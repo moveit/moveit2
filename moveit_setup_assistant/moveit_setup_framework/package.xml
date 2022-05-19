@@ -4,8 +4,9 @@
   <name>moveit_setup_framework</name>
   <version>1.1.5</version>
   <description>C++ Interface for defining setup steps for MoveIt Setup Assistant</description>
-  <maintainer email="davidvlu@gmail.com">David V. Lu</maintainer>
+  <maintainer email="davidvlu@gmail.com">David V. Lu!!</maintainer>
   <license>BSD</license>
+  <author email="davidvlu@gmail.com">David V. Lu!!</author>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
   <depend>ament_index_cpp</depend>

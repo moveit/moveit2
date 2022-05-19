@@ -37,11 +37,13 @@
 #include <moveit_setup_simulation/simulation.hpp>
 #include <moveit_setup_simulation/xml_manipulation.hpp>
 
-namespace moveit_setup_simulation
+namespace moveit_setup
+{
+namespace simulation
 {
 void Simulation::onInit()
 {
-  urdf_config_ = config_data_->get<moveit_setup_framework::URDFConfig>("urdf");
+  urdf_config_ = config_data_->get<URDFConfig>("urdf");
 }
 
 // ******************************************************************************************
@@ -161,9 +163,9 @@ std::string Simulation::getGazeboCompatibleURDF()
 // ******************************************************************************************
 // Output Gazebo URDF file
 // ******************************************************************************************
-bool Simulation::outputGazeboURDFFile(const std::string& file_path)
+bool Simulation::outputGazeboURDFFile(const std::filesystem::path& file_path)
 {
-  std::ofstream os(file_path.c_str(), std::ios_base::trunc);
+  std::ofstream os(file_path, std::ios_base::trunc);
   if (!os.good())
   {
     RCLCPP_ERROR_STREAM(*logger_, "Unable to open file for writing " << file_path);
@@ -190,4 +192,5 @@ bool Simulation::isValidXML(const std::string& new_urdf_contents, int& error_row
   return !doc.Error();
 }
 
-}  // namespace moveit_setup_simulation
+}  // namespace simulation
+}  // namespace moveit_setup

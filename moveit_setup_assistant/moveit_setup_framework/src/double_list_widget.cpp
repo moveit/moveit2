@@ -47,7 +47,7 @@
 #include <QVBoxLayout>
 #include <moveit_setup_framework/qt/double_list_widget.hpp>
 
-namespace moveit_setup_framework
+namespace moveit_setup
 {
 // ******************************************************************************************
 //
@@ -344,4 +344,4 @@ std::vector<std::string> DoubleListWidget::getSelectedValues() const
   return values;
 }
 
-}  // namespace moveit_setup_framework
+}  // namespace moveit_setup

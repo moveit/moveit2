@@ -44,14 +44,16 @@ class QPushButton;
 #include <moveit_setup_framework/qt/setup_step_widget.hpp>
 #include <moveit_setup_simulation/simulation.hpp>
 
-namespace moveit_setup_simulation
+namespace moveit_setup
+{
+namespace simulation
 {
 // ******************************************************************************************
 // ******************************************************************************************
 // Class for showing changes needed to help user bring his robot into gazebo simulation
 // ******************************************************************************************
 // ******************************************************************************************
-class SimulationWidget : public moveit_setup_framework::SetupStepWidget
+class SimulationWidget : public SetupStepWidget
 {
   Q_OBJECT
 
@@ -64,7 +66,7 @@ public:
   void focusGiven() override;
   bool focusLost() override;
 
-  moveit_setup_framework::SetupStep& getSetupStep() override
+  SetupStep& getSetupStep() override
   {
     return setup_step_;
   }
@@ -95,4 +97,5 @@ private:
   Simulation setup_step_;
 };
 
-}  // namespace moveit_setup_simulation
+}  // namespace simulation
+}  // namespace moveit_setup

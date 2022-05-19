@@ -38,17 +38,19 @@
 #include <moveit_setup_framework/setup_step.hpp>
 #include <moveit_setup_framework/data/srdf_config.hpp>
 
-namespace moveit_setup_srdf_plugins
+namespace moveit_setup
+{
+namespace srdf_setup
 {
 /**
  * @brief Setup Step that contains the SRDFConfig
  */
-class SRDFStep : public moveit_setup_framework::SetupStep
+class SRDFStep : public SetupStep
 {
 public:
   void onInit() override
   {
-    srdf_config_ = config_data_->get<moveit_setup_framework::SRDFConfig>("srdf");
+    srdf_config_ = config_data_->get<SRDFConfig>("srdf");
   }
 
   bool isReady() const override
@@ -62,11 +64,19 @@ public:
   }
 
 protected:
-  std::shared_ptr<moveit_setup_framework::SRDFConfig> srdf_config_;
+  std::shared_ptr<SRDFConfig> srdf_config_;
 };
 
 /**
  * @brief This class provides a number of standard operations based on srdf's vector members
+ *
+ * Assuming T is a type that has a name_ field, this provides the following operations on the container
+ * in which the name_ field is kept unique.
+ *  * find
+ *  * create
+ *  * rename
+ *  * remove
+ *  * get
  */
 template <typename T>
 class SuperSRDFStep : public SRDFStep
@@ -80,7 +90,7 @@ public:
   /**
    * @brief Returns the info field associated with this part of the SRDF
    */
-  virtual moveit_setup_framework::InformationFields getInfoField() const = 0;
+  virtual InformationFields getInfoField() const = 0;
 
   /**
    * @brief Return a pointer to an item with the given name if it exists, otherwise null
@@ -167,4 +177,5 @@ public:
     }
   }
 };
-}  // namespace moveit_setup_srdf_plugins
+}  // namespace srdf_setup
+}  // namespace moveit_setup

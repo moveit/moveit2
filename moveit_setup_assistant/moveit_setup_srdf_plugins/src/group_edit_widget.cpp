@@ -48,7 +48,9 @@
 
 #include <moveit_setup_srdf_plugins/group_edit_widget.hpp>
 
-namespace moveit_setup_srdf_plugins
+namespace moveit_setup
+{
+namespace srdf_setup
 {
 // ******************************************************************************************
 //
@@ -336,9 +338,8 @@ void GroupEditWidget::selectKinematicsFile()
   }
 
   std::string package_name;
-  std::string relative_filename;
-  bool package_found =
-      moveit_setup_framework::extractPackageNameFromPath(filename.toStdString(), package_name, relative_filename);
+  std::filesystem::path relative_filename;
+  bool package_found = extractPackageNameFromPath(filename.toStdString(), package_name, relative_filename);
 
   QString lookup_path = filename;
   if (package_found)
@@ -348,4 +349,5 @@ void GroupEditWidget::selectKinematicsFile()
   kinematics_parameters_file_field_->setText(lookup_path);
 }
 
-}  // namespace moveit_setup_srdf_plugins
+}  // namespace srdf_setup
+}  // namespace moveit_setup

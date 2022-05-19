@@ -35,17 +35,16 @@
 #include <moveit_setup_framework/data/urdf_config.hpp>
 #include <moveit_setup_framework/utilities.hpp>
 #include <moveit/rdf_loader/rdf_loader.h>
-#include <ament_index_cpp/get_package_share_directory.hpp>
 #include <boost/algorithm/string/join.hpp>
 
-namespace moveit_setup_framework
+namespace moveit_setup
 {
 void URDFConfig::onInit()
 {
   parent_node_->declare_parameter("robot_description", rclcpp::ParameterType::PARAMETER_STRING);
 }
 
-void URDFConfig::loadPrevious(const std::string& /*config_package_path*/, const YAML::Node& node)
+void URDFConfig::loadPrevious(const std::filesystem::path& /*config_package_path*/, const YAML::Node& node)
 {
   if (!getYamlProperty(node, "package", urdf_pkg_name_))
   {
@@ -65,7 +64,7 @@ YAML::Node URDFConfig::saveToYaml() const
 {
   YAML::Node node;
   node["package"] = urdf_pkg_name_;
-  node["relative_path"] = urdf_pkg_relative_path_;
+  node["relative_path"] = urdf_pkg_relative_path_.string();
   if (!xacro_args_.empty())
   {
     node["xacro_args"] = xacro_args_;
@@ -73,7 +72,7 @@ YAML::Node URDFConfig::saveToYaml() const
   return node;
 }
 
-void URDFConfig::loadFromPath(const std::string& urdf_file_path, const std::string& xacro_args)
+void URDFConfig::loadFromPath(const std::filesystem::path& urdf_file_path, const std::string& xacro_args)
 {
   urdf_path_ = urdf_file_path;
   xacro_args_ = xacro_args;
@@ -82,7 +81,7 @@ void URDFConfig::loadFromPath(const std::string& urdf_file_path, const std::stri
   load();
 }
 
-void URDFConfig::loadFromPath(const std::string& urdf_file_path, const std::vector<std::string>& xacro_args)
+void URDFConfig::loadFromPath(const std::filesystem::path& urdf_file_path, const std::vector<std::string>& xacro_args)
 {
   urdf_path_ = urdf_file_path;
   xacro_args_vec_ = xacro_args;
@@ -102,7 +101,7 @@ void URDFConfig::setPackageName()
   else
   {
     // Check that ROS can find the package
-    const std::string robot_desc_pkg_path = ament_index_cpp::get_package_share_directory(urdf_pkg_name_);
+    const std::filesystem::path robot_desc_pkg_path = getSharePath(urdf_pkg_name_);
 
     if (robot_desc_pkg_path.empty())
     {
@@ -114,15 +113,14 @@ void URDFConfig::setPackageName()
   }
 }
 
-void URDFConfig::loadFromPackage(const std::string& package_name, const std::string& relative_path,
+void URDFConfig::loadFromPackage(const std::filesystem::path& package_name, const std::filesystem::path& relative_path,
                                  const std::string& xacro_args)
 {
   urdf_pkg_name_ = package_name;
   urdf_pkg_relative_path_ = relative_path;
   xacro_args_ = xacro_args;
 
-  std::string pkg_path = ament_index_cpp::get_package_share_directory(urdf_pkg_name_);
-  urdf_path_ = appendPaths(pkg_path, relative_path);
+  urdf_path_ = getSharePath(urdf_pkg_name_) / relative_path;
   load();
 }
 
@@ -133,7 +131,7 @@ void URDFConfig::load()
 
   if (!rdf_loader::RDFLoader::loadXmlFileToString(urdf_string_, urdf_path_, xacro_args_vec_))
   {
-    throw std::runtime_error("URDF/COLLADA file not found: " + urdf_path_);
+    throw std::runtime_error("URDF/COLLADA file not found: " + urdf_path_.string());
   }
 
   if (urdf_string_.empty() && rdf_loader::RDFLoader::isXacroFile(urdf_path_))
@@ -178,7 +176,7 @@ void URDFConfig::collectVariables(std::vector<TemplateVariable>& variables)
   }
   else
   {
-    urdf_location = "$(find " + urdf_pkg_name_ + ")/" + urdf_pkg_relative_path_;
+    urdf_location = "$(find " + urdf_pkg_name_ + ")/" + urdf_pkg_relative_path_.string();
   }
 
   variables.push_back(TemplateVariable("URDF_LOCATION", urdf_location));
@@ -193,7 +191,7 @@ void URDFConfig::collectVariables(std::vector<TemplateVariable>& variables)
     variables.push_back(TemplateVariable("URDF_LOAD_ATTRIBUTE", "textfile=\"" + urdf_location + "\""));
   }
 }
-}  // namespace moveit_setup_framework
+}  // namespace moveit_setup
 
 #include <pluginlib/class_list_macros.hpp>  // NOLINT
-PLUGINLIB_EXPORT_CLASS(moveit_setup_framework::URDFConfig, moveit_setup_framework::SetupConfig)
+PLUGINLIB_EXPORT_CLASS(moveit_setup::URDFConfig, moveit_setup::SetupConfig)

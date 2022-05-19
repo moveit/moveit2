@@ -42,7 +42,9 @@
 #include <QLineEdit>
 #include <QPushButton>
 
-namespace moveit_setup_controllers
+namespace moveit_setup
+{
+namespace controllers
 {
 class ControllerEditWidget : public QWidget
 {
@@ -137,4 +139,5 @@ private:
 
   Controllers& setup_step_;
 };
-}  // namespace moveit_setup_controllers
+}  // namespace controllers
+}  // namespace moveit_setup

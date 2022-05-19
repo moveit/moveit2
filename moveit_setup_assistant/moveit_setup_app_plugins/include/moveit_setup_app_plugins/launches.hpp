@@ -38,12 +38,14 @@
 #include <moveit_setup_framework/setup_step.hpp>
 #include <moveit_setup_app_plugins/launches_config.hpp>
 
-namespace moveit_setup_app_plugins
+namespace moveit_setup
+{
+namespace app
 {
 /**
  * @brief Setup step for generating launch files that are not otherwise associated with a specific step.
  */
-class Launches : public moveit_setup_framework::SetupStep
+class Launches : public SetupStep
 {
 public:
   std::string getName() const override
@@ -87,4 +89,5 @@ protected:
   std::vector<LaunchBundle> available_launch_bundles_;
   std::shared_ptr<LaunchesConfig> launches_config_;
 };
-}  // namespace moveit_setup_app_plugins
+}  // namespace app
+}  // namespace moveit_setup

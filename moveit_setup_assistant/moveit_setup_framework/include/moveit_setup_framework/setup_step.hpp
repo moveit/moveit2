@@ -38,7 +38,7 @@
 #include <rclcpp/node.hpp>
 #include <moveit_setup_framework/data_warehouse.hpp>
 
-namespace moveit_setup_framework
+namespace moveit_setup
 {
 /**
  * @brief Contains all of the non-GUI code necessary for doing one "screen" worth of setup.
@@ -91,4 +91,4 @@ protected:
   rclcpp::Node::SharedPtr parent_node_;
   std::shared_ptr<rclcpp::Logger> logger_;
 };
-}  // namespace moveit_setup_framework
+}  // namespace moveit_setup

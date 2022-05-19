@@ -38,7 +38,9 @@
 
 #include <QHeaderView>
 
-namespace moveit_setup_srdf_plugins
+namespace moveit_setup
+{
+namespace srdf_setup
 {
 class RotatedHeaderView : public QHeaderView
 {
@@ -48,4 +50,5 @@ public:
   QSize sectionSizeFromContents(int logicalIndex) const override;
   int sectionSizeHint(int logicalIndex) const;
 };
-}  // namespace moveit_setup_srdf_plugins
+}  // namespace srdf_setup
+}  // namespace moveit_setup

@@ -44,7 +44,9 @@
 #include <QMessageBox>
 #include <QTableWidget>
 
-namespace moveit_setup_srdf_plugins
+namespace moveit_setup
+{
+namespace srdf_setup
 {
 // ******************************************************************************************
 // Constructor
@@ -56,14 +58,14 @@ void PassiveJointsWidget::onInit()
 
   // Top Header Area ------------------------------------------------
 
-  auto header = new moveit_setup_framework::HeaderWidget("Define Passive Joints",
-                                                         "Specify the set of passive joints (not actuated). Joint "
-                                                         "state is not expected to be published for these joints.",
-                                                         this);
+  auto header = new HeaderWidget(
+      "Define Passive Joints",
+      "Specify the set of passive joints (not actuated). Joint state is not expected to be published for these joints.",
+      this);
   layout->addWidget(header);
 
   // Joints edit widget
-  joints_widget_ = new moveit_setup_framework::DoubleListWidget(this, "Joint Collection", "Joint", false);
+  joints_widget_ = new DoubleListWidget(this, "Joint Collection", "Joint", false);
   connect(joints_widget_, SIGNAL(selectionUpdated()), this, SLOT(selectionUpdated()));
   connect(joints_widget_, SIGNAL(previewSelected(std::vector<std::string>)), this,
           SLOT(previewSelectedJoints(std::vector<std::string>)));
@@ -130,7 +132,8 @@ void PassiveJointsWidget::previewSelectedJoints(const std::vector<std::string>& 
   }
 }
 
-}  // namespace moveit_setup_srdf_plugins
+}  // namespace srdf_setup
+}  // namespace moveit_setup
 
 #include <pluginlib/class_list_macros.hpp>  // NOLINT
-PLUGINLIB_EXPORT_CLASS(moveit_setup_srdf_plugins::PassiveJointsWidget, moveit_setup_framework::SetupStepWidget)
+PLUGINLIB_EXPORT_CLASS(moveit_setup::srdf_setup::PassiveJointsWidget, moveit_setup::SetupStepWidget)

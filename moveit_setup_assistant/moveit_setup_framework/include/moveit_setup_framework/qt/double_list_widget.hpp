@@ -42,7 +42,7 @@
 #include <QTableWidgetItem>
 #include <QItemSelection>
 
-namespace moveit_setup_framework
+namespace moveit_setup
 {
 class DoubleListWidget : public QWidget
 {
@@ -136,4 +136,4 @@ private:
   void previewSelected(const QList<QTableWidgetItem*>& selected);
 };
 
-}  // namespace moveit_setup_framework
+}  // namespace moveit_setup

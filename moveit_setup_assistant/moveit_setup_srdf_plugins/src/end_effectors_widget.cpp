@@ -55,7 +55,9 @@
 #include <QVBoxLayout>
 #include <QWidget>
 
-namespace moveit_setup_srdf_plugins
+namespace moveit_setup
+{
+namespace srdf_setup
 {
 // ******************************************************************************************
 // Constructor
@@ -67,13 +69,12 @@ void EndEffectorsWidget::onInit()
 
   // Top Header Area ------------------------------------------------
 
-  auto header =
-      new moveit_setup_framework::HeaderWidget("Define End Effectors",
-                                               "Setup your robot's end effectors. These are planning groups "
-                                               "corresponding to grippers or tools, attached to a parent "
-                                               "planning group (an arm). The specified parent link is used as the "
-                                               "reference frame for IK attempts.",
-                                               this);
+  auto header = new HeaderWidget("Define End Effectors",
+                                 "Setup your robot's end effectors. These are planning groups "
+                                 "corresponding to grippers or tools, attached to a parent "
+                                 "planning group (an arm). The specified parent link is used as the "
+                                 "reference frame for IK attempts.",
+                                 this);
   layout->addWidget(header);
 
   // Create contents screens ---------------------------------------
@@ -470,19 +471,6 @@ void EndEffectorsWidget::doneEditing()
     return;
   }
 
-  /*
-  if (!setup_step_.isLinkInGroup(parent_name_field_->currentText().toStdString(),
-                                 group_name_field_->currentText().toStdString()))
-  {
-    QMessageBox::warning(this, "Error Saving",
-                         QString::fromStdString("Group " + group_name_field_->currentText().toStdString() +
-                                                " contains the link " + parent_name_field_->currentText().toStdString() +
-                                                ". However, the parent link of the end-effector should not belong to "
-                                                "the group for the end-effector itself."));
-    return;
-  }
-  */
-
   if (!parent_group_name_field_->currentText().isEmpty())
   {
     if (!setup_step_.isLinkInGroup(parent_name_field_->currentText().toStdString(),
@@ -610,7 +598,8 @@ void EndEffectorsWidget::focusGiven()
   loadParentComboBox();
 }
 
-}  // namespace moveit_setup_srdf_plugins
+}  // namespace srdf_setup
+}  // namespace moveit_setup
 
 #include <pluginlib/class_list_macros.hpp>  // NOLINT
-PLUGINLIB_EXPORT_CLASS(moveit_setup_srdf_plugins::EndEffectorsWidget, moveit_setup_framework::SetupStepWidget)
+PLUGINLIB_EXPORT_CLASS(moveit_setup::srdf_setup::EndEffectorsWidget, moveit_setup::SetupStepWidget)

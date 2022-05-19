@@ -36,41 +36,38 @@
 
 #pragma once
 
-#include <boost/filesystem/path.hpp>        // for creating folders/files
-#include <boost/filesystem/operations.hpp>  // is_regular_file, is_directory, etc.
+#include <ament_index_cpp/get_package_share_directory.hpp>
+#include <filesystem>
 #include <string>
 #include <tinyxml2.h>
 #include <yaml-cpp/yaml.h>
 
-namespace moveit_setup_framework
+namespace moveit_setup
 {
-// ******************************************************************************************
-// Helper Function for joining a file path and a file name, or two file paths, etc, in a cross-platform way
-// ******************************************************************************************
-inline std::string appendPaths(const std::string& path1, const std::string& path2)
+/**
+ * @brief Return a path for the given package's share folder
+ */
+inline std::filesystem::path getSharePath(const std::string& package_name)
 {
-  boost::filesystem::path result = path1;
-  result /= path2;
-  return result.make_preferred().string();
+  return std::filesystem::path(ament_index_cpp::get_package_share_directory(package_name));
 }
 
 /**
  * @brief Create folders (recursively)
  * @return false if the path was not a directory and was unable to create the directory(s)
  */
-inline bool createFolders(const std::string& output_path)
+inline bool createFolders(const std::filesystem::path& output_path)
 {
-  return boost::filesystem::is_directory(output_path) || boost::filesystem::create_directories(output_path);
+  return std::filesystem::is_directory(output_path) || std::filesystem::create_directories(output_path);
 }
 
 /**
  * @brief Create parent folders (recursively)
  * @return false if the path was not a directory and was unable to create the directory(s)
  */
-inline bool createParentFolders(const std::string& file_path_string)
+inline bool createParentFolders(const std::filesystem::path& file_path)
 {
-  boost::filesystem::path file_path(file_path_string);
-  return createFolders(file_path.parent_path().string());
+  return createFolders(file_path.parent_path());
 }
 
 /**
@@ -80,43 +77,8 @@ inline bool createParentFolders(const std::string& file_path_string)
  * @param relative_filepath holds the relative path of the file to the package root
  * @return whether the file belongs to a known package
  */
-inline bool extractPackageNameFromPath(const std::string& path, std::string& package_name,
-                                       std::string& relative_filepath)
-{
-  boost::filesystem::path sub_path = path;  // holds the directory less one folder
-  boost::filesystem::path relative_path;    // holds the path after the sub_path
-
-  // truncate path step by step and check if it contains a package.xml
-  while (!sub_path.empty())
-  {
-    if (boost::filesystem::is_regular_file(sub_path / "package.xml"))
-    {
-      relative_filepath = relative_path.string();
-      // Search the <name> </name> string in the package.xml file
-      // This works assuming the package name is entered as <name>PACKAGE_NAME</name>
-      // Default package name to folder name
-      package_name = sub_path.leaf().string();
-      tinyxml2::XMLDocument package_xml_file;
-      auto is_open = package_xml_file.LoadFile((sub_path / "package.xml").c_str());
-      if (is_open == tinyxml2::XML_SUCCESS)
-      {
-        auto name_potential =
-            package_xml_file.FirstChildElement("package")->FirstChildElement("name")->FirstChild()->ToText()->Value();
-        if (name_potential)
-        {
-          // Change package name if we have non-empty potential, else it defaults
-          package_name = name_potential;
-        }
-      }
-      return true;
-    }
-    relative_path = sub_path.leaf() / relative_path;
-    sub_path.remove_leaf();
-  }
-
-  // No package name found, we must be outside ROS
-  return false;
-}
+bool extractPackageNameFromPath(const std::filesystem::path& path, std::string& package_name,
+                                std::filesystem::path& relative_filepath);
 
 // Formerly "parse"
 template <typename T>
@@ -128,4 +90,16 @@ inline bool getYamlProperty(const YAML::Node& node, const std::string& key, T& s
   return valid;
 }
 
-}  // namespace moveit_setup_framework
+inline bool getYamlProperty(const YAML::Node& node, const std::string& key, std::filesystem::path& storage,
+                            const std::string& default_value = "")
+{
+  std::string storage_s;
+  bool ret = getYamlProperty(node, key, storage_s, default_value);
+  if (ret)
+  {
+    storage = storage_s;
+  }
+  return ret;
+}
+
+}  // namespace moveit_setup

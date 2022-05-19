@@ -36,7 +36,9 @@
 
 #include <moveit_setup_app_plugins/launches_config.hpp>
 
-namespace moveit_setup_app_plugins
+namespace moveit_setup
+{
+namespace app
 {
 bool LaunchesConfig::isIncluded(const LaunchBundle& bundle) const
 {
@@ -65,15 +67,16 @@ void LaunchesConfig::collectDependencies(std::set<std::string>& packages) const
   }
 }
 
-void LaunchesConfig::collectFiles(const std::string& package_path, const std::time_t& last_gen_time,
-                                  std::vector<moveit_setup_framework::GeneratedFilePtr>& files)
+void LaunchesConfig::collectFiles(const std::filesystem::path& package_path, const GeneratedTime& last_gen_time,
+                                  std::vector<GeneratedFilePtr>& files)
 {
   for (const LaunchBundle& bundle : bundles_)
   {
     bundle.collectFiles(package_path, last_gen_time, files);
   }
 }
-}  // namespace moveit_setup_app_plugins
+}  // namespace app
+}  // namespace moveit_setup
 
 #include <pluginlib/class_list_macros.hpp>  // NOLINT
-PLUGINLIB_EXPORT_CLASS(moveit_setup_app_plugins::LaunchesConfig, moveit_setup_framework::SetupConfig)
+PLUGINLIB_EXPORT_CLASS(moveit_setup::app::LaunchesConfig, moveit_setup::SetupConfig)

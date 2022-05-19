@@ -36,11 +36,14 @@
 #pragma once
 
 #include <moveit_setup_framework/config.hpp>
+#include <moveit_setup_framework/data_warehouse.hpp>
 #include <moveit_setup_framework/templates.hpp>
-#include <ament_index_cpp/get_package_share_directory.hpp>
 #include <moveit_setup_framework/utilities.hpp>
+#include <moveit_setup_framework/data/srdf_config.hpp>
 
-namespace moveit_setup_controllers
+namespace moveit_setup
+{
+namespace controllers
 {
 /**
  * Single controller "instance" configuration
@@ -57,10 +60,10 @@ static const std::string CONTROLLERS_YAML = "config/ros_controllers.yaml";
 /**
  * @brief All the controller configurations
  */
-class ControllersConfig : public moveit_setup_framework::SetupConfig
+class ControllersConfig : public SetupConfig
 {
 public:
-  void loadPrevious(const std::string& package_path, const YAML::Node& node) override;
+  void loadPrevious(const std::filesystem::path& package_path, const YAML::Node& node) override;
 
   bool isConfigured() const override
   {
@@ -76,10 +79,10 @@ public:
     return ros_controllers_config_;
   }
 
-  class GeneratedControllersConfig : public moveit_setup_framework::YamlGeneratedFile
+  class GeneratedControllersConfig : public YamlGeneratedFile
   {
   public:
-    GeneratedControllersConfig(const std::string& package_path, const std::time_t& last_gen_time,
+    GeneratedControllersConfig(const std::filesystem::path& package_path, const GeneratedTime& last_gen_time,
                                ControllersConfig& parent)
       : YamlGeneratedFile(package_path, last_gen_time), parent_(parent)
     {
@@ -87,11 +90,10 @@ public:
 
     bool hasChanges() const override
     {
-      // TODO: Also return true when the SRDF groups have changed
-      return parent_.changed_;
+      return parent_.changed_ || parent_.hasChangedGroups();
     }
 
-    std::string getRelativePath() const override
+    std::filesystem::path getRelativePath() const override
     {
       return CONTROLLERS_YAML;
     }
@@ -107,10 +109,10 @@ public:
     ControllersConfig& parent_;
   };
 
-  class GeneratedContollerLaunch : public moveit_setup_framework::TemplatedGeneratedFile
+  class GeneratedContollerLaunch : public TemplatedGeneratedFile
   {
   public:
-    GeneratedContollerLaunch(const std::string& package_path, const std::time_t& last_gen_time,
+    GeneratedContollerLaunch(const std::filesystem::path& package_path, const GeneratedTime& last_gen_time,
                              ControllersConfig& parent)
       : TemplatedGeneratedFile(package_path, last_gen_time), parent_(parent)
     {
@@ -118,20 +120,17 @@ public:
 
     bool hasChanges() const override
     {
-      // TODO: Also return true when the SRDF groups have changed
-      return parent_.changed_;
+      return parent_.changed_ || parent_.hasChangedGroups();
     }
 
-    std::string getRelativePath() const override
+    std::filesystem::path getRelativePath() const override
     {
       return "launch/ros_controllers.launch";
     }
 
-    std::string getTemplatePath() const override
+    std::filesystem::path getTemplatePath() const override
     {
-      std::string pkg_path = ament_index_cpp::get_package_share_directory("moveit_setup_controllers");
-      std::string templates_folder = moveit_setup_framework::appendPaths(pkg_path, "templates");
-      return moveit_setup_framework::appendPaths(templates_folder, getRelativePath());
+      return getSharePath("moveit_setup_controllers") / "templates" / getRelativePath();
     }
 
     std::string getDescription() const override
@@ -143,14 +142,14 @@ public:
     ControllersConfig& parent_;
   };
 
-  void collectFiles(const std::string& package_path, const std::time_t& last_gen_time,
-                    std::vector<moveit_setup_framework::GeneratedFilePtr>& files) override
+  void collectFiles(const std::filesystem::path& package_path, const GeneratedTime& last_gen_time,
+                    std::vector<GeneratedFilePtr>& files) override
   {
     files.push_back(std::make_shared<GeneratedControllersConfig>(package_path, last_gen_time, *this));
     files.push_back(std::make_shared<GeneratedContollerLaunch>(package_path, last_gen_time, *this));
   }
 
-  void collectVariables(std::vector<moveit_setup_framework::TemplateVariable>& variables) override;
+  void collectVariables(std::vector<TemplateVariable>& variables) override;
 
   /**
    * \brief Adds a controller to ros_controllers_config_ vector
@@ -184,6 +183,12 @@ public:
    */
   bool deleteController(const std::string& controller_name);
 
+  bool hasChangedGroups() const
+  {
+    auto srdf_config = config_data_->get<SRDFConfig>("srdf");
+    return srdf_config->getChangeMask() & GROUPS;
+  }
+
 protected:
   /**
    * Helper function for parsing ros_controllers.yaml file
@@ -196,4 +201,5 @@ protected:
   std::vector<ControllerInfo> ros_controllers_config_;
   bool changed_;
 };
-}  // namespace moveit_setup_controllers
+}  // namespace controllers
+}  // namespace moveit_setup

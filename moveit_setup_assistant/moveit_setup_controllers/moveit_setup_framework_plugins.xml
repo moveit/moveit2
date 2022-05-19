@@ -1,8 +1,8 @@
 <library path="libmoveit_setup_controllers">
-  <class type="moveit_setup_controllers::ControllersConfig" base_class_type="moveit_setup_framework::SetupConfig">
+  <class type="moveit_setup::controllers::ControllersConfig" base_class_type="moveit_setup::SetupConfig">
     <description>Data for Controllers</description>
   </class>
-  <class type="moveit_setup_controllers::ControllersWidget" base_class_type="moveit_setup_framework::SetupStepWidget">
+  <class type="moveit_setup::controllers::ControllersWidget" base_class_type="moveit_setup::SetupStepWidget">
     <description>Configures the ros2_control plugins</description>
   </class>
 </library>

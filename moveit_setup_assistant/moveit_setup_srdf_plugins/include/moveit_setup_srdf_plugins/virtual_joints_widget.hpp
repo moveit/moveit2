@@ -45,9 +45,11 @@
 #include <QComboBox>
 #include <QTableWidget>
 
-namespace moveit_setup_srdf_plugins
+namespace moveit_setup
 {
-class VirtualJointsWidget : public moveit_setup_framework::SetupStepWidget
+namespace srdf_setup
+{
+class VirtualJointsWidget : public SetupStepWidget
 {
   Q_OBJECT
 
@@ -55,7 +57,7 @@ public:
   // ******************************************************************************************
   // Public Functions
   // ******************************************************************************************
-  moveit_setup_framework::SetupStep& getSetupStep() override
+  SetupStep& getSetupStep() override
   {
     return setup_step_;
   }
@@ -162,4 +164,5 @@ private:
   void edit(const std::string& name);
 };
 
-}  // namespace moveit_setup_srdf_plugins
+}  // namespace srdf_setup
+}  // namespace moveit_setup

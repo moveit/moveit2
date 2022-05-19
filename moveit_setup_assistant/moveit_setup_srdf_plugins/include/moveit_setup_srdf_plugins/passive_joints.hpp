@@ -37,7 +37,9 @@
 
 #include <moveit_setup_srdf_plugins/srdf_step.hpp>
 
-namespace moveit_setup_srdf_plugins
+namespace moveit_setup
+{
+namespace srdf_setup
 {
 class PassiveJoints : public SRDFStep
 {
@@ -64,4 +66,5 @@ public:
 
   void setPassiveJoints(const std::vector<std::string>& passive_joints);
 };
-}  // namespace moveit_setup_srdf_plugins
+}  // namespace srdf_setup
+}  // namespace moveit_setup

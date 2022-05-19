@@ -44,7 +44,9 @@
 #include <moveit_setup_core_plugins/author_information_widget.hpp>
 #include <moveit_setup_framework/qt/helper_widgets.hpp>
 
-namespace moveit_setup_core_plugins
+namespace moveit_setup
+{
+namespace core
 {
 // ******************************************************************************************
 // Outer User Interface for MoveIt Configuration Assistant
@@ -57,12 +59,10 @@ void AuthorInformationWidget::onInit()
 
   // Top Header Area ------------------------------------------------
 
-  auto header =
-      new moveit_setup_framework::HeaderWidget("Specify Author Information",
-                                               "Input contact information of the author and initial maintainer of the "
-                                               "generated package. catkin requires valid details in the package's "
-                                               "package.xml",
-                                               this);
+  auto header = new HeaderWidget("Specify Author Information",
+                                 "Input contact information of the author and initial maintainer of the generated "
+                                 "package. catkin requires valid details in the package's package.xml",
+                                 this);
   layout->addWidget(header);
 
   QLabel* name_title = new QLabel(this);
@@ -105,7 +105,8 @@ void AuthorInformationWidget::editedEmail()
   setup_step_.setAuthorEmail(this->email_edit_->text().toStdString());
 }
 
-}  // namespace moveit_setup_core_plugins
+}  // namespace core
+}  // namespace moveit_setup
 
 #include <pluginlib/class_list_macros.hpp>  // NOLINT
-PLUGINLIB_EXPORT_CLASS(moveit_setup_core_plugins::AuthorInformationWidget, moveit_setup_framework::SetupStepWidget)
+PLUGINLIB_EXPORT_CLASS(moveit_setup::core::AuthorInformationWidget, moveit_setup::SetupStepWidget)

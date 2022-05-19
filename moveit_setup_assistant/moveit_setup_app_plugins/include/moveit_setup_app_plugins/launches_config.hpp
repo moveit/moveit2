@@ -38,17 +38,18 @@
 #include <moveit_setup_framework/config.hpp>
 #include <moveit_setup_framework/templates.hpp>
 #include <moveit_setup_app_plugins/launch_bundle.hpp>
-#include <ament_index_cpp/get_package_share_directory.hpp>
 #include <moveit_setup_framework/utilities.hpp>
 
-namespace moveit_setup_app_plugins
+namespace moveit_setup
+{
+namespace app
 {
 /**
  * @brief Stores which LaunchBundles are configured to be generated.
  *
  * Saved as a set in which the bundles to be generated are included in the set.
  */
-class LaunchesConfig : public moveit_setup_framework::SetupConfig
+class LaunchesConfig : public SetupConfig
 {
 public:
   bool isConfigured() const override
@@ -79,10 +80,11 @@ public:
   /**
    * @brief Provide the files to be generated
    */
-  void collectFiles(const std::string& package_path, const std::time_t& last_gen_time,
-                    std::vector<moveit_setup_framework::GeneratedFilePtr>& files) override;
+  void collectFiles(const std::filesystem::path& package_path, const GeneratedTime& last_gen_time,
+                    std::vector<GeneratedFilePtr>& files) override;
 
 protected:
   std::set<LaunchBundle> bundles_;
 };
-}  // namespace moveit_setup_app_plugins
+}  // namespace app
+}  // namespace moveit_setup

@@ -41,9 +41,11 @@
 #include <moveit_setup_framework/qt/double_list_widget.hpp>
 #include <moveit_setup_srdf_plugins/passive_joints.hpp>
 
-namespace moveit_setup_srdf_plugins
+namespace moveit_setup
 {
-class PassiveJointsWidget : public moveit_setup_framework::SetupStepWidget
+namespace srdf_setup
+{
+class PassiveJointsWidget : public SetupStepWidget
 {
   Q_OBJECT
 
@@ -57,7 +59,7 @@ public:
   /// Received when this widget is chosen from the navigation menu
   void focusGiven() override;
 
-  moveit_setup_framework::SetupStep& getSetupStep() override
+  SetupStep& getSetupStep() override
   {
     return setup_step_;
   }
@@ -66,7 +68,7 @@ public:
   // Qt Components
   // ******************************************************************************************
 
-  moveit_setup_framework::DoubleListWidget* joints_widget_;
+  DoubleListWidget* joints_widget_;
 
 private Q_SLOTS:
 
@@ -89,4 +91,5 @@ private:
   std::string current_edit_vjoint_;
 };
 
-}  // namespace moveit_setup_srdf_plugins
+}  // namespace srdf_setup
+}  // namespace moveit_setup

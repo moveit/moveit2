@@ -8,6 +8,7 @@
   <maintainer email="tyler@picknik.ai">Tyler Weaver</maintainer>
   <maintainer email="rhaschke@techfak.uni-bielefeld.de">Robert Haschke</maintainer>
   <maintainer email="moveit_releasers@googlegroups.com">MoveIt Release Team</maintainer>
+  <maintainer email="davidvlu@gmail.com">David V. Lu!!</maintainer>
 
   <license>BSD</license>
 
@@ -15,6 +16,7 @@
   <url type="bugtracker">https://github.com/ros-planning/moveit2/issues</url>
   <url type="repository">https://github.com/ros-planning/moveit2</url>
 
+  <author email="davidvlu@gmail.com">David V. Lu!!</author>
   <author email="dave@picknik.ai">Dave Coleman</author>
 
   <buildtool_depend>ament_cmake</buildtool_depend>

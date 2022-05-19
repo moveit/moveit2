@@ -51,9 +51,11 @@
 #include <moveit_setup_framework/qt/setup_step_widget.hpp>
 #include <moveit_setup_srdf_plugins/robot_poses.hpp>
 
-namespace moveit_setup_srdf_plugins
+namespace moveit_setup
 {
-class RobotPosesWidget : public moveit_setup_framework::SetupStepWidget
+namespace srdf_setup
+{
+class RobotPosesWidget : public SetupStepWidget
 {
   Q_OBJECT
 
@@ -67,7 +69,7 @@ public:
   /// Received when this widget is chosen from the navigation menu
   void focusGiven() override;
 
-  moveit_setup_framework::SetupStep& getSetupStep() override
+  SetupStep& getSetupStep() override
   {
     return setup_step_;
   }
@@ -186,6 +188,8 @@ private:
    * Show the robot in the current pose
    */
   void showPose(const srdf::Model::GroupState& pose);
+
+  void updateStateAndCollision(const moveit::core::RobotState& robot_state);
 };
 
 // ******************************************************************************************
@@ -261,7 +265,8 @@ private:
   // ******************************************************************************************
 };
 
-}  // namespace moveit_setup_srdf_plugins
+}  // namespace srdf_setup
+}  // namespace moveit_setup
 
 // Declare std::string as metatype so we can use it in a signal
 Q_DECLARE_METATYPE(std::string)

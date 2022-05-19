@@ -58,7 +58,9 @@
 #include <regex>
 #include <moveit/robot_state/conversions.h>
 
-namespace moveit_setup_controllers
+namespace moveit_setup
+{
+namespace controllers
 {
 // ******************************************************************************************
 // Outer User Interface for MoveIt Configuration Assistant
@@ -74,7 +76,7 @@ void ControllersWidget::onInit()
   this->setWindowTitle("Controller Configuration");  // title of window
 
   // Top Header Area ------------------------------------------------
-  auto header = new moveit_setup_framework::HeaderWidget(
+  auto header = new HeaderWidget(
       "Setup Controllers",
       "Configure controllers to be used by MoveIt's controller manager(s) to operate the robot's physical hardware",
       this);
@@ -84,14 +86,14 @@ void ControllersWidget::onInit()
   controllers_tree_widget_ = createContentsWidget();
 
   // Joints edit widget
-  joints_widget_ = new moveit_setup_framework::DoubleListWidget(this, "Joint Collection", "Joint");
+  joints_widget_ = new DoubleListWidget(this, "Joint Collection", "Joint");
   connect(joints_widget_, SIGNAL(cancelEditing()), this, SLOT(cancelEditing()));
   connect(joints_widget_, SIGNAL(doneEditing()), this, SLOT(saveJointsScreen()));
   connect(joints_widget_, SIGNAL(previewSelected(std::vector<std::string>)), this,
           SLOT(previewSelectedJoints(std::vector<std::string>)));
 
   // Joints Groups Widget
-  joint_groups_widget_ = new moveit_setup_framework::DoubleListWidget(this, "Group Joints Collection", "Group");
+  joint_groups_widget_ = new DoubleListWidget(this, "Group Joints Collection", "Group");
   connect(joint_groups_widget_, SIGNAL(cancelEditing()), this, SLOT(cancelEditing()));
   connect(joint_groups_widget_, SIGNAL(doneEditing()), this, SLOT(saveJointsGroupsScreen()));
   connect(joint_groups_widget_, SIGNAL(previewSelected(std::vector<std::string>)), this,
@@ -794,7 +796,8 @@ void ControllersWidget::itemSelectionChanged()
   }
 }
 
-}  // namespace moveit_setup_controllers
+}  // namespace controllers
+}  // namespace moveit_setup
 
 #include <pluginlib/class_list_macros.hpp>  // NOLINT
-PLUGINLIB_EXPORT_CLASS(moveit_setup_controllers::ControllersWidget, moveit_setup_framework::SetupStepWidget)
+PLUGINLIB_EXPORT_CLASS(moveit_setup::controllers::ControllersWidget, moveit_setup::SetupStepWidget)

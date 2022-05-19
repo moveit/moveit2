@@ -45,7 +45,9 @@
 #include <QString>
 #include <QVBoxLayout>
 
-namespace moveit_setup_srdf_plugins
+namespace moveit_setup
+{
+namespace srdf_setup
 {
 void VirtualJointsWidget::onInit()
 {
@@ -54,11 +56,10 @@ void VirtualJointsWidget::onInit()
 
   // Top Header Area ------------------------------------------------
 
-  auto header = new moveit_setup_framework::HeaderWidget(
-      "Define Virtual Joints",
-      "Create a virtual joint between the base robot link and an external frame of reference. "
-      "This allows to place the robot in the world or on a mobile platform.",
-      this);
+  auto header = new HeaderWidget("Define Virtual Joints",
+                                 "Create a virtual joint between the base robot link and an external frame of "
+                                 "reference. This allows to place the robot in the world or on a mobile platform.",
+                                 this);
   layout->addWidget(header);
 
   // Create contents screens ---------------------------------------
@@ -519,7 +520,8 @@ void VirtualJointsWidget::focusGiven()
   loadChildLinksComboBox();
 }
 
-}  // namespace moveit_setup_srdf_plugins
+}  // namespace srdf_setup
+}  // namespace moveit_setup
 
 #include <pluginlib/class_list_macros.hpp>  // NOLINT
-PLUGINLIB_EXPORT_CLASS(moveit_setup_srdf_plugins::VirtualJointsWidget, moveit_setup_framework::SetupStepWidget)
+PLUGINLIB_EXPORT_CLASS(moveit_setup::srdf_setup::VirtualJointsWidget, moveit_setup::SetupStepWidget)

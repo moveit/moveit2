@@ -40,7 +40,7 @@
 #include <moveit_setup_framework/qt/rviz_panel.hpp>
 #include <QWidget>
 
-namespace moveit_setup_framework
+namespace moveit_setup
 {
 /**
  * @brief The GUI code for one SetupStep
@@ -115,4 +115,4 @@ protected:
   RVizPanel* rviz_panel_;
   bool debug_;
 };
-}  // namespace moveit_setup_framework
+}  // namespace moveit_setup

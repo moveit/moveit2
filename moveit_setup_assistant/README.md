@@ -2,21 +2,21 @@
 
 ## Migration Progress
 ### Fully Ported
- * `moveit_setup_core_plugins::StartScreenWidget`
- * `moveit_setup_srdf_plugins::DefaultCollisionsWidget`
- * `moveit_setup_srdf_plugins::VirtualJointsWidget`
- * `moveit_setup_srdf_plugins::PlanningGroupsWidget`
- * `moveit_setup_srdf_plugins::RobotPosesWidget`
- * `moveit_setup_srdf_plugins::EndEffectorsWidget`
- * `moveit_setup_srdf_plugins::PassiveJointsWidget`
- * `moveit_setup_app_plugins::PerceptionWidget`
- * `moveit_setup_app_plugins::LaunchesWidget`
- * `moveit_setup_core_plugins::AuthorInformationWidget`
- * `moveit_setup_core_plugins::ConfigurationFilesWidget`
+ * `moveit_setup::core::StartScreenWidget`
+ * `moveit_setup::srdf_setup::DefaultCollisionsWidget`
+ * `moveit_setup::srdf_setup::VirtualJointsWidget`
+ * `moveit_setup::srdf_setup::PlanningGroupsWidget`
+ * `moveit_setup::srdf_setup::RobotPosesWidget`
+ * `moveit_setup::srdf_setup::EndEffectorsWidget`
+ * `moveit_setup::srdf_setup::PassiveJointsWidget`
+ * `moveit_setup::app::PerceptionWidget`
+ * `moveit_setup::app::LaunchesWidget`
+ * `moveit_setup::core::AuthorInformationWidget`
+ * `moveit_setup::core::ConfigurationFilesWidget`
 
 ### Not Ported Yet
- * `moveit_setup_controllers::ControllersWidget`
- * `moveit_setup_simulation::SimulationWidget`
+ * `moveit_setup::controllers::ControllersWidget`
+ * `moveit_setup::simulation::SimulationWidget`
 
 ### Notes
  * `PerceptionWidget` is ported, except `moveit_configs_utils` needs to be modified to load `sensors_3d.yaml`. This may require adjustments to the format of `sensors_3d.yaml`
@@ -101,7 +101,7 @@ This class is a container for the logic for a single file to appear in MoveIt co
 
 The `collectFiles` method of `SetupConfig` allows us to specify all of the files we'd like to generate relative to a specific `SetupConfig`. There can be any number of files generated (zero, one or many) for each config.
 
- * `getRelativePath` - Returns the string of the path relative to the configuration package root
+ * `getRelativePath` - Returns the path relative to the configuration package root
  * `getDescription` - Returns an English description of this file's purpose.
  * `hasChanges` - Returns true if this file will have changes when it is written to file
  * `write` - Writes the file to disk
@@ -120,7 +120,7 @@ The status can be in one of five (5) states, as specified by the `FileStatus` en
 
 Checking for external modification depends on the timestamps of the written files, which is why `collectFiles` and the constructor for `GeneratedFile` require passing in the timestamp of the last package generation.
 
-Note it may be useful to call `moveit_setup_framework::createParentFolders` before writing.
+Note it may be useful to call `moveit_setup::createParentFolders` before writing.
 
 There is also `YamlGeneratedFile` as an easy abstraction of generating a YAML file. The `write` method is already implemented, and instead `writeYaml` must be implemented.
 

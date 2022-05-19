@@ -70,7 +70,7 @@ int main(int argc, char** argv)
   // clang-format off
   po::options_description desc("Allowed options");
   desc.add_options()("help,h", "Show help message")("debug,g", "Run in debug/test mode")(
-      "urdf_path,u", po::value<std::string>(), "Optional, path to URDF file in ROS package")(
+      "urdf_path,u", po::value<std::filesystem::path>(), "Optional, path to URDF file in ROS package")(
       "config_pkg,c", po::value<std::string>(), "Optional, pass in existing config package to load");
   // clang-format on
 
@@ -99,7 +99,7 @@ int main(int argc, char** argv)
   setlocale(LC_NUMERIC, "C");
 
   // Load Qt Widget
-  moveit_setup_assistant::SetupAssistantWidget saw(node, nullptr, vm);
+  moveit_setup::assistant::SetupAssistantWidget saw(node, nullptr, vm);
   saw.setMinimumWidth(1090);
   saw.setMinimumHeight(600);
   //  saw.setWindowState( Qt::WindowMaximized );

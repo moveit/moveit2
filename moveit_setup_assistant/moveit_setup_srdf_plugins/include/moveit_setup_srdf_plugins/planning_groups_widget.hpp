@@ -52,7 +52,9 @@
 // Forward Declaration (outside of namespace for Qt)
 class PlanGroupType;
 
-namespace moveit_setup_srdf_plugins
+namespace moveit_setup
+{
+namespace srdf_setup
 {
 // Custom Type
 enum GroupType
@@ -69,7 +71,7 @@ enum GroupType
 // CLASS
 // ******************************************************************************************
 // ******************************************************************************************
-class PlanningGroupsWidget : public moveit_setup_framework::SetupStepWidget
+class PlanningGroupsWidget : public SetupStepWidget
 {
   Q_OBJECT
 
@@ -85,7 +87,7 @@ public:
   /// Received when this widget is chosen from the navigation menu
   void focusGiven() override;
 
-  moveit_setup_framework::SetupStep& getSetupStep() override
+  SetupStep& getSetupStep() override
   {
     return setup_step_;
   }
@@ -157,9 +159,9 @@ private:
   // Stacked Layout SUBPAGES -------------------------------------------
 
   QWidget* groups_tree_widget_;
-  moveit_setup_framework::DoubleListWidget* joints_widget_;
-  moveit_setup_framework::DoubleListWidget* links_widget_;
-  moveit_setup_framework::DoubleListWidget* subgroups_widget_;
+  DoubleListWidget* joints_widget_;
+  DoubleListWidget* links_widget_;
+  DoubleListWidget* subgroups_widget_;
   KinematicChainWidget* chain_widget_;
   GroupEditWidget* group_edit_widget_;
 
@@ -201,7 +203,6 @@ private:
   /// Switch to current groups view
   void showMainScreen();
 };
-}  // namespace moveit_setup_srdf_plugins
 
 // ******************************************************************************************
 // ******************************************************************************************
@@ -216,7 +217,7 @@ public:
   PlanGroupType()
   {
   }
-  PlanGroupType(srdf::Model::Group* group, const moveit_setup_srdf_plugins::GroupType type);
+  PlanGroupType(srdf::Model::Group* group, const GroupType type);
   virtual ~PlanGroupType()
   {
     ;
@@ -224,7 +225,10 @@ public:
 
   srdf::Model::Group* group_;
 
-  moveit_setup_srdf_plugins::GroupType type_;
+  GroupType type_;
 };
 
-Q_DECLARE_METATYPE(PlanGroupType);
+}  // namespace srdf_setup
+}  // namespace moveit_setup
+
+Q_DECLARE_METATYPE(moveit_setup::srdf_setup::PlanGroupType);

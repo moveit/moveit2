@@ -48,7 +48,9 @@
 #include <moveit_setup_srdf_plugins/collision_linear_model.hpp>
 #include <moveit_setup_srdf_plugins/rotated_header_view.hpp>
 
-namespace moveit_setup_srdf_plugins
+namespace moveit_setup
+{
+namespace srdf_setup
 {
 // ******************************************************************************************
 // User interface for editing the default collision matrix list in an SRDF
@@ -63,7 +65,7 @@ void DefaultCollisionsWidget::onInit()
   layout_ = new QVBoxLayout(this);
 
   // Top Label Area ------------------------------------------------
-  auto header = new moveit_setup_framework::HeaderWidget(
+  auto header = new HeaderWidget(
       "Optimize Self-Collision Checking",
       "This searches for pairs of robot links that can safely be disabled from collision checking, decreasing motion "
       "planning time. These pairs are disabled when they are always in collision, never in collision, in collision in "
@@ -718,7 +720,7 @@ bool DefaultCollisionsWidget::focusLost()
   return true;
 }
 
-moveit_setup_srdf_plugins::MonitorThread::MonitorThread(DefaultCollisions& setup_step, QProgressBar* progress_bar)
+MonitorThread::MonitorThread(DefaultCollisions& setup_step, QProgressBar* progress_bar)
   : setup_step_(setup_step), canceled_(false)
 {
   // connect progress bar for updates
@@ -726,7 +728,7 @@ moveit_setup_srdf_plugins::MonitorThread::MonitorThread(DefaultCollisions& setup
     connect(this, SIGNAL(progress(int)), progress_bar, SLOT(setValue(int)));
 }
 
-void moveit_setup_srdf_plugins::MonitorThread::run()
+void MonitorThread::run()
 {
   // loop until worker thread is finished or cancel is requested
   int thread_progress;
@@ -744,7 +746,8 @@ void moveit_setup_srdf_plugins::MonitorThread::run()
   Q_EMIT progress(100);
 }
 
-}  // namespace moveit_setup_srdf_plugins
+}  // namespace srdf_setup
+}  // namespace moveit_setup
 
 #include <pluginlib/class_list_macros.hpp>  // NOLINT
-PLUGINLIB_EXPORT_CLASS(moveit_setup_srdf_plugins::DefaultCollisionsWidget, moveit_setup_framework::SetupStepWidget)
+PLUGINLIB_EXPORT_CLASS(moveit_setup::srdf_setup::DefaultCollisionsWidget, moveit_setup::SetupStepWidget)
