@@ -34,7 +34,7 @@
 
 /* Author: Dave Coleman */
 
-#include "header_widget.h"
+#include "moveit_setup_framework/qt/helper_widgets.hpp"
 #include <QFileDialog>
 #include <QFont>
 #include <QLabel>
@@ -42,7 +42,7 @@
 #include <QPushButton>
 #include <QVBoxLayout>
 
-namespace moveit_setup_assistant
+namespace moveit_setup_framework
 {
 // ******************************************************************************************
 // ******************************************************************************************
@@ -230,4 +230,4 @@ void LoadPathArgsWidget::setArgsEnabled(bool enabled)
 {
   args_->setEnabled(enabled);
 }
-}  // namespace moveit_setup_assistant
+}  // namespace moveit_setup_framework

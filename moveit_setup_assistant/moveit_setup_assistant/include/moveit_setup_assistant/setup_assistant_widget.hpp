@@ -36,44 +36,27 @@
 
 #pragma once
 
+// ROS
+#include <pluginlib/class_loader.hpp>
+#include <rviz_common/ros_integration/ros_client_abstraction.hpp>
+
 // Qt
+#include <QWidget>
+#include <QStackedWidget>
+#include <QAbstractTableModel>
 class QSplitter;
 
 // Setup Assistant
-#include "navigation_widget.h"
-#include "start_screen_widget.h"
-#include "default_collisions_widget.h"
-#include "planning_groups_widget.h"
-#include "robot_poses_widget.h"
-#include "end_effectors_widget.h"
-#include "virtual_joints_widget.h"
-#include "passive_joints_widget.h"
-#include "author_information_widget.h"
-#include "simulation_widget.h"
-#include "configuration_files_widget.h"
-#include "perception_widget.h"
-#include "controllers_widget.h"
+#include "moveit_setup_framework/qt/setup_step_widget.hpp"
+#include "moveit_setup_framework/qt/rviz_panel.hpp"
+#include "moveit_setup_framework/data_warehouse.hpp"
+#include "moveit_setup_assistant/navigation_widget.hpp"
 
 #ifndef Q_MOC_RUN
-#include <moveit/setup_assistant/tools/moveit_config_data.h>
-
 // Other
 #include <boost/program_options/variables_map.hpp>  // for parsing input arguments
 #include <boost/thread/mutex.hpp>
 #endif
-
-// Forward declarations
-namespace rviz
-{
-class GridDisplay;
-class RenderPanel;
-class VisualizationManager;
-}  // namespace rviz
-
-namespace moveit_rviz_plugin
-{
-class RobotStateDisplay;
-}
 
 namespace moveit_setup_assistant
 {
@@ -91,13 +74,8 @@ public:
    * @param parent - used by Qt for destructing all elements
    * @return
    */
-  SetupAssistantWidget(QWidget* parent, const boost::program_options::variables_map& args);
-
-  /**
-   * Deconstructor
-   *
-   */
-  ~SetupAssistantWidget() override;
+  SetupAssistantWidget(rviz_common::ros_integration::RosNodeAbstractionIface::WeakPtr node, QWidget* parent,
+                       const boost::program_options::variables_map& args);
 
   /**
    * Changes viewable screen
@@ -148,77 +126,43 @@ private Q_SLOTS:
   void updateTimer();
 
   /**
-   * Call a function that enables navigation and goes to screen 2
+   * Function for handling the dataUpdated event
    */
-  void progressPastStartScreen();
+  void onDataUpdate();
 
   /**
-   * Load Rviz once we have a robot description ready
-   *
+   * Advance to the next step
    */
-  void loadRviz();
+  void onAdvanceRequest();
 
   /**
    * Change the widget modal state based on subwidgets state
    *
    * @param isModal if true disable left navigation
    */
-  void setModalMode(bool isModal);
-
-  /**
-   * Highlight a link of the robot
-   *
-   * @param link_name name of link to highlight
-   */
-  void highlightLink(const std::string& link_name, const QColor& color);
-
-  /**
-   * Highlight a robot group
-   */
-  void highlightGroup(const std::string& group_name);
-
-  /**
-   * Unhighlight all links of a robot
-   */
-  void unhighlightAll();
-
-  // received when virtual joints that change the reference frame are added
-  void virtualJointReferenceFrameChanged();
+  void onModalModeUpdate(bool isModal);
 
 private:
   // ******************************************************************************************
   // Variables
   // ******************************************************************************************
+  rviz_common::ros_integration::RosNodeAbstractionIface::WeakPtr node_abstraction_;
+  rclcpp::Node::SharedPtr node_;
   QList<QString> nav_name_list_;
   NavigationWidget* navs_view_;
 
-  QWidget* rviz_container_;
+  moveit_setup_framework::RVizPanel* rviz_panel_;
   QSplitter* splitter_;
   QStackedWidget* main_content_;
   int current_index_;
   boost::mutex change_screen_lock_;
 
-  // Rviz Panel
-  rviz::RenderPanel* rviz_render_panel_;
-  rviz::VisualizationManager* rviz_manager_;
-  moveit_rviz_plugin::RobotStateDisplay* robot_state_display_;
-
-  // Screen Widgets
-  StartScreenWidget* start_screen_widget_;
-  DefaultCollisionsWidget* default_collisions_widget_;
-  PlanningGroupsWidget* planning_groups_widget;
-  RobotPosesWidget* robot_poses_widget_;
-  EndEffectorsWidget* end_effectors_widget_;
-  VirtualJointsWidget* virtual_joints_widget_;
-  PassiveJointsWidget* passive_joints_widget_;
-  AuthorInformationWidget* author_information_widget_;
-  ConfigurationFilesWidget* configuration_files_widget_;
-  SimulationWidget* simulation_widget_;
-  PerceptionWidget* perception_widget_;
-  ControllersWidget* controllers_widget_;
+  // Setup Steps
+  pluginlib::ClassLoader<moveit_setup_framework::SetupStepWidget> widget_loader_;
+  std::vector<std::shared_ptr<moveit_setup_framework::SetupStepWidget>> steps_;
 
   /// Contains all the configuration data for the setup assistant
-  MoveItConfigDataPtr config_data_;
+  moveit_setup_framework::DataWarehousePtr config_data_;
 
   // ******************************************************************************************
   // Private Functions
