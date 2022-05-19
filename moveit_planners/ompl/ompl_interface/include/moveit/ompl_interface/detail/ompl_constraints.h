@@ -348,13 +348,13 @@ private:
 class OrientationConstraint : public BaseConstraint
 {
 public:
-  OrientationConstraint(const robot_model::RobotModelConstPtr& robot_model, const std::string& group,
+  OrientationConstraint(const moveit::core::RobotModelConstPtr& robot_model, const std::string& group,
                         const unsigned int num_dofs)
     : BaseConstraint(robot_model, group, num_dofs)
   {
   }
 
-  void parseConstraintMsg(const moveit_msgs::Constraints& constraints) override;
+  void parseConstraintMsg(const moveit_msgs::msg::Constraints& constraints) override;
   Eigen::VectorXd calcError(const Eigen::Ref<const Eigen::VectorXd>& x) const override;
   virtual Eigen::MatrixXd calcErrorJacobian(const Eigen::Ref<const Eigen::VectorXd>& x) const override;
 };
@@ -378,7 +378,7 @@ Bounds positionConstraintMsgToBoundVector(const moveit_msgs::msg::PositionConstr
  * the width of the tolerance regions around the target orientation, represented using exponential coordinates.
  *
  * */
-std::vector<Bounds> orientationConstraintMsgToBoundVector(const moveit_msgs::OrientationConstraint& ori_con);
+std::vector<Bounds> orientationConstraintMsgToBoundVector(const moveit_msgs::msg::OrientationConstraint& ori_con);
 
 /** \brief Factory to create constraints based on what is in the MoveIt constraint message. **/
 std::shared_ptr<BaseConstraint> createOMPLConstraint(const moveit::core::RobotModelConstPtr& robot_model,

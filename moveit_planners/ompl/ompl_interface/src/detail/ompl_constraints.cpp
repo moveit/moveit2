@@ -313,16 +313,16 @@ void EqualityPositionConstraint::jacobian(const Eigen::Ref<const Eigen::VectorXd
 /******************************************
  * Orientation constraints
  * ****************************************/
-void OrientationConstraint::parseConstraintMsg(const moveit_msgs::Constraints& constraints)
+void OrientationConstraint::parseConstraintMsg(const moveit_msgs::msg::Constraints& constraints)
 {
   bounds_.clear();
   bounds_ = orientationConstraintMsgToBoundVector(constraints.orientation_constraints.at(0));
-  ROS_INFO_STREAM("Parsing orientation constraints");
-  ROS_INFO_STREAM("Parsed rx / roll constraints" << bounds_[0]);
-  ROS_INFO_STREAM("Parsed ry / pitch constraints" << bounds_[1]);
-  ROS_INFO_STREAM("Parsed rz / yaw constraints" << bounds_[2]);
+  RCLCPP_INFO_STREAM(LOGGER, "Parsing orientation constraints");
+  RCLCPP_INFO_STREAM(LOGGER, "Parsed rx / roll constraints" << bounds_[0]);
+  RCLCPP_INFO_STREAM(LOGGER, "Parsed ry / pitch constraints" << bounds_[1]);
+  RCLCPP_INFO_STREAM(LOGGER, "Parsed rz / yaw constraints" << bounds_[2]);
 
-  tf::quaternionMsgToEigen(constraints.orientation_constraints.at(0).orientation, target_orientation_);
+  tf2::fromMsg(constraints.orientation_constraints.at(0).orientation, target_orientation_);
 
   link_name_ = constraints.orientation_constraints.at(0).link_name;
 }
@@ -361,7 +361,7 @@ Bounds positionConstraintMsgToBoundVector(const moveit_msgs::msg::PositionConstr
            { dims.at(0) / 2.0, dims.at(1) / 2.0, dims.at(2) / 2.0 } };
 }
 
-std::vector<Bounds> orientationConstraintMsgToBoundVector(const moveit_msgs::OrientationConstraint& ori_con)
+std::vector<Bounds> orientationConstraintMsgToBoundVector(const moveit_msgs::msg::OrientationConstraint& ori_con)
 {
   std::vector<double> dims{ ori_con.absolute_x_axis_tolerance, ori_con.absolute_y_axis_tolerance,
                             ori_con.absolute_z_axis_tolerance };
@@ -425,7 +425,7 @@ std::shared_ptr<BaseConstraint> createOMPLConstraint(const moveit::core::RobotMo
   }
   else if (num_ori_con > 0)
   {
-    ROS_ERROR_NAMED(LOGNAME, "Orientation constraints are not yet supported.");
+    RCLCPP_ERROR(LOGGER, "OMPL is using orientation constraints.");
     auto ori_con = std::make_shared<OrientationConstraint>(robot_model, group, num_dofs);
     ori_con->init(constraints);
     return ori_con;
