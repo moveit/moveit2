@@ -38,12 +38,11 @@
 #include <moveit_setup_framework/config.hpp>
 #include <moveit_setup_framework/templates.hpp>
 #include <moveit_setup_framework/data/urdf_config.hpp>
-#include <ament_index_cpp/get_package_share_directory.hpp>
 #include <moveit/robot_model/robot_model.h>
 #include <moveit/planning_scene/planning_scene.h>  // for getting kinematic model
 #include <srdfdom/srdf_writer.h>                   // for writing srdf data
 
-namespace moveit_setup_framework
+namespace moveit_setup
 {
 // bits of information that can be changed in the SRDF
 enum InformationFields
@@ -72,12 +71,12 @@ public:
     return robot_model_ != nullptr;
   }
 
-  void loadPrevious(const std::string& package_path, const YAML::Node& node) override;
+  void loadPrevious(const std::filesystem::path& package_path, const YAML::Node& node) override;
   YAML::Node saveToYaml() const override;
 
   /// Load SRDF File
-  void loadSRDFFile(const std::string& package_path, const std::string& relative_path);
-  void loadSRDFFile(const std::string& srdf_file_path,
+  void loadSRDFFile(const std::filesystem::path& package_path, const std::filesystem::path& relative_path);
+  void loadSRDFFile(const std::filesystem::path& srdf_file_path,
                     const std::vector<std::string>& xacro_args = std::vector<std::string>());
 
   moveit::core::RobotModelPtr getRobotModel() const
@@ -155,12 +154,12 @@ public:
   class GeneratedSRDF : public GeneratedFile
   {
   public:
-    GeneratedSRDF(const std::string& package_path, const std::time_t& last_gen_time, SRDFConfig& parent)
+    GeneratedSRDF(const std::filesystem::path& package_path, const GeneratedTime& last_gen_time, SRDFConfig& parent)
       : GeneratedFile(package_path, last_gen_time), parent_(parent)
     {
     }
 
-    std::string getRelativePath() const override
+    std::filesystem::path getRelativePath() const override
     {
       return parent_.srdf_pkg_relative_path_;
     }
@@ -180,7 +179,7 @@ public:
 
     bool write() override
     {
-      std::string path = getPath();
+      std::filesystem::path path = getPath();
       createParentFolders(path);
       return parent_.write(path);
     }
@@ -192,12 +191,13 @@ public:
   class GeneratedJointLimits : public YamlGeneratedFile
   {
   public:
-    GeneratedJointLimits(const std::string& package_path, const std::time_t& last_gen_time, SRDFConfig& parent)
+    GeneratedJointLimits(const std::filesystem::path& package_path, const GeneratedTime& last_gen_time,
+                         SRDFConfig& parent)
       : YamlGeneratedFile(package_path, last_gen_time), parent_(parent)
     {
     }
 
-    std::string getRelativePath() const override
+    std::filesystem::path getRelativePath() const override
     {
       return JOINT_LIMITS_FILE;
     }
@@ -227,15 +227,14 @@ public:
   public:
     using TemplatedGeneratedFile::TemplatedGeneratedFile;
 
-    std::string getRelativePath() const override
+    std::filesystem::path getRelativePath() const override
     {
       return CARTESIAN_LIMITS_FILE;
     }
 
-    std::string getTemplatePath() const override
+    std::filesystem::path getTemplatePath() const override
     {
-      return appendPaths(ament_index_cpp::get_package_share_directory("moveit_setup_framework"),
-                         appendPaths("templates", CARTESIAN_LIMITS_FILE));
+      return getSharePath("moveit_setup_framework") / "templates" / CARTESIAN_LIMITS_FILE;
     }
 
     std::string getDescription() const override
@@ -251,7 +250,7 @@ public:
     }
   };
 
-  void collectFiles(const std::string& package_path, const std::time_t& last_gen_time,
+  void collectFiles(const std::filesystem::path& package_path, const GeneratedTime& last_gen_time,
                     std::vector<GeneratedFilePtr>& files) override
   {
     files.push_back(std::make_shared<GeneratedSRDF>(package_path, last_gen_time, *this));
@@ -261,14 +260,19 @@ public:
 
   void collectVariables(std::vector<TemplateVariable>& variables) override;
 
-  bool write(const std::string& path)
+  bool write(const std::filesystem::path& path)
   {
     return srdf_.writeSRDF(path);
   }
 
-  std::string getPath() const
+  std::filesystem::path getPath() const
   {
     return srdf_path_;
+  }
+
+  unsigned long getChangeMask() const
+  {
+    return changes_;
   }
 
 protected:
@@ -279,10 +283,10 @@ protected:
   // SRDF Data
   // ******************************************************************************************
   /// Full file-system path to srdf
-  std::string srdf_path_;
+  std::filesystem::path srdf_path_;
 
   /// Path relative to loaded configuration package
-  std::string srdf_pkg_relative_path_;
+  std::filesystem::path srdf_pkg_relative_path_;
 
   /// SRDF Data and Writer
   srdf::SRDFWriter srdf_;
@@ -297,4 +301,4 @@ protected:
   // bitfield of changes (composed of InformationFields)
   unsigned long changes_;
 };
-}  // namespace moveit_setup_framework
+}  // namespace moveit_setup

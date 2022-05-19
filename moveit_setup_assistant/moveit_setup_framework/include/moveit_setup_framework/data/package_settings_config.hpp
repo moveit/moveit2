@@ -37,7 +37,7 @@
 #include <moveit_setup_framework/config.hpp>
 #include <moveit_setup_framework/data_warehouse.hpp>
 
-namespace moveit_setup_framework
+namespace moveit_setup
 {
 static const std::string SETUP_ASSISTANT_FILE = ".setup_assistant";
 
@@ -50,7 +50,7 @@ public:
    * Not to be confused with loadExisting which is a PackageSettingsConfig-specific
    * method for loading ALL configs and their data.
    */
-  void loadPrevious(const std::string& package_path, const YAML::Node& node) override;
+  void loadPrevious(const std::filesystem::path& package_path, const YAML::Node& node) override;
   YAML::Node saveToYaml() const override;
 
   /**
@@ -60,7 +60,7 @@ public:
    */
   void loadExisting(const std::string& package_path_or_name);
 
-  const std::string& getPackagePath() const
+  const std::filesystem::path& getPackagePath() const
   {
     return config_pkg_path_;
   }
@@ -70,11 +70,11 @@ public:
     return new_package_name_;
   }
 
-  void setPackagePath(const std::string& package_path);
+  void setPackagePath(const std::filesystem::path& package_path);
 
   void setPackageName(const std::string& package_name);
 
-  const std::time_t& getGenerationTime() const
+  const GeneratedTime& getGenerationTime() const
   {
     return config_pkg_generated_timestamp_;
   }
@@ -91,12 +91,13 @@ public:
   class GeneratedSettings : public YamlGeneratedFile
   {
   public:
-    GeneratedSettings(const std::string& package_path, const std::time_t& last_gen_time, PackageSettingsConfig& parent)
+    GeneratedSettings(const std::filesystem::path& package_path, const GeneratedTime& last_gen_time,
+                      PackageSettingsConfig& parent)
       : YamlGeneratedFile(package_path, last_gen_time), parent_(parent)
     {
     }
 
-    std::string getRelativePath() const override
+    std::filesystem::path getRelativePath() const override
     {
       return SETUP_ASSISTANT_FILE;
     }
@@ -121,7 +122,8 @@ public:
   class GeneratedPackageXML : public TemplatedGeneratedFile
   {
   public:
-    GeneratedPackageXML(const std::string& package_path, const std::time_t& last_gen_time, PackageSettingsConfig& parent)
+    GeneratedPackageXML(const std::filesystem::path& package_path, const GeneratedTime& last_gen_time,
+                        PackageSettingsConfig& parent)
       : TemplatedGeneratedFile(package_path, last_gen_time), parent_(parent)
     {
     }
@@ -131,17 +133,15 @@ public:
       return parent_.author_info_changed_;
     }
 
-    std::string getRelativePath() const override
+    std::filesystem::path getRelativePath() const override
     {
       return "package.xml";
     }
 
-    std::string getTemplatePath() const override
+    std::filesystem::path getTemplatePath() const override
     {
       // Note: we call the file package.xml.template so that it isn't automatically indexed by rosprofile
-      std::string pkg_path = ament_index_cpp::get_package_share_directory("moveit_setup_framework");
-      std::string templates_folder = appendPaths(pkg_path, "templates");
-      return appendPaths(templates_folder, "package.xml.template");
+      return getSharePath("moveit_setup_framework") / "templates" / "package.xml.template";
     }
 
     std::string getDescription() const override
@@ -163,16 +163,14 @@ public:
       return false;  // Generally doesn't change
     }
 
-    std::string getRelativePath() const override
+    std::filesystem::path getRelativePath() const override
     {
       return "CMakeLists.txt";
     }
 
-    std::string getTemplatePath() const override
+    std::filesystem::path getTemplatePath() const override
     {
-      std::string pkg_path = ament_index_cpp::get_package_share_directory("moveit_setup_framework");
-      std::string templates_folder = appendPaths(pkg_path, "templates");
-      return appendPaths(templates_folder, "CMakeLists.txt");
+      return getSharePath("moveit_setup_framework") / "templates" / "CMakeLists.txt";
     }
 
     std::string getDescription() const override
@@ -181,7 +179,7 @@ public:
     }
   };
 
-  void collectFiles(const std::string& package_path, const std::time_t& last_gen_time,
+  void collectFiles(const std::filesystem::path& package_path, const GeneratedTime& last_gen_time,
                     std::vector<GeneratedFilePtr>& files) override
   {
     files.push_back(std::make_shared<GeneratedSettings>(package_path, last_gen_time, *this));
@@ -214,7 +212,7 @@ public:
 
 protected:
   /// Loaded configuration package path - if an existing package was loaded, holds that path
-  std::string config_pkg_path_;
+  std::filesystem::path config_pkg_path_;
 
   /// Name of the new package that is being (or going) to be generated, based on user specified save path
   std::string new_package_name_{ "unnamed_moveit_config" };
@@ -228,8 +226,8 @@ protected:
   bool author_info_changed_{ false };
 
   /// Timestamp when configuration package was generated, if it was previously generated
-  std::time_t config_pkg_generated_timestamp_{ 0 };
+  GeneratedTime config_pkg_generated_timestamp_;
 
   std::set<std::string> package_dependencies_;
 };
-}  // namespace moveit_setup_framework
+}  // namespace moveit_setup

@@ -52,7 +52,9 @@
 #include <QStackedWidget>
 #include <QTableWidget>
 
-namespace moveit_setup_srdf_plugins
+namespace moveit_setup
+{
+namespace srdf_setup
 {
 // ******************************************************************************************
 // Outer User Interface for MoveIt Configuration Assistant
@@ -67,12 +69,11 @@ void RobotPosesWidget::onInit()
 
   // Top Header Area ------------------------------------------------
 
-  auto header = new moveit_setup_framework::HeaderWidget(
-      "Define Robot Poses",
-      "Create poses for the robot. Poses are defined as sets of joint values for "
-      "particular planning groups. This is useful for things like <i>home position</i>. "
-      "The <i>first</i> listed pose will be the robot's initial pose in simulation.",
-      this);
+  auto header = new HeaderWidget("Define Robot Poses",
+                                 "Create poses for the robot. Poses are defined as sets of joint values for particular "
+                                 "planning groups. This is useful for things like <i>home position</i>. The "
+                                 "<i>first</i> listed pose will be the robot's initial pose in simulation.",
+                                 this);
   layout->addWidget(header);
 
   // Create contents screens ---------------------------------------
@@ -326,8 +327,7 @@ void RobotPosesWidget::showPose(const srdf::Model::GroupState& pose)
   }
 
   // Update the joints
-  bool collision = setup_step_.publishState(robot_state);
-  collision_warning_->setHidden(!collision);
+  updateStateAndCollision(robot_state);
 
   // Unhighlight all links
   rviz_panel_->unhighlightAll();
@@ -345,8 +345,7 @@ void RobotPosesWidget::showDefaultPose()
   robot_state.setToDefaultValues();
 
   // Update the joints
-  bool collision = setup_step_.publishState(robot_state);
-  collision_warning_->setHidden(!collision);
+  updateStateAndCollision(robot_state);
 
   // Unhighlight all links
   rviz_panel_->unhighlightAll();
@@ -357,14 +356,16 @@ void RobotPosesWidget::showDefaultPose()
 // ******************************************************************************************
 void RobotPosesWidget::playPoses()
 {
+  using namespace std::chrono_literals;
+
   // Loop through each pose and play them
   for (const srdf::Model::GroupState& pose : setup_step_.getGroupStates())
   {
     RCLCPP_INFO_STREAM(setup_step_.getLogger(), "Showing pose " << pose.name_);
     showPose(pose);
-    // TODO: ros::Duration(0.05).sleep();
+    rclcpp::sleep_for(50000000ns);  // 0.05 s
     QApplication::processEvents();
-    // TODO: ros::Duration(0.45).sleep();
+    rclcpp::sleep_for(450000000ns);  // 0.45 s
   }
 }
 
@@ -490,8 +491,7 @@ void RobotPosesWidget::loadJointSliders(const QString& selected)
   joint_list_widget_->resize(300, joint_models.size() * 70);  // w, h
 
   // Update the robot model in Rviz with newly selected joint values
-  bool collision = setup_step_.publishState(robot_state);
-  collision_warning_->setHidden(!collision);
+  updateStateAndCollision(robot_state);
 
   // Highlight the planning group
   rviz_panel_->unhighlightAll();
@@ -684,8 +684,16 @@ void RobotPosesWidget::updateRobotModel(const std::string& name, double value)
   robot_state.setVariablePosition(name, value);
 
   // Update the robot model/rviz
-  bool collision = setup_step_.publishState(robot_state);
-  collision_warning_->setHidden(!collision);
+  updateStateAndCollision(robot_state);
+}
+
+void RobotPosesWidget::updateStateAndCollision(const moveit::core::RobotState& robot_state)
+{
+  setup_step_.publishState(robot_state);
+
+  // if in collision, show warning
+  // if no collision, hide warning
+  collision_warning_->setHidden(!setup_step_.checkSelfCollision(robot_state));
 }
 
 // ******************************************************************************************
@@ -803,7 +811,8 @@ void SliderWidget::changeJointSlider()
   Q_EMIT jointValueChanged(joint_model_->getName(), value);
 }
 
-}  // namespace moveit_setup_srdf_plugins
+}  // namespace srdf_setup
+}  // namespace moveit_setup
 
 #include <pluginlib/class_list_macros.hpp>  // NOLINT
-PLUGINLIB_EXPORT_CLASS(moveit_setup_srdf_plugins::RobotPosesWidget, moveit_setup_framework::SetupStepWidget)
+PLUGINLIB_EXPORT_CLASS(moveit_setup::srdf_setup::RobotPosesWidget, moveit_setup::SetupStepWidget)

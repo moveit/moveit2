@@ -38,9 +38,11 @@
 #include <moveit_setup_framework/setup_step.hpp>
 #include <moveit_setup_framework/data/package_settings_config.hpp>
 
-namespace moveit_setup_core_plugins
+namespace moveit_setup
 {
-class AuthorInformation : public moveit_setup_framework::SetupStep
+namespace core
+{
+class AuthorInformation : public SetupStep
 {
 public:
   std::string getName() const override
@@ -62,6 +64,7 @@ public:
   void setAuthorEmail(const std::string& email);
 
 protected:
-  std::shared_ptr<moveit_setup_framework::PackageSettingsConfig> package_settings_;
+  std::shared_ptr<PackageSettingsConfig> package_settings_;
 };
-}  // namespace moveit_setup_core_plugins
+}  // namespace core
+}  // namespace moveit_setup

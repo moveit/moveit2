@@ -36,13 +36,15 @@
 
 #include <moveit_setup_controllers/controllers.hpp>
 
-namespace moveit_setup_controllers
+namespace moveit_setup
+{
+namespace controllers
 {
 void Controllers::onInit()
 {
-  config_data_->registerType("controllers", "moveit_setup_controllers::ControllersConfig");
-  srdf_config_ = config_data_->get<moveit_setup_framework::SRDFConfig>("srdf");
-  controllers_config_ = config_data_->get<moveit_setup_controllers::ControllersConfig>("controllers");
+  config_data_->registerType("controllers", "moveit_setup::controllers::ControllersConfig");
+  srdf_config_ = config_data_->get<SRDFConfig>("srdf");
+  controllers_config_ = config_data_->get<ControllersConfig>("controllers");
 }
 
 // ******************************************************************************************
@@ -86,4 +88,5 @@ std::vector<std::string> Controllers::getJointsFromGroups(const std::vector<std:
   return joint_names;
 }
 
-}  // namespace moveit_setup_controllers
+}  // namespace controllers
+}  // namespace moveit_setup

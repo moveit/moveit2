@@ -37,7 +37,9 @@
 #include <moveit_setup_srdf_plugins/robot_poses.hpp>
 #include <moveit/robot_state/conversions.h>
 
-namespace moveit_setup_srdf_plugins
+namespace moveit_setup
+{
+namespace srdf_setup
 {
 void RobotPoses::onInit()
 {
@@ -52,10 +54,10 @@ void RobotPoses::onInit()
   // Collision Detection initializtion -------------------------------
 
   // Setup the request
-  request.contacts = true;
-  request.max_contacts = 1;
-  request.max_contacts_per_pair = 1;
-  request.verbose = false;
+  request_.contacts = true;
+  request_.max_contacts = 1;
+  request_.max_contacts_per_pair = 1;
+  request_.verbose = false;
 }
 
 // ******************************************************************************************
@@ -96,7 +98,7 @@ void RobotPoses::loadAllowedCollisionMatrix()
 // ******************************************************************************************
 // Publish the current RobotState to Rviz
 // ******************************************************************************************
-bool RobotPoses::publishState(const moveit::core::RobotState& robot_state)
+void RobotPoses::publishState(const moveit::core::RobotState& robot_state)
 {
   // Create a planning scene message
   moveit_msgs::msg::DisplayRobotState msg;
@@ -104,10 +106,13 @@ bool RobotPoses::publishState(const moveit::core::RobotState& robot_state)
 
   // Publish!
   pub_robot_state_->publish(msg);
+}
 
+bool RobotPoses::checkSelfCollision(const moveit::core::RobotState& robot_state)
+{
   // Decide if current state is in collision
   collision_detection::CollisionResult result;
-  srdf_config_->getPlanningScene()->checkSelfCollision(request, result, robot_state, allowed_collision_matrix_);
+  srdf_config_->getPlanningScene()->checkSelfCollision(request_, result, robot_state, allowed_collision_matrix_);
   return !result.contacts.empty();
 }
 
@@ -151,7 +156,8 @@ void RobotPoses::setToCurrentValues(srdf::Model::GroupState& group_state)
     // Add joint vector to SRDF
     group_state.joint_values_[joint_model->getName()] = std::move(joint_values);
   }
-  srdf_config_->updateRobotModel(moveit_setup_framework::POSES);
+  srdf_config_->updateRobotModel(POSES);
 }
 
-}  // namespace moveit_setup_srdf_plugins
+}  // namespace srdf_setup
+}  // namespace moveit_setup

@@ -38,9 +38,11 @@
 #include <moveit_setup_framework/setup_step.hpp>
 #include <moveit_setup_framework/data/urdf_config.hpp>
 
-namespace moveit_setup_simulation
+namespace moveit_setup
 {
-class Simulation : public moveit_setup_framework::SetupStep
+namespace simulation
+{
+class Simulation : public SetupStep
 {
 public:
   std::string getName() const override
@@ -55,7 +57,7 @@ public:
     return false;
   }
 
-  std::string getURDFPath() const
+  std::filesystem::path getURDFPath() const
   {
     return urdf_config_->getURDFPath();
   }
@@ -83,7 +85,7 @@ public:
    */
   std::string getGazeboCompatibleURDF();
 
-  bool outputGazeboURDFFile(const std::string& file_path);
+  bool outputGazeboURDFFile(const std::filesystem::path& file_path);
 
   /**
    * @brief Check if the given xml is valid
@@ -97,7 +99,7 @@ public:
                   std::string& error_description) const;
 
 protected:
-  std::shared_ptr<moveit_setup_framework::URDFConfig> urdf_config_;
+  std::shared_ptr<URDFConfig> urdf_config_;
 
   /// Gazebo URDF robot model string
   // NOTE: Created when the robot urdf is not compatible with Gazebo.
@@ -106,4 +108,5 @@ protected:
   /// Whether a new Gazebo URDF is created
   bool save_gazebo_urdf_;
 };
-}  // namespace moveit_setup_simulation
+}  // namespace simulation
+}  // namespace moveit_setup

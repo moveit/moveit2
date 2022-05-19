@@ -45,12 +45,14 @@
 #include <QTreeWidget>
 #include <moveit_setup_srdf_plugins/kinematic_chain_widget.hpp>
 
-namespace moveit_setup_srdf_plugins
+namespace moveit_setup
+{
+namespace srdf_setup
 {
 // ******************************************************************************************
 // Constructor
 // ******************************************************************************************
-KinematicChainWidget::KinematicChainWidget(QWidget* parent, moveit_setup_framework::RVizPanel* rviz_panel)
+KinematicChainWidget::KinematicChainWidget(QWidget* parent, RVizPanel* rviz_panel)
   : QWidget(parent), rviz_panel_(rviz_panel)
 {
   // Basic widget container
@@ -231,4 +233,5 @@ void KinematicChainWidget::itemSelected()
     rviz_panel_->highlightLink(item->text(0).toStdString(), QColor(255, 0, 0));
   }
 }
-}  // namespace moveit_setup_srdf_plugins
+}  // namespace srdf_setup
+}  // namespace moveit_setup

@@ -47,10 +47,12 @@
 #include <QProgressBar>
 #include <QPushButton>
 
-namespace moveit_setup_core_plugins
+namespace moveit_setup
+{
+namespace core
 {
 // Class
-class ConfigurationFilesWidget : public moveit_setup_framework::SetupStepWidget
+class ConfigurationFilesWidget : public SetupStepWidget
 {
   Q_OBJECT
 
@@ -61,7 +63,7 @@ public:
 
   void onInit() override;
 
-  moveit_setup_framework::SetupStep& getSetupStep() override
+  SetupStep& getSetupStep() override
   {
     return setup_step_;
   }
@@ -73,7 +75,7 @@ public:
   // Qt Components
   // ******************************************************************************************
   QPushButton* btn_save_;
-  moveit_setup_framework::LoadPathWidget* stack_path_;
+  LoadPathWidget* stack_path_;
   QProgressBar* progress_bar_;
   QListWidget* action_list_;
   QLabel* action_label_;
@@ -137,4 +139,5 @@ private:
   bool noGroupsEmpty();
 };
 
-}  // namespace moveit_setup_core_plugins
+}  // namespace core
+}  // namespace moveit_setup

@@ -37,7 +37,7 @@
 #include <moveit_setup_framework/qt/xml_syntax_highlighter.hpp>
 #include <assert.h>
 
-namespace moveit_setup_framework
+namespace moveit_setup
 {
 XmlSyntaxHighlighter::XmlSyntaxHighlighter(QTextDocument* parent) : QSyntaxHighlighter(parent)
 {
@@ -125,4 +125,4 @@ void XmlSyntaxHighlighter::highlightBlock(const QString& text)
   setCurrentBlockState(active != rules.cend() ? active->first : -1);
 }
 
-}  // namespace moveit_setup_framework
+}  // namespace moveit_setup

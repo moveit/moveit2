@@ -42,7 +42,7 @@
 #include <QPushButton>
 #include <QVBoxLayout>
 
-namespace moveit_setup_framework
+namespace moveit_setup
 {
 // ******************************************************************************************
 // ******************************************************************************************
@@ -230,4 +230,4 @@ void LoadPathArgsWidget::setArgsEnabled(bool enabled)
 {
   args_->setEnabled(enabled);
 }
-}  // namespace moveit_setup_framework
+}  // namespace moveit_setup

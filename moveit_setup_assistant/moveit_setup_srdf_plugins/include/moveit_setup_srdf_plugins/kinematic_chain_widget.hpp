@@ -45,7 +45,9 @@
 #include <moveit_setup_framework/qt/rviz_panel.hpp>
 #include <moveit_setup_srdf_plugins/planning_groups.hpp>
 
-namespace moveit_setup_srdf_plugins
+namespace moveit_setup
+{
+namespace srdf_setup
 {
 class KinematicChainWidget : public QWidget
 {
@@ -56,7 +58,7 @@ public:
   // ******************************************************************************************
 
   /// Constructor
-  KinematicChainWidget(QWidget* parent, moveit_setup_framework::RVizPanel* rviz_panel);
+  KinematicChainWidget(QWidget* parent, RVizPanel* rviz_panel);
 
   /// Loads the available data list
   void setAvailable(const LinkNameTree& link_name_tree);
@@ -112,10 +114,11 @@ private:
 
   /// Remember if the chain tree has been loaded
   bool kinematic_chain_loaded_;
-  moveit_setup_framework::RVizPanel* rviz_panel_;
+  RVizPanel* rviz_panel_;
 
   // ******************************************************************************************
   // Private Functions
   // ******************************************************************************************
 };
-}  // namespace moveit_setup_srdf_plugins
+}  // namespace srdf_setup
+}  // namespace moveit_setup

@@ -36,10 +36,10 @@
 
 #include <moveit_setup_srdf_plugins/group_meta_config.hpp>
 
-namespace moveit_setup_srdf_plugins
+namespace moveit_setup
 {
-using moveit_setup_framework::getYamlProperty;
-
+namespace srdf_setup
+{
 bool GroupMetaConfig::isConfigured() const
 {
   return !group_meta_data_.empty();
@@ -48,9 +48,9 @@ bool GroupMetaConfig::isConfigured() const
 // ******************************************************************************************
 // Input kinematics.yaml file
 // ******************************************************************************************
-void GroupMetaConfig::loadPrevious(const std::string& package_path, const YAML::Node& /* node */)
+void GroupMetaConfig::loadPrevious(const std::filesystem::path& package_path, const YAML::Node& /* node */)
 {
-  std::string file_path = package_path + "/" + KINEMATICS_FILE;
+  std::filesystem::path file_path = package_path / KINEMATICS_FILE;
   if (!inputKinematicsYAML(file_path))
   {
     throw std::runtime_error("Failed to parse kinematics yaml file. This file is not critical but any previous "
@@ -91,10 +91,10 @@ void GroupMetaConfig::setMetaData(const std::string& group_name, const GroupMeta
   changed_ = true;
 }
 
-bool GroupMetaConfig::inputKinematicsYAML(const std::string& file_path)
+bool GroupMetaConfig::inputKinematicsYAML(const std::filesystem::path& file_path)
 {
   // Load file
-  std::ifstream input_stream(file_path.c_str());
+  std::ifstream input_stream(file_path);
   if (!input_stream.good())
   {
     return false;
@@ -171,8 +171,10 @@ bool GroupMetaConfig::GeneratedGroupMetaConfig::writeYaml(YAML::Emitter& emitter
   return true;
 }
 
-void GroupMetaConfig::collectVariables(std::vector<moveit_setup_framework::TemplateVariable>& variables)
+void GroupMetaConfig::collectVariables(std::vector<TemplateVariable>& variables)
 {
+  // TODO: Put any additional parameters files into the ROS 2 launch files where they can be read
+
   // Add parameter files for the kinematics solvers that should be loaded
   // in addition to kinematics.yaml by planning_context.launch
   std::string kinematics_parameters_files_block;
@@ -189,11 +191,11 @@ void GroupMetaConfig::collectVariables(std::vector<moveit_setup_framework::Templ
                        groups.second.kinematics_parameters_file_ + "\"/>";
     kinematics_parameters_files_block += line;
   }
-  variables.push_back(moveit_setup_framework::TemplateVariable("KINEMATICS_PARAMETERS_FILE_NAMES_BLOCK",
-                                                               kinematics_parameters_files_block));
+  variables.push_back(TemplateVariable("KINEMATICS_PARAMETERS_FILE_NAMES_BLOCK", kinematics_parameters_files_block));
 }
 
-}  // namespace moveit_setup_srdf_plugins
+}  // namespace srdf_setup
+}  // namespace moveit_setup
 
 #include <pluginlib/class_list_macros.hpp>  // NOLINT
-PLUGINLIB_EXPORT_CLASS(moveit_setup_srdf_plugins::GroupMetaConfig, moveit_setup_framework::SetupConfig)
+PLUGINLIB_EXPORT_CLASS(moveit_setup::srdf_setup::GroupMetaConfig, moveit_setup::SetupConfig)

@@ -38,9 +38,11 @@
 #include <moveit_setup_framework/setup_step.hpp>
 #include <moveit_setup_app_plugins/perception_config.hpp>
 
-namespace moveit_setup_app_plugins
+namespace moveit_setup
 {
-class Perception : public moveit_setup_framework::SetupStep
+namespace app
+{
+class Perception : public SetupStep
 {
 public:
   std::string getName() const override
@@ -76,4 +78,5 @@ public:
 protected:
   std::shared_ptr<PerceptionConfig> perception_config_;
 };
-}  // namespace moveit_setup_app_plugins
+}  // namespace app
+}  // namespace moveit_setup

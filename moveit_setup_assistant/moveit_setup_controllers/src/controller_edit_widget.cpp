@@ -45,7 +45,9 @@
 #include <QVBoxLayout>
 #include <moveit_setup_controllers/controller_edit_widget.hpp>
 
-namespace moveit_setup_controllers
+namespace moveit_setup
+{
+namespace controllers
 {
 // ******************************************************************************************
 //  ControllerEditWidget constructor, create controller edit screen GUI
@@ -252,4 +254,5 @@ std::string ControllerEditWidget::getControllerType()
   return controller_type_field_->currentText().toStdString();
 }
 
-}  // namespace moveit_setup_controllers
+}  // namespace controllers
+}  // namespace moveit_setup

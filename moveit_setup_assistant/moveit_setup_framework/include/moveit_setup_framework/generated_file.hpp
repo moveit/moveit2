@@ -36,13 +36,15 @@
 
 #pragma once
 #include <moveit_setup_framework/utilities.hpp>
+#include <moveit_setup_framework/generated_time.hpp>
 #include <moveit/macros/class_forward.h>
+#include <chrono>
 #include <memory>
 #include <string>
 #include <iostream>
 #include <fstream>
 
-namespace moveit_setup_framework
+namespace moveit_setup
 {
 /**
  * @brief Status associated with each GeneratedFile
@@ -64,15 +66,15 @@ MOVEIT_CLASS_FORWARD(GeneratedFile);  // Defines GeneratedFilePtr, ConstPtr, Wea
 class GeneratedFile : public std::enable_shared_from_this<GeneratedFile>
 {
 public:
-  GeneratedFile(const std::string& package_path, const std::time_t& last_gen_time)
+  GeneratedFile(const std::filesystem::path& package_path, const GeneratedTime& last_gen_time)
     : package_path_(package_path), last_gen_time_(last_gen_time)
   {
   }
 
   /**
-   * @brief Returns the string of the path relative to the configuration package root
+   * @brief Returns the path relative to the configuration package root
    */
-  virtual std::string getRelativePath() const = 0;
+  virtual std::filesystem::path getRelativePath() const = 0;
 
   /**
    * @brief Returns an English description of this file's purpose.
@@ -92,19 +94,19 @@ public:
   /**
    * @brief Returns the fully qualified path to this file
    */
-  std::string getPath() const
+  std::filesystem::path getPath() const
   {
-    return appendPaths(package_path_, getRelativePath());
+    return package_path_ / getRelativePath();
   }
 
   FileStatus getStatus() const
   {
-    std::string path = getPath();
-    if (!boost::filesystem::is_regular_file(path) || last_gen_time_ == 0)
+    std::filesystem::path full_path = getPath();
+    if (!std::filesystem::is_regular_file(full_path) || last_gen_time_ == GeneratedTime())
     {
       return FileStatus::NEW;
     }
-    std::time_t mod_time = boost::filesystem::last_write_time(path);
+    GeneratedTime mod_time = std::filesystem::last_write_time(full_path);
     if (mod_time > last_gen_time_ + TIME_MOD_TOLERANCE || mod_time < last_gen_time_ - TIME_MOD_TOLERANCE)
     {
       return hasChanges() ? FileStatus::CONFLICTED : FileStatus::EXTERNALLY_MODIFIED;
@@ -116,10 +118,10 @@ public:
   }
 
 protected:
-  static const std::time_t TIME_MOD_TOLERANCE = 10;
+  static constexpr GeneratedTime::duration TIME_MOD_TOLERANCE = std::chrono::seconds(10);
 
-  std::string package_path_;
-  const std::time_t& last_gen_time_;
+  std::filesystem::path package_path_;
+  const GeneratedTime& last_gen_time_;
 };
 
 class YamlGeneratedFile : public GeneratedFile
@@ -136,9 +138,9 @@ public:
       return false;
     }
 
-    std::string file_path = getPath();
+    std::filesystem::path file_path = getPath();
     createParentFolders(file_path);
-    std::ofstream output_stream(file_path.c_str(), std::ios_base::trunc);
+    std::ofstream output_stream(file_path, std::ios_base::trunc);
     if (!output_stream.good())
     {
       return false;
@@ -153,4 +155,4 @@ public:
   virtual bool writeYaml(YAML::Emitter& emitter) = 0;
 };
 
-}  // namespace moveit_setup_framework
+}  // namespace moveit_setup

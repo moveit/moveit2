@@ -38,7 +38,9 @@
 #include <moveit_setup_srdf_plugins/srdf_step.hpp>
 #include <moveit_msgs/msg/display_robot_state.hpp>
 
-namespace moveit_setup_srdf_plugins
+namespace moveit_setup
+{
+namespace srdf_setup
 {
 // Note: Does not derive from SuperSRDFStep because we always need to check the name AND the group name for each pose
 class RobotPoses : public SRDFStep
@@ -80,9 +82,14 @@ public:
   }
 
   /**
-   * @brief Publish the given state on the moveit_robot_state topic and return true if it is in collision
+   * @brief Publish the given state on the moveit_robot_state topic
    */
-  bool publishState(const moveit::core::RobotState& robot_state);
+  void publishState(const moveit::core::RobotState& robot_state);
+
+  /**
+   * @brief Check if the given robot state is in collision
+   */
+  bool checkSelfCollision(const moveit::core::RobotState& robot_state);
 
   /**
    * @brief Returns a vector of joint models for the given group name
@@ -109,9 +116,10 @@ protected:
   // ******************************************************************************************
   // Collision Variables
   // ******************************************************************************************
-  collision_detection::CollisionRequest request;
+  collision_detection::CollisionRequest request_;
 
   /// Allowed collision matrix for robot poses
   collision_detection::AllowedCollisionMatrix allowed_collision_matrix_;
 };
-}  // namespace moveit_setup_srdf_plugins
+}  // namespace srdf_setup
+}  // namespace moveit_setup

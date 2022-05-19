@@ -38,7 +38,9 @@
 
 #include <QSplitter>
 
-namespace moveit_setup_app_plugins
+namespace moveit_setup
+{
+namespace app
 {
 void LaunchesWidget::onInit()
 {
@@ -47,8 +49,8 @@ void LaunchesWidget::onInit()
 
   // Top Header Area ------------------------------------------------
 
-  auto header = new moveit_setup_framework::HeaderWidget(
-      "Configure Desired Launch Files", "Figure out which launch files you want to be generated.", this);
+  auto header = new HeaderWidget("Configure Desired Launch Files",
+                                 "Figure out which launch files you want to be generated.", this);
   layout->addWidget(header);
 
   QSplitter* splitter = new QSplitter(Qt::Horizontal, this);
@@ -119,7 +121,8 @@ void LaunchesWidget::changeCheckedState(QListWidgetItem* item)
   setup_step_.setState(id, state);
 }
 
-}  // namespace moveit_setup_app_plugins
+}  // namespace app
+}  // namespace moveit_setup
 
 #include <pluginlib/class_list_macros.hpp>  // NOLINT
-PLUGINLIB_EXPORT_CLASS(moveit_setup_app_plugins::LaunchesWidget, moveit_setup_framework::SetupStepWidget)
+PLUGINLIB_EXPORT_CLASS(moveit_setup::app::LaunchesWidget, moveit_setup::SetupStepWidget)

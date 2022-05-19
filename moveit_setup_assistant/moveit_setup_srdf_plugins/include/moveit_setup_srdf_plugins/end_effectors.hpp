@@ -38,7 +38,9 @@
 #include <moveit_setup_srdf_plugins/srdf_step.hpp>
 #include <moveit_setup_framework/data/urdf_config.hpp>
 
-namespace moveit_setup_srdf_plugins
+namespace moveit_setup
+{
+namespace srdf_setup
 {
 class EndEffectors : public SuperSRDFStep<srdf::Model::EndEffector>
 {
@@ -53,9 +55,9 @@ public:
     return srdf_config_->getEndEffectors();
   }
 
-  moveit_setup_framework::InformationFields getInfoField() const override
+  InformationFields getInfoField() const override
   {
-    return moveit_setup_framework::END_EFFECTORS;
+    return END_EFFECTORS;
   }
 
   void onInit() override;
@@ -85,6 +87,7 @@ public:
                      const std::string& parent_group);
 
 protected:
-  std::shared_ptr<moveit_setup_framework::URDFConfig> urdf_config_;
+  std::shared_ptr<URDFConfig> urdf_config_;
 };
-}  // namespace moveit_setup_srdf_plugins
+}  // namespace srdf_setup
+}  // namespace moveit_setup

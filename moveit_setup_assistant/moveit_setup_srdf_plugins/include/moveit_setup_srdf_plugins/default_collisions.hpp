@@ -49,7 +49,9 @@ struct CollisionPairLess
   }
 };
 
-namespace moveit_setup_srdf_plugins
+namespace moveit_setup
+{
+namespace srdf_setup
 {
 class DefaultCollisions : public SRDFStep
 {
@@ -98,4 +100,5 @@ protected:
   boost::thread worker_;
   unsigned int progress_;
 };
-}  // namespace moveit_setup_srdf_plugins
+}  // namespace srdf_setup
+}  // namespace moveit_setup

@@ -65,7 +65,9 @@
 #include <QTreeWidgetItem>
 #include <QVBoxLayout>
 
-namespace moveit_setup_srdf_plugins
+namespace moveit_setup
+{
+namespace srdf_setup
 {
 // Name of rviz topic in ROS
 static const std::string VIS_TOPIC_NAME = "planning_components_visualization";
@@ -79,7 +81,7 @@ void PlanningGroupsWidget::onInit()
   QVBoxLayout* layout = new QVBoxLayout();
 
   // Top Label Area ------------------------------------------------
-  auto header = new moveit_setup_framework::HeaderWidget(
+  auto header = new HeaderWidget(
       "Define Planning Groups",
       "Create and edit 'joint model' groups for your robot based on joint collections, "
       "link collections, kinematic chains or subgroups. "
@@ -95,14 +97,14 @@ void PlanningGroupsWidget::onInit()
   groups_tree_widget_ = createContentsWidget();  // included in this file
 
   // Joints edit widget
-  joints_widget_ = new moveit_setup_framework::DoubleListWidget(this, "Joint Collection", "Joint");
+  joints_widget_ = new DoubleListWidget(this, "Joint Collection", "Joint");
   connect(joints_widget_, SIGNAL(cancelEditing()), this, SLOT(cancelEditing()));
   connect(joints_widget_, SIGNAL(doneEditing()), this, SLOT(saveJointsScreen()));
   connect(joints_widget_, SIGNAL(previewSelected(std::vector<std::string>)), this,
           SLOT(previewSelectedJoints(std::vector<std::string>)));
 
   // Links edit widget
-  links_widget_ = new moveit_setup_framework::DoubleListWidget(this, "Link Collection", "Link");
+  links_widget_ = new DoubleListWidget(this, "Link Collection", "Link");
   connect(links_widget_, SIGNAL(cancelEditing()), this, SLOT(cancelEditing()));
   connect(links_widget_, SIGNAL(doneEditing()), this, SLOT(saveLinksScreen()));
   connect(links_widget_, SIGNAL(previewSelected(std::vector<std::string>)), this,
@@ -114,7 +116,7 @@ void PlanningGroupsWidget::onInit()
   connect(chain_widget_, SIGNAL(doneEditing()), this, SLOT(saveChainScreen()));
 
   // Subgroups Widget
-  subgroups_widget_ = new moveit_setup_framework::DoubleListWidget(this, "Subgroup", "Subgroup");
+  subgroups_widget_ = new DoubleListWidget(this, "Subgroup", "Subgroup");
   connect(subgroups_widget_, SIGNAL(cancelEditing()), this, SLOT(cancelEditing()));
   connect(subgroups_widget_, SIGNAL(doneEditing()), this, SLOT(saveSubgroupsScreen()));
   connect(subgroups_widget_, SIGNAL(previewSelected(std::vector<std::string>)), this,
@@ -1048,18 +1050,18 @@ void PlanningGroupsWidget::previewSelectedSubgroup(const std::vector<std::string
   }
 }
 
-}  // namespace moveit_setup_srdf_plugins
-
 // ******************************************************************************************
 // ******************************************************************************************
 // CLASS
 // ******************************************************************************************
 // ******************************************************************************************
 
-PlanGroupType::PlanGroupType(srdf::Model::Group* group, const moveit_setup_srdf_plugins::GroupType type)
-  : group_(group), type_(type)
+PlanGroupType::PlanGroupType(srdf::Model::Group* group, const GroupType type) : group_(group), type_(type)
 {
 }
 
+}  // namespace srdf_setup
+}  // namespace moveit_setup
+
 #include <pluginlib/class_list_macros.hpp>  // NOLINT
-PLUGINLIB_EXPORT_CLASS(moveit_setup_srdf_plugins::PlanningGroupsWidget, moveit_setup_framework::SetupStepWidget)
+PLUGINLIB_EXPORT_CLASS(moveit_setup::srdf_setup::PlanningGroupsWidget, moveit_setup::SetupStepWidget)

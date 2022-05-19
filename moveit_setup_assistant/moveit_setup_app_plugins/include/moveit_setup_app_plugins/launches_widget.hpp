@@ -41,9 +41,11 @@
 #include <QLabel>
 #include <QListWidget>
 
-namespace moveit_setup_app_plugins
+namespace moveit_setup
 {
-class LaunchesWidget : public moveit_setup_framework::SetupStepWidget
+namespace app
+{
+class LaunchesWidget : public SetupStepWidget
 {
   Q_OBJECT
 
@@ -54,7 +56,7 @@ public:
 
   void onInit() override;
 
-  moveit_setup_framework::SetupStep& getSetupStep() override
+  SetupStep& getSetupStep() override
   {
     return setup_step_;
   }
@@ -81,4 +83,5 @@ private:
   QListWidget* list_widget_;
   QLabel* text_widget_;
 };
-}  // namespace moveit_setup_app_plugins
+}  // namespace app
+}  // namespace moveit_setup

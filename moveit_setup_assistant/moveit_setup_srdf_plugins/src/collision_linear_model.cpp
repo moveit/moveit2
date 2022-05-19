@@ -40,9 +40,10 @@
 #include <QItemSelection>
 #include <QPainter>
 #include <cmath>
-
-using namespace moveit_setup_srdf_plugins;
-
+namespace moveit_setup
+{
+namespace srdf_setup
+{
 CollisionLinearModel::CollisionLinearModel(CollisionMatrixModel* src, QObject* parent) : QAbstractProxyModel(parent)
 {
   setSourceModel(src);
@@ -239,7 +240,7 @@ void SortFilterProxyModel::setShowAll(bool show_all)
 bool SortFilterProxyModel::filterAcceptsRow(int source_row, const QModelIndex& source_parent) const
 {
   CollisionLinearModel* m = qobject_cast<CollisionLinearModel*>(sourceModel());
-  if (!(show_all_ || m->reason(source_row) <= moveit_setup_srdf_plugins::ALWAYS ||
+  if (!(show_all_ || m->reason(source_row) <= ALWAYS ||
         m->data(m->index(source_row, 2), Qt::CheckStateRole) == Qt::Checked))
     return false;  // not accepted due to check state
 
@@ -305,3 +306,5 @@ void SortFilterProxyModel::sort(int column, Qt::SortOrder order)
   QSortFilterProxyModel::sort(column, Qt::AscendingOrder);
   endResetModel();
 }
+}  // namespace srdf_setup
+}  // namespace moveit_setup

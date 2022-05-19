@@ -36,22 +36,24 @@
 
 #include <moveit_setup_core_plugins/start_screen.hpp>
 
-namespace moveit_setup_core_plugins
+namespace moveit_setup
+{
+namespace core
 {
 void StartScreen::onInit()
 {
-  package_settings_ = config_data_->get<moveit_setup_framework::PackageSettingsConfig>("package_settings");
-  srdf_config_ = config_data_->get<moveit_setup_framework::SRDFConfig>("srdf");
-  urdf_config_ = config_data_->get<moveit_setup_framework::URDFConfig>("urdf");
+  package_settings_ = config_data_->get<PackageSettingsConfig>("package_settings");
+  srdf_config_ = config_data_->get<SRDFConfig>("srdf");
+  urdf_config_ = config_data_->get<URDFConfig>("urdf");
 }
 
-void StartScreen::loadURDFFile(const std::string& urdf_file_path, const std::string& xacro_args)
+void StartScreen::loadURDFFile(const std::filesystem::path& urdf_file_path, const std::string& xacro_args)
 {
   urdf_config_->loadFromPath(urdf_file_path, xacro_args);
   srdf_config_->updateRobotModel();
 }
 
-std::string StartScreen::getURDFPath()
+std::filesystem::path StartScreen::getURDFPath()
 {
   return urdf_config_->getURDFPath();
 }
@@ -61,12 +63,12 @@ std::string StartScreen::getXacroArgs()
   return urdf_config_->getXacroArgs();
 }
 
-std::string StartScreen::getPackagePath()
+std::filesystem::path StartScreen::getPackagePath()
 {
   return package_settings_->getPackagePath();
 }
 
-void StartScreen::loadExisting(const std::string& package_path)
+void StartScreen::loadExisting(const std::filesystem::path& package_path)
 {
   package_settings_->loadExisting(package_path);
 }
@@ -75,4 +77,5 @@ bool StartScreen::isXacroFile()
 {
   return urdf_config_->isXacroFile();
 }
-}  // namespace moveit_setup_core_plugins
+}  // namespace core
+}  // namespace moveit_setup

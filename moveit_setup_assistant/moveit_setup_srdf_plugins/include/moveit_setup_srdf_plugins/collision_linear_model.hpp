@@ -46,6 +46,10 @@
 
 #include <moveit_setup_srdf_plugins/collision_matrix_model.hpp>
 
+namespace moveit_setup
+{
+namespace srdf_setup
+{
 class CollisionLinearModel : public QAbstractProxyModel
 {
   Q_OBJECT
@@ -66,7 +70,7 @@ public:
   QModelIndex index(int row, int column, const QModelIndex& parent = QModelIndex()) const override;
   QModelIndex parent(const QModelIndex& child) const override;
   QVariant data(const QModelIndex& index, int role) const override;
-  moveit_setup_srdf_plugins::DisabledReason reason(int row) const;
+  DisabledReason reason(int row) const;
 
   bool setData(const QModelIndex& index, const QVariant& value, int role) override;
   void setEnabled(const QItemSelection& selection, bool value);
@@ -99,3 +103,5 @@ private:
   QVector<int> sort_columns_;  // sorting history
   QVector<int> sort_orders_;   // corresponding sort orders
 };
+}  // namespace srdf_setup
+}  // namespace moveit_setup
