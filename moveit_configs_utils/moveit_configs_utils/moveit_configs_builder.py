@@ -250,37 +250,42 @@ class MoveItConfigsBuilder(ParameterBuilder):
         self.__moveit_configs.package_path = self._package_path
         self.__robot_name = robot_name
         setup_assistant_file = self._package_path / ".setup_assistant"
-        if not setup_assistant_file.exists():
+
+        self.__urdf_package = None
+        self.__urdf_file_path = None
+        self.__srdf_file_path = None
+
+        if setup_assistant_file.exists():
+            setup_assistant_yaml = load_yaml(setup_assistant_file)
+            config = setup_assistant_yaml.get("moveit_setup_assistant_config", {})
+            urdf_config = config.get("urdf", config.get("URDF"))
+            if urdf_config:
+                self.__urdf_package = Path(
+                    get_package_share_directory(urdf_config["package"])
+                )
+                self.__urdf_file_path = Path(urdf_config["relative_path"])
+
+            srdf_config = config.get("srdf", config.get("SRDF"))
+            if srdf_config:
+                self.__srdf_file_path = Path(srdf_config["relative_path"])
+
+        if not self.__urdf_package or not self.__urdf_file_path:
             logging.warning(
-                f"\x1b[33;21mPackage `{self._package_path}` doesn't have `.setup_assistant` file "
-                f"-- using config/{robot_name}.urdf and config/{robot_name}.srdf\x1b[0m"
+                f"\x1b[33;21mCannot infer URDF from `{self._package_path}`. -- using config/{robot_name}.urdf\x1b[0m"
             )
             self.__urdf_package = self._package_path
             self.__urdf_file_path = self.__config_dir_path / (
                 self.__robot_name + ".urdf"
             )
+
+        if not self.__srdf_file_path:
+            logging.warning(
+                f"\x1b[33;21mCannot infer SRDF from `{self._package_path}`. -- using config/{robot_name}.srdf\x1b[0m"
+            )
             self.__srdf_file_path = self.__config_dir_path / (
                 self.__robot_name + ".srdf"
             )
-        else:
-            setup_assistant_yaml = load_yaml(setup_assistant_file)
-            self.__urdf_package = Path(
-                get_package_share_directory(
-                    setup_assistant_yaml["moveit_setup_assistant_config"]["URDF"][
-                        "package"
-                    ]
-                )
-            )
-            self.__urdf_file_path = Path(
-                setup_assistant_yaml["moveit_setup_assistant_config"]["URDF"][
-                    "relative_path"
-                ]
-            )
-            self.__srdf_file_path = Path(
-                setup_assistant_yaml["moveit_setup_assistant_config"]["SRDF"][
-                    "relative_path"
-                ]
-            )
+
         self.__robot_description = robot_description
 
     def robot_description(self, file_path: Optional[str] = None, mappings: dict = None):
