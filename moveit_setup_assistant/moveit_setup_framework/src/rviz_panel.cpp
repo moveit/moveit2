@@ -39,7 +39,7 @@
 #include <QApplication>
 #include "rviz_rendering/render_window.hpp"
 
-namespace moveit_setup_framework
+namespace moveit_setup
 {
 RVizPanel::RVizPanel(QWidget* parent, rviz_common::ros_integration::RosNodeAbstractionIface::WeakPtr node_abstraction,
                      DataWarehousePtr config_data)
@@ -124,14 +124,14 @@ RVizPanel::~RVizPanel()
 
 moveit::core::RobotModelPtr RVizPanel::getRobotModel() const
 {
-  auto urdf = config_data_->get<moveit_setup_framework::URDFConfig>("urdf");
+  auto urdf = config_data_->get<moveit_setup::URDFConfig>("urdf");
 
   if (!urdf->isConfigured())
   {
     return nullptr;
   }
 
-  auto srdf = config_data_->get<moveit_setup_framework::SRDFConfig>("srdf");
+  auto srdf = config_data_->get<moveit_setup::SRDFConfig>("srdf");
 
   return srdf->getRobotModel();
 }
@@ -217,4 +217,4 @@ void RVizPanel::unhighlightAllEvent()
   }
 }
 
-}  // namespace moveit_setup_framework
+}  // namespace moveit_setup

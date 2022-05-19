@@ -49,10 +49,10 @@
 #include <QStackedWidget>
 #include <QString>
 #include <pluginlib/class_loader.hpp>  // for loading all avail kinematic planners
-// GetPath
-#include <ament_index_cpp/get_package_share_directory.hpp>
 
-namespace moveit_setup_assistant
+namespace moveit_setup
+{
+namespace assistant
 {
 // ******************************************************************************************
 // Outer User Interface for MoveIt Configuration Assistant
@@ -62,20 +62,18 @@ SetupAssistantWidget::SetupAssistantWidget(rviz_common::ros_integration::RosNode
   : QWidget(parent)
   , node_abstraction_(node)
   , node_(node_abstraction_.lock()->get_raw_node())
-  , widget_loader_("moveit_setup_framework", "moveit_setup_framework::SetupStepWidget")
+  , widget_loader_("moveit_setup_framework", "moveit_setup::SetupStepWidget")
 {
   // Create object to hold all MoveIt configuration data
-  config_data_ = std::make_shared<moveit_setup_framework::DataWarehouse>(node_);
+  config_data_ = std::make_shared<DataWarehouse>(node_);
 
   // Set debug mode flag if necessary
   if (args.count("debug"))
     config_data_->debug = true;
 
   // Setting the window icon
-  std::string moveit_ros_visualization_package_path =
-      ament_index_cpp::get_package_share_directory("moveit_ros_visualization");
-  moveit_ros_visualization_package_path += "/icons/classes/MotionPlanning.png";
-  this->setWindowIcon(QIcon(moveit_ros_visualization_package_path.c_str()));
+  auto icon_path = getSharePath("moveit_ros_visualization") / "icons/classes/MotionPlanning.png";
+  this->setWindowIcon(QIcon(icon_path.c_str()));
 
   // Basic widget container -----------------------------------------
   QHBoxLayout* layout = new QHBoxLayout();
@@ -89,24 +87,24 @@ SetupAssistantWidget::SetupAssistantWidget(rviz_common::ros_integration::RosNode
   std::vector<std::string> setup_steps;
   // TODO: The list of setup steps should be read from a parameter with some as the default
   // TODO: (or be configured dynamically in some other step)
-  setup_steps.push_back("moveit_setup_core_plugins::StartScreenWidget");
-  setup_steps.push_back("moveit_setup_srdf_plugins::DefaultCollisionsWidget");
-  setup_steps.push_back("moveit_setup_srdf_plugins::VirtualJointsWidget");
-  setup_steps.push_back("moveit_setup_srdf_plugins::PlanningGroupsWidget");
-  setup_steps.push_back("moveit_setup_srdf_plugins::RobotPosesWidget");
-  setup_steps.push_back("moveit_setup_srdf_plugins::EndEffectorsWidget");
-  setup_steps.push_back("moveit_setup_srdf_plugins::PassiveJointsWidget");
-  // setup_steps.push_back("moveit_setup_controllers::ControllersWidget");
-  // setup_steps.push_back("moveit_setup_simulation::SimulationWidget");
-  setup_steps.push_back("moveit_setup_app_plugins::PerceptionWidget");
-  setup_steps.push_back("moveit_setup_app_plugins::LaunchesWidget");
-  setup_steps.push_back("moveit_setup_core_plugins::AuthorInformationWidget");
-  setup_steps.push_back("moveit_setup_core_plugins::ConfigurationFilesWidget");
+  setup_steps.push_back("moveit_setup::core::StartScreenWidget");
+  setup_steps.push_back("moveit_setup::srdf_setup::DefaultCollisionsWidget");
+  setup_steps.push_back("moveit_setup::srdf_setup::VirtualJointsWidget");
+  setup_steps.push_back("moveit_setup::srdf_setup::PlanningGroupsWidget");
+  setup_steps.push_back("moveit_setup::srdf_setup::RobotPosesWidget");
+  setup_steps.push_back("moveit_setup::srdf_setup::EndEffectorsWidget");
+  setup_steps.push_back("moveit_setup::srdf_setup::PassiveJointsWidget");
+  // setup_steps.push_back("moveit_setup::controllers::ControllersWidget");
+  // setup_steps.push_back("moveit_setup::simulation::SimulationWidget");
+  setup_steps.push_back("moveit_setup::app::PerceptionWidget");
+  setup_steps.push_back("moveit_setup::app::LaunchesWidget");
+  setup_steps.push_back("moveit_setup::core::AuthorInformationWidget");
+  setup_steps.push_back("moveit_setup::core::ConfigurationFilesWidget");
   node_->declare_parameter("setup_steps", setup_steps);
   setup_steps = node_->get_parameter("setup_steps").as_string_array();
 
   // Rviz View Right Pane ---------------------------------------------------
-  rviz_panel_ = new moveit_setup_framework::RVizPanel(this, node_abstraction_, config_data_);
+  rviz_panel_ = new RVizPanel(this, node_abstraction_, config_data_);
   rviz_panel_->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
   rviz_panel_->hide();  // do not show until after the start screen
 
@@ -129,14 +127,14 @@ SetupAssistantWidget::SetupAssistantWidget(rviz_common::ros_integration::RosNode
   // Pass command arg values to start screen and show appropriate part of screen
   if (args.count("urdf_path"))
   {
-    std::string urdf_path = args["urdf_path"].as<std::string>();
-    auto config = config_data_->get<moveit_setup_framework::URDFConfig>("urdf");
+    std::filesystem::path urdf_path = args["urdf_path"].as<std::filesystem::path>();
+    auto config = config_data_->get<URDFConfig>("urdf");
     config->loadFromPath(urdf_path);
   }
   if (args.count("config_pkg"))
   {
     std::string config_pkg = args["config_pkg"].as<std::string>();
-    auto package_settings = config_data_->get<moveit_setup_framework::PackageSettingsConfig>("package_settings");
+    auto package_settings = config_data_->get<PackageSettingsConfig>("package_settings");
     package_settings->loadExisting(config_pkg);
   }
 
@@ -298,4 +296,5 @@ void SetupAssistantWidget::onModalModeUpdate(bool isModal)
   }
 }
 
-}  // namespace moveit_setup_assistant
+}  // namespace assistant
+}  // namespace moveit_setup

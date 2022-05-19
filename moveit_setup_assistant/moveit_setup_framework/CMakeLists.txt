@@ -38,6 +38,7 @@ add_library(${PROJECT_NAME}
     src/rviz_panel.cpp
     src/data_warehouse.cpp
     src/templates.cpp
+    src/utilities.cpp
     src/xml_syntax_highlighter.cpp
     ${MOC_FILES}
 )

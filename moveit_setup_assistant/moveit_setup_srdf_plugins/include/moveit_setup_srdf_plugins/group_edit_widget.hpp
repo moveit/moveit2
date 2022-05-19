@@ -44,7 +44,9 @@
 
 #include <moveit_setup_srdf_plugins/planning_groups.hpp>
 
-namespace moveit_setup_srdf_plugins
+namespace moveit_setup
+{
+namespace srdf_setup
 {
 class GroupEditWidget : public QWidget
 {
@@ -125,4 +127,5 @@ private:
   // Private Functions
   // ******************************************************************************************
 };
-}  // namespace moveit_setup_srdf_plugins
+}  // namespace srdf_setup
+}  // namespace moveit_setup

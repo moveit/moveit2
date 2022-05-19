@@ -38,17 +38,19 @@
 #include <moveit_setup_framework/config.hpp>
 #include <moveit_setup_framework/data_warehouse.hpp>
 
-namespace moveit_setup_app_plugins
+namespace moveit_setup
+{
+namespace app
 {
 using SensorParameters = std::map<std::string, std::string>;
 
-class PerceptionConfig : public moveit_setup_framework::SetupConfig
+class PerceptionConfig : public SetupConfig
 {
 public:
-  void loadPrevious(const std::string& package_path, const YAML::Node& node) override;
+  void loadPrevious(const std::filesystem::path& package_path, const YAML::Node& node) override;
 
   /// Load perception sensor config
-  static std::vector<SensorParameters> load3DSensorsYAML(const std::string& file_path);
+  static std::vector<SensorParameters> load3DSensorsYAML(const std::filesystem::path& file_path);
 
   bool isConfigured() const override
   {
@@ -70,10 +72,11 @@ public:
 
   void setConfig(const SensorParameters& parameters);
 
-  class GeneratedSensorConfig : public moveit_setup_framework::YamlGeneratedFile
+  class GeneratedSensorConfig : public YamlGeneratedFile
   {
   public:
-    GeneratedSensorConfig(const std::string& package_path, const std::time_t& last_gen_time, PerceptionConfig& parent)
+    GeneratedSensorConfig(const std::filesystem::path& package_path, const GeneratedTime& last_gen_time,
+                          PerceptionConfig& parent)
       : YamlGeneratedFile(package_path, last_gen_time), parent_(parent)
     {
     }
@@ -83,7 +86,7 @@ public:
       return parent_.changed_;
     }
 
-    std::string getRelativePath() const override
+    std::filesystem::path getRelativePath() const override
     {
       return "config/sensors_3d.yaml";
     }
@@ -99,8 +102,8 @@ public:
     PerceptionConfig& parent_;
   };
 
-  void collectFiles(const std::string& package_path, const std::time_t& last_gen_time,
-                    std::vector<moveit_setup_framework::GeneratedFilePtr>& files) override
+  void collectFiles(const std::filesystem::path& package_path, const GeneratedTime& last_gen_time,
+                    std::vector<GeneratedFilePtr>& files) override
   {
     files.push_back(std::make_shared<GeneratedSensorConfig>(package_path, last_gen_time, *this));
   }
@@ -110,4 +113,5 @@ protected:
   std::vector<SensorParameters> sensors_plugin_config_parameter_list_;
   bool changed_{ false };
 };
-}  // namespace moveit_setup_app_plugins
+}  // namespace app
+}  // namespace moveit_setup

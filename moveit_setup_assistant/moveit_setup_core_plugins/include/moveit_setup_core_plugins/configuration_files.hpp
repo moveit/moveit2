@@ -36,11 +36,11 @@
 #include <moveit_setup_framework/setup_step.hpp>
 #include <moveit_setup_framework/data/package_settings_config.hpp>
 
-namespace moveit_setup_core_plugins
+namespace moveit_setup
 {
-using moveit_setup_framework::FileStatus;
-
-class ConfigurationFiles : public moveit_setup_framework::SetupStep
+namespace core
+{
+class ConfigurationFiles : public SetupStep
 {
 public:
   std::string getName() const override
@@ -50,12 +50,12 @@ public:
 
   void onInit() override;
 
-  const std::string& getPackagePath()
+  const std::filesystem::path& getPackagePath()
   {
     return package_settings_->getPackagePath();
   }
 
-  void setPackagePath(const std::string& package_path)
+  void setPackagePath(const std::filesystem::path& package_path)
   {
     package_settings_->setPackagePath(package_path);
   }
@@ -68,7 +68,7 @@ public:
   /// Populate the 'Files to be generated' list
   void loadFiles();
 
-  const std::vector<moveit_setup_framework::GeneratedFilePtr> getGeneratedFiles() const
+  const std::vector<GeneratedFilePtr> getGeneratedFiles() const
   {
     return gen_files_;
   }
@@ -78,7 +78,7 @@ public:
     return gen_files_.size();
   }
 
-  bool shouldGenerate(const moveit_setup_framework::GeneratedFilePtr& file) const
+  bool shouldGenerate(const GeneratedFilePtr& file) const
   {
     std::string rel_path = file->getRelativePath();
     auto it = should_generate_.find(rel_path);
@@ -122,10 +122,11 @@ protected:
   // Variables
   // ******************************************************************************************
   /// Vector of all files to be generated
-  std::vector<moveit_setup_framework::GeneratedFilePtr> gen_files_;
+  std::vector<GeneratedFilePtr> gen_files_;
 
   std::unordered_map<std::string, bool> should_generate_;
 
-  std::shared_ptr<moveit_setup_framework::PackageSettingsConfig> package_settings_;
+  std::shared_ptr<PackageSettingsConfig> package_settings_;
 };
-}  // namespace moveit_setup_core_plugins
+}  // namespace core
+}  // namespace moveit_setup

@@ -41,9 +41,11 @@ class QLineEdit;
 #include <moveit_setup_framework/qt/setup_step_widget.hpp>
 #include <moveit_setup_core_plugins/author_information.hpp>
 
-namespace moveit_setup_core_plugins
+namespace moveit_setup
 {
-class AuthorInformationWidget : public moveit_setup_framework::SetupStepWidget
+namespace core
+{
+class AuthorInformationWidget : public SetupStepWidget
 {
   Q_OBJECT
 
@@ -57,7 +59,7 @@ public:
   /// Received when this widget is chosen from the navigation menu
   void focusGiven() override;
 
-  moveit_setup_framework::SetupStep& getSetupStep() override
+  SetupStep& getSetupStep() override
   {
     return setup_step_;
   }
@@ -82,4 +84,5 @@ private:
   AuthorInformation setup_step_;
 };
 
-}  // namespace moveit_setup_core_plugins
+}  // namespace core
+}  // namespace moveit_setup

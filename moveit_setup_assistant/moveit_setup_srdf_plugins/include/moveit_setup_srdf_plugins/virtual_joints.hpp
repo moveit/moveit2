@@ -38,7 +38,9 @@
 #include <moveit_setup_srdf_plugins/srdf_step.hpp>
 #include <moveit_setup_framework/data/urdf_config.hpp>
 
-namespace moveit_setup_srdf_plugins
+namespace moveit_setup
+{
+namespace srdf_setup
 {
 class VirtualJoints : public SuperSRDFStep<srdf::Model::VirtualJoint>
 {
@@ -53,9 +55,9 @@ public:
     return srdf_config_->getVirtualJoints();
   }
 
-  moveit_setup_framework::InformationFields getInfoField() const override
+  InformationFields getInfoField() const override
   {
-    return moveit_setup_framework::VIRTUAL_JOINTS;
+    return VIRTUAL_JOINTS;
   }
 
   void onInit() override;
@@ -69,6 +71,7 @@ public:
   }
 
 protected:
-  std::shared_ptr<moveit_setup_framework::URDFConfig> urdf_config_;
+  std::shared_ptr<URDFConfig> urdf_config_;
 };
-}  // namespace moveit_setup_srdf_plugins
+}  // namespace srdf_setup
+}  // namespace moveit_setup

@@ -62,14 +62,16 @@
 #include <boost/function/function_fwd.hpp>
 #endif
 
-namespace moveit_setup_srdf_plugins
+namespace moveit_setup
+{
+namespace srdf_setup
 {
 class MonitorThread;
 
 /**
  * \brief User interface for editing the default collision matrix list in an SRDF
  */
-class DefaultCollisionsWidget : public moveit_setup_framework::SetupStepWidget
+class DefaultCollisionsWidget : public SetupStepWidget
 {
   Q_OBJECT
 
@@ -87,7 +89,7 @@ public:
 
   ~DefaultCollisionsWidget() override;
 
-  moveit_setup_framework::SetupStep& getSetupStep() override
+  SetupStep& getSetupStep() override
   {
     return setup_step_;
   }
@@ -238,4 +240,5 @@ private:
   DefaultCollisions& setup_step_;
   bool canceled_;
 };
-}  // namespace moveit_setup_srdf_plugins
+}  // namespace srdf_setup
+}  // namespace moveit_setup

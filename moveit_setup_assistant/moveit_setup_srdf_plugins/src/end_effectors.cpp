@@ -36,12 +36,14 @@
 
 #include <moveit_setup_srdf_plugins/end_effectors.hpp>
 
-namespace moveit_setup_srdf_plugins
+namespace moveit_setup
+{
+namespace srdf_setup
 {
 void EndEffectors::onInit()
 {
   SuperSRDFStep::onInit();
-  urdf_config_ = config_data_->get<moveit_setup_framework::URDFConfig>("urdf");
+  urdf_config_ = config_data_->get<URDFConfig>("urdf");
 }
 
 bool EndEffectors::isLinkInGroup(const std::string& link, const std::string& group) const
@@ -57,7 +59,8 @@ void EndEffectors::setProperties(srdf::Model::EndEffector* eef, const std::strin
   eef->parent_link_ = parent_link;
   eef->component_group_ = component_group;
   eef->parent_group_ = parent_group;
-  srdf_config_->updateRobotModel(moveit_setup_framework::END_EFFECTORS);
+  srdf_config_->updateRobotModel(END_EFFECTORS);
 }
 
-}  // namespace moveit_setup_srdf_plugins
+}  // namespace srdf_setup
+}  // namespace moveit_setup

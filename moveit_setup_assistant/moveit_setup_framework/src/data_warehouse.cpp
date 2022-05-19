@@ -39,14 +39,14 @@
 #include <moveit_setup_framework/data/srdf_config.hpp>
 #include <moveit_setup_framework/data/package_settings_config.hpp>
 
-namespace moveit_setup_framework
+namespace moveit_setup
 {
 DataWarehouse::DataWarehouse(const rclcpp::Node::SharedPtr& parent_node)
-  : parent_node_(parent_node), config_loader_("moveit_setup_framework", "moveit_setup_framework::SetupConfig")
+  : parent_node_(parent_node), config_loader_("moveit_setup_framework", "moveit_setup::SetupConfig")
 {
-  registerType("urdf", "moveit_setup_framework::URDFConfig");
-  registerType("srdf", "moveit_setup_framework::SRDFConfig");
-  registerType("package_settings", "moveit_setup_framework::PackageSettingsConfig");
+  registerType("urdf", "moveit_setup::URDFConfig");
+  registerType("srdf", "moveit_setup::SRDFConfig");
+  registerType("package_settings", "moveit_setup::PackageSettingsConfig");
 }
 
 SetupConfigPtr DataWarehouse::get(const std::string& config_name, std::string config_class)
@@ -98,4 +98,4 @@ std::vector<std::string> DataWarehouse::getRegisteredNames() const
   }
   return names;
 }
-}  // namespace moveit_setup_framework
+}  // namespace moveit_setup

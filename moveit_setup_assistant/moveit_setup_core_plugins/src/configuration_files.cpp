@@ -36,16 +36,18 @@
 #include <moveit_setup_framework/templates.hpp>
 #include <moveit_setup_framework/data/srdf_config.hpp>
 
-namespace moveit_setup_core_plugins
+namespace moveit_setup
+{
+namespace core
 {
 void ConfigurationFiles::onInit()
 {
-  package_settings_ = config_data_->get<moveit_setup_framework::PackageSettingsConfig>("package_settings");
+  package_settings_ = config_data_->get<PackageSettingsConfig>("package_settings");
 }
 
 void ConfigurationFiles::loadTemplateVariables()
 {
-  auto& variables = moveit_setup_framework::TemplatedGeneratedFile::variables_;
+  auto& variables = TemplatedGeneratedFile::variables_;
   variables.clear();
   for (const auto& config : config_data_->getConfigured())
   {
@@ -57,7 +59,7 @@ void ConfigurationFiles::loadFiles()
 {
   package_settings_->loadDependencies();
   loadTemplateVariables();
-  std::string package_path = package_settings_->getPackagePath();
+  std::filesystem::path package_path = package_settings_->getPackagePath();
   auto gen_time = package_settings_->getGenerationTime();
 
   // Check if we are 'editing' a prev generated config pkg
@@ -94,8 +96,8 @@ void ConfigurationFiles::setShouldGenerate(const std::string& rel_path, bool sho
 bool ConfigurationFiles::isExistingConfig()
 {
   // if the folder doesn't exist or is empty
-  std::string package_path = getPackagePath();
-  return boost::filesystem::is_directory(package_path) && !boost::filesystem::is_empty(package_path);
+  std::filesystem::path package_path(getPackagePath());
+  return std::filesystem::is_directory(package_path) && !std::filesystem::is_empty(package_path);
 }
 
 bool ConfigurationFiles::hasSetupAssistantFile()
@@ -104,8 +106,7 @@ bool ConfigurationFiles::hasSetupAssistantFile()
   {
     return true;
   }
-  return boost::filesystem::is_regular_file(
-      moveit_setup_framework::appendPaths(getPackagePath(), moveit_setup_framework::SETUP_ASSISTANT_FILE));
+  return std::filesystem::is_regular_file(getPackagePath() / SETUP_ASSISTANT_FILE);
 }
 
 std::vector<std::string> ConfigurationFiles::getIncompleteWarnings() const
@@ -113,7 +114,7 @@ std::vector<std::string> ConfigurationFiles::getIncompleteWarnings() const
   // There may be a better way to generalize this, but for now, we add some manual checks of the srdf/author info
   std::vector<std::string> warnings;
 
-  auto srdf_config = config_data_->get<moveit_setup_framework::SRDFConfig>("srdf");
+  auto srdf_config = config_data_->get<SRDFConfig>("srdf");
   // Check that at least 1 planning group exists
   if (srdf_config->getGroups().empty())
   {
@@ -155,7 +156,7 @@ std::vector<std::string> ConfigurationFiles::getIncompleteWarnings() const
 
 std::string ConfigurationFiles::getInvalidGroupName() const
 {
-  auto srdf_config = config_data_->get<moveit_setup_framework::SRDFConfig>("srdf");
+  auto srdf_config = config_data_->get<SRDFConfig>("srdf");
   for (const auto& group : srdf_config->getGroups())
   {
     // Whenever 1 of the 4 component types are found, stop checking this group
@@ -172,4 +173,5 @@ std::string ConfigurationFiles::getInvalidGroupName() const
   return "";
 }
 
-}  // namespace moveit_setup_core_plugins
+}  // namespace core
+}  // namespace moveit_setup

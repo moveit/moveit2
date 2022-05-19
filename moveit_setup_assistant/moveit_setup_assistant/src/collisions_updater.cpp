@@ -47,10 +47,10 @@ namespace po = boost::program_options;
 
 int main(int argc, char* argv[])
 {
-  std::string config_pkg_path;
-  std::string urdf_path;
-  std::string srdf_path;
-  std::string output_path;
+  std::filesystem::path config_pkg_path;
+  std::filesystem::path urdf_path;
+  std::filesystem::path srdf_path;
+  std::filesystem::path output_path;
 
   bool include_default = false, include_always = false, keep_old = false, verbose = false;
 
@@ -91,14 +91,14 @@ int main(int argc, char* argv[])
   rclcpp::init(argc, argv);
   rclcpp::Node::SharedPtr node = std::make_shared<rclcpp::Node>("collision_updater");
   static const rclcpp::Logger LOGGER = rclcpp::get_logger("collision_updater");
-  moveit_setup_framework::DataWarehousePtr config_data = std::make_shared<moveit_setup_framework::DataWarehouse>(node);
+  moveit_setup::DataWarehousePtr config_data = std::make_shared<moveit_setup::DataWarehouse>(node);
 
-  moveit_setup_srdf_plugins::DefaultCollisions setup_step;
+  moveit_setup::srdf_setup::DefaultCollisions setup_step;
   setup_step.initialize(node, config_data);
 
   if (!config_pkg_path.empty())
   {
-    auto package_settings = config_data->get<moveit_setup_framework::PackageSettingsConfig>("package_settings");
+    auto package_settings = config_data->get<moveit_setup::PackageSettingsConfig>("package_settings");
     try
     {
       package_settings->loadExisting(config_pkg_path);
@@ -120,12 +120,12 @@ int main(int argc, char* argv[])
     return 1;
   }
 
-  auto srdf_config = config_data->get<moveit_setup_framework::SRDFConfig>("srdf");
+  auto srdf_config = config_data->get<moveit_setup::SRDFConfig>("srdf");
 
   // overwrite config paths if applicable
   if (!urdf_path.empty())
   {
-    auto config = config_data->get<moveit_setup_framework::URDFConfig>("urdf");
+    auto config = config_data->get<moveit_setup::URDFConfig>("urdf");
 
     std::vector<std::string> xacro_args;
     if (vm.count("xacro-args"))
@@ -159,9 +159,9 @@ int main(int argc, char* argv[])
 
   size_t skip_mask = 0;
   if (!include_default)
-    skip_mask |= (1 << moveit_setup_srdf_plugins::DEFAULT);
+    skip_mask |= (1 << moveit_setup::srdf_setup::DEFAULT);
   if (!include_always)
-    skip_mask |= (1 << moveit_setup_srdf_plugins::ALWAYS);
+    skip_mask |= (1 << moveit_setup::srdf_setup::ALWAYS);
 
   setup_step.linkPairsToSRDFSorted(skip_mask);
 

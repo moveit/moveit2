@@ -37,7 +37,7 @@
 #include <moveit_setup_framework/config.hpp>
 #include <urdf/model.h>  // for testing a valid urdf is loaded
 
-namespace moveit_setup_framework
+namespace moveit_setup
 {
 class URDFConfig : public SetupConfig
 {
@@ -49,13 +49,13 @@ public:
 
   void onInit() override;
 
-  void loadPrevious(const std::string& package_path, const YAML::Node& node) override;
+  void loadPrevious(const std::filesystem::path& package_path, const YAML::Node& node) override;
   YAML::Node saveToYaml() const override;
 
   /// Load URDF File
-  void loadFromPath(const std::string& urdf_file_path, const std::string& xacro_args = "");
-  void loadFromPath(const std::string& urdf_file_path, const std::vector<std::string>& xacro_args);
-  void loadFromPackage(const std::string& package_name, const std::string& relative_path,
+  void loadFromPath(const std::filesystem::path& urdf_file_path, const std::string& xacro_args = "");
+  void loadFromPath(const std::filesystem::path& urdf_file_path, const std::vector<std::string>& xacro_args);
+  void loadFromPackage(const std::filesystem::path& package_name, const std::filesystem::path& relative_path,
                        const std::string& xacro_args = "");
 
   const urdf::Model& getModel() const
@@ -78,7 +78,7 @@ public:
     return urdf_string_;
   }
 
-  std::string getURDFPath() const
+  std::filesystem::path getURDFPath() const
   {
     return urdf_path_;
   }
@@ -101,13 +101,13 @@ protected:
   void load();
 
   /// Full file-system path to urdf
-  std::string urdf_path_;
+  std::filesystem::path urdf_path_;
 
   /// Name of package containing urdf (note: this may be empty b/c user may not have urdf in pkg)
   std::string urdf_pkg_name_;
 
   /// Path relative to urdf package (note: this may be same as urdf_path_)
-  std::string urdf_pkg_relative_path_;
+  std::filesystem::path urdf_pkg_relative_path_;
 
   /// Flag indicating whether the URDF was loaded from .xacro format
   bool urdf_from_xacro_;
@@ -122,4 +122,4 @@ protected:
   /// URDF robot model string
   std::string urdf_string_;
 };
-}  // namespace moveit_setup_framework
+}  // namespace moveit_setup

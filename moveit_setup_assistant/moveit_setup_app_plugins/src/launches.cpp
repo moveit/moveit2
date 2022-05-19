@@ -35,12 +35,14 @@
 /* Author: David V. Lu!! */
 #include <moveit_setup_app_plugins/launches.hpp>
 
-namespace moveit_setup_app_plugins
+namespace moveit_setup
+{
+namespace app
 {
 void Launches::onInit()
 {
-  config_data_->registerType("launches", "moveit_setup_app_plugins::LaunchesConfig");
-  launches_config_ = config_data_->get<moveit_setup_app_plugins::LaunchesConfig>("launches");
+  config_data_->registerType("launches", "moveit_setup::app::LaunchesConfig");
+  launches_config_ = config_data_->get<LaunchesConfig>("launches");
 
   available_launch_bundles_.push_back(
       LaunchBundle("Robot State Publisher Launch",
@@ -102,4 +104,5 @@ void Launches::setState(unsigned int id, bool state)
     launches_config_->remove(bundle);
   }
 }
-}  // namespace moveit_setup_app_plugins
+}  // namespace app
+}  // namespace moveit_setup

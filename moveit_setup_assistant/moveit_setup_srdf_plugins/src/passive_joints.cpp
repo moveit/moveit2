@@ -36,7 +36,9 @@
 
 #include <moveit_setup_srdf_plugins/passive_joints.hpp>
 
-namespace moveit_setup_srdf_plugins
+namespace moveit_setup
+{
+namespace srdf_setup
 {
 std::vector<std::string> PassiveJoints::getActiveJoints() const
 {
@@ -76,7 +78,8 @@ void PassiveJoints::setPassiveJoints(const std::vector<std::string>& passive_joi
     pj.name_ = passive_joint;
     passive_joints.push_back(pj);
   }
-  srdf_config_->updateRobotModel(moveit_setup_framework::PASSIVE_JOINTS);
+  srdf_config_->updateRobotModel(PASSIVE_JOINTS);
 }
 
-}  // namespace moveit_setup_srdf_plugins
+}  // namespace srdf_setup
+}  // namespace moveit_setup

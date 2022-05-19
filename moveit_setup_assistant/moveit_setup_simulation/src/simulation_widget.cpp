@@ -52,7 +52,9 @@
 
 #include <regex>
 
-namespace moveit_setup_simulation
+namespace moveit_setup
+{
+namespace simulation
 {
 // ******************************************************************************************
 // Constructor
@@ -65,12 +67,10 @@ void SimulationWidget::onInit()
 
   // Top Header Area ------------------------------------------------
 
-  auto header =
-      new moveit_setup_framework::HeaderWidget("Simulate With Gazebo",
-                                               "The following tool will auto-generate the URDF changes needed "
-                                               "for Gazebo compatibility with ROSControl and MoveIt. The "
-                                               "needed changes are shown in green.",
-                                               this);
+  auto header = new HeaderWidget("Simulate With Gazebo",
+                                 "The following tool will auto-generate the URDF changes needed for Gazebo "
+                                 "compatibility with ROSControl and MoveIt. The needed changes are shown in green.",
+                                 this);
   layout->addWidget(header);
   layout->addSpacerItem(new QSpacerItem(1, 8, QSizePolicy::Fixed, QSizePolicy::Fixed));
 
@@ -108,7 +108,7 @@ void SimulationWidget::onInit()
   simulation_text_->setLineWrapMode(QTextEdit::NoWrap);
   layout->addWidget(simulation_text_);
   // Configure highlighter
-  auto highlighter = new moveit_setup_framework::XmlSyntaxHighlighter(simulation_text_->document());
+  auto highlighter = new XmlSyntaxHighlighter(simulation_text_->document());
   QTextCharFormat format;
   format.setForeground(Qt::darkGreen);
   highlighter->addTag("inertial", format);
@@ -221,7 +221,8 @@ void SimulationWidget::copyURDF()
   simulation_text_->selectAll();
   simulation_text_->copy();
 }
-}  // namespace moveit_setup_simulation
+}  // namespace simulation
+}  // namespace moveit_setup
 
 #include <pluginlib/class_list_macros.hpp>  // NOLINT
-PLUGINLIB_EXPORT_CLASS(moveit_setup_simulation::SimulationWidget, moveit_setup_framework::SetupStepWidget)
+PLUGINLIB_EXPORT_CLASS(moveit_setup::simulation::SimulationWidget, moveit_setup::SetupStepWidget)

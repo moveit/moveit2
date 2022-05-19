@@ -39,7 +39,9 @@
 #include <map>
 #include <string>
 
-namespace moveit_setup_srdf_plugins
+namespace moveit_setup
+{
+namespace srdf_setup
 {
 // Default kin solver values
 static const double DEFAULT_KIN_SOLVER_SEARCH_RESOLUTION = 0.005;
@@ -59,11 +61,11 @@ struct GroupMetaData
 
 static const std::string KINEMATICS_FILE = "config/kinematics.yaml";
 
-class GroupMetaConfig : public moveit_setup_framework::SetupConfig
+class GroupMetaConfig : public SetupConfig
 {
 public:
   bool isConfigured() const override;
-  void loadPrevious(const std::string& package_path, const YAML::Node& node) override;
+  void loadPrevious(const std::filesystem::path& package_path, const YAML::Node& node) override;
 
   void deleteGroup(const std::string& group_name);
   void renameGroup(const std::string& old_group_name, const std::string& new_group_name);
@@ -71,15 +73,16 @@ public:
   const GroupMetaData& getMetaData(const std::string& group_name) const;
   void setMetaData(const std::string& group_name, const GroupMetaData& meta_data);
 
-  class GeneratedGroupMetaConfig : public moveit_setup_framework::YamlGeneratedFile
+  class GeneratedGroupMetaConfig : public YamlGeneratedFile
   {
   public:
-    GeneratedGroupMetaConfig(const std::string& package_path, const std::time_t& last_gen_time, GroupMetaConfig& parent)
+    GeneratedGroupMetaConfig(const std::filesystem::path& package_path, const GeneratedTime& last_gen_time,
+                             GroupMetaConfig& parent)
       : YamlGeneratedFile(package_path, last_gen_time), parent_(parent)
     {
     }
 
-    std::string getRelativePath() const override
+    std::filesystem::path getRelativePath() const override
     {
       return KINEMATICS_FILE;
     }
@@ -101,17 +104,17 @@ public:
     GroupMetaConfig& parent_;
   };
 
-  void collectFiles(const std::string& package_path, const std::time_t& last_gen_time,
-                    std::vector<moveit_setup_framework::GeneratedFilePtr>& files) override
+  void collectFiles(const std::filesystem::path& package_path, const GeneratedTime& last_gen_time,
+                    std::vector<GeneratedFilePtr>& files) override
   {
     files.push_back(std::make_shared<GeneratedGroupMetaConfig>(package_path, last_gen_time, *this));
   }
 
-  void collectVariables(std::vector<moveit_setup_framework::TemplateVariable>& variables) override;
+  void collectVariables(std::vector<TemplateVariable>& variables) override;
 
 protected:
   // Helper method with old name that conveniently returns a bool
-  bool inputKinematicsYAML(const std::string& file_path);
+  bool inputKinematicsYAML(const std::filesystem::path& file_path);
 
   /// Planning groups extra data not found in srdf but used in config files
   std::map<std::string, GroupMetaData> group_meta_data_;
@@ -120,4 +123,5 @@ protected:
 
   bool changed_{ false };
 };
-}  // namespace moveit_setup_srdf_plugins
+}  // namespace srdf_setup
+}  // namespace moveit_setup

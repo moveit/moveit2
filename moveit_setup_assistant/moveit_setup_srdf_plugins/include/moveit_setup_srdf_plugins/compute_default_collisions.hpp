@@ -43,7 +43,9 @@ namespace planning_scene
 MOVEIT_CLASS_FORWARD(PlanningScene);  // Defines PlanningScenePtr, ConstPtr, WeakPtr... etc
 }
 
-namespace moveit_setup_srdf_plugins
+namespace moveit_setup
+{
+namespace srdf_setup
 {
 /**
  * \brief Reasons for disabling link pairs. Append "in collision" for understanding.
@@ -108,4 +110,5 @@ const std::string disabledReasonToString(DisabledReason reason);
  * \return reason as struct
  */
 DisabledReason disabledReasonFromString(const std::string& reason);
-}  // namespace moveit_setup_srdf_plugins
+}  // namespace srdf_setup
+}  // namespace moveit_setup

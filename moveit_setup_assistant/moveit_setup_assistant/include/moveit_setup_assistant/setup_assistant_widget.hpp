@@ -58,7 +58,9 @@ class QSplitter;
 #include <boost/thread/mutex.hpp>
 #endif
 
-namespace moveit_setup_assistant
+namespace moveit_setup
+{
+namespace assistant
 {
 class SetupAssistantWidget : public QWidget
 {
@@ -151,21 +153,22 @@ private:
   QList<QString> nav_name_list_;
   NavigationWidget* navs_view_;
 
-  moveit_setup_framework::RVizPanel* rviz_panel_;
+  RVizPanel* rviz_panel_;
   QSplitter* splitter_;
   QStackedWidget* main_content_;
   int current_index_;
   boost::mutex change_screen_lock_;
 
   // Setup Steps
-  pluginlib::ClassLoader<moveit_setup_framework::SetupStepWidget> widget_loader_;
-  std::vector<std::shared_ptr<moveit_setup_framework::SetupStepWidget>> steps_;
+  pluginlib::ClassLoader<SetupStepWidget> widget_loader_;
+  std::vector<std::shared_ptr<SetupStepWidget>> steps_;
 
   /// Contains all the configuration data for the setup assistant
-  moveit_setup_framework::DataWarehousePtr config_data_;
+  DataWarehousePtr config_data_;
 
   // ******************************************************************************************
   // Private Functions
   // ******************************************************************************************
 };
-}  // namespace moveit_setup_assistant
+}  // namespace assistant
+}  // namespace moveit_setup

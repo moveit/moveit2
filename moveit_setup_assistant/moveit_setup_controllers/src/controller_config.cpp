@@ -38,16 +38,16 @@
 #include <moveit_setup_framework/data/srdf_config.hpp>
 #include <moveit_setup_framework/data_warehouse.hpp>
 
-namespace moveit_setup_controllers
+namespace moveit_setup
 {
-using moveit_setup_framework::getYamlProperty;
-
-void ControllersConfig::loadPrevious(const std::string& package_path, const YAML::Node& /*node*/)
+namespace controllers
+{
+void ControllersConfig::loadPrevious(const std::filesystem::path& package_path, const YAML::Node& /*node*/)
 {
   changed_ = false;
   // Load ros controllers yaml file if available-----------------------------------------------
-  std::string ros_controllers_yaml_path = moveit_setup_framework::appendPaths(package_path, CONTROLLERS_YAML);
-  std::ifstream input_stream(ros_controllers_yaml_path.c_str());
+  std::filesystem::path ros_controllers_yaml_path = package_path / CONTROLLERS_YAML;
+  std::ifstream input_stream(ros_controllers_yaml_path);
   if (!input_stream.good())
   {
     RCLCPP_WARN_STREAM((*logger_), "Does not exist " << ros_controllers_yaml_path);
@@ -298,7 +298,7 @@ bool ControllersConfig::GeneratedControllersConfig::writeYaml(YAML::Emitter& /*e
   std::vector<std::vector<std::string>> planning_groups;
   std::vector<std::string> group_joints;
 
-  auto srdf_config = parent_.config_data_->get<moveit_setup_framework::SRDFConfig>("srdf");
+  auto srdf_config = parent_.config_data_->get<SRDFConfig>("srdf");
 
   // We are going to write the joints names many times.
   // Loop through groups to store the joints names in group_joints vector and reuse is.
@@ -458,7 +458,7 @@ bool ControllersConfig::GeneratedControllersConfig::writeYaml(YAML::Emitter& /*e
   return true;
 }
 
-void ControllersConfig::collectVariables(std::vector<moveit_setup_framework::TemplateVariable>& variables)
+void ControllersConfig::collectVariables(std::vector<TemplateVariable>& variables)
 {
   // Add Controllers variable for ros_controllers.launch file
   std::stringstream controllers;
@@ -469,10 +469,11 @@ void ControllersConfig::collectVariables(std::vector<moveit_setup_framework::Tem
       controllers << controller.name_ << " ";
   }
 
-  variables.push_back(moveit_setup_framework::TemplateVariable("ROS_CONTROLLERS", controllers.str()));
+  variables.push_back(TemplateVariable("ROS_CONTROLLERS", controllers.str()));
 }
 
-}  // namespace moveit_setup_controllers
+}  // namespace controllers
+}  // namespace moveit_setup
 
 #include <pluginlib/class_list_macros.hpp>  // NOLINT
-PLUGINLIB_EXPORT_CLASS(moveit_setup_controllers::ControllersConfig, moveit_setup_framework::SetupConfig)
+PLUGINLIB_EXPORT_CLASS(moveit_setup::controllers::ControllersConfig, moveit_setup::SetupConfig)

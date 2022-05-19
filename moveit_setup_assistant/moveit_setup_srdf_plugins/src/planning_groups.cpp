@@ -42,7 +42,9 @@
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/depth_first_search.hpp>
 
-namespace moveit_setup_srdf_plugins
+namespace moveit_setup
+{
+namespace srdf_setup
 {
 // Used for checking for cycles in a subgroup hierarchy
 struct CycleDetector : public boost::dfs_visitor<>
@@ -64,7 +66,7 @@ protected:
 void PlanningGroups::onInit()
 {
   SuperSRDFStep::onInit();
-  config_data_->registerType("group_meta", "moveit_setup_srdf_plugins::GroupMetaConfig");
+  config_data_->registerType("group_meta", "moveit_setup::srdf_setup::GroupMetaConfig");
   group_meta_config_ = config_data_->get<GroupMetaConfig>("group_meta");
 }
 
@@ -86,7 +88,7 @@ void PlanningGroups::renameGroup(const std::string& old_group_name, const std::s
       if (subgroup == old_group_name)  // same name
       {
         subgroup.assign(new_group_name);  // updated
-        changes |= moveit_setup_framework::GROUP_CONTENTS;
+        changes |= GROUP_CONTENTS;
       }
     }
   }
@@ -99,7 +101,7 @@ void PlanningGroups::renameGroup(const std::string& old_group_name, const std::s
     {
       RCLCPP_DEBUG_STREAM((*logger_), "Changed eef '" << eef.name_ << "' to new parent group name " << new_group_name);
       eef.parent_group_ = new_group_name;  // updated
-      changes |= moveit_setup_framework::END_EFFECTORS;
+      changes |= END_EFFECTORS;
     }
 
     // Check if this eef's group references old group name. if so, update it
@@ -107,7 +109,7 @@ void PlanningGroups::renameGroup(const std::string& old_group_name, const std::s
     {
       RCLCPP_DEBUG_STREAM((*logger_), "Changed eef '" << eef.name_ << "' to new group name " << new_group_name);
       eef.component_group_ = new_group_name;  // updated
-      changes |= moveit_setup_framework::END_EFFECTORS;
+      changes |= END_EFFECTORS;
     }
   }
 
@@ -120,12 +122,12 @@ void PlanningGroups::renameGroup(const std::string& old_group_name, const std::s
       RCLCPP_DEBUG_STREAM((*logger_), "Changed group state group '" << gs.group_ << "' to new parent group name "
                                                                     << new_group_name);
       gs.group_ = new_group_name;  // updated
-      changes |= moveit_setup_framework::POSES;
+      changes |= POSES;
     }
   }
 
   group_meta_config_->renameGroup(old_group_name, new_group_name);
-  changes |= moveit_setup_framework::GROUPS;
+  changes |= GROUPS;
 
   // Now update the robot model based on our changed to the SRDF
   srdf_config_->updateRobotModel(changes);
@@ -149,7 +151,7 @@ void PlanningGroups::deleteGroup(const std::string& group_name)
     if (it->component_group_ == group_name)
     {
       it = eefs.erase(it);
-      changes |= moveit_setup_framework::END_EFFECTORS;
+      changes |= END_EFFECTORS;
     }
     else
     {
@@ -168,7 +170,7 @@ void PlanningGroups::deleteGroup(const std::string& group_name)
     while (subgroup_it != subgroups.end())
     {
       subgroups.erase(subgroup_it);
-      changes |= moveit_setup_framework::GROUP_CONTENTS;
+      changes |= GROUP_CONTENTS;
       subgroup_it = std::find(subgroups.begin(), subgroups.end(), group_name);
     }
   }
@@ -176,7 +178,7 @@ void PlanningGroups::deleteGroup(const std::string& group_name)
   group_meta_config_->deleteGroup(group_name);
 
   srdf_config_->updateRobotModel(changes);
-}  // namespace moveit_setup_srdf_plugins
+}
 
 void PlanningGroups::setJoints(const std::string& group_name, const std::vector<std::string>& joint_names)
 {
@@ -187,7 +189,7 @@ void PlanningGroups::setJoints(const std::string& group_name, const std::vector<
   searched_group->joints_ = joint_names;
 
   // Update the kinematic model with changes
-  srdf_config_->updateRobotModel(moveit_setup_framework::GROUP_CONTENTS);
+  srdf_config_->updateRobotModel(GROUP_CONTENTS);
 }
 
 void PlanningGroups::setLinks(const std::string& group_name, const std::vector<std::string>& link_names)
@@ -199,7 +201,7 @@ void PlanningGroups::setLinks(const std::string& group_name, const std::vector<s
   searched_group->links_ = link_names;
 
   // Update the kinematic model with changes
-  srdf_config_->updateRobotModel(moveit_setup_framework::GROUP_CONTENTS);
+  srdf_config_->updateRobotModel(GROUP_CONTENTS);
 }
 
 void PlanningGroups::setChain(const std::string& group_name, const std::string& base, const std::string& tip)
@@ -257,7 +259,7 @@ void PlanningGroups::setChain(const std::string& group_name, const std::string& 
   }
 
   // Update the kinematic model with changes
-  srdf_config_->updateRobotModel(moveit_setup_framework::GROUP_CONTENTS);
+  srdf_config_->updateRobotModel(GROUP_CONTENTS);
 }
 
 void PlanningGroups::setSubgroups(const std::string& selected_group_name, const std::vector<std::string>& subgroups)
@@ -331,7 +333,7 @@ void PlanningGroups::setSubgroups(const std::string& selected_group_name, const 
   searched_group->subgroups_ = subgroups;
 
   // Update the kinematic model with changes
-  srdf_config_->updateRobotModel(moveit_setup_framework::GROUP_CONTENTS);
+  srdf_config_->updateRobotModel(GROUP_CONTENTS);
 }
 
 std::string PlanningGroups::getChildOfJoint(const std::string& joint_name) const
@@ -442,4 +444,5 @@ std::vector<std::string> PlanningGroups::getOMPLPlanners() const
   return planner_names;
 }
 
-}  // namespace moveit_setup_srdf_plugins
+}  // namespace srdf_setup
+}  // namespace moveit_setup
