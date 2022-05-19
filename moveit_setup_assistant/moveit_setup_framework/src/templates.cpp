@@ -38,27 +38,27 @@
 #include <rclcpp/rclcpp.hpp>
 #include <boost/algorithm/string.hpp>  // for string find and replace in templates
 
-namespace moveit_setup_framework
+namespace moveit_setup
 {
 std::vector<TemplateVariable> TemplatedGeneratedFile::variables_;
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_setup_framework.templates");
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_setup.templates");
 
 bool TemplatedGeneratedFile::write()
 {
-  std::string template_path = getTemplatePath();
+  std::filesystem::path template_path = getTemplatePath();
 
   // Error check file
-  if (!boost::filesystem::is_regular_file(template_path))
+  if (!std::filesystem::is_regular_file(template_path))
   {
-    RCLCPP_ERROR_STREAM(LOGGER, "Unable to find template file " << template_path);
+    RCLCPP_ERROR_STREAM(LOGGER, "Unable to find template file " << template_path.string());
     return false;
   }
 
   // Load file
-  std::ifstream template_stream(template_path.c_str());
+  std::ifstream template_stream(template_path);
   if (!template_stream.good())  // File not found
   {
-    RCLCPP_ERROR_STREAM(LOGGER, "Unable to load file " << template_path);
+    RCLCPP_ERROR_STREAM(LOGGER, "Unable to load file " << template_path.string());
     return false;
   }
 
@@ -78,13 +78,13 @@ bool TemplatedGeneratedFile::write()
   }
 
   // Save string to new location -----------------------------------------------------------
-  std::string file_path = getPath();
+  std::filesystem::path file_path = getPath();
   createParentFolders(file_path);
 
-  std::ofstream output_stream(file_path.c_str(), std::ios_base::trunc);
+  std::ofstream output_stream(file_path, std::ios_base::trunc);
   if (!output_stream.good())
   {
-    RCLCPP_ERROR_STREAM(LOGGER, "Unable to open file for writing " << file_path);
+    RCLCPP_ERROR_STREAM(LOGGER, "Unable to open file for writing " << file_path.string());
     return false;
   }
 
@@ -94,4 +94,4 @@ bool TemplatedGeneratedFile::write()
   return true;  // file created successfully
 }
 
-}  // namespace moveit_setup_framework
+}  // namespace moveit_setup

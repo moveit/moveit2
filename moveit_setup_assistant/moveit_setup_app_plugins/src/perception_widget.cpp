@@ -46,7 +46,9 @@
 #include <QLineEdit>
 #include <QVBoxLayout>
 
-namespace moveit_setup_app_plugins
+namespace moveit_setup
+{
+namespace app
 {
 void PerceptionWidget::onInit()
 {
@@ -56,15 +58,12 @@ void PerceptionWidget::onInit()
 
   // Top Header Area ------------------------------------------------
 
-  auto header = new moveit_setup_framework::HeaderWidget(
+  auto header = new HeaderWidget(
       "Setup 3D Perception Sensors",
-      "Configure your 3D sensors to work with MoveIt "
-      "Please see <a "
-      "href='https://ros-planning.github.io/moveit_tutorials/doc/perception_pipeline/"
-      "perception_pipeline_tutorial.html'>Perception Documentation</a> "
-      "for more details.",
+      "Configure your 3D sensors to work with MoveIt. Please see <a "
+      "href='https://moveit.picknik.ai/galactic/doc/examples/perception_pipeline/perception_pipeline_tutorial.html"
+      "'>Perception Documentation</a> for more details.",
       this);
-  // TODO: Update the above hyperlink with MoveIt2 Tutorial
   layout->addWidget(header);
 
   // Add spacing
@@ -310,7 +309,8 @@ void PerceptionWidget::loadSensorPluginsComboBox()
   }
 }
 
-}  // namespace moveit_setup_app_plugins
+}  // namespace app
+}  // namespace moveit_setup
 
 #include <pluginlib/class_list_macros.hpp>  // NOLINT
-PLUGINLIB_EXPORT_CLASS(moveit_setup_app_plugins::PerceptionWidget, moveit_setup_framework::SetupStepWidget)
+PLUGINLIB_EXPORT_CLASS(moveit_setup::app::PerceptionWidget, moveit_setup::SetupStepWidget)

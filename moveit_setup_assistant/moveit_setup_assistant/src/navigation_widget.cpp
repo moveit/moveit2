@@ -41,7 +41,9 @@
 #include <QStandardItemModel>
 #include <iostream>
 
-namespace moveit_setup_assistant
+namespace moveit_setup
+{
+namespace assistant
 {
 // ******************************************************************************************
 // CLASS
@@ -179,4 +181,5 @@ void NavDelegate::paint(QPainter* painter, const QStyleOptionViewItem& option, c
 
   painter->restore();
 }
-}  // namespace moveit_setup_assistant
+}  // namespace assistant
+}  // namespace moveit_setup

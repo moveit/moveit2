@@ -48,9 +48,11 @@
 #include <moveit_setup_controllers/controllers.hpp>
 #include <moveit_setup_controllers/controller_edit_widget.hpp>
 
-namespace moveit_setup_controllers
+namespace moveit_setup
 {
-class ControllersWidget : public moveit_setup_framework::SetupStepWidget
+namespace controllers
+{
+class ControllersWidget : public SetupStepWidget
 {
   Q_OBJECT
 
@@ -66,7 +68,7 @@ public:
   /// Received when this widget is chosen from the navigation menu
   void focusGiven() override;
 
-  moveit_setup_framework::SetupStep& getSetupStep() override
+  SetupStep& getSetupStep() override
   {
     return setup_step_;
   }
@@ -133,8 +135,8 @@ private:
   QPushButton* btn_add_;
   QPushButton* btn_edit_;
   QHBoxLayout* controls_layout_;
-  moveit_setup_framework::DoubleListWidget* joints_widget_;
-  moveit_setup_framework::DoubleListWidget* joint_groups_widget_;
+  DoubleListWidget* joints_widget_;
+  DoubleListWidget* joint_groups_widget_;
 
   /// Remember what controller we are editing when an edit screen is being shown
   std::string current_edit_controller_;
@@ -155,4 +157,5 @@ private:
   void loadControllerScreen(ControllerInfo* this_controller);
 };
 
-}  // namespace moveit_setup_controllers
+}  // namespace controllers
+}  // namespace moveit_setup

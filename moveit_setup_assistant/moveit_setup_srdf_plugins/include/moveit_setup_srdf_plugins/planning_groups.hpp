@@ -40,7 +40,9 @@
 #include <moveit/robot_model/robot_model.h>
 #include <vector>
 
-namespace moveit_setup_srdf_plugins
+namespace moveit_setup
+{
+namespace srdf_setup
 {
 class LinkNameTree
 {
@@ -74,9 +76,9 @@ public:
     return srdf_config_->getGroups();
   }
 
-  moveit_setup_framework::InformationFields getInfoField() const override
+  InformationFields getInfoField() const override
   {
-    return moveit_setup_framework::GROUPS;
+    return GROUPS;
   }
 
   void onInit() override;
@@ -147,4 +149,5 @@ public:
 protected:
   std::shared_ptr<GroupMetaConfig> group_meta_config_;
 };
-}  // namespace moveit_setup_srdf_plugins
+}  // namespace srdf_setup
+}  // namespace moveit_setup

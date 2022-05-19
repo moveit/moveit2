@@ -51,14 +51,14 @@
 #include "moveit_setup_core_plugins/configuration_files_widget.hpp"
 
 // Boost
-#include <boost/algorithm/string.hpp>       // string trim
-#include <boost/filesystem/path.hpp>        // for creating folders/files
-#include <boost/filesystem/operations.hpp>  // is_regular_file, is_directory, etc.
+#include <boost/algorithm/string.hpp>  // string trim
 // Read write files
 #include <iostream>  // For writing yaml and launch files
 #include <fstream>
 
-namespace moveit_setup_core_plugins
+namespace moveit_setup
+{
+namespace core
 {
 // ******************************************************************************************
 // Outer User Interface for MoveIt Configuration Assistant
@@ -72,23 +72,22 @@ void ConfigurationFilesWidget::onInit()
 
   // Top Header Area ------------------------------------------------
 
-  auto header = new moveit_setup_framework::HeaderWidget(
-      "Generate Configuration Files",
-      "Create or update the configuration files package needed to run your robot with MoveIt. Uncheck "
-      "files to disable them from being generated - this is useful if you have made custom changes to "
-      "them. Files in orange have been automatically detected as changed.",
-      this);
+  auto header =
+      new HeaderWidget("Generate Configuration Files",
+                       "Create or update the configuration files package needed to run your robot with MoveIt. Uncheck "
+                       "files to disable them from being generated - this is useful if you have made custom changes to "
+                       "them. Files in orange have been automatically detected as changed.",
+                       this);
   layout->addWidget(header);
 
   // Path Widget ----------------------------------------------------
 
   // Stack Path Dialog
-  stack_path_ = new moveit_setup_framework::LoadPathWidget(
-      "Configuration Package Save Path",
-      "Specify the desired directory for the MoveIt configuration package to be "
-      "generated. Overwriting an existing configuration package directory is acceptable. "
-      "Example: <i>/u/robot/ros/panda_moveit_config</i>",
-      this, true);  // is directory
+  stack_path_ = new LoadPathWidget("Configuration Package Save Path",
+                                   "Specify the desired directory for the MoveIt configuration package to be "
+                                   "generated. Overwriting an existing configuration package directory is acceptable. "
+                                   "Example: <i>/u/robot/ros/panda_moveit_config</i>",
+                                   this, true);  // is directory
   layout->addWidget(stack_path_);
   connect(stack_path_, SIGNAL(pathChanged(QString)), this, SLOT(onPackagePathChanged(QString)));
 
@@ -186,27 +185,14 @@ void ConfigurationFilesWidget::setCheckSelected(bool checked)
 
 void ConfigurationFilesWidget::onPackagePathChanged(const QString& path)
 {
-  std::string package_path = path.toStdString();
+  std::filesystem::path package_path = path.toStdString();
+
   if (package_path == setup_step_.getPackagePath())
   {
     return;
   }
   setup_step_.setPackagePath(package_path);
-
-  // Determine new potential package name
-  boost::filesystem::path fs_package_path;
-
-  // Remove end slash if there is one
-  if (!package_path.compare(package_path.size() - 1, 1, "/"))
-  {
-    fs_package_path = boost::filesystem::path(package_path.substr(0, package_path.size() - 1));
-  }
-  else
-  {
-    fs_package_path = boost::filesystem::path(package_path);
-  }
-
-  setup_step_.setPackageName(fs_package_path.filename().string());
+  setup_step_.setPackageName(package_path.filename().string());
 
   focusGiven();
 }
@@ -421,10 +407,12 @@ void ConfigurationFilesWidget::savePackage()
 bool ConfigurationFilesWidget::generatePackage()
 {
   // Get path name
-  std::string new_package_path = stack_path_->getPath();
+  std::string package_path_s = stack_path_->getPath();
+  // Trim whitespace from user input
+  boost::trim(package_path_s);
 
   // Check that a valid stack package name has been given
-  if (new_package_path.empty())
+  if (package_path_s.empty())
   {
     QMessageBox::warning(this, "Error Generating",
                          "No package path provided. Please choose a directory location to "
@@ -440,9 +428,6 @@ bool ConfigurationFilesWidget::generatePackage()
   if (!noGroupsEmpty())
     return false;  // not ready
 
-  // Trim whitespace from user input
-  boost::trim(new_package_path);
-
   // Make sure old package is correct package type and verify over write
   if (setup_step_.isExistingConfig())
   {
@@ -454,7 +439,7 @@ bool ConfigurationFilesWidget::generatePackage()
           QString("The chosen package location already exists but was not previously created using this MoveIt Setup "
                   "Assistant. "
                   "If this is a mistake, add the missing file: ")
-              .append(moveit_setup_framework::SETUP_ASSISTANT_FILE.c_str()));
+              .append(SETUP_ASSISTANT_FILE.c_str()));
       return false;
     }
 
@@ -462,7 +447,7 @@ bool ConfigurationFilesWidget::generatePackage()
     if (QMessageBox::question(this, "Confirm Package Update",
                               QString("Are you sure you want to overwrite this existing package with updated "
                                       "configurations?<br /><i>")
-                                  .append(new_package_path.c_str())
+                                  .append(package_path_s.c_str())
                                   .append("</i>"),
                               QMessageBox::Ok | QMessageBox::Cancel) == QMessageBox::Cancel)
     {
@@ -473,7 +458,7 @@ bool ConfigurationFilesWidget::generatePackage()
   setup_step_.setGenerationTime();
 
   // Begin to create files and folders ----------------------------------------------------------------------
-  std::string absolute_path;
+  std::filesystem::path absolute_path;
 
   for (auto& gen_file : setup_step_.getGeneratedFiles())
   {
@@ -482,9 +467,10 @@ bool ConfigurationFilesWidget::generatePackage()
     {
       continue;
     }
+    absolute_path = gen_file->getPath();
 
     // Create the absolute path
-    RCLCPP_DEBUG_STREAM(setup_step_.getLogger(), "Creating file " << gen_file->getPath());
+    RCLCPP_DEBUG_STREAM(setup_step_.getLogger(), "Creating file " << absolute_path.string());
 
     // Run the generate function
     if (!gen_file->write())
@@ -537,7 +523,8 @@ bool ConfigurationFilesWidget::noGroupsEmpty()
 
   return true;  // good
 }
-}  // namespace moveit_setup_core_plugins
+}  // namespace core
+}  // namespace moveit_setup
 
 #include <pluginlib/class_list_macros.hpp>  // NOLINT
-PLUGINLIB_EXPORT_CLASS(moveit_setup_core_plugins::ConfigurationFilesWidget, moveit_setup_framework::SetupStepWidget)
+PLUGINLIB_EXPORT_CLASS(moveit_setup::core::ConfigurationFilesWidget, moveit_setup::SetupStepWidget)

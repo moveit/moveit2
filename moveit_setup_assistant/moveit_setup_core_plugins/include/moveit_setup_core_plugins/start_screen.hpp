@@ -38,9 +38,11 @@
 #include <moveit_setup_framework/data/srdf_config.hpp>
 #include <moveit_setup_framework/data/urdf_config.hpp>
 
-namespace moveit_setup_core_plugins
+namespace moveit_setup
 {
-class StartScreen : public moveit_setup_framework::SetupStep
+namespace core
+{
+class StartScreen : public SetupStep
 {
 public:
   std::string getName() const override
@@ -50,19 +52,20 @@ public:
 
   void onInit() override;
 
-  std::string getURDFPath();
+  std::filesystem::path getURDFPath();
   std::string getXacroArgs();
-  std::string getPackagePath();
+  std::filesystem::path getPackagePath();
 
   bool isXacroFile();
 
-  void loadURDFFile(const std::string& urdf_file_path, const std::string& xacro_args);
+  void loadURDFFile(const std::filesystem::path& urdf_file_path, const std::string& xacro_args);
 
-  void loadExisting(const std::string& package_path);
+  void loadExisting(const std::filesystem::path& package_path);
 
 protected:
-  std::shared_ptr<moveit_setup_framework::PackageSettingsConfig> package_settings_;
-  std::shared_ptr<moveit_setup_framework::SRDFConfig> srdf_config_;
-  std::shared_ptr<moveit_setup_framework::URDFConfig> urdf_config_;
+  std::shared_ptr<PackageSettingsConfig> package_settings_;
+  std::shared_ptr<SRDFConfig> srdf_config_;
+  std::shared_ptr<URDFConfig> urdf_config_;
 };
-}  // namespace moveit_setup_core_plugins
+}  // namespace core
+}  // namespace moveit_setup

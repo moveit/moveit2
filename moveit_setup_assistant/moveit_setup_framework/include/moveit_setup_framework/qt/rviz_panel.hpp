@@ -48,7 +48,7 @@
 #include <QHBoxLayout>
 #include <QVBoxLayout>
 
-namespace moveit_setup_framework
+namespace moveit_setup
 {
 // Used for loading kinematic model
 static const std::string ROBOT_DESCRIPTION = "robot_description";
@@ -138,4 +138,4 @@ protected:
 
   DataWarehousePtr config_data_;
 };
-}  // namespace moveit_setup_framework
+}  // namespace moveit_setup

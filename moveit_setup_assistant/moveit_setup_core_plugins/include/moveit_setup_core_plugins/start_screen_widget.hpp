@@ -49,7 +49,9 @@ class QPushButton;
 #include <moveit_setup_core_plugins/start_screen.hpp>
 #endif
 
-namespace moveit_setup_core_plugins
+namespace moveit_setup
+{
+namespace core
 {
 // Class Prototypes
 class SelectModeWidget;
@@ -57,7 +59,7 @@ class SelectModeWidget;
 /**
  * \brief Start screen user interface for MoveIt Configuration Assistant
  */
-class StartScreenWidget : public moveit_setup_framework::SetupStepWidget
+class StartScreenWidget : public SetupStepWidget
 {
   Q_OBJECT
 
@@ -76,15 +78,15 @@ public:
   // Qt Components
   // ******************************************************************************************
   SelectModeWidget* select_mode_;
-  moveit_setup_framework::LoadPathArgsWidget* stack_path_;
-  moveit_setup_framework::LoadPathArgsWidget* urdf_file_;
+  LoadPathArgsWidget* stack_path_;
+  LoadPathArgsWidget* urdf_file_;
   QPushButton* btn_load_;
   QLabel* next_label_;
   QProgressBar* progress_bar_;  // TODO: Note that since the refactoring, the progress bar is less useful than before
   QImage* right_image_;
   QLabel* right_image_label_;
 
-  moveit_setup_framework::SetupStep& getSetupStep() override
+  SetupStep& getSetupStep() override
   {
     return setup_step_;
   }
@@ -155,4 +157,5 @@ public:
   QPushButton* btn_exist_;
   QLabel* widget_instructions_;
 };
-}  // namespace moveit_setup_core_plugins
+}  // namespace core
+}  // namespace moveit_setup

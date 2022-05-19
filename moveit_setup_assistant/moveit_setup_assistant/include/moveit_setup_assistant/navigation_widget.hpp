@@ -40,7 +40,9 @@
 #include <QStyledItemDelegate>
 class QStandardItemModel;
 
-namespace moveit_setup_assistant
+namespace moveit_setup
+{
+namespace assistant
 {
 /**
  * Widget for showing a left hand side list of navigation items
@@ -81,4 +83,5 @@ public:
   QSize sizeHint(const QStyleOptionViewItem& option, const QModelIndex& index) const override;
   void paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const override;
 };
-}  // namespace moveit_setup_assistant
+}  // namespace assistant
+}  // namespace moveit_setup

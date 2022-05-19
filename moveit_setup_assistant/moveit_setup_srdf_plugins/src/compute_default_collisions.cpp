@@ -41,7 +41,9 @@
 #include <boost/unordered_map.hpp>
 #include <boost/assign.hpp>
 
-namespace moveit_setup_srdf_plugins
+namespace moveit_setup
+{
+namespace srdf_setup
 {
 // ******************************************************************************************
 // Custom Types, Enums and Structs
@@ -677,4 +679,5 @@ DisabledReason disabledReasonFromString(const std::string& reason)
   return r;
 }
 
-}  // namespace moveit_setup_srdf_plugins
+}  // namespace srdf_setup
+}  // namespace moveit_setup

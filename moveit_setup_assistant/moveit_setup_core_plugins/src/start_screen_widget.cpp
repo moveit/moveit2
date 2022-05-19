@@ -49,22 +49,16 @@
 #include <QTimer>
 #include <QVBoxLayout>
 
-// ROS
-#include <ament_index_cpp/get_package_share_directory.hpp>  // for getting file path for loading images
 // SA
 #include "moveit_setup_core_plugins/start_screen_widget.hpp"
 // C
 #include <fstream>  // for reading in urdf
 #include <streambuf>
-// Boost
-#include <boost/filesystem/path.hpp>        // for reading folders/files
-#include <boost/filesystem/operations.hpp>  // for reading folders/files
 
-namespace moveit_setup_core_plugins
+namespace moveit_setup
 {
-// Boost file system
-namespace fs = boost::filesystem;
-
+namespace core
+{
 // ******************************************************************************************
 // Start screen user interface for MoveIt Configuration Assistant
 // ******************************************************************************************
@@ -83,8 +77,7 @@ void StartScreenWidget::onInit()
   // Right Image Area ----------------------------------------------
   right_image_ = new QImage();
   right_image_label_ = new QLabel(this);
-  std::string image_path =
-      ament_index_cpp::get_package_share_directory("moveit_setup_assistant") + "/resources/MoveIt_Setup_Assistant2.png";
+  auto image_path = getSharePath("moveit_setup_assistant") / "resources/MoveIt_Setup_Assistant2.png";
 
   if (right_image_->load(image_path.c_str()))
   {
@@ -100,12 +93,11 @@ void StartScreenWidget::onInit()
   right_layout->setAlignment(right_image_label_, Qt::AlignRight | Qt::AlignTop);
 
   // Top Label Area ---------------------------------------------------
-  moveit_setup_framework::HeaderWidget* header =
-      new moveit_setup_framework::HeaderWidget("MoveIt Setup Assistant",
-                                               "These tools will assist you in creating a Semantic Robot "
-                                               "Description Format (SRDF) file, various yaml configuration and many "
-                                               "roslaunch files for utilizing all aspects of MoveIt functionality.",
-                                               this);
+  HeaderWidget* header = new HeaderWidget(
+      "MoveIt Setup Assistant",
+      "These tools will assist you in creating a Semantic Robot Description Format (SRDF) file, various yaml "
+      "configuration and many roslaunch files for utilizing all aspects of MoveIt functionality.",
+      this);
   layout->addWidget(header);
 
   // Select Mode Area -------------------------------------------------
@@ -117,11 +109,10 @@ void StartScreenWidget::onInit()
   // Path Box Area ----------------------------------------------------
 
   // Stack Path Dialog
-  stack_path_ = new moveit_setup_framework::LoadPathArgsWidget(
-      "Load MoveIt Configuration Package",
-      "Specify the package name or path of an existing MoveIt configuration package to be "
-      "edited for your robot. Example package name: <i>panda_moveit_config</i>",
-      "optional xacro arguments:", this, true);  // directory
+  stack_path_ = new LoadPathArgsWidget("Load MoveIt Configuration Package",
+                                       "Specify the package name or path of an existing MoveIt configuration package "
+                                       "to be edited for your robot. Example package name: <i>panda_moveit_config</i>",
+                                       "optional xacro arguments:", this, true);  // directory
   // user needs to select option before this is shown
   stack_path_->hide();
   stack_path_->setArgs("");
@@ -129,10 +120,9 @@ void StartScreenWidget::onInit()
   left_layout->addWidget(stack_path_);
 
   // URDF File Dialog
-  urdf_file_ = new moveit_setup_framework::LoadPathArgsWidget(
+  urdf_file_ = new LoadPathArgsWidget(
       "Load a URDF or COLLADA Robot Model",
-      "Specify the location of an existing Universal Robot Description Format or "
-      "COLLADA file for your robot",
+      "Specify the location of an existing Universal Robot Description Format or COLLADA file for your robot",
       "optional xacro arguments:", this, false, true);  // no directory, load only
   // user needs to select option before this is shown
   urdf_file_->hide();
@@ -212,7 +202,7 @@ StartScreenWidget::~StartScreenWidget()
 
 void StartScreenWidget::focusGiven()
 {
-  std::string pkg_path = setup_step_.getPackagePath();
+  std::filesystem::path pkg_path = setup_step_.getPackagePath();
   if (!pkg_path.empty())
   {
     stack_path_->setPath(pkg_path);
@@ -220,7 +210,7 @@ void StartScreenWidget::focusGiven()
     return;
   }
 
-  std::string urdf_path = setup_step_.getURDFPath();
+  std::filesystem::path urdf_path = setup_step_.getURDFPath();
   if (!urdf_path.empty())
   {
     urdf_file_->setPath(urdf_path);
@@ -322,7 +312,7 @@ void StartScreenWidget::onUrdfPathChanged(const QString& path)
 bool StartScreenWidget::loadPackageSettings(bool show_warnings)
 {
   // Get the package path
-  std::string package_path_input = stack_path_->getPath();
+  std::filesystem::path package_path_input = stack_path_->getPath();
 
   try
   {
@@ -377,7 +367,7 @@ bool StartScreenWidget::loadExistingFiles()
 bool StartScreenWidget::loadNewFiles()
 {
   // Get URDF file path
-  std::string urdf_path = urdf_file_->getPath();
+  std::filesystem::path urdf_path = urdf_file_->getPath();
 
   // Check that box is filled out
   if (urdf_path.empty())
@@ -387,7 +377,7 @@ bool StartScreenWidget::loadNewFiles()
   }
 
   // Check that this file exits
-  if (!fs::is_regular_file(urdf_path))
+  if (!std::filesystem::is_regular_file(urdf_path))
   {
     QMessageBox::warning(this, "Error Loading Files",
                          QString("Unable to locate the URDF file: ").append(urdf_path.c_str()));
@@ -470,10 +460,9 @@ SelectModeWidget::SelectModeWidget(QWidget* parent) : QFrame(parent)
   widget_instructions_->setWordWrap(true);
   widget_instructions_->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
   widget_instructions_->setText(
-      "All settings for MoveIt are stored in the MoveIt configuration package. Here you have "
-      "the option to create a new configuration package or load an existing one. Note: "
-      "changes to a MoveIt configuration package outside this Setup Assistant are likely to be "
-      "overwritten by this tool.");
+      "All settings for MoveIt are stored in the MoveIt configuration package. Here you have the option to create a "
+      "new configuration package or load an existing one. Note: changes to a MoveIt configuration package outside this "
+      "Setup Assistant are likely to be overwritten by this tool.");
 
   layout->addWidget(widget_instructions_);
   layout->setAlignment(widget_instructions_, Qt::AlignTop);
@@ -495,7 +484,8 @@ SelectModeWidget::SelectModeWidget(QWidget* parent) : QFrame(parent)
   btn_new_->setCheckable(true);
 }
 
-}  // namespace moveit_setup_core_plugins
+}  // namespace core
+}  // namespace moveit_setup
 
 #include <pluginlib/class_list_macros.hpp>  // NOLINT
-PLUGINLIB_EXPORT_CLASS(moveit_setup_core_plugins::StartScreenWidget, moveit_setup_framework::SetupStepWidget)
+PLUGINLIB_EXPORT_CLASS(moveit_setup::core::StartScreenWidget, moveit_setup::SetupStepWidget)

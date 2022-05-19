@@ -1,7 +1,7 @@
 /*********************************************************************
  * Software License Agreement (BSD License)
  *
- *  Copyright (c) 2021, PickNik Robotics
+ *  Copyright (c) 2022, Metro Robots
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *     copyright notice, this list of conditions and the following
  *     disclaimer in the documentation and/or other materials provided
  *     with the distribution.
- *   * Neither the name of PickNik Robotics nor the names of its
+ *   * Neither the name of Metro Robots nor the names of its
  *     contributors may be used to endorse or promote products derived
  *     from this software without specific prior written permission.
  *
@@ -34,17 +34,52 @@
 
 /* Author: David V. Lu!! */
 
-#include <moveit_setup_app_plugins/perception.hpp>
+#include <moveit_setup_framework/utilities.hpp>
 
 namespace moveit_setup
 {
-namespace app
+bool extractPackageNameFromPath(const std::filesystem::path& path, std::string& package_name,
+                                std::filesystem::path& relative_filepath)
 {
-void Perception::onInit()
-{
-  config_data_->registerType("sensors", "moveit_setup::app::PerceptionConfig");
-  perception_config_ = config_data_->get<PerceptionConfig>("sensors");
+  std::filesystem::path sub_path = path;  // holds the directory less one folder
+  if (std::filesystem::is_regular_file(sub_path))
+  {
+    relative_filepath = sub_path.filename();  // holds the path after the sub_path
+    sub_path = sub_path.parent_path();
+  }
+  else
+  {
+    relative_filepath = sub_path;
+  }
+
+  // truncate path step by step and check if it contains a package.xml
+  while (!sub_path.empty())
+  {
+    if (std::filesystem::is_regular_file(sub_path / "package.xml"))
+    {
+      // Search the <name> </name> string in the package.xml file
+      // This works assuming the package name is entered as <name>PACKAGE_NAME</name>
+      // Default package name to folder name
+      package_name = sub_path.filename().string();
+      tinyxml2::XMLDocument package_xml_file;
+      auto is_open = package_xml_file.LoadFile((sub_path / "package.xml").c_str());
+      if (is_open == tinyxml2::XML_SUCCESS)
+      {
+        auto name_potential =
+            package_xml_file.FirstChildElement("package")->FirstChildElement("name")->FirstChild()->ToText()->Value();
+        if (name_potential)
+        {
+          // Change package name if we have non-empty potential, else it defaults
+          package_name = name_potential;
+        }
+      }
+      return true;
+    }
+    relative_filepath = sub_path.filename() / relative_filepath;
+    sub_path = sub_path.parent_path();
+  }
+  // No package name found, we must be outside ROS
+  return false;
 }
 
-}  // namespace app
 }  // namespace moveit_setup

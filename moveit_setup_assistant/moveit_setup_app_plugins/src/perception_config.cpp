@@ -36,20 +36,20 @@
 
 #include <moveit_setup_app_plugins/perception_config.hpp>
 
-namespace moveit_setup_app_plugins
+namespace moveit_setup
+{
+namespace app
 {
 // ******************************************************************************************
 // Loads sensors_3d yaml file
 // ******************************************************************************************
-void PerceptionConfig::loadPrevious(const std::string& package_path, const YAML::Node& /*node*/)
+void PerceptionConfig::loadPrevious(const std::filesystem::path& package_path, const YAML::Node& /*node*/)
 {
   // Loads parameters values from sensors_3d yaml file if available
-  std::string sensors_3d_yaml_path = moveit_setup_framework::appendPaths(package_path, "config/sensors_3d.yaml");
-  if (!boost::filesystem::is_regular_file(sensors_3d_yaml_path))
+  std::filesystem::path sensors_3d_yaml_path = package_path / "config/sensors_3d.yaml";
+  if (!std::filesystem::is_regular_file(sensors_3d_yaml_path))
   {
-    std::string pkg_path = ament_index_cpp::get_package_share_directory("moveit_setup_app_plugins");
-    std::string templates_folder = moveit_setup_framework::appendPaths(pkg_path, "templates");
-    sensors_3d_yaml_path = moveit_setup_framework::appendPaths(templates_folder, "config/sensors_3d.yaml");
+    sensors_3d_yaml_path = getSharePath("moveit_setup_app_plugins") / "templates" / "config/sensors_3d.yaml";
   }
   try
   {
@@ -64,7 +64,7 @@ void PerceptionConfig::loadPrevious(const std::string& package_path, const YAML:
 // ******************************************************************************************
 // Input sensors_3d yaml file
 // ******************************************************************************************
-std::vector<SensorParameters> PerceptionConfig::load3DSensorsYAML(const std::string& file_path)
+std::vector<SensorParameters> PerceptionConfig::load3DSensorsYAML(const std::filesystem::path& file_path)
 {
   std::vector<SensorParameters> config;
   // Is there a sensors config in the package?
@@ -72,10 +72,10 @@ std::vector<SensorParameters> PerceptionConfig::load3DSensorsYAML(const std::str
     return config;
 
   // Load file
-  std::ifstream input_stream(file_path.c_str());
+  std::ifstream input_stream(file_path);
   if (!input_stream.good())
   {
-    throw std::runtime_error("Unable to open file for reading " + file_path);
+    throw std::runtime_error("Unable to open file for reading " + file_path.string());
   }
 
   // Begin parsing
@@ -164,7 +164,8 @@ bool PerceptionConfig::GeneratedSensorConfig::writeYaml(YAML::Emitter& emitter)
   emitter << YAML::EndMap;
   return true;
 }
-}  // namespace moveit_setup_app_plugins
+}  // namespace app
+}  // namespace moveit_setup
 
 #include <pluginlib/class_list_macros.hpp>  // NOLINT
-PLUGINLIB_EXPORT_CLASS(moveit_setup_app_plugins::PerceptionConfig, moveit_setup_framework::SetupConfig)
+PLUGINLIB_EXPORT_CLASS(moveit_setup::app::PerceptionConfig, moveit_setup::SetupConfig)

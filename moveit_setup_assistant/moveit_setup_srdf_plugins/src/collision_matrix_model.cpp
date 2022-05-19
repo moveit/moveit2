@@ -44,27 +44,29 @@
 #include <QApplication>
 #include <QItemSelection>
 
-using namespace moveit_setup_srdf_plugins;
-
+namespace moveit_setup
+{
+namespace srdf_setup
+{
 /// Boost mapping of reasons for disabling a link pair to strings
-static const boost::unordered_map<moveit_setup_srdf_plugins::DisabledReason, const char*> LONG_REASONS_TO_STRING =
+static const boost::unordered_map<DisabledReason, const char*> LONG_REASONS_TO_STRING =
     boost::assign::map_list_of  // clang-format off
-    ( moveit_setup_srdf_plugins::NEVER, "Never in Collision" )
-    ( moveit_setup_srdf_plugins::DEFAULT, "Collision by Default" )
-    ( moveit_setup_srdf_plugins::ADJACENT, "Adjacent Links" )
-    ( moveit_setup_srdf_plugins::ALWAYS, "Always in Collision" )
-    ( moveit_setup_srdf_plugins::USER, "User Disabled" )
-    ( moveit_setup_srdf_plugins::NOT_DISABLED, "");  // clang-format on
+    ( NEVER, "Never in Collision" )
+    ( DEFAULT, "Collision by Default" )
+    ( ADJACENT, "Adjacent Links" )
+    ( ALWAYS, "Always in Collision" )
+    ( USER, "User Disabled" )
+    ( NOT_DISABLED, "");  // clang-format on
 
 /// Boost mapping of reasons to a background color
-static const boost::unordered_map<moveit_setup_srdf_plugins::DisabledReason, QVariant> LONG_REASONS_TO_BRUSH =
+static const boost::unordered_map<DisabledReason, QVariant> LONG_REASONS_TO_BRUSH =
     boost::assign::map_list_of  // clang-format off
-    ( moveit_setup_srdf_plugins::NEVER, QBrush(QColor("lightgreen")) )
-    ( moveit_setup_srdf_plugins::DEFAULT, QBrush(QColor("lightpink")) )
-    ( moveit_setup_srdf_plugins::ADJACENT, QBrush(QColor("powderblue")) )
-    ( moveit_setup_srdf_plugins::ALWAYS, QBrush(QColor("tomato")) )
-    ( moveit_setup_srdf_plugins::USER, QBrush(QColor("yellow")) )
-    ( moveit_setup_srdf_plugins::NOT_DISABLED, QBrush());  // clang-format on
+    ( NEVER, QBrush(QColor("lightgreen")) )
+    ( DEFAULT, QBrush(QColor("lightpink")) )
+    ( ADJACENT, QBrush(QColor("powderblue")) )
+    ( ALWAYS, QBrush(QColor("tomato")) )
+    ( USER, QBrush(QColor("yellow")) )
+    ( NOT_DISABLED, QBrush());  // clang-format on
 
 CollisionMatrixModel::CollisionMatrixModel(LinkPairMap& pairs, const std::vector<std::string>& names, QObject* parent)
   : QAbstractTableModel(parent), pairs(pairs), std_names(names)
@@ -122,11 +124,11 @@ QVariant CollisionMatrixModel::data(const QModelIndex& index, int role) const
   return QVariant();
 }
 
-moveit_setup_srdf_plugins::DisabledReason CollisionMatrixModel::reason(const QModelIndex& index) const
+DisabledReason CollisionMatrixModel::reason(const QModelIndex& index) const
 {
   LinkPairMap::const_iterator item = this->item(index);
   if (item == pairs.end())
-    return moveit_setup_srdf_plugins::NOT_DISABLED;
+    return NOT_DISABLED;
   return item->second.reason;
 }
 
@@ -145,12 +147,12 @@ bool CollisionMatrixModel::setData(const QModelIndex& index, const QVariant& val
     item->second.disable_check = new_value;
 
     // Handle USER Reasons: 1) pair is disabled by user
-    if (item->second.disable_check && item->second.reason == moveit_setup_srdf_plugins::NOT_DISABLED)
-      item->second.reason = moveit_setup_srdf_plugins::USER;
+    if (item->second.disable_check && item->second.reason == NOT_DISABLED)
+      item->second.reason = USER;
 
     // Handle USER Reasons: 2) pair was disabled by user and now is enabled (not checked)
-    else if (!item->second.disable_check && item->second.reason == moveit_setup_srdf_plugins::USER)
-      item->second.reason = moveit_setup_srdf_plugins::NOT_DISABLED;
+    else if (!item->second.disable_check && item->second.reason == USER)
+      item->second.reason = NOT_DISABLED;
 
     QModelIndex mirror = this->index(index.column(), index.row());
     Q_EMIT dataChanged(index, index);
@@ -218,3 +220,5 @@ Qt::ItemFlags CollisionMatrixModel::flags(const QModelIndex& index) const
     f |= Qt::ItemIsUserCheckable;
   return f;
 }
+}  // namespace srdf_setup
+}  // namespace moveit_setup

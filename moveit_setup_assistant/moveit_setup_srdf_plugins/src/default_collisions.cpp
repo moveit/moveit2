@@ -36,7 +36,9 @@
 
 #include <moveit_setup_srdf_plugins/default_collisions.hpp>
 
-namespace moveit_setup_srdf_plugins
+namespace moveit_setup
+{
+namespace srdf_setup
 {
 std::vector<std::string> DefaultCollisions::getCollidingLinks()
 {
@@ -62,11 +64,11 @@ void DefaultCollisions::linkPairsToSRDF()
     {
       dc.link1_ = pair_it->first.first;
       dc.link2_ = pair_it->first.second;
-      dc.reason_ = moveit_setup_srdf_plugins::disabledReasonToString(pair_it->second.reason);
+      dc.reason_ = disabledReasonToString(pair_it->second.reason);
       disabled_list.push_back(dc);
     }
   }
-  srdf_config_->updateRobotModel(moveit_setup_framework::COLLISIONS);  // mark as changed
+  srdf_config_->updateRobotModel(COLLISIONS);  // mark as changed
 }
 
 void DefaultCollisions::linkPairsToSRDFSorted(size_t skip_mask)
@@ -96,7 +98,7 @@ void DefaultCollisions::linkPairsToSRDFSorted(size_t skip_mask)
       dc.link2_ = link_pair.first.second;
       if (dc.link1_ >= dc.link2_)
         std::swap(dc.link1_, dc.link2_);
-      dc.reason_ = moveit_setup_srdf_plugins::disabledReasonToString(link_pair.second.reason);
+      dc.reason_ = disabledReasonToString(link_pair.second.reason);
 
       disabled_collisions.insert(dc);
     }
@@ -117,10 +119,10 @@ void DefaultCollisions::linkPairsFromSRDF()
   planning_scene::PlanningScenePtr scene = srdf_config_->getPlanningScene()->diff();
 
   // Populate link_pairs_ list with every possible n choose 2 combination of links
-  moveit_setup_srdf_plugins::computeLinkPairs(*scene, link_pairs_);
+  computeLinkPairs(*scene, link_pairs_);
 
   // Create temp link pair data struct
-  moveit_setup_srdf_plugins::LinkPairData link_pair_data;
+  LinkPairData link_pair_data;
   std::pair<std::string, std::string> link_pair;
 
   // Loop through all disabled collisions in SRDF and update the comprehensive list that has already been created
@@ -133,7 +135,7 @@ void DefaultCollisions::linkPairsFromSRDF()
       std::swap(link_pair.first, link_pair.second);
 
     // Set the link meta data
-    link_pair_data.reason = moveit_setup_srdf_plugins::disabledReasonFromString(disabled_collision.reason_);
+    link_pair_data.reason = disabledReasonFromString(disabled_collision.reason_);
     link_pair_data.disable_check = true;  // disable checking the collision btw the 2 links
 
     // Insert into map
@@ -161,8 +163,8 @@ void DefaultCollisions::generateCollisionTable(unsigned int num_trials, double m
   srdf_config_->getPlanningScene()->getAllowedCollisionMatrixNonConst().clear();
 
   // Find the default collision matrix - all links that are allowed to collide
-  link_pairs_ = moveit_setup_srdf_plugins::computeDefaultCollisions(
-      srdf_config_->getPlanningScene(), &progress_, include_never_colliding, num_trials, min_frac, verbose);
+  link_pairs_ = computeDefaultCollisions(srdf_config_->getPlanningScene(), &progress_, include_never_colliding,
+                                         num_trials, min_frac, verbose);
 
   // End the progress bar loop
   progress_ = 100;
@@ -185,4 +187,5 @@ int DefaultCollisions::getThreadProgress() const
   return progress_;
 }
 
-}  // namespace moveit_setup_srdf_plugins
+}  // namespace srdf_setup
+}  // namespace moveit_setup

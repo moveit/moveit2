@@ -42,7 +42,7 @@
 
 #pragma once
 
-namespace moveit_setup_framework
+namespace moveit_setup
 {
 MOVEIT_CLASS_FORWARD(DataWarehouse);  // Defines DataWarehousePtr, ConstPtr, WeakPtr... etc
 
@@ -105,4 +105,4 @@ protected:
   std::unordered_map<std::string, SetupConfigPtr> configs_;        // mapping from name to config
   std::unordered_map<std::string, std::string> registered_types_;  // mapping from name to config class type
 };
-}  // namespace moveit_setup_framework
+}  // namespace moveit_setup

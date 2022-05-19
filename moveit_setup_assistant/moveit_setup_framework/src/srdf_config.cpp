@@ -36,7 +36,7 @@
 #include <moveit_setup_framework/utilities.hpp>
 #include <moveit/rdf_loader/rdf_loader.h>
 
-namespace moveit_setup_framework
+namespace moveit_setup
 {
 void SRDFConfig::onInit()
 {
@@ -44,7 +44,7 @@ void SRDFConfig::onInit()
   changes_ = 0L;
 }
 
-void SRDFConfig::loadPrevious(const std::string& package_path, const YAML::Node& node)
+void SRDFConfig::loadPrevious(const std::filesystem::path& package_path, const YAML::Node& node)
 {
   if (!getYamlProperty(node, "relative_path", srdf_pkg_relative_path_))
   {
@@ -56,7 +56,7 @@ void SRDFConfig::loadPrevious(const std::string& package_path, const YAML::Node&
 YAML::Node SRDFConfig::saveToYaml() const
 {
   YAML::Node node;
-  node["relative_path"] = srdf_pkg_relative_path_;
+  node["relative_path"] = srdf_pkg_relative_path_.string();
   return node;
 }
 
@@ -73,15 +73,15 @@ void SRDFConfig::loadURDFModel()
   parent_node_->set_parameter(rclcpp::Parameter("robot_description_semantic", srdf_.getSRDFString()));
 }
 
-void SRDFConfig::loadSRDFFile(const std::string& package_path, const std::string& relative_path)
+void SRDFConfig::loadSRDFFile(const std::filesystem::path& package_path, const std::filesystem::path& relative_path)
 {
   srdf_pkg_relative_path_ = relative_path;
-  loadSRDFFile(appendPaths(package_path, relative_path));
+  loadSRDFFile(std::filesystem::path(package_path) / relative_path);
 }
 // ******************************************************************************************
 // Load SRDF File to Parameter Server
 // ******************************************************************************************
-void SRDFConfig::loadSRDFFile(const std::string& srdf_file_path, const std::vector<std::string>& xacro_args)
+void SRDFConfig::loadSRDFFile(const std::filesystem::path& srdf_file_path, const std::vector<std::string>& xacro_args)
 {
   srdf_path_ = srdf_file_path;
 
@@ -90,7 +90,7 @@ void SRDFConfig::loadSRDFFile(const std::string& srdf_file_path, const std::vect
   std::string srdf_string;
   if (!rdf_loader::RDFLoader::loadXmlFileToString(srdf_string, srdf_path_, xacro_args))
   {
-    throw std::runtime_error("SRDF file not found: " + srdf_path_);
+    throw std::runtime_error("SRDF file not found: " + srdf_path_.string());
   }
 
   // Verify that file is in correct format / not an XACRO by loading into robot model
@@ -113,7 +113,7 @@ void SRDFConfig::getRelativePath()
   {
     return;
   }
-  srdf_pkg_relative_path_ = appendPaths("config", urdf_model_->getName() + ".srdf");
+  srdf_pkg_relative_path_ = std::filesystem::path("config") / (urdf_model_->getName() + ".srdf");
 }
 
 void SRDFConfig::updateRobotModel(long changed_information)
@@ -129,7 +129,7 @@ void SRDFConfig::updateRobotModel(long changed_information)
 
   if (srdf_pkg_relative_path_.empty())
   {
-    srdf_pkg_relative_path_ = appendPaths("config", urdf_model_->getName() + ".srdf");
+    srdf_pkg_relative_path_ = std::filesystem::path("config") / (urdf_model_->getName() + ".srdf");
     srdf_.robot_name_ = urdf_model_->getName();
     changes_ |= OTHER;
   }
@@ -184,7 +184,7 @@ void SRDFConfig::removePoseByName(const std::string& pose_name, const std::strin
     if (pose_it->name_ == pose_name && pose_it->group_ == group_name)
     {
       srdf_.group_states_.erase(pose_it);
-      updateRobotModel(moveit_setup_framework::POSES);
+      updateRobotModel(moveit_setup::POSES);
       return;
     }
   }
@@ -316,7 +316,7 @@ bool SRDFConfig::GeneratedJointLimits::writeYaml(YAML::Emitter& emitter)
   return true;  // file created successfully
 }
 
-}  // namespace moveit_setup_framework
+}  // namespace moveit_setup
 
 #include <pluginlib/class_list_macros.hpp>  // NOLINT
-PLUGINLIB_EXPORT_CLASS(moveit_setup_framework::SRDFConfig, moveit_setup_framework::SetupConfig)
+PLUGINLIB_EXPORT_CLASS(moveit_setup::SRDFConfig, moveit_setup::SetupConfig)

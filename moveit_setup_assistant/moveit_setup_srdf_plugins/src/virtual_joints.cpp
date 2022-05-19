@@ -36,12 +36,14 @@
 
 #include <moveit_setup_srdf_plugins/virtual_joints.hpp>
 
-namespace moveit_setup_srdf_plugins
+namespace moveit_setup
+{
+namespace srdf_setup
 {
 void VirtualJoints::onInit()
 {
   SuperSRDFStep::onInit();
-  urdf_config_ = config_data_->get<moveit_setup_framework::URDFConfig>("urdf");
+  urdf_config_ = config_data_->get<URDFConfig>("urdf");
 }
 
 void VirtualJoints::setProperties(srdf::Model::VirtualJoint* vj, const std::string& parent_name,
@@ -50,6 +52,7 @@ void VirtualJoints::setProperties(srdf::Model::VirtualJoint* vj, const std::stri
   vj->parent_frame_ = parent_name;
   vj->child_link_ = child_name;
   vj->type_ = joint_type;
-  srdf_config_->updateRobotModel(moveit_setup_framework::VIRTUAL_JOINTS);
+  srdf_config_->updateRobotModel(VIRTUAL_JOINTS);
 }
-}  // namespace moveit_setup_srdf_plugins
+}  // namespace srdf_setup
+}  // namespace moveit_setup

@@ -36,13 +36,12 @@
 #pragma once
 
 #include <moveit_setup_framework/templates.hpp>
-#include <ament_index_cpp/get_package_share_directory.hpp>
 #include <moveit_setup_framework/utilities.hpp>
 
-namespace moveit_setup_app_plugins
+namespace moveit_setup
 {
-using moveit_setup_framework::appendPaths;
-
+namespace app
+{
 /**
  * @brief One launch file and any other bonus files that get bundled with it, i.e. the RViz launch file and its config.
  *
@@ -87,7 +86,7 @@ public:
     id_ = id;
   }
 
-  void addFile(const std::string& relative_path, const std::string& description)
+  void addFile(const std::filesystem::path& relative_path, const std::string& description)
   {
     bonus_files_.push_back(BonusFile(relative_path, description));
   }
@@ -105,19 +104,19 @@ public:
     return title_ < other.title_;
   }
 
-  class GenericLaunchTemplate : public moveit_setup_framework::TemplatedGeneratedFile
+  class GenericLaunchTemplate : public TemplatedGeneratedFile
   {
   public:
-    GenericLaunchTemplate(const std::string& package_path, const std::time_t& last_gen_time, const LaunchBundle& parent)
+    GenericLaunchTemplate(const std::filesystem::path& package_path, const GeneratedTime& last_gen_time,
+                          const LaunchBundle& parent)
       : TemplatedGeneratedFile(package_path, last_gen_time), parent_(parent)
     {
       function_name_ = "generate_" + parent_.launch_name_ + "_launch";
-      relative_path_ = appendPaths("launch", parent_.launch_name_ + ".launch.py");
-      template_path_ = appendPaths(ament_index_cpp::get_package_share_directory("moveit_setup_app_plugins"),
-                                   "templates/launch/generic.launch.py.template");
+      relative_path_ = std::filesystem::path("launch") / (parent_.launch_name_ + ".launch.py");
+      template_path_ = getSharePath("moveit_setup_app_plugins") / "templates/launch/generic.launch.py.template";
     }
 
-    std::string getRelativePath() const override
+    std::filesystem::path getRelativePath() const override
     {
       return relative_path_;
     }
@@ -127,7 +126,7 @@ public:
       return parent_.description_;
     }
 
-    std::string getTemplatePath() const override
+    std::filesystem::path getTemplatePath() const override
     {
       return template_path_;
     }
@@ -140,7 +139,7 @@ public:
     bool write() override
     {
       // Add function name as a TemplateVariable, then remove it
-      variables_.push_back(moveit_setup_framework::TemplateVariable("FUNCTION_NAME", function_name_));
+      variables_.push_back(TemplateVariable("FUNCTION_NAME", function_name_));
       bool ret = TemplatedGeneratedFile::write();
       variables_.pop_back();
       return ret;
@@ -148,28 +147,29 @@ public:
 
   protected:
     const LaunchBundle& parent_;
-    std::string function_name_, relative_path_, template_path_;
+    std::string function_name_;
+    std::filesystem::path relative_path_, template_path_;
   };
 
-  struct BonusFile  // basically a std::pair<std::string, std::string>
+  struct BonusFile  // basically a std::pair<std::filesystem::path, std::string>
   {
-    BonusFile(const std::string& path, const std::string& description) : path(path), description(description)
+    BonusFile(const std::filesystem::path& path, const std::string& description) : path(path), description(description)
     {
     }
-    std::string path;
+    std::filesystem::path path;
     std::string description;
   };
 
-  class BonusTemplatedFile : public moveit_setup_framework::TemplatedGeneratedFile
+  class BonusTemplatedFile : public TemplatedGeneratedFile
   {
   public:
-    BonusTemplatedFile(const std::string& package_path, const std::time_t& last_gen_time,
-                       const std::string& relative_path, const std::string& description)
+    BonusTemplatedFile(const std::filesystem::path& package_path, const GeneratedTime& last_gen_time,
+                       const std::filesystem::path& relative_path, const std::string& description)
       : TemplatedGeneratedFile(package_path, last_gen_time), relative_path_(relative_path), description_(description)
     {
     }
 
-    std::string getRelativePath() const override
+    std::filesystem::path getRelativePath() const override
     {
       return relative_path_;
     }
@@ -179,11 +179,9 @@ public:
       return description_;
     }
 
-    std::string getTemplatePath() const override
+    std::filesystem::path getTemplatePath() const override
     {
-      return appendPaths(appendPaths(ament_index_cpp::get_package_share_directory("moveit_setup_app_plugins"),
-                                     "templates"),
-                         relative_path_);
+      return getSharePath("moveit_setup_app_plugins") / "templates" / relative_path_;
     }
 
     bool hasChanges() const override
@@ -192,11 +190,12 @@ public:
     }
 
   protected:
-    std::string relative_path_, description_;
+    std::filesystem::path relative_path_;
+    std::string description_;
   };
 
-  void collectFiles(const std::string& package_path, const std::time_t& last_gen_time,
-                    std::vector<moveit_setup_framework::GeneratedFilePtr>& files) const
+  void collectFiles(const std::filesystem::path& package_path, const GeneratedTime& last_gen_time,
+                    std::vector<GeneratedFilePtr>& files) const
   {
     files.push_back(std::make_shared<GenericLaunchTemplate>(package_path, last_gen_time, *this));
 
@@ -214,4 +213,5 @@ protected:
 
   std::vector<BonusFile> bonus_files_;
 };
-}  // namespace moveit_setup_app_plugins
+}  // namespace app
+}  // namespace moveit_setup

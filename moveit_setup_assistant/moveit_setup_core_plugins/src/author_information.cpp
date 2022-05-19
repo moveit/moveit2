@@ -36,11 +36,13 @@
 
 #include <moveit_setup_core_plugins/author_information.hpp>
 
-namespace moveit_setup_core_plugins
+namespace moveit_setup
+{
+namespace core
 {
 void AuthorInformation::onInit()
 {
-  package_settings_ = config_data_->get<moveit_setup_framework::PackageSettingsConfig>("package_settings");
+  package_settings_ = config_data_->get<PackageSettingsConfig>("package_settings");
 }
 
 std::string AuthorInformation::getAuthorName() const
@@ -63,4 +65,5 @@ void AuthorInformation::setAuthorEmail(const std::string& email)
   package_settings_->setAuthorEmail(email);
 }
 
-}  // namespace moveit_setup_core_plugins
+}  // namespace core
+}  // namespace moveit_setup

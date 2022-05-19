@@ -38,7 +38,7 @@
 #include <moveit_setup_framework/generated_file.hpp>
 #include <string>
 
-namespace moveit_setup_framework
+namespace moveit_setup
 {
 /**
  * @brief Simple Key/value pair for templates
@@ -65,11 +65,11 @@ public:
   /**
    * @brief Returns the full path to the template file
    */
-  virtual std::string getTemplatePath() const = 0;
+  virtual std::filesystem::path getTemplatePath() const = 0;
 
   bool write() override;
 
   static std::vector<TemplateVariable> variables_;
 };
 
-}  // namespace moveit_setup_framework
+}  // namespace moveit_setup

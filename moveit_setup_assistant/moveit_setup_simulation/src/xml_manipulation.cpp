@@ -36,7 +36,9 @@
 
 #include <moveit_setup_simulation/xml_manipulation.hpp>
 
-namespace moveit_setup_simulation
+namespace moveit_setup
+{
+namespace simulation
 {
 namespace
 {
@@ -81,4 +83,5 @@ TiXmlElement* uniqueInsert(TiXmlElement& element, const char* tag, const std::ve
   return result;
 }
 
-}  // namespace moveit_setup_simulation
+}  // namespace simulation
+}  // namespace moveit_setup

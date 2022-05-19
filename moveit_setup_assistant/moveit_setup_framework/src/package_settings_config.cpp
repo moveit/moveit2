@@ -33,21 +33,22 @@
  *********************************************************************/
 #include <moveit_setup_framework/data/package_settings_config.hpp>
 #include <moveit_setup_framework/utilities.hpp>
-#include <ament_index_cpp/get_package_share_directory.hpp>
 #include <regex>
 
-namespace moveit_setup_framework
+namespace moveit_setup
 {
 const std::unordered_map<std::string, std::string>
     BACKWARDS_KEY_LOOKUP({ { "urdf", "URDF" }, { "srdf", "SRDF" }, { "package_settings", "CONFIG" } });
 
 const std::regex MAIL_REGEX("\\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,63}\\b", std::regex::icase);
 
-void PackageSettingsConfig::loadPrevious(const std::string& /*config_package_path*/, const YAML::Node& node)
+void PackageSettingsConfig::loadPrevious(const std::filesystem::path& /*config_package_path*/, const YAML::Node& node)
 {
   getYamlProperty(node, "author_name", author_name_);
   getYamlProperty(node, "author_email", author_email_);
-  getYamlProperty(node, "generated_timestamp", config_pkg_generated_timestamp_);
+  unsigned long int timestamp_i;
+  getYamlProperty(node, "generated_timestamp", timestamp_i);
+  config_pkg_generated_timestamp_ = fromEpoch(timestamp_i);
 }
 
 YAML::Node PackageSettingsConfig::saveToYaml() const
@@ -55,11 +56,11 @@ YAML::Node PackageSettingsConfig::saveToYaml() const
   YAML::Node node;
   node["author_name"] = author_name_;
   node["author_email"] = author_email_;
-  node["generated_timestamp"] = config_pkg_generated_timestamp_;
+  node["generated_timestamp"] = toEpoch(config_pkg_generated_timestamp_);
   return node;
 }
 
-void PackageSettingsConfig::setPackagePath(const std::string& package_path)
+void PackageSettingsConfig::setPackagePath(const std::filesystem::path& package_path)
 {
   config_pkg_path_ = package_path;
 }
@@ -76,7 +77,7 @@ void PackageSettingsConfig::loadExisting(const std::string& package_path_or_name
     throw std::runtime_error("Please specify a configuration package path to load.");
   }
   // Check if it is a path that exists
-  if (boost::filesystem::is_directory(package_path_or_name))
+  if (std::filesystem::is_directory(package_path_or_name))
   {
     // they inputted a full path
     setPackagePath(package_path_or_name);
@@ -92,10 +93,10 @@ void PackageSettingsConfig::loadExisting(const std::string& package_path_or_name
      *            process is messy. For now, we just use the share path and rely on the user
      *            to write back to the proper directory in the ConfigurationFiles step
      */
-    std::string share_dir = ament_index_cpp::get_package_share_directory(package_path_or_name);
+    auto share_dir = getSharePath(package_path_or_name);
 
     // check that the folder exists
-    if (!boost::filesystem::is_directory(share_dir))
+    if (!std::filesystem::is_directory(share_dir))
     {
       throw std::runtime_error("The specified path is not a directory or is not accessible.");
     }
@@ -104,22 +105,22 @@ void PackageSettingsConfig::loadExisting(const std::string& package_path_or_name
   }
 
   // Load the package name from the package.xml
-  std::string relative_path;  // we don't use this output value
+  std::filesystem::path relative_path;  // we don't use this output value
   extractPackageNameFromPath(config_pkg_path_, new_package_name_, relative_path);
 
   // Load Config Yaml
-  std::string config_path = appendPaths(config_pkg_path_, ".setup_assistant");
-  if (!boost::filesystem::is_regular_file(config_path))
+  std::filesystem::path config_path = config_pkg_path_ / SETUP_ASSISTANT_FILE;
+  if (!std::filesystem::is_regular_file(config_path))
   {
     throw std::runtime_error("The chosen package location exists but was not created using MoveIt Setup Assistant. "
                              "If this is a mistake, provide the missing file: " +
-                             config_path);
+                             config_path.string());
   }
 
-  std::ifstream input_stream(config_path.c_str());
+  std::ifstream input_stream(config_path);
   if (!input_stream.good())
   {
-    throw std::runtime_error("Unable to open file for reading " + config_path);
+    throw std::runtime_error("Unable to open file for reading " + config_path.string());
   }
 
   // Begin parsing
@@ -150,7 +151,7 @@ void PackageSettingsConfig::loadExisting(const std::string& package_path_or_name
   }
   catch (YAML::ParserException& e)  // Catch errors, translate to runtime_error
   {
-    throw std::runtime_error("Error parsing " + config_path + ": " + e.what());
+    throw std::runtime_error("Error parsing " + config_path.string() + ": " + e.what());
   }
 }
 
@@ -214,10 +215,10 @@ bool PackageSettingsConfig::hasValidEmail() const
 
 void PackageSettingsConfig::setGenerationTime()
 {
-  config_pkg_generated_timestamp_ = std::time(nullptr);  // TODO: is this cross-platform?
+  config_pkg_generated_timestamp_ = GeneratedTime::clock::now();
 }
 
-}  // namespace moveit_setup_framework
+}  // namespace moveit_setup
 
 #include <pluginlib/class_list_macros.hpp>  // NOLINT
-PLUGINLIB_EXPORT_CLASS(moveit_setup_framework::PackageSettingsConfig, moveit_setup_framework::SetupConfig)
+PLUGINLIB_EXPORT_CLASS(moveit_setup::PackageSettingsConfig, moveit_setup::SetupConfig)
