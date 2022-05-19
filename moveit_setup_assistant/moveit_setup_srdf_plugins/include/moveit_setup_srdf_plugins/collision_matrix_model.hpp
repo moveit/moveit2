@@ -39,7 +39,7 @@
 #include <QAbstractTableModel>
 
 #ifndef Q_MOC_RUN
-#include <moveit/setup_assistant/tools/compute_default_collisions.hpp>
+#include <moveit_setup_srdf_plugins/compute_default_collisions.hpp>
 #endif
 
 class QItemSelection;
@@ -48,13 +48,13 @@ class CollisionMatrixModel : public QAbstractTableModel
 {
   Q_OBJECT
 public:
-  CollisionMatrixModel(moveit_setup_assistant::LinkPairMap& pairs, const std::vector<std::string>& names,
+  CollisionMatrixModel(moveit_setup_srdf_plugins::LinkPairMap& pairs, const std::vector<std::string>& names,
                        QObject* parent = nullptr);
   int rowCount(const QModelIndex& parent = QModelIndex()) const override;
   int columnCount(const QModelIndex& parent = QModelIndex()) const override;
   QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
   QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
-  moveit_setup_assistant::DisabledReason reason(const QModelIndex& index) const;
+  moveit_setup_srdf_plugins::DisabledReason reason(const QModelIndex& index) const;
 
   // for editing
   Qt::ItemFlags flags(const QModelIndex& index) const override;
@@ -66,14 +66,14 @@ public Q_SLOTS:
   void setFilterRegExp(const QString& filter);
 
 private:
-  moveit_setup_assistant::LinkPairMap::iterator item(const QModelIndex& index);
-  moveit_setup_assistant::LinkPairMap::const_iterator item(const QModelIndex& index) const
+  moveit_setup_srdf_plugins::LinkPairMap::iterator item(const QModelIndex& index);
+  moveit_setup_srdf_plugins::LinkPairMap::const_iterator item(const QModelIndex& index) const
   {
     return const_cast<CollisionMatrixModel*>(this)->item(index);
   }
 
 private:
-  moveit_setup_assistant::LinkPairMap& pairs;
+  moveit_setup_srdf_plugins::LinkPairMap& pairs;
   const std::vector<std::string> std_names;  // names of links
   QList<QString> q_names;                    // names of links
   QList<int> visual_to_index;                // map from visual index to actual index

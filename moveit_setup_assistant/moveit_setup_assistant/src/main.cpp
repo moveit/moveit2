@@ -34,8 +34,8 @@
 
 /* Author: Dave Coleman */
 
-#include "widgets/setup_assistant_widget.h"
-#include <ros/ros.h>
+#include "moveit_setup_assistant/setup_assistant_widget.hpp"
+#include <rviz_common/ros_integration/ros_client_abstraction.hpp>
 #include <QApplication>
 #include <QMessageBox>
 #include <boost/program_options.hpp>
@@ -82,13 +82,14 @@ int main(int argc, char** argv)
     usage(desc, 1);
   }
   // Start ROS Node
-  ros::init(argc, argv, "moveit_setup_assistant", ros::init_options::NoSigintHandler);
+  auto client = std::make_unique<rviz_common::ros_integration::RosClientAbstraction>();
+  auto node = client->init(argc, argv, "moveit_setup_assistant", false);
 
-  // ROS Spin
-  ros::AsyncSpinner spinner(1);
-  spinner.start();
-
-  ros::NodeHandle nh;
+  /* TODO:
+   * Migration Notes:
+   *   ROS 1 MSA had an explicit SIGINT handler (ros::init_options::NoSigintHandler) not replicated here
+   *   ROS 1 MSA also started an ASyncSpinner
+   */
 
   // Create Qt Application
   QApplication qt_app(argc, argv);
@@ -96,7 +97,7 @@ int main(int argc, char** argv)
   setlocale(LC_NUMERIC, "C");
 
   // Load Qt Widget
-  moveit_setup_assistant::SetupAssistantWidget saw(nullptr, vm);
+  moveit_setup_assistant::SetupAssistantWidget saw(node, nullptr, vm);
   saw.setMinimumWidth(1090);
   saw.setMinimumHeight(600);
   //  saw.setWindowState( Qt::WindowMaximized );
@@ -109,7 +110,7 @@ int main(int argc, char** argv)
   const int result = qt_app.exec();
 
   // Shutdown ROS
-  ros::shutdown();
+  rclcpp::shutdown();
 
   return result;
 }

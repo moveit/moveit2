@@ -7,100 +7,60 @@ moveit_package()
 
 # find dependencies
 find_package(ament_cmake REQUIRED)
-find_package(moveit_core REQUIRED)
-find_package(moveit_ros_planning REQUIRED)
-find_package(moveit_ros_visualization REQUIRED)
+find_package(ament_index_cpp REQUIRED)
+find_package(Boost REQUIRED program_options)
+find_package(moveit_setup_framework REQUIRED)
+find_package(moveit_setup_srdf_plugins REQUIRED)
+find_package(pluginlib REQUIRED)
+find_package(Qt5Core REQUIRED)
+find_package(Qt5Widgets REQUIRED)
 find_package(rclcpp REQUIRED)
-find_package(urdf REQUIRED)
-find_package(srdfdom REQUIRED)
-find_package(ompl REQUIRED)
 
 set(THIS_PACKAGE_INCLUDE_DEPENDS
-  moveit_core
-  moveit_ros_planning
-  moveit_ros_visualization
+  ament_index_cpp
+  moveit_setup_framework
+  moveit_setup_srdf_plugins
+  pluginlib
+  Qt5Core
+  Qt5Widgets
   rclcpp
-  urdf
-  srdfdom
 )
 
 # Header files that need Qt Moc pre-processing for use with Qt signals, etc:
-#set(HEADERS
-#  src/widgets/navigation_widget.h
-#  src/widgets/header_widget.h
-#  src/widgets/setup_assistant_widget.h
-#  src/widgets/start_screen_widget.h
-#  src/widgets/planning_groups_widget.h
-#  src/widgets/double_list_widget.h
-#  src/widgets/kinematic_chain_widget.h
-#  src/widgets/group_edit_widget.h
-#  src/widgets/default_collisions_widget.h
-#  src/widgets/robot_poses_widget.h
-#  src/widgets/end_effectors_widget.h
-#  src/widgets/virtual_joints_widget.h
-#  src/widgets/passive_joints_widget.h
-#  src/widgets/perception_widget.h
-#  src/widgets/ros_controllers_widget.h
-#  src/widgets/controller_edit_widget.h
-#  src/widgets/configuration_files_widget.h
-#  src/widgets/setup_screen_widget.h
-#  src/widgets/simulation_widget.h
-#  src/widgets/author_information_widget.h
-#)
-
-# Main Widgets Library - all screens (navigation options)
-#add_library(${PROJECT_NAME}_widgets
-#  src/widgets/start_screen_widget.cpp
-#  src/widgets/planning_groups_widget.cpp
-#  src/widgets/double_list_widget.cpp
-#  src/widgets/kinematic_chain_widget.cpp
-#  src/widgets/group_edit_widget.cpp
-#  src/widgets/default_collisions_widget.cpp
-#  src/widgets/robot_poses_widget.cpp
-#  src/widgets/end_effectors_widget.cpp
-#  src/widgets/virtual_joints_widget.cpp
-#  src/widgets/passive_joints_widget.cpp
-#  src/widgets/perception_widget.cpp
-#  src/widgets/configuration_files_widget.cpp
-#  src/widgets/ros_controllers_widget.cpp
-#  src/widgets/controller_edit_widget.cpp
-#  src/widgets/navigation_widget.cpp
-#  src/widgets/header_widget.cpp
-#  src/widgets/setup_assistant_widget.cpp
-#  src/widgets/setup_screen_widget.cpp
-#  src/widgets/simulation_widget.cpp
-#  src/widgets/author_information_widget.cpp
-#  ${HEADERS}
-#)
-
-# Tools Library
-add_library(${PROJECT_NAME}_tools
-  src/tools/compute_default_collisions.cpp
-  src/tools/moveit_config_data.cpp
-  src/tools/xml_manipulation.cpp
-  src/tools/collision_linear_model.cpp
-  src/tools/collision_matrix_model.cpp
-  src/tools/rotated_header_view.cpp
-  src/tools/xml_syntax_highlighter.cpp
+set(HEADERS
+  include/moveit_setup_assistant/navigation_widget.hpp
+  include/moveit_setup_assistant/setup_assistant_widget.hpp
 )
-target_include_directories(${PROJECT_NAME}_tools PUBLIC
+# Instruct CMake to run moc automatically when needed.
+set(CMAKE_AUTOMOC ON)
+add_definitions(-DQT_NO_KEYWORDS)
+
+qt5_wrap_cpp(MOC_FILES
+  ${HEADERS}
+)
+
+add_executable(moveit_setup_assistant
+    src/main.cpp
+    src/setup_assistant_widget.cpp
+    src/navigation_widget.cpp
+    ${MOC_FILES}
+)
+target_include_directories(moveit_setup_assistant PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>
-  ${OMPL_INCLUDE_DIRS}
 )
 ament_target_dependencies(
-  ${PROJECT_NAME}_tools
+  moveit_setup_assistant
   ${THIS_PACKAGE_INCLUDE_DEPENDS}
+)
+target_link_libraries(moveit_setup_assistant
+  ${Boost_LIBRARIES}
 )
 
 add_executable(${PROJECT_NAME}_updater src/collisions_updater.cpp)
 target_include_directories(${PROJECT_NAME}_updater PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>)
-target_link_libraries(
-  ${PROJECT_NAME}_updater
-  ${PROJECT_NAME}_tools
-)
 
 ament_target_dependencies(
   ${PROJECT_NAME}_updater
@@ -115,7 +75,7 @@ set_target_properties(
 
 install(
   TARGETS
-    ${PROJECT_NAME}_tools
+    moveit_setup_assistant
     ${PROJECT_NAME}_updater
   EXPORT ${PROJECT_NAME}Targets
   ARCHIVE DESTINATION lib
@@ -123,21 +83,18 @@ install(
   RUNTIME DESTINATION lib/${PROJECT_NAME}
   INCLUDES DESTINATION include
 )
+install(DIRECTORY include/
+        DESTINATION include
+)
+ament_export_include_directories(include)
 install(DIRECTORY launch DESTINATION share/${PROJECT_NAME})
 install(DIRECTORY resources DESTINATION share/${PROJECT_NAME})
-install(DIRECTORY templates DESTINATION share/${PROJECT_NAME})
 ament_export_targets(${PROJECT_NAME}Targets HAS_LIBRARY_TARGET)
 ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS})
 
 # Unit tests
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
-
-  # These don't pass yet, disable them for now
-  set(ament_cmake_copyright_FOUND TRUE)
-  set(ament_cmake_cpplint_FOUND TRUE)
-  set(ament_cmake_uncrustify_FOUND TRUE)
-
   ament_lint_auto_find_test_dependencies()
 endif()
 

@@ -41,7 +41,7 @@
 class QLabel;
 class QLineEdit;
 
-namespace moveit_setup_assistant
+namespace moveit_setup_framework
 {
 // ******************************************************************************************
 // ******************************************************************************************
@@ -118,4 +118,4 @@ public:
   void setArgs(const QString& args);
   void setArgsEnabled(bool enabled = true);
 };
-}  // namespace moveit_setup_assistant
+}  // namespace moveit_setup_framework

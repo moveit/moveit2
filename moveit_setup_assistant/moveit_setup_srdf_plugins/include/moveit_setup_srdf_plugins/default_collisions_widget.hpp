@@ -35,41 +35,41 @@
 /* Author: Dave Coleman */
 
 #pragma once
+
+#include <moveit_setup_framework/qt/setup_step_widget.hpp>
+#include <moveit_setup_srdf_plugins/default_collisions.hpp>
+
 #include <QThread>
-class QAbstractItemModel;
-class QAction;
-class QButtonGroup;
-class QCheckBox;
-class QGroupBox;
-class QHeaderView;
-class QItemSelection;
-class QItemSelectionModel;
-class QLabel;
-class QLineEdit;
-class QProgressBar;
-class QPushButton;
-class QRadioButton;
-class QSlider;
-class QSpinBox;
-class QTableView;
-class QVBoxLayout;
+#include <QAbstractItemModel>
+#include <QAction>
+#include <QButtonGroup>
+#include <QCheckBox>
+#include <QGroupBox>
+#include <QHeaderView>
+#include <QItemSelection>
+#include <QItemSelectionModel>
+#include <QLabel>
+#include <QLineEdit>
+#include <QProgressBar>
+#include <QPushButton>
+#include <QSlider>
+#include <QSpinBox>
+#include <QTableView>
+#include <QVBoxLayout>
 
 #ifndef Q_MOC_RUN
 #include <boost/thread/thread.hpp>
 #include <boost/function/function_fwd.hpp>
-#include <moveit/setup_assistant/tools/moveit_config_data.h>
 #endif
 
-#include "setup_screen_widget.h"  // a base class for screens in the setup assistant
-
-namespace moveit_setup_assistant
+namespace moveit_setup_srdf_plugins
 {
 class MonitorThread;
 
 /**
  * \brief User interface for editing the default collision matrix list in an SRDF
  */
-class DefaultCollisionsWidget : public SetupScreenWidget
+class DefaultCollisionsWidget : public moveit_setup_framework::SetupStepWidget
 {
   Q_OBJECT
 
@@ -83,23 +83,14 @@ public:
   // ******************************************************************************************
   // Public Functions
   // ******************************************************************************************
+  void onInit() override;
 
-  /**
-   * \brief User interface for editing the default collision matrix list in an SRDF
-   * \param urdf_file String srdf file location. It will create a new file or will edit an existing one
-   */
-  DefaultCollisionsWidget(QWidget* parent, const MoveItConfigDataPtr& config_data);
   ~DefaultCollisionsWidget() override;
 
-  /**
-   * \brief Output Link Pairs to SRDF Format
-   */
-  void linkPairsToSRDF();
-
-  /**
-   * \brief Load Link Pairs from SRDF Format
-   */
-  void linkPairsFromSRDF();
+  moveit_setup_framework::SetupStep& getSetupStep() override
+  {
+    return setup_step_;
+  }
 
 private Q_SLOTS:
 
@@ -194,22 +185,11 @@ private:
   // ******************************************************************************************
   MonitorThread* worker_;
 
-  /// main storage of link pair data
-  moveit_setup_assistant::LinkPairMap link_pairs_;
-
-  /// Contains all the configuration data for the setup assistant
-  moveit_setup_assistant::MoveItConfigDataPtr config_data_;
+  DefaultCollisions setup_step_;
 
   // ******************************************************************************************
   // Private Functions
   // ******************************************************************************************
-
-  /**
-   * \brief The thread that is called to allow the GUI to update. Calls an external function to do calcs
-   * \param collision_progress A shared pointer between 3 threads to allow progress bar to update. See declaration
-   * location for more details and warning.
-   */
-  void generateCollisionTable(unsigned int* collision_progress);
 
   /**
    * \brief Helper function to disable parts of GUI during computation
@@ -240,7 +220,7 @@ class MonitorThread : public QThread
   Q_OBJECT
 
 public:
-  MonitorThread(const boost::function<void(unsigned int*)>& f, QProgressBar* progress_bar = nullptr);
+  MonitorThread(DefaultCollisions& setup_step, QProgressBar* progress_bar = nullptr);
   void run() override;
   void cancel()
   {
@@ -255,8 +235,7 @@ Q_SIGNALS:
   void progress(int /*_t1*/);
 
 private:
-  boost::thread worker_;
-  unsigned int progress_;
+  DefaultCollisions& setup_step_;
   bool canceled_;
 };
-}  // namespace moveit_setup_assistant
+}  // namespace moveit_setup_srdf_plugins

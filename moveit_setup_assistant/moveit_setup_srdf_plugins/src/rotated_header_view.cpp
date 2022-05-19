@@ -34,10 +34,10 @@
 
 /* Author: Robert Haschke */
 
-#include "rotated_header_view.h"
+#include <moveit_setup_srdf_plugins/rotated_header_view.hpp>
 #include <QPainter>
 
-namespace moveit_setup_assistant
+namespace moveit_setup_srdf_plugins
 {
 RotatedHeaderView::RotatedHeaderView(Qt::Orientation orientation, QWidget* parent) : QHeaderView(orientation, parent)
 {
@@ -126,4 +126,4 @@ int RotatedHeaderView::sectionSizeHint(int logicalIndex) const
   int hint = size.height();
   return qMax(minimumSectionSize(), hint);
 }
-}  // namespace moveit_setup_assistant
+}  // namespace moveit_setup_srdf_plugins
