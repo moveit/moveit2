@@ -34,14 +34,14 @@
 
 /* Author: Robert Haschke */
 
-#include "collision_linear_model.h"
-#include "collision_matrix_model.h"
+#include <moveit_setup_srdf_plugins/collision_linear_model.hpp>
+#include <moveit_setup_srdf_plugins/collision_matrix_model.hpp>
 
 #include <QItemSelection>
 #include <QPainter>
 #include <cmath>
 
-using namespace moveit_setup_assistant;
+using namespace moveit_setup_srdf_plugins;
 
 CollisionLinearModel::CollisionLinearModel(CollisionMatrixModel* src, QObject* parent) : QAbstractProxyModel(parent)
 {
@@ -239,7 +239,7 @@ void SortFilterProxyModel::setShowAll(bool show_all)
 bool SortFilterProxyModel::filterAcceptsRow(int source_row, const QModelIndex& source_parent) const
 {
   CollisionLinearModel* m = qobject_cast<CollisionLinearModel*>(sourceModel());
-  if (!(show_all_ || m->reason(source_row) <= moveit_setup_assistant::ALWAYS ||
+  if (!(show_all_ || m->reason(source_row) <= moveit_setup_srdf_plugins::ALWAYS ||
         m->data(m->index(source_row, 2), Qt::CheckStateRole) == Qt::Checked))
     return false;  // not accepted due to check state
 
