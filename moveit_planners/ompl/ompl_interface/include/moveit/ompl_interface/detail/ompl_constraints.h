@@ -378,7 +378,7 @@ Bounds positionConstraintMsgToBoundVector(const moveit_msgs::msg::PositionConstr
  * the width of the tolerance regions around the target orientation, represented using exponential coordinates.
  *
  * */
-std::vector<Bounds> orientationConstraintMsgToBoundVector(const moveit_msgs::msg::OrientationConstraint& ori_con);
+Bounds orientationConstraintMsgToBoundVector(const moveit_msgs::msg::OrientationConstraint& ori_con);
 
 /** \brief Factory to create constraints based on what is in the MoveIt constraint message. **/
 std::shared_ptr<BaseConstraint> createOMPLConstraint(const moveit::core::RobotModelConstPtr& robot_model,

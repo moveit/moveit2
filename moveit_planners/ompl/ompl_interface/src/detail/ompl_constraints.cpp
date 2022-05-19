@@ -315,12 +315,11 @@ void EqualityPositionConstraint::jacobian(const Eigen::Ref<const Eigen::VectorXd
  * ****************************************/
 void OrientationConstraint::parseConstraintMsg(const moveit_msgs::msg::Constraints& constraints)
 {
-  bounds_.clear();
   bounds_ = orientationConstraintMsgToBoundVector(constraints.orientation_constraints.at(0));
   RCLCPP_INFO_STREAM(LOGGER, "Parsing orientation constraints");
-  RCLCPP_INFO_STREAM(LOGGER, "Parsed rx / roll constraints" << bounds_[0]);
-  RCLCPP_INFO_STREAM(LOGGER, "Parsed ry / pitch constraints" << bounds_[1]);
-  RCLCPP_INFO_STREAM(LOGGER, "Parsed rz / yaw constraints" << bounds_[2]);
+  RCLCPP_INFO_STREAM(LOGGER, "Parsed rx / roll constraints" << bounds_);
+  RCLCPP_INFO_STREAM(LOGGER, "Parsed ry / pitch constraints" << bounds_);
+  RCLCPP_INFO_STREAM(LOGGER, "Parsed rz / yaw constraints" << bounds_);
 
   tf2::fromMsg(constraints.orientation_constraints.at(0).orientation, target_orientation_);
 
@@ -361,10 +360,10 @@ Bounds positionConstraintMsgToBoundVector(const moveit_msgs::msg::PositionConstr
            { dims.at(0) / 2.0, dims.at(1) / 2.0, dims.at(2) / 2.0 } };
 }
 
-std::vector<Bounds> orientationConstraintMsgToBoundVector(const moveit_msgs::msg::OrientationConstraint& ori_con)
+Bounds orientationConstraintMsgToBoundVector(const moveit_msgs::msg::OrientationConstraint& ori_con)
 {
-  std::vector<double> dims{ ori_con.absolute_x_axis_tolerance, ori_con.absolute_y_axis_tolerance,
-                            ori_con.absolute_z_axis_tolerance };
+  std::vector<double> dims = { ori_con.absolute_x_axis_tolerance, ori_con.absolute_y_axis_tolerance,
+                               ori_con.absolute_z_axis_tolerance };
 
   // dimension of -1 signifies unconstrained parameter, so set to infinity
   for (auto& dim : dims)
@@ -372,7 +371,7 @@ std::vector<Bounds> orientationConstraintMsgToBoundVector(const moveit_msgs::msg
     if (dim == -1)
       dim = std::numeric_limits<double>::infinity();
   }
-  return { { -dims[0], dims[0] }, { -dims[1], dims[1] }, { -dims[2], dims[2] } };
+  return { { -dims[0], -dims[1], -dims[2] }, { dims[0], dims[1], dims[2] } };
 }
 
 /******************************************
