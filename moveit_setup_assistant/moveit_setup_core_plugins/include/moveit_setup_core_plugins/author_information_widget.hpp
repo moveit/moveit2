@@ -38,15 +38,12 @@
 
 class QLineEdit;
 
-#ifndef Q_MOC_RUN
-#include <moveit/setup_assistant/tools/moveit_config_data.h>
-#endif
+#include <moveit_setup_framework/qt/setup_step_widget.hpp>
+#include <moveit_setup_core_plugins/author_information.hpp>
 
-#include "setup_screen_widget.h"  // a base class for screens in the setup assistant
-
-namespace moveit_setup_assistant
+namespace moveit_setup_core_plugins
 {
-class AuthorInformationWidget : public SetupScreenWidget
+class AuthorInformationWidget : public moveit_setup_framework::SetupStepWidget
 {
   Q_OBJECT
 
@@ -55,10 +52,15 @@ public:
   // Public Functions
   // ******************************************************************************************
 
-  AuthorInformationWidget(QWidget* parent, const MoveItConfigDataPtr& config_data);
+  void onInit() override;
 
   /// Received when this widget is chosen from the navigation menu
   void focusGiven() override;
+
+  moveit_setup_framework::SetupStep& getSetupStep() override
+  {
+    return setup_step_;
+  }
 
   // ******************************************************************************************
   // Qt Components
@@ -77,8 +79,7 @@ private Q_SLOTS:
   void editedEmail();
 
 private:
-  /// Contains all the configuration data for the setup assistant
-  moveit_setup_assistant::MoveItConfigDataPtr config_data_;
+  AuthorInformation setup_step_;
 };
 
-}  // namespace moveit_setup_assistant
+}  // namespace moveit_setup_core_plugins

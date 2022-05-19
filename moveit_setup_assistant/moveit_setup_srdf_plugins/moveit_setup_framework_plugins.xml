@@ -1,0 +1,8 @@
+<library path="moveit_setup_srdf_plugins">
+  <class type="moveit_setup_srdf_plugins::VirtualJointsWidget" base_class_type="moveit_setup_framework::SetupStepWidget">
+    <description>Step where you can setup the virtual joints in your SRDF</description>
+  </class>
+  <class type="moveit_setup_srdf_plugins::DefaultCollisionsWidget" base_class_type="moveit_setup_framework::SetupStepWidget">
+    <description>Step to ignore self-colisions</description>
+  </class>
+</library>

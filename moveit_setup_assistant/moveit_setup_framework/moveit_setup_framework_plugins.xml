@@ -1,0 +1,11 @@
+<library path="moveit_setup_framework">
+  <class type="moveit_setup_framework::URDFConfig" base_class_type="moveit_setup_framework::SetupConfig">
+    <description>Data for the URDF</description>
+  </class>
+  <class type="moveit_setup_framework::SRDFConfig" base_class_type="moveit_setup_framework::SetupConfig">
+    <description>Data for the SRDF</description>
+  </class>
+  <class type="moveit_setup_framework::PackageSettingsConfig" base_class_type="moveit_setup_framework::SetupConfig">
+    <description>Data for general settings for the MoveIt config package</description>
+  </class>
+</library>

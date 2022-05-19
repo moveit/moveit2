@@ -41,8 +41,6 @@
 #include <boost/filesystem/path.hpp>        // for creating folders/files
 #include <boost/filesystem/operations.hpp>  // is_regular_file, is_directory, etc.
 #include <boost/algorithm/string/trim.hpp>
-#include <tinyxml.h>
-#include <boost/algorithm/string/predicate.hpp>
 
 // ROS
 #include <rclcpp/rclcpp.hpp>
@@ -61,10 +59,6 @@ namespace fs = boost::filesystem;
 // ******************************************************************************************
 MoveItConfigData::MoveItConfigData() : config_pkg_generated_timestamp_(0)
 {
-  // Create an instance of SRDF writer and URDF model for all widgets to share
-  srdf_ = std::make_shared<srdf::SRDFWriter>();
-  urdf_model_ = std::make_shared<urdf::Model>();
-
   // Not in debug mode
   debug_ = false;
 
@@ -80,152 +74,6 @@ MoveItConfigData::MoveItConfigData() : config_pkg_generated_timestamp_(0)
 // Destructor
 // ******************************************************************************************
 MoveItConfigData::~MoveItConfigData() = default;
-
-// ******************************************************************************************
-// Load a robot model
-// ******************************************************************************************
-void MoveItConfigData::setRobotModel(const moveit::core::RobotModelPtr& robot_model)
-{
-  robot_model_ = robot_model;
-}
-
-// ******************************************************************************************
-// Provide a kinematic model. Load a new one if necessary
-// ******************************************************************************************
-moveit::core::RobotModelConstPtr MoveItConfigData::getRobotModel()
-{
-  if (!robot_model_)
-  {
-    // Initialize with a URDF Model Interface and a SRDF Model
-    robot_model_ = std::make_shared<moveit::core::RobotModel>(urdf_model_, srdf_->srdf_model_);
-  }
-
-  return robot_model_;
-}
-
-// ******************************************************************************************
-// Update the Kinematic Model with latest SRDF modifications
-// ******************************************************************************************
-void MoveItConfigData::updateRobotModel()
-{
-  RCLCPP_INFO_STREAM(LOGGER, "Updating kinematic model");
-
-  // Tell SRDF Writer to create new SRDF Model, use original URDF model
-  srdf_->updateSRDFModel(*urdf_model_);
-
-  // Create new kin model
-  robot_model_ = std::make_shared<moveit::core::RobotModel>(urdf_model_, srdf_->srdf_model_);
-
-  // Reset the planning scene
-  planning_scene_.reset();
-}
-
-// ******************************************************************************************
-// Provide a shared planning scene
-// ******************************************************************************************
-planning_scene::PlanningScenePtr MoveItConfigData::getPlanningScene()
-{
-  if (!planning_scene_)
-  {
-    // make sure kinematic model exists
-    getRobotModel();
-
-    // Allocate an empty planning scene
-    planning_scene_ = std::make_shared<planning_scene::PlanningScene>(robot_model_);
-  }
-  return planning_scene_;
-}
-
-// ******************************************************************************************
-// Load the allowed collision matrix from the SRDF's list of link pairs
-// ******************************************************************************************
-void MoveItConfigData::loadAllowedCollisionMatrix()
-{
-  allowed_collision_matrix_.clear();
-
-  // load collision defaults
-  for (const std::string& name : srdf_->no_default_collision_links_)
-    allowed_collision_matrix_.setDefaultEntry(name, collision_detection::AllowedCollision::ALWAYS);
-  // re-enable specific collision pairs
-  for (auto const& collision : srdf_->enabled_collision_pairs_)
-    allowed_collision_matrix_.setEntry(collision.link1_, collision.link2_, false);
-  // *finally* disable selected collision pairs
-  for (auto const& collision : srdf_->disabled_collision_pairs_)
-    allowed_collision_matrix_.setEntry(collision.link1_, collision.link2_, true);
-}
-
-// ******************************************************************************************
-// Output MoveIt Setup Assistant hidden settings file
-// ******************************************************************************************
-bool MoveItConfigData::outputSetupAssistantFile(const std::string& file_path)
-{
-  YAML::Emitter emitter;
-  emitter << YAML::BeginMap;
-
-  // Output every available planner ---------------------------------------------------
-  emitter << YAML::Key << "moveit_setup_assistant_config";
-
-  emitter << YAML::Value << YAML::BeginMap;
-
-  // URDF Path Location
-  emitter << YAML::Key << "URDF";
-  emitter << YAML::Value << YAML::BeginMap;
-  emitter << YAML::Key << "package" << YAML::Value << urdf_pkg_name_;
-  emitter << YAML::Key << "relative_path" << YAML::Value << urdf_pkg_relative_path_;
-  emitter << YAML::Key << "xacro_args" << YAML::Value << xacro_args_;
-  emitter << YAML::EndMap;
-
-  /// SRDF Path Location
-  emitter << YAML::Key << "SRDF";
-  emitter << YAML::Value << YAML::BeginMap;
-  emitter << YAML::Key << "relative_path" << YAML::Value << srdf_pkg_relative_path_;
-  emitter << YAML::EndMap;
-
-  /// Package generation time
-  emitter << YAML::Key << "CONFIG";
-  emitter << YAML::Value << YAML::BeginMap;
-  emitter << YAML::Key << "author_name" << YAML::Value << author_name_;
-  emitter << YAML::Key << "author_email" << YAML::Value << author_email_;
-  auto cur_time = std::time(nullptr);
-  emitter << YAML::Key << "generated_timestamp" << YAML::Value << cur_time;  // TODO: is this cross-platform?
-  emitter << YAML::EndMap;
-
-  emitter << YAML::EndMap;
-
-  std::ofstream output_stream(file_path.c_str(), std::ios_base::trunc);
-  if (!output_stream.good())
-  {
-    RCLCPP_ERROR_STREAM(LOGGER, "Unable to open file for writing " << file_path);
-    return false;
-  }
-
-  output_stream << emitter.c_str();
-  output_stream.close();
-
-  /// Update the parsed setup_assistant timestamp
-  // NOTE: Needed for when people run the MSA generator multiple times in a row.
-  config_pkg_generated_timestamp_ = cur_time;
-
-  return true;  // file created successfully
-}
-
-// ******************************************************************************************
-// Output Gazebo URDF file
-// ******************************************************************************************
-bool MoveItConfigData::outputGazeboURDFFile(const std::string& file_path)
-{
-  std::ofstream os(file_path.c_str(), std::ios_base::trunc);
-  if (!os.good())
-  {
-    RCLCPP_ERROR_STREAM(LOGGER, "Unable to open file for writing " << file_path);
-    return false;
-  }
-
-  os << gazebo_urdf_string_.c_str() << std::endl;
-  os.close();
-
-  return true;
-}
 
 // ******************************************************************************************
 // Output OMPL Planning config files
@@ -1082,46 +930,6 @@ bool MoveItConfigData::outputROSControllersYAML(const std::string& file_path)
 }
 
 // ******************************************************************************************
-// Output 3D Sensor configuration file
-// ******************************************************************************************
-bool MoveItConfigData::output3DSensorPluginYAML(const std::string& file_path)
-{
-  YAML::Emitter emitter;
-
-  emitter << YAML::BeginMap;
-  emitter << YAML::Key << "sensors";
-  emitter << YAML::Value << YAML::BeginSeq;
-
-  for (auto& sensors_plugin_config : sensors_plugin_config_parameter_list_)
-  {
-    emitter << YAML::BeginMap;
-
-    for (auto& parameter : sensors_plugin_config)
-    {
-      emitter << YAML::Key << parameter.first;
-      emitter << YAML::Value << parameter.second.getValue();
-    }
-    emitter << YAML::EndMap;
-  }
-
-  emitter << YAML::EndSeq;
-
-  emitter << YAML::EndMap;
-
-  std::ofstream output_stream(file_path.c_str(), std::ios_base::trunc);
-  if (!output_stream.good())
-  {
-    RCLCPP_ERROR_STREAM(LOGGER, "Unable to open file for writing " << file_path);
-    return false;
-  }
-
-  output_stream << emitter.c_str();
-  output_stream.close();
-
-  return true;  // file created successfully
-}
-
-// ******************************************************************************************
 // Output joint limits config files
 // ******************************************************************************************
 bool MoveItConfigData::outputJointLimitsYAML(const std::string& file_path)
@@ -1554,87 +1362,6 @@ bool MoveItConfigData::addDefaultControllers(const std::string& controller_type)
 }
 
 // ******************************************************************************************
-// Set package path; try to resolve path from package name if directory does not exist
-// ******************************************************************************************
-bool MoveItConfigData::setPackagePath(const std::string& pkg_path)
-{
-  std::string full_package_path;
-
-  // check that the folder exists
-  if (!fs::is_directory(pkg_path))
-  {
-    // does not exist, check if its a package
-    full_package_path = ament_index_cpp::get_package_share_directory(pkg_path);
-
-    // check that the folder exists
-    if (!fs::is_directory(full_package_path))
-    {
-      return false;
-    }
-  }
-  else
-  {
-    // they inputted a full path
-    full_package_path = pkg_path;
-  }
-
-  config_pkg_path_ = full_package_path;
-  return true;
-}
-
-// ******************************************************************************************
-// Extract the package/stack name from an absolute file path
-// Input:  path
-// Output: package name and relative path
-// ******************************************************************************************
-bool MoveItConfigData::extractPackageNameFromPath(const std::string& path, std::string& package_name,
-                                                  std::string& relative_filepath) const
-{
-  fs::path sub_path = path;  // holds the directory less one folder
-  fs::path relative_path;    // holds the path after the sub_path
-
-  bool package_found = false;
-
-  // truncate path step by step and check if it contains a package.xml
-  while (!sub_path.empty())
-  {
-    RCLCPP_DEBUG_STREAM(LOGGER, "checking in " << sub_path.make_preferred().string());
-    if (fs::is_regular_file(sub_path / "package.xml"))
-    {
-      RCLCPP_DEBUG_STREAM(LOGGER, "Found package.xml in " << sub_path.make_preferred().string());
-      package_found = true;
-      relative_filepath = relative_path.string();
-      package_name = sub_path.leaf().string();
-      break;
-    }
-    relative_path = sub_path.leaf() / relative_path;
-    sub_path.remove_leaf();
-  }
-
-  // Assign data to moveit_config_data
-  if (!package_found)
-  {
-    // No package name found, we must be outside ROS
-    return false;
-  }
-
-  RCLCPP_DEBUG_STREAM(LOGGER, "Package name for file \"" << path << "\" is \"" << package_name << "\"");
-  return true;
-}
-
-// ******************************************************************************************
-// Resolve path to .setup_assistant file
-// ******************************************************************************************
-
-bool MoveItConfigData::getSetupAssistantYAMLPath(std::string& path)
-{
-  path = appendPaths(config_pkg_path_, ".setup_assistant");
-
-  // Check if the old package is a setup assistant package
-  return fs::is_regular_file(path);
-}
-
-// ******************************************************************************************
 // Make the full URDF path using the loaded .setup_assistant data
 // ******************************************************************************************
 bool MoveItConfigData::createFullURDFPath()
@@ -1664,148 +1391,6 @@ bool MoveItConfigData::createFullURDFPath()
 
   // Check that this file exits -------------------------------------------------
   return fs::is_regular_file(urdf_path_);
-}
-
-// ******************************************************************************************
-// Make the full SRDF path using the loaded .setup_assistant data
-// ******************************************************************************************
-bool MoveItConfigData::createFullSRDFPath(const std::string& package_path)
-{
-  srdf_path_ = appendPaths(package_path, srdf_pkg_relative_path_);
-
-  return fs::is_regular_file(srdf_path_);
-}
-
-// ******************************************************************************************
-// Input .setup_assistant file - contains data used for the MoveIt Setup Assistant
-// ******************************************************************************************
-bool MoveItConfigData::inputSetupAssistantYAML(const std::string& file_path)
-{
-  // Load file
-  std::ifstream input_stream(file_path.c_str());
-  if (!input_stream.good())
-  {
-    RCLCPP_ERROR_STREAM(LOGGER, "Unable to open file for reading " << file_path);
-    return false;
-  }
-
-  // Begin parsing
-  try
-  {
-    const YAML::Node& doc = YAML::Load(input_stream);
-
-    // Get title node
-    if (const YAML::Node& title_node = doc["moveit_setup_assistant_config"])
-    {
-      // URDF Properties
-      if (const YAML::Node& urdf_node = title_node["URDF"])
-      {
-        if (!parse(urdf_node, "package", urdf_pkg_name_))
-          return false;  // if we do not find this value we cannot continue
-
-        if (!parse(urdf_node, "relative_path", urdf_pkg_relative_path_))
-          return false;  // if we do not find this value we cannot continue
-
-        parse(urdf_node, "xacro_args", xacro_args_);
-      }
-      // SRDF Properties
-      if (const YAML::Node& srdf_node = title_node["SRDF"])
-      {
-        if (!parse(srdf_node, "relative_path", srdf_pkg_relative_path_))
-          return false;  // if we do not find this value we cannot continue
-      }
-      // Package generation time
-      if (const YAML::Node& config_node = title_node["CONFIG"])
-      {
-        parse(config_node, "author_name", author_name_);
-        parse(config_node, "author_email", author_email_);
-        parse(config_node, "generated_timestamp", config_pkg_generated_timestamp_);
-      }
-      return true;
-    }
-  }
-  catch (YAML::ParserException& e)  // Catch errors
-  {
-    RCLCPP_ERROR_STREAM(LOGGER, e.what());
-  }
-
-  return false;  // if it gets to this point an error has occurred
-}
-
-// ******************************************************************************************
-// Input sensors_3d yaml file
-// ******************************************************************************************
-void MoveItConfigData::input3DSensorsYAML(const std::string& file_path)
-{
-  sensors_plugin_config_parameter_list_ = load3DSensorsYAML(file_path);
-}
-
-// ******************************************************************************************
-// Load sensors_3d.yaml file
-// ******************************************************************************************
-std::vector<std::map<std::string, GenericParameter>> MoveItConfigData::load3DSensorsYAML(const std::string& file_path)
-{
-  std::vector<std::map<std::string, GenericParameter>> config;
-
-  // Is there a sensors config in the package?
-  if (file_path.empty())
-    return config;
-
-  // Load file
-  std::ifstream input_stream(file_path.c_str());
-  if (!input_stream.good())
-  {
-    RCLCPP_ERROR_STREAM(LOGGER, "Unable to open file for reading " << file_path);
-    return config;
-  }
-
-  // Begin parsing
-  try
-  {
-    const YAML::Node& doc = YAML::Load(input_stream);
-    // Get sensors node
-    const YAML::Node& sensors_node = doc["sensors"];
-
-    // Make sure that the sensors are written as a sequence
-    if (sensors_node && sensors_node.IsSequence())
-    {
-      // Loop over the sensors available in the file
-      for (const YAML::Node& sensor : sensors_node)
-      {
-        std::map<std::string, GenericParameter> sensor_map;
-        bool empty_node = true;
-        for (YAML::const_iterator sensor_it = sensor.begin(); sensor_it != sensor.end(); ++sensor_it)
-        {
-          empty_node = false;
-          GenericParameter sensor_param;
-          sensor_param.setName(sensor_it->first.as<std::string>());
-          sensor_param.setValue(sensor_it->second.as<std::string>());
-
-          // Set the key as the parameter name to make accessing it easier
-          sensor_map[sensor_it->first.as<std::string>()] = sensor_param;
-        }
-        // Don't push empty nodes
-        if (!empty_node)
-          config.push_back(sensor_map);
-      }
-    }
-  }
-  catch (YAML::ParserException& e)  // Catch errors
-  {
-    RCLCPP_ERROR_STREAM(LOGGER, "Error parsing sensors yaml: " << e.what());
-  }
-
-  return config;
-}
-
-// ******************************************************************************************
-// Helper Function for joining a file path and a file name, or two file paths, etc, in a cross-platform way
-// ******************************************************************************************
-std::string MoveItConfigData::appendPaths(const std::string& path1, const std::string& path2)
-{
-  fs::path result = path1;
-  result /= path2;
-  return result.make_preferred().string();
 }
 
 srdf::Model::Group* MoveItConfigData::findGroupByName(const std::string& name)
@@ -1882,7 +1467,7 @@ bool MoveItConfigData::addController(const ControllerConfig& new_controller)
 }
 
 // ******************************************************************************************
-// Used to add a sensor plugin configuration parameter to the sensor plugin configuration parameter list
+// Gets ros_controllers_config_ vector
 // ******************************************************************************************
 void MoveItConfigData::addGenericParameterToSensorPluginConfig(const std::string& name, const std::string& value,
                                                                const std::string& /*comment*/)
@@ -1892,14 +1477,6 @@ void MoveItConfigData::addGenericParameterToSensorPluginConfig(const std::string
   new_parameter.setName(name);
   new_parameter.setValue(value);
   sensors_plugin_config_parameter_list_[0][name] = new_parameter;
-}
-
-// ******************************************************************************************
-// Used to clear sensor plugin configuration parameter list
-// ******************************************************************************************
-void MoveItConfigData::clearSensorPluginConfig()
-{
-  sensors_plugin_config_parameter_list_.clear();
 }
 
 }  // namespace moveit_setup_assistant

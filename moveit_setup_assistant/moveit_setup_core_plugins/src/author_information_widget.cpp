@@ -41,16 +41,15 @@
 #include <QApplication>
 #include <QLabel>
 #include <QLineEdit>
-#include "author_information_widget.h"
-#include "header_widget.h"
+#include <moveit_setup_core_plugins/author_information_widget.hpp>
+#include <moveit_setup_framework/qt/helper_widgets.hpp>
 
-namespace moveit_setup_assistant
+namespace moveit_setup_core_plugins
 {
 // ******************************************************************************************
 // Outer User Interface for MoveIt Configuration Assistant
 // ******************************************************************************************
-AuthorInformationWidget::AuthorInformationWidget(QWidget* parent, const MoveItConfigDataPtr& config_data)
-  : SetupScreenWidget(parent), config_data_(config_data)
+void AuthorInformationWidget::onInit()
 {
   // Basic widget container
   QVBoxLayout* layout = new QVBoxLayout();
@@ -58,11 +57,12 @@ AuthorInformationWidget::AuthorInformationWidget(QWidget* parent, const MoveItCo
 
   // Top Header Area ------------------------------------------------
 
-  HeaderWidget* header = new HeaderWidget("Specify Author Information",
-                                          "Input contact information of the author and initial maintainer of the "
-                                          "generated package. catkin requires valid details in the package's "
-                                          "package.xml",
-                                          this);
+  auto header =
+      new moveit_setup_framework::HeaderWidget("Specify Author Information",
+                                               "Input contact information of the author and initial maintainer of the "
+                                               "generated package. catkin requires valid details in the package's "
+                                               "package.xml",
+                                               this);
   layout->addWidget(header);
 
   QLabel* name_title = new QLabel(this);
@@ -91,20 +91,21 @@ AuthorInformationWidget::AuthorInformationWidget(QWidget* parent, const MoveItCo
 void AuthorInformationWidget::focusGiven()
 {
   // Allow list box to populate
-  this->name_edit_->setText(QString::fromStdString(config_data_->author_name_));
-  this->email_edit_->setText(QString::fromStdString(config_data_->author_email_));
+  this->name_edit_->setText(QString::fromStdString(setup_step_.getAuthorName()));
+  this->email_edit_->setText(QString::fromStdString(setup_step_.getAuthorEmail()));
 }
 
 void AuthorInformationWidget::editedName()
 {
-  config_data_->author_name_ = this->name_edit_->text().toStdString();
-  config_data_->changes |= MoveItConfigData::AUTHOR_INFO;
+  setup_step_.setAuthorName(this->name_edit_->text().toStdString());
 }
 
 void AuthorInformationWidget::editedEmail()
 {
-  config_data_->author_email_ = this->email_edit_->text().toStdString();
-  config_data_->changes |= MoveItConfigData::AUTHOR_INFO;
+  setup_step_.setAuthorEmail(this->email_edit_->text().toStdString());
 }
 
-}  // namespace moveit_setup_assistant
+}  // namespace moveit_setup_core_plugins
+
+#include <pluginlib/class_list_macros.hpp>  // NOLINT
+PLUGINLIB_EXPORT_CLASS(moveit_setup_core_plugins::AuthorInformationWidget, moveit_setup_framework::SetupStepWidget)

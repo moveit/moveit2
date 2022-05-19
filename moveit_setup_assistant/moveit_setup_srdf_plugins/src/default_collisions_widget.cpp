@@ -34,47 +34,36 @@
 
 /* Author: Dave Coleman */
 
-#include <QAction>
 #include <QApplication>
-#include <QButtonGroup>
-#include <QCheckBox>
-#include <QFont>
-#include <QGroupBox>
 #include <QHBoxLayout>
 #include <QKeyEvent>
-#include <QLabel>
-#include <QLineEdit>
 #include <QMenu>
 #include <QMessageBox>
-#include <QProgressBar>
-#include <QPushButton>
 #include <QRadioButton>
-#include <QSlider>
-#include <QSpinBox>
 #include <QString>
-#include <QTableView>
-#include <QVBoxLayout>
 
-#include "default_collisions_widget.h"
-#include "header_widget.h"
-#include "../tools/collision_matrix_model.h"
-#include "../tools/collision_linear_model.h"
-#include "../tools/rotated_header_view.h"
-#include <ros/console.h>
+#include <moveit_setup_srdf_plugins/default_collisions_widget.hpp>
+#include <moveit_setup_framework/qt/helper_widgets.hpp>
+#include <moveit_setup_srdf_plugins/collision_matrix_model.hpp>
+#include <moveit_setup_srdf_plugins/collision_linear_model.hpp>
+#include <moveit_setup_srdf_plugins/rotated_header_view.hpp>
 
-namespace moveit_setup_assistant
+namespace moveit_setup_srdf_plugins
 {
 // ******************************************************************************************
 // User interface for editing the default collision matrix list in an SRDF
 // ******************************************************************************************
-DefaultCollisionsWidget::DefaultCollisionsWidget(QWidget* parent, const MoveItConfigDataPtr& config_data)
-  : SetupScreenWidget(parent), model_(nullptr), selection_model_(nullptr), worker_(nullptr), config_data_(config_data)
+void DefaultCollisionsWidget::onInit()
 {
+  model_ = nullptr;
+  selection_model_ = nullptr;
+  worker_ = nullptr;
+
   // Basic widget container
   layout_ = new QVBoxLayout(this);
 
   // Top Label Area ------------------------------------------------
-  HeaderWidget* header = new HeaderWidget(
+  auto header = new moveit_setup_framework::HeaderWidget(
       "Optimize Self-Collision Checking",
       "This searches for pairs of robot links that can safely be disabled from collision checking, decreasing motion "
       "planning time. These pairs are disabled when they are always in collision, never in collision, in collision in "
@@ -234,8 +223,11 @@ void DefaultCollisionsWidget::startGeneratingCollisionTable()
   disableControls(true);
   btn_revert_->setEnabled(true);  // allow to interrupt and revert
 
+  // Start actual worker thread
+  setup_step_.startGenerationThread(density_slider_->value() * 1000 + 1000, fraction_spinbox_->value() / 100.0);
+
   // create a MonitorThread running generateCollisionTable() in a worker thread and monitoring the progress
-  worker_ = new MonitorThread([this](unsigned int* progress) { generateCollisionTable(progress); }, progress_bar_);
+  worker_ = new MonitorThread(setup_step_, progress_bar_);
   connect(worker_, SIGNAL(finished()), this, SLOT(finishGeneratingCollisionTable()));
   worker_->start();  // start after having finished() signal connected
 }
@@ -254,33 +246,8 @@ void DefaultCollisionsWidget::finishGeneratingCollisionTable()
   // Hide the progress bar
   disableControls(false);  // enable everything else
 
-  config_data_->changes |= MoveItConfigData::COLLISIONS;
   worker_->deleteLater();
   worker_ = nullptr;
-}
-
-// ******************************************************************************************
-// The worker function to compute the collision matrix
-// ******************************************************************************************
-void DefaultCollisionsWidget::generateCollisionTable(unsigned int* collision_progress)
-{
-  unsigned int num_trials = density_slider_->value() * 1000 + 1000;  // scale to trials amount
-  double min_frac = (double)fraction_spinbox_->value() / 100.0;
-
-  const bool verbose = true;  // Output benchmarking and statistics
-  const bool include_never_colliding = true;
-
-  // clear previously loaded collision matrix entries
-  config_data_->getPlanningScene()->getAllowedCollisionMatrixNonConst().clear();
-
-  // Find the default collision matrix - all links that are allowed to collide
-  link_pairs_ = moveit_setup_assistant::computeDefaultCollisions(
-      config_data_->getPlanningScene(), collision_progress, include_never_colliding, num_trials, min_frac, verbose);
-
-  // End the progress bar loop
-  *collision_progress = 100;
-
-  ROS_INFO_STREAM("Thread complete " << link_pairs_.size());
 }
 
 // ******************************************************************************************
@@ -288,8 +255,8 @@ void DefaultCollisionsWidget::generateCollisionTable(unsigned int* collision_pro
 // ******************************************************************************************
 void DefaultCollisionsWidget::loadCollisionTable()
 {
-  CollisionMatrixModel* matrix_model = new CollisionMatrixModel(
-      link_pairs_, config_data_->getPlanningScene()->getRobotModel()->getLinkModelNamesWithCollisionGeometry());
+  CollisionMatrixModel* matrix_model =
+      new CollisionMatrixModel(setup_step_.getLinkPairs(), setup_step_.getCollidingLinks());
   QAbstractItemModel* model;
 
   if (view_mode_buttons_->checkedId() == MATRIX_MODE)
@@ -554,7 +521,7 @@ void DefaultCollisionsWidget::showSections(QHeaderView* header, const QList<int>
 
 void DefaultCollisionsWidget::revertChanges()
 {
-  linkPairsFromSRDF();
+  setup_step_.linkPairsFromSRDF();
   loadCollisionTable();
   btn_revert_->setEnabled(false);  // no changes to revert
 }
@@ -671,77 +638,13 @@ void DefaultCollisionsWidget::checkedFilterChanged()
   m->setShowAll(collision_checkbox_->checkState() == Qt::Checked);
 }
 
-// Output Link Pairs to SRDF Format and update the collision matrix
-// ******************************************************************************************
-void DefaultCollisionsWidget::linkPairsToSRDF()
-{
-  // reset the data in the SRDF Writer class
-  config_data_->srdf_->disabled_collision_pairs_.clear();
-
-  // Create temp disabled collision
-  srdf::Model::CollisionPair dc;
-
-  // copy the data in this class's LinkPairMap datastructure to srdf::Model::CollisionPair format
-  for (moveit_setup_assistant::LinkPairMap::const_iterator pair_it = link_pairs_.begin(); pair_it != link_pairs_.end();
-       ++pair_it)
-  {
-    // Only copy those that are actually disabled
-    if (pair_it->second.disable_check)
-    {
-      dc.link1_ = pair_it->first.first;
-      dc.link2_ = pair_it->first.second;
-      dc.reason_ = moveit_setup_assistant::disabledReasonToString(pair_it->second.reason);
-      config_data_->srdf_->disabled_collision_pairs_.push_back(dc);
-    }
-  }
-
-  // Update collision_matrix for robot pose's use
-  config_data_->loadAllowedCollisionMatrix();
-}
-
-// ******************************************************************************************
-// Load Link Pairs from SRDF Format
-// ******************************************************************************************
-void DefaultCollisionsWidget::linkPairsFromSRDF()
-{
-  // Clear all the previous data in the compute_default_collisions tool
-  link_pairs_.clear();
-
-  // Create new instance of planning scene using pointer
-  planning_scene::PlanningScenePtr scene = config_data_->getPlanningScene()->diff();
-
-  // Populate link_pairs_ list with every possible n choose 2 combination of links
-  moveit_setup_assistant::computeLinkPairs(*scene, link_pairs_);
-
-  // Create temp link pair data struct
-  moveit_setup_assistant::LinkPairData link_pair_data;
-  std::pair<std::string, std::string> link_pair;
-
-  // Loop through all disabled collisions in SRDF and update the comprehensive list that has already been created
-  for (const auto& disabled_collision : config_data_->srdf_->disabled_collision_pairs_)
-  {
-    // Set the link names
-    link_pair.first = disabled_collision.link1_;
-    link_pair.second = disabled_collision.link2_;
-    if (link_pair.first >= link_pair.second)
-      std::swap(link_pair.first, link_pair.second);
-
-    // Set the link meta data
-    link_pair_data.reason = moveit_setup_assistant::disabledReasonFromString(disabled_collision.reason_);
-    link_pair_data.disable_check = true;  // disable checking the collision btw the 2 links
-
-    // Insert into map
-    link_pairs_[link_pair] = link_pair_data;
-  }
-}
-
 // ******************************************************************************************
 // Preview whatever element is selected
 // ******************************************************************************************
 void DefaultCollisionsWidget::previewSelectedMatrix(const QModelIndex& index)
 {
   // Unhighlight all links
-  Q_EMIT unhighlightAll();
+  rviz_panel_->unhighlightAll();
 
   if (!index.isValid())
     return;
@@ -760,14 +663,14 @@ void DefaultCollisionsWidget::previewSelectedMatrix(const QModelIndex& index)
   uint check_state = model_->data(index, Qt::CheckStateRole).toUInt();
 
   QColor color = (check_state == Qt::Checked) ? QColor(0, 255, 0) : QColor(255, 0, 0);
-  Q_EMIT highlightLink(first_link.toStdString(), color);
-  Q_EMIT highlightLink(second_link.toStdString(), color);
+  rviz_panel_->highlightLink(first_link.toStdString(), color);
+  rviz_panel_->highlightLink(second_link.toStdString(), color);
 }
 
 void DefaultCollisionsWidget::previewSelectedLinear(const QModelIndex& index)
 {
   // Unhighlight all links
-  Q_EMIT unhighlightAll();
+  rviz_panel_->unhighlightAll();
 
   if (!index.isValid())
     return;
@@ -778,8 +681,8 @@ void DefaultCollisionsWidget::previewSelectedLinear(const QModelIndex& index)
   uint check_state = model_->data(model_->index(index.row(), 2), Qt::CheckStateRole).toUInt();
 
   QColor color = (check_state == Qt::Checked) ? QColor(0, 255, 0) : QColor(255, 0, 0);
-  Q_EMIT highlightLink(first_link.toStdString(), color);
-  Q_EMIT highlightLink(second_link.toStdString(), color);
+  rviz_panel_->highlightLink(first_link.toStdString(), color);
+  rviz_panel_->highlightLink(second_link.toStdString(), color);
 }
 
 // ******************************************************************************************
@@ -788,7 +691,7 @@ void DefaultCollisionsWidget::previewSelectedLinear(const QModelIndex& index)
 void DefaultCollisionsWidget::focusGiven()
 {
   // Convert the SRDF data to LinkPairData format
-  linkPairsFromSRDF();
+  setup_step_.linkPairsFromSRDF();
 
   // Load the data to the table
   loadCollisionTable();
@@ -811,38 +714,37 @@ bool DefaultCollisionsWidget::focusLost()
   }
 
   // Copy changes to srdf_writer object and config_data_->allowed_collision_matrix_
-  linkPairsToSRDF();
+  setup_step_.linkPairsToSRDF();
   return true;
 }
 
-moveit_setup_assistant::MonitorThread::MonitorThread(const boost::function<void(unsigned int*)>& f,
-                                                     QProgressBar* progress_bar)
-  : progress_(0), canceled_(false)
+moveit_setup_srdf_plugins::MonitorThread::MonitorThread(DefaultCollisions& setup_step, QProgressBar* progress_bar)
+  : setup_step_(setup_step), canceled_(false)
 {
-  // start worker thread
-  worker_ = boost::thread([f, progress_ptr = &progress_] { f(progress_ptr); });
   // connect progress bar for updates
   if (progress_bar)
     connect(this, SIGNAL(progress(int)), progress_bar, SLOT(setValue(int)));
 }
 
-void moveit_setup_assistant::MonitorThread::run()
+void moveit_setup_srdf_plugins::MonitorThread::run()
 {
   // loop until worker thread is finished or cancel is requested
-  while (!canceled_ && progress_ < 100)
+  int thread_progress;
+  while (!canceled_ && (thread_progress = setup_step_.getThreadProgress()) < 100)
   {
-    Q_EMIT progress(progress_);
+    Q_EMIT progress(thread_progress);
     QThread::msleep(100);  // sleep 100ms
   }
 
   // cancel worker thread
   if (canceled_)
-    worker_.interrupt();
+    setup_step_.cancelGenerationThread();
+  setup_step_.joinGenerationThread();
 
-  worker_.join();
-
-  progress_ = 100;
-  Q_EMIT progress(progress_);
+  Q_EMIT progress(100);
 }
 
-}  // namespace moveit_setup_assistant
+}  // namespace moveit_setup_srdf_plugins
+
+#include <pluginlib/class_list_macros.hpp>  // NOLINT
+PLUGINLIB_EXPORT_CLASS(moveit_setup_srdf_plugins::DefaultCollisionsWidget, moveit_setup_framework::SetupStepWidget)
