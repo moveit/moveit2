@@ -541,7 +541,7 @@ ModelBasedPlanningContextPtr PlanningContextManager::getPlanningContext(
       (req.path_constraints.position_constraints.size() == 1 ||
        req.path_constraints.orientation_constraints.size() == 1))
   {
-    factory = getStateSpaceFactory(JointModelStateSpace::PARAMETERIZATION_TYPE);
+    factory = getStateSpaceFactory(ConstrainedPlanningStateSpace::PARAMETERIZATION_TYPE);
   }
   else if (joint_space_planning_iterator != pc->second.config.end() &&
            boost::lexical_cast<bool>(joint_space_planning_iterator->second))

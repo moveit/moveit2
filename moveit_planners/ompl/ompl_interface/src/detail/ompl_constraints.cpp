@@ -424,7 +424,7 @@ std::shared_ptr<BaseConstraint> createOMPLConstraint(const moveit::core::RobotMo
   }
   else if (num_ori_con > 0)
   {
-    RCLCPP_ERROR(LOGGER, "OMPL is using orientation constraints.");
+    RCLCPP_DEBUG(LOGGER, "OMPL is using orientation constraints.");
     auto ori_con = std::make_shared<OrientationConstraint>(robot_model, group, num_dofs);
     ori_con->init(constraints);
     return ori_con;
