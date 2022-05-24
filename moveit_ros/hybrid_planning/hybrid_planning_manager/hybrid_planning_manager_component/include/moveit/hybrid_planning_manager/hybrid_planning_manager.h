@@ -60,6 +60,16 @@ public:
   /** \brief Constructor */
   HybridPlanningManager(const rclcpp::NodeOptions& options);
 
+  /** \brief Constructor */
+  ~HybridPlanningManager()
+  {
+    // Join the thread used for long-running callbacks
+    if (long_callback_thread_ != nullptr)
+    {
+      long_callback_thread_->join();
+    }
+  }
+
   /**
    * Allows creation of a smart pointer that references to instances of this object
    * @return shared pointer of the HybridPlanningManager instance that called the function
@@ -74,6 +84,11 @@ public:
    * @return Initialization successful yes/no
    */
   bool initialize();
+
+  /**
+   * Cancel any active action goals, including global and local planners
+   */
+  void cancelHybridManagerGoals() noexcept;
 
   /**
    * This handles execution of a hybrid planning goal in a new thread, to avoid blocking the executor.
@@ -131,5 +146,8 @@ private:
 
   // Global solution subscriber
   rclcpp::Subscription<moveit_msgs::msg::MotionPlanResponse>::SharedPtr global_solution_sub_;
+
+  // This thread is used for long-running callbacks. It's a member so they do not go out of scope.
+  std::unique_ptr<std::thread> long_callback_thread_;
 };
 }  // namespace moveit::hybrid_planning

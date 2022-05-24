@@ -155,22 +155,19 @@ bool HybridPlanningManager::initialize()
       },
       // Cancel callback
       [this](std::shared_ptr<rclcpp_action::ServerGoalHandle<moveit_msgs::action::HybridPlanner>> /*unused*/) {
-        // Prevent any new global or local requests from going out
-        stop_hybrid_planning_ = true;
-
-        // Cancel local action
-        local_planner_action_client_->async_cancel_all_goals();
-
-        // Cancel global action
-        global_planner_action_client_->async_cancel_all_goals();
-
+        cancelHybridManagerGoals();
         RCLCPP_INFO(LOGGER, "Received request to cancel goal");
         return rclcpp_action::CancelResponse::ACCEPT;
       },
       // Request callback
       [this](std::shared_ptr<rclcpp_action::ServerGoalHandle<moveit_msgs::action::HybridPlanner>> goal_handle) {
         // this needs to return quickly to avoid blocking the executor, so spin up a new thread
-        std::thread{ &HybridPlanningManager::executeHybridPlannerGoal, this, goal_handle }.detach();
+        if (long_callback_thread_ != nullptr)
+        {
+          cancelHybridManagerGoals();
+        }
+        long_callback_thread_ =
+            std::make_unique<std::thread>(&HybridPlanningManager::executeHybridPlannerGoal, this, goal_handle);
       });
 
   // Initialize global solution subscriber
@@ -189,6 +186,21 @@ bool HybridPlanningManager::initialize()
         }
       });
   return true;
+}
+
+void HybridPlanningManager::cancelHybridManagerGoals() noexcept
+{
+  // Prevent any new global or local requests from going out
+  stop_hybrid_planning_ = true;
+  // Cancel local action
+  local_planner_action_client_->async_cancel_all_goals();
+  // Cancel global action
+  global_planner_action_client_->async_cancel_all_goals();
+  if (long_callback_thread_ != nullptr)
+  {
+    long_callback_thread_->join();
+    long_callback_thread_ = nullptr;
+  }
 }
 
 void HybridPlanningManager::executeHybridPlannerGoal(
