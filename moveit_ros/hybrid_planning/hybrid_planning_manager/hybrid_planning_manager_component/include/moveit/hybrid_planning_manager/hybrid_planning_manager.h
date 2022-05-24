@@ -76,6 +76,13 @@ public:
   bool initialize();
 
   /**
+   * This handles execution of a hybrid planning goal in a new thread, to avoid blocking the executor.
+   * @param goal_handle The action server goal
+   */
+  void executeHybridPlannerGoal(
+      std::shared_ptr<rclcpp_action::ServerGoalHandle<moveit_msgs::action::HybridPlanner>> goal_handle);
+
+  /**
    * Send global planning request to global planner component
    * @return Global planner successfully started yes/no
    */

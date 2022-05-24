@@ -86,7 +86,8 @@ bool GlobalPlannerComponent::initializeGlobalPlanner()
         return rclcpp_action::CancelResponse::ACCEPT;
       },
       [this](std::shared_ptr<rclcpp_action::ServerGoalHandle<moveit_msgs::action::GlobalPlanner>> goal_handle) {
-        return globalPlanningRequestCallback(goal_handle);
+        // this needs to return quickly to avoid blocking the executor, so spin up a new thread
+        std::thread{ &GlobalPlannerComponent::globalPlanningRequestCallback, this, goal_handle }.detach();
       });
 
   global_trajectory_pub_ = node_->create_publisher<moveit_msgs::msg::MotionPlanResponse>("global_trajectory", 1);
