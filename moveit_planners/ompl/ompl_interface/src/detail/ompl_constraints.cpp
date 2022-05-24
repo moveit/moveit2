@@ -316,10 +316,10 @@ void EqualityPositionConstraint::jacobian(const Eigen::Ref<const Eigen::VectorXd
 void OrientationConstraint::parseConstraintMsg(const moveit_msgs::msg::Constraints& constraints)
 {
   bounds_ = orientationConstraintMsgToBoundVector(constraints.orientation_constraints.at(0));
-  RCLCPP_INFO_STREAM(LOGGER, "Parsing orientation constraints");
-  RCLCPP_INFO_STREAM(LOGGER, "Parsed rx / roll constraints" << bounds_);
-  RCLCPP_INFO_STREAM(LOGGER, "Parsed ry / pitch constraints" << bounds_);
-  RCLCPP_INFO_STREAM(LOGGER, "Parsed rz / yaw constraints" << bounds_);
+  RCLCPP_DEBUG_STREAM(LOGGER, "Parsing orientation constraints");
+  RCLCPP_DEBUG_STREAM(LOGGER, "Parsed rx / roll constraints" << bounds_);
+  RCLCPP_DEBUG_STREAM(LOGGER, "Parsed ry / pitch constraints" << bounds_);
+  RCLCPP_DEBUG_STREAM(LOGGER, "Parsed rz / yaw constraints" << bounds_);
 
   tf2::fromMsg(constraints.orientation_constraints.at(0).orientation, target_orientation_);
 
@@ -392,16 +392,16 @@ std::shared_ptr<BaseConstraint> createOMPLConstraint(const moveit::core::RobotMo
 
   if (num_pos_con > 1)
   {
-    RCLCPP_WARN(LOGGER, "Only a single position constraints supported. Using the first one.");
+    RCLCPP_WARN(LOGGER, "Only a single position constraint is supported. Using the first one.");
   }
   if (num_ori_con > 1)
   {
-    RCLCPP_WARN(LOGGER, "Only a single orientation constraints supported. Using the first one.");
+    RCLCPP_WARN(LOGGER, "Only a single orientation constraint is supported. Using the first one.");
   }
 
   if (num_pos_con > 0 && num_ori_con > 0)
   {
-    RCLCPP_ERROR(LOGGER, "Combining position and orientation constraints not implemented yet for OMPL's constrained "
+    RCLCPP_ERROR(LOGGER, "Combining position and orientation constraints is not implemented yet for OMPL's constrained "
                          "state space.");
     return nullptr;
   }

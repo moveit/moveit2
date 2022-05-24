@@ -356,7 +356,7 @@ public:
 
   void parseConstraintMsg(const moveit_msgs::msg::Constraints& constraints) override;
   Eigen::VectorXd calcError(const Eigen::Ref<const Eigen::VectorXd>& x) const override;
-  virtual Eigen::MatrixXd calcErrorJacobian(const Eigen::Ref<const Eigen::VectorXd>& x) const override;
+  Eigen::MatrixXd calcErrorJacobian(const Eigen::Ref<const Eigen::VectorXd>& x) const override;
 };
 
 /** \brief Extract position constraints from the MoveIt message.
@@ -397,11 +397,10 @@ inline Eigen::Matrix3d angularVelocityToAngleAxis(double angle, const Eigen::Ref
   r_skew << 0, -axis[2], axis[1], axis[2], 0, -axis[0], -axis[1], axis[0], 0;
   r_skew *= angle;
 
-  double C;
-  C = (1 - 0.5 * t * std::sin(t) / (1 - std::cos(t)));
+  double c;
+  c = (1 - 0.5 * t * std::sin(t) / (1 - std::cos(t)));
 
-  return Eigen::Matrix3d::Identity() - 0.5 * r_skew + r_skew * r_skew / (t * t) * C;
-  // return E;
+  return Eigen::Matrix3d::Identity() - 0.5 * r_skew + r_skew * r_skew / (t * t) * c;
 }
 
 }  // namespace ompl_interface
