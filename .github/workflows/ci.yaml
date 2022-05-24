@@ -23,6 +23,10 @@ jobs:
             ROS_DISTRO: rolling
             IKFAST_TEST: true
             CLANG_TIDY: pedantic
+          - IMAGE: humble-ci
+            ROS_DISTRO: humble
+          - IMAGE: humble-ci-testing
+            ROS_DISTRO: humble
     env:
       CXXFLAGS: >-
         -Wall -Wextra -Wwrite-strings -Wunreachable-code -Wpointer-arith -Wredundant-decls
