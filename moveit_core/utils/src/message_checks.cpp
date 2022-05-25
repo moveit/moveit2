@@ -71,7 +71,7 @@ bool isEmpty(const moveit_msgs::msg::Constraints& constr)
 
 bool isEmpty(const geometry_msgs::msg::Quaternion& msg)
 {
-  return msg.x == 0.0 && msg.y == 0.0 && msg.z == 0.0 && msg.w == 0.0;
+  return msg.x == 0.0 && msg.y == 0.0 && msg.z == 0.0 && msg.w == 1.0;
 }
 
 bool isEmpty(const geometry_msgs::msg::Pose& msg)
