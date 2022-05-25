@@ -1,4 +1,4 @@
-<library path="libmoveit_setup_app_plugins">
+<library path="moveit_setup_app_plugins">
   <class type="moveit_setup::app::LaunchesWidget" base_class_type="moveit_setup::SetupStepWidget">
     <description>Configures launches to generate</description>
   </class>

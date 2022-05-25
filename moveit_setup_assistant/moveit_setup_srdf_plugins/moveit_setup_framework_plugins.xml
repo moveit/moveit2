@@ -1,4 +1,4 @@
-<library path="libmoveit_setup_srdf_plugins">
+<library path="moveit_setup_srdf_plugins">
   <class type="moveit_setup::srdf_setup::VirtualJointsWidget" base_class_type="moveit_setup::SetupStepWidget">
     <description>Step where you can setup the virtual joints in your SRDF</description>
   </class>

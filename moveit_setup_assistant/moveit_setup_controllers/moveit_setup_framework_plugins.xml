@@ -1,4 +1,4 @@
-<library path="libmoveit_setup_controllers">
+<library path="moveit_setup_controllers">
   <class type="moveit_setup::controllers::ControllersConfig" base_class_type="moveit_setup::SetupConfig">
     <description>Data for Controllers</description>
   </class>

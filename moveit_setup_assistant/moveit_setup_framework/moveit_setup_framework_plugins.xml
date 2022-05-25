@@ -1,4 +1,4 @@
-<library path="libmoveit_setup_framework">
+<library path="moveit_setup_framework">
   <class type="moveit_setup::URDFConfig" base_class_type="moveit_setup::SetupConfig">
     <description>Data for the URDF</description>
   </class>
