@@ -75,7 +75,7 @@ install(TARGETS ${LIBRARIES}
   RUNTIME DESTINATION lib/${PROJECT_NAME}
   INCLUDES DESTINATION include)
 
-install(TARGETS hybrid_planning_demo_node
+install(TARGETS cancel_action hybrid_planning_demo_node
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION lib/${PROJECT_NAME}
