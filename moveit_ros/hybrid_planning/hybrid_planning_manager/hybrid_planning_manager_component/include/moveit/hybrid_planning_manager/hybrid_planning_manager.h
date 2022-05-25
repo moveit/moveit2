@@ -60,8 +60,8 @@ public:
   /** \brief Constructor */
   HybridPlanningManager(const rclcpp::NodeOptions& options);
 
-  /** \brief Constructor */
-  ~HybridPlanningManager()
+  /** \brief Destructor */
+  ~HybridPlanningManager() override
   {
     // Join the thread used for long-running callbacks
     if (long_callback_thread_.joinable())

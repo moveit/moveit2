@@ -55,10 +55,10 @@ namespace moveit::hybrid_planning
 class GlobalPlannerComponent
 {
 public:
-  /** \brief Destructor */
+  /** \brief Constructor */
   GlobalPlannerComponent(const rclcpp::NodeOptions& options);
 
-  /** \brief Constructor */
+  /** \brief Destructor */
   ~GlobalPlannerComponent()
   {
     // Join the thread used for long-running callbacks
