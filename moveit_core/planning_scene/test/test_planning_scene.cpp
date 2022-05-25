@@ -49,7 +49,7 @@
 #include <moveit/collision_detection/collision_common.h>
 #include <moveit/collision_detection/collision_plugin_cache.h>
 
-// Test not setting object's pose would use the shape pose as the object pose
+// Test not setting the object's pose should use the shape pose as the object pose
 TEST(PlanningScene, TestOneShapeObjectPose)
 {
   urdf::ModelInterfaceSharedPtr urdf_model = moveit::core::loadModelInterface("pr2");
