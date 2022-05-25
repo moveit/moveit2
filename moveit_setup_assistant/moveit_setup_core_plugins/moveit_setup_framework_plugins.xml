@@ -1,4 +1,4 @@
-<library path="libmoveit_setup_core_plugins">
+<library path="moveit_setup_core_plugins">
   <class type="moveit_setup::core::StartScreenWidget" base_class_type="moveit_setup::SetupStepWidget">
     <description>Start Screen for loading the URDF or initial MoveIt Config</description>
   </class>

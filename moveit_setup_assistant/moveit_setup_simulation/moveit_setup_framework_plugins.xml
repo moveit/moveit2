@@ -1,4 +1,4 @@
-<library path="libmoveit_setup_simulation">
+<library path="moveit_setup_simulation">
   <class type="moveit_setup::simulation::LaunchesWidget" base_class_type="moveit_setup::SetupStepWidget">
     <description>Configures launches to generate</description>
   </class>
