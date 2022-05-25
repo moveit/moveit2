@@ -387,7 +387,7 @@ class MoveItConfigsBuilder(ParameterBuilder):
             controller_pattern = re.compile("^(.*)_controllers.yaml$")
             possible_names = get_pattern_matches(config_folder, controller_pattern)
             if not possible_names:
-                # Warn the user instead of raising exception 
+                # Warn the user instead of raising exception
                 logging.warning(
                     "\x1b[33;20mtrajectory_execution: `Parameter file_path is undefined "
                     f"and no matches for {config_folder}/*_controllers.yaml\x1b[0m"

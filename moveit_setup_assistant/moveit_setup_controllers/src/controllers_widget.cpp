@@ -76,11 +76,16 @@ void ControllersWidget::onInit()
   this->setWindowTitle("Controller Configuration");  // title of window
 
   // Top Header Area ------------------------------------------------
-  // TODO: Remove warning and revert to original header message once controllers are implemented https://github.com/ros-planning/moveit2/issues/1261
-  auto header = new HeaderWidget(
-      "Setup Controllers",
-      "<font color='red'>Configuring controllers to be used by MoveIt's controller manager(s) to operate the robot's physical hardware is not implemented yet! Please generate the files mentioned in <a href='https://github.com/ros-planning/moveit2/issues/1261'> https://github.com/ros-planning/moveit2/issues/1261</a> by hand if you want to work with trajectory execution!</font>",
-      this);
+  // TODO: Remove warning and revert to original header message once controllers are implemented
+  // https://github.com/ros-planning/moveit2/issues/1261
+  auto header =
+      new HeaderWidget("Setup Controllers",
+                       "<font color='red'>Configuring controllers to be used by MoveIt's controller manager(s) to "
+                       "operate the robot's physical hardware is not implemented yet! Please generate the files "
+                       "mentioned in <a href='https://github.com/ros-planning/moveit2/issues/1261'> "
+                       "https://github.com/ros-planning/moveit2/issues/1261</a> by hand if you want to work with "
+                       "trajectory execution!</font>",
+                       this);
   layout->addWidget(header);
 
   // Tree Box ----------------------------------------------------------------------
