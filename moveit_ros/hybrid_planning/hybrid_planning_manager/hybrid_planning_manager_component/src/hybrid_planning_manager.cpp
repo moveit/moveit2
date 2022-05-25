@@ -162,12 +162,11 @@ bool HybridPlanningManager::initialize()
       // Request callback
       [this](std::shared_ptr<rclcpp_action::ServerGoalHandle<moveit_msgs::action::HybridPlanner>> goal_handle) {
         // this needs to return quickly to avoid blocking the executor, so spin up a new thread
-        if (long_callback_thread_ != nullptr)
+        if (long_callback_thread_.joinable())
         {
           cancelHybridManagerGoals();
         }
-        long_callback_thread_ =
-            std::make_unique<std::thread>(&HybridPlanningManager::executeHybridPlannerGoal, this, goal_handle);
+        long_callback_thread_ = std::thread(&HybridPlanningManager::executeHybridPlannerGoal, this, goal_handle);
       });
 
   // Initialize global solution subscriber
@@ -196,10 +195,9 @@ void HybridPlanningManager::cancelHybridManagerGoals() noexcept
   local_planner_action_client_->async_cancel_all_goals();
   // Cancel global action
   global_planner_action_client_->async_cancel_all_goals();
-  if (long_callback_thread_ != nullptr)
+  if (long_callback_thread_.joinable())
   {
-    long_callback_thread_->join();
-    long_callback_thread_ = nullptr;
+    long_callback_thread_.join();
   }
 }
 

@@ -79,10 +79,9 @@ bool GlobalPlannerComponent::initializeGlobalPlanner()
       },
       [this](const std::shared_ptr<rclcpp_action::ServerGoalHandle<moveit_msgs::action::GlobalPlanner>>& /*unused*/) {
         RCLCPP_INFO(LOGGER, "Received request to cancel global planning goal");
-        if (long_callback_thread_ != nullptr)
+        if (long_callback_thread_.joinable())
         {
-          long_callback_thread_->join();
-          long_callback_thread_ = nullptr;
+          long_callback_thread_.join();
         }
         if (!global_planner_instance_->reset())
         {
@@ -92,18 +91,12 @@ bool GlobalPlannerComponent::initializeGlobalPlanner()
       },
       [this](std::shared_ptr<rclcpp_action::ServerGoalHandle<moveit_msgs::action::GlobalPlanner>> goal_handle) {
         // this needs to return quickly to avoid blocking the executor, so spin up a new thread
-        if (long_callback_thread_ == nullptr)
+        if (long_callback_thread_.joinable())
         {
-          long_callback_thread_ =
-              std::make_unique<std::thread>(&GlobalPlannerComponent::globalPlanningRequestCallback, this, goal_handle);
-        }
-        else
-        {
-          long_callback_thread_->join();
+          long_callback_thread_.join();
           global_planner_instance_->reset();
-          long_callback_thread_ =
-              std::make_unique<std::thread>(&GlobalPlannerComponent::globalPlanningRequestCallback, this, goal_handle);
         }
+        long_callback_thread_ = std::thread(&GlobalPlannerComponent::globalPlanningRequestCallback, this, goal_handle);
       });
 
   global_trajectory_pub_ = node_->create_publisher<moveit_msgs::msg::MotionPlanResponse>("global_trajectory", 1);

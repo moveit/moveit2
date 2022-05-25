@@ -64,9 +64,9 @@ public:
   ~HybridPlanningManager()
   {
     // Join the thread used for long-running callbacks
-    if (long_callback_thread_ != nullptr)
+    if (long_callback_thread_.joinable())
     {
-      long_callback_thread_->join();
+      long_callback_thread_.join();
     }
   }
 
@@ -148,6 +148,6 @@ private:
   rclcpp::Subscription<moveit_msgs::msg::MotionPlanResponse>::SharedPtr global_solution_sub_;
 
   // This thread is used for long-running callbacks. It's a member so they do not go out of scope.
-  std::unique_ptr<std::thread> long_callback_thread_;
+  std::thread long_callback_thread_;
 };
 }  // namespace moveit::hybrid_planning
