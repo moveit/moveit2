@@ -200,11 +200,8 @@ BoxConstraint::BoxConstraint(const moveit::core::RobotModelConstPtr& robot_model
 
 void BoxConstraint::parseConstraintMsg(const moveit_msgs::msg::Constraints& constraints)
 {
-  RCLCPP_DEBUG(LOGGER, "Parsing box position constraint for OMPL constrained state space.");
   assert(bounds_.size() == 0);
   bounds_ = positionConstraintMsgToBoundVector(constraints.position_constraints.at(0));
-  RCLCPP_DEBUG(LOGGER, "Parsed Box constraints");
-  RCLCPP_DEBUG_STREAM(LOGGER, "Bounds: " << bounds_);
 
   // extract target position and orientation
   geometry_msgs::msg::Point position =
@@ -216,7 +213,6 @@ void BoxConstraint::parseConstraintMsg(const moveit_msgs::msg::Constraints& cons
                target_orientation_);
 
   link_name_ = constraints.position_constraints.at(0).link_name;
-  RCLCPP_DEBUG_STREAM(LOGGER, "Position constraints applied to link: " << link_name_);
 }
 
 Eigen::VectorXd BoxConstraint::calcError(const Eigen::Ref<const Eigen::VectorXd>& x) const
@@ -270,12 +266,7 @@ void EqualityPositionConstraint::parseConstraintMsg(const moveit_msgs::msg::Cons
   tf2::fromMsg(constraints.position_constraints.at(0).constraint_region.primitive_poses.at(0).orientation,
                target_orientation_);
 
-  RCLCPP_DEBUG_STREAM(LOGGER, "Equality constraint on x-position? " << (is_dim_constrained_[0] ? "yes" : "no"));
-  RCLCPP_DEBUG_STREAM(LOGGER, "Equality constraint on y-position? " << (is_dim_constrained_[1] ? "yes" : "no"));
-  RCLCPP_DEBUG_STREAM(LOGGER, "Equality constraint on z-position? " << (is_dim_constrained_[2] ? "yes" : "no"));
-
   link_name_ = constraints.position_constraints.at(0).link_name;
-  RCLCPP_DEBUG_STREAM(LOGGER, "Position constraints applied to link: " << link_name_);
 }
 
 void EqualityPositionConstraint::function(const Eigen::Ref<const Eigen::VectorXd>& joint_values,
@@ -403,16 +394,13 @@ std::shared_ptr<BaseConstraint> createOMPLConstraint(const moveit::core::RobotMo
   }
   else if (num_pos_con > 0)
   {
-    RCLCPP_DEBUG_STREAM(LOGGER, "Constraint name: " << constraints.name);
     BaseConstraintPtr pos_con;
     if (constraints.name == "use_equality_constraints")
     {
-      RCLCPP_DEBUG(LOGGER, "OMPL is using equality position constraints.");
       pos_con = std::make_shared<EqualityPositionConstraint>(robot_model, group, num_dofs);
     }
     else
     {
-      RCLCPP_DEBUG(LOGGER, "OMPL is using box position constraints.");
       pos_con = std::make_shared<BoxConstraint>(robot_model, group, num_dofs);
     }
     pos_con->init(constraints);
