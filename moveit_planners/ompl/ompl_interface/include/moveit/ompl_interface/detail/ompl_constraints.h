@@ -326,7 +326,7 @@ private:
  * ****************************************/
 /** \brief Orientation constraints parameterized using exponential coordinates.
  *
- * An orientation constraints is modelled as a deviation from a target orientation.
+ * An orientation constraint is modeled as a deviation from a target orientation.
  * The deviation is represented using exponential coordinates. A three element vector represents the rotation axis
  * multiplied with the angle in radians around this axis.
  *
@@ -341,7 +341,7 @@ private:
  *     - absolute_z_axis_tolerance / 2 < error[2] < absolute_z_axis_tolerance / 2
  *
  * **IMPORTANT** It is NOT how orientation error is handled in the default MoveIt constraint samplers, where XYZ
- * intrinsic euler angles are used. Using exponential coordinates is analog to how orientation Error is calculated in
+ * intrinsic euler angles are used. Using exponential coordinates is analog to how orientation error is calculated in
  * the TrajOpt  motion planner.
  *
  * */
@@ -385,13 +385,12 @@ std::shared_ptr<BaseConstraint> createOMPLConstraint(const moveit::core::RobotMo
                                                      const std::string& group,
                                                      const moveit_msgs::msg::Constraints& constraints);
 
-/** Convert anglular velocity to angle-axis velocity, base on:
+/** Return a matrix to convert angular velocity to angle-axis velocity, based on:
  * https://ethz.ch/content/dam/ethz/special-interest/mavt/robotics-n-intelligent-systems/rsl-dam/documents/RobotDynamics2016/RD2016script.pdf
+ * Eq. 2.107
  * */
 inline Eigen::Matrix3d angularVelocityToAngleAxis(double angle, const Eigen::Ref<const Eigen::Vector3d> axis)
 {
-  // Eigen::Matrix3d E;
-
   double t{ std::abs(angle) };
   Eigen::Matrix3d r_skew;
   r_skew << 0, -axis[2], axis[1], axis[2], 0, -axis[0], -axis[1], axis[0], 0;
@@ -400,7 +399,7 @@ inline Eigen::Matrix3d angularVelocityToAngleAxis(double angle, const Eigen::Ref
   double c;
   c = (1 - 0.5 * t * std::sin(t) / (1 - std::cos(t)));
 
-  return Eigen::Matrix3d::Identity() - 0.5 * r_skew + r_skew * r_skew / (t * t) * c;
+  return Eigen::Matrix3d::Identity() - 0.5 * r_skew + (r_skew * r_skew / (t * t)) * c;
 }
 
 }  // namespace ompl_interface

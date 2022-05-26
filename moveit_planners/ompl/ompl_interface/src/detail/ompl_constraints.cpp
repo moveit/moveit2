@@ -316,10 +316,6 @@ void EqualityPositionConstraint::jacobian(const Eigen::Ref<const Eigen::VectorXd
 void OrientationConstraint::parseConstraintMsg(const moveit_msgs::msg::Constraints& constraints)
 {
   bounds_ = orientationConstraintMsgToBoundVector(constraints.orientation_constraints.at(0));
-  RCLCPP_DEBUG_STREAM(LOGGER, "Parsing orientation constraints");
-  RCLCPP_DEBUG_STREAM(LOGGER, "Parsed rx / roll constraints" << bounds_);
-  RCLCPP_DEBUG_STREAM(LOGGER, "Parsed ry / pitch constraints" << bounds_);
-  RCLCPP_DEBUG_STREAM(LOGGER, "Parsed rz / yaw constraints" << bounds_);
 
   tf2::fromMsg(constraints.orientation_constraints.at(0).orientation, target_orientation_);
 
@@ -424,7 +420,6 @@ std::shared_ptr<BaseConstraint> createOMPLConstraint(const moveit::core::RobotMo
   }
   else if (num_ori_con > 0)
   {
-    RCLCPP_DEBUG(LOGGER, "OMPL is using orientation constraints.");
     auto ori_con = std::make_shared<OrientationConstraint>(robot_model, group, num_dofs);
     ori_con->init(constraints);
     return ori_con;
