@@ -415,6 +415,7 @@ class MoveItConfigsBuilder(ParameterBuilder):
         else:
             file_path = self._package_path / file_path
 
+        if file_path:
             self.__moveit_configs.trajectory_execution.update(load_yaml(file_path))
         return self
 
