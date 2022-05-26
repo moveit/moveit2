@@ -2,6 +2,17 @@
 Changelog for package moveit_ros_control_interface
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.5.0 (2022-05-26)
+------------------
+* Enable cppcheck (`#1224 <https://github.com/ros-planning/moveit2/issues/1224>`_)
+  Co-authored-by: jeoseo <jeongwooseo2012@gmail.com>
+* Make moveit_common a 'depend' rather than 'build_depend' (`#1226 <https://github.com/ros-planning/moveit2/issues/1226>`_)
+* 1.1.9
+* 1.1.8
+* 1.1.7
+* 1.1.6
+* Contributors: Jafar, Robert Haschke, jeoseo
+
 2.4.0 (2022-01-20)
 ------------------
 * moveit_build_options()
