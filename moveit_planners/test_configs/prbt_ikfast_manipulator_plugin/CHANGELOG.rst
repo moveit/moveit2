@@ -2,6 +2,16 @@
 Changelog for package moveit_resources_prbt_ikfast_manipulator_plugin
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.5.0 (2022-05-26)
+------------------
+* Fix prbt_ikfast win compilation (`#1161 <https://github.com/ros-planning/moveit2/issues/1161>`_)
+* Remove new operators (`#1135 <https://github.com/ros-planning/moveit2/issues/1135>`_)
+  replace new operator with make_shared
+* Remove unused parameters. (`#1018 <https://github.com/ros-planning/moveit2/issues/1018>`_)
+  Co-authored-by: Tyler Weaver <tyler@picknik.ai>
+  Co-authored-by: Vatan Aksoy Tezer <vatan@picknik.ai>
+* Contributors: Cory Crean, Sencer Yazıcı, Tobias Fischer
+
 2.4.0 (2022-01-20)
 ------------------
 * Replace NULL with nullptr (`#961 <https://github.com/ros-planning/moveit2/issues/961>`_)

@@ -2,6 +2,93 @@
 Changelog for package moveit_ros_planning
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.5.0 (2022-05-26)
+------------------
+* Enable cppcheck (`#1224 <https://github.com/ros-planning/moveit2/issues/1224>`_)
+  Co-authored-by: jeoseo <jeongwooseo2012@gmail.com>
+* Make moveit_common a 'depend' rather than 'build_depend' (`#1226 <https://github.com/ros-planning/moveit2/issues/1226>`_)
+* Remove unused includes for boost::bind (`#1220 <https://github.com/ros-planning/moveit2/issues/1220>`_)
+* Avoid bind(), use lambdas instead (`#1204 <https://github.com/ros-planning/moveit2/issues/1204>`_)
+  Adaption of https://github.com/ros-planning/moveit/pull/3106
+* banish bind()
+  source:https://github.com/ros-planning/moveit/pull/3106/commits/a2911c80c28958c1fce8fb52333d770248c4ec05; required minor updates compared to original source commit in order to ensure compatibility with ROS2
+* various: prefer object and references over pointers
+  source: https://github.com/ros-planning/moveit/pull/3106/commits/1a8e5715e3142a92977ac585031b9dc1871f8718; this commit contains minor changes when compared to the source commit which it is based on, these changes are limited to ensuring compatibility with ROS2.
+* Delete an unused variable and a redundant log message (`#1179 <https://github.com/ros-planning/moveit2/issues/1179>`_)
+  Co-authored-by: Vatan Aksoy Tezer <vatan@picknik.ai>
+* Fix failing test
+* Comment failing rdf integration test
+* Merge https://github.com/ros-planning/moveit/commit/424a5b7b8b774424f78346d1e98bf1c9a33f0e78
+* Return `ExecutionStatus` from `MoveItCpp::execute()` (`#1147 <https://github.com/ros-planning/moveit2/issues/1147>`_)
+  Return an `ExecutionStatus` from `MoveItCpp::execute()`, which is
+  convertible to a bool in the caller code.
+  This change is forward compatible.
+* Set controller status before it is checked on trajectory execution (`#1014 <https://github.com/ros-planning/moveit2/issues/1014>`_)
+* Remove new operators (`#1135 <https://github.com/ros-planning/moveit2/issues/1135>`_)
+  replace new operator with make_shared
+* RDFLoader Broken with Xacro Files (`#1132 <https://github.com/ros-planning/moveit2/issues/1132>`_)
+  * A broken RDFLoader test
+  * Bugfix: Add space between executable and path (if no arguments)
+* Simply MoveItCpp::getPlanningPipelineNames() (`#1114 <https://github.com/ros-planning/moveit2/issues/1114>`_)
+* [moveit_cpp] Fix config of multiple pipelines (`#1096 <https://github.com/ros-planning/moveit2/issues/1096>`_)
+* Merge https://github.com/ros-planning/moveit/commit/a25515b73d682df03ed3eccd839110c296aa79fc
+* Merge https://github.com/ros-planning/moveit/commit/ab42a1d7017b27eb6c353fb29331b2da08ab0039
+* Make lockSceneRead() and lockSceneWrite() protected member functions (`#1100 <https://github.com/ros-planning/moveit2/issues/1100>`_)
+  * No lock in planning_component.cpp
+  * Make lockSceneRead(), lockSceneWrite() protected
+  * Add a migration note
+* Temporarily add galactic CI (`#1107 <https://github.com/ros-planning/moveit2/issues/1107>`_)
+  * Add galactic CI
+  * Comment out rolling
+  * panda_ros_controllers -> panda_ros2_controllers
+  * Ignore flake8 tests
+* 1.1.9
+* Compilation fixes for Jammy and bring back Rolling CI (`#1095 <https://github.com/ros-planning/moveit2/issues/1095>`_)
+  * Use jammy dockers and clang-format-12
+  * Fix unused depend, and move to python3-lxml
+  * add ompl to repos, fix versions and ogre
+  * Remove ogre keys
+  * Fix boolean node operator
+  * Stop building dockers on branch and fix servo null pointer
+  * update pre-commit to clang-format-12 and pre-commit fixes
+  * clang-format workaround and more pre-commit fixes
+* Fix mixed-up implementations in TfSubscription creation (`#1073 <https://github.com/ros-planning/moveit2/issues/1073>`_)
+  Co-authored-by: Jean-Christophe Ruel <jeanchristophe.ruel@elmec.ca>
+* Get parameter on initialize (rebased version of `#893 <https://github.com/ros-planning/moveit2/issues/893>`_) (`#996 <https://github.com/ros-planning/moveit2/issues/996>`_)
+  Get parameter `trajectory_execution.execution_duration_monitoring` in
+  initialize().
+  Co-authored-by: Gaël Écorchard <gael.ecorchard@cvut.cz>
+* Misc fixes for time and transforms (`#768 <https://github.com/ros-planning/moveit2/issues/768>`_)
+  * Fix setting shape_transform_cache_lookup_wait_time from seconds
+  * Fix setting last_update_time from seconds
+  * Check the return value of canTransform
+* Fix race condition in SynchronizedStringParameter::waitForMessage (`#1050 <https://github.com/ros-planning/moveit2/issues/1050>`_)
+  Co-authored-by: Tyler Weaver <squirrel428@protonmail.com>
+* 1.1.8
+* Delete profiler (`#998 <https://github.com/ros-planning/moveit2/issues/998>`_)
+  * Delete profiler and evaluator tools
+* Remove unused parameters. (`#1018 <https://github.com/ros-planning/moveit2/issues/1018>`_)
+  Co-authored-by: Tyler Weaver <tyler@picknik.ai>
+  Co-authored-by: Vatan Aksoy Tezer <vatan@picknik.ai>
+* Fix deprecation warning in moveit_cpp (`#3019 <https://github.com/ros-planning/moveit2/issues/3019>`_)
+  Fixup for `#3009 <https://github.com/ros-planning/moveit2/issues/3009>`_.
+* 1.1.7
+* Move MoveItErrorCode class to moveit_core (`#3009 <https://github.com/ros-planning/moveit2/issues/3009>`_)
+  ... reducing code duplication and facilitating re-use
+* Merge `#2944 <https://github.com/ros-planning/moveit2/issues/2944>`_: various fixes to the rviz plugins
+* Switch to std::bind (`#2967 <https://github.com/ros-planning/moveit2/issues/2967>`_)
+  * boost::bind -> std::bind
+  grep -rlI --exclude-dir=.git "boost::bind" | xargs sed -i 's/boost::bind/std::bind/g'
+  * Convert bind placeholders
+  grep -rlI --exclude-dir=.git " _[0-9]" | xargs sed -i 's/ _\([0-9]\)/ std::placeholders::_\1/g'
+  * Update bind include header
+  grep -rlI --exclude-dir=.git "boost/bind" | xargs sed -i 's#boost/bind.hpp#functional#'
+* MoveitCpp - added ability to set path constraints for PlanningComponent. (`#2959 <https://github.com/ros-planning/moveit2/issues/2959>`_)
+* RDFLoader: clear buffer before reading content (`#2963 <https://github.com/ros-planning/moveit2/issues/2963>`_)
+* 1.1.6
+* Reset markers on display_contacts topic after a new planning attempt
+* Contributors: Abishalini, AndyZe, Colin Kohler, Cory Crean, David V. Lu!!, Denis Štogl, Gaël Écorchard, Henning Kayser, Jafar, Jafar Abdi, JafarAbdi, Jean-Christophe Ruel, Jeroen, Jochen Sprickerhof, Rick Staa, Robert Haschke, Sencer Yazıcı, Stephanie Eng, Tyler Weaver, Vatan Aksoy Tezer, jeoseo, v4hn
+
 2.4.0 (2022-01-20)
 ------------------
 * Merge https://github.com/ros-planning/moveit/commit/f3ac6070497da90da33551fc1dc3a68938340413

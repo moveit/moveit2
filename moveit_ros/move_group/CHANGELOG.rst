@@ -2,6 +2,39 @@
 Changelog for package moveit_ros_move_group
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.5.0 (2022-05-26)
+------------------
+* Merge https://github.com/ros-planning/moveit/commit/72d919299796bffc21f5eb752d66177841dc3442
+* Enable cppcheck (`#1224 <https://github.com/ros-planning/moveit2/issues/1224>`_)
+  Co-authored-by: jeoseo <jeongwooseo2012@gmail.com>
+* Make TOTG the default time-parameterization algorithm everywhere (`#1218 <https://github.com/ros-planning/moveit2/issues/1218>`_)
+  Co-authored-by: Jafar <cafer.abdi@gmail.com>
+* Make moveit_common a 'depend' rather than 'build_depend' (`#1226 <https://github.com/ros-planning/moveit2/issues/1226>`_)
+* Avoid bind(), use lambdas instead (`#1204 <https://github.com/ros-planning/moveit2/issues/1204>`_)
+  Adaption of https://github.com/ros-planning/moveit/pull/3106
+* banish bind()
+  source:https://github.com/ros-planning/moveit/pull/3106/commits/a2911c80c28958c1fce8fb52333d770248c4ec05; required minor updates compared to original source commit in order to ensure compatibility with ROS2
+* Merge https://github.com/ros-planning/moveit/commit/ab42a1d7017b27eb6c353fb29331b2da08ab0039
+* 1.1.9
+* Fix missing include (`#3051 <https://github.com/ros-planning/moveit2/issues/3051>`_)
+* 1.1.8
+* Improve loading of planning pipelines (`#3036 <https://github.com/ros-planning/moveit2/issues/3036>`_)
+  Ensure that planning pipelines considered in `~/planning_pipelines/*` actually have a `planning_plugin` parameter defined.
+  Otherwise, issue an error message.
+* Remove unused parameters. (`#1018 <https://github.com/ros-planning/moveit2/issues/1018>`_)
+  Co-authored-by: Tyler Weaver <tyler@picknik.ai>
+  Co-authored-by: Vatan Aksoy Tezer <vatan@picknik.ai>
+* 1.1.7
+* Switch to std::bind (`#2967 <https://github.com/ros-planning/moveit2/issues/2967>`_)
+  * boost::bind -> std::bind
+  grep -rlI --exclude-dir=.git "boost::bind" | xargs sed -i 's/boost::bind/std::bind/g'
+  * Convert bind placeholders
+  grep -rlI --exclude-dir=.git " _[0-9]" | xargs sed -i 's/ _\([0-9]\)/ std::placeholders::_\1/g'
+  * Update bind include header
+  grep -rlI --exclude-dir=.git "boost/bind" | xargs sed -i 's#boost/bind.hpp#functional#'
+* 1.1.6
+* Contributors: Abishalini, AndyZe, Cory Crean, Henning Kayser, Jafar, Jochen Sprickerhof, Robert Haschke, Tobias Fischer, jeoseo, v4hn
+
 2.4.0 (2022-01-20)
 ------------------
 * moveit_build_options()

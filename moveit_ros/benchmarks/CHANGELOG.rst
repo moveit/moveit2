@@ -2,6 +2,45 @@
 Changelog for package moveit_ros_benchmarks
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.5.0 (2022-05-26)
+------------------
+* Merge https://github.com/ros-planning/moveit/commit/72d919299796bffc21f5eb752d66177841dc3442
+* Enable cppcheck (`#1224 <https://github.com/ros-planning/moveit2/issues/1224>`_)
+  Co-authored-by: jeoseo <jeongwooseo2012@gmail.com>
+* Make moveit_common a 'depend' rather than 'build_depend' (`#1226 <https://github.com/ros-planning/moveit2/issues/1226>`_)
+* Avoid bind(), use lambdas instead (`#1204 <https://github.com/ros-planning/moveit2/issues/1204>`_)
+  Adaption of https://github.com/ros-planning/moveit/pull/3106
+* banish bind()
+  source:https://github.com/ros-planning/moveit/pull/3106/commits/a2911c80c28958c1fce8fb52333d770248c4ec05; required minor updates compared to original source commit in order to ensure compatibility with ROS2
+* [moveit_ros_benchmarks] Add missing moveit_core dependency (`#1157 <https://github.com/ros-planning/moveit2/issues/1157>`_)
+* Merge https://github.com/ros-planning/moveit/commit/a25515b73d682df03ed3eccd839110c296aa79fc
+* Merge https://github.com/ros-planning/moveit/commit/ab42a1d7017b27eb6c353fb29331b2da08ab0039
+* Filter more invalid values in moveit_benchmark_statistics.py (`#3084 <https://github.com/ros-planning/moveit2/issues/3084>`_)
+  Count "-nan" and "-inf" as null value in the database.
+* 1.1.9
+* 1.1.8
+* Remove unused parameters. (`#1018 <https://github.com/ros-planning/moveit2/issues/1018>`_)
+  Co-authored-by: Tyler Weaver <tyler@picknik.ai>
+  Co-authored-by: Vatan Aksoy Tezer <vatan@picknik.ai>
+* Add moveit_configs_utils package to simplify loading paramters (`#591 <https://github.com/ros-planning/moveit2/issues/591>`_)
+  Co-authored-by: AndyZe <zelenak@picknik.ai>
+  Co-authored-by: Stephanie Eng <stephanie-eng@users.noreply.github.com>
+  Co-authored-by: Tyler Weaver <tyler@picknik.ai>
+* 1.1.7
+* Provide MOVEIT_VERSION_CHECK macro (`#2997 <https://github.com/ros-planning/moveit2/issues/2997>`_)
+  - Rename MOVEIT_VERSION -> MOVEIT_VERSION_STR
+  - MOVEIT_VERSION becomes a numeric identifier
+  - Use like: #if MOVEIT_VERSION >= MOVEIT_VERSION_CHECK(1, 0, 0)
+* Switch to std::bind (`#2967 <https://github.com/ros-planning/moveit2/issues/2967>`_)
+  * boost::bind -> std::bind
+  grep -rlI --exclude-dir=.git "boost::bind" | xargs sed -i 's/boost::bind/std::bind/g'
+  * Convert bind placeholders
+  grep -rlI --exclude-dir=.git " _[0-9]" | xargs sed -i 's/ _\([0-9]\)/ std::placeholders::_\1/g'
+  * Update bind include header
+  grep -rlI --exclude-dir=.git "boost/bind" | xargs sed -i 's#boost/bind.hpp#functional#'
+* 1.1.6
+* Contributors: Abishalini, Cory Crean, Gaël Écorchard, Henning Kayser, Hugal31, Jafar, Jafar Abdi, Jochen Sprickerhof, Robert Haschke, jeoseo, v4hn
+
 2.4.0 (2022-01-20)
 ------------------
 * Merge https://github.com/ros-planning/moveit/commit/f3ac6070497da90da33551fc1dc3a68938340413

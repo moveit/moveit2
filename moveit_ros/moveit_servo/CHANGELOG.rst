@@ -2,6 +2,71 @@
 Changelog for package moveit_servo
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.5.0 (2022-05-26)
+------------------
+* Enable cppcheck (`#1224 <https://github.com/ros-planning/moveit2/issues/1224>`_)
+  Co-authored-by: jeoseo <jeongwooseo2012@gmail.com>
+* Make moveit_common a 'depend' rather than 'build_depend' (`#1226 <https://github.com/ros-planning/moveit2/issues/1226>`_)
+* Avoid bind(), use lambdas instead (`#1204 <https://github.com/ros-planning/moveit2/issues/1204>`_)
+  Adaption of https://github.com/ros-planning/moveit/pull/3106
+* banish bind()
+  source:https://github.com/ros-planning/moveit/pull/3106/commits/a2911c80c28958c1fce8fb52333d770248c4ec05; required minor updates compared to original source commit in order to ensure compatibility with ROS2
+* Delete an unused variable and a redundant log message (`#1179 <https://github.com/ros-planning/moveit2/issues/1179>`_)
+  Co-authored-by: Vatan Aksoy Tezer <vatan@picknik.ai>
+* [Servo] Add override parameter to set constant velocity scaling in Servo (`#1169 <https://github.com/ros-planning/moveit2/issues/1169>`_)
+* Rename panda controllers
+* Enable rolling / jammy CI (again) (`#1134 <https://github.com/ros-planning/moveit2/issues/1134>`_)
+  * Use ros2_control binaries
+  * Use output screen instead of explicitly stating stderr
+* Temporarily add galactic CI (`#1107 <https://github.com/ros-planning/moveit2/issues/1107>`_)
+  * Add galactic CI
+  * Comment out rolling
+  * panda_ros_controllers -> panda_ros2_controllers
+  * Ignore flake8 tests
+* 1.1.9
+* Compilation fixes for Jammy and bring back Rolling CI (`#1095 <https://github.com/ros-planning/moveit2/issues/1095>`_)
+  * Use jammy dockers and clang-format-12
+  * Fix unused depend, and move to python3-lxml
+  * add ompl to repos, fix versions and ogre
+  * Remove ogre keys
+  * Fix boolean node operator
+  * Stop building dockers on branch and fix servo null pointer
+  * update pre-commit to clang-format-12 and pre-commit fixes
+  * clang-format workaround and more pre-commit fixes
+* Explicitly set is_primary_planning_scene_monitor in Servo example config (`#1060 <https://github.com/ros-planning/moveit2/issues/1060>`_)
+* 1.1.8
+* [hybrid planning] Add action abortion and test; improve the existing test (`#980 <https://github.com/ros-planning/moveit2/issues/980>`_)
+  * Add action abortion and test; improve the existing test
+  * Add controller run-dependency
+  * Fix the clearing of robot trajectory when a collision would occur
+  * Fix replanning if local planner is stuck
+  * Lambda function everything
+  * Thread safety for stop_hybrid_planning\_
+  * Thread-safe state\_
+  * Clang tidy
+  * Update the planning scene properly
+  * Update Servo test initial_positions.yaml
+  Co-authored-by: Tyler Weaver <tyler@picknik.ai>
+* Remove unused parameters. (`#1018 <https://github.com/ros-planning/moveit2/issues/1018>`_)
+  Co-authored-by: Tyler Weaver <tyler@picknik.ai>
+  Co-authored-by: Vatan Aksoy Tezer <vatan@picknik.ai>
+* Add moveit_configs_utils package to simplify loading paramters (`#591 <https://github.com/ros-planning/moveit2/issues/591>`_)
+  Co-authored-by: AndyZe <zelenak@picknik.ai>
+  Co-authored-by: Stephanie Eng <stephanie-eng@users.noreply.github.com>
+  Co-authored-by: Tyler Weaver <tyler@picknik.ai>
+* 1.1.7
+* 1.1.6
+* Servo: sync position limit enforcement with MoveIt2 (`#2898 <https://github.com/ros-planning/moveit2/issues/2898>`_)
+  * fix enforce position bug
+  * remove unnecessary variable
+  * make clang tidy happy
+  * Update my comment
+  * implement same logic as in the moveit2! repo
+  * fix copy-pase error
+  Co-authored-by: Michael Wiznitzer <michael.wiznitzer@resquared.com>
+  Co-authored-by: AndyZe <andyz@utexas.edu>
+* Contributors: AndyZe, Cory Crean, Henning Kayser, Jafar, Jafar Abdi, Joseph Schornak, Marq Rasmussen, Michael Wiznitzer, Robert Haschke, Vatan Aksoy Tezer, jeoseo, v4hn
+
 2.4.0 (2022-01-20)
 ------------------
 * Remove 'using namespace' from header files. (`#994 <https://github.com/ros-planning/moveit2/issues/994>`_)
