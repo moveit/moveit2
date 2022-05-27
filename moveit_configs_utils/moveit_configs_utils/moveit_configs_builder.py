@@ -286,9 +286,10 @@ class MoveItConfigsBuilder(ParameterBuilder):
             controller_pattern = re.compile("^(.*)_controllers.yaml$")
             possible_names = get_pattern_matches(config_folder, controller_pattern)
             if not possible_names:
-                raise RuntimeError(
-                    "trajectory_execution: `Parameter file_path is undefined "
-                    f"and no matches for {config_folder}/*_controllers.yaml"
+                # Warn the user instead of raising exception
+                logging.warning(
+                    "\x1b[33;20mtrajectory_execution: `Parameter file_path is undefined "
+                    f"and no matches for {config_folder}/*_controllers.yaml\x1b[0m"
                 )
             else:
                 chosen_name = None
@@ -313,7 +314,8 @@ class MoveItConfigsBuilder(ParameterBuilder):
         else:
             file_path = self._package_path / file_path
 
-        self.__moveit_configs.trajectory_execution.update(load_yaml(file_path))
+        if file_path:
+            self.__moveit_configs.trajectory_execution.update(load_yaml(file_path))
         return self
 
     def planning_scene_monitor(
