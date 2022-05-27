@@ -13,7 +13,6 @@ from moveit_configs_utils import MoveItConfigsBuilder
 def generate_move_group_test_description(*args, gtest_name: SomeSubstitutionsType):
     moveit_config = (
         MoveItConfigsBuilder("moveit_resources_panda")
-        .robot_description(file_path="config/panda.urdf.xacro")
         .trajectory_execution(file_path="config/gripper_moveit_controllers.yaml")
         .to_moveit_configs()
     )

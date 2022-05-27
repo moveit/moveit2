@@ -8,11 +8,7 @@ from launch_param_builder import ParameterBuilder
 
 
 def generate_launch_description():
-    moveit_config = (
-        MoveItConfigsBuilder("moveit_resources_panda")
-        .robot_description(file_path="config/panda.urdf.xacro")
-        .to_moveit_configs()
-    )
+    moveit_config = MoveItConfigsBuilder("moveit_resources_panda").to_moveit_configs()
 
     # Get parameters for the Pose Tracking node
     servo_params = {

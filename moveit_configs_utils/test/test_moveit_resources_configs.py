@@ -17,7 +17,6 @@ def test_panda_with_gripper_config():
     try:
         moveit_config = (
             MoveItConfigsBuilder("moveit_resources_panda")
-            .robot_description(file_path="config/panda.urdf.xacro")
             .robot_description_semantic(file_path="config/panda.srdf")
             .trajectory_execution(file_path="config/gripper_moveit_controllers.yaml")
         )
