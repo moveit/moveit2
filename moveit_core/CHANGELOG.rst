@@ -2,6 +2,154 @@
 Changelog for package moveit_core
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.5.0 (2022-05-26)
+------------------
+* Fix a bug when checking a pose is empty and TOTG corner case (`#1274 <https://github.com/ros-planning/moveit2/issues/1274>`_)
+  * Fix having empty object pose would use the shape pose as the object pose
+  * TOTG: Fix parameterizing a trajectory would produce a different last waypoint than the input last waypoint
+* Add missing dependencies to cmake (`#1258 <https://github.com/ros-planning/moveit2/issues/1258>`_)
+* Fix bug in applying planning scene diffs that have attached collision objects (`#3124 <https://github.com/ros-planning/moveit2/issues/3124>`_) (`#1251 <https://github.com/ros-planning/moveit2/issues/1251>`_)
+* Merge https://github.com/ros-planning/moveit/commit/72d919299796bffc21f5eb752d66177841dc3442
+* Allow custom velocity/accel/jerk limits for Ruckig smoothing (`#1221 <https://github.com/ros-planning/moveit2/issues/1221>`_)
+* Allow custom velocity/acceleration limits for TOTG time-parameterization algorithm (`#1195 <https://github.com/ros-planning/moveit2/issues/1195>`_)
+* Make moveit_common a 'depend' rather than 'build_depend' (`#1226 <https://github.com/ros-planning/moveit2/issues/1226>`_)
+* Remove unused includes for boost::bind (`#1220 <https://github.com/ros-planning/moveit2/issues/1220>`_)
+* Avoid bind(), use lambdas instead (`#1204 <https://github.com/ros-planning/moveit2/issues/1204>`_)
+* Fix clang-tidy warning (`#1208 <https://github.com/ros-planning/moveit2/issues/1208>`_)
+* banish bind()
+  source:https://github.com/ros-planning/moveit/pull/3106/commits/a2911c80c28958c1fce8fb52333d770248c4ec05; required minor updates compared to original source commit in order to ensure compatibility with ROS2
+* various: prefer object and references over pointers
+  source: https://github.com/ros-planning/moveit/pull/3106/commits/1a8e5715e3142a92977ac585031b9dc1871f8718; this commit contains minor changes when compared to the source commit which it is based on, these changes are limited to ensuring compatibility with ROS2.
+* migrate PRA internals to lambdas
+  source: https://github.com/ros-planning/moveit/pull/3106/commits/6436597d5113a02dcfc976c85a2710fe7cd4c69e; in addition to the original commit I updated logging to support ros2 logging standards.
+* drop unused arguments not needed for lambda binding
+  source: https://github.com/ros-planning/moveit/pull/3106/commits/6805b7edc248a1e4557977f45722997bbbef5b22 ; I have also had to update how moveit_msgs is referenced (movit_msgs:: -> moveit_msgs::msg:: ) and I  added the changes to this commit that correspond to tests for the constraint samplers package.
+* simplify distance field method binding
+  source: https://github.com/ros-planning/moveit/pull/3106/commits/0322d63242d9990a9f93debd72085ede94efe0e9
+* Use orocos_kdl_vendor package (`#1207 <https://github.com/ros-planning/moveit2/issues/1207>`_)
+* Clamp inputs to Ruckig. Use current waypoint as input for next iteration (`#1202 <https://github.com/ros-planning/moveit2/issues/1202>`_)
+  * Clamp inputs to Ruckig. Use the current waypoint as input for next iteration.
+  * Fix the usage of std::clamp()
+* Add a warning for TOTG if vel/accel limits aren't specified. (`#1186 <https://github.com/ros-planning/moveit2/issues/1186>`_)
+* RCLCPP Upgrade Bugfixes (`#1181 <https://github.com/ros-planning/moveit2/issues/1181>`_)
+* Ruckig smoothing cleanup (`#1111 <https://github.com/ros-planning/moveit2/issues/1111>`_)
+* Replace num_dof and idx variables with JointGroup API (`#1152 <https://github.com/ros-planning/moveit2/issues/1152>`_)
+* Merge https://github.com/ros-planning/moveit/commit/424a5b7b8b774424f78346d1e98bf1c9a33f0e78
+* Remove new operators (`#1135 <https://github.com/ros-planning/moveit2/issues/1135>`_)
+  replace new operator with make_shared
+* ACM: Consider default entries when packing a ROS message (`#3096 <https://github.com/ros-planning/moveit2/issues/3096>`_)
+  Previously, getAllEntryNames() just returned names occurring in the collision pair list.
+  Now, also consider names in `default_entries\_`.
+* Merge https://github.com/ros-planning/moveit/commit/a25515b73d682df03ed3eccd839110c296aa79fc
+* Off by one in getAverageSegmentDuration (`#1079 <https://github.com/ros-planning/moveit2/issues/1079>`_)
+* Fix missing boost::ref -> std::ref
+* Merge https://github.com/ros-planning/moveit/commit/ab42a1d7017b27eb6c353fb29331b2da08ab0039
+* Add special case for sphere bodies in sphere decomposition (`#3056 <https://github.com/ros-planning/moveit2/issues/3056>`_)
+* Add Ptr definitions for TimeParameterization classes (`#3078 <https://github.com/ros-planning/moveit2/issues/3078>`_)
+  Follow up on `#3021 <https://github.com/ros-planning/moveit2/issues/3021>`_.
+* Fix Python versioned dependency (`#3063 <https://github.com/ros-planning/moveit2/issues/3063>`_)
+* Merge https://github.com/ros-planning/moveit/commit/25a63b920adf46f0a747aad92ada70d8afedb3ec
+* Merge https://github.com/ros-planning/moveit/commit/0d7462f140e03b4c319fa8cce04a47fe3f650c60
+* Avoid downgrading default C++ standard (`#3043 <https://github.com/ros-planning/moveit2/issues/3043>`_)
+* Delete profiler (`#998 <https://github.com/ros-planning/moveit2/issues/998>`_)
+* Initalize RobotState in Ruckig test (`#1032 <https://github.com/ros-planning/moveit2/issues/1032>`_)
+* Remove unused parameters. (`#1018 <https://github.com/ros-planning/moveit2/issues/1018>`_)
+* Merge PR `#2938 <https://github.com/ros-planning/moveit2/issues/2938>`_: Rework ACM
+  Implement ACM defaults as a fallback instead of an override.
+  Based on `ros-planning/srdfdom#97 <https://github.com/ros-planning/srdfdom/issues/97>`_, this allows disabling collisions for specific links/objects by default and re-enabling individual pairs if necessary.
+* Make TimeParameterization classes polymorphic (`#3021 <https://github.com/ros-planning/moveit2/issues/3021>`_)
+* Fix wrong transform in distance fields' determineCollisionSpheres() (`#3022 <https://github.com/ros-planning/moveit2/issues/3022>`_)
+* collision_distance_field: Fix undefined behavior vector insertion (`#3017 <https://github.com/ros-planning/moveit2/issues/3017>`_)
+  Co-authored-by: andreas-botbuilt <94128674+andreas-botbuilt@users.noreply.github.com>
+* Unify initialization of ACM from SRDF
+* Adapt to API changes in srdfdom
+  @v4hn requested splitting of collision_pairs into (re)enabled and disabled.
+* ACM:print(): show default value
+* Adapt message passing of AllowedCollisionMatrix
+  - Serialize full current state (previously pairs with a default, but no entry were skipped)
+  - Only initialize matrix entries that deviate from the default.
+* Optimization: Check for most common case first
+* Add comment to prefer setDefaultEntry() over setEntry()
+  ... because the former will consider future collision entries as well.
+* ACM: specific pair entries take precedence over defaults
+  Reverts c72a8570d420a23a9fe4715705ed617f18836634
+* Improve formatting of comments
+* Don't fill all ACM entries by default
+* Adapt to API changes in srdfdom
+* Move MoveItErrorCode class to moveit_core (`#3009 <https://github.com/ros-planning/moveit2/issues/3009>`_)
+  ... reducing code duplication and facilitating re-use
+* Disable (flaky) timing tests in DEBUG mode (`#3012 <https://github.com/ros-planning/moveit2/issues/3012>`_)
+* RobotState::attachBody: Migrate to unique_ptr argument (`#3011 <https://github.com/ros-planning/moveit2/issues/3011>`_)
+  ... to indicate transfer of ownership and simplify pointer handling
+* Add API stress tests for TOTG, fix undefined behavior (`#2957 <https://github.com/ros-planning/moveit2/issues/2957>`_)
+* TOTG: catch division by 0
+  This bug is already in the original implementation:
+  https://github.com/tobiaskunz/trajectories/blob/master/Path.cpp
+  In case the dot product between the two vectors is close to +/-1,
+  angle becomes +/-PI and cos/tan of 0.5 * PI in the lines below will
+  produce a division by 0.
+  This happens easily if a optimal trajectory is processed by TOTG, i.e.,
+  if a trajectory is processed by TOTG twice.
+* Add API stress tests for TOTG
+* Do not assert on printTransform with non-isometry (`#3005 <https://github.com/ros-planning/moveit2/issues/3005>`_)
+  instead print a tag and the matrix
+  building a Quaternion from non-isometries is undefined behavior in Eigen, thus the split.
+* Provide MOVEIT_VERSION_CHECK macro (`#2997 <https://github.com/ros-planning/moveit2/issues/2997>`_)
+  - Rename MOVEIT_VERSION -> MOVEIT_VERSION_STR
+  - MOVEIT_VERSION becomes a numeric identifier
+  - Use like: #if MOVEIT_VERSION >= MOVEIT_VERSION_CHECK(1, 0, 0)
+* quietly use backward_cpp/ros if available (`#2988 <https://github.com/ros-planning/moveit2/issues/2988>`_)
+  This is simply convenient and you always need it when you did not explicitly add it.
+  Follow @tylerjw's initiative to add it to MoveIt2:
+  https://github.com/ros-planning/moveit2/pull/794
+* Allow restricting collision pairs to a group (`#2987 <https://github.com/ros-planning/moveit2/issues/2987>`_)
+* Add backwards compatibility for old scene serialization format (`#2986 <https://github.com/ros-planning/moveit2/issues/2986>`_)
+  * [moveit_core] test_planning_scene: Add failing unit test for old scene format
+  The serialization format for the .scene files changed in
+  https://github.com/ros-planning/moveit/pull/2037. This commits a
+  testcase using the old scene format. It will fail and a subsequent
+  commit to introduce backwards compatibility to the scene-file parsing
+  will make it pass.
+  * [moveit_core] PlanningScene: Add backwards compatibility for old scene version format
+  This commit adds a mechanism for detecting the version of the scene file
+  format to enable the loadGeometryFromStream method to read old version
+  scene files without having to migrate them. To detect the version of the
+  scene format, we use the content of the line following the start of an
+  object: In the old version of the format, this specified the number of
+  shapes in the object (a single int). In the new version of the format,
+  it is the translational part of the pose of the object (i.e. three
+  double values separated by spaces). To detect the format, we check for
+  the number of spaces after trimming the string.
+  * Simplify code: Avoid reading full stream
+  Co-authored-by: Robert Haschke <rhaschke@techfak.uni-bielefeld.de>
+* Switch to std::bind (`#2967 <https://github.com/ros-planning/moveit2/issues/2967>`_)
+  * boost::bind -> std::bind
+  grep -rlI --exclude-dir=.git "boost::bind" | xargs sed -i 's/boost::bind/std::bind/g'
+  * Convert bind placeholders
+  grep -rlI --exclude-dir=.git " _[0-9]" | xargs sed -i 's/ _\([0-9]\)/ std::placeholders::_\1/g'
+  * Update bind include header
+  grep -rlI --exclude-dir=.git "boost/bind" | xargs sed -i 's#boost/bind.hpp#functional#'
+* Add waypoint duration to the trajectory deep copy unit test (`#2961 <https://github.com/ros-planning/moveit2/issues/2961>`_)
+  * Add waypoint duration to the trajectory deep copy test
+  * Slightly more accurate comments
+* 1.1.6
+* Silent warning about virtual_joint in Gazebo setups
+  Gazebo requires a fixed joint from world to the first robot link.
+  This resembles the virtual_joint of SRDF.
+  However, the RobotModel parser issues the following warning:
+  Skipping virtual joint 'xxx' because its child frame 'xxx' does not match the URDF frame 'world'
+* Drop the minimum velocity/acceleration limits for TOTG (`#2937 <https://github.com/ros-planning/moveit2/issues/2937>`_)
+  Just complain about negative / zero values.
+* Fix Debug build: re-add seemingly unused arguments
+* Merge `#2918 <https://github.com/ros-planning/moveit2/issues/2918>`_ (add RobotState::getRigidlyAttachedParentLink)
+  Merge branch 'pr-master-state-rigidly-attached-parent'
+* add RS::getRigidlyConnectedParentLinkModel
+  to resolve links for attached objects as well
+* consistent parameter names for AttachedBody constructor
+  "attach_posture" is plain wrong.
+  I don't see why clang-tidy did not find this before.
+* Contributors: Abishalini, AndyZe, Burak Payzun, Cory Crean, David V. Lu!!, Henning Kayser, Jafar, Jafar Abdi, Jochen Sprickerhof, Jonathan Grebe, Martin Oehler, Michael Görner, Robert Haschke, Sencer Yazıcı, Simon Schmeisser, Stephanie Eng, Tyler Weaver, Wolfgang Merkt, jeoseo, pvanlaar, v4hn
+
 2.4.0 (2022-01-20)
 ------------------
 * Move background_processing (`#997 <https://github.com/ros-planning/moveit2/issues/997>`_)

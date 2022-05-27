@@ -2,6 +2,24 @@
 Changelog for package moveit_planners_ompl
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.5.0 (2022-05-26)
+------------------
+* Make moveit_common a 'depend' rather than 'build_depend' (`#1226 <https://github.com/ros-planning/moveit2/issues/1226>`_)
+* Avoid bind(), use lambdas instead (`#1204 <https://github.com/ros-planning/moveit2/issues/1204>`_)
+* banish bind()
+  source:https://github.com/ros-planning/moveit/pull/3106/commits/a2911c80c28958c1fce8fb52333d770248c4ec05; required minor updates compared to original source commit in order to ensure compatibility with ROS2
+* planning_context_manager: rename protected methods
+  sources: https://github.com/ros-planning/moveit/pull/3106/commits/a183bc16f0b5490b1b40789ad2709d1cdbba7453, https://github.com/ros-planning/moveit/pull/3106/commits/c07be63b6cd5cfcea51e91e613bea9be68950754;
+* Revert OMPL parameter loading
+* [ompl] Small code refactor (`#1138 <https://github.com/ros-planning/moveit2/issues/1138>`_)
+* Remove new operators (`#1135 <https://github.com/ros-planning/moveit2/issues/1135>`_)
+* Merge https://github.com/ros-planning/moveit/commit/a25515b73d682df03ed3eccd839110c296aa79fc
+* Delete profiler (`#998 <https://github.com/ros-planning/moveit2/issues/998>`_)
+* Use termination condition for simplification step (`#2981 <https://github.com/ros-planning/moveit2/issues/2981>`_)
+  ... to allow canceling the simplification step
+* Switch to std::bind (`#2967 <https://github.com/ros-planning/moveit2/issues/2967>`_)
+* Contributors: Abishalini, Gaël Écorchard, Henning Kayser, Jafar, Jochen Sprickerhof, Robert Haschke, Sencer Yazıcı, Simon Schmeisser, Tyler Weaver, Vatan Aksoy Tezer, jeoseo, rhaschke, v4hn
+
 2.4.0 (2022-01-20)
 ------------------
 * moveit_build_options()

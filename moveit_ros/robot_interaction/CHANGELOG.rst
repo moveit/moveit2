@@ -2,6 +2,46 @@
 Changelog for package moveit_ros_robot_interaction
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.5.0 (2022-05-26)
+------------------
+* Merge https://github.com/ros-planning/moveit/commit/72d919299796bffc21f5eb752d66177841dc3442
+* Enable cppcheck (`#1224 <https://github.com/ros-planning/moveit2/issues/1224>`_)
+  Co-authored-by: jeoseo <jeongwooseo2012@gmail.com>
+* Make moveit_common a 'depend' rather than 'build_depend' (`#1226 <https://github.com/ros-planning/moveit2/issues/1226>`_)
+* Avoid bind(), use lambdas instead (`#1204 <https://github.com/ros-planning/moveit2/issues/1204>`_)
+  Adaption of https://github.com/ros-planning/moveit/pull/3106
+* banish bind()
+  source:https://github.com/ros-planning/moveit/pull/3106/commits/a2911c80c28958c1fce8fb52333d770248c4ec05; required minor updates compared to original source commit in order to ensure compatibility with ROS2
+* various: prefer object and references over pointers
+  source: https://github.com/ros-planning/moveit/pull/3106/commits/1a8e5715e3142a92977ac585031b9dc1871f8718; this commit contains minor changes when compared to the source commit which it is based on, these changes are limited to ensuring compatibility with ROS2.
+* Merge https://github.com/ros-planning/moveit/commit/424a5b7b8b774424f78346d1e98bf1c9a33f0e78
+* Remove new operators (`#1135 <https://github.com/ros-planning/moveit2/issues/1135>`_)
+  replace new operator with make_shared
+* Consider eef's parent group when creating eef markers (`#3095 <https://github.com/ros-planning/moveit2/issues/3095>`_)
+  If we have end-effector(s) defined, a corresponding rviz marker for IK
+  should be created only if the eef's group matches the considered JMG.
+* Merge https://github.com/ros-planning/moveit/commit/a25515b73d682df03ed3eccd839110c296aa79fc
+* Merge https://github.com/ros-planning/moveit/commit/ab42a1d7017b27eb6c353fb29331b2da08ab0039
+* 1.1.9
+* 1.1.8
+* 1.1.7
+* Disable slow robot_interaction tests in DEBUG mode (`#3014 <https://github.com/ros-planning/moveit2/issues/3014>`_)
+  These tests are known to run for a very long time in debug builds. So let's disable them in this case.
+  If you still insist to run them, you can do so via `locked_robot_state_test --gtest_also_run_disabled_tests`
+* Add marker for subgroups even if no endeffector is defined for them (`#2977 <https://github.com/ros-planning/moveit2/issues/2977>`_)
+  For single groups, the old logic fell back to add a marker
+  for the last link if IK is supported for it and no endeffector is defined.
+  That (quite reasonable) fallback did not yet work for subgroups though.
+* Switch to std::bind (`#2967 <https://github.com/ros-planning/moveit2/issues/2967>`_)
+  * boost::bind -> std::bind
+  grep -rlI --exclude-dir=.git "boost::bind" | xargs sed -i 's/boost::bind/std::bind/g'
+  * Convert bind placeholders
+  grep -rlI --exclude-dir=.git " _[0-9]" | xargs sed -i 's/ _\([0-9]\)/ std::placeholders::_\1/g'
+  * Update bind include header
+  grep -rlI --exclude-dir=.git "boost/bind" | xargs sed -i 's#boost/bind.hpp#functional#'
+* 1.1.6
+* Contributors: Abishalini, Henning Kayser, Jafar, Jochen Sprickerhof, Michael Görner, Robert Haschke, Sencer Yazıcı, jeoseo, v4hn
+
 2.4.0 (2022-01-20)
 ------------------
 * Replace NULL with nullptr (`#961 <https://github.com/ros-planning/moveit2/issues/961>`_)

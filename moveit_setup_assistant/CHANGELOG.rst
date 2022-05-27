@@ -2,6 +2,187 @@
 Changelog for package moveit_setup_assistant
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.5.0 (2022-05-26)
+------------------
+* Make moveit_common a 'depend' rather than 'build_depend' (`#1226 <https://github.com/ros-planning/moveit2/issues/1226>`_)
+* Avoid bind(), use lambdas instead (`#1204 <https://github.com/ros-planning/moveit2/issues/1204>`_)
+  Adaption of https://github.com/ros-planning/moveit/pull/3106
+* banish bind()
+  source:https://github.com/ros-planning/moveit/pull/3106/commits/a2911c80c28958c1fce8fb52333d770248c4ec05; required minor updates compared to original source commit in order to ensure compatibility with ROS2
+* Merge https://github.com/ros-planning/moveit/commit/424a5b7b8b774424f78346d1e98bf1c9a33f0e78
+* Merge `#3081 <https://github.com/ros-planning/moveit2/issues/3081>`_: Improve Gazebo-compatible URDF generation in MSA
+* Add inertial/origin tag
+* Don't overwrite existing attributes
+* Merge https://github.com/ros-planning/moveit/commit/ab42a1d7017b27eb6c353fb29331b2da08ab0039
+* Move getGazeboCompatibleURDF() from MoveItConfigData to SimulationWidget
+  This is a function specific to the SimulationWidget
+* Provide button to open original URDF file
+* Fix widget layout
+* Use focusGiven() + focusLost() to generate and validate Gazebo URDF
+* XmlSyntaxHighlighter: allow nested highlighting
+* Replace manual highlighting with a SyntaxHighlighter
+* Simplify getGazeboCompatibleURDF()
+  Use a new utility function uniqueInsert() to avoid code duplication
+  when inserting XML elements uniquely.
+* getGazeboCompatibleURDF(): Compare original and final XML
+  Instead of manually keeping track of changes, compare the two docs.
+  This is much more robust.
+* getGazeboCompatibleURDF(): Skip catching YAML exceptions
+  There is no YAML involved!
+* fixup: config_path\_ -> static const CONFIG_PATH
+* fixup: Simplify saving
+  - new_gazebo_urdf\_ -> save_gazebo_urdf\_
+  - directly save content, avoid extra parsing
+  - hide overwrite button if doc is empty
+  - disable overwrite button if saving is not possible due to xacro
+* fixup: Drop hidden_func\_ from ConfigurationFilesWidget
+  but (re)create the list of to-be-generated files each time
+  entering the widget to allow for dynamic adaption of the file list
+* fixup: Improve message boxes
+* fixup: avoid code duplication
+* Allow (over)writing the Gazebo-compatible URDF
+* Use more specific check for correct tag
+* static_cast<std::string>(*) -> std::string(*)
+* fixup: (slightly) improve comment
+* fixup: avoid segfaults if expected XML elements are missing
+* fixup: fix variable name: transitions_elements -> transmission_elements
+* 1.1.9
+* Avoid creating duplicate transmission tags
+  Only add Gazebo transmission tags for joints if they are not yet present.
+* Fix collisions_updater's set comparison (`#3076 <https://github.com/ros-planning/moveit2/issues/3076>`_)
+  Use operator< of std::pair(string,string) for comparing two link pairs.
+* Compilation fixes for Jammy and bring back Rolling CI (`#1095 <https://github.com/ros-planning/moveit2/issues/1095>`_)
+  * Use jammy dockers and clang-format-12
+  * Fix unused depend, and move to python3-lxml
+  * add ompl to repos, fix versions and ogre
+  * Remove ogre keys
+  * Fix boolean node operator
+  * Stop building dockers on branch and fix servo null pointer
+  * update pre-commit to clang-format-12 and pre-commit fixes
+  * clang-format workaround and more pre-commit fixes
+* MSA: boost::bind -> std::bind (`#3039 <https://github.com/ros-planning/moveit2/issues/3039>`_)
+* Do not automatically load robot description in move_group.launch (`#3065 <https://github.com/ros-planning/moveit2/issues/3065>`_)
+  MoveIt should not overwrite a previously uploaded robot description.
+  It should only provide it optionally in demo mode.
+* Merge https://github.com/ros-planning/moveit/commit/25a63b920adf46f0a747aad92ada70d8afedb3ec
+* Merge https://github.com/ros-planning/moveit/commit/0d7462f140e03b4c319fa8cce04a47fe3f650c60
+* 1.1.8
+* Merge PR `#2938 <https://github.com/ros-planning/moveit2/issues/2938>`_: Rework ACM
+  Implement ACM defaults as a fallback instead of an override.
+  Based on `ros-planning/srdfdom#97 <https://github.com/ros-planning/srdfdom/issues/97>`_, this allows disabling collisions for specific links/objects by default and re-enabling individual pairs if necessary.
+* MSA: Add STOMP + OMPL-CHOMP configs (`#2955 <https://github.com/ros-planning/moveit2/issues/2955>`_)
+  - Add stomp planner to MSA
+  - Add OMPL-CHOMP planner to MSA
+  - Remove obsolete CHOMP parameters
+  - Update CHOMP config parameters to match code defaults
+  - Create CHOMP config via template (instead of code)
+  Co-authored-by: Robert Haschke <rhaschke@techfak.uni-bielefeld.de>
+* 1.1.7
+* Move MoveItConfigData::setCollisionLinkPairs to collisions_updater.cpp
+  This method is only used there to update disabled collision entries.
+* Unify initialization of ACM from SRDF
+* Adapt to API changes in srdfdom
+  @v4hn requested splitting of collision_pairs into (re)enabled and disabled.
+* Adapt to API changes in srdfdom
+* Merge PR `#3013 <https://github.com/ros-planning/moveit2/issues/3013>`_: MSA cleanup
+* Modernize loops
+* Pass xacro_args to both, urdf and srdf loading
+* Switch to std::bind (`#2967 <https://github.com/ros-planning/moveit2/issues/2967>`_)
+  * boost::bind -> std::bind
+  grep -rlI --exclude-dir=.git "boost::bind" | xargs sed -i 's/boost::bind/std::bind/g'
+  * Convert bind placeholders
+  grep -rlI --exclude-dir=.git " _[0-9]" | xargs sed -i 's/ _\([0-9]\)/ std::placeholders::_\1/g'
+  * Update bind include header
+  grep -rlI --exclude-dir=.git "boost/bind" | xargs sed -i 's#boost/bind.hpp#functional#'
+* MSA: Notice file updates (`#2964 <https://github.com/ros-planning/moveit2/issues/2964>`_)
+  This commit fixes a MSA bug causing files in a loaded MoveIt config to be incorrectly classified as externally modified
+  after being written by the "Generate Package" button.
+  As this status is solely based on the file timestamp relative to the timestamp stored in the .setupassistant file,
+  we need to update this timestamp when we wrote the files.
+* Upload controller_list for simple controller manager (`#2954 <https://github.com/ros-planning/moveit2/issues/2954>`_)
+* 1.1.6
+* Various improvements to MSA: `#2932 <https://github.com/ros-planning/moveit2/issues/2932>`_, `#2945 <https://github.com/ros-planning/moveit2/issues/2945>`_, `#2946 <https://github.com/ros-planning/moveit2/issues/2946>`_
+* Pilz: Define default planner
+* Simplify definition of `planning_plugin` parameter
+  There is no means to declare the planning_plugin as an arg first.
+* Allow checking/unchecking multiple files for generation
+* Improve instructions
+* moveit.rviz: Use Orbit view controller
+* moveit.rviz template: remove link names
+* Rename launch argument execution_type -> fake_execution_type
+  ... to clarify that this parameter is only used for fake controllers
+* gazebo.launch: delayed unpause
+  Only unpause simulation when robot model was loaded.
+  This ensures that the initial pose is actually held.
+* gazebo.yaml: Allow initial_joint_positions
+* gazebo.launch: Load URDF via xacro if neccessary
+* Modularize demo_gazebo.launch: draw on demo.launch
+* demo.launch: start joint + robot-state publishers in fake mode only
+  This will facilitate re-use of demo.launch.
+* Formatting
+* Fix controller choice
+  - Provide all types of JointTrajectoryController as well as
+  FollowJointTrajectory and GripperCommand (use by simple manager)
+  - Use effort_controllers/JointTrajectoryController as default
+  - Create FollowJointTrajectory entries for any JointTrajectoryController
+* Simplify code
+* Update widget texts to speak about generic controllers
+* Rename ROSControllersWidget -> ControllersWidget
+* Rename files ros_controllers_widget.* -> controllers_widget.*
+* Rename ros_controllers_config\_ -> controller_configs\_
+* Rename functions *ROSController* -> *Controller*
+* Rename ROSControlConfig -> ControllerConfig
+* Fix ros_controllers.yaml: always handle joints as sequence
+* Rework controller config generation
+  We should write separate controller config files for different controller managers:
+  - simple_moveit_controllers.yaml handles everything relevant for SimpleMoveItControllerManager
+  - ros_controllers.yaml handles ros_control config
+  - gazebo_controllers.yaml handles controllers required for Gazebo
+* Add gazebo_controllers.yaml
+* Fix handling of sensors_3d.yaml
+  - Reading both, the default and the existing package's sensors_3d.yaml
+  into the config, the config file was growing by 2 configs each time.
+  - Not visiting the Perception tab, was writing the default config with 2 entries
+  - Selecting "None" was writing an invalid config:
+  sensors:
+  - {}
+  - {}
+* Cleanup generation of ros_controllers.yaml
+* Rework moveit_controller_manager handling
+  There are 3 basic MoveIt controller manager plugins:
+  - fake = `moveit_fake_controller_manager::MoveItFakeControllerManager`
+  Used in demo.launch. Doesn't really control the robot, but just
+  interpolates between via points. Allows these execution_types:
+  - via points: just jumps to the via points
+  - interpolate: linearly interpolates between via points (default)
+  - last point: jumps to the final trajectory point (used for fast execution testing)
+  - ros_control = `moveit_ros_control_interface::MoveItControllerManager`
+  Interfaces to ros_control controllers.
+  - simple = `moveit_simple_controller_manager/MoveItSimpleControllerManager`
+  Interfaces to action servers for `FollowJointTrajectory` and/or `GripperCommand`
+  that in turn interface to the low-level robot controllers (typically based on ros_control)
+  However, so far move_group.launch distinguished between `fake` and `robot` only.
+  The argument moveit_controller_manager now allows switching between all 3 variants.
+  Adding more *_moveit_controller_manager.launch files allows for an extension of this scheme.
+* Fix definition of real-robot moveit_controller_manager
+  Fixes the following error (occurring since 61d18f2f073aa4c8a13c2278c41a63591d401c4a)
+  ```
+  [FATAL] ros.moveit_ros_planning.trajectory_execution_manager:
+  Exception while loading controller manager 'robot':
+  According to the loaded plugin descriptions the class robot
+  with base class type moveit_controller_manager::MoveItControllerManager does not exist.
+  ```
+  As we introduced `pass_all_args="true"`, the value of the argument
+  `moveit_controller_manager` was the robot name.
+* Remove execution_type argument from real-robot controller_manager.launch
+* moveit_controller_manager.launch: pass execution_type via pass_all_args (`#2928 <https://github.com/ros-planning/moveit2/issues/2928>`_)
+  While we need to pass execution_type to fake_moveit_controller_manager.launch,
+  the controller_manager.launch files of real-robot shouldn't be required
+  to define this argument. However, if they don't roslaunch fails with an
+  `unused args` exception (see `#2786 <https://github.com/ros-planning/moveit2/issues/2786>`_).
+  Passing arguments via pass_all_args should solve that issue.
+* Contributors: Abishalini, Henning Kayser, Jafar, Jochen Sprickerhof, Loy van Beek, Michael Görner, Rick Staa, Robert Haschke, Vatan Aksoy Tezer, jeoseo, rickstaa, v4hn
+
 2.4.0 (2022-01-20)
 ------------------
 * Replace NULL with nullptr (`#961 <https://github.com/ros-planning/moveit2/issues/961>`_)

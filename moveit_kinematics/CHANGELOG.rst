@@ -2,6 +2,26 @@
 Changelog for package moveit_kinematics
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.5.0 (2022-05-26)
+------------------
+* Fix reading joint weights in KDLKinematicsPlugin (`#1216 <https://github.com/ros-planning/moveit2/issues/1216>`_)
+* Make moveit_common a 'depend' rather than 'build_depend' (`#1226 <https://github.com/ros-planning/moveit2/issues/1226>`_)
+* Avoid bind(), use lambdas instead (`#1204 <https://github.com/ros-planning/moveit2/issues/1204>`_)
+  Adaption of https://github.com/ros-planning/moveit/pull/3106
+* remove unused arguments from kinematics test
+  source https://github.com/ros-planning/moveit/pull/3106/commits/ddb68b6178ecfde267b5c7c9734aa47f6c4c4a5f; I also had to amend moveit_msgs to moveit_msgs::msg in this commit, otherwise everything remains the same as source commit. When I ran the kinematics plugin test locally it threw an error both before and after this change. Hopefully we can revisit this point as part of the code review, the error related to the robot description.
+* Use orocos_kdl_vendor package (`#1207 <https://github.com/ros-planning/moveit2/issues/1207>`_)
+* Use a steady clock for timeout for IK (`#795 <https://github.com/ros-planning/moveit2/issues/795>`_)
+* Merge https://github.com/ros-planning/moveit/commit/a25515b73d682df03ed3eccd839110c296aa79fc
+* Merge https://github.com/ros-planning/moveit/commit/ab42a1d7017b27eb6c353fb29331b2da08ab0039
+* Compilation fixes for Jammy and bring back Rolling CI (`#1095 <https://github.com/ros-planning/moveit2/issues/1095>`_)
+* Add moveit_configs_utils package to simplify loading paramters (`#591 <https://github.com/ros-planning/moveit2/issues/591>`_)
+* round_collada_numbers.py: python 2/3 compatibility (`#2983 <https://github.com/ros-planning/moveit2/issues/2983>`_)
+  Python3 requires the files to be opened in binary mode read a bytes object instead of a string, which is needed in turn by etree.parse().
+  Co-authored-by: Robert Haschke <rhaschke@techfak.uni-bielefeld.de>
+* Switch to std::bind (`#2967 <https://github.com/ros-planning/moveit2/issues/2967>`_)
+* Contributors: Abishalini, Gaël Écorchard, Henning Kayser, Jafar, Jafar Abdi, Jochen Sprickerhof, Robert Haschke, Tomislav Bazina, Vatan Aksoy Tezer, jeoseo, v4hn
+
 2.4.0 (2022-01-20)
 ------------------
 * Fix IKFast test dependency (`#993 <https://github.com/ros-planning/moveit2/issues/993>`_)

@@ -44,9 +44,37 @@
 #include <sstream>
 #include <string>
 #include <boost/filesystem/path.hpp>
+#include <tf2_eigen/tf2_eigen.hpp>
 
 #include <moveit/collision_detection/collision_common.h>
 #include <moveit/collision_detection/collision_plugin_cache.h>
+
+// Test not setting the object's pose should use the shape pose as the object pose
+TEST(PlanningScene, TestOneShapeObjectPose)
+{
+  urdf::ModelInterfaceSharedPtr urdf_model = moveit::core::loadModelInterface("pr2");
+  srdf::ModelSharedPtr srdf_model = std::make_shared<srdf::Model>();
+  planning_scene::PlanningScene ps(urdf_model, srdf_model);
+
+  const std::string object_name = "object";
+  const Eigen::Isometry3d expected_transfrom = Eigen::Isometry3d::Identity() * Eigen::Translation3d(0.5, -0.25, 0.0);
+
+  moveit_msgs::msg::CollisionObject co;
+  co.header.frame_id = "base_footprint";
+  co.id = object_name;
+  co.operation = moveit_msgs::msg::CollisionObject::ADD;
+  co.primitives.push_back([] {
+    shape_msgs::msg::SolidPrimitive primitive;
+    primitive.type = shape_msgs::msg::SolidPrimitive::CYLINDER;
+    primitive.dimensions = { 0.25, 0.02 };
+    return primitive;
+  }());
+  co.primitive_poses.push_back(tf2::toMsg(expected_transfrom));
+
+  ps.processCollisionObjectMsg(co);
+
+  EXPECT_TRUE(expected_transfrom.isApprox(ps.getFrameTransform(object_name)));
+}
 
 TEST(PlanningScene, LoadRestore)
 {

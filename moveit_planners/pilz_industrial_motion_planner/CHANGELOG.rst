@@ -2,6 +2,58 @@
 Changelog for package pilz_industrial_motion_planner
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.5.0 (2022-05-26)
+------------------
+* Make moveit_common a 'depend' rather than 'build_depend' (`#1226 <https://github.com/ros-planning/moveit2/issues/1226>`_)
+* Avoid bind(), use lambdas instead (`#1204 <https://github.com/ros-planning/moveit2/issues/1204>`_)
+  Adaption of https://github.com/ros-planning/moveit/pull/3106
+* Fix double delete in PILZ CIRC generation (`#1229 <https://github.com/ros-planning/moveit2/issues/1229>`_)
+* banish bind()
+  source:https://github.com/ros-planning/moveit/pull/3106/commits/a2911c80c28958c1fce8fb52333d770248c4ec05; required minor updates compared to original source commit in order to ensure compatibility with ROS2
+* Use orocos_kdl_vendor package (`#1207 <https://github.com/ros-planning/moveit2/issues/1207>`_)
+* Remove new operators (`#1135 <https://github.com/ros-planning/moveit2/issues/1135>`_)
+  replace new operator with make_shared
+* [moveit_cpp] Fix double param declaration (`#1097 <https://github.com/ros-planning/moveit2/issues/1097>`_)
+* Merge https://github.com/ros-planning/moveit/commit/a25515b73d682df03ed3eccd839110c296aa79fc
+* Fix missing boost::ref -> std::ref
+* Merge https://github.com/ros-planning/moveit/commit/ab42a1d7017b27eb6c353fb29331b2da08ab0039
+* Compilation fixes for Jammy and bring back Rolling CI (`#1095 <https://github.com/ros-planning/moveit2/issues/1095>`_)
+* Merge https://github.com/ros-planning/moveit/commit/25a63b920adf46f0a747aad92ada70d8afedb3ec
+* Merge https://github.com/ros-planning/moveit/commit/0d7462f140e03b4c319fa8cce04a47fe3f650c60
+* Avoid downgrading default C++ standard (`#3043 <https://github.com/ros-planning/moveit2/issues/3043>`_)
+* Resolve ambiguous function specification (`#3040 <https://github.com/ros-planning/moveit2/issues/3040>`_)
+  As Eigen introduced construction from brace-initializers as well, we do need to distinguish between
+  void setJointGroupPositions(const JointModelGroup* group, const std::vector<double>&) and
+  void setJointGroupPositions(const JointModelGroup* group, const Eigen::VectorXd&)
+* Add missing test dependencies (`#1027 <https://github.com/ros-planning/moveit2/issues/1027>`_)
+* Add moveit_configs_utils package to simplify loading paramters (`#591 <https://github.com/ros-planning/moveit2/issues/591>`_)
+* Merge pr `#3000 <https://github.com/ros-planning/moveit2/issues/3000>`_: Pilz planner: improve reporting of invalid start joints
+* pilz: restrict start state check to active group
+* pilz: report joint name with invalid limits in start state
+  it does not provide enough feedback, is almost trivial and does redundant checks in the single case it's called from.
+* Switch to std::bind (`#2967 <https://github.com/ros-planning/moveit2/issues/2967>`_)
+* Fix orientation of subframe offset in Pilz planners (`#2890 <https://github.com/ros-planning/moveit2/issues/2890>`_)
+  Fix `#2879 <https://github.com/ros-planning/moveit2/issues/2879>`_ by reorienting the subframe offset applied to a goal pose in the PTP planner,
+* Merge PRs `#2948 <https://github.com/ros-planning/moveit2/issues/2948>`_ (improve CI) and `#2949 <https://github.com/ros-planning/moveit2/issues/2949>`_ (simplify ROS .test files)
+* Remove unused moveit_planning_execution.launch
+* Use test_environment.launch in unittests
+* Rename launch argument execution_type -> fake_execution_type
+  ... to clarify that this parameter is only used for fake controllers
+* Pilz unittests: use test_environment.launch
+* Merge PR `#2940 <https://github.com/ros-planning/moveit2/issues/2940>`_: Improve error messages of Pilz planner
+* Fix typo: demangel -> demangle
+* Remove deprecated xacro --inorder
+* Fix unittests by providing a valid JMG
+* Don't complain about missing limits for irrelevant JMGs
+  When planning an arm motion, Pilz's PTP planner shouldn't complain (and bail out)
+  on missing joint limits of hand joints!
+* Avoid duplicate error messages
+* Improve error messages
+  - Downgrade ERROR to WARN
+  - Report affected joint name
+  - Quote (possibly empty) planner id
+* Contributors: Abishalini, Gaël Écorchard, Henning Kayser, Jafar, Jafar Abdi, Jochen Sprickerhof, Robert Haschke, Sencer Yazıcı, Tom Noble, Tyler Weaver, Vatan Aksoy Tezer, jeoseo, v4hn
+
 2.4.0 (2022-01-20)
 ------------------
 * Remove 'using namespace' from header files. (`#994 <https://github.com/ros-planning/moveit2/issues/994>`_)
