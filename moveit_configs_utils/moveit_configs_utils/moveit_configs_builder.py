@@ -388,7 +388,7 @@ class MoveItConfigsBuilder(ParameterBuilder):
             for child in ros2_control_fake_components_desc.childNodes:
                 robot_description.documentElement.appendChild(child)
         self.__moveit_configs.robot_description = {
-            self.__robot_description: robot_description
+            self.__robot_description: robot_description.toxml()
         }
         return self
 
