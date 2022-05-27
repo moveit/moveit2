@@ -336,21 +336,50 @@ class MoveItConfigsBuilder(ParameterBuilder):
 
         self.__robot_description = robot_description
 
-    def robot_description(self, file_path: Optional[str] = None, mappings: dict = None):
+    def robot_description(
+        self,
+        file_path: Optional[str] = None,
+        mappings: dict = None,
+        auto_generate_fake_components: bool = True,
+        initial_position={},
+        initial_velocity={},
+    ):
         """Load robot description.
 
         :param file_path: Absolute or relative path to the URDF file (w.r.t. robot_name_moveit_config).
-        :param mappings: mappings to be passed when loading the xacro file.
+        :param mappings: Mappings to be passed when loading the xacro file.
+        :param auto_generate_fake_components: If true moveit_configs_utils will automatically generate the ros2_control description for the fake components
+        :param initial_position: A dictionary of joint_name -> initial_joint_position, only used ros2_control description is automatically generated
+        :param initial_velocity: A dictionary of joint_name -> initial_joint_velocity, only used ros2_control description is automatically generated
         :return: Instance of MoveItConfigsBuilder with robot_description loaded.
         """
         if file_path is None:
             robot_description_file_path = self.__urdf_package / self.__urdf_file_path
         else:
             robot_description_file_path = self._package_path / file_path
-        self.__moveit_configs.robot_description = {
-            self.__robot_description: load_xacro(
-                robot_description_file_path, mappings=mappings
+        robot_description = xacro.process_file(
+            robot_description_file_path, mappings=mappings
+        )
+        if auto_generate_fake_components:
+            if (
+                len(
+                    robot_description.documentElement.getElementsByTagName(
+                        "ros2_control"
+                    )
+                )
+                != 0
+            ):
+                raise RuntimeError(
+                    f"Can't auto-generate ros2_control fake components description, provided robot_description file '{robot_description_file_path}' already contains 'ros2_control' tag"
+                    "Make sure to set auto_generate_fake_components to false when calling robot_description(..., auto_generate_fake_components = false)"
+                )
+            ros2_control_fake_components_desc = generate_fake_system_description(
+                robot_description, initial_position, initial_velocity
             )
+            for child in ros2_control_fake_components_desc.childNodes:
+                robot_description.documentElement.appendChild(child)
+        self.__moveit_configs.robot_description = {
+            self.__robot_description: robot_description
         }
         return self
 
