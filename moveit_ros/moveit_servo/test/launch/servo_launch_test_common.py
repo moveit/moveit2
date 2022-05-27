@@ -16,7 +16,7 @@ from launch_param_builder import ParameterBuilder
 def generate_servo_test_description(
     *args,
     gtest_name: SomeSubstitutionsType,
-    start_position_path: SomeSubstitutionsType = None
+    initial_positions: SomeSubstitutionsType = None
 ):
 
     # Get parameters using the demo config file
@@ -26,16 +26,10 @@ def generate_servo_test_description(
         .to_dict()
     }
 
-    # Get URDF and SRDF
-    if start_position_path:
-        initial_positions_file = os.path.join(
-            os.path.dirname(__file__), start_position_path
-        )
-
     moveit_config = (
         MoveItConfigsBuilder("moveit_resources_panda")
         .robot_description(
-            file_path="config/panda.urdf.xacro", initial_positions=initial_positions_file
+            file_path="config/panda.urdf.xacro", initial_positions=initial_positions
         )
         .to_moveit_configs()
     )

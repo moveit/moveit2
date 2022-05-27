@@ -10,7 +10,15 @@ from servo_launch_test_common import generate_servo_test_description
 def generate_test_description():
     return generate_servo_test_description(
         gtest_name="test_servo_collision",
-        start_position_path="../config/collision_start_positions.yaml",
+        initial_positions={
+            "panda_joint1": 0.0,
+            "panda_joint2": -0.785,
+            "panda_joint3": 0.0,
+            "panda_joint4": -2.9,
+            "panda_joint5": 0.0,
+            "panda_joint6": 1.1,
+            "panda_joint7": 0.785,
+        },
     )
 
 

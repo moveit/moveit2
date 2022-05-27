@@ -10,7 +10,15 @@ from servo_launch_test_common import generate_servo_test_description
 def generate_test_description():
     return generate_servo_test_description(
         gtest_name="test_servo_singularity",
-        start_position_path="../config/singularity_start_positions.yaml",
+        initial_positions={
+            "panda_joint1": 0.221,
+            "panda_joint2": 0.530,
+            "panda_joint3": -0.231,
+            "panda_joint4": -0.920,
+            "panda_joint5": 0.117,
+            "panda_joint6": 1.439,
+            "panda_joint7": -1.286,
+        },
     )
 
 
