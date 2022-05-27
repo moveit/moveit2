@@ -8,6 +8,9 @@
   <class type="moveit_setup::srdf_setup::PlanningGroupsWidget" base_class_type="moveit_setup::SetupStepWidget">
     <description>Step to configure planning groups</description>
   </class>
+  <class type="moveit_setup::controllers::ControllersWidget" base_class_type="moveit_setup::SetupStepWidget">
+    <description>Step to configure robot controllers</description>
+  </class>
   <class type="moveit_setup::srdf_setup::RobotPosesWidget" base_class_type="moveit_setup::SetupStepWidget">
     <description>Step to configure robot poses</description>
   </class>
