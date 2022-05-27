@@ -94,7 +94,7 @@ SetupAssistantWidget::SetupAssistantWidget(rviz_common::ros_integration::RosNode
   setup_steps.push_back("moveit_setup::srdf_setup::RobotPosesWidget");
   setup_steps.push_back("moveit_setup::srdf_setup::EndEffectorsWidget");
   setup_steps.push_back("moveit_setup::srdf_setup::PassiveJointsWidget");
-  // setup_steps.push_back("moveit_setup::controllers::ControllersWidget");
+  setup_steps.push_back("moveit_setup::controllers::ControllersWidget");
   // setup_steps.push_back("moveit_setup::simulation::SimulationWidget");
   setup_steps.push_back("moveit_setup::app::PerceptionWidget");
   setup_steps.push_back("moveit_setup::app::LaunchesWidget");
