@@ -51,7 +51,7 @@ Example:
 """
 
 from pathlib import Path
-from typing import Optional, List
+from typing import Optional, List, Union
 import logging
 import xacro
 
@@ -68,7 +68,6 @@ moveit_configs_utils_path = Path(get_package_share_directory("moveit_configs_uti
 def generate_fake_system_description(
     robot_description: Document,
     initial_position={},
-    initial_velocity={},
 ) -> Document:
     """Generate ros2 control fake system description from urdf file"""
     robot = URDF.from_xml_string(robot_description.toxml())
@@ -92,7 +91,7 @@ def generate_fake_system_description(
               <param name="initial_value">{{initial_position.get(joint.name, 0.0)}}</param>
             </state_interface>
             <state_interface name="velocity">
-              <param name="initial_value">{{initial_velocity.get(joint.name, 0.0)}}</param>
+              <param name="initial_value">0.0</param>
             </state_interface>
         </joint>
         {%- endif %}
@@ -104,8 +103,7 @@ def generate_fake_system_description(
         template.render(
             joints=robot.joints,
             name=f"{robot.name.capitalize()}FakeSystem",
-            initial_position=initial_position,
-            initial_velocity=initial_velocity,
+            initial_position=initial_position or {},
         )
     )
 
@@ -341,16 +339,14 @@ class MoveItConfigsBuilder(ParameterBuilder):
         file_path: Optional[str] = None,
         mappings: dict = None,
         auto_generate_fake_components: bool = True,
-        initial_position={},
-        initial_velocity={},
+        initial_positions: Union[str, dict] = None,
     ):
         """Load robot description.
 
         :param file_path: Absolute or relative path to the URDF file (w.r.t. robot_name_moveit_config).
         :param mappings: Mappings to be passed when loading the xacro file.
         :param auto_generate_fake_components: If true moveit_configs_utils will automatically generate the ros2_control description for the fake components
-        :param initial_position: A dictionary of joint_name -> initial_joint_position, only used ros2_control description is automatically generated
-        :param initial_velocity: A dictionary of joint_name -> initial_joint_velocity, only used ros2_control description is automatically generated
+        :param initial_positions: A dictionary of joint_name -> initial_joint_position, only used when ros2_control description is automatically generated
         :return: Instance of MoveItConfigsBuilder with robot_description loaded.
         """
         if file_path is None:
@@ -373,8 +369,21 @@ class MoveItConfigsBuilder(ParameterBuilder):
                     f"Can't auto-generate ros2_control fake components description, provided robot_description file '{robot_description_file_path}' already contains 'ros2_control' tag"
                     "Make sure to set auto_generate_fake_components to false when calling robot_description(..., auto_generate_fake_components = false)"
                 )
+            if type(initial_positions) == str:
+                initial_positions = load_yaml(self._package_path / initial_positions)[
+                    "initial_positions"
+                ]
+            if initial_positions is None:
+                # For backward compatibility check for config/initial_positions.yaml
+                initial_positions_file = (
+                    self._package_path / "config" / "initial_positions.yaml"
+                )
+                if initial_positions_file.exists():
+                    initial_positions = load_yaml(initial_positions_file)[
+                        "initial_positions"
+                    ]
             ros2_control_fake_components_desc = generate_fake_system_description(
-                robot_description, initial_position, initial_velocity
+                robot_description, initial_positions
             )
             for child in ros2_control_fake_components_desc.childNodes:
                 robot_description.documentElement.appendChild(child)

@@ -33,7 +33,6 @@ def test_generated_panda_fake_components():
             + "/urdf/panda.urdf"
         ),
         initial_position={"panda_joint6": 1.4, "panda_finger_joint1": 0.2},
-        initial_velocity={"panda_joint1": -0.1, "panda_joint3": 0.1},
     )
     expected_output = (
         '<?xml version="1.0" ?>\n'
@@ -47,7 +46,7 @@ def test_generated_panda_fake_components():
         '\t\t\t<param name="initial_value">0.0</param>\n'
         "\t\t</state_interface>\n"
         '\t\t<state_interface name="velocity">\n'
-        '\t\t\t<param name="initial_value">-0.1</param>\n'
+        '\t\t\t<param name="initial_value">0.0</param>\n'
         "\t\t</state_interface>\n"
         "\t</joint>\n"
         '\t<joint name="panda_joint2">\n'
@@ -65,7 +64,7 @@ def test_generated_panda_fake_components():
         '\t\t\t<param name="initial_value">0.0</param>\n'
         "\t\t</state_interface>\n"
         '\t\t<state_interface name="velocity">\n'
-        '\t\t\t<param name="initial_value">0.1</param>\n'
+        '\t\t\t<param name="initial_value">0.0</param>\n'
         "\t\t</state_interface>\n"
         "\t</joint>\n"
         '\t<joint name="panda_joint4">\n'
@@ -136,7 +135,6 @@ def test_generated_fanuc_fake_components():
             + "/urdf/fanuc.urdf"
         ),
         initial_position={"joint_5": 1.4, "joint_6": 0.2},
-        initial_velocity={"joint_1": -0.1, "joint_3": 0.3},
     )
     expected_output = (
         '<?xml version="1.0" ?>\n'
@@ -150,7 +148,7 @@ def test_generated_fanuc_fake_components():
         '\t\t\t<param name="initial_value">0.0</param>\n'
         "\t\t</state_interface>\n"
         '\t\t<state_interface name="velocity">\n'
-        '\t\t\t<param name="initial_value">-0.1</param>\n'
+        '\t\t\t<param name="initial_value">0.0</param>\n'
         "\t\t</state_interface>\n"
         "\t</joint>\n"
         '\t<joint name="joint_2">\n'
@@ -168,7 +166,7 @@ def test_generated_fanuc_fake_components():
         '\t\t\t<param name="initial_value">0.0</param>\n'
         "\t\t</state_interface>\n"
         '\t\t<state_interface name="velocity">\n'
-        '\t\t\t<param name="initial_value">0.3</param>\n'
+        '\t\t\t<param name="initial_value">0.0</param>\n'
         "\t\t</state_interface>\n"
         "\t</joint>\n"
         '\t<joint name="joint_4">\n'
