@@ -53,13 +53,61 @@ Example:
 from pathlib import Path
 from typing import Optional, List
 import logging
+import xacro
+
 import re
 from ament_index_python.packages import get_package_share_directory
-
 from launch_param_builder import ParameterBuilder, load_yaml, load_xacro
-
+from jinja2 import Template
+from urdf_parser_py.urdf import URDF
+from xml.dom.minidom import Document, parseString
 
 moveit_configs_utils_path = Path(get_package_share_directory("moveit_configs_utils"))
+
+
+def generate_fake_system_description(
+    robot_description: Document,
+    initial_position={},
+    initial_velocity={},
+) -> Document:
+    """Generate ros2 control fake system description from urdf file"""
+    robot = URDF.from_xml_string(robot_description.toxml())
+    template = Template(
+        """
+    <ros2_control name="{{name}}" type="system">
+        <hardware>
+            <plugin>fake_components/GenericSystem</plugin>
+        </hardware>
+        {% for joint in joints -%}
+        {% if joint.type in ["revolute", "continuous", "prismatic"] -%}
+        <joint name="{{joint.name}}">
+            {% if joint.mimic -%}
+            <param name="mimic">{{joint.mimic.joint}}</param>
+            {% if joint.mimic.multiplier -%}
+            <param name="multiplier">{{joint.mimic.multiplier}}</param>
+            {%- endif %}
+            {%- endif %}
+            <command_interface name="position"/>
+            <state_interface name="position">
+              <param name="initial_value">{{initial_position.get(joint.name, 0.0)}}</param>
+            </state_interface>
+            <state_interface name="velocity">
+              <param name="initial_value">{{initial_velocity.get(joint.name, 0.0)}}</param>
+            </state_interface>
+        </joint>
+        {%- endif %}
+        {%- endfor %}
+    </ros2_control>
+    """
+    )
+    return parseString(
+        template.render(
+            joints=robot.joints,
+            name=f"{robot.name.capitalize()}FakeSystem",
+            initial_position=initial_position,
+            initial_velocity=initial_velocity,
+        )
+    )
 
 
 def get_pattern_matches(folder, pattern):
