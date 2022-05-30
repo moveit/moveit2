@@ -111,6 +111,7 @@ add_library(command_list_manager SHARED
   src/command_list_manager.cpp
   src/plan_components_builder.cpp
 )
+target_link_libraries(command_list_manager trajectory_generation_common joint_limits_common)
 ament_target_dependencies(command_list_manager ${THIS_PACKAGE_INCLUDE_DEPENDS})
 
 #############
@@ -161,7 +162,7 @@ target_link_libraries(sequence_capability joint_limits_common command_list_manag
 ## Install ##
 #############
 pluginlib_export_plugin_description_file(moveit_core plugins/pilz_industrial_motion_planner_plugin_description.xml)
-pluginlib_export_plugin_description_file(move_group plugins/sequence_capability_plugin_description.xml)
+pluginlib_export_plugin_description_file(moveit_ros_move_group plugins/sequence_capability_plugin_description.xml)
 pluginlib_export_plugin_description_file(pilz_industrial_motion_planner plugins/planning_context_plugin_description.xml)
 
 ## Mark libraries for installation
