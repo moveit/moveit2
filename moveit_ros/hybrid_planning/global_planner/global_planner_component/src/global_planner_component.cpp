@@ -43,6 +43,7 @@
 namespace
 {
 const rclcpp::Logger LOGGER = rclcpp::get_logger("global_planner_component");
+const auto JOIN_THREAD_TIMEOUT = std::chrono::seconds(1);
 }  // namespace
 
 namespace moveit::hybrid_planning
@@ -72,11 +73,28 @@ bool GlobalPlannerComponent::initializeGlobalPlanner()
   }
   global_planning_request_server_ = rclcpp_action::create_server<moveit_msgs::action::GlobalPlanner>(
       node_, global_planning_action_name,
-      [](const rclcpp_action::GoalUUID& /*unused*/,
-         std::shared_ptr<const moveit_msgs::action::GlobalPlanner::Goal> /*unused*/) {
+      // Goal callback
+      [this](const rclcpp_action::GoalUUID& /*unused*/,
+             std::shared_ptr<const moveit_msgs::action::GlobalPlanner::Goal> /*unused*/) {
         RCLCPP_INFO(LOGGER, "Received global planning goal request");
+        // If another goal is active, cancel it and reject this goal
+        if (long_callback_thread_.joinable())
+        {
+          // Try to terminate the execution thread
+          auto future = std::async(std::launch::async, &std::thread::join, &long_callback_thread_);
+          if (future.wait_for(JOIN_THREAD_TIMEOUT) == std::future_status::timeout)
+          {
+            RCLCPP_WARN(LOGGER, "Another goal was running. Rejecting the new hybrid planning goal.");
+            return rclcpp_action::GoalResponse::REJECT;
+          }
+          if (!global_planner_instance_->reset())
+          {
+            throw std::runtime_error("Failed to reset the global planner while aborting current global planning");
+          }
+        }
         return rclcpp_action::GoalResponse::ACCEPT_AND_EXECUTE;
       },
+      // Cancel callback
       [this](const std::shared_ptr<rclcpp_action::ServerGoalHandle<moveit_msgs::action::GlobalPlanner>>& /*unused*/) {
         RCLCPP_INFO(LOGGER, "Received request to cancel global planning goal");
         if (long_callback_thread_.joinable())
@@ -89,6 +107,7 @@ bool GlobalPlannerComponent::initializeGlobalPlanner()
         }
         return rclcpp_action::CancelResponse::ACCEPT;
       },
+      // Execution callback
       [this](std::shared_ptr<rclcpp_action::ServerGoalHandle<moveit_msgs::action::GlobalPlanner>> goal_handle) {
         // this needs to return quickly to avoid blocking the executor, so spin up a new thread
         if (long_callback_thread_.joinable())
