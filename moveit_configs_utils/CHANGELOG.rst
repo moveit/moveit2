@@ -2,6 +2,9 @@
 Changelog for package moveit_configs_utils
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.5.1 (2022-05-31)
+------------------
+
 2.5.0 (2022-05-26)
 ------------------
 * Add options to config for publishing description (`#1265 <https://github.com/ros-planning/moveit2/issues/1265>`_)

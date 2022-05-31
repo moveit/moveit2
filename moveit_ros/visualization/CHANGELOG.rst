@@ -2,6 +2,9 @@
 Changelog for package moveit_ros_visualization
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.5.1 (2022-05-31)
+------------------
+
 2.5.0 (2022-05-26)
 ------------------
 * Declare the default_planning_pipeline parameter (`#1227 <https://github.com/ros-planning/moveit2/issues/1227>`_)

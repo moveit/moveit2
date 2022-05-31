@@ -2,6 +2,9 @@
 Changelog for package moveit_ros_planning_interface
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.5.1 (2022-05-31)
+------------------
+
 2.5.0 (2022-05-26)
 ------------------
 * move_group_interface: No need to spin after publishing (`#1250 <https://github.com/ros-planning/moveit2/issues/1250>`_)

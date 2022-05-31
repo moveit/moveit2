@@ -2,6 +2,11 @@
 Changelog for package pilz_industrial_motion_planner
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.5.1 (2022-05-31)
+------------------
+* Fix exporting PILZ's move_group capabilities (`#1281 <https://github.com/ros-planning/moveit2/issues/1281>`_)
+* Contributors: Jafar
+
 2.5.0 (2022-05-26)
 ------------------
 * Make moveit_common a 'depend' rather than 'build_depend' (`#1226 <https://github.com/ros-planning/moveit2/issues/1226>`_)

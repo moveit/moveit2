@@ -2,6 +2,9 @@
 Changelog for package moveit_kinematics
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.5.1 (2022-05-31)
+------------------
+
 2.5.0 (2022-05-26)
 ------------------
 * Fix reading joint weights in KDLKinematicsPlugin (`#1216 <https://github.com/ros-planning/moveit2/issues/1216>`_)

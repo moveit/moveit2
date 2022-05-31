@@ -2,6 +2,9 @@
 Changelog for package moveit
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.5.1 (2022-05-31)
+------------------
+
 2.5.0 (2022-05-26)
 ------------------
 * Fix copyright notice in README script (`#1115 <https://github.com/ros-planning/moveit2/issues/1115>`_)

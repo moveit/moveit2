@@ -2,6 +2,9 @@
 Changelog for package moveit_ros_control_interface
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.5.1 (2022-05-31)
+------------------
+
 2.5.0 (2022-05-26)
 ------------------
 * Enable cppcheck (`#1224 <https://github.com/ros-planning/moveit2/issues/1224>`_)

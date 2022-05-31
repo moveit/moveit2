@@ -2,6 +2,9 @@
 Changelog for package moveit_core
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.5.1 (2022-05-31)
+------------------
+
 2.5.0 (2022-05-26)
 ------------------
 * Fix a bug when checking a pose is empty and TOTG corner case (`#1274 <https://github.com/ros-planning/moveit2/issues/1274>`_)

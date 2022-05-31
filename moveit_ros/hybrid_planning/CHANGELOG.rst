@@ -2,6 +2,11 @@
 Changelog for package moveit_hybrid_planning
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.5.1 (2022-05-31)
+------------------
+* Remove position controllers from CMake (`#1285 <https://github.com/ros-planning/moveit2/issues/1285>`_)
+* Contributors: Vatan Aksoy Tezer
+
 2.5.0 (2022-05-26)
 ------------------
 * Fix hybrid planning launching (`#1271 <https://github.com/ros-planning/moveit2/issues/1271>`_)
