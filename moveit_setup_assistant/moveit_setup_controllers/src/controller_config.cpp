@@ -289,7 +289,7 @@ void outputFollowJointTrajectoryYAML(YAML::Emitter& emitter, std::vector<Control
 // ******************************************************************************************
 // Output controllers config files
 // ******************************************************************************************
-bool ControllersConfig::GeneratedControllersConfig::writeYaml(YAML::Emitter& emitter)
+bool ControllersConfig::GeneratedControllersConfig::writeYaml(YAML::Emitter& /*emitter*/)
 {
   // Copy ros_control_config_ to a new vector to avoid modifying it
   std::vector<ControllerInfo> ros_controllers_config_output(parent_.ros_controllers_config_);
