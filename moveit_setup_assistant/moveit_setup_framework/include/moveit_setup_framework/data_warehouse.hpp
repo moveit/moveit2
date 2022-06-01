@@ -82,6 +82,30 @@ public:
   }
 
   /**
+   * @brief Get all of the registered configs that match the given config_class
+   *
+   * @param config_class The string representing the class name
+   * @returns Map of shared pointers from config names to singleton config
+   */
+  template <typename T>
+  std::unordered_map<std::string, std::shared_ptr<T>> getAll()
+  {
+    std::unordered_map<std::string, std::shared_ptr<T>> matches;
+    for (const auto& pair : registered_types_)
+    {
+      SetupConfigPtr uncast_ptr = get(pair.first);
+      std::shared_ptr<T> ptr = std::dynamic_pointer_cast<T>(uncast_ptr);
+      if (!ptr)
+      {
+        continue;
+      }
+
+      matches[pair.first] = ptr;
+    }
+    return matches;
+  }
+
+  /**
    * @brief Associates a class_name with the given name. Makes calls to get more succinct.
    */
   void registerType(const std::string& config_name, const std::string& config_class);

@@ -154,11 +154,16 @@ class MoveItConfigsBuilder(ParameterBuilder):
         self.__urdf_file_path = None
         self.__srdf_file_path = None
 
+        modified_urdf_path = Path("config") / (self.__robot_name + ".urdf.xacro")
+        if (self._package_path / modified_urdf_path).exists():
+            self.__urdf_package = self._package_path
+            self.__urdf_file_path = modified_urdf_path
+
         if setup_assistant_file.exists():
             setup_assistant_yaml = load_yaml(setup_assistant_file)
             config = setup_assistant_yaml.get("moveit_setup_assistant_config", {})
             urdf_config = config.get("urdf", config.get("URDF"))
-            if urdf_config:
+            if urdf_config and self.__urdf_package is None:
                 self.__urdf_package = Path(
                     get_package_share_directory(urdf_config["package"])
                 )
