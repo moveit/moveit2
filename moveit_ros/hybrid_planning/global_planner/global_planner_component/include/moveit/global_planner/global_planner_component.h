@@ -102,6 +102,9 @@ private:
 
   // This thread is used for long-running callbacks. It's a member so they do not go out of scope.
   std::thread long_callback_thread_;
+
+  // A unique callback group, to avoid mixing callbacks with other action servers
+  rclcpp::CallbackGroup::SharedPtr cb_group_;
 };
 
 }  // namespace moveit::hybrid_planning

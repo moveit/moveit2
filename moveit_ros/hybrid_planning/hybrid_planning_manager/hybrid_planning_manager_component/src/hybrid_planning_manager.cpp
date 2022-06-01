@@ -144,6 +144,7 @@ bool HybridPlanningManager::initialize()
     RCLCPP_ERROR(LOGGER, "hybrid_planning_action_name parameter was not defined");
     return false;
   }
+  cb_group_ = this->create_callback_group(rclcpp::CallbackGroupType::MutuallyExclusive);
   hybrid_planning_request_server_ = rclcpp_action::create_server<moveit_msgs::action::HybridPlanner>(
       this->get_node_base_interface(), this->get_node_clock_interface(), this->get_node_logging_interface(),
       this->get_node_waitables_interface(), hybrid_planning_action_name,
@@ -167,7 +168,8 @@ bool HybridPlanningManager::initialize()
           cancelHybridManagerGoals();
         }
         long_callback_thread_ = std::thread(&HybridPlanningManager::executeHybridPlannerGoal, this, goal_handle);
-      });
+      },
+      rcl_action_server_get_default_options(), cb_group_);
 
   // Initialize global solution subscriber
   global_solution_sub_ = create_subscription<moveit_msgs::msg::MotionPlanResponse>(

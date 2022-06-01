@@ -35,13 +35,13 @@ set(LIBRARIES
 
 set(THIS_PACKAGE_INCLUDE_DEPENDS
   moveit_core
+  moveit_msgs
   moveit_ros_planning
   moveit_ros_planning_interface
-  moveit_msgs
-  rclcpp
-  rclcpp_components
-  rclcpp_action
   pluginlib
+  rclcpp
+  rclcpp_action
+  rclcpp_components
   std_msgs
   std_srvs
   tf2_ros

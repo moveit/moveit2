@@ -71,6 +71,7 @@ bool GlobalPlannerComponent::initializeGlobalPlanner()
     RCLCPP_ERROR(LOGGER, "global_planning_action_name was not defined");
     return false;
   }
+  cb_group_ = node_->create_callback_group(rclcpp::CallbackGroupType::MutuallyExclusive);
   global_planning_request_server_ = rclcpp_action::create_server<moveit_msgs::action::GlobalPlanner>(
       node_, global_planning_action_name,
       // Goal callback
@@ -116,7 +117,8 @@ bool GlobalPlannerComponent::initializeGlobalPlanner()
           global_planner_instance_->reset();
         }
         long_callback_thread_ = std::thread(&GlobalPlannerComponent::globalPlanningRequestCallback, this, goal_handle);
-      });
+      },
+      rcl_action_server_get_default_options(), cb_group_);
 
   global_trajectory_pub_ = node_->create_publisher<moveit_msgs::msg::MotionPlanResponse>("global_trajectory", 1);
 
