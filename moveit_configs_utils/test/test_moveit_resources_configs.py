@@ -1,7 +1,7 @@
 import xacro
 from ament_index_python import get_package_share_directory
 
-from moveit_configs_utils import MoveItConfigsBuilder, generate_fake_system_description
+from moveit_configs_utils import MoveItConfigsBuilder, generate_fake_controllers
 
 
 def test_moveit_resources_configs():
@@ -25,8 +25,8 @@ def test_panda_with_gripper_config():
         assert False, f"moveit_resources_panda gripper config failed to build: {e}"
 
 
-def test_generated_panda_fake_components():
-    robot_description = generate_fake_system_description(
+def test_generated_panda_fake_controllers():
+    robot_description = generate_fake_controllers(
         xacro.process_file(
             get_package_share_directory("moveit_resources_panda_description")
             + "/urdf/panda.urdf"
@@ -128,7 +128,7 @@ def test_generated_panda_fake_components():
 
 
 def test_generated_fanuc_fake_components():
-    robot_description = generate_fake_system_description(
+    robot_description = generate_fake_controllers(
         xacro.process_file(
             get_package_share_directory("moveit_resources_fanuc_description")
             + "/urdf/fanuc.urdf"

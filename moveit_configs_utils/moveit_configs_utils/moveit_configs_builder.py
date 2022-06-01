@@ -65,7 +65,7 @@ from xml.dom.minidom import Document, parseString
 moveit_configs_utils_path = Path(get_package_share_directory("moveit_configs_utils"))
 
 
-def generate_fake_system_description(
+def generate_fake_controllers(
     robot_description: Document,
     initial_position={},
 ) -> Document:
@@ -338,14 +338,14 @@ class MoveItConfigsBuilder(ParameterBuilder):
         self,
         file_path: Optional[str] = None,
         mappings: dict = None,
-        auto_generate_fake_components: bool = True,
+        auto_generate_fake_controllers: bool = True,
         initial_positions: Union[str, dict] = None,
     ):
         """Load robot description.
 
         :param file_path: Absolute or relative path to the URDF file (w.r.t. robot_name_moveit_config).
         :param mappings: Mappings to be passed when loading the xacro file.
-        :param auto_generate_fake_components: If true moveit_configs_utils will automatically generate the ros2_control description for the fake components
+        :param auto_generate_fake_controllers: If true moveit_configs_utils will automatically generate the ros2_control description for the fake components
         :param initial_positions: A dictionary of joint_name -> initial_joint_position, only used when ros2_control description is automatically generated
         :return: Instance of MoveItConfigsBuilder with robot_description loaded.
         """
@@ -356,7 +356,7 @@ class MoveItConfigsBuilder(ParameterBuilder):
         robot_description = xacro.process_file(
             robot_description_file_path, mappings=mappings
         )
-        if auto_generate_fake_components:
+        if auto_generate_fake_controllers:
             if (
                 len(
                     robot_description.documentElement.getElementsByTagName(
@@ -367,7 +367,7 @@ class MoveItConfigsBuilder(ParameterBuilder):
             ):
                 raise RuntimeError(
                     f"Can't auto-generate ros2_control fake components description, provided robot_description file '{robot_description_file_path}' already contains 'ros2_control' tag"
-                    "Make sure to set auto_generate_fake_components to false when calling robot_description(..., auto_generate_fake_components = false)"
+                    "Make sure to set auto_generate_fake_controllers to false when calling robot_description(..., auto_generate_fake_controllers = false)"
                 )
             if type(initial_positions) == str:
                 initial_positions = load_yaml(self._package_path / initial_positions)[
@@ -382,7 +382,7 @@ class MoveItConfigsBuilder(ParameterBuilder):
                     initial_positions = load_yaml(initial_positions_file)[
                         "initial_positions"
                     ]
-            ros2_control_fake_components_desc = generate_fake_system_description(
+            ros2_control_fake_components_desc = generate_fake_controllers(
                 robot_description, initial_positions
             )
             for child in ros2_control_fake_components_desc.childNodes:
