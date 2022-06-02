@@ -1,9 +1,15 @@
 # ghcr.io/ros-planning/moveit2:${ROS_DISTRO}-ci
 # ROS base image augmented with all MoveIt dependencies to use for CI
 
+<<<<<<< HEAD
 ARG ROS_DISTRO=foxy
 FROM ros:${ROS_DISTRO}-ros-base-focal
 MAINTAINER Robert Haschke rhaschke@techfak.uni-bielefeld.de
+=======
+ARG ROS_DISTRO=rolling
+FROM ros:${ROS_DISTRO}-ros-base
+LABEL maintainer Robert Haschke rhaschke@techfak.uni-bielefeld.de
+>>>>>>> cea57649b (Add hadolint for linting dockerfiles (#1306))
 
 ENV TERM xterm
 
@@ -18,7 +24,7 @@ COPY . src/moveit2
 RUN \
     # Update apt package list as previous containers clear the cache
     apt-get -q update && \
-    apt-get -q -y dist-upgrade && \
+    apt-get -q -y upgrade && \
     #
     # Install some base dependencies
     apt-get -q install --no-install-recommends -y \
