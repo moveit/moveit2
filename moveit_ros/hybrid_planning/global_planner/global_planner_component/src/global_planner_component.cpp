@@ -43,6 +43,7 @@
 namespace
 {
 const rclcpp::Logger LOGGER = rclcpp::get_logger("global_planner_component");
+const auto JOIN_THREAD_TIMEOUT = std::chrono::seconds(1);
 }  // namespace
 
 namespace moveit::hybrid_planning
@@ -70,24 +71,54 @@ bool GlobalPlannerComponent::initializeGlobalPlanner()
     RCLCPP_ERROR(LOGGER, "global_planning_action_name was not defined");
     return false;
   }
+  cb_group_ = node_->create_callback_group(rclcpp::CallbackGroupType::MutuallyExclusive);
   global_planning_request_server_ = rclcpp_action::create_server<moveit_msgs::action::GlobalPlanner>(
       node_, global_planning_action_name,
-      [](const rclcpp_action::GoalUUID& /*unused*/,
-         std::shared_ptr<const moveit_msgs::action::GlobalPlanner::Goal> /*unused*/) {
+      // Goal callback
+      [this](const rclcpp_action::GoalUUID& /*unused*/,
+             std::shared_ptr<const moveit_msgs::action::GlobalPlanner::Goal> /*unused*/) {
         RCLCPP_INFO(LOGGER, "Received global planning goal request");
+        // If another goal is active, cancel it and reject this goal
+        if (long_callback_thread_.joinable())
+        {
+          // Try to terminate the execution thread
+          auto future = std::async(std::launch::async, &std::thread::join, &long_callback_thread_);
+          if (future.wait_for(JOIN_THREAD_TIMEOUT) == std::future_status::timeout)
+          {
+            RCLCPP_WARN(LOGGER, "Another goal was running. Rejecting the new hybrid planning goal.");
+            return rclcpp_action::GoalResponse::REJECT;
+          }
+          if (!global_planner_instance_->reset())
+          {
+            throw std::runtime_error("Failed to reset the global planner while aborting current global planning");
+          }
+        }
         return rclcpp_action::GoalResponse::ACCEPT_AND_EXECUTE;
       },
+      // Cancel callback
       [this](const std::shared_ptr<rclcpp_action::ServerGoalHandle<moveit_msgs::action::GlobalPlanner>>& /*unused*/) {
         RCLCPP_INFO(LOGGER, "Received request to cancel global planning goal");
+        if (long_callback_thread_.joinable())
+        {
+          long_callback_thread_.join();
+        }
         if (!global_planner_instance_->reset())
         {
           throw std::runtime_error("Failed to reset the global planner while aborting current global planning");
         }
         return rclcpp_action::CancelResponse::ACCEPT;
       },
+      // Execution callback
       [this](std::shared_ptr<rclcpp_action::ServerGoalHandle<moveit_msgs::action::GlobalPlanner>> goal_handle) {
-        return globalPlanningRequestCallback(goal_handle);
-      });
+        // this needs to return quickly to avoid blocking the executor, so spin up a new thread
+        if (long_callback_thread_.joinable())
+        {
+          long_callback_thread_.join();
+          global_planner_instance_->reset();
+        }
+        long_callback_thread_ = std::thread(&GlobalPlannerComponent::globalPlanningRequestCallback, this, goal_handle);
+      },
+      rcl_action_server_get_default_options(), cb_group_);
 
   global_trajectory_pub_ = node_->create_publisher<moveit_msgs::msg::MotionPlanResponse>("global_trajectory", 1);
 

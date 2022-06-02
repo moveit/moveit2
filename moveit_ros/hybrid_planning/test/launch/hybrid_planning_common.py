@@ -1,5 +1,4 @@
 # Return a list of nodes we commonly launch for the demo. Nice for testing use.
-import launch
 import os
 import xacro
 import yaml
