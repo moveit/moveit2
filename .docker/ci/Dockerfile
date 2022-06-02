@@ -2,13 +2,8 @@
 # ROS base image augmented with all MoveIt dependencies to use for CI
 
 ARG ROS_DISTRO=rolling
-<<<<<<< HEAD
 FROM ros:${ROS_DISTRO}-ros-base-focal
-MAINTAINER Robert Haschke rhaschke@techfak.uni-bielefeld.de
-=======
-FROM ros:${ROS_DISTRO}-ros-base
 LABEL maintainer Robert Haschke rhaschke@techfak.uni-bielefeld.de
->>>>>>> cea57649b (Add hadolint for linting dockerfiles (#1306))
 
 ENV TERM xterm
 

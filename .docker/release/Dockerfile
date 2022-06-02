@@ -2,13 +2,8 @@
 # Full debian-based install of MoveIt using apt-get
 
 ARG ROS_DISTRO=rolling
-<<<<<<< HEAD
 FROM ros:${ROS_DISTRO}-ros-base-focal
-MAINTAINER Robert Haschke rhaschke@techfak.uni-bielefeld.de
-=======
-FROM ros:${ROS_DISTRO}-ros-base
 LABEL maintainer Robert Haschke rhaschke@techfak.uni-bielefeld.de
->>>>>>> cea57649b (Add hadolint for linting dockerfiles (#1306))
 
 # Commands are combined in single RUN statement with "apt/lists" folder removal to reduce image size
 RUN apt-get update -q && \
