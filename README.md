@@ -1,6 +1,6 @@
-<img src="https://moveit.ros.org/assets/logo/moveit2/moveit_logo-black.png" alt="MoveIt 2 Logo" width="200"/>
+<img src="https://moveit.ros.org/assets/logo/moveit_logo-black.png" alt="MoveIt Logo" width="200"/>
 
-The MoveIt Motion Planning Framework for **ROS 2**. For ROS 1, see [MoveIt 1](https://github.com/ros-planning/moveit).
+The [MoveIt Motion Planning Framework for ROS 2](http://moveit.ros.org).
 
 *Easy-to-use open source robotics manipulation platform for developing commercial applications, prototyping designs, and benchmarking algorithms.*
 
@@ -10,43 +10,32 @@ The MoveIt Motion Planning Framework for **ROS 2**. For ROS 1, see [MoveIt 1](ht
 [![CI (Rolling and Humble)](https://github.com/ros-planning/moveit2/actions/workflows/ci.yaml/badge.svg?branch=main)](https://github.com/ros-planning/moveit2/actions/workflows/ci.yaml?query=branch%3Amain)
 [![Code Coverage](https://codecov.io/gh/ros-planning/moveit2/branch/main/graph/badge.svg?token=W7uHKcY0ly)](https://codecov.io/gh/ros-planning/moveit2)
 
-## General MoveIt Documentation
-
-- [MoveIt Website](http://moveit.ros.org)
-- [Tutorials and Documentation](https://ros-planning.github.io/moveit_tutorials/)
-- [How to Get Involved](http://moveit.ros.org/about/get_involved/)
-- [Future Release Dates](https://moveit.ros.org/#release-versions)
-
-## MoveIt 2 Specific Documentation
-
-- [MoveIt 2 Migration Progress](https://docs.google.com/spreadsheets/d/1aPb3hNP213iPHQIYgcnCYh9cGFUlZmi_06E_9iTSsOI/edit?usp=sharing)
-- [MoveIt 2 Migration Guidelines](doc/MIGRATION_GUIDE.md)
-- [MoveIt 2 Development Roadmap](https://moveit.ros.org/documentation/contributing/roadmap/)
-
-## Source Build
-
-See [MoveIt 2 Source Build - Linux](https://moveit.ros.org/install-moveit2/source/)
-
 ## Getting Started
 
-We've prepared a simple demo setup that you can use for quickly spinning up a simulated robot environment with MoveItCpp.
-See the [MoveItCpp Tutorial](https://moveit.picknik.ai/foxy/doc/moveit_cpp/moveitcpp_tutorial.html) for further instructions and information.
+See our extensive [Tutorials and Documentation](https://moveit.picknik.ai/)
 
-The [Move Group C++ Interface](https://moveit.picknik.ai/foxy/doc/move_group_interface/move_group_interface_tutorial.html) provides a simple launch file for running a MoveGroup setup.
-You can test it using the MotionPlanning display in RViz or by implementing your own MoveGroupInterface application.
+## Install
 
-## Having Doxygen Reference Locally
-See [How To Generate API Doxygen Reference Locally](https://moveit.picknik.ai/main/doc/how_to_guides/how_to_generate_api_doxygen_locally.html)
+- [Binary Install](https://moveit.ros.org/install-moveit2/binary/)
+- [Source Build](https://moveit.ros.org/install-moveit2/source/)
+
+## More Info
+
+- [How to Get Involved](http://moveit.ros.org/about/get_involved/)
+- [Development Roadmap](https://moveit.ros.org/documentation/contributing/roadmap/)
+- [Future Release Dates](https://moveit.ros.org/#release-versions)
+- [MoveIt 2 Migration Guidelines](doc/MIGRATION_GUIDE.md)
+- [MoveIt 2 Migration Progress](https://docs.google.com/spreadsheets/d/1aPb3hNP213iPHQIYgcnCYh9cGFUlZmi_06E_9iTSsOI/edit?usp=sharing)
 
 ## Supporters
 
-This open source project is maintained by supporters from around the world — see [MoveIt maintainers](https://moveit.ros.org/about/). Special thanks to contributor from Intel and Open Robotics.
+This open source project is maintained by supporters from around the world — see our [MoveIt Maintainers and Core Contributors](https://moveit.ros.org/about/).
 
 <a href="https://picknik.ai/">
   <img src="https://picknik.ai/assets/images/logo.jpg" width="168">
 </a>
 
-[PickNik Inc.](https://picknik.ai/) is leading and organizing the development of MoveIt 2.
+[PickNik Inc](https://picknik.ai/) is leading the development of MoveIt.
 If you would like to support this project, please contact hello@picknik.ai
 
 <a href="http://rosin-project.eu">
@@ -54,7 +43,7 @@ If you would like to support this project, please contact hello@picknik.ai
        alt="rosin_logo" height="60" >
 </a>
 
-The port to ROS 2 is supported by ROSIN - ROS-Industrial Quality-Assured Robot Software Components.
+The port to ROS 2 was supported by ROSIN - ROS-Industrial Quality-Assured Robot Software Components.
 More information: <a href="http://rosin-project.eu">rosin-project.eu</a>
 
 <img src="http://rosin-project.eu/wp-content/uploads/rosin_eu_flag.jpg"
@@ -63,9 +52,11 @@ More information: <a href="http://rosin-project.eu">rosin-project.eu</a>
 This project has received funding from the European Union’s Horizon 2020
 research and innovation programme under grant agreement no. 732287.
 
+## Generate API Doxygen Documentation
+See [How To Generate API Doxygen Reference Locally](https://moveit.picknik.ai/main/doc/how_to_guides/how_to_generate_api_doxygen_locally.html)
 
-# ROS2 Buildfarm
-| MoveIt 2 Package | Foxy Binary | Galactic Binary | Rolling Binary | Humble Binary |
+# Buildfarm
+| MoveIt Package | Foxy Binary | Galactic Binary | Rolling Binary | Humble Binary |
 |:---:|:---:|:---:|:---:|:---:|
 | geometric_shapes | [![Build Status](https://build.ros2.org/buildStatus/icon?job=Fbin_uF64__geometric_shapes__ubuntu_focal_amd64__binary)](https://build.ros2.org/job/Fbin_uF64__geometric_shapes__ubuntu_focal_amd64__binary) | [![Build Status](https://build.ros2.org/buildStatus/icon?job=Gbin_uF64__geometric_shapes__ubuntu_focal_amd64__binary)](https://build.ros2.org/job/Gbin_uF64__geometric_shapes__ubuntu_focal_amd64__binary) | [![Build Status](https://build.ros2.org/buildStatus/icon?job=Rbin_uJ64__geometric_shapes__ubuntu_jammy_amd64__binary)](https://build.ros2.org/job/Rbin_uJ64__geometric_shapes__ubuntu_jammy_amd64__binary) | [![Build Status](https://build.ros2.org/buildStatus/icon?job=Hbin_uJ64__geometric_shapes__ubuntu_jammy_amd64__binary)](https://build.ros2.org/job/Hbin_uJ64__geometric_shapes__ubuntu_jammy_amd64__binary) |
 | moveit | [![Build Status](https://build.ros2.org/buildStatus/icon?job=Fbin_uF64__moveit__ubuntu_focal_amd64__binary)](https://build.ros2.org/job/Fbin_uF64__moveit__ubuntu_focal_amd64__binary) | [![Build Status](https://build.ros2.org/buildStatus/icon?job=Gbin_uF64__moveit__ubuntu_focal_amd64__binary)](https://build.ros2.org/job/Gbin_uF64__moveit__ubuntu_focal_amd64__binary) | [![Build Status](https://build.ros2.org/buildStatus/icon?job=Rbin_uJ64__moveit__ubuntu_jammy_amd64__binary)](https://build.ros2.org/job/Rbin_uJ64__moveit__ubuntu_jammy_amd64__binary) | [![Build Status](https://build.ros2.org/buildStatus/icon?job=Hbin_uJ64__moveit__ubuntu_jammy_amd64__binary)](https://build.ros2.org/job/Hbin_uJ64__moveit__ubuntu_jammy_amd64__binary) |
