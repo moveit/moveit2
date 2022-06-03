@@ -50,7 +50,7 @@ def generate_moveit_rviz_launch(moveit_config):
     ld.add_action(
         DeclareLaunchArgument(
             "rviz_config",
-            default_value=str(moveit_config.package_path / "launch/moveit.rviz"),
+            default_value=str(moveit_config.package_path / "config/moveit.rviz"),
         )
     )
 
