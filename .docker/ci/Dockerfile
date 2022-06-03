@@ -3,7 +3,7 @@
 
 ARG ROS_DISTRO=rolling
 FROM ros:${ROS_DISTRO}-ros-base
-MAINTAINER Robert Haschke rhaschke@techfak.uni-bielefeld.de
+LABEL maintainer Robert Haschke rhaschke@techfak.uni-bielefeld.de
 
 ENV TERM xterm
 
@@ -18,7 +18,7 @@ COPY . src/moveit2
 RUN \
     # Update apt package list as previous containers clear the cache
     apt-get -q update && \
-    apt-get -q -y dist-upgrade && \
+    apt-get -q -y upgrade && \
     #
     # Install some base dependencies
     apt-get -q install --no-install-recommends -y \
