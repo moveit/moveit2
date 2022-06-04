@@ -22,6 +22,7 @@ qt5_wrap_cpp(MOC_FILES
 )
 
 add_library(${PROJECT_NAME}
+    src/control_xacro_config.cpp
     src/controller_edit_widget.cpp
     src/controllers.cpp
     src/controllers_widget.cpp
