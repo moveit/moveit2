@@ -12,7 +12,6 @@ find_package(moveit_msgs REQUIRED)
 find_package(moveit_ros_planning REQUIRED)
 find_package(moveit_ros_planning_interface REQUIRED)
 find_package(pluginlib REQUIRED)
-find_package(position_controllers REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(rclcpp_action REQUIRED)
 find_package(rclcpp_components REQUIRED)
@@ -36,14 +35,13 @@ set(LIBRARIES
 
 set(THIS_PACKAGE_INCLUDE_DEPENDS
   moveit_core
+  moveit_msgs
   moveit_ros_planning
   moveit_ros_planning_interface
-  moveit_msgs
-  position_controllers
-  rclcpp
-  rclcpp_components
-  rclcpp_action
   pluginlib
+  rclcpp
+  rclcpp_action
+  rclcpp_components
   std_msgs
   std_srvs
   tf2_ros
@@ -77,7 +75,7 @@ install(TARGETS ${LIBRARIES}
   RUNTIME DESTINATION lib/${PROJECT_NAME}
   INCLUDES DESTINATION include)
 
-install(TARGETS hybrid_planning_demo_node
+install(TARGETS cancel_action hybrid_planning_demo_node
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION lib/${PROJECT_NAME}

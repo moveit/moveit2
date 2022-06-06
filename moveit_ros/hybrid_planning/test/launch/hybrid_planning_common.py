@@ -1,5 +1,4 @@
 # Return a list of nodes we commonly launch for the demo. Nice for testing use.
-import launch
 import os
 import xacro
 import yaml
@@ -78,7 +77,7 @@ def generate_common_hybrid_launch_description():
     planning_pipelines_config["ompl"].update(ompl_planning_yaml)
 
     moveit_simple_controllers_yaml = load_yaml(
-        "moveit_resources_panda_moveit_config", "config/panda_controllers.yaml"
+        "moveit_resources_panda_moveit_config", "config/moveit_controllers.yaml"
     )
     moveit_controllers = {
         "moveit_simple_controller_manager": moveit_simple_controllers_yaml,

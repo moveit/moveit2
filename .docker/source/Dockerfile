@@ -5,7 +5,7 @@
 
 ARG ROS_DISTRO=rolling
 FROM ghcr.io/ros-planning/moveit2:${ROS_DISTRO}-ci-testing
-MAINTAINER Robert Haschke rhaschke@techfak.uni-bielefeld.de
+LABEL maintainer Robert Haschke rhaschke@techfak.uni-bielefeld.de
 
 # Export ROS_UNDERLAY for downstream docker containers
 ENV ROS_UNDERLAY /root/ws_moveit/install
@@ -21,9 +21,9 @@ RUN --mount=type=cache,target=/root/.ccache/ \
     PATH=/usr/lib/ccache:$PATH && \
     # Fetch required upstream sources for building
     vcs import src < src/moveit2/moveit2.repos && \
-    if [ -r src/moveit2/moveit2_${ROS_DISTRO}.repos ] ; then vcs import src < src/moveit2/moveit2_${ROS_DISTRO}.repos ; fi && \
+    if [ -r "src/moveit2/moveit2_${ROS_DISTRO}.repos" ] ; then vcs import src < "src/moveit2/moveit2_${ROS_DISTRO}.repos" ; fi && \
     #
-    . /opt/ros/${ROS_DISTRO}/setup.sh &&\
+    . "/opt/ros/${ROS_DISTRO}/setup.sh" &&\
     colcon build \
             --cmake-args -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
             --ament-cmake-args -DCMAKE_BUILD_TYPE=Release \
