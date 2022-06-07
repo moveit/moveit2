@@ -11,4 +11,7 @@
   <class type="moveit_setup::controllers::ControllersWidget" base_class_type="moveit_setup::SetupStepWidget">
     <description>Configures the ros2_control plugins</description>
   </class>
+  <class type="moveit_setup::controllers::UrdfModificationsWidget" base_class_type="moveit_setup::SetupStepWidget">
+    <description>Widget to modify the URDF for ros2_control interfaces</description>
+  </class>
 </library>

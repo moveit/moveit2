@@ -19,6 +19,7 @@ add_definitions(-DQT_NO_KEYWORDS)
 qt5_wrap_cpp(MOC_FILES
     include/moveit_setup_controllers/controller_edit_widget.hpp
     include/moveit_setup_controllers/controllers_widget.hpp
+    include/moveit_setup_controllers/urdf_modifications_widget.hpp
 )
 
 add_library(${PROJECT_NAME}
@@ -28,6 +29,8 @@ add_library(${PROJECT_NAME}
     src/controllers_widget.cpp
     src/controller_config.cpp
     src/modified_urdf_config.cpp
+    src/urdf_modifications.cpp
+    src/urdf_modifications_widget.cpp
     ${MOC_FILES}
 )
 target_include_directories(${PROJECT_NAME} PUBLIC
