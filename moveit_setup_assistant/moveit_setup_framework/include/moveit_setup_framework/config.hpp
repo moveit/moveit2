@@ -57,6 +57,8 @@ MOVEIT_CLASS_FORWARD(SetupConfig);  // Defines SetupConfigPtr, ConstPtr, WeakPtr
 class SetupConfig
 {
 public:
+  virtual ~SetupConfig() = default;
+
   /**
    * @brief Called after construction to initialize the step
    * @param config_data Pointer to all the other configs

@@ -49,6 +49,8 @@ class SetupStepWidget : public QWidget
 {
   Q_OBJECT
 public:
+  virtual ~SetupStepWidget() = default;
+
   /**
    * @brief Called after construction to initialize the step
    * @param parent_node Shared pointer to the parent node

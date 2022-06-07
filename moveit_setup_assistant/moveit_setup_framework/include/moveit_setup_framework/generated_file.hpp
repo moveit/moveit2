@@ -71,6 +71,8 @@ public:
   {
   }
 
+  virtual ~GeneratedFile() = default;
+
   /**
    * @brief Returns the path relative to the configuration package root
    */
