@@ -34,52 +34,50 @@
 
 /* Author: David V. Lu!! */
 
+#pragma once
+
 #include <moveit_setup_controllers/controllers.hpp>
+#include <moveit_setup_controllers/moveit_controllers_config.hpp>
 
 namespace moveit_setup
 {
 namespace controllers
 {
-// ******************************************************************************************
-// Add a Follow Joint Trajectory action Controller for each Planning Group
-// ******************************************************************************************
-bool Controllers::addDefaultControllers()
+class MoveItControllers : public Controllers
 {
-  std::vector<std::string> group_names = getGroupNames();
-  if (group_names.empty())
+public:
+  std::string getName() const override
   {
-    return false;
+    return "MoveIt Controllers";
   }
 
-  // Loop through groups
-  bool success = true;
-  for (const std::string& group_name : group_names)
+  void onInit() override
   {
-    // Get list of associated joints
-    std::vector<std::string> joint_names = srdf_config_->getJointNames(group_name, true, false);  // exclude passive
-    if (joint_names.empty())
-    {
-      continue;
-    }
-    bool ret = controllers_config_->addController(group_name + "_controller", getDefaultType(), joint_names);
-    success &= ret;
+    config_data_->registerType("moveit_controllers", "moveit_setup::controllers::MoveItControllersConfig");
+    srdf_config_ = config_data_->get<SRDFConfig>("srdf");
+    controllers_config_ = config_data_->get<MoveItControllersConfig>("moveit_controllers");
   }
 
-  return success;
-}
-
-std::vector<std::string> Controllers::getJointsFromGroups(const std::vector<std::string>& group_names) const
-{
-  std::vector<std::string> joint_names;
-  for (const std::string& group_name : group_names)
+  std::string getInstructions() const override
   {
-    for (const std::string& joint_name : srdf_config_->getJointNames(group_name, true, false))  // exclude passive
-    {
-      joint_names.push_back(joint_name);
-    }
+    return "Configure controllers to be used by MoveIt's controller manager(s) to operate the robot's physical "
+           "hardware";
   }
-  return joint_names;
-}
 
+  std::string getButtonText() const override
+  {
+    return "Auto Add &FollowJointsTrajectory \n Controllers For Each Planning Group";
+  }
+
+  std::vector<std::string> getAvailableTypes() const override
+  {
+    return { "FollowJointTrajectory", "GripperCommand" };
+  }
+
+  std::string getDefaultType() const override
+  {
+    return "FollowJointTrajectory";
+  }
+};
 }  // namespace controllers
 }  // namespace moveit_setup

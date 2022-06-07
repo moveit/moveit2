@@ -1,7 +1,7 @@
 /*********************************************************************
  * Software License Agreement (BSD License)
  *
- *  Copyright (c) 2021, PickNik Robotics
+ *  Copyright (c) 2022, Metro Robots
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *     copyright notice, this list of conditions and the following
  *     disclaimer in the documentation and/or other materials provided
  *     with the distribution.
- *   * Neither the name of PickNik Robotics nor the names of its
+ *   * Neither the name of Metro Robots nor the names of its
  *     contributors may be used to endorse or promote products derived
  *     from this software without specific prior written permission.
  *
@@ -34,52 +34,50 @@
 
 /* Author: David V. Lu!! */
 
+#pragma once
+
 #include <moveit_setup_controllers/controllers.hpp>
+#include <moveit_setup_controllers/ros2_controllers_config.hpp>
 
 namespace moveit_setup
 {
 namespace controllers
 {
-// ******************************************************************************************
-// Add a Follow Joint Trajectory action Controller for each Planning Group
-// ******************************************************************************************
-bool Controllers::addDefaultControllers()
+class ROS2Controllers : public Controllers
 {
-  std::vector<std::string> group_names = getGroupNames();
-  if (group_names.empty())
+public:
+  std::string getName() const override
   {
-    return false;
+    return "ROS 2 Controllers";
   }
 
-  // Loop through groups
-  bool success = true;
-  for (const std::string& group_name : group_names)
+  void onInit() override
   {
-    // Get list of associated joints
-    std::vector<std::string> joint_names = srdf_config_->getJointNames(group_name, true, false);  // exclude passive
-    if (joint_names.empty())
-    {
-      continue;
-    }
-    bool ret = controllers_config_->addController(group_name + "_controller", getDefaultType(), joint_names);
-    success &= ret;
+    config_data_->registerType("ros2_controllers", "moveit_setup::controllers::ROS2ControllersConfig");
+    config_data_->registerType("control_xacro", "moveit_setup::controllers::ControlXacroConfig");
+    srdf_config_ = config_data_->get<SRDFConfig>("srdf");
+    controllers_config_ = config_data_->get<ROS2ControllersConfig>("ros2_controllers");
   }
 
-  return success;
-}
-
-std::vector<std::string> Controllers::getJointsFromGroups(const std::vector<std::string>& group_names) const
-{
-  std::vector<std::string> joint_names;
-  for (const std::string& group_name : group_names)
+  std::string getInstructions() const override
   {
-    for (const std::string& joint_name : srdf_config_->getJointNames(group_name, true, false))  // exclude passive
-    {
-      joint_names.push_back(joint_name);
-    }
+    return "Configure controllers to be used to simulate the robot's hardware interfaces and movement.";
   }
-  return joint_names;
-}
 
+  std::string getButtonText() const override
+  {
+    return "Auto Add &JointTrajectoryController \n Controllers For Each Planning Group";
+  }
+
+  std::vector<std::string> getAvailableTypes() const override
+  {
+    return { "joint_trajectory_controller/JointTrajectoryController", "position_controllers/GripperActionController" };
+  }
+
+  std::string getDefaultType() const override
+  {
+    return "joint_trajectory_controller/JointTrajectoryController";
+  }
+};
 }  // namespace controllers
 }  // namespace moveit_setup

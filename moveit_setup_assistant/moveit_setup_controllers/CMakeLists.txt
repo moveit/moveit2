@@ -27,8 +27,12 @@ add_library(${PROJECT_NAME}
     src/controller_edit_widget.cpp
     src/controllers.cpp
     src/controllers_widget.cpp
-    src/controller_config.cpp
+    src/controllers_config.cpp
     src/modified_urdf_config.cpp
+    src/moveit_controllers_config.cpp
+    src/moveit_controllers_widget.cpp
+    src/ros2_controllers_config.cpp
+    src/ros2_controllers_widget.cpp
     src/urdf_modifications.cpp
     src/urdf_modifications_widget.cpp
     ${MOC_FILES}
@@ -62,6 +66,10 @@ install(FILES moveit_setup_framework_plugins.xml
 )
 install(DIRECTORY include/
         DESTINATION include
+)
+
+install(DIRECTORY launch
+        DESTINATION share/${PROJECT_NAME}
 )
 ament_export_include_directories(include)
 

@@ -70,7 +70,7 @@ public:
 
   SetupStep& getSetupStep() override
   {
-    return setup_step_;
+    return *setup_step_;
   }
 
 private Q_SLOTS:
@@ -118,7 +118,7 @@ private Q_SLOTS:
   /// Called sleceted item changed
   void itemSelectionChanged();
 
-private:
+protected:
   // ******************************************************************************************
   // Qt Components
   // ******************************************************************************************
@@ -144,7 +144,7 @@ private:
   /// Remember whethere we're editing a controller or adding a new one
   bool adding_new_controller_;
 
-  Controllers setup_step_;
+  std::shared_ptr<Controllers> setup_step_;
 
   /// Builds the main screen list widget
   QWidget* createContentsWidget();
