@@ -270,10 +270,10 @@ double PlanarJointModel::distance(const double* values1, const double* values2) 
 
 bool PlanarJointModel::satisfiesPositionBounds(const double* values, const Bounds& bounds, double margin) const
 {
-  for (unsigned int i = 0; i < 3; ++i)
-    if (values[0] < bounds[0].min_position_ - margin || values[0] > bounds[0].max_position_ + margin)
-      return false;
-  return true;
+  if (values[0] < bounds[0].min_position_ - margin || values[0] > bounds[0].max_position_ + margin)
+    return false;
+  else
+    return true;
 }
 
 bool PlanarJointModel::normalizeRotation(double* values) const
