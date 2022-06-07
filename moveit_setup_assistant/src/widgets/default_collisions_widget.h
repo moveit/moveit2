@@ -233,14 +233,14 @@ private:
 };
 
 /**
- * \brief QThread to monitor progress of a boost::thread
+ * \brief QThread to monitor progress of a std::thread
  */
 class MonitorThread : public QThread
 {
   Q_OBJECT
 
 public:
-  MonitorThread(const boost::function<void(unsigned int*)>& f, QProgressBar* progress_bar = nullptr);
+  MonitorThread(const std::function<void(unsigned int*)>& f, QProgressBar* progress_bar = nullptr);
   void run() override;
   void cancel()
   {
@@ -255,7 +255,7 @@ Q_SIGNALS:
   void progress(int /*_t1*/);
 
 private:
-  boost::thread worker_;
+  std::thread worker_;
   unsigned int progress_;
   bool canceled_;
 };

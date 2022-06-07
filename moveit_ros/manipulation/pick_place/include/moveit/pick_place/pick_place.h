@@ -88,7 +88,7 @@ protected:
   bool done_;
   bool pushed_all_poses_;
   boost::condition_variable done_condition_;
-  boost::mutex done_mutex_;
+  std::mutex done_mutex_;
   moveit_msgs::msg::MoveItErrorCodes error_code_;
 };
 

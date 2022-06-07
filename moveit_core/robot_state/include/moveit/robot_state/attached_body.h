@@ -49,7 +49,7 @@ namespace moveit
 namespace core
 {
 class AttachedBody;
-typedef boost::function<void(AttachedBody* body, bool attached)> AttachedBodyCallback;
+typedef std::function<void(AttachedBody* body, bool attached)> AttachedBodyCallback;
 
 /** @brief Object defining bodies that can be attached to robot links.
  *

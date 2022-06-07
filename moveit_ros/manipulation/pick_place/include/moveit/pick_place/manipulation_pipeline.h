@@ -56,12 +56,12 @@ public:
     return name_;
   }
 
-  void setSolutionCallback(const boost::function<void()>& callback)
+  void setSolutionCallback(const std::function<void()>& callback)
   {
     solution_callback_ = callback;
   }
 
-  void setEmptyQueueCallback(const boost::function<void()>& callback)
+  void setEmptyQueueCallback(const std::function<void()>& callback)
   {
     empty_queue_callback_ = callback;
   }
@@ -104,13 +104,13 @@ protected:
   std::vector<ManipulationPlanPtr> success_;
   std::vector<ManipulationPlanPtr> failed_;
 
-  std::vector<boost::thread*> processing_threads_;
+  std::vector<std::thread*> processing_threads_;
   boost::condition_variable queue_access_cond_;
-  boost::mutex queue_access_lock_;
-  boost::mutex result_lock_;
+  std::mutex queue_access_lock_;
+  std::mutex result_lock_;
 
-  boost::function<void()> solution_callback_;
-  boost::function<void()> empty_queue_callback_;
+  std::function<void()> solution_callback_;
+  std::function<void()> empty_queue_callback_;
   unsigned int empty_queue_threads_;
 
   bool stop_processing_;

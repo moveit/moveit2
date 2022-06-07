@@ -815,12 +815,12 @@ bool DefaultCollisionsWidget::focusLost()
   return true;
 }
 
-moveit_setup_assistant::MonitorThread::MonitorThread(const boost::function<void(unsigned int*)>& f,
+moveit_setup_assistant::MonitorThread::MonitorThread(const std::function<void(unsigned int*)>& f,
                                                      QProgressBar* progress_bar)
   : progress_(0), canceled_(false)
 {
   // start worker thread
-  worker_ = boost::thread([f, progress_ptr = &progress_] { f(progress_ptr); });
+  worker_ = std::thread([f, progress_ptr = &progress_] { f(progress_ptr); });
   // connect progress bar for updates
   if (progress_bar)
     connect(this, SIGNAL(progress(int)), progress_bar, SLOT(setValue(int)));

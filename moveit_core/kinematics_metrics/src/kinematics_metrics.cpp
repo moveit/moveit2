@@ -47,7 +47,7 @@ static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_kinematics_metri
 double KinematicsMetrics::getJointLimitsPenalty(const moveit::core::RobotState& state,
                                                 const moveit::core::JointModelGroup* joint_model_group) const
 {
-  if (fabs(penalty_multiplier_) <= boost::math::tools::epsilon<double>())
+  if (fabs(penalty_multiplier_) <= std::numeric_limits<double>::min())
     return 1.0;
   double joint_limits_multiplier(1.0);
   const std::vector<const moveit::core::JointModel*>& joint_model_vector = joint_model_group->getJointModels();
@@ -87,7 +87,7 @@ double KinematicsMetrics::getJointLimitsPenalty(const moveit::core::RobotState& 
     double lower_bound_distance = joint_model->distance(joint_values, &lower_bounds[0]);
     double upper_bound_distance = joint_model->distance(joint_values, &upper_bounds[0]);
     double range = lower_bound_distance + upper_bound_distance;
-    if (range <= boost::math::tools::epsilon<double>())
+    if (range <= std::numeric_limits<double>::min())
       continue;
     joint_limits_multiplier *= (lower_bound_distance * upper_bound_distance / (range * range));
   }

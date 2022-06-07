@@ -65,7 +65,7 @@ MOVEIT_CLASS_FORWARD(RobotState);  // Defines RobotStatePtr, ConstPtr, WeakPtr..
    joint_group_variable_values
     the state is valid or not. Returns true if the state is valid. This call is allowed to modify \e robot_state (e.g.,
    set \e joint_group_variable_values) */
-typedef boost::function<bool(RobotState* robot_state, const JointModelGroup* joint_group,
+typedef std::function<bool(RobotState* robot_state, const JointModelGroup* joint_group,
                              const double* joint_group_variable_values)>
     GroupStateValidityCallbackFn;
 

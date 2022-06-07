@@ -150,7 +150,7 @@ public:
   static const double DEFAULT_TIMEOUT;               /* = 1.0 */
 
   /** @brief Signature for a callback to validate an IK solution. Typically used for collision checking. */
-  using IKCallbackFn = boost::function<void(const geometry_msgs::msg::Pose&, const std::vector<double>&,
+  using IKCallbackFn = std::function<void(const geometry_msgs::msg::Pose&, const std::vector<double>&,
                                             moveit_msgs::msg::MoveItErrorCodes&)>;
 
   /**

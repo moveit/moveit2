@@ -151,7 +151,7 @@ protected:
   std::map<std::string, double> zero_state_;
 
   // random seed
-  boost::uint32_t random_seed_{ 100 };
+  uint32_t random_seed_{ 100 };
   random_numbers::RandomNumberGenerator rng_{ random_seed_ };
 };
 

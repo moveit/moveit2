@@ -139,7 +139,8 @@ bool World::knowsTransform(const std::string& name) const
     for (const std::pair<const std::string, ObjectPtr>& object : objects_)
     {
       // if "object name/" matches start of object_id, we found the matching object
-      if (boost::starts_with(name, object.first) && name[object.first.length()] == '/')
+      // name.rfind is in service of removing the call to boost::starts_with and does the same thing
+      if (name.rfind(object.first, 0) == 0 && name[object.first.length()] == '/')
       {
         return object.second->global_subframe_poses_.find(name.substr(object.first.length() + 1)) !=
                object.second->global_subframe_poses_.end();
@@ -173,7 +174,8 @@ const Eigen::Isometry3d& World::getTransform(const std::string& name, bool& fram
     for (const std::pair<const std::string, ObjectPtr>& object : objects_)
     {
       // if "object name/" matches start of object_id, we found the matching object
-      if (boost::starts_with(name, object.first) && name[object.first.length()] == '/')
+      // name.rfind is in service of removing the call to boost::starts_with and does the same thing
+      if (name.rfind(object.first, 0) == 0 && name[object.first.length()] == '/')
       {
         auto it = object.second->global_subframe_poses_.find(name.substr(object.first.length() + 1));
         if (it != object.second->global_subframe_poses_.end())

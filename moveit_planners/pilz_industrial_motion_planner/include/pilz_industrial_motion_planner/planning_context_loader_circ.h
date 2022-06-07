@@ -62,7 +62,7 @@ public:
                    const std::string& group) const override;
 };
 
-typedef boost::shared_ptr<PlanningContextLoaderCIRC> PlanningContextLoaderCIRCPtr;
-typedef boost::shared_ptr<const PlanningContextLoaderCIRC> PlanningContextLoaderCIRCConstPtr;
+typedef std::shared_ptr<PlanningContextLoaderCIRC> PlanningContextLoaderCIRCPtr;
+typedef std::shared_ptr<const PlanningContextLoaderCIRC> PlanningContextLoaderCIRCConstPtr;
 
 }  // namespace pilz_industrial_motion_planner

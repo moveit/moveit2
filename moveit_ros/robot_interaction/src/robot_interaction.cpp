@@ -81,7 +81,7 @@ RobotInteraction::RobotInteraction(const moveit::core::RobotModelConstPtr& robot
 
   // spin a thread that will process feedback events
   run_processing_thread_ = true;
-  processing_thread_ = std::make_unique<boost::thread>([this] { processingThread(); });
+  processing_thread_ = std::make_unique<std::thread>([this] { processingThread(); });
 }
 
 RobotInteraction::~RobotInteraction()
@@ -114,7 +114,7 @@ void RobotInteraction::addActiveComponent(const InteractiveMarkerConstructorFn& 
                                           const ProcessFeedbackFn& process, const InteractiveMarkerUpdateFn& update,
                                           const std::string& name)
 {
-  boost::unique_lock<boost::mutex> ulock(marker_access_lock_);
+  std::unique_lock<std::mutex> ulock(marker_access_lock_);
   GenericInteraction g;
   g.construct_marker = construct;
   g.update_pose = update;
@@ -194,7 +194,7 @@ double RobotInteraction::computeGroupMarkerSize(const std::string& group)
 
 void RobotInteraction::decideActiveJoints(const std::string& group)
 {
-  boost::unique_lock<boost::mutex> ulock(marker_access_lock_);
+  std::unique_lock<std::mutex> ulock(marker_access_lock_);
   active_vj_.clear();
 
   if (group.empty())
@@ -270,7 +270,7 @@ void RobotInteraction::decideActiveEndEffectors(const std::string& group)
 
 void RobotInteraction::decideActiveEndEffectors(const std::string& group, InteractionStyle::InteractionStyle style)
 {
-  boost::unique_lock<boost::mutex> ulock(marker_access_lock_);
+  std::unique_lock<std::mutex> ulock(marker_access_lock_);
   active_eef_.clear();
 
   if (group.empty())
@@ -353,7 +353,7 @@ void RobotInteraction::decideActiveEndEffectors(const std::string& group, Intera
 
 void RobotInteraction::clear()
 {
-  boost::unique_lock<boost::mutex> ulock(marker_access_lock_);
+  std::unique_lock<std::mutex> ulock(marker_access_lock_);
   active_eef_.clear();
   active_vj_.clear();
   active_generic_.clear();
@@ -363,7 +363,7 @@ void RobotInteraction::clear()
 
 void RobotInteraction::clearInteractiveMarkers()
 {
-  boost::unique_lock<boost::mutex> ulock(marker_access_lock_);
+  std::unique_lock<std::mutex> ulock(marker_access_lock_);
   clearInteractiveMarkersUnsafe();
 }
 
@@ -459,7 +459,7 @@ void RobotInteraction::addInteractiveMarkers(const InteractionHandlerPtr& handle
   // If scale is left at default size of 0, scale will be based on end effector link size. a good value is between 0-1
   std::vector<visualization_msgs::msg::InteractiveMarker> ims;
   {
-    boost::unique_lock<boost::mutex> ulock(marker_access_lock_);
+    std::unique_lock<std::mutex> ulock(marker_access_lock_);
     moveit::core::RobotStateConstPtr s = handler->getState();
 
     for (std::size_t i = 0; i < active_generic_.size(); ++i)
@@ -570,7 +570,7 @@ void RobotInteraction::toggleMoveInteractiveMarkerTopic(bool enable)
 {
   if (enable)
   {
-    boost::unique_lock<boost::mutex> ulock(marker_access_lock_);
+    std::unique_lock<std::mutex> ulock(marker_access_lock_);
     if (int_marker_move_subscribers_.empty())
     {
       for (size_t i = 0; i < int_marker_move_topics_.size(); ++i)
@@ -589,7 +589,7 @@ void RobotInteraction::toggleMoveInteractiveMarkerTopic(bool enable)
   }
   else
   {
-    boost::unique_lock<boost::mutex> ulock(marker_access_lock_);
+    std::unique_lock<std::mutex> ulock(marker_access_lock_);
     int_marker_move_subscribers_.clear();
   }
 }
@@ -628,7 +628,7 @@ void RobotInteraction::updateInteractiveMarkers(const InteractionHandlerPtr& han
   std::string root_link;
   std::map<std::string, geometry_msgs::msg::Pose> pose_updates;
   {
-    boost::unique_lock<boost::mutex> ulock(marker_access_lock_);
+    std::unique_lock<std::mutex> ulock(marker_access_lock_);
 
     moveit::core::RobotStateConstPtr s = handler->getState();
     root_link = s->getRobotModel()->getModelFrame();
@@ -671,7 +671,7 @@ void RobotInteraction::publishInteractiveMarkers()
 
 bool RobotInteraction::showingMarkers(const InteractionHandlerPtr& handler)
 {
-  boost::unique_lock<boost::mutex> ulock(marker_access_lock_);
+  std::unique_lock<std::mutex> ulock(marker_access_lock_);
 
   for (const EndEffectorInteraction& eef : active_eef_)
     if (shown_markers_.find(getMarkerName(handler, eef)) == shown_markers_.end())
@@ -697,7 +697,7 @@ void RobotInteraction::moveInteractiveMarker(const std::string& name, const geom
     feedback->event_type = visualization_msgs::msg::InteractiveMarkerFeedback::POSE_UPDATE;
     processInteractiveMarkerFeedback(feedback);
     {
-      boost::unique_lock<boost::mutex> ulock(marker_access_lock_);
+      std::unique_lock<std::mutex> ulock(marker_access_lock_);
       int_marker_server_->setPose(name, msg.pose, msg.header);  // move the interactive marker
       int_marker_server_->applyChanges();
     }
@@ -708,7 +708,7 @@ void RobotInteraction::processInteractiveMarkerFeedback(
     const visualization_msgs::msg::InteractiveMarkerFeedback::ConstSharedPtr& feedback)
 {
   // perform some validity checks
-  boost::unique_lock<boost::mutex> ulock(marker_access_lock_);
+  std::unique_lock<std::mutex> ulock(marker_access_lock_);
   std::map<std::string, std::size_t>::const_iterator it = shown_markers_.find(feedback->marker_name);
   if (it == shown_markers_.end())
   {
@@ -730,7 +730,7 @@ void RobotInteraction::processInteractiveMarkerFeedback(
 
 void RobotInteraction::processingThread()
 {
-  boost::unique_lock<boost::mutex> ulock(marker_access_lock_);
+  std::unique_lock<std::mutex> ulock(marker_access_lock_);
 
   while (run_processing_thread_ && rclcpp::ok())
   {

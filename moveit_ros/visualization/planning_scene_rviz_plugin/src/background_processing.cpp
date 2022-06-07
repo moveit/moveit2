@@ -49,7 +49,7 @@ BackgroundProcessing::BackgroundProcessing()
   // spin a thread that will process user events
   run_processing_thread_ = true;
   processing_ = false;
-  processing_thread_ = std::make_unique<boost::thread>([this]() { return processingThread(); });
+  processing_thread_ = std::make_unique<std::thread>([this]() { return processingThread(); });
 }
 
 BackgroundProcessing::~BackgroundProcessing()
@@ -61,7 +61,7 @@ BackgroundProcessing::~BackgroundProcessing()
 
 void BackgroundProcessing::processingThread()
 {
-  boost::unique_lock<boost::mutex> ulock(action_lock_);
+  std::unique_lock<std::mutex> ulock(action_lock_);
 
   while (run_processing_thread_)
   {
@@ -96,10 +96,10 @@ void BackgroundProcessing::processingThread()
   }
 }
 
-void BackgroundProcessing::addJob(const boost::function<void()>& job, const std::string& name)
+void BackgroundProcessing::addJob(const std::function<void()>& job, const std::string& name)
 {
   {
-    boost::mutex::scoped_lock _(action_lock_);
+    std::scoped_lock _(action_lock_);
     actions_.push_back(job);
     action_names_.push_back(name);
     new_action_condition_.notify_all();
@@ -113,7 +113,7 @@ void BackgroundProcessing::clear()
   bool update = false;
   std::deque<std::string> removed;
   {
-    boost::mutex::scoped_lock _(action_lock_);
+    std::scoped_lock _(action_lock_);
     update = !actions_.empty();
     actions_.clear();
     action_names_.swap(removed);
@@ -125,13 +125,13 @@ void BackgroundProcessing::clear()
 
 std::size_t BackgroundProcessing::getJobCount() const
 {
-  boost::mutex::scoped_lock _(action_lock_);
+  std::scoped_lock _(action_lock_);
   return actions_.size() + (processing_ ? 1 : 0);
 }
 
 void BackgroundProcessing::setJobUpdateEvent(const JobUpdateCallback& event)
 {
-  boost::mutex::scoped_lock _(action_lock_);
+  std::scoped_lock _(action_lock_);
   queue_change_event_ = event;
 }
 
