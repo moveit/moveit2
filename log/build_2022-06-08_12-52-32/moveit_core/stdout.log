@@ -1,0 +1,47 @@
+-- The CXX compiler identification is GNU 11.2.0
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: /usr/lib/ccache/c++ - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Found moveit_common: 2.5.1 (/home/henry/ws_moveit2/src/moveit2/install/moveit_common/share/moveit_common/cmake)
+-- Found ament_cmake: 1.3.2 (/opt/ros/humble/share/ament_cmake/cmake)
+-- Found Python3: /usr/bin/python3.10 (found version "3.10.4") found components: Interpreter 
+-- Found libdw: /usr/lib/x86_64-linux-gnu/libdw.so  
+-- Could NOT find libbfd (missing: LIBBFD_LIBRARY LIBBFD_INCLUDE_DIR) 
+-- BACKWARD_HAS_UNWIND=1
+-- BACKWARD_HAS_BACKTRACE=0
+-- BACKWARD_HAS_BACKTRACE_SYMBOL=0
+-- BACKWARD_HAS_DW=1
+-- BACKWARD_HAS_BFD=0
+-- Found Backward: /opt/ros/humble/share/backward_ros/cmake  
+-- Found rclcpp: 16.0.1 (/opt/ros/humble/share/rclcpp/cmake)
+-- Found rosidl_generator_c: 3.1.3 (/opt/ros/humble/share/rosidl_generator_c/cmake)
+-- Found rosidl_adapter: 3.1.3 (/opt/ros/humble/share/rosidl_adapter/cmake)
+-- Found rosidl_generator_cpp: 3.1.3 (/opt/ros/humble/share/rosidl_generator_cpp/cmake)
+-- Using all available rosidl_typesupport_c: rosidl_typesupport_fastrtps_c;rosidl_typesupport_introspection_c
+-- Using all available rosidl_typesupport_cpp: rosidl_typesupport_fastrtps_cpp;rosidl_typesupport_introspection_cpp
+-- Found rmw_implementation_cmake: 6.1.0 (/opt/ros/humble/share/rmw_implementation_cmake/cmake)
+-- Found rmw_fastrtps_cpp: 6.2.1 (/opt/ros/humble/share/rmw_fastrtps_cpp/cmake)
+-- Found OpenSSL: /usr/lib/x86_64-linux-gnu/libcrypto.so (found version "3.0.2")  
+-- Found FastRTPS: /opt/ros/humble/include  
+-- Using RMW implementation 'rmw_fastrtps_cpp' as default
+-- Found eigen3_cmake_module: 0.1.1 (/opt/ros/humble/share/eigen3_cmake_module/cmake)
+-- Found Eigen3: TRUE (found version "3.4.0") 
+-- Found PkgConfig: /usr/bin/pkg-config (found version "0.29.2") 
+-- Checking for module 'fcl>=0.5.0'
+--   Found fcl, version 0.7.0
+-- Found Bullet: /usr/lib/x86_64-linux-gnu/libBulletDynamics.so (Required is at least version "2.87") 
+-- Found angles: 1.13.0 (/opt/ros/humble/share/angles/cmake)
+-- Found urdf: 2.6.0 (/opt/ros/humble/share/urdf/cmake)
+-- Found tf2_eigen: 0.25.0 (/opt/ros/humble/share/tf2_eigen/cmake)
+-- Found tf2_kdl: 0.25.0 (/opt/ros/humble/share/tf2_kdl/cmake)
+-- Found tf2_geometry_msgs: 0.25.0 (/opt/ros/humble/share/tf2_geometry_msgs/cmake)
+-- Found eigen_stl_containers: 1.0.0 (/opt/ros/humble/share/eigen_stl_containers/cmake)
+-- Found geometric_shapes: 2.1.3 (/opt/ros/humble/share/geometric_shapes/cmake)
+-- Found Boost: /usr/lib/x86_64-linux-gnu/cmake/Boost-1.74.0/BoostConfig.cmake (found version "1.74.0") found components: filesystem 
+-- library: /usr/lib/x86_64-linux-gnu/libcurl.so
+-- Found kdl_parser: 2.6.2 (/opt/ros/humble/share/kdl_parser/cmake)
+-- Found moveit_msgs: 2.2.0 (/opt/ros/humble/share/moveit_msgs/cmake)
+-- Configuring incomplete, errors occurred!
+See also "/home/henry/ws_moveit2/src/moveit2/build/moveit_core/CMakeFiles/CMakeOutput.log".

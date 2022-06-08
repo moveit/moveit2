@@ -199,7 +199,7 @@ private:
   std::unique_ptr<std::thread> processing_thread_;
   bool run_processing_thread_;
 
-  boost::condition_variable new_feedback_condition_;
+  std::condition_variable new_feedback_condition_;
   std::map<std::string, visualization_msgs::msg::InteractiveMarkerFeedback::ConstSharedPtr> feedback_map_;
 
   moveit::core::RobotModelConstPtr robot_model_;

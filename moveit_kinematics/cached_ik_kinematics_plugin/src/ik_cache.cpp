@@ -73,7 +73,7 @@ void IKCache::initializeCache(const std::string& robot_id, const std::string& gr
   // use mutex lock for rest of initialization
   std::lock_guard<std::mutex> slock(lock_);
   // determine cache file name
-  std::filesystem::path prefix(!cached_ik_path.empty() ? cached_ik_path : std::filesystem::current_path());
+  std::filesystem::path prefix(!cached_ik_path.empty() ? std::filesystem::path(cached_ik_path) : std::filesystem::current_path());
   // create cache directory if necessary
   std::filesystem::create_directories(prefix);
 
@@ -87,7 +87,7 @@ void IKCache::initializeCache(const std::string& robot_id, const std::string& gr
   if (std::filesystem::exists(cache_file_name_))
   {
     // read cache
-    boost::filesystem::ifstream cache_file(cache_file_name_, std::ios_base::binary | std::ios_base::in);
+    std::ifstream cache_file(cache_file_name_, std::ios_base::binary | std::ios_base::in);
     cache_file.read((char*)&last_saved_cache_size_, sizeof(unsigned int));
     unsigned int num_dofs;
     cache_file.read((char*)&num_dofs, sizeof(unsigned int));
@@ -219,7 +219,7 @@ void IKCache::saveCache() const
 
   RCLCPP_INFO(LOGGER, "writing %ld IK solutions to %s", ik_cache_.size(), cache_file_name_.string().c_str());
 
-  boost::filesystem::ofstream cache_file(cache_file_name_, std::ios_base::binary | std::ios_base::out);
+  std::ofstream cache_file(cache_file_name_, std::ios_base::binary | std::ios_base::out);
   unsigned int position_size = 3 * sizeof(tf2Scalar);
   unsigned int orientation_size = 4 * sizeof(tf2Scalar);
   unsigned int pose_size = position_size + orientation_size;

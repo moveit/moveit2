@@ -1,0 +1,8 @@
+source;share/moveit_resources_prbt_support/hook/cmake_prefix_path.ps1
+source;share/moveit_resources_prbt_support/hook/cmake_prefix_path.dsv
+source;share/moveit_resources_prbt_support/hook/cmake_prefix_path.sh
+source;share/moveit_resources_prbt_support/local_setup.bash
+source;share/moveit_resources_prbt_support/local_setup.dsv
+source;share/moveit_resources_prbt_support/local_setup.ps1
+source;share/moveit_resources_prbt_support/local_setup.sh
+source;share/moveit_resources_prbt_support/local_setup.zsh

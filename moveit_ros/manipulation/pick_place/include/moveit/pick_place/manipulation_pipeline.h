@@ -105,7 +105,7 @@ protected:
   std::vector<ManipulationPlanPtr> failed_;
 
   std::vector<std::thread*> processing_threads_;
-  boost::condition_variable queue_access_cond_;
+  std::condition_variable queue_access_cond_;
   std::mutex queue_access_lock_;
   std::mutex result_lock_;
 

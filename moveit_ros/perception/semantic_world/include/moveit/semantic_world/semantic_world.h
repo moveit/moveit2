@@ -61,7 +61,7 @@ class SemanticWorld
 {
 public:
   /** @brief The signature for a callback on receiving table messages*/
-  typedef boost::function<void()> TableCallbackFn;
+  typedef std::function<void()> TableCallbackFn;
 
   /**
    * @brief A (simple) semantic world representation for pick and place and other tasks.

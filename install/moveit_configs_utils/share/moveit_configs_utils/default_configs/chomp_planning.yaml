@@ -1,0 +1,12 @@
+planning_plugin: chomp_interface/CHOMPPlanner
+enable_failure_recovery: true
+jiggle_fraction: 0.05
+request_adapters: >-
+    default_planner_request_adapters/AddTimeParameterization
+    default_planner_request_adapters/ResolveConstraintFrames
+    default_planner_request_adapters/FixWorkspaceBounds
+    default_planner_request_adapters/FixStartStateBounds
+    default_planner_request_adapters/FixStartStateCollision
+    default_planner_request_adapters/FixStartStatePathConstraints
+ridge_factor: 0.01
+start_state_max_bounds_error: 0.1

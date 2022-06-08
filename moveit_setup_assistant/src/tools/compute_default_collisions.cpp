@@ -559,7 +559,7 @@ unsigned int disableNeverInCollision(const unsigned int num_trials, planning_sce
   boost::thread_group bgroup;  // create a group of threads
   std::mutex lock;           // used for sharing the same data structures
 
-  int num_threads = boost::thread::hardware_concurrency();  // how many cores does this computer have?
+  int num_threads = std::thread::hardware_concurrency();  // how many cores does this computer have?
   // RCLCPP_INFO_STREAM_STREAM(LOGGER, "Performing " << num_trials << " trials for 'always in collision' checking on " <<
   //   num_threads << " threads...");
 

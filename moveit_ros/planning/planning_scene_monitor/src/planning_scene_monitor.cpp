@@ -437,7 +437,7 @@ void PlanningSceneMonitor::scenePublishingThread()
               msg.robot_state.is_diff = true;
             }
           }
-          std::recursive_mutex::scoped_lock prevent_shape_cache_updates(shape_handles_lock_);  // we don't want the
+          std::scoped_lock prevent_shape_cache_updates(shape_handles_lock_);  // we don't want the
                                                                                                  // transform cache to
                                                                                                  // update while we are
                                                                                                  // potentially changing
@@ -527,7 +527,7 @@ bool PlanningSceneMonitor::updatesScene(const planning_scene::PlanningSceneConst
 void PlanningSceneMonitor::triggerSceneUpdateEvent(SceneUpdateType update_type)
 {
   // do not modify update functions while we are calling them
-  std::recursive_mutex::scoped_lock lock(update_lock_);
+  std::scoped_lock lock(update_lock_);
 
   for (std::function<void(SceneUpdateType)>& update_callback : update_callbacks_)
     update_callback(update_type);
@@ -666,7 +666,7 @@ bool PlanningSceneMonitor::newPlanningSceneMessage(const moveit_msgs::msg::Plann
   {
     std::unique_lock<std::shared_mutex> ulock(scene_update_mutex_);
     // we don't want the transform cache to update while we are potentially changing attached bodies
-    std::recursive_mutex::scoped_lock prevent_shape_cache_updates(shape_handles_lock_);
+    std::scoped_lock prevent_shape_cache_updates(shape_handles_lock_);
 
     last_update_time_ = rclcpp::Clock().now();
     last_robot_motion_time_ = scene.robot_state.joint_state.header.stamp;
@@ -794,7 +794,7 @@ void PlanningSceneMonitor::excludeRobotLinksFromOctree()
   if (!octomap_monitor_)
     return;
 
-  std::recursive_mutex::scoped_lock _(shape_handles_lock_);
+  std::scoped_lock _(shape_handles_lock_);
 
   includeRobotLinksInOctree();
   const std::vector<const moveit::core::LinkModel*>& links = getRobotModel()->getLinkModelsWithCollisionGeometry();
@@ -831,7 +831,7 @@ void PlanningSceneMonitor::includeRobotLinksInOctree()
   if (!octomap_monitor_)
     return;
 
-  std::recursive_mutex::scoped_lock _(shape_handles_lock_);
+  std::scoped_lock _(shape_handles_lock_);
 
   for (std::pair<const moveit::core::LinkModel* const,
                  std::vector<std::pair<occupancy_map_monitor::ShapeHandle, std::size_t>>>& link_shape_handle :
@@ -846,7 +846,7 @@ void PlanningSceneMonitor::includeAttachedBodiesInOctree()
   if (!octomap_monitor_)
     return;
 
-  std::recursive_mutex::scoped_lock _(shape_handles_lock_);
+  std::scoped_lock _(shape_handles_lock_);
 
   // clear information about any attached body, without referring to the AttachedBody* ptr (could be invalid)
   for (std::pair<const moveit::core::AttachedBody* const,
@@ -859,7 +859,7 @@ void PlanningSceneMonitor::includeAttachedBodiesInOctree()
 
 void PlanningSceneMonitor::excludeAttachedBodiesFromOctree()
 {
-  std::recursive_mutex::scoped_lock _(shape_handles_lock_);
+  std::scoped_lock _(shape_handles_lock_);
 
   includeAttachedBodiesInOctree();
   // add attached objects again
@@ -874,7 +874,7 @@ void PlanningSceneMonitor::includeWorldObjectsInOctree()
   if (!octomap_monitor_)
     return;
 
-  std::recursive_mutex::scoped_lock _(shape_handles_lock_);
+  std::scoped_lock _(shape_handles_lock_);
 
   // clear information about any attached object
   for (std::pair<const std::string, std::vector<std::pair<occupancy_map_monitor::ShapeHandle, const Eigen::Isometry3d*>>>&
@@ -887,7 +887,7 @@ void PlanningSceneMonitor::includeWorldObjectsInOctree()
 
 void PlanningSceneMonitor::excludeWorldObjectsFromOctree()
 {
-  std::recursive_mutex::scoped_lock _(shape_handles_lock_);
+  std::scoped_lock _(shape_handles_lock_);
 
   includeWorldObjectsInOctree();
   for (const std::pair<const std::string, collision_detection::World::ObjectPtr>& it : *scene_->getWorld())
@@ -899,7 +899,7 @@ void PlanningSceneMonitor::excludeAttachedBodyFromOctree(const moveit::core::Att
   if (!octomap_monitor_)
     return;
 
-  std::recursive_mutex::scoped_lock _(shape_handles_lock_);
+  std::scoped_lock _(shape_handles_lock_);
   bool found = false;
   for (std::size_t i = 0; i < attached_body->getShapes().size(); ++i)
   {
@@ -921,7 +921,7 @@ void PlanningSceneMonitor::includeAttachedBodyInOctree(const moveit::core::Attac
   if (!octomap_monitor_)
     return;
 
-  std::recursive_mutex::scoped_lock _(shape_handles_lock_);
+  std::scoped_lock _(shape_handles_lock_);
 
   AttachedBodyShapeHandles::iterator it = attached_body_shape_handles_.find(attached_body);
   if (it != attached_body_shape_handles_.end())
@@ -938,7 +938,7 @@ void PlanningSceneMonitor::excludeWorldObjectFromOctree(const collision_detectio
   if (!octomap_monitor_)
     return;
 
-  std::recursive_mutex::scoped_lock _(shape_handles_lock_);
+  std::scoped_lock _(shape_handles_lock_);
 
   bool found = false;
   for (std::size_t i = 0; i < obj->shapes_.size(); ++i)
@@ -961,7 +961,7 @@ void PlanningSceneMonitor::includeWorldObjectInOctree(const collision_detection:
   if (!octomap_monitor_)
     return;
 
-  std::recursive_mutex::scoped_lock _(shape_handles_lock_);
+  std::scoped_lock _(shape_handles_lock_);
 
   CollisionBodyShapeHandles::iterator it = collision_body_shape_handles_.find(obj->id_);
   if (it != collision_body_shape_handles_.end())
@@ -1116,7 +1116,7 @@ bool PlanningSceneMonitor::getShapeTransformCache(const std::string& target_fram
 {
   try
   {
-    std::recursive_mutex::scoped_lock _(shape_handles_lock_);
+    std::scoped_lock _(shape_handles_lock_);
 
     for (const std::pair<const moveit::core::LinkModel* const,
                          std::vector<std::pair<occupancy_map_monitor::ShapeHandle, std::size_t>>>& link_shape_handle :
@@ -1427,14 +1427,14 @@ void PlanningSceneMonitor::updateSceneWithCurrentState()
 
 void PlanningSceneMonitor::addUpdateCallback(const std::function<void(SceneUpdateType)>& fn)
 {
-  std::recursive_mutex::scoped_lock lock(update_lock_);
+  std::scoped_lock lock(update_lock_);
   if (fn)
     update_callbacks_.push_back(fn);
 }
 
 void PlanningSceneMonitor::clearUpdateCallbacks()
 {
-  std::recursive_mutex::scoped_lock lock(update_lock_);
+  std::scoped_lock lock(update_lock_);
   update_callbacks_.clear();
 }
 

@@ -87,7 +87,7 @@ protected:
   double last_plan_time_;
   bool done_;
   bool pushed_all_poses_;
-  boost::condition_variable done_condition_;
+  std::condition_variable done_condition_;
   std::mutex done_mutex_;
   moveit_msgs::msg::MoveItErrorCodes error_code_;
 };

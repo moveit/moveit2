@@ -88,8 +88,8 @@ struct InitProxy
 static void roscpp_init_or_stop(bool init)
 {
   // ensure we do not accidentally initialize ROS multiple times per process
-  static boost::mutex lock;
-  boost::mutex::scoped_lock slock(lock);
+  static std::mutex lock;
+  std::mutex::scoped_lock slock(lock);
 
   // once per process, we start a spinner
   static bool once = true;

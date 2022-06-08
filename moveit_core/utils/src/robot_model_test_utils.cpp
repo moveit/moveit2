@@ -43,6 +43,7 @@
 #include <urdf_parser/urdf_parser.h>
 #include <moveit/utils/robot_model_test_utils.h>
 #include <ament_index_cpp/get_package_share_directory.hpp>
+#include <filesystem>
 
 namespace moveit
 {

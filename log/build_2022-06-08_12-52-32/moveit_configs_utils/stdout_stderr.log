@@ -1,0 +1,48 @@
+running egg_info
+creating ../build/moveit_configs_utils/moveit_configs_utils.egg-info
+writing ../build/moveit_configs_utils/moveit_configs_utils.egg-info/PKG-INFO
+writing dependency_links to ../build/moveit_configs_utils/moveit_configs_utils.egg-info/dependency_links.txt
+writing entry points to ../build/moveit_configs_utils/moveit_configs_utils.egg-info/entry_points.txt
+writing requirements to ../build/moveit_configs_utils/moveit_configs_utils.egg-info/requires.txt
+writing top-level names to ../build/moveit_configs_utils/moveit_configs_utils.egg-info/top_level.txt
+writing manifest file '../build/moveit_configs_utils/moveit_configs_utils.egg-info/SOURCES.txt'
+reading manifest file '../build/moveit_configs_utils/moveit_configs_utils.egg-info/SOURCES.txt'
+writing manifest file '../build/moveit_configs_utils/moveit_configs_utils.egg-info/SOURCES.txt'
+running build
+running build_py
+creating /home/henry/ws_moveit2/src/moveit2/build/moveit_configs_utils/build
+creating /home/henry/ws_moveit2/src/moveit2/build/moveit_configs_utils/build/lib
+creating /home/henry/ws_moveit2/src/moveit2/build/moveit_configs_utils/build/lib/moveit_configs_utils
+copying moveit_configs_utils/launches.py -> /home/henry/ws_moveit2/src/moveit2/build/moveit_configs_utils/build/lib/moveit_configs_utils
+copying moveit_configs_utils/moveit_configs_builder.py -> /home/henry/ws_moveit2/src/moveit2/build/moveit_configs_utils/build/lib/moveit_configs_utils
+copying moveit_configs_utils/__init__.py -> /home/henry/ws_moveit2/src/moveit2/build/moveit_configs_utils/build/lib/moveit_configs_utils
+copying moveit_configs_utils/launch_utils.py -> /home/henry/ws_moveit2/src/moveit2/build/moveit_configs_utils/build/lib/moveit_configs_utils
+running install
+/usr/lib/python3/dist-packages/setuptools/command/install.py:34: SetuptoolsDeprecationWarning: setup.py install is deprecated. Use build and pip and other standards-based tools.
+  warnings.warn(
+running install_lib
+creating /home/henry/ws_moveit2/src/moveit2/install/moveit_configs_utils/lib/python3.10/site-packages/moveit_configs_utils
+copying /home/henry/ws_moveit2/src/moveit2/build/moveit_configs_utils/build/lib/moveit_configs_utils/launches.py -> /home/henry/ws_moveit2/src/moveit2/install/moveit_configs_utils/lib/python3.10/site-packages/moveit_configs_utils
+copying /home/henry/ws_moveit2/src/moveit2/build/moveit_configs_utils/build/lib/moveit_configs_utils/moveit_configs_builder.py -> /home/henry/ws_moveit2/src/moveit2/install/moveit_configs_utils/lib/python3.10/site-packages/moveit_configs_utils
+copying /home/henry/ws_moveit2/src/moveit2/build/moveit_configs_utils/build/lib/moveit_configs_utils/__init__.py -> /home/henry/ws_moveit2/src/moveit2/install/moveit_configs_utils/lib/python3.10/site-packages/moveit_configs_utils
+copying /home/henry/ws_moveit2/src/moveit2/build/moveit_configs_utils/build/lib/moveit_configs_utils/launch_utils.py -> /home/henry/ws_moveit2/src/moveit2/install/moveit_configs_utils/lib/python3.10/site-packages/moveit_configs_utils
+byte-compiling /home/henry/ws_moveit2/src/moveit2/install/moveit_configs_utils/lib/python3.10/site-packages/moveit_configs_utils/launches.py to launches.cpython-310.pyc
+byte-compiling /home/henry/ws_moveit2/src/moveit2/install/moveit_configs_utils/lib/python3.10/site-packages/moveit_configs_utils/moveit_configs_builder.py to moveit_configs_builder.cpython-310.pyc
+byte-compiling /home/henry/ws_moveit2/src/moveit2/install/moveit_configs_utils/lib/python3.10/site-packages/moveit_configs_utils/__init__.py to __init__.cpython-310.pyc
+byte-compiling /home/henry/ws_moveit2/src/moveit2/install/moveit_configs_utils/lib/python3.10/site-packages/moveit_configs_utils/launch_utils.py to launch_utils.cpython-310.pyc
+running install_data
+creating /home/henry/ws_moveit2/src/moveit2/install/moveit_configs_utils/share/ament_index
+creating /home/henry/ws_moveit2/src/moveit2/install/moveit_configs_utils/share/ament_index/resource_index
+creating /home/henry/ws_moveit2/src/moveit2/install/moveit_configs_utils/share/ament_index/resource_index/packages
+copying resource/moveit_configs_utils -> /home/henry/ws_moveit2/src/moveit2/install/moveit_configs_utils/share/ament_index/resource_index/packages
+copying package.xml -> /home/henry/ws_moveit2/src/moveit2/install/moveit_configs_utils/share/moveit_configs_utils
+creating /home/henry/ws_moveit2/src/moveit2/install/moveit_configs_utils/share/moveit_configs_utils/default_configs
+copying default_configs/ompl_defaults.yaml -> /home/henry/ws_moveit2/src/moveit2/install/moveit_configs_utils/share/moveit_configs_utils/default_configs
+copying default_configs/pilz_industrial_motion_planner_planning.yaml -> /home/henry/ws_moveit2/src/moveit2/install/moveit_configs_utils/share/moveit_configs_utils/default_configs
+copying default_configs/chomp_planning.yaml -> /home/henry/ws_moveit2/src/moveit2/install/moveit_configs_utils/share/moveit_configs_utils/default_configs
+copying default_configs/trajopt_planning.yaml -> /home/henry/ws_moveit2/src/moveit2/install/moveit_configs_utils/share/moveit_configs_utils/default_configs
+copying default_configs/ompl_planning.yaml -> /home/henry/ws_moveit2/src/moveit2/install/moveit_configs_utils/share/moveit_configs_utils/default_configs
+running install_egg_info
+Copying ../build/moveit_configs_utils/moveit_configs_utils.egg-info to /home/henry/ws_moveit2/src/moveit2/install/moveit_configs_utils/lib/python3.10/site-packages/moveit_configs_utils-2.5.0-py3.10.egg-info
+running install_scripts
+writing list of installed files to '/home/henry/ws_moveit2/src/moveit2/build/moveit_configs_utils/install.log'

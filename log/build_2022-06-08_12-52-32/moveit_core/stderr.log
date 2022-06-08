@@ -1,0 +1,17 @@
+[31mCMake Error at CMakeLists.txt:43 (find_package):
+  By not providing "Findsrdfdom.cmake" in CMAKE_MODULE_PATH this project has
+  asked CMake to find a package configuration file provided by "srdfdom", but
+  CMake did not find one.
+
+  Could not find a package configuration file provided by "srdfdom" with any
+  of the following names:
+
+    srdfdomConfig.cmake
+    srdfdom-config.cmake
+
+  Add the installation prefix of "srdfdom" to CMAKE_PREFIX_PATH or set
+  "srdfdom_DIR" to a directory containing one of the above files.  If
+  "srdfdom" provides a separate development package or SDK, be sure it has
+  been installed.
+
+[0m

@@ -44,6 +44,7 @@
 
 #include <memory>
 #include <string>
+#include <shared_mutex>
 
 namespace collision_detection
 {

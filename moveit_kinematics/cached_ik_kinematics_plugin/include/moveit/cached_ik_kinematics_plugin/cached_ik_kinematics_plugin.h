@@ -46,6 +46,7 @@
 #include <mutex>
 #include <unordered_map>
 #include <utility>
+#include <filesystem>
 
 namespace cached_ik_kinematics_plugin
 {
