@@ -42,6 +42,8 @@
 #include <boost/function.hpp>
 #include <boost/noncopyable.hpp>
 #include <memory>
+#include <thread>
+#include <condition_variable>
 
 namespace moveit
 {

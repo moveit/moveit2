@@ -533,8 +533,8 @@ static void runThreads(int ncheck, int nset, int nmod)
   for (int i = 0; i < p; ++i)
   {
     threads[i]->join();
-    wthread.join();
   }
+  wthread.join();
 
   // clean up
   for (int i = 0; i < p; ++i)

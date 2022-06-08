@@ -43,6 +43,7 @@
 #include <boost/algorithm/string/trim.hpp>
 #include <tinyxml.h>
 #include <boost/algorithm/string/predicate.hpp>
+#include <filesystem>
 
 // ROS
 #include <rclcpp/rclcpp.hpp>
@@ -1604,11 +1605,11 @@ bool MoveItConfigData::extractPackageNameFromPath(const std::string& path, std::
       RCLCPP_DEBUG_STREAM(LOGGER, "Found package.xml in " << sub_path.make_preferred().string());
       package_found = true;
       relative_filepath = relative_path.string();
-      package_name = sub_path.leaf().string();
+      package_name = sub_path.filename();
       break;
     }
-    relative_path = sub_path.leaf() / relative_path;
-    sub_path.remove_leaf();
+    relative_path = sub_path.filename() / relative_path;
+    sub_path.remove_filename();
   }
 
   // Assign data to moveit_config_data
