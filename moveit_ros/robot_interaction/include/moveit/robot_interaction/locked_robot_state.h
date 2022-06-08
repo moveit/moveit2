@@ -78,7 +78,7 @@ public:
   void setState(const moveit::core::RobotState& state);
 
   // This is a function that can modify the maintained state.
-  typedef boost::function<void(moveit::core::RobotState*)> ModifyStateFunction;
+  typedef std::function<void(moveit::core::RobotState*)> ModifyStateFunction;
 
   // Modify the state.
   //
@@ -99,7 +99,7 @@ protected:
 protected:
   // this locks all accesses to the state_ member.
   // The lock can also be used by subclasses to lock additional fields.
-  mutable boost::mutex state_lock_;
+  mutable std::mutex state_lock_;
 
 private:
   // The state maintained by this class.

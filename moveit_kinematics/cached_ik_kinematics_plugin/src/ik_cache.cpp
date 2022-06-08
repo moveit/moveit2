@@ -36,6 +36,7 @@
 
 #include <boost/filesystem/fstream.hpp>
 #include <numeric>
+#include <filesystem>
 
 #include <moveit/cached_ik_kinematics_plugin/cached_ik_kinematics_plugin.h>
 
@@ -72,9 +73,9 @@ void IKCache::initializeCache(const std::string& robot_id, const std::string& gr
   // use mutex lock for rest of initialization
   std::lock_guard<std::mutex> slock(lock_);
   // determine cache file name
-  boost::filesystem::path prefix(!cached_ik_path.empty() ? cached_ik_path : boost::filesystem::current_path());
+  std::filesystem::path prefix(!cached_ik_path.empty() ? cached_ik_path : std::filesystem::current_path());
   // create cache directory if necessary
-  boost::filesystem::create_directories(prefix);
+  std::filesystem::create_directories(prefix);
 
   cache_file_name_ = prefix / (robot_id + group_name + "_" + cache_name + "_" + std::to_string(max_cache_size_) + "_" +
                                std::to_string(min_pose_distance_) + "_" +
@@ -83,7 +84,7 @@ void IKCache::initializeCache(const std::string& robot_id, const std::string& gr
   ik_cache_.clear();
   ik_nn_.clear();
   last_saved_cache_size_ = 0;
-  if (boost::filesystem::exists(cache_file_name_))
+  if (std::filesystem::exists(cache_file_name_))
   {
     // read cache
     boost::filesystem::ifstream cache_file(cache_file_name_, std::ios_base::binary | std::ios_base::in);

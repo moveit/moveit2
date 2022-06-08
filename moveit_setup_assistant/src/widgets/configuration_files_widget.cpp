@@ -62,7 +62,7 @@
 namespace moveit_setup_assistant
 {
 // Boost file system
-namespace fs = boost::filesystem;
+namespace fs = std::filesystem;
 
 static const std::string SETUP_ASSISTANT_FILE = ".setup_assistant";
 static const std::string CONFIG_PATH = "config";

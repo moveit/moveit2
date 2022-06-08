@@ -73,7 +73,7 @@
 namespace moveit_setup_assistant
 {
 // Boost file system
-namespace fs = boost::filesystem;
+namespace fs = std::filesystem;
 
 // ******************************************************************************************
 // Start screen user interface for MoveIt Configuration Assistant

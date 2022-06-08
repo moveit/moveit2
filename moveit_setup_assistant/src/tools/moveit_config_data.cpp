@@ -54,7 +54,7 @@
 namespace moveit_setup_assistant
 {
 // File system
-namespace fs = boost::filesystem;
+namespace fs = std::filesystem;
 
 // ******************************************************************************************
 // Constructor

@@ -51,6 +51,7 @@
 #include <streambuf>
 #include <algorithm>
 #include <chrono>
+#include <filesystem>
 
 namespace rdf_loader
 {
@@ -125,7 +126,7 @@ bool RDFLoader::loadFileToString(std::string& buffer, const std::string& path)
     return false;
   }
 
-  if (!boost::filesystem::exists(path))
+  if (!std::filesystem::exists(path))
   {
     RCLCPP_ERROR(LOGGER, "File does not exist");
     return false;
@@ -158,7 +159,7 @@ bool RDFLoader::loadXacroFileToString(std::string& buffer, const std::string& pa
     return false;
   }
 
-  if (!boost::filesystem::exists(path))
+  if (!std::filesystem::exists(path))
   {
     RCLCPP_ERROR(LOGGER, "File does not exist");
     return false;
@@ -220,7 +221,7 @@ bool RDFLoader::loadPkgFileToString(std::string& buffer, const std::string& pack
     return false;
   }
 
-  boost::filesystem::path path(package_path);
+  std::filesystem::path path(package_path);
   // Use boost to cross-platform combine paths
   path = path / relative_path;
 

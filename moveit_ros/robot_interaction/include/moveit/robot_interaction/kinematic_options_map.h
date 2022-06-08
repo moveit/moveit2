@@ -91,7 +91,7 @@ public:
 
 private:
   // this protects all members.
-  mutable boost::mutex lock_;
+  mutable std::mutex lock_;
 
   // default kinematic options.
   // PROTECTED BY lock_

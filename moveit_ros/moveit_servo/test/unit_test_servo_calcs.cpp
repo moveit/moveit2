@@ -53,7 +53,7 @@ static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_servo.unit_test_
 
 void loadModelFile(std::string package_name, std::string filename, std::string& file_content)
 {
-  boost::filesystem::path res_path(ament_index_cpp::get_package_share_directory(package_name));
+  std::filesystem::path res_path(ament_index_cpp::get_package_share_directory(package_name));
   std::string xml_string;
   std::fstream xml_file((res_path / filename).string().c_str(), std::fstream::in);
   while (xml_file.good())

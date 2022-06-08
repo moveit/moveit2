@@ -196,7 +196,7 @@ private:
   void processingThread();
   void clearInteractiveMarkersUnsafe();
 
-  std::unique_ptr<boost::thread> processing_thread_;
+  std::unique_ptr<std::thread> processing_thread_;
   bool run_processing_thread_;
 
   boost::condition_variable new_feedback_condition_;
@@ -219,7 +219,7 @@ private:
   // of Thread 1: Lock A,         Lock B, Unlock B, Unloack A
   //    Thread 2:         Lock B, Lock A
   // => deadlock
-  boost::mutex marker_access_lock_;
+  std::mutex marker_access_lock_;
 
   interactive_markers::InteractiveMarkerServer* int_marker_server_;
   // ros subscribers to move the interactive markers by other ros nodes
