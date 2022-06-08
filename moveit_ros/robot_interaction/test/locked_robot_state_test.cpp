@@ -532,9 +532,9 @@ static void runThreads(int ncheck, int nset, int nmod)
   // wait for all threads to finish
   for (int i = 0; i < p; ++i)
   {
-    threads[i]->join();
+    if (threads[i]->joinable()) {threads[i]->join();}
   }
-  wthread.join();
+  if (wthread.joinable()) {wthread.join();}
 
   // clean up
   for (int i = 0; i < p; ++i)
