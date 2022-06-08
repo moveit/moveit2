@@ -109,7 +109,7 @@ void ModifiedUrdfConfig::collectVariables(std::vector<TemplateVariable>& variabl
     {
       continue;
     }
-    for (const std::pair<std::string, std::string> argument : xacro->getArguments())
+    for (const std::pair<std::string, std::string>& argument : xacro->getArguments())
     {
       args += "    <xacro:arg name=\"";
       args += argument.first;

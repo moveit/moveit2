@@ -106,7 +106,7 @@ std::vector<std::string> ControlXacroConfig::getCommands() const
 void getInterfaceNames(const tinyxml2::XMLElement* joint_el, const std::string& element_name,
                        std::vector<std::string>& interface_names)
 {
-  for (const tinyxml2::XMLElement* el = joint_el->FirstChildElement(element_name.c_str()); el != NULL;
+  for (const tinyxml2::XMLElement* el = joint_el->FirstChildElement(element_name.c_str()); el != nullptr;
        el = el->NextSiblingElement())
   {
     interface_names.push_back(el->Attribute("name"));
@@ -135,10 +135,10 @@ void ControlXacroConfig::loadFromDescription()
 
   auto urdf_config = config_data_->get<URDFConfig>("urdf");
   urdf_xml.Parse(urdf_config->getURDFContents().c_str());
-  for (XMLElement* control_el = urdf_xml.FirstChildElement("ros2_control"); control_el != NULL;
+  for (XMLElement* control_el = urdf_xml.FirstChildElement("ros2_control"); control_el != nullptr;
        control_el = control_el->NextSiblingElement())
   {
-    for (XMLElement* joint_el = control_el->FirstChildElement("joint"); joint_el != NULL;
+    for (XMLElement* joint_el = control_el->FirstChildElement("joint"); joint_el != nullptr;
          joint_el = joint_el->NextSiblingElement())
     {
       std::string joint_name = joint_el->Attribute("name");
@@ -228,7 +228,7 @@ const ControlInterfaces ControlXacroConfig::getControlInterfaces(const std::vect
 std::string ControlXacroConfig::getJointsXML() const
 {
   std::string joints = "";
-  const std::string TAB = "            ";
+  const std::string tab = "            ";
   // Loop through all joints to preserve joint ordering
   for (const std::string& joint_name : joint_names_)
   {
@@ -240,28 +240,28 @@ std::string ControlXacroConfig::getJointsXML() const
 
     const ControlInterfaces& ci = pair->second;
 
-    joints += TAB;
+    joints += tab;
     joints += "<joint name=\"" + joint_name + "\">\n";
     for (const std::string& command_interface : ci.command_interfaces)
     {
-      joints += TAB;
+      joints += tab;
       joints += "    <command_interface name=\"";
       joints += command_interface;
       joints += "\"/>\n";
     }
     for (const std::string& state_interface : ci.state_interfaces)
     {
-      joints += TAB;
+      joints += tab;
       joints += "    <state_interface name=\"";
       joints += state_interface;
       if (state_interface == "position")
       {
         joints += "\">\n";
-        joints += TAB;
+        joints += tab;
         joints += "      <param name=\"initial_value\">${initial_positions['";
         joints += joint_name;
         joints += "']}</param>\n";
-        joints += TAB;
+        joints += tab;
         joints += "    </state_interface>\n";
       }
       else
@@ -269,7 +269,7 @@ std::string ControlXacroConfig::getJointsXML() const
         joints += "\"/>\n";
       }
     }
-    joints += TAB;
+    joints += tab;
     joints += "</joint>\n";
   }
   return joints;

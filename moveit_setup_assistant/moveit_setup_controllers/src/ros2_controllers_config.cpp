@@ -102,7 +102,9 @@ void ROS2ControllersConfig::loadPrevious(const std::filesystem::path& package_pa
       auto jnode = controller_node["joints"];
       if (jnode.IsDefined() && jnode.IsSequence())
       {
-        for (std::size_t i = 0; i < jnode.size(); i++)
+        // Looping through sequences with yaml is sometimes buggy when using iterators
+        // so here we use a "classic" loop and disable the clang-tidy rule
+        for (std::size_t i = 0; i < jnode.size(); i++)  // NOLINT(modernize-loop-convert)
         {
           controller.joints_.push_back(jnode[i].as<std::string>());
         }

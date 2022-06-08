@@ -9,13 +9,15 @@
  * `moveit_setup::srdf_setup::RobotPosesWidget`
  * `moveit_setup::srdf_setup::EndEffectorsWidget`
  * `moveit_setup::srdf_setup::PassiveJointsWidget`
+ * `moveit_setup::controllers::UrdfModificationsWidget`
+ * `moveit_setup::controllers::ROS2ControllersWidget`
+ * `moveit_setup::controllers::MoveItControllersWidget`
  * `moveit_setup::app::PerceptionWidget`
  * `moveit_setup::app::LaunchesWidget`
  * `moveit_setup::core::AuthorInformationWidget`
  * `moveit_setup::core::ConfigurationFilesWidget`
 
 ### Not Ported Yet
- * `moveit_setup::controllers::ControllersWidget`
  * `moveit_setup::simulation::SimulationWidget`
 
 ### Notes
