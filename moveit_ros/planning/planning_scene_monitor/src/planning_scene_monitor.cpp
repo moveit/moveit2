@@ -438,10 +438,10 @@ void PlanningSceneMonitor::scenePublishingThread()
             }
           }
           std::scoped_lock prevent_shape_cache_updates(shape_handles_lock_);  // we don't want the
-                                                                                                 // transform cache to
-                                                                                                 // update while we are
-                                                                                                 // potentially changing
-                                                                                                 // attached bodies
+                                                                              // transform cache to
+                                                                              // update while we are
+                                                                              // potentially changing
+                                                                              // attached bodies
           scene_->setAttachedBodyUpdateCallback(moveit::core::AttachedBodyCallback());
           scene_->setCollisionObjectUpdateCallback(collision_detection::World::ObserverCallbackFn());
           scene_->pushDiffs(parent_scene_);

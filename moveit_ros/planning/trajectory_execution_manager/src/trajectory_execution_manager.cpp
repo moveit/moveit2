@@ -1282,7 +1282,7 @@ void TrajectoryExecutionManager::execute(const ExecutionCompleteCallback& callba
   // start the execution thread
   execution_complete_ = false;
   execution_thread_ = std::make_unique<std::thread>(&TrajectoryExecutionManager::executeThread, this, callback,
-                                                      part_callback, auto_clear);
+                                                    part_callback, auto_clear);
 }
 
 moveit_controller_manager::ExecutionStatus TrajectoryExecutionManager::waitForExecution()

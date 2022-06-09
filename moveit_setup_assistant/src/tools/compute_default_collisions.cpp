@@ -51,9 +51,8 @@ namespace moveit_setup_assistant
 const std::unordered_map<DisabledReason, std::string> REASONS_TO_STRING = boost::assign::map_list_of(NEVER, "Never")(
     DEFAULT, "Default")(ADJACENT, "Adjacent")(ALWAYS, "Always")(USER, "User")(NOT_DISABLED, "Not Disabled");
 
-const std::unordered_map<std::string, DisabledReason> REASONS_FROM_STRING =
-    boost::assign::map_list_of("Never", NEVER)("Default", DEFAULT)(
-        "Adjacent", ADJACENT)("Always", ALWAYS)("User", USER)("Not Disabled", NOT_DISABLED);
+const std::unordered_map<std::string, DisabledReason> REASONS_FROM_STRING = boost::assign::map_list_of("Never", NEVER)(
+    "Default", DEFAULT)("Adjacent", ADJACENT)("Always", ALWAYS)("User", USER)("Not Disabled", NOT_DISABLED);
 
 // Used for logging
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("collision_updater");
@@ -557,7 +556,7 @@ unsigned int disableNeverInCollision(const unsigned int num_trials, planning_sce
   unsigned int num_disabled = 0;
 
   boost::thread_group bgroup;  // create a group of threads
-  std::mutex lock;           // used for sharing the same data structures
+  std::mutex lock;             // used for sharing the same data structures
 
   int num_threads = std::thread::hardware_concurrency();  // how many cores does this computer have?
   // RCLCPP_INFO_STREAM_STREAM(LOGGER, "Performing " << num_trials << " trials for 'always in collision' checking on " <<

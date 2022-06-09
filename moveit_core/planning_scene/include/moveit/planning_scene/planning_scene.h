@@ -75,8 +75,7 @@ typedef std::function<bool(const moveit::core::RobotState&, bool)> StateFeasibil
     The order of the arguments matters: the notion of feasibility is to be checked for motion segments that start at the
    first state and end at the second state. The third argument indicates
     whether the check should be verbose or not. */
-using MotionFeasibilityFn =
-    std::function<bool(const moveit::core::RobotState&, const moveit::core::RobotState&, bool)>;
+using MotionFeasibilityFn = std::function<bool(const moveit::core::RobotState&, const moveit::core::RobotState&, bool)>;
 
 /** \brief A map from object names (e.g., attached bodies, collision objects) to their colors */
 using ObjectColorMap = std::map<std::string, std_msgs::msg::ColorRGBA>;
@@ -87,7 +86,7 @@ using ObjectTypeMap = std::map<std::string, object_recognition_msgs::msg::Object
 /** \brief This class maintains the representation of the
     environment as seen by a planning instance. The environment
     geometry, the robot geometry and state are maintained. */
-class MOVEIT_PLANNING_SCENE_EXPORT PlanningScene : private boost::noncopyable, // should we manually implement this?
+class MOVEIT_PLANNING_SCENE_EXPORT PlanningScene : private boost::noncopyable,  // should we manually implement this?
                                                    public std::enable_shared_from_this<PlanningScene>
 {
 public:

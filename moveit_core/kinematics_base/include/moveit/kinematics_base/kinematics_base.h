@@ -151,7 +151,7 @@ public:
 
   /** @brief Signature for a callback to validate an IK solution. Typically used for collision checking. */
   using IKCallbackFn = std::function<void(const geometry_msgs::msg::Pose&, const std::vector<double>&,
-                                            moveit_msgs::msg::MoveItErrorCodes&)>;
+                                          moveit_msgs::msg::MoveItErrorCodes&)>;
 
   /**
    * @brief Given a desired pose of the end-effector, compute the joint angles to reach it

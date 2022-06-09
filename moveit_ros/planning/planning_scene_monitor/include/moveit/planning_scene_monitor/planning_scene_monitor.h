@@ -476,7 +476,7 @@ protected:
   planning_scene::PlanningScenePtr scene_;
   planning_scene::PlanningSceneConstPtr scene_const_;
   planning_scene::PlanningScenePtr parent_scene_;  /// if diffs are monitored, this is the pointer to the parent scene
-  std::shared_mutex scene_update_mutex_;         /// mutex for stored scene
+  std::shared_mutex scene_update_mutex_;           /// mutex for stored scene
   rclcpp::Time last_update_time_;                  /// Last time the state was updated
   rclcpp::Time last_robot_motion_time_;            /// Last time the robot has moved
 
@@ -548,7 +548,7 @@ protected:
   /// lock access to update_callbacks_
   std::recursive_mutex update_lock_;
   std::vector<std::function<void(SceneUpdateType)> > update_callbacks_;  /// List of callbacks to trigger when updates
-                                                                           /// are received
+                                                                         /// are received
 
 private:
   void getUpdatedFrameTransforms(std::vector<geometry_msgs::msg::TransformStamped>& transforms);

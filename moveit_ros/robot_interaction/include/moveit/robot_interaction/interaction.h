@@ -99,7 +99,7 @@ typedef std::function<bool(const moveit::core::RobotState& state, visualization_
 ///           is somehow invalid or erronious (e.g. in collision).  true if
 ///           everything worked well.
 typedef std::function<bool(moveit::core::RobotState& state,
-                             const visualization_msgs::msg::InteractiveMarkerFeedback::ConstSharedPtr& feedback)>
+                           const visualization_msgs::msg::InteractiveMarkerFeedback::ConstSharedPtr& feedback)>
     ProcessFeedbackFn;
 
 /// Type of function for updating marker pose for new state.

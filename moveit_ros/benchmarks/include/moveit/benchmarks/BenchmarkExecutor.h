@@ -89,7 +89,7 @@ public:
 
   /// Definition of a post-run benchmark event function.  Invoked immediately after each planner calls solve().
   typedef std::function<void(const moveit_msgs::msg::MotionPlanRequest& request,
-                               const planning_interface::MotionPlanDetailedResponse& response, PlannerRunData& run_data)>
+                             const planning_interface::MotionPlanDetailedResponse& response, PlannerRunData& run_data)>
       PostRunEventFunction;
 
   BenchmarkExecutor(const rclcpp::Node::SharedPtr& node,

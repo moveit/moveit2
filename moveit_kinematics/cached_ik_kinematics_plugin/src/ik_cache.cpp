@@ -73,7 +73,8 @@ void IKCache::initializeCache(const std::string& robot_id, const std::string& gr
   // use mutex lock for rest of initialization
   std::lock_guard<std::mutex> slock(lock_);
   // determine cache file name
-  std::filesystem::path prefix(!cached_ik_path.empty() ? std::filesystem::path(cached_ik_path) : std::filesystem::current_path());
+  std::filesystem::path prefix(!cached_ik_path.empty() ? std::filesystem::path(cached_ik_path) :
+                                                         std::filesystem::current_path());
   // create cache directory if necessary
   std::filesystem::create_directories(prefix);
 
