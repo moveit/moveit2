@@ -57,12 +57,6 @@ std::string SynchronizedStringParameter::loadInitialValue(const NodeInterfaceSha
     if (shouldPublish())
     {
       // Transient local is similar to latching in ROS 1.
-      ////      rclcpp::PublisherOptionsWithAllocator tmp;
-      ////    auto tmp = rclcpp::PublisherOptionsBase();
-      //    rclcpp::PublisherOptionsWithAllocator<std::allocator<void>> options;
-      //    rclcpp::PublisherFactory factory = rclcpp::create_publisher_factory<std_msgs::msg::String,
-      //    std::allocator<void>, rclcpp::Publisher<std_msgs::msg::String> >(options);
-
       string_publisher_ = rclcpp::create_publisher<std_msgs::msg::String>(parameters_interface_, topics_interface_,
                                                                           name_, rclcpp::QoS(1).transient_local());
 

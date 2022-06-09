@@ -41,7 +41,7 @@
 #include <urdf/model.h>
 #include <srdfdom/model.h>
 #include <rclcpp/rclcpp.hpp>
-#include <rclcpp/node_interfaces/node_parameters_interface.hpp>
+//#include <rclcpp/node_interfaces/node_parameters_interface.hpp>
 
 namespace rdf_loader
 {
