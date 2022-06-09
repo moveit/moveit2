@@ -41,6 +41,7 @@
 #include <urdf/model.h>
 #include <srdfdom/model.h>
 #include <rclcpp/rclcpp.hpp>
+#include <rclcpp/node_interfaces/node_parameters_interface.hpp>
 
 namespace rdf_loader
 {
@@ -52,6 +53,10 @@ using NewModelCallback = std::function<void()>;
  */
 class RDFLoader
 {
+// alias
+using TopicsInterfaceSharedPtr = std::shared_ptr<rclcpp::node_interfaces::NodeTopicsInterface>;
+using ParametersInterfaceSharedPtr = std::shared_ptr<rclcpp::node_interfaces::NodeParametersInterface>;
+
 public:
   /** @brief Default constructor
    *
@@ -70,6 +75,10 @@ public:
    *  @param default_timeout Default value for parameter with "_timeout" suffix.
    */
   RDFLoader(const std::shared_ptr<rclcpp::Node>& node, const std::string& ros_name = "robot_description",
+            bool default_continuous_value = false, double default_timeout = 10.0);
+
+  RDFLoader(const NodeInterfaceSharedPtr& node_interface, const TopicsInterfaceSharedPtr& topics_interface,
+            const ParametersInterfaceSharedPtr& parameters_interface, const std::string& ros_name = "robot_description",
             bool default_continuous_value = false, double default_timeout = 10.0);
 
   /** @brief Initialize the robot model from a string representation of the URDF and SRDF documents */
@@ -122,6 +131,9 @@ private:
 
   void urdfUpdateCallback(const std::string& new_urdf_string);
   void srdfUpdateCallback(const std::string& new_srdf_string);
+  void loadRobot(const NodeInterfaceSharedPtr& node_interface, const TopicsInterfaceSharedPtr& topics_interface,
+                 const ParametersInterfaceSharedPtr& parameters_interface, const std::string& ros_name,
+                 bool default_continuous_value, double default_timeout);
 
   NewModelCallback new_model_cb_;
 

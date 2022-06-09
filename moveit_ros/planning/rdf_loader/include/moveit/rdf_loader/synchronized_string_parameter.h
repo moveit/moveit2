@@ -38,9 +38,16 @@
 
 #include <std_msgs/msg/string.hpp>
 #include <rclcpp/rclcpp.hpp>
+#include "rclcpp/publisher_factory.hpp"
+#include <rclcpp/publisher_options.hpp>
+#include <rclcpp/create_publisher.hpp>
 
 namespace rdf_loader
 {
+// alias
+using NodeInterfaceSharedPtr = std::shared_ptr<rclcpp::node_interfaces::NodeBaseInterface>;
+using TopicsInterfaceSharedPtr = std::shared_ptr<rclcpp::node_interfaces::NodeTopicsInterface>;
+using ParametersInterfaceSharedPtr = std::shared_ptr<rclcpp::node_interfaces::NodeParametersInterface>;
 using StringCallback = std::function<void(const std::string&)>;
 
 /**
@@ -59,7 +66,9 @@ using StringCallback = std::function<void(const std::string&)>;
 class SynchronizedStringParameter
 {
 public:
-  std::string loadInitialValue(const std::shared_ptr<rclcpp::Node>& node, const std::string& name,
+  std::string loadInitialValue(const NodeInterfaceSharedPtr& node_interface,
+                               const TopicsInterfaceSharedPtr& topics_interface,
+                               const ParametersInterfaceSharedPtr& parameters_interface, const std::string& name,
                                StringCallback parent_callback = {}, bool default_continuous_value = false,
                                double default_timeout = 10.0);
 
@@ -72,12 +81,14 @@ protected:
 
   void stringCallback(const std_msgs::msg::String::SharedPtr msg);
 
-  std::shared_ptr<rclcpp::Node> node_;
+  NodeInterfaceSharedPtr node_interface_ = nullptr;
+  TopicsInterfaceSharedPtr topics_interface_ = nullptr;
+  ParametersInterfaceSharedPtr parameters_interface_ = nullptr;
   std::string name_;
   StringCallback parent_callback_;
 
   rclcpp::Subscription<std_msgs::msg::String>::SharedPtr string_subscriber_;
-  rclcpp::Publisher<std_msgs::msg::String>::SharedPtr string_publisher_;
+    std::shared_ptr<rclcpp::Publisher<std_msgs::msg::String>>string_publisher_;
 
   std::string content_;
 };

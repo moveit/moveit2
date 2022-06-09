@@ -93,6 +93,17 @@ bool KinematicsBase::initialize(const rclcpp::Node::SharedPtr& /*node*/,
   return false;
 }
 
+bool KinematicsBase::initialize(const moveit::core::RobotModel& /*robot_model*/, const std::string& group_name,
+                                const std::string& /*base_frame*/, const std::vector<std::string>& /*tip_frames*/,
+                                double /*search_discretization*/)
+{
+    RCLCPP_ERROR(LOGGER,
+                 "IK plugin for group '%s' relies on deprecated API. "
+                 "Please implement initialize(rclcpp::Node::SharedPtr, RobotModel, ...).",
+                 group_name.c_str());
+    return false;
+}
+
 bool KinematicsBase::setRedundantJoints(const std::vector<unsigned int>& redundant_joint_indices)
 {
   for (const unsigned int& redundant_joint_index : redundant_joint_indices)

@@ -48,6 +48,11 @@ MOVEIT_CLASS_FORWARD(RobotModelLoader);  // Defines RobotModelLoaderPtr, ConstPt
 /** @class RobotModelLoader */
 class RobotModelLoader
 {
+// alias
+using NodeInterfaceSharedPtr = std::shared_ptr<rclcpp::node_interfaces::NodeBaseInterface>;
+using TopicsInterfaceSharedPtr = std::shared_ptr<rclcpp::node_interfaces::NodeTopicsInterface>;
+using ParametersInterfaceSharedPtr = std::shared_ptr<rclcpp::node_interfaces::NodeParametersInterface>;
+
 public:
   /** @brief Structure that encodes the options to be passed to the RobotModelLoader constructor */
   struct Options
@@ -80,6 +85,13 @@ public:
   RobotModelLoader(const rclcpp::Node::SharedPtr& node, const Options& opt = Options());
 
   RobotModelLoader(const rclcpp::Node::SharedPtr& node, const std::string& robot_description,
+                   bool load_kinematics_solvers = true);
+
+  RobotModelLoader(const NodeInterfaceSharedPtr& node_interface, const TopicsInterfaceSharedPtr& topics_interface,
+                   const ParametersInterfaceSharedPtr& parameters_interface, const Options& opt = Options());
+
+  RobotModelLoader(const NodeInterfaceSharedPtr& node_interface, const TopicsInterfaceSharedPtr& topics_interface,
+                   const ParametersInterfaceSharedPtr& parameters_interface, const std::string& robot_description,
                    bool load_kinematics_solvers = true);
 
   ~RobotModelLoader();
@@ -132,6 +144,9 @@ private:
   moveit::core::RobotModelPtr model_;
   rdf_loader::RDFLoaderPtr rdf_loader_;
   kinematics_plugin_loader::KinematicsPluginLoaderPtr kinematics_loader_;
-  const rclcpp::Node::SharedPtr node_;
+  NodeInterfaceSharedPtr node_interface_;
+  ParametersInterfaceSharedPtr parameters_interface_;
+  TopicsInterfaceSharedPtr topics_interface_;
+
 };
 }  // namespace robot_model_loader
