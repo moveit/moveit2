@@ -85,7 +85,7 @@ std::string SynchronizedStringParameter::loadInitialValue(const NodeInterfaceSha
   {
     parameters_interface_->declare_parameter(timeout_param, rclcpp::ParameterType::PARAMETER_DOUBLE);
   }
-  double d_timeout = default_timeout; // ten second default
+  double d_timeout = default_timeout;  // ten second default
   rclcpp::Parameter d_timeout_parameter;
   if (parameters_interface_->get_parameter(timeout_param, d_timeout_parameter))
   {
