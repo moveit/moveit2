@@ -147,9 +147,9 @@ bool executeAttachObject(const ManipulationPlanSharedDataConstPtr& shared_plan_d
     ok = ps->processAttachedCollisionObjectMsg(msg);
   }
   motion_plan.planning_scene_monitor_->triggerSceneUpdateEvent(
-      (planning_scene_monitor::PlanningSceneMonitor::SceneUpdateType)(
-          planning_scene_monitor::PlanningSceneMonitor::UPDATE_GEOMETRY +
-          planning_scene_monitor::PlanningSceneMonitor::UPDATE_STATE));
+      (planning_scene_monitor::PlanningSceneMonitor::
+           SceneUpdateType)(planning_scene_monitor::PlanningSceneMonitor::UPDATE_GEOMETRY +
+                            planning_scene_monitor::PlanningSceneMonitor::UPDATE_STATE));
   return ok;
 }
 
