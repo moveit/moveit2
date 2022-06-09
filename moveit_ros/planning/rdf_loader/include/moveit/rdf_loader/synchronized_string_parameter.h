@@ -38,9 +38,6 @@
 
 #include <std_msgs/msg/string.hpp>
 #include <rclcpp/rclcpp.hpp>
-#include "rclcpp/publisher_factory.hpp"
-#include <rclcpp/publisher_options.hpp>
-#include <rclcpp/create_publisher.hpp>
 
 namespace rdf_loader
 {

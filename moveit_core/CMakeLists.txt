@@ -100,8 +100,8 @@ set(THIS_PACKAGE_LIBRARIES
     moveit_planning_interface
     moveit_planning_scene
     moveit_planning_request_adapter
-#    # TODO: Port python bindings
-#    # moveit_python_tools
+    # TODO: Port python bindings
+    # moveit_python_tools
     moveit_robot_model
     moveit_robot_state
     moveit_robot_trajectory
@@ -225,7 +225,6 @@ pluginlib_export_plugin_description_file(moveit_core collision_detector_fcl_desc
 pluginlib_export_plugin_description_file(moveit_core collision_detector_bullet_description.xml)
 pluginlib_export_plugin_description_file(moveit_core filter_plugin_butterworth.xml)
 
-set(BUILD_TESTING 0)
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
 
