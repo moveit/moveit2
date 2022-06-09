@@ -1,7 +1,6 @@
 cmake_minimum_required(VERSION 3.10.2)
 project(moveit_ros_planning)
 
-set(BUILD_TESTING 1)
 # Common cmake code applied to all moveit packages
 find_package(moveit_common REQUIRED)
 moveit_package()

@@ -1,18 +1,3 @@
-#project(tests)
-#cmake_minimum_required(VERSION 3.22)
-#
-#find_package(ament_cmake REQUIRED)
-#find_package(rclcpp REQUIRED)
-#find_package(rclcpp_lifecycle REQUIRED)
-#find_package(urdf REQUIRED)
-#find_package(srdfdom REQUIRED)
-#find_package(moveit_core REQUIRED)
-#find_package(Boost REQUIRED)
-#
-#
-#
-#
-#
 set(MOVEIT_LIB_NAME moveit_rdf_loader)
 
 add_library(${MOVEIT_LIB_NAME} SHARED src/rdf_loader.cpp src/synchronized_string_parameter.cpp)
