@@ -1185,16 +1185,7 @@ bool IKFastKinematicsPlugin::getPositionIK(const geometry_msgs::msg::Pose& ik_po
   }
 
   // Sort the solutions under limits and find the one that is closest to ik_seed_state
-  if (!solutions_obey_limits.empty())
-  {
-    std::sort(solutions_obey_limits.begin(), solutions_obey_limits.end());
-    solution = solutions_obey_limits[0].value;
-    error_code.val = moveit_msgs::msg::MoveItErrorCodes::SUCCESS;
-    return true;
-  }
-
-  error_code.val = moveit_msgs::msg::MoveItErrorCodes::NO_IK_SOLUTION;
-  return false;
+  return !solutions_obey_limits.empty();
 }
 
 bool IKFastKinematicsPlugin::getPositionIK(const std::vector<geometry_msgs::msg::Pose>& ik_poses,
