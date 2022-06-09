@@ -374,8 +374,8 @@ ompl::base::ConstraintPtr createOMPLConstraints(const moveit::core::RobotModelCo
   const std::size_t num_pos_con = constraints.position_constraints.size();
   const std::size_t num_ori_con = constraints.orientation_constraints.size();
 
-  // This factory method contains template code to support different constraints, but only position constraints are
-  // currently supported. The other options return a nullptr for now and should not be used.
+  // This factory method contains template code to support position and/or orientation constraints.
+  // If the specified constraints are invalid, a nullptr is returned.
   std::vector<ompl::base::ConstraintPtr> ompl_constraints;
   if (num_pos_con > 1)
   {
