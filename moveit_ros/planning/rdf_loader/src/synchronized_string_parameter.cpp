@@ -71,26 +71,20 @@ std::string SynchronizedStringParameter::loadInitialValue(const NodeInterfaceSha
   std::string keep_open_param = name_ + "_continuous";
   if (!parameters_interface_->has_parameter(keep_open_param))
   {
-    parameters_interface_->declare_parameter(keep_open_param, rclcpp::ParameterType::PARAMETER_BOOL);
+    parameters_interface_->declare_parameter(keep_open_param,rclcpp::ParameterValue(default_continuous_value));
   }
-  bool keep_open = default_continuous_value;
   rclcpp::Parameter keep_open_parameter;
-  if (parameters_interface_->get_parameter(keep_open_param, keep_open_parameter))
-  {
-    keep_open = keep_open_parameter.as_bool();
-  }
+  parameters_interface_->get_parameter(keep_open_param, keep_open_parameter);
+  bool keep_open = keep_open_parameter.as_bool();
 
   std::string timeout_param = name_ + "_timeout";
   if (!parameters_interface_->has_parameter(timeout_param))
   {
-    parameters_interface_->declare_parameter(timeout_param, rclcpp::ParameterType::PARAMETER_DOUBLE);
+    parameters_interface_->declare_parameter(timeout_param, rclcpp::ParameterValue(default_timeout));
   }
-  double d_timeout = default_timeout;  // ten second default
   rclcpp::Parameter d_timeout_parameter;
-  if (parameters_interface_->get_parameter(timeout_param, d_timeout_parameter))
-  {
-    d_timeout = d_timeout_parameter.as_double();
-  }
+  parameters_interface_->get_parameter(timeout_param, d_timeout_parameter);
+  double d_timeout = d_timeout_parameter.as_double();
   rclcpp::Duration timeout = rclcpp::Duration::from_seconds(d_timeout);
 
   if (!waitForMessage(timeout))
@@ -112,14 +106,11 @@ bool SynchronizedStringParameter::getMainParameter()
   // Check if the parameter is declared, declare it if it's not declared yet
   if (!parameters_interface_->has_parameter(name_))
   {
-    parameters_interface_->declare_parameter(name_, rclcpp::ParameterType::PARAMETER_STRING);
+    parameters_interface_->declare_parameter(name_, rclcpp::ParameterValue(std::string()));
   }
-  content_ = std::string();
   rclcpp::Parameter name_parameter;
-  if (parameters_interface_->get_parameter(name_, name_parameter))
-  {
-    content_ = name_parameter.as_string();
-  }
+  parameters_interface_->get_parameter(name_, name_parameter);
+  content_ = name_parameter.as_string();
 
   return !content_.empty();
 }
@@ -127,17 +118,14 @@ bool SynchronizedStringParameter::getMainParameter()
 bool SynchronizedStringParameter::shouldPublish()
 {
   std::string publish_param = "publish_" + name_;
-  bool publish_string = false;
   if (!parameters_interface_->has_parameter(publish_param))
   {
-    parameters_interface_->declare_parameter(publish_param, rclcpp::ParameterType::PARAMETER_BOOL);
+    parameters_interface_->declare_parameter(publish_param, rclcpp::ParameterValue(false));
   }
 
   rclcpp::Parameter publish_string_parameter;
-  if (parameters_interface_->get_parameter(publish_param, publish_string_parameter))
-  {
-    publish_string = publish_string_parameter.as_bool();
-  }
+  parameters_interface_->get_parameter(publish_param, publish_string_parameter);
+  bool publish_string = publish_string_parameter.as_bool();
 
   return publish_string;
 }
