@@ -36,7 +36,6 @@
 
 #include <moveit/rdf_loader/synchronized_string_parameter.h>
 
-
 namespace rdf_loader
 {
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_ros.robot_model_loader");
@@ -45,7 +44,8 @@ std::string SynchronizedStringParameter::loadInitialValue(const NodeInterfaceSha
                                                           const TopicsInterfaceSharedPtr& topics_interface,
                                                           const ParametersInterfaceSharedPtr& parameters_interface,
                                                           const std::string& name, StringCallback parent_callback,
-                                                          bool default_continuous_value, double default_timeout){
+                                                          bool default_continuous_value, double default_timeout)
+{
   node_interface_ = node_interface;
   topics_interface_ = topics_interface;
   parameters_interface_ = parameters_interface;
@@ -57,14 +57,14 @@ std::string SynchronizedStringParameter::loadInitialValue(const NodeInterfaceSha
     if (shouldPublish())
     {
       // Transient local is similar to latching in ROS 1.
-////      rclcpp::PublisherOptionsWithAllocator tmp;
-////    auto tmp = rclcpp::PublisherOptionsBase();
-//    rclcpp::PublisherOptionsWithAllocator<std::allocator<void>> options;
-//    rclcpp::PublisherFactory factory = rclcpp::create_publisher_factory<std_msgs::msg::String, std::allocator<void>, rclcpp::Publisher<std_msgs::msg::String> >(options);
+      ////      rclcpp::PublisherOptionsWithAllocator tmp;
+      ////    auto tmp = rclcpp::PublisherOptionsBase();
+      //    rclcpp::PublisherOptionsWithAllocator<std::allocator<void>> options;
+      //    rclcpp::PublisherFactory factory = rclcpp::create_publisher_factory<std_msgs::msg::String,
+      //    std::allocator<void>, rclcpp::Publisher<std_msgs::msg::String> >(options);
 
-    string_publisher_ = rclcpp::create_publisher<std_msgs::msg::String>(parameters_interface_, topics_interface_, name_, rclcpp::QoS(1).transient_local());
-
-
+      string_publisher_ = rclcpp::create_publisher<std_msgs::msg::String>(parameters_interface_, topics_interface_,
+                                                                          name_, rclcpp::QoS(1).transient_local());
 
       std_msgs::msg::String msg;
       msg.data = content_;
@@ -77,22 +77,24 @@ std::string SynchronizedStringParameter::loadInitialValue(const NodeInterfaceSha
   std::string keep_open_param = name_ + "_continuous";
   if (!parameters_interface_->has_parameter(keep_open_param))
   {
-      parameters_interface_->declare_parameter(keep_open_param, rclcpp::ParameterType::PARAMETER_BOOL);
+    parameters_interface_->declare_parameter(keep_open_param, rclcpp::ParameterType::PARAMETER_BOOL);
   }
   bool keep_open;
-  keep_open = default_continuous_value; // ten second default
-  if (parameters_interface_->has_parameter(keep_open_param)){
+  keep_open = default_continuous_value;  // ten second default
+  if (parameters_interface_->has_parameter(keep_open_param))
+  {
     keep_open = parameters_interface_->get_parameter(keep_open_param).as_bool();
   }
 
   std::string timeout_param = name_ + "_timeout";
   if (!parameters_interface_->has_parameter(timeout_param))
   {
-      parameters_interface_->declare_parameter(timeout_param, rclcpp::ParameterType::PARAMETER_DOUBLE);
+    parameters_interface_->declare_parameter(timeout_param, rclcpp::ParameterType::PARAMETER_DOUBLE);
   }
   double d_timeout;
-  d_timeout = default_timeout; // ten second default
-  if (parameters_interface_->has_parameter(timeout_param)){
+  d_timeout = default_timeout;  // ten second default
+  if (parameters_interface_->has_parameter(timeout_param))
+  {
     d_timeout = parameters_interface_->get_parameter(timeout_param).as_double();
   }
   rclcpp::Duration timeout = rclcpp::Duration::from_seconds(d_timeout);
@@ -116,12 +118,13 @@ bool SynchronizedStringParameter::getMainParameter()
   // Check if the parameter is declared, declare it if it's not declared yet
   if (!parameters_interface_->has_parameter(name_))
   {
-      parameters_interface_->declare_parameter(name_, rclcpp::ParameterType::PARAMETER_STRING);
+    parameters_interface_->declare_parameter(name_, rclcpp::ParameterType::PARAMETER_STRING);
   }
-    content_ = std::string();
-    if (parameters_interface_->has_parameter(name_)){
-        content_ = parameters_interface_->get_parameter(name_).as_string();
-    }
+  content_ = std::string();
+  if (parameters_interface_->has_parameter(name_))
+  {
+    content_ = parameters_interface_->get_parameter(name_).as_string();
+  }
 
   return !content_.empty();
 }
@@ -132,12 +135,13 @@ bool SynchronizedStringParameter::shouldPublish()
   bool publish_string;
   if (!parameters_interface_->has_parameter(publish_param))
   {
-      parameters_interface_->declare_parameter(publish_param, rclcpp::ParameterType::PARAMETER_BOOL);
+    parameters_interface_->declare_parameter(publish_param, rclcpp::ParameterType::PARAMETER_BOOL);
   }
-    publish_string = false;
-    if (parameters_interface_->has_parameter(publish_param)){
-        publish_string = parameters_interface_->get_parameter(publish_param).as_bool();
-    }
+  publish_string = false;
+  if (parameters_interface_->has_parameter(publish_param))
+  {
+    publish_string = parameters_interface_->get_parameter(publish_param).as_bool();
+  }
 
   return publish_string;
 }

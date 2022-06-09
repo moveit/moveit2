@@ -56,34 +56,39 @@ namespace rdf_loader
 {
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_rdf_loader.rdf_loader");
 
-void RDFLoader::loadRobot(const NodeInterfaceSharedPtr& node_interface, const TopicsInterfaceSharedPtr& topics_interface,
+void RDFLoader::loadRobot(const NodeInterfaceSharedPtr& node_interface,
+                          const TopicsInterfaceSharedPtr& topics_interface,
                           const ParametersInterfaceSharedPtr& parameters_interface, const std::string& ros_name,
-                          bool default_continuous_value, double default_timeout){
-    rclcpp::Clock clock;
-    auto start = clock.now();
+                          bool default_continuous_value, double default_timeout)
+{
+  rclcpp::Clock clock;
+  auto start = clock.now();
 
-    urdf_string_ = urdf_ssp_.loadInitialValue(node_interface,
-                                              topics_interface, parameters_interface, ros_name, [this](const std::string& new_urdf_string) { return urdfUpdateCallback(new_urdf_string); },
-                                              default_continuous_value, default_timeout);
+  urdf_string_ = urdf_ssp_.loadInitialValue(
+      node_interface, topics_interface, parameters_interface, ros_name,
+      [this](const std::string& new_urdf_string) { return urdfUpdateCallback(new_urdf_string); },
+      default_continuous_value, default_timeout);
 
-    const std::string srdf_name = ros_name + "_semantic";
-    srdf_string_ = srdf_ssp_.loadInitialValue(node_interface,
-                                              topics_interface, parameters_interface, srdf_name, [this](const std::string& new_srdf_string) { return srdfUpdateCallback(new_srdf_string); },
-                                              default_continuous_value, default_timeout);
+  const std::string srdf_name = ros_name + "_semantic";
+  srdf_string_ = srdf_ssp_.loadInitialValue(
+      node_interface, topics_interface, parameters_interface, srdf_name,
+      [this](const std::string& new_srdf_string) { return srdfUpdateCallback(new_srdf_string); },
+      default_continuous_value, default_timeout);
 
-    if (!loadFromStrings())
-    {
-        return;
-    }
+  if (!loadFromStrings())
+  {
+    return;
+  }
 
-    RCLCPP_INFO_STREAM(LOGGER, "Loaded robot model in " << (clock.now() - start).seconds() << " seconds");
+  RCLCPP_INFO_STREAM(LOGGER, "Loaded robot model in " << (clock.now() - start).seconds() << " seconds");
 }
 
 RDFLoader::RDFLoader(const std::shared_ptr<rclcpp::Node>& node, const std::string& ros_name,
-          bool default_continuous_value, double default_timeout) : ros_name_(ros_name)
+                     bool default_continuous_value, double default_timeout)
+  : ros_name_(ros_name)
 {
-    loadRobot(node->get_node_base_interface(),node->get_node_topics_interface(),
-              node->get_node_parameters_interface(), ros_name, default_continuous_value, default_timeout);
+  loadRobot(node->get_node_base_interface(), node->get_node_topics_interface(), node->get_node_parameters_interface(),
+            ros_name, default_continuous_value, default_timeout);
 }
 
 RDFLoader::RDFLoader(const NodeInterfaceSharedPtr& node_interface, const TopicsInterfaceSharedPtr& topics_interface,
@@ -91,7 +96,7 @@ RDFLoader::RDFLoader(const NodeInterfaceSharedPtr& node_interface, const TopicsI
                      bool default_continuous_value, double default_timeout)
   : ros_name_(ros_name)
 {
-    loadRobot(node_interface, topics_interface, parameters_interface, ros_name, default_continuous_value, default_timeout);
+  loadRobot(node_interface, topics_interface, parameters_interface, ros_name, default_continuous_value, default_timeout);
 }
 
 RDFLoader::RDFLoader(const std::string& urdf_string, const std::string& srdf_string)

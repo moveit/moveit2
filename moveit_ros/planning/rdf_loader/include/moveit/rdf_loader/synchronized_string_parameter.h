@@ -88,7 +88,7 @@ protected:
   StringCallback parent_callback_;
 
   rclcpp::Subscription<std_msgs::msg::String>::SharedPtr string_subscriber_;
-    std::shared_ptr<rclcpp::Publisher<std_msgs::msg::String>>string_publisher_;
+  std::shared_ptr<rclcpp::Publisher<std_msgs::msg::String>> string_publisher_;
 
   std::string content_;
 };

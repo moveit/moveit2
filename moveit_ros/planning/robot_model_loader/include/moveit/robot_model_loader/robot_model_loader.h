@@ -48,10 +48,10 @@ MOVEIT_CLASS_FORWARD(RobotModelLoader);  // Defines RobotModelLoaderPtr, ConstPt
 /** @class RobotModelLoader */
 class RobotModelLoader
 {
-// alias
-using NodeInterfaceSharedPtr = std::shared_ptr<rclcpp::node_interfaces::NodeBaseInterface>;
-using TopicsInterfaceSharedPtr = std::shared_ptr<rclcpp::node_interfaces::NodeTopicsInterface>;
-using ParametersInterfaceSharedPtr = std::shared_ptr<rclcpp::node_interfaces::NodeParametersInterface>;
+  // alias
+  using NodeInterfaceSharedPtr = std::shared_ptr<rclcpp::node_interfaces::NodeBaseInterface>;
+  using TopicsInterfaceSharedPtr = std::shared_ptr<rclcpp::node_interfaces::NodeTopicsInterface>;
+  using ParametersInterfaceSharedPtr = std::shared_ptr<rclcpp::node_interfaces::NodeParametersInterface>;
 
 public:
   /** @brief Structure that encodes the options to be passed to the RobotModelLoader constructor */
@@ -147,6 +147,5 @@ private:
   NodeInterfaceSharedPtr node_interface_;
   ParametersInterfaceSharedPtr parameters_interface_;
   TopicsInterfaceSharedPtr topics_interface_;
-
 };
 }  // namespace robot_model_loader
