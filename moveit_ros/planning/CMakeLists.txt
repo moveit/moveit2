@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.10.2)
 project(moveit_ros_planning)
 
+set(BUILD_TESTING 1)
 # Common cmake code applied to all moveit packages
 find_package(moveit_common REQUIRED)
 moveit_package()
@@ -10,6 +11,7 @@ find_package(moveit_msgs REQUIRED)
 # find_package(moveit_ros_perception REQUIRED)
 find_package(pluginlib REQUIRED)
 find_package(rclcpp REQUIRED)
+find_package(rclcpp_lifecycle REQUIRED)
 find_package(message_filters REQUIRED)
 find_package(srdfdom REQUIRED)
 find_package(urdf REQUIRED)
@@ -56,6 +58,7 @@ set(THIS_PACKAGE_LIBRARIES
 set(THIS_PACKAGE_INCLUDE_DEPENDS
   pluginlib
   rclcpp
+  rclcpp_lifecycle
   message_filters
   srdfdom
   urdf
