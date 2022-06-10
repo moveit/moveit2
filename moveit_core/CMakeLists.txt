@@ -83,7 +83,7 @@ set(THIS_PACKAGE_INCLUDE_DIRS
     sensor_manager/include
     trajectory_processing/include
     utils/include
-    )
+)
 
 set(THIS_PACKAGE_LIBRARIES
     moveit_butterworth_filter
@@ -111,31 +111,31 @@ set(THIS_PACKAGE_LIBRARIES
     moveit_trajectory_processing
     moveit_transforms
     moveit_utils
-    )
+)
 
 set(THIS_PACKAGE_INCLUDE_DEPENDS
-    angles
-    eigen_stl_containers
-    geometric_shapes
-    geometry_msgs
-    kdl_parser
-    moveit_msgs
-    octomap_msgs
-    random_numbers
-    sensor_msgs
-    shape_msgs
-    srdfdom
-    std_msgs
-    tf2_eigen
-    tf2_geometry_msgs
-    trajectory_msgs
-    visualization_msgs
-    Eigen3
-    eigen3_cmake_module
-    OCTOMAP
-    Bullet
-    ruckig
-    )
+  angles
+  eigen_stl_containers
+  geometric_shapes
+  geometry_msgs
+  kdl_parser
+  moveit_msgs
+  octomap_msgs
+  random_numbers
+  sensor_msgs
+  shape_msgs
+  srdfdom
+  std_msgs
+  tf2_eigen
+  tf2_geometry_msgs
+  trajectory_msgs
+  visualization_msgs
+  Eigen3
+  eigen3_cmake_module
+  OCTOMAP
+  Bullet
+  ruckig
+)
 
 include_directories(SYSTEM ${EIGEN3_INCLUDE_DIRS}
   ${LIBFCL_INCLUDE_DIRS}
