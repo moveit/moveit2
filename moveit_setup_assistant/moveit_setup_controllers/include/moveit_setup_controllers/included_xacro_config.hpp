@@ -49,6 +49,10 @@ class IncludedXacroConfig : public SetupConfig
 public:
   void onInit() override
   {
+    // Register the modified config and access it to ensure it is generated
+    config_data_->registerType("modified_urdf", "moveit_setup::ModifiedUrdfConfig");
+    config_data_->get("modified_urdf", "moveit_setup::ModifiedUrdfConfig");
+
     urdf_config_ = config_data_->get<URDFConfig>("urdf");
   }
 

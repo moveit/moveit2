@@ -42,7 +42,6 @@ namespace controllers
 {
 void UrdfModifications::onInit()
 {
-  config_data_->registerType("modified_urdf", "moveit_setup::ModifiedUrdfConfig");
   config_data_->registerType("control_xacro", "moveit_setup::controllers::ControlXacroConfig");
   control_xacro_config_ = config_data_->get<ControlXacroConfig>("control_xacro");
   srdf_config_ = config_data_->get<SRDFConfig>("srdf");
