@@ -29,6 +29,7 @@
 
   <depend>angles</depend>
   <depend>rclcpp</depend>
+  <depend>moveit_node_interface</depend>
   <depend>common_interfaces</depend>
   <depend>assimp</depend>
   <depend>boost</depend>

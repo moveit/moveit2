@@ -9,7 +9,7 @@ target_include_directories(${MOVEIT_LIB_NAME} PUBLIC $<BUILD_INTERFACE:${CMAKE_C
 # This line ensures that messages are built before the library is built
 ament_target_dependencies(
   ${MOVEIT_LIB_NAME}
-  rclcpp
+  moveit_node_interface
   urdf
   urdfdom_headers
   srdfdom moveit_msgs

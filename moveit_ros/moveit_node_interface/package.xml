@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>moveit_node_interface</name>
+  <version>0.0.0</version>
+  <description>Wrapper for common interfaces provided by ROS nodes</description>
+  <maintainer email="henningkayser@picknik.ai">Henning Kayser</maintainer>
+  <maintainer email="tyler@picknik.ai">Tyler Weaver</maintainer>
+  <maintainer email="moveit_releasers@googlegroups.com">MoveIt Release Team</maintainer>
+  <license>BSD</license>
+
+  <url type="website">http://moveit.ros.org</url>
+  <url type="bugtracker">https://github.com/ros-planning/moveit2/issues</url>
+  <url type="repository">https://github.com/ros-planning/moveit2</url>
+
+  <maintainer email="paul.gesel@picknik.ai">Paul Gesel</maintainer>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <!--
+  <exec_depend>moveit_ros_perception</exec_depend>
+  -->
+  <depend>rclcpp</depend>
+  <depend>rclcpp_lifecycle</depend>
+  <!--
+  <exec_depend>moveit_ros_manipulation</exec_depend>
+  -->
+
+  <test_depend>ament_lint_auto</test_depend>
+  <test_depend>ament_lint_common</test_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+
+</package>

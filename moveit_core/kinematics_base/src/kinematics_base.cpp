@@ -92,7 +92,7 @@ bool KinematicsBase::initialize(const rclcpp::Node::SharedPtr& /*node*/,
                group_name.c_str());
   return false;
 }
-
+// TODO
 bool KinematicsBase::initialize(const moveit::core::RobotModel& /*robot_model*/, const std::string& group_name,
                                 const std::string& /*base_frame*/, const std::vector<std::string>& /*tip_frames*/,
                                 double /*search_discretization*/)

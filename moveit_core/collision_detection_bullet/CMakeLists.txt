@@ -17,7 +17,7 @@ ament_target_dependencies(${MOVEIT_LIB_NAME} SYSTEM
   BULLET
 )
 ament_target_dependencies(${MOVEIT_LIB_NAME}
-  rclcpp
+        rclcpp
   rmw_implementation
   urdf
   urdfdom
@@ -36,7 +36,7 @@ ament_target_dependencies(collision_detector_bullet_plugin SYSTEM
   BULLET
 )
 ament_target_dependencies(collision_detector_bullet_plugin
-  rclcpp
+        rclcpp
   urdf
   visualization_msgs
   pluginlib
