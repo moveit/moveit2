@@ -47,7 +47,6 @@
 #include <string>
 #include <tf2_ros/qos.hpp>
 
-
 #include <moveit/planning_scene_monitor/current_state_monitor_middleware_handle.hpp>
 
 namespace planning_scene_monitor
