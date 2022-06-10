@@ -37,9 +37,6 @@
 
 #pragma once
 
-// System
-#include <boost/shared_ptr.hpp>
-
 // ROS msgs
 #include <geometry_msgs/PoseStamped.h>
 

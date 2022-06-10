@@ -38,12 +38,10 @@
 // Reading/Writing Files
 #include <iostream>  // For writing yaml and launch files
 #include <fstream>
-#include <boost/filesystem/path.hpp>        // for creating folders/files
-#include <boost/filesystem/operations.hpp>  // is_regular_file, is_directory, etc.
 #include <boost/algorithm/string/trim.hpp>
 #include <tinyxml.h>
 #include <boost/algorithm/string/predicate.hpp>
-#include <filesystem>
+#include <filesystem>  // for creating folders/files
 
 // ROS
 #include <rclcpp/rclcpp.hpp>

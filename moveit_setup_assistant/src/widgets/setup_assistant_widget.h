@@ -59,7 +59,6 @@ class QSplitter;
 
 // Other
 #include <boost/program_options/variables_map.hpp>  // for parsing input arguments
-#include <boost/thread/mutex.hpp>
 #endif
 
 // Forward declarations

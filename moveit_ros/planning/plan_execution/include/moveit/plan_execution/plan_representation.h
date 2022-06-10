@@ -39,7 +39,6 @@
 #include <moveit/planning_scene_monitor/planning_scene_monitor.h>
 #include <moveit/robot_trajectory/robot_trajectory.h>
 #include <moveit_msgs/msg/move_it_error_codes.hpp>
-#include <boost/function.hpp>
 
 namespace plan_execution
 {

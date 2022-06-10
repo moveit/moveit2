@@ -42,7 +42,6 @@
 #include <geometric_shapes/shapes.h>
 #include <rclcpp/rclcpp.hpp>
 
-#include <boost/function.hpp>
 #include <Eigen/Core>
 #include <Eigen/Geometry>
 

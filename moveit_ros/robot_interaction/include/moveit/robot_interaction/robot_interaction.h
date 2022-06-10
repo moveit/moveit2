@@ -42,8 +42,6 @@
 #include <moveit/macros/class_forward.h>
 #include <moveit/robot_state/robot_state.h>
 #include <moveit/robot_interaction/interaction.h>
-#include <boost/function.hpp>
-#include <boost/thread.hpp>
 #include <memory>
 
 // This is needed for legacy code that includes robot_interaction.h but not

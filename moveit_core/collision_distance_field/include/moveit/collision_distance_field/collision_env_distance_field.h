@@ -41,7 +41,6 @@
 #include <moveit/collision_distance_field/collision_common_distance_field.h>
 #include <moveit/collision_detection/collision_env.h>
 #include <moveit/planning_scene/planning_scene.h>
-#include <boost/thread/mutex.hpp>
 #include "rclcpp/rclcpp.hpp"
 
 namespace collision_detection

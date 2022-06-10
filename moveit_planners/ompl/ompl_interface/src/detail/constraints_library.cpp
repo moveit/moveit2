@@ -35,7 +35,6 @@
 /* Author: Ioan Sucan */
 
 #include <boost/date_time/posix_time/posix_time.hpp>
-#include <boost/filesystem.hpp>
 #include <filesystem>
 #include <fstream>
 #include <moveit/ompl_interface/detail/constrained_sampler.h>

@@ -36,8 +36,6 @@
 
 #pragma once
 
-#include <boost/array.hpp>
-#include <boost/function.hpp>
 #include <vector>
 #include <string>
 #include <map>

@@ -40,8 +40,6 @@
 #include <urdf_parser/urdf_parser.h>
 #include <fstream>
 #include <string>
-#include <boost/filesystem/path.hpp>
-#include <boost/filesystem/operations.hpp>
 #include <moveit/setup_assistant/tools/moveit_config_data.h>
 #include <moveit/utils/robot_model_test_utils.h>
 #include <ros/package.h>

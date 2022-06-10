@@ -40,7 +40,6 @@
 #include <moveit/robot_state/robot_state.h>
 #include <moveit/planning_scene_monitor/current_state_monitor.h>
 #include <moveit/robot_trajectory/robot_trajectory.h>
-#include <boost/thread.hpp>
 #include <rclcpp/time.hpp>
 #include <memory>
 #include <functional>

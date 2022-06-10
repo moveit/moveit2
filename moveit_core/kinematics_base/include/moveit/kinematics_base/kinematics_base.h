@@ -40,7 +40,6 @@
 #include <moveit_msgs/msg/move_it_error_codes.hpp>
 #include <moveit/macros/class_forward.h>
 #include "rclcpp/rclcpp.hpp"
-#include <boost/function.hpp>
 #include <string>
 
 #include "moveit_kinematics_base_export.h"

@@ -41,7 +41,6 @@
 #include <moveit/planning_scene/planning_scene.h>
 #include <object_recognition_msgs/msg/table_array.hpp>
 #include <moveit_msgs/msg/collision_object.hpp>
-#include <boost/thread/mutex.hpp>
 
 namespace shapes
 {

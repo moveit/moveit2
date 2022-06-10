@@ -47,7 +47,6 @@
 #include <fstream>
 #include <stdexcept>
 #include <vector>
-#include <boost/thread.hpp>
 #include <rclcpp/rclcpp.hpp>
 
 using namespace std;

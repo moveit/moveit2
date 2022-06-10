@@ -40,8 +40,6 @@
 #include <visualization_msgs/msg/interactive_marker.hpp>
 #include <interactive_markers/menu_handler.hpp>
 #include <moveit/robot_state/robot_state.h>
-#include <boost/function.hpp>
-#include <boost/thread.hpp>
 
 namespace moveit
 {

@@ -37,7 +37,6 @@
 #pragma once
 
 #include <moveit/collision_detection/occupancy_map.h>
-#include <boost/thread.hpp>
 #include <deque>
 #include <unordered_map>
 #include <condition_variable>

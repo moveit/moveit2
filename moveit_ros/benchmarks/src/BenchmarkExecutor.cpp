@@ -51,7 +51,6 @@
 #include <boost/progress.hpp>
 #undef BOOST_ALLOW_DEPRECATED_HEADERS
 #include <boost/math/constants/constants.hpp>
-#include <boost/filesystem.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <limits>
 #include <filesystem>

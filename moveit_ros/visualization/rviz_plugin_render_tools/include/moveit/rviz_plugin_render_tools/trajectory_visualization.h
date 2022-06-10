@@ -36,7 +36,6 @@
 
 #pragma once
 
-#include <boost/thread/mutex.hpp>
 #include <moveit/macros/class_forward.h>
 #include <rviz_common/display.hpp>
 #include <rviz_common/panel_dock_widget.hpp>

@@ -57,9 +57,6 @@
 // C
 #include <fstream>  // for reading in urdf
 #include <streambuf>
-// Boost
-#include <boost/filesystem/path.hpp>        // for reading folders/files
-#include <boost/filesystem/operations.hpp>  // for reading folders/files
 // MoveIt
 #include <moveit/rdf_loader/rdf_loader.h>
 

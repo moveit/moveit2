@@ -44,7 +44,6 @@
 #include <std_msgs/msg/string.hpp>
 #include <rclcpp/rclcpp.hpp>
 #include <moveit/controller_manager/controller_manager.h>
-#include <boost/thread.hpp>
 #include <pluginlib/class_loader.hpp>
 
 #include <memory>

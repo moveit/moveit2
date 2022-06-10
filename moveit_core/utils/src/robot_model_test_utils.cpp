@@ -36,7 +36,6 @@
 
 #include "rclcpp/rclcpp.hpp"
 #include <boost/algorithm/string_regex.hpp>
-#include <boost/filesystem.hpp>
 #include <boost/math/constants/constants.hpp>
 #include <geometry_msgs/msg/pose.hpp>
 

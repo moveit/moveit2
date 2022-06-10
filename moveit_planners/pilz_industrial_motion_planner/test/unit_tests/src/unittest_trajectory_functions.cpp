@@ -38,7 +38,6 @@
 #include <math.h>
 #include <string>
 #include <vector>
-#include <boost/thread.hpp>
 
 #include <Eigen/Geometry>
 #include <kdl/frames.hpp>

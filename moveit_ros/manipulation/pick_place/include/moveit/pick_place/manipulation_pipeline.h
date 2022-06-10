@@ -37,8 +37,6 @@
 #pragma once
 
 #include <moveit/pick_place/manipulation_stage.h>
-#include <boost/thread.hpp>
-#include <boost/function.hpp>
 #include <vector>
 #include <deque>
 

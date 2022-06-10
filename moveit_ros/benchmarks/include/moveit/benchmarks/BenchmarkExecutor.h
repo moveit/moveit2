@@ -52,7 +52,6 @@
 #include <map>
 #include <vector>
 #include <string>
-#include <boost/function.hpp>
 
 namespace moveit_ros_benchmarks
 {

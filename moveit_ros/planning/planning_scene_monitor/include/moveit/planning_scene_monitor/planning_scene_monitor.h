@@ -47,9 +47,6 @@
 #include <moveit/collision_plugin_loader/collision_plugin_loader.h>
 #include <moveit_msgs/srv/get_planning_scene.hpp>
 #include <boost/noncopyable.hpp>
-#include <boost/thread/shared_mutex.hpp>
-#include <boost/thread/recursive_mutex.hpp>
-#include <boost/thread/thread.hpp>
 #include <memory>
 #include <thread>
 

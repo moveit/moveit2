@@ -47,7 +47,6 @@
 #include <fcl/octree.h>
 #endif
 
-#include <boost/thread/mutex.hpp>
 #include <memory>
 #include <type_traits>
 

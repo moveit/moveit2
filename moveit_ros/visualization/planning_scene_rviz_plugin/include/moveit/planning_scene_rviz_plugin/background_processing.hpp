@@ -38,12 +38,11 @@
 
 #include <deque>
 #include <string>
-#include <boost/thread.hpp>
-#include <boost/function.hpp>
 #include <boost/noncopyable.hpp>
 #include <memory>
 #include <thread>
 #include <condition_variable>
+#include <functional>
 
 namespace moveit
 {

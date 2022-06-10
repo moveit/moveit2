@@ -58,11 +58,11 @@ LazyFreeSpaceUpdater::~LazyFreeSpaceUpdater()
 {
   running_ = false;
   {
-    boost::unique_lock<std::mutex> _(update_cell_sets_lock_);
+    std::unique_lock<std::mutex> _(update_cell_sets_lock_);
     update_condition_.notify_one();
   }
   {
-    boost::unique_lock<std::mutex> _(cell_process_lock_);
+    std::unique_lock<std::mutex> _(cell_process_lock_);
     process_condition_.notify_one();
   }
   update_thread_.join();
