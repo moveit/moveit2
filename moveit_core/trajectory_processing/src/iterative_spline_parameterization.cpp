@@ -36,6 +36,8 @@
 
 #include <moveit/trajectory_processing/iterative_spline_parameterization.h>
 #include <moveit/robot_state/conversions.h>
+#include <rclcpp/logger.hpp>
+#include <rclcpp/logging.hpp>
 #include <vector>
 
 static const double VLIMIT = 1.0;  // default if not specified in model

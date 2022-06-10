@@ -37,13 +37,14 @@
 
 #include <moveit/robot_state/conversions.h>
 #include <geometric_shapes/shape_operations.h>
+#include <rclcpp/logger.hpp>
+#include <rclcpp/logging.hpp>
 #if __has_include(<tf2_eigen/tf2_eigen.hpp>)
 #include <tf2_eigen/tf2_eigen.hpp>
 #else
 #include <tf2_eigen/tf2_eigen.h>
 #endif
 #include <boost/lexical_cast.hpp>
-#include "rclcpp/rclcpp.hpp"
 
 namespace moveit
 {

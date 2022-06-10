@@ -36,6 +36,8 @@
 
 #include <moveit/constraint_samplers/union_constraint_sampler.h>
 #include <moveit/constraint_samplers/default_constraint_samplers.h>
+#include <rclcpp/logger.hpp>
+#include <rclcpp/logging.hpp>
 #include <algorithm>
 
 namespace constraint_samplers
