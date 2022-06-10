@@ -35,7 +35,6 @@
 /* Author: Abishalini Sivaraman */
 
 #include <moveit/planning_scene_monitor/trajectory_monitor_middleware_handle.hpp>
-#include <rclcpp/rclcpp.hpp>
 
 namespace planning_scene_monitor
 {

@@ -36,8 +36,10 @@
 
 #include <sys/types.h>
 #include <signal.h>
-#include <rclcpp/rclcpp.hpp>
 #include <moveit/warehouse/warehouse_connector.h>
+#include <rclcpp/logger.hpp>
+#include <rclcpp/logging.hpp>
+#include <rclcpp/utilities.hpp>
 
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.ros.warehouse.warehouse_connector");
 

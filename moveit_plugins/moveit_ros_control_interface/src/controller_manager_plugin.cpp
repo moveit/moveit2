@@ -34,23 +34,22 @@
 
 /* Author: Mathias Lüdtke */
 
-#include <rclcpp/rclcpp.hpp>
-
 #include <moveit/macros/class_forward.h>
 #include <moveit/utils/rclcpp_utils.h>
-
 #include <moveit_ros_control_interface/ControllerHandle.h>
-
 #include <moveit/controller_manager/controller_manager.h>
-
 #include <controller_manager_msgs/srv/list_controllers.hpp>
 #include <controller_manager_msgs/srv/switch_controller.hpp>
-
 #include <pluginlib/class_list_macros.hpp>
 #include <pluginlib/class_loader.hpp>
-
 #include <boost/bimap.hpp>
-
+#include <rclcpp/client.hpp>
+#include <rclcpp/duration.hpp>
+#include <rclcpp/logger.hpp>
+#include <rclcpp/logging.hpp>
+#include <rclcpp/node.hpp>
+#include <rclcpp/parameter_value.hpp>
+#include <rclcpp/time.hpp>
 #include <map>
 #include <memory>
 

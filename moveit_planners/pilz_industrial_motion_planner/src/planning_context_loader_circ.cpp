@@ -32,7 +32,8 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#include <rclcpp/rclcpp.hpp>
+#include <rclcpp/logger.hpp>
+#include <rclcpp/logging.hpp>
 
 #include "pilz_industrial_motion_planner/planning_context_loader_circ.h"
 #include "moveit/planning_scene/planning_scene.h"

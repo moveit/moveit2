@@ -37,8 +37,6 @@
 #include <chomp_interface/chomp_planning_context.h>
 #include <moveit/robot_state/conversions.h>
 
-#include "rclcpp/rclcpp.hpp"
-
 namespace chomp_interface
 {
 CHOMPPlanningContext::CHOMPPlanningContext(const std::string& name, const std::string& group,
