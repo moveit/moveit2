@@ -9,7 +9,7 @@ generate_export_header(${MOVEIT_LIB_NAME})
 target_include_directories(${MOVEIT_LIB_NAME} PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>)
 set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
 ament_target_dependencies(${MOVEIT_LIB_NAME}
-        rclcpp
+  rclcpp
   rmw_implementation
   urdf
   urdfdom
@@ -25,7 +25,7 @@ target_link_libraries(${MOVEIT_LIB_NAME}
 add_library(collision_detector_fcl_plugin SHARED src/collision_detector_fcl_plugin_loader.cpp)
 set_target_properties(collision_detector_fcl_plugin PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
 ament_target_dependencies(collision_detector_fcl_plugin
-        rclcpp
+  rclcpp
   urdf
   visualization_msgs
   pluginlib

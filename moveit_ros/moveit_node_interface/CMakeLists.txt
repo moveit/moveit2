@@ -13,7 +13,6 @@ set(MOVEIT_LIB_NAME moveit_node_interface)
 
 add_library(${MOVEIT_LIB_NAME} SHARED src/node_interface.cpp)
 include_directories(include)
-
 ament_target_dependencies(${MOVEIT_LIB_NAME}
         rclcpp
         rclcpp_lifecycle)
@@ -22,13 +21,14 @@ set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES VERSION "${${PROJECT_NAME}_V
 
 # Install Libraries
 install(
-        TARGETS ${MOVEIT_LIB_NAME}
-        EXPORT export_${PROJECT_NAME}
-        LIBRARY DESTINATION lib
-        ARCHIVE DESTINATION lib
-        RUNTIME DESTINATION bin
-        INCLUDES DESTINATION include
+  TARGETS ${MOVEIT_LIB_NAME}
+  EXPORT export_${PROJECT_NAME}
+  LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib
+  RUNTIME DESTINATION bin
+  INCLUDES DESTINATION include
 )
+
 # install includes
 install(DIRECTORY include/ DESTINATION include)
 
@@ -38,7 +38,6 @@ if(BUILD_TESTING)
 endif()
 
 ament_export_targets(export_${PROJECT_NAME} HAS_LIBRARY_TARGET)
-ament_export_dependencies(rclcpp
-                          rclcpp_lifecycle)
+ament_export_dependencies(rclcpp rclcpp_lifecycle)
 
 ament_package()
