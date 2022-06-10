@@ -40,14 +40,12 @@
 #include <moveit/macros/class_forward.h>
 #include <moveit/robot_model/robot_model.h>
 #include <moveit/kinematics_base/kinematics_base.h>
+#include <node_interface/node_interface.h>
 
 namespace kinematics_plugin_loader
 {
 MOVEIT_CLASS_FORWARD(KinematicsPluginLoader);  // Defines KinematicsPluginLoaderPtr, ConstPtr, WeakPtr... etc
-// alias
-using NodeInterfaceSharedPtr = std::shared_ptr<rclcpp::node_interfaces::NodeBaseInterface>;
-using TopicsInterfaceSharedPtr = std::shared_ptr<rclcpp::node_interfaces::NodeTopicsInterface>;
-using ParametersInterfaceSharedPtr = std::shared_ptr<rclcpp::node_interfaces::NodeParametersInterface>;
+
 /** \brief Helper class for loading kinematics solvers */
 class KinematicsPluginLoader
 {
@@ -60,24 +58,17 @@ public:
   KinematicsPluginLoader(const rclcpp::Node::SharedPtr& node,
                          const std::string& robot_description = "robot_description",
                          double default_search_resolution = 0.0)
-    : node_interface_(node->get_node_base_interface())
-    , parameters_interface_(node->get_node_parameters_interface())
-    , topics_interface_(node->get_node_topics_interface())
-    , robot_description_(robot_description)
-    , default_search_resolution_(default_search_resolution)
+    : robot_description_(robot_description), default_search_resolution_(default_search_resolution)
   {
+    node_interface_ = std::make_shared<node_interface::NodeInterface>(node);
   }
 
-  KinematicsPluginLoader(const NodeInterfaceSharedPtr& node_interface, const TopicsInterfaceSharedPtr& topics_interface,
-                         const ParametersInterfaceSharedPtr& parameters_interface,
+  KinematicsPluginLoader(const node_interface::NodeInterfaceSharedPtr& node_interface,
                          const std::string& robot_description = "robot_description",
                          double default_search_resolution = 0.0)
-    : node_interface_(node_interface)
-    , parameters_interface_(parameters_interface)
-    , topics_interface_(topics_interface)
-    , robot_description_(robot_description)
-    , default_search_resolution_(default_search_resolution)
+    : robot_description_(robot_description), default_search_resolution_(default_search_resolution)
   {
+    node_interface_ = node_interface;
   }
 
   /** \brief Use a default kinematics solver (\e solver_plugin) for
@@ -87,31 +78,26 @@ public:
       parameter under which the robot description can be found. This
       is passed to the kinematics solver initialization as well as
       used to read the SRDF document when needed. */
-  KinematicsPluginLoader(const NodeInterfaceSharedPtr& node_interface, const TopicsInterfaceSharedPtr& topics_interface,
-                         const ParametersInterfaceSharedPtr& parameters_interface, const std::string& solver_plugin,
+  KinematicsPluginLoader(const node_interface::NodeInterfaceSharedPtr& node_interface, const std::string& solver_plugin,
                          double solve_timeout, const std::string& robot_description = "robot_description",
                          double default_search_resolution = 0.0)
-    : node_interface_(node_interface)
-    , parameters_interface_(parameters_interface)
-    , topics_interface_(topics_interface)
-    , robot_description_(robot_description)
+    : robot_description_(robot_description)
     , default_search_resolution_(default_search_resolution)
     , default_solver_plugin_(solver_plugin)
     , default_solver_timeout_(solve_timeout)
   {
+    node_interface_ = node_interface;
   }
 
   KinematicsPluginLoader(const rclcpp::Node::SharedPtr& node, const std::string& solver_plugin, double solve_timeout,
                          const std::string& robot_description = "robot_description",
                          double default_search_resolution = 0.0)
-    : node_interface_(node->get_node_base_interface())
-    , parameters_interface_(node->get_node_parameters_interface())
-    , topics_interface_(node->get_node_topics_interface())
-    , robot_description_(robot_description)
+    : robot_description_(robot_description)
     , default_search_resolution_(default_search_resolution)
     , default_solver_plugin_(solver_plugin)
     , default_solver_timeout_(solve_timeout)
   {
+    node_interface_ = std::make_shared<node_interface::NodeInterface>(node);
   }
 
   /** \brief Get a function pointer that allocates and initializes a kinematics solver. If not previously called, this
@@ -137,9 +123,7 @@ public:
   void status() const;
 
 private:
-  NodeInterfaceSharedPtr node_interface_;
-  ParametersInterfaceSharedPtr parameters_interface_;
-  TopicsInterfaceSharedPtr topics_interface_;
+  node_interface::NodeInterfaceSharedPtr node_interface_;
   std::string robot_description_;
   double default_search_resolution_;
 

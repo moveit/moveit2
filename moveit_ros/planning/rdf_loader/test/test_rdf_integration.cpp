@@ -60,8 +60,8 @@ TEST(RDFIntegration, non_existent)
 TEST(RDFIntegration, non_existent_life_cycle)
 {
   auto test_node = std::make_shared<rclcpp_lifecycle::LifecycleNode>("non_existent");
-  rdf_loader::RDFLoader loader(test_node->get_node_base_interface(), test_node->get_node_topics_interface(),
-                               test_node->get_node_parameters_interface(), "does_not_exist");
+  auto node_interface = std::make_shared<node_interface::NodeInterface>(test_node);
+  rdf_loader::RDFLoader loader(node_interface, "does_not_exist");
   ASSERT_EQ(nullptr, loader.getURDF());
   ASSERT_EQ(nullptr, loader.getSRDF());
 }
@@ -79,8 +79,8 @@ TEST(RDFIntegration, topic_based)
 TEST(RDFIntegration, topic_based_life_cycle)
 {
   auto test_node = std::make_shared<rclcpp_lifecycle::LifecycleNode>("topic_based");
-  rdf_loader::RDFLoader loader(test_node->get_node_base_interface(), test_node->get_node_topics_interface(),
-                               test_node->get_node_parameters_interface(), "topic_description");
+  auto node_interface = std::make_shared<node_interface::NodeInterface>(test_node);
+  rdf_loader::RDFLoader loader(node_interface, "topic_description");
   ASSERT_NE(nullptr, loader.getURDF());
   EXPECT_EQ("gonzo", loader.getURDF()->name_);
   ASSERT_NE(nullptr, loader.getSRDF());
@@ -130,8 +130,8 @@ TEST(RDFIntegration, executor_life_cycle)
   std::thread spinning_thread([&executor] { executor.spin(); });
 
   // WHEN the RDFLoader is created
-  rdf_loader::RDFLoader loader(test_node->get_node_base_interface(), test_node->get_node_topics_interface(),
-                               test_node->get_node_parameters_interface(), "topic_description");
+  auto node_interface = std::make_shared<node_interface::NodeInterface>(test_node);
+  rdf_loader::RDFLoader loader(node_interface, "topic_description");
 
   // THEN the RDFLoader should return non-null values for the URDF and SRDF
   // model.

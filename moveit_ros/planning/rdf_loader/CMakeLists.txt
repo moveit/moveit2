@@ -9,7 +9,8 @@ ament_target_dependencies(${MOVEIT_LIB_NAME}
       urdf
       srdfdom
       moveit_core
-      Boost)
+      Boost
+      moveit_node_interface)
 
 install(DIRECTORY include/ DESTINATION include)
 install(DIRECTORY
@@ -33,7 +34,7 @@ if(BUILD_TESTING)
 
   install(
     TARGETS
-      test_rdf_integration boring_string_publisher
+    test_rdf_integration boring_string_publisher
     ARCHIVE DESTINATION lib
     LIBRARY DESTINATION lib
     RUNTIME DESTINATION lib/${PROJECT_NAME}

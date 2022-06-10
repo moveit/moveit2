@@ -49,34 +49,30 @@ static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_ros.robot_model_
 
 RobotModelLoader::RobotModelLoader(const rclcpp::Node::SharedPtr& node, const std::string& robot_description,
                                    bool load_kinematics_solvers)
-  : parameters_interface_(node->get_node_parameters_interface())
 {
+  node_interface_ = std::make_shared<node_interface::NodeInterface>(node);
   Options opt(robot_description);
   opt.load_kinematics_solvers_ = load_kinematics_solvers;
   configure(opt);
 }
 
 RobotModelLoader::RobotModelLoader(const rclcpp::Node::SharedPtr& node, const Options& opt)
-  : parameters_interface_(node->get_node_parameters_interface())
 {
+  node_interface_ = std::make_shared<node_interface::NodeInterface>(node);
   configure(opt);
 }
 
-RobotModelLoader::RobotModelLoader(const NodeInterfaceSharedPtr& node_interface,
-                                   const TopicsInterfaceSharedPtr& topics_interface,
-                                   const ParametersInterfaceSharedPtr& parameters_interface,
+RobotModelLoader::RobotModelLoader(const node_interface::NodeInterfaceSharedPtr& node_interface,
                                    const std::string& robot_description, bool load_kinematics_solvers)
-  : node_interface_(node_interface), parameters_interface_(parameters_interface), topics_interface_(topics_interface)
+  : node_interface_(node_interface)
 {
   Options opt(robot_description);
   opt.load_kinematics_solvers_ = load_kinematics_solvers;
   configure(opt);
 }
 
-RobotModelLoader::RobotModelLoader(const NodeInterfaceSharedPtr& node_interface,
-                                   const TopicsInterfaceSharedPtr& topics_interface,
-                                   const ParametersInterfaceSharedPtr& parameters_interface, const Options& opt)
-  : node_interface_(node_interface), parameters_interface_(parameters_interface), topics_interface_(topics_interface)
+RobotModelLoader::RobotModelLoader(const node_interface::NodeInterfaceSharedPtr& node_interface, const Options& opt)
+  : node_interface_(node_interface)
 {
   configure(opt);
 }
@@ -128,8 +124,7 @@ void RobotModelLoader::configure(const Options& opt)
   if (!opt.urdf_string_.empty() && !opt.srdf_string_.empty())
     rdf_loader_ = std::make_shared<rdf_loader::RDFLoader>(opt.urdf_string_, opt.srdf_string_);
   else
-    rdf_loader_ = std::make_shared<rdf_loader::RDFLoader>(node_interface_, topics_interface_, parameters_interface_,
-                                                          opt.robot_description_);
+    rdf_loader_ = std::make_shared<rdf_loader::RDFLoader>(node_interface_, opt.robot_description_);
   if (rdf_loader_->getURDF())
   {
     const srdf::ModelSharedPtr& srdf =
@@ -152,12 +147,13 @@ void RobotModelLoader::configure(const Options& opt)
         try
         {
           param_name = prefix + "max_position";
-          if (!parameters_interface_->has_parameter(param_name))
+          if (!node_interface_->parameter_interface_->has_parameter(param_name))
           {
-            parameters_interface_->declare_parameter(param_name, rclcpp::ParameterType::PARAMETER_DOUBLE);
+            node_interface_->parameter_interface_->declare_parameter(param_name,
+                                                                     rclcpp::ParameterType::PARAMETER_DOUBLE);
           }
           rclcpp::Parameter max_position_parameter;
-          if (parameters_interface_->get_parameter(param_name, max_position_parameter))
+          if (node_interface_->parameter_interface_->get_parameter(param_name, max_position_parameter))
           {
             if (canSpecifyPosition(joint_model, joint_id))
             {
@@ -167,12 +163,13 @@ void RobotModelLoader::configure(const Options& opt)
           }
 
           param_name = prefix + "min_position";
-          if (!parameters_interface_->has_parameter(param_name))
+          if (!node_interface_->parameter_interface_->has_parameter(param_name))
           {
-            parameters_interface_->declare_parameter(param_name, rclcpp::ParameterType::PARAMETER_DOUBLE);
+            node_interface_->parameter_interface_->declare_parameter(param_name,
+                                                                     rclcpp::ParameterType::PARAMETER_DOUBLE);
           }
           rclcpp::Parameter min_position_parameter;
-          if (parameters_interface_->get_parameter(param_name, min_position_parameter))
+          if (node_interface_->parameter_interface_->get_parameter(param_name, min_position_parameter))
           {
             if (canSpecifyPosition(joint_model, joint_id))
             {
@@ -183,43 +180,44 @@ void RobotModelLoader::configure(const Options& opt)
 
           // Check if parameter has been declared to avoid exception
           param_name = prefix + "has_velocity_limits";
-          if (!parameters_interface_->has_parameter(param_name))
+          if (!node_interface_->parameter_interface_->has_parameter(param_name))
           {
-            parameters_interface_->declare_parameter(param_name, rclcpp::ParameterType::PARAMETER_BOOL);
+            node_interface_->parameter_interface_->declare_parameter(param_name, rclcpp::ParameterType::PARAMETER_BOOL);
           }
           joint_limit[joint_id].has_velocity_limits = false;
           rclcpp::Parameter has_vel_limits_parameter;
-          if (parameters_interface_->get_parameter(param_name, has_vel_limits_parameter))
+          if (node_interface_->parameter_interface_->get_parameter(param_name, has_vel_limits_parameter))
             joint_limit[joint_id].has_velocity_limits = has_vel_limits_parameter.as_bool();
 
           param_name = prefix + "has_acceleration_limits";
-          if (!parameters_interface_->has_parameter(param_name))
+          if (!node_interface_->parameter_interface_->has_parameter(param_name))
           {
-            parameters_interface_->declare_parameter(param_name, rclcpp::ParameterType::PARAMETER_BOOL);
+            node_interface_->parameter_interface_->declare_parameter(param_name, rclcpp::ParameterType::PARAMETER_BOOL);
           }
           rclcpp::Parameter has_acc_limits_parameter;
-          if (parameters_interface_->get_parameter(param_name, has_acc_limits_parameter))
+          if (node_interface_->parameter_interface_->get_parameter(param_name, has_acc_limits_parameter))
             joint_limit[joint_id].has_acceleration_limits = has_acc_limits_parameter.as_bool();
 
           param_name = prefix + "has_jerk_limits";
-          if (!parameters_interface_->has_parameter(param_name))
+          if (!node_interface_->parameter_interface_->has_parameter(param_name))
           {
-            parameters_interface_->declare_parameter(param_name, rclcpp::ParameterType::PARAMETER_BOOL);
+            node_interface_->parameter_interface_->declare_parameter(param_name, rclcpp::ParameterType::PARAMETER_BOOL);
           }
           rclcpp::Parameter has_jerk_limits_parameter;
-          if (parameters_interface_->get_parameter(param_name, has_jerk_limits_parameter))
+          if (node_interface_->parameter_interface_->get_parameter(param_name, has_jerk_limits_parameter))
             joint_limit[joint_id].has_jerk_limits = has_jerk_limits_parameter.as_bool();
 
           if (has_vel_limits_parameter.as_bool())
           {
             param_name = prefix + "max_velocity";
-            if (!parameters_interface_->has_parameter(param_name))
+            if (!node_interface_->parameter_interface_->has_parameter(param_name))
             {
-              parameters_interface_->declare_parameter(param_name, rclcpp::ParameterType::PARAMETER_DOUBLE);
+              node_interface_->parameter_interface_->declare_parameter(param_name,
+                                                                       rclcpp::ParameterType::PARAMETER_DOUBLE);
             }
 
             rclcpp::Parameter max_velocity_parameter;
-            if (parameters_interface_->get_parameter(param_name, max_velocity_parameter))
+            if (node_interface_->parameter_interface_->get_parameter(param_name, max_velocity_parameter))
             {
               joint_limit[joint_id].max_velocity = max_velocity_parameter.as_double();
             }
@@ -233,13 +231,14 @@ void RobotModelLoader::configure(const Options& opt)
           if (has_acc_limits_parameter.as_bool())
           {
             param_name = prefix + "max_acceleration";
-            if (!parameters_interface_->has_parameter(param_name))
+            if (!node_interface_->parameter_interface_->has_parameter(param_name))
             {
-              parameters_interface_->declare_parameter(param_name, rclcpp::ParameterType::PARAMETER_DOUBLE);
+              node_interface_->parameter_interface_->declare_parameter(param_name,
+                                                                       rclcpp::ParameterType::PARAMETER_DOUBLE);
             }
 
             rclcpp::Parameter max_acceleration_parameter;
-            if (parameters_interface_->get_parameter(param_name, max_acceleration_parameter))
+            if (node_interface_->parameter_interface_->get_parameter(param_name, max_acceleration_parameter))
             {
               joint_limit[joint_id].max_acceleration = max_acceleration_parameter.as_double();
             }
@@ -253,13 +252,14 @@ void RobotModelLoader::configure(const Options& opt)
           if (has_jerk_limits_parameter.as_bool())
           {
             param_name = prefix + "max_jerk";
-            if (!parameters_interface_->has_parameter(param_name))
+            if (!node_interface_->parameter_interface_->has_parameter(param_name))
             {
-              parameters_interface_->declare_parameter(param_name, rclcpp::ParameterType::PARAMETER_DOUBLE);
+              node_interface_->parameter_interface_->declare_parameter(param_name,
+                                                                       rclcpp::ParameterType::PARAMETER_DOUBLE);
             }
 
             rclcpp::Parameter max_jerk_parameter;
-            if (parameters_interface_->get_parameter(param_name, max_jerk_parameter))
+            if (node_interface_->parameter_interface_->get_parameter(param_name, max_jerk_parameter))
             {
               joint_limit[joint_id].max_jerk = max_position_parameter.as_double();
             }
@@ -294,7 +294,7 @@ void RobotModelLoader::loadKinematicsSolvers(const kinematics_plugin_loader::Kin
       kinematics_loader_ = kloader;
     else
       kinematics_loader_ = std::make_shared<kinematics_plugin_loader::KinematicsPluginLoader>(
-          node_interface_, topics_interface_, parameters_interface_, rdf_loader_->getRobotDescription());
+          node_interface_, rdf_loader_->getRobotDescription());
     moveit::core::SolverAllocatorFn kinematics_allocator =
         kinematics_loader_->getLoaderFunction(rdf_loader_->getSRDF());
     const std::vector<std::string>& groups = kinematics_loader_->getKnownGroups();
