@@ -1,13 +1,1 @@
 repositories:
-  geometric_shapes:
-    type: git
-    url: https://github.com/ros-planning/geometric_shapes
-    version: ros2
-  moveit_resources:
-    type: git
-    url: https://github.com/ros-planning/moveit_resources
-    version: ros2
-  srdfdom:
-    type: git
-    url: https://github.com/ros-planning/srdfdom.git
-    version: ros2
