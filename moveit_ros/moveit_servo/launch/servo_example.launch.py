@@ -79,16 +79,23 @@ def generate_launch_description():
         output="screen",
     )
 
-    # Load controllers
-    load_controllers = []
-    for controller in ["panda_arm_controller", "joint_state_broadcaster"]:
-        load_controllers += [
-            ExecuteProcess(
-                cmd=["ros2 run controller_manager spawner {}".format(controller)],
-                shell=True,
-                output="screen",
-            )
-        ]
+    joint_state_broadcaster_spawner = Node(
+        package="controller_manager",
+        executable="spawner",
+        arguments=[
+            "joint_state_broadcaster",
+            "--controller-manager-timeout",
+            "300",
+            "--controller-manager",
+            "/controller_manager",
+        ],
+    )
+
+    panda_arm_controller_spawner = Node(
+        package="controller_manager",
+        executable="spawner",
+        arguments=["panda_arm_controller", "-c", "/controller_manager"],
+    )
 
     # Launch as much as possible in components
     container = ComposableNodeContainer(
@@ -148,5 +155,12 @@ def generate_launch_description():
     )
 
     return LaunchDescription(
-        [rviz_node, ros2_control_node, servo_node, container] + load_controllers
+        [
+            rviz_node,
+            ros2_control_node,
+            joint_state_broadcaster_spawner,
+            panda_arm_controller_spawner,
+            servo_node,
+            container,
+        ]
     )
