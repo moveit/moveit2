@@ -60,7 +60,7 @@ public:
                          double default_search_resolution = 0.0)
     : robot_description_(robot_description), default_search_resolution_(default_search_resolution)
   {
-    node_interface_ = std::make_shared<node_interface::NodeInterface>(node);
+    node_interface_ = std::make_shared<node_interface::NodeInterface>(node_interface::NodeInterface(node));
   }
 
   KinematicsPluginLoader(const node_interface::NodeInterfaceSharedPtr& node_interface,
@@ -97,7 +97,7 @@ public:
     , default_solver_plugin_(solver_plugin)
     , default_solver_timeout_(solve_timeout)
   {
-    node_interface_ = std::make_shared<node_interface::NodeInterface>(node);
+    node_interface_ = std::make_shared<node_interface::NodeInterface>(node_interface::NodeInterface(node));
   }
 
   /** \brief Get a function pointer that allocates and initializes a kinematics solver. If not previously called, this

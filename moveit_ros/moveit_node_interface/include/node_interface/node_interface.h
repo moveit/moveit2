@@ -38,41 +38,96 @@
 
 #include <rclcpp/rclcpp.hpp>
 #include <rclcpp_lifecycle/lifecycle_node.hpp>
+#include <memory>
 
 namespace node_interface
 {
-// alias
-using BaseNodeInterfaceSharedPtr = std::shared_ptr<rclcpp::node_interfaces::NodeBaseInterface>;
-using TopicsInterfaceSharedPtr = std::shared_ptr<rclcpp::node_interfaces::NodeTopicsInterface>;
-using ParametersInterfaceSharedPtr = std::shared_ptr<rclcpp::node_interfaces::NodeParametersInterface>;
+    struct NodeInterface
+    {
+//        template <typename T>
+//        NodeInterface(T&& obj) : node_handle_(std::make_shared<Wrapper<T>>(std::forward<T>(obj))) {
+//            static_assert(!std::is_base_of_v<T, std::shared_ptr<rclcpp_lifecycle::LifecycleNode>>
+//                          || !std::is_base_of_v<T, std::shared_ptr<rclcpp::Node>>,
+//                          "Node interface can only wrap rclcpp_lifecycle::LifecycleNode or rclcpp_lifecycle::LifecycleNode shared pointers");
+//        }
+        bool has_lifecycle_node_;
 
-struct NodeInterface
-{
-  BaseNodeInterfaceSharedPtr base_node_interface_ = nullptr;
-  TopicsInterfaceSharedPtr topic_interface_ = nullptr;
-  ParametersInterfaceSharedPtr parameter_interface_ = nullptr;
+        NodeInterface(const std::shared_ptr<rclcpp::Node> & obj) :
+            node_handle_(std::make_shared<Wrapper<std::shared_ptr<rclcpp::Node>>>(obj)) {
+            has_lifecycle_node_ = false;
+        }
 
-  NodeInterface(const std::shared_ptr<rclcpp::Node>& node)
-  {
-    base_node_interface_ = node->get_node_base_interface();
-    topic_interface_ = node->get_node_topics_interface();
-    parameter_interface_ = node->get_node_parameters_interface();
-  }
-  NodeInterface(const std::shared_ptr<rclcpp_lifecycle::LifecycleNode>& node)
-  {
-    base_node_interface_ = node->get_node_base_interface();
-    topic_interface_ = node->get_node_topics_interface();
-    parameter_interface_ = node->get_node_parameters_interface();
-  }
-  NodeInterface(const BaseNodeInterfaceSharedPtr& base_node_interface, const TopicsInterfaceSharedPtr& topic_interface,
-                const ParametersInterfaceSharedPtr& parameter_interface)
-  {
-    base_node_interface_ = base_node_interface;
-    topic_interface_ = topic_interface;
-    parameter_interface_ = parameter_interface;
-  }
-};
+        NodeInterface(const std::shared_ptr<rclcpp_lifecycle::LifecycleNode> & obj) :
+                node_handle_(std::make_shared<Wrapper<std::shared_ptr<rclcpp_lifecycle::LifecycleNode>>>(obj)) {
+                has_lifecycle_node_ = true;
+        }
 
-typedef std::shared_ptr<NodeInterface> NodeInterfaceSharedPtr;
+        rclcpp::node_interfaces::NodeBaseInterface::SharedPtr get_node_base_interface() const {
+            return node_handle_->get_node_base_interface();
+        }
+
+        rclcpp::node_interfaces::NodeTopicsInterface::SharedPtr get_node_topics_interface() const {
+            return node_handle_->get_node_topics_interface();
+        }
+
+        rclcpp::node_interfaces::NodeParametersInterface::SharedPtr get_node_parameters_interface() const{
+            return node_handle_->get_node_parameters_interface();
+        }
+
+        struct  NodeBase
+        {
+            virtual rclcpp::node_interfaces::NodeBaseInterface::SharedPtr get_node_base_interface() const = 0;
+
+            virtual rclcpp::node_interfaces::NodeTopicsInterface::SharedPtr get_node_topics_interface() const = 0;
+
+            virtual  rclcpp::node_interfaces::NodeParametersInterface::SharedPtr get_node_parameters_interface() const = 0;
+
+            virtual std::shared_ptr<rclcpp::Node> get_rcl_node() const = 0;
+
+            virtual ~NodeBase() {}
+        };
+
+        std::shared_ptr<rclcpp::Node> get_rcl_node() const
+        {
+            return node_handle_->get_rcl_node();
+        }
+
+
+        template<typename T>
+        struct Wrapper : public NodeBase
+        {
+
+            Wrapper(const std::shared_ptr<rclcpp::Node>& t) : wrapped_node_(t) {
+                rcl_node = t;
+            }
+
+            Wrapper(const std::shared_ptr<rclcpp_lifecycle::LifecycleNode>& t) : wrapped_node_(t) {}
+
+           rclcpp::node_interfaces::NodeBaseInterface::SharedPtr get_node_base_interface() const override{
+               return wrapped_node_->get_node_base_interface();
+            }
+
+            rclcpp::node_interfaces::NodeTopicsInterface::SharedPtr get_node_topics_interface() const override{
+                return wrapped_node_->get_node_topics_interface();
+            }
+
+            rclcpp::node_interfaces::NodeParametersInterface::SharedPtr get_node_parameters_interface() const override{
+                return wrapped_node_->get_node_parameters_interface();
+                }
+
+            std::shared_ptr<rclcpp::Node> get_rcl_node() const override
+            {
+                return rcl_node;// std::dynamic_pointer_cast<std::shared_ptr<rclcpp::Node>>(wrapped_node_);
+            }
+
+            T wrapped_node_;
+            std::shared_ptr<rclcpp::Node> rcl_node;
+        };
+
+        std::shared_ptr<NodeBase> node_handle_;
+    };
+
+
+    using NodeInterfaceSharedPtr = std::shared_ptr<NodeInterface>;
 
 }  // namespace node_interface

@@ -55,10 +55,10 @@ template <rclcpp::ParameterType ParamType>
 rclcpp::Parameter declare_parameter(const node_interface::NodeInterfaceSharedPtr& node_interface,
                                     const std::string& parameter_name)
 {
-  if (!node_interface->parameter_interface_->has_parameter(parameter_name))
-    node_interface->parameter_interface_->declare_parameter(parameter_name, ParamType);
+  if (!node_interface->get_node_parameters_interface()->has_parameter(parameter_name))
+    node_interface->get_node_parameters_interface()->declare_parameter(parameter_name, ParamType);
   rclcpp::Parameter parameter;
-  if (!node_interface->parameter_interface_->get_parameter(parameter_name, parameter))
+  if (!node_interface->get_node_parameters_interface()->get_parameter(parameter_name, parameter))
     RCLCPP_DEBUG_STREAM(LOGGER, "Parameter `" << parameter_name << "` doesn't exists");
   return parameter;
 }
@@ -82,7 +82,7 @@ public:
     , search_res_(search_res)
     , iksolver_to_tip_links_(iksolver_to_tip_links)
   {
-    node_interface_ = node_interface;
+//    node_interface_ = node_interface;
     try
     {
       kinematics_loader_ =
@@ -192,7 +192,7 @@ public:
           // choose search resolution
           double search_res = search_res_.find(jmg->getName())->second[i];  // we know this exists, by construction
 
-          if (!result->initialize(jmg->getParentModel(), jmg->getName(),
+          if (!result->initialize(node_interface_, jmg->getParentModel(), jmg->getName(),
                                   (base.empty() || base[0] != '/') ? base : base.substr(1), tips, search_res))
           {
             RCLCPP_ERROR(LOGGER, "Kinematics solver of type '%s' could not be initialized for group '%s'",

@@ -93,14 +93,23 @@ bool KinematicsBase::initialize(const rclcpp::Node::SharedPtr& /*node*/,
   return false;
 }
 
-bool KinematicsBase::initialize(const moveit::core::RobotModel& /*robot_model*/, const std::string& group_name,
-                                const std::string& /*base_frame*/, const std::vector<std::string>& /*tip_frames*/,
-                                double /*search_discretization*/)
+bool KinematicsBase::initialize(const node_interface::NodeInterfaceSharedPtr& node, const moveit::core::RobotModel& robot_model, const std::string& group_name,
+                                const std::string& base_frame, const std::vector<std::string>& tip_frames,
+                                double search_discretization)
 {
-  RCLCPP_ERROR(LOGGER,
-               "IK plugin for group '%s' relies on deprecated API. "
-               "Please implement initialize(rclcpp::Node::SharedPtr, RobotModel, ...).",
-               group_name.c_str());
+
+
+    if (node->has_lifecycle_node_){
+        RCLCPP_ERROR(LOGGER,
+                     "IK plugin for group '%s' relies on deprecated API. "
+                     "Please implement initialize(rclcpp::Node::SharedPtr, RobotModel, ...).",
+                     group_name.c_str());
+    } else{
+        // try old interface
+        return initialize(node->get_rcl_node(), robot_model, group_name, base_frame, tip_frames,
+                          search_discretization);
+    }
+
   return false;
 }
 

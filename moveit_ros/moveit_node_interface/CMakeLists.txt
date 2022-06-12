@@ -1,10 +1,6 @@
 cmake_minimum_required(VERSION 3.10.2)
 project(moveit_node_interface)
 
-# Common cmake code applied to all moveit packages
-find_package(moveit_common REQUIRED)
-moveit_package()
-
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(rclcpp_lifecycle REQUIRED)

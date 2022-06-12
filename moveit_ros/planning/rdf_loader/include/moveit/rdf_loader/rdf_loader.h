@@ -69,7 +69,7 @@ public:
    *  @param default_continuous_value Default value for parameter with "_continuous" suffix.
    *  @param default_timeout Default value for parameter with "_timeout" suffix.
    */
-  RDFLoader(const std::shared_ptr<rclcpp::Node>& node, const std::string& ros_name = "robot_description",
+  RDFLoader(std::shared_ptr<rclcpp::Node>& node, const std::string& ros_name = "robot_description",
             bool default_continuous_value = false, double default_timeout = 10.0);
 
   RDFLoader(const node_interface::NodeInterfaceSharedPtr& node_interface,
