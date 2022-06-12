@@ -38,15 +38,15 @@
 
 namespace node_interface {
 
-    rclcpp::node_interfaces::NodeBaseInterface::SharedPtr NodeInterface::get_node_base_interface() const {
+    rclcpp::node_interfaces::NodeBaseInterface::SharedPtr NodeInterface::get_node_base_interface() {
         return node_handle_->get_node_base_interface();
     }
 
-    rclcpp::node_interfaces::NodeTopicsInterface::SharedPtr NodeInterface::get_node_topics_interface() const {
+    rclcpp::node_interfaces::NodeTopicsInterface::SharedPtr NodeInterface::get_node_topics_interface() {
         return node_handle_->get_node_topics_interface();
     }
 
-    rclcpp::node_interfaces::NodeParametersInterface::SharedPtr NodeInterface::get_node_parameters_interface() const {
+    rclcpp::node_interfaces::NodeParametersInterface::SharedPtr NodeInterface::get_node_parameters_interface() {
         return node_handle_->get_node_parameters_interface();
     }
 
@@ -58,18 +58,33 @@ namespace node_interface {
         node_handle_->get_rcl_node();
     }
 
-    template<typename T>
-    rclcpp::node_interfaces::NodeBaseInterface::SharedPtr NodeInterface::Wrapper<T>::get_node_base_interface() const {
+    template<>
+    rclcpp::node_interfaces::NodeBaseInterface::SharedPtr NodeInterface::Wrapper<std::shared_ptr<rclcpp::Node>>::get_node_base_interface(){
         return node->get_node_base_interface();
     }
 
-    template<typename T>
-    rclcpp::node_interfaces::NodeTopicsInterface::SharedPtr NodeInterface::Wrapper<T>::get_node_topics_interface() const {
+    template<>
+    rclcpp::node_interfaces::NodeBaseInterface::SharedPtr NodeInterface::Wrapper<std::shared_ptr<rclcpp_lifecycle::LifecycleNode>>::get_node_base_interface() {
+        return node->get_node_base_interface();
+    }
+
+    template<>
+    rclcpp::node_interfaces::NodeTopicsInterface::SharedPtr NodeInterface::Wrapper<std::shared_ptr<rclcpp::Node>>::get_node_topics_interface() {
         return node->get_node_topics_interface();
     }
 
-    template<typename T>
-    rclcpp::node_interfaces::NodeParametersInterface::SharedPtr NodeInterface::Wrapper<T>::get_node_parameters_interface() const {
+    template<>
+    rclcpp::node_interfaces::NodeTopicsInterface::SharedPtr NodeInterface::Wrapper<std::shared_ptr<rclcpp_lifecycle::LifecycleNode>>::get_node_topics_interface() {
+        return node->get_node_topics_interface();
+    }
+
+    template<>
+            rclcpp::node_interfaces::NodeParametersInterface::SharedPtr NodeInterface::Wrapper<std::shared_ptr<rclcpp::Node>>::get_node_parameters_interface() {
+        return node->get_node_parameters_interface();
+    }
+
+    template<>
+    rclcpp::node_interfaces::NodeParametersInterface::SharedPtr NodeInterface::Wrapper<std::shared_ptr<rclcpp_lifecycle::LifecycleNode>>::get_node_parameters_interface() {
         return node->get_node_parameters_interface();
     }
 
@@ -78,8 +93,13 @@ namespace node_interface {
         return node;
     }
 
-    template<typename T>
-    std::optional<std::shared_ptr<rclcpp::Node>> NodeInterface::Wrapper<T>::get_rcl_node() const {
+    template<>
+    std::optional<std::shared_ptr<rclcpp::Node>> NodeInterface::Wrapper<std::shared_ptr<rclcpp_lifecycle::LifecycleNode>>::get_rcl_node() const {
+        return {};
+    }
+
+    template<>
+    std::optional<std::shared_ptr<rclcpp_lifecycle::LifecycleNode>> NodeInterface::Wrapper<std::shared_ptr<rclcpp::Node>>::get_lifecycle_node() const {
         return {};
     }
 
@@ -88,9 +108,6 @@ namespace node_interface {
         return node;
     }
 
-    template<typename T>
-    std::optional<std::shared_ptr<rclcpp_lifecycle::LifecycleNode>> NodeInterface::Wrapper<T>::get_lifecycle_node() const {
-        return {};
-    }
+
 
 }  // namespace node_interface

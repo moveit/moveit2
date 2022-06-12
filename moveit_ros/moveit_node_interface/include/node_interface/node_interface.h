@@ -49,11 +49,11 @@ namespace node_interface
     private:
         struct  NodeBase
         {
-            virtual rclcpp::node_interfaces::NodeBaseInterface::SharedPtr get_node_base_interface() const = 0;
+            virtual rclcpp::node_interfaces::NodeBaseInterface::SharedPtr get_node_base_interface() = 0;
 
-            virtual rclcpp::node_interfaces::NodeTopicsInterface::SharedPtr get_node_topics_interface() const = 0;
+            virtual rclcpp::node_interfaces::NodeTopicsInterface::SharedPtr get_node_topics_interface() = 0;
 
-            virtual  rclcpp::node_interfaces::NodeParametersInterface::SharedPtr get_node_parameters_interface() const = 0;
+            virtual  rclcpp::node_interfaces::NodeParametersInterface::SharedPtr get_node_parameters_interface() = 0;
 
             virtual std::optional<std::shared_ptr<rclcpp::Node>> get_rcl_node() const = 0;
 
@@ -64,13 +64,16 @@ namespace node_interface
         template<typename T>
         struct Wrapper : public NodeBase
         {
-            Wrapper(const T& t) : node(t) {}
+            Wrapper(const T& t) : node(t) {
+                static_assert(std::is_base_of_v<std::shared_ptr<rclcpp::Node>,T> ||
+                                      std::is_base_of_v<std::shared_ptr<rclcpp_lifecycle::LifecycleNode>,T>, "NodeInterface can only wrap std::shared_ptr<rclcpp::Node> and rclcpp_lifecycle::LifecycleNode type");
+            }
 
-            rclcpp::node_interfaces::NodeBaseInterface::SharedPtr get_node_base_interface() const override;
+            rclcpp::node_interfaces::NodeBaseInterface::SharedPtr get_node_base_interface() override;
 
-            rclcpp::node_interfaces::NodeTopicsInterface::SharedPtr get_node_topics_interface() const override;
+            rclcpp::node_interfaces::NodeTopicsInterface::SharedPtr get_node_topics_interface() override;
 
-            rclcpp::node_interfaces::NodeParametersInterface::SharedPtr get_node_parameters_interface() const override;
+            rclcpp::node_interfaces::NodeParametersInterface::SharedPtr get_node_parameters_interface() override;
 
             std::optional<std::shared_ptr<rclcpp::Node>> get_rcl_node() const override;
 
@@ -80,27 +83,22 @@ namespace node_interface
         };
 
     public:
-        NodeInterface(const std::shared_ptr<rclcpp::Node> & obj) :
-            node_handle_(std::make_shared<Wrapper<std::shared_ptr<rclcpp::Node>>>(obj)),
-            has_lifecycle_node_(false){}
+        NodeInterface(const std::shared_ptr<rclcpp::Node> & node_ptr) :
+            node_handle_(std::make_shared<Wrapper<std::shared_ptr<rclcpp::Node>>>(node_ptr)){}
 
-        NodeInterface(const std::shared_ptr<rclcpp_lifecycle::LifecycleNode> & obj) :
-                node_handle_(std::make_shared<Wrapper<std::shared_ptr<rclcpp_lifecycle::LifecycleNode>>>(obj)),
-                has_lifecycle_node_(true){}
+        NodeInterface(const std::shared_ptr<rclcpp_lifecycle::LifecycleNode> & node_ptr) :
+                node_handle_(std::make_shared<Wrapper<std::shared_ptr<rclcpp_lifecycle::LifecycleNode>>>(node_ptr)){}
 
-        rclcpp::node_interfaces::NodeBaseInterface::SharedPtr get_node_base_interface() const;
+        rclcpp::node_interfaces::NodeBaseInterface::SharedPtr get_node_base_interface();
 
-        rclcpp::node_interfaces::NodeTopicsInterface::SharedPtr get_node_topics_interface() const;
+        rclcpp::node_interfaces::NodeTopicsInterface::SharedPtr get_node_topics_interface();
 
-        rclcpp::node_interfaces::NodeParametersInterface::SharedPtr get_node_parameters_interface() const;
+        rclcpp::node_interfaces::NodeParametersInterface::SharedPtr get_node_parameters_interface();
 
         // returns rclcpp::Node node it is the wrapped type. Otherwise, it returns nullptr
         std::shared_ptr<rclcpp::Node> get_rcl_node() const;
 
         std::shared_ptr<NodeBase> node_handle_;
-
-        // true if the wrapped node is a rclcpp_lifecycle::LifecycleNode type
-        bool has_lifecycle_node_;
 
         std::optional<std::shared_ptr<rclcpp_lifecycle::LifecycleNode>> get_lifecycle_node() const;
     };
