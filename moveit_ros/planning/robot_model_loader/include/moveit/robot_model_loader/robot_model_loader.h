@@ -82,9 +82,9 @@ public:
   RobotModelLoader(const rclcpp::Node::SharedPtr& node, const std::string& robot_description,
                    bool load_kinematics_solvers = true);
 
-  RobotModelLoader(const node_interface::NodeInterfaceSharedPtr& node_interface, const Options& opt = Options());
+  RobotModelLoader(node_interface::NodeInterfaceSharedPtr& node_interface, const Options& opt = Options());
 
-  RobotModelLoader(const node_interface::NodeInterfaceSharedPtr& node_interface, const std::string& robot_description,
+  RobotModelLoader(node_interface::NodeInterfaceSharedPtr& node_interface, const std::string& robot_description,
                    bool load_kinematics_solvers = true);
 
   ~RobotModelLoader();

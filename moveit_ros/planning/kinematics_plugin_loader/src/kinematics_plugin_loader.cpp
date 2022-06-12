@@ -76,13 +76,12 @@ public:
                        const std::map<std::string, std::vector<std::string>>& possible_kinematics_solvers,
                        const std::map<std::string, std::vector<double>>& search_res,
                        const std::map<std::string, std::vector<std::string>>& iksolver_to_tip_links)
-    : node_interface_{ std::move(node_interface) }
+    : node_interface_{std::move(node_interface)}
     , robot_description_(robot_description)
     , possible_kinematics_solvers_(possible_kinematics_solvers)
     , search_res_(search_res)
     , iksolver_to_tip_links_(iksolver_to_tip_links)
   {
-//    node_interface_ = node_interface;
     try
     {
       kinematics_loader_ =

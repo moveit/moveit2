@@ -62,17 +62,17 @@ RobotModelLoader::RobotModelLoader(const rclcpp::Node::SharedPtr& node, const Op
   configure(opt);
 }
 
-RobotModelLoader::RobotModelLoader(const node_interface::NodeInterfaceSharedPtr& node_interface,
+RobotModelLoader::RobotModelLoader(node_interface::NodeInterfaceSharedPtr& node_interface,
                                    const std::string& robot_description, bool load_kinematics_solvers)
-  : node_interface_(node_interface)
+  : node_interface_{std::move(node_interface)}
 {
   Options opt(robot_description);
   opt.load_kinematics_solvers_ = load_kinematics_solvers;
   configure(opt);
 }
 
-RobotModelLoader::RobotModelLoader(const node_interface::NodeInterfaceSharedPtr& node_interface, const Options& opt)
-  : node_interface_(node_interface)
+RobotModelLoader::RobotModelLoader(node_interface::NodeInterfaceSharedPtr& node_interface, const Options& opt)
+  : node_interface_{std::move(node_interface)}
 {
   configure(opt);
 }

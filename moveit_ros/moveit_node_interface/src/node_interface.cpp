@@ -108,6 +108,4 @@ namespace node_interface {
         return node;
     }
 
-
-
 }  // namespace node_interface

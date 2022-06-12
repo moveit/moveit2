@@ -84,10 +84,8 @@ void RDFLoader::loadRobot(const node_interface::NodeInterfaceSharedPtr& node_int
 RDFLoader::RDFLoader(std::shared_ptr<rclcpp::Node>& node, const std::string& ros_name,
                      bool default_continuous_value, double default_timeout)
   : ros_name_(ros_name)
+  , nodeInterface_(std::make_shared<node_interface::NodeInterface>(node_interface::NodeInterface(node)))
 {
-
-  nodeInterface_ = std::make_shared<node_interface::NodeInterface>(node_interface::NodeInterface(node));
-
   loadRobot(nodeInterface_, ros_name, default_continuous_value, default_timeout);
 }
 
