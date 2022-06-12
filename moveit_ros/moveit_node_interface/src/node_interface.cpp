@@ -51,30 +51,46 @@ namespace node_interface {
     }
 
     std::shared_ptr<rclcpp::Node> NodeInterface::get_rcl_node() const {
-        if (!has_lifecycle_node_) {
-            return node_handle_->get_rcl_node();
-        }
-        return nullptr;
+        node_handle_->get_rcl_node();
+    }
+
+    std::optional<std::shared_ptr<rclcpp_lifecycle::LifecycleNode>> NodeInterface::get_lifecycle_node() const {
+        node_handle_->get_rcl_node();
     }
 
     template<typename T>
     rclcpp::node_interfaces::NodeBaseInterface::SharedPtr NodeInterface::Wrapper<T>::get_node_base_interface() const {
-        return wrapped_node_->get_node_base_interface();
+        return node->get_node_base_interface();
     }
 
     template<typename T>
     rclcpp::node_interfaces::NodeTopicsInterface::SharedPtr NodeInterface::Wrapper<T>::get_node_topics_interface() const {
-        return wrapped_node_->get_node_topics_interface();
+        return node->get_node_topics_interface();
     }
 
     template<typename T>
     rclcpp::node_interfaces::NodeParametersInterface::SharedPtr NodeInterface::Wrapper<T>::get_node_parameters_interface() const {
-        return wrapped_node_->get_node_parameters_interface();
+        return node->get_node_parameters_interface();
+    }
+
+    template<>
+    std::optional<std::shared_ptr<rclcpp::Node>> NodeInterface::Wrapper<std::shared_ptr<rclcpp::Node>>::get_rcl_node() const {
+        return node;
     }
 
     template<typename T>
-    std::shared_ptr<rclcpp::Node> NodeInterface::Wrapper<T>::get_rcl_node() const {
-        return rcl_node;
+    std::optional<std::shared_ptr<rclcpp::Node>> NodeInterface::Wrapper<T>::get_rcl_node() const {
+        return {};
     }
 
-}
+    template<>
+    std::optional<std::shared_ptr<rclcpp_lifecycle::LifecycleNode>> NodeInterface::Wrapper<std::shared_ptr<rclcpp_lifecycle::LifecycleNode>>::get_lifecycle_node() const {
+        return node;
+    }
+
+    template<typename T>
+    std::optional<std::shared_ptr<rclcpp_lifecycle::LifecycleNode>> NodeInterface::Wrapper<T>::get_lifecycle_node() const {
+        return {};
+    }
+
+}  // namespace node_interface

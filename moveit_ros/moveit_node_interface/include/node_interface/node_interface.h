@@ -55,17 +55,16 @@ namespace node_interface
 
             virtual  rclcpp::node_interfaces::NodeParametersInterface::SharedPtr get_node_parameters_interface() const = 0;
 
-            virtual std::shared_ptr<rclcpp::Node> get_rcl_node() const = 0;
+            virtual std::optional<std::shared_ptr<rclcpp::Node>> get_rcl_node() const = 0;
 
-            virtual ~NodeBase() {}
+            virtual std::optional<std::shared_ptr<rclcpp_lifecycle::LifecycleNode>> get_lifecycle_node() const = 0;
+
         };
 
         template<typename T>
         struct Wrapper : public NodeBase
         {
-            Wrapper(const std::shared_ptr<rclcpp::Node>& t) : wrapped_node_(t), rcl_node(t) {}
-
-            Wrapper(const std::shared_ptr<rclcpp_lifecycle::LifecycleNode>& t) : wrapped_node_(t) {}
+            Wrapper(const T& t) : node(t) {}
 
             rclcpp::node_interfaces::NodeBaseInterface::SharedPtr get_node_base_interface() const override;
 
@@ -73,10 +72,11 @@ namespace node_interface
 
             rclcpp::node_interfaces::NodeParametersInterface::SharedPtr get_node_parameters_interface() const override;
 
-            std::shared_ptr<rclcpp::Node> get_rcl_node() const override;
+            std::optional<std::shared_ptr<rclcpp::Node>> get_rcl_node() const override;
 
-            T wrapped_node_;
-            std::shared_ptr<rclcpp::Node> rcl_node;
+            std::optional<std::shared_ptr<rclcpp_lifecycle::LifecycleNode>> get_lifecycle_node() const override;
+
+            T node;
         };
 
     public:
@@ -101,6 +101,8 @@ namespace node_interface
 
         // true if the wrapped node is a rclcpp_lifecycle::LifecycleNode type
         bool has_lifecycle_node_;
+
+        std::optional<std::shared_ptr<rclcpp_lifecycle::LifecycleNode>> get_lifecycle_node() const;
     };
 
     using NodeInterfaceSharedPtr = std::shared_ptr<NodeInterface>;
