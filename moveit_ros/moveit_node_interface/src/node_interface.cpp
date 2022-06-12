@@ -1,7 +1,7 @@
 /*********************************************************************
  * Software License Agreement (BSD License)
  *
- *  Copyright (c) 2011, Willow Garage, Inc.
+ *  Copyright (c) 2022, PickNik Robotics
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *     copyright notice, this list of conditions and the following
  *     disclaimer in the documentation and/or other materials provided
  *     with the distribution.
- *   * Neither the name of Willow Garage nor the names of its
+ *   * Neither the name of PickNik Robotics nor the names of its
  *     contributors may be used to endorse or promote products derived
  *     from this software without specific prior written permission.
  *
@@ -35,3 +35,46 @@
 /* Author: Paul Gesel */
 
 #include "node_interface/node_interface.h"
+
+namespace node_interface {
+
+    rclcpp::node_interfaces::NodeBaseInterface::SharedPtr NodeInterface::get_node_base_interface() const {
+        return node_handle_->get_node_base_interface();
+    }
+
+    rclcpp::node_interfaces::NodeTopicsInterface::SharedPtr NodeInterface::get_node_topics_interface() const {
+        return node_handle_->get_node_topics_interface();
+    }
+
+    rclcpp::node_interfaces::NodeParametersInterface::SharedPtr NodeInterface::get_node_parameters_interface() const {
+        return node_handle_->get_node_parameters_interface();
+    }
+
+    std::shared_ptr<rclcpp::Node> NodeInterface::get_rcl_node() const {
+        if (!has_lifecycle_node_) {
+            return node_handle_->get_rcl_node();
+        }
+        return nullptr;
+    }
+
+    template<typename T>
+    rclcpp::node_interfaces::NodeBaseInterface::SharedPtr NodeInterface::Wrapper<T>::get_node_base_interface() const {
+        return wrapped_node_->get_node_base_interface();
+    }
+
+    template<typename T>
+    rclcpp::node_interfaces::NodeTopicsInterface::SharedPtr NodeInterface::Wrapper<T>::get_node_topics_interface() const {
+        return wrapped_node_->get_node_topics_interface();
+    }
+
+    template<typename T>
+    rclcpp::node_interfaces::NodeParametersInterface::SharedPtr NodeInterface::Wrapper<T>::get_node_parameters_interface() const {
+        return wrapped_node_->get_node_parameters_interface();
+    }
+
+    template<typename T>
+    std::shared_ptr<rclcpp::Node> NodeInterface::Wrapper<T>::get_rcl_node() const {
+        return rcl_node;
+    }
+
+}

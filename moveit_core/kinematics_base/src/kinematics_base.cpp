@@ -105,7 +105,7 @@ bool KinematicsBase::initialize(const node_interface::NodeInterfaceSharedPtr& no
                      "Please implement initialize(rclcpp::Node::SharedPtr, RobotModel, ...).",
                      group_name.c_str());
     } else{
-        // try old interface
+        // try rclcpp node interface
         return initialize(node->get_rcl_node(), robot_model, group_name, base_frame, tip_frames,
                           search_discretization);
     }
