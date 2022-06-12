@@ -69,10 +69,10 @@ public:
    *  @param default_continuous_value Default value for parameter with "_continuous" suffix.
    *  @param default_timeout Default value for parameter with "_timeout" suffix.
    */
-  RDFLoader(std::shared_ptr<rclcpp::Node>& node, const std::string& ros_name = "robot_description",
+  RDFLoader(const std::shared_ptr<rclcpp::Node>& node, const std::string& ros_name = "robot_description",
             bool default_continuous_value = false, double default_timeout = 10.0);
 
-  RDFLoader(const node_interface::NodeInterfaceSharedPtr& node_interface,
+  RDFLoader(node_interface::NodeInterfaceSharedPtr& node_interface,
             const std::string& ros_name = "robot_description", bool default_continuous_value = false,
             double default_timeout = 10.0);
 
@@ -126,7 +126,7 @@ private:
 
   void urdfUpdateCallback(const std::string& new_urdf_string);
   void srdfUpdateCallback(const std::string& new_srdf_string);
-  void loadRobot(const node_interface::NodeInterfaceSharedPtr& node_interface, const std::string& ros_name,
+  void loadRobot(node_interface::NodeInterfaceSharedPtr& node_interface, const std::string& ros_name,
                  bool default_continuous_value, double default_timeout);
 
   NewModelCallback new_model_cb_;
