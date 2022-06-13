@@ -175,7 +175,7 @@ jobs:
       - source
     steps:
       - name: Delete Untagged Images
-        uses: actions/github-script@v5
+        uses: actions/github-script@v6
         with:
           github-token: ${{ secrets.DELETE_PACKAGES_TOKEN }}
           script: |
