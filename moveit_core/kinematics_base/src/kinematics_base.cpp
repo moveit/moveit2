@@ -104,7 +104,7 @@ bool KinematicsBase::initialize(const node_interface::NodeInterfaceSharedPtr& no
                      group_name.c_str());
     } else{
         // try to call IK plugin with old rclcpp node interface
-        return initialize(node, robot_model, group_name, base_frame, tip_frames,
+        return initialize(node.value(), robot_model, group_name, base_frame, tip_frames,
                           search_discretization);
     }
   return false;

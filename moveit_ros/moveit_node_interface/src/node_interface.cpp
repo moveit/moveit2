@@ -39,7 +39,7 @@
 namespace node_interface {
 
     rclcpp::node_interfaces::NodeBaseInterface::SharedPtr NodeInterface::get_node_base_interface() {
-        return node_handle_->get_node_base_interface();
+    	return node_handle_->get_node_base_interface();
     }
 
     rclcpp::node_interfaces::NodeTopicsInterface::SharedPtr NodeInterface::get_node_topics_interface() {
@@ -50,12 +50,12 @@ namespace node_interface {
         return node_handle_->get_node_parameters_interface();
     }
 
-    std::shared_ptr<rclcpp::Node> NodeInterface::get_rcl_node() const {
-        node_handle_->get_rcl_node();
+    std::optional<std::shared_ptr<rclcpp::Node>> NodeInterface::get_rcl_node() const {
+        return node_handle_->get_rcl_node();
     }
 
     std::optional<std::shared_ptr<rclcpp_lifecycle::LifecycleNode>> NodeInterface::get_lifecycle_node() const {
-        node_handle_->get_rcl_node();
+        return node_handle_->get_lifecycle_node();
     }
 
     template<>

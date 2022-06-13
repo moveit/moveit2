@@ -95,7 +95,7 @@ namespace node_interface
 
         rclcpp::node_interfaces::NodeParametersInterface::SharedPtr get_node_parameters_interface();
 
-        std::shared_ptr<rclcpp::Node> get_rcl_node() const;
+        std::optional<std::shared_ptr<rclcpp::Node>> get_rcl_node() const;
 
         std::shared_ptr<NodeBase> node_handle_;
 
