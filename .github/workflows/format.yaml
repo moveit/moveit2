@@ -19,7 +19,7 @@ jobs:
     - uses: actions/setup-python@v2
     - name: Install clang-format-12
       run: sudo apt-get install clang-format-12
-    - uses: pre-commit/action@v2.0.3
+    - uses: pre-commit/action@v3.0.0
       id: precommit
     - name: Upload pre-commit changes
       if: failure() && steps.precommit.outcome == 'failure'
