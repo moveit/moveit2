@@ -61,7 +61,7 @@ public:
 
   std::string getInstructions() const override
   {
-    return "Configure controllers to be used to simulate the robot's hardware interfaces and movement.";
+    return "Configure ros2_controllers. By default, ros2_control fake_components are used to create a simple simulation.";
   }
 
   std::string getButtonText() const override

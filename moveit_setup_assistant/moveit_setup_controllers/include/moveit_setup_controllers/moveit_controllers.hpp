@@ -60,7 +60,7 @@ public:
 
   std::string getInstructions() const override
   {
-    return "Configure controllers to be used by MoveIt's controller manager(s) to operate the robot's physical "
+    return "Configure controllers to be used in executing trajectories with MoveIt (hardware or simulation)."
            "hardware";
   }
 

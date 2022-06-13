@@ -50,7 +50,7 @@ void ROS2ControllersConfig::loadPrevious(const std::filesystem::path& package_pa
   changed_ = false;
   controllers_.clear();
 
-  // Load moveit controllers yaml file if available-----------------------------------------------
+  // Load ros2 controllers yaml file if available-----------------------------------------------
   std::filesystem::path ros_controllers_yaml_path = package_path / CONTROLLERS_YAML;
   std::ifstream input_stream(ros_controllers_yaml_path);
   if (!input_stream.good())
