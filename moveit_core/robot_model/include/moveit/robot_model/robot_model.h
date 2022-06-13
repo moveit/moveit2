@@ -50,6 +50,8 @@
 #include <moveit/robot_model/prismatic_joint_model.h>
 #include <Eigen/Geometry>
 #include <iostream>
+#include <array>
+#include <functional>
 
 /** \brief Main namespace for MoveIt */
 namespace moveit
