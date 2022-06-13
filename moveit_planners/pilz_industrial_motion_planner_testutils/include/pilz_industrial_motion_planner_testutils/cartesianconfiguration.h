@@ -158,7 +158,7 @@ inline const JointConfiguration& CartesianConfiguration::getSeed() const
 
 inline bool CartesianConfiguration::hasSeed() const
 {
-  return seed_.is_initialized();
+  return seed_.has_value();
 }
 
 inline void CartesianConfiguration::setPoseTolerance(const double tol)
