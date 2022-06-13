@@ -116,9 +116,9 @@ void UrdfModificationsWidget::focusGiven()
   interface_widget->setLayout(interface_layout);
   layout->addWidget(interface_widget);
 
-  btn_go_ = new QPushButton("Add interfaces");
-  connect(btn_go_, SIGNAL(clicked()), this, SLOT(addInterfaces()));
-  layout->addWidget(btn_go_);
+  btn_add_interfaces_ = new QPushButton("Add interfaces");
+  connect(btn_add_interfaces_, SIGNAL(clicked()), this, SLOT(addInterfaces()));
+  layout->addWidget(btn_add_interfaces_);
 
   generated_text_widget_ = new QTextEdit();
   generated_text_widget_->setReadOnly(true);

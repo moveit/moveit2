@@ -67,7 +67,7 @@ private:
                              const std::vector<std::string>& selected_interfaces, QWidget* parent = nullptr);
   std::vector<std::string> getInterfaces(const char first_letter, const std::vector<std::string>& available_interfaces);
   QWidget* content_widget_;
-  QPushButton* btn_go_;
+  QPushButton* btn_add_interfaces_;
   QTextEdit* generated_text_widget_;
   std::unordered_map<std::string, QCheckBox*> check_boxes_;
 
