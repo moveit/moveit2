@@ -79,7 +79,7 @@ jobs:
           # free up a lot of stuff from /usr/local
           sudo rm -rf /usr/local
           df -h
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: testspace-com/setup-testspace@v1
         with:
           domain: ros-planning
