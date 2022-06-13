@@ -140,6 +140,6 @@ inline void Sequence::setAllBlendRadiiToZero()
 template <class T>
 inline bool Sequence::cmdIsOfType(const size_t index_cmd) const
 {
-  return cmds_.at(index_cmd).first.type() == typeid(T);
+  return std::holds_alternative<T>(cmds_.at(index_cmd).first);
 }
 }  // namespace pilz_industrial_motion_planner_testutils

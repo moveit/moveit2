@@ -81,7 +81,6 @@ PoseTracking::PoseTracking(const rclcpp::Node::SharedPtr& node, const ServoParam
   , transform_buffer_(node_->get_clock())
   , transform_listener_(transform_buffer_)
   , stop_requested_(false)
-  , angular_error_(boost::none)
 {
   readROSParams();
 
