@@ -49,16 +49,16 @@ static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_ros.robot_model_
 
 RobotModelLoader::RobotModelLoader(const rclcpp::Node::SharedPtr& node, const std::string& robot_description,
                                    bool load_kinematics_solvers)
+   : node_interface_(std::make_shared<node_interface::NodeInterface>(node_interface::NodeInterface(node)))
 {
-  node_interface_ = std::make_shared<node_interface::NodeInterface>(node_interface::NodeInterface(node));
   Options opt(robot_description);
   opt.load_kinematics_solvers_ = load_kinematics_solvers;
   configure(opt);
 }
 
 RobotModelLoader::RobotModelLoader(const rclcpp::Node::SharedPtr& node, const Options& opt)
+   : node_interface_(std::make_shared<node_interface::NodeInterface>(node))
 {
-  node_interface_ = std::make_shared<node_interface::NodeInterface>(node);
   configure(opt);
 }
 

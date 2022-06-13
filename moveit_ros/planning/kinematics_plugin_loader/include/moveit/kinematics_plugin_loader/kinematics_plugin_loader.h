@@ -78,7 +78,7 @@ public:
   KinematicsPluginLoader(node_interface::NodeInterfaceSharedPtr& node_interface, const std::string& solver_plugin,
                          double solve_timeout, const std::string& robot_description = "robot_description",
                          double default_search_resolution = 0.0)
-    : node_interface_{ std::move(node_interface)}
+    : node_interface_{std::move(node_interface)}
     , robot_description_(robot_description)
     , default_search_resolution_(default_search_resolution)
     , default_solver_plugin_(solver_plugin)

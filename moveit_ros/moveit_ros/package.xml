@@ -22,18 +22,12 @@
 
   <buildtool_depend>ament_cmake</buildtool_depend>
 
-  <!--
-  <exec_depend>moveit_ros_perception</exec_depend>
-  -->
   <exec_depend>moveit_ros_planning</exec_depend>
   <exec_depend>moveit_ros_warehouse</exec_depend>
   <exec_depend>moveit_ros_benchmarks</exec_depend>
   <exec_depend>moveit_ros_robot_interaction</exec_depend>
   <exec_depend>moveit_ros_planning_interface</exec_depend>
   <exec_depend>moveit_ros_visualization</exec_depend>
-  <!--
-  <exec_depend>moveit_ros_manipulation</exec_depend>
-  -->
   <exec_depend>moveit_ros_move_group</exec_depend>
 
   <test_depend>ament_lint_auto</test_depend>

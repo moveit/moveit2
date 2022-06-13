@@ -44,7 +44,7 @@ std::string SynchronizedStringParameter::loadInitialValue(node_interface::NodeIn
                                                           const std::string& name, StringCallback parent_callback,
                                                           bool default_continuous_value, double default_timeout)
 {
-    node_interface_ = std::move(node_interface);
+  node_interface_ = std::move(node_interface);
   name_ = name;
   parent_callback_ = parent_callback;
 
