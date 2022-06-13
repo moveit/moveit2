@@ -219,7 +219,6 @@ bool RDFLoader::loadPkgFileToString(std::string& buffer, const std::string& pack
   }
 
   std::filesystem::path path(package_path);
-  // Use boost to cross-platform combine paths
   path = path / relative_path;
 
   return loadXmlFileToString(buffer, path.string(), xacro_args);

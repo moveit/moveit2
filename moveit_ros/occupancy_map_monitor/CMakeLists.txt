@@ -24,8 +24,6 @@ find_package(octomap REQUIRED)
 find_package(geometric_shapes REQUIRED)
 find_package(tf2_ros REQUIRED)
 
-# Finds Boost Components
-include(ConfigExtras.cmake)
 
 include_directories(include)
 include_directories(SYSTEM
@@ -40,7 +38,6 @@ set(THIS_PACKAGE_INCLUDE_DEPENDS
   pluginlib
   octomap
   geometric_shapes
-  Boost
 )
 
 add_library(${MOVEIT_LIB_NAME} SHARED
