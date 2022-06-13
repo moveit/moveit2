@@ -219,8 +219,8 @@ def generate_move_group_launch(moveit_config):
     }
 
     move_group_params = [
-        move_group_configuration,
         moveit_config.to_dict(),
+        move_group_configuration,
     ]
 
     add_debuggable_node(
