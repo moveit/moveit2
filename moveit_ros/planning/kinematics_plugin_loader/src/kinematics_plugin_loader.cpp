@@ -72,7 +72,8 @@ public:
    * \param search_res
    * \param iksolver_to_tip_links - a map between each ik solver and a vector of custom-specified tip link(s)
    */
-  KinematicsLoaderImpl(moveit::node_interface::NodeInterfaceSharedPtr node_interface, const std::string& robot_description,
+  KinematicsLoaderImpl(moveit::node_interface::NodeInterfaceSharedPtr node_interface,
+                       const std::string& robot_description,
                        const std::map<std::string, std::vector<std::string>>& possible_kinematics_solvers,
                        const std::map<std::string, std::vector<double>>& search_res,
                        const std::map<std::string, std::vector<std::string>>& iksolver_to_tip_links)

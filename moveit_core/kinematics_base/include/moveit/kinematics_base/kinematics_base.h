@@ -366,7 +366,7 @@ public:
                           const std::string& group_name, const std::string& base_frame,
                           const std::vector<std::string>& tip_frames, double search_discretization);
 
-    /**
+  /**
    * @brief  Initialization function for the kinematics, for use with kinematic chain IK solvers
    * @param node Shared ptr to a moveit_node_interface used by the IK plugin
    * @param robot_model - allow the URDF to be loaded much quicker by passing in a pre-parsed model of the robot

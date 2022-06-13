@@ -53,10 +53,10 @@ std::string SynchronizedStringParameter::loadInitialValue(moveit::node_interface
     if (shouldPublish())
     {
       // Transient local is similar to latching in ROS 1.
-        auto node_parameters = node_interface_->get_node_parameters_interface();
-        auto node_topics = node_interface_->get_node_topics_interface();
-        string_publisher_ = rclcpp::create_publisher<std_msgs::msg::String>(
-                node_parameters, node_topics, "topic", rclcpp::QoS(1).transient_local());
+      auto node_parameters = node_interface_->get_node_parameters_interface();
+      auto node_topics = node_interface_->get_node_topics_interface();
+      string_publisher_ = rclcpp::create_publisher<std_msgs::msg::String>(node_parameters, node_topics, "topic",
+                                                                          rclcpp::QoS(1).transient_local());
 
       std_msgs::msg::String msg;
       msg.data = content_;
@@ -69,8 +69,8 @@ std::string SynchronizedStringParameter::loadInitialValue(moveit::node_interface
   std::string keep_open_param = name_ + "_continuous";
   if (!node_interface_->get_node_parameters_interface()->has_parameter(keep_open_param))
   {
-    node_interface_->get_node_parameters_interface()->declare_parameter(keep_open_param,
-                                                                        rclcpp::ParameterValue(default_continuous_value));
+    node_interface_->get_node_parameters_interface()->declare_parameter(
+        keep_open_param, rclcpp::ParameterValue(default_continuous_value));
   }
   rclcpp::Parameter keep_open_parameter;
   node_interface_->get_node_parameters_interface()->get_parameter(keep_open_param, keep_open_parameter);
@@ -79,7 +79,8 @@ std::string SynchronizedStringParameter::loadInitialValue(moveit::node_interface
   std::string timeout_param = name_ + "_timeout";
   if (!node_interface_->get_node_parameters_interface()->has_parameter(timeout_param))
   {
-    node_interface_->get_node_parameters_interface()->declare_parameter(timeout_param, rclcpp::ParameterValue(default_timeout));
+    node_interface_->get_node_parameters_interface()->declare_parameter(timeout_param,
+                                                                        rclcpp::ParameterValue(default_timeout));
   }
   rclcpp::Parameter d_timeout_parameter;
   node_interface_->get_node_parameters_interface()->get_parameter(timeout_param, d_timeout_parameter);
@@ -131,7 +132,8 @@ bool SynchronizedStringParameter::shouldPublish()
 
 bool SynchronizedStringParameter::waitForMessage(const rclcpp::Duration timeout)
 {
-  auto const nd_name = std::string(node_interface_->get_node_base_interface()->get_name()).append("_ssp_").append(name_);
+  auto const nd_name =
+      std::string(node_interface_->get_node_base_interface()->get_name()).append("_ssp_").append(name_);
   auto const temp_node = std::make_shared<rclcpp::Node>(nd_name);
   string_subscriber_ = temp_node->create_subscription<std_msgs::msg::String>(
       name_, rclcpp::QoS(1).transient_local().reliable(),

@@ -58,15 +58,21 @@ public:
   KinematicsPluginLoader(const rclcpp::Node::SharedPtr& node,
                          const std::string& robot_description = "robot_description",
                          double default_search_resolution = 0.0)
-    : node_interface_(std::make_shared<moveit::node_interface::NodeInterface>(moveit::node_interface::NodeInterface(node)))
+    : node_interface_(
+          std::make_shared<moveit::node_interface::NodeInterface>(moveit::node_interface::NodeInterface(node)))
     , robot_description_(robot_description)
-    , default_search_resolution_(default_search_resolution){}
+    , default_search_resolution_(default_search_resolution)
+  {
+  }
 
   KinematicsPluginLoader(moveit::node_interface::NodeInterfaceSharedPtr& node_interface,
                          const std::string& robot_description = "robot_description",
                          double default_search_resolution = 0.0)
-    : node_interface_(node_interface), robot_description_(robot_description)
-    , default_search_resolution_(default_search_resolution){}
+    : node_interface_(node_interface)
+    , robot_description_(robot_description)
+    , default_search_resolution_(default_search_resolution)
+  {
+  }
 
   /** \brief Use a default kinematics solver (\e solver_plugin) for
       all the groups in the robot model. The default timeout for the
@@ -75,24 +81,29 @@ public:
       parameter under which the robot description can be found. This
       is passed to the kinematics solver initialization as well as
       used to read the SRDF document when needed. */
-  KinematicsPluginLoader(moveit::node_interface::NodeInterfaceSharedPtr& node_interface, const std::string& solver_plugin,
-                         double solve_timeout, const std::string& robot_description = "robot_description",
+  KinematicsPluginLoader(moveit::node_interface::NodeInterfaceSharedPtr& node_interface,
+                         const std::string& solver_plugin, double solve_timeout,
+                         const std::string& robot_description = "robot_description",
                          double default_search_resolution = 0.0)
     : node_interface_(node_interface)
     , robot_description_(robot_description)
     , default_search_resolution_(default_search_resolution)
     , default_solver_plugin_(solver_plugin)
-    , default_solver_timeout_(solve_timeout){}
+    , default_solver_timeout_(solve_timeout)
+  {
+  }
 
   KinematicsPluginLoader(const rclcpp::Node::SharedPtr& node, const std::string& solver_plugin, double solve_timeout,
                          const std::string& robot_description = "robot_description",
                          double default_search_resolution = 0.0)
-    : node_interface_(std::make_shared<moveit::node_interface::NodeInterface>(moveit::node_interface::NodeInterface(node)))
+    : node_interface_(
+          std::make_shared<moveit::node_interface::NodeInterface>(moveit::node_interface::NodeInterface(node)))
     , robot_description_(robot_description)
     , default_search_resolution_(default_search_resolution)
     , default_solver_plugin_(solver_plugin)
     , default_solver_timeout_(solve_timeout)
-      {}
+  {
+  }
 
   /** \brief Get a function pointer that allocates and initializes a kinematics solver. If not previously called, this
    * function reads the SRDF and calls the variant below. */
