@@ -55,6 +55,8 @@ class QTableView;
 class QVBoxLayout;
 
 #ifndef Q_MOC_RUN
+#include <thread>
+#include <functional>
 #include <moveit/setup_assistant/tools/moveit_config_data.h>
 #endif
 

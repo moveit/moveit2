@@ -47,6 +47,9 @@
 #include <moveit/robot_model/robot_model.h>
 #include <moveit/kinematic_constraints/kinematic_constraint.h>
 
+// std
+#include <memory>
+
 namespace kinematics_constraint_aware
 {
 /**

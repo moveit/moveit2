@@ -38,6 +38,7 @@
 #include <moveit/planning_scene_monitor/planning_scene_monitor.h>
 #include <boost/program_options/parsers.hpp>
 #include <boost/program_options/variables_map.hpp>
+#include <thread>
 
 using namespace std::chrono_literals;
 

@@ -39,6 +39,8 @@
 #include <moveit/pick_place/manipulation_stage.h>
 #include <vector>
 #include <deque>
+#include <thread>
+#include <functional>
 
 namespace pick_place
 {

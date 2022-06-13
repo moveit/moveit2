@@ -37,6 +37,8 @@
 #pragma once
 
 #include <moveit/robot_interaction/kinematic_options.h>
+#include <thread>
+#include <functional>
 
 #include "moveit_robot_interaction_export.h"
 

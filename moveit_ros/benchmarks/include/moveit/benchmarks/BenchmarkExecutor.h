@@ -52,6 +52,7 @@
 #include <map>
 #include <vector>
 #include <string>
+#include <functional>
 
 namespace moveit_ros_benchmarks
 {

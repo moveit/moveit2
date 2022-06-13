@@ -56,6 +56,7 @@
 // Read write files
 #include <iostream>  // For writing yaml and launch files
 #include <fstream>
+#include <filesystem>
 
 namespace moveit_setup_assistant
 {

@@ -42,6 +42,7 @@
 #include <set>
 #include <map>
 #include <mutex>
+#include <functional>
 
 namespace point_containment_filter
 {

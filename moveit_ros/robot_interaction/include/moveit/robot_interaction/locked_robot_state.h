@@ -40,6 +40,9 @@
 #include <moveit/macros/class_forward.h>
 #include <moveit/robot_state/robot_state.h>
 
+#include <functional>
+#include <thread>
+
 namespace robot_interaction
 {
 MOVEIT_CLASS_FORWARD(LockedRobotState);  // Defines LockedRobotStatePtr, ConstPtr, WeakPtr... etc

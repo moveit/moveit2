@@ -44,6 +44,9 @@
 #include <urdf/model.h>
 #include <srdf/model.h>
 
+// std
+#include <memory>
+
 namespace kinematics_cache_ros
 {
 bool KinematicsCacheROS::init(const kinematics_cache::KinematicsCache::Options& opt,

@@ -43,6 +43,8 @@
 #include <moveit/robot_state/robot_state.h>
 #include <moveit/robot_interaction/interaction.h>
 #include <memory>
+#include <functional>
+#include <thread>
 
 // This is needed for legacy code that includes robot_interaction.h but not
 // interaction_handler.h

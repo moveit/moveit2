@@ -43,6 +43,7 @@
 #include <rclcpp/time.hpp>
 #include <memory>
 #include <functional>
+#include <thread>
 
 namespace planning_scene_monitor
 {

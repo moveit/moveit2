@@ -38,6 +38,7 @@
 #include "moveit/py_bindings_tools/py_conversions.h"
 #include <ros/ros.h>
 #include <memory>
+#include <thread>
 
 static std::vector<std::string>& ROScppArgs()
 {

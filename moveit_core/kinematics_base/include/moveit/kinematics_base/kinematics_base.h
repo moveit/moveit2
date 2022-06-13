@@ -41,6 +41,7 @@
 #include <moveit/macros/class_forward.h>
 #include "rclcpp/rclcpp.hpp"
 #include <string>
+#include <functional>
 
 #include "moveit_kinematics_base_export.h"
 

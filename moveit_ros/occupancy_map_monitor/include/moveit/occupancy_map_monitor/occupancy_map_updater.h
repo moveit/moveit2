@@ -47,6 +47,7 @@
 
 #include <map>
 #include <string>
+#include <functional>
 
 namespace occupancy_map_monitor
 {

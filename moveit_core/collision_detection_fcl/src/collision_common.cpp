@@ -49,6 +49,7 @@
 
 #include <memory>
 #include <type_traits>
+#include <mutex>
 
 namespace collision_detection
 {

@@ -39,6 +39,8 @@
 #include <chrono>
 #include <functional>
 #include <string>
+#include <condition_variable>
+#include <mutex>
 
 #include <boost/signals2.hpp>
 

@@ -42,6 +42,7 @@
 #include <tf2_eigen/tf2_eigen.h>
 #endif
 #include <memory>
+#include <mutex>
 
 namespace collision_detection
 {

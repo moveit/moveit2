@@ -40,6 +40,7 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <functional>
 #include <Eigen/Geometry>
 #include <eigen_stl_containers/eigen_stl_vector_container.h>
 #include <moveit/transforms/transforms.h>

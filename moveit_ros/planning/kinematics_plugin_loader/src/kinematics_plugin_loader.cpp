@@ -41,6 +41,7 @@
 #include <vector>
 #include <map>
 #include <memory>
+#include <mutex>
 #include "rclcpp/rclcpp.hpp"
 
 namespace kinematics_plugin_loader

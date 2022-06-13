@@ -43,6 +43,7 @@
 #include <fstream>
 #include <sstream>
 #include <string>
+#include <filesystem>
 #include <tf2_eigen/tf2_eigen.hpp>
 
 #include <moveit/collision_detection/collision_common.h>

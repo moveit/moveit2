@@ -39,6 +39,7 @@
 #include <boost/math/special_functions/binomial.hpp>  // for statistics at end
 #include <boost/thread.hpp>
 #include <boost/assign.hpp>
+#include <unordered_map>
 
 namespace moveit_setup_assistant
 {

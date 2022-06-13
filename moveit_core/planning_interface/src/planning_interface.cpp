@@ -35,6 +35,7 @@
 /* Author: Ioan Sucan */
 
 #include <moveit/planning_interface/planning_interface.h>
+#include <mutex>
 #include <set>
 
 namespace planning_interface

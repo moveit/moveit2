@@ -42,6 +42,7 @@
 #include <eigen_stl_containers/eigen_stl_containers.h>
 #include <trajectory_msgs/msg/joint_trajectory.hpp>
 #include <set>
+#include <functional>
 
 namespace moveit
 {

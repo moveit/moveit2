@@ -43,6 +43,7 @@
 #include <moveit/planning_interface/planning_interface.h>
 
 #include <pluginlib/class_loader.hpp>
+#include <memory>
 
 namespace pilz_industrial_motion_planner
 {

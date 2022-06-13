@@ -54,6 +54,9 @@
 #include <moveit/kinematic_constraints/kinematic_constraint.h>
 #include <moveit/kinematics_constraint_aware/kinematics_request_response.h>
 
+// std
+#include <functional>
+
 namespace kinematics_constraint_aware
 {
 class KinematicsConstraintAware;

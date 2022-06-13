@@ -54,6 +54,7 @@
 #include <boost/noncopyable.hpp>
 #include <boost/concept_check.hpp>
 #include <memory>
+#include <functional>
 #include "rclcpp/rclcpp.hpp"
 
 #include "moveit_planning_scene_export.h"

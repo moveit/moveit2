@@ -49,6 +49,9 @@
 #include <boost/noncopyable.hpp>
 #include <memory>
 #include <thread>
+#include <shared_mutex>
+#include <mutex>
+#include <thread>
 
 #include "moveit_planning_scene_monitor_export.h"
 

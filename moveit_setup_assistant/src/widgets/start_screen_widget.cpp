@@ -57,6 +57,7 @@
 // C
 #include <fstream>  // for reading in urdf
 #include <streambuf>
+#include <filesystem>
 // MoveIt
 #include <moveit/rdf_loader/rdf_loader.h>
 

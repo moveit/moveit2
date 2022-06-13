@@ -45,6 +45,8 @@
 
 #include "rclcpp/rclcpp.hpp"
 
+#include <thread>
+
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("unittest_planning_context_loader");
 
 class PlanningContextLoadersTest : public ::testing::TestWithParam<std::vector<std::string>>

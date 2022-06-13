@@ -39,6 +39,7 @@
 #include <moveit/robot_state/conversions.h>
 #include <urdf_parser/urdf_parser.h>
 #include <fstream>
+#include <filesystem>
 #include <gtest/gtest.h>
 #include <geometric_shapes/shapes.h>
 

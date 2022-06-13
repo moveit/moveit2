@@ -37,6 +37,7 @@
 #include <moveit/robot_model/robot_model.h>
 #include <urdf_parser/urdf_parser.h>
 #include <fstream>
+#include <filesystem>
 #include <gtest/gtest.h>
 
 #include <moveit/utils/robot_model_test_utils.h>

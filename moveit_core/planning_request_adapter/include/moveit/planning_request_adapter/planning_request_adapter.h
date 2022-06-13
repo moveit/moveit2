@@ -39,6 +39,7 @@
 #include <moveit/macros/class_forward.h>
 #include <moveit/planning_interface/planning_interface.h>
 #include <moveit/planning_scene/planning_scene.h>
+#include <functional>
 
 /** \brief Generic interface to adapting motion planning requests */
 namespace planning_request_adapter
