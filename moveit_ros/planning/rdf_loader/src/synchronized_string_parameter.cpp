@@ -40,11 +40,11 @@ namespace rdf_loader
 {
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_ros.robot_model_loader");
 
-std::string SynchronizedStringParameter::loadInitialValue(node_interface::NodeInterfaceSharedPtr& node_interface,
+std::string SynchronizedStringParameter::loadInitialValue(moveit::node_interface::NodeInterfaceSharedPtr& node_interface,
                                                           const std::string& name, StringCallback parent_callback,
                                                           bool default_continuous_value, double default_timeout)
 {
-  node_interface_ = std::move(node_interface);
+  node_interface_ = node_interface;
   name_ = name;
   parent_callback_ = parent_callback;
 

@@ -49,7 +49,7 @@ static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_ros.robot_model_
 
 RobotModelLoader::RobotModelLoader(const rclcpp::Node::SharedPtr& node, const std::string& robot_description,
                                    bool load_kinematics_solvers)
-   : node_interface_(std::make_shared<node_interface::NodeInterface>(node_interface::NodeInterface(node)))
+   : node_interface_(std::make_shared<moveit::node_interface::NodeInterface>(moveit::node_interface::NodeInterface(node)))
 {
   Options opt(robot_description);
   opt.load_kinematics_solvers_ = load_kinematics_solvers;
@@ -57,22 +57,22 @@ RobotModelLoader::RobotModelLoader(const rclcpp::Node::SharedPtr& node, const st
 }
 
 RobotModelLoader::RobotModelLoader(const rclcpp::Node::SharedPtr& node, const Options& opt)
-   : node_interface_(std::make_shared<node_interface::NodeInterface>(node))
+   : node_interface_(std::make_shared<moveit::node_interface::NodeInterface>(node))
 {
   configure(opt);
 }
 
-RobotModelLoader::RobotModelLoader(node_interface::NodeInterfaceSharedPtr& node_interface,
+RobotModelLoader::RobotModelLoader(moveit::node_interface::NodeInterfaceSharedPtr& node_interface,
                                    const std::string& robot_description, bool load_kinematics_solvers)
-  : node_interface_{std::move(node_interface)}
+  : node_interface_(node_interface)
 {
   Options opt(robot_description);
   opt.load_kinematics_solvers_ = load_kinematics_solvers;
   configure(opt);
 }
 
-RobotModelLoader::RobotModelLoader(node_interface::NodeInterfaceSharedPtr& node_interface, const Options& opt)
-  : node_interface_{std::move(node_interface)}
+RobotModelLoader::RobotModelLoader(moveit::node_interface::NodeInterfaceSharedPtr& node_interface, const Options& opt)
+  : node_interface_(node_interface)
 {
   configure(opt);
 }

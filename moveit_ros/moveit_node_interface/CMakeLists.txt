@@ -5,19 +5,17 @@ find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(rclcpp_lifecycle REQUIRED)
 
-set(MOVEIT_LIB_NAME moveit_node_interface)
-
-add_library(${MOVEIT_LIB_NAME} SHARED src/node_interface.cpp)
+add_library(${PROJECT_NAME}  SHARED src/moveit_node_interface.cpp)
 include_directories(include)
-ament_target_dependencies(${MOVEIT_LIB_NAME}
+ament_target_dependencies(${PROJECT_NAME}
         rclcpp
         rclcpp_lifecycle)
 
-set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
+set_target_properties(${PROJECT_NAME}  PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
 
 # Install Libraries
 install(
-  TARGETS ${MOVEIT_LIB_NAME}
+  TARGETS ${PROJECT_NAME}
   EXPORT export_${PROJECT_NAME}
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
@@ -35,5 +33,6 @@ endif()
 
 ament_export_targets(export_${PROJECT_NAME} HAS_LIBRARY_TARGET)
 ament_export_dependencies(rclcpp rclcpp_lifecycle)
+ament_export_include_directories(include)
 
 ament_package()

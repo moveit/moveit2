@@ -34,9 +34,9 @@
 
 /* Author: Paul Gesel */
 
-#include "node_interface/node_interface.h"
+#include "moveit_node_interface/moveit_node_interface.hpp"
 
-namespace node_interface {
+namespace moveit::node_interface {
 
     rclcpp::node_interfaces::NodeBaseInterface::SharedPtr NodeInterface::get_node_base_interface() {
     	return node_handle_->get_node_base_interface();
@@ -108,4 +108,4 @@ namespace node_interface {
         return node;
     }
 
-}  // namespace node_interface
+}  // namespace moveit::node_interface

@@ -56,7 +56,7 @@ namespace rdf_loader
 {
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_rdf_loader.rdf_loader");
 
-void RDFLoader::loadRobot(node_interface::NodeInterfaceSharedPtr& node_interface, const std::string& ros_name,
+void RDFLoader::loadRobot(moveit::node_interface::NodeInterfaceSharedPtr& node_interface, const std::string& ros_name,
                           bool default_continuous_value, double default_timeout)
 {
   rclcpp::Clock clock;
@@ -84,12 +84,12 @@ void RDFLoader::loadRobot(node_interface::NodeInterfaceSharedPtr& node_interface
 RDFLoader::RDFLoader(const std::shared_ptr<rclcpp::Node>& node, const std::string& ros_name,
                      bool default_continuous_value, double default_timeout)
   : ros_name_(ros_name)
-  , nodeInterface_(std::make_shared<node_interface::NodeInterface>(node_interface::NodeInterface(node)))
+  , nodeInterface_(std::make_shared<moveit::node_interface::NodeInterface>(moveit::node_interface::NodeInterface(node)))
 {
   loadRobot(nodeInterface_, ros_name, default_continuous_value, default_timeout);
 }
 
-RDFLoader::RDFLoader(node_interface::NodeInterfaceSharedPtr& node_interface, const std::string& ros_name,
+RDFLoader::RDFLoader(moveit::node_interface::NodeInterfaceSharedPtr& node_interface, const std::string& ros_name,
                      bool default_continuous_value, double default_timeout)
   : ros_name_(ros_name)
 {

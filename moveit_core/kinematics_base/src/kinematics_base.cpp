@@ -93,21 +93,19 @@ bool KinematicsBase::initialize(const rclcpp::Node::SharedPtr& /*node*/,
   return false;
 }
 
-bool KinematicsBase::initialize(const node_interface::NodeInterfaceSharedPtr& node_interface, const moveit::core::RobotModel& robot_model, const std::string& group_name,
+bool KinematicsBase::initialize(const moveit::node_interface::NodeInterfaceSharedPtr& node_interface, const moveit::core::RobotModel& robot_model, const std::string& group_name,
                                 const std::string& base_frame, const std::vector<std::string>& tip_frames,
                                 double search_discretization)
 {
     if (auto node = node_interface->get_rcl_node()){
-        RCLCPP_ERROR(LOGGER,
-                     "IK plugin for group '%s' relies on deprecated API. "
-                     "Please implement initialize(rclcpp::Node::SharedPtr, RobotModel, ...).",
-                     group_name.c_str());
-    } else{
-        // try to call IK plugin with old rclcpp node interface
-        return initialize(node.value(), robot_model, group_name, base_frame, tip_frames,
-                          search_discretization);
+        // try to call IK plugin with the old rclcpp node interface
+        return initialize(node.value(), robot_model, group_name, base_frame, tip_frames, search_discretization);
     }
-  return false;
+
+    RCLCPP_ERROR(LOGGER, "IK plugin for group '%s' relies on deprecated API. "
+     "Please implement initialize(moveit::node_interface::NodeInterfaceSharedPtr, RobotModel, ...).", group_name.c_str());
+    return false;
+
 }
 
 bool KinematicsBase::setRedundantJoints(const std::vector<unsigned int>& redundant_joint_indices)

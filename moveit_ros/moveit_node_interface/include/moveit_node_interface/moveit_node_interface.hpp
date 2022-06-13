@@ -32,17 +32,17 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-/* Author: Paul Gesel */
+/* Author: Paul Gesel
+   Description: The NodeInterface struct is a wrapper for rclcpp::Node and rclcpp_lifecycle::LifecycleNode types.
+*/
 
 #pragma once
 
-#include <rclcpp/rclcpp.hpp>
+#include <rclcpp/node.hpp>
 #include <rclcpp_lifecycle/lifecycle_node.hpp>
 #include <memory>
 
-// The NodeInterface struct is a wrapper for rclcpp::Node and rclcpp_lifecycle::LifecycleNode types.
-
-namespace node_interface
+namespace moveit::node_interface
 {
     struct NodeInterface
     {
@@ -104,4 +104,4 @@ namespace node_interface
 
     using NodeInterfaceSharedPtr = std::shared_ptr<NodeInterface>;
 
-}  // namespace node_interface
+}  // namespace moveit_node_interface

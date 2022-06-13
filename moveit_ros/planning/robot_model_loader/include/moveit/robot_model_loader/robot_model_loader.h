@@ -82,9 +82,9 @@ public:
   RobotModelLoader(const rclcpp::Node::SharedPtr& node, const std::string& robot_description,
                    bool load_kinematics_solvers = true);
 
-  RobotModelLoader(node_interface::NodeInterfaceSharedPtr& node_interface, const Options& opt = Options());
+  RobotModelLoader(moveit::node_interface::NodeInterfaceSharedPtr& node_interface, const Options& opt = Options());
 
-  RobotModelLoader(node_interface::NodeInterfaceSharedPtr& node_interface, const std::string& robot_description,
+  RobotModelLoader(moveit::node_interface::NodeInterfaceSharedPtr& node_interface, const std::string& robot_description,
                    bool load_kinematics_solvers = true);
 
   ~RobotModelLoader();
@@ -137,6 +137,6 @@ private:
   moveit::core::RobotModelPtr model_;
   rdf_loader::RDFLoaderPtr rdf_loader_;
   kinematics_plugin_loader::KinematicsPluginLoaderPtr kinematics_loader_;
-  node_interface::NodeInterfaceSharedPtr node_interface_;
+  moveit::node_interface::NodeInterfaceSharedPtr node_interface_;
 };
 }  // namespace robot_model_loader

@@ -135,6 +135,7 @@ set(THIS_PACKAGE_INCLUDE_DEPENDS
   OCTOMAP
   Bullet
   ruckig
+  moveit_node_interface
 )
 
 include_directories(SYSTEM ${EIGEN3_INCLUDE_DIRS}
@@ -219,7 +220,7 @@ install(
 )
 
 ament_export_targets(export_${PROJECT_NAME} HAS_LIBRARY_TARGET)
-ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS} moveit_node_interface orocos_kdl_vendor)
+ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS} orocos_kdl_vendor)
 
 # Plugin exports
 pluginlib_export_plugin_description_file(moveit_core collision_detector_fcl_description.xml)
