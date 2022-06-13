@@ -368,7 +368,7 @@ public:
 
   /**
    * @brief  Initialization function for the kinematics, for use with kinematic chain IK solvers
-   * @param node Shared ptr to a moveit_node_interface used by the IK plugin
+   * @param node Shared ptr to a moveit node interface used by the IK plugin
    * @param robot_model - allow the URDF to be loaded much quicker by passing in a pre-parsed model of the robot
    * @param group_name The group for which this solver is being configured
    * @param base_frame The base frame in which all input poses are expected.

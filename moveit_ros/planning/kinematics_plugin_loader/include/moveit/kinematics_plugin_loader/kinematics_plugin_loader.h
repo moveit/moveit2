@@ -93,6 +93,13 @@ public:
   {
   }
 
+  /** \brief Use a default kinematics solver (\e solver_plugin) for
+      all the groups in the robot model. The default timeout for the
+      solver is \e solve_timeout and the default number of IK attempts
+      is \e ik_attempts. Takes a moveit node interface argument and the name of the ROS
+      parameter under which the robot description can be found as an optional argument. This
+      is passed to the kinematics solver initialization as well as
+      used to read the SRDF document when needed. */
   KinematicsPluginLoader(const rclcpp::Node::SharedPtr& node, const std::string& solver_plugin, double solve_timeout,
                          const std::string& robot_description = "robot_description",
                          double default_search_resolution = 0.0)
