@@ -139,7 +139,7 @@ bool World::knowsTransform(const std::string& name) const
     for (const std::pair<const std::string, ObjectPtr>& object : objects_)
     {
       // if "object name/" matches start of object_id, we found the matching object
-      // name.rfind is in service of removing the call to boost::starts_with and does the same thing
+      // rfind searches name for object.first in the first index (returns 0 if found)
       if (name.rfind(object.first, 0) == 0 && name[object.first.length()] == '/')
       {
         return object.second->global_subframe_poses_.find(name.substr(object.first.length() + 1)) !=
