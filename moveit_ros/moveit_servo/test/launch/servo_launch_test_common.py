@@ -56,16 +56,23 @@ def generate_servo_test_description(
         output="screen",
     )
 
-    # Load controllers
-    load_controllers = []
-    for controller in ["panda_arm_controller", "joint_state_broadcaster"]:
-        load_controllers += [
-            ExecuteProcess(
-                cmd=["ros2 run controller_manager spawner {}".format(controller)],
-                shell=True,
-                output="screen",
-            )
-        ]
+    joint_state_broadcaster_spawner = Node(
+        package="controller_manager",
+        executable="spawner",
+        arguments=[
+            "joint_state_broadcaster",
+            "--controller-manager-timeout",
+            "300",
+            "--controller-manager",
+            "/controller_manager",
+        ],
+    )
+
+    panda_arm_controller_spawner = Node(
+        package="controller_manager",
+        executable="spawner",
+        arguments=["panda_arm_controller", "-c", "/controller_manager"],
+    )
 
     # Component nodes for tf and Servo
     test_container = ComposableNodeContainer(
@@ -142,12 +149,13 @@ def generate_servo_test_description(
                 "containing test executables",
             ),
             ros2_control_node,
+            joint_state_broadcaster_spawner,
+            panda_arm_controller_spawner,
             servo_node,
             test_container,
             TimerAction(period=2.0, actions=[servo_gtest]),
             launch_testing.actions.ReadyToTest(),
         ]
-        + load_controllers
     ), {
         "servo_node": servo_node,
         "test_container": test_container,
