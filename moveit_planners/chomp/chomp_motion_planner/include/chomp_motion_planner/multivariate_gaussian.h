@@ -63,7 +63,7 @@ private:
   Eigen::MatrixXd covariance_cholesky_; /**< Cholesky decomposition (LL^T) of the covariance */
 
   int size_;
-  boost::mt19937 rng_;
+  boost::mt19937 rng_;  // TODO
   boost::normal_distribution<> normal_dist_;
   boost::variate_generator<boost::mt19937, boost::normal_distribution<> > gaussian_;
 };

@@ -55,6 +55,7 @@
 #include <memory>
 #include <functional>
 #include <thread>
+#include <variant>
 #include "rclcpp/rclcpp.hpp"
 
 #include "moveit_planning_scene_export.h"
