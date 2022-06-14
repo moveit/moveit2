@@ -54,8 +54,8 @@ const boost::unordered_map<DisabledReason, std::string> REASONS_TO_STRING = boos
     DEFAULT, "Default")(ADJACENT, "Adjacent")(ALWAYS, "Always")(USER, "User")(NOT_DISABLED, "Not Disabled");
 
 const boost::unordered_map<std::string, DisabledReason> REASONS_FROM_STRING =
-    boost::assign::map_list_of("Never", NEVER)("Default", DEFAULT)(
-        "Adjacent", ADJACENT)("Always", ALWAYS)("User", USER)("Not Disabled", NOT_DISABLED);
+    boost::assign::map_list_of("Never", NEVER)("Default", DEFAULT)("Adjacent", ADJACENT)("Always", ALWAYS)(
+        "User", USER)("Not Disabled", NOT_DISABLED);
 
 // Used for logging
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("collision_updater");
