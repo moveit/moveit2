@@ -674,13 +674,13 @@ bool BenchmarkExecutor::loadStates(const std::string& regex, std::vector<StartSt
 {
   if (!regex.empty())
   {
-    boost::regex start_regex(regex);
+    std::regex start_regex(regex);
     std::vector<std::string> state_names;
     rs_->getKnownRobotStates(state_names);
     for (const std::string& state_name : state_names)
     {
-      boost::cmatch match;
-      if (boost::regex_match(state_name.c_str(), match, start_regex))
+      std::smatch match;
+      if (std::regex_match(state_name, match, start_regex))
       {
         moveit_warehouse::RobotStateWithMetadata robot_state;
         try

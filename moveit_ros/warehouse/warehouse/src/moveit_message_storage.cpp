@@ -36,9 +36,9 @@
 
 #include <moveit/warehouse/moveit_message_storage.h>
 #include <warehouse_ros/database_loader.h>
-#include <boost/regex.hpp>
 #include <memory>
 #include <utility>
+#include <regex>
 
 moveit_warehouse::MoveItMessageStorage::MoveItMessageStorage(warehouse_ros::DatabaseConnection::Ptr conn)
   : conn_(std::move(conn))
@@ -50,11 +50,11 @@ void moveit_warehouse::MoveItMessageStorage::filterNames(const std::string& rege
   if (!regex.empty())
   {
     std::vector<std::string> fnames;
-    boost::regex r(regex);
+    std::regex r(regex);
     for (std::string& name : names)
     {
-      boost::cmatch match;
-      if (boost::regex_match(name.c_str(), match, r))
+      std::smatch match;
+      if (std::regex_match(name, match, r))
         fnames.push_back(name);
     }
     names.swap(fnames);

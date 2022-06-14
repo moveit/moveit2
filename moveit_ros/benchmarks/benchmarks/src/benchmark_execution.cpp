@@ -40,7 +40,6 @@
 #include <moveit/planning_scene/planning_scene.h>
 #include <moveit/robot_state/conversions.h>
 
-#include <boost/regex.hpp>
 #include <boost/tokenizer.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/program_options/parsers.hpp>
@@ -63,6 +62,7 @@
 #include <memory>
 #include <string>
 #include <stdexcept>
+#include <regex>
 
 namespace moveit_benchmarks
 {
@@ -231,13 +231,13 @@ void moveit_benchmarks::BenchmarkExecution::runAllBenchmarks(BenchmarkType type)
   std::vector<std::string> start_states;
   if (!options_.start_regex.empty())
   {
-    boost::regex start_regex(options_.start_regex);
+    std::regex start_regex(options_.start_regex);
     std::vector<std::string> state_names;
     rs_.getKnownRobotStates(state_names);
     for (std::size_t i = 0; i < state_names.size(); ++i)
     {
-      boost::cmatch match;
-      if (boost::regex_match(state_names[i].c_str(), match, start_regex))
+      std::smatch match;
+      if (std::regex_match(state_names[i], match, start_regex))
         start_states.push_back(state_names[i]);
     }
     if (start_states.empty())
