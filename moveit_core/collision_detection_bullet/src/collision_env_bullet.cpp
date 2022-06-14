@@ -40,6 +40,8 @@
 #include <moveit/collision_detection_bullet/bullet_integration/contact_checker_common.h>
 #include <functional>
 #include <bullet/btBulletCollisionCommon.h>
+#include <rclcpp/logger.hpp>
+#include <rclcpp/logging.hpp>
 
 namespace collision_detection
 {

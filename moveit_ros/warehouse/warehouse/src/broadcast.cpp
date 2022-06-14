@@ -37,13 +37,19 @@
 #include <moveit/warehouse/planning_scene_storage.h>
 #include <moveit/warehouse/constraints_storage.h>
 #include <moveit/warehouse/state_storage.h>
-
 #include <boost/program_options/cmdline.hpp>
 #include <boost/program_options/options_description.hpp>
 #include <boost/program_options/parsers.hpp>
 #include <boost/program_options/variables_map.hpp>
-
-#include <rclcpp/rclcpp.hpp>
+#include <rclcpp/executors/static_single_threaded_executor.hpp>
+#include <rclcpp/logger.hpp>
+#include <rclcpp/logging.hpp>
+#include <rclcpp/node.hpp>
+#include <rclcpp/node_options.hpp>
+#include <rclcpp/publisher.hpp>
+#include <rclcpp/qos_event.hpp>
+#include <rclcpp/rate.hpp>
+#include <rclcpp/utilities.hpp>
 
 static const std::string PLANNING_SCENE_TOPIC = "planning_scene";
 static const std::string PLANNING_REQUEST_TOPIC = "motion_plan_request";

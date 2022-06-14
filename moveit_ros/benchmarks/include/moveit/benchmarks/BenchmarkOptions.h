@@ -36,10 +36,10 @@
 
 #pragma once
 
+#include <rclcpp/node.hpp>
 #include <string>
 #include <map>
 #include <vector>
-#include <rclcpp/rclcpp.hpp>
 #include <moveit_msgs/msg/workspace_parameters.hpp>
 
 namespace moveit_ros_benchmarks

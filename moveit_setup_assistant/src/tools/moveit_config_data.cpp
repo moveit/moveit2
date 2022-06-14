@@ -43,13 +43,10 @@
 #include <boost/algorithm/string/trim.hpp>
 #include <tinyxml.h>
 #include <boost/algorithm/string/predicate.hpp>
-
-// ROS
-#include <rclcpp/rclcpp.hpp>
 #include <ament_index_cpp/get_package_share_directory.hpp>  // for getting file path for loading images
-
 // OMPL version
 #include <ompl/config.h>
+#include <rclcpp/logging.hpp>
 
 namespace moveit_setup_assistant
 {

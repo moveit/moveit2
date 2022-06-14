@@ -36,16 +36,16 @@
 
 // MoveIt
 #include <moveit/rdf_loader/rdf_loader.h>
-
-// ROS 2
-#include <rclcpp/rclcpp.hpp>
 #include <std_msgs/msg/string.hpp>
 #include <ament_index_cpp/get_package_prefix.hpp>
 #include <ament_index_cpp/get_package_share_directory.hpp>
-
 // Boost
 #include <boost/filesystem.hpp>
-
+#include <rclcpp/duration.hpp>
+#include <rclcpp/logger.hpp>
+#include <rclcpp/logging.hpp>
+#include <rclcpp/node.hpp>
+#include <rclcpp/time.hpp>
 // C++
 #include <fstream>
 #include <streambuf>

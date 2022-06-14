@@ -35,14 +35,14 @@
 /* Author: Ioan Sucan, Jon Binney */
 
 #include <moveit/collision_detection/occupancy_map.h>
-
 #include <moveit/occupancy_map_monitor/occupancy_map_monitor.h>
 #include <moveit/occupancy_map_monitor/occupancy_map_monitor_middleware_handle.hpp>
 #include <moveit_msgs/srv/load_map.hpp>
 #include <moveit_msgs/srv/save_map.hpp>
-
-#include <rclcpp/rclcpp.hpp>
-
+#include <rclcpp/clock.hpp>
+#include <rclcpp/logger.hpp>
+#include <rclcpp/logging.hpp>
+#include <rclcpp/node.hpp>
 #include <memory>
 #include <string>
 #include <utility>
