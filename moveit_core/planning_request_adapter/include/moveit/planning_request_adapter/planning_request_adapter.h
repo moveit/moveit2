@@ -40,6 +40,8 @@
 #include <moveit/planning_interface/planning_interface.h>
 #include <moveit/planning_scene/planning_scene.h>
 #include <functional>
+#include <rclcpp/logging.hpp>
+#include <rclcpp/node.hpp>
 
 /** \brief Generic interface to adapting motion planning requests */
 namespace planning_request_adapter

@@ -40,9 +40,11 @@
 #include <moveit/robot_model/revolute_joint_model.h>
 #include <moveit/exceptions/exceptions.h>
 #include <boost/lexical_cast.hpp>
+#include <rclcpp/logger.hpp>
+#include <rclcpp/logging.hpp>
 #include <algorithm>
+
 #include "order_robot_model_items.inc"
-#include "rclcpp/rclcpp.hpp"
 
 namespace moveit
 {

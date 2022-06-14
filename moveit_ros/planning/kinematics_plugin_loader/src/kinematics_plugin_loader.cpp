@@ -37,12 +37,15 @@
 #include <moveit/kinematics_plugin_loader/kinematics_plugin_loader.h>
 #include <moveit/rdf_loader/rdf_loader.h>
 #include <pluginlib/class_loader.hpp>
+#include <rclcpp/logger.hpp>
+#include <rclcpp/logging.hpp>
+#include <rclcpp/parameter.hpp>
+#include <rclcpp/parameter_value.hpp>
 #include <sstream>
 #include <vector>
 #include <map>
 #include <memory>
 #include <mutex>
-#include "rclcpp/rclcpp.hpp"
 
 namespace kinematics_plugin_loader
 {

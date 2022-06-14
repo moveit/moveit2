@@ -36,6 +36,8 @@
 
 #include <moveit/planning_interface/planning_interface.h>
 #include <mutex>
+#include <rclcpp/logger.hpp>
+#include <rclcpp/logging.hpp>
 #include <set>
 
 namespace planning_interface

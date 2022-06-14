@@ -42,7 +42,10 @@
 #include <moveit_servo/servo_parameters.h>
 #include <moveit_servo/parameter_descriptor_builder.hpp>
 #include <moveit/planning_scene_monitor/planning_scene_monitor.h>
-#include <rclcpp/rclcpp.hpp>
+#include <rclcpp/logger.hpp>
+#include <rclcpp/logging.hpp>
+#include <rclcpp/parameter.hpp>
+#include <rclcpp/parameter_value.hpp>
 #include <type_traits>
 
 namespace moveit_servo

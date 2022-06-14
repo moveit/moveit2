@@ -56,8 +56,6 @@
 
 #include <chrono>
 
-#include "rclcpp/rclcpp.hpp"
-
 namespace chomp
 {
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("chomp_planner");

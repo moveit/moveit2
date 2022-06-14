@@ -38,13 +38,12 @@
 
 #pragma once
 
+#include <rclcpp/node.hpp>
 #include <mutex>
 #include <thread>
 #include <vector>
 
 #include <moveit/planning_scene_monitor/planning_scene_monitor.h>
-#include <rclcpp/rclcpp.hpp>
-
 namespace moveit_servo
 {
 using SetParameterCallbackType = std::function<rcl_interfaces::msg::SetParametersResult(const rclcpp::Parameter&)>;

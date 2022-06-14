@@ -35,7 +35,8 @@
 /* Author: Acorn Pooley, Ioan Sucan */
 
 #include <moveit/exceptions/exceptions.h>
-#include "rclcpp/rclcpp.hpp"
+#include <rclcpp/logger.hpp>
+#include <rclcpp/logging.hpp>
 
 // Logger
 namespace moveit
