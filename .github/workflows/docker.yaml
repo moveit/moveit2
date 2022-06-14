@@ -7,7 +7,16 @@ on:
   workflow_dispatch:
   push:
     branches:
+<<<<<<< HEAD
       - galactic
+=======
+      - main
+  pull_request:
+    paths:
+      - .docker/**
+      - .github/workflows/docker.yaml
+      - moveit2.repos
+>>>>>>> b8961af0c (Organize docker and testspace event conditions  (#1343))
 
 jobs:
   release:
@@ -22,6 +31,7 @@ jobs:
     env:
       GH_IMAGE: ghcr.io/ros-planning/moveit2:${{ matrix.ROS_DISTRO }}-${{ github.job }}
       DH_IMAGE: moveit/moveit2:${{ matrix.ROS_DISTRO }}-${{ github.job }}
+      PUSH: ${{ (github.event_name != 'pull_request') && (github.repository == 'ros-planning/moveit2') }}
 
     steps:
       - name: Check for apt updates
@@ -38,13 +48,23 @@ jobs:
         uses: docker/setup-buildx-action@v1
         if: ${{ github.event_name == 'workflow_dispatch' || github.event_name != 'schedule' || steps.apt.outputs.no_cache }}
       - name: Login to Github Container Registry
+<<<<<<< HEAD
         uses: docker/login-action@v1
+=======
+        if: env.PUSH == 'true'
+        uses: docker/login-action@v2
+>>>>>>> b8961af0c (Organize docker and testspace event conditions  (#1343))
         with:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Login to DockerHub
+<<<<<<< HEAD
         uses: docker/login-action@v1
+=======
+        if: env.PUSH == 'true'
+        uses: docker/login-action@v2
+>>>>>>> b8961af0c (Organize docker and testspace event conditions  (#1343))
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
@@ -54,10 +74,15 @@ jobs:
         with:
           file: .docker/${{ github.job }}/Dockerfile
           build-args: ROS_DISTRO=${{ matrix.ROS_DISTRO }}
+<<<<<<< HEAD
           push: true
           no-cache: ${{ steps.apt.outputs.no_cache || github.event_name == 'workflow_dispatch' }}
           cache-from: type=registry,ref=${{ env.GH_IMAGE }}
           cache-to: type=inline
+=======
+          push: ${{ env.PUSH }}
+          no-cache: true
+>>>>>>> b8961af0c (Organize docker and testspace event conditions  (#1343))
           tags: |
             ${{ env.GH_IMAGE }}
             ${{ env.DH_IMAGE }}
@@ -74,6 +99,7 @@ jobs:
     env:
       GH_IMAGE: ghcr.io/ros-planning/moveit2:${{ matrix.ROS_DISTRO }}-${{ github.job }}
       DH_IMAGE: moveit/moveit2:${{ matrix.ROS_DISTRO }}-${{ github.job }}
+      PUSH: ${{ (github.event_name != 'pull_request') && (github.repository == 'ros-planning/moveit2') }}
 
     steps:
       - name: Check for apt updates
@@ -90,13 +116,23 @@ jobs:
         uses: docker/setup-buildx-action@v1
         if: ${{ github.event_name == 'workflow_dispatch' || github.event_name != 'schedule' || steps.apt.outputs.no_cache }}
       - name: Login to Github Container Registry
+<<<<<<< HEAD
         uses: docker/login-action@v1
+=======
+        if: env.PUSH == 'true'
+        uses: docker/login-action@v2
+>>>>>>> b8961af0c (Organize docker and testspace event conditions  (#1343))
         with:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Login to DockerHub
+<<<<<<< HEAD
         uses: docker/login-action@v1
+=======
+        if: env.PUSH == 'true'
+        uses: docker/login-action@v2
+>>>>>>> b8961af0c (Organize docker and testspace event conditions  (#1343))
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
@@ -106,10 +142,15 @@ jobs:
         with:
           file: .docker/${{ github.job }}/Dockerfile
           build-args: ROS_DISTRO=${{ matrix.ROS_DISTRO }}
+<<<<<<< HEAD
           push: true
           no-cache: ${{ steps.apt.outputs.no_cache || github.event_name == 'workflow_dispatch' }}
           cache-from: type=registry,ref=${{ env.GH_IMAGE }}
           cache-to: type=inline
+=======
+          push: ${{ env.PUSH }}
+          no-cache: true
+>>>>>>> b8961af0c (Organize docker and testspace event conditions  (#1343))
           tags: |
             ${{ env.GH_IMAGE }}
             ${{ env.DH_IMAGE }}
@@ -127,6 +168,7 @@ jobs:
     env:
       GH_IMAGE: ghcr.io/ros-planning/moveit2:${{ matrix.ROS_DISTRO }}-${{ github.job }}
       DH_IMAGE: moveit/moveit2:${{ matrix.ROS_DISTRO }}-${{ github.job }}
+      PUSH: ${{ (github.event_name != 'pull_request') && (github.repository == 'ros-planning/moveit2') }}
 
     steps:
       - name: Check for apt updates
@@ -143,13 +185,23 @@ jobs:
         uses: docker/setup-buildx-action@v1
         if: ${{ github.event_name == 'workflow_dispatch' || github.event_name != 'schedule' || steps.apt.outputs.no_cache }}
       - name: Login to Github Container Registry
+<<<<<<< HEAD
         uses: docker/login-action@v1
+=======
+        if: env.PUSH == 'true'
+        uses: docker/login-action@v2
+>>>>>>> b8961af0c (Organize docker and testspace event conditions  (#1343))
         with:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Login to DockerHub
+<<<<<<< HEAD
         uses: docker/login-action@v1
+=======
+        if: env.PUSH == 'true'
+        uses: docker/login-action@v2
+>>>>>>> b8961af0c (Organize docker and testspace event conditions  (#1343))
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
@@ -159,10 +211,15 @@ jobs:
         with:
           file: .docker/${{ github.job }}/Dockerfile
           build-args: ROS_DISTRO=${{ matrix.ROS_DISTRO }}
+<<<<<<< HEAD
           push: true
           no-cache: ${{ steps.apt.outputs.no_cache || github.event_name == 'workflow_dispatch' }}
           cache-from: type=registry,ref=${{ env.GH_IMAGE }}
           cache-to: type=inline
+=======
+          push: ${{ env.PUSH }}
+          no-cache: true
+>>>>>>> b8961af0c (Organize docker and testspace event conditions  (#1343))
           tags: |
             ${{ env.GH_IMAGE }}
             ${{ env.DH_IMAGE }}
@@ -180,19 +237,30 @@ jobs:
     env:
       GH_IMAGE: ghcr.io/ros-planning/moveit2:${{ matrix.ROS_DISTRO }}-${{ github.job }}
       DH_IMAGE: moveit/moveit2:${{ matrix.ROS_DISTRO }}-${{ github.job }}
+      PUSH: ${{ (github.event_name != 'pull_request') && (github.repository == 'ros-planning/moveit2') }}
 
     steps:
       - uses: actions/checkout@v2
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
       - name: Login to Github Container Registry
+<<<<<<< HEAD
         uses: docker/login-action@v1
+=======
+        if: env.PUSH == 'true'
+        uses: docker/login-action@v2
+>>>>>>> b8961af0c (Organize docker and testspace event conditions  (#1343))
         with:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Login to DockerHub
+<<<<<<< HEAD
         uses: docker/login-action@v1
+=======
+        if: env.PUSH == 'true'
+        uses: docker/login-action@v2
+>>>>>>> b8961af0c (Organize docker and testspace event conditions  (#1343))
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
@@ -204,9 +272,44 @@ jobs:
           context: .
           file: .docker/${{ github.job }}/Dockerfile
           build-args: ROS_DISTRO=${{ matrix.ROS_DISTRO }}
+<<<<<<< HEAD
           push: true
           cache-from: type=registry,ref=${{ env.GH_IMAGE }}
           cache-to: type=inline
           tags: |
             ${{ env.GH_IMAGE }}
             ${{ env.DH_IMAGE }}
+=======
+          push: ${{ env.PUSH }}
+          no-cache: true
+          tags: |
+            ${{ env.GH_IMAGE }}
+            ${{ env.DH_IMAGE }}
+
+  delete_untagged:
+    runs-on: ubuntu-latest
+    needs:
+      - release
+      - source
+    steps:
+      - name: Delete Untagged Images
+        if: (github.event_name != 'pull_request') && (github.repository == 'ros-planning/moveit2')
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.DELETE_PACKAGES_TOKEN }}
+          script: |
+            const response = await github.request("GET /orgs/${{ env.OWNER }}/packages/container/${{ env.PACKAGE_NAME }}/versions", {
+                per_page: ${{ env.PER_PAGE }}
+              });
+            for(version of response.data) {
+                if (version.metadata.container.tags.length == 0) {
+                    console.log("delete " + version.id)
+                    const deleteResponse = await github.request("DELETE /orgs/${{ env.OWNER }}/packages/container/${{ env.PACKAGE_NAME }}/versions/" + version.id, { });
+                    console.log("status " + deleteResponse.status)
+                }
+            }
+        env:
+          OWNER: ros-planning
+          PACKAGE_NAME: moveit2
+          PER_PAGE: 100
+>>>>>>> b8961af0c (Organize docker and testspace event conditions  (#1343))

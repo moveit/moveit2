@@ -64,7 +64,15 @@ jobs:
           # free up a lot of stuff from /usr/local
           sudo rm -rf /usr/local
           df -h
+<<<<<<< HEAD
       - uses: actions/checkout@v2
+=======
+      - uses: actions/checkout@v3
+      - uses: testspace-com/setup-testspace@v1
+        if: github.repository == 'ros-planning/moveit2'
+        with:
+          domain: ros-planning
+>>>>>>> b8961af0c (Organize docker and testspace event conditions  (#1343))
       - name: Get latest release date for rosdistro
         id: rosdistro_release_date
         uses: JafarAbdi/latest-rosdistro-release-date-action@main
@@ -110,6 +118,13 @@ jobs:
         name: Run industrial_ci
         uses: ros-industrial/industrial_ci@master
         env: ${{ matrix.env }}
+<<<<<<< HEAD
+=======
+      - name: Push result to Testspace
+        if: always() && (github.repository == 'ros-planning/moveit2')
+        run: |
+          testspace "[ ${{ matrix.env.IMAGE }} ]${{ env.BASEDIR }}/target_ws/**/test_results/**/*.xml"
+>>>>>>> b8961af0c (Organize docker and testspace event conditions  (#1343))
       - name: Upload test artifacts (on failure)
         uses: actions/upload-artifact@v2
         if: failure() && (steps.ici.outputs.run_target_test || steps.ici.outputs.target_test_results)
