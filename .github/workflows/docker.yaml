@@ -140,7 +140,7 @@ jobs:
       DH_IMAGE: moveit/moveit2:${{ matrix.ROS_DISTRO }}-${{ github.job }}
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
       - name: Login to Github Container Registry
@@ -175,7 +175,7 @@ jobs:
       - source
     steps:
       - name: Delete Untagged Images
-        uses: actions/github-script@v5
+        uses: actions/github-script@v6
         with:
           github-token: ${{ secrets.DELETE_PACKAGES_TOKEN }}
           script: |
