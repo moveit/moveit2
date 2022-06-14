@@ -12,6 +12,7 @@ on:
     paths:
       - .docker/**
       - .github/workflows/docker.yaml
+      - moveit2.repos
 
 jobs:
   release:
