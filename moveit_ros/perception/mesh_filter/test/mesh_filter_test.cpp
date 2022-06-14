@@ -79,8 +79,8 @@ public:
 template <typename Type>
 class MeshFilterTest : public testing::TestWithParam<double>
 {
-  BOOST_STATIC_ASSERT_MSG(FilterTraits<Type>::FILTER_GL_TYPE != GL_ZERO, "Only \"float\" and \"unsigned short int\" "
-                                                                         "are allowed.");
+  static_assert(FilterTraits<Type>::FILTER_GL_TYPE != GL_ZERO, "Only \"float\" and \"unsigned short int\" "
+                                                               "are allowed.");
 
 public:
   MeshFilterTest(unsigned width = 500, unsigned height = 500, double near = 0.5, double far = 5.0, double shadow = 0.1,
