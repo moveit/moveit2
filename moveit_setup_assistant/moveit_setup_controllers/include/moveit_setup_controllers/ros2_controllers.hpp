@@ -61,7 +61,8 @@ public:
 
   std::string getInstructions() const override
   {
-    return "Configure ros2_controllers. By default, ros2_control fake_components are used to create a simple simulation.";
+    return "Configure ros2_controllers. By default, ros2_control fake_components are used to create a simple "
+           "simulation.";
   }
 
   std::string getButtonText() const override
