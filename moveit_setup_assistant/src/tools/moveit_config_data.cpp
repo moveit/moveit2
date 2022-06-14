@@ -41,7 +41,7 @@
 #include <boost/algorithm/string/trim.hpp>
 #include <tinyxml.h>
 #include <boost/algorithm/string/predicate.hpp>
-#include <filesystem>  // for creating folders/files
+#include <filesystem>                                       // for creating folders/files
 #include <ament_index_cpp/get_package_share_directory.hpp>  // for getting file path for loading images
 // OMPL version
 #include <ompl/config.h>
