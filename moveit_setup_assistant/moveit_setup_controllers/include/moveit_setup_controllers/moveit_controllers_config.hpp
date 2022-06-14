@@ -1,7 +1,7 @@
 /*********************************************************************
  * Software License Agreement (BSD License)
  *
- *  Copyright (c) 2021, PickNik Robotics
+ *  Copyright (c) 2022, Metro Robots
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *     copyright notice, this list of conditions and the following
  *     disclaimer in the documentation and/or other materials provided
  *     with the distribution.
- *   * Neither the name of PickNik Robotics nor the names of its
+ *   * Neither the name of Metro Robots nor the names of its
  *     contributors may be used to endorse or promote products derived
  *     from this software without specific prior written permission.
  *
@@ -34,52 +34,64 @@
 
 /* Author: David V. Lu!! */
 
-#include <moveit_setup_controllers/controllers.hpp>
+#pragma once
+
+#include <moveit_setup_controllers/controllers_config.hpp>
 
 namespace moveit_setup
 {
 namespace controllers
 {
-// ******************************************************************************************
-// Add a Follow Joint Trajectory action Controller for each Planning Group
-// ******************************************************************************************
-bool Controllers::addDefaultControllers()
+static const std::string MOVEIT_CONTROLLERS_YAML = "config/moveit_controllers.yaml";
+
+class MoveItControllersConfig : public ControllersConfig
 {
-  std::vector<std::string> group_names = getGroupNames();
-  if (group_names.empty())
-  {
-    return false;
-  }
+public:
+  void loadPrevious(const std::filesystem::path& package_path, const YAML::Node& node) override;
 
-  // Loop through groups
-  bool success = true;
-  for (const std::string& group_name : group_names)
+  class GeneratedControllersConfig : public YamlGeneratedFile
   {
-    // Get list of associated joints
-    std::vector<std::string> joint_names = srdf_config_->getJointNames(group_name, true, false);  // exclude passive
-    if (joint_names.empty())
+  public:
+    GeneratedControllersConfig(const std::filesystem::path& package_path, const GeneratedTime& last_gen_time,
+                               MoveItControllersConfig& parent)
+      : YamlGeneratedFile(package_path, last_gen_time), parent_(parent)
     {
-      continue;
     }
-    bool ret = controllers_config_->addController(group_name + "_controller", getDefaultType(), joint_names);
-    success &= ret;
-  }
 
-  return success;
-}
-
-std::vector<std::string> Controllers::getJointsFromGroups(const std::vector<std::string>& group_names) const
-{
-  std::vector<std::string> joint_names;
-  for (const std::string& group_name : group_names)
-  {
-    for (const std::string& joint_name : srdf_config_->getJointNames(group_name, true, false))  // exclude passive
+    bool hasChanges() const override
     {
-      joint_names.push_back(joint_name);
+      return parent_.changed_ || parent_.hasChangedGroups();
     }
-  }
-  return joint_names;
-}
 
+    std::filesystem::path getRelativePath() const override
+    {
+      return MOVEIT_CONTROLLERS_YAML;
+    }
+
+    std::string getDescription() const override
+    {
+      return "Creates configurations for moveit_controllers.";
+    }
+
+    bool writeYaml(YAML::Emitter& emitter) override;
+
+  protected:
+    MoveItControllersConfig& parent_;
+  };
+
+  void collectFiles(const std::filesystem::path& package_path, const GeneratedTime& last_gen_time,
+                    std::vector<GeneratedFilePtr>& files) override
+  {
+    files.push_back(std::make_shared<GeneratedControllersConfig>(package_path, last_gen_time, *this));
+  }
+
+protected:
+  /**
+   * Helper function for parsing ros_controllers.yaml file
+   * @param YAML::Node - individual controller to be parsed
+   * @return true if the file was read correctly
+   */
+  bool parseController(const std::string& name, const YAML::Node& controller);
+};
 }  // namespace controllers
 }  // namespace moveit_setup

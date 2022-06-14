@@ -96,6 +96,11 @@ public:
 
   void collectVariables(std::vector<TemplateVariable>& variables) override;
 
+  std::string getRobotName() const
+  {
+    return urdf_model_->getName();
+  }
+
 protected:
   void setPackageName();
   void load();

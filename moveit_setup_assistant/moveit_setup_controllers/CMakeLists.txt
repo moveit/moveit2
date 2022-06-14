@@ -19,13 +19,22 @@ add_definitions(-DQT_NO_KEYWORDS)
 qt5_wrap_cpp(MOC_FILES
     include/moveit_setup_controllers/controller_edit_widget.hpp
     include/moveit_setup_controllers/controllers_widget.hpp
+    include/moveit_setup_controllers/urdf_modifications_widget.hpp
 )
 
 add_library(${PROJECT_NAME}
+    src/control_xacro_config.cpp
     src/controller_edit_widget.cpp
     src/controllers.cpp
     src/controllers_widget.cpp
-    src/controller_config.cpp
+    src/controllers_config.cpp
+    src/modified_urdf_config.cpp
+    src/moveit_controllers_config.cpp
+    src/moveit_controllers_widget.cpp
+    src/ros2_controllers_config.cpp
+    src/ros2_controllers_widget.cpp
+    src/urdf_modifications.cpp
+    src/urdf_modifications_widget.cpp
     ${MOC_FILES}
 )
 target_include_directories(${PROJECT_NAME} PUBLIC
@@ -57,6 +66,10 @@ install(FILES moveit_setup_framework_plugins.xml
 )
 install(DIRECTORY include/
         DESTINATION include
+)
+
+install(DIRECTORY launch
+        DESTINATION share/${PROJECT_NAME}
 )
 ament_export_include_directories(include)
 

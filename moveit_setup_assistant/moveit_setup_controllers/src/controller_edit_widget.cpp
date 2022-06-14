@@ -52,8 +52,7 @@ namespace controllers
 // ******************************************************************************************
 //  ControllerEditWidget constructor, create controller edit screen GUI
 // ******************************************************************************************
-ControllerEditWidget::ControllerEditWidget(QWidget* parent, Controllers& setup_step)
-  : QWidget(parent), setup_step_(setup_step)
+ControllerEditWidget::ControllerEditWidget(QWidget* parent) : QWidget(parent)
 {
   // Basic widget container
   QVBoxLayout* layout = new QVBoxLayout();
@@ -160,10 +159,9 @@ ControllerEditWidget::ControllerEditWidget(QWidget* parent, Controllers& setup_s
 // ******************************************************************************************
 // Set the fields with previous values
 // ******************************************************************************************
-void ControllerEditWidget::setSelected(const std::string& controller_name)
+void ControllerEditWidget::setSelected(const std::string& controller_name, const ControllerInfo* searched_controller)
 {
   controller_name_field_->setText(QString(controller_name.c_str()));
-  ControllerInfo* searched_controller = setup_step_.findControllerByName(controller_name);
   if (searched_controller != nullptr)
   {
     const std::string controller_type = searched_controller->type_;
@@ -189,23 +187,18 @@ void ControllerEditWidget::setSelected(const std::string& controller_name)
 // ******************************************************************************************
 // Populate the combo dropdown box with controllers types
 // ******************************************************************************************
-void ControllerEditWidget::loadControllersTypesComboBox()
+void ControllerEditWidget::loadControllersTypesComboBox(const std::vector<std::string>& controller_types)
 {
   // Only load this combo box once
   if (has_loaded_)
     return;
   has_loaded_ = true;
 
-  const std::vector<std::string> default_types = { "effort_controllers/JointTrajectoryController",
-                                                   "velocity_controllers/JointTrajectoryController",
-                                                   "position_controllers/JointTrajectoryController",
-                                                   "FollowJointTrajectory", "GripperCommand" };
-
   // Remove all old items
   controller_type_field_->clear();
 
-  // Loop through all controller default_types and add to combo box
-  for (const std::string& type : default_types)
+  // Loop through all controller types and add to combo box
+  for (const std::string& type : controller_types)
     controller_type_field_->addItem(type.c_str());
 }
 

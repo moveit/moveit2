@@ -76,23 +76,11 @@ void ControllersWidget::onInit()
   this->setWindowTitle("Controller Configuration");  // title of window
 
   // Top Header Area ------------------------------------------------
-  // TODO: Remove warning and revert to original header message once controllers are implemented
-  // https://github.com/ros-planning/moveit2/issues/1261
-  auto header =
-      new HeaderWidget("Setup Controllers",
-                       "<font color='red'>Configuring controllers to be used by MoveIt's controller manager(s) to "
-                       "operate the robot's physical hardware is not implemented yet! Please generate the files "
-                       "mentioned in <a href='https://github.com/ros-planning/moveit2/issues/1261'> "
-                       "https://github.com/ros-planning/moveit2/issues/1261</a> by hand if you want to work with "
-                       "trajectory execution!</font>",
-                       this);
+  auto header = new HeaderWidget("Setup " + setup_step_->getName(), setup_step_->getInstructions(), this);
   layout->addWidget(header);
 
   // Tree Box ----------------------------------------------------------------------
   controllers_tree_widget_ = createContentsWidget();
-
-  // TODO: Reneable contents widget once controllers are implemented
-  controllers_tree_widget_->setEnabled(false);
 
   // Joints edit widget
   joints_widget_ = new DoubleListWidget(this, "Joint Collection", "Joint");
@@ -109,7 +97,7 @@ void ControllersWidget::onInit()
           SLOT(previewSelectedGroup(std::vector<std::string>)));
 
   // Controller Edit Widget
-  controller_edit_widget_ = new ControllerEditWidget(this, setup_step_);
+  controller_edit_widget_ = new ControllerEditWidget(this);
   connect(controller_edit_widget_, SIGNAL(cancelEditing()), this, SLOT(cancelEditing()));
   connect(controller_edit_widget_, SIGNAL(deleteController()), this, SLOT(deleteController()));
   connect(controller_edit_widget_, SIGNAL(save()), this, SLOT(saveControllerScreenEdit()));
@@ -141,8 +129,7 @@ QWidget* ControllersWidget::createContentsWidget()
   QHBoxLayout* upper_controls_layout = new QHBoxLayout();
 
   // Add default controller
-  QPushButton* btn_add_default =
-      new QPushButton("Auto Add &FollowJointsTrajectory \n Controllers For Each Planning Group", this);
+  QPushButton* btn_add_default = new QPushButton(setup_step_->getButtonText().c_str(), this);
   btn_add_default->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
   btn_add_default->setMaximumWidth(600);
   connect(btn_add_default, SIGNAL(clicked()), this, SLOT(addDefaultControllers()));
@@ -221,7 +208,7 @@ void ControllersWidget::loadControllersTree()
   controllers_tree_->clear();                   // reset the tree
 
   // Display all controllers by looping through them
-  for (ControllerInfo& controller : setup_step_.getControllers())
+  for (ControllerInfo& controller : setup_step_->getControllers())
   {
     loadToControllersTree(controller);
   }
@@ -296,7 +283,7 @@ void ControllersWidget::focusGiven()
 void ControllersWidget::loadJointsScreen(ControllerInfo* this_controller)
 {
   // Get the names of the all joints
-  const std::vector<std::string>& joints = setup_step_.getJointNames();
+  const std::vector<std::string>& joints = setup_step_->getJointNames();
 
   if (joints.empty())
   {
@@ -324,7 +311,7 @@ void ControllersWidget::loadJointsScreen(ControllerInfo* this_controller)
 void ControllersWidget::loadGroupsScreen(ControllerInfo* this_controller)
 {
   // Set the available groups (left box)
-  joint_groups_widget_->setAvailable(setup_step_.getGroupNames());
+  joint_groups_widget_->setAvailable(setup_step_->getGroupNames());
 
   // Set the selected groups (right box)
   joint_groups_widget_->setSelected(this_controller->joints_);
@@ -366,13 +353,13 @@ void ControllersWidget::deleteController()
     return;
   }
   // Delete actual controller
-  if (setup_step_.deleteController(controller_name))
+  if (setup_step_->deleteController(controller_name))
   {
-    RCLCPP_INFO_STREAM(setup_step_.getLogger(), "Controller " << controller_name << " deleted succefully");
+    RCLCPP_INFO_STREAM(setup_step_->getLogger(), "Controller " << controller_name << " deleted succefully");
   }
   else
   {
-    RCLCPP_WARN_STREAM(setup_step_.getLogger(), "Couldn't delete Controller " << controller_name);
+    RCLCPP_WARN_STREAM(setup_step_->getLogger(), "Couldn't delete Controller " << controller_name);
   }
 
   current_edit_controller_.clear();
@@ -402,7 +389,7 @@ void ControllersWidget::addController()
 // ******************************************************************************************
 void ControllersWidget::addDefaultControllers()
 {
-  if (!setup_step_.addDefaultControllers())
+  if (!setup_step_->addDefaultControllers())
     QMessageBox::warning(this, "Error adding controllers", "No Planning Groups configured!");
   loadControllersTree();
 }
@@ -413,7 +400,7 @@ void ControllersWidget::addDefaultControllers()
 void ControllersWidget::loadControllerScreen(ControllerInfo* this_controller)
 {
   // Load the avail controllers. This function only runs once
-  controller_edit_widget_->loadControllersTypesComboBox();
+  controller_edit_widget_->loadControllersTypesComboBox(setup_step_->getAvailableTypes());
 
   if (this_controller == nullptr)  // this is a new screen
   {
@@ -433,7 +420,8 @@ void ControllersWidget::loadControllerScreen(ControllerInfo* this_controller)
   }
 
   // Set the data in the edit box
-  controller_edit_widget_->setSelected(current_edit_controller_);
+  ControllerInfo* searched_controller = setup_step_->findControllerByName(current_edit_controller_);
+  controller_edit_widget_->setSelected(current_edit_controller_, searched_controller);
 }
 
 // ******************************************************************************************
@@ -443,10 +431,10 @@ void ControllersWidget::cancelEditing()
 {
   if (!current_edit_controller_.empty() && adding_new_controller_)
   {
-    ControllerInfo* editing = setup_step_.findControllerByName(current_edit_controller_);
+    ControllerInfo* editing = setup_step_->findControllerByName(current_edit_controller_);
     if (editing && editing->joints_.empty())
     {
-      setup_step_.deleteController(current_edit_controller_);
+      setup_step_->deleteController(current_edit_controller_);
       current_edit_controller_.clear();
 
       // Load the data to the tree
@@ -473,7 +461,7 @@ void ControllersWidget::previewSelectedJoints(const std::vector<std::string>& jo
   for (const std::string& joint : joints)
   {
     // Get the name of the link
-    const std::string link = setup_step_.getChildOfJoint(joint);
+    const std::string link = setup_step_->getChildOfJoint(joint);
 
     if (link.empty())
     {
@@ -530,7 +518,7 @@ void ControllersWidget::saveControllerScreenJoints()
     return;
 
   // Find the controller we are editing based on the controller name string
-  ControllerInfo* editing_controller = setup_step_.findControllerByName(current_edit_controller_);
+  ControllerInfo* editing_controller = setup_step_->findControllerByName(current_edit_controller_);
 
   loadJointsScreen(editing_controller);
 
@@ -548,7 +536,7 @@ void ControllersWidget::saveControllerScreenGroups()
     return;
 
   // Find the controller we are editing based on the controller name string
-  ControllerInfo* editing_controller = setup_step_.findControllerByName(current_edit_controller_);
+  ControllerInfo* editing_controller = setup_step_->findControllerByName(current_edit_controller_);
 
   loadGroupsScreen(editing_controller);
 
@@ -562,7 +550,7 @@ void ControllersWidget::saveControllerScreenGroups()
 void ControllersWidget::saveJointsScreen()
 {
   // Find the controller we are editing based on the controller name string
-  ControllerInfo* searched_controller = setup_step_.findControllerByName(current_edit_controller_);
+  ControllerInfo* searched_controller = setup_step_->findControllerByName(current_edit_controller_);
 
   // Clear the old data
   searched_controller->joints_.clear();
@@ -586,10 +574,10 @@ void ControllersWidget::saveJointsScreen()
 void ControllersWidget::saveJointsGroupsScreen()
 {
   // Find the controller we are editing based on the controller name string
-  ControllerInfo* searched_controller = setup_step_.findControllerByName(current_edit_controller_);
+  ControllerInfo* searched_controller = setup_step_->findControllerByName(current_edit_controller_);
 
   // Clear the old data
-  searched_controller->joints_ = setup_step_.getJointsFromGroups(joint_groups_widget_->getSelectedValues());
+  searched_controller->joints_ = setup_step_->getJointsFromGroups(joint_groups_widget_->getSelectedValues());
 
   // Switch to main screen
   showMainScreen();
@@ -637,11 +625,11 @@ bool ControllersWidget::saveControllerScreen()
   if (!current_edit_controller_.empty())
   {
     // Find the controller we are editing based on the group name string
-    searched_controller = setup_step_.findControllerByName(current_edit_controller_);
+    searched_controller = setup_step_->findControllerByName(current_edit_controller_);
   }
 
   // Check that the controller name is unique
-  for (const auto& controller : setup_step_.getControllers())
+  for (const auto& controller : setup_step_->getControllers())
   {
     if (controller.name_.compare(controller_name) == 0)  // the names are the same
     {
@@ -662,7 +650,7 @@ bool ControllersWidget::saveControllerScreen()
     ControllerInfo new_controller;
     new_controller.name_ = controller_name;
     new_controller.type_ = controller_type;
-    setup_step_.addController(new_controller);
+    setup_step_->addController(new_controller);
 
     adding_new_controller_ = true;  // remember this controller is new
   }
@@ -707,7 +695,7 @@ void ControllersWidget::editSelected()
     // The controller this joint belong to
     controller_item = item->parent()->parent();
     current_edit_controller_ = controller_item->text(0).toUtf8().constData();
-    ControllerInfo* this_controller = setup_step_.findControllerByName(current_edit_controller_);
+    ControllerInfo* this_controller = setup_step_->findControllerByName(current_edit_controller_);
 
     // Load the data
     loadJointsScreen(this_controller);
@@ -719,7 +707,7 @@ void ControllersWidget::editSelected()
   {
     controller_item = item->parent();
     current_edit_controller_ = controller_item->text(0).toUtf8().constData();
-    ControllerInfo* this_controller = setup_step_.findControllerByName(current_edit_controller_);
+    ControllerInfo* this_controller = setup_step_->findControllerByName(current_edit_controller_);
 
     // Load the data
     loadJointsScreen(this_controller);
@@ -731,7 +719,7 @@ void ControllersWidget::editSelected()
   {
     // Load the data
     current_edit_controller_ = item->text(0).toUtf8().constData();
-    ControllerInfo* this_controller = setup_step_.findControllerByName(current_edit_controller_);
+    ControllerInfo* this_controller = setup_step_->findControllerByName(current_edit_controller_);
     loadControllerScreen(this_controller);
 
     // Switch to screen
@@ -756,7 +744,7 @@ void ControllersWidget::editController()
 
   adding_new_controller_ = false;
 
-  loadControllerScreen(setup_step_.findControllerByName(current_edit_controller_));
+  loadControllerScreen(setup_step_->findControllerByName(current_edit_controller_));
 
   // Switch to screen
   changeScreen(2);  // 1 is index of controller edit
@@ -807,6 +795,3 @@ void ControllersWidget::itemSelectionChanged()
 
 }  // namespace controllers
 }  // namespace moveit_setup
-
-#include <pluginlib/class_list_macros.hpp>  // NOLINT
-PLUGINLIB_EXPORT_CLASS(moveit_setup::controllers::ControllersWidget, moveit_setup::SetupStepWidget)

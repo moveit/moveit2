@@ -1,7 +1,7 @@
 /*********************************************************************
  * Software License Agreement (BSD License)
  *
- *  Copyright (c) 2021, PickNik Robotics
+ *  Copyright (c) 2022, Metro Robots
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *     copyright notice, this list of conditions and the following
  *     disclaimer in the documentation and/or other materials provided
  *     with the distribution.
- *   * Neither the name of PickNik Robotics nor the names of its
+ *   * Neither the name of Metro Robots nor the names of its
  *     contributors may be used to endorse or promote products derived
  *     from this software without specific prior written permission.
  *
@@ -33,53 +33,64 @@
  *********************************************************************/
 
 /* Author: David V. Lu!! */
+#pragma once
 
-#include <moveit_setup_controllers/controllers.hpp>
+#include <moveit_setup_framework/setup_step.hpp>
+#include <moveit_setup_controllers/control_xacro_config.hpp>
 
 namespace moveit_setup
 {
 namespace controllers
 {
-// ******************************************************************************************
-// Add a Follow Joint Trajectory action Controller for each Planning Group
-// ******************************************************************************************
-bool Controllers::addDefaultControllers()
+class UrdfModifications : public SetupStep
 {
-  std::vector<std::string> group_names = getGroupNames();
-  if (group_names.empty())
+public:
+  std::string getName() const override
   {
-    return false;
+    return "ros2_control URDF Modifications";
   }
 
-  // Loop through groups
-  bool success = true;
-  for (const std::string& group_name : group_names)
+  void onInit() override;
+
+  bool isReady() const override
   {
-    // Get list of associated joints
-    std::vector<std::string> joint_names = srdf_config_->getJointNames(group_name, true, false);  // exclude passive
-    if (joint_names.empty())
-    {
-      continue;
-    }
-    bool ret = controllers_config_->addController(group_name + "_controller", getDefaultType(), joint_names);
-    success &= ret;
+    return !srdf_config_->getGroups().empty();
   }
 
-  return success;
-}
-
-std::vector<std::string> Controllers::getJointsFromGroups(const std::vector<std::string>& group_names) const
-{
-  std::vector<std::string> joint_names;
-  for (const std::string& group_name : group_names)
+  void refresh()
   {
-    for (const std::string& joint_name : srdf_config_->getJointNames(group_name, true, false))  // exclude passive
-    {
-      joint_names.push_back(joint_name);
-    }
+    control_xacro_config_->loadFromDescription();
   }
-  return joint_names;
-}
 
+  /**
+   * @brief Return true if there aren't ros2_control tags for all the joints
+   */
+  bool needsModification() const;
+
+  /**
+   * @brief Add ros2_control tags for all unconfigured joints with the specified interfaces
+   */
+  void setInterfaces(const std::vector<std::string>& command_interfaces,
+                     const std::vector<std::string>& state_interfaces);
+
+  std::string getJointsXML() const
+  {
+    return control_xacro_config_->getJointsXML();
+  }
+
+  const ControlInterfaces& getDefaultControlInterfaces() const
+  {
+    return control_xacro_config_->getDefaultControlInterfaces();
+  }
+
+  const ControlInterfaces& getAvailableControlInterfaces() const
+  {
+    return control_xacro_config_->getAvailableControlInterfaces();
+  }
+
+protected:
+  std::shared_ptr<SRDFConfig> srdf_config_;
+  std::shared_ptr<ControlXacroConfig> control_xacro_config_;
+};
 }  // namespace controllers
 }  // namespace moveit_setup

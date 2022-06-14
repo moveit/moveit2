@@ -1,7 +1,7 @@
 /*********************************************************************
  * Software License Agreement (BSD License)
  *
- *  Copyright (c) 2021, PickNik Robotics
+ *  Copyright (c) 2022, Metro Robots
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *     copyright notice, this list of conditions and the following
  *     disclaimer in the documentation and/or other materials provided
  *     with the distribution.
- *   * Neither the name of PickNik Robotics nor the names of its
+ *   * Neither the name of Metro Robots nor the names of its
  *     contributors may be used to endorse or promote products derived
  *     from this software without specific prior written permission.
  *
@@ -34,52 +34,24 @@
 
 /* Author: David V. Lu!! */
 
-#include <moveit_setup_controllers/controllers.hpp>
+#include <moveit_setup_controllers/controllers_widget.hpp>
+#include <moveit_setup_controllers/moveit_controllers.hpp>
 
 namespace moveit_setup
 {
 namespace controllers
 {
-// ******************************************************************************************
-// Add a Follow Joint Trajectory action Controller for each Planning Group
-// ******************************************************************************************
-bool Controllers::addDefaultControllers()
+class MoveItControllersWidget : public ControllersWidget
 {
-  std::vector<std::string> group_names = getGroupNames();
-  if (group_names.empty())
+public:
+  MoveItControllersWidget() : ControllersWidget()
   {
-    return false;
+    setup_step_ = std::make_shared<MoveItControllers>();
   }
-
-  // Loop through groups
-  bool success = true;
-  for (const std::string& group_name : group_names)
-  {
-    // Get list of associated joints
-    std::vector<std::string> joint_names = srdf_config_->getJointNames(group_name, true, false);  // exclude passive
-    if (joint_names.empty())
-    {
-      continue;
-    }
-    bool ret = controllers_config_->addController(group_name + "_controller", getDefaultType(), joint_names);
-    success &= ret;
-  }
-
-  return success;
-}
-
-std::vector<std::string> Controllers::getJointsFromGroups(const std::vector<std::string>& group_names) const
-{
-  std::vector<std::string> joint_names;
-  for (const std::string& group_name : group_names)
-  {
-    for (const std::string& joint_name : srdf_config_->getJointNames(group_name, true, false))  // exclude passive
-    {
-      joint_names.push_back(joint_name);
-    }
-  }
-  return joint_names;
-}
+};
 
 }  // namespace controllers
 }  // namespace moveit_setup
+
+#include <pluginlib/class_list_macros.hpp>  // NOLINT
+PLUGINLIB_EXPORT_CLASS(moveit_setup::controllers::MoveItControllersWidget, moveit_setup::SetupStepWidget)
