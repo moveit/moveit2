@@ -93,5 +93,3 @@ if(BUILD_TESTING)
     ${MOVEIT_LIB_NAME}
   )
 endif()
-
-ament_package(CONFIG_EXTRAS ConfigExtras.cmake)
