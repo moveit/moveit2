@@ -40,6 +40,7 @@
 #include <Eigen/Dense>
 #include <Eigen/Eigenvalues>
 #include <boost/math/constants/constants.hpp>
+#include <limits>
 
 namespace kinematics_metrics
 {

@@ -46,7 +46,6 @@
 #include <moveit/utils/robot_model_test_utils.h>
 #include <gtest/gtest.h>
 #include <fstream>
-#include <filesystem>
 
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.ompl_planning.test.test_state_space");
 

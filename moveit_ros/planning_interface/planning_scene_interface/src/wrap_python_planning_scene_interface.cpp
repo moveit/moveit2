@@ -42,8 +42,6 @@
 #include <boost/python.hpp>
 #include <Python.h>
 
-#include <functional>
-
 /** @cond IGNORE */
 
 namespace bp = boost::python;
