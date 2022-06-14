@@ -57,7 +57,7 @@ void PerceptionConfig::loadPrevious(const std::filesystem::path& package_path, c
   }
   catch (const std::runtime_error& e)
   {
-    RCLCPP_ERROR_STREAM((*logger_), e.what());
+    RCLCPP_ERROR_STREAM(*logger_, e.what());
   }
 }
 
