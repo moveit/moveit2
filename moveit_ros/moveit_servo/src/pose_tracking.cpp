@@ -345,7 +345,7 @@ void PoseTracking::doPostMotionReset()
 {
   stopMotion();
   stop_requested_ = false;
-  angular_error_ = boost::none;
+  angular_error_ = {};
 
   // Reset error integrals and previous errors of PID controllers
   cartesian_position_pids_[0].reset();
