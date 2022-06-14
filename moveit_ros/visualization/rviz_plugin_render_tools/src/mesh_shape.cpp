@@ -37,8 +37,8 @@
 #include <OgreMaterialManager.h>
 #include <OgreManualObject.h>
 
-#include <boost/lexical_cast.hpp>
 #include <rviz_common/logging.hpp>
+#include <string>
 
 namespace rviz_rendering
 {
@@ -46,8 +46,7 @@ MeshShape::MeshShape(Ogre::SceneManager* scene_manager, Ogre::SceneNode* parent_
   : Shape(Shape::Mesh, scene_manager, parent_node), started_(false)
 {
   static uint32_t count = 0;
-  manual_object_ =
-      scene_manager->createManualObject("MeshShape_ManualObject" + boost::lexical_cast<std::string>(count++));
+  manual_object_ = scene_manager->createManualObject("MeshShape_ManualObject" + std::to_string(count++));
   material_->setCullingMode(Ogre::CULL_NONE);
 }
 
@@ -121,7 +120,7 @@ void MeshShape::endTriangles()
     started_ = false;
     manual_object_->end();
     static uint32_t count = 0;
-    std::string name = "ConvertedMeshShape@" + boost::lexical_cast<std::string>(count++);
+    std::string name = "ConvertedMeshShape@" + std::to_string(count++);
     manual_object_->convertToMesh(name);
     entity_ = scene_manager_->createEntity(name);
     if (entity_)

@@ -1093,9 +1093,9 @@ bool PlanningGroupsWidget::saveGroupScreen()
   double kinematics_resolution_double;
   try
   {
-    kinematics_resolution_double = boost::lexical_cast<double>(kinematics_resolution);
+    kinematics_resolution_double = std::stod(kinematics_resolution);
   }
-  catch (boost::bad_lexical_cast&)
+  catch (std::invalid_argument&)
   {
     QMessageBox::warning(this, "Error Saving", "Unable to convert kinematics resolution to a double number.");
     return false;
@@ -1105,9 +1105,9 @@ bool PlanningGroupsWidget::saveGroupScreen()
   double kinematics_timeout_double;
   try
   {
-    kinematics_timeout_double = boost::lexical_cast<double>(kinematics_timeout);
+    kinematics_timeout_double = std::stod(kinematics_timeout);
   }
-  catch (boost::bad_lexical_cast&)
+  catch (std::invalid_argument&)
   {
     QMessageBox::warning(this, "Error Saving", "Unable to convert kinematics solver timeout to a double number.");
     return false;

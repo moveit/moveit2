@@ -48,10 +48,10 @@
 #include <rviz_common/display_context.hpp>
 #include <rviz_default_plugins/robot/robot.hpp>
 
-#include <boost/lexical_cast.hpp>
 #include <boost/math/constants/constants.hpp>
 
 #include <memory>
+#include <string>
 
 namespace moveit_rviz_plugin
 {

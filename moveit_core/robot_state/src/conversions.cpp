@@ -45,6 +45,8 @@
 #include <tf2_eigen/tf2_eigen.h>
 #endif
 #include <boost/lexical_cast.hpp>
+#include <string>
+#include "rclcpp/rclcpp.hpp"
 
 namespace moveit
 {
@@ -560,7 +562,7 @@ void streamToRobotState(RobotState& state, const std::string& line, const std::s
     // Get a variable
     if (!std::getline(line_stream, cell, separator[0]))
       RCLCPP_ERROR(LOGGER, "Missing variable %s", state.getVariableNames()[i].c_str());
-    state.getVariablePositions()[i] = boost::lexical_cast<double>(cell.c_str());
+    state.getVariablePositions()[i] = std::stod(cell);
   }
 }
 

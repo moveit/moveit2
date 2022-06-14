@@ -191,7 +191,7 @@ private:
   // Flag that a different thread has requested a stop.
   std::atomic<bool> stop_requested_;
 
-  boost::optional<double> angular_error_;
+  std::optional<double> angular_error_;
 };
 
 // using alias

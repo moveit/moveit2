@@ -43,7 +43,6 @@
 #include <moveit/planning_pipeline/planning_pipeline.h>
 #include <moveit_msgs/PickupAction.h>
 #include <moveit_msgs/PlaceAction.h>
-#include <boost/noncopyable.hpp>
 #include <memory>
 
 namespace pick_place
@@ -110,9 +109,19 @@ public:
   bool plan(const planning_scene::PlanningSceneConstPtr& planning_scene, const moveit_msgs::action::PlaceGoal& goal);
 };
 
-class PickPlace : private boost::noncopyable, public std::enable_shared_from_this<PickPlace>
+class PickPlace : public std::enable_shared_from_this<PickPlace>
 {
 public:
+  /**
+   * @brief PickPlace cannot be copy-constructed
+   */
+  PickPlace(const PickPlace&) = delete;
+
+  /**
+   * @brief PickPlace cannot be copy-assigned
+   */
+  PickPlace& operator=(const PickPlace&) = delete;
+
   static const std::string DISPLAY_PATH_TOPIC;
   static const std::string DISPLAY_GRASP_TOPIC;
 

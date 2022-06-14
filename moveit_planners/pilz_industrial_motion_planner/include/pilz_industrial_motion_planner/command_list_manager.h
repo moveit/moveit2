@@ -36,7 +36,7 @@
 
 #include <string>
 
-#include <boost/optional.hpp>
+#include <optional>
 
 #include <moveit/planning_interface/planning_interface.h>
 #include <moveit/planning_pipeline/planning_pipeline.h>
@@ -107,7 +107,7 @@ public:
 
 private:
   using MotionResponseCont = std::vector<planning_interface::MotionPlanResponse>;
-  using RobotState_OptRef = boost::optional<const moveit::core::RobotState&>;
+  using RobotState_OptRef = std::optional<const moveit::core::RobotState&>;
   using RadiiCont = std::vector<double>;
   using GroupNamesCont = std::vector<std::string>;
 

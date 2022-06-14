@@ -191,8 +191,7 @@ void PickPlace::visualizeGrasps(const std::vector<ManipulationPlanPtr>& plans) c
       unsigned int type = std::min(plan->processing_stage_, colors.size() - 1);
       state.updateStateWithLinkAt(plan->shared_data_->ik_link_, plan->transformed_goal_pose_);
       state.getRobotMarkers(ma, jmg->getLinkModelNames(), colors[type],
-                            "moveit_grasps:stage_" + boost::lexical_cast<std::string>(plan->processing_stage_),
-                            ros::Duration(60));
+                            "moveit_grasps:stage_" + std::to_string(plan->processing_stage_), ros::Duration(60));
     }
   }
 
