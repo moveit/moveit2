@@ -38,6 +38,7 @@ set(THIS_PACKAGE_INCLUDE_DEPENDS
   pluginlib
   octomap
   geometric_shapes
+  Boost
 )
 
 add_library(${MOVEIT_LIB_NAME} SHARED
@@ -93,3 +94,5 @@ if(BUILD_TESTING)
     ${MOVEIT_LIB_NAME}
   )
 endif()
+
+ament_package()
