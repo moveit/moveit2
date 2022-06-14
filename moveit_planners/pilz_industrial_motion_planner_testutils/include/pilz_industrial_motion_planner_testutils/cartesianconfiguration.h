@@ -36,8 +36,8 @@
 
 #include <vector>
 #include <sstream>
+#include <optional>
 
-#include <boost/optional.hpp>
 #include <geometry_msgs/msg/pose.hpp>
 #include <geometry_msgs/msg/pose_stamped.hpp>
 #include <moveit/robot_model/robot_model.h>

@@ -39,7 +39,7 @@
 #pragma once
 
 #include <atomic>
-#include <boost/optional/optional.hpp>
+#include <optional>
 #include <control_toolbox/pid.hpp>
 #include <moveit_servo/make_shared_from_pool.h>
 #include <moveit_servo/servo.h>
