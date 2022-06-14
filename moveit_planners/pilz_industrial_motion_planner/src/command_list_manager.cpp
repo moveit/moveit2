@@ -34,14 +34,14 @@
 
 #include "pilz_industrial_motion_planner/command_list_manager.h"
 
+#include <rclcpp/logger.hpp>
+#include <rclcpp/logging.hpp>
 #include <cassert>
 #include <functional>
 #include <sstream>
 
 #include <moveit/planning_pipeline/planning_pipeline.h>
 #include <moveit/robot_state/conversions.h>
-#include <rclcpp/rclcpp.hpp>
-
 #include "pilz_industrial_motion_planner/cartesian_limits_aggregator.h"
 #include "pilz_industrial_motion_planner/joint_limits_aggregator.h"
 #include "pilz_industrial_motion_planner/tip_frame_getter.h"

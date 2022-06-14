@@ -45,7 +45,10 @@
 #include <eigen3/Eigen/Core>
 #include <moveit_msgs/msg/robot_trajectory.hpp>
 #include <pluginlib/class_list_macros.hpp>
-#include <rclcpp/rclcpp.hpp>
+#include <rclcpp/logger.hpp>
+#include <rclcpp/logging.hpp>
+#include <rclcpp/node.hpp>
+#include <rclcpp/parameter_value.hpp>
 #include <vector>
 
 namespace chomp

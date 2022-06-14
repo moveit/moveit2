@@ -37,6 +37,12 @@
 #include <geometric_shapes/solid_primitive_dims.h>
 #include <moveit/kinematic_constraints/utils.h>
 #include <moveit/utils/message_checks.h>
+#include <rclcpp/logger.hpp>
+#include <rclcpp/logging.hpp>
+#include <rclcpp/node.hpp>
+#include <rclcpp/parameter_value.hpp>
+
+#include "rclcpp/node.hpp"
 #if __has_include(<tf2_geometry_msgs/tf2_geometry_msgs.hpp>)
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
 #else

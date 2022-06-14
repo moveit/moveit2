@@ -35,7 +35,8 @@
 /* Author: Ioan Sucan */
 
 #include <moveit/planning_scene_rviz_plugin/background_processing.hpp>
-#include "rclcpp/rclcpp.hpp"
+#include <rclcpp/logger.hpp>
+#include <rclcpp/logging.hpp>
 
 namespace moveit
 {

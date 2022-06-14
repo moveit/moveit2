@@ -39,7 +39,10 @@
 #include <moveit/trajectory_processing/trajectory_tools.h>
 #include <moveit/robot_state/conversions.h>
 #include <class_loader/class_loader.hpp>
-#include <rclcpp/rclcpp.hpp>
+#include <rclcpp/logger.hpp>
+#include <rclcpp/logging.hpp>
+#include <rclcpp/node.hpp>
+#include <rclcpp/parameter_value.hpp>
 
 namespace default_planner_request_adapters
 {

@@ -37,7 +37,8 @@
 #include <moveit/point_containment_filter/shape_mask.h>
 #include <geometric_shapes/body_operations.h>
 #include <sensor_msgs/point_cloud2_iterator.hpp>
-#include <rclcpp/rclcpp.hpp>
+#include <rclcpp/logger.hpp>
+#include <rclcpp/logging.hpp>
 
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.ros.perception.shape_mask");
 

@@ -39,6 +39,8 @@
 #include <memory>
 #include <moveit/robot_state/cartesian_interpolator.h>
 #include <geometric_shapes/check_isometry.h>
+#include <rclcpp/logger.hpp>
+#include <rclcpp/logging.hpp>
 
 namespace moveit
 {
