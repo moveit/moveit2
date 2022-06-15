@@ -37,9 +37,13 @@
 */
 
 #include <moveit_msgs/action/hybrid_planner.hpp>
-
-#include <rclcpp/rclcpp.hpp>
-#include <rclcpp_action/rclcpp_action.hpp>
+#include <rclcpp/executors.hpp>
+#include <rclcpp/logging.hpp>
+#include <rclcpp/node.hpp>
+#include <rclcpp/node_options.hpp>
+#include <rclcpp/utilities.hpp>
+#include <rclcpp_action/client.hpp>
+#include <rclcpp_action/create_client.hpp>
 
 namespace
 {

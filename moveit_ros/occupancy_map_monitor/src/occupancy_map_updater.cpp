@@ -36,9 +36,9 @@
 
 #include <moveit/occupancy_map_monitor/occupancy_map_monitor.h>
 #include <moveit/occupancy_map_monitor/occupancy_map_updater.h>
-
-#include <rclcpp/rclcpp.hpp>
-
+#include <rclcpp/clock.hpp>
+#include <rclcpp/logger.hpp>
+#include <rclcpp/logging.hpp>
 #include <string>
 
 namespace occupancy_map_monitor

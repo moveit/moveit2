@@ -33,8 +33,10 @@
  *********************************************************************/
 
 #include "pilz_industrial_motion_planner/joint_limits_container.h"
+#include <cmath>
 
-#include "rclcpp/rclcpp.hpp"
+#include <rclcpp/logger.hpp>
+#include <rclcpp/logging.hpp>
 #include <stdexcept>
 
 namespace pilz_industrial_motion_planner

@@ -35,6 +35,8 @@
 /* Author: Ioan Sucan */
 
 #include <moveit/constraint_samplers/constraint_sampler.h>
+#include <rclcpp/logger.hpp>
+#include <rclcpp/logging.hpp>
 
 namespace constraint_samplers
 {

@@ -36,7 +36,8 @@
 
 #include <moveit/collision_detection/allvalid/collision_env_allvalid.h>
 #include <moveit/collision_detection/allvalid/collision_detector_allocator_allvalid.h>
-#include "rclcpp/rclcpp.hpp"
+#include <rclcpp/logger.hpp>
+#include <rclcpp/logging.hpp>
 
 // Logger
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_collision_detection.collision_world_allvalid");

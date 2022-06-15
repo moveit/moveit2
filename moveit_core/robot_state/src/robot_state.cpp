@@ -40,6 +40,10 @@
 #include <moveit/transforms/transforms.h>
 #include <geometric_shapes/check_isometry.h>
 #include <geometric_shapes/shape_operations.h>
+#include <rclcpp/clock.hpp>
+#include <rclcpp/logger.hpp>
+#include <rclcpp/logging.hpp>
+#include <rclcpp/time.hpp>
 #if __has_include(<tf2_eigen/tf2_eigen.hpp>)
 #include <tf2_eigen/tf2_eigen.hpp>
 #else
@@ -48,7 +52,6 @@
 #include <moveit/macros/console_colors.h>
 #include <functional>
 #include <moveit/robot_model/aabb.h>
-#include "rclcpp/rclcpp.hpp"
 
 namespace moveit
 {

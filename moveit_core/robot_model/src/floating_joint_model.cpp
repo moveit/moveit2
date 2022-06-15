@@ -38,9 +38,10 @@
 #include <moveit/robot_model/floating_joint_model.h>
 #include <geometric_shapes/check_isometry.h>
 #include <boost/math/constants/constants.hpp>
+#include <rclcpp/logger.hpp>
+#include <rclcpp/logging.hpp>
 #include <limits>
 #include <cmath>
-#include "rclcpp/rclcpp.hpp"
 
 namespace moveit
 {

@@ -36,10 +36,13 @@
    Desc:   Simple utility to see all the collision objects in a planning scene, including attached
 */
 
-#include <rclcpp/rclcpp.hpp>
-
 // MoveIt
 #include <moveit/planning_scene_monitor/planning_scene_monitor.h>
+#include <rclcpp/executors/multi_threaded_executor.hpp>
+#include <rclcpp/logger.hpp>
+#include <rclcpp/logging.hpp>
+#include <rclcpp/node.hpp>
+#include <rclcpp/utilities.hpp>
 
 static const std::string ROBOT_DESCRIPTION = "robot_description";
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("print_planning_scene_info");

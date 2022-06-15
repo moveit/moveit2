@@ -42,9 +42,9 @@
 #include <moveit/planning_interface/planning_interface.h>
 #include <moveit_msgs/msg/motion_plan_request.hpp>
 #include <moveit_msgs/msg/motion_plan_response.hpp>
+#include <rclcpp/node.hpp>
 #include <string>
 #include <map>
-#include <rclcpp/rclcpp.hpp>
 
 /** \brief The MoveIt interface to OMPL */
 namespace ompl_interface

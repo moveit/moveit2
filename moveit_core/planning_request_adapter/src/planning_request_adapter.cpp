@@ -35,9 +35,9 @@
 /* Author: Ioan Sucan */
 
 #include <moveit/planning_request_adapter/planning_request_adapter.h>
+#include <rclcpp/logger.hpp>
 #include <functional>
 #include <algorithm>
-#include "rclcpp/rclcpp.hpp"
 
 namespace planning_request_adapter
 {

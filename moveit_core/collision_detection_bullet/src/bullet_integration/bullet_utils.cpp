@@ -40,6 +40,8 @@
 #include <geometric_shapes/shapes.h>
 #include <memory>
 #include <octomap/octomap.h>
+#include <rclcpp/logger.hpp>
+#include <rclcpp/logging.hpp>
 
 static const rclcpp::Logger BULLET_LOGGER = rclcpp::get_logger("collision_detection.bullet");
 

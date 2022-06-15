@@ -48,7 +48,8 @@
 #include <stdexcept>
 #include <vector>
 #include <boost/thread.hpp>
-#include <rclcpp/rclcpp.hpp>
+#include <rclcpp/logger.hpp>
+#include <rclcpp/logging.hpp>
 
 using namespace std;
 

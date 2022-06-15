@@ -35,10 +35,11 @@
 /* Author: Sachin Chitta */
 
 #include <moveit/kinematics_metrics/kinematics_metrics.h>
+#include <rclcpp/logger.hpp>
+#include <rclcpp/logging.hpp>
 #include <Eigen/Dense>
 #include <Eigen/Eigenvalues>
 #include <boost/math/constants/constants.hpp>
-#include "rclcpp/rclcpp.hpp"
 
 namespace kinematics_metrics
 {
