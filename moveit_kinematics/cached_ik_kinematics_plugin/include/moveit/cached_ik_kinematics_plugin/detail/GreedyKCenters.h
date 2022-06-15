@@ -41,7 +41,7 @@
 #include <boost/numeric/ublas/matrix.hpp>
 #include <functional>
 #include <random>
-#include <Eigen>
+#include <eigen3/Eigen/Core>
 
 namespace cached_ik_kinematics_plugin
 {
@@ -55,7 +55,7 @@ public:
   /** \brief The definition of a distance function */
   using DistanceFunction = std::function<double(const _T&, const _T&)>;
   /** \brief A matrix type for storing distances between points and centers */
-  using Matrix = Eigen::Matrix<double>;
+  using Matrix = Eigen::MatrixXd;
 
   GreedyKCenters() = default;
 
@@ -89,8 +89,8 @@ public:
 
     centers.clear();
     centers.reserve(k);
-    if (dists.size1() < data.size() || dists.size2() < k)
-      dists.resize(std::max(2 * dists.size1() + 1, data.size()), k, false);
+    if (dists.rows() < data.size() || dists.cols() < k)
+      dists.resize(std::max(2 * dists.rows() + 1, data.size()), k, false);
     // first center is picked randomly
     centers.push_back(std::uniform_int_distribution<size_t>{ 0, data.size() - 1 }(generator_));
     for (unsigned i = 1; i < k; ++i)
