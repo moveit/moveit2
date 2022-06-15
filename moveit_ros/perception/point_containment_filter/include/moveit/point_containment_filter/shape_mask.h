@@ -38,12 +38,11 @@
 
 #include <sensor_msgs/msg/point_cloud2.hpp>
 #include <geometric_shapes/bodies.h>
-#include <boost/function.hpp>
 #include <vector>
 #include <set>
 #include <map>
-
-#include <boost/thread/mutex.hpp>
+#include <mutex>
+#include <functional>
 
 namespace point_containment_filter
 {
@@ -61,7 +60,7 @@ public:
     CLIP = 2
   };
 
-  typedef boost::function<bool(ShapeHandle, Eigen::Isometry3d&)> TransformCallback;
+  typedef std::function<bool(ShapeHandle, Eigen::Isometry3d&)> TransformCallback;
 
   /** \brief Construct the filter */
   ShapeMask(const TransformCallback& transform_callback = TransformCallback());
@@ -117,7 +116,7 @@ protected:
   TransformCallback transform_callback_;
 
   /** \brief Protects, bodies_ and bspheres_. All public methods acquire this mutex for their whole duration. */
-  mutable boost::mutex shapes_lock_;
+  mutable std::mutex shapes_lock_;
   std::set<SeeShape, SortBodies> bodies_;
   std::vector<bodies::BoundingSphere> bspheres_;
 

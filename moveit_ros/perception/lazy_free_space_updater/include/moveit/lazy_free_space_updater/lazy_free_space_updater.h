@@ -37,9 +37,10 @@
 #pragma once
 
 #include <moveit/collision_detection/occupancy_map.h>
-#include <boost/thread.hpp>
 #include <deque>
 #include <unordered_map>
+#include <condition_variable>
+#include <thread>
 
 namespace occupancy_map_monitor
 {
@@ -75,16 +76,16 @@ private:
   std::deque<octomap::KeySet*> occupied_cells_sets_;
   std::deque<octomap::KeySet*> model_cells_sets_;
   std::deque<octomap::point3d> sensor_origins_;
-  boost::condition_variable update_condition_;
-  boost::mutex update_cell_sets_lock_;
+  std::condition_variable update_condition_;
+  std::mutex update_cell_sets_lock_;
 
   OcTreeKeyCountMap* process_occupied_cells_set_;
   octomap::KeySet* process_model_cells_set_;
   octomap::point3d process_sensor_origin_;
-  boost::condition_variable process_condition_;
-  boost::mutex cell_process_lock_;
+  std::condition_variable process_condition_;
+  std::mutex cell_process_lock_;
 
-  boost::thread update_thread_;
-  boost::thread process_thread_;
+  std::thread update_thread_;
+  std::thread process_thread_;
 };
 }  // namespace occupancy_map_monitor

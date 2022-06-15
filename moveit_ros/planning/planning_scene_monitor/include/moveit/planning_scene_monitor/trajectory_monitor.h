@@ -40,10 +40,10 @@
 #include <moveit/robot_state/robot_state.h>
 #include <moveit/planning_scene_monitor/current_state_monitor.h>
 #include <moveit/robot_trajectory/robot_trajectory.h>
-#include <boost/thread.hpp>
 #include <rclcpp/time.hpp>
 #include <memory>
 #include <functional>
+#include <thread>
 
 namespace planning_scene_monitor
 {
@@ -138,7 +138,7 @@ private:
   rclcpp::Time trajectory_start_time_;
   rclcpp::Time last_recorded_state_time_;
 
-  std::unique_ptr<boost::thread> record_states_thread_;
+  std::unique_ptr<std::thread> record_states_thread_;
   TrajectoryStateAddedCallback state_add_callback_;
 };
 }  // namespace planning_scene_monitor

@@ -200,7 +200,7 @@ void SetupAssistantWidget::navigationClicked(const QModelIndex& index)
 // ******************************************************************************************
 void SetupAssistantWidget::moveToScreen(const int index)
 {
-  boost::mutex::scoped_lock slock(change_screen_lock_);
+  std::scoped_lock slock(change_screen_lock_);
 
   if (current_index_ != index)
   {

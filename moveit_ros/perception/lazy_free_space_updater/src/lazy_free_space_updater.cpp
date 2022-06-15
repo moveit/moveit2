@@ -58,11 +58,11 @@ LazyFreeSpaceUpdater::~LazyFreeSpaceUpdater()
 {
   running_ = false;
   {
-    boost::unique_lock<boost::mutex> _(update_cell_sets_lock_);
+    std::unique_lock<std::mutex> _(update_cell_sets_lock_);
     update_condition_.notify_one();
   }
   {
-    boost::unique_lock<boost::mutex> _(cell_process_lock_);
+    std::unique_lock<std::mutex> _(cell_process_lock_);
     process_condition_.notify_one();
   }
   update_thread_.join();
@@ -74,7 +74,7 @@ void LazyFreeSpaceUpdater::pushLazyUpdate(octomap::KeySet* occupied_cells, octom
 {
   RCLCPP_DEBUG(LOGGER, "Pushing %lu occupied cells and %lu model cells for lazy updating...",
                (long unsigned int)occupied_cells->size(), (long unsigned int)model_cells->size());
-  boost::mutex::scoped_lock _(update_cell_sets_lock_);
+  std::scoped_lock _(update_cell_sets_lock_);
   occupied_cells_sets_.push_back(occupied_cells);
   model_cells_sets_.push_back(model_cells);
   sensor_origins_.push_back(sensor_origin);
@@ -116,7 +116,7 @@ void LazyFreeSpaceUpdater::processThread()
     free_cells1.clear();
     free_cells2.clear();
 
-    boost::unique_lock<boost::mutex> ulock(cell_process_lock_);
+    std::unique_lock<std::mutex> ulock(cell_process_lock_);
     while (!process_occupied_cells_set_ && running_)
       process_condition_.wait(ulock);
 
@@ -207,7 +207,7 @@ void LazyFreeSpaceUpdater::lazyUpdateThread()
 
   while (running_)
   {
-    boost::unique_lock<boost::mutex> ulock(update_cell_sets_lock_);
+    std::unique_lock<std::mutex> ulock(update_cell_sets_lock_);
     while (occupied_cells_sets_.empty() && running_)
       update_condition_.wait(ulock);
 

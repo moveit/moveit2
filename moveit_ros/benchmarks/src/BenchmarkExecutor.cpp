@@ -51,9 +51,9 @@
 #include <boost/progress.hpp>
 #undef BOOST_ALLOW_DEPRECATED_HEADERS
 #include <boost/math/constants/constants.hpp>
-#include <boost/filesystem.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <limits>
+#include <filesystem>
 #ifndef _WIN32
 #include <unistd.h>
 #else
@@ -1100,7 +1100,7 @@ void BenchmarkExecutor::writeOutput(const BenchmarkRequest& brequest, const std:
     filename.append("/");
 
   // Ensure directories exist
-  boost::filesystem::create_directories(filename);
+  std::filesystem::create_directories(filename);
 
   filename += (options_.getBenchmarkName().empty() ? "" : options_.getBenchmarkName() + "_") + brequest.name + "_" +
               getHostname() + "_" + start_time + ".log";

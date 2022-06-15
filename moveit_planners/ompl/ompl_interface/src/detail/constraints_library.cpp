@@ -35,7 +35,7 @@
 /* Author: Ioan Sucan */
 
 #include <boost/date_time/posix_time/posix_time.hpp>
-#include <boost/filesystem.hpp>
+#include <filesystem>
 #include <fstream>
 #include <moveit/ompl_interface/detail/constrained_sampler.h>
 #include <moveit/ompl_interface/detail/constraints_library.h>
@@ -369,7 +369,7 @@ void ompl_interface::ConstraintsLibrary::saveConstraintApproximations(const std:
               (unsigned int)constraint_approximations_.size(), path.c_str());
   try
   {
-    boost::filesystem::create_directories(path);
+    std::filesystem::create_directory(path);
   }
   catch (...)
   {

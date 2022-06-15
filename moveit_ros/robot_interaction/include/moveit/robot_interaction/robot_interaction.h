@@ -42,9 +42,9 @@
 #include <moveit/macros/class_forward.h>
 #include <moveit/robot_state/robot_state.h>
 #include <moveit/robot_interaction/interaction.h>
-#include <boost/function.hpp>
-#include <boost/thread.hpp>
 #include <memory>
+#include <functional>
+#include <thread>
 
 // This is needed for legacy code that includes robot_interaction.h but not
 // interaction_handler.h
@@ -196,10 +196,10 @@ private:
   void processingThread();
   void clearInteractiveMarkersUnsafe();
 
-  std::unique_ptr<boost::thread> processing_thread_;
+  std::unique_ptr<std::thread> processing_thread_;
   bool run_processing_thread_;
 
-  boost::condition_variable new_feedback_condition_;
+  std::condition_variable new_feedback_condition_;
   std::map<std::string, visualization_msgs::msg::InteractiveMarkerFeedback::ConstSharedPtr> feedback_map_;
 
   moveit::core::RobotModelConstPtr robot_model_;
@@ -219,7 +219,7 @@ private:
   // of Thread 1: Lock A,         Lock B, Unlock B, Unloack A
   //    Thread 2:         Lock B, Lock A
   // => deadlock
-  boost::mutex marker_access_lock_;
+  std::mutex marker_access_lock_;
 
   interactive_markers::InteractiveMarkerServer* int_marker_server_;
   // ros subscribers to move the interactive markers by other ros nodes

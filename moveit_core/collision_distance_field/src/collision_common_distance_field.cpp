@@ -35,7 +35,6 @@
 /* Author: E. Gil Jones */
 
 #include <moveit/collision_distance_field/collision_common_distance_field.h>
-#include <boost/thread/mutex.hpp>
 #include <rclcpp/duration.hpp>
 #include <rclcpp/logger.hpp>
 #include <rclcpp/logging.hpp>
@@ -46,6 +45,7 @@
 #include <tf2_eigen/tf2_eigen.h>
 #endif
 #include <memory>
+#include <mutex>
 
 namespace collision_detection
 {
@@ -62,7 +62,7 @@ struct BodyDecompositionCache
   static const unsigned int MAX_CLEAN_COUNT = 100;
   Map map_;
   unsigned int clean_count_;
-  boost::mutex lock_;
+  std::mutex lock_;
 };
 
 BodyDecompositionCache& getBodyDecompositionCache()
@@ -77,7 +77,7 @@ BodyDecompositionConstPtr getBodyDecompositionCacheEntry(const shapes::ShapeCons
   BodyDecompositionCache& cache = getBodyDecompositionCache();
   shapes::ShapeConstWeakPtr wptr(shape);
   {
-    boost::mutex::scoped_lock slock(cache.lock_);
+    std::scoped_lock slock(cache.lock_);
     BodyDecompositionCache::Map::const_iterator cache_it = cache.map_.find(wptr);
     if (cache_it != cache.map_.end())
     {
@@ -87,7 +87,7 @@ BodyDecompositionConstPtr getBodyDecompositionCacheEntry(const shapes::ShapeCons
 
   BodyDecompositionConstPtr bdcp = std::make_shared<const BodyDecomposition>(shape, resolution);
   {
-    boost::mutex::scoped_lock slock(cache.lock_);
+    std::scoped_lock slock(cache.lock_);
     cache.map_[wptr] = bdcp;
     cache.clean_count_++;
     return bdcp;

@@ -901,7 +901,7 @@ bool IKFastKinematicsPlugin::searchPositionIK(const geometry_msgs::msg::Pose& ik
     std::sort(solutions_obey_limits.begin(), solutions_obey_limits.end());
 
     // check for collisions if a callback is provided
-    if (!solution_callback.empty())
+    if (solution_callback)
     {
       for (std::size_t i = 0; i < solutions_obey_limits.size(); ++i)
       {
@@ -1029,7 +1029,7 @@ bool IKFastKinematicsPlugin::searchPositionIK(const geometry_msgs::msg::Pose& ik
           getSolution(solutions, ik_seed_state, s, solution);
 
           // This solution is within joint limits, now check if in collision (if callback provided)
-          if (!solution_callback.empty())
+          if (solution_callback)
           {
             solution_callback(ik_pose, solution, error_code);
           }

@@ -86,7 +86,7 @@ void planning_scene_monitor::TrajectoryMonitor::startTrajectoryMonitor()
 {
   if (sampling_frequency_ > std::numeric_limits<double>::epsilon() && !record_states_thread_)
   {
-    record_states_thread_ = std::make_unique<boost::thread>([this] { recordStates(); });
+    record_states_thread_ = std::make_unique<std::thread>([this] { recordStates(); });
     RCLCPP_DEBUG(LOGGER, "Started trajectory monitor");
   }
 }
@@ -95,7 +95,7 @@ void planning_scene_monitor::TrajectoryMonitor::stopTrajectoryMonitor()
 {
   if (record_states_thread_)
   {
-    std::unique_ptr<boost::thread> copy;
+    std::unique_ptr<std::thread> copy;
     copy.swap(record_states_thread_);
     copy->join();
     RCLCPP_DEBUG(LOGGER, "Stopped trajectory monitor");

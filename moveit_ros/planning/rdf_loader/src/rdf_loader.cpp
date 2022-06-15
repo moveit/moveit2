@@ -39,18 +39,19 @@
 #include <std_msgs/msg/string.hpp>
 #include <ament_index_cpp/get_package_prefix.hpp>
 #include <ament_index_cpp/get_package_share_directory.hpp>
-// Boost
-#include <boost/filesystem.hpp>
+
 #include <rclcpp/duration.hpp>
 #include <rclcpp/logger.hpp>
 #include <rclcpp/logging.hpp>
 #include <rclcpp/node.hpp>
 #include <rclcpp/time.hpp>
+
 // C++
 #include <fstream>
 #include <streambuf>
 #include <algorithm>
 #include <chrono>
+#include <filesystem>
 
 namespace rdf_loader
 {
@@ -142,7 +143,7 @@ bool RDFLoader::loadFileToString(std::string& buffer, const std::string& path)
     return false;
   }
 
-  if (!boost::filesystem::exists(path))
+  if (!std::filesystem::exists(path))
   {
     RCLCPP_ERROR(LOGGER, "File does not exist");
     return false;
@@ -175,7 +176,7 @@ bool RDFLoader::loadXacroFileToString(std::string& buffer, const std::string& pa
     return false;
   }
 
-  if (!boost::filesystem::exists(path))
+  if (!std::filesystem::exists(path))
   {
     RCLCPP_ERROR(LOGGER, "File does not exist");
     return false;
@@ -237,8 +238,7 @@ bool RDFLoader::loadPkgFileToString(std::string& buffer, const std::string& pack
     return false;
   }
 
-  boost::filesystem::path path(package_path);
-  // Use boost to cross-platform combine paths
+  std::filesystem::path path(package_path);
   path = path / relative_path;
 
   return loadXmlFileToString(buffer, path.string(), xacro_args);

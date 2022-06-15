@@ -36,12 +36,12 @@
 
 #pragma once
 
-#include <boost/thread/mutex.hpp>
 #include <moveit/macros/class_forward.h>
 #include <rviz_common/display.hpp>
 #include <rviz_common/panel_dock_widget.hpp>
 #include <rviz_common/properties/int_property.hpp>
 #include <rviz_common/properties/ros_topic_property.hpp>
+#include <mutex>
 
 #ifndef Q_MOC_RUN
 #include <moveit/rviz_plugin_render_tools/robot_state_visualization.h>
@@ -151,7 +151,7 @@ protected:
   bool drop_displaying_trajectory_;
   int current_state_;
   float current_state_time_;
-  boost::mutex update_trajectory_message_;
+  std::mutex update_trajectory_message_;
 
   moveit::core::RobotModelConstPtr robot_model_;
   moveit::core::RobotStatePtr robot_state_;

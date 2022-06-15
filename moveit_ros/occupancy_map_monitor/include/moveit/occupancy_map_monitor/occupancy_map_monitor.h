@@ -244,7 +244,7 @@ public:
    *
    * @param[in]  update_callback  The update callback function
    */
-  void setUpdateCallback(const boost::function<void()>& update_callback)
+  void setUpdateCallback(const std::function<void()>& update_callback)
   {
     tree_->setUpdateCallback(update_callback);
   }

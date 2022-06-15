@@ -9,7 +9,6 @@ ament_target_dependencies(${MOVEIT_LIB_NAME}
       urdf
       srdfdom
       moveit_core
-      Boost
       moveit_node_interface)
 
 install(DIRECTORY include/ DESTINATION include)
