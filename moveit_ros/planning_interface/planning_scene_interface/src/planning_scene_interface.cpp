@@ -39,6 +39,8 @@
 #include <moveit_msgs/srv/get_planning_scene.hpp>
 #include <moveit_msgs/srv/apply_planning_scene.hpp>
 #include <algorithm>
+#include <rclcpp/executors.hpp>
+#include <rclcpp/future_return_code.hpp>
 
 namespace moveit
 {

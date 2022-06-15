@@ -40,12 +40,12 @@
 #include <moveit/robot_model/robot_model.h>
 #include <moveit/robot_state/conversions.h>
 
+#include <rclcpp/logger.hpp>
+#include <rclcpp/logging.hpp>
 #include <eigen3/Eigen/Core>
 #include <eigen3/Eigen/LU>
 #include <random>
 #include <visualization_msgs/msg/marker_array.hpp>
-
-#include "rclcpp/rclcpp.hpp"
 
 namespace chomp
 {

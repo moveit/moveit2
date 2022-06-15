@@ -35,8 +35,9 @@
 /* Author: Ioan Sucan, Jens Petit */
 
 #include <moveit/collision_detection/collision_env.h>
+#include <rclcpp/logger.hpp>
+#include <rclcpp/logging.hpp>
 #include <limits>
-#include "rclcpp/rclcpp.hpp"
 
 // Logger
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_collision_detection.collision_robot");

@@ -34,13 +34,18 @@
 
 /* Author: Ioan Sucan */
 
-#include <rclcpp/rclcpp.hpp>
 #include <moveit/plan_execution/plan_execution.h>
 #include <moveit/robot_state/conversions.h>
 #include <moveit/trajectory_processing/trajectory_tools.h>
 #include <moveit/collision_detection/collision_tools.h>
 #include <moveit/utils/message_checks.h>
 #include <boost/algorithm/string/join.hpp>
+#include <rclcpp/logger.hpp>
+#include <rclcpp/logging.hpp>
+#include <rclcpp/node.hpp>
+#include <rclcpp/parameter_value.hpp>
+#include <rclcpp/rate.hpp>
+#include <rclcpp/utilities.hpp>
 
 // #include <dynamic_reconfigure/server.h>
 // #include <moveit_ros_planning/PlanExecutionDynamicReconfigureConfig.h>

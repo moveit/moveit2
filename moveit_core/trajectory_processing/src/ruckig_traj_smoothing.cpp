@@ -33,12 +33,13 @@
 
 /* Author: Jack Center, Wyatt Rees, Andy Zelenak, Stephanie Eng */
 
+#include <rclcpp/logger.hpp>
+#include <rclcpp/logging.hpp>
 #include <algorithm>
 #include <cmath>
 #include <Eigen/Geometry>
 #include <limits>
 #include <moveit/trajectory_processing/ruckig_traj_smoothing.h>
-#include <rclcpp/rclcpp.hpp>
 #include <vector>
 
 namespace trajectory_processing

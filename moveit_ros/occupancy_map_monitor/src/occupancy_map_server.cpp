@@ -37,9 +37,17 @@
 #include <moveit/occupancy_map_monitor/occupancy_map_monitor.h>
 
 #include <octomap_msgs/conversions.h>
-#include <rclcpp/rclcpp.hpp>
 #include <tf2_ros/transform_listener.h>
-
+#include <rclcpp/clock.hpp>
+#include <rclcpp/executors.hpp>
+#include <rclcpp/experimental/buffers/intra_process_buffer.hpp>
+#include <rclcpp/logger.hpp>
+#include <rclcpp/logging.hpp>
+#include <rclcpp/node.hpp>
+#include <rclcpp/publisher.hpp>
+#include <rclcpp/qos_event.hpp>
+#include <rclcpp/time.hpp>
+#include <rclcpp/utilities.hpp>
 #include <memory>
 #include <sstream>
 

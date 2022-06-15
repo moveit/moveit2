@@ -43,9 +43,9 @@
 #include <kdl/utilities/error.h>
 #include <kdl/utilities/utility.h>
 #include <moveit/robot_state/conversions.h>
-#include <rclcpp/rclcpp.hpp>
-
 #include <tf2_eigen_kdl/tf2_eigen_kdl.hpp>
+#include <rclcpp/logger.hpp>
+#include <rclcpp/logging.hpp>
 #if __has_include(<tf2_eigen/tf2_eigen.hpp>)
 #include <tf2_eigen/tf2_eigen.hpp>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>

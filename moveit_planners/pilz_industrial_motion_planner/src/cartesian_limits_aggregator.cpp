@@ -32,8 +32,11 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
+#include <rclcpp/exceptions/exceptions.hpp>
+#include <rclcpp/logging.hpp>
+#include <rclcpp/node.hpp>
+#include <rclcpp/parameter_value.hpp>
 #include <limits>
-#include <rclcpp/rclcpp.hpp>
 
 #include "pilz_industrial_motion_planner/cartesian_limits_aggregator.h"
 

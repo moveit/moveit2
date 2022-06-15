@@ -36,6 +36,7 @@
 
 #include <moveit/kinematics_base/kinematics_base.h>
 #include <moveit/robot_model/joint_model_group.h>
+#include <rclcpp/logger.hpp>
 
 namespace kinematics
 {

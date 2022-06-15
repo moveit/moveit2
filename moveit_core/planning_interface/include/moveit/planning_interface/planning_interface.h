@@ -39,6 +39,7 @@
 #include <moveit/macros/class_forward.h>
 #include <moveit/planning_interface/planning_request.h>
 #include <moveit/planning_interface/planning_response.h>
+#include <rclcpp/node.hpp>
 #include <string>
 #include <map>
 #include "rclcpp/rclcpp.hpp"

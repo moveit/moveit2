@@ -35,9 +35,10 @@
 /* Author: Ioan Sucan, E. Gil Jones */
 
 #include <moveit/collision_detection/collision_matrix.h>
+#include <rclcpp/logger.hpp>
+#include <rclcpp/logging.hpp>
 #include <functional>
 #include <iomanip>
-#include "rclcpp/rclcpp.hpp"
 
 namespace collision_detection
 {

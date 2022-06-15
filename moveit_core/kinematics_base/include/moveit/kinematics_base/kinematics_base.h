@@ -39,8 +39,9 @@
 #include <geometry_msgs/msg/pose.hpp>
 #include <moveit_msgs/msg/move_it_error_codes.hpp>
 #include <moveit/macros/class_forward.h>
-#include "rclcpp/rclcpp.hpp"
 #include <boost/function.hpp>
+#include <rclcpp/logging.hpp>
+#include <rclcpp/node.hpp>
 #include <string>
 
 #include "moveit_kinematics_base_export.h"

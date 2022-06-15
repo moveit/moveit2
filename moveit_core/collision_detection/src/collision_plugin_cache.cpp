@@ -34,6 +34,8 @@
 
 #include <moveit/collision_detection/collision_plugin_cache.h>
 #include <pluginlib/class_loader.hpp>
+#include <rclcpp/logger.hpp>
+#include <rclcpp/logging.hpp>
 #include <memory>
 
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("collision_detection");
