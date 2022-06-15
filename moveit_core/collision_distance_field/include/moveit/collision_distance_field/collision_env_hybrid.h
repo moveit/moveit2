@@ -41,8 +41,6 @@
 #include <moveit/collision_distance_field/collision_common_distance_field.h>
 #include <moveit/collision_distance_field/collision_env_distance_field.h>
 
-#include <boost/thread/mutex.hpp>
-
 namespace collision_detection
 {
 /** \brief This hybrid collision environment combines FCL and a distance field. Both can be used to calculate

@@ -57,9 +57,7 @@
 // C
 #include <fstream>  // for reading in urdf
 #include <streambuf>
-// Boost
-#include <boost/filesystem/path.hpp>        // for reading folders/files
-#include <boost/filesystem/operations.hpp>  // for reading folders/files
+#include <filesystem>
 // MoveIt
 #include <moveit/rdf_loader/rdf_loader.h>
 
@@ -73,7 +71,7 @@
 namespace moveit_setup_assistant
 {
 // Boost file system
-namespace fs = boost::filesystem;
+namespace fs = std::filesystem;
 
 // ******************************************************************************************
 // Start screen user interface for MoveIt Configuration Assistant

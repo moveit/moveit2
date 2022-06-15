@@ -8,7 +8,6 @@ ament_target_dependencies(${MOVEIT_LIB_NAME}
   pluginlib
   class_loader
   moveit_core
-  Boost
 )
 target_link_libraries(${MOVEIT_LIB_NAME}
   moveit_rdf_loader

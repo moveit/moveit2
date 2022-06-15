@@ -482,7 +482,7 @@ void MotionPlanningDisplay::computeMetrics(bool start, const std::string& group,
   const std::vector<robot_interaction::EndEffectorInteraction>& eef = robot_interaction_->getActiveEndEffectors();
   if (eef.empty())
     return;
-  boost::mutex::scoped_lock slock(update_metrics_lock_);
+  std::scoped_lock slock(update_metrics_lock_);
 
   moveit::core::RobotStateConstPtr state = start ? getQueryStartState() : getQueryGoalState();
   for (const robot_interaction::EndEffectorInteraction& ee : eef)

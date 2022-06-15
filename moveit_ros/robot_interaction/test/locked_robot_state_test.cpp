@@ -325,7 +325,7 @@ private:
   void checkState(robot_interaction::LockedRobotState& locked_state);
 
   // mutex protects quit_ and counter variables
-  boost::mutex cnt_lock_;
+  std::mutex cnt_lock_;
 
   // set to true by waitThreadFunc() when all counters have reached at least
   // max.
@@ -484,7 +484,7 @@ static void runThreads(int ncheck, int nset, int nmod)
   int num = ncheck + nset + nmod;
 
   typedef int* int_ptr;
-  typedef boost::thread* thread_ptr;
+  typedef std::thread* thread_ptr;
   int* cnt = new int[num];
   int_ptr* counters = new int_ptr[num + 1];
   thread_ptr* threads = new thread_ptr[num];
@@ -497,7 +497,7 @@ static void runThreads(int ncheck, int nset, int nmod)
   {
     cnt[p] = 0;
     counters[p] = &cnt[p];
-    threads[p] = new boost::thread(&MyInfo::checkThreadFunc, &info, &ls1, &cnt[p]);
+    threads[p] = new std::thread(&MyInfo::checkThreadFunc, &info, &ls1, &cnt[p]);
     val += 0.1;
     p++;
   }
@@ -507,7 +507,7 @@ static void runThreads(int ncheck, int nset, int nmod)
   {
     cnt[p] = 0;
     counters[p] = &cnt[p];
-    threads[p] = new boost::thread(&MyInfo::setThreadFunc, &info, &ls1, &cnt[p], val);
+    threads[p] = new std::thread(&MyInfo::setThreadFunc, &info, &ls1, &cnt[p], val);
     val += 0.1;
     p++;
   }
@@ -517,7 +517,7 @@ static void runThreads(int ncheck, int nset, int nmod)
   {
     cnt[p] = 0;
     counters[p] = &cnt[p];
-    threads[p] = new boost::thread(&MyInfo::modifyThreadFunc, &info, &ls1, &cnt[p], val);
+    threads[p] = new std::thread(&MyInfo::modifyThreadFunc, &info, &ls1, &cnt[p], val);
     val += 0.1;
     p++;
   }
@@ -527,12 +527,18 @@ static void runThreads(int ncheck, int nset, int nmod)
 
   // this thread waits for all the other threads to make progress, then stops
   // everything.
-  boost::thread wthread(&MyInfo::waitThreadFunc, &info, &ls1, counters, 1000);
+  std::thread wthread(&MyInfo::waitThreadFunc, &info, &ls1, counters, 1000);
 
   // wait for all threads to finish
   for (int i = 0; i < p; ++i)
   {
-    threads[i]->join();
+    if (threads[i]->joinable())
+    {
+      threads[i]->join();
+    }
+  }
+  if (wthread.joinable())
+  {
     wthread.join();
   }
 

@@ -35,7 +35,6 @@ if(BUILD_TESTING)
 
   ament_add_gtest(test_collision_distance_field test/test_collision_distance_field.cpp)
   ament_target_dependencies(test_collision_distance_field
-    Boost
     geometric_shapes
     OCTOMAP
     srdfdom

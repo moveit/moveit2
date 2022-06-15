@@ -182,7 +182,7 @@ void PlanningSceneDisplay::clearJobs()
 {
   background_process_.clear();
   {
-    boost::unique_lock<boost::mutex> ulock(main_loop_jobs_lock_);
+    std::unique_lock<std::mutex> ulock(main_loop_jobs_lock_);
     main_loop_jobs_.clear();
   }
 }
@@ -231,25 +231,25 @@ void PlanningSceneDisplay::reset()
   }
 }
 
-void PlanningSceneDisplay::addBackgroundJob(const boost::function<void()>& job, const std::string& name)
+void PlanningSceneDisplay::addBackgroundJob(const std::function<void()>& job, const std::string& name)
 {
   background_process_.addJob(job, name);
 }
 
-void PlanningSceneDisplay::spawnBackgroundJob(const boost::function<void()>& job)
+void PlanningSceneDisplay::spawnBackgroundJob(const std::function<void()>& job)
 {
-  boost::thread t(job);
+  std::thread t(job);
 }
 
-void PlanningSceneDisplay::addMainLoopJob(const boost::function<void()>& job)
+void PlanningSceneDisplay::addMainLoopJob(const std::function<void()>& job)
 {
-  boost::unique_lock<boost::mutex> ulock(main_loop_jobs_lock_);
+  std::unique_lock<std::mutex> ulock(main_loop_jobs_lock_);
   main_loop_jobs_.push_back(job);
 }
 
 void PlanningSceneDisplay::waitForAllMainLoopJobs()
 {
-  boost::unique_lock<boost::mutex> ulock(main_loop_jobs_lock_);
+  std::unique_lock<std::mutex> ulock(main_loop_jobs_lock_);
   while (!main_loop_jobs_.empty())
     main_loop_jobs_empty_condition_.wait(ulock);
 }
@@ -259,7 +259,7 @@ void PlanningSceneDisplay::executeMainLoopJobs()
   main_loop_jobs_lock_.lock();
   while (!main_loop_jobs_.empty())
   {
-    boost::function<void()> fn = main_loop_jobs_.front();
+    std::function<void()> fn = main_loop_jobs_.front();
     main_loop_jobs_.pop_front();
     main_loop_jobs_lock_.unlock();
     try
@@ -532,7 +532,7 @@ void PlanningSceneDisplay::clearRobotModel()
 void PlanningSceneDisplay::loadRobotModel()
 {
   // wait for other robot loadRobotModel() calls to complete;
-  boost::mutex::scoped_lock _(robot_model_loading_lock_);
+  std::scoped_lock _(robot_model_loading_lock_);
 
   // we need to make sure the clearing of the robot model is in the main thread,
   // so that rendering operations do not have data removed from underneath,

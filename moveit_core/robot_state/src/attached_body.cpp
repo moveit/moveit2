@@ -135,7 +135,7 @@ void AttachedBody::setPadding(double padding)
 
 const Eigen::Isometry3d& AttachedBody::getSubframeTransform(const std::string& frame_name, bool* found) const
 {
-  if (boost::starts_with(frame_name, id_) && frame_name[id_.length()] == '/')
+  if (frame_name.rfind(id_, 0) == 0 && frame_name[id_.length()] == '/')
   {
     auto it = subframe_poses_.find(frame_name.substr(id_.length() + 1));
     if (it != subframe_poses_.end())
@@ -153,7 +153,7 @@ const Eigen::Isometry3d& AttachedBody::getSubframeTransform(const std::string& f
 
 const Eigen::Isometry3d& AttachedBody::getGlobalSubframeTransform(const std::string& frame_name, bool* found) const
 {
-  if (boost::starts_with(frame_name, id_) && frame_name[id_.length()] == '/')
+  if (frame_name.rfind(id_, 0) == 0 && frame_name[id_.length()] == '/')
   {
     auto it = global_subframe_poses_.find(frame_name.substr(id_.length() + 1));
     if (it != global_subframe_poses_.end())

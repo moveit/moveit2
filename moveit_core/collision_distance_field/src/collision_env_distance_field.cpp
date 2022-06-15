@@ -171,7 +171,7 @@ void CollisionEnvDistanceField::generateCollisionCheckingStructures(
     // DistanceFieldCacheEntry for CollisionRobot");
     DistanceFieldCacheEntryPtr new_dfce =
         generateDistanceFieldCacheEntry(group_name, state, acm, generate_distance_field);
-    boost::mutex::scoped_lock slock(update_cache_lock_);
+    std::scoped_lock slock(update_cache_lock_);
     (const_cast<CollisionEnvDistanceField*>(this))->distance_field_cache_entry_ = new_dfce;
     dfce = new_dfce;
   }

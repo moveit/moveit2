@@ -406,7 +406,7 @@ bool KDLKinematicsPlugin::searchPositionIK(const geometry_msgs::msg::Pose& ik_po
         continue;
 
       Eigen::Map<Eigen::VectorXd>(solution.data(), solution.size()) = jnt_pos_out.data;
-      if (!solution_callback.empty())
+      if (solution_callback)
       {
         solution_callback(ik_pose, solution, error_code);
         if (error_code.val != error_code.SUCCESS)

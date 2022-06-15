@@ -24,8 +24,6 @@ find_package(octomap REQUIRED)
 find_package(geometric_shapes REQUIRED)
 find_package(tf2_ros REQUIRED)
 
-# Finds Boost Components
-include(ConfigExtras.cmake)
 
 include_directories(include)
 include_directories(SYSTEM
@@ -97,4 +95,4 @@ if(BUILD_TESTING)
   )
 endif()
 
-ament_package(CONFIG_EXTRAS ConfigExtras.cmake)
+ament_package()

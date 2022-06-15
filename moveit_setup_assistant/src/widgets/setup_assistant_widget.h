@@ -59,7 +59,7 @@ class QSplitter;
 
 // Other
 #include <boost/program_options/variables_map.hpp>  // for parsing input arguments
-#include <boost/thread/mutex.hpp>
+#include <mutex>
 #endif
 
 // Forward declarations
@@ -196,7 +196,7 @@ private:
   QSplitter* splitter_;
   QStackedWidget* main_content_;
   int current_index_;
-  boost::mutex change_screen_lock_;
+  std::mutex change_screen_lock_;
 
   // Rviz Panel
   rviz::RenderPanel* rviz_render_panel_;

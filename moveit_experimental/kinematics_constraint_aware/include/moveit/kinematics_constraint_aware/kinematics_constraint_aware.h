@@ -37,9 +37,6 @@
 
 #pragma once
 
-// System
-#include <boost/function.hpp>
-
 // ROS msgs
 #include <moveit_msgs/GetConstraintAwarePositionIK.h>
 #include <geometry_msgs/PoseStamped.h>

@@ -15,7 +15,6 @@ ament_target_dependencies(
   srdfdom moveit_msgs
   geometric_shapes
   geometry_msgs
-  Boost
 )
 
 install(DIRECTORY include/ DESTINATION include)
