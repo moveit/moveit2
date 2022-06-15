@@ -43,6 +43,7 @@
 #include <filesystem>
 #include <rclcpp/logger.hpp>
 #include <rclcpp/logging.hpp>
+#include <regex>
 
 namespace moveit
 {
@@ -118,8 +119,9 @@ void RobotModelBuilder::addChain(const std::string& section, const std::string& 
                                  const std::vector<geometry_msgs::msg::Pose>& joint_origins, urdf::Vector3 joint_axis)
 {
   // https://stackoverflow.com/questions/53849/how-do-i-tokenize-a-string-in-c
-  auto const link_names = std::vector<std::string>(
-      std::sregex_token_iterator{ begin(str), end(str), std::regex{ "->" }, -1 }, std::sregex_token_iterator{});
+  std::regex re("->");
+  auto const link_names = std::vector<std::string>(std::sregex_token_iterator{ begin(section), end(section), re, -1 },
+                                                   std::sregex_token_iterator{});
 
   if (link_names.empty())
   {
