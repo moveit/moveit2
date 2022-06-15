@@ -89,8 +89,8 @@ public:
 
     centers.clear();
     centers.reserve(k);
-    if (dists.rows() < data.size() || dists.cols() < k)
-      dists.resize(std::max(2 * dists.rows() + 1, data.size()), k, false);
+    if (((long unsigned int)dists.rows()) < data.size() || ((long unsigned int)dists.cols()) < k)
+      dists.resize(std::max(2 * ((long unsigned int)dists.rows()) + 1, data.size()), k);
     // first center is picked randomly
     centers.push_back(std::uniform_int_distribution<size_t>{ 0, data.size() - 1 }(generator_));
     for (unsigned i = 1; i < k; ++i)
