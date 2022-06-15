@@ -437,9 +437,9 @@ Bounds positionConstraintMsgToBoundVector(const moveit_msgs::msg::PositionConstr
 Bounds orientationConstraintMsgToBoundVector(const moveit_msgs::msg::OrientationConstraint& ori_con);
 
 /** \brief Factory to create constraints based on what is in the MoveIt constraint message. **/
-std::shared_ptr<BaseConstraint> createOMPLConstraint(const moveit::core::RobotModelConstPtr& robot_model,
-                                                     const std::string& group,
-                                                     const moveit_msgs::msg::Constraints& constraints);
+ompl::base::ConstraintPtr createOMPLConstraints(const moveit::core::RobotModelConstPtr& robot_model,
+                                                const std::string& group,
+                                                const moveit_msgs::msg::Constraints& constraints);
 
 /** \brief  Return a matrix to convert angular velocity to angle-axis velocity
  *  Based on:

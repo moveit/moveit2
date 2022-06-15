@@ -364,9 +364,9 @@ Bounds orientationConstraintMsgToBoundVector(const moveit_msgs::msg::Orientation
 /******************************************
  * OMPL Constraints Factory
  * ****************************************/
-std::shared_ptr<BaseConstraint> createOMPLConstraint(const moveit::core::RobotModelConstPtr& robot_model,
-                                                     const std::string& group,
-                                                     const moveit_msgs::msg::Constraints& constraints)
+ompl::base::ConstraintPtr createOMPLConstraints(const moveit::core::RobotModelConstPtr& robot_model,
+                                                const std::string& group,
+                                                const moveit_msgs::msg::Constraints& constraints)
 {
   // TODO(bostoncleek): does this reach the end w/o a return ?
 
@@ -374,9 +374,9 @@ std::shared_ptr<BaseConstraint> createOMPLConstraint(const moveit::core::RobotMo
   const std::size_t num_pos_con = constraints.position_constraints.size();
   const std::size_t num_ori_con = constraints.orientation_constraints.size();
 
-  // This factory method contains template code to support different constraints, but only position constraints are
-  // currently supported. The other options return a nullptr for now and should not be used.
-
+  // This factory method contains template code to support position and/or orientation constraints.
+  // If the specified constraints are invalid, a nullptr is returned.
+  std::vector<ompl::base::ConstraintPtr> ompl_constraints;
   if (num_pos_con > 1)
   {
     RCLCPP_WARN(LOGGER, "Only a single position constraint is supported. Using the first one.");
@@ -385,14 +385,7 @@ std::shared_ptr<BaseConstraint> createOMPLConstraint(const moveit::core::RobotMo
   {
     RCLCPP_WARN(LOGGER, "Only a single orientation constraint is supported. Using the first one.");
   }
-
-  if (num_pos_con > 0 && num_ori_con > 0)
-  {
-    RCLCPP_ERROR(LOGGER, "Combining position and orientation constraints is not implemented yet for OMPL's constrained "
-                         "state space.");
-    return nullptr;
-  }
-  else if (num_pos_con > 0)
+  if (num_pos_con > 0)
   {
     BaseConstraintPtr pos_con;
     if (constraints.name == "use_equality_constraints")
@@ -404,18 +397,19 @@ std::shared_ptr<BaseConstraint> createOMPLConstraint(const moveit::core::RobotMo
       pos_con = std::make_shared<BoxConstraint>(robot_model, group, num_dofs);
     }
     pos_con->init(constraints);
-    return pos_con;
+    ompl_constraints.emplace_back(pos_con);
   }
-  else if (num_ori_con > 0)
+  if (num_ori_con > 0)
   {
     auto ori_con = std::make_shared<OrientationConstraint>(robot_model, group, num_dofs);
     ori_con->init(constraints);
-    return ori_con;
+    ompl_constraints.emplace_back(ori_con);
   }
-  else
+  if (num_pos_con < 1 && num_ori_con < 1)
   {
     RCLCPP_ERROR(LOGGER, "No path constraints found in planning request.");
     return nullptr;
   }
+  return std::make_shared<ompl::base::ConstraintIntersection>(num_dofs, ompl_constraints);
 }
 }  // namespace ompl_interface
