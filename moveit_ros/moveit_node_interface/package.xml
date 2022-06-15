@@ -4,16 +4,14 @@
   <name>moveit_node_interface</name>
   <version>0.0.0</version>
   <description>Wrapper for common interfaces provided by ROS nodes</description>
-  <maintainer email="henningkayser@picknik.ai">Henning Kayser</maintainer>
-  <maintainer email="tyler@picknik.ai">Tyler Weaver</maintainer>
-  <maintainer email="moveit_releasers@googlegroups.com">MoveIt Release Team</maintainer>
+  <author email="paul.gesel@picknik.ai">Paul Gesel</author>
+
   <license>BSD</license>
 
   <url type="website">http://moveit.ros.org</url>
   <url type="bugtracker">https://github.com/ros-planning/moveit2/issues</url>
   <url type="repository">https://github.com/ros-planning/moveit2</url>
 
-  <maintainer email="paul.gesel@picknik.ai">Paul Gesel</maintainer>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
 
