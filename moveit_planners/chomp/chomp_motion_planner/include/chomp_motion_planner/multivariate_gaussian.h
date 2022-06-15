@@ -36,6 +36,7 @@
 
 #pragma once
 
+#include <random>
 #include <boost/random/mersenne_twister.hpp>
 #include <boost/random/normal_distribution.hpp>
 #include <boost/random/variate_generator.hpp>
@@ -63,9 +64,9 @@ private:
   Eigen::MatrixXd covariance_cholesky_; /**< Cholesky decomposition (LL^T) of the covariance */
 
   int size_;
-  boost::mt19937 rng_;  // TODO
-  boost::normal_distribution<> normal_dist_;
-  boost::variate_generator<boost::mt19937, boost::normal_distribution<> > gaussian_;
+  std::random_device rd;
+  std::mt19937 rng_;
+  std::normal_distribution<double> gaussian_;
 };
 
 //////////////////////// template function definitions follow //////////////////////////////
@@ -73,14 +74,9 @@ private:
 template <typename Derived1, typename Derived2>
 MultivariateGaussian::MultivariateGaussian(const Eigen::MatrixBase<Derived1>& mean,
                                            const Eigen::MatrixBase<Derived2>& covariance)
-  : mean_(mean)
-  , covariance_(covariance)
-  , covariance_cholesky_(covariance_.llt().matrixL())
-  , rng_()
-  , normal_dist_(0.0, 1.0)
-  , gaussian_(rng_, normal_dist_)
+  : mean_(mean), covariance_(covariance), covariance_cholesky_(covariance_.llt().matrixL()), rd(), gaussian_(0.0, 1.0)
 {
-  rng_.seed(rand());
+  rng_ = std::mt19937(rd());
   size_ = mean.rows();
 }
 
@@ -88,7 +84,7 @@ template <typename Derived>
 void MultivariateGaussian::sample(Eigen::MatrixBase<Derived>& output)
 {
   for (int i = 0; i < size_; ++i)
-    output(i) = gaussian_();
+    output(i) = gaussian_(rng_);
   output = mean_ + covariance_cholesky_ * output;
 }
 }  // namespace chomp

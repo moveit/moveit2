@@ -41,6 +41,7 @@
 #include <boost/numeric/ublas/matrix.hpp>
 #include <functional>
 #include <random>
+#include <Eigen>
 
 namespace cached_ik_kinematics_plugin
 {
@@ -54,7 +55,7 @@ public:
   /** \brief The definition of a distance function */
   using DistanceFunction = std::function<double(const _T&, const _T&)>;
   /** \brief A matrix type for storing distances between points and centers */
-  using Matrix = boost::numeric::ublas::matrix<double>;  // TODO
+  using Matrix = Eigen::Matrix<double>;
 
   GreedyKCenters() = default;
 

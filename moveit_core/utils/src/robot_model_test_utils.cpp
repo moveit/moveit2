@@ -34,7 +34,6 @@
 
 /* Author: Bryce Willey */
 
-#include <boost/algorithm/string_regex.hpp>  // TODO
 #include <boost/math/constants/constants.hpp>
 #include <geometry_msgs/msg/pose.hpp>
 #include <urdf_parser/urdf_parser.h>
