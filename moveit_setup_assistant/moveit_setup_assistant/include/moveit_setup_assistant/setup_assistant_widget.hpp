@@ -55,7 +55,6 @@ class QSplitter;
 #ifndef Q_MOC_RUN
 // Other
 #include <boost/program_options/variables_map.hpp>  // for parsing input arguments
-#include <boost/thread/mutex.hpp>
 #endif
 
 namespace moveit_setup
@@ -157,7 +156,7 @@ private:
   QSplitter* splitter_;
   QStackedWidget* main_content_;
   int current_index_;
-  boost::mutex change_screen_lock_;
+  std::mutex change_screen_lock_;
 
   // Setup Steps
   pluginlib::ClassLoader<SetupStepWidget> widget_loader_;

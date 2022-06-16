@@ -105,7 +105,7 @@ public:
     discard_overlapping_cost_sources_ = value;
   }
 
-  void setBeforeLookCallback(const boost::function<void()>& callback)
+  void setBeforeLookCallback(const std::function<void()>& callback)
   {
     before_look_callback_ = callback;
   }
@@ -129,7 +129,7 @@ private:
   bool display_cost_sources_;
   rclcpp::Publisher<visualization_msgs::msg::MarkerArray>::SharedPtr cost_sources_publisher_;
 
-  boost::function<void()> before_look_callback_;
+  std::function<void()> before_look_callback_;
 
   // class DynamicReconfigureImpl;
   // DynamicReconfigureImpl* reconfigure_impl_;

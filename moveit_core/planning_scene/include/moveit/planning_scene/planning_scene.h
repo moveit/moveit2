@@ -52,9 +52,9 @@
 #include <moveit_msgs/msg/planning_scene_components.hpp>
 #include <octomap_msgs/msg/octomap_with_pose.hpp>
 #include <boost/noncopyable.hpp>
-#include <boost/function.hpp>
 #include <boost/concept_check.hpp>
 #include <memory>
+#include <functional>
 #include "rclcpp/rclcpp.hpp"
 
 #include "moveit_planning_scene_export.h"
@@ -68,15 +68,14 @@ MOVEIT_CLASS_FORWARD(PlanningScene);  // Defines PlanningScenePtr, ConstPtr, Wea
    respecting constraints and collision avoidance).
     The first argument is the state to check the feasibility for, the second one is whether the check should be verbose
    or not. */
-typedef boost::function<bool(const moveit::core::RobotState&, bool)> StateFeasibilityFn;
+typedef std::function<bool(const moveit::core::RobotState&, bool)> StateFeasibilityFn;
 
 /** \brief This is the function signature for additional feasibility checks to be imposed on motions segments between
    states (in addition to respecting constraints and collision avoidance).
     The order of the arguments matters: the notion of feasibility is to be checked for motion segments that start at the
    first state and end at the second state. The third argument indicates
     whether the check should be verbose or not. */
-using MotionFeasibilityFn =
-    boost::function<bool(const moveit::core::RobotState&, const moveit::core::RobotState&, bool)>;
+using MotionFeasibilityFn = std::function<bool(const moveit::core::RobotState&, const moveit::core::RobotState&, bool)>;
 
 /** \brief A map from object names (e.g., attached bodies, collision objects) to their colors */
 using ObjectColorMap = std::map<std::string, std_msgs::msg::ColorRGBA>;

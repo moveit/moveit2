@@ -342,7 +342,7 @@ bool SrvKinematicsPlugin::searchPositionIK(const std::vector<geometry_msgs::msg:
   robot_state_->copyJointGroupPositions(joint_model_group_, solution);
 
   // Run the solution callback (i.e. collision checker) if available
-  if (!solution_callback.empty())
+  if (solution_callback)
   {
     RCLCPP_DEBUG(LOGGER, "Calling solution callback on IK solution");
 

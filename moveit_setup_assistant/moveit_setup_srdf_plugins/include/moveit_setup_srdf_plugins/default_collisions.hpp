@@ -37,7 +37,7 @@
 
 #include <moveit_setup_srdf_plugins/srdf_step.hpp>
 #include <moveit_setup_srdf_plugins/compute_default_collisions.hpp>
-#include <boost/thread/thread.hpp>
+#include <thread>
 
 // less operation for two CollisionPairs
 struct CollisionPairLess
@@ -97,7 +97,7 @@ protected:
   LinkPairMap link_pairs_;
 
   // For threaded operations
-  boost::thread worker_;
+  std::thread worker_;
   unsigned int progress_;
 };
 }  // namespace srdf_setup

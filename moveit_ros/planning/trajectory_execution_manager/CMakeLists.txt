@@ -9,7 +9,6 @@ ament_target_dependencies(${MOVEIT_LIB_NAME}
   moveit_core
   moveit_ros_occupancy_map_monitor
   rclcpp
-  Boost
   pluginlib
   std_msgs
   sensor_msgs

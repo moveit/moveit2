@@ -34,9 +34,6 @@
 
 #include <gtest/gtest.h>
 
-// Boost includes
-#include <boost/scoped_ptr.hpp>
-
 #include <pluginlib/class_loader.hpp>
 
 #include <moveit/robot_model/robot_model.h>

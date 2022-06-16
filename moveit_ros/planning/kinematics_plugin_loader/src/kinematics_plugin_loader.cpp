@@ -37,7 +37,6 @@
 #include <moveit/kinematics_plugin_loader/kinematics_plugin_loader.h>
 #include <moveit/rdf_loader/rdf_loader.h>
 #include <pluginlib/class_loader.hpp>
-#include <boost/thread/mutex.hpp>
 #include <rclcpp/logger.hpp>
 #include <rclcpp/logging.hpp>
 #include <rclcpp/parameter.hpp>
@@ -46,6 +45,7 @@
 #include <vector>
 #include <map>
 #include <memory>
+#include <mutex>
 
 namespace kinematics_plugin_loader
 {
@@ -176,7 +176,7 @@ public:
                                   jmg->getParentModel().getModelFrame();
 
     // just to be sure, do not call the same pluginlib instance allocation function in parallel
-    boost::mutex::scoped_lock slock(lock_);
+    std::scoped_lock slock(lock_);
     for (std::size_t i = 0; !result && i < it->second.size(); ++i)
     {
       try
@@ -226,7 +226,7 @@ public:
   // second call in JointModelGroup::setSolverAllocators() is to actually retrieve the instance for use
   kinematics::KinematicsBasePtr allocKinematicsSolverWithCache(const moveit::core::JointModelGroup* jmg)
   {
-    boost::mutex::scoped_lock slock(cache_lock_);
+    std::scoped_lock slock(cache_lock_);
     kinematics::KinematicsBasePtr& cached = instances_[jmg];
     if (cached.unique())
       return std::move(cached);  // pass on unique instance
@@ -258,8 +258,8 @@ private:
                                                                            // of custom-specified tip link(s)
   std::shared_ptr<pluginlib::ClassLoader<kinematics::KinematicsBase>> kinematics_loader_;
   std::map<const moveit::core::JointModelGroup*, kinematics::KinematicsBasePtr> instances_;
-  boost::mutex lock_;
-  boost::mutex cache_lock_;
+  std::mutex lock_;
+  std::mutex cache_lock_;
 };
 
 void KinematicsPluginLoader::status() const

@@ -39,10 +39,10 @@
 #include <chrono>
 #include <functional>
 #include <string>
+#include <condition_variable>
+#include <mutex>
 
 #include <boost/signals2.hpp>
-#include <boost/thread/condition_variable.hpp>
-#include <boost/thread/mutex.hpp>
 
 #include <rclcpp/rclcpp.hpp>
 #include <sensor_msgs/msg/joint_state.hpp>

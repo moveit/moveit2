@@ -43,9 +43,7 @@
 #include <moveit/planning_interface/planning_interface.h>
 
 #include <pluginlib/class_loader.hpp>
-
-// Boost includes
-#include <boost/scoped_ptr.hpp>
+#include <memory>
 
 namespace pilz_industrial_motion_planner
 {

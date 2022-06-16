@@ -57,11 +57,6 @@
 #include <QTableView>
 #include <QVBoxLayout>
 
-#ifndef Q_MOC_RUN
-#include <boost/thread/thread.hpp>
-#include <boost/function/function_fwd.hpp>
-#endif
-
 namespace moveit_setup
 {
 namespace srdf_setup
@@ -215,7 +210,7 @@ private:
 };
 
 /**
- * \brief QThread to monitor progress of a boost::thread
+ * \brief QThread to monitor progress of the setup step
  */
 class MonitorThread : public QThread
 {

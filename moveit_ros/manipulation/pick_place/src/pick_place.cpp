@@ -59,14 +59,14 @@ PickPlacePlanBase::~PickPlacePlanBase() = default;
 
 void PickPlacePlanBase::foundSolution()
 {
-  boost::mutex::scoped_lock slock(done_mutex_);
+  std::scoped_lock slock(done_mutex_);
   done_ = true;
   done_condition_.notify_all();
 }
 
 void PickPlacePlanBase::emptyQueue()
 {
-  boost::mutex::scoped_lock slock(done_mutex_);
+  std::scoped_lock slock(done_mutex_);
   if (pushed_all_poses_)
   {
     done_ = true;
@@ -83,7 +83,7 @@ void PickPlacePlanBase::initialize()
 void PickPlacePlanBase::waitForPipeline(const ros::WallTime& endtime)
 {
   // wait till we're done
-  boost::unique_lock<boost::mutex> lock(done_mutex_);
+  std::unique_lock<std::mutex> lock(done_mutex_);
   pushed_all_poses_ = true;
   while (!done_ && endtime > ros::WallTime::now())
     done_condition_.timed_wait(lock, (endtime - ros::WallTime::now()).toBoost());

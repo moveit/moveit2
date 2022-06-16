@@ -1297,7 +1297,7 @@ public:
     if (constraints_init_thread_)
       constraints_init_thread_->join();
     constraints_init_thread_ =
-        std::make_unique<boost::thread>([this, host, port] { initializeConstraintsStorageThread(host, port); });
+        std::make_unique<std::thread>([this, host, port] { initializeConstraintsStorageThread(host, port); });
   }
 
   void setWorkspace(double minx, double miny, double minz, double maxx, double maxy, double maxz)
@@ -1392,7 +1392,7 @@ private:
   rclcpp::Client<moveit_msgs::srv::GetCartesianPath>::SharedPtr cartesian_path_service_;
   // rclcpp::Client<moveit_msgs::srv::GraspPlanning>::SharedPtr plan_grasps_service_;
   std::unique_ptr<moveit_warehouse::ConstraintsStorage> constraints_storage_;
-  std::unique_ptr<boost::thread> constraints_init_thread_;
+  std::unique_ptr<std::thread> constraints_init_thread_;
   bool initializing_constraints_;
 };
 

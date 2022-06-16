@@ -35,7 +35,6 @@
 /* Author: Robert Haschke */
 
 #include <moveit_setup_srdf_plugins/collision_matrix_model.hpp>
-#include <boost/unordered_map.hpp>
 #include <boost/assign.hpp>
 #include <QVector>
 #include <QBrush>
@@ -43,13 +42,14 @@
 #include <QPalette>
 #include <QApplication>
 #include <QItemSelection>
+#include <unordered_map>
 
 namespace moveit_setup
 {
 namespace srdf_setup
 {
-/// Boost mapping of reasons for disabling a link pair to strings
-static const boost::unordered_map<DisabledReason, const char*> LONG_REASONS_TO_STRING =
+/// Mapping of reasons for disabling a link pair to strings
+static const std::unordered_map<DisabledReason, const char*> LONG_REASONS_TO_STRING =
     boost::assign::map_list_of  // clang-format off
     ( NEVER, "Never in Collision" )
     ( DEFAULT, "Collision by Default" )
@@ -58,8 +58,8 @@ static const boost::unordered_map<DisabledReason, const char*> LONG_REASONS_TO_S
     ( USER, "User Disabled" )
     ( NOT_DISABLED, "");  // clang-format on
 
-/// Boost mapping of reasons to a background color
-static const boost::unordered_map<DisabledReason, QVariant> LONG_REASONS_TO_BRUSH =
+/// Mapping of reasons to a background color
+static const std::unordered_map<DisabledReason, QVariant> LONG_REASONS_TO_BRUSH =
     boost::assign::map_list_of  // clang-format off
     ( NEVER, QBrush(QColor("lightgreen")) )
     ( DEFAULT, QBrush(QColor("lightpink")) )

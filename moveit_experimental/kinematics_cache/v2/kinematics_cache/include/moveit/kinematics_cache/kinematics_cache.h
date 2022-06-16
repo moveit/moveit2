@@ -41,7 +41,7 @@
 #include <moveit/robot_model/robot_model.h>
 #include <moveit/robot_state/robot_state.h>
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 namespace kinematics_cache
 {
@@ -51,8 +51,8 @@ public:
   struct Options
   {
     geometry_msgs::Point origin;
-    boost::array<double, 3> workspace_size;
-    boost::array<double, 3> resolution;
+    std::array<double, 3> workspace_size;
+    std::array<double, 3> resolution;
     unsigned int max_solutions_per_grid_location;
   };
 
