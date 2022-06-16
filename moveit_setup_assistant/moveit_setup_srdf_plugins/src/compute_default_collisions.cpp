@@ -642,7 +642,7 @@ void disableNeverInCollisionThread(ThreadComputation tc)
       {
         // Collision Matrix and links_seen_colliding is modified only if needed, based on above if statement
 
-        std::mutex::scoped_lock slock(*tc.lock_);
+        std::scoped_lock slock(*tc.lock_);
         tc.links_seen_colliding_->insert(it->first);
 
         tc.scene_.getAllowedCollisionMatrixNonConst().setEntry(it->first.first, it->first.second,

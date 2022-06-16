@@ -210,7 +210,7 @@ void SetupAssistantWidget::onAdvanceRequest()
 // ******************************************************************************************
 void SetupAssistantWidget::moveToScreen(const int index)
 {
-  boost::mutex::scoped_lock slock(change_screen_lock_);
+  std::scoped_lock slock(change_screen_lock_);
   if (!navs_view_->isEnabled(index))
   {
     return;
