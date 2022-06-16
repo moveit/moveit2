@@ -105,7 +105,7 @@ void URDFConfig::setPackageName()
 
     if (robot_desc_pkg_path.empty())
     {
-      RCLCPP_WARN((*logger_),
+      RCLCPP_WARN(*logger_,
                   "Package Not Found In ROS Workspace. ROS was unable to find the package name '%s'"
                   " within the ROS workspace. This may cause issues later.",
                   urdf_pkg_name_.c_str());
@@ -126,8 +126,8 @@ void URDFConfig::loadFromPackage(const std::filesystem::path& package_name, cons
 
 void URDFConfig::load()
 {
-  RCLCPP_DEBUG_STREAM((*logger_), "URDF Package Name: " << urdf_pkg_name_);
-  RCLCPP_DEBUG_STREAM((*logger_), "URDF Package Path: " << urdf_pkg_relative_path_);
+  RCLCPP_DEBUG_STREAM(*logger_, "URDF Package Name: " << urdf_pkg_name_);
+  RCLCPP_DEBUG_STREAM(*logger_, "URDF Package Path: " << urdf_pkg_relative_path_);
 
   if (!rdf_loader::RDFLoader::loadXmlFileToString(urdf_string_, urdf_path_, xacro_args_vec_))
   {
@@ -149,7 +149,7 @@ void URDFConfig::load()
   // Set parameter
   parent_node_->set_parameter(rclcpp::Parameter("robot_description", urdf_string_));
 
-  RCLCPP_INFO_STREAM((*logger_), "Loaded " << urdf_model_->getName() << " robot model.");
+  RCLCPP_INFO_STREAM(*logger_, "Loaded " << urdf_model_->getName() << " robot model.");
 }
 
 bool URDFConfig::isXacroFile() const

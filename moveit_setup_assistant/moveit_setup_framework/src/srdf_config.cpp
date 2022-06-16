@@ -104,7 +104,7 @@ void SRDFConfig::loadSRDFFile(const std::filesystem::path& srdf_file_path, const
 
   updateRobotModel();
 
-  RCLCPP_INFO_STREAM((*logger_), "Robot semantic model successfully loaded.");
+  RCLCPP_INFO_STREAM(*logger_, "Robot semantic model successfully loaded.");
 }
 
 void SRDFConfig::getRelativePath()

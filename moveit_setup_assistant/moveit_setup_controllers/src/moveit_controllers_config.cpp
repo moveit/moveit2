@@ -51,7 +51,7 @@ void MoveItControllersConfig::loadPrevious(const std::filesystem::path& package_
   std::ifstream input_stream(ros_controllers_yaml_path);
   if (!input_stream.good())
   {
-    RCLCPP_WARN_STREAM((*logger_), "Does not exist " << ros_controllers_yaml_path);
+    RCLCPP_WARN_STREAM(*logger_, "Does not exist " << ros_controllers_yaml_path);
     return;
   }
 
@@ -71,8 +71,7 @@ void MoveItControllersConfig::loadPrevious(const std::filesystem::path& package_
       const YAML::Node& cnode = controllers[controller_name];
       if (!cnode.IsDefined())
       {
-        RCLCPP_WARN_STREAM((*logger_),
-                           "Configuration for controller " << controller_name << " does not exist! Ignoring.");
+        RCLCPP_WARN_STREAM(*logger_, "Configuration for controller " << controller_name << " does not exist! Ignoring.");
         continue;
       }
 
@@ -84,7 +83,7 @@ void MoveItControllersConfig::loadPrevious(const std::filesystem::path& package_
   }
   catch (YAML::ParserException& e)  // Catch errors
   {
-    RCLCPP_ERROR_STREAM((*logger_), e.what());
+    RCLCPP_ERROR_STREAM(*logger_, e.what());
   }
 }
 
@@ -99,7 +98,7 @@ bool MoveItControllersConfig::parseController(const std::string& name, const YAM
   getYamlProperty(controller_node, "type", control_setting.type_);
   if (control_setting.type_.empty())
   {
-    RCLCPP_ERROR_STREAM((*logger_), "Couldn't parse type for controller " << name << " in moveit_controllers.yaml");
+    RCLCPP_ERROR_STREAM(*logger_, "Couldn't parse type for controller " << name << " in moveit_controllers.yaml");
     return false;
   }
 
@@ -115,7 +114,7 @@ bool MoveItControllersConfig::parseController(const std::string& name, const YAM
   }
   if (control_setting.joints_.empty())
   {
-    RCLCPP_ERROR_STREAM((*logger_), "Couldn't parse joints for controller " << name << " in moveit_controllers.yaml");
+    RCLCPP_ERROR_STREAM(*logger_, "Couldn't parse joints for controller " << name << " in moveit_controllers.yaml");
     return false;
   }
   // All required fields were parsed correctly

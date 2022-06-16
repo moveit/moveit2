@@ -99,7 +99,7 @@ void PlanningGroups::renameGroup(const std::string& old_group_name, const std::s
     // Check if this eef's parent group references old group name. if so, update it
     if (eef.parent_group_ == old_group_name)  // same name
     {
-      RCLCPP_DEBUG_STREAM((*logger_), "Changed eef '" << eef.name_ << "' to new parent group name " << new_group_name);
+      RCLCPP_DEBUG_STREAM(*logger_, "Changed eef '" << eef.name_ << "' to new parent group name " << new_group_name);
       eef.parent_group_ = new_group_name;  // updated
       changes |= END_EFFECTORS;
     }
@@ -107,7 +107,7 @@ void PlanningGroups::renameGroup(const std::string& old_group_name, const std::s
     // Check if this eef's group references old group name. if so, update it
     if (eef.component_group_.compare(old_group_name) == 0)  // same name
     {
-      RCLCPP_DEBUG_STREAM((*logger_), "Changed eef '" << eef.name_ << "' to new group name " << new_group_name);
+      RCLCPP_DEBUG_STREAM(*logger_, "Changed eef '" << eef.name_ << "' to new group name " << new_group_name);
       eef.component_group_ = new_group_name;  // updated
       changes |= END_EFFECTORS;
     }
@@ -119,8 +119,8 @@ void PlanningGroups::renameGroup(const std::string& old_group_name, const std::s
     // Check if this eef's parent group references old group name. if so, update it
     if (gs.group_ == old_group_name)  // same name
     {
-      RCLCPP_DEBUG_STREAM((*logger_), "Changed group state group '" << gs.group_ << "' to new parent group name "
-                                                                    << new_group_name);
+      RCLCPP_DEBUG_STREAM(*logger_, "Changed group state group '" << gs.group_ << "' to new parent group name "
+                                                                  << new_group_name);
       gs.group_ = new_group_name;  // updated
       changes |= POSES;
     }
