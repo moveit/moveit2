@@ -59,8 +59,6 @@ static const char* DEFAULT_CAPABILITIES[] = {
    "move_group/MoveGroupKinematicsService",
    "move_group/MoveGroupExecuteTrajectoryAction",
    "move_group/MoveGroupMoveAction",
-    // TODO (ddengster) : wait for port for moveit_ros_manipulation package
-   //"move_group/MoveGroupPickPlaceAction",
    "move_group/MoveGroupPlanService",
    "move_group/MoveGroupQueryPlannersService",
    "move_group/MoveGroupStateValidationService",
