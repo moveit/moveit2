@@ -62,10 +62,6 @@
 #include <moveit_msgs/srv/get_planner_params.hpp>
 #include <moveit_msgs/srv/set_planner_params.hpp>
 #include <moveit/utils/rclcpp_utils.h>
-// TODO(JafarAbdi): Enable once moveit_ros_manipulation is ported
-// #include <moveit_msgs/msg/place_location.hpp>
-// #include <moveit_msgs/action/pickup.hpp>
-// #include <moveit_msgs/action/place.hpp>
 
 #include <std_msgs/msg/string.hpp>
 #include <geometry_msgs/msg/transform_stamped.h>
@@ -163,14 +159,6 @@ public:
     move_action_client_ = rclcpp_action::create_client<moveit_msgs::action::MoveGroup>(
         pnode_, rclcpp::names::append(opt_.move_group_namespace_, move_group::MOVE_ACTION));
     move_action_client_->wait_for_action_server(wait_for_servers.to_chrono<std::chrono::duration<double>>());
-    // TODO(JafarAbdi): Enable once moveit_ros_manipulation is ported
-    // pick_action_client_ = rclcpp_action::create_client<moveit_msgs::action::Pickup>(
-    //        node_, move_group::PICKUP_ACTION);
-    //    pick_action_client_->wait_for_action_server(std::chrono::nanoseconds(timeout_for_servers.nanoseconds()));
-    //
-    //    place_action_client_ = rclcpp_action::create_client<moveit_msgs::action::Place>(
-    //        node_, move_group::PLACE_ACTION);
-    //    place_action_client_->wait_for_action_server(std::chrono::nanoseconds(timeout_for_servers.nanoseconds()));
     execute_action_client_ = rclcpp_action::create_client<moveit_msgs::action::ExecuteTrajectory>(
         pnode_, rclcpp::names::append(opt_.move_group_namespace_, move_group::EXECUTE_ACTION_NAME));
     execute_action_client_->wait_for_action_server(wait_for_servers.to_chrono<std::chrono::duration<double>>());

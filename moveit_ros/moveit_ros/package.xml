@@ -31,9 +31,6 @@
   <exec_depend>moveit_ros_robot_interaction</exec_depend>
   <exec_depend>moveit_ros_planning_interface</exec_depend>
   <exec_depend>moveit_ros_visualization</exec_depend>
-  <!--
-  <exec_depend>moveit_ros_manipulation</exec_depend>
-  -->
   <exec_depend>moveit_ros_move_group</exec_depend>
 
   <test_depend>ament_lint_auto</test_depend>

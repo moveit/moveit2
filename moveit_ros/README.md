@@ -4,5 +4,4 @@ This repository includes components of MoveIt that use ROS. This is where much o
 - planning
 - planning interfaces
 - benchmarking
-- manipulation
 - visualization
