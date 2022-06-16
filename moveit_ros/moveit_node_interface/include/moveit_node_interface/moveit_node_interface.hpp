@@ -49,15 +49,15 @@ struct NodeInterface
 private:
   struct NodeBase
   {
-    virtual rclcpp::node_interfaces::NodeBaseInterface::SharedPtr get_node_base_interface() = 0;
+    virtual rclcpp::node_interfaces::NodeBaseInterface::SharedPtr get_node_base_interface() = 0;  // NOLINT
 
-    virtual rclcpp::node_interfaces::NodeTopicsInterface::SharedPtr get_node_topics_interface() = 0;
+    virtual rclcpp::node_interfaces::NodeTopicsInterface::SharedPtr get_node_topics_interface() = 0;  // NOLINT
 
-    virtual rclcpp::node_interfaces::NodeParametersInterface::SharedPtr get_node_parameters_interface() = 0;
+    virtual rclcpp::node_interfaces::NodeParametersInterface::SharedPtr get_node_parameters_interface() = 0;  // NOLINT
 
-    virtual std::optional<std::shared_ptr<rclcpp::Node>> get_rcl_node() const = 0;
+    virtual std::optional<std::shared_ptr<rclcpp::Node>> get_rcl_node() const = 0;  // NOLINT
 
-    virtual std::optional<std::shared_ptr<rclcpp_lifecycle::LifecycleNode>> get_lifecycle_node() const = 0;
+    virtual std::optional<std::shared_ptr<rclcpp_lifecycle::LifecycleNode>> get_lifecycle_node() const = 0;  // NOLINT
   };
 
   template <typename T>
@@ -95,17 +95,17 @@ public:
   {
   }
 
-  rclcpp::node_interfaces::NodeBaseInterface::SharedPtr get_node_base_interface();
+  rclcpp::node_interfaces::NodeBaseInterface::SharedPtr get_node_base_interface();  // NOLINT
 
-  rclcpp::node_interfaces::NodeTopicsInterface::SharedPtr get_node_topics_interface();
+  rclcpp::node_interfaces::NodeTopicsInterface::SharedPtr get_node_topics_interface();  // NOLINT
 
-  rclcpp::node_interfaces::NodeParametersInterface::SharedPtr get_node_parameters_interface();
+  rclcpp::node_interfaces::NodeParametersInterface::SharedPtr get_node_parameters_interface();  // NOLINT
 
-  std::optional<std::shared_ptr<rclcpp::Node>> get_rcl_node() const;
+  std::optional<std::shared_ptr<rclcpp::Node>> get_rcl_node() const;  // NOLINT
 
   std::shared_ptr<NodeBase> node_handle_;
 
-  std::optional<std::shared_ptr<rclcpp_lifecycle::LifecycleNode>> get_lifecycle_node() const;
+  std::optional<std::shared_ptr<rclcpp_lifecycle::LifecycleNode>> get_lifecycle_node() const;  // NOLINT
 };
 
 using NodeInterfaceSharedPtr = std::shared_ptr<NodeInterface>;
