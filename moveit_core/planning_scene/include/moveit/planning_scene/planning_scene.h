@@ -51,7 +51,6 @@
 #include <moveit_msgs/msg/constraints.hpp>
 #include <moveit_msgs/msg/planning_scene_components.hpp>
 #include <octomap_msgs/msg/octomap_with_pose.hpp>
-#include <boost/concept_check.hpp>
 #include <memory>
 #include <functional>
 #include <thread>
