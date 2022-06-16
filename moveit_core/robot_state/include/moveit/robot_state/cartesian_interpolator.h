@@ -40,8 +40,6 @@
 
 #include <moveit/robot_state/robot_state.h>
 
-#include <boost/assert.hpp>
-
 namespace moveit
 {
 namespace core

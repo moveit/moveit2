@@ -38,7 +38,6 @@
 
 #pragma once
 
-#include <boost/numeric/ublas/matrix.hpp>
 #include <functional>
 #include <random>
 #include <eigen3/Eigen/Core>

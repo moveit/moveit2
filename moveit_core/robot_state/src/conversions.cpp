@@ -44,9 +44,7 @@
 #else
 #include <tf2_eigen/tf2_eigen.h>
 #endif
-#include <boost/lexical_cast.hpp>
 #include <string>
-#include "rclcpp/rclcpp.hpp"
 
 namespace moveit
 {

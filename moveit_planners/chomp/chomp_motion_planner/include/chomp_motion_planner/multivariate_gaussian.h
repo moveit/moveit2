@@ -37,9 +37,6 @@
 #pragma once
 
 #include <random>
-#include <boost/random/mersenne_twister.hpp>
-#include <boost/random/normal_distribution.hpp>
-#include <boost/random/variate_generator.hpp>
 #include <cstdlib>
 #include <eigen3/Eigen/Cholesky>
 #include <eigen3/Eigen/Core>
