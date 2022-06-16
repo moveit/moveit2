@@ -25,7 +25,6 @@ find_package(catkin REQUIRED COMPONENTS
 )
 
 find_package(Eigen3 REQUIRED)
-find_package(Boost REQUIRED thread system filesystem date_time program_options)
 
 generate_dynamic_reconfigure_options("pick_place/cfg/PickPlaceDynamicReconfigure.cfg")
 
@@ -51,7 +50,6 @@ include_directories(move_group_pick_place_capability/include)
 
 include_directories(SYSTEM
                     ${catkin_INCLUDE_DIRS}
-                    ${Boost_INCLUDE_DIRS}
                     ${EIGEN3_INCLUDE_DIRS})
 
 add_subdirectory(pick_place)

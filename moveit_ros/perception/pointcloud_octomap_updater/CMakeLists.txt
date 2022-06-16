@@ -11,7 +11,6 @@ ament_target_dependencies(${MOVEIT_LIB_NAME}_core
   moveit_ros_occupancy_map_monitor
   tf2_geometry_msgs
   tf2
-  Boost
 )
 target_link_libraries(${MOVEIT_LIB_NAME}_core moveit_point_containment_filter)
 set_target_properties(${MOVEIT_LIB_NAME}_core PROPERTIES COMPILE_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
@@ -28,7 +27,6 @@ ament_target_dependencies(${MOVEIT_LIB_NAME}
   moveit_ros_occupancy_map_monitor
   tf2_geometry_msgs
   tf2
-  Boost
   pluginlib
 )
 target_link_libraries(${MOVEIT_LIB_NAME} ${MOVEIT_LIB_NAME}_core)
