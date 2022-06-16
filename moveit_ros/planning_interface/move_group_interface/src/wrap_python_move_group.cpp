@@ -58,6 +58,7 @@
 #include <tf2_ros/buffer.h>
 
 #include <boost/python.hpp>
+#include <boost/noncopyable.hpp>
 #include <eigenpy/eigenpy.hpp>
 #include <memory>
 #include <Python.h>
