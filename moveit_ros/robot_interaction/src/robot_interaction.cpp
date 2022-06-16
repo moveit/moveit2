@@ -53,8 +53,6 @@
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 #endif
 #include <tf2/LinearMath/Transform.h>
-#include <boost/math/constants/constants.hpp>
-#include <boost/algorithm/string.hpp>
 
 #include <algorithm>
 #include <limits>

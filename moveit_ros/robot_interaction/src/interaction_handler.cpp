@@ -54,7 +54,6 @@
 #else
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 #endif
-#include <boost/math/constants/constants.hpp>
 #include <algorithm>
 #include <string>
 
