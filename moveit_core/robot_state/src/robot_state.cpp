@@ -35,11 +35,11 @@
 
 /* Author: Ioan Sucan, Sachin Chitta, Acorn Pooley, Mario Prats, Dave Coleman */
 
-#include <moveit/robot_state/robot_state.h>
-#include <moveit/robot_state/cartesian_interpolator.h>
-#include <moveit/transforms/transforms.h>
 #include <geometric_shapes/check_isometry.h>
 #include <geometric_shapes/shape_operations.h>
+#include <moveit/robot_state/cartesian_interpolator.h>
+#include <moveit/robot_state/robot_state.h>
+#include <moveit/transforms/transforms.h>
 #include <rclcpp/clock.hpp>
 #include <rclcpp/logger.hpp>
 #include <rclcpp/logging.hpp>
@@ -49,10 +49,10 @@
 #else
 #include <tf2_eigen/tf2_eigen.h>
 #endif
-#include <moveit/macros/console_colors.h>
-#include <functional>
-#include <moveit/robot_model/aabb.h>
 #include <cassert>
+#include <functional>
+#include <moveit/macros/console_colors.h>
+#include <moveit/robot_model/aabb.h>
 
 namespace moveit
 {

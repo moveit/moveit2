@@ -60,9 +60,9 @@
 
 #include <fstream>
 #include <memory>
-#include <string>
-#include <stdexcept>
 #include <regex>
+#include <stdexcept>
+#include <string>
 
 namespace moveit_benchmarks
 {
