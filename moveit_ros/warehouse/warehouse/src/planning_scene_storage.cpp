@@ -35,9 +35,9 @@
 /* Author: Ioan Sucan */
 
 #include <moveit/warehouse/planning_scene_storage.h>
-#include <boost/regex.hpp>
 #include <utility>
 #include <rclcpp/serialization.hpp>
+#include <regex>
 
 const std::string moveit_warehouse::PlanningSceneStorage::DATABASE_NAME = "moveit_planning_scenes";
 
@@ -286,11 +286,11 @@ void moveit_warehouse::PlanningSceneStorage::getPlanningQueriesNames(const std::
   if (!regex.empty())
   {
     std::vector<std::string> fnames;
-    boost::regex r(regex);
+    std::regex r(regex);
     for (const std::string& query_name : query_names)
     {
-      boost::cmatch match;
-      if (boost::regex_match(query_name.c_str(), match, r))
+      std::smatch match;
+      if (std::regex_match(query_name, match, r))
       {
         fnames.push_back(query_name);
       }

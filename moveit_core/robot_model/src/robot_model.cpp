@@ -37,7 +37,6 @@
 
 #include <moveit/robot_model/robot_model.h>
 #include <geometric_shapes/shape_operations.h>
-#include <boost/math/constants/constants.hpp>
 #include <rclcpp/logger.hpp>
 #include <algorithm>
 #include <limits>

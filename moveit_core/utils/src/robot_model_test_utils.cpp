@@ -35,7 +35,6 @@
 /* Author: Bryce Willey */
 
 #include <boost/algorithm/string_regex.hpp>
-#include <boost/math/constants/constants.hpp>
 #include <geometry_msgs/msg/pose.hpp>
 #include <urdf_parser/urdf_parser.h>
 #include <moveit/utils/robot_model_test_utils.h>
@@ -191,8 +190,8 @@ void RobotModelBuilder::addChain(const std::string& section, const std::string& 
     if (joint->type == urdf::Joint::REVOLUTE || joint->type == urdf::Joint::PRISMATIC)
     {
       auto limits = std::make_shared<urdf::JointLimits>();
-      limits->lower = -boost::math::constants::pi<double>();
-      limits->upper = boost::math::constants::pi<double>();
+      limits->lower = -M_PI;
+      limits->upper = M_PI;
 
       joint->limits = limits;
     }

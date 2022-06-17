@@ -53,12 +53,10 @@
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 #endif
 #include <tf2/LinearMath/Transform.h>
-#include <boost/lexical_cast.hpp>
-#include <boost/math/constants/constants.hpp>
-#include <boost/algorithm/string.hpp>
 
 #include <algorithm>
 #include <limits>
+#include <string>
 
 #include <Eigen/Core>
 #include <Eigen/Geometry>
@@ -120,7 +118,7 @@ void RobotInteraction::addActiveComponent(const InteractiveMarkerConstructorFn& 
   g.update_pose = update;
   g.process_feedback = process;
   // compute the suffix that will be added to the generated markers
-  g.marker_name_suffix = "_" + name + "_" + boost::lexical_cast<std::string>(active_generic_.size());
+  g.marker_name_suffix = "_" + name + "_" + std::to_string(active_generic_.size());
   active_generic_.push_back(g);
 }
 

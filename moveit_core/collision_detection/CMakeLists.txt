@@ -24,7 +24,6 @@ ament_target_dependencies(${MOVEIT_LIB_NAME}
   visualization_msgs
   tf2_eigen
   geometric_shapes
-  Boost
   OCTOMAP
 )
 

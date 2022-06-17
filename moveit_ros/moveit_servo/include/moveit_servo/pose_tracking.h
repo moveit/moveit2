@@ -39,11 +39,11 @@
 #pragma once
 
 #include <atomic>
-#include <boost/optional/optional.hpp>
 #include <control_toolbox/pid.hpp>
 #include <moveit_servo/make_shared_from_pool.h>
-#include <moveit_servo/servo.h>
 #include <moveit_servo/servo_parameters.h>
+#include <moveit_servo/servo.h>
+#include <optional>
 #if __has_include(<tf2_geometry_msgs/tf2_geometry_msgs.hpp>)
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
 #else
@@ -191,7 +191,7 @@ private:
   // Flag that a different thread has requested a stop.
   std::atomic<bool> stop_requested_;
 
-  boost::optional<double> angular_error_;
+  std::optional<double> angular_error_;
 };
 
 // using alias

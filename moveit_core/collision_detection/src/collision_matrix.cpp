@@ -368,7 +368,7 @@ void AllowedCollisionMatrix::getMessage(moveit_msgs::msg::AllowedCollisionMatrix
   for (std::size_t i = 0; i < msg.entry_names.size(); ++i)
     msg.entry_values[i].enabled.resize(msg.entry_names.size(), false);
 
-  // there is an approximation here: if we use a boost function to decide
+  // there is an approximation here: if we use a function to decide
   // whether a collision is allowed or not, we just assume the collision is not allowed.
   for (std::size_t i = 0; i < msg.entry_names.size(); ++i)
   {

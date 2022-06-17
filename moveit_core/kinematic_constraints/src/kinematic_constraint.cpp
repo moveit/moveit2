@@ -40,7 +40,6 @@
 #include <moveit/robot_state/conversions.h>
 #include <moveit/collision_detection_fcl/collision_env_fcl.h>
 #include <geometric_shapes/check_isometry.h>
-#include <boost/math/constants/constants.hpp>
 #include <rclcpp/logger.hpp>
 #include <rclcpp/logging.hpp>
 #include <rclcpp/time.hpp>
@@ -51,6 +50,7 @@
 #endif
 #include <functional>
 #include <limits>
+#include <math.h>
 #include <memory>
 #include <typeinfo>
 
@@ -64,11 +64,11 @@ static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_kinematic_constr
 
 static double normalizeAngle(double angle)
 {
-  double v = fmod(angle, 2.0 * boost::math::constants::pi<double>());
-  if (v < -boost::math::constants::pi<double>())
-    v += 2.0 * boost::math::constants::pi<double>();
-  else if (v > boost::math::constants::pi<double>())
-    v -= 2.0 * boost::math::constants::pi<double>();
+  double v = fmod(angle, 2.0 * M_PI);
+  if (v < -M_PI)
+    v += 2.0 * M_PI;
+  else if (v > M_PI)
+    v -= 2.0 * M_PI;
   return v;
 }
 
@@ -287,10 +287,10 @@ ConstraintEvaluationResult JointConstraint::decide(const moveit::core::RobotStat
   {
     dif = normalizeAngle(current_joint_position) - joint_position_;
 
-    if (dif > boost::math::constants::pi<double>())
-      dif = 2.0 * boost::math::constants::pi<double>() - dif;
-    else if (dif < -boost::math::constants::pi<double>())
-      dif += 2.0 * boost::math::constants::pi<double>();  // we include a sign change to have dif > 0
+    if (dif > M_PI)
+      dif = 2.0 * M_PI - dif;
+    else if (dif < -M_PI)
+      dif += 2.0 * M_PI;  // we include a sign change to have dif > 0
   }
   else
     dif = current_joint_position - joint_position_;
@@ -803,7 +803,7 @@ bool VisibilityConstraint::configure(const moveit_msgs::msg::VisibilityConstrain
 
   // compute the points on the base circle of the cone that make up the cone sides
   points_.clear();
-  double delta = 2.0 * boost::math::constants::pi<double>() / (double)cone_sides_;
+  double delta = 2.0 * M_PI / (double)cone_sides_;
   double a = 0.0;
   for (unsigned int i = 0; i < cone_sides_; ++i, a += delta)
   {

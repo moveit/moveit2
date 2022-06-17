@@ -554,9 +554,8 @@ unsigned int disableNeverInCollision(const unsigned int num_trials, planning_sce
                                      StringPairSet& links_seen_colliding, unsigned int* progress)
 {
   unsigned int num_disabled = 0;
-
-  boost::thread_group bgroup;  // create a group of threads
-  std::mutex lock;             // used for sharing the same data structures
+  std::vector<std::thread> bgroup;
+  std::mutex lock;  // used for sharing the same data structures
 
   int num_threads = std::thread::hardware_concurrency();  // how many cores does this computer have?
   // RCLCPP_INFO_STREAM_STREAM(LOGGER, "Performing " << num_trials << " trials for 'always in collision' checking on " <<
@@ -565,19 +564,12 @@ unsigned int disableNeverInCollision(const unsigned int num_trials, planning_sce
   for (int i = 0; i < num_threads; ++i)
   {
     ThreadComputation tc(scene, req, i, num_trials / num_threads, &links_seen_colliding, &lock, progress);
-    bgroup.create_thread([tc] { return disableNeverInCollisionThread(tc); });
+    bgroup.push_back(std::thread([tc] { return disableNeverInCollisionThread(tc); }));
   }
 
-  try
+  for (auto& thread : bgroup)
   {
-    bgroup.join_all();  // wait for all threads to finish
-  }
-  catch (boost::thread_interrupted)
-  {
-    RCLCPP_WARN_STREAM(LOGGER, "disableNeverInCollision interrupted");
-    bgroup.interrupt_all();
-    bgroup.join_all();  // wait for all threads to interrupt
-    throw;
+    thread.join();
   }
 
   // Loop through every possible link pair and check if it has ever been seen in collision

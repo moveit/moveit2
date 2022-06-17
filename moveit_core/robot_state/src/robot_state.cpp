@@ -35,11 +35,11 @@
 
 /* Author: Ioan Sucan, Sachin Chitta, Acorn Pooley, Mario Prats, Dave Coleman */
 
-#include <moveit/robot_state/robot_state.h>
-#include <moveit/robot_state/cartesian_interpolator.h>
-#include <moveit/transforms/transforms.h>
 #include <geometric_shapes/check_isometry.h>
 #include <geometric_shapes/shape_operations.h>
+#include <moveit/robot_state/cartesian_interpolator.h>
+#include <moveit/robot_state/robot_state.h>
+#include <moveit/transforms/transforms.h>
 #include <rclcpp/clock.hpp>
 #include <rclcpp/logger.hpp>
 #include <rclcpp/logging.hpp>
@@ -49,8 +49,9 @@
 #else
 #include <tf2_eigen/tf2_eigen.h>
 #endif
-#include <moveit/macros/console_colors.h>
+#include <cassert>
 #include <functional>
+#include <moveit/macros/console_colors.h>
 #include <moveit/robot_model/aabb.h>
 
 namespace moveit
@@ -1132,7 +1133,7 @@ const Eigen::Isometry3d& RobotState::getFrameInfo(const std::string& frame_id, c
   }
   if ((robot_link = robot_model_->getLinkModel(frame_id, &frame_found)))
   {
-    BOOST_VERIFY(checkLinkTransforms());
+    assert(checkLinkTransforms());
     return global_link_transforms_[robot_link->getLinkIndex()];
   }
   robot_link = nullptr;
@@ -1144,7 +1145,7 @@ const Eigen::Isometry3d& RobotState::getFrameInfo(const std::string& frame_id, c
     const Eigen::Isometry3d& transform = jt->second->getGlobalPose();
     robot_link = jt->second->getAttachedLink();
     frame_found = true;
-    BOOST_VERIFY(checkLinkTransforms());
+    assert(checkLinkTransforms());
     return transform;
   }
 
@@ -1155,7 +1156,7 @@ const Eigen::Isometry3d& RobotState::getFrameInfo(const std::string& frame_id, c
     if (frame_found)
     {
       robot_link = body.second->getAttachedLink();
-      BOOST_VERIFY(checkLinkTransforms());
+      assert(checkLinkTransforms());
       return transform;
     }
   }
@@ -1284,7 +1285,7 @@ bool RobotState::getJacobian(const JointModelGroup* group, const LinkModel* link
                              const Eigen::Vector3d& reference_point_position, Eigen::MatrixXd& jacobian,
                              bool use_quaternion_representation) const
 {
-  BOOST_VERIFY(checkLinkTransforms());
+  assert(checkLinkTransforms());
 
   if (!group->isChain())
   {
@@ -2049,7 +2050,7 @@ double RobotState::computeCartesianPath(const JointModelGroup* group, std::vecto
 
 void RobotState::computeAABB(std::vector<double>& aabb) const
 {
-  BOOST_VERIFY(checkLinkTransforms());
+  assert(checkLinkTransforms());
 
   core::AABB bounding_box;
   std::vector<const LinkModel*> links = robot_model_->getLinkModelsWithCollisionGeometry();

@@ -161,10 +161,10 @@ CommandListManager::getPreviousEndState(const MotionResponseCont& motion_plan_re
   {
     if (it->trajectory_->getGroupName() == group_name)
     {
-      return it->trajectory_->getLastWayPoint();
+      return std::reference_wrapper(it->trajectory_->getLastWayPoint());
     }
   }
-  return boost::none;
+  return {};
 }
 
 void CommandListManager::setStartState(const MotionResponseCont& motion_plan_responses, const std::string& group_name,

@@ -36,7 +36,6 @@
 
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/replace.hpp>
-#include <boost/lexical_cast.hpp>
 
 #include <moveit/rviz_plugin_render_tools/trajectory_visualization.h>
 
@@ -56,6 +55,8 @@
 #include <rviz_common/properties/string_property.hpp>
 #include <rviz_default_plugins/robot/robot_link.hpp>
 #include <rviz_common/window_manager_interface.hpp>
+
+#include <string>
 
 using namespace std::placeholders;
 
@@ -259,8 +260,8 @@ void TrajectoryVisualization::changedShowTrail()
   for (std::size_t i = 0; i < trajectory_trail_.size(); ++i)
   {
     int waypoint_i = std::min(i * stepsize, t->getWayPointCount() - 1);  // limit to last trajectory point
-    auto r = std::make_unique<RobotStateVisualization>(scene_node_, context_,
-                                                       "Trail Robot " + boost::lexical_cast<std::string>(i), nullptr);
+    auto r =
+        std::make_unique<RobotStateVisualization>(scene_node_, context_, "Trail Robot " + std::to_string(i), nullptr);
     r->load(*robot_model_->getURDF());
     r->setVisualVisible(display_path_visual_enabled_property_->getBool());
     r->setCollisionVisible(display_path_collision_enabled_property_->getBool());
@@ -392,9 +393,9 @@ float TrajectoryVisualization::getStateDisplayTime()
   float value;
   try
   {
-    value = boost::lexical_cast<float>(tm);
+    value = std::stof(tm);
   }
-  catch (const boost::bad_lexical_cast& ex)
+  catch (const std::invalid_argument& ex)
   {
     state_display_time_property_->setStdString(default_time_string);
     return default_time_value;

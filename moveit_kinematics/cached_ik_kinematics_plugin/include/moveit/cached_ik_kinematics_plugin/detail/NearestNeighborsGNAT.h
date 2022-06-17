@@ -45,6 +45,7 @@
 #include <utility>
 #include "GreedyKCenters.h"
 #include "NearestNeighbors.h"
+#include <iostream>
 
 namespace cached_ik_kinematics_plugin
 {
