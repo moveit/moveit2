@@ -34,6 +34,7 @@
 
 /* Author: Bryce Willey */
 
+#include <boost/algorithm/string_regex.hpp>
 #include <boost/math/constants/constants.hpp>
 #include <geometry_msgs/msg/pose.hpp>
 #include <urdf_parser/urdf_parser.h>
@@ -42,7 +43,6 @@
 #include <filesystem>
 #include <rclcpp/logger.hpp>
 #include <rclcpp/logging.hpp>
-#include <regex>
 
 namespace moveit
 {
@@ -117,11 +117,8 @@ RobotModelBuilder::RobotModelBuilder(const std::string& name, const std::string&
 void RobotModelBuilder::addChain(const std::string& section, const std::string& type,
                                  const std::vector<geometry_msgs::msg::Pose>& joint_origins, urdf::Vector3 joint_axis)
 {
-  // https://stackoverflow.com/questions/53849/how-do-i-tokenize-a-string-in-c
-  std::regex re("->");
-  auto const link_names = std::vector<std::string>(std::sregex_token_iterator{ begin(section), end(section), re, -1 },
-                                                   std::sregex_token_iterator{});
-
+  std::vector<std::string> link_names;
+  boost::split_regex(link_names, section, boost::regex("->"));
   if (link_names.empty())
   {
     RCLCPP_ERROR(LOGGER, "No links specified (empty section?)");
