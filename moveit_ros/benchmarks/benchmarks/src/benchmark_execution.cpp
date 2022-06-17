@@ -46,7 +46,6 @@
 #include <boost/program_options/variables_map.hpp>
 #include <boost/algorithm/string/case_conv.hpp>
 #include <boost/algorithm/string.hpp>
-#include <boost/math/constants/constants.hpp>
 #include <boost/progress.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
 
@@ -59,6 +58,7 @@
 #include <Eigen/Geometry>
 
 #include <fstream>
+#include <math.h>
 #include <memory>
 #include <regex>
 #include <stdexcept>
@@ -864,7 +864,7 @@ void moveit_benchmarks::BenchmarkExecution::collectMetrics(RunData& rundata,
           if (acosValue > -1.0 && acosValue < 1.0)
           {
             // the smoothness is actually the outside angle of the one we compute
-            double angle = (boost::math::constants::pi<double>() - acos(acosValue));
+            double angle = (M_PI - acos(acosValue));
 
             // and we normalize by the length of the segments
             double u = 2.0 * angle;  /// (a + b);

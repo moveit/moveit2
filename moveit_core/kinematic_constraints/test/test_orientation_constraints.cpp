@@ -45,7 +45,7 @@
 #include <tf2_eigen/tf2_eigen.h>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 #endif
-#include <boost/math/constants/constants.hpp>
+#include <math.h>
 
 #include <moveit/utils/robot_model_test_utils.h>
 
@@ -202,24 +202,24 @@ TEST_F(SphericalRobot, Test2)
   moveit::core::RobotState robot_state(robot_model_);
   // Singularity: roll + yaw = theta
   // These violate either absolute_x_axis_tolerance or absolute_z_axis_tolerance
-  robot_state.setVariablePositions(getJointValues(0.15, boost::math::constants::half_pi<double>(), 0.15));
+  robot_state.setVariablePositions(getJointValues(0.15, M_PI_2, 0.15));
   robot_state.update();
   EXPECT_TRUE(oc.configure(ocm, tf));
   EXPECT_FALSE(oc.decide(robot_state).satisfied);
 
-  robot_state.setVariablePositions(getJointValues(0.21, boost::math::constants::half_pi<double>(), 0.0));
+  robot_state.setVariablePositions(getJointValues(0.21, M_PI_2, 0.0));
   robot_state.update();
   EXPECT_TRUE(oc.configure(ocm, tf));
   EXPECT_FALSE(oc.decide(robot_state).satisfied);
 
-  robot_state.setVariablePositions(getJointValues(0.0, boost::math::constants::half_pi<double>(), 0.21));
+  robot_state.setVariablePositions(getJointValues(0.0, M_PI_2, 0.21));
   robot_state.update();
   EXPECT_TRUE(oc.configure(ocm, tf));
   EXPECT_FALSE(oc.decide(robot_state).satisfied);
 
   // Singularity: roll - yaw = theta
   // This's identical to -pi/2 pitch rotation
-  robot_state.setVariablePositions(getJointValues(0.15, -boost::math::constants::half_pi<double>(), 0.15));
+  robot_state.setVariablePositions(getJointValues(0.15, -M_PI_2, 0.15));
   robot_state.update();
 
   EXPECT_TRUE(oc.configure(ocm, tf));
@@ -248,12 +248,12 @@ TEST_F(SphericalRobot, Test3)
   // Singularity: roll + yaw = theta
 
   // These tests violate absolute_x_axis_tolerance
-  robot_state.setVariablePositions(getJointValues(0.21, boost::math::constants::half_pi<double>(), 0.0));
+  robot_state.setVariablePositions(getJointValues(0.21, M_PI_2, 0.0));
   robot_state.update();
   EXPECT_TRUE(oc.configure(ocm, tf));
   EXPECT_FALSE(oc.decide(robot_state).satisfied);
 
-  robot_state.setVariablePositions(getJointValues(0.0, boost::math::constants::half_pi<double>(), 0.21));
+  robot_state.setVariablePositions(getJointValues(0.0, M_PI_2, 0.21));
   robot_state.update();
   EXPECT_TRUE(oc.configure(ocm, tf));
   EXPECT_FALSE(oc.decide(robot_state).satisfied);
@@ -263,12 +263,12 @@ TEST_F(SphericalRobot, Test3)
   ocm.absolute_z_axis_tolerance = 0.2;
 
   // These tests violate absolute_z_axis_tolerance
-  robot_state.setVariablePositions(getJointValues(0.21, boost::math::constants::half_pi<double>(), 0.0));
+  robot_state.setVariablePositions(getJointValues(0.21, M_PI_2, 0.0));
   robot_state.update();
   EXPECT_TRUE(oc.configure(ocm, tf));
   EXPECT_FALSE(oc.decide(robot_state).satisfied);
 
-  robot_state.setVariablePositions(getJointValues(0.0, boost::math::constants::half_pi<double>(), 0.21));
+  robot_state.setVariablePositions(getJointValues(0.0, M_PI_2, 0.21));
   robot_state.update();
   EXPECT_TRUE(oc.configure(ocm, tf));
   EXPECT_FALSE(oc.decide(robot_state).satisfied);
@@ -296,12 +296,12 @@ TEST_F(SphericalRobot, Test4)
   // Singularity: roll + yaw = theta
 
   // These tests violate absolute_x_axis_tolerance
-  robot_state.setVariablePositions(getJointValues(0.21, -boost::math::constants::half_pi<double>(), 0.0));
+  robot_state.setVariablePositions(getJointValues(0.21, -M_PI_2, 0.0));
   robot_state.update();
   EXPECT_TRUE(oc.configure(ocm, tf));
   EXPECT_FALSE(oc.decide(robot_state).satisfied);
 
-  robot_state.setVariablePositions(getJointValues(0.0, -boost::math::constants::half_pi<double>(), 0.21));
+  robot_state.setVariablePositions(getJointValues(0.0, -M_PI_2, 0.21));
   robot_state.update();
   EXPECT_TRUE(oc.configure(ocm, tf));
   EXPECT_FALSE(oc.decide(robot_state).satisfied);
@@ -311,17 +311,17 @@ TEST_F(SphericalRobot, Test4)
   ocm.absolute_z_axis_tolerance = 0.2;
 
   // These tests violate absolute_z_axis_tolerance
-  robot_state.setVariablePositions(getJointValues(0.21, -boost::math::constants::half_pi<double>(), 0.0));
+  robot_state.setVariablePositions(getJointValues(0.21, -M_PI_2, 0.0));
   robot_state.update();
   EXPECT_TRUE(oc.configure(ocm, tf));
   EXPECT_FALSE(oc.decide(robot_state).satisfied);
 
-  robot_state.setVariablePositions(getJointValues(0.0, -boost::math::constants::half_pi<double>(), 0.21));
+  robot_state.setVariablePositions(getJointValues(0.0, -M_PI_2, 0.21));
   robot_state.update();
   EXPECT_TRUE(oc.configure(ocm, tf));
   EXPECT_FALSE(oc.decide(robot_state).satisfied);
 
-  robot_state.setVariablePositions(getJointValues(0.5, -boost::math::constants::half_pi<double>(), 0.21));
+  robot_state.setVariablePositions(getJointValues(0.5, -M_PI_2, 0.21));
   robot_state.update();
   EXPECT_TRUE(oc.configure(ocm, tf));
   EXPECT_FALSE(oc.decide(robot_state).satisfied);
@@ -336,7 +336,7 @@ TEST_F(SphericalRobot, Test5)
   moveit_msgs::msg::OrientationConstraint ocm;
 
   moveit::core::RobotState robot_state(robot_model_);
-  robot_state.setVariablePositions(getJointValues(0.0, boost::math::constants::half_pi<double>(), 0.0));
+  robot_state.setVariablePositions(getJointValues(0.0, M_PI_2, 0.0));
   robot_state.update();
 
   ocm.link_name = "yaw";
@@ -347,7 +347,7 @@ TEST_F(SphericalRobot, Test5)
   ocm.absolute_z_axis_tolerance = 1.0;
   ocm.weight = 1.0;
 
-  robot_state.setVariablePositions(getJointValues(0.2, boost::math::constants::half_pi<double>(), 0.3));
+  robot_state.setVariablePositions(getJointValues(0.2, M_PI_2, 0.3));
   robot_state.update();
 
   EXPECT_TRUE(oc.configure(ocm, tf));
