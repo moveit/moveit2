@@ -189,19 +189,25 @@ def generate_common_hybrid_launch_description():
         output="screen",
     )
 
-    # Load controllers
-    load_controllers = []
-    for controller in [
-        "joint_state_broadcaster",
-        "panda_joint_group_position_controller",
-    ]:
-        load_controllers += [
-            ExecuteProcess(
-                cmd=["ros2 run controller_manager spawner {}".format(controller)],
-                shell=True,
-                output="screen",
-            )
-        ]
+    joint_state_broadcaster_spawner = Node(
+        package="controller_manager",
+        executable="spawner",
+        arguments=[
+            "joint_state_broadcaster",
+            "--controller-manager",
+            "/controller_manager",
+        ],
+    )
+
+    panda_joint_group_position_controller_spawner = Node(
+        package="controller_manager",
+        executable="spawner",
+        arguments=[
+            "panda_joint_group_position_controller",
+            "-c",
+            "/controller_manager",
+        ],
+    )
 
     launched_nodes = [
         container,
@@ -209,6 +215,8 @@ def generate_common_hybrid_launch_description():
         rviz_node,
         robot_state_publisher,
         ros2_control_node,
-    ] + load_controllers
+        joint_state_broadcaster_spawner,
+        panda_joint_group_position_controller_spawner,
+    ]
 
     return launched_nodes
