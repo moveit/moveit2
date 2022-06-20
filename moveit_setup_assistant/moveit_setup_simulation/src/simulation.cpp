@@ -35,7 +35,6 @@
 /* Author: David V. Lu!! */
 
 #include <moveit_setup_simulation/simulation.hpp>
-#include <moveit_setup_simulation/xml_manipulation.hpp>
 
 namespace moveit_setup
 {
@@ -73,23 +72,31 @@ std::string Simulation::getJointHardwareInterface(const std::string& joint_name)
   return "hardware_interface/EffortJointInterface";
 }
 
+std::string printXML(const tinyxml2::XMLDocument& doc)
+{
+  tinyxml2::XMLPrinter printer;
+  doc.Accept(&printer);
+  return printer.CStr();
+}
+
 // ******************************************************************************************
 // Writes a Gazebo compatible robot URDF to gazebo_compatible_urdf_string_
 // ******************************************************************************************
 std::string Simulation::getGazeboCompatibleURDF()
 {
-  TiXmlDocument doc;
+  using tinyxml2::XMLElement;
+
+  tinyxml2::XMLDocument doc;
   std::string urdf_string = urdf_config_->getURDFContents();
-  doc.Parse(urdf_string.c_str(), nullptr, TIXML_ENCODING_UTF8);
+  doc.Parse(urdf_string.c_str());
   auto root = doc.RootElement();
 
   // Normalize original urdf_string_
-  TiXmlPrinter orig_urdf;
-  doc.Accept(&orig_urdf);
+  std::string orig_urdf = printXML(doc);
 
   // Map existing SimpleTransmission elements to their joint name
-  std::map<std::string, TiXmlElement*> transmission_elements;
-  for (TiXmlElement* element = root->FirstChildElement("transmission"); element != nullptr;
+  std::map<std::string, XMLElement*> transmission_elements;
+  for (XMLElement* element = root->FirstChildElement("transmission"); element != nullptr;
        element = element->NextSiblingElement(element->Value()))
   {
     auto type_tag = element->FirstChildElement("type");
@@ -101,15 +108,15 @@ std::string Simulation::getGazeboCompatibleURDF()
   }
 
   // Loop through Link and Joint elements and add Gazebo tags if not present
-  for (TiXmlElement* element = root->FirstChildElement(); element != nullptr; element = element->NextSiblingElement())
+  for (XMLElement* element = root->FirstChildElement(); element != nullptr; element = element->NextSiblingElement())
   {
     const std::string tag_name(element->Value());
     if (tag_name == "link" && element->FirstChildElement("collision"))
     {
-      TiXmlElement* inertial = uniqueInsert(*element, "inertial");
-      uniqueInsert(*inertial, "mass", { { "value", "0.1" } });
-      uniqueInsert(*inertial, "origin", { { "xyz", "0 0 0" }, { "rpy", "0 0 0" } });
-      uniqueInsert(*inertial, "inertia",
+      XMLElement* inertial = uniqueInsert(doc, *element, "inertial");
+      uniqueInsert(doc, *inertial, "mass", { { "value", "0.1" } });
+      uniqueInsert(doc, *inertial, "origin", { { "xyz", "0 0 0" }, { "rpy", "0 0 0" } });
+      uniqueInsert(doc, *inertial, "inertia",
                    { { "ixx", "0.03" },
                      { "iyy", "0.03" },
                      { "izz", "0.03" },
@@ -125,39 +132,39 @@ std::string Simulation::getGazeboCompatibleURDF()
         continue;  // skip invalid or fixed joints
 
       // find existing or create new transmission element for this joint
-      TiXmlElement* transmission;
+      XMLElement* transmission;
       auto it = transmission_elements.find(joint_name);
       if (it != transmission_elements.end())
         transmission = it->second;
       else
       {
-        transmission = root->InsertEndChild(TiXmlElement("transmission"))->ToElement();
-        transmission->SetAttribute("name", std::string("trans_") + joint_name);
+        transmission = doc.NewElement("transmission");
+        root->InsertEndChild(transmission);
+        transmission->SetAttribute("name", (std::string("trans_") + joint_name).c_str());
       }
 
-      uniqueInsert(*transmission, "type", {}, "transmission_interface/SimpleTransmission");
+      uniqueInsert(doc, *transmission, "type", {}, "transmission_interface/SimpleTransmission");
 
       std::string hw_interface = getJointHardwareInterface(joint_name);
-      auto* joint = uniqueInsert(*transmission, "joint", { { "name", joint_name } });
-      uniqueInsert(*joint, "hardwareInterface", {}, hw_interface.c_str());
+      auto* joint = uniqueInsert(doc, *transmission, "joint", { { "name", joint_name } });
+      uniqueInsert(doc, *joint, "hardwareInterface", {}, hw_interface.c_str());
 
       auto actuator_name = joint_name + std::string("_motor");
-      auto* actuator = uniqueInsert(*transmission, "actuator", { { "name", actuator_name.c_str() } });
-      uniqueInsert(*actuator, "hardwareInterface", {}, hw_interface.c_str());
-      uniqueInsert(*actuator, "mechanicalReduction", {}, "1");
+      auto* actuator = uniqueInsert(doc, *transmission, "actuator", { { "name", actuator_name.c_str() } });
+      uniqueInsert(doc, *actuator, "hardwareInterface", {}, hw_interface.c_str());
+      uniqueInsert(doc, *actuator, "mechanicalReduction", {}, "1");
     }
   }
 
   // Add gazebo_ros_control plugin which reads the transmission tags
-  TiXmlElement* gazebo = uniqueInsert(*root, "gazebo");
-  TiXmlElement* plugin = uniqueInsert(*gazebo, "plugin", { { "name", "gazebo_ros_control", true } });
-  uniqueInsert(*plugin, "robotNamespace", {}, "/");
+  XMLElement* gazebo = uniqueInsert(doc, *root, "gazebo");
+  XMLElement* plugin = uniqueInsert(doc, *gazebo, "plugin", { { "name", "gazebo_ros_control", true } });
+  uniqueInsert(doc, *plugin, "robotNamespace", {}, "/");
 
   // generate new URDF
-  TiXmlPrinter new_urdf;
-  doc.Accept(&new_urdf);
+  std::string new_urdf = printXML(doc);
   // and return it when there are changes
-  return orig_urdf.Str() == new_urdf.Str() ? std::string() : new_urdf.Str();
+  return orig_urdf == new_urdf ? std::string() : new_urdf;
 }
 
 // ******************************************************************************************
@@ -178,16 +185,14 @@ bool Simulation::outputGazeboURDFFile(const std::filesystem::path& file_path)
   return true;
 }
 
-bool Simulation::isValidXML(const std::string& new_urdf_contents, int& error_row, int& error_col,
-                            std::string& error_description) const
+bool Simulation::isValidXML(const std::string& new_urdf_contents, int& error_row, std::string& error_description) const
 {
-  TiXmlDocument doc;
-  doc.Parse(new_urdf_contents.c_str(), nullptr, TIXML_ENCODING_UTF8);
+  tinyxml2::XMLDocument doc;
+  doc.Parse(new_urdf_contents.c_str());
   if (doc.Error())
   {
-    error_row = doc.ErrorRow();
-    error_col = doc.ErrorCol();
-    error_description = doc.ErrorDesc();
+    error_row = doc.ErrorLineNum();
+    error_description = doc.ErrorStr();
   }
   return !doc.Error();
 }

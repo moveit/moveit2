@@ -82,4 +82,50 @@ bool extractPackageNameFromPath(const std::filesystem::path& path, std::string& 
   return false;
 }
 
+bool hasRequiredAttributes(const tinyxml2::XMLElement& e, const std::vector<XMLAttribute>& attributes)
+{
+  for (const auto& attr : attributes)
+  {
+    if (!attr.required)
+      continue;  // attribute not required
+    const char* value = e.Attribute(attr.name);
+    if (value && strcmp(attr.value, value) == 0)
+      continue;  // attribute has required value
+    else
+      return false;
+  }
+  return true;
+};
+
+tinyxml2::XMLElement* uniqueInsert(tinyxml2::XMLDocument& doc, tinyxml2::XMLElement& element, const char* tag,
+                                   const std::vector<XMLAttribute>& attributes, const char* text)
+{
+  // search for existing element with required tag name and attributes
+  tinyxml2::XMLElement* result = element.FirstChildElement(tag);
+  while (result && !hasRequiredAttributes(*result, attributes))
+    result = result->NextSiblingElement(tag);
+
+  if (!result)  // if not yet present, create new element
+  {
+    result = doc.NewElement(tag);
+    element.InsertEndChild(result);
+  }
+
+  // set (not-yet existing) attributes
+  for (const auto& attr : attributes)
+  {
+    if (!result->Attribute(attr.name))
+      result->SetAttribute(attr.name, attr.value);
+  }
+
+  // insert text if required
+  if (text && !result->GetText())
+  {
+    tinyxml2::XMLText* text_el = doc.NewText(text);
+    result->InsertEndChild(text_el);
+  }
+
+  return result;
+}
+
 }  // namespace moveit_setup

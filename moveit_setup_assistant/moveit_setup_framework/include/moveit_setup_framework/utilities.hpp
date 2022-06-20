@@ -80,6 +80,31 @@ inline bool createParentFolders(const std::filesystem::path& file_path)
 bool extractPackageNameFromPath(const std::filesystem::path& path, std::string& package_name,
                                 std::filesystem::path& relative_filepath);
 
+/**
+ * @brief Simple structure for easy xml creation
+ */
+struct XMLAttribute
+{
+  const char* name;
+  const char* value;
+  bool required = false;
+};
+
+/**
+ * @brief Insert a new XML element with a given tag, attributes, and text
+ *
+ * If a corresponding element already exists (and has required attribute values), it is just reused.
+ *
+ * @param doc The XMLDocument, used for creating new elements
+ * @param element The tag inside of which the new tag should be inserted
+ * @param tag The name of the tag
+ * @param attributes Attribute name/value pairs to be created/overwritten
+ * @param text If not null, text value to insert inside the new tag
+ * @returns The new or existing element
+ */
+tinyxml2::XMLElement* uniqueInsert(tinyxml2::XMLDocument& doc, tinyxml2::XMLElement& element, const char* tag,
+                                   const std::vector<XMLAttribute>& attributes = {}, const char* text = nullptr);
+
 // Formerly "parse"
 template <typename T>
 inline bool getYamlProperty(const YAML::Node& node, const std::string& key, T& storage, const T& default_value = T())
