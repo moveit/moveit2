@@ -121,7 +121,7 @@ public:
   /**
    * @brief Returns a list of config_names that have registered types associated with them
    */
-  std::vector<std::string> getRegisteredNames() const;
+  const std::vector<std::string>& getRegisteredNames() const;
 
   /// Is this application in debug mode?
   bool debug{ false };
@@ -131,5 +131,6 @@ protected:
   pluginlib::ClassLoader<SetupConfig> config_loader_;
   std::unordered_map<std::string, SetupConfigPtr> configs_;        // mapping from name to config
   std::unordered_map<std::string, std::string> registered_types_;  // mapping from name to config class type
+  std::vector<std::string> registered_names_;                      // string version of keys for the maps, with ordering
 };
 }  // namespace moveit_setup
