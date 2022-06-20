@@ -49,6 +49,16 @@ DataWarehouse::DataWarehouse(const rclcpp::Node::SharedPtr& parent_node)
   registerType("package_settings", "moveit_setup::PackageSettingsConfig");
 }
 
+void DataWarehouse::preloadWithURDFPath(const std::filesystem::path& urdf_path)
+{
+  get<URDFConfig>("urdf")->loadFromPath(urdf_path);
+}
+
+void DataWarehouse::preloadWithFullConfig(const std::string& package_path_or_name)
+{
+  get<PackageSettingsConfig>("package_settings")->loadExisting(package_path_or_name);
+}
+
 SetupConfigPtr DataWarehouse::get(const std::string& config_name, std::string config_class)
 {
   if (config_class.empty())

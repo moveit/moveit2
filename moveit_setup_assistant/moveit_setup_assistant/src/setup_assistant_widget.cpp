@@ -36,8 +36,6 @@
 
 // SA
 #include "moveit_setup_assistant/setup_assistant_widget.hpp"
-#include <moveit_setup_framework/data/urdf_config.hpp>
-#include <moveit_setup_framework/data/package_settings_config.hpp>
 
 // Qt
 #include <QApplication>
@@ -129,15 +127,11 @@ SetupAssistantWidget::SetupAssistantWidget(rviz_common::ros_integration::RosNode
   // Pass command arg values to start screen and show appropriate part of screen
   if (args.count("urdf_path"))
   {
-    std::filesystem::path urdf_path = args["urdf_path"].as<std::filesystem::path>();
-    auto config = config_data_->get<URDFConfig>("urdf");
-    config->loadFromPath(urdf_path);
+    config_data_->preloadWithURDFPath(args["urdf_path"].as<std::filesystem::path>());
   }
   if (args.count("config_pkg"))
   {
-    std::string config_pkg = args["config_pkg"].as<std::string>();
-    auto package_settings = config_data_->get<PackageSettingsConfig>("package_settings");
-    package_settings->loadExisting(config_pkg);
+    config_data_->preloadWithFullConfig(args["config_pkg"].as<std::string>());
   }
 
   // Navigation Left Pane --------------------------------------------------
