@@ -702,7 +702,7 @@ void PlanningGroupsWidget::saveJointsScreen()
 // ******************************************************************************************
 void PlanningGroupsWidget::saveLinksScreen()
 {
-  setup_step_.setJoints(current_edit_group_, links_widget_->getSelectedValues());
+  setup_step_.setLinks(current_edit_group_, links_widget_->getSelectedValues());
 
   // Switch to main screen
   showMainScreen();
