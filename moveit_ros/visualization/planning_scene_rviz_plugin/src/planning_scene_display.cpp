@@ -239,6 +239,7 @@ void PlanningSceneDisplay::addBackgroundJob(const std::function<void()>& job, co
 void PlanningSceneDisplay::spawnBackgroundJob(const std::function<void()>& job)
 {
   std::thread t(job);
+  t.detach();
 }
 
 void PlanningSceneDisplay::addMainLoopJob(const std::function<void()>& job)
