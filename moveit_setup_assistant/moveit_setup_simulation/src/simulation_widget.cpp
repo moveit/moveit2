@@ -168,10 +168,10 @@ bool SimulationWidget::focusLost()
 
   // validate XML
   std::string urdf = simulation_text_->document()->toPlainText().toStdString();
-  int error_row, error_col;
+  int error_row;
   std::string error_description;
 
-  if (setup_step_.isValidXML(urdf, error_row, error_col, error_description))
+  if (setup_step_.isValidXML(urdf, error_row, error_description))
   {
     config_data_->gazebo_urdf_string_ = std::move(urdf);
     return true;
@@ -181,7 +181,6 @@ bool SimulationWidget::focusLost()
     QTextCursor cursor = simulation_text_->textCursor();
     cursor.movePosition(QTextCursor::Start);
     cursor.movePosition(QTextCursor::Down, QTextCursor::MoveAnchor, error_row);
-    cursor.movePosition(QTextCursor::Right, QTextCursor::MoveAnchor, error_col);
     simulation_text_->setTextCursor(cursor);
     QMessageBox::warning(this, tr("Gazebo URDF"), tr("Error parsing XML:\n").append(error_description.c_str()));
     simulation_text_->setFocus(Qt::OtherFocusReason);

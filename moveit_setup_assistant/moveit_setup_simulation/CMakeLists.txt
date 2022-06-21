@@ -23,7 +23,6 @@ qt5_wrap_cpp(MOC_FILES
 add_library(${PROJECT_NAME}
     src/simulation.cpp
     src/simulation_widget.cpp
-    src/xml_manipulation.cpp
     ${MOC_FILES}
 )
 target_include_directories(${PROJECT_NAME} PUBLIC

@@ -91,12 +91,10 @@ public:
    * @brief Check if the given xml is valid
    * @param[in] new_urdf_contents The string of xml to check
    * @param[out] error_row The row of the error
-   * @param[out] error_col The col of the error
    * @param[out] error_description The description
    * @returns True if valid, false otherwise
    */
-  bool isValidXML(const std::string& new_urdf_contents, int& error_row, int& error_col,
-                  std::string& error_description) const;
+  bool isValidXML(const std::string& new_urdf_contents, int& error_row, std::string& error_description) const;
 
 protected:
   std::shared_ptr<URDFConfig> urdf_config_;
