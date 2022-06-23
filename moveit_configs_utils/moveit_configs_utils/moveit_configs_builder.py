@@ -28,6 +28,7 @@ Example:
     moveit_configs.planning_pipelines
     moveit_configs.trajectory_execution
     moveit_configs.planning_scene_monitor
+    moveit_configs.sensors_3d
     moveit_configs.move_group_capabilities
     moveit_configs.joint_limits
     moveit_configs.moveit_cpp
@@ -100,8 +101,10 @@ class MoveItConfigs:
     planning_pipelines: Dict = field(default_factory=dict)
     # A dictionary contains parameters for trajectory execution & moveit controller managers.
     trajectory_execution: Dict = field(default_factory=dict)
-    # A dictionary that have the planning scene monitor's parameters.
+    # A dictionary that has the planning scene monitor's parameters.
     planning_scene_monitor: Dict = field(default_factory=dict)
+    # A dictionary that has the sensor 3d configuration parameters.
+    sensors_3d: Dict = field(default_factory=dict)
     # A dictionary containing move_group's non-default capabilities.
     move_group_capabilities: Dict = field(default_factory=dict)
     # A dictionary containing the overridden position/velocity/acceleration limits.
@@ -119,6 +122,7 @@ class MoveItConfigs:
         parameters.update(self.planning_pipelines)
         parameters.update(self.trajectory_execution)
         parameters.update(self.planning_scene_monitor)
+        parameters.update(self.sensors_3d)
         parameters.update(self.joint_limits)
         parameters.update(self.moveit_cpp)
         parameters.update(self.cartesian_limits)
@@ -345,6 +349,18 @@ class MoveItConfigsBuilder(ParameterBuilder):
         }
         return self
 
+    def sensors_3d(self, file_path: Optional[str] = None):
+        """Load sensors_3d paramerss.
+
+        :param file_path: Absolute or relative path to the sensors_3d yaml file (w.r.t. robot_name_moveit_config).
+        :return: Instance of MoveItConfigsBuilder with robot_description_planning loaded.
+        """
+        self.__moveit_configs.sensors_3d = load_yaml(
+            self._package_path
+            / (file_path or self.__config_dir_path / "sensors_3d.yaml")
+        )
+        return self
+
     def planning_pipelines(
         self,
         default_planning_pipeline: str = None,
@@ -436,6 +452,8 @@ class MoveItConfigsBuilder(ParameterBuilder):
             self.trajectory_execution()
         if not self.__moveit_configs.planning_scene_monitor:
             self.planning_scene_monitor()
+        if not self.__moveit_configs.sensors_3d:
+            self.sensors_3d()
         if not self.__moveit_configs.joint_limits:
             self.joint_limits()
         # TODO(JafarAbdi): We should have a default moveit_cpp.yaml as port of a moveit config package
