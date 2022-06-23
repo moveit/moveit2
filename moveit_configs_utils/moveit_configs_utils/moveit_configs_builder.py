@@ -122,7 +122,9 @@ class MoveItConfigs:
         parameters.update(self.planning_pipelines)
         parameters.update(self.trajectory_execution)
         parameters.update(self.planning_scene_monitor)
-        parameters.update(self.sensors_3d)
+        if self.sensors_3d:
+            # Not all robots have sensors_3d defined
+            parameters.update(self.sensors_3d)
         parameters.update(self.joint_limits)
         parameters.update(self.moveit_cpp)
         parameters.update(self.cartesian_limits)
