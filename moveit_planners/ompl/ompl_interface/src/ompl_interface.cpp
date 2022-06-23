@@ -93,9 +93,16 @@ OMPLInterface::~OMPLInterface() = default;
 void OMPLInterface::storePlannerData(const std::shared_ptr<std_srvs::srv::Trigger::Request> /* unused */,
                                      std::shared_ptr<std_srvs::srv::Trigger::Response> response)
 {
-  context_manager_.storePlannerData();
-  response->success = true;
-  RCLCPP_INFO(LOGGER, "Stored motion planner data");
+  bool success = context_manager_.storePlannerData();
+  response->success = success;
+  if (success)
+  {
+    RCLCPP_INFO(LOGGER, "Stored motion planner data");
+  }
+  else
+  {
+    RCLCPP_ERROR(LOGGER, "Motion planning graph is empty");
+  }
 }
 
 void OMPLInterface::setPlannerConfigurations(const planning_interface::PlannerConfigurationMap& pconfig)

@@ -96,22 +96,23 @@ struct PlanningContextManager::CachedContexts
   std::mutex lock_;
 };
 
-MultiQueryPlannerAllocator::~MultiQueryPlannerAllocator()
-{
-  storePlannerData();
-}
-
-void MultiQueryPlannerAllocator::storePlannerData()
+bool MultiQueryPlannerAllocator::storePlannerData()
 {
   // Store all planner data
   for (const auto& entry : planner_data_storage_paths_)
   {
     ob::PlannerData data(planners_[entry.first]->getSpaceInformation());
     planners_[entry.first]->getPlannerData(data);
+    if (data.numVertices() == 0)
+    {
+      return false;
+    }
     RCLCPP_INFO_STREAM(getLogger(), "Storing planner data. NumEdges: " << data.numEdges()
                                                                        << ", NumVertices: " << data.numVertices());
     storage_.store(data, entry.second.c_str());
   }
+
+  return true;
 }
 
 template <typename T>
@@ -274,9 +275,9 @@ PlanningContextManager::PlanningContextManager(moveit::core::RobotModelConstPtr 
 
 PlanningContextManager::~PlanningContextManager() = default;
 
-void PlanningContextManager::storePlannerData()
+bool PlanningContextManager::storePlannerData()
 {
-  planner_allocator_.storePlannerData();
+  return planner_allocator_.storePlannerData();
 }
 
 ConfiguredPlannerAllocator PlanningContextManager::plannerSelector(const std::string& planner) const

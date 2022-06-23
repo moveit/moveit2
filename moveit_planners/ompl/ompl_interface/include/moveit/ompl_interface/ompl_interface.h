@@ -71,6 +71,10 @@ public:
 
   virtual ~OMPLInterface();
 
+  /** @brief Store the OMPL planner data in a file.
+   *  @param request the service request
+   *  @param response the service response
+   */
   void storePlannerData(const std::shared_ptr<std_srvs::srv::Trigger::Request> request,
                         std::shared_ptr<std_srvs::srv::Trigger::Response> response);
 
