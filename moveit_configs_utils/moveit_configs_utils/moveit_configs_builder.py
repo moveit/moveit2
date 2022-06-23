@@ -355,10 +355,9 @@ class MoveItConfigsBuilder(ParameterBuilder):
         :param file_path: Absolute or relative path to the sensors_3d yaml file (w.r.t. robot_name_moveit_config).
         :return: Instance of MoveItConfigsBuilder with robot_description_planning loaded.
         """
-        self.__moveit_configs.sensors_3d = load_yaml(
-            self._package_path
-            / (file_path or self.__config_dir_path / "sensors_3d.yaml")
-        )
+        sensors_path = self._package_path / (file_path or self.__config_dir_path / "sensors_3d.yaml")
+        if sensors_path.exists():
+            self.__moveit_configs.sensors_3d = load_yaml(sensors_path)
         return self
 
     def planning_pipelines(
