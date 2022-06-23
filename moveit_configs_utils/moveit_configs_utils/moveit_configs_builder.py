@@ -122,9 +122,7 @@ class MoveItConfigs:
         parameters.update(self.planning_pipelines)
         parameters.update(self.trajectory_execution)
         parameters.update(self.planning_scene_monitor)
-        if self.sensors_3d:
-            # Not all robots have sensors_3d defined
-            parameters.update(self.sensors_3d)
+        parameters.update(self.sensors_3d)
         parameters.update(self.joint_limits)
         parameters.update(self.moveit_cpp)
         parameters.update(self.cartesian_limits)
@@ -361,7 +359,9 @@ class MoveItConfigsBuilder(ParameterBuilder):
             file_path or self.__config_dir_path / "sensors_3d.yaml"
         )
         if sensors_path.exists():
-            self.__moveit_configs.sensors_3d = load_yaml(sensors_path)
+            sensors_data = load_yaml(sensors_path)
+            if len(sensors_data["sensors"]) > 0 and sensors_data["sensors"][0]:
+                self.__moveit_configs.sensors_3d = sensors_data
         return self
 
     def planning_pipelines(
