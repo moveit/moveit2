@@ -1023,6 +1023,7 @@ protected:
   const moveit::core::RobotState& getTargetRobotState() const;
 
 private:
+  static size_t node_num;
   std::map<std::string, std::vector<double> > remembered_joint_values_;
   class MoveGroupInterfaceImpl;
   MoveGroupInterfaceImpl* impl_;
