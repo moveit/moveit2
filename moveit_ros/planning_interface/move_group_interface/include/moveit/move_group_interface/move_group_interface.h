@@ -1014,6 +1014,7 @@ private:
   std::map<std::string, std::vector<double> > remembered_joint_values_;
   class MoveGroupInterfaceImpl;
   MoveGroupInterfaceImpl* impl_;
+  static size_t node_num;
 };
 }  // namespace planning_interface
 }  // namespace moveit
