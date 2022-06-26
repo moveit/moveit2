@@ -52,6 +52,7 @@
 #include <rclcpp/time.hpp>
 #include <map>
 #include <memory>
+#include <queue>
 
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.plugins.ros_control_interface");
 static const rclcpp::Duration CONTROLLER_INFORMATION_VALIDITY_AGE = rclcpp::Duration::from_seconds(1.0);
@@ -146,7 +147,8 @@ class MoveItControllerManager : public moveit_controller_manager::MoveItControll
     managed_controllers_.clear();
     active_controllers_.clear();
 
-    const auto& result = result_future.get();
+    auto result = result_future.get();
+    MoveItControllerManager::fix_chained_controllers(result);
     for (const controller_manager_msgs::msg::ControllerState& controller : result->controller)
     {
       // If the controller is active, add it to the map of active controllers.
@@ -418,6 +420,75 @@ public:
       return result_future.get()->ok;
     }
     return true;
+  }
+
+  static void fix_chained_controllers(std::shared_ptr<controller_manager_msgs::srv::ListControllers::Response>& result){
+    // chained_to maps controller to a set of controller it outputs to
+    std::unordered_map<controller_manager_msgs::msg::ControllerState *, std::unordered_set<controller_manager_msgs::msg::ControllerState *>> chained_to;
+    // chained_from maps controller to a set of controller it receives from
+    std::unordered_map<controller_manager_msgs::msg::ControllerState *, std::unordered_set<controller_manager_msgs::msg::ControllerState *>> chained_from;
+
+    // controller_name_map maps controller names to the controller pointer
+    std::unordered_map<std::string, controller_manager_msgs::msg::ControllerState *> controller_name_map;
+    for (auto &c: result->controller) {
+      controller_name_map[c.name] = &c;
+    }
+    for (auto &c: result->controller) {
+      std::vector<std::string> tmp;
+      for (auto it = c.claimed_interfaces.begin(); it != c.claimed_interfaces.end(); it++) {
+        std::string interface = *it;
+        auto name = interface.substr(0, interface.find("/"));
+        // if the controller interface begins with a controller name, then it is chained
+        if (controller_name_map.find(name) != controller_name_map.end()) {
+          chained_to[&c].insert(controller_name_map[name]);
+          chained_from[controller_name_map[name]].insert(&c);
+        } else {
+          tmp.push_back(interface);
+        }
+      }
+      c.claimed_interfaces = tmp;
+    }
+
+    std::queue<controller_manager_msgs::msg::ControllerState *> chained_to_queue;
+    for (const auto &tmp: chained_to) {
+      for (auto tmp2: tmp.second) {
+        chained_to_queue.push(tmp2);
+      }
+    }
+
+    while (!chained_to_queue.empty()) {
+      auto c = chained_to_queue.front();
+      chained_to_queue.pop();
+      // if c is chained_from then it depends on another controller,
+      // so push to back of queue
+      if (chained_to.find(c) != chained_to.end()) {
+        chained_to_queue.push(c);
+        continue;
+      }
+
+      auto c_set = chained_from[c];
+      // add command interface to chained controllers
+      for (auto c2: c_set) {
+        for (auto interface: c->claimed_interfaces) {
+          c2->claimed_interfaces.push_back(interface);
+        }
+        c2->required_command_interfaces = c2->claimed_interfaces;
+        chained_to[c2].erase(c);
+        // enable any controller that depended on c
+        if (chained_to[c2].empty()) {
+          chained_to.erase(c2);
+        }
+      }
+    }
+
+    std::vector<controller_manager_msgs::msg::ControllerState> cs_final;
+    // if controller is in the chained from map, then it is an intermediate and should not be included
+    for (auto &c: result->controller) {
+      if (chained_from.find(&c) == chained_from.end()) {
+        cs_final.push_back(c);
+      }
+    }
+    result->controller = cs_final;
   }
 };
 /**

@@ -63,6 +63,18 @@ if(BUILD_TESTING)
 
   # Run all lint tests in package.xml except those listed above
   ament_lint_auto_find_test_dependencies()
+
+  find_package(ament_cmake_gtest REQUIRED)
+  ament_add_gtest(controller_manager_plugin_test
+#          src/controller_manager_plugin.cpp
+          test/controller_manager_plugin_test.cpp)
+  ament_target_dependencies(controller_manager_plugin_test
+          ${THIS_PACKAGE_INCLUDE_DEPENDS}
+          )
+  target_include_directories(controller_manager_plugin_test PRIVATE src)
+  target_include_directories(controller_manager_plugin_test PRIVATE include)
+
+
 endif()
 
 #############
