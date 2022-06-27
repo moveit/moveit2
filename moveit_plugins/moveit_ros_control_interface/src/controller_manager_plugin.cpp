@@ -422,8 +422,8 @@ public:
     return true;
   }
   /**
-   *  \brief fixChainedControllers modifies ListControllers service response if it contains chained controllers.
-   *  Since chained controllers cannot be written to directly, they are removed from the response and their interface
+   * \brief fixChainedControllers modifies ListControllers service response if it contains chained controllers.
+   * Since chained controllers cannot be written to directly, they are removed from the response and their interface
    * are propagated back to the first controller with a non-chained input
    */
   static void fixChainedControllers(std::shared_ptr<controller_manager_msgs::srv::ListControllers::Response>& result)
