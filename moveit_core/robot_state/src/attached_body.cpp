@@ -37,7 +37,6 @@
 #include <moveit/robot_state/attached_body.h>
 #include <geometric_shapes/check_isometry.h>
 #include <geometric_shapes/shapes.h>
-#include <boost/algorithm/string/predicate.hpp>
 
 namespace moveit
 {

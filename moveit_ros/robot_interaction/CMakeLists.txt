@@ -13,13 +13,10 @@ find_package(tf2_geometry_msgs REQUIRED)
 find_package(tf2_ros REQUIRED)
 find_package(rclcpp REQUIRED)
 
-# Finds Boost Components
-include(ConfigExtras.cmake)
 
 set(MOVEIT_LIB_NAME moveit_robot_interaction)
 
 set(THIS_PACKAGE_INCLUDE_DEPENDS
-  Boost
   moveit_ros_planning
   interactive_markers
   tf2_geometry_msgs
@@ -45,8 +42,6 @@ if(BUILD_TESTING)
   find_package(ament_cmake_gtest REQUIRED)
   ament_add_gtest(locked_robot_state_test test/locked_robot_state_test.cpp)
   target_link_libraries(locked_robot_state_test ${MOVEIT_LIB_NAME})
-  ament_target_dependencies(locked_robot_state_test
-    Boost)
 endif()
 
 install(
@@ -78,4 +73,4 @@ if(BUILD_TESTING)
   ament_lint_auto_find_test_dependencies()
 endif()
 
-ament_package(CONFIG_EXTRAS ConfigExtras.cmake)
+ament_package()

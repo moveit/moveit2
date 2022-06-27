@@ -34,6 +34,7 @@
 
 /* Author: Ioan Sucan, Adam Leeper */
 
+#include <math.h>
 #include <moveit/robot_trajectory/robot_trajectory.h>
 #include <moveit/robot_state/conversions.h>
 #include <rclcpp/duration.hpp>
@@ -45,7 +46,6 @@
 #else
 #include <tf2_eigen/tf2_eigen.h>
 #endif
-#include <boost/math/constants/constants.hpp>
 #include <numeric>
 
 namespace robot_trajectory
@@ -175,10 +175,10 @@ RobotTrajectory& RobotTrajectory::unwind()
     for (std::size_t j = 1; j < waypoints_.size(); ++j)
     {
       double current_value = waypoints_[j]->getJointPositions(cont_joint)[0];
-      if (last_value > current_value + boost::math::constants::pi<double>())
-        running_offset += 2.0 * boost::math::constants::pi<double>();
-      else if (current_value > last_value + boost::math::constants::pi<double>())
-        running_offset -= 2.0 * boost::math::constants::pi<double>();
+      if (last_value > current_value + M_PI)
+        running_offset += 2.0 * M_PI;
+      else if (current_value > last_value + M_PI)
+        running_offset -= 2.0 * M_PI;
 
       last_value = current_value;
       if (running_offset > std::numeric_limits<double>::epsilon() ||
@@ -223,10 +223,10 @@ RobotTrajectory& RobotTrajectory::unwind(const moveit::core::RobotState& state)
     for (std::size_t j = 1; j < waypoints_.size(); ++j)
     {
       double current_value = waypoints_[j]->getJointPositions(cont_joint)[0];
-      if (last_value > current_value + boost::math::constants::pi<double>())
-        running_offset += 2.0 * boost::math::constants::pi<double>();
-      else if (current_value > last_value + boost::math::constants::pi<double>())
-        running_offset -= 2.0 * boost::math::constants::pi<double>();
+      if (last_value > current_value + M_PI)
+        running_offset += 2.0 * M_PI;
+      else if (current_value > last_value + M_PI)
+        running_offset -= 2.0 * M_PI;
 
       last_value = current_value;
       if (running_offset > std::numeric_limits<double>::epsilon() ||

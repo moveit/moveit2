@@ -34,13 +34,13 @@
 
 /* Author: Sachin Chitta */
 
+#include <Eigen/Dense>
+#include <Eigen/Eigenvalues>
+#include <limits>
+#include <math.h>
 #include <moveit/kinematics_metrics/kinematics_metrics.h>
 #include <rclcpp/logger.hpp>
 #include <rclcpp/logging.hpp>
-#include <Eigen/Dense>
-#include <Eigen/Eigenvalues>
-#include <boost/math/constants/constants.hpp>
-#include <limits>
 
 namespace kinematics_metrics
 {
@@ -68,9 +68,8 @@ double KinematicsMetrics::getJointLimitsPenalty(const moveit::core::RobotState& 
       if (bounds[0].min_position_ == -std::numeric_limits<double>::max() ||
           bounds[0].max_position_ == std::numeric_limits<double>::max() ||
           bounds[1].min_position_ == -std::numeric_limits<double>::max() ||
-          bounds[1].max_position_ == std::numeric_limits<double>::max() ||
-          bounds[2].min_position_ == -boost::math::constants::pi<double>() ||
-          bounds[2].max_position_ == boost::math::constants::pi<double>())
+          bounds[1].max_position_ == std::numeric_limits<double>::max() || bounds[2].min_position_ == -M_PI ||
+          bounds[2].max_position_ == M_PI)
         continue;
     }
     if (joint_model->getType() == moveit::core::JointModel::FLOATING)

@@ -150,8 +150,6 @@ private:
 
   std::map<std::string, object_recognition_msgs::msg::Table> current_tables_in_collision_world_;
 
-  //  boost::mutex table_lock_;
-
   rclcpp::Subscription<object_recognition_msgs::msg::TableArray>::SharedPtr table_subscriber_;
 
   rclcpp::Publisher<visualization_msgs::msg::MarkerArray>::SharedPtr visualization_publisher_;

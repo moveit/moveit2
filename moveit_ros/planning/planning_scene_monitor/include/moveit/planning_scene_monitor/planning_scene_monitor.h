@@ -46,7 +46,6 @@
 #include <moveit/planning_scene_monitor/current_state_monitor.h>
 #include <moveit/collision_plugin_loader/collision_plugin_loader.h>
 #include <moveit_msgs/srv/get_planning_scene.hpp>
-#include <boost/noncopyable.hpp>
 #include <memory>
 #include <thread>
 #include <shared_mutex>
@@ -62,9 +61,19 @@ MOVEIT_CLASS_FORWARD(PlanningSceneMonitor);  // Defines PlanningSceneMonitorPtr,
 /**
  * @brief PlanningSceneMonitor
  * Subscribes to the topic \e planning_scene */
-class MOVEIT_PLANNING_SCENE_MONITOR_EXPORT PlanningSceneMonitor : private boost::noncopyable
+class MOVEIT_PLANNING_SCENE_MONITOR_EXPORT PlanningSceneMonitor
 {
 public:
+  /**
+   * @brief PlanningSceneMonitor cannot be copy-constructed
+   */
+  PlanningSceneMonitor(const PlanningSceneMonitor&) = delete;
+
+  /**
+   * @brief PlanningSceneMonitor cannot be copy-assigned
+   */
+  PlanningSceneMonitor& operator=(const PlanningSceneMonitor&) = delete;
+
   enum SceneUpdateType
   {
     /** \brief No update */

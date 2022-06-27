@@ -51,10 +51,10 @@
 #include <moveit_msgs/msg/constraints.hpp>
 #include <moveit_msgs/msg/planning_scene_components.hpp>
 #include <octomap_msgs/msg/octomap_with_pose.hpp>
-#include <boost/noncopyable.hpp>
-#include <boost/concept_check.hpp>
 #include <memory>
 #include <functional>
+#include <thread>
+#include <variant>
 #include "rclcpp/rclcpp.hpp"
 
 #include "moveit_planning_scene_export.h"
@@ -86,10 +86,19 @@ using ObjectTypeMap = std::map<std::string, object_recognition_msgs::msg::Object
 /** \brief This class maintains the representation of the
     environment as seen by a planning instance. The environment
     geometry, the robot geometry and state are maintained. */
-class MOVEIT_PLANNING_SCENE_EXPORT PlanningScene : private boost::noncopyable,
-                                                   public std::enable_shared_from_this<PlanningScene>
+class MOVEIT_PLANNING_SCENE_EXPORT PlanningScene : public std::enable_shared_from_this<PlanningScene>
 {
 public:
+  /**
+   * @brief PlanningScene cannot be copy-constructed
+   */
+  PlanningScene(const PlanningScene&) = delete;
+
+  /**
+   * @brief PlanningScene cannot be copy-assigned
+   */
+  PlanningScene& operator=(const PlanningScene&) = delete;
+
   /** \brief construct using an existing RobotModel */
   PlanningScene(const moveit::core::RobotModelConstPtr& robot_model,
                 const collision_detection::WorldPtr& world = std::make_shared<collision_detection::World>());

@@ -31,7 +31,6 @@
 !moveit_ros/move_group/package.xml
 !moveit_ros/robot_interaction/package.xml
 !moveit_ros/visualization/package.xml
-!moveit_ros/manipulation/package.xml
 !moveit_ros/planning/package.xml
 !moveit_ros/planning_interface/package.xml
 !moveit_ros/benchmarks/package.xml

@@ -46,7 +46,6 @@
 #include <geometry_msgs/msg/twist.hpp>
 #include <cassert>
 
-#include <boost/assert.hpp>
 #include <rclcpp/duration.hpp>
 
 /* Terminology
@@ -1356,7 +1355,7 @@ public:
     {
       throw Exception("Invalid link");
     }
-    BOOST_VERIFY(checkLinkTransforms());
+    assert(checkLinkTransforms());
     return global_link_transforms_[link->getLinkIndex()];
   }
 
@@ -1388,7 +1387,7 @@ public:
 
   const Eigen::Isometry3d& getCollisionBodyTransform(const LinkModel* link, std::size_t index) const
   {
-    BOOST_VERIFY(checkCollisionTransforms());
+    assert(checkCollisionTransforms());
     return global_collision_body_transforms_[link->getFirstCollisionBodyTransformIndex() + index];
   }
 
@@ -1416,7 +1415,7 @@ public:
 
   const Eigen::Isometry3d& getJointTransform(const JointModel* joint) const
   {
-    BOOST_VERIFY(checkJointTransforms(joint));
+    assert(checkJointTransforms(joint));
     return variable_joint_transforms_[joint->getJointIndex()];
   }
 

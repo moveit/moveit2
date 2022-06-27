@@ -16,7 +16,6 @@ ament_target_dependencies(${MOVEIT_LIB_NAME}_core
     moveit_ros_planning
     moveit_msgs
     pluginlib
-    Boost
     rviz_ogre_vendor
 )
 target_include_directories(${MOVEIT_LIB_NAME}_core PRIVATE "${OGRE_PREFIX_DIR}/include")

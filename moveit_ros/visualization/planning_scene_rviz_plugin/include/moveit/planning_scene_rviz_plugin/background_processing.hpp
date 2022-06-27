@@ -38,7 +38,6 @@
 
 #include <deque>
 #include <string>
-#include <boost/noncopyable.hpp>
 #include <memory>
 #include <thread>
 #include <condition_variable>
@@ -54,9 +53,19 @@ namespace tools
 /** \brief This class provides simple API for executing background
     jobs. A queue of jobs is created and the specified jobs are
     executed in order, one at a time. */
-class BackgroundProcessing : private boost::noncopyable
+class BackgroundProcessing
 {
 public:
+  /**
+   * @brief BackgroundProcessing cannot be copy-constructed
+   */
+  BackgroundProcessing(const BackgroundProcessing&) = delete;
+
+  /**
+   * @brief BackgroundProcessing cannot be copy-assigned
+   */
+  BackgroundProcessing& operator=(const BackgroundProcessing&) = delete;
+
   /** \brief Events for jobs */
   enum JobEvent
   {

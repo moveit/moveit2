@@ -34,6 +34,7 @@
 
 /* Author: Ioan Sucan, Acorn Pooley, Adam Leeper */
 
+#include <math.h>
 #include <moveit/robot_interaction/interactive_marker_helpers.h>
 #include <tf2/LinearMath/Quaternion.h>
 #if __has_include(<tf2_geometry_msgs/tf2_geometry_msgs.hpp>)
@@ -41,8 +42,6 @@
 #else
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 #endif
-
-#include <boost/math/constants/constants.hpp>
 
 namespace robot_interaction
 {
@@ -73,7 +72,7 @@ void addTArrowMarker(visualization_msgs::msg::InteractiveMarker& im)
   // Arrow points along Z
   tf2::Quaternion imq, tmq;
   tf2::fromMsg(m.pose.orientation, imq);
-  tmq.setRPY(0, -boost::math::constants::pi<double>() / 2.0, 0);
+  tmq.setRPY(0, -M_PI / 2.0, 0);
   imq = imq * tmq;
   m.pose.orientation = tf2::toMsg(imq);
   m.color.r = 0.0f;
@@ -93,7 +92,7 @@ void addTArrowMarker(visualization_msgs::msg::InteractiveMarker& im)
   mc.pose = im.pose;
   // Cylinder points along Y
   tf2::fromMsg(mc.pose.orientation, imq);
-  tmq.setRPY(boost::math::constants::pi<double>() / 2.0, 0, 0);
+  tmq.setRPY(M_PI / 2.0, 0, 0);
   imq = imq * tmq;
   mc.pose.orientation = tf2::toMsg(imq);
   mc.pose.position.x -= 0.04;

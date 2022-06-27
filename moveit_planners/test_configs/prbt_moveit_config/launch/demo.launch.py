@@ -34,10 +34,6 @@ def load_yaml(package_name, file_path):
 
 def generate_launch_description():
 
-    db_arg = DeclareLaunchArgument(
-        "db", default_value="False", description="Database flag"
-    )
-
     # planning_context
     robot_description_config = xacro.process_file(
         os.path.join(
@@ -138,7 +134,6 @@ def generate_launch_description():
     )
 
     # RViz
-    # tutorial_mode = LaunchConfiguration("rviz_tutorial")
     rviz_base = os.path.join(
         get_package_share_directory("moveit_resources_prbt_moveit_config"), "launch"
     )
@@ -156,7 +151,6 @@ def generate_launch_description():
             robot_description_kinematics,
             planning_pipelines_config,
         ],
-        # condition=UnlessCondition(tutorial_mode),
     )
 
     # Static TF
@@ -190,22 +184,27 @@ def generate_launch_description():
         output="screen",
     )
 
-    # Load controllers
-    load_controllers = []
-    for controller in [
-        "prbt_arm_controller",
-        "joint_state_broadcaster",
-    ]:
-        load_controllers += [
-            ExecuteProcess(
-                cmd=["ros2 run controller_manager spawner {}".format(controller)],
-                shell=True,
-                output="screen",
-            )
-        ]
+    joint_state_broadcaster_spawner = Node(
+        package="controller_manager",
+        executable="spawner",
+        arguments=[
+            "joint_state_broadcaster",
+            "--controller-manager",
+            "/controller_manager",
+        ],
+    )
+
+    prbt_arm_controller_spawner = Node(
+        package="controller_manager",
+        executable="spawner",
+        arguments=[
+            "panda_joint_group_position_controller",
+            "-c",
+            "/controller_manager",
+        ],
+    )
 
     # Warehouse mongodb server
-    db_config = LaunchConfiguration("db")
     mongodb_server_node = Node(
         package="warehouse_ros_mongo",
         executable="mongo_wrapper_ros.py",
@@ -215,19 +214,17 @@ def generate_launch_description():
             {"warehouse_plugin": "warehouse_ros_mongo::MongoDatabaseConnection"},
         ],
         output="screen",
-        # condition=IfCondition(db_config)
     )
 
     return LaunchDescription(
         [
-            # tutorial_arg,
-            # db_arg,
             rviz_node,
             static_tf,
             robot_state_publisher,
             run_move_group_node,
             ros2_control_node,
+            joint_state_broadcaster_spawner,
+            prbt_arm_controller_spawner,
             mongodb_server_node,
         ]
-        + load_controllers
     )

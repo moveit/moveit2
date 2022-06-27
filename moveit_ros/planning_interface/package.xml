@@ -25,8 +25,6 @@
   <depend>moveit_ros_planning</depend>
   <depend>moveit_ros_warehouse</depend>
   <depend>moveit_ros_move_group</depend>
-  <!-- TODO(JafarAbdi): uncomment after porting moveit_ros_manipulation -->
-  <!--depend>moveit_ros_manipulation</depend-->
   <depend>rclcpp</depend>
   <depend>rclpy</depend>
   <depend>rclcpp_action</depend>

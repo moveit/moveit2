@@ -18,9 +18,6 @@
   <exec_depend>moveit_core</exec_depend>
   <exec_depend>moveit_planners</exec_depend>
   <exec_depend>moveit_plugins</exec_depend>
-  <!--
-  <exec_depend>moveit_ros_manipulation</exec_depend>
-  -->
   <exec_depend>moveit_ros_move_group</exec_depend>
   <!--
   TODO(henningkayser): enable after #307 is merged

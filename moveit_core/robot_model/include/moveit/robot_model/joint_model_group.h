@@ -43,6 +43,7 @@
 #include <srdfdom/model.h>
 #include <functional>
 #include <set>
+#include <string>
 
 namespace moveit
 {
