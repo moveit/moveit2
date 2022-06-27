@@ -99,10 +99,11 @@ void PointCloudOctomapUpdater::start()
   std::string prefix = "";
   if (!ns_.empty())
     prefix = ns_ + "/";
-    
+
   rclcpp::QoS qos(rclcpp::QoSInitialization::from_rmw(rmw_qos_profile_sensor_data));
   if (!filtered_cloud_topic_.empty())
-    filtered_cloud_publisher_ = node_->create_publisher<sensor_msgs::msg::PointCloud2>(filtered_cloud_topic_, qos);
+    filtered_cloud_publisher_ =
+        node_->create_publisher<sensor_msgs::msg::PointCloud2>(filtered_cloud_topic_, rclcpp::SensorDataQoS());
   if (point_cloud_subscriber_)
     return;
   /* subscribe to point cloud topic using tf filter*/
