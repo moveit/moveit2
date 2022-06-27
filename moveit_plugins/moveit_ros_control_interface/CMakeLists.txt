@@ -66,7 +66,6 @@ if(BUILD_TESTING)
 
   find_package(ament_cmake_gtest REQUIRED)
   ament_add_gtest(controller_manager_plugin_test
-#          src/controller_manager_plugin.cpp
           test/controller_manager_plugin_test.cpp)
   ament_target_dependencies(controller_manager_plugin_test
           ${THIS_PACKAGE_INCLUDE_DEPENDS}

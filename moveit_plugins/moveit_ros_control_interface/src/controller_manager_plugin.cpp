@@ -422,8 +422,9 @@ public:
     return true;
   }
   /**
-   *  \brief fixChainedControllers discovers all running ros_control node and delegates member function to the
-   * corresponding MoveItControllerManager instances
+   *  \brief fixChainedControllers modifies ListControllers service response if it contains chained controllers.
+   *  Since chained controllers cannot be written to directly, they are removed from the response and their interface
+   * are propagated back to the first controller with a non-chained input
    */
   static void fixChainedControllers(std::shared_ptr<controller_manager_msgs::srv::ListControllers::Response>& result)
   {
