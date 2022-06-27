@@ -448,7 +448,7 @@ public:
       for (auto it = c.claimed_interfaces.begin(); it != c.claimed_interfaces.end(); it++)
       {
         std::string interface = *it;
-        auto name = interface.substr(0, interface.find("/"));
+        auto name = interface.substr(0, interface.find('/'));
         // if the controller interface begins with a controller name, then it is chained
         if (controller_name_map.find(name) != controller_name_map.end())
         {
@@ -468,11 +468,11 @@ public:
     // create a queue of all controllers that are chained to
     // these need to be processed first
     std::queue<controller_manager_msgs::msg::ControllerState*> chained_to_queue;
-    for (const auto& tmp : chained_to)
+    for (const auto& chained_controllers : chained_to)
     {
-      for (auto tmp2 : tmp.second)
+      for (auto chained_to_controllers : chained_controllers.second)
       {
-        chained_to_queue.push(tmp2);
+        chained_to_queue.push(chained_to_controllers);
       }
     }
 
@@ -491,7 +491,7 @@ public:
       // add command interface to chained controllers
       for (auto c2 : dependent_set)
       {
-        for (auto interface : c->claimed_interfaces)
+        for (const auto& interface : c->claimed_interfaces)
         {
           c2->claimed_interfaces.push_back(interface);
         }
