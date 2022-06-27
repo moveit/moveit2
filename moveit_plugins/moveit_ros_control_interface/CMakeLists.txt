@@ -68,11 +68,11 @@ if(BUILD_TESTING)
   ament_add_gtest(controller_manager_plugin_test
           test/controller_manager_plugin_test.cpp)
   ament_target_dependencies(controller_manager_plugin_test
-          ${THIS_PACKAGE_INCLUDE_DEPENDS}
-          )
+      ${THIS_PACKAGE_INCLUDE_DEPENDS}
+  )
+
   target_include_directories(controller_manager_plugin_test PRIVATE src)
   target_include_directories(controller_manager_plugin_test PRIVATE include)
-
 
 endif()
 
