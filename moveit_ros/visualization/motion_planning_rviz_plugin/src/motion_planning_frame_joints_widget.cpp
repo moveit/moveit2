@@ -202,20 +202,26 @@ MotionPlanningFrameJointsWidget::~MotionPlanningFrameJointsWidget()
   delete ui_;
 }
 
+void MotionPlanningFrameJointsWidget::clearRobotModel()
+{
+  ui_->joints_view_->setModel(nullptr);
+  start_state_handler_.reset();
+  goal_state_handler_.reset();
+  start_state_model_.reset();
+  goal_state_model_.reset();
+}
+
 void MotionPlanningFrameJointsWidget::changePlanningGroup(
     const std::string& group_name, const robot_interaction::InteractionHandlerPtr& start_state_handler,
     const robot_interaction::InteractionHandlerPtr& goal_state_handler)
 {
   // release previous models (if any)
-  ui_->joints_view_->setModel(nullptr);
-  start_state_model_.reset();
-  goal_state_model_.reset();
-
+  clearRobotModel();
   // create new models
   start_state_handler_ = start_state_handler;
   goal_state_handler_ = goal_state_handler;
-  start_state_model_.reset(new JMGItemModel(*start_state_handler_->getState(), group_name, this));
-  goal_state_model_.reset(new JMGItemModel(*goal_state_handler_->getState(), group_name, this));
+  start_state_model_ = std::make_unique<JMGItemModel>(*start_state_handler_->getState(), group_name, this);
+  goal_state_model_ = std::make_unique<JMGItemModel>(*goal_state_handler_->getState(), group_name, this);
 
   // forward model updates to the PlanningDisplay
   connect(start_state_model_.get(), &JMGItemModel::dataChanged, this, [this]() {
@@ -338,6 +344,9 @@ void MotionPlanningFrameJointsWidget::updateNullspaceSliders()
 cleanup:
   if (i == 0)
     nullspace_.resize(0, 0);
+
+  // show/hide dummy slider
+  ui_->dummy_ns_slider_->setVisible(i == 0);
 
   // hide remaining sliders
   for (; i < ns_sliders_.size(); ++i)

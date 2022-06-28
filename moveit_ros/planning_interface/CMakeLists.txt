@@ -10,7 +10,6 @@ find_package(moveit_msgs REQUIRED)
 find_package(moveit_core REQUIRED)
 find_package(moveit_ros_planning REQUIRED)
 find_package(moveit_ros_warehouse REQUIRED)
-# find_package(moveit_ros_manipulation REQUIRED)
 find_package(moveit_ros_move_group REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(tf2 REQUIRED)
@@ -51,7 +50,6 @@ set(THIS_PACKAGE_INCLUDE_DEPENDS
   moveit_core
   moveit_ros_planning
   moveit_ros_warehouse
-#  moveit_ros_manipulation
   moveit_ros_move_group
   tf2
   tf2_eigen
@@ -79,7 +77,6 @@ add_subdirectory(move_group_interface)
 if(BUILD_TESTING)
   find_package(ament_cmake_gtest REQUIRED)
   find_package(ros_testing REQUIRED)
-  find_package(Boost REQUIRED COMPONENTS filesystem)
 
   # TODO (vatanaksoytezer): Enable once this test is not flaky
   # Move group interface cpp ompl constrained planning integration test
@@ -111,7 +108,6 @@ if(BUILD_TESTING)
 
   # These don't pass yet, disable them for now
   set(ament_cmake_copyright_FOUND TRUE)
-  set(ament_cmake_cppcheck_FOUND TRUE)
   set(ament_cmake_cpplint_FOUND TRUE)
   set(ament_cmake_flake8_FOUND TRUE)
   set(ament_cmake_uncrustify_FOUND TRUE)

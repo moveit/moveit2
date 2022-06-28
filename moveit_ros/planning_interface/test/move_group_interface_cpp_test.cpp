@@ -69,7 +69,7 @@
 #include <tf2_eigen/tf2_eigen.h>
 #endif
 
-// 10um acuracy tested for position and orientation
+// 10um accuracy tested for position and orientation
 constexpr double EPSILON = 1e-5;
 
 static const std::string PLANNING_GROUP = "panda_arm";
@@ -134,8 +134,8 @@ public:
   {
     SCOPED_TRACE("planAndMove");
     moveit::planning_interface::MoveGroupInterface::Plan my_plan;
-    ASSERT_EQ(move_group_->plan(my_plan), moveit::planning_interface::MoveItErrorCode::SUCCESS);
-    ASSERT_EQ(move_group_->move(), moveit::planning_interface::MoveItErrorCode::SUCCESS);
+    ASSERT_EQ(move_group_->plan(my_plan), moveit::core::MoveItErrorCode::SUCCESS);
+    ASSERT_EQ(move_group_->move(), moveit::core::MoveItErrorCode::SUCCESS);
   }
 
   void testEigenPose(const Eigen::Isometry3d& expected, const Eigen::Isometry3d& actual)
@@ -194,7 +194,7 @@ TEST_F(MoveGroupTestFixture, PathConstraintCollisionTest)
 
   ////////////////////////////////////////////////////////////////////
   // set a custom start state
-  // this simplifies planning for the orientation constraint bellow
+  // this simplifies planning for the orientation constraint below
   geometry_msgs::Pose start_pose;
   start_pose.orientation.w = 1.0;
   start_pose.position.x = 0.3;
@@ -326,7 +326,7 @@ TEST_F(MoveGroupTestFixture, CartPathTest)
   ASSERT_GE(EPSILON + move_group_->computeCartesianPath(waypoints, eef_step, jump_threshold, trajectory), 1.0);
 
   // Execute trajectory
-  EXPECT_EQ(move_group_->execute(trajectory), moveit::planning_interface::MoveItErrorCode::SUCCESS);
+  EXPECT_EQ(move_group_->execute(trajectory), moveit::core::MoveItErrorCode::SUCCESS);
 
   // get the pose after the movement
   testPose(target_waypoint);

@@ -59,8 +59,6 @@ static const char* DEFAULT_CAPABILITIES[] = {
    "move_group/MoveGroupKinematicsService",
    "move_group/MoveGroupExecuteTrajectoryAction",
    "move_group/MoveGroupMoveAction",
-    // TODO (ddengster) : wait for port for moveit_ros_manipulation package
-   //"move_group/MoveGroupPickPlaceAction",
    "move_group/MoveGroupPlanService",
    "move_group/MoveGroupQueryPlannersService",
    "move_group/MoveGroupStateValidationService",
@@ -121,8 +119,8 @@ private:
   {
     try
     {
-      capability_plugin_loader_.reset(
-          new pluginlib::ClassLoader<MoveGroupCapability>("moveit_ros_move_group", "move_group::MoveGroupCapability"));
+      capability_plugin_loader_ = std::make_shared<pluginlib::ClassLoader<MoveGroupCapability>>(
+          "moveit_ros_move_group", "move_group::MoveGroupCapability");
     }
     catch (pluginlib::PluginlibException& ex)
     {
@@ -141,7 +139,7 @@ private:
     if (context_->moveit_cpp_->getNode()->get_parameter("capabilities", capability_plugins))
     {
       boost::char_separator<char> sep(" ");
-      boost::tokenizer<boost::char_separator<char> > tok(capability_plugins, sep);
+      boost::tokenizer<boost::char_separator<char>> tok(capability_plugins, sep);
       capabilities.insert(tok.begin(), tok.end());
     }
 
@@ -154,7 +152,7 @@ private:
                                                           pipeline_capabilities))
       {
         boost::char_separator<char> sep(" ");
-        boost::tokenizer<boost::char_separator<char> > tok(pipeline_capabilities, sep);
+        boost::tokenizer<boost::char_separator<char>> tok(pipeline_capabilities, sep);
         capabilities.insert(tok.begin(), tok.end());
       }
     }
@@ -163,8 +161,8 @@ private:
     if (context_->moveit_cpp_->getNode()->get_parameter("disable_capabilities", capability_plugins))
     {
       boost::char_separator<char> sep(" ");
-      boost::tokenizer<boost::char_separator<char> > tok(capability_plugins, sep);
-      for (boost::tokenizer<boost::char_separator<char> >::iterator cap_name = tok.begin(); cap_name != tok.end();
+      boost::tokenizer<boost::char_separator<char>> tok(capability_plugins, sep);
+      for (boost::tokenizer<boost::char_separator<char>>::iterator cap_name = tok.begin(); cap_name != tok.end();
            ++cap_name)
         capabilities.erase(*cap_name);
     }
@@ -187,18 +185,18 @@ private:
     }
 
     std::stringstream ss;
-    ss << std::endl;
-    ss << std::endl;
-    ss << "********************************************************" << std::endl;
-    ss << "* MoveGroup using: " << std::endl;
+    ss << '\n';
+    ss << '\n';
+    ss << "********************************************************" << '\n';
+    ss << "* MoveGroup using: " << '\n';
     for (const MoveGroupCapabilityPtr& cap : capabilities_)
-      ss << "*     - " << cap->getName() << std::endl;
-    ss << "********************************************************" << std::endl;
+      ss << "*     - " << cap->getName() << '\n';
+    ss << "********************************************************" << '\n';
     RCLCPP_INFO(LOGGER, "%s", ss.str().c_str());
   }
 
   MoveGroupContextPtr context_;
-  std::shared_ptr<pluginlib::ClassLoader<MoveGroupCapability> > capability_plugin_loader_;
+  std::shared_ptr<pluginlib::ClassLoader<MoveGroupCapability>> capability_plugin_loader_;
   std::vector<MoveGroupCapabilityPtr> capabilities_;
 };
 }  // namespace move_group
@@ -236,16 +234,16 @@ int main(int argc, char** argv)
   std::string default_planning_pipeline;
   if (nh->get_parameter("default_planning_pipeline", default_planning_pipeline))
   {
-    // Ignore default_planning_pipeline if there is no known entry in pipeline_names
+    // Ignore default_planning_pipeline if there is no matching entry in pipeline_names
     if (std::find(pipeline_names.begin(), pipeline_names.end(), default_planning_pipeline) == pipeline_names.end())
     {
       RCLCPP_WARN(LOGGER,
-                  "MoveGroup launched with ~default_planning_pipeline '%s' not configured in ~/planning_pipelines",
+                  "MoveGroup launched with ~default_planning_pipeline '%s' not configured in ~planning_pipelines",
                   default_planning_pipeline.c_str());
       default_planning_pipeline = "";  // reset invalid pipeline id
     }
   }
-  else
+  else if (pipeline_names.size() > 1)  // only warn if there are multiple pipelines to choose from
   {
     // Handle deprecated move_group.launch
     RCLCPP_WARN(LOGGER,

@@ -50,7 +50,7 @@ public:
    *
    * This state space factory is currently only used if `use_ompl_constrained_state_space` was set to `true` in
    * ompl_planning.yaml. In that case it is the only factory to choose from, so the priority does not matter.
-   * It returns a low priority so it will never be choosen when others are available.
+   * It returns a low priority so it will never be chosen when others are available.
    * (The second lowest priority is -1 in the PoseModelStateSpaceFactory.)
    *
    * For more details on this state space selection process, see:

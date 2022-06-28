@@ -51,7 +51,7 @@ public:
   {
   }
 
-  void initialize(const rclcpp::Node::SharedPtr& node, const std::string& parameter_namespace) override
+  void initialize(const rclcpp::Node::SharedPtr& /* unused */, const std::string& /* unused */) override
   {
   }
 
@@ -70,7 +70,6 @@ public:
       if (!smoother_.applySmoothing(*res.trajectory_, req.max_velocity_scaling_factor,
                                     req.max_acceleration_scaling_factor))
       {
-        RCLCPP_WARN(LOGGER, " Trajectory smoothing for the solution path failed.");
         result = false;
       }
     }

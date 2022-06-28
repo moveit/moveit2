@@ -63,8 +63,6 @@
 
 #pragma once
 
-using namespace std::chrono_literals;
-
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_servo.servo_launch_test_common.hpp");
 
 namespace moveit_servo
@@ -84,7 +82,7 @@ public:
     , executor_(std::make_shared<rclcpp::executors::SingleThreadedExecutor>())
   {
     // read parameters and store them in shared pointer to constant
-    servo_parameters_ = moveit_servo::ServoParameters::makeServoParameters(node_, LOGGER, "moveit_servo", false);
+    servo_parameters_ = moveit_servo::ServoParameters::makeServoParameters(node_, "moveit_servo", false);
     if (servo_parameters_ == nullptr)
     {
       RCLCPP_FATAL(LOGGER, "Failed to load the servo parameters");
@@ -115,7 +113,7 @@ public:
     // Otherwise the Servo is still running when another test starts...
     if (!client_servo_stop_)
     {
-      client_servo_stop_->async_send_request(std::make_shared<std_srvs::srv::Trigger::Request>());
+      stop();
     }
     executor_->cancel();
     if (executor_thread_.joinable())
@@ -143,7 +141,7 @@ public:
         return false;
       }
       RCLCPP_INFO(LOGGER, "client_servo_start_ service not available, waiting again...");
-      rclcpp::sleep_for(500ms);
+      rclcpp::sleep_for(std::chrono::milliseconds(500));
     }
 
     // If we setup the start client, also setup the stop client...
@@ -156,13 +154,13 @@ public:
         return false;
       }
       RCLCPP_INFO(LOGGER, "client_servo_stop_ service not available, waiting again...");
-      rclcpp::sleep_for(500ms);
+      rclcpp::sleep_for(std::chrono::milliseconds(500));
     }
 
     // Status sub (we need this to check that we've started / stopped)
     sub_servo_status_ = node_->create_subscription<std_msgs::msg::Int8>(
         resolveServoTopicName(servo_parameters_->status_topic), rclcpp::SystemDefaultsQoS(),
-        std::bind(&ServoFixture::statusCB, this, std::placeholders::_1));
+        [this](const std_msgs::msg::Int8::SharedPtr msg) { return statusCB(msg); });
     return true;
   }
 
@@ -177,7 +175,7 @@ public:
         return false;
       }
       RCLCPP_INFO(LOGGER, "client_servo_pause_ service not available, waiting again...");
-      rclcpp::sleep_for(500ms);
+      rclcpp::sleep_for(std::chrono::milliseconds(500));
     }
     return true;
   }
@@ -193,7 +191,7 @@ public:
         return false;
       }
       RCLCPP_INFO(LOGGER, "client_servo_unpause_ service not available, waiting again...");
-      rclcpp::sleep_for(500ms);
+      rclcpp::sleep_for(std::chrono::milliseconds(500));
     }
     return true;
   }
@@ -210,7 +208,7 @@ public:
         return false;
       }
       RCLCPP_INFO(LOGGER, "client_change_control_dims_ service not available, waiting again...");
-      rclcpp::sleep_for(500ms);
+      rclcpp::sleep_for(std::chrono::milliseconds(500));
     }
     return true;
   }
@@ -227,7 +225,7 @@ public:
         return false;
       }
       RCLCPP_INFO(LOGGER, "client_change_drift_dims_ service not available, waiting again...");
-      rclcpp::sleep_for(500ms);
+      rclcpp::sleep_for(std::chrono::milliseconds(500));
     }
     return true;
   }
@@ -236,7 +234,7 @@ public:
   {
     sub_collision_scale_ = node_->create_subscription<std_msgs::msg::Float64>(
         resolveServoTopicName("~/collision_velocity_scale"), rclcpp::SystemDefaultsQoS(),
-        std::bind(&ServoFixture::collisionScaleCB, this, std::placeholders::_1));
+        [this](const std_msgs::msg::Float64::SharedPtr msg) { return collisionScaleCB(msg); });
     return true;
   }
 
@@ -246,14 +244,14 @@ public:
     {
       sub_trajectory_cmd_output_ = node_->create_subscription<trajectory_msgs::msg::JointTrajectory>(
           resolveServoTopicName(servo_parameters_->command_out_topic), rclcpp::SystemDefaultsQoS(),
-          std::bind(&ServoFixture::trajectoryCommandCB, this, std::placeholders::_1));
+          [this](const trajectory_msgs::msg::JointTrajectory::SharedPtr msg) { return trajectoryCommandCB(msg); });
       return true;
     }
     else if (command_type == "std_msgs/Float64MultiArray")
     {
       sub_array_cmd_output_ = node_->create_subscription<std_msgs::msg::Float64MultiArray>(
           resolveServoTopicName(servo_parameters_->command_out_topic), rclcpp::SystemDefaultsQoS(),
-          std::bind(&ServoFixture::arrayCommandCB, this, std::placeholders::_1));
+          [this](const std_msgs::msg::Float64MultiArray::SharedPtr msg) { return arrayCommandCB(msg); });
       return true;
     }
     else
@@ -267,7 +265,7 @@ public:
   {
     sub_joint_state_ = node_->create_subscription<sensor_msgs::msg::JointState>(
         resolveServoTopicName(servo_parameters_->joint_topic), rclcpp::SystemDefaultsQoS(),
-        std::bind(&ServoFixture::jointStateCB, this, std::placeholders::_1));
+        [this](const sensor_msgs::msg::JointState::SharedPtr msg) { return jointStateCB(msg); });
     return true;
   }
 

@@ -61,7 +61,7 @@ namespace moveit_rviz_plugin
 {
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_ros_visualization.planning_scene_display");
 // ******************************************************************************************
-// Base class contructor
+// Base class constructor
 // ******************************************************************************************
 PlanningSceneDisplay::PlanningSceneDisplay(bool listen_to_planning_scene, bool show_scene_robot)
   : Display(), planning_scene_needs_render_(true), current_scene_time_(0.0f)
@@ -174,8 +174,7 @@ PlanningSceneDisplay::~PlanningSceneDisplay()
   planning_scene_render_.reset();
   if (context_ && context_->getSceneManager() && planning_scene_node_)
     context_->getSceneManager()->destroySceneNode(planning_scene_node_);
-  if (planning_scene_robot_)
-    planning_scene_robot_.reset();
+  planning_scene_robot_.reset();
   planning_scene_monitor_.reset();
 }
 
@@ -183,7 +182,7 @@ void PlanningSceneDisplay::clearJobs()
 {
   background_process_.clear();
   {
-    boost::unique_lock<boost::mutex> ulock(main_loop_jobs_lock_);
+    std::unique_lock<std::mutex> ulock(main_loop_jobs_lock_);
     main_loop_jobs_.clear();
   }
 }
@@ -200,13 +199,13 @@ void PlanningSceneDisplay::onInitialize()
   node_ = ros_node_abstraction->get_raw_node();
   planning_scene_topic_property_->initialize(ros_node_abstraction);
 
-  // the scene node that contains everything
+  // the scene node that contains everything and is located at the planning frame
   planning_scene_node_ = scene_node_->createChildSceneNode();
 
   if (robot_category_)
   {
-    planning_scene_robot_.reset(
-        new RobotStateVisualization(planning_scene_node_, context_, "Planning Scene", robot_category_));
+    planning_scene_robot_ =
+        std::make_shared<RobotStateVisualization>(planning_scene_node_, context_, "Planning Scene", robot_category_);
     planning_scene_robot_->setVisible(true);
     planning_scene_robot_->setVisualVisible(scene_robot_visual_enabled_property_->getBool());
     planning_scene_robot_->setCollisionVisible(scene_robot_collision_enabled_property_->getBool());
@@ -222,7 +221,7 @@ void PlanningSceneDisplay::reset()
   Display::reset();
 
   if (isEnabled())
-    addBackgroundJob(boost::bind(&PlanningSceneDisplay::loadRobotModel, this), "loadRobotModel");
+    addBackgroundJob([this] { loadRobotModel(); }, "loadRobotModel");
 
   if (planning_scene_robot_)
   {
@@ -232,25 +231,26 @@ void PlanningSceneDisplay::reset()
   }
 }
 
-void PlanningSceneDisplay::addBackgroundJob(const boost::function<void()>& job, const std::string& name)
+void PlanningSceneDisplay::addBackgroundJob(const std::function<void()>& job, const std::string& name)
 {
   background_process_.addJob(job, name);
 }
 
-void PlanningSceneDisplay::spawnBackgroundJob(const boost::function<void()>& job)
+void PlanningSceneDisplay::spawnBackgroundJob(const std::function<void()>& job)
 {
-  boost::thread t(job);
+  std::thread t(job);
+  t.detach();
 }
 
-void PlanningSceneDisplay::addMainLoopJob(const boost::function<void()>& job)
+void PlanningSceneDisplay::addMainLoopJob(const std::function<void()>& job)
 {
-  boost::unique_lock<boost::mutex> ulock(main_loop_jobs_lock_);
+  std::unique_lock<std::mutex> ulock(main_loop_jobs_lock_);
   main_loop_jobs_.push_back(job);
 }
 
 void PlanningSceneDisplay::waitForAllMainLoopJobs()
 {
-  boost::unique_lock<boost::mutex> ulock(main_loop_jobs_lock_);
+  std::unique_lock<std::mutex> ulock(main_loop_jobs_lock_);
   while (!main_loop_jobs_.empty())
     main_loop_jobs_empty_condition_.wait(ulock);
 }
@@ -260,7 +260,7 @@ void PlanningSceneDisplay::executeMainLoopJobs()
   main_loop_jobs_lock_.lock();
   while (!main_loop_jobs_.empty())
   {
-    boost::function<void()> fn = main_loop_jobs_.front();
+    std::function<void()> fn = main_loop_jobs_.front();
     main_loop_jobs_.pop_front();
     main_loop_jobs_lock_.unlock();
     try
@@ -398,7 +398,7 @@ void PlanningSceneDisplay::changedPlanningSceneTopic()
       service_name = rclcpp::names::append(getMoveGroupNS(), service_name);
     auto bg_func = [=]() {
       if (planning_scene_monitor_->requestPlanningSceneState(service_name))
-        addMainLoopJob(boost::bind(&PlanningSceneDisplay::onNewPlanningSceneState, this));
+        addMainLoopJob([this] { onNewPlanningSceneState(); });
       else
         setStatus(rviz_common::properties::StatusProperty::Warn, "PlanningScene", "Requesting initial scene failed");
     };
@@ -526,19 +526,19 @@ planning_scene_monitor::PlanningSceneMonitorPtr PlanningSceneDisplay::createPlan
 void PlanningSceneDisplay::clearRobotModel()
 {
   planning_scene_render_.reset();
-  planning_scene_monitor_.reset();  // this so that the destructor of the PlanningSceneMonitor gets called before a new
-                                    // instance of a scene monitor is constructed
+  // Ensure old PSM is destroyed before we attempt to create a new one
+  planning_scene_monitor_.reset();
 }
 
 void PlanningSceneDisplay::loadRobotModel()
 {
   // wait for other robot loadRobotModel() calls to complete;
-  boost::mutex::scoped_lock _(robot_model_loading_lock_);
+  std::scoped_lock _(robot_model_loading_lock_);
 
   // we need to make sure the clearing of the robot model is in the main thread,
   // so that rendering operations do not have data removed from underneath,
   // so the next function is executed in the main loop
-  addMainLoopJob(boost::bind(&PlanningSceneDisplay::clearRobotModel, this));
+  addMainLoopJob([this] { clearRobotModel(); });
 
   waitForAllMainLoopJobs();
 
@@ -547,8 +547,10 @@ void PlanningSceneDisplay::loadRobotModel()
   {
     planning_scene_monitor_.swap(psm);
     planning_scene_monitor_->addUpdateCallback(
-        boost::bind(&PlanningSceneDisplay::sceneMonitorReceivedUpdate, this, boost::placeholders::_1));
-    addMainLoopJob(boost::bind(&PlanningSceneDisplay::onRobotModelLoaded, this));
+        [this](planning_scene_monitor::PlanningSceneMonitor::SceneUpdateType type) {
+          sceneMonitorReceivedUpdate(type);
+        });
+    addMainLoopJob([this] { onRobotModelLoaded(); });
     waitForAllMainLoopJobs();
   }
   else
@@ -563,7 +565,7 @@ void PlanningSceneDisplay::loadRobotModel()
 void PlanningSceneDisplay::onRobotModelLoaded()
 {
   changedPlanningSceneTopic();
-  planning_scene_render_.reset(new PlanningSceneRender(planning_scene_node_, context_, planning_scene_robot_));
+  planning_scene_render_ = std::make_shared<PlanningSceneRender>(planning_scene_node_, context_, planning_scene_robot_);
   planning_scene_render_->getGeometryNode()->setVisible(scene_enabled_property_->getBool());
 
   const planning_scene_monitor::LockedPlanningSceneRO& ps = getPlanningSceneRO();
@@ -610,7 +612,7 @@ void PlanningSceneDisplay::onEnable()
 {
   Display::onEnable();
 
-  addBackgroundJob(boost::bind(&PlanningSceneDisplay::loadRobotModel, this), "loadRobotModel");
+  addBackgroundJob([this] { loadRobotModel(); }, "loadRobotModel");
 
   if (planning_scene_robot_)
   {
@@ -652,6 +654,8 @@ void PlanningSceneDisplay::update(float wall_dt, float ros_dt)
 
   executeMainLoopJobs();
 
+  calculateOffsetPosition();
+
   if (planning_scene_monitor_)
     updateInternal(wall_dt, ros_dt);
 }
@@ -664,7 +668,6 @@ void PlanningSceneDisplay::updateInternal(float wall_dt, float /*ros_dt*/)
        planning_scene_needs_render_))
   {
     renderPlanningScene();
-    calculateOffsetPosition();
     current_scene_time_ = 0.0f;
     robot_state_needs_render_ = false;
     planning_scene_needs_render_ = false;

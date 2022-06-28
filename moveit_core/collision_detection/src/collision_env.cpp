@@ -35,8 +35,9 @@
 /* Author: Ioan Sucan, Jens Petit */
 
 #include <moveit/collision_detection/collision_env.h>
+#include <rclcpp/logger.hpp>
+#include <rclcpp/logging.hpp>
 #include <limits>
-#include "rclcpp/rclcpp.hpp"
 
 // Logger
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_collision_detection.collision_robot");
@@ -74,7 +75,7 @@ static inline bool validatePadding(double padding)
 namespace collision_detection
 {
 CollisionEnv::CollisionEnv(const moveit::core::RobotModelConstPtr& model, double padding, double scale)
-  : robot_model_(model), world_(new World()), world_const_(world_)
+  : robot_model_(model), world_(std::make_shared<World>()), world_const_(world_)
 {
   if (!validateScale(scale))
     scale = 1.0;
@@ -279,7 +280,7 @@ void CollisionEnv::getScale(std::vector<moveit_msgs::msg::LinkScale>& scale) con
   }
 }
 
-void CollisionEnv::updatedPaddingOrScaling(const std::vector<std::string>& links)
+void CollisionEnv::updatedPaddingOrScaling(const std::vector<std::string>& /*links*/)
 {
 }
 
@@ -287,7 +288,7 @@ void CollisionEnv::setWorld(const WorldPtr& world)
 {
   world_ = world;
   if (!world_)
-    world_.reset(new World());
+    world_ = std::make_shared<World>();
 
   world_const_ = world;
 }

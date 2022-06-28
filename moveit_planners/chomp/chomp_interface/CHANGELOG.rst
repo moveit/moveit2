@@ -2,6 +2,40 @@
 Changelog for package chomp_interface
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.5.1 (2022-05-31)
+------------------
+
+2.5.0 (2022-05-26)
+------------------
+* Make TOTG the default time-parameterization algorithm everywhere (`#1218 <https://github.com/ros-planning/moveit2/issues/1218>`_)
+* Make moveit_common a 'depend' rather than 'build_depend' (`#1226 <https://github.com/ros-planning/moveit2/issues/1226>`_)
+* Merge https://github.com/ros-planning/moveit/commit/424a5b7b8b774424f78346d1e98bf1c9a33f0e78
+* Merge https://github.com/ros-planning/moveit/commit/ab42a1d7017b27eb6c353fb29331b2da08ab0039
+* Remove unused parameters. (`#1018 <https://github.com/ros-planning/moveit2/issues/1018>`_)
+* MSA: Add STOMP + OMPL-CHOMP configs (`#2955 <https://github.com/ros-planning/moveit2/issues/2955>`_)
+* Move MoveItErrorCode class to moveit_core (`#3009 <https://github.com/ros-planning/moveit2/issues/3009>`_)
+* Merge PRs `#2948 <https://github.com/ros-planning/moveit2/issues/2948>`_ (improve CI) and `#2949 <https://github.com/ros-planning/moveit2/issues/2949>`_ (simplify ROS .test files)
+* Use test_environment.launch in unittests
+* Contributors: Abishalini, AndyZe, Cory Crean, Jafar, Jafar Abdi, Rick Staa, Robert Haschke, jeoseo
+
+2.4.0 (2022-01-20)
+------------------
+* moveit_build_options()
+  Declare common build options like CMAKE_CXX_STANDARD, CMAKE_BUILD_TYPE,
+  and compiler options (namely warning flags) once.
+  Each package depending on moveit_core can use these via moveit_build_options().
+* Contributors: Robert Haschke
+
+2.3.2 (2021-12-29)
+------------------
+
+2.3.1 (2021-12-23)
+------------------
+* Port CHOMP Motion Planner to ROS 2 (`#809 <https://github.com/ros-planning/moveit2/issues/809>`_)
+* Update Maintainers of MoveIt package (`#697 <https://github.com/ros-planning/moveit2/issues/697>`_)
+* clang-tidy: modernize-make-shared, modernize-make-unique (`#2762 <https://github.com/ros-planning/moveit/issues/2762>`_)
+* Contributors: Dave Coleman, Henning Kayser, Robert Haschke, andreas-botbuilt, pvanlaar
+
 1.1.1 (2020-10-13)
 ------------------
 * [maint] Add comment to MOVEIT_CLASS_FORWARD (`#2315 <https://github.com/ros-planning/moveit/issues/2315>`_)

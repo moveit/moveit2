@@ -36,9 +36,9 @@
 
 #include "moveit/py_bindings_tools/roscpp_initializer.h"
 #include "moveit/py_bindings_tools/py_conversions.h"
-#include <boost/thread.hpp>
 #include <ros/ros.h>
 #include <memory>
+#include <thread>
 
 static std::vector<std::string>& ROScppArgs()
 {
@@ -88,8 +88,8 @@ struct InitProxy
 static void roscpp_init_or_stop(bool init)
 {
   // ensure we do not accidentally initialize ROS multiple times per process
-  static boost::mutex lock;
-  boost::mutex::scoped_lock slock(lock);
+  static std::mutex lock;
+  std::mutex::scoped_lock slock(lock);
 
   // once per process, we start a spinner
   static bool once = true;
@@ -104,8 +104,8 @@ static void roscpp_init_or_stop(bool init)
     // if ROS (cpp) is not initialized, we initialize it
     if (!ros::isInitialized())
     {
-      proxy.reset(new InitProxy());
-      spinner.reset(new ros::AsyncSpinner(1));
+      proxy = std::make_unique<InitProxy>();
+      spinner = std::make_unique<ros::AsyncSpinner>(1);
       spinner->start();
     }
   }

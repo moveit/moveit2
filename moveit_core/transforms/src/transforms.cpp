@@ -36,13 +36,14 @@
 
 #include <moveit/transforms/transforms.h>
 #include <geometric_shapes/check_isometry.h>
+#include <rclcpp/logger.hpp>
+#include <rclcpp/logging.hpp>
 #if __has_include(<tf2_eigen/tf2_eigen.hpp>)
 #include <tf2_eigen/tf2_eigen.hpp>
 #else
 #include <tf2_eigen/tf2_eigen.h>
 #endif
 #include <boost/algorithm/string/trim.hpp>
-#include "rclcpp/rclcpp.hpp"
 
 namespace moveit
 {
@@ -141,8 +142,15 @@ void Transforms::setTransform(const geometry_msgs::msg::TransformStamped& transf
 {
   if (sameFrame(transform.child_frame_id, target_frame_))
   {
-    Eigen::Isometry3d t = tf2::transformToEigen(transform);
-    setTransform(t, transform.header.frame_id);
+    // convert message manually to ensure correct normalization for double (error < 1e-12)
+    // tf2 only enforces float normalization (error < 1e-5)
+    const auto& trans = transform.transform.translation;
+    const auto& rot = transform.transform.rotation;
+    Eigen::Translation3d translation(trans.x, trans.y, trans.z);
+    Eigen::Quaterniond rotation(rot.w, rot.x, rot.y, rot.z);
+    rotation.normalize();
+
+    setTransform(translation * rotation, transform.header.frame_id);
   }
   else
   {

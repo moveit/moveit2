@@ -49,7 +49,6 @@
 #include <boost/program_options/options_description.hpp>
 #include <boost/program_options/parsers.hpp>
 #include <boost/program_options/variables_map.hpp>
-#include <rclcpp/rclcpp.hpp>
 
 static const std::string ROBOT_DESCRIPTION = "robot_description";
 
@@ -216,12 +215,14 @@ int main(int argc, char** argv)
   node_options.automatically_declare_parameters_from_overrides(true);
   rclcpp::Node::SharedPtr node = rclcpp::Node::make_shared("import_from_text_to_warehouse", node_options);
 
+  // clang-format off
   boost::program_options::options_description desc;
   desc.add_options()("help", "Show help message")("queries", boost::program_options::value<std::string>(),
                                                   "Name of file containing motion planning queries.")(
       "scene", boost::program_options::value<std::string>(), "Name of file containing motion planning scene.")(
       "host", boost::program_options::value<std::string>(),
       "Host for the DB.")("port", boost::program_options::value<std::size_t>(), "Port for the DB.");
+  // clang-format on
 
   boost::program_options::variables_map vm;
   boost::program_options::store(boost::program_options::parse_command_line(argc, argv, desc), vm);
@@ -229,7 +230,7 @@ int main(int argc, char** argv)
 
   if (vm.count("help") || argc == 1)  // show help if no parameters passed
   {
-    std::cout << desc << std::endl;
+    std::cout << desc << '\n';
     return 1;
   }
   // Set up db

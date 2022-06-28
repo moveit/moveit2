@@ -40,6 +40,7 @@
 #pragma once
 
 #include <rclcpp/rclcpp.hpp>
+#include <moveit/controller_manager/controller_manager.h>
 #include <moveit/planning_scene_monitor/planning_scene_monitor.h>
 #include <moveit/planning_pipeline/planning_pipeline.h>
 #include <moveit/trajectory_execution_manager/trajectory_execution_manager.h>
@@ -108,13 +109,13 @@ public:
 
   /** \brief Constructor */
   [[deprecated("Passing tf2_ros::Buffer to MoveItCpp's constructor is deprecated")]] MoveItCpp(
-      const rclcpp::Node::SharedPtr& node, const std::shared_ptr<tf2_ros::Buffer>& tf_buffer)
+      const rclcpp::Node::SharedPtr& node, const std::shared_ptr<tf2_ros::Buffer>& /* unused */)
     : MoveItCpp(node)
   {
   }
   MoveItCpp(const rclcpp::Node::SharedPtr& node);
   [[deprecated("Passing tf2_ros::Buffer to MoveItCpp's constructor is deprecated")]] MoveItCpp(
-      const rclcpp::Node::SharedPtr& node, const Options& options, const std::shared_ptr<tf2_ros::Buffer>& tf_buffer)
+      const rclcpp::Node::SharedPtr& node, const Options& options, const std::shared_ptr<tf2_ros::Buffer>& /* unused */)
     : MoveItCpp(node, options)
   {
   }
@@ -167,8 +168,9 @@ public:
 
   /** \brief Execute a trajectory on the planning group specified by group_name using the trajectory execution manager.
    * If blocking is set to false, the execution is run in background and the function returns immediately. */
-  bool execute(const std::string& group_name, const robot_trajectory::RobotTrajectoryPtr& robot_trajectory,
-               bool blocking = true);
+  moveit_controller_manager::ExecutionStatus execute(const std::string& group_name,
+                                                     const robot_trajectory::RobotTrajectoryPtr& robot_trajectory,
+                                                     bool blocking = true);
 
 private:
   //  Core properties and instances

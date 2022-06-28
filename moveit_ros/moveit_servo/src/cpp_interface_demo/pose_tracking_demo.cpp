@@ -55,8 +55,10 @@ class StatusMonitor
 public:
   StatusMonitor(const rclcpp::Node::SharedPtr& node, const std::string& topic)
   {
-    sub_ = node->create_subscription<std_msgs::msg::Int8>(
-        topic, rclcpp::SystemDefaultsQoS(), std::bind(&StatusMonitor::statusCB, this, std::placeholders::_1));
+    sub_ = node->create_subscription<std_msgs::msg::Int8>(topic, rclcpp::SystemDefaultsQoS(),
+                                                          [this](const std_msgs::msg::Int8::ConstSharedPtr msg) {
+                                                            return statusCB(msg);
+                                                          });
   }
 
 private:
@@ -89,7 +91,7 @@ int main(int argc, char** argv)
   executor.add_node(node);
   std::thread executor_thread([&executor]() { executor.spin(); });
 
-  auto servo_parameters = moveit_servo::ServoParameters::makeServoParameters(node, LOGGER);
+  auto servo_parameters = moveit_servo::ServoParameters::makeServoParameters(node);
 
   if (servo_parameters == nullptr)
   {

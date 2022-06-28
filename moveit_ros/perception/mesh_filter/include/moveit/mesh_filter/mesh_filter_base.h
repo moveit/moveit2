@@ -89,7 +89,7 @@ public:
                  const std::string& render_vertex_shader = "", const std::string& render_fragment_shader = "",
                  const std::string& filter_vertex_shader = "", const std::string& filter_fragment_shader = "");
 
-  /** \brief Desctructor */
+  /** \brief Destructor */
   ~MeshFilterBase();
 
   /**
@@ -210,7 +210,7 @@ protected:
    * \param[in] handle the handle of the mesh that is predetermined and passed
    * \param[in] cmesh the mesh to be added to the corresponding handle
    */
-  void addMeshHelper(MeshHandle handle, const shapes::Mesh* cmesh);
+  void addMeshHelper(MeshHandle handle, const shapes::Mesh& cmesh);
 
   /**
    * \brief used within a Job to allow the main thread removing meshes

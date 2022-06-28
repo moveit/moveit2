@@ -36,12 +36,12 @@
 
 #pragma once
 
-#include <boost/thread/mutex.hpp>
 #include <moveit/macros/class_forward.h>
 #include <rviz_common/display.hpp>
 #include <rviz_common/panel_dock_widget.hpp>
 #include <rviz_common/properties/int_property.hpp>
 #include <rviz_common/properties/ros_topic_property.hpp>
+#include <mutex>
 
 #ifndef Q_MOC_RUN
 #include <moveit/rviz_plugin_render_tools/robot_state_visualization.h>
@@ -87,11 +87,12 @@ public:
 
   ~TrajectoryVisualization() override;
 
-  virtual void update(float wall_dt, float ros_dt);
+  virtual void update(float wall_dt, float sim_dt);
   virtual void reset();
 
   void onInitialize(const rclcpp::Node::SharedPtr& node, Ogre::SceneNode* scene_node,
                     rviz_common::DisplayContext* context);
+  void clearRobotModel();
   void onRobotModelLoaded(const moveit::core::RobotModelConstPtr& robot_model);
   void onEnable();
   void onDisable();
@@ -150,12 +151,12 @@ protected:
   bool drop_displaying_trajectory_;
   int current_state_;
   float current_state_time_;
-  boost::mutex update_trajectory_message_;
+  std::mutex update_trajectory_message_;
 
   moveit::core::RobotModelConstPtr robot_model_;
   moveit::core::RobotStatePtr robot_state_;
 
-  // Pointers from parent display taht we save
+  // Pointers from parent display that we save
   rviz_common::Display* display_;  // the parent display that this class populates
   rviz_common::properties::Property* widget_;
   Ogre::SceneNode* scene_node_;
@@ -171,6 +172,7 @@ protected:
   rviz_common::properties::RosTopicProperty* trajectory_topic_property_;
   rviz_common::properties::FloatProperty* robot_path_alpha_property_;
   rviz_common::properties::BoolProperty* loop_display_property_;
+  rviz_common::properties::BoolProperty* use_sim_time_property_;
   rviz_common::properties::BoolProperty* trail_display_property_;
   rviz_common::properties::BoolProperty* interrupt_display_property_;
   rviz_common::properties::ColorProperty* robot_color_property_;

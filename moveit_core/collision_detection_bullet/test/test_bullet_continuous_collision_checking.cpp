@@ -78,19 +78,11 @@ protected:
     robot_model_ = moveit::core::loadTestingRobotModel("panda");
     robot_model_ok_ = static_cast<bool>(robot_model_);
 
-    acm_.reset(new collision_detection::AllowedCollisionMatrix());
-    // Use default collision operations in the SRDF to setup the acm
-    const std::vector<std::string>& collision_links = robot_model_->getLinkModelNamesWithCollisionGeometry();
-    acm_->setEntry(collision_links, collision_links, false);
+    acm_ = std::make_shared<collision_detection::AllowedCollisionMatrix>(*robot_model_->getSRDF());
 
-    // allow collisions for pairs that have been disabled
-    const std::vector<srdf::Model::DisabledCollision>& dc = robot_model_->getSRDF()->getDisabledCollisionPairs();
-    for (const srdf::Model::DisabledCollision& it : dc)
-      acm_->setEntry(it.link1_, it.link2_, true);
+    cenv_ = std::make_shared<collision_detection::CollisionEnvBullet>(robot_model_);
 
-    cenv_.reset(new collision_detection::CollisionEnvBullet(robot_model_));
-
-    robot_state_.reset(new moveit::core::RobotState(robot_model_));
+    robot_state_ = std::make_shared<moveit::core::RobotState>(robot_model_);
 
     setToHome(*robot_state_);
   }
@@ -116,7 +108,7 @@ void addCollisionObjects(cb::BulletCastBVHManager& checker)
   ////////////////////////////
   // Add static box to checker
   ////////////////////////////
-  shapes::ShapePtr static_box(new shapes::Box(1, 1, 1));
+  shapes::ShapePtr static_box = std::make_shared<shapes::Box>(1, 1, 1);
   Eigen::Isometry3d static_box_pose;
   static_box_pose.setIdentity();
 
@@ -127,14 +119,14 @@ void addCollisionObjects(cb::BulletCastBVHManager& checker)
   obj1_poses.push_back(static_box_pose);
   obj1_types.push_back(cb::CollisionObjectType::USE_SHAPE_TYPE);
 
-  cb::CollisionObjectWrapperPtr cow_1(new cb::CollisionObjectWrapper(
-      "static_box_link", collision_detection::BodyType::WORLD_OBJECT, obj1_shapes, obj1_poses, obj1_types));
+  cb::CollisionObjectWrapperPtr cow_1 = std::make_shared<cb::CollisionObjectWrapper>(
+      "static_box_link", collision_detection::BodyType::WORLD_OBJECT, obj1_shapes, obj1_poses, obj1_types);
   checker.addCollisionObject(cow_1);
 
   ////////////////////////////
   // Add moving box to checker
   ////////////////////////////
-  shapes::ShapePtr moving_box(new shapes::Box(0.2, 0.2, 0.2));
+  shapes::ShapePtr moving_box = std::make_shared<shapes::Box>(0.2, 0.2, 0.2);
   Eigen::Isometry3d moving_box_pose;
 
   moving_box_pose.setIdentity();
@@ -147,8 +139,8 @@ void addCollisionObjects(cb::BulletCastBVHManager& checker)
   obj2_poses.push_back(moving_box_pose);
   obj2_types.push_back(cb::CollisionObjectType::USE_SHAPE_TYPE);
 
-  cb::CollisionObjectWrapperPtr cow_2(new cb::CollisionObjectWrapper(
-      "moving_box_link", collision_detection::BodyType::WORLD_OBJECT, obj2_shapes, obj2_poses, obj2_types));
+  cb::CollisionObjectWrapperPtr cow_2 = std::make_shared<cb::CollisionObjectWrapper>(
+      "moving_box_link", collision_detection::BodyType::WORLD_OBJECT, obj2_shapes, obj2_poses, obj2_types);
   checker.addCollisionObject(cow_2);
 }
 
@@ -157,7 +149,7 @@ void addCollisionObjectsMesh(cb::BulletCastBVHManager& checker)
   ////////////////////////////
   // Add static box to checker
   ////////////////////////////
-  shapes::ShapePtr static_box(new shapes::Box(0.3, 0.3, 0.3));
+  shapes::ShapePtr static_box = std::make_shared<shapes::Box>(0.3, 0.3, 0.3);
   Eigen::Isometry3d static_box_pose;
   static_box_pose.setIdentity();
 
@@ -168,8 +160,8 @@ void addCollisionObjectsMesh(cb::BulletCastBVHManager& checker)
   obj1_poses.push_back(static_box_pose);
   obj1_types.push_back(cb::CollisionObjectType::USE_SHAPE_TYPE);
 
-  cb::CollisionObjectWrapperPtr cow_1(new cb::CollisionObjectWrapper(
-      "static_box_link", collision_detection::BodyType::WORLD_OBJECT, obj1_shapes, obj1_poses, obj1_types));
+  cb::CollisionObjectWrapperPtr cow_1 = std::make_shared<cb::CollisionObjectWrapper>(
+      "static_box_link", collision_detection::BodyType::WORLD_OBJECT, obj1_shapes, obj1_poses, obj1_types);
   checker.addCollisionObject(cow_1);
   ////////////////////////////
   // Add moving mesh to checker
@@ -186,14 +178,13 @@ void addCollisionObjectsMesh(cb::BulletCastBVHManager& checker)
   s_pose.setIdentity();
 
   std::string kinect = "package://moveit_resources_panda_description/meshes/collision/hand.stl";
-  shapes::ShapeConstPtr s;
-  s.reset(shapes::createMeshFromResource(kinect));
+  auto s = std::shared_ptr<shapes::Shape>{ shapes::createMeshFromResource(kinect) };
   obj2_shapes.push_back(s);
   obj2_types.push_back(cb::CollisionObjectType::CONVEX_HULL);
   obj2_poses.push_back(s_pose);
 
-  cb::CollisionObjectWrapperPtr cow_2(new cb::CollisionObjectWrapper(
-      "moving_box_link", collision_detection::BodyType::WORLD_OBJECT, obj2_shapes, obj2_poses, obj2_types));
+  cb::CollisionObjectWrapperPtr cow_2 = std::make_shared<cb::CollisionObjectWrapper>(
+      "moving_box_link", collision_detection::BodyType::WORLD_OBJECT, obj2_shapes, obj2_poses, obj2_types);
   checker.addCollisionObject(cow_2);
 }
 
@@ -263,7 +254,7 @@ TEST_F(BulletCollisionDetectionTester, DISABLED_ContinuousCollisionSelf)
   ASSERT_FALSE(res.collision);
   res.clear();
 
-  RCLCPP_INFO(TEST_LOGGER, "Continous to continous collisions are not supported yet, therefore fail here.");
+  RCLCPP_INFO(TEST_LOGGER, "Continuous to continuous collisions are not supported yet, therefore fail here.");
   ASSERT_TRUE(res.collision);
   res.clear();
 }
@@ -314,6 +305,21 @@ TEST_F(BulletCollisionDetectionTester, ContinuousCollisionWorld)
   cenv_->checkRobotCollision(req, res, state1, state2, *acm_);
   ASSERT_TRUE(res.collision);
   ASSERT_EQ(res.contact_count, 4u);
+  // test contact types
+  for (auto& contact_pair : res.contacts)
+  {
+    for (collision_detection::Contact& contact : contact_pair.second)
+    {
+      collision_detection::BodyType contact_type1 = contact.body_name_1 == "box" ?
+                                                        collision_detection::BodyType::WORLD_OBJECT :
+                                                        collision_detection::BodyType::ROBOT_LINK;
+      collision_detection::BodyType contact_type2 = contact.body_name_2 == "box" ?
+                                                        collision_detection::BodyType::WORLD_OBJECT :
+                                                        collision_detection::BodyType::ROBOT_LINK;
+      ASSERT_EQ(contact.body_type_1, contact_type1);
+      ASSERT_EQ(contact.body_type_2, contact_type2);
+    }
+  }
   res.clear();
 }
 

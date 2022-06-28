@@ -134,8 +134,9 @@ void clutterWorld(const planning_scene::PlanningScenePtr& planning_scene, const 
       }
       case CollisionObjectType::BOX:
       {
-        shape.reset(new shapes::Box(num_generator.uniformReal(0.05, 0.2), num_generator.uniformReal(0.05, 0.2),
-                                    num_generator.uniformReal(0.05, 0.2)));
+        shape =
+            std::make_shared<shapes::Box>(num_generator.uniformReal(0.05, 0.2), num_generator.uniformReal(0.05, 0.2),
+                                          num_generator.uniformReal(0.05, 0.2));
         name = "box";
         break;
       }
@@ -223,7 +224,7 @@ void runCollisionDetection(unsigned int trials, const planning_scene::PlanningSc
   ROS_INFO("Performed %lf collision checks per second", (double)trials * states.size() / duration);
   ROS_INFO_STREAM("Total number was " << trials * states.size() << " checks.");
   ROS_INFO_STREAM("We had " << states.size() << " different robot states which were "
-                            << (res.collision ? "in collison " : "not in collision ") << "with " << res.contact_count);
+                            << (res.collision ? "in collision " : "not in collision ") << "with " << res.contact_count);
 
   // color collided objects red
   for (auto& contact : res.contacts)
@@ -304,7 +305,7 @@ int main(int argc, char** argv)
 
   robot_model = moveit::core::loadTestingRobotModel("panda");
 
-  planning_scene::PlanningScenePtr planning_scene(new planning_scene::PlanningScene(robot_model));
+  auto scene = std::make_shared<planning_scene::PlanningScene>(robot_model);
   planning_scene_monitor::PlanningSceneMonitor psm(planning_scene, ROBOT_DESCRIPTION);
   psm.startPublishingPlanningScene(planning_scene_monitor::PlanningSceneMonitor::UPDATE_SCENE);
   psm.startSceneMonitor();

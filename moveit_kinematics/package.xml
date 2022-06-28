@@ -1,14 +1,12 @@
 <?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
   <name>moveit_kinematics</name>
-  <version>2.3.0</version>
+  <version>2.5.1</version>
   <description>Package for all inverse kinematics solvers in MoveIt</description>
 
-  <author email="dave@picknik.ai">Dave Coleman</author>
-  <author email="isucan@google.com">Ioan Sucan</author>
-  <author email="robot.moveit@gmail.com">Sachin Chitta</author>
-
-  <maintainer email="dave@picknik.ai">Dave Coleman</maintainer>
+  <maintainer email="henningkayser@picknik.ai">Henning Kayser</maintainer>
+  <maintainer email="tyler@picknik.ai">Tyler Weaver</maintainer>
   <maintainer email="g.a.vanderhoorn@tudelft.nl">G.A. vd. Hoorn</maintainer>
   <maintainer email="jorge.nicho@swri.org">Jorge Nicho</maintainer>
   <maintainer email="moveit_releasers@googlegroups.com">MoveIt Release Team</maintainer>
@@ -19,8 +17,12 @@
   <url type="repository">https://github.com/ros-planning/moveit2</url>
   <url type="bugtracker">https://github.com/ros-planning/moveit2/issues</url>
 
+  <author email="dave@picknik.ai">Dave Coleman</author>
+  <author email="isucan@google.com">Ioan Sucan</author>
+  <author email="robot.moveit@gmail.com">Sachin Chitta</author>
+
   <buildtool_depend>ament_cmake</buildtool_depend>
-  <build_depend>moveit_common</build_depend>
+  <depend>moveit_common</depend>
 
   <depend>moveit_core</depend>
   <depend>class_loader</depend>
@@ -28,12 +30,12 @@
   <depend>eigen</depend>
   <depend>tf2</depend>
   <depend>tf2_kdl</depend>
-  <depend>orocos_kdl</depend>
+  <depend>orocos_kdl_vendor</depend>
   <depend>moveit_msgs</depend>
 
   <!-- some requirements of ikfast scripts -->
   <exec_depend>urdfdom</exec_depend> <!-- provides check_urdf -->
-  <exec_depend>python-lxml</exec_depend>
+  <exec_depend>python3-lxml</exec_depend>
 
   <test_depend>moveit_ros_planning</test_depend>
   <test_depend>moveit_resources_fanuc_description</test_depend>
@@ -45,6 +47,8 @@
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>
   <test_depend>ros_testing</test_depend>
+  <test_depend>moveit_configs_utils</test_depend>
+  <test_depend>launch_param_builder</test_depend>
 
   <export>
     <build_type>ament_cmake</build_type>

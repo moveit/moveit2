@@ -8,3 +8,5 @@ coverage:
         target: auto
         threshold: 5%
     patch: off
+ignore:
+  - "moveit_planners/test_configs"

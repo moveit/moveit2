@@ -38,8 +38,9 @@
 #include <moveit/occupancy_map_monitor/occupancy_map_updater.h>
 
 #include <pluginlib/class_loader.hpp>
-#include <rclcpp/rclcpp.hpp>
-
+#include <rclcpp/logger.hpp>
+#include <rclcpp/logging.hpp>
+#include <rclcpp/parameter_value.hpp>
 #include <memory>
 #include <string>
 #include <utility>
@@ -131,7 +132,7 @@ OccupancyMapUpdaterPtr OccupancyMapMonitorMiddlewareHandle::loadOccupancyMapUpda
   catch (pluginlib::PluginlibException& exception)
   {
     RCLCPP_ERROR_STREAM(LOGGER, "Exception while loading octomap updater '" << sensor_plugin
-                                                                            << "': " << exception.what() << std::endl);
+                                                                            << "': " << exception.what() << '\n');
   }
   return nullptr;
 }

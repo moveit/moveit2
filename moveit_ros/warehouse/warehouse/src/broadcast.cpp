@@ -37,13 +37,19 @@
 #include <moveit/warehouse/planning_scene_storage.h>
 #include <moveit/warehouse/constraints_storage.h>
 #include <moveit/warehouse/state_storage.h>
-
 #include <boost/program_options/cmdline.hpp>
 #include <boost/program_options/options_description.hpp>
 #include <boost/program_options/parsers.hpp>
 #include <boost/program_options/variables_map.hpp>
-
-#include <rclcpp/rclcpp.hpp>
+#include <rclcpp/executors/static_single_threaded_executor.hpp>
+#include <rclcpp/logger.hpp>
+#include <rclcpp/logging.hpp>
+#include <rclcpp/node.hpp>
+#include <rclcpp/node_options.hpp>
+#include <rclcpp/publisher.hpp>
+#include <rclcpp/qos_event.hpp>
+#include <rclcpp/rate.hpp>
+#include <rclcpp/utilities.hpp>
 
 static const std::string PLANNING_SCENE_TOPIC = "planning_scene";
 static const std::string PLANNING_REQUEST_TOPIC = "motion_plan_request";
@@ -68,6 +74,7 @@ int main(int argc, char** argv)
   // time to wait in between publishing messages
   double delay = 0.001;
 
+  // clang-format off
   boost::program_options::options_description desc;
   desc.add_options()("help", "Show help message")("host", boost::program_options::value<std::string>(),
                                                   "Host for the "
@@ -80,14 +87,14 @@ int main(int argc, char** argv)
       "state", boost::program_options::value<std::string>(),
       "Name of the robot state to publish.")("delay", boost::program_options::value<double>()->default_value(delay),
                                              "Time to wait in between publishing messages (s)");
-
+  // clang-format on
   boost::program_options::variables_map vm;
   boost::program_options::store(boost::program_options::parse_command_line(argc, argv, desc), vm);
   boost::program_options::notify(vm);
 
   if (vm.count("help") || (!vm.count("scene") && !vm.count("constraint") && !vm.count("state")))
   {
-    std::cout << desc << std::endl;
+    std::cout << desc << '\n';
     return 1;
   }
   try
@@ -96,7 +103,7 @@ int main(int argc, char** argv)
   }
   catch (...)
   {
-    std::cout << desc << std::endl;
+    std::cout << desc << '\n';
     return 2;
   }
   // Set up db
@@ -142,7 +149,8 @@ int main(int argc, char** argv)
           std::vector<moveit_warehouse::MotionPlanRequestWithMetadata> planning_queries;
           std::vector<std::string> query_names;
           pss.getPlanningQueries(planning_queries, query_names, pswm->name);
-          RCLCPP_INFO(LOGGER, "There are %d planning queries associated to the scene", (int)planning_queries.size());
+          RCLCPP_INFO(LOGGER, "There are %d planning queries associated to the scene",
+                      static_cast<int>(planning_queries.size()));
           rclcpp::sleep_for(500ms);
           for (std::size_t i = 0; i < planning_queries.size(); ++i)
           {

@@ -2,6 +2,52 @@
 Changelog for package moveit_planners_ompl
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.5.1 (2022-05-31)
+------------------
+
+2.5.0 (2022-05-26)
+------------------
+* Make moveit_common a 'depend' rather than 'build_depend' (`#1226 <https://github.com/ros-planning/moveit2/issues/1226>`_)
+* Avoid bind(), use lambdas instead (`#1204 <https://github.com/ros-planning/moveit2/issues/1204>`_)
+* banish bind()
+  source:https://github.com/ros-planning/moveit/pull/3106/commits/a2911c80c28958c1fce8fb52333d770248c4ec05; required minor updates compared to original source commit in order to ensure compatibility with ROS2
+* planning_context_manager: rename protected methods
+  sources: https://github.com/ros-planning/moveit/pull/3106/commits/a183bc16f0b5490b1b40789ad2709d1cdbba7453, https://github.com/ros-planning/moveit/pull/3106/commits/c07be63b6cd5cfcea51e91e613bea9be68950754;
+* Revert OMPL parameter loading
+* [ompl] Small code refactor (`#1138 <https://github.com/ros-planning/moveit2/issues/1138>`_)
+* Remove new operators (`#1135 <https://github.com/ros-planning/moveit2/issues/1135>`_)
+* Merge https://github.com/ros-planning/moveit/commit/a25515b73d682df03ed3eccd839110c296aa79fc
+* Delete profiler (`#998 <https://github.com/ros-planning/moveit2/issues/998>`_)
+* Use termination condition for simplification step (`#2981 <https://github.com/ros-planning/moveit2/issues/2981>`_)
+  ... to allow canceling the simplification step
+* Switch to std::bind (`#2967 <https://github.com/ros-planning/moveit2/issues/2967>`_)
+* Contributors: Abishalini, Gaël Écorchard, Henning Kayser, Jafar, Jochen Sprickerhof, Robert Haschke, Sencer Yazıcı, Simon Schmeisser, Tyler Weaver, Vatan Aksoy Tezer, jeoseo, rhaschke, v4hn
+
+2.4.0 (2022-01-20)
+------------------
+* moveit_build_options()
+  Declare common build options like CMAKE_CXX_STANDARD, CMAKE_BUILD_TYPE,
+  and compiler options (namely warning flags) once.
+  Each package depending on moveit_core can use these via moveit_build_options().
+* Contributors: Robert Haschke
+
+2.3.2 (2021-12-29)
+------------------
+
+2.3.1 (2021-12-23)
+------------------
+* Add codespell to precommit, fix A LOT of spelling mistakes (`#934 <https://github.com/ros-planning/moveit2/issues/934>`_)
+* Get rid of "std::endl" (`#918 <https://github.com/ros-planning/moveit2/issues/918>`_)
+* changed post-increments in loops to preincrements (`#888 <https://github.com/ros-planning/moveit2/issues/888>`_)
+* Enforce package.xml format 3 Schema (`#779 <https://github.com/ros-planning/moveit2/issues/779>`_)
+* Update Maintainers of MoveIt package (`#697 <https://github.com/ros-planning/moveit2/issues/697>`_)
+* Reduce log verbosity, improved info message (`#714 <https://github.com/ros-planning/moveit2/issues/714>`_)
+* Fix `#2811 <https://github.com/ros-planning/moveit/issues/2811>`_ (`#2872 <https://github.com/ros-planning/moveit/issues/2872>`_)
+  This is a PR for `#2811 <https://github.com/ros-planning/moveit/issues/2811>`_
+* Add missing dependencies to generated dynamic_reconfigure headers
+* clang-tidy: modernize-make-shared, modernize-make-unique (`#2762 <https://github.com/ros-planning/moveit/issues/2762>`_)
+* Contributors: Dave Coleman, David V. Lu!!, Henning Kayser, Mathias Lüdtke, Parthasarathy Bana, Robert Haschke, Sencer Yazıcı, pvanlaar, v4hn, werner291
+
 2.3.0 (2021-10-08)
 ------------------
 * Fix cmake warnings (`#690 <https://github.com/ros-planning/moveit2/issues/690>`_)

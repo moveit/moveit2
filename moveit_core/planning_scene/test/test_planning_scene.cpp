@@ -43,12 +43,42 @@
 #include <fstream>
 #include <sstream>
 #include <string>
-#include <boost/filesystem/path.hpp>
+#include <tf2_eigen/tf2_eigen.hpp>
+
+#include <moveit/collision_detection/collision_common.h>
+#include <moveit/collision_detection/collision_plugin_cache.h>
+
+// Test not setting the object's pose should use the shape pose as the object pose
+TEST(PlanningScene, TestOneShapeObjectPose)
+{
+  urdf::ModelInterfaceSharedPtr urdf_model = moveit::core::loadModelInterface("pr2");
+  srdf::ModelSharedPtr srdf_model = std::make_shared<srdf::Model>();
+  planning_scene::PlanningScene ps(urdf_model, srdf_model);
+
+  const std::string object_name = "object";
+  const Eigen::Isometry3d expected_transfrom = Eigen::Isometry3d::Identity() * Eigen::Translation3d(0.5, -0.25, 0.0);
+
+  moveit_msgs::msg::CollisionObject co;
+  co.header.frame_id = "base_footprint";
+  co.id = object_name;
+  co.operation = moveit_msgs::msg::CollisionObject::ADD;
+  co.primitives.push_back([] {
+    shape_msgs::msg::SolidPrimitive primitive;
+    primitive.type = shape_msgs::msg::SolidPrimitive::CYLINDER;
+    primitive.dimensions = { 0.25, 0.02 };
+    return primitive;
+  }());
+  co.primitive_poses.push_back(tf2::toMsg(expected_transfrom));
+
+  ps.processCollisionObjectMsg(co);
+
+  EXPECT_TRUE(expected_transfrom.isApprox(ps.getFrameTransform(object_name)));
+}
 
 TEST(PlanningScene, LoadRestore)
 {
   urdf::ModelInterfaceSharedPtr urdf_model = moveit::core::loadModelInterface("pr2");
-  srdf::ModelSharedPtr srdf_model(new srdf::Model());
+  srdf::ModelSharedPtr srdf_model = std::make_shared<srdf::Model>();
   planning_scene::PlanningScene ps(urdf_model, srdf_model);
   moveit_msgs::msg::PlanningScene ps_msg;
   ps.getPlanningSceneMsg(ps_msg);
@@ -62,14 +92,14 @@ TEST(PlanningScene, LoadRestore)
 TEST(PlanningScene, LoadRestoreDiff)
 {
   urdf::ModelInterfaceSharedPtr urdf_model = moveit::core::loadModelInterface("pr2");
-  srdf::ModelSharedPtr srdf_model(new srdf::Model());
+  srdf::ModelSharedPtr srdf_model = std::make_shared<srdf::Model>();
   auto ps = std::make_shared<planning_scene::PlanningScene>(urdf_model, srdf_model);
 
   collision_detection::World& world = *ps->getWorldNonConst();
 
   /* add one object to ps's world */
   Eigen::Isometry3d id = Eigen::Isometry3d::Identity();
-  world.addToObject("sphere", shapes::ShapeConstPtr(new shapes::Sphere(0.4)), id);
+  world.addToObject("sphere", std::make_shared<const shapes::Sphere>(0.4), id);
 
   /* ps can be written to and set from message */
   moveit_msgs::msg::PlanningScene ps_msg;
@@ -87,7 +117,7 @@ TEST(PlanningScene, LoadRestoreDiff)
   EXPECT_TRUE(next->getWorld()->hasObject("sphere"));
 
   /* object in overlay is only added in overlay */
-  next->getWorldNonConst()->addToObject("sphere_in_next_only", shapes::ShapeConstPtr(new shapes::Sphere(0.5)), id);
+  next->getWorldNonConst()->addToObject("sphere_in_next_only", std::make_shared<const shapes::Sphere>(0.5), id);
   EXPECT_EQ(next->getWorld()->size(), 2u);
   EXPECT_EQ(ps->getWorld()->size(), 1u);
 
@@ -122,13 +152,13 @@ TEST(PlanningScene, LoadRestoreDiff)
 TEST(PlanningScene, MakeAttachedDiff)
 {
   urdf::ModelInterfaceSharedPtr urdf_model = moveit::core::loadModelInterface("pr2");
-  srdf::ModelSharedPtr srdf_model(new srdf::Model());
+  srdf::ModelSharedPtr srdf_model = std::make_shared<srdf::Model>();
   auto ps = std::make_shared<planning_scene::PlanningScene>(urdf_model, srdf_model);
 
   /* add a single object to ps's world */
   collision_detection::World& world = *ps->getWorldNonConst();
   Eigen::Isometry3d id = Eigen::Isometry3d::Identity();
-  world.addToObject("sphere", shapes::ShapeConstPtr(new shapes::Sphere(0.4)), id);
+  world.addToObject("sphere", std::make_shared<const shapes::Sphere>(0.4), id);
 
   /* attach object in diff */
   planning_scene::PlanningScenePtr attached_object_diff_scene = ps->diff();
@@ -161,7 +191,7 @@ TEST(PlanningScene, isStateValid)
   }
 }
 
-TEST(PlanningScene, loadGoodSceneGeometry)
+TEST(PlanningScene, loadGoodSceneGeometryNewFormat)
 {
   moveit::core::RobotModelPtr robot_model = moveit::core::loadTestingRobotModel("pr2");
   auto ps = std::make_shared<planning_scene::PlanningScene>(robot_model->getURDF(), robot_model->getSRDF());
@@ -169,24 +199,56 @@ TEST(PlanningScene, loadGoodSceneGeometry)
   std::istringstream good_scene_geometry;
   good_scene_geometry.str("foobar_scene\n"
                           "* foo\n"
+                          "0 0 0\n"
+                          "0 0 0 1\n"
                           "1\n"
                           "box\n"
                           "2.58 1.36 0.31\n"
                           "1.49257 1.00222 0.170051\n"
                           "0 0 4.16377e-05 1\n"
                           "0 0 1 0.3\n"
+                          "0\n"
                           "* bar\n"
+                          "0 0 0\n"
+                          "0 0 0 1\n"
                           "1\n"
                           "cylinder\n"
                           "0.02 0.0001\n"
                           "0.453709 0.499136 0.355051\n"
                           "0 0 4.16377e-05 1\n"
                           "1 0 0 1\n"
+                          "0\n"
                           ".\n");
   EXPECT_TRUE(ps->loadGeometryFromStream(good_scene_geometry));
   EXPECT_EQ(ps->getName(), "foobar_scene");
   EXPECT_TRUE(ps->getWorld()->hasObject("foo"));
   EXPECT_TRUE(ps->getWorld()->hasObject("bar"));
+  EXPECT_FALSE(ps->getWorld()->hasObject("baz"));  // Sanity check.
+}
+
+TEST(PlanningScene, loadGoodSceneGeometryOldFormat)
+{
+  moveit::core::RobotModelPtr robot_model = moveit::core::loadTestingRobotModel("pr2");
+  auto ps = std::make_shared<planning_scene::PlanningScene>(robot_model->getURDF(), robot_model->getSRDF());
+
+  std::istringstream good_scene_geometry;
+  good_scene_geometry.str("foobar_scene\n"
+                          "* foo\n"
+                          "2\n"
+                          "box\n"
+                          ".77 0.39 0.05\n"
+                          "0 0 0.025\n"
+                          "0 0 0 1\n"
+                          "0.82 0.75 0.60 1\n"
+                          "box\n"
+                          ".77 0.39 0.05\n"
+                          "0 0 1.445\n"
+                          "0 0 0 1\n"
+                          "0.82 0.75 0.60 1\n"
+                          ".\n");
+  EXPECT_TRUE(ps->loadGeometryFromStream(good_scene_geometry));
+  EXPECT_EQ(ps->getName(), "foobar_scene");
+  EXPECT_TRUE(ps->getWorld()->hasObject("foo"));
   EXPECT_FALSE(ps->getWorld()->hasObject("baz"));  // Sanity check.
 }
 
@@ -202,6 +264,8 @@ TEST(PlanningScene, loadBadSceneGeometry)
   std::istringstream malformed_scene_geometry;
   malformed_scene_geometry.str("malformed_scene_geometry\n"
                                "* foo\n"
+                               "0 0 0\n"
+                               "0 0 0 1\n"
                                "1\n"
                                "box\n"
                                "2.58 1.36\n" /* Only two tokens; should be 3 */
@@ -230,6 +294,233 @@ TEST(PlanningScene, switchCollisionDetectorType)
     EXPECT_FALSE(ps->isStateValid(current_state, "left_arm"));
   }
 }
+
+TEST(PlanningScene, FailRetrievingNonExistentObject)
+{
+  moveit::core::RobotModelPtr robot_model = moveit::core::loadTestingRobotModel("pr2");
+  planning_scene::PlanningScene ps{ robot_model };
+  moveit_msgs::msg::CollisionObject obj;
+  EXPECT_FALSE(ps.getCollisionObjectMsg(obj, "non_existent_object"));
+}
+
+class CollisionDetectorTests : public testing::TestWithParam<const char*>
+{
+};
+TEST_P(CollisionDetectorTests, ClearDiff)
+{
+  const std::string plugin_name = GetParam();
+  SCOPED_TRACE(plugin_name);
+
+  urdf::ModelInterfaceSharedPtr urdf_model = moveit::core::loadModelInterface("pr2");
+  srdf::ModelSharedPtr srdf_model = std::make_shared<srdf::Model>();
+  // create parent scene
+  planning_scene::PlanningScenePtr parent = std::make_shared<planning_scene::PlanningScene>(urdf_model, srdf_model);
+
+  collision_detection::CollisionPluginCache loader;
+  if (!loader.activate(plugin_name, parent))
+  {
+#if defined(GTEST_SKIP_)
+    GTEST_SKIP_("Failed to load collision plugin");
+#else
+    return;
+#endif
+  }
+
+  // create child scene
+  planning_scene::PlanningScenePtr child = parent->diff();
+
+  // create collision request variables
+  collision_detection::CollisionRequest req;
+  collision_detection::CollisionResult res;
+  moveit::core::RobotState* state = new moveit::core::RobotState(child->getRobotModel());
+  state->setToDefaultValues();
+  state->update();
+
+  // there should be no collision with the environment
+  res.clear();
+  parent->getCollisionEnv()->checkRobotCollision(req, res, *state, parent->getAllowedCollisionMatrix());
+  EXPECT_FALSE(res.collision);
+  res.clear();
+  child->getCollisionEnv()->checkRobotCollision(req, res, *state, child->getAllowedCollisionMatrix());
+  EXPECT_FALSE(res.collision);
+
+  // create message to add a collision object at the world origin
+  moveit_msgs::msg::PlanningScene ps_msg;
+  ps_msg.is_diff = false;
+  moveit_msgs::msg::CollisionObject co;
+  co.header.frame_id = "base_link";
+  co.operation = moveit_msgs::msg::CollisionObject::ADD;
+  co.id = "box";
+  co.pose.orientation.w = 1.0;
+  {
+    shape_msgs::msg::SolidPrimitive sp;
+    sp.type = shape_msgs::msg::SolidPrimitive::BOX;
+    sp.dimensions = { 1., 1., 1. };
+    co.primitives.push_back(sp);
+    geometry_msgs::msg::Pose sp_pose;
+    sp_pose.orientation.w = 1.0;
+    co.primitive_poses.push_back(sp_pose);
+  }
+  ps_msg.world.collision_objects.push_back(co);
+
+  // add object to the parent planning scene
+  parent->usePlanningSceneMsg(ps_msg);
+
+  // the parent scene should be in collision
+  res.clear();
+  parent->getCollisionEnv()->checkRobotCollision(req, res, *state, parent->getAllowedCollisionMatrix());
+  EXPECT_TRUE(res.collision);
+
+  // the child scene was not updated yet, so no collision
+  res.clear();
+  child->getCollisionEnv()->checkRobotCollision(req, res, *state, child->getAllowedCollisionMatrix());
+  EXPECT_FALSE(res.collision);
+
+  // update the child scene
+  child->clearDiffs();
+
+  // child and parent scene should be in collision
+  res.clear();
+  parent->getCollisionEnv()->checkRobotCollision(req, res, *state, parent->getAllowedCollisionMatrix());
+  EXPECT_TRUE(res.collision);
+  res.clear();
+  child->getCollisionEnv()->checkRobotCollision(req, res, *state, child->getAllowedCollisionMatrix());
+  EXPECT_TRUE(res.collision);
+
+  child.reset();
+  parent.reset();
+}
+
+// Returns a planning scene diff message
+moveit_msgs::msg::PlanningScene create_planning_scene_diff(planning_scene::PlanningScene& ps,
+                                                           const std::string& object_name, const int8_t operation,
+                                                           const bool attach_object = false,
+                                                           const bool create_object = true)
+{
+  // Helper function to create an object for RobotStateDiffBug
+  auto add_object = [](const std::string& object_name, const int8_t operation) {
+    moveit_msgs::msg::CollisionObject co;
+    co.header.frame_id = "panda_link0";
+    co.id = object_name;
+    co.operation = operation;
+    co.primitives.push_back([] {
+      shape_msgs::msg::SolidPrimitive primitive;
+      primitive.type = shape_msgs::msg::SolidPrimitive::SPHERE;
+      primitive.dimensions.push_back(1.0);
+      return primitive;
+    }());
+    co.primitive_poses.push_back([] {
+      geometry_msgs::msg::Pose pose;
+      pose.orientation.w = 1.0;
+      return pose;
+    }());
+    co.pose = co.primitive_poses[0];
+    return co;
+  };
+  // Helper function to create an attached object for RobotStateDiffBug
+  auto add_attached_object = [](const std::string& object_name, const int8_t operation) {
+    moveit_msgs::msg::AttachedCollisionObject aco;
+    aco.object.operation = operation;
+    aco.object.id = object_name;
+    aco.link_name = "panda_link0";
+    return aco;
+  };
+
+  auto new_ps = ps.diff();
+  if (operation == moveit_msgs::msg::CollisionObject::REMOVE ||
+      (operation == moveit_msgs::msg::CollisionObject::ADD && create_object))
+    new_ps->processCollisionObjectMsg(add_object(object_name, operation));
+  if (attach_object)
+    new_ps->processAttachedCollisionObjectMsg(add_attached_object(object_name, operation));
+  moveit_msgs::msg::PlanningScene scene_msg;
+  new_ps->getPlanningSceneDiffMsg(scene_msg);
+  return scene_msg;
+}
+
+// Returns collision objects names sorted alphabetically
+std::set<std::string> get_collision_objects_names(const planning_scene::PlanningScene& ps)
+{
+  std::vector<moveit_msgs::msg::CollisionObject> collision_objects;
+  ps.getCollisionObjectMsgs(collision_objects);
+  std::set<std::string> collision_objects_names;
+  for (const auto& collision_object : collision_objects)
+    collision_objects_names.emplace(collision_object.id);
+  return collision_objects_names;
+}
+
+// Returns attached collision objects names sorted alphabetically
+std::set<std::string> get_attached_collision_objects_names(const planning_scene::PlanningScene& ps)
+{
+  std::vector<moveit_msgs::msg::AttachedCollisionObject> collision_objects;
+  ps.getAttachedCollisionObjectMsgs(collision_objects);
+  std::set<std::string> collision_objects_names;
+  for (const auto& collision_object : collision_objects)
+    collision_objects_names.emplace(collision_object.object.id);
+  return collision_objects_names;
+}
+
+TEST(PlanningScene, RobotStateDiffBug)
+{
+  auto urdf_model = moveit::core::loadModelInterface("panda");
+  auto srdf_model = std::make_shared<srdf::Model>();
+  auto ps = std::make_shared<planning_scene::PlanningScene>(urdf_model, srdf_model);
+
+  // It works as expected for collision objects case
+  {
+    const auto ps1 = create_planning_scene_diff(*ps, "object1", moveit_msgs::msg::CollisionObject::ADD);
+    const auto ps2 = create_planning_scene_diff(*ps, "object2", moveit_msgs::msg::CollisionObject::ADD);
+
+    ps->usePlanningSceneMsg(ps2);
+    ps->usePlanningSceneMsg(ps1);
+    EXPECT_EQ(get_collision_objects_names(*ps), (std::set<std::string>{ "object1", "object2" }));
+  }
+
+  {
+    const auto ps1 = create_planning_scene_diff(*ps, "object2", moveit_msgs::msg::CollisionObject::REMOVE);
+
+    ps->usePlanningSceneMsg(ps1);
+    EXPECT_EQ(get_collision_objects_names(*ps), (std::set<std::string>{ "object1" }));
+  }
+
+  // Attached collision objects case
+  ps = std::make_shared<planning_scene::PlanningScene>(urdf_model, srdf_model);
+
+  // Test that triggered a bug related to having two diffs that add two different objects
+  {
+    const auto ps1 = create_planning_scene_diff(*ps, "object1", moveit_msgs::msg::CollisionObject::ADD, true);
+    const auto ps2 = create_planning_scene_diff(*ps, "object2", moveit_msgs::msg::CollisionObject::ADD, true);
+
+    ps->usePlanningSceneMsg(ps1);
+    ps->usePlanningSceneMsg(ps2);
+    EXPECT_TRUE(get_collision_objects_names(*ps).empty());
+    // Should print object1 and object2 -- it prints object2 only (or object1 depending on the order of operation)
+    EXPECT_EQ(get_attached_collision_objects_names(*ps), (std::set<std::string>{ "object1", "object2" }));
+  }
+
+  // Test that triggered a bug related to removing an object when having a robot state diff
+  {
+    const auto ps1 = create_planning_scene_diff(*ps, "object2", moveit_msgs::msg::CollisionObject::REMOVE, true);
+    ps->usePlanningSceneMsg(ps1);
+
+    EXPECT_EQ(get_collision_objects_names(*ps), (std::set<std::string>{ "object2" }));
+    EXPECT_EQ(get_attached_collision_objects_names(*ps), (std::set<std::string>{ "object1" }));
+  }
+
+  {
+    const auto ps1 = create_planning_scene_diff(*ps, "object2", moveit_msgs::msg::CollisionObject::ADD, true, false);
+    ps->usePlanningSceneMsg(ps1);
+
+    EXPECT_TRUE(get_collision_objects_names(*ps).empty());
+    EXPECT_EQ(get_attached_collision_objects_names(*ps), (std::set<std::string>{ "object1", "object2" }));
+  }
+}
+
+#ifndef INSTANTIATE_TEST_SUITE_P  // prior to gtest 1.10
+#define INSTANTIATE_TEST_SUITE_P(...) INSTANTIATE_TEST_CASE_P(__VA_ARGS__)
+#endif
+
+// instantiate parameterized tests for common collision plugins
+INSTANTIATE_TEST_SUITE_P(PluginTests, CollisionDetectorTests, testing::Values("FCL", "Bullet"));
 
 int main(int argc, char** argv)
 {

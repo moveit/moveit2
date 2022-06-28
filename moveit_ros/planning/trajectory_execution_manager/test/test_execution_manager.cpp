@@ -45,7 +45,7 @@ int main(int argc, char** argv)
   rclcpp::init(argc, argv);
   auto node = rclcpp::Node::make_shared("test_trajectory_execution_manager");
 
-  robot_model_loader::RobotModelLoaderPtr rml(new robot_model_loader::RobotModelLoader(node));
+  auto rml = std::make_shared<robot_model_loader::RobotModelLoader>(node);
   planning_scene_monitor::PlanningSceneMonitor psm(node, rml);
   trajectory_execution_manager::TrajectoryExecutionManager tem(node, rml->getModel(), psm.getStateMonitor(), true);
 

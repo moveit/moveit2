@@ -36,8 +36,11 @@
 
 /* Author: Ioan Sucan, Sachin Chitta, Acorn Pooley, Mario Prats, Dave Coleman */
 
+#include <memory>
 #include <moveit/robot_state/cartesian_interpolator.h>
 #include <geometric_shapes/check_isometry.h>
+#include <rclcpp/logger.hpp>
+#include <rclcpp/logging.hpp>
 
 namespace moveit
 {
@@ -51,13 +54,11 @@ static const std::size_t MIN_STEPS_FOR_JUMP_THRESH = 10;
 
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_robot_state.cartesian_interpolator");
 
-double CartesianInterpolator::computeCartesianPath(RobotState* start_state, const JointModelGroup* group,
-                                                   std::vector<RobotStatePtr>& traj, const LinkModel* link,
-                                                   const Eigen::Vector3d& direction, bool global_reference_frame,
-                                                   double distance, const MaxEEFStep& max_step,
-                                                   const JumpThreshold& jump_threshold,
-                                                   const GroupStateValidityCallbackFn& validCallback,
-                                                   const kinematics::KinematicsQueryOptions& options)
+CartesianInterpolator::Distance CartesianInterpolator::computeCartesianPath(
+    RobotState* start_state, const JointModelGroup* group, std::vector<RobotStatePtr>& traj, const LinkModel* link,
+    const Eigen::Vector3d& direction, bool global_reference_frame, double distance, const MaxEEFStep& max_step,
+    const JumpThreshold& jump_threshold, const GroupStateValidityCallbackFn& validCallback,
+    const kinematics::KinematicsQueryOptions& options)
 {
   // this is the Cartesian pose we start from, and have to move in the direction indicated
   // getGlobalLinkTransform() returns a valid isometry by contract
@@ -71,16 +72,16 @@ double CartesianInterpolator::computeCartesianPath(RobotState* start_state, cons
   target_pose.translation() += rotated_direction * distance;
 
   // call computeCartesianPath for the computed target pose in the global reference frame
-  return (distance * computeCartesianPath(start_state, group, traj, link, target_pose, true, max_step, jump_threshold,
-                                          validCallback, options));
+  return CartesianInterpolator::Distance(distance) * computeCartesianPath(start_state, group, traj, link, target_pose,
+                                                                          true, max_step, jump_threshold, validCallback,
+                                                                          options);
 }
 
-double CartesianInterpolator::computeCartesianPath(RobotState* start_state, const JointModelGroup* group,
-                                                   std::vector<RobotStatePtr>& traj, const LinkModel* link,
-                                                   const Eigen::Isometry3d& target, bool global_reference_frame,
-                                                   const MaxEEFStep& max_step, const JumpThreshold& jump_threshold,
-                                                   const GroupStateValidityCallbackFn& validCallback,
-                                                   const kinematics::KinematicsQueryOptions& options)
+CartesianInterpolator::Percentage CartesianInterpolator::computeCartesianPath(
+    RobotState* start_state, const JointModelGroup* group, std::vector<RobotStatePtr>& traj, const LinkModel* link,
+    const Eigen::Isometry3d& target, bool global_reference_frame, const MaxEEFStep& max_step,
+    const JumpThreshold& jump_threshold, const GroupStateValidityCallbackFn& validCallback,
+    const kinematics::KinematicsQueryOptions& options)
 {
   const std::vector<const JointModel*>& cjnt = group->getContinuousJointModels();
   // make sure that continuous joints wrap
@@ -147,7 +148,7 @@ double CartesianInterpolator::computeCartesianPath(RobotState* start_state, cons
     }
 
   traj.clear();
-  traj.push_back(RobotStatePtr(new moveit::core::RobotState(*start_state)));
+  traj.push_back(std::make_shared<moveit::core::RobotState>(*start_state));
 
   double last_valid_percentage = 0.0;
   for (std::size_t i = 1; i <= steps; ++i)
@@ -160,7 +161,7 @@ double CartesianInterpolator::computeCartesianPath(RobotState* start_state, cons
     // Explicitly use a single IK attempt only: We want a smooth trajectory.
     // Random seeding (of additional attempts) would probably create IK jumps.
     if (start_state->setFromIK(group, pose, link->getName(), consistency_limits, 0.0, validCallback, options))
-      traj.push_back(RobotStatePtr(new moveit::core::RobotState(*start_state)));
+      traj.push_back(std::make_shared<moveit::core::RobotState>(*start_state));
     else
       break;
 
@@ -169,16 +170,14 @@ double CartesianInterpolator::computeCartesianPath(RobotState* start_state, cons
 
   last_valid_percentage *= checkJointSpaceJump(group, traj, jump_threshold);
 
-  return last_valid_percentage;
+  return CartesianInterpolator::Percentage(last_valid_percentage);
 }
 
-double CartesianInterpolator::computeCartesianPath(RobotState* start_state, const JointModelGroup* group,
-                                                   std::vector<RobotStatePtr>& traj, const LinkModel* link,
-                                                   const EigenSTL::vector_Isometry3d& waypoints,
-                                                   bool global_reference_frame, const MaxEEFStep& max_step,
-                                                   const JumpThreshold& jump_threshold,
-                                                   const GroupStateValidityCallbackFn& validCallback,
-                                                   const kinematics::KinematicsQueryOptions& options)
+CartesianInterpolator::Percentage CartesianInterpolator::computeCartesianPath(
+    RobotState* start_state, const JointModelGroup* group, std::vector<RobotStatePtr>& traj, const LinkModel* link,
+    const EigenSTL::vector_Isometry3d& waypoints, bool global_reference_frame, const MaxEEFStep& max_step,
+    const JumpThreshold& jump_threshold, const GroupStateValidityCallbackFn& validCallback,
+    const kinematics::KinematicsQueryOptions& options)
 {
   double percentage_solved = 0.0;
   for (std::size_t i = 0; i < waypoints.size(); ++i)
@@ -210,11 +209,12 @@ double CartesianInterpolator::computeCartesianPath(RobotState* start_state, cons
 
   percentage_solved *= checkJointSpaceJump(group, traj, jump_threshold);
 
-  return percentage_solved;
+  return CartesianInterpolator::Percentage(percentage_solved);
 }
 
-double CartesianInterpolator::checkJointSpaceJump(const JointModelGroup* group, std::vector<RobotStatePtr>& traj,
-                                                  const JumpThreshold& jump_threshold)
+CartesianInterpolator::Percentage CartesianInterpolator::checkJointSpaceJump(const JointModelGroup* group,
+                                                                             std::vector<RobotStatePtr>& traj,
+                                                                             const JumpThreshold& jump_threshold)
 {
   double percentage_solved = 1.0;
   if (traj.size() <= 1)
@@ -226,12 +226,12 @@ double CartesianInterpolator::checkJointSpaceJump(const JointModelGroup* group, 
   if (jump_threshold.revolute > 0.0 || jump_threshold.prismatic > 0.0)
     percentage_solved *= checkAbsoluteJointSpaceJump(group, traj, jump_threshold.revolute, jump_threshold.prismatic);
 
-  return percentage_solved;
+  return CartesianInterpolator::Percentage(percentage_solved);
 }
 
-double CartesianInterpolator::checkRelativeJointSpaceJump(const JointModelGroup* group,
-                                                          std::vector<RobotStatePtr>& traj,
-                                                          double jump_threshold_factor)
+CartesianInterpolator::Percentage CartesianInterpolator::checkRelativeJointSpaceJump(const JointModelGroup* group,
+                                                                                     std::vector<RobotStatePtr>& traj,
+                                                                                     double jump_threshold_factor)
 {
   if (traj.size() < MIN_STEPS_FOR_JUMP_THRESH)
   {
@@ -263,12 +263,13 @@ double CartesianInterpolator::checkRelativeJointSpaceJump(const JointModelGroup*
       break;
     }
 
-  return percentage;
+  return CartesianInterpolator::Percentage(percentage);
 }
 
-double CartesianInterpolator::checkAbsoluteJointSpaceJump(const JointModelGroup* group,
-                                                          std::vector<RobotStatePtr>& traj, double revolute_threshold,
-                                                          double prismatic_threshold)
+CartesianInterpolator::Percentage CartesianInterpolator::checkAbsoluteJointSpaceJump(const JointModelGroup* group,
+                                                                                     std::vector<RobotStatePtr>& traj,
+                                                                                     double revolute_threshold,
+                                                                                     double prismatic_threshold)
 {
   bool check_revolute = revolute_threshold > 0.0;
   bool check_prismatic = prismatic_threshold > 0.0;
@@ -315,10 +316,10 @@ double CartesianInterpolator::checkAbsoluteJointSpaceJump(const JointModelGroup*
     {
       double percent_valid = (double)(traj_ix + 1) / (double)(traj.size());
       traj.resize(traj_ix + 1);
-      return percent_valid;
+      return CartesianInterpolator::Percentage(percent_valid);
     }
   }
-  return 1.0;
+  return CartesianInterpolator::Percentage(1.0);
 }
 
 }  // end of namespace core

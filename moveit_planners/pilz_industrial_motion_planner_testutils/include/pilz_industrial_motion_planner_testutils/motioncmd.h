@@ -32,8 +32,7 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#ifndef MOTIONCMD_H
-#define MOTIONCMD_H
+#pragma once
 
 #include <string>
 #include <memory>
@@ -89,5 +88,3 @@ inline void MotionCmd::setAccelerationScale(double acceleration_scale)
 
 using MotionCmdUPtr = std::unique_ptr<MotionCmd>;
 }  // namespace pilz_industrial_motion_planner_testutils
-
-#endif  // MOTIONCMD_H

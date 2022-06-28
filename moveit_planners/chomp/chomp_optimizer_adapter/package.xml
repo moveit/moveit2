@@ -2,21 +2,26 @@
 <package format="2">
   <name>moveit_chomp_optimizer_adapter</name>
   <description>MoveIt planning request adapter utilizing chomp for solution optimization</description>
-
-  <version>1.1.5</version>
-  <author email="raghavendersahdev@gmail.com">Raghavender Sahdev</author>
+  <version>2.5.1</version>
   <maintainer email="raghavendersahdev@gmail.com">Raghavender Sahdev</maintainer>
   <maintainer email="moveit_releasers@googlegroups.com">MoveIt Release Team</maintainer>
 
   <license>BSD</license>
 
-  <buildtool_depend>catkin</buildtool_depend>
+  <author email="raghavendersahdev@gmail.com">Raghavender Sahdev</author>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+  <depend>moveit_common</depend>
 
   <depend>moveit_core</depend>
   <depend>chomp_motion_planner</depend>
   <depend version_gte="1.11.2">pluginlib</depend>
 
+  <test_depend>ament_lint_auto</test_depend>
+  <test_depend>ament_lint_common</test_depend>
+
   <export>
+    <build_type>ament_cmake</build_type>
     <moveit_core plugin="${prefix}/chomp_optimizer_adapter_plugin_description.xml"/>
   </export>
 </package>

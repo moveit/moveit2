@@ -40,6 +40,7 @@
 #include <moveit/planning_interface/planning_request.h>
 #include <moveit/planning_interface/planning_response.h>
 #include <moveit/planning_scene/planning_scene.h>
+#include <moveit/robot_state/robot_state.h>
 
 namespace chomp
 {

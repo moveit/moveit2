@@ -34,7 +34,6 @@
 
 /* Author: Dan Greenwald */
 
-#include <rclcpp/rclcpp.hpp>
 #include <moveit/warehouse/state_storage.h>
 #include <moveit_msgs/srv/save_robot_state_to_warehouse.hpp>
 #include <moveit_msgs/srv/list_robot_states_in_warehouse.hpp>
@@ -42,6 +41,13 @@
 #include <moveit_msgs/srv/check_if_robot_state_exists_in_warehouse.hpp>
 #include <moveit_msgs/srv/delete_robot_state_from_warehouse.hpp>
 #include <moveit_msgs/srv/rename_robot_state_in_warehouse.hpp>
+#include <rclcpp/executors.hpp>
+#include <rclcpp/logger.hpp>
+#include <rclcpp/logging.hpp>
+#include <rclcpp/node.hpp>
+#include <rclcpp/node_options.hpp>
+#include <rclcpp/parameter_value.hpp>
+#include <rclcpp/utilities.hpp>
 
 static const std::string ROBOT_DESCRIPTION = "robot_description";
 
@@ -49,45 +55,45 @@ static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.ros.warehouse.wa
 
 bool storeState(const std::shared_ptr<moveit_msgs::srv::SaveRobotStateToWarehouse::Request> request,
                 std::shared_ptr<moveit_msgs::srv::SaveRobotStateToWarehouse::Response> response,
-                moveit_warehouse::RobotStateStorage* rs)
+                moveit_warehouse::RobotStateStorage& rs)
 {
   if (request->name.empty())
   {
     RCLCPP_ERROR(LOGGER, "You must specify a name to store a state");
     return (response->success = false);
   }
-  rs->addRobotState(request->state, request->name, request->robot);
+  rs.addRobotState(request->state, request->name, request->robot);
   return (response->success = true);
 }
 
 bool listStates(const std::shared_ptr<moveit_msgs::srv::ListRobotStatesInWarehouse::Request> request,
                 std::shared_ptr<moveit_msgs::srv::ListRobotStatesInWarehouse::Response> response,
-                moveit_warehouse::RobotStateStorage* rs)
+                moveit_warehouse::RobotStateStorage& rs)
 {
   if (request->regex.empty())
   {
-    rs->getKnownRobotStates(response->states, request->robot);
+    rs.getKnownRobotStates(response->states, request->robot);
   }
   else
   {
-    rs->getKnownRobotStates(request->regex, response->states, request->robot);
+    rs.getKnownRobotStates(request->regex, response->states, request->robot);
   }
   return true;
 }
 
 bool hasState(const std::shared_ptr<moveit_msgs::srv::CheckIfRobotStateExistsInWarehouse::Request> request,
               std::shared_ptr<moveit_msgs::srv::CheckIfRobotStateExistsInWarehouse::Response> response,
-              moveit_warehouse::RobotStateStorage* rs)
+              moveit_warehouse::RobotStateStorage& rs)
 {
-  response->exists = rs->hasRobotState(request->name, request->robot);
+  response->exists = rs.hasRobotState(request->name, request->robot);
   return true;
 }
 
 bool getState(const std::shared_ptr<moveit_msgs::srv::GetRobotStateFromWarehouse::Request> request,
               std::shared_ptr<moveit_msgs::srv::GetRobotStateFromWarehouse::Response> response,
-              moveit_warehouse::RobotStateStorage* rs)
+              moveit_warehouse::RobotStateStorage& rs)
 {
-  if (!rs->hasRobotState(request->name, request->robot))
+  if (!rs.hasRobotState(request->name, request->robot))
   {
     RCLCPP_ERROR_STREAM(LOGGER, "No state called '" << request->name << "' for robot '" << request->robot << "'.");
     moveit_msgs::msg::RobotState dummy;
@@ -95,34 +101,34 @@ bool getState(const std::shared_ptr<moveit_msgs::srv::GetRobotStateFromWarehouse
     return false;
   }
   moveit_warehouse::RobotStateWithMetadata state_buffer;
-  rs->getRobotState(state_buffer, request->name, request->robot);
+  rs.getRobotState(state_buffer, request->name, request->robot);
   response->state = static_cast<const moveit_msgs::msg::RobotState&>(*state_buffer);
   return true;
 }
 
 bool renameState(const std::shared_ptr<moveit_msgs::srv::RenameRobotStateInWarehouse::Request> request,
                  std::shared_ptr<moveit_msgs::srv::RenameRobotStateInWarehouse::Response> /*response*/,
-                 moveit_warehouse::RobotStateStorage* rs)
+                 moveit_warehouse::RobotStateStorage& rs)
 {
-  if (!rs->hasRobotState(request->old_name, request->robot))
+  if (!rs.hasRobotState(request->old_name, request->robot))
   {
     RCLCPP_ERROR_STREAM(LOGGER, "No state called '" << request->old_name << "' for robot '" << request->robot << "'.");
     return false;
   }
-  rs->renameRobotState(request->old_name, request->new_name, request->robot);
+  rs.renameRobotState(request->old_name, request->new_name, request->robot);
   return true;
 }
 
 bool deleteState(const std::shared_ptr<moveit_msgs::srv::DeleteRobotStateFromWarehouse::Request> request,
                  std::shared_ptr<moveit_msgs::srv::DeleteRobotStateFromWarehouse::Response> /*response*/,
-                 moveit_warehouse::RobotStateStorage* rs)
+                 moveit_warehouse::RobotStateStorage& rs)
 {
-  if (!rs->hasRobotState(request->name, request->robot))
+  if (!rs.hasRobotState(request->name, request->robot))
   {
     RCLCPP_ERROR_STREAM(LOGGER, "No state called '" << request->name << "' for robot '" << request->robot << "'.");
     return false;
   }
-  rs->removeRobotState(request->name, request->robot);
+  rs.removeRobotState(request->name, request->robot);
   return true;
 }
 
@@ -185,36 +191,34 @@ int main(int argc, char** argv)
       RCLCPP_INFO(LOGGER, " * %s", name.c_str());
   }
 
-  using std::placeholders::_1;
-  using std::placeholders::_2;
   auto save_cb = [&](const std::shared_ptr<moveit_msgs::srv::SaveRobotStateToWarehouse::Request> request,
                      std::shared_ptr<moveit_msgs::srv::SaveRobotStateToWarehouse::Response> response) -> bool {
-    return storeState(request, response, &rs);
+    return storeState(request, response, rs);
   };
 
   auto list_cb = [&](const std::shared_ptr<moveit_msgs::srv::ListRobotStatesInWarehouse::Request> request,
                      std::shared_ptr<moveit_msgs::srv::ListRobotStatesInWarehouse::Response> response) -> bool {
-    return listStates(request, response, &rs);
+    return listStates(request, response, rs);
   };
 
   auto get_cb = [&](const std::shared_ptr<moveit_msgs::srv::GetRobotStateFromWarehouse::Request> request,
                     std::shared_ptr<moveit_msgs::srv::GetRobotStateFromWarehouse::Response> response) -> bool {
-    return getState(request, response, &rs);
+    return getState(request, response, rs);
   };
 
   auto has_cb = [&](const std::shared_ptr<moveit_msgs::srv::CheckIfRobotStateExistsInWarehouse::Request> request,
                     std::shared_ptr<moveit_msgs::srv::CheckIfRobotStateExistsInWarehouse::Response> response) -> bool {
-    return hasState(request, response, &rs);
+    return hasState(request, response, rs);
   };
 
   auto rename_cb = [&](const std::shared_ptr<moveit_msgs::srv::RenameRobotStateInWarehouse::Request> request,
                        std::shared_ptr<moveit_msgs::srv::RenameRobotStateInWarehouse::Response> response) -> bool {
-    return renameState(request, response, &rs);
+    return renameState(request, response, rs);
   };
 
   auto delete_cb = [&](const std::shared_ptr<moveit_msgs::srv::DeleteRobotStateFromWarehouse::Request> request,
                        std::shared_ptr<moveit_msgs::srv::DeleteRobotStateFromWarehouse::Response> response) -> bool {
-    return deleteState(request, response, &rs);
+    return deleteState(request, response, rs);
   };
 
   auto save_state_server =

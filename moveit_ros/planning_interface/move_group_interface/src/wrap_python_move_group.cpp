@@ -58,6 +58,7 @@
 #include <tf2_ros/buffer.h>
 
 #include <boost/python.hpp>
+#include <boost/noncopyable.hpp>
 #include <eigenpy/eigenpy.hpp>
 #include <memory>
 #include <Python.h>
@@ -271,7 +272,7 @@ public:
     msg.header.frame_id = getPoseReferenceFrame();
     msg.header.stamp = ros::Time::now();
     GILReleaser gr;
-    return place(object_name, msg, plan_only) == MoveItErrorCode::SUCCESS;
+    return place(object_name, msg, plan_only) == moveit::core::MoveItErrorCode::SUCCESS;
   }
 
   bool placePoses(const std::string& object_name, const bp::list& poses_list, bool plan_only = false)
@@ -281,7 +282,7 @@ public:
     for (int i = 0; i < l; ++i)
       py_bindings_tools::deserializeMsg(py_bindings_tools::ByteString(poses_list[i]), poses[i]);
     GILReleaser gr;
-    return place(object_name, poses, plan_only) == MoveItErrorCode::SUCCESS;
+    return place(object_name, poses, plan_only) == moveit::core::MoveItErrorCode::SUCCESS;
   }
 
   bool placeLocation(const std::string& object_name, const py_bindings_tools::ByteString& location_str,
@@ -290,7 +291,7 @@ public:
     std::vector<moveit_msgs::action::PlaceLocation> locations(1);
     py_bindings_tools::deserializeMsg(location_str, locations[0]);
     GILReleaser gr;
-    return place(object_name, std::move(locations), plan_only) == MoveItErrorCode::SUCCESS;
+    return place(object_name, std::move(locations), plan_only) == moveit::core::MoveItErrorCode::SUCCESS;
   }
 
   bool placeLocations(const std::string& object_name, const bp::list& location_list, bool plan_only = false)
@@ -300,13 +301,13 @@ public:
     for (int i = 0; i < l; ++i)
       py_bindings_tools::deserializeMsg(py_bindings_tools::ByteString(location_list[i]), locations[i]);
     GILReleaser gr;
-    return place(object_name, std::move(locations), plan_only) == MoveItErrorCode::SUCCESS;
+    return place(object_name, std::move(locations), plan_only) == moveit::core::MoveItErrorCode::SUCCESS;
   }
 
   bool placeAnywhere(const std::string& object_name, bool plan_only = false)
   {
     GILReleaser gr;
-    return place(object_name, plan_only) == MoveItErrorCode::SUCCESS;
+    return place(object_name, plan_only) == moveit::core::MoveItErrorCode::SUCCESS;
   }
 
   void convertListToArrayOfPoses(const bp::list& poses, std::vector<geometry_msgs::Pose>& msg)
@@ -449,12 +450,12 @@ public:
   bool movePython()
   {
     GILReleaser gr;
-    return move() == MoveItErrorCode::SUCCESS;
+    return move() == moveit::core::MoveItErrorCode::SUCCESS;
   }
 
   bool asyncMovePython()
   {
-    return asyncMove() == MoveItErrorCode::SUCCESS;
+    return asyncMove() == moveit::core::MoveItErrorCode::SUCCESS;
   }
 
   bool attachObjectPython(const std::string& object_name, const std::string& link_name, const bp::list& touch_links)
@@ -467,14 +468,14 @@ public:
     MoveGroupInterface::Plan plan;
     py_bindings_tools::deserializeMsg(plan_str, plan.trajectory_);
     GILReleaser gr;
-    return execute(plan) == MoveItErrorCode::SUCCESS;
+    return execute(plan) == moveit::core::MoveItErrorCode::SUCCESS;
   }
 
   bool asyncExecutePython(const py_bindings_tools::ByteString& plan_str)
   {
     MoveGroupInterface::Plan plan;
     py_bindings_tools::deserializeMsg(plan_str, plan.trajectory_);
-    return asyncExecute(plan) == MoveItErrorCode::SUCCESS;
+    return asyncExecute(plan) == moveit::core::MoveItErrorCode::SUCCESS;
   }
 
   bp::tuple planPython()
@@ -554,6 +555,19 @@ public:
   py_bindings_tools::ByteString getPathConstraintsPython()
   {
     moveit_msgs::msg::Constraints constraints_msg(getPathConstraints());
+    return py_bindings_tools::serializeMsg(constraints_msg);
+  }
+
+  void setTrajectoryConstraintsFromMsg(const py_bindings_tools::ByteString& constraints_str)
+  {
+    moveit_msgs::TrajectoryConstraints constraints_msg;
+    py_bindings_tools::deserializeMsg(constraints_str, constraints_msg);
+    setTrajectoryConstraints(constraints_msg);
+  }
+
+  py_bindings_tools::ByteString getTrajectoryConstraintsPython()
+  {
+    moveit_msgs::TrajectoryConstraints constraints_msg(getTrajectoryConstraints());
     return py_bindings_tools::serializeMsg(constraints_msg);
   }
 
@@ -663,7 +677,7 @@ static void wrap_move_group_interface()
   move_group_interface_class.def("move", &MoveGroupInterfaceWrapper::movePython);
   move_group_interface_class.def("execute", &MoveGroupInterfaceWrapper::executePython);
   move_group_interface_class.def("async_execute", &MoveGroupInterfaceWrapper::asyncExecutePython);
-  moveit::planning_interface::MoveItErrorCode (MoveGroupInterfaceWrapper::*pick_1)(const std::string&, bool) =
+  moveit::core::MoveItErrorCode (MoveGroupInterfaceWrapper::*pick_1)(const std::string&, bool) =
       &MoveGroupInterfaceWrapper::pick;
   move_group_interface_class.def("pick", pick_1);
   move_group_interface_class.def("pick", &MoveGroupInterfaceWrapper::pickGrasp);
@@ -765,6 +779,12 @@ static void wrap_move_group_interface()
   move_group_interface_class.def("set_path_constraints_from_msg", &MoveGroupInterfaceWrapper::setPathConstraintsFromMsg);
   move_group_interface_class.def("get_path_constraints", &MoveGroupInterfaceWrapper::getPathConstraintsPython);
   move_group_interface_class.def("clear_path_constraints", &MoveGroupInterfaceWrapper::clearPathConstraints);
+
+  move_group_interface_class.def("set_trajectory_constraints_from_msg",
+                                 &MoveGroupInterfaceWrapper::setTrajectoryConstraintsFromMsg);
+  move_group_interface_class.def("get_trajectory_constraints",
+                                 &MoveGroupInterfaceWrapper::getTrajectoryConstraintsPython);
+  move_group_interface_class.def("clear_trajectory_constraints", &MoveGroupInterfaceWrapper::clearTrajectoryConstraints);
   move_group_interface_class.def("get_known_constraints", &MoveGroupInterfaceWrapper::getKnownConstraintsList);
   move_group_interface_class.def("set_constraints_database", &MoveGroupInterfaceWrapper::setConstraintsDatabase);
   move_group_interface_class.def("set_workspace", &MoveGroupInterfaceWrapper::setWorkspace);

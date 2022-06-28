@@ -48,7 +48,6 @@
 #include <stdint.h>
 
 #include <memory>
-#include <boost/bind.hpp>
 
 namespace occupancy_map_monitor
 {
@@ -97,7 +96,8 @@ bool DepthImageOctomapUpdater::setParams(const std::string& name_space)
         node_->get_parameter(name_space + ".max_update_rate", max_update_rate_) &&
         node_->get_parameter(name_space + ".skip_vertical_pixels", skip_vertical_pixels_) &&
         node_->get_parameter(name_space + ".skip_horizontal_pixels", skip_horizontal_pixels_) &&
-        node_->get_parameter(name_space + ".filtered_cloud_topic", filtered_cloud_topic_);
+        node_->get_parameter(name_space + ".filtered_cloud_topic", filtered_cloud_topic_) &&
+        node_->get_parameter(name_space + ".ns", ns_);
     return true;
   }
   catch (const rclcpp::exceptions::InvalidParameterTypeException& e)
@@ -116,20 +116,17 @@ bool DepthImageOctomapUpdater::initialize(const rclcpp::Node::SharedPtr& node)
   filtered_label_transport_ = std::make_unique<image_transport::ImageTransport>(node_);
 
   tf_buffer_ = monitor_->getTFClient();
-  free_space_updater_.reset(new LazyFreeSpaceUpdater(tree_));
+  free_space_updater_ = std::make_unique<LazyFreeSpaceUpdater>(tree_);
 
   // create our mesh filter
-  mesh_filter_.reset(new mesh_filter::MeshFilter<mesh_filter::StereoCameraModel>(
-      mesh_filter::MeshFilterBase::TransformCallback(), mesh_filter::StereoCameraModel::REGISTERED_PSDK_PARAMS));
+  mesh_filter_ = std::make_unique<mesh_filter::MeshFilter<mesh_filter::StereoCameraModel>>(
+      mesh_filter::MeshFilterBase::TransformCallback(), mesh_filter::StereoCameraModel::REGISTERED_PSDK_PARAMS);
   mesh_filter_->parameters().setDepthRange(near_clipping_plane_distance_, far_clipping_plane_distance_);
   mesh_filter_->setShadowThreshold(shadow_threshold_);
   mesh_filter_->setPaddingOffset(padding_offset_);
   mesh_filter_->setPaddingScale(padding_scale_);
-  mesh_filter_->setTransformCallback(boost::bind(&DepthImageOctomapUpdater::getShapeTransform, this,
-                                                 boost::placeholders::_1, boost::placeholders::_2));
-
-  // init rclcpp time default value
-  last_update_time_ = node_->now();
+  mesh_filter_->setTransformCallback(
+      [this](mesh_filter::MeshHandle mesh, Eigen::Isometry3d& tf) { return getShapeTransform(mesh, tf); });
 
   return true;
 }
@@ -139,18 +136,25 @@ void DepthImageOctomapUpdater::start()
   rmw_qos_profile_t custom_qos = rmw_qos_profile_system_default;
   pub_model_depth_image_ = model_depth_transport_->advertiseCamera("model_depth", 1);
 
+  std::string prefix = "";
+  if (!ns_.empty())
+    prefix = ns_ + "/";
+
+  pub_model_depth_image_ = model_depth_transport_->advertiseCamera(prefix + "model_depth", 1);
   if (!filtered_cloud_topic_.empty())
-    pub_filtered_depth_image_ = filtered_depth_transport_->advertiseCamera(filtered_cloud_topic_, 1);
+    pub_filtered_depth_image_ = filtered_depth_transport_->advertiseCamera(prefix + filtered_cloud_topic_, 1);
   else
-    pub_filtered_depth_image_ = filtered_depth_transport_->advertiseCamera("filtered_depth", 1);
+    pub_filtered_depth_image_ = filtered_depth_transport_->advertiseCamera(prefix + "filtered_depth", 1);
 
-  pub_filtered_label_image_ = filtered_label_transport_->advertiseCamera("filtered_label", 1);
+  pub_filtered_label_image_ = filtered_label_transport_->advertiseCamera(prefix + "filtered_label", 1);
 
-  sub_depth_image_ =
-      image_transport::create_camera_subscription(node_.get(), image_topic_,
-                                                  boost::bind(&DepthImageOctomapUpdater::depthImageCallback, this,
-                                                              boost::placeholders::_1, boost::placeholders::_2),
-                                                  "raw", custom_qos);
+  sub_depth_image_ = image_transport::create_camera_subscription(
+      node_.get(), image_topic_,
+      [this](const sensor_msgs::msg::Image::ConstSharedPtr& depth_msg,
+             const sensor_msgs::msg::CameraInfo::ConstSharedPtr& info_msg) {
+        return depthImageCallback(depth_msg, info_msg);
+      },
+      "raw", custom_qos);
 }
 
 void DepthImageOctomapUpdater::stop()
@@ -225,7 +229,7 @@ void DepthImageOctomapUpdater::depthImageCallback(const sensor_msgs::msg::Image:
   if (max_update_rate_ > 0)
   {
     // ensure we are not updating the octomap representation too often
-    if (node_->now() - last_update_time_ <= rclcpp::Duration(std::chrono::duration<double>(1.0 / max_update_rate_)))
+    if (node_->now() - last_update_time_ <= rclcpp::Duration::from_seconds(1.0 / max_update_rate_))
       return;
     last_update_time_ = node_->now();
   }
@@ -263,7 +267,8 @@ void DepthImageOctomapUpdater::depthImageCallback(const sensor_msgs::msg::Image:
     {
       // wait at most 50ms
       static const double TEST_DT = 0.005;
-      const int nt = (int)(0.5 + average_callback_dt_ / TEST_DT) * std::max(1, ((int)queue_size_ / 2));
+      const int nt =
+          static_cast<int>((0.5 + average_callback_dt_ / TEST_DT) * std::max(1, (static_cast<int>(queue_size_) / 2)));
       bool found = false;
       std::string err;
       for (int t = 0; t < nt; ++t)
@@ -298,7 +303,7 @@ void DepthImageOctomapUpdater::depthImageCallback(const sensor_msgs::msg::Image:
         failed_tf_++;
         if (failed_tf_ > good_tf_)
           RCLCPP_WARN_THROTTLE(LOGGER, *node_->get_clock(), 1000,
-                               "More than half of the image messages discared due to TF being unavailable (%u%%). "
+                               "More than half of the image messages discarded due to TF being unavailable (%u%%). "
                                "Transform error of sensor data: %s; quitting callback.",
                                (100 * failed_tf_) / (good_tf_ + failed_tf_), err.c_str());
         else

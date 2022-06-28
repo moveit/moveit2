@@ -48,7 +48,7 @@
 #else
 #include <tf2_eigen/tf2_eigen.h>
 #endif
-#include <moveit/trajectory_processing/iterative_time_parameterization.h>
+#include <moveit/trajectory_processing/time_optimal_trajectory_generation.h>
 
 #include "ui_motion_planning_rviz_plugin_frame.h"
 
@@ -59,15 +59,14 @@ static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_ros_visualizatio
 void MotionPlanningFrame::planButtonClicked()
 {
   publishSceneIfNeeded();
-  planning_display_->addBackgroundJob(boost::bind(&MotionPlanningFrame::computePlanButtonClicked, this),
-                                      "compute plan");
+  planning_display_->addBackgroundJob([this] { computePlanButtonClicked(); }, "compute plan");
 }
 
 void MotionPlanningFrame::executeButtonClicked()
 {
   ui_->execute_button->setEnabled(false);
   // execution is done in a separate thread, to not block other background jobs by blocking for synchronous execution
-  planning_display_->spawnBackgroundJob(boost::bind(&MotionPlanningFrame::computeExecuteButtonClicked, this));
+  planning_display_->spawnBackgroundJob([this] { computeExecuteButtonClicked(); });
 }
 
 void MotionPlanningFrame::planAndExecuteButtonClicked()
@@ -76,13 +75,13 @@ void MotionPlanningFrame::planAndExecuteButtonClicked()
   ui_->plan_and_execute_button->setEnabled(false);
   ui_->execute_button->setEnabled(false);
   // execution is done in a separate thread, to not block other background jobs by blocking for synchronous execution
-  planning_display_->spawnBackgroundJob(boost::bind(&MotionPlanningFrame::computePlanAndExecuteButtonClicked, this));
+  planning_display_->spawnBackgroundJob([this] { computePlanAndExecuteButtonClicked(); });
 }
 
 void MotionPlanningFrame::stopButtonClicked()
 {
   ui_->stop_button->setEnabled(false);  // avoid clicking again
-  planning_display_->addBackgroundJob(boost::bind(&MotionPlanningFrame::computeStopButtonClicked, this), "stop");
+  planning_display_->addBackgroundJob([this] { computeStopButtonClicked(); }, "stop");
 }
 
 void MotionPlanningFrame::allowReplanningToggled(bool checked)
@@ -157,13 +156,13 @@ bool MotionPlanningFrame::computeCartesianPlan()
     // https://groups.google.com/forum/#!topic/moveit-users/MOoFxy2exT4
     robot_trajectory::RobotTrajectory rt(move_group_->getRobotModel(), move_group_->getName());
     rt.setRobotTrajectoryMsg(*move_group_->getCurrentState(), trajectory);
-    trajectory_processing::IterativeParabolicTimeParameterization iptp;
-    bool success =
-        iptp.computeTimeStamps(rt, ui_->velocity_scaling_factor->value(), ui_->acceleration_scaling_factor->value());
-    RCLCPP_INFO(LOGGER, "Computing time stamps %s", success ? "SUCCEDED" : "FAILED");
+    trajectory_processing::TimeOptimalTrajectoryGeneration time_parameterization;
+    bool success = time_parameterization.computeTimeStamps(rt, ui_->velocity_scaling_factor->value(),
+                                                           ui_->acceleration_scaling_factor->value());
+    RCLCPP_INFO(LOGGER, "Computing time stamps %s", success ? "SUCCEEDED" : "FAILED");
 
     // Store trajectory in current_plan_
-    current_plan_.reset(new moveit::planning_interface::MoveGroupInterface::Plan());
+    current_plan_ = std::make_shared<moveit::planning_interface::MoveGroupInterface::Plan>();
     rt.getRobotTrajectoryMsg(current_plan_->trajectory_);
     current_plan_->planning_time_ = (rclcpp::Clock().now() - start).seconds();
     return success;
@@ -173,8 +172,8 @@ bool MotionPlanningFrame::computeCartesianPlan()
 
 bool MotionPlanningFrame::computeJointSpacePlan()
 {
-  current_plan_.reset(new moveit::planning_interface::MoveGroupInterface::Plan());
-  return move_group_->plan(*current_plan_) == moveit::planning_interface::MoveItErrorCode::SUCCESS;
+  current_plan_ = std::make_shared<moveit::planning_interface::MoveGroupInterface::Plan>();
+  return move_group_->plan(*current_plan_) == moveit::core::MoveItErrorCode::SUCCESS;
 }
 
 void MotionPlanningFrame::computePlanButtonClicked()
@@ -211,20 +210,22 @@ void MotionPlanningFrame::computeExecuteButtonClicked()
   if (mgi && current_plan_)
   {
     ui_->stop_button->setEnabled(true);  // enable stopping
-    bool success = mgi->execute(*current_plan_) == moveit::planning_interface::MoveItErrorCode::SUCCESS;
+    bool success = mgi->execute(*current_plan_) == moveit::core::MoveItErrorCode::SUCCESS;
     onFinishedExecution(success);
   }
 }
 
 void MotionPlanningFrame::computePlanAndExecuteButtonClicked()
 {
-  if (!move_group_)
+  // ensures the MoveGroupInterface is not destroyed while executing
+  moveit::planning_interface::MoveGroupInterfacePtr mgi(move_group_);
+  if (!mgi)
     return;
   configureForPlanning();
   planning_display_->rememberPreviousStartState();
   // move_group::move() on the server side, will always start from the current state
   // to suppress a warning, we pass an empty state (which encodes "start from current state")
-  move_group_->setStartStateToCurrentState();
+  mgi->setStartStateToCurrentState();
   ui_->stop_button->setEnabled(true);
   if (ui_->use_cartesian_path->isEnabled() && ui_->use_cartesian_path->checkState())
   {
@@ -233,7 +234,7 @@ void MotionPlanningFrame::computePlanAndExecuteButtonClicked()
   }
   else
   {
-    bool success = move_group_->move() == moveit::planning_interface::MoveItErrorCode::SUCCESS;
+    bool success = mgi->move() == moveit::core::MoveItErrorCode::SUCCESS;
     onFinishedExecution(success);
   }
   ui_->plan_and_execute_button->setEnabled(true);
@@ -255,7 +256,7 @@ void MotionPlanningFrame::onFinishedExecution(bool success)
   // disable stop button
   ui_->stop_button->setEnabled(false);
 
-  // update query start state to current if neccessary
+  // update query start state to current if necessary
   if (ui_->start_state_combo_box->currentText() == "<current>")
     startStateTextChanged(ui_->start_state_combo_box->currentText());
 
@@ -280,8 +281,7 @@ void MotionPlanningFrame::onNewPlanningSceneState()
 void MotionPlanningFrame::startStateTextChanged(const QString& start_state)
 {
   // use background job: fetching the current state might take up to a second
-  planning_display_->addBackgroundJob(boost::bind(&MotionPlanningFrame::startStateTextChangedExec, this,
-                                                  start_state.toStdString()),
+  planning_display_->addBackgroundJob([this, state = start_state.toStdString()] { startStateTextChangedExec(state); },
                                       "update start state");
 }
 
@@ -295,8 +295,8 @@ void MotionPlanningFrame::startStateTextChangedExec(const std::string& start_sta
 void MotionPlanningFrame::goalStateTextChanged(const QString& goal_state)
 {
   // use background job: fetching the current state might take up to a second
-  planning_display_->addBackgroundJob(
-      boost::bind(&MotionPlanningFrame::goalStateTextChangedExec, this, goal_state.toStdString()), "update goal state");
+  planning_display_->addBackgroundJob([this, state = goal_state.toStdString()] { goalStateTextChangedExec(state); },
+                                      "update goal state");
 }
 
 void MotionPlanningFrame::goalStateTextChangedExec(const std::string& goal_state)
@@ -471,8 +471,7 @@ void MotionPlanningFrame::populatePlannerDescription(const moveit_msgs::msg::Pla
 void MotionPlanningFrame::populateConstraintsList()
 {
   if (move_group_)
-    planning_display_->addMainLoopJob(
-        boost::bind(&MotionPlanningFrame::populateConstraintsList, this, move_group_->getKnownConstraints()));
+    planning_display_->addMainLoopJob([this]() { populateConstraintsList(move_group_->getKnownConstraints()); });
 }
 
 void MotionPlanningFrame::populateConstraintsList(const std::vector<std::string>& constr)
@@ -575,7 +574,7 @@ void MotionPlanningFrame::remoteUpdateStartStateCallback(const std_msgs::msg::Em
 {
   if (move_group_ && planning_display_)
   {
-    planning_display_->waitForCurrentRobotState();
+    planning_display_->waitForCurrentRobotState(node_->get_clock()->now());
     const planning_scene_monitor::LockedPlanningSceneRO& ps = planning_display_->getPlanningSceneRO();
     if (ps)
     {
@@ -589,7 +588,7 @@ void MotionPlanningFrame::remoteUpdateGoalStateCallback(const std_msgs::msg::Emp
 {
   if (move_group_ && planning_display_)
   {
-    planning_display_->waitForCurrentRobotState();
+    planning_display_->waitForCurrentRobotState(node_->get_clock()->now());
     const planning_scene_monitor::LockedPlanningSceneRO& ps = planning_display_->getPlanningSceneRO();
     if (ps)
     {
@@ -606,11 +605,11 @@ void MotionPlanningFrame::remoteUpdateCustomStartStateCallback(const moveit_msgs
   msg_no_attached.is_diff = true;
   if (move_group_ && planning_display_)
   {
-    planning_display_->waitForCurrentRobotState();
+    planning_display_->waitForCurrentRobotState(node_->get_clock()->now());
     const planning_scene_monitor::LockedPlanningSceneRO& ps = planning_display_->getPlanningSceneRO();
     if (ps)
     {
-      moveit::core::RobotStatePtr state(new moveit::core::RobotState(ps->getCurrentState()));
+      auto state = std::make_shared<moveit::core::RobotState>(ps->getCurrentState());
       moveit::core::robotStateMsgToRobotState(ps->getTransforms(), msg_no_attached, *state);
       planning_display_->setQueryStartState(*state);
     }
@@ -624,11 +623,11 @@ void MotionPlanningFrame::remoteUpdateCustomGoalStateCallback(const moveit_msgs:
   msg_no_attached.is_diff = true;
   if (move_group_ && planning_display_)
   {
-    planning_display_->waitForCurrentRobotState();
+    planning_display_->waitForCurrentRobotState(node_->get_clock()->now());
     const planning_scene_monitor::LockedPlanningSceneRO& ps = planning_display_->getPlanningSceneRO();
     if (ps)
     {
-      moveit::core::RobotStatePtr state(new moveit::core::RobotState(ps->getCurrentState()));
+      auto state = std::make_shared<moveit::core::RobotState>(ps->getCurrentState());
       moveit::core::robotStateMsgToRobotState(ps->getTransforms(), msg_no_attached, *state);
       planning_display_->setQueryGoalState(*state);
     }

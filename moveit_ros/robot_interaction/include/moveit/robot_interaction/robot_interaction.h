@@ -42,9 +42,9 @@
 #include <moveit/macros/class_forward.h>
 #include <moveit/robot_state/robot_state.h>
 #include <moveit/robot_interaction/interaction.h>
-#include <boost/function.hpp>
-#include <boost/thread.hpp>
 #include <memory>
+#include <functional>
+#include <thread>
 
 // This is needed for legacy code that includes robot_interaction.h but not
 // interaction_handler.h
@@ -172,7 +172,7 @@ private:
   // called by decideActiveComponents(); add markers for planar and floating joints
   void decideActiveJoints(const std::string& group);
 
-  void moveInteractiveMarker(const std::string& name, const geometry_msgs::msg::PoseStamped::ConstSharedPtr msg);
+  void moveInteractiveMarker(const std::string& name, const geometry_msgs::msg::PoseStamped& msg);
   // register the name of the topic and marker name to move interactive marker from other ROS nodes
   void registerMoveInteractiveMarkerTopic(const std::string& marker_name, const std::string& name);
   // return the diameter of the sphere that certainly can enclose the AABB of the link
@@ -196,10 +196,10 @@ private:
   void processingThread();
   void clearInteractiveMarkersUnsafe();
 
-  std::unique_ptr<boost::thread> processing_thread_;
+  std::unique_ptr<std::thread> processing_thread_;
   bool run_processing_thread_;
 
-  boost::condition_variable new_feedback_condition_;
+  std::condition_variable new_feedback_condition_;
   std::map<std::string, visualization_msgs::msg::InteractiveMarkerFeedback::ConstSharedPtr> feedback_map_;
 
   moveit::core::RobotModelConstPtr robot_model_;
@@ -214,12 +214,12 @@ private:
   // This mutex is locked every time markers are read or updated;
   // This includes the active_* arrays and shown_markers_
   // Please note that this mutex *MUST NOT* be locked while operations
-  // on the interative marker server are called because the server
+  // on the interactive marker server are called because the server
   // also locks internally and we could othewrise end up with a problem
   // of Thread 1: Lock A,         Lock B, Unlock B, Unloack A
   //    Thread 2:         Lock B, Lock A
   // => deadlock
-  boost::mutex marker_access_lock_;
+  std::mutex marker_access_lock_;
 
   interactive_markers::InteractiveMarkerServer* int_marker_server_;
   // ros subscribers to move the interactive markers by other ros nodes

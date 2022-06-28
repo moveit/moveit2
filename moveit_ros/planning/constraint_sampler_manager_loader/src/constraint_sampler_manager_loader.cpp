@@ -36,8 +36,10 @@
 
 #include <moveit/constraint_sampler_manager_loader/constraint_sampler_manager_loader.h>
 #include <pluginlib/class_loader.hpp>
-#include "rclcpp/rclcpp.hpp"
 #include <boost/tokenizer.hpp>
+#include <rclcpp/logger.hpp>
+#include <rclcpp/logging.hpp>
+#include <rclcpp/parameter_value.hpp>
 #include <memory>
 
 namespace constraint_sampler_manager_loader
@@ -55,9 +57,9 @@ public:
       node_->get_parameter("constraint_samplers", constraint_samplers);
       try
       {
-        constraint_sampler_plugin_loader_.reset(
-            new pluginlib::ClassLoader<constraint_samplers::ConstraintSamplerAllocator>(
-                "moveit_core", "constraint_samplers::ConstraintSamplerAllocator"));
+        constraint_sampler_plugin_loader_ =
+            std::make_unique<pluginlib::ClassLoader<constraint_samplers::ConstraintSamplerAllocator>>(
+                "moveit_core", "constraint_samplers::ConstraintSamplerAllocator");
       }
       catch (pluginlib::PluginlibException& ex)
       {
@@ -65,8 +67,8 @@ public:
         return;
       }
       boost::char_separator<char> sep(" ");
-      boost::tokenizer<boost::char_separator<char> > tok(constraint_samplers, sep);
-      for (boost::tokenizer<boost::char_separator<char> >::iterator beg = tok.begin(); beg != tok.end(); ++beg)
+      boost::tokenizer<boost::char_separator<char>> tok(constraint_samplers, sep);
+      for (boost::tokenizer<boost::char_separator<char>>::iterator beg = tok.begin(); beg != tok.end(); ++beg)
       {
         try
         {
@@ -85,15 +87,13 @@ public:
 
 private:
   const rclcpp::Node::SharedPtr node_;
-  std::unique_ptr<pluginlib::ClassLoader<constraint_samplers::ConstraintSamplerAllocator> >
+  std::unique_ptr<pluginlib::ClassLoader<constraint_samplers::ConstraintSamplerAllocator>>
       constraint_sampler_plugin_loader_;
 };
 ConstraintSamplerManagerLoader::ConstraintSamplerManagerLoader(
     const rclcpp::Node::SharedPtr& node, const constraint_samplers::ConstraintSamplerManagerPtr& csm)
-  : constraint_sampler_manager_(
-        csm ? csm :
-              constraint_samplers::ConstraintSamplerManagerPtr(new constraint_samplers::ConstraintSamplerManager()))
-  , impl_(new Helper(node, constraint_sampler_manager_))
+  : constraint_sampler_manager_(csm ? csm : std::make_shared<constraint_samplers::ConstraintSamplerManager>())
+  , impl_(std::make_shared<Helper>(node, constraint_sampler_manager_))
 {
 }
 }  // namespace constraint_sampler_manager_loader

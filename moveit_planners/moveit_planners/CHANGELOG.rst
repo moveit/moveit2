@@ -2,6 +2,28 @@
 Changelog for package moveit_planners
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.5.1 (2022-05-31)
+------------------
+
+2.5.0 (2022-05-26)
+------------------
+* Merge pr `#3000 <https://github.com/ros-planning/moveit2/issues/3000>`_: Pilz planner: improve reporting of invalid start joints
+* add pilz planner to moveit_planners dependency
+* Contributors: Robert Haschke, v4hn
+
+2.4.0 (2022-01-20)
+------------------
+
+2.3.2 (2021-12-29)
+------------------
+
+2.3.1 (2021-12-23)
+------------------
+* PILZ: Migrate and Restructure test directory
+* Enforce package.xml format 3 Schema (`#779 <https://github.com/ros-planning/moveit2/issues/779>`_)
+* Update Maintainers of MoveIt package (`#697 <https://github.com/ros-planning/moveit2/issues/697>`_)
+* Contributors: Dave Coleman, Henning Kayser, Robert Haschke, Sebastian Jahr
+
 2.3.0 (2021-10-08)
 ------------------
 

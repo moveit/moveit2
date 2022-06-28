@@ -1,0 +1,94 @@
+<?xml version="1.0" ?>
+
+<!--
+Copyright (c) 2018 Pilz GmbH & Co. KG
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+  <xacro:macro name="simple_gripper_brackets"
+               params="gripper_name:=^
+                       parent_left:=^|''
+                       parent_right:=^|''
+                       size_x:=^|0.03
+                       size_y:=^|0.01
+                       size_z:=^|0.05">
+    <xacro:if value="${parent_left==''}">
+      <xacro:property name="parent_left" value="${gripper_name}_finger_left_link" />
+    </xacro:if>
+    <xacro:if value="${parent_right==''}">
+      <xacro:property name="parent_right" value="${gripper_name}_finger_right_link" />
+    </xacro:if>
+
+    <!-- fixed joint attaching to left bracket mounting -->
+    <joint name="${gripper_name}_link_left_bracket_fixed_joint" type="fixed">
+      <parent link="${parent_left}"/>
+      <child link="${gripper_name}_finger_left_link_bracket"/>
+    </joint>
+
+    <!-- link of left bracket -->
+    <link name="${gripper_name}_finger_left_link_bracket">
+        <inertial>
+          <origin xyz="0 0 0" rpy="0 0 0"/>
+          <mass value="1"/>
+          <inertia ixx="0.01" ixy="0" ixz="0" iyy="0.01" iyz="0" izz="0.01" />
+        </inertial>
+        <visual>
+          <origin xyz="0 ${size_y/2} ${size_z/2-0.005}" rpy="0 0 0" />
+          <geometry>
+            <box size="${size_x} ${size_y} ${size_z}"/>
+          </geometry>
+          <material name="light_gray">
+            <color rgba="0.6 0.6 0.6 1"/>
+          </material>
+        </visual>
+        <collision>
+          <origin xyz="0 ${size_y/2} ${size_z/2-0.005}" rpy="0 0 0" />
+          <geometry>
+            <box size="${size_x} ${size_y} ${size_z}"/>
+          </geometry>
+        </collision>
+    </link>
+
+    <!-- fixed joint attaching to right bracket mounting -->
+    <joint name="${gripper_name}_link_right_bracket_fixed_joint" type="fixed">
+      <parent link="${parent_right}"/>
+      <child link="${gripper_name}_finger_right_link_bracket"/>
+    </joint>
+
+    <!-- link of right bracket -->
+    <link name="${gripper_name}_finger_right_link_bracket">
+        <inertial>
+          <origin xyz="0 0 0" rpy="0 0 0"/>
+          <mass value="1"/>
+          <inertia ixx="0.01" ixy="0" ixz="0" iyy="0.01" iyz="0" izz="0.01" />
+        </inertial>
+        <visual>
+          <origin xyz="0 -${size_y/2} ${size_z/2-0.005}" rpy="0 0 0" />
+          <geometry>
+            <box size="${size_x} ${size_y} ${size_z}"/>
+          </geometry>
+          <material name="dark_grey">
+            <color rgba="0.8 0.8 0.8 1"/>
+          </material>
+        </visual>
+        <collision>
+          <origin xyz="0 -${size_y/2} ${size_z/2-0.005}" rpy="0 0 0" />
+          <geometry>
+            <box size="${size_x} ${size_y} ${size_z}"/>
+          </geometry>
+        </collision>
+    </link>
+  </xacro:macro>
+</robot>

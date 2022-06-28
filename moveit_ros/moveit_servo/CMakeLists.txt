@@ -30,25 +30,6 @@ set(FAKE_SERVO_CMDS_NAME fake_command_publisher)
 find_package(moveit_common REQUIRED)
 moveit_package()
 
-find_package(ament_cmake REQUIRED)
-find_package(control_msgs REQUIRED)
-find_package(control_toolbox REQUIRED)
-find_package(geometry_msgs REQUIRED)
-find_package(moveit_core REQUIRED)
-find_package(moveit_msgs REQUIRED)
-find_package(moveit_ros_planning REQUIRED)
-find_package(pluginlib REQUIRED)
-find_package(rclcpp REQUIRED)
-find_package(rclcpp_components REQUIRED)
-find_package(sensor_msgs REQUIRED)
-find_package(std_msgs REQUIRED)
-find_package(std_srvs REQUIRED)
-find_package(tf2_eigen REQUIRED)
-find_package(trajectory_msgs REQUIRED)
-
-find_package(eigen3_cmake_module REQUIRED)
-find_package(Eigen3 REQUIRED)
-
 set(THIS_PACKAGE_INCLUDE_DEPENDS
   control_msgs
   control_toolbox
@@ -66,6 +47,13 @@ set(THIS_PACKAGE_INCLUDE_DEPENDS
   trajectory_msgs
 )
 
+find_package(ament_cmake REQUIRED)
+find_package(eigen3_cmake_module REQUIRED)
+find_package(Eigen3 REQUIRED)
+foreach(Dependency IN ITEMS ${THIS_PACKAGE_INCLUDE_DEPENDS})
+  find_package(${Dependency} REQUIRED)
+endforeach()
+
 include_directories(
   include
 )
@@ -75,7 +63,10 @@ include_directories(
 ###################
 
 # This library provides a way of loading parameters for servo
-add_library(${SERVO_PARAM_LIB_NAME} SHARED src/servo_parameters.cpp)
+add_library(${SERVO_PARAM_LIB_NAME} SHARED
+  src/servo_parameters.cpp
+  src/parameter_descriptor_builder.cpp
+)
 set_target_properties(${SERVO_PARAM_LIB_NAME} PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
 ament_target_dependencies(${SERVO_PARAM_LIB_NAME} ${THIS_PACKAGE_INCLUDE_DEPENDS})
 
@@ -183,7 +174,6 @@ if(BUILD_TESTING)
 
   # These don't pass yet, disable them for now
   set(ament_cmake_copyright_FOUND TRUE)
-  set(ament_cmake_cppcheck_FOUND TRUE)
   set(ament_cmake_cpplint_FOUND TRUE)
   set(ament_cmake_flake8_FOUND TRUE)
   set(ament_cmake_uncrustify_FOUND TRUE)

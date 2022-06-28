@@ -36,21 +36,20 @@
 
 #include <eigen3/Eigen/Eigen>
 #include <kdl/rotational_interpolation_sa.hpp>
+#include <moveit/planning_scene/planning_scene.h>
 
 #include "pilz_industrial_motion_planner/trajectory_generator.h"
 #include "pilz_industrial_motion_planner/velocity_profile_atrap.h"
-
-using namespace pilz_industrial_motion_planner;
 
 namespace pilz_industrial_motion_planner
 {
 // TODO date type of units
 
-CREATE_MOVEIT_ERROR_CODE_EXCEPTION(LinTrajectoryConversionFailure, moveit_msgs::MoveItErrorCodes::FAILURE);
+CREATE_MOVEIT_ERROR_CODE_EXCEPTION(LinTrajectoryConversionFailure, moveit_msgs::msg::MoveItErrorCodes::FAILURE);
 
-CREATE_MOVEIT_ERROR_CODE_EXCEPTION(JointNumberMismatch, moveit_msgs::MoveItErrorCodes::INVALID_GOAL_CONSTRAINTS);
-CREATE_MOVEIT_ERROR_CODE_EXCEPTION(LinJointMissingInStartState, moveit_msgs::MoveItErrorCodes::INVALID_ROBOT_STATE);
-CREATE_MOVEIT_ERROR_CODE_EXCEPTION(LinInverseForGoalIncalculable, moveit_msgs::MoveItErrorCodes::NO_IK_SOLUTION);
+CREATE_MOVEIT_ERROR_CODE_EXCEPTION(JointNumberMismatch, moveit_msgs::msg::MoveItErrorCodes::INVALID_GOAL_CONSTRAINTS);
+CREATE_MOVEIT_ERROR_CODE_EXCEPTION(LinJointMissingInStartState, moveit_msgs::msg::MoveItErrorCodes::INVALID_ROBOT_STATE);
+CREATE_MOVEIT_ERROR_CODE_EXCEPTION(LinInverseForGoalIncalculable, moveit_msgs::msg::MoveItErrorCodes::NO_IK_SOLUTION);
 
 /**
  * @brief This class implements a linear trajectory generator in Cartesian
@@ -66,14 +65,17 @@ public:
    * @param model: robot model
    * @param planner_limits: limits in joint and Cartesian spaces
    */
-  TrajectoryGeneratorLIN(const robot_model::RobotModelConstPtr& robot_model,
-                         const pilz_industrial_motion_planner::LimitsContainer& planner_limits);
+  TrajectoryGeneratorLIN(const moveit::core::RobotModelConstPtr& robot_model,
+                         const pilz_industrial_motion_planner::LimitsContainer& planner_limits,
+                         const std::string& group_name);
 
 private:
-  void extractMotionPlanInfo(const planning_interface::MotionPlanRequest& req, MotionPlanInfo& info) const final;
+  void extractMotionPlanInfo(const planning_scene::PlanningSceneConstPtr& scene,
+                             const planning_interface::MotionPlanRequest& req, MotionPlanInfo& info) const final;
 
-  void plan(const planning_interface::MotionPlanRequest& req, const MotionPlanInfo& plan_info,
-            const double& sampling_time, trajectory_msgs::JointTrajectory& joint_trajectory) override;
+  void plan(const planning_scene::PlanningSceneConstPtr& scene, const planning_interface::MotionPlanRequest& req,
+            const MotionPlanInfo& plan_info, const double& sampling_time,
+            trajectory_msgs::msg::JointTrajectory& joint_trajectory) override;
 
   /**
    * @brief construct a KDL::Path object for a Cartesian straight line

@@ -1,0 +1,27 @@
+#
+# Copyright © 2018 Pilz GmbH & Co. KG
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+gripper_joint_trajectory_controller:
+  type: position_controllers/JointTrajectoryController
+  joints:
+     - prbt_gripper_finger_left_joint
+  constraints:
+      goal_time: 0.6
+      stopped_velocity_tolerance: 0.05
+      prbt_gripper_finger_left_joint: {trajectory: 0.001, goal: 0.001}
+  stop_trajectory_duration: 0.1
+  state_publish_rate:  25
+  action_monitor_rate: 10
+  required_drive_mode: 7

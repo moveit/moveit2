@@ -35,14 +35,13 @@
 #include "pilz_industrial_motion_planner_testutils/sequence.h"
 
 #include <algorithm>
-#include <boost/variant.hpp>
 
 namespace pilz_industrial_motion_planner_testutils
 {
 /**
  * @brief Visitor transforming the stored command into a MotionPlanRequest.
  */
-class ToReqVisitor : public boost::static_visitor<planning_interface::MotionPlanRequest>
+class ToReqVisitor
 {
 public:
   template <typename T>
@@ -55,7 +54,7 @@ public:
 /**
  * @brief Visitor returning not the specific command type but the base type.
  */
-class ToBaseVisitor : public boost::static_visitor<MotionCmd&>
+class ToBaseVisitor
 {
 public:
   template <typename T>
@@ -65,21 +64,21 @@ public:
   }
 };
 
-moveit_msgs::MotionSequenceRequest Sequence::toRequest() const
+moveit_msgs::msg::MotionSequenceRequest Sequence::toRequest() const
 {
-  moveit_msgs::MotionSequenceRequest req;
+  moveit_msgs::msg::MotionSequenceRequest req;
 
   std::vector<std::string> group_names;
   for (const auto& cmd : cmds_)
   {
-    moveit_msgs::MotionSequenceItem item;
-    item.req = boost::apply_visitor(ToReqVisitor(), cmd.first);
+    moveit_msgs::msg::MotionSequenceItem item;
+    item.req = std::visit(ToReqVisitor(), cmd.first);
 
     if (std::find(group_names.begin(), group_names.end(), item.req.group_name) != group_names.end())
     {
       // Remove start state because only the first request of a group
       // is allowed to have a start state in a sequence.
-      item.req.start_state = moveit_msgs::RobotState();
+      item.req.start_state = moveit_msgs::msg::RobotState();
     }
     else
     {
@@ -114,7 +113,7 @@ void Sequence::erase(const size_t start, const size_t end)
 
 MotionCmd& Sequence::getCmd(const size_t index_cmd)
 {
-  return boost::apply_visitor(ToBaseVisitor(), cmds_.at(index_cmd).first);
+  return std::visit(ToBaseVisitor(), cmds_.at(index_cmd).first);
 }
 
 }  // namespace pilz_industrial_motion_planner_testutils

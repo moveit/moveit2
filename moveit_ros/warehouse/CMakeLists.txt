@@ -5,10 +5,6 @@ project(moveit_ros_warehouse)
 find_package(moveit_common REQUIRED)
 moveit_package()
 
-if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-  add_compile_options(-Wpedantic)
-endif()
-
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(moveit_core REQUIRED)
@@ -48,7 +44,6 @@ if(BUILD_TESTING)
 
   # These don't pass yet, disable them for now
   set(ament_cmake_copyright_FOUND TRUE)
-  set(ament_cmake_cppcheck_FOUND TRUE)
   set(ament_cmake_cpplint_FOUND TRUE)
   set(ament_cmake_flake8_FOUND TRUE)
   set(ament_cmake_uncrustify_FOUND TRUE)

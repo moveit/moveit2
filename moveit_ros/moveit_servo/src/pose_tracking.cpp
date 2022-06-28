@@ -42,6 +42,32 @@ namespace
 {
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_servo.pose_tracking");
 constexpr size_t LOG_THROTTLE_PERIOD = 10;  // sec
+
+// Helper template for declaring and getting ros param
+template <typename T>
+void declareOrGetParam(T& output_value, const std::string& param_name, const rclcpp::Node::SharedPtr& node,
+                       const rclcpp::Logger& logger, const T default_value = T{})
+{
+  try
+  {
+    if (node->has_parameter(param_name))
+    {
+      node->get_parameter<T>(param_name, output_value);
+    }
+    else
+    {
+      output_value = node->declare_parameter<T>(param_name, default_value);
+    }
+  }
+  catch (const rclcpp::exceptions::InvalidParameterTypeException& e)
+  {
+    RCLCPP_WARN_STREAM(logger, "InvalidParameterTypeException(" << param_name << "): " << e.what());
+    RCLCPP_ERROR_STREAM(logger, "Error getting parameter \'" << param_name << "\', check parameter type in YAML file");
+    throw e;
+  }
+
+  RCLCPP_INFO_STREAM(logger, "Found parameter - " << param_name << ": " << output_value);
+}
 }  // namespace
 
 namespace moveit_servo
@@ -55,12 +81,10 @@ PoseTracking::PoseTracking(const rclcpp::Node::SharedPtr& node, const ServoParam
   , transform_buffer_(node_->get_clock())
   , transform_listener_(transform_buffer_)
   , stop_requested_(false)
-  , angular_error_(boost::none)
 {
   readROSParams();
 
   robot_model_ = planning_scene_monitor_->getRobotModel();
-  joint_model_group_ = robot_model_->getJointModelGroup(move_group_name_);
 
   // Initialize PID controllers
   initializePID(x_pid_config_, cartesian_position_pids_);
@@ -75,7 +99,7 @@ PoseTracking::PoseTracking(const rclcpp::Node::SharedPtr& node, const ServoParam
   // Connect to Servo ROS interfaces
   target_pose_sub_ = node_->create_subscription<geometry_msgs::msg::PoseStamped>(
       "target_pose", rclcpp::SystemDefaultsQoS(),
-      std::bind(&PoseTracking::targetPoseCallback, this, std::placeholders::_1));
+      [this](const geometry_msgs::msg::PoseStamped::ConstSharedPtr msg) { return targetPoseCallback(msg); });
 
   // Publish outgoing twist commands to the Servo object
   twist_stamped_pub_ = node_->create_publisher<geometry_msgs::msg::TwistStamped>(
@@ -321,7 +345,7 @@ void PoseTracking::doPostMotionReset()
 {
   stopMotion();
   stop_requested_ = false;
-  angular_error_ = boost::none;
+  angular_error_ = {};
 
   // Reset error integrals and previous errors of PID controllers
   cartesian_position_pids_[0].reset();

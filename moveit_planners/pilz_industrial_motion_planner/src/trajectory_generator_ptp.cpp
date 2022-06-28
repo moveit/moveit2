@@ -34,8 +34,10 @@
 
 #include "pilz_industrial_motion_planner/trajectory_generator_ptp.h"
 #include "moveit/robot_state/conversions.h"
-#include "ros/ros.h"
 
+#include <rclcpp/duration.hpp>
+#include <rclcpp/logger.hpp>
+#include <rclcpp/logging.hpp>
 #include <iostream>
 #include <sstream>
 
@@ -52,8 +54,10 @@
 
 namespace pilz_industrial_motion_planner
 {
-TrajectoryGeneratorPTP::TrajectoryGeneratorPTP(const robot_model::RobotModelConstPtr& robot_model,
-                                               const LimitsContainer& planner_limits)
+static const rclcpp::Logger LOGGER =
+    rclcpp::get_logger("moveit.pilz_industrial_motion_planner.trajectory_generator_ptp");
+TrajectoryGeneratorPTP::TrajectoryGeneratorPTP(const moveit::core::RobotModelConstPtr& robot_model,
+                                               const LimitsContainer& planner_limits, const std::string& group_name)
   : TrajectoryGenerator::TrajectoryGenerator(robot_model, planner_limits)
 {
   if (!planner_limits_.hasJointLimits())
@@ -64,43 +68,37 @@ TrajectoryGeneratorPTP::TrajectoryGeneratorPTP(const robot_model::RobotModelCons
   joint_limits_ = planner_limits_.getJointLimitContainer();
 
   // collect most strict joint limits for each group in robot model
-  for (const auto& jmg : robot_model->getJointModelGroups())
+  const auto* jmg = robot_model->getJointModelGroup(group_name);
+  if (!jmg)
+    throw TrajectoryGeneratorInvalidLimitsException("invalid group: " + group_name);
+
+  const auto& active_joints = jmg->getActiveJointModelNames();
+
+  // no active joints
+  if (!active_joints.empty())
   {
-    auto active_joints = jmg->getActiveJointModelNames();
+    most_strict_limit_ = joint_limits_.getCommonLimit(active_joints);
 
-    // no active joints
-    if (active_joints.empty())
+    if (!most_strict_limit_.has_velocity_limits)
     {
-      continue;
+      throw TrajectoryGeneratorInvalidLimitsException("velocity limit not set for group " + group_name);
     }
-
-    JointLimit most_strict_limit = joint_limits_.getCommonLimit(active_joints);
-
-    if (!most_strict_limit.has_velocity_limits)
+    if (!most_strict_limit_.has_acceleration_limits)
     {
-      ROS_ERROR_STREAM("velocity limit not set for group " << jmg->getName());
-      throw TrajectoryGeneratorInvalidLimitsException("velocity limit not set for group " + jmg->getName());
+      throw TrajectoryGeneratorInvalidLimitsException("acceleration limit not set for group " + group_name);
     }
-    if (!most_strict_limit.has_acceleration_limits)
+    if (!most_strict_limit_.has_deceleration_limits)
     {
-      ROS_ERROR_STREAM("acceleration limit not set for group " << jmg->getName());
-      throw TrajectoryGeneratorInvalidLimitsException("acceleration limit not set for group " + jmg->getName());
+      throw TrajectoryGeneratorInvalidLimitsException("deceleration limit not set for group " + group_name);
     }
-    if (!most_strict_limit.has_deceleration_limits)
-    {
-      ROS_ERROR_STREAM("deceleration limit not set for group " << jmg->getName());
-      throw TrajectoryGeneratorInvalidLimitsException("deceleration limit not set for group " + jmg->getName());
-    }
-
-    most_strict_limits_.insert(std::pair<std::string, JointLimit>(jmg->getName(), most_strict_limit));
   }
 
-  ROS_INFO("Initialized Point-to-Point Trajectory Generator.");
+  RCLCPP_INFO(LOGGER, "Initialized Point-to-Point Trajectory Generator.");
 }
 
 void TrajectoryGeneratorPTP::planPTP(const std::map<std::string, double>& start_pos,
                                      const std::map<std::string, double>& goal_pos,
-                                     trajectory_msgs::JointTrajectory& joint_trajectory, const std::string& group_name,
+                                     trajectory_msgs::msg::JointTrajectory& joint_trajectory,
                                      const double& velocity_scaling_factor, const double& acceleration_scaling_factor,
                                      const double& sampling_time)
 {
@@ -122,11 +120,11 @@ void TrajectoryGeneratorPTP::planPTP(const std::map<std::string, double>& start_
   }
   if (goal_reached)
   {
-    ROS_INFO_STREAM("Goal already reached, set one goal point explicitly.");
+    RCLCPP_INFO_STREAM(LOGGER, "Goal already reached, set one goal point explicitly.");
     if (joint_trajectory.points.empty())
     {
-      trajectory_msgs::JointTrajectoryPoint point;
-      point.time_from_start = ros::Duration(sampling_time);
+      trajectory_msgs::msg::JointTrajectoryPoint point;
+      point.time_from_start = rclcpp::Duration::from_seconds(sampling_time);
       for (const std::string& joint_name : joint_trajectory.joint_names)
       {
         point.positions.push_back(start_pos.at(joint_name));
@@ -147,10 +145,9 @@ void TrajectoryGeneratorPTP::planPTP(const std::map<std::string, double>& start_
   {
     // create vecocity profile if necessary
     velocity_profile.insert(std::make_pair(
-        joint_name,
-        VelocityProfileATrap(velocity_scaling_factor * most_strict_limits_.at(group_name).max_velocity,
-                             acceleration_scaling_factor * most_strict_limits_.at(group_name).max_acceleration,
-                             acceleration_scaling_factor * most_strict_limits_.at(group_name).max_deceleration)));
+        joint_name, VelocityProfileATrap(velocity_scaling_factor * most_strict_limit_.max_velocity,
+                                         acceleration_scaling_factor * most_strict_limit_.max_acceleration,
+                                         acceleration_scaling_factor * most_strict_limit_.max_deceleration)));
 
     velocity_profile.at(joint_name).SetProfile(start_pos.at(joint_name), goal_pos.at(joint_name));
     if (velocity_profile.at(joint_name).Duration() > max_duration)
@@ -203,8 +200,8 @@ void TrajectoryGeneratorPTP::planPTP(const std::map<std::string, double>& start_
   // construct joint trajectory point
   for (double time_stamp : time_samples)
   {
-    trajectory_msgs::JointTrajectoryPoint point;
-    point.time_from_start = ros::Duration(time_stamp);
+    trajectory_msgs::msg::JointTrajectoryPoint point;
+    point.time_from_start = rclcpp::Duration::from_seconds(time_stamp);
     for (std::string& joint_name : joint_trajectory.joint_names)
     {
       point.positions.push_back(velocity_profile.at(joint_name).Pos(time_stamp));
@@ -220,7 +217,8 @@ void TrajectoryGeneratorPTP::planPTP(const std::map<std::string, double>& start_
             0.0);
 }
 
-void TrajectoryGeneratorPTP::extractMotionPlanInfo(const planning_interface::MotionPlanRequest& req,
+void TrajectoryGeneratorPTP::extractMotionPlanInfo(const planning_scene::PlanningSceneConstPtr& scene,
+                                                   const planning_interface::MotionPlanRequest& req,
                                                    MotionPlanInfo& info) const
 {
   info.group_name = req.group_name;
@@ -241,34 +239,24 @@ void TrajectoryGeneratorPTP::extractMotionPlanInfo(const planning_interface::Mot
       info.goal_joint_position[joint_constraint.joint_name] = joint_constraint.position;
     }
   }
-  // slove the ik
+  // solve the ik
   else
   {
-    geometry_msgs::Point p =
-        req.goal_constraints.at(0).position_constraints.at(0).constraint_region.primitive_poses.at(0).position;
-    p.x -= req.goal_constraints.at(0).position_constraints.at(0).target_point_offset.x;
-    p.y -= req.goal_constraints.at(0).position_constraints.at(0).target_point_offset.y;
-    p.z -= req.goal_constraints.at(0).position_constraints.at(0).target_point_offset.z;
-
-    geometry_msgs::Pose pose;
-    pose.position = p;
-    pose.orientation = req.goal_constraints.at(0).orientation_constraints.at(0).orientation;
-    Eigen::Isometry3d pose_eigen;
-    normalizeQuaternion(pose.orientation);
-    tf2::fromMsg(pose, pose_eigen);
-    if (!computePoseIK(robot_model_, req.group_name, req.goal_constraints.at(0).position_constraints.at(0).link_name,
-                       pose_eigen, robot_model_->getModelFrame(), info.start_joint_position, info.goal_joint_position))
+    Eigen::Isometry3d goal_pose = getConstraintPose(req.goal_constraints.front());
+    if (!computePoseIK(scene, req.group_name, req.goal_constraints.at(0).position_constraints.at(0).link_name,
+                       goal_pose, robot_model_->getModelFrame(), info.start_joint_position, info.goal_joint_position))
     {
       throw PtpNoIkSolutionForGoalPose("No IK solution for goal pose");
     }
   }
 }
 
-void TrajectoryGeneratorPTP::plan(const planning_interface::MotionPlanRequest& req, const MotionPlanInfo& plan_info,
-                                  const double& sampling_time, trajectory_msgs::JointTrajectory& joint_trajectory)
+void TrajectoryGeneratorPTP::plan(const planning_scene::PlanningSceneConstPtr& /*scene*/,
+                                  const planning_interface::MotionPlanRequest& req, const MotionPlanInfo& plan_info,
+                                  const double& sampling_time, trajectory_msgs::msg::JointTrajectory& joint_trajectory)
 {
   // plan the ptp trajectory
-  planPTP(plan_info.start_joint_position, plan_info.goal_joint_position, joint_trajectory, plan_info.group_name,
+  planPTP(plan_info.start_joint_position, plan_info.goal_joint_position, joint_trajectory,
           req.max_velocity_scaling_factor, req.max_acceleration_scaling_factor, sampling_time);
 }
 

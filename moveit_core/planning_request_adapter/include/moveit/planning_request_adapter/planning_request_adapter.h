@@ -39,7 +39,9 @@
 #include <moveit/macros/class_forward.h>
 #include <moveit/planning_interface/planning_interface.h>
 #include <moveit/planning_scene/planning_scene.h>
-#include <boost/function.hpp>
+#include <functional>
+#include <rclcpp/logging.hpp>
+#include <rclcpp/node.hpp>
 
 /** \brief Generic interface to adapting motion planning requests */
 namespace planning_request_adapter
@@ -50,8 +52,8 @@ class PlanningRequestAdapter
 {
 public:
   using PlannerFn =
-      boost::function<bool(const planning_scene::PlanningSceneConstPtr&, const planning_interface::MotionPlanRequest&,
-                           planning_interface::MotionPlanResponse&)>;
+      std::function<bool(const planning_scene::PlanningSceneConstPtr&, const planning_interface::MotionPlanRequest&,
+                         planning_interface::MotionPlanResponse&)>;
 
   PlanningRequestAdapter()
   {

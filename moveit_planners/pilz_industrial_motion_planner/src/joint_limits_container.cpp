@@ -33,23 +33,27 @@
  *********************************************************************/
 
 #include "pilz_industrial_motion_planner/joint_limits_container.h"
+#include <cmath>
 
-#include "ros/ros.h"
+#include <rclcpp/logger.hpp>
+#include <rclcpp/logging.hpp>
 #include <stdexcept>
 
 namespace pilz_industrial_motion_planner
 {
-bool JointLimitsContainer::addLimit(const std::string& joint_name, JointLimit joint_limit)
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.pilz_industrial_motion_planner.joint_limits_container");
+bool JointLimitsContainer::addLimit(const std::string& joint_name,
+                                    pilz_industrial_motion_planner::JointLimit joint_limit)
 {
   if (joint_limit.has_deceleration_limits && joint_limit.max_deceleration >= 0)
   {
-    ROS_ERROR_STREAM("joint_limit.max_deceleration MUST be negative!");
+    RCLCPP_ERROR_STREAM(LOGGER, "joint_limit.max_deceleration MUST be negative!");
     return false;
   }
   const auto& insertion_result{ container_.insert(std::pair<std::string, JointLimit>(joint_name, joint_limit)) };
   if (!insertion_result.second)
   {
-    ROS_ERROR_STREAM("joint_limit for joint " << joint_name << " already contained.");
+    RCLCPP_ERROR_STREAM(LOGGER, "joint_limit for joint " << joint_name << " already contained.");
     return false;
   }
   return true;
@@ -72,7 +76,7 @@ bool JointLimitsContainer::empty() const
 
 JointLimit JointLimitsContainer::getCommonLimit() const
 {
-  JointLimit common_limit;
+  pilz_industrial_motion_planner::JointLimit common_limit;
   for (const auto& limit : container_)
   {
     updateCommonLimit(limit.second, common_limit);
@@ -82,7 +86,7 @@ JointLimit JointLimitsContainer::getCommonLimit() const
 
 JointLimit JointLimitsContainer::getCommonLimit(const std::vector<std::string>& joint_names) const
 {
-  JointLimit common_limit;
+  pilz_industrial_motion_planner::JointLimit common_limit;
   for (const auto& joint_name : joint_names)
   {
     updateCommonLimit(container_.at(joint_name), common_limit);
@@ -115,25 +119,6 @@ bool JointLimitsContainer::verifyPositionLimit(const std::string& joint_name, co
 {
   return (!(hasLimit(joint_name) && getLimit(joint_name).has_position_limits &&
             (joint_position < getLimit(joint_name).min_position || joint_position > getLimit(joint_name).max_position)));
-}
-
-bool JointLimitsContainer::verifyPositionLimits(const std::vector<std::string>& joint_names,
-                                                const std::vector<double>& joint_positions) const
-{
-  if (joint_names.size() != joint_positions.size())
-  {
-    throw std::out_of_range("joint_names vector has a different size than joint_positions vector.");
-  }
-
-  for (std::size_t i = 0; i < joint_names.size(); ++i)
-  {
-    if (!verifyPositionLimit(joint_names.at(i), joint_positions.at(i)))
-    {
-      return false;
-    }
-  }
-
-  return true;
 }
 
 void JointLimitsContainer::updateCommonLimit(const JointLimit& joint_limit, JointLimit& common_limit)

@@ -40,8 +40,9 @@
 #include <octomap/math/Utils.h>
 #include <octomap/octomap.h>
 #include <geometric_shapes/shapes.h>
+#include <rclcpp/logger.hpp>
+#include <rclcpp/logging.hpp>
 #include <memory>
-#include "rclcpp/rclcpp.hpp"
 
 // Logger
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_collision_detection.collision_octomap_filter");
@@ -247,11 +248,8 @@ bool sampleCloud(const octomap::point3d_list& cloud, const double& spacing, cons
   double a = 0, b = 0, c = 0, r2 = 0, r4 = 0, r6 = 0, a1 = 0, b1 = 0, c1 = 0, a2 = 0, b2 = 0, c2 = 0;
   bool wyvill = true;
 
-  octomap::point3d_list::const_iterator it;
-  for (it = cloud.begin(); it != cloud.end(); ++it)
+  for (const octomath::Vector3& v : cloud)
   {
-    octomath::Vector3 v = (*it);
-
     if (wyvill)
     {
       r2 = r * r;

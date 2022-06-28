@@ -37,6 +37,9 @@
 #include <moveit/distance_field/distance_field.h>
 #include <moveit/distance_field/find_internal_points.h>
 #include <geometric_shapes/body_operations.h>
+#include <rclcpp/logger.hpp>
+#include <rclcpp/logging.hpp>
+#include <rclcpp/time.hpp>
 #if __has_include(<tf2_eigen/tf2_eigen.hpp>)
 #include <tf2_eigen/tf2_eigen.hpp>
 #else
@@ -44,7 +47,6 @@
 #endif
 #include <octomap/octomap.h>
 #include <octomap/OcTree.h>
-#include "rclcpp/rclcpp.hpp"
 
 namespace distance_field
 {
@@ -484,24 +486,24 @@ void DistanceField::getProjectionPlanes(const std::string& frame_id, const rclcp
   double initial_val = sqrt(INT_MAX);
 
   // Initialize
-  for (int y = 0; y < max_y_cell; y++)
-    for (int x = 0; x < max_x_cell; x++)
+  for (int y = 0; y < max_y_cell; ++y)
+    for (int x = 0; x < max_x_cell; ++x)
       z_projection[x + y * max_x_cell] = initial_val;
 
-  for (int z = 0; z < max_z_cell; z++)
-    for (int y = 0; y < max_y_cell; y++)
+  for (int z = 0; z < max_z_cell; ++z)
+    for (int y = 0; y < max_y_cell; ++y)
       x_projection[y + z * max_y_cell] = initial_val;
 
-  for (int z = 0; z < max_z_cell; z++)
-    for (int x = 0; x < max_x_cell; x++)
+  for (int z = 0; z < max_z_cell; ++z)
+    for (int x = 0; x < max_x_cell; ++x)
       y_projection[x + z * max_x_cell] = initial_val;
 
   // Calculate projections
-  for (int z = 0; z < max_z_cell; z++)
+  for (int z = 0; z < max_z_cell; ++z)
   {
-    for (int y = 0; y < max_y_cell; y++)
+    for (int y = 0; y < max_y_cell; ++y)
     {
-      for (int x = 0; x < max_x_cell; x++)
+      for (int x = 0; x < max_x_cell; ++x)
       {
         double dist = getDistance(x, y, z);
         z_projection[x + y * max_x_cell] = std::min(dist, z_projection[x + y * max_x_cell]);
@@ -531,9 +533,9 @@ void DistanceField::getProjectionPlanes(const std::string& frame_id, const rclcp
   marker.colors.resize(max_x_cell * max_y_cell + max_y_cell * max_z_cell + max_z_cell * max_x_cell);
 
   z = 0;
-  for (y = 0; y < max_y_cell; y++)
+  for (y = 0; y < max_y_cell; ++y)
   {
-    for (x = 0; x < max_x_cell; x++)
+    for (x = 0; x < max_x_cell; ++x)
     {
       double dist = z_projection[x + y * max_x_cell];
       setPoint(x, y, z, dist, marker.points[index], marker.colors[index], max_dist);
@@ -542,9 +544,9 @@ void DistanceField::getProjectionPlanes(const std::string& frame_id, const rclcp
   }
 
   x = 0;
-  for (z = 0; z < max_z_cell; z++)
+  for (z = 0; z < max_z_cell; ++z)
   {
-    for (y = 0; y < max_y_cell; y++)
+    for (y = 0; y < max_y_cell; ++y)
     {
       double dist = x_projection[y + z * max_y_cell];
       setPoint(x, y, z, dist, marker.points[index], marker.colors[index], max_dist);
@@ -553,9 +555,9 @@ void DistanceField::getProjectionPlanes(const std::string& frame_id, const rclcp
   }
 
   y = 0;
-  for (z = 0; z < max_z_cell; z++)
+  for (z = 0; z < max_z_cell; ++z)
   {
-    for (x = 0; x < max_x_cell; x++)
+    for (x = 0; x < max_x_cell; ++x)
     {
       double dist = y_projection[x + z * max_x_cell];
       setPoint(x, y, z, dist, marker.points[index], marker.colors[index], max_dist);

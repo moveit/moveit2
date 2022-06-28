@@ -2,6 +2,26 @@
 Changelog for package moveit
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.5.1 (2022-05-31)
+------------------
+
+2.5.0 (2022-05-26)
+------------------
+* Fix copyright notice in README script (`#1115 <https://github.com/ros-planning/moveit2/issues/1115>`_)
+* Contributors: Abishalini, Henning Kayser, Robert Haschke
+
+2.4.0 (2022-01-20)
+------------------
+
+2.3.2 (2021-12-29)
+------------------
+
+2.3.1 (2021-12-23)
+------------------
+* Enforce package.xml format 3 Schema (`#779 <https://github.com/ros-planning/moveit2/issues/779>`_)
+* Update Maintainers of MoveIt package (`#697 <https://github.com/ros-planning/moveit2/issues/697>`_)
+* Contributors: Dave Coleman, Henning Kayser, Robert Haschke
+
 2.3.0 (2021-10-08)
 ------------------
 

@@ -1,0 +1,28 @@
+name: Docker Lint
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - .docker/**
+      - .github/workflows/docker_lint.yaml
+  pull_request:
+    paths:
+      - .docker/**
+      - .github/workflows/docker_lint.yaml
+
+jobs:
+  docker-lint:
+    strategy:
+      fail-fast: false
+      matrix:
+        DOCKERFILE_PATH: [ci, ci-testing, release, source]
+
+    name: Lint Dockerfiles
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: hadolint/hadolint-action@v2.1.0
+        with:
+          dockerfile: .docker/${{ matrix.DOCKERFILE_PATH }}/Dockerfile
+          config: .docker/.hadolint.yaml

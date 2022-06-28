@@ -39,13 +39,13 @@
 #include <moveit/robot_interaction/locked_robot_state.h>
 
 robot_interaction::LockedRobotState::LockedRobotState(const moveit::core::RobotState& state)
-  : state_(new moveit::core::RobotState(state))
+  : state_(std::make_shared<moveit::core::RobotState>(state))
 {
   state_->update();
 }
 
 robot_interaction::LockedRobotState::LockedRobotState(const moveit::core::RobotModelPtr& model)
-  : state_(new moveit::core::RobotState(model))
+  : state_(std::make_shared<moveit::core::RobotState>(model))
 {
   state_->setToDefaultValues();
   state_->update();
@@ -55,21 +55,21 @@ robot_interaction::LockedRobotState::~LockedRobotState() = default;
 
 moveit::core::RobotStateConstPtr robot_interaction::LockedRobotState::getState() const
 {
-  boost::mutex::scoped_lock lock(state_lock_);
+  std::scoped_lock lock(state_lock_);
   return state_;
 }
 
 void robot_interaction::LockedRobotState::setState(const moveit::core::RobotState& state)
 {
   {
-    boost::mutex::scoped_lock lock(state_lock_);
+    std::scoped_lock lock(state_lock_);
 
     // If someone else has a reference to the state, then make a new copy.
     // The old state is orphaned (does not change, but is now out of date).
     if (state_.unique())
       *state_ = state;
     else
-      state_.reset(new moveit::core::RobotState(state));
+      state_ = std::make_shared<moveit::core::RobotState>(state);
 
     state_->update();
   }
@@ -79,12 +79,12 @@ void robot_interaction::LockedRobotState::setState(const moveit::core::RobotStat
 void robot_interaction::LockedRobotState::modifyState(const ModifyStateFunction& modify)
 {
   {
-    boost::mutex::scoped_lock lock(state_lock_);
+    std::scoped_lock lock(state_lock_);
 
     // If someone else has a reference to the state, then make a copy.
     // The old state is orphaned (does not change, but is now out of date).
     if (!state_.unique())
-      state_.reset(new moveit::core::RobotState(*state_));
+      state_ = std::make_shared<moveit::core::RobotState>(*state_);
 
     modify(state_.get());
     state_->update();

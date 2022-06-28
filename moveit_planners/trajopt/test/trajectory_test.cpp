@@ -91,7 +91,7 @@ TEST_F(TrajectoryTest, goalTolerance)
   const std::string NODE_NAME = "trajectory_test";
 
   // Create a RobotState and JointModelGroup to keep track of the current robot pose and planning group
-  moveit::core::RobotStatePtr current_state(new moveit::core::RobotState(robot_model_));
+  auto current_state = std::make_shared<moveit::core::RobotState>(robot_model_);
   current_state->setToDefaultValues();
 
   const moveit::core::JointModelGroup* joint_model_group = current_state->getJointModelGroup(PLANNING_GROUP);
@@ -99,7 +99,7 @@ TEST_F(TrajectoryTest, goalTolerance)
   const std::vector<std::string>& joint_names = joint_model_group->getActiveJointModelNames();
   EXPECT_EQ(joint_names.size(), 7);
 
-  planning_scene::PlanningScenePtr planning_scene(new planning_scene::PlanningScene(robot_model_));
+  auto planning_scene = std::make_shared<planning_scene::PlanningScene>(robot_model_);
 
   // Create response and request
   planning_interface::MotionPlanRequest req;
@@ -108,7 +108,7 @@ TEST_F(TrajectoryTest, goalTolerance)
   // Set start state
   // ======================================================================================
   std::vector<double> start_joint_values = { 0.4, 0.3, 0.5, -0.55, 0.88, 1.0, -0.075 };
-  moveit::core::RobotStatePtr start_state(new moveit::core::RobotState(robot_model_));
+  auto start_state = std::make_shared<moveit::core::RobotState>(robot_model_);
   start_state->setJointGroupPositions(joint_model_group, start_joint_values);
   start_state->update();
 
@@ -119,7 +119,7 @@ TEST_F(TrajectoryTest, goalTolerance)
 
   // Set the goal state and joints tolerance
   // ========================================================================================
-  moveit::core::RobotStatePtr goal_state(new moveit::core::RobotState(robot_model_));
+  auto goal_state = std::make_shared<moveit::core::RobotState>(robot_model_);
   std::vector<double> goal_joint_values = { 0.8, 0.7, 1, -1.3, 1.9, 2.2, -0.1 };
   goal_state->setJointGroupPositions(joint_model_group, goal_joint_values);
   goal_state->update();
@@ -138,7 +138,7 @@ TEST_F(TrajectoryTest, goalTolerance)
   // ======================================================================================
   // We will now construct a loader to load a planner, by name.
   // Note that we are using the ROS pluginlib library here.
-  boost::scoped_ptr<pluginlib::ClassLoader<planning_interface::PlannerManager>> planner_plugin_loader;
+  std::unique_ptr<pluginlib::ClassLoader<planning_interface::PlannerManager>> planner_plugin_loader;
   planning_interface::PlannerManagerPtr planner_instance;
 
   std::string planner_plugin_name = "trajopt_interface/TrajOptPlanner";
@@ -148,8 +148,8 @@ TEST_F(TrajectoryTest, goalTolerance)
   EXPECT_TRUE(node_handle_.getParam("planning_plugin", planner_plugin_name));
   try
   {
-    planner_plugin_loader.reset(new pluginlib::ClassLoader<planning_interface::PlannerManager>(
-        "moveit_core", "planning_interface::PlannerManager"));
+    planner_plugin_loader = std::make_shared<pluginlib::ClassLoader<planning_interface::PlannerManager>>(
+        "moveit_core", "planning_interface::PlannerManager");
   }
   catch (pluginlib::PluginlibException& ex)
   {
@@ -169,11 +169,11 @@ TEST_F(TrajectoryTest, goalTolerance)
     for (std::size_t i = 0; i < classes.size(); ++i)
       ss << classes[i] << " ";
     ROS_ERROR_STREAM_NAMED(NODE_NAME, "Exception while loading planner '" << planner_plugin_name << "': " << ex.what()
-                                                                          << std::endl
+                                                                          << '\n'
                                                                           << "Available plugins: " << ss.str());
   }
 
-  // Creat planning context
+  // Create planning context
   // ========================================================================================
   planning_interface::PlanningContextPtr context =
       planner_instance->getPlanningContext(planning_scene, req, res.error_code_);
@@ -192,7 +192,7 @@ TEST_F(TrajectoryTest, goalTolerance)
   {
     double goal_error =
         abs(joints_values_last_step[joint_index] - req.goal_constraints[0].joint_constraints[joint_index].position);
-    std::cerr << "goal_error: " << goal_error << std::endl;
+    std::cerr << "goal_error: " << goal_error << '\n';
     EXPECT_LT(goal_error, GOAL_TOLERANCE);
   }
 }

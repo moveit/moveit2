@@ -1,18 +1,19 @@
 <?xml version="1.0"?>
-<package format="2">
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
   <name>moveit_ros_control_interface</name>
-  <version>2.3.0</version>
+  <version>2.5.1</version>
   <description>ros_control controller manager interface for MoveIt</description>
-
-  <author email="mathias.luedtke@ipa.fraunhofer.de">Mathias Lüdtke</author>
-
-  <maintainer email="mathias.luedtke@ipa.fraunhofer.de">Mathias Lüdtke</maintainer>
+  <maintainer email="henningkayser@picknik.ai">Henning Kayser</maintainer>
+  <maintainer email="tyler@picknik.ai">Tyler Weaver</maintainer>
   <maintainer email="moveit_releasers@googlegroups.com">MoveIt Release Team</maintainer>
 
   <license>BSD</license>
 
+  <author email="mathias.luedtke@ipa.fraunhofer.de">Mathias Lüdtke</author>
+
   <buildtool_depend>ament_cmake</buildtool_depend>
-  <build_depend>moveit_common</build_depend>
+  <depend>moveit_common</depend>
   <depend>rclcpp_action</depend>
   <depend>controller_manager_msgs</depend>
   <depend>moveit_core</depend>

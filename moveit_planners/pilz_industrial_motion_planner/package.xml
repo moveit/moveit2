@@ -1,14 +1,12 @@
 <?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
   <name>pilz_industrial_motion_planner</name>
-  <version>1.1.5</version>
+  <version>2.5.1</version>
   <description>MoveIt plugin to generate industrial trajectories PTP, LIN, CIRC and sequences thereof.</description>
 
-  <maintainer email="a.gutenkunst@pilz.de">Alexander Gutenkunst</maintainer>
   <maintainer email="c.henkel@pilz.de">Christian Henkel</maintainer>
   <maintainer email="i.martini@pilz.de">Immanuel Martini</maintainer>
-  <maintainer email="j.schleicher@pilz.de">Joachim Schleicher</maintainer>
-  <maintainer email="h.slusarek@pilz.de">Hagen Slusarek</maintainer>
 
   <license>BSD</license>
 
@@ -16,39 +14,49 @@
   <url type="bugtracker">https://github.com/ros-planning/moveit2/issues</url>
   <url type="repository">https://github.com/ros-planning/moveit2</url>
 
-  <buildtool_depend>catkin</buildtool_depend>
+  <buildtool_depend>ament_cmake</buildtool_depend>
+  <buildtool_depend>eigen3_cmake_module</buildtool_depend>
+  <buildtool_export_depend>eigen3_cmake_module</buildtool_export_depend>
+  <depend>moveit_common</depend>
 
+  <!-- TODO(henning): Enable when this is available
   <depend>joint_limits_interface</depend>
+  -->
+  <depend>geometry_msgs</depend>
   <depend>moveit_ros_planning_interface</depend>
   <depend>moveit_msgs</depend>
   <depend>moveit_core</depend>
   <depend>moveit_ros_planning</depend> <!-- RobotModelLoader -->
   <depend>moveit_ros_move_group</depend> <!-- move_group capability -->
-  <depend condition="$ROS_DISTRO != noetic">orocos_kdl</depend>
-  <depend condition="$ROS_DISTRO == noetic">liborocos-kdl-dev</depend>
+  <depend>orocos_kdl_vendor</depend>
   <depend>pluginlib</depend>
-  <depend>roscpp</depend>
+  <depend>rclcpp</depend>
   <depend>tf2</depend>
   <depend>tf2_eigen</depend>
   <depend>tf2_geometry_msgs</depend>
   <depend>tf2_kdl</depend>
+  <depend>tf2_eigen_kdl</depend>
   <depend>tf2_ros</depend>
 
-  <!-- Test dependencies -->
-  <test_depend>rostest</test_depend>
-  <test_depend>rosunit</test_depend>
-  <test_depend>cmake_modules</test_depend>
-  <test_depend>moveit_resources_panda_moveit_config</test_depend>
   <test_depend>pilz_industrial_motion_planner_testutils</test_depend>
+  <test_depend>moveit_resources_panda_moveit_config</test_depend>
   <test_depend>moveit_resources_prbt_moveit_config</test_depend>
   <test_depend>moveit_resources_prbt_support</test_depend>
   <test_depend>moveit_resources_prbt_pg70_support</test_depend>
-  <test_depend>code_coverage</test_depend>
+  <!--
+  <test_depend>moveit_configs_utils</test_depend>
+  <test_depend>launch_param_builder</test_depend>
+  -->
+  <test_depend>boost</test_depend>
+
+  <test_depend>ament_cmake_gmock</test_depend>
+  <test_depend>ament_cmake_gtest</test_depend>
+  <test_depend>ament_lint_auto</test_depend>
+  <test_depend>ament_lint_common</test_depend>
+  <test_depend>ros_testing</test_depend>
 
   <!-- The export tag contains other, unspecified, tags -->
   <export>
-    <moveit_core plugin="${prefix}/plugins/pilz_industrial_motion_planner_plugin_description.xml"/>
-    <moveit_ros_move_group plugin="${prefix}/plugins/sequence_capability_plugin_description.xml"/>
-    <pilz_industrial_motion_planner plugin="${prefix}/plugins/planning_context_plugin_description.xml"/>
+    <build_type>ament_cmake</build_type>
   </export>
 </package>

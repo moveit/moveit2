@@ -1,0 +1,17 @@
+robot_description: "robot_description"
+trajectory_operator_plugin_name: "moveit_hybrid_planning/SimpleSampler"
+local_constraint_solver_plugin_name: "moveit_hybrid_planning/ForwardTrajectory"
+local_planning_frequency: 100.0
+global_solution_topic: "global_trajectory"
+local_solution_topic: "/panda_joint_group_position_controller/commands" # or panda_arm_controller/joint_trajectory
+local_solution_topic_type: "std_msgs/Float64MultiArray" # or trajectory_msgs/JointTrajectory
+publish_joint_positions: true
+publish_joint_velocities: false
+group_name: "panda_arm"
+# Subscribe to this topic
+monitored_planning_scene: "/planning_scene"
+collision_object_topic: "/collision_object"
+joint_states_topic: "/joint_states"
+
+# ForwardTrajectory param
+stop_before_collision: true

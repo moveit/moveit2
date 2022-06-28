@@ -32,23 +32,20 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#ifndef ROBOTSTATEMSGCONVERTIBLE_H
-#define ROBOTSTATEMSGCONVERTIBLE_H
+#pragma once
 
-#include <moveit_msgs/RobotState.h>
+#include <moveit_msgs/msg/robot_state.hpp>
 #include <moveit/robot_model/robot_model.h>
 
 namespace pilz_industrial_motion_planner_testutils
 {
 /**
  * @brief Interface class to express that a derived class can be converted
- * into a moveit_msgs::RobotState.
+ * into a moveit_msgs::msg::RobotState.
  */
 class RobotStateMsgConvertible
 {
 public:
-  virtual moveit_msgs::RobotState toMoveitMsgsRobotState() const = 0;
+  virtual moveit_msgs::msg::RobotState toMoveitMsgsRobotState() const = 0;
 };
 }  // namespace pilz_industrial_motion_planner_testutils
-
-#endif  // ROBOTSTATEMSGCONVERTIBLE_H

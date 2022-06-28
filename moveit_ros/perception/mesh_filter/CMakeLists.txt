@@ -16,7 +16,6 @@ ament_target_dependencies(${MOVEIT_LIB_NAME}
   moveit_core
   geometric_shapes
   Eigen3
-  Boost
 )
 
 target_link_libraries(${MOVEIT_LIB_NAME} ${gl_LIBS} ${SYSTEM_GL_LIBRARIES})

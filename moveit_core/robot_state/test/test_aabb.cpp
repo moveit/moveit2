@@ -39,7 +39,7 @@
 #include <moveit/robot_state/robot_state.h>
 #include <urdf_parser/urdf_parser.h>
 #include <fstream>
-#include <boost/filesystem.hpp>
+#include <string>
 #include <gtest/gtest.h>
 #if __has_include(<tf2_geometry_msgs/tf2_geometry_msgs.hpp>)
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
@@ -142,13 +142,13 @@ TEST_F(TestAABB, TestPR2)
   EXPECT_NEAR(aabb.sizes()[2], 0.2901, 1e-4);
 
 #if VISUALIZE_PR2_RVIZ
-  std::cout << "Overall bounding box of PR2:" << std::endl;
+  std::cout << "Overall bounding box of PR2:" << '\n';
   std::string dims[] = { "x", "y", "z" };
   for (std::size_t i = 0; i < 3; ++i)
   {
     double dim = pr2_aabb[2 * i + 1] - pr2_aabb[2 * i];
     double center = dim / 2;
-    std::cout << dims[i] << ": size=" << dim << ", offset=" << (pr2_aabb[2 * i + 1] - center) << std::endl;
+    std::cout << dims[i] << ": size=" << dim << ", offset=" << (pr2_aabb[2 * i + 1] - center) << '\n';
   }
 
   // Initialize a ROS publisher
@@ -241,7 +241,7 @@ TEST_F(TestAABB, TestPR2)
       aabb.extendWithTransformedBox(transforms[i], extents);
 
       // Publish AABB
-      msg->ns = (*it)->getName() + boost::lexical_cast<std::string>(i);
+      msg->ns = (*it)->getName() + std::to_string(i);
       msg->pose.position.x = transforms[i].translation()[0];
       msg->pose.position.y = transforms[i].translation()[1];
       msg->pose.position.z = transforms[i].translation()[2];

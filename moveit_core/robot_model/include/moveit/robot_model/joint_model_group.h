@@ -41,8 +41,9 @@
 #include <moveit/robot_model/link_model.h>
 #include <moveit/kinematics_base/kinematics_base.h>
 #include <srdfdom/model.h>
-#include <boost/function.hpp>
+#include <functional>
 #include <set>
+#include <string>
 
 namespace moveit
 {
@@ -52,7 +53,7 @@ class RobotModel;
 class JointModelGroup;
 
 /** \brief Function type that allocates a kinematics solver for a particular group */
-typedef boost::function<kinematics::KinematicsBasePtr(const JointModelGroup*)> SolverAllocatorFn;
+typedef std::function<kinematics::KinematicsBasePtr(const JointModelGroup*)> SolverAllocatorFn;
 
 /** \brief Map from group instances to allocator functions & bijections */
 using SolverAllocatorMapFn = std::map<const JointModelGroup*, SolverAllocatorFn>;
@@ -510,7 +511,7 @@ public:
   /**
    * \brief Get one end effector tip, throwing an error if there ends up being more in the joint model group
    *  This is a useful helper function because most planning groups (almost all) only have one tip
-   * \return pointer to LinkModel, or NULL on failure
+   * \return pointer to LinkModel, or nullptr on failure
    */
   const moveit::core::LinkModel* getOnlyOneEndEffectorTip() const;
 
@@ -636,7 +637,7 @@ protected:
 
   /** \brief The group includes all the joint variables that make up the joints the group consists of.
       This map gives the position in the state vector of the group for each of these variables.
-      Additionaly, it includes the names of the joints and the index for the first variable of that joint. */
+      Additionally, it includes the names of the joints and the index for the first variable of that joint. */
   VariableIndexMap joint_variables_index_map_;
 
   /** \brief The bounds for all the active joint models */

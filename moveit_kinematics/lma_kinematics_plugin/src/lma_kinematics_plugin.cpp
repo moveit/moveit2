@@ -140,9 +140,9 @@ bool LMAKinematicsPlugin::initialize(const rclcpp::Node::SharedPtr& node, const 
     RCLCPP_INFO(LOGGER, "Using position only ik");
 
   // Setup the joint state groups that we need
-  state_.reset(new moveit::core::RobotState(robot_model_));
+  state_ = std::make_shared<moveit::core::RobotState>(robot_model_);
 
-  fk_solver_.reset(new KDL::ChainFkSolverPos_recursive(kdl_chain_));
+  fk_solver_ = std::make_unique<KDL::ChainFkSolverPos_recursive>(kdl_chain_);
 
   initialized_ = true;
   RCLCPP_DEBUG(LOGGER, "LMA solver initialized");
@@ -292,7 +292,7 @@ bool LMAKinematicsPlugin::searchPositionIK(const geometry_msgs::msg::Pose& ik_po
         continue;
 
       Eigen::Map<Eigen::VectorXd>(solution.data(), solution.size()) = jnt_pos_out.data;
-      if (!solution_callback.empty())
+      if (solution_callback)
       {
         solution_callback(ik_pose, solution, error_code);
         if (error_code.val != error_code.SUCCESS)
@@ -334,7 +334,7 @@ bool LMAKinematicsPlugin::getPositionFK(const std::vector<std::string>& link_nam
   jnt_pos_in.data = Eigen::Map<const Eigen::VectorXd>(joint_angles.data(), joint_angles.size());
 
   bool valid = true;
-  for (unsigned int i = 0; i < poses.size(); i++)
+  for (unsigned int i = 0; i < poses.size(); ++i)
   {
     if (fk_solver_->JntToCart(jnt_pos_in, p_out) >= 0)
     {

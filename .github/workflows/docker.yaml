@@ -8,13 +8,18 @@ on:
   push:
     branches:
       - main
+  pull_request:
+    paths:
+      - .docker/**
+      - .github/workflows/docker.yaml
+      - moveit2.repos
 
 jobs:
   release:
     strategy:
       fail-fast: false
       matrix:
-        ROS_DISTRO: [rolling, galactic]
+        ROS_DISTRO: [humble, rolling]
     runs-on: ubuntu-latest
     permissions:
       packages: write
@@ -22,42 +27,31 @@ jobs:
     env:
       GH_IMAGE: ghcr.io/ros-planning/moveit2:${{ matrix.ROS_DISTRO }}-${{ github.job }}
       DH_IMAGE: moveit/moveit2:${{ matrix.ROS_DISTRO }}-${{ github.job }}
+      PUSH: ${{ (github.event_name != 'pull_request') && (github.repository == 'ros-planning/moveit2') }}
 
     steps:
-      - name: Check for apt updates
-        uses: addnab/docker-run-action@v3
-        continue-on-error: true
-        id: apt
-        with:
-          image: ${{ env.GH_IMAGE }}
-          run: |
-            apt-get update
-            have_updates=$(apt-get --simulate upgrade | grep -q "^0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.$" && echo false || echo true)
-            echo "::set-output name=no_cache::$have_updates"
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
-        if: ${{ github.event_name == 'workflow_dispatch' || github.event_name != 'schedule' || steps.apt.outputs.no_cache }}
-      - name: Login to Github Containter Registry
-        uses: docker/login-action@v1
+        uses: docker/setup-buildx-action@v2
+      - name: Login to Github Container Registry
+        if: env.PUSH == 'true'
+        uses: docker/login-action@v2
         with:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Login to DockerHub
-        uses: docker/login-action@v1
+        if: env.PUSH == 'true'
+        uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
       - name: Build and Push
-        uses: docker/build-push-action@v2
-        if: ${{ github.event_name == 'workflow_dispatch' || github.event_name != 'schedule' || steps.apt.outputs.no_cache }}
+        uses: docker/build-push-action@v3
         with:
           file: .docker/${{ github.job }}/Dockerfile
           build-args: ROS_DISTRO=${{ matrix.ROS_DISTRO }}
-          push: true
-          no-cache: ${{ steps.apt.outputs.no_cache || github.event_name == 'workflow_dispatch' }}
-          cache-from: type=registry,ref=${{ env.GH_IMAGE }}
-          cache-to: type=inline
+          push: ${{ env.PUSH }}
+          no-cache: true
           tags: |
             ${{ env.GH_IMAGE }}
             ${{ env.DH_IMAGE }}
@@ -66,7 +60,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        ROS_DISTRO: [rolling, galactic]
+        ROS_DISTRO: [humble, rolling]
     runs-on: ubuntu-latest
     permissions:
       packages: write
@@ -74,42 +68,31 @@ jobs:
     env:
       GH_IMAGE: ghcr.io/ros-planning/moveit2:${{ matrix.ROS_DISTRO }}-${{ github.job }}
       DH_IMAGE: moveit/moveit2:${{ matrix.ROS_DISTRO }}-${{ github.job }}
+      PUSH: ${{ (github.event_name != 'pull_request') && (github.repository == 'ros-planning/moveit2') }}
 
     steps:
-      - name: Check for apt updates
-        uses: addnab/docker-run-action@v3
-        continue-on-error: true
-        id: apt
-        with:
-          image: ${{ env.GH_IMAGE }}
-          run: |
-            apt-get update
-            have_updates=$(apt-get --simulate upgrade | grep -q "^0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.$" && echo false || echo true)
-            echo "::set-output name=no_cache::$have_updates"
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
-        if: ${{ github.event_name == 'workflow_dispatch' || github.event_name != 'schedule' || steps.apt.outputs.no_cache }}
-      - name: Login to Github Containter Registry
-        uses: docker/login-action@v1
+        uses: docker/setup-buildx-action@v2
+      - name: Login to Github Container Registry
+        if: env.PUSH == 'true'
+        uses: docker/login-action@v2
         with:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Login to DockerHub
-        uses: docker/login-action@v1
+        if: env.PUSH == 'true'
+        uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
       - name: Build and Push
-        uses: docker/build-push-action@v2
-        if: ${{ github.event_name == 'workflow_dispatch' || github.event_name != 'schedule' || steps.apt.outputs.no_cache }}
+        uses: docker/build-push-action@v3
         with:
           file: .docker/${{ github.job }}/Dockerfile
           build-args: ROS_DISTRO=${{ matrix.ROS_DISTRO }}
-          push: true
-          no-cache: ${{ steps.apt.outputs.no_cache || github.event_name == 'workflow_dispatch' }}
-          cache-from: type=registry,ref=${{ env.GH_IMAGE }}
-          cache-to: type=inline
+          push: ${{ env.PUSH }}
+          no-cache: true
           tags: |
             ${{ env.GH_IMAGE }}
             ${{ env.DH_IMAGE }}
@@ -119,7 +102,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        ROS_DISTRO: [rolling, galactic]
+        ROS_DISTRO: [humble, rolling]
     runs-on: ubuntu-latest
     permissions:
       packages: write
@@ -127,42 +110,31 @@ jobs:
     env:
       GH_IMAGE: ghcr.io/ros-planning/moveit2:${{ matrix.ROS_DISTRO }}-${{ github.job }}
       DH_IMAGE: moveit/moveit2:${{ matrix.ROS_DISTRO }}-${{ github.job }}
+      PUSH: ${{ (github.event_name != 'pull_request') && (github.repository == 'ros-planning/moveit2') }}
 
     steps:
-      - name: Check for apt updates
-        uses: addnab/docker-run-action@v3
-        continue-on-error: true
-        id: apt
-        with:
-          image: ${{ env.GH_IMAGE }}
-          run: |
-            apt-get update
-            have_updates=$(apt-get --simulate upgrade | grep -q "^0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.$" && echo false || echo true)
-            echo "::set-output name=no_cache::$have_updates"
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
-        if: ${{ github.event_name == 'workflow_dispatch' || github.event_name != 'schedule' || steps.apt.outputs.no_cache }}
-      - name: Login to Github Containter Registry
-        uses: docker/login-action@v1
+        uses: docker/setup-buildx-action@v2
+      - name: Login to Github Container Registry
+        if: env.PUSH == 'true'
+        uses: docker/login-action@v2
         with:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Login to DockerHub
-        uses: docker/login-action@v1
+        if: env.PUSH == 'true'
+        uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
       - name: Build and Push
-        uses: docker/build-push-action@v2
-        if: ${{ github.event_name == 'workflow_dispatch' || github.event_name != 'schedule' || steps.apt.outputs.no_cache }}
+        uses: docker/build-push-action@v3
         with:
           file: .docker/${{ github.job }}/Dockerfile
           build-args: ROS_DISTRO=${{ matrix.ROS_DISTRO }}
-          push: true
-          no-cache: ${{ steps.apt.outputs.no_cache || github.event_name == 'workflow_dispatch' }}
-          cache-from: type=registry,ref=${{ env.GH_IMAGE }}
-          cache-to: type=inline
+          push: ${{ env.PUSH }}
+          no-cache: true
           tags: |
             ${{ env.GH_IMAGE }}
             ${{ env.DH_IMAGE }}
@@ -172,7 +144,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        ROS_DISTRO: [rolling, galactic]
+        ROS_DISTRO: [humble, rolling]
     runs-on: ubuntu-latest
     permissions:
       packages: write
@@ -180,33 +152,62 @@ jobs:
     env:
       GH_IMAGE: ghcr.io/ros-planning/moveit2:${{ matrix.ROS_DISTRO }}-${{ github.job }}
       DH_IMAGE: moveit/moveit2:${{ matrix.ROS_DISTRO }}-${{ github.job }}
+      PUSH: ${{ (github.event_name != 'pull_request') && (github.repository == 'ros-planning/moveit2') }}
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
-      - name: Login to Github Containter Registry
-        uses: docker/login-action@v1
+        uses: docker/setup-buildx-action@v2
+      - name: Login to Github Container Registry
+        if: env.PUSH == 'true'
+        uses: docker/login-action@v2
         with:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Login to DockerHub
-        uses: docker/login-action@v1
+        if: env.PUSH == 'true'
+        uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
       - name: "Remove .dockerignore"
         run: rm .dockerignore  # enforce full source context
       - name: Build and Push
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v3
         with:
           context: .
           file: .docker/${{ github.job }}/Dockerfile
           build-args: ROS_DISTRO=${{ matrix.ROS_DISTRO }}
-          push: true
-          cache-from: type=registry,ref=${{ env.GH_IMAGE }}
-          cache-to: type=inline
+          push: ${{ env.PUSH }}
+          no-cache: true
           tags: |
             ${{ env.GH_IMAGE }}
             ${{ env.DH_IMAGE }}
+
+  delete_untagged:
+    runs-on: ubuntu-latest
+    needs:
+      - release
+      - source
+    steps:
+      - name: Delete Untagged Images
+        if: (github.event_name != 'pull_request') && (github.repository == 'ros-planning/moveit2')
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.DELETE_PACKAGES_TOKEN }}
+          script: |
+            const response = await github.request("GET /orgs/${{ env.OWNER }}/packages/container/${{ env.PACKAGE_NAME }}/versions", {
+                per_page: ${{ env.PER_PAGE }}
+              });
+            for(version of response.data) {
+                if (version.metadata.container.tags.length == 0) {
+                    console.log("delete " + version.id)
+                    const deleteResponse = await github.request("DELETE /orgs/${{ env.OWNER }}/packages/container/${{ env.PACKAGE_NAME }}/versions/" + version.id, { });
+                    console.log("status " + deleteResponse.status)
+                }
+            }
+        env:
+          OWNER: ros-planning
+          PACKAGE_NAME: moveit2
+          PER_PAGE: 100

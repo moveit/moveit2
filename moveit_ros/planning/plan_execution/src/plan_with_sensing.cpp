@@ -34,11 +34,17 @@
 
 /* Author: Ioan Sucan */
 
-#include <rclcpp/rclcpp.hpp>
 #include <moveit/plan_execution/plan_with_sensing.h>
 #include <moveit/trajectory_processing/trajectory_tools.h>
 #include <moveit/collision_detection/collision_tools.h>
 #include <boost/algorithm/string/join.hpp>
+#include <rclcpp/logger.hpp>
+#include <rclcpp/logging.hpp>
+#include <rclcpp/node.hpp>
+#include <rclcpp/parameter_value.hpp>
+#include <rclcpp/publisher.hpp>
+#include <rclcpp/qos_event.hpp>
+#include <rclcpp/time.hpp>
 
 // #include <dynamic_reconfigure/server.h>
 // #include <moveit_ros_planning/SenseForPlanDynamicReconfigureConfig.h>
@@ -56,12 +62,12 @@ static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_ros.plan_with_se
 //     : owner_(owner) /*, dynamic_reconfigure_server_(ros::NodeHandle("~/sense_for_plan"))*/
 //   {
 //     // dynamic_reconfigure_server_.setCallback(
-//     //     boost::bind(&DynamicReconfigureImpl::dynamicReconfigureCallback, this, _1, _2));
+//     //     [this](const auto& config, uint32_t level) { dynamicReconfigureCallback(config, level); });
 //   }
 //
 // private:
 //   // TODO(anasarrak): Adapt the dynamic parameters for ros2
-//   // void dynamicReconfigureCallback(SenseForPlanDynamicReconfigureConfig& config, uint32_t level)
+//   // void dynamicReconfigureCallback(const SenseForPlanDynamicReconfigureConfig& config, uint32_t level)
 //   // {
 //   //   owner_->setMaxSafePathCost(config.max_safe_path_cost);
 //   //   owner_->setMaxCostSources(config.max_cost_sources);
@@ -93,8 +99,8 @@ plan_execution::PlanWithSensing::PlanWithSensing(
   {
     try
     {
-      sensor_manager_loader_.reset(new pluginlib::ClassLoader<moveit_sensor_manager::MoveItSensorManager>(
-          "moveit_core", "moveit_sensor_manager::MoveItSensorManager"));
+      sensor_manager_loader_ = std::make_unique<pluginlib::ClassLoader<moveit_sensor_manager::MoveItSensorManager>>(
+          "moveit_core", "moveit_sensor_manager::MoveItSensorManager");
     }
     catch (pluginlib::PluginlibException& ex)
     {

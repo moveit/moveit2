@@ -108,6 +108,7 @@ public:
   MotionPlanningFrame(MotionPlanningDisplay* pdisplay, rviz_common::DisplayContext* context, QWidget* parent = nullptr);
   ~MotionPlanningFrame() override;
 
+  void clearRobotModel();
   void changePlanningGroup();
   void enable();
   void disable();
@@ -117,6 +118,7 @@ protected:
   static const int ITEM_TYPE_SCENE = 1;
   static const int ITEM_TYPE_QUERY = 2;
 
+  void initFromMoveGroupNS();
   void constructPlanningRequest(moveit_msgs::msg::MotionPlanRequest& mreq);
 
   void updateSceneMarkers(float wall_dt, float ros_dt);
@@ -327,6 +329,8 @@ private:
   rclcpp::Publisher<moveit_msgs::msg::PlanningSceneWorld>::SharedPtr planning_scene_world_publisher_;
 
   collision_detection::CollisionEnv::ObjectConstPtr scaled_object_;
+  moveit::core::FixedTransformsMap scaled_object_subframes_;
+  EigenSTL::vector_Isometry3d scaled_object_shape_poses_;
 
   std::vector<std::pair<std::string, bool> > known_collision_objects_;
   long unsigned int known_collision_objects_version_;

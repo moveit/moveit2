@@ -41,7 +41,7 @@
 #include <moveit/robot_model/robot_model.h>
 #include <moveit/robot_state/robot_state.h>
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 namespace kinematics_cache
 {
@@ -51,8 +51,8 @@ public:
   struct Options
   {
     geometry_msgs::Point origin;
-    boost::array<double, 3> workspace_size;
-    boost::array<double, 3> resolution;
+    std::array<double, 3> workspace_size;
+    std::array<double, 3> resolution;
     unsigned int max_solutions_per_grid_location;
   };
 
@@ -100,7 +100,7 @@ public:
    *  @param solver An instance of a kinematics solver
    *  @param kinematic_model An instance of a kinematic model
    *  @param opt Parameters needed for defining the cache workspace
-   *  @return False if any error occured during initialization
+   *  @return False if any error occurred during initialization
    */
   bool initialize(kinematics::KinematicsBaseConstPtr& solver, const moveit::core::RobotModelConstPtr& kinematic_model,
                   const KinematicsCache::Options& opt);

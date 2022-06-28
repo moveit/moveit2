@@ -69,7 +69,7 @@ TEST(CurrentStateMonitorTests, StartCreateSubscriptionTest)
   // GIVEN a CurrentStateMonitor
   planning_scene_monitor::CurrentStateMonitor current_state_monitor{
     std::move(mock_middleware_handle), moveit::core::loadTestingRobotModel("panda"),
-    std::make_shared<tf2_ros::Buffer>(std::make_shared<rclcpp::Clock>())
+    std::make_shared<tf2_ros::Buffer>(std::make_shared<rclcpp::Clock>()), false
   };
 
   // WHEN we start the current state monitor
@@ -81,7 +81,7 @@ TEST(CurrentStateMonitorTests, StartActiveTest)
   // GIVEN a CurrentStateMonitor
   planning_scene_monitor::CurrentStateMonitor current_state_monitor{
     std::make_unique<MockMiddlewareHandle>(), moveit::core::loadTestingRobotModel("panda"),
-    std::make_shared<tf2_ros::Buffer>(std::make_shared<rclcpp::Clock>())
+    std::make_shared<tf2_ros::Buffer>(std::make_shared<rclcpp::Clock>()), false
   };
 
   // WHEN we start the current state monitor
@@ -102,7 +102,7 @@ TEST(CurrentStateMonitorTests, StopResetSubscriptionTest)
   // GIVEN a CurrentStateMonitor that is started
   planning_scene_monitor::CurrentStateMonitor current_state_monitor{
     std::move(mock_middleware_handle), moveit::core::loadTestingRobotModel("panda"),
-    std::make_shared<tf2_ros::Buffer>(std::make_shared<rclcpp::Clock>())
+    std::make_shared<tf2_ros::Buffer>(std::make_shared<rclcpp::Clock>()), false
   };
   current_state_monitor.startStateMonitor();
 
@@ -117,7 +117,7 @@ TEST(CurrentStateMonitorTests, StopNotActiveTest)
   // GIVEN a CurrentStateMonitor that is started
   planning_scene_monitor::CurrentStateMonitor current_state_monitor{
     std::move(mock_middleware_handle), moveit::core::loadTestingRobotModel("panda"),
-    std::make_shared<tf2_ros::Buffer>(std::make_shared<rclcpp::Clock>())
+    std::make_shared<tf2_ros::Buffer>(std::make_shared<rclcpp::Clock>()), false
   };
   current_state_monitor.startStateMonitor();
 
@@ -140,7 +140,7 @@ TEST(CurrentStateMonitorTests, DestructStopTest)
   {
     planning_scene_monitor::CurrentStateMonitor current_state_monitor{
       std::move(mock_middleware_handle), moveit::core::loadTestingRobotModel("panda"),
-      std::make_shared<tf2_ros::Buffer>(std::make_shared<rclcpp::Clock>())
+      std::make_shared<tf2_ros::Buffer>(std::make_shared<rclcpp::Clock>()), false
     };
     current_state_monitor.startStateMonitor();
     EXPECT_TRUE(current_state_monitor.isActive());
@@ -150,14 +150,14 @@ TEST(CurrentStateMonitorTests, DestructStopTest)
 
 TEST(CurrentStateMonitorTests, NoModelTest)
 {
-  // GIVEN an unitialized robot model
+  // GIVEN an uninitialized robot model
   moveit::core::RobotModelPtr robot_model = nullptr;
 
   // WHEN the CurrentStateMonitor is constructed with it
   // THEN we expect the monitor to throw because of the invalid model
   EXPECT_THROW(planning_scene_monitor::CurrentStateMonitor _(
                    std::make_unique<MockMiddlewareHandle>(), robot_model,
-                   std::make_shared<tf2_ros::Buffer>(std::make_shared<rclcpp::Clock>())),
+                   std::make_shared<tf2_ros::Buffer>(std::make_shared<rclcpp::Clock>()), false),
                std::invalid_argument);
 }
 
@@ -166,7 +166,7 @@ TEST(CurrentStateMonitorTests, HaveCompleteStateConstructFalse)
   // GIVEN a CurrentStateMonitor
   planning_scene_monitor::CurrentStateMonitor current_state_monitor{
     std::make_unique<MockMiddlewareHandle>(), moveit::core::loadTestingRobotModel("panda"),
-    std::make_shared<tf2_ros::Buffer>(std::make_shared<rclcpp::Clock>())
+    std::make_shared<tf2_ros::Buffer>(std::make_shared<rclcpp::Clock>()), false
   };
 
   // WHEN it is constructed
@@ -188,7 +188,7 @@ TEST(CurrentStateMonitorTests, WaitForCompleteStateWaits)
   // GIVEN a CurrentStateMonitor
   planning_scene_monitor::CurrentStateMonitor current_state_monitor{
     std::move(mock_middleware_handle), moveit::core::loadTestingRobotModel("panda"),
-    std::make_shared<tf2_ros::Buffer>(std::make_shared<rclcpp::Clock>())
+    std::make_shared<tf2_ros::Buffer>(std::make_shared<rclcpp::Clock>()), false
   };
 
   // WHEN we wait for complete state for 1s

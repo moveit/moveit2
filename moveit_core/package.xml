@@ -1,27 +1,31 @@
 <?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
   <name>moveit_core</name>
-  <version>2.3.0</version>
+  <version>2.5.1</version>
   <description>Core libraries used by MoveIt</description>
-  <author email="isucan@google.com">Ioan Sucan</author>
-  <author email="robot.moveit@gmail.com">Sachin Chitta</author>
-  <author email="acorn.pooley@sri.com">Acorn Pooley</author>
 
-  <maintainer email="dave@picknik.ai">Dave Coleman</maintainer>
+  <maintainer email="henningkayser@picknik.ai">Henning Kayser</maintainer>
+  <maintainer email="tyler@picknik.ai">Tyler Weaver</maintainer>
   <maintainer email="me@v4hn.de">Michael Görner</maintainer>
-  <maintainer email="mferguson@fetchrobotics.com">Michael Ferguson</maintainer>
   <maintainer email="moveit_releasers@googlegroups.com">MoveIt Release Team</maintainer>
 
   <license>BSD</license>
+
   <url type="website">http://moveit.ros.org</url>
   <url type="bugtracker">https://github.com/ros-planning/moveit2/issues</url>
   <url type="repository">https://github.com/ros-planning/moveit2</url>
+
+  <author email="isucan@google.com">Ioan Sucan</author>
+  <author email="robot.moveit@gmail.com">Sachin Chitta</author>
+  <author email="acorn.pooley@sri.com">Acorn Pooley</author>
+  <author email="dave@picknik.ai">Dave Coleman</author>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
   <buildtool_depend>pkg-config</buildtool_depend>
   <buildtool_depend>eigen3_cmake_module</buildtool_depend>
   <buildtool_export_depend>eigen3_cmake_module</buildtool_export_depend>
-  <build_depend>moveit_common</build_depend>
+  <depend>moveit_common</depend>
 
   <depend>angles</depend>
   <depend>rclcpp</depend>
@@ -61,8 +65,9 @@
   <test_depend>moveit_resources_pr2_description</test_depend>
   <test_depend>angles</test_depend>
   <test_depend>tf2_kdl</test_depend>
-  <test_depend>orocos_kdl</test_depend>
+  <test_depend>orocos_kdl_vendor</test_depend>
   <test_depend>ament_cmake_gtest</test_depend>
+  <test_depend>ament_cmake_gmock</test_depend>
   <test_depend>ament_index_cpp</test_depend>
 
   <test_depend>ament_lint_auto</test_depend>

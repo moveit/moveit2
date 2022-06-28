@@ -2,6 +2,68 @@
 Changelog for package moveit_ros_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.5.1 (2022-05-31)
+------------------
+
+2.5.0 (2022-05-26)
+------------------
+* Enable cppcheck (`#1224 <https://github.com/ros-planning/moveit2/issues/1224>`_)
+  Co-authored-by: jeoseo <jeongwooseo2012@gmail.com>
+* Make moveit_common a 'depend' rather than 'build_depend' (`#1226 <https://github.com/ros-planning/moveit2/issues/1226>`_)
+* Remove unused includes for boost::bind (`#1220 <https://github.com/ros-planning/moveit2/issues/1220>`_)
+* Avoid bind(), use lambdas instead (`#1204 <https://github.com/ros-planning/moveit2/issues/1204>`_)
+  Adaption of https://github.com/ros-planning/moveit/pull/3106
+* banish bind()
+  source:https://github.com/ros-planning/moveit/pull/3106/commits/a2911c80c28958c1fce8fb52333d770248c4ec05; required minor updates compared to original source commit in order to ensure compatibility with ROS2
+* various: prefer object and references over pointers
+  source: https://github.com/ros-planning/moveit/pull/3106/commits/1a8e5715e3142a92977ac585031b9dc1871f8718; this commit contains minor changes when compared to the source commit which it is based on, these changes are limited to ensuring compatibility with ROS2.
+* Remove new operators (`#1135 <https://github.com/ros-planning/moveit2/issues/1135>`_)
+  replace new operator with make_shared
+* Merge https://github.com/ros-planning/moveit/commit/ab42a1d7017b27eb6c353fb29331b2da08ab0039
+* 1.1.9
+* Use GLEW::GLEW link target (`#3079 <https://github.com/ros-planning/moveit2/issues/3079>`_)
+  While ${GLEW_LIBRARIES} works on Ubuntu, it fails on newer installs of GLEW.
+* Misc fixes for time and transforms (`#768 <https://github.com/ros-planning/moveit2/issues/768>`_)
+  * Fix setting shape_transform_cache_lookup_wait_time from seconds
+  * Fix setting last_update_time from seconds
+  * Check the return value of canTransform
+* Fix use of std::bind (`#3048 <https://github.com/ros-planning/moveit2/issues/3048>`_)
+  Fixup for ab42a1d7017b27eb6c353fb29331b2da08ab0039 (`#2967 <https://github.com/ros-planning/moveit2/issues/2967>`_)
+* 1.1.8
+* 1.1.7
+* Switch to std::bind (`#2967 <https://github.com/ros-planning/moveit2/issues/2967>`_)
+  * boost::bind -> std::bind
+  grep -rlI --exclude-dir=.git "boost::bind" | xargs sed -i 's/boost::bind/std::bind/g'
+  * Convert bind placeholders
+  grep -rlI --exclude-dir=.git " _[0-9]" | xargs sed -i 's/ _\([0-9]\)/ std::placeholders::_\1/g'
+  * Update bind include header
+  grep -rlI --exclude-dir=.git "boost/bind" | xargs sed -i 's#boost/bind.hpp#functional#'
+* Add ns for depth image & pointcloud octomap updaters (`#2916 <https://github.com/ros-planning/moveit2/issues/2916>`_)
+* 1.1.6
+* Contributors: Abishalini, Henning Kayser, Jafar, Jafar Abdi, Jochen Sprickerhof, Michael Görner, Robert Haschke, Sencer Yazıcı, Stephanie Eng, Tim Redick, Tobias Fischer, jeoseo, v4hn
+
+2.4.0 (2022-01-20)
+------------------
+* Fix boost linking errors for Windows (`#957 <https://github.com/ros-planning/moveit2/issues/957>`_)
+* moveit_build_options()
+  Declare common build options like CMAKE_CXX_STANDARD, CMAKE_BUILD_TYPE,
+  and compiler options (namely warning flags) once.
+  Each package depending on moveit_core can use these via moveit_build_options().
+* Contributors: Akash, Robert Haschke
+
+2.3.2 (2021-12-29)
+------------------
+
+2.3.1 (2021-12-23)
+------------------
+* Replaced C-Style Cast with C++ Style Cast. (`#935 <https://github.com/ros-planning/moveit2/issues/935>`_)
+* Add codespell to precommit, fix A LOT of spelling mistakes (`#934 <https://github.com/ros-planning/moveit2/issues/934>`_)
+* Enforce package.xml format 3 Schema (`#779 <https://github.com/ros-planning/moveit2/issues/779>`_)
+* Update Maintainers of MoveIt package (`#697 <https://github.com/ros-planning/moveit2/issues/697>`_)
+* clipped points should only be considered up to the max_range (`#2848 <https://github.com/ros-planning/moveit/issues/2848>`_)
+* clang-tidy: modernize-make-shared, modernize-make-unique (`#2762 <https://github.com/ros-planning/moveit/issues/2762>`_)
+* Contributors: Dave Coleman, David V. Lu!!, Henning Kayser, Kaustubh, Michael Görner, Robert Haschke, pvanlaar
+
 2.3.0 (2021-10-08)
 ------------------
 * Fix warnings in Galactic and Rolling (`#598 <https://github.com/ros-planning/moveit2/issues/598>`_)

@@ -58,7 +58,6 @@ if(BUILD_TESTING)
 
   # These don't pass yet, disable them for now
   set(ament_cmake_copyright_FOUND TRUE)
-  set(ament_cmake_cppcheck_FOUND TRUE)
   set(ament_cmake_cpplint_FOUND TRUE)
   set(ament_cmake_uncrustify_FOUND TRUE)
 
@@ -76,10 +75,11 @@ EXPORT export_${PROJECT_NAME}
 ARCHIVE DESTINATION lib
 LIBRARY DESTINATION lib
 RUNTIME DESTINATION bin
+INCLUDES DESTINATION include
 )
 
 ## Mark cpp header files for installation
-install(DIRECTORY include/${PROJECT_NAME}/
+install(DIRECTORY include/
   DESTINATION include
 )
 

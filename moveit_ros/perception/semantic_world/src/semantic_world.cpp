@@ -34,17 +34,21 @@
 
 /* Author: Sachin Chitta */
 
-#include <rclcpp/rclcpp.hpp>
 #include <visualization_msgs/msg/marker_array.hpp>
 #include <geometry_msgs/msg/quaternion.hpp>
-
 // MoveIt
 #include <moveit/semantic_world/semantic_world.h>
 #include <geometric_shapes/shape_operations.h>
 #include <moveit_msgs/msg/planning_scene.hpp>
-
 // OpenCV
 #include <opencv2/imgproc/imgproc.hpp>
+#include <rclcpp/experimental/buffers/intra_process_buffer.hpp>
+#include <rclcpp/logger.hpp>
+#include <rclcpp/logging.hpp>
+#include <rclcpp/node.hpp>
+#include <rclcpp/publisher.hpp>
+#include <rclcpp/qos_event.hpp>
+#include <rclcpp/subscription.hpp>
 
 // Eigen
 #if __has_include(<tf2_eigen/tf2_eigen.hpp>)
@@ -66,7 +70,8 @@ SemanticWorld::SemanticWorld(const rclcpp::Node::SharedPtr node,
 
 {
   table_subscriber_ = node_handle_->create_subscription<object_recognition_msgs::msg::TableArray>(
-      "table_array", 1, std::bind(&SemanticWorld::tableCallback, this, std::placeholders::_1));
+      "table_array", 1,
+      [this](const object_recognition_msgs::msg::TableArray::SharedPtr msg) { return tableCallback(msg); });
   visualization_publisher_ =
       node_handle_->create_publisher<visualization_msgs::msg::MarkerArray>("visualize_place", 20);
   collision_object_publisher_ =
@@ -77,7 +82,7 @@ SemanticWorld::SemanticWorld(const rclcpp::Node::SharedPtr node,
 visualization_msgs::msg::MarkerArray
 SemanticWorld::getPlaceLocationsMarker(const std::vector<geometry_msgs::msg::PoseStamped>& poses) const
 {
-  RCLCPP_DEBUG(LOGGER, "Visualizing: %d place poses", (int)poses.size());
+  RCLCPP_DEBUG(LOGGER, "Visualizing: %d place poses", static_cast<int>(poses.size()));
   visualization_msgs::msg::MarkerArray marker;
   for (std::size_t i = 0; i < poses.size(); ++i)
   {
@@ -343,9 +348,9 @@ SemanticWorld::generatePlacePoses(const object_recognition_msgs::msg::Table& tab
 
   double x_range = fabs(x_max - x_min);
   double y_range = fabs(y_max - y_min);
-  int max_range = (int)x_range + 1;
-  if (max_range < (int)y_range + 1)
-    max_range = (int)y_range + 1;
+  int max_range = static_cast<int>(x_range) + 1;
+  if (max_range < static_cast<int>(y_range) + 1)
+    max_range = static_cast<int>(y_range) + 1;
 
   int image_scale = std::max<int>(max_range, 4);
   cv::Mat src = cv::Mat::zeros(image_scale * scale_factor, image_scale * scale_factor, CV_8UC1);
@@ -374,7 +379,7 @@ SemanticWorld::generatePlacePoses(const object_recognition_msgs::msg::Table& tab
         int point_y = k * resolution * scale_factor;
         cv::Point2f point2f(point_x, point_y);
         double result = cv::pointPolygonTest(contours[0], point2f, true);
-        if ((int)result >= (int)(min_distance_from_edge * scale_factor))
+        if (static_cast<int>(result) >= static_cast<int>(min_distance_from_edge * scale_factor))
         {
           Eigen::Vector3d point((double)(point_x) / scale_factor + x_min, (double)(point_y) / scale_factor + y_min,
                                 height_above_table + mm * delta_height);
@@ -421,9 +426,9 @@ bool SemanticWorld::isInsideTableContour(const geometry_msgs::msg::Pose& pose,
 
   double x_range = fabs(x_max - x_min);
   double y_range = fabs(y_max - y_min);
-  int max_range = (int)x_range + 1;
-  if (max_range < (int)y_range + 1)
-    max_range = (int)y_range + 1;
+  int max_range = static_cast<int>(x_range) + 1;
+  if (max_range < static_cast<int>(y_range) + 1)
+    max_range = static_cast<int>(y_range) + 1;
 
   int image_scale = std::max<int>(max_range, 4);
   cv::Mat src = cv::Mat::zeros(image_scale * scale_factor, image_scale * scale_factor, CV_8UC1);
@@ -456,7 +461,7 @@ bool SemanticWorld::isInsideTableContour(const geometry_msgs::msg::Pose& pose,
   double result = cv::pointPolygonTest(contours[0], point2f, true);
   RCLCPP_DEBUG(LOGGER, "table distance: %f", result);
 
-  return (int)result >= (int)(min_distance_from_edge * scale_factor);
+  return static_cast<int>(result) >= static_cast<int>(min_distance_from_edge * scale_factor);
 }
 
 std::string SemanticWorld::findObjectTable(const geometry_msgs::msg::Pose& pose, double min_distance_from_edge,
@@ -475,7 +480,7 @@ std::string SemanticWorld::findObjectTable(const geometry_msgs::msg::Pose& pose,
 void SemanticWorld::tableCallback(const object_recognition_msgs::msg::TableArray::SharedPtr msg)
 {
   table_array_ = *msg;
-  RCLCPP_INFO(LOGGER, "Table callback with %d tables", (int)table_array_.tables.size());
+  RCLCPP_INFO(LOGGER, "Table callback with %d tables", static_cast<int>(table_array_.tables.size()));
   transformTableArray(table_array_);
   // Callback on an update
   if (table_callback_)

@@ -2,6 +2,90 @@
 Changelog for package moveit_ros_planning_interface
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.5.1 (2022-05-31)
+------------------
+
+2.5.0 (2022-05-26)
+------------------
+* move_group_interface: No need to spin after publishing (`#1250 <https://github.com/ros-planning/moveit2/issues/1250>`_)
+* Enable cppcheck (`#1224 <https://github.com/ros-planning/moveit2/issues/1224>`_)
+  Co-authored-by: jeoseo <jeongwooseo2012@gmail.com>
+* Make moveit_common a 'depend' rather than 'build_depend' (`#1226 <https://github.com/ros-planning/moveit2/issues/1226>`_)
+* Fix deprecated namespace (`#1228 <https://github.com/ros-planning/moveit2/issues/1228>`_)
+* Avoid bind(), use lambdas instead (`#1204 <https://github.com/ros-planning/moveit2/issues/1204>`_)
+  Adaption of https://github.com/ros-planning/moveit/pull/3106
+* banish bind()
+  source:https://github.com/ros-planning/moveit/pull/3106/commits/a2911c80c28958c1fce8fb52333d770248c4ec05; required minor updates compared to original source commit in order to ensure compatibility with ROS2
+* RCLCPP Upgrade Bugfixes (`#1181 <https://github.com/ros-planning/moveit2/issues/1181>`_)
+* Rename panda controllers
+* Merge https://github.com/ros-planning/moveit/commit/424a5b7b8b774424f78346d1e98bf1c9a33f0e78
+* Enable rolling / jammy CI (again) (`#1134 <https://github.com/ros-planning/moveit2/issues/1134>`_)
+  * Use ros2_control binaries
+  * Use output screen instead of explicitly stating stderr
+* Update black version, formatting changes (`#1148 <https://github.com/ros-planning/moveit2/issues/1148>`_)
+* Merge https://github.com/ros-planning/moveit/commit/a25515b73d682df03ed3eccd839110c296aa79fc
+* Merge https://github.com/ros-planning/moveit/commit/ab42a1d7017b27eb6c353fb29331b2da08ab0039
+* Temporarily add galactic CI (`#1107 <https://github.com/ros-planning/moveit2/issues/1107>`_)
+  * Add galactic CI
+  * Comment out rolling
+  * panda_ros_controllers -> panda_ros2_controllers
+  * Ignore flake8 tests
+* 1.1.9
+* 1.1.8
+* Add moveit_configs_utils package to simplify loading paramters (`#591 <https://github.com/ros-planning/moveit2/issues/591>`_)
+  Co-authored-by: AndyZe <zelenak@picknik.ai>
+  Co-authored-by: Stephanie Eng <stephanie-eng@users.noreply.github.com>
+  Co-authored-by: Tyler Weaver <tyler@picknik.ai>
+* 1.1.7
+* Move MoveItErrorCode class to moveit_core (`#3009 <https://github.com/ros-planning/moveit2/issues/3009>`_)
+  ... reducing code duplication and facilitating re-use
+* Fix MoveGroupInterface uninitialized RobotState (`#3008 <https://github.com/ros-planning/moveit2/issues/3008>`_)
+* Switch to std::bind (`#2967 <https://github.com/ros-planning/moveit2/issues/2967>`_)
+  * boost::bind -> std::bind
+  grep -rlI --exclude-dir=.git "boost::bind" | xargs sed -i 's/boost::bind/std::bind/g'
+  * Convert bind placeholders
+  grep -rlI --exclude-dir=.git " _[0-9]" | xargs sed -i 's/ _\([0-9]\)/ std::placeholders::_\1/g'
+  * Update bind include header
+  grep -rlI --exclude-dir=.git "boost/bind" | xargs sed -i 's#boost/bind.hpp#functional#'
+* 1.1.6
+* Merge PRs `#2948 <https://github.com/ros-planning/moveit2/issues/2948>`_ (improve CI) and `#2949 <https://github.com/ros-planning/moveit2/issues/2949>`_ (simplify ROS .test files)
+* Use test_environment.launch in unittests
+* Contributors: Abishalini, Captain Yoshi, David V. Lu!!, Henning Kayser, Jafar, Jafar Abdi, Jochen Sprickerhof, Robert Haschke, Stephanie Eng, Tyler Weaver, Vatan Aksoy Tezer, jeoseo, v4hn
+
+2.4.0 (2022-01-20)
+------------------
+* Fix boost linking errors for Windows (`#957 <https://github.com/ros-planning/moveit2/issues/957>`_)
+* Replace NULL with nullptr (`#961 <https://github.com/ros-planning/moveit2/issues/961>`_)
+  * Fixes `#841 <https://github.com/ros-planning/moveit2/issues/841>`_
+* Merge https://github.com/ros-planning/moveit/commit/a0ee2020c4a40d03a48044d71753ed23853a665d
+* moveit_build_options()
+  Declare common build options like CMAKE_CXX_STANDARD, CMAKE_BUILD_TYPE,
+  and compiler options (namely warning flags) once.
+  Each package depending on moveit_core can use these via moveit_build_options().
+* MGI: add missing replan/look options to interface (`#2892 <https://github.com/ros-planning/moveit2/issues/2892>`_)
+  - reordered methods because looking requires replanning
+  - there's no sense in wrapping methods in methods.
+  just use pimpl-friend paradigm instead. Someone could
+  rework all the other methods in the future.
+* PSI: get object.pose from new msg field (`#2877 <https://github.com/ros-planning/moveit2/issues/2877>`_)
+* Contributors: Abishalini, Akash, Gauthier Hentz, Michael Görner, Robert Haschke, Stephanie Eng
+
+2.3.2 (2021-12-29)
+------------------
+
+2.3.1 (2021-12-23)
+------------------
+* Add codespell to precommit, fix A LOT of spelling mistakes (`#934 <https://github.com/ros-planning/moveit2/issues/934>`_)
+* Consider simulated time (`#883 <https://github.com/ros-planning/moveit2/issues/883>`_)
+* Enforce package.xml format 3 Schema (`#779 <https://github.com/ros-planning/moveit2/issues/779>`_)
+* Update Maintainers of MoveIt package (`#697 <https://github.com/ros-planning/moveit2/issues/697>`_)
+* Find/replace deprecated spawner.py (`#737 <https://github.com/ros-planning/moveit2/issues/737>`_)
+* common_objects: getSharedRobotModelLoader fix deadlock (`#734 <https://github.com/ros-planning/moveit2/issues/734>`_)
+* fix trajectory constraints for moveit commander (`#2429 <https://github.com/ros-planning/moveit/issues/2429>`_)
+* MGI::setStartState: Only fetch current state when new state is diff (`#2775 <https://github.com/ros-planning/moveit/issues/2775>`_)
+* clang-tidy: modernize-make-shared, modernize-make-unique (`#2762 <https://github.com/ros-planning/moveit/issues/2762>`_)
+* Contributors: AndyZe, Dave Coleman, David V. Lu!!, Felix von Drigalski, Gaël Écorchard, Henning Kayser, Jafar Abdi, Kevin Chang, Robert Haschke, pvanlaar
+
 2.3.0 (2021-10-08)
 ------------------
 * Support passing MoveGroup's namespace to MoveGroupInterface (`#533 <https://github.com/ros-planning/moveit2/issues/533>`_)

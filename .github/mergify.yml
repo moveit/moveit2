@@ -1,0 +1,44 @@
+pull_request_rules:
+  - name: backport to foxy at reviewers discretion
+    conditions:
+      - base=main
+      - "label=backport-foxy"
+    actions:
+      backport:
+        branches:
+          - foxy
+
+  - name: backport to galactic at reviewers discretion
+    conditions:
+      - base=main
+      - "label=backport-galactic"
+    actions:
+      backport:
+        branches:
+          - galactic
+
+  - name: backport to humble at reviewers discretion
+    conditions:
+      - base=main
+      - "label=backport-humble"
+    actions:
+      backport:
+        branches:
+          - humble
+
+  - name: ask to resolve conflict
+    conditions:
+      - conflict
+      - author!=mergify[bot]
+    actions:
+        comment:
+          message: This pull request is in conflict. Could you fix it @{{author}}?
+
+  - name: development targets main branch
+    conditions:
+      - base!=main
+      - author!=mergify[bot]
+    actions:
+        comment:
+          message: |
+            Please target the `main` branch for development, we will backport the changes to {{base}} for you if approved and if they don't break API.

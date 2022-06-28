@@ -32,10 +32,7 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#ifndef COMMAND_TYPES_TYPEDEF_H
-#define COMMAND_TYPES_TYPEDEF_H
-
-#include <boost/variant.hpp>
+#pragma once
 
 #include "ptp.h"
 #include "lin.h"
@@ -44,6 +41,8 @@
 #include "jointconfiguration.h"
 #include "cartesianconfiguration.h"
 #include "circ_auxiliary_types.h"
+
+#include <variant>
 
 namespace pilz_industrial_motion_planner_testutils
 {
@@ -61,9 +60,7 @@ typedef Circ<CartesianConfiguration, CartesianInterim, CartesianConfiguration> C
 typedef Circ<JointConfiguration, CartesianCenter, JointConfiguration> CircJointCenterCart;
 typedef Circ<JointConfiguration, CartesianInterim, JointConfiguration> CircJointInterimCart;
 
-typedef boost::variant<PtpJoint, PtpJointCart, PtpCart, LinJoint, LinCart, CircCenterCart, CircInterimCart,
-                       CircJointCenterCart, CircJointInterimCart, Gripper>
+typedef std::variant<PtpJoint, PtpJointCart, PtpCart, LinJoint, LinCart, CircCenterCart, CircInterimCart,
+                     CircJointCenterCart, CircJointInterimCart, Gripper>
     CmdVariant;
 }  // namespace pilz_industrial_motion_planner_testutils
-
-#endif  // COMMAND_TYPES_TYPEDEF_H

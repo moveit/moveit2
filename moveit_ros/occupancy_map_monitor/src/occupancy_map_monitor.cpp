@@ -35,15 +35,14 @@
 /* Author: Ioan Sucan, Jon Binney */
 
 #include <moveit/collision_detection/occupancy_map.h>
-
 #include <moveit/occupancy_map_monitor/occupancy_map_monitor.h>
 #include <moveit/occupancy_map_monitor/occupancy_map_monitor_middleware_handle.hpp>
 #include <moveit_msgs/srv/load_map.hpp>
 #include <moveit_msgs/srv/save_map.hpp>
-
-#include <boost/bind.hpp>
-#include <rclcpp/rclcpp.hpp>
-
+#include <rclcpp/clock.hpp>
+#include <rclcpp/logger.hpp>
+#include <rclcpp/logging.hpp>
+#include <rclcpp/node.hpp>
 #include <memory>
 #include <string>
 #include <utility>
@@ -125,7 +124,7 @@ OccupancyMapMonitor::OccupancyMapMonitor(std::unique_ptr<MiddlewareHandle> middl
       continue;
     }
 
-    // Add the succesfully initialized updater
+    // Add the successfully initialized updater
     addUpdater(occupancy_map_updater);
   }
 
@@ -155,23 +154,30 @@ void OccupancyMapMonitor::addUpdater(const OccupancyMapUpdaterPtr& updater)
     if (map_updaters_.size() > 1)
     {
       mesh_handles_.resize(map_updaters_.size());
-      // when we had one updater only, we passed direcly the transform cache callback to that updater
+      // when we had one updater only, we passed directly the transform cache callback to that updater
       if (map_updaters_.size() == 2)
       {
         map_updaters_[0]->setTransformCacheCallback(
-            boost::bind(&OccupancyMapMonitor::getShapeTransformCache, this, 0, _1, _2, _3));
+            [this](const std::string& frame, const rclcpp::Time& stamp, ShapeTransformCache& cache) {
+              return getShapeTransformCache(0, frame, stamp, cache);
+            });
         map_updaters_[1]->setTransformCacheCallback(
-            boost::bind(&OccupancyMapMonitor::getShapeTransformCache, this, 1, _1, _2, _3));
+            [this](const std::string& frame, const rclcpp::Time& stamp, ShapeTransformCache& cache) {
+              return getShapeTransformCache(1, frame, stamp, cache);
+            });
       }
       else
         map_updaters_.back()->setTransformCacheCallback(
-            boost::bind(&OccupancyMapMonitor::getShapeTransformCache, this, map_updaters_.size() - 1, _1, _2, _3));
+            [this, i = map_updaters_.size() - 1](const std::string& frame, const rclcpp::Time& stamp,
+                                                 ShapeTransformCache& cache) {
+              return getShapeTransformCache(i, frame, stamp, cache);
+            });
     }
     else
       updater->setTransformCacheCallback(transform_cache_callback_);
   }
   else
-    RCLCPP_ERROR(LOGGER, "NULL updater was specified");
+    RCLCPP_ERROR(LOGGER, "nullptr updater was specified");
 }
 
 void OccupancyMapMonitor::publishDebugInformation(bool flag)
@@ -263,7 +269,7 @@ bool OccupancyMapMonitor::getShapeTransformCache(std::size_t index, const std::s
     return false;
 }
 
-bool OccupancyMapMonitor::saveMapCallback(const std::shared_ptr<rmw_request_id_t> request_header,
+bool OccupancyMapMonitor::saveMapCallback(const std::shared_ptr<rmw_request_id_t> /* unused */,
                                           const std::shared_ptr<moveit_msgs::srv::SaveMap::Request> request,
                                           std::shared_ptr<moveit_msgs::srv::SaveMap::Response> response)
 {
@@ -281,7 +287,7 @@ bool OccupancyMapMonitor::saveMapCallback(const std::shared_ptr<rmw_request_id_t
   return true;
 }
 
-bool OccupancyMapMonitor::loadMapCallback(const std::shared_ptr<rmw_request_id_t> request_header,
+bool OccupancyMapMonitor::loadMapCallback(const std::shared_ptr<rmw_request_id_t> /* unused */,
                                           const std::shared_ptr<moveit_msgs::srv::LoadMap::Request> request,
                                           std::shared_ptr<moveit_msgs::srv::LoadMap::Response> response)
 {

@@ -2,6 +2,32 @@
 Changelog for package moveit_chomp_optimizer_adapter
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.5.1 (2022-05-31)
+------------------
+
+2.5.0 (2022-05-26)
+------------------
+* Make TOTG the default time-parameterization algorithm everywhere (`#1218 <https://github.com/ros-planning/moveit2/issues/1218>`_)
+* Make moveit_common a 'depend' rather than 'build_depend' (`#1226 <https://github.com/ros-planning/moveit2/issues/1226>`_)
+* Remove unused parameters. (`#1018 <https://github.com/ros-planning/moveit2/issues/1018>`_)
+* Contributors: AndyZe, Cory Crean, Jafar, Robert Haschke, jeoseo
+
+2.4.0 (2022-01-20)
+------------------
+* moveit_build_options()
+  Declare common build options like CMAKE_CXX_STANDARD, CMAKE_BUILD_TYPE,
+  and compiler options (namely warning flags) once.
+  Each package depending on moveit_core can use these via moveit_build_options().
+* Contributors: Robert Haschke
+
+2.3.2 (2021-12-29)
+------------------
+
+2.3.1 (2021-12-23)
+------------------
+* Port CHOMP Motion Planner to ROS 2 (`#809 <https://github.com/ros-planning/moveit2/issues/809>`_)
+* Contributors: Henning Kayser, andreas-botbuilt
+
 1.1.1 (2020-10-13)
 ------------------
 

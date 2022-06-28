@@ -41,6 +41,7 @@
 #include <Eigen/Core>
 #include <list>
 #include <moveit/robot_trajectory/robot_trajectory.h>
+#include <moveit/trajectory_processing/time_parameterization.h>
 
 namespace trajectory_processing
 {
@@ -159,17 +160,25 @@ private:
   mutable std::list<TrajectoryStep>::const_iterator cached_trajectory_segment_;
 };
 
-class TimeOptimalTrajectoryGeneration
+MOVEIT_CLASS_FORWARD(TimeOptimalTrajectoryGeneration);
+class TimeOptimalTrajectoryGeneration : public TimeParameterization
 {
 public:
   TimeOptimalTrajectoryGeneration(const double path_tolerance = 0.1, const double resample_dt = 0.1,
                                   const double min_angle_change = 0.001);
-  ~TimeOptimalTrajectoryGeneration();
 
   bool computeTimeStamps(robot_trajectory::RobotTrajectory& trajectory, const double max_velocity_scaling_factor = 1.0,
-                         const double max_acceleration_scaling_factor = 1.0) const;
+                         const double max_acceleration_scaling_factor = 1.0) const override;
+
+  bool computeTimeStamps(robot_trajectory::RobotTrajectory& trajectory,
+                         const std::unordered_map<std::string, double>& velocity_limits,
+                         const std::unordered_map<std::string, double>& acceleration_limits) const override;
 
 private:
+  bool doTimeParameterizationCalculations(robot_trajectory::RobotTrajectory& trajectory,
+                                          const Eigen::VectorXd& max_velocity,
+                                          const Eigen::VectorXd& max_acceleration) const;
+
   const double path_tolerance_;
   const double resample_dt_;
   const double min_angle_change_;

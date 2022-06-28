@@ -35,12 +35,29 @@
 /* Author: Ioan Sucan */
 
 #include <moveit/constraint_samplers/default_constraint_samplers.h>
+#include <rclcpp/logger.hpp>
+#include <rclcpp/logging.hpp>
 #include <cassert>
-#include <boost/bind.hpp>
+#include <functional>
 
 namespace constraint_samplers
 {
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_constraint_samplers.default_constraint_samplers");
+
+random_numbers::RandomNumberGenerator createSeededRNG([[maybe_unused]] const std::string& seed_param)
+{
+  // int rng_seed;
+  // if (ros::param::get(seed_param, rng_seed))
+  // {
+  //   ROS_DEBUG_STREAM_NAMED("constraint_samplers", "Creating random number generator with seed " << rng_seed);
+  //   return random_numbers::RandomNumberGenerator(rng_seed);
+  // }
+  // else
+  // {
+  return random_numbers::RandomNumberGenerator(12345);
+  // }
+}
+
 bool JointConstraintSampler::configure(const moveit_msgs::msg::Constraints& constr)
 {
   // construct the constraints
@@ -61,7 +78,7 @@ bool JointConstraintSampler::configure(const std::vector<kinematic_constraints::
 
   if (!jmg_)
   {
-    RCLCPP_ERROR(LOGGER, "NULL group specified for constraint sampler");
+    RCLCPP_ERROR(LOGGER, "nullptr group specified for constraint sampler");
     return false;
   }
 
@@ -197,19 +214,19 @@ IKSamplingPose::IKSamplingPose()
 }
 
 IKSamplingPose::IKSamplingPose(const kinematic_constraints::PositionConstraint& pc)
-  : position_constraint_(new kinematic_constraints::PositionConstraint(pc))
+  : position_constraint_(std::make_shared<kinematic_constraints::PositionConstraint>(pc))
 {
 }
 
 IKSamplingPose::IKSamplingPose(const kinematic_constraints::OrientationConstraint& oc)
-  : orientation_constraint_(new kinematic_constraints::OrientationConstraint(oc))
+  : orientation_constraint_(std::make_shared<kinematic_constraints::OrientationConstraint>(oc))
 {
 }
 
 IKSamplingPose::IKSamplingPose(const kinematic_constraints::PositionConstraint& pc,
                                const kinematic_constraints::OrientationConstraint& oc)
-  : position_constraint_(new kinematic_constraints::PositionConstraint(pc))
-  , orientation_constraint_(new kinematic_constraints::OrientationConstraint(oc))
+  : position_constraint_(std::make_shared<kinematic_constraints::PositionConstraint>(pc))
+  , orientation_constraint_(std::make_shared<kinematic_constraints::OrientationConstraint>(oc))
 {
 }
 
@@ -530,8 +547,7 @@ namespace
 {
 void samplingIkCallbackFnAdapter(moveit::core::RobotState* state, const moveit::core::JointModelGroup* jmg,
                                  const moveit::core::GroupStateValidityCallbackFn& constraint,
-                                 const geometry_msgs::msg::Pose& /*unused*/, const std::vector<double>& ik_sol,
-                                 moveit_msgs::msg::MoveItErrorCodes& error_code)
+                                 const std::vector<double>& ik_sol, moveit_msgs::msg::MoveItErrorCodes& error_code)
 {
   const std::vector<unsigned int>& bij = jmg->getKinematicsSolverJointBijection();
   std::vector<double> solution(bij.size());
@@ -561,8 +577,11 @@ bool IKConstraintSampler::sampleHelper(moveit::core::RobotState& state, const mo
 
   kinematics::KinematicsBase::IKCallbackFn adapted_ik_validity_callback;
   if (group_state_validity_callback_)
-    adapted_ik_validity_callback =
-        boost::bind(&samplingIkCallbackFnAdapter, &state, jmg_, group_state_validity_callback_, _1, _2, _3);
+    adapted_ik_validity_callback = [this, state_ptr = &state](const geometry_msgs::msg::Pose&,
+                                                              const std::vector<double>& joints,
+                                                              moveit_msgs::msg::MoveItErrorCodes& error_code) {
+      return samplingIkCallbackFnAdapter(state_ptr, jmg_, group_state_validity_callback_, joints, error_code);
+    };
 
   for (unsigned int a = 0; a < max_attempts; ++a)
   {

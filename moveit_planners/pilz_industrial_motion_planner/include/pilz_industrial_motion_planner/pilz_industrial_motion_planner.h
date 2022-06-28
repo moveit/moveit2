@@ -34,7 +34,7 @@
 
 #pragma once
 
-#include <ros/ros.h>
+#include <rclcpp/rclcpp.hpp>
 
 #include "pilz_industrial_motion_planner/joint_limits_extension.h"
 #include "pilz_industrial_motion_planner/planning_context_loader.h"
@@ -43,9 +43,7 @@
 #include <moveit/planning_interface/planning_interface.h>
 
 #include <pluginlib/class_loader.hpp>
-
-// Boost includes
-#include <boost/scoped_ptr.hpp>
+#include <memory>
 
 namespace pilz_industrial_motion_planner
 {
@@ -55,7 +53,7 @@ namespace pilz_industrial_motion_planner
  * corresponds to the requested motion command
  * set as planner_id in the MotionPlanRequest).
  * It can be easily extended with additional commands by creating a class
- * inherting from PlanningContextLoader.
+ * inheriting from PlanningContextLoader.
  */
 class CommandPlanner : public planning_interface::PlannerManager
 {
@@ -69,10 +67,12 @@ public:
    * Upon initialization this planner will look for plugins implementing
    * pilz_industrial_motion_planner::PlanningContextLoader.
    * @param model The robot model
+   * @param node The node
    * @param ns The namespace
    * @return true on success, false otherwise
    */
-  bool initialize(const robot_model::RobotModelConstPtr& model, const std::string& ns) override;
+  bool initialize(const moveit::core::RobotModelConstPtr& model, const rclcpp::Node::SharedPtr& node,
+                  const std::string& ns) override;
 
   /// Description of the planner
   std::string getDescription() const override;
@@ -94,9 +94,10 @@ public:
    * @param error_code
    * @return
    */
-  planning_interface::PlanningContextPtr getPlanningContext(const planning_scene::PlanningSceneConstPtr& planning_scene,
-                                                            const planning_interface::MotionPlanRequest& req,
-                                                            moveit_msgs::MoveItErrorCodes& error_code) const override;
+  planning_interface::PlanningContextPtr
+  getPlanningContext(const planning_scene::PlanningSceneConstPtr& planning_scene,
+                     const planning_interface::MotionPlanRequest& req,
+                     moveit_msgs::msg::MoveItErrorCodes& error_code) const override;
 
   /**
    * @brief Checks if the request can be handled
@@ -116,7 +117,7 @@ public:
 
 private:
   /// Plugin loader
-  boost::scoped_ptr<pluginlib::ClassLoader<PlanningContextLoader>> planner_context_loader;
+  std::unique_ptr<pluginlib::ClassLoader<PlanningContextLoader>> planner_context_loader;
 
   /// Mapping from command to loader
   std::map<std::string, pilz_industrial_motion_planner::PlanningContextLoaderPtr> context_loader_map_;

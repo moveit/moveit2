@@ -41,6 +41,8 @@
 
 #include <urdf_parser/urdf_parser.h>
 #include <gtest/gtest.h>
+
+#include <memory>
 #include <sstream>
 #include <algorithm>
 #include <ctype.h>
@@ -227,9 +229,9 @@ protected:
         "</robot>";
 
     urdf::ModelInterfaceSharedPtr urdf_model = urdf::parseURDF(MODEL2);
-    srdf::ModelSharedPtr srdf_model(new srdf::Model());
+    srdf::ModelSharedPtr srdf_model = std::make_shared<srdf::Model>();
     srdf_model->initString(*urdf_model, SMODEL2);
-    robot_model_.reset(new moveit::core::RobotModel(urdf_model, srdf_model));
+    robot_model_ = std::make_shared<moveit::core::RobotModel>(urdf_model, srdf_model);
   }
 
   void TearDown() override
@@ -241,20 +243,18 @@ protected:
 };
 
 std::size_t generateTestTraj(std::vector<std::shared_ptr<moveit::core::RobotState>>& traj,
-                             const moveit::core::RobotModelConstPtr& robot_model_,
-                             const moveit::core::JointModelGroup* joint_model_group)
+                             const moveit::core::RobotModelConstPtr& robot_model_)
 {
   traj.clear();
 
-  std::shared_ptr<moveit::core::RobotState> robot_state(new moveit::core::RobotState(robot_model_));
+  auto robot_state = std::make_shared<moveit::core::RobotState>(robot_model_);
   robot_state->setToDefaultValues();
   double ja, jc;
 
   // 3 waypoints with default joints
   for (std::size_t traj_ix = 0; traj_ix < 3; ++traj_ix)
   {
-    // robot_state.reset(new moveit::core::RobotState(*robot_state));
-    traj.push_back(moveit::core::RobotStatePtr(new moveit::core::RobotState(*robot_state)));
+    traj.push_back(std::make_shared<moveit::core::RobotState>(*robot_state));
   }
 
   ja = robot_state->getVariablePosition("panda_joint0");
@@ -265,34 +265,33 @@ std::size_t generateTestTraj(std::vector<std::shared_ptr<moveit::core::RobotStat
   robot_state->setVariablePosition("panda_joint0", ja);
   jc = jc - 0.01;
   robot_state->setVariablePosition("panda_joint1", jc);
-  traj.push_back(moveit::core::RobotStatePtr(new moveit::core::RobotState(*robot_state)));
+  traj.push_back(std::make_shared<moveit::core::RobotState>(*robot_state));
 
   // 5th waypoint with a large jump of 1.01 in first revolute joint
   ja = ja + 1.01;
   robot_state->setVariablePosition("panda_joint0", ja);
-  traj.push_back(moveit::core::RobotStatePtr(new moveit::core::RobotState(*robot_state)));
+  traj.push_back(std::make_shared<moveit::core::RobotState>(*robot_state));
 
   // 6th waypoint with a large jump of 1.01 in first prismatic joint
   jc = jc + 1.01;
   robot_state->setVariablePosition("panda_joint1", jc);
-  traj.push_back(moveit::core::RobotStatePtr(new moveit::core::RobotState(*robot_state)));
+  traj.push_back(std::make_shared<moveit::core::RobotState>(*robot_state));
 
   // 7th waypoint with no jump
-  traj.push_back(moveit::core::RobotStatePtr(new moveit::core::RobotState(*robot_state)));
+  traj.push_back(std::make_shared<moveit::core::RobotState>(*robot_state));
 
   return traj.size();
 }
 
 TEST_F(OneRobot, testGenerateTrajectory)
 {
-  const moveit::core::JointModelGroup* joint_model_group = robot_model_->getJointModelGroup("arm");
   std::vector<std::shared_ptr<moveit::core::RobotState>> traj;
 
   // The full trajectory should be of length 7
   const std::size_t expected_full_traj_len = 7;
 
   // Generate a test trajectory
-  std::size_t full_traj_len = generateTestTraj(traj, robot_model_, joint_model_group);
+  std::size_t full_traj_len = generateTestTraj(traj, robot_model_);
 
   // Test the generateTestTraj still generates a trajectory of length 7
   EXPECT_EQ(full_traj_len, expected_full_traj_len);  // full traj should be 7 waypoints long
@@ -308,7 +307,7 @@ TEST_F(OneRobot, checkAbsoluteJointSpaceJump)
   const std::size_t expected_prismatic_jump_traj_len = 5;
 
   // Pre-compute expected results for tests
-  std::size_t full_traj_len = generateTestTraj(traj, robot_model_, joint_model_group);
+  std::size_t full_traj_len = generateTestTraj(traj, robot_model_);
   const double expected_revolute_jump_fraction = (double)expected_revolute_jump_traj_len / (double)full_traj_len;
   const double expected_prismatic_jump_fraction = (double)expected_prismatic_jump_traj_len / (double)full_traj_len;
 
@@ -321,28 +320,28 @@ TEST_F(OneRobot, checkAbsoluteJointSpaceJump)
   EXPECT_NEAR(expected_revolute_jump_fraction, fraction, 0.01);
 
   // Indirect call using checkJointSpaceJumps
-  generateTestTraj(traj, robot_model_, joint_model_group);
+  generateTestTraj(traj, robot_model_);
   fraction = moveit::core::CartesianInterpolator::checkJointSpaceJump(joint_model_group, traj,
                                                                       moveit::core::JumpThreshold(1.0, 1.0));
   EXPECT_EQ(expected_revolute_jump_traj_len, traj.size());  // traj should be cut before the revolute jump
   EXPECT_NEAR(expected_revolute_jump_fraction, fraction, 0.01);
 
   // Test revolute joints
-  generateTestTraj(traj, robot_model_, joint_model_group);
+  generateTestTraj(traj, robot_model_);
   fraction = moveit::core::CartesianInterpolator::checkJointSpaceJump(joint_model_group, traj,
                                                                       moveit::core::JumpThreshold(1.0, 0.0));
   EXPECT_EQ(expected_revolute_jump_traj_len, traj.size());  // traj should be cut before the revolute jump
   EXPECT_NEAR(expected_revolute_jump_fraction, fraction, 0.01);
 
   // Test prismatic joints
-  generateTestTraj(traj, robot_model_, joint_model_group);
+  generateTestTraj(traj, robot_model_);
   fraction = moveit::core::CartesianInterpolator::checkJointSpaceJump(joint_model_group, traj,
                                                                       moveit::core::JumpThreshold(0.0, 1.0));
   EXPECT_EQ(expected_prismatic_jump_traj_len, traj.size());  // traj should be cut before the prismatic jump
   EXPECT_NEAR(expected_prismatic_jump_fraction, fraction, 0.01);
 
   // Ignore all absolute jumps
-  generateTestTraj(traj, robot_model_, joint_model_group);
+  generateTestTraj(traj, robot_model_);
   fraction = moveit::core::CartesianInterpolator::checkJointSpaceJump(joint_model_group, traj,
                                                                       moveit::core::JumpThreshold(0.0, 0.0));
   EXPECT_EQ(full_traj_len, traj.size());  // traj should not be cut
@@ -358,7 +357,7 @@ TEST_F(OneRobot, checkRelativeJointSpaceJump)
   const std::size_t expected_relative_jump_traj_len = 4;
 
   // Pre-compute expected results for tests
-  std::size_t full_traj_len = generateTestTraj(traj, robot_model_, joint_model_group);
+  std::size_t full_traj_len = generateTestTraj(traj, robot_model_);
   const double expected_relative_jump_fraction = (double)expected_relative_jump_traj_len / (double)full_traj_len;
 
   // Container for results
@@ -370,14 +369,14 @@ TEST_F(OneRobot, checkRelativeJointSpaceJump)
   EXPECT_NEAR(expected_relative_jump_fraction, fraction, 0.01);
 
   // Indirect call of relative version using checkJointSpaceJumps
-  generateTestTraj(traj, robot_model_, joint_model_group);
+  generateTestTraj(traj, robot_model_);
   fraction = moveit::core::CartesianInterpolator::checkJointSpaceJump(joint_model_group, traj,
                                                                       moveit::core::JumpThreshold(2.97));
   EXPECT_EQ(expected_relative_jump_traj_len, traj.size());  // traj should be cut before the first jump of 1.01
   EXPECT_NEAR(expected_relative_jump_fraction, fraction, 0.01);
 
   // Trajectory should not be cut: 1.01 < 2.98 * (0.01 * 2 + 1.01 * 2)/6.
-  generateTestTraj(traj, robot_model_, joint_model_group);
+  generateTestTraj(traj, robot_model_);
   fraction = moveit::core::CartesianInterpolator::checkJointSpaceJump(joint_model_group, traj,
                                                                       moveit::core::JumpThreshold(2.98));
   EXPECT_EQ(full_traj_len, traj.size());  // traj should not be cut

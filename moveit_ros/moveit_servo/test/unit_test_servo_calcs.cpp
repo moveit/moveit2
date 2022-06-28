@@ -45,7 +45,7 @@
 #include <fstream>
 #include <sstream>
 #include <string>
-#include <boost/filesystem/path.hpp>
+#include <filesystem>
 #include <ament_index_cpp/get_package_share_directory.hpp>
 #include "unit_test_servo_calcs.hpp"
 
@@ -53,7 +53,7 @@ static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_servo.unit_test_
 
 void loadModelFile(std::string package_name, std::string filename, std::string& file_content)
 {
-  boost::filesystem::path res_path(ament_index_cpp::get_package_share_directory(package_name));
+  std::filesystem::path res_path(ament_index_cpp::get_package_share_directory(package_name));
   std::string xml_string;
   std::fstream xml_file((res_path / filename).string().c_str(), std::fstream::in);
   while (xml_file.good())
@@ -528,7 +528,7 @@ int main(int argc, char** argv)
   TEST_PSM->startStateMonitor();
 
   // read parameters and store them in shared pointer to constant
-  TEST_PARAMS = moveit_servo::ServoParameters::makeServoParameters(TEST_NODE, LOGGER);
+  TEST_PARAMS = moveit_servo::ServoParameters::makeServoParameters(TEST_NODE);
   if (TEST_PARAMS == nullptr)
   {
     RCLCPP_FATAL(LOGGER, "Failed to load the servo parameters");

@@ -35,12 +35,12 @@
 
 /* Author: Ioan Sucan */
 
-#include <moveit/robot_model/floating_joint_model.h>
-#include <geometric_shapes/check_isometry.h>
-#include <boost/math/constants/constants.hpp>
-#include <limits>
 #include <cmath>
-#include "rclcpp/rclcpp.hpp"
+#include <geometric_shapes/check_isometry.h>
+#include <limits>
+#include <moveit/robot_model/floating_joint_model.h>
+#include <rclcpp/logger.hpp>
+#include <rclcpp/logging.hpp>
 
 namespace moveit
 {
@@ -53,7 +53,8 @@ constexpr size_t STATE_SPACE_DIMENSION = 7;
 
 }  // namespace
 
-FloatingJointModel::FloatingJointModel(const std::string& name) : JointModel(name), angular_distance_weight_(1.0)
+FloatingJointModel::FloatingJointModel(const std::string& name, size_t joint_index, size_t first_variable_index)
+  : JointModel(name, joint_index, first_variable_index), angular_distance_weight_(1.0)
 {
   type_ = FLOATING;
   local_variable_names_.push_back("trans_x");
@@ -65,7 +66,7 @@ FloatingJointModel::FloatingJointModel(const std::string& name) : JointModel(nam
   local_variable_names_.push_back("rot_w");
   for (size_t i = 0; i < STATE_SPACE_DIMENSION; ++i)
   {
-    variable_names_.push_back(name_ + "/" + local_variable_names_[i]);
+    variable_names_.push_back(getName() + "/" + local_variable_names_[i]);
     variable_index_map_[variable_names_.back()] = i;
   }
 
@@ -102,7 +103,7 @@ double FloatingJointModel::getMaximumExtent(const Bounds& other_bounds) const
   double dx = other_bounds[0].max_position_ - other_bounds[0].min_position_;
   double dy = other_bounds[1].max_position_ - other_bounds[1].min_position_;
   double dz = other_bounds[2].max_position_ - other_bounds[2].min_position_;
-  return sqrt(dx * dx + dy * dy + dz * dz) + boost::math::constants::pi<double>() * 0.5 * angular_distance_weight_;
+  return sqrt(dx * dx + dy * dy + dz * dz) + M_PI * 0.5 * angular_distance_weight_;
 }
 
 double FloatingJointModel::distance(const double* values1, const double* values2) const
@@ -310,7 +311,7 @@ void FloatingJointModel::getVariableRandomPositionsNearBy(random_numbers::Random
                                 std::min(bounds[2].max_position_, near[2] + distance));
 
   double da = angular_distance_weight_ * distance;
-  if (da >= .25 * boost::math::constants::pi<double>())
+  if (da >= .25 * M_PI)
   {
     double q[4];
     rng.quaternion(q);

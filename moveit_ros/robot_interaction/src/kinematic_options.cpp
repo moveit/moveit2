@@ -35,7 +35,6 @@
 /* Author: Acorn Pooley */
 
 #include <moveit/robot_interaction/kinematic_options.h>
-#include <boost/static_assert.hpp>
 #include <rclcpp/logging.hpp>
 
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_ros_robot_interaction.kinematic_options");
@@ -85,7 +84,7 @@ void robot_interaction::KinematicOptions::setOptions(const KinematicOptions& sou
   F(::kinematics::DiscretizationMethods::DiscretizationMethod, discretization_method, DISCRETIZATION_METHOD)
 
   // This structure should be identical to kinematics::KinematicsQueryOptions
-  // This is only used in the BOOST_STATIC_ASSERT below.
+  // This is only used in the static_assert below.
   struct DummyKinematicsQueryOptions
   {
 #define F(type, member, enumval) type member;
@@ -93,7 +92,7 @@ void robot_interaction::KinematicOptions::setOptions(const KinematicOptions& sou
 #undef F
   };
   // This structure should be identical to robot_interaction::KinematicOptions
-  // This is only used in the BOOST_STATIC_ASSERT below.
+  // This is only used in the static_assert below.
   struct DummyKinematicOptions
   {
 #define F(type, member, enumval) type member;
@@ -106,8 +105,8 @@ void robot_interaction::KinematicOptions::setOptions(const KinematicOptions& sou
   // kinematics::KinematicsQueryOptions or robot_interaction::KinematicOptions
   // and not added to the O_FIELDS and QO_FIELDS definitions above. To fix add
   // any new fields to the definitions above.
-  BOOST_STATIC_ASSERT(sizeof(kinematics::KinematicsQueryOptions) == sizeof(DummyKinematicsQueryOptions));
-  BOOST_STATIC_ASSERT(sizeof(KinematicOptions) == sizeof(DummyKinematicOptions));
+  static_assert(sizeof(kinematics::KinematicsQueryOptions) == sizeof(DummyKinematicsQueryOptions));
+  static_assert(sizeof(KinematicOptions) == sizeof(DummyKinematicOptions));
 
 // copy fields from other to this if its bit is set in fields
 #define F(type, member, enumval)                                                                                       \
