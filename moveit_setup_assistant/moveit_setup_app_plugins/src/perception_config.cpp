@@ -89,19 +89,17 @@ std::vector<SensorParameters> PerceptionConfig::load3DSensorsYAML(const std::fil
     if (sensors_node && sensors_node.IsSequence())
     {
       // Loop over the sensors available in the file
-      for (const YAML::Node& sensor : sensors_node)
+      for (const YAML::Node& sensor_name : sensors_node)
       {
-        SensorParameters sensor_map;
-        bool empty_node = true;
+        const YAML::Node& sensor = doc[sensor_name.as<std::string>()];
 
+        SensorParameters sensor_map;
         for (YAML::const_iterator sensor_it = sensor.begin(); sensor_it != sensor.end(); ++sensor_it)
         {
-          empty_node = false;
           sensor_map[sensor_it->first.as<std::string>()] = sensor_it->second.as<std::string>();
         }
-        // Don't push empty nodes
-        if (!empty_node)
-          config.push_back(sensor_map);
+
+        config.push_back(sensor_map);
       }
     }
     return config;
@@ -149,7 +147,10 @@ bool PerceptionConfig::GeneratedSensorConfig::writeYaml(YAML::Emitter& emitter)
 {
   emitter << YAML::BeginMap;
   emitter << YAML::Key << "sensors";
-  emitter << YAML::Value << YAML::BeginSeq;
+  emitter << YAML::BeginSeq;
+  emitter << YAML::Value << "default_sensor";
+  emitter << YAML::EndSeq;
+  emitter << YAML::Key << "default_sensor";
   for (auto& sensor_config : parent_.sensors_plugin_config_parameter_list_)
   {
     emitter << YAML::BeginMap;
@@ -160,7 +161,6 @@ bool PerceptionConfig::GeneratedSensorConfig::writeYaml(YAML::Emitter& emitter)
     }
     emitter << YAML::EndMap;
   }
-  emitter << YAML::EndSeq;
   emitter << YAML::EndMap;
   return true;
 }
