@@ -208,7 +208,6 @@ void mesh_filter::DepthSelfFiltering::connectCb()
   else if (!sub_depth_image_)
   {
     image_transport::TransportHints hints("raw", ros::TransportHints(), getPrivateNodeHandle());
-    // see if there's a constructor that doesn't take queue size, if not then get rmw_qos_...'s queue size and use that
     sub_depth_image_ =
         input_depth_transport_->subscribeCamera("depth", rmw_qos_profile_sensor_data.depth,
                                                 &DepthSelfFiltering::depthCb, this, hints, rmw_qos_profile_sensor_data);
