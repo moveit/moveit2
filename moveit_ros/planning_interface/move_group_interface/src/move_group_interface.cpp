@@ -77,7 +77,7 @@ namespace moveit
 {
 namespace planning_interface
 {
-size_t MoveGroupInterface::node_num = 0;
+size_t MoveGroupInterface::number_of_objects_ = 0;
 
 const std::string MoveGroupInterface::ROBOT_DESCRIPTION =
     "robot_description";  // name of the robot description (a param name, so it can be changed externally)
@@ -105,15 +105,15 @@ public:
                          const std::shared_ptr<tf2_ros::Buffer>& tf_buffer, const rclcpp::Duration& wait_for_servers)
     : opt_(opt), node_(node), tf_buffer_(tf_buffer)
   {
-    if (node_num == 0)
+    if (!number_of_objects_)
     {
       pnode_ = std::make_shared<rclcpp::Node>("move_group_interface_node");
     }
     else
     {
-      pnode_ = std::make_shared<rclcpp::Node>("move_group_interface_node_" + std::to_string(node_num));
+      pnode_ = std::make_shared<rclcpp::Node>("move_group_interface_node_" + std::to_string(number_of_objects_));
     }
-    node_num++;
+    number_of_objects_++;
 
     robot_model_ = opt.robot_model_ ? opt.robot_model_ : getSharedRobotModel(node_, opt.robot_description_);
     if (!getRobotModel())

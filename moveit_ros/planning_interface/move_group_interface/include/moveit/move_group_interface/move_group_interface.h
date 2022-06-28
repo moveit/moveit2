@@ -1009,12 +1009,12 @@ public:
 protected:
   /** return the full RobotState of the joint-space target, only for internal use */
   const moveit::core::RobotState& getTargetRobotState() const;
+  static size_t number_of_objects_;
 
 private:
   std::map<std::string, std::vector<double> > remembered_joint_values_;
   class MoveGroupInterfaceImpl;
   MoveGroupInterfaceImpl* impl_;
-  static size_t node_num;
 };
 }  // namespace planning_interface
 }  // namespace moveit
