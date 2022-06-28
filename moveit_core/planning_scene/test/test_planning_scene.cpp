@@ -295,6 +295,14 @@ TEST(PlanningScene, switchCollisionDetectorType)
   }
 }
 
+TEST(PlanningScene, FailRetrievingNonExistentObject)
+{
+  moveit::core::RobotModelPtr robot_model = moveit::core::loadTestingRobotModel("pr2");
+  planning_scene::PlanningScene ps{ robot_model };
+  moveit_msgs::msg::CollisionObject obj;
+  EXPECT_FALSE(ps.getCollisionObjectMsg(obj, "non_existent_object"));
+}
+
 class CollisionDetectorTests : public testing::TestWithParam<const char*>
 {
 };

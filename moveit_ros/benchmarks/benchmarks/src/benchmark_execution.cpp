@@ -889,13 +889,13 @@ void moveit_benchmarks::BenchmarkExecution::collectMetrics(RunData& rundata,
 
 namespace
 {
-bool isIKSolutionCollisionFree(const planning_scene::PlanningScene* scene, moveit::core::RobotState* state,
-                               const moveit::core::JointModelGroup* group, const double* ik_solution, bool* reachable)
+bool isIKSolutionCollisionFree(const planning_scene::PlanningScene& scene, moveit::core::RobotState& state,
+                               const moveit::core::JointModelGroup* group, const double* ik_solution, bool& reachable)
 {
-  state->setJointGroupPositions(group, ik_solution);
-  state->update();
-  *reachable = true;
-  if (scene->isStateColliding(*state, group->getName(), false))
+  state.setJointGroupPositions(group, ik_solution);
+  state.update();
+  reachable = true;
+  if (scene.isStateColliding(state, group->getName(), false))
     return false;
   else
     return true;

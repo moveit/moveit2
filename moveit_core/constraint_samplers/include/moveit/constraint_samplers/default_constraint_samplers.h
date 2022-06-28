@@ -43,6 +43,8 @@
 
 namespace constraint_samplers
 {
+random_numbers::RandomNumberGenerator createSeededRNG([[maybe_unused]] const std::string& seed_param);
+
 MOVEIT_CLASS_FORWARD(JointConstraintSampler);  // Defines JointConstraintSamplerPtr, ConstPtr, WeakPtr... etc
 
 /**
@@ -69,8 +71,10 @@ public:
    */
   JointConstraintSampler(const planning_scene::PlanningSceneConstPtr& scene, const std::string& group_name)
     : ConstraintSampler(scene, group_name)
+    , random_number_generator_(createSeededRNG("~joint_constraint_sampler_random_seed"))
   {
   }
+
   /**
    * \brief Configures a joint constraint given a Constraints message.
    *
@@ -305,6 +309,7 @@ public:
    */
   IKConstraintSampler(const planning_scene::PlanningSceneConstPtr& scene, const std::string& group_name)
     : ConstraintSampler(scene, group_name)
+    , random_number_generator_(createSeededRNG("~ik_constraint_sampler_random_seed"))
   {
   }
 
