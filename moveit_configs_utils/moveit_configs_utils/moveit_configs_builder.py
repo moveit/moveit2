@@ -154,11 +154,16 @@ class MoveItConfigsBuilder(ParameterBuilder):
         self.__urdf_file_path = None
         self.__srdf_file_path = None
 
+        modified_urdf_path = Path("config") / (self.__robot_name + ".urdf.xacro")
+        if (self._package_path / modified_urdf_path).exists():
+            self.__urdf_package = self._package_path
+            self.__urdf_file_path = modified_urdf_path
+
         if setup_assistant_file.exists():
             setup_assistant_yaml = load_yaml(setup_assistant_file)
             config = setup_assistant_yaml.get("moveit_setup_assistant_config", {})
             urdf_config = config.get("urdf", config.get("URDF"))
-            if urdf_config:
+            if urdf_config and self.__urdf_package is None:
                 self.__urdf_package = Path(
                     get_package_share_directory(urdf_config["package"])
                 )
@@ -286,9 +291,10 @@ class MoveItConfigsBuilder(ParameterBuilder):
             controller_pattern = re.compile("^(.*)_controllers.yaml$")
             possible_names = get_pattern_matches(config_folder, controller_pattern)
             if not possible_names:
-                raise RuntimeError(
-                    "trajectory_execution: `Parameter file_path is undefined "
-                    f"and no matches for {config_folder}/*_controllers.yaml"
+                # Warn the user instead of raising exception
+                logging.warning(
+                    "\x1b[33;20mtrajectory_execution: `Parameter file_path is undefined "
+                    f"and no matches for {config_folder}/*_controllers.yaml\x1b[0m"
                 )
             else:
                 chosen_name = None
@@ -313,7 +319,8 @@ class MoveItConfigsBuilder(ParameterBuilder):
         else:
             file_path = self._package_path / file_path
 
-        self.__moveit_configs.trajectory_execution.update(load_yaml(file_path))
+        if file_path:
+            self.__moveit_configs.trajectory_execution.update(load_yaml(file_path))
         return self
 
     def planning_scene_monitor(

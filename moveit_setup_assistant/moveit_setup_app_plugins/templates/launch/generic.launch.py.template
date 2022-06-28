@@ -1,0 +1,7 @@
+from moveit_configs_utils import MoveItConfigsBuilder
+from moveit_configs_utils.launches import [FUNCTION_NAME]
+
+
+def generate_launch_description():
+    moveit_config = MoveItConfigsBuilder("[ROBOT_NAME]", package_name="[GENERATED_PACKAGE_NAME]").to_moveit_configs()
+    return [FUNCTION_NAME](moveit_config)
