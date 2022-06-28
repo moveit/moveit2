@@ -138,6 +138,7 @@ void PerceptionConfig::setConfig(const SensorParameters& parameters)
     // Right now, the widget only supports editing one plugin
     sensors_plugin_config_parameter_list_[0] = parameters;
   }
+  sensors_plugin_config_parameter_list_[0]["name"] = "default_sensor";
 }
 
 // ******************************************************************************************
@@ -148,14 +149,21 @@ bool PerceptionConfig::GeneratedSensorConfig::writeYaml(YAML::Emitter& emitter)
   emitter << YAML::BeginMap;
   emitter << YAML::Key << "sensors";
   emitter << YAML::BeginSeq;
-  emitter << YAML::Value << "default_sensor";
-  emitter << YAML::EndSeq;
-  emitter << YAML::Key << "default_sensor";
   for (auto& sensor_config : parent_.sensors_plugin_config_parameter_list_)
   {
+    emitter << YAML::Value << sensor_config["name"];
+  }
+  emitter << YAML::EndSeq;
+  for (auto& sensor_config : parent_.sensors_plugin_config_parameter_list_)
+  {
+    emitter << YAML::Key << sensor_config["name"];
     emitter << YAML::BeginMap;
     for (auto& parameter : sensor_config)
     {
+      if (parameter.first == "name")
+      {
+        continue;
+      }
       emitter << YAML::Key << parameter.first;
       emitter << YAML::Value << parameter.second;
     }
