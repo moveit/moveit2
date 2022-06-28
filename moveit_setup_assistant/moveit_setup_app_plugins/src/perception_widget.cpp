@@ -95,21 +95,25 @@ void PerceptionWidget::onInit()
   // Max Range
   max_range_field_ = new QLineEdit(this);
   max_range_field_->setMaximumWidth(400);
+  max_range_field_->setValidator(new QDoubleValidator(this));
   point_cloud_form_layout->addRow("Max Range:", max_range_field_);
 
   // Point Subsample
   point_subsample_field_ = new QLineEdit(this);
   point_subsample_field_->setMaximumWidth(400);
+  point_subsample_field_->setValidator(new QIntValidator(this));
   point_cloud_form_layout->addRow("Point Subsample:", point_subsample_field_);
 
   // Padding Offset
   padding_offset_field_ = new QLineEdit(this);
   padding_offset_field_->setMaximumWidth(400);
+  padding_offset_field_->setValidator(new QDoubleValidator(this));
   point_cloud_form_layout->addRow("Padding Offset:", padding_offset_field_);
 
   // Padding Scale
   padding_scale_field_ = new QLineEdit(this);
   padding_scale_field_->setMaximumWidth(400);
+  padding_scale_field_->setValidator(new QDoubleValidator(this));
   point_cloud_form_layout->addRow("Padding Scale:", padding_scale_field_);
 
   // Filtered Cloud Topic
@@ -120,6 +124,7 @@ void PerceptionWidget::onInit()
   // Max Update Rate
   max_update_rate_field_ = new QLineEdit(this);
   max_update_rate_field_->setMaximumWidth(400);
+  max_update_rate_field_->setValidator(new QDoubleValidator(this));
   point_cloud_form_layout->addRow("Max Update Rate:", max_update_rate_field_);
 
   // Point Cloud form layout
@@ -141,31 +146,37 @@ void PerceptionWidget::onInit()
   // Queue Size
   queue_size_field_ = new QLineEdit(this);
   queue_size_field_->setMaximumWidth(400);
+  queue_size_field_->setValidator(new QIntValidator(this));
   depth_map_form_layout->addRow("Queue Size:", queue_size_field_);
 
   // Near Clipping Plane Distance
   near_clipping_field_ = new QLineEdit(this);
   near_clipping_field_->setMaximumWidth(400);
+  near_clipping_field_->setValidator(new QDoubleValidator(this));
   depth_map_form_layout->addRow("Near Clipping Plane Distance:", near_clipping_field_);
 
   // Far Clipping Plane Distance
   far_clipping_field_ = new QLineEdit(this);
   far_clipping_field_->setMaximumWidth(400);
+  far_clipping_field_->setValidator(new QDoubleValidator(this));
   depth_map_form_layout->addRow("Far Clipping Plane Distance:", far_clipping_field_);
 
   // Shadow Threshold
   shadow_threshold_field_ = new QLineEdit(this);
   shadow_threshold_field_->setMaximumWidth(400);
+  shadow_threshold_field_->setValidator(new QDoubleValidator(this));
   depth_map_form_layout->addRow("Shadow Threshold:", shadow_threshold_field_);
 
   // Padding Offset
   depth_padding_offset_field_ = new QLineEdit(this);
   depth_padding_offset_field_->setMaximumWidth(400);
+  depth_padding_offset_field_->setValidator(new QDoubleValidator(this));
   depth_map_form_layout->addRow("Padding Offset:", depth_padding_offset_field_);
 
   // Padding Scale
   depth_padding_scale_field_ = new QLineEdit(this);
   depth_padding_scale_field_->setMaximumWidth(400);
+  depth_padding_scale_field_->setValidator(new QDoubleValidator(this));
   depth_map_form_layout->addRow("Padding Scale:", depth_padding_scale_field_);
 
   // Filtered Cloud Topic
@@ -176,6 +187,7 @@ void PerceptionWidget::onInit()
   // Filtered Cloud Topic
   depth_max_update_rate_field_ = new QLineEdit(this);
   depth_max_update_rate_field_->setMaximumWidth(400);
+  depth_max_update_rate_field_->setValidator(new QDoubleValidator(this));
   depth_map_form_layout->addRow("Max Update Rate:", depth_max_update_rate_field_);
 
   depth_map_group_->setLayout(depth_map_form_layout);
