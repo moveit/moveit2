@@ -125,7 +125,11 @@ void ControlXacroConfig::loadFromDescription()
   {
     for (const std::string& joint_name : srdf_config->getJointNames(group_name, true, false))  // exclude passive
     {
-      joint_names_.push_back(joint_name);
+      if (std::find(joint_names_.begin(), joint_names_.end(), joint_name) == joint_names_.end())
+      {
+        // This is a new joint, add to list of joint names
+        joint_names_.push_back(joint_name);
+      }
     }
   }
 
