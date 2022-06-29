@@ -1130,7 +1130,7 @@ TEST_F(LoadPlanningModelsPr2, SubgroupPoseConstraintsSampler)
               (double)succ / (double)NT);
 }
 
-TEST_F(LoadPlanningModelsPr2, DISABLED_JointConstraintsSamplerSeeded)
+TEST_F(LoadPlanningModelsPr2, JointConstraintsSamplerSeeded)
 {
   // ros::param::set("~joint_constraint_sampler_random_seed", 12345);
   constraint_samplers::JointConstraintSampler seeded_sampler1(ps_, "right_arm");
@@ -1172,7 +1172,7 @@ TEST_F(LoadPlanningModelsPr2, DISABLED_JointConstraintsSamplerSeeded)
   EXPECT_THAT(joint_positions_v2, Not(ContainerEq(joint_positions_v3)));
 }
 
-TEST_F(LoadPlanningModelsPr2, DISABLED_IKConstraintsSamplerSeeded)
+TEST_F(LoadPlanningModelsPr2, IKConstraintsSamplerSeeded)
 {
   // ros::param::set("~ik_constraint_sampler_random_seed", 12345);
   kinematic_constraints::PositionConstraint pc(robot_model_);
