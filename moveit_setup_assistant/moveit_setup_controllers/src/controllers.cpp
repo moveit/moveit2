@@ -65,7 +65,7 @@ bool Controllers::addDefaultControllers()
     // If this group is an end effector, use proper default
     bool is_end_effector = false;
     auto end_effectors = srdf_config_->getEndEffectors();
-    for (auto ee : end_effectors)
+    for (const auto& ee : end_effectors)
     {
       if (ee.component_group_ == group_name)
       {
