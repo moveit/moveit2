@@ -165,23 +165,14 @@ bool MoveItControllersConfig::GeneratedControllersConfig::writeYaml(YAML::Emitte
           // Write joints
           emitter << YAML::Key << "joints";
           emitter << YAML::Value;
-          if (controller.joints_.size() != 1)
-          {
-            emitter << YAML::BeginSeq;
+          emitter << YAML::BeginSeq;
 
-            // Iterate through the joints
-            for (const std::string& joint : controller.joints_)
-            {
-              emitter << joint;
-            }
-            emitter << YAML::EndSeq;
-          }
-          else
+          // Iterate through the joints
+          for (const std::string& joint : controller.joints_)
           {
-            emitter << YAML::BeginMap;
-            emitter << controller.joints_[0];
-            emitter << YAML::EndMap;
+            emitter << joint;
           }
+          emitter << YAML::EndSeq;
           // Depending on the controller type, fill the required data
           if (controller.type_ == "FollowJointTrajectory")
           {
@@ -211,8 +202,8 @@ bool MoveItControllersConfig::GeneratedControllersConfig::writeYaml(YAML::Emitte
             }
             emitter << YAML::EndMap;
           }
-          emitter << YAML::EndMap;
         }
+        emitter << YAML::EndMap;
       }
     }
     emitter << YAML::EndMap;
