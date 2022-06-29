@@ -53,6 +53,7 @@ struct ControllerInfo
   std::string name_;                 // controller name
   std::string type_;                 // controller type
   std::vector<std::string> joints_;  // joints controlled by this controller
+  std::map<std::string, std::string> parameters_;
 };
 
 /**

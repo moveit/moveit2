@@ -102,6 +102,14 @@ bool MoveItControllersConfig::parseController(const std::string& name, const YAM
     return false;
   }
 
+  for (const std::string& parameter : { "action_ns", "default" })
+  {
+    if (controller_node[parameter].IsDefined())
+    {
+      control_setting.parameters_[parameter] = controller_node[parameter].as<std::string>();
+    }
+  }
+
   const YAML::Node& joints_node = controller_node["joints"];
 
   if (joints_node.IsSequence())
@@ -173,34 +181,11 @@ bool MoveItControllersConfig::GeneratedControllersConfig::writeYaml(YAML::Emitte
             emitter << joint;
           }
           emitter << YAML::EndSeq;
-          // Depending on the controller type, fill the required data
-          if (controller.type_ == "FollowJointTrajectory")
+
+          for (const auto& pair : controller.parameters_)
           {
-            emitter << YAML::Key << "action_ns" << YAML::Value << "follow_joint_trajectory";
-            emitter << YAML::Key << "default" << YAML::Value << "true";
-          }
-          else
-          {
-            // Write gains as they are required for vel and effort controllers
-            emitter << YAML::Key << "gains";
-            emitter << YAML::Value;
-            emitter << YAML::BeginMap;
-            {
-              // Iterate through the joints
-              for (const std::string& joint : controller.joints_)
-              {
-                emitter << YAML::Key << joint << YAML::Value << YAML::BeginMap;
-                emitter << YAML::Key << "p";
-                emitter << YAML::Value << "100";
-                emitter << YAML::Key << "d";
-                emitter << YAML::Value << "1";
-                emitter << YAML::Key << "i";
-                emitter << YAML::Value << "1";
-                emitter << YAML::Key << "i_clamp";
-                emitter << YAML::Value << "1" << YAML::EndMap;
-              }
-            }
-            emitter << YAML::EndMap;
+            emitter << YAML::Key << pair.first;
+            emitter << YAML::Value << pair.second;
           }
         }
         emitter << YAML::EndMap;
