@@ -43,8 +43,7 @@ namespace moveit_setup
 namespace controllers
 {
 bool ControllersConfig::addController(const std::string& name, const std::string& type,
-                                      const std::vector<std::string>& joint_names,
-                                      const std::string& action_ns)
+                                      const std::vector<std::string>& joint_names, const std::string& action_ns)
 {
   ControllerInfo controller;
   controller.name_ = name;

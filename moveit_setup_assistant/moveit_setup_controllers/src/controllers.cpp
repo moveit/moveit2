@@ -76,8 +76,8 @@ bool Controllers::addDefaultControllers()
 
     if (is_end_effector)
     {
-      success &= controllers_config_->addController(group_name + "_controller", getGripperDefaultType(),
-                                                    joint_names, getGripperDefaultActionNamespace());
+      success &= controllers_config_->addController(group_name + "_controller", getGripperDefaultType(), joint_names,
+                                                    getGripperDefaultActionNamespace());
     }
     else
     {
