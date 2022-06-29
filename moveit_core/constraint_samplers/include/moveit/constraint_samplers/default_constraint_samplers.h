@@ -40,10 +40,11 @@
 #include <moveit/macros/class_forward.h>
 #include <random_numbers/random_numbers.h>
 #include "rclcpp/rclcpp.hpp"
+#include <random>
 
 namespace constraint_samplers
 {
-random_numbers::RandomNumberGenerator createSeededRNG([[maybe_unused]] const std::string& seed_param);
+random_numbers::RandomNumberGenerator createSeededRNG(unsigned int seed_param);
 
 MOVEIT_CLASS_FORWARD(JointConstraintSampler);  // Defines JointConstraintSamplerPtr, ConstPtr, WeakPtr... etc
 
@@ -70,10 +71,8 @@ public:
    *
    */
   JointConstraintSampler(const planning_scene::PlanningSceneConstPtr& scene, const std::string& group_name)
-    : ConstraintSampler(scene, group_name)
+    : ConstraintSampler(scene, group_name), random_number_generator_(12345)
   {
-    std::random_device rd;
-    random_number_generator_ = random_numbers::RandomNumberGenerator(rd);
   }
 
   /**
@@ -327,8 +326,25 @@ public:
    *
    */
   IKConstraintSampler(const planning_scene::PlanningSceneConstPtr& scene, const std::string& group_name)
-    : ConstraintSampler(scene, group_name)
-    , random_number_generator_(createSeededRNG("~ik_constraint_sampler_random_seed"))
+    : ConstraintSampler(scene, group_name), random_number_generator_(12345)
+  {
+  }
+
+  /**
+   * \brief Constructor
+   *
+   * @param [in] scene The planning scene used to check the constraint
+   *
+   * @param [in] group_name The group name associated with the
+   * constraint.  Will be invalid if no group name is passed in or the
+   * joint model group cannot be found in the kinematic model
+   *
+   * @param [in] seed The rng seed to be used
+   *
+   */
+  IKConstraintSampler(const planning_scene::PlanningSceneConstPtr& scene, const std::string& group_name,
+                      unsigned int seed)
+    : ConstraintSampler(scene, group_name), random_number_generator_(createSeededRNG(seed))
   {
   }
 
