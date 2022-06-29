@@ -102,7 +102,7 @@ bool MoveItControllersConfig::parseController(const std::string& name, const YAM
     return false;
   }
 
-  for (const std::string& parameter : { "action_ns", "default" })
+  for (const std::string parameter : { "action_ns", "default" })
   {
     if (controller_node[parameter].IsDefined())
     {
