@@ -94,6 +94,7 @@ std::vector<SensorParameters> PerceptionConfig::load3DSensorsYAML(const std::fil
         const YAML::Node& sensor = doc[sensor_name.as<std::string>()];
 
         SensorParameters sensor_map;
+        sensor_map["name"] = sensor_name.as<std::string>();
         for (YAML::const_iterator sensor_it = sensor.begin(); sensor_it != sensor.end(); ++sensor_it)
         {
           sensor_map[sensor_it->first.as<std::string>()] = sensor_it->second.as<std::string>();
