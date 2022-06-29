@@ -52,7 +52,8 @@ namespace controllers
 // ******************************************************************************************
 //  ControllerEditWidget constructor, create controller edit screen GUI
 // ******************************************************************************************
-ControllerEditWidget::ControllerEditWidget(QWidget* parent) : QWidget(parent)
+ControllerEditWidget::ControllerEditWidget(QWidget* parent, const FieldPointers& additional_fields)
+  : QWidget(parent), additional_fields_(additional_fields)
 {
   // Basic widget container
   QVBoxLayout* layout = new QVBoxLayout();
@@ -77,7 +78,16 @@ ControllerEditWidget::ControllerEditWidget(QWidget* parent) : QWidget(parent)
   controller_type_field_ = new QComboBox(this);
   controller_type_field_->setEditable(false);
   controller_type_field_->setMaximumWidth(400);
+  connect(controller_type_field_, SIGNAL(currentIndexChanged(int)), this, SLOT(typeChanged(int)));
   form_layout->addRow("Controller Type:", controller_type_field_);
+
+  for (const auto& field : additional_fields_)
+  {
+    QLineEdit* input = new QLineEdit(this);
+    input->setMaximumWidth(400);
+    form_layout->addRow(field->display_name_.c_str(), input);
+    additional_fields_inputs_.push_back(input);
+  }
 
   controller_options_group->setLayout(form_layout);
 
@@ -245,6 +255,28 @@ std::string ControllerEditWidget::getControllerName()
 std::string ControllerEditWidget::getControllerType()
 {
   return controller_type_field_->currentText().toStdString();
+}
+
+std::map<std::string, std::string> ControllerEditWidget::getAdditionalParameters()
+{
+  std::map<std::string, std::string> parameters;
+  for (unsigned int i = 0; i < additional_fields_.size(); i++)
+  {
+    std::string key = additional_fields_[i]->parameter_name_;
+    std::string value = additional_fields_inputs_[i]->text().trimmed().toStdString();
+    parameters[key] = value;
+  }
+  return parameters;
+}
+
+void ControllerEditWidget::typeChanged(int /*index*/)
+{
+  std::string controller_type = getControllerType();
+  for (unsigned int i = 0; i < additional_fields_.size(); i++)
+  {
+    std::string new_value = additional_fields_[i]->getDefaultValue(controller_type);
+    additional_fields_inputs_[i]->setText(new_value.c_str());
+  }
 }
 
 }  // namespace controllers
