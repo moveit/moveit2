@@ -61,8 +61,29 @@ bool Controllers::addDefaultControllers()
     {
       continue;
     }
-    bool ret = controllers_config_->addController(group_name + "_controller", getDefaultType(), joint_names);
-    success &= ret;
+
+    // If this group is an end effector, use proper default
+    bool is_end_effector = false;
+    auto end_effectors = srdf_config_->getEndEffectors();
+    for (auto ee : end_effectors)
+    {
+      if (ee.component_group_ == group_name)
+      {
+        is_end_effector = true;
+        break;
+      }
+    }
+
+    if (is_end_effector)
+    {
+      success &= controllers_config_->addController(group_name + "_controller", getGripperDefaultType(),
+                                                    joint_names, getGripperDefaultActionNamespace());
+    }
+    else
+    {
+      success &= controllers_config_->addController(group_name + "_controller", getDefaultType(), joint_names,
+                                                    getDefaultActionNamespace());
+    }
   }
 
   return success;

@@ -52,6 +52,7 @@ struct ControllerInfo
 {
   std::string name_;                 // controller name
   std::string type_;                 // controller type
+  std::string action_ns_;            // action namespace
   std::vector<std::string> joints_;  // joints controlled by this controller
 };
 
@@ -81,7 +82,8 @@ public:
    * \param joint_names vector of the joint names
    * \return true if inserted correctly
    */
-  bool addController(const std::string& name, const std::string& type, const std::vector<std::string>& joint_names);
+  bool addController(const std::string& name, const std::string& type, const std::vector<std::string>& joint_names,
+                     const std::string& action_ns = std::string());
 
   /**
    * \brief Adds a controller to controllers_ vector

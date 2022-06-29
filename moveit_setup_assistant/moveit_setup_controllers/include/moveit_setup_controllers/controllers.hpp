@@ -54,6 +54,18 @@ public:
 
   virtual std::string getDefaultType() const = 0;
 
+  virtual std::string getDefaultActionNamespace() const
+  {
+    return std::string();
+  }
+
+  virtual std::string getGripperDefaultType() const = 0;
+
+  virtual std::string getGripperDefaultActionNamespace() const
+  {
+    return std::string();
+  }
+
   bool isReady() const override
   {
     return !srdf_config_->getGroups().empty();

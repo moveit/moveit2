@@ -102,6 +102,8 @@ bool MoveItControllersConfig::parseController(const std::string& name, const YAM
     return false;
   }
 
+  getYamlProperty(controller_node, "action_ns", control_setting.action_ns_);
+
   const YAML::Node& joints_node = controller_node["joints"];
 
   if (joints_node.IsSequence())
@@ -185,8 +187,12 @@ bool MoveItControllersConfig::GeneratedControllersConfig::writeYaml(YAML::Emitte
           // Depending on the controller type, fill the required data
           if (controller.type_ == "FollowJointTrajectory")
           {
-            emitter << YAML::Key << "action_ns" << YAML::Value << "follow_joint_trajectory";
+            emitter << YAML::Key << "action_ns" << YAML::Value << controller.action_ns_;
             emitter << YAML::Key << "default" << YAML::Value << "true";
+          }
+          else if (controller.type_ == "GripperCommand")
+          {
+            emitter << YAML::Key << "action_ns" << YAML::Value << controller.action_ns_;
           }
           else
           {

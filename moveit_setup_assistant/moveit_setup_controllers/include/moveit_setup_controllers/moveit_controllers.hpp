@@ -78,6 +78,21 @@ public:
   {
     return "FollowJointTrajectory";
   }
+
+  std::string getDefaultActionNamespace() const override
+  {
+    return "follow_joint_trajectory";
+  }
+
+  std::string getGripperDefaultType() const override
+  {
+    return "GripperCommand";
+  }
+
+  std::string getGripperDefaultActionNamespace() const override
+  {
+    return "command";
+  }
 };
 }  // namespace controllers
 }  // namespace moveit_setup
