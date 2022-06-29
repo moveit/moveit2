@@ -295,6 +295,13 @@ int main(int argc, char** argv)
 
     move_group::MoveGroupExe mge(moveit_cpp, default_planning_pipeline, debug);
 
+    bool monitor_dynamics;
+    if (nh->get_parameter("monitor_dynamics", monitor_dynamics) && monitor_dynamics)
+    {
+      RCLCPP_INFO(LOGGER, "MoveGroup monitors robot dynamics (higher load)");
+      planning_scene_monitor->getStateMonitor()->enableCopyDynamics(true);
+    }
+
     planning_scene_monitor->publishDebugInformation(debug);
 
     mge.status();
