@@ -1160,8 +1160,7 @@ TEST_F(LoadPlanningModelsPr2, JointConstraintsSamplerSeeded)
   using namespace testing;
   EXPECT_THAT(joint_positions_v, ContainerEq(joint_positions_v2));
 
-  // ros::param::del("~joint_constraint_sampler_random_seed");
-  constraint_samplers::JointConstraintSampler seeded_sampler3(ps_, "right_arm", 271828);
+  constraint_samplers::JointConstraintSampler seeded_sampler3(ps_, "right_arm");
   EXPECT_TRUE(seeded_sampler3.configure(js));
   ks.setToDefaultValues();
   EXPECT_TRUE(seeded_sampler3.sample(ks, ks, 5));
@@ -1223,7 +1222,7 @@ TEST_F(LoadPlanningModelsPr2, IKConstraintsSamplerSeeded)
   EXPECT_TRUE(found);
 
   // ros::param::del("~ik_constraint_sampler_random_seed");
-  constraint_samplers::IKConstraintSampler seeded_sampler3(ps_, "left_arm", 182845);
+  constraint_samplers::IKConstraintSampler seeded_sampler3(ps_, "left_arm");
   EXPECT_TRUE(seeded_sampler3.configure(constraint_samplers::IKSamplingPose(pc)));
   ks.setToDefaultValues();
   ks.update();
