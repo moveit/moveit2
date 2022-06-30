@@ -44,8 +44,6 @@
 
 namespace constraint_samplers
 {
-random_numbers::RandomNumberGenerator createSeededRNG(unsigned int seed_param);
-
 MOVEIT_CLASS_FORWARD(JointConstraintSampler);  // Defines JointConstraintSamplerPtr, ConstPtr, WeakPtr... etc
 
 /**
@@ -71,7 +69,7 @@ public:
    *
    */
   JointConstraintSampler(const planning_scene::PlanningSceneConstPtr& scene, const std::string& group_name)
-    : ConstraintSampler(scene, group_name), random_number_generator_(createSeededRNG(12345))
+    : ConstraintSampler(scene, group_name), random_number_generator_(random_numbers::RandomNumberGenerator(12345))
   {
   }
 
@@ -89,7 +87,7 @@ public:
    */
   JointConstraintSampler(const planning_scene::PlanningSceneConstPtr& scene, const std::string& group_name,
                          unsigned int seed)
-    : ConstraintSampler(scene, group_name), random_number_generator_(createSeededRNG(seed))
+    : ConstraintSampler(scene, group_name), random_number_generator_(random_numbers::RandomNumberGenerator(seed))
   {
   }
 
@@ -326,7 +324,7 @@ public:
    *
    */
   IKConstraintSampler(const planning_scene::PlanningSceneConstPtr& scene, const std::string& group_name)
-    : ConstraintSampler(scene, group_name), random_number_generator_(createSeededRNG(12345))
+    : ConstraintSampler(scene, group_name), random_number_generator_(random_numbers::RandomNumberGenerator(12345))
   {
   }
 
@@ -344,7 +342,7 @@ public:
    */
   IKConstraintSampler(const planning_scene::PlanningSceneConstPtr& scene, const std::string& group_name,
                       unsigned int seed)
-    : ConstraintSampler(scene, group_name), random_number_generator_(createSeededRNG(seed))
+    : ConstraintSampler(scene, group_name), random_number_generator_(random_numbers::RandomNumberGenerator(seed))
   {
   }
 

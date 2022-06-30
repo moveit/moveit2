@@ -44,11 +44,6 @@ namespace constraint_samplers
 {
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_constraint_samplers.default_constraint_samplers");
 
-random_numbers::RandomNumberGenerator createSeededRNG(unsigned int seed)
-{
-  return random_numbers::RandomNumberGenerator(seed);
-}
-
 bool JointConstraintSampler::configure(const moveit_msgs::msg::Constraints& constr)
 {
   // construct the constraints
