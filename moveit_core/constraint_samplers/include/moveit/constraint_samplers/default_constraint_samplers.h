@@ -69,7 +69,7 @@ public:
    *
    */
   JointConstraintSampler(const planning_scene::PlanningSceneConstPtr& scene, const std::string& group_name)
-    : ConstraintSampler(scene, group_name), random_number_generator_(random_numbers::RandomNumberGenerator(12345))
+    : ConstraintSampler(scene, group_name), random_number_generator_(random_numbers::RandomNumberGenerator())
   {
   }
 
@@ -324,7 +324,7 @@ public:
    *
    */
   IKConstraintSampler(const planning_scene::PlanningSceneConstPtr& scene, const std::string& group_name)
-    : ConstraintSampler(scene, group_name), random_number_generator_(random_numbers::RandomNumberGenerator(12345))
+    : ConstraintSampler(scene, group_name), random_number_generator_(random_numbers::RandomNumberGenerator())
   {
   }
 
