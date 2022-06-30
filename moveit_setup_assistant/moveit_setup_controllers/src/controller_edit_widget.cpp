@@ -187,6 +187,16 @@ void ControllerEditWidget::setSelected(const std::string& controller_name, const
     {
       controller_type_field_->setCurrentIndex(type_index);
     }
+
+    for (unsigned int i = 0; i < additional_fields_.size(); i++)
+    {
+      std::string key = additional_fields_[i]->parameter_name_;
+      const auto& it = searched_controller->parameters_.find(key);
+      if (it != searched_controller->parameters_.end())
+      {
+        additional_fields_inputs_[i]->setText(it->second.c_str());
+      }
+    }
   }
   else
   {
