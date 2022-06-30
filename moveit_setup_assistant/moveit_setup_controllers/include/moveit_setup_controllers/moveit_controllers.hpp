@@ -78,6 +78,49 @@ public:
   {
     return "FollowJointTrajectory";
   }
+
+  class ActionNamespaceField : public AdditionalControllerField
+  {
+  public:
+    ActionNamespaceField() : AdditionalControllerField("Action Namespace", "action_ns")
+    {
+    }
+    std::string getDefaultValue(const std::string& controller_type) const override
+    {
+      if (controller_type == "FollowJointTrajectory")
+      {
+        return "follow_joint_trajectory";
+      }
+      else if (controller_type == "GripperCommand")
+      {
+        return "gripper_cmd";
+      }
+      else
+      {
+        return "";
+      }
+    }
+  };
+
+  class DefaultField : public AdditionalControllerField
+  {
+  public:
+    DefaultField() : AdditionalControllerField("Default", "default")
+    {
+    }
+    std::string getDefaultValue(const std::string& /*controller_type*/) const override
+    {
+      return "true";
+    }
+  };
+
+  virtual FieldPointers getAdditionalControllerFields() const
+  {
+    FieldPointers fields;
+    fields.push_back(std::make_shared<ActionNamespaceField>());
+    fields.push_back(std::make_shared<DefaultField>());
+    return fields;
+  }
 };
 }  // namespace controllers
 }  // namespace moveit_setup
