@@ -1221,7 +1221,6 @@ TEST_F(LoadPlanningModelsPr2, IKConstraintsSamplerSeeded)
   const Eigen::Isometry3d root_to_left_tool2 = ks.getFrameTransform("l_gripper_tool_frame", &found);
   EXPECT_TRUE(found);
 
-  // ros::param::del("~ik_constraint_sampler_random_seed");
   constraint_samplers::IKConstraintSampler seeded_sampler3(ps_, "left_arm");
   EXPECT_TRUE(seeded_sampler3.configure(constraint_samplers::IKSamplingPose(pc)));
   ks.setToDefaultValues();
