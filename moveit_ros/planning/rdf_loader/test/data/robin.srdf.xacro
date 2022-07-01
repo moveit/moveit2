@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<robot name="robin" xmlns:xacro="http://www.ros.org/wiki/xacro">
+  <xacro:macro name="srdf_macro">
+    <group name="group0">
+      <chain base_link="base_link" tip_link="flipper"/>
+    </group>
+  </xacro:macro>
+  <xacro:srdf_macro />
+</robot>
