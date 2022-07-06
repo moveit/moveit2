@@ -53,7 +53,7 @@ planning_pipeline::PlanningPipeline::PlanningPipeline(const moveit::core::RobotM
                                                       const std::string& parameter_namespace,
                                                       const std::string& planner_plugin_param_name,
                                                       const std::string& adapter_plugins_param_name)
-  : node_(node), parameter_namespace_(parameter_namespace), robot_model_(model)
+  : active_{ false }, node_(node), parameter_namespace_(parameter_namespace), robot_model_(model)
 {
   std::string planner_plugin_fullname = parameter_namespace_ + "." + planner_plugin_param_name;
   if (parameter_namespace_.empty())
@@ -85,7 +85,8 @@ planning_pipeline::PlanningPipeline::PlanningPipeline(const moveit::core::RobotM
                                                       const std::string& parameter_namespace,
                                                       const std::string& planner_plugin_name,
                                                       const std::vector<std::string>& adapter_plugin_names)
-  : node_(node)
+  : active_{ false }
+  , node_(node)
   , parameter_namespace_(parameter_namespace)
   , planner_plugin_name_(planner_plugin_name)
   , adapter_plugin_names_(adapter_plugin_names)
@@ -231,7 +232,7 @@ void planning_pipeline::PlanningPipeline::checkSolutionPaths(bool flag)
 
 bool planning_pipeline::PlanningPipeline::generatePlan(const planning_scene::PlanningSceneConstPtr& planning_scene,
                                                        const planning_interface::MotionPlanRequest& req,
-                                                       planning_interface::MotionPlanResponse& res) const
+                                                       planning_interface::MotionPlanResponse& res)
 {
   std::vector<std::size_t> dummy;
   return generatePlan(planning_scene, req, res, dummy);
@@ -240,16 +241,24 @@ bool planning_pipeline::PlanningPipeline::generatePlan(const planning_scene::Pla
 bool planning_pipeline::PlanningPipeline::generatePlan(const planning_scene::PlanningSceneConstPtr& planning_scene,
                                                        const planning_interface::MotionPlanRequest& req,
                                                        planning_interface::MotionPlanResponse& res,
-                                                       std::vector<std::size_t>& adapter_added_state_index) const
+                                                       std::vector<std::size_t>& adapter_added_state_index)
 {
+  // Set planning pipeline active
+  active_ = true;
+
   // broadcast the request we are about to work on, if needed
   if (publish_received_requests_)
+  {
     received_request_publisher_->publish(req);
+  }
   adapter_added_state_index.clear();
 
   if (!planner_instance_)
   {
     RCLCPP_ERROR(LOGGER, "No planning plugin loaded. Cannot plan.");
+    // Set planning pipeline to inactive
+
+    active_ = false;
     return false;
   }
 
@@ -278,6 +287,9 @@ bool planning_pipeline::PlanningPipeline::generatePlan(const planning_scene::Pla
   catch (std::exception& ex)
   {
     RCLCPP_ERROR(LOGGER, "Exception caught: '%s'", ex.what());
+    // Set planning pipeline to inactive
+
+    active_ = false;
     return false;
   }
   bool valid = true;
@@ -401,11 +413,16 @@ bool planning_pipeline::PlanningPipeline::generatePlan(const planning_scene::Pla
                           "equivalent?");
   }
 
+  // Set planning pipeline to inactive
+
+  active_ = false;
   return solved && valid;
 }
 
 void planning_pipeline::PlanningPipeline::terminate() const
 {
   if (planner_instance_)
+  {
     planner_instance_->terminate();
+  }
 }

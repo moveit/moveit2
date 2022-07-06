@@ -54,6 +54,36 @@ class PlanningComponent
 public:
   using MoveItErrorCode [[deprecated("Use moveit::core::MoveItErrorCode")]] = moveit::core::MoveItErrorCode;
 
+  class PlanSolutions
+  {
+  public:
+    /// \brief Constructor
+    PlanSolutions(const size_t expected_size = 0)
+    {
+      solutions_.reserve(expected_size);
+    }
+
+    /// \brief Thread safe method to add PlanSolutions to this data structure
+    /// TODO(sjahr): Refactor this method to an insert method similar to
+    /// https://github.com/ompl/ompl/blob/main/src/ompl/base/src/ProblemDefinition.cpp#L54-L161. This way, it is
+    /// possible to created a sorted container e.g. according to a user specified criteria
+    void pushBack(planning_interface::MotionPlanResponse plan_solution)
+    {
+      std::lock_guard<std::mutex> lock_guard(solutions_mutex_);
+      solutions_.push_back(plan_solution);
+    }
+
+    /// \brief Get solutions
+    std::vector<planning_interface::MotionPlanResponse> const& getSolutions()
+    {
+      return solutions_;
+    }
+
+  private:
+    std::vector<planning_interface::MotionPlanResponse> solutions_;
+    std::mutex solutions_mutex_;
+  };
+
   /// Planner parameters provided with the MotionPlanRequest
   struct PlanRequestParameters
   {
@@ -64,17 +94,63 @@ public:
     double max_velocity_scaling_factor;
     double max_acceleration_scaling_factor;
 
-    void load(const rclcpp::Node::SharedPtr& node)
+    template <typename T>
+    void declareOrGetParam(rclcpp::Node::SharedPtr const& node, std::string const& param_name, T& output_value,
+                           T default_value)
     {
+      // Try to get parameter or use default
+      if (!node->get_parameter_or(param_name, output_value, default_value))
+      {
+        RCLCPP_WARN(node->get_logger(),
+                    "Parameter \'%s\' not found in config use default value instead, check parameter type and "
+                    "namespace in YAML file",
+                    (param_name).c_str());
+      }
+    }
+
+    void load(const rclcpp::Node::SharedPtr& node, const std::string& param_namespace = "")
+    {
+      // Set namespace
       std::string ns = "plan_request_params.";
-      node->get_parameter_or(ns + "planner_id", planner_id, std::string(""));
-      node->get_parameter_or(ns + "planning_pipeline", planning_pipeline, std::string(""));
-      node->get_parameter_or(ns + "planning_time", planning_time, 1.0);
-      node->get_parameter_or(ns + "planning_attempts", planning_attempts, 5);
-      node->get_parameter_or(ns + "max_velocity_scaling_factor", max_velocity_scaling_factor, 1.0);
-      node->get_parameter_or(ns + "max_acceleration_scaling_factor", max_acceleration_scaling_factor, 1.0);
+      if (!param_namespace.empty())
+      {
+        ns = param_namespace + ".plan_request_params.";
+      }
+
+      // Declare parameters
+      declareOrGetParam<std::string>(node, ns + "planner_id", planner_id, std::string(""));
+      declareOrGetParam<std::string>(node, ns + "planning_pipeline", planning_pipeline, std::string(""));
+      declareOrGetParam<double>(node, ns + "planning_time", planning_time, 1.0);
+      declareOrGetParam<int>(node, ns + "planning_attempts", planning_attempts, 5);
+      declareOrGetParam<double>(node, ns + "max_velocity_scaling_factor", max_velocity_scaling_factor, 1.0);
+      declareOrGetParam<double>(node, ns + "max_acceleration_scaling_factor", max_acceleration_scaling_factor, 1.0);
     }
   };
+
+  /// Planner parameters provided with the MotionPlanRequest
+  struct MultiPipelinePlanRequestParameters
+  {
+    std::vector<PlanRequestParameters> multi_plan_request_parameters;
+
+    void load(const rclcpp::Node::SharedPtr& node, const std::vector<std::string>& planning_pipeline_names)
+    {
+      multi_plan_request_parameters.reserve(planning_pipeline_names.size());
+
+      for (auto const& planning_pipeline_name : planning_pipeline_names)
+      {
+        PlanRequestParameters parameters;
+        parameters.load(node, planning_pipeline_name);
+        multi_plan_request_parameters.push_back(parameters);
+      }
+    }
+  };
+
+  /// \brief A solution callback function type for the parallel planning API of planning component
+  typedef std::function<planning_interface::MotionPlanResponse(std::vector<planning_interface::MotionPlanResponse> const& solutions)> SolutionCallbackFunction;
+  /// \brief A stopping criterion callback function for the parallel planning API of planning component
+  typedef std::function<bool(PlanSolutions const& solutions,
+                             MultiPipelinePlanRequestParameters const& plan_request_parameters)>
+      StoppingCriterionFunction;
 
   /** \brief Constructor */
   PlanningComponent(const std::string& group_name, const rclcpp::Node::SharedPtr& node);
@@ -143,7 +219,13 @@ public:
   planning_interface::MotionPlanResponse plan();
   /** \brief Run a plan from start or current state to fulfill the last goal constraints provided by setGoal() using the
    * provided PlanRequestParameters. */
-  planning_interface::MotionPlanResponse plan(const PlanRequestParameters& parameters);
+  planning_interface::MotionPlanResponse plan(const PlanRequestParameters& parameters, const bool update_last_solution = true);
+
+  /** \brief Run a plan from start or current state to fulfill the last goal constraints provided by setGoal() using the
+   * provided PlanRequestParameters. */
+  planning_interface::MotionPlanResponse plan(const MultiPipelinePlanRequestParameters& parameters,
+                    SolutionCallbackFunction solution_selection_callback = nullptr,
+                    StoppingCriterionFunction stopping_criterion_callback = nullptr);
 
   /** \brief Execute the latest computed solution trajectory computed by plan(). By default this function terminates
    * after the execution is complete. The execution can be run in background by setting blocking to false. */
@@ -159,6 +241,8 @@ private:
   const std::string group_name_;
   // The robot_model_ member variable of MoveItCpp class will manually free the joint_model_group_ resources
   const moveit::core::JointModelGroup* joint_model_group_;
+
+  std::mutex plan_mutex_;
 
   // Planning
   std::set<std::string> planning_pipeline_names_;

@@ -41,6 +41,7 @@
 #include <moveit/planning_pipeline/planning_pipeline.h>
 #include <moveit/planning_scene_monitor/planning_scene_monitor.h>
 #include <moveit/robot_state/conversions.h>
+#include <thread>
 
 namespace moveit_cpp
 {
@@ -59,7 +60,7 @@ PlanningComponent::PlanningComponent(const std::string& group_name, const MoveIt
   planning_pipeline_names_ = moveit_cpp_->getPlanningPipelineNames(group_name);
   plan_request_parameters_.load(node_);
   RCLCPP_DEBUG_STREAM(
-      LOGGER, "Plan request parameters loaded with --"
+      LOGGER, "Default plan request parameters loaded with --"
                   << " planning_pipeline: " << plan_request_parameters_.planning_pipeline << ","
                   << " planner_id: " << plan_request_parameters_.planner_id << ","
                   << " planning_time: " << plan_request_parameters_.planning_time << ","
@@ -113,19 +114,24 @@ bool PlanningComponent::setTrajectoryConstraints(const moveit_msgs::msg::Traject
   return true;
 }
 
-planning_interface::MotionPlanResponse PlanningComponent::plan(const PlanRequestParameters& parameters)
+planning_interface::MotionPlanResponse PlanningComponent::plan(const PlanRequestParameters& parameters, const bool update_last_solution)
 {
-  last_plan_solution_ = planning_interface::MotionPlanResponse();
+  auto plan_solution = planning_interface::MotionPlanResponse();
+
+  // check if joint_model_group exists
   if (!joint_model_group_)
   {
     RCLCPP_ERROR(LOGGER, "Failed to retrieve joint model group for name '%s'.", group_name_.c_str());
-    last_plan_solution_.error_code_ = moveit::core::MoveItErrorCode::INVALID_GROUP_NAME;
-    return last_plan_solution_;
+    plan_solution.error_code_ = moveit::core::MoveItErrorCode::INVALID_GROUP_NAME;
+    if (update_last_solution)
+    {
+      last_plan_solution_ = plan_solution;
+    }
+    return plan_solution;
   }
 
   // Clone current planning scene
-  planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor =
-      moveit_cpp_->getPlanningSceneMonitorNonConst();
+  planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor = moveit_cpp_->getPlanningSceneMonitor();
   planning_scene_monitor->updateFrameTransforms();
   const planning_scene::PlanningScenePtr planning_scene = [planning_scene_monitor] {
     planning_scene_monitor::LockedPlanningSceneRO ls(planning_scene_monitor);
@@ -156,11 +162,14 @@ planning_interface::MotionPlanResponse PlanningComponent::plan(const PlanRequest
   if (current_goal_constraints_.empty())
   {
     RCLCPP_ERROR(LOGGER, "No goal constraints set for planning request");
-    last_plan_solution_.error_code_ = moveit::core::MoveItErrorCode::INVALID_GOAL_CONSTRAINTS;
-    return last_plan_solution_;
+    plan_solution.error_code_ = moveit::core::MoveItErrorCode::INVALID_GOAL_CONSTRAINTS;
+    if (update_last_solution)
+    {
+      last_plan_solution_ = plan_solution;
+    }
+    return plan_solution;
   }
   req.goal_constraints = current_goal_constraints_;
-
   // Set path constraints
   req.path_constraints = current_path_constraints_;
   // Set trajectory constraints
@@ -171,21 +180,31 @@ planning_interface::MotionPlanResponse PlanningComponent::plan(const PlanRequest
   if (planning_pipeline_names_.find(parameters.planning_pipeline) == planning_pipeline_names_.end())
   {
     RCLCPP_ERROR(LOGGER, "No planning pipeline available for name '%s'", parameters.planning_pipeline.c_str());
-    last_plan_solution_.error_code_ = moveit::core::MoveItErrorCode::FAILURE;
-    return last_plan_solution_;
+    plan_solution.error_code_ = moveit::core::MoveItErrorCode::FAILURE;
+    if (update_last_solution)
+    {
+      last_plan_solution_ = plan_solution;
+    }
+    return plan_solution;
   }
   const planning_pipeline::PlanningPipelinePtr pipeline =
       moveit_cpp_->getPlanningPipelines().at(parameters.planning_pipeline);
   pipeline->generatePlan(planning_scene, req, res);
-  last_plan_solution_.error_code_ = res.error_code_;
+
+  plan_solution.error_code_ = res.error_code_;
   if (res.error_code_.val != res.error_code_.SUCCESS)
   {
     RCLCPP_ERROR(LOGGER, "Could not compute plan successfully");
-    return last_plan_solution_;
+        if (update_last_solution)
+    {
+      last_plan_solution_ = plan_solution;
+    }
+    return plan_solution;
   }
-  last_plan_solution_.trajectory_ = res.trajectory_;
-  last_plan_solution_.planning_time_ = res.planning_time_;
-  last_plan_solution_.start_state_ = req.start_state;
+  plan_solution.trajectory_ = res.trajectory_;
+  plan_solution.planning_time_ = res.planning_time_;
+  plan_solution.start_state_ = req.start_state;
+  plan_solution.error_code_ = res.error_code_.val;
 
   // TODO(henningkayser): Visualize trajectory
   // std::vector<const moveit::core::LinkModel*> eef_links;
@@ -199,7 +218,127 @@ planning_interface::MotionPlanResponse PlanningComponent::plan(const PlanRequest
   //    visual_tools_->publishRobotState(last_solution_trajectory_->getLastWayPoint(), rviz_visual_tools::TRANSLUCENT);
   //  }
   //}
-  return last_plan_solution_;
+
+  if (update_last_solution)
+  {
+    last_plan_solution_ = plan_solution;
+  }
+  return plan_solution;
+}
+
+planning_interface::MotionPlanResponse PlanningComponent::plan(const MultiPipelinePlanRequestParameters& parameters,
+                                                        SolutionCallbackFunction solution_selection_callback,
+                                                        StoppingCriterionFunction stopping_criterion_callback)
+{
+  // Create solutions container
+  PlanningComponent::PlanSolutions planning_solutions{ parameters.multi_plan_request_parameters.size() };
+  std::vector<std::thread> planning_threads;
+  planning_threads.reserve(parameters.multi_plan_request_parameters.size());
+
+  // Launch planning threads
+  for (auto const& plan_request_parameter : parameters.multi_plan_request_parameters)
+  {
+    auto planning_thread = std::thread([&]() {
+      try
+      {
+        auto solution = plan(plan_request_parameter, false);
+        planning_solutions.pushBack(solution);
+      }
+      catch (const std::exception& e)
+      {
+        RCLCPP_ERROR_STREAM(LOGGER, "Planning pipeline '" << plan_request_parameter.planning_pipeline.c_str()
+                                                          << "' threw exception '" << e.what() << "'");
+        auto plan_solution = std::make_shared<planning_interface::MotionPlanResponse>();
+        plan_solution->error_code_ = moveit::core::MoveItErrorCode::FAILURE;
+      }
+    });
+    planning_threads.push_back(std::move(planning_thread));
+  }
+
+  // Launch monitor thread if a stopping criterion is provided as function arguments. Otherwise,
+  // the parallel planning process takes as long as the longest planner takes.
+  if (stopping_criterion_callback != nullptr)
+  {
+    auto monitor_thread = std::thread([&]() {
+      while (planning_solutions.getSolutions().size() < planning_threads.size())
+      {
+        if (stopping_criterion_callback(planning_solutions, parameters))
+        {
+          // Terminate planning pipelines
+          for (auto const& plan_request_parameter : parameters.multi_plan_request_parameters)
+          {
+            auto const& planning_pipeline =
+                moveit_cpp_->getPlanningPipelines().at(plan_request_parameter.planning_pipeline);
+            if (planning_pipeline->isActive())
+            {
+              planning_pipeline->terminate();
+            }
+          }
+        }
+      }
+      using namespace std::chrono_literals;
+      std::this_thread::sleep_for(0.1s);
+    });
+    if (monitor_thread.joinable())
+    {
+      monitor_thread.join();
+    }
+  }
+  // Wait for threads to finish
+  for (auto& planning_thread : planning_threads)
+  {
+    if (planning_thread.joinable())
+    {
+      planning_thread.join();
+    }
+  }
+
+  // Select solution
+  // If no custom solution selection callback is provided, choose the shortest path available
+  if (solution_selection_callback == nullptr)
+  {
+    RCLCPP_DEBUG(LOGGER, "No custom solution selection callback provided, automatically choose shortest path");
+    auto const& solutions = planning_solutions.getSolutions();
+
+    // TODO Make debug before merge
+    for (auto const& solution : solutions)
+    {
+      RCLCPP_INFO_STREAM(LOGGER,
+                         "Solution error code is: " << moveit::core::error_code_to_string(solution.error_code_.val));
+      if (solution.trajectory_ != nullptr)
+      {
+        RCLCPP_INFO_STREAM(LOGGER, "Solution path length is: " << robot_trajectory::path_length(*solution.trajectory_));
+      }
+    }
+
+    // Find trajectory with minimal path
+    auto const shortest_trajectory = std::min_element(solutions.begin(), solutions.end(),
+                                                      [](planning_interface::MotionPlanResponse const& solution_a,
+                                                         planning_interface::MotionPlanResponse const& solution_b) {
+                                                        // If both solutions were successful, check which path is shorter
+                                                        if (solution_a && solution_b)
+                                                        {
+                                                          return robot_trajectory::path_length(*solution_a.trajectory_) <
+                                                                 robot_trajectory::path_length(*solution_b.trajectory_);
+                                                        }
+                                                        // If only solution a is successful, return a
+                                                        else if (solution_a)
+                                                        {
+                                                          return true;
+                                                        }
+                                                        // Else return solution b, either because it is successful or not
+                                                        return false;
+                                                      });
+    if (shortest_trajectory->trajectory_ != nullptr)
+    {
+      RCLCPP_INFO_STREAM(LOGGER, "Chosen solution with path length: "
+                                     << robot_trajectory::path_length(*shortest_trajectory->trajectory_));
+    }
+    return *shortest_trajectory;
+  }
+
+  // Return best solution determined by user defined callback
+  return solution_selection_callback(planning_solutions.getSolutions());
 }
 
 planning_interface::MotionPlanResponse PlanningComponent::plan()
