@@ -215,12 +215,8 @@ RobotTrajectory& RobotTrajectory::unwind(const moveit::core::RobotState& state)
 
     double last_value = waypoints_[0]->getJointPositions(cont_joint)[0];
     cont_joint->enforcePositionBounds(&last_value);
-    if (running_offset > std::numeric_limits<double>::epsilon() ||
-        running_offset < -std::numeric_limits<double>::epsilon())
-    {
-      double current_value = last_value + running_offset;
-      waypoints_[0]->setJointPositions(cont_joint, &current_value);
-    }
+    double current_value = last_value + running_offset;
+    waypoints_[0]->setJointPositions(cont_joint, &current_value);
 
     for (std::size_t j = 1; j < waypoints_.size(); ++j)
     {

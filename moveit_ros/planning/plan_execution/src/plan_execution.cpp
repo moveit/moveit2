@@ -357,7 +357,7 @@ moveit_msgs::msg::MoveItErrorCodes plan_execution::PlanExecution::executeAndMoni
     // in the meantime we do a hack:
 
     bool unwound = false;
-    for (std::size_t j = 0; j < i; ++j)
+    for (int j = i - 1; j >= 0; --j)
     {
       // if we ran unwind on a path for the same group
       if (plan.plan_components_[j].trajectory_ &&
