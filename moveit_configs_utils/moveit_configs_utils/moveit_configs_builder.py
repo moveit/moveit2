@@ -430,6 +430,14 @@ class MoveItConfigsBuilder(ParameterBuilder):
         :param file_path: Absolute or relative path to the cartesian limits file (w.r.t. robot_name_moveit_config).
         :return: Instance of MoveItConfigsBuilder with pilz_cartesian_limits loaded.
         """
+        deprecated_path = self._package_path / (
+            file_path or self.__config_dir_path / "cartesian_limits.yaml"
+        )
+        if deprecated_path.exists():
+            logging.warning(
+                f"\x1b[33;21mcartesian_limits.yaml is deprecated, please rename to pilz_cartesian_limits.yaml\x1b[0m"
+            )
+
         self.__moveit_configs.pilz_cartesian_limits = {
             self.__robot_description
             + "_planning": load_yaml(
