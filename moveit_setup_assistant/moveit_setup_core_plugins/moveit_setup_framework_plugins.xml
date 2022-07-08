@@ -1,0 +1,11 @@
+<library path="moveit_setup_core_plugins">
+  <class type="moveit_setup::core::StartScreenWidget" base_class_type="moveit_setup::SetupStepWidget">
+    <description>Start Screen for loading the URDF or initial MoveIt Config</description>
+  </class>
+  <class type="moveit_setup::core::ConfigurationFilesWidget" base_class_type="moveit_setup::SetupStepWidget">
+    <description>The screen that actually generates the files for the Config package</description>
+  </class>
+  <class type="moveit_setup::core::AuthorInformationWidget" base_class_type="moveit_setup::SetupStepWidget">
+    <description>The screen that configures the author's name and email</description>
+  </class>
+</library>

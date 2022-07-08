@@ -6,12 +6,6 @@ set(MOVEIT_LIB_NAME ${PROJECT_NAME})
 find_package(moveit_common REQUIRED)
 moveit_package()
 
-# Disable -Wpedantic warnings due to the warnings in ros-dashing-octomap
-# TODO: add -Wpedantic warnings back when PR(https://github.com/OctoMap/octomap/pull/275) is merged
-if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-  add_compile_options(-Wno-pedantic)
-endif()
-
 if(APPLE)
   find_package(X11 REQUIRED)
 endif()

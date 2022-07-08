@@ -28,6 +28,7 @@ Example:
     moveit_configs.planning_pipelines
     moveit_configs.trajectory_execution
     moveit_configs.planning_scene_monitor
+    moveit_configs.sensors_3d
     moveit_configs.move_group_capabilities
     moveit_configs.joint_limits
     moveit_configs.moveit_cpp
@@ -100,8 +101,10 @@ class MoveItConfigs:
     planning_pipelines: Dict = field(default_factory=dict)
     # A dictionary contains parameters for trajectory execution & moveit controller managers.
     trajectory_execution: Dict = field(default_factory=dict)
-    # A dictionary that have the planning scene monitor's parameters.
+    # A dictionary that has the planning scene monitor's parameters.
     planning_scene_monitor: Dict = field(default_factory=dict)
+    # A dictionary that has the sensor 3d configuration parameters.
+    sensors_3d: Dict = field(default_factory=dict)
     # A dictionary containing move_group's non-default capabilities.
     move_group_capabilities: Dict = field(default_factory=dict)
     # A dictionary containing the overridden position/velocity/acceleration limits.
@@ -119,6 +122,7 @@ class MoveItConfigs:
         parameters.update(self.planning_pipelines)
         parameters.update(self.trajectory_execution)
         parameters.update(self.planning_scene_monitor)
+        parameters.update(self.sensors_3d)
         parameters.update(self.joint_limits)
         parameters.update(self.moveit_cpp)
         parameters.update(self.cartesian_limits)
@@ -154,11 +158,16 @@ class MoveItConfigsBuilder(ParameterBuilder):
         self.__urdf_file_path = None
         self.__srdf_file_path = None
 
+        modified_urdf_path = Path("config") / (self.__robot_name + ".urdf.xacro")
+        if (self._package_path / modified_urdf_path).exists():
+            self.__urdf_package = self._package_path
+            self.__urdf_file_path = modified_urdf_path
+
         if setup_assistant_file.exists():
             setup_assistant_yaml = load_yaml(setup_assistant_file)
             config = setup_assistant_yaml.get("moveit_setup_assistant_config", {})
             urdf_config = config.get("urdf", config.get("URDF"))
-            if urdf_config:
+            if urdf_config and self.__urdf_package is None:
                 self.__urdf_package = Path(
                     get_package_share_directory(urdf_config["package"])
                 )
@@ -286,9 +295,10 @@ class MoveItConfigsBuilder(ParameterBuilder):
             controller_pattern = re.compile("^(.*)_controllers.yaml$")
             possible_names = get_pattern_matches(config_folder, controller_pattern)
             if not possible_names:
-                raise RuntimeError(
-                    "trajectory_execution: `Parameter file_path is undefined "
-                    f"and no matches for {config_folder}/*_controllers.yaml"
+                # Warn the user instead of raising exception
+                logging.warning(
+                    "\x1b[33;20mtrajectory_execution: `Parameter file_path is undefined "
+                    f"and no matches for {config_folder}/*_controllers.yaml\x1b[0m"
                 )
             else:
                 chosen_name = None
@@ -313,7 +323,8 @@ class MoveItConfigsBuilder(ParameterBuilder):
         else:
             file_path = self._package_path / file_path
 
-        self.__moveit_configs.trajectory_execution.update(load_yaml(file_path))
+        if file_path:
+            self.__moveit_configs.trajectory_execution.update(load_yaml(file_path))
         return self
 
     def planning_scene_monitor(
@@ -336,6 +347,23 @@ class MoveItConfigsBuilder(ParameterBuilder):
             "publish_robot_description_semantic": publish_robot_description_semantic,
             # }
         }
+        return self
+
+    def sensors_3d(self, file_path: Optional[str] = None):
+        """Load sensors_3d paramerss.
+
+        :param file_path: Absolute or relative path to the sensors_3d yaml file (w.r.t. robot_name_moveit_config).
+        :return: Instance of MoveItConfigsBuilder with robot_description_planning loaded.
+        """
+        sensors_path = self._package_path / (
+            file_path or self.__config_dir_path / "sensors_3d.yaml"
+        )
+        if sensors_path.exists():
+            sensors_data = load_yaml(sensors_path)
+            # TODO(mikeferguson): remove the second part of this check once
+            # https://github.com/ros-planning/moveit_resources/pull/141 has made through buildfarm
+            if len(sensors_data["sensors"]) > 0 and sensors_data["sensors"][0]:
+                self.__moveit_configs.sensors_3d = sensors_data
         return self
 
     def planning_pipelines(
@@ -429,6 +457,8 @@ class MoveItConfigsBuilder(ParameterBuilder):
             self.trajectory_execution()
         if not self.__moveit_configs.planning_scene_monitor:
             self.planning_scene_monitor()
+        if not self.__moveit_configs.sensors_3d:
+            self.sensors_3d()
         if not self.__moveit_configs.joint_limits:
             self.joint_limits()
         # TODO(JafarAbdi): We should have a default moveit_cpp.yaml as port of a moveit config package

@@ -1,0 +1,23 @@
+<library path="moveit_setup_controllers">
+  <class type="moveit_setup::ModifiedUrdfConfig" base_class_type="moveit_setup::SetupConfig">
+    <description>A modified version of the original URDF file with additional interfaces (e.g. ros2_control, simulation)</description>
+  </class>
+  <class type="moveit_setup::controllers::ControlXacroConfig" base_class_type="moveit_setup::SetupConfig">
+    <description>Information about ros2_control tags that need to be added via xacro</description>
+  </class>
+  <class type="moveit_setup::controllers::MoveItControllersConfig" base_class_type="moveit_setup::SetupConfig">
+    <description>Data for MoveIt Controllers</description>
+  </class>
+  <class type="moveit_setup::controllers::ROS2ControllersConfig" base_class_type="moveit_setup::SetupConfig">
+    <description>Data for ROS2 Controllers</description>
+  </class>
+  <class type="moveit_setup::controllers::UrdfModificationsWidget" base_class_type="moveit_setup::SetupStepWidget">
+    <description>Widget to modify the URDF for ros2_control interfaces</description>
+  </class>
+  <class type="moveit_setup::controllers::MoveItControllersWidget" base_class_type="moveit_setup::SetupStepWidget">
+    <description>Configures the moveit_controllers</description>
+  </class>
+  <class type="moveit_setup::controllers::ROS2ControllersWidget" base_class_type="moveit_setup::SetupStepWidget">
+    <description>Configures the ros2_controllers</description>
+  </class>
+</library>
