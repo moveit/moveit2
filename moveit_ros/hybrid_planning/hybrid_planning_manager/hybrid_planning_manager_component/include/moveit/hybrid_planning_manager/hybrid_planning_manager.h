@@ -84,21 +84,6 @@ public:
     return node_->get_node_base_interface();
   }
 
-  rclcpp::node_interfaces::NodeGraphInterface::SharedPtr get_node_graph_interface()
-  {
-    return node_->get_node_graph_interface();
-  }
-
-  rclcpp::node_interfaces::NodeLoggingInterface::SharedPtr get_node_logging_interface()
-  {
-    return node_->get_node_logging_interface();
-  }
-
-  rclcpp::node_interfaces::NodeWaitablesInterface::SharedPtr get_node_waitables_interface()
-  {
-    return node_->get_node_waitables_interface();
-  }
-
   /**
    * Load and initialized planner logic plugin and ROS 2 action and topic interfaces
    * @return Initialization successful yes/no

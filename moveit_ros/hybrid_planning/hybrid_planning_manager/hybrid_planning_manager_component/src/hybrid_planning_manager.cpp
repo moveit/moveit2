@@ -45,27 +45,17 @@ namespace moveit::hybrid_planning
 using namespace std::chrono_literals;
 
 HybridPlanningManager::HybridPlanningManager(const rclcpp::NodeOptions& options)
-  : initialized_(false), stop_hybrid_planning_(false)
+  : initialized_(false)
+  , stop_hybrid_planning_(false)
+  , node_{ std::make_shared<rclcpp::Node>("hybrid_planning_manager", options) }
 {
-  node_ = std::make_shared<rclcpp::Node>("hybrid_planning_manager", options);
   // Initialize hybrid planning component after construction
   // TODO(sjahr) Remove once life cycle component nodes are available
-  timer_ = node_->create_wall_timer(1ms, [this]() {
-    if (initialized_)
-    {
-      timer_->cancel();
-    }
-    else
-    {
-      if (!this->initialize())
-      {
-        const std::string error = "Failed to initialize global planner";
-        timer_->cancel();
-        throw std::runtime_error(error);
-      }
-      initialized_ = true;
-    }
-  });
+  if (!this->initialize())
+  {
+    const std::string error = "Failed to initialize global planner";
+    throw std::runtime_error(error);
+  }
 }
 
 bool HybridPlanningManager::initialize()
@@ -114,7 +104,7 @@ bool HybridPlanningManager::initialize()
     return false;
   }
   local_planner_action_client_ =
-      rclcpp_action::create_client<moveit_msgs::action::LocalPlanner>(this, local_planning_action_name);
+      rclcpp_action::create_client<moveit_msgs::action::LocalPlanner>(node_, local_planning_action_name);
   if (!local_planner_action_client_->wait_for_action_server(2s))
   {
     RCLCPP_ERROR(LOGGER, "Local planner action server not available after waiting");
@@ -130,7 +120,7 @@ bool HybridPlanningManager::initialize()
     return false;
   }
   global_planner_action_client_ =
-      rclcpp_action::create_client<moveit_msgs::action::GlobalPlanner>(this, global_planning_action_name);
+      rclcpp_action::create_client<moveit_msgs::action::GlobalPlanner>(node_, global_planning_action_name);
   if (!global_planner_action_client_->wait_for_action_server(2s))
   {
     RCLCPP_ERROR(LOGGER, "Global planner action server not available after waiting");
