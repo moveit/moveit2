@@ -54,14 +54,14 @@ namespace moveit::hybrid_planning
 /**
  * Class HybridPlanningManager - ROS 2 component node that implements the hybrid planning manager.
  */
-class HybridPlanningManager : public rclcpp::Node
+class HybridPlanningManager : public std::enable_shared_from_this<HybridPlanningManager>
 {
 public:
   /** \brief Constructor */
   HybridPlanningManager(const rclcpp::NodeOptions& options);
 
   /** \brief Destructor */
-  ~HybridPlanningManager() override
+  ~HybridPlanningManager()
   {
     // Join the thread used for long-running callbacks
     if (long_callback_thread_.joinable())
@@ -76,7 +76,27 @@ public:
    */
   std::shared_ptr<HybridPlanningManager> shared_from_this()
   {
-    return std::static_pointer_cast<HybridPlanningManager>(Node::shared_from_this());
+    return std::static_pointer_cast<HybridPlanningManager>(shared_from_this());
+  }
+
+  rclcpp::node_interfaces::NodeBaseInterface::SharedPtr get_node_base_interface()
+  {
+    return node_->get_node_base_interface();
+  }
+
+  rclcpp::node_interfaces::NodeGraphInterface::SharedPtr get_node_graph_interface()
+  {
+    return node_->get_node_graph_interface();
+  }
+
+  rclcpp::node_interfaces::NodeLoggingInterface::SharedPtr get_node_logging_interface()
+  {
+    return node_->get_node_logging_interface();
+  }
+
+  rclcpp::node_interfaces::NodeWaitablesInterface::SharedPtr get_node_waitables_interface()
+  {
+    return node_->get_node_waitables_interface();
   }
 
   /**
@@ -152,5 +172,7 @@ private:
 
   // A unique callback group, to avoid mixing callbacks with other action servers
   rclcpp::CallbackGroup::SharedPtr cb_group_;
+
+  std::shared_ptr<rclcpp::Node> node_;
 };
 }  // namespace moveit::hybrid_planning
