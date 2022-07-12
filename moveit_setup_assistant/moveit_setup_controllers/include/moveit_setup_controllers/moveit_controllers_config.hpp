@@ -92,6 +92,8 @@ protected:
    * @return true if the file was read correctly
    */
   bool parseController(const std::string& name, const YAML::Node& controller);
+
+  std::map<std::string, YAML::Node> trajectory_parameters_;
 };
 }  // namespace controllers
 }  // namespace moveit_setup
