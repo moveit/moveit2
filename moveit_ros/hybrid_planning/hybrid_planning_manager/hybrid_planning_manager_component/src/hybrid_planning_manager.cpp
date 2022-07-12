@@ -51,11 +51,22 @@ HybridPlanningManager::HybridPlanningManager(const rclcpp::NodeOptions& options)
 {
   // Initialize hybrid planning component after construction
   // TODO(sjahr) Remove once life cycle component nodes are available
-  if (!this->initialize())
-  {
-    const std::string error = "Failed to initialize global planner";
-    throw std::runtime_error(error);
-  }
+  timer_ = node_->create_wall_timer(1ms, [this]() {
+    if (initialized_)
+    {
+      timer_->cancel();
+    }
+    else
+    {
+      if (!this->initialize())
+      {
+        const std::string error = "Failed to initialize global planner";
+        timer_->cancel();
+        throw std::runtime_error(error);
+      }
+      initialized_ = true;
+    }
+  });
 }
 
 bool HybridPlanningManager::initialize()

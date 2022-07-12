@@ -70,15 +70,6 @@ public:
     }
   }
 
-  /**
-   * Allows creation of a smart pointer that references to instances of this object
-   * @return shared pointer of the HybridPlanningManager instance that called the function
-   */
-  std::shared_ptr<HybridPlanningManager> shared_from_this()
-  {
-    return std::static_pointer_cast<HybridPlanningManager>(shared_from_this());
-  }
-
   rclcpp::node_interfaces::NodeBaseInterface::SharedPtr get_node_base_interface()
   {
     return node_->get_node_base_interface();
