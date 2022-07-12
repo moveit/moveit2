@@ -43,6 +43,7 @@
 #include <mutex>
 
 #include <std_msgs/msg/bool.h>
+#include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
 
 // #include <moveit_servo/make_shared_from_pool.h> // TODO(adamp): create an issue about this
 #include <moveit_servo/servo_calcs.h>
@@ -177,6 +178,7 @@ ServoCalcs::ServoCalcs(rclcpp::Node::SharedPtr node,
   num_joints_ = internal_joint_state_.name.size();
   internal_joint_state_.position.resize(num_joints_);
   internal_joint_state_.velocity.resize(num_joints_);
+  delta_theta_.setZero(num_joints_);
 
   for (std::size_t i = 0; i < num_joints_; ++i)
   {
@@ -208,6 +210,25 @@ ServoCalcs::ServoCalcs(rclcpp::Node::SharedPtr node,
   empty_matrix.setZero();
   tf_moveit_to_ee_frame_ = empty_matrix;
   tf_moveit_to_robot_cmd_frame_ = empty_matrix;
+
+  // Get the IK solver for the group
+  ik_solver_ = joint_model_group_->getSolverInstance();
+  if (!ik_solver_)
+  {
+    use_inv_jacobian_ = true;
+    RCLCPP_WARN(
+        LOGGER,
+        "No kinematics solver instantiated for group '%s'. Will use inverse Jacobian for servo calculations instead.",
+        joint_model_group_->getName().c_str());
+  }
+  else if (!ik_solver_->supportsGroup(joint_model_group_))
+  {
+    use_inv_jacobian_ = true;
+    RCLCPP_WARN(LOGGER,
+                "The loaded kinematics plugin does not support group '%s'. Will use inverse Jacobian for servo "
+                "calculations instead.",
+                joint_model_group_->getName().c_str());
+  }
 }
 
 ServoCalcs::~ServoCalcs()
@@ -549,7 +570,6 @@ bool ServoCalcs::cartesianServoCalcs(geometry_msgs::msg::TwistStamped& cmd,
       const auto tf_moveit_to_incoming_cmd_frame =
           current_state_->getGlobalLinkTransform(parameters_->planning_frame).inverse() *
           current_state_->getGlobalLinkTransform(cmd.header.frame_id);
-
       translation_vector = tf_moveit_to_incoming_cmd_frame.linear() * translation_vector;
       angular_vector = tf_moveit_to_incoming_cmd_frame.linear() * angular_vector;
     }
@@ -566,7 +586,6 @@ bool ServoCalcs::cartesianServoCalcs(geometry_msgs::msg::TwistStamped& cmd,
 
   Eigen::VectorXd delta_x = scaleCartesianCommand(cmd);
 
-  // Convert from cartesian commands to joint commands
   Eigen::MatrixXd jacobian = current_state_->getJacobian(joint_model_group_);
 
   removeDriftDimensions(jacobian, delta_x);
@@ -576,7 +595,53 @@ bool ServoCalcs::cartesianServoCalcs(geometry_msgs::msg::TwistStamped& cmd,
   Eigen::MatrixXd matrix_s = svd.singularValues().asDiagonal();
   Eigen::MatrixXd pseudo_inverse = svd.matrixV() * matrix_s.inverse() * svd.matrixU().transpose();
 
-  delta_theta_ = pseudo_inverse * delta_x;
+  // Convert from cartesian commands to joint commands
+  // Use an IK solver plugin if we have one, otherwise use inverse Jacobian.
+  if (!use_inv_jacobian_)
+  {
+    // get a transformation matrix with the desired position change &
+    // get a transformation matrix with desired orientation change
+    Eigen::Isometry3d tf_pos_delta(Eigen::Isometry3d::Identity());
+    tf_pos_delta.translate(Eigen::Vector3d(delta_x[0], delta_x[1], delta_x[2]));
+
+    Eigen::Isometry3d tf_rot_delta(Eigen::Isometry3d::Identity());
+    Eigen::Quaterniond q = Eigen::AngleAxisd(delta_x[3], Eigen::Vector3d::UnitX()) *
+                           Eigen::AngleAxisd(delta_x[4], Eigen::Vector3d::UnitY()) *
+                           Eigen::AngleAxisd(delta_x[5], Eigen::Vector3d::UnitZ());
+    tf_rot_delta.rotate(q);
+
+    // Poses passed to IK solvers are assumed to be in the tip link (EE) reference frame
+    // So, apply the base->end effector transform to the delta transform
+    // apply rotation after so that it's local to EE
+    auto full_tf = tf_pos_delta * tf_moveit_to_ee_frame_ * tf_rot_delta;
+    geometry_msgs::msg::Pose next_pose = tf2::toMsg(full_tf);
+
+    // setup for IK call
+    std::vector<double> solution(num_joints_);
+    moveit_msgs::msg::MoveItErrorCodes err;
+    kinematics::KinematicsQueryOptions opts;
+    opts.return_approximate_solution = true;
+    if (ik_solver_->searchPositionIK(next_pose, internal_joint_state_.position, parameters_->publish_period / 2.0,
+                                     solution, err, opts))
+    {
+      // find the difference in joint positions that will get us to the desired pose
+      for (size_t i = 0; i < num_joints_; i++)
+      {
+        delta_theta_[i] = solution[i] - internal_joint_state_.position[i];
+      }
+    }
+    else
+    {
+      RCLCPP_WARN(LOGGER, "Could not find IK solution for requested motion, got error code %d", err.val);
+      return false;
+    }
+  }
+  else
+  {
+    // no supported IK plugin, use inverse Jacobian
+    delta_theta_ = pseudo_inverse * delta_x;
+  }
+
   delta_theta_ *= velocityScalingFactorForSingularity(delta_x, svd, pseudo_inverse);
 
   return internalServoUpdate(delta_theta_, joint_trajectory, ServoType::CARTESIAN_SPACE);
