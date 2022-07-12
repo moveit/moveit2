@@ -29,8 +29,8 @@ def generate_launch_description():
         name="hybrid_planning_demo_node",
         output="screen",
         parameters=[
-            get_robot_description(),
-            get_robot_description_semantic(),
+            robot_description,
+            robot_description_semantic,
             common_hybrid_planning_param,
         ],
     )
