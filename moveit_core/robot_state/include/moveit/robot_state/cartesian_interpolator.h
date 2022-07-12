@@ -169,14 +169,17 @@ public:
 
      For absolute jump thresholds, if any individual joint-space motion delta is larger then \e revolute_jump_threshold
      for revolute joints or \e prismatic_jump_threshold for prismatic joints then this step is considered a failure and
-     the returned path is truncated up to just before the jump.*/
+     the returned path is truncated up to just before the jump.
+
+     Kinematics solvers may use cost functions to prioritize certain solutions, which may be specified with \e cost_function. */
   static Distance
   computeCartesianPath(RobotState* start_state, const JointModelGroup* group,
                        std::vector<std::shared_ptr<RobotState>>& traj, const LinkModel* link,
                        const Eigen::Vector3d& direction, bool global_reference_frame, double distance,
                        const MaxEEFStep& max_step, const JumpThreshold& jump_threshold,
                        const GroupStateValidityCallbackFn& validCallback = GroupStateValidityCallbackFn(),
-                       const kinematics::KinematicsQueryOptions& options = kinematics::KinematicsQueryOptions());
+                       const kinematics::KinematicsQueryOptions& options = kinematics::KinematicsQueryOptions(),
+                       kinematics::KinematicsBase::IKCostFn cost_function = kinematics::KinematicsBase::IKCostFn());
 
   /** \brief Compute the sequence of joint values that correspond to a straight Cartesian path, for a particular group.
 
@@ -190,7 +193,8 @@ public:
                        const Eigen::Isometry3d& target, bool global_reference_frame, const MaxEEFStep& max_step,
                        const JumpThreshold& jump_threshold,
                        const GroupStateValidityCallbackFn& validCallback = GroupStateValidityCallbackFn(),
-                       const kinematics::KinematicsQueryOptions& options = kinematics::KinematicsQueryOptions());
+                       const kinematics::KinematicsQueryOptions& options = kinematics::KinematicsQueryOptions(),
+                       kinematics::KinematicsBase::IKCostFn cost_function = kinematics::KinematicsBase::IKCostFn());
 
   /** \brief Compute the sequence of joint values that perform a general Cartesian path.
 
@@ -204,7 +208,8 @@ public:
                        const EigenSTL::vector_Isometry3d& waypoints, bool global_reference_frame,
                        const MaxEEFStep& max_step, const JumpThreshold& jump_threshold,
                        const GroupStateValidityCallbackFn& validCallback = GroupStateValidityCallbackFn(),
-                       const kinematics::KinematicsQueryOptions& options = kinematics::KinematicsQueryOptions());
+                       const kinematics::KinematicsQueryOptions& options = kinematics::KinematicsQueryOptions(),
+                       kinematics::KinematicsBase::IKCostFn cost_function = kinematics::KinematicsBase::IKCostFn());
 
   /** \brief Tests joint space jumps of a trajectory.
 
