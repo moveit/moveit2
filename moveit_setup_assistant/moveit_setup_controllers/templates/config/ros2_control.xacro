@@ -6,7 +6,7 @@
         <ros2_control name="${name}" type="system">
             <hardware>
                 <!-- By default, set up controllers for simulation. This won't work on real hardware -->
-                <plugin>fake_components/GenericSystem</plugin>
+                <plugin>mock_components/GenericSystem</plugin>
             </hardware>
 [ROS2_CONTROL_JOINTS]
         </ros2_control>

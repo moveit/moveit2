@@ -78,7 +78,7 @@ public:
     std::map<std::string, CollisionPluginPtr>::iterator it = plugins_.find(name);
     if (it == plugins_.end())
     {
-      CollisionPluginPtr plugin = load(name);
+      const CollisionPluginPtr plugin = load(name);
       if (plugin)
       {
         return plugin->initialize(scene);

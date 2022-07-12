@@ -154,6 +154,10 @@ public:
   using IKCallbackFn = std::function<void(const geometry_msgs::msg::Pose&, const std::vector<double>&,
                                           moveit_msgs::msg::MoveItErrorCodes&)>;
 
+  /** @brief Signature for a cost function used to evaluate IK solutions. */
+  using IKCostFn = std::function<double(const geometry_msgs::msg::Pose&, const moveit::core::RobotState&,
+                                        moveit::core::JointModelGroup*, const std::vector<double>&)>;
+
   /**
    * @brief Given a desired pose of the end-effector, compute the joint angles to reach it
    *
@@ -319,6 +323,46 @@ public:
 
     // Otherwise throw error because this function should have been implemented
     RCLCPP_ERROR(LOGGER, "This kinematic solver does not support searchPositionIK with multiple poses");
+    return false;
+  }
+
+  /**
+   * @brief Given a set of desired poses for a planning group with multiple end-effectors, search for the joint angles
+   * required to reach them. This is useful for e.g. biped robots that need to perform whole-body IK.
+   * Not necessary for most robots that have kinematic chains.
+   * This particular method is intended for "searching" for a solution by stepping through the redundancy
+   * (or other numerical routines).
+   * @param ik_poses the desired pose of each tip link, in the same order as the getTipFrames() vector
+   * @param ik_seed_state an initial guess solution for the inverse kinematics
+   * @param timeout The amount of time (in seconds) available to the solver
+   * @param consistency_limits the distance that any joint in the solution can be from the corresponding joints in the
+   * current seed state
+   * @param solution the solution vector
+   * @param solution_callback A callback to validate an IK solution
+   * @param cost_function A function to evaluate the cost of a particular IK solution
+   * @param error_code an error code that encodes the reason for failure or success
+   * @param options container for other IK options. See definition of KinematicsQueryOptions for details.
+   * @param context_state (optional) the context in which this request is being made.
+   *        The position values corresponding to joints in the current group may not match those in ik_seed_state.
+   *        The values in ik_seed_state are the ones to use. The state is passed to provide the \em other joint values,
+   *        in case they are needed for context, like with an IK solver that computes a balanced result for a biped.
+   * @return True if a valid solution was found, false otherwise
+   */
+  virtual bool
+  searchPositionIK(const std::vector<geometry_msgs::msg::Pose>& ik_poses, const std::vector<double>& ik_seed_state,
+                   double timeout, const std::vector<double>& consistency_limits, std::vector<double>& solution,
+                   const IKCallbackFn& solution_callback, IKCostFn cost_function,
+                   moveit_msgs::msg::MoveItErrorCodes& error_code,
+                   const kinematics::KinematicsQueryOptions& options = kinematics::KinematicsQueryOptions(),
+                   const moveit::core::RobotState* context_state = nullptr) const
+  {
+    // if cost function is empty, omit
+    if (!cost_function)
+    {
+      return searchPositionIK(ik_poses, ik_seed_state, timeout, consistency_limits, solution, solution_callback,
+                              error_code, options, context_state);
+    }
+    RCLCPP_ERROR(LOGGER, "This kinematic solver does not support IK solution cost functions");
     return false;
   }
 
