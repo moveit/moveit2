@@ -149,6 +149,7 @@ private:
   // A unique callback group, to avoid mixing callbacks with other action servers
   rclcpp::CallbackGroup::SharedPtr cb_group_;
 
+  // Node shared pointer so that we have a fully-formed pointer to Node in constructor
   std::shared_ptr<rclcpp::Node> node_;
 };
 }  // namespace moveit::hybrid_planning
