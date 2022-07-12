@@ -59,7 +59,7 @@ enum InformationFields
 };
 
 static const std::string JOINT_LIMITS_FILE = "config/joint_limits.yaml";
-static const std::string CARTESIAN_LIMITS_FILE = "config/cartesian_limits.yaml";
+static const std::string CARTESIAN_LIMITS_FILE = "config/pilz_cartesian_limits.yaml";
 
 class SRDFConfig : public SetupConfig
 {
