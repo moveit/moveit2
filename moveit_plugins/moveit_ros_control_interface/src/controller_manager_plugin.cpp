@@ -426,95 +426,111 @@ public:
    * Since chained controllers cannot be written to directly, they are removed from the response and their interface
    * are propagated back to the first controller with a non-chained input
    */
-  static void fixChainedControllers(std::shared_ptr<controller_manager_msgs::srv::ListControllers::Response>& result)
-  {
-    // chained_to maps controllers to a set of controllers that it feeds into
-    std::unordered_map<controller_manager_msgs::msg::ControllerState*,
-                       std::unordered_set<controller_manager_msgs::msg::ControllerState*>>
-        chained_to;
-    // chained_from maps a controller to a set of controller it receives from
-    std::unordered_map<controller_manager_msgs::msg::ControllerState*,
-                       std::unordered_set<controller_manager_msgs::msg::ControllerState*>>
-        chained_from;
-    // controller_name_map maps controller names to the controller pointer
+  static void fixChainedControllers(std::shared_ptr<controller_manager_msgs::srv::ListControllers::Response>& result) {
+
     std::unordered_map<std::string, controller_manager_msgs::msg::ControllerState*> controller_name_map;
-    for (auto& c : result->controller)
+        for (auto& c : result->controller)
     {
       controller_name_map[c.name] = &c;
     }
-    for (auto& c : result->controller)
-    {
-      std::vector<std::string> non_chained_interfaces;
-      for (auto it = c.claimed_interfaces.begin(); it != c.claimed_interfaces.end(); it++)
-      {
-        std::string interface = *it;
-        auto name = interface.substr(0, interface.find('/'));
-        // if the controller interface begins with a controller name, then it is chained
-        if (controller_name_map.find(name) != controller_name_map.end())
-        {
-          chained_to[&c].insert(controller_name_map[name]);
-          chained_from[controller_name_map[name]].insert(&c);
-        }
-        else
-        {
-          non_chained_interfaces.push_back(interface);
-        }
+    for (auto &c: result->controller) {
+      assert(c.chain_connections.size() <=1);
+      for (const auto& chain_connection : c.chain_connections){
+        c.required_command_interfaces = controller_name_map[chain_connection.name]->required_command_interfaces;
+        c.claimed_interfaces = controller_name_map[chain_connection.name]->claimed_interfaces;
+        controller_name_map[chain_connection.name]->claimed_interfaces.clear();
+        controller_name_map[chain_connection.name]->required_command_interfaces.clear();
       }
-      // only use non-chained interfaces, these interfaces will accumulate and
-      // propagate to the controller chain input controller
-      c.claimed_interfaces = non_chained_interfaces;
     }
+    int o =0;
 
-    // create a queue of all controllers that are chained to
-    // these need to be processed first
-    std::queue<controller_manager_msgs::msg::ControllerState*> chained_to_queue;
-    for (const auto& chained_controllers : chained_to)
-    {
-      for (auto chained_to_controllers : chained_controllers.second)
-      {
-        chained_to_queue.push(chained_to_controllers);
-      }
-    }
-
-    while (!chained_to_queue.empty())
-    {
-      auto c = chained_to_queue.front();
-      chained_to_queue.pop();
-      // if c is chained_from then it depends on another controller,
-      // so push to back of queue
-      if (chained_to.find(c) != chained_to.end())
-      {
-        chained_to_queue.push(c);
-        continue;
-      }
-      auto dependent_set = chained_from[c];
-      // add command interface to chained controllers
-      for (auto c2 : dependent_set)
-      {
-        for (const auto& interface : c->claimed_interfaces)
-        {
-          c2->claimed_interfaces.push_back(interface);
-        }
-        c2->required_command_interfaces = c2->claimed_interfaces;
-        chained_to[c2].erase(c);
-        // enable any controller that depended on c
-        if (chained_to[c2].empty())
-        {
-          chained_to.erase(c2);
-        }
-      }
-    }
-
-    std::vector<controller_manager_msgs::msg::ControllerState> cs_final;
-    // if controller is in the chained from map, then it is an intermediate and should not be included
-    for (auto& c : result->controller)
-    {
-      if (chained_from.find(&c) == chained_from.end())
-      {
-        cs_final.push_back(c);
-      }
-    }
-    result->controller = cs_final;
+//    // chained_to maps controllers to a set of controllers that it feeds into
+//    std::unordered_map<controller_manager_msgs::msg::ControllerState*,
+//                       std::unordered_set<controller_manager_msgs::msg::ControllerState*>>
+//        chained_to;
+//    // chained_from maps a controller to a set of controller it receives from
+//    std::unordered_map<controller_manager_msgs::msg::ControllerState*,
+//                       std::unordered_set<controller_manager_msgs::msg::ControllerState*>>
+//        chained_from;
+//    // controller_name_map maps controller names to the controller pointer
+//    std::unordered_map<std::string, controller_manager_msgs::msg::ControllerState*> controller_name_map;
+//    for (auto& c : result->controller)
+//    {
+//      controller_name_map[c.name] = &c;
+//    }
+//    for (auto& c : result->controller)
+//    {
+////      std::vector<std::string> non_chained_interfaces;
+////      for (auto it = c.claimed_interfaces.begin(); it != c.claimed_interfaces.end(); it++)
+////      {
+////        std::string interface = *it;
+////        auto name = interface.substr(0, interface.find('/'));
+////        // if the controller interface begins with a controller name, then it is chained
+////        if (controller_name_map.find(name) != controller_name_map.end())
+//        for (const auto& chain_connection : c.chain_connections)
+//        {
+//          chained_to[&c].insert(controller_name_map[chain_connection.name]);
+//          chained_from[controller_name_map[chain_connection.name]].insert(&c);
+//        }
+////        else{
+////          non_chained_interfaces.push_back(interface);
+////        }
+//      }
+//      // only use non-chained interfaces, these interfaces will accumulate and
+//      // propagate to the controller chain input controller
+//      c.claimed_interfaces = non_chained_interfaces;
+////    }
+//
+//    // create a queue of all controllers that are chained to
+//    // these need to be processed first
+//    std::queue<controller_manager_msgs::msg::ControllerState*> chained_to_queue;
+//    for (const auto& chained_controllers : chained_to)
+//    {
+//      for (auto chained_to_controllers : chained_controllers.second)
+//      {
+//        chained_to_queue.push(chained_to_controllers);
+//      }
+//    }
+//
+//    while (!chained_to_queue.empty())
+//    {
+//      auto c = chained_to_queue.front();
+//      chained_to_queue.pop();
+//      // if c is chained_from then it depends on another controller,
+//      // so push to back of queue
+//      if (chained_to.find(c) != chained_to.end())
+//      {
+//        chained_to_queue.push(c);
+//        continue;
+//      }
+//      auto dependent_set = chained_from[c];
+//      // add command interface to chained controllers
+//      for (auto c2 : dependent_set)
+//      {
+//        for (const auto& interface : c->claimed_interfaces)
+//        {
+//          c2->claimed_interfaces.push_back(interface);
+//        }
+//        c2->required_command_interfaces = c2->claimed_interfaces;
+//        chained_to[c2].erase(c);
+//        // enable any controller that depended on c
+//        if (chained_to[c2].empty())
+//        {
+//          chained_to.erase(c2);
+//        }
+//      }
+//    }
+//
+//    std::vector<controller_manager_msgs::msg::ControllerState> cs_final;
+//    // if controller is in the chained from map, then it is an intermediate and should not be included
+//    for (auto& c : result->controller)
+//    {
+//      if (chained_from.find(&c) == chained_from.end())
+//      {
+//        cs_final.push_back(c);
+//      }
+//    }
+//    result->controller = cs_final;
   }
 };
 /**
