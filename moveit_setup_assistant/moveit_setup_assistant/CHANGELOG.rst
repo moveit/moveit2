@@ -2,6 +2,29 @@
 Changelog for package moveit_setup_assistant
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.5.2 (2022-07-18)
+------------------
+* [MSA] Testing Framework for MoveItSetupAssistant (`#1383 <https://github.com/ros-planning/moveit2/issues/1383>`_)
+* Merge pull request `#1254 <https://github.com/ros-planning/moveit2/issues/1254>`_ from ros-planning/feature/msa
+  MoveIt Setup Assistant - Merge the Feature branch
+* Fix compile issues
+* Merge remote-tracking branch 'upstream/main' into feature/msa
+* [MSA] ros2_control Integration (`#1299 <https://github.com/ros-planning/moveit2/issues/1299>`_)
+* [MSA] Workaround to launch files without controllers (`#1275 <https://github.com/ros-planning/moveit2/issues/1275>`_)
+* [MSA] PR Feedback
+* [MSA] Initial Controllers and Simulation Steps Port (`#1252 <https://github.com/ros-planning/moveit2/issues/1252>`_)
+* [MSA] Launch Updates (`#1247 <https://github.com/ros-planning/moveit2/issues/1247>`_)
+* [MSA] Merge main into feature/msa (Part II) (`#1240 <https://github.com/ros-planning/moveit2/issues/1240>`_)
+* [MSA] Three small edits (`#1203 <https://github.com/ros-planning/moveit2/issues/1203>`_)
+* [MSA] Add Setup Step for Generating Launch Files (`#1129 <https://github.com/ros-planning/moveit2/issues/1129>`_)
+* [MSA] Fix arg parsing in main (`#1110 <https://github.com/ros-planning/moveit2/issues/1110>`_)
+* [MSA] Simplify loading of new SRDF (`#1102 <https://github.com/ros-planning/moveit2/issues/1102>`_)
+* [MSA] SRDF Setup (`#1057 <https://github.com/ros-planning/moveit2/issues/1057>`_)
+* [MSA] Navigation Widget Fixes (`#1054 <https://github.com/ros-planning/moveit2/issues/1054>`_)
+* [MSA] Initial Refactor
+* [MSA] Move Files Around (split into multiple packages, change to hpp extension)
+* Contributors: David V. Lu!!, Vatan Aksoy Tezer
+
 2.5.1 (2022-05-31)
 ------------------
 

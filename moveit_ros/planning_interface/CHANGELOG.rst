@@ -2,6 +2,26 @@
 Changelog for package moveit_ros_planning_interface
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.5.2 (2022-07-18)
+------------------
+* Merge https://github.com/ros-planning/moveit/commit/c88f6fb64e9057a4b9a8f6fafc01060e8c48a216
+* Merge remote-tracking branch 'origin/main' into feature/msa
+* Launch file cleanup (`#1380 <https://github.com/ros-planning/moveit2/issues/1380>`_)
+  * Launch file cleanup
+  * Delete deprecated launch files
+* Removing more boost usage (`#1372 <https://github.com/ros-planning/moveit2/issues/1372>`_)
+* Remove manipulation from moveit_ros (`#1177 <https://github.com/ros-planning/moveit2/issues/1177>`_)
+* Merge remote-tracking branch 'upstream/main' into feature/msa
+* Removing some boost usage (`#1331 <https://github.com/ros-planning/moveit2/issues/1331>`_)
+  Co-authored-by: Vatan Aksoy Tezer <vatan@picknik.ai>
+* Remove unnecessary rclcpp.hpp includes (`#1333 <https://github.com/ros-planning/moveit2/issues/1333>`_)
+* Merge pull request `#3106 <https://github.com/ros-planning/moveit2/issues/3106>`_ from v4hn/pr-master-bind-them-all / banish bind()
+* banish bind()
+* Formatting (`#3105 <https://github.com/ros-planning/moveit2/issues/3105>`_)
+* Replace obsolete distutils.core with setuptools (`#3103 <https://github.com/ros-planning/moveit2/issues/3103>`_)
+  http://wiki.ros.org/noetic/Migration#Setuptools_instead_of_Distutils
+* Contributors: Abishalini, AndyZe, David V. Lu, Henry Moore, Jafar, Michael Görner, Stephanie Eng, Vatan Aksoy Tezer, v4hn
+
 2.5.1 (2022-05-31)
 ------------------
 

@@ -2,6 +2,46 @@
 Changelog for package moveit_core
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.5.2 (2022-07-18)
+------------------
+* Added const to moveit_core/collision_detection per issue 879 (`#1416 <https://github.com/ros-planning/moveit2/issues/1416>`_)
+* Add generic cost function to KinematicsBase, CartesianInterpolator, and RobotState (`#1386 <https://github.com/ros-planning/moveit2/issues/1386>`_)
+* Merge pull request `#1402 <https://github.com/ros-planning/moveit2/issues/1402>`_ from Abishalini/pr-sync-a436a97
+  Sync with MoveIt
+* Merge https://github.com/ros-planning/moveit/commit/a436a9771f7445c162cc3090c4c7c57bdb5bf194
+* Merge https://github.com/ros-planning/moveit/commit/c88f6fb64e9057a4b9a8f6fafc01060e8c48a216
+* Merge remote-tracking branch 'origin/main' into feature/msa
+* Removing more boost usage (`#1372 <https://github.com/ros-planning/moveit2/issues/1372>`_)
+* Fix PlanarJointModel::satisfiesPositionBounds (`#1353 <https://github.com/ros-planning/moveit2/issues/1353>`_)
+  Co-authored-by: Vatan Aksoy Tezer <vatan@picknik.ai>
+* Type safety for CartesianInterpolator (`#1325 <https://github.com/ros-planning/moveit2/issues/1325>`_)
+* Merge remote-tracking branch 'upstream/main' into feature/msa
+* Removing some boost usage (`#1331 <https://github.com/ros-planning/moveit2/issues/1331>`_)
+  Co-authored-by: Vatan Aksoy Tezer <vatan@picknik.ai>
+* Remove unnecessary rclcpp.hpp includes (`#1333 <https://github.com/ros-planning/moveit2/issues/1333>`_)
+* Fix PlanarJointModel::satisfiesPositionBounds (`#3160 <https://github.com/ros-planning/moveit/issues/3160>`_)
+* Port OMPL orientation constraints to MoveIt2 (`#1273 <https://github.com/ros-planning/moveit2/issues/1273>`_)
+  Co-authored-by: JeroenDM <jeroendemaeyer@live.be>
+  Co-authored-by: AndyZe <andyz@utexas.edu>
+* Switch to hpp headers of pluginlib
+* Adds another test case to `#3124 <https://github.com/ros-planning/moveit/issues/3124>`_ and adds some further minor improvements to the original PR (`#3142 <https://github.com/ros-planning/moveit/issues/3142>`_)
+* Fix bug in applying planning scene diffs that have attached collision objects (`#3124 <https://github.com/ros-planning/moveit/issues/3124>`_)
+  Co-authored-by: AndyZe <andyz@utexas.edu>
+* Fix flaky constraint sampler test (`#3135 <https://github.com/ros-planning/moveit/issues/3135>`_)
+* Constraint samplers with seed (`#3112 <https://github.com/ros-planning/moveit/issues/3112>`_)
+  Co-authored-by: Robert Haschke <rhaschke@techfak.uni-bielefeld.de>
+* Fix clang-tidy warning (`#3129 <https://github.com/ros-planning/moveit/issues/3129>`_)
+* Merge pull request `#3106 <https://github.com/ros-planning/moveit/issues/3106>`_ from v4hn/pr-master-bind-them-all / banish bind()
+* Fix clang-tidy
+* using namespace collision_detection
+* banish bind()
+* various: prefer objects and references over pointers
+* Migrate PRA internals to lambdas
+* drop unused arguments not needed for lambda binding
+* simplify distance field method binding
+* Fix null pointer access to CollisionEnvObject in PlanningScene (`#3104 <https://github.com/ros-planning/moveit2/issues/3104>`_)
+* Contributors: Abishalini, Bilal Gill, David V. Lu, Henry Moore, Jafar, Jochen Sprickerhof, Michael Görner, Robert Haschke, Rufus Wong, Stephanie Eng, Tahsincan Köse, Tyler Weaver, Vatan Aksoy Tezer, Wyatt Rees, v4hn
+
 2.5.1 (2022-05-31)
 ------------------
 

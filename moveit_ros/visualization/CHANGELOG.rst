@@ -2,6 +2,23 @@
 Changelog for package moveit_ros_visualization
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.5.2 (2022-07-18)
+------------------
+* Merge https://github.com/ros-planning/moveit/commit/c88f6fb64e9057a4b9a8f6fafc01060e8c48a216
+* Merge remote-tracking branch 'origin/main' into feature/msa
+* fix regression from `#1331 <https://github.com/ros-planning/moveit2/issues/1331>`_ (`#1384 <https://github.com/ros-planning/moveit2/issues/1384>`_)
+* Removing more boost usage (`#1372 <https://github.com/ros-planning/moveit2/issues/1372>`_)
+* Merge remote-tracking branch 'upstream/main' into feature/msa
+* Removing some boost usage (`#1331 <https://github.com/ros-planning/moveit2/issues/1331>`_)
+* Remove unnecessary rclcpp.hpp includes (`#1333 <https://github.com/ros-planning/moveit2/issues/1333>`_)
+* Fix rviz segfault when changing move group during execution (`#3123 <https://github.com/ros-planning/moveit2/issues/3123>`_)
+* Merge pull request `#3106 <https://github.com/ros-planning/moveit/issues/3106>`_ from v4hn/pr-master-bind-them-all / banish bind()
+* Fix clang-tidy
+* banish bind()
+* Replace obsolete distutils.core with setuptools (`#3103 <https://github.com/ros-planning/moveit2/issues/3103>`_)
+  http://wiki.ros.org/noetic/Migration#Setuptools_instead_of_Distutils
+* Contributors: Abishalini, David V. Lu, Henry Moore, Jafar, Michael Ferguson, Michael Görner, Robert Haschke, Vatan Aksoy Tezer, bsygo, v4hn
+
 2.5.1 (2022-05-31)
 ------------------
 

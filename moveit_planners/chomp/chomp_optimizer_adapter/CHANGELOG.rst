@@ -2,6 +2,12 @@
 Changelog for package moveit_chomp_optimizer_adapter
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.5.2 (2022-07-18)
+------------------
+* Remove unnecessary rclcpp.hpp includes (`#1333 <https://github.com/ros-planning/moveit2/issues/1333>`_)
+* Update plugin library paths (`#1304 <https://github.com/ros-planning/moveit2/issues/1304>`_)
+* Contributors: Jafar, Sebastian Jahr
+
 2.5.1 (2022-05-31)
 ------------------
 

@@ -2,6 +2,22 @@
 Changelog for package moveit_ros_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.5.2 (2022-07-18)
+------------------
+* Remove no longer needed no-pedantic option in moveit_ros_occupancy_map_monitor package (`#1397 <https://github.com/ros-planning/moveit2/issues/1397>`_)
+* Merge remote-tracking branch 'origin/main' into feature/msa
+* Removing more boost usage (`#1372 <https://github.com/ros-planning/moveit2/issues/1372>`_)
+* Merge remote-tracking branch 'upstream/main' into feature/msa
+* Removing some boost usage (`#1331 <https://github.com/ros-planning/moveit2/issues/1331>`_)
+  Co-authored-by: Vatan Aksoy Tezer <vatan@picknik.ai>
+* Remove unnecessary rclcpp.hpp includes (`#1333 <https://github.com/ros-planning/moveit2/issues/1333>`_)
+* Update plugin library paths (`#1304 <https://github.com/ros-planning/moveit2/issues/1304>`_)
+* Merge pull request `#3106 <https://github.com/ros-planning/moveit2/issues/3106>`_ from v4hn/pr-master-bind-them-all / banish bind()
+* Fix clang-tidy
+* banish bind()
+* various: prefer objects and references over pointers
+* Contributors: David V. Lu, Henry Moore, Jafar, Michael Görner, Nathan Brooks, Robert Haschke, Sebastian Jahr, Vatan Aksoy Tezer, v4hn
+
 2.5.1 (2022-05-31)
 ------------------
 
