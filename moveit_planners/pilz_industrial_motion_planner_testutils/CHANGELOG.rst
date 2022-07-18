@@ -2,6 +2,14 @@
 Changelog for package pilz_industrial_motion_planner_testutils
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.5.2 (2022-07-18)
+------------------
+* Merge remote-tracking branch 'origin/main' into feature/msa
+* Removing more boost usage (`#1372 <https://github.com/ros-planning/moveit2/issues/1372>`_)
+* Merge pull request `#3106 <https://github.com/ros-planning/moveit2/issues/3106>`_ from v4hn/pr-master-bind-them-all / banish bind()
+* banish bind()
+* Contributors: Henry Moore, Michael Görner, Vatan Aksoy Tezer, v4hn
+
 2.5.1 (2022-05-31)
 ------------------
 

@@ -2,6 +2,26 @@
 Changelog for package moveit_planners_ompl
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.5.2 (2022-07-18)
+------------------
+* Merge remote-tracking branch 'origin/main' into feature/msa
+* Removing more boost usage (`#1372 <https://github.com/ros-planning/moveit2/issues/1372>`_)
+* Merge remote-tracking branch 'upstream/main' into feature/msa
+* Removing some boost usage (`#1331 <https://github.com/ros-planning/moveit2/issues/1331>`_)
+  Co-authored-by: Vatan Aksoy Tezer <vatan@picknik.ai>
+* Add support for mixed constraints with constrained planner (`#1319 <https://github.com/ros-planning/moveit2/issues/1319>`_)
+  Co-authored-by: AndyZe <zelenak@picknik.ai>
+* Remove unnecessary rclcpp.hpp includes (`#1333 <https://github.com/ros-planning/moveit2/issues/1333>`_)
+* Print OMPL setup info at the DEBUG level (`#1330 <https://github.com/ros-planning/moveit2/issues/1330>`_)
+* Port OMPL orientation constraints to MoveIt2 (`#1273 <https://github.com/ros-planning/moveit2/issues/1273>`_)
+  Co-authored-by: AndyZe <andyz@utexas.edu>
+  Co-authored-by: JeroenDM <jeroendemaeyer@live.be>
+* Merge pull request `#3106 <https://github.com/ros-planning/moveit2/issues/3106>`_ from v4hn/pr-master-bind-them-all / banish bind()
+* Cleanup OMPL's PlanningContextManager's protected API
+* banish bind()
+* planning_context_manager: rename protected methods
+* Contributors: AndyZe, David V. Lu, Henry Moore, Jafar, Jeroen De Maeyer, Michael Görner, Robert Haschke, Stephanie Eng, Vatan Aksoy Tezer
+
 2.5.1 (2022-05-31)
 ------------------
 

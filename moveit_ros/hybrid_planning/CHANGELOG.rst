@@ -2,6 +2,14 @@
 Changelog for package moveit_hybrid_planning
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.5.2 (2022-07-18)
+------------------
+* Merge remote-tracking branch 'origin/main' into feature/msa
+* Launch file cleanup (`#1380 <https://github.com/ros-planning/moveit2/issues/1380>`_)
+* Remove unnecessary rclcpp.hpp includes (`#1333 <https://github.com/ros-planning/moveit2/issues/1333>`_)
+* [Hybrid Planning] Improve action cancellation (`#1272 <https://github.com/ros-planning/moveit2/issues/1272>`_)
+* Contributors: AndyZe, Jafar, Vatan Aksoy Tezer
+
 2.5.1 (2022-05-31)
 ------------------
 * Remove position controllers from CMake (`#1285 <https://github.com/ros-planning/moveit2/issues/1285>`_)

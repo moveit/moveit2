@@ -2,6 +2,12 @@
 Changelog for package moveit_runtime
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.5.2 (2022-07-18)
+------------------
+* Merge remote-tracking branch 'origin/main' into feature/msa
+* Remove manipulation from moveit_ros (`#1177 <https://github.com/ros-planning/moveit2/issues/1177>`_)
+* Contributors: Stephanie Eng, Vatan Aksoy Tezer
+
 2.5.1 (2022-05-31)
 ------------------
 

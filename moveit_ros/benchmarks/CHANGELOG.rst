@@ -2,6 +2,23 @@
 Changelog for package moveit_ros_benchmarks
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.5.2 (2022-07-18)
+------------------
+* Merge https://github.com/ros-planning/moveit/commit/c88f6fb64e9057a4b9a8f6fafc01060e8c48a216
+* Merge remote-tracking branch 'origin/main' into feature/msa
+* Removing more boost usage (`#1372 <https://github.com/ros-planning/moveit2/issues/1372>`_)
+* Merge remote-tracking branch 'upstream/main' into feature/msa
+* Removing some boost usage (`#1331 <https://github.com/ros-planning/moveit2/issues/1331>`_)
+  Co-authored-by: Vatan Aksoy Tezer <vatan@picknik.ai>
+* Remove unnecessary rclcpp.hpp includes (`#1333 <https://github.com/ros-planning/moveit2/issues/1333>`_)
+* Fix namespace of planning plugin for benchmarks examples (`#3128 <https://github.com/ros-planning/moveit2/issues/3128>`_)
+  Since `#2888 <https://github.com/ros-planning/moveit2/issues/2888>`_ / https://github.com/ros-planning/moveit_resources/pull/92
+  `planning_pipeline.launch.xml` loads into `pipeline` namespace by default,
+  thus making an explicit specification of `ompl` redundant.
+* Merge pull request `#3106 <https://github.com/ros-planning/moveit2/issues/3106>`_ from v4hn/pr-master-bind-them-all / banish bind()
+* various: prefer objects and references over pointers
+* Contributors: Abishalini, David V. Lu, Henry Moore, Jafar, Michael Görner, Robert Haschke, Vatan Aksoy Tezer, v4hn
+
 2.5.1 (2022-05-31)
 ------------------
 

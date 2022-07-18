@@ -2,6 +2,21 @@
 Changelog for package moveit_ros_move_group
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.5.2 (2022-07-18)
+------------------
+* Merge pull request `#1402 <https://github.com/ros-planning/moveit2/issues/1402>`_ from Abishalini/pr-sync-a436a97
+  Sync with MoveIt
+* Merge https://github.com/ros-planning/moveit/commit/a436a9771f7445c162cc3090c4c7c57bdb5bf194
+* Merge remote-tracking branch 'origin/main' into feature/msa
+* Remove manipulation from moveit_ros (`#1177 <https://github.com/ros-planning/moveit2/issues/1177>`_)
+* Merge pull request `#3137 <https://github.com/ros-planning/moveit2/issues/3137>`_ from TAMS-Group/pr-master-monitor-dynamics
+  move_group can optionally monitor dynamics
+* optionally enable dynamics monitoring in move_group node
+* convert move_group to LOGNAME
+* Merge pull request `#3106 <https://github.com/ros-planning/moveit/issues/3106>`_ from v4hn/pr-master-bind-them-all / banish bind()
+* banish bind()
+* Contributors: Abishalini, Michael Görner, Stephanie Eng, Tyler Weaver, Vatan Aksoy Tezer, v4hn
+
 2.5.1 (2022-05-31)
 ------------------
 

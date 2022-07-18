@@ -2,6 +2,17 @@
 Changelog for package moveit_servo
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.5.2 (2022-07-18)
+------------------
+* Merge remote-tracking branch 'origin/main' into feature/msa
+* Removing more boost usage (`#1372 <https://github.com/ros-planning/moveit2/issues/1372>`_)
+* Merge remote-tracking branch 'upstream/main' into feature/msa
+* Removing some boost usage (`#1331 <https://github.com/ros-planning/moveit2/issues/1331>`_)
+* Remove unnecessary rclcpp.hpp includes (`#1333 <https://github.com/ros-planning/moveit2/issues/1333>`_)
+* Update Servo integration tests (`#1336 <https://github.com/ros-planning/moveit2/issues/1336>`_)
+* Minor cleanup of Servo CMakeLists (`#1345 <https://github.com/ros-planning/moveit2/issues/1345>`_)
+* Contributors: AndyZe, David V. Lu, Henry Moore, Jafar, Vatan Aksoy Tezer
+
 2.5.1 (2022-05-31)
 ------------------
 
@@ -15,7 +26,6 @@ Changelog for package moveit_servo
 * banish bind()
   source:https://github.com/ros-planning/moveit/pull/3106/commits/a2911c80c28958c1fce8fb52333d770248c4ec05; required minor updates compared to original source commit in order to ensure compatibility with ROS2
 * Delete an unused variable and a redundant log message (`#1179 <https://github.com/ros-planning/moveit2/issues/1179>`_)
-  Co-authored-by: Vatan Aksoy Tezer <vatan@picknik.ai>
 * [Servo] Add override parameter to set constant velocity scaling in Servo (`#1169 <https://github.com/ros-planning/moveit2/issues/1169>`_)
 * Rename panda controllers
 * Enable rolling / jammy CI (again) (`#1134 <https://github.com/ros-planning/moveit2/issues/1134>`_)
@@ -52,7 +62,6 @@ Changelog for package moveit_servo
   Co-authored-by: Tyler Weaver <tyler@picknik.ai>
 * Remove unused parameters. (`#1018 <https://github.com/ros-planning/moveit2/issues/1018>`_)
   Co-authored-by: Tyler Weaver <tyler@picknik.ai>
-  Co-authored-by: Vatan Aksoy Tezer <vatan@picknik.ai>
 * Add moveit_configs_utils package to simplify loading paramters (`#591 <https://github.com/ros-planning/moveit2/issues/591>`_)
   Co-authored-by: AndyZe <zelenak@picknik.ai>
   Co-authored-by: Stephanie Eng <stephanie-eng@users.noreply.github.com>
