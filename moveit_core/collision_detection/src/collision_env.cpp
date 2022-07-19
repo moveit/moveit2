@@ -42,7 +42,7 @@
 // Logger
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_collision_detection.collision_robot");
 
-static inline bool validateScale(double scale)
+static inline bool validateScale(const double scale)
 {
   if (scale < std::numeric_limits<double>::epsilon())
   {
@@ -57,7 +57,7 @@ static inline bool validateScale(double scale)
   return true;
 }
 
-static inline bool validatePadding(double padding)
+static inline bool validatePadding(const double padding)
 {
   if (padding < 0.0)
   {
@@ -83,7 +83,7 @@ CollisionEnv::CollisionEnv(const moveit::core::RobotModelConstPtr& model, double
     padding = 0.0;
 
   const std::vector<const moveit::core::LinkModel*>& links = robot_model_->getLinkModelsWithCollisionGeometry();
-  for (auto link : links)
+  for (const auto link : links)
   {
     link_padding_[link->getName()] = padding;
     link_scale_[link->getName()] = scale;
@@ -100,7 +100,7 @@ CollisionEnv::CollisionEnv(const moveit::core::RobotModelConstPtr& model, const 
     padding = 0.0;
 
   const std::vector<const moveit::core::LinkModel*>& links = robot_model_->getLinkModelsWithCollisionGeometry();
-  for (auto link : links)
+  for (const auto link : links)
   {
     link_padding_[link->getName()] = padding;
     link_scale_[link->getName()] = scale;
@@ -113,13 +113,13 @@ CollisionEnv::CollisionEnv(const CollisionEnv& other, const WorldPtr& world)
   link_padding_ = other.link_padding_;
   link_scale_ = other.link_scale_;
 }
-void CollisionEnv::setPadding(double padding)
+void CollisionEnv::setPadding(const double padding)
 {
   if (!validatePadding(padding))
     return;
   std::vector<std::string> u;
   const std::vector<const moveit::core::LinkModel*>& links = robot_model_->getLinkModelsWithCollisionGeometry();
-  for (auto link : links)
+  for (const auto link : links)
   {
     if (getLinkPadding(link->getName()) != padding)
       u.push_back(link->getName());
@@ -129,13 +129,13 @@ void CollisionEnv::setPadding(double padding)
     updatedPaddingOrScaling(u);
 }
 
-void CollisionEnv::setScale(double scale)
+void CollisionEnv::setScale(const double scale)
 {
   if (!validateScale(scale))
     return;
   std::vector<std::string> u;
   const std::vector<const moveit::core::LinkModel*>& links = robot_model_->getLinkModelsWithCollisionGeometry();
-  for (auto link : links)
+  for (const auto link : links)
   {
     if (getLinkScale(link->getName()) != scale)
       u.push_back(link->getName());
@@ -145,10 +145,10 @@ void CollisionEnv::setScale(double scale)
     updatedPaddingOrScaling(u);
 }
 
-void CollisionEnv::setLinkPadding(const std::string& link_name, double padding)
+void CollisionEnv::setLinkPadding(const std::string& link_name, const double padding)
 {
   validatePadding(padding);
-  bool update = getLinkPadding(link_name) != padding;
+  const bool update = getLinkPadding(link_name) != padding;
   link_padding_[link_name] = padding;
   if (update)
   {
@@ -172,7 +172,7 @@ void CollisionEnv::setLinkPadding(const std::map<std::string, double>& padding)
   for (const auto& link_pad_pair : padding)
   {
     validatePadding(link_pad_pair.second);
-    bool update = getLinkPadding(link_pad_pair.first) != link_pad_pair.second;
+    const bool update = getLinkPadding(link_pad_pair.first) != link_pad_pair.second;
     link_padding_[link_pad_pair.first] = link_pad_pair.second;
     if (update)
       u.push_back(link_pad_pair.first);
@@ -186,10 +186,10 @@ const std::map<std::string, double>& CollisionEnv::getLinkPadding() const
   return link_padding_;
 }
 
-void CollisionEnv::setLinkScale(const std::string& link_name, double scale)
+void CollisionEnv::setLinkScale(const std::string& link_name, const double scale)
 {
   validateScale(scale);
-  bool update = getLinkScale(link_name) != scale;
+  const bool update = getLinkScale(link_name) != scale;
   link_scale_[link_name] = scale;
   if (update)
   {
@@ -200,7 +200,7 @@ void CollisionEnv::setLinkScale(const std::string& link_name, double scale)
 
 double CollisionEnv::getLinkScale(const std::string& link_name) const
 {
-  auto it = link_scale_.find(link_name);
+  const auto it = link_scale_.find(link_name);
   if (it != link_scale_.end())
     return it->second;
   else
@@ -212,7 +212,7 @@ void CollisionEnv::setLinkScale(const std::map<std::string, double>& scale)
   std::vector<std::string> u;
   for (const auto& link_scale_pair : scale)
   {
-    bool update = getLinkScale(link_scale_pair.first) != link_scale_pair.second;
+    const bool update = getLinkScale(link_scale_pair.first) != link_scale_pair.second;
     link_scale_[link_scale_pair.first] = link_scale_pair.second;
     if (update)
       u.push_back(link_scale_pair.first);
@@ -232,7 +232,7 @@ void CollisionEnv::setPadding(const std::vector<moveit_msgs::msg::LinkPadding>& 
   for (const auto& p : padding)
   {
     validatePadding(p.padding);
-    bool update = getLinkPadding(p.link_name) != p.padding;
+    const bool update = getLinkPadding(p.link_name) != p.padding;
     link_padding_[p.link_name] = p.padding;
     if (update)
       u.push_back(p.link_name);
@@ -247,7 +247,7 @@ void CollisionEnv::setScale(const std::vector<moveit_msgs::msg::LinkScale>& scal
   for (const auto& s : scale)
   {
     validateScale(s.scale);
-    bool update = getLinkScale(s.link_name) != s.scale;
+    const bool update = getLinkScale(s.link_name) != s.scale;
     link_scale_[s.link_name] = s.scale;
     if (update)
       u.push_back(s.link_name);

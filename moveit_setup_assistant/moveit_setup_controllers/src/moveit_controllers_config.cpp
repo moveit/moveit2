@@ -45,6 +45,7 @@ void MoveItControllersConfig::loadPrevious(const std::filesystem::path& package_
 {
   changed_ = false;
   controllers_.clear();
+  trajectory_parameters_.clear();
 
   // Load moveit controllers yaml file if available-----------------------------------------------
   std::filesystem::path ros_controllers_yaml_path = package_path / MOVEIT_CONTROLLERS_YAML;
@@ -60,7 +61,8 @@ void MoveItControllersConfig::loadPrevious(const std::filesystem::path& package_
   {
     // Used in parsing controllers
     ControllerInfo control_setting;
-    YAML::Node controllers = YAML::Load(input_stream)["moveit_simple_controller_manager"];
+    YAML::Node doc = YAML::Load(input_stream);
+    YAML::Node controllers = doc["moveit_simple_controller_manager"];
 
     std::vector<std::string> controller_names;
     getYamlProperty(controllers, "controller_names", controller_names);
@@ -78,6 +80,15 @@ void MoveItControllersConfig::loadPrevious(const std::filesystem::path& package_
       if (!parseController(controller_name, cnode))
       {
         return;
+      }
+    }
+
+    YAML::Node trajectory_execution = doc["trajectory_execution"];
+    if (trajectory_execution.IsDefined() && trajectory_execution.IsMap())
+    {
+      for (const auto& kv : trajectory_execution)
+      {
+        trajectory_parameters_[kv.first.as<std::string>()] = kv.second;
       }
     }
   }
@@ -139,10 +150,16 @@ bool MoveItControllersConfig::GeneratedControllersConfig::writeYaml(YAML::Emitte
   emitter << YAML::Newline;
   emitter << YAML::BeginMap;
   {
-    // TODO: Output possible trajectory_execution parameters including...
-    //       * allowed_execution_duration_scaling: 1.2
-    //       * allowed_goal_duration_margin: 0.5
-    //       * allowed_start_tolerance: 0.01
+    if (!parent_.trajectory_parameters_.empty())
+    {
+      emitter << YAML::Key << "trajectory_execution" << YAML::Value;
+      emitter << YAML::BeginMap;
+      for (const auto& kv : parent_.trajectory_parameters_)
+      {
+        emitter << YAML::Key << kv.first << YAML::Value << kv.second;
+      }
+      emitter << YAML::EndMap;
+    }
 
     emitter << YAML::Key << "moveit_controller_manager" << YAML::Value
             << "moveit_simple_controller_manager/MoveItSimpleControllerManager";

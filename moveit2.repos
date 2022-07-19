@@ -1,1 +1,10 @@
 repositories:
+  # https://github.com/ros-planning/moveit_resources/pull/147
+  moveit_resources:
+    type: git
+    url: https://github.com/ros-planning/moveit_resources.git
+    version: ros2
+  ros2_control:
+    type: git
+    url: https://github.com/ros-controls/ros2_control.git
+    version: 2.12.0
