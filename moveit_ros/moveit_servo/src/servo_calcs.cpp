@@ -625,9 +625,9 @@ bool ServoCalcs::cartesianServoCalcs(geometry_msgs::msg::TwistStamped& cmd,
                                      solution, err, opts))
     {
       // find the difference in joint positions that will get us to the desired pose
-      for (size_t i = 0; i < num_joints_; i++)
+      for (size_t i = 0; i < num_joints_; ++i)
       {
-        delta_theta_[i] = solution[i] - internal_joint_state_.position[i];
+        delta_theta_.coeffRef(i) = solution.at(i) - internal_joint_state_.position.at(i);
       }
     }
     else
