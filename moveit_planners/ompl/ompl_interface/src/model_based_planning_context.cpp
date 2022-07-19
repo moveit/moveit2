@@ -67,6 +67,10 @@
 #include "ompl/base/objectives/MaximizeMinClearanceObjective.h"
 #include <ompl/geometric/planners/prm/LazyPRM.h>
 
+#include <moveit/planning_interface/ompl_optimization_objective_loader.h>
+#include <pluginlib/class_loader.hpp>
+
+
 namespace ompl_interface
 {
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.ompl_planning.model_based_planning_context");
@@ -350,8 +354,26 @@ void ompl_interface::ModelBasedPlanningContext::useConfig()
     }
     else
     {
-      objective =
-          std::make_shared<ompl::base::PathLengthOptimizationObjective>(ompl_simple_setup_->getSpaceInformation());
+        pluginlib::ClassLoader<ompl_optimization_loader::OptimizationObjectiveLoader> poly_loader("moveit_core", "ompl_optimization_loader::OptimizationObjectiveLoader");
+
+        try
+        {
+            RCLCPP_DEBUG(LOGGER, "Using optimization objective : %s", optimizer.c_str());
+            std::shared_ptr<ompl_optimization_loader::OptimizationObjectiveLoader> obj = poly_loader.createSharedInstance(optimizer);
+
+            objective = obj->getOptimizationObjective(ompl_simple_setup_->getSpaceInformation());
+
+        }
+        catch(pluginlib::PluginlibException& ex)
+        {
+            RCLCPP_ERROR(LOGGER, "The plugin failed to load for some reason. Error: %s",  ex.what());
+            RCLCPP_ERROR(LOGGER, "Fall back to the default optimizer");
+
+            objective =
+                    std::make_shared<ompl::base::PathLengthOptimizationObjective>(ompl_simple_setup_->getSpaceInformation());
+
+        }
+
     }
 
     ompl_simple_setup_->setOptimizationObjective(objective);
