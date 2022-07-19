@@ -40,7 +40,8 @@
 #include <moveit/macros/class_forward.h>
 #include <random_numbers/random_numbers.h>
 #include "rclcpp/rclcpp.hpp"
-#include <random>
+#include <string>
+#include <Eigen/Geometry>
 
 namespace constraint_samplers
 {
