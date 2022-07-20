@@ -6,6 +6,7 @@ find_package(moveit_common REQUIRED)
 moveit_package()
 
 find_package(ament_cmake REQUIRED)
+find_package(ament_cmake_python REQUIRED)
 find_package(moveit_msgs REQUIRED)
 find_package(moveit_core REQUIRED)
 find_package(moveit_ros_planning REQUIRED)
@@ -21,8 +22,9 @@ find_package(rclcpp REQUIRED)
 find_package(rclcpp_action REQUIRED)
 find_package(rclpy REQUIRED)
 
-# find_package(PythonInterp REQUIRED)
-# find_package(PythonLibs "${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}" REQUIRED)
+# Find python before pybind11
+find_package(Python3 REQUIRED COMPONENTS Interpreter Development)
+find_package(pybind11 REQUIRED)
 
 find_package(Eigen3 REQUIRED)
 # find_package(eigenpy REQUIRED)
@@ -31,7 +33,7 @@ find_package(Eigen3 REQUIRED)
 include(ConfigExtras.cmake)
 
 set(THIS_PACKAGE_INCLUDE_DIRS
-#  py_bindings_tools/include
+  py_bindings_tools/include
   common_planning_interface_objects/include
   planning_scene_interface/include
   move_group_interface/include
@@ -41,8 +43,6 @@ set(THIS_PACKAGE_LIBRARIES
   moveit_common_planning_interface_objects
   moveit_planning_scene_interface
   moveit_move_group_interface
-#  moveit_py_bindings_tools
-#  moveit_py_bindings_tools_python
 )
 
 set(THIS_PACKAGE_INCLUDE_DEPENDS
@@ -61,11 +61,12 @@ set(THIS_PACKAGE_INCLUDE_DEPENDS
   rclcpp_action
   Eigen3
   Boost
+  pybind11
 )
 
 include_directories(${THIS_PACKAGE_INCLUDE_DIRS})
 
-# add_subdirectory(py_bindings_tools)
+add_subdirectory(py_bindings_tools)
 add_subdirectory(common_planning_interface_objects)
 add_subdirectory(planning_scene_interface)
 add_subdirectory(move_group_interface)
