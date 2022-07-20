@@ -29,6 +29,8 @@ find_package(pybind11 REQUIRED)
 find_package(Eigen3 REQUIRED)
 # find_package(eigenpy REQUIRED)
 
+ament_python_install_package(${PROJECT_NAME})
+
 # Finds Boost Components
 include(ConfigExtras.cmake)
 
