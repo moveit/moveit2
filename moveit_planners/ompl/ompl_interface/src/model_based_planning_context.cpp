@@ -373,7 +373,7 @@ void ompl_interface::ModelBasedPlanningContext::useConfig()
   }
 
 
-  // check whether the path returned by the planner should be interpolated
+  // check whether the path returned by the planner should be simplified
   it = cfg.find("simplify_solutions");
   if (it != cfg.end())
   {
