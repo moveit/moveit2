@@ -66,12 +66,21 @@ set(THIS_PACKAGE_INCLUDE_DEPENDS
   pybind11
 )
 
+# Set the build location and install location for a CPython extension
+function(configure_build_install_location _library_name)
+  # Install library for actual use
+  install(TARGETS ${_library_name}
+    DESTINATION "${PYTHON_INSTALL_DIR}/${PROJECT_NAME}"
+  )
+endfunction()
+
 include_directories(${THIS_PACKAGE_INCLUDE_DIRS})
 
 add_subdirectory(py_bindings_tools)
 add_subdirectory(common_planning_interface_objects)
 add_subdirectory(planning_scene_interface)
 add_subdirectory(move_group_interface)
+add_subdirectory(rclcpp_interface)
 # add_subdirectory(robot_interface)
 # add_subdirectory(test)
 
