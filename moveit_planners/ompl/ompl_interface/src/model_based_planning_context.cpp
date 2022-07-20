@@ -67,7 +67,7 @@
 #include "ompl/base/objectives/MaximizeMinClearanceObjective.h"
 #include <ompl/geometric/planners/prm/LazyPRM.h>
 
-#include <moveit/planning_interface/ompl_optimization_objective_loader.h>
+#include <moveit/ompl_interface/ompl_optimization_objective_loader.h>
 #include <pluginlib/class_loader.hpp>
 
 
