@@ -119,7 +119,7 @@ OMPLInterface::getPlanningContext(const planning_scene::PlanningSceneConstPtr& p
 
 void OMPLInterface::configureContext(const ModelBasedPlanningContextPtr& context) const
 {
-  context->simplifySolutions(simplify_solutions_);
+//  context->simplifySolutions(simplify_solutions_);
 }
 
 void OMPLInterface::loadConstraintSamplers()
