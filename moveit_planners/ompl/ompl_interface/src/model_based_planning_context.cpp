@@ -372,7 +372,16 @@ void ompl_interface::ModelBasedPlanningContext::useConfig()
     cfg.erase(it);
   }
 
-  // check whether solution paths from parallel planning should be hybridized
+
+  // check whether the path returned by the planner should be interpolated
+  it = cfg.find("simplify_solution");
+  if (it != cfg.end())
+  {
+    simplify_solution_ = boost::lexical_cast<bool>(it->second);
+    cfg.erase(it);
+  }
+
+    // check whether solution paths from parallel planning should be hybridized
   it = cfg.find("hybridize");
   if (it != cfg.end())
   {
