@@ -115,15 +115,6 @@ public:
   {
     return use_constraints_approximations_;
   }
-  bool simplifySolutions() const
-  {
-    return simplify_solutions_;
-  }
-
-  void simplifySolutions(bool flag)
-  {
-    simplify_solutions_ = flag;
-  }
 
   /** @brief Print the status of this node*/
   void printStatus();
@@ -159,8 +150,6 @@ protected:
   PlanningContextManager context_manager_;
 
   bool use_constraints_approximations_;
-
-  bool simplify_solutions_;
 
 private:
   constraint_sampler_manager_loader::ConstraintSamplerManagerLoaderPtr constraint_sampler_manager_loader_;
