@@ -72,6 +72,7 @@ PointCloudOctomapUpdater::~PointCloudOctomapUpdater()
 
 bool PointCloudOctomapUpdater::setParams(const std::string& name_space)
 {
+  // This parameter is optional
   node_->get_parameter_or(name_space + ".ns", ns_, std::string());
   return node_->get_parameter(name_space + ".point_cloud_topic", point_cloud_topic_) &&
          node_->get_parameter(name_space + ".max_range", max_range_) &&
