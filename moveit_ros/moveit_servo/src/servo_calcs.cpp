@@ -611,10 +611,27 @@ bool ServoCalcs::cartesianServoCalcs(geometry_msgs::msg::TwistStamped& cmd,
     tf_rot_delta.rotate(q);
 
     // Poses passed to IK solvers are assumed to be in the tip link (EE) reference frame
-    // So, apply the base->end effector transform to the delta transform
-    // apply rotation after so that it's local to EE
-    auto full_tf = tf_pos_delta * tf_moveit_to_ee_frame_ * tf_rot_delta;
-    geometry_msgs::msg::Pose next_pose = tf2::toMsg(full_tf);
+    // First, find the new EE position without newly applied rotation
+    auto tf_no_new_rot = tf_pos_delta * tf_moveit_to_ee_frame_;
+    // we want the rotation to be applied in the requested reference frame,
+    // but we want the rotation to be about the EE point in space, not the origin.
+    // So, we need to translate to origin, rotate, then translate back
+    // Given T = transformation matrix from origin -> EE point in space (translation component of tf_no_new_rot)
+    // and T' as the opposite transformation, EE point in space -> origin (translation only)
+    // apply final transformation as T * R * T' * tf_no_new_rot
+    auto tf_translation = tf_no_new_rot.translation();
+    auto tf_neg_translation = Eigen::Isometry3d::Identity();  // T'
+    tf_neg_translation(0, 3) = -tf_translation(0, 0);
+    tf_neg_translation(1, 3) = -tf_translation(1, 0);
+    tf_neg_translation(2, 3) = -tf_translation(2, 0);
+    auto tf_pos_translation = Eigen::Isometry3d::Identity();  // T
+    tf_pos_translation(0, 3) = tf_translation(0, 0);
+    tf_pos_translation(1, 3) = tf_translation(1, 0);
+    tf_pos_translation(2, 3) = tf_translation(2, 0);
+
+    // T * R * T' * tf_no_new_rot
+    auto tf = tf_pos_translation * tf_rot_delta * tf_neg_translation * tf_no_new_rot;
+    geometry_msgs::msg::Pose next_pose = tf2::toMsg(tf);
 
     // setup for IK call
     std::vector<double> solution(num_joints_);
