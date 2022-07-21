@@ -1403,6 +1403,10 @@ private:
   bool initializing_constraints_;
 };
 
+MoveGroupInterface::MoveGroupInterface()
+{
+}
+
 MoveGroupInterface::MoveGroupInterface(const rclcpp::Node::SharedPtr& node, const std::string& group_name,
                                        const std::shared_ptr<tf2_ros::Buffer>& tf_buffer,
                                        const rclcpp::Duration& wait_for_servers)

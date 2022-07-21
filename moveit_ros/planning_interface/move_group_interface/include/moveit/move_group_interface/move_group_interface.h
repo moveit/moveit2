@@ -142,6 +142,8 @@ public:
     double planning_time_;
   };
 
+  MoveGroupInterface(); // Add for the supporting to the python interface
+
   /**
       \brief Construct a MoveGroupInterface instance call using a specified set of options \e opt.
 
