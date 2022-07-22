@@ -271,6 +271,11 @@ void ServoCalcs::start()
                            current_state_->getGlobalLinkTransform(parameters_->ee_frame_name);
   tf_moveit_to_robot_cmd_frame_ = current_state_->getGlobalLinkTransform(parameters_->planning_frame).inverse() *
                                   current_state_->getGlobalLinkTransform(robot_link_command_frame_);
+  if (!use_inv_jacobian_)
+  {
+    ik_base_to_tip_frame_ = current_state_->getGlobalLinkTransform(ik_solver_->getBaseFrame()).inverse() *
+                            current_state_->getGlobalLinkTransform(ik_solver_->getTipFrame());
+  }
 
   stop_requested_ = false;
   thread_ = std::thread([this] { mainCalcLoop(); });
@@ -382,6 +387,12 @@ void ServoCalcs::calculateSingleIteration()
   // Calculate this transform to ensure it is available via C++ API
   tf_moveit_to_ee_frame_ = current_state_->getGlobalLinkTransform(parameters_->planning_frame).inverse() *
                            current_state_->getGlobalLinkTransform(parameters_->ee_frame_name);
+
+  if (!use_inv_jacobian_)
+  {
+    ik_base_to_tip_frame_ = current_state_->getGlobalLinkTransform(ik_solver_->getBaseFrame()).inverse() *
+                            current_state_->getGlobalLinkTransform(ik_solver_->getTipFrame());
+  }
 
   have_nonzero_command_ = have_nonzero_twist_stamped_ || have_nonzero_joint_command_;
 
@@ -610,9 +621,10 @@ bool ServoCalcs::cartesianServoCalcs(geometry_msgs::msg::TwistStamped& cmd,
                            Eigen::AngleAxisd(delta_x[5], Eigen::Vector3d::UnitZ());
     tf_rot_delta.rotate(q);
 
-    // Poses passed to IK solvers are assumed to be in the tip link (EE) reference frame
-    // First, find the new EE position without newly applied rotation
-    auto tf_no_new_rot = tf_pos_delta * tf_moveit_to_ee_frame_;
+    // Poses passed to IK solvers are assumed to be in some tip link (usually EE) reference frame
+    // First, find the new tip link position without newly applied rotation
+
+    auto tf_no_new_rot = tf_pos_delta * ik_base_to_tip_frame_;
     // we want the rotation to be applied in the requested reference frame,
     // but we want the rotation to be about the EE point in space, not the origin.
     // So, we need to translate to origin, rotate, then translate back

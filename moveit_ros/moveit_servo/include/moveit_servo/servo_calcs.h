@@ -372,6 +372,7 @@ protected:
   pluginlib::ClassLoader<online_signal_smoothing::SmoothingBaseClass> smoothing_loader_;
 
   kinematics::KinematicsBaseConstPtr ik_solver_;
+  Eigen::Isometry3d ik_base_to_tip_frame_;
   bool use_inv_jacobian_ = false;
 };
 }  // namespace moveit_servo
