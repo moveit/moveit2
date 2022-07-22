@@ -106,6 +106,7 @@ def generate_servo_test_description(
             moveit_config.robot_description,
             moveit_config.robot_description_semantic,
             moveit_config.joint_limits,
+            moveit_config.robot_description_kinematics,
         ],
     )
 
