@@ -32,106 +32,60 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-/* Author: Ioan Sucan */
+/* Author: Larry Lu, Ioan Sucan */
 
 #pragma once
 
-#include <ros/ros.h>
-#include <Python.h>
-#include <boost/python.hpp>
+#include <pybind11/pybind11.h>
+#include <rclcpp/rclcpp.hpp>
+#include <rclcpp/serialization.hpp>
+#include <rmw/rmw.h>
+#include <rmw/serialized_message.h>
 #include <string>
 #include <stdexcept>
-#include <type_traits>
+
+namespace py = pybind11;
 
 namespace moveit
 {
 namespace py_bindings_tools
 {
-/** \brief C++ Wrapper class for Python 3 \c Bytes Object */
-class ByteString : public boost::python::object
+/** \brief Convert a ROS message to a Python Bytes */
+template <typename T, typename std::enable_if<rosidl_generator_traits::is_message<T>::value, int>::type = 0>
+py::bytes serializeMsg(const T& msg)
 {
-public:
-  // constructors for bp::handle and friends
-  BOOST_PYTHON_FORWARD_OBJECT_CONSTRUCTORS(ByteString, boost::python::object)
-  ByteString() : boost::python::object(boost::python::handle<>(PyBytes_FromString("")))
-  {
-  }
-  explicit ByteString(const char* s) : boost::python::object(boost::python::handle<>(PyBytes_FromString(s)))
-  {
-  }
-  explicit ByteString(const std::string& s)
-    : boost::python::object(boost::python::handle<>(PyBytes_FromStringAndSize(s.c_str(), s.size())))
-  {
-  }
-  // bp::list[] returns a proxy which has to be converted to an object first
-  template <typename T>
-  explicit ByteString(const boost::python::api::proxy<T>& proxy) : boost::python::object(proxy)
-  {
-  }
-  /** \brief Serializes a ROS message into a Python Bytes object
-   * The second template parameter ensures that this overload is only chosen with a ROS message argument
-   */
-  template <typename T, typename std::enable_if<ros::message_traits::IsMessage<T>::value, int>::type = 0>
-  explicit ByteString(const T& msg)
-    : boost::python::object(
-          boost::python::handle<>(PyBytes_FromStringAndSize(nullptr, ros::serialization::serializationLength(msg))))
-  {
-    ros::serialization::OStream stream_arg(reinterpret_cast<uint8_t*>(PyBytes_AS_STRING(ptr())),
-                                           PyBytes_GET_SIZE(ptr()));
-    ros::serialization::serialize(stream_arg, msg);
-  }
-
-  /** \brief Convert content to a ROS message */
-  template <typename T>
-  void deserialize(T& msg) const
-  {
-    static_assert(sizeof(uint8_t) == sizeof(char), "ros/python buffer layout mismatch");
-    char* buf = PyBytes_AsString(ptr());
-    // buf == nullptr on error
-    if (!buf)
-    {
-      throw std::runtime_error("Underlying python object is not a Bytes/String instance");
-    }
-    // unfortunately no constructor with const uint8_t
-    ros::serialization::IStream stream_arg(reinterpret_cast<uint8_t*>(buf), PyBytes_GET_SIZE(ptr()));
-    ros::serialization::deserialize(stream_arg, msg);
-  }
-};
-
-/** \brief Convert a ROS message to a Python Bytestring */
-template <typename T>
-ByteString serializeMsg(const T& msg)
-{
-  return ByteString(msg);
+  rclcpp::Serialization<T> serializer;
+  rclcpp::SerializedMessage serialized_msg;
+  serializer.serialize_message(&msg, &serialized_msg);
+  return py::bytes(reinterpret_cast<const char*>(serialized_msg.get_rcl_serialized_message().buffer),
+                   serialized_msg.get_rcl_serialized_message().buffer_length);
 }
 
-/** \brief Convert a Python Bytestring to a ROS message */
-template <typename T>
-void deserializeMsg(const ByteString& data, T& msg)
+/** \brief Convert a Python Bytes to a ROS message */
+template <typename T, typename std::enable_if<rosidl_generator_traits::is_message<T>::value, int>::type = 0>
+void deserializeMsg(py::bytes data, T& msg)
 {
-  data.deserialize(msg);
+  rcl_serialized_message_t rcl_serialized_msg = rmw_get_zero_initialized_serialized_message();
+  char* serialized_buffer;
+  Py_ssize_t length;
+  if (PYBIND11_BYTES_AS_STRING_AND_SIZE(data.ptr(), &serialized_buffer, &length))
+  {
+    throw py::error_already_set();
+  }
+  if (length < 0)
+  {
+    throw py::error_already_set();
+  }
+  rcl_serialized_msg.buffer_capacity = length;
+  rcl_serialized_msg.buffer_length = length;
+  rcl_serialized_msg.buffer = reinterpret_cast<uint8_t*>(serialized_buffer);
+  rmw_ret_t rmw_ret =
+      rmw_deserialize(&rcl_serialized_msg, rosidl_typesupport_cpp::get_message_type_support_handle<T>(), &msg);
+  if (RMW_RET_OK != rmw_ret)
+  {
+    throw std::runtime_error("failed to deserialize ROS message");
+  }
 }
 
 }  // namespace py_bindings_tools
 }  // namespace moveit
-
-namespace boost
-{
-namespace python
-{
-namespace converter
-{
-// only accept Python 3 Bytes / Python 2 String instance when used as C++ function parameter
-template <>
-struct object_manager_traits<moveit::py_bindings_tools::ByteString>
-#if PY_VERSION_HEX >= 0x03000000
-  : pytype_object_manager_traits<&PyBytes_Type, moveit::py_bindings_tools::ByteString>
-#else
-  : pytype_object_manager_traits<&PyString_Type, moveit::py_bindings_tools::ByteString>
-#endif
-
-{
-};
-}  // namespace converter
-}  // namespace python
-}  // namespace boost
