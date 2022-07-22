@@ -32,65 +32,65 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-/* Author: Ioan Sucan */
+/* Author: Larry Lu, Ioan Sucan */
 
 #pragma once
 
-#include <boost/python.hpp>
-#include <boost/python/stl_iterator.hpp>
+#include <pybind11/pybind11.h>
+#include <pybind11/stl.h>
 #include <string>
 #include <vector>
 #include <map>
+
+namespace py = pybind11;
 
 namespace moveit
 {
 namespace py_bindings_tools
 {
 template <typename T>
-std::vector<T> typeFromList(const boost::python::object& values)
+std::vector<T> typeFromList(const py::object& values)
 {
-  boost::python::stl_input_iterator<T> begin(values), end;
   std::vector<T> v;
-  v.assign(begin, end);
+  auto l = values.cast<py::list>();
+  for (int i = 0; i < (int)(py::len(l)); ++i)
+  {
+    v.push_back(l[i].cast<T>());
+  }
   return v;
 }
 
-template <typename T>
-boost::python::list listFromType(const std::vector<T>& v)
-{
-  boost::python::list l;
-  for (std::size_t i = 0; i < v.size(); ++i)
-    l.append(v[i]);
-  return l;
-}
-
-template <typename T>
-boost::python::dict dictFromType(const std::map<std::string, T>& v)
-{
-  boost::python::dict d;
-  for (typename std::map<std::string, T>::const_iterator it = v.begin(); it != v.end(); ++it)
-    d[it->first] = it->second;
-  return d;
-}
-
-std::vector<double> doubleFromList(const boost::python::object& values)
+std::vector<double> doubleFromList(const py::object& values)
 {
   return typeFromList<double>(values);
 }
 
-std::vector<std::string> stringFromList(const boost::python::object& values)
+std::vector<std::string> stringFromList(const py::object& values)
 {
   return typeFromList<std::string>(values);
 }
 
-boost::python::list listFromDouble(const std::vector<double>& v)
+template <typename T>
+py::list listFromType(const std::vector<T>& v)
 {
-  return listFromType<double>(v);
+  return py::cast(v);
 }
 
-boost::python::list listFromString(const std::vector<std::string>& v)
+py::list listFromDouble(const std::vector<double>& v)
 {
-  return listFromType<std::string>(v);
+  return py::cast(v);
 }
+
+py::list listFromString(const std::vector<std::string>& v)
+{
+  return py::cast(v);
+}
+
+template <typename T>
+py::dict dictFromType(const std::map<std::string, T>& v)
+{
+  return py::cast(v);
+}
+
 }  // namespace py_bindings_tools
 }  // namespace moveit
