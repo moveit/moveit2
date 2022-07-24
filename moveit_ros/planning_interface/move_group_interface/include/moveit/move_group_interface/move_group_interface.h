@@ -146,6 +146,8 @@ public:
                      const std::shared_ptr<tf2_ros::Buffer>& tf_buffer = std::shared_ptr<tf2_ros::Buffer>(),
                      const rclcpp::Duration& wait_for_servers = rclcpp::Duration::from_seconds(-1));
 
+  MoveGroupInterface();  // Add for the supporting to the python interface
+
   ~MoveGroupInterface();
 
   /**

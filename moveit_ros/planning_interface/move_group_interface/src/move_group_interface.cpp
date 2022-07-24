@@ -1401,6 +1401,10 @@ MoveGroupInterface::MoveGroupInterface(const rclcpp::Node::SharedPtr& node, cons
   impl_ = new MoveGroupInterfaceImpl(node, opt, tf_buffer ? tf_buffer : getSharedTF(), wait_for_servers);
 }
 
+MoveGroupInterface::MoveGroupInterface()
+{
+}
+
 MoveGroupInterface::~MoveGroupInterface()
 {
   delete impl_;
