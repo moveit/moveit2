@@ -30,7 +30,7 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
-# Author: Ioan Sucan, William Baker
+# Author: Larry Lu, Ioan Sucan, William Baker
 
 from geometry_msgs.msg import Pose, PoseStamped
 from moveit_msgs.msg import (
@@ -47,10 +47,8 @@ from moveit_msgs.msg import (
     MotionPlanRequest,
 )
 from sensor_msgs.msg import JointState
-import rospy
-import tf
-from moveit_ros_planning_interface import _moveit_move_group_interface
-from .exception import MoveItCommanderException
+from moveit_ros_planning_interface import move_group_interface
+from moveit_commander.exception import MoveItCommanderException
 import moveit_commander.conversions as conversions
 
 
@@ -60,11 +58,11 @@ class MoveGroupCommander(object):
     """
 
     def __init__(
-        self, name, robot_description="robot_description", ns="", wait_for_servers=5.0
+        self, name, robot_description="robot_description", move_group_node_name="move_group"
     ):
         """Specify the group name for which to construct this commander instance. Throws an exception if there is an initialization error."""
-        self._g = _moveit_move_group_interface.MoveGroupInterface(
-            name, robot_description, ns, wait_for_servers
+        self._g = move_group_interface.MoveGroupInterface(
+            move_group_node_name, name, robot_description
         )
 
     def get_name(self):
@@ -102,8 +100,8 @@ class MoveGroupCommander(object):
 
     def get_interface_description(self):
         """Get the description of the planner interface (list of planner ids)"""
-        desc = PlannerInterfaceDescription()
-        conversions.msg_from_string(desc, self._g.get_interface_description())
+        desc = conversions.deserialize(
+            self._g.get_interface_description(), PlannerInterfaceDescription)
         return desc
 
     def get_pose_reference_frame(self):
@@ -126,7 +124,8 @@ class MoveGroupCommander(object):
         """Get the current pose of the end-effector of the group. Throws an exception if there is not end-effector."""
         if len(end_effector_link) > 0 or self.has_end_effector_link():
             return conversions.list_to_pose_stamped(
-                self._g.get_current_pose(end_effector_link), self.get_planning_frame()
+                self._g.get_current_pose(
+                    end_effector_link), self.get_planning_frame()
             )
         else:
             raise MoveItCommanderException(
@@ -138,7 +137,8 @@ class MoveGroupCommander(object):
         if len(end_effector_link) > 0 or self.has_end_effector_link():
             return self._g.get_current_rpy(end_effector_link)
         else:
-            raise MoveItCommanderException("There is no end effector to get the rpy of")
+            raise MoveItCommanderException(
+                "There is no end effector to get the rpy of")
 
     def get_random_joint_values(self):
         return self._g.get_random_joint_values()
@@ -146,7 +146,8 @@ class MoveGroupCommander(object):
     def get_random_pose(self, end_effector_link=""):
         if len(end_effector_link) > 0 or self.has_end_effector_link():
             return conversions.list_to_pose_stamped(
-                self._g.get_random_pose(end_effector_link), self.get_planning_frame()
+                self._g.get_random_pose(
+                    end_effector_link), self.get_planning_frame()
             )
         else:
             raise MoveItCommanderException(
@@ -177,20 +178,17 @@ class MoveGroupCommander(object):
         >>> moveit_robot_state.joint_state = joint_state
         >>> group.set_start_state(moveit_robot_state)
         """
-        self._g.set_start_state(conversions.msg_to_string(msg))
+        self._g.set_start_state(conversions.serialize(msg))
 
     def get_current_state_bounded(self):
         """Get the current state of the robot bounded."""
-        s = RobotState()
-        c_str = self._g.get_current_state_bounded()
-        conversions.msg_from_string(s, c_str)
+        s = self._g.get_current_state_bounded()
         return s
 
     def get_current_state(self):
         """Get the current state of the robot."""
-        s = RobotState()
         c_str = self._g.get_current_state()
-        conversions.msg_from_string(s, c_str)
+        s = conversions.deserialize(c_str, RobotState)
         return s
 
     def get_joint_value_target(self):
@@ -214,7 +212,7 @@ class MoveGroupCommander(object):
             if arg2 is not None or arg3 is not None:
                 raise MoveItCommanderException("Too many arguments specified")
             if not self._g.set_joint_value_target_from_joint_state_message(
-                conversions.msg_to_string(arg1)
+                conversions.serialize(arg1)
             ):
                 raise MoveItCommanderException(
                     "Error setting joint target. Is the target within bounds?"
@@ -254,11 +252,11 @@ class MoveGroupCommander(object):
             r = False
             if type(arg1) is PoseStamped:
                 r = self._g.set_joint_value_target_from_pose_stamped(
-                    conversions.msg_to_string(arg1), eef, approx
+                    conversions.serialize(arg1), eef, approx
                 )
             else:
                 r = self._g.set_joint_value_target_from_pose(
-                    conversions.msg_to_string(arg1), eef, approx
+                    conversions.serialize(arg1), eef, approx
                 )
             if not r:
                 if approx:
@@ -290,7 +288,8 @@ class MoveGroupCommander(object):
                 if not self._g.set_rpy_target(
                     rpy[0], rpy[1], rpy[2], end_effector_link
                 ):
-                    raise MoveItCommanderException("Unable to set orientation target")
+                    raise MoveItCommanderException(
+                        "Unable to set orientation target")
             else:
                 raise MoveItCommanderException("Expected [roll, pitch, yaw]")
         else:
@@ -305,7 +304,8 @@ class MoveGroupCommander(object):
                 if not self._g.set_orientation_target(
                     q[0], q[1], q[2], q[3], end_effector_link
                 ):
-                    raise MoveItCommanderException("Unable to set orientation target")
+                    raise MoveItCommanderException(
+                        "Unable to set orientation target")
             else:
                 raise MoveItCommanderException("Expected [qx, qy, qz, qw]")
         else:
@@ -354,12 +354,14 @@ class MoveGroupCommander(object):
         """Set the pose of the end-effector, if one is available. The expected input is a list of poses. Each pose can be a Pose message, a list of 6 floats: [x, y, z, rot_x, rot_y, rot_z] or a list of 7 floats [x, y, z, qx, qy, qz, qw]"""
         if len(end_effector_link) > 0 or self.has_end_effector_link():
             if not self._g.set_pose_targets(
-                [conversions.pose_to_list(p) if type(p) is Pose else p for p in poses],
+                [conversions.pose_to_list(p) if type(
+                    p) is Pose else p for p in poses],
                 end_effector_link,
             ):
                 raise MoveItCommanderException("Unable to set target poses")
         else:
-            raise MoveItCommanderException("There is no end effector to set poses for")
+            raise MoveItCommanderException(
+                "There is no end effector to set poses for")
 
     def shift_pose_target(self, axis, value, end_effector_link=""):
         """Get the current pose of the end effector, add value to the corresponding axis (0..5: X, Y, Z, R, P, Y) and set the new pose as the pose target"""
@@ -374,9 +376,11 @@ class MoveGroupCommander(object):
                 pose[axis] = pose[axis] + value
                 self.set_pose_target(pose, end_effector_link)
             else:
-                raise MoveItCommanderException("An axis value between 0 and 5 expected")
+                raise MoveItCommanderException(
+                    "An axis value between 0 and 5 expected")
         else:
-            raise MoveItCommanderException("There is no end effector to set poses for")
+            raise MoveItCommanderException(
+                "There is no end effector to set poses for")
 
     def clear_pose_target(self, end_effector_link):
         """Clear the pose target for a particular end-effector"""
@@ -469,9 +473,8 @@ class MoveGroupCommander(object):
 
     def get_path_constraints(self):
         """Get the actual path constraints in form of a moveit_msgs.msgs.Constraints"""
-        c = Constraints()
         c_str = self._g.get_path_constraints()
-        conversions.msg_from_string(c, c_str)
+        c = conversions.deserialize(c_str, Constraints)
         return c
 
     def set_path_constraints(self, value):
@@ -480,7 +483,8 @@ class MoveGroupCommander(object):
             self.clear_path_constraints()
         else:
             if type(value) is Constraints:
-                self._g.set_path_constraints_from_msg(conversions.msg_to_string(value))
+                self._g.set_path_constraints_from_msg(
+                    conversions.serialize(value))
             elif not self._g.set_path_constraints(value):
                 raise MoveItCommanderException(
                     "Unable to set path constraints " + value
@@ -492,9 +496,8 @@ class MoveGroupCommander(object):
 
     def get_trajectory_constraints(self):
         """Get the actual trajectory constraints in form of a moveit_msgs.msgs.TrajectoryConstraints"""
-        c = TrajectoryConstraints()
         c_str = self._g.get_trajectory_constraints()
-        conversions.msg_from_string(c, c_str)
+        c = conversions.deserialize(c_str, TrajectoryConstraints)
         return c
 
     def set_trajectory_constraints(self, value):
@@ -504,7 +507,7 @@ class MoveGroupCommander(object):
         else:
             if type(value) is TrajectoryConstraints:
                 self._g.set_trajectory_constraints_from_msg(
-                    conversions.msg_to_string(value)
+                    conversions.serialize(value)
                 )
             else:
                 raise MoveItCommanderException(
@@ -556,7 +559,8 @@ class MoveGroupCommander(object):
                 self._g.set_workspace(ws[0], ws[1], 0.0, ws[2], ws[3], 0.0)
             else:
                 if len(ws) == 6:
-                    self._g.set_workspace(ws[0], ws[1], ws[2], ws[3], ws[4], ws[5])
+                    self._g.set_workspace(
+                        ws[0], ws[1], ws[2], ws[3], ws[4], ws[5])
                 else:
                     raise MoveItCommanderException(
                         "Expected 0, 4 or 6 values in list specifying workspace"
@@ -596,7 +600,8 @@ class MoveGroupCommander(object):
 
         elif joints is not None:
             try:
-                self.set_joint_value_target(self.get_remembered_joint_values()[joints])
+                self.set_joint_value_target(
+                    self.get_remembered_joint_values()[joints])
             except (KeyError, TypeError):
                 self.set_joint_value_target(joints)
         if wait:
@@ -616,26 +621,24 @@ class MoveGroupCommander(object):
 
         elif joints is not None:
             try:
-                self.set_joint_value_target(self.get_remembered_joint_values()[joints])
+                self.set_joint_value_target(
+                    self.get_remembered_joint_values()[joints])
             except MoveItCommanderException:
                 self.set_joint_value_target(joints)
 
         (error_code_msg, trajectory_msg, planning_time) = self._g.plan()
 
-        error_code = MoveItErrorCodes()
-        error_code.deserialize(error_code_msg)
-        plan = RobotTrajectory()
+        error_code = conversions.deserialize(error_code_msg, MoveItErrorCodes)
         return (
             error_code.val == MoveItErrorCodes.SUCCESS,
-            plan.deserialize(trajectory_msg),
+            conversions.deserialize(trajectory_msg, RobotTrajectory),
             planning_time,
             error_code,
         )
 
     def construct_motion_plan_request(self):
         """Returns a MotionPlanRequest filled with the current goals of the move_group_interface"""
-        mpr = MotionPlanRequest()
-        return mpr.deserialize(self._g.construct_motion_plan_request())
+        return conversions.deserialize(self._g.construct_motion_plan_request(), MotionPlanRequest)
 
     def compute_cartesian_path(
         self,
@@ -648,7 +651,7 @@ class MoveGroupCommander(object):
         """Compute a sequence of waypoints that make the end-effector move in straight line segments that follow the poses specified as waypoints. Configurations are computed for every eef_step meters; The jump_threshold specifies the maximum distance in configuration space between consecutive points in the resultingpath; Kinematic constraints for the path given by path_constraints will be met for every point along the trajectory, if they are not met, a partial solution will be returned. The return value is a tuple: a fraction of how much of the path was followed, the actual RobotTrajectory."""
         if path_constraints:
             if type(path_constraints) is Constraints:
-                constraints_str = conversions.msg_to_string(path_constraints)
+                constraints_str = conversions.serialize(path_constraints)
             else:
                 raise MoveItCommanderException(
                     "Unable to set path constraints, unknown constraint type "
@@ -669,16 +672,15 @@ class MoveGroupCommander(object):
                 avoid_collisions,
             )
 
-        path = RobotTrajectory()
-        path.deserialize(ser_path)
+        path = conversions.deserialize(ser_path, RobotTrajectory)
         return (path, fraction)
 
     def execute(self, plan_msg, wait=True):
         """Execute a previously planned path"""
         if wait:
-            return self._g.execute(conversions.msg_to_string(plan_msg))
+            return self._g.execute(conversions.serialize(plan_msg))
         else:
-            return self._g.async_execute(conversions.msg_to_string(plan_msg))
+            return self._g.async_execute(conversions.serialize(plan_msg))
 
     def attach_object(self, object_name, link_name="", touch_links=[]):
         """Given the name of an object existing in the planning scene, attach it to a link. The link used is specified by the second argument. If left unspecified, the end-effector link is used, if one is known. If there is no end-effector link, the first link in the group is used. If no link is identified, failure is reported. True is returned if an attach request was successfully sent to the move_group node. This does not verify that the attach request also was successfully applied by move_group."""
@@ -692,11 +694,12 @@ class MoveGroupCommander(object):
         """Pick the named object. A grasp message, or a list of Grasp messages can also be specified as argument."""
         if type(grasp) is Grasp:
             return self._g.pick(
-                object_name, conversions.msg_to_string(grasp), plan_only
+                object_name, conversions.serialize(grasp), plan_only
             )
         else:
             return self._g.pick(
-                object_name, [conversions.msg_to_string(x) for x in grasp], plan_only
+                object_name, [conversions.serialize(
+                    x) for x in grasp], plan_only
             )
 
     def place(self, object_name, location=None, plan_only=False):
@@ -717,20 +720,20 @@ class MoveGroupCommander(object):
             )
         elif type(location) is PlaceLocation:
             result = self._g.place(
-                object_name, conversions.msg_to_string(location), plan_only
+                object_name, conversions.serialize(location), plan_only
             )
         elif type(location) is list:
             if location:
                 if type(location[0]) is PlaceLocation:
                     result = self._g.place_locations_list(
                         object_name,
-                        [conversions.msg_to_string(x) for x in location],
+                        [conversions.serialize(x) for x in location],
                         plan_only,
                     )
                 elif type(location[0]) is PoseStamped:
                     result = self._g.place_poses_list(
                         object_name,
-                        [conversions.msg_to_string(x) for x in location],
+                        [conversions.serialize(x) for x in location],
                         plan_only,
                     )
                 else:
@@ -755,8 +758,8 @@ class MoveGroupCommander(object):
         acceleration_scaling_factor=1.0,
         algorithm="iterative_time_parameterization",
     ):
-        ser_ref_state_in = conversions.msg_to_string(ref_state_in)
-        ser_traj_in = conversions.msg_to_string(traj_in)
+        ser_ref_state_in = conversions.serialize(ref_state_in)
+        ser_traj_in = conversions.serialize(traj_in)
         ser_traj_out = self._g.retime_trajectory(
             ser_ref_state_in,
             ser_traj_in,
@@ -764,8 +767,7 @@ class MoveGroupCommander(object):
             acceleration_scaling_factor,
             algorithm,
         )
-        traj_out = RobotTrajectory()
-        traj_out.deserialize(ser_traj_out)
+        traj_out = conversions.deserialize(ser_traj_out, RobotTrajectory)
         return traj_out
 
     def get_jacobian_matrix(self, joint_values, reference_point=None):
@@ -777,7 +779,7 @@ class MoveGroupCommander(object):
 
     def enforce_bounds(self, robot_state_msg):
         """Takes a moveit_msgs RobotState and enforces the state bounds, based on the C++ RobotState enforceBounds()"""
-        s = RobotState()
-        c_str = self._g.enforce_bounds(conversions.msg_to_string(robot_state_msg))
-        conversions.msg_from_string(s, c_str)
+        c_str = self._g.enforce_bounds(
+            conversions.serialize(robot_state_msg))
+        s = conversions.deserialize(c_str, RobotState)
         return s

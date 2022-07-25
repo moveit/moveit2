@@ -32,14 +32,12 @@
 #
 # Author: Ioan Sucan
 
-from moveit_ros_planning_interface import _moveit_roscpp_initializer
+from moveit_ros_planning_interface import rclcpp_interface
 
 
-def roscpp_initialize(args):
-    # remove __name:= argument
-    args2 = [a for a in args if not a.startswith("__name:=")]
-    _moveit_roscpp_initializer.roscpp_init("move_group_commander_wrappers", args2)
+def init(args):
+    rclcpp_interface.rclcpp_init(args)
 
 
-def roscpp_shutdown():
-    _moveit_roscpp_initializer.roscpp_shutdown()
+def shutdown():
+    rclcpp_interface.rclcpp_shutdown()

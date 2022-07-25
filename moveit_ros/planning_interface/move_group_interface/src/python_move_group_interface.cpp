@@ -787,7 +787,7 @@ PYBIND11_MODULE(move_group_interface, m)
       .def("get_named_targets", &MoveGroupInterfacePython::getNamedTargetsPython)
       .def("get_named_target_values", &MoveGroupInterfacePython::getNamedTargetValuesPython)
       .def("get_current_state_bounded", &MoveGroupInterfacePython::getCurrentStateBoundedPython)
-      .def("get_current_state", &MoveGroupInterfacePython::getCurrentStatePython)
+      .def("get_current_state", &MoveGroupInterfacePython::getCurrentStatePython, py::arg("wait")=1.0)
       .def("get_jacobian_matrix", &MoveGroupInterfacePython::getJacobianMatrixPython)
       .def("enforce_bounds", &MoveGroupInterfacePython::enforceBoundsPython);
 }

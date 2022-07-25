@@ -30,18 +30,18 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
-# Author: Ioan Sucan, Felix Messmer
+# Author: Larry Lu, Ioan Sucan, Felix Messmer
 
-import rospy
-from rosgraph.names import ns_join
-from . import conversions
+from rclpy.publisher import Publisher
+# from rosgraph.names import ns_join
+import moveit_commander.conversions as conversions
 
 from moveit_msgs.msg import PlanningScene, CollisionObject, AttachedCollisionObject
-from moveit_ros_planning_interface import _moveit_planning_scene_interface
+from moveit_ros_planning_interface import planning_scene_interface
 from geometry_msgs.msg import Pose, Point
 from shape_msgs.msg import SolidPrimitive, Plane, Mesh, MeshTriangle
-from .exception import MoveItCommanderException
-from moveit_msgs.srv import ApplyPlanningScene, ApplyPlanningSceneRequest
+from moveit_commander.exception import MoveItCommanderException
+from moveit_msgs.srv import ApplyPlanningScene
 
 try:
     from pyassimp import pyassimp
@@ -61,17 +61,17 @@ class PlanningSceneInterface(object):
     Python interface for a C++ PlanningSceneInterface.
     Uses both C++ wrapped methods and scene manipulation topics
     to manipulate the PlanningScene managed by the PlanningSceneMonitor.
-    See wrap_python_planning_scene_interface.cpp for the wrapped methods.
+    See python_planning_scene_interface.cpp for the wrapped methods.
     """
 
     def __init__(self, ns="", synchronous=False, service_timeout=5.0):
         """Create a planning scene interface; it uses both C++ wrapped methods and scene manipulation topics."""
-        self._psi = _moveit_planning_scene_interface.PlanningSceneInterface(ns)
+        self._psi = planning_scene_interface.PlanningSceneInterface(ns)
 
-        self._pub_co = rospy.Publisher(
+        self._pub_co = Publisher(
             ns_join(ns, "collision_object"), CollisionObject, queue_size=100
         )
-        self._pub_aco = rospy.Publisher(
+        self._pub_aco = Publisher(
             ns_join(ns, "attached_collision_object"),
             AttachedCollisionObject,
             queue_size=100,
@@ -85,7 +85,8 @@ class PlanningSceneInterface(object):
 
     def __submit(self, collision_object, attach=False):
         if self.__synchronous:
-            diff_req = self.__make_planning_scene_diff_req(collision_object, attach)
+            diff_req = self.__make_planning_scene_diff_req(
+                collision_object, attach)
             self._apply_planning_scene_diff.call(diff_req)
         else:
             if attach:
@@ -359,6 +360,6 @@ class PlanningSceneInterface(object):
             scene.robot_state.attached_collision_objects = [collision_object]
         else:
             scene.world.collision_objects = [collision_object]
-        planning_scene_diff_req = ApplyPlanningSceneRequest()
+        planning_scene_diff_req = ApplyPlanningScene.Request()
         planning_scene_diff_req.scene = scene
         return planning_scene_diff_req
