@@ -65,6 +65,9 @@
 #endif
 #include <trajectory_msgs/msg/joint_trajectory.hpp>
 
+// moveit_core
+#include <moveit/kinematics_base/kinematics_base.h>
+
 // moveit_servo
 #include <moveit_servo/servo_parameters.h>
 #include <moveit_servo/status_codes.h>
@@ -367,5 +370,9 @@ protected:
 
   // Load a smoothing plugin
   pluginlib::ClassLoader<online_signal_smoothing::SmoothingBaseClass> smoothing_loader_;
+
+  kinematics::KinematicsBaseConstPtr ik_solver_;
+  Eigen::Isometry3d ik_base_to_tip_frame_;
+  bool use_inv_jacobian_ = false;
 };
 }  // namespace moveit_servo
