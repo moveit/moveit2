@@ -161,16 +161,23 @@ TEST_F(PoseTrackingFixture, OutgoingMsgTest)
   std::function<void(const trajectory_msgs::msg::JointTrajectory::ConstSharedPtr)> traj_callback =
       [&/* this */](const trajectory_msgs::msg::JointTrajectory::ConstSharedPtr msg) {
         EXPECT_EQ(msg->header.frame_id, "panda_link0");
-        // Check for an expected joint position command
-        // As of now, the robot doesn't actually move because there are no controllers enabled.
-        double angle_tolerance = 0.08;  // rad
-        EXPECT_NEAR(msg->points[0].positions[0], 0, angle_tolerance);
-        EXPECT_NEAR(msg->points[0].positions[1], -0.785, angle_tolerance);
-        EXPECT_NEAR(msg->points[0].positions[2], 0, angle_tolerance);
-        EXPECT_NEAR(msg->points[0].positions[3], -2.360, angle_tolerance);
-        EXPECT_NEAR(msg->points[0].positions[4], 0, angle_tolerance);
-        EXPECT_NEAR(msg->points[0].positions[5], 1.571, angle_tolerance);
-        EXPECT_NEAR(msg->points[0].positions[6], 0.785, angle_tolerance);
+
+        // Exact joint positions may vary based on IK solver
+        // so check that the EE transform is as expected
+        moveit::core::RobotStatePtr temp_state(planning_scene_monitor_->getStateMonitor()->getCurrentState());
+        const std::string group_name = "panda_arm";
+        // copyJointGroupPositions can't take a const vector, make a copy
+        std::vector<double> positions(msg->points[0].positions);
+        temp_state->copyJointGroupPositions(group_name, positions);
+        Eigen::Isometry3d hand_tf = temp_state->getFrameTransform("panda_hand");
+
+        moveit::core::RobotStatePtr test_state(planning_scene_monitor_->getStateMonitor()->getCurrentState());
+        std::vector<double> test_positions = { 0, -0.785, 0, -2.360, 0, 1.571, 0.758 };
+        test_state->copyJointGroupPositions(group_name, test_positions);
+        Eigen::Isometry3d test_hand_tf = test_state->getFrameTransform("panda_hand");
+
+        double precision = 0.02;  // Hilbert-Schmidt norm
+        EXPECT_TRUE(test_hand_tf.isApprox(hand_tf, precision));
 
         this->tracker_->stopMotion();
         return;
