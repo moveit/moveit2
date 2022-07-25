@@ -84,8 +84,8 @@ std::size_t countIndividualConstraints(const moveit_msgs::msg::Constraints& cons
  * @return A full constraint message containing all the joint constraints
  */
 moveit_msgs::msg::Constraints constructGoalConstraints(const moveit::core::RobotState& state,
-                                                       const moveit::core::JointModelGroup* jmg, double tolerance_below,
-                                                       double tolerance_above);
+                                                       std::shared_ptr<const moveit::core::JointModelGroup> jmg,
+                                                       double tolerance_below, double tolerance_above);
 
 /**
  * \brief Generates a constraint message intended to be used as a goal
@@ -99,7 +99,7 @@ moveit_msgs::msg::Constraints constructGoalConstraints(const moveit::core::Robot
  * @return A full constraint message containing all the joint constraints
  */
 moveit_msgs::msg::Constraints constructGoalConstraints(const moveit::core::RobotState& state,
-                                                       const moveit::core::JointModelGroup* jmg,
+                                                       std::shared_ptr<const moveit::core::JointModelGroup> jmg,
                                                        double tolerance = std::numeric_limits<double>::epsilon());
 
 /**

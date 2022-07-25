@@ -54,7 +54,7 @@ namespace
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_robot_model.joint_model_group");
 
 // check if a parent or ancestor of joint is included in this group
-bool includesParent(const JointModel* joint, const JointModelGroup* group)
+bool includesParent(const JointModel* joint, std::shared_ptr<const JointModelGroup> group)
 {
   bool found = false;
   // if we find that an ancestor is also in the group, then the joint is not a root
@@ -169,7 +169,7 @@ JointModelGroup::JointModelGroup(const std::string& group_name, const srdf::Mode
   for (const JointModel* active_joint_model : active_joint_model_vector_)
   {
     // if we find that an ancestor is also in the group, then the joint is not a root
-    if (!includesParent(active_joint_model, this))
+    if (!includesParent(active_joint_model, shared_from_this()))
       joint_roots_.push_back(active_joint_model);
   }
 
@@ -275,7 +275,7 @@ void JointModelGroup::setSubgroupNames(const std::vector<std::string>& subgroups
     subgroup_names_set_.insert(subgroup_name);
 }
 
-void JointModelGroup::getSubgroups(std::vector<const JointModelGroup*>& sub_groups) const
+void JointModelGroup::getSubgroups(std::vector<std::shared_ptr<const JointModelGroup>>& sub_groups) const
 {
   sub_groups.resize(subgroup_names_.size());
   for (std::size_t i = 0; i < subgroup_names_.size(); ++i)
@@ -449,7 +449,7 @@ void JointModelGroup::addDefaultState(const std::string& name, const std::map<st
 
 bool JointModelGroup::getVariableDefaultPositions(const std::string& name, std::map<std::string, double>& values) const
 {
-  std::map<std::string, std::map<std::string, double> >::const_iterator it = default_states_.find(name);
+  std::map<std::string, std::map<std::string, double>>::const_iterator it = default_states_.find(name);
   if (it == default_states_.end())
     return false;
   values = it->second;
@@ -506,7 +506,7 @@ bool JointModelGroup::getEndEffectorTips(std::vector<const LinkModel*>& tips) co
   tips.clear();
   for (const std::string& name : getAttachedEndEffectorNames())
   {
-    const JointModelGroup* eef = parent_model_->getEndEffector(name);
+    std::shared_ptr<const JointModelGroup> eef = parent_model_->getEndEffector(name);
     if (!eef)
     {
       RCLCPP_ERROR(LOGGER, "Unable to find joint model group for eef");
@@ -561,7 +561,7 @@ void JointModelGroup::setDefaultIKTimeout(double ik_timeout)
   group_kinematics_.first.default_ik_timeout_ = ik_timeout;
   if (group_kinematics_.first.solver_instance_)
     group_kinematics_.first.solver_instance_->setDefaultTimeout(ik_timeout);
-  for (std::pair<const JointModelGroup* const, KinematicsSolver>& it : group_kinematics_.second)
+  for (std::pair<const std::shared_ptr<const JointModelGroup>, KinematicsSolver>& it : group_kinematics_.second)
     it.second.default_ik_timeout_ = ik_timeout;
 }
 
@@ -595,7 +595,7 @@ void JointModelGroup::setSolverAllocators(const std::pair<SolverAllocatorFn, Sol
   if (solvers.first)
   {
     group_kinematics_.first.allocator_ = solvers.first;
-    group_kinematics_.first.solver_instance_ = solvers.first(this);
+    group_kinematics_.first.solver_instance_ = solvers.first(shared_from_this());
     if (group_kinematics_.first.solver_instance_)
     {
       group_kinematics_.first.solver_instance_->setDefaultTimeout(group_kinematics_.first.default_ik_timeout_);
@@ -606,12 +606,12 @@ void JointModelGroup::setSolverAllocators(const std::pair<SolverAllocatorFn, Sol
   }
   else
     // we now compute a joint bijection only if we have a solver map
-    for (const std::pair<const JointModelGroup* const, SolverAllocatorFn>& it : solvers.second)
+    for (const std::pair<const std::shared_ptr<const JointModelGroup>, SolverAllocatorFn>& it : solvers.second)
       if (it.first->getSolverInstance())
       {
         KinematicsSolver& ks = group_kinematics_.second[it.first];
         ks.allocator_ = it.second;
-        ks.solver_instance_ = const_cast<JointModelGroup*>(it.first)->getSolverInstance();
+        ks.solver_instance_ = std::const_pointer_cast<JointModelGroup>(it.first)->getSolverInstance();
         ks.default_ik_timeout_ = group_kinematics_.first.default_ik_timeout_;
         if (!computeIKIndexBijection(ks.solver_instance_->getJointNames(), ks.bijection_))
         {
@@ -706,7 +706,7 @@ void JointModelGroup::printGroupInfo(std::ostream& out) const
   if (!group_kinematics_.second.empty())
   {
     out << "  * Compound kinematics solver:\n";
-    for (const std::pair<const JointModelGroup* const, KinematicsSolver>& it : group_kinematics_.second)
+    for (const std::pair<const std::shared_ptr<const JointModelGroup>, KinematicsSolver>& it : group_kinematics_.second)
     {
       out << "    " << it.first->getName() << ":";
       for (unsigned int index : it.second.bijection_)

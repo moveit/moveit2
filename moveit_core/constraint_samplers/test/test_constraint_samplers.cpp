@@ -57,14 +57,14 @@
 class LoadPlanningModelsPr2 : public testing::Test
 {
 protected:
-  kinematics::KinematicsBasePtr getKinematicsSolverRightArm(const moveit::core::JointModelGroup* /*jmg*/)
+  kinematics::KinematicsBasePtr getKinematicsSolverRightArm(std::shared_ptr<const moveit::core::JointModelGroup> /*jmg*/)
   {
     {
       return pr2_kinematics_plugin_right_arm_;
     }
   }
 
-  kinematics::KinematicsBasePtr getKinematicsSolverLeftArm(const moveit::core::JointModelGroup* /*jmg*/)
+  kinematics::KinematicsBasePtr getKinematicsSolverLeftArm(std::shared_ptr<const moveit::core::JointModelGroup> /*jmg*/)
   {
     {
       return pr2_kinematics_plugin_left_arm_;
@@ -84,8 +84,12 @@ protected:
     pr2_kinematics_plugin_left_arm_->initialize(node_, *robot_model_, "left_arm", "torso_lift_link",
                                                 { "l_wrist_roll_link" }, .01);
 
-    func_right_arm_ = [this](const moveit::core::JointModelGroup* jmg) { return getKinematicsSolverRightArm(jmg); };
-    func_left_arm_ = [this](const moveit::core::JointModelGroup* jmg) { return getKinematicsSolverLeftArm(jmg); };
+    func_right_arm_ = [this](std::shared_ptr<const moveit::core::JointModelGroup> jmg) {
+      return getKinematicsSolverRightArm(jmg);
+    };
+    func_left_arm_ = [this](std::shared_ptr<const moveit::core::JointModelGroup> jmg) {
+      return getKinematicsSolverLeftArm(jmg);
+    };
 
     std::map<std::string, moveit::core::SolverAllocatorFn> allocators;
     allocators["right_arm"] = func_right_arm_;

@@ -374,19 +374,19 @@ public:
   bool hasJointModelGroup(const std::string& group) const;
 
   /** \brief Get a joint group from this model (by name) */
-  const JointModelGroup* getJointModelGroup(const std::string& name) const;
+  std::shared_ptr<const JointModelGroup> getJointModelGroup(const std::string& name) const;
 
   /** \brief Get a joint group from this model (by name) */
-  JointModelGroup* getJointModelGroup(const std::string& name);
+  std::shared_ptr<JointModelGroup> getJointModelGroup(const std::string& name);
 
   /** \brief Get the available joint groups */
-  const std::vector<const JointModelGroup*>& getJointModelGroups() const
+  const std::vector<std::shared_ptr<const JointModelGroup>>& getJointModelGroups() const
   {
     return joint_model_groups_const_;
   }
 
   /** \brief Get the available joint groups */
-  const std::vector<JointModelGroup*>& getJointModelGroups()
+  const std::vector<std::shared_ptr<JointModelGroup>>& getJointModelGroups()
   {
     return joint_model_groups_;
   }
@@ -401,13 +401,13 @@ public:
   bool hasEndEffector(const std::string& eef) const;
 
   /** \brief Get the joint group that corresponds to a given end-effector name */
-  const JointModelGroup* getEndEffector(const std::string& name) const;
+  std::shared_ptr<const JointModelGroup> getEndEffector(const std::string& name) const;
 
   /** \brief Get the joint group that corresponds to a given end-effector name */
-  JointModelGroup* getEndEffector(const std::string& name);
+  std::shared_ptr<JointModelGroup> getEndEffector(const std::string& name);
 
   /** \brief Get the map between end effector names and the groups they correspond to */
-  const std::vector<const JointModelGroup*>& getEndEffectors() const
+  const std::vector<std::shared_ptr<const JointModelGroup>>& getEndEffectors() const
   {
     return end_effectors_;
   }
@@ -586,16 +586,16 @@ protected:
   JointModelGroupMap end_effectors_map_;
 
   /** \brief The array of joint model groups, in alphabetical order */
-  std::vector<JointModelGroup*> joint_model_groups_;
+  std::vector<std::shared_ptr<JointModelGroup>> joint_model_groups_;
 
   /** \brief The array of joint model groups, in alphabetical order */
-  std::vector<const JointModelGroup*> joint_model_groups_const_;
+  std::vector<std::shared_ptr<const JointModelGroup>> joint_model_groups_const_;
 
   /** \brief A vector of all group names, in alphabetical order */
   std::vector<std::string> joint_model_group_names_;
 
   /** \brief The array of end-effectors, in alphabetical order */
-  std::vector<const JointModelGroup*> end_effectors_;
+  std::vector<std::shared_ptr<const JointModelGroup>> end_effectors_;
 
 private:
   /** \brief Given an URDF model and a SRDF model, build a full kinematic model */

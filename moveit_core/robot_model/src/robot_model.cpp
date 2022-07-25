@@ -61,8 +61,6 @@ RobotModel::RobotModel(const urdf::ModelInterfaceSharedPtr& urdf_model, const sr
 
 RobotModel::~RobotModel()
 {
-  for (std::pair<const std::string, JointModelGroup*>& it : joint_model_group_map_)
-    delete it.second;
   for (JointModel* joint_model : joint_model_vector_)
     delete joint_model;
   for (LinkModel* link_model : link_model_vector_)
@@ -321,7 +319,7 @@ void RobotModel::buildGroupStates(const srdf::Model& srdf_model)
   {
     if (hasJointModelGroup(group_state.group_))
     {
-      JointModelGroup* jmg = getJointModelGroup(group_state.group_);
+      std::shared_ptr<JointModelGroup> jmg = getJointModelGroup(group_state.group_);
       std::vector<const JointModel*> remaining_joints = jmg->getActiveJointModels();
       std::map<std::string, double> state;
       for (std::map<std::string, std::vector<double>>::const_iterator jt = group_state.joint_values_.begin();
@@ -437,7 +435,7 @@ bool RobotModel::hasEndEffector(const std::string& eef) const
   return end_effectors_map_.find(eef) != end_effectors_map_.end();
 }
 
-const JointModelGroup* RobotModel::getEndEffector(const std::string& name) const
+std::shared_ptr<const JointModelGroup> RobotModel::getEndEffector(const std::string& name) const
 {
   JointModelGroupMap::const_iterator it = end_effectors_map_.find(name);
   if (it == end_effectors_map_.end())
@@ -451,7 +449,7 @@ const JointModelGroup* RobotModel::getEndEffector(const std::string& name) const
   return it->second;
 }
 
-JointModelGroup* RobotModel::getEndEffector(const std::string& name)
+std::shared_ptr<JointModelGroup> RobotModel::getEndEffector(const std::string& name)
 {
   JointModelGroupMap::const_iterator it = end_effectors_map_.find(name);
   if (it == end_effectors_map_.end())
@@ -470,7 +468,7 @@ bool RobotModel::hasJointModelGroup(const std::string& name) const
   return joint_model_group_map_.find(name) != joint_model_group_map_.end();
 }
 
-const JointModelGroup* RobotModel::getJointModelGroup(const std::string& name) const
+std::shared_ptr<const JointModelGroup> RobotModel::getJointModelGroup(const std::string& name) const
 {
   JointModelGroupMap::const_iterator it = joint_model_group_map_.find(name);
   if (it == joint_model_group_map_.end())
@@ -481,7 +479,7 @@ const JointModelGroup* RobotModel::getJointModelGroup(const std::string& name) c
   return it->second;
 }
 
-JointModelGroup* RobotModel::getJointModelGroup(const std::string& name)
+std::shared_ptr<JointModelGroup> RobotModel::getJointModelGroup(const std::string& name)
 {
   JointModelGroupMap::const_iterator it = joint_model_group_map_.find(name);
   if (it == joint_model_group_map_.end())
@@ -538,7 +536,7 @@ void RobotModel::buildGroups(const srdf::Model& srdf_model)
   for (JointModelGroupMap::const_iterator it = joint_model_group_map_.begin(); it != joint_model_group_map_.end(); ++it)
     joint_model_groups_.push_back(it->second);
   std::sort(joint_model_groups_.begin(), joint_model_groups_.end(), OrderGroupsByName());
-  for (JointModelGroup* joint_model_group : joint_model_groups_)
+  for (std::shared_ptr<JointModelGroup> joint_model_group : joint_model_groups_)
   {
     joint_model_groups_const_.push_back(joint_model_group);
     joint_model_group_names_.push_back(joint_model_group->getName());
@@ -553,7 +551,7 @@ void RobotModel::buildGroupsInfoSubgroups()
   // compute subgroups
   for (JointModelGroupMap::const_iterator it = joint_model_group_map_.begin(); it != joint_model_group_map_.end(); ++it)
   {
-    JointModelGroup* jmg = it->second;
+    std::shared_ptr<JointModelGroup> jmg = it->second;
     std::vector<std::string> subgroup_names;
     std::set<const JointModel*> joints(jmg->getJointModels().begin(), jmg->getJointModels().end());
     for (JointModelGroupMap::const_iterator jt = joint_model_group_map_.begin(); jt != joint_model_group_map_.end();
@@ -561,7 +559,7 @@ void RobotModel::buildGroupsInfoSubgroups()
       if (jt->first != it->first)
       {
         bool ok = true;
-        JointModelGroup* sub_jmg = jt->second;
+        std::shared_ptr<JointModelGroup> sub_jmg = jt->second;
         const std::vector<const JointModel*>& sub_joints = sub_jmg->getJointModels();
         for (const JointModel* sub_joint : sub_joints)
           if (joints.find(sub_joint) == joints.end())
@@ -594,7 +592,7 @@ void RobotModel::buildGroupsInfoEndEffectors(const srdf::Model& srdf_model)
 
         // check to see if there are groups that contain the parent link of this end effector.
         // record this information if found;
-        std::vector<JointModelGroup*> possible_parent_groups;
+        std::vector<std::shared_ptr<JointModelGroup>> possible_parent_groups;
         for (JointModelGroupMap::const_iterator jt = joint_model_group_map_.begin(); jt != joint_model_group_map_.end();
              ++jt)
           if (jt->first != it->first)
@@ -606,7 +604,7 @@ void RobotModel::buildGroupsInfoEndEffectors(const srdf::Model& srdf_model)
             }
           }
 
-        JointModelGroup* eef_parent_group = nullptr;
+        std::shared_ptr<JointModelGroup> eef_parent_group = nullptr;
         // if a parent group is specified in SRDF, try to use it
         if (!eef.parent_group_.empty())
         {
@@ -739,7 +737,7 @@ bool RobotModel::addJointModelGroup(const srdf::Model::Group& gc)
   // add joints from subgroups
   for (const std::string& subgroup : gc.subgroups_)
   {
-    const JointModelGroup* sg = getJointModelGroup(subgroup);
+    std::shared_ptr<const JointModelGroup> sg = getJointModelGroup(subgroup);
     if (sg)
     {
       // active joints
@@ -770,7 +768,7 @@ bool RobotModel::addJointModelGroup(const srdf::Model::Group& gc)
   for (const JointModel* it : jset)
     joints.push_back(it);
 
-  JointModelGroup* jmg = new JointModelGroup(gc.name_, gc, joints, this);
+  std::shared_ptr<JointModelGroup> jmg = std::make_shared<JointModelGroup>(gc.name_, gc, joints, this);
   joint_model_group_map_[gc.name_] = jmg;
 
   return true;
@@ -1411,7 +1409,7 @@ void RobotModel::interpolate(const double* from, const double* to, double t, dou
 void RobotModel::setKinematicsAllocators(const std::map<std::string, SolverAllocatorFn>& allocators)
 {
   // we first set all the "simple" allocators -- where a group has one IK solver
-  for (JointModelGroup* jmg : joint_model_groups_)
+  for (std::shared_ptr<JointModelGroup> jmg : joint_model_groups_)
   {
     std::map<std::string, SolverAllocatorFn>::const_iterator jt = allocators.find(jmg->getName());
     if (jt != allocators.end())
@@ -1424,7 +1422,7 @@ void RobotModel::setKinematicsAllocators(const std::map<std::string, SolverAlloc
 
   // now we set compound IK solvers; we do this later because we need the index maps computed by the previous calls to
   // setSolverAllocators()
-  for (JointModelGroup* jmg : joint_model_groups_)
+  for (std::shared_ptr<JointModelGroup> jmg : joint_model_groups_)
   {
     std::pair<SolverAllocatorFn, SolverAllocatorMapFn> solver_allocator_pair;
     std::map<std::string, SolverAllocatorFn>::const_iterator jt = allocators.find(jmg->getName());
@@ -1434,12 +1432,12 @@ void RobotModel::setKinematicsAllocators(const std::map<std::string, SolverAlloc
       std::set<const JointModel*> joints;
       joints.insert(jmg->getJointModels().begin(), jmg->getJointModels().end());
 
-      std::vector<const JointModelGroup*> subs;
+      std::vector<std::shared_ptr<const JointModelGroup>> subs;
 
       // go through the groups that have IK allocators and see if they are part of jmg; collect them in subs
       for (const std::pair<const std::string, SolverAllocatorFn>& allocator : allocators)
       {
-        const JointModelGroup* sub = getJointModelGroup(allocator.first);
+        std::shared_ptr<const JointModelGroup> sub = getJointModelGroup(allocator.first);
         if (!sub)  // this should actually not happen, all groups should be well defined
         {
           subs.clear();
@@ -1467,7 +1465,7 @@ void RobotModel::setKinematicsAllocators(const std::map<std::string, SolverAlloc
       if (!subs.empty())
       {
         std::stringstream ss;
-        for (const JointModelGroup* sub : subs)
+        for (std::shared_ptr<const JointModelGroup> sub : subs)
         {
           ss << sub->getName() << " ";
           solver_allocator_pair.second[sub] = allocators.find(sub->getName())->second;
@@ -1523,7 +1521,7 @@ void RobotModel::printModelInfo(std::ostream& out) const
   }
 
   out << "Available groups: \n";
-  for (JointModelGroup* joint_model_group : joint_model_groups_)
+  for (std::shared_ptr<JointModelGroup> joint_model_group : joint_model_groups_)
     joint_model_group->printGroupInfo(out);
 }
 

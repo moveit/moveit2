@@ -84,7 +84,7 @@ void OMPLInterface::setPlannerConfigurations(const planning_interface::PlannerCo
   planning_interface::PlannerConfigurationMap pconfig2 = pconfig;
 
   // construct default configurations for planning groups that don't have configs already passed in
-  for (const moveit::core::JointModelGroup* group : robot_model_->getJointModelGroups())
+  for (std::shared_ptr<const moveit::core::JointModelGroup> group : robot_model_->getJointModelGroups())
   {
     if (pconfig.find(group->getName()) == pconfig.end())
     {

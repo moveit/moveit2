@@ -55,7 +55,7 @@ namespace
 {
 bool isStateValid(const planning_scene::PlanningScene* planning_scene,
                   const kinematic_constraints::KinematicConstraintSet* constraint_set, moveit::core::RobotState* state,
-                  const moveit::core::JointModelGroup* group, const double* ik_solution)
+                  std::shared_ptr<const moveit::core::JointModelGroup> group, const double* ik_solution)
 {
   state->setJointGroupPositions(group, ik_solution);
   state->update();
@@ -99,7 +99,7 @@ bool MoveGroupCartesianPathService::computeService(const std::shared_ptr<rmw_req
   moveit::core::RobotState start_state =
       planning_scene_monitor::LockedPlanningSceneRO(context_->planning_scene_monitor_)->getCurrentState();
   moveit::core::robotStateMsgToRobotState(req->start_state, start_state);
-  if (const moveit::core::JointModelGroup* jmg = start_state.getJointModelGroup(req->group_name))
+  if (std::shared_ptr<const moveit::core::JointModelGroup> jmg = start_state.getJointModelGroup(req->group_name))
   {
     std::string link_name = req->link_name;
     if (link_name.empty() && !jmg->getLinkModelNames().empty())
@@ -152,14 +152,15 @@ bool MoveGroupCartesianPathService::computeService(const std::shared_ptr<rmw_req
             ls = std::make_unique<planning_scene_monitor::LockedPlanningSceneRO>(context_->planning_scene_monitor_);
             kset = std::make_unique<kinematic_constraints::KinematicConstraintSet>((*ls)->getRobotModel());
             kset->add(req->path_constraints, (*ls)->getTransforms());
-            constraint_fn =
-                [scene = req->avoid_collisions ? static_cast<const planning_scene::PlanningSceneConstPtr&>(*ls).get() :
-                                                 nullptr,
-                 kset = kset->empty() ? nullptr : kset.get()](moveit::core::RobotState* robot_state,
-                                                              const moveit::core::JointModelGroup* joint_group,
-                                                              const double* joint_group_variable_values) {
-                  return isStateValid(scene, kset, robot_state, joint_group, joint_group_variable_values);
-                };
+            constraint_fn = [scene = req->avoid_collisions ?
+                                         static_cast<const planning_scene::PlanningSceneConstPtr&>(*ls).get() :
+                                         nullptr,
+                             kset = kset->empty() ? nullptr : kset.get()](
+                                moveit::core::RobotState* robot_state,
+                                std::shared_ptr<const moveit::core::JointModelGroup> joint_group,
+                                const double* joint_group_variable_values) {
+              return isStateValid(scene, kset, robot_state, joint_group, joint_group_variable_values);
+            };
           }
           bool global_frame = !moveit::core::Transforms::sameFrame(link_name, req->header.frame_id);
           RCLCPP_INFO(LOGGER,

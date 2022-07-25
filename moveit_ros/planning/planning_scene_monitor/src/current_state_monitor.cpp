@@ -300,7 +300,7 @@ bool CurrentStateMonitor::waitForCompleteState(const std::string& group, double 
   std::vector<std::string> missing_joints;
   if (!haveCompleteState(missing_joints))
   {
-    const moveit::core::JointModelGroup* jmg = robot_model_->getJointModelGroup(group);
+    std::shared_ptr<const moveit::core::JointModelGroup> jmg = robot_model_->getJointModelGroup(group);
     if (jmg)
     {
       std::set<std::string> mj;

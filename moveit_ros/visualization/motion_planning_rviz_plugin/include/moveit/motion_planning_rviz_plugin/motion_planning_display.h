@@ -232,7 +232,8 @@ protected:
   void scheduleDrawQueryStartState(robot_interaction::InteractionHandler* handler, bool error_state_changed);
   void scheduleDrawQueryGoalState(robot_interaction::InteractionHandler* handler, bool error_state_changed);
 
-  bool isIKSolutionCollisionFree(moveit::core::RobotState* state, const moveit::core::JointModelGroup* group,
+  bool isIKSolutionCollisionFree(moveit::core::RobotState* state,
+                                 std::shared_ptr<const moveit::core::JointModelGroup> group,
                                  const double* ik_solution) const;
 
   void computeMetrics(bool start, const std::string& group, double payload);

@@ -142,7 +142,7 @@ private:
 
   unsigned int dimension_; /** Dimension of the group */
 
-  const moveit::core::JointModelGroup* joint_model_group_;
+  std::shared_ptr<const moveit::core::JointModelGroup> joint_model_group_;
 
   moveit::core::RobotStatePtr robot_state_;
 

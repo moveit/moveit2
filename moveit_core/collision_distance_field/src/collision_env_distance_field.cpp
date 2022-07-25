@@ -142,8 +142,8 @@ void CollisionEnvDistanceField::initialize(
   moveit::core::RobotState state(robot_model_);
   planning_scene_ = std::make_shared<planning_scene::PlanningScene>(robot_model_);
 
-  const std::vector<const moveit::core::JointModelGroup*>& jmg = robot_model_->getJointModelGroups();
-  for (const moveit::core::JointModelGroup* jm : jmg)
+  const std::vector<std::shared_ptr<const moveit::core::JointModelGroup>>& jmg = robot_model_->getJointModelGroups();
+  for (std::shared_ptr<const moveit::core::JointModelGroup> jm : jmg)
   {
     std::map<std::string, bool> updated_group_entry;
     std::vector<std::string> links = jm->getUpdatedLinkModelsWithGeometryNames();
@@ -1014,7 +1014,8 @@ void CollisionEnvDistanceField::createCollisionModelMarker(const moveit::core::R
   sphere_marker.lifetime = rclcpp::Duration::from_seconds(0);
 
   unsigned int id = 0;
-  const moveit::core::JointModelGroup* joint_group = state.getJointModelGroup(distance_field_cache_entry_->group_name_);
+  std::shared_ptr<const moveit::core::JointModelGroup> joint_group =
+      state.getJointModelGroup(distance_field_cache_entry_->group_name_);
   const std::vector<std::string>& group_link_names = joint_group->getUpdatedLinkModelNames();
 
   std::map<std::string, unsigned int>::const_iterator map_iter;

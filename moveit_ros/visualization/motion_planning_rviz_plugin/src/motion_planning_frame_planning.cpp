@@ -316,7 +316,7 @@ void MotionPlanningFrame::updateQueryStateHelper(moveit::core::RobotState& state
   if (v == "<random>")
   {
     configureWorkspace();
-    if (const moveit::core::JointModelGroup* jmg =
+    if (std::shared_ptr<const moveit::core::JointModelGroup> jmg =
             state.getJointModelGroup(planning_display_->getCurrentPlanningGroup()))
       state.setToRandomPositions(jmg);
     return;
@@ -326,7 +326,7 @@ void MotionPlanningFrame::updateQueryStateHelper(moveit::core::RobotState& state
   {
     configureWorkspace();
 
-    if (const moveit::core::JointModelGroup* jmg =
+    if (std::shared_ptr<const moveit::core::JointModelGroup> jmg =
             state.getJointModelGroup(planning_display_->getCurrentPlanningGroup()))
     {
       // Loop until a collision free state is found
@@ -385,7 +385,8 @@ void MotionPlanningFrame::updateQueryStateHelper(moveit::core::RobotState& state
   }
 
   // maybe it is a named state
-  if (const moveit::core::JointModelGroup* jmg = state.getJointModelGroup(planning_display_->getCurrentPlanningGroup()))
+  if (std::shared_ptr<const moveit::core::JointModelGroup> jmg =
+          state.getJointModelGroup(planning_display_->getCurrentPlanningGroup()))
     state.setToDefaultValues(jmg, v);
 }
 
@@ -497,7 +498,7 @@ void MotionPlanningFrame::constructPlanningRequest(moveit_msgs::msg::MotionPlanR
   mreq.workspace_parameters.max_corner.y = ui_->wcenter_y->value() + ui_->wsize_y->value() / 2.0;
   mreq.workspace_parameters.max_corner.z = ui_->wcenter_z->value() + ui_->wsize_z->value() / 2.0;
   moveit::core::RobotStateConstPtr s = planning_display_->getQueryGoalState();
-  const moveit::core::JointModelGroup* jmg = s->getJointModelGroup(mreq.group_name);
+  std::shared_ptr<const moveit::core::JointModelGroup> jmg = s->getJointModelGroup(mreq.group_name);
   if (jmg)
   {
     mreq.goal_constraints.resize(1);

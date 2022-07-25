@@ -51,7 +51,8 @@ void def_robot_state_bindings(py::module& m)
   py::class_<RobotState, RobotStatePtr>(m, "RobotState")
       .def(py::init<const robot_model::RobotModelConstPtr&>(), py::arg("robot_model"))
       .def("setToRandomPositions", py::overload_cast<>(&RobotState::setToRandomPositions))
-      .def("setToRandomPositions", py::overload_cast<const JointModelGroup*>(&RobotState::setToRandomPositions))
+      .def("setToRandomPositions",
+           py::overload_cast<std::shared_ptr<const JointModelGroup>>(&RobotState::setToRandomPositions))
       .def("getJointModelGroup", &RobotState::getJointModelGroup, py::return_value_policy::reference)
       .def("getJointModel", &RobotState::getJointModel, py::return_value_policy::reference)
       .def("getLinkModel", &RobotState::getLinkModel, py::return_value_policy::reference)
@@ -63,9 +64,10 @@ void def_robot_state_bindings(py::module& m)
       .def("setJointGroupPositions",
            py::overload_cast<const std::string&, const std::vector<double>&>(&RobotState::setJointGroupPositions))
       .def("setJointGroupPositions",
-           py::overload_cast<const JointModelGroup*, const std::vector<double>&>(&RobotState::setJointGroupPositions))
+           py::overload_cast<std::shared_ptr<const JointModelGroup>, const std::vector<double>&>(
+               &RobotState::setJointGroupPositions))
       .def("satisfiesBounds",
-           py::overload_cast<const JointModelGroup*, double>(&RobotState::satisfiesBounds, py::const_),
+           py::overload_cast<std::shared_ptr<const JointModelGroup>, double>(&RobotState::satisfiesBounds, py::const_),
            py::arg("joint_model_group"), py::arg("margin") = 0.0)
       .def("update", &RobotState::update, py::arg("force") = false)
       .def("printStateInfo",

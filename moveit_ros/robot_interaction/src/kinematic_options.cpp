@@ -49,7 +49,7 @@ bool robot_interaction::KinematicOptions::setStateFromIK(moveit::core::RobotStat
                                                          const std::string& tip,
                                                          const geometry_msgs::msg::Pose& pose) const
 {
-  const moveit::core::JointModelGroup* jmg = state.getJointModelGroup(group);
+  std::shared_ptr<const moveit::core::JointModelGroup> jmg = state.getJointModelGroup(group);
   if (!jmg)
   {
     RCLCPP_ERROR(LOGGER, "No getJointModelGroup('%s') found", group.c_str());

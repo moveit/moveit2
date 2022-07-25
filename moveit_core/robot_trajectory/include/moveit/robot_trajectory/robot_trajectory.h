@@ -74,7 +74,8 @@ public:
    *
    *  If group is nullptr this is equivalent to the first constructor.
    */
-  RobotTrajectory(const moveit::core::RobotModelConstPtr& robot_model, const moveit::core::JointModelGroup* group);
+  RobotTrajectory(const moveit::core::RobotModelConstPtr& robot_model,
+                  std::shared_ptr<const moveit::core::JointModelGroup> group);
 
   /** Assignment operator, performing a shallow copy, i.e. copying waypoints by pointer */
   RobotTrajectory& operator=(const RobotTrajectory&) = default;
@@ -90,7 +91,7 @@ public:
     return robot_model_;
   }
 
-  const moveit::core::JointModelGroup* getGroup() const
+  std::shared_ptr<const moveit::core::JointModelGroup> getGroup() const
   {
     return group_;
   }
@@ -378,7 +379,7 @@ public:
 
 private:
   moveit::core::RobotModelConstPtr robot_model_;
-  const moveit::core::JointModelGroup* group_;
+  std::shared_ptr<const moveit::core::JointModelGroup> group_;
   std::deque<moveit::core::RobotStatePtr> waypoints_;
   std::deque<double> duration_from_previous_;
   rclcpp::Clock clock_ros_;

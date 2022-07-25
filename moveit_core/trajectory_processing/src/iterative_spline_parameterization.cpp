@@ -84,7 +84,7 @@ bool IterativeSplineParameterization::computeTimeStamps(robot_trajectory::RobotT
   if (trajectory.empty())
     return true;
 
-  const moveit::core::JointModelGroup* group = trajectory.getGroup();
+  std::shared_ptr<const moveit::core::JointModelGroup> group = trajectory.getGroup();
   if (!group)
   {
     RCLCPP_ERROR(LOGGER, "It looks like the planner did not set "
@@ -584,7 +584,7 @@ static double global_adjustment_factor(const int n, double x1[], double x2[], co
 void globalAdjustment(std::vector<SingleJointTrajectory>& t2, robot_trajectory::RobotTrajectory& trajectory,
                       std::vector<double>& time_diff)
 {
-  const moveit::core::JointModelGroup* group = trajectory.getGroup();
+  std::shared_ptr<const moveit::core::JointModelGroup> group = trajectory.getGroup();
 
   const unsigned int num_points = trajectory.getWayPointCount();
   const unsigned int num_joints = group->getVariableCount();

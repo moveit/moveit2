@@ -57,7 +57,7 @@ int initRepeatedPointTrajectory(robot_trajectory::RobotTrajectory& trajectory)
   const int num = 3;
   unsigned i;
 
-  const moveit::core::JointModelGroup* group = trajectory.getGroup();
+  std::shared_ptr<const moveit::core::JointModelGroup> group = trajectory.getGroup();
   if (!group)
   {
     RCLCPP_ERROR(LOGGER, "Need to set the group");
@@ -84,7 +84,7 @@ int initStraightTrajectory(robot_trajectory::RobotTrajectory& trajectory)
   const double max = 2.0;
   unsigned i;
 
-  const moveit::core::JointModelGroup* group = trajectory.getGroup();
+  std::shared_ptr<const moveit::core::JointModelGroup> group = trajectory.getGroup();
   if (!group)
   {
     RCLCPP_ERROR(LOGGER, "Need to set the group");
@@ -110,7 +110,7 @@ int initStraightTrajectory(robot_trajectory::RobotTrajectory& trajectory)
 
 void printTrajectory(robot_trajectory::RobotTrajectory& trajectory)
 {
-  const moveit::core::JointModelGroup* group = trajectory.getGroup();
+  std::shared_ptr<const moveit::core::JointModelGroup> group = trajectory.getGroup();
   const std::vector<int>& idx = group->getVariableIndexList();
   trajectory.print(std::cout, { idx[0] });
 }

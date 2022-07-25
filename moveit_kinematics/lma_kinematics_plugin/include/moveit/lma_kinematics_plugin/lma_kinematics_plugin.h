@@ -147,7 +147,7 @@ private:
   unsigned int dimension_;                             ///< Dimension of the group
   moveit_msgs::msg::KinematicSolverInfo solver_info_;  ///< Stores information for the inverse kinematics solver
 
-  const moveit::core::JointModelGroup* joint_model_group_;
+  std::shared_ptr<const moveit::core::JointModelGroup> joint_model_group_;
   moveit::core::RobotStatePtr state_;
   KDL::Chain kdl_chain_;
   std::unique_ptr<KDL::ChainFkSolverPos> fk_solver_;

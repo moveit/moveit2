@@ -104,7 +104,7 @@ public:
    *
    * @return The joint model group
    */
-  const moveit::core::JointModelGroup* getJointModelGroup() const
+  std::shared_ptr<const moveit::core::JointModelGroup> getJointModelGroup() const
   {
     return jmg_;
   }
@@ -287,7 +287,7 @@ protected:
   /// Holds the planning scene
   planning_scene::PlanningSceneConstPtr scene_;
   /// Holds the joint model group associated with this constraint
-  const moveit::core::JointModelGroup* const jmg_;
+  const std::shared_ptr<const moveit::core::JointModelGroup> jmg_;
   /// Holds the set of frames that must exist in the reference state to allow samples to be drawn
   std::vector<std::string> frame_depends_;
   /// Holds the callback for state validity

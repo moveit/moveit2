@@ -64,6 +64,6 @@ private:
       next_waypoint_index_;  // Indicates which reference trajectory waypoint is the current local goal constrained
   moveit_msgs::action::LocalPlanner::Feedback feedback_;  // Empty feedback
   trajectory_processing::TimeOptimalTrajectoryGeneration time_parametrization_;
-  const moveit::core::JointModelGroup* joint_group_;
+  std::shared_ptr<const moveit::core::JointModelGroup> joint_group_;
 };
 }  // namespace moveit::hybrid_planning

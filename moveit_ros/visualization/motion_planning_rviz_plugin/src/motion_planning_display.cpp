@@ -588,7 +588,7 @@ void MotionPlanningDisplay::displayMetrics(bool start)
     }
 
     const moveit::core::LinkModel* lm = nullptr;
-    const moveit::core::JointModelGroup* jmg = getRobotModel()->getJointModelGroup(ee.parent_group);
+    std::shared_ptr<const moveit::core::JointModelGroup> jmg = getRobotModel()->getJointModelGroup(ee.parent_group);
     if (jmg)
       if (!jmg->getLinkModelNames().empty())
         lm = state->getLinkModel(jmg->getLinkModelNames().back());
@@ -641,7 +641,7 @@ void MotionPlanningDisplay::drawQueryStartState()
       }
       if (!getCurrentPlanningGroup().empty())
       {
-        const moveit::core::JointModelGroup* jmg = state->getJointModelGroup(getCurrentPlanningGroup());
+        std::shared_ptr<const moveit::core::JointModelGroup> jmg = state->getJointModelGroup(getCurrentPlanningGroup());
         if (jmg)
         {
           std::vector<std::string> outside_bounds;
@@ -761,7 +761,7 @@ void MotionPlanningDisplay::drawQueryGoalState()
 
       if (!getCurrentPlanningGroup().empty())
       {
-        const moveit::core::JointModelGroup* jmg = state->getJointModelGroup(getCurrentPlanningGroup());
+        std::shared_ptr<const moveit::core::JointModelGroup> jmg = state->getJointModelGroup(getCurrentPlanningGroup());
         if (jmg)
         {
           const std::vector<const moveit::core::JointModel*>& jmodels = jmg->getActiveJointModels();
@@ -962,7 +962,7 @@ void MotionPlanningDisplay::useApproximateIK(bool flag)
 }
 
 bool MotionPlanningDisplay::isIKSolutionCollisionFree(moveit::core::RobotState* state,
-                                                      const moveit::core::JointModelGroup* group,
+                                                      std::shared_ptr<const moveit::core::JointModelGroup> group,
                                                       const double* ik_solution) const
 {
   if (frame_->ui_->collision_aware_ik->isChecked() && planning_scene_monitor_)
@@ -1059,7 +1059,7 @@ void MotionPlanningDisplay::setQueryStateHelper(bool use_start_state, const std:
 
   if (v == "<random>")
   {
-    if (const moveit::core::JointModelGroup* jmg = state.getJointModelGroup(getCurrentPlanningGroup()))
+    if (std::shared_ptr<const moveit::core::JointModelGroup> jmg = state.getJointModelGroup(getCurrentPlanningGroup()))
       state.setToRandomPositions(jmg);
   }
   else if (v == "<current>")
@@ -1079,7 +1079,7 @@ void MotionPlanningDisplay::setQueryStateHelper(bool use_start_state, const std:
   else
   {
     // maybe it is a named state
-    if (const moveit::core::JointModelGroup* jmg = state.getJointModelGroup(getCurrentPlanningGroup()))
+    if (std::shared_ptr<const moveit::core::JointModelGroup> jmg = state.getJointModelGroup(getCurrentPlanningGroup()))
       state.setToDefaultValues(jmg, state_name);
   }
 
@@ -1144,7 +1144,7 @@ void MotionPlanningDisplay::onRobotModelLoaded()
       getRobotModel(), node_, rclcpp::names::append(getMoveGroupNS(), "rviz_moveit_motion_planning_display"));
   robot_interaction::KinematicOptions o;
   o.state_validity_callback_ = [this](moveit::core::RobotState* robot_state,
-                                      const moveit::core::JointModelGroup* joint_group,
+                                      std::shared_ptr<const moveit::core::JointModelGroup> joint_group,
                                       const double* joint_group_variable_values) {
     return isIKSolutionCollisionFree(robot_state, joint_group, joint_group_variable_values);
   };
@@ -1217,7 +1217,7 @@ void MotionPlanningDisplay::updateStateExceptModified(moveit::core::RobotState& 
   moveit::core::RobotState src_copy = src;
   for (const std::string& modified_group : modified_groups_)
   {
-    const moveit::core::JointModelGroup* jmg = dest.getJointModelGroup(modified_group);
+    std::shared_ptr<const moveit::core::JointModelGroup> jmg = dest.getJointModelGroup(modified_group);
     if (jmg)
     {
       std::vector<double> values_to_keep;

@@ -125,7 +125,7 @@ std::vector<const moveit::core::JointModel*> RobotPoses::getSimpleJointModels(co
                              ". Are you sure this group has associated joints/links?");
   }
 
-  const moveit::core::JointModelGroup* joint_model_group = robot_model->getJointModelGroup(group_name);
+  std::shared_ptr<const moveit::core::JointModelGroup> joint_model_group = robot_model->getJointModelGroup(group_name);
 
   std::vector<const moveit::core::JointModel*> joint_models;
   for (const moveit::core::JointModel* joint_model : joint_model_group->getJointModels())

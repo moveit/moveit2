@@ -179,7 +179,8 @@ void ompl_interface::PoseModelStateSpace::setPlanningVolume(double minX, double 
 }
 
 ompl_interface::PoseModelStateSpace::PoseComponent::PoseComponent(
-    const moveit::core::JointModelGroup* subgroup, const moveit::core::JointModelGroup::KinematicsSolver& k)
+    std::shared_ptr<const moveit::core::JointModelGroup> subgroup,
+    const moveit::core::JointModelGroup::KinematicsSolver& k)
   : subgroup_(subgroup), kinematics_solver_(k.allocator_(subgroup)), bijection_(k.bijection_)
 {
   state_space_ = std::make_shared<ompl::base::SE3StateSpace>();

@@ -128,7 +128,8 @@ std::string KinematicsBase::removeSlash(const std::string& str) const
   return (!str.empty() && str[0] == '/') ? removeSlash(str.substr(1)) : str;
 }
 
-bool KinematicsBase::supportsGroup(const moveit::core::JointModelGroup* jmg, std::string* error_text_out) const
+bool KinematicsBase::supportsGroup(std::shared_ptr<const moveit::core::JointModelGroup> jmg,
+                                   std::string* error_text_out) const
 {
   // Default implementation for legacy solvers:
   if (!jmg->isChain())

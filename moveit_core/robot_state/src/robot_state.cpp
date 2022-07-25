@@ -294,14 +294,15 @@ void RobotState::setToRandomPositions()
   // mimic values are correctly set in RobotModel
 }
 
-void RobotState::setToRandomPositions(const JointModelGroup* group)
+void RobotState::setToRandomPositions(std::shared_ptr<const JointModelGroup> group)
 {
   // we do not make calls to RobotModel for random number generation because mimic joints
   // could trigger updates outside the state of the group itself
   random_numbers::RandomNumberGenerator& rng = getRandomNumberGenerator();
   setToRandomPositions(group, rng);
 }
-void RobotState::setToRandomPositions(const JointModelGroup* group, random_numbers::RandomNumberGenerator& rng)
+void RobotState::setToRandomPositions(std::shared_ptr<const JointModelGroup> group,
+                                      random_numbers::RandomNumberGenerator& rng)
 {
   const std::vector<const JointModel*>& joints = group->getActiveJointModels();
   for (const JointModel* joint : joints)
@@ -309,7 +310,7 @@ void RobotState::setToRandomPositions(const JointModelGroup* group, random_numbe
   updateMimicJoints(group);
 }
 
-void RobotState::setToRandomPositionsNearBy(const JointModelGroup* group, const RobotState& seed,
+void RobotState::setToRandomPositionsNearBy(std::shared_ptr<const JointModelGroup> group, const RobotState& seed,
                                             const std::vector<double>& distances)
 {
   // we do not make calls to RobotModel for random number generation because mimic joints
@@ -318,7 +319,7 @@ void RobotState::setToRandomPositionsNearBy(const JointModelGroup* group, const 
   setToRandomPositionsNearBy(group, seed, distances, rng);
 }
 
-void RobotState::setToRandomPositionsNearBy(const JointModelGroup* group, const RobotState& seed,
+void RobotState::setToRandomPositionsNearBy(std::shared_ptr<const JointModelGroup> group, const RobotState& seed,
                                             const std::vector<double>& distances,
                                             random_numbers::RandomNumberGenerator& rng)
 {
@@ -333,7 +334,8 @@ void RobotState::setToRandomPositionsNearBy(const JointModelGroup* group, const 
   updateMimicJoints(group);
 }
 
-void RobotState::setToRandomPositionsNearBy(const JointModelGroup* group, const RobotState& seed, double distance)
+void RobotState::setToRandomPositionsNearBy(std::shared_ptr<const JointModelGroup> group, const RobotState& seed,
+                                            double distance)
 {
   // we do not make calls to RobotModel for random number generation because mimic joints
   // could trigger updates outside the state of the group itself
@@ -341,8 +343,8 @@ void RobotState::setToRandomPositionsNearBy(const JointModelGroup* group, const 
   setToRandomPositionsNearBy(group, seed, distance, rng);
 }
 
-void RobotState::setToRandomPositionsNearBy(const JointModelGroup* group, const RobotState& seed, double distance,
-                                            random_numbers::RandomNumberGenerator& rng)
+void RobotState::setToRandomPositionsNearBy(std::shared_ptr<const JointModelGroup> group, const RobotState& seed,
+                                            double distance, random_numbers::RandomNumberGenerator& rng)
 {
   const std::vector<const JointModel*>& joints = group->getActiveJointModels();
   for (const JointModel* joint : joints)
@@ -354,7 +356,7 @@ void RobotState::setToRandomPositionsNearBy(const JointModelGroup* group, const 
   updateMimicJoints(group);
 }
 
-bool RobotState::setToDefaultValues(const JointModelGroup* group, const std::string& name)
+bool RobotState::setToDefaultValues(std::shared_ptr<const JointModelGroup> group, const std::string& name)
 {
   std::map<std::string, double> m;
   bool r = group->getVariableDefaultPositions(name, m);  // mimic values are updated
@@ -516,7 +518,7 @@ void RobotState::setJointEfforts(const JointModel* joint, const double* effort)
   memcpy(effort_ + joint->getFirstVariableIndex(), effort, joint->getVariableCount() * sizeof(double));
 }
 
-void RobotState::setJointGroupPositions(const JointModelGroup* group, const double* gstate)
+void RobotState::setJointGroupPositions(std::shared_ptr<const JointModelGroup> group, const double* gstate)
 {
   const std::vector<int>& il = group->getVariableIndexList();
   if (group->isContiguousWithinState())
@@ -529,7 +531,7 @@ void RobotState::setJointGroupPositions(const JointModelGroup* group, const doub
   updateMimicJoints(group);
 }
 
-void RobotState::setJointGroupPositions(const JointModelGroup* group, const Eigen::VectorXd& values)
+void RobotState::setJointGroupPositions(std::shared_ptr<const JointModelGroup> group, const Eigen::VectorXd& values)
 {
   const std::vector<int>& il = group->getVariableIndexList();
   for (std::size_t i = 0; i < il.size(); ++i)
@@ -537,7 +539,8 @@ void RobotState::setJointGroupPositions(const JointModelGroup* group, const Eige
   updateMimicJoints(group);
 }
 
-void RobotState::setJointGroupActivePositions(const JointModelGroup* group, const std::vector<double>& gstate)
+void RobotState::setJointGroupActivePositions(std::shared_ptr<const JointModelGroup> group,
+                                              const std::vector<double>& gstate)
 {
   assert(gstate.size() == group->getActiveVariableCount());
   std::size_t i = 0;
@@ -549,7 +552,8 @@ void RobotState::setJointGroupActivePositions(const JointModelGroup* group, cons
   updateMimicJoints(group);
 }
 
-void RobotState::setJointGroupActivePositions(const JointModelGroup* group, const Eigen::VectorXd& values)
+void RobotState::setJointGroupActivePositions(std::shared_ptr<const JointModelGroup> group,
+                                              const Eigen::VectorXd& values)
 {
   assert(values.size() == group->getActiveVariableCount());
   std::size_t i = 0;
@@ -561,7 +565,7 @@ void RobotState::setJointGroupActivePositions(const JointModelGroup* group, cons
   updateMimicJoints(group);
 }
 
-void RobotState::copyJointGroupPositions(const JointModelGroup* group, double* gstate) const
+void RobotState::copyJointGroupPositions(std::shared_ptr<const JointModelGroup> group, double* gstate) const
 {
   const std::vector<int>& il = group->getVariableIndexList();
   if (group->isContiguousWithinState())
@@ -571,7 +575,7 @@ void RobotState::copyJointGroupPositions(const JointModelGroup* group, double* g
       gstate[i] = position_[il[i]];
 }
 
-void RobotState::copyJointGroupPositions(const JointModelGroup* group, Eigen::VectorXd& values) const
+void RobotState::copyJointGroupPositions(std::shared_ptr<const JointModelGroup> group, Eigen::VectorXd& values) const
 {
   const std::vector<int>& il = group->getVariableIndexList();
   values.resize(il.size());
@@ -579,7 +583,7 @@ void RobotState::copyJointGroupPositions(const JointModelGroup* group, Eigen::Ve
     values(i) = position_[il[i]];
 }
 
-void RobotState::setJointGroupVelocities(const JointModelGroup* group, const double* gstate)
+void RobotState::setJointGroupVelocities(std::shared_ptr<const JointModelGroup> group, const double* gstate)
 {
   markVelocity();
   const std::vector<int>& il = group->getVariableIndexList();
@@ -592,7 +596,7 @@ void RobotState::setJointGroupVelocities(const JointModelGroup* group, const dou
   }
 }
 
-void RobotState::setJointGroupVelocities(const JointModelGroup* group, const Eigen::VectorXd& values)
+void RobotState::setJointGroupVelocities(std::shared_ptr<const JointModelGroup> group, const Eigen::VectorXd& values)
 {
   markVelocity();
   const std::vector<int>& il = group->getVariableIndexList();
@@ -600,7 +604,7 @@ void RobotState::setJointGroupVelocities(const JointModelGroup* group, const Eig
     velocity_[il[i]] = values(i);
 }
 
-void RobotState::copyJointGroupVelocities(const JointModelGroup* group, double* gstate) const
+void RobotState::copyJointGroupVelocities(std::shared_ptr<const JointModelGroup> group, double* gstate) const
 {
   const std::vector<int>& il = group->getVariableIndexList();
   if (group->isContiguousWithinState())
@@ -610,7 +614,7 @@ void RobotState::copyJointGroupVelocities(const JointModelGroup* group, double* 
       gstate[i] = velocity_[il[i]];
 }
 
-void RobotState::copyJointGroupVelocities(const JointModelGroup* group, Eigen::VectorXd& values) const
+void RobotState::copyJointGroupVelocities(std::shared_ptr<const JointModelGroup> group, Eigen::VectorXd& values) const
 {
   const std::vector<int>& il = group->getVariableIndexList();
   values.resize(il.size());
@@ -618,7 +622,7 @@ void RobotState::copyJointGroupVelocities(const JointModelGroup* group, Eigen::V
     values(i) = velocity_[il[i]];
 }
 
-void RobotState::setJointGroupAccelerations(const JointModelGroup* group, const double* gstate)
+void RobotState::setJointGroupAccelerations(std::shared_ptr<const JointModelGroup> group, const double* gstate)
 {
   markAcceleration();
   const std::vector<int>& il = group->getVariableIndexList();
@@ -631,7 +635,7 @@ void RobotState::setJointGroupAccelerations(const JointModelGroup* group, const 
   }
 }
 
-void RobotState::setJointGroupAccelerations(const JointModelGroup* group, const Eigen::VectorXd& values)
+void RobotState::setJointGroupAccelerations(std::shared_ptr<const JointModelGroup> group, const Eigen::VectorXd& values)
 {
   markAcceleration();
   const std::vector<int>& il = group->getVariableIndexList();
@@ -639,7 +643,7 @@ void RobotState::setJointGroupAccelerations(const JointModelGroup* group, const 
     acceleration_[il[i]] = values(i);
 }
 
-void RobotState::copyJointGroupAccelerations(const JointModelGroup* group, double* gstate) const
+void RobotState::copyJointGroupAccelerations(std::shared_ptr<const JointModelGroup> group, double* gstate) const
 {
   const std::vector<int>& il = group->getVariableIndexList();
   if (group->isContiguousWithinState())
@@ -649,7 +653,7 @@ void RobotState::copyJointGroupAccelerations(const JointModelGroup* group, doubl
       gstate[i] = acceleration_[il[i]];
 }
 
-void RobotState::copyJointGroupAccelerations(const JointModelGroup* group, Eigen::VectorXd& values) const
+void RobotState::copyJointGroupAccelerations(std::shared_ptr<const JointModelGroup> group, Eigen::VectorXd& values) const
 {
   const std::vector<int>& il = group->getVariableIndexList();
   values.resize(il.size());
@@ -837,7 +841,7 @@ bool RobotState::satisfiesBounds(double margin) const
   return true;
 }
 
-bool RobotState::satisfiesBounds(const JointModelGroup* group, double margin) const
+bool RobotState::satisfiesBounds(std::shared_ptr<const JointModelGroup> group, double margin) const
 {
   const std::vector<const JointModel*>& jm = group->getActiveJointModels();
   for (const JointModel* joint : jm)
@@ -853,7 +857,7 @@ void RobotState::enforceBounds()
     enforceBounds(joint);
 }
 
-void RobotState::enforceBounds(const JointModelGroup* joint_group)
+void RobotState::enforceBounds(std::shared_ptr<const JointModelGroup> joint_group)
 {
   const std::vector<const JointModel*>& jm = joint_group->getActiveJointModels();
   for (const JointModel* joint : jm)
@@ -866,7 +870,7 @@ void RobotState::harmonizePositions()
     harmonizePosition(jm);
 }
 
-void RobotState::harmonizePositions(const JointModelGroup* joint_group)
+void RobotState::harmonizePositions(std::shared_ptr<const JointModelGroup> joint_group)
 {
   for (const JointModel* jm : joint_group->getActiveJointModels())
     harmonizePosition(jm);
@@ -877,7 +881,8 @@ std::pair<double, const JointModel*> RobotState::getMinDistanceToPositionBounds(
   return getMinDistanceToPositionBounds(robot_model_->getActiveJointModels());
 }
 
-std::pair<double, const JointModel*> RobotState::getMinDistanceToPositionBounds(const JointModelGroup* group) const
+std::pair<double, const JointModel*>
+RobotState::getMinDistanceToPositionBounds(std::shared_ptr<const JointModelGroup> group) const
 {
   return getMinDistanceToPositionBounds(group->getActiveJointModels());
 }
@@ -919,7 +924,8 @@ RobotState::getMinDistanceToPositionBounds(const std::vector<const JointModel*>&
   return std::make_pair(distance, index);
 }
 
-bool RobotState::isValidVelocityMove(const RobotState& other, const JointModelGroup* group, double dt) const
+bool RobotState::isValidVelocityMove(const RobotState& other, std::shared_ptr<const JointModelGroup> group,
+                                     double dt) const
 {
   const std::vector<const JointModel*>& jm = group->getActiveJointModels();
   for (const JointModel* joint_id : jm)
@@ -939,7 +945,7 @@ bool RobotState::isValidVelocityMove(const RobotState& other, const JointModelGr
   return true;
 }
 
-double RobotState::distance(const RobotState& other, const JointModelGroup* joint_group) const
+double RobotState::distance(const RobotState& other, std::shared_ptr<const JointModelGroup> joint_group) const
 {
   double d = 0.0;
   const std::vector<const JointModel*>& jm = joint_group->getActiveJointModels();
@@ -960,7 +966,8 @@ void RobotState::interpolate(const RobotState& to, double t, RobotState& state) 
   state.dirty_link_transforms_ = state.robot_model_->getRootJoint();
 }
 
-void RobotState::interpolate(const RobotState& to, double t, RobotState& state, const JointModelGroup* joint_group) const
+void RobotState::interpolate(const RobotState& to, double t, RobotState& state,
+                             std::shared_ptr<const JointModelGroup> joint_group) const
 {
   moveit::core::checkInterpolationParamBounds(LOGGER, t);
   const std::vector<const JointModel*>& jm = joint_group->getActiveJointModels();
@@ -1028,7 +1035,8 @@ void RobotState::getAttachedBodies(std::vector<const AttachedBody*>& attached_bo
     attached_bodies.push_back(it.second.get());
 }
 
-void RobotState::getAttachedBodies(std::vector<const AttachedBody*>& attached_bodies, const JointModelGroup* group) const
+void RobotState::getAttachedBodies(std::vector<const AttachedBody*>& attached_bodies,
+                                   std::shared_ptr<const JointModelGroup> group) const
 {
   attached_bodies.clear();
   for (const auto& it : attached_body_map_)
@@ -1069,7 +1077,7 @@ void RobotState::clearAttachedBodies(const LinkModel* link)
   }
 }
 
-void RobotState::clearAttachedBodies(const JointModelGroup* group)
+void RobotState::clearAttachedBodies(std::shared_ptr<const JointModelGroup> group)
 {
   for (auto it = attached_body_map_.cbegin(); it != attached_body_map_.cend(); ++it)
   {
@@ -1272,7 +1280,7 @@ void RobotState::getRobotMarkers(visualization_msgs::msg::MarkerArray& arr, cons
   }
 }
 
-Eigen::MatrixXd RobotState::getJacobian(const JointModelGroup* group,
+Eigen::MatrixXd RobotState::getJacobian(std::shared_ptr<const JointModelGroup> group,
                                         const Eigen::Vector3d& reference_point_position) const
 {
   Eigen::MatrixXd result;
@@ -1281,7 +1289,7 @@ Eigen::MatrixXd RobotState::getJacobian(const JointModelGroup* group,
   return result;
 }
 
-bool RobotState::getJacobian(const JointModelGroup* group, const LinkModel* link,
+bool RobotState::getJacobian(std::shared_ptr<const JointModelGroup> group, const LinkModel* link,
                              const Eigen::Vector3d& reference_point_position, Eigen::MatrixXd& jacobian,
                              bool use_quaternion_representation) const
 {
@@ -1389,15 +1397,15 @@ bool RobotState::getJacobian(const JointModelGroup* group, const LinkModel* link
   return true;
 }
 
-bool RobotState::setFromDiffIK(const JointModelGroup* jmg, const Eigen::VectorXd& twist, const std::string& tip,
-                               double dt, const GroupStateValidityCallbackFn& constraint)
+bool RobotState::setFromDiffIK(std::shared_ptr<const JointModelGroup> jmg, const Eigen::VectorXd& twist,
+                               const std::string& tip, double dt, const GroupStateValidityCallbackFn& constraint)
 {
   Eigen::VectorXd qdot;
   computeVariableVelocity(jmg, qdot, twist, getLinkModel(tip));
   return integrateVariableVelocity(jmg, qdot, dt, constraint);
 }
 
-bool RobotState::setFromDiffIK(const JointModelGroup* jmg, const geometry_msgs::msg::Twist& twist,
+bool RobotState::setFromDiffIK(std::shared_ptr<const JointModelGroup> jmg, const geometry_msgs::msg::Twist& twist,
                                const std::string& tip, double dt, const GroupStateValidityCallbackFn& constraint)
 {
   Eigen::Matrix<double, 6, 1> t;
@@ -1405,7 +1413,7 @@ bool RobotState::setFromDiffIK(const JointModelGroup* jmg, const geometry_msgs::
   return setFromDiffIK(jmg, t, tip, dt, constraint);
 }
 
-void RobotState::computeVariableVelocity(const JointModelGroup* jmg, Eigen::VectorXd& qdot,
+void RobotState::computeVariableVelocity(std::shared_ptr<const JointModelGroup> jmg, Eigen::VectorXd& qdot,
                                          const Eigen::VectorXd& twist, const LinkModel* tip) const
 {
   // Get the Jacobian of the group at the current configuration
@@ -1446,8 +1454,8 @@ void RobotState::computeVariableVelocity(const JointModelGroup* jmg, Eigen::Vect
   qdot = jinv * twist;
 }
 
-bool RobotState::integrateVariableVelocity(const JointModelGroup* jmg, const Eigen::VectorXd& qdot, double dt,
-                                           const GroupStateValidityCallbackFn& constraint)
+bool RobotState::integrateVariableVelocity(std::shared_ptr<const JointModelGroup> jmg, const Eigen::VectorXd& qdot,
+                                           double dt, const GroupStateValidityCallbackFn& constraint)
 {
   Eigen::VectorXd q(jmg->getVariableCount());
   copyJointGroupPositions(jmg, q);
@@ -1465,8 +1473,8 @@ bool RobotState::integrateVariableVelocity(const JointModelGroup* jmg, const Eig
     return true;
 }
 
-bool RobotState::setFromIK(const JointModelGroup* jmg, const geometry_msgs::msg::Pose& pose, double timeout,
-                           const GroupStateValidityCallbackFn& constraint,
+bool RobotState::setFromIK(std::shared_ptr<const JointModelGroup> jmg, const geometry_msgs::msg::Pose& pose,
+                           double timeout, const GroupStateValidityCallbackFn& constraint,
                            const kinematics::KinematicsQueryOptions& options,
                            kinematics::KinematicsBase::IKCostFn cost_function)
 {
@@ -1479,8 +1487,8 @@ bool RobotState::setFromIK(const JointModelGroup* jmg, const geometry_msgs::msg:
   return setFromIK(jmg, pose, solver->getTipFrame(), timeout, constraint, options, cost_function);
 }
 
-bool RobotState::setFromIK(const JointModelGroup* jmg, const geometry_msgs::msg::Pose& pose, const std::string& tip,
-                           double timeout, const GroupStateValidityCallbackFn& constraint,
+bool RobotState::setFromIK(std::shared_ptr<const JointModelGroup> jmg, const geometry_msgs::msg::Pose& pose,
+                           const std::string& tip, double timeout, const GroupStateValidityCallbackFn& constraint,
                            const kinematics::KinematicsQueryOptions& options,
                            kinematics::KinematicsBase::IKCostFn cost_function)
 {
@@ -1490,7 +1498,7 @@ bool RobotState::setFromIK(const JointModelGroup* jmg, const geometry_msgs::msg:
   return setFromIK(jmg, mat, tip, consistency_limits, timeout, constraint, options, cost_function);
 }
 
-bool RobotState::setFromIK(const JointModelGroup* jmg, const Eigen::Isometry3d& pose, double timeout,
+bool RobotState::setFromIK(std::shared_ptr<const JointModelGroup> jmg, const Eigen::Isometry3d& pose, double timeout,
                            const GroupStateValidityCallbackFn& constraint,
                            const kinematics::KinematicsQueryOptions& options,
                            kinematics::KinematicsBase::IKCostFn cost_function)
@@ -1505,8 +1513,8 @@ bool RobotState::setFromIK(const JointModelGroup* jmg, const Eigen::Isometry3d& 
   return setFromIK(jmg, pose, solver->getTipFrame(), consistency_limits, timeout, constraint, options, cost_function);
 }
 
-bool RobotState::setFromIK(const JointModelGroup* jmg, const Eigen::Isometry3d& pose_in, const std::string& tip_in,
-                           double timeout, const GroupStateValidityCallbackFn& constraint,
+bool RobotState::setFromIK(std::shared_ptr<const JointModelGroup> jmg, const Eigen::Isometry3d& pose_in,
+                           const std::string& tip_in, double timeout, const GroupStateValidityCallbackFn& constraint,
                            const kinematics::KinematicsQueryOptions& options,
                            kinematics::KinematicsBase::IKCostFn cost_function)
 {
@@ -1516,7 +1524,7 @@ bool RobotState::setFromIK(const JointModelGroup* jmg, const Eigen::Isometry3d& 
 
 namespace
 {
-bool ikCallbackFnAdapter(RobotState* state, const JointModelGroup* group,
+bool ikCallbackFnAdapter(RobotState* state, std::shared_ptr<const JointModelGroup> group,
                          const GroupStateValidityCallbackFn& constraint, const geometry_msgs::msg::Pose& /*unused*/,
                          const std::vector<double>& ik_sol, moveit_msgs::msg::MoveItErrorCodes& error_code)
 {
@@ -1554,8 +1562,8 @@ bool RobotState::setToIKSolverFrame(Eigen::Isometry3d& pose, const std::string& 
   return true;
 }
 
-bool RobotState::setFromIK(const JointModelGroup* jmg, const Eigen::Isometry3d& pose_in, const std::string& tip_in,
-                           const std::vector<double>& consistency_limits_in, double timeout,
+bool RobotState::setFromIK(std::shared_ptr<const JointModelGroup> jmg, const Eigen::Isometry3d& pose_in,
+                           const std::string& tip_in, const std::vector<double>& consistency_limits_in, double timeout,
                            const GroupStateValidityCallbackFn& constraint,
                            const kinematics::KinematicsQueryOptions& options,
                            kinematics::KinematicsBase::IKCostFn cost_function)
@@ -1567,25 +1575,25 @@ bool RobotState::setFromIK(const JointModelGroup* jmg, const Eigen::Isometry3d& 
   std::vector<std::string> tips;
   tips.push_back(tip_in);
 
-  std::vector<std::vector<double> > consistency_limits;
+  std::vector<std::vector<double>> consistency_limits;
   consistency_limits.push_back(consistency_limits_in);
 
   return setFromIK(jmg, poses, tips, consistency_limits, timeout, constraint, options, cost_function);
 }
 
-bool RobotState::setFromIK(const JointModelGroup* jmg, const EigenSTL::vector_Isometry3d& poses_in,
+bool RobotState::setFromIK(std::shared_ptr<const JointModelGroup> jmg, const EigenSTL::vector_Isometry3d& poses_in,
                            const std::vector<std::string>& tips_in, double timeout,
                            const GroupStateValidityCallbackFn& constraint,
                            const kinematics::KinematicsQueryOptions& options,
                            kinematics::KinematicsBase::IKCostFn cost_function)
 {
-  const std::vector<std::vector<double> > consistency_limits;
+  const std::vector<std::vector<double>> consistency_limits;
   return setFromIK(jmg, poses_in, tips_in, consistency_limits, timeout, constraint, options, cost_function);
 }
 
-bool RobotState::setFromIK(const JointModelGroup* jmg, const EigenSTL::vector_Isometry3d& poses_in,
+bool RobotState::setFromIK(std::shared_ptr<const JointModelGroup> jmg, const EigenSTL::vector_Isometry3d& poses_in,
                            const std::vector<std::string>& tips_in,
-                           const std::vector<std::vector<double> >& consistency_limit_sets, double timeout,
+                           const std::vector<std::vector<double>>& consistency_limit_sets, double timeout,
                            const GroupStateValidityCallbackFn& constraint,
                            const kinematics::KinematicsQueryOptions& options,
                            kinematics::KinematicsBase::IKCostFn cost_function)
@@ -1818,16 +1826,17 @@ bool RobotState::setFromIK(const JointModelGroup* jmg, const EigenSTL::vector_Is
   return false;
 }
 
-bool RobotState::setFromIKSubgroups(const JointModelGroup* jmg, const EigenSTL::vector_Isometry3d& poses_in,
+bool RobotState::setFromIKSubgroups(std::shared_ptr<const JointModelGroup> jmg,
+                                    const EigenSTL::vector_Isometry3d& poses_in,
                                     const std::vector<std::string>& tips_in,
-                                    const std::vector<std::vector<double> >& consistency_limits, double timeout,
+                                    const std::vector<std::vector<double>>& consistency_limits, double timeout,
                                     const GroupStateValidityCallbackFn& constraint,
                                     const kinematics::KinematicsQueryOptions& /*options*/)
 {
   // Assume we have already ran setFromIK() and those checks
 
   // Get containing subgroups
-  std::vector<const JointModelGroup*> sub_groups;
+  std::vector<std::shared_ptr<const JointModelGroup>> sub_groups;
   jmg->getSubgroups(sub_groups);
 
   // Error check
@@ -2022,7 +2031,7 @@ bool RobotState::setFromIKSubgroups(const JointModelGroup* jmg, const EigenSTL::
   return false;
 }
 
-double RobotState::computeCartesianPath(const JointModelGroup* group, std::vector<RobotStatePtr>& traj,
+double RobotState::computeCartesianPath(std::shared_ptr<const JointModelGroup> group, std::vector<RobotStatePtr>& traj,
                                         const LinkModel* link, const Eigen::Vector3d& direction,
                                         bool global_reference_frame, double distance, double max_step,
                                         double jump_threshold_factor, const GroupStateValidityCallbackFn& validCallback,
@@ -2033,7 +2042,7 @@ double RobotState::computeCartesianPath(const JointModelGroup* group, std::vecto
                                                      JumpThreshold(jump_threshold_factor), validCallback, options);
 }
 
-double RobotState::computeCartesianPath(const JointModelGroup* group, std::vector<RobotStatePtr>& traj,
+double RobotState::computeCartesianPath(std::shared_ptr<const JointModelGroup> group, std::vector<RobotStatePtr>& traj,
                                         const LinkModel* link, const Eigen::Isometry3d& target,
                                         bool global_reference_frame, double max_step, double jump_threshold_factor,
                                         const GroupStateValidityCallbackFn& validCallback,
@@ -2044,7 +2053,7 @@ double RobotState::computeCartesianPath(const JointModelGroup* group, std::vecto
                                                      validCallback, options);
 }
 
-double RobotState::computeCartesianPath(const JointModelGroup* group, std::vector<RobotStatePtr>& traj,
+double RobotState::computeCartesianPath(std::shared_ptr<const JointModelGroup> group, std::vector<RobotStatePtr>& traj,
                                         const LinkModel* link, const EigenSTL::vector_Isometry3d& waypoints,
                                         bool global_reference_frame, double max_step, double jump_threshold_factor,
                                         const GroupStateValidityCallbackFn& validCallback,
@@ -2085,8 +2094,8 @@ void RobotState::computeAABB(std::vector<double>& aabb) const
   {
     // The following is a shorthand for something like:
     // aabb[0, 2, 4] = bounding_box.min(); aabb[1, 3, 5] = bounding_box.max();
-    Eigen::Map<Eigen::VectorXd, Eigen::Unaligned, Eigen::InnerStride<2> >(aabb.data(), 3) = bounding_box.min();
-    Eigen::Map<Eigen::VectorXd, Eigen::Unaligned, Eigen::InnerStride<2> >(aabb.data() + 1, 3) = bounding_box.max();
+    Eigen::Map<Eigen::VectorXd, Eigen::Unaligned, Eigen::InnerStride<2>>(aabb.data(), 3) = bounding_box.min();
+    Eigen::Map<Eigen::VectorXd, Eigen::Unaligned, Eigen::InnerStride<2>>(aabb.data() + 1, 3) = bounding_box.max();
   }
 }
 
@@ -2097,7 +2106,8 @@ void RobotState::printStatePositions(std::ostream& out) const
     out << nm[i] << "=" << position_[i] << '\n';
 }
 
-void RobotState::printStatePositionsWithJointLimits(const moveit::core::JointModelGroup* jmg, std::ostream& out) const
+void RobotState::printStatePositionsWithJointLimits(std::shared_ptr<const moveit::core::JointModelGroup> jmg,
+                                                    std::ostream& out) const
 {
   // TODO(davetcoleman): support joints with multiple variables / multiple DOFs such as floating joints
   // TODO(davetcoleman): support unbounded joints

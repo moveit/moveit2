@@ -118,7 +118,7 @@ public:
 private:
   struct PoseComponent
   {
-    PoseComponent(const moveit::core::JointModelGroup* subgroup,
+    PoseComponent(std::shared_ptr<const moveit::core::JointModelGroup> subgroup,
                   const moveit::core::JointModelGroup::KinematicsSolver& k);
 
     bool computeStateFK(StateType* full_state, unsigned int idx) const;
@@ -129,7 +129,7 @@ private:
       return subgroup_->getName() < o.subgroup_->getName();
     }
 
-    const moveit::core::JointModelGroup* subgroup_;
+    std::shared_ptr<const moveit::core::JointModelGroup> subgroup_;
     kinematics::KinematicsBasePtr kinematics_solver_;
     std::vector<unsigned int> bijection_;
     ompl::base::StateSpacePtr state_space_;

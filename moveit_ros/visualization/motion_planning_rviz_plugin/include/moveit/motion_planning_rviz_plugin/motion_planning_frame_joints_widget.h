@@ -68,7 +68,7 @@ class JMGItemModel : public QAbstractTableModel
 {
   Q_OBJECT
   moveit::core::RobotState robot_state_;
-  const moveit::core::JointModelGroup* jmg_;
+  std::shared_ptr<const moveit::core::JointModelGroup> jmg_;
 
 public:
   JMGItemModel(const moveit::core::RobotState& robot_state, const std::string& group_name, QObject* parent = nullptr);
@@ -92,7 +92,7 @@ public:
   {
     return robot_state_;
   }
-  const moveit::core::JointModelGroup* getJointModelGroup() const
+  std::shared_ptr<const moveit::core::JointModelGroup> getJointModelGroup() const
   {
     return jmg_;
   }

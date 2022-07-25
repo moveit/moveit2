@@ -74,8 +74,8 @@ public:
    * @return False if the group was not found
    */
   bool getManipulabilityIndex(const moveit::core::RobotState& state,
-                              const moveit::core::JointModelGroup* joint_model_group, double& manipulability_index,
-                              bool translation = false) const;
+                              std::shared_ptr<const moveit::core::JointModelGroup> joint_model_group,
+                              double& manipulability_index, bool translation = false) const;
 
   /**
    * @brief Get the (translation) manipulability ellipsoid for a given group at a given joint configuration
@@ -97,7 +97,7 @@ public:
    * @return False if the group was not found
    */
   bool getManipulabilityEllipsoid(const moveit::core::RobotState& state,
-                                  const moveit::core::JointModelGroup* joint_model_group,
+                                  std::shared_ptr<const moveit::core::JointModelGroup> joint_model_group,
                                   Eigen::MatrixXcd& eigen_values, Eigen::MatrixXcd& eigen_vectors) const;
 
   /**
@@ -121,7 +121,8 @@ public:
    * @param condition_number Condition number for JJ^T
    * @return False if the group was not found
    */
-  bool getManipulability(const moveit::core::RobotState& state, const moveit::core::JointModelGroup* joint_model_group,
+  bool getManipulability(const moveit::core::RobotState& state,
+                         std::shared_ptr<const moveit::core::JointModelGroup> joint_model_group,
                          double& condition_number, bool translation = false) const;
 
   void setPenaltyMultiplier(double multiplier)
@@ -151,7 +152,7 @@ private:
    * @return multiplier that is multiplied with every manipulability measure computed here
    */
   double getJointLimitsPenalty(const moveit::core::RobotState& state,
-                               const moveit::core::JointModelGroup* joint_model_group) const;
+                               std::shared_ptr<const moveit::core::JointModelGroup> joint_model_group) const;
 
   double penalty_multiplier_;
 };

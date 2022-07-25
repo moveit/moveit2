@@ -59,7 +59,7 @@ struct OrderJointsByIndex
 
 struct OrderGroupsByName
 {
-  bool operator()(const JointModelGroup *a, const JointModelGroup *b) const
+  bool operator()(std::shared_ptr<const JointModelGroup> a, std::shared_ptr<const JointModelGroup> b) const
   {
     return a->getName() < b->getName();
   }

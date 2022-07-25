@@ -299,7 +299,7 @@ TEST_F(OneRobot, testGenerateTrajectory)
 
 TEST_F(OneRobot, checkAbsoluteJointSpaceJump)
 {
-  const moveit::core::JointModelGroup* joint_model_group = robot_model_->getJointModelGroup("arm");
+  std::shared_ptr<const moveit::core::JointModelGroup> joint_model_group = robot_model_->getJointModelGroup("arm");
   std::vector<std::shared_ptr<moveit::core::RobotState>> traj;
 
   // A revolute joint jumps 1.01 at the 5th waypoint and a prismatic joint jumps 1.01 at the 6th waypoint
@@ -350,7 +350,7 @@ TEST_F(OneRobot, checkAbsoluteJointSpaceJump)
 
 TEST_F(OneRobot, checkRelativeJointSpaceJump)
 {
-  const moveit::core::JointModelGroup* joint_model_group = robot_model_->getJointModelGroup("arm");
+  std::shared_ptr<const moveit::core::JointModelGroup> joint_model_group = robot_model_->getJointModelGroup("arm");
   std::vector<std::shared_ptr<moveit::core::RobotState>> traj;
 
   // The first large jump of 1.01 occurs at the 5th waypoint so the test should trim the trajectory to length 4

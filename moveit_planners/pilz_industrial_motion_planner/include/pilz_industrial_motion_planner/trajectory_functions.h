@@ -213,7 +213,7 @@ bool intersectionFound(const Eigen::Vector3d& p_center, const Eigen::Vector3d& p
  * @return
  */
 bool isStateColliding(const bool test_for_self_collision, const planning_scene::PlanningSceneConstPtr& scene,
-                      moveit::core::RobotState* state, const moveit::core::JointModelGroup* const group,
+                      moveit::core::RobotState* state, const std::shared_ptr<const moveit::core::JointModelGroup> group,
                       const double* const ik_solution);
 }  // namespace pilz_industrial_motion_planner
 

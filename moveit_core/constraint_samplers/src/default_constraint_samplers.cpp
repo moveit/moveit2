@@ -545,7 +545,8 @@ bool IKConstraintSampler::samplePose(Eigen::Vector3d& pos, Eigen::Quaterniond& q
 
 namespace
 {
-void samplingIkCallbackFnAdapter(moveit::core::RobotState* state, const moveit::core::JointModelGroup* jmg,
+void samplingIkCallbackFnAdapter(moveit::core::RobotState* state,
+                                 std::shared_ptr<const moveit::core::JointModelGroup> jmg,
                                  const moveit::core::GroupStateValidityCallbackFn& constraint,
                                  const std::vector<double>& ik_sol, moveit_msgs::msg::MoveItErrorCodes& error_code)
 {

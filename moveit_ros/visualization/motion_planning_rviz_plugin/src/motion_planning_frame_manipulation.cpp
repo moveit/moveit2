@@ -330,7 +330,7 @@ void MotionPlanningFrame::placeObjectButtonClicked()
     RCLCPP_ERROR(LOGGER, "No planning scene");
     return;
   }
-  const moveit::core::JointModelGroup* jmg = ps->getCurrentState().getJointModelGroup(group_name);
+  std::shared_ptr<const moveit::core::JointModelGroup> jmg = ps->getCurrentState().getJointModelGroup(group_name);
   if (jmg)
     ps->getCurrentState().getAttachedBodies(attached_bodies, jmg);
 

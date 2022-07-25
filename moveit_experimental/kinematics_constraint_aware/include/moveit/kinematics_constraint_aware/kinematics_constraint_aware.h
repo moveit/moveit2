@@ -128,7 +128,7 @@ private:
 
   moveit::core::RobotModelConstPtr kinematic_model_;
 
-  const moveit::core::JointModelGroup* joint_model_group_;
+  std::shared_ptr<const moveit::core::JointModelGroup> joint_model_group_;
 
   std::string group_name_;
 

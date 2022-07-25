@@ -449,7 +449,7 @@ void PlanningSceneDisplay::setGroupColor(rviz_default_plugins::robot::Robot* rob
 {
   if (getRobotModel())
   {
-    const moveit::core::JointModelGroup* jmg = getRobotModel()->getJointModelGroup(group_name);
+    std::shared_ptr<const moveit::core::JointModelGroup> jmg = getRobotModel()->getJointModelGroup(group_name);
     if (jmg)
     {
       const std::vector<std::string>& links = jmg->getLinkModelNamesWithCollisionGeometry();
@@ -473,7 +473,7 @@ void PlanningSceneDisplay::unsetGroupColor(rviz_default_plugins::robot::Robot* r
 {
   if (getRobotModel())
   {
-    const moveit::core::JointModelGroup* jmg = getRobotModel()->getJointModelGroup(group_name);
+    std::shared_ptr<const moveit::core::JointModelGroup> jmg = getRobotModel()->getJointModelGroup(group_name);
     if (jmg)
     {
       const std::vector<std::string>& links = jmg->getLinkModelNamesWithCollisionGeometry();

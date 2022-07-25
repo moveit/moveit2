@@ -61,7 +61,7 @@ RobotTrajectory::RobotTrajectory(const moveit::core::RobotModelConstPtr& robot_m
 }
 
 RobotTrajectory::RobotTrajectory(const moveit::core::RobotModelConstPtr& robot_model,
-                                 const moveit::core::JointModelGroup* group)
+                                 std::shared_ptr<const moveit::core::JointModelGroup> group)
   : robot_model_(robot_model), group_(group)
 {
 }

@@ -61,7 +61,7 @@ ConstraintSamplerPtr ConstraintSamplerManager::selectDefaultSampler(const planni
                                                                     const std::string& group_name,
                                                                     const moveit_msgs::msg::Constraints& constr)
 {
-  const moveit::core::JointModelGroup* jmg = scene->getRobotModel()->getJointModelGroup(group_name);
+  std::shared_ptr<const moveit::core::JointModelGroup> jmg = scene->getRobotModel()->getJointModelGroup(group_name);
   if (!jmg)
     return ConstraintSamplerPtr();
   std::stringstream ss;

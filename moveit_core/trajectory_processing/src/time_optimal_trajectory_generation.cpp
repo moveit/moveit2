@@ -872,7 +872,7 @@ bool TimeOptimalTrajectoryGeneration::computeTimeStamps(robot_trajectory::RobotT
   if (trajectory.empty())
     return true;
 
-  const moveit::core::JointModelGroup* group = trajectory.getGroup();
+  std::shared_ptr<const moveit::core::JointModelGroup> group = trajectory.getGroup();
   if (!group)
   {
     RCLCPP_ERROR(LOGGER, "It looks like the planner did not set the group the plan was computed for");
@@ -975,7 +975,7 @@ bool TimeOptimalTrajectoryGeneration::computeTimeStamps(
     return true;
 
   // Get the default joint limits from the robot model, then overwrite any that are provided as arguments
-  const moveit::core::JointModelGroup* group = trajectory.getGroup();
+  std::shared_ptr<const moveit::core::JointModelGroup> group = trajectory.getGroup();
   if (!group)
   {
     RCLCPP_ERROR(LOGGER, "It looks like the planner did not set the group the plan was computed for");
@@ -1064,7 +1064,7 @@ bool TimeOptimalTrajectoryGeneration::doTimeParameterizationCalculations(robot_t
   // This lib does not actually work properly when angles wrap around, so we need to unwind the path first
   trajectory.unwind();
 
-  const moveit::core::JointModelGroup* group = trajectory.getGroup();
+  std::shared_ptr<const moveit::core::JointModelGroup> group = trajectory.getGroup();
   if (!group)
   {
     RCLCPP_ERROR(LOGGER, "It looks like the planner did not set the group the plan was computed for");

@@ -83,7 +83,8 @@ TrajOptProblem::TrajOptProblem(const ProblemInfo& problem_info)
 {
   moveit::core::RobotModelConstPtr robot_model = planning_scene_->getRobotModel();
   moveit::core::RobotState current_state = planning_scene_->getCurrentState();
-  const moveit::core::JointModelGroup* joint_model_group = current_state.getJointModelGroup(planning_group_);
+  std::shared_ptr<const moveit::core::JointModelGroup> joint_model_group =
+      current_state.getJointModelGroup(planning_group_);
 
   moveit::core::JointBoundsVector bounds = joint_model_group->getActiveJointModelsBounds();
   dof_ = joint_model_group->getActiveJointModelNames().size();  // or bounds.size();
@@ -183,7 +184,8 @@ TrajOptProblemPtr ConstructProblem(const ProblemInfo& pci)
   moveit::core::RobotModelConstPtr robot_model = pci.planning_scene->getRobotModel();
   moveit::core::RobotState current_state = pci.planning_scene->getCurrentState();
 
-  const moveit::core::JointModelGroup* joint_model_group = current_state.getJointModelGroup(pci.planning_group_name);
+  std::shared_ptr<const moveit::core::JointModelGroup> joint_model_group =
+      current_state.getJointModelGroup(pci.planning_group_name);
   int n_dof = prob->GetNumDOF();
 
   std::vector<double> current_joint_values;

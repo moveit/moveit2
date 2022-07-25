@@ -290,7 +290,7 @@ protected:
   geometry_msgs::msg::TwistStamped twist_stamped_cmd_;
   control_msgs::msg::JointJog joint_servo_cmd_;
 
-  const moveit::core::JointModelGroup* joint_model_group_;
+  std::shared_ptr<const moveit::core::JointModelGroup> joint_model_group_;
 
   moveit::core::RobotStatePtr current_state_;
 

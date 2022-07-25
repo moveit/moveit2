@@ -131,7 +131,7 @@ TEST_F(GetSolverTipFrameTest, TestExceptionNoSolver)
  */
 TEST_F(GetSolverTipFrameTest, NullptrJointGroup)
 {
-  moveit::core::JointModelGroup* group = nullptr;
+  std::shared_ptr<moveit::core::JointModelGroup> group = nullptr;
   EXPECT_THROW(hasSolver(group), std::invalid_argument);
 }
 

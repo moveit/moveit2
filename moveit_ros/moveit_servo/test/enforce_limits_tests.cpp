@@ -44,7 +44,8 @@ namespace
 {
 constexpr double PUBLISH_PERIOD = 0.01;
 
-void checkVelocityLimits(const moveit::core::JointModelGroup* joint_model_group, const Eigen::ArrayXd& velocity)
+void checkVelocityLimits(std::shared_ptr<const moveit::core::JointModelGroup> joint_model_group,
+                         const Eigen::ArrayXd& velocity)
 {
   std::size_t joint_index{ 0 };
   for (const moveit::core::JointModel* joint : joint_model_group->getActiveJointModels())
@@ -70,7 +71,7 @@ protected:
   }
 
   moveit::core::RobotModelPtr robot_model_;
-  const moveit::core::JointModelGroup* joint_model_group_;
+  std::shared_ptr<const moveit::core::JointModelGroup> joint_model_group_;
 };
 
 }  // namespace

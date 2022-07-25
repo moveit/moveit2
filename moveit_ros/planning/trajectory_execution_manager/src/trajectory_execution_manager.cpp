@@ -1680,7 +1680,7 @@ moveit_controller_manager::ExecutionStatus TrajectoryExecutionManager::getLastEx
 
 bool TrajectoryExecutionManager::ensureActiveControllersForGroup(const std::string& group)
 {
-  const moveit::core::JointModelGroup* joint_model_group = robot_model_->getJointModelGroup(group);
+  std::shared_ptr<const moveit::core::JointModelGroup> joint_model_group = robot_model_->getJointModelGroup(group);
   if (joint_model_group)
     return ensureActiveControllersForJoints(joint_model_group->getJointModelNames());
   else

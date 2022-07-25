@@ -124,10 +124,12 @@ TEST_F(LoadPlanningModelsPr2, GroupInit)
   srdf_model->initString(*urdf_model_, SMODEL1);
   moveit::core::RobotModel robot_model1(urdf_model_, srdf_model);
 
-  const moveit::core::JointModelGroup* left_arm_base_tip_group = robot_model1.getJointModelGroup("left_arm_base_tip");
+  std::shared_ptr<const moveit::core::JointModelGroup> left_arm_base_tip_group =
+      robot_model1.getJointModelGroup("left_arm_base_tip");
   ASSERT_TRUE(left_arm_base_tip_group == nullptr);
 
-  const moveit::core::JointModelGroup* left_arm_joints_group = robot_model1.getJointModelGroup("left_arm_joints");
+  std::shared_ptr<const moveit::core::JointModelGroup> left_arm_joints_group =
+      robot_model1.getJointModelGroup("left_arm_joints");
   ASSERT_TRUE(left_arm_joints_group == nullptr);
 
   static const std::string SMODEL2 = "<?xml version=\"1.0\" ?>"
@@ -205,12 +207,12 @@ TEST_F(LoadPlanningModelsPr2, GroupInit)
 TEST_F(LoadPlanningModelsPr2, SubgroupInit)
 {
   moveit::core::RobotModel robot_model(urdf_model_, srdf_model_);
-  const moveit::core::JointModelGroup* jmg = robot_model.getJointModelGroup("arms");
+  std::shared_ptr<const moveit::core::JointModelGroup> jmg = robot_model.getJointModelGroup("arms");
   ASSERT_TRUE(jmg);
   EXPECT_EQ(jmg->getSubgroupNames().size(), 2u);
   EXPECT_TRUE(jmg->isSubgroup("right_arm"));
 
-  const moveit::core::JointModelGroup* jmg2 = robot_model.getJointModelGroup("whole_body");
+  std::shared_ptr<const moveit::core::JointModelGroup> jmg2 = robot_model.getJointModelGroup("whole_body");
   EXPECT_EQ(jmg2->getSubgroupNames().size(), 5u);
   EXPECT_TRUE(jmg2->isSubgroup("arms"));
   EXPECT_TRUE(jmg2->isSubgroup("right_arm"));

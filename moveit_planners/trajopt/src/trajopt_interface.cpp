@@ -89,7 +89,8 @@ bool TrajOptInterface::solve(const planning_scene::PlanningSceneConstPtr& planni
     ROS_ERROR_STREAM_NAMED(name_, "robot model is not loaded properly");
   auto current_state = std::make_shared<moveit::core::RobotState>(robot_model);
   *current_state = planning_scene->getCurrentState();
-  const moveit::core::JointModelGroup* joint_model_group = current_state->getJointModelGroup(req.group_name);
+  std::shared_ptr<const moveit::core::JointModelGroup> joint_model_group =
+      current_state->getJointModelGroup(req.group_name);
   if (joint_model_group == nullptr)
     ROS_ERROR_STREAM_NAMED(name_, "joint model group is empty");
   std::vector<std::string> group_joint_names = joint_model_group->getActiveJointModelNames();

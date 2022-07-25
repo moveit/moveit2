@@ -70,7 +70,7 @@ private:
    */
   [[nodiscard]] static bool getRobotModelBounds(const double max_velocity_scaling_factor,
                                                 const double max_acceleration_scaling_factor,
-                                                moveit::core::JointModelGroup const* const group,
+                                                const std::shared_ptr<const moveit::core::JointModelGroup> group,
                                                 ruckig::InputParameter<ruckig::DynamicDOFs>& ruckig_input);
 
   /**
@@ -82,7 +82,7 @@ private:
    */
   static void getNextRuckigInput(const moveit::core::RobotStatePtr& current_waypoint,
                                  const moveit::core::RobotStatePtr& next_waypoint,
-                                 const moveit::core::JointModelGroup* joint_group,
+                                 std::shared_ptr<const moveit::core::JointModelGroup> joint_group,
                                  ruckig::InputParameter<ruckig::DynamicDOFs>& ruckig_input);
 
   /**
@@ -93,7 +93,7 @@ private:
    * \param[out] ruckig_output   Output from the Ruckig algorithm. Initialized here.
    */
   static void initializeRuckigState(const moveit::core::RobotState& first_waypoint,
-                                    const moveit::core::JointModelGroup* joint_group,
+                                    std::shared_ptr<const moveit::core::JointModelGroup> joint_group,
                                     ruckig::InputParameter<ruckig::DynamicDOFs>& ruckig_input,
                                     ruckig::OutputParameter<ruckig::DynamicDOFs>& ruckig_output);
 

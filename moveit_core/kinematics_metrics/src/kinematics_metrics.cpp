@@ -46,8 +46,9 @@ namespace kinematics_metrics
 {
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_kinematics_metrics.kinematics_metrics");
 
-double KinematicsMetrics::getJointLimitsPenalty(const moveit::core::RobotState& state,
-                                                const moveit::core::JointModelGroup* joint_model_group) const
+double
+KinematicsMetrics::getJointLimitsPenalty(const moveit::core::RobotState& state,
+                                         std::shared_ptr<const moveit::core::JointModelGroup> joint_model_group) const
 {
   if (fabs(penalty_multiplier_) <= std::numeric_limits<double>::min())
     return 1.0;
@@ -98,7 +99,7 @@ double KinematicsMetrics::getJointLimitsPenalty(const moveit::core::RobotState& 
 bool KinematicsMetrics::getManipulabilityIndex(const moveit::core::RobotState& state, const std::string& group_name,
                                                double& manipulability_index, bool translation) const
 {
-  const moveit::core::JointModelGroup* joint_model_group = robot_model_->getJointModelGroup(group_name);
+  std::shared_ptr<const moveit::core::JointModelGroup> joint_model_group = robot_model_->getJointModelGroup(group_name);
   if (joint_model_group)
     return getManipulabilityIndex(state, joint_model_group, manipulability_index, translation);
   else
@@ -106,7 +107,7 @@ bool KinematicsMetrics::getManipulabilityIndex(const moveit::core::RobotState& s
 }
 
 bool KinematicsMetrics::getManipulabilityIndex(const moveit::core::RobotState& state,
-                                               const moveit::core::JointModelGroup* joint_model_group,
+                                               std::shared_ptr<const moveit::core::JointModelGroup> joint_model_group,
                                                double& manipulability_index, bool translation) const
 {
   // state.getJacobian() only works for chain groups.
@@ -170,17 +171,16 @@ bool KinematicsMetrics::getManipulabilityEllipsoid(const moveit::core::RobotStat
                                                    Eigen::MatrixXcd& eigen_values,
                                                    Eigen::MatrixXcd& eigen_vectors) const
 {
-  const moveit::core::JointModelGroup* joint_model_group = robot_model_->getJointModelGroup(group_name);
+  std::shared_ptr<const moveit::core::JointModelGroup> joint_model_group = robot_model_->getJointModelGroup(group_name);
   if (joint_model_group)
     return getManipulabilityEllipsoid(state, joint_model_group, eigen_values, eigen_vectors);
   else
     return false;
 }
 
-bool KinematicsMetrics::getManipulabilityEllipsoid(const moveit::core::RobotState& state,
-                                                   const moveit::core::JointModelGroup* joint_model_group,
-                                                   Eigen::MatrixXcd& eigen_values,
-                                                   Eigen::MatrixXcd& eigen_vectors) const
+bool KinematicsMetrics::getManipulabilityEllipsoid(
+    const moveit::core::RobotState& state, std::shared_ptr<const moveit::core::JointModelGroup> joint_model_group,
+    Eigen::MatrixXcd& eigen_values, Eigen::MatrixXcd& eigen_vectors) const
 {
   // state.getJacobian() only works for chain groups.
   if (!joint_model_group->isChain())
@@ -199,7 +199,7 @@ bool KinematicsMetrics::getManipulabilityEllipsoid(const moveit::core::RobotStat
 bool KinematicsMetrics::getManipulability(const moveit::core::RobotState& state, const std::string& group_name,
                                           double& manipulability, bool translation) const
 {
-  const moveit::core::JointModelGroup* joint_model_group = robot_model_->getJointModelGroup(group_name);
+  std::shared_ptr<const moveit::core::JointModelGroup> joint_model_group = robot_model_->getJointModelGroup(group_name);
   if (joint_model_group)
     return getManipulability(state, joint_model_group, manipulability, translation);
   else
@@ -207,7 +207,7 @@ bool KinematicsMetrics::getManipulability(const moveit::core::RobotState& state,
 }
 
 bool KinematicsMetrics::getManipulability(const moveit::core::RobotState& state,
-                                          const moveit::core::JointModelGroup* joint_model_group,
+                                          std::shared_ptr<const moveit::core::JointModelGroup> joint_model_group,
                                           double& manipulability, bool translation) const
 {
   // state.getJacobian() only works for chain groups.

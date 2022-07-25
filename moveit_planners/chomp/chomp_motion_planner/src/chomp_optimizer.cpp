@@ -1020,7 +1020,7 @@ void ChompOptimizer::perturbTrajectory()
     return;
   int mid_point = worst_collision_cost_state_;
   moveit::core::RobotState random_state = state_;
-  const moveit::core::JointModelGroup* planning_group = state_.getJointModelGroup(planning_group_);
+  std::shared_ptr<const moveit::core::JointModelGroup> planning_group = state_.getJointModelGroup(planning_group_);
   random_state.setToRandomPositions(planning_group);
   std::vector<double> vals;
   random_state.copyJointGroupPositions(planning_group_, vals);

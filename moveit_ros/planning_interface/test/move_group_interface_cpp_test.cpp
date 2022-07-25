@@ -169,7 +169,7 @@ public:
   void testJointPositions(const std::vector<double>& expected)
   {
     SCOPED_TRACE("testJointPositions");
-    const moveit::core::JointModelGroup* joint_model_group =
+    std::shared_ptr<const moveit::core::JointModelGroup> joint_model_group =
         move_group_->getCurrentState()->getJointModelGroup(PLANNING_GROUP);
     std::vector<double> actual;
     move_group_->getCurrentState()->copyJointGroupPositions(joint_model_group, actual);

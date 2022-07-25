@@ -72,7 +72,7 @@ bool RuckigSmoothing::applySmoothing(robot_trajectory::RobotTrajectory& trajecto
   }
 
   // Kinematic limits (vels/accels/jerks) from RobotModel
-  moveit::core::JointModelGroup const* const group = trajectory.getGroup();
+  const std::shared_ptr<const moveit::core::JointModelGroup> group = trajectory.getGroup();
   const size_t num_dof = group->getVariableCount();
   ruckig::InputParameter<ruckig::DynamicDOFs> ruckig_input{ num_dof };
   if (!getRobotModelBounds(max_velocity_scaling_factor, max_acceleration_scaling_factor, group, ruckig_input))
@@ -103,7 +103,7 @@ bool RuckigSmoothing::applySmoothing(robot_trajectory::RobotTrajectory& trajecto
   }
 
   // Set default kinematic limits (vels/accels/jerks)
-  moveit::core::JointModelGroup const* const group = trajectory.getGroup();
+  const std::shared_ptr<const moveit::core::JointModelGroup> group = trajectory.getGroup();
   const size_t num_dof = group->getVariableCount();
   ruckig::InputParameter<ruckig::DynamicDOFs> ruckig_input{ num_dof };
   double max_velocity_scaling_factor = 1.0;
@@ -144,7 +144,7 @@ bool RuckigSmoothing::applySmoothing(robot_trajectory::RobotTrajectory& trajecto
 
 bool RuckigSmoothing::validateGroup(const robot_trajectory::RobotTrajectory& trajectory)
 {
-  moveit::core::JointModelGroup const* const group = trajectory.getGroup();
+  const std::shared_ptr<const moveit::core::JointModelGroup> group = trajectory.getGroup();
   if (!group)
   {
     RCLCPP_ERROR(LOGGER, "The planner did not set the group the plan was computed for");
@@ -155,7 +155,7 @@ bool RuckigSmoothing::validateGroup(const robot_trajectory::RobotTrajectory& tra
 
 bool RuckigSmoothing::getRobotModelBounds(const double max_velocity_scaling_factor,
                                           const double max_acceleration_scaling_factor,
-                                          moveit::core::JointModelGroup const* const group,
+                                          const std::shared_ptr<const moveit::core::JointModelGroup> group,
                                           ruckig::InputParameter<ruckig::DynamicDOFs>& ruckig_input)
 {
   const size_t num_dof = group->getVariableCount();
@@ -211,7 +211,7 @@ bool RuckigSmoothing::runRuckig(robot_trajectory::RobotTrajectory& trajectory,
                                 ruckig::InputParameter<ruckig::DynamicDOFs>& ruckig_input)
 {
   const size_t num_waypoints = trajectory.getWayPointCount();
-  moveit::core::JointModelGroup const* const group = trajectory.getGroup();
+  const std::shared_ptr<const moveit::core::JointModelGroup> group = trajectory.getGroup();
   const size_t num_dof = group->getVariableCount();
   ruckig::OutputParameter<ruckig::DynamicDOFs> ruckig_output{ num_dof };
   const std::vector<int>& move_group_idx = group->getVariableIndexList();
@@ -294,7 +294,7 @@ bool RuckigSmoothing::runRuckig(robot_trajectory::RobotTrajectory& trajectory,
 }
 
 void RuckigSmoothing::initializeRuckigState(const moveit::core::RobotState& first_waypoint,
-                                            const moveit::core::JointModelGroup* joint_group,
+                                            std::shared_ptr<const moveit::core::JointModelGroup> joint_group,
                                             ruckig::InputParameter<ruckig::DynamicDOFs>& ruckig_input,
                                             ruckig::OutputParameter<ruckig::DynamicDOFs>& ruckig_output)
 {
@@ -327,7 +327,7 @@ void RuckigSmoothing::initializeRuckigState(const moveit::core::RobotState& firs
 
 void RuckigSmoothing::getNextRuckigInput(const moveit::core::RobotStatePtr& current_waypoint,
                                          const moveit::core::RobotStatePtr& next_waypoint,
-                                         const moveit::core::JointModelGroup* joint_group,
+                                         std::shared_ptr<const moveit::core::JointModelGroup> joint_group,
                                          ruckig::InputParameter<ruckig::DynamicDOFs>& ruckig_input)
 {
   const size_t num_dof = joint_group->getVariableCount();

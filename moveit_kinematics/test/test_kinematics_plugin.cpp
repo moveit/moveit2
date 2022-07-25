@@ -285,7 +285,7 @@ public:
 public:
   rclcpp::Node::SharedPtr node_;
   moveit::core::RobotModelPtr robot_model_;
-  moveit::core::JointModelGroup* jmg_;
+  std::shared_ptr<moveit::core::JointModelGroup> jmg_;
   kinematics::KinematicsBasePtr kinematics_solver_;
   random_numbers::RandomNumberGenerator rng_{ 42 };
   std::string root_link_;

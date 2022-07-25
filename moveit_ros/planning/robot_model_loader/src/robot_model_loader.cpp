@@ -274,7 +274,7 @@ void RobotModelLoader::loadKinematicsSolvers(const kinematics_plugin_loader::Kin
       if (!model_->hasJointModelGroup(group))
         continue;
 
-      const moveit::core::JointModelGroup* jmg = model_->getJointModelGroup(group);
+      std::shared_ptr<const moveit::core::JointModelGroup> jmg = model_->getJointModelGroup(group);
 
       kinematics::KinematicsBasePtr solver = kinematics_allocator(jmg);
       if (solver)
@@ -304,7 +304,7 @@ void RobotModelLoader::loadKinematicsSolvers(const kinematics_plugin_loader::Kin
     {
       if (!model_->hasJointModelGroup(it.first))
         continue;
-      moveit::core::JointModelGroup* jmg = model_->getJointModelGroup(it.first);
+      std::shared_ptr<moveit::core::JointModelGroup> jmg = model_->getJointModelGroup(it.first);
       jmg->setDefaultIKTimeout(it.second);
     }
   }

@@ -144,14 +144,15 @@ std::size_t countIndividualConstraints(const moveit_msgs::msg::Constraints& cons
 }
 
 moveit_msgs::msg::Constraints constructGoalConstraints(const moveit::core::RobotState& state,
-                                                       const moveit::core::JointModelGroup* jmg, double tolerance)
+                                                       std::shared_ptr<const moveit::core::JointModelGroup> jmg,
+                                                       double tolerance)
 {
   return constructGoalConstraints(state, jmg, tolerance, tolerance);
 }
 
 moveit_msgs::msg::Constraints constructGoalConstraints(const moveit::core::RobotState& state,
-                                                       const moveit::core::JointModelGroup* jmg, double tolerance_below,
-                                                       double tolerance_above)
+                                                       std::shared_ptr<const moveit::core::JointModelGroup> jmg,
+                                                       double tolerance_below, double tolerance_above)
 {
   moveit_msgs::msg::Constraints goal;
   std::vector<double> vals;

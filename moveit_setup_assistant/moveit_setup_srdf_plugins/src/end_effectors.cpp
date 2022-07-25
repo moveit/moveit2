@@ -49,7 +49,7 @@ void EndEffectors::onInit()
 bool EndEffectors::isLinkInGroup(const std::string& link, const std::string& group) const
 {
   const auto rm = srdf_config_->getRobotModel();
-  const moveit::core::JointModelGroup* jmg = rm->getJointModelGroup(group);
+  std::shared_ptr<const moveit::core::JointModelGroup> jmg = rm->getJointModelGroup(group);
   return jmg->hasLinkModel(link);
 }
 

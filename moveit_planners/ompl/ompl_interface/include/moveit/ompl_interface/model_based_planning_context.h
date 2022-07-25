@@ -120,7 +120,7 @@ public:
     return spec_.state_space_->getRobotModel();
   }
 
-  const moveit::core::JointModelGroup* getJointModelGroup() const
+  std::shared_ptr<const moveit::core::JointModelGroup> getJointModelGroup() const
   {
     return spec_.state_space_->getJointModelGroup();
   }

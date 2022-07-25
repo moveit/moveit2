@@ -89,7 +89,7 @@ protected:
   MoveItCppPtr moveit_cpp_ptr;
   PlanningComponentPtr planning_component_ptr;
   moveit::core::RobotModelConstPtr robot_model_ptr;
-  const moveit::core::JointModelGroup* jmg_ptr;
+  std::shared_ptr<const moveit::core::JointModelGroup> jmg_ptr;
   const std::string PLANNING_GROUP = "panda_arm";
   geometry_msgs::PoseStamped target_pose1;
   geometry_msgs::Pose target_pose2;

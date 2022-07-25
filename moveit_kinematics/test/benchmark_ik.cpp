@@ -89,7 +89,7 @@ int main(int argc, char* argv[])
   collision_detection::CollisionResult collision_result;
   std::chrono::duration<double> ik_time(0);
   std::chrono::time_point<std::chrono::system_clock> start;
-  std::vector<moveit::core::JointModelGroup*> groups;
+  std::vector<std::shared_ptr<moveit::core::JointModelGroup>> groups;
   std::vector<std::string> end_effectors;
 
   if (group == "all")

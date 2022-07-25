@@ -76,10 +76,9 @@ bool ompl_interface::ConstrainedGoalSampler::checkStateValidity(ob::State* new_g
   return static_cast<const StateValidityChecker*>(si_->getStateValidityChecker().get())->isValid(new_goal, verbose);
 }
 
-bool ompl_interface::ConstrainedGoalSampler::stateValidityCallback(ob::State* new_goal,
-                                                                   moveit::core::RobotState const* state,
-                                                                   const moveit::core::JointModelGroup* jmg,
-                                                                   const double* jpos, bool verbose) const
+bool ompl_interface::ConstrainedGoalSampler::stateValidityCallback(
+    ob::State* new_goal, moveit::core::RobotState const* state,
+    std::shared_ptr<const moveit::core::JointModelGroup> jmg, const double* jpos, bool verbose) const
 {
   // we copy the state to not change the seed state
   moveit::core::RobotState solution_state(*state);
@@ -120,12 +119,12 @@ bool ompl_interface::ConstrainedGoalSampler::sampleUsingConstraintSampler(const 
     if (constraint_sampler_)
     {
       // makes the constraint sampler also perform a validity callback
-      moveit::core::GroupStateValidityCallbackFn gsvcf = [this, new_goal,
-                                                          verbose](moveit::core::RobotState* robot_state,
-                                                                   const moveit::core::JointModelGroup* joint_group,
-                                                                   const double* joint_group_variable_values) {
-        return stateValidityCallback(new_goal, robot_state, joint_group, joint_group_variable_values, verbose);
-      };
+      moveit::core::GroupStateValidityCallbackFn gsvcf =
+          [this, new_goal, verbose](moveit::core::RobotState* robot_state,
+                                    std::shared_ptr<const moveit::core::JointModelGroup> joint_group,
+                                    const double* joint_group_variable_values) {
+            return stateValidityCallback(new_goal, robot_state, joint_group, joint_group_variable_values, verbose);
+          };
       constraint_sampler_->setGroupStateValidityCallback(gsvcf);
 
       if (constraint_sampler_->sample(work_state_, planning_context_->getMaximumStateSamplingAttempts()))

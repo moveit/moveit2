@@ -52,7 +52,7 @@ typedef std::function<double(const ompl::base::State* state1, const ompl::base::
 struct ModelBasedStateSpaceSpecification
 {
   ModelBasedStateSpaceSpecification(const moveit::core::RobotModelConstPtr& robot_model,
-                                    const moveit::core::JointModelGroup* jmg)
+                                    std::shared_ptr<const moveit::core::JointModelGroup> jmg)
     : robot_model_(robot_model), joint_model_group_(jmg)
   {
   }
@@ -65,7 +65,7 @@ struct ModelBasedStateSpaceSpecification
   }
 
   moveit::core::RobotModelConstPtr robot_model_;
-  const moveit::core::JointModelGroup* joint_model_group_;
+  std::shared_ptr<const moveit::core::JointModelGroup> joint_model_group_;
   moveit::core::JointBoundsVector joint_bounds_;
 };
 
@@ -207,7 +207,7 @@ public:
     return spec_.robot_model_;
   }
 
-  const moveit::core::JointModelGroup* getJointModelGroup() const
+  std::shared_ptr<const moveit::core::JointModelGroup> getJointModelGroup() const
   {
     return spec_.joint_model_group_;
   }

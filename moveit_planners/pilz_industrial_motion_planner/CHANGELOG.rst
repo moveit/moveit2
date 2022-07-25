@@ -43,8 +43,8 @@ Changelog for package pilz_industrial_motion_planner
 * Avoid downgrading default C++ standard (`#3043 <https://github.com/ros-planning/moveit2/issues/3043>`_)
 * Resolve ambiguous function specification (`#3040 <https://github.com/ros-planning/moveit2/issues/3040>`_)
   As Eigen introduced construction from brace-initializers as well, we do need to distinguish between
-  void setJointGroupPositions(const JointModelGroup* group, const std::vector<double>&) and
-  void setJointGroupPositions(const JointModelGroup* group, const Eigen::VectorXd&)
+  void setJointGroupPositions(std::shared_ptr<const JointModelGroup> group, const std::vector<double>&) and
+  void setJointGroupPositions(std::shared_ptr<const JointModelGroup> group, const Eigen::VectorXd&)
 * Add missing test dependencies (`#1027 <https://github.com/ros-planning/moveit2/issues/1027>`_)
 * Add moveit_configs_utils package to simplify loading paramters (`#591 <https://github.com/ros-planning/moveit2/issues/591>`_)
 * Merge pr `#3000 <https://github.com/ros-planning/moveit2/issues/3000>`_: Pilz planner: improve reporting of invalid start joints

@@ -113,7 +113,7 @@ bool ChompPlanner::solve(const planning_scene::PlanningSceneConstPtr& planning_s
   }
   robotStateToArray(goal_state, req.group_name, trajectory.getTrajectoryPoint(goal_index));
 
-  const moveit::core::JointModelGroup* model_group =
+  std::shared_ptr<const moveit::core::JointModelGroup> model_group =
       planning_scene->getRobotModel()->getJointModelGroup(req.group_name);
   // fix the goal to move the shortest angular distance for wrap-around joints:
   for (size_t i = 0; i < model_group->getActiveJointModels().size(); ++i)

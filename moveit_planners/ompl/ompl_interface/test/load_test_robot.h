@@ -144,7 +144,7 @@ protected:
 
   moveit::core::RobotModelPtr robot_model_;
   moveit::core::RobotStatePtr robot_state_;
-  const moveit::core::JointModelGroup* joint_model_group_;
+  std::shared_ptr<const moveit::core::JointModelGroup> joint_model_group_;
 
   std::size_t num_dofs_;
   std::string base_link_name_;

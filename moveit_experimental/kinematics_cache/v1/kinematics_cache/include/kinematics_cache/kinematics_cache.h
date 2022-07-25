@@ -171,10 +171,10 @@ private:
   planning_models::RobotModelConstPtr kinematic_model_; /** An instance of the kinematic model */
   planning_models::RobotState* Ptr kinematic_state_;    /** An instance of the kinematic state */
 
-  const planning_models::RobotModel::JointModelGroup* joint_model_group_; /** Joint model group associated with this
-                                                                             cache */
-  std::shared_ptr<planning_models::RobotState* ::JointStateGroup> joint_state_group_; /** Joint state corresponding
-                                                                                           to cache */
+  const planning_models::RobotModel::std::shared_ptr<JointModelGroup> joint_model_group_; /** Joint model group
+                                                                             associated with this cache */
+  std::shared_ptr<planning_models::RobotState* ::JointStateGroup> joint_state_group_;     /** Joint state corresponding
+                                                                                               to cache */
 
   //    mutable std::vector<double> solution_local_; /** Local pre-allocated storage */
 

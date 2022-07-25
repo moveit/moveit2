@@ -219,7 +219,7 @@ TEST_F(TrajectoryFunctionsTestFlangeAndGripper, TipLinkFK)
 TEST_F(TrajectoryFunctionsTestFlangeAndGripper, testIKSolver)
 {
   // Load solver
-  const moveit::core::JointModelGroup* jmg = robot_model_->getJointModelGroup(planning_group_);
+  std::shared_ptr<const moveit::core::JointModelGroup> jmg = robot_model_->getJointModelGroup(planning_group_);
   const kinematics::KinematicsBaseConstPtr& solver = jmg->getSolverInstance();
 
   // robot state
@@ -275,7 +275,7 @@ TEST_F(TrajectoryFunctionsTestFlangeAndGripper, testIKRobotState)
 {
   // robot state
   moveit::core::RobotState rstate(robot_model_);
-  const moveit::core::JointModelGroup* jmg = robot_model_->getJointModelGroup(planning_group_);
+  std::shared_ptr<const moveit::core::JointModelGroup> jmg = robot_model_->getJointModelGroup(planning_group_);
 
   while (random_test_number_ > 0)
   {
@@ -335,7 +335,7 @@ TEST_F(TrajectoryFunctionsTestFlangeAndGripper, testComputePoseIK)
   moveit::core::RobotState rstate(robot_model_);
 
   const std::string frame_id = robot_model_->getModelFrame();
-  const moveit::core::JointModelGroup* jmg = robot_model_->getJointModelGroup(planning_group_);
+  std::shared_ptr<const moveit::core::JointModelGroup> jmg = robot_model_->getJointModelGroup(planning_group_);
 
   while (random_test_number_ > 0)
   {
@@ -431,7 +431,7 @@ TEST_F(TrajectoryFunctionsTestFlangeAndGripper, testComputePoseIKInvalidFrameId)
 // TEST_F(TrajectoryFunctionsTestOnlyGripper, testComputePoseIKSelfCollisionForValidPosition)
 // {
 //   const std::string frame_id = robot_model_->getModelFrame();
-//   const moveit::core::JointModelGroup* jmg = robot_model_->getJointModelGroup(planning_group_);
+//   std::shared_ptr<const moveit::core::JointModelGroup> jmg = robot_model_->getJointModelGroup(planning_group_);
 //
 //   // create seed
 //   std::vector<double> ik_seed_states = { -0.553, 0.956, 1.758, 0.146, -1.059, 1.247 };
@@ -506,7 +506,7 @@ TEST_F(TrajectoryFunctionsTestFlangeAndGripper, testComputePoseIKSelfCollisionFo
   moveit::core::RobotState rstate(robot_model_);
 
   const std::string frame_id = robot_model_->getModelFrame();
-  const moveit::core::JointModelGroup* jmg = robot_model_->getJointModelGroup(planning_group_);
+  std::shared_ptr<const moveit::core::JointModelGroup> jmg = robot_model_->getJointModelGroup(planning_group_);
 
   // create seed
   std::map<std::string, double> ik_seed;

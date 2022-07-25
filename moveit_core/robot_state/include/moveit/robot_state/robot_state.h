@@ -65,7 +65,7 @@ MOVEIT_CLASS_FORWARD(RobotState);  // Defines RobotStatePtr, ConstPtr, WeakPtr..
    joint_group_variable_values
     the state is valid or not. Returns true if the state is valid. This call is allowed to modify \e robot_state (e.g.,
    set \e joint_group_variable_values) */
-typedef std::function<bool(RobotState* robot_state, const JointModelGroup* joint_group,
+typedef std::function<bool(RobotState* robot_state, std::shared_ptr<const JointModelGroup> joint_group,
                            const double* joint_group_variable_values)>
     GroupStateValidityCallbackFn;
 
@@ -131,7 +131,7 @@ public:
   }
 
   /** \brief Get the model of a particular joint group */
-  const JointModelGroup* getJointModelGroup(const std::string& group) const
+  std::shared_ptr<const JointModelGroup> getJointModelGroup(const std::string& group) const
   {
     return robot_model_->getJointModelGroup(group);
   }
@@ -604,7 +604,7 @@ public:
    *   of mimic joints), set those as the new values that correspond to the group */
   void setJointGroupPositions(const std::string& joint_group_name, const double* gstate)
   {
-    const JointModelGroup* jmg = robot_model_->getJointModelGroup(joint_group_name);
+    std::shared_ptr<const JointModelGroup> jmg = robot_model_->getJointModelGroup(joint_group_name);
     if (jmg)
       setJointGroupPositions(jmg, gstate);
   }
@@ -613,7 +613,7 @@ public:
    *   of mimic joints), set those as the new values that correspond to the group */
   void setJointGroupPositions(const std::string& joint_group_name, const std::vector<double>& gstate)
   {
-    const JointModelGroup* jmg = robot_model_->getJointModelGroup(joint_group_name);
+    std::shared_ptr<const JointModelGroup> jmg = robot_model_->getJointModelGroup(joint_group_name);
     if (jmg)
     {
       assert(gstate.size() == jmg->getVariableCount());
@@ -623,7 +623,7 @@ public:
 
   /** \brief Given positions for the variables that make up a group, in the order found in the group (including values
    *   of mimic joints), set those as the new values that correspond to the group */
-  void setJointGroupPositions(const JointModelGroup* group, const std::vector<double>& gstate)
+  void setJointGroupPositions(std::shared_ptr<const JointModelGroup> group, const std::vector<double>& gstate)
   {
     assert(gstate.size() == group->getVariableCount());
     setJointGroupPositions(group, &gstate[0]);
@@ -631,13 +631,13 @@ public:
 
   /** \brief Given positions for the variables that make up a group, in the order found in the group (including values
    *   of mimic joints), set those as the new values that correspond to the group */
-  void setJointGroupPositions(const JointModelGroup* group, const double* gstate);
+  void setJointGroupPositions(std::shared_ptr<const JointModelGroup> group, const double* gstate);
 
   /** \brief Given positions for the variables that make up a group, in the order found in the group (including values
    *   of mimic joints), set those as the new values that correspond to the group */
   void setJointGroupPositions(const std::string& joint_group_name, const Eigen::VectorXd& values)
   {
-    const JointModelGroup* jmg = robot_model_->getJointModelGroup(joint_group_name);
+    std::shared_ptr<const JointModelGroup> jmg = robot_model_->getJointModelGroup(joint_group_name);
     if (jmg)
     {
       assert(values.size() == jmg->getVariableCount());
@@ -647,19 +647,19 @@ public:
 
   /** \brief Given positions for the variables that make up a group, in the order found in the group (including values
    *   of mimic joints), set those as the new values that correspond to the group */
-  void setJointGroupPositions(const JointModelGroup* group, const Eigen::VectorXd& values);
+  void setJointGroupPositions(std::shared_ptr<const JointModelGroup> group, const Eigen::VectorXd& values);
 
   /** \brief Given positions for the variables of active joints that make up a group,
    * in the order found in the group (excluding values of mimic joints), set those
    * as the new values that correspond to the group */
-  void setJointGroupActivePositions(const JointModelGroup* group, const std::vector<double>& gstate);
+  void setJointGroupActivePositions(std::shared_ptr<const JointModelGroup> group, const std::vector<double>& gstate);
 
   /** \brief Given positions for the variables of active joints that make up a group,
    * in the order found in the group (excluding values of mimic joints), set those
    * as the new values that correspond to the group */
   void setJointGroupActivePositions(const std::string& joint_group_name, const std::vector<double>& gstate)
   {
-    const JointModelGroup* jmg = robot_model_->getJointModelGroup(joint_group_name);
+    std::shared_ptr<const JointModelGroup> jmg = robot_model_->getJointModelGroup(joint_group_name);
     if (jmg)
     {
       assert(gstate.size() == jmg->getActiveVariableCount());
@@ -670,14 +670,14 @@ public:
   /** \brief Given positions for the variables of active joints that make up a group,
    * in the order found in the group (excluding values of mimic joints), set those
    * as the new values that correspond to the group */
-  void setJointGroupActivePositions(const JointModelGroup* group, const Eigen::VectorXd& values);
+  void setJointGroupActivePositions(std::shared_ptr<const JointModelGroup> group, const Eigen::VectorXd& values);
 
   /** \brief Given positions for the variables of active joints that make up a group,
    * in the order found in the group (excluding values of mimic joints), set those
    * as the new values that correspond to the group */
   void setJointGroupActivePositions(const std::string& joint_group_name, const Eigen::VectorXd& values)
   {
-    const JointModelGroup* jmg = robot_model_->getJointModelGroup(joint_group_name);
+    std::shared_ptr<const JointModelGroup> jmg = robot_model_->getJointModelGroup(joint_group_name);
     if (jmg)
     {
       assert(values.size() == jmg->getActiveVariableCount());
@@ -690,7 +690,7 @@ public:
    * RobotState itself, so we copy instead of returning a pointer.*/
   void copyJointGroupPositions(const std::string& joint_group_name, std::vector<double>& gstate) const
   {
-    const JointModelGroup* jmg = robot_model_->getJointModelGroup(joint_group_name);
+    std::shared_ptr<const JointModelGroup> jmg = robot_model_->getJointModelGroup(joint_group_name);
     if (jmg)
     {
       gstate.resize(jmg->getVariableCount());
@@ -703,7 +703,7 @@ public:
    * RobotState itself, so we copy instead of returning a pointer.*/
   void copyJointGroupPositions(const std::string& joint_group_name, double* gstate) const
   {
-    const JointModelGroup* jmg = robot_model_->getJointModelGroup(joint_group_name);
+    std::shared_ptr<const JointModelGroup> jmg = robot_model_->getJointModelGroup(joint_group_name);
     if (jmg)
       copyJointGroupPositions(jmg, gstate);
   }
@@ -711,7 +711,7 @@ public:
   /** \brief For a given group, copy the position values of the variables that make up the group into another location,
    * in the order that the variables are found in the group. This is not necessarily a contiguous block of memory in the
    * RobotState itself, so we copy instead of returning a pointer.*/
-  void copyJointGroupPositions(const JointModelGroup* group, std::vector<double>& gstate) const
+  void copyJointGroupPositions(std::shared_ptr<const JointModelGroup> group, std::vector<double>& gstate) const
   {
     gstate.resize(group->getVariableCount());
     copyJointGroupPositions(group, &gstate[0]);
@@ -720,14 +720,14 @@ public:
   /** \brief For a given group, copy the position values of the variables that make up the group into another location,
    * in the order that the variables are found in the group. This is not necessarily a contiguous block of memory in the
    * RobotState itself, so we copy instead of returning a pointer.*/
-  void copyJointGroupPositions(const JointModelGroup* group, double* gstate) const;
+  void copyJointGroupPositions(std::shared_ptr<const JointModelGroup> group, double* gstate) const;
 
   /** \brief For a given group, copy the position values of the variables that make up the group into another location,
    * in the order that the variables are found in the group. This is not necessarily a contiguous block of memory in the
    * RobotState itself, so we copy instead of returning a pointer.*/
   void copyJointGroupPositions(const std::string& joint_group_name, Eigen::VectorXd& values) const
   {
-    const JointModelGroup* jmg = robot_model_->getJointModelGroup(joint_group_name);
+    std::shared_ptr<const JointModelGroup> jmg = robot_model_->getJointModelGroup(joint_group_name);
     if (jmg)
       copyJointGroupPositions(jmg, values);
   }
@@ -735,7 +735,7 @@ public:
   /** \brief For a given group, copy the position values of the variables that make up the group into another location,
    * in the order that the variables are found in the group. This is not necessarily a contiguous block of memory in the
    * RobotState itself, so we copy instead of returning a pointer.*/
-  void copyJointGroupPositions(const JointModelGroup* group, Eigen::VectorXd& values) const;
+  void copyJointGroupPositions(std::shared_ptr<const JointModelGroup> group, Eigen::VectorXd& values) const;
 
   /** @} */
 
@@ -747,7 +747,7 @@ public:
    *   of mimic joints), set those as the new values that correspond to the group */
   void setJointGroupVelocities(const std::string& joint_group_name, const double* gstate)
   {
-    const JointModelGroup* jmg = robot_model_->getJointModelGroup(joint_group_name);
+    std::shared_ptr<const JointModelGroup> jmg = robot_model_->getJointModelGroup(joint_group_name);
     if (jmg)
       setJointGroupVelocities(jmg, gstate);
   }
@@ -756,41 +756,41 @@ public:
    *   of mimic joints), set those as the new values that correspond to the group */
   void setJointGroupVelocities(const std::string& joint_group_name, const std::vector<double>& gstate)
   {
-    const JointModelGroup* jmg = robot_model_->getJointModelGroup(joint_group_name);
+    std::shared_ptr<const JointModelGroup> jmg = robot_model_->getJointModelGroup(joint_group_name);
     if (jmg)
       setJointGroupVelocities(jmg, &gstate[0]);
   }
 
   /** \brief Given velocities for the variables that make up a group, in the order found in the group (including values
    *   of mimic joints), set those as the new values that correspond to the group */
-  void setJointGroupVelocities(const JointModelGroup* group, const std::vector<double>& gstate)
+  void setJointGroupVelocities(std::shared_ptr<const JointModelGroup> group, const std::vector<double>& gstate)
   {
     setJointGroupVelocities(group, &gstate[0]);
   }
 
   /** \brief Given velocities for the variables that make up a group, in the order found in the group (including values
    *   of mimic joints), set those as the new values that correspond to the group */
-  void setJointGroupVelocities(const JointModelGroup* group, const double* gstate);
+  void setJointGroupVelocities(std::shared_ptr<const JointModelGroup> group, const double* gstate);
 
   /** \brief Given velocities for the variables that make up a group, in the order found in the group (including values
    *   of mimic joints), set those as the new values that correspond to the group */
   void setJointGroupVelocities(const std::string& joint_group_name, const Eigen::VectorXd& values)
   {
-    const JointModelGroup* jmg = robot_model_->getJointModelGroup(joint_group_name);
+    std::shared_ptr<const JointModelGroup> jmg = robot_model_->getJointModelGroup(joint_group_name);
     if (jmg)
       setJointGroupVelocities(jmg, values);
   }
 
   /** \brief Given velocities for the variables that make up a group, in the order found in the group (including values
    *   of mimic joints), set those as the new values that correspond to the group */
-  void setJointGroupVelocities(const JointModelGroup* group, const Eigen::VectorXd& values);
+  void setJointGroupVelocities(std::shared_ptr<const JointModelGroup> group, const Eigen::VectorXd& values);
 
   /** \brief For a given group, copy the velocity values of the variables that make up the group into another location,
    * in the order that the variables are found in the group. This is not necessarily a contiguous block of memory in the
    * RobotState itself, so we copy instead of returning a pointer.*/
   void copyJointGroupVelocities(const std::string& joint_group_name, std::vector<double>& gstate) const
   {
-    const JointModelGroup* jmg = robot_model_->getJointModelGroup(joint_group_name);
+    std::shared_ptr<const JointModelGroup> jmg = robot_model_->getJointModelGroup(joint_group_name);
     if (jmg)
     {
       gstate.resize(jmg->getVariableCount());
@@ -803,7 +803,7 @@ public:
    * RobotState itself, so we copy instead of returning a pointer.*/
   void copyJointGroupVelocities(const std::string& joint_group_name, double* gstate) const
   {
-    const JointModelGroup* jmg = robot_model_->getJointModelGroup(joint_group_name);
+    std::shared_ptr<const JointModelGroup> jmg = robot_model_->getJointModelGroup(joint_group_name);
     if (jmg)
       copyJointGroupVelocities(jmg, gstate);
   }
@@ -811,7 +811,7 @@ public:
   /** \brief For a given group, copy the velocity values of the variables that make up the group into another location,
    * in the order that the variables are found in the group. This is not necessarily a contiguous block of memory in the
    * RobotState itself, so we copy instead of returning a pointer.*/
-  void copyJointGroupVelocities(const JointModelGroup* group, std::vector<double>& gstate) const
+  void copyJointGroupVelocities(std::shared_ptr<const JointModelGroup> group, std::vector<double>& gstate) const
   {
     gstate.resize(group->getVariableCount());
     copyJointGroupVelocities(group, &gstate[0]);
@@ -820,14 +820,14 @@ public:
   /** \brief For a given group, copy the velocity values of the variables that make up the group into another location,
    * in the order that the variables are found in the group. This is not necessarily a contiguous block of memory in the
    * RobotState itself, so we copy instead of returning a pointer.*/
-  void copyJointGroupVelocities(const JointModelGroup* group, double* gstate) const;
+  void copyJointGroupVelocities(std::shared_ptr<const JointModelGroup> group, double* gstate) const;
 
   /** \brief For a given group, copy the velocity values of the variables that make up the group into another location,
    * in the order that the variables are found in the group. This is not necessarily a contiguous block of memory in the
    * RobotState itself, so we copy instead of returning a pointer.*/
   void copyJointGroupVelocities(const std::string& joint_group_name, Eigen::VectorXd& values) const
   {
-    const JointModelGroup* jmg = robot_model_->getJointModelGroup(joint_group_name);
+    std::shared_ptr<const JointModelGroup> jmg = robot_model_->getJointModelGroup(joint_group_name);
     if (jmg)
       copyJointGroupVelocities(jmg, values);
   }
@@ -835,7 +835,7 @@ public:
   /** \brief For a given group, copy the velocity values of the variables that make up the group into another location,
    * in the order that the variables are found in the group. This is not necessarily a contiguous block of memory in the
    * RobotState itself, so we copy instead of returning a pointer.*/
-  void copyJointGroupVelocities(const JointModelGroup* group, Eigen::VectorXd& values) const;
+  void copyJointGroupVelocities(std::shared_ptr<const JointModelGroup> group, Eigen::VectorXd& values) const;
 
   /** @} */
 
@@ -847,7 +847,7 @@ public:
    *   values of mimic joints), set those as the new values that correspond to the group */
   void setJointGroupAccelerations(const std::string& joint_group_name, const double* gstate)
   {
-    const JointModelGroup* jmg = robot_model_->getJointModelGroup(joint_group_name);
+    std::shared_ptr<const JointModelGroup> jmg = robot_model_->getJointModelGroup(joint_group_name);
     if (jmg)
       setJointGroupAccelerations(jmg, gstate);
   }
@@ -856,41 +856,41 @@ public:
    *   values of mimic joints), set those as the new values that correspond to the group */
   void setJointGroupAccelerations(const std::string& joint_group_name, const std::vector<double>& gstate)
   {
-    const JointModelGroup* jmg = robot_model_->getJointModelGroup(joint_group_name);
+    std::shared_ptr<const JointModelGroup> jmg = robot_model_->getJointModelGroup(joint_group_name);
     if (jmg)
       setJointGroupAccelerations(jmg, &gstate[0]);
   }
 
   /** \brief Given accelerations for the variables that make up a group, in the order found in the group (including
    *   values of mimic joints), set those as the new values that correspond to the group */
-  void setJointGroupAccelerations(const JointModelGroup* group, const std::vector<double>& gstate)
+  void setJointGroupAccelerations(std::shared_ptr<const JointModelGroup> group, const std::vector<double>& gstate)
   {
     setJointGroupAccelerations(group, &gstate[0]);
   }
 
   /** \brief Given accelerations for the variables that make up a group, in the order found in the group (including
    *   values of mimic joints), set those as the new values that correspond to the group */
-  void setJointGroupAccelerations(const JointModelGroup* group, const double* gstate);
+  void setJointGroupAccelerations(std::shared_ptr<const JointModelGroup> group, const double* gstate);
 
   /** \brief Given accelerations for the variables that make up a group, in the order found in the group (including
    *   values of mimic joints), set those as the new values that correspond to the group */
   void setJointGroupAccelerations(const std::string& joint_group_name, const Eigen::VectorXd& values)
   {
-    const JointModelGroup* jmg = robot_model_->getJointModelGroup(joint_group_name);
+    std::shared_ptr<const JointModelGroup> jmg = robot_model_->getJointModelGroup(joint_group_name);
     if (jmg)
       setJointGroupAccelerations(jmg, values);
   }
 
   /** \brief Given accelerations for the variables that make up a group, in the order found in the group (including
    *   values of mimic joints), set those as the new values that correspond to the group */
-  void setJointGroupAccelerations(const JointModelGroup* group, const Eigen::VectorXd& values);
+  void setJointGroupAccelerations(std::shared_ptr<const JointModelGroup> group, const Eigen::VectorXd& values);
 
   /** \brief For a given group, copy the acceleration values of the variables that make up the group into another
    * location, in the order that the variables are found in the group. This is not necessarily a contiguous block of
    * memory in the RobotState itself, so we copy instead of returning a pointer.*/
   void copyJointGroupAccelerations(const std::string& joint_group_name, std::vector<double>& gstate) const
   {
-    const JointModelGroup* jmg = robot_model_->getJointModelGroup(joint_group_name);
+    std::shared_ptr<const JointModelGroup> jmg = robot_model_->getJointModelGroup(joint_group_name);
     if (jmg)
     {
       gstate.resize(jmg->getVariableCount());
@@ -903,7 +903,7 @@ public:
    * memory in the RobotState itself, so we copy instead of returning a pointer.*/
   void copyJointGroupAccelerations(const std::string& joint_group_name, double* gstate) const
   {
-    const JointModelGroup* jmg = robot_model_->getJointModelGroup(joint_group_name);
+    std::shared_ptr<const JointModelGroup> jmg = robot_model_->getJointModelGroup(joint_group_name);
     if (jmg)
       copyJointGroupAccelerations(jmg, gstate);
   }
@@ -911,7 +911,7 @@ public:
   /** \brief For a given group, copy the acceleration values of the variables that make up the group into another
    * location, in the order that the variables are found in the group. This is not necessarily a contiguous block of
    * memory in the RobotState itself, so we copy instead of returning a pointer.*/
-  void copyJointGroupAccelerations(const JointModelGroup* group, std::vector<double>& gstate) const
+  void copyJointGroupAccelerations(std::shared_ptr<const JointModelGroup> group, std::vector<double>& gstate) const
   {
     gstate.resize(group->getVariableCount());
     copyJointGroupAccelerations(group, &gstate[0]);
@@ -920,14 +920,14 @@ public:
   /** \brief For a given group, copy the acceleration values of the variables that make up the group into another
    * location, in the order that the variables are found in the group. This is not necessarily a contiguous block of
    * memory in the RobotState itself, so we copy instead of returning a pointer.*/
-  void copyJointGroupAccelerations(const JointModelGroup* group, double* gstate) const;
+  void copyJointGroupAccelerations(std::shared_ptr<const JointModelGroup> group, double* gstate) const;
 
   /** \brief For a given group, copy the acceleration values of the variables that make up the group into another
    * location, in the order that the variables are found in the group. This is not necessarily a contiguous block of
    * memory in the RobotState itself, so we copy instead of returning a pointer.*/
   void copyJointGroupAccelerations(const std::string& joint_group_name, Eigen::VectorXd& values) const
   {
-    const JointModelGroup* jmg = robot_model_->getJointModelGroup(joint_group_name);
+    std::shared_ptr<const JointModelGroup> jmg = robot_model_->getJointModelGroup(joint_group_name);
     if (jmg)
       copyJointGroupAccelerations(jmg, values);
   }
@@ -935,7 +935,7 @@ public:
   /** \brief For a given group, copy the acceleration values of the variables that make up the group into another
    * location, in the order that the variables are found in the group. This is not necessarily a contiguous block of
    * memory in the RobotState itself, so we copy instead of returning a pointer.*/
-  void copyJointGroupAccelerations(const JointModelGroup* group, Eigen::VectorXd& values) const;
+  void copyJointGroupAccelerations(std::shared_ptr<const JointModelGroup> group, Eigen::VectorXd& values) const;
 
   /** @} */
 
@@ -949,8 +949,8 @@ public:
       @param pose The pose the last link in the chain needs to achieve
       @param timeout The timeout passed to the kinematics solver on each attempt
       @param constraint A state validity constraint to be required for IK solutions */
-  bool setFromIK(const JointModelGroup* group, const geometry_msgs::msg::Pose& pose, double timeout = 0.0,
-                 const GroupStateValidityCallbackFn& constraint = GroupStateValidityCallbackFn(),
+  bool setFromIK(std::shared_ptr<const JointModelGroup> group, const geometry_msgs::msg::Pose& pose,
+                 double timeout = 0.0, const GroupStateValidityCallbackFn& constraint = GroupStateValidityCallbackFn(),
                  const kinematics::KinematicsQueryOptions& options = kinematics::KinematicsQueryOptions(),
                  kinematics::KinematicsBase::IKCostFn cost_function = kinematics::KinematicsBase::IKCostFn());
 
@@ -961,8 +961,9 @@ public:
       @param tip The name of the link the pose is specified for
       @param timeout The timeout passed to the kinematics solver on each attempt
       @param constraint A state validity constraint to be required for IK solutions */
-  bool setFromIK(const JointModelGroup* group, const geometry_msgs::msg::Pose& pose, const std::string& tip,
-                 double timeout = 0.0, const GroupStateValidityCallbackFn& constraint = GroupStateValidityCallbackFn(),
+  bool setFromIK(std::shared_ptr<const JointModelGroup> group, const geometry_msgs::msg::Pose& pose,
+                 const std::string& tip, double timeout = 0.0,
+                 const GroupStateValidityCallbackFn& constraint = GroupStateValidityCallbackFn(),
                  const kinematics::KinematicsQueryOptions& options = kinematics::KinematicsQueryOptions(),
                  kinematics::KinematicsBase::IKCostFn cost_function = kinematics::KinematicsBase::IKCostFn());
 
@@ -972,7 +973,7 @@ public:
       @param pose The pose the last link in the chain needs to achieve
       @param tip The name of the link the pose is specified for
       @param timeout The timeout passed to the kinematics solver on each attempt */
-  bool setFromIK(const JointModelGroup* group, const Eigen::Isometry3d& pose, double timeout = 0.0,
+  bool setFromIK(std::shared_ptr<const JointModelGroup> group, const Eigen::Isometry3d& pose, double timeout = 0.0,
                  const GroupStateValidityCallbackFn& constraint = GroupStateValidityCallbackFn(),
                  const kinematics::KinematicsQueryOptions& options = kinematics::KinematicsQueryOptions(),
                  kinematics::KinematicsBase::IKCostFn cost_function = kinematics::KinematicsBase::IKCostFn());
@@ -983,7 +984,7 @@ public:
       @param pose The pose the last link in the chain needs to achieve
       @param timeout The timeout passed to the kinematics solver on each attempt
       @param constraint A state validity constraint to be required for IK solutions */
-  bool setFromIK(const JointModelGroup* group, const Eigen::Isometry3d& pose, const std::string& tip,
+  bool setFromIK(std::shared_ptr<const JointModelGroup> group, const Eigen::Isometry3d& pose, const std::string& tip,
                  double timeout = 0.0, const GroupStateValidityCallbackFn& constraint = GroupStateValidityCallbackFn(),
                  const kinematics::KinematicsQueryOptions& options = kinematics::KinematicsQueryOptions(),
                  kinematics::KinematicsBase::IKCostFn cost_function = kinematics::KinematicsBase::IKCostFn());
@@ -996,7 +997,7 @@ public:
       @param consistency_limits This specifies the desired distance between the solution and the seed state
       @param timeout The timeout passed to the kinematics solver on each attempt
       @param constraint A state validity constraint to be required for IK solutions */
-  bool setFromIK(const JointModelGroup* group, const Eigen::Isometry3d& pose, const std::string& tip,
+  bool setFromIK(std::shared_ptr<const JointModelGroup> group, const Eigen::Isometry3d& pose, const std::string& tip,
                  const std::vector<double>& consistency_limits, double timeout = 0.0,
                  const GroupStateValidityCallbackFn& constraint = GroupStateValidityCallbackFn(),
                  const kinematics::KinematicsQueryOptions& options = kinematics::KinematicsQueryOptions(),
@@ -1011,7 +1012,7 @@ public:
       @param tips The names of the frames for which IK is attempted.
       @param timeout The timeout passed to the kinematics solver on each attempt
       @param constraint A state validity constraint to be required for IK solutions */
-  bool setFromIK(const JointModelGroup* group, const EigenSTL::vector_Isometry3d& poses,
+  bool setFromIK(std::shared_ptr<const JointModelGroup> group, const EigenSTL::vector_Isometry3d& poses,
                  const std::vector<std::string>& tips, double timeout = 0.0,
                  const GroupStateValidityCallbackFn& constraint = GroupStateValidityCallbackFn(),
                  const kinematics::KinematicsQueryOptions& options = kinematics::KinematicsQueryOptions(),
@@ -1027,7 +1028,7 @@ public:
       @param consistency_limits This specifies the desired distance between the solution and the seed state
       @param timeout The timeout passed to the kinematics solver on each attempt
       @param constraint A state validity constraint to be required for IK solutions */
-  bool setFromIK(const JointModelGroup* group, const EigenSTL::vector_Isometry3d& poses,
+  bool setFromIK(std::shared_ptr<const JointModelGroup> group, const EigenSTL::vector_Isometry3d& poses,
                  const std::vector<std::string>& tips, const std::vector<std::vector<double>>& consistency_limits,
                  double timeout = 0.0, const GroupStateValidityCallbackFn& constraint = GroupStateValidityCallbackFn(),
                  const kinematics::KinematicsQueryOptions& options = kinematics::KinematicsQueryOptions(),
@@ -1041,7 +1042,7 @@ public:
       @param consistency_limits This specifies the desired distance between the solution and the seed state
       @param timeout The timeout passed to the kinematics solver on each attempt
       @param constraint A state validity constraint to be required for IK solutions */
-  bool setFromIKSubgroups(const JointModelGroup* group, const EigenSTL::vector_Isometry3d& poses,
+  bool setFromIKSubgroups(std::shared_ptr<const JointModelGroup> group, const EigenSTL::vector_Isometry3d& poses,
                           const std::vector<std::string>& tips,
                           const std::vector<std::vector<double>>& consistency_limits, double timeout = 0.0,
                           const GroupStateValidityCallbackFn& constraint = GroupStateValidityCallbackFn(),
@@ -1054,8 +1055,8 @@ public:
    * @param dt a time interval (seconds)
    * @param st a secondary task computation function
    */
-  bool setFromDiffIK(const JointModelGroup* group, const Eigen::VectorXd& twist, const std::string& tip, double dt,
-                     const GroupStateValidityCallbackFn& constraint = GroupStateValidityCallbackFn());
+  bool setFromDiffIK(std::shared_ptr<const JointModelGroup> group, const Eigen::VectorXd& twist, const std::string& tip,
+                     double dt, const GroupStateValidityCallbackFn& constraint = GroupStateValidityCallbackFn());
 
   /** \brief Set the joint values from a Cartesian velocity applied during a time dt
    * @param group the group of joints this function operates on
@@ -1064,8 +1065,9 @@ public:
    * @param dt a time interval (seconds)
    * @param st a secondary task computation function
    */
-  bool setFromDiffIK(const JointModelGroup* group, const geometry_msgs::msg::Twist& twist, const std::string& tip,
-                     double dt, const GroupStateValidityCallbackFn& constraint = GroupStateValidityCallbackFn());
+  bool setFromDiffIK(std::shared_ptr<const JointModelGroup> group, const geometry_msgs::msg::Twist& twist,
+                     const std::string& tip, double dt,
+                     const GroupStateValidityCallbackFn& constraint = GroupStateValidityCallbackFn());
 
   /** \brief Compute the sequence of joint values that correspond to a straight Cartesian path for a particular group.
 
@@ -1101,9 +1103,9 @@ public:
      NOTE: As of ROS-Melodic these are deprecated and should not be used
      */
   [[deprecated]] double
-  computeCartesianPath(const JointModelGroup* group, std::vector<RobotStatePtr>& traj, const LinkModel* link,
-                       const Eigen::Vector3d& direction, bool global_reference_frame, double distance, double max_step,
-                       double jump_threshold_factor,
+  computeCartesianPath(std::shared_ptr<const JointModelGroup> group, std::vector<RobotStatePtr>& traj,
+                       const LinkModel* link, const Eigen::Vector3d& direction, bool global_reference_frame,
+                       double distance, double max_step, double jump_threshold_factor,
                        const GroupStateValidityCallbackFn& validCallback = GroupStateValidityCallbackFn(),
                        const kinematics::KinematicsQueryOptions& options = kinematics::KinematicsQueryOptions());
 
@@ -1117,9 +1119,9 @@ public:
      NOTE: As of ROS-Melodic these are deprecated and should not be used
      */
   [[deprecated]] double
-  computeCartesianPath(const JointModelGroup* group, std::vector<RobotStatePtr>& traj, const LinkModel* link,
-                       const Eigen::Isometry3d& target, bool global_reference_frame, double max_step,
-                       double jump_threshold_factor,
+  computeCartesianPath(std::shared_ptr<const JointModelGroup> group, std::vector<RobotStatePtr>& traj,
+                       const LinkModel* link, const Eigen::Isometry3d& target, bool global_reference_frame,
+                       double max_step, double jump_threshold_factor,
                        const GroupStateValidityCallbackFn& validCallback = GroupStateValidityCallbackFn(),
                        const kinematics::KinematicsQueryOptions& options = kinematics::KinematicsQueryOptions());
 
@@ -1133,9 +1135,9 @@ public:
      NOTE: As of ROS-Melodic these are deprecated and should not be used
      */
   [[deprecated]] double
-  computeCartesianPath(const JointModelGroup* group, std::vector<RobotStatePtr>& traj, const LinkModel* link,
-                       const EigenSTL::vector_Isometry3d& waypoints, bool global_reference_frame, double max_step,
-                       double jump_threshold_factor,
+  computeCartesianPath(std::shared_ptr<const JointModelGroup> group, std::vector<RobotStatePtr>& traj,
+                       const LinkModel* link, const EigenSTL::vector_Isometry3d& waypoints, bool global_reference_frame,
+                       double max_step, double jump_threshold_factor,
                        const GroupStateValidityCallbackFn& validCallback = GroupStateValidityCallbackFn(),
                        const kinematics::KinematicsQueryOptions& options = kinematics::KinematicsQueryOptions());
 
@@ -1148,8 +1150,9 @@ public:
    * (default is false)
    * \return True if jacobian was successfully computed, false otherwise
    */
-  bool getJacobian(const JointModelGroup* group, const LinkModel* link, const Eigen::Vector3d& reference_point_position,
-                   Eigen::MatrixXd& jacobian, bool use_quaternion_representation = false) const;
+  bool getJacobian(std::shared_ptr<const JointModelGroup> group, const LinkModel* link,
+                   const Eigen::Vector3d& reference_point_position, Eigen::MatrixXd& jacobian,
+                   bool use_quaternion_representation = false) const;
 
   /** \brief Compute the Jacobian with reference to a particular point on a given link, for a specified group.
    * \param group The group to compute the Jacobian for
@@ -1160,8 +1163,9 @@ public:
    * (default is false)
    * \return True if jacobian was successfully computed, false otherwise
    */
-  bool getJacobian(const JointModelGroup* group, const LinkModel* link, const Eigen::Vector3d& reference_point_position,
-                   Eigen::MatrixXd& jacobian, bool use_quaternion_representation = false)
+  bool getJacobian(std::shared_ptr<const JointModelGroup> group, const LinkModel* link,
+                   const Eigen::Vector3d& reference_point_position, Eigen::MatrixXd& jacobian,
+                   bool use_quaternion_representation = false)
   {
     updateLinkTransforms();
     return static_cast<const RobotState*>(this)->getJacobian(group, link, reference_point_position, jacobian,
@@ -1174,7 +1178,7 @@ public:
    * \param reference_point_position The reference point position (with respect to the link specified in link_name)
    * \return The computed Jacobian.
    */
-  Eigen::MatrixXd getJacobian(const JointModelGroup* group,
+  Eigen::MatrixXd getJacobian(std::shared_ptr<const JointModelGroup> group,
                               const Eigen::Vector3d& reference_point_position = Eigen::Vector3d(0.0, 0.0, 0.0)) const;
 
   /** \brief Compute the Jacobian with reference to the last link of a specified group. If the group is not a chain, an
@@ -1183,7 +1187,7 @@ public:
    * \param reference_point_position The reference point position (with respect to the link specified in link_name)
    * \return The computed Jacobian.
    */
-  Eigen::MatrixXd getJacobian(const JointModelGroup* group,
+  Eigen::MatrixXd getJacobian(std::shared_ptr<const JointModelGroup> group,
                               const Eigen::Vector3d& reference_point_position = Eigen::Vector3d(0.0, 0.0, 0.0))
   {
     updateLinkTransforms();
@@ -1192,13 +1196,13 @@ public:
 
   /** \brief Given a twist for a particular link (\e tip), compute the corresponding velocity for every variable and
    * store it in \e qdot */
-  void computeVariableVelocity(const JointModelGroup* jmg, Eigen::VectorXd& qdot, const Eigen::VectorXd& twist,
-                               const LinkModel* tip) const;
+  void computeVariableVelocity(std::shared_ptr<const JointModelGroup> jmg, Eigen::VectorXd& qdot,
+                               const Eigen::VectorXd& twist, const LinkModel* tip) const;
 
   /** \brief Given a twist for a particular link (\e tip), compute the corresponding velocity for every variable and
    * store it in \e qdot */
-  void computeVariableVelocity(const JointModelGroup* jmg, Eigen::VectorXd& qdot, const Eigen::VectorXd& twist,
-                               const LinkModel* tip)
+  void computeVariableVelocity(std::shared_ptr<const JointModelGroup> jmg, Eigen::VectorXd& qdot,
+                               const Eigen::VectorXd& twist, const LinkModel* tip)
   {
     updateLinkTransforms();
     static_cast<const RobotState*>(this)->computeVariableVelocity(jmg, qdot, twist, tip);
@@ -1207,7 +1211,7 @@ public:
   /** \brief Given the velocities for the variables in this group (\e qdot) and an amount of time (\e dt),
       update the current state using the Euler forward method. If the constraint specified is satisfied, return true,
      otherwise return false. */
-  bool integrateVariableVelocity(const JointModelGroup* jmg, const Eigen::VectorXd& qdot, double dt,
+  bool integrateVariableVelocity(std::shared_ptr<const JointModelGroup> jmg, const Eigen::VectorXd& qdot, double dt,
                                  const GroupStateValidityCallbackFn& constraint = GroupStateValidityCallbackFn());
 
   /** @} */
@@ -1230,11 +1234,11 @@ public:
   void setToDefaultValues();
 
   /** \brief Set the joints in \e group to the position \e name defined in the SRDF */
-  bool setToDefaultValues(const JointModelGroup* group, const std::string& name);
+  bool setToDefaultValues(std::shared_ptr<const JointModelGroup> group, const std::string& name);
 
   bool setToDefaultValues(const std::string& group_name, const std::string& state_name)
   {
-    const JointModelGroup* jmg = getJointModelGroup(group_name);
+    std::shared_ptr<const JointModelGroup> jmg = getJointModelGroup(group_name);
     if (jmg)
       return setToDefaultValues(jmg, state_name);
     else
@@ -1245,25 +1249,25 @@ public:
   void setToRandomPositions();
 
   /** \brief Set all joints in \e group to random values.  Values will be within default bounds. */
-  void setToRandomPositions(const JointModelGroup* group);
+  void setToRandomPositions(std::shared_ptr<const JointModelGroup> group);
 
   /** \brief Set all joints in \e group to random values using a specified random number generator.
       Values will be within default bounds. */
-  void setToRandomPositions(const JointModelGroup* group, random_numbers::RandomNumberGenerator& rng);
+  void setToRandomPositions(std::shared_ptr<const JointModelGroup> group, random_numbers::RandomNumberGenerator& rng);
 
   /** \brief Set all joints in \e group to random values near the value in \e seed.
    *  \e distance is the maximum amount each joint value will vary from the
    *  corresponding value in \e seed.  \distance represents meters for
    *  prismatic/postitional joints and radians for revolute/orientation joints.
    *  Resulting values are clamped within default bounds. */
-  void setToRandomPositionsNearBy(const JointModelGroup* group, const RobotState& seed, double distance);
+  void setToRandomPositionsNearBy(std::shared_ptr<const JointModelGroup> group, const RobotState& seed, double distance);
 
   /** \brief Set all joints in \e group to random values near the value in \e seed, using a specified random number generator.
    *  \e distance is the maximum amount each joint value will vary from the
    *  corresponding value in \e seed.  \distance represents meters for
    *  prismatic/postitional joints and radians for revolute/orientation joints.
    *  Resulting values are clamped within default bounds. */
-  void setToRandomPositionsNearBy(const JointModelGroup* group, const RobotState& seed, double distance,
+  void setToRandomPositionsNearBy(std::shared_ptr<const JointModelGroup> group, const RobotState& seed, double distance,
                                   random_numbers::RandomNumberGenerator& rng);
 
   /** \brief Set all joints in \e group to random values near the value in \e seed.
@@ -1273,7 +1277,7 @@ public:
    *  corresponding value in \e seed.  \distance represents meters for
    *  prismatic/postitional joints and radians for revolute/orientation joints.
    *  Resulting values are clamped within default bounds. */
-  void setToRandomPositionsNearBy(const JointModelGroup* group, const RobotState& seed,
+  void setToRandomPositionsNearBy(std::shared_ptr<const JointModelGroup> group, const RobotState& seed,
                                   const std::vector<double>& distances);
 
   /** \brief Set all joints in \e group to random values near the value in \e seed, using a specified random number generator.
@@ -1283,7 +1287,7 @@ public:
    *  corresponding value in \e seed.  \distance represents meters for
    *  prismatic/postitional joints and radians for revolute/orientation joints.
    *  Resulting values are clamped within default bounds. */
-  void setToRandomPositionsNearBy(const JointModelGroup* group, const RobotState& seed,
+  void setToRandomPositionsNearBy(std::shared_ptr<const JointModelGroup> group, const RobotState& seed,
                                   const std::vector<double>& distances, random_numbers::RandomNumberGenerator& rng);
 
   /** @} */
@@ -1460,7 +1464,7 @@ public:
   }
 
   /** \brief Return the sum of joint distances to "other" state. An L1 norm. Only considers active joints. */
-  double distance(const RobotState& other, const JointModelGroup* joint_group) const;
+  double distance(const RobotState& other, std::shared_ptr<const JointModelGroup> joint_group) const;
 
   /** \brief Return the sum of joint distances to "other" state. An L1 norm. Only considers active joints. */
   double distance(const RobotState& other, const JointModel* joint) const
@@ -1488,7 +1492,8 @@ public:
    * @param state holds the result
    * @param joint_group interpolate only for the joints in this group
    */
-  void interpolate(const RobotState& to, double t, RobotState& state, const JointModelGroup* joint_group) const;
+  void interpolate(const RobotState& to, double t, RobotState& state,
+                   std::shared_ptr<const JointModelGroup> joint_group) const;
 
   /**
    * Interpolate towards "to" state, but only for a single joint. Mimic joints are correctly updated
@@ -1508,7 +1513,7 @@ public:
   }
 
   void enforceBounds();
-  void enforceBounds(const JointModelGroup* joint_group);
+  void enforceBounds(std::shared_ptr<const JointModelGroup> joint_group);
   void enforceBounds(const JointModel* joint)
   {
     enforcePositionBounds(joint);
@@ -1526,7 +1531,7 @@ public:
 
   /// Call harmonizePosition() for all joints / all joints in group / given joint
   void harmonizePositions();
-  void harmonizePositions(const JointModelGroup* joint_group);
+  void harmonizePositions(std::shared_ptr<const JointModelGroup> joint_group);
   void harmonizePosition(const JointModel* joint)
   {
     if (joint->harmonizePosition(position_ + joint->getFirstVariableIndex()))
@@ -1540,7 +1545,7 @@ public:
   }
 
   bool satisfiesBounds(double margin = 0.0) const;
-  bool satisfiesBounds(const JointModelGroup* joint_group, double margin = 0.0) const;
+  bool satisfiesBounds(std::shared_ptr<const JointModelGroup> joint_group, double margin = 0.0) const;
   bool satisfiesBounds(const JointModel* joint, double margin = 0.0) const
   {
     return satisfiesPositionBounds(joint, margin) && (!has_velocity_ || satisfiesVelocityBounds(joint, margin));
@@ -1560,7 +1565,8 @@ public:
 
   /** \brief Get the minimm distance from a group in this state to the bounds.
       The minimum distance and the joint for which this minimum is achieved are returned. */
-  std::pair<double, const JointModel*> getMinDistanceToPositionBounds(const JointModelGroup* group) const;
+  std::pair<double, const JointModel*>
+  getMinDistanceToPositionBounds(std::shared_ptr<const JointModelGroup> group) const;
 
   /** \brief Get the minimm distance from a set of joints in the state to the bounds.
       The minimum distance and the joint for which this minimum is achieved are returned. */
@@ -1573,7 +1579,7 @@ public:
    * \param group - planning group to compare joint positions against
    * \param dt - time step between the two points
    */
-  bool isValidVelocityMove(const RobotState& other, const JointModelGroup* group, double dt) const;
+  bool isValidVelocityMove(const RobotState& other, std::shared_ptr<const JointModelGroup> group, double dt) const;
 
   /** @} */
 
@@ -1668,7 +1674,8 @@ public:
   void getAttachedBodies(std::vector<const AttachedBody*>& attached_bodies) const;
 
   /** \brief Get all bodies attached to a particular group the model corresponding to this state */
-  void getAttachedBodies(std::vector<const AttachedBody*>& attached_bodies, const JointModelGroup* group) const;
+  void getAttachedBodies(std::vector<const AttachedBody*>& attached_bodies,
+                         std::shared_ptr<const JointModelGroup> group) const;
 
   /** \brief Get all bodies attached to a particular link in the model corresponding to this state */
   void getAttachedBodies(std::vector<const AttachedBody*>& attached_bodies, const LinkModel* link_model) const;
@@ -1681,7 +1688,7 @@ public:
   void clearAttachedBodies(const LinkModel* link);
 
   /** \brief Clear the bodies attached to a specific group */
-  void clearAttachedBodies(const JointModelGroup* group);
+  void clearAttachedBodies(std::shared_ptr<const JointModelGroup> group);
 
   /** \brief Clear all attached bodies. This calls delete on the AttachedBody instances, if needed. */
   void clearAttachedBodies();
@@ -1788,7 +1795,8 @@ public:
   void printStatePositions(std::ostream& out = std::cout) const;
 
   /** \brief Output to console the current state of the robot's joint limits */
-  void printStatePositionsWithJointLimits(const moveit::core::JointModelGroup* jmg, std::ostream& out = std::cout) const;
+  void printStatePositionsWithJointLimits(std::shared_ptr<const moveit::core::JointModelGroup> jmg,
+                                          std::ostream& out = std::cout) const;
 
   void printStateInfo(std::ostream& out = std::cout) const;
 
@@ -1828,7 +1836,7 @@ private:
         dirty_link_transforms_ == nullptr ? joint : robot_model_->getCommonRoot(dirty_link_transforms_, joint);
   }
 
-  void markDirtyJointTransforms(const JointModelGroup* group)
+  void markDirtyJointTransforms(std::shared_ptr<const JointModelGroup> group)
   {
     for (const JointModel* jm : group->getActiveJointModels())
       dirty_joint_transforms_[jm->getJointIndex()] = 1;
@@ -1867,7 +1875,7 @@ private:
   }
 
   /** \brief Update all mimic joints within group */
-  void updateMimicJoints(const JointModelGroup* group)
+  void updateMimicJoints(std::shared_ptr<const JointModelGroup> group)
   {
     for (const JointModel* jm : group->getMimicJointModels())
     {

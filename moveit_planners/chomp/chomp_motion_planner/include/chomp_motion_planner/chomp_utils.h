@@ -55,7 +55,7 @@ static const double DIFF_RULES[3][DIFF_RULE_LENGTH] = {
 static inline void robotStateToArray(const moveit::core::RobotState& state, const std::string& planning_group_name,
                                      Eigen::MatrixXd::RowXpr joint_array)
 {
-  const moveit::core::JointModelGroup* group = state.getJointModelGroup(planning_group_name);
+  std::shared_ptr<const moveit::core::JointModelGroup> group = state.getJointModelGroup(planning_group_name);
   size_t joint_index = 0;
   for (const moveit::core::JointModel* jm : group->getActiveJointModels())
     joint_array[joint_index++] = state.getVariablePosition(jm->getFirstVariableIndex());

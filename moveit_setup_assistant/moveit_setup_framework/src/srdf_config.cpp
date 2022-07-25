@@ -194,7 +194,7 @@ std::vector<std::string> SRDFConfig::getJointNames(const std::string& group_name
                                                    bool include_passive)
 {
   std::vector<std::string> names;
-  const moveit::core::JointModelGroup* joint_model_group = robot_model_->getJointModelGroup(group_name);
+  std::shared_ptr<const moveit::core::JointModelGroup> joint_model_group = robot_model_->getJointModelGroup(group_name);
 
   // Iterate through the joints
   for (const moveit::core::JointModel* joint : joint_model_group->getActiveJointModels())
@@ -266,7 +266,8 @@ bool SRDFConfig::GeneratedJointLimits::writeYaml(YAML::Emitter& emitter)
   for (srdf::Model::Group& group : parent_.srdf_.groups_)
   {
     // Get list of associated joints
-    const moveit::core::JointModelGroup* joint_model_group = parent_.getRobotModel()->getJointModelGroup(group.name_);
+    std::shared_ptr<const moveit::core::JointModelGroup> joint_model_group =
+        parent_.getRobotModel()->getJointModelGroup(group.name_);
 
     const std::vector<const moveit::core::JointModel*>& joint_models = joint_model_group->getJointModels();
 

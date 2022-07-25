@@ -47,7 +47,8 @@ namespace moveit_servo
 {
 namespace
 {
-double getVelocityScalingFactor(const moveit::core::JointModelGroup* joint_model_group, const Eigen::VectorXd& velocity)
+double getVelocityScalingFactor(std::shared_ptr<const moveit::core::JointModelGroup> joint_model_group,
+                                const Eigen::VectorXd& velocity)
 {
   std::size_t joint_delta_index{ 0 };
   double velocity_scaling_factor{ 1.0 };
@@ -69,8 +70,9 @@ double getVelocityScalingFactor(const moveit::core::JointModelGroup* joint_model
 
 }  // namespace
 
-void enforceVelocityLimits(const moveit::core::JointModelGroup* joint_model_group, const double publish_period,
-                           sensor_msgs::msg::JointState& joint_state, const double override_velocity_scaling_factor)
+void enforceVelocityLimits(std::shared_ptr<const moveit::core::JointModelGroup> joint_model_group,
+                           const double publish_period, sensor_msgs::msg::JointState& joint_state,
+                           const double override_velocity_scaling_factor)
 {
   // Get the velocity scaling factor
   Eigen::VectorXd velocity =

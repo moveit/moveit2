@@ -94,7 +94,8 @@ TEST_F(TrajectoryTest, goalTolerance)
   auto current_state = std::make_shared<moveit::core::RobotState>(robot_model_);
   current_state->setToDefaultValues();
 
-  const moveit::core::JointModelGroup* joint_model_group = current_state->getJointModelGroup(PLANNING_GROUP);
+  std::shared_ptr<const moveit::core::JointModelGroup> joint_model_group =
+      current_state->getJointModelGroup(PLANNING_GROUP);
   EXPECT_NE(joint_model_group, nullptr);
   const std::vector<std::string>& joint_names = joint_model_group->getActiveJointModelNames();
   EXPECT_EQ(joint_names.size(), 7);

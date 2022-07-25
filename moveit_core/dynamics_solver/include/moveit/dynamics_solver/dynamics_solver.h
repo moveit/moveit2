@@ -128,7 +128,7 @@ public:
     return robot_model_;
   }
 
-  const moveit::core::JointModelGroup* getGroup() const
+  std::shared_ptr<const moveit::core::JointModelGroup> getGroup() const
   {
     return joint_model_group_;
   }
@@ -138,7 +138,7 @@ private:
   KDL::Chain kdl_chain_;                                     // KDL chain
 
   moveit::core::RobotModelConstPtr robot_model_;
-  const moveit::core::JointModelGroup* joint_model_group_;
+  std::shared_ptr<const moveit::core::JointModelGroup> joint_model_group_;
 
   moveit::core::RobotStatePtr state_;  // robot state
 

@@ -116,7 +116,7 @@ int main(int argc, char** argv)
   const std::vector<std::string>& gnames = psm.getRobotModel()->getJointModelGroupNames();
   for (const std::string& gname : gnames)
   {
-    const moveit::core::JointModelGroup* jmg = psm.getRobotModel()->getJointModelGroup(gname);
+    std::shared_ptr<const moveit::core::JointModelGroup> jmg = psm.getRobotModel()->getJointModelGroup(gname);
     if (!jmg->isChain())
       continue;
     const std::vector<std::string>& lnames = jmg->getLinkModelNames();

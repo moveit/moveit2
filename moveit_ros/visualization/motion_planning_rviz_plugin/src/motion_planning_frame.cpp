@@ -326,7 +326,7 @@ void MotionPlanningFrame::fillStateSelectionOptions()
   std::string group = planning_display_->getCurrentPlanningGroup();
   if (group.empty())
     return;
-  const moveit::core::JointModelGroup* jmg = robot_model->getJointModelGroup(group);
+  std::shared_ptr<const moveit::core::JointModelGroup> jmg = robot_model->getJointModelGroup(group);
   if (jmg)
   {
     ui_->start_state_combo_box->addItem(QString("<random valid>"));

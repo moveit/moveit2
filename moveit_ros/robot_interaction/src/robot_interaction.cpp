@@ -157,7 +157,7 @@ double RobotInteraction::computeGroupMarkerSize(const std::string& group)
 {
   if (group.empty())
     return DEFAULT_SCALE;
-  const moveit::core::JointModelGroup* jmg = robot_model_->getJointModelGroup(group);
+  std::shared_ptr<const moveit::core::JointModelGroup> jmg = robot_model_->getJointModelGroup(group);
   if (!jmg)
     return 0.0;
 
@@ -201,7 +201,7 @@ void RobotInteraction::decideActiveJoints(const std::string& group)
   RCLCPP_DEBUG(LOGGER, "Deciding active joints for group '%s'", group.c_str());
 
   const srdf::ModelConstSharedPtr& srdf = robot_model_->getSRDF();
-  const moveit::core::JointModelGroup* jmg = robot_model_->getJointModelGroup(group);
+  std::shared_ptr<const moveit::core::JointModelGroup> jmg = robot_model_->getJointModelGroup(group);
 
   if (!jmg || !srdf)
     return;
@@ -277,7 +277,7 @@ void RobotInteraction::decideActiveEndEffectors(const std::string& group, Intera
   RCLCPP_DEBUG(LOGGER, "Deciding active end-effectors for group '%s'", group.c_str());
 
   const srdf::ModelConstSharedPtr& srdf = robot_model_->getSRDF();
-  const moveit::core::JointModelGroup* jmg = robot_model_->getJointModelGroup(group);
+  std::shared_ptr<const moveit::core::JointModelGroup> jmg = robot_model_->getJointModelGroup(group);
 
   if (!jmg || !srdf)
   {
@@ -289,41 +289,42 @@ void RobotInteraction::decideActiveEndEffectors(const std::string& group, Intera
   const std::pair<moveit::core::JointModelGroup::KinematicsSolver, moveit::core::JointModelGroup::KinematicsSolverMap>&
       smap = jmg->getGroupKinematics();
 
-  auto add_active_end_effectors_for_single_group = [&](const moveit::core::JointModelGroup* single_group) {
-    bool found_eef{ false };
-    for (const srdf::Model::EndEffector& eef : eefs)
-    {
-      if (single_group->hasLinkModel(eef.parent_link_) &&
-          (eef.parent_group_.empty() || single_group->getName() == eef.parent_group_) &&
-          single_group->canSetStateFromIK(eef.parent_link_))
-      {
-        // We found an end-effector whose parent is the group.
-        EndEffectorInteraction ee;
-        ee.parent_group = single_group->getName();
-        ee.parent_link = eef.parent_link_;
-        ee.eef_group = eef.component_group_;
-        ee.interaction = style;
-        active_eef_.push_back(ee);
-        found_eef = true;
-      }
-    }
+  auto add_active_end_effectors_for_single_group =
+      [&](std::shared_ptr<const moveit::core::JointModelGroup> single_group) {
+        bool found_eef{ false };
+        for (const srdf::Model::EndEffector& eef : eefs)
+        {
+          if (single_group->hasLinkModel(eef.parent_link_) &&
+              (eef.parent_group_.empty() || single_group->getName() == eef.parent_group_) &&
+              single_group->canSetStateFromIK(eef.parent_link_))
+          {
+            // We found an end-effector whose parent is the group.
+            EndEffectorInteraction ee;
+            ee.parent_group = single_group->getName();
+            ee.parent_link = eef.parent_link_;
+            ee.eef_group = eef.component_group_;
+            ee.interaction = style;
+            active_eef_.push_back(ee);
+            found_eef = true;
+          }
+        }
 
-    // No end effectors found. Use last link in group as the "end effector".
-    if (!found_eef && !single_group->getLinkModelNames().empty())
-    {
-      std::string last_link{ single_group->getLinkModelNames().back() };
+        // No end effectors found. Use last link in group as the "end effector".
+        if (!found_eef && !single_group->getLinkModelNames().empty())
+        {
+          std::string last_link{ single_group->getLinkModelNames().back() };
 
-      if (single_group->canSetStateFromIK(last_link))
-      {
-        EndEffectorInteraction ee;
-        ee.parent_group = single_group->getName();
-        ee.parent_link = last_link;
-        ee.eef_group = single_group->getName();
-        ee.interaction = style;
-        active_eef_.push_back(ee);
-      }
-    }
-  };
+          if (single_group->canSetStateFromIK(last_link))
+          {
+            EndEffectorInteraction ee;
+            ee.parent_group = single_group->getName();
+            ee.parent_link = last_link;
+            ee.eef_group = single_group->getName();
+            ee.interaction = style;
+            active_eef_.push_back(ee);
+          }
+        }
+      };
 
   // if we have an IK solver for the selected group, we check if there are any end effectors attached to this group
   if (smap.first)
@@ -333,8 +334,8 @@ void RobotInteraction::decideActiveEndEffectors(const std::string& group, Intera
   // if the group contains subgroups with IK, add markers for them individually
   else if (!smap.second.empty())
   {
-    for (const std::pair<const moveit::core::JointModelGroup* const, moveit::core::JointModelGroup::KinematicsSolver>&
-             it : smap.second)
+    for (const std::pair<const std::shared_ptr<const moveit::core::JointModelGroup>,
+                         moveit::core::JointModelGroup::KinematicsSolver>& it : smap.second)
       add_active_end_effectors_for_single_group(it.first);
   }
 

@@ -121,7 +121,8 @@ public:
 
     // Create a RobotState and JointModelGroup
     const auto robot_state = std::make_shared<moveit::core::RobotState>(robot_model);
-    const moveit::core::JointModelGroup* joint_model_group = robot_state->getJointModelGroup(planning_group);
+    std::shared_ptr<const moveit::core::JointModelGroup> joint_model_group =
+        robot_state->getJointModelGroup(planning_group);
 
     // Configure a valid robot state
     robot_state->setToDefaultValues(joint_model_group, "ready");

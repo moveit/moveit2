@@ -253,7 +253,7 @@ ompl::base::StateSamplerPtr ompl_interface::ModelBasedStateSpace::allocDefaultSt
   class DefaultStateSampler : public ompl::base::StateSampler
   {
   public:
-    DefaultStateSampler(const ompl::base::StateSpace* space, const moveit::core::JointModelGroup* group,
+    DefaultStateSampler(const ompl::base::StateSpace* space, std::shared_ptr<const moveit::core::JointModelGroup> group,
                         const moveit::core::JointBoundsVector* joint_bounds)
       : ompl::base::StateSampler(space), joint_model_group_(group), joint_bounds_(joint_bounds)
     {
@@ -279,7 +279,7 @@ ompl::base::StateSamplerPtr ompl_interface::ModelBasedStateSpace::allocDefaultSt
 
   protected:
     random_numbers::RandomNumberGenerator moveit_rng_;
-    const moveit::core::JointModelGroup* joint_model_group_;
+    std::shared_ptr<const moveit::core::JointModelGroup> joint_model_group_;
     const moveit::core::JointBoundsVector* joint_bounds_;
   };
 

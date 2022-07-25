@@ -103,7 +103,7 @@ void IterativeParabolicTimeParameterization::applyVelocityConstraints(robot_traj
                                                                       std::vector<double>& time_diff,
                                                                       const double max_velocity_scaling_factor) const
 {
-  const moveit::core::JointModelGroup* group = rob_trajectory.getGroup();
+  std::shared_ptr<const moveit::core::JointModelGroup> group = rob_trajectory.getGroup();
   const std::vector<std::string>& vars = group->getVariableNames();
   const std::vector<int>& idx = group->getVariableIndexList();
   const moveit::core::RobotModel& rmodel = group->getParentModel();
@@ -201,7 +201,7 @@ void updateTrajectory(robot_trajectory::RobotTrajectory& rob_trajectory, const s
   moveit::core::RobotStatePtr curr_waypoint;
   moveit::core::RobotStatePtr next_waypoint;
 
-  const moveit::core::JointModelGroup* group = rob_trajectory.getGroup();
+  std::shared_ptr<const moveit::core::JointModelGroup> group = rob_trajectory.getGroup();
   const std::vector<std::string>& vars = group->getVariableNames();
   const std::vector<int>& idx = group->getVariableIndexList();
 
@@ -307,7 +307,7 @@ void IterativeParabolicTimeParameterization::applyAccelerationConstraints(
   moveit::core::RobotStatePtr curr_waypoint;
   moveit::core::RobotStatePtr next_waypoint;
 
-  const moveit::core::JointModelGroup* group = rob_trajectory.getGroup();
+  std::shared_ptr<const moveit::core::JointModelGroup> group = rob_trajectory.getGroup();
   const std::vector<std::string>& vars = group->getVariableNames();
   const std::vector<int>& idx = group->getVariableIndexList();
   const moveit::core::RobotModel& rmodel = group->getParentModel();
@@ -467,7 +467,7 @@ bool IterativeParabolicTimeParameterization::computeTimeStamps(robot_trajectory:
   if (trajectory.empty())
     return true;
 
-  const moveit::core::JointModelGroup* group = trajectory.getGroup();
+  std::shared_ptr<const moveit::core::JointModelGroup> group = trajectory.getGroup();
   if (!group)
   {
     RCLCPP_ERROR(LOGGER, "It looks like the planner did not set "

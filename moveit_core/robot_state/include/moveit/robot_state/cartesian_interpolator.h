@@ -173,7 +173,7 @@ public:
 
      Kinematics solvers may use cost functions to prioritize certain solutions, which may be specified with \e cost_function. */
   static Distance
-  computeCartesianPath(RobotState* start_state, const JointModelGroup* group,
+  computeCartesianPath(RobotState* start_state, std::shared_ptr<const JointModelGroup> group,
                        std::vector<std::shared_ptr<RobotState>>& traj, const LinkModel* link,
                        const Eigen::Vector3d& direction, bool global_reference_frame, double distance,
                        const MaxEEFStep& max_step, const JumpThreshold& jump_threshold,
@@ -188,7 +188,7 @@ public:
      in the local reference frame of the link. In the latter case (\e global_reference_frame is false) the \e target is
      rotated accordingly. All other comments from the previous function apply. */
   static Percentage
-  computeCartesianPath(RobotState* start_state, const JointModelGroup* group,
+  computeCartesianPath(RobotState* start_state, std::shared_ptr<const JointModelGroup> group,
                        std::vector<std::shared_ptr<RobotState>>& traj, const LinkModel* link,
                        const Eigen::Isometry3d& target, bool global_reference_frame, const MaxEEFStep& max_step,
                        const JumpThreshold& jump_threshold,
@@ -203,7 +203,7 @@ public:
      frame or in the local reference frame of the link at the immediately preceding waypoint. The link needs to move
      in a straight line between two consecutive waypoints. All other comments apply. */
   static Percentage
-  computeCartesianPath(RobotState* start_state, const JointModelGroup* group,
+  computeCartesianPath(RobotState* start_state, std::shared_ptr<const JointModelGroup> group,
                        std::vector<std::shared_ptr<RobotState>>& traj, const LinkModel* link,
                        const EigenSTL::vector_Isometry3d& waypoints, bool global_reference_frame,
                        const MaxEEFStep& max_step, const JumpThreshold& jump_threshold,
@@ -228,7 +228,8 @@ public:
 
      TODO: move to more appropriate location
   */
-  static Percentage checkJointSpaceJump(const JointModelGroup* group, std::vector<std::shared_ptr<RobotState>>& traj,
+  static Percentage checkJointSpaceJump(std::shared_ptr<const JointModelGroup> group,
+                                        std::vector<std::shared_ptr<RobotState>>& traj,
                                         const JumpThreshold& jump_threshold);
 
   /** \brief Tests for relative joint space jumps of the trajectory \e traj.
@@ -243,7 +244,7 @@ public:
 
      TODO: move to more appropriate location
    */
-  static Percentage checkRelativeJointSpaceJump(const JointModelGroup* group,
+  static Percentage checkRelativeJointSpaceJump(std::shared_ptr<const JointModelGroup> group,
                                                 std::vector<std::shared_ptr<RobotState>>& traj,
                                                 double jump_threshold_factor);
 
@@ -261,7 +262,7 @@ public:
 
      TODO: move to more appropriate location
   */
-  static Percentage checkAbsoluteJointSpaceJump(const JointModelGroup* group,
+  static Percentage checkAbsoluteJointSpaceJump(std::shared_ptr<const JointModelGroup> group,
                                                 std::vector<std::shared_ptr<RobotState>>& traj,
                                                 double revolute_jump_threshold, double prismatic_jump_threshold);
 };

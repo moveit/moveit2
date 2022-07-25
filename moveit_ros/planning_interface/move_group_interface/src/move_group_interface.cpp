@@ -199,7 +199,7 @@ public:
     return robot_model_;
   }
 
-  const moveit::core::JointModelGroup* getJointModelGroup() const
+  std::shared_ptr<const moveit::core::JointModelGroup> getJointModelGroup() const
   {
     return joint_model_group_;
   }
@@ -1357,7 +1357,7 @@ private:
 
   // joint state goal
   moveit::core::RobotStatePtr joint_state_target_;
-  const moveit::core::JointModelGroup* joint_model_group_;
+  std::shared_ptr<const moveit::core::JointModelGroup> joint_model_group_;
 
   // pose goal;
   // for each link we have a set of possible goal locations;
@@ -1858,7 +1858,7 @@ bool MoveGroupInterface::setEndEffectorLink(const std::string& link_name)
 
 bool MoveGroupInterface::setEndEffector(const std::string& eef_name)
 {
-  const moveit::core::JointModelGroup* jmg = impl_->getRobotModel()->getEndEffector(eef_name);
+  std::shared_ptr<const moveit::core::JointModelGroup> jmg = impl_->getRobotModel()->getEndEffector(eef_name);
   if (jmg)
     return setEndEffectorLink(jmg->getEndEffectorParentGroup().second);
   return false;

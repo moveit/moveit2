@@ -129,7 +129,7 @@ private:
   planning_scene::PlanningSceneConstPtr planning_scene_;
   moveit::core::RobotState state_;
   moveit::core::RobotState start_state_;
-  const moveit::core::JointModelGroup* joint_model_group_;
+  std::shared_ptr<const moveit::core::JointModelGroup> joint_model_group_;
   const collision_detection::CollisionEnvHybrid* hy_env_;
 
   std::vector<ChompCost> joint_costs_;

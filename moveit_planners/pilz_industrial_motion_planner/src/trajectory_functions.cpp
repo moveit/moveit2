@@ -85,9 +85,10 @@ bool pilz_industrial_motion_planner::computePoseIK(const planning_scene::Plannin
   rstate.setVariablePositions(seed);
 
   moveit::core::GroupStateValidityCallbackFn ik_constraint_function;
-  ik_constraint_function = [check_self_collision, scene](moveit::core::RobotState* robot_state,
-                                                         const moveit::core::JointModelGroup* joint_group,
-                                                         const double* joint_group_variable_values) {
+  ik_constraint_function = [check_self_collision,
+                            scene](moveit::core::RobotState* robot_state,
+                                   std::shared_ptr<const moveit::core::JointModelGroup> joint_group,
+                                   const double* joint_group_variable_values) {
     return pilz_industrial_motion_planner::isStateColliding(check_self_collision, scene, robot_state, joint_group,
                                                             joint_group_variable_values);
   };
@@ -585,7 +586,7 @@ bool pilz_industrial_motion_planner::intersectionFound(const Eigen::Vector3d& p_
 bool pilz_industrial_motion_planner::isStateColliding(const bool test_for_self_collision,
                                                       const planning_scene::PlanningSceneConstPtr& scene,
                                                       moveit::core::RobotState* rstate,
-                                                      const moveit::core::JointModelGroup* const group,
+                                                      const std::shared_ptr<const moveit::core::JointModelGroup> group,
                                                       const double* const ik_solution)
 {
   if (!test_for_self_collision)

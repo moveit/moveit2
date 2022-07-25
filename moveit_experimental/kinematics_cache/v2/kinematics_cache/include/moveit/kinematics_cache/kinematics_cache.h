@@ -171,7 +171,8 @@ private:
   moveit::core::RobotModelConstPtr kinematic_model_; /** An instance of the kinematic model */
   moveit::core::RobotStatePtr kinematic_state_;      /** An instance of the kinematic state */
 
-  const moveit::core::JointModelGroup* joint_model_group_;           /** Joint model group associated with this cache */
+  std::shared_ptr<const moveit::core::JointModelGroup>
+      joint_model_group_;                                            /** Joint model group associated with this cache */
   std::shared_ptr<moveit::core::JointStateGroup> joint_state_group_; /** Joint state corresponding to cache */
 
   //    mutable std::vector<double> solution_local_; /** Local pre-allocated storage */

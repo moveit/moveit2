@@ -98,7 +98,7 @@ public:
    * \param jmg - joint model group pointer
    * \return tips - list of valid links in a planning group to plan for
    */
-  std::vector<std::string> chooseTipFrames(const moveit::core::JointModelGroup* jmg)
+  std::vector<std::string> chooseTipFrames(std::shared_ptr<const moveit::core::JointModelGroup> jmg)
   {
     std::vector<std::string> tips;
     std::map<std::string, std::vector<std::string>>::const_iterator ik_it = iksolver_to_tip_links_.find(jmg->getName());
@@ -140,7 +140,7 @@ public:
     return tips;
   }
 
-  kinematics::KinematicsBasePtr allocKinematicsSolver(const moveit::core::JointModelGroup* jmg)
+  kinematics::KinematicsBasePtr allocKinematicsSolver(std::shared_ptr<const moveit::core::JointModelGroup> jmg)
   {
     kinematics::KinematicsBasePtr result;
     if (!kinematics_loader_)
@@ -224,7 +224,7 @@ public:
   // cache solver between two consecutive calls
   // first call in RobotModelLoader::loadKinematicsSolvers() is just to check suitability for jmg
   // second call in JointModelGroup::setSolverAllocators() is to actually retrieve the instance for use
-  kinematics::KinematicsBasePtr allocKinematicsSolverWithCache(const moveit::core::JointModelGroup* jmg)
+  kinematics::KinematicsBasePtr allocKinematicsSolverWithCache(std::shared_ptr<const moveit::core::JointModelGroup> jmg)
   {
     std::scoped_lock slock(cache_lock_);
     kinematics::KinematicsBasePtr& cached = instances_[jmg];
@@ -257,7 +257,7 @@ private:
   std::map<std::string, std::vector<std::string>> iksolver_to_tip_links_;  // a map between each ik solver and a vector
                                                                            // of custom-specified tip link(s)
   std::shared_ptr<pluginlib::ClassLoader<kinematics::KinematicsBase>> kinematics_loader_;
-  std::map<const moveit::core::JointModelGroup*, kinematics::KinematicsBasePtr> instances_;
+  std::map<std::shared_ptr<const moveit::core::JointModelGroup>, kinematics::KinematicsBasePtr> instances_;
   std::mutex lock_;
   std::mutex cache_lock_;
 };
@@ -273,7 +273,7 @@ void KinematicsPluginLoader::status() const
 moveit::core::SolverAllocatorFn KinematicsPluginLoader::getLoaderFunction()
 {
   if (loader_)
-    return [&loader = *loader_](const moveit::core::JointModelGroup* jmg) {
+    return [&loader = *loader_](std::shared_ptr<const moveit::core::JointModelGroup> jmg) {
       return loader.allocKinematicsSolverWithCache(jmg);
     };
 
@@ -426,7 +426,7 @@ moveit::core::SolverAllocatorFn KinematicsPluginLoader::getLoaderFunction(const 
                                                      iksolver_to_tip_links);
   }
 
-  return [&loader = *loader_](const moveit::core::JointModelGroup* jmg) {
+  return [&loader = *loader_](std::shared_ptr<const moveit::core::JointModelGroup> jmg) {
     return loader.allocKinematicsSolverWithCache(jmg);
   };
 }

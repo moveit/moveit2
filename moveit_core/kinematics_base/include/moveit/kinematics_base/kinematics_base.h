@@ -156,7 +156,7 @@ public:
 
   /** @brief Signature for a cost function used to evaluate IK solutions. */
   using IKCostFn = std::function<double(const geometry_msgs::msg::Pose&, const moveit::core::RobotState&,
-                                        moveit::core::JointModelGroup*, const std::vector<double>&)>;
+                                        std::shared_ptr<moveit::core::JointModelGroup>, const std::vector<double>&)>;
 
   /**
    * @brief Given a desired pose of the end-effector, compute the joint angles to reach it
@@ -502,7 +502,8 @@ public:
    *          supported.
    * \return True if the group is supported, false if not.
    */
-  virtual bool supportsGroup(const moveit::core::JointModelGroup* jmg, std::string* error_text_out = nullptr) const;
+  virtual bool supportsGroup(std::shared_ptr<const moveit::core::JointModelGroup> jmg,
+                             std::string* error_text_out = nullptr) const;
 
   /**
    * @brief  Set the search discretization value for all the redundant joints

@@ -174,7 +174,7 @@ private:
   MoveItCppPtr moveit_cpp_;
   const std::string group_name_;
   // The robot_model_ member variable of MoveItCpp class will manually free the joint_model_group_ resources
-  const moveit::core::JointModelGroup* joint_model_group_;
+  std::shared_ptr<const moveit::core::JointModelGroup> joint_model_group_;
 
   // Planning
   std::set<std::string> planning_pipeline_names_;

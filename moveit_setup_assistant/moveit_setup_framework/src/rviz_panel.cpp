@@ -173,7 +173,7 @@ void RVizPanel::highlightGroupEvent(const std::string& group_name)
   if (!rm->hasJointModelGroup(group_name))
     return;
 
-  const moveit::core::JointModelGroup* joint_model_group = rm->getJointModelGroup(group_name);
+  std::shared_ptr<const moveit::core::JointModelGroup> joint_model_group = rm->getJointModelGroup(group_name);
   if (joint_model_group)
   {
     const std::vector<const moveit::core::LinkModel*>& link_models = joint_model_group->getLinkModels();

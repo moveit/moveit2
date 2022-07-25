@@ -390,11 +390,11 @@ TEST_F(OneRobot, FK)
   moveit::core::RobotModelConstPtr model = robot_model_;
 
   // testing that the two planning groups are the same
-  const moveit::core::JointModelGroup* g_one = model->getJointModelGroup("base_from_joints");
-  const moveit::core::JointModelGroup* g_two = model->getJointModelGroup("base_from_base_to_tip");
-  const moveit::core::JointModelGroup* g_three = model->getJointModelGroup("base_with_subgroups");
-  const moveit::core::JointModelGroup* g_four = model->getJointModelGroup("base_with_bad_subgroups");
-  const moveit::core::JointModelGroup* g_mim = model->getJointModelGroup("mim_joints");
+  std::shared_ptr<const moveit::core::JointModelGroup> g_one = model->getJointModelGroup("base_from_joints");
+  std::shared_ptr<const moveit::core::JointModelGroup> g_two = model->getJointModelGroup("base_from_base_to_tip");
+  std::shared_ptr<const moveit::core::JointModelGroup> g_three = model->getJointModelGroup("base_with_subgroups");
+  std::shared_ptr<const moveit::core::JointModelGroup> g_four = model->getJointModelGroup("base_with_bad_subgroups");
+  std::shared_ptr<const moveit::core::JointModelGroup> g_mim = model->getJointModelGroup("mim_joints");
 
   ASSERT_TRUE(g_one != nullptr);
   ASSERT_TRUE(g_two != nullptr);
@@ -552,7 +552,8 @@ TEST_F(OneRobot, FK)
 TEST_F(OneRobot, testPrintCurrentPositionWithJointLimits)
 {
   moveit::core::RobotState state(robot_model_);
-  const moveit::core::JointModelGroup* joint_model_group = robot_model_->getJointModelGroup("base_from_base_to_e");
+  std::shared_ptr<const moveit::core::JointModelGroup> joint_model_group =
+      robot_model_->getJointModelGroup("base_from_base_to_e");
   ASSERT_TRUE(joint_model_group);
 
   state.setToDefaultValues();

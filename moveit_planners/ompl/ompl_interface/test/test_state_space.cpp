@@ -160,7 +160,7 @@ TEST_F(LoadPlanningModelsPr2, StateSpaceCopy)
     EXPECT_LT(robot_state.distance(robot_state2), EPSILON);
 
     // copy the first state to OMPL as backup (this is where the 'different' method comes into play)
-    const moveit::core::JointModelGroup* joint_model_group =
+    std::shared_ptr<const moveit::core::JointModelGroup> joint_model_group =
         robot_state.getRobotModel()->getJointModelGroup(joint_model_state_space.getJointModelGroupName());
     std::vector<std::string> joint_model_names = joint_model_group->getActiveJointModelNames();
     for (std::size_t joint_index = 0; joint_index < joint_model_group->getVariableCount(); ++joint_index)

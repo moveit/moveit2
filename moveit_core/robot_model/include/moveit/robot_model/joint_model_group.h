@@ -44,6 +44,7 @@
 #include <functional>
 #include <set>
 #include <string>
+#include <memory>
 
 namespace moveit
 {
@@ -53,20 +54,20 @@ class RobotModel;
 class JointModelGroup;
 
 /** \brief Function type that allocates a kinematics solver for a particular group */
-typedef std::function<kinematics::KinematicsBasePtr(const JointModelGroup*)> SolverAllocatorFn;
+typedef std::function<kinematics::KinematicsBasePtr(std::shared_ptr<const JointModelGroup>)> SolverAllocatorFn;
 
 /** \brief Map from group instances to allocator functions & bijections */
-using SolverAllocatorMapFn = std::map<const JointModelGroup*, SolverAllocatorFn>;
+using SolverAllocatorMapFn = std::map<std::shared_ptr<const JointModelGroup>, SolverAllocatorFn>;
 
 /** \brief Map of names to instances for JointModelGroup */
-using JointModelGroupMap = std::map<std::string, JointModelGroup*>;
+using JointModelGroupMap = std::map<std::string, std::shared_ptr<JointModelGroup>>;
 
 /** \brief Map of names to const instances for JointModelGroup */
-using JointModelGroupMapConst = std::map<std::string, const JointModelGroup*>;
+using JointModelGroupMapConst = std::map<std::string, std::shared_ptr<const JointModelGroup>>;
 
 using JointBoundsVector = std::vector<const JointModel::Bounds*>;
 
-class JointModelGroup
+class JointModelGroup : public std::enable_shared_from_this<JointModelGroup>
 {
 public:
   struct KinematicsSolver
@@ -103,7 +104,7 @@ public:
   };
 
   /// Map from group instances to allocator functions & bijections
-  using KinematicsSolverMap = std::map<const JointModelGroup*, KinematicsSolver>;
+  using KinematicsSolverMap = std::map<std::shared_ptr<const JointModelGroup>, KinematicsSolver>;
 
   JointModelGroup(const std::string& name, const srdf::Model::Group& config,
                   const std::vector<const JointModel*>& joint_vector, const RobotModel* parent_model);
@@ -429,7 +430,7 @@ public:
   }
 
   /** \brief Get the groups that are subsets of this one (in terms of joints set) */
-  void getSubgroups(std::vector<const JointModelGroup*>& sub_groups) const;
+  void getSubgroups(std::vector<std::shared_ptr<const JointModelGroup>>& sub_groups) const;
 
   /** \brief Check if the joints of group \e group are a subset of the joints in this group */
   bool isSubgroup(const std::string& group) const
@@ -748,7 +749,7 @@ protected:
   srdf::Model::Group config_;
 
   /** \brief The set of default states specified for this group in the SRDF */
-  std::map<std::string, std::map<std::string, double> > default_states_;
+  std::map<std::string, std::map<std::string, double>> default_states_;
 
   /** \brief The names of the default states specified for this group in the SRDF */
   std::vector<std::string> default_states_names_;

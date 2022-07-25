@@ -469,7 +469,7 @@ bool IKFastKinematicsPlugin::initialize(const rclcpp::Node::SharedPtr& node,
     KinematicsBase::setSearchDiscretization(search_discretization);
   }
 
-  const moveit::core::JointModelGroup* jmg = robot_model_->getJointModelGroup(group_name);
+  std::shared_ptr<const moveit::core::JointModelGroup> jmg = robot_model_->getJointModelGroup(group_name);
   if (!jmg)
   {
     RCLCPP_ERROR_STREAM(LOGGER, "Unknown planning group: " << group_name);

@@ -143,7 +143,7 @@ public:
    * @param group  JointModelGroup determining the joints to copy
    */
   void assignCHOMPTrajectoryPointFromRobotState(const moveit::core::RobotState& source, size_t chomp_trajectory_point,
-                                                const moveit::core::JointModelGroup* group);
+                                                std::shared_ptr<const moveit::core::JointModelGroup> group);
 
   /**
    * \brief Sets the start and end index for the modifiable part of the trajectory

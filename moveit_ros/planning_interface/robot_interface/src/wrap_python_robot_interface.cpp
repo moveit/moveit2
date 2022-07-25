@@ -79,7 +79,7 @@ public:
 
   bp::list getGroupActiveJointNames(const std::string& group) const
   {
-    const moveit::core::JointModelGroup* jmg = robot_model_->getJointModelGroup(group);
+    std::shared_ptr<const moveit::core::JointModelGroup> jmg = robot_model_->getJointModelGroup(group);
     if (jmg)
       return py_bindings_tools::listFromString(jmg->getActiveJointModelNames());
     else
@@ -93,7 +93,7 @@ public:
 
   bp::list getGroupJointNames(const std::string& group) const
   {
-    const moveit::core::JointModelGroup* jmg = robot_model_->getJointModelGroup(group);
+    std::shared_ptr<const moveit::core::JointModelGroup> jmg = robot_model_->getJointModelGroup(group);
     if (jmg)
       return py_bindings_tools::listFromString(jmg->getJointModelNames());
     else
@@ -102,7 +102,7 @@ public:
 
   bp::list getGroupJointTips(const std::string& group) const
   {
-    const moveit::core::JointModelGroup* jmg = robot_model_->getJointModelGroup(group);
+    std::shared_ptr<const moveit::core::JointModelGroup> jmg = robot_model_->getJointModelGroup(group);
     if (jmg)
     {
       std::vector<std::string> tips;
@@ -120,7 +120,7 @@ public:
 
   bp::list getGroupLinkNames(const std::string& group) const
   {
-    const moveit::core::JointModelGroup* jmg = robot_model_->getJointModelGroup(group);
+    std::shared_ptr<const moveit::core::JointModelGroup> jmg = robot_model_->getJointModelGroup(group);
     if (jmg)
       return py_bindings_tools::listFromString(jmg->getLinkModelNames());
     else
@@ -183,7 +183,7 @@ public:
   bp::list getDefaultStateNames(const std::string& group)
   {
     bp::list l;
-    const moveit::core::JointModelGroup* jmg = robot_model_->getJointModelGroup(group);
+    std::shared_ptr<const moveit::core::JointModelGroup> jmg = robot_model_->getJointModelGroup(group);
     if (jmg)
     {
       for (auto& known_state : jmg->getDefaultStateNames())
@@ -214,7 +214,7 @@ public:
 
   bp::dict getJointValues(const std::string& group, const std::string& named_state)
   {
-    const moveit::core::JointModelGroup* jmg = robot_model_->getJointModelGroup(group);
+    std::shared_ptr<const moveit::core::JointModelGroup> jmg = robot_model_->getJointModelGroup(group);
     if (!jmg)
       return boost::python::dict();
     std::map<std::string, double> values;
@@ -255,7 +255,7 @@ public:
   {
     // name of the group that is parent to this end-effector group;
     // Second: the link this in the parent group that this group attaches to
-    const moveit::core::JointModelGroup* jmg = robot_model_->getJointModelGroup(group);
+    std::shared_ptr<const moveit::core::JointModelGroup> jmg = robot_model_->getJointModelGroup(group);
     if (!jmg)
       return boost::python::make_tuple("", "");
     std::pair<std::string, std::string> parent_group = jmg->getEndEffectorParentGroup();
@@ -337,7 +337,7 @@ public:
     if (!ensureCurrentState())
       return py_bindings_tools::ByteString("");
     moveit::core::RobotStatePtr s = current_state_monitor_->getCurrentState();
-    const moveit::core::JointModelGroup* jmg = robot_model_->getJointModelGroup(group);
+    std::shared_ptr<const moveit::core::JointModelGroup> jmg = robot_model_->getJointModelGroup(group);
     visualization_msgs::MarkerArray msg;
     if (jmg)
     {
@@ -349,7 +349,7 @@ public:
 
   py_bindings_tools::ByteString getRobotMarkersGroupPythonDict(const std::string& group, bp::dict& values)
   {
-    const moveit::core::JointModelGroup* jmg = robot_model_->getJointModelGroup(group);
+    std::shared_ptr<const moveit::core::JointModelGroup> jmg = robot_model_->getJointModelGroup(group);
     if (!jmg)
       return py_bindings_tools::ByteString("");
     bp::list links = py_bindings_tools::listFromString(jmg->getLinkModelNames());
