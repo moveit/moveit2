@@ -111,7 +111,9 @@ TEST_F(GetSolverTipFrameTest, TestExceptionMoreThanOneTipFrame)
 
   EXPECT_CALL(solver_mock_, getTipFrames()).Times(AtLeast(1)).WillRepeatedly(ReturnRef(tip_frames));
 
-  EXPECT_THROW(getSolverTipFrame(&jmg_mock_), MoreThanOneTipFrameException);
+  EXPECT_THROW(
+      getSolverTipFrame(std::shared_ptr<moveit::core::JointModelGroup>((moveit::core::JointModelGroup*)&jmg_mock_)),
+      MoreThanOneTipFrameException);
 }
 
 /**
@@ -122,7 +124,9 @@ TEST_F(GetSolverTipFrameTest, TestExceptionNoSolver)
 {
   EXPECT_CALL(jmg_mock_, getSolverInstance()).WillOnce(Return(nullptr));
 
-  EXPECT_THROW(getSolverTipFrame(&jmg_mock_), NoSolverException);
+  EXPECT_THROW(
+      getSolverTipFrame(std::shared_ptr<moveit::core::JointModelGroup>((moveit::core::JointModelGroup*)&jmg_mock_)),
+      NoSolverException);
 }
 
 /**
@@ -131,7 +135,7 @@ TEST_F(GetSolverTipFrameTest, TestExceptionNoSolver)
  */
 TEST_F(GetSolverTipFrameTest, NullptrJointGroup)
 {
-  std::shared_ptr<moveit::core::JointModelGroup> group = nullptr;
+  std::shared_ptr<moveit::core::JointModelGroup> group(nullptr);
   EXPECT_THROW(hasSolver(group), std::invalid_argument);
 }
 

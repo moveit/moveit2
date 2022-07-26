@@ -53,7 +53,7 @@ CREATE_MOVEIT_ERROR_CODE_EXCEPTION(MoreThanOneTipFrameException, moveit_msgs::ms
  * @throws exception in case group is null.
  */
 template <class JointModelGroup>
-static bool hasSolver(std::shared_ptr<const JointModelGroup> group)
+static bool hasSolver(std::shared_ptr<JointModelGroup> group)
 {
   if (group == nullptr)
   {
@@ -72,7 +72,7 @@ static bool hasSolver(std::shared_ptr<const JointModelGroup> group)
  * frame.
  */
 template <class JointModelGroup>
-static const std::string& getSolverTipFrame(std::shared_ptr<const JointModelGroup> group)
+static const std::string& getSolverTipFrame(std::shared_ptr<JointModelGroup> group)
 {
   if (!hasSolver(group))
   {

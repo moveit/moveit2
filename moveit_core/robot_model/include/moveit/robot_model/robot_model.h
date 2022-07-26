@@ -51,6 +51,7 @@
 #include <rclcpp/logging.hpp>
 #include <Eigen/Geometry>
 #include <iostream>
+#include <memory>
 
 /** \brief Main namespace for MoveIt */
 namespace moveit

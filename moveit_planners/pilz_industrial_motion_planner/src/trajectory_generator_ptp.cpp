@@ -68,7 +68,7 @@ TrajectoryGeneratorPTP::TrajectoryGeneratorPTP(const moveit::core::RobotModelCon
   joint_limits_ = planner_limits_.getJointLimitContainer();
 
   // collect most strict joint limits for each group in robot model
-  const auto* jmg = robot_model->getJointModelGroup(group_name);
+  const auto jmg = robot_model->getJointModelGroup(group_name);
   if (!jmg)
     throw TrajectoryGeneratorInvalidLimitsException("invalid group: " + group_name);
 
