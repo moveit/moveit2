@@ -16,6 +16,11 @@ def generate_test_description():
         .yaml("config/panda_simulated_config.yaml", parameter_namespace="moveit_servo")
         .to_dict()
     )
+    moveit_config = (
+        MoveItConfigsBuilder("moveit_resources_panda")
+        .robot_description(file_path="config/panda.urdf.xacro")
+        .to_moveit_configs()
+    )
 
     test_binary_dir_arg = launch.actions.DeclareLaunchArgument(
         name="test_binary_dir",
@@ -29,7 +34,10 @@ def generate_test_description():
                 "unit_test_servo_calcs",
             ]
         ),
-        parameters=[servo_params],
+        parameters=[
+            servo_params,
+            moveit_config.robot_description_kinematics,
+        ],
         output="screen",
         # prefix="kitty gdb -e run --args"
     )
