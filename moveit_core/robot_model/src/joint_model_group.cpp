@@ -54,7 +54,7 @@ namespace
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_robot_model.joint_model_group");
 
 // check if a parent or ancestor of joint is included in this group
-bool includesParent(const JointModel* joint, std::shared_ptr<const JointModelGroup> group)
+bool includesParent(const JointModel* joint, const JointModelGroup* group)
 {
   bool found = false;
   // if we find that an ancestor is also in the group, then the joint is not a root
@@ -169,7 +169,7 @@ JointModelGroup::JointModelGroup(const std::string& group_name, const srdf::Mode
   for (const JointModel* active_joint_model : active_joint_model_vector_)
   {
     // if we find that an ancestor is also in the group, then the joint is not a root
-    if (!includesParent(active_joint_model, shared_from_this()))
+    if (!includesParent(active_joint_model, this))
       joint_roots_.push_back(active_joint_model);
   }
 
