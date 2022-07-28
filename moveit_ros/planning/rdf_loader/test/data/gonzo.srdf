@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<robot name="gonzo">
+  <group name="group0">
+    <chain base_link="base_link" tip_link="nose"/>
+  </group>
+</robot>

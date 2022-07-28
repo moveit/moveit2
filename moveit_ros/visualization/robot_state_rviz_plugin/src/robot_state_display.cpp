@@ -376,7 +376,7 @@ void RobotStateDisplay::unsetLinkColor(rviz_default_plugins::robot::Robot* robot
 // ******************************************************************************************
 // Load
 // ******************************************************************************************
-void RobotStateDisplay::loadRobotModel()
+void RobotStateDisplay::initializeLoader()
 {
   if (robot_description_property_->getStdString().empty())
   {
@@ -384,8 +384,13 @@ void RobotStateDisplay::loadRobotModel()
     return;
   }
 
-  rdf_loader_.reset(new rdf_loader::RDFLoader(node_, robot_description_property_->getStdString()));
+  rdf_loader_.reset(new rdf_loader::RDFLoader(node_, robot_description_property_->getStdString(), true));
+  loadRobotModel();
+  rdf_loader_->setNewModelCallback([this]() { return loadRobotModel(); });
+}
 
+void RobotStateDisplay::loadRobotModel()
+{
   if (rdf_loader_->getURDF())
   {
     try
@@ -429,7 +434,7 @@ void RobotStateDisplay::onEnable()
 {
   Display::onEnable();
   if (!rdf_loader_)
-    loadRobotModel();
+    initializeLoader();
   changedRobotStateTopic();
   calculateOffsetPosition();
 }

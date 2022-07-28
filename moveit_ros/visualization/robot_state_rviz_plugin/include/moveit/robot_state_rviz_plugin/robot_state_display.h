@@ -101,6 +101,7 @@ private Q_SLOTS:
   void changedAllLinks();
 
 protected:
+  void initializeLoader();
   void loadRobotModel();
 
   /**
