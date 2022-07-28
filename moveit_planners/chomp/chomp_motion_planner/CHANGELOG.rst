@@ -2,6 +2,9 @@
 Changelog for package chomp_motion_planner
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.5.3 (2022-07-28)
+------------------
+
 2.5.2 (2022-07-18)
 ------------------
 * Merge remote-tracking branch 'origin/main' into feature/msa

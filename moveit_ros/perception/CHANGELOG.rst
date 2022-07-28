@@ -2,6 +2,16 @@
 Changelog for package moveit_ros_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.5.3 (2022-07-28)
+------------------
+* pointcloud_octomap_updater: Don't return false when not finding optional parameter (`#1418 <https://github.com/ros-planning/moveit2/issues/1418>`_)
+  * Don't return false when not finding optional parameter
+  * Update moveit_ros/perception/pointcloud_octomap_updater/src/pointcloud_octomap_updater.cpp
+  Co-authored-by: AndyZe <andyz@utexas.edu>
+  Co-authored-by: AndyZe <andyz@utexas.edu>
+  Co-authored-by: Vatan Aksoy Tezer <vatan@picknik.ai>
+* Contributors: Jafar
+
 2.5.2 (2022-07-18)
 ------------------
 * Remove no longer needed no-pedantic option in moveit_ros_occupancy_map_monitor package (`#1397 <https://github.com/ros-planning/moveit2/issues/1397>`_)
