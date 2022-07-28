@@ -44,20 +44,6 @@ namespace constraint_samplers
 {
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_constraint_samplers.default_constraint_samplers");
 
-random_numbers::RandomNumberGenerator createSeededRNG([[maybe_unused]] const std::string& seed_param)
-{
-  // int rng_seed;
-  // if (ros::param::get(seed_param, rng_seed))
-  // {
-  //   ROS_DEBUG_STREAM_NAMED("constraint_samplers", "Creating random number generator with seed " << rng_seed);
-  //   return random_numbers::RandomNumberGenerator(rng_seed);
-  // }
-  // else
-  // {
-  return random_numbers::RandomNumberGenerator(12345);
-  // }
-}
-
 bool JointConstraintSampler::configure(const moveit_msgs::msg::Constraints& constr)
 {
   // construct the constraints
