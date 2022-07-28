@@ -2,6 +2,11 @@
 Changelog for package moveit_core
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.5.3 (2022-07-28)
+------------------
+* Constraint samplers seed (`#1411 <https://github.com/ros-planning/moveit2/issues/1411>`_)
+* Contributors: Henry Moore
+
 2.5.2 (2022-07-18)
 ------------------
 * Added const to moveit_core/collision_detection per issue 879 (`#1416 <https://github.com/ros-planning/moveit2/issues/1416>`_)
