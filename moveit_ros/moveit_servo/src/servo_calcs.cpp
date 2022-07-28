@@ -795,7 +795,7 @@ double ServoCalcs::velocityScalingFactorForSingularity(const Eigen::VectorXd& co
   double dot = vector_toward_singularity.dot(commanded_velocity);
   // When condition > lower_singularity_threshold and moving closer to singularity, scale between
   // lower_singularity_threshold and approaching_stop_singularity_threshold
-  // When condition > lower_singularity_threshold and moving away from to singularity, scale more conservatively between
+  // When condition > lower_singularity_threshold and moving away from singularity, scale more conservatively between
   // lower_singularity_threshold and hard_stop_singularity_threshold.
   double upper_threshold =
       dot > 0 ? parameters_->approaching_stop_singularity_threshold : parameters_->hard_stop_singularity_threshold;
