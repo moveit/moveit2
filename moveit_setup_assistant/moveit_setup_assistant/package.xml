@@ -27,11 +27,11 @@
   <depend>rclcpp</depend>
   <depend>moveit_setup_framework</depend>
   <depend>moveit_setup_srdf_plugins</depend> <!-- For collision_updater executable -->
-  <depend>moveit_setup_controllers</depend>
-  <depend>moveit_setup_core_plugins</depend>
-  <depend>moveit_setup_app_plugins</depend>
+  <exec_depend>moveit_setup_controllers</exec_depend>
+  <exec_depend>moveit_setup_core_plugins</exec_depend>
+  <exec_depend>moveit_setup_app_plugins</exec_depend>
   <!-- TODO: Enable once https://github.com/ros-planning/moveit2/issues/1262 is resolved -->
-  <!-- <depend>moveit_setup_simulation</depend>  -->
+  <!-- <exec_depend>moveit_setup_simulation</exec_depend>  -->
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_clang_format</test_depend>
