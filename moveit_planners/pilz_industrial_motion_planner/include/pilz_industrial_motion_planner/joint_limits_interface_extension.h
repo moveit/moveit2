@@ -37,7 +37,7 @@
 #include "pilz_industrial_motion_planner/joint_limits_extension.h"
 #include <limits>
 
-#include <joint_limits/joint_limits_rosparam.hpp>
+#include <joint_limits_copy/joint_limits_rosparam.hpp>
 
 namespace pilz_industrial_motion_planner
 {
