@@ -22,11 +22,16 @@
   <buildtool_depend>ament_cmake</buildtool_depend>
 
   <depend>ament_index_cpp</depend>
-  <depend>moveit_setup_framework</depend>
-  <depend>moveit_setup_srdf_plugins</depend> <!-- For collision_updater executable -->
   <depend>pluginlib</depend>
   <depend>qtbase5-dev</depend>
   <depend>rclcpp</depend>
+  <depend>moveit_setup_framework</depend>
+  <depend>moveit_setup_srdf_plugins</depend> <!-- For collision_updater executable -->
+  <exec_depend>moveit_setup_controllers</exec_depend>
+  <exec_depend>moveit_setup_core_plugins</exec_depend>
+  <exec_depend>moveit_setup_app_plugins</exec_depend>
+  <!-- TODO: Enable once https://github.com/ros-planning/moveit2/issues/1262 is resolved -->
+  <!-- <exec_depend>moveit_setup_simulation</exec_depend>  -->
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_clang_format</test_depend>
