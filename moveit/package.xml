@@ -28,10 +28,8 @@
   <exec_depend>moveit_planners</exec_depend>
   <exec_depend>moveit_plugins</exec_depend>
   <exec_depend>moveit_ros</exec_depend>
-  <!--
-  TODO(#313): Enable after porting MSA
   <exec_depend>moveit_setup_assistant</exec_depend>
-  -->
+
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>
