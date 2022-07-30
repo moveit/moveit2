@@ -13,9 +13,8 @@ robot_name_moveit_config/
         joint_limits.yaml -> Overriding position/velocity/acceleration limits from the URDF file
         moveit_cpp.yaml -> MoveItCpp related parameters
         *_planning.yaml -> planning pipelines parameters
-        cartesian_limits.yaml -> Pilz planner parameters
-        # TODO(JafarAbdi): Check to see if this is a good default value
-        robot_name_controllers.yaml -> trajectory execution manager's parameters
+        pilz_cartesian_limits.yaml -> Pilz planner parameters
+        moveit_controllers.yaml -> trajectory execution manager's parameters
         ...
 
 Example:
@@ -28,10 +27,11 @@ Example:
     moveit_configs.planning_pipelines
     moveit_configs.trajectory_execution
     moveit_configs.planning_scene_monitor
+    moveit_configs.sensors_3d
     moveit_configs.move_group_capabilities
     moveit_configs.joint_limits
     moveit_configs.moveit_cpp
-    moveit_configs.cartesian_limits
+    moveit_configs.pilz_cartesian_limits
     # Or to get all the parameters as a dictionary
     moveit_configs.to_dict()
 
@@ -100,8 +100,10 @@ class MoveItConfigs:
     planning_pipelines: Dict = field(default_factory=dict)
     # A dictionary contains parameters for trajectory execution & moveit controller managers.
     trajectory_execution: Dict = field(default_factory=dict)
-    # A dictionary that have the planning scene monitor's parameters.
+    # A dictionary that has the planning scene monitor's parameters.
     planning_scene_monitor: Dict = field(default_factory=dict)
+    # A dictionary that has the sensor 3d configuration parameters.
+    sensors_3d: Dict = field(default_factory=dict)
     # A dictionary containing move_group's non-default capabilities.
     move_group_capabilities: Dict = field(default_factory=dict)
     # A dictionary containing the overridden position/velocity/acceleration limits.
@@ -109,7 +111,7 @@ class MoveItConfigs:
     # A dictionary containing MoveItCpp related parameters.
     moveit_cpp: Dict = field(default_factory=dict)
     # A dictionary containing the cartesian limits for the Pilz planner.
-    cartesian_limits: Dict = field(default_factory=dict)
+    pilz_cartesian_limits: Dict = field(default_factory=dict)
 
     def to_dict(self):
         parameters = {}
@@ -119,9 +121,10 @@ class MoveItConfigs:
         parameters.update(self.planning_pipelines)
         parameters.update(self.trajectory_execution)
         parameters.update(self.planning_scene_monitor)
+        parameters.update(self.sensors_3d)
         parameters.update(self.joint_limits)
         parameters.update(self.moveit_cpp)
-        parameters.update(self.cartesian_limits)
+        parameters.update(self.pilz_cartesian_limits)
         return parameters
 
 
@@ -345,6 +348,23 @@ class MoveItConfigsBuilder(ParameterBuilder):
         }
         return self
 
+    def sensors_3d(self, file_path: Optional[str] = None):
+        """Load sensors_3d paramerss.
+
+        :param file_path: Absolute or relative path to the sensors_3d yaml file (w.r.t. robot_name_moveit_config).
+        :return: Instance of MoveItConfigsBuilder with robot_description_planning loaded.
+        """
+        sensors_path = self._package_path / (
+            file_path or self.__config_dir_path / "sensors_3d.yaml"
+        )
+        if sensors_path.exists():
+            sensors_data = load_yaml(sensors_path)
+            # TODO(mikeferguson): remove the second part of this check once
+            # https://github.com/ros-planning/moveit_resources/pull/141 has made through buildfarm
+            if len(sensors_data["sensors"]) > 0 and sensors_data["sensors"][0]:
+                self.__moveit_configs.sensors_3d = sensors_data
+        return self
+
     def planning_pipelines(
         self,
         default_planning_pipeline: str = None,
@@ -404,17 +424,25 @@ class MoveItConfigsBuilder(ParameterBuilder):
 
         return self
 
-    def cartesian_limits(self, file_path: Optional[str] = None):
+    def pilz_cartesian_limits(self, file_path: Optional[str] = None):
         """Load cartesian limits.
 
         :param file_path: Absolute or relative path to the cartesian limits file (w.r.t. robot_name_moveit_config).
-        :return: Instance of MoveItConfigsBuilder with cartesian_limits loaded.
+        :return: Instance of MoveItConfigsBuilder with pilz_cartesian_limits loaded.
         """
-        self.__moveit_configs.cartesian_limits = {
+        deprecated_path = self._package_path / (
+            file_path or self.__config_dir_path / "cartesian_limits.yaml"
+        )
+        if deprecated_path.exists():
+            logging.warning(
+                f"\x1b[33;21mcartesian_limits.yaml is deprecated, please rename to pilz_cartesian_limits.yaml\x1b[0m"
+            )
+
+        self.__moveit_configs.pilz_cartesian_limits = {
             self.__robot_description
             + "_planning": load_yaml(
                 self._package_path
-                / (file_path or self.__config_dir_path / "cartesian_limits.yaml")
+                / (file_path or self.__config_dir_path / "pilz_cartesian_limits.yaml")
             )
         }
         return self
@@ -436,13 +464,15 @@ class MoveItConfigsBuilder(ParameterBuilder):
             self.trajectory_execution()
         if not self.__moveit_configs.planning_scene_monitor:
             self.planning_scene_monitor()
+        if not self.__moveit_configs.sensors_3d:
+            self.sensors_3d()
         if not self.__moveit_configs.joint_limits:
             self.joint_limits()
         # TODO(JafarAbdi): We should have a default moveit_cpp.yaml as port of a moveit config package
         # if not self.__moveit_configs.moveit_cpp:
         #     self.moveit_cpp()
-        if not self.__moveit_configs.cartesian_limits:
-            self.cartesian_limits()
+        if not self.__moveit_configs.pilz_cartesian_limits:
+            self.pilz_cartesian_limits()
         return self.__moveit_configs
 
     def to_dict(self, include_moveit_configs: bool = True):

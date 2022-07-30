@@ -2,6 +2,15 @@
 Changelog for package moveit_resources_prbt_moveit_config
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.5.2 (2022-07-18)
+------------------
+* Rename cartesian_limits.yaml (`#1422 <https://github.com/ros-planning/moveit2/issues/1422>`_)
+  Co-authored-by: Tyler Weaver <maybe@tylerjw.dev>
+* Delete the fake_controller_manager from ROS1 (`#1413 <https://github.com/ros-planning/moveit2/issues/1413>`_)
+* Merge remote-tracking branch 'origin/main' into feature/msa
+* Launch file cleanup (`#1380 <https://github.com/ros-planning/moveit2/issues/1380>`_)
+* Contributors: AndyZe, Vatan Aksoy Tezer
+
 2.5.1 (2022-05-31)
 ------------------
 

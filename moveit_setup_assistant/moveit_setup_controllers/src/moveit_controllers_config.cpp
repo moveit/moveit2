@@ -45,6 +45,7 @@ void MoveItControllersConfig::loadPrevious(const std::filesystem::path& package_
 {
   changed_ = false;
   controllers_.clear();
+  trajectory_parameters_.clear();
 
   // Load moveit controllers yaml file if available-----------------------------------------------
   std::filesystem::path ros_controllers_yaml_path = package_path / MOVEIT_CONTROLLERS_YAML;
@@ -60,7 +61,8 @@ void MoveItControllersConfig::loadPrevious(const std::filesystem::path& package_
   {
     // Used in parsing controllers
     ControllerInfo control_setting;
-    YAML::Node controllers = YAML::Load(input_stream)["moveit_simple_controller_manager"];
+    YAML::Node doc = YAML::Load(input_stream);
+    YAML::Node controllers = doc["moveit_simple_controller_manager"];
 
     std::vector<std::string> controller_names;
     getYamlProperty(controllers, "controller_names", controller_names);
@@ -78,6 +80,15 @@ void MoveItControllersConfig::loadPrevious(const std::filesystem::path& package_
       if (!parseController(controller_name, cnode))
       {
         return;
+      }
+    }
+
+    YAML::Node trajectory_execution = doc["trajectory_execution"];
+    if (trajectory_execution.IsDefined() && trajectory_execution.IsMap())
+    {
+      for (const auto& kv : trajectory_execution)
+      {
+        trajectory_parameters_[kv.first.as<std::string>()] = kv.second;
       }
     }
   }
@@ -100,6 +111,14 @@ bool MoveItControllersConfig::parseController(const std::string& name, const YAM
   {
     RCLCPP_ERROR_STREAM(*logger_, "Couldn't parse type for controller " << name << " in moveit_controllers.yaml");
     return false;
+  }
+
+  for (const std::string parameter : { "action_ns", "default" })
+  {
+    if (controller_node[parameter].IsDefined())
+    {
+      control_setting.parameters_[parameter] = controller_node[parameter].as<std::string>();
+    }
   }
 
   const YAML::Node& joints_node = controller_node["joints"];
@@ -131,10 +150,16 @@ bool MoveItControllersConfig::GeneratedControllersConfig::writeYaml(YAML::Emitte
   emitter << YAML::Newline;
   emitter << YAML::BeginMap;
   {
-    // TODO: Output possible trajectory_execution parameters including...
-    //       * allowed_execution_duration_scaling: 1.2
-    //       * allowed_goal_duration_margin: 0.5
-    //       * allowed_start_tolerance: 0.01
+    if (!parent_.trajectory_parameters_.empty())
+    {
+      emitter << YAML::Key << "trajectory_execution" << YAML::Value;
+      emitter << YAML::BeginMap;
+      for (const auto& kv : parent_.trajectory_parameters_)
+      {
+        emitter << YAML::Key << kv.first << YAML::Value << kv.second;
+      }
+      emitter << YAML::EndMap;
+    }
 
     emitter << YAML::Key << "moveit_controller_manager" << YAML::Value
             << "moveit_simple_controller_manager/MoveItSimpleControllerManager";
@@ -165,54 +190,22 @@ bool MoveItControllersConfig::GeneratedControllersConfig::writeYaml(YAML::Emitte
           // Write joints
           emitter << YAML::Key << "joints";
           emitter << YAML::Value;
-          if (controller.joints_.size() != 1)
-          {
-            emitter << YAML::BeginSeq;
+          emitter << YAML::BeginSeq;
 
-            // Iterate through the joints
-            for (const std::string& joint : controller.joints_)
-            {
-              emitter << joint;
-            }
-            emitter << YAML::EndSeq;
-          }
-          else
+          // Iterate through the joints
+          for (const std::string& joint : controller.joints_)
           {
-            emitter << YAML::BeginMap;
-            emitter << controller.joints_[0];
-            emitter << YAML::EndMap;
+            emitter << joint;
           }
-          // Depending on the controller type, fill the required data
-          if (controller.type_ == "FollowJointTrajectory")
+          emitter << YAML::EndSeq;
+
+          for (const auto& pair : controller.parameters_)
           {
-            emitter << YAML::Key << "action_ns" << YAML::Value << "follow_joint_trajectory";
-            emitter << YAML::Key << "default" << YAML::Value << "true";
+            emitter << YAML::Key << pair.first;
+            emitter << YAML::Value << pair.second;
           }
-          else
-          {
-            // Write gains as they are required for vel and effort controllers
-            emitter << YAML::Key << "gains";
-            emitter << YAML::Value;
-            emitter << YAML::BeginMap;
-            {
-              // Iterate through the joints
-              for (const std::string& joint : controller.joints_)
-              {
-                emitter << YAML::Key << joint << YAML::Value << YAML::BeginMap;
-                emitter << YAML::Key << "p";
-                emitter << YAML::Value << "100";
-                emitter << YAML::Key << "d";
-                emitter << YAML::Value << "1";
-                emitter << YAML::Key << "i";
-                emitter << YAML::Value << "1";
-                emitter << YAML::Key << "i_clamp";
-                emitter << YAML::Value << "1" << YAML::EndMap;
-              }
-            }
-            emitter << YAML::EndMap;
-          }
-          emitter << YAML::EndMap;
         }
+        emitter << YAML::EndMap;
       }
     }
     emitter << YAML::EndMap;

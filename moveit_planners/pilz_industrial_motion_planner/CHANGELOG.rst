@@ -2,6 +2,21 @@
 Changelog for package pilz_industrial_motion_planner
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.5.2 (2022-07-18)
+------------------
+* Rename cartesian_limits.yaml (`#1422 <https://github.com/ros-planning/moveit2/issues/1422>`_)
+  Co-authored-by: Tyler Weaver <maybe@tylerjw.dev>
+* Merge remote-tracking branch 'origin/main' into feature/msa
+* Removing more boost usage (`#1372 <https://github.com/ros-planning/moveit2/issues/1372>`_)
+* Merge remote-tracking branch 'upstream/main' into feature/msa
+* Removing some boost usage (`#1331 <https://github.com/ros-planning/moveit2/issues/1331>`_)
+  Co-authored-by: Vatan Aksoy Tezer <vatan@picknik.ai>
+* Remove unnecessary rclcpp.hpp includes (`#1333 <https://github.com/ros-planning/moveit2/issues/1333>`_)
+* Switch to hpp headers of pluginlib
+* Merge pull request `#3106 <https://github.com/ros-planning/moveit2/issues/3106>`_ from v4hn/pr-master-bind-them-all / banish bind()
+* banish bind()
+* Contributors: AndyZe, David V. Lu, Henry Moore, Jafar, Jochen Sprickerhof, Michael Görner, Vatan Aksoy Tezer, v4hn
+
 2.5.1 (2022-05-31)
 ------------------
 * Fix exporting PILZ's move_group capabilities (`#1281 <https://github.com/ros-planning/moveit2/issues/1281>`_)

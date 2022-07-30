@@ -60,8 +60,9 @@ bool sampleCloud(const octomap::point3d_list& cloud, const double& spacing, cons
                  const octomath::Vector3& position, double& intensity, octomath::Vector3& gradient);
 
 int collision_detection::refineContactNormals(const World::ObjectConstPtr& object, CollisionResult& res,
-                                              double cell_bbx_search_distance, double allowed_angle_divergence,
-                                              bool estimate_depth, double iso_value, double metaball_radius_multiple)
+                                              const double cell_bbx_search_distance,
+                                              const double allowed_angle_divergence, const bool estimate_depth,
+                                              const double iso_value, const double metaball_radius_multiple)
 {
   if (!object)
   {
@@ -79,8 +80,8 @@ int collision_detection::refineContactNormals(const World::ObjectConstPtr& objec
   // iterate through contacts
   for (auto& contact : res.contacts)
   {
-    std::string contact1 = contact.first.first;
-    std::string contact2 = contact.first.second;
+    const std::string contact1 = contact.first.first;
+    const std::string contact2 = contact.first.second;
     std::string octomap_name = "";
     std::vector<collision_detection::Contact>& contact_vector = contact.second;
 
@@ -97,7 +98,7 @@ int collision_detection::refineContactNormals(const World::ObjectConstPtr& objec
     if (!object->shapes_.empty())
     {
       const shapes::ShapeConstPtr& shape = object->shapes_[0];
-      std::shared_ptr<const shapes::OcTree> shape_octree = std::dynamic_pointer_cast<const shapes::OcTree>(shape);
+      const std::shared_ptr<const shapes::OcTree> shape_octree = std::dynamic_pointer_cast<const shapes::OcTree>(shape);
       if (shape_octree)
       {
         std::shared_ptr<const octomap::OcTree> octree = shape_octree->octree;
@@ -107,11 +108,11 @@ int collision_detection::refineContactNormals(const World::ObjectConstPtr& objec
           const Eigen::Vector3d& point = contact_info.pos;
           const Eigen::Vector3d& normal = contact_info.normal;
 
-          octomath::Vector3 contact_point(point[0], point[1], point[2]);
-          octomath::Vector3 contact_normal(normal[0], normal[1], normal[2]);
-          octomath::Vector3 diagonal = octomath::Vector3(1, 1, 1);
-          octomath::Vector3 bbx_min = contact_point - diagonal * cell_size * cell_bbx_search_distance;
-          octomath::Vector3 bbx_max = contact_point + diagonal * cell_size * cell_bbx_search_distance;
+          const octomath::Vector3 contact_point(point[0], point[1], point[2]);
+          const octomath::Vector3 contact_normal(normal[0], normal[1], normal[2]);
+          const octomath::Vector3 diagonal = octomath::Vector3(1, 1, 1);
+          const octomath::Vector3 bbx_min = contact_point - diagonal * cell_size * cell_bbx_search_distance;
+          const octomath::Vector3 bbx_max = contact_point + diagonal * cell_size * cell_bbx_search_distance;
           octomap::point3d_list node_centers;
           octomap::OcTreeBaseImpl<octomap::OcTreeNode, octomap::AbstractOccupancyOcTree>::leaf_bbx_iterator it =
               octree->begin_leafs_bbx(bbx_min, bbx_max);
@@ -120,7 +121,7 @@ int collision_detection::refineContactNormals(const World::ObjectConstPtr& objec
           int count = 0;
           for (; it != leafs_end; ++it)
           {
-            octomap::point3d pt = it.getCoordinate();
+            const octomap::point3d pt = it.getCoordinate();
             // double prob = it->getOccupancy();
             if (octree->isNodeOccupied(*it))  // magic number!
             {
@@ -144,7 +145,7 @@ int collision_detection::refineContactNormals(const World::ObjectConstPtr& objec
                                            n, depth, estimate_depth))
           {
             // only modify normal if the refinement predicts a "very different" result.
-            double divergence = contact_normal.angleTo(n);
+            const double divergence = contact_normal.angleTo(n);
             if (divergence > allowed_angle_divergence)
             {
               modified++;
@@ -167,7 +168,7 @@ int collision_detection::refineContactNormals(const World::ObjectConstPtr& objec
 
 bool getMetaballSurfaceProperties(const octomap::point3d_list& cloud, const double& spacing, const double& iso_value,
                                   const double& r_multiple, const octomath::Vector3& contact_point,
-                                  octomath::Vector3& normal, double& depth, bool estimate_depth)
+                                  octomath::Vector3& normal, double& depth, const bool estimate_depth)
 {
   double intensity;
   if (estimate_depth)
@@ -215,7 +216,7 @@ bool findSurface(const octomap::point3d_list& cloud, const double& spacing, cons
   {
     if (!sampleCloud(cloud, spacing, r_multiple, p, intensity, gs))
       return false;
-    double s = iso_value - intensity;
+    const double s = iso_value - intensity;
     dp = (gs * -s) * (1.0 / std::max(gs.dot(gs), epsilon));
     p = p + dp;
     if (dp.dot(dp) < epsilon)
@@ -235,10 +236,10 @@ bool sampleCloud(const octomap::point3d_list& cloud, const double& spacing, cons
   intensity = 0.f;
   gradient = octomath::Vector3(0, 0, 0);
 
-  double r = r_multiple * spacing;  // TODO magic number!
+  const double r = r_multiple * spacing;  // TODO magic number!
   // double T = 0.5; // TODO magic number!
 
-  int nn = cloud.size();
+  const int nn = cloud.size();
   if (nn == 0)
   {
     return false;
@@ -246,7 +247,7 @@ bool sampleCloud(const octomap::point3d_list& cloud, const double& spacing, cons
 
   // variables for Wyvill
   double a = 0, b = 0, c = 0, r2 = 0, r4 = 0, r6 = 0, a1 = 0, b1 = 0, c1 = 0, a2 = 0, b2 = 0, c2 = 0;
-  bool wyvill = true;
+  const bool wyvill = true;
 
   for (const octomath::Vector3& v : cloud)
   {
@@ -274,17 +275,17 @@ bool sampleCloud(const octomap::point3d_list& cloud, const double& spacing, cons
     octomath::Vector3 f_grad(0, 0, 0);
 
     octomath::Vector3 pos = position - v;
-    double r = pos.norm();
+    const double r = pos.norm();
     pos = pos * (1.0 / r);
     if (r > r)  // must skip points outside valid bounds.
     {
       continue;
     }
-    double r2 = r * r;
-    double r3 = r * r2;
-    double r4 = r2 * r2;
-    double r5 = r3 * r2;
-    double r6 = r3 * r3;
+    const double r2 = r * r;
+    const double r3 = r * r2;
+    const double r4 = r2 * r2;
+    const double r5 = r3 * r2;
+    const double r6 = r3 * r3;
 
     if (wyvill)
     {
@@ -294,7 +295,7 @@ bool sampleCloud(const octomap::point3d_list& cloud, const double& spacing, cons
     else
     {
       RCLCPP_ERROR(LOGGER, "This should not be called!");
-      double r_scaled = r / r;
+      const double r_scaled = r / r;
       // TODO still need to address the scaling...
       f_val = pow((1 - r_scaled), 4) * (4 * r_scaled + 1);
       f_grad = pos * (-4.0 / r * pow(1.0 - r_scaled, 3) * (4.0 * r_scaled + 1.0) + 4.0 / r * pow(1 - r_scaled, 4));

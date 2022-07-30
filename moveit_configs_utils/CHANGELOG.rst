@@ -2,6 +2,27 @@
 Changelog for package moveit_configs_utils
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.5.2 (2022-07-18)
+------------------
+* Rename cartesian_limits.yaml (`#1422 <https://github.com/ros-planning/moveit2/issues/1422>`_)
+  Co-authored-by: Tyler Weaver <maybe@tylerjw.dev>
+* Merge pull request `#1402 <https://github.com/ros-planning/moveit2/issues/1402>`_ from Abishalini/pr-sync-a436a97
+  Sync with MoveIt
+* Merge https://github.com/ros-planning/moveit/commit/a436a9771f7445c162cc3090c4c7c57bdb5bf194
+* load sensors_3d.yaml (`#1387 <https://github.com/ros-planning/moveit2/issues/1387>`_)
+* Merge pull request `#1254 <https://github.com/ros-planning/moveit2/issues/1254>`_ from ros-planning/feature/msa
+  MoveIt Setup Assistant - Merge the Feature branch
+* [MSA] ros2_control Integration (`#1299 <https://github.com/ros-planning/moveit2/issues/1299>`_)
+  Co-authored-by: AndyZe <andyz@utexas.edu>
+* [MSA] Workaround to launch files without controllers (`#1275 <https://github.com/ros-planning/moveit2/issues/1275>`_)
+  Co-authored-by: Jafar <jafar.uruc@gmail.com>
+* Fix moveit_configs_utils parameter ordering (`#1315 <https://github.com/ros-planning/moveit2/issues/1315>`_)
+* Remove TrajOpt Default Parameters (`#1332 <https://github.com/ros-planning/moveit2/issues/1332>`_)
+  Co-authored-by: AndyZe <zelenak@picknik.ai>
+* Decorate MoveItConfigs with dataclaass (`#1308 <https://github.com/ros-planning/moveit2/issues/1308>`_)
+* moveit_config_utils: Change default rviz config file location (`#1316 <https://github.com/ros-planning/moveit2/issues/1316>`_)
+* Contributors: Abishalini, AndyZe, David V. Lu!!, Jafar, Michael Ferguson, Tyler Weaver, Vatan Aksoy Tezer
+
 2.5.1 (2022-05-31)
 ------------------
 

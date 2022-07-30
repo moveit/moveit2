@@ -49,6 +49,16 @@ DataWarehouse::DataWarehouse(const rclcpp::Node::SharedPtr& parent_node)
   registerType("package_settings", "moveit_setup::PackageSettingsConfig");
 }
 
+void DataWarehouse::preloadWithURDFPath(const std::filesystem::path& urdf_path)
+{
+  get<URDFConfig>("urdf")->loadFromPath(urdf_path);
+}
+
+void DataWarehouse::preloadWithFullConfig(const std::string& package_path_or_name)
+{
+  get<PackageSettingsConfig>("package_settings")->loadExisting(package_path_or_name);
+}
+
 SetupConfigPtr DataWarehouse::get(const std::string& config_name, std::string config_class)
 {
   if (config_class.empty())
@@ -74,28 +84,30 @@ SetupConfigPtr DataWarehouse::get(const std::string& config_name, std::string co
 void DataWarehouse::registerType(const std::string& config_name, const std::string& config_class)
 {
   registered_types_[config_name] = config_class;
+  registered_names_.push_back(config_name);
 }
 
 std::vector<SetupConfigPtr> DataWarehouse::getConfigured()
 {
   std::vector<SetupConfigPtr> configs;
-  for (const auto& kv : configs_)
+  for (const std::string& config_name : registered_names_)
   {
-    if (kv.second->isConfigured())
+    auto it = configs_.find(config_name);
+    if (it == configs_.end())
     {
-      configs.push_back(kv.second);
+      continue;
+    }
+    SetupConfigPtr ptr = it->second;
+    if (ptr->isConfigured())
+    {
+      configs.push_back(ptr);
     }
   }
   return configs;
 }
 
-std::vector<std::string> DataWarehouse::getRegisteredNames() const
+const std::vector<std::string>& DataWarehouse::getRegisteredNames() const
 {
-  std::vector<std::string> names;
-  for (const auto& type_pair : registered_types_)
-  {
-    names.push_back(type_pair.first);
-  }
-  return names;
+  return registered_names_;
 }
 }  // namespace moveit_setup

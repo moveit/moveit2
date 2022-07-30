@@ -51,7 +51,7 @@ def load_moveit_config():
     robot_description_semantic_file = "config/prbt.srdf.xacro"
     robot_description_kinematics_file = "config/kinematics.yaml"
     joint_limits_file = "config/joint_limits.yaml"
-    cartesian_limits_file = "config/cartesian_limits.yaml"
+    pilz_cartesian_limits_file = "config/pilz_cartesian_limits.yaml"
     # TODO(henningkayser): Switch to MoveItConfigsBuilder once #591 is merged
     # return (
     #     MoveItConfigsBuilder(moveit_config_package_name)
@@ -62,7 +62,7 @@ def load_moveit_config():
     #     .robot_description_semantic(file_path=robot_description_semantic_file)
     #     .robot_description_kinematics(file_path=robot_description_kinematics_file)
     #     .joint_limits(file_path=joint_limits_file)
-    #     .cartesian_limits(file_path=cartesian_limits_file)
+    #     .pilz_cartesian_limits(file_path=pilz_cartesian_limits_file)
     #     .to_moveit_configs()
     # )
 
@@ -98,7 +98,7 @@ def load_moveit_config():
     configs.robot_description_planning = {
         "robot_description_planning": {
             **load_yaml(moveit_config_package_name, joint_limits_file),
-            **load_yaml(moveit_config_package_name, cartesian_limits_file),
+            **load_yaml(moveit_config_package_name, pilz_cartesian_limits_file),
         }
     }
 

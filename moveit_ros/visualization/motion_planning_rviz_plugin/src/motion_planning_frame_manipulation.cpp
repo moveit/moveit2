@@ -62,7 +62,7 @@ void MotionPlanningFrame::detectObjectsButtonClicked()
   //    const planning_scene_monitor::LockedPlanningSceneRO& ps = planning_display_->getPlanningSceneRO();
   //    if (ps)
   //    {
-  //      semantic_world_.reset(new moveit::semantic_world::SemanticWorld(ps));
+  //      semantic_world_ = std::make_shared<moveit::semantic_world::SemanticWorld>(ps);
   //    }
   //    if (semantic_world_)
   //    {

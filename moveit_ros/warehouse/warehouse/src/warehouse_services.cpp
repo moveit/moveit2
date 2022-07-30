@@ -191,8 +191,6 @@ int main(int argc, char** argv)
       RCLCPP_INFO(LOGGER, " * %s", name.c_str());
   }
 
-  using std::placeholders::_1;
-  using std::placeholders::_2;
   auto save_cb = [&](const std::shared_ptr<moveit_msgs::srv::SaveRobotStateToWarehouse::Request> request,
                      std::shared_ptr<moveit_msgs::srv::SaveRobotStateToWarehouse::Response> response) -> bool {
     return storeState(request, response, rs);
