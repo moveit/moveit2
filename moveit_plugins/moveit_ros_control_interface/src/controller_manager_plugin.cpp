@@ -151,6 +151,7 @@ class MoveItControllerManager : public moveit_controller_manager::MoveItControll
     MoveItControllerManager::fixChainedControllers(result);
     for (const controller_manager_msgs::msg::ControllerState& controller : result->controller)
     {
+      RCLCPP_ERROR(LOGGER, "CONTROLERS!!!: %s", controller.name.c_str());
       // If the controller is active, add it to the map of active controllers.
       if (isActive(controller))
       {
