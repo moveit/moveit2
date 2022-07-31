@@ -48,12 +48,9 @@
 // #include <moveit_servo/make_shared_from_pool.h> // TODO(adamp): create an issue about this
 #include <moveit_servo/servo_calcs.h>
 #include <moveit_servo/enforce_limits.hpp>
+#include <moveit_servo/realtime.hpp>
 
 using namespace std::chrono_literals;  // for s, ms, etc.
-
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_servo.servo_calcs");
-constexpr auto ROS_LOG_THROTTLE_PERIOD = std::chrono::milliseconds(3000).count();
-static constexpr double STOPPED_VELOCITY_EPS = 1e-4;  // rad/s
 
 namespace moveit_servo
 {
@@ -88,6 +85,15 @@ geometry_msgs::msg::TransformStamped convertIsometryToTransform(const Eigen::Iso
 
   return output;
 }
+
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_servo.servo_calcs");
+constexpr auto ROS_LOG_THROTTLE_PERIOD = std::chrono::milliseconds(3000).count();
+static constexpr double STOPPED_VELOCITY_EPS = 1e-4;  // rad/s
+
+// This value is used when configuring the main loop to use SCHED_FIFO scheduling
+// We use a midpoint RT priority to allow maximum flexibility to users
+// Reference: https://man7.org/linux/man-pages/man2/sched_setparam.2.html
+int const THREAD_PRIORITY = 50;
 }  // namespace
 
 // Constructor for the class that handles servoing calculations
@@ -240,6 +246,19 @@ void ServoCalcs::start()
 {
   // Stop the thread if we are currently running
   stop();
+
+  // Check if a realtime kernel is installed. Set a higher thread priority, if so
+  if (moveit_servo::has_realtime_kernel())
+  {
+    if (!moveit_servo::configure_sched_fifo(THREAD_PRIORITY))
+    {
+      RCLCPP_WARN(LOGGER, "Could not enable FIFO RT scheduling policy");
+    }
+  }
+  else
+  {
+    RCLCPP_INFO(LOGGER, "RT kernel is recommended for better performance");
+  }
 
   // Set up the "last" published message, in case we need to send it first
   auto initial_joint_trajectory = std::make_unique<trajectory_msgs::msg::JointTrajectory>();

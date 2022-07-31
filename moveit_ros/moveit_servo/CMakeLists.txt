@@ -72,9 +72,9 @@ ament_target_dependencies(${SERVO_PARAM_LIB_NAME} ${THIS_PACKAGE_INCLUDE_DEPENDS
 
 # This library provides a C++ interface for sending realtime twist or joint commands to a robot
 add_library(${SERVO_LIB_NAME} SHARED
-  # These files are used to produce differential motion
   src/collision_check.cpp
   src/enforce_limits.cpp
+  src/realtime.cpp
   src/servo.cpp
   src/servo_calcs.cpp
 )
