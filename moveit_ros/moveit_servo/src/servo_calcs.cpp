@@ -247,19 +247,6 @@ void ServoCalcs::start()
   // Stop the thread if we are currently running
   stop();
 
-  // Check if a realtime kernel is installed. Set a higher thread priority, if so
-  if (controller_manager::has_realtime_kernel())
-  {
-    if (!controller_manager::configure_sched_fifo(THREAD_PRIORITY))
-    {
-      RCLCPP_WARN(LOGGER, "Could not enable FIFO RT scheduling policy");
-    }
-  }
-  else
-  {
-    RCLCPP_INFO(LOGGER, "RT kernel is recommended for better performance");
-  }
-
   // Set up the "last" published message, in case we need to send it first
   auto initial_joint_trajectory = std::make_unique<trajectory_msgs::msg::JointTrajectory>();
   initial_joint_trajectory->header.stamp = node_->now();
@@ -297,7 +284,21 @@ void ServoCalcs::start()
   }
 
   stop_requested_ = false;
-  thread_ = std::thread([this] { mainCalcLoop(); });
+  thread_ = std::thread([this] {
+    // Check if a realtime kernel is installed. Set a higher thread priority, if so
+    if (controller_manager::has_realtime_kernel())
+    {
+      if (!controller_manager::configure_sched_fifo(THREAD_PRIORITY))
+      {
+        RCLCPP_WARN(LOGGER, "Could not enable FIFO RT scheduling policy");
+      }
+    }
+    else
+    {
+      RCLCPP_INFO(LOGGER, "RT kernel is recommended for better performance");
+    }
+    mainCalcLoop();
+  });
   new_input_cmd_ = false;
 }
 
