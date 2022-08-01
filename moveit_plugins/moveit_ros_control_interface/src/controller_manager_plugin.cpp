@@ -180,6 +180,8 @@ class MoveItControllerManager : public moveit_controller_manager::MoveItControll
                          return parseJointNameFromResource(required_interface);
                        });
         allocate(absname, controller_it->second);
+      } else{
+        RCLCPP_ERROR(LOGGER, "I can not find CONTROLER: %s", controller.name.c_str());
       }
     }
   }
