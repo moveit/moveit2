@@ -30,16 +30,14 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
-# Author: Ioan Sucan
+# Author: Larry Lu, Ioan Sucan
 
-from moveit_ros_planning_interface import _moveit_roscpp_initializer
-
-
-def roscpp_initialize(args):
-    # remove __name:= argument
-    args2 = [a for a in args if not a.startswith("__name:=")]
-    _moveit_roscpp_initializer.roscpp_init("move_group_commander_wrappers", args2)
+from moveit_ros_planning_interface import rclcpp_interface
 
 
-def roscpp_shutdown():
-    _moveit_roscpp_initializer.roscpp_shutdown()
+def init(args):
+    rclcpp_interface.rclcpp_init(args)
+
+
+def shutdown():
+    rclcpp_interface.rclcpp_shutdown()

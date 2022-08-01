@@ -30,18 +30,15 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
-# Author: Ioan Sucan, Felix Messmer
+# Author: Larry Lu, Ioan Sucan, Felix Messmer
 
-import rospy
-from rosgraph.names import ns_join
-from . import conversions
+import moveit_commander.conversions as conversions
 
-from moveit_msgs.msg import PlanningScene, CollisionObject, AttachedCollisionObject
-from moveit_ros_planning_interface import _moveit_planning_scene_interface
+from moveit_msgs.msg import CollisionObject, AttachedCollisionObject
+from moveit_ros_planning_interface import planning_scene_interface
 from geometry_msgs.msg import Pose, Point
 from shape_msgs.msg import SolidPrimitive, Plane, Mesh, MeshTriangle
-from .exception import MoveItCommanderException
-from moveit_msgs.srv import ApplyPlanningScene, ApplyPlanningSceneRequest
+from moveit_commander.exception import MoveItCommanderException
 
 try:
     from pyassimp import pyassimp
@@ -61,37 +58,24 @@ class PlanningSceneInterface(object):
     Python interface for a C++ PlanningSceneInterface.
     Uses both C++ wrapped methods and scene manipulation topics
     to manipulate the PlanningScene managed by the PlanningSceneMonitor.
-    See wrap_python_planning_scene_interface.cpp for the wrapped methods.
+    See python_planning_scene_interface.cpp for the wrapped methods.
     """
 
-    def __init__(self, ns="", synchronous=False, service_timeout=5.0):
+    def __init__(self, ns="", synchronous=False):
         """Create a planning scene interface; it uses both C++ wrapped methods and scene manipulation topics."""
-        self._psi = _moveit_planning_scene_interface.PlanningSceneInterface(ns)
-
-        self._pub_co = rospy.Publisher(
-            ns_join(ns, "collision_object"), CollisionObject, queue_size=100
-        )
-        self._pub_aco = rospy.Publisher(
-            ns_join(ns, "attached_collision_object"),
-            AttachedCollisionObject,
-            queue_size=100,
-        )
+        self._psi = planning_scene_interface.PlanningSceneInterface(
+            ns, synchronous)
         self.__synchronous = synchronous
-        if self.__synchronous:
-            self._apply_planning_scene_diff = rospy.ServiceProxy(
-                ns_join(ns, "apply_planning_scene"), ApplyPlanningScene
-            )
-            self._apply_planning_scene_diff.wait_for_service(service_timeout)
+        
 
     def __submit(self, collision_object, attach=False):
-        if self.__synchronous:
-            diff_req = self.__make_planning_scene_diff_req(collision_object, attach)
-            self._apply_planning_scene_diff.call(diff_req)
+        co_str = conversions.serialize(collision_object)
+        if attach:
+            self._psi.apply_attached_collision_object(
+                co_str, self.__synchronous)
         else:
-            if attach:
-                self._pub_aco.publish(collision_object)
-            else:
-                self._pub_co.publish(collision_object)
+            self._psi.apply_collision_object(co_str, self.__synchronous)
+
 
     def add_object(self, collision_object):
         """Add an object to the planning scene"""
@@ -117,15 +101,16 @@ class PlanningSceneInterface(object):
         co = self.__make_box(name, pose, size)
         self.__submit(co, attach=False)
 
-    def add_plane(self, name, pose, normal=(0, 0, 1), offset=0):
+    def add_plane(self, name, pose, normal=(0.0, 0.0, 1.0), offset=0.0):
         """Add a plane to the planning scene"""
         co = CollisionObject()
         co.operation = CollisionObject.ADD
         co.id = name
         co.header = pose.header
         p = Plane()
-        p.coef = list(normal)
-        p.coef.append(offset)
+        coef = list(normal)
+        coef.append(offset)
+        p.coef = coef
         co.planes = [p]
         co.plane_poses = [pose.pose]
         self.__submit(co, attach=False)
@@ -216,8 +201,7 @@ class PlanningSceneInterface(object):
         ser_ops = self._psi.get_object_poses(object_ids)
         ops = dict()
         for key in ser_ops:
-            msg = Pose()
-            conversions.msg_from_string(msg, ser_ops[key])
+            msg = conversions.deserialize(ser_ops[key], Pose)
             ops[key] = msg
         return ops
 
@@ -228,8 +212,7 @@ class PlanningSceneInterface(object):
         ser_objs = self._psi.get_objects(object_ids)
         objs = dict()
         for key in ser_objs:
-            msg = CollisionObject()
-            conversions.msg_from_string(msg, ser_objs[key])
+            msg = conversions.deserialize(ser_objs[key], CollisionObject)
             objs[key] = msg
         return objs
 
@@ -240,8 +223,8 @@ class PlanningSceneInterface(object):
         ser_aobjs = self._psi.get_attached_objects(object_ids)
         aobjs = dict()
         for key in ser_aobjs:
-            msg = AttachedCollisionObject()
-            conversions.msg_from_string(msg, ser_aobjs[key])
+            msg = conversions.deserialize(
+                ser_aobjs[key], AttachedCollisionObject)
             aobjs[key] = msg
         return aobjs
 
@@ -250,7 +233,7 @@ class PlanningSceneInterface(object):
         Applies the planning scene message.
         """
         return self._psi.apply_planning_scene(
-            conversions.msg_to_string(planning_scene_message)
+            conversions.serialize(planning_scene_message)
         )
 
     @staticmethod
@@ -349,16 +332,3 @@ class PlanningSceneInterface(object):
         cylinder.dimensions = [height, radius]
         co.primitives = [cylinder]
         return co
-
-    @staticmethod
-    def __make_planning_scene_diff_req(collision_object, attach=False):
-        scene = PlanningScene()
-        scene.is_diff = True
-        scene.robot_state.is_diff = True
-        if attach:
-            scene.robot_state.attached_collision_objects = [collision_object]
-        else:
-            scene.world.collision_objects = [collision_object]
-        planning_scene_diff_req = ApplyPlanningSceneRequest()
-        planning_scene_diff_req.scene = scene
-        return planning_scene_diff_req

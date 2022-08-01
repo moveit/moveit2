@@ -30,11 +30,11 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
-# Author: Ioan Sucan
+# Author: Larry Lu, Ioan Sucan
 
-from moveit_commander import MoveGroupCommander
-from .exception import MoveItCommanderException
-from moveit_ros_planning_interface import _moveit_robot_interface
+from moveit_commander.move_group import MoveGroupCommander
+from moveit_commander.exception import MoveItCommanderException
+from moveit_ros_planning_interface import robot_interface
 from moveit_msgs.msg import RobotState
 from visualization_msgs.msg import MarkerArray
 import moveit_commander.conversions as conversions
@@ -151,10 +151,12 @@ class RobotCommander(object):
                 self._robot.get_planning_frame(),
             )
 
-    def __init__(self, robot_description="robot_description", ns=""):
+    def __init__(self, move_group_node_name="move_group", robot_description="robot_description", ns=""):
+        self._move_group_node_name = move_group_node_name
         self._robot_description = robot_description
         self._ns = ns
-        self._r = _moveit_robot_interface.RobotInterface(robot_description, ns)
+        self._r = robot_interface.RobotInterface(
+            move_group_node_name, robot_description)
         self._groups = {}
         self._joint_owner_groups = {}
 
@@ -178,15 +180,19 @@ class RobotCommander(object):
         """
         mrkr = MarkerArray()
         if not args:
-            conversions.msg_from_string(mrkr, self._r.get_robot_markers())
+            mrkr = conversions.deserialize(
+                self._r.get_robot_markers(), MarkerArray)
         else:
             if isinstance(args[0], RobotState):
-                msg_str = conversions.msg_to_string(args[0])
-                conversions.msg_from_string(mrkr, self._r.get_robot_markers(msg_str))
+                msg_str = conversions.serialize(args[0])
+                mrkr = conversions.deserialize(
+                    self._r.get_robot_markers(msg_str), MarkerArray)
             elif isinstance(args[0], dict):
-                conversions.msg_from_string(mrkr, self._r.get_robot_markers(*args))
+                mrkr = conversions.deserialize(
+                    self._r.get_robot_markers(*args), MarkerArray)
             elif isinstance(args[0], str):
-                conversions.msg_from_string(mrkr, self._r.get_group_markers(*args))
+                mrkr = conversions.deserialize(
+                    self._r.get_group_markers(*args), MarkerArray)
             else:
                 raise MoveItCommanderException("Unexpected type")
         return mrkr
@@ -205,7 +211,8 @@ class RobotCommander(object):
             if self.has_group(group):
                 return self._r.get_group_active_joint_names(group)
             else:
-                raise MoveItCommanderException("There is no group named %s" % group)
+                raise MoveItCommanderException(
+                    "There is no group named %s" % group)
         else:
             return self._r.get_active_joint_names()
 
@@ -219,7 +226,8 @@ class RobotCommander(object):
             if self.has_group(group):
                 return self._r.get_group_joint_names(group)
             else:
-                raise MoveItCommanderException("There is no group named %s" % group)
+                raise MoveItCommanderException(
+                    "There is no group named %s" % group)
         else:
             return self._r.get_joint_names()
 
@@ -232,7 +240,8 @@ class RobotCommander(object):
             if self.has_group(group):
                 return self._r.get_group_link_names(group)
             else:
-                raise MoveItCommanderException("There is no group named %s" % group)
+                raise MoveItCommanderException(
+                    "There is no group named %s" % group)
         else:
             return self._r.get_link_names()
 
@@ -242,8 +251,7 @@ class RobotCommander(object):
 
     def get_current_state(self):
         """Get a RobotState message describing the current state of the robot"""
-        s = RobotState()
-        s.deserialize(self._r.get_current_state())
+        s = conversions.deserialize(self._r.get_current_state(), RobotState)
         return s
 
     def get_current_variable_values(self):
@@ -282,9 +290,10 @@ class RobotCommander(object):
         """
         if not name in self._groups:
             if not self.has_group(name):
-                raise MoveItCommanderException("There is no group named %s" % name)
+                raise MoveItCommanderException(
+                    "There is no group named %s" % name)
             self._groups[name] = MoveGroupCommander(
-                name, self._robot_description, self._ns
+                name, self._robot_description, self._move_group_node_name
             )
         return self._groups[name]
 

@@ -53,8 +53,19 @@ class PlanningSceneInterfacePython : public PlanningSceneInterface
 {
 public:
   // ROSInitializer is constructed first, and ensures ros::init() was called, if needed
-  PlanningSceneInterfacePython(const std::string& ns = "") : PlanningSceneInterface(ns)
+  PlanningSceneInterfacePython(const std::string& ns = "", bool sync = true) : PlanningSceneInterface(ns)
   {
+    if (!sync)
+    {
+      rclcpp::NodeOptions options;
+      options.arguments({ "--ros-args", "-r",
+                          "__node:=" + std::string("planning_scene_interface_python_") +
+                              std::to_string(reinterpret_cast<std::size_t>(this)) });
+      node_ = rclcpp::Node::make_shared("_", ns, options);
+      collision_object_publisher_ = node_->create_publisher<moveit_msgs::msg::CollisionObject>("collision_object", 1);
+      attached_collision_object_publisher_ =
+          node_->create_publisher<moveit_msgs::msg::AttachedCollisionObject>("attached_collision_object", 1);
+    }
   }
 
   py::list getKnownObjectNamesPython(bool with_type = false)
@@ -102,11 +113,17 @@ public:
     return py_bindings_tools::dictFromType(ser_aobjs);
   }
 
-  bool applyCollisionObjectPython(const py::bytes& co_str)
+  bool applyCollisionObjectPython(const py::bytes& co_str, bool sync)
   {
     moveit_msgs::msg::CollisionObject co_msg;
     py_bindings_tools::deserializeMsg(co_str, co_msg);
-    return applyCollisionObject(co_msg);
+    if (sync)
+      return applyCollisionObject(co_msg);
+    else
+    {
+      collision_object_publisher_->publish(co_msg);
+      return true;
+    }
   }
 
   bool applyCollisionObjectWithColorPython(const py::bytes& co_str, const py::bytes& oc_str)
@@ -141,11 +158,17 @@ public:
     return applyCollisionObjects(co_msgs, oc_msgs);
   }
 
-  bool applyAttachedCollisionObjectPython(const py::bytes& co_str)
+  bool applyAttachedCollisionObjectPython(const py::bytes& co_str, bool sync)
   {
     moveit_msgs::msg::AttachedCollisionObject co_msg;
     py_bindings_tools::deserializeMsg(co_str, co_msg);
-    return applyAttachedCollisionObject(co_msg);
+    if (sync)
+      return applyAttachedCollisionObject(co_msg);
+    else
+    {
+      attached_collision_object_publisher_->publish(co_msg);
+      return true;
+    }
   }
 
   bool applyAttachedCollisionObjectsPython(const py::list& co_strs)
@@ -196,6 +219,11 @@ public:
   {
     removeCollisionObjects(py_bindings_tools::stringFromList(object_ids));
   }
+
+private:
+  rclcpp::Node::SharedPtr node_;
+  rclcpp::Publisher<moveit_msgs::msg::CollisionObject>::SharedPtr collision_object_publisher_;
+  rclcpp::Publisher<moveit_msgs::msg::AttachedCollisionObject>::SharedPtr attached_collision_object_publisher_;
 };
 
 }  // namespace planning_interface
@@ -207,17 +235,18 @@ PYBIND11_MODULE(planning_scene_interface, m)
 {
   m.doc() = "MOVEIT2 planning_scene interface.";
   py::class_<PlanningSceneInterfacePython>(m, "PlanningSceneInterface")
-      .def(py::init<std::string>(), py::arg("ns") = "")
+      .def(py::init<std::string, bool>(), py::arg("ns") = "", py::arg("sync") = true)
       .def("get_known_object_names", &PlanningSceneInterfacePython::getKnownObjectNamesPython,
            py::arg("with_type") = false)
       .def("get_known_object_names_in_roi", &PlanningSceneInterfacePython::getKnownObjectNamesInROIPython)
       .def("get_object_poses", &PlanningSceneInterfacePython::getObjectPosesPython)
       .def("get_objects", &PlanningSceneInterfacePython::getObjectsPython)
       .def("get_attached_objects", &PlanningSceneInterfacePython::getAttachedObjectsPython)
-      .def("apply_collision_object", &PlanningSceneInterfacePython::applyCollisionObjectPython)
+      .def("apply_collision_object", &PlanningSceneInterfacePython::applyCollisionObjectPython, py::arg("co_str"), py::arg("sync") = true)
       .def("apply_collision_object", &PlanningSceneInterfacePython::applyCollisionObjectWithColorPython)
       .def("apply_collision_objects", &PlanningSceneInterfacePython::applyCollisionObjectsWithColorPython)
-      .def("apply_attached_collision_object", &PlanningSceneInterfacePython::applyAttachedCollisionObjectPython)
+      .def("apply_attached_collision_object", &PlanningSceneInterfacePython::applyAttachedCollisionObjectPython, py::arg("co_str"),
+           py::arg("sync") = true)
       .def("apply_attached_collision_objects", &PlanningSceneInterfacePython::applyAttachedCollisionObjectsPython)
       .def("apply_planning_scene", &PlanningSceneInterfacePython::applyPlanningScenePython)
       .def("add_collision_objects", &PlanningSceneInterfacePython::addCollisionObjectsPython)

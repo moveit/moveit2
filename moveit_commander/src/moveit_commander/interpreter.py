@@ -32,7 +32,7 @@
 #
 # Author: Ioan Sucan
 
-import rospy
+from rclpy.clock import Clock
 from moveit_commander import (
     RobotCommander,
     MoveGroupCommander,
@@ -40,7 +40,7 @@ from moveit_commander import (
     MoveItCommanderException,
 )
 from geometry_msgs.msg import Pose, PoseStamped
-import tf
+import transforms3d
 import re
 import time
 import os.path
@@ -270,7 +270,7 @@ class MoveGroupCommandInterpreter(object):
             pose.pose.orientation.y = 0
             pose.pose.orientation.z = 0
             pose.pose.orientation.w = 1
-            pose.header.stamp = rospy.get_rostime()
+            pose.header.stamp = Clock().now().to_msg()
             pose.header.frame_id = self._robot.get_root_link()
             self._planning_scene_interface.attach_box(
                 self._robot.get_root_link(), "ground", pose, (3, 3, 0.1)
@@ -671,8 +671,9 @@ class MoveGroupCommandInterpreter(object):
                     p.position.x = float(clist[1])
                     p.position.y = float(clist[2])
                     p.position.z = float(clist[3])
-                    q = tf.transformations.quaternion_from_euler(
-                        float(clist[4]), float(clist[5]), float(clist[6])
+                    q = transforms3d.euler.euler2quat(
+                        float(clist[4]), float(clist[5]), float(clist[6]),
+                        'sxyz'
                     )
                     p.orientation.x = q[0]
                     p.orientation.y = q[1]
