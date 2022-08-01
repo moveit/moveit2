@@ -33,6 +33,7 @@ moveit_package()
 set(THIS_PACKAGE_INCLUDE_DEPENDS
   control_msgs
   control_toolbox
+  controller_manager
   geometry_msgs
   moveit_core
   moveit_msgs
@@ -74,7 +75,6 @@ ament_target_dependencies(${SERVO_PARAM_LIB_NAME} ${THIS_PACKAGE_INCLUDE_DEPENDS
 add_library(${SERVO_LIB_NAME} SHARED
   src/collision_check.cpp
   src/enforce_limits.cpp
-  src/realtime.cpp
   src/servo.cpp
   src/servo_calcs.cpp
 )
