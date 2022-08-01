@@ -15,18 +15,17 @@ ament_target_dependencies(${MOVEIT_LIB_NAME}
   moveit_ros_warehouse
 )
 
-# TODO (ddengster) : port wrap_python_move_group
-#add_library(${MOVEIT_LIB_NAME}_python src/wrap_python_move_group.cpp)
-#target_link_libraries(${MOVEIT_LIB_NAME}_python ${MOVEIT_LIB_NAME} ${eigenpy_LIBRARIES} ${PYTHON_LIBRARIES} ${LIBS} ${Boost_LIBRARIES} moveit_py_bindings_tools)
-#add_dependencies(${MOVEIT_LIB_NAME}_python)
-#set_target_properties(${MOVEIT_LIB_NAME}_python PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
-#set_target_properties(${MOVEIT_LIB_NAME}_python PROPERTIES OUTPUT_NAME _moveit_move_group_interface PREFIX "")
-#set_target_properties(${MOVEIT_LIB_NAME}_python PROPERTIES LIBRARY_OUTPUT_DIRECTORY "bin")
+set(MOVEIT_PYTHON_LIB_NAME move_group_interface)
+pybind11_add_module(${MOVEIT_PYTHON_LIB_NAME} SHARED src/python_move_group_interface.cpp)
+set_target_properties(${MOVEIT_PYTHON_LIB_NAME} PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
+target_link_libraries(${MOVEIT_PYTHON_LIB_NAME} PUBLIC ${MOVEIT_LIB_NAME} ${PYTHON_LIBRARIES} ${LIBS})
+
 if(WIN32)
-#  set_target_properties(${MOVEIT_LIB_NAME}_python PROPERTIES SUFFIX .pyd)
+  set_target_properties(${MOVEIT_PYTHON_LIB_NAME} PROPERTIES SUFFIX .pyd)
 endif()
 
 install(DIRECTORY include/ DESTINATION include)
+configure_build_install_location(${MOVEIT_PYTHON_LIB_NAME})
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${MOVEIT_LIB_NAME}_export.h DESTINATION include)
 
 #add_executable(demo src/demo.cpp)
