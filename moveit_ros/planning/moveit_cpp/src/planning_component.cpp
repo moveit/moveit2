@@ -313,13 +313,4 @@ const PlanningComponent::PlanSolutionPtr PlanningComponent::getLastPlanSolution(
 {
   return last_plan_solution_;
 }
-
-void PlanningComponent::clearContents()
-{
-  considered_start_state_.reset();
-  last_plan_solution_.reset();
-  current_goal_constraints_.clear();
-  moveit_cpp_.reset();
-  planning_pipeline_names_.clear();
-}
 }  // namespace moveit_cpp

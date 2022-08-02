@@ -195,9 +195,6 @@ private:
   // TODO(henningkayser): implement path/trajectory constraints
   // std::unique_ptr<moveit_msgs::msg::Constraints> path_constraints_;
   // std::unique_ptr<moveit_msgs::msg::TrajectoryConstraints> trajectory_constraints_;
-
-  /** \brief Reset all member variables */
-  void clearContents();
 };
 }  // namespace moveit_cpp
 
