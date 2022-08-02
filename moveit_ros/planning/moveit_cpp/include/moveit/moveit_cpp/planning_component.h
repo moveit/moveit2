@@ -107,11 +107,11 @@ public:
   PlanningComponent(const PlanningComponent&) = delete;
   PlanningComponent& operator=(const PlanningComponent&) = delete;
 
-  PlanningComponent(PlanningComponent&& other) = default;
+  PlanningComponent(PlanningComponent&& other) = delete;
   PlanningComponent& operator=(PlanningComponent&& other) = delete;
 
   /** \brief Destructor */
-  ~PlanningComponent();
+  ~PlanningComponent() = default;
 
   /** \brief Get the name of the planning group */
   const std::string& getPlanningGroupName() const;

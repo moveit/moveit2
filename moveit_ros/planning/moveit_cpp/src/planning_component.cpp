@@ -81,12 +81,6 @@ PlanningComponent::PlanningComponent(const std::string& group_name, const rclcpp
   planning_pipeline_names_ = moveit_cpp_->getPlanningPipelineNames(group_name);
 }
 
-PlanningComponent::~PlanningComponent()
-{
-  RCLCPP_INFO(LOGGER, "Deleting PlanningComponent '%s'", group_name_.c_str());
-  clearContents();
-}
-
 const std::vector<std::string> PlanningComponent::getNamedTargetStates()
 {
   if (joint_model_group_)
