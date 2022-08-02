@@ -25,6 +25,7 @@
 
   <depend>control_msgs</depend>
   <depend>control_toolbox</depend>
+  <depend>controller_manager</depend>
   <depend>geometry_msgs</depend>
   <depend>moveit_msgs</depend>
   <depend>moveit_core</depend>
