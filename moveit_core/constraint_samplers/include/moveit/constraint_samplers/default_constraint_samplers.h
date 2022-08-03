@@ -140,8 +140,6 @@ public:
 
   bool sample(moveit::core::RobotState& state, const moveit::core::RobotState& ks, unsigned int max_attempts) override;
 
-  bool project(moveit::core::RobotState& state, unsigned int max_attempts) override;
-
   /**
    * \brief Gets the number of constrained joints - joints that have an
    * additional bound beyond the joint limits.
@@ -488,7 +486,6 @@ public:
   bool sample(moveit::core::RobotState& state, const moveit::core::RobotState& reference_state,
               unsigned int max_attempts) override;
 
-  bool project(moveit::core::RobotState& state, unsigned int max_attempts) override;
   /**
    * \brief Returns a pose that falls within the constraint regions.
    *
@@ -550,7 +547,7 @@ protected:
               const kinematics::KinematicsBase::IKCallbackFn& adapted_ik_validity_callback, double timeout,
               moveit::core::RobotState& state, bool use_as_seed);
   bool sampleHelper(moveit::core::RobotState& state, const moveit::core::RobotState& reference_state,
-                    unsigned int max_attempts, bool project);
+                    unsigned int max_attempts);
   bool validate(moveit::core::RobotState& state) const;
 
   random_numbers::RandomNumberGenerator random_number_generator_; /**< \brief Random generator used by the sampler */
