@@ -12,4 +12,9 @@
         <description></description>
     </class>
   </library>
+<!--  <library path="moveit_ros_control_interface_admittance_plugin">-->
+<!--    <class name="admittance_controller/AdmittanceController" type="moveit_ros_control_interface::AdmittanceControllerAllocator" base_class_type="moveit_ros_control_interface::ControllerHandleAllocator">-->
+<!--      <description></description>-->
+<!--    </class>-->
+<!--  </library>-->
 </class_libraries>

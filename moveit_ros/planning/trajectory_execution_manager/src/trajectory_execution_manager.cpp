@@ -852,9 +852,21 @@ bool TrajectoryExecutionManager::selectControllers(const std::set<std::string>& 
 }
 
 bool TrajectoryExecutionManager::distributeTrajectory(const moveit_msgs::msg::RobotTrajectory& trajectory,
-                                                      const std::vector<std::string>& controllers,
+                                                      std::vector<std::string>& controllers,
                                                       std::vector<moveit_msgs::msg::RobotTrajectory>& parts)
 {
+  // add controller dependencies
+  auto queue = controllers;
+  while (!queue.empty()){
+    auto controller = queue.back();
+    controller.erase(0,1);
+    queue.pop_back();
+    for (const auto& dependency : controller_manager_->getControllerDependencies(controller) ){
+      queue.push_back(dependency);
+      controllers.push_back("/"+dependency);
+    }
+  }
+
   parts.clear();
   parts.resize(controllers.size());
 

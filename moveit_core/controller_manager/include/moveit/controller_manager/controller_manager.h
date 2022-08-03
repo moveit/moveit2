@@ -209,5 +209,12 @@ public:
   /** \brief Activate and deactivate controllers */
   virtual bool switchControllers(const std::vector<std::string>& activate,
                                  const std::vector<std::string>& deactivate) = 0;
+
+  /** \brief Returns list of controllers that  `controller_name` depends on */
+  std::vector<std::string> getControllerDependencies(const std::string & controller_name){
+    return dependency_map_[controller_name];
+  };
+protected:
+  std::unordered_map<std::string, std::vector<std::string>> dependency_map_;
 };
 }  // namespace moveit_controller_manager
