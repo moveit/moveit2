@@ -282,7 +282,7 @@ private:
   void updateControllerState(ControllerInformation& ci, const rclcpp::Duration& age);
 
   bool distributeTrajectory(const moveit_msgs::msg::RobotTrajectory& trajectory,
-                            std::vector<std::string>& controllers,
+                            const std::vector<std::string>& controllers,
                             std::vector<moveit_msgs::msg::RobotTrajectory>& parts);
 
   bool findControllers(const std::set<std::string>& actuated_joints, std::size_t controller_count,

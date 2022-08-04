@@ -110,6 +110,8 @@ class MoveItControllerManager : public moveit_controller_manager::MoveItControll
   rclcpp::Client<controller_manager_msgs::srv::ListControllers>::SharedPtr list_controllers_service_;
   rclcpp::Client<controller_manager_msgs::srv::SwitchController>::SharedPtr switch_controller_service_;
 
+  std::unordered_map<std::string, std::vector<std::string>> dependency_map_;
+
   /**
    * \brief Check if given controller is active
    * @param s state of controller
@@ -355,8 +357,24 @@ public:
    * @param deactivate
    * @return true if switching succeeded
    */
-  bool switchControllers(const std::vector<std::string>& activate, const std::vector<std::string>& deactivate) override
+  bool switchControllers(const std::vector<std::string>& activate_base, const std::vector<std::string>& deactivate_base) override
   {
+    // add controller dependencies
+    std::vector<std::string> activate  = activate_base;
+    std::vector<std::string> deactivate  = deactivate_base;
+    for (auto controllers: {&activate, &deactivate}){
+      auto queue = *controllers;
+      while (!queue.empty()){
+        auto controller = queue.back();
+        controller.erase(0,1);
+        queue.pop_back();
+        for (const auto& dependency : dependency_map_[controller]){
+          queue.push_back(dependency);
+          controllers->push_back("/" + dependency);
+        }
+      }
+    }
+
     std::scoped_lock<std::mutex> lock(controllers_mutex_);
     discover(true);
 
