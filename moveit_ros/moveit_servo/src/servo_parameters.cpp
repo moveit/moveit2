@@ -262,6 +262,13 @@ void ServoParameters::declare(const std::string& ns,
                                      ParameterDescriptorBuilder{}
                                          .type(PARAMETER_DOUBLE)
                                          .description("Start decelerating when a scene collision is this far [m]"));
+  node_parameters->declare_parameter(
+      ns + ".leaving_singularity_threshold_multiplier",
+      ParameterValue{ parameters.leaving_singularity_threshold_multiplier },
+      ParameterDescriptorBuilder{}
+          .type(PARAMETER_DOUBLE)
+          .description("When 'lower_singularity_threshold' is triggered, but we are moving away from singularity, move "
+                       "this many times faster than if we were moving further into singularity"));
 }
 
 ServoParameters ServoParameters::get(const std::string& ns,
@@ -326,6 +333,17 @@ ServoParameters ServoParameters::get(const std::string& ns,
   parameters.hard_stop_singularity_threshold =
       node_parameters->get_parameter(ns + ".hard_stop_singularity_threshold").as_double();
   parameters.joint_limit_margin = node_parameters->get_parameter(ns + ".joint_limit_margin").as_double();
+
+  try
+  {
+    parameters.leaving_singularity_threshold_multiplier =
+        node_parameters->get_parameter(ns + ".leaving_singularity_threshold_multiplier").as_double();
+  }
+  catch (const std::runtime_error& e)
+  {
+    // if multiplier is 1.0, original behavior is preserved
+    parameters.leaving_singularity_threshold_multiplier = 1.0;
+  }
 
   // Collision checking
   parameters.check_collisions = node_parameters->get_parameter(ns + ".check_collisions").as_bool();

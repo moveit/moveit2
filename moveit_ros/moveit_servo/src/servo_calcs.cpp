@@ -905,15 +905,16 @@ double ServoCalcs::velocityScalingFactorForSingularity(const Eigen::VectorXd& co
     vector_toward_singularity *= -1;
   }
 
-  // If this dot product is positive, we're moving toward singularity ==> decelerate
+  // If this dot product is positive, we're moving toward singularity
   double dot = vector_toward_singularity.dot(commanded_velocity);
-  // When condition > lower_singularity_threshold and moving closer to singularity, scale between
-  // lower_singularity_threshold and approaching_stop_singularity_threshold
-  // When condition > lower_singularity_threshold and moving away from singularity, scale more conservatively between
-  // lower_singularity_threshold and hard_stop_singularity_threshold.
+  // see https://github.com/ros-planning/moveit2/pull/620#issuecomment-1201418258 for visual explanation of algorithm
   double upper_threshold =
-      dot > 0 ? parameters_->approaching_stop_singularity_threshold : parameters_->hard_stop_singularity_threshold;
-  if ((ini_condition > parameters_->lower_singularity_threshold) && (ini_condition < upper_threshold))
+      dot > 0 ? parameters_->hard_stop_singularity_threshold :
+                (parameters_->hard_stop_singularity_threshold - parameters_->lower_singularity_threshold) *
+                        parameters_->leaving_singularity_threshold_multiplier +
+                    parameters_->lower_singularity_threshold;
+  if ((ini_condition > parameters_->lower_singularity_threshold) &&
+      (ini_condition < parameters_->hard_stop_singularity_threshold))
   {
     velocity_scale = 1. - (ini_condition - parameters_->lower_singularity_threshold) /
                               (upper_threshold - parameters_->lower_singularity_threshold);
