@@ -343,6 +343,9 @@ ServoParameters ServoParameters::get(const std::string& ns,
   {
     // if multiplier is 1.0, original behavior is preserved
     parameters.leaving_singularity_threshold_multiplier = 1.0;
+    RCLCPP_WARN(LOGGER, "Using deprecated servo singularity handling; add parameter "
+                        "'leaving_singularity_threshold_multiplier' to define leaving singularity threshold. See "
+                        "https://github.com/ros-planning/moveit2/pull/620 for more information.")
   }
 
   // Collision checking
