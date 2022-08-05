@@ -334,12 +334,12 @@ ServoParameters ServoParameters::get(const std::string& ns,
       node_parameters->get_parameter(ns + ".hard_stop_singularity_threshold").as_double();
   parameters.joint_limit_margin = node_parameters->get_parameter(ns + ".joint_limit_margin").as_double();
 
-  try
+  if (node_parameters->has_parameter(ns + ".leaving_singularity_threshold_multiplier"))
   {
     parameters.leaving_singularity_threshold_multiplier =
         node_parameters->get_parameter(ns + ".leaving_singularity_threshold_multiplier").as_double();
   }
-  catch (const std::runtime_error& e)
+  else
   {
     // if multiplier is 1.0, original behavior is preserved
     parameters.leaving_singularity_threshold_multiplier = 1.0;
