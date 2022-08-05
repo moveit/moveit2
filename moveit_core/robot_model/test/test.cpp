@@ -138,7 +138,7 @@ TEST(FloatingJointTest, interpolation_test)
   double intp[7];
   random_numbers::RandomNumberGenerator rng;
 
-  for (size_t i = 0; i < 1000; i++)
+  for (size_t i = 0; i < 1000; ++i)
   {
     // We set some bounds where the joint position's translation component is bounded between -1 and 1 in all
     // dimensions. This is necessary, otherwise we just get (0,0,0) translations.
