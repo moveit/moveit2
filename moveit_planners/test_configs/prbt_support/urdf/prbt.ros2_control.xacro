@@ -6,7 +6,7 @@
 		<ros2_control name="${name}" type="system">
 			<hardware>
 				<xacro:if value="${use_fake_hardware}">
-					<plugin>fake_components/GenericSystem</plugin>
+					<plugin>mock_components/GenericSystem</plugin>
 					<param name="fake_sensor_commands">${fake_sensor_commands}</param>
 					<param name="state_following_offset">0.0</param>
 				</xacro:if>

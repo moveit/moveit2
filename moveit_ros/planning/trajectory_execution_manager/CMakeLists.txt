@@ -23,12 +23,12 @@ install(DIRECTORY include/ DESTINATION include)
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${MOVEIT_LIB_NAME}_export.h DESTINATION include)
 
 if(CATKIN_ENABLE_TESTING)
-
 ## This needs further cleanup before it can run
 # add_library(test_controller_manager_plugin test/test_moveit_controller_manager_plugin.cpp)
 # set_target_properties(test_controller_manager_plugin PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
 # target_link_libraries(test_controller_manager_plugin ${MOVEIT_LIB_NAME} ${catkin_LIBRARIES} ${Boost_LIBRARIES})
 #
+# find_package(moveit_resources_panda_moveit_config REQUIRED)
 # find_package(rostest REQUIRED)
 # add_rostest_gtest(test_execution_manager
 #                   test/test_execution_manager.test

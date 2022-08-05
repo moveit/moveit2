@@ -58,7 +58,7 @@ CartesianInterpolator::Distance CartesianInterpolator::computeCartesianPath(
     RobotState* start_state, const JointModelGroup* group, std::vector<RobotStatePtr>& traj, const LinkModel* link,
     const Eigen::Vector3d& direction, bool global_reference_frame, double distance, const MaxEEFStep& max_step,
     const JumpThreshold& jump_threshold, const GroupStateValidityCallbackFn& validCallback,
-    const kinematics::KinematicsQueryOptions& options)
+    const kinematics::KinematicsQueryOptions& options, kinematics::KinematicsBase::IKCostFn cost_function)
 {
   // this is the Cartesian pose we start from, and have to move in the direction indicated
   // getGlobalLinkTransform() returns a valid isometry by contract
@@ -74,14 +74,14 @@ CartesianInterpolator::Distance CartesianInterpolator::computeCartesianPath(
   // call computeCartesianPath for the computed target pose in the global reference frame
   return CartesianInterpolator::Distance(distance) * computeCartesianPath(start_state, group, traj, link, target_pose,
                                                                           true, max_step, jump_threshold, validCallback,
-                                                                          options);
+                                                                          options, cost_function);
 }
 
 CartesianInterpolator::Percentage CartesianInterpolator::computeCartesianPath(
     RobotState* start_state, const JointModelGroup* group, std::vector<RobotStatePtr>& traj, const LinkModel* link,
     const Eigen::Isometry3d& target, bool global_reference_frame, const MaxEEFStep& max_step,
     const JumpThreshold& jump_threshold, const GroupStateValidityCallbackFn& validCallback,
-    const kinematics::KinematicsQueryOptions& options)
+    const kinematics::KinematicsQueryOptions& options, kinematics::KinematicsBase::IKCostFn cost_function)
 {
   const std::vector<const JointModel*>& cjnt = group->getContinuousJointModels();
   // make sure that continuous joints wrap
@@ -160,7 +160,8 @@ CartesianInterpolator::Percentage CartesianInterpolator::computeCartesianPath(
 
     // Explicitly use a single IK attempt only: We want a smooth trajectory.
     // Random seeding (of additional attempts) would probably create IK jumps.
-    if (start_state->setFromIK(group, pose, link->getName(), consistency_limits, 0.0, validCallback, options))
+    if (start_state->setFromIK(group, pose, link->getName(), consistency_limits, 0.0, validCallback, options,
+                               cost_function))
       traj.push_back(std::make_shared<moveit::core::RobotState>(*start_state));
     else
       break;
@@ -177,7 +178,7 @@ CartesianInterpolator::Percentage CartesianInterpolator::computeCartesianPath(
     RobotState* start_state, const JointModelGroup* group, std::vector<RobotStatePtr>& traj, const LinkModel* link,
     const EigenSTL::vector_Isometry3d& waypoints, bool global_reference_frame, const MaxEEFStep& max_step,
     const JumpThreshold& jump_threshold, const GroupStateValidityCallbackFn& validCallback,
-    const kinematics::KinematicsQueryOptions& options)
+    const kinematics::KinematicsQueryOptions& options, kinematics::KinematicsBase::IKCostFn cost_function)
 {
   double percentage_solved = 0.0;
   for (std::size_t i = 0; i < waypoints.size(); ++i)
@@ -187,7 +188,7 @@ CartesianInterpolator::Percentage CartesianInterpolator::computeCartesianPath(
     std::vector<RobotStatePtr> waypoint_traj;
     double wp_percentage_solved =
         computeCartesianPath(start_state, group, waypoint_traj, link, waypoints[i], global_reference_frame, max_step,
-                             NO_JOINT_SPACE_JUMP_TEST, validCallback, options);
+                             NO_JOINT_SPACE_JUMP_TEST, validCallback, options, cost_function);
     if (fabs(wp_percentage_solved - 1.0) < std::numeric_limits<double>::epsilon())
     {
       percentage_solved = (double)(i + 1) / (double)waypoints.size();

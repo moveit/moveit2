@@ -46,6 +46,10 @@ ament_target_dependencies(${PROJECT_NAME}
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
   ament_lint_auto_find_test_dependencies()
+
+  find_package(ament_cmake_gtest REQUIRED)
+  ament_add_gtest(test_perception test/test_perception.cpp)
+  target_link_libraries(test_perception ${PROJECT_NAME})
 endif()
 
 install(DIRECTORY templates DESTINATION share/${PROJECT_NAME})

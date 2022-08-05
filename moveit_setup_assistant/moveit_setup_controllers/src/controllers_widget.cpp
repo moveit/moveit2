@@ -97,7 +97,7 @@ void ControllersWidget::onInit()
           SLOT(previewSelectedGroup(std::vector<std::string>)));
 
   // Controller Edit Widget
-  controller_edit_widget_ = new ControllerEditWidget(this);
+  controller_edit_widget_ = new ControllerEditWidget(this, setup_step_->getAdditionalControllerFields());
   connect(controller_edit_widget_, SIGNAL(cancelEditing()), this, SLOT(cancelEditing()));
   connect(controller_edit_widget_, SIGNAL(deleteController()), this, SLOT(deleteController()));
   connect(controller_edit_widget_, SIGNAL(save()), this, SLOT(saveControllerScreenEdit()));
@@ -607,6 +607,7 @@ bool ControllersWidget::saveControllerScreen()
   // Get a reference to the supplied strings
   const std::string& controller_name = controller_edit_widget_->getControllerName();
   const std::string& controller_type = controller_edit_widget_->getControllerType();
+  std::map<std::string, std::string> controller_parameters = controller_edit_widget_->getAdditionalParameters();
 
   // Used for editing existing controllers
   ControllerInfo* searched_controller = nullptr;
@@ -650,6 +651,7 @@ bool ControllersWidget::saveControllerScreen()
     ControllerInfo new_controller;
     new_controller.name_ = controller_name;
     new_controller.type_ = controller_type;
+    new_controller.parameters_ = controller_parameters;
     setup_step_->addController(new_controller);
 
     adding_new_controller_ = true;  // remember this controller is new
@@ -662,6 +664,7 @@ bool ControllersWidget::saveControllerScreen()
     // Change controller name
     searched_controller->name_ = controller_name;
     searched_controller->type_ = controller_type;
+    searched_controller->parameters_ = controller_parameters;
   }
 
   // Reload main screen table

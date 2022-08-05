@@ -89,12 +89,13 @@ std::vector<SensorParameters> PerceptionConfig::load3DSensorsYAML(const std::fil
     if (sensors_node && sensors_node.IsSequence())
     {
       // Loop over the sensors available in the file
-      for (const YAML::Node& sensor_name : sensors_node)
+      for (const YAML::Node& sensor_name_node : sensors_node)
       {
-        const YAML::Node& sensor = doc[sensor_name.as<std::string>()];
+        std::string sensor_name = sensor_name_node.as<std::string>();
+        const YAML::Node& sensor = doc[sensor_name];
 
         SensorParameters sensor_map;
-        sensor_map["name"] = sensor_name.as<std::string>();
+        sensor_map["name"] = sensor_name;
         for (YAML::const_iterator sensor_it = sensor.begin(); sensor_it != sensor.end(); ++sensor_it)
         {
           sensor_map[sensor_it->first.as<std::string>()] = sensor_it->second.as<std::string>();

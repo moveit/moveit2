@@ -59,13 +59,13 @@ def generate_launch_description():
     joint_limits_yaml = load_yaml(
         "moveit_resources_prbt_moveit_config", "config/joint_limits.yaml"
     )
-    cartesian_limits_yaml = load_yaml(
-        "moveit_resources_prbt_moveit_config", "config/cartesian_limits.yaml"
+    pilz_cartesian_limits_yaml = load_yaml(
+        "moveit_resources_prbt_moveit_config", "config/pilz_cartesian_limits.yaml"
     )
     robot_description_planning = {
         "robot_description_planning": {
             **joint_limits_yaml,
-            **cartesian_limits_yaml,
+            **pilz_cartesian_limits_yaml,
         }
     }
     kinematics_yaml = load_yaml(
