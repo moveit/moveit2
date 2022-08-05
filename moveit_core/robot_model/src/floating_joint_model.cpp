@@ -136,8 +136,9 @@ void FloatingJointModel::interpolate(const double* from, const double* to, const
   state[1] = from[1] + (to[1] - from[1]) * t;
   state[2] = from[2] + (to[2] - from[2]) * t;
 
-  double dq = fabs(from[3] * to[3] + from[4] * to[4] + from[5] * to[5] + from[6] * to[6]);
-  double theta = (dq + std::numeric_limits<double>::epsilon() >= 1.0) ? 0.0 : acos(dq);
+  double dq = from[3] * to[3] + from[4] * to[4] + from[5] * to[5] + from[6] * to[6];
+  double theta = (fabs(dq) + std::numeric_limits<double>::epsilon() >= 1.0) ? 0.0 : acos(fabs(dq));
+
   if (theta > std::numeric_limits<double>::epsilon())
   {
     double d = 1.0 / sin(theta);
