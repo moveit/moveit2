@@ -133,6 +133,17 @@ TEST(FloatingJointTest, interpolation_test)
   // Create a simple floating joint model with some dummy parameters (these are not used by the test)
   moveit::core::FloatingJointModel fjm("joint", 0, 0);
 
+  // We set some bounds where the joint position's translation component is bounded between -1 and 1 in all
+  // dimensions. This is necessary, otherwise we just get (0,0,0) translations.
+  moveit::core::JointModel::Bounds bounds;
+  bounds = fjm.getVariableBounds();
+  bounds[0].min_position_ = -1.0;
+  bounds[0].max_position_ = 1.0;
+  bounds[1].min_position_ = -1.0;
+  bounds[1].max_position_ = 1.0;
+  bounds[2].min_position_ = -1.0;
+  bounds[2].max_position_ = 1.0;
+
   double jv1[7];
   double jv2[7];
   double intp[7];
@@ -140,17 +151,6 @@ TEST(FloatingJointTest, interpolation_test)
 
   for (size_t i = 0; i < 1000; ++i)
   {
-    // We set some bounds where the joint position's translation component is bounded between -1 and 1 in all
-    // dimensions. This is necessary, otherwise we just get (0,0,0) translations.
-    moveit::core::JointModel::Bounds bounds;
-    bounds = fjm.getVariableBounds();
-    bounds[0].min_position_ = -1.0;
-    bounds[0].max_position_ = 1.0;
-    bounds[1].min_position_ = -1.0;
-    bounds[1].max_position_ = 1.0;
-    bounds[2].min_position_ = -1.0;
-    bounds[2].max_position_ = 1.0;
-
     // Randomize the joint settings.
     fjm.getVariableRandomPositions(rng, jv1, bounds);
     fjm.getVariableRandomPositions(rng, jv2, bounds);
