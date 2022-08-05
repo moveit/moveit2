@@ -374,6 +374,7 @@ public:
         }
       }
     }
+    std::reverse(activate.begin(),activate.end());
 
     std::scoped_lock<std::mutex> lock(controllers_mutex_);
     discover(true);
