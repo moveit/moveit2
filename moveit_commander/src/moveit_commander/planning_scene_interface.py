@@ -268,11 +268,11 @@ class PlanningSceneInterface(object):
         co.operation = CollisionObject.ADD
         co.id = name
         co.header = pose.header
+        co.pose = pose.pose
         box = SolidPrimitive()
         box.type = SolidPrimitive.BOX
         box.dimensions = list(size)
         co.primitives = [box]
-        co.primitive_poses = [pose.pose]
         return co
 
     @staticmethod
@@ -290,6 +290,7 @@ class PlanningSceneInterface(object):
         co.operation = CollisionObject.ADD
         co.id = name
         co.header = pose.header
+        co.pose = pose.pose
 
         mesh = Mesh()
         first_face = scene.meshes[0].faces[0]
@@ -320,7 +321,6 @@ class PlanningSceneInterface(object):
             point.z = vertex[2] * scale[2]
             mesh.vertices.append(point)
         co.meshes = [mesh]
-        co.mesh_poses = [pose.pose]
         pyassimp.release(scene)
         return co
 
@@ -330,11 +330,11 @@ class PlanningSceneInterface(object):
         co.operation = CollisionObject.ADD
         co.id = name
         co.header = pose.header
+        co.pose = pose.pose
         sphere = SolidPrimitive()
         sphere.type = SolidPrimitive.SPHERE
         sphere.dimensions = [radius]
         co.primitives = [sphere]
-        co.primitive_poses = [pose.pose]
         return co
 
     @staticmethod
@@ -343,11 +343,11 @@ class PlanningSceneInterface(object):
         co.operation = CollisionObject.ADD
         co.id = name
         co.header = pose.header
+        co.pose = pose.pose
         cylinder = SolidPrimitive()
         cylinder.type = SolidPrimitive.CYLINDER
         cylinder.dimensions = [height, radius]
         co.primitives = [cylinder]
-        co.primitive_poses = [pose.pose]
         return co
 
     @staticmethod
