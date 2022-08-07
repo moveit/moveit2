@@ -473,12 +473,14 @@ public:
         return false;
       }
       dependency_map_[c.name].clear();
-
-      dependency_map_[c.name].push_back(c.chain_connections[0].name);
-      c.required_command_interfaces = controller_name_map[c.chain_connections[0].name]->required_command_interfaces;
-      c.claimed_interfaces = controller_name_map[c.chain_connections[0].name]->claimed_interfaces;
-      controller_name_map[c.chain_connections[0].name]->claimed_interfaces.clear();
-      controller_name_map[c.chain_connections[0].name]->required_command_interfaces.clear();
+      for (const auto& chained_controller : c.chain_connections)
+      {
+        dependency_map_[c.name].push_back(chained_controller.name);
+        c.required_command_interfaces = controller_name_map[chained_controller.name]->required_command_interfaces;
+        c.claimed_interfaces = controller_name_map[chained_controller.name]->claimed_interfaces;
+        controller_name_map[chained_controller.name]->claimed_interfaces.clear();
+        controller_name_map[chained_controller.name]->required_command_interfaces.clear();
+      }
     }
     return true;
   }
