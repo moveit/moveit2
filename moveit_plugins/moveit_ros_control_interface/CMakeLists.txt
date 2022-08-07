@@ -53,16 +53,6 @@ ament_target_dependencies(${PROJECT_NAME}_gripper_plugin
     Boost
 )
 
-#add_library(${PROJECT_NAME}_admittance_plugin SHARED
-#    src/admittance_controller_plugin.cpp
-#    )
-#set_target_properties(${PROJECT_NAME}_admittance_plugin PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
-#target_include_directories(${PROJECT_NAME}_admittance_plugin PRIVATE include)
-#ament_target_dependencies(${PROJECT_NAME}_admittance_plugin
-#    ${THIS_PACKAGE_INCLUDE_DEPENDS}
-#    Boost
-#    )
-
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
 
@@ -73,16 +63,6 @@ if(BUILD_TESTING)
 
   # Run all lint tests in package.xml except those listed above
   ament_lint_auto_find_test_dependencies()
-
-  find_package(ament_cmake_gtest REQUIRED)
-  ament_add_gtest(controller_manager_plugin_test
-          test/controller_manager_plugin_test.cpp)
-  ament_target_dependencies(controller_manager_plugin_test
-      ${THIS_PACKAGE_INCLUDE_DEPENDS}
-  )
-
-  target_include_directories(controller_manager_plugin_test PRIVATE src)
-  target_include_directories(controller_manager_plugin_test PRIVATE include)
 
 endif()
 

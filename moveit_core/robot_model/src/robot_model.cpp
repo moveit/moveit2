@@ -1220,7 +1220,6 @@ const JointModel* RobotModel::getJointModel(const std::string& name) const
   JointModelMap::const_iterator it = joint_model_map_.find(name);
   if (it != joint_model_map_.end())
     return it->second;
-  RCLCPP_ERROR(LOGGER, "Joint '%s' not found in model '%s'.", name.c_str(), model_name_.c_str());
   return nullptr;
 }
 

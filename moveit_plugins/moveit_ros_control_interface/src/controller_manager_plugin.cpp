@@ -153,7 +153,6 @@ class MoveItControllerManager : public moveit_controller_manager::MoveItControll
     MoveItControllerManager::fixChainedControllers(result);
     for (const controller_manager_msgs::msg::ControllerState& controller : result->controller)
     {
-      RCLCPP_ERROR(LOGGER, "CONTROLERS!!!: %s", controller.name.c_str());
       // If the controller is active, add it to the map of active controllers.
       if (isActive(controller))
       {
@@ -182,8 +181,6 @@ class MoveItControllerManager : public moveit_controller_manager::MoveItControll
                          return parseJointNameFromResource(required_interface);
                        });
         allocate(absname, controller_it->second);
-      } else{
-        RCLCPP_ERROR(LOGGER, "I can not find CONTROLER: %s", controller.name.c_str());
       }
     }
   }
@@ -374,7 +371,7 @@ public:
         }
       }
     }
-    std::reverse(activate.begin(),activate.end());
+    std::reverse(activate.begin(), activate.end());
 
     std::scoped_lock<std::mutex> lock(controllers_mutex_);
     discover(true);
@@ -432,16 +429,39 @@ public:
 
     if (!request->start_controllers.empty() || !request->stop_controllers.empty())
     {  // something to switch?
-      auto result_future = switch_controller_service_->async_send_request(request);
-      if (result_future.wait_for(std::chrono::duration<double>(SERVICE_CALL_TIMEOUT)) == std::future_status::timeout)
-      {
-        RCLCPP_ERROR_STREAM(LOGGER, "Couldn't switch controllers at " << switch_controller_service_->get_service_name()
-                                                                      << " within " << SERVICE_CALL_TIMEOUT
-                                                                      << " seconds");
-        return false;
+
+      auto empty_request = std::make_shared<controller_manager_msgs::srv::SwitchController::Request>(*request);
+      empty_request->stop_controllers.clear();
+      empty_request->start_controllers.clear();
+
+      for (const auto& stop_controller : request->stop_controllers){
+        auto tmp_rest = std::make_shared<controller_manager_msgs::srv::SwitchController::Request>(*empty_request);
+        tmp_rest->stop_controllers.push_back(stop_controller);
+        auto result_future = switch_controller_service_->async_send_request(tmp_rest);
+        if (result_future.wait_for(std::chrono::duration<double>(SERVICE_CALL_TIMEOUT)) == std::future_status::timeout)
+        {
+          RCLCPP_ERROR_STREAM(LOGGER, "Couldn't switch controllers at " << switch_controller_service_->get_service_name()
+                                                                        << " within " << SERVICE_CALL_TIMEOUT
+                                                                        << " seconds");
+          return false;
+        }
       }
+
+      for (const auto& start_controller : request->start_controllers){
+        auto tmp_rest = std::make_shared<controller_manager_msgs::srv::SwitchController::Request>(*empty_request);
+        tmp_rest->start_controllers.push_back(start_controller);
+        auto result_future = switch_controller_service_->async_send_request(tmp_rest);
+        if (result_future.wait_for(std::chrono::duration<double>(SERVICE_CALL_TIMEOUT)) == std::future_status::timeout)
+        {
+          RCLCPP_ERROR_STREAM(LOGGER, "Couldn't switch controllers at " << switch_controller_service_->get_service_name()
+                                                                        << " within " << SERVICE_CALL_TIMEOUT
+                                                                        << " seconds");
+          return false;
+        }
+      }
+
       discover(true);
-      return result_future.get()->ok;
+      return true;
     }
     return true;
   }
