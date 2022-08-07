@@ -63,7 +63,6 @@ if(BUILD_TESTING)
 
   # Run all lint tests in package.xml except those listed above
   ament_lint_auto_find_test_dependencies()
-
 endif()
 
 #############

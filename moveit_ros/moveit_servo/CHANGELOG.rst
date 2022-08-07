@@ -2,6 +2,11 @@
 Changelog for package moveit_servo
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.5.3 (2022-07-28)
+------------------
+* Use kinematics plugin instead of inverse Jacobian for servo IK (`#1434 <https://github.com/ros-planning/moveit2/issues/1434>`_)
+* Contributors: Wyatt Rees
+
 2.5.2 (2022-07-18)
 ------------------
 * Merge remote-tracking branch 'origin/main' into feature/msa

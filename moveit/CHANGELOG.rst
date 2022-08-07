@@ -2,6 +2,11 @@
 Changelog for package moveit
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.5.3 (2022-07-28)
+------------------
+* Organize package xml of MSA (`#1454 <https://github.com/ros-planning/moveit2/issues/1454>`_)
+* Contributors: Vatan Aksoy Tezer
+
 2.5.2 (2022-07-18)
 ------------------
 

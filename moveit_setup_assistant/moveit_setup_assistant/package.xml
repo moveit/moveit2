@@ -2,7 +2,7 @@
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
   <name>moveit_setup_assistant</name>
-  <version>2.5.2</version>
+  <version>2.5.3</version>
   <description>Generates a configuration package that makes it easy to use MoveIt</description>
   <maintainer email="henningkayser@picknik.ai">Henning Kayser</maintainer>
   <maintainer email="tyler@picknik.ai">Tyler Weaver</maintainer>
@@ -22,11 +22,16 @@
   <buildtool_depend>ament_cmake</buildtool_depend>
 
   <depend>ament_index_cpp</depend>
-  <depend>moveit_setup_framework</depend>
-  <depend>moveit_setup_srdf_plugins</depend> <!-- For collision_updater executable -->
   <depend>pluginlib</depend>
   <depend>qtbase5-dev</depend>
   <depend>rclcpp</depend>
+  <depend>moveit_setup_framework</depend>
+  <depend>moveit_setup_srdf_plugins</depend> <!-- For collision_updater executable -->
+  <exec_depend>moveit_setup_controllers</exec_depend>
+  <exec_depend>moveit_setup_core_plugins</exec_depend>
+  <exec_depend>moveit_setup_app_plugins</exec_depend>
+  <!-- TODO: Enable once https://github.com/ros-planning/moveit2/issues/1262 is resolved -->
+  <!-- <exec_depend>moveit_setup_simulation</exec_depend>  -->
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_clang_format</test_depend>

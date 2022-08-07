@@ -354,18 +354,22 @@ public:
    * @param deactivate
    * @return true if switching succeeded
    */
-  bool switchControllers(const std::vector<std::string>& activate_base, const std::vector<std::string>& deactivate_base) override
+  bool switchControllers(const std::vector<std::string>& activate_base,
+                         const std::vector<std::string>& deactivate_base) override
   {
     // add controller dependencies
-    std::vector<std::string> activate  = activate_base;
-    std::vector<std::string> deactivate  = deactivate_base;
-    for (auto controllers: {&activate, &deactivate}){
+    std::vector<std::string> activate = activate_base;
+    std::vector<std::string> deactivate = deactivate_base;
+    for (auto controllers : { &activate, &deactivate })
+    {
       auto queue = *controllers;
-      while (!queue.empty()){
+      while (!queue.empty())
+      {
         auto controller = queue.back();
-        controller.erase(0,1);
+        controller.erase(0, 1);
         queue.pop_back();
-        for (const auto& dependency : dependency_map_[controller]){
+        for (const auto& dependency : dependency_map_[controller])
+        {
           queue.push_back(dependency);
           controllers->push_back("/" + dependency);
         }
@@ -413,11 +417,13 @@ public:
         {
           resources_bimap::right_const_iterator res = claimed_resources.right.find(required_resource);
           if (res != claimed_resources.right.end())
-          {                                                    // resource is claimed
-            if (std::find(request->stop_controllers.begin(), request->stop_controllers.end(), res->second) == request->stop_controllers.end()){
+          {  // resource is claimed
+            if (std::find(request->stop_controllers.begin(), request->stop_controllers.end(), res->second) ==
+                request->stop_controllers.end())
+            {
               request->stop_controllers.push_back(res->second);  // add claiming controller to stop list
             }
-            claimed_resources.left.erase(res->second);         // remove claimed resources
+            claimed_resources.left.erase(res->second);  // remove claimed resources
           }
         }
       }
@@ -429,39 +435,16 @@ public:
 
     if (!request->start_controllers.empty() || !request->stop_controllers.empty())
     {  // something to switch?
-
-      auto empty_request = std::make_shared<controller_manager_msgs::srv::SwitchController::Request>(*request);
-      empty_request->stop_controllers.clear();
-      empty_request->start_controllers.clear();
-
-      for (const auto& stop_controller : request->stop_controllers){
-        auto tmp_rest = std::make_shared<controller_manager_msgs::srv::SwitchController::Request>(*empty_request);
-        tmp_rest->stop_controllers.push_back(stop_controller);
-        auto result_future = switch_controller_service_->async_send_request(tmp_rest);
-        if (result_future.wait_for(std::chrono::duration<double>(SERVICE_CALL_TIMEOUT)) == std::future_status::timeout)
-        {
-          RCLCPP_ERROR_STREAM(LOGGER, "Couldn't switch controllers at " << switch_controller_service_->get_service_name()
-                                                                        << " within " << SERVICE_CALL_TIMEOUT
-                                                                        << " seconds");
-          return false;
-        }
+      auto result_future = switch_controller_service_->async_send_request(request);
+      if (result_future.wait_for(std::chrono::duration<double>(SERVICE_CALL_TIMEOUT)) == std::future_status::timeout)
+      {
+        RCLCPP_ERROR_STREAM(LOGGER, "Couldn't switch controllers at " << switch_controller_service_->get_service_name()
+                                                                      << " within " << SERVICE_CALL_TIMEOUT
+                                                                      << " seconds");
+        return false;
       }
-
-      for (const auto& start_controller : request->start_controllers){
-        auto tmp_rest = std::make_shared<controller_manager_msgs::srv::SwitchController::Request>(*empty_request);
-        tmp_rest->start_controllers.push_back(start_controller);
-        auto result_future = switch_controller_service_->async_send_request(tmp_rest);
-        if (result_future.wait_for(std::chrono::duration<double>(SERVICE_CALL_TIMEOUT)) == std::future_status::timeout)
-        {
-          RCLCPP_ERROR_STREAM(LOGGER, "Couldn't switch controllers at " << switch_controller_service_->get_service_name()
-                                                                        << " within " << SERVICE_CALL_TIMEOUT
-                                                                        << " seconds");
-          return false;
-        }
-      }
-
       discover(true);
-      return true;
+      return result_future.get()->ok;
     }
     return true;
   }
@@ -470,17 +453,19 @@ public:
    * Since chained controllers cannot be written to directly, they are removed from the response and their interface
    * are propagated back to the first controller with a non-chained input
    */
-  void fixChainedControllers(std::shared_ptr<controller_manager_msgs::srv::ListControllers::Response>& result) {
-
+  void fixChainedControllers(std::shared_ptr<controller_manager_msgs::srv::ListControllers::Response>& result)
+  {
     std::unordered_map<std::string, controller_manager_msgs::msg::ControllerState*> controller_name_map;
-        for (auto& c : result->controller)
+    for (auto& c : result->controller)
     {
       controller_name_map[c.name] = &c;
     }
-    for (auto &c: result->controller) {
-      assert(c.chain_connections.size() <=1);
+    for (auto& c : result->controller)
+    {
+      assert(c.chain_connections.size() <= 1);
       dependency_map_[c.name].clear();
-      for (const auto& chain_connection : c.chain_connections){
+      for (const auto& chain_connection : c.chain_connections)
+      {
         dependency_map_[c.name].push_back(chain_connection.name);
 
         c.required_command_interfaces = controller_name_map[chain_connection.name]->required_command_interfaces;
@@ -489,7 +474,6 @@ public:
         controller_name_map[chain_connection.name]->required_command_interfaces.clear();
       }
     }
-    int o =0;
   }
 };
 /**
