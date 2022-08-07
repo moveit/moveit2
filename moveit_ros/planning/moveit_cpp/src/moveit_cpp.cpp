@@ -269,13 +269,14 @@ MoveItCpp::execute(const std::string& group_name, const robot_trajectory::RobotT
   // Execute trajectory
   moveit_msgs::msg::RobotTrajectory robot_trajectory_msg;
   robot_trajectory->getRobotTrajectoryMsg(robot_trajectory_msg);
+  // TODO: cambel
+  // blocking is the only valid option right now. Add non-blocking use case
   if (blocking)
   {
     trajectory_execution_manager_->push(robot_trajectory_msg);
     trajectory_execution_manager_->execute();
     return trajectory_execution_manager_->waitForExecution();
   }
-  trajectory_execution_manager_->pushAndExecute(robot_trajectory_msg);
   return moveit_controller_manager::ExecutionStatus::RUNNING;
 }
 

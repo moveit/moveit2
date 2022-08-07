@@ -2,6 +2,9 @@
 Changelog for package moveit_ros_occupancy_map_monitor
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.5.3 (2022-07-28)
+------------------
+
 2.5.2 (2022-07-18)
 ------------------
 * Remove no longer needed no-pedantic option in moveit_ros_occupancy_map_monitor package (`#1397 <https://github.com/ros-planning/moveit2/issues/1397>`_)
