@@ -38,11 +38,7 @@
 #include <gtest/gtest.h>
 #include <urdf_parser/urdf_parser.h>
 #include <fstream>
-#if __has_include(<tf2_eigen/tf2_eigen.hpp>)
 #include <tf2_eigen/tf2_eigen.hpp>
-#else
-#include <tf2_eigen/tf2_eigen.h>
-#endif
 #include <math.h>
 #include <moveit/utils/robot_model_test_utils.h>
 
