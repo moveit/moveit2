@@ -38,13 +38,8 @@
 #include <gtest/gtest.h>
 
 #include <urdf_parser/urdf_parser.h>
-#if __has_include(<tf2_eigen/tf2_eigen.hpp>)
 #include <tf2_eigen/tf2_eigen.hpp>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
-#else
-#include <tf2_eigen/tf2_eigen.h>
-#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
-#endif
 #include <math.h>
 
 #include <moveit/utils/robot_model_test_utils.h>
