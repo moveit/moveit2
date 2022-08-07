@@ -38,11 +38,7 @@
 #include <kdl/chainfksolverpos_recursive.hpp>
 #include <kdl/chainiksolverpos_lma.hpp>
 
-#if __has_include(<tf2_kdl/tf2_kdl.hpp>)
 #include <tf2_kdl/tf2_kdl.hpp>
-#else
-#include <tf2_kdl/tf2_kdl.h>
-#endif
 #include <kdl_parser/kdl_parser.hpp>
 #include <kdl/frames_io.hpp>
 #include <kdl/kinfam_io.hpp>

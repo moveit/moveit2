@@ -37,11 +37,7 @@
 #include <moveit/kdl_kinematics_plugin/kdl_kinematics_plugin.h>
 #include <moveit/kdl_kinematics_plugin/chainiksolver_vel_mimic_svd.hpp>
 
-#if __has_include(<tf2_kdl/tf2_kdl.hpp>)
 #include <tf2_kdl/tf2_kdl.hpp>
-#else
-#include <tf2_kdl/tf2_kdl.h>
-#endif
 #include <tf2/transform_datatypes.h>
 
 #include <kdl_parser/kdl_parser.hpp>

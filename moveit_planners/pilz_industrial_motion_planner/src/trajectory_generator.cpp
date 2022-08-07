@@ -36,13 +36,8 @@
 
 #include <cassert>
 
-#if __has_include(<tf2_eigen/tf2_eigen.hpp>)
 #include <tf2_eigen/tf2_eigen.hpp>
 #include <tf2_kdl/tf2_kdl.hpp>
-#else
-#include <tf2_eigen/tf2_eigen.h>
-#include <tf2_kdl/tf2_kdl.h>
-#endif
 #include <boost/range/combine.hpp>
 
 #include <kdl/velocityprofile_trap.hpp>
