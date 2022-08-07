@@ -150,7 +150,11 @@ class MoveItControllerManager : public moveit_controller_manager::MoveItControll
     active_controllers_.clear();
 
     auto result = result_future.get();
-    MoveItControllerManager::fixChainedControllers(result);
+    if (!MoveItControllerManager::fixChainedControllers(result))
+    {
+      return;
+    }
+
     for (const controller_manager_msgs::msg::ControllerState& controller : result->controller)
     {
       // If the controller is active, add it to the map of active controllers.
@@ -450,10 +454,10 @@ public:
   }
   /**
    * \brief fixChainedControllers modifies ListControllers service response if it contains chained controllers.
-   * Since chained controllers cannot be written to directly, they are removed from the response and their interface
+   * Since chained controllers cannot be written to directly, they are removed from the response and their interfaces
    * are propagated back to the first controller with a non-chained input
    */
-  void fixChainedControllers(std::shared_ptr<controller_manager_msgs::srv::ListControllers::Response>& result)
+  bool fixChainedControllers(std::shared_ptr<controller_manager_msgs::srv::ListControllers::Response>& result)
   {
     std::unordered_map<std::string, controller_manager_msgs::msg::ControllerState*> controller_name_map;
     for (auto& c : result->controller)
@@ -462,18 +466,21 @@ public:
     }
     for (auto& c : result->controller)
     {
-      assert(c.chain_connections.size() <= 1);
-      dependency_map_[c.name].clear();
-      for (const auto& chain_connection : c.chain_connections)
+      if (c.chain_connections.size() > 1)
       {
-        dependency_map_[c.name].push_back(chain_connection.name);
-
-        c.required_command_interfaces = controller_name_map[chain_connection.name]->required_command_interfaces;
-        c.claimed_interfaces = controller_name_map[chain_connection.name]->claimed_interfaces;
-        controller_name_map[chain_connection.name]->claimed_interfaces.clear();
-        controller_name_map[chain_connection.name]->required_command_interfaces.clear();
+        RCLCPP_ERROR_STREAM(LOGGER, "Controller with name %s chains to more than one controller. Chaining to more than "
+                                    "one controller is not supported.");
+        return false;
       }
+      dependency_map_[c.name].clear();
+
+      dependency_map_[c.name].push_back(c.chain_connections[0].name);
+      c.required_command_interfaces = controller_name_map[c.chain_connections[0].name]->required_command_interfaces;
+      c.claimed_interfaces = controller_name_map[c.chain_connections[0].name]->claimed_interfaces;
+      controller_name_map[c.chain_connections[0].name]->claimed_interfaces.clear();
+      controller_name_map[c.chain_connections[0].name]->required_command_interfaces.clear();
     }
+    return true;
   }
 };
 /**
