@@ -16,17 +16,13 @@ jobs:
       fail-fast: false
       matrix:
         env:
-          - IMAGE: rolling-ci
-            CCOV: true
-            ROS_DISTRO: rolling
-          - IMAGE: rolling-ci-testing
-            ROS_DISTRO: rolling
-            IKFAST_TEST: true
-            CLANG_TIDY: pedantic
           - IMAGE: humble-ci
+            CCOV: true
             ROS_DISTRO: humble
           - IMAGE: humble-ci-testing
             ROS_DISTRO: humble
+            IKFAST_TEST: true
+            CLANG_TIDY: pedantic
     env:
       CXXFLAGS: >-
         -Wall -Wextra -Wwrite-strings -Wunreachable-code -Wpointer-arith -Wredundant-decls
