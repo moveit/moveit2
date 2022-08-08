@@ -162,6 +162,10 @@ class MoveItConfigsBuilder(ParameterBuilder):
             self.__urdf_package = self._package_path
             self.__urdf_file_path = modified_urdf_path
 
+        modified_srdf_path = Path("config") / (self.__robot_name + ".srdf")
+        if (self._package_path / modified_srdf_path).exists():
+            self.__srdf_file_path = modified_srdf_path
+
         if setup_assistant_file.exists():
             setup_assistant_yaml = load_yaml(setup_assistant_file)
             config = setup_assistant_yaml.get("moveit_setup_assistant_config", {})
