@@ -44,11 +44,7 @@
 #include <moveit_servo/servo_parameters.h>
 #include <moveit_servo/servo.h>
 #include <optional>
-#if __has_include(<tf2_geometry_msgs/tf2_geometry_msgs.hpp>)
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
-#else
-#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
-#endif
 #include <tf2_ros/transform_listener.h>
 #include <rclcpp/rclcpp.hpp>
 
