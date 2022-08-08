@@ -136,6 +136,7 @@ void FloatingJointModel::interpolate(const double* from, const double* to, const
   state[1] = from[1] + (to[1] - from[1]) * t;
   state[2] = from[2] + (to[2] - from[2]) * t;
 
+  // Check if the quaternions are significantly different
   if (abs(from[3] - to[3]) + abs(from[4] - to[4]) + abs(from[5] - to[5]) + abs(from[6] - to[6]) >
       std::numeric_limits<double>::epsilon())
   {
