@@ -39,11 +39,7 @@
 #include <moveit/utils/message_checks.h>
 #include <moveit/move_group/capability_names.h>
 #include <tf2_ros/transform_broadcaster.h>
-#if __has_include(<tf2_eigen/tf2_eigen.hpp>)
 #include <tf2_eigen/tf2_eigen.hpp>
-#else
-#include <tf2_eigen/tf2_eigen.h>
-#endif
 #include <moveit/robot_state/robot_state.h>
 #include <moveit/robot_state/attached_body.h>
 

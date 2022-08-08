@@ -43,11 +43,7 @@
 
 #include <std_srvs/srv/empty.hpp>
 #include <moveit_msgs/msg/robot_state.hpp>
-#if __has_include(<tf2_eigen/tf2_eigen.hpp>)
 #include <tf2_eigen/tf2_eigen.hpp>
-#else
-#include <tf2_eigen/tf2_eigen.h>
-#endif
 #include <moveit/trajectory_processing/time_optimal_trajectory_generation.h>
 
 #include "ui_motion_planning_rviz_plugin_frame.h"

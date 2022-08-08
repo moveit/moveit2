@@ -37,11 +37,7 @@
 #include <math.h>
 #include <moveit/robot_interaction/interactive_marker_helpers.h>
 #include <tf2/LinearMath/Quaternion.h>
-#if __has_include(<tf2_geometry_msgs/tf2_geometry_msgs.hpp>)
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
-#else
-#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
-#endif
 
 namespace robot_interaction
 {
