@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - main
+      - humble
   pull_request:
     paths:
       - .docker/**
