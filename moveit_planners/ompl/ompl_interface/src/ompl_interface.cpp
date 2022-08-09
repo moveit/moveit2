@@ -108,16 +108,7 @@ OMPLInterface::getPlanningContext(const planning_scene::PlanningSceneConstPtr& p
 {
   ModelBasedPlanningContextPtr ctx =
       context_manager_.getPlanningContext(planning_scene, req, error_code, node_, use_constraints_approximations_);
-//  if (ctx)
-//  {
-//    configureContext(ctx);
-//  }
   return ctx;
-}
-
-void OMPLInterface::configureContext(const ModelBasedPlanningContextPtr& context) const
-{
-
 }
 
 void OMPLInterface::loadConstraintSamplers()

@@ -131,8 +131,6 @@ protected:
   /** @brief Load the additional plugins for sampling constraints */
   void loadConstraintSamplers();
 
-  void configureContext(const ModelBasedPlanningContextPtr& context) const;
-
   /** \brief Configure the OMPL planning context for a new planning request */
   ModelBasedPlanningContextPtr prepareForSolve(const planning_interface::MotionPlanRequest& req,
                                                const planning_scene::PlanningSceneConstPtr& planning_scene,
