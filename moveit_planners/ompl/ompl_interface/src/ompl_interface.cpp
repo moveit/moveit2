@@ -54,7 +54,6 @@ OMPLInterface::OMPLInterface(const moveit::core::RobotModelConstPtr& robot_model
   , constraint_sampler_manager_(std::make_shared<constraint_samplers::ConstraintSamplerManager>())
   , context_manager_(robot_model, constraint_sampler_manager_)
   , use_constraints_approximations_(true)
-  , simplify_solutions_(true)
 {
   RCLCPP_DEBUG(LOGGER, "Initializing OMPL interface using ROS parameters");
   loadPlannerConfigurations();
@@ -70,7 +69,6 @@ OMPLInterface::OMPLInterface(const moveit::core::RobotModelConstPtr& robot_model
   , constraint_sampler_manager_(std::make_shared<constraint_samplers::ConstraintSamplerManager>())
   , context_manager_(robot_model, constraint_sampler_manager_)
   , use_constraints_approximations_(true)
-  , simplify_solutions_(true)
 {
   RCLCPP_DEBUG(LOGGER, "Initializing OMPL interface using specified configuration");
   setPlannerConfigurations(pconfig);
@@ -112,16 +110,7 @@ OMPLInterface::getPlanningContext(const planning_scene::PlanningSceneConstPtr& p
 {
   ModelBasedPlanningContextPtr ctx =
       context_manager_.getPlanningContext(planning_scene, req, error_code, node_, use_constraints_approximations_);
-  if (ctx)
-  {
-    configureContext(ctx);
-  }
   return ctx;
-}
-
-void OMPLInterface::configureContext(const ModelBasedPlanningContextPtr& context) const
-{
-  context->simplifySolutions(simplify_solutions_);
 }
 
 void OMPLInterface::loadConstraintSamplers()
