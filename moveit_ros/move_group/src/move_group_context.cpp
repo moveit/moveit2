@@ -39,7 +39,6 @@
 #include <moveit/moveit_cpp/moveit_cpp.h>
 #include <moveit/planning_pipeline/planning_pipeline.h>
 #include <moveit/plan_execution/plan_execution.h>
-#include <moveit/plan_execution/plan_with_sensing.h>
 
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_move_group_capabilities_base.move_group_context");
 
@@ -78,16 +77,11 @@ move_group::MoveGroupContext::MoveGroupContext(const moveit_cpp::MoveItCppPtr& m
     trajectory_execution_manager_ = moveit_cpp_->getTrajectoryExecutionManager();
     plan_execution_ = std::make_shared<plan_execution::PlanExecution>(moveit_cpp_->getNode(), planning_scene_monitor_,
                                                                       trajectory_execution_manager_);
-    plan_with_sensing_ =
-        std::make_shared<plan_execution::PlanWithSensing>(moveit_cpp_->getNode(), trajectory_execution_manager_);
-    if (debug)
-      plan_with_sensing_->displayCostSources(true);
   }
 }
 
 move_group::MoveGroupContext::~MoveGroupContext()
 {
-  plan_with_sensing_.reset();
   plan_execution_.reset();
   trajectory_execution_manager_.reset();
   planning_pipeline_.reset();
