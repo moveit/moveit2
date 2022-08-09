@@ -2,6 +2,11 @@
 Changelog for package pilz_industrial_motion_planner
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.5.3 (2022-07-28)
+------------------
+* rename header files so debs are installable (`#1443 <https://github.com/ros-planning/moveit2/issues/1443>`_)
+* Contributors: Michael Ferguson
+
 2.5.2 (2022-07-18)
 ------------------
 * Rename cartesian_limits.yaml (`#1422 <https://github.com/ros-planning/moveit2/issues/1422>`_)

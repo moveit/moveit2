@@ -1134,10 +1134,9 @@ TEST_F(LoadPlanningModelsPr2, SubgroupPoseConstraintsSampler)
               (double)succ / (double)NT);
 }
 
-TEST_F(LoadPlanningModelsPr2, DISABLED_JointConstraintsSamplerSeeded)
+TEST_F(LoadPlanningModelsPr2, JointConstraintsSamplerSeeded)
 {
-  // ros::param::set("~joint_constraint_sampler_random_seed", 12345);
-  constraint_samplers::JointConstraintSampler seeded_sampler1(ps_, "right_arm");
+  constraint_samplers::JointConstraintSampler seeded_sampler1(ps_, "right_arm", 314159);
   kinematic_constraints::JointConstraint jc(robot_model_);
   moveit_msgs::msg::JointConstraint jcm;
   jcm.position = 0.42;
@@ -1156,7 +1155,7 @@ TEST_F(LoadPlanningModelsPr2, DISABLED_JointConstraintsSamplerSeeded)
   const double* joint_positions = ks.getVariablePositions();
   const std::vector<double> joint_positions_v(joint_positions, joint_positions + ks.getVariableCount());
 
-  constraint_samplers::JointConstraintSampler seeded_sampler2(ps_, "right_arm");
+  constraint_samplers::JointConstraintSampler seeded_sampler2(ps_, "right_arm", 314159);
   EXPECT_TRUE(seeded_sampler2.configure(js));
   ks.setToDefaultValues();
   EXPECT_TRUE(seeded_sampler2.sample(ks, ks, 1));
@@ -1165,7 +1164,6 @@ TEST_F(LoadPlanningModelsPr2, DISABLED_JointConstraintsSamplerSeeded)
   using namespace testing;
   EXPECT_THAT(joint_positions_v, ContainerEq(joint_positions_v2));
 
-  // ros::param::del("~joint_constraint_sampler_random_seed");
   constraint_samplers::JointConstraintSampler seeded_sampler3(ps_, "right_arm");
   EXPECT_TRUE(seeded_sampler3.configure(js));
   ks.setToDefaultValues();
@@ -1176,9 +1174,8 @@ TEST_F(LoadPlanningModelsPr2, DISABLED_JointConstraintsSamplerSeeded)
   EXPECT_THAT(joint_positions_v2, Not(ContainerEq(joint_positions_v3)));
 }
 
-TEST_F(LoadPlanningModelsPr2, DISABLED_IKConstraintsSamplerSeeded)
+TEST_F(LoadPlanningModelsPr2, IKConstraintsSamplerSeeded)
 {
-  // ros::param::set("~ik_constraint_sampler_random_seed", 12345);
   kinematic_constraints::PositionConstraint pc(robot_model_);
   moveit_msgs::msg::PositionConstraint pcm;
 
@@ -1205,7 +1202,7 @@ TEST_F(LoadPlanningModelsPr2, DISABLED_IKConstraintsSamplerSeeded)
   moveit::core::Transforms& tf = ps_->getTransformsNonConst();
   EXPECT_TRUE(pc.configure(pcm, tf));
 
-  constraint_samplers::IKConstraintSampler seeded_sampler1(ps_, "left_arm");
+  constraint_samplers::IKConstraintSampler seeded_sampler1(ps_, "left_arm", 265358);
   EXPECT_TRUE(seeded_sampler1.configure(constraint_samplers::IKSamplingPose(pc)));
 
   moveit::core::RobotState ks(robot_model_);
@@ -1218,7 +1215,7 @@ TEST_F(LoadPlanningModelsPr2, DISABLED_IKConstraintsSamplerSeeded)
   const Eigen::Isometry3d root_to_left_tool1 = ks.getFrameTransform("l_gripper_tool_frame", &found);
   EXPECT_TRUE(found);
 
-  constraint_samplers::IKConstraintSampler seeded_sampler2(ps_, "left_arm");
+  constraint_samplers::IKConstraintSampler seeded_sampler2(ps_, "left_arm", 265358);
   EXPECT_TRUE(seeded_sampler2.configure(constraint_samplers::IKSamplingPose(pc)));
   ks.setToDefaultValues();
   ks.update();
@@ -1228,7 +1225,6 @@ TEST_F(LoadPlanningModelsPr2, DISABLED_IKConstraintsSamplerSeeded)
   const Eigen::Isometry3d root_to_left_tool2 = ks.getFrameTransform("l_gripper_tool_frame", &found);
   EXPECT_TRUE(found);
 
-  // ros::param::del("~ik_constraint_sampler_random_seed");
   constraint_samplers::IKConstraintSampler seeded_sampler3(ps_, "left_arm");
   EXPECT_TRUE(seeded_sampler3.configure(constraint_samplers::IKSamplingPose(pc)));
   ks.setToDefaultValues();

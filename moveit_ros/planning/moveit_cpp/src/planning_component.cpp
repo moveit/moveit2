@@ -81,12 +81,6 @@ PlanningComponent::PlanningComponent(const std::string& group_name, const rclcpp
   planning_pipeline_names_ = moveit_cpp_->getPlanningPipelineNames(group_name);
 }
 
-PlanningComponent::~PlanningComponent()
-{
-  RCLCPP_INFO(LOGGER, "Deleting PlanningComponent '%s'", group_name_.c_str());
-  clearContents();
-}
-
 const std::vector<std::string> PlanningComponent::getNamedTargetStates()
 {
   if (joint_model_group_)
@@ -318,14 +312,5 @@ bool PlanningComponent::execute(bool blocking)
 const PlanningComponent::PlanSolutionPtr PlanningComponent::getLastPlanSolution()
 {
   return last_plan_solution_;
-}
-
-void PlanningComponent::clearContents()
-{
-  considered_start_state_.reset();
-  last_plan_solution_.reset();
-  current_goal_constraints_.clear();
-  moveit_cpp_.reset();
-  planning_pipeline_names_.clear();
 }
 }  // namespace moveit_cpp

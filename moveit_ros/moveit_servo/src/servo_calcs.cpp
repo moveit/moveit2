@@ -42,6 +42,7 @@
 #include <chrono>
 #include <mutex>
 
+#include <controller_manager/realtime.hpp>
 #include <std_msgs/msg/bool.h>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
 
@@ -50,10 +51,6 @@
 #include <moveit_servo/enforce_limits.hpp>
 
 using namespace std::chrono_literals;  // for s, ms, etc.
-
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_servo.servo_calcs");
-constexpr auto ROS_LOG_THROTTLE_PERIOD = std::chrono::milliseconds(3000).count();
-static constexpr double STOPPED_VELOCITY_EPS = 1e-4;  // rad/s
 
 namespace moveit_servo
 {
@@ -88,6 +85,15 @@ geometry_msgs::msg::TransformStamped convertIsometryToTransform(const Eigen::Iso
 
   return output;
 }
+
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_servo.servo_calcs");
+constexpr auto ROS_LOG_THROTTLE_PERIOD = std::chrono::milliseconds(3000).count();
+static constexpr double STOPPED_VELOCITY_EPS = 1e-4;  // rad/s
+
+// This value is used when configuring the main loop to use SCHED_FIFO scheduling
+// We use a slightly lower priority than the ros2_control default in order to reduce jitter
+// Reference: https://man7.org/linux/man-pages/man2/sched_setparam.2.html
+int const THREAD_PRIORITY = 40;
 }  // namespace
 
 // Constructor for the class that handles servoing calculations
@@ -278,7 +284,21 @@ void ServoCalcs::start()
   }
 
   stop_requested_ = false;
-  thread_ = std::thread([this] { mainCalcLoop(); });
+  thread_ = std::thread([this] {
+    // Check if a realtime kernel is installed. Set a higher thread priority, if so
+    if (controller_manager::has_realtime_kernel())
+    {
+      if (!controller_manager::configure_sched_fifo(THREAD_PRIORITY))
+      {
+        RCLCPP_WARN(LOGGER, "Could not enable FIFO RT scheduling policy");
+      }
+    }
+    else
+    {
+      RCLCPP_INFO(LOGGER, "RT kernel is recommended for better performance");
+    }
+    mainCalcLoop();
+  });
   new_input_cmd_ = false;
 }
 

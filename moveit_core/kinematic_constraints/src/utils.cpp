@@ -43,16 +43,8 @@
 #include <rclcpp/parameter_value.hpp>
 
 #include "rclcpp/node.hpp"
-#if __has_include(<tf2_geometry_msgs/tf2_geometry_msgs.hpp>)
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
-#else
-#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
-#endif
-#if __has_include(<tf2_eigen/tf2_eigen.hpp>)
 #include <tf2_eigen/tf2_eigen.hpp>
-#else
-#include <tf2_eigen/tf2_eigen.h>
-#endif
 
 using namespace moveit::core;
 
@@ -485,7 +477,7 @@ static bool collectConstraints(const rclcpp::Node::SharedPtr& node, const std::v
 {
   for (const auto& constraint_id : constraint_ids)
   {
-    const auto constraint_param = ".constraints." + constraint_id;
+    const auto constraint_param = "constraints." + constraint_id;
     if (!node->has_parameter(constraint_param + ".type"))
     {
       RCLCPP_ERROR(LOGGER, "constraint parameter does not specify its type");
