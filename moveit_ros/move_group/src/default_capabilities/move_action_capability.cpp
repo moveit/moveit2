@@ -39,7 +39,6 @@
 #include <moveit/moveit_cpp/moveit_cpp.h>
 #include <moveit/planning_pipeline/planning_pipeline.h>
 #include <moveit/plan_execution/plan_execution.h>
-#include <moveit/plan_execution/plan_with_sensing.h>
 #include <moveit/trajectory_processing/trajectory_tools.h>
 #include <moveit/kinematic_constraints/utils.h>
 #include <moveit/utils/message_checks.h>
@@ -149,17 +148,6 @@ void MoveGroupMoveAction::executeMoveCallbackPlanAndExecute(const std::shared_pt
   opt.plan_callback_ = [this, &motion_plan_request](plan_execution::ExecutableMotionPlan& plan) {
     return planUsingPlanningPipeline(motion_plan_request, plan);
   };
-  if (goal->get_goal()->planning_options.look_around && context_->plan_with_sensing_)
-  {
-    opt.plan_callback_ = [plan_with_sensing = context_->plan_with_sensing_.get(), planner = opt.plan_callback_,
-                          attempts = goal->get_goal()->planning_options.look_around_attempts,
-                          safe_execution_cost = goal->get_goal()->planning_options.max_safe_execution_cost](
-                             plan_execution::ExecutableMotionPlan& plan) {
-      return plan_with_sensing->computePlan(plan, planner, attempts, safe_execution_cost);
-    };
-
-    context_->plan_with_sensing_->setBeforeLookCallback([this]() { return startMoveLookCallback(); });
-  }
 
   plan_execution::ExecutableMotionPlan plan;
   if (preempt_requested_)

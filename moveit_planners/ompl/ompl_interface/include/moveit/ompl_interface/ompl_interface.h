@@ -115,15 +115,6 @@ public:
   {
     return use_constraints_approximations_;
   }
-  bool simplifySolutions() const
-  {
-    return simplify_solutions_;
-  }
-
-  void simplifySolutions(bool flag)
-  {
-    simplify_solutions_ = flag;
-  }
 
   /** @brief Print the status of this node*/
   void printStatus();
@@ -139,8 +130,6 @@ protected:
 
   /** @brief Load the additional plugins for sampling constraints */
   void loadConstraintSamplers();
-
-  void configureContext(const ModelBasedPlanningContextPtr& context) const;
 
   /** \brief Configure the OMPL planning context for a new planning request */
   ModelBasedPlanningContextPtr prepareForSolve(const planning_interface::MotionPlanRequest& req,
@@ -159,8 +148,6 @@ protected:
   PlanningContextManager context_manager_;
 
   bool use_constraints_approximations_;
-
-  bool simplify_solutions_;
 
 private:
   constraint_sampler_manager_loader::ConstraintSamplerManagerLoaderPtr constraint_sampler_manager_loader_;

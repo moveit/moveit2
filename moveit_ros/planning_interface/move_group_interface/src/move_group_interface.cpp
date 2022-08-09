@@ -39,11 +39,7 @@
 #include <stdexcept>
 #include <sstream>
 #include <memory>
-#if __has_include(<tf2_geometry_msgs/tf2_geometry_msgs.hpp>)
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
-#else
-#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
-#endif
 #include <moveit/warehouse/constraints_storage.h>
 #include <moveit/kinematic_constraints/utils.h>
 #include <moveit/move_group/capability_names.h>
@@ -66,11 +62,7 @@
 #include <std_msgs/msg/string.hpp>
 #include <geometry_msgs/msg/transform_stamped.h>
 #include <tf2/utils.h>
-#if __has_include(<tf2_eigen/tf2_eigen.hpp>)
 #include <tf2_eigen/tf2_eigen.hpp>
-#else
-#include <tf2_eigen/tf2_eigen.h>
-#endif
 #include <tf2_ros/transform_listener.h>
 
 namespace moveit
