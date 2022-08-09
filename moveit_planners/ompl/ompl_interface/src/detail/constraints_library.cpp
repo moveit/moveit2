@@ -54,7 +54,7 @@ void msgToHex(const T& msg, std::string& hex)
 {
   static const char SYMBOL[] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
   auto type_support = rosidl_typesupport_cpp::get_message_type_support_handle<T>();
-  rmw_serialized_message_t serialized_msg;
+  rmw_serialized_message_t serialized_msg = { nullptr, 0, 0, rcutils_get_default_allocator() };
   rmw_ret_t result = rmw_serialize(&msg, type_support, &serialized_msg);
   if (result != RMW_RET_OK)
   {
