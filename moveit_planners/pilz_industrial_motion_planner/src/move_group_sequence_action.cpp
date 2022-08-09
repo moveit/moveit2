@@ -42,7 +42,6 @@
 
 #include <moveit/kinematic_constraints/utils.h>
 #include <moveit/plan_execution/plan_execution.h>
-#include <moveit/plan_execution/plan_with_sensing.h>
 #include <moveit/planning_pipeline/planning_pipeline.h>
 #include <moveit/robot_state/conversions.h>
 #include <moveit/trajectory_processing/trajectory_tools.h>
@@ -166,10 +165,6 @@ void MoveGroupSequenceAction::executeSequenceCallbackPlanAndExecute(
   [this, &request = goal->request](plan_execution::ExecutableMotionPlan& plan) {
     return planUsingSequenceManager(request, plan);
   };
-  if (goal->planning_options.look_around && context_->plan_with_sensing_)
-  {
-    RCLCPP_WARN(LOGGER, "Plan with sensing not yet implemented/tested. This option is ignored.");  // LCOV_EXCL_LINE
-  }
 
   plan_execution::ExecutableMotionPlan plan;
   context_->plan_execution_->planAndExecute(plan, planning_scene_diff, opt);

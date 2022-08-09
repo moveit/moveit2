@@ -54,7 +54,6 @@
 /moveit_core/robot_model/                                   @tylerjw
 /moveit_core/robot_state/                                   @rhaschke @mlautman @felixvd
 /moveit_core/robot_trajectory/                              @mlautman
-/moveit_core/sensor_manager/                                @mlautman
 /moveit_core/trajectory_processing/                         @mlautman
 /moveit_core/transforms/                                    @rhaschke
 /moveit_core/utils/                                         @mlautman
