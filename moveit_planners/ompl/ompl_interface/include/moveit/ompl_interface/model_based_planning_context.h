@@ -46,6 +46,9 @@
 #include <ompl/base/StateStorage.h>
 #include <ompl/base/spaces/constraint/ConstrainedStateSpace.h>
 
+#include <moveit/ompl_interface/ompl_optimization_objective_loader.h>
+#include <pluginlib/class_loader.hpp>
+
 namespace ompl_interface
 {
 namespace ob = ompl::base;
@@ -390,6 +393,10 @@ protected:
   /** \brief Convert OMPL PlannerStatus to moveit_msgs::msg::MoveItErrorCode */
   int32_t logPlannerStatus(og::SimpleSetupPtr ompl_simple_setup);
 
+  /** \brief Construct the map with all the declared optimization objective plugin
+   */
+  void constructOptimizationObjectives();
+
   ModelBasedPlanningContextSpecification spec_;
 
   moveit::core::RobotState complete_initial_robot_state_;
@@ -452,5 +459,8 @@ protected:
 
   // if false parallel plan returns the first solution found
   bool hybridize_;
+
+  /// map of all the optimization objectives plugins
+  std::map<std::string, std::shared_ptr<ompl_optimization_loader::OptimizationObjectiveLoader>> optimization_objectives_;
 };
 }  // namespace ompl_interface
