@@ -35,25 +35,18 @@
 #include "pilz_industrial_motion_planner/trajectory_generator_lin.h"
 
 #include <cassert>
-#include <rclcpp/rclcpp.hpp>
 #include <sstream>
 #include <time.h>
-
 #include <moveit/robot_state/conversions.h>
-
 #include <kdl/path_line.hpp>
 #include <kdl/trajectory_segment.hpp>
 #include <kdl/utilities/error.h>
-
 #include <tf2/convert.h>
 #include <tf2_eigen_kdl/tf2_eigen_kdl.hpp>
-#if __has_include(<tf2_eigen/tf2_eigen.hpp>)
+#include <rclcpp/logger.hpp>
+#include <rclcpp/logging.hpp>
 #include <tf2_eigen/tf2_eigen.hpp>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
-#else
-#include <tf2_eigen/tf2_eigen.h>
-#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
-#endif
 
 namespace pilz_industrial_motion_planner
 {

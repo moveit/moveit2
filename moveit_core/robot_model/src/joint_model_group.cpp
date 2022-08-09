@@ -39,10 +39,11 @@
 #include <moveit/robot_model/joint_model_group.h>
 #include <moveit/robot_model/revolute_joint_model.h>
 #include <moveit/exceptions/exceptions.h>
-#include <boost/lexical_cast.hpp>
+#include <rclcpp/logger.hpp>
+#include <rclcpp/logging.hpp>
 #include <algorithm>
+
 #include "order_robot_model_items.inc"
-#include "rclcpp/rclcpp.hpp"
 
 namespace moveit
 {
@@ -367,9 +368,9 @@ void JointModelGroup::getVariableRandomPositionsNearBy(random_numbers::RandomNum
 {
   assert(active_joint_bounds.size() == active_joint_model_vector_.size());
   if (distances.size() != active_joint_model_vector_.size())
-    throw Exception("When sampling random values nearby for group '" + name_ + "', distances vector should be of size " +
-                    boost::lexical_cast<std::string>(active_joint_model_vector_.size()) + ", but it is of size " +
-                    boost::lexical_cast<std::string>(distances.size()));
+    throw Exception("When sampling random values nearby for group '" + name_ +
+                    "', distances vector should be of size " + std::to_string(active_joint_model_vector_.size()) +
+                    ", but it is of size " + std::to_string(distances.size()));
   for (std::size_t i = 0; i < active_joint_model_vector_.size(); ++i)
     active_joint_model_vector_[i]->getVariableRandomPositionsNearBy(rng, values + active_joint_model_start_index_[i],
                                                                     *active_joint_bounds[i],

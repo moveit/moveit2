@@ -54,11 +54,7 @@
 
 #include <gtest/gtest.h>
 
-#if __has_include(<tf2_eigen/tf2_eigen.hpp>)
 #include <tf2_eigen/tf2_eigen.hpp>
-#else
-#include <tf2_eigen/tf2_eigen.h>
-#endif
 
 #include <moveit/ompl_interface/planning_context_manager.h>
 #include <moveit/planning_scene/planning_scene.h>

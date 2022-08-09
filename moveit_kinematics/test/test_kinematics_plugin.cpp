@@ -40,11 +40,7 @@
 #include <functional>
 #include <pluginlib/class_loader.hpp>
 #include <rclcpp/rclcpp.hpp>
-#if __has_include(<tf2_eigen/tf2_eigen.hpp>)
 #include <tf2_eigen/tf2_eigen.hpp>
-#else
-#include <tf2_eigen/tf2_eigen.h>
-#endif
 
 // MoveIt
 #include <moveit/kinematics_base/kinematics_base.h>
@@ -265,8 +261,7 @@ public:
     return testing::AssertionSuccess();
   }
 
-  void searchIKCallback(const geometry_msgs::msg::Pose& /*ik_pose*/, const std::vector<double>& joint_state,
-                        moveit_msgs::msg::MoveItErrorCodes& error_code)
+  void searchIKCallback(const std::vector<double>& joint_state, moveit_msgs::msg::MoveItErrorCodes& error_code)
   {
     std::vector<std::string> link_names = { tip_link_ };
     std::vector<geometry_msgs::msg::Pose> poses;
@@ -589,10 +584,11 @@ TEST_F(KinematicsTest, searchIKWithCallback)
       continue;
     }
 
-    kinematics_solver_->searchPositionIK(poses[0], fk_values, timeout_, solution,
-                                         std::bind(&KinematicsTest::searchIKCallback, this, std::placeholders::_1,
-                                                   std::placeholders::_2, std::placeholders::_3),
-                                         error_code);
+    kinematics_solver_->searchPositionIK(
+        poses[0], fk_values, timeout_, solution,
+        [this](const geometry_msgs::msg::Pose&, const std::vector<double>& joints,
+               moveit_msgs::msg::MoveItErrorCodes& error_code) { searchIKCallback(joints, error_code); },
+        error_code);
     if (error_code.val == error_code.SUCCESS)
       success++;
     else

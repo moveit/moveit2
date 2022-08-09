@@ -34,24 +34,24 @@
 
 /* Author: Sachin Chitta */
 
-#include <rclcpp/rclcpp.hpp>
 #include <visualization_msgs/msg/marker_array.hpp>
 #include <geometry_msgs/msg/quaternion.hpp>
-
 // MoveIt
 #include <moveit/semantic_world/semantic_world.h>
 #include <geometric_shapes/shape_operations.h>
 #include <moveit_msgs/msg/planning_scene.hpp>
-
 // OpenCV
 #include <opencv2/imgproc/imgproc.hpp>
+#include <rclcpp/experimental/buffers/intra_process_buffer.hpp>
+#include <rclcpp/logger.hpp>
+#include <rclcpp/logging.hpp>
+#include <rclcpp/node.hpp>
+#include <rclcpp/publisher.hpp>
+#include <rclcpp/qos_event.hpp>
+#include <rclcpp/subscription.hpp>
 
 // Eigen
-#if __has_include(<tf2_eigen/tf2_eigen.hpp>)
 #include <tf2_eigen/tf2_eigen.hpp>
-#else
-#include <tf2_eigen/tf2_eigen.h>
-#endif
 #include <Eigen/Geometry>
 
 namespace moveit
@@ -66,7 +66,8 @@ SemanticWorld::SemanticWorld(const rclcpp::Node::SharedPtr node,
 
 {
   table_subscriber_ = node_handle_->create_subscription<object_recognition_msgs::msg::TableArray>(
-      "table_array", 1, std::bind(&SemanticWorld::tableCallback, this, std::placeholders::_1));
+      "table_array", 1,
+      [this](const object_recognition_msgs::msg::TableArray::SharedPtr msg) { return tableCallback(msg); });
   visualization_publisher_ =
       node_handle_->create_publisher<visualization_msgs::msg::MarkerArray>("visualize_place", 20);
   collision_object_publisher_ =

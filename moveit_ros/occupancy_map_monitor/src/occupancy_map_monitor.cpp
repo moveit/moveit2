@@ -35,15 +35,14 @@
 /* Author: Ioan Sucan, Jon Binney */
 
 #include <moveit/collision_detection/occupancy_map.h>
-
 #include <moveit/occupancy_map_monitor/occupancy_map_monitor.h>
 #include <moveit/occupancy_map_monitor/occupancy_map_monitor_middleware_handle.hpp>
 #include <moveit_msgs/srv/load_map.hpp>
 #include <moveit_msgs/srv/save_map.hpp>
-
-#include <boost/bind.hpp>
-#include <rclcpp/rclcpp.hpp>
-
+#include <rclcpp/clock.hpp>
+#include <rclcpp/logger.hpp>
+#include <rclcpp/logging.hpp>
+#include <rclcpp/node.hpp>
 #include <memory>
 #include <string>
 #include <utility>
@@ -158,17 +157,21 @@ void OccupancyMapMonitor::addUpdater(const OccupancyMapUpdaterPtr& updater)
       // when we had one updater only, we passed directly the transform cache callback to that updater
       if (map_updaters_.size() == 2)
       {
-        map_updaters_[0]->setTransformCacheCallback(std::bind(&OccupancyMapMonitor::getShapeTransformCache, this, 0,
-                                                              std::placeholders::_1, std::placeholders::_2,
-                                                              std::placeholders::_3));
-        map_updaters_[1]->setTransformCacheCallback(std::bind(&OccupancyMapMonitor::getShapeTransformCache, this, 1,
-                                                              std::placeholders::_1, std::placeholders::_2,
-                                                              std::placeholders::_3));
+        map_updaters_[0]->setTransformCacheCallback(
+            [this](const std::string& frame, const rclcpp::Time& stamp, ShapeTransformCache& cache) {
+              return getShapeTransformCache(0, frame, stamp, cache);
+            });
+        map_updaters_[1]->setTransformCacheCallback(
+            [this](const std::string& frame, const rclcpp::Time& stamp, ShapeTransformCache& cache) {
+              return getShapeTransformCache(1, frame, stamp, cache);
+            });
       }
       else
-        map_updaters_.back()->setTransformCacheCallback(std::bind(&OccupancyMapMonitor::getShapeTransformCache, this,
-                                                                  map_updaters_.size() - 1, std::placeholders::_1,
-                                                                  std::placeholders::_2, std::placeholders::_3));
+        map_updaters_.back()->setTransformCacheCallback(
+            [this, i = map_updaters_.size() - 1](const std::string& frame, const rclcpp::Time& stamp,
+                                                 ShapeTransformCache& cache) {
+              return getShapeTransformCache(i, frame, stamp, cache);
+            });
     }
     else
       updater->setTransformCacheCallback(transform_cache_callback_);

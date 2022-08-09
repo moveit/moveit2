@@ -37,6 +37,8 @@
 #include <moveit/collision_detection_fcl/collision_common.h>
 #include <geometric_shapes/shapes.h>
 #include <moveit/collision_detection_fcl/fcl_compat.h>
+#include <rclcpp/logger.hpp>
+#include <rclcpp/logging.hpp>
 
 #if (MOVEIT_FCL_VERSION >= FCL_VERSION_CHECK(0, 6, 0))
 #include <fcl/geometry/bvh/BVH_model.h>
@@ -47,9 +49,9 @@
 #include <fcl/octree.h>
 #endif
 
-#include <boost/thread/mutex.hpp>
 #include <memory>
 #include <type_traits>
+#include <mutex>
 
 namespace collision_detection
 {

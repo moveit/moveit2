@@ -1,8 +1,6 @@
 find_package(trac_ik_kinematics_plugin QUIET)
 find_package(ur_kinematics QUIET)
 
-find_package(Boost COMPONENTS filesystem program_options REQUIRED)
-
 set(MOVEIT_LIB_NAME moveit_cached_ik_kinematics_base)
 add_library(${MOVEIT_LIB_NAME} SHARED src/ik_cache.cpp)
 set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
@@ -10,7 +8,6 @@ ament_target_dependencies(${MOVEIT_LIB_NAME}
   rclcpp
   moveit_core
   moveit_msgs
-  Boost
 )
 
 if(trac_ik_kinematics_plugin_FOUND)

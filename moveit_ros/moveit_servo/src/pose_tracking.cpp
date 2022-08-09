@@ -81,7 +81,6 @@ PoseTracking::PoseTracking(const rclcpp::Node::SharedPtr& node, const ServoParam
   , transform_buffer_(node_->get_clock())
   , transform_listener_(transform_buffer_)
   , stop_requested_(false)
-  , angular_error_(boost::none)
 {
   readROSParams();
 
@@ -100,7 +99,7 @@ PoseTracking::PoseTracking(const rclcpp::Node::SharedPtr& node, const ServoParam
   // Connect to Servo ROS interfaces
   target_pose_sub_ = node_->create_subscription<geometry_msgs::msg::PoseStamped>(
       "target_pose", rclcpp::SystemDefaultsQoS(),
-      std::bind(&PoseTracking::targetPoseCallback, this, std::placeholders::_1));
+      [this](const geometry_msgs::msg::PoseStamped::ConstSharedPtr msg) { return targetPoseCallback(msg); });
 
   // Publish outgoing twist commands to the Servo object
   twist_stamped_pub_ = node_->create_publisher<geometry_msgs::msg::TwistStamped>(
@@ -346,7 +345,7 @@ void PoseTracking::doPostMotionReset()
 {
   stopMotion();
   stop_requested_ = false;
-  angular_error_ = boost::none;
+  angular_error_ = {};
 
   // Reset error integrals and previous errors of PID controllers
   cartesian_position_pids_[0].reset();

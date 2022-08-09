@@ -38,11 +38,7 @@
 #include <kdl/chainfksolverpos_recursive.hpp>
 #include <kdl/chainiksolverpos_lma.hpp>
 
-#if __has_include(<tf2_kdl/tf2_kdl.hpp>)
 #include <tf2_kdl/tf2_kdl.hpp>
-#else
-#include <tf2_kdl/tf2_kdl.h>
-#endif
 #include <kdl_parser/kdl_parser.hpp>
 #include <kdl/frames_io.hpp>
 #include <kdl/kinfam_io.hpp>
@@ -292,7 +288,7 @@ bool LMAKinematicsPlugin::searchPositionIK(const geometry_msgs::msg::Pose& ik_po
         continue;
 
       Eigen::Map<Eigen::VectorXd>(solution.data(), solution.size()) = jnt_pos_out.data;
-      if (!solution_callback.empty())
+      if (solution_callback)
       {
         solution_callback(ik_pose, solution, error_code);
         if (error_code.val != error_code.SUCCESS)

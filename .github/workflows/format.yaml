@@ -13,13 +13,15 @@ on:
 jobs:
   pre-commit:
     name: Format
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
-    - uses: actions/checkout@v2
-    - uses: actions/setup-python@v2
+    - uses: actions/checkout@v3
+    - uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
     - name: Install clang-format-12
       run: sudo apt-get install clang-format-12
-    - uses: pre-commit/action@v2.0.3
+    - uses: pre-commit/action@v3.0.0
       id: precommit
     - name: Upload pre-commit changes
       if: failure() && steps.precommit.outcome == 'failure'

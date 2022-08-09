@@ -36,13 +36,14 @@
  *   POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <rclcpp/logger.hpp>
+#include <rclcpp/logging.hpp>
 #include <limits>
 #include <Eigen/Geometry>
 #include <algorithm>
 #include <cmath>
 #include <moveit/trajectory_processing/time_optimal_trajectory_generation.h>
 #include <vector>
-#include "rclcpp/rclcpp.hpp"
 
 namespace trajectory_processing
 {
@@ -911,17 +912,11 @@ bool TimeOptimalTrajectoryGeneration::computeTimeStamps(robot_trajectory::RobotT
                 max_acceleration_scaling_factor, acceleration_scaling_factor);
   }
 
-  // This lib does not actually work properly when angles wrap around, so we need to unwind the path first
-  trajectory.unwind();
-
-  // This is pretty much copied from IterativeParabolicTimeParameterization::applyVelocityConstraints
   const std::vector<std::string>& vars = group->getVariableNames();
-  const std::vector<int>& idx = group->getVariableIndexList();
   const moveit::core::RobotModel& rmodel = group->getParentModel();
   const unsigned num_joints = group->getVariableCount();
-  const unsigned num_points = trajectory.getWayPointCount();
 
-  // Get the limits (we do this at same time, unlike IterativeParabolicTimeParameterization)
+  // Get the vel/accel limits
   Eigen::VectorXd max_velocity(num_joints);
   Eigen::VectorXd max_acceleration(num_joints);
   for (size_t j = 0; j < num_joints; ++j)
@@ -932,7 +927,7 @@ bool TimeOptimalTrajectoryGeneration::computeTimeStamps(robot_trajectory::RobotT
     max_velocity[j] = 1.0;
     if (bounds.velocity_bounded_)
     {
-      if (bounds.max_velocity_ < std::numeric_limits<double>::epsilon())
+      if (bounds.max_velocity_ <= 0.0)
       {
         RCLCPP_ERROR(LOGGER, "Invalid max_velocity %f specified for '%s', must be greater than 0.0",
                      bounds.max_velocity_, vars[j].c_str());
@@ -951,7 +946,7 @@ bool TimeOptimalTrajectoryGeneration::computeTimeStamps(robot_trajectory::RobotT
     max_acceleration[j] = 1.0;
     if (bounds.acceleration_bounded_)
     {
-      if (bounds.max_acceleration_ < std::numeric_limits<double>::epsilon())
+      if (bounds.max_acceleration_ < 0.0)
       {
         RCLCPP_ERROR(LOGGER, "Invalid max_acceleration %f specified for '%s', must be greater than 0.0",
                      bounds.max_acceleration_, vars[j].c_str());
@@ -968,6 +963,117 @@ bool TimeOptimalTrajectoryGeneration::computeTimeStamps(robot_trajectory::RobotT
                                   << " rad/s^2. You can define acceleration limits in the URDF or joint_limits.yaml.");
     }
   }
+
+  return doTimeParameterizationCalculations(trajectory, max_velocity, max_acceleration);
+}
+
+bool TimeOptimalTrajectoryGeneration::computeTimeStamps(
+    robot_trajectory::RobotTrajectory& trajectory, const std::unordered_map<std::string, double>& velocity_limits,
+    const std::unordered_map<std::string, double>& acceleration_limits) const
+{
+  if (trajectory.empty())
+    return true;
+
+  // Get the default joint limits from the robot model, then overwrite any that are provided as arguments
+  const moveit::core::JointModelGroup* group = trajectory.getGroup();
+  if (!group)
+  {
+    RCLCPP_ERROR(LOGGER, "It looks like the planner did not set the group the plan was computed for");
+    return false;
+  }
+  const unsigned num_joints = group->getVariableCount();
+  const std::vector<std::string>& vars = group->getVariableNames();
+  const moveit::core::RobotModel& rmodel = group->getParentModel();
+
+  Eigen::VectorXd max_velocity(num_joints);
+  Eigen::VectorXd max_acceleration(num_joints);
+  for (size_t j = 0; j < num_joints; ++j)
+  {
+    const moveit::core::VariableBounds& bounds = rmodel.getVariableBounds(vars[j]);
+
+    // VELOCITY LIMIT
+    // Check if a custom limit was specified as an argument
+    bool set_velocity_limit = false;
+    auto it = velocity_limits.find(vars[j]);
+    if (it != velocity_limits.end())
+    {
+      max_velocity[j] = it->second;
+      set_velocity_limit = true;
+    }
+
+    if (bounds.velocity_bounded_ && !set_velocity_limit)
+    {
+      // Set the default velocity limit, from robot model
+      if (bounds.max_velocity_ < 0.0)
+      {
+        RCLCPP_ERROR(LOGGER, "Invalid max_velocity %f specified for '%s', must be greater than 0.0",
+                     bounds.max_velocity_, vars[j].c_str());
+        return false;
+      }
+      max_velocity[j] = std::min(std::fabs(bounds.max_velocity_), std::fabs(bounds.min_velocity_));
+      set_velocity_limit = true;
+    }
+
+    if (!set_velocity_limit)
+    {
+      max_velocity[j] = 1.0;
+      RCLCPP_WARN_STREAM_ONCE(
+          LOGGER, "Joint velocity limits are not defined. Using the default "
+                      << max_velocity[j] << " rad/s. You can define velocity limits in the URDF or joint_limits.yaml.");
+    }
+
+    // ACCELERATION LIMIT
+    // Check if a custom limit was specified as an argument
+    bool set_acceleration_limit = false;
+    it = acceleration_limits.find(vars[j]);
+    if (it != acceleration_limits.end())
+    {
+      max_acceleration[j] = it->second;
+      set_acceleration_limit = true;
+    }
+
+    if (bounds.acceleration_bounded_ && !set_acceleration_limit)
+    {
+      // Set the default acceleration limit, from robot model
+      if (bounds.max_acceleration_ < 0.0)
+      {
+        RCLCPP_ERROR(LOGGER, "Invalid max_acceleration %f specified for '%s', must be greater than 0.0",
+                     bounds.max_acceleration_, vars[j].c_str());
+        return false;
+      }
+      max_acceleration[j] = std::min(std::fabs(bounds.max_acceleration_), std::fabs(bounds.min_acceleration_));
+      set_acceleration_limit = true;
+    }
+    if (!set_acceleration_limit)
+    {
+      max_acceleration[j] = 1.0;
+      RCLCPP_WARN_STREAM_ONCE(LOGGER,
+                              "Joint acceleration limits are not defined. Using the default "
+                                  << max_acceleration[j]
+                                  << " rad/s^2. You can define acceleration limits in the URDF or joint_limits.yaml.");
+    }
+  }
+
+  return doTimeParameterizationCalculations(trajectory, max_velocity, max_acceleration);
+}
+
+bool TimeOptimalTrajectoryGeneration::doTimeParameterizationCalculations(robot_trajectory::RobotTrajectory& trajectory,
+                                                                         const Eigen::VectorXd& max_velocity,
+                                                                         const Eigen::VectorXd& max_acceleration) const
+{
+  // This lib does not actually work properly when angles wrap around, so we need to unwind the path first
+  trajectory.unwind();
+
+  const moveit::core::JointModelGroup* group = trajectory.getGroup();
+  if (!group)
+  {
+    RCLCPP_ERROR(LOGGER, "It looks like the planner did not set the group the plan was computed for");
+    return false;
+  }
+
+  const unsigned num_points = trajectory.getWayPointCount();
+  const std::vector<int>& idx = group->getVariableIndexList();
+  const unsigned num_joints = group->getVariableCount();
 
   // Have to convert into Eigen data structs and remove repeated points
   //  (https://github.com/tobiaskunz/trajectories/issues/3)
@@ -991,6 +1097,10 @@ bool TimeOptimalTrajectoryGeneration::computeTimeStamps(robot_trajectory::RobotT
 
     if (diverse_point)
       points.push_back(new_point);
+    // If the last point is not a diverse_point we replace the last added point with it to make sure to always have the
+    // input end point as the last point
+    else if (p == num_points - 1)
+      points.back() = new_point;
   }
 
   // Return trajectory with only the first waypoint if there are not multiple diverse points

@@ -43,7 +43,12 @@
 #include <boost/program_options/variables_map.hpp>
 #include <moveit/planning_scene_monitor/planning_scene_monitor.h>
 #include <moveit/robot_state/conversions.h>
-#include <rclcpp/rclcpp.hpp>
+#include <rclcpp/executors.hpp>
+#include <rclcpp/logger.hpp>
+#include <rclcpp/logging.hpp>
+#include <rclcpp/node.hpp>
+#include <rclcpp/node_options.hpp>
+#include <rclcpp/utilities.hpp>
 
 static const std::string ROBOT_DESCRIPTION = "robot_description";
 

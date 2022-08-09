@@ -39,11 +39,7 @@
 
 #include <moveit/ompl_interface/detail/ompl_constraints.h>
 
-#if __has_include(<tf2_eigen/tf2_eigen.hpp>)
 #include <tf2_eigen/tf2_eigen.hpp>
-#else
-#include <tf2_eigen/tf2_eigen.h>
-#endif
 
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_planners_ompl.ompl_constraints");
 
@@ -200,11 +196,8 @@ BoxConstraint::BoxConstraint(const moveit::core::RobotModelConstPtr& robot_model
 
 void BoxConstraint::parseConstraintMsg(const moveit_msgs::msg::Constraints& constraints)
 {
-  RCLCPP_DEBUG(LOGGER, "Parsing box position constraint for OMPL constrained state space.");
   assert(bounds_.size() == 0);
   bounds_ = positionConstraintMsgToBoundVector(constraints.position_constraints.at(0));
-  RCLCPP_DEBUG(LOGGER, "Parsed Box constraints");
-  RCLCPP_DEBUG_STREAM(LOGGER, "Bounds: " << bounds_);
 
   // extract target position and orientation
   geometry_msgs::msg::Point position =
@@ -216,7 +209,6 @@ void BoxConstraint::parseConstraintMsg(const moveit_msgs::msg::Constraints& cons
                target_orientation_);
 
   link_name_ = constraints.position_constraints.at(0).link_name;
-  RCLCPP_DEBUG_STREAM(LOGGER, "Position constraints applied to link: " << link_name_);
 }
 
 Eigen::VectorXd BoxConstraint::calcError(const Eigen::Ref<const Eigen::VectorXd>& x) const
@@ -270,12 +262,7 @@ void EqualityPositionConstraint::parseConstraintMsg(const moveit_msgs::msg::Cons
   tf2::fromMsg(constraints.position_constraints.at(0).constraint_region.primitive_poses.at(0).orientation,
                target_orientation_);
 
-  RCLCPP_DEBUG_STREAM(LOGGER, "Equality constraint on x-position? " << (is_dim_constrained_[0] ? "yes" : "no"));
-  RCLCPP_DEBUG_STREAM(LOGGER, "Equality constraint on y-position? " << (is_dim_constrained_[1] ? "yes" : "no"));
-  RCLCPP_DEBUG_STREAM(LOGGER, "Equality constraint on z-position? " << (is_dim_constrained_[2] ? "yes" : "no"));
-
   link_name_ = constraints.position_constraints.at(0).link_name;
-  RCLCPP_DEBUG_STREAM(LOGGER, "Position constraints applied to link: " << link_name_);
 }
 
 void EqualityPositionConstraint::function(const Eigen::Ref<const Eigen::VectorXd>& joint_values,
@@ -310,6 +297,32 @@ void EqualityPositionConstraint::jacobian(const Eigen::Ref<const Eigen::VectorXd
   }
 }
 
+/******************************************
+ * Orientation constraints
+ * ****************************************/
+void OrientationConstraint::parseConstraintMsg(const moveit_msgs::msg::Constraints& constraints)
+{
+  bounds_ = orientationConstraintMsgToBoundVector(constraints.orientation_constraints.at(0));
+
+  tf2::fromMsg(constraints.orientation_constraints.at(0).orientation, target_orientation_);
+
+  link_name_ = constraints.orientation_constraints.at(0).link_name;
+}
+
+Eigen::VectorXd OrientationConstraint::calcError(const Eigen::Ref<const Eigen::VectorXd>& x) const
+{
+  Eigen::Matrix3d orientation_difference = forwardKinematics(x).linear().transpose() * target_orientation_;
+  Eigen::AngleAxisd aa(orientation_difference);
+  return aa.axis() * aa.angle();
+}
+
+Eigen::MatrixXd OrientationConstraint::calcErrorJacobian(const Eigen::Ref<const Eigen::VectorXd>& x) const
+{
+  Eigen::Matrix3d orientation_difference = forwardKinematics(x).linear().transpose() * target_orientation_;
+  Eigen::AngleAxisd aa{ orientation_difference };
+  return -angularVelocityToAngleAxis(aa.angle(), aa.axis()) * robotGeometricJacobian(x).bottomRows(3);
+}
+
 /************************************
  * MoveIt constraint message parsing
  * **********************************/
@@ -330,12 +343,26 @@ Bounds positionConstraintMsgToBoundVector(const moveit_msgs::msg::PositionConstr
            { dims.at(0) / 2.0, dims.at(1) / 2.0, dims.at(2) / 2.0 } };
 }
 
+Bounds orientationConstraintMsgToBoundVector(const moveit_msgs::msg::OrientationConstraint& ori_con)
+{
+  std::vector<double> dims = { ori_con.absolute_x_axis_tolerance, ori_con.absolute_y_axis_tolerance,
+                               ori_con.absolute_z_axis_tolerance };
+
+  // dimension of -1 signifies unconstrained parameter, so set to infinity
+  for (auto& dim : dims)
+  {
+    if (dim == -1)
+      dim = std::numeric_limits<double>::infinity();
+  }
+  return { { -dims[0], -dims[1], -dims[2] }, { dims[0], dims[1], dims[2] } };
+}
+
 /******************************************
  * OMPL Constraints Factory
  * ****************************************/
-std::shared_ptr<BaseConstraint> createOMPLConstraint(const moveit::core::RobotModelConstPtr& robot_model,
-                                                     const std::string& group,
-                                                     const moveit_msgs::msg::Constraints& constraints)
+ompl::base::ConstraintPtr createOMPLConstraints(const moveit::core::RobotModelConstPtr& robot_model,
+                                                const std::string& group,
+                                                const moveit_msgs::msg::Constraints& constraints)
 {
   // TODO(bostoncleek): does this reach the end w/o a return ?
 
@@ -343,50 +370,42 @@ std::shared_ptr<BaseConstraint> createOMPLConstraint(const moveit::core::RobotMo
   const std::size_t num_pos_con = constraints.position_constraints.size();
   const std::size_t num_ori_con = constraints.orientation_constraints.size();
 
-  // This factory method contains template code to support different constraints, but only position constraints are
-  // currently supported. The other options return a nullptr for now and should not be used.
-
+  // This factory method contains template code to support position and/or orientation constraints.
+  // If the specified constraints are invalid, a nullptr is returned.
+  std::vector<ompl::base::ConstraintPtr> ompl_constraints;
   if (num_pos_con > 1)
   {
-    RCLCPP_WARN(LOGGER, "Only a single position constraints supported. Using the first one.");
+    RCLCPP_WARN(LOGGER, "Only a single position constraint is supported. Using the first one.");
   }
   if (num_ori_con > 1)
   {
-    RCLCPP_WARN(LOGGER, "Only a single orientation constraints supported. Using the first one.");
+    RCLCPP_WARN(LOGGER, "Only a single orientation constraint is supported. Using the first one.");
   }
-
-  if (num_pos_con > 0 && num_ori_con > 0)
+  if (num_pos_con > 0)
   {
-    RCLCPP_ERROR(LOGGER, "Combining position and orientation constraints not implemented yet for OMPL's constrained "
-                         "state space.");
-    return nullptr;
-  }
-  else if (num_pos_con > 0)
-  {
-    RCLCPP_DEBUG_STREAM(LOGGER, "Constraint name: " << constraints.name);
     BaseConstraintPtr pos_con;
     if (constraints.name == "use_equality_constraints")
     {
-      RCLCPP_DEBUG(LOGGER, "OMPL is using equality position constraints.");
       pos_con = std::make_shared<EqualityPositionConstraint>(robot_model, group, num_dofs);
     }
     else
     {
-      RCLCPP_DEBUG(LOGGER, "OMPL is using box position constraints.");
       pos_con = std::make_shared<BoxConstraint>(robot_model, group, num_dofs);
     }
     pos_con->init(constraints);
-    return pos_con;
+    ompl_constraints.emplace_back(pos_con);
   }
-  else if (num_ori_con > 0)
+  if (num_ori_con > 0)
   {
-    RCLCPP_ERROR(LOGGER, "Orientation constraints are not yet supported.");
-    return nullptr;
+    auto ori_con = std::make_shared<OrientationConstraint>(robot_model, group, num_dofs);
+    ori_con->init(constraints);
+    ompl_constraints.emplace_back(ori_con);
   }
-  else
+  if (num_pos_con < 1 && num_ori_con < 1)
   {
     RCLCPP_ERROR(LOGGER, "No path constraints found in planning request.");
     return nullptr;
   }
+  return std::make_shared<ompl::base::ConstraintIntersection>(num_dofs, ompl_constraints);
 }
 }  // namespace ompl_interface

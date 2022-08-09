@@ -22,8 +22,8 @@ ament_target_dependencies(${MOVEIT_LIB_NAME}
   urdf
   urdfdom
   urdfdom_headers
-  Boost
   visualization_msgs
+  octomap_msgs
 )
 target_link_libraries(${MOVEIT_LIB_NAME}
   moveit_collision_detection
@@ -40,6 +40,7 @@ ament_target_dependencies(collision_detector_bullet_plugin
   visualization_msgs
   pluginlib
   rmw_implementation
+  octomap_msgs
 )
 target_link_libraries(collision_detector_bullet_plugin
   ${MOVEIT_LIB_NAME}

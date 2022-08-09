@@ -37,16 +37,8 @@
 #include <moveit/planning_scene_monitor/current_state_monitor.h>
 #include <moveit/planning_scene_monitor/current_state_monitor_middleware_handle.hpp>
 
-#if __has_include(<tf2_eigen/tf2_eigen.hpp>)
 #include <tf2_eigen/tf2_eigen.hpp>
-#else
-#include <tf2_eigen/tf2_eigen.h>
-#endif
-#if __has_include(<tf2_geometry_msgs/tf2_geometry_msgs.hpp>)
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
-#else
-#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
-#endif
 
 #include <chrono>
 #include <limits>
@@ -168,15 +160,14 @@ void CurrentStateMonitor::startStateMonitor(const std::string& joint_states_topi
     else
     {
       middleware_handle_->createJointStateSubscription(
-          joint_states_topic, std::bind(&CurrentStateMonitor::jointStateCallback, this, std::placeholders::_1));
+          joint_states_topic,
+          [this](sensor_msgs::msg::JointState::ConstSharedPtr joint_state) { return jointStateCallback(joint_state); });
     }
     if (tf_buffer_ && !robot_model_->getMultiDOFJointModels().empty())
     {
       tf_buffer_->setUsingDedicatedThread(true);
-      middleware_handle_->createDynamicTfSubscription(
-          std::bind(&CurrentStateMonitor::transformCallback, this, std::placeholders::_1, false));
-      middleware_handle_->createStaticTfSubscription(
-          std::bind(&CurrentStateMonitor::transformCallback, this, std::placeholders::_1, true));
+      middleware_handle_->createDynamicTfSubscription([this](const auto& msg) { return transformCallback(msg, false); });
+      middleware_handle_->createStaticTfSubscription([this](const auto& msg) { return transformCallback(msg, true); });
     }
     state_monitor_started_ = true;
     monitor_start_time_ = middleware_handle_->now();

@@ -38,10 +38,10 @@
 
 #include <deque>
 #include <string>
-#include <boost/thread.hpp>
-#include <boost/function.hpp>
-#include <boost/noncopyable.hpp>
 #include <memory>
+#include <thread>
+#include <condition_variable>
+#include <functional>
 
 namespace moveit
 {
@@ -53,9 +53,19 @@ namespace tools
 /** \brief This class provides simple API for executing background
     jobs. A queue of jobs is created and the specified jobs are
     executed in order, one at a time. */
-class BackgroundProcessing : private boost::noncopyable
+class BackgroundProcessing
 {
 public:
+  /**
+   * @brief BackgroundProcessing cannot be copy-constructed
+   */
+  BackgroundProcessing(const BackgroundProcessing&) = delete;
+
+  /**
+   * @brief BackgroundProcessing cannot be copy-assigned
+   */
+  BackgroundProcessing& operator=(const BackgroundProcessing&) = delete;
+
   /** \brief Events for jobs */
   enum JobEvent
   {
@@ -69,10 +79,10 @@ public:
 
   /** \brief The signature for callback triggered when job events take place: the event that took place and the name of
    * the job */
-  typedef boost::function<void(JobEvent, const std::string&)> JobUpdateCallback;
+  typedef std::function<void(JobEvent, const std::string&)> JobUpdateCallback;
 
   /** \brief The signature for job callbacks */
-  typedef boost::function<void()> JobCallback;
+  typedef std::function<void()> JobCallback;
 
   /** \brief Constructor. The background thread is activated automatically. */
   BackgroundProcessing();
@@ -96,11 +106,11 @@ public:
   void clearJobUpdateEvent();
 
 private:
-  std::unique_ptr<boost::thread> processing_thread_;
+  std::unique_ptr<std::thread> processing_thread_;
   bool run_processing_thread_;
 
-  mutable boost::mutex action_lock_;
-  boost::condition_variable new_action_condition_;
+  mutable std::mutex action_lock_;
+  std::condition_variable new_action_condition_;
   std::deque<JobCallback> actions_;
   std::deque<std::string> action_names_;
 

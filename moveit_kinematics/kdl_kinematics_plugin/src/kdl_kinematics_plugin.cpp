@@ -37,11 +37,7 @@
 #include <moveit/kdl_kinematics_plugin/kdl_kinematics_plugin.h>
 #include <moveit/kdl_kinematics_plugin/chainiksolver_vel_mimic_svd.hpp>
 
-#if __has_include(<tf2_kdl/tf2_kdl.hpp>)
 #include <tf2_kdl/tf2_kdl.hpp>
-#else
-#include <tf2_kdl/tf2_kdl.h>
-#endif
 #include <tf2/transform_datatypes.h>
 
 #include <kdl_parser/kdl_parser.hpp>
@@ -88,11 +84,11 @@ void KDLKinematicsPlugin::getJointWeights()
   const std::vector<std::string>& active_names = joint_model_group_->getActiveJointModelNames();
   std::vector<std::string> names;
   std::vector<double> weights;
-  if (lookupParam(node_, "joint_weights/weights", weights, weights))
+  if (lookupParam(node_, "joint_weights.weights", weights, weights))
   {
-    if (!lookupParam(node_, "joint_weights/names", names, names) || names.size() != weights.size())
+    if (!lookupParam(node_, "joint_weights.names", names, names) || (names.size() != weights.size()))
     {
-      RCLCPP_ERROR(LOGGER, "Expecting list parameter joint_weights/names of same size as list joint_weights/weights");
+      RCLCPP_ERROR(LOGGER, "Expecting list parameter joint_weights.names of same size as list joint_weights.weights");
       // fall back to default weights
       weights.clear();
     }
@@ -406,7 +402,7 @@ bool KDLKinematicsPlugin::searchPositionIK(const geometry_msgs::msg::Pose& ik_po
         continue;
 
       Eigen::Map<Eigen::VectorXd>(solution.data(), solution.size()) = jnt_pos_out.data;
-      if (!solution_callback.empty())
+      if (solution_callback)
       {
         solution_callback(ik_pose, solution, error_code);
         if (error_code.val != error_code.SUCCESS)

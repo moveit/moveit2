@@ -36,11 +36,7 @@
 
 #include <moveit/depth_image_octomap_updater/depth_image_octomap_updater.h>
 #include <moveit/occupancy_map_monitor/occupancy_map_monitor.h>
-#if __has_include(<tf2_geometry_msgs/tf2_geometry_msgs.hpp>)
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
-#else
-#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
-#endif
 #include <tf2/LinearMath/Vector3.h>
 #include <tf2/LinearMath/Transform.h>
 #include <geometric_shapes/shape_operations.h>
@@ -48,7 +44,6 @@
 #include <stdint.h>
 
 #include <memory>
-#include <boost/bind.hpp>
 
 namespace occupancy_map_monitor
 {
@@ -127,7 +122,7 @@ bool DepthImageOctomapUpdater::initialize(const rclcpp::Node::SharedPtr& node)
   mesh_filter_->setPaddingOffset(padding_offset_);
   mesh_filter_->setPaddingScale(padding_scale_);
   mesh_filter_->setTransformCallback(
-      std::bind(&DepthImageOctomapUpdater::getShapeTransform, this, std::placeholders::_1, std::placeholders::_2));
+      [this](mesh_filter::MeshHandle mesh, Eigen::Isometry3d& tf) { return getShapeTransform(mesh, tf); });
 
   return true;
 }
@@ -151,7 +146,10 @@ void DepthImageOctomapUpdater::start()
 
   sub_depth_image_ = image_transport::create_camera_subscription(
       node_.get(), image_topic_,
-      std::bind(&DepthImageOctomapUpdater::depthImageCallback, this, std::placeholders::_1, std::placeholders::_2),
+      [this](const sensor_msgs::msg::Image::ConstSharedPtr& depth_msg,
+             const sensor_msgs::msg::CameraInfo::ConstSharedPtr& info_msg) {
+        return depthImageCallback(depth_msg, info_msg);
+      },
       "raw", custom_qos);
 }
 

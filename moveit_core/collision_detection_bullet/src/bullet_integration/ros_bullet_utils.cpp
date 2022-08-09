@@ -33,6 +33,9 @@
 
 #include "moveit/collision_detection_bullet/bullet_integration/ros_bullet_utils.h"
 
+#include <rclcpp/logger.hpp>
+#include <rclcpp/logging.hpp>
+
 const rclcpp::Logger BULLET_LOGGER = rclcpp::get_logger("collision_detection.bullet");
 
 namespace collision_detection_bullet

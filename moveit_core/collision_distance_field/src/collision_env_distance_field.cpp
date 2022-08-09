@@ -35,11 +35,12 @@
 /* Author: E. Gil Jones */
 
 #include <moveit/robot_model/robot_model.h>
-#if __has_include(<tf2_eigen/tf2_eigen.hpp>)
+#include <rclcpp/clock.hpp>
+#include <rclcpp/duration.hpp>
+#include <rclcpp/logger.hpp>
+#include <rclcpp/logging.hpp>
+#include <rclcpp/time.hpp>
 #include <tf2_eigen/tf2_eigen.hpp>
-#else
-#include <tf2_eigen/tf2_eigen.h>
-#endif
 #include <moveit/collision_distance_field/collision_env_distance_field.h>
 #include <moveit/collision_distance_field/collision_common_distance_field.h>
 #include <moveit/distance_field/propagation_distance_field.h>
@@ -72,7 +73,7 @@ CollisionEnvDistanceField::CollisionEnvDistanceField(
 
   // request notifications about changes to world
   observer_handle_ = getWorld()->addObserver(
-      std::bind(&CollisionEnvDistanceField::notifyObjectChange, this, std::placeholders::_1, std::placeholders::_2));
+      [this](const World::ObjectConstPtr& object, World::Action action) { return notifyObjectChange(object, action); });
 }
 
 CollisionEnvDistanceField::CollisionEnvDistanceField(
@@ -89,7 +90,7 @@ CollisionEnvDistanceField::CollisionEnvDistanceField(
 
   // request notifications about changes to world
   observer_handle_ = getWorld()->addObserver(
-      std::bind(&CollisionEnvDistanceField::notifyObjectChange, this, std::placeholders::_1, std::placeholders::_2));
+      [this](const World::ObjectConstPtr& object, World::Action action) { return notifyObjectChange(object, action); });
 
   getWorld()->notifyObserverAllObjects(observer_handle_, World::CREATE);
 }
@@ -113,7 +114,7 @@ CollisionEnvDistanceField::CollisionEnvDistanceField(const CollisionEnvDistanceF
 
   // request notifications about changes to world
   observer_handle_ = getWorld()->addObserver(
-      std::bind(&CollisionEnvDistanceField::notifyObjectChange, this, std::placeholders::_1, std::placeholders::_2));
+      [this](const World::ObjectConstPtr& object, World::Action action) { return notifyObjectChange(object, action); });
   getWorld()->notifyObserverAllObjects(observer_handle_, World::CREATE);
 }
 
@@ -166,7 +167,7 @@ void CollisionEnvDistanceField::generateCollisionCheckingStructures(
     // DistanceFieldCacheEntry for CollisionRobot");
     DistanceFieldCacheEntryPtr new_dfce =
         generateDistanceFieldCacheEntry(group_name, state, acm, generate_distance_field);
-    boost::mutex::scoped_lock slock(update_cache_lock_);
+    std::scoped_lock slock(update_cache_lock_);
     (const_cast<CollisionEnvDistanceField*>(this))->distance_field_cache_entry_ = new_dfce;
     dfce = new_dfce;
   }
@@ -1694,34 +1695,33 @@ void CollisionEnvDistanceField::setWorld(const WorldPtr& world)
 
   // request notifications about changes to new world
   observer_handle_ = getWorld()->addObserver(
-      std::bind(&CollisionEnvDistanceField::notifyObjectChange, this, std::placeholders::_1, std::placeholders::_2));
+      [this](const World::ObjectConstPtr& object, World::Action action) { return notifyObjectChange(object, action); });
 
   // get notifications any objects already in the new world
   getWorld()->notifyObserverAllObjects(observer_handle_, World::CREATE);
 }
 
-void CollisionEnvDistanceField::notifyObjectChange(CollisionEnvDistanceField* self, const ObjectConstPtr& obj,
-                                                   World::Action action)
+void CollisionEnvDistanceField::notifyObjectChange(const ObjectConstPtr& obj, World::Action action)
 {
   rclcpp::Clock clock;
   rclcpp::Time start_time = clock.now();
 
   EigenSTL::vector_Vector3d add_points;
   EigenSTL::vector_Vector3d subtract_points;
-  self->updateDistanceObject(obj->id_, self->distance_field_cache_entry_world_, add_points, subtract_points);
+  updateDistanceObject(obj->id_, distance_field_cache_entry_world_, add_points, subtract_points);
 
   if (action == World::DESTROY)
   {
-    self->distance_field_cache_entry_world_->distance_field_->removePointsFromField(subtract_points);
+    distance_field_cache_entry_world_->distance_field_->removePointsFromField(subtract_points);
   }
   else if (action & (World::MOVE_SHAPE | World::REMOVE_SHAPE))
   {
-    self->distance_field_cache_entry_world_->distance_field_->removePointsFromField(subtract_points);
-    self->distance_field_cache_entry_world_->distance_field_->addPointsToField(add_points);
+    distance_field_cache_entry_world_->distance_field_->removePointsFromField(subtract_points);
+    distance_field_cache_entry_world_->distance_field_->addPointsToField(add_points);
   }
   else
   {
-    self->distance_field_cache_entry_world_->distance_field_->addPointsToField(add_points);
+    distance_field_cache_entry_world_->distance_field_->addPointsToField(add_points);
   }
 
   RCLCPP_DEBUG(LOGGER, "Modifying object %s took %lf s", obj->id_.c_str(), (clock.now() - start_time).seconds());

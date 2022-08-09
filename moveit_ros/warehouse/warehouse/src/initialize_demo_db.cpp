@@ -34,6 +34,7 @@
 
 /* Author: Ioan Sucan */
 
+#include <math.h>
 #include <moveit/warehouse/planning_scene_storage.h>
 #include <moveit/warehouse/constraints_storage.h>
 #include <moveit/warehouse/state_storage.h>
@@ -45,8 +46,12 @@
 #include <boost/program_options/options_description.hpp>
 #include <boost/program_options/parsers.hpp>
 #include <boost/program_options/variables_map.hpp>
-#include <boost/math/constants/constants.hpp>
-#include <rclcpp/rclcpp.hpp>
+#include <rclcpp/executors.hpp>
+#include <rclcpp/logger.hpp>
+#include <rclcpp/logging.hpp>
+#include <rclcpp/node.hpp>
+#include <rclcpp/node_options.hpp>
+#include <rclcpp/utilities.hpp>
 
 static const std::string ROBOT_DESCRIPTION = "robot_description";
 
@@ -127,7 +132,7 @@ int main(int argc, char** argv)
     ocm.orientation.w = 1.0;
     ocm.absolute_x_axis_tolerance = 0.1;
     ocm.absolute_y_axis_tolerance = 0.1;
-    ocm.absolute_z_axis_tolerance = boost::math::constants::pi<double>();
+    ocm.absolute_z_axis_tolerance = M_PI;
     ocm.weight = 1.0;
     moveit_msgs::msg::Constraints cmsg;
     cmsg.orientation_constraints.resize(1, ocm);

@@ -30,28 +30,10 @@ set(FAKE_SERVO_CMDS_NAME fake_command_publisher)
 find_package(moveit_common REQUIRED)
 moveit_package()
 
-find_package(ament_cmake REQUIRED)
-find_package(control_msgs REQUIRED)
-find_package(control_toolbox REQUIRED)
-find_package(geometry_msgs REQUIRED)
-find_package(moveit_core REQUIRED)
-find_package(moveit_msgs REQUIRED)
-find_package(moveit_ros_planning REQUIRED)
-find_package(pluginlib REQUIRED)
-find_package(rclcpp REQUIRED)
-find_package(rclcpp_components REQUIRED)
-find_package(sensor_msgs REQUIRED)
-find_package(std_msgs REQUIRED)
-find_package(std_srvs REQUIRED)
-find_package(tf2_eigen REQUIRED)
-find_package(trajectory_msgs REQUIRED)
-
-find_package(eigen3_cmake_module REQUIRED)
-find_package(Eigen3 REQUIRED)
-
 set(THIS_PACKAGE_INCLUDE_DEPENDS
   control_msgs
   control_toolbox
+  controller_manager
   geometry_msgs
   moveit_core
   moveit_msgs
@@ -65,6 +47,13 @@ set(THIS_PACKAGE_INCLUDE_DEPENDS
   tf2_eigen
   trajectory_msgs
 )
+
+find_package(ament_cmake REQUIRED)
+find_package(eigen3_cmake_module REQUIRED)
+find_package(Eigen3 REQUIRED)
+foreach(Dependency IN ITEMS ${THIS_PACKAGE_INCLUDE_DEPENDS})
+  find_package(${Dependency} REQUIRED)
+endforeach()
 
 include_directories(
   include
@@ -84,7 +73,6 @@ ament_target_dependencies(${SERVO_PARAM_LIB_NAME} ${THIS_PACKAGE_INCLUDE_DEPENDS
 
 # This library provides a C++ interface for sending realtime twist or joint commands to a robot
 add_library(${SERVO_LIB_NAME} SHARED
-  # These files are used to produce differential motion
   src/collision_check.cpp
   src/enforce_limits.cpp
   src/servo.cpp
@@ -186,7 +174,6 @@ if(BUILD_TESTING)
 
   # These don't pass yet, disable them for now
   set(ament_cmake_copyright_FOUND TRUE)
-  set(ament_cmake_cppcheck_FOUND TRUE)
   set(ament_cmake_cpplint_FOUND TRUE)
   set(ament_cmake_flake8_FOUND TRUE)
   set(ament_cmake_uncrustify_FOUND TRUE)

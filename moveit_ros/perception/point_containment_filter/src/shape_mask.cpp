@@ -37,7 +37,8 @@
 #include <moveit/point_containment_filter/shape_mask.h>
 #include <geometric_shapes/body_operations.h>
 #include <sensor_msgs/point_cloud2_iterator.hpp>
-#include <rclcpp/rclcpp.hpp>
+#include <rclcpp/logger.hpp>
+#include <rclcpp/logging.hpp>
 
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.ros.perception.shape_mask");
 
@@ -60,14 +61,14 @@ void point_containment_filter::ShapeMask::freeMemory()
 
 void point_containment_filter::ShapeMask::setTransformCallback(const TransformCallback& transform_callback)
 {
-  boost::mutex::scoped_lock _(shapes_lock_);
+  std::scoped_lock _(shapes_lock_);
   transform_callback_ = transform_callback;
 }
 
 point_containment_filter::ShapeHandle point_containment_filter::ShapeMask::addShape(const shapes::ShapeConstPtr& shape,
                                                                                     double scale, double padding)
 {
-  boost::mutex::scoped_lock _(shapes_lock_);
+  std::scoped_lock _(shapes_lock_);
   SeeShape ss;
   ss.body = bodies::createEmptyBodyFromShapeType(shape->type);
   if (ss.body)
@@ -101,7 +102,7 @@ point_containment_filter::ShapeHandle point_containment_filter::ShapeMask::addSh
 
 void point_containment_filter::ShapeMask::removeShape(ShapeHandle handle)
 {
-  boost::mutex::scoped_lock _(shapes_lock_);
+  std::scoped_lock _(shapes_lock_);
   std::map<ShapeHandle, std::set<SeeShape, SortBodies>::iterator>::iterator it = used_handles_.find(handle);
   if (it != used_handles_.end())
   {
@@ -119,7 +120,7 @@ void point_containment_filter::ShapeMask::maskContainment(const sensor_msgs::msg
                                                           const double min_sensor_dist, const double max_sensor_dist,
                                                           std::vector<int>& mask)
 {
-  boost::mutex::scoped_lock _(shapes_lock_);
+  std::scoped_lock _(shapes_lock_);
   const unsigned int np = data_in.data.size() / data_in.point_step;
   mask.resize(np);
 
@@ -178,7 +179,7 @@ void point_containment_filter::ShapeMask::maskContainment(const sensor_msgs::msg
 
 int point_containment_filter::ShapeMask::getMaskContainment(const Eigen::Vector3d& pt) const
 {
-  boost::mutex::scoped_lock _(shapes_lock_);
+  std::scoped_lock _(shapes_lock_);
 
   int out = OUTSIDE;
   for (std::set<SeeShape>::const_iterator it = bodies_.begin(); it != bodies_.end() && out == OUTSIDE; ++it)

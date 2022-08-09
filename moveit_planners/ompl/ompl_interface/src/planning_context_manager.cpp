@@ -315,7 +315,7 @@ void PlanningContextManager::registerDefaultStateSpaces()
 
 ConfiguredPlannerSelector PlanningContextManager::getPlannerSelector() const
 {
-  return std::bind(&PlanningContextManager::plannerSelector, this, std::placeholders::_1);
+  return [this](const std::string& planner) { return plannerSelector(planner); };
 }
 
 void PlanningContextManager::setPlannerConfigurations(const planning_interface::PlannerConfigurationMap& pconfig)
@@ -325,11 +325,9 @@ void PlanningContextManager::setPlannerConfigurations(const planning_interface::
 
 ModelBasedPlanningContextPtr
 PlanningContextManager::getPlanningContext(const planning_interface::PlannerConfigurationSettings& config,
-                                           const StateSpaceFactoryTypeSelector& factory_selector,
+                                           const ModelBasedStateSpaceFactoryPtr& factory,
                                            const moveit_msgs::msg::MotionPlanRequest& req) const
 {
-  const ModelBasedStateSpaceFactoryPtr& factory = factory_selector(config.group);
-
   // Check for a cached planning context
   ModelBasedPlanningContextPtr context;
 
@@ -364,7 +362,7 @@ PlanningContextManager::getPlanningContext(const planning_interface::PlannerConf
 
       // Select the correct type of constraints based on the path constraints in the planning request.
       ompl::base::ConstraintPtr ompl_constraint =
-          createOMPLConstraint(robot_model_, config.group, req.path_constraints);
+          createOMPLConstraints(robot_model_, config.group, req.path_constraints);
 
       // Create a constrained state space of type "projected state space".
       // Other types are available, so we probably should add another setting to ompl_planning.yaml
@@ -413,8 +411,7 @@ PlanningContextManager::getPlanningContext(const planning_interface::PlannerConf
   return context;
 }
 
-const ModelBasedStateSpaceFactoryPtr&
-PlanningContextManager::getStateSpaceFactory1(const std::string& /* dummy */, const std::string& factory_type) const
+const ModelBasedStateSpaceFactoryPtr& PlanningContextManager::getStateSpaceFactory(const std::string& factory_type) const
 {
   auto f = factory_type.empty() ? state_space_factories_.begin() : state_space_factories_.find(factory_type);
   if (f != state_space_factories_.end())
@@ -431,8 +428,8 @@ PlanningContextManager::getStateSpaceFactory1(const std::string& /* dummy */, co
 }
 
 const ModelBasedStateSpaceFactoryPtr&
-PlanningContextManager::getStateSpaceFactory2(const std::string& group,
-                                              const moveit_msgs::msg::MotionPlanRequest& req) const
+PlanningContextManager::getStateSpaceFactory(const std::string& group,
+                                             const moveit_msgs::msg::MotionPlanRequest& req) const
 {
   // find the problem representation to use
   auto best = state_space_factories_.end();
@@ -535,29 +532,30 @@ ModelBasedPlanningContextPtr PlanningContextManager::getPlanningContext(
   // However consecutive IK solutions are not checked for proximity at the moment and sometimes happen to be flipped,
   // leading to invalid trajectories. This workaround lets the user prevent this problem by forcing rejection sampling
   // in JointModelStateSpace.
-  StateSpaceFactoryTypeSelector factory_selector;
+  ModelBasedStateSpaceFactoryPtr factory;
   auto constrained_planning_iterator = pc->second.config.find("enforce_constrained_state_space");
   auto joint_space_planning_iterator = pc->second.config.find("enforce_joint_model_state_space");
 
+  // Use ConstrainedPlanningStateSpace if there is exactly one position constraint or one orientation constraint
+  // Mixed constraints are not supported
   if (constrained_planning_iterator != pc->second.config.end() &&
       boost::lexical_cast<bool>(constrained_planning_iterator->second) &&
-      req.path_constraints.position_constraints.size() == 1)
+      ((req.path_constraints.position_constraints.size() == 1) !=
+       (req.path_constraints.orientation_constraints.size() == 1)))
   {
-    factory_selector = std::bind(&PlanningContextManager::getStateSpaceFactory1, this, std::placeholders::_1,
-                                 ConstrainedPlanningStateSpace::PARAMETERIZATION_TYPE);
+    factory = getStateSpaceFactory(ConstrainedPlanningStateSpace::PARAMETERIZATION_TYPE);
   }
   else if (joint_space_planning_iterator != pc->second.config.end() &&
            boost::lexical_cast<bool>(joint_space_planning_iterator->second))
   {
-    factory_selector = std::bind(&PlanningContextManager::getStateSpaceFactory1, this, std::placeholders::_1,
-                                 JointModelStateSpace::PARAMETERIZATION_TYPE);
+    factory = getStateSpaceFactory(JointModelStateSpace::PARAMETERIZATION_TYPE);
   }
   else
   {
-    factory_selector = std::bind(&PlanningContextManager::getStateSpaceFactory2, this, std::placeholders::_1, req);
+    factory = getStateSpaceFactory(pc->second.group, req);
   }
 
-  ModelBasedPlanningContextPtr context = getPlanningContext(pc->second, factory_selector, req);
+  ModelBasedPlanningContextPtr context = getPlanningContext(pc->second, factory, req);
 
   if (context)
   {

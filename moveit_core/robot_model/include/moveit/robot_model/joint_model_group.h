@@ -41,8 +41,9 @@
 #include <moveit/robot_model/link_model.h>
 #include <moveit/kinematics_base/kinematics_base.h>
 #include <srdfdom/model.h>
-#include <boost/function.hpp>
+#include <functional>
 #include <set>
+#include <string>
 
 namespace moveit
 {
@@ -52,7 +53,7 @@ class RobotModel;
 class JointModelGroup;
 
 /** \brief Function type that allocates a kinematics solver for a particular group */
-typedef boost::function<kinematics::KinematicsBasePtr(const JointModelGroup*)> SolverAllocatorFn;
+typedef std::function<kinematics::KinematicsBasePtr(const JointModelGroup*)> SolverAllocatorFn;
 
 /** \brief Map from group instances to allocator functions & bijections */
 using SolverAllocatorMapFn = std::map<const JointModelGroup*, SolverAllocatorFn>;

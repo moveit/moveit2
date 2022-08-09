@@ -45,16 +45,8 @@
 #include <moveit/kinematics_base/kinematics_base.h>
 #include <moveit/robot_state/robot_state.h>
 #include <Eigen/Geometry>
-#if __has_include(<tf2_kdl/tf2_kdl.hpp>)
 #include <tf2_kdl/tf2_kdl.hpp>
-#else
-#include <tf2_kdl/tf2_kdl.h>
-#endif
-#if __has_include(<tf2_eigen/tf2_eigen.hpp>)
 #include <tf2_eigen/tf2_eigen.hpp>
-#else
-#include <tf2_eigen/tf2_eigen.h>
-#endif
 
 using namespace moveit::core;
 
@@ -901,7 +893,7 @@ bool IKFastKinematicsPlugin::searchPositionIK(const geometry_msgs::msg::Pose& ik
     std::sort(solutions_obey_limits.begin(), solutions_obey_limits.end());
 
     // check for collisions if a callback is provided
-    if (!solution_callback.empty())
+    if (solution_callback)
     {
       for (std::size_t i = 0; i < solutions_obey_limits.size(); ++i)
       {
@@ -1029,7 +1021,7 @@ bool IKFastKinematicsPlugin::searchPositionIK(const geometry_msgs::msg::Pose& ik
           getSolution(solutions, ik_seed_state, s, solution);
 
           // This solution is within joint limits, now check if in collision (if callback provided)
-          if (!solution_callback.empty())
+          if (solution_callback)
           {
             solution_callback(ik_pose, solution, error_code);
           }

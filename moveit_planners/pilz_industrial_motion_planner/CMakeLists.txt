@@ -111,6 +111,7 @@ add_library(command_list_manager SHARED
   src/command_list_manager.cpp
   src/plan_components_builder.cpp
 )
+target_link_libraries(command_list_manager trajectory_generation_common joint_limits_common)
 ament_target_dependencies(command_list_manager ${THIS_PACKAGE_INCLUDE_DEPENDS})
 
 #############
@@ -161,7 +162,7 @@ target_link_libraries(sequence_capability joint_limits_common command_list_manag
 ## Install ##
 #############
 pluginlib_export_plugin_description_file(moveit_core plugins/pilz_industrial_motion_planner_plugin_description.xml)
-pluginlib_export_plugin_description_file(move_group plugins/sequence_capability_plugin_description.xml)
+pluginlib_export_plugin_description_file(moveit_ros_move_group plugins/sequence_capability_plugin_description.xml)
 pluginlib_export_plugin_description_file(pilz_industrial_motion_planner plugins/planning_context_plugin_description.xml)
 
 ## Mark libraries for installation
@@ -192,7 +193,7 @@ ament_export_include_directories(
   include
 )
 ament_export_targets(${PROJECT_NAME}Targets HAS_LIBRARY_TARGET)
-ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS})
+ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS} orocos_kdl_vendor)
 
 if(BUILD_TESTING)
   # Include Tests
@@ -202,7 +203,6 @@ if(BUILD_TESTING)
 
   # These don't pass yet, disable them for now
   set(ament_cmake_copyright_FOUND TRUE)
-  set(ament_cmake_cppcheck_FOUND TRUE)
   set(ament_cmake_cpplint_FOUND TRUE)
   set(ament_cmake_flake8_FOUND TRUE)
   set(ament_cmake_uncrustify_FOUND TRUE)

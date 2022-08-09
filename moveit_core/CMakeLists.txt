@@ -79,7 +79,6 @@ set(THIS_PACKAGE_INCLUDE_DIRS
     planning_scene/include
     # TODO: Port python bindings
     # python/tools/include
-    sensor_manager/include
     trajectory_processing/include
     utils/include
 )
@@ -170,7 +169,6 @@ add_subdirectory(planning_scene)
 add_subdirectory(robot_model)
 add_subdirectory(robot_state)
 add_subdirectory(robot_trajectory)
-add_subdirectory(sensor_manager)
 add_subdirectory(trajectory_processing)
 add_subdirectory(transforms)
 add_subdirectory(utils)
@@ -218,7 +216,7 @@ install(
 )
 
 ament_export_targets(export_${PROJECT_NAME} HAS_LIBRARY_TARGET)
-ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS})
+ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS} orocos_kdl_vendor)
 
 # Plugin exports
 pluginlib_export_plugin_description_file(moveit_core collision_detector_fcl_description.xml)
@@ -230,7 +228,6 @@ if(BUILD_TESTING)
 
   # These don't pass yet, disable them for now
   set(ament_cmake_copyright_FOUND TRUE)
-  set(ament_cmake_cppcheck_FOUND TRUE)
   set(ament_cmake_cpplint_FOUND TRUE)
   set(ament_cmake_flake8_FOUND TRUE)
   set(ament_cmake_uncrustify_FOUND TRUE)

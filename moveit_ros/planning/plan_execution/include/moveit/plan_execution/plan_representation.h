@@ -39,7 +39,7 @@
 #include <moveit/planning_scene_monitor/planning_scene_monitor.h>
 #include <moveit/robot_trajectory/robot_trajectory.h>
 #include <moveit_msgs/msg/move_it_error_codes.hpp>
-#include <boost/function.hpp>
+#include <functional>
 
 namespace plan_execution
 {
@@ -65,7 +65,7 @@ struct ExecutableTrajectory
   std::string description_;
   bool trajectory_monitoring_;
   collision_detection::AllowedCollisionMatrixConstPtr allowed_collision_matrix_;
-  boost::function<bool(const ExecutableMotionPlan*)> effect_on_success_;
+  std::function<bool(const ExecutableMotionPlan*)> effect_on_success_;
   std::vector<std::string> controller_names_;
 };
 
@@ -85,5 +85,5 @@ struct ExecutableMotionPlan
 };
 
 /// The signature of a function that can compute a motion plan
-using ExecutableMotionPlanComputationFn = boost::function<bool(ExecutableMotionPlan&)>;
+using ExecutableMotionPlanComputationFn = std::function<bool(ExecutableMotionPlan&)>;
 }  // namespace plan_execution

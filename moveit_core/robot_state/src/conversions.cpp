@@ -37,13 +37,10 @@
 
 #include <moveit/robot_state/conversions.h>
 #include <geometric_shapes/shape_operations.h>
-#if __has_include(<tf2_eigen/tf2_eigen.hpp>)
+#include <rclcpp/logger.hpp>
+#include <rclcpp/logging.hpp>
 #include <tf2_eigen/tf2_eigen.hpp>
-#else
-#include <tf2_eigen/tf2_eigen.h>
-#endif
-#include <boost/lexical_cast.hpp>
-#include "rclcpp/rclcpp.hpp"
+#include <string>
 
 namespace moveit
 {
@@ -559,7 +556,7 @@ void streamToRobotState(RobotState& state, const std::string& line, const std::s
     // Get a variable
     if (!std::getline(line_stream, cell, separator[0]))
       RCLCPP_ERROR(LOGGER, "Missing variable %s", state.getVariableNames()[i].c_str());
-    state.getVariablePositions()[i] = boost::lexical_cast<double>(cell.c_str());
+    state.getVariablePositions()[i] = std::stod(cell);
   }
 }
 

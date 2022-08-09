@@ -35,7 +35,9 @@
 /* Author: Ioan Sucan */
 
 #include <moveit/planning_interface/planning_interface.h>
-#include <boost/thread/mutex.hpp>
+#include <mutex>
+#include <rclcpp/logger.hpp>
+#include <rclcpp/logging.hpp>
 #include <set>
 
 namespace planning_interface
@@ -47,7 +49,7 @@ namespace
 // keep track of currently active contexts
 struct ActiveContexts
 {
-  boost::mutex mutex_;
+  std::mutex mutex_;
   std::set<PlanningContext*> contexts_;
 };
 
@@ -61,14 +63,14 @@ static ActiveContexts& getActiveContexts()
 PlanningContext::PlanningContext(const std::string& name, const std::string& group) : name_(name), group_(group)
 {
   ActiveContexts& ac = getActiveContexts();
-  boost::mutex::scoped_lock _(ac.mutex_);
+  std::scoped_lock _(ac.mutex_);
   ac.contexts_.insert(this);
 }
 
 PlanningContext::~PlanningContext()
 {
   ActiveContexts& ac = getActiveContexts();
-  boost::mutex::scoped_lock _(ac.mutex_);
+  std::scoped_lock _(ac.mutex_);
   ac.contexts_.erase(this);
 }
 
@@ -124,7 +126,7 @@ void PlannerManager::setPlannerConfigurations(const PlannerConfigurationMap& pcs
 void PlannerManager::terminate() const
 {
   ActiveContexts& ac = getActiveContexts();
-  boost::mutex::scoped_lock _(ac.mutex_);
+  std::scoped_lock _(ac.mutex_);
   for (PlanningContext* context : ac.contexts_)
     context->terminate();
 }

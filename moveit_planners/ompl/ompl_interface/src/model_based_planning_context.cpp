@@ -111,7 +111,7 @@ void ompl_interface::ModelBasedPlanningContext::configure(const rclcpp::Node::Sh
   complete_initial_robot_state_.update();
   ompl_simple_setup_->getStateSpace()->computeSignature(space_signature_);
   ompl_simple_setup_->getStateSpace()->setStateSamplerAllocator(
-      std::bind(&ModelBasedPlanningContext::allocPathConstrainedSampler, this, std::placeholders::_1));
+      [this](const ompl::base::StateSpace* ss) { return allocPathConstrainedSampler(ss); });
 
   if (spec_.constrained_state_space_)
   {
@@ -372,6 +372,14 @@ void ompl_interface::ModelBasedPlanningContext::useConfig()
     cfg.erase(it);
   }
 
+  // check whether the path returned by the planner should be simplified
+  it = cfg.find("simplify_solutions");
+  if (it != cfg.end())
+  {
+    simplify_solutions_ = boost::lexical_cast<bool>(it->second);
+    cfg.erase(it);
+  }
+
   // check whether solution paths from parallel planning should be hybridized
   it = cfg.find("hybridize");
   if (it != cfg.end())
@@ -393,7 +401,8 @@ void ompl_interface::ModelBasedPlanningContext::useConfig()
     cfg.erase(it);
     const std::string planner_name = getGroupName() + "/" + name_;
     ompl_simple_setup_->setPlannerAllocator(
-        std::bind(spec_.planner_selector_(type), std::placeholders::_1, planner_name, std::cref(spec_)));
+        [planner_name, &spec = this->spec_, allocator = spec_.planner_selector_(type)](
+            const ompl::base::SpaceInformationPtr& si) { return allocator(si, planner_name, spec); });
     RCLCPP_INFO(LOGGER,
                 "Planner configuration '%s' will use planner '%s'. "
                 "Additional configuration parameters will be set when the planner is constructed.",
@@ -749,6 +758,11 @@ void ompl_interface::ModelBasedPlanningContext::postSolve()
   {
     RCLCPP_WARN(LOGGER, "Computed solution is approximate");
   }
+
+  // Debug OMPL setup and solution
+  std::stringstream debug_out;
+  ompl_simple_setup_->print(debug_out);
+  RCLCPP_DEBUG(LOGGER, "%s", rclcpp::get_c_string(debug_out.str()));
 }
 
 bool ompl_interface::ModelBasedPlanningContext::solve(planning_interface::MotionPlanResponse& res)

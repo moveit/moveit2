@@ -8,7 +8,6 @@ ament_target_dependencies(${MOVEIT_LIB_NAME}
   rclcpp
   sensor_msgs
   geometric_shapes
-  Boost
 )
 
 install(DIRECTORY include/ DESTINATION include)

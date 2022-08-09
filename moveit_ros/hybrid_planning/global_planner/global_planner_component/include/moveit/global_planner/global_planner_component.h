@@ -55,7 +55,18 @@ namespace moveit::hybrid_planning
 class GlobalPlannerComponent
 {
 public:
+  /** \brief Constructor */
   GlobalPlannerComponent(const rclcpp::NodeOptions& options);
+
+  /** \brief Destructor */
+  ~GlobalPlannerComponent()
+  {
+    // Join the thread used for long-running callbacks
+    if (long_callback_thread_.joinable())
+    {
+      long_callback_thread_.join();
+    }
+  }
 
   // This function is required to make this class a valid NodeClass
   // see https://docs.ros2.org/foxy/api/rclcpp_components/register__node__macro_8hpp.html
@@ -88,6 +99,12 @@ private:
 
   // Initialize planning scene monitor and load pipelines
   bool initializeGlobalPlanner();
+
+  // This thread is used for long-running callbacks. It's a member so they do not go out of scope.
+  std::thread long_callback_thread_;
+
+  // A unique callback group, to avoid mixing callbacks with other action servers
+  rclcpp::CallbackGroup::SharedPtr cb_group_;
 };
 
 }  // namespace moveit::hybrid_planning

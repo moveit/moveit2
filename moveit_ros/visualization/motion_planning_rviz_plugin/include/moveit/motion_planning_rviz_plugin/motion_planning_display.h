@@ -294,7 +294,7 @@ protected:
   // Metric calculations
   kinematics_metrics::KinematicsMetricsPtr kinematics_metrics_;
   std::map<std::string, dynamics_solver::DynamicsSolverPtr> dynamics_solver_;
-  boost::mutex update_metrics_lock_;
+  std::mutex update_metrics_lock_;
 
   // The trajectory playback component
   TrajectoryVisualizationPtr trajectory_visual_;

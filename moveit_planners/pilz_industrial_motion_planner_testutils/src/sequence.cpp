@@ -35,14 +35,13 @@
 #include "pilz_industrial_motion_planner_testutils/sequence.h"
 
 #include <algorithm>
-#include <boost/variant.hpp>
 
 namespace pilz_industrial_motion_planner_testutils
 {
 /**
  * @brief Visitor transforming the stored command into a MotionPlanRequest.
  */
-class ToReqVisitor : public boost::static_visitor<planning_interface::MotionPlanRequest>
+class ToReqVisitor
 {
 public:
   template <typename T>
@@ -55,7 +54,7 @@ public:
 /**
  * @brief Visitor returning not the specific command type but the base type.
  */
-class ToBaseVisitor : public boost::static_visitor<MotionCmd&>
+class ToBaseVisitor
 {
 public:
   template <typename T>
@@ -73,7 +72,7 @@ moveit_msgs::msg::MotionSequenceRequest Sequence::toRequest() const
   for (const auto& cmd : cmds_)
   {
     moveit_msgs::msg::MotionSequenceItem item;
-    item.req = boost::apply_visitor(ToReqVisitor(), cmd.first);
+    item.req = std::visit(ToReqVisitor(), cmd.first);
 
     if (std::find(group_names.begin(), group_names.end(), item.req.group_name) != group_names.end())
     {
@@ -114,7 +113,7 @@ void Sequence::erase(const size_t start, const size_t end)
 
 MotionCmd& Sequence::getCmd(const size_t index_cmd)
 {
-  return boost::apply_visitor(ToBaseVisitor(), cmds_.at(index_cmd).first);
+  return std::visit(ToBaseVisitor(), cmds_.at(index_cmd).first);
 }
 
 }  // namespace pilz_industrial_motion_planner_testutils

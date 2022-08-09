@@ -58,12 +58,11 @@
 #include <std_msgs/msg/float64_multi_array.hpp>
 #include <std_msgs/msg/int8.hpp>
 #include <std_srvs/srv/empty.hpp>
-#if __has_include(<tf2_eigen/tf2_eigen.hpp>)
 #include <tf2_eigen/tf2_eigen.hpp>
-#else
-#include <tf2_eigen/tf2_eigen.h>
-#endif
 #include <trajectory_msgs/msg/joint_trajectory.hpp>
+
+// moveit_core
+#include <moveit/kinematics_base/kinematics_base.h>
 
 // moveit_servo
 #include <moveit_servo/servo_parameters.h>
@@ -367,5 +366,9 @@ protected:
 
   // Load a smoothing plugin
   pluginlib::ClassLoader<online_signal_smoothing::SmoothingBaseClass> smoothing_loader_;
+
+  kinematics::KinematicsBaseConstPtr ik_solver_;
+  Eigen::Isometry3d ik_base_to_tip_frame_;
+  bool use_inv_jacobian_ = false;
 };
 }  // namespace moveit_servo

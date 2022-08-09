@@ -7,8 +7,7 @@ ament_target_dependencies(${MOVEIT_LIB_NAME}
       ament_index_cpp
       urdf
       srdfdom
-      moveit_core
-      Boost)
+      moveit_core)
 
 install(DIRECTORY include/ DESTINATION include)
 install(DIRECTORY

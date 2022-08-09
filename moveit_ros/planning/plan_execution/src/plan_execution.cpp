@@ -34,13 +34,18 @@
 
 /* Author: Ioan Sucan */
 
-#include <rclcpp/rclcpp.hpp>
 #include <moveit/plan_execution/plan_execution.h>
 #include <moveit/robot_state/conversions.h>
 #include <moveit/trajectory_processing/trajectory_tools.h>
 #include <moveit/collision_detection/collision_tools.h>
 #include <moveit/utils/message_checks.h>
 #include <boost/algorithm/string/join.hpp>
+#include <rclcpp/logger.hpp>
+#include <rclcpp/logging.hpp>
+#include <rclcpp/node.hpp>
+#include <rclcpp/parameter_value.hpp>
+#include <rclcpp/rate.hpp>
+#include <rclcpp/utilities.hpp>
 
 // #include <dynamic_reconfigure/server.h>
 // #include <moveit_ros_planning/PlanExecutionDynamicReconfigureConfig.h>
@@ -56,12 +61,11 @@ static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_ros.plan_executi
 //     : owner_(owner)  //, dynamic_reconfigure_server_(ros::NodeHandle("~/plan_execution"))
 //   {
 //     // dynamic_reconfigure_server_.setCallback(
-//     //     std::bind(&DynamicReconfigureImpl::dynamicReconfigureCallback, this, std::placeholders::_1,
-//     std::placeholders::_2));
+//     //     [this](const auto& config, uint32_t level) { dynamicReconfigureCallback(config, level); });
 //   }
 //
 // private:
-//   // void dynamicReconfigureCallback(PlanExecutionDynamicReconfigureConfig& config, uint32_t level)
+//   // void dynamicReconfigureCallback(const PlanExecutionDynamicReconfigureConfig& config, uint32_t level)
 //   // {
 //   //   owner_->setMaxReplanAttempts(config.max_replan_attempts);
 //   //   owner_->setTrajectoryStateRecordingFrequency(config.record_trajectory_state_frequency);
@@ -87,7 +91,9 @@ plan_execution::PlanExecution::PlanExecution(
 
   // we want to be notified when new information is available
   planning_scene_monitor_->addUpdateCallback(
-      std::bind(&PlanExecution::planningSceneUpdatedCallback, this, std::placeholders::_1));
+      [this](const planning_scene_monitor::PlanningSceneMonitor::SceneUpdateType update_type) {
+        planningSceneUpdatedCallback(update_type);
+      });
 
   // start the dynamic-reconfigure server
   // reconfigure_impl_ = new DynamicReconfigureImpl(this);
@@ -415,8 +421,8 @@ moveit_msgs::msg::MoveItErrorCodes plan_execution::PlanExecution::executeAndMoni
 
   // start a trajectory execution thread
   trajectory_execution_manager_->execute(
-      std::bind(&PlanExecution::doneWithTrajectoryExecution, this, std::placeholders::_1),
-      std::bind(&PlanExecution::successfulTrajectorySegmentExecution, this, &plan, std::placeholders::_1));
+      [this](const moveit_controller_manager::ExecutionStatus& status) { doneWithTrajectoryExecution(status); },
+      [this, &plan](std::size_t index) { successfulTrajectorySegmentExecution(plan, index); });
   // wait for path to be done, while checking that the path does not become invalid
   rclcpp::WallRate r(100);
   path_became_invalid_ = false;
@@ -510,19 +516,19 @@ void plan_execution::PlanExecution::doneWithTrajectoryExecution(
   execution_complete_ = true;
 }
 
-void plan_execution::PlanExecution::successfulTrajectorySegmentExecution(const ExecutableMotionPlan* plan,
+void plan_execution::PlanExecution::successfulTrajectorySegmentExecution(const ExecutableMotionPlan& plan,
                                                                          std::size_t index)
 {
-  if (plan->plan_components_.empty())
+  if (plan.plan_components_.empty())
   {
     RCLCPP_WARN(LOGGER, "Length of provided motion plan is zero.");
     return;
   }
 
   // if any side-effects are associated to the trajectory part that just completed, execute them
-  RCLCPP_DEBUG(LOGGER, "Completed '%s'", plan->plan_components_[index].description_.c_str());
-  if (plan->plan_components_[index].effect_on_success_)
-    if (!plan->plan_components_[index].effect_on_success_(plan))
+  RCLCPP_DEBUG(LOGGER, "Completed '%s'", plan.plan_components_[index].description_.c_str());
+  if (plan.plan_components_[index].effect_on_success_)
+    if (!plan.plan_components_[index].effect_on_success_(&plan))
     {
       // execution of side-effect failed
       RCLCPP_ERROR(LOGGER, "Execution of path-completion side-effect failed. Preempting.");
@@ -532,14 +538,14 @@ void plan_execution::PlanExecution::successfulTrajectorySegmentExecution(const E
 
   // if there is a next trajectory, check it for validity, before we start execution
   ++index;
-  if (index < plan->plan_components_.size() && plan->plan_components_[index].trajectory_ &&
-      !plan->plan_components_[index].trajectory_->empty())
+  if (index < plan.plan_components_.size() && plan.plan_components_[index].trajectory_ &&
+      !plan.plan_components_[index].trajectory_->empty())
   {
     std::pair<int, int> next_index(static_cast<int>(index), 0);
-    if (!isRemainingPathValid(*plan, next_index))
+    if (!isRemainingPathValid(plan, next_index))
     {
       RCLCPP_INFO(LOGGER, "Upcoming trajectory component '%s' is invalid",
-                  plan->plan_components_[next_index.first].description_.c_str());
+                  plan.plan_components_[next_index.first].description_.c_str());
       path_became_invalid_ = true;
     }
   }

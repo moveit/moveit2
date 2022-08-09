@@ -7,10 +7,6 @@ moveit_package()
 
 option(WITH_OPENGL "Build the parts that depend on OpenGL" ON)
 
-if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-  add_compile_options(-Wpedantic)
-endif()
-
 if(WITH_OPENGL)
   # Prefer newer vendor-specific OpenGL library
   if(POLICY CMP0072)
@@ -134,7 +130,6 @@ if(BUILD_TESTING)
 
   # These don't pass yet, disable them for now
   set(ament_cmake_copyright_FOUND TRUE)
-  set(ament_cmake_cppcheck_FOUND TRUE)
   set(ament_cmake_cpplint_FOUND TRUE)
   set(ament_cmake_uncrustify_FOUND TRUE)
 

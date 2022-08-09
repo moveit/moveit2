@@ -35,12 +35,12 @@
 
 /* Author: Ioan Sucan */
 
-#include <moveit/robot_model/floating_joint_model.h>
-#include <geometric_shapes/check_isometry.h>
-#include <boost/math/constants/constants.hpp>
-#include <limits>
 #include <cmath>
-#include "rclcpp/rclcpp.hpp"
+#include <geometric_shapes/check_isometry.h>
+#include <limits>
+#include <moveit/robot_model/floating_joint_model.h>
+#include <rclcpp/logger.hpp>
+#include <rclcpp/logging.hpp>
 
 namespace moveit
 {
@@ -103,7 +103,7 @@ double FloatingJointModel::getMaximumExtent(const Bounds& other_bounds) const
   double dx = other_bounds[0].max_position_ - other_bounds[0].min_position_;
   double dy = other_bounds[1].max_position_ - other_bounds[1].min_position_;
   double dz = other_bounds[2].max_position_ - other_bounds[2].min_position_;
-  return sqrt(dx * dx + dy * dy + dz * dz) + boost::math::constants::pi<double>() * 0.5 * angular_distance_weight_;
+  return sqrt(dx * dx + dy * dy + dz * dz) + M_PI * 0.5 * angular_distance_weight_;
 }
 
 double FloatingJointModel::distance(const double* values1, const double* values2) const
@@ -136,19 +136,20 @@ void FloatingJointModel::interpolate(const double* from, const double* to, const
   state[1] = from[1] + (to[1] - from[1]) * t;
   state[2] = from[2] + (to[2] - from[2]) * t;
 
-  double dq = fabs(from[3] * to[3] + from[4] * to[4] + from[5] * to[5] + from[6] * to[6]);
-  double theta = (dq + std::numeric_limits<double>::epsilon() >= 1.0) ? 0.0 : acos(dq);
-  if (theta > std::numeric_limits<double>::epsilon())
+  // Check if the quaternions are significantly different
+  if (abs(from[3] - to[3]) + abs(from[4] - to[4]) + abs(from[5] - to[5]) + abs(from[6] - to[6]) >
+      std::numeric_limits<double>::epsilon())
   {
-    double d = 1.0 / sin(theta);
-    double s0 = sin((1.0 - t) * theta);
-    double s1 = sin(t * theta);
-    if (dq < 0)  // Take care of long angle case see http://en.wikipedia.org/wiki/Slerp
-      s1 = -s1;
-    state[3] = (from[3] * s0 + to[3] * s1) * d;
-    state[4] = (from[4] * s0 + to[4] * s1) * d;
-    state[5] = (from[5] * s0 + to[5] * s1) * d;
-    state[6] = (from[6] * s0 + to[6] * s1) * d;
+    // Note the ordering: Eigen takes w first!
+    Eigen::Quaterniond q1(from[6], from[3], from[4], from[5]);
+    Eigen::Quaterniond q2(to[6], to[3], to[4], to[5]);
+
+    Eigen::Quaterniond q = q1.slerp(t, q2);
+
+    state[3] = q.x();
+    state[4] = q.y();
+    state[5] = q.z();
+    state[6] = q.w();
   }
   else
   {
@@ -311,7 +312,7 @@ void FloatingJointModel::getVariableRandomPositionsNearBy(random_numbers::Random
                                 std::min(bounds[2].max_position_, near[2] + distance));
 
   double da = angular_distance_weight_ * distance;
-  if (da >= .25 * boost::math::constants::pi<double>())
+  if (da >= .25 * M_PI)
   {
     double q[4];
     rng.quaternion(q);

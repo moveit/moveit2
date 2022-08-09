@@ -40,13 +40,15 @@
 #include <moveit/planning_interface/planning_interface.h>
 #include <moveit/planning_request_adapter/planning_request_adapter.h>
 #include <moveit/robot_state/conversions.h>
-#include <moveit/trajectory_processing/iterative_time_parameterization.h>
 #include <moveit/trajectory_processing/trajectory_tools.h>
 
 #include <eigen3/Eigen/Core>
 #include <moveit_msgs/msg/robot_trajectory.hpp>
 #include <pluginlib/class_list_macros.hpp>
-#include <rclcpp/rclcpp.hpp>
+#include <rclcpp/logger.hpp>
+#include <rclcpp/logging.hpp>
+#include <rclcpp/node.hpp>
+#include <rclcpp/parameter_value.hpp>
 #include <vector>
 
 namespace chomp

@@ -25,10 +25,10 @@ target_link_libraries(${MOVEIT_LIB_NAME}
 install(DIRECTORY include/ DESTINATION include)
 
 if(BUILD_TESTING)
+  find_package(ament_cmake_gmock REQUIRED)
   find_package(orocos_kdl REQUIRED)
   find_package(angles REQUIRED)
   find_package(tf2_kdl REQUIRED)
-
   include_directories(SYSTEM ${orocos_kdl_INCLUDE_DIRS} ${angles_INCLUDE_DIRS} ${tf2_kdl_INCLUDE_DIRS})
 
   if(WIN32)
@@ -37,7 +37,7 @@ if(BUILD_TESTING)
     set(append_library_dirs "${CMAKE_CURRENT_BINARY_DIR};${CMAKE_CURRENT_BINARY_DIR}/../utils;${CMAKE_CURRENT_BINARY_DIR}/../robot_state;${CMAKE_CURRENT_BINARY_DIR}/../planning_scene;${CMAKE_CURRENT_BINARY_DIR}/../robot_model;${CMAKE_CURRENT_BINARY_DIR}/../kinematics_constraint")
   endif()
 
-  ament_add_gtest(test_constraint_samplers
+  ament_add_gmock(test_constraint_samplers
     test/test_constraint_samplers.cpp
     test/pr2_arm_kinematics_plugin.cpp
     test/pr2_arm_ik.cpp

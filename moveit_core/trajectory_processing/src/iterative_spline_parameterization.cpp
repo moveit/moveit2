@@ -36,6 +36,8 @@
 
 #include <moveit/trajectory_processing/iterative_spline_parameterization.h>
 #include <moveit/robot_state/conversions.h>
+#include <rclcpp/logger.hpp>
+#include <rclcpp/logging.hpp>
 #include <vector>
 
 static const double VLIMIT = 1.0;  // default if not specified in model
@@ -344,6 +346,15 @@ bool IterativeSplineParameterization::computeTimeStamps(robot_trajectory::RobotT
   }
 
   return true;
+}
+
+bool IterativeSplineParameterization::computeTimeStamps(
+    robot_trajectory::RobotTrajectory& /*trajectory*/,
+    const std::unordered_map<std::string, double>& /*velocity_limits*/,
+    const std::unordered_map<std::string, double>& /*acceleration_limits*/) const
+{
+  RCLCPP_ERROR(LOGGER, "ISTP does not support this version of computeTimeStamps. Try TOTG instead?");
+  return false;
 }
 
 //////// Internal functions //////////////

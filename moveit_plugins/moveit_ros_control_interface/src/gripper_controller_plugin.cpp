@@ -34,10 +34,10 @@
 
 /* Author: Joseph Schornak */
 
-#include <rclcpp/rclcpp.hpp>
 #include <moveit_ros_control_interface/ControllerHandle.h>
 #include <pluginlib/class_list_macros.hpp>
 #include <moveit_simple_controller_manager/gripper_controller_handle.h>
+#include <rclcpp/node.hpp>
 #include <memory>
 
 namespace moveit_ros_control_interface

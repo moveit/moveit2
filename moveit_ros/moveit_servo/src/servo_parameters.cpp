@@ -42,7 +42,10 @@
 #include <moveit_servo/servo_parameters.h>
 #include <moveit_servo/parameter_descriptor_builder.hpp>
 #include <moveit/planning_scene_monitor/planning_scene_monitor.h>
-#include <rclcpp/rclcpp.hpp>
+#include <rclcpp/logger.hpp>
+#include <rclcpp/logging.hpp>
+#include <rclcpp/parameter.hpp>
+#include <rclcpp/parameter_value.hpp>
 #include <type_traits>
 
 namespace moveit_servo
@@ -442,10 +445,10 @@ ServoParameters::SharedConstPtr ServoParameters::makeServoParameters(const rclcp
     // register parameter change callback
     if (dynamic_parameters)
     {
-      using std::placeholders::_1;
-      parameters_ptr->callback_handler_->on_set_parameters_callback_handler_ =
-          node->add_on_set_parameters_callback(std::bind(&ServoParameters::CallbackHandler::setParametersCallback,
-                                                         parameters_ptr->callback_handler_.get(), _1));
+      parameters_ptr->callback_handler_->on_set_parameters_callback_handler_ = node->add_on_set_parameters_callback(
+          [ptr = parameters_ptr->callback_handler_.get()](const std::vector<rclcpp::Parameter>& parameters) {
+            return ptr->setParametersCallback(parameters);
+          });
     }
 
     return parameters_ptr;

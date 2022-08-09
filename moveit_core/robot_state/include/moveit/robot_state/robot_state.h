@@ -46,7 +46,7 @@
 #include <geometry_msgs/msg/twist.hpp>
 #include <cassert>
 
-#include <boost/assert.hpp>
+#include <rclcpp/duration.hpp>
 
 /* Terminology
    * Model Frame: RobotModel's root frame == PlanningScene's planning frame
@@ -65,8 +65,8 @@ MOVEIT_CLASS_FORWARD(RobotState);  // Defines RobotStatePtr, ConstPtr, WeakPtr..
    joint_group_variable_values
     the state is valid or not. Returns true if the state is valid. This call is allowed to modify \e robot_state (e.g.,
    set \e joint_group_variable_values) */
-typedef boost::function<bool(RobotState* robot_state, const JointModelGroup* joint_group,
-                             const double* joint_group_variable_values)>
+typedef std::function<bool(RobotState* robot_state, const JointModelGroup* joint_group,
+                           const double* joint_group_variable_values)>
     GroupStateValidityCallbackFn;
 
 /** \brief Representation of a robot's state. This includes position,
@@ -951,7 +951,8 @@ public:
       @param constraint A state validity constraint to be required for IK solutions */
   bool setFromIK(const JointModelGroup* group, const geometry_msgs::msg::Pose& pose, double timeout = 0.0,
                  const GroupStateValidityCallbackFn& constraint = GroupStateValidityCallbackFn(),
-                 const kinematics::KinematicsQueryOptions& options = kinematics::KinematicsQueryOptions());
+                 const kinematics::KinematicsQueryOptions& options = kinematics::KinematicsQueryOptions(),
+                 kinematics::KinematicsBase::IKCostFn cost_function = kinematics::KinematicsBase::IKCostFn());
 
   /** \brief If the group this state corresponds to is a chain and a solver is available, then the joint values can be
      set by computing inverse kinematics.
@@ -962,7 +963,8 @@ public:
       @param constraint A state validity constraint to be required for IK solutions */
   bool setFromIK(const JointModelGroup* group, const geometry_msgs::msg::Pose& pose, const std::string& tip,
                  double timeout = 0.0, const GroupStateValidityCallbackFn& constraint = GroupStateValidityCallbackFn(),
-                 const kinematics::KinematicsQueryOptions& options = kinematics::KinematicsQueryOptions());
+                 const kinematics::KinematicsQueryOptions& options = kinematics::KinematicsQueryOptions(),
+                 kinematics::KinematicsBase::IKCostFn cost_function = kinematics::KinematicsBase::IKCostFn());
 
   /** \brief If the group this state corresponds to is a chain and a solver is available, then the joint values can be
      set by computing inverse kinematics.
@@ -972,7 +974,8 @@ public:
       @param timeout The timeout passed to the kinematics solver on each attempt */
   bool setFromIK(const JointModelGroup* group, const Eigen::Isometry3d& pose, double timeout = 0.0,
                  const GroupStateValidityCallbackFn& constraint = GroupStateValidityCallbackFn(),
-                 const kinematics::KinematicsQueryOptions& options = kinematics::KinematicsQueryOptions());
+                 const kinematics::KinematicsQueryOptions& options = kinematics::KinematicsQueryOptions(),
+                 kinematics::KinematicsBase::IKCostFn cost_function = kinematics::KinematicsBase::IKCostFn());
 
   /** \brief If the group this state corresponds to is a chain and a solver is available, then the joint values can be
      set by computing inverse kinematics.
@@ -982,7 +985,8 @@ public:
       @param constraint A state validity constraint to be required for IK solutions */
   bool setFromIK(const JointModelGroup* group, const Eigen::Isometry3d& pose, const std::string& tip,
                  double timeout = 0.0, const GroupStateValidityCallbackFn& constraint = GroupStateValidityCallbackFn(),
-                 const kinematics::KinematicsQueryOptions& options = kinematics::KinematicsQueryOptions());
+                 const kinematics::KinematicsQueryOptions& options = kinematics::KinematicsQueryOptions(),
+                 kinematics::KinematicsBase::IKCostFn cost_function = kinematics::KinematicsBase::IKCostFn());
 
   /** \brief If the group this state corresponds to is a chain and a solver is available, then the joint values can be
      set by computing inverse kinematics.
@@ -995,7 +999,8 @@ public:
   bool setFromIK(const JointModelGroup* group, const Eigen::Isometry3d& pose, const std::string& tip,
                  const std::vector<double>& consistency_limits, double timeout = 0.0,
                  const GroupStateValidityCallbackFn& constraint = GroupStateValidityCallbackFn(),
-                 const kinematics::KinematicsQueryOptions& options = kinematics::KinematicsQueryOptions());
+                 const kinematics::KinematicsQueryOptions& options = kinematics::KinematicsQueryOptions(),
+                 kinematics::KinematicsBase::IKCostFn cost_function = kinematics::KinematicsBase::IKCostFn());
 
   /** \brief  Warning: This function inefficiently copies all transforms around.
       If the group consists of a set of sub-groups that are each a chain and a solver
@@ -1009,7 +1014,8 @@ public:
   bool setFromIK(const JointModelGroup* group, const EigenSTL::vector_Isometry3d& poses,
                  const std::vector<std::string>& tips, double timeout = 0.0,
                  const GroupStateValidityCallbackFn& constraint = GroupStateValidityCallbackFn(),
-                 const kinematics::KinematicsQueryOptions& options = kinematics::KinematicsQueryOptions());
+                 const kinematics::KinematicsQueryOptions& options = kinematics::KinematicsQueryOptions(),
+                 kinematics::KinematicsBase::IKCostFn cost_function = kinematics::KinematicsBase::IKCostFn());
 
   /** \brief Warning: This function inefficiently copies all transforms around.
       If the group consists of a set of sub-groups that are each a chain and a solver
@@ -1024,7 +1030,8 @@ public:
   bool setFromIK(const JointModelGroup* group, const EigenSTL::vector_Isometry3d& poses,
                  const std::vector<std::string>& tips, const std::vector<std::vector<double>>& consistency_limits,
                  double timeout = 0.0, const GroupStateValidityCallbackFn& constraint = GroupStateValidityCallbackFn(),
-                 const kinematics::KinematicsQueryOptions& options = kinematics::KinematicsQueryOptions());
+                 const kinematics::KinematicsQueryOptions& options = kinematics::KinematicsQueryOptions(),
+                 kinematics::KinematicsBase::IKCostFn cost_function = kinematics::KinematicsBase::IKCostFn());
 
   /**
       \brief setFromIK for multiple poses and tips (end effectors) when no solver exists for the jmg that can solver for
@@ -1355,7 +1362,7 @@ public:
     {
       throw Exception("Invalid link");
     }
-    BOOST_VERIFY(checkLinkTransforms());
+    assert(checkLinkTransforms());
     return global_link_transforms_[link->getLinkIndex()];
   }
 
@@ -1387,7 +1394,7 @@ public:
 
   const Eigen::Isometry3d& getCollisionBodyTransform(const LinkModel* link, std::size_t index) const
   {
-    BOOST_VERIFY(checkCollisionTransforms());
+    assert(checkCollisionTransforms());
     return global_collision_body_transforms_[link->getFirstCollisionBodyTransformIndex() + index];
   }
 
@@ -1415,7 +1422,7 @@ public:
 
   const Eigen::Isometry3d& getJointTransform(const JointModel* joint) const
   {
-    BOOST_VERIFY(checkJointTransforms(joint));
+    assert(checkJointTransforms(joint));
     return variable_joint_transforms_[joint->getJointIndex()];
   }
 

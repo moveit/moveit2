@@ -44,19 +44,10 @@
 #include <interactive_markers/interactive_marker_server.hpp>
 #include <interactive_markers/menu_handler.hpp>
 #include <tf2/LinearMath/Transform.h>
-#if __has_include(<tf2_eigen/tf2_eigen.hpp>)
 #include <tf2_eigen/tf2_eigen.hpp>
-#else
-#include <tf2_eigen/tf2_eigen.h>
-#endif
-#if __has_include(<tf2_geometry_msgs/tf2_geometry_msgs.hpp>)
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
-#else
-#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
-#endif
-#include <boost/lexical_cast.hpp>
-#include <boost/math/constants/constants.hpp>
 #include <algorithm>
+#include <string>
 
 #include <Eigen/Core>
 #include <Eigen/Geometry>
@@ -98,37 +89,37 @@ std::string InteractionHandler::fixName(std::string name)
 
 void InteractionHandler::setPoseOffset(const EndEffectorInteraction& eef, const geometry_msgs::msg::Pose& m)
 {
-  boost::mutex::scoped_lock slock(offset_map_lock_);
+  std::scoped_lock slock(offset_map_lock_);
   offset_map_[eef.eef_group] = m;
 }
 
 void InteractionHandler::setPoseOffset(const JointInteraction& vj, const geometry_msgs::msg::Pose& m)
 {
-  boost::mutex::scoped_lock slock(offset_map_lock_);
+  std::scoped_lock slock(offset_map_lock_);
   offset_map_[vj.joint_name] = m;
 }
 
 void InteractionHandler::clearPoseOffset(const EndEffectorInteraction& eef)
 {
-  boost::mutex::scoped_lock slock(offset_map_lock_);
+  std::scoped_lock slock(offset_map_lock_);
   offset_map_.erase(eef.eef_group);
 }
 
 void InteractionHandler::clearPoseOffset(const JointInteraction& vj)
 {
-  boost::mutex::scoped_lock slock(offset_map_lock_);
+  std::scoped_lock slock(offset_map_lock_);
   offset_map_.erase(vj.joint_name);
 }
 
 void InteractionHandler::clearPoseOffsets()
 {
-  boost::mutex::scoped_lock slock(offset_map_lock_);
+  std::scoped_lock slock(offset_map_lock_);
   offset_map_.clear();
 }
 
 bool InteractionHandler::getPoseOffset(const EndEffectorInteraction& eef, geometry_msgs::msg::Pose& m)
 {
-  boost::mutex::scoped_lock slock(offset_map_lock_);
+  std::scoped_lock slock(offset_map_lock_);
   std::map<std::string, geometry_msgs::msg::Pose>::iterator it = offset_map_.find(eef.eef_group);
   if (it != offset_map_.end())
   {
@@ -140,7 +131,7 @@ bool InteractionHandler::getPoseOffset(const EndEffectorInteraction& eef, geomet
 
 bool InteractionHandler::getPoseOffset(const JointInteraction& vj, geometry_msgs::msg::Pose& m)
 {
-  boost::mutex::scoped_lock slock(offset_map_lock_);
+  std::scoped_lock slock(offset_map_lock_);
   std::map<std::string, geometry_msgs::msg::Pose>::iterator it = offset_map_.find(vj.joint_name);
   if (it != offset_map_.end())
   {
@@ -153,7 +144,7 @@ bool InteractionHandler::getPoseOffset(const JointInteraction& vj, geometry_msgs
 bool InteractionHandler::getLastEndEffectorMarkerPose(const EndEffectorInteraction& eef,
                                                       geometry_msgs::msg::PoseStamped& ps)
 {
-  boost::mutex::scoped_lock slock(pose_map_lock_);
+  std::scoped_lock slock(pose_map_lock_);
   std::map<std::string, geometry_msgs::msg::PoseStamped>::iterator it = pose_map_.find(eef.eef_group);
   if (it != pose_map_.end())
   {
@@ -165,7 +156,7 @@ bool InteractionHandler::getLastEndEffectorMarkerPose(const EndEffectorInteracti
 
 bool InteractionHandler::getLastJointMarkerPose(const JointInteraction& vj, geometry_msgs::msg::PoseStamped& ps)
 {
-  boost::mutex::scoped_lock slock(pose_map_lock_);
+  std::scoped_lock slock(pose_map_lock_);
   std::map<std::string, geometry_msgs::msg::PoseStamped>::iterator it = pose_map_.find(vj.joint_name);
   if (it != pose_map_.end())
   {
@@ -177,37 +168,37 @@ bool InteractionHandler::getLastJointMarkerPose(const JointInteraction& vj, geom
 
 void InteractionHandler::clearLastEndEffectorMarkerPose(const EndEffectorInteraction& eef)
 {
-  boost::mutex::scoped_lock slock(pose_map_lock_);
+  std::scoped_lock slock(pose_map_lock_);
   pose_map_.erase(eef.eef_group);
 }
 
 void InteractionHandler::clearLastJointMarkerPose(const JointInteraction& vj)
 {
-  boost::mutex::scoped_lock slock(pose_map_lock_);
+  std::scoped_lock slock(pose_map_lock_);
   pose_map_.erase(vj.joint_name);
 }
 
 void InteractionHandler::clearLastMarkerPoses()
 {
-  boost::mutex::scoped_lock slock(pose_map_lock_);
+  std::scoped_lock slock(pose_map_lock_);
   pose_map_.clear();
 }
 
 void InteractionHandler::setMenuHandler(const std::shared_ptr<interactive_markers::MenuHandler>& mh)
 {
-  boost::mutex::scoped_lock lock(state_lock_);
+  std::scoped_lock lock(state_lock_);
   menu_handler_ = mh;
 }
 
 const std::shared_ptr<interactive_markers::MenuHandler>& InteractionHandler::getMenuHandler()
 {
-  boost::mutex::scoped_lock lock(state_lock_);
+  std::scoped_lock lock(state_lock_);
   return menu_handler_;
 }
 
 void InteractionHandler::clearMenuHandler()
 {
-  boost::mutex::scoped_lock lock(state_lock_);
+  std::scoped_lock lock(state_lock_);
   menu_handler_.reset();
 }
 
@@ -218,8 +209,9 @@ void InteractionHandler::handleGeneric(
   {
     StateChangeCallbackFn callback;
     // modify the RobotState in-place with the state_lock_ held.
-    LockedRobotState::modifyState(
-        std::bind(&InteractionHandler::updateStateGeneric, this, std::placeholders::_1, &g, &feedback, &callback));
+    LockedRobotState::modifyState([this, &g, &feedback, &callback](moveit::core::RobotState* state) {
+      updateStateGeneric(*state, g, feedback, callback);
+    });
 
     // This calls update_callback_ to notify client that state changed.
     if (callback)
@@ -251,8 +243,9 @@ void InteractionHandler::handleEndEffector(
 
   // modify the RobotState in-place with state_lock_ held.
   // This locks state_lock_ before calling updateState()
-  LockedRobotState::modifyState(std::bind(&InteractionHandler::updateStateEndEffector, this, std::placeholders::_1,
-                                          &eef, &tpose.pose, &callback));
+  LockedRobotState::modifyState([this, &eef, &pose = tpose.pose, &callback](moveit::core::RobotState* state) {
+    updateStateEndEffector(*state, eef, pose, callback);
+  });
 
   // This calls update_callback_ to notify client that state changed.
   if (callback)
@@ -282,8 +275,9 @@ void InteractionHandler::handleJoint(const JointInteraction& vj,
 
   // modify the RobotState in-place with state_lock_ held.
   // This locks state_lock_ before calling updateState()
-  LockedRobotState::modifyState(
-      std::bind(&InteractionHandler::updateStateJoint, this, std::placeholders::_1, &vj, &tpose.pose, &callback));
+  LockedRobotState::modifyState([this, &vj, &pose = tpose.pose, &callback](moveit::core::RobotState* state) {
+    updateStateJoint(*state, vj, pose, callback);
+  });
 
   // This calls update_callback_ to notify client that state changed.
   if (callback)
@@ -292,45 +286,49 @@ void InteractionHandler::handleJoint(const JointInteraction& vj,
 
 // MUST hold state_lock_ when calling this!
 void InteractionHandler::updateStateGeneric(
-    moveit::core::RobotState* state, const GenericInteraction* g,
-    const visualization_msgs::msg::InteractiveMarkerFeedback::ConstSharedPtr* feedback, StateChangeCallbackFn* callback)
+    moveit::core::RobotState& state, const GenericInteraction& g,
+    const visualization_msgs::msg::InteractiveMarkerFeedback::ConstSharedPtr& feedback, StateChangeCallbackFn& callback)
 {
-  bool ok = g->process_feedback(*state, *feedback);
-  bool error_state_changed = setErrorState(g->marker_name_suffix, !ok);
+  bool ok = g.process_feedback(state, feedback);
+  bool error_state_changed = setErrorState(g.marker_name_suffix, !ok);
   if (update_callback_)
-    *callback = std::bind(update_callback_, std::placeholders::_1, error_state_changed);
+    callback = [cb = this->update_callback_, error_state_changed](robot_interaction::InteractionHandler* handler) {
+      cb(handler, error_state_changed);
+    };
 }
 
 // MUST hold state_lock_ when calling this!
-void InteractionHandler::updateStateEndEffector(moveit::core::RobotState* state, const EndEffectorInteraction* eef,
-                                                const geometry_msgs::msg::Pose* pose, StateChangeCallbackFn* callback)
+void InteractionHandler::updateStateEndEffector(moveit::core::RobotState& state, const EndEffectorInteraction& eef,
+                                                const geometry_msgs::msg::Pose& pose, StateChangeCallbackFn& callback)
 {
   // This is called with state_lock_ held, so no additional locking needed to
   // access kinematic_options_map_.
-  KinematicOptions kinematic_options = kinematic_options_map_->getOptions(eef->parent_group);
+  KinematicOptions kinematic_options = kinematic_options_map_->getOptions(eef.parent_group);
 
-  bool ok = kinematic_options.setStateFromIK(*state, eef->parent_group, eef->parent_link, *pose);
-  bool error_state_changed = setErrorState(eef->parent_group, !ok);
+  bool ok = kinematic_options.setStateFromIK(state, eef.parent_group, eef.parent_link, pose);
+  bool error_state_changed = setErrorState(eef.parent_group, !ok);
   if (update_callback_)
-    *callback = std::bind(update_callback_, std::placeholders::_1, error_state_changed);
+    callback = [cb = this->update_callback_, error_state_changed](robot_interaction::InteractionHandler* handler) {
+      cb(handler, error_state_changed);
+    };
 }
 
 // MUST hold state_lock_ when calling this!
-void InteractionHandler::updateStateJoint(moveit::core::RobotState* state, const JointInteraction* vj,
-                                          const geometry_msgs::msg::Pose* feedback_pose,
-                                          StateChangeCallbackFn* callback)
+void InteractionHandler::updateStateJoint(moveit::core::RobotState& state, const JointInteraction& vj,
+                                          const geometry_msgs::msg::Pose& feedback_pose,
+                                          StateChangeCallbackFn& callback)
 {
   Eigen::Isometry3d pose;
-  tf2::fromMsg(*feedback_pose, pose);
+  tf2::fromMsg(feedback_pose, pose);
 
-  if (!vj->parent_frame.empty() && !moveit::core::Transforms::sameFrame(vj->parent_frame, planning_frame_))
-    pose = state->getGlobalLinkTransform(vj->parent_frame).inverse() * pose;
+  if (!vj.parent_frame.empty() && !moveit::core::Transforms::sameFrame(vj.parent_frame, planning_frame_))
+    pose = state.getGlobalLinkTransform(vj.parent_frame).inverse() * pose;
 
-  state->setJointPositions(vj->joint_name, pose);
-  state->update();
+  state.setJointPositions(vj.joint_name, pose);
+  state.update();
 
   if (update_callback_)
-    *callback = std::bind(update_callback_, std::placeholders::_1, false);
+    callback = [cb = this->update_callback_](robot_interaction::InteractionHandler* handler) { cb(handler, false); };
 }
 
 bool InteractionHandler::inError(const EndEffectorInteraction& eef) const
@@ -350,7 +348,7 @@ bool InteractionHandler::inError(const JointInteraction& /*unused*/) const
 
 void InteractionHandler::clearError()
 {
-  boost::mutex::scoped_lock lock(state_lock_);
+  std::scoped_lock lock(state_lock_);
   error_state_.clear();
 }
 
@@ -373,7 +371,7 @@ bool InteractionHandler::setErrorState(const std::string& name, bool new_error_s
 
 bool InteractionHandler::getErrorState(const std::string& name) const
 {
-  boost::mutex::scoped_lock lock(state_lock_);
+  std::scoped_lock lock(state_lock_);
   return error_state_.find(name) != error_state_.end();
 }
 
@@ -415,37 +413,37 @@ bool InteractionHandler::transformFeedbackPose(
 
 void InteractionHandler::setUpdateCallback(const InteractionHandlerCallbackFn& callback)
 {
-  boost::mutex::scoped_lock lock(state_lock_);
+  std::scoped_lock lock(state_lock_);
   update_callback_ = callback;
 }
 
 const InteractionHandlerCallbackFn& InteractionHandler::getUpdateCallback() const
 {
-  boost::mutex::scoped_lock lock(state_lock_);
+  std::scoped_lock lock(state_lock_);
   return update_callback_;
 }
 
 void InteractionHandler::setMeshesVisible(bool visible)
 {
-  boost::mutex::scoped_lock lock(state_lock_);
+  std::scoped_lock lock(state_lock_);
   display_meshes_ = visible;
 }
 
 bool InteractionHandler::getMeshesVisible() const
 {
-  boost::mutex::scoped_lock lock(state_lock_);
+  std::scoped_lock lock(state_lock_);
   return display_meshes_;
 }
 
 void InteractionHandler::setControlsVisible(bool visible)
 {
-  boost::mutex::scoped_lock lock(state_lock_);
+  std::scoped_lock lock(state_lock_);
   display_controls_ = visible;
 }
 
 bool InteractionHandler::getControlsVisible() const
 {
-  boost::mutex::scoped_lock lock(state_lock_);
+  std::scoped_lock lock(state_lock_);
   return display_controls_;
 }
 }  // namespace robot_interaction

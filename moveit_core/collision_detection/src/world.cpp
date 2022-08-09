@@ -35,9 +35,9 @@
 /* Author: Acorn Pooley, Ioan Sucan */
 
 #include <moveit/collision_detection/world.h>
-#include <rclcpp/rclcpp.hpp>
 #include <geometric_shapes/check_isometry.h>
-#include <boost/algorithm/string/predicate.hpp>
+#include <rclcpp/logger.hpp>
+#include <rclcpp/logging.hpp>
 
 namespace collision_detection
 {
@@ -110,7 +110,7 @@ std::vector<std::string> World::getObjectIds() const
 
 World::ObjectConstPtr World::getObject(const std::string& object_id) const
 {
-  auto it = objects_.find(object_id);
+  const auto it = objects_.find(object_id);
   if (it == objects_.end())
     return ObjectConstPtr();
   else
@@ -131,7 +131,7 @@ bool World::hasObject(const std::string& object_id) const
 bool World::knowsTransform(const std::string& name) const
 {
   // Check object names first
-  std::map<std::string, ObjectPtr>::const_iterator it = objects_.find(name);
+  const std::map<std::string, ObjectPtr>::const_iterator it = objects_.find(name);
   if (it != objects_.end())
     return true;
   else  // Then objects' subframes
@@ -139,7 +139,8 @@ bool World::knowsTransform(const std::string& name) const
     for (const std::pair<const std::string, ObjectPtr>& object : objects_)
     {
       // if "object name/" matches start of object_id, we found the matching object
-      if (boost::starts_with(name, object.first) && name[object.first.length()] == '/')
+      // rfind searches name for object.first in the first index (returns 0 if found)
+      if (name.rfind(object.first, 0) == 0 && name[object.first.length()] == '/')
       {
         return object.second->global_subframe_poses_.find(name.substr(object.first.length() + 1)) !=
                object.second->global_subframe_poses_.end();
@@ -163,7 +164,7 @@ const Eigen::Isometry3d& World::getTransform(const std::string& name, bool& fram
   // assume found
   frame_found = true;
 
-  std::map<std::string, ObjectPtr>::const_iterator it = objects_.find(name);
+  const std::map<std::string, ObjectPtr>::const_iterator it = objects_.find(name);
   if (it != objects_.end())
   {
     return it->second->pose_;
@@ -173,9 +174,10 @@ const Eigen::Isometry3d& World::getTransform(const std::string& name, bool& fram
     for (const std::pair<const std::string, ObjectPtr>& object : objects_)
     {
       // if "object name/" matches start of object_id, we found the matching object
-      if (boost::starts_with(name, object.first) && name[object.first.length()] == '/')
+      // rfind searches name for object.first in the first index (returns 0 if found)
+      if (name.rfind(object.first, 0) == 0 && name[object.first.length()] == '/')
       {
-        auto it = object.second->global_subframe_poses_.find(name.substr(object.first.length() + 1));
+        const auto it = object.second->global_subframe_poses_.find(name.substr(object.first.length() + 1));
         if (it != object.second->global_subframe_poses_.end())
         {
           return it->second;
@@ -190,9 +192,9 @@ const Eigen::Isometry3d& World::getTransform(const std::string& name, bool& fram
   return IDENTITY_TRANSFORM;
 }
 
-const Eigen::Isometry3d& World::getGlobalShapeTransform(const std::string& object_id, int shape_index) const
+const Eigen::Isometry3d& World::getGlobalShapeTransform(const std::string& object_id, const int shape_index) const
 {
-  auto it = objects_.find(object_id);
+  const auto it = objects_.find(object_id);
   if (it != objects_.end())
   {
     return it->second->global_shape_poses_[shape_index];
@@ -207,7 +209,7 @@ const Eigen::Isometry3d& World::getGlobalShapeTransform(const std::string& objec
 
 const EigenSTL::vector_Isometry3d& World::getGlobalShapeTransforms(const std::string& object_id) const
 {
-  auto it = objects_.find(object_id);
+  const auto it = objects_.find(object_id);
   if (it != objects_.end())
   {
     return it->second->global_shape_poses_;
@@ -223,10 +225,10 @@ const EigenSTL::vector_Isometry3d& World::getGlobalShapeTransforms(const std::st
 bool World::moveShapeInObject(const std::string& object_id, const shapes::ShapeConstPtr& shape,
                               const Eigen::Isometry3d& shape_pose)
 {
-  auto it = objects_.find(object_id);
+  const auto it = objects_.find(object_id);
   if (it != objects_.end())
   {
-    unsigned int n = it->second->shapes_.size();
+    const unsigned int n = it->second->shapes_.size();
     for (unsigned int i = 0; i < n; ++i)
       if (it->second->shapes_[i] == shape)
       {
@@ -244,7 +246,7 @@ bool World::moveShapeInObject(const std::string& object_id, const shapes::ShapeC
 
 bool World::moveObject(const std::string& object_id, const Eigen::Isometry3d& transform)
 {
-  auto it = objects_.find(object_id);
+  const auto it = objects_.find(object_id);
   if (it == objects_.end())
     return false;
   if (transform.isApprox(Eigen::Isometry3d::Identity()))
@@ -278,10 +280,10 @@ bool World::setObjectPose(const std::string& object_id, const Eigen::Isometry3d&
 
 bool World::removeShapeFromObject(const std::string& object_id, const shapes::ShapeConstPtr& shape)
 {
-  auto it = objects_.find(object_id);
+  const auto it = objects_.find(object_id);
   if (it != objects_.end())
   {
-    unsigned int n = it->second->shapes_.size();
+    const unsigned int n = it->second->shapes_.size();
     for (unsigned int i = 0; i < n; ++i)
       if (it->second->shapes_[i] == shape)
       {
@@ -307,7 +309,7 @@ bool World::removeShapeFromObject(const std::string& object_id, const shapes::Sh
 
 bool World::removeObject(const std::string& object_id)
 {
-  auto it = objects_.find(object_id);
+  const auto it = objects_.find(object_id);
   if (it != objects_.end())
   {
     notify(it->second, DESTROY);
@@ -325,7 +327,7 @@ void World::clearObjects()
 
 bool World::setSubframesOfObject(const std::string& object_id, const moveit::core::FixedTransformsMap& subframe_poses)
 {
-  auto obj_pair = objects_.find(object_id);
+  const auto obj_pair = objects_.find(object_id);
   if (obj_pair == objects_.end())
   {
     return false;
@@ -361,7 +363,7 @@ void World::updateGlobalPosesInternal(ObjectPtr& obj, bool update_shape_poses, b
 
 World::ObserverHandle World::addObserver(const ObserverCallbackFn& callback)
 {
-  auto o = new Observer(callback);
+  const auto o = new Observer(callback);
   observers_.push_back(o);
   return ObserverHandle(o);
 }
