@@ -1309,25 +1309,22 @@ bool RobotState::getJacobian(const JointModelGroup* group, const LinkModel* link
   Eigen::Isometry3d link_transform = reference_transform * getGlobalLinkTransform(link);  // valid isometry
   Eigen::Vector3d point_transform = link_transform * reference_point_position;
 
-  /*
-  RCLCPP_DEBUG(LOGGER, "Point from reference origin expressed in world coordinates: %f %f %f",
-           point_transform.x(),
-           point_transform.y(),
-           point_transform.z());
-  */
+  // RCLCPP_DEBUG(LOGGER, "Point from reference origin expressed in world coordinates: %f %f %f",
+  //         point_transform.x(),
+  //         point_transform.y(),
+  //         point_transform.z());
 
   Eigen::Vector3d joint_axis;
   Eigen::Isometry3d joint_transform;
 
   while (link)
   {
-    /*
-    RCLCPP_DEBUG(LOGGER, "Link: %s, %f %f %f",link_state->getName().c_str(),
-             link_state->getGlobalLinkTransform().translation().x(),
-             link_state->getGlobalLinkTransform().translation().y(),
-             link_state->getGlobalLinkTransform().translation().z());
-    RCLCPP_DEBUG(LOGGER, "Joint: %s",link_state->getParentJointState()->getName().c_str());
-    */
+    // RCLCPP_DEBUG(LOGGER, "Link: %s, %f %f %f",link_state->getName().c_str(),
+    //         link_state->getGlobalLinkTransform().translation().x(),
+    //         link_state->getGlobalLinkTransform().translation().y(),
+    //         link_state->getGlobalLinkTransform().translation().z());
+    // RCLCPP_DEBUG(LOGGER, "Joint: %s",link_state->getParentJointState()->getName().c_str());
+
     const JointModel* pjm = link->getParentJointModel();
     if (pjm->getVariableCount() > 0)
     {
