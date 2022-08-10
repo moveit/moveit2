@@ -94,9 +94,9 @@ TEST_F(LoadPlanningModelsPr2, Model)
 
 TEST(SiblingAssociateLinks, SimpleYRobot)
 {
-  // base_link - a - b - c
-  //               \
-  //               - d ~ e
+  // base_link - a - b - c  //
+  //               \        //
+  //               - d ~ e  //
   moveit::core::RobotModelBuilder builder("one_robot", "base_link");
   builder.addChain("base_link->a", "continuous");
   builder.addChain("a->b->c", "fixed");
