@@ -121,7 +121,7 @@ TEST(SiblingAssociateLinks, SimpleYRobot)
 TEST(FloatingJointTest, interpolation_test)
 {
   // Create a simple floating joint model with some dummy parameters (these are not used by the test)
-  moveit::core::FloatingJointModel fjm("joint", 0, 0);
+  moveit::core::FloatingJointModel fjm("joint");
 
   // We set some bounds where the joint position's translation component is bounded between -1 and 1 in all
   // dimensions. This is necessary, otherwise we just get (0,0,0) translations.
