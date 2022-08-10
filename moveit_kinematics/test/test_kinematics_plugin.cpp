@@ -474,16 +474,16 @@ TEST_F(KinematicsTest, unitIK)
   constexpr char pose_type_relative[] = "relative";
   constexpr char pose_type_absolute[] = "absolute";
 
-  /* process tests definitions on parameter server of the form
-     pose_1:
-       pose:   [0.3, 0.2, 0.1, 0, 0, 0] // xyzrpy (position + euler angles)
-       joints: [0, 0, 0, 0, 0, 0]  // ground truth solution
-       type: relative  // pose applied relative to current pose
-     pose_2:
-       pose:   [0.1, 0.2, 0.3, 0, 0, 0, 0] // xyzwxyz (position + quaternion)
-       joints: [1, 2, 3, 4, 5, 6]  // pose applied absolute in planning frame
-       type: absolute
-  */
+  // process tests definitions on parameter server of the form
+  //   pose_1:
+  //     pose:   [0.3, 0.2, 0.1, 0, 0, 0] // xyzrpy (position + euler angles)
+  //     joints: [0, 0, 0, 0, 0, 0]  // ground truth solution
+  //     type: relative  // pose applied relative to current pose
+  //   pose_2:
+  //     pose:   [0.1, 0.2, 0.3, 0, 0, 0, 0] // xyzwxyz (position + quaternion)
+  //     joints: [1, 2, 3, 4, 5, 6]  // pose applied absolute in planning frame
+  //     type: absolute
+
   for (size_t i = 0; i < expected_test_poses; ++i)  // NOLINT(modernize-loop-convert)
   {
     const std::string pose_name = "pose_" + std::to_string(i);
