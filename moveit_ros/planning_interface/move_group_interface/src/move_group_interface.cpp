@@ -1006,7 +1006,6 @@ public:
       std_msgs::msg::String event;
       event.data = "stop";
       trajectory_event_publisher_->publish(event);
-      rclcpp::spin_some(pnode_);
     }
   }
 
@@ -1033,7 +1032,6 @@ public:
       aco.touch_links = touch_links;
     aco.object.operation = moveit_msgs::msg::CollisionObject::ADD;
     attached_object_publisher_->publish(aco);
-    rclcpp::spin_some(pnode_);
     return true;
   }
 
@@ -1054,13 +1052,11 @@ public:
       {
         aco.link_name = lname;
         attached_object_publisher_->publish(aco);
-        rclcpp::spin_some(pnode_);
       }
     }
     else
     {
       attached_object_publisher_->publish(aco);
-      rclcpp::spin_some(pnode_);
     }
     return true;
   }
