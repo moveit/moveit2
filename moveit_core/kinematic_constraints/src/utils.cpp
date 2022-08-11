@@ -288,7 +288,7 @@ moveit_msgs::msg::Constraints constructGoalConstraints(const std::string& link_n
   return goal;
 }
 
-/** Initialize a PoseStamped message from node parameters specified at pose_param. */
+// Initialize a PoseStamped message from node parameters specified at pose_param.
 static bool constructPoseStamped(const rclcpp::Node::SharedPtr& node, const std::string& pose_param,
                                  geometry_msgs::msg::PoseStamped& pose)
 {
@@ -314,7 +314,7 @@ static bool constructPoseStamped(const rclcpp::Node::SharedPtr& node, const std:
   return true;
 }
 
-/** Initialize a JointConstraint message from node parameters specified at constraint_param. */
+// Initialize a JointConstraint message from node parameters specified at constraint_param.
 static bool constructConstraint(const rclcpp::Node::SharedPtr& node, const std::string& constraint_param,
                                 moveit_msgs::msg::JointConstraint& constraint)
 {
@@ -356,7 +356,7 @@ static bool constructConstraint(const rclcpp::Node::SharedPtr& node, const std::
   return true;
 }
 
-/** Initialize a PositionConstraint message from node parameters specified at constraint_param. */
+// Initialize a PositionConstraint message from node parameters specified at constraint_param.
 static bool constructConstraint(const rclcpp::Node::SharedPtr& node, const std::string& constraint_param,
                                 moveit_msgs::msg::PositionConstraint& constraint)
 {
@@ -409,7 +409,7 @@ static bool constructConstraint(const rclcpp::Node::SharedPtr& node, const std::
   return true;
 }
 
-/** Initialize an OrientationConstraint message from node parameters specified at constraint_param. */
+// Initialize an OrientationConstraint message from node parameters specified at constraint_param.
 static bool constructConstraint(const rclcpp::Node::SharedPtr& node, const std::string& constraint_param,
                                 moveit_msgs::msg::OrientationConstraint& constraint)
 {
@@ -442,7 +442,7 @@ static bool constructConstraint(const rclcpp::Node::SharedPtr& node, const std::
   return true;
 }
 
-/** Initialize a VisibilityConstraint message from node parameters specified at constraint_param. */
+// Initialize a VisibilityConstraint message from node parameters specified at constraint_param.
 static bool constructConstraint(const rclcpp::Node::SharedPtr& node, const std::string& constraint_param,
                                 moveit_msgs::msg::VisibilityConstraint& constraint)
 {
@@ -470,7 +470,7 @@ static bool constructConstraint(const rclcpp::Node::SharedPtr& node, const std::
   return true;
 }
 
-/** Initialize a Constraints message containing constraints specified by node parameters under constraint_ids. */
+// Initialize a Constraints message containing constraints specified by node parameters under constraint_ids.
 static bool collectConstraints(const rclcpp::Node::SharedPtr& node, const std::vector<std::string>& constraint_ids,
                                moveit_msgs::msg::Constraints& constraints)
 {
