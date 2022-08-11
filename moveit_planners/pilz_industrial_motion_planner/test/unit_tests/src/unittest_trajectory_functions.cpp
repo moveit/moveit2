@@ -738,8 +738,8 @@ TEST_F(TrajectoryFunctionsTestFlangeAndGripper, testDetermineAndCheckSamplingTim
   double sampling_time{ 0.0 };
 
   moveit::core::RobotState rstate(robot_model_);
-  first_trajectory->insertWayPoint(0, rstate, 0.1);
-  second_trajectory->insertWayPoint(0, rstate, 0.1);
+  first_trajectory->insertWayPoint(0, rstate, rclcpp::Duration::from_seconds(0.1));
+  second_trajectory->insertWayPoint(0, rstate, rclcpp::Duration::from_seconds(0.1));
 
   EXPECT_FALSE(pilz_industrial_motion_planner::determineAndCheckSamplingTime(first_trajectory, second_trajectory,
                                                                              epsilon, sampling_time));
@@ -764,7 +764,7 @@ TEST_F(TrajectoryFunctionsTestFlangeAndGripper, testDetermineAndCheckSamplingTim
       std::make_shared<robot_trajectory::RobotTrajectory>(robot_model_, planning_group_);
   double epsilon{ 0.0001 };
   double sampling_time{ 0.0 };
-  double expected_sampling_time{ 0.1 };
+  auto const expected_sampling_time = rclcpp::Duration::from_seconds(0.1);
 
   moveit::core::RobotState rstate(robot_model_);
   first_trajectory->insertWayPoint(0, rstate, expected_sampling_time);
@@ -776,7 +776,7 @@ TEST_F(TrajectoryFunctionsTestFlangeAndGripper, testDetermineAndCheckSamplingTim
 
   EXPECT_TRUE(pilz_industrial_motion_planner::determineAndCheckSamplingTime(first_trajectory, second_trajectory,
                                                                             epsilon, sampling_time));
-  EXPECT_EQ(expected_sampling_time, sampling_time);
+  EXPECT_EQ(expected_sampling_time.seconds(), sampling_time);
 }
 
 /**
@@ -798,14 +798,14 @@ TEST_F(TrajectoryFunctionsTestFlangeAndGripper, testDetermineAndCheckSamplingTim
       std::make_shared<robot_trajectory::RobotTrajectory>(robot_model_, planning_group_);
   double epsilon{ 0.0001 };
   double sampling_time{ 0.0 };
-  double expected_sampling_time{ 0.1 };
+  auto const expected_sampling_time = rclcpp::Duration::from_seconds(0.1);
 
   moveit::core::RobotState rstate(robot_model_);
   first_trajectory->insertWayPoint(0, rstate, expected_sampling_time);
   first_trajectory->insertWayPoint(1, rstate, expected_sampling_time);
   first_trajectory->insertWayPoint(2, rstate, expected_sampling_time);
   // Violate sampling time
-  first_trajectory->insertWayPoint(2, rstate, expected_sampling_time + 1.0);
+  first_trajectory->insertWayPoint(2, rstate, expected_sampling_time + rclcpp::Duration::from_seconds(1.0));
   first_trajectory->insertWayPoint(3, rstate, expected_sampling_time);
 
   second_trajectory->insertWayPoint(0, rstate, expected_sampling_time);
@@ -815,7 +815,7 @@ TEST_F(TrajectoryFunctionsTestFlangeAndGripper, testDetermineAndCheckSamplingTim
 
   EXPECT_FALSE(pilz_industrial_motion_planner::determineAndCheckSamplingTime(first_trajectory, second_trajectory,
                                                                              epsilon, sampling_time));
-  EXPECT_EQ(expected_sampling_time, sampling_time);
+  EXPECT_EQ(expected_sampling_time.seconds(), sampling_time);
 }
 
 /**

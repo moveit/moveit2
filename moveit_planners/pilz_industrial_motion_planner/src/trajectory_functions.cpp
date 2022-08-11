@@ -434,18 +434,18 @@ bool pilz_industrial_motion_planner::determineAndCheckSamplingTime(
 
   if (n1 >= 2)
   {
-    sampling_time = first_trajectory->getWayPointDurationFromPrevious(1);
+    sampling_time = first_trajectory->getWayPointDurationFromPreviousAt(1).seconds();
   }
   else
   {
-    sampling_time = second_trajectory->getWayPointDurationFromPrevious(1);
+    sampling_time = second_trajectory->getWayPointDurationFromPreviousAt(1).seconds();
   }
 
   for (std::size_t i = 1; i < std::max(n1, n2); ++i)
   {
     if (i < n1)
     {
-      if (fabs(sampling_time - first_trajectory->getWayPointDurationFromPrevious(i)) > epsilon)
+      if (fabs(sampling_time - first_trajectory->getWayPointDurationFromPreviousAt(i).seconds()) > epsilon)
       {
         RCLCPP_ERROR_STREAM(LOGGER, "First trajectory violates sampline time " << sampling_time << " between points "
                                                                                << (i - 1) << "and " << i
@@ -456,7 +456,7 @@ bool pilz_industrial_motion_planner::determineAndCheckSamplingTime(
 
     if (i < n2)
     {
-      if (fabs(sampling_time - second_trajectory->getWayPointDurationFromPrevious(i)) > epsilon)
+      if (fabs(sampling_time - second_trajectory->getWayPointDurationFromPreviousAt(i).seconds()) > epsilon)
       {
         RCLCPP_ERROR_STREAM(LOGGER, "Second trajectory violates sampline time " << sampling_time << " between points "
                                                                                 << (i - 1) << "and " << i

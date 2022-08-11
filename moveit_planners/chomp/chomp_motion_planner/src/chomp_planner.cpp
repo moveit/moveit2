@@ -240,7 +240,7 @@ bool ChompPlanner::solve(const planning_scene::PlanningSceneConstPtr& planning_s
       assert(jm->getVariableCount() == 1);
       state->setVariablePosition(jm->getFirstVariableIndex(), source[joint_index++]);
     }
-    result->addSuffixWayPoint(state, 0.0);
+    result->addSuffixWayPoint(state, rclcpp::Duration::from_seconds(0.0));
   }
 
   res.trajectory_.resize(1);

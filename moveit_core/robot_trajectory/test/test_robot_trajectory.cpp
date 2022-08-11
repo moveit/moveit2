@@ -77,11 +77,11 @@ protected:
     double duration_from_previous = 0.1;
     std::size_t waypoint_count = 5;
     for (std::size_t ix = 0; ix < waypoint_count; ++ix)
-      trajectory->addSuffixWayPoint(*robot_state_, duration_from_previous);
-    // Quick check that getDuration is working correctly
-    EXPECT_EQ(trajectory->getDuration(), duration_from_previous * waypoint_count)
+      trajectory->addSuffixWayPoint(*robot_state_, rclcpp::Duration::from_seconds(duration_from_previous));
+    // Quick check that total_duration is working correctly
+    EXPECT_EQ(robot_trajectory::total_duration(*trajectory).seconds(), duration_from_previous * waypoint_count)
         << "Generated trajectory duration incorrect";
-    EXPECT_EQ(waypoint_count, trajectory->getWayPointDurations().size())
+    EXPECT_EQ(waypoint_count, trajectory->getDurationFromPreviousDeque().size())
         << "Generated trajectory has the wrong number of waypoints";
     EXPECT_EQ(waypoint_count, trajectory->size());
   }
@@ -91,9 +91,9 @@ protected:
   {
     // Copy the trajectory
     trajectory_copy = std::make_shared<robot_trajectory::RobotTrajectory>(*trajectory, deepcopy);
-    // Quick check that the getDuration values match
-    EXPECT_EQ(trajectory_copy->getDuration(), trajectory->getDuration());
-    EXPECT_EQ(trajectory_copy->getWayPointDurations().size(), trajectory->getWayPointDurations().size());
+    // Quick check that the total_duration values match
+    EXPECT_EQ(robot_trajectory::total_duration(*trajectory_copy), robot_trajectory::total_duration(*trajectory));
+    EXPECT_EQ(trajectory_copy->getDurationFromPreviousDeque().size(), trajectory->getDurationFromPreviousDeque().size());
   }
 
   void modifyFirstWaypointPtrAndCheckTrajectory(robot_trajectory::RobotTrajectoryPtr& trajectory)
@@ -118,12 +118,12 @@ protected:
     EXPECT_EQ(trajectory_first_state[0], trajectory_first_state_after_update[0]);
 
     // Modify the first waypoint duration
-    double trajectory_first_duration_before_update = trajectory->getWayPointDurationFromPrevious(0);
-    double new_duration = trajectory_first_duration_before_update + 0.1;
+    auto trajectory_first_duration_before_update = trajectory->getWayPointDurationFromPreviousAt(0);
+    auto new_duration = trajectory_first_duration_before_update + rclcpp::Duration::from_seconds(0.1);
     trajectory->setWayPointDurationFromPrevious(0, new_duration);
 
     // Check that the trajectory's first duration was updated
-    EXPECT_EQ(trajectory->getWayPointDurationFromPrevious(0), new_duration);
+    EXPECT_EQ(trajectory->getWayPointDurationFromPreviousAt(0), new_duration);
   }
 
   void modifyFirstWaypointAndCheckTrajectory(robot_trajectory::RobotTrajectoryPtr& trajectory)
@@ -190,10 +190,10 @@ TEST_F(RobotTrajectoryTestFixture, ChainEdits)
       .clear()
       .setRobotTrajectoryMsg(*robot_state_, initial_trajectory_msg)
       .reverse()
-      .addSuffixWayPoint(*robot_state_, 0.1)
-      .addPrefixWayPoint(*robot_state_, 0.1)
-      .insertWayPoint(1, *robot_state_, 0.1)
-      .append(*initial_trajectory, 0.1);
+      .addSuffixWayPoint(*robot_state_, rclcpp::Duration::from_seconds(0.1))
+      .addPrefixWayPoint(*robot_state_, rclcpp::Duration::from_seconds(0.1))
+      .insertWayPoint(1, *robot_state_, rclcpp::Duration::from_seconds(0.1))
+      .append(*initial_trajectory, rclcpp::Duration::from_seconds(0.1));
 
   EXPECT_EQ(trajectory.getGroupName(), arm_jmg_name_);
   EXPECT_EQ(trajectory.getWayPointCount(), initial_trajectory->getWayPointCount() * 2 + 3);
@@ -250,7 +250,7 @@ TEST_F(RobotTrajectoryTestFixture, RobotTrajectoryDeepCopy)
   // Check that joint positions changed in the original trajectory but not the deep copy
   EXPECT_NE(trajectory_first_state_after_update[0], trajectory_copy_first_state_after_update[0]);
   // Check that the first waypoint duration changed in the original trajectory but not the deep copy
-  EXPECT_NE(trajectory->getWayPointDurationFromPrevious(0), trajectory_copy->getWayPointDurationFromPrevious(0));
+  EXPECT_NE(trajectory->getWayPointDurationFromPreviousAt(0), trajectory_copy->getWayPointDurationFromPreviousAt(0));
 }
 
 TEST_F(RobotTrajectoryTestFixture, RobotTrajectoryIterator)

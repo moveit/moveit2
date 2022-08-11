@@ -196,7 +196,7 @@ TEST_F(TrajectoryGeneratorPTPTest, emptyRequest)
   robot_trajectory::RobotTrajectoryPtr trajectory(
       new robot_trajectory::RobotTrajectory(this->robot_model_, planning_group_));
   moveit::core::RobotState state(this->robot_model_);
-  trajectory->addPrefixWayPoint(state, 0);
+  trajectory->addPrefixWayPoint(state, rclcpp::Duration::from_seconds(0));
   res.trajectory_ = trajectory;
 
   EXPECT_FALSE(res.trajectory_->empty());
@@ -554,7 +554,7 @@ TEST_F(TrajectoryGeneratorPTPTest, testScalingFactor)
   EXPECT_TRUE(checkTrajectory(res_msg.trajectory.joint_trajectory, req, planner_limits_.getJointLimitContainer()));
 
   // trajectory duration
-  EXPECT_NEAR(4.5, res.trajectory_->getWayPointDurationFromStart(res.trajectory_->getWayPointCount()),
+  EXPECT_NEAR(4.5, res.trajectory_->getWayPointDurationFromStartAt(res.trajectory_->getWayPointCount()).seconds(),
               joint_acceleration_tolerance_);
 
   // way point at 1s
@@ -681,7 +681,7 @@ TEST_F(TrajectoryGeneratorPTPTest, testJointGoalAndAlmostZeroStartVelocity)
   EXPECT_TRUE(checkTrajectory(res_msg.trajectory.joint_trajectory, req, planner_limits_.getJointLimitContainer()));
 
   // trajectory duration
-  EXPECT_NEAR(4.5, res.trajectory_->getWayPointDurationFromStart(res.trajectory_->getWayPointCount()),
+  EXPECT_NEAR(4.5, res.trajectory_->getWayPointDurationFromStartAt(res.trajectory_->getWayPointCount()).seconds(),
               joint_acceleration_tolerance_);
 
   // way point at 1s
@@ -823,7 +823,7 @@ TEST_F(TrajectoryGeneratorPTPTest, testJointGoalNoStartVel)
   EXPECT_TRUE(checkTrajectory(res_msg.trajectory.joint_trajectory, req, planner_limits_.getJointLimitContainer()));
 
   // trajectory duration
-  EXPECT_NEAR(4.5, res.trajectory_->getWayPointDurationFromStart(res.trajectory_->getWayPointCount()),
+  EXPECT_NEAR(4.5, res.trajectory_->getWayPointDurationFromStartAt(res.trajectory_->getWayPointCount()).seconds(),
               joint_position_tolerance_);
 
   // way point at 0s

@@ -171,7 +171,7 @@ bool MoveGroupCartesianPathService::computeService(const std::shared_ptr<rmw_req
 
           robot_trajectory::RobotTrajectory rt(context_->planning_scene_monitor_->getRobotModel(), req->group_name);
           for (const moveit::core::RobotStatePtr& traj_state : traj)
-            rt.addSuffixWayPoint(traj_state, 0.0);
+            rt.addSuffixWayPoint(traj_state, rclcpp::Duration::from_seconds(0.0));
 
           // time trajectory
           // \todo optionally compute timing to move the eef with constant speed

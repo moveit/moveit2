@@ -37,10 +37,11 @@
 #include <moveit/trajectory_processing/ruckig_traj_smoothing.h>
 #include <moveit/robot_state/robot_state.h>
 #include <moveit/utils/robot_model_test_utils.h>
+#include <rclcpp/duration.hpp>
 
 namespace
 {
-constexpr double DEFAULT_TIMESTEP = 0.1;  // sec
+const auto DEFAULT_TIMESTEP = rclcpp::Duration::from_seconds(0.1);
 constexpr char JOINT_GROUP[] = "panda_arm";
 
 class RuckigTests : public testing::Test
@@ -114,7 +115,7 @@ TEST_F(RuckigTests, trajectory_duration)
   // Zero velocities and accelerations at the endpoints
   robot_state.setVariablePosition("panda_joint1", 0.0);
   robot_state.update();
-  trajectory_->addSuffixWayPoint(robot_state, 0.0);
+  trajectory_->addSuffixWayPoint(robot_state, rclcpp::Duration::from_seconds(0.0));
 
   robot_state.setVariablePosition("panda_joint1", 0.1);
   robot_state.update();
@@ -122,8 +123,10 @@ TEST_F(RuckigTests, trajectory_duration)
 
   EXPECT_TRUE(
       smoother_.applySmoothing(*trajectory_, 1.0 /* max vel scaling factor */, 1.0 /* max accel scaling factor */));
-  EXPECT_GT(trajectory_->getWayPointDurationFromStart(trajectory_->getWayPointCount() - 1), 0.9999 * ideal_duration);
-  EXPECT_LT(trajectory_->getWayPointDurationFromStart(trajectory_->getWayPointCount() - 1), 1.5 * ideal_duration);
+  EXPECT_GT(trajectory_->getWayPointDurationFromStartAt(trajectory_->getWayPointCount() - 1),
+            rclcpp::Duration::from_seconds(0.9999 * ideal_duration));
+  EXPECT_LT(trajectory_->getWayPointDurationFromStartAt(trajectory_->getWayPointCount() - 1),
+            rclcpp::Duration::from_seconds(1.5 * ideal_duration));
 }
 
 TEST_F(RuckigTests, single_waypoint)

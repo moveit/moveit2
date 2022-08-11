@@ -39,6 +39,7 @@
 #include <math.h>
 #include <tf2_eigen/tf2_eigen.hpp>
 #include <moveit/planning_interface/planning_interface.h>
+#include <rclcpp/duration.hpp>
 
 namespace
 {
@@ -119,7 +120,7 @@ bool pilz_industrial_motion_planner::TrajectoryBlenderTransitionWindow::blend(
   for (size_t i = 0; i < first_intersection_index; ++i)
   {
     res.first_trajectory->insertWayPoint(i, req.first_trajectory->getWayPoint(i),
-                                         req.first_trajectory->getWayPointDurationFromPrevious(i));
+                                         req.first_trajectory->getWayPointDurationFromPreviousAt(i));
   }
 
   // append the blend trajectory
@@ -128,11 +129,11 @@ bool pilz_industrial_motion_planner::TrajectoryBlenderTransitionWindow::blend(
   for (size_t i = second_intersection_index + 1; i < req.second_trajectory->getWayPointCount(); ++i)
   {
     res.second_trajectory->insertWayPoint(i - (second_intersection_index + 1), req.second_trajectory->getWayPoint(i),
-                                          req.second_trajectory->getWayPointDurationFromPrevious(i));
+                                          req.second_trajectory->getWayPointDurationFromPreviousAt(i));
   }
 
   // adjust the time from start
-  res.second_trajectory->setWayPointDurationFromPrevious(0, sampling_time);
+  res.second_trajectory->setWayPointDurationFromPrevious(0, rclcpp::Duration::from_seconds(sampling_time));
 
   res.error_code.val = moveit_msgs::msg::MoveItErrorCodes::SUCCESS;
   return true;

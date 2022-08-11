@@ -357,7 +357,7 @@ TEST_F(TrajectoryBlenderTransitionWindowTest, testNonUniformSamplingTime)
 
   // Modify first time interval
   EXPECT_GT(res[0].trajectory_->getWayPointCount(), 2u);
-  res[0].trajectory_->setWayPointDurationFromPrevious(1, 2 * sampling_time_);
+  res[0].trajectory_->setWayPointDurationFromPrevious(1, rclcpp::Duration::from_seconds(2 * sampling_time_));
 
   pilz_industrial_motion_planner::TrajectoryBlendRequest blend_req;
   pilz_industrial_motion_planner::TrajectoryBlendResponse blend_res;
@@ -632,15 +632,16 @@ TEST_F(TrajectoryBlenderTransitionWindowTest, testNonLinearBlending)
 
     CartesianTrajectory cart_traj;
     trajectory_msgs::msg::JointTrajectory joint_traj;
-    const double duration{ lin_traj->getWayPointDurationFromStart(lin_traj->getWayPointCount()) };
+    const double duration{ lin_traj->getWayPointDurationFromStartAt(lin_traj->getWayPointCount()).seconds() };
     // time from start zero does not work
-    const double time_from_start_offset{ time_scaling_factor * lin_traj->getWayPointDurations().back() };
+    const double time_from_start_offset{ time_scaling_factor *
+                                         lin_traj->getDurationFromPreviousDeque().back().seconds() };
 
     // generate modified cartesian trajectory
     for (size_t i = 0; i < lin_traj->getWayPointCount(); ++i)
     {
       // transform time to interval [0, 4*pi]
-      const double sine_arg{ 4 * M_PI * lin_traj->getWayPointDurationFromStart(i) / duration };
+      const double sine_arg{ 4 * M_PI * lin_traj->getWayPointDurationFromStartAt(i).seconds() / duration };
 
       // get pose
       CartesianTrajectoryPoint waypoint;
@@ -655,7 +656,7 @@ TEST_F(TrajectoryBlenderTransitionWindowTest, testNonLinearBlending)
       // add to trajectory
       waypoint.pose = waypoint_pose;
       waypoint.time_from_start = rclcpp::Duration::from_seconds(
-          time_from_start_offset + time_scaling_factor * lin_traj->getWayPointDurationFromStart(i));
+          time_from_start_offset + time_scaling_factor * lin_traj->getWayPointDurationFromStartAt(i).seconds());
       cart_traj.points.push_back(waypoint);
     }
 

@@ -144,7 +144,7 @@ bool IterativeSplineParameterization::computeTimeStamps(robot_trajectory::RobotT
         point.setVariablePosition(idx[j],
                                   (9 * p0->getVariablePosition(idx[j]) + 1 * p1->getVariablePosition(idx[j])) / 10);
       }
-      trajectory.insertWayPoint(1, point, 0.0);
+      trajectory.insertWayPoint(1, point, rclcpp::Duration::from_seconds(0.0));
       num_points++;
 
       // 2nd-last point is 10% of p0, and 90% of p1
@@ -155,7 +155,7 @@ bool IterativeSplineParameterization::computeTimeStamps(robot_trajectory::RobotT
         point.setVariablePosition(idx[j],
                                   (1 * p0->getVariablePosition(idx[j]) + 9 * p1->getVariablePosition(idx[j])) / 10);
       }
-      trajectory.insertWayPoint(num_points - 1, point, 0.0);
+      trajectory.insertWayPoint(num_points - 1, point, rclcpp::Duration::from_seconds(0.0));
       num_points++;
     }
   }
@@ -327,7 +327,7 @@ bool IterativeSplineParameterization::computeTimeStamps(robot_trajectory::RobotT
 
   // Convert back to JointTrajectory form
   for (unsigned int i = 1; i < num_points; ++i)
-    trajectory.setWayPointDurationFromPrevious(i, time_diff[i - 1]);
+    trajectory.setWayPointDurationFromPrevious(i, rclcpp::Duration::from_seconds(time_diff[i - 1]));
   for (unsigned int i = 0; i < num_points; ++i)
   {
     for (unsigned int j = 0; j < num_joints; ++j)

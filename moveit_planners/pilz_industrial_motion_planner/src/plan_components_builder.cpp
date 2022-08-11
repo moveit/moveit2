@@ -64,7 +64,7 @@ void PlanComponentsBuilder::appendWithStrictTimeIncrease(robot_trajectory::Robot
 
   for (size_t i = 1; i < source.getWayPointCount(); ++i)
   {
-    result.addSuffixWayPoint(source.getWayPoint(i), source.getWayPointDurationFromPrevious(i));
+    result.addSuffixWayPoint(source.getWayPoint(i), source.getWayPointDurationFromPreviousAt(i));
   }
 }
 

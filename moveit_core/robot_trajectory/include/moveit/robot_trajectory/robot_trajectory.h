@@ -49,6 +49,7 @@
 #include "rclcpp/rclcpp.hpp"
 #include "rclcpp/time.hpp"
 #include "rclcpp/utilities.hpp"
+#include "rclcpp/duration.hpp"
 
 namespace robot_trajectory
 {
@@ -116,7 +117,7 @@ public:
 
   const moveit::core::RobotState& getWayPoint(std::size_t index) const
   {
-    return *waypoints_[index];
+    return *waypoints_.at(index);
   }
 
   const moveit::core::RobotState& getLastWayPoint() const
@@ -131,7 +132,7 @@ public:
 
   moveit::core::RobotStatePtr& getWayPointPtr(std::size_t index)
   {
-    return waypoints_[index];
+    return waypoints_.at(index);
   }
 
   moveit::core::RobotStatePtr& getLastWayPointPtr()
@@ -144,32 +145,57 @@ public:
     return waypoints_.front();
   }
 
-  const std::deque<double>& getWayPointDurations() const
+  std::deque<rclcpp::Duration> const& getDurationFromPreviousDeque() const
   {
     return duration_from_previous_;
+  }
+
+  [[deprecated("getWayPointDurations is deprecated, replaed by getDurationFromPreviousDeque")]] std::deque<double>
+  getWayPointDurations() const
+  {
+    std::deque<double> ret;
+    std::transform(duration_from_previous_.cbegin(), duration_from_previous_.cend(), ret.begin(),
+                   [](auto const& e) { return e.seconds(); });
+    return ret;
   }
 
   /** @brief  Returns the duration after start that a waypoint will be reached.
    *  @param  The waypoint index.
    *  @return The duration from start; returns overall duration if index is out of range.
    */
-  double getWayPointDurationFromStart(std::size_t index) const;
+  rclcpp::Duration getWayPointDurationFromStartAt(std::size_t index) const;
 
-  [[deprecated]] double getWaypointDurationFromStart(std::size_t index) const;
-
-  double getWayPointDurationFromPrevious(std::size_t index) const
+  [[deprecated("`getWayPointDurationFromStart` is deprecated, use `getWayPointDurationFromStartAt`")]] double
+  getWayPointDurationFromStart(std::size_t index) const
   {
-    if (duration_from_previous_.size() > index)
-      return duration_from_previous_[index];
-    else
-      return 0.0;
+    return getWayPointDurationFromStartAt(index).seconds();
   }
 
-  RobotTrajectory& setWayPointDurationFromPrevious(std::size_t index, double value)
+  rclcpp::Duration getWayPointDurationFromPreviousAt(std::size_t index) const
+  {
+    if (duration_from_previous_.size() > index)
+      return duration_from_previous_.at(index);
+    else
+      return rclcpp::Duration::from_seconds(0.0);
+  }
+
+  [[deprecated("`getWayPointDurationFromPrevious` is deprecated, use `getWayPointDurationFromPreviousAt`")]] double
+  getWayPointDurationFromPrevious(std::size_t index) const
+  {
+    return getWayPointDurationFromPreviousAt(index).seconds();
+  }
+
+  [[deprecated("Use of double for duration is deprecated, please pass in rclcpp::Duration")]] RobotTrajectory&
+  setWayPointDurationFromPrevious(std::size_t index, double value)
+  {
+    return setWayPointDurationFromPrevious(index, rclcpp::Duration::from_seconds(value));
+  }
+
+  RobotTrajectory& setWayPointDurationFromPrevious(std::size_t index, rclcpp::Duration value)
   {
     if (duration_from_previous_.size() <= index)
-      duration_from_previous_.resize(index + 1, 0.0);
-    duration_from_previous_[index] = value;
+      duration_from_previous_.resize(index + 1, rclcpp::Duration::from_seconds(0.0));
+    duration_from_previous_.at(index) = value;
     return *this;
   }
 
@@ -183,9 +209,15 @@ public:
    * \param state - current robot state
    * \param dt - duration from previous
    */
-  RobotTrajectory& addSuffixWayPoint(const moveit::core::RobotState& state, double dt)
+  RobotTrajectory& addSuffixWayPoint(const moveit::core::RobotState& state, rclcpp::Duration dt)
   {
     return addSuffixWayPoint(std::make_shared<moveit::core::RobotState>(state), dt);
+  }
+
+  [[deprecated("Use of double for duration is deprecated, please pass in rclcpp::Duration")]] RobotTrajectory&
+  addSuffixWayPoint(const moveit::core::RobotState& state, double dt)
+  {
+    return addSuffixWayPoint(state, rclcpp::Duration::from_seconds(dt));
   }
 
   /**
@@ -193,7 +225,7 @@ public:
    * \param state - current robot state
    * \param dt - duration from previous
    */
-  RobotTrajectory& addSuffixWayPoint(const moveit::core::RobotStatePtr& state, double dt)
+  RobotTrajectory& addSuffixWayPoint(const moveit::core::RobotStatePtr& state, rclcpp::Duration dt)
   {
     state->update();
     waypoints_.push_back(state);
@@ -201,12 +233,24 @@ public:
     return *this;
   }
 
-  RobotTrajectory& addPrefixWayPoint(const moveit::core::RobotState& state, double dt)
+  [[deprecated("Use of double for duration is deprecated, please pass in rclcpp::Duration")]] RobotTrajectory&
+  addSuffixWayPoint(const moveit::core::RobotStatePtr& state, double dt)
+  {
+    return addSuffixWayPoint(state, rclcpp::Duration::from_seconds(dt));
+  }
+
+  RobotTrajectory& addPrefixWayPoint(const moveit::core::RobotState& state, rclcpp::Duration dt)
   {
     return addPrefixWayPoint(std::make_shared<moveit::core::RobotState>(state), dt);
   }
 
-  RobotTrajectory& addPrefixWayPoint(const moveit::core::RobotStatePtr& state, double dt)
+  [[deprecated("Use of double for duration is deprecated, please pass in rclcpp::Duration")]] RobotTrajectory&
+  addPrefixWayPoint(const moveit::core::RobotState& state, double dt)
+  {
+    return addPrefixWayPoint(state, rclcpp::Duration::from_seconds(dt));
+  }
+
+  RobotTrajectory& addPrefixWayPoint(const moveit::core::RobotStatePtr& state, rclcpp::Duration dt)
   {
     state->update();
     waypoints_.push_front(state);
@@ -214,17 +258,35 @@ public:
     return *this;
   }
 
-  RobotTrajectory& insertWayPoint(std::size_t index, const moveit::core::RobotState& state, double dt)
+  [[deprecated("Use of double for duration is deprecated, please pass in rclcpp::Duration")]] RobotTrajectory&
+  addPrefixWayPoint(const moveit::core::RobotStatePtr& state, double dt)
+  {
+    return addPrefixWayPoint(state, rclcpp::Duration::from_seconds(dt));
+  }
+
+  RobotTrajectory& insertWayPoint(std::size_t index, const moveit::core::RobotState& state, rclcpp::Duration dt)
   {
     return insertWayPoint(index, std::make_shared<moveit::core::RobotState>(state), dt);
   }
 
-  RobotTrajectory& insertWayPoint(std::size_t index, const moveit::core::RobotStatePtr& state, double dt)
+  [[deprecated("Use of double for duration is deprecated, please pass in rclcpp::Duration")]] RobotTrajectory&
+  insertWayPoint(std::size_t index, const moveit::core::RobotState& state, double dt)
+  {
+    return insertWayPoint(index, state, rclcpp::Duration::from_seconds(dt));
+  }
+
+  RobotTrajectory& insertWayPoint(std::size_t index, const moveit::core::RobotStatePtr& state, rclcpp::Duration dt)
   {
     state->update();
     waypoints_.insert(waypoints_.begin() + index, state);
     duration_from_previous_.insert(duration_from_previous_.begin() + index, dt);
     return *this;
+  }
+
+  [[deprecated("Use of double for duration is deprecated, please pass in rclcpp::Duration")]] RobotTrajectory&
+  insertWayPoint(std::size_t index, const moveit::core::RobotStatePtr& state, double dt)
+  {
+    return insertWayPoint(index, state, rclcpp::Duration::from_seconds(dt));
   }
 
   /**
@@ -237,8 +299,15 @@ public:
    * \param end_index - index of last traj point of the part to append from the source traj, the default is to add until
    * the end of the source traj
    */
-  RobotTrajectory& append(const RobotTrajectory& source, double dt, size_t start_index = 0,
+  RobotTrajectory& append(const RobotTrajectory& source, rclcpp::Duration dt, size_t start_index = 0,
                           size_t end_index = std::numeric_limits<std::size_t>::max());
+
+  [[deprecated("Use of double for duration is deprecated, please pass in rclcpp::Duration")]] RobotTrajectory&
+  append(const RobotTrajectory& source, double dt, size_t start_index = 0,
+         size_t end_index = std::numeric_limits<std::size_t>::max())
+  {
+    return append(source, rclcpp::Duration::from_seconds(dt), start_index, end_index);
+  }
 
   void swap(robot_trajectory::RobotTrajectory& other);
 
@@ -249,9 +318,10 @@ public:
     return *this;
   }
 
-  double getDuration() const;
+  [[deprecated("`getDuration` is deprecated, use the free function `total_duration`")]] double getDuration() const;
 
-  double getAverageSegmentDuration() const;
+  [[deprecated("`getAverageSegmentDuration` is deprecated, use the free function `average_segment_duration`")]] double
+  getAverageSegmentDuration() const;
 
   void getRobotTrajectoryMsg(moveit_msgs::msg::RobotTrajectory& trajectory,
                              const std::vector<std::string>& joint_filter = std::vector<std::string>()) const;
@@ -296,7 +366,14 @@ public:
    *  @param The waypoint index after (or equal to) the supplied duration.
    *  @param The progress (0 to 1) between the two waypoints, based on time (not based on joint distances).
    */
-  void findWayPointIndicesForDurationAfterStart(const double& duration, int& before, int& after, double& blend) const;
+  void findWayPointIndicesForDurationAfterStart(const rclcpp::Duration& duration, int& before, int& after,
+                                                double& blend) const;
+
+  [[deprecated("Use of double for duration is deprecated, please pass in rclcpp::Duration")]] void
+  findWayPointIndicesForDurationAfterStart(const double& duration, int& before, int& after, double& blend) const
+  {
+    findWayPointIndicesForDurationAfterStart(rclcpp::Duration::from_seconds(duration), before, after, blend);
+  }
 
   // TODO support visitor function for interpolation, or at least different types.
   /** @brief Gets a robot state corresponding to a supplied duration from start for the trajectory, using linear time
@@ -305,16 +382,23 @@ public:
    *  @param The resulting robot state.
    *  @return True if state is valid, false otherwise (trajectory is empty).
    */
-  bool getStateAtDurationFromStart(const double request_duration, moveit::core::RobotStatePtr& output_state) const;
+  bool getStateAtDurationFromStart(const rclcpp::Duration request_duration,
+                                   moveit::core::RobotStatePtr& output_state) const;
+
+  [[deprecated("Use of double for duration is deprecated, please pass in rclcpp::Duration")]] bool
+  getStateAtDurationFromStart(const double request_duration, moveit::core::RobotStatePtr& output_state) const
+  {
+    return getStateAtDurationFromStart(rclcpp::Duration::from_seconds(request_duration), output_state);
+  }
 
   class Iterator
   {
     std::deque<moveit::core::RobotStatePtr>::iterator waypoint_iterator;
-    std::deque<double>::iterator duration_iterator;
+    std::deque<rclcpp::Duration>::iterator duration_iterator;
 
   public:
     explicit Iterator(std::deque<moveit::core::RobotStatePtr>::iterator _waypoint_iterator,
-                      std::deque<double>::iterator _duration_iterator)
+                      std::deque<rclcpp::Duration>::iterator _duration_iterator)
       : waypoint_iterator(_waypoint_iterator), duration_iterator(_duration_iterator)
     {
     }
@@ -338,16 +422,16 @@ public:
     {
       return !(*this == other);
     }
-    std::pair<moveit::core::RobotStatePtr, double> operator*() const
+    std::pair<moveit::core::RobotStatePtr, rclcpp::Duration> operator*() const
     {
       return std::pair{ *waypoint_iterator, *duration_iterator };
     }
 
     // iterator traits
     using difference_type = long;
-    using value_type = std::pair<moveit::core::RobotStatePtr, double>;
-    using pointer = const std::pair<moveit::core::RobotStatePtr, double>*;
-    using reference = std::pair<moveit::core::RobotStatePtr, double>;
+    using value_type = std::pair<moveit::core::RobotStatePtr, rclcpp::Duration>;
+    using pointer = const std::pair<moveit::core::RobotStatePtr, rclcpp::Duration>*;
+    using reference = std::pair<moveit::core::RobotStatePtr, rclcpp::Duration>;
     using iterator_category = std::input_iterator_tag;
   };
 
@@ -380,11 +464,17 @@ private:
   moveit::core::RobotModelConstPtr robot_model_;
   const moveit::core::JointModelGroup* group_;
   std::deque<moveit::core::RobotStatePtr> waypoints_;
-  std::deque<double> duration_from_previous_;
+  std::deque<rclcpp::Duration> duration_from_previous_;
   rclcpp::Clock clock_ros_;
 };
 
 /** @brief Operator overload for printing trajectory to a stream */
 std::ostream& operator<<(std::ostream& out, const RobotTrajectory& trajectory);
+
+/// \brief Calculate the total duration of a trajectory
+rclcpp::Duration total_duration(RobotTrajectory const& trajectory);
+
+/// \brief Calculate the average duration of each segment of a trajectory
+rclcpp::Duration average_segment_duration(RobotTrajectory const& trajectory);
 
 }  // namespace robot_trajectory

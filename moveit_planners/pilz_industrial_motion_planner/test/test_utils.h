@@ -230,7 +230,8 @@ inline int getWayPointIndex(const robot_trajectory::RobotTrajectoryPtr& trajecto
 {
   int index_before, index_after;
   double blend;
-  trajectory->findWayPointIndicesForDurationAfterStart(time_from_start, index_before, index_after, blend);
+  trajectory->findWayPointIndicesForDurationAfterStart(rclcpp::Duration::from_seconds(time_from_start), index_before,
+                                                       index_after, blend);
   return blend > 0.5 ? index_after : index_before;
 }
 

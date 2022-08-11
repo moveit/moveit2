@@ -1110,7 +1110,7 @@ bool TimeOptimalTrajectoryGeneration::doTimeParameterizationCalculations(robot_t
     waypoint.zeroVelocities();
     waypoint.zeroAccelerations();
     trajectory.clear();
-    trajectory.addSuffixWayPoint(waypoint, 0.0);
+    trajectory.addSuffixWayPoint(waypoint, rclcpp::Duration::from_seconds(0.0));
     return true;
   }
 
@@ -1144,7 +1144,7 @@ bool TimeOptimalTrajectoryGeneration::doTimeParameterizationCalculations(robot_t
       waypoint.setVariableAcceleration(idx[j], acceleration[j]);
     }
 
-    trajectory.addSuffixWayPoint(waypoint, t - last_t);
+    trajectory.addSuffixWayPoint(waypoint, rclcpp::Duration::from_seconds(t - last_t));
     last_t = t;
   }
 

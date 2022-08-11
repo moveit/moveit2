@@ -114,7 +114,7 @@ public:
             added_path_index.push_back(i);
 
           // we need to append the solution paths.
-          res2.trajectory_->append(*res.trajectory_, 0.0);
+          res2.trajectory_->append(*res.trajectory_, rclcpp::Duration::from_seconds(0.0));
           res2.trajectory_->swap(*res.trajectory_);
           return true;
         }

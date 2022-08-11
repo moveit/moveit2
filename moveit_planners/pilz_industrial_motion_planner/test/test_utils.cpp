@@ -489,10 +489,10 @@ bool testutils::checkJointTrajectory(const trajectory_msgs::msg::JointTrajectory
   // Check for strictly positively increasing time steps
   for (unsigned int i = 1; i < trajectory->getWayPointCount(); ++i)
   {
-    if (trajectory->getWayPointDurationFromPrevious(i) <= 0.0)
+    if (trajectory->getWayPointDurationFromPreviousAt(i).seconds() <= 0.0)
     {
       return ::testing::AssertionFailure()
-             << "Waypoint " << (i) << " has " << trajectory->getWayPointDurationFromPrevious(i)
+             << "Waypoint " << (i) << " has " << trajectory->getWayPointDurationFromPreviousAt(i).seconds()
              << " time between itself and its predecessor."
              << " Total points in trajectory: " << trajectory->getWayPointCount() << ".";
     }
@@ -593,7 +593,8 @@ bool testutils::checkOriginalTrajectoryAfterBlending(const pilz_industrial_motio
     }
 
     // check time from start
-    if (res.first_trajectory->getWayPointDurationFromStart(i) != req.first_trajectory->getWayPointDurationFromStart(i))
+    if (res.first_trajectory->getWayPointDurationFromStartAt(i).seconds() !=
+        req.first_trajectory->getWayPointDurationFromStartAt(i).seconds())
     {
       std::cout << i << "th time_from_start of the first trajectory is not same." << '\n';
       return false;
@@ -636,29 +637,32 @@ bool testutils::checkOriginalTrajectoryAfterBlending(const pilz_industrial_motio
     // check time from start
     if (i < size_second - 1)
     {
-      if (fabs((res.second_trajectory->getWayPointDurationFromStart(size_second - i - 1) -
-                res.second_trajectory->getWayPointDurationFromStart(size_second - i - 2)) -
-               (req.second_trajectory->getWayPointDurationFromStart(size_second_original - i - 1) -
-                req.second_trajectory->getWayPointDurationFromStart(size_second_original - i - 2))) > time_tolerance)
+      if (fabs((res.second_trajectory->getWayPointDurationFromStartAt(size_second - i - 1).seconds() -
+                res.second_trajectory->getWayPointDurationFromStartAt(size_second - i - 2).seconds()) -
+               (req.second_trajectory->getWayPointDurationFromStartAt(size_second_original - i - 1).seconds() -
+                req.second_trajectory->getWayPointDurationFromStartAt(size_second_original - i - 2).seconds())) >
+          time_tolerance)
       {
-        std::cout << size_second - i - 1 << "th time from start of the second trajectory is not same."
-                  << res.second_trajectory->getWayPointDurationFromStart(size_second - i - 1) << ", "
-                  << res.second_trajectory->getWayPointDurationFromStart(size_second - i - 2) << ", "
-                  << req.second_trajectory->getWayPointDurationFromStart(size_second_original - i - 1) << ", "
-                  << req.second_trajectory->getWayPointDurationFromStart(size_second_original - i - 2) << '\n';
+        std::cout
+            << size_second - i - 1 << "th time from start of the second trajectory is not same."
+            << res.second_trajectory->getWayPointDurationFromStartAt(size_second - i - 1).seconds() << ", "
+            << res.second_trajectory->getWayPointDurationFromStartAt(size_second - i - 2).seconds() << ", "
+            << req.second_trajectory->getWayPointDurationFromStartAt(size_second_original - i - 1).seconds() << ", "
+            << req.second_trajectory->getWayPointDurationFromStartAt(size_second_original - i - 2).seconds() << '\n';
         return false;
       }
     }
     else
     {
-      if (fabs((res.second_trajectory->getWayPointDurationFromStart(size_second - i - 1)) -
-               (req.second_trajectory->getWayPointDurationFromStart(size_second_original - i - 1) -
-                req.second_trajectory->getWayPointDurationFromStart(size_second_original - i - 2))) > time_tolerance)
+      if (fabs((res.second_trajectory->getWayPointDurationFromStartAt(size_second - i - 1).seconds()) -
+               (req.second_trajectory->getWayPointDurationFromStartAt(size_second_original - i - 1).seconds() -
+                req.second_trajectory->getWayPointDurationFromStartAt(size_second_original - i - 2).seconds())) >
+          time_tolerance)
       {
         std::cout << size_second - i - 1 << "th time from start of the second trajectory is not same."
-                  << res.second_trajectory->getWayPointDurationFromStart(size_second - i - 1) << ", "
-                  << req.second_trajectory->getWayPointDurationFromStart(size_second_original - i - 1) -
-                         req.second_trajectory->getWayPointDurationFromStart(size_second_original - i - 2)
+                  << res.second_trajectory->getWayPointDurationFromStartAt(size_second - i - 1).seconds() << ", "
+                  << req.second_trajectory->getWayPointDurationFromStartAt(size_second_original - i - 1).seconds() -
+                         req.second_trajectory->getWayPointDurationFromStartAt(size_second_original - i - 2).seconds()
                   << '\n';
         return false;
       }
@@ -777,7 +781,8 @@ bool testutils::checkBlendingCartSpaceContinuity(const pilz_industrial_motion_pl
                                                  const pilz_industrial_motion_planner::LimitsContainer& planner_limits)
 {
   // sampling time
-  double duration = res.blend_trajectory->getWayPointDurationFromPrevious(res.blend_trajectory->getWayPointCount() - 1);
+  double duration =
+      res.blend_trajectory->getWayPointDurationFromPreviousAt(res.blend_trajectory->getWayPointCount() - 1).seconds();
   if (duration == 0.0)
   {
     std::cout << "Cannot perform check of cartesian space continuity with "
@@ -1000,7 +1005,7 @@ void testutils::createFakeCartTraj(const robot_trajectory::RobotTrajectoryPtr& t
   for (size_t i = 0; i < traj->getWayPointCount(); ++i)
   {
     trajectory_msgs::msg::JointTrajectoryPoint waypoint;
-    waypoint.time_from_start = rclcpp::Duration::from_seconds(traj->getWayPointDurationFromStart(i));
+    waypoint.time_from_start = rclcpp::Duration::from_seconds(traj->getWayPointDurationFromStartAt(i).seconds());
     Eigen::Isometry3d waypoint_pose = traj->getWayPointPtr(i)->getFrameTransform(link_name);
     Eigen::Vector3d waypoint_position = waypoint_pose.translation();
     waypoint.positions.push_back(waypoint_position(0));
@@ -1374,8 +1379,8 @@ testutils::checkCartesianTranslationalPath(const robot_trajectory::RobotTrajecto
     auto waypoint_pose_1 = trajectory->getWayPoint(i - 1).getFrameTransform(link_name);
     auto waypoint_pose_2 = trajectory->getWayPoint(i).getFrameTransform(link_name);
 
-    auto t1 = trajectory->getWayPointDurationFromPrevious(i - 1);
-    auto t2 = trajectory->getWayPointDurationFromPrevious(i);
+    auto t1 = trajectory->getWayPointDurationFromPreviousAt(i - 1).seconds();
+    auto t2 = trajectory->getWayPointDurationFromPreviousAt(i).seconds();
 
     auto vel1 = (waypoint_pose_1.translation() - waypoint_pose_0.translation()).norm() / t1;
     auto vel2 = (waypoint_pose_2.translation() - waypoint_pose_1.translation()).norm() / t2;
@@ -1411,8 +1416,8 @@ testutils::checkCartesianRotationalPath(const robot_trajectory::RobotTrajectoryC
     auto waypoint_pose_1 = trajectory->getWayPoint(i - 1).getFrameTransform(link_name);
     auto waypoint_pose_2 = trajectory->getWayPoint(i).getFrameTransform(link_name);
 
-    auto t1 = trajectory->getWayPointDurationFromPrevious(i - 1);
-    auto t2 = trajectory->getWayPointDurationFromPrevious(i);
+    auto t1 = trajectory->getWayPointDurationFromPreviousAt(i - 1).seconds();
+    auto t2 = trajectory->getWayPointDurationFromPreviousAt(i).seconds();
 
     Eigen::Quaterniond orientation0(waypoint_pose_0.rotation());
     Eigen::Quaterniond orientation1(waypoint_pose_1.rotation());

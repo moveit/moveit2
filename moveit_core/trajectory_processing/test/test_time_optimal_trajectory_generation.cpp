@@ -165,7 +165,7 @@ TEST(time_optimal_trajectory_generation, test_custom_limits)
   moveit::core::RobotState waypoint_state(robot_model);
   waypoint_state.setToDefaultValues();
 
-  const double delta_t = 0.1;
+  const auto delta_t = rclcpp::Duration::from_seconds(0.1);
   robot_trajectory::RobotTrajectory trajectory(robot_model, group);
   waypoint_state.setJointGroupPositions(group, std::vector<double>{ -0.5, -3.52, 1.35, -2.51, -0.88, 0.63, 0.0 });
   trajectory.addSuffixWayPoint(waypoint_state, delta_t);
@@ -272,7 +272,7 @@ TEST(time_optimal_trajectory_generation, testLastWaypoint)
   robot_trajectory::RobotTrajectory trajectory(robot_model, group);
   auto add_waypoint = [&](const std::vector<double>& waypoint) {
     waypoint_state.setJointGroupPositions(group, waypoint);
-    trajectory.addSuffixWayPoint(waypoint_state, 0.1);
+    trajectory.addSuffixWayPoint(waypoint_state, rclcpp::Duration::from_seconds(0.1));
   };
   add_waypoint({ 0.000000000, 0.000000000 });
   add_waypoint({ 0.000396742, 0.000396742 });
@@ -391,17 +391,17 @@ TEST(time_optimal_trajectory_generation, testPluginAPI)
 
   robot_trajectory::RobotTrajectory trajectory(robot_model, group);
   waypoint_state.setJointGroupPositions(group, std::vector<double>{ -0.5, -3.52, 1.35, -2.51, -0.88, 0.63, 0.0 });
-  trajectory.addSuffixWayPoint(waypoint_state, 0.1);
+  trajectory.addSuffixWayPoint(waypoint_state, rclcpp::Duration::from_seconds(0.1));
   waypoint_state.setJointGroupPositions(group, std::vector<double>{ -0.5, -3.52, 1.35, -2.51, -0.88, 0.63, 0.0 });
-  trajectory.addSuffixWayPoint(waypoint_state, 0.1);
+  trajectory.addSuffixWayPoint(waypoint_state, rclcpp::Duration::from_seconds(0.1));
   waypoint_state.setJointGroupPositions(group, std::vector<double>{ 0.0, -3.5, 1.4, -1.2, -1.0, -0.2, 0.0 });
-  trajectory.addSuffixWayPoint(waypoint_state, 0.1);
+  trajectory.addSuffixWayPoint(waypoint_state, rclcpp::Duration::from_seconds(0.1));
   waypoint_state.setJointGroupPositions(group, std::vector<double>{ -0.5, -3.52, 1.35, -2.51, -0.88, 0.63, 0.0 });
-  trajectory.addSuffixWayPoint(waypoint_state, 0.1);
+  trajectory.addSuffixWayPoint(waypoint_state, rclcpp::Duration::from_seconds(0.1));
   waypoint_state.setJointGroupPositions(group, std::vector<double>{ 0.0, -3.5, 1.4, -1.2, -1.0, -0.2, 0.0 });
-  trajectory.addSuffixWayPoint(waypoint_state, 0.1);
+  trajectory.addSuffixWayPoint(waypoint_state, rclcpp::Duration::from_seconds(0.1));
   waypoint_state.setJointGroupPositions(group, std::vector<double>{ -0.5, -3.52, 1.35, -2.51, -0.88, 0.63, 0.0 });
-  trajectory.addSuffixWayPoint(waypoint_state, 0.1);
+  trajectory.addSuffixWayPoint(waypoint_state, rclcpp::Duration::from_seconds(0.1));
 
   // Number TOTG iterations
   constexpr size_t totg_iterations = 10;
@@ -412,7 +412,7 @@ TEST(time_optimal_trajectory_generation, testPluginAPI)
     robot_trajectory::RobotTrajectory test_trajectory(trajectory, true /* deep copy */);
 
     // Test if the trajectory was copied correctly
-    ASSERT_EQ(test_trajectory.getDuration(), trajectory.getDuration());
+    ASSERT_EQ(robot_trajectory::total_duration(test_trajectory), robot_trajectory::total_duration(trajectory));
     moveit::core::JointBoundsVector test_bounds = test_trajectory.getRobotModel()->getActiveJointModelsBounds();
     moveit::core::JointBoundsVector original_bounds = trajectory.getRobotModel()->getActiveJointModelsBounds();
     ASSERT_EQ(test_bounds.size(), original_bounds.size());
@@ -430,7 +430,7 @@ TEST(time_optimal_trajectory_generation, testPluginAPI)
       ASSERT_EQ(test_bounds.at(0)->at(bound_idx).acceleration_bounded_,
                 original_bounds.at(0)->at(bound_idx).acceleration_bounded_);
     }
-    ASSERT_EQ(test_trajectory.getWayPointDurationFromPrevious(1), trajectory.getWayPointDurationFromPrevious(1));
+    ASSERT_EQ(test_trajectory.getWayPointDurationFromPreviousAt(1), trajectory.getWayPointDurationFromPreviousAt(1));
 
     TimeOptimalTrajectoryGeneration totg;
     ASSERT_TRUE(totg.computeTimeStamps(test_trajectory)) << "Failed to compute time stamps";

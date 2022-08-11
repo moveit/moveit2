@@ -220,7 +220,7 @@ bool RuckigSmoothing::runRuckig(robot_trajectory::RobotTrajectory& trajectory,
   trajectory.unwind();
 
   // Initialize the smoother
-  double timestep = trajectory.getAverageSegmentDuration();
+  double timestep = robot_trajectory::average_segment_duration(trajectory).seconds();
   std::unique_ptr<ruckig::Ruckig<ruckig::DynamicDOFs>> ruckig_ptr;
   ruckig_ptr = std::make_unique<ruckig::Ruckig<ruckig::DynamicDOFs>>(num_dof, timestep);
   initializeRuckigState(*trajectory.getFirstWayPointPtr(), group, ruckig_input, ruckig_output);
@@ -258,12 +258,13 @@ bool RuckigSmoothing::runRuckig(robot_trajectory::RobotTrajectory& trajectory,
         for (size_t time_stretch_idx = 1; time_stretch_idx < num_waypoints; ++time_stretch_idx)
         {
           trajectory.setWayPointDurationFromPrevious(
-              time_stretch_idx,
-              duration_extension_factor * original_trajectory.getWayPointDurationFromPrevious(time_stretch_idx));
+              time_stretch_idx, rclcpp::Duration::from_seconds(
+                                    duration_extension_factor *
+                                    original_trajectory.getWayPointDurationFromPreviousAt(time_stretch_idx).seconds()));
           // re-calculate waypoint velocity and acceleration
           auto target_state = trajectory.getWayPointPtr(time_stretch_idx);
           const auto prev_state = trajectory.getWayPointPtr(time_stretch_idx - 1);
-          timestep = trajectory.getAverageSegmentDuration();
+          timestep = robot_trajectory::average_segment_duration(trajectory).seconds();
           for (size_t joint = 0; joint < num_dof; ++joint)
           {
             target_state->setVariableVelocity(move_group_idx.at(joint),

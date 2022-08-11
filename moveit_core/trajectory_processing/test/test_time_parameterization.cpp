@@ -71,7 +71,7 @@ int initRepeatedPointTrajectory(robot_trajectory::RobotTrajectory& trajectory)
   for (i = 0; i < num; ++i)
   {
     state.setVariablePosition(idx[0], 1.0);
-    trajectory.addSuffixWayPoint(state, 0.0);
+    trajectory.addSuffixWayPoint(state, rclcpp::Duration::from_seconds(0.0));
   }
 
   return 0;
@@ -98,12 +98,12 @@ int initStraightTrajectory(robot_trajectory::RobotTrajectory& trajectory)
   for (i = 0; i < num; ++i)
   {
     state.setVariablePosition(idx[0], i * max / num);
-    trajectory.addSuffixWayPoint(state, 0.0);
+    trajectory.addSuffixWayPoint(state, rclcpp::Duration::from_seconds(0.0));
   }
 
   // leave final velocity/acceleration unset
   state.setVariablePosition(idx[0], max);
-  trajectory.addSuffixWayPoint(state, 0.0);
+  trajectory.addSuffixWayPoint(state, rclcpp::Duration::from_seconds(0.0));
 
   return 0;
 }
@@ -126,7 +126,8 @@ TEST(TestTimeParameterization, TestIterativeParabolic)
   std::cout << "IterativeParabolicTimeParameterization  took " << (std::chrono::system_clock::now() - wt).count()
             << '\n';
   printTrajectory(TRAJECTORY);
-  ASSERT_LT(TRAJECTORY.getWayPointDurationFromStart(TRAJECTORY.getWayPointCount() - 1), 3.0);
+  ASSERT_LT(TRAJECTORY.getWayPointDurationFromStartAt(TRAJECTORY.getWayPointCount() - 1),
+            rclcpp::Duration::from_seconds(3.0));
 }
 
 TEST(TestTimeParameterization, TestIterativeSpline)
@@ -138,7 +139,8 @@ TEST(TestTimeParameterization, TestIterativeSpline)
   EXPECT_TRUE(time_parameterization.computeTimeStamps(TRAJECTORY));
   std::cout << "IterativeSplineParameterization took " << (std::chrono::system_clock::now() - wt).count() << '\n';
   printTrajectory(TRAJECTORY);
-  ASSERT_LT(TRAJECTORY.getWayPointDurationFromStart(TRAJECTORY.getWayPointCount() - 1), 5.0);
+  ASSERT_LT(TRAJECTORY.getWayPointDurationFromStartAt(TRAJECTORY.getWayPointCount() - 1),
+            rclcpp::Duration::from_seconds(5.0));
 }
 
 TEST(TestTimeParameterization, TestIterativeSplineAddPoints)
@@ -151,7 +153,8 @@ TEST(TestTimeParameterization, TestIterativeSplineAddPoints)
   std::cout << "IterativeSplineParameterization with added points took "
             << (std::chrono::system_clock::now() - wt).count() << '\n';
   printTrajectory(TRAJECTORY);
-  ASSERT_LT(TRAJECTORY.getWayPointDurationFromStart(TRAJECTORY.getWayPointCount() - 1), 5.0);
+  ASSERT_LT(TRAJECTORY.getWayPointDurationFromStartAt(TRAJECTORY.getWayPointCount() - 1),
+            rclcpp::Duration::from_seconds(5.0));
 }
 
 TEST(TestTimeParameterization, TestRepeatedPoint)
@@ -161,7 +164,8 @@ TEST(TestTimeParameterization, TestRepeatedPoint)
 
   EXPECT_TRUE(time_parameterization.computeTimeStamps(TRAJECTORY));
   printTrajectory(TRAJECTORY);
-  ASSERT_LT(TRAJECTORY.getWayPointDurationFromStart(TRAJECTORY.getWayPointCount() - 1), 0.001);
+  ASSERT_LT(TRAJECTORY.getWayPointDurationFromStartAt(TRAJECTORY.getWayPointCount() - 1),
+            rclcpp::Duration::from_seconds(0.001));
 }
 
 int main(int argc, char** argv)

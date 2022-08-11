@@ -207,12 +207,12 @@ void updateTrajectory(robot_trajectory::RobotTrajectory& rob_trajectory, const s
 
   int num_points = rob_trajectory.getWayPointCount();
 
-  rob_trajectory.setWayPointDurationFromPrevious(0, time_sum);
+  rob_trajectory.setWayPointDurationFromPrevious(0, rclcpp::Duration::from_seconds(time_sum));
 
   // Times
   for (int i = 1; i < num_points; ++i)
     // Update the time between the waypoints in the robot_trajectory.
-    rob_trajectory.setWayPointDurationFromPrevious(i, time_diff[i - 1]);
+    rob_trajectory.setWayPointDurationFromPrevious(i, rclcpp::Duration::from_seconds(time_diff[i - 1]));
 
   // Return if there is only one point in the trajectory!
   if (num_points <= 1)
