@@ -150,7 +150,7 @@ public:
     return duration_from_previous_;
   }
 
-  [[deprecated("getWayPointDurations is deprecated, replaed by getDurationFromPreviousDeque")]] std::deque<double>
+  [[deprecated("getWayPointDurations is deprecated, replaced by getDurationFromPreviousDeque")]] std::deque<double>
   getWayPointDurations() const
   {
     std::deque<double> ret;
