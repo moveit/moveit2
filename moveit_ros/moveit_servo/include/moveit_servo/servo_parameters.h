@@ -96,7 +96,6 @@ struct ServoParameters
   bool halt_all_joints_in_cartesian_mode{ true };
   // Configure handling of singularities and joint limits
   double lower_singularity_threshold{ 17.0 };
-  double approaching_stop_singularity_threshold{ 23.5 };
   double hard_stop_singularity_threshold{ 30.0 };
   double leaving_singularity_threshold_multiplier{ 2.0 };
   double joint_limit_margin{ 0.1 };

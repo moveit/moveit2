@@ -230,18 +230,18 @@ void ServoParameters::declare(const std::string& ns,
   node_parameters->declare_parameter(
       ns + ".hard_stop_singularity_threshold", ParameterValue{ parameters.hard_stop_singularity_threshold },
       ParameterDescriptorBuilder{}.type(PARAMETER_DOUBLE).description("Stop when the condition number hits this"));
-  // Default approaching_stop_singularity_threshold to hard_stop_singularity_threshold
-  node_parameters->declare_parameter(
-      ns + ".approaching_stop_singularity_threshold",
-      ParameterValue{ parameters.approaching_stop_singularity_threshold },
-      ParameterDescriptorBuilder{}
-          .type(PARAMETER_DOUBLE)
-          .description("Stop when the condition number hits this and we are continuing to approach singularity"));
   node_parameters->declare_parameter(
       ns + ".joint_limit_margin", ParameterValue{ parameters.joint_limit_margin },
       ParameterDescriptorBuilder{}
           .type(PARAMETER_DOUBLE)
           .description("Added as a buffer to joint limits [radians]. If moving quickly, make this larger."));
+  node_parameters->declare_parameter(
+      ns + ".leaving_singularity_threshold_multiplier",
+      ParameterValue{ parameters.leaving_singularity_threshold_multiplier },
+      ParameterDescriptorBuilder{}
+          .type(PARAMETER_DOUBLE)
+          .description("When 'lower_singularity_threshold' is triggered, but we are moving away from singularity, move "
+                       "this many times faster than if we were moving further into singularity"));
 
   // Collision checking
   node_parameters->declare_parameter(ns + ".check_collisions", ParameterValue{ parameters.check_collisions },
@@ -262,13 +262,6 @@ void ServoParameters::declare(const std::string& ns,
                                      ParameterDescriptorBuilder{}
                                          .type(PARAMETER_DOUBLE)
                                          .description("Start decelerating when a scene collision is this far [m]"));
-  node_parameters->declare_parameter(
-      ns + ".leaving_singularity_threshold_multiplier",
-      ParameterValue{ parameters.leaving_singularity_threshold_multiplier },
-      ParameterDescriptorBuilder{}
-          .type(PARAMETER_DOUBLE)
-          .description("When 'lower_singularity_threshold' is triggered, but we are moving away from singularity, move "
-                       "this many times faster than if we were moving further into singularity"));
 }
 
 ServoParameters ServoParameters::get(const std::string& ns,
@@ -342,7 +335,7 @@ ServoParameters ServoParameters::get(const std::string& ns,
   else
   {
     parameters.leaving_singularity_threshold_multiplier = 1.0;
-    RCLCPP_WARN(LOGGER, "Using deprecated servo singularity handling; add parameter "
+    RCLCPP_WARN(LOGGER, "Using default servo singularity handling; add parameter "
                         "'leaving_singularity_threshold_multiplier' to define leaving singularity threshold. See "
                         "https://github.com/ros-planning/moveit2/pull/620 for more information.");
   }
@@ -370,6 +363,12 @@ std::optional<ServoParameters> ServoParameters::validate(ServoParameters paramet
   if (parameters.num_outgoing_halt_msgs_to_publish < 0)
   {
     RCLCPP_WARN(LOGGER, "Parameter 'num_outgoing_halt_msgs_to_publish' should be greater than zero. Check yaml file.");
+    return std::nullopt;
+  }
+  if (parameters.leaving_singularity_threshold_multiplier <= 0)
+  {
+    RCLCPP_WARN(LOGGER,
+                "Parameter 'leaving_singularity_threshold_multiplier' should be greater than zero. Check yaml file.");
     return std::nullopt;
   }
   if (parameters.hard_stop_singularity_threshold <= parameters.lower_singularity_threshold)
