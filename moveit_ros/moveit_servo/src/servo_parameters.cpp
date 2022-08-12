@@ -341,7 +341,6 @@ ServoParameters ServoParameters::get(const std::string& ns,
   }
   else
   {
-    // if multiplier is 1.0, original behavior is preserved
     parameters.leaving_singularity_threshold_multiplier = 1.0;
     RCLCPP_WARN(LOGGER, "Using deprecated servo singularity handling; add parameter "
                         "'leaving_singularity_threshold_multiplier' to define leaving singularity threshold. See "
