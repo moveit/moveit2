@@ -373,13 +373,6 @@ std::optional<ServoParameters> ServoParameters::validate(ServoParameters paramet
     RCLCPP_WARN(LOGGER, "Parameter 'num_outgoing_halt_msgs_to_publish' should be greater than zero. Check yaml file.");
     return std::nullopt;
   }
-  if (parameters.hard_stop_singularity_threshold <= parameters.approaching_stop_singularity_threshold)
-  {
-    RCLCPP_WARN(LOGGER, "Parameter 'hard_stop_singularity_threshold' "
-                        "should be greater than 'approaching_stop_singularity_threshold.' "
-                        "Check yaml file.");
-    return std::nullopt;
-  }
   if (parameters.hard_stop_singularity_threshold <= parameters.lower_singularity_threshold)
   {
     RCLCPP_WARN(LOGGER, "Parameter 'hard_stop_singularity_threshold' "
