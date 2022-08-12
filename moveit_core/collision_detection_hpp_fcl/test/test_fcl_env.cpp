@@ -42,8 +42,8 @@
 #include <moveit/robot_state/robot_state.h>
 #include <moveit/utils/robot_model_test_utils.h>
 
-#include <moveit/collision_detection_fcl/collision_common.h>
-#include <moveit/collision_detection_fcl/collision_env_fcl.h>
+#include <moveit/collision_detection_hpp_fcl/collision_common.h>
+#include <moveit/collision_detection_hpp_fcl/collision_env_hpp_fcl.h>
 
 #include <urdf_parser/urdf_parser.h>
 #include <geometric_shapes/shape_operations.h>
@@ -89,7 +89,7 @@ protected:
     acm_->setEntry("panda_link5", "panda_link7", true);
     acm_->setEntry("panda_link6", "panda_hand", true);
 
-    c_env_ = std::make_shared<collision_detection::CollisionEnvFCL>(robot_model_);
+    c_env_ = std::make_shared<collision_detection::CollisionEnvHPPFCL>(robot_model_);
 
     robot_state_ = std::make_shared<moveit::core::RobotState>(robot_model_);
 
