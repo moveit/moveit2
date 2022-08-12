@@ -36,6 +36,7 @@
   <depend>bullet</depend>
   <depend>eigen_stl_containers</depend>
   <depend>libfcl-dev</depend>
+  <!-- <depend>hpp-fcl</depend> -->
   <depend>geometric_shapes</depend>
   <depend>geometry_msgs</depend>
   <depend>kdl_parser</depend>

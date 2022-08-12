@@ -12,6 +12,7 @@ find_package(Eigen3 REQUIRED)
 
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(LIBFCL REQUIRED "fcl>=0.5.0")
+pkg_check_modules(hpp-fcl REQUIRED hpp-fcl)
 # replace LIBFCL_LIBRARIES with full paths to the libraries
 set(LIBFCL_LIBRARIES_FULL "")
 foreach(LIBFCL_LIBRARY ${LIBFCL_LIBRARIES})
@@ -59,6 +60,7 @@ set(THIS_PACKAGE_INCLUDE_DIRS
     exceptions/include
     collision_detection/include
     collision_detection_fcl/include
+    collision_detection_hpp_fcl/include
     collision_detection_bullet/include
     constraint_samplers/include
     controller_manager/include
@@ -137,6 +139,7 @@ set(THIS_PACKAGE_INCLUDE_DEPENDS
 
 include_directories(SYSTEM ${EIGEN3_INCLUDE_DIRS}
   ${LIBFCL_INCLUDE_DIRS}
+  ${hpp-fcl_INCLUDE_DIRS}
 )
 
 include_directories(${THIS_PACKAGE_INCLUDE_DIRS}
@@ -177,6 +180,7 @@ add_subdirectory(version)
 add_subdirectory(collision_detection)
 add_subdirectory(collision_detection_bullet)
 add_subdirectory(collision_detection_fcl)
+add_subdirectory(collision_detection_hpp_fcl)
 
 # TODO: Port python bindings
 # add_subdirectory(python)
@@ -220,6 +224,7 @@ ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS} orocos_kdl_vendor)
 
 # Plugin exports
 pluginlib_export_plugin_description_file(moveit_core collision_detector_fcl_description.xml)
+pluginlib_export_plugin_description_file(moveit_core collision_detector_hpp_fcl_description.xml)
 pluginlib_export_plugin_description_file(moveit_core collision_detector_bullet_description.xml)
 pluginlib_export_plugin_description_file(moveit_core filter_plugin_butterworth.xml)
 
