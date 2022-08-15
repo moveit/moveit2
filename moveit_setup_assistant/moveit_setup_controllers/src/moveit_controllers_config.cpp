@@ -187,7 +187,17 @@ bool MoveItControllersConfig::GeneratedControllersConfig::writeYaml(YAML::Emitte
         emitter << YAML::BeginMap;
         {
           emitter << YAML::Key << "type" << YAML::Value << controller.type_;
-          emitter << YAML::Key << "action_ns" << YAML::Value << "follow_joint_trajectory";
+          if (controller.type_ == "FollowJointTrajectory")
+          {
+            emitter << YAML::Key << "action_ns" << YAML::Value << "follow_joint_trajectory";
+          }
+          else
+          {
+            RCLCPP_ERROR_STREAM(*logger_, "Only a FollowJointTrajectory type of controller is supported, for now. "
+                                          "Update moveit_controllers.yaml.");
+            return false;
+          }
+
           // Write joints
           emitter << YAML::Key << "joints";
           emitter << YAML::Value;
