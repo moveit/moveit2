@@ -653,21 +653,18 @@ std::optional<double> smoothness(RobotTrajectory const& trajectory)
 
 std::optional<double> waypoint_density(RobotTrajectory const& trajectory)
 {
-  if (trajectory.getWayPointCount() == 0)
+  // Only calculate density if more than one waypoint exists
+  if (trajectory.getWayPointCount() > 1)
   {
-    // Cannot calculate trajectory density because the trajectory does not
-    // contain any points
-    return std::nullopt;
+    // Calculate path length
+    auto const length = path_length(trajectory);
+    if (length > 0.0)
+    {
+      auto density = (double)trajectory.getWayPointCount() / length;
+      return density;
+    }
   }
-
-  // Calculate path length
-  auto const length = path_length(trajectory);
-  if (length > 0.0)
-  {
-    auto density = length / (double)trajectory.getWayPointCount();
-    return density;
-  }
-  // In case the path length is zero, no value is returned
+  // Trajectory is empty, a single point or path length is zero
   return std::nullopt;
 }
 
