@@ -56,7 +56,8 @@ def load_moveit_config():
         MoveItConfigsBuilder(moveit_config_package_name)
         .robot_description(
             file_path=get_package_share_directory(description_package_name)
-            + "/" + description_xacro_file
+            + "/"
+            + description_xacro_file
         )
         .robot_description_semantic(file_path=robot_description_semantic_file)
         .robot_description_kinematics(file_path=robot_description_kinematics_file)
