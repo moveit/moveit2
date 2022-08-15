@@ -52,58 +52,15 @@ def load_moveit_config():
     robot_description_kinematics_file = "config/kinematics.yaml"
     joint_limits_file = "config/joint_limits.yaml"
     pilz_cartesian_limits_file = "config/pilz_cartesian_limits.yaml"
-    # TODO(henningkayser): Switch to MoveItConfigsBuilder once #591 is merged
-    # return (
-    #     MoveItConfigsBuilder(moveit_config_package_name)
-    #     .robot_description(
-    #         file_path=get_package_share_directory(description_package_name)
-    #         + "/" + description_xacro_file
-    #     )
-    #     .robot_description_semantic(file_path=robot_description_semantic_file)
-    #     .robot_description_kinematics(file_path=robot_description_kinematics_file)
-    #     .joint_limits(file_path=joint_limits_file)
-    #     .pilz_cartesian_limits(file_path=pilz_cartesian_limits_file)
-    #     .to_moveit_configs()
-    # )
-
-    configs = MoveItConfigs()
-
-    # planning_context
-    robot_description = xacro.process_file(
-        os.path.join(
-            get_package_share_directory(description_package_name),
-            description_xacro_file,
+    return (
+        MoveItConfigsBuilder(moveit_config_package_name)
+        .robot_description(
+            file_path=get_package_share_directory(description_package_name)
+            + "/" + description_xacro_file
         )
+        .robot_description_semantic(file_path=robot_description_semantic_file)
+        .robot_description_kinematics(file_path=robot_description_kinematics_file)
+        .joint_limits(file_path=joint_limits_file)
+        .pilz_cartesian_limits(file_path=pilz_cartesian_limits_file)
+        .to_moveit_configs()
     )
-
-    configs.robot_description = {"robot_description": robot_description.toxml()}
-
-    semantic_xacro = xacro.process_file(
-        os.path.join(
-            get_package_share_directory(moveit_config_package_name),
-            robot_description_semantic_file,
-        )
-    )
-
-    configs.robot_description_semantic = {
-        "robot_description_semantic": semantic_xacro.toxml()
-    }
-
-    configs.robot_description_kinematics = {
-        "robot_description_kinematics": load_yaml(
-            moveit_config_package_name, robot_description_kinematics_file
-        )
-    }
-
-    configs.robot_description_planning = {
-        "robot_description_planning": {
-            **load_yaml(moveit_config_package_name, joint_limits_file),
-            **load_yaml(moveit_config_package_name, pilz_cartesian_limits_file),
-        }
-    }
-
-    planning_plugin = {
-        "planning_plugin": "pilz_industrial_motion_planner::CommandPlanner"
-    }
-
-    return configs
