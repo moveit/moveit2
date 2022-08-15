@@ -235,6 +235,13 @@ void ServoParameters::declare(const std::string& ns,
       ParameterDescriptorBuilder{}
           .type(PARAMETER_DOUBLE)
           .description("Added as a buffer to joint limits [radians]. If moving quickly, make this larger."));
+  node_parameters->declare_parameter(
+      ns + ".leaving_singularity_threshold_multiplier",
+      ParameterValue{ parameters.leaving_singularity_threshold_multiplier },
+      ParameterDescriptorBuilder{}
+          .type(PARAMETER_DOUBLE)
+          .description("When 'lower_singularity_threshold' is triggered, but we are moving away from singularity, move "
+                       "this many times faster than if we were moving further into singularity"));
 
   // Collision checking
   node_parameters->declare_parameter(ns + ".check_collisions", ParameterValue{ parameters.check_collisions },
@@ -320,6 +327,19 @@ ServoParameters ServoParameters::get(const std::string& ns,
       node_parameters->get_parameter(ns + ".hard_stop_singularity_threshold").as_double();
   parameters.joint_limit_margin = node_parameters->get_parameter(ns + ".joint_limit_margin").as_double();
 
+  if (node_parameters->has_parameter(ns + ".leaving_singularity_threshold_multiplier"))
+  {
+    parameters.leaving_singularity_threshold_multiplier =
+        node_parameters->get_parameter(ns + ".leaving_singularity_threshold_multiplier").as_double();
+  }
+  else
+  {
+    parameters.leaving_singularity_threshold_multiplier = 1.0;
+    RCLCPP_WARN(LOGGER, "Using the deprecated type of servo singularity handling; add parameter "
+                        "'leaving_singularity_threshold_multiplier' to define leaving singularity threshold. See "
+                        "https://github.com/ros-planning/moveit2/pull/620 for more information.");
+  }
+
   // Collision checking
   parameters.check_collisions = node_parameters->get_parameter(ns + ".check_collisions").as_bool();
   parameters.collision_check_rate = node_parameters->get_parameter(ns + ".collision_check_rate").as_double();
@@ -343,6 +363,12 @@ std::optional<ServoParameters> ServoParameters::validate(ServoParameters paramet
   if (parameters.num_outgoing_halt_msgs_to_publish < 0)
   {
     RCLCPP_WARN(LOGGER, "Parameter 'num_outgoing_halt_msgs_to_publish' should be greater than zero. Check yaml file.");
+    return std::nullopt;
+  }
+  if (parameters.leaving_singularity_threshold_multiplier <= 0)
+  {
+    RCLCPP_WARN(LOGGER,
+                "Parameter 'leaving_singularity_threshold_multiplier' should be greater than zero. Check yaml file.");
     return std::nullopt;
   }
   if (parameters.hard_stop_singularity_threshold <= parameters.lower_singularity_threshold)
