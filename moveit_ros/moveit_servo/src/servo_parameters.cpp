@@ -335,7 +335,7 @@ ServoParameters ServoParameters::get(const std::string& ns,
   else
   {
     parameters.leaving_singularity_threshold_multiplier = 1.0;
-    RCLCPP_WARN(LOGGER, "Using default servo singularity handling; add parameter "
+    RCLCPP_WARN(LOGGER, "Using the deprecated type of servo singularity handling; add parameter "
                         "'leaving_singularity_threshold_multiplier' to define leaving singularity threshold. See "
                         "https://github.com/ros-planning/moveit2/pull/620 for more information.");
   }
