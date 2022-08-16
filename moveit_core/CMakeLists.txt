@@ -12,7 +12,6 @@ find_package(Eigen3 REQUIRED)
 
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(LIBFCL REQUIRED "fcl>=0.5.0")
-pkg_check_modules(hpp-fcl REQUIRED)
 # replace LIBFCL_LIBRARIES with full paths to the libraries
 set(LIBFCL_LIBRARIES_FULL "")
 foreach(LIBFCL_LIBRARY ${LIBFCL_LIBRARIES})
@@ -34,6 +33,7 @@ find_package(tf2_geometry_msgs REQUIRED)
 find_package(eigen_stl_containers REQUIRED)
 find_package(geometric_shapes REQUIRED)
 find_package(geometry_msgs REQUIRED)
+find_package(hpp-fcl REQUIRED)
 find_package(kdl_parser REQUIRED)
 find_package(moveit_msgs REQUIRED)
 find_package(octomap_msgs REQUIRED)
@@ -90,6 +90,7 @@ set(THIS_PACKAGE_LIBRARIES
     moveit_collision_distance_field
     moveit_collision_detection
     moveit_collision_detection_fcl
+    moveit_collision_detection_hpp_fcl
     moveit_collision_detection_bullet
     moveit_dynamics_solver
     moveit_constraint_samplers
@@ -114,6 +115,7 @@ set(THIS_PACKAGE_LIBRARIES
 )
 
 set(THIS_PACKAGE_INCLUDE_DEPENDS
+  hpp-fcl
   angles
   eigen_stl_containers
   geometric_shapes
@@ -139,7 +141,6 @@ set(THIS_PACKAGE_INCLUDE_DEPENDS
 
 include_directories(SYSTEM ${EIGEN3_INCLUDE_DIRS}
   ${LIBFCL_INCLUDE_DIRS}
-  ${hpp-fcl_INCLUDE_DIRS}
 )
 
 include_directories(${THIS_PACKAGE_INCLUDE_DIRS}

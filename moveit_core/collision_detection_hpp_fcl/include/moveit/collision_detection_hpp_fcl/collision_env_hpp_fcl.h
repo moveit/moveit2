@@ -37,7 +37,7 @@
 #pragma once
 
 #include <moveit/collision_detection/collision_env.h>
-#include <moveit/collision_detection_hpp_fcl/collision_common.h>
+#include <moveit/collision_detection_hpp_fcl/collision_common_hpp_fcl.h>
 
 #include <hpp/fcl/broadphase/broadphase_collision_manager.h>
 

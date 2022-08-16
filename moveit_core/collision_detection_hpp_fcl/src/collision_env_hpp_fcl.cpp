@@ -36,7 +36,7 @@
 
 #include <moveit/collision_detection_hpp_fcl/collision_env_hpp_fcl.h>
 #include <moveit/collision_detection_hpp_fcl/collision_detector_allocator_hpp_fcl.h>
-#include <moveit/collision_detection_hpp_fcl/collision_common.h>
+#include <moveit/collision_detection_hpp_fcl/collision_common_hpp_fcl.h>
 
 #include <rclcpp/logger.hpp>
 #include <rclcpp/logging.hpp>

@@ -1,7 +1,7 @@
 set(MOVEIT_LIB_NAME moveit_collision_detection_hpp_fcl)
 
 add_library(${MOVEIT_LIB_NAME} SHARED
-  src/collision_common.cpp
+  src/collision_common_hpp_fcl.cpp
   src/collision_env_hpp_fcl.cpp
 )
 include(GenerateExportHeader)
@@ -13,6 +13,7 @@ target_include_directories(${MOVEIT_LIB_NAME} PUBLIC
 set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
 ament_target_dependencies(${MOVEIT_LIB_NAME}
   rclcpp
+  hpp-fcl
   rmw_implementation
   urdf
   urdfdom
@@ -21,7 +22,6 @@ ament_target_dependencies(${MOVEIT_LIB_NAME}
 )
 target_link_libraries(${MOVEIT_LIB_NAME}
   moveit_collision_detection
-  ${hpp-fcl_LIBRARIES}
 )
 
 add_library(collision_detector_hpp_fcl_plugin SHARED src/collision_detector_hpp_fcl_plugin_loader.cpp)
