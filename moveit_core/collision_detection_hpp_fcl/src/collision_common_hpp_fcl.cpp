@@ -279,7 +279,7 @@ HPPFCLGeometryConstPtr createCollisionGeometry(const shapes::ShapeConstPtr& shap
     case shapes::OCTREE:
     {
       const shapes::OcTree* g = static_cast<const shapes::OcTree*>(shape.get());
-      cg_g = new fcl::OcTreed(g->octree);
+      cg_g = new hpp::fcl::OcTree(g->octree);
     }
     break;
     default:
