@@ -39,12 +39,13 @@
 #include <moveit/collision_detection/collision_detector_allocator.h>
 #include <moveit/collision_detection_hpp_fcl/collision_env_hpp_fcl.h>
 
-#include "moveit_collision_detection_fcl_export.h"
+// TODO (vatanaksoytezer): Fix windows
+// #include "moveit_collision_detection_fcl_export.h"
 
 namespace collision_detection
 {
 /** \brief An allocator for HPPFCL collision detectors */
-class MOVEIT_COLLISION_DETECTION_HPPFCL_EXPORT CollisionDetectorAllocatorHPPFCL
+class CollisionDetectorAllocatorHPPFCL
   : public CollisionDetectorAllocatorTemplate<CollisionEnvHPPFCL, CollisionDetectorAllocatorHPPFCL>
 {
 public:

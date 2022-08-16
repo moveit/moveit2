@@ -6,7 +6,10 @@ add_library(${MOVEIT_LIB_NAME} SHARED
 )
 include(GenerateExportHeader)
 generate_export_header(${MOVEIT_LIB_NAME})
-target_include_directories(${MOVEIT_LIB_NAME} PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>)
+target_include_directories(${MOVEIT_LIB_NAME} PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include>
+)
 set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
 ament_target_dependencies(${MOVEIT_LIB_NAME}
   rclcpp
@@ -14,11 +17,11 @@ ament_target_dependencies(${MOVEIT_LIB_NAME}
   urdf
   urdfdom
   urdfdom_headers
-  hpp-fcl
   visualization_msgs
 )
 target_link_libraries(${MOVEIT_LIB_NAME}
   moveit_collision_detection
+  ${hpp-fcl_LIBRARIES}
 )
 
 add_library(collision_detector_hpp_fcl_plugin SHARED src/collision_detector_hpp_fcl_plugin_loader.cpp)

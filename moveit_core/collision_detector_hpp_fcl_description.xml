@@ -1,0 +1,8 @@
+<library path="collision_detector_hpp_fcl_plugin">
+  <class name="FCL" type="collision_detection::CollisionDetectorHPPFCLPluginLoader"
+  base_class_type="collision_detection::CollisionPlugin">
+    <description>
+      HPP-FCL Collision Detector, a revised and optimized version of FCL.
+    </description>
+  </class>
+</library>

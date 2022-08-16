@@ -241,7 +241,9 @@ void CollisionEnvHPPFCL::checkSelfCollisionHelper(const CollisionRequest& req, C
   allocSelfCollisionBroadPhase(state, manager);
   CollisionData cd(&req, &res, acm);
   cd.enableGroup(getRobotModel());
-  manager.manager_->collide(&cd, &collisionCallback);
+  CollisionCallback collision_callback;
+  collision_callback.data = &cd;
+  manager.manager_->collide(&collision_callback);
   if (req.distance)
   {
     DistanceRequest dreq;
@@ -292,8 +294,10 @@ void CollisionEnvHPPFCL::checkRobotCollisionHelper(const CollisionRequest& req, 
 
   CollisionData cd(&req, &res, acm);
   cd.enableGroup(getRobotModel());
+  CollisionCallback collision_callback;
+  collision_callback.data = &cd;
   for (std::size_t i = 0; !cd.done_ && i < fcl_obj.collision_objects_.size(); ++i)
-    manager_->collide(fcl_obj.collision_objects_[i].get(), &cd, &collisionCallback);
+    manager_->collide(fcl_obj.collision_objects_[i].get(), &collision_callback);
 
   if (req.distance)
   {
@@ -314,8 +318,10 @@ void CollisionEnvHPPFCL::distanceSelf(const DistanceRequest& req, DistanceResult
   HPPFCLManager manager;
   allocSelfCollisionBroadPhase(state, manager);
   DistanceData drd(&req, &res);
+  collision_detection::DistanceCallback callback;
+  callback.data = &drd;
 
-  manager.manager_->distance(&drd, &distanceCallback);
+  manager.manager_->distance(&callback);
 }
 
 void CollisionEnvHPPFCL::distanceRobot(const DistanceRequest& req, DistanceResult& res,
@@ -325,8 +331,10 @@ void CollisionEnvHPPFCL::distanceRobot(const DistanceRequest& req, DistanceResul
   constructHPPFCLObjectRobot(state, fcl_obj);
 
   DistanceData drd(&req, &res);
+  collision_detection::DistanceCallback callback;
+  callback.data = &drd;
   for (std::size_t i = 0; !drd.done && i < fcl_obj.collision_objects_.size(); ++i)
-    manager_->distance(fcl_obj.collision_objects_[i].get(), &drd, &distanceCallback);
+    manager_->distance(fcl_obj.collision_objects_[i].get(), &callback);
 }
 
 void CollisionEnvHPPFCL::updateHPPFCLObject(const std::string& id)
