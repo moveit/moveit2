@@ -471,8 +471,9 @@ class MoveItConfigsBuilder(ParameterBuilder):
         # TODO(JafarAbdi): We should have a default moveit_cpp.yaml as port of a moveit config package
         # if not self.__moveit_configs.moveit_cpp:
         #     self.moveit_cpp()
-        if not self.__moveit_configs.pilz_cartesian_limits:
-            self.pilz_cartesian_limits()
+        if "pilz_industrial_motion_planner" in self.__moveit_configs.planning_pipelines:
+            if not self.__moveit_configs.pilz_cartesian_limits:
+                self.pilz_cartesian_limits()
         return self.__moveit_configs
 
     def to_dict(self, include_moveit_configs: bool = True):
