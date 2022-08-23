@@ -14,8 +14,7 @@
 
 /// \author Adolfo Rodriguez Tsouroukdissian
 
-#ifndef JOINT_LIMITS__JOINT_LIMITS_ROSPARAM_HPP_
-#define JOINT_LIMITS__JOINT_LIMITS_ROSPARAM_HPP_
+#pragma once
 
 // TODO(henning): This file is copied from the DRAFT PR https://github.com/ros-controls/ros2_control/pull/462 since the
 // current ros2_control implementation does not offer the desired joint limits API, yet. Remove when ros2_control has an
@@ -301,5 +300,3 @@ inline bool get_joint_limits(const std::string& joint_name, const rclcpp::Node::
 }
 
 }  // namespace joint_limits
-
-#endif  // JOINT_LIMITS__JOINT_LIMITS_ROSPARAM_HPP_
