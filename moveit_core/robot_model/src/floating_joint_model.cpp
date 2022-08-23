@@ -126,7 +126,7 @@ double FloatingJointModel::distanceRotation(const double* values1, const double*
   if (dq + std::numeric_limits<double>::epsilon() >= 1.0)
     return 0.0;
   else
-    return acos(dq);
+    return 2.0 * acos(dq);
 }
 
 void FloatingJointModel::interpolate(const double* from, const double* to, const double t, double* state) const
