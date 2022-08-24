@@ -41,7 +41,7 @@
 namespace moveit_ros_control_interface
 {
 /**
- * \brief SThis class allows MoveIt's controller manager to start and stop a controller that does not have a
+ * \brief This class allows MoveIt's controller manager to start and stop a controller that do not have a
  * corresponding controller handle implementation without actually executing MoveIt trajectories through the controller
  * handle.
  */

@@ -56,6 +56,8 @@ namespace moveit_servo
 {
 namespace
 {
+constexpr char CONDITION_TOPIC[] = "~/condition";
+
 // Helper function for detecting zeroed message
 bool isNonZero(const geometry_msgs::msg::TwistStamped& msg)
 {
@@ -178,7 +180,7 @@ ServoCalcs::ServoCalcs(rclcpp::Node::SharedPtr node,
 
   // Publish status
   status_pub_ = node_->create_publisher<std_msgs::msg::Int8>(parameters_->status_topic, rclcpp::SystemDefaultsQoS());
-  condition_pub_ = node_->create_publisher<std_msgs::msg::Float64>("~/condition", rclcpp::SystemDefaultsQoS());
+  condition_pub_ = node_->create_publisher<std_msgs::msg::Float64>(CONDITION_TOPIC, rclcpp::SystemDefaultsQoS());
 
   internal_joint_state_.name = joint_model_group_->getActiveJointModelNames();
   num_joints_ = internal_joint_state_.name.size();
@@ -903,31 +905,32 @@ double ServoCalcs::velocityScalingFactorForSingularity(const Eigen::VectorXd& co
     vector_toward_singularity *= -1;
   }
 
-  // If this dot product is positive, we're moving toward singularity ==> decelerate
+  // If this dot product is positive, we're moving toward singularity
   double dot = vector_toward_singularity.dot(commanded_velocity);
-  if (dot > 0)
+  // see https://github.com/ros-planning/moveit2/pull/620#issuecomment-1201418258 for visual explanation of algorithm
+  double upper_threshold =
+      dot > 0 ? parameters_->hard_stop_singularity_threshold :
+                (parameters_->hard_stop_singularity_threshold - parameters_->lower_singularity_threshold) *
+                        parameters_->leaving_singularity_threshold_multiplier +
+                    parameters_->lower_singularity_threshold;
+  if ((ini_condition > parameters_->lower_singularity_threshold) &&
+      (ini_condition < parameters_->hard_stop_singularity_threshold))
   {
-    // Ramp velocity down linearly when the Jacobian condition is between lower_singularity_threshold and
-    // hard_stop_singularity_threshold, and we're moving towards the singularity
-    if ((ini_condition > parameters_->lower_singularity_threshold) &&
-        (ini_condition < parameters_->hard_stop_singularity_threshold))
-    {
-      velocity_scale =
-          1. - (ini_condition - parameters_->lower_singularity_threshold) /
-                   (parameters_->hard_stop_singularity_threshold - parameters_->lower_singularity_threshold);
-      status_ = StatusCode::DECELERATE_FOR_SINGULARITY;
-      rclcpp::Clock& clock = *node_->get_clock();
-      RCLCPP_WARN_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD, SERVO_STATUS_CODE_MAP.at(status_));
-    }
+    velocity_scale = 1. - (ini_condition - parameters_->lower_singularity_threshold) /
+                              (upper_threshold - parameters_->lower_singularity_threshold);
+    status_ =
+        dot > 0 ? StatusCode::DECELERATE_FOR_APPROACHING_SINGULARITY : StatusCode::DECELERATE_FOR_LEAVING_SINGULARITY;
+    rclcpp::Clock& clock = *node_->get_clock();
+    RCLCPP_WARN_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD, SERVO_STATUS_CODE_MAP.at(status_));
+  }
 
-    // Very close to singularity, so halt.
-    else if (ini_condition > parameters_->hard_stop_singularity_threshold)
-    {
-      velocity_scale = 0;
-      status_ = StatusCode::HALT_FOR_SINGULARITY;
-      rclcpp::Clock& clock = *node_->get_clock();
-      RCLCPP_WARN_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD, SERVO_STATUS_CODE_MAP.at(status_));
-    }
+  // Very close to singularity, so halt.
+  else if (ini_condition >= upper_threshold)
+  {
+    velocity_scale = 0;
+    status_ = StatusCode::HALT_FOR_SINGULARITY;
+    rclcpp::Clock& clock = *node_->get_clock();
+    RCLCPP_WARN_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD, SERVO_STATUS_CODE_MAP.at(status_));
   }
 
   return velocity_scale;
