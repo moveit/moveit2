@@ -380,6 +380,7 @@ public:
         }
       }
     }
+    // activation dependencies must be started first, but they are processed last, so the of needs to be flipped
     std::reverse(activate.begin(), activate.end());
 
     std::scoped_lock<std::mutex> lock(controllers_mutex_);
