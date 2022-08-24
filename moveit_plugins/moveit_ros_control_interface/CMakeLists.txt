@@ -53,6 +53,16 @@ ament_target_dependencies(${PROJECT_NAME}_gripper_plugin
     Boost
 )
 
+add_library(${PROJECT_NAME}_empty_plugin SHARED
+    src/empty_controller_plugin.cpp
+    )
+set_target_properties(${PROJECT_NAME}_empty_plugin PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
+target_include_directories(${PROJECT_NAME}_empty_plugin PRIVATE include)
+ament_target_dependencies(${PROJECT_NAME}_empty_plugin
+    ${THIS_PACKAGE_INCLUDE_DEPENDS}
+    Boost
+    )
+
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
 
@@ -70,7 +80,7 @@ endif()
 #############
 
 ## Mark executables and/or libraries for installation
-install(TARGETS ${PROJECT_NAME}_plugin ${PROJECT_NAME}_trajectory_plugin ${PROJECT_NAME}_gripper_plugin
+install(TARGETS ${PROJECT_NAME}_plugin ${PROJECT_NAME}_trajectory_plugin ${PROJECT_NAME}_gripper_plugin ${PROJECT_NAME}_empty_plugin
 EXPORT export_${PROJECT_NAME}
 ARCHIVE DESTINATION lib
 LIBRARY DESTINATION lib
