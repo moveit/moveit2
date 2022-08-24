@@ -110,7 +110,8 @@ class MoveItControllerManager : public moveit_controller_manager::MoveItControll
   rclcpp::Client<controller_manager_msgs::srv::ListControllers>::SharedPtr list_controllers_service_;
   rclcpp::Client<controller_manager_msgs::srv::SwitchController>::SharedPtr switch_controller_service_;
 
-  std::unordered_map<std::string, std::vector<std::string>> dependency_map_;
+  // Chained controllers have dependencies (other controllers which must be running)
+  std::unordered_map<std::string /* controller name */, std::vector<std::string> /* dependencies */> dependency_map_;
 
   /**
    * \brief Check if given controller is active
