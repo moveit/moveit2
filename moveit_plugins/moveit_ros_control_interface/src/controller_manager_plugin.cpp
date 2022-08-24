@@ -460,27 +460,28 @@ public:
    */
   bool fixChainedControllers(std::shared_ptr<controller_manager_msgs::srv::ListControllers::Response>& result)
   {
-    std::unordered_map<std::string, std::unique_ptr<controller_manager_msgs::msg::ControllerState>> controller_name_map;
-    for (const auto& c : result->controller)
+    std::unordered_map<std::string, size_t> controller_name_map;
+    for (size_t i = 0; i < result->controller.size(); i++)
     {
-      controller_name_map[c.name] = &c;
+      controller_name_map[result->controller[i].name] = i;
     }
-    for (const auto& c : result->controller)
+    for (auto& controller : result->controller)
     {
-      if (c.chain_connections.size() > 1)
+      if (controller.chain_connections.size() > 1)
       {
         RCLCPP_ERROR_STREAM(LOGGER, "Controller with name %s chains to more than one controller. Chaining to more than "
                                     "one controller is not supported.");
         return false;
       }
-      dependency_map_[c.name].clear();
-      for (const auto& chained_controller : c.chain_connections)
+      dependency_map_[controller.name].clear();
+      for (const auto& chained_controller : controller.chain_connections)
       {
-        dependency_map_[c.name].push_back(chained_controller.name);
-        c.required_command_interfaces = controller_name_map[chained_controller.name]->required_command_interfaces;
-        c.claimed_interfaces = controller_name_map[chained_controller.name]->claimed_interfaces;
-        controller_name_map[chained_controller.name]->claimed_interfaces.clear();
-        controller_name_map[chained_controller.name]->required_command_interfaces.clear();
+        auto ind = controller_name_map[chained_controller.name];
+        dependency_map_[controller.name].push_back(chained_controller.name);
+        controller.required_command_interfaces = result->controller[ind].required_command_interfaces;
+        controller.claimed_interfaces = result->controller[ind].claimed_interfaces;
+        result->controller[ind].claimed_interfaces.clear();
+        result->controller[ind].required_command_interfaces.clear();
       }
     }
 
