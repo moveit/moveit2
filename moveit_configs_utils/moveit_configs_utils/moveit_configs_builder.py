@@ -349,7 +349,7 @@ class MoveItConfigsBuilder(ParameterBuilder):
         return self
 
     def sensors_3d(self, file_path: Optional[str] = None):
-        """Load sensors_3d paramerss.
+        """Load sensors_3d parameters.
 
         :param file_path: Absolute or relative path to the sensors_3d yaml file (w.r.t. robot_name_moveit_config).
         :return: Instance of MoveItConfigsBuilder with robot_description_planning loaded.
@@ -471,8 +471,9 @@ class MoveItConfigsBuilder(ParameterBuilder):
         # TODO(JafarAbdi): We should have a default moveit_cpp.yaml as port of a moveit config package
         # if not self.__moveit_configs.moveit_cpp:
         #     self.moveit_cpp()
-        if not self.__moveit_configs.pilz_cartesian_limits:
-            self.pilz_cartesian_limits()
+        if "pilz_industrial_motion_planner" in self.__moveit_configs.planning_pipelines:
+            if not self.__moveit_configs.pilz_cartesian_limits:
+                self.pilz_cartesian_limits()
         return self.__moveit_configs
 
     def to_dict(self, include_moveit_configs: bool = True):
