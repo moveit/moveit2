@@ -16,6 +16,7 @@ install(DIRECTORY
         DESTINATION share/${PROJECT_NAME}/rdf_loader/test
 )
 
+# TODO(sjahr) Debug and re-enable
 #if(BUILD_TESTING)
 #  find_package(ament_cmake_gtest REQUIRED)
 #  find_package(ros_testing REQUIRED)
