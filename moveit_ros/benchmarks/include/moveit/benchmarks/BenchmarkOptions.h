@@ -44,9 +44,38 @@
 
 namespace moveit_ros_benchmarks
 {
-class BenchmarkOptions
+/// \brief Options to configure a benchmark experiment. The configuration is provided via ROS2 parameters
+/// \details Parameter configuration example:
+/// benchmark_config: # Benchmark param namespace
+///     warehouse:
+///         host: # Host address for warehouse
+///         port: # Port name for warehouse
+///         scene_name: # Scene name to load for this experiment
+///     parameters:
+///         name: # Experiment name
+///         runs: # Number of experiment runs
+///         group: # Joint group name
+///         timeout: # Experiment timeout
+///         output_directory: # Output directory for results file
+///         queries_regex: # Number of queries
+///         start_states_regex: # Start states
+///         goal_constraints_regex: # Goal constrains
+///         path_constraints_regex
+///         trajectory_constraints_regex
+///         predefined_poses_group: # Group where the predefined poses are specified
+///         predefined_poses: # List of named targets
+///     planning_pipelines:
+///       pipeline_names: # List of pipeline names to be loaded by moveit_cpp
+///       pipelines: # List of pipeline names to be used by the benchmark tool
+///       my_pipeline: # Example pipeline definition
+///         name: # Pipeline name
+///         planners: # List of planners of the pipeline to be tested
+///       parallel_pipelines: # List of parallel planning pipelines to be tested
+///       my_parallel_planning_pipeline:
+///         pipelines: # List of parallel planning pipelines
+///         planner_ids: # Ordered! list planner_ids used by the individual pipelines listed in 'pipeline'
+struct BenchmarkOptions
 {
-public:
   /** \brief Constructor */
   BenchmarkOptions();
   /** \brief Constructor accepting a custom namespace for parameter lookup */
@@ -92,6 +121,9 @@ public:
   void getGoalOffsets(std::vector<double>& offsets) const;
   /** \brief Get all planning pipeline names mapped to their parameter configuration */
   const std::map<std::string, std::vector<std::string>>& getPlanningPipelineConfigurations() const;
+  /** \brief Get all parallel planning pipeline names mapped to their parameter configuration */
+  const std::map<std::string, std::vector<std::pair<std::string, std::string>>>&
+  getParallelPipelineConfigurations() const;
   /** \brief Get all planning pipeline names */
   void getPlanningPipelineNames(std::vector<std::string>& planning_pipeline_names) const;
 
@@ -100,12 +132,11 @@ public:
   /* \brief Get the parameter set of the planning workspace */
   const moveit_msgs::msg::WorkspaceParameters& getWorkspaceParameters() const;
 
-protected:
   void readBenchmarkOptions(const rclcpp::Node::SharedPtr& node);
 
   void readWarehouseOptions(const rclcpp::Node::SharedPtr& node);
   void readBenchmarkParameters(const rclcpp::Node::SharedPtr& node);
-  void readPlannerConfigs(const rclcpp::Node::SharedPtr& node);
+  bool readPlannerConfigs(const rclcpp::Node::SharedPtr& node);
 
   void readWorkspaceParameters(const rclcpp::Node::SharedPtr& node);
   void readGoalOffset(const rclcpp::Node::SharedPtr& node);
@@ -132,6 +163,7 @@ protected:
 
   /// planner configurations
   std::map<std::string, std::vector<std::string>> planning_pipelines_;
+  std::map<std::string, std::vector<std::pair<std::string, std::string>>> parallel_planning_pipelines_;
 
   moveit_msgs::msg::WorkspaceParameters workspace_;
 };

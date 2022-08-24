@@ -1,0 +1,3 @@
+planning_pipelines:
+  # MoveIt cpp
+  pipeline_names: ["ompl", "ompl_rrtc", "chomp", "pilz_industrial_motion_planner"]

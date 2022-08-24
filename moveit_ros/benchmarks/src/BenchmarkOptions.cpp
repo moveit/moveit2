@@ -156,11 +156,19 @@ const std::map<std::string, std::vector<std::string>>& BenchmarkOptions::getPlan
   return planning_pipelines_;
 }
 
+const std::map<std::string, std::vector<std::pair<std::string, std::string>>>&
+BenchmarkOptions::getParallelPipelineConfigurations() const
+{
+  return parallel_planning_pipelines_;
+}
+
 void BenchmarkOptions::getPlanningPipelineNames(std::vector<std::string>& planning_pipeline_names) const
 {
   planning_pipeline_names.clear();
   for (const std::pair<const std::string, std::vector<std::string>>& planning_pipeline : planning_pipelines_)
+  {
     planning_pipeline_names.push_back(planning_pipeline.first);
+  }
 }
 
 const std::string& BenchmarkOptions::getWorkspaceFrameID() const
@@ -179,7 +187,9 @@ void BenchmarkOptions::readWarehouseOptions(const rclcpp::Node::SharedPtr& node)
   node->get_parameter_or(std::string("benchmark_config.warehouse.port"), port_, 33829);
 
   if (!node->get_parameter("benchmark_config.warehouse.scene_name", scene_name_))
+  {
     RCLCPP_WARN(LOGGER, "Benchmark scene_name NOT specified");
+  }
 
   RCLCPP_INFO(LOGGER, "Benchmark host: %s", hostname_.c_str());
   RCLCPP_INFO(LOGGER, "Benchmark port: %d", port_);
@@ -193,13 +203,14 @@ void BenchmarkOptions::readBenchmarkParameters(const rclcpp::Node::SharedPtr& no
   node->get_parameter_or(std::string("benchmark_config.parameters.timeout"), timeout_, 10.0);
   node->get_parameter_or(std::string("benchmark_config.parameters.output_directory"), output_directory_,
                          std::string(""));
-  node->get_parameter_or(std::string("benchmark_config.parameters.queries"), query_regex_, std::string(".*"));
-  node->get_parameter_or(std::string("benchmark_config.parameters.start_states"), start_state_regex_, std::string(""));
-  node->get_parameter_or(std::string("benchmark_config.parameters.goal_constraints"), goal_constraint_regex_,
+  node->get_parameter_or(std::string("benchmark_config.parameters.queries_regex"), query_regex_, std::string(".*"));
+  node->get_parameter_or(std::string("benchmark_config.parameters.start_states_regex"), start_state_regex_,
                          std::string(""));
-  node->get_parameter_or(std::string("benchmark_config.parameters.path_constraints"), path_constraint_regex_,
+  node->get_parameter_or(std::string("benchmark_config.parameters.goal_constraints_regex"), goal_constraint_regex_,
                          std::string(""));
-  node->get_parameter_or(std::string("benchmark_config.parameters.trajectory_constraints"),
+  node->get_parameter_or(std::string("benchmark_config.parameters.path_constraints_regex"), path_constraint_regex_,
+                         std::string(""));
+  node->get_parameter_or(std::string("benchmark_config.parameters.trajectory_constraints_regex"),
                          trajectory_constraint_regex_, std::string(""));
   node->get_parameter_or(std::string("benchmark_config.parameters.predefined_poses"), predefined_poses_, {});
   node->get_parameter_or(std::string("benchmark_config.parameters.predefined_poses_group"), predefined_poses_group_,
@@ -260,40 +271,109 @@ void BenchmarkOptions::readWorkspaceParameters(const rclcpp::Node::SharedPtr& no
   workspace_.header.stamp = rclcpp::Clock().now();
 }
 
-void BenchmarkOptions::readPlannerConfigs(const rclcpp::Node::SharedPtr& node)
+bool BenchmarkOptions::readPlannerConfigs(const rclcpp::Node::SharedPtr& node)
 {
+  const std::string ns = "benchmark_config.planning_pipelines";
+  // pipelines
   planning_pipelines_.clear();
 
-  const std::string np = "benchmark_config.planning_pipelines";
   std::vector<std::string> pipelines;
-  if (!node->get_parameter(np + ".pipelines", pipelines))
+  if (!node->get_parameter(ns + ".pipelines", pipelines))
   {
-    RCLCPP_ERROR(LOGGER, "Fail to get the parameter in `%s` namespace.", (np + ".pipelines").c_str());
-    return;
+    RCLCPP_ERROR(LOGGER, "Fail to get the parameter in `%s` namespace.", (ns + ".pipelines").c_str());
+    return false;
   }
 
   for (const std::string& pipeline : pipelines)
   {
-    std::string pipeline_name;
-    const std::string pipeline_parameter_name = std::string(np).append(".").append(pipeline).append(".name");
-    if (!node->get_parameter(pipeline_parameter_name, pipeline_name))
+    if (!pipeline.empty())
     {
-      RCLCPP_ERROR(LOGGER, "Fail to get the parameter in `%s` namespace.", pipeline_parameter_name.c_str());
-      return;
+      std::string pipeline_name;
+      const std::string pipeline_parameter_name = std::string(ns).append(".").append(pipeline).append(".name");
+      if (!node->get_parameter(pipeline_parameter_name, pipeline_name))
+      {
+        RCLCPP_ERROR(LOGGER, "Fail to get the parameter in `%s` namespace.", pipeline_parameter_name.c_str());
+        return false;
+      }
+
+      RCLCPP_INFO(LOGGER, "Reading in planner names for planning pipeline '%s'", pipeline_name.c_str());
+
+      std::vector<std::string> planners;
+      const std::string pipeline_parameter_planners = std::string(ns).append(".").append(pipeline).append(".planners");
+      if (!node->get_parameter(pipeline_parameter_planners, planners))
+      {
+        RCLCPP_ERROR(LOGGER, "Fail to get the parameter in `%s` namespace.", pipeline_parameter_planners.c_str());
+        return false;
+      }
+
+      for (const std::string& planner : planners)
+      {
+        RCLCPP_INFO(LOGGER, "  %s", planner.c_str());
+      }
+
+      planning_pipelines_[pipeline_name] = planners;
     }
-
-    RCLCPP_INFO(LOGGER, "Reading in planner names for planning pipeline '%s'", pipeline_name.c_str());
-
-    std::vector<std::string> planners;
-    if (!node->get_parameter(pipeline_parameter_name, planners))
-    {
-      RCLCPP_ERROR(LOGGER, "Fail to get the parameter in `%s` namespace.", pipeline_parameter_name.c_str());
-      return;
-    }
-
-    for (const std::string& planner : planners)
-      RCLCPP_INFO(LOGGER, "  %s", planner.c_str());
-
-    planning_pipelines_[pipeline_name] = planners;
   }
+  // parallel pipelines
+  parallel_planning_pipelines_.clear();
+
+  std::vector<std::string> parallel_pipelines;
+  if (!node->get_parameter(ns + ".parallel_pipelines", parallel_pipelines))
+  {
+    RCLCPP_ERROR(LOGGER, "Fail to get the parameter in `%s` namespace.", (ns + ".parallel_pipelines").c_str());
+    return false;
+  }
+
+  for (const std::string& parallel_pipeline : parallel_pipelines)
+  {
+    if (!parallel_pipeline.empty())
+    {  // Read pipelines
+      RCLCPP_INFO(LOGGER, "Reading in parameters for parallel planning pipeline '%s'", parallel_pipeline.c_str());
+
+      // Read pipelines
+      std::vector<std::string> pipelines;
+      const std::string pipelines_parameter =
+          std::string(ns).append(".").append(parallel_pipeline).append(".pipelines");
+      if (!node->get_parameter(pipelines_parameter, pipelines))
+      {
+        RCLCPP_ERROR(LOGGER, "Fail to get the parameter in `%s` namespace.", pipelines_parameter.c_str());
+        return false;
+      }
+
+      // Read planner_ids
+      std::vector<std::string> planner_ids;
+      const std::string pipeline_planner_ids_parameter =
+          std::string(ns).append(".").append(parallel_pipeline).append(".planner_ids");
+      if (!node->get_parameter(pipeline_planner_ids_parameter, planner_ids))
+      {
+        RCLCPP_ERROR(LOGGER, "Fail to get the parameter in `%s` namespace.", pipeline_planner_ids_parameter.c_str());
+        return false;
+      }
+
+      if (pipelines.size() != planner_ids.size())
+      {
+        RCLCPP_ERROR(LOGGER, "Number of planner ids is unequal to the number of pipelines in %s.",
+                     parallel_pipeline.c_str());
+        return false;
+      }
+
+      std::vector<std::pair<std::string, std::string>> pipeline_planner_id_pairs;
+      for (size_t i = 0; i < pipelines.size(); ++i)
+      {
+        pipeline_planner_id_pairs.push_back(std::pair<std::string, std::string>(pipelines[i], planner_ids[i]));
+      }
+
+      parallel_planning_pipelines_[parallel_pipeline] = pipeline_planner_id_pairs;
+
+      for (auto const& entry : parallel_planning_pipelines_)
+      {
+        RCLCPP_INFO(LOGGER, "Parallel planning pipeline '%s'", entry.first.c_str());
+        for (auto const& pair : entry.second)
+        {
+          RCLCPP_INFO(LOGGER, "  '%s': '%s'", pair.first.c_str(), pair.second.c_str());
+        }
+      }
+    }
+  }
+  return true;
 }
