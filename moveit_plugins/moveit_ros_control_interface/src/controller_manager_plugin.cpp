@@ -464,7 +464,7 @@ public:
     {
       controller_name_map[c.name] = &c;
     }
-    for (auto& c : result->controller)
+    for (const auto& c : result->controller)
     {
       if (c.chain_connections.size() > 1)
       {
