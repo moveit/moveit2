@@ -36,9 +36,8 @@
 
 #pragma once
 
-#include <rclcpp/rclcpp.hpp>
 #include <moveit_ros_control_interface/ControllerHandle.h>
-
+#include <rclcpp/rclcpp.hpp>
 
 namespace moveit_simple_controller_manager
 {
@@ -86,7 +85,6 @@ public:
 
 private:
   const rclcpp::Logger LOGGER;
-
 };
 
 }  // end namespace moveit_simple_controller_manager

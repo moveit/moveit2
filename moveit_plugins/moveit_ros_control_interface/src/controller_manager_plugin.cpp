@@ -172,7 +172,8 @@ class MoveItControllerManager : public moveit_controller_manager::MoveItControll
       }
 
       // Instantiate a controller handle if one is available for this type of controller.
-      if (loader_.isClassAvailable(controller.type)){
+      if (loader_.isClassAvailable(controller.type))
+      {
         std::string absname = getAbsName(controller.name);
         auto controller_it = managed_controllers_.insert(std::make_pair(absname, controller)).first;  // with namespace
         // Get the names of the interfaces that would be claimed by this currently-inactive controller if it was activated.
@@ -380,26 +381,6 @@ public:
     }
     std::reverse(activate.begin(), activate.end());
 
-
-    for (auto pair : dependency_map_){
-      for (auto controller_name : pair.second){
-        RCLCPP_ERROR(LOGGER, "dependency_map_ !!!!!!!!!!!!!!!!!!!!!!!!!!: {%s, %s}", pair.first.c_str(), controller_name.c_str());
-      }
-    }
-
-    for (auto val : activate){
-      RCLCPP_ERROR(LOGGER, "Activate_moveit!!!!!!!!!!!!!!!!!!!!!!!!!!: %s", val.c_str());
-    }
-    for (auto val : deactivate){
-      RCLCPP_ERROR(LOGGER, "Deactivate_moveit!!!!!!!!!!!!!!!!!!!!!!!!!!: %s", val.c_str());
-    }
-
-
-    for (auto val : managed_controllers_){
-      RCLCPP_ERROR(LOGGER, "managed!!!!!!!!!!!!!!!!!!!!!!!!!!: %s", val.first.c_str());
-    }
-
-
     std::scoped_lock<std::mutex> lock(controllers_mutex_);
     discover(true);
 
@@ -478,7 +459,6 @@ public:
    */
   bool fixChainedControllers(std::shared_ptr<controller_manager_msgs::srv::ListControllers::Response>& result)
   {
-
     std::unordered_map<std::string, controller_manager_msgs::msg::ControllerState*> controller_name_map;
     for (auto& c : result->controller)
     {
@@ -502,11 +482,7 @@ public:
         controller_name_map[chained_controller.name]->required_command_interfaces.clear();
       }
     }
-    for (auto pair : dependency_map_){
-      for (auto controller_name : pair.second){
-        RCLCPP_ERROR(LOGGER, "result->controllers !!!!!!!!!!!!!!!!!!!!!!!!!!: {%s, %s}", pair.first.c_str(), controller_name.c_str());
-      }
-    }
+
     return true;
   }
 };

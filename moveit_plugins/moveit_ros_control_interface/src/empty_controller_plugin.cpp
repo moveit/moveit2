@@ -48,18 +48,17 @@ namespace moveit_ros_control_interface
 /**
  * @brief Allocator plugin for the EmptyControllerAllocator.
  */
-  class EmptyControllerAllocator : public ControllerHandleAllocator
+class EmptyControllerAllocator : public ControllerHandleAllocator
+{
+public:
+  moveit_controller_manager::MoveItControllerHandlePtr alloc(const rclcpp::Node::SharedPtr& /* node */,
+                                                             const std::string& name,
+                                                             const std::vector<std::string>& /* resources */) override
   {
-  public:
-    moveit_controller_manager::MoveItControllerHandlePtr alloc(const rclcpp::Node::SharedPtr& /* node */,
-                                                               const std::string& name,
-                                                               const std::vector<std::string>& /* resources */) override
-    {
-      return std::make_shared<moveit_simple_controller_manager::EmptyControllerHandle>(name,
-                                                                                          "empty_controller_handle");
-    }
-  };
+    return std::make_shared<moveit_simple_controller_manager::EmptyControllerHandle>(name, "empty_controller_handle");
+  }
+};
 }  // namespace moveit_ros_control_interface
 
 PLUGINLIB_EXPORT_CLASS(moveit_ros_control_interface::EmptyControllerAllocator,
-    moveit_ros_control_interface::ControllerHandleAllocator);
+                       moveit_ros_control_interface::ControllerHandleAllocator);
