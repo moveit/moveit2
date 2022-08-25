@@ -462,7 +462,7 @@ public:
   bool fixChainedControllers(std::shared_ptr<controller_manager_msgs::srv::ListControllers::Response>& result)
   {
     std::unordered_map<std::string, size_t> controller_name_map;
-    for (size_t i = 0; i < result->controller.size(); i++)
+    for (size_t i = 0; i < result->controller.size(); ++i)
     {
       controller_name_map[result->controller[i].name] = i;
     }
