@@ -47,13 +47,14 @@ protected:
   moveit::core::RobotStatePtr robot_state_;
   const std::string robot_model_name_ = "panda";
   const std::string arm_jmg_name_ = "panda_arm";
+  const std::string arm_state_name_ = "ready";
 
 protected:
   void SetUp() override
   {
     robot_model_ = moveit::core::loadTestingRobotModel(robot_model_name_);
     robot_state_ = std::make_shared<moveit::core::RobotState>(robot_model_);
-    robot_state_->setToDefaultValues();
+    robot_state_->setToDefaultValues(arm_jmg_name_, arm_state_name_);
     robot_state_->setVariableVelocity(/*index*/ 0, /*value*/ 1.0);
     robot_state_->setVariableAcceleration(/*index*/ 0, /*value*/ -0.1);
     robot_state_->update();
@@ -295,6 +296,41 @@ TEST_F(RobotTrajectoryTestFixture, RobotTrajectoryIterator)
   EXPECT_NE(++(++(++trajectory->begin())), trajectory->end());
   EXPECT_NE(++(++(++(++trajectory->begin()))), trajectory->end());
   EXPECT_EQ(++(++(++(++(++trajectory->begin())))), trajectory->end());
+}
+
+TEST_F(RobotTrajectoryTestFixture, RobotTrajectoryLength)
+{
+  robot_trajectory::RobotTrajectoryPtr trajectory;
+  initTestTrajectory(trajectory);
+  EXPECT_GT(robot_trajectory::path_length(*trajectory), 0.0);
+}
+
+TEST_F(RobotTrajectoryTestFixture, RobotTrajectorySmoothness)
+{
+  robot_trajectory::RobotTrajectoryPtr trajectory;
+  initTestTrajectory(trajectory);
+
+  const auto smoothness = robot_trajectory::smoothness(*trajectory);
+  ASSERT_TRUE(smoothness.has_value());
+  EXPECT_GT(smoothness.value(), 0.0);
+
+  // Check for empty trajectory
+  trajectory->clear();
+  EXPECT_FALSE(robot_trajectory::smoothness(*trajectory).has_value());
+}
+
+TEST_F(RobotTrajectoryTestFixture, RobotTrajectoryDensity)
+{
+  robot_trajectory::RobotTrajectoryPtr trajectory;
+  initTestTrajectory(trajectory);
+
+  const auto density = robot_trajectory::waypoint_density(*trajectory);
+  ASSERT_TRUE(density.has_value());
+  EXPECT_GT(density.value(), 0.0);
+
+  // Check for empty trajectory
+  trajectory->clear();
+  EXPECT_FALSE(robot_trajectory::waypoint_density(*trajectory).has_value());
 }
 
 int main(int argc, char** argv)
