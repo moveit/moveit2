@@ -140,18 +140,16 @@ public:
     double meters;
   };
 
-  /** \brief Compute the sequence of joint values that correspond to a straight Cartesian path for a particular group.
+  /** \brief Compute the sequence of joint values that correspond to a straight Cartesian path for a particular link.
 
-     The Cartesian path to be followed is specified as a direction of motion (\e direction, unit vector) for the origin
-     The Cartesian path to be followed is specified as a direction of motion (\e direction, unit vector) for the origin
-     of a robot link (\e link). The direction is assumed to be either in a global reference frame or in the local
-     reference frame of the link. In the latter case (\e global_reference_frame is false) the \e direction is rotated
-     accordingly. The link needs to move in a straight line, following the specified direction, for the desired \e
-     distance. The resulting joint values are stored in the vector \e traj, one by one. The maximum distance in
+     The Cartesian path to be followed is specified as a \e translation vector to be followed by the robot \e link.
+     This vector is assumed to be specified either in the global reference frame or in the local
+     reference frame of the link.
+     The resulting joint values are stored in the vector \e traj, one by one. The maximum distance in
      Cartesian space between consecutive points on the resulting path is specified in the \e MaxEEFStep struct which
      provides two fields: translation and rotation. If a \e validCallback is specified, this is passed to the internal
      call to setFromIK(). In case of IK failure, the computation of the path stops and the value returned corresponds to
-     the distance that was computed and for which corresponding states were added to the path.  At the end of the
+     the distance that was achieved and for which corresponding states were added to the path.  At the end of the
      function call, the state of the group corresponds to the last attempted Cartesian pose.
 
      During the computation of the trajectory, it is usually preferred if consecutive joint values do not 'jump' by a
@@ -175,11 +173,28 @@ public:
   static Distance
   computeCartesianPath(RobotState* start_state, const JointModelGroup* group,
                        std::vector<std::shared_ptr<RobotState>>& traj, const LinkModel* link,
+                       const Eigen::Vector3d& translation, bool global_reference_frame, const MaxEEFStep& max_step,
+                       const JumpThreshold& jump_threshold,
+                       const GroupStateValidityCallbackFn& validCallback = GroupStateValidityCallbackFn(),
+                       const kinematics::KinematicsQueryOptions& options = kinematics::KinematicsQueryOptions(),
+                       kinematics::KinematicsBase::IKCostFn cost_function = kinematics::KinematicsBase::IKCostFn());
+
+  /** \brief Compute the sequence of joint values that correspond to a straight Cartesian path, for a particular link.
+
+     In contrast to the previous function, the translation vector is specified as a (unit) direction vector and
+     a distance. */
+  static Distance
+  computeCartesianPath(RobotState* start_state, const JointModelGroup* group,
+                       std::vector<std::shared_ptr<RobotState>>& traj, const LinkModel* link,
                        const Eigen::Vector3d& direction, bool global_reference_frame, double distance,
                        const MaxEEFStep& max_step, const JumpThreshold& jump_threshold,
                        const GroupStateValidityCallbackFn& validCallback = GroupStateValidityCallbackFn(),
                        const kinematics::KinematicsQueryOptions& options = kinematics::KinematicsQueryOptions(),
-                       kinematics::KinematicsBase::IKCostFn cost_function = kinematics::KinematicsBase::IKCostFn());
+                       kinematics::KinematicsBase::IKCostFn cost_function = kinematics::KinematicsBase::IKCostFn())
+  {
+    return computeCartesianPath(start_state, group, traj, link, distance * direction, global_reference_frame, max_step,
+                                jump_threshold, validCallback, options, cost_function);
+  }
 
   /** \brief Compute the sequence of joint values that correspond to a straight Cartesian path, for a particular group.
 

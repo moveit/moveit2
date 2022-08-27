@@ -56,24 +56,20 @@ static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_robot_state.cart
 
 CartesianInterpolator::Distance CartesianInterpolator::computeCartesianPath(
     RobotState* start_state, const JointModelGroup* group, std::vector<RobotStatePtr>& traj, const LinkModel* link,
-    const Eigen::Vector3d& direction, bool global_reference_frame, double distance, const MaxEEFStep& max_step,
+    const Eigen::Vector3d& translation, bool global_reference_frame, const MaxEEFStep& max_step,
     const JumpThreshold& jump_threshold, const GroupStateValidityCallbackFn& validCallback,
     const kinematics::KinematicsQueryOptions& options, kinematics::KinematicsBase::IKCostFn cost_function)
 {
-  // this is the Cartesian pose we start from, and have to move in the direction indicated
-  // getGlobalLinkTransform() returns a valid isometry by contract
-  const Eigen::Isometry3d& start_pose = start_state->getGlobalLinkTransform(link);
+  const double distance = translation.norm();
+  // The target pose is obtained by adding the translation vector to the link's current pose
+  Eigen::Isometry3d pose = start_state->getGlobalLinkTransform(link);
 
-  // the direction can be in the local reference frame (in which case we rotate it)
-  const Eigen::Vector3d rotated_direction = global_reference_frame ? direction : start_pose.linear() * direction;
-
-  // The target pose is built by applying a translation to the start pose for the desired direction and distance
-  Eigen::Isometry3d target_pose = start_pose;  // valid isometry
-  target_pose.translation() += rotated_direction * distance;
+  // the translation direction can be specified w.r.t. the local link frame (then rotate into global frame)
+  pose.translation() += global_reference_frame ? translation : pose.linear() * translation;
 
   // call computeCartesianPath for the computed target pose in the global reference frame
-  return CartesianInterpolator::Distance(distance) * computeCartesianPath(start_state, group, traj, link, target_pose,
-                                                                          true, max_step, jump_threshold, validCallback,
+  return CartesianInterpolator::Distance(distance) * computeCartesianPath(start_state, group, traj, link, pose, true,
+                                                                          max_step, jump_threshold, validCallback,
                                                                           options, cost_function);
 }
 
