@@ -196,12 +196,13 @@ public:
                                 jump_threshold, validCallback, options, cost_function);
   }
 
-  /** \brief Compute the sequence of joint values that correspond to a straight Cartesian path, for a particular group.
+  /** \brief Compute the sequence of joint values that correspond to a straight Cartesian path, for a particular frame.
 
      In contrast to the previous function, the Cartesian path is specified as a target frame to be reached (\e target)
-     for the origin of a robot link (\e link). The target frame is assumed to be either in a global reference frame or
-     in the local reference frame of the link. In the latter case (\e global_reference_frame is false) the \e target is
-     rotated accordingly. All other comments from the previous function apply. */
+     for a virtual frame attached to the robot \e link with the given \e link_offset.
+     The target frame is assumed to be specified either w.r.t. to the global reference frame or the virtual link frame.
+     This function returns the percentage (0..1) of the path that was achieved.
+     All other comments from the previous function apply. */
   static Percentage
   computeCartesianPath(RobotState* start_state, const JointModelGroup* group,
                        std::vector<std::shared_ptr<RobotState>>& traj, const LinkModel* link,
@@ -209,14 +210,15 @@ public:
                        const JumpThreshold& jump_threshold,
                        const GroupStateValidityCallbackFn& validCallback = GroupStateValidityCallbackFn(),
                        const kinematics::KinematicsQueryOptions& options = kinematics::KinematicsQueryOptions(),
-                       kinematics::KinematicsBase::IKCostFn cost_function = kinematics::KinematicsBase::IKCostFn());
+                       kinematics::KinematicsBase::IKCostFn cost_function = kinematics::KinematicsBase::IKCostFn(),
+                       const Eigen::Isometry3d& link_offset = Eigen::Isometry3d::Identity());
 
   /** \brief Compute the sequence of joint values that perform a general Cartesian path.
 
      In contrast to the previous functions, the Cartesian path is specified as a set of \e waypoints to be sequentially
-     reached for the origin of a robot link (\e link). The waypoints are transforms given either in a global reference
-     frame or in the local reference frame of the link at the immediately preceding waypoint. The link needs to move
-     in a straight line between two consecutive waypoints. All other comments apply. */
+     reached by the virtual frame attached to the robot \e link. The waypoints are transforms given either w.r.t. the global
+     reference frame or the virtual frame at the immediately preceding waypoint. The virtual frame needs
+     to move in a straight line between two consecutive waypoints. All other comments apply. */
   static Percentage
   computeCartesianPath(RobotState* start_state, const JointModelGroup* group,
                        std::vector<std::shared_ptr<RobotState>>& traj, const LinkModel* link,
@@ -224,7 +226,8 @@ public:
                        const MaxEEFStep& max_step, const JumpThreshold& jump_threshold,
                        const GroupStateValidityCallbackFn& validCallback = GroupStateValidityCallbackFn(),
                        const kinematics::KinematicsQueryOptions& options = kinematics::KinematicsQueryOptions(),
-                       kinematics::KinematicsBase::IKCostFn cost_function = kinematics::KinematicsBase::IKCostFn());
+                       kinematics::KinematicsBase::IKCostFn cost_function = kinematics::KinematicsBase::IKCostFn(),
+                       const Eigen::Isometry3d& link_offset = Eigen::Isometry3d::Identity());
 
   /** \brief Tests joint space jumps of a trajectory.
 
