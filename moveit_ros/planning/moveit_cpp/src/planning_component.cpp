@@ -107,6 +107,12 @@ bool PlanningComponent::setPathConstraints(const moveit_msgs::msg::Constraints& 
   return true;
 }
 
+bool PlanningComponent::setTrajectoryConstraints(const moveit_msgs::msg::TrajectoryConstraints& trajectory_constraints)
+{
+  current_trajectory_constraints_ = trajectory_constraints;
+  return true;
+}
+
 PlanningComponent::PlanSolution PlanningComponent::plan(const PlanRequestParameters& parameters)
 {
   last_plan_solution_ = std::make_shared<PlanSolution>();
@@ -156,7 +162,9 @@ PlanningComponent::PlanSolution PlanningComponent::plan(const PlanRequestParamet
   req.goal_constraints = current_goal_constraints_;
 
   // Set path constraints
-  req.path_constraints = current_path_constraints_;
+  req.path_constraints = current_path_constraints_;  // TODO pass as function argument
+  // Set trajectory constraints
+  req.trajectory_constraints = current_trajectory_constraints_;
 
   // Run planning attempt
   ::planning_interface::MotionPlanResponse res;
