@@ -42,8 +42,7 @@
 namespace moveit_simple_controller_manager
 {
 /*
- * This is an interface for a gripper using control_msgs/GripperCommandAction
- * action interface (single DOF).
+ * An interface for controllers that have no handle, e.g. chained controllers like an Admittance controller
  */
 class EmptyControllerHandle : public moveit_controller_manager::MoveItControllerHandle
 {
