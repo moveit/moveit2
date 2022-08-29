@@ -64,6 +64,9 @@ public:
     /// The trajectory of the robot (may not contain joints that are the same as for the start_state_)
     robot_trajectory::RobotTrajectoryPtr trajectory;
 
+    // Planning time (seconds)
+    double planning_time;
+
     /// Reason why the plan failed
     moveit::core::MoveItErrorCode error_code;
 

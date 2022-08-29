@@ -162,7 +162,7 @@ PlanningComponent::PlanSolution PlanningComponent::plan(const PlanRequestParamet
   req.goal_constraints = current_goal_constraints_;
 
   // Set path constraints
-  req.path_constraints = current_path_constraints_;  // TODO pass as function argument
+  req.path_constraints = current_path_constraints_;
   // Set trajectory constraints
   req.trajectory_constraints = current_trajectory_constraints_;
 
@@ -185,6 +185,8 @@ PlanningComponent::PlanSolution PlanningComponent::plan(const PlanRequestParamet
   }
   last_plan_solution_->start_state = req.start_state;
   last_plan_solution_->trajectory = res.trajectory_;
+  last_plan_solution_->planning_time = res.planning_time_;
+
   // TODO(henningkayser): Visualize trajectory
   // std::vector<const moveit::core::LinkModel*> eef_links;
   // if (joint_model_group->getEndEffectorTips(eef_links))
