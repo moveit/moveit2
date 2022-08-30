@@ -1513,7 +1513,7 @@ bool ikCallbackFnAdapter(RobotState* state, const JointModelGroup* group,
                          const GroupStateValidityCallbackFn& constraint, const geometry_msgs::msg::Pose& /*unused*/,
                          const std::vector<double>& ik_sol, moveit_msgs::msg::MoveItErrorCodes& error_code)
 {
-  const std::vector<unsigned int>& bij = group->getKinematicsSolverJointBijection();
+  const std::vector<size_t>& bij = group->getKinematicsSolverJointBijection();
   std::vector<double> solution(bij.size());
   for (std::size_t i = 0; i < bij.size(); ++i)
     solution[bij[i]] = ik_sol[i];
@@ -1787,7 +1787,7 @@ bool RobotState::setFromIK(const JointModelGroup* jmg, const EigenSTL::vector_Is
     };
 
   // Bijection
-  const std::vector<unsigned int>& bij = jmg->getKinematicsSolverJointBijection();
+  const std::vector<size_t>& bij = jmg->getKinematicsSolverJointBijection();
 
   std::vector<double> initial_values;
   copyJointGroupPositions(jmg, initial_values);
@@ -1961,7 +1961,7 @@ bool RobotState::setFromIKSubgroups(const JointModelGroup* jmg, const EigenSTL::
     bool found_solution = true;
     for (std::size_t sg = 0; sg < sub_groups.size(); ++sg)
     {
-      const std::vector<unsigned int>& bij = sub_groups[sg]->getKinematicsSolverJointBijection();
+      const std::vector<size_t>& bij = sub_groups[sg]->getKinematicsSolverJointBijection();
       std::vector<double> seed(bij.size());
       // the first seed is the initial state
       if (first_seed)
