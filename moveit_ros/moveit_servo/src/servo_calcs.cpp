@@ -305,7 +305,7 @@ void ServoCalcs::stop()
 
 void ServoCalcs::mainCalcLoop()
 {
-  rclcpp::Rate rate(1.0 / parameters_->publish_period);
+  rclcpp::WallRate rate(1.0 / parameters_->publish_period);
 
   while (rclcpp::ok() && !stop_requested_)
   {

@@ -114,7 +114,6 @@ PoseTrackingStatusCode PoseTracking::moveToPose(const Eigen::Vector3d& positiona
   // Wait a bit for a target pose message to arrive.
   // The target pose may get updated by new messages as the robot moves (in a callback function).
   const rclcpp::Time start_time = node_->now();
-  rclcpp::Clock clock;
 
   while ((!haveRecentTargetPose(target_pose_timeout) || !haveRecentEndEffectorPose(target_pose_timeout)) &&
          ((node_->now() - start_time).seconds() < target_pose_timeout))
@@ -170,7 +169,7 @@ PoseTrackingStatusCode PoseTracking::moveToPose(const Eigen::Vector3d& positiona
 
     if (!loop_rate_.sleep())
     {
-      RCLCPP_WARN_STREAM_THROTTLE(LOGGER, clock, LOG_THROTTLE_PERIOD, "Target control rate was missed");
+      RCLCPP_WARN_STREAM_THROTTLE(LOGGER, *node_->get_clock(), LOG_THROTTLE_PERIOD, "Target control rate was missed");
     }
   }
 
