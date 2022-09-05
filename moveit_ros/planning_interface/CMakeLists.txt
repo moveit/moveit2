@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.16.3)
+cmake_minimum_required(VERSION 3.22)
 project(moveit_ros_planning_interface)
 
 # Common cmake code applied to all moveit packages

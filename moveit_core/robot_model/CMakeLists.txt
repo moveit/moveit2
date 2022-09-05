@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.16.3)
+cmake_minimum_required(VERSION 3.22)
 set(MOVEIT_LIB_NAME moveit_robot_model)
 
 add_library(${MOVEIT_LIB_NAME} SHARED
