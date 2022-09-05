@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.16.3)
 project(moveit_planners_chomp)
 
 # Common cmake code applied to all moveit packages
