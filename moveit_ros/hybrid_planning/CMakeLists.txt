@@ -72,7 +72,7 @@ install(TARGETS ${LIBRARIES}
   EXPORT export_${PROJECT_NAME}
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
-  RUNTIME DESTINATION lib/${PROJECT_NAME}
+  RUNTIME DESTINATION bin
   INCLUDES DESTINATION include)
 
 install(TARGETS cancel_action hybrid_planning_demo_node
