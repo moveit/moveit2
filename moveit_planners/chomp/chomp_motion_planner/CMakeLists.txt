@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.22)
 project(chomp_motion_planner)
 
 # Common cmake code applied to all moveit packages
