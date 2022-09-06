@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.22)
 set(MOVEIT_LIB_NAME moveit_kinematics_base)
 
 add_library(${MOVEIT_LIB_NAME} SHARED src/kinematics_base.cpp)

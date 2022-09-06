@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.10.2)
+cmake_minimum_required(VERSION 3.22)
 project(moveit_hybrid_planning)
 
 # Common cmake code applied to all moveit packages
@@ -72,7 +72,7 @@ install(TARGETS ${LIBRARIES}
   EXPORT export_${PROJECT_NAME}
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
-  RUNTIME DESTINATION lib/${PROJECT_NAME}
+  RUNTIME DESTINATION bin
   INCLUDES DESTINATION include)
 
 install(TARGETS cancel_action hybrid_planning_demo_node
