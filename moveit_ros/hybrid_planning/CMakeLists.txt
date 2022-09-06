@@ -69,7 +69,7 @@ rclcpp_components_register_nodes(moveit_global_planner_component "moveit::hybrid
 rclcpp_components_register_nodes(moveit_local_planner_component "moveit::hybrid_planning::LocalPlannerComponent")
 
 install(TARGETS ${LIBRARIES}
-  EXPORT export_${PROJECT_NAME}
+  EXPORT ${PROJECT_NAME}Targets
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION bin
@@ -95,6 +95,6 @@ pluginlib_export_plugin_description_file(moveit_hybrid_planning forward_trajecto
 ament_export_include_directories(include)
 ament_export_libraries(${LIBRARIES})
 ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS})
-ament_export_targets(export_${PROJECT_NAME} HAS_LIBRARY_TARGET)
+ament_export_targets(${PROJECT_NAME}Targets HAS_LIBRARY_TARGET)
 
 ament_package()

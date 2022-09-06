@@ -60,7 +60,7 @@ endif()
 install(DIRECTORY templates DESTINATION share/${PROJECT_NAME})
 
 install(TARGETS ${PROJECT_NAME}
-        EXPORT export_${PROJECT_NAME}
+        EXPORT ${PROJECT_NAME}Targets
         ARCHIVE DESTINATION lib
         LIBRARY DESTINATION lib
         RUNTIME DESTINATION bin
@@ -78,7 +78,7 @@ install(DIRECTORY launch
 ament_export_include_directories(include)
 
 ament_export_libraries(${PROJECT_NAME})
-ament_export_targets(export_${PROJECT_NAME})
+ament_export_targets(${PROJECT_NAME}Targets)
 pluginlib_export_plugin_description_file(moveit_setup_framework moveit_setup_framework_plugins.xml)
 
 ament_package()

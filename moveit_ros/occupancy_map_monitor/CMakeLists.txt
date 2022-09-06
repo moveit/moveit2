@@ -53,7 +53,7 @@ target_link_libraries(moveit_ros_occupancy_map_server ${MOVEIT_LIB_NAME})
 
 install(
   TARGETS ${MOVEIT_LIB_NAME}
-  EXPORT export_${PROJECT_NAME}
+  EXPORT ${PROJECT_NAME}Targets
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
   RUNTIME DESTINATION bin
@@ -65,7 +65,7 @@ install(TARGETS moveit_ros_occupancy_map_server
 )
 install(DIRECTORY include/ DESTINATION include)
 
-ament_export_targets(export_${PROJECT_NAME} HAS_LIBRARY_TARGET)
+ament_export_targets(${PROJECT_NAME}Targets HAS_LIBRARY_TARGET)
 ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS} eigen3_cmake_module)
 
 if(BUILD_TESTING)
