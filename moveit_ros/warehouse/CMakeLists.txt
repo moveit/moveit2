@@ -92,19 +92,7 @@ install(
   INCLUDES DESTINATION include
 )
 
-ament_export_targets(${PROJECT_NAME}Targets HAS_LIBRARY_TARGET)
-
-install(
-  TARGETS
-    moveit_save_to_warehouse
-    moveit_warehouse_broadcast
-    moveit_warehouse_import_from_text
-    moveit_warehouse_save_as_text
-    moveit_init_demo_warehouse
-    moveit_warehouse_services
-  RUNTIME DESTINATION RUNTIME DESTINATION lib/${PROJECT_NAME}
-)
-
+ament_export_targets(export_${PROJECT_NAME} HAS_LIBRARY_TARGET)
 ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS})
 
 if(BUILD_TESTING)
