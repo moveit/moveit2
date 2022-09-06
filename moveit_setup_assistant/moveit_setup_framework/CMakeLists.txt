@@ -82,7 +82,7 @@ install(TARGETS ${PROJECT_NAME}
         RUNTIME DESTINATION bin
         INCLUDES DESTINATION include
 )
-ament_export_include_directories(include)
+
 ament_export_dependencies(rclcpp)
 ament_export_dependencies(Qt5Core)
 ament_export_dependencies(Qt5Widgets)
