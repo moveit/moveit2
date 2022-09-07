@@ -180,7 +180,6 @@ ServoCalcs::ServoCalcs(rclcpp::Node::SharedPtr node,
 
   // Publish status
   status_pub_ = node_->create_publisher<std_msgs::msg::Int8>(parameters_->status_topic, rclcpp::SystemDefaultsQoS());
-  condition_pub_ = node_->create_publisher<std_msgs::msg::Float64>(CONDITION_TOPIC, rclcpp::SystemDefaultsQoS());
 
   internal_joint_state_.name = joint_model_group_->getActiveJointModelNames();
   num_joints_ = internal_joint_state_.name.size();
@@ -693,7 +692,11 @@ bool ServoCalcs::cartesianServoCalcs(geometry_msgs::msg::TwistStamped& cmd,
     delta_theta_ = pseudo_inverse * delta_x;
   }
 
-  delta_theta_ *= velocityScalingFactorForSingularity(joint_model_group_, delta_x, svd, pseudo_inverse);
+  delta_theta_ *= velocityScalingFactorForSingularity(joint_model_group_, delta_x, svd, pseudo_inverse,
+                                                      parameters_->hard_stop_singularity_threshold,
+                                                      parameters_->lower_singularity_threshold,
+                                                      parameters_->leaving_singularity_threshold_multiplier,
+                                                      *node_->get_clock(), current_state_, status_);
 
   return internalServoUpdate(delta_theta_, joint_trajectory, ServoType::CARTESIAN_SPACE);
 }
@@ -862,13 +865,17 @@ void ServoCalcs::composeJointTrajMessage(const sensor_msgs::msg::JointState& joi
 }
 
 // Possibly calculate a velocity scaling factor, due to proximity of singularity and direction of motion
-double ServoCalcs::velocityScalingFactorForSingularity(const moveit::core::JointModelGroup* joint_model_group,
-                                                       const Eigen::VectorXd& commanded_velocity,
-                                                       const Eigen::JacobiSVD<Eigen::MatrixXd>& svd,
-                                                       const Eigen::MatrixXd& pseudo_inverse)
+double velocityScalingFactorForSingularity(const moveit::core::JointModelGroup* joint_model_group,
+                                           const Eigen::VectorXd& commanded_twist,
+                                           const Eigen::JacobiSVD<Eigen::MatrixXd>& svd,
+                                           const Eigen::MatrixXd& pseudo_inverse,
+                                           const double hard_stop_singularity_threshold,
+                                           const double lower_singularity_threshold,
+                                           const double leaving_singularity_threshold_multiplier, rclcpp::Clock& clock,
+                                           moveit::core::RobotStatePtr current_state, StatusCode& status)
 {
   double velocity_scale = 1;
-  std::size_t num_dimensions = commanded_velocity.size();
+  std::size_t num_dimensions = commanded_twist.size();
 
   // Find the direction away from nearest singularity.
   // The last column of U from the SVD of the Jacobian points directly toward or away from the singularity.
@@ -877,10 +884,6 @@ double ServoCalcs::velocityScalingFactorForSingularity(const moveit::core::Joint
   Eigen::VectorXd vector_toward_singularity = svd.matrixU().col(num_dimensions - 1);
 
   double ini_condition = svd.singularValues()(0) / svd.singularValues()(svd.singularValues().size() - 1);
-
-  auto condition_msg = std::make_unique<std_msgs::msg::Float64>();
-  condition_msg->data = ini_condition;
-  condition_pub_->publish(std::move(condition_msg));
 
   // This singular vector tends to flip direction unpredictably. See R. Bro,
   // "Resolving the Sign Ambiguity in the Singular Value Decomposition".
@@ -892,10 +895,10 @@ double ServoCalcs::velocityScalingFactorForSingularity(const moveit::core::Joint
 
   // Calculate a small change in joints
   Eigen::VectorXd new_theta;
-  current_state_->copyJointGroupPositions(joint_model_group, new_theta);
+  current_state->copyJointGroupPositions(joint_model_group, new_theta);
   new_theta += pseudo_inverse * delta_x;
-  current_state_->setJointGroupPositions(joint_model_group, new_theta);
-  Eigen::MatrixXd new_jacobian = current_state_->getJacobian(joint_model_group);
+  current_state->setJointGroupPositions(joint_model_group, new_theta);
+  Eigen::MatrixXd new_jacobian = current_state->getJacobian(joint_model_group);
 
   Eigen::JacobiSVD<Eigen::MatrixXd> new_svd(new_jacobian);
   double new_condition = new_svd.singularValues()(0) / new_svd.singularValues()(new_svd.singularValues().size() - 1);
@@ -907,31 +910,27 @@ double ServoCalcs::velocityScalingFactorForSingularity(const moveit::core::Joint
   }
 
   // If this dot product is positive, we're moving toward singularity
-  double dot = vector_toward_singularity.dot(commanded_velocity);
+  double dot = vector_toward_singularity.dot(commanded_twist);
   // see https://github.com/ros-planning/moveit2/pull/620#issuecomment-1201418258 for visual explanation of algorithm
-  double upper_threshold =
-      dot > 0 ? parameters_->hard_stop_singularity_threshold :
-                (parameters_->hard_stop_singularity_threshold - parameters_->lower_singularity_threshold) *
-                        parameters_->leaving_singularity_threshold_multiplier +
-                    parameters_->lower_singularity_threshold;
-  if ((ini_condition > parameters_->lower_singularity_threshold) &&
-      (ini_condition < parameters_->hard_stop_singularity_threshold))
+  double upper_threshold = dot > 0 ? hard_stop_singularity_threshold :
+                                     (hard_stop_singularity_threshold - lower_singularity_threshold) *
+                                             leaving_singularity_threshold_multiplier +
+                                         lower_singularity_threshold;
+  if ((ini_condition > lower_singularity_threshold) && (ini_condition < hard_stop_singularity_threshold))
   {
-    velocity_scale = 1. - (ini_condition - parameters_->lower_singularity_threshold) /
-                              (upper_threshold - parameters_->lower_singularity_threshold);
-    status_ =
+    velocity_scale =
+        1. - (ini_condition - lower_singularity_threshold) / (upper_threshold - lower_singularity_threshold);
+    status =
         dot > 0 ? StatusCode::DECELERATE_FOR_APPROACHING_SINGULARITY : StatusCode::DECELERATE_FOR_LEAVING_SINGULARITY;
-    rclcpp::Clock& clock = *node_->get_clock();
-    RCLCPP_WARN_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD, SERVO_STATUS_CODE_MAP.at(status_));
+    RCLCPP_WARN_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD, SERVO_STATUS_CODE_MAP.at(status));
   }
 
   // Very close to singularity, so halt.
   else if (ini_condition >= upper_threshold)
   {
     velocity_scale = 0;
-    status_ = StatusCode::HALT_FOR_SINGULARITY;
-    rclcpp::Clock& clock = *node_->get_clock();
-    RCLCPP_WARN_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD, SERVO_STATUS_CODE_MAP.at(status_));
+    status = StatusCode::HALT_FOR_SINGULARITY;
+    RCLCPP_WARN_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD, SERVO_STATUS_CODE_MAP.at(status));
   }
 
   return velocity_scale;

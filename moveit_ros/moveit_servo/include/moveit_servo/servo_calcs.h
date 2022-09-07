@@ -77,6 +77,28 @@ enum class ServoType
   JOINT_SPACE
 };
 
+/** \brief Possibly calculate a velocity scaling factor, due to proximity of
+ * singularity and direction of motion
+ * @param[in] joint_model_group   The MoveIt group
+ * @param[in] commanded_twist     The commanded Cartesian twist
+ * @param[in] svd                 A singular value decomposition of the Jacobian
+ * @param[in] pseudo_inverse      The pseudo-inverse of the Jacobian
+ * @param[in] hard_stop_singularity_threshold  Halt if condition(Jacobian) > hard_stop_singularity_threshold
+ * @param[in] lower_singularity_threshold      Decelerate if condition(Jacobian) > lower_singularity_threshold
+ * @param[in] leaving_singularity_threshold_multiplier      Allow faster motion away from singularity
+ * @param[in, out] clock          A ROS clock, for logging
+ * @param[in, out] current_state  The state of the robot. Used in internal calculations.
+ * @param[out] status             Singularity status
+ */
+double velocityScalingFactorForSingularity(const moveit::core::JointModelGroup* joint_model_group,
+                                           const Eigen::VectorXd& commanded_twist,
+                                           const Eigen::JacobiSVD<Eigen::MatrixXd>& svd,
+                                           const Eigen::MatrixXd& pseudo_inverse,
+                                           const double hard_stop_singularity_threshold,
+                                           const double lower_singularity_threshold,
+                                           const double leaving_singularity_threshold_multiplier, rclcpp::Clock& clock,
+                                           moveit::core::RobotStatePtr current_state, StatusCode& status);
+
 class ServoCalcs
 {
 public:
@@ -171,14 +193,6 @@ protected:
       \return Vector of the joints that would move farther past position margin limits
    */
   std::vector<const moveit::core::JointModel*> enforcePositionLimits(sensor_msgs::msg::JointState& joint_state) const;
-
-  /** \brief Possibly calculate a velocity scaling factor, due to proximity of
-   * singularity and direction of motion
-   */
-  double velocityScalingFactorForSingularity(const moveit::core::JointModelGroup* joint_model_group,
-                                             const Eigen::VectorXd& commanded_velocity,
-                                             const Eigen::JacobiSVD<Eigen::MatrixXd>& svd,
-                                             const Eigen::MatrixXd& pseudo_inverse);
 
   /** \brief Compose the outgoing JointTrajectory message */
   void composeJointTrajMessage(const sensor_msgs::msg::JointState& joint_state,
@@ -314,7 +328,6 @@ protected:
   rclcpp::Publisher<std_msgs::msg::Int8>::SharedPtr status_pub_;
   rclcpp::Publisher<trajectory_msgs::msg::JointTrajectory>::SharedPtr trajectory_outgoing_cmd_pub_;
   rclcpp::Publisher<std_msgs::msg::Float64MultiArray>::SharedPtr multiarray_outgoing_cmd_pub_;
-  rclcpp::Publisher<std_msgs::msg::Float64>::SharedPtr condition_pub_;
   rclcpp::Service<moveit_msgs::srv::ChangeControlDimensions>::SharedPtr control_dimensions_server_;
   rclcpp::Service<moveit_msgs::srv::ChangeDriftDimensions>::SharedPtr drift_dimensions_server_;
   rclcpp::Service<std_srvs::srv::Empty>::SharedPtr reset_servo_status_;
