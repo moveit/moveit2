@@ -134,9 +134,17 @@ TEST_F(ServoCalcsUnitTests, SingularityScaling)
   Eigen::VectorXd commanded_twist(6);
   commanded_twist << 1, 0, 0, 0, 0, 0;
   // This singular Jacobian only produces motion for Joint 1
-  Eigen::MatrixXd jacobian(6, 6);
-  jacobian << 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0,
-      0, 1, 0, 0, 0, 0, 0;
+  Eigen::MatrixXd jacobian(7, 6);
+  // clang-format off
+  jacobian <<
+    1, 0, 0, 0, 0, 0,
+    1, 0, 0, 0, 0, 0,
+    1, 0, 0, 0, 0, 0,
+    1, 0, 0, 0, 0, 0,
+    1, 0, 0, 0, 0, 0,
+    1, 0, 0, 0, 0, 0,
+    1, 0, 0, 0, 0, 0;
+  // clang-format on
   Eigen::JacobiSVD<Eigen::MatrixXd> svd =
       Eigen::JacobiSVD<Eigen::MatrixXd>(jacobian, Eigen::ComputeThinU | Eigen::ComputeThinV);
   Eigen::MatrixXd matrix_s = svd.singularValues().asDiagonal();
