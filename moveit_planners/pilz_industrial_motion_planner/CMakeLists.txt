@@ -28,6 +28,8 @@ find_package(tf2_ros REQUIRED)
 find_package(orocos_kdl REQUIRED)
 find_package(Boost REQUIRED COMPONENTS)
 
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}  -std=c++11")
+
 # TODO(henning): Remove/Port
 # if(CATKIN_ENABLE_TESTING AND ENABLE_COVERAGE_TESTING)
 #   find_package(code_coverage REQUIRED)
