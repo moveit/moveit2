@@ -81,11 +81,11 @@ endif()
 
 ## Mark executables and/or libraries for installation
 install(TARGETS ${PROJECT_NAME}_plugin ${PROJECT_NAME}_trajectory_plugin ${PROJECT_NAME}_gripper_plugin ${PROJECT_NAME}_empty_plugin
-EXPORT export_${PROJECT_NAME}
-ARCHIVE DESTINATION lib
-LIBRARY DESTINATION lib
-RUNTIME DESTINATION bin
-INCLUDES DESTINATION include
+  EXPORT ${PROJECT_NAME}Targets
+  ARCHIVE DESTINATION lib
+  LIBRARY DESTINATION lib
+  RUNTIME DESTINATION bin
+  INCLUDES DESTINATION include
 )
 
 ## Mark cpp header files for installation
@@ -96,7 +96,7 @@ install(DIRECTORY include/
 pluginlib_export_plugin_description_file(moveit_core moveit_core_plugins.xml)
 pluginlib_export_plugin_description_file(moveit_ros_control_interface moveit_ros_control_interface_plugins.xml)
 
-ament_export_targets(export_${PROJECT_NAME} HAS_LIBRARY_TARGET)
+ament_export_targets(${PROJECT_NAME}Targets HAS_LIBRARY_TARGET)
 ament_export_dependencies(
     ${THIS_PACKAGE_INCLUDE_DEPENDS}
     Boost

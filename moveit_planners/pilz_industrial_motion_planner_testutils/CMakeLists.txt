@@ -48,7 +48,7 @@ ament_target_dependencies(${PROJECT_NAME}
 
 install(
   TARGETS ${PROJECT_NAME}
-  EXPORT export_${PROJECT_NAME}
+  EXPORT ${PROJECT_NAME}Targets
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
   RUNTIME DESTINATION bin
@@ -57,7 +57,7 @@ install(
 
 install(DIRECTORY include/ DESTINATION include)
 
-ament_export_targets(export_${PROJECT_NAME} HAS_LIBRARY_TARGET)
+ament_export_targets(${PROJECT_NAME}Targets HAS_LIBRARY_TARGET)
 ament_export_dependencies(rclcpp moveit_core moveit_msgs tf2_eigen)
 
 if(BUILD_TESTING)
