@@ -175,7 +175,8 @@ protected:
   /** \brief Possibly calculate a velocity scaling factor, due to proximity of
    * singularity and direction of motion
    */
-  double velocityScalingFactorForSingularity(const Eigen::VectorXd& commanded_velocity,
+  double velocityScalingFactorForSingularity(const moveit::core::JointModelGroup* joint_model_group,
+                                             const Eigen::VectorXd& commanded_velocity,
                                              const Eigen::JacobiSVD<Eigen::MatrixXd>& svd,
                                              const Eigen::MatrixXd& pseudo_inverse);
 

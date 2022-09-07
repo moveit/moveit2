@@ -693,7 +693,7 @@ bool ServoCalcs::cartesianServoCalcs(geometry_msgs::msg::TwistStamped& cmd,
     delta_theta_ = pseudo_inverse * delta_x;
   }
 
-  delta_theta_ *= velocityScalingFactorForSingularity(delta_x, svd, pseudo_inverse);
+  delta_theta_ *= velocityScalingFactorForSingularity(joint_model_group_, delta_x, svd, pseudo_inverse);
 
   return internalServoUpdate(delta_theta_, joint_trajectory, ServoType::CARTESIAN_SPACE);
 }
@@ -862,7 +862,8 @@ void ServoCalcs::composeJointTrajMessage(const sensor_msgs::msg::JointState& joi
 }
 
 // Possibly calculate a velocity scaling factor, due to proximity of singularity and direction of motion
-double ServoCalcs::velocityScalingFactorForSingularity(const Eigen::VectorXd& commanded_velocity,
+double ServoCalcs::velocityScalingFactorForSingularity(const moveit::core::JointModelGroup* joint_model_group,
+                                                       const Eigen::VectorXd& commanded_velocity,
                                                        const Eigen::JacobiSVD<Eigen::MatrixXd>& svd,
                                                        const Eigen::MatrixXd& pseudo_inverse)
 {
@@ -891,10 +892,10 @@ double ServoCalcs::velocityScalingFactorForSingularity(const Eigen::VectorXd& co
 
   // Calculate a small change in joints
   Eigen::VectorXd new_theta;
-  current_state_->copyJointGroupPositions(joint_model_group_, new_theta);
+  current_state_->copyJointGroupPositions(joint_model_group, new_theta);
   new_theta += pseudo_inverse * delta_x;
-  current_state_->setJointGroupPositions(joint_model_group_, new_theta);
-  Eigen::MatrixXd new_jacobian = current_state_->getJacobian(joint_model_group_);
+  current_state_->setJointGroupPositions(joint_model_group, new_theta);
+  Eigen::MatrixXd new_jacobian = current_state_->getJacobian(joint_model_group);
 
   Eigen::JacobiSVD<Eigen::MatrixXd> new_svd(new_jacobian);
   double new_condition = new_svd.singularValues()(0) / new_svd.singularValues()(new_svd.singularValues().size() - 1);
