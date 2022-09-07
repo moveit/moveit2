@@ -94,7 +94,7 @@ public:
       auto test_parameters = std::make_shared<struct TestParameters>();
       test_parameters->publish_hz = 2.0 / servo_parameters_->incoming_command_timeout;
       test_parameters->publish_period = 1.0 / test_parameters->publish_hz;
-      test_parameters->timeout_iterations = 10 * test_parameters->publish_hz;
+      test_parameters->timeout_iterations = 50 * test_parameters->publish_hz;
       test_parameters->servo_node_name = "/servo_node";
       test_parameters_ = test_parameters;
     }
