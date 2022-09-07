@@ -55,7 +55,7 @@ TEST_F(ServoFixture, ReachSingular)
   // Look for DECELERATE_FOR_LEAVING_SINGULARITY status
   watchForStatus(moveit_servo::StatusCode::DECELERATE_FOR_LEAVING_SINGULARITY);
 
-  rclcpp::Rate publish_loop_rate(test_parameters_->publish_hz);
+  rclcpp::WallRate publish_loop_rate(test_parameters_->publish_hz);
   auto log_time_start = node_->now();
   size_t iterations = 0;
   while (!sawTrackedStatus() && iterations++ < test_parameters_->timeout_iterations)

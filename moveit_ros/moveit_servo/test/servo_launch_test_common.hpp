@@ -409,7 +409,7 @@ public:
     RCLCPP_INFO_STREAM(LOGGER, "Wait for start servo: " << (node_->now() - time_start).seconds());
 
     // Test that status messages start
-    rclcpp::Rate publish_loop_rate(test_parameters_->publish_hz);
+    rclcpp::WallRate publish_loop_rate(test_parameters_->publish_hz);
     time_start = node_->now();
     auto num_statuses_start = getNumStatus();
     size_t iterations = 0;

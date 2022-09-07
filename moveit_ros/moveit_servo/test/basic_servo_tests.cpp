@@ -82,7 +82,7 @@ TEST_F(ServoFixture, SendTwistStampedTest)
 
   // Set the rate differently from the publish period from the parameters to show that
   // the number of outputs is set by the number of commands sent and not the rate they are sent.
-  rclcpp::Rate publish_rate(2. / publish_period);
+  rclcpp::WallRate publish_rate(2. / publish_period);
 
   // Send a few Cartesian velocity commands
   for (size_t i = 0; i < num_commands && rclcpp::ok(); ++i)
@@ -133,7 +133,7 @@ TEST_F(ServoFixture, SendJointServoTest)
 
   // Set the rate differently from the publish period from the parameters to show that
   // the number of outputs is set by the number of commands sent and not the rate they are sent.
-  rclcpp::Rate publish_rate(2. / publish_period);
+  rclcpp::WallRate publish_rate(2. / publish_period);
 
   // Send a few joint velocity commands
   for (size_t i = 0; i < num_commands && rclcpp::ok(); ++i)
