@@ -133,18 +133,13 @@ TEST_F(ServoCalcsUnitTests, SingularityScaling)
   // If we are at a singularity, we should halt
   Eigen::VectorXd commanded_twist(6);
   commanded_twist << 1, 0, 0, 0, 0, 0;
-  // This singular Jacobian only produces motion for Joint 1
-  Eigen::MatrixXd jacobian(7, 6);
-  // clang-format off
-  jacobian <<
-    1, 0, 0, 0, 0, 0,
-    1, 0, 0, 0, 0, 0,
-    1, 0, 0, 0, 0, 0,
-    1, 0, 0, 0, 0, 0,
-    1, 0, 0, 0, 0, 0,
-    1, 0, 0, 0, 0, 0,
-    1, 0, 0, 0, 0, 0;
-  // clang-format on
+
+  // Start near a singularity
+  std::shared_ptr<moveit::core::RobotState> robot_state = std::make_shared<moveit::core::RobotState>(robot_model_);
+  robot_state->setToDefaultValues();
+
+  Eigen::MatrixXd jacobian = robot_state->getJacobian(joint_model_group_);
+
   Eigen::JacobiSVD<Eigen::MatrixXd> svd =
       Eigen::JacobiSVD<Eigen::MatrixXd>(jacobian, Eigen::ComputeThinU | Eigen::ComputeThinV);
   Eigen::MatrixXd matrix_s = svd.singularValues().asDiagonal();
@@ -155,8 +150,6 @@ TEST_F(ServoCalcsUnitTests, SingularityScaling)
   double leaving_singularity_threshold_multiplier = 2;
 
   rclcpp::Clock clock;
-  std::shared_ptr<moveit::core::RobotState> robot_state = std::make_shared<moveit::core::RobotState>(robot_model_);
-  robot_state->setToDefaultValues();
   moveit_servo::StatusCode status;
 
   double scaling_factor = moveit_servo::velocityScalingFactorForSingularity(
