@@ -156,6 +156,7 @@ TEST_F(ServoCalcsUnitTests, SingularityScaling)
 
   rclcpp::Clock clock;
   std::shared_ptr<moveit::core::RobotState> robot_state = std::make_shared<moveit::core::RobotState>(robot_model_);
+  robot_state->setToDefaultValues();
   moveit_servo::StatusCode status;
 
   double scaling_factor = moveit_servo::velocityScalingFactorForSingularity(
