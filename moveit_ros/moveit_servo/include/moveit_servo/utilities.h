@@ -27,22 +27,35 @@
 // POSSIBILITY OF SUCH DAMAGE.
 
 /* Author    : Andy Zelenak
-   Desc      : Free functions. We keep them in a separate translation unit to reduce .o filesize issues
+   Desc      : Free functions. We keep them in a separate translation unit to reduce .o filesize
    Title     : utilities.h
    Project   : moveit_servo
 */
 
 #pragma once
 
-#include <rclcpp/rclcpp.hpp>
-
+#include <control_msgs/msg/joint_jog.hpp>
+#include <geometry_msgs/msg/twist_stamped.hpp>
 #include <moveit/robot_model/joint_model_group.h>
 #include <moveit/robot_state/robot_state.h>
+#include <rclcpp/rclcpp.hpp>
+#include <tf2_eigen/tf2_eigen.hpp>
 
 #include <moveit_servo/status_codes.h>
 
 namespace moveit_servo
 {
+// Helper function for detecting zeroed message
+bool isNonZero(const geometry_msgs::msg::TwistStamped& msg);
+
+// Helper function for detecting zeroed message
+bool isNonZero(const control_msgs::msg::JointJog& msg);
+
+// Helper function for converting Eigen::Isometry3d to geometry_msgs/TransformStamped
+geometry_msgs::msg::TransformStamped convertIsometryToTransform(const Eigen::Isometry3d& eigen_tf,
+                                                                const std::string& parent_frame,
+                                                                const std::string& child_frame);
+
 /** \brief Possibly calculate a velocity scaling factor, due to proximity of
  * singularity and direction of motion
  * @param[in] joint_model_group   The MoveIt group

@@ -27,7 +27,7 @@
 // POSSIBILITY OF SUCH DAMAGE.
 
 /* Author    : Andy Zelenak
-   Desc      : Free functions. We keep them in a separate translation unit to reduce .o filesize issues
+   Desc      : Free functions. We keep them in a separate translation unit to reduce .o filesize
    Title     : utilities.cpp
    Project   : moveit_servo
 */
@@ -41,6 +41,36 @@ namespace
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_servo.utilities");
 constexpr auto ROS_LOG_THROTTLE_PERIOD = std::chrono::milliseconds(3000).count();
 }  // namespace
+
+/** \brief Helper function for detecting zeroed message **/
+bool isNonZero(const geometry_msgs::msg::TwistStamped& msg)
+{
+  return msg.twist.linear.x != 0.0 || msg.twist.linear.y != 0.0 || msg.twist.linear.z != 0.0 ||
+         msg.twist.angular.x != 0.0 || msg.twist.angular.y != 0.0 || msg.twist.angular.z != 0.0;
+}
+
+/** \brief Helper function for detecting zeroed message **/
+bool isNonZero(const control_msgs::msg::JointJog& msg)
+{
+  bool all_zeros = true;
+  for (double delta : msg.velocities)
+  {
+    all_zeros &= (delta == 0.0);
+  }
+  return !all_zeros;
+}
+
+/** \brief Helper function for converting Eigen::Isometry3d to geometry_msgs/TransformStamped **/
+geometry_msgs::msg::TransformStamped convertIsometryToTransform(const Eigen::Isometry3d& eigen_tf,
+                                                                const std::string& parent_frame,
+                                                                const std::string& child_frame)
+{
+  geometry_msgs::msg::TransformStamped output = tf2::eigenToTransform(eigen_tf);
+  output.header.frame_id = parent_frame;
+  output.child_frame_id = child_frame;
+
+  return output;
+}
 
 /** \brief Possibly calculate a velocity scaling factor, due to proximity of
  * singularity and direction of motion

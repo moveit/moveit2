@@ -59,36 +59,6 @@ namespace
 {
 constexpr char CONDITION_TOPIC[] = "~/condition";
 
-// Helper function for detecting zeroed message
-bool isNonZero(const geometry_msgs::msg::TwistStamped& msg)
-{
-  return msg.twist.linear.x != 0.0 || msg.twist.linear.y != 0.0 || msg.twist.linear.z != 0.0 ||
-         msg.twist.angular.x != 0.0 || msg.twist.angular.y != 0.0 || msg.twist.angular.z != 0.0;
-}
-
-// Helper function for detecting zeroed message
-bool isNonZero(const control_msgs::msg::JointJog& msg)
-{
-  bool all_zeros = true;
-  for (double delta : msg.velocities)
-  {
-    all_zeros &= (delta == 0.0);
-  };
-  return !all_zeros;
-}
-
-// Helper function for converting Eigen::Isometry3d to geometry_msgs/TransformStamped
-geometry_msgs::msg::TransformStamped convertIsometryToTransform(const Eigen::Isometry3d& eigen_tf,
-                                                                const std::string& parent_frame,
-                                                                const std::string& child_frame)
-{
-  geometry_msgs::msg::TransformStamped output = tf2::eigenToTransform(eigen_tf);
-  output.header.frame_id = parent_frame;
-  output.child_frame_id = child_frame;
-
-  return output;
-}
-
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_servo.servo_calcs");
 constexpr auto ROS_LOG_THROTTLE_PERIOD = std::chrono::milliseconds(3000).count();
 static constexpr double STOPPED_VELOCITY_EPS = 1e-4;  // rad/s

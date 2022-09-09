@@ -58,7 +58,6 @@
 #include <std_msgs/msg/float64_multi_array.hpp>
 #include <std_msgs/msg/int8.hpp>
 #include <std_srvs/srv/empty.hpp>
-#include <tf2_eigen/tf2_eigen.hpp>
 #include <trajectory_msgs/msg/joint_trajectory.hpp>
 
 // moveit_core
