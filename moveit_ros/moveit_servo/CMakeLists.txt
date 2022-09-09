@@ -77,6 +77,7 @@ add_library(${SERVO_LIB_NAME} SHARED
   src/enforce_limits.cpp
   src/servo.cpp
   src/servo_calcs.cpp
+  src/utilities.cpp
 )
 set_target_properties(${SERVO_LIB_NAME} PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
 ament_target_dependencies(${SERVO_LIB_NAME} ${THIS_PACKAGE_INCLUDE_DEPENDS})
