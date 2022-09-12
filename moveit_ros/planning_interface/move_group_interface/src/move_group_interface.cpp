@@ -185,8 +185,7 @@ public:
     if (constraints_init_thread_)
       constraints_init_thread_->join();
 
-    if (callback_executor_.is_spinning())
-      callback_executor_.cancel();
+    callback_executor_.cancel();
 
     if (callback_thread_.joinable())
       callback_thread_.join();

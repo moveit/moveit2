@@ -52,6 +52,7 @@
 #include <rclcpp/time.hpp>
 #include <map>
 #include <memory>
+#include <queue>
 
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.plugins.ros_control_interface");
 static const rclcpp::Duration CONTROLLER_INFORMATION_VALIDITY_AGE = rclcpp::Duration::from_seconds(1.0);
@@ -109,6 +110,9 @@ class MoveItControllerManager : public moveit_controller_manager::MoveItControll
   rclcpp::Client<controller_manager_msgs::srv::ListControllers>::SharedPtr list_controllers_service_;
   rclcpp::Client<controller_manager_msgs::srv::SwitchController>::SharedPtr switch_controller_service_;
 
+  // Chained controllers have dependencies (other controllers which must be running)
+  std::unordered_map<std::string /* controller name */, std::vector<std::string> /* dependencies */> dependency_map_;
+
   /**
    * \brief Check if given controller is active
    * @param s state of controller
@@ -146,7 +150,12 @@ class MoveItControllerManager : public moveit_controller_manager::MoveItControll
     managed_controllers_.clear();
     active_controllers_.clear();
 
-    const auto& result = result_future.get();
+    auto result = result_future.get();
+    if (!MoveItControllerManager::fixChainedControllers(result))
+    {
+      return;
+    }
+
     for (const controller_manager_msgs::msg::ControllerState& controller : result->controller)
     {
       // If the controller is active, add it to the map of active controllers.
@@ -350,8 +359,30 @@ public:
    * @param deactivate
    * @return true if switching succeeded
    */
-  bool switchControllers(const std::vector<std::string>& activate, const std::vector<std::string>& deactivate) override
+  bool switchControllers(const std::vector<std::string>& activate_base,
+                         const std::vector<std::string>& deactivate_base) override
   {
+    // add controller dependencies
+    std::vector<std::string> activate = activate_base;
+    std::vector<std::string> deactivate = deactivate_base;
+    for (auto controllers : { &activate, &deactivate })
+    {
+      auto queue = *controllers;
+      while (!queue.empty())
+      {
+        auto controller = queue.back();
+        controller.erase(0, 1);
+        queue.pop_back();
+        for (const auto& dependency : dependency_map_[controller])
+        {
+          queue.push_back(dependency);
+          controllers->push_back("/" + dependency);
+        }
+      }
+    }
+    // activation dependencies must be started first, but they are processed last, so the order needs to be flipped
+    std::reverse(activate.begin(), activate.end());
+
     std::scoped_lock<std::mutex> lock(controllers_mutex_);
     discover(true);
 
@@ -392,9 +423,13 @@ public:
         {
           resources_bimap::right_const_iterator res = claimed_resources.right.find(required_resource);
           if (res != claimed_resources.right.end())
-          {                                                    // resource is claimed
-            request->stop_controllers.push_back(res->second);  // add claiming controller to stop list
-            claimed_resources.left.erase(res->second);         // remove claimed resources
+          {  // resource is claimed
+            if (std::find(request->stop_controllers.begin(), request->stop_controllers.end(), res->second) ==
+                request->stop_controllers.end())
+            {
+              request->stop_controllers.push_back(res->second);  // add claiming controller to stop list
+            }
+            claimed_resources.left.erase(res->second);  // remove claimed resources
           }
         }
       }
@@ -417,6 +452,40 @@ public:
       discover(true);
       return result_future.get()->ok;
     }
+    return true;
+  }
+  /**
+   * \brief fixChainedControllers modifies ListControllers service response if it contains chained controllers.
+   * Since chained controllers cannot be written to directly, they are removed from the response and their interfaces
+   * are propagated back to the first controller with a non-chained input
+   */
+  bool fixChainedControllers(std::shared_ptr<controller_manager_msgs::srv::ListControllers::Response>& result)
+  {
+    std::unordered_map<std::string, size_t> controller_name_map;
+    for (size_t i = 0; i < result->controller.size(); ++i)
+    {
+      controller_name_map[result->controller[i].name] = i;
+    }
+    for (auto& controller : result->controller)
+    {
+      if (controller.chain_connections.size() > 1)
+      {
+        RCLCPP_ERROR_STREAM(LOGGER, "Controller with name %s chains to more than one controller. Chaining to more than "
+                                    "one controller is not supported.");
+        return false;
+      }
+      dependency_map_[controller.name].clear();
+      for (const auto& chained_controller : controller.chain_connections)
+      {
+        auto ind = controller_name_map[chained_controller.name];
+        dependency_map_[controller.name].push_back(chained_controller.name);
+        controller.required_command_interfaces = result->controller[ind].required_command_interfaces;
+        controller.claimed_interfaces = result->controller[ind].claimed_interfaces;
+        result->controller[ind].claimed_interfaces.clear();
+        result->controller[ind].required_command_interfaces.clear();
+      }
+    }
+
     return true;
   }
 };

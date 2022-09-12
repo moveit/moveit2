@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.10.2)
+cmake_minimum_required(VERSION 3.22)
 project(moveit_resources_prbt_ikfast_manipulator_plugin)
 
 set(CMAKE_CXX_STANDARD 17)
@@ -50,14 +50,14 @@ pluginlib_export_plugin_description_file(moveit_core prbt_manipulator_moveit_ikf
 
 install(
   TARGETS prbt_manipulator_moveit_ikfast_plugin
-  EXPORT export_${PROJECT_NAME}
+  EXPORT ${PROJECT_NAME}Targets
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
   RUNTIME DESTINATION bin
   INCLUDES DESTINATION include
 )
 
-ament_export_targets(export_${PROJECT_NAME} HAS_LIBRARY_TARGET)
+ament_export_targets(${PROJECT_NAME}Targets HAS_LIBRARY_TARGET)
 ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS})
 
 ament_package()

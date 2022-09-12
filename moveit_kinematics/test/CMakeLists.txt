@@ -56,6 +56,6 @@ if(BUILD_TESTING)
   install(DIRECTORY config DESTINATION share/${PROJECT_NAME})
   install(DIRECTORY launch DESTINATION share/${PROJECT_NAME})
 
-  install(TARGETS benchmark_ik RUNTIME DESTINATION bin)
+  install(TARGETS benchmark_ik RUNTIME DESTINATION lib/${PROJECT_NAME})
   install(TARGETS test_kinematics_plugin DESTINATION lib/${PROJECT_NAME})
 endif()

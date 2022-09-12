@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.10.2)
+cmake_minimum_required(VERSION 3.22)
 project(moveit_simple_controller_manager)
 
 # Common cmake code applied to all moveit packages
@@ -41,7 +41,7 @@ ament_target_dependencies(${PROJECT_NAME}
 
 install(
   TARGETS ${PROJECT_NAME}
-  EXPORT export_${PROJECT_NAME}
+  EXPORT ${PROJECT_NAME}Targets
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
   RUNTIME DESTINATION bin
@@ -49,7 +49,7 @@ install(
 )
 install(DIRECTORY include/ DESTINATION include)
 
-ament_export_targets(export_${PROJECT_NAME} HAS_LIBRARY_TARGET)
+ament_export_targets(${PROJECT_NAME}Targets HAS_LIBRARY_TARGET)
 ament_export_dependencies(
   ${THIS_PACKAGE_INCLUDE_DEPENDS}
   Boost

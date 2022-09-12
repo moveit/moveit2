@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.10.2)
+cmake_minimum_required(VERSION 3.22)
 project(moveit_planners_ompl)
 
 # Common cmake code applied to all moveit packages
@@ -15,7 +15,7 @@ find_package(tf2_eigen REQUIRED)
 find_package(tf2_ros REQUIRED)
 find_package(ompl REQUIRED)
 
-if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+if(CMAKE_CXX_COMPILER_ID MATCHES "(GNU|Clang)")
     add_compile_options(-Wno-overloaded-virtual)
 endif()
 
@@ -27,13 +27,13 @@ include_directories(SYSTEM
 add_subdirectory(ompl_interface)
 
 install(TARGETS moveit_ompl_interface moveit_ompl_planner_plugin
-  EXPORT export_${PROJECT_NAME}
+  EXPORT ${PROJECT_NAME}Targets
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
   RUNTIME DESTINATION bin
   INCLUDES DESTINATION include
 )
-ament_export_targets(export_${PROJECT_NAME} HAS_LIBRARY_TARGET)
+ament_export_targets(${PROJECT_NAME}Targets HAS_LIBRARY_TARGET)
 ament_export_dependencies(moveit_core ompl)
 
 pluginlib_export_plugin_description_file(moveit_core ompl_interface_plugin_description.xml)
