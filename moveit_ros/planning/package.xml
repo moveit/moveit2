@@ -25,6 +25,7 @@
   <buildtool_export_depend>eigen3_cmake_module</buildtool_export_depend>
 
   <depend>ament_index_cpp</depend>
+  <depend>generate_parameter_library</depend>
   <depend>moveit_core</depend>
   <depend>moveit_ros_occupancy_map_monitor</depend>
   <depend>moveit_msgs</depend>

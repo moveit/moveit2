@@ -39,6 +39,7 @@
 #include <moveit/macros/class_forward.h>
 #include <moveit/robot_model/robot_model.h>
 #include <moveit/kinematics_base/kinematics_base.h>
+#include <kinematics_parameters.hpp>
 
 namespace kinematics_plugin_loader
 {
@@ -102,6 +103,8 @@ public:
 
 private:
   const rclcpp::Node::SharedPtr node_;
+  std::shared_ptr<kinematics::ParamListener> param_listener_;
+  kinematics::Params params_;
   std::string robot_description_;
   double default_search_resolution_;
 
