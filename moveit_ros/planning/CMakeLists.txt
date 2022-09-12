@@ -6,6 +6,7 @@ find_package(moveit_common REQUIRED)
 moveit_package()
 
 find_package(ament_cmake REQUIRED)
+find_package(generate_parameter_library REQUIRED)
 find_package(moveit_msgs REQUIRED)
 # find_package(moveit_ros_perception REQUIRED)
 find_package(pluginlib REQUIRED)
@@ -99,6 +100,7 @@ install(
 
 ament_export_targets(${PROJECT_NAME}Targets HAS_LIBRARY_TARGET)
 ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS})
+ament_export_dependencies(generate_parameter_library)
 
 pluginlib_export_plugin_description_file(moveit_core "planning_request_adapters_plugin_description.xml")
 

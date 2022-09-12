@@ -22,12 +22,12 @@ target_link_libraries(${MOVEIT_LIB_NAME}
   kinematics_parameters
 )
 
-# install(
-#   TARGETS kinematics_parameters
-#   EXPORT ${PROJECT_NAME}Targets
-#   ARCHIVE DESTINATION lib
-#   LIBRARY DESTINATION lib
-#   RUNTIME DESTINATION bin
-# )
+install(
+  TARGETS kinematics_parameters
+  EXPORT ${PROJECT_NAME}Targets
+  ARCHIVE DESTINATION lib
+  LIBRARY DESTINATION lib
+  RUNTIME DESTINATION bin
+)
 
 install(DIRECTORY include/ DESTINATION include)
