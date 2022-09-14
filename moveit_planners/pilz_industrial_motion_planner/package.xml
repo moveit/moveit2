@@ -43,7 +43,9 @@
   <test_depend>moveit_resources_prbt_moveit_config</test_depend>
   <test_depend>moveit_resources_prbt_support</test_depend>
   <test_depend>moveit_resources_prbt_pg70_support</test_depend>
+
   <test_depend>moveit_configs_utils</test_depend>
+  <test_depend>launch_param_builder</test_depend>
 
   <test_depend>boost</test_depend>
 

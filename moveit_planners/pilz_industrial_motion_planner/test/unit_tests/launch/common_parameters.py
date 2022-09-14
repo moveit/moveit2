@@ -1,6 +1,11 @@
 from ament_index_python.packages import get_package_share_directory
 
 from moveit_configs_utils import MoveItConfigsBuilder
+from launch_param_builder import ParameterBuilder
+
+
+def load_yaml(package_name, file_path):
+    return ParameterBuilder(package_name).yaml(file_path).to_dict()
 
 
 def load_moveit_config():
