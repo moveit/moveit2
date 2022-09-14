@@ -9,7 +9,7 @@ def load_yaml(package_name, file_path):
 
 
 def load_moveit_config():
-    moveit_config_package_name = "moveit_resources_prbt_moveit_config"
+    moveit_config_package_name = "moveit_resources_prbt"
     description_package_name = "moveit_resources_prbt_support"
     description_xacro_file = "urdf/prbt.xacro"
     robot_description_semantic_file = "config/prbt.srdf.xacro"
