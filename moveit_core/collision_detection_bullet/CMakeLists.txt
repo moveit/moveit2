@@ -63,24 +63,17 @@ if(BUILD_TESTING)
     set(append_library_dirs "${CMAKE_CURRENT_BINARY_DIR};${CMAKE_CURRENT_BINARY_DIR}/../collision_detection;${CMAKE_CURRENT_BINARY_DIR}/../robot_state;${CMAKE_CURRENT_BINARY_DIR}/../robot_model;${CMAKE_CURRENT_BINARY_DIR}/../utils")
   endif()
 
+  # TODO: remove if transition to gtest's new API TYPED_TEST_SUITE_P is finished
+  if(CMAKE_CXX_COMPILER_ID MATCHES "(GNU|Clang)")
+    add_compile_options(-Wno-deprecated-declarations)
+  endif()
+
   ament_add_gtest(test_bullet_collision_detection test/test_bullet_collision_detection_pr2.cpp)
   target_link_libraries(test_bullet_collision_detection moveit_test_utils ${MOVEIT_LIB_NAME})
-  # TODO: remove if transition to gtest's new API TYPED_TEST_SUITE_P is finished
-  if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-    target_compile_options(test_bullet_collision_detection PRIVATE -Wno-deprecated-declarations)
-  endif()
 
   ament_add_gtest(test_bullet_collision_detection_panda test/test_bullet_collision_detection_panda.cpp)
   target_link_libraries(test_bullet_collision_detection_panda moveit_test_utils ${MOVEIT_LIB_NAME})
-  # TODO: remove if transition to gtest's new API TYPED_TEST_SUITE_P is finished
-  if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-    target_compile_options(test_bullet_collision_detection_panda PRIVATE -Wno-deprecated-declarations)
-  endif()
 
   ament_add_gtest(test_bullet_continuous_collision_checking test/test_bullet_continuous_collision_checking.cpp)
   target_link_libraries(test_bullet_continuous_collision_checking moveit_test_utils ${MOVEIT_LIB_NAME})
-  # TODO: remove if transition to gtest's new API TYPED_TEST_SUITE_P is finished
-  if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-    target_compile_options(test_bullet_continuous_collision_checking PRIVATE -Wno-deprecated-declarations)
-  endif()
 endif()

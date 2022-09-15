@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.10.2)
+cmake_minimum_required(VERSION 3.22)
 project(moveit_setup_simulation)
 
 # Common cmake code applied to all moveit packages
@@ -44,10 +44,11 @@ endif()
 install(DIRECTORY templates DESTINATION share/${PROJECT_NAME})
 
 install(TARGETS ${PROJECT_NAME}
-        EXPORT export_${PROJECT_NAME}
+        EXPORT ${PROJECT_NAME}Targets
         ARCHIVE DESTINATION lib
         LIBRARY DESTINATION lib
         RUNTIME DESTINATION bin
+        INCLUDES DESTINATION include
 )
 install(FILES moveit_setup_framework_plugins.xml
         DESTINATION share/${PROJECT_NAME}
@@ -55,10 +56,8 @@ install(FILES moveit_setup_framework_plugins.xml
 install(DIRECTORY include/
         DESTINATION include
 )
-ament_export_include_directories(include)
 
-ament_export_libraries(${PROJECT_NAME})
-ament_export_targets(export_${PROJECT_NAME})
+ament_export_targets(${PROJECT_NAME}Targets HAS_LIBRARY_TARGET)
 pluginlib_export_plugin_description_file(moveit_setup_framework moveit_setup_framework_plugins.xml)
 
 ament_package()
