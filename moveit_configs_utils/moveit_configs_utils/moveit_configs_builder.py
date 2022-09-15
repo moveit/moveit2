@@ -114,6 +114,7 @@ class MoveItConfigs:
     pilz_cartesian_limits: Dict = field(default_factory=dict)
 
     def to_dict(self):
+        print("to_dict called from MoveItConfigs")
         parameters = {}
         parameters.update(self.robot_description)
         parameters.update(self.robot_description_semantic)
@@ -124,7 +125,11 @@ class MoveItConfigs:
         parameters.update(self.sensors_3d)
         parameters.update(self.joint_limits)
         parameters.update(self.moveit_cpp)
-        parameters.update(self.pilz_cartesian_limits)
+
+        parameters["robot_description_planning"].update(
+            self.pilz_cartesian_limits["robot_description_planning"]
+        )
+        # parameters.update(self.pilz_cartesian_limits)
         return parameters
 
 
@@ -252,6 +257,13 @@ class MoveItConfigsBuilder(ParameterBuilder):
         :param file_path: Absolute or relative path to the joint limits yaml file (w.r.t. robot_name_moveit_config).
         :return: Instance of MoveItConfigsBuilder with robot_description_planning loaded.
         """
+        print("Add joint limits to robot_description_planning")
+        print(
+            load_yaml(
+                self._package_path
+                / (file_path or self.__config_dir_path / "joint_limits.yaml")
+            )
+        )
         self.__moveit_configs.joint_limits = {
             self.__robot_description
             + "_planning": load_yaml(
@@ -438,6 +450,9 @@ class MoveItConfigsBuilder(ParameterBuilder):
                 f"\x1b[33;21mcartesian_limits.yaml is deprecated, please rename to pilz_cartesian_limits.yaml\x1b[0m"
             )
 
+        print("deprecated path : ", deprecated_path)
+
+        print("Add pilz cartesian limits to robot_description_planning")
         self.__moveit_configs.pilz_cartesian_limits = {
             self.__robot_description
             + "_planning": load_yaml(
@@ -483,6 +498,7 @@ class MoveItConfigsBuilder(ParameterBuilder):
                                        only the ones from ParameterBuilder
         :return: Dictionary with all parameters loaded.
         """
+        print("to_dict called from MoveItConfigsBuilder")
         parameters = self._parameters
         if include_moveit_configs:
             parameters.update(self.to_moveit_configs().to_dict())
