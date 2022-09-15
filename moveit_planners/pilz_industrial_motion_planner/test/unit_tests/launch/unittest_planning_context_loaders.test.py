@@ -25,11 +25,6 @@ def generate_test_description():
         executable="unittest_planning_context_loaders",
         name="unittest_planning_context_loaders",
         parameters=[
-            # test_config.robot_description,
-            # test_config.robot_description_semantic,
-            # test_config.robot_description_kinematics,
-            # test_config.robot_description_planning,
-            # test_config.planning_plugin,
             test_config.to_dict(),
         ],
         output="screen",

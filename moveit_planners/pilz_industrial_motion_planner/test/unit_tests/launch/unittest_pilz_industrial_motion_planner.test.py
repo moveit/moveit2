@@ -29,10 +29,6 @@ def generate_test_description():
         executable="unittest_pilz_industrial_motion_planner",
         name="unittest_pilz_industrial_motion_planner",
         parameters=[
-            # test_config.robot_description,
-            # test_config.robot_description_semantic,
-            # test_config.robot_description_kinematics,
-            # test_config.robot_description_planning,
             test_config.to_dict(),
             planning_plugin,
         ],
