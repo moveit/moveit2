@@ -44,7 +44,6 @@ namespace collision_detection
 {
 void CollisionResult::print() const
 {
-  rclcpp::Clock clock;
   if (!contacts.empty())
   {
 #pragma GCC diagnostic push
