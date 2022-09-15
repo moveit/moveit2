@@ -305,7 +305,7 @@ moveit::core::SolverAllocatorFn KinematicsPluginLoader::getLoaderFunction(const 
         // read the list of plugin names for possible kinematics solvers
         for (const srdf::Model::Group& known_group : known_groups)
         {
-          std::string base_param_name = known_group.name_;
+          std::string base_param_name = robot_description_ + "_kinematics." + known_group.name_;
 
           param_listener_ = std::make_shared<kinematics::ParamListener>(node_, base_param_name);
           params_ = param_listener_->get_params();
