@@ -44,9 +44,9 @@ namespace collision_detection
 {
 void CollisionResult::print() const
 {
-  rclcpp::Clock clock;
   if (!contacts.empty())
   {
+    rclcpp::Clock clock;
     RCLCPP_WARN_STREAM_THROTTLE(LOGGER, clock, LOG_THROTTLE_PERIOD,
                                 "Objects in collision (printing 1st of "
                                     << contacts.size() << " pairs): " << contacts.begin()->first.first << ", "
