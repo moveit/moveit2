@@ -200,8 +200,8 @@ public:
 
      In contrast to the previous function, the Cartesian path is specified as a target frame to be reached (\e target)
      for a virtual frame attached to the robot \e link with the given \e link_offset.
-     The target frame is assumed to be specified either w.r.t. to the global reference frame or the virtual link frame (\e global_reference_frame is false).
-     This function returns the percentage (0..1) of the path that was achieved.
+     The target frame is assumed to be specified either w.r.t. to the global reference frame or the virtual link frame
+     (\e global_reference_frame is false). This function returns the percentage (0..1) of the path that was achieved.
      All other comments from the previous function apply. */
   static Percentage
   computeCartesianPath(RobotState* start_state, const JointModelGroup* group,
