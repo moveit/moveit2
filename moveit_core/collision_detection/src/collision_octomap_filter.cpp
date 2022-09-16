@@ -221,8 +221,7 @@ bool findSurface(const octomap::point3d_list& cloud, const double& spacing, cons
     const double s = iso_value - intensity;
     dp = (gs * -s) * (1.0 / std::max(gs.dot(gs), epsilon));
     p = p + dp;
-    const double epsilon = 1e-10;
-    if (dp.dot(dp) < epsilon)
+    if (dp.dot(dp) < 1e-10 /* epsilon */)
     {
       surface_point = p;
       normal = gs.normalized();
