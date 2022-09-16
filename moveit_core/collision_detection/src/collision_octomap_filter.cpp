@@ -190,7 +190,7 @@ bool getMetaballSurfaceProperties(const octomap::point3d_list& cloud, const doub
   else  // just get normals, no depth
   {
     octomath::Vector3 gradient;
-    double intensity;
+    double intensity = 0;
     if (sampleCloud(cloud, spacing, r_multiple, contact_point, intensity, gradient))
     {
       normal = gradient.normalized();
