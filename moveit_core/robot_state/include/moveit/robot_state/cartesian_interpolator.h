@@ -144,7 +144,7 @@ public:
 
      The Cartesian path to be followed is specified as a \e translation vector to be followed by the robot \e link.
      This vector is assumed to be specified either in the global reference frame or in the local
-     reference frame of the link.
+     reference frame of the link (\e global_reference_frame is false).
      The resulting joint values are stored in the vector \e traj, one by one. The maximum distance in
      Cartesian space between consecutive points on the resulting path is specified in the \e MaxEEFStep struct which
      provides two fields: translation and rotation. If a \e validCallback is specified, this is passed to the internal
@@ -200,7 +200,7 @@ public:
 
      In contrast to the previous function, the Cartesian path is specified as a target frame to be reached (\e target)
      for a virtual frame attached to the robot \e link with the given \e link_offset.
-     The target frame is assumed to be specified either w.r.t. to the global reference frame or the virtual link frame.
+     The target frame is assumed to be specified either w.r.t. to the global reference frame or the virtual link frame (\e global_reference_frame is false).
      This function returns the percentage (0..1) of the path that was achieved.
      All other comments from the previous function apply. */
   static Percentage
