@@ -74,10 +74,6 @@ CollisionCheck::CollisionCheck(rclcpp::Node::SharedPtr node, const ServoParamete
   collision_velocity_scale_pub_ =
       node_->create_publisher<std_msgs::msg::Float64>("~/collision_velocity_scale", rclcpp::SystemDefaultsQoS());
 
-  worst_case_stop_time_sub_ = node_->create_subscription<std_msgs::msg::Float64>(
-      "~/worst_case_stop_time", rclcpp::SystemDefaultsQoS(),
-      [this](const std_msgs::msg::Float64::SharedPtr msg) { return worstCaseStopTimeCB(msg); });
-
   current_state_ = planning_scene_monitor_->getStateMonitor()->getCurrentState();
 }
 
@@ -155,11 +151,6 @@ void CollisionCheck::run()
     msg->data = velocity_scale_;
     collision_velocity_scale_pub_->publish(std::move(msg));
   }
-}
-
-void CollisionCheck::worstCaseStopTimeCB(const std_msgs::msg::Float64::SharedPtr msg)
-{
-  worst_case_stop_time_ = msg.get()->data;
 }
 
 void CollisionCheck::setPaused(bool paused)
