@@ -67,6 +67,5 @@ command_out_topic: /panda_arm_controller/joint_trajectory # Publish outgoing com
 ## Collision checking for the entire robot body
 check_collisions: true # Check collisions?
 collision_check_rate: 10.0 # [Hz] Collision-checking can easily bog down a CPU if done too often.
-# Collision checking begins slowing down when nearer than a specified distance.
 self_collision_proximity_threshold: 0.01 # Start decelerating when a self-collision is this far [m]
 scene_collision_proximity_threshold: 0.02 # Start decelerating when a scene collision is this far [m]
