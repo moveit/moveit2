@@ -113,14 +113,14 @@ bool PlanningComponent::setTrajectoryConstraints(const moveit_msgs::msg::Traject
   return true;
 }
 
-PlanningComponent::PlanSolution PlanningComponent::plan(const PlanRequestParameters& parameters)
+planning_interface::MotionPlanResponse PlanningComponent::plan(const PlanRequestParameters& parameters)
 {
-  last_plan_solution_ = std::make_shared<PlanSolution>();
+  last_plan_solution_ = planning_interface::MotionPlanResponse();
   if (!joint_model_group_)
   {
     RCLCPP_ERROR(LOGGER, "Failed to retrieve joint model group for name '%s'.", group_name_.c_str());
-    last_plan_solution_->error_code = moveit::core::MoveItErrorCode::INVALID_GROUP_NAME;
-    return *last_plan_solution_;
+    last_plan_solution_.error_code_ = moveit::core::MoveItErrorCode::INVALID_GROUP_NAME;
+    return last_plan_solution_;
   }
 
   // Clone current planning scene
@@ -156,8 +156,8 @@ PlanningComponent::PlanSolution PlanningComponent::plan(const PlanRequestParamet
   if (current_goal_constraints_.empty())
   {
     RCLCPP_ERROR(LOGGER, "No goal constraints set for planning request");
-    last_plan_solution_->error_code = moveit::core::MoveItErrorCode::INVALID_GOAL_CONSTRAINTS;
-    return *last_plan_solution_;
+    last_plan_solution_.error_code_ = moveit::core::MoveItErrorCode::INVALID_GOAL_CONSTRAINTS;
+    return last_plan_solution_;
   }
   req.goal_constraints = current_goal_constraints_;
 
@@ -171,21 +171,21 @@ PlanningComponent::PlanSolution PlanningComponent::plan(const PlanRequestParamet
   if (planning_pipeline_names_.find(parameters.planning_pipeline) == planning_pipeline_names_.end())
   {
     RCLCPP_ERROR(LOGGER, "No planning pipeline available for name '%s'", parameters.planning_pipeline.c_str());
-    last_plan_solution_->error_code = moveit::core::MoveItErrorCode::FAILURE;
-    return *last_plan_solution_;
+    last_plan_solution_.error_code_ = moveit::core::MoveItErrorCode::FAILURE;
+    return last_plan_solution_;
   }
   const planning_pipeline::PlanningPipelinePtr pipeline =
       moveit_cpp_->getPlanningPipelines().at(parameters.planning_pipeline);
   pipeline->generatePlan(planning_scene, req, res);
-  last_plan_solution_->error_code = res.error_code_.val;
+  last_plan_solution_.error_code_ = res.error_code_.val;
   if (res.error_code_.val != res.error_code_.SUCCESS)
   {
     RCLCPP_ERROR(LOGGER, "Could not compute plan successfully");
-    return *last_plan_solution_;
+    return last_plan_solution_;
   }
-  last_plan_solution_->start_state = req.start_state;
-  last_plan_solution_->trajectory = res.trajectory_;
-  last_plan_solution_->planning_time = res.planning_time_;
+  last_plan_solution_.trajectory_ = res.trajectory_;
+  last_plan_solution_.planning_time_ = res.planning_time_;
+  last_plan_solution_.start_state_ = req.start_state;
 
   // TODO(henningkayser): Visualize trajectory
   // std::vector<const moveit::core::LinkModel*> eef_links;
@@ -199,10 +199,10 @@ PlanningComponent::PlanSolution PlanningComponent::plan(const PlanRequestParamet
   //    visual_tools_->publishRobotState(last_solution_trajectory_->getLastWayPoint(), rviz_visual_tools::TRANSLUCENT);
   //  }
   //}
-  return *last_plan_solution_;
+  return last_plan_solution_;
 }
 
-PlanningComponent::PlanSolution PlanningComponent::plan()
+planning_interface::MotionPlanResponse PlanningComponent::plan()
 {
   return plan(plan_request_parameters_);
 }
@@ -316,10 +316,10 @@ bool PlanningComponent::execute(bool blocking)
   //  RCLCPP_ERROR("Failed to parameterize trajectory");
   //  return false;
   //}
-  return moveit_cpp_->execute(group_name_, last_plan_solution_->trajectory, blocking);
+  return moveit_cpp_->execute(group_name_, last_plan_solution_.trajectory_, blocking);
 }
 
-const PlanningComponent::PlanSolutionPtr PlanningComponent::getLastPlanSolution()
+planning_interface::MotionPlanResponse const& PlanningComponent::getLastMotionPlanResponse()
 {
   return last_plan_solution_;
 }

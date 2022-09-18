@@ -43,6 +43,7 @@
 #include <geometry_msgs/msg/pose_stamped.h>
 #include <moveit/robot_state/conversions.h>
 #include <moveit/utils/moveit_error_code.h>
+#include <moveit/planning_interface/planning_response.h>
 
 namespace moveit_cpp
 {
@@ -51,30 +52,7 @@ MOVEIT_CLASS_FORWARD(PlanningComponent);  // Defines PlanningComponentPtr, Const
 class PlanningComponent
 {
 public:
-  MOVEIT_STRUCT_FORWARD(PlanSolution);
-
   using MoveItErrorCode [[deprecated("Use moveit::core::MoveItErrorCode")]] = moveit::core::MoveItErrorCode;
-
-  /// The representation of a plan solution
-  struct PlanSolution
-  {
-    /// The full starting state used for planning
-    moveit_msgs::msg::RobotState start_state;
-
-    /// The trajectory of the robot (may not contain joints that are the same as for the start_state_)
-    robot_trajectory::RobotTrajectoryPtr trajectory;
-
-    // Planning time (seconds)
-    double planning_time;
-
-    /// Reason why the plan failed
-    moveit::core::MoveItErrorCode error_code;
-
-    explicit operator bool() const
-    {
-      return bool(error_code);
-    }
-  };
 
   /// Planner parameters provided with the MotionPlanRequest
   struct PlanRequestParameters
@@ -162,17 +140,17 @@ public:
 
   /** \brief Run a plan from start or current state to fulfill the last goal constraints provided by setGoal() using
    * default parameters. */
-  PlanSolution plan();
+  planning_interface::MotionPlanResponse plan();
   /** \brief Run a plan from start or current state to fulfill the last goal constraints provided by setGoal() using the
    * provided PlanRequestParameters. */
-  PlanSolution plan(const PlanRequestParameters& parameters);
+  planning_interface::MotionPlanResponse plan(const PlanRequestParameters& parameters);
 
   /** \brief Execute the latest computed solution trajectory computed by plan(). By default this function terminates
    * after the execution is complete. The execution can be run in background by setting blocking to false. */
   bool execute(bool blocking = true);
 
   /** \brief Return the last plan solution*/
-  const PlanSolutionPtr getLastPlanSolution();
+  planning_interface::MotionPlanResponse const& getLastMotionPlanResponse();
 
 private:
   // Core properties and instances
@@ -192,7 +170,7 @@ private:
   PlanRequestParameters plan_request_parameters_;
   moveit_msgs::msg::WorkspaceParameters workspace_parameters_;
   bool workspace_parameters_set_ = false;
-  PlanSolutionPtr last_plan_solution_;
+  planning_interface::MotionPlanResponse last_plan_solution_;
 
   // common properties for goals
   // TODO(henningkayser): support goal tolerances
