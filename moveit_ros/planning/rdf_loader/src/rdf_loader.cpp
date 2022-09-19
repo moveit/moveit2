@@ -61,6 +61,7 @@ RDFLoader::RDFLoader(const std::shared_ptr<rclcpp::Node>& node, const std::strin
                      bool default_continuous_value, double default_timeout)
   : ros_name_(ros_name)
 {
+  std::cout << "ros_name : " << ros_name << std::endl;
   auto start = node->now();
 
   urdf_string_ = urdf_ssp_.loadInitialValue(

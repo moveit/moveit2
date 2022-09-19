@@ -55,27 +55,8 @@ public:
       found. This is passed to the kinematics solver initialization as
       well as used to read the SRDF document when needed. */
   KinematicsPluginLoader(const rclcpp::Node::SharedPtr& node,
-                         const std::string& robot_description = "robot_description",
-                         double default_search_resolution = 0.0)
-    : node_(node), robot_description_(robot_description), default_search_resolution_(default_search_resolution)
-  {
-  }
-
-  /** \brief Use a default kinematics solver (\e solver_plugin) for
-      all the groups in the robot model. The default timeout for the
-      solver is \e solve_timeout and the default number of IK attempts
-      is \e ik_attempts. Take node as an argument and as optional argument the name of the ROS
-      parameter under which the robot description can be found. This
-      is passed to the kinematics solver initialization as well as
-      used to read the SRDF document when needed. */
-  KinematicsPluginLoader(const rclcpp::Node::SharedPtr& node, const std::string& solver_plugin, double solve_timeout,
-                         const std::string& robot_description = "robot_description",
-                         double default_search_resolution = 0.0)
-    : node_(node)
-    , robot_description_(robot_description)
-    , default_search_resolution_(default_search_resolution)
-    , default_solver_plugin_(solver_plugin)
-    , default_solver_timeout_(solve_timeout)
+                         const std::string& robot_description = "robot_description")
+    : node_(node), robot_description_(robot_description)
   {
   }
 
@@ -103,22 +84,14 @@ public:
 
 private:
   const rclcpp::Node::SharedPtr node_;
-  // std::unordered_map<std::string, std::shared_ptr<kinematics::ParamListener>> kinematics_param_listener_;
-  // std::unordered_map<std::string, kinematics::Params> kinematics_params_;
-
-  std::shared_ptr<kinematics::ParamListener> param_listener_;
-  kinematics::Params params_;
+  std::unordered_map<std::string, std::shared_ptr<kinematics::ParamListener>> kinematics_param_listener_;
+  std::unordered_map<std::string, kinematics::Params> kinematics_params_;
   std::string robot_description_;
-  double default_search_resolution_;
 
   MOVEIT_CLASS_FORWARD(KinematicsLoaderImpl);  // Defines KinematicsLoaderImplPtr, ConstPtr, WeakPtr... etc
   KinematicsLoaderImplPtr loader_;
 
   std::vector<std::string> groups_;
   std::map<std::string, double> ik_timeout_;
-
-  // default configuration
-  std::string default_solver_plugin_;
-  double default_solver_timeout_;
 };
 }  // namespace kinematics_plugin_loader
