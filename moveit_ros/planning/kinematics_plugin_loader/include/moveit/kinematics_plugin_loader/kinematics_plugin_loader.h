@@ -103,6 +103,9 @@ public:
 
 private:
   const rclcpp::Node::SharedPtr node_;
+  // std::unordered_map<std::string, std::shared_ptr<kinematics::ParamListener>> kinematics_param_listener_;
+  // std::unordered_map<std::string, kinematics::Params> kinematics_params_;
+
   std::shared_ptr<kinematics::ParamListener> param_listener_;
   kinematics::Params params_;
   std::string robot_description_;
