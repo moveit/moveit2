@@ -1,0 +1,25 @@
+cartesian_limits:
+  max_trans_vel: {
+    type: double,
+    # default_value: ,
+    description: "Max translation velocity",
+    # validation:
+  }
+  max_trans_acc: {
+    type: double,
+    # default_value: ,
+    description: "Max translation acceleraion",
+    # validation:
+  }
+  max_trans_dec: {
+    type: double,
+    # default_value: ,
+    description: "Max translation decceleration",
+    # validation:
+  }
+  max_rot_vel: {
+    type: double,
+    # default_value: ,
+    description: "Max rotational velocity",
+    # validation:
+  }
