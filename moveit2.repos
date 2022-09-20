@@ -8,3 +8,11 @@ repositories:
     type: git
     url: https://github.com/ros-controls/ros2_control.git
     version: 2.13.0
+  generate_parameter_library:
+    type: git
+    url: https://github.com/PickNikRobotics/generate_parameter_library.git
+    version: main
+  cpp_polyfills:
+    type: git
+    url: https://github.com/PickNikRobotics/cpp_polyfills.git
+    version: main
