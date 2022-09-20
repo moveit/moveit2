@@ -67,7 +67,6 @@
 #include "ompl/base/objectives/MaximizeMinClearanceObjective.h"
 #include <ompl/geometric/planners/prm/LazyPRM.h>
 
-
 namespace ompl_interface
 {
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.ompl_planning.model_based_planning_context");
@@ -354,7 +353,7 @@ void ompl_interface::ModelBasedPlanningContext::useConfig()
     else if (optimization_objectives_.find(optimizer) != optimization_objectives_.end())
     {
       objective =
-              optimization_objectives_[optimizer]->getOptimizationObjective(ompl_simple_setup_->getSpaceInformation());
+          optimization_objectives_[optimizer]->getOptimizationObjective(ompl_simple_setup_->getSpaceInformation());
     }
     else
     {
@@ -362,8 +361,7 @@ void ompl_interface::ModelBasedPlanningContext::useConfig()
       RCLCPP_ERROR(LOGGER, "Fall back to the default optimizer : PathLengthOptimizationObjective");
 
       objective =
-              std::make_shared<ompl::base::PathLengthOptimizationObjective>(ompl_simple_setup_->getSpaceInformation());
-
+          std::make_shared<ompl::base::PathLengthOptimizationObjective>(ompl_simple_setup_->getSpaceInformation());
     }
 
     ompl_simple_setup_->setOptimizationObjective(objective);
@@ -1067,18 +1065,20 @@ bool ompl_interface::ModelBasedPlanningContext::loadConstraintApproximations(con
 
 void ompl_interface::ModelBasedPlanningContext::constructOptimizationObjectives()
 {
-  auto optimization_objective_loader = pluginlib::ClassLoader<ompl_optimization_loader::OptimizationObjectiveLoader>("moveit_core", "ompl_optimization_loader::OptimizationObjectiveLoader");
+  auto optimization_objective_loader = pluginlib::ClassLoader<ompl_optimization_loader::OptimizationObjectiveLoader>(
+      "moveit_core", "ompl_optimization_loader::OptimizationObjectiveLoader");
 
   for (const auto& plugin_name : optimization_objective_loader.getDeclaredClasses())
   {
     try
     {
       RCLCPP_DEBUG(LOGGER, "Loading optimization objective : %s", plugin_name.c_str());
-      std::shared_ptr<ompl_optimization_loader::OptimizationObjectiveLoader> obj_loader = optimization_objective_loader.createSharedInstance(plugin_name);
+      std::shared_ptr<ompl_optimization_loader::OptimizationObjectiveLoader> obj_loader =
+          optimization_objective_loader.createSharedInstance(plugin_name);
 
       optimization_objectives_[plugin_name] = obj_loader;
     }
-    catch(pluginlib::PluginlibException& ex)
+    catch (pluginlib::PluginlibException& ex)
     {
       RCLCPP_ERROR(LOGGER, "The plugin %s failed to load for some reason. Error: %s", plugin_name.c_str(), ex.what());
     }
