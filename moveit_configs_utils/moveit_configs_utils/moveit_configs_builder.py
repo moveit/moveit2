@@ -124,7 +124,10 @@ class MoveItConfigs:
         parameters.update(self.sensors_3d)
         parameters.update(self.joint_limits)
         parameters.update(self.moveit_cpp)
-        parameters.update(self.pilz_cartesian_limits)
+        # Update robot_description_planning with pilz cartesian limits
+        parameters["robot_description_planning"].update(
+            self.pilz_cartesian_limits["robot_description_planning"]
+        )
         return parameters
 
 
@@ -431,7 +434,7 @@ class MoveItConfigsBuilder(ParameterBuilder):
         :return: Instance of MoveItConfigsBuilder with pilz_cartesian_limits loaded.
         """
         deprecated_path = self._package_path / (
-            file_path or self.__config_dir_path / "cartesian_limits.yaml"
+            self.__config_dir_path / "cartesian_limits.yaml"
         )
         if deprecated_path.exists():
             logging.warning(
