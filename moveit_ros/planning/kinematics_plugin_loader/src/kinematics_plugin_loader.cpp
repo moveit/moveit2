@@ -299,44 +299,41 @@ moveit::core::SolverAllocatorFn KinematicsPluginLoader::getLoaderFunction(const 
                                        kinematics_param_listener_.at(known_group.name_)->get_params());
 
         std::string kinematics_solver_param_name = kinematics_param_prefix + ".kinematics_solver";
-        const auto kinematics_solver = kinematics_params_.at(known_group.name_).kinematics_solver;
-        possible_kinematics_solvers[known_group.name_].push_back(kinematics_solver);
-        RCLCPP_DEBUG(LOGGER, "Using kinematics solver '%s' for group '%s'.", kinematics_solver.c_str(),
-                     known_group.name_.c_str());
+        const auto kinematics_solvers = kinematics_params_.at(known_group.name_).kinematics_solver;
+
+        for (auto solver : kinematics_solvers)
+        {
+          possible_kinematics_solvers[known_group.name_].push_back(solver);
+          RCLCPP_DEBUG(LOGGER, "Found kinematics solver '%s' for group '%s'.", solver.c_str(),
+                       known_group.name_.c_str());
+        }
+
+        std::string kinematics_solver_res_param_name = kinematics_param_prefix + ".kinematics_solver_search_resolution";
+        const auto kinematics_solver_search_resolutions =
+            kinematics_params_.at(known_group.name_).kinematics_solver_search_resolution;
+
+        for (auto kinematics_solver_search_resolution : kinematics_solver_search_resolutions)
+        {
+          search_res[known_group.name_].push_back(kinematics_solver_search_resolution);
+          RCLCPP_DEBUG(LOGGER, "Found param %s : %f", kinematics_solver_res_param_name.c_str(),
+                       kinematics_solver_search_resolution);
+        }
 
         std::string kinematics_solver_timeout_param_name = kinematics_param_prefix + ".kinematics_solver_timeout";
         const auto kinematics_solver_timeout = kinematics_params_.at(known_group.name_).kinematics_solver_timeout;
-        RCLCPP_DEBUG(LOGGER, "Param %s : %f", kinematics_solver_timeout_param_name.c_str(), kinematics_solver_timeout);
+        RCLCPP_DEBUG(LOGGER, "Found param %s : %f", kinematics_solver_timeout_param_name.c_str(),
+                     kinematics_solver_timeout);
         ik_timeout_[known_group.name_] = kinematics_solver_timeout;
-
-        std::string kinematics_solver_res_param_name = kinematics_param_prefix + ".kinematics_solver_search_resolution";
-        const auto kinematics_solver_search_resolution =
-            kinematics_params_.at(known_group.name_).kinematics_solver_search_resolution;
-        RCLCPP_DEBUG(LOGGER, "Param %s : %f", kinematics_solver_res_param_name.c_str(),
-                     kinematics_solver_search_resolution);
-        search_res[known_group.name_].push_back(kinematics_solver_search_resolution);
 
         // Allow a kinematic solver's tip links to be specified on the rosparam server as an array
         std::string ksolver_ik_links_param_name = kinematics_param_prefix + ".kinematics_solver_ik_links";
-        //   rclcpp::Parameter ksolver_ik_links_param =
-        //       declare_parameter<rclcpp::ParameterType::PARAMETER_STRING_ARRAY>(node_, ksolver_ik_links_param_name);
-        //   if (ksolver_ik_links_param.get_type() != rclcpp::ParameterType::PARAMETER_NOT_SET)
-        //   {
-        //     if (ksolver_ik_links_param.get_type() == rclcpp::ParameterType::PARAMETER_STRING_ARRAY)
-        //     {
-        //       const auto& ksolver_ik_links = ksolver_ik_links_param.as_string_array();
-        //       for (auto& ksolver_ik_link : ksolver_ik_links)
-        //       {
-        //         RCLCPP_DEBUG(LOGGER, "found tip %s for group %s", ksolver_ik_link.c_str(),
-        //         known_group.name_.c_str()); iksolver_to_tip_links[known_group.name_].push_back(ksolver_ik_link);
-        //       }
-        //     }
-        //     else
-        //     {
-        //       RCLCPP_WARN(LOGGER, "the parameter '%s' needs to be of type 'STRING_ARRAY'",
-        //                   ksolver_ik_links_param_name.c_str());
-        //     }
-        //   }
+        const auto kinematics_solver_ik_links = kinematics_params_.at(known_group.name_).kinematics_solver_ik_links;
+        for (auto& kinematics_solver_ik_link : kinematics_solver_ik_links)
+        {
+          RCLCPP_DEBUG(LOGGER, "Found tip %s for group %s", kinematics_solver_ik_link.c_str(),
+                       known_group.name_.c_str());
+          iksolver_to_tip_links[known_group.name_].push_back(kinematics_solver_ik_link);
+        }
       }
     }
 
