@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+<robot name="gonzo">
+  <material name="blue">
+    <color rgba="0.29 0.26 0.44 1"/>
+  </material>
+  <link name="base_link">
+    <visual>
+      <geometry>
+        <cylinder length="1.0" radius="0.2"/>
+      </geometry>
+      <material name="blue"/>
+    </visual>
+    <collision>
+      <geometry>
+        <cylinder length="1.0" radius="0.2"/>
+      </geometry>
+    </collision>
+  </link>
+  <link name="nose">
+    <visual>
+      <geometry>
+        <cylinder length="0.5" radius="0.1"/>
+      </geometry>
+      <material name="blue"/>
+      <origin xyz="0.0 0.0 0.25"/>
+    </visual>
+    <collision>
+      <geometry>
+        <cylinder length="0.5" radius="0.1"/>
+      </geometry>
+      <origin xyz="0.0 0.0 0.25"/>
+  </collision>
+  </link>
+  <joint name="joint_a" type="continuous">
+    <parent link="base_link"/>
+    <child link="nose"/>
+    <axis xyz="0 1 0"/>
+    <origin xyz="0.0 0.0 0.5"/>
+  </joint>
+</robot>
