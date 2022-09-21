@@ -64,12 +64,16 @@ CommandListManager::CommandListManager(const rclcpp::Node::SharedPtr& node,
       node_, PARAM_NAMESPACE_LIMITS, model_->getActiveJointModels());
 
   // Obtain cartesian limits
-  pilz_industrial_motion_planner::CartesianLimit cartesian_limit =
-      pilz_industrial_motion_planner::CartesianLimitsAggregator::getAggregatedLimits(node_, PARAM_NAMESPACE_LIMITS);
+  // pilz_industrial_motion_planner::CartesianLimit cartesian_limit =
+  //     pilz_industrial_motion_planner::CartesianLimitsAggregator::getAggregatedLimits(node_, PARAM_NAMESPACE_LIMITS);
+
+  cartesian_limits_param_listener_ =
+      std::make_shared<cartesian_limits::ParamListener>(node, PARAM_NAMESPACE_LIMITS + ".cartesian_limits");
+  cartesian_limits_params_ = cartesian_limits_param_listener_->get_params();
 
   pilz_industrial_motion_planner::LimitsContainer limits;
   limits.setJointLimits(aggregated_limit_active_joints);
-  limits.setCartesianLimits(cartesian_limit);
+  limits.setCartesianLimits(cartesian_limits_params_);
 
   plan_comp_builder_.setModel(model);
   plan_comp_builder_.setBlender(std::unique_ptr<pilz_industrial_motion_planner::TrajectoryBlender>(

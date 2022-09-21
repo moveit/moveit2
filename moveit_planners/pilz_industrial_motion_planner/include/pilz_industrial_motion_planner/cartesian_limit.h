@@ -34,6 +34,8 @@
 
 #pragma once
 
+#include "cartesian_limits_parameters.hpp"
+
 namespace pilz_industrial_motion_planner
 {
 /**

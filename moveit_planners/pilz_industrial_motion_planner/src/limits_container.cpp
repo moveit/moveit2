@@ -34,45 +34,44 @@
 
 #include "pilz_industrial_motion_planner/limits_container.h"
 
-pilz_industrial_motion_planner::LimitsContainer::LimitsContainer()
-  : has_joint_limits_(false), has_cartesian_limits_(false)
+namespace pilz_industrial_motion_planner
+{
+LimitsContainer::LimitsContainer() : has_joint_limits_(false), has_cartesian_limits_(false)
 {
 }
 
-bool pilz_industrial_motion_planner::LimitsContainer::hasJointLimits() const
+bool LimitsContainer::hasJointLimits() const
 {
   return has_joint_limits_;
 }
 
-void pilz_industrial_motion_planner::LimitsContainer::setJointLimits(
-    pilz_industrial_motion_planner::JointLimitsContainer& joint_limits)
+void LimitsContainer::setJointLimits(JointLimitsContainer& joint_limits)
 {
   has_joint_limits_ = true;
   joint_limits_ = joint_limits;
 }
 
-const pilz_industrial_motion_planner::JointLimitsContainer&
-pilz_industrial_motion_planner::LimitsContainer::getJointLimitContainer() const
+const JointLimitsContainer& LimitsContainer::getJointLimitContainer() const
 {
   return joint_limits_;
 }
 
-bool pilz_industrial_motion_planner::LimitsContainer::hasFullCartesianLimits() const
-{
-  return (has_cartesian_limits_ && cartesian_limit_.hasMaxTranslationalVelocity() &&
-          cartesian_limit_.hasMaxTranslationalAcceleration() && cartesian_limit_.hasMaxTranslationalDeceleration() &&
-          cartesian_limit_.hasMaxRotationalVelocity());
-}
+// bool LimitsContainer::hasFullCartesianLimits() const
+// {
+//   return (has_cartesian_limits_ && cartesian_limit_.hasMaxTranslationalVelocity() &&
+//           cartesian_limit_.hasMaxTranslationalAcceleration() && cartesian_limit_.hasMaxTranslationalDeceleration() &&
+//           cartesian_limit_.hasMaxRotationalVelocity());
+// }
 
-void pilz_industrial_motion_planner::LimitsContainer::setCartesianLimits(
-    pilz_industrial_motion_planner::CartesianLimit& cartesian_limit)
+void LimitsContainer::setCartesianLimits(cartesian_limits::Params& cartesian_limit)
 {
   has_cartesian_limits_ = true;
   cartesian_limit_ = cartesian_limit;
 }
 
-const pilz_industrial_motion_planner::CartesianLimit&
-pilz_industrial_motion_planner::LimitsContainer::getCartesianLimits() const
+const cartesian_limits::Params& LimitsContainer::getCartesianLimits() const
 {
   return cartesian_limit_;
 }
+
+}  // namespace pilz_industrial_motion_planner
