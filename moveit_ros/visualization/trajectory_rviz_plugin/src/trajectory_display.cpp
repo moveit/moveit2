@@ -128,7 +128,7 @@ void TrajectoryDisplay::onDisable()
   trajectory_visual_->onDisable();
 }
 
-void TrajectoryDisplay::update(float wall_dt, float ros_dt)
+void TrajectoryDisplay::update(double wall_dt, double ros_dt)
 {
   Display::update(wall_dt, ros_dt);
   trajectory_visual_->update(wall_dt, ros_dt);
