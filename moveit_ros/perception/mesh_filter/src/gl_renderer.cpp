@@ -55,7 +55,7 @@ using namespace std;
 
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.ros.perception.gl_renderer");
 
-mesh_filter::GLRenderer::GLRenderer(unsigned width, unsigned height, float near, float far)
+mesh_filter::GLRenderer::GLRenderer(unsigned width, unsigned height, double near, double far)
   : width_(width)
   , height_(height)
   , fbo_id_(0)
@@ -92,7 +92,7 @@ void mesh_filter::GLRenderer::setBufferSize(unsigned width, unsigned height)
   }
 }
 
-void mesh_filter::GLRenderer::setClippingRange(float near, float far)
+void mesh_filter::GLRenderer::setClippingRange(double near, double far)
 {
   if (near_ <= 0)
     throw runtime_error("near clipping plane distance needs to be larger than 0");
@@ -102,7 +102,7 @@ void mesh_filter::GLRenderer::setClippingRange(float near, float far)
   far_ = far;
 }
 
-void mesh_filter::GLRenderer::setCameraParameters(float fx, float fy, float cx, float cy)
+void mesh_filter::GLRenderer::setCameraParameters(double fx, double fy, double cx, double cy)
 {
   fx_ = fx;
   fy_ = fy;
@@ -112,10 +112,10 @@ void mesh_filter::GLRenderer::setCameraParameters(float fx, float fy, float cx, 
 
 void mesh_filter::GLRenderer::setCameraParameters() const
 {
-  float left = near_ * -cx_ / fx_;
-  float right = near_ * (width_ - cx_) / fx_;
-  float top = near_ * cy_ / fy_;
-  float bottom = near_ * (cy_ - height_) / fy_;
+  double left = near_ * -cx_ / fx_;
+  double right = near_ * (width_ - cx_) / fx_;
+  double top = near_ * cy_ / fy_;
+  double bottom = near_ * (cy_ - height_) / fy_;
 
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
@@ -214,7 +214,7 @@ void mesh_filter::GLRenderer::getColorBuffer(unsigned char* buffer) const
   glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-void mesh_filter::GLRenderer::getDepthBuffer(float* buffer) const
+void mesh_filter::GLRenderer::getDepthBuffer(double* buffer) const
 {
   glBindFramebuffer(GL_FRAMEBUFFER, fbo_id_);
   glBindTexture(GL_TEXTURE_2D, depth_id_);
@@ -246,12 +246,12 @@ const GLuint& mesh_filter::GLRenderer::getProgramID() const
   return program_;
 }
 
-const float& mesh_filter::GLRenderer::getNearClippingDistance() const
+const double& mesh_filter::GLRenderer::getNearClippingDistance() const
 {
   return near_;
 }
 
-const float& mesh_filter::GLRenderer::getFarClippingDistance() const
+const double& mesh_filter::GLRenderer::getFarClippingDistance() const
 {
   return far_;
 }
