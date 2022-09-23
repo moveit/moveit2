@@ -61,10 +61,6 @@ public:
   }
 
   /** \brief Get a function pointer that allocates and initializes a kinematics solver. If not previously called, this
-   * function reads the SRDF and calls the variant below. */
-  moveit::core::SolverAllocatorFn getLoaderFunction();
-
-  /** \brief Get a function pointer that allocates and initializes a kinematics solver. If not previously called, this
    * function reads ROS parameters for the groups defined in the SRDF. */
   moveit::core::SolverAllocatorFn getLoaderFunction(const srdf::ModelSharedPtr& srdf_model);
 

@@ -247,18 +247,6 @@ void KinematicsPluginLoader::status() const
     RCLCPP_INFO(LOGGER, "Loader function was never required");
 }
 
-moveit::core::SolverAllocatorFn KinematicsPluginLoader::getLoaderFunction()
-{
-  if (loader_)
-    return [&loader = *loader_](const moveit::core::JointModelGroup* jmg) {
-      return loader.allocKinematicsSolverWithCache(jmg);
-    };
-
-  rdf_loader::RDFLoader rml(node_, robot_description_);
-  robot_description_ = rml.getRobotDescription();
-  return getLoaderFunction(rml.getSRDF());
-}
-
 moveit::core::SolverAllocatorFn KinematicsPluginLoader::getLoaderFunction(const srdf::ModelSharedPtr& srdf_model)
 {
   if (!loader_)
