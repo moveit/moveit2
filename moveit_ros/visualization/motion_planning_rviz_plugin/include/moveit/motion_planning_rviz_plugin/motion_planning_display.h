@@ -106,7 +106,7 @@ public:
   void load(const rviz_common::Config& config) override;
   void save(rviz_common::Config config) const override;
 
-  void update(float wall_dt, float ros_dt) override;
+  void update(double wall_dt, double ros_dt) override;
   void reset() override;
 
   moveit::core::RobotStateConstPtr getQueryStartState() const
@@ -213,7 +213,7 @@ protected:
   void onRobotModelLoaded() override;
   void onNewPlanningSceneState() override;
   void onSceneMonitorReceivedUpdate(planning_scene_monitor::PlanningSceneMonitor::SceneUpdateType update_type) override;
-  void updateInternal(float wall_dt, float ros_dt) override;
+  void updateInternal(double wall_dt, double ros_dt) override;
 
   void renderWorkspaceBox();
   void updateLinkColors();

@@ -87,7 +87,7 @@ public:
 
   ~TrajectoryVisualization() override;
 
-  virtual void update(float wall_dt, float sim_dt);
+  virtual void update(double wall_dt, double sim_dt);
   virtual void reset();
 
   void onInitialize(const rclcpp::Node::SharedPtr& node, Ogre::SceneNode* scene_node,
@@ -132,7 +132,7 @@ protected:
    * \return Positive values indicate a fixed time per state
    *         Negative values indicate a realtime-factor
    */
-  float getStateDisplayTime();
+  double getStateDisplayTime();
   void clearTrajectoryTrail();
 
   // Handles actually drawing the robot along motion plans
@@ -150,7 +150,7 @@ protected:
   bool animating_path_;
   bool drop_displaying_trajectory_;
   int current_state_;
-  float current_state_time_;
+  double current_state_time_;
   std::mutex update_trajectory_message_;
 
   moveit::core::RobotModelConstPtr robot_model_;

@@ -658,7 +658,7 @@ void PlanningSceneDisplay::queueRenderSceneGeometry()
   planning_scene_needs_render_ = true;
 }
 
-void PlanningSceneDisplay::update(float wall_dt, float ros_dt)
+void PlanningSceneDisplay::update(double wall_dt, double ros_dt)
 {
   Display::update(wall_dt, ros_dt);
 
@@ -670,7 +670,7 @@ void PlanningSceneDisplay::update(float wall_dt, float ros_dt)
     updateInternal(wall_dt, ros_dt);
 }
 
-void PlanningSceneDisplay::updateInternal(float wall_dt, float /*ros_dt*/)
+void PlanningSceneDisplay::updateInternal(double wall_dt, double /*ros_dt*/)
 {
   current_scene_time_ += wall_dt;
   if (planning_scene_render_ &&

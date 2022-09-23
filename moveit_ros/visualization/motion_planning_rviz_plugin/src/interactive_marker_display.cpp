@@ -182,7 +182,7 @@ void InteractiveMarkerDisplay::unsubscribe()
   Display::reset();
 }
 
-void InteractiveMarkerDisplay::update(float wall_dt, float ros_dt)
+void InteractiveMarkerDisplay::update(double wall_dt, double ros_dt)
 {
   (void)wall_dt;
   (void)ros_dt;
