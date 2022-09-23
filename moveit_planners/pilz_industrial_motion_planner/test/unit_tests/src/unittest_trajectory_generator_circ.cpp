@@ -106,14 +106,9 @@ protected:
     pilz_industrial_motion_planner::JointLimitsContainer joint_limits =
         pilz_industrial_motion_planner::JointLimitsAggregator::getAggregatedLimits(
             node_, PARAM_NAMESPACE_LIMITS, robot_model_->getActiveJointModels());
-    // CartesianLimit cart_limits;
+
     // Cartesian limits are chose as such values to ease the manually compute the
     // trajectory
-    // cart_limits.setMaxRotationalVelocity(1 * M_PI);
-    // cart_limits.setMaxTranslationalAcceleration(1 * M_PI);
-    // cart_limits.setMaxTranslationalDeceleration(1 * M_PI);
-    // cart_limits.setMaxTranslationalVelocity(1 * M_PI);
-
     cartesian_limits::Params cartesian_limit;
     cartesian_limit.max_trans_vel = 1.0 * M_PI;
     cartesian_limit.max_trans_acc = 1.0 * M_PI;
