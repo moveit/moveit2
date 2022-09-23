@@ -51,7 +51,7 @@ const rclcpp::Logger LOGGER = rclcpp::get_logger("local_planner_component");
 const auto JOIN_THREAD_TIMEOUT = std::chrono::seconds(1);
 
 // If the trajectory progress reaches more than 0.X the global goal state is considered as reached
-constexpr float PROGRESS_THRESHOLD = 0.995;
+constexpr double PROGRESS_THRESHOLD = 0.995;
 }  // namespace
 
 LocalPlannerComponent::LocalPlannerComponent(const rclcpp::NodeOptions& options)

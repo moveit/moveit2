@@ -121,7 +121,7 @@ protected:
   void initFromMoveGroupNS();
   void constructPlanningRequest(moveit_msgs::msg::MotionPlanRequest& mreq);
 
-  void updateSceneMarkers(float wall_dt, float ros_dt);
+  void updateSceneMarkers(double wall_dt, double ros_dt);
 
   void updateExternalCommunication();
 

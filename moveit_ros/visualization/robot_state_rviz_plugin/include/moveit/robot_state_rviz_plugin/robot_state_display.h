@@ -71,7 +71,7 @@ public:
   ~RobotStateDisplay() override;
 
   void load(const rviz_common::Config& config) override;
-  void update(float wall_dt, float ros_dt) override;
+  void update(double wall_dt, double ros_dt) override;
   void reset() override;
 
   const moveit::core::RobotModelConstPtr& getRobotModel() const

@@ -79,7 +79,7 @@ public:
   void load(const rviz_common::Config& config) override;
   void save(rviz_common::Config config) const override;
 
-  void update(float wall_dt, float ros_dt) override;
+  void update(double wall_dt, double ros_dt) override;
   void reset() override;
 
   void setLinkColor(const std::string& link_name, const QColor& color);
@@ -178,7 +178,7 @@ protected:
   void fixedFrameChanged() override;
 
   // new virtual functions added by this plugin
-  virtual void updateInternal(float wall_dt, float ros_dt);
+  virtual void updateInternal(double wall_dt, double ros_dt);
   virtual void onSceneMonitorReceivedUpdate(planning_scene_monitor::PlanningSceneMonitor::SceneUpdateType update_type);
 
   planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor_;
@@ -199,7 +199,7 @@ protected:
   bool planning_scene_needs_render_;
   // or only the robot position (excluding attached object changes)
   bool robot_state_needs_render_;
-  float current_scene_time_;
+  double current_scene_time_;
 
   rviz_common::properties::Property* scene_category_;
   rviz_common::properties::Property* robot_category_;
