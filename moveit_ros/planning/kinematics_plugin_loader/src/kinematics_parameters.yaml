@@ -1,13 +1,13 @@
 kinematics:
   kinematics_solver: {
-    type: string_array,
-    default_value: ["kdl_kinematics_plugin/KDLKinematicsPlugin"],
+    type: string,
+    default_value: kdl_kinematics_plugin/KDLKinematicsPlugin,
     description: "Kinematics solver",
     # validation:
   }
   kinematics_solver_search_resolution: {
-    type: double_array,
-    default_value: [0.1],
+    type: double,
+    default_value: 0.1,
     description: "kinematics solver search resolution",
     # validation:
   }

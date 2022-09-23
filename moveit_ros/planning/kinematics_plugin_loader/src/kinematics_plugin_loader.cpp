@@ -299,25 +299,19 @@ moveit::core::SolverAllocatorFn KinematicsPluginLoader::getLoaderFunction(const 
                                        kinematics_param_listener_.at(known_group.name_)->get_params());
 
         std::string kinematics_solver_param_name = kinematics_param_prefix + ".kinematics_solver";
-        const auto kinematics_solvers = kinematics_params_.at(known_group.name_).kinematics_solver;
+        const auto kinematics_solver = kinematics_params_.at(known_group.name_).kinematics_solver;
 
-        for (auto solver : kinematics_solvers)
-        {
-          possible_kinematics_solvers[known_group.name_].push_back(solver);
-          RCLCPP_DEBUG(LOGGER, "Found kinematics solver '%s' for group '%s'.", solver.c_str(),
-                       known_group.name_.c_str());
-        }
+        possible_kinematics_solvers[known_group.name_].push_back(kinematics_solver);
+        RCLCPP_DEBUG(LOGGER, "Found kinematics solver '%s' for group '%s'.", kinematics_solver.c_str(),
+                     known_group.name_.c_str());
 
         std::string kinematics_solver_res_param_name = kinematics_param_prefix + ".kinematics_solver_search_resolution";
-        const auto kinematics_solver_search_resolutions =
+        const auto kinematics_solver_search_resolution =
             kinematics_params_.at(known_group.name_).kinematics_solver_search_resolution;
 
-        for (auto kinematics_solver_search_resolution : kinematics_solver_search_resolutions)
-        {
-          search_res[known_group.name_].push_back(kinematics_solver_search_resolution);
-          RCLCPP_DEBUG(LOGGER, "Found param %s : %f", kinematics_solver_res_param_name.c_str(),
-                       kinematics_solver_search_resolution);
-        }
+        search_res[known_group.name_].push_back(kinematics_solver_search_resolution);
+        RCLCPP_DEBUG(LOGGER, "Found param %s : %f", kinematics_solver_res_param_name.c_str(),
+                     kinematics_solver_search_resolution);
 
         std::string kinematics_solver_timeout_param_name = kinematics_param_prefix + ".kinematics_solver_timeout";
         const auto kinematics_solver_timeout = kinematics_params_.at(known_group.name_).kinematics_solver_timeout;
