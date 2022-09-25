@@ -1679,7 +1679,10 @@ std::map<std::string, double> MoveGroupInterface::getNamedTargetValues(const std
   }
   else
   {
-    impl_->getJointModelGroup()->getVariableDefaultPositions(name, positions);
+    if (!impl_->getJointModelGroup()->getVariableDefaultPositions(name, positions))
+    {
+      RCLCPP_ERROR(LOGGER, "The requested named target '%s' does not exist, returning empty positions.", name.c_str());
+    }
   }
   return positions;
 }
