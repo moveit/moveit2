@@ -83,9 +83,6 @@ private:
   /** \brief Get a read-only copy of the planning scene */
   planning_scene_monitor::LockedPlanningSceneRO getLockedPlanningSceneRO() const;
 
-  /** \brief Callback for collision stopping time, from the thread that is aware of velocity and acceleration */
-  void worstCaseStopTimeCB(const std_msgs::msg::Float64::SharedPtr msg);
-
   // Pointer to the ROS node
   const std::shared_ptr<rclcpp::Node> node_;
 
@@ -107,9 +104,6 @@ private:
   bool collision_detected_ = false;
   bool paused_ = false;
 
-  // Variables for stop-distance-based collision checking
-  double worst_case_stop_time_ = std::numeric_limits<double>::max();
-
   const double self_velocity_scale_coefficient_;
   const double scene_velocity_scale_coefficient_;
 
@@ -121,7 +115,6 @@ private:
   rclcpp::TimerBase::SharedPtr timer_;
   double period_;  // The loop period, in seconds
   rclcpp::Publisher<std_msgs::msg::Float64>::SharedPtr collision_velocity_scale_pub_;
-  rclcpp::Subscription<std_msgs::msg::Float64>::SharedPtr worst_case_stop_time_sub_;
 
   mutable std::mutex joint_state_mutex_;
   sensor_msgs::msg::JointState latest_joint_state_;
