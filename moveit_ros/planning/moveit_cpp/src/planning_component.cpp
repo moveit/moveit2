@@ -235,6 +235,17 @@ planning_interface::MotionPlanResponse PlanningComponent::plan(const MultiPipeli
   std::vector<std::thread> planning_threads;
   planning_threads.reserve(parameters.multi_plan_request_parameters.size());
 
+  // Print a warning if more parallel planning problems than available concurrent threads are defined. If
+  // std::thread::hardware_concurrency() is not defined, the command returns 0 so the check does not work
+  auto const hardware_concurrency = std::thread::hardware_concurrency();
+  if (parameters.multi_plan_request_parameters.size() < hardware_concurrency && hardware_concurrency != 0)
+  {
+    RCLCPP_WARN(
+        LOGGER,
+        "More parallel planning problems defined ('%ld') than possible to solve concurrently with the hardware ('%d')",
+        parameters.multi_plan_request_parameters.size(), hardware_concurrency);
+  }
+
   // Launch planning threads
   for (auto const& plan_request_parameter : parameters.multi_plan_request_parameters)
   {
