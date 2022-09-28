@@ -248,8 +248,9 @@ planning_interface::MotionPlanResponse PlanningComponent::plan(const MultiPipeli
       {
         RCLCPP_ERROR_STREAM(LOGGER, "Planning pipeline '" << plan_request_parameter.planning_pipeline.c_str()
                                                           << "' threw exception '" << e.what() << "'");
-        auto plan_solution = std::make_shared<planning_interface::MotionPlanResponse>();
-        plan_solution->error_code_ = moveit::core::MoveItErrorCode::FAILURE;
+        auto plan_solution = planning_interface::MotionPlanResponse();
+        plan_solution.error_code_ = moveit::core::MoveItErrorCode::FAILURE;
+        planning_solutions.pushBack(plan_solution);
       }
     });
     planning_threads.push_back(std::move(planning_thread));
