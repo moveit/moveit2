@@ -177,7 +177,7 @@ planning_interface::MotionPlanResponse PlanningComponent::plan(const PlanRequest
   const planning_pipeline::PlanningPipelinePtr pipeline =
       moveit_cpp_->getPlanningPipelines().at(parameters.planning_pipeline);
   pipeline->generatePlan(planning_scene, req, res);
-  last_plan_solution_.error_code_ = res.error_code_.val;
+  last_plan_solution_.error_code_ = res.error_code_;
   if (res.error_code_.val != res.error_code_.SUCCESS)
   {
     RCLCPP_ERROR(LOGGER, "Could not compute plan successfully");
