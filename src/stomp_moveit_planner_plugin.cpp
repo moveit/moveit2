@@ -26,7 +26,8 @@ public:
     robot_model_ = model;
     node_ = node;
     parameter_namespace_ = parameter_namespace;
-    // TODO: Load STOMP config
+
+    param_listener_ = std::make_shared<stomp_moveit::ParamListener>(node, parameter_namespace);
 
     return true;
   }
@@ -51,7 +52,8 @@ public:
       return nullptr;
     }
 
-    PlanningContextPtr planning_context = std::make_shared<StompPlanningContext>("STOMP", req.group_name);
+    PlanningContextPtr planning_context =
+        std::make_shared<StompPlanningContext>("STOMP", req.group_name, param_listener_->get_params());
     planning_context->setPlanningScene(planning_scene);
     planning_context->setMotionPlanRequest(req);
 
@@ -100,6 +102,7 @@ private:
   moveit::core::RobotModelConstPtr robot_model_;
   rclcpp::Node::SharedPtr node_;
   std::string parameter_namespace_;
+  std::shared_ptr<stomp_moveit::ParamListener> param_listener_;
 };
 
 }  // namespace stomp_moveit

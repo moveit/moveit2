@@ -11,6 +11,9 @@ find_package(stomp REQUIRED)
 find_package(moveit_core REQUIRED)
 find_package(moveit_ros REQUIRED)
 find_package(moveit_visual_tools REQUIRED)
+find_package(generate_parameter_library REQUIRED)
+
+generate_parameter_library(stomp_moveit_parameters res/stomp_moveit.yaml)
 
 include_directories(stomp_moveit PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
@@ -24,11 +27,11 @@ add_library(stomp_moveit_plugin SHARED
 ament_target_dependencies(stomp_moveit_plugin
   moveit_core
 )
-target_link_libraries(stomp_moveit_plugin stomp::stomp)
+target_link_libraries(stomp_moveit_plugin stomp::stomp stomp_moveit_parameters)
 
 pluginlib_export_plugin_description_file(moveit_core stomp_moveit_plugin_description.xml)
 
-install(TARGETS stomp_moveit_plugin
+install(TARGETS stomp_moveit_plugin stomp_moveit_parameters
   EXPORT ${PROJECT_NAME}Targets
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
@@ -51,7 +54,7 @@ install(TARGETS stomp_moveit_example
 install(DIRECTORY launch DESTINATION share/${PROJECT_NAME})
 
 ament_export_targets(${PROJECT_NAME}Targets HAS_LIBRARY_TARGET)
-ament_export_dependencies(moveit_core stomp)
+ament_export_dependencies(moveit_core stomp generate_parameter_library)
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)

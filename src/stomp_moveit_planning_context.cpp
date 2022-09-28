@@ -6,6 +6,7 @@
 #include <stomp_moveit/noise_generators.hpp>
 #include <stomp_moveit/cost_functions.hpp>
 #include <stomp_moveit/stomp_moveit_task.hpp>
+#include <stomp_moveit_parameters.hpp>
 
 #include <moveit/constraint_samplers/constraint_sampler_manager.h>
 
@@ -53,31 +54,28 @@ stomp::TaskPtr createStompTask(const stomp::StompConfiguration& config, const St
       std::make_shared<ComposableTask>(noise_generator_fn, cost_fn, filter_fn, iteration_callback_fn, done_callback_fn);
   return task;
 }
-stomp::StompConfiguration loadStompConfig(size_t num_dimensions)
+
+stomp::StompConfiguration getStompConfig(const stomp_moveit::Params& params, size_t num_dimensions)
 {
   stomp::StompConfiguration config;
-  // General settings
-  config.num_iterations = 1000;           /**< @brief Maximum number of iteration allowed */
-  config.num_iterations_after_valid = 0;  /**< @brief Stomp will stop optimizing this many iterations after finding a
-                                      valid solution */
-  config.num_timesteps = 40;              /**< @brief Number of timesteps */
-  config.num_dimensions = num_dimensions; /**< @brief Parameter dimensionality */
-  config.delta_t = 0.1;                   /**< @brief Time change between consecutive points */
-  config.initialization_method = stomp::TrajectoryInitializations::
-      LINEAR_INTERPOLATION; /**< @brief TrajectoryInitializations::TrajectoryInitialization */
+  config.num_dimensions = num_dimensions;                                                 // Copied from joint count
+  config.initialization_method = stomp::TrajectoryInitializations::LINEAR_INTERPOLATION;  // TODO: set from request
+  config.num_iterations = params.num_iterations;
+  config.num_iterations_after_valid = params.num_iterations_after_valid;
+  config.num_timesteps = params.num_timesteps;
+  config.delta_t = params.delta_t;
+  config.exponentiated_cost_sensitivity = params.exponentiated_cost_sensitivity;
+  config.num_rollouts = params.num_rollouts;
+  config.max_rollouts = params.max_rollouts;
+  config.control_cost_weight = params.control_cost_weight;
 
-  // Probability Calculation
-  config.exponentiated_cost_sensitivity = 0.5; /**< @brief Default exponetiated cost sensitivity coefficient */
-
-  // Noisy trajectory generation
-  config.num_rollouts = 15; /**< @brief Number of noisy trajectories*/
-  config.max_rollouts = 25; /**< @brief The combined number of new and old rollouts during each iteration shouldn't
-                       exceed this value */
-
-  // Cost calculation
-  config.control_cost_weight = 0.1; /**< @brief Percentage of the trajectory accelerations cost to be applied in the
-                                 total cost calculation >*/
   return config;
+}
+
+StompPlanningContext::StompPlanningContext(const std::string& name, const std::string& group,
+                                           const stomp_moveit::Params& params)
+  : planning_interface::PlanningContext(name, group), params_(params)
+{
 }
 
 bool StompPlanningContext::solve(planning_interface::MotionPlanResponse& res)
@@ -105,7 +103,7 @@ bool StompPlanningContext::solve(planning_interface::MotionPlanResponse& res)
 
   // STOMP config and task
   const auto group = getPlanningScene()->getRobotModel()->getJointModelGroup(getGroupName());
-  const auto config = loadStompConfig(group->getActiveJointModels().size() /* num_dimensions */);
+  const auto config = getStompConfig(params_, group->getActiveJointModels().size() /* num_dimensions */);
   const auto task = createStompTask(config, *this);
 
   // Solve motion plan

@@ -2,12 +2,14 @@
 
 #include <moveit/planning_interface/planning_interface.h>
 
+#include <stomp_moveit_parameters.hpp>
+
 namespace stomp_moveit
 {
 class StompPlanningContext : public planning_interface::PlanningContext
 {
 public:
-  using planning_interface::PlanningContext::PlanningContext;
+  StompPlanningContext(const std::string& name, const std::string& group_name, const stomp_moveit::Params& params);
 
   bool solve(planning_interface::MotionPlanResponse& res) override;
 
@@ -16,5 +18,8 @@ public:
   bool terminate() override;
 
   void clear() override;
+
+private:
+  const stomp_moveit::Params params_;
 };
 }  // namespace stomp_moveit
