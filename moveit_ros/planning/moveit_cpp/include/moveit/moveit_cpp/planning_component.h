@@ -130,9 +130,8 @@ public:
   /// Planner parameters provided with the MotionPlanRequest
   struct MultiPipelinePlanRequestParameters
   {
-    std::vector<PlanRequestParameters> multi_plan_request_parameters;
-
-    void load(const rclcpp::Node::SharedPtr& node, const std::vector<std::string>& planning_pipeline_names)
+    MultiPipelinePlanRequestParameters(const rclcpp::Node::SharedPtr& node,
+                                       const std::vector<std::string>& planning_pipeline_names)
     {
       multi_plan_request_parameters.reserve(planning_pipeline_names.size());
 
@@ -143,6 +142,8 @@ public:
         multi_plan_request_parameters.push_back(parameters);
       }
     }
+    // Plan request parameters for the individual planning pipelines which run concurrently
+    std::vector<PlanRequestParameters> multi_plan_request_parameters;
   };
 
   /// \brief A solution callback function type for the parallel planning API of planning component

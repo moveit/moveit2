@@ -250,10 +250,10 @@ planning_interface::MotionPlanResponse PlanningComponent::plan(const MultiPipeli
   for (auto const& plan_request_parameter : parameters.multi_plan_request_parameters)
   {
     auto planning_thread = std::thread([&]() {
+      auto plan_solution = planning_interface::MotionPlanResponse();
       try
       {
         auto solution = plan(plan_request_parameter, false);
-        planning_solutions.pushBack(solution);
       }
       catch (const std::exception& e)
       {
@@ -263,16 +263,9 @@ planning_interface::MotionPlanResponse PlanningComponent::plan(const MultiPipeli
         plan_solution.error_code_ = moveit::core::MoveItErrorCode::FAILURE;
         planning_solutions.pushBack(plan_solution);
       }
-    });
-    planning_threads.push_back(std::move(planning_thread));
-  }
+      planning_solutions.pushBack(plan_solution);
 
-  // Launch monitor thread if a stopping criterion is provided as function arguments. Otherwise,
-  // the parallel planning process takes as long as the longest planner takes.
-  if (stopping_criterion_callback != nullptr)
-  {
-    auto monitor_thread = std::thread([&]() {
-      while (planning_solutions.getSolutions().size() < planning_threads.size())
+      if (stopping_criterion_callback != nullptr)
       {
         if (stopping_criterion_callback(planning_solutions, parameters))
         {
@@ -288,14 +281,10 @@ planning_interface::MotionPlanResponse PlanningComponent::plan(const MultiPipeli
           }
         }
       }
-      using namespace std::chrono_literals;
-      std::this_thread::sleep_for(0.1s);
     });
-    if (monitor_thread.joinable())
-    {
-      monitor_thread.join();
-    }
+    planning_threads.push_back(std::move(planning_thread));
   }
+
   // Wait for threads to finish
   for (auto& planning_thread : planning_threads)
   {
