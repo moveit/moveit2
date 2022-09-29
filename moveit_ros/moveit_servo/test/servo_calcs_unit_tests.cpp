@@ -33,12 +33,18 @@
  *********************************************************************/
 
 /* Author: Tyler Weaver, Andy Zelenak
-   Desc:   Enforce limits unit tests
+   Desc:   Unit tests
 */
 
-#include <moveit/utils/robot_model_test_utils.h>
 #include <gtest/gtest.h>
+
+#include <moveit/utils/robot_model_test_utils.h>
+
 #include <moveit_servo/enforce_limits.hpp>
+#include <moveit_servo/servo_calcs.h>
+#include <moveit_servo/servo_parameters.h>
+#include <moveit_servo/status_codes.h>
+#include <moveit_servo/utilities.h>
 
 namespace
 {
@@ -60,7 +66,7 @@ void checkVelocityLimits(const moveit::core::JointModelGroup* joint_model_group,
   }
 }
 
-class EnforceLimitsTests : public testing::Test
+class ServoCalcsUnitTests : public testing::Test
 {
 protected:
   void SetUp() override
@@ -75,7 +81,7 @@ protected:
 
 }  // namespace
 
-TEST_F(EnforceLimitsTests, VelocityScalingTest)
+TEST_F(ServoCalcsUnitTests, VelocitiesTooFast)
 {
   // Request velocities that are too fast
   std::vector<double> joint_position{ 0, 0, 0, 0, 0, 0, 0 };
@@ -91,7 +97,7 @@ TEST_F(EnforceLimitsTests, VelocityScalingTest)
   checkVelocityLimits(joint_model_group_, eigen_velocity);
 }
 
-TEST_F(EnforceLimitsTests, NegativeJointAngleDeltasTest)
+TEST_F(ServoCalcsUnitTests, NegativeVelocitiesTooFast)
 {
   // Negative velocities exceeding the limit
   std::vector<double> joint_position{ 0, 0, 0, 0, 0, 0, 0 };
@@ -107,7 +113,7 @@ TEST_F(EnforceLimitsTests, NegativeJointAngleDeltasTest)
   checkVelocityLimits(joint_model_group_, eigen_velocity);
 }
 
-TEST_F(EnforceLimitsTests, LowJointVelocityDeltaTest)
+TEST_F(ServoCalcsUnitTests, AcceptableJointVelocities)
 {
   // Final test with joint velocities that are acceptable
   std::vector<double> joint_position{ 0, 0, 0, 0, 0, 0, 0 };
@@ -121,6 +127,45 @@ TEST_F(EnforceLimitsTests, LowJointVelocityDeltaTest)
   Eigen::ArrayXd eigen_velocity =
       Eigen::Map<Eigen::ArrayXd, Eigen::Unaligned>(joint_state.velocity.data(), joint_state.velocity.size());
   checkVelocityLimits(joint_model_group_, eigen_velocity);
+}
+
+TEST_F(ServoCalcsUnitTests, SingularityScaling)
+{
+  // If we are at a singularity, we should halt
+  Eigen::VectorXd commanded_twist(6);
+  commanded_twist << 1, 0, 0, 0, 0, 0;
+
+  // Start near a singularity
+  std::shared_ptr<moveit::core::RobotState> robot_state = std::make_shared<moveit::core::RobotState>(robot_model_);
+  robot_state->setToDefaultValues();
+  robot_state->setVariablePosition("panda_joint1", 0.221);
+  robot_state->setVariablePosition("panda_joint2", 0.530);
+  robot_state->setVariablePosition("panda_joint3", -0.231);
+  robot_state->setVariablePosition("panda_joint4", -0.920);
+  robot_state->setVariablePosition("panda_joint5", 0.117);
+  robot_state->setVariablePosition("panda_joint6", 1.439);
+  robot_state->setVariablePosition("panda_joint7", -1.286);
+
+  Eigen::MatrixXd jacobian = robot_state->getJacobian(joint_model_group_);
+
+  Eigen::JacobiSVD<Eigen::MatrixXd> svd =
+      Eigen::JacobiSVD<Eigen::MatrixXd>(jacobian, Eigen::ComputeThinU | Eigen::ComputeThinV);
+  Eigen::MatrixXd matrix_s = svd.singularValues().asDiagonal();
+  Eigen::MatrixXd pseudo_inverse = svd.matrixV() * matrix_s.inverse() * svd.matrixU().transpose();
+
+  // Use very low thresholds to ensure they are triggered
+  double hard_stop_singularity_threshold = 2;
+  double lower_singularity_threshold = 1;
+  double leaving_singularity_threshold_multiplier = 2;
+
+  rclcpp::Clock clock;
+  moveit_servo::StatusCode status;
+
+  double scaling_factor = moveit_servo::velocityScalingFactorForSingularity(
+      joint_model_group_, commanded_twist, svd, pseudo_inverse, hard_stop_singularity_threshold,
+      lower_singularity_threshold, leaving_singularity_threshold_multiplier, clock, robot_state, status);
+
+  EXPECT_EQ(scaling_factor, 0);
 }
 
 int main(int argc, char** argv)
