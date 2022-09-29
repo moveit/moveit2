@@ -239,7 +239,7 @@ planning_interface::MotionPlanResponse PlanningComponent::plan(const MultiPipeli
   // Print a warning if more parallel planning problems than available concurrent threads are defined. If
   // std::thread::hardware_concurrency() is not defined, the command returns 0 so the check does not work
   auto const hardware_concurrency = std::thread::hardware_concurrency();
-  if (parameters.multi_plan_request_parameters.size() < hardware_concurrency && hardware_concurrency != 0)
+  if (parameters.multi_plan_request_parameters.size() > hardware_concurrency && hardware_concurrency != 0)
   {
     RCLCPP_WARN(
         LOGGER,
@@ -254,7 +254,7 @@ planning_interface::MotionPlanResponse PlanningComponent::plan(const MultiPipeli
       auto plan_solution = planning_interface::MotionPlanResponse();
       try
       {
-        auto solution = plan(plan_request_parameter, false);
+        plan_solution = plan(plan_request_parameter, false);
       }
       catch (const std::exception& e)
       {
@@ -262,7 +262,6 @@ planning_interface::MotionPlanResponse PlanningComponent::plan(const MultiPipeli
                                                           << "' threw exception '" << e.what() << "'");
         auto plan_solution = planning_interface::MotionPlanResponse();
         plan_solution.error_code_ = moveit::core::MoveItErrorCode::FAILURE;
-        planning_solutions.pushBack(plan_solution);
       }
       planning_solutions.pushBack(plan_solution);
 
@@ -271,6 +270,7 @@ planning_interface::MotionPlanResponse PlanningComponent::plan(const MultiPipeli
         if (stopping_criterion_callback(planning_solutions, parameters))
         {
           // Terminate planning pipelines
+          RCLCPP_ERROR_STREAM(LOGGER, "Stopping criterion met: Terminating planning pipelines that are still active");
           for (auto const& plan_request_parameter : parameters.multi_plan_request_parameters)
           {
             moveit_cpp_->terminatePlanningPipeline(plan_request_parameter.planning_pipeline);
