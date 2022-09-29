@@ -49,6 +49,10 @@ namespace moveit_cpp
 {
 MOVEIT_CLASS_FORWARD(PlanningComponent);  // Defines PlanningComponentPtr, ConstPtr, WeakPtr... etc
 
+/// \brief A function to choose the solution with the shortest path from a vector of solutions
+planning_interface::MotionPlanResponse
+getShortestSolution(std::vector<planning_interface::MotionPlanResponse> const& solutions);
+
 class PlanningComponent
 {
 public:
@@ -227,9 +231,10 @@ public:
 
   /** \brief Run a plan from start or current state to fulfill the last goal constraints provided by setGoal() using the
    * provided PlanRequestParameters. */
-  planning_interface::MotionPlanResponse plan(const MultiPipelinePlanRequestParameters& parameters,
-                                              SolutionCallbackFunction solution_selection_callback = nullptr,
-                                              StoppingCriterionFunction stopping_criterion_callback = nullptr);
+  planning_interface::MotionPlanResponse
+  plan(const MultiPipelinePlanRequestParameters& parameters,
+       SolutionCallbackFunction solution_selection_callback = &getShortestSolution,
+       StoppingCriterionFunction stopping_criterion_callback = nullptr);
 
   /** \brief Execute the latest computed solution trajectory computed by plan(). By default this function terminates
    * after the execution is complete. The execution can be run in background by setting blocking to false. */
