@@ -724,9 +724,9 @@ ConstraintEvaluationResult OrientationConstraint::decide(const moveit::core::Rob
     RCLCPP_ERROR(LOGGER, "The parameterization type for the orientation constraints is invalid.");
   }
 
-  bool result = xyz_rotation(2) < absolute_z_axis_tolerance_ + std::numeric_limits<double>::epsilon() &&
-                xyz_rotation(1) < absolute_y_axis_tolerance_ + std::numeric_limits<double>::epsilon() &&
-                xyz_rotation(0) < absolute_x_axis_tolerance_ + std::numeric_limits<double>::epsilon();
+  bool result = xyz_rotation(2) < absolute_z_axis_tolerance_ / 2 + std::numeric_limits<double>::epsilon() &&
+                xyz_rotation(1) < absolute_y_axis_tolerance_ / 2 + std::numeric_limits<double>::epsilon() &&
+                xyz_rotation(0) < absolute_x_axis_tolerance_ / 2 + std::numeric_limits<double>::epsilon();
 
   if (verbose)
   {
