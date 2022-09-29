@@ -272,12 +272,7 @@ planning_interface::MotionPlanResponse PlanningComponent::plan(const MultiPipeli
           // Terminate planning pipelines
           for (auto const& plan_request_parameter : parameters.multi_plan_request_parameters)
           {
-            auto const& planning_pipeline =
-                moveit_cpp_->getPlanningPipelines().at(plan_request_parameter.planning_pipeline);
-            if (planning_pipeline->isActive())
-            {
-              planning_pipeline->terminate();
-            }
+            moveit_cpp_->terminatePlanningPipeline(plan_request_parameter.planning_pipeline);
           }
         }
       }

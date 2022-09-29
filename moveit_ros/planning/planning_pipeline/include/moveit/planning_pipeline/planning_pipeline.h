@@ -174,7 +174,7 @@ public:
   }
 
   /** \brief Get current status of the planning pipeline */
-  bool isActive() const
+  [[nodiscard]] bool isActive() const
   {
     return active_;
   }
