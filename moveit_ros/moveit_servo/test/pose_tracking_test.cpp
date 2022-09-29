@@ -196,7 +196,7 @@ TEST_F(PoseTrackingFixture, OutgoingMsgTest)
   // Republish the target pose in a new thread, as if the target is moving
   std::thread target_pub_thread([&] {
     size_t msg_count = 0;
-    rclcpp::Rate loop_rate(50);
+    rclcpp::WallRate loop_rate(50);
     while (++msg_count < 100)
     {
       target_pose_pub_->publish(target_pose);

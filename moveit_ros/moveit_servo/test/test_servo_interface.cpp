@@ -58,7 +58,7 @@ TEST_F(ServoFixture, SendTwistStampedTest)
   auto time_start = node_->now();
 
   // Publish N messages with some time between, ensure it's less than the timeout for Servo
-  rclcpp::Rate publish_loop_rate(test_parameters_->publish_hz);
+  rclcpp::WallRate publish_loop_rate(test_parameters_->publish_hz);
   size_t num_commands = 30;
   resetNumCommands();
   for (size_t i = 0; i < num_commands && rclcpp::ok(); ++i)
@@ -99,7 +99,7 @@ TEST_F(ServoFixture, SendJointServoTest)
   auto time_start = node_->now();
 
   // Publish N messages with some time between, ensure it's less than the timeout for Servo
-  rclcpp::Rate publish_loop_rate(test_parameters_->publish_hz);
+  rclcpp::WallRate publish_loop_rate(test_parameters_->publish_hz);
   size_t num_commands = 30;
   resetNumCommands();
   for (size_t i = 0; i < num_commands && rclcpp::ok(); ++i)
