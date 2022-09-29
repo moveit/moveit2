@@ -3,19 +3,25 @@ kinematics:
     type: string,
     default_value: kdl_kinematics_plugin/KDLKinematicsPlugin,
     description: "Kinematics solver",
-    # validation:
+    validation: {
+      not_empty<>: []
+    }
   }
   kinematics_solver_search_resolution: {
     type: double,
     default_value: 0.1,
     description: "kinematics solver search resolution",
-    # validation:
+    validation: {
+      lower_bounds<>: [ 0.0 ]
+    }
   }
   kinematics_solver_timeout: {
     type: double,
     default_value: 0.05,
     description: "kinematics solver timeout",
-    # validation:
+    validation: {
+      lower_bounds<>: [ 0.0 ]
+    }
   }
   kinematics_solver_ik_links: {
     type: string_array,
