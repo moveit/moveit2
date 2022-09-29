@@ -114,7 +114,8 @@ bool PlanningComponent::setTrajectoryConstraints(const moveit_msgs::msg::Traject
   return true;
 }
 
-planning_interface::MotionPlanResponse PlanningComponent::plan(const PlanRequestParameters& parameters, const bool update_last_solution)
+planning_interface::MotionPlanResponse PlanningComponent::plan(const PlanRequestParameters& parameters,
+                                                               const bool update_last_solution)
 {
   auto plan_solution = planning_interface::MotionPlanResponse();
 
@@ -195,7 +196,7 @@ planning_interface::MotionPlanResponse PlanningComponent::plan(const PlanRequest
   if (res.error_code_.val != res.error_code_.SUCCESS)
   {
     RCLCPP_ERROR(LOGGER, "Could not compute plan successfully");
-        if (update_last_solution)
+    if (update_last_solution)
     {
       last_plan_solution_ = plan_solution;
     }
@@ -227,8 +228,8 @@ planning_interface::MotionPlanResponse PlanningComponent::plan(const PlanRequest
 }
 
 planning_interface::MotionPlanResponse PlanningComponent::plan(const MultiPipelinePlanRequestParameters& parameters,
-                                                        SolutionCallbackFunction solution_selection_callback,
-                                                        StoppingCriterionFunction stopping_criterion_callback)
+                                                               SolutionCallbackFunction solution_selection_callback,
+                                                               StoppingCriterionFunction stopping_criterion_callback)
 {
   // Create solutions container
   PlanningComponent::PlanSolutions planning_solutions{ parameters.multi_plan_request_parameters.size() };
@@ -308,23 +309,24 @@ planning_interface::MotionPlanResponse PlanningComponent::plan(const MultiPipeli
     }
 
     // Find trajectory with minimal path
-    auto const shortest_trajectory = std::min_element(solutions.begin(), solutions.end(),
-                                                      [](planning_interface::MotionPlanResponse const& solution_a,
-                                                         planning_interface::MotionPlanResponse const& solution_b) {
-                                                        // If both solutions were successful, check which path is shorter
-                                                        if (solution_a && solution_b)
-                                                        {
-                                                          return robot_trajectory::path_length(*solution_a.trajectory_) <
-                                                                 robot_trajectory::path_length(*solution_b.trajectory_);
-                                                        }
-                                                        // If only solution a is successful, return a
-                                                        else if (solution_a)
-                                                        {
-                                                          return true;
-                                                        }
-                                                        // Else return solution b, either because it is successful or not
-                                                        return false;
-                                                      });
+    auto const shortest_trajectory =
+        std::min_element(solutions.begin(), solutions.end(),
+                         [](planning_interface::MotionPlanResponse const& solution_a,
+                            planning_interface::MotionPlanResponse const& solution_b) {
+                           // If both solutions were successful, check which path is shorter
+                           if (solution_a && solution_b)
+                           {
+                             return robot_trajectory::path_length(*solution_a.trajectory_) <
+                                    robot_trajectory::path_length(*solution_b.trajectory_);
+                           }
+                           // If only solution a is successful, return a
+                           else if (solution_a)
+                           {
+                             return true;
+                           }
+                           // Else return solution b, either because it is successful or not
+                           return false;
+                         });
     if (shortest_trajectory->trajectory_ != nullptr)
     {
       RCLCPP_INFO_STREAM(LOGGER, "Chosen solution with path length: "

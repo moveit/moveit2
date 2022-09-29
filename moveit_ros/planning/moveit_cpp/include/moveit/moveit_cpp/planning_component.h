@@ -147,7 +147,9 @@ public:
   };
 
   /// \brief A solution callback function type for the parallel planning API of planning component
-  typedef std::function<planning_interface::MotionPlanResponse(std::vector<planning_interface::MotionPlanResponse> const& solutions)> SolutionCallbackFunction;
+  typedef std::function<planning_interface::MotionPlanResponse(
+      std::vector<planning_interface::MotionPlanResponse> const& solutions)>
+      SolutionCallbackFunction;
   /// \brief A stopping criterion callback function for the parallel planning API of planning component
   typedef std::function<bool(PlanSolutions const& solutions,
                              MultiPipelinePlanRequestParameters const& plan_request_parameters)>
@@ -220,13 +222,14 @@ public:
   planning_interface::MotionPlanResponse plan();
   /** \brief Run a plan from start or current state to fulfill the last goal constraints provided by setGoal() using the
    * provided PlanRequestParameters. */
-  planning_interface::MotionPlanResponse plan(const PlanRequestParameters& parameters, const bool update_last_solution = true);
+  planning_interface::MotionPlanResponse plan(const PlanRequestParameters& parameters,
+                                              const bool update_last_solution = true);
 
   /** \brief Run a plan from start or current state to fulfill the last goal constraints provided by setGoal() using the
    * provided PlanRequestParameters. */
   planning_interface::MotionPlanResponse plan(const MultiPipelinePlanRequestParameters& parameters,
-                    SolutionCallbackFunction solution_selection_callback = nullptr,
-                    StoppingCriterionFunction stopping_criterion_callback = nullptr);
+                                              SolutionCallbackFunction solution_selection_callback = nullptr,
+                                              StoppingCriterionFunction stopping_criterion_callback = nullptr);
 
   /** \brief Execute the latest computed solution trajectory computed by plan(). By default this function terminates
    * after the execution is complete. The execution can be run in background by setting blocking to false. */
