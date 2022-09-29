@@ -80,8 +80,8 @@ public:
 
 private:
   const rclcpp::Node::SharedPtr node_;
-  std::unordered_map<std::string, std::shared_ptr<kinematics::ParamListener>> kinematics_param_listener_;
-  std::unordered_map<std::string, kinematics::Params> kinematics_params_;
+  std::unordered_map<std::string, std::shared_ptr<kinematics::ParamListener>> group_param_listener_;
+  std::unordered_map<std::string, kinematics::Params> group_params_;
   std::string robot_description_;
 
   MOVEIT_CLASS_FORWARD(KinematicsLoaderImpl);  // Defines KinematicsLoaderImplPtr, ConstPtr, WeakPtr... etc
