@@ -4,14 +4,7 @@ kinematics:
     default_value: kdl_kinematics_plugin/KDLKinematicsPlugin,
     description: "Kinematics solver",
     validation: {
-      not_empty<>: [],
-      one_of<>: [[kdl_kinematics_plugin/KDLKinematicsPlugin,
-                  prbt_manipulator/IKFastKinematicsPlugin,
-                  bio_ik/BioIKKinematicsPlugin,
-                  lma_kinematics_plugin/LMAKinematicsPlugin,
-                  srv_kinematics_plugin/SrvKinematicsPlugin,
-                  cached_ik_kinematics_plugin/CachedKDLKinematicsPlugin,
-                  cached_ik_kinematics_plugin/CachedSrvKinematicsPlugin ]]
+      not_empty<>: []
     }
   }
   kinematics_solver_search_resolution: {
@@ -27,7 +20,7 @@ kinematics:
     default_value: 0.05,
     description: "kinematics solver timeout",
     validation: {
-      gt_eq<>: [ 0.0 ]
+      gt<>: [ 0.0 ]
     }
   }
   kinematics_solver_ik_links: {
