@@ -58,17 +58,14 @@ public:
    * \param robot_description
    * \param possible_kinematics_solvers
    * \param search_res
-   * \param iksolver_to_tip_links - a map between each ik solver and a vector of custom-specified tip link(s)
    */
   KinematicsLoaderImpl(const rclcpp::Node::SharedPtr& node, const std::string& robot_description,
                        const std::map<std::string, std::string>& possible_kinematics_solvers,
-                       const std::map<std::string, double>& search_res,
-                       const std::map<std::string, std::vector<std::string>>& iksolver_to_tip_links)
+                       const std::map<std::string, double>& search_res)
     : node_(node)
     , robot_description_(robot_description)
     , possible_kinematics_solvers_(possible_kinematics_solvers)
     , search_res_(search_res)
-    , iksolver_to_tip_links_(iksolver_to_tip_links)
   {
     try
     {
@@ -90,28 +87,13 @@ public:
   std::vector<std::string> chooseTipFrames(const moveit::core::JointModelGroup* jmg)
   {
     std::vector<std::string> tips;
-    std::map<std::string, std::vector<std::string>>::const_iterator ik_it = iksolver_to_tip_links_.find(jmg->getName());
+    // get the last link in the chain
+    RCLCPP_DEBUG(LOGGER,
+                 "Choosing tip frame of kinematic solver for group %s"
+                 "based on last link in chain",
+                 jmg->getName().c_str());
 
-    // Check if tips were loaded onto the rosparam server previously
-    if (ik_it != iksolver_to_tip_links_.end())
-    {
-      // the tip is being chosen based on a corresponding rosparam ik link
-      RCLCPP_DEBUG(LOGGER,
-                   "Choosing tip frame of kinematic solver for group %s"
-                   "based on values in rosparam server.",
-                   jmg->getName().c_str());
-      tips = ik_it->second;
-    }
-    else
-    {
-      // get the last link in the chain
-      RCLCPP_DEBUG(LOGGER,
-                   "Choosing tip frame of kinematic solver for group %s"
-                   "based on last link in chain",
-                   jmg->getName().c_str());
-
-      tips.push_back(jmg->getLinkModels().back()->getName());
-    }
+    tips.push_back(jmg->getLinkModels().back()->getName());
 
     // Error check
     if (tips.empty())
@@ -231,8 +213,6 @@ private:
   std::string robot_description_;
   std::map<std::string, std::string> possible_kinematics_solvers_;
   std::map<std::string, double> search_res_;
-  std::map<std::string, std::vector<std::string>> iksolver_to_tip_links_;  // a map between each ik solver and a vector
-                                                                           // of custom-specified tip link(s)
   std::shared_ptr<pluginlib::ClassLoader<kinematics::KinematicsBase>> kinematics_loader_;
   std::map<const moveit::core::JointModelGroup*, kinematics::KinematicsBasePtr> instances_;
   std::mutex lock_;
@@ -291,21 +271,11 @@ moveit::core::SolverAllocatorFn KinematicsPluginLoader::getLoaderFunction(const 
         ik_timeout_[known_group.name_] = kinematics_solver_timeout;
         RCLCPP_DEBUG(LOGGER, "Found param %s : %f", kinematics_solver_timeout_param_name.c_str(),
                      kinematics_solver_timeout);
-
-        // Allow a kinematic solver's tip links to be specified on the rosparam server as an array
-        std::string ksolver_ik_links_param_name = kinematics_param_prefix + ".kinematics_solver_ik_links";
-        const auto kinematics_solver_ik_links = group_params_.at(known_group.name_).kinematics_solver_ik_links;
-        for (auto& kinematics_solver_ik_link : kinematics_solver_ik_links)
-        {
-          RCLCPP_DEBUG(LOGGER, "Found tip %s for group %s", kinematics_solver_ik_link.c_str(),
-                       known_group.name_.c_str());
-          iksolver_to_tip_links[known_group.name_].push_back(kinematics_solver_ik_link);
-        }
       }
     }
 
-    loader_ = std::make_shared<KinematicsLoaderImpl>(node_, robot_description_, possible_kinematics_solvers, search_res,
-                                                     iksolver_to_tip_links);
+    loader_ =
+        std::make_shared<KinematicsLoaderImpl>(node_, robot_description_, possible_kinematics_solvers, search_res);
   }
 
   return [&loader = *loader_](const moveit::core::JointModelGroup* jmg) {
