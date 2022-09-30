@@ -23,8 +23,3 @@ kinematics:
       gt<>: [ 0.0 ]
     }
   }
-  kinematics_solver_ik_links: {
-    type: string_array,
-    default_value: [],
-    description: "TODO",
-  }
