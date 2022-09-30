@@ -345,8 +345,8 @@ Bounds positionConstraintMsgToBoundVector(const moveit_msgs::msg::PositionConstr
 
 Bounds orientationConstraintMsgToBoundVector(const moveit_msgs::msg::OrientationConstraint& ori_con)
 {
-  std::vector<double> dims = { ori_con.absolute_x_axis_tolerance, ori_con.absolute_y_axis_tolerance,
-                               ori_con.absolute_z_axis_tolerance };
+  std::vector<double> dims = { ori_con.absolute_x_axis_tolerance * 2.0, ori_con.absolute_y_axis_tolerance * 2.0,
+                               ori_con.absolute_z_axis_tolerance * 2.0 };
 
   // dimension of -1 signifies unconstrained parameter, so set to infinity
   for (auto& dim : dims)
