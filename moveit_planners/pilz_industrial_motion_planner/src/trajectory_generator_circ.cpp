@@ -63,6 +63,9 @@ TrajectoryGeneratorCIRC::TrajectoryGeneratorCIRC(const moveit::core::RobotModelC
   //   throw TrajectoryGeneratorInvalidLimitsException(
   //       "Cartesian limits are not fully set for CIRC trajectory generator.");
   // }
+  // TODO: Need to check if all the parameters are set up the user in cartesian_limits.yaml
+  // All the default values are 0.0
+  planner_limits_.printCartesianLimits();
 }
 
 void TrajectoryGeneratorCIRC::cmdSpecificRequestValidation(const planning_interface::MotionPlanRequest& req) const

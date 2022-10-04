@@ -221,8 +221,8 @@ private:
   //! trajectories.
   PlanComponentsBuilder plan_comp_builder_;
 
-  std::shared_ptr<cartesian_limits::ParamListener> cartesian_limits_param_listener_;
-  cartesian_limits::Params cartesian_limits_params_;
+  std::shared_ptr<cartesian_limits::ParamListener> param_listener_;
+  cartesian_limits::Params params_;
 };
 
 inline void CommandListManager::checkLastBlendRadiusZero(const moveit_msgs::msg::MotionSequenceRequest& req_list)

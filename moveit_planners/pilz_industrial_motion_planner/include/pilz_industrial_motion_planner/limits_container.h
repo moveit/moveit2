@@ -70,12 +70,9 @@ public:
   const JointLimitsContainer& getJointLimitContainer() const;
 
   /**
-   * @brief Return if this LimitsContainer has defined cartesian limits
-   *
-   * @return True if container contains cartesian limits including maximum
-   * velocity/acceleration/deceleration
+   * @brief Prints the cartesian limits set by user. Default values for limits are 0.0
    */
-  // bool hasFullCartesianLimits() const;
+  void printCartesianLimits() const;
 
   /**
    * @brief Set cartesian limits

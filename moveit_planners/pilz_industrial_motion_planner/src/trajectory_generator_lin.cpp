@@ -61,6 +61,7 @@ TrajectoryGeneratorLIN::TrajectoryGeneratorLIN(const moveit::core::RobotModelCon
   //   RCLCPP_ERROR(LOGGER, "Cartesian limits not set for LIN trajectory generator.");
   //   throw TrajectoryGeneratorInvalidLimitsException("Cartesian limits are not fully set for LIN trajectory generator.");
   // }
+  planner_limits_.printCartesianLimits();
 }
 
 void TrajectoryGeneratorLIN::extractMotionPlanInfo(const planning_scene::PlanningSceneConstPtr& scene,

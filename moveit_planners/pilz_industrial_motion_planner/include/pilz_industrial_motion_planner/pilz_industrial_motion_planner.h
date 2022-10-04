@@ -140,8 +140,8 @@ private:
   pilz_industrial_motion_planner::JointLimitsContainer aggregated_limit_active_joints_;
 
   /// cartesian limit
-  std::shared_ptr<cartesian_limits::ParamListener> cartesian_limits_param_listener_;
-  cartesian_limits::Params cartesian_limits_params_;
+  std::shared_ptr<cartesian_limits::ParamListener> param_listener_;
+  cartesian_limits::Params params_;
 
   pilz_industrial_motion_planner::CartesianLimit cartesian_limit_;
 };
