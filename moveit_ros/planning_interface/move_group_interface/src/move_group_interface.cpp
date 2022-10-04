@@ -163,17 +163,17 @@ public:
 
     query_service_ = node_->create_client<moveit_msgs::srv::QueryPlannerInterfaces>(
         rclcpp::names::append(opt_.move_group_namespace_, move_group::QUERY_PLANNERS_SERVICE_NAME),
-        rmw_qos_profile_services_default, callback_group_);
+        rclcpp::SystemDefaultsQoS(), callback_group_);
     get_params_service_ = node_->create_client<moveit_msgs::srv::GetPlannerParams>(
         rclcpp::names::append(opt_.move_group_namespace_, move_group::GET_PLANNER_PARAMS_SERVICE_NAME),
-        rmw_qos_profile_services_default, callback_group_);
+        rclcpp::SystemDefaultsQoS(), callback_group_);
     set_params_service_ = node_->create_client<moveit_msgs::srv::SetPlannerParams>(
         rclcpp::names::append(opt_.move_group_namespace_, move_group::SET_PLANNER_PARAMS_SERVICE_NAME),
-        rmw_qos_profile_services_default, callback_group_);
+        rclcpp::SystemDefaultsQoS(), callback_group_);
 
     cartesian_path_service_ = node_->create_client<moveit_msgs::srv::GetCartesianPath>(
         rclcpp::names::append(opt_.move_group_namespace_, move_group::CARTESIAN_PATH_SERVICE_NAME),
-        rmw_qos_profile_services_default, callback_group_);
+        rclcpp::SystemDefaultsQoS(), callback_group_);
 
     // plan_grasps_service_ = pnode_->create_client<moveit_msgs::srv::GraspPlanning>(GRASP_PLANNING_SERVICE_NAME);
 
