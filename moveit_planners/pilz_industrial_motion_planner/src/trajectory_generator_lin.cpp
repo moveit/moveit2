@@ -56,11 +56,6 @@ TrajectoryGeneratorLIN::TrajectoryGeneratorLIN(const moveit::core::RobotModelCon
                                                const LimitsContainer& planner_limits, const std::string& /*group_name*/)
   : TrajectoryGenerator::TrajectoryGenerator(robot_model, planner_limits)
 {
-  // if (!planner_limits_.hasFullCartesianLimits())
-  // {
-  //   RCLCPP_ERROR(LOGGER, "Cartesian limits not set for LIN trajectory generator.");
-  //   throw TrajectoryGeneratorInvalidLimitsException("Cartesian limits are not fully set for LIN trajectory generator.");
-  // }
   planner_limits_.printCartesianLimits();
 }
 

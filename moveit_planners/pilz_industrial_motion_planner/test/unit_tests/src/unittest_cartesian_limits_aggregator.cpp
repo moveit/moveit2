@@ -32,63 +32,63 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#include <gtest/gtest.h>
+// #include <gtest/gtest.h>
 
-#include <rclcpp/rclcpp.hpp>
+// #include <rclcpp/rclcpp.hpp>
 
-#include "pilz_industrial_motion_planner/cartesian_limit.h"
-#include "pilz_industrial_motion_planner/cartesian_limits_aggregator.h"
+// #include "pilz_industrial_motion_planner/cartesian_limit.h"
+// #include "pilz_industrial_motion_planner/cartesian_limits_aggregator.h"
 
-/**
- * @brief Unittest of the CartesianLimitsAggregator class
- */
-class CartesianLimitsAggregator : public ::testing::Test
-{
-protected:
-  void SetUp() override
-  {
-    node_ = rclcpp::Node::make_shared("unittest_cartesian_limits_aggregator");
-  }
-  rclcpp::Node::SharedPtr node_;
-};
+// /**
+//  * @brief Unittest of the CartesianLimitsAggregator class
+//  */
+// class CartesianLimitsAggregator : public ::testing::Test
+// {
+// protected:
+//   void SetUp() override
+//   {
+//     node_ = rclcpp::Node::make_shared("unittest_cartesian_limits_aggregator");
+//   }
+//   rclcpp::Node::SharedPtr node_;
+// };
 
-/**
- * @brief Check if only velocity is set
- */
-TEST_F(CartesianLimitsAggregator, OnlyVelocity)
-{
-  pilz_industrial_motion_planner::CartesianLimit limit =
-      pilz_industrial_motion_planner::CartesianLimitsAggregator::getAggregatedLimits(node_, "only_vel");
-  EXPECT_TRUE(limit.hasMaxTranslationalVelocity());
-  EXPECT_EQ(limit.getMaxTranslationalVelocity(), 10);
-  EXPECT_FALSE(limit.hasMaxTranslationalAcceleration());
-  EXPECT_FALSE(limit.hasMaxTranslationalDeceleration());
-  EXPECT_FALSE(limit.hasMaxRotationalVelocity());
-}
+// /**
+//  * @brief Check if only velocity is set
+//  */
+// TEST_F(CartesianLimitsAggregator, OnlyVelocity)
+// {
+//   pilz_industrial_motion_planner::CartesianLimit limit =
+//       pilz_industrial_motion_planner::CartesianLimitsAggregator::getAggregatedLimits(node_, "only_vel");
+//   EXPECT_TRUE(limit.hasMaxTranslationalVelocity());
+//   EXPECT_EQ(limit.getMaxTranslationalVelocity(), 10);
+//   EXPECT_FALSE(limit.hasMaxTranslationalAcceleration());
+//   EXPECT_FALSE(limit.hasMaxTranslationalDeceleration());
+//   EXPECT_FALSE(limit.hasMaxRotationalVelocity());
+// }
 
-/**
- * @brief Check if all values are set correctly
- */
-TEST_F(CartesianLimitsAggregator, AllValues)
-{
-  pilz_industrial_motion_planner::CartesianLimit limit =
-      pilz_industrial_motion_planner::CartesianLimitsAggregator::getAggregatedLimits(node_, "all_values");
-  EXPECT_TRUE(limit.hasMaxTranslationalVelocity());
-  EXPECT_EQ(limit.getMaxTranslationalVelocity(), 1);
+// /**
+//  * @brief Check if all values are set correctly
+//  */
+// TEST_F(CartesianLimitsAggregator, AllValues)
+// {
+//   pilz_industrial_motion_planner::CartesianLimit limit =
+//       pilz_industrial_motion_planner::CartesianLimitsAggregator::getAggregatedLimits(node_, "all_values");
+//   EXPECT_TRUE(limit.hasMaxTranslationalVelocity());
+//   EXPECT_EQ(limit.getMaxTranslationalVelocity(), 1);
 
-  EXPECT_TRUE(limit.hasMaxTranslationalAcceleration());
-  EXPECT_EQ(limit.getMaxTranslationalAcceleration(), 2);
+//   EXPECT_TRUE(limit.hasMaxTranslationalAcceleration());
+//   EXPECT_EQ(limit.getMaxTranslationalAcceleration(), 2);
 
-  EXPECT_TRUE(limit.hasMaxTranslationalDeceleration());
-  EXPECT_EQ(limit.getMaxTranslationalDeceleration(), -3);
+//   EXPECT_TRUE(limit.hasMaxTranslationalDeceleration());
+//   EXPECT_EQ(limit.getMaxTranslationalDeceleration(), -3);
 
-  EXPECT_TRUE(limit.hasMaxRotationalVelocity());
-  EXPECT_EQ(limit.getMaxRotationalVelocity(), 4);
-}
+//   EXPECT_TRUE(limit.hasMaxRotationalVelocity());
+//   EXPECT_EQ(limit.getMaxRotationalVelocity(), 4);
+// }
 
-int main(int argc, char** argv)
-{
-  rclcpp::init(argc, argv);
-  testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
-}
+// int main(int argc, char** argv)
+// {
+//   rclcpp::init(argc, argv);
+//   testing::InitGoogleTest(&argc, argv);
+//   return RUN_ALL_TESTS();
+// }

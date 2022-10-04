@@ -42,7 +42,8 @@
 
 #include <moveit/planning_pipeline/planning_pipeline.h>
 #include <moveit/robot_state/conversions.h>
-#include "pilz_industrial_motion_planner/cartesian_limits_aggregator.h"
+
+#include "cartesian_limits_parameters.hpp"
 #include "pilz_industrial_motion_planner/joint_limits_aggregator.h"
 #include "pilz_industrial_motion_planner/tip_frame_getter.h"
 #include "pilz_industrial_motion_planner/trajectory_blend_request.h"

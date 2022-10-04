@@ -142,8 +142,6 @@ private:
   /// cartesian limit
   std::shared_ptr<cartesian_limits::ParamListener> param_listener_;
   cartesian_limits::Params params_;
-
-  pilz_industrial_motion_planner::CartesianLimit cartesian_limit_;
 };
 
 MOVEIT_CLASS_FORWARD(CommandPlanner);

@@ -103,8 +103,6 @@ add_library(joint_limits_common SHARED
   src/joint_limits_container.cpp
   src/joint_limits_validator.cpp
   src/limits_container.cpp
-  src/cartesian_limit.cpp
-  src/cartesian_limits_aggregator.cpp
 )
 target_link_libraries(joint_limits_common cartesian_limits_parameters)
 ament_target_dependencies(joint_limits_common ${THIS_PACKAGE_INCLUDE_DEPENDS})
