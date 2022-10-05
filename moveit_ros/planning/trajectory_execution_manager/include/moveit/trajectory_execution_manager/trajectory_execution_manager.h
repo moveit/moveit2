@@ -98,7 +98,7 @@ public:
   bool isManagingControllers() const;
 
   /// Get the instance of the controller manager used (this is the plugin instance loaded)
-  const moveit_controller_manager::MoveItControllerManagerPtr& getControllerManager() const;
+  const moveit_controller_manager::Ros2ControlManagerPtr& getControllerManager() const;
 
   /** \brief Execute a named event (e.g., 'stop') */
   void processEvent(const std::string& event);
@@ -222,7 +222,7 @@ private:
     std::string name_;
     std::set<std::string> joints_;
     std::set<std::string> overlapping_controllers_;
-    moveit_controller_manager::MoveItControllerManager::ControllerState state_;
+    moveit_controller_manager::Ros2ControlManager::ControllerState state_;
     rclcpp::Time last_update_{ 0, 0, RCL_ROS_TIME };
 
     bool operator<(ControllerInformation& other) const
@@ -305,8 +305,8 @@ private:
 
   std::vector<TrajectoryExecutionContext*> trajectories_;
 
-  std::unique_ptr<pluginlib::ClassLoader<moveit_controller_manager::MoveItControllerManager> > controller_manager_loader_;
-  moveit_controller_manager::MoveItControllerManagerPtr controller_manager_;
+  std::unique_ptr<pluginlib::ClassLoader<moveit_controller_manager::Ros2ControlManager> > controller_manager_loader_;
+  moveit_controller_manager::Ros2ControlManagerPtr controller_manager_;
 
   bool verbose_;
 
