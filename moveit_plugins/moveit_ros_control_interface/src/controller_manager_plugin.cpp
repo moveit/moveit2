@@ -82,7 +82,7 @@ MOVEIT_CLASS_FORWARD(Ros2ControlManager);  // Defines Ros2ControlManagerPtr, Con
  * instance.
  * All services and names are relative to ns_.
  */
-class Ros2ControlManager : public moveit_controller_manager::Ros2ControlManager
+class Ros2ControlManager : public moveit_controller_manager::MoveItControllerManager
 {
   std::string ns_;
   pluginlib::ClassLoader<ControllerHandleAllocator> loader_;
@@ -493,7 +493,7 @@ public:
  *  \brief Ros2ControlMultiManager discovers all running ros_control node and delegates member function to the
  * corresponding Ros2ControlManager instances
  */
-class Ros2ControlMultiManager : public moveit_controller_manager::Ros2ControlManager
+class Ros2ControlMultiManager : public moveit_controller_manager::MoveItControllerManager
 {
   typedef std::map<std::string, moveit_ros_control_interface::Ros2ControlManagerPtr> ControllerManagersMap;
   ControllerManagersMap controller_managers_;
@@ -659,7 +659,8 @@ public:
 
 }  // namespace moveit_ros_control_interface
 
-PLUGINLIB_EXPORT_CLASS(moveit_ros_control_interface::Ros2ControlManager, moveit_controller_manager::Ros2ControlManager);
+PLUGINLIB_EXPORT_CLASS(moveit_ros_control_interface::Ros2ControlManager,
+                       moveit_controller_manager::MoveItControllerManager);
 
 PLUGINLIB_EXPORT_CLASS(moveit_ros_control_interface::Ros2ControlMultiManager,
-                       moveit_controller_manager::Ros2ControlManager);
+                       moveit_controller_manager::MoveItControllerManager);

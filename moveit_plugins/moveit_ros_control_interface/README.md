@@ -1,6 +1,6 @@
 # MoveIt ROS Control Plugin
 
-This package provides plugins of base class `moveit_controller_manager::Ros2ControlManager` and a new plugin base class for `moveit_controller_manager::MoveItControllerHandle` allocators.
+This package provides plugins of base class `moveit_controller_manager::MoveItControllerManager` and a new plugin base class for `moveit_controller_manager::MoveItControllerHandle` allocators.
 The allocator class is necessary because `moveit_controller_manager::MoveItControllerHandle` needs a name passed to the constructor.
 Two variantes are provided, `moveit_ros_control_interface::Ros2ControlManager` for interfacing a single ros_control node and `moveit_ros_control_interface::Ros2ControlMultiManager` for seamless integration with any number of ros_control nodes.
 
@@ -23,7 +23,7 @@ In your MoveIt launch file (e.g. `ROBOT_moveit_config/launch/ROBOT_moveit_contro
 ```
 
 And make sure to set the `ros_control_namespace` parameter to the namespace (without the /controller_manager/ part) of the ros_control-based node you like to interface.
-If you are using the `moveit_setup_assistent` you can add it to `ROBOT_moveit_config/config/controllers.yaml`, e.g.:
+If you are using the `moveit_setup_assistent` you can add it to `ROBOT_moveit_config/config/moveit_controllers.yaml`, e.g.:
 ```
 ros_control_namespace: /ROS_CONTROL_NODE
 controller_list:

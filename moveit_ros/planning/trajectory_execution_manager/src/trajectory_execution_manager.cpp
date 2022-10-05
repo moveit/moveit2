@@ -101,8 +101,8 @@ void TrajectoryExecutionManager::initialize()
   try
   {
     controller_manager_loader_ =
-        std::make_unique<pluginlib::ClassLoader<moveit_controller_manager::Ros2ControlManager>>(
-            "moveit_core", "moveit_controller_manager::Ros2ControlManager");
+        std::make_unique<pluginlib::ClassLoader<moveit_controller_manager::MoveItControllerManager>>(
+            "moveit_core", "moveit_controller_manager::MoveItControllerManager");
   }
   catch (pluginlib::PluginlibException& ex)
   {
@@ -137,7 +137,7 @@ void TrajectoryExecutionManager::initialize()
     if (controller == "moveit_ros_control_interface/MoveItControllerManager")
     {
       RCLCPP_FATAL(LOGGER, "moveit_ros_control_interface/MoveItControllerManager is deprecated. Replace with "
-                           "`moveit_ros_control_interface/Ros2ControlManager.`");
+                           "`moveit_ros_control_interface/MoveItControllerManager.`");
     }
     if (controller == "moveit_ros_control_interface/MoveItMultiControllerManager")
     {
@@ -260,7 +260,7 @@ bool TrajectoryExecutionManager::isManagingControllers() const
   return manage_controllers_;
 }
 
-const moveit_controller_manager::Ros2ControlManagerPtr& TrajectoryExecutionManager::getControllerManager() const
+const moveit_controller_manager::MoveItControllerManagerPtr& TrajectoryExecutionManager::getControllerManager() const
 {
   return controller_manager_;
 }

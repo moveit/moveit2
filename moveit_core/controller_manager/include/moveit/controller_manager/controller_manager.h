@@ -147,14 +147,14 @@ protected:
   std::string name_;
 };
 
-MOVEIT_CLASS_FORWARD(Ros2ControlManager);  // Defines Ros2ControlManagerPtr, ConstPtr, WeakPtr... etc
+MOVEIT_CLASS_FORWARD(MoveItControllerManager);  // Defines MoveItControllerManagerPtr, ConstPtr, WeakPtr... etc
 
 /** @brief MoveIt does not enforce how controllers are implemented.
     To make your controllers usable by MoveIt, this interface needs to be implemented.
     The main purpose of this interface is to expose the set of known controllers and
     potentially to allow activating and deactivating them, if multiple controllers are available.
  */
-class Ros2ControlManager
+class MoveItControllerManager
 {
 public:
   /** \brief Each controller known to MoveIt has a state. This
@@ -175,11 +175,11 @@ public:
   };
 
   /** \brief Default constructor. This needs to have no arguments so that the plugin system can construct the object. */
-  Ros2ControlManager()
+  MoveItControllerManager()
   {
   }
 
-  virtual ~Ros2ControlManager()
+  virtual ~MoveItControllerManager()
   {
   }
 

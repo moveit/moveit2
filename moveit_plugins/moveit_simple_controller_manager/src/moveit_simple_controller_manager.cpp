@@ -84,7 +84,7 @@ namespace moveit_simple_controller_manager
 {
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.plugins.moveit_simple_controller_manager");
 static const std::string PARAM_BASE_NAME = "moveit_simple_controller_manager";
-class MoveItSimpleControllerManager : public moveit_controller_manager::Ros2ControlManager
+class MoveItSimpleControllerManager : public moveit_controller_manager::MoveItControllerManager
 {
 public:
   MoveItSimpleControllerManager() = default;
@@ -193,7 +193,7 @@ public:
           continue;
         }
 
-        moveit_controller_manager::Ros2ControlManager::ControllerState state;
+        moveit_controller_manager::MoveItControllerManager::ControllerState state;
         node_->get_parameter_or(makeParameterName(PARAM_BASE_NAME, controller_name, "default"), state.default_, false);
         state.active_ = true;
 
@@ -270,7 +270,8 @@ public:
     }
   }
 
-  moveit_controller_manager::Ros2ControlManager::ControllerState getControllerState(const std::string& name) override
+  moveit_controller_manager::MoveItControllerManager::ControllerState
+  getControllerState(const std::string& name) override
   {
     return controller_states_[name];
   }
@@ -285,10 +286,10 @@ public:
 protected:
   rclcpp::Node::SharedPtr node_;
   std::map<std::string, ActionBasedControllerHandleBasePtr> controllers_;
-  std::map<std::string, moveit_controller_manager::Ros2ControlManager::ControllerState> controller_states_;
+  std::map<std::string, moveit_controller_manager::MoveItControllerManager::ControllerState> controller_states_;
 };
 
 }  // end namespace moveit_simple_controller_manager
 
 PLUGINLIB_EXPORT_CLASS(moveit_simple_controller_manager::MoveItSimpleControllerManager,
-                       moveit_controller_manager::Ros2ControlManager);
+                       moveit_controller_manager::MoveItControllerManager);
