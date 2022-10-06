@@ -67,7 +67,7 @@ public:
                     const planning_interface::MotionPlanRequest& req, planning_interface::MotionPlanResponse& res,
                     std::vector<std::size_t>& added_path_index) const override
   {
-    RCLCPP_ERROR(LOGGER, "Running '%s'", getDescription().c_str());
+    RCLCPP_DEBUG(LOGGER, "Running '%s'", getDescription().c_str());
 
     // get the specified start state
     moveit::core::RobotState start_state = planning_scene->getCurrentState();

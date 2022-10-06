@@ -145,7 +145,6 @@ bool PlanningRequestAdapterChain::adaptAndPlan(const planning_interface::Planner
                const planning_scene::PlanningSceneConstPtr& scene, const planning_interface::MotionPlanRequest& req,
                planning_interface::MotionPlanResponse& res) {
         res = callAdapter(adapter, fn, scene, req, added_path_index);
-        RCLCPP_ERROR_STREAM(LOGGER, "Adapter  result: " << res.error_code_.val);
         // If any adapter fails, return false
         if (res.error_code_.val != moveit_msgs::msg::MoveItErrorCodes::SUCCESS)
         {
