@@ -76,7 +76,7 @@ public:
                     const planning_interface::MotionPlanRequest& req, planning_interface::MotionPlanResponse& res,
                     std::vector<std::size_t>& added_path_index) const override
   {
-    RCLCPP_DEBUG(LOGGER, "Running '%s'", getDescription().c_str());
+    RCLCPP_ERROR(LOGGER, "Running '%s'", getDescription().c_str());
 
     // get the specified start state
     moveit::core::RobotState start_state = planning_scene->getCurrentState();
@@ -151,9 +151,10 @@ public:
       {
         RCLCPP_WARN(LOGGER,
                     "Unable to find a valid state nearby the start state (using jiggle fraction of %lf and %u sampling "
-                    "attempts). Passing the original planning request to the planner.",
+                    "attempts).",
                     jiggle_fraction_, sampling_attempts_);
-        return planner(planning_scene, req, res);
+        res.error_code_.val = moveit_msgs::msg::MoveItErrorCodes::START_STATE_IN_COLLISION;
+        return false;
       }
     }
     else

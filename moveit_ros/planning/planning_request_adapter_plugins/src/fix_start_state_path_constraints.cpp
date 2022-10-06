@@ -67,7 +67,7 @@ public:
                     const planning_interface::MotionPlanRequest& req, planning_interface::MotionPlanResponse& res,
                     std::vector<std::size_t>& added_path_index) const override
   {
-    RCLCPP_DEBUG(LOGGER, "Running '%s'", getDescription().c_str());
+    RCLCPP_ERROR(LOGGER, "Running '%s'", getDescription().c_str());
 
     // get the specified start state
     moveit::core::RobotState start_state = planning_scene->getCurrentState();
@@ -96,7 +96,8 @@ public:
       if (solved1)
       {
         planning_interface::MotionPlanRequest req3 = req;
-        RCLCPP_INFO(LOGGER, "Planned to path constraints. Resuming original planning request.");
+        RCLCPP_INFO(LOGGER, "The start state was modified to match path constraints. Now resuming the original "
+                            "planning request.");
 
         // extract the last state of the computed motion plan and set it as the new start state
         moveit::core::robotStateToRobotStateMsg(res2.trajectory_->getLastWayPoint(), req3.start_state);
@@ -119,19 +120,22 @@ public:
           return true;
         }
         else
+        {
+          RCLCPP_WARN(LOGGER, "Unable to meet path constraints at the start.");
+          res.error_code_.val = moveit_msgs::msg::MoveItErrorCodes::START_STATE_VIOLATES_PATH_CONSTRAINTS;
           return false;
+        }
       }
       else
       {
-        RCLCPP_WARN(LOGGER, "Unable to plan to path constraints. Running usual motion plan.");
-        bool result = planner(planning_scene, req, res);
-        res.planning_time_ += res2.planning_time_;
-        return result;
+        RCLCPP_WARN(LOGGER, "Unable to meet path constraints at the start.");
+        res.error_code_.val = moveit_msgs::msg::MoveItErrorCodes::START_STATE_VIOLATES_PATH_CONSTRAINTS;
+        return false;
       }
     }
     else
     {
-      RCLCPP_DEBUG(LOGGER, "Path constraints are OK. Running usual motion plan.");
+      RCLCPP_DEBUG(LOGGER, "Path constraints are OK. Continuing without `fix_start_state_path_constraints`.");
       return planner(planning_scene, req, res);
     }
   }
