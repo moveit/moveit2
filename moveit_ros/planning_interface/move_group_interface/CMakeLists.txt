@@ -1,5 +1,6 @@
 set(MOVEIT_LIB_NAME moveit_move_group_interface)
 
+# TODO(#1608): Enable deprecated declarations warning as error once humble support is removed from main branch
 add_compile_options(-Wno-deprecated-declarations)
 
 add_library(${MOVEIT_LIB_NAME} SHARED src/move_group_interface.cpp)
