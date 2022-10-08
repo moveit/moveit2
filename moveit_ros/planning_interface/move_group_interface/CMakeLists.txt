@@ -1,5 +1,7 @@
 set(MOVEIT_LIB_NAME moveit_move_group_interface)
 
+add_compile_options(-Wno-deprecated-declarations)
+
 add_library(${MOVEIT_LIB_NAME} SHARED src/move_group_interface.cpp)
 include(GenerateExportHeader)
 generate_export_header(${MOVEIT_LIB_NAME})
