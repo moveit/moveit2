@@ -45,10 +45,10 @@ void getCostMarkers(visualization_msgs::msg::MarkerArray& arr, const std::string
                     std::set<CostSource>& cost_sources)
 {
   std_msgs::msg::ColorRGBA color;
-  color.r = 1.0f;
-  color.g = 0.5f;
-  color.b = 0.0f;
-  color.a = 0.4f;
+  color.r{ 1.0f };
+  color.g{ 0.5f };
+  color.b{ 0.0f };
+  color.a{ 0.4f };
   getCostMarkers(arr, frame_id, cost_sources, color, rclcpp::Duration(60, 0));
 }
 
@@ -56,10 +56,10 @@ void getCollisionMarkersFromContacts(visualization_msgs::msg::MarkerArray& arr, 
                                      const CollisionResult::ContactMap& con)
 {
   std_msgs::msg::ColorRGBA color;
-  color.r = 1.0f;
-  color.g = 0.0f;
-  color.b = 0.0f;
-  color.a = 0.8f;
+  color.r{ 1.0f };
+  color.g{ 0.0f };
+  color.b{ 0.0f };
+  color.a{ 0.8f };
   getCollisionMarkersFromContacts(arr, frame_id, con, color, rclcpp::Duration(60, 0));
 }
 
@@ -80,16 +80,16 @@ void getCostMarkers(visualization_msgs::msg::MarkerArray& arr, const std::string
     mk.pose.position.x = (cost_source.aabb_max[0] + cost_source.aabb_min[0]) / 2.0;
     mk.pose.position.y = (cost_source.aabb_max[1] + cost_source.aabb_min[1]) / 2.0;
     mk.pose.position.z = (cost_source.aabb_max[2] + cost_source.aabb_min[2]) / 2.0;
-    mk.pose.orientation.x = 0.0;
-    mk.pose.orientation.y = 0.0;
-    mk.pose.orientation.z = 0.0;
-    mk.pose.orientation.w = 1.0;
+    mk.pose.orientation.x{ 0.0 };
+    mk.pose.orientation.y{ 0.0 };
+    mk.pose.orientation.z{ 0.0 };
+    mk.pose.orientation.w{ 1.0 };
     mk.scale.x = cost_source.aabb_max[0] - cost_source.aabb_min[0];
     mk.scale.y = cost_source.aabb_max[1] - cost_source.aabb_min[1];
     mk.scale.z = cost_source.aabb_max[2] - cost_source.aabb_min[2];
     mk.color = color;
     if (mk.color.a == 0.0)
-      mk.color.a = 1.0;
+      mk.color.a{ 1.0 };
     mk.lifetime = lifetime;
     arr.markers.push_back(mk);
   }
@@ -121,14 +121,14 @@ void getCollisionMarkersFromContacts(visualization_msgs::msg::MarkerArray& arr, 
       mk.pose.position.x = contact.pos.x();
       mk.pose.position.y = contact.pos.y();
       mk.pose.position.z = contact.pos.z();
-      mk.pose.orientation.x = 0.0;
-      mk.pose.orientation.y = 0.0;
-      mk.pose.orientation.z = 0.0;
-      mk.pose.orientation.w = 1.0;
+      mk.pose.orientation.x{ 0.0 };
+      mk.pose.orientation.y{ 0.0 };
+      mk.pose.orientation.z{ 0.0 };
+      mk.pose.orientation.w{ 1.0 };
       mk.scale.x = mk.scale.y = mk.scale.z = radius * 2.0;
       mk.color = color;
       if (mk.color.a == 0.0)
-        mk.color.a = 1.0;
+        mk.color.a{ 1.0 };
       mk.lifetime = lifetime;
       arr.markers.push_back(mk);
     }
@@ -150,7 +150,7 @@ bool getSensorPositioning(geometry_msgs::msg::Point& point, const std::set<CostS
 
 double getTotalCost(const std::set<CostSource>& cost_sources)
 {
-  double cost = 0.0;
+  double cost{ 0.0 };
   for (const auto& cost_source : cost_sources)
     cost += cost_source.getVolume() * cost_source.cost;
   return cost;
