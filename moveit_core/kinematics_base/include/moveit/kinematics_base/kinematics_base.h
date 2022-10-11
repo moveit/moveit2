@@ -156,7 +156,7 @@ public:
 
   /** @brief Signature for a cost function used to evaluate IK solutions. */
   using IKCostFn = std::function<double(const geometry_msgs::msg::Pose&, const moveit::core::RobotState&,
-                                        moveit::core::JointModelGroup*, const std::vector<double>&)>;
+                                        moveit::core::JointModelGroup const*, const std::vector<double>&)>;
 
   /**
    * @brief Given a desired pose of the end-effector, compute the joint angles to reach it
