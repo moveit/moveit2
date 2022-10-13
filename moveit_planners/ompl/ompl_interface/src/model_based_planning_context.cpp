@@ -980,15 +980,15 @@ void ompl_interface::ModelBasedPlanningContext::omplPlannerStatusToMoveItErrorCo
       break;
     case ompl::base::PlannerStatus::INVALID_START:
       RCLCPP_WARN(LOGGER, "Invalid start state");
-      res.val = moveit_msgs::msg::MoveItErrorCodes::PLANNING_FAILED;
+      res.val = moveit_msgs::msg::MoveItErrorCodes::START_STATE_INVALID;
       break;
     case ompl::base::PlannerStatus::INVALID_GOAL:
       RCLCPP_WARN(LOGGER, "Invalid goal state");
-      res.val = moveit_msgs::msg::MoveItErrorCodes::PLANNING_FAILED;
+      res.val = moveit_msgs::msg::MoveItErrorCodes::GOAL_STATE_INVALID;
       break;
     case ompl::base::PlannerStatus::UNRECOGNIZED_GOAL_TYPE:
       RCLCPP_WARN(LOGGER, "Unrecognized goal type");
-      res.val = moveit_msgs::msg::MoveItErrorCodes::PLANNING_FAILED;
+      res.val = moveit_msgs::msg::MoveItErrorCodes::UNRECOGNIZED_GOAL_TYPE;
       break;
     case ompl::base::PlannerStatus::TIMEOUT:
       RCLCPP_WARN(LOGGER, "Timed out");
@@ -1003,11 +1003,11 @@ void ompl_interface::ModelBasedPlanningContext::omplPlannerStatusToMoveItErrorCo
       break;
     case ompl::base::PlannerStatus::CRASH:
       RCLCPP_WARN(LOGGER, "OMPL crashed!");
-      res.val = moveit_msgs::msg::MoveItErrorCodes::FAILURE;
+      res.val = moveit_msgs::msg::MoveItErrorCodes::CRASH;
       break;
     case ompl::base::PlannerStatus::ABORT:
       RCLCPP_WARN(LOGGER, "OMPL was aborted");
-      res.val = moveit_msgs::msg::MoveItErrorCodes::FAILURE;
+      res.val = moveit_msgs::msg::MoveItErrorCodes::ABORT;
       break;
     default:
       // This should never happen
