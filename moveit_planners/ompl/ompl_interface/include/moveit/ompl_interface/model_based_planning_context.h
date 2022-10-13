@@ -388,7 +388,7 @@ protected:
   void unregisterTerminationCondition();
 
   /** \brief Convert OMPL PlannerStatus to moveit_msgs::msg::MoveItErrorCode */
-  void omplPlannerStatusToMoveItErrorCode(og::SimpleSetupPtr ompl_simple_setup, moveit_msgs::msg::MoveItErrorCodes& res);
+  int32_t logPlannerStatus(og::SimpleSetupPtr ompl_simple_setup);
 
   ModelBasedPlanningContextSpecification spec_;
 
