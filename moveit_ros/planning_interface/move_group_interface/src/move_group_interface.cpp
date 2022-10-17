@@ -64,6 +64,8 @@
 #include <tf2/utils.h>
 #include <tf2_eigen/tf2_eigen.hpp>
 #include <tf2_ros/transform_listener.h>
+#include <rclcpp/rclcpp.hpp>
+#include <rclcpp/version.h>
 
 namespace moveit
 {
@@ -161,6 +163,25 @@ public:
         node_, rclcpp::names::append(opt_.move_group_namespace_, move_group::EXECUTE_ACTION_NAME), callback_group_);
     execute_action_client_->wait_for_action_server(wait_for_servers.to_chrono<std::chrono::duration<double>>());
 
+    // Support both Rolling and Humble on the Main branch
+    // Rolling has deprecated the version of the create_client method that takes
+    // rmw_qos_profile_services_default for the QoS argument
+#if RCLCPP_VERSION_GTE(17, 0, 0)
+    // Rolling
+    query_service_ = node_->create_client<moveit_msgs::srv::QueryPlannerInterfaces>(
+        rclcpp::names::append(opt_.move_group_namespace_, move_group::QUERY_PLANNERS_SERVICE_NAME),
+        rclcpp::SystemDefaultsQoS(), callback_group_);
+    get_params_service_ = node_->create_client<moveit_msgs::srv::GetPlannerParams>(
+        rclcpp::names::append(opt_.move_group_namespace_, move_group::GET_PLANNER_PARAMS_SERVICE_NAME),
+        rclcpp::SystemDefaultsQoS(), callback_group_);
+    set_params_service_ = node_->create_client<moveit_msgs::srv::SetPlannerParams>(
+        rclcpp::names::append(opt_.move_group_namespace_, move_group::SET_PLANNER_PARAMS_SERVICE_NAME),
+        rclcpp::SystemDefaultsQoS(), callback_group_);
+    cartesian_path_service_ = node_->create_client<moveit_msgs::srv::GetCartesianPath>(
+        rclcpp::names::append(opt_.move_group_namespace_, move_group::CARTESIAN_PATH_SERVICE_NAME),
+        rclcpp::SystemDefaultsQoS(), callback_group_);
+#else
+    // Humble
     query_service_ = node_->create_client<moveit_msgs::srv::QueryPlannerInterfaces>(
         rclcpp::names::append(opt_.move_group_namespace_, move_group::QUERY_PLANNERS_SERVICE_NAME),
         rmw_qos_profile_services_default, callback_group_);
@@ -170,11 +191,10 @@ public:
     set_params_service_ = node_->create_client<moveit_msgs::srv::SetPlannerParams>(
         rclcpp::names::append(opt_.move_group_namespace_, move_group::SET_PLANNER_PARAMS_SERVICE_NAME),
         rmw_qos_profile_services_default, callback_group_);
-
     cartesian_path_service_ = node_->create_client<moveit_msgs::srv::GetCartesianPath>(
         rclcpp::names::append(opt_.move_group_namespace_, move_group::CARTESIAN_PATH_SERVICE_NAME),
         rmw_qos_profile_services_default, callback_group_);
-
+#endif
     // plan_grasps_service_ = pnode_->create_client<moveit_msgs::srv::GraspPlanning>(GRASP_PLANNING_SERVICE_NAME);
 
     RCLCPP_INFO_STREAM(LOGGER, "Ready to take commands for planning group " << opt.group_name_ << ".");
