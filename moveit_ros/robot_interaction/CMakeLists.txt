@@ -5,6 +5,7 @@ project(moveit_ros_robot_interaction)
 find_package(moveit_common REQUIRED)
 moveit_package()
 
+find_package(moveit_core REQUIRED)
 find_package(moveit_ros_planning REQUIRED)
 find_package(interactive_markers REQUIRED)
 find_package(tf2 REQUIRED)
@@ -17,6 +18,7 @@ find_package(rclcpp REQUIRED)
 set(MOVEIT_LIB_NAME moveit_robot_interaction)
 
 set(THIS_PACKAGE_INCLUDE_DEPENDS
+  moveit_core
   moveit_ros_planning
   interactive_markers
   tf2_geometry_msgs
