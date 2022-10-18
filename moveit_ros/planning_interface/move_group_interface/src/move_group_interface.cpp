@@ -90,19 +90,17 @@ enum ActiveTargetType
 // Function to support both Rolling and Humble on the main branch
 // Rolling has deprecated the version of the create_client method that takes
 // rmw_qos_profile_services_default for the QoS argument
-template <typename ServiceT>
-typename rclcpp::Client<ServiceT>::SharedPtr create_client_default_qos(const rclcpp::Node::SharedPtr& node,
-                                                                       const std::string& name,
-                                                                       rclcpp::CallbackGroup::SharedPtr group)
+#if RCLCPP_VERSION_GTE(17, 0, 0)  // Rolling
+auto qos_default()
 {
-#if RCLCPP_VERSION_GTE(17, 0, 0)
-  // Rolling
-  return node->create_client<ServiceT>(name, rclcpp::SystemDefaultsQoS(), group);
-#else
-  // Humble
-  return node->create_client<ServiceT>(name, rmw_qos_profile_services_default, group);
-#endif
+  return rclcpp::SystemDefaultsQoS();
 }
+#else  // Humble
+auto qos_default()
+{
+  return rmw_qos_profile_services_default;
+}
+#endif
 
 }  // namespace
 
@@ -181,17 +179,17 @@ public:
         node_, rclcpp::names::append(opt_.move_group_namespace_, move_group::EXECUTE_ACTION_NAME), callback_group_);
     execute_action_client_->wait_for_action_server(wait_for_servers.to_chrono<std::chrono::duration<double>>());
 
-    query_service_ = create_client_default_qos<moveit_msgs::srv::QueryPlannerInterfaces>(
-        node_, rclcpp::names::append(opt_.move_group_namespace_, move_group::QUERY_PLANNERS_SERVICE_NAME),
+    query_service_ = node_->create_client<moveit_msgs::srv::QueryPlannerInterfaces>(
+        rclcpp::names::append(opt_.move_group_namespace_, move_group::QUERY_PLANNERS_SERVICE_NAME), qos_default(),
         callback_group_);
-    get_params_service_ = create_client_default_qos<moveit_msgs::srv::GetPlannerParams>(
-        node_, rclcpp::names::append(opt_.move_group_namespace_, move_group::GET_PLANNER_PARAMS_SERVICE_NAME),
+    get_params_service_ = node_->create_client<moveit_msgs::srv::GetPlannerParams>(
+        rclcpp::names::append(opt_.move_group_namespace_, move_group::GET_PLANNER_PARAMS_SERVICE_NAME), qos_default(),
         callback_group_);
-    set_params_service_ = create_client_default_qos<moveit_msgs::srv::SetPlannerParams>(
-        node_, rclcpp::names::append(opt_.move_group_namespace_, move_group::SET_PLANNER_PARAMS_SERVICE_NAME),
+    set_params_service_ = node_->create_client<moveit_msgs::srv::SetPlannerParams>(
+        rclcpp::names::append(opt_.move_group_namespace_, move_group::SET_PLANNER_PARAMS_SERVICE_NAME), qos_default(),
         callback_group_);
-    cartesian_path_service_ = create_client_default_qos<moveit_msgs::srv::GetCartesianPath>(
-        node_, rclcpp::names::append(opt_.move_group_namespace_, move_group::CARTESIAN_PATH_SERVICE_NAME),
+    cartesian_path_service_ = node_->create_client<moveit_msgs::srv::GetCartesianPath>(
+        rclcpp::names::append(opt_.move_group_namespace_, move_group::CARTESIAN_PATH_SERVICE_NAME), qos_default(),
         callback_group_);
 
     RCLCPP_INFO_STREAM(LOGGER, "Ready to take commands for planning group " << opt.group_name_ << ".");
