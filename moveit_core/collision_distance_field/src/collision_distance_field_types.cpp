@@ -63,7 +63,7 @@ std::vector<CollisionSphere> determineCollisionSpheres(const bodies::Body* body,
   {
     bodies::BoundingCylinder cyl;
     body->computeBoundingCylinder(cyl);
-    unsigned int num_points{ ceil(cyl.length / (cyl.radius / 2.0)) };
+    unsigned int num_points = ceil(cyl.length / (cyl.radius / 2.0));
     double spacing{ cyl.length / ((num_points * 1.0) - 1.0) };
     relative_transform = cyl.pose;
 
@@ -349,7 +349,7 @@ PosedBodyPointDecomposition::PosedBodyPointDecomposition(const BodyDecomposition
 PosedBodyPointDecomposition::PosedBodyPointDecomposition(const std::shared_ptr<const octomap::OcTree>& octree)
   : body_decomposition_()
 {
-  int num_nodes{ octree->getNumLeafNodes() };
+  int num_nodes = octree->getNumLeafNodes();
   posed_collision_points_.reserve(num_nodes);
   for (octomap::OcTree::tree_iterator tree_iter = octree->begin_tree(); tree_iter != octree->end_tree(); ++tree_iter)
   {
