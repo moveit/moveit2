@@ -70,14 +70,14 @@ double countSamplesPerSecond(const ConstraintSamplerPtr& sampler, const moveit::
     return 0.0;
   }
   moveit::core::RobotState ks(reference_state);
-  unsigned long int valid = 0;
-  unsigned long int total = 0;
+  unsigned long int valid{ 0 };
+  unsigned long int total{ 0 };
   rclcpp::Time end = rclcpp::Clock().now() + rclcpp::Duration::from_seconds(1);
   do
   {
-    static const unsigned int N = 10;
+    static const unsigned int N{ 10 };
     total += N;
-    for (unsigned int i = 0; i < N; ++i)
+    for (unsigned int i{ 0 }; i < N; ++i)
     {
       if (sampler->sample(ks, 1))
         valid++;
@@ -104,7 +104,7 @@ void visualizeDistribution(const ConstraintSamplerPtr& sampler, const moveit::co
   color.g = 0.0f;
   color.b = 0.0f;
   color.a = 1.0f;
-  for (unsigned int i = 0; i < sample_count; ++i)
+  for (unsigned int i{ 0 }; i < sample_count; ++i)
   {
     if (!sampler->sample(ks))
       continue;

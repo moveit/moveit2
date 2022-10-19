@@ -91,7 +91,7 @@ void PropagationDistanceField::initialize()
 
   // create a sqrt table:
   sqrt_table_.resize(max_distance_sq_ + 1);
-  for (int i = 0; i <= max_distance_sq_; ++i)
+  for (int i{ 0 }; i <= max_distance_sq_; ++i)
     sqrt_table_[i] = sqrt(double(i)) * resolution_;
 
   reset();
@@ -384,7 +384,7 @@ void PropagationDistanceField::removeObstacleVoxels(const EigenSTL::vector_Vecto
 void PropagationDistanceField::propagatePositive()
 {
   // now process the queue:
-  for (unsigned int i = 0; i < bucket_queue_.size(); ++i)
+  for (unsigned int i{ 0 }; i < bucket_queue_.size(); ++i)
   {
     EigenSTL::vector_Vector3i::iterator list_it = bucket_queue_[i].begin();
     EigenSTL::vector_Vector3i::iterator list_end = bucket_queue_[i].end();
@@ -440,7 +440,7 @@ void PropagationDistanceField::propagatePositive()
 void PropagationDistanceField::propagateNegative()
 {
   // now process the queue:
-  for (unsigned int i = 0; i < negative_bucket_queue_.size(); ++i)
+  for (unsigned int i{ 0 }; i < negative_bucket_queue_.size(); ++i)
   {
     EigenSTL::vector_Vector3i::iterator list_it = negative_bucket_queue_[i].begin();
     EigenSTL::vector_Vector3i::iterator list_end = negative_bucket_queue_[i].end();
@@ -500,11 +500,11 @@ void PropagationDistanceField::propagateNegative()
 void PropagationDistanceField::reset()
 {
   voxel_grid_->reset(PropDistanceFieldVoxel(max_distance_sq_, 0));
-  for (int x = 0; x < getXNumCells(); ++x)
+  for (int x{ 0 }; x < getXNumCells(); ++x)
   {
-    for (int y = 0; y < getYNumCells(); ++y)
+    for (int y{ 0 }; y < getYNumCells(); ++y)
     {
-      for (int z = 0; z < getZNumCells(); ++z)
+      for (int z{ 0 }; z < getZNumCells(); ++z)
       {
         PropDistanceFieldVoxel& voxel = voxel_grid_->getCell(x, y, z);
         voxel.closest_negative_point_.x() = x;
@@ -521,11 +521,11 @@ void PropagationDistanceField::initNeighborhoods()
 {
   // first initialize the direction number mapping:
   direction_number_to_direction_.resize(27);
-  for (int dx = -1; dx <= 1; ++dx)
+  for (int dx{ -1 }; dx <= 1; ++dx)
   {
-    for (int dy = -1; dy <= 1; ++dy)
+    for (int dy{ -1 }; dy <= 1; ++dy)
     {
-      for (int dz = -1; dz <= 1; ++dz)
+      for (int dz{ -1 }; dz <= 1; ++dz)
       {
         int direction_number = getDirectionNumber(dx, dy, dz);
         Eigen::Vector3i n_point(dx, dy, dz);
@@ -539,19 +539,19 @@ void PropagationDistanceField::initNeighborhoods()
   {
     neighborhoods_[n].resize(27);
     // source directions
-    for (int dx = -1; dx <= 1; ++dx)
+    for (int dx{ -1 }; dx <= 1; ++dx)
     {
-      for (int dy = -1; dy <= 1; ++dy)
+      for (int dy{ -1 }; dy <= 1; ++dy)
       {
-        for (int dz = -1; dz <= 1; ++dz)
+        for (int dz{ -1 }; dz <= 1; ++dz)
         {
-          int direction_number = getDirectionNumber(dx, dy, dz);
+          int direction_number{ getDirectionNumber(dx, dy, dz) };
           // target directions:
-          for (int tdx = -1; tdx <= 1; ++tdx)
+          for (int tdx{ -1 }; tdx <= 1; ++tdx)
           {
-            for (int tdy = -1; tdy <= 1; ++tdy)
+            for (int tdy{ -1 }; tdy <= 1; ++tdy)
             {
-              for (int tdz = -1; tdz <= 1; ++tdz)
+              for (int tdz{ -1 }; tdz <= 1; ++tdz)
               {
                 if (tdx == 0 && tdy == 0 && tdz == 0)
                   continue;
@@ -642,11 +642,11 @@ bool PropagationDistanceField::writeToStream(std::ostream& os) const
   out.push(boost::iostreams::zlib_compressor());
   out.push(os);
 
-  for (unsigned int x = 0; x < static_cast<unsigned int>(getXNumCells()); ++x)
+  for (unsigned int x{ 0 }; x < static_cast<unsigned int>(getXNumCells()); ++x)
   {
-    for (unsigned int y = 0; y < static_cast<unsigned int>(getYNumCells()); ++y)
+    for (unsigned int y{ 0 }; y < static_cast<unsigned int>(getYNumCells()); ++y)
     {
-      for (unsigned int z = 0; z < static_cast<unsigned int>(getZNumCells()); z += 8)
+      for (unsigned int z{ 0 }; z < static_cast<unsigned int>(getZNumCells()); z += 8)
       {
         std::bitset<8> bs(0);
         unsigned int zv = std::min((unsigned int)8, getZNumCells() - z);
@@ -724,11 +724,11 @@ bool PropagationDistanceField::readFromStream(std::istream& is)
   // std::cout << "Nums " << getXNumCells() << " " << getYNumCells() << " " << getZNumCells() << '\n';
 
   EigenSTL::vector_Vector3i obs_points;
-  for (unsigned int x = 0; x < static_cast<unsigned int>(getXNumCells()); ++x)
+  for (unsigned int x{ 0 }; x < static_cast<unsigned int>(getXNumCells()); ++x)
   {
-    for (unsigned int y = 0; y < static_cast<unsigned int>(getYNumCells()); ++y)
+    for (unsigned int y{ 0 }; y < static_cast<unsigned int>(getYNumCells()); ++y)
     {
-      for (unsigned int z = 0; z < static_cast<unsigned int>(getZNumCells()); z += 8)
+      for (unsigned int z{ 0 }; z < static_cast<unsigned int>(getZNumCells()); z += 8)
       {
         char inchar;
         if (!in.good())
@@ -738,7 +738,7 @@ bool PropagationDistanceField::readFromStream(std::istream& is)
         in.get(inchar);
         std::bitset<8> inbit((unsigned long long)inchar);
         unsigned int zv = std::min((unsigned int)8, getZNumCells() - z);
-        for (unsigned int zi = 0; zi < zv; ++zi)
+        for (unsigned int zi{ 0 }; zi < zv; ++zi)
         {
           if (inbit[zi] == 1)
           {

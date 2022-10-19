@@ -163,11 +163,11 @@ bool JointConstraintSampler::sample(moveit::core::RobotState& state,
 
   // sample the unbounded joints first (in case some joint variables are bounded)
   std::vector<double> v;
-  for (std::size_t i = 0; i < unbounded_.size(); ++i)
+  for (std::size_t i{ 0 }; i < unbounded_.size(); ++i)
   {
     v.resize(unbounded_[i]->getVariableCount());
     unbounded_[i]->getVariableRandomPositions(random_number_generator_, &v[0]);
-    for (std::size_t j = 0; j < v.size(); ++j)
+    for (std::size_t j{ 0 }; j < v.size(); ++j)
       values_[uindex_[i] + j] = v[j];
   }
 
@@ -277,8 +277,8 @@ bool IKConstraintSampler::configure(const IKSamplingPose& sp)
 
 bool IKConstraintSampler::configure(const moveit_msgs::msg::Constraints& constr)
 {
-  for (std::size_t p = 0; p < constr.position_constraints.size(); ++p)
-    for (std::size_t o = 0; o < constr.orientation_constraints.size(); ++o)
+  for (std::size_t p{ 0 }; p < constr.position_constraints.size(); ++p)
+    for (std::size_t o{ 0 }; o < constr.orientation_constraints.size(); ++o)
       if (constr.position_constraints[p].link_name == constr.orientation_constraints[o].link_name)
       {
         kinematic_constraints::PositionConstraintPtr pc(
@@ -310,12 +310,12 @@ bool IKConstraintSampler::configure(const moveit_msgs::msg::Constraints& constr)
 
 double IKConstraintSampler::getSamplingVolume() const
 {
-  double v = 1.0;
+  double v{ 1.0 };
   if (sampling_pose_.position_constraint_)
   {
     const std::vector<bodies::BodyPtr>& constraint_regions =
         sampling_pose_.position_constraint_->getConstraintRegions();
-    double vol = 0;
+    double vol{ 0 };
     for (const bodies::BodyPtr& constraint_region : constraint_regions)
       vol += constraint_region->computeVolume();
     if (!constraint_regions.empty())
@@ -532,7 +532,7 @@ void samplingIkCallbackFnAdapter(moveit::core::RobotState* state, const moveit::
 {
   const std::vector<size_t>& bij = jmg->getKinematicsSolverJointBijection();
   std::vector<double> solution(bij.size());
-  for (std::size_t i = 0; i < bij.size(); ++i)
+  for (std::size_t i{ 0 }; i < bij.size(); ++i)
     solution[i] = ik_sol[bij[i]];
   if (constraint(state, jmg, &solution[0]))
     error_code.val = moveit_msgs::msg::MoveItErrorCodes::SUCCESS;
@@ -564,7 +564,7 @@ bool IKConstraintSampler::sampleHelper(moveit::core::RobotState& state, const mo
       return samplingIkCallbackFnAdapter(state_ptr, jmg_, group_state_validity_callback_, joints, error_code);
     };
 
-  for (unsigned int a = 0; a < max_attempts; ++a)
+  for (unsigned int a{ 0 }; a < max_attempts; ++a)
   {
     // sample a point in the constraint region
     Eigen::Vector3d point;

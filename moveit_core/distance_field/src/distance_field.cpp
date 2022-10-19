@@ -110,11 +110,11 @@ void DistanceField::getIsoSurfaceMarkers(double min_distance, double max_distanc
   // inf_marker.lifetime = ros::Duration(30.0);
 
   inf_marker.points.reserve(100000);
-  for (int x = 0; x < getXNumCells(); ++x)
+  for (int x{ 0 }; x < getXNumCells(); ++x)
   {
-    for (int y = 0; y < getYNumCells(); ++y)
+    for (int y{ 0 }; y < getYNumCells(); ++y)
     {
-      for (int z = 0; z < getZNumCells(); ++z)
+      for (int z{ 0 }; z < getZNumCells(); ++z)
       {
         double dist = getDistance(x, y, z);
 
@@ -144,11 +144,11 @@ void DistanceField::getGradientMarkers(double min_distance, double max_distance,
 
   int id = 0;
 
-  for (int x = 0; x < getXNumCells(); ++x)
+  for (int x{ 0 }; x < getXNumCells(); ++x)
   {
-    for (int y = 0; y < getYNumCells(); ++y)
+    for (int y{ 0 }; y < getYNumCells(); ++y)
     {
-      for (int z = 0; z < getZNumCells(); ++z)
+      for (int z{ 0 }; z < getZNumCells(); ++z)
       {
         double world_x, world_y, world_z;
         gridToWorld(x, y, z, world_x, world_y, world_z);
@@ -417,18 +417,18 @@ void DistanceField::getPlaneMarkers(PlaneVisualizationType type, double length, 
   worldToGrid(min_x, min_y, min_z, min_x_cell, min_y_cell, min_z_cell);
   worldToGrid(max_x, max_y, max_z, max_x_cell, max_y_cell, max_z_cell);
   plane_marker.color.a = 1.0;
-  for (int x = min_x_cell; x <= max_x_cell; ++x)
+  for (int x{ min_x_cell }; x <= max_x_cell; ++x)
   {
-    for (int y = min_y_cell; y <= max_y_cell; ++y)
+    for (int y{ min_y_cell }; y <= max_y_cell; ++y)
     {
-      for (int z = min_z_cell; z <= max_z_cell; ++z)
+      for (int z{ min_z_cell }; z <= max_z_cell; ++z)
       {
         if (!isCellValid(x, y, z))
         {
           continue;
         }
         double dist = getDistance(x, y, z);
-        int last = plane_marker.points.size();
+        int last{ plane_marker.points.size() };
         plane_marker.points.resize(last + 1);
         plane_marker.colors.resize(last + 1);
         double nx, ny, nz;
@@ -472,9 +472,9 @@ void DistanceField::setPoint(int xCell, int yCell, int zCell, double dist, geome
 void DistanceField::getProjectionPlanes(const std::string& frame_id, const rclcpp::Time& stamp, double max_dist,
                                         visualization_msgs::msg::Marker& marker) const
 {
-  int max_x_cell = getXNumCells();
-  int max_y_cell = getYNumCells();
-  int max_z_cell = getZNumCells();
+  int max_x_cell{ getXNumCells() };
+  int max_y_cell{ getYNumCells() };
+  int max_z_cell{ getZNumCells() };
 
   double* x_projection = new double[max_y_cell * max_z_cell];
   double* y_projection = new double[max_z_cell * max_x_cell];
@@ -482,24 +482,24 @@ void DistanceField::getProjectionPlanes(const std::string& frame_id, const rclcp
   double initial_val = sqrt(INT_MAX);
 
   // Initialize
-  for (int y = 0; y < max_y_cell; ++y)
-    for (int x = 0; x < max_x_cell; ++x)
+  for (int y{ 0 }; y < max_y_cell; ++y)
+    for (int x{ 0 }; x < max_x_cell; ++x)
       z_projection[x + y * max_x_cell] = initial_val;
 
-  for (int z = 0; z < max_z_cell; ++z)
-    for (int y = 0; y < max_y_cell; ++y)
+  for (int z{ 0 }; z < max_z_cell; ++z)
+    for (int y{ 0 }; y < max_y_cell; ++y)
       x_projection[y + z * max_y_cell] = initial_val;
 
-  for (int z = 0; z < max_z_cell; ++z)
-    for (int x = 0; x < max_x_cell; ++x)
+  for (int z{ 0 }; z < max_z_cell; ++z)
+    for (int x{ 0 }; x < max_x_cell; ++x)
       y_projection[x + z * max_x_cell] = initial_val;
 
   // Calculate projections
-  for (int z = 0; z < max_z_cell; ++z)
+  for (int z{ 0 }; z < max_z_cell; ++z)
   {
-    for (int y = 0; y < max_y_cell; ++y)
+    for (int y{ 0 }; y < max_y_cell; ++y)
     {
-      for (int x = 0; x < max_x_cell; ++x)
+      for (int x{ 0 }; x < max_x_cell; ++x)
       {
         double dist = getDistance(x, y, z);
         z_projection[x + y * max_x_cell] = std::min(dist, z_projection[x + y * max_x_cell]);
@@ -524,7 +524,7 @@ void DistanceField::getProjectionPlanes(const std::string& frame_id, const rclcp
   // marker.lifetime = ros::Duration(30.0);
 
   int x, y, z;
-  int index = 0;
+  int index{ 0 };
   marker.points.resize(max_x_cell * max_y_cell + max_y_cell * max_z_cell + max_z_cell * max_x_cell);
   marker.colors.resize(max_x_cell * max_y_cell + max_y_cell * max_z_cell + max_z_cell * max_x_cell);
 

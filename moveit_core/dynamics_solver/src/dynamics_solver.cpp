@@ -181,14 +181,14 @@ bool DynamicsSolver::getTorques(const std::vector<double>& joint_angles, const s
       kdl_torques(num_joints_);
   KDL::Wrenches kdl_wrenches(num_segments_);
 
-  for (unsigned int i = 0; i < num_joints_; ++i)
+  for (unsigned int i{ 0 }; i < num_joints_; ++i)
   {
     kdl_angles(i) = joint_angles[i];
     kdl_velocities(i) = joint_velocities[i];
     kdl_accelerations(i) = joint_accelerations[i];
   }
 
-  for (unsigned int i = 0; i < num_segments_; ++i)
+  for (unsigned int i{ 0 }; i < num_segments_; ++i)
   {
     kdl_wrenches[i](0) = wrenches[i].force.x;
     kdl_wrenches[i](1) = wrenches[i].force.y;
@@ -205,7 +205,7 @@ bool DynamicsSolver::getTorques(const std::vector<double>& joint_angles, const s
     return false;
   }
 
-  for (unsigned int i = 0; i < num_joints_; ++i)
+  for (unsigned int i{ 0 }; i < num_joints_; ++i)
     torques[i] = kdl_torques(i);
 
   return true;
@@ -232,7 +232,7 @@ bool DynamicsSolver::getMaxPayload(const std::vector<double>& joint_angles, doub
   if (!getTorques(joint_angles, joint_velocities, joint_accelerations, wrenches, zero_torques))
     return false;
 
-  for (unsigned int i = 0; i < num_joints_; ++i)
+  for (unsigned int i{ 0 }; i < num_joints_; ++i)
   {
     if (fabs(zero_torques[i]) >= max_torques_[i])
     {
@@ -257,7 +257,7 @@ bool DynamicsSolver::getMaxPayload(const std::vector<double>& joint_angles, doub
     return false;
 
   double min_payload = std::numeric_limits<double>::max();
-  for (unsigned int i = 0; i < num_joints_; ++i)
+  for (unsigned int i{ 0 }; i < num_joints_; ++i)
   {
     double payload_joint = std::max<double>((max_torques_[i] - zero_torques[i]) / (torques[i] - zero_torques[i]),
                                             (-max_torques_[i] - zero_torques[i]) /

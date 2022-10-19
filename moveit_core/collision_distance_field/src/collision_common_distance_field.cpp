@@ -95,7 +95,7 @@ PosedBodyPointDecompositionVectorPtr getCollisionObjectPointDecomposition(const 
                                                                           double resolution)
 {
   PosedBodyPointDecompositionVectorPtr ret = std::make_shared<PosedBodyPointDecompositionVector>();
-  for (unsigned int i = 0; i < obj.shapes_.size(); ++i)
+  for (unsigned int i{ 0 }; i < obj.shapes_.size(); ++i)
   {
     PosedBodyPointDecompositionPtr pbd(
         new PosedBodyPointDecomposition(getBodyDecompositionCacheEntry(obj.shapes_[i], resolution)));
