@@ -139,9 +139,7 @@ TEST_P(CollisionDetectorTests, Threaded)
   planning_scene_.reset();
 }
 
-#ifndef INSTANTIATE_TEST_SUITE_P  // prior to gtest 1.10
-#define INSTANTIATE_TEST_SUITE_P(...) INSTANTIATE_TEST_CASE_P(__VA_ARGS__)
-#endif
+#pragma once
 
 // instantiate parameterized tests for common collision plugins
 INSTANTIATE_TEST_SUITE_P(PluginTests, CollisionDetectorTests, testing::Values("FCL", "Bullet"));
