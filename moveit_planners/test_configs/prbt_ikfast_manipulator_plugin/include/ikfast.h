@@ -236,9 +236,9 @@ public:
   {
     v.resize(0);
     v.push_back(0);
-    for (int i = (int)_vbasesol.size() - 1; i >= 0; --i)
+    for (int i = static_cast<int>(_vbasesol.size()) - 1; i >= 0; --i)
     {
-      if (_vbasesol[i].maxsolutions != (unsigned char)-1 && _vbasesol[i].maxsolutions > 1)
+      if (_vbasesol[i].maxsolutions != static_cast<unsigned char>(-1) && _vbasesol[i].maxsolutions > 1)
       {
         for (size_t j = 0; j < v.size(); ++j)
         {
