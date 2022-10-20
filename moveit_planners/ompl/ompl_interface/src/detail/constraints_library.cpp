@@ -109,7 +109,7 @@ public:
     : ob::StateSampler(space), state_storage_(state_storage)
   {
     max_index_ = milestones - 1;
-    inv_dim_ = space->getDimension() > 0 ? 1.0 / (double)space->getDimension() : 1.0;
+    inv_dim_ = space->getDimension() > 0 ? 1.0 / static_cast<double>(space->getDimension()) : 1.0;
   }
 
   void sampleUniform(ob::State* state) override
@@ -357,8 +357,9 @@ void ompl_interface::ConstraintsLibrary::loadConstraintApproximations(const std:
     RCLCPP_INFO(LOGGER,
                 "Loaded %lu states (%lu milestones) and %lu connections (%0.1lf per state) "
                 "for constraint named '%s'%s",
-                cass->size(), cap->getMilestoneCount(), sum, (double)sum / (double)cap->getMilestoneCount(),
-                msg.name.c_str(), explicit_motions ? ". Explicit motions included." : "");
+                cass->size(), cap->getMilestoneCount(), sum,
+                static_cast<double>(sum) / static_cast<double>(cap->getMilestoneCount()), msg.name.c_str(),
+                explicit_motions ? ". Explicit motions included." : "");
   }
   RCLCPP_INFO(LOGGER, "Done loading constrained space approximations.");
 }
@@ -529,7 +530,7 @@ ompl::base::StateStoragePtr ompl_interface::ConstraintsLibrary::constructConstra
     {
       done = done_now;
       RCLCPP_INFO(LOGGER, "%d%% complete (kept %0.1lf%% sampled states)", done,
-                  100.0 * (double)state_storage->size() / (double)attempts);
+                  100.0 * static_cast<double>(state_storage->size()) / static_cast<double>(attempts));
     }
 
     if (!slow_warn && attempts > 10 && attempts > state_storage->size() * 100)

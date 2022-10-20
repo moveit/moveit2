@@ -328,7 +328,7 @@ bool ChompOptimizer::optimize()
     //       averageCostVelocity += (costs.at(i) - costs.at(i - 1));
     //     }
 
-    //     averageCostVelocity /= (double)(costWindow);
+    //     averageCostVelocity /= static_cast<double>(costWindow);
     //     currentCostIter = -1;
     //   }
     // }
