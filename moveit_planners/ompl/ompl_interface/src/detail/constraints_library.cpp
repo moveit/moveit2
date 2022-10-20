@@ -185,7 +185,7 @@ bool interpolateUsingStoredStates(const ConstraintApproximationStateStorage* sta
     if (it == md.second.end())
       return false;
     const std::pair<std::size_t, std::size_t>& istates = it->second;
-    std::size_t index = (std::size_t)((istates.second - istates.first + 2) * t + 0.5);
+    std::size_t index = static_cast<std::size_t>((istates.second - istates.first + 2) * t + 0.5);
 
     if (index == 0)
       state_storage->getStateSpace()->copyState(state, from);
