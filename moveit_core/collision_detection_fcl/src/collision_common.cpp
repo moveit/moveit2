@@ -349,7 +349,7 @@ bool collisionCallback(fcl::CollisionObjectd* o1, fcl::CollisionObjectd* o2, voi
       if (cdata->req_->verbose)
         RCLCPP_INFO(LOGGER,
                     "Collision checking is considered complete (collision was found and %u contacts are stored)",
-                    (unsigned int)cdata->res_->contact_count);
+                    static_cast<unsigned int>(cdata->res_->contact_count));
     }
 
   if (!cdata->done_ && cdata->req_->is_done)

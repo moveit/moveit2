@@ -67,9 +67,9 @@ void KinematicsCache::setup(const KinematicsCache::Options& opt)
   cache_resolution_y_ = opt.resolution[1];
   cache_resolution_z_ = opt.resolution[2];
 
-  cache_size_x_ = (unsigned int)(opt.workspace_size[0] / opt.resolution[0]);
-  cache_size_y_ = (unsigned int)(opt.workspace_size[1] / opt.resolution[1]);
-  cache_size_z_ = (unsigned int)(opt.workspace_size[2] / opt.resolution[2]);
+  cache_size_x_ = static_cast<unsigned int>(opt.workspace_size[0] / opt.resolution[0]);
+  cache_size_y_ = static_cast<unsigned int>(opt.workspace_size[1] / opt.resolution[1]);
+  cache_size_z_ = static_cast<unsigned int>(opt.workspace_size[2] / opt.resolution[2]);
   max_solutions_per_grid_location_ = std::max((unsigned int)1, opt.max_solutions_per_grid_location);
   solution_dimension_ = joint_model_group_->getVariableCount();
   size_grid_node_ = max_solutions_per_grid_location_ * solution_dimension_;
