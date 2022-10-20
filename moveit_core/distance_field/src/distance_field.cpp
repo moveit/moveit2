@@ -428,7 +428,7 @@ void DistanceField::getPlaneMarkers(PlaneVisualizationType type, double length, 
           continue;
         }
         double dist = getDistance(x, y, z);
-        int last = plane_marker.points.size();
+        size_t last{ plane_marker.points.size() };
         plane_marker.points.resize(last + 1);
         plane_marker.colors.resize(last + 1);
         double nx, ny, nz;
