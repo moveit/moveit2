@@ -736,7 +736,7 @@ bool PropagationDistanceField::readFromStream(std::istream& is)
           return false;
         }
         in.get(inchar);
-        std::bitset<8> inbit((unsigned long long)inchar);
+        std::bitset<8> inbit(static_cast<unsigned long long>(inchar));
         unsigned int zv = std::min(static_cast<unsigned int>(8), getZNumCells() - z);
         for (unsigned int zi = 0; zi < zv; ++zi)
         {
