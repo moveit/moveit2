@@ -367,7 +367,7 @@ void ompl_interface::ConstraintsLibrary::loadConstraintApproximations(const std:
 void ompl_interface::ConstraintsLibrary::saveConstraintApproximations(const std::string& path)
 {
   RCLCPP_INFO(LOGGER, "Saving %u constrained space approximations to '%s'",
-              (unsigned int)constraint_approximations_.size(), path.c_str());
+              static_cast<unsigned int>(constraint_approximations_.size()), path.c_str());
   try
   {
     std::filesystem::create_directory(path);
@@ -558,7 +558,7 @@ ompl::base::StateStoragePtr ompl_interface::ConstraintsLibrary::constructConstra
   }
 
   result.state_sampling_time = ompl::time::seconds(ompl::time::now() - start);
-  RCLCPP_INFO(LOGGER, "Generated %u states in %lf seconds", (unsigned int)state_storage->size(),
+  RCLCPP_INFO(LOGGER, "Generated %u states in %lf seconds", static_cast<unsigned int>(state_storage->size()),
               result.state_sampling_time);
   if (constrained_sampler)
   {

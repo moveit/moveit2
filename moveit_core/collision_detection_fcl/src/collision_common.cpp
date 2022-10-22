@@ -359,7 +359,8 @@ bool collisionCallback(fcl::CollisionObjectd* o1, fcl::CollisionObjectd* o2, voi
       RCLCPP_INFO(LOGGER,
                   "Collision checking is considered complete due to external callback. "
                   "%s was found. %u contacts are stored.",
-                  cdata->res_->collision ? "Collision" : "No collision", (unsigned int)cdata->res_->contact_count);
+                  cdata->res_->collision ? "Collision" : "No collision",
+                  static_cast<unsigned int>(cdata->res_->contact_count));
   }
 
   return cdata->done_;
@@ -396,7 +397,7 @@ struct FCLShapeCache
       //      RCLCPP_DEBUG(LOGGER, "Cleaning up cache for FCL objects that correspond to static
       //      shapes. Cache size
       //      reduced from %u
-      //      to %u", from, (unsigned int)map_.size());
+      //      to %u", from, static_cast<unsigned int>(map_.size()));
     }
   }
 
