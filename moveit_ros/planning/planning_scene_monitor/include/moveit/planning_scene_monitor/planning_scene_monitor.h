@@ -209,7 +209,9 @@ public:
    * @see LockedPlanningSceneRO
    * @see LockedPlanningSceneRW.
    * @return A pointer to the current planning scene.*/
-  const planning_scene::PlanningScenePtr& getPlanningScene()
+  [[deprecated("getPlanningScene() is deprecated, use LockedPlanningSceneRO or LockedPlanningSceneRW "
+               "instead.")]] const planning_scene::PlanningScenePtr&
+  getPlanningScene()
   {
     return scene_;
   }
@@ -217,7 +219,9 @@ public:
   /*! @brief <b>Avoid this function!</b>  Returns an @b
    *         unsafe pointer to the current planning scene.
    * @copydetails PlanningSceneMonitor::getPlanningScene() */
-  const planning_scene::PlanningSceneConstPtr& getPlanningScene() const
+  [[deprecated("getPlanningScene() is deprecated, use LockedPlanningSceneRO or LockedPlanningSceneRW "
+               "instead.")]] const planning_scene::PlanningSceneConstPtr&
+  getPlanningScene() const
   {
     return scene_const_;
   }

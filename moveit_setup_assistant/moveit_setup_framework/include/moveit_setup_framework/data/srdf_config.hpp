@@ -85,7 +85,9 @@ public:
   }
 
   /// Provide a shared planning scene
-  planning_scene::PlanningScenePtr getPlanningScene();
+  [[deprecated("getPlanningScene() is deprecated, use LockedPlanningSceneRO or LockedPlanningSceneRW "
+               "instead.")]] planning_scene::PlanningScenePtr
+  getPlanningScene();
 
   /// Update the robot model with the new SRDF, AND mark the changes that have been made to the model
   /// changed_information should be composed of InformationFields

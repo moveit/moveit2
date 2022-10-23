@@ -100,7 +100,9 @@ public:
   }
 
   /** \brief Get the planning scene associated to this planning context */
-  const planning_scene::PlanningSceneConstPtr& getPlanningScene() const
+  [[deprecated("getPlanningScene() is deprecated, use LockedPlanningSceneRO or LockedPlanningSceneRW "
+               "instead.")]] const planning_scene::PlanningSceneConstPtr&
+  getPlanningScene() const
   {
     return planning_scene_;
   }
