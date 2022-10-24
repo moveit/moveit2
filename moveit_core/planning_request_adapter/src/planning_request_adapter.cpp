@@ -145,8 +145,7 @@ bool PlanningRequestAdapterChain::adaptAndPlan(const planning_interface::Planner
                const planning_scene::PlanningSceneConstPtr& scene, const planning_interface::MotionPlanRequest& req,
                planning_interface::MotionPlanResponse& res) {
         res = callAdapter(adapter, fn, scene, req, added_path_index);
-        // If any adapter fails, return false. Otherwise, the pipeline would continue onward anyway and the failure
-        // error code would get lost.
+        // Abort pipeline and return error code in case of failure
         return (res.error_code_.val == moveit_msgs::msg::MoveItErrorCodes::SUCCESS);
       };
     }

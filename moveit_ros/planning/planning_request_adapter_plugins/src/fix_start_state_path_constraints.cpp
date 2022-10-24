@@ -93,6 +93,7 @@ public:
       bool solved1 = planner(planning_scene, req2, res2);
       added_path_index_temp.swap(added_path_index);
 
+      bool solved2 = false;
       if (solved1)
       {
         planning_interface::MotionPlanRequest req3 = req;
@@ -101,7 +102,7 @@ public:
 
         // extract the last state of the computed motion plan and set it as the new start state
         moveit::core::robotStateToRobotStateMsg(res2.trajectory_->getLastWayPoint(), req3.start_state);
-        bool solved2 = planner(planning_scene, req3, res);
+        solved2 = planner(planning_scene, req3, res);
         res.planning_time_ += res2.planning_time_;
 
         if (solved2)
@@ -119,14 +120,9 @@ public:
           res2.trajectory_->swap(*res.trajectory_);
           return true;
         }
-        else
-        {
-          RCLCPP_WARN(LOGGER, "Unable to meet path constraints at the start.");
-          res.error_code_.val = moveit_msgs::msg::MoveItErrorCodes::START_STATE_VIOLATES_PATH_CONSTRAINTS;
-          return false;
-        }
       }
-      else
+
+      if (!solved1 || !solved2)
       {
         RCLCPP_WARN(LOGGER, "Unable to meet path constraints at the start.");
         res.error_code_.val = moveit_msgs::msg::MoveItErrorCodes::START_STATE_VIOLATES_PATH_CONSTRAINTS;
