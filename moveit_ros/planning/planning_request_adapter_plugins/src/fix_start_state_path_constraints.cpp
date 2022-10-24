@@ -131,12 +131,10 @@ public:
         return false;
       }
     }
-    else
-    {
-      RCLCPP_DEBUG(LOGGER, "Path constraints are OK. Continuing without `fix_start_state_path_constraints`.");
-      planner(planning_scene, req, res);
-      return (res.error_code_.val == moveit_msgs::msg::MoveItErrorCodes::SUCCESS);
-    }
+
+    RCLCPP_DEBUG(LOGGER, "Path constraints are OK. Continuing without `fix_start_state_path_constraints`.");
+    planner(planning_scene, req, res);
+    return (res.error_code_.val == moveit_msgs::msg::MoveItErrorCodes::SUCCESS);
   }
 };
 }  // namespace default_planner_request_adapters
