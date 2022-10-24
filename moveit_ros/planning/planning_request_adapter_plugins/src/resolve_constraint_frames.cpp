@@ -66,8 +66,11 @@ public:
     planning_interface::MotionPlanRequest modified = req;
     kinematic_constraints::resolveConstraintFrames(planning_scene->getCurrentState(), modified.path_constraints);
     for (moveit_msgs::msg::Constraints& constraint : modified.goal_constraints)
+    {
       kinematic_constraints::resolveConstraintFrames(planning_scene->getCurrentState(), constraint);
-    return planner(planning_scene, modified, res);
+    }
+    planner(planning_scene, modified, res);
+    return (res.error_code_.val == moveit_msgs::msg::MoveItErrorCodes::SUCCESS);
   }
 };
 

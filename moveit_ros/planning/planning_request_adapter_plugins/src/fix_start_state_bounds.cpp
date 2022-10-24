@@ -171,10 +171,13 @@ public:
     {
       planning_interface::MotionPlanRequest req2 = req;
       moveit::core::robotStateToRobotStateMsg(start_state, req2.start_state);
-      solved = planner(planning_scene, req2, res);
+      planner(planning_scene, req2, res);
     }
     else
-      solved = planner(planning_scene, req, res);
+    {
+      planner(planning_scene, req, res);
+    }
+    solved = (res.error_code_.val == moveit_msgs::msg::MoveItErrorCodes::SUCCESS);
 
     // re-add the prefix state, if it was constructed
     if (prefix_state && res.trajectory_ && !res.trajectory_->empty())

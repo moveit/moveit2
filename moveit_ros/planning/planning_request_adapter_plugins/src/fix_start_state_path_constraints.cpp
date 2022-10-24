@@ -90,7 +90,8 @@ public:
       // index information from that call
       std::vector<std::size_t> added_path_index_temp;
       added_path_index_temp.swap(added_path_index);
-      bool solved1 = planner(planning_scene, req2, res2);
+      planner(planning_scene, req2, res2);
+      bool solved1 = (res.error_code_.val == moveit_msgs::msg::MoveItErrorCodes::SUCCESS);
       added_path_index_temp.swap(added_path_index);
 
       bool solved2 = false;
@@ -102,7 +103,8 @@ public:
 
         // extract the last state of the computed motion plan and set it as the new start state
         moveit::core::robotStateToRobotStateMsg(res2.trajectory_->getLastWayPoint(), req3.start_state);
-        solved2 = planner(planning_scene, req3, res);
+        planner(planning_scene, req3, res);
+        solved2 = (res.error_code_.val == moveit_msgs::msg::MoveItErrorCodes::SUCCESS);
         res.planning_time_ += res2.planning_time_;
 
         if (solved2)
@@ -132,7 +134,8 @@ public:
     else
     {
       RCLCPP_DEBUG(LOGGER, "Path constraints are OK. Continuing without `fix_start_state_path_constraints`.");
-      return planner(planning_scene, req, res);
+      planner(planning_scene, req, res);
+      return (res.error_code_.val == moveit_msgs::msg::MoveItErrorCodes::SUCCESS);
     }
   }
 };

@@ -150,7 +150,7 @@ bool PlanningRequestAdapterChain::adaptAndPlan(const planning_interface::Planner
       };
     }
 
-    bool result = fn(planning_scene, req, res);
+    fn(planning_scene, req, res);
     added_path_index.clear();
 
     // merge the index values from each adapter
@@ -163,7 +163,7 @@ bool PlanningRequestAdapterChain::adaptAndPlan(const planning_interface::Planner
         added_path_index.push_back(added_index);
       }
     std::sort(added_path_index.begin(), added_path_index.end());
-    return result;
+    return res.error_code_.val == moveit_msgs::msg::MoveItErrorCodes::SUCCESS;
   }
 }
 

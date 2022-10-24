@@ -180,8 +180,11 @@ public:
 
     // following call to planner() calls the OMPL planner and stores the trajectory inside the MotionPlanResponse res
     // variable which is then used by CHOMP for optimization of the computed trajectory
-    if (!planner(ps, req, res))
+    planner(ps, req, res);
+    if (res.error_code_.val != moveit_msgs::msg::MoveItErrorCodes::SUCCESS)
+    {
       return false;
+    }
 
     // create a hybrid collision detector to set the collision checker as hybrid
     collision_detection::CollisionDetectorAllocatorPtr hybrid_cd(

@@ -51,7 +51,8 @@ public:
                     const planning_interface::MotionPlanRequest& req, planning_interface::MotionPlanResponse& res,
                     std::vector<std::size_t>& /*added_path_index*/) const override
   {
-    return planner(planning_scene, req, res);
+    planner(planning_scene, req, res);
+    return res.error_code_.val == moveit_msgs::msg::MoveItErrorCodes::SUCCESS;
   }
 
   void initialize(const rclcpp::Node::SharedPtr& /* node */, const std::string& /* parameter_namespace */) override

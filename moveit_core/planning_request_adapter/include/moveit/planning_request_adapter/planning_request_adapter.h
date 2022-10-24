@@ -52,7 +52,7 @@ class PlanningRequestAdapter
 {
 public:
   using PlannerFn =
-      std::function<bool(const planning_scene::PlanningSceneConstPtr&, const planning_interface::MotionPlanRequest&,
+      std::function<void(const planning_scene::PlanningSceneConstPtr&, const planning_interface::MotionPlanRequest&,
                          planning_interface::MotionPlanResponse&)>;
 
   PlanningRequestAdapter()

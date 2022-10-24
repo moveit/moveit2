@@ -63,7 +63,8 @@ public:
                     const planning_interface::MotionPlanRequest& req, planning_interface::MotionPlanResponse& res,
                     std::vector<std::size_t>& /*added_path_index*/) const override
   {
-    bool result = planner(planning_scene, req, res);
+    planner(planning_scene, req, res);
+    bool result = (res.error_code_.val == moveit_msgs::msg::MoveItErrorCodes::SUCCESS);
     if (result && res.trajectory_)
     {
       RCLCPP_DEBUG(LOGGER, "Running '%s'", getDescription().c_str());
