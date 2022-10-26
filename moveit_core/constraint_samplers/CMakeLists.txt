@@ -1,5 +1,7 @@
 set(MOVEIT_LIB_NAME moveit_constraint_samplers)
 
+add_compile_options(-Wdeprecated-declarations)
+
 add_library(${MOVEIT_LIB_NAME} SHARED
   src/constraint_sampler.cpp
   src/constraint_sampler_manager.cpp
@@ -21,8 +23,6 @@ target_link_libraries(${MOVEIT_LIB_NAME}
   moveit_kinematics_base
   moveit_planning_scene
 )
-
-target_compile_definitions(${MOVEIT_LIB_NAME} PRIVATE -DAPPROVAL_TESTS_SHOW_DEPRECATION_WARNINGS=1)
 
 install(DIRECTORY include/ DESTINATION include)
 
