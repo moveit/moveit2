@@ -22,6 +22,8 @@ target_link_libraries(${MOVEIT_LIB_NAME}
   moveit_planning_scene
 )
 
+target_compile_definitions(${MOVEIT_LIB_NAME} PRIVATE -DAPPROVAL_TESTS_SHOW_DEPRECATION_WARNINGS=1)
+
 install(DIRECTORY include/ DESTINATION include)
 
 if(BUILD_TESTING)
