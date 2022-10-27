@@ -109,25 +109,25 @@ std::map<std::string, JointLimit>::const_iterator JointLimitsContainer::end() co
   return container_.end();
 }
 
-bool JointLimitsContainer::verifyPositionLimit(const std::string& joint_name, const double& joint_position) const
+bool JointLimitsContainer::verifyPositionLimit(const std::string& joint_name, double joint_position) const
 {
   return (!(hasLimit(joint_name) && getLimit(joint_name).has_position_limits &&
             (joint_position < getLimit(joint_name).min_position || joint_position > getLimit(joint_name).max_position)));
 }
 
-bool JointLimitsContainer::verifyVelocityLimit(const std::string& joint_name, const double& joint_velocity) const
+bool JointLimitsContainer::verifyVelocityLimit(const std::string& joint_name, double joint_velocity) const
 {
   return (!(hasLimit(joint_name) && getLimit(joint_name).has_velocity_limits &&
             fabs(joint_velocity) > getLimit(joint_name).max_velocity));
 }
 
-bool JointLimitsContainer::verifyAccelerationLimit(const std::string& joint_name, const double& joint_acceleration) const
+bool JointLimitsContainer::verifyAccelerationLimit(const std::string& joint_name, double joint_acceleration) const
 {
   return (!(hasLimit(joint_name) && getLimit(joint_name).has_acceleration_limits &&
             fabs(joint_acceleration) > getLimit(joint_name).max_acceleration));
 }
 
-bool JointLimitsContainer::verifyDecelerationLimit(const std::string& joint_name, const double& joint_acceleration) const
+bool JointLimitsContainer::verifyDecelerationLimit(const std::string& joint_name, double joint_acceleration) const
 {
   return (!(hasLimit(joint_name) && getLimit(joint_name).has_deceleration_limits &&
             fabs(joint_acceleration) > -1.0 * getLimit(joint_name).max_deceleration));
