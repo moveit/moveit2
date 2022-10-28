@@ -77,12 +77,12 @@ public:
       moveit_msgs::msg::WorkspaceParameters& default_wp = req2.workspace_parameters;
       default_wp.min_corner.x = default_wp.min_corner.y = default_wp.min_corner.z = -workspace_extent_;
       default_wp.max_corner.x = default_wp.max_corner.y = default_wp.max_corner.z = workspace_extent_;
-      planner(planning_scene, req2, res);
-      return res.error_code_.val == moveit_msgs::msg::MoveItErrorCodes::SUCCESS;
+      moveit::core::MoveItErrorCode moveit_code = planner(planning_scene, req2, res);
+      return bool(moveit_code);
     }
 
-    planner(planning_scene, req, res);
-    return res.error_code_.val == moveit_msgs::msg::MoveItErrorCodes::SUCCESS;
+    moveit::core::MoveItErrorCode moveit_code = planner(planning_scene, req, res);
+    return bool(moveit_code);
   }
 
 private:

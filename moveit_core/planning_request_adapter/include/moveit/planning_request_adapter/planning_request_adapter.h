@@ -39,6 +39,7 @@
 #include <moveit/macros/class_forward.h>
 #include <moveit/planning_interface/planning_interface.h>
 #include <moveit/planning_scene/planning_scene.h>
+#include <moveit/utils/moveit_error_code.h>
 #include <functional>
 #include <rclcpp/logging.hpp>
 #include <rclcpp/node.hpp>
@@ -52,7 +53,7 @@ class PlanningRequestAdapter
 {
 public:
   using PlannerFn =
-      std::function<void(const planning_scene::PlanningSceneConstPtr&, const planning_interface::MotionPlanRequest&,
+      std::function<moveit::core::MoveItErrorCode(const planning_scene::PlanningSceneConstPtr&, const planning_interface::MotionPlanRequest&,
                          planning_interface::MotionPlanResponse&)>;
 
   PlanningRequestAdapter()

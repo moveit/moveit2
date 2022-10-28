@@ -180,8 +180,8 @@ public:
 
     // following call to planner() calls the OMPL planner and stores the trajectory inside the MotionPlanResponse res
     // variable which is then used by CHOMP for optimization of the computed trajectory
-    planner(ps, req, res);
-    if (res.error_code_.val != moveit_msgs::msg::MoveItErrorCodes::SUCCESS)
+    moveit::core::MoveItErrorCode moveit_code = planner(ps, req, res);
+    if (!bool(moveit_code))
     {
       return false;
     }

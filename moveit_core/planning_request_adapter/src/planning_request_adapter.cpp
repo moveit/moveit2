@@ -57,7 +57,7 @@ bool callPlannerInterfaceSolve(const planning_interface::PlannerManager& planner
     return false;
 }
 
-planning_interface::MotionPlanResponse callAdapter(const PlanningRequestAdapter& adapter,
+bool callAdapter(const PlanningRequestAdapter& adapter,
                                                    const PlanningRequestAdapter::PlannerFn& planner,
                                                    const planning_scene::PlanningSceneConstPtr& planning_scene,
                                                    const planning_interface::MotionPlanRequest& req,
@@ -66,16 +66,16 @@ planning_interface::MotionPlanResponse callAdapter(const PlanningRequestAdapter&
   planning_interface::MotionPlanResponse res;
   try
   {
-    adapter.adaptAndPlan(planner, planning_scene, req, res, added_path_index);
-    return res;
+    moveit::core::MoveItErrorCode moveit_code = adapter.adaptAndPlan(planner, planning_scene, req, res, added_path_index);
+    return bool(moveit_code);
   }
   catch (std::exception& ex)
   {
     RCLCPP_ERROR(LOGGER, "Exception caught executing adapter '%s': %s\nSkipping adapter instead.",
                  adapter.getDescription().c_str(), ex.what());
     added_path_index.clear();
-    planner(planning_scene, req, res);
-    return res;
+    moveit::core::MoveItErrorCode moveit_code = planner(planning_scene, req, res);
+    return bool(moveit_code);
   }
 }
 
@@ -144,17 +144,17 @@ bool PlanningRequestAdapterChain::adaptAndPlan(const planning_interface::Planner
       fn = [&adapter = *adapters_[i], fn, &added_path_index = added_path_index_each[i]](
                const planning_scene::PlanningSceneConstPtr& scene, const planning_interface::MotionPlanRequest& req,
                planning_interface::MotionPlanResponse& res) {
-        res = callAdapter(adapter, fn, scene, req, added_path_index);
         // Abort pipeline and return error code in case of failure
-        return (res.error_code_.val == moveit_msgs::msg::MoveItErrorCodes::SUCCESS);
+        return callAdapter(adapter, fn, scene, req, added_path_index);
       };
     }
 
-    fn(planning_scene, req, res);
+    moveit::core::MoveItErrorCode moveit_code = fn(planning_scene, req, res);
     added_path_index.clear();
 
     // merge the index values from each adapter
     for (std::vector<std::size_t>& added_states_by_each_adapter : added_path_index_each)
+    {
       for (std::size_t& added_index : added_states_by_each_adapter)
       {
         for (std::size_t& index_in_path : added_path_index)
@@ -162,8 +162,9 @@ bool PlanningRequestAdapterChain::adaptAndPlan(const planning_interface::Planner
             index_in_path++;
         added_path_index.push_back(added_index);
       }
+    }
     std::sort(added_path_index.begin(), added_path_index.end());
-    return res.error_code_.val == moveit_msgs::msg::MoveItErrorCodes::SUCCESS;
+    return bool(moveit_code);
   }
 }
 

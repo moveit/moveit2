@@ -69,8 +69,8 @@ public:
     {
       kinematic_constraints::resolveConstraintFrames(planning_scene->getCurrentState(), constraint);
     }
-    planner(planning_scene, modified, res);
-    return (res.error_code_.val == moveit_msgs::msg::MoveItErrorCodes::SUCCESS);
+    moveit::core::MoveItErrorCode moveit_code = planner(planning_scene, modified, res);
+    return bool(moveit_code);
   }
 };
 

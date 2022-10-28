@@ -90,12 +90,11 @@ public:
       // index information from that call
       std::vector<std::size_t> added_path_index_temp;
       added_path_index_temp.swap(added_path_index);
-      planner(planning_scene, req2, res2);
-      bool solved1 = (res.error_code_.val == moveit_msgs::msg::MoveItErrorCodes::SUCCESS);
+      moveit::core::MoveItErrorCode solved1 = planner(planning_scene, req2, res2);
       added_path_index_temp.swap(added_path_index);
 
-      bool solved2 = false;
-      if (solved1)
+      moveit::core::MoveItErrorCode solved2(moveit_msgs::msg::MoveItErrorCodes::FAILURE);
+      if (bool(solved1))
       {
         planning_interface::MotionPlanRequest req3 = req;
         RCLCPP_INFO(LOGGER, "The start state was modified to match path constraints. Now resuming the original "
@@ -103,11 +102,10 @@ public:
 
         // extract the last state of the computed motion plan and set it as the new start state
         moveit::core::robotStateToRobotStateMsg(res2.trajectory_->getLastWayPoint(), req3.start_state);
-        planner(planning_scene, req3, res);
-        solved2 = (res.error_code_.val == moveit_msgs::msg::MoveItErrorCodes::SUCCESS);
+        solved2 = planner(planning_scene, req3, res);
         res.planning_time_ += res2.planning_time_;
 
-        if (solved2)
+        if (bool(solved2))
         {
           // since we add a prefix, we need to correct any existing index positions
           for (std::size_t& added_index : added_path_index)
@@ -124,7 +122,7 @@ public:
         }
       }
 
-      if (!solved1 || !solved2)
+      if (!bool(solved1) || !bool(solved2))
       {
         RCLCPP_WARN(LOGGER, "Unable to meet path constraints at the start.");
         res.error_code_.val = moveit_msgs::msg::MoveItErrorCodes::START_STATE_VIOLATES_PATH_CONSTRAINTS;
@@ -133,8 +131,8 @@ public:
     }
 
     RCLCPP_DEBUG(LOGGER, "Path constraints are OK. Continuing without `fix_start_state_path_constraints`.");
-    planner(planning_scene, req, res);
-    return (res.error_code_.val == moveit_msgs::msg::MoveItErrorCodes::SUCCESS);
+    moveit::core::MoveItErrorCode moveit_code = planner(planning_scene, req, res);
+    return bool(moveit_code);
   }
 };
 }  // namespace default_planner_request_adapters

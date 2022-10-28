@@ -165,19 +165,18 @@ public:
       }
     }
 
-    bool solved;
+    moveit::core::MoveItErrorCode moveit_code;
     // if we made any changes, use them
     if (change_req)
     {
       planning_interface::MotionPlanRequest req2 = req;
       moveit::core::robotStateToRobotStateMsg(start_state, req2.start_state);
-      planner(planning_scene, req2, res);
+      moveit_code = planner(planning_scene, req2, res);
     }
     else
     {
-      planner(planning_scene, req, res);
+      moveit_code = planner(planning_scene, req, res);
     }
-    solved = (res.error_code_.val == moveit_msgs::msg::MoveItErrorCodes::SUCCESS);
 
     // re-add the prefix state, if it was constructed
     if (prefix_state && res.trajectory_ && !res.trajectory_->empty())
@@ -193,7 +192,7 @@ public:
       added_path_index.push_back(0);
     }
 
-    return solved;
+    return bool(moveit_code);
   }
 
 private:

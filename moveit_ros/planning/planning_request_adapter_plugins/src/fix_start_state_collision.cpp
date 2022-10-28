@@ -132,9 +132,8 @@ public:
       {
         planning_interface::MotionPlanRequest req2 = req;
         moveit::core::robotStateToRobotStateMsg(start_state, req2.start_state);
-        planner(planning_scene, req, res);
-        bool solved = (res.error_code_.val == moveit_msgs::msg::MoveItErrorCodes::SUCCESS);
-        if (solved && !res.trajectory_->empty())
+        moveit::core::MoveItErrorCode moveit_code = planner(planning_scene, req2, res);
+        if (bool(moveit_code) && !res.trajectory_->empty())
         {
           // heuristically decide a duration offset for the trajectory (induced by the additional point added as a
           // prefix to the computed trajectory)
@@ -146,7 +145,7 @@ public:
             added_index++;
           added_path_index.push_back(0);
         }
-        return solved;
+        return bool(moveit_code);
       }
       else
       {
@@ -164,8 +163,8 @@ public:
         RCLCPP_DEBUG(LOGGER, "Start state is valid");
       else
         RCLCPP_DEBUG(LOGGER, "Start state is valid with respect to group %s", creq.group_name.c_str());
-      planner(planning_scene, req, res);
-      return res.error_code_.val == moveit_msgs::msg::MoveItErrorCodes::SUCCESS;
+      moveit::core::MoveItErrorCode moveit_code = planner(planning_scene, req, res);
+      return bool(moveit_code);
     }
   }
 

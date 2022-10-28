@@ -64,18 +64,17 @@ public:
                     const planning_interface::MotionPlanRequest& req, planning_interface::MotionPlanResponse& res,
                     std::vector<std::size_t>& /*added_path_index*/) const override
   {
-    planner(planning_scene, req, res);
-    bool result = (res.error_code_.val == moveit_msgs::msg::MoveItErrorCodes::SUCCESS);
-    if (result && res.trajectory_)
+    moveit::core::MoveItErrorCode moveit_code = planner(planning_scene, req, res);
+    if (bool(moveit_code) && res.trajectory_)
     {
       if (!smoother_.applySmoothing(*res.trajectory_, req.max_velocity_scaling_factor,
                                     req.max_acceleration_scaling_factor))
       {
-        result = false;
+        moveit_code = moveit::core::MoveItErrorCode::FAILURE;
       }
     }
 
-    return result;
+    return bool(moveit_code);
   }
 
 private:
