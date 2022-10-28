@@ -232,7 +232,7 @@ planning_interface::MotionPlanResponse PlanningComponent::plan(const MultiPipeli
                                                                StoppingCriterionFunction stopping_criterion_callback)
 {
   // Create solutions container
-  PlanningComponent::PlanSolutions planning_solutions{ parameters.multi_plan_request_parameters.size() };
+  PlanSolutions planning_solutions{ parameters.multi_plan_request_parameters.size() };
   std::vector<std::thread> planning_threads;
   planning_threads.reserve(parameters.multi_plan_request_parameters.size());
 
@@ -263,6 +263,7 @@ planning_interface::MotionPlanResponse PlanningComponent::plan(const MultiPipeli
         auto plan_solution = planning_interface::MotionPlanResponse();
         plan_solution.error_code_ = moveit::core::MoveItErrorCode::FAILURE;
       }
+      plan_solution.planner_id_ = plan_request_parameter.planner_id;
       planning_solutions.pushBack(plan_solution);
 
       if (stopping_criterion_callback != nullptr)
@@ -414,38 +415,5 @@ bool PlanningComponent::execute(bool blocking)
 const planning_interface::MotionPlanResponse& PlanningComponent::getLastMotionPlanResponse()
 {
   return last_plan_solution_;
-}
-
-planning_interface::MotionPlanResponse
-getShortestSolution(const std::vector<planning_interface::MotionPlanResponse>& solutions)
-{
-  // Find trajectory with minimal path
-  auto const shortest_trajectory = std::min_element(solutions.begin(), solutions.end(),
-                                                    [](const planning_interface::MotionPlanResponse& solution_a,
-                                                       const planning_interface::MotionPlanResponse& solution_b) {
-                                                      // If both solutions were successful, check which path is shorter
-                                                      if (solution_a && solution_b)
-                                                      {
-                                                        return robot_trajectory::path_length(*solution_a.trajectory_) <
-                                                               robot_trajectory::path_length(*solution_b.trajectory_);
-                                                      }
-                                                      // If only solution a is successful, return a
-                                                      else if (solution_a)
-                                                      {
-                                                        return true;
-                                                      }
-                                                      // Else return solution b, either because it is successful or not
-                                                      return false;
-                                                    });
-  if (shortest_trajectory->trajectory_ != nullptr)
-  {
-    RCLCPP_INFO(LOGGER, "Chosen solution with shortest path length: '%f'",
-                robot_trajectory::path_length(*shortest_trajectory->trajectory_));
-  }
-  else
-  {
-    RCLCPP_INFO_STREAM(LOGGER, "Could not determine shortest path");
-  }
-  return *shortest_trajectory;
 }
 }  // namespace moveit_cpp

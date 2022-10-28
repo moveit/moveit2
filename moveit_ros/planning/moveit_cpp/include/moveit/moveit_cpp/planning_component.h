@@ -39,6 +39,7 @@
 
 #include <rclcpp/rclcpp.hpp>
 #include <moveit/moveit_cpp/moveit_cpp.h>
+#include <moveit/moveit_cpp/plan_solutions.h>
 #include <moveit/robot_state/robot_state.h>
 #include <geometry_msgs/msg/pose_stamped.h>
 #include <moveit/robot_state/conversions.h>
@@ -57,37 +58,6 @@ class PlanningComponent
 {
 public:
   using MoveItErrorCode [[deprecated("Use moveit::core::MoveItErrorCode")]] = moveit::core::MoveItErrorCode;
-
-  class PlanSolutions
-  {
-  public:
-    /// \brief Constructor
-    PlanSolutions(const size_t expected_size = 0)
-    {
-      solutions_.reserve(expected_size);
-    }
-
-    /// \brief Thread safe method to add PlanSolutions to this data structure
-    /// TODO(sjahr): Refactor this method to an insert method similar to
-    /// https://github.com/ompl/ompl/blob/main/src/ompl/base/src/ProblemDefinition.cpp#L54-L161. This way, it is
-    /// possible to created a sorted container e.g. according to a user specified criteria
-    void pushBack(planning_interface::MotionPlanResponse plan_solution)
-    {
-      std::lock_guard<std::mutex> lock_guard(solutions_mutex_);
-      solutions_.push_back(plan_solution);
-    }
-
-    /// \brief Get solutions
-    const std::vector<planning_interface::MotionPlanResponse>& getSolutions()
-    {
-      return solutions_;
-    }
-
-  private:
-    std::vector<planning_interface::MotionPlanResponse> solutions_;
-    std::mutex solutions_mutex_;
-  };
-
   /// Planner parameters provided with the MotionPlanRequest
   struct PlanRequestParameters
   {

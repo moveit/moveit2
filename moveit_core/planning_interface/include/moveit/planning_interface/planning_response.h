@@ -63,6 +63,7 @@ struct MotionPlanResponse
   moveit::core::MoveItErrorCode error_code_;
   /// The full starting state used for planning
   moveit_msgs::msg::RobotState start_state_;
+  std::string planner_id_;
 
   // Enable checking of query success or failure, for example if(response) ...
   explicit operator bool() const
@@ -79,6 +80,7 @@ struct MotionPlanDetailedResponse
   std::vector<std::string> description_;
   std::vector<double> processing_time_;
   moveit_msgs::msg::MoveItErrorCodes error_code_;
+  std::string planner_id_;
 };
 
 }  // namespace planning_interface
