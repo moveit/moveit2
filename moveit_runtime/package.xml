@@ -19,10 +19,7 @@
   <exec_depend>moveit_planners</exec_depend>
   <exec_depend>moveit_plugins</exec_depend>
   <exec_depend>moveit_ros_move_group</exec_depend>
-  <!--
-  TODO(henningkayser): enable after #307 is merged
   <exec_depend>moveit_ros_perception</exec_depend>
-  -->
   <exec_depend>moveit_ros_planning</exec_depend>
   <exec_depend>moveit_ros_planning_interface</exec_depend>
   <exec_depend>moveit_ros_warehouse</exec_depend>
