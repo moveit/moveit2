@@ -248,7 +248,7 @@ planning_interface::MotionPlanResponse PlanningComponent::plan(const MultiPipeli
   }
 
   // Launch planning threads
-  for (auto const& plan_request_parameter : parameters.multi_plan_request_parameters)
+  for (const auto& plan_request_parameter : parameters.multi_plan_request_parameters)
   {
     auto planning_thread = std::thread([&]() {
       auto plan_solution = planning_interface::MotionPlanResponse();
@@ -271,7 +271,7 @@ planning_interface::MotionPlanResponse PlanningComponent::plan(const MultiPipeli
         {
           // Terminate planning pipelines
           RCLCPP_ERROR_STREAM(LOGGER, "Stopping criterion met: Terminating planning pipelines that are still active");
-          for (auto const& plan_request_parameter : parameters.multi_plan_request_parameters)
+          for (const auto& plan_request_parameter : parameters.multi_plan_request_parameters)
           {
             moveit_cpp_->terminatePlanningPipeline(plan_request_parameter.planning_pipeline);
           }
@@ -411,18 +411,18 @@ bool PlanningComponent::execute(bool blocking)
   return moveit_cpp_->execute(group_name_, last_plan_solution_.trajectory_, blocking);
 }
 
-planning_interface::MotionPlanResponse const& PlanningComponent::getLastMotionPlanResponse()
+const planning_interface::MotionPlanResponse& PlanningComponent::getLastMotionPlanResponse()
 {
   return last_plan_solution_;
 }
 
 planning_interface::MotionPlanResponse
-getShortestSolution(std::vector<planning_interface::MotionPlanResponse> const& solutions)
+getShortestSolution(const std::vector<planning_interface::MotionPlanResponse>& solutions)
 {
   // Find trajectory with minimal path
   auto const shortest_trajectory = std::min_element(solutions.begin(), solutions.end(),
-                                                    [](planning_interface::MotionPlanResponse const& solution_a,
-                                                       planning_interface::MotionPlanResponse const& solution_b) {
+                                                    [](const planning_interface::MotionPlanResponse& solution_a,
+                                                       const planning_interface::MotionPlanResponse& solution_b) {
                                                       // If both solutions were successful, check which path is shorter
                                                       if (solution_a && solution_b)
                                                       {

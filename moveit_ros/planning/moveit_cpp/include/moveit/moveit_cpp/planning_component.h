@@ -51,7 +51,7 @@ MOVEIT_CLASS_FORWARD(PlanningComponent);  // Defines PlanningComponentPtr, Const
 
 /// \brief A function to choose the solution with the shortest path from a vector of solutions
 planning_interface::MotionPlanResponse
-getShortestSolution(std::vector<planning_interface::MotionPlanResponse> const& solutions);
+getShortestSolution(const std::vector<planning_interface::MotionPlanResponse>& solutions);
 
 class PlanningComponent
 {
@@ -78,7 +78,7 @@ public:
     }
 
     /// \brief Get solutions
-    std::vector<planning_interface::MotionPlanResponse> const& getSolutions()
+    const std::vector<planning_interface::MotionPlanResponse>& getSolutions()
     {
       return solutions_;
     }
@@ -99,7 +99,7 @@ public:
     double max_acceleration_scaling_factor;
 
     template <typename T>
-    void declareOrGetParam(rclcpp::Node::SharedPtr const& node, std::string const& param_name, T& output_value,
+    void declareOrGetParam(const rclcpp::Node::SharedPtr& node, const std::string& param_name, T& output_value,
                            T default_value)
     {
       // Try to get parameter or use default
@@ -139,7 +139,7 @@ public:
     {
       multi_plan_request_parameters.reserve(planning_pipeline_names.size());
 
-      for (auto const& planning_pipeline_name : planning_pipeline_names)
+      for (const auto& planning_pipeline_name : planning_pipeline_names)
       {
         PlanRequestParameters parameters;
         parameters.load(node, planning_pipeline_name);
@@ -152,11 +152,11 @@ public:
 
   /// \brief A solution callback function type for the parallel planning API of planning component
   typedef std::function<planning_interface::MotionPlanResponse(
-      std::vector<planning_interface::MotionPlanResponse> const& solutions)>
+      const std::vector<planning_interface::MotionPlanResponse>& solutions)>
       SolutionCallbackFunction;
   /// \brief A stopping criterion callback function for the parallel planning API of planning component
-  typedef std::function<bool(PlanSolutions const& solutions,
-                             MultiPipelinePlanRequestParameters const& plan_request_parameters)>
+  typedef std::function<bool(const PlanSolutions& solutions,
+                             const MultiPipelinePlanRequestParameters& plan_request_parameters)>
       StoppingCriterionFunction;
 
   /** \brief Constructor */
@@ -241,7 +241,7 @@ public:
   bool execute(bool blocking = true);
 
   /** \brief Return the last plan solution*/
-  planning_interface::MotionPlanResponse const& getLastMotionPlanResponse();
+  const planning_interface::MotionPlanResponse& getLastMotionPlanResponse();
 
 private:
   // Core properties and instances

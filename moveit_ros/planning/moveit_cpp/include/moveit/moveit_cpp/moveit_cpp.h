@@ -173,7 +173,7 @@ public:
                                                      bool blocking = true);
 
   /** \brief Utility to terminate all active planning pipelines */
-  bool terminatePlanningPipeline(std::string const& pipeline_name);
+  bool terminatePlanningPipeline(const std::string& pipeline_name);
 
 private:
   //  Core properties and instances

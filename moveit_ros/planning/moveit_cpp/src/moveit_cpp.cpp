@@ -276,11 +276,11 @@ MoveItCpp::execute(const std::string& group_name, const robot_trajectory::RobotT
   return moveit_controller_manager::ExecutionStatus::RUNNING;
 }
 
-bool MoveItCpp::terminatePlanningPipeline(std::string const& pipeline_name)
+bool MoveItCpp::terminatePlanningPipeline(const std::string& pipeline_name)
 {
   try
   {
-    auto const& planning_pipeline = planning_pipelines_.at(pipeline_name);
+    const auto& planning_pipeline = planning_pipelines_.at(pipeline_name);
     if (planning_pipeline->isActive())
     {
       planning_pipeline->terminate();
