@@ -57,25 +57,23 @@ bool callPlannerInterfaceSolve(const planning_interface::PlannerManager& planner
     return false;
 }
 
-bool callAdapter(const PlanningRequestAdapter& adapter,
-                                                   const PlanningRequestAdapter::PlannerFn& planner,
-                                                   const planning_scene::PlanningSceneConstPtr& planning_scene,
-                                                   const planning_interface::MotionPlanRequest& req,
-                                                   std::vector<std::size_t>& added_path_index)
+void callAdapter(const PlanningRequestAdapter& adapter, const PlanningRequestAdapter::PlannerFn& planner,
+                 const planning_scene::PlanningSceneConstPtr& planning_scene,
+                 const planning_interface::MotionPlanRequest& req, planning_interface::MotionPlanResponse& res,
+                 std::vector<std::size_t>& added_path_index)
 {
-  planning_interface::MotionPlanResponse res;
   try
   {
-    moveit::core::MoveItErrorCode moveit_code = adapter.adaptAndPlan(planner, planning_scene, req, res, added_path_index);
-    return bool(moveit_code);
+    adapter.adaptAndPlan(planner, planning_scene, req, res, added_path_index);
+    return;
   }
   catch (std::exception& ex)
   {
     RCLCPP_ERROR(LOGGER, "Exception caught executing adapter '%s': %s\nSkipping adapter instead.",
                  adapter.getDescription().c_str(), ex.what());
     added_path_index.clear();
-    moveit::core::MoveItErrorCode moveit_code = planner(planning_scene, req, res);
-    return bool(moveit_code);
+    planner(planning_scene, req, res);
+    return;
   }
 }
 
@@ -144,8 +142,9 @@ bool PlanningRequestAdapterChain::adaptAndPlan(const planning_interface::Planner
       fn = [&adapter = *adapters_[i], fn, &added_path_index = added_path_index_each[i]](
                const planning_scene::PlanningSceneConstPtr& scene, const planning_interface::MotionPlanRequest& req,
                planning_interface::MotionPlanResponse& res) {
-        // Abort pipeline and return error code in case of failure
-        return callAdapter(adapter, fn, scene, req, added_path_index);
+        // Abort pipeline and return in case of failure
+        callAdapter(adapter, fn, scene, req, res, added_path_index);
+        return (res.error_code_.val == moveit_msgs::msg::MoveItErrorCodes::SUCCESS);
       };
     }
 

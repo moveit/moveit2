@@ -52,9 +52,9 @@ MOVEIT_CLASS_FORWARD(PlanningRequestAdapter);  // Defines PlanningRequestAdapter
 class PlanningRequestAdapter
 {
 public:
-  using PlannerFn =
-      std::function<moveit::core::MoveItErrorCode(const planning_scene::PlanningSceneConstPtr&, const planning_interface::MotionPlanRequest&,
-                         planning_interface::MotionPlanResponse&)>;
+  using PlannerFn = std::function<moveit::core::MoveItErrorCode(const planning_scene::PlanningSceneConstPtr&,
+                                                                const planning_interface::MotionPlanRequest&,
+                                                                planning_interface::MotionPlanResponse&)>;
 
   PlanningRequestAdapter()
   {
