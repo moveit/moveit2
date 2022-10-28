@@ -47,19 +47,21 @@ enum class StatusCode : int8_t
 {
   INVALID = -1,
   NO_WARNING = 0,
-  DECELERATE_FOR_SINGULARITY = 1,
+  DECELERATE_FOR_APPROACHING_SINGULARITY = 1,
   HALT_FOR_SINGULARITY = 2,
   DECELERATE_FOR_COLLISION = 3,
   HALT_FOR_COLLISION = 4,
-  JOINT_BOUND = 5
+  JOINT_BOUND = 5,
+  DECELERATE_FOR_LEAVING_SINGULARITY = 6
 };
 
-const std::unordered_map<StatusCode, std::string>
-    SERVO_STATUS_CODE_MAP({ { StatusCode::INVALID, "Invalid" },
-                            { StatusCode::NO_WARNING, "No warnings" },
-                            { StatusCode::DECELERATE_FOR_SINGULARITY, "Close to a singularity, decelerating" },
-                            { StatusCode::HALT_FOR_SINGULARITY, "Very close to a singularity, emergency stop" },
-                            { StatusCode::DECELERATE_FOR_COLLISION, "Close to a collision, decelerating" },
-                            { StatusCode::HALT_FOR_COLLISION, "Collision detected, emergency stop" },
-                            { StatusCode::JOINT_BOUND, "Close to a joint bound (position or velocity), halting" } });
+const std::unordered_map<StatusCode, std::string> SERVO_STATUS_CODE_MAP(
+    { { StatusCode::INVALID, "Invalid" },
+      { StatusCode::NO_WARNING, "No warnings" },
+      { StatusCode::DECELERATE_FOR_APPROACHING_SINGULARITY, "Moving closer to a singularity, decelerating" },
+      { StatusCode::HALT_FOR_SINGULARITY, "Very close to a singularity, emergency stop" },
+      { StatusCode::DECELERATE_FOR_COLLISION, "Close to a collision, decelerating" },
+      { StatusCode::HALT_FOR_COLLISION, "Collision detected, emergency stop" },
+      { StatusCode::JOINT_BOUND, "Close to a joint bound (position or velocity), halting" },
+      { StatusCode::DECELERATE_FOR_LEAVING_SINGULARITY, "Moving away from a singularity, decelerating" } });
 }  // namespace moveit_servo
