@@ -17,6 +17,7 @@ find_package(pluginlib REQUIRED)
 find_package(moveit_core REQUIRED)
 find_package(moveit_ros_planning REQUIRED)
 find_package(moveit_msgs REQUIRED)
+find_package(generate_parameter_library REQUIRED)
 
 # Finds Boost Components
 include(ConfigExtras.cmake)
@@ -42,6 +43,7 @@ set(THIS_PACKAGE_INCLUDE_DEPENDS
   moveit_core
   moveit_ros_planning
   Boost
+  generate_parameter_library
 )
 
 pluginlib_export_plugin_description_file(moveit_core kdl_kinematics_plugin_description.xml)
