@@ -536,11 +536,10 @@ ModelBasedPlanningContextPtr PlanningContextManager::getPlanningContext(
   auto constrained_planning_iterator = pc->second.config.find("enforce_constrained_state_space");
   auto joint_space_planning_iterator = pc->second.config.find("enforce_joint_model_state_space");
 
-  // Use ConstrainedPlanningStateSpace if there is exactly one position constraint or one orientation constraint
-  // Mixed constraints are not supported
+  // Use ConstrainedPlanningStateSpace if there is exactly one position constraint and/or one orientation constraint
   if (constrained_planning_iterator != pc->second.config.end() &&
       boost::lexical_cast<bool>(constrained_planning_iterator->second) &&
-      ((req.path_constraints.position_constraints.size() == 1) !=
+      ((req.path_constraints.position_constraints.size() == 1) ||
        (req.path_constraints.orientation_constraints.size() == 1)))
   {
     factory = getStateSpaceFactory(ConstrainedPlanningStateSpace::PARAMETERIZATION_TYPE);
