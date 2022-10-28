@@ -96,8 +96,7 @@ private:
   bool has_cartesian_limits_;
 
   /// The cartesian limits
-  // CartesianLimit cartesian_limit_;
-  cartesian_limits::Params cartesian_limit_;
+  cartesian_limits::Params cartesian_limits_;
 };
 
 }  // namespace pilz_industrial_motion_planner

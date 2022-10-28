@@ -63,19 +63,19 @@ void LimitsContainer::printCartesianLimits() const
 {
   RCLCPP_DEBUG(LOGGER,
                "Pilz Cartesian Limits - Max Trans Vel : %f, Max Trans Acc : %f, Max Trans Dec : %f, Max Rot Vel : %f",
-               cartesian_limit_.max_trans_vel, cartesian_limit_.max_trans_acc, cartesian_limit_.max_trans_dec,
-               cartesian_limit_.max_rot_vel);
+               cartesian_limits_.max_trans_vel, cartesian_limits_.max_trans_acc, cartesian_limits_.max_trans_dec,
+               cartesian_limits_.max_rot_vel);
 }
 
-void LimitsContainer::setCartesianLimits(cartesian_limits::Params& cartesian_limit)
+void LimitsContainer::setCartesianLimits(cartesian_limits::Params& cartesian_limits)
 {
   has_cartesian_limits_ = true;
-  cartesian_limit_ = cartesian_limit;
+  cartesian_limits_ = cartesian_limits;
 }
 
 const cartesian_limits::Params& LimitsContainer::getCartesianLimits() const
 {
-  return cartesian_limit_;
+  return cartesian_limits_;
 }
 
 }  // namespace pilz_industrial_motion_planner
