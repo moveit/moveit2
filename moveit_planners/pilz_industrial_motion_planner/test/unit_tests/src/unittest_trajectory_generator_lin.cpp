@@ -384,23 +384,6 @@ TEST_F(TrajectoryGeneratorLINTest, LinStartEqualsGoal)
 }
 
 /**
- * @brief Checks that constructor throws an exception if no limits are given.
- *
- * Test Sequence:
- *    1. Call Ctor without set limits.
- *
- * Expected Results:
- *    1. Ctor throws exception.
- */
-// TEST_F(TrajectoryGeneratorLINTest, CtorNoLimits)
-// {
-//   pilz_industrial_motion_planner::LimitsContainer planner_limits;
-
-//   EXPECT_THROW(pilz_industrial_motion_planner::TrajectoryGeneratorLIN(robot_model_, planner_limits, planning_group_),
-//                pilz_industrial_motion_planner::TrajectoryGeneratorInvalidLimitsException);
-// }
-
-/**
  * @brief Checks that generate() function returns 'false' if called with an
  * incorrect number of joints.
  *

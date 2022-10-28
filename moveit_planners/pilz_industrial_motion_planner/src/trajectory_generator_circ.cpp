@@ -58,8 +58,6 @@ TrajectoryGeneratorCIRC::TrajectoryGeneratorCIRC(const moveit::core::RobotModelC
                                                  const std::string& /*group_name*/)
   : TrajectoryGenerator::TrajectoryGenerator(robot_model, planner_limits)
 {
-  // TODO: Need to check if all the parameters are set up the user in cartesian_limits.yaml
-  // All the default values are 0.0
   planner_limits_.printCartesianLimits();
 }
 

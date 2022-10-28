@@ -270,16 +270,6 @@ TEST_F(TrajectoryGeneratorCIRCTest, TestExceptionErrorCodeMapping)
 }
 
 /**
- * @brief Construct a TrajectoryGeneratorCirc with no limits given
- */
-// TEST_F(TrajectoryGeneratorCIRCTest, noLimits)
-// {
-//   LimitsContainer planner_limits;
-//   EXPECT_THROW(TrajectoryGeneratorCIRC(this->robot_model_, planner_limits, planning_group_),
-//                TrajectoryGeneratorInvalidLimitsException);
-// }
-
-/**
  * @brief test invalid motion plan request with incomplete start state and
  * cartesian goal
  */
