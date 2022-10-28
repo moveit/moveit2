@@ -566,7 +566,7 @@ void JointModelGroup::setDefaultIKTimeout(double ik_timeout)
 }
 
 bool JointModelGroup::computeIKIndexBijection(const std::vector<std::string>& ik_jnames,
-                                              std::vector<unsigned int>& joint_bijection) const
+                                              std::vector<size_t>& joint_bijection) const
 {
   joint_bijection.clear();
   for (const std::string& ik_jname : ik_jnames)
@@ -584,7 +584,7 @@ bool JointModelGroup::computeIKIndexBijection(const std::vector<std::string>& ik
       return false;
     }
     const JointModel* jm = getJointModel(ik_jname);
-    for (unsigned int k = 0; k < jm->getVariableCount(); ++k)
+    for (size_t k = 0; k < jm->getVariableCount(); ++k)
       joint_bijection.push_back(it->second + k);
   }
   return true;
@@ -742,7 +742,7 @@ bool JointModelGroup::isValidVelocityMove(const double* from_joint_pose, const d
                                           std::size_t array_size, double dt) const
 {
   const std::vector<const JointModel::Bounds*>& bounds = getActiveJointModelsBounds();
-  const std::vector<unsigned int>& bij = getKinematicsSolverJointBijection();
+  const std::vector<size_t>& bij = getKinematicsSolverJointBijection();
 
   for (std::size_t i = 0; i < array_size; ++i)
   {

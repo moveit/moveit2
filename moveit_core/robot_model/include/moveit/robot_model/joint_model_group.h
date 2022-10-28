@@ -95,7 +95,7 @@ public:
         An element bijection[i] at index \e i in this array, maps the variable at index bijection[i] in this group to
        the variable at index
         i in the kinematic solver. */
-    std::vector<unsigned int> bijection_;
+    std::vector<size_t> bijection_;
 
     kinematics::KinematicsBasePtr solver_instance_;
 
@@ -566,7 +566,7 @@ public:
      kinematics solver.
       An element bijection[i] at index \e i in this array, maps the variable at index bijection[i] in this group to
       the variable at index i in the kinematic solver. */
-  const std::vector<unsigned int>& getKinematicsSolverJointBijection() const
+  const std::vector<size_t>& getKinematicsSolverJointBijection() const
   {
     return group_kinematics_.first.bijection_;
   }
@@ -583,8 +583,7 @@ public:
                            double dt) const;
 
 protected:
-  bool computeIKIndexBijection(const std::vector<std::string>& ik_jnames,
-                               std::vector<unsigned int>& joint_bijection) const;
+  bool computeIKIndexBijection(const std::vector<std::string>& ik_jnames, std::vector<size_t>& joint_bijection) const;
 
   /** \brief Update the variable values for the state of a group with respect to the mimic joints. This only updates
       mimic joints that have the parent in this group. If there is a joint mimicking one that is outside the group,
