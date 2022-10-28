@@ -64,6 +64,8 @@
 #include <tf2/utils.h>
 #include <tf2_eigen/tf2_eigen.hpp>
 #include <tf2_ros/transform_listener.h>
+#include <rclcpp/rclcpp.hpp>
+#include <rclcpp/version.h>
 
 namespace moveit
 {
@@ -84,7 +86,23 @@ enum ActiveTargetType
   POSITION,
   ORIENTATION
 };
+
+// Function to support both Rolling and Humble on the main branch
+// Rolling has deprecated the version of the create_client method that takes
+// rmw_qos_profile_services_default for the QoS argument
+#if RCLCPP_VERSION_GTE(17, 0, 0)  // Rolling
+auto qos_default()
+{
+  return rclcpp::SystemDefaultsQoS();
 }
+#else  // Humble
+auto qos_default()
+{
+  return rmw_qos_profile_services_default;
+}
+#endif
+
+}  // namespace
 
 class MoveGroupInterface::MoveGroupInterfaceImpl
 {
@@ -162,20 +180,17 @@ public:
     execute_action_client_->wait_for_action_server(wait_for_servers.to_chrono<std::chrono::duration<double>>());
 
     query_service_ = node_->create_client<moveit_msgs::srv::QueryPlannerInterfaces>(
-        rclcpp::names::append(opt_.move_group_namespace_, move_group::QUERY_PLANNERS_SERVICE_NAME),
-        rmw_qos_profile_services_default, callback_group_);
+        rclcpp::names::append(opt_.move_group_namespace_, move_group::QUERY_PLANNERS_SERVICE_NAME), qos_default(),
+        callback_group_);
     get_params_service_ = node_->create_client<moveit_msgs::srv::GetPlannerParams>(
-        rclcpp::names::append(opt_.move_group_namespace_, move_group::GET_PLANNER_PARAMS_SERVICE_NAME),
-        rmw_qos_profile_services_default, callback_group_);
+        rclcpp::names::append(opt_.move_group_namespace_, move_group::GET_PLANNER_PARAMS_SERVICE_NAME), qos_default(),
+        callback_group_);
     set_params_service_ = node_->create_client<moveit_msgs::srv::SetPlannerParams>(
-        rclcpp::names::append(opt_.move_group_namespace_, move_group::SET_PLANNER_PARAMS_SERVICE_NAME),
-        rmw_qos_profile_services_default, callback_group_);
-
+        rclcpp::names::append(opt_.move_group_namespace_, move_group::SET_PLANNER_PARAMS_SERVICE_NAME), qos_default(),
+        callback_group_);
     cartesian_path_service_ = node_->create_client<moveit_msgs::srv::GetCartesianPath>(
-        rclcpp::names::append(opt_.move_group_namespace_, move_group::CARTESIAN_PATH_SERVICE_NAME),
-        rmw_qos_profile_services_default, callback_group_);
-
-    // plan_grasps_service_ = pnode_->create_client<moveit_msgs::srv::GraspPlanning>(GRASP_PLANNING_SERVICE_NAME);
+        rclcpp::names::append(opt_.move_group_namespace_, move_group::CARTESIAN_PATH_SERVICE_NAME), qos_default(),
+        callback_group_);
 
     RCLCPP_INFO_STREAM(LOGGER, "Ready to take commands for planning group " << opt.group_name_ << ".");
   }
@@ -1679,7 +1694,10 @@ std::map<std::string, double> MoveGroupInterface::getNamedTargetValues(const std
   }
   else
   {
-    impl_->getJointModelGroup()->getVariableDefaultPositions(name, positions);
+    if (!impl_->getJointModelGroup()->getVariableDefaultPositions(name, positions))
+    {
+      RCLCPP_ERROR(LOGGER, "The requested named target '%s' does not exist, returning empty positions.", name.c_str());
+    }
   }
   return positions;
 }
