@@ -184,7 +184,7 @@ private:
    * = 0.0: perform position-only IK */
   double orientation_vs_position_weight_;
 
-  // std::shared_ptr<kdl_kinematics::ParamListener> param_listener_;
-  // kdl_kinematics::Params params_;
+  std::shared_ptr<kdl_kinematics::ParamListener> param_listener_;
+  kdl_kinematics::Params params_;
 };
 }  // namespace kdl_kinematics_plugin
