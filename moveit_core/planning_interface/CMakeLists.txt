@@ -1,7 +1,5 @@
 set(MOVEIT_LIB_NAME moveit_planning_interface)
 
-add_compile_options(-Wdeprecated-declarations)
-
 add_library(${MOVEIT_LIB_NAME} SHARED
   src/planning_interface.cpp
   src/planning_response.cpp

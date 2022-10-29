@@ -1,7 +1,5 @@
 set(MOVEIT_LIB_NAME moveit_constraint_samplers)
 
-add_compile_options(-Wdeprecated-declarations)
-
 add_library(${MOVEIT_LIB_NAME} SHARED
   src/constraint_sampler.cpp
   src/constraint_sampler_manager.cpp

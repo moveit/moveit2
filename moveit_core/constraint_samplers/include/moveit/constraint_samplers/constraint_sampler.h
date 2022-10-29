@@ -115,9 +115,7 @@ public:
    *
    * @return The planning scene as a const ptr
    */
-  [[deprecated("getPlanningScene() is deprecated, use LockedPlanningSceneRO or LockedPlanningSceneRW "
-               "instead.")]] const planning_scene::PlanningSceneConstPtr&
-  getPlanningScene() const
+  const planning_scene::PlanningSceneConstPtr& getPlanningScene() const
   {
     return scene_;
   }

@@ -1,7 +1,5 @@
 set(MOVEIT_LIB_NAME moveit_planning_scene_monitor)
 
-add_compile_options(-Wdeprecated-declarations)
-
 add_library(${MOVEIT_LIB_NAME} SHARED
   src/planning_scene_monitor.cpp
   src/current_state_monitor.cpp
