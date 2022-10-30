@@ -483,7 +483,7 @@ unsigned int disableAlwaysInCollision(planning_scene::PlanningScene& scene, Link
   // Trial count variables
   static const unsigned int SMALL_TRIAL_COUNT = 200;
   static const unsigned int SMALL_TRIAL_LIMIT =
-      static_cast<unsigned int>((static_cast<double>(SMALL_TRIAL_COUNT) * min_collision_faction));
+      (unsigned int)((double)SMALL_TRIAL_COUNT * min_collision_faction));
 
   bool done = false;
   unsigned int num_disabled = 0;
