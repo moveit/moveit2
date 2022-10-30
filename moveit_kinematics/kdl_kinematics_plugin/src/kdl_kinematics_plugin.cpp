@@ -140,6 +140,12 @@ bool KDLKinematicsPlugin::initialize(const rclcpp::Node::SharedPtr& node, const 
                                      const std::vector<std::string>& tip_frames, double search_discretization)
 {
   node_ = node;
+
+  // Get Solver Parameters
+  std::string kinematics_param_prefix = "robot_description_kinematics." + group_name;
+  param_listener_ = std::make_shared<kdl_kinematics::ParamListener>(node, kinematics_param_prefix);
+  params_ = param_listener_->get_params();
+
   storeValues(robot_model, group_name, base_frame, tip_frames, search_discretization);
   joint_model_group_ = robot_model_->getJointModelGroup(group_name);
   if (!joint_model_group_)
@@ -197,18 +203,6 @@ bool KDLKinematicsPlugin::initialize(const rclcpp::Node::SharedPtr& node, const 
     joint_min_(i) = solver_info_.limits[i].min_position;
     joint_max_(i) = solver_info_.limits[i].max_position;
   }
-
-  // Get Solver Parameters
-  lookupParam(node_, "max_solver_iterations", max_solver_iterations_, 500);
-  lookupParam(node_, "epsilon", epsilon_, 1e-5);
-  lookupParam(node_, "orientation_vs_position", orientation_vs_position_weight_, 1.0);
-
-  bool position_ik;
-  lookupParam(node_, "position_only_ik", position_ik, false);
-  if (position_ik)  // position_only_ik overrules orientation_vs_position
-    orientation_vs_position_weight_ = 0.0;
-  if (orientation_vs_position_weight_ == 0.0)
-    RCLCPP_INFO(LOGGER, "Using position only ik");
 
   getJointWeights();
 
@@ -358,9 +352,14 @@ bool KDLKinematicsPlugin::searchPositionIK(const geometry_msgs::msg::Pose& ik_po
         consistency_limits_mimic.push_back(consistency_limits[i]);
     }
   }
+
+  auto orientation_vs_position_weight = params_.position_only_ik ? 0.0 : params_.orientation_vs_position;
+  if (orientation_vs_position_weight == 0.0)
+    RCLCPP_INFO(LOGGER, "Using position only ik");
+
   Eigen::Matrix<double, 6, 1> cartesian_weights;
   cartesian_weights.topRows<3>().setConstant(1.0);
-  cartesian_weights.bottomRows<3>().setConstant(orientation_vs_position_weight_);
+  cartesian_weights.bottomRows<3>().setConstant(orientation_vs_position_weight);
 
   KDL::JntArray jnt_seed_state(dimension_);
   KDL::JntArray jnt_pos_in(dimension_);
@@ -368,7 +367,7 @@ bool KDLKinematicsPlugin::searchPositionIK(const geometry_msgs::msg::Pose& ik_po
   jnt_seed_state.data = Eigen::Map<const Eigen::VectorXd>(ik_seed_state.data(), ik_seed_state.size());
   jnt_pos_in = jnt_seed_state;
 
-  KDL::ChainIkSolverVelMimicSVD ik_solver_vel(kdl_chain_, mimic_joints_, orientation_vs_position_weight_ == 0.0);
+  KDL::ChainIkSolverVelMimicSVD ik_solver_vel(kdl_chain_, mimic_joints_, orientation_vs_position_weight == 0.0);
   solution.resize(dimension_);
 
   KDL::Frame pose_desired;
@@ -393,7 +392,7 @@ bool KDLKinematicsPlugin::searchPositionIK(const geometry_msgs::msg::Pose& ik_po
     }
 
     int ik_valid =
-        CartToJnt(ik_solver_vel, jnt_pos_in, pose_desired, jnt_pos_out, max_solver_iterations_,
+        CartToJnt(ik_solver_vel, jnt_pos_in, pose_desired, jnt_pos_out, params_.max_solver_iterations,
                   Eigen::Map<const Eigen::VectorXd>(joint_weights_.data(), joint_weights_.size()), cartesian_weights);
     if (ik_valid == 0 || options.return_approximate_solution)  // found acceptable solution
     {
@@ -451,7 +450,7 @@ int KDLKinematicsPlugin::CartToJnt(KDL::ChainIkSolverVelMimicSVD& ik_solver, con
     const double position_error = delta_twist.vel.Norm();
     const double orientation_error = ik_solver.isPositionOnly() ? 0 : delta_twist.rot.Norm();
     const double delta_twist_norm = std::max(position_error, orientation_error);
-    if (delta_twist_norm <= epsilon_)
+    if (delta_twist_norm <= params_.epsilon)
     {
       success = true;
       break;
@@ -481,9 +480,9 @@ int KDLKinematicsPlugin::CartToJnt(KDL::ChainIkSolverVelMimicSVD& ik_solver, con
     const double delta_q_norm = delta_q.data.lpNorm<1>();
     RCLCPP_DEBUG(LOGGER, "[%3d] pos err: %f  rot err: %f  delta_q: %f", i, position_error, orientation_error,
                  delta_q_norm);
-    if (delta_q_norm < epsilon_)  // stuck in singularity
+    if (delta_q_norm < params_.epsilon)  // stuck in singularity
     {
-      if (step_size < epsilon_)  // cannot reach target
+      if (step_size < params_.epsilon)  // cannot reach target
         break;
       // wiggle joints
       last_delta_twist_norm = DBL_MAX;

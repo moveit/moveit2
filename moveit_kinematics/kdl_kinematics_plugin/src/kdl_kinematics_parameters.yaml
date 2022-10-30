@@ -39,6 +39,6 @@ kdl_kinematics:
   position_only_ik: {
     type: bool,
     default_value: false,
-    description: "position_only_ik overrules orientation_vs_position. Sets orientation_vs_position to 0.0",
+    description: "position_only_ik overrules orientation_vs_position. If true, sets orientation_vs_position weight to 0.0",
     # validation:
   }
