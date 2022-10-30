@@ -81,54 +81,28 @@ bool KDLKinematicsPlugin::checkConsistency(const Eigen::VectorXd& seed_state,
 
 void KDLKinematicsPlugin::getJointWeights()
 {
-  const std::vector<std::string>& active_names = joint_model_group_->getActiveJointModelNames();
-  std::vector<std::string> names;
-  std::vector<double> weights;
-  if (lookupParam(node_, "joint_weights.weights", weights, weights))
-  {
-    if (!lookupParam(node_, "joint_weights.names", names, names) || (names.size() != weights.size()))
-    {
-      RCLCPP_ERROR(LOGGER, "Expecting list parameter joint_weights.names of same size as list joint_weights.weights");
-      // fall back to default weights
-      weights.clear();
-    }
-  }
-  else if (lookupParam(node_, "joint_weights", weights,
-                       weights))  // try reading weight lists (for all active joints) directly
-  {
-    std::size_t num_active = active_names.size();
-    if (weights.size() == num_active)
-    {
-      joint_weights_ = weights;
-      return;
-    }
-    else if (!weights.empty())
-    {
-      RCLCPP_ERROR(LOGGER, "Expecting parameter joint_weights to list weights for all active joints (%zu) in order",
-                   num_active);
-      // fall back to default weights
-      weights.clear();
-    }
-  }
+  const std::vector<std::string> joint_names = joint_model_group_->getActiveJointModelNames();
+  // Default all joint weights to 1.0
+  joint_weights_ = std::vector<double>(joint_names.size(), 1.0);
 
-  // by default assign weights of 1.0 to all joints
-  joint_weights_ = std::vector<double>(active_names.size(), 1.0);
-  if (weights.empty())  // indicates default case
-    return;
-
-  // modify weights of listed joints
-  assert(names.size() == weights.size());
-  for (size_t i = 0; i != names.size(); ++i)
+  // Check if joint weight is assigned in kinematics YAML
+  // Loop through map (key: joint name and value: Struct with a weight member variable)
+  for (const auto& joint_weight : params_.joints_map)
   {
-    auto it = std::find(active_names.begin(), active_names.end(), names[i]);
-    if (it == active_names.cend())
-      RCLCPP_WARN(LOGGER, "Joint '%s' is not an active joint in group '%s'", names[i].c_str(),
+    // Check if joint is an active joint in the group
+    const auto joint_name = joint_weight.first;
+    auto it = std::find(joint_names.begin(), joint_names.end(), joint_name);
+    if (it == joint_names.cend())
+    {
+      RCLCPP_WARN(LOGGER, "Joint '%s' is not an active joint in group '%s'", joint_name.c_str(),
                   joint_model_group_->getName().c_str());
-    else if (weights[i] < 0.0)
-      RCLCPP_WARN(LOGGER, "Negative weight %f for joint '%s' will be ignored", weights[i], names[i].c_str());
-    else
-      joint_weights_[it - active_names.begin()] = weights[i];
+      continue;
+    }
+
+    // Find index of the joint name and assign weight to the coressponding index
+    joint_weights_.at(it - joint_names.begin()) = joint_weight.second.weight;
   }
+
   RCLCPP_INFO_STREAM(
       LOGGER, "Joint weights for group '"
                   << getGroupName() << "': \n"
