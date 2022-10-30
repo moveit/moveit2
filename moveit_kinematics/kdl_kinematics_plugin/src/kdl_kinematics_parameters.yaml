@@ -10,6 +10,9 @@ kdl_kinematics:
       type: double,
       default_value: 1.0,
       description: "Joint weight",
+      validation: {
+        gt<>: [ 0.0 ]
+      }
     }
 
   max_solver_iterations: {
