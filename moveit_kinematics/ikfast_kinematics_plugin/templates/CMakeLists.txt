@@ -20,7 +20,7 @@ include_directories(include)
 
 generate_parameter_library(
   ikfast_kinematics_parameters # cmake target name for the parameter library
-  ikfast_kinematics_parameters.yaml # path to input yaml file
+  src/ikfast_kinematics_parameters.yaml # path to input yaml file
 )
 
 set(IKFAST_LIBRARY_NAME _LIBRARY_NAME_)
