@@ -29,6 +29,7 @@ set(THIS_PACKAGE_INCLUDE_DIRS
 )
 
 set(THIS_PACKAGE_LIBRARIES
+  cached_ik_kinematics_parameters
   moveit_cached_ik_kinematics_base
   moveit_cached_ik_kinematics_plugin
   moveit_kdl_kinematics_plugin
