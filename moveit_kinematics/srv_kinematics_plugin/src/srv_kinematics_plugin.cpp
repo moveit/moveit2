@@ -64,6 +64,11 @@ bool SrvKinematicsPlugin::initialize(const rclcpp::Node::SharedPtr& node, const 
 
   RCLCPP_INFO(LOGGER, "SrvKinematicsPlugin initializing");
 
+  // Get Solver Parameters
+  std::string kinematics_param_prefix = "robot_description_kinematics." + group_name;
+  param_listener_ = std::make_shared<srv_kinematics::ParamListener>(node, kinematics_param_prefix);
+  params_ = param_listener_->get_params();
+
   storeValues(robot_model, group_name, base_frame, tip_frames, search_discretization);
   joint_model_group_ = robot_model_->getJointModelGroup(group_name);
   if (!joint_model_group_)
@@ -107,18 +112,13 @@ bool SrvKinematicsPlugin::initialize(const rclcpp::Node::SharedPtr& node, const 
     ik_group_info_.link_names.push_back(tip_frame);
   }
 
-  // Choose what ROS service to send IK requests to
-  RCLCPP_DEBUG(LOGGER, "Looking for ROS service name on rosparam server with param: "
-                       "/kinematics_solver_service_name");
-  std::string ik_service_name;
-  lookupParam(node_, "kinematics_solver_service_name", ik_service_name, std::string("solve_ik"));
-
   // Setup the joint state groups that we need
   robot_state_ = std::make_shared<moveit::core::RobotState>(robot_model_);
   robot_state_->setToDefaultValues();
 
   // Create the ROS2 service client
-  ik_service_client_ = node_->create_client<moveit_msgs::srv::GetPositionIK>(ik_service_name);
+  RCLCPP_DEBUG(LOGGER, "IK Service client topic : %s", params_.kinematics_solver_service_name.c_str());
+  ik_service_client_ = node_->create_client<moveit_msgs::srv::GetPositionIK>(params_.kinematics_solver_service_name);
 
   if (!ik_service_client_->wait_for_service(std::chrono::seconds(1)))  // wait 0.1 seconds, blocking
     RCLCPP_WARN_STREAM(LOGGER,

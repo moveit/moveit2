@@ -152,5 +152,8 @@ private:
   rclcpp::Client<moveit_msgs::srv::GetPositionIK>::SharedPtr ik_service_client_;
 
   rclcpp::Node::SharedPtr node_;
+
+  std::shared_ptr<srv_kinematics::ParamListener> param_listener_;
+  srv_kinematics::Params params_;
 };
 }  // namespace srv_kinematics_plugin
