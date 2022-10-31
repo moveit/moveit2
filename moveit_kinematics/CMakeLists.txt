@@ -32,6 +32,7 @@ set(THIS_PACKAGE_LIBRARIES
   moveit_cached_ik_kinematics_base
   moveit_cached_ik_kinematics_plugin
   moveit_kdl_kinematics_plugin
+  lma_kinematics_parameters
   moveit_lma_kinematics_plugin
   moveit_srv_kinematics_plugin
 )
