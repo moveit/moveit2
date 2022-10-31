@@ -17,6 +17,11 @@ find_package(LAPACK REQUIRED)
 
 include_directories(include)
 
+generate_parameter_library(
+  ikfast_kinematics_parameters # cmake target name for the parameter library
+  ikfast_kinematics_parameters.yaml # path to input yaml file
+)
+
 set(IKFAST_LIBRARY_NAME _LIBRARY_NAME_)
 add_library(${IKFAST_LIBRARY_NAME} SHARED src/_ROBOT_NAME___GROUP_NAME__ikfast_moveit_plugin.cpp)
 ament_target_dependencies(${IKFAST_LIBRARY_NAME}
@@ -30,7 +35,11 @@ ament_target_dependencies(${IKFAST_LIBRARY_NAME}
 # suppress warnings about unused variables in OpenRave's solver code
 target_compile_options(${IKFAST_LIBRARY_NAME} PRIVATE -Wno-unused-variable -Wno-unused-parameter)
 
-install(TARGETS ${IKFAST_LIBRARY_NAME}
+target_link_libraries(${MOVEIT_LIB_NAME}
+  ikfast_kinematics_parameters
+)
+
+install(TARGETS ${IKFAST_LIBRARY_NAME} ikfast_kinematics_parameters
   EXPORT ${PROJECT_NAME}Targets
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
