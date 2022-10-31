@@ -413,6 +413,10 @@ bool IKFastKinematicsPlugin::initialize(const rclcpp::Node::SharedPtr& node, con
     return false;
   }
 
+  std::string kinematics_param_prefix = "robot_description_kinematics." + group_name;
+  param_listener_ = std::make_shared<prbt_ikfast_kinematics::ParamListener>(node, kinematics_param_prefix);
+  params_ = param_listener_->get_params();
+
   storeValues(robot_model, group_name, base_frame, tip_frames, search_discretization);
 
   RCLCPP_INFO_STREAM(LOGGER, "Using link_prefix: '" << params_.link_prefix << "'");
