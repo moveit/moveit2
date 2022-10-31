@@ -1,6 +1,7 @@
 kdl_kinematics:
   joints: {
     type: string_array,
+    default_value: [],
     description: "Joints names to assign weights",
   }
 
