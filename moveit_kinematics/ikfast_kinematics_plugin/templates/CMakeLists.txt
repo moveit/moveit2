@@ -14,6 +14,7 @@ find_package(rclcpp REQUIRED)
 find_package(tf2_kdl REQUIRED)
 find_package(tf2_eigen REQUIRED)
 find_package(LAPACK REQUIRED)
+find_package(generate_parameter_library REQUIRED)
 
 include_directories(include)
 
@@ -53,4 +54,5 @@ ament_export_dependencies(pluginlib)
 ament_export_dependencies(rclcpp)
 ament_export_dependencies(tf2_kdl)
 ament_export_dependencies(tf2_eigen)
+ament_export_dependencies(generate_parameter_library)
 ament_package()
