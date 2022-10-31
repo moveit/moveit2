@@ -37,7 +37,7 @@ jobs:
       AFTER_SETUP_UPSTREAM_WORKSPACE: vcs pull $BASEDIR/upstream_ws/src
       # Uninstall binaries that are duplicated in the .repos file
       # TODO(andyz): remove this once a sync containing 35b93c8 happens
-      AFTER_SETUP_UPSTREAM_WORKSPACE_EMBED: sudo apt remove ros-${{ matrix.env.ROS_DISTRO }}-moveit-msgs -y
+      AFTER_SETUP_UPSTREAM_WORKSPACE_EMBED: sudo apt remove -y ros-${{ matrix.env.ROS_DISTRO }}-moveit-msgs || true
       AFTER_SETUP_DOWNSTREAM_WORKSPACE: vcs pull $BASEDIR/downstream_ws/src
       # Clear the ccache stats before and log the stats after the build
       AFTER_SETUP_CCACHE: ccache --zero-stats --max-size=10.0G
