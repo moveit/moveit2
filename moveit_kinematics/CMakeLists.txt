@@ -34,6 +34,7 @@ set(THIS_PACKAGE_LIBRARIES
   moveit_kdl_kinematics_plugin
   lma_kinematics_parameters
   moveit_lma_kinematics_plugin
+  srv_kinematics_parameters
   moveit_srv_kinematics_plugin
 )
 
