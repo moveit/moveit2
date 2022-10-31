@@ -43,6 +43,7 @@
 
 // ROS2
 #include <rclcpp/rclcpp.hpp>
+#include <srv_kinematics_parameters.hpp>
 
 // System
 #include <memory>
