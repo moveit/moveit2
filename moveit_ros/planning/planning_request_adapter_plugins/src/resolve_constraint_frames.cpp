@@ -58,9 +58,11 @@ public:
     return "Resolve constraint frames to robot links";
   }
 
-  bool adaptAndPlan(const PlannerFn& planner, const planning_scene::PlanningSceneConstPtr& planning_scene,
-                    const planning_interface::MotionPlanRequest& req, planning_interface::MotionPlanResponse& res,
-                    std::vector<std::size_t>& /*added_path_index*/) const override
+  moveit::core::MoveItErrorCode adaptAndPlan(const PlannerFn& planner,
+                                             const planning_scene::PlanningSceneConstPtr& planning_scene,
+                                             const planning_interface::MotionPlanRequest& req,
+                                             planning_interface::MotionPlanResponse& res,
+                                             std::vector<std::size_t>& /*added_path_index*/) const override
   {
     RCLCPP_DEBUG(LOGGER, "Running '%s'", getDescription().c_str());
     planning_interface::MotionPlanRequest modified = req;
@@ -69,8 +71,7 @@ public:
     {
       kinematic_constraints::resolveConstraintFrames(planning_scene->getCurrentState(), constraint);
     }
-    moveit::core::MoveItErrorCode moveit_code = planner(planning_scene, modified, res);
-    return bool(moveit_code);
+    return planner(planning_scene, modified, res);
   }
 };
 

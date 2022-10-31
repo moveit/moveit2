@@ -72,9 +72,11 @@ public:
     return "Fix Start State In Collision";
   }
 
-  bool adaptAndPlan(const PlannerFn& planner, const planning_scene::PlanningSceneConstPtr& planning_scene,
-                    const planning_interface::MotionPlanRequest& req, planning_interface::MotionPlanResponse& res,
-                    std::vector<std::size_t>& added_path_index) const override
+  moveit::core::MoveItErrorCode adaptAndPlan(const PlannerFn& planner,
+                                             const planning_scene::PlanningSceneConstPtr& planning_scene,
+                                             const planning_interface::MotionPlanRequest& req,
+                                             planning_interface::MotionPlanResponse& res,
+                                             std::vector<std::size_t>& added_path_index) const override
   {
     RCLCPP_DEBUG(LOGGER, "Running '%s'", getDescription().c_str());
 
@@ -145,7 +147,7 @@ public:
             added_index++;
           added_path_index.push_back(0);
         }
-        return bool(moveit_code);
+        return moveit_code;
       }
       else
       {
@@ -154,7 +156,8 @@ public:
                     "attempts).",
                     jiggle_fraction_, sampling_attempts_);
         res.error_code_.val = moveit_msgs::msg::MoveItErrorCodes::START_STATE_IN_COLLISION;
-        return false;
+        return moveit::core::MoveItErrorCode(moveit_msgs::msg::MoveItErrorCodes::START_STATE_IN_COLLISION);
+        ;
       }
     }
     else
@@ -163,8 +166,7 @@ public:
         RCLCPP_DEBUG(LOGGER, "Start state is valid");
       else
         RCLCPP_DEBUG(LOGGER, "Start state is valid with respect to group %s", creq.group_name.c_str());
-      moveit::core::MoveItErrorCode moveit_code = planner(planning_scene, req, res);
-      return bool(moveit_code);
+      return planner(planning_scene, req, res);
     }
   }
 

@@ -64,9 +64,11 @@ public:
     return "Add Time Optimal Parameterization";
   }
 
-  bool adaptAndPlan(const PlannerFn& planner, const planning_scene::PlanningSceneConstPtr& planning_scene,
-                    const planning_interface::MotionPlanRequest& req, planning_interface::MotionPlanResponse& res,
-                    std::vector<std::size_t>& /*added_path_index*/) const override
+  moveit::core::MoveItErrorCode adaptAndPlan(const PlannerFn& planner,
+                                             const planning_scene::PlanningSceneConstPtr& planning_scene,
+                                             const planning_interface::MotionPlanRequest& req,
+                                             planning_interface::MotionPlanResponse& res,
+                                             std::vector<std::size_t>& /*added_path_index*/) const override
   {
     moveit::core::MoveItErrorCode moveit_code = planner(planning_scene, req, res);
     if (bool(moveit_code) && res.trajectory_)
@@ -81,7 +83,7 @@ public:
       }
     }
 
-    return bool(moveit_code);
+    return moveit_code;
   }
 
 protected:

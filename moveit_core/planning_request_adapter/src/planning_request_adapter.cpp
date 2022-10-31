@@ -45,45 +45,50 @@ rclcpp::Logger LOGGER = rclcpp::get_logger("moveit").get_child("planning_request
 
 namespace
 {
-bool callPlannerInterfaceSolve(const planning_interface::PlannerManager& planner,
-                               const planning_scene::PlanningSceneConstPtr& planning_scene,
-                               const planning_interface::MotionPlanRequest& req,
-                               planning_interface::MotionPlanResponse& res)
+moveit::core::MoveItErrorCode callPlannerInterfaceSolve(const planning_interface::PlannerManager& planner,
+                                                        const planning_scene::PlanningSceneConstPtr& planning_scene,
+                                                        const planning_interface::MotionPlanRequest& req,
+                                                        planning_interface::MotionPlanResponse& res)
 {
   planning_interface::PlanningContextPtr context = planner.getPlanningContext(planning_scene, req, res.error_code_);
   if (context)
-    return context->solve(res);
+  {
+    // TODO(andyz): consider returning a moveit::core::MoveItErrorCode from context->solve()
+    bool result = context->solve(res);
+    return result ? moveit::core::MoveItErrorCode::SUCCESS : moveit::core::MoveItErrorCode::FAILURE;
+  }
   else
-    return false;
+  {
+    return moveit::core::MoveItErrorCode::FAILURE;
+  }
 }
 
-void callAdapter(const PlanningRequestAdapter& adapter, const PlanningRequestAdapter::PlannerFn& planner,
-                 const planning_scene::PlanningSceneConstPtr& planning_scene,
-                 const planning_interface::MotionPlanRequest& req, planning_interface::MotionPlanResponse& res,
-                 std::vector<std::size_t>& added_path_index)
+moveit::core::MoveItErrorCode callAdapter(const PlanningRequestAdapter& adapter,
+                                          const PlanningRequestAdapter::PlannerFn& planner,
+                                          const planning_scene::PlanningSceneConstPtr& planning_scene,
+                                          const planning_interface::MotionPlanRequest& req,
+                                          planning_interface::MotionPlanResponse& res,
+                                          std::vector<std::size_t>& added_path_index)
 {
   try
   {
-    adapter.adaptAndPlan(planner, planning_scene, req, res, added_path_index);
-    return;
+    return adapter.adaptAndPlan(planner, planning_scene, req, res, added_path_index);
   }
   catch (std::exception& ex)
   {
     RCLCPP_ERROR(LOGGER, "Exception caught executing adapter '%s': %s\nSkipping adapter instead.",
                  adapter.getDescription().c_str(), ex.what());
     added_path_index.clear();
-    planner(planning_scene, req, res);
-    return;
+    return planner(planning_scene, req, res);
   }
 }
 
 }  // namespace
 
-bool PlanningRequestAdapter::adaptAndPlan(const planning_interface::PlannerManagerPtr& planner,
-                                          const planning_scene::PlanningSceneConstPtr& planning_scene,
-                                          const planning_interface::MotionPlanRequest& req,
-                                          planning_interface::MotionPlanResponse& res,
-                                          std::vector<std::size_t>& added_path_index) const
+moveit::core::MoveItErrorCode PlanningRequestAdapter::adaptAndPlan(
+    const planning_interface::PlannerManagerPtr& planner, const planning_scene::PlanningSceneConstPtr& planning_scene,
+    const planning_interface::MotionPlanRequest& req, planning_interface::MotionPlanResponse& res,
+    std::vector<std::size_t>& added_path_index) const
 {
   return adaptAndPlan(
       [&planner](const planning_scene::PlanningSceneConstPtr& scene, const planning_interface::MotionPlanRequest& req,
@@ -93,29 +98,26 @@ bool PlanningRequestAdapter::adaptAndPlan(const planning_interface::PlannerManag
       planning_scene, req, res, added_path_index);
 }
 
-bool PlanningRequestAdapter::adaptAndPlan(const planning_interface::PlannerManagerPtr& planner,
-                                          const planning_scene::PlanningSceneConstPtr& planning_scene,
-                                          const planning_interface::MotionPlanRequest& req,
-                                          planning_interface::MotionPlanResponse& res) const
+moveit::core::MoveItErrorCode PlanningRequestAdapter::adaptAndPlan(
+    const planning_interface::PlannerManagerPtr& planner, const planning_scene::PlanningSceneConstPtr& planning_scene,
+    const planning_interface::MotionPlanRequest& req, planning_interface::MotionPlanResponse& res) const
 {
   std::vector<std::size_t> dummy;
   return adaptAndPlan(planner, planning_scene, req, res, dummy);
 }
 
-bool PlanningRequestAdapterChain::adaptAndPlan(const planning_interface::PlannerManagerPtr& planner,
-                                               const planning_scene::PlanningSceneConstPtr& planning_scene,
-                                               const planning_interface::MotionPlanRequest& req,
-                                               planning_interface::MotionPlanResponse& res) const
+moveit::core::MoveItErrorCode PlanningRequestAdapterChain::adaptAndPlan(
+    const planning_interface::PlannerManagerPtr& planner, const planning_scene::PlanningSceneConstPtr& planning_scene,
+    const planning_interface::MotionPlanRequest& req, planning_interface::MotionPlanResponse& res) const
 {
   std::vector<std::size_t> dummy;
   return adaptAndPlan(planner, planning_scene, req, res, dummy);
 }
 
-bool PlanningRequestAdapterChain::adaptAndPlan(const planning_interface::PlannerManagerPtr& planner,
-                                               const planning_scene::PlanningSceneConstPtr& planning_scene,
-                                               const planning_interface::MotionPlanRequest& req,
-                                               planning_interface::MotionPlanResponse& res,
-                                               std::vector<std::size_t>& added_path_index) const
+moveit::core::MoveItErrorCode PlanningRequestAdapterChain::adaptAndPlan(
+    const planning_interface::PlannerManagerPtr& planner, const planning_scene::PlanningSceneConstPtr& planning_scene,
+    const planning_interface::MotionPlanRequest& req, planning_interface::MotionPlanResponse& res,
+    std::vector<std::size_t>& added_path_index) const
 {
   // if there are no adapters, run the planner directly
   if (adapters_.empty())
@@ -143,8 +145,7 @@ bool PlanningRequestAdapterChain::adaptAndPlan(const planning_interface::Planner
                const planning_scene::PlanningSceneConstPtr& scene, const planning_interface::MotionPlanRequest& req,
                planning_interface::MotionPlanResponse& res) {
         // Abort pipeline and return in case of failure
-        callAdapter(adapter, fn, scene, req, res, added_path_index);
-        return (res.error_code_.val == moveit_msgs::msg::MoveItErrorCodes::SUCCESS);
+        return callAdapter(adapter, fn, scene, req, res, added_path_index);
       };
     }
 
@@ -163,7 +164,7 @@ bool PlanningRequestAdapterChain::adaptAndPlan(const planning_interface::Planner
       }
     }
     std::sort(added_path_index.begin(), added_path_index.end());
-    return bool(moveit_code);
+    return moveit_code;
   }
 }
 

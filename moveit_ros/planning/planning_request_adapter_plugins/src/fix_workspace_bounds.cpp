@@ -62,9 +62,11 @@ public:
     return "Fix Workspace Bounds";
   }
 
-  bool adaptAndPlan(const PlannerFn& planner, const planning_scene::PlanningSceneConstPtr& planning_scene,
-                    const planning_interface::MotionPlanRequest& req, planning_interface::MotionPlanResponse& res,
-                    std::vector<std::size_t>& /*added_path_index*/) const override
+  moveit::core::MoveItErrorCode adaptAndPlan(const PlannerFn& planner,
+                                             const planning_scene::PlanningSceneConstPtr& planning_scene,
+                                             const planning_interface::MotionPlanRequest& req,
+                                             planning_interface::MotionPlanResponse& res,
+                                             std::vector<std::size_t>& /*added_path_index*/) const override
   {
     RCLCPP_DEBUG(LOGGER, "Running '%s'", getDescription().c_str());
     const moveit_msgs::msg::WorkspaceParameters& wparams = req.workspace_parameters;
@@ -77,12 +79,10 @@ public:
       moveit_msgs::msg::WorkspaceParameters& default_wp = req2.workspace_parameters;
       default_wp.min_corner.x = default_wp.min_corner.y = default_wp.min_corner.z = -workspace_extent_;
       default_wp.max_corner.x = default_wp.max_corner.y = default_wp.max_corner.z = workspace_extent_;
-      moveit::core::MoveItErrorCode moveit_code = planner(planning_scene, req2, res);
-      return bool(moveit_code);
+      return planner(planning_scene, req2, res);
     }
 
-    moveit::core::MoveItErrorCode moveit_code = planner(planning_scene, req, res);
-    return bool(moveit_code);
+    return planner(planning_scene, req, res);
   }
 
 private:

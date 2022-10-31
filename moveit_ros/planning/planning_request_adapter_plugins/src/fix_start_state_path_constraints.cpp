@@ -63,9 +63,11 @@ public:
     return "Fix Start State Path Constraints";
   }
 
-  bool adaptAndPlan(const PlannerFn& planner, const planning_scene::PlanningSceneConstPtr& planning_scene,
-                    const planning_interface::MotionPlanRequest& req, planning_interface::MotionPlanResponse& res,
-                    std::vector<std::size_t>& added_path_index) const override
+  moveit::core::MoveItErrorCode adaptAndPlan(const PlannerFn& planner,
+                                             const planning_scene::PlanningSceneConstPtr& planning_scene,
+                                             const planning_interface::MotionPlanRequest& req,
+                                             planning_interface::MotionPlanResponse& res,
+                                             std::vector<std::size_t>& added_path_index) const override
   {
     RCLCPP_DEBUG(LOGGER, "Running '%s'", getDescription().c_str());
 
@@ -118,21 +120,22 @@ public:
           // we need to append the solution paths.
           res2.trajectory_->append(*res.trajectory_, 0.0);
           res2.trajectory_->swap(*res.trajectory_);
-          return true;
+          return moveit_msgs::msg::MoveItErrorCodes::SUCCESS;
         }
       }
 
       if (!bool(solved1) || !bool(solved2))
       {
         RCLCPP_WARN(LOGGER, "Unable to meet path constraints at the start.");
+        moveit::core::MoveItErrorCode moveit_code(
+            moveit_msgs::msg::MoveItErrorCodes::START_STATE_VIOLATES_PATH_CONSTRAINTS);
         res.error_code_.val = moveit_msgs::msg::MoveItErrorCodes::START_STATE_VIOLATES_PATH_CONSTRAINTS;
-        return false;
+        return moveit_code;
       }
     }
 
     RCLCPP_DEBUG(LOGGER, "Path constraints are OK. Continuing without `fix_start_state_path_constraints`.");
-    moveit::core::MoveItErrorCode moveit_code = planner(planning_scene, req, res);
-    return bool(moveit_code);
+    return planner(planning_scene, req, res);
   }
 };
 }  // namespace default_planner_request_adapters
