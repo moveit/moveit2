@@ -64,12 +64,14 @@ public:
     return "Add Time Optimal Parameterization";
   }
 
-  bool adaptAndPlan(const PlannerFn& planner, const planning_scene::PlanningSceneConstPtr& planning_scene,
-                    const planning_interface::MotionPlanRequest& req, planning_interface::MotionPlanResponse& res,
-                    std::vector<std::size_t>& /*added_path_index*/) const override
+  moveit::core::MoveItErrorCode adaptAndPlan(const PlannerFn& planner,
+                                             const planning_scene::PlanningSceneConstPtr& planning_scene,
+                                             const planning_interface::MotionPlanRequest& req,
+                                             planning_interface::MotionPlanResponse& res,
+                                             std::vector<std::size_t>& /*added_path_index*/) const override
   {
-    bool result = planner(planning_scene, req, res);
-    if (result && res.trajectory_)
+    moveit::core::MoveItErrorCode moveit_code = planner(planning_scene, req, res);
+    if (bool(moveit_code) && res.trajectory_)
     {
       RCLCPP_DEBUG(LOGGER, " Running '%s'", getDescription().c_str());
       TimeOptimalTrajectoryGeneration totg(path_tolerance_, resample_dt_, min_angle_change_);
@@ -77,11 +79,11 @@ public:
                                   req.max_acceleration_scaling_factor))
       {
         RCLCPP_WARN(LOGGER, " Time parametrization for the solution path failed.");
-        result = false;
+        moveit_code = moveit::core::MoveItErrorCode::FAILURE;
       }
     }
 
-    return result;
+    return moveit_code;
   }
 
 protected:
