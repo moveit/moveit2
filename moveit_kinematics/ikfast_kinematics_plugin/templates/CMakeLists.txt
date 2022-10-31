@@ -36,7 +36,7 @@ ament_target_dependencies(${IKFAST_LIBRARY_NAME}
 # suppress warnings about unused variables in OpenRave's solver code
 target_compile_options(${IKFAST_LIBRARY_NAME} PRIVATE -Wno-unused-variable -Wno-unused-parameter)
 
-target_link_libraries(${MOVEIT_LIB_NAME}
+target_link_libraries(${IKFAST_LIBRARY_NAME}
   ikfast_kinematics_parameters
 )
 
