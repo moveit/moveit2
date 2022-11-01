@@ -142,9 +142,8 @@ inline std::string error_code_to_string(MoveItErrorCode error_code)
       return std::string("ABORT");
     case moveit::core::MoveItErrorCode::NO_IK_SOLUTION:
       return std::string("NO_IK_SOLUTION");
-    default:
-      return std::string("Unrecognized MoveItErrorCode. This should never happen!");
   }
+  return std::string("Unrecognized MoveItErrorCode. This should never happen!");
 }
 
 }  // namespace core
