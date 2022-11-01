@@ -43,6 +43,7 @@
 #include <rclcpp/time.hpp>
 #include <tf2_eigen/tf2_eigen.hpp>
 #include <numeric>
+#include <optional>
 
 namespace robot_trajectory
 {
@@ -598,6 +599,73 @@ std::ostream& operator<<(std::ostream& out, const RobotTrajectory& trajectory)
 {
   trajectory.print(out);
   return out;
+}
+
+double path_length(RobotTrajectory const& trajectory)
+{
+  auto trajectory_length = 0.0;
+  for (std::size_t index = 1; index < trajectory.getWayPointCount(); ++index)
+  {
+    auto const& first = trajectory.getWayPoint(index - 1);
+    auto const& second = trajectory.getWayPoint(index);
+    trajectory_length += first.distance(second);
+  }
+  return trajectory_length;
+}
+
+std::optional<double> smoothness(RobotTrajectory const& trajectory)
+{
+  if (trajectory.getWayPointCount() > 2)
+  {
+    auto smoothness = 0.0;
+    double a = trajectory.getWayPoint(0).distance(trajectory.getWayPoint(1));
+    for (std::size_t k = 2; k < trajectory.getWayPointCount(); ++k)
+    {
+      // view the path as a sequence of segments, and look at the triangles it forms:
+      //          s1
+      //          /\          s4
+      //      a  /  \ b       |
+      //        /    \        |
+      //       /......\_______|
+      //     s0    c   s2     s3
+
+      // use Pythagoras generalized theorem to find the cos of the angle between segments a and b
+      double b = trajectory.getWayPoint(k - 1).distance(trajectory.getWayPoint(k));
+      double cdist = trajectory.getWayPoint(k - 2).distance(trajectory.getWayPoint(k));
+      double acos_value = (a * a + b * b - cdist * cdist) / (2.0 * a * b);
+      if (acos_value > -1.0 && acos_value < 1.0)
+      {
+        // the smoothness is actually the outside angle of the one we compute
+        double angle = (M_PI - acos(acos_value));
+
+        // and we normalize by the length of the segments
+        double u = 2.0 * angle;  /// (a + b);
+        smoothness += u * u;
+      }
+      a = b;
+    }
+    smoothness /= (double)trajectory.getWayPointCount();
+    return smoothness;
+  }
+  // In case the path is to short, no value is returned
+  return std::nullopt;
+}
+
+std::optional<double> waypoint_density(RobotTrajectory const& trajectory)
+{
+  // Only calculate density if more than one waypoint exists
+  if (trajectory.getWayPointCount() > 1)
+  {
+    // Calculate path length
+    auto const length = path_length(trajectory);
+    if (length > 0.0)
+    {
+      auto density = (double)trajectory.getWayPointCount() / length;
+      return density;
+    }
+  }
+  // Trajectory is empty, a single point or path length is zero
+  return std::nullopt;
 }
 
 }  // end of namespace robot_trajectory

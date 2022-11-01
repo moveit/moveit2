@@ -42,6 +42,7 @@
 #include <moveit_msgs/msg/robot_state.hpp>
 #include <deque>
 #include <memory>
+#include <optional>
 
 #include "rcl/error_handling.h"
 #include "rcl/time.h"
@@ -386,5 +387,25 @@ private:
 
 /** @brief Operator overload for printing trajectory to a stream */
 std::ostream& operator<<(std::ostream& out, const RobotTrajectory& trajectory);
+
+/// \brief Calculate the path length of a given trajectory based on the
+/// accumulated robot state distances.
+/// The distance between two robot states is calculated based on the sum of
+/// active joint distances between the two states (L1 norm).
+/// \param[in] trajectory Given robot trajectory
+/// \return Length of the robot trajectory [rad]
+[[nodiscard]] double path_length(RobotTrajectory const& trajectory);
+
+/// \brief Calculate the smoothness of a given trajectory
+/// \param[in] trajectory Given robot trajectory
+/// \return Smoothness of the given trajectory
+/// or nullopt if it is not possible to calculate the smoothness
+[[nodiscard]] std::optional<double> smoothness(RobotTrajectory const& trajectory);
+
+/// \brief Calculate the waypoint density of a trajectory
+/// \param[in] trajectory Given robot trajectory
+/// \return Waypoint density of the given trajectory
+/// or nullopt if it is not possible to calculate the density
+[[nodiscard]] std::optional<double> waypoint_density(RobotTrajectory const& trajectory);
 
 }  // namespace robot_trajectory
