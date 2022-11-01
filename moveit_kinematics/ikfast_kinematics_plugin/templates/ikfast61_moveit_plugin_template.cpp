@@ -47,6 +47,7 @@
 #include <Eigen/Geometry>
 #include <tf2_kdl/tf2_kdl.hpp>
 #include <tf2_eigen/tf2_eigen.hpp>
+#include <ikfast_kinematics_parameters.hpp>
 
 using namespace moveit::core;
 
@@ -160,13 +161,13 @@ class IKFastKinematicsPlugin : public kinematics::KinematicsBase
   const size_t num_joints_;
   std::vector<int> free_params_;
 
+  std::shared_ptr<ikfast_kinematics::ParamListener> param_listener_;
+  ikfast_kinematics::Params params_;
+
   // The ikfast and base frame are the start and end of the kinematic chain for which the
   // IKFast analytic solution was generated.
   const std::string IKFAST_TIP_FRAME_ = "_EEF_LINK_";
   const std::string IKFAST_BASE_FRAME_ = "_BASE_LINK_";
-
-  // prefix added to tip- and baseframe to allow different namespaces or multi-robot setups
-  std::string link_prefix_;
 
   // The transform tip and base bool are set to true if this solver is used with a kinematic
   // chain that extends beyond the ikfast tip and base frame. The solution will be valid so
@@ -409,15 +410,14 @@ bool IKFastKinematicsPlugin::initialize(const rclcpp::Node::SharedPtr& node,
     return false;
   }
 
+  // Get Solver Parameters
+  std::string kinematics_param_prefix = "robot_description_kinematics." + group_name;
+  param_listener_ = std::make_shared<ikfast_kinematics::ParamListener>(node, kinematics_param_prefix);
+  params_ = param_listener_->get_params();
+
   storeValues(robot_model, group_name, base_frame, tip_frames, search_discretization);
-  if (!lookupParam(node, "link_prefix", link_prefix_, std::string("")))
-  {
-    RCLCPP_INFO(LOGGER, "Using empty link_prefix.");
-  }
-  else
-  {
-    RCLCPP_INFO_STREAM(LOGGER, "Using link_prefix: '" << link_prefix_ << "'");
-  }
+
+  RCLCPP_INFO_STREAM(LOGGER, "Using link_prefix: '" << params_.link_prefix << "'");
 
   // verbose error output. subsequent checks in computeRelativeTransform return false then
   if (!robot_model.hasLinkModel(tip_frames_[0]))
@@ -425,12 +425,12 @@ bool IKFastKinematicsPlugin::initialize(const rclcpp::Node::SharedPtr& node,
   if (!robot_model.hasLinkModel(base_frame_))
     RCLCPP_ERROR_STREAM(LOGGER, "base_frame '" << base_frame_ << "' does not exist.");
 
-  if (!robot_model.hasLinkModel(link_prefix_ + IKFAST_TIP_FRAME_))
-    RCLCPP_ERROR_STREAM(LOGGER, "prefixed tip frame '" << link_prefix_ + IKFAST_TIP_FRAME_
+  if (!robot_model.hasLinkModel(params_.link_prefix + IKFAST_TIP_FRAME_))
+    RCLCPP_ERROR_STREAM(LOGGER, "prefixed tip frame '" << params_.link_prefix + IKFAST_TIP_FRAME_
                                                        << "' does not exist. "
                                                           "Please check your link_prefix parameter.");
-  if (!robot_model.hasLinkModel(link_prefix_ + IKFAST_BASE_FRAME_))
-    RCLCPP_ERROR_STREAM(LOGGER, "prefixed base frame '" << link_prefix_ + IKFAST_BASE_FRAME_
+  if (!robot_model.hasLinkModel(params_.link_prefix + IKFAST_BASE_FRAME_))
+    RCLCPP_ERROR_STREAM(LOGGER, "prefixed base frame '" << params_.link_prefix + IKFAST_BASE_FRAME_
                                                         << "' does not exist. "
                                                            "Please check your link_prefix parameter.");
   // This IKFast solution was generated with IKFAST_TIP_FRAME_ and IKFAST_BASE_FRAME_.
@@ -438,9 +438,9 @@ bool IKFastKinematicsPlugin::initialize(const rclcpp::Node::SharedPtr& node,
   // a robot mounted on a table or a robot with an end effector attached to the last link.
   // To support these use cases, we store the transform from the IKFAST_BASE_FRAME_ to the
   // base_frame_ and IKFAST_TIP_FRAME_ the tip_frame_ and transform to the input pose accordingly
-  if (!computeRelativeTransform(tip_frames_[0], link_prefix_ + IKFAST_TIP_FRAME_, group_tip_to_chain_tip_,
+  if (!computeRelativeTransform(tip_frames_[0], params_.link_prefix + IKFAST_TIP_FRAME_, group_tip_to_chain_tip_,
                                 tip_transform_required_) ||
-      !computeRelativeTransform(link_prefix_ + IKFAST_BASE_FRAME_, base_frame_, chain_base_to_group_base_,
+      !computeRelativeTransform(params_.link_prefix + IKFAST_BASE_FRAME_, base_frame_, chain_base_to_group_base_,
                                 base_transform_required_))
   {
     return false;
