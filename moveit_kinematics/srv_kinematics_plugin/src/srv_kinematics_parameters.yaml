@@ -1,0 +1,9 @@
+srv_kinematics:
+  kinematics_solver_service_name: {
+    type: string,
+    default_value: "solve_ik",
+    description: "Kinematics Solver Service Name",
+    validation: {
+      not_empty<>: []
+    }
+  }

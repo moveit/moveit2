@@ -54,13 +54,10 @@ void CachedIKKinematicsPlugin<KinematicsPlugin>::initCache(const std::string& ro
                                                            const std::string& cache_name)
 {
   IKCache::Options opts;
-  int max_cache_size;  // rosparam can't handle unsigned int
-  kinematics::KinematicsBase::lookupParam(node_, "max_cache_size", max_cache_size,
-                                          static_cast<int>(opts.max_cache_size));
-  opts.max_cache_size = max_cache_size;
-  kinematics::KinematicsBase::lookupParam(node_, "min_pose_distance", opts.min_pose_distance, 1.0);
-  kinematics::KinematicsBase::lookupParam(node_, "min_joint_config_distance", opts.min_joint_config_distance, 1.0);
-  kinematics::KinematicsBase::lookupParam<std::string>(node_, "cached_ik_path", opts.cached_ik_path, "");
+  opts.max_cache_size = params_.max_cache_size;
+  opts.min_pose_distance = params_.min_pose_distance;
+  opts.min_joint_config_distance = params_.min_joint_config_distance;
+  opts.cached_ik_path = params_.cached_ik_path;
 
   cache_.initializeCache(robot_id, group_name, cache_name, KinematicsPlugin::getJointNames().size(), opts);
 
