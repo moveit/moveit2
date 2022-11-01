@@ -1,5 +1,10 @@
 set(MOVEIT_LIB_NAME moveit_kdl_kinematics_plugin)
 
+generate_parameter_library(
+  kdl_kinematics_parameters # cmake target name for the parameter library
+  src/kdl_kinematics_parameters.yaml # path to input yaml file
+)
+
 add_library(${MOVEIT_LIB_NAME} SHARED
   src/kdl_kinematics_plugin.cpp
   src/chainiksolver_vel_mimic_svd.cpp)
@@ -14,6 +19,10 @@ ament_target_dependencies(${MOVEIT_LIB_NAME}
   kdl_parser
   tf2_kdl
   EIGEN3
+)
+
+target_link_libraries(${MOVEIT_LIB_NAME}
+  kdl_kinematics_parameters
 )
 
 # prevent pluginlib from using boost
