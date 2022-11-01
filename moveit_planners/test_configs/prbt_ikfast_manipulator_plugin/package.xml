@@ -21,6 +21,7 @@
   <build_depend>tf2_eigen</build_depend>
   <build_depend>tf2_kdl</build_depend>
   <build_depend>tf2_eigen_kdl</build_depend>
+  <depend>generate_parameter_library</depend>
   <exec_depend>moveit_core</exec_depend>
   <exec_depend>pluginlib</exec_depend>
   <exec_depend>rclcpp</exec_depend>
