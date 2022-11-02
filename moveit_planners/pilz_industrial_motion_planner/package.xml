@@ -22,6 +22,7 @@
   <!-- TODO(henning): Enable when this is available
   <depend>joint_limits_interface</depend>
   -->
+  <depend>generate_parameter_library</depend>
   <depend>geometry_msgs</depend>
   <depend>moveit_ros_planning_interface</depend>
   <depend>moveit_msgs</depend>

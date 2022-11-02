@@ -107,11 +107,12 @@ protected:
 
     pilz_industrial_motion_planner::JointLimitsContainer joint_limits =
         testutils::createFakeLimits(robot_model_->getVariableNames());
-    pilz_industrial_motion_planner::CartesianLimit cartesian_limit;
-    cartesian_limit.setMaxRotationalVelocity(1.0 * M_PI);
-    cartesian_limit.setMaxTranslationalAcceleration(1.0 * M_PI);
-    cartesian_limit.setMaxTranslationalDeceleration(1.0 * M_PI);
-    cartesian_limit.setMaxTranslationalVelocity(1.0 * M_PI);
+
+    cartesian_limits::Params cartesian_limit;
+    cartesian_limit.max_trans_vel = 1.0 * M_PI;
+    cartesian_limit.max_trans_acc = 1.0 * M_PI;
+    cartesian_limit.max_trans_dec = 1.0 * M_PI;
+    cartesian_limit.max_rot_vel = 1.0 * M_PI;
 
     pilz_industrial_motion_planner::LimitsContainer limits;
     limits.setJointLimits(joint_limits);

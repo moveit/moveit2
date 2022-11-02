@@ -56,11 +56,7 @@ TrajectoryGeneratorLIN::TrajectoryGeneratorLIN(const moveit::core::RobotModelCon
                                                const LimitsContainer& planner_limits, const std::string& /*group_name*/)
   : TrajectoryGenerator::TrajectoryGenerator(robot_model, planner_limits)
 {
-  if (!planner_limits_.hasFullCartesianLimits())
-  {
-    RCLCPP_ERROR(LOGGER, "Cartesian limits not set for LIN trajectory generator.");
-    throw TrajectoryGeneratorInvalidLimitsException("Cartesian limits are not fully set for LIN trajectory generator.");
-  }
+  planner_limits_.printCartesianLimits();
 }
 
 void TrajectoryGeneratorLIN::extractMotionPlanInfo(const planning_scene::PlanningSceneConstPtr& scene,
@@ -188,8 +184,8 @@ std::unique_ptr<KDL::Path> TrajectoryGeneratorLIN::setPathLIN(const Eigen::Affin
   KDL::Frame kdl_start_pose, kdl_goal_pose;
   tf2::transformEigenToKDL(start_pose, kdl_start_pose);
   tf2::transformEigenToKDL(goal_pose, kdl_goal_pose);
-  double eqradius = planner_limits_.getCartesianLimits().getMaxTranslationalVelocity() /
-                    planner_limits_.getCartesianLimits().getMaxRotationalVelocity();
+  double eqradius =
+      planner_limits_.getCartesianLimits().max_trans_vel / planner_limits_.getCartesianLimits().max_rot_vel;
   KDL::RotationalInterpolation* rot_interpo = new KDL::RotationalInterpolation_SingleAxis();
 
   return std::unique_ptr<KDL::Path>(
