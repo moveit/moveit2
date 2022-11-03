@@ -120,45 +120,45 @@ move_group::MoveGroupCapability::clearSceneRobotState(const moveit_msgs::msg::Pl
 std::string move_group::MoveGroupCapability::getActionResultString(const moveit_msgs::msg::MoveItErrorCodes& error_code,
                                                                    bool planned_trajectory_empty, bool plan_only)
 {
-  if (error_code.val == moveit_msgs::msg::MoveItErrorCodes::SUCCESS)
+  switch (error_code.val)
   {
-    if (planned_trajectory_empty)
-      return "Requested path and goal constraints are already met.";
-    else
-    {
-      if (plan_only)
-        return "Motion plan was computed successfully.";
+    case moveit_msgs::msg::MoveItErrorCodes::SUCCESS:
+      if (planned_trajectory_empty)
+        return "Requested path and goal constraints are already met.";
       else
-        return "Solution was found and executed.";
-    }
+      {
+        if (plan_only)
+          return "Motion plan was computed successfully.";
+        else
+          return "Solution was found and executed.";
+      }
+    case moveit_msgs::msg::MoveItErrorCodes::INVALID_GROUP_NAME:
+      return "Must specify group in motion plan request";
+    case moveit_msgs::msg::MoveItErrorCodes::PLANNING_FAILED:
+    case moveit_msgs::msg::MoveItErrorCodes::INVALID_MOTION_PLAN:
+      if (planned_trajectory_empty)
+        return "No motion plan found. No execution attempted.";
+      else
+        return "Motion plan was found but it seems to be invalid (possibly due to postprocessing). Not executing.";
+    case moveit_msgs::msg::MoveItErrorCodes::UNABLE_TO_AQUIRE_SENSOR_DATA:
+      return "Motion plan was found but it seems to be too costly and looking around did not help.";
+    case moveit_msgs::msg::MoveItErrorCodes::MOTION_PLAN_INVALIDATED_BY_ENVIRONMENT_CHANGE:
+      return "Solution found but the environment changed during execution and the path was aborted";
+    case moveit_msgs::msg::MoveItErrorCodes::CONTROL_FAILED:
+      return "Solution found but controller failed during execution";
+    case moveit_msgs::msg::MoveItErrorCodes::TIMED_OUT:
+      return "Timeout reached";
+    case moveit_msgs::msg::MoveItErrorCodes::PREEMPTED:
+      return "Preempted";
+    case moveit_msgs::msg::MoveItErrorCodes::INVALID_GOAL_CONSTRAINTS:
+      return "Invalid goal constraints";
+    case moveit_msgs::msg::MoveItErrorCodes::INVALID_OBJECT_NAME:
+      return "Invalid object name";
+    case moveit_msgs::msg::MoveItErrorCodes::FAILURE:
+      return "Catastrophic failure";
+    default:
+      return "Unknown event";
   }
-  else if (error_code.val == moveit_msgs::msg::MoveItErrorCodes::INVALID_GROUP_NAME)
-    return "Must specify group in motion plan request";
-  else if (error_code.val == moveit_msgs::msg::MoveItErrorCodes::PLANNING_FAILED ||
-           error_code.val == moveit_msgs::msg::MoveItErrorCodes::INVALID_MOTION_PLAN)
-  {
-    if (planned_trajectory_empty)
-      return "No motion plan found. No execution attempted.";
-    else
-      return "Motion plan was found but it seems to be invalid (possibly due to postprocessing). Not executing.";
-  }
-  else if (error_code.val == moveit_msgs::msg::MoveItErrorCodes::UNABLE_TO_AQUIRE_SENSOR_DATA)
-    return "Motion plan was found but it seems to be too costly and looking around did not help.";
-  else if (error_code.val == moveit_msgs::msg::MoveItErrorCodes::MOTION_PLAN_INVALIDATED_BY_ENVIRONMENT_CHANGE)
-    return "Solution found but the environment changed during execution and the path was aborted";
-  else if (error_code.val == moveit_msgs::msg::MoveItErrorCodes::CONTROL_FAILED)
-    return "Solution found but controller failed during execution";
-  else if (error_code.val == moveit_msgs::msg::MoveItErrorCodes::TIMED_OUT)
-    return "Timeout reached";
-  else if (error_code.val == moveit_msgs::msg::MoveItErrorCodes::PREEMPTED)
-    return "Preempted";
-  else if (error_code.val == moveit_msgs::msg::MoveItErrorCodes::INVALID_GOAL_CONSTRAINTS)
-    return "Invalid goal constraints";
-  else if (error_code.val == moveit_msgs::msg::MoveItErrorCodes::INVALID_OBJECT_NAME)
-    return "Invalid object name";
-  else if (error_code.val == moveit_msgs::msg::MoveItErrorCodes::FAILURE)
-    return "Catastrophic failure";
-  return "Unknown event";
 }
 
 std::string move_group::MoveGroupCapability::stateToStr(MoveGroupState state) const
