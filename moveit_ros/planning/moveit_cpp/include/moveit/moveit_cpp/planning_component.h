@@ -50,7 +50,7 @@ namespace moveit_cpp
 {
 MOVEIT_CLASS_FORWARD(PlanningComponent);  // Defines PlanningComponentPtr, ConstPtr, WeakPtr... etc
 
-/// \brief A function to choose the solution with the shortest path from a vector of solutions
+/** \brief A function to choose the solution with the shortest path from a vector of solutions  */
 planning_interface::MotionPlanResponse
 getShortestSolution(const std::vector<planning_interface::MotionPlanResponse>& solutions);
 
@@ -120,11 +120,11 @@ public:
     std::vector<PlanRequestParameters> multi_plan_request_parameters;
   };
 
-  /// \brief A solution callback function type for the parallel planning API of planning component
+  /** \brief A solution callback function type for the parallel planning API of planning component  */
   typedef std::function<planning_interface::MotionPlanResponse(
       const std::vector<planning_interface::MotionPlanResponse>& solutions)>
       SolutionCallbackFunction;
-  /// \brief A stopping criterion callback function for the parallel planning API of planning component
+  /** \brief A stopping criterion callback function for the parallel planning API of planning component */
   typedef std::function<bool(const PlanSolutions& solutions,
                              const MultiPipelinePlanRequestParameters& plan_request_parameters)>
       StoppingCriterionFunction;
@@ -219,8 +219,6 @@ private:
   const std::string group_name_;
   // The robot_model_ member variable of MoveItCpp class will manually free the joint_model_group_ resources
   const moveit::core::JointModelGroup* joint_model_group_;
-
-  std::mutex plan_mutex_;
 
   // Planning
   std::set<std::string> planning_pipeline_names_;
