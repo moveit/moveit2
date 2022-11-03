@@ -37,6 +37,7 @@
 #include <moveit/moveit_cpp/moveit_cpp.h>
 #include <moveit/move_group/move_group_capability.h>
 #include <moveit/robot_state/conversions.h>
+#include <moveit/utils/moveit_error_code.h>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
 
 #include <sstream>
@@ -133,7 +134,7 @@ std::string move_group::MoveGroupCapability::getActionResultString(const moveit_
           return "Solution was found and executed.";
       }
     case moveit_msgs::msg::MoveItErrorCodes::INVALID_GROUP_NAME:
-      return "Must specify group in motion plan request";
+      return "Invalid group in motion plan request";
     case moveit_msgs::msg::MoveItErrorCodes::PLANNING_FAILED:
     case moveit_msgs::msg::MoveItErrorCodes::INVALID_MOTION_PLAN:
       if (planned_trajectory_empty)
@@ -144,20 +145,8 @@ std::string move_group::MoveGroupCapability::getActionResultString(const moveit_
       return "Motion plan was found but it seems to be too costly and looking around did not help.";
     case moveit_msgs::msg::MoveItErrorCodes::MOTION_PLAN_INVALIDATED_BY_ENVIRONMENT_CHANGE:
       return "Solution found but the environment changed during execution and the path was aborted";
-    case moveit_msgs::msg::MoveItErrorCodes::CONTROL_FAILED:
-      return "Solution found but controller failed during execution";
-    case moveit_msgs::msg::MoveItErrorCodes::TIMED_OUT:
-      return "Timeout reached";
-    case moveit_msgs::msg::MoveItErrorCodes::PREEMPTED:
-      return "Preempted";
-    case moveit_msgs::msg::MoveItErrorCodes::INVALID_GOAL_CONSTRAINTS:
-      return "Invalid goal constraints";
-    case moveit_msgs::msg::MoveItErrorCodes::INVALID_OBJECT_NAME:
-      return "Invalid object name";
-    case moveit_msgs::msg::MoveItErrorCodes::FAILURE:
-      return "Catastrophic failure";
     default:
-      return "Unknown event";
+      return moveit::core::error_code_to_string(error_code);
   }
 }
 

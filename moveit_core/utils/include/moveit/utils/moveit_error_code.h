@@ -47,11 +47,7 @@ namespace core
 class MoveItErrorCode : public moveit_msgs::msg::MoveItErrorCodes
 {
 public:
-  MoveItErrorCode()
-  {
-    val = 0;
-  }
-  MoveItErrorCode(int code)
+  MoveItErrorCode(int code = 0)
   {
     val = code;
   }
