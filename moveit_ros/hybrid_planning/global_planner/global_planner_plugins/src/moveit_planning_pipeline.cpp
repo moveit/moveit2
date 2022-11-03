@@ -132,7 +132,7 @@ moveit_msgs::msg::MotionPlanResponse MoveItPlanningPipeline::plan(
 
   // Plan motion
   auto plan_solution = planning_components->plan(plan_params);
-  if (plan_solution.error_code_ != moveit_msgs::msg::MoveItErrorCodes::SUCCESS)
+  if (!bool(plan_solution.error_code_))
   {
     response.error_code = plan_solution.error_code_;
     return response;
