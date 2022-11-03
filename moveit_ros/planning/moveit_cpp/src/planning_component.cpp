@@ -115,7 +115,7 @@ bool PlanningComponent::setTrajectoryConstraints(const moveit_msgs::msg::Traject
 }
 
 planning_interface::MotionPlanResponse PlanningComponent::plan(const PlanRequestParameters& parameters,
-                                                               const bool update_last_solution)
+                                                               const bool store_solution)
 {
   auto plan_solution = planning_interface::MotionPlanResponse();
 
@@ -124,7 +124,7 @@ planning_interface::MotionPlanResponse PlanningComponent::plan(const PlanRequest
   {
     RCLCPP_ERROR(LOGGER, "Failed to retrieve joint model group for name '%s'.", group_name_.c_str());
     plan_solution.error_code_ = moveit::core::MoveItErrorCode::INVALID_GROUP_NAME;
-    if (update_last_solution)
+    if (store_solution)
     {
       last_plan_solution_ = plan_solution;
     }
@@ -164,7 +164,7 @@ planning_interface::MotionPlanResponse PlanningComponent::plan(const PlanRequest
   {
     RCLCPP_ERROR(LOGGER, "No goal constraints set for planning request");
     plan_solution.error_code_ = moveit::core::MoveItErrorCode::INVALID_GOAL_CONSTRAINTS;
-    if (update_last_solution)
+    if (store_solution)
     {
       last_plan_solution_ = plan_solution;
     }
@@ -182,7 +182,7 @@ planning_interface::MotionPlanResponse PlanningComponent::plan(const PlanRequest
   {
     RCLCPP_ERROR(LOGGER, "No planning pipeline available for name '%s'", parameters.planning_pipeline.c_str());
     plan_solution.error_code_ = moveit::core::MoveItErrorCode::FAILURE;
-    if (update_last_solution)
+    if (store_solution)
     {
       last_plan_solution_ = plan_solution;
     }
@@ -196,7 +196,7 @@ planning_interface::MotionPlanResponse PlanningComponent::plan(const PlanRequest
   if (res.error_code_.val != res.error_code_.SUCCESS)
   {
     RCLCPP_ERROR(LOGGER, "Could not compute plan successfully");
-    if (update_last_solution)
+    if (store_solution)
     {
       last_plan_solution_ = plan_solution;
     }
@@ -220,7 +220,7 @@ planning_interface::MotionPlanResponse PlanningComponent::plan(const PlanRequest
   //  }
   //}
 
-  if (update_last_solution)
+  if (store_solution)
   {
     last_plan_solution_ = plan_solution;
   }
@@ -260,7 +260,7 @@ planning_interface::MotionPlanResponse PlanningComponent::plan(const MultiPipeli
       {
         RCLCPP_ERROR_STREAM(LOGGER, "Planning pipeline '" << plan_request_parameter.planning_pipeline.c_str()
                                                           << "' threw exception '" << e.what() << "'");
-        auto plan_solution = planning_interface::MotionPlanResponse();
+        plan_solution = planning_interface::MotionPlanResponse();
         plan_solution.error_code_ = moveit::core::MoveItErrorCode::FAILURE;
       }
       plan_solution.planner_id_ = plan_request_parameter.planner_id;
