@@ -124,9 +124,9 @@ public:
       else
       {
         RCLCPP_WARN(LOGGER, "Unable to plan to path constraints. Running usual motion plan.");
-        bool result = planner(planning_scene, req, res);
-        res.planning_time_ += res2.planning_time_;
-        return result;
+        res.error_code_.val = moveit_msgs::msg::MoveItErrorCodes::START_STATE_VIOLATES_PATH_CONSTRAINTS;
+        res.planning_time_ = res2.planning_time_;
+        return false;  // skip remaining planners
       }
     }
     else
