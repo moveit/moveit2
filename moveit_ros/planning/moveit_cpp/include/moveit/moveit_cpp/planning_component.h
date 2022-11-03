@@ -37,14 +37,14 @@
 
 #pragma once
 
-#include <rclcpp/rclcpp.hpp>
-#include <moveit/moveit_cpp/moveit_cpp.h>
-#include <moveit/moveit_cpp/plan_solutions.h>
-#include <moveit/robot_state/robot_state.h>
 #include <geometry_msgs/msg/pose_stamped.h>
-#include <moveit/robot_state/conversions.h>
-#include <moveit/utils/moveit_error_code.h>
+#include <moveit/moveit_cpp/moveit_cpp.h>
+#include <moveit/moveit_cpp/plan_solutions.hpp>
 #include <moveit/planning_interface/planning_response.h>
+#include <moveit/robot_state/conversions.h>
+#include <moveit/robot_state/robot_state.h>
+#include <moveit/utils/moveit_error_code.h>
+#include <rclcpp/rclcpp.hpp>
 
 namespace moveit_cpp
 {
