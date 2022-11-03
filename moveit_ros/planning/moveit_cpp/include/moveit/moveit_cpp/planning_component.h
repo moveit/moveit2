@@ -49,11 +49,6 @@
 namespace moveit_cpp
 {
 MOVEIT_CLASS_FORWARD(PlanningComponent);  // Defines PlanningComponentPtr, ConstPtr, WeakPtr... etc
-
-/** \brief A function to choose the solution with the shortest path from a vector of solutions  */
-planning_interface::MotionPlanResponse
-getShortestSolution(const std::vector<planning_interface::MotionPlanResponse>& solutions);
-
 class PlanningComponent
 {
 public:
