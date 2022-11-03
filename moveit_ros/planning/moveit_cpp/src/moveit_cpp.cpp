@@ -276,6 +276,25 @@ MoveItCpp::execute(const std::string& group_name, const robot_trajectory::RobotT
   return moveit_controller_manager::ExecutionStatus::RUNNING;
 }
 
+bool MoveItCpp::terminatePlanningPipeline(const std::string& pipeline_name)
+{
+  try
+  {
+    const auto& planning_pipeline = planning_pipelines_.at(pipeline_name);
+    if (planning_pipeline->isActive())
+    {
+      planning_pipeline->terminate();
+    }
+    return true;
+  }
+  catch (const std::out_of_range& oor)
+  {
+    RCLCPP_ERROR(LOGGER, "Cannot terminate pipeline '%s' because no pipeline with that name exists",
+                 pipeline_name.c_str());
+    return false;
+  }
+}
+
 const std::shared_ptr<tf2_ros::Buffer>& MoveItCpp::getTFBuffer() const
 {
   return planning_scene_monitor_->getTFClient();
