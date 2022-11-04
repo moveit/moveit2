@@ -2,6 +2,18 @@
 Changelog for package moveit_ros_planning_interface
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.5.4 (2022-11-04)
+------------------
+* Improve CMake usage (`#1550 <https://github.com/ros-planning/moveit2/issues/1550>`_) (`#1555 <https://github.com/ros-planning/moveit2/issues/1555>`_)
+  Co-authored-by: Sebastian Jahr <sebastian.jahr@picknik.ai>
+* Changed 'return false' in plan, move and execute such that MoveItErrorCode is returned (`#1266 <https://github.com/ros-planning/moveit2/issues/1266>`_) (`#1460 <https://github.com/ros-planning/moveit2/issues/1460>`_)
+* Fix callback execution in MGI (backport `#1305 <https://github.com/ros-planning/moveit2/issues/1305>`_) (`#1462 <https://github.com/ros-planning/moveit2/issues/1462>`_)
+  The initial implementation with the private node allowed for concurrent spinning of the same node, producing runtime exceptions. This change removes the need for a private node by letting MGI manage its own CallbackGroup and Executor thread.
+  (cherry picked from commit 042186aef33d9af6de4ccb17e79b0eaffdc7febb)
+  Co-authored-by: Henning Kayser <henningkayser@picknik.ai>
+* Remove __has_include statements (`#1481 <https://github.com/ros-planning/moveit2/issues/1481>`_) (`#1483 <https://github.com/ros-planning/moveit2/issues/1483>`_)
+* Contributors: mergify[bot]
+
 2.5.3 (2022-07-28)
 ------------------
 

@@ -2,6 +2,29 @@
 Changelog for package moveit_ros_planning
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.5.4 (2022-11-04)
+------------------
+* Backport to Humble (`#1642 <https://github.com/ros-planning/moveit2/issues/1642>`_)
+  Co-authored-by: Robert Haschke <rhaschke@techfak.uni-bielefeld.de>
+  Co-authored-by: Michael Görner <me@v4hn.de>
+  Co-authored-by: Jochen Sprickerhof <git@jochen.sprickerhof.de>
+* Rename MoveItControllerManager. Add deprecation warning (`#1601 <https://github.com/ros-planning/moveit2/issues/1601>`_) (`#1666 <https://github.com/ros-planning/moveit2/issues/1666>`_)
+  (cherry picked from commit b050890a2632a723dd95c08542ef6ed57d77fb06)
+  Co-authored-by: AndyZe <zelenak@picknik.ai>
+* Disable flaky test_servo_singularity + test_rdf_integration (`#1530 <https://github.com/ros-planning/moveit2/issues/1530>`_) (`#1654 <https://github.com/ros-planning/moveit2/issues/1654>`_)
+  (cherry picked from commit f7655df7a439069565efa0de73c08e9d1dd45dde)
+  Co-authored-by: Sebastian Jahr <sebastian.jahr@picknik.ai>
+* Removed plan_with_sensing (`#1142 <https://github.com/ros-planning/moveit2/issues/1142>`_) (`#1647 <https://github.com/ros-planning/moveit2/issues/1647>`_)
+  (cherry picked from commit ad9fb465776c68d53431ec477ff89d7e4e25f3b3)
+  Co-authored-by: Stephanie Eng <stephanie-eng@users.noreply.github.com>
+* Default destructor for PlanningComponent (`#1470 <https://github.com/ros-planning/moveit2/issues/1470>`_) (`#1645 <https://github.com/ros-planning/moveit2/issues/1645>`_)
+  (cherry picked from commit f95e110085d7d5a9ac7b1cfa903d1a885ff519cb)
+  Co-authored-by: Tyler Weaver <tyler@picknik.ai>
+* Improve CMake usage (`#1550 <https://github.com/ros-planning/moveit2/issues/1550>`_) (`#1555 <https://github.com/ros-planning/moveit2/issues/1555>`_)
+  Co-authored-by: Sebastian Jahr <sebastian.jahr@picknik.ai>
+* Remove __has_include statements (`#1481 <https://github.com/ros-planning/moveit2/issues/1481>`_) (`#1483 <https://github.com/ros-planning/moveit2/issues/1483>`_)
+* Contributors: Tyler Weaver, mergify[bot]
+
 2.5.3 (2022-07-28)
 ------------------
 

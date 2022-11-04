@@ -2,6 +2,16 @@
 Changelog for package moveit_ros_robot_interaction
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.5.4 (2022-11-04)
+------------------
+* Add moveit_core dependency to robot_interaction (`#1617 <https://github.com/ros-planning/moveit2/issues/1617>`_) (`#1618 <https://github.com/ros-planning/moveit2/issues/1618>`_)
+  (cherry picked from commit cc63903a11652eae3829f7e1dcc1d74e73c50839)
+  Co-authored-by: Sebastian Castro <4603398+sea-bass@users.noreply.github.com>
+* Improve CMake usage (`#1550 <https://github.com/ros-planning/moveit2/issues/1550>`_) (`#1555 <https://github.com/ros-planning/moveit2/issues/1555>`_)
+  Co-authored-by: Sebastian Jahr <sebastian.jahr@picknik.ai>
+* Remove __has_include statements (`#1481 <https://github.com/ros-planning/moveit2/issues/1481>`_) (`#1483 <https://github.com/ros-planning/moveit2/issues/1483>`_)
+* Contributors: mergify[bot]
+
 2.5.3 (2022-07-28)
 ------------------
 

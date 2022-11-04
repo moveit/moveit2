@@ -2,6 +2,18 @@
 Changelog for package moveit_ros_benchmarks
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.5.4 (2022-11-04)
+------------------
+* Free functions for calculating properties of trajectories (`#1503 <https://github.com/ros-planning/moveit2/issues/1503>`_) (`#1657 <https://github.com/ros-planning/moveit2/issues/1657>`_)
+  (cherry picked from commit 43a22ece72bb5362e6ef7df1d2783b03935aea2e)
+* Remove unused benchmark_execution.cpp file (`#1535 <https://github.com/ros-planning/moveit2/issues/1535>`_) (`#1564 <https://github.com/ros-planning/moveit2/issues/1564>`_)
+  (cherry picked from commit 8a9652ecbb4bc43964b296a0f62e298bfe7c1870)
+  Co-authored-by: Sebastian Jahr <sebastian.jahr@picknik.ai>
+* Improve CMake usage (`#1550 <https://github.com/ros-planning/moveit2/issues/1550>`_) (`#1555 <https://github.com/ros-planning/moveit2/issues/1555>`_)
+  Co-authored-by: Sebastian Jahr <sebastian.jahr@picknik.ai>
+* Remove __has_include statements (`#1481 <https://github.com/ros-planning/moveit2/issues/1481>`_) (`#1483 <https://github.com/ros-planning/moveit2/issues/1483>`_)
+* Contributors: mergify[bot]
+
 2.5.3 (2022-07-28)
 ------------------
 

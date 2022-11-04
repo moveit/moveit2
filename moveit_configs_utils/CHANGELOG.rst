@@ -2,6 +2,19 @@
 Changelog for package moveit_configs_utils
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.5.4 (2022-11-04)
+------------------
+* Use MoveItConfigsBuilder in Pilz test launch file (`#1571 <https://github.com/ros-planning/moveit2/issues/1571>`_) (`#1662 <https://github.com/ros-planning/moveit2/issues/1662>`_)
+  (cherry picked from commit 5e880bacaad780f511ed99847050216a8b9905c1)
+  Co-authored-by: Abishalini Sivaraman <abi.gpuram@gmail.com>
+* Only require Cartesian limits if Pilz is used (`#1519 <https://github.com/ros-planning/moveit2/issues/1519>`_) (`#1653 <https://github.com/ros-planning/moveit2/issues/1653>`_)
+  (cherry picked from commit 40f7f091cc77a683f3c0a4af64f6a463dd0846f1)
+  Co-authored-by: Stephanie Eng <stephanie-eng@users.noreply.github.com>
+* Typo fix (`#1518 <https://github.com/ros-planning/moveit2/issues/1518>`_) (`#1650 <https://github.com/ros-planning/moveit2/issues/1650>`_)
+  (cherry picked from commit e89526de24d88fb05eb646a7925de69ba480bfe8)
+  Co-authored-by: Stephanie Eng <stephanie-eng@users.noreply.github.com>
+* Contributors: mergify[bot]
+
 2.5.3 (2022-07-28)
 ------------------
 

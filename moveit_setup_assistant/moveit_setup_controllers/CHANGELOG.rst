@@ -2,6 +2,15 @@
 Changelog for package moveit_setup_controllers
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.5.4 (2022-11-04)
+------------------
+* MSA: write the default controller namespace (`#1515 <https://github.com/ros-planning/moveit2/issues/1515>`_) (`#1651 <https://github.com/ros-planning/moveit2/issues/1651>`_)
+  (cherry picked from commit 066e8621166858d3f556726197b07643a1b685f9)
+  Co-authored-by: AndyZe <zelenak@picknik.ai>
+* Improve CMake usage (`#1550 <https://github.com/ros-planning/moveit2/issues/1550>`_) (`#1555 <https://github.com/ros-planning/moveit2/issues/1555>`_)
+  Co-authored-by: Sebastian Jahr <sebastian.jahr@picknik.ai>
+* Contributors: mergify[bot]
+
 2.5.3 (2022-07-28)
 ------------------
 

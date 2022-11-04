@@ -2,6 +2,15 @@
 Changelog for package moveit_ros_warehouse
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.5.4 (2022-11-04)
+------------------
+* Restructure moveit warehouse package (`#1551 <https://github.com/ros-planning/moveit2/issues/1551>`_) (`#1661 <https://github.com/ros-planning/moveit2/issues/1661>`_)
+  (cherry picked from commit 8fddbda48148204835de23a741ba11f5be1021fa)
+* Improve CMake usage (`#1550 <https://github.com/ros-planning/moveit2/issues/1550>`_) (`#1555 <https://github.com/ros-planning/moveit2/issues/1555>`_)
+  Co-authored-by: Sebastian Jahr <sebastian.jahr@picknik.ai>
+* Remove __has_include statements (`#1481 <https://github.com/ros-planning/moveit2/issues/1481>`_) (`#1483 <https://github.com/ros-planning/moveit2/issues/1483>`_)
+* Contributors: mergify[bot]
+
 2.5.3 (2022-07-28)
 ------------------
 

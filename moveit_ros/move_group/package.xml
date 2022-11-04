@@ -2,7 +2,7 @@
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
   <name>moveit_ros_move_group</name>
-  <version>2.5.3</version>
+  <version>2.5.4</version>
   <description>The move_group node for MoveIt</description>
   <maintainer email="me@v4hn.de">Michael Görner</maintainer>
   <maintainer email="henningkayser@picknik.ai">Henning Kayser</maintainer>

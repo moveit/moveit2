@@ -2,6 +2,18 @@
 Changelog for package moveit_ros_control_interface
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.5.4 (2022-11-04)
+------------------
+* Rename MoveItControllerManager. Add deprecation warning (`#1601 <https://github.com/ros-planning/moveit2/issues/1601>`_) (`#1666 <https://github.com/ros-planning/moveit2/issues/1666>`_)
+  (cherry picked from commit b050890a2632a723dd95c08542ef6ed57d77fb06)
+  Co-authored-by: AndyZe <zelenak@picknik.ai>
+* Support chained controllers (backport `#1482 <https://github.com/ros-planning/moveit2/issues/1482>`_) (`#1623 <https://github.com/ros-planning/moveit2/issues/1623>`_)
+  (cherry picked from commit 3db960a4b3b1e1d25630867a62ea1182bac2e96a)
+  Co-authored-by: Paul Gesel <paulgesel@gmail.com>
+* Improve CMake usage (`#1550 <https://github.com/ros-planning/moveit2/issues/1550>`_) (`#1555 <https://github.com/ros-planning/moveit2/issues/1555>`_)
+  Co-authored-by: Sebastian Jahr <sebastian.jahr@picknik.ai>
+* Contributors: mergify[bot]
+
 2.5.3 (2022-07-28)
 ------------------
 

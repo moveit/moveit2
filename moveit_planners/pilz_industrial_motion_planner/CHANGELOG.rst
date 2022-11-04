@@ -2,6 +2,29 @@
 Changelog for package pilz_industrial_motion_planner
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.5.4 (2022-11-04)
+------------------
+* Backport to Humble (`#1642 <https://github.com/ros-planning/moveit2/issues/1642>`_)
+  Co-authored-by: Robert Haschke <rhaschke@techfak.uni-bielefeld.de>
+  Co-authored-by: Michael Görner <me@v4hn.de>
+  Co-authored-by: Jochen Sprickerhof <git@jochen.sprickerhof.de>
+* Use MoveItConfigsBuilder in Pilz test launch file (`#1571 <https://github.com/ros-planning/moveit2/issues/1571>`_) (`#1662 <https://github.com/ros-planning/moveit2/issues/1662>`_)
+  (cherry picked from commit 5e880bacaad780f511ed99847050216a8b9905c1)
+  Co-authored-by: Abishalini Sivaraman <abi.gpuram@gmail.com>
+* Add planner configurations to CHOMP and PILZ (`#1522 <https://github.com/ros-planning/moveit2/issues/1522>`_) (`#1656 <https://github.com/ros-planning/moveit2/issues/1656>`_)
+  (cherry picked from commit 888fc5358280b20edc394947e98341c0f03dc0bd)
+  Co-authored-by: Sebastian Jahr <sebastian.jahr@picknik.ai>
+* Use pragma once as header include guard (`#1525 <https://github.com/ros-planning/moveit2/issues/1525>`_) (`#1652 <https://github.com/ros-planning/moveit2/issues/1652>`_)
+  (cherry picked from commit 7d758de1b2f2904b8c85520129fa8d48aad93713)
+  Co-authored-by: J. Javan <J-Javan@users.noreply.github.com>
+* Removed plan_with_sensing (`#1142 <https://github.com/ros-planning/moveit2/issues/1142>`_) (`#1647 <https://github.com/ros-planning/moveit2/issues/1647>`_)
+  (cherry picked from commit ad9fb465776c68d53431ec477ff89d7e4e25f3b3)
+  Co-authored-by: Stephanie Eng <stephanie-eng@users.noreply.github.com>
+* Improve CMake usage (`#1550 <https://github.com/ros-planning/moveit2/issues/1550>`_) (`#1555 <https://github.com/ros-planning/moveit2/issues/1555>`_)
+  Co-authored-by: Sebastian Jahr <sebastian.jahr@picknik.ai>
+* Remove __has_include statements (`#1481 <https://github.com/ros-planning/moveit2/issues/1481>`_) (`#1483 <https://github.com/ros-planning/moveit2/issues/1483>`_)
+* Contributors: Tyler Weaver, mergify[bot]
+
 2.5.3 (2022-07-28)
 ------------------
 * rename header files so debs are installable (`#1443 <https://github.com/ros-planning/moveit2/issues/1443>`_)

@@ -2,6 +2,29 @@
 Changelog for package moveit_planners_ompl
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.5.4 (2022-11-04)
+------------------
+* simplify_solution per planning context (`#1437 <https://github.com/ros-planning/moveit2/issues/1437>`_) (`#1646 <https://github.com/ros-planning/moveit2/issues/1646>`_)
+  (cherry picked from commit 048062cc8749a1e1e224ff99a3bfa12e8c3ae3ba)
+  Co-authored-by: Antoine Duplex <106062275+AntoineDevop@users.noreply.github.com>
+* Convert OMPL status to MoveItErrorCode in the OMPL interface (`#1606 <https://github.com/ros-planning/moveit2/issues/1606>`_) (`#1668 <https://github.com/ros-planning/moveit2/issues/1668>`_)
+  (cherry picked from commit baba9b041225ed5518d5235996afb9aa3c5a61f8)
+  Co-authored-by: AndyZe <zelenak@picknik.ai>
+* size_t bijection index type (`#1544 <https://github.com/ros-planning/moveit2/issues/1544>`_) (`#1659 <https://github.com/ros-planning/moveit2/issues/1659>`_)
+  (cherry picked from commit af7bd63a084d62de0821bb0e451008f2b1b11954)
+* Fix logic with enforcing constrained planning state space in OMPL (backport `#1589 <https://github.com/ros-planning/moveit2/issues/1589>`_) (`#1641 <https://github.com/ros-planning/moveit2/issues/1641>`_)
+  (cherry picked from commit 67e08b7999e252971907dab5cf17b789d1336863)
+  Co-authored-by: Stephanie Eng <stephanie-eng@users.noreply.github.com>
+* Improve CMake usage (`#1550 <https://github.com/ros-planning/moveit2/issues/1550>`_) (`#1555 <https://github.com/ros-planning/moveit2/issues/1555>`_)
+  Co-authored-by: Sebastian Jahr <sebastian.jahr@picknik.ai>
+* Fixes for using generate_state_database (backport `#1412 <https://github.com/ros-planning/moveit2/issues/1412>`_) (`#1493 <https://github.com/ros-planning/moveit2/issues/1493>`_)
+* correctly initialize rmw_serialized_message_t
+  (cherry picked from commit cf714d5407d5100e4587e9ead740c665e5a70507)
+* automatically declare parameters from overrides
+  (cherry picked from commit b961e9c14d66a6a7abd91490a76ee2bef0fe08dc)
+* Remove __has_include statements (`#1481 <https://github.com/ros-planning/moveit2/issues/1481>`_) (`#1483 <https://github.com/ros-planning/moveit2/issues/1483>`_)
+* Contributors: Alaa, Henning Kayser, mergify[bot]
+
 2.5.3 (2022-07-28)
 ------------------
 

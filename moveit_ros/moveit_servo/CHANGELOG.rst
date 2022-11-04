@@ -2,6 +2,23 @@
 Changelog for package moveit_servo
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.5.4 (2022-11-04)
+------------------
+* [Servo] Remove the option for "stop distance"-based collision checking (`#1574 <https://github.com/ros-planning/moveit2/issues/1574>`_) (`#1663 <https://github.com/ros-planning/moveit2/issues/1663>`_)
+  (cherry picked from commit e96004702bbd338a08340eab0985fd04c74968fa)
+  Co-authored-by: AndyZe <zelenak@picknik.ai>
+* [Servo] Use a WallRate so the clock is monotonically increasing (`#1543 <https://github.com/ros-planning/moveit2/issues/1543>`_) (`#1658 <https://github.com/ros-planning/moveit2/issues/1658>`_)
+  (cherry picked from commit c134d89710e831ae58a66e53d87a78b44b0b307c)
+  Co-authored-by: AndyZe <zelenak@picknik.ai>
+* Disable flaky test_servo_singularity + test_rdf_integration (`#1530 <https://github.com/ros-planning/moveit2/issues/1530>`_) (`#1654 <https://github.com/ros-planning/moveit2/issues/1654>`_)
+  (cherry picked from commit f7655df7a439069565efa0de73c08e9d1dd45dde)
+  Co-authored-by: Sebastian Jahr <sebastian.jahr@picknik.ai>
+* Enforce singularity threshold when moving away from a singularity (`#620 <https://github.com/ros-planning/moveit2/issues/620>`_) (`#1649 <https://github.com/ros-planning/moveit2/issues/1649>`_)
+* Improve CMake usage (`#1550 <https://github.com/ros-planning/moveit2/issues/1550>`_) (`#1555 <https://github.com/ros-planning/moveit2/issues/1555>`_)
+  Co-authored-by: Sebastian Jahr <sebastian.jahr@picknik.ai>
+* Remove __has_include statements (`#1481 <https://github.com/ros-planning/moveit2/issues/1481>`_) (`#1483 <https://github.com/ros-planning/moveit2/issues/1483>`_)
+* Contributors: mergify[bot]
+
 2.5.3 (2022-07-28)
 ------------------
 * Use kinematics plugin instead of inverse Jacobian for servo IK (`#1434 <https://github.com/ros-planning/moveit2/issues/1434>`_)

@@ -2,6 +2,38 @@
 Changelog for package moveit_core
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.5.4 (2022-11-04)
+------------------
+* Free functions for calculating properties of trajectories (`#1503 <https://github.com/ros-planning/moveit2/issues/1503>`_) (`#1657 <https://github.com/ros-planning/moveit2/issues/1657>`_)
+  (cherry picked from commit 43a22ece72bb5362e6ef7df1d2783b03935aea2e)
+* Improve Cartesian interpolation (`#1547 <https://github.com/ros-planning/moveit2/issues/1547>`_) (`#1670 <https://github.com/ros-planning/moveit2/issues/1670>`_)
+* added brace intialization (`#1615 <https://github.com/ros-planning/moveit2/issues/1615>`_) (`#1667 <https://github.com/ros-planning/moveit2/issues/1667>`_)
+  (cherry picked from commit f1d0ab59228dc04899724add96162eb93f039939)
+  Co-authored-by: Abhijeet Das Gupta <75399048+abhijelly@users.noreply.github.com>
+* size_t bijection index type (`#1544 <https://github.com/ros-planning/moveit2/issues/1544>`_) (`#1659 <https://github.com/ros-planning/moveit2/issues/1659>`_)
+  (cherry picked from commit af7bd63a084d62de0821bb0e451008f2b1b11954)
+* Add planner configurations to CHOMP and PILZ (`#1522 <https://github.com/ros-planning/moveit2/issues/1522>`_) (`#1656 <https://github.com/ros-planning/moveit2/issues/1656>`_)
+  (cherry picked from commit 888fc5358280b20edc394947e98341c0f03dc0bd)
+  Co-authored-by: Sebastian Jahr <sebastian.jahr@picknik.ai>
+* Add error_code_to_string function (`#1523 <https://github.com/ros-planning/moveit2/issues/1523>`_) (`#1655 <https://github.com/ros-planning/moveit2/issues/1655>`_)
+  (cherry picked from commit 042709ab3ddfd9e33a0533eb1df14536c1cf1ecf)
+  Co-authored-by: Sebastian Jahr <sebastian.jahr@picknik.ai>
+* Use pragma once as header include guard (`#1525 <https://github.com/ros-planning/moveit2/issues/1525>`_) (`#1652 <https://github.com/ros-planning/moveit2/issues/1652>`_)
+  (cherry picked from commit 7d758de1b2f2904b8c85520129fa8d48aad93713)
+  Co-authored-by: J. Javan <J-Javan@users.noreply.github.com>
+* Unified code comment style (`#1053 <https://github.com/ros-planning/moveit2/issues/1053>`_) (`#1648 <https://github.com/ros-planning/moveit2/issues/1648>`_)
+* Const ptr to jmg arg for cost function (`#1537 <https://github.com/ros-planning/moveit2/issues/1537>`_) (`#1610 <https://github.com/ros-planning/moveit2/issues/1610>`_)
+  (cherry picked from commit 389a5a855140450e5051035e42441c4653c302a2)
+* Improve CMake usage (`#1550 <https://github.com/ros-planning/moveit2/issues/1550>`_) (`#1555 <https://github.com/ros-planning/moveit2/issues/1555>`_)
+  Co-authored-by: Sebastian Jahr <sebastian.jahr@picknik.ai>
+* Fixed fabs() use in quaternion interpolation (backport `#1479 <https://github.com/ros-planning/moveit2/issues/1479>`_) (`#1496 <https://github.com/ros-planning/moveit2/issues/1496>`_)
+* Fixes for using generate_state_database (backport `#1412 <https://github.com/ros-planning/moveit2/issues/1412>`_) (`#1493 <https://github.com/ros-planning/moveit2/issues/1493>`_)
+* Fixed fabs() use in quaternion interpolation (`#1479 <https://github.com/ros-planning/moveit2/issues/1479>`_)
+* fix path to constraints parameters
+  (cherry picked from commit fb0331610a304172c395084d4d981ed173684305)
+* Remove __has_include statements (`#1481 <https://github.com/ros-planning/moveit2/issues/1481>`_) (`#1483 <https://github.com/ros-planning/moveit2/issues/1483>`_)
+* Contributors: Alaa, Henning Kayser, werner291
+
 2.5.3 (2022-07-28)
 ------------------
 * Constraint samplers seed (`#1411 <https://github.com/ros-planning/moveit2/issues/1411>`_)

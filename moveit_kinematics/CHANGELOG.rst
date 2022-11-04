@@ -2,6 +2,26 @@
 Changelog for package moveit_kinematics
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.5.4 (2022-11-04)
+------------------
+* Backport to Humble (`#1642 <https://github.com/ros-planning/moveit2/issues/1642>`_)
+  Co-authored-by: Robert Haschke <rhaschke@techfak.uni-bielefeld.de>
+  Co-authored-by: Michael Görner <me@v4hn.de>
+  Co-authored-by: Jochen Sprickerhof <git@jochen.sprickerhof.de>
+* Use pragma once as header include guard (`#1525 <https://github.com/ros-planning/moveit2/issues/1525>`_) (`#1652 <https://github.com/ros-planning/moveit2/issues/1652>`_)
+  (cherry picked from commit 7d758de1b2f2904b8c85520129fa8d48aad93713)
+  Co-authored-by: J. Javan <J-Javan@users.noreply.github.com>
+* Unified code comment style (`#1053 <https://github.com/ros-planning/moveit2/issues/1053>`_) (`#1648 <https://github.com/ros-planning/moveit2/issues/1648>`_)
+  * Changes the comment style from /**/ to //
+  Co-authored-by: JafarAbdi <cafer.abdi@gmail.com>
+  Co-authored-by: Henning Kayser <henningkayser@picknik.ai>
+  (cherry picked from commit 1d67b519e6ef9ca1ebba494743791da998b72950)
+  Co-authored-by: Michael Marron <62182318+michael-marron@users.noreply.github.com>
+* Improve CMake usage (`#1550 <https://github.com/ros-planning/moveit2/issues/1550>`_) (`#1555 <https://github.com/ros-planning/moveit2/issues/1555>`_)
+  Co-authored-by: Sebastian Jahr <sebastian.jahr@picknik.ai>
+* Remove __has_include statements (`#1481 <https://github.com/ros-planning/moveit2/issues/1481>`_) (`#1483 <https://github.com/ros-planning/moveit2/issues/1483>`_)
+* Contributors: Tyler Weaver, mergify[bot]
+
 2.5.3 (2022-07-28)
 ------------------
 
