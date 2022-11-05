@@ -535,8 +535,7 @@ protected:
     // (which is important during removal; removing pivots is a
     // special case). The nodeQueue, which contains other Nodes
     // that need to be checked for nearest neighbors, is updated.
-    void nearestK(const GNAT& gnat, const _T& data, std::size_t k, NearQueue& nbh, NodeQueue& nodeQueue,
-                  bool& isPivot) const
+    void nearestK(const GNAT& gnat, const _T& data, std::size_t k, NearQueue& nbh, NodeQueue& nodeQueue, bool& isPivot)
     {
       for (unsigned int i = 0; i < data_.size(); ++i)
         if (!gnat.isRemoved(data_[i]))
@@ -552,7 +551,7 @@ protected:
         std::vector<int> permutation(children_.size());
         for (unsigned int i = 0; i < permutation.size(); ++i)
           permutation[i] = i;
-        std::random_shuffle(permutation.begin(), permutation.end());
+        std::shuffle(permutation.begin(), permutation.end(), randomNumberGenerator_);
 
         for (unsigned int i = 0; i < children_.size(); ++i)
           if (permutation[i] >= 0)
@@ -592,7 +591,7 @@ protected:
     // \brief Return all elements that are within distance r in nbh.
     // The nodeQueue, which contains other Nodes that need to
     // be checked for nearest neighbors, is updated.
-    void nearestR(const GNAT& gnat, const _T& data, double r, NearQueue& nbh, NodeQueue& nodeQueue) const
+    void nearestR(const GNAT& gnat, const _T& data, double r, NearQueue& nbh, NodeQueue& nodeQueue)
     {
       double dist = r;  // note difference with nearestK
 
@@ -606,7 +605,7 @@ protected:
         std::vector<int> permutation(children_.size());
         for (unsigned int i = 0; i < permutation.size(); ++i)
           permutation[i] = i;
-        std::random_shuffle(permutation.begin(), permutation.end());
+        std::shuffle(permutation.begin(), permutation.end(), randomNumberGenerator_);
 
         for (unsigned int i = 0; i < children_.size(); ++i)
           if (permutation[i] >= 0)
@@ -687,6 +686,11 @@ protected:
     // \brief The child nodes of this node. By definition, only internal nodes
     // have child nodes.
     std::vector<Node*> children_;
+    // \brief Random number generator to compute random permutations.
+    // Note that methods that use randomNumberGenerator_ cannot be declared const
+    // because we need to advance the state of the generator (hence changing the
+    // object state). The alternative would be to make this \c static or a pointer.
+    std::mt19937 randomNumberGenerator_{ std::random_device{}() };
   };
 
   // \brief The data structure containing the elements stored in this structure.
