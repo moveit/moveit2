@@ -50,7 +50,7 @@ moveit::core::MoveItErrorCode callPlannerInterfaceSolve(const planning_interface
                                                         const planning_interface::MotionPlanRequest& req,
                                                         planning_interface::MotionPlanResponse& res)
 {
-  planning_interface::PlanningContextPtr context = planner.getPlanningContext(planning_scene, req, res.error_code_);
+  planning_interface::PlanningContextPtr context = planner.getPlanningContext(planning_scene, req, res.error_code);
   if (context)
   {
     // TODO(andyz): consider returning a moveit::core::MoveItErrorCode from context->solve()
