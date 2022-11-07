@@ -172,7 +172,7 @@ public:
                                                      const robot_trajectory::RobotTrajectoryPtr& robot_trajectory,
                                                      bool blocking = true);
 
-  /** \brief Utility to terminate a planning pipelines */
+  /** \brief Utility to terminate the given planning pipeline */
   bool terminatePlanningPipeline(const std::string& pipeline_name);
 
 private:
