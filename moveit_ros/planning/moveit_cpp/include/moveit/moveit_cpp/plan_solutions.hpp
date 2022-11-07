@@ -39,6 +39,7 @@
 
 #include <algorithm>
 #include <moveit/planning_interface/planning_response.h>
+#include <mutex>
 #include <thread>
 
 namespace moveit_cpp
@@ -56,7 +57,7 @@ public:
 
   /** \brief Thread safe method to add PlanSolutions to this data structure TODO(sjahr): Refactor this method to an
    * insert method similar to https://github.com/ompl/ompl/blob/main/src/ompl/base/src/ProblemDefinition.cpp#L54-L161.
-   * This way, it is possible to created a sorted container e.g. according to a user specified criteria
+   * This way, it is possible to create a sorted container e.g. according to a user specified criteria
    */
   void pushBack(planning_interface::MotionPlanResponse plan_solution)
   {
