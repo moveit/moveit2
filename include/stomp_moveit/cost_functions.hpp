@@ -9,6 +9,9 @@ namespace stomp_moveit
 {
 namespace costs
 {
+// Interpolation step size for collision checking (joint space, L2 norm)
+constexpr double COL_CHECK_DISTANCE = 0.05;
+
 CostFn get_collision_cost_function(const std::shared_ptr<const planning_scene::PlanningScene>& planning_scene,
                                    const moveit::core::JointModelGroup* group, double collision_penalty)
 {
@@ -22,33 +25,54 @@ CostFn get_collision_cost_function(const std::shared_ptr<const planning_scene::P
 
     validity = true;
     std::vector<std::pair<long, long>> collision_windows;
-    bool in_collision = false;
+    bool in_collision_window = false;
 
-    for (int timestep = 0; timestep < values.cols(); ++timestep)
+    // Iterate over sample waypoint pairs and check for collisions in each segment.
+    // If a collision is found, weighted penalty costs are applied to both waypoints.
+    // Subsequent collisions are assumed to have the same cause (same object), so
+    // we are keeping track of 'collision_windows' which are used for smoothing out
+    // the costs per assumed 'object' with a gaussian, penalizing neighboring but
+    // collision-free states as well.
+    for (int timestep = 0; timestep < values.cols() - 1; ++timestep)
     {
-      set_joint_positions(values.col(timestep), joints, sample_state);
-      sample_state.update();
-
-      if (planning_scene->isStateColliding(sample_state, group_name))
+      Eigen::VectorXd current = values.col(timestep);
+      Eigen::VectorXd next = values.col(timestep + 1);
+      const double segment_distance = (next - current).norm();
+      double interpolation_fraction = 0.0;
+      const double interpolation_step = std::min(0.5, COL_CHECK_DISTANCE / segment_distance);
+      bool found_collision = false;
+      while (!found_collision && interpolation_fraction < 1.0)
       {
-        costs(timestep) = collision_penalty;
+        Eigen::VectorXd sample_vec = (1 - interpolation_fraction) * current + interpolation_fraction * next;
+        set_joint_positions(sample_vec, joints, sample_state);
+        sample_state.update();
+        found_collision = planning_scene->isStateColliding(sample_state, group_name);
+        interpolation_fraction += interpolation_step;
+      }
+
+      if (found_collision)
+      {
+        // Apply weighted collision penalties -> This trajectory is definitely invalid
+        costs(timestep) = (1 - interpolation_fraction) * collision_penalty;
+        costs(timestep + 1) = interpolation_fraction * collision_penalty;
         validity = false;
 
-        if (!in_collision)
+        // Open new collision window when this is the first detected collision in a group
+        if (!in_collision_window)
         {
           collision_windows.emplace_back(timestep, values.cols());
-          in_collision = true;
+          in_collision_window = true;
         }
       }
       else
       {
-        if (in_collision)
+        // Close current collision window if the current state is collision-free
+        if (in_collision_window)
         {
           collision_windows.back().second = timestep - 1;
-          in_collision = false;
+          in_collision_window = false;
         }
       }
-      // TODO: Check intermediate collisions
     }
 
     // Smooth out cost of colliding segments using a gaussian
