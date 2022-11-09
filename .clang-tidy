@@ -1,8 +1,6 @@
 ---
-# TODO(henningkayser): Re-enable performance-unnecessary-value-param once #214 is resolved
 Checks:          '-*,
                   performance-*,
-                  -performance-unnecessary-value-param,
                   llvm-namespace-comment,
                   modernize-redundant-void-arg,
                   modernize-use-nullptr,
