@@ -50,10 +50,10 @@ MoveGroupStateValidationService::MoveGroupStateValidationService() : MoveGroupCa
 void MoveGroupStateValidationService::initialize()
 {
   validity_service_ = context_->moveit_cpp_->getNode()->create_service<moveit_msgs::srv::GetStateValidity>(
-      STATE_VALIDITY_SERVICE_NAME, [this](const std::shared_ptr<rmw_request_id_t> request_header,
-                                          const std::shared_ptr<moveit_msgs::srv::GetStateValidity::Request> req,
-                                          std::shared_ptr<moveit_msgs::srv::GetStateValidity::Response> res) {
-        return computeService(request_header, req, std::move(res));
+      STATE_VALIDITY_SERVICE_NAME, [this](const std::shared_ptr<rmw_request_id_t>& request_header,
+                                          const std::shared_ptr<moveit_msgs::srv::GetStateValidity::Request>& req,
+                                          const std::shared_ptr<moveit_msgs::srv::GetStateValidity::Response>& res) {
+        return computeService(request_header, req, res);
       });
 }
 
@@ -130,6 +130,5 @@ bool MoveGroupStateValidationService::computeService(
 }  // namespace move_group
 
 #include <pluginlib/class_list_macros.hpp>
-#include <utility>
 
 PLUGINLIB_EXPORT_CLASS(move_group::MoveGroupStateValidationService, move_group::MoveGroupCapability)

@@ -48,7 +48,6 @@
 
 // #include <moveit_servo/make_shared_from_pool.h> // TODO(adamp): create an issue about this
 #include <moveit_servo/enforce_limits.hpp>
-#include <utility>
 #include <moveit_servo/servo_calcs.h>
 #include <moveit_servo/utilities.h>
 
@@ -71,10 +70,10 @@ int const THREAD_PRIORITY = 40;
 }  // namespace
 
 // Constructor for the class that handles servoing calculations
-ServoCalcs::ServoCalcs(rclcpp::Node::SharedPtr node,
+ServoCalcs::ServoCalcs(const rclcpp::Node::SharedPtr& node,
                        const std::shared_ptr<const moveit_servo::ServoParameters>& parameters,
                        const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor)
-  : node_(std::move(node))
+  : node_(node)
   , parameters_(parameters)
   , planning_scene_monitor_(planning_scene_monitor)
   , stop_requested_(true)
@@ -113,29 +112,30 @@ ServoCalcs::ServoCalcs(rclcpp::Node::SharedPtr node,
 
   // ROS Server for allowing drift in some dimensions
   drift_dimensions_server_ = node_->create_service<moveit_msgs::srv::ChangeDriftDimensions>(
-      "~/change_drift_dimensions", [this](const std::shared_ptr<moveit_msgs::srv::ChangeDriftDimensions::Request> req,
-                                          std::shared_ptr<moveit_msgs::srv::ChangeDriftDimensions::Response> res) {
-        return changeDriftDimensions(req, std::move(res));
+      "~/change_drift_dimensions",
+      [this](const std::shared_ptr<moveit_msgs::srv::ChangeDriftDimensions::Request>& req,
+             const std::shared_ptr<moveit_msgs::srv::ChangeDriftDimensions::Response>& res) {
+        return changeDriftDimensions(req, res);
       });
 
   // ROS Server for changing the control dimensions
   control_dimensions_server_ = node_->create_service<moveit_msgs::srv::ChangeControlDimensions>(
       "~/change_control_dimensions",
-      [this](const std::shared_ptr<moveit_msgs::srv::ChangeControlDimensions::Request> req,
-             std::shared_ptr<moveit_msgs::srv::ChangeControlDimensions::Response> res) {
-        return changeControlDimensions(req, std::move(res));
+      [this](const std::shared_ptr<moveit_msgs::srv::ChangeControlDimensions::Request>& req,
+             const std::shared_ptr<moveit_msgs::srv::ChangeControlDimensions::Response>& res) {
+        return changeControlDimensions(req, res);
       });
 
   // ROS Server to reset the status, e.g. so the arm can move again after a collision
   reset_servo_status_ = node_->create_service<std_srvs::srv::Empty>(
       "~/reset_servo_status",
-      [this](const std::shared_ptr<std_srvs::srv::Empty::Request> req,
-             std::shared_ptr<std_srvs::srv::Empty::Response> res) { return resetServoStatus(req, std::move(res)); });
+      [this](const std::shared_ptr<std_srvs::srv::Empty::Request>& req,
+             const std::shared_ptr<std_srvs::srv::Empty::Response>& res) { return resetServoStatus(req, res); });
 
   // Subscribe to the collision_check topic
   collision_velocity_scale_sub_ = node_->create_subscription<std_msgs::msg::Float64>(
       "~/collision_velocity_scale", rclcpp::SystemDefaultsQoS(),
-      [this](const std_msgs::msg::Float64::SharedPtr msg) { return collisionVelocityScaleCB(msg); });
+      [this](const std_msgs::msg::Float64::SharedPtr& msg) { return collisionVelocityScaleCB(msg); });
 
   // Publish freshly-calculated joints to the robot.
   // Put the outgoing msg in the right format (trajectory_msgs/JointTrajectory or std_msgs/Float64MultiArray).

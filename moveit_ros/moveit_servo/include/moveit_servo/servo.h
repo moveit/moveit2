@@ -55,7 +55,7 @@ class Servo
 {
 public:
   Servo(const rclcpp::Node::SharedPtr& node, const ServoParameters::SharedConstPtr& parameters,
-        planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor);
+        const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor);
 
   ~Servo();
 

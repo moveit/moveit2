@@ -43,7 +43,6 @@
 #include <deque>
 #include <memory>
 #include <optional>
-#include <utility>
 
 #include "rcl/error_handling.h"
 #include "rcl/time.h"
@@ -335,10 +334,9 @@ public:
     {
       return ((waypoint_iterator == other.waypoint_iterator) && (duration_iterator == other.duration_iterator));
     }
-    bool operator!=(
-        const const It& /*erator*/ /*o*/* /*o*/* /*o*/* /*o*/* /*o*/* /* /* /* / /*oth /*oth /*other*/ /*other*/) const
+    bool operator!=(const Iterator& other) const
     {
-      return !(*ter);
+      return !(*this == other);
     }
     std::pair<moveit::core::RobotStatePtr, double> operator*() const
     {

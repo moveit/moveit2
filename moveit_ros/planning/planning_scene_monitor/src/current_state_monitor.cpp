@@ -43,7 +43,6 @@
 #include <chrono>
 #include <limits>
 #include <memory>
-#include <utility>
 
 namespace planning_scene_monitor
 {
@@ -161,8 +160,8 @@ void CurrentStateMonitor::startStateMonitor(const std::string& joint_states_topi
     else
     {
       middleware_handle_->createJointStateSubscription(
-          joint_states_topic, [this](sensor_msgs::msg::JointState::ConstSharedPtr joint_state) {
-            return jointStateCallback(std::move(joint_state));
+          joint_states_topic, [this](const sensor_msgs::msg::JointState::ConstSharedPtr& joint_state) {
+            return jointStateCallback(joint_state);
           });
     }
     if (tf_buffer_ && !robot_model_->getMultiDOFJointModels().empty())

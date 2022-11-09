@@ -47,7 +47,6 @@
 #include <QStackedWidget>
 #include <QString>
 #include <pluginlib/class_loader.hpp>  // for loading all avail kinematic planners
-#include <utility>
 
 namespace moveit_setup
 {
@@ -56,10 +55,10 @@ namespace assistant
 // ******************************************************************************************
 // Outer User Interface for MoveIt Configuration Assistant
 // ******************************************************************************************
-SetupAssistantWidget::SetupAssistantWidget(rviz_common::ros_integration::RosNodeAbstractionIface::WeakPtr node,
+SetupAssistantWidget::SetupAssistantWidget(const rviz_common::ros_integration::RosNodeAbstractionIface::WeakPtr& node,
                                            QWidget* parent, const boost::program_options::variables_map& args)
   : QWidget(parent)
-  , node_abstraction_(std::move(node))
+  , node_abstraction_(node)
   , node_(node_abstraction_.lock()->get_raw_node())
   , widget_loader_("moveit_setup_framework", "moveit_setup::SetupStepWidget")
 {

@@ -49,8 +49,8 @@ void move_group::ClearOctomapService::initialize()
 {
   service_ = context_->moveit_cpp_->getNode()->create_service<std_srvs::srv::Empty>(
       CLEAR_OCTOMAP_SERVICE_NAME,
-      [this](const std::shared_ptr<std_srvs::srv::Empty::Request> req,
-             std::shared_ptr<std_srvs::srv::Empty::Response> res) { return clearOctomap(req, std::move(res)); });
+      [this](const std::shared_ptr<std_srvs::srv::Empty::Request>& req,
+             const std::shared_ptr<std_srvs::srv::Empty::Response>& res) { return clearOctomap(req, res); });
 }
 
 void move_group::ClearOctomapService::clearOctomap(const std::shared_ptr<std_srvs::srv::Empty::Request>& /*req*/,
@@ -65,6 +65,5 @@ void move_group::ClearOctomapService::clearOctomap(const std::shared_ptr<std_srv
 }
 
 #include <pluginlib/class_list_macros.hpp>
-#include <utility>
 
 PLUGINLIB_EXPORT_CLASS(move_group::ClearOctomapService, move_group::MoveGroupCapability)

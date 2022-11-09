@@ -131,14 +131,14 @@ OccupancyMapMonitor::OccupancyMapMonitor(std::unique_ptr<MiddlewareHandle> middl
   /* advertise a service for loading octomaps from disk */
   auto save_map_service_callback = [this](const std::shared_ptr<rmw_request_id_t>& request_header,
                                           const std::shared_ptr<moveit_msgs::srv::SaveMap::Request>& request,
-                                          std::shared_ptr<moveit_msgs::srv::SaveMap::Response> response) -> bool {
-    return saveMapCallback(request_header, request, std::move(response));
+                                          const std::shared_ptr<moveit_msgs::srv::SaveMap::Response>& response) -> bool {
+    return saveMapCallback(request_header, request, response);
   };
 
   auto load_map_service_callback = [this](const std::shared_ptr<rmw_request_id_t>& request_header,
                                           const std::shared_ptr<moveit_msgs::srv::LoadMap::Request>& request,
-                                          std::shared_ptr<moveit_msgs::srv::LoadMap::Response> response) -> bool {
-    return loadMapCallback(request_header, request, std::move(response));
+                                          const std::shared_ptr<moveit_msgs::srv::LoadMap::Response>& response) -> bool {
+    return loadMapCallback(request_header, request, response);
   };
 
   middleware_handle_->createSaveMapService(save_map_service_callback);

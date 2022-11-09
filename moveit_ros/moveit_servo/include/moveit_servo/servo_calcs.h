@@ -79,7 +79,8 @@ enum class ServoType
 class ServoCalcs
 {
 public:
-  ServoCalcs(rclcpp::Node::SharedPtr node, const std::shared_ptr<const moveit_servo::ServoParameters>& parameters,
+  ServoCalcs(const rclcpp::Node::SharedPtr& node,
+             const std::shared_ptr<const moveit_servo::ServoParameters>& parameters,
              const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor);
 
   ~ServoCalcs();

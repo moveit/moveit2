@@ -36,17 +36,16 @@
 
 #include <moveit/rdf_loader/synchronized_string_parameter.h>
 
-#include <utility>
-
 namespace rdf_loader
 {
 std::string SynchronizedStringParameter::loadInitialValue(const std::shared_ptr<rclcpp::Node>& node,
-                                                          const std::string& name, StringCallback parent_callback,
+                                                          const std::string& name,
+                                                          const StringCallback& parent_callback,
                                                           bool default_continuous_value, double default_timeout)
 {
   node_ = node;
   name_ = name;
-  parent_callback_ = std::move(parent_callback);
+  parent_callback_ = parent_callback;
 
   if (getMainParameter())
   {

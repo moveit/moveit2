@@ -37,18 +37,18 @@
 #include <moveit_setup_framework/data/urdf_config.hpp>
 #include <moveit_setup_framework/data/srdf_config.hpp>
 #include <QApplication>
-#include <utility>
 #include "rviz_rendering/render_window.hpp"
 
 namespace moveit_setup
 {
-RVizPanel::RVizPanel(QWidget* parent, rviz_common::ros_integration::RosNodeAbstractionIface::WeakPtr node_abstraction,
-                     DataWarehousePtr config_data)
+RVizPanel::RVizPanel(QWidget* parent,
+                     const rviz_common::ros_integration::RosNodeAbstractionIface::WeakPtr& node_abstraction,
+                     const DataWarehousePtr& config_data)
   : QWidget(parent)
   , parent_(parent)
-  , node_abstraction_(std::move(node_abstraction))
+  , node_abstraction_(node_abstraction)
   , node_(node_abstraction_.lock()->get_raw_node())
-  , config_data_(std::move(config_data))
+  , config_data_(config_data)
 {
   logger_ = std::make_shared<rclcpp::Logger>(node_->get_logger().get_child("RVizPanel"));
 

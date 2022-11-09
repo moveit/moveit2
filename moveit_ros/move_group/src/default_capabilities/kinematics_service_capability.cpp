@@ -53,16 +53,16 @@ MoveGroupKinematicsService::MoveGroupKinematicsService() : MoveGroupCapability("
 void MoveGroupKinematicsService::initialize()
 {
   fk_service_ = context_->moveit_cpp_->getNode()->create_service<moveit_msgs::srv::GetPositionFK>(
-      FK_SERVICE_NAME, [this](const std::shared_ptr<rmw_request_id_t> req_header,
-                              const std::shared_ptr<moveit_msgs::srv::GetPositionFK::Request> req,
+      FK_SERVICE_NAME, [this](const std::shared_ptr<rmw_request_id_t>& req_header,
+                              const std::shared_ptr<moveit_msgs::srv::GetPositionFK::Request>& req,
                               std::shared_ptr<moveit_msgs::srv::GetPositionFK::Response> res) {
-        return computeFKService(req_header, req, std::move(res));
+        return computeFKService(req_header, req, res);
       });
   ik_service_ = context_->moveit_cpp_->getNode()->create_service<moveit_msgs::srv::GetPositionIK>(
-      IK_SERVICE_NAME, [this](const std::shared_ptr<rmw_request_id_t> req_header,
-                              const std::shared_ptr<moveit_msgs::srv::GetPositionIK::Request> req,
+      IK_SERVICE_NAME, [this](const std::shared_ptr<rmw_request_id_t>& req_header,
+                              const std::shared_ptr<moveit_msgs::srv::GetPositionIK::Request>& req,
                               std::shared_ptr<moveit_msgs::srv::GetPositionIK::Response> res) {
-        return computeIKService(req_header, req, std::move(res));
+        return computeIKService(req_header, req, res);
       });
 }
 
@@ -237,6 +237,5 @@ bool MoveGroupKinematicsService::computeFKService(const std::shared_ptr<rmw_requ
 }  // namespace move_group
 
 #include <pluginlib/class_list_macros.hpp>
-#include <utility>
 
 PLUGINLIB_EXPORT_CLASS(move_group::MoveGroupKinematicsService, move_group::MoveGroupCapability)

@@ -128,8 +128,8 @@ struct ServoParameters
    * @param name Name of parameter (key used for callback in map)
    * @param callback function to call when parameter is changed
    */
-  [[nodiscard]] bool registerSetParameterCallback(const std /*unused*/ /*unused*/:&:stringconst & name,
-                &                                  const SetParameterCallbackType& callback) const
+  [[nodiscard]] bool registerSetParameterCallback(const std::string& name,
+                                                  const SetParameterCallbackType& callback) const
   {
     if (callback_handler_)
     {

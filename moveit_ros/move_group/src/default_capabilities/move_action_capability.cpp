@@ -68,7 +68,7 @@ void MoveGroupMoveAction::initialize()
         RCLCPP_INFO(LOGGER, "Received request to cancel goal");
         return rclcpp_action::CancelResponse::ACCEPT;
       },
-      [this](std::shared_ptr<MGActionGoal> goal) { return executeMoveCallback(std::move(goal)); });
+      [this](const std::shared_ptr<MGActionGoal>& goal) { return executeMoveCallback(goal); });
 }
 
 void MoveGroupMoveAction::executeMoveCallback(const std::shared_ptr<MGActionGoal>& goal)
@@ -276,6 +276,5 @@ void MoveGroupMoveAction::setMoveState(MoveGroupState state, const std::shared_p
 }  // namespace move_group
 
 #include <pluginlib/class_list_macros.hpp>
-#include <utility>
 
 PLUGINLIB_EXPORT_CLASS(move_group::MoveGroupMoveAction, move_group::MoveGroupCapability)

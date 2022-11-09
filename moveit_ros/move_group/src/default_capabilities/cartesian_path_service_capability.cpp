@@ -78,10 +78,10 @@ void MoveGroupCartesianPathService::initialize()
   cartesian_path_service_ = context_->moveit_cpp_->getNode()->create_service<moveit_msgs::srv::GetCartesianPath>(
 
       CARTESIAN_PATH_SERVICE_NAME,
-      [this](const std::shared_ptr<rmw_request_id_t> req_id,
-             const std::shared_ptr<moveit_msgs::srv::GetCartesianPath::Request> req,
-             std::shared_ptr<moveit_msgs::srv::GetCartesianPath::Response> res) -> bool {
-        return computeService(req_id, req, std::move(res));
+      [this](const std::shared_ptr<rmw_request_id_t>& req_id,
+             const std::shared_ptr<moveit_msgs::srv::GetCartesianPath::Request>& req,
+             const std::shared_ptr<moveit_msgs::srv::GetCartesianPath::Response>& res) -> bool {
+        return computeService(req_id, req, res);
       });
 }
 
@@ -206,6 +206,5 @@ bool MoveGroupCartesianPathService::computeService(
 }  // namespace move_group
 
 #include <pluginlib/class_list_macros.hpp>
-#include <utility>
 
 PLUGINLIB_EXPORT_CLASS(move_group::MoveGroupCartesianPathService, move_group::MoveGroupCapability)

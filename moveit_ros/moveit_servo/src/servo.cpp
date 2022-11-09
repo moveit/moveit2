@@ -40,8 +40,6 @@
 #include <moveit_servo/make_shared_from_pool.h>
 #include <moveit_servo/servo.h>
 
-#include <utility>
-
 namespace moveit_servo
 {
 namespace
@@ -51,8 +49,8 @@ constexpr double ROBOT_STATE_WAIT_TIME = 10.0;  // seconds
 }  // namespace
 
 Servo::Servo(const rclcpp::Node::SharedPtr& node, const ServoParameters::SharedConstPtr& parameters,
-             planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor)
-  : planning_scene_monitor_{ std::move(planning_scene_monitor) }
+             const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor)
+  : planning_scene_monitor_{ planning_scene_monitor }
   , parameters_{ parameters }
   , servo_calcs_{ node, parameters, planning_scene_monitor_ }
   , collision_checker_{ node, parameters, planning_scene_monitor_ }

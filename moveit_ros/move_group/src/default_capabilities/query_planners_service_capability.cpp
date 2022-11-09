@@ -48,24 +48,25 @@ MoveGroupQueryPlannersService::MoveGroupQueryPlannersService() : MoveGroupCapabi
 void MoveGroupQueryPlannersService::initialize()
 {
   query_service_ = context_->moveit_cpp_->getNode()->create_service<moveit_msgs::srv::QueryPlannerInterfaces>(
-      QUERY_PLANNERS_SERVICE_NAME, [this](const std::shared_ptr<rmw_request_id_t> request_header,
-                                          const std::shared_ptr<moveit_msgs::srv::QueryPlannerInterfaces::Request> req,
-                                          std::shared_ptr<moveit_msgs::srv::QueryPlannerInterfaces::Response> res) {
-        return queryInterface(request_header, req, std::move(res));
+      QUERY_PLANNERS_SERVICE_NAME,
+      [this](const std::shared_ptr<rmw_request_id_t>& request_header,
+             const std::shared_ptr<moveit_msgs::srv::QueryPlannerInterfaces::Request>& req,
+             const std::shared_ptr<moveit_msgs::srv::QueryPlannerInterfaces::Response>& res) {
+        return queryInterface(request_header, req, res);
       });
 
   get_service_ = context_->moveit_cpp_->getNode()->create_service<moveit_msgs::srv::GetPlannerParams>(
-      GET_PLANNER_PARAMS_SERVICE_NAME, [this](const std::shared_ptr<rmw_request_id_t> request_header,
-                                              const std::shared_ptr<moveit_msgs::srv::GetPlannerParams::Request> req,
-                                              std::shared_ptr<moveit_msgs::srv::GetPlannerParams::Response> res) {
-        return getParams(request_header, req, std::move(res));
+      GET_PLANNER_PARAMS_SERVICE_NAME, [this](const std::shared_ptr<rmw_request_id_t>& request_header,
+                                              const std::shared_ptr<moveit_msgs::srv::GetPlannerParams::Request>& req,
+                                              const std::shared_ptr<moveit_msgs::srv::GetPlannerParams::Response>& res) {
+        return getParams(request_header, req, res);
       });
 
   set_service_ = context_->moveit_cpp_->getNode()->create_service<moveit_msgs::srv::SetPlannerParams>(
-      SET_PLANNER_PARAMS_SERVICE_NAME, [this](const std::shared_ptr<rmw_request_id_t> request_header,
-                                              const std::shared_ptr<moveit_msgs::srv::SetPlannerParams::Request> req,
-                                              std::shared_ptr<moveit_msgs::srv::SetPlannerParams::Response> res) {
-        return setParams(request_header, req, std::move(res));
+      SET_PLANNER_PARAMS_SERVICE_NAME, [this](const std::shared_ptr<rmw_request_id_t>& request_header,
+                                              const std::shared_ptr<moveit_msgs::srv::SetPlannerParams::Request>& req,
+                                              const std::shared_ptr<moveit_msgs::srv::SetPlannerParams::Response>& res) {
+        return setParams(request_header, req, res);
       });
 }
 
@@ -164,6 +165,5 @@ bool MoveGroupQueryPlannersService::setParams(
 }  // namespace move_group
 
 #include <pluginlib/class_list_macros.hpp>
-#include <utility>
 
 PLUGINLIB_EXPORT_CLASS(move_group::MoveGroupQueryPlannersService, move_group::MoveGroupCapability)

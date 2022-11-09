@@ -52,10 +52,10 @@ MoveGroupPlanService::MoveGroupPlanService() : MoveGroupCapability("MotionPlanSe
 void MoveGroupPlanService::initialize()
 {
   plan_service_ = context_->moveit_cpp_->getNode()->create_service<moveit_msgs::srv::GetMotionPlan>(
-      PLANNER_SERVICE_NAME, [this](const std::shared_ptr<rmw_request_id_t> request_header,
-                                   const std::shared_ptr<moveit_msgs::srv::GetMotionPlan::Request> req,
-                                   std::shared_ptr<moveit_msgs::srv::GetMotionPlan::Response> res) {
-        return computePlanService(request_header, req, std::move(res));
+      PLANNER_SERVICE_NAME, [this](const std::shared_ptr<rmw_request_id_t>& request_header,
+                                   const std::shared_ptr<moveit_msgs::srv::GetMotionPlan::Request>& req,
+                                   const std::shared_ptr<moveit_msgs::srv::GetMotionPlan::Response>& res) {
+        return computePlanService(request_header, req, res);
       });
 }
 
@@ -96,6 +96,5 @@ bool MoveGroupPlanService::computePlanService(const std::shared_ptr<rmw_request_
 }  // namespace move_group
 
 #include <pluginlib/class_list_macros.hpp>
-#include <utility>
 
 PLUGINLIB_EXPORT_CLASS(move_group::MoveGroupPlanService, move_group::MoveGroupCapability)
