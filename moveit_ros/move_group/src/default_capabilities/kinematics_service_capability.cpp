@@ -55,13 +55,13 @@ void MoveGroupKinematicsService::initialize()
   fk_service_ = context_->moveit_cpp_->getNode()->create_service<moveit_msgs::srv::GetPositionFK>(
       FK_SERVICE_NAME, [this](const std::shared_ptr<rmw_request_id_t>& req_header,
                               const std::shared_ptr<moveit_msgs::srv::GetPositionFK::Request>& req,
-                              std::shared_ptr<moveit_msgs::srv::GetPositionFK::Response> res) {
+                              const std::shared_ptr<moveit_msgs::srv::GetPositionFK::Response>& res) {
         return computeFKService(req_header, req, res);
       });
   ik_service_ = context_->moveit_cpp_->getNode()->create_service<moveit_msgs::srv::GetPositionIK>(
       IK_SERVICE_NAME, [this](const std::shared_ptr<rmw_request_id_t>& req_header,
                               const std::shared_ptr<moveit_msgs::srv::GetPositionIK::Request>& req,
-                              std::shared_ptr<moveit_msgs::srv::GetPositionIK::Response> res) {
+                              const std::shared_ptr<moveit_msgs::srv::GetPositionIK::Response>& res) {
         return computeIKService(req_header, req, res);
       });
 }
