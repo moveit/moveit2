@@ -40,8 +40,6 @@
 
 #include <moveit/robot_state/robot_state.h>
 
-#include <utility>
-
 namespace moveit
 {
 namespace core
@@ -172,30 +170,28 @@ public:
      the returned path is truncated up to just before the jump.
 
      Kinematics solvers may use cost functions to prioritize certain solutions, which may be specified with \e cost_function. */
-  static Distance
-  computeCartesianPath(RobotState* start_state, const JointModelGroup* group,
-                       std::vector<std::shared_ptr<RobotState>>& traj, const LinkModel* link,
-                       const Eigen::Vector3d& translation, bool global_reference_frame, const MaxEEFStep& max_step,
-                       const JumpThreshold& jump_threshold,
-                       const GroupStateValidityCallbackFn& validCallback = GroupStateValidityCallbackFn(),
-                       const kinematics::KinematicsQueryOptions& options = kinematics::KinematicsQueryOptions(),
-                       kinematics::KinematicsBase::IKCostFn cost_function = kinematics::KinematicsBase::IKCostFn());
+  static Distance computeCartesianPath(
+      RobotState* start_state, const JointModelGroup* group, std::vector<std::shared_ptr<RobotState>>& traj,
+      const LinkModel* link, const Eigen::Vector3d& translation, bool global_reference_frame,
+      const MaxEEFStep& max_step, const JumpThreshold& jump_threshold,
+      const GroupStateValidityCallbackFn& validCallback = GroupStateValidityCallbackFn(),
+      const kinematics::KinematicsQueryOptions& options = kinematics::KinematicsQueryOptions(),
+      const kinematics::KinematicsBase::IKCostFn& cost_function = kinematics::KinematicsBase::IKCostFn());
 
   /** \brief Compute the sequence of joint values that correspond to a straight Cartesian path, for a particular link.
 
      In contrast to the previous function, the translation vector is specified as a (unit) direction vector and
      a distance. */
-  static Distance
-  computeCartesianPath(RobotState* start_state, const JointModelGroup* group,
-                       std::vector<std::shared_ptr<RobotState>>& traj, const LinkModel* link,
-                       const Eigen::Vector3d& direction, bool global_reference_frame, double distance,
-                       const MaxEEFStep& max_step, const JumpThreshold& jump_threshold,
-                       const GroupStateValidityCallbackFn& validCallback = GroupStateValidityCallbackFn(),
-                       const kinematics::KinematicsQueryOptions& options = kinematics::KinematicsQueryOptions(),
-                       kinematics::KinematicsBase::IKCostFn cost_function = kinematics::KinematicsBase::IKCostFn())
+  static Distance computeCartesianPath(
+      RobotState* start_state, const JointModelGroup* group, std::vector<std::shared_ptr<RobotState>>& traj,
+      const LinkModel* link, const Eigen::Vector3d& direction, bool global_reference_frame, double distance,
+      const MaxEEFStep& max_step, const JumpThreshold& jump_threshold,
+      const GroupStateValidityCallbackFn& validCallback = GroupStateValidityCallbackFn(),
+      const kinematics::KinematicsQueryOptions& options = kinematics::KinematicsQueryOptions(),
+      const kinematics::KinematicsBase::IKCostFn& cost_function = kinematics::KinematicsBase::IKCostFn())
   {
     return computeCartesianPath(start_state, group, traj, link, distance * direction, global_reference_frame, max_step,
-                                jump_threshold, validCallback, options, std::move(cost_function));
+                                jump_threshold, validCallback, options, cost_function);
   }
 
   /** \brief Compute the sequence of joint values that correspond to a straight Cartesian path, for a particular frame.

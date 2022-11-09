@@ -41,7 +41,6 @@
 #include <geometric_shapes/check_isometry.h>
 #include <rclcpp/logger.hpp>
 #include <rclcpp/logging.hpp>
-#include <utility>
 
 namespace moveit
 {
@@ -59,7 +58,7 @@ CartesianInterpolator::Distance CartesianInterpolator::computeCartesianPath(
     RobotState* start_state, const JointModelGroup* group, std::vector<RobotStatePtr>& traj, const LinkModel* link,
     const Eigen::Vector3d& translation, bool global_reference_frame, const MaxEEFStep& max_step,
     const JumpThreshold& jump_threshold, const GroupStateValidityCallbackFn& validCallback,
-    const kinematics::KinematicsQueryOptions& options, kinematics::KinematicsBase::IKCostFn cost_function)
+    const kinematics::KinematicsQueryOptions& options, const kinematics::KinematicsBase::IKCostFn& cost_function)
 {
   const double distance = translation.norm();
   // The target pose is obtained by adding the translation vector to the link's current pose
@@ -71,7 +70,7 @@ CartesianInterpolator::Distance CartesianInterpolator::computeCartesianPath(
   // call computeCartesianPath for the computed target pose in the global reference frame
   return CartesianInterpolator::Distance(distance) * computeCartesianPath(start_state, group, traj, link, pose, true,
                                                                           max_step, jump_threshold, validCallback,
-                                                                          options, std::move(cost_function));
+                                                                          options, cost_function);
 }
 
 CartesianInterpolator::Percentage CartesianInterpolator::computeCartesianPath(
