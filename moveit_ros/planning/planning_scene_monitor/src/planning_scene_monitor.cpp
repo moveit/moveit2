@@ -51,6 +51,7 @@
 #include <std_msgs/msg/string.hpp>
 
 #include <chrono>
+#include <utility>
 using namespace std::chrono_literals;
 
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_ros.planning_scene_monitor.planning_scene_monitor");
@@ -252,7 +253,7 @@ void PlanningSceneMonitor::initialize(const planning_scene::PlanningScenePtr& sc
     return;
   }
 
-  auto psm_parameter_set_callback = [this](std::vector<rclcpp::Parameter> parameters) -> auto
+  auto psm_parameter_set_callback = [this](const std::vector<rclcpp::Parameter>& parameters) -> auto
   {
     auto result = rcl_interfaces::msg::SetParametersResult();
     result.successful = true;
@@ -578,12 +579,13 @@ void PlanningSceneMonitor::providePlanningSceneService(const std::string& servic
   get_scene_service_ = pnode_->create_service<moveit_msgs::srv::GetPlanningScene>(
       service_name, [this](moveit_msgs::srv::GetPlanningScene::Request::SharedPtr req,
                            moveit_msgs::srv::GetPlanningScene::Response::SharedPtr res) {
-        return getPlanningSceneServiceCallback(req, res);
+        return getPlanningSceneServiceCallback(std::move(req), std::move(res));
       });
 }
 
-void PlanningSceneMonitor::getPlanningSceneServiceCallback(moveit_msgs::srv::GetPlanningScene::Request::SharedPtr req,
-                                                           moveit_msgs::srv::GetPlanningScene::Response::SharedPtr res)
+void PlanningSceneMonitor::getPlanningSceneServiceCallback(
+    const moveit_msgs::srv::GetPlanningScene::Request::SharedPtr& req,
+    const moveit_msgs::srv::GetPlanningScene::Response::SharedPtr& res)
 {
   if (req->components.components & moveit_msgs::msg::PlanningSceneComponents::TRANSFORMS)
     updateFrameTransforms();
@@ -618,7 +620,7 @@ void PlanningSceneMonitor::updatePublishSettings(bool publish_geom_updates, bool
     stopPublishingPlanningScene();
 }
 
-void PlanningSceneMonitor::newPlanningSceneCallback(moveit_msgs::msg::PlanningScene::SharedPtr scene)
+void PlanningSceneMonitor::newPlanningSceneCallback(const moveit_msgs::msg::PlanningScene::SharedPtr& scene)
 {
   newPlanningSceneMessage(*scene);
 }
@@ -728,7 +730,7 @@ bool PlanningSceneMonitor::newPlanningSceneMessage(const moveit_msgs::msg::Plann
   return result;
 }
 
-void PlanningSceneMonitor::newPlanningSceneWorldCallback(moveit_msgs::msg::PlanningSceneWorld::SharedPtr world)
+void PlanningSceneMonitor::newPlanningSceneWorldCallback(const moveit_msgs::msg::PlanningSceneWorld::SharedPtr& world)
 {
   if (scene_)
   {
@@ -752,7 +754,7 @@ void PlanningSceneMonitor::newPlanningSceneWorldCallback(moveit_msgs::msg::Plann
   }
 }
 
-void PlanningSceneMonitor::collisionObjectCallback(moveit_msgs::msg::CollisionObject::SharedPtr obj)
+void PlanningSceneMonitor::collisionObjectCallback(const moveit_msgs::msg::CollisionObject::SharedPtr& obj)
 {
   if (!scene_)
     return;
@@ -767,7 +769,7 @@ void PlanningSceneMonitor::collisionObjectCallback(moveit_msgs::msg::CollisionOb
   triggerSceneUpdateEvent(UPDATE_GEOMETRY);
 }
 
-void PlanningSceneMonitor::attachObjectCallback(moveit_msgs::msg::AttachedCollisionObject::SharedPtr obj)
+void PlanningSceneMonitor::attachObjectCallback(const moveit_msgs::msg::AttachedCollisionObject::SharedPtr& obj)
 {
   if (scene_)
   {
@@ -1176,15 +1178,16 @@ void PlanningSceneMonitor::startWorldGeometryMonitor(const std::string& collisio
   {
     collision_object_subscriber_ = pnode_->create_subscription<moveit_msgs::msg::CollisionObject>(
         collision_objects_topic, 1024,
-        [this](moveit_msgs::msg::CollisionObject::SharedPtr obj) { return collisionObjectCallback(obj); });
+        [this](moveit_msgs::msg::CollisionObject::SharedPtr obj) { return collisionObjectCallback(std::move(obj)); });
     RCLCPP_INFO(LOGGER, "Listening to '%s'", collision_objects_topic.c_str());
   }
 
   if (!planning_scene_world_topic.empty())
   {
     planning_scene_world_subscriber_ = pnode_->create_subscription<moveit_msgs::msg::PlanningSceneWorld>(
-        planning_scene_world_topic, 1,
-        [this](moveit_msgs::msg::PlanningSceneWorld::SharedPtr world) { return newPlanningSceneWorldCallback(world); });
+        planning_scene_world_topic, 1, [this](moveit_msgs::msg::PlanningSceneWorld::SharedPtr world) {
+          return newPlanningSceneWorldCallback(std::move(world));
+        });
     RCLCPP_INFO(LOGGER, "Listening to '%s' for planning scene world geometry", planning_scene_world_topic.c_str());
   }
 
@@ -1253,8 +1256,9 @@ void PlanningSceneMonitor::startStateMonitor(const std::string& joint_states_top
     {
       // using regular message filter as there's no header
       attached_collision_object_subscriber_ = pnode_->create_subscription<moveit_msgs::msg::AttachedCollisionObject>(
-          attached_objects_topic, 1024,
-          [this](moveit_msgs::msg::AttachedCollisionObject::SharedPtr obj) { return attachObjectCallback(obj); });
+          attached_objects_topic, 1024, [this](moveit_msgs::msg::AttachedCollisionObject::SharedPtr obj) {
+            return attachObjectCallback(std::move(obj));
+          });
       RCLCPP_INFO(LOGGER, "Listening to '%s' for attached collision objects",
                   attached_collision_object_subscriber_->get_topic_name());
     }

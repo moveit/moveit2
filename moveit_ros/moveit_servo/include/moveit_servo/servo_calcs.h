@@ -229,9 +229,9 @@ protected:
   void jointStateCB(const sensor_msgs::msg::JointState::SharedPtr msg);
 
   /* \brief Command callbacks */
-  void twistStampedCB(const geometry_msgs::msg::TwistStamped::SharedPtr msg);
-  void jointCmdCB(const control_msgs::msg::JointJog::SharedPtr msg);
-  void collisionVelocityScaleCB(const std_msgs::msg::Float64::SharedPtr msg);
+  void twistStampedCB(const geometry_msgs::msg::TwistStamped::SharedPtr& msg);
+  void jointCmdCB(const control_msgs::msg::JointJog::SharedPtr& msg);
+  void collisionVelocityScaleCB(const std_msgs::msg::Float64::SharedPtr& msg);
 
   /**
    * Allow drift in certain dimensions. For example, may allow the wrist to rotate freely.
@@ -241,17 +241,17 @@ protected:
    * @param response the service response
    * @return true if the adjustment was made
    */
-  void changeDriftDimensions(const std::shared_ptr<moveit_msgs::srv::ChangeDriftDimensions::Request> req,
-                             std::shared_ptr<moveit_msgs::srv::ChangeDriftDimensions::Response> res);
+  void changeDriftDimensions(const std::shared_ptr<moveit_msgs::srv::ChangeDriftDimensions::Request>& req,
+                             const std::shared_ptr<moveit_msgs::srv::ChangeDriftDimensions::Response>& res);
 
   /** \brief Start the main calculation timer */
   // Service callback for changing servoing dimensions
-  void changeControlDimensions(const std::shared_ptr<moveit_msgs::srv::ChangeControlDimensions::Request> req,
-                               std::shared_ptr<moveit_msgs::srv::ChangeControlDimensions::Response> res);
+  void changeControlDimensions(const std::shared_ptr<moveit_msgs::srv::ChangeControlDimensions::Request>& req,
+                               const std::shared_ptr<moveit_msgs::srv::ChangeControlDimensions::Response>& res);
 
   /** \brief Service callback to reset Servo status, e.g. so the arm can move again after a collision */
-  bool resetServoStatus(const std::shared_ptr<std_srvs::srv::Empty::Request> req,
-                        std::shared_ptr<std_srvs::srv::Empty::Response> res);
+  bool resetServoStatus(const std::shared_ptr<std_srvs::srv::Empty::Request>& req,
+                        const std::shared_ptr<std_srvs::srv::Empty::Response>& res);
 
   // Pointer to the ROS node
   std::shared_ptr<rclcpp::Node> node_;

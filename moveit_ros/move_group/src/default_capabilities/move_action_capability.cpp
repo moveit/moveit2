@@ -60,7 +60,7 @@ void MoveGroupMoveAction::initialize()
   auto node = context_->moveit_cpp_->getNode();
   execute_action_server_ = rclcpp_action::create_server<MGAction>(
       node, MOVE_ACTION,
-      [](const rclcpp_action::GoalUUID& /*unused*/, std::shared_ptr<const MGAction::Goal> /*unused*/) {
+      [](const rclcpp_action::GoalUUID& /*unused*/, const std::shared_ptr<const MGAction::Goal>& /*unused*/) {
         RCLCPP_INFO(LOGGER, "Received request");
         return rclcpp_action::GoalResponse::ACCEPT_AND_EXECUTE;
       },
@@ -68,10 +68,10 @@ void MoveGroupMoveAction::initialize()
         RCLCPP_INFO(LOGGER, "Received request to cancel goal");
         return rclcpp_action::CancelResponse::ACCEPT;
       },
-      [this](std::shared_ptr<MGActionGoal> goal) { return executeMoveCallback(goal); });
+      [this](std::shared_ptr<MGActionGoal> goal) { return executeMoveCallback(std::move(goal)); });
 }
 
-void MoveGroupMoveAction::executeMoveCallback(std::shared_ptr<MGActionGoal> goal)
+void MoveGroupMoveAction::executeMoveCallback(const std::shared_ptr<MGActionGoal>& goal)
 {
   RCLCPP_INFO(LOGGER, "executing..");
   setMoveState(PLANNING, goal);
@@ -276,5 +276,6 @@ void MoveGroupMoveAction::setMoveState(MoveGroupState state, const std::shared_p
 }  // namespace move_group
 
 #include <pluginlib/class_list_macros.hpp>
+#include <utility>
 
 PLUGINLIB_EXPORT_CLASS(move_group::MoveGroupMoveAction, move_group::MoveGroupCapability)

@@ -308,7 +308,7 @@ void RobotStateDisplay::changedRobotStateTopic()
       [this](const moveit_msgs::msg::DisplayRobotState::ConstSharedPtr state) { return newRobotStateCallback(state); });
 }
 
-void RobotStateDisplay::newRobotStateCallback(const moveit_msgs::msg::DisplayRobotState::ConstSharedPtr state_msg)
+void RobotStateDisplay::newRobotStateCallback(const moveit_msgs::msg::DisplayRobotState::ConstSharedPtr& state_msg)
 {
   if (!robot_model_)
     return;

@@ -38,6 +38,7 @@
  */
 
 #include <std_msgs/msg/float64.hpp>
+#include <utility>
 
 #include <moveit_servo/collision_check.h>
 // #include <moveit_servo/make_shared_from_pool.h>
@@ -51,7 +52,7 @@ namespace moveit_servo
 // Constructor for the class that handles collision checking
 CollisionCheck::CollisionCheck(rclcpp::Node::SharedPtr node, const ServoParameters::SharedConstPtr& parameters,
                                const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor)
-  : node_(node)
+  : node_(std::move(node))
   , parameters_(parameters)
   , planning_scene_monitor_(planning_scene_monitor)
   , self_velocity_scale_coefficient_(-log(0.001) / parameters->self_collision_proximity_threshold)

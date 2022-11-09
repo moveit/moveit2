@@ -114,7 +114,7 @@ public:
     }
   };
 
-  virtual FieldPointers getAdditionalControllerFields() const
+  FieldPointers getAdditionalControllerFields() const override
   {
     FieldPointers fields;
     fields.push_back(std::make_shared<ActionNamespaceField>());

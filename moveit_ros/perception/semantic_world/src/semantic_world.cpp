@@ -60,7 +60,7 @@ namespace semantic_world
 {
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.ros.perception.semantic_world");
 
-SemanticWorld::SemanticWorld(const rclcpp::Node::SharedPtr node,
+SemanticWorld::SemanticWorld(const rclcpp::Node::SharedPtr& node,
                              const planning_scene::PlanningSceneConstPtr& planning_scene)
   : planning_scene_(planning_scene), node_handle_(node)
 
@@ -473,7 +473,7 @@ std::string SemanticWorld::findObjectTable(const geometry_msgs::msg::Pose& pose,
   return std::string();
 }
 
-void SemanticWorld::tableCallback(const object_recognition_msgs::msg::TableArray::SharedPtr msg)
+void SemanticWorld::tableCallback(const object_recognition_msgs::msg::TableArray::SharedPtr& msg)
 {
   table_array_ = *msg;
   RCLCPP_INFO(LOGGER, "Table callback with %d tables", static_cast<int>(table_array_.tables.size()));

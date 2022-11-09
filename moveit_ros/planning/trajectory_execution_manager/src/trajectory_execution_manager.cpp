@@ -199,7 +199,7 @@ void TrajectoryExecutionManager::initialize()
   else
     RCLCPP_INFO(LOGGER, "Trajectory execution is not managing controllers");
 
-  auto controller_mgr_parameter_set_callback = [this](std::vector<rclcpp::Parameter> parameters) {
+  auto controller_mgr_parameter_set_callback = [this](const std::vector<rclcpp::Parameter>& parameters) {
     auto result = rcl_interfaces::msg::SetParametersResult();
     result.successful = true;
     for (const auto& parameter : parameters)
@@ -273,7 +273,7 @@ void TrajectoryExecutionManager::processEvent(const std::string& event)
     RCLCPP_WARN_STREAM(LOGGER, "Unknown event type: '" << event << "'");
 }
 
-void TrajectoryExecutionManager::receiveEvent(const std_msgs::msg::String::SharedPtr event)
+void TrajectoryExecutionManager::receiveEvent(const std_msgs::msg::String::SharedPtr& event)
 {
   RCLCPP_INFO_STREAM(LOGGER, "Received event '" << event->data << "'");
   processEvent(event->data);

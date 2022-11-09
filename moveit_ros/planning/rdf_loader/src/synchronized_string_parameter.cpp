@@ -36,6 +36,8 @@
 
 #include <moveit/rdf_loader/synchronized_string_parameter.h>
 
+#include <utility>
+
 namespace rdf_loader
 {
 std::string SynchronizedStringParameter::loadInitialValue(const std::shared_ptr<rclcpp::Node>& node,
@@ -44,7 +46,7 @@ std::string SynchronizedStringParameter::loadInitialValue(const std::shared_ptr<
 {
   node_ = node;
   name_ = name;
-  parent_callback_ = parent_callback;
+  parent_callback_ = std::move(parent_callback);
 
   if (getMainParameter())
   {
@@ -117,7 +119,7 @@ bool SynchronizedStringParameter::shouldPublish()
   return publish_string;
 }
 
-bool SynchronizedStringParameter::waitForMessage(const rclcpp::Duration timeout)
+bool SynchronizedStringParameter::waitForMessage(const rclcpp::Duration& timeout)
 {
   auto const nd_name = std::string(node_->get_name()).append("_ssp_").append(name_);
   auto const temp_node = std::make_shared<rclcpp::Node>(nd_name);
@@ -142,7 +144,7 @@ bool SynchronizedStringParameter::waitForMessage(const rclcpp::Duration timeout)
   return false;
 }
 
-void SynchronizedStringParameter::stringCallback(const std_msgs::msg::String::SharedPtr msg)
+void SynchronizedStringParameter::stringCallback(const std_msgs::msg::String::SharedPtr& msg)
 {
   if (msg->data == content_)
   {

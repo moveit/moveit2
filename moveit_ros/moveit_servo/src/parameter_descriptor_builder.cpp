@@ -32,6 +32,8 @@
    Project   : moveit_servo
 */
 
+#include <utility>
+
 #include "moveit_servo/parameter_descriptor_builder.hpp"
 
 namespace moveit_servo
@@ -44,13 +46,13 @@ ParameterDescriptorBuilder& ParameterDescriptorBuilder::type(uint8_t type)
 
 ParameterDescriptorBuilder& ParameterDescriptorBuilder::description(std::string description)
 {
-  msg_.description = description;
+  msg_.description = std::move(description);
   return *this;
 }
 
 ParameterDescriptorBuilder& ParameterDescriptorBuilder::additionalConstraints(std::string additional_constraints)
 {
-  msg_.additional_constraints = additional_constraints;
+  msg_.additional_constraints = std::move(additional_constraints);
   return *this;
 }
 

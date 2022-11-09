@@ -156,7 +156,7 @@ bool LocalPlannerComponent::initialize()
       node_, config_.local_planning_action_name,
       // Goal callback
       [this](const rclcpp_action::GoalUUID& /*unused*/,
-             std::shared_ptr<const moveit_msgs::action::LocalPlanner::Goal> /*unused*/) {
+             const std::shared_ptr<const moveit_msgs::action::LocalPlanner::Goal>& /*unused*/) {
         RCLCPP_INFO(LOGGER, "Received local planning goal request");
         // If another goal is active, cancel it and reject this goal
         if (long_callback_thread_.joinable())

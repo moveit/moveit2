@@ -43,6 +43,7 @@
 #include <deque>
 #include <memory>
 #include <optional>
+#include <utility>
 
 #include "rcl/error_handling.h"
 #include "rcl/time.h"
@@ -313,8 +314,8 @@ public:
     std::deque<double>::iterator duration_iterator;
 
   public:
-    explicit Iterator(std::deque<moveit::core::RobotStatePtr>::iterator _waypoint_iterator,
-                      std::deque<double>::iterator _duration_iterator)
+    explicit Iterator(const std::deque<moveit::core::RobotStatePtr>::iterator& _waypoint_iterator,
+                      const std::deque<double>::iterator& _duration_iterator)
       : waypoint_iterator(_waypoint_iterator), duration_iterator(_duration_iterator)
     {
     }
@@ -330,13 +331,14 @@ public:
       ++(*this);
       return retval;
     }
-    bool operator==(Iterator other) const
+    bool operator==(const Iterator& other) const
     {
       return ((waypoint_iterator == other.waypoint_iterator) && (duration_iterator == other.duration_iterator));
     }
-    bool operator!=(Iterator other) const
+    bool operator!=(
+        const const It& /*erator*/ /*o*/* /*o*/* /*o*/* /*o*/* /*o*/* /* /* /* / /*oth /*oth /*other*/ /*other*/) const
     {
-      return !(*this == other);
+      return !(*ter);
     }
     std::pair<moveit::core::RobotStatePtr, double> operator*() const
     {

@@ -63,11 +63,11 @@ void MoveGroupSequenceService::initialize()
   sequence_service_ = context_->moveit_cpp_->getNode()->create_service<moveit_msgs::srv::GetMotionSequence>(
       SEQUENCE_SERVICE_NAME,
       [this](const moveit_msgs::srv::GetMotionSequence::Request::SharedPtr req,
-             moveit_msgs::srv::GetMotionSequence::Response::SharedPtr res) { return plan(req, res); });
+             moveit_msgs::srv::GetMotionSequence::Response::SharedPtr res) { return plan(req, std::move(res)); });
 }
 
-bool MoveGroupSequenceService::plan(const moveit_msgs::srv::GetMotionSequence::Request::SharedPtr req,
-                                    moveit_msgs::srv::GetMotionSequence::Response::SharedPtr res)
+bool MoveGroupSequenceService::plan(const moveit_msgs::srv::GetMotionSequence::Request::SharedPtr& req,
+                                    const moveit_msgs::srv::GetMotionSequence::Response::SharedPtr& res)
 {
   // Handle empty requests
   if (req->request.items.empty())
@@ -127,4 +127,5 @@ bool MoveGroupSequenceService::plan(const moveit_msgs::srv::GetMotionSequence::R
 }  // namespace pilz_industrial_motion_planner
 
 #include <pluginlib/class_list_macros.hpp>
+#include <utility>
 PLUGINLIB_EXPORT_CLASS(pilz_industrial_motion_planner::MoveGroupSequenceService, move_group::MoveGroupCapability)

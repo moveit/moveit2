@@ -81,13 +81,14 @@ void MoveGroupCartesianPathService::initialize()
       [this](const std::shared_ptr<rmw_request_id_t> req_id,
              const std::shared_ptr<moveit_msgs::srv::GetCartesianPath::Request> req,
              std::shared_ptr<moveit_msgs::srv::GetCartesianPath::Response> res) -> bool {
-        return computeService(req_id, req, res);
+        return computeService(req_id, req, std::move(res));
       });
 }
 
-bool MoveGroupCartesianPathService::computeService(const std::shared_ptr<rmw_request_id_t> /* unused */,
-                                                   const std::shared_ptr<moveit_msgs::srv::GetCartesianPath::Request> req,
-                                                   std::shared_ptr<moveit_msgs::srv::GetCartesianPath::Response> res)
+bool MoveGroupCartesianPathService::computeService(
+    const std::shared_ptr<rmw_request_id_t>& /* unused */,
+    const std::shared_ptr<moveit_msgs::srv::GetCartesianPath::Request>& req,
+    const std::shared_ptr<moveit_msgs::srv::GetCartesianPath::Response>& res)
 {
   RCLCPP_INFO(LOGGER, "Received request to compute Cartesian path");
   context_->planning_scene_monitor_->updateFrameTransforms();
@@ -205,5 +206,6 @@ bool MoveGroupCartesianPathService::computeService(const std::shared_ptr<rmw_req
 }  // namespace move_group
 
 #include <pluginlib/class_list_macros.hpp>
+#include <utility>
 
 PLUGINLIB_EXPORT_CLASS(move_group::MoveGroupCartesianPathService, move_group::MoveGroupCapability)

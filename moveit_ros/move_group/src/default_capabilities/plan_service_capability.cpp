@@ -55,13 +55,13 @@ void MoveGroupPlanService::initialize()
       PLANNER_SERVICE_NAME, [this](const std::shared_ptr<rmw_request_id_t> request_header,
                                    const std::shared_ptr<moveit_msgs::srv::GetMotionPlan::Request> req,
                                    std::shared_ptr<moveit_msgs::srv::GetMotionPlan::Response> res) {
-        return computePlanService(request_header, req, res);
+        return computePlanService(request_header, req, std::move(res));
       });
 }
 
-bool MoveGroupPlanService::computePlanService(const std::shared_ptr<rmw_request_id_t> /* unused */,
-                                              const std::shared_ptr<moveit_msgs::srv::GetMotionPlan::Request> req,
-                                              std::shared_ptr<moveit_msgs::srv::GetMotionPlan::Response> res)
+bool MoveGroupPlanService::computePlanService(const std::shared_ptr<rmw_request_id_t>& /* unused */,
+                                              const std::shared_ptr<moveit_msgs::srv::GetMotionPlan::Request>& req,
+                                              const std::shared_ptr<moveit_msgs::srv::GetMotionPlan::Response>& res)
 {
   RCLCPP_INFO(LOGGER, "Received new planning service request...");
   // before we start planning, ensure that we have the latest robot state received...
@@ -96,5 +96,6 @@ bool MoveGroupPlanService::computePlanService(const std::shared_ptr<rmw_request_
 }  // namespace move_group
 
 #include <pluginlib/class_list_macros.hpp>
+#include <utility>
 
 PLUGINLIB_EXPORT_CLASS(move_group::MoveGroupPlanService, move_group::MoveGroupCapability)

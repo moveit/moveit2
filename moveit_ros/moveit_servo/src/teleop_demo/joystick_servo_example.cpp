@@ -227,7 +227,7 @@ public:
       collision_pub_thread_.join();
   }
 
-  void joyCB(const sensor_msgs::msg::Joy::SharedPtr msg)
+  void joyCB(const sensor_msgs::msg::Joy::SharedPtr& msg)
   {
     // Create the messages we might publish
     auto twist_msg = std::make_unique<geometry_msgs::msg::TwistStamped>();

@@ -47,6 +47,7 @@
 #include <tf2_eigen/tf2_eigen.hpp>
 #include <cassert>
 #include <functional>
+#include <utility>
 #include <moveit/macros/console_colors.h>
 #include <moveit/robot_model/aabb.h>
 
@@ -1469,7 +1470,7 @@ bool RobotState::setFromIK(const JointModelGroup* jmg, const geometry_msgs::msg:
     RCLCPP_ERROR(LOGGER, "No kinematics solver instantiated for group '%s'", jmg->getName().c_str());
     return false;
   }
-  return setFromIK(jmg, pose, solver->getTipFrame(), timeout, constraint, options, cost_function);
+  return setFromIK(jmg, pose, solver->getTipFrame(), timeout, constraint, options, std::move(cost_function));
 }
 
 bool RobotState::setFromIK(const JointModelGroup* jmg, const geometry_msgs::msg::Pose& pose, const std::string& tip,
@@ -1480,7 +1481,7 @@ bool RobotState::setFromIK(const JointModelGroup* jmg, const geometry_msgs::msg:
   Eigen::Isometry3d mat;
   tf2::fromMsg(pose, mat);
   static std::vector<double> consistency_limits;
-  return setFromIK(jmg, mat, tip, consistency_limits, timeout, constraint, options, cost_function);
+  return setFromIK(jmg, mat, tip, consistency_limits, timeout, constraint, options, std::move(cost_function));
 }
 
 bool RobotState::setFromIK(const JointModelGroup* jmg, const Eigen::Isometry3d& pose, double timeout,
@@ -1495,7 +1496,8 @@ bool RobotState::setFromIK(const JointModelGroup* jmg, const Eigen::Isometry3d& 
     return false;
   }
   static std::vector<double> consistency_limits;
-  return setFromIK(jmg, pose, solver->getTipFrame(), consistency_limits, timeout, constraint, options, cost_function);
+  return setFromIK(jmg, pose, solver->getTipFrame(), consistency_limits, timeout, constraint, options,
+                   std::move(cost_function));
 }
 
 bool RobotState::setFromIK(const JointModelGroup* jmg, const Eigen::Isometry3d& pose_in, const std::string& tip_in,
@@ -1504,7 +1506,7 @@ bool RobotState::setFromIK(const JointModelGroup* jmg, const Eigen::Isometry3d& 
                            kinematics::KinematicsBase::IKCostFn cost_function)
 {
   static std::vector<double> consistency_limits;
-  return setFromIK(jmg, pose_in, tip_in, consistency_limits, timeout, constraint, options, cost_function);
+  return setFromIK(jmg, pose_in, tip_in, consistency_limits, timeout, constraint, options, std::move(cost_function));
 }
 
 namespace
@@ -1563,7 +1565,7 @@ bool RobotState::setFromIK(const JointModelGroup* jmg, const Eigen::Isometry3d& 
   std::vector<std::vector<double> > consistency_limits;
   consistency_limits.push_back(consistency_limits_in);
 
-  return setFromIK(jmg, poses, tips, consistency_limits, timeout, constraint, options, cost_function);
+  return setFromIK(jmg, poses, tips, consistency_limits, timeout, constraint, options, std::move(cost_function));
 }
 
 bool RobotState::setFromIK(const JointModelGroup* jmg, const EigenSTL::vector_Isometry3d& poses_in,
@@ -1573,7 +1575,7 @@ bool RobotState::setFromIK(const JointModelGroup* jmg, const EigenSTL::vector_Is
                            kinematics::KinematicsBase::IKCostFn cost_function)
 {
   const std::vector<std::vector<double> > consistency_limits;
-  return setFromIK(jmg, poses_in, tips_in, consistency_limits, timeout, constraint, options, cost_function);
+  return setFromIK(jmg, poses_in, tips_in, consistency_limits, timeout, constraint, options, std::move(cost_function));
 }
 
 bool RobotState::setFromIK(const JointModelGroup* jmg, const EigenSTL::vector_Isometry3d& poses_in,
@@ -1799,8 +1801,8 @@ bool RobotState::setFromIK(const JointModelGroup* jmg, const EigenSTL::vector_Is
   std::vector<double> ik_sol;
   moveit_msgs::msg::MoveItErrorCodes error;
 
-  if (solver->searchPositionIK(ik_queries, seed, timeout, consistency_limits, ik_sol, ik_callback_fn, cost_function,
-                               error, options, this))
+  if (solver->searchPositionIK(ik_queries, seed, timeout, consistency_limits, ik_sol, ik_callback_fn,
+                               std::move(cost_function), error, options, this))
   {
     std::vector<double> solution(bij.size());
     for (std::size_t i = 0; i < bij.size(); ++i)

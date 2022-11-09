@@ -57,13 +57,13 @@ void ApplyPlanningSceneService::initialize()
       APPLY_PLANNING_SCENE_SERVICE_NAME, [this](const std::shared_ptr<rmw_request_id_t> request_header,
                                                 const std::shared_ptr<moveit_msgs::srv::ApplyPlanningScene::Request> req,
                                                 std::shared_ptr<moveit_msgs::srv::ApplyPlanningScene::Response> res) {
-        return applyScene(request_header, req, res);
+        return applyScene(request_header, req, std::move(res));
       });
 }
 
-bool ApplyPlanningSceneService::applyScene(const std::shared_ptr<rmw_request_id_t> /* unused */,
-                                           const std::shared_ptr<moveit_msgs::srv::ApplyPlanningScene::Request> req,
-                                           std::shared_ptr<moveit_msgs::srv::ApplyPlanningScene::Response> res)
+bool ApplyPlanningSceneService::applyScene(const std::shared_ptr<rmw_request_id_t>& /* unused */,
+                                           const std::shared_ptr<moveit_msgs::srv::ApplyPlanningScene::Request>& req,
+                                           const std::shared_ptr<moveit_msgs::srv::ApplyPlanningScene::Response>& res)
 {
   if (!context_->planning_scene_monitor_)
   {
@@ -77,5 +77,6 @@ bool ApplyPlanningSceneService::applyScene(const std::shared_ptr<rmw_request_id_
 }  // namespace move_group
 
 #include <pluginlib/class_list_macros.hpp>
+#include <utility>
 
 PLUGINLIB_EXPORT_CLASS(move_group::ApplyPlanningSceneService, move_group::MoveGroupCapability)

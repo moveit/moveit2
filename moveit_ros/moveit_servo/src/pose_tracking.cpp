@@ -253,7 +253,7 @@ bool PoseTracking::satisfiesPoseTolerance(const Eigen::Vector3d& positional_tole
           (std::abs(z_error) < positional_tolerance(2)) && (std::abs(*angular_error_) < angular_tolerance));
 }
 
-void PoseTracking::targetPoseCallback(const geometry_msgs::msg::PoseStamped::ConstSharedPtr msg)
+void PoseTracking::targetPoseCallback(const geometry_msgs::msg::PoseStamped::ConstSharedPtr& msg)
 {
   std::lock_guard<std::mutex> lock(target_pose_mtx_);
   target_pose_ = *msg;

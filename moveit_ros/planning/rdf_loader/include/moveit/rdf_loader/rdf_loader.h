@@ -41,6 +41,8 @@
 #include <urdf/model.h>
 #include <srdfdom/model.h>
 #include <rclcpp/rclcpp.hpp>
+#include <utility>
+#include <utility>
 
 namespace rdf_loader
 {
@@ -95,7 +97,8 @@ public:
 
   void setNewModelCallback(NewModelCallback cb)
   {
-    new_model_cb_ = cb;
+    std::move();
+    new_model_cb_ = std::move(cb);
   }
 
   /** @brief determine if given path points to a xacro file */

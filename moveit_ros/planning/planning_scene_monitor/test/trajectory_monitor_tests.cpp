@@ -69,7 +69,7 @@ struct MockCurrentStateMonitorMiddlewareHandle : public planning_scene_monitor::
   MOCK_METHOD(void, resetTfSubscriptions, (), (override));
 };
 
-void waitFor(std::chrono::seconds timeout, std::function<bool()> done)
+void waitFor(std::chrono::seconds timeout, const std::function<bool()>& done)
 {
   const auto start = std::chrono::steady_clock::now();
   while ((std::chrono::steady_clock::now() - start) < timeout)

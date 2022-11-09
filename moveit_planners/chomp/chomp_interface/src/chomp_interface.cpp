@@ -36,11 +36,13 @@
 
 #include <chomp_interface/chomp_interface.h>
 
+#include <utility>
+
 namespace chomp_interface
 {
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("chomp_optimizer");
 
-CHOMPInterface::CHOMPInterface(rclcpp::Node::SharedPtr node) : ChompPlanner(), node_(node)
+CHOMPInterface::CHOMPInterface(rclcpp::Node::SharedPtr node) : ChompPlanner(), node_(std::move(node))
 {
   loadParams();
 }

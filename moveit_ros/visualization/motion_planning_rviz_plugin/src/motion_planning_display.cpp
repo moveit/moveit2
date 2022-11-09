@@ -293,7 +293,7 @@ void MotionPlanningDisplay::toggleSelectPlanningGroupSubscription(bool enable)
   }
 }
 
-void MotionPlanningDisplay::selectPlanningGroupCallback(const std_msgs::msg::String::ConstSharedPtr msg)
+void MotionPlanningDisplay::selectPlanningGroupCallback(const std_msgs::msg::String::ConstSharedPtr& msg)
 {
   // synchronize ROS callback with main loop
   addMainLoopJob([this, group = msg->data] { changePlanningGroup(group); });

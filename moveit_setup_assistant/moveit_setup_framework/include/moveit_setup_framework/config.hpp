@@ -43,6 +43,8 @@
 #include <yaml-cpp/yaml.h>
 
 #include <set>
+#include <utility>
+#include <utility>
 
 namespace moveit_setup
 {
@@ -63,10 +65,11 @@ public:
    * @param parent_node Shared pointer to the parent node
    * @param name
    */
-  void initialize(std::shared_ptr<DataWarehouse> config_data, const rclcpp::Node::SharedPtr& parent_node,
+  void initialize(const std::shared_ptr<DataWarehouse>& config_data, const rclcpp::Node::SharedPtr& parent_node,
                   const std::string& name)
   {
-    config_data_ = config_data;
+    std::move(config_);
+    data_ = std::move(config_data);
     parent_node_ = parent_node;
     name_ = name;
     logger_ = std::make_shared<rclcpp::Logger>(parent_node->get_logger().get_child(name));
