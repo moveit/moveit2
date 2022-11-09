@@ -46,6 +46,7 @@
 #include <unordered_map>
 #include <utility>
 #include <filesystem>
+#include <cached_ik_kinematics_parameters.hpp>
 
 namespace cached_ik_kinematics_plugin
 {
@@ -229,6 +230,11 @@ public:
                   const std::vector<std::string>& tip_frames, double search_discretization) override
   {
     node_ = node;
+
+    std::string kinematics_param_prefix = "robot_description_kinematics." + group_name;
+    param_listener_ = std::make_shared<cached_ik_kinematics::ParamListener>(node, kinematics_param_prefix);
+    params_ = param_listener_->get_params();
+
     return initializeImpl(node, robot_model, group_name, base_frame, tip_frames, search_discretization);
   }
 
@@ -257,6 +263,8 @@ public:
 
 private:
   rclcpp::Node::SharedPtr node_;
+  std::shared_ptr<cached_ik_kinematics::ParamListener> param_listener_;
+  cached_ik_kinematics::Params params_;
 
   IKCache cache_;
 

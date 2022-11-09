@@ -9,10 +9,16 @@ ament_target_dependencies(${MOVEIT_LIB_NAME}
   moveit_core
   moveit_msgs
 )
+target_link_libraries(${MOVEIT_LIB_NAME} moveit_cached_ik_kinematics_plugin)
 
 if(trac_ik_kinematics_plugin_FOUND)
     include_directories(${trac_ik_kinematics_plugin_INCLUDE_DIRS})
 endif()
+
+generate_parameter_library(
+  cached_ik_kinematics_parameters # cmake target name for the parameter library
+  include/moveit/cached_ik_kinematics_plugin/cached_ik_kinematics_parameters.yaml # path to input yaml file
+)
 
 set(MOVEIT_LIB_NAME moveit_cached_ik_kinematics_plugin)
 add_library(${MOVEIT_LIB_NAME} SHARED src/cached_ik_kinematics_plugin.cpp)
@@ -23,7 +29,7 @@ ament_target_dependencies(${MOVEIT_LIB_NAME}
   moveit_msgs
 )
 target_link_libraries(${MOVEIT_LIB_NAME}
-    moveit_cached_ik_kinematics_base
+    cached_ik_kinematics_parameters
     moveit_kdl_kinematics_plugin
     moveit_srv_kinematics_plugin)
 if(trac_ik_kinematics_plugin_FOUND)
