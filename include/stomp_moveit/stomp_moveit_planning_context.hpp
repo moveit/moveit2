@@ -4,6 +4,12 @@
 
 #include <stomp_moveit_parameters.hpp>
 
+// Forward declaration
+namespace stomp
+{
+class Stomp;
+}
+
 namespace stomp_moveit
 {
 class StompPlanningContext : public planning_interface::PlanningContext
@@ -21,5 +27,6 @@ public:
 
 private:
   const stomp_moveit::Params params_;
+  std::shared_ptr<stomp::Stomp> stomp_;
 };
 }  // namespace stomp_moveit

@@ -1,3 +1,6 @@
+#include <atomic>
+#include <future>
+
 #include <stomp/stomp.h>
 
 #include <stomp_moveit/stomp_moveit_planning_context.hpp>
@@ -12,15 +15,13 @@
 
 namespace stomp_moveit
 {
-bool solveWithStomp(const stomp::StompConfiguration& config, const stomp::TaskPtr& task,
-                    const moveit::core::RobotState& start_state, const moveit::core::RobotState& goal_state,
-                    const moveit::core::JointModelGroup* group, robot_trajectory::RobotTrajectoryPtr& trajectory)
+bool solveWithStomp(const std::shared_ptr<stomp::Stomp>& stomp, const moveit::core::RobotState& start_state,
+                    const moveit::core::RobotState& goal_state, const moveit::core::JointModelGroup* group,
+                    robot_trajectory::RobotTrajectoryPtr& trajectory)
 {
-  stomp::Stomp stomp(config, task);
-
   Eigen::MatrixXd waypoints;
   const auto& joints = group->getActiveJointModels();
-  bool success = stomp.solve(get_positions(start_state, joints), get_positions(goal_state, joints), waypoints);
+  bool success = stomp->solve(get_positions(start_state, joints), get_positions(goal_state, joints), waypoints);
   if (success)
   {
     trajectory = std::make_shared<robot_trajectory::RobotTrajectory>(start_state.getRobotModel(), group);
@@ -101,15 +102,38 @@ bool StompPlanningContext::solve(planning_interface::MotionPlanResponse& res)
     return false;  // Can't plan without valid goal state
   }
 
-  // STOMP config and task
+  // STOMP config, task, planner instance
   const auto group = getPlanningScene()->getRobotModel()->getJointModelGroup(getGroupName());
   const auto config = getStompConfig(params_, group->getActiveJointModels().size() /* num_dimensions */);
   const auto task = createStompTask(config, *this);
+  stomp_ = std::make_shared<stomp::Stomp>(config, task);
 
-  // Solve motion plan
-  if (!solveWithStomp(config, task, start_state, goal_state, group, trajectory))
+  std::condition_variable cv;
+  std::mutex cv_mutex;
+  bool finished = false;
+  auto timeout_future = std::async(std::launch::async, [&, stomp = stomp_]() {
+    std::unique_lock<std::mutex> lock(cv_mutex);
+    cv.wait_for(lock, std::chrono::duration<double>(req.allowed_planning_time), [&finished] { return finished; });
+    if (!finished)
+    {
+      stomp->cancel();
+    }
+  });
+
+  // Solve
+  if (!solveWithStomp(stomp_, start_state, goal_state, group, trajectory))
   {
-    result_code = moveit_msgs::msg::MoveItErrorCodes::PLANNING_FAILED;
+    // We timed out if the timeout task has completed so that the timeout future is valid and ready
+    bool timed_out =
+        timeout_future.valid() && timeout_future.wait_for(std::chrono::nanoseconds(1)) == std::future_status::ready;
+    result_code =
+        timed_out ? moveit_msgs::msg::MoveItErrorCodes::TIMED_OUT : moveit_msgs::msg::MoveItErrorCodes::PLANNING_FAILED;
+  }
+  stomp_.reset();
+  {
+    std::unique_lock<std::mutex> lock(cv_mutex);
+    finished = true;
+    cv.notify_all();
   }
 
   // Stop time
@@ -126,7 +150,14 @@ bool StompPlanningContext::solve(planning_interface::MotionPlanDetailedResponse&
 
 bool StompPlanningContext::terminate()
 {
-  return false;
+  // Copy shared pointer to avoid race conditions
+  auto stomp = stomp_;
+  if (stomp)
+  {
+    return stomp->cancel();
+  }
+
+  return true;
 }
 
 void StompPlanningContext::clear()
