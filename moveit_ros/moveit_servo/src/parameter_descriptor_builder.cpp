@@ -42,13 +42,13 @@ ParameterDescriptorBuilder& ParameterDescriptorBuilder::type(uint8_t type)
   return *this;
 }
 
-ParameterDescriptorBuilder& ParameterDescriptorBuilder::description(std::string description)
+ParameterDescriptorBuilder& ParameterDescriptorBuilder::description(const std::string& description)
 {
   msg_.description = description;
   return *this;
 }
 
-ParameterDescriptorBuilder& ParameterDescriptorBuilder::additionalConstraints(std::string additional_constraints)
+ParameterDescriptorBuilder& ParameterDescriptorBuilder::additionalConstraints(const std::string& additional_constraints)
 {
   msg_.additional_constraints = additional_constraints;
   return *this;

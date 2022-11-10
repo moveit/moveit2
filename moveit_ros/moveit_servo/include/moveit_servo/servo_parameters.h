@@ -118,7 +118,7 @@ struct ServoParameters
    * @param dynamic_parameters Enable dynamic parameter handling. (default: true)
    * @return std::shared_ptr<ServoParameters> if all parameters were loaded and verified successfully, nullptr otherwise
    */
-  static SharedConstPtr makeServoParameters(const rclcpp::Node::SharedPtr& node, std::string ns = "moveit_servo",
+  static SharedConstPtr makeServoParameters(const rclcpp::Node::SharedPtr& node, const std::string& ns = "moveit_servo",
                                             bool dynamic_parameters = true);
 
   /**
@@ -128,7 +128,8 @@ struct ServoParameters
    * @param name Name of parameter (key used for callback in map)
    * @param callback function to call when parameter is changed
    */
-  [[nodiscard]] bool registerSetParameterCallback(const std::string name, SetParameterCallbackType callback) const
+  [[nodiscard]] bool registerSetParameterCallback(const std::string& name,
+                                                  const SetParameterCallbackType& callback) const
   {
     if (callback_handler_)
     {

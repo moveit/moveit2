@@ -75,7 +75,7 @@ public:
    * @param parent - used by Qt for destructing all elements
    * @return
    */
-  SetupAssistantWidget(rviz_common::ros_integration::RosNodeAbstractionIface::WeakPtr node, QWidget* parent,
+  SetupAssistantWidget(const rviz_common::ros_integration::RosNodeAbstractionIface::WeakPtr& node, QWidget* parent,
                        const boost::program_options::variables_map& args);
 
   /**

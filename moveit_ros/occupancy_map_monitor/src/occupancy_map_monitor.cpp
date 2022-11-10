@@ -129,15 +129,15 @@ OccupancyMapMonitor::OccupancyMapMonitor(std::unique_ptr<MiddlewareHandle> middl
   }
 
   /* advertise a service for loading octomaps from disk */
-  auto save_map_service_callback = [this](const std::shared_ptr<rmw_request_id_t> request_header,
-                                          const std::shared_ptr<moveit_msgs::srv::SaveMap::Request> request,
-                                          std::shared_ptr<moveit_msgs::srv::SaveMap::Response> response) -> bool {
+  auto save_map_service_callback = [this](const std::shared_ptr<rmw_request_id_t>& request_header,
+                                          const std::shared_ptr<moveit_msgs::srv::SaveMap::Request>& request,
+                                          const std::shared_ptr<moveit_msgs::srv::SaveMap::Response>& response) -> bool {
     return saveMapCallback(request_header, request, response);
   };
 
-  auto load_map_service_callback = [this](const std::shared_ptr<rmw_request_id_t> request_header,
-                                          const std::shared_ptr<moveit_msgs::srv::LoadMap::Request> request,
-                                          std::shared_ptr<moveit_msgs::srv::LoadMap::Response> response) -> bool {
+  auto load_map_service_callback = [this](const std::shared_ptr<rmw_request_id_t>& request_header,
+                                          const std::shared_ptr<moveit_msgs::srv::LoadMap::Request>& request,
+                                          const std::shared_ptr<moveit_msgs::srv::LoadMap::Response>& response) -> bool {
     return loadMapCallback(request_header, request, response);
   };
 
@@ -269,9 +269,9 @@ bool OccupancyMapMonitor::getShapeTransformCache(std::size_t index, const std::s
     return false;
 }
 
-bool OccupancyMapMonitor::saveMapCallback(const std::shared_ptr<rmw_request_id_t> /* unused */,
-                                          const std::shared_ptr<moveit_msgs::srv::SaveMap::Request> request,
-                                          std::shared_ptr<moveit_msgs::srv::SaveMap::Response> response)
+bool OccupancyMapMonitor::saveMapCallback(const std::shared_ptr<rmw_request_id_t>& /* unused */,
+                                          const std::shared_ptr<moveit_msgs::srv::SaveMap::Request>& request,
+                                          const std::shared_ptr<moveit_msgs::srv::SaveMap::Response>& response)
 {
   RCLCPP_INFO(LOGGER, "Writing map to %s", request->filename.c_str());
   tree_->lockRead();
@@ -287,9 +287,9 @@ bool OccupancyMapMonitor::saveMapCallback(const std::shared_ptr<rmw_request_id_t
   return true;
 }
 
-bool OccupancyMapMonitor::loadMapCallback(const std::shared_ptr<rmw_request_id_t> /* unused */,
-                                          const std::shared_ptr<moveit_msgs::srv::LoadMap::Request> request,
-                                          std::shared_ptr<moveit_msgs::srv::LoadMap::Response> response)
+bool OccupancyMapMonitor::loadMapCallback(const std::shared_ptr<rmw_request_id_t>& /* unused */,
+                                          const std::shared_ptr<moveit_msgs::srv::LoadMap::Request>& request,
+                                          const std::shared_ptr<moveit_msgs::srv::LoadMap::Response>& response)
 {
   RCLCPP_INFO(LOGGER, "Reading map from %s", request->filename.c_str());
 

@@ -454,7 +454,7 @@ std::optional<ServoParameters> ServoParameters::validate(ServoParameters paramet
 }
 
 ServoParameters::SharedConstPtr ServoParameters::makeServoParameters(const rclcpp::Node::SharedPtr& node,
-                                                                     std::string ns, /* = "moveit_servo"*/
+                                                                     const std::string& ns, /* = "moveit_servo"*/
                                                                      bool dynamic_parameters /* = true */)
 {
   auto node_parameters = node->get_node_parameters_interface();
