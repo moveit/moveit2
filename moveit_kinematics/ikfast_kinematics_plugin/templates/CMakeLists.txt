@@ -14,8 +14,14 @@ find_package(rclcpp REQUIRED)
 find_package(tf2_kdl REQUIRED)
 find_package(tf2_eigen REQUIRED)
 find_package(LAPACK REQUIRED)
+find_package(generate_parameter_library REQUIRED)
 
 include_directories(include)
+
+generate_parameter_library(
+  ikfast_kinematics_parameters # cmake target name for the parameter library
+  src/ikfast_kinematics_parameters.yaml # path to input yaml file
+)
 
 set(IKFAST_LIBRARY_NAME _LIBRARY_NAME_)
 add_library(${IKFAST_LIBRARY_NAME} SHARED src/_ROBOT_NAME___GROUP_NAME__ikfast_moveit_plugin.cpp)
@@ -30,7 +36,11 @@ ament_target_dependencies(${IKFAST_LIBRARY_NAME}
 # suppress warnings about unused variables in OpenRave's solver code
 target_compile_options(${IKFAST_LIBRARY_NAME} PRIVATE -Wno-unused-variable -Wno-unused-parameter)
 
-install(TARGETS ${IKFAST_LIBRARY_NAME}
+target_link_libraries(${IKFAST_LIBRARY_NAME}
+  ikfast_kinematics_parameters
+)
+
+install(TARGETS ${IKFAST_LIBRARY_NAME} ikfast_kinematics_parameters
   EXPORT ${PROJECT_NAME}Targets
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
@@ -44,4 +54,5 @@ ament_export_dependencies(pluginlib)
 ament_export_dependencies(rclcpp)
 ament_export_dependencies(tf2_kdl)
 ament_export_dependencies(tf2_eigen)
+ament_export_dependencies(generate_parameter_library)
 ament_package()

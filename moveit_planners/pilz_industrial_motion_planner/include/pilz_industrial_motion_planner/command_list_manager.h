@@ -48,6 +48,8 @@
 #include "pilz_industrial_motion_planner/trajectory_blender.h"
 #include "pilz_industrial_motion_planner/trajectory_generation_exceptions.h"
 
+#include <cartesian_limits_parameters.hpp>
+
 namespace pilz_industrial_motion_planner
 {
 using RobotTrajCont = std::vector<robot_trajectory::RobotTrajectoryPtr>;
@@ -218,6 +220,9 @@ private:
   //! @brief Builder to construct the container containing the final
   //! trajectories.
   PlanComponentsBuilder plan_comp_builder_;
+
+  std::shared_ptr<cartesian_limits::ParamListener> param_listener_;
+  cartesian_limits::Params params_;
 };
 
 inline void CommandListManager::checkLastBlendRadiusZero(const moveit_msgs::msg::MotionSequenceRequest& req_list)

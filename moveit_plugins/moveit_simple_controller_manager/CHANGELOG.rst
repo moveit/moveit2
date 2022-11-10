@@ -2,6 +2,56 @@
 Changelog for package moveit_simple_controller_manager
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.6.0 (2022-11-10)
+------------------
+* Merge PR `#1553 <https://github.com/ros-planning/moveit2/issues/1553>`_: Improve cmake files
+* Use standard exported targets: export\_${PROJECT_NAME} -> ${PROJECT_NAME}Targets
+* Improve CMake usage (`#1550 <https://github.com/ros-planning/moveit2/issues/1550>`_)
+* Support chained controllers (`#1482 <https://github.com/ros-planning/moveit2/issues/1482>`_)
+  * fix controller list if chained controllers exist
+  * add comments and clean code
+  * added additional comments
+  * fix formatting
+  * fix white space
+  * add const reference and chhnage variable name
+  * simplify logic to only  work with one layer chain
+  * Don't return false when not finding optional parameter
+  * Update moveit_ros/perception/pointcloud_octomap_updater/src/pointcloud_octomap_updater.cpp
+  Co-authored-by: AndyZe <andyz@utexas.edu>
+  * add debug information
+  * print controller names
+  * print controllers with not known type
+  * load controller dependencies
+  * start chained controllers in switch
+  * reverse order of activate controllers
+  * prevent stoppping controller twice
+  * revert all debug changes
+  * add ROS error if a controller chains to more than one
+  * use loop to index chained connections
+  * update ros_control
+  * add empty controller allocator for admittance controller
+  * fix plugin xml
+  * Update moveit_plugins/moveit_ros_control_interface/src/controller_manager_plugin.cpp
+  Co-authored-by: AndyZe <andyz@utexas.edu>
+  * Update moveit_plugins/moveit_ros_control_interface/src/controller_manager_plugin.cpp
+  Co-authored-by: AndyZe <andyz@utexas.edu>
+  * Update moveit_plugins/moveit_ros_control_interface/src/controller_manager_plugin.cpp
+  Co-authored-by: AndyZe <andyz@utexas.edu>
+  * Update moveit_plugins/moveit_ros_control_interface/src/controller_manager_plugin.cpp
+  Co-authored-by: AndyZe <andyz@utexas.edu>
+  * fix map indexing
+  * add comment
+  * Update moveit_plugins/moveit_ros_control_interface/src/controller_manager_plugin.cpp
+  Co-authored-by: Tyler Weaver <squirrel428@protonmail.com>
+  * Typos
+  Co-authored-by: JafarAbdi <cafer.abdi@gmail.com>
+  Co-authored-by: Jafar <jafar.uruc@gmail.com>
+  Co-authored-by: AndyZe <andyz@utexas.edu>
+  Co-authored-by: Vatan Aksoy Tezer <vatan@picknik.ai>
+  Co-authored-by: Tyler Weaver <squirrel428@protonmail.com>
+  Co-authored-by: AndyZe <zelenak@picknik.ai>
+* Contributors: Paul Gesel, Robert Haschke, Sebastian Jahr
+
 2.5.3 (2022-07-28)
 ------------------
 

@@ -286,8 +286,8 @@ TrajectoryGenerator::cartesianTrapVelocityProfile(const double& max_velocity_sca
                                                   const std::unique_ptr<KDL::Path>& path) const
 {
   std::unique_ptr<KDL::VelocityProfile> vp_trans = std::make_unique<KDL::VelocityProfile_Trap>(
-      max_velocity_scaling_factor * planner_limits_.getCartesianLimits().getMaxTranslationalVelocity(),
-      max_acceleration_scaling_factor * planner_limits_.getCartesianLimits().getMaxTranslationalAcceleration());
+      max_velocity_scaling_factor * planner_limits_.getCartesianLimits().max_trans_vel,
+      max_acceleration_scaling_factor * planner_limits_.getCartesianLimits().max_trans_acc);
 
   if (path->PathLength() > std::numeric_limits<double>::epsilon())  // avoid division by zero
   {

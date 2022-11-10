@@ -147,11 +147,13 @@ TEST_P(PlanningContextLoadersTest, LoadContext)
       testutils::createFakeLimits(robot_model_->getVariableNames());
   pilz_industrial_motion_planner::LimitsContainer limits;
   limits.setJointLimits(joint_limits);
-  pilz_industrial_motion_planner::CartesianLimit cart_limits;
-  cart_limits.setMaxRotationalVelocity(1 * M_PI);
-  cart_limits.setMaxTranslationalAcceleration(2);
-  cart_limits.setMaxTranslationalDeceleration(2);
-  cart_limits.setMaxTranslationalVelocity(1);
+
+  cartesian_limits::Params cart_limits;
+  cart_limits.max_trans_vel = 1 * M_PI;
+  cart_limits.max_trans_acc = 2;
+  cart_limits.max_trans_dec = 2;
+  cart_limits.max_rot_vel = 1;
+
   limits.setCartesianLimits(cart_limits);
 
   planning_context_loader_->setLimits(limits);
