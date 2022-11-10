@@ -63,25 +63,25 @@ private:
   std::shared_ptr<planning_scene_monitor::PlanningSceneMonitor> planning_scene_monitor_;
 
   /** \brief Start the servo loop. Must be called once to begin Servoing. */
-  void startCB(const std::shared_ptr<std_srvs::srv::Trigger::Request> request,
-               std::shared_ptr<std_srvs::srv::Trigger::Response> response);
+  void startCB(const std::shared_ptr<std_srvs::srv::Trigger::Request>& request,
+               const std::shared_ptr<std_srvs::srv::Trigger::Response>& response);
   rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr start_servo_service_;
 
   /** \brief Stop the servo loop. This involves more overhead than pauseCB, e.g. it clears the planning scene monitor.
    * We recommend using pauseCB/unpauseCB if you will resume the Servo loop soon.
    */
-  void stopCB(const std::shared_ptr<std_srvs::srv::Trigger::Request> request,
-              std::shared_ptr<std_srvs::srv::Trigger::Response> response);
+  void stopCB(const std::shared_ptr<std_srvs::srv::Trigger::Request>& request,
+              const std::shared_ptr<std_srvs::srv::Trigger::Response>& response);
   rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr stop_servo_service_;
 
   /** \brief Pause the servo loop but continue monitoring joint state so we can resume easily. */
-  void pauseCB(const std::shared_ptr<std_srvs::srv::Trigger::Request> request,
-               std::shared_ptr<std_srvs::srv::Trigger::Response> response);
+  void pauseCB(const std::shared_ptr<std_srvs::srv::Trigger::Request>& request,
+               const std::shared_ptr<std_srvs::srv::Trigger::Response>& response);
   rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr pause_servo_service_;
 
   /** \brief Resume the servo loop after pauseCB has been called. */
-  void unpauseCB(const std::shared_ptr<std_srvs::srv::Trigger::Request> request,
-                 std::shared_ptr<std_srvs::srv::Trigger::Response> response);
+  void unpauseCB(const std::shared_ptr<std_srvs::srv::Trigger::Request>& request,
+                 const std::shared_ptr<std_srvs::srv::Trigger::Response>& response);
   rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr unpause_servo_service_;
 };
 }  // namespace moveit_servo

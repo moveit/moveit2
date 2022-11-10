@@ -246,7 +246,7 @@ protected:
   void setQueryStateHelper(bool use_start_state, const std::string& v);
   void populateMenuHandler(std::shared_ptr<interactive_markers::MenuHandler>& mh);
 
-  void selectPlanningGroupCallback(const std_msgs::msg::String::ConstSharedPtr msg);
+  void selectPlanningGroupCallback(const std_msgs::msg::String::ConstSharedPtr& msg);
 
   // overrides from Display
   void onInitialize() override;

@@ -197,7 +197,7 @@ public:
    * provided PlanRequestParameters. */
   planning_interface::MotionPlanResponse
   plan(const MultiPipelinePlanRequestParameters& parameters,
-       SolutionCallbackFunction solution_selection_callback = &getShortestSolution,
+       const SolutionCallbackFunction& solution_selection_callback = &getShortestSolution,
        StoppingCriterionFunction stopping_criterion_callback = nullptr);
 
   /** \brief Execute the latest computed solution trajectory computed by plan(). By default this function terminates

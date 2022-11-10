@@ -2,6 +2,103 @@
 Changelog for package moveit_ros_planning
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.6.0 (2022-11-10)
+------------------
+* Short-circuit planning adapters (`#1694 <https://github.com/ros-planning/moveit2/issues/1694>`_)
+  * Revert "Planning request adapters: short-circuit if failure, return code rather than bool (`#1605 <https://github.com/ros-planning/moveit2/issues/1605>`_)"
+  This reverts commit 66a64b4a72b6ddef1af2329f20ed8162554d5bcb.
+  * Add debug message in call stack of planning_request_adapters
+  * Short-circuit planning request adapters
+  * Replace if-elseif cascade with switch
+  * Cleanup translation of MoveItErrorCode to string
+  - Move default code to moveit_core/utils
+  - Override defaults in existing getActionResultString()
+  - Provide translations for all error codes defined in moveit_msgs
+  * Fix comment according to review
+  * Add braces
+  Co-authored-by: Henning Kayser <henningkayser@picknik.ai>
+  * Add braces
+  Co-authored-by: Henning Kayser <henningkayser@picknik.ai>
+  Co-authored-by: Henning Kayser <henningkayser@picknik.ai>
+  Co-authored-by: AndyZe <andyz@utexas.edu>
+* Fixup for `#1420 <https://github.com/ros-planning/moveit2/issues/1420>`_: Restore constness of generatePlan() (`#1699 <https://github.com/ros-planning/moveit2/issues/1699>`_)
+* Parallel planning pipelines (`#1420 <https://github.com/ros-planning/moveit2/issues/1420>`_)
+  * Add setTrajectoryConstraints() to PlanningComponent
+  * Add planning time to PlanningComponent::PlanSolution
+  * Replace PlanSolution with MotionPlanResponse
+  * Address review
+  * Add MultiPipelinePlanRequestParameters
+  Add plan(const MultiPipelinePlanRequestParameters& parameters)
+  Add mutex to avoid segfaults
+  Add optional stop_criterion_callback and solution_selection_callback
+  Remove stop_criterion_callback
+  Make default solution_selection_callback = nullptr
+  Remove parameter handling copy&paste code in favor of a template
+  Add TODO to refactor pushBack() method into insert()
+  Fix selection criteria and add RCLCPP_INFO output
+  Changes due to rebase and formatting
+  Fix race condition and segfault when no solution is found
+  Satisfy clang tidy
+  Remove mutex and thread safety TODOs
+  Add stopping functionality to parallel planning
+  Remove unnecessary TODOs
+  * Fix unused plan solution with failure
+  * Add sanity check for number of parallel planning problems
+  * Check stopping criterion when new solution is generated + make thread safe
+  * Add terminatePlanningPipeline() to MoveItCpp interface
+  * Format!
+  * Bug fixes
+  * Move getShortestSolution callback into own function
+  * No east const
+  * Remove PlanSolutions and make planner_id accessible
+  * Make solution executable
+  * Rename update_last_solution to store_solution
+  * Alphabetize includes and include plan_solutions.hpp instead of .h
+  * Address review
+  * Add missing header
+  * Apply suggestions from code review
+  Co-authored-by: AndyZe <andyz@utexas.edu>
+  Co-authored-by: AndyZe <andyz@utexas.edu>
+* Fixed typo in deprecation warning in ControllerManager (`#1688 <https://github.com/ros-planning/moveit2/issues/1688>`_)
+  * fixed typo as suggested by  @AndyZe
+  * Update naming
+  Co-authored-by: AndyZe <andyz@utexas.edu>
+* Planning request adapters: short-circuit if failure, return code rather than bool (`#1605 <https://github.com/ros-planning/moveit2/issues/1605>`_)
+  * Return code rather than bool
+  * Remove all debug prints
+  * Small fixup
+  * Minor cleanup of comment and error handling
+  * void return from PlannerFn
+  * Control reaches end of non-void function
+  * Use a MoveItErrorCode cast
+  * More efficient callAdapter()
+  * More MoveItErrorCode
+  * CI fixup attempt
+* Rename MoveItControllerManager. Add deprecation warning (`#1601 <https://github.com/ros-planning/moveit2/issues/1601>`_)
+  * Rename MoveItControllerManager->Ros2ControlManager. Add deprecation warning.
+  * Do not rename base class
+  * Still allow users to load plugins by the old names
+  Co-authored-by: Jafar <jafar.uruc@gmail.com>
+* Use generate_parameter_library to load kinematics parameters (`#1568 <https://github.com/ros-planning/moveit2/issues/1568>`_)
+* Merge PR `#1553 <https://github.com/ros-planning/moveit2/issues/1553>`_: Improve cmake files
+* Use standard exported targets: export\_${PROJECT_NAME} -> ${PROJECT_NAME}Targets
+* Improve CMake usage (`#1550 <https://github.com/ros-planning/moveit2/issues/1550>`_)
+* Disable flaky test_servo_singularity + test_rdf_integration (`#1530 <https://github.com/ros-planning/moveit2/issues/1530>`_)
+* Remove sensor manager (`#1172 <https://github.com/ros-planning/moveit2/issues/1172>`_)
+* Removed plan_with_sensing (`#1142 <https://github.com/ros-planning/moveit2/issues/1142>`_)
+* Remove __has_include statements (`#1481 <https://github.com/ros-planning/moveit2/issues/1481>`_)
+* Merge https://github.com/ros-planning/moveit/commit/a63580edd05b01d9480c333645036e5b2b222da9
+* Default destructor for PlanningComponent (`#1470 <https://github.com/ros-planning/moveit2/issues/1470>`_)
+* trajectory execution manager: reactivate tests (`#3177 <https://github.com/ros-planning/moveit2/issues/3177>`_)
+* Clean up TrajectoryExecutionManager API: remove unused code (`#3178 <https://github.com/ros-planning/moveit2/issues/3178>`_)
+  * Clean up unused code
+  * Add a comment to MIGRATION.md
+  Co-authored-by: Cristian Beltran <cristianbehe@gmail.com>
+* Merge PR `#3172 <https://github.com/ros-planning/moveit2/issues/3172>`_: Fix CI
+* Load robot_description via planning_context.launch
+* TrajectoryExecutionManager: Use local LOGNAME instead of member name\_ (`#3168 <https://github.com/ros-planning/moveit2/issues/3168>`_)
+* Contributors: Abhijeet Das Gupta, Abishalini Sivaraman, AndyZe, Robert Haschke, Sebastian Jahr, Stephanie Eng, Tyler Weaver, Vatan Aksoy Tezer, abishalini, cambel
+
 2.5.3 (2022-07-28)
 ------------------
 

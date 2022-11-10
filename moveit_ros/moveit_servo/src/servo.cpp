@@ -48,8 +48,8 @@ const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_servo.servo");
 constexpr double ROBOT_STATE_WAIT_TIME = 10.0;  // seconds
 }  // namespace
 
-Servo::Servo(const rclcpp::Node::SharedPtr& node, ServoParameters::SharedConstPtr parameters,
-             planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor)
+Servo::Servo(const rclcpp::Node::SharedPtr& node, const ServoParameters::SharedConstPtr& parameters,
+             const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor)
   : planning_scene_monitor_{ planning_scene_monitor }
   , parameters_{ parameters }
   , servo_calcs_{ node, parameters, planning_scene_monitor_ }

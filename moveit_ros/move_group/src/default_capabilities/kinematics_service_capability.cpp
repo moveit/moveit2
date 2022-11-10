@@ -53,15 +53,15 @@ MoveGroupKinematicsService::MoveGroupKinematicsService() : MoveGroupCapability("
 void MoveGroupKinematicsService::initialize()
 {
   fk_service_ = context_->moveit_cpp_->getNode()->create_service<moveit_msgs::srv::GetPositionFK>(
-      FK_SERVICE_NAME, [this](const std::shared_ptr<rmw_request_id_t> req_header,
-                              const std::shared_ptr<moveit_msgs::srv::GetPositionFK::Request> req,
-                              std::shared_ptr<moveit_msgs::srv::GetPositionFK::Response> res) {
+      FK_SERVICE_NAME, [this](const std::shared_ptr<rmw_request_id_t>& req_header,
+                              const std::shared_ptr<moveit_msgs::srv::GetPositionFK::Request>& req,
+                              const std::shared_ptr<moveit_msgs::srv::GetPositionFK::Response>& res) {
         return computeFKService(req_header, req, res);
       });
   ik_service_ = context_->moveit_cpp_->getNode()->create_service<moveit_msgs::srv::GetPositionIK>(
-      IK_SERVICE_NAME, [this](const std::shared_ptr<rmw_request_id_t> req_header,
-                              const std::shared_ptr<moveit_msgs::srv::GetPositionIK::Request> req,
-                              std::shared_ptr<moveit_msgs::srv::GetPositionIK::Response> res) {
+      IK_SERVICE_NAME, [this](const std::shared_ptr<rmw_request_id_t>& req_header,
+                              const std::shared_ptr<moveit_msgs::srv::GetPositionIK::Request>& req,
+                              const std::shared_ptr<moveit_msgs::srv::GetPositionIK::Response>& res) {
         return computeIKService(req_header, req, res);
       });
 }
@@ -158,9 +158,9 @@ void MoveGroupKinematicsService::computeIK(moveit_msgs::msg::PositionIKRequest& 
     error_code.val = moveit_msgs::msg::MoveItErrorCodes::INVALID_GROUP_NAME;
 }
 
-bool MoveGroupKinematicsService::computeIKService(const std::shared_ptr<rmw_request_id_t> /* unused */,
-                                                  const std::shared_ptr<moveit_msgs::srv::GetPositionIK::Request> req,
-                                                  std::shared_ptr<moveit_msgs::srv::GetPositionIK::Response> res)
+bool MoveGroupKinematicsService::computeIKService(const std::shared_ptr<rmw_request_id_t>& /* unused */,
+                                                  const std::shared_ptr<moveit_msgs::srv::GetPositionIK::Request>& req,
+                                                  const std::shared_ptr<moveit_msgs::srv::GetPositionIK::Response>& res)
 {
   context_->planning_scene_monitor_->updateFrameTransforms();
 
@@ -192,9 +192,9 @@ bool MoveGroupKinematicsService::computeIKService(const std::shared_ptr<rmw_requ
   return true;
 }
 
-bool MoveGroupKinematicsService::computeFKService(const std::shared_ptr<rmw_request_id_t> /* unused */,
-                                                  const std::shared_ptr<moveit_msgs::srv::GetPositionFK::Request> req,
-                                                  std::shared_ptr<moveit_msgs::srv::GetPositionFK::Response> res)
+bool MoveGroupKinematicsService::computeFKService(const std::shared_ptr<rmw_request_id_t>& /* unused */,
+                                                  const std::shared_ptr<moveit_msgs::srv::GetPositionFK::Request>& req,
+                                                  const std::shared_ptr<moveit_msgs::srv::GetPositionFK::Response>& res)
 {
   if (req->fk_link_names.empty())
   {

@@ -445,16 +445,16 @@ protected:
   void configureDefaultPadding();
 
   /** @brief Callback for a new collision object msg*/
-  void collisionObjectCallback(moveit_msgs::msg::CollisionObject::SharedPtr obj);
+  void collisionObjectCallback(const moveit_msgs::msg::CollisionObject::ConstSharedPtr& obj);
 
   /** @brief Callback for a new planning scene world*/
-  void newPlanningSceneWorldCallback(moveit_msgs::msg::PlanningSceneWorld::SharedPtr world);
+  void newPlanningSceneWorldCallback(const moveit_msgs::msg::PlanningSceneWorld::ConstSharedPtr& world);
 
   /** @brief Callback for octomap updates */
   void octomapUpdateCallback();
 
   /** @brief Callback for a new attached object msg*/
-  void attachObjectCallback(moveit_msgs::msg::AttachedCollisionObject::SharedPtr obj);
+  void attachObjectCallback(const moveit_msgs::msg::AttachedCollisionObject::ConstSharedPtr& obj);
 
   /** @brief Callback for a change for an attached object of the current state of the planning scene */
   void currentStateAttachedBodyUpdateCallback(moveit::core::AttachedBody* attached_body, bool just_attached);
@@ -572,11 +572,11 @@ private:
   void stateUpdateTimerCallback();
 
   // Callback for a new planning scene msg
-  void newPlanningSceneCallback(const moveit_msgs::msg::PlanningScene::SharedPtr scene);
+  void newPlanningSceneCallback(const moveit_msgs::msg::PlanningScene::ConstSharedPtr& scene);
 
   // Callback for requesting the full planning scene via service
-  void getPlanningSceneServiceCallback(moveit_msgs::srv::GetPlanningScene::Request::SharedPtr req,
-                                       moveit_msgs::srv::GetPlanningScene::Response::SharedPtr res);
+  void getPlanningSceneServiceCallback(const moveit_msgs::srv::GetPlanningScene::Request::SharedPtr& req,
+                                       const moveit_msgs::srv::GetPlanningScene::Response::SharedPtr& res);
 
   void updatePublishSettings(bool publish_geom_updates, bool publish_state_updates, bool publish_transform_updates,
                              bool publish_planning_scene, double publish_planning_scene_hz);
