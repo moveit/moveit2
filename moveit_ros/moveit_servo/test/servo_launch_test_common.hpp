@@ -265,7 +265,7 @@ public:
   {
     sub_joint_state_ = node_->create_subscription<sensor_msgs::msg::JointState>(
         resolveServoTopicName(servo_parameters_->joint_topic), rclcpp::SystemDefaultsQoS(),
-        [this](const sensor_msgs::msg::JointState::SharedPtr msg) { return jointStateCB(msg); });
+        [this](const sensor_msgs::msg::JointState::ConstSharedPtr& msg) { return jointStateCB(msg); });
     return true;
   }
 
@@ -285,7 +285,7 @@ public:
     latest_collision_scale_ = msg.get()->data;
   }
 
-  void jointStateCB(const sensor_msgs::msg::JointState::SharedPtr& msg)
+  void jointStateCB(const sensor_msgs::msg::JointState::ConstSharedPtr& msg)
   {
     const std::lock_guard<std::mutex> lock(latest_state_mutex_);
     ++num_joint_state_;

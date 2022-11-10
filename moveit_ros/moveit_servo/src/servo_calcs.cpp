@@ -104,11 +104,11 @@ ServoCalcs::ServoCalcs(const rclcpp::Node::SharedPtr& node,
   // Subscribe to command topics
   twist_stamped_sub_ = node_->create_subscription<geometry_msgs::msg::TwistStamped>(
       parameters_->cartesian_command_in_topic, rclcpp::SystemDefaultsQoS(),
-      [this](const geometry_msgs::msg::TwistStamped::SharedPtr msg) { return twistStampedCB(msg); });
+      [this](const geometry_msgs::msg::TwistStamped::ConstSharedPtr& msg) { return twistStampedCB(msg); });
 
   joint_cmd_sub_ = node_->create_subscription<control_msgs::msg::JointJog>(
       parameters_->joint_command_in_topic, rclcpp::SystemDefaultsQoS(),
-      [this](const control_msgs::msg::JointJog::SharedPtr msg) { return jointCmdCB(msg); });
+      [this](const control_msgs::msg::JointJog::ConstSharedPtr& msg) { return jointCmdCB(msg); });
 
   // ROS Server for allowing drift in some dimensions
   drift_dimensions_server_ = node_->create_service<moveit_msgs::srv::ChangeDriftDimensions>(
@@ -135,7 +135,7 @@ ServoCalcs::ServoCalcs(const rclcpp::Node::SharedPtr& node,
   // Subscribe to the collision_check topic
   collision_velocity_scale_sub_ = node_->create_subscription<std_msgs::msg::Float64>(
       "~/collision_velocity_scale", rclcpp::SystemDefaultsQoS(),
-      [this](const std_msgs::msg::Float64::SharedPtr& msg) { return collisionVelocityScaleCB(msg); });
+      [this](const std_msgs::msg::Float64::ConstSharedPtr& msg) { return collisionVelocityScaleCB(msg); });
 
   // Publish freshly-calculated joints to the robot.
   // Put the outgoing msg in the right format (trajectory_msgs/JointTrajectory or std_msgs/Float64MultiArray).
@@ -1173,7 +1173,7 @@ bool ServoCalcs::getEEFrameTransform(geometry_msgs::msg::TransformStamped& trans
   return true;
 }
 
-void ServoCalcs::twistStampedCB(const geometry_msgs::msg::TwistStamped::SharedPtr& msg)
+void ServoCalcs::twistStampedCB(const geometry_msgs::msg::TwistStamped::ConstSharedPtr& msg)
 {
   const std::lock_guard<std::mutex> lock(main_loop_mutex_);
   latest_twist_stamped_ = msg;
@@ -1187,7 +1187,7 @@ void ServoCalcs::twistStampedCB(const geometry_msgs::msg::TwistStamped::SharedPt
   input_cv_.notify_all();
 }
 
-void ServoCalcs::jointCmdCB(const control_msgs::msg::JointJog::SharedPtr& msg)
+void ServoCalcs::jointCmdCB(const control_msgs::msg::JointJog::ConstSharedPtr& msg)
 {
   const std::lock_guard<std::mutex> lock(main_loop_mutex_);
   latest_joint_cmd_ = msg;
@@ -1201,7 +1201,7 @@ void ServoCalcs::jointCmdCB(const control_msgs::msg::JointJog::SharedPtr& msg)
   input_cv_.notify_all();
 }
 
-void ServoCalcs::collisionVelocityScaleCB(const std_msgs::msg::Float64::SharedPtr& msg)
+void ServoCalcs::collisionVelocityScaleCB(const std_msgs::msg::Float64::ConstSharedPtr& msg)
 {
   collision_velocity_scale_ = msg.get()->data;
 }

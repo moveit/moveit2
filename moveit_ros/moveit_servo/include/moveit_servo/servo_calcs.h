@@ -227,12 +227,12 @@ protected:
   void enforceControlDimensions(geometry_msgs::msg::TwistStamped& command);
 
   /* \brief Callback for joint subsription */
-  void jointStateCB(const sensor_msgs::msg::JointState::SharedPtr msg);
+  void jointStateCB(const sensor_msgs::msg::JointState::ConstSharedPtr& msg);
 
   /* \brief Command callbacks */
-  void twistStampedCB(const geometry_msgs::msg::TwistStamped::SharedPtr& msg);
-  void jointCmdCB(const control_msgs::msg::JointJog::SharedPtr& msg);
-  void collisionVelocityScaleCB(const std_msgs::msg::Float64::SharedPtr& msg);
+  void twistStampedCB(const geometry_msgs::msg::TwistStamped::ConstSharedPtr& msg);
+  void jointCmdCB(const control_msgs::msg::JointJog::ConstSharedPtr& msg);
+  void collisionVelocityScaleCB(const std_msgs::msg::Float64::ConstSharedPtr& msg);
 
   /**
    * Allow drift in certain dimensions. For example, may allow the wrist to rotate freely.
