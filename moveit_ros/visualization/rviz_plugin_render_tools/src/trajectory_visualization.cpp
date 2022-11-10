@@ -367,7 +367,7 @@ void TrajectoryVisualization::interruptCurrentDisplay()
 double TrajectoryVisualization::getStateDisplayTime()
 {
   constexpr char default_time_string[] = "3x";
-  constexpr double default_time_value = -3.0f;
+  constexpr double default_time_value = -3.0;
 
   std::string tm = state_display_time_property_->getStdString();
   boost::trim(tm);
