@@ -181,13 +181,8 @@ moveit_msgs::msg::Constraints constructGoalConstraints(const std::string& link_n
 
   pcm.header = pose.header;
   pcm.constraint_region.primitive_poses.resize(1);
-  pcm.constraint_region.primitive_poses[0].position = pose.pose.position;
-
   // orientation of constraint region does not affect anything, since it is a sphere
-  pcm.constraint_region.primitive_poses[0].orientation.x = 0.0;
-  pcm.constraint_region.primitive_poses[0].orientation.y = 0.0;
-  pcm.constraint_region.primitive_poses[0].orientation.z = 0.0;
-  pcm.constraint_region.primitive_poses[0].orientation.w = 1.0;
+  pcm.constraint_region.primitive_poses[0].position = pose.pose.position;
   pcm.weight = 1.0;
 
   goal.orientation_constraints.resize(1);
