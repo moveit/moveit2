@@ -55,17 +55,10 @@ public:
   bool initialize(const moveit::core::RobotModelConstPtr& model, const rclcpp::Node::SharedPtr& node,
                   const std::string& /* unused */) override
   {
-    planning_interface::PlannerConfigurationMap pconfig;
     for (const std::string& group : model->getJointModelGroupNames())
     {
       planning_contexts_[group] = std::make_shared<CHOMPPlanningContext>("chomp_planning_context", group, model, node);
-      const planning_interface::PlannerConfigurationSettings planner_config_settings{
-        group, group, std::map<std::string, std::string>()
-      };
-      pconfig[planner_config_settings.name] = planner_config_settings;
     }
-
-    setPlannerConfigurations(pconfig);
     return true;
   }
 
@@ -118,11 +111,6 @@ public:
   {
     algs.resize(1);
     algs[0] = "CHOMP";
-  }
-
-  void setPlannerConfigurations(const planning_interface::PlannerConfigurationMap& pcs) override
-  {
-    config_settings_ = pcs;
   }
 
 protected:
