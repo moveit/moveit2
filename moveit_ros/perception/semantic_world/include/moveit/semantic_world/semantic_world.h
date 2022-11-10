@@ -136,7 +136,7 @@ private:
 
   shapes::Mesh* orientPlanarPolygon(const shapes::Mesh& polygon) const;
 
-  void tableCallback(const object_recognition_msgs::msg::TableArray::SharedPtr& msg);
+  void tableCallback(const object_recognition_msgs::msg::TableArray::ConstSharedPtr& msg);
 
   void transformTableArray(object_recognition_msgs::msg::TableArray& table_array) const;
 

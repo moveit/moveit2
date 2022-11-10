@@ -183,8 +183,8 @@ void TrajectoryExecutionManager::initialize()
   auto options = rclcpp::SubscriptionOptions();
   options.callback_group = callback_group;
   event_topic_subscriber_ = node_->create_subscription<std_msgs::msg::String>(
-      EXECUTION_EVENT_TOPIC, 100, [this](const std_msgs::msg::String::SharedPtr event) { return receiveEvent(event); },
-      options);
+      EXECUTION_EVENT_TOPIC, 100,
+      [this](const std_msgs::msg::String::ConstSharedPtr& event) { return receiveEvent(event); }, options);
 
   controller_mgr_node_->get_parameter("trajectory_execution.execution_duration_monitoring",
                                       execution_duration_monitoring_);
@@ -273,7 +273,7 @@ void TrajectoryExecutionManager::processEvent(const std::string& event)
     RCLCPP_WARN_STREAM(LOGGER, "Unknown event type: '" << event << "'");
 }
 
-void TrajectoryExecutionManager::receiveEvent(const std_msgs::msg::String::SharedPtr& event)
+void TrajectoryExecutionManager::receiveEvent(const std_msgs::msg::String::ConstSharedPtr& event)
 {
   RCLCPP_INFO_STREAM(LOGGER, "Received event '" << event->data << "'");
   processEvent(event->data);
