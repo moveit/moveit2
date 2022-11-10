@@ -2,7 +2,7 @@
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
   <name>moveit_ros_robot_interaction</name>
-  <version>2.5.3</version>
+  <version>2.6.0</version>
   <description>Components of MoveIt that offer interaction via interactive markers</description>
   <maintainer email="henningkayser@picknik.ai">Henning Kayser</maintainer>
   <maintainer email="tyler@picknik.ai">Tyler Weaver</maintainer>
@@ -18,8 +18,9 @@
   <author email="isucan@google.com">Ioan Sucan</author>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
-  <depend>moveit_common</depend>
 
+  <depend>moveit_common</depend>
+  <depend>moveit_core</depend>
   <depend>moveit_ros_planning</depend>
   <depend>rclcpp</depend>
   <depend>tf2</depend>

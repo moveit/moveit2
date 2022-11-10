@@ -13,7 +13,6 @@ set(UNIT_TEST_SOURCEFILES
   unittest_joint_limits_aggregator
   unittest_joint_limits_container
   unittest_joint_limits_validator
-  unittest_cartesian_limits_aggregator
   unittest_planning_context_loaders
   unittest_planning_context
   unittest_get_solver_tip_frame
@@ -134,11 +133,6 @@ target_link_libraries(unittest_joint_limits_container joint_limits_common)
 ament_add_gtest(unittest_joint_limits_validator
   src/unittest_joint_limits_validator.cpp)
 target_link_libraries(unittest_joint_limits_validator joint_limits_common)
-
-# Cartesian Limits Aggregator Unit Test
-ament_add_gtest_executable(unittest_cartesian_limits_aggregator src/unittest_cartesian_limits_aggregator.cpp)
-target_link_libraries(unittest_cartesian_limits_aggregator joint_limits_common)
-add_ros_test(launch/unittest_cartesian_limits_aggregator.test.py ARGS "test_binary_dir:=${CMAKE_CURRENT_BINARY_DIR}")
 
 # PlanningContextLoaderPTP Unit Test
 ament_add_gtest_executable(unittest_planning_context_loaders

@@ -57,7 +57,7 @@ MOVEIT_CLASS_FORWARD(MoveGroupCapability);  // Defines MoveGroupCapabilityPtr, C
 class MoveGroupCapability
 {
 public:
-  MoveGroupCapability(const std::string& capability_name) : capability_name_(capability_name)
+  explicit MoveGroupCapability(const std::string& capability_name) : capability_name_(capability_name)
   {
   }
 

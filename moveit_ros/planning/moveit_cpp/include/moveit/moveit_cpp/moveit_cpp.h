@@ -172,6 +172,9 @@ public:
                                                      const robot_trajectory::RobotTrajectoryPtr& robot_trajectory,
                                                      bool blocking = true);
 
+  /** \brief Utility to terminate the given planning pipeline */
+  bool terminatePlanningPipeline(const std::string& pipeline_name);
+
 private:
   //  Core properties and instances
   rclcpp::Node::SharedPtr node_;

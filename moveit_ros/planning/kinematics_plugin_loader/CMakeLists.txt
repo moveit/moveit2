@@ -9,8 +9,23 @@ ament_target_dependencies(${MOVEIT_LIB_NAME}
   class_loader
   moveit_core
 )
+
+generate_parameter_library(
+  kinematics_parameters # cmake target name for the parameter library
+  src/kinematics_parameters.yaml # path to input yaml file
+)
+
 target_link_libraries(${MOVEIT_LIB_NAME}
   moveit_rdf_loader
+  kinematics_parameters
+)
+
+install(
+  TARGETS kinematics_parameters
+  EXPORT ${PROJECT_NAME}Targets
+  ARCHIVE DESTINATION lib
+  LIBRARY DESTINATION lib
+  RUNTIME DESTINATION bin
 )
 
 install(DIRECTORY include/ DESTINATION include)

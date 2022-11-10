@@ -39,6 +39,7 @@
 #include <moveit/trajectory_processing/trajectory_tools.h>
 #include <moveit/collision_detection/collision_tools.h>
 #include <moveit/utils/message_checks.h>
+#include <moveit/utils/moveit_error_code.h>
 #include <boost/algorithm/string/join.hpp>
 #include <rclcpp/logger.hpp>
 #include <rclcpp/logging.hpp>
@@ -107,35 +108,6 @@ plan_execution::PlanExecution::~PlanExecution()
 void plan_execution::PlanExecution::stop()
 {
   preempt_.request();
-}
-
-std::string plan_execution::PlanExecution::getErrorCodeString(const moveit_msgs::msg::MoveItErrorCodes& error_code)
-{
-  if (error_code.val == moveit_msgs::msg::MoveItErrorCodes::SUCCESS)
-    return "Success";
-  else if (error_code.val == moveit_msgs::msg::MoveItErrorCodes::INVALID_GROUP_NAME)
-    return "Invalid group name";
-  else if (error_code.val == moveit_msgs::msg::MoveItErrorCodes::PLANNING_FAILED)
-    return "Planning failed.";
-  else if (error_code.val == moveit_msgs::msg::MoveItErrorCodes::INVALID_MOTION_PLAN)
-    return "Invalid motion plan";
-  else if (error_code.val == moveit_msgs::msg::MoveItErrorCodes::UNABLE_TO_AQUIRE_SENSOR_DATA)
-    return "Unable to acquire sensor data";
-  else if (error_code.val == moveit_msgs::msg::MoveItErrorCodes::MOTION_PLAN_INVALIDATED_BY_ENVIRONMENT_CHANGE)
-    return "Motion plan invalidated by environment change";
-  else if (error_code.val == moveit_msgs::msg::MoveItErrorCodes::CONTROL_FAILED)
-    return "Controller failed during execution";
-  else if (error_code.val == moveit_msgs::msg::MoveItErrorCodes::TIMED_OUT)
-    return "Timeout reached";
-  else if (error_code.val == moveit_msgs::msg::MoveItErrorCodes::PREEMPTED)
-    return "Preempted";
-  else if (error_code.val == moveit_msgs::msg::MoveItErrorCodes::INVALID_GOAL_CONSTRAINTS)
-    return "Invalid goal constraints";
-  else if (error_code.val == moveit_msgs::msg::MoveItErrorCodes::INVALID_OBJECT_NAME)
-    return "Invalid object name";
-  else if (error_code.val == moveit_msgs::msg::MoveItErrorCodes::FAILURE)
-    return "Catastrophic failure";
-  return "Unknown event";
 }
 
 void plan_execution::PlanExecution::planAndExecute(ExecutableMotionPlan& plan, const Options& opt)
@@ -276,7 +248,7 @@ void plan_execution::PlanExecution::planAndExecuteHelper(ExecutableMotionPlan& p
   else
   {
     RCLCPP_DEBUG(LOGGER, "PlanExecution terminating with error code %d - '%s'", plan.error_code_.val,
-                 getErrorCodeString(plan.error_code_).c_str());
+                 moveit::core::error_code_to_string(plan.error_code_).c_str());
   }
 }
 

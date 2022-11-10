@@ -80,7 +80,9 @@ public:
       return planner(planning_scene, req2, res);
     }
     else
+    {
       return planner(planning_scene, req, res);
+    }
   }
 
 private:

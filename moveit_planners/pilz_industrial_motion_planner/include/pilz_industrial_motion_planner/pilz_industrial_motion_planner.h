@@ -45,6 +45,8 @@
 #include <pluginlib/class_loader.hpp>
 #include <memory>
 
+#include <cartesian_limits_parameters.hpp>
+
 namespace pilz_industrial_motion_planner
 {
 /**
@@ -138,7 +140,8 @@ private:
   pilz_industrial_motion_planner::JointLimitsContainer aggregated_limit_active_joints_;
 
   /// cartesian limit
-  pilz_industrial_motion_planner::CartesianLimit cartesian_limit_;
+  std::shared_ptr<cartesian_limits::ParamListener> param_listener_;
+  cartesian_limits::Params params_;
 };
 
 MOVEIT_CLASS_FORWARD(CommandPlanner);

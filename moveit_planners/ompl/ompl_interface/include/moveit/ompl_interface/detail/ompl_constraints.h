@@ -365,9 +365,9 @@ private:
  *
  *  And then the constraints can be written as
  *
- *     - absolute_x_axis_tolerance / 2 < error[0] < absolute_x_axis_tolerance / 2
- *     - absolute_y_axis_tolerance / 2 < error[1] < absolute_y_axis_tolerance / 2
- *     - absolute_z_axis_tolerance / 2 < error[2] < absolute_z_axis_tolerance / 2
+ *     - absolute_x_axis_tolerance < error[0] < absolute_x_axis_tolerance
+ *     - absolute_y_axis_tolerance < error[1] < absolute_y_axis_tolerance
+ *     - absolute_z_axis_tolerance < error[2] < absolute_z_axis_tolerance
  *
  * **IMPORTANT** It is NOT how orientation error is handled in the default MoveIt constraint samplers, where XYZ
  * intrinsic euler angles are used. Using exponential coordinates is analog to how orientation error is calculated in

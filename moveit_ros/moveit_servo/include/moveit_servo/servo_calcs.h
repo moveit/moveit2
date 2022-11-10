@@ -58,7 +58,6 @@
 #include <std_msgs/msg/float64_multi_array.hpp>
 #include <std_msgs/msg/int8.hpp>
 #include <std_srvs/srv/empty.hpp>
-#include <tf2_eigen/tf2_eigen.hpp>
 #include <trajectory_msgs/msg/joint_trajectory.hpp>
 
 // moveit_core
@@ -172,13 +171,6 @@ protected:
    */
   std::vector<const moveit::core::JointModel*> enforcePositionLimits(sensor_msgs::msg::JointState& joint_state) const;
 
-  /** \brief Possibly calculate a velocity scaling factor, due to proximity of
-   * singularity and direction of motion
-   */
-  double velocityScalingFactorForSingularity(const Eigen::VectorXd& commanded_velocity,
-                                             const Eigen::JacobiSVD<Eigen::MatrixXd>& svd,
-                                             const Eigen::MatrixXd& pseudo_inverse);
-
   /** \brief Compose the outgoing JointTrajectory message */
   void composeJointTrajMessage(const sensor_msgs::msg::JointState& joint_state,
                                trajectory_msgs::msg::JointTrajectory& joint_trajectory);
@@ -232,9 +224,6 @@ protected:
    * @param command TwistStamped msg being used in the Cartesian calcs process
    */
   void enforceControlDimensions(geometry_msgs::msg::TwistStamped& command);
-
-  /* \brief Callback for joint subsription */
-  void jointStateCB(const sensor_msgs::msg::JointState::SharedPtr msg);
 
   /* \brief Command callbacks */
   void twistStampedCB(const geometry_msgs::msg::TwistStamped::SharedPtr msg);
@@ -313,7 +302,6 @@ protected:
   rclcpp::Publisher<std_msgs::msg::Int8>::SharedPtr status_pub_;
   rclcpp::Publisher<trajectory_msgs::msg::JointTrajectory>::SharedPtr trajectory_outgoing_cmd_pub_;
   rclcpp::Publisher<std_msgs::msg::Float64MultiArray>::SharedPtr multiarray_outgoing_cmd_pub_;
-  rclcpp::Publisher<std_msgs::msg::Float64>::SharedPtr condition_pub_;
   rclcpp::Service<moveit_msgs::srv::ChangeControlDimensions>::SharedPtr control_dimensions_server_;
   rclcpp::Service<moveit_msgs::srv::ChangeDriftDimensions>::SharedPtr drift_dimensions_server_;
   rclcpp::Service<std_srvs::srv::Empty>::SharedPtr reset_servo_status_;

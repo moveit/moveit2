@@ -125,9 +125,10 @@ class MoveItConfigs:
         parameters.update(self.joint_limits)
         parameters.update(self.moveit_cpp)
         # Update robot_description_planning with pilz cartesian limits
-        parameters["robot_description_planning"].update(
-            self.pilz_cartesian_limits["robot_description_planning"]
-        )
+        if self.pilz_cartesian_limits:
+            parameters["robot_description_planning"].update(
+                self.pilz_cartesian_limits["robot_description_planning"]
+            )
         return parameters
 
 

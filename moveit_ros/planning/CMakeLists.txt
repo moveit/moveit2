@@ -6,6 +6,7 @@ find_package(moveit_common REQUIRED)
 moveit_package()
 
 find_package(ament_cmake REQUIRED)
+find_package(generate_parameter_library REQUIRED)
 find_package(moveit_msgs REQUIRED)
 # find_package(moveit_ros_perception REQUIRED)
 find_package(pluginlib REQUIRED)
@@ -55,6 +56,7 @@ set(THIS_PACKAGE_LIBRARIES
 
 set(THIS_PACKAGE_INCLUDE_DEPENDS
   pluginlib
+  generate_parameter_library
   rclcpp
   message_filters
   srdfdom

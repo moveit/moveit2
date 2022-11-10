@@ -133,6 +133,18 @@ void TrajectoryExecutionManager::initialize()
       }
     }
 
+    // Deprecation warnings, October 2022
+    if (controller == "moveit_ros_control_interface/MoveItControllerManager")
+    {
+      RCLCPP_WARN(LOGGER, "moveit_ros_control_interface/MoveItControllerManager is deprecated. Replace with "
+                          "`moveit_ros_control_interface/Ros2ControlManager.`");
+    }
+    if (controller == "moveit_ros_control_interface/MoveItMultiControllerManager")
+    {
+      RCLCPP_WARN(LOGGER, "moveit_ros_control_interface/MoveItMultiControllerManager is deprecated. Replace with "
+                          "`moveit_ros_control_interface/Ros2ControlMultiManager.`");
+    }
+
     if (!controller.empty())
       try
       {

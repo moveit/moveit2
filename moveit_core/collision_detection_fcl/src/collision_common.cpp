@@ -156,7 +156,7 @@ bool collisionCallback(fcl::CollisionObjectd* o1, fcl::CollisionObjectd* o2, voi
     RCLCPP_DEBUG(LOGGER, "Actually checking collisions between %s and %s", cd1->getID().c_str(), cd2->getID().c_str());
 
   // see if we need to compute a contact
-  std::size_t want_contact_count = 0;
+  std::size_t want_contact_count{ 0 };
   if (cdata->req_->contacts)
     if (cdata->res_->contact_count < cdata->req_->max_contacts)
     {
@@ -249,7 +249,7 @@ bool collisionCallback(fcl::CollisionObjectd* o1, fcl::CollisionObjectd* o2, voi
       // otherwise, we need to compute more things
       bool enable_cost = cdata->req_->cost;
       std::size_t num_max_cost_sources = cdata->req_->max_cost_sources;
-      bool enable_contact = true;
+      bool enable_contact{ true };
 
       fcl::CollisionResultd col_result;
       int num_contacts =

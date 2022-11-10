@@ -787,9 +787,9 @@ bool testutils::checkBlendingCartSpaceContinuity(const pilz_industrial_motion_pl
   }
 
   // limits
-  double max_trans_velo = planner_limits.getCartesianLimits().getMaxTranslationalVelocity();
-  double max_trans_acc = planner_limits.getCartesianLimits().getMaxTranslationalAcceleration();
-  double max_rot_velo = planner_limits.getCartesianLimits().getMaxRotationalVelocity();
+  double max_trans_velo = planner_limits.getCartesianLimits().max_trans_vel;
+  double max_trans_acc = planner_limits.getCartesianLimits().max_trans_acc;
+  double max_rot_velo = planner_limits.getCartesianLimits().max_rot_vel;
   double max_rot_acc = max_trans_acc / max_trans_velo * max_rot_velo;
 
   // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
