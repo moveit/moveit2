@@ -137,7 +137,7 @@ void TrajectoryExecutionManager::initialize()
     if (controller == "moveit_ros_control_interface/MoveItControllerManager")
     {
       RCLCPP_WARN(LOGGER, "moveit_ros_control_interface/MoveItControllerManager is deprecated. Replace with "
-                          "`moveit_ros_control_interface/MoveItControllerManager.`");
+                          "`moveit_ros_control_interface/Ros2ControlManager.`");
     }
     if (controller == "moveit_ros_control_interface/MoveItMultiControllerManager")
     {

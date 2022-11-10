@@ -2,6 +2,30 @@
 Changelog for package moveit_ros_planning_interface
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.6.0 (2022-11-10)
+------------------
+* Log error when named joint state target does not exist (`#1580 <https://github.com/ros-planning/moveit2/issues/1580>`_)
+* Express Humble/Rolling differences in #if (`#1620 <https://github.com/ros-planning/moveit2/issues/1620>`_)
+* Fix deprecated declaration usage (`#1598 <https://github.com/ros-planning/moveit2/issues/1598>`_)
+  * Fix type
+  * Suppress warning
+  * Add TODO
+* Merge PR `#1553 <https://github.com/ros-planning/moveit2/issues/1553>`_: Improve cmake files
+* Remove callback_executor\_.is_spinning()
+* Use standard exported targets: export\_${PROJECT_NAME} -> ${PROJECT_NAME}Targets
+* Improve CMake usage (`#1550 <https://github.com/ros-planning/moveit2/issues/1550>`_)
+* Remove __has_include statements (`#1481 <https://github.com/ros-planning/moveit2/issues/1481>`_)
+* Merge https://github.com/ros-planning/moveit/commit/a63580edd05b01d9480c333645036e5b2b222da9
+* Fix callback execution in MGI (`#1305 <https://github.com/ros-planning/moveit2/issues/1305>`_)
+  The initial implementation with the private node allowed for concurrent spinning of the same node, producing runtime exceptions. This change removes the need for a private node by letting MGI manage its own CallbackGroup and Executor thread.
+* Changed 'return false' in plan, move and execute such that MoveItErrorCode is returned (`#1266 <https://github.com/ros-planning/moveit2/issues/1266>`_)
+* Add and fix dual arm test (`#3119 <https://github.com/ros-planning/moveit2/issues/3119>`_)
+  * Add dual arm test
+  * Fix and simplify UnionConstraintSampler: update joint transforms
+  Co-authored-by: Cristian Beltran <cristianbehe@gmail.com>
+  Co-authored-by: Robert Haschke <rhaschke@techfak.uni-bielefeld.de>
+* Contributors: Abishalini Sivaraman, Henning Kayser, Robert Haschke, Rufus Wong, Sebastian Jahr, Tyler Weaver, Vatan Aksoy Tezer, abishalini, cambel, tbastiaens-riwo
+
 2.5.3 (2022-07-28)
 ------------------
 

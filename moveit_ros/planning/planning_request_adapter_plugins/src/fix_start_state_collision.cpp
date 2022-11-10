@@ -153,7 +153,8 @@ public:
                     "Unable to find a valid state nearby the start state (using jiggle fraction of %lf and %u sampling "
                     "attempts). Passing the original planning request to the planner.",
                     jiggle_fraction_, sampling_attempts_);
-        return planner(planning_scene, req, res);
+        res.error_code_.val = moveit_msgs::msg::MoveItErrorCodes::START_STATE_IN_COLLISION;
+        return false;  // skip remaining adapters and/or planner
       }
     }
     else

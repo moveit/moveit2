@@ -225,9 +225,6 @@ protected:
    */
   void enforceControlDimensions(geometry_msgs::msg::TwistStamped& command);
 
-  /* \brief Callback for joint subsription */
-  void jointStateCB(const sensor_msgs::msg::JointState::SharedPtr msg);
-
   /* \brief Command callbacks */
   void twistStampedCB(const geometry_msgs::msg::TwistStamped::SharedPtr msg);
   void jointCmdCB(const control_msgs::msg::JointJog::SharedPtr msg);

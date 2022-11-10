@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <package format="3">
   <name>moveit_resources_prbt_ikfast_manipulator_plugin</name>
-  <version>2.5.3</version>
+  <version>2.6.0</version>
   <description>The prbt_ikfast_manipulator_plugin package</description>
   <maintainer email="a.gutenkunst@pilz.de">Alexander Gutenkunst</maintainer>
   <maintainer email="c.henkel@pilz.de">Christian Henkel</maintainer>
@@ -21,6 +21,7 @@
   <build_depend>tf2_eigen</build_depend>
   <build_depend>tf2_kdl</build_depend>
   <build_depend>tf2_eigen_kdl</build_depend>
+  <depend>generate_parameter_library</depend>
   <exec_depend>moveit_core</exec_depend>
   <exec_depend>pluginlib</exec_depend>
   <exec_depend>rclcpp</exec_depend>

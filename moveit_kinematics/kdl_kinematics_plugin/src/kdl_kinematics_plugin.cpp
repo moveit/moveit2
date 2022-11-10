@@ -81,54 +81,28 @@ bool KDLKinematicsPlugin::checkConsistency(const Eigen::VectorXd& seed_state,
 
 void KDLKinematicsPlugin::getJointWeights()
 {
-  const std::vector<std::string>& active_names = joint_model_group_->getActiveJointModelNames();
-  std::vector<std::string> names;
-  std::vector<double> weights;
-  if (lookupParam(node_, "joint_weights.weights", weights, weights))
-  {
-    if (!lookupParam(node_, "joint_weights.names", names, names) || (names.size() != weights.size()))
-    {
-      RCLCPP_ERROR(LOGGER, "Expecting list parameter joint_weights.names of same size as list joint_weights.weights");
-      // fall back to default weights
-      weights.clear();
-    }
-  }
-  else if (lookupParam(node_, "joint_weights", weights,
-                       weights))  // try reading weight lists (for all active joints) directly
-  {
-    std::size_t num_active = active_names.size();
-    if (weights.size() == num_active)
-    {
-      joint_weights_ = weights;
-      return;
-    }
-    else if (!weights.empty())
-    {
-      RCLCPP_ERROR(LOGGER, "Expecting parameter joint_weights to list weights for all active joints (%zu) in order",
-                   num_active);
-      // fall back to default weights
-      weights.clear();
-    }
-  }
+  const std::vector<std::string> joint_names = joint_model_group_->getActiveJointModelNames();
+  // Default all joint weights to 1.0
+  joint_weights_ = std::vector<double>(joint_names.size(), 1.0);
 
-  // by default assign weights of 1.0 to all joints
-  joint_weights_ = std::vector<double>(active_names.size(), 1.0);
-  if (weights.empty())  // indicates default case
-    return;
-
-  // modify weights of listed joints
-  assert(names.size() == weights.size());
-  for (size_t i = 0; i != names.size(); ++i)
+  // Check if joint weight is assigned in kinematics YAML
+  // Loop through map (key: joint name and value: Struct with a weight member variable)
+  for (const auto& joint_weight : params_.joints_map)
   {
-    auto it = std::find(active_names.begin(), active_names.end(), names[i]);
-    if (it == active_names.cend())
-      RCLCPP_WARN(LOGGER, "Joint '%s' is not an active joint in group '%s'", names[i].c_str(),
+    // Check if joint is an active joint in the group
+    const auto joint_name = joint_weight.first;
+    auto it = std::find(joint_names.begin(), joint_names.end(), joint_name);
+    if (it == joint_names.cend())
+    {
+      RCLCPP_WARN(LOGGER, "Joint '%s' is not an active joint in group '%s'", joint_name.c_str(),
                   joint_model_group_->getName().c_str());
-    else if (weights[i] < 0.0)
-      RCLCPP_WARN(LOGGER, "Negative weight %f for joint '%s' will be ignored", weights[i], names[i].c_str());
-    else
-      joint_weights_[it - active_names.begin()] = weights[i];
+      continue;
+    }
+
+    // Find index of the joint name and assign weight to the coressponding index
+    joint_weights_.at(it - joint_names.begin()) = joint_weight.second.weight;
   }
+
   RCLCPP_INFO_STREAM(
       LOGGER, "Joint weights for group '"
                   << getGroupName() << "': \n"
@@ -140,6 +114,12 @@ bool KDLKinematicsPlugin::initialize(const rclcpp::Node::SharedPtr& node, const 
                                      const std::vector<std::string>& tip_frames, double search_discretization)
 {
   node_ = node;
+
+  // Get Solver Parameters
+  std::string kinematics_param_prefix = "robot_description_kinematics." + group_name;
+  param_listener_ = std::make_shared<kdl_kinematics::ParamListener>(node, kinematics_param_prefix);
+  params_ = param_listener_->get_params();
+
   storeValues(robot_model, group_name, base_frame, tip_frames, search_discretization);
   joint_model_group_ = robot_model_->getJointModelGroup(group_name);
   if (!joint_model_group_)
@@ -197,18 +177,6 @@ bool KDLKinematicsPlugin::initialize(const rclcpp::Node::SharedPtr& node, const 
     joint_min_(i) = solver_info_.limits[i].min_position;
     joint_max_(i) = solver_info_.limits[i].max_position;
   }
-
-  // Get Solver Parameters
-  lookupParam(node_, "max_solver_iterations", max_solver_iterations_, 500);
-  lookupParam(node_, "epsilon", epsilon_, 1e-5);
-  lookupParam(node_, "orientation_vs_position", orientation_vs_position_weight_, 1.0);
-
-  bool position_ik;
-  lookupParam(node_, "position_only_ik", position_ik, false);
-  if (position_ik)  // position_only_ik overrules orientation_vs_position
-    orientation_vs_position_weight_ = 0.0;
-  if (orientation_vs_position_weight_ == 0.0)
-    RCLCPP_INFO(LOGGER, "Using position only ik");
 
   getJointWeights();
 
@@ -358,9 +326,14 @@ bool KDLKinematicsPlugin::searchPositionIK(const geometry_msgs::msg::Pose& ik_po
         consistency_limits_mimic.push_back(consistency_limits[i]);
     }
   }
+
+  auto orientation_vs_position_weight = params_.position_only_ik ? 0.0 : params_.orientation_vs_position;
+  if (orientation_vs_position_weight == 0.0)
+    RCLCPP_INFO(LOGGER, "Using position only ik");
+
   Eigen::Matrix<double, 6, 1> cartesian_weights;
   cartesian_weights.topRows<3>().setConstant(1.0);
-  cartesian_weights.bottomRows<3>().setConstant(orientation_vs_position_weight_);
+  cartesian_weights.bottomRows<3>().setConstant(orientation_vs_position_weight);
 
   KDL::JntArray jnt_seed_state(dimension_);
   KDL::JntArray jnt_pos_in(dimension_);
@@ -368,7 +341,7 @@ bool KDLKinematicsPlugin::searchPositionIK(const geometry_msgs::msg::Pose& ik_po
   jnt_seed_state.data = Eigen::Map<const Eigen::VectorXd>(ik_seed_state.data(), ik_seed_state.size());
   jnt_pos_in = jnt_seed_state;
 
-  KDL::ChainIkSolverVelMimicSVD ik_solver_vel(kdl_chain_, mimic_joints_, orientation_vs_position_weight_ == 0.0);
+  KDL::ChainIkSolverVelMimicSVD ik_solver_vel(kdl_chain_, mimic_joints_, orientation_vs_position_weight == 0.0);
   solution.resize(dimension_);
 
   KDL::Frame pose_desired;
@@ -393,7 +366,7 @@ bool KDLKinematicsPlugin::searchPositionIK(const geometry_msgs::msg::Pose& ik_po
     }
 
     int ik_valid =
-        CartToJnt(ik_solver_vel, jnt_pos_in, pose_desired, jnt_pos_out, max_solver_iterations_,
+        CartToJnt(ik_solver_vel, jnt_pos_in, pose_desired, jnt_pos_out, params_.max_solver_iterations,
                   Eigen::Map<const Eigen::VectorXd>(joint_weights_.data(), joint_weights_.size()), cartesian_weights);
     if (ik_valid == 0 || options.return_approximate_solution)  // found acceptable solution
     {
@@ -451,7 +424,7 @@ int KDLKinematicsPlugin::CartToJnt(KDL::ChainIkSolverVelMimicSVD& ik_solver, con
     const double position_error = delta_twist.vel.Norm();
     const double orientation_error = ik_solver.isPositionOnly() ? 0 : delta_twist.rot.Norm();
     const double delta_twist_norm = std::max(position_error, orientation_error);
-    if (delta_twist_norm <= epsilon_)
+    if (delta_twist_norm <= params_.epsilon)
     {
       success = true;
       break;
@@ -481,9 +454,9 @@ int KDLKinematicsPlugin::CartToJnt(KDL::ChainIkSolverVelMimicSVD& ik_solver, con
     const double delta_q_norm = delta_q.data.lpNorm<1>();
     RCLCPP_DEBUG(LOGGER, "[%3d] pos err: %f  rot err: %f  delta_q: %f", i, position_error, orientation_error,
                  delta_q_norm);
-    if (delta_q_norm < epsilon_)  // stuck in singularity
+    if (delta_q_norm < params_.epsilon)  // stuck in singularity
     {
-      if (step_size < epsilon_)  // cannot reach target
+      if (step_size < params_.epsilon)  // cannot reach target
         break;
       // wiggle joints
       last_delta_twist_norm = DBL_MAX;
