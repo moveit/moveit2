@@ -2,6 +2,33 @@
 Changelog for package moveit_kinematics
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.6.0 (2022-11-10)
+------------------
+* Use generate_parameter_library to load KDL kinematics parameters (`#1671 <https://github.com/ros-planning/moveit2/issues/1671>`_)
+* Use generate_parameter_library to load ikfast kinematics parameters (`#1675 <https://github.com/ros-planning/moveit2/issues/1675>`_)
+* Use generate_parameter_library to load cached IK kinematics parameters (`#1677 <https://github.com/ros-planning/moveit2/issues/1677>`_)
+* Use generate_parameter_library to load srv kinematics parameters (`#1674 <https://github.com/ros-planning/moveit2/issues/1674>`_)
+* Use generate_parameter_library to load LMA kinematics parameters (`#1673 <https://github.com/ros-planning/moveit2/issues/1673>`_)
+* Merge PR `#1553 <https://github.com/ros-planning/moveit2/issues/1553>`_: Improve cmake files
+* Use standard exported targets: export\_${PROJECT_NAME} -> ${PROJECT_NAME}Targets
+* Improve CMake usage (`#1550 <https://github.com/ros-planning/moveit2/issues/1550>`_)
+* Use pragma once as header include guard (`#1525 <https://github.com/ros-planning/moveit2/issues/1525>`_)
+* Unified code comment style (`#1053 <https://github.com/ros-planning/moveit2/issues/1053>`_)
+  * Changes the comment style from /**/ to //
+  Co-authored-by: JafarAbdi <cafer.abdi@gmail.com>
+  Co-authored-by: Henning Kayser <henningkayser@picknik.ai>
+* Remove __has_include statements (`#1481 <https://github.com/ros-planning/moveit2/issues/1481>`_)
+* Merge https://github.com/ros-planning/moveit/commit/a63580edd05b01d9480c333645036e5b2b222da9
+* Merge PR `#3172 <https://github.com/ros-planning/moveit2/issues/3172>`_: Fix CI
+* Fix test_ikfast_plugins.sh
+  - Create panda.urdf using catkin build panda_description
+  - Improve debug output
+* Fix run_quiet()
+  - Show output on error
+  - Restore both stdout and stderr
+* auto_create_ikfast_moveit_plugin.sh: allow xacro input
+* Contributors: Abishalini Sivaraman, J. Javan, Michael Marron, Robert Haschke, Sebastian Jahr, Vatan Aksoy Tezer, abishalini
+
 2.5.3 (2022-07-28)
 ------------------
 

@@ -2,6 +2,55 @@
 Changelog for package moveit_servo
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.6.0 (2022-11-10)
+------------------
+* Fix dead tutorial link (`#1701 <https://github.com/ros-planning/moveit2/issues/1701>`_)
+  When we refactored the tutorials site it looks like we killed some links. Do we not have a CI job to catch dead links?
+* [Servo] CI simplification (`#1556 <https://github.com/ros-planning/moveit2/issues/1556>`_)
+  This reverts commit 3322f19056d10d5e5c95c0276e383b048a840573.
+* [Servo] Remove the option for "stop distance"-based collision checking (`#1574 <https://github.com/ros-planning/moveit2/issues/1574>`_)
+* Merge PR `#1553 <https://github.com/ros-planning/moveit2/issues/1553>`_: Improve cmake files
+* Use standard exported targets: export\_${PROJECT_NAME} -> ${PROJECT_NAME}Targets
+* Improve CMake usage (`#1550 <https://github.com/ros-planning/moveit2/issues/1550>`_)
+* [Servo] Use a WallRate so the clock is monotonically increasing (`#1543 <https://github.com/ros-planning/moveit2/issues/1543>`_)
+  * [Servo] Use a WallRate so the clock is monotonically increasing
+  * Re-enable a commented integration test
+* Disable flaky test_servo_singularity + test_rdf_integration (`#1530 <https://github.com/ros-planning/moveit2/issues/1530>`_)
+* Enforce singularity threshold when moving away from a singularity (`#620 <https://github.com/ros-planning/moveit2/issues/620>`_)
+  * Enforce singularity threshold behavior even when moving away from a singularity
+  - Prevent uncontrolled behavior when servo starts close to a singularity and then servos away from it
+  - Scale velocity at a different rate when approaching/leaving singularity
+  - Add status code to distinguish between velocity scaling when moving towards/away from the singularity
+  * Work on expanding servo singularity tests
+  * Pre-commit
+  * removed duplicate input checking
+  * added 2 other tests
+  * undid changes to singularity test
+  * Update moveit_ros/moveit_servo/src/servo_calcs.cpp with Nathan's suggestion
+  Co-authored-by: Nathan Brooks <nbbrooks@gmail.com>
+  * readability changes and additional servo parameter check
+  * updating to newest design
+  * added warning message
+  * added missing semicolon
+  * made optional parameter nicer
+  * Remove outdated warning
+  Co-authored-by: AndyZe <andyz@utexas.edu>
+  * Removing inaccurate comment
+  Co-authored-by: AndyZe <andyz@utexas.edu>
+  * making Andy's suggested changes, added some comments and defaults, moved code block next to relevant singularity code
+  * removed part of comment that does not apply any more
+  * Mention "deprecation" in the warning
+  Co-authored-by: Henry Moore <henrygerardmoore@gmail.com>
+  Co-authored-by: Henry Moore <44307180+henrygerardmoore@users.noreply.github.com>
+  Co-authored-by: AndyZe <zelenak@picknik.ai>
+  Co-authored-by: AndyZe <andyz@utexas.edu>
+* Remove __has_include statements (`#1481 <https://github.com/ros-planning/moveit2/issues/1481>`_)
+* Servo: check for and enable a realtime kernel (`#1464 <https://github.com/ros-planning/moveit2/issues/1464>`_)
+  * Check for and enable a realtime kernel
+  * Set thread priority to 40. Link against controller_mgr.
+  * Do it from the right thread
+* Contributors: AndyZe, Nathan Brooks, Robert Haschke, Sebastian Jahr, Vatan Aksoy Tezer
+
 2.5.3 (2022-07-28)
 ------------------
 * Use kinematics plugin instead of inverse Jacobian for servo IK (`#1434 <https://github.com/ros-planning/moveit2/issues/1434>`_)

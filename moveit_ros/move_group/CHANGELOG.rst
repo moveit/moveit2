@@ -2,6 +2,34 @@
 Changelog for package moveit_ros_move_group
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.6.0 (2022-11-10)
+------------------
+* Short-circuit planning adapters (`#1694 <https://github.com/ros-planning/moveit2/issues/1694>`_)
+  * Revert "Planning request adapters: short-circuit if failure, return code rather than bool (`#1605 <https://github.com/ros-planning/moveit2/issues/1605>`_)"
+  This reverts commit 66a64b4a72b6ddef1af2329f20ed8162554d5bcb.
+  * Add debug message in call stack of planning_request_adapters
+  * Short-circuit planning request adapters
+  * Replace if-elseif cascade with switch
+  * Cleanup translation of MoveItErrorCode to string
+  - Move default code to moveit_core/utils
+  - Override defaults in existing getActionResultString()
+  - Provide translations for all error codes defined in moveit_msgs
+  * Fix comment according to review
+  * Add braces
+  Co-authored-by: Henning Kayser <henningkayser@picknik.ai>
+  * Add braces
+  Co-authored-by: Henning Kayser <henningkayser@picknik.ai>
+  Co-authored-by: Henning Kayser <henningkayser@picknik.ai>
+  Co-authored-by: AndyZe <andyz@utexas.edu>
+* avoid implicit conversions (`#1593 <https://github.com/ros-planning/moveit2/issues/1593>`_)
+* Remove unused header (`#1572 <https://github.com/ros-planning/moveit2/issues/1572>`_)
+* Merge PR `#1553 <https://github.com/ros-planning/moveit2/issues/1553>`_: Improve cmake files
+* Use standard exported targets: export\_${PROJECT_NAME} -> ${PROJECT_NAME}Targets
+* Improve CMake usage (`#1550 <https://github.com/ros-planning/moveit2/issues/1550>`_)
+* Removed plan_with_sensing (`#1142 <https://github.com/ros-planning/moveit2/issues/1142>`_)
+* Remove __has_include statements (`#1481 <https://github.com/ros-planning/moveit2/issues/1481>`_)
+* Contributors: Abishalini Sivaraman, Robert Haschke, Sarah Nix, Sebastian Jahr, Stephanie Eng, Vatan Aksoy Tezer
+
 2.5.3 (2022-07-28)
 ------------------
 

@@ -2,6 +2,13 @@
 Changelog for package moveit_ros_occupancy_map_monitor
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.6.0 (2022-11-10)
+------------------
+* Merge PR `#1553 <https://github.com/ros-planning/moveit2/issues/1553>`_: Improve cmake files
+* Use standard exported targets: export\_${PROJECT_NAME} -> ${PROJECT_NAME}Targets
+* Improve CMake usage (`#1550 <https://github.com/ros-planning/moveit2/issues/1550>`_)
+* Contributors: Robert Haschke, Sebastian Jahr
+
 2.5.3 (2022-07-28)
 ------------------
 
