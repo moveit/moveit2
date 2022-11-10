@@ -219,7 +219,9 @@ public:
   /*! @brief <b>Avoid this function!</b>  Returns an @b
    *         unsafe pointer to the current planning scene.
    * @copydetails PlanningSceneMonitor::getPlanningScene() */
-  const planning_scene::PlanningSceneConstPtr& getPlanningScene() const
+  [[deprecated("getPlanningScene() is deprecated, use LockedPlanningSceneRO or LockedPlanningSceneRW "
+               "instead.")]] const planning_scene::PlanningSceneConstPtr&
+  getPlanningScene() const
   {
     return scene_const_;
   }
@@ -659,16 +661,23 @@ public:
 
   operator bool() const
   {
-    return planning_scene_monitor_ && planning_scene_monitor_->getPlanningScene();
+    planning_scene_monitor::LockedPlanningSceneRO ls(planning_scene_monitor_);
+    return planning_scene_monitor_ && ls;
   }
 
   operator const planning_scene::PlanningSceneConstPtr&() const
   {
+// Ignore getPlanningScene() deprecation
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
     return static_cast<const PlanningSceneMonitor*>(planning_scene_monitor_.get())->getPlanningScene();
   }
 
   const planning_scene::PlanningSceneConstPtr& operator->() const
   {
+// Ignore getPlanningScene() deprecation
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
     return static_cast<const PlanningSceneMonitor*>(planning_scene_monitor_.get())->getPlanningScene();
   }
 
@@ -745,11 +754,17 @@ public:
 
   operator const planning_scene::PlanningScenePtr&()
   {
+// Ignore getPlanningScene() deprecation
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
     return planning_scene_monitor_->getPlanningScene();
   }
 
   const planning_scene::PlanningScenePtr& operator->()
   {
+// Ignore getPlanningScene() deprecation
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
     return planning_scene_monitor_->getPlanningScene();
   }
 };
