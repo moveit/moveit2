@@ -649,7 +649,7 @@ bool PropagationDistanceField::writeToStream(std::ostream& os) const
       for (unsigned int z = 0; z < static_cast<unsigned int>(getZNumCells()); z += 8)
       {
         std::bitset<8> bs(0);
-        unsigned int zv = std::min(static_cast<unsigned int>(8), getZNumCells() - z);
+        unsigned int zv = std::min(8u, getZNumCells() - z);
         for (unsigned int zi = 0; zi < zv; ++zi)
         {
           if (getCell(x, y, z + zi).distance_square_ == 0)
@@ -737,7 +737,7 @@ bool PropagationDistanceField::readFromStream(std::istream& is)
         }
         in.get(inchar);
         std::bitset<8> inbit(static_cast<unsigned long long>(inchar));
-        unsigned int zv = std::min(static_cast<unsigned int>(8), getZNumCells() - z);
+        unsigned int zv = std::min(8u, getZNumCells() - z);
         for (unsigned int zi = 0; zi < zv; ++zi)
         {
           if (inbit[zi] == 1)
