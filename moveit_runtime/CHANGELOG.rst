@@ -2,6 +2,12 @@
 Changelog for package moveit_runtime
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.6.0 (2022-11-10)
+------------------
+* Improve CMake usage (`#1550 <https://github.com/ros-planning/moveit2/issues/1550>`_)
+* Uncomment moveit_ros_perception dependency (`#1463 <https://github.com/ros-planning/moveit2/issues/1463>`_)
+* Contributors: AndyZe, Sebastian Jahr
+
 2.5.3 (2022-07-28)
 ------------------
 
