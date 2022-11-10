@@ -78,16 +78,17 @@ void MoveGroupCartesianPathService::initialize()
   cartesian_path_service_ = context_->moveit_cpp_->getNode()->create_service<moveit_msgs::srv::GetCartesianPath>(
 
       CARTESIAN_PATH_SERVICE_NAME,
-      [this](const std::shared_ptr<rmw_request_id_t> req_id,
-             const std::shared_ptr<moveit_msgs::srv::GetCartesianPath::Request> req,
-             std::shared_ptr<moveit_msgs::srv::GetCartesianPath::Response> res) -> bool {
+      [this](const std::shared_ptr<rmw_request_id_t>& req_id,
+             const std::shared_ptr<moveit_msgs::srv::GetCartesianPath::Request>& req,
+             const std::shared_ptr<moveit_msgs::srv::GetCartesianPath::Response>& res) -> bool {
         return computeService(req_id, req, res);
       });
 }
 
-bool MoveGroupCartesianPathService::computeService(const std::shared_ptr<rmw_request_id_t> /* unused */,
-                                                   const std::shared_ptr<moveit_msgs::srv::GetCartesianPath::Request> req,
-                                                   std::shared_ptr<moveit_msgs::srv::GetCartesianPath::Response> res)
+bool MoveGroupCartesianPathService::computeService(
+    const std::shared_ptr<rmw_request_id_t>& /* unused */,
+    const std::shared_ptr<moveit_msgs::srv::GetCartesianPath::Request>& req,
+    const std::shared_ptr<moveit_msgs::srv::GetCartesianPath::Response>& res)
 {
   RCLCPP_INFO(LOGGER, "Received request to compute Cartesian path");
   context_->planning_scene_monitor_->updateFrameTransforms();

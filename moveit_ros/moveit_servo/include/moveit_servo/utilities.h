@@ -76,6 +76,6 @@ double velocityScalingFactorForSingularity(const moveit::core::JointModelGroup* 
                                            const double hard_stop_singularity_threshold,
                                            const double lower_singularity_threshold,
                                            const double leaving_singularity_threshold_multiplier, rclcpp::Clock& clock,
-                                           moveit::core::RobotStatePtr current_state, StatusCode& status);
+                                           const moveit::core::RobotStatePtr& current_state, StatusCode& status);
 
 }  // namespace moveit_servo
