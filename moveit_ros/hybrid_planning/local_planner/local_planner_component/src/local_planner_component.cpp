@@ -156,7 +156,7 @@ bool LocalPlannerComponent::initialize()
       node_, config_.local_planning_action_name,
       // Goal callback
       [this](const rclcpp_action::GoalUUID& /*unused*/,
-             std::shared_ptr<const moveit_msgs::action::LocalPlanner::Goal> /*unused*/) {
+             const std::shared_ptr<const moveit_msgs::action::LocalPlanner::Goal>& /*unused*/) {
         RCLCPP_INFO(LOGGER, "Received local planning goal request");
         // If another goal is active, cancel it and reject this goal
         if (long_callback_thread_.joinable())
@@ -201,7 +201,7 @@ bool LocalPlannerComponent::initialize()
 
   // Initialize global trajectory listener
   global_solution_subscriber_ = node_->create_subscription<moveit_msgs::msg::MotionPlanResponse>(
-      config_.global_solution_topic, 1, [this](const moveit_msgs::msg::MotionPlanResponse::SharedPtr msg) {
+      config_.global_solution_topic, 1, [this](const moveit_msgs::msg::MotionPlanResponse::ConstSharedPtr& msg) {
         // Add received trajectory to internal reference trajectory
         robot_trajectory::RobotTrajectory new_trajectory(planning_scene_monitor_->getRobotModel(), msg->group_name);
         moveit::core::RobotState start_state(planning_scene_monitor_->getRobotModel());

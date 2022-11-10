@@ -271,7 +271,7 @@ public:
   }
 
 private:
-  void waitForService(std::shared_ptr<rclcpp::ClientBase> srv)
+  void waitForService(const std::shared_ptr<rclcpp::ClientBase>& srv)
   {
     // rclcpp::Duration time_before_warning(5.0);
     // srv.waitForExistence(time_before_warning);

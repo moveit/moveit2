@@ -58,7 +58,7 @@ CartesianInterpolator::Distance CartesianInterpolator::computeCartesianPath(
     RobotState* start_state, const JointModelGroup* group, std::vector<RobotStatePtr>& traj, const LinkModel* link,
     const Eigen::Vector3d& translation, bool global_reference_frame, const MaxEEFStep& max_step,
     const JumpThreshold& jump_threshold, const GroupStateValidityCallbackFn& validCallback,
-    const kinematics::KinematicsQueryOptions& options, kinematics::KinematicsBase::IKCostFn cost_function)
+    const kinematics::KinematicsQueryOptions& options, const kinematics::KinematicsBase::IKCostFn& cost_function)
 {
   const double distance = translation.norm();
   // The target pose is obtained by adding the translation vector to the link's current pose
@@ -77,7 +77,7 @@ CartesianInterpolator::Percentage CartesianInterpolator::computeCartesianPath(
     RobotState* start_state, const JointModelGroup* group, std::vector<RobotStatePtr>& traj, const LinkModel* link,
     const Eigen::Isometry3d& target, bool global_reference_frame, const MaxEEFStep& max_step,
     const JumpThreshold& jump_threshold, const GroupStateValidityCallbackFn& validCallback,
-    const kinematics::KinematicsQueryOptions& options, kinematics::KinematicsBase::IKCostFn cost_function,
+    const kinematics::KinematicsQueryOptions& options, const kinematics::KinematicsBase::IKCostFn& cost_function,
     const Eigen::Isometry3d& link_offset)
 {
   // check unsanitized inputs for non-isometry
@@ -177,7 +177,7 @@ CartesianInterpolator::Percentage CartesianInterpolator::computeCartesianPath(
     RobotState* start_state, const JointModelGroup* group, std::vector<RobotStatePtr>& traj, const LinkModel* link,
     const EigenSTL::vector_Isometry3d& waypoints, bool global_reference_frame, const MaxEEFStep& max_step,
     const JumpThreshold& jump_threshold, const GroupStateValidityCallbackFn& validCallback,
-    const kinematics::KinematicsQueryOptions& options, kinematics::KinematicsBase::IKCostFn cost_function,
+    const kinematics::KinematicsQueryOptions& options, const kinematics::KinematicsBase::IKCostFn& cost_function,
     const Eigen::Isometry3d& link_offset)
 {
   double percentage_solved = 0.0;

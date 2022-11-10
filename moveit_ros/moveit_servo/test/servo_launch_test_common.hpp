@@ -238,7 +238,7 @@ public:
     return true;
   }
 
-  bool setupCommandSub(std::string command_type)
+  bool setupCommandSub(const std::string& command_type)
   {
     if (command_type == "trajectory_msgs/JointTrajectory")
     {
@@ -265,11 +265,11 @@ public:
   {
     sub_joint_state_ = node_->create_subscription<sensor_msgs::msg::JointState>(
         resolveServoTopicName(servo_parameters_->joint_topic), rclcpp::SystemDefaultsQoS(),
-        [this](const sensor_msgs::msg::JointState::SharedPtr msg) { return jointStateCB(msg); });
+        [this](const sensor_msgs::msg::JointState::ConstSharedPtr& msg) { return jointStateCB(msg); });
     return true;
   }
 
-  void statusCB(const std_msgs::msg::Int8::SharedPtr msg)
+  void statusCB(const std_msgs::msg::Int8::SharedPtr& msg)
   {
     const std::lock_guard<std::mutex> lock(latest_state_mutex_);
     ++num_status_;
@@ -278,28 +278,28 @@ public:
       status_seen_ = true;
   }
 
-  void collisionScaleCB(const std_msgs::msg::Float64::SharedPtr msg)
+  void collisionScaleCB(const std_msgs::msg::Float64::SharedPtr& msg)
   {
     const std::lock_guard<std::mutex> lock(latest_state_mutex_);
     ++num_collision_scale_;
     latest_collision_scale_ = msg.get()->data;
   }
 
-  void jointStateCB(const sensor_msgs::msg::JointState::SharedPtr msg)
+  void jointStateCB(const sensor_msgs::msg::JointState::ConstSharedPtr& msg)
   {
     const std::lock_guard<std::mutex> lock(latest_state_mutex_);
     ++num_joint_state_;
     latest_joint_state_ = msg;
   }
 
-  void trajectoryCommandCB(const trajectory_msgs::msg::JointTrajectory::SharedPtr msg)
+  void trajectoryCommandCB(const trajectory_msgs::msg::JointTrajectory::SharedPtr& msg)
   {
     const std::lock_guard<std::mutex> lock(latest_state_mutex_);
     ++num_commands_;
     latest_traj_cmd_ = msg;
   }
 
-  void arrayCommandCB(const std_msgs::msg::Float64MultiArray::SharedPtr msg)
+  void arrayCommandCB(const std_msgs::msg::Float64MultiArray::SharedPtr& msg)
   {
     const std::lock_guard<std::mutex> lock(latest_state_mutex_);
     ++num_commands_;

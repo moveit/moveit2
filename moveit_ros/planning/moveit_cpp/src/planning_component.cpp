@@ -189,7 +189,86 @@ PlanningComponent::PlanSolution PlanningComponent::plan(const PlanRequestParamet
   //    visual_tools_->publishRobotState(last_solution_trajectory_->getLastWayPoint(), rviz_visual_tools::TRANSLUCENT);
   //  }
   //}
+<<<<<<< HEAD
   return *last_plan_solution_;
+=======
+
+  if (store_solution)
+  {
+    last_plan_solution_ = plan_solution;
+  }
+  return plan_solution;
+}
+
+planning_interface::MotionPlanResponse
+PlanningComponent::plan(const MultiPipelinePlanRequestParameters& parameters,
+                        const SolutionCallbackFunction& solution_selection_callback,
+                        StoppingCriterionFunction stopping_criterion_callback)
+{
+  // Create solutions container
+  PlanSolutions planning_solutions{ parameters.multi_plan_request_parameters.size() };
+  std::vector<std::thread> planning_threads;
+  planning_threads.reserve(parameters.multi_plan_request_parameters.size());
+
+  // Print a warning if more parallel planning problems than available concurrent threads are defined. If
+  // std::thread::hardware_concurrency() is not defined, the command returns 0 so the check does not work
+  auto const hardware_concurrency = std::thread::hardware_concurrency();
+  if (parameters.multi_plan_request_parameters.size() > hardware_concurrency && hardware_concurrency != 0)
+  {
+    RCLCPP_WARN(
+        LOGGER,
+        "More parallel planning problems defined ('%ld') than possible to solve concurrently with the hardware ('%d')",
+        parameters.multi_plan_request_parameters.size(), hardware_concurrency);
+  }
+
+  // Launch planning threads
+  for (const auto& plan_request_parameter : parameters.multi_plan_request_parameters)
+  {
+    auto planning_thread = std::thread([&]() {
+      auto plan_solution = planning_interface::MotionPlanResponse();
+      try
+      {
+        plan_solution = plan(plan_request_parameter, false);
+      }
+      catch (const std::exception& e)
+      {
+        RCLCPP_ERROR_STREAM(LOGGER, "Planning pipeline '" << plan_request_parameter.planning_pipeline.c_str()
+                                                          << "' threw exception '" << e.what() << "'");
+        plan_solution = planning_interface::MotionPlanResponse();
+        plan_solution.error_code_ = moveit::core::MoveItErrorCode::FAILURE;
+      }
+      plan_solution.planner_id_ = plan_request_parameter.planner_id;
+      planning_solutions.pushBack(plan_solution);
+
+      if (stopping_criterion_callback != nullptr)
+      {
+        if (stopping_criterion_callback(planning_solutions, parameters))
+        {
+          // Terminate planning pipelines
+          RCLCPP_ERROR_STREAM(LOGGER, "Stopping criterion met: Terminating planning pipelines that are still active");
+          for (const auto& plan_request_parameter : parameters.multi_plan_request_parameters)
+          {
+            moveit_cpp_->terminatePlanningPipeline(plan_request_parameter.planning_pipeline);
+          }
+        }
+      }
+    });
+    planning_threads.push_back(std::move(planning_thread));
+  }
+
+  // Wait for threads to finish
+  for (auto& planning_thread : planning_threads)
+  {
+    if (planning_thread.joinable())
+    {
+      planning_thread.join();
+    }
+  }
+
+  // Return best solution determined by user defined callback (Default: Shortest path)
+  last_plan_solution_ = solution_selection_callback(planning_solutions.getSolutions());
+  return last_plan_solution_;
+>>>>>>> 132ad2853 (Fix clang-tidy issues (#1706))
 }
 
 PlanningComponent::PlanSolution PlanningComponent::plan()

@@ -63,7 +63,7 @@ public:
    * @param parent_node Shared pointer to the parent node
    * @param name
    */
-  void initialize(std::shared_ptr<DataWarehouse> config_data, const rclcpp::Node::SharedPtr& parent_node,
+  void initialize(const std::shared_ptr<DataWarehouse>& config_data, const rclcpp::Node::SharedPtr& parent_node,
                   const std::string& name)
   {
     config_data_ = config_data;

@@ -56,13 +56,13 @@ public:
   StatusMonitor(const rclcpp::Node::SharedPtr& node, const std::string& topic)
   {
     sub_ = node->create_subscription<std_msgs::msg::Int8>(topic, rclcpp::SystemDefaultsQoS(),
-                                                          [this](const std_msgs::msg::Int8::ConstSharedPtr msg) {
+                                                          [this](const std_msgs::msg::Int8::ConstSharedPtr& msg) {
                                                             return statusCB(msg);
                                                           });
   }
 
 private:
-  void statusCB(const std_msgs::msg::Int8::ConstSharedPtr msg)
+  void statusCB(const std_msgs::msg::Int8::ConstSharedPtr& msg)
   {
     moveit_servo::StatusCode latest_status = static_cast<moveit_servo::StatusCode>(msg->data);
     if (latest_status != status_)

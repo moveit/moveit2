@@ -159,7 +159,14 @@ public:
   PlanSolution plan();
   /** \brief Run a plan from start or current state to fulfill the last goal constraints provided by setGoal() using the
    * provided PlanRequestParameters. */
+<<<<<<< HEAD
   PlanSolution plan(const PlanRequestParameters& parameters);
+=======
+  planning_interface::MotionPlanResponse
+  plan(const MultiPipelinePlanRequestParameters& parameters,
+       const SolutionCallbackFunction& solution_selection_callback = &getShortestSolution,
+       StoppingCriterionFunction stopping_criterion_callback = nullptr);
+>>>>>>> 132ad2853 (Fix clang-tidy issues (#1706))
 
   /** \brief Execute the latest computed solution trajectory computed by plan(). By default this function terminates
    * after the execution is complete. The execution can be run in background by setting blocking to false. */
