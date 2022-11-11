@@ -72,7 +72,7 @@ public:
 
   void setConfig(const SensorParameters& parameters);
 
-  class GeneratedSensorConfig : public YamlGeneratedFile
+  class GeneratedSensorConfig final : public YamlGeneratedFile
   {
   public:
     GeneratedSensorConfig(const std::filesystem::path& package_path, const GeneratedTime& last_gen_time,

@@ -1258,10 +1258,10 @@ void ServoCalcs::twistStampedCB(const geometry_msgs::msg::TwistStamped::ConstSha
 {
   const std::lock_guard<std::mutex> lock(main_loop_mutex_);
   latest_twist_stamped_ = msg;
-  latest_twist_cmd_is_nonzero_ = isNonZero(*latest_twist_stamped_.get());
+  latest_twist_cmd_is_nonzero_ = isNonZero(*latest_twist_stamped_);
 
-  if (msg.get()->header.stamp != rclcpp::Time(0.))
-    latest_twist_command_stamp_ = msg.get()->header.stamp;
+  if (msg->header.stamp != rclcpp::Time(0.))
+    latest_twist_command_stamp_ = msg->header.stamp;
 
   // notify that we have a new input
   new_input_cmd_ = true;
@@ -1272,10 +1272,10 @@ void ServoCalcs::jointCmdCB(const control_msgs::msg::JointJog::ConstSharedPtr& m
 {
   const std::lock_guard<std::mutex> lock(main_loop_mutex_);
   latest_joint_cmd_ = msg;
-  latest_joint_cmd_is_nonzero_ = isNonZero(*latest_joint_cmd_.get());
+  latest_joint_cmd_is_nonzero_ = isNonZero(*latest_joint_cmd_);
 
-  if (msg.get()->header.stamp != rclcpp::Time(0.))
-    latest_joint_command_stamp_ = msg.get()->header.stamp;
+  if (msg->header.stamp != rclcpp::Time(0.))
+    latest_joint_command_stamp_ = msg->header.stamp;
 
   // notify that we have a new input
   new_input_cmd_ = true;
@@ -1284,7 +1284,7 @@ void ServoCalcs::jointCmdCB(const control_msgs::msg::JointJog::ConstSharedPtr& m
 
 void ServoCalcs::collisionVelocityScaleCB(const std_msgs::msg::Float64::ConstSharedPtr& msg)
 {
-  collision_velocity_scale_ = msg.get()->data;
+  collision_velocity_scale_ = msg->data;
 }
 
 void ServoCalcs::changeDriftDimensions(const std::shared_ptr<moveit_msgs::srv::ChangeDriftDimensions::Request>& req,
