@@ -137,7 +137,7 @@ private:
   bool satisfiesPoseTolerance(const Eigen::Vector3d& positional_tolerance, const double angular_tolerance);
 
   /** \brief Subscribe to the target pose on this topic */
-  void targetPoseCallback(const geometry_msgs::msg::PoseStamped::ConstSharedPtr msg);
+  void targetPoseCallback(const geometry_msgs::msg::PoseStamped::ConstSharedPtr& msg);
 
   /** \brief Update PID controller target positions & orientations */
   void updateControllerSetpoints();

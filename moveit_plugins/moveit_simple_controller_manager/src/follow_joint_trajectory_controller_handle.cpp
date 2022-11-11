@@ -66,7 +66,8 @@ bool FollowJointTrajectoryControllerHandle::sendTrajectory(const moveit_msgs::ms
   rclcpp_action::Client<control_msgs::action::FollowJointTrajectory>::SendGoalOptions send_goal_options;
   // Active callback
   send_goal_options.goal_response_callback =
-      [this](rclcpp_action::Client<control_msgs::action::FollowJointTrajectory>::GoalHandle::SharedPtr goal_handle) {
+      [this](
+          const rclcpp_action::Client<control_msgs::action::FollowJointTrajectory>::GoalHandle::SharedPtr& goal_handle) {
         RCLCPP_INFO_STREAM(LOGGER, name_ << " started execution");
         if (!goal_handle)
           RCLCPP_WARN(LOGGER, "Goal request rejected");

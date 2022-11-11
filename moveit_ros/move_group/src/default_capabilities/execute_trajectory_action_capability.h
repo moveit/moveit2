@@ -59,7 +59,7 @@ public:
   void initialize() override;
 
 private:
-  void executePathCallback(std::shared_ptr<ExecTrajectoryGoal> goal);
+  void executePathCallback(const std::shared_ptr<ExecTrajectoryGoal>& goal);
   void executePath(const std::shared_ptr<ExecTrajectoryGoal>& goal, std::shared_ptr<ExecTrajectory::Result>& action_res);
 
   void preemptExecuteTrajectoryCallback();

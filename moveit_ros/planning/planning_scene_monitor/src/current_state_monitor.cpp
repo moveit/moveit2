@@ -160,8 +160,9 @@ void CurrentStateMonitor::startStateMonitor(const std::string& joint_states_topi
     else
     {
       middleware_handle_->createJointStateSubscription(
-          joint_states_topic,
-          [this](sensor_msgs::msg::JointState::ConstSharedPtr joint_state) { return jointStateCallback(joint_state); });
+          joint_states_topic, [this](const sensor_msgs::msg::JointState::ConstSharedPtr& joint_state) {
+            return jointStateCallback(joint_state);
+          });
     }
     if (tf_buffer_ && !robot_model_->getMultiDOFJointModels().empty())
     {
@@ -309,7 +310,7 @@ bool CurrentStateMonitor::waitForCompleteState(const std::string& group, double 
   return ok;
 }
 
-void CurrentStateMonitor::jointStateCallback(sensor_msgs::msg::JointState::ConstSharedPtr joint_state)
+void CurrentStateMonitor::jointStateCallback(const sensor_msgs::msg::JointState::ConstSharedPtr& joint_state)
 {
   if (joint_state->name.size() != joint_state->position.size())
   {
@@ -465,7 +466,7 @@ void CurrentStateMonitor::updateMultiDofJoints()
 }
 
 // Copied from https://github.com/ros2/geometry2/blob/ros2/tf2_ros/src/transform_listener.cpp
-void CurrentStateMonitor::transformCallback(const tf2_msgs::msg::TFMessage::ConstSharedPtr msg, const bool is_static)
+void CurrentStateMonitor::transformCallback(const tf2_msgs::msg::TFMessage::ConstSharedPtr& msg, const bool is_static)
 {
   for (const auto& transform : msg->transforms)
   {

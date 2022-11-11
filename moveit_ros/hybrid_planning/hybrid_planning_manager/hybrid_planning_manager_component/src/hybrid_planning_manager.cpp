@@ -150,12 +150,12 @@ bool HybridPlanningManager::initialize()
       this->get_node_waitables_interface(), hybrid_planning_action_name,
       // Goal callback
       [](const rclcpp_action::GoalUUID& /*unused*/,
-         std::shared_ptr<const moveit_msgs::action::HybridPlanner::Goal> /*unused*/) {
+         const std::shared_ptr<const moveit_msgs::action::HybridPlanner::Goal>& /*unused*/) {
         RCLCPP_INFO(LOGGER, "Received goal request");
         return rclcpp_action::GoalResponse::ACCEPT_AND_EXECUTE;
       },
       // Cancel callback
-      [this](std::shared_ptr<rclcpp_action::ServerGoalHandle<moveit_msgs::action::HybridPlanner>> /*unused*/) {
+      [this](const std::shared_ptr<rclcpp_action::ServerGoalHandle<moveit_msgs::action::HybridPlanner>>& /*unused*/) {
         cancelHybridManagerGoals();
         RCLCPP_INFO(LOGGER, "Received request to cancel goal");
         return rclcpp_action::CancelResponse::ACCEPT;
@@ -174,7 +174,7 @@ bool HybridPlanningManager::initialize()
   // Initialize global solution subscriber
   global_solution_sub_ = create_subscription<moveit_msgs::msg::MotionPlanResponse>(
       "global_trajectory", rclcpp::SystemDefaultsQoS(),
-      [this](const moveit_msgs::msg::MotionPlanResponse::SharedPtr /* unused */) {
+      [this](const moveit_msgs::msg::MotionPlanResponse::ConstSharedPtr& /* unused */) {
         // react is defined in a hybrid_planning_manager plugin
         ReactionResult reaction_result = planner_logic_instance_->react(HybridPlanningEvent::GLOBAL_SOLUTION_AVAILABLE);
         if (reaction_result.error_code.val != moveit_msgs::msg::MoveItErrorCodes::SUCCESS)
@@ -231,7 +231,7 @@ bool HybridPlanningManager::sendGlobalPlannerAction()
 
   // Add goal response callback
   global_goal_options.goal_response_callback =
-      [this](rclcpp_action::ClientGoalHandle<moveit_msgs::action::GlobalPlanner>::SharedPtr goal_handle) {
+      [this](const rclcpp_action::ClientGoalHandle<moveit_msgs::action::GlobalPlanner>::SharedPtr& goal_handle) {
         auto planning_progress = std::make_shared<moveit_msgs::action::HybridPlanner::Feedback>();
         auto& feedback = planning_progress->feedback;
         if (!goal_handle)
@@ -301,7 +301,7 @@ bool HybridPlanningManager::sendLocalPlannerAction()
 
   // Add goal response callback
   local_goal_options.goal_response_callback =
-      [this](rclcpp_action::ClientGoalHandle<moveit_msgs::action::LocalPlanner>::SharedPtr goal_handle) {
+      [this](const rclcpp_action::ClientGoalHandle<moveit_msgs::action::LocalPlanner>::SharedPtr& goal_handle) {
         auto planning_progress = std::make_shared<moveit_msgs::action::HybridPlanner::Feedback>();
         auto& feedback = planning_progress->feedback;
         if (!goal_handle)
@@ -317,8 +317,8 @@ bool HybridPlanningManager::sendLocalPlannerAction()
 
   // Add feedback callback
   local_goal_options.feedback_callback =
-      [this](rclcpp_action::ClientGoalHandle<moveit_msgs::action::LocalPlanner>::SharedPtr /*unused*/,
-             const std::shared_ptr<const moveit_msgs::action::LocalPlanner::Feedback> local_planner_feedback) {
+      [this](const rclcpp_action::ClientGoalHandle<moveit_msgs::action::LocalPlanner>::SharedPtr& /*unused*/,
+             const std::shared_ptr<const moveit_msgs::action::LocalPlanner::Feedback>& local_planner_feedback) {
         // react is defined in a hybrid_planning_manager plugin
         ReactionResult reaction_result = planner_logic_instance_->react(local_planner_feedback->feedback);
         if (reaction_result.error_code.val != moveit_msgs::msg::MoveItErrorCodes::SUCCESS)

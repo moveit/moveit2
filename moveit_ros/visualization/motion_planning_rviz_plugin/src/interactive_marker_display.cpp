@@ -113,11 +113,13 @@ void InteractiveMarkerDisplay::onInitialize()
       pnode_, frame_transformer, fixed_frame_.toStdString());
 
   interactive_marker_client_->setInitializeCallback(
-      [this](visualization_msgs::srv::GetInteractiveMarkers::Response::SharedPtr msg) {
+      [this](const visualization_msgs::srv::GetInteractiveMarkers::Response::SharedPtr& msg) {
         return initializeCallback(msg);
       });
   interactive_marker_client_->setUpdateCallback(
-      [this](visualization_msgs::msg::InteractiveMarkerUpdate::ConstSharedPtr msg) { return updateCallback(msg); });
+      [this](const visualization_msgs::msg::InteractiveMarkerUpdate::ConstSharedPtr& msg) {
+        return updateCallback(msg);
+      });
   interactive_marker_client_->setResetCallback([this]() { return resetCallback(); });
   interactive_marker_client_->setStatusCallback(
       [this](interactive_markers::InteractiveMarkerClient::Status status, const std::string& message) {
@@ -278,13 +280,14 @@ void InteractiveMarkerDisplay::updatePoses(
   }
 }
 
-void InteractiveMarkerDisplay::initializeCallback(visualization_msgs::srv::GetInteractiveMarkers::Response::SharedPtr msg)
+void InteractiveMarkerDisplay::initializeCallback(
+    const visualization_msgs::srv::GetInteractiveMarkers::Response::SharedPtr& msg)
 {
   eraseAllMarkers();
   updateMarkers(msg->markers);
 }
 
-void InteractiveMarkerDisplay::updateCallback(visualization_msgs::msg::InteractiveMarkerUpdate::ConstSharedPtr msg)
+void InteractiveMarkerDisplay::updateCallback(const visualization_msgs::msg::InteractiveMarkerUpdate::ConstSharedPtr& msg)
 {
   updateMarkers(msg->markers);
   updatePoses(msg->poses);
