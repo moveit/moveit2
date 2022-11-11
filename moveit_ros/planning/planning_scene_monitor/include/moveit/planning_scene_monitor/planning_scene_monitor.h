@@ -667,18 +667,12 @@ public:
 
   operator const planning_scene::PlanningSceneConstPtr&() const
   {
-// Ignore getPlanningScene() deprecation
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-    return static_cast<const PlanningSceneMonitor*>(planning_scene_monitor_.get())->getPlanningScene();
+    return static_cast<const PlanningSceneMonitor*>(planning_scene_monitor_.get())->scene_;
   }
 
   const planning_scene::PlanningSceneConstPtr& operator->() const
   {
-// Ignore getPlanningScene() deprecation
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-    return static_cast<const PlanningSceneMonitor*>(planning_scene_monitor_.get())->getPlanningScene();
+    return static_cast<const PlanningSceneMonitor*>(planning_scene_monitor_.get())->scene_;
   }
 
 protected:
@@ -754,18 +748,12 @@ public:
 
   operator const planning_scene::PlanningScenePtr&()
   {
-// Ignore getPlanningScene() deprecation
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-    return planning_scene_monitor_->getPlanningScene();
+    return planning_scene_monitor_->scene_;
   }
 
   const planning_scene::PlanningScenePtr& operator->()
   {
-// Ignore getPlanningScene() deprecation
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-    return planning_scene_monitor_->getPlanningScene();
+    return planning_scene_monitor_->scene_;
   }
 };
 }  // namespace planning_scene_monitor
