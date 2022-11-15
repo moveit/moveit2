@@ -246,6 +246,18 @@ void ServoCalcs::start()
   last_sent_command_ = std::move(initial_joint_trajectory);
 
   current_state_ = planning_scene_monitor_->getStateMonitor()->getCurrentState();
+
+  // Check that all links are known to the robot
+  auto check_link_is_known = [this](const std::string& frame_name) {
+    if (!current_state_->knowsFrameTransform(frame_name))
+    {
+      throw std::runtime_error{ "Unknown frame: " + frame_name };
+    }
+  };
+  check_link_is_known(parameters_->planning_frame);
+  check_link_is_known(parameters_->ee_frame_name);
+  check_link_is_known(robot_link_command_frame_);
+
   tf_moveit_to_ee_frame_ = current_state_->getGlobalLinkTransform(parameters_->planning_frame).inverse() *
                            current_state_->getGlobalLinkTransform(parameters_->ee_frame_name);
   tf_moveit_to_robot_cmd_frame_ = current_state_->getGlobalLinkTransform(parameters_->planning_frame).inverse() *
@@ -532,6 +544,16 @@ rcl_interfaces::msg::SetParametersResult ServoCalcs::robotLinkCommandFrameCallba
 {
   const std::lock_guard<std::mutex> lock(main_loop_mutex_);
   rcl_interfaces::msg::SetParametersResult result;
+
+  // Check that the new frame is known
+  if (!current_state_->knowsFrameTransform(parameter.as_string()))
+  {
+    RCLCPP_ERROR_STREAM(LOGGER, "Failed to change robot_link_command_frame. Passed frame '" << parameter.as_string()
+                                                                                            << "' is unknown");
+    result.successful = false;
+    return result;
+  }
+
   result.successful = true;
   robot_link_command_frame_ = parameter.as_string();
   RCLCPP_INFO_STREAM(LOGGER, "robot_link_command_frame changed to: " + robot_link_command_frame_);
@@ -1004,6 +1026,15 @@ bool ServoCalcs::checkValidCommand(const geometry_msgs::msg::TwistStamped& cmd)
                                   "Component of incoming command is >1. Skipping this datapoint.");
       return false;
     }
+  }
+
+  // Check that the command frame is known
+  if (!cmd.header.frame_id.empty() && !current_state_->knowsFrameTransform(cmd.header.frame_id))
+  {
+    rclcpp::Clock& clock = *node_->get_clock();
+    RCLCPP_WARN_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD,
+                                "Commanded frame '" << cmd.header.frame_id << "' is unknown, skipping this command");
+    return false;
   }
 
   return true;
