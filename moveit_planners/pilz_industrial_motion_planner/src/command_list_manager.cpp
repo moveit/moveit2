@@ -32,7 +32,7 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#include "pilz_industrial_motion_planner/command_list_manager.h"
+#include <pilz_industrial_motion_planner/command_list_manager.h>
 
 #include <rclcpp/logger.hpp>
 #include <rclcpp/logging.hpp>
@@ -44,10 +44,10 @@
 #include <moveit/robot_state/conversions.h>
 
 #include "cartesian_limits_parameters.hpp"
-#include "pilz_industrial_motion_planner/joint_limits_aggregator.h"
-#include "pilz_industrial_motion_planner/tip_frame_getter.h"
-#include "pilz_industrial_motion_planner/trajectory_blend_request.h"
-#include "pilz_industrial_motion_planner/trajectory_blender_transition_window.h"
+#include <pilz_industrial_motion_planner/joint_limits_aggregator.h>
+#include <pilz_industrial_motion_planner/tip_frame_getter.h>
+#include <pilz_industrial_motion_planner/trajectory_blend_request.h>
+#include <pilz_industrial_motion_planner/trajectory_blender_transition_window.h>
 
 namespace pilz_industrial_motion_planner
 {

@@ -50,8 +50,8 @@
 #include <memory>
 #include <typeinfo>
 
-#include "rclcpp/clock.hpp"
-#include "rclcpp/duration.hpp"
+#include <rclcpp/clock.hpp>
+#include <rclcpp/duration.hpp>
 
 namespace kinematic_constraints
 {

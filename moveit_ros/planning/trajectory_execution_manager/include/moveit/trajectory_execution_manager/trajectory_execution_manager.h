@@ -50,7 +50,7 @@
 #include <deque>
 #include <thread>
 
-#include "moveit_trajectory_execution_manager_export.h"
+#include <moveit_trajectory_execution_manager_export.h>
 
 namespace trajectory_execution_manager
 {

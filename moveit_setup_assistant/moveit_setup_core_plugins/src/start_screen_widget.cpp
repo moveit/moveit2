@@ -50,7 +50,7 @@
 #include <QVBoxLayout>
 
 // SA
-#include "moveit_setup_core_plugins/start_screen_widget.hpp"
+#include <moveit_setup_core_plugins/start_screen_widget.hpp>
 // C
 #include <fstream>  // for reading in urdf
 #include <streambuf>

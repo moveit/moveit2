@@ -32,7 +32,7 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#include "pilz_industrial_motion_planner/trajectory_generator_lin.h"
+#include <pilz_industrial_motion_planner/trajectory_generator_lin.h>
 
 #include <cassert>
 #include <sstream>
