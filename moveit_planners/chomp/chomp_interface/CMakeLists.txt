@@ -11,6 +11,7 @@ find_package(moveit_core REQUIRED)
 find_package(chomp_motion_planner REQUIRED)
 find_package(pluginlib REQUIRED)
 find_package(rclcpp REQUIRED)
+find_package(rsl REQUIRED)
 
 set(THIS_PACKAGE_INCLUDE_DEPENDS
   moveit_core
@@ -18,6 +19,7 @@ set(THIS_PACKAGE_INCLUDE_DEPENDS
   moveit_core
   pluginlib
   rclcpp
+  rsl
 )
 
 include_directories(

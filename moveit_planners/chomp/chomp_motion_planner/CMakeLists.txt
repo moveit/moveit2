@@ -9,11 +9,13 @@ moveit_package()
 find_package(ament_cmake REQUIRED)
 find_package(moveit_core REQUIRED)
 find_package(rclcpp REQUIRED)
+find_package(rsl REQUIRED)
 find_package(trajectory_msgs REQUIRED)
 
 set(THIS_PACKAGE_INCLUDE_DEPENDS
   moveit_core
   rclcpp
+  rsl
   trajectory_msgs
   visualization_msgs
 )
