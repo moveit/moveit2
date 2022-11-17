@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>moveit_configs_utils</name>
+  <version>2.6.0</version>
+  <description>Python library for loading moveit config parameters in launch files</description>
+  <maintainer email="moveit_releasers@googlegroups.com">MoveIt Release Team</maintainer>
+  <license>BSD</license>
+  <author email="jafar@picknik.ai">Jafar Abdi</author>
+  <author email="davidvlu@gmail.com">David V. Lu!!</author>
+
+  <exec_depend>ament_index_python</exec_depend>
+  <exec_depend>launch_param_builder</exec_depend>
+  <exec_depend>launch</exec_depend>
+  <exec_depend>launch_ros</exec_depend>
+  <exec_depend>srdfdom</exec_depend>
+
+  <test_depend>ament_lint_auto</test_depend>
+  <test_depend>ament_lint_common</test_depend>
+
+  <export>
+    <build_type>ament_python</build_type>
+  </export>
+</package>

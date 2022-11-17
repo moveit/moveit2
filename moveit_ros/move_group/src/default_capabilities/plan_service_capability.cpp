@@ -51,17 +51,17 @@ MoveGroupPlanService::MoveGroupPlanService() : MoveGroupCapability("MotionPlanSe
 
 void MoveGroupPlanService::initialize()
 {
-  using std::placeholders::_1;
-  using std::placeholders::_2;
-  using std::placeholders::_3;
-
   plan_service_ = context_->moveit_cpp_->getNode()->create_service<moveit_msgs::srv::GetMotionPlan>(
-      PLANNER_SERVICE_NAME, std::bind(&MoveGroupPlanService::computePlanService, this, _1, _2, _3));
+      PLANNER_SERVICE_NAME, [this](const std::shared_ptr<rmw_request_id_t>& request_header,
+                                   const std::shared_ptr<moveit_msgs::srv::GetMotionPlan::Request>& req,
+                                   const std::shared_ptr<moveit_msgs::srv::GetMotionPlan::Response>& res) {
+        return computePlanService(request_header, req, res);
+      });
 }
 
-bool MoveGroupPlanService::computePlanService(const std::shared_ptr<rmw_request_id_t> request_header,
-                                              const std::shared_ptr<moveit_msgs::srv::GetMotionPlan::Request> req,
-                                              std::shared_ptr<moveit_msgs::srv::GetMotionPlan::Response> res)
+bool MoveGroupPlanService::computePlanService(const std::shared_ptr<rmw_request_id_t>& /* unused */,
+                                              const std::shared_ptr<moveit_msgs::srv::GetMotionPlan::Request>& req,
+                                              const std::shared_ptr<moveit_msgs::srv::GetMotionPlan::Response>& res)
 {
   RCLCPP_INFO(LOGGER, "Received new planning service request...");
   // before we start planning, ensure that we have the latest robot state received...

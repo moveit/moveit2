@@ -46,7 +46,7 @@ namespace core
 class FloatingJointModel : public JointModel
 {
 public:
-  FloatingJointModel(const std::string& name);
+  FloatingJointModel(const std::string& name, size_t joint_index, size_t first_variable_index);
 
   void getVariableDefaultPositions(double* values, const Bounds& other_bounds) const override;
   void getVariableRandomPositions(random_numbers::RandomNumberGenerator& rng, double* values,

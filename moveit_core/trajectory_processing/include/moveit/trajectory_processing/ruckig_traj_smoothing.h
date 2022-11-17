@@ -31,7 +31,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *******************************************************************************/
 
-/* Author: Jack Center, Wyatt Rees, Andy Zelenak */
+/* Author: Jack Center, Wyatt Rees, Andy Zelenak, Stephanie Eng */
 
 #pragma once
 
@@ -49,26 +49,60 @@ public:
                              const double max_velocity_scaling_factor = 1.0,
                              const double max_acceleration_scaling_factor = 1.0);
 
+  static bool applySmoothing(robot_trajectory::RobotTrajectory& trajectory,
+                             const std::unordered_map<std::string, double>& velocity_limits,
+                             const std::unordered_map<std::string, double>& acceleration_limits,
+                             const std::unordered_map<std::string, double>& jerk_limits);
+
 private:
   /**
+   * \brief A utility function to check if the group is defined.
+   * \param trajectory      Trajectory to smooth.
+   */
+  [[nodiscard]] static bool validateGroup(const robot_trajectory::RobotTrajectory& trajectory);
+
+  /**
+   * \brief A utility function to get bounds from a JointModelGroup and save them for Ruckig.
+   * \param max_velocity_scaling_factor       Scale all joint velocity limits by this factor. Usually 1.0.
+   * \param max_acceleration_scaling_factor      Scale all joint acceleration limits by this factor. Usually 1.0.
+   * \param group      The RobotModel and the limits are retrieved from this group.
+   * \param[out] ruckig_input     The limits are stored in this ruckig::InputParameter, for use in Ruckig.
+   */
+  [[nodiscard]] static bool getRobotModelBounds(const double max_velocity_scaling_factor,
+                                                const double max_acceleration_scaling_factor,
+                                                moveit::core::JointModelGroup const* const group,
+                                                ruckig::InputParameter<ruckig::DynamicDOFs>& ruckig_input);
+
+  /**
    * \brief Feed previous output back as input for next iteration. Get next target state from the next waypoint.
+   * \param current_waypoint    The nominal current state
+   * \param next_waypoint       The nominal, desired state at the next waypoint
+   * \param joint_group         The MoveIt JointModelGroup of interest
+   * \param[out] ruckig_input   The Rucking parameters for the next iteration
    */
-  static void getNextCurrentTargetStates(ruckig::InputParameter<0>& ruckig_input,
-                                         ruckig::OutputParameter<0>& ruckig_output,
-                                         const moveit::core::RobotStatePtr& next_waypoint, size_t num_dof,
-                                         const std::vector<int>& idx);
+  static void getNextRuckigInput(const moveit::core::RobotStatePtr& current_waypoint,
+                                 const moveit::core::RobotStatePtr& next_waypoint,
+                                 const moveit::core::JointModelGroup* joint_group,
+                                 ruckig::InputParameter<ruckig::DynamicDOFs>& ruckig_input);
 
   /**
-   * \brief Check for lagging motion of any joint at a waypoint.
-   *
-   * \return true if lagging motion is detected on any joint
+   * \brief Initialize Ruckig position/vel/accel. This initializes ruckig_input and ruckig_output to the same values
+   * \param first_waypoint  The Ruckig input/output parameters are initialized to the values at this waypoint
+   * \param joint_group     The MoveIt JointModelGroup of interest
+   * \param[out] rucking_input   Input parameters to Ruckig. Initialized here.
+   * \param[out] ruckig_output   Output from the Ruckig algorithm. Initialized here.
    */
-  static bool checkForLaggingMotion(const size_t num_dof, const ruckig::InputParameter<0>& ruckig_input,
-                                    const ruckig::OutputParameter<0>& ruckig_output);
+  static void initializeRuckigState(const moveit::core::RobotState& first_waypoint,
+                                    const moveit::core::JointModelGroup* joint_group,
+                                    ruckig::InputParameter<ruckig::DynamicDOFs>& ruckig_input,
+                                    ruckig::OutputParameter<ruckig::DynamicDOFs>& ruckig_output);
 
   /**
-   * \brief Return L2-norm of velocity, taking all joints into account.
+   * \brief A utility function to instantiate and run Ruckig for a series of waypoints.
+   * \param[in, out] trajectory      Trajectory to smooth.
+   * \param[in, out] ruckig_input    Necessary input for Ruckig smoothing. Contains kinematic limits (vel, accel, jerk)
    */
-  static double getTargetVelocityMagnitude(const ruckig::InputParameter<0>& ruckig_input, size_t num_dof);
+  [[nodiscard]] static bool runRuckig(robot_trajectory::RobotTrajectory& trajectory,
+                                      ruckig::InputParameter<ruckig::DynamicDOFs>& ruckig_input);
 };
 }  // namespace trajectory_processing

@@ -62,12 +62,12 @@ protected:
 
   void SetUp() override
   {
-    value_.reset(new CollisionAllocatorType);
+    value_ = std::make_shared<CollisionAllocatorType>();
     robot_model_ = moveit::core::loadTestingRobotModel("pr2");
     robot_model_ok_ = static_cast<bool>(robot_model_);
     kinect_dae_resource_ = "package://moveit_resources_pr2_description/urdf/meshes/sensors/kinect_v0/kinect.dae";
 
-    acm_.reset(new collision_detection::AllowedCollisionMatrix(robot_model_->getLinkModelNames(), true));
+    acm_ = std::make_shared<collision_detection::AllowedCollisionMatrix>(robot_model_->getLinkModelNames(), true);
 
     cenv_ = value_->allocateEnv(robot_model_);
   }
@@ -86,6 +86,12 @@ protected:
 
   std::string kinect_dae_resource_;
 };
+
+#ifdef NDEBUG
+#define EXPECT_TIME_LT(EXPR, VAL) EXPECT_LT(EXPR, VAL)
+#else  // Don't perform timing checks in Debug mode (but evaluate expression)
+#define EXPECT_TIME_LT(EXPR, VAL) (void)(EXPR)
+#endif
 
 TYPED_TEST_CASE_P(CollisionDetectorTest);
 
@@ -195,7 +201,8 @@ TYPED_TEST_P(CollisionDetectorTest, ContactReporting)
 
   req.max_contacts = 10;
   req.max_contacts_per_pair = 2;
-  this->acm_.reset(new collision_detection::AllowedCollisionMatrix(this->robot_model_->getLinkModelNames(), false));
+  this->acm_ =
+      std::make_shared<collision_detection::AllowedCollisionMatrix>(this->robot_model_->getLinkModelNames(), false);
   this->cenv_->checkSelfCollision(req, res, robot_state, *this->acm_);
   ASSERT_TRUE(res.collision);
   EXPECT_LE(res.contacts.size(), 10u);
@@ -233,7 +240,7 @@ TYPED_TEST_P(CollisionDetectorTest, ContactPositions)
   ASSERT_EQ(res.contacts.begin()->second.size(), 1u);
 
   for (collision_detection::CollisionResult::ContactMap::const_iterator it = res.contacts.begin();
-       it != res.contacts.end(); it++)
+       it != res.contacts.end(); ++it)
   {
     EXPECT_NEAR(it->second[0].pos.x(), 5.0, .33);
   }
@@ -254,7 +261,7 @@ TYPED_TEST_P(CollisionDetectorTest, ContactPositions)
   ASSERT_EQ(res2.contacts.begin()->second.size(), 1u);
 
   for (collision_detection::CollisionResult::ContactMap::const_iterator it = res2.contacts.begin();
-       it != res2.contacts.end(); it++)
+       it != res2.contacts.end(); ++it)
   {
     EXPECT_NEAR(it->second[0].pos.x(), 3.0, 0.33);
   }
@@ -278,7 +285,8 @@ TYPED_TEST_P(CollisionDetectorTest, AttachedBodyTester)
   collision_detection::CollisionRequest req;
   collision_detection::CollisionResult res;
 
-  this->acm_.reset(new collision_detection::AllowedCollisionMatrix(this->robot_model_->getLinkModelNames(), true));
+  this->acm_ =
+      std::make_shared<collision_detection::AllowedCollisionMatrix>(this->robot_model_->getLinkModelNames(), true);
 
   moveit::core::RobotState robot_state(this->robot_model_);
   robot_state.setToDefaultValues();
@@ -294,7 +302,7 @@ TYPED_TEST_P(CollisionDetectorTest, AttachedBodyTester)
   ASSERT_FALSE(res.collision);
 
   shapes::Shape* shape = new shapes::Box(.1, .1, .1);
-  this->cenv_->getWorld()->addToObject("box", shapes::ShapeConstPtr(shape), pos1);
+  this->cenv_->getWorld()->addToObject("box", pos1, shapes::ShapeConstPtr(shape), Eigen::Isometry3d::Identity());
 
   res = collision_detection::CollisionResult();
   this->cenv_->checkRobotCollision(req, res, robot_state, *this->acm_);
@@ -309,7 +317,7 @@ TYPED_TEST_P(CollisionDetectorTest, AttachedBodyTester)
   shapes.push_back(shapes::ShapeConstPtr(shape));
   poses.push_back(Eigen::Isometry3d::Identity());
   std::vector<std::string> touch_links;
-  robot_state.attachBody("box", shapes, poses, touch_links, "r_gripper_palm_link");
+  robot_state.attachBody("box", poses[0], shapes, poses, touch_links, "r_gripper_palm_link");
 
   res = collision_detection::CollisionResult();
   this->cenv_->checkSelfCollision(req, res, robot_state, *this->acm_);
@@ -320,8 +328,8 @@ TYPED_TEST_P(CollisionDetectorTest, AttachedBodyTester)
 
   touch_links.push_back("r_gripper_palm_link");
   touch_links.push_back("r_gripper_motor_accelerometer_link");
-  shapes[0].reset(new shapes::Box(.1, .1, .1));
-  robot_state.attachBody("box", shapes, poses, touch_links, "r_gripper_palm_link");
+  shapes[0] = std::make_shared<shapes::Box>(.1, .1, .1);
+  robot_state.attachBody("box", poses[0], shapes, poses, touch_links, "r_gripper_palm_link");
   robot_state.update();
 
   res = collision_detection::CollisionResult();
@@ -330,7 +338,7 @@ TYPED_TEST_P(CollisionDetectorTest, AttachedBodyTester)
 
   pos1.translation().x() = 5.01;
   shapes::Shape* coll = new shapes::Box(.1, .1, .1);
-  this->cenv_->getWorld()->addToObject("coll", shapes::ShapeConstPtr(coll), pos1);
+  this->cenv_->getWorld()->addToObject("coll", pos1, shapes::ShapeConstPtr(coll), Eigen::Isometry3d::Identity());
   res = collision_detection::CollisionResult();
   this->cenv_->checkRobotCollision(req, res, robot_state, *this->acm_);
   ASSERT_TRUE(res.collision);
@@ -361,7 +369,7 @@ TYPED_TEST_P(CollisionDetectorTest, DiffSceneTester)
   double second_check =
       std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now() - before).count();
 
-  EXPECT_LT(fabs(first_check - second_check), .05);
+  EXPECT_TIME_LT(fabs(first_check - second_check), .05);
 
   std::vector<shapes::ShapeConstPtr> shapes;
   shapes.resize(1);
@@ -372,7 +380,7 @@ TYPED_TEST_P(CollisionDetectorTest, DiffSceneTester)
   poses.push_back(Eigen::Isometry3d::Identity());
 
   std::vector<std::string> touch_links;
-  robot_state.attachBody("kinect", shapes, poses, touch_links, "r_gripper_palm_link");
+  robot_state.attachBody("kinect", poses[0], shapes, poses, touch_links, "r_gripper_palm_link");
 
   before = std::chrono::system_clock::now();
   new_cenv->checkSelfCollision(req, res, robot_state);
@@ -382,7 +390,7 @@ TYPED_TEST_P(CollisionDetectorTest, DiffSceneTester)
   second_check = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now() - before).count();
 
   // the first check is going to take a while, as data must be constructed
-  EXPECT_LT(second_check, .1);
+  EXPECT_TIME_LT(second_check, .1);
 
   collision_detection::CollisionEnvPtr other_new_cenv = this->value_->allocateEnv(this->cenv_, this->cenv_->getWorld());
   before = std::chrono::system_clock::now();
@@ -392,7 +400,7 @@ TYPED_TEST_P(CollisionDetectorTest, DiffSceneTester)
   new_cenv->checkSelfCollision(req, res, robot_state);
   second_check = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now() - before).count();
 
-  EXPECT_LT(fabs(first_check - second_check), .05);
+  EXPECT_TIME_LT(fabs(first_check - second_check), .05);
 }
 
 TYPED_TEST_P(CollisionDetectorTest, ConvertObjectToAttached)
@@ -405,7 +413,7 @@ TYPED_TEST_P(CollisionDetectorTest, ConvertObjectToAttached)
   Eigen::Isometry3d pos2 = Eigen::Isometry3d::Identity();
   pos2.translation().x() = 10.0;
 
-  this->cenv_->getWorld()->addToObject("kinect", shape, pos1);
+  this->cenv_->getWorld()->addToObject("kinect", pos1, shape, Eigen::Isometry3d::Identity());
 
   moveit::core::RobotState robot_state(this->robot_model_);
   robot_state.setToDefaultValues();
@@ -420,7 +428,7 @@ TYPED_TEST_P(CollisionDetectorTest, ConvertObjectToAttached)
   double second_check =
       std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now() - before).count();
 
-  EXPECT_LT(second_check, .05);
+  EXPECT_TIME_LT(second_check, .05);
 
   collision_detection::CollisionEnv::ObjectConstPtr object = this->cenv_->getWorld()->getObject("kinect");
   this->cenv_->getWorld()->removeObject("kinect");
@@ -433,13 +441,16 @@ TYPED_TEST_P(CollisionDetectorTest, ConvertObjectToAttached)
   robot_state2.update();
 
   std::vector<std::string> touch_links;
-  robot_state1.attachBody("kinect", object->shapes_, object->shape_poses_, touch_links, "r_gripper_palm_link");
+  Eigen::Isometry3d identity_transform{ Eigen::Isometry3d::Identity() };
+  robot_state1.attachBody("kinect", identity_transform, object->shapes_, object->shape_poses_, touch_links,
+                          "r_gripper_palm_link");
 
   EigenSTL::vector_Isometry3d other_poses;
   other_poses.push_back(pos2);
 
   // This creates a new set of constant properties for the attached body, which happens to be the same as the one above;
-  robot_state2.attachBody("kinect", object->shapes_, object->shape_poses_, touch_links, "r_gripper_palm_link");
+  robot_state2.attachBody("kinect", identity_transform, object->shapes_, object->shape_poses_, touch_links,
+                          "r_gripper_palm_link");
 
   // going to take a while, but that's fine
   res = collision_detection::CollisionResult();
@@ -456,24 +467,24 @@ TYPED_TEST_P(CollisionDetectorTest, ConvertObjectToAttached)
   this->cenv_->checkSelfCollision(req, res, robot_state2, *this->acm_);
   second_check = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now() - before).count();
 
-  EXPECT_LT(first_check, .05);
-  EXPECT_LT(fabs(first_check - second_check), .1);
+  EXPECT_TIME_LT(first_check, .05);
+  EXPECT_TIME_LT(fabs(first_check - second_check), .1);
 }
 
 TYPED_TEST_P(CollisionDetectorTest, TestCollisionMapAdditionSpeed)
 {
   EigenSTL::vector_Isometry3d poses;
   std::vector<shapes::ShapeConstPtr> shapes;
-  for (unsigned int i = 0; i < 10000; i++)
+  for (unsigned int i = 0; i < 10000; ++i)
   {
     poses.push_back(Eigen::Isometry3d::Identity());
-    shapes.push_back(shapes::ShapeConstPtr(new shapes::Box(.01, .01, .01)));
+    shapes.push_back(std::make_shared<shapes::Box>(.01, .01, .01));
   }
   auto start = std::chrono::system_clock::now();
   this->cenv_->getWorld()->addToObject("map", shapes, poses);
   double t = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now() - start).count();
-  // TODO: investigate why bullet collision checking is considerably slower here
-  EXPECT_GE(5.0, t);
+  // TODO (j-petit): investigate why bullet collision checking is considerably slower here
+  EXPECT_TIME_LT(t, 5.0);
   // this is not really a failure; it is just that slow;
   // looking into doing collision checking with a voxel grid.
   RCLCPP_INFO(rclcpp::get_logger("moveit.core.collision_detection.bullet"), "Adding boxes took %g", t);
@@ -493,7 +504,7 @@ TYPED_TEST_P(CollisionDetectorTest, MoveMesh)
   this->cenv_->getWorld()->addToObject("kinect", kinect_shape, kinect_pose);
 
   Eigen::Isometry3d np;
-  for (unsigned int i = 0; i < 5; i++)
+  for (unsigned int i = 0; i < 5; ++i)
   {
     np = Eigen::Translation3d(i * .001, i * .001, i * .001) * Eigen::Quaterniond::Identity();
     this->cenv_->getWorld()->moveShapeInObject("kinect", kinect_shape, np);
@@ -516,12 +527,12 @@ TYPED_TEST_P(CollisionDetectorTest, TestChangingShapeSize)
 
   EigenSTL::vector_Isometry3d poses;
   std::vector<shapes::ShapeConstPtr> shapes;
-  for (unsigned int i = 0; i < 5; i++)
+  for (unsigned int i = 0; i < 5; ++i)
   {
     this->cenv_->getWorld()->removeObject("shape");
     shapes.clear();
     poses.clear();
-    shapes.push_back(shapes::ShapeConstPtr(new shapes::Box(1 + i * .0001, 1 + i * .0001, 1 + i * .0001)));
+    shapes.push_back(std::make_shared<const shapes::Box>(1 + i * .0001, 1 + i * .0001, 1 + i * .0001));
     poses.push_back(Eigen::Isometry3d::Identity());
     this->cenv_->getWorld()->addToObject("shape", shapes, poses);
     collision_detection::CollisionRequest req;
@@ -538,12 +549,12 @@ TYPED_TEST_P(CollisionDetectorTest, TestChangingShapeSize)
   collision_detection::CollisionResult res2;
   this->cenv_->checkCollision(req2, res2, robot_state1, *this->acm_);
   ASSERT_TRUE(res2.collision);
-  for (unsigned int i = 0; i < 5; i++)
+  for (unsigned int i = 0; i < 5; ++i)
   {
     this->cenv_->getWorld()->removeObject("shape");
     shapes.clear();
     poses.clear();
-    shapes.push_back(shapes::ShapeConstPtr(new shapes::Box(1 + i * .0001, 1 + i * .0001, 1 + i * .0001)));
+    shapes.push_back(std::make_shared<shapes::Box>(1 + i * .0001, 1 + i * .0001, 1 + i * .0001));
     poses.push_back(Eigen::Isometry3d::Identity());
     this->cenv_->getWorld()->addToObject("shape", shapes, poses);
     collision_detection::CollisionRequest req;

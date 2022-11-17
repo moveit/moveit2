@@ -1,0 +1,24 @@
+  cached_ik_kinematics:
+    max_cache_size: {
+      type: int,
+      default_value: 5000,
+      description: "Maximum cache size",
+    }
+
+    min_pose_distance: {
+      type: double,
+      default_value: 1.0,
+      description: "Minimum pose distance",
+    }
+
+    min_joint_config_distance: {
+      type: double,
+      default_value: 1.0,
+      description: "Minimum joint config distance",
+    }
+
+    cached_ik_path: {
+      type: string,
+      default_value: "",
+      description: "Cached IK path",
+    }

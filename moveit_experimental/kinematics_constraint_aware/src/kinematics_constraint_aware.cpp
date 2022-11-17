@@ -40,12 +40,8 @@
 #include <moveit/robot_model/robot_model.h>
 #include <moveit/planning_scene/planning_scene.h>
 #include <Eigen/Geometry.h>
-#if __has_include(<tf2_eigen/tf2_eigen.hpp>)
 #include <tf2_eigen/tf2_eigen.hpp>
-#else
-#include <tf2_eigen/tf2_eigen.h>
-#endif
-#include <boost/bind.hpp>
+#include <functional>
 
 namespace kinematics_constraint_aware
 {
@@ -55,7 +51,7 @@ KinematicsConstraintAware::KinematicsConstraintAware(const moveit::core::RobotMo
   if (!kinematic_model->hasJointModelGroup(group_name))
   {
     ROS_ERROR_NAMED("kinematics_constraint_aware", "The group %s does not exist", group_name.c_str());
-    joint_model_group_ = NULL;
+    joint_model_group_ = nullptr;
     return;
   }
   kinematic_model_ = kinematic_model;
@@ -90,13 +86,13 @@ KinematicsConstraintAware::KinematicsConstraintAware(const moveit::core::RobotMo
       }
       else
       {
-        joint_model_group_ = NULL;
+        joint_model_group_ = nullptr;
         return;
       }
     }
     else
     {
-      joint_model_group_ = NULL;
+      joint_model_group_ = nullptr;
       ROS_INFO_NAMED("kinematics_constraint_aware", "No solver allocated for group %s", group_name.c_str());
     }
     has_sub_groups_ = true;
@@ -122,7 +118,7 @@ bool KinematicsConstraintAware::getIK(const planning_scene::PlanningSceneConstPt
 
   if (!response.solution_)
   {
-    response.solution_.reset(new moveit::core::RobotState(planning_scene->getCurrentState()));
+    response.solution_ = std::make_shared<moveit::core::RobotState>(planning_scene->getCurrentState());
   }
 
   ros::WallTime start_time = ros::WallTime::now();
@@ -164,8 +160,11 @@ bool KinematicsConstraintAware::getIK(const planning_scene::PlanningSceneConstPt
   EigenSTL::vector_Isometry3d goals =
       transformPoses(planning_scene, kinematic_state, request.pose_stamped_vector_, kinematic_model_->getModelFrame());
 
-  moveit::core::StateValidityCallbackFn constraint_callback_fn =
-      boost::bind(&KinematicsConstraintAware::validityCallbackFn, this, planning_scene, request, response, _1, _2);
+  moveit::core::StateValidityCallbackFn constraint_callback_fn = [this, &planning_scene, &request,
+                                                                  &response](moveit::core::JointStateGroup* jsg,
+                                                                             const std::vector<double>& jg_values) {
+    validityCallbackFn(planning_scene, request, response, jsg, jg_values);
+  };
 
   bool result = false;
   if (has_sub_groups_)
@@ -324,16 +323,16 @@ bool KinematicsConstraintAware::convertServiceRequest(
   else
     kinematics_request.pose_stamped_vector_ = request.ik_request.pose_stamped_vector;
 
-  kinematics_request.robot_state_.reset(new moveit::core::RobotState(planning_scene->getCurrentState()));
+  kinematics_request.robot_state_ = std::make_shared<moveit::core::RobotState>(planning_scene->getCurrentState());
   kinematics_request.robot_state_->setStateValues(request.ik_request.robot_state.joint_state);
-  kinematics_request.constraints_.reset(
-      new kinematic_constraints::KinematicConstraintSet(kinematic_model_, planning_scene->getTransforms()));
+  kinematics_request.constraints_ = std::make_shared<kinematic_constraints::KinematicConstraintSet>(
+      kinematic_model_, planning_scene->getTransforms());
   kinematics_request.constraints_->add(request.constraints);
   kinematics_request.timeout_ = request.ik_request.timeout;
   kinematics_request.group_name_ = request.ik_request.group_name;
   kinematics_request.check_for_collisions_ = true;
 
-  kinematics_response.solution_.reset(new moveit::core::RobotState(planning_scene->getCurrentState()));
+  kinematics_response.solution_ = std::make_shared<moveit::core::RobotState>(planning_scene->getCurrentState());
 
   return true;
 }

@@ -1,0 +1,52 @@
+<package format="2">
+  <name>moveit_hybrid_planning</name>
+  <version>2.6.0</version>
+  <description>Hybrid planning components of MoveIt 2</description>
+  <author email="sebastian.jahr@picknik.ai">Sebastian Jahr</author>
+
+  <maintainer email="moveit_releasers@googlegroups.com">MoveIt Release Team</maintainer>
+
+  <license>BSD</license>
+
+  <url type="website">http://moveit.ros.org</url>
+  <url type="bugtracker">https://github.com/ros-planning/moveit2/issues</url>
+  <url type="repository">https://github.com/ros-planning/moveit2</url>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+  <depend>moveit_common</depend>
+
+  <depend>ament_index_cpp</depend>
+  <depend>moveit_msgs</depend>
+  <depend>moveit_core</depend>
+  <depend>moveit_ros_planning</depend>
+  <depend>moveit_ros_planning_interface</depend>
+  <depend>pluginlib</depend>
+  <depend>rclcpp</depend>
+  <depend>rclcpp_action</depend>
+  <depend>rclcpp_components</depend>
+  <depend>std_msgs</depend>
+  <depend>std_srvs</depend>
+  <depend>tf2_ros</depend>
+  <depend>trajectory_msgs</depend>
+
+  <exec_depend>controller_manager</exec_depend>
+  <exec_depend>position_controllers</exec_depend>
+  <exec_depend>robot_state_publisher</exec_depend>
+  <exec_depend>rviz2</exec_depend>
+  <exec_depend>moveit_resources_panda_moveit_config</exec_depend>
+
+  <test_depend>ament_cmake_gtest</test_depend>
+  <test_depend>ament_lint_auto</test_depend>
+  <test_depend>ament_lint_common</test_depend>
+  <test_depend>moveit_planners_ompl</test_depend>
+  <test_depend>ros_testing</test_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+    <moveit_hybrid_planning plugin="${prefix}/simple_sampler_plugin.xml"/>
+    <moveit_hybrid_planning plugin="${prefix}/replan_invalidated_trajectory_plugin.xml"/>
+    <moveit_hybrid_planning plugin="${prefix}/single_plan_execution_plugin.xml"/>
+    <moveit_hybrid_planning plugin="${prefix}/forward_trajectory_plugin.xml"/>
+  </export>
+
+</package>

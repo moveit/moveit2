@@ -32,8 +32,7 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#ifndef XML_TESTDATA_LOADER_H
-#define XML_TESTDATA_LOADER_H
+#pragma once
 
 #include <string>
 #include <vector>
@@ -219,5 +218,3 @@ std::vector<double> XmlTestdataLoader::strVec2doubleVec(std::vector<std::string>
 
 using XmlTestDataLoaderUPtr = std::unique_ptr<TestdataLoader>;
 }  // namespace pilz_industrial_motion_planner_testutils
-
-#endif  // XML_TESTDATA_LOADER_H

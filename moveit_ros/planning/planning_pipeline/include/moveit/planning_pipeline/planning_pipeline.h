@@ -36,6 +36,8 @@
 
 #pragma once
 
+#include <atomic>
+
 #include <moveit/planning_interface/planning_interface.h>
 #include <moveit/planning_request_adapter/planning_request_adapter.h>
 #include <pluginlib/class_loader.hpp>
@@ -173,8 +175,17 @@ public:
     return robot_model_;
   }
 
+  /** \brief Get current status of the planning pipeline */
+  [[nodiscard]] bool isActive() const
+  {
+    return active_;
+  }
+
 private:
   void configure();
+
+  // Flag that indicates whether or not the planning pipeline is currently solving a planning problem
+  mutable std::atomic<bool> active_;
 
   std::shared_ptr<rclcpp::Node> node_;
   std::string parameter_namespace_;

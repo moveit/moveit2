@@ -36,12 +36,14 @@
 
 #pragma once
 
-#include <moveit/planning_interface/planning_interface.h>
 #include <chomp_interface/chomp_interface.h>
+#include <moveit/planning_interface/planning_interface.h>
+
+#include <rclcpp/rclcpp.hpp>
 
 namespace chomp_interface
 {
-MOVEIT_CLASS_FORWARD(CHOMPPlanningContext)  // Defines CHOMPPlanningContextPtr, ConstPtr, WeakPtr... etc
+MOVEIT_CLASS_FORWARD(CHOMPPlanningContext);  // Defines CHOMPPlanningContextPtr, ConstPtr, WeakPtr... etc
 
 class CHOMPPlanningContext : public planning_interface::PlanningContext
 {
@@ -53,7 +55,7 @@ public:
   bool terminate() override;
 
   CHOMPPlanningContext(const std::string& name, const std::string& group, const moveit::core::RobotModelConstPtr& model,
-                       ros::NodeHandle& nh);
+                       const rclcpp::Node::SharedPtr& node);
 
   ~CHOMPPlanningContext() override = default;
 
@@ -64,4 +66,4 @@ private:
   moveit::core::RobotModelConstPtr robot_model_;
 };
 
-} /* namespace chomp_interface */
+}  // namespace chomp_interface

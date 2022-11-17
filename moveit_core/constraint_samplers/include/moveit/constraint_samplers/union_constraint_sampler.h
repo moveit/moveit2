@@ -117,7 +117,7 @@ public:
    *
    * @return Always true
    */
-  bool configure(const moveit_msgs::msg::Constraints& constr) override
+  bool configure(const moveit_msgs::msg::Constraints& /*constr*/) override
   {
     return true;
   }
@@ -129,7 +129,7 @@ public:
    *
    * @return Always true
    */
-  virtual bool canService(const moveit_msgs::msg::Constraints& constr) const
+  virtual bool canService(const moveit_msgs::msg::Constraints& /*constr*/) const
   {
     return true;
   }
@@ -147,12 +147,10 @@ public:
    * @param [in] reference_state Reference kinematic state that will be passed through to samplers
    * @param [in] max_attempts Max attempts, which will be passed through to samplers
    *
-   * @return True if all invidual samplers return true
+   * @return True if all individual samplers return true
    */
   bool sample(moveit::core::RobotState& state, const moveit::core::RobotState& reference_state,
               unsigned int max_attempts) override;
-
-  bool project(moveit::core::RobotState& state, unsigned int max_attempts) override;
 
   /**
    * \brief Get the name of the constraint sampler, for debugging purposes

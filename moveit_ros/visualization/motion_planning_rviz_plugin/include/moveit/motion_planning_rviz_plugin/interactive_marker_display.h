@@ -33,8 +33,7 @@
 // pnode_, private_executor_, and private_executor_thread_ to fix the lag in the motion planning display interactive
 // marker cause by Rviz having only a single thread executor
 
-#ifndef RVIZ_DEFAULT_PLUGINS__DISPLAYS__INTERACTIVE_MARKERS__INTERACTIVE_MARKER_DISPLAY_HPP_
-#define RVIZ_DEFAULT_PLUGINS__DISPLAYS__INTERACTIVE_MARKERS__INTERACTIVE_MARKER_DISPLAY_HPP_
+#pragma once
 
 #include <map>
 #include <memory>
@@ -115,10 +114,10 @@ private:
   void unsubscribe();
 
   /// Called by InteractiveMarkerClient when successfully initialized.
-  void initializeCallback(visualization_msgs::srv::GetInteractiveMarkers::Response::SharedPtr /*msg*/);
+  void initializeCallback(const visualization_msgs::srv::GetInteractiveMarkers::Response::SharedPtr& /*msg*/);
 
   /// Called by InteractiveMarkerClient when an update from a server is received.
-  void updateCallback(visualization_msgs::msg::InteractiveMarkerUpdate::ConstSharedPtr msg);
+  void updateCallback(const visualization_msgs::msg::InteractiveMarkerUpdate::ConstSharedPtr& msg);
 
   /// Called by InteractiveMarkerClient when it resets.
   void resetCallback();
@@ -157,5 +156,3 @@ private:
 
 }  // namespace displays
 }  // namespace rviz_default_plugins
-
-#endif  // RVIZ_DEFAULT_PLUGINS__DISPLAYS__INTERACTIVE_MARKERS__INTERACTIVE_MARKER_DISPLAY_HPP_

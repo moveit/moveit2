@@ -9,23 +9,27 @@ add_library(${MOVEIT_LIB_NAME} SHARED
   src/world.cpp
   src/world_diff.cpp
   src/collision_env.cpp
+  src/collision_plugin_cache.cpp
 )
 include(GenerateExportHeader)
 generate_export_header(${MOVEIT_LIB_NAME})
-target_include_directories(${MOVEIT_LIB_NAME} PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>)
-set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES VERSION ${${PROJECT_NAME}_VERSION})
+
 ament_target_dependencies(${MOVEIT_LIB_NAME}
   rclcpp
   rmw_implementation
   urdf
   urdfdom
   urdfdom_headers
+  srdfdom
   visualization_msgs
   tf2_eigen
   geometric_shapes
-  Boost
   OCTOMAP
 )
+target_include_directories(${MOVEIT_LIB_NAME} BEFORE PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>)
+target_include_directories(${MOVEIT_LIB_NAME} PUBLIC $<TARGET_PROPERTY:moveit_planning_scene,INCLUDE_DIRECTORIES>)
+
+set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES VERSION ${${PROJECT_NAME}_VERSION})
 
 target_link_libraries(${MOVEIT_LIB_NAME}
   moveit_robot_state

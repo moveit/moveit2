@@ -79,8 +79,8 @@ public:
 template <typename Type>
 class MeshFilterTest : public testing::TestWithParam<double>
 {
-  BOOST_STATIC_ASSERT_MSG(FilterTraits<Type>::FILTER_GL_TYPE != GL_ZERO, "Only \"float\" and \"unsigned short int\" "
-                                                                         "are allowed.");
+  static_assert(FilterTraits<Type>::FILTER_GL_TYPE != GL_ZERO, "Only \"float\" and \"unsigned short int\" "
+                                                               "are allowed.");
 
 public:
   MeshFilterTest(unsigned width = 500, unsigned height = 500, double near = 0.5, double far = 5.0, double shadow = 0.1,
@@ -118,7 +118,8 @@ MeshFilterTest<Type>::MeshFilterTest(unsigned width, unsigned height, double nea
   , shadow_(shadow)
   , epsilon_(epsilon)
   , sensor_parameters_(width, height, near_, far_, width >> 1, height >> 1, width >> 1, height >> 1, 0.1, 0.1)
-  , filter_(std::bind(&MeshFilterTest<Type>::transformCallback, this, _1, _2), sensor_parameters_)
+  , filter_([this](mesh_filter::MeshHandle mesh, Eigen::Isometry3d& tf) { return transformCallback(mesh, tf); },
+            sensor_parameters_)
   , sensor_data_(width_ * height_)
   , distance_(0.0)
 {
@@ -132,7 +133,7 @@ MeshFilterTest<Type>::MeshFilterTest(unsigned width, unsigned height, double nea
   shapes::Mesh mesh = createMesh(0);
   handle_ = filter_.addMesh(mesh);
 
-  // make it random but reproducable
+  // make it random but reproducible
   srand(0);
   Type t_near = near_ / FilterTraits<Type>::ToMetricScale;
   Type t_far = far_ / FilterTraits<Type>::ToMetricScale;

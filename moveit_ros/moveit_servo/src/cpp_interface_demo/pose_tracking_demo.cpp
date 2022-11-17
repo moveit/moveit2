@@ -55,12 +55,14 @@ class StatusMonitor
 public:
   StatusMonitor(const rclcpp::Node::SharedPtr& node, const std::string& topic)
   {
-    sub_ = node->create_subscription<std_msgs::msg::Int8>(
-        topic, rclcpp::SystemDefaultsQoS(), std::bind(&StatusMonitor::statusCB, this, std::placeholders::_1));
+    sub_ = node->create_subscription<std_msgs::msg::Int8>(topic, rclcpp::SystemDefaultsQoS(),
+                                                          [this](const std_msgs::msg::Int8::ConstSharedPtr& msg) {
+                                                            return statusCB(msg);
+                                                          });
   }
 
 private:
-  void statusCB(const std_msgs::msg::Int8::ConstSharedPtr msg)
+  void statusCB(const std_msgs::msg::Int8::ConstSharedPtr& msg)
   {
     moveit_servo::StatusCode latest_status = static_cast<moveit_servo::StatusCode>(msg->data);
     if (latest_status != status_)
@@ -89,7 +91,7 @@ int main(int argc, char** argv)
   executor.add_node(node);
   std::thread executor_thread([&executor]() { executor.spin(); });
 
-  auto servo_parameters = moveit_servo::ServoParameters::makeServoParameters(node, LOGGER);
+  auto servo_parameters = moveit_servo::ServoParameters::makeServoParameters(node);
 
   if (servo_parameters == nullptr)
   {
@@ -166,7 +168,7 @@ int main(int argc, char** argv)
                                    << moveit_servo::POSE_TRACKING_STATUS_CODE_MAP.at(tracking_status));
   });
 
-  rclcpp::Rate loop_rate(50);
+  rclcpp::WallRate loop_rate(50);
   for (size_t i = 0; i < 500; ++i)
   {
     // Modify the pose target a little bit each cycle

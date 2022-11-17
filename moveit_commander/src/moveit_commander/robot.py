@@ -32,7 +32,8 @@
 #
 # Author: Ioan Sucan
 
-from moveit_commander import MoveGroupCommander, MoveItCommanderException
+from moveit_commander import MoveGroupCommander
+from .exception import MoveItCommanderException
 from moveit_ros_planning_interface import _moveit_robot_interface
 from moveit_msgs.msg import RobotState
 from visualization_msgs.msg import MarkerArray
@@ -52,7 +53,7 @@ class RobotCommander(object):
             """
             @return number of the list that _Joint__get_joint_limits
                     methods returns.
-            @see: http://docs.ros.org/indigo/api/moveit_core/html/classmoveit_1_1core_1_1JointModel.html#details
+            @see: http://docs.ros.org/en/latest/api/moveit_core/html/cpp/classmoveit_1_1core_1_1JointModel.html#details
                   for more about variable.
             """
             return len(self.__get_joint_limits())
@@ -168,7 +169,7 @@ class RobotCommander(object):
         """Get a MarkerArray of the markers that make up this robot
 
         Usage:
-            (): get's all markers for current state
+            (): gets all markers for current state
             state (RobotState): gets markers for a particular state
             values (dict): get markers with given values
             values, links (dict, list): get markers with given values and these links
@@ -191,7 +192,7 @@ class RobotCommander(object):
         return mrkr
 
     def get_root_link(self):
-        """Get the name of the root link of the robot model """
+        """Get the name of the root link of the robot model"""
         return self._r.get_robot_root_link()
 
     def get_active_joint_names(self, group=None):
@@ -240,7 +241,7 @@ class RobotCommander(object):
         return self._r.get_group_names()
 
     def get_current_state(self):
-        """ Get a RobotState message describing the current state of the robot"""
+        """Get a RobotState message describing the current state of the robot"""
         s = RobotState()
         s.deserialize(self._r.get_current_state())
         return s

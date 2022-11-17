@@ -33,13 +33,16 @@
 
 #include "moveit/collision_detection_bullet/bullet_integration/bullet_discrete_bvh_manager.h"
 
+#include <rclcpp/logger.hpp>
+#include <rclcpp/logging.hpp>
+
 static const rclcpp::Logger BULLET_LOGGER = rclcpp::get_logger("collision_detection.bullet");
 
 namespace collision_detection_bullet
 {
 BulletDiscreteBVHManagerPtr BulletDiscreteBVHManager::clone() const
 {
-  BulletDiscreteBVHManagerPtr manager(new BulletDiscreteBVHManager());
+  auto manager = std::make_shared<BulletDiscreteBVHManager>();
 
   for (const std::pair<const std::string, CollisionObjectWrapperPtr>& cow : link2cow_)
   {

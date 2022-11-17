@@ -3,7 +3,19 @@
 API changes in MoveIt releases
 
 ## ROS Rolling
+- `lockSceneRead()` and `lockSceneWrite()` are now protected member functions, for internal use only. To lock the planning scene, use LockedPlanningSceneRO or LockedPlanningSceneRW:
+```
+      planning_scene_monitor::LockedPlanningSceneRO ls(planning_scene_monitor);
+      moveit::core::RobotModelConstPtr model = ls->getRobotModel();
+```
 - ServoServer was renamed to ServoNode
+- `CollisionObject` messages are now defined with a `Pose`, and shapes and subframes are defined relative to the object's pose. This makes it easier to place objects with subframes and multiple shapes in the scene. This causes several changes:
+    - `getFrameTransform()` now returns this pose instead of the first shape's pose.
+    - The Rviz plugin's manipulation tab now uses the object's pose instead of the shape pose to evaluate if object's are in the region of interest.
+    - Planning scene geometry text files (`.scene`) have changed format. Loading old files is still supported. You can add a line `0 0 0 0 0 0 1` under each line with an asterisk to upgrade old files.
+- add API for passing RNG to setToRandomPositionsNearBy
+- Static member variable interface of the CollisionDetectorAllocatorTemplate for the string NAME was replaced with a virtual method `getName`.
+- Enhance `RDFLoader` to load from string parameter OR string topic (and add the ability to publish a string topic).
 
 ## ROS Noetic
 - RobotModel no longer overrides empty URDF collision geometry by matching the visual geometry of the link.
@@ -24,12 +36,19 @@ API changes in MoveIt releases
 - The joint states of `passive` joints must be published in ROS and the CurrentStateMonitor will now wait for them as well. Their semantics dictate that they cannot be actively controlled, but they must be known to use the full robot state in collision checks. (https://github.com/ros-planning/moveit/pull/2663)
 - Removed deprecated header `moveit/macros/deprecation.h`. Use `[[deprecated]]` instead.
 - All uses of `MOVEIT_CLASS_FORWARD` et. al. must now be followed by a semicolon for consistency (and to get -pedantic builds to pass for the codebase).
+- In case you start RViz in a namespace, the default topic for the trajectory visualization display now uses the relative instead of the absolute namespace (i.e. `<ns>/move_group/display_planned_path` instead of `/move_group/display_planned_path`).
+- `RobotState::attachBody()` now takes a unique_ptr instead of an owning raw pointer.
+- Moved the class `MoveItErrorCode` from both `moveit_ros_planning` and `moveit_ros_planning_interface` to `moveit_core`. The class now is in namespace `moveit::core`, access via `moveit::planning_interface` or `moveit_cpp::PlanningComponent` is deprecated.
+- End-effector markers in rviz are shown only if the eef's parent group is active _and_ the parent link is part of that group. Before, these conditions were _OR_-connected.
+  You might need to define additional end-effectors.
+- Removed `ConstraintSampler::project()` as there was no real difference to `sample()`.
+- Removed `TrajectoryExecutionManager::pushAndExecute()` and the code associated to it. The code was unused and broken.
 
 ## ROS Melodic
 
 - Migration to ``tf2`` API.
 - Replaced Eigen::Affine3d with Eigen::Isometry3d, which is computationally more efficient.
-  Simply find-replace occurences of Affine3d:
+  Simply find-replace occurrences of Affine3d:
   ``find . -iname "*.[hc]*" -print0 | xargs -0 sed -i 's#Affine3#Isometry3#g'``
 - The move_group capability ``ExecuteTrajectoryServiceCapability`` has been removed in favor of the improved ``ExecuteTrajectoryActionCapability`` capability. Since Indigo, both capabilities were supported. If you still load default capabilities in your ``config/launch/move_group.launch``, you can just remove them from the capabilities parameter. The correct default capabilities will be loaded automatically.
 - Deprecated method ``CurrentStateMonitor::waitForCurrentState(double wait_time)`` was finally removed.

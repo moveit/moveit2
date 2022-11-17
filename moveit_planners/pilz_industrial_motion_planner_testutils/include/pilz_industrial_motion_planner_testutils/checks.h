@@ -32,16 +32,15 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#ifndef CHECKS_H
-#define CHECKS_H
+#pragma once
 
 #include <gtest/gtest.h>
 #include <moveit/robot_state/robot_state.h>
 
 namespace pilz_industrial_motion_planner_testutils
 {
-::testing::AssertionResult isAtExpectedPosition(const robot_state::RobotState& expected,
-                                                const robot_state::RobotState& actual, const double epsilon,
+::testing::AssertionResult isAtExpectedPosition(const moveit::core::RobotState& expected,
+                                                const moveit::core::RobotState& actual, const double epsilon,
                                                 const std::string& group_name = "")
 {
   if (group_name.empty() && expected.distance(actual) <= epsilon)
@@ -58,5 +57,3 @@ namespace pilz_industrial_motion_planner_testutils
   return ::testing::AssertionFailure() << msg.str();
 }
 }  // namespace pilz_industrial_motion_planner_testutils
-
-#endif  // CENTERAUXILIARY_H

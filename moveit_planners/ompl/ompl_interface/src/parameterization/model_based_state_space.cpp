@@ -75,9 +75,9 @@ ompl_interface::ModelBasedStateSpace::ModelBasedStateSpace(ModelBasedStateSpaceS
   setTagSnapToSegment(0.95);
 
   /// expose parameters
-  params_.declareParam<double>("tag_snap_to_segment",
-                               std::bind(&ModelBasedStateSpace::setTagSnapToSegment, this, std::placeholders::_1),
-                               std::bind(&ModelBasedStateSpace::getTagSnapToSegment, this));
+  params_.declareParam<double>(
+      "tag_snap_to_segment", [this](double tag_snap_to_segment) { setTagSnapToSegment(tag_snap_to_segment); },
+      [this] { return getTagSnapToSegment(); });
 }
 
 ompl_interface::ModelBasedStateSpace::~ModelBasedStateSpace() = default;
@@ -289,7 +289,7 @@ ompl::base::StateSamplerPtr ompl_interface::ModelBasedStateSpace::allocDefaultSt
 
 void ompl_interface::ModelBasedStateSpace::printSettings(std::ostream& out) const
 {
-  out << "ModelBasedStateSpace '" << getName() << "' at " << this << std::endl;
+  out << "ModelBasedStateSpace '" << getName() << "' at " << this << '\n';
 }
 
 void ompl_interface::ModelBasedStateSpace::printState(const ompl::base::State* state, std::ostream& out) const
@@ -301,21 +301,21 @@ void ompl_interface::ModelBasedStateSpace::printState(const ompl::base::State* s
     const int vc = j->getVariableCount();
     for (int i = 0; i < vc; ++i)
       out << state->as<StateType>()->values[idx + i] << " ";
-    out << std::endl;
+    out << '\n';
   }
 
   if (state->as<StateType>()->isStartState())
-    out << "* start state" << std::endl;
+    out << "* start state \n";
   if (state->as<StateType>()->isGoalState())
-    out << "* goal state" << std::endl;
+    out << "* goal state \n";
   if (state->as<StateType>()->isValidityKnown())
   {
     if (state->as<StateType>()->isMarkedValid())
-      out << "* valid state" << std::endl;
+      out << "* valid state \n";
     else
-      out << "* invalid state" << std::endl;
+      out << "* invalid state \n";
   }
-  out << "Tag: " << state->as<StateType>()->tag << std::endl;
+  out << "Tag: " << state->as<StateType>()->tag << '\n';
 }
 
 void ompl_interface::ModelBasedStateSpace::copyToRobotState(moveit::core::RobotState& rstate,

@@ -1,0 +1,33 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<package format="3">
+  <name>moveit_resources_prbt_ikfast_manipulator_plugin</name>
+  <version>2.6.0</version>
+  <description>The prbt_ikfast_manipulator_plugin package</description>
+  <maintainer email="a.gutenkunst@pilz.de">Alexander Gutenkunst</maintainer>
+  <maintainer email="c.henkel@pilz.de">Christian Henkel</maintainer>
+  <maintainer email="h.slusarek@pilz.de">Hagen Slusarek</maintainer>
+  <maintainer email="i.martini@pilz.de">Immanuel Martini</maintainer>
+  <license>Apache 2.0</license>
+  <buildtool_depend>ament_cmake</buildtool_depend>
+  <url type="website">http://moveit.ros.org</url>
+  <url type="bugtracker">https://github.com/ros-planning/moveit-resources/issues</url>
+  <url type="repository">https://github.com/ros-planning/moveit-resources</url>
+
+  <depend>tf2_geometry_msgs</depend>
+
+  <build_depend>moveit_core</build_depend>
+  <build_depend>pluginlib</build_depend>
+  <build_depend>rclcpp</build_depend>
+  <build_depend>tf2_eigen</build_depend>
+  <build_depend>tf2_kdl</build_depend>
+  <build_depend>tf2_eigen_kdl</build_depend>
+  <depend>generate_parameter_library</depend>
+  <exec_depend>moveit_core</exec_depend>
+  <exec_depend>pluginlib</exec_depend>
+  <exec_depend>rclcpp</exec_depend>
+  <exec_depend>tf2_kdl</exec_depend>
+  <export>
+    <moveit_core plugin="${prefix}/prbt_manipulator_moveit_ikfast_plugin_description.xml"/>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>

@@ -39,10 +39,11 @@
 #include <moveit/robot_model/joint_model_group.h>
 #include <moveit/robot_model/revolute_joint_model.h>
 #include <moveit/exceptions/exceptions.h>
-#include <boost/lexical_cast.hpp>
+#include <rclcpp/logger.hpp>
+#include <rclcpp/logging.hpp>
 #include <algorithm>
+
 #include "order_robot_model_items.inc"
-#include "rclcpp/rclcpp.hpp"
 
 namespace moveit
 {
@@ -367,9 +368,9 @@ void JointModelGroup::getVariableRandomPositionsNearBy(random_numbers::RandomNum
 {
   assert(active_joint_bounds.size() == active_joint_model_vector_.size());
   if (distances.size() != active_joint_model_vector_.size())
-    throw Exception("When sampling random values nearby for group '" + name_ + "', distances vector should be of size " +
-                    boost::lexical_cast<std::string>(active_joint_model_vector_.size()) + ", but it is of size " +
-                    boost::lexical_cast<std::string>(distances.size()));
+    throw Exception("When sampling random values nearby for group '" + name_ +
+                    "', distances vector should be of size " + std::to_string(active_joint_model_vector_.size()) +
+                    ", but it is of size " + std::to_string(distances.size()));
   for (std::size_t i = 0; i < active_joint_model_vector_.size(); ++i)
     active_joint_model_vector_[i]->getVariableRandomPositionsNearBy(rng, values + active_joint_model_start_index_[i],
                                                                     *active_joint_bounds[i],
@@ -565,7 +566,7 @@ void JointModelGroup::setDefaultIKTimeout(double ik_timeout)
 }
 
 bool JointModelGroup::computeIKIndexBijection(const std::vector<std::string>& ik_jnames,
-                                              std::vector<unsigned int>& joint_bijection) const
+                                              std::vector<size_t>& joint_bijection) const
 {
   joint_bijection.clear();
   for (const std::string& ik_jname : ik_jnames)
@@ -583,7 +584,7 @@ bool JointModelGroup::computeIKIndexBijection(const std::vector<std::string>& ik
       return false;
     }
     const JointModel* jm = getJointModel(ik_jname);
-    for (unsigned int k = 0; k < jm->getVariableCount(); ++k)
+    for (size_t k = 0; k < jm->getVariableCount(); ++k)
       joint_bijection.push_back(it->second + k);
   }
   return true;
@@ -640,7 +641,7 @@ bool JointModelGroup::canSetStateFromIK(const std::string& tip) const
     // remove frame reference, if specified
     const std::string& tip_local = tip[0] == '/' ? tip.substr(1) : tip;
     const std::string& tip_frame_local = tip_frame[0] == '/' ? tip_frame.substr(1) : tip_frame;
-    RCLCPP_WARN(LOGGER, "comparing input tip: %s to this groups tip: %s ", tip_local.c_str(), tip_frame_local.c_str());
+    RCLCPP_DEBUG(LOGGER, "comparing input tip: %s to this groups tip: %s ", tip_local.c_str(), tip_frame_local.c_str());
 
     // Check if the IK solver's tip is the same as the frame of inquiry
     if (tip_local != tip_frame_local)
@@ -668,11 +669,11 @@ bool JointModelGroup::canSetStateFromIK(const std::string& tip) const
 
 void JointModelGroup::printGroupInfo(std::ostream& out) const
 {
-  out << "Group '" << name_ << "' using " << variable_count_ << " variables" << std::endl;
-  out << "  * Joints:" << std::endl;
+  out << "Group '" << name_ << "' using " << variable_count_ << " variables\n";
+  out << "  * Joints:\n";
   for (const JointModel* joint_model : joint_model_vector_)
-    out << "    '" << joint_model->getName() << "' (" << joint_model->getTypeName() << ")" << std::endl;
-  out << "  * Variables:" << std::endl;
+    out << "    '" << joint_model->getName() << "' (" << joint_model->getTypeName() << ")\n";
+  out << "  * Variables:\n";
   for (const std::string& variable_name : variable_names_)
   {
     int local_idx = joint_variables_index_map_.find(variable_name)->second;
@@ -682,10 +683,10 @@ void JointModelGroup::printGroupInfo(std::ostream& out) const
         << local_idx << " in group state";
     if (jm->getMimic())
       out << ", mimic '" << jm->getMimic()->getName() << "'";
-    out << std::endl;
-    out << "        " << parent_model_->getVariableBounds(variable_name) << std::endl;
+    out << '\n';
+    out << "        " << parent_model_->getVariableBounds(variable_name) << '\n';
   }
-  out << "  * Variables Index List:" << std::endl;
+  out << "  * Variables Index List:\n";
   out << "    ";
   for (int variable_index : variable_index_list_)
     out << variable_index << " ";
@@ -693,35 +694,35 @@ void JointModelGroup::printGroupInfo(std::ostream& out) const
     out << "(contiguous)";
   else
     out << "(non-contiguous)";
-  out << std::endl;
+  out << '\n';
   if (group_kinematics_.first)
   {
-    out << "  * Kinematics solver bijection:" << std::endl;
+    out << "  * Kinematics solver bijection:\n";
     out << "    ";
     for (unsigned int index : group_kinematics_.first.bijection_)
       out << index << " ";
-    out << std::endl;
+    out << '\n';
   }
   if (!group_kinematics_.second.empty())
   {
-    out << "  * Compound kinematics solver:" << std::endl;
+    out << "  * Compound kinematics solver:\n";
     for (const std::pair<const JointModelGroup* const, KinematicsSolver>& it : group_kinematics_.second)
     {
       out << "    " << it.first->getName() << ":";
       for (unsigned int index : it.second.bijection_)
         out << " " << index;
-      out << std::endl;
+      out << '\n';
     }
   }
 
   if (!group_mimic_update_.empty())
   {
-    out << "  * Local Mimic Updates:" << std::endl;
+    out << "  * Local Mimic Updates:\n";
     for (const GroupMimicUpdate& mimic_update : group_mimic_update_)
       out << "    [" << mimic_update.dest << "] = " << mimic_update.factor << " * [" << mimic_update.src << "] + "
-          << mimic_update.offset << std::endl;
+          << mimic_update.offset << '\n';
   }
-  out << std::endl;
+  out << '\n';
 }
 
 bool JointModelGroup::isValidVelocityMove(const std::vector<double>& from_joint_pose,
@@ -741,7 +742,7 @@ bool JointModelGroup::isValidVelocityMove(const double* from_joint_pose, const d
                                           std::size_t array_size, double dt) const
 {
   const std::vector<const JointModel::Bounds*>& bounds = getActiveJointModelsBounds();
-  const std::vector<unsigned int>& bij = getKinematicsSolverJointBijection();
+  const std::vector<size_t>& bij = getKinematicsSolverJointBijection();
 
   for (std::size_t i = 0; i < array_size; ++i)
   {

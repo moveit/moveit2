@@ -39,6 +39,8 @@
 #include <moveit_msgs/srv/get_planning_scene.hpp>
 #include <moveit_msgs/srv/apply_planning_scene.hpp>
 #include <algorithm>
+#include <rclcpp/executors.hpp>
+#include <rclcpp/future_return_code.hpp>
 
 namespace moveit
 {
@@ -160,18 +162,10 @@ public:
       {
         if (std::find(object_ids.begin(), object_ids.end(), collision_object.id) != object_ids.end())
         {
-          if (collision_object.mesh_poses.empty() && collision_object.primitive_poses.empty())
-            continue;
-          if (!collision_object.mesh_poses.empty())
-            result[collision_object.id] = collision_object.mesh_poses[0];
-          else
-            result[collision_object.id] = collision_object.primitive_poses[0];
+          result[collision_object.id] = collision_object.pose;
         }
       }
     }
-    else
-      RCLCPP_WARN(LOGGER, "Could not call planning scene service to get object names");
-
     return result;
   }
 
@@ -277,7 +271,7 @@ public:
   }
 
 private:
-  void waitForService(std::shared_ptr<rclcpp::ClientBase> srv)
+  void waitForService(const std::shared_ptr<rclcpp::ClientBase>& srv)
   {
     // rclcpp::Duration time_before_warning(5.0);
     // srv.waitForExistence(time_before_warning);

@@ -39,7 +39,6 @@
 #include <moveit/moveit_cpp/moveit_cpp.h>
 #include <moveit/planning_pipeline/planning_pipeline.h>
 #include <moveit/plan_execution/plan_execution.h>
-#include <moveit/plan_execution/plan_with_sensing.h>
 #include <moveit/trajectory_processing/trajectory_tools.h>
 #include <moveit/kinematic_constraints/utils.h>
 #include <moveit/utils/message_checks.h>
@@ -58,13 +57,10 @@ MoveGroupMoveAction::MoveGroupMoveAction()
 void MoveGroupMoveAction::initialize()
 {
   // start the move action server
-  using std::placeholders::_1;
-  using std::placeholders::_2;
-
   auto node = context_->moveit_cpp_->getNode();
   execute_action_server_ = rclcpp_action::create_server<MGAction>(
       node, MOVE_ACTION,
-      [](const rclcpp_action::GoalUUID& /*unused*/, std::shared_ptr<const MGAction::Goal> /*unused*/) {
+      [](const rclcpp_action::GoalUUID& /*unused*/, const std::shared_ptr<const MGAction::Goal>& /*unused*/) {
         RCLCPP_INFO(LOGGER, "Received request");
         return rclcpp_action::GoalResponse::ACCEPT_AND_EXECUTE;
       },
@@ -72,15 +68,16 @@ void MoveGroupMoveAction::initialize()
         RCLCPP_INFO(LOGGER, "Received request to cancel goal");
         return rclcpp_action::CancelResponse::ACCEPT;
       },
-      std::bind(&MoveGroupMoveAction::executeMoveCallback, this, _1));
+      [this](const std::shared_ptr<MGActionGoal>& goal) { return executeMoveCallback(goal); });
 }
 
-void MoveGroupMoveAction::executeMoveCallback(std::shared_ptr<MGActionGoal> goal)
+void MoveGroupMoveAction::executeMoveCallback(const std::shared_ptr<MGActionGoal>& goal)
 {
   RCLCPP_INFO(LOGGER, "executing..");
   setMoveState(PLANNING, goal);
   // before we start planning, ensure that we have the latest robot state received...
-  context_->planning_scene_monitor_->waitForCurrentRobotState(rclcpp::Clock(RCL_ROS_TIME).now());
+  auto node = context_->moveit_cpp_->getNode();
+  context_->planning_scene_monitor_->waitForCurrentRobotState(node->get_clock()->now());
   context_->planning_scene_monitor_->updateFrameTransforms();
 
   auto action_res = std::make_shared<MGAction::Result>();
@@ -146,18 +143,11 @@ void MoveGroupMoveAction::executeMoveCallbackPlanAndExecute(const std::shared_pt
   opt.replan_ = goal->get_goal()->planning_options.replan;
   opt.replan_attempts_ = goal->get_goal()->planning_options.replan_attempts;
   opt.replan_delay_ = goal->get_goal()->planning_options.replan_delay;
-  opt.before_execution_callback_ = boost::bind(&MoveGroupMoveAction::startMoveExecutionCallback, this);
+  opt.before_execution_callback_ = [this] { startMoveExecutionCallback(); };
 
-  opt.plan_callback_ = boost::bind(&MoveGroupMoveAction::planUsingPlanningPipeline, this,
-                                   boost::cref(motion_plan_request), boost::placeholders::_1);
-  if (goal->get_goal()->planning_options.look_around && context_->plan_with_sensing_)
-  {
-    opt.plan_callback_ = boost::bind(&plan_execution::PlanWithSensing::computePlan, context_->plan_with_sensing_.get(),
-                                     boost::placeholders::_1, opt.plan_callback_,
-                                     goal->get_goal()->planning_options.look_around_attempts,
-                                     goal->get_goal()->planning_options.max_safe_execution_cost);
-    context_->plan_with_sensing_->setBeforeLookCallback(boost::bind(&MoveGroupMoveAction::startMoveLookCallback, this));
-  }
+  opt.plan_callback_ = [this, &motion_plan_request](plan_execution::ExecutableMotionPlan& plan) {
+    return planUsingPlanningPipeline(motion_plan_request, plan);
+  };
 
   plan_execution::ExecutableMotionPlan plan;
   if (preempt_requested_)

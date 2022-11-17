@@ -39,6 +39,7 @@
 
 #include <moveit/robot_model/robot_model.h>
 #include <moveit/robot_trajectory/robot_trajectory.h>
+#include <moveit/planning_interface/planning_interface.h>
 
 #include "pilz_industrial_motion_planner/trajectory_blend_request.h"
 #include "pilz_industrial_motion_planner/trajectory_blender.h"
@@ -50,10 +51,10 @@ namespace pilz_industrial_motion_planner
 using TipFrameFunc_t = std::function<const std::string&(const std::string&)>;
 
 // List of exceptions which can be thrown by the PlanComponentsBuilder class.
-CREATE_MOVEIT_ERROR_CODE_EXCEPTION(NoBlenderSetException, moveit_msgs::MoveItErrorCodes::FAILURE);
-CREATE_MOVEIT_ERROR_CODE_EXCEPTION(NoTipFrameFunctionSetException, moveit_msgs::MoveItErrorCodes::FAILURE);
-CREATE_MOVEIT_ERROR_CODE_EXCEPTION(NoRobotModelSetException, moveit_msgs::MoveItErrorCodes::FAILURE);
-CREATE_MOVEIT_ERROR_CODE_EXCEPTION(BlendingFailedException, moveit_msgs::MoveItErrorCodes::FAILURE);
+CREATE_MOVEIT_ERROR_CODE_EXCEPTION(NoBlenderSetException, moveit_msgs::msg::MoveItErrorCodes::FAILURE);
+CREATE_MOVEIT_ERROR_CODE_EXCEPTION(NoTipFrameFunctionSetException, moveit_msgs::msg::MoveItErrorCodes::FAILURE);
+CREATE_MOVEIT_ERROR_CODE_EXCEPTION(NoRobotModelSetException, moveit_msgs::msg::MoveItErrorCodes::FAILURE);
+CREATE_MOVEIT_ERROR_CODE_EXCEPTION(BlendingFailedException, moveit_msgs::msg::MoveItErrorCodes::FAILURE);
 
 /**
  * @brief Helper class to encapsulate the merge and blend process of
@@ -87,13 +88,16 @@ public:
    * appended/attached to the newly created empty trajectory:
    *      - if the given and previous trajectory are from different groups.
    *
+   * @param planning_scene The scene planning is occurring in.
+   *
    * @param other Trajectories which has to be added to the trajectory container
    * under construction.
    *
    * @param blend_radius The blending radius between the previous and the
    * specified trajectory.
    */
-  void append(const robot_trajectory::RobotTrajectoryPtr& other, const double blend_radius);
+  void append(const planning_scene::PlanningSceneConstPtr& planning_scene,
+              const robot_trajectory::RobotTrajectoryPtr& other, const double blend_radius);
 
   /**
    * @brief Clears the trajectory container under construction.
@@ -106,7 +110,8 @@ public:
   std::vector<robot_trajectory::RobotTrajectoryPtr> build() const;
 
 private:
-  void blend(const robot_trajectory::RobotTrajectoryPtr& other, const double blend_radius);
+  void blend(const planning_scene::PlanningSceneConstPtr& planning_scene,
+             const robot_trajectory::RobotTrajectoryPtr& other, const double blend_radius);
 
 private:
   /**

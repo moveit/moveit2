@@ -40,8 +40,6 @@
 
 #include <moveit/robot_state/robot_state.h>
 
-#include <boost/assert.hpp>
-
 namespace moveit
 {
 namespace core
@@ -97,18 +95,61 @@ class CartesianInterpolator
   // TODO(mlautman): Eventually, this planner should be moved out of robot_state
 
 public:
-  /** \brief Compute the sequence of joint values that correspond to a straight Cartesian path for a particular group.
+  struct Percentage
+  {
+    // value must be in [0,1]
+    Percentage(double value) : value(value)
+    {
+      if (value < 0.0 || value > 1.0)
+        throw std::runtime_error("Percentage values must be between 0 and 1, inclusive");
+    }
+    operator double()
+    {
+      return value;
+    }
+    double operator*()
+    {
+      return value;
+    }
+    Percentage operator*(const Percentage& p)
+    {
+      Percentage res(value * p.value);
+      return res;
+    }
+    double value;
+  };
 
-     The Cartesian path to be followed is specified as a direction of motion (\e direction, unit vector) for the origin
-     The Cartesian path to be followed is specified as a direction of motion (\e direction, unit vector) for the origin
-     of a robot link (\e link). The direction is assumed to be either in a global reference frame or in the local
-     reference frame of the link. In the latter case (\e global_reference_frame is false) the \e direction is rotated
-     accordingly. The link needs to move in a straight line, following the specified direction, for the desired \e
-     distance. The resulting joint values are stored in the vector \e traj, one by one. The maximum distance in
+  struct Distance
+  {
+    Distance(double meters) : meters(meters)
+    {
+    }
+    operator double()
+    {
+      return meters;
+    }
+    double operator*()
+    {
+      return meters;
+    }
+    Distance operator*(const Percentage& p)
+    {
+      Distance res(meters * p.value);
+      return res;
+    }
+    double meters;
+  };
+
+  /** \brief Compute the sequence of joint values that correspond to a straight Cartesian path for a particular link.
+
+     The Cartesian path to be followed is specified as a \e translation vector to be followed by the robot \e link.
+     This vector is assumed to be specified either in the global reference frame or in the local
+     reference frame of the link (\e global_reference_frame is false).
+     The resulting joint values are stored in the vector \e traj, one by one. The maximum distance in
      Cartesian space between consecutive points on the resulting path is specified in the \e MaxEEFStep struct which
      provides two fields: translation and rotation. If a \e validCallback is specified, this is passed to the internal
      call to setFromIK(). In case of IK failure, the computation of the path stops and the value returned corresponds to
-     the distance that was computed and for which corresponding states were added to the path.  At the end of the
+     the distance that was achieved and for which corresponding states were added to the path.  At the end of the
      function call, the state of the group corresponds to the last attempted Cartesian pose.
 
      During the computation of the trajectory, it is usually preferred if consecutive joint values do not 'jump' by a
@@ -126,42 +167,63 @@ public:
 
      For absolute jump thresholds, if any individual joint-space motion delta is larger then \e revolute_jump_threshold
      for revolute joints or \e prismatic_jump_threshold for prismatic joints then this step is considered a failure and
-     the returned path is truncated up to just before the jump.*/
-  static double
-  computeCartesianPath(RobotState* start_state, const JointModelGroup* group,
-                       std::vector<std::shared_ptr<RobotState>>& traj, const LinkModel* link,
-                       const Eigen::Vector3d& direction, bool global_reference_frame, double distance,
-                       const MaxEEFStep& max_step, const JumpThreshold& jump_threshold,
-                       const GroupStateValidityCallbackFn& validCallback = GroupStateValidityCallbackFn(),
-                       const kinematics::KinematicsQueryOptions& options = kinematics::KinematicsQueryOptions());
+     the returned path is truncated up to just before the jump.
 
-  /** \brief Compute the sequence of joint values that correspond to a straight Cartesian path, for a particular group.
+     Kinematics solvers may use cost functions to prioritize certain solutions, which may be specified with \e cost_function. */
+  static Distance computeCartesianPath(
+      RobotState* start_state, const JointModelGroup* group, std::vector<std::shared_ptr<RobotState>>& traj,
+      const LinkModel* link, const Eigen::Vector3d& translation, bool global_reference_frame,
+      const MaxEEFStep& max_step, const JumpThreshold& jump_threshold,
+      const GroupStateValidityCallbackFn& validCallback = GroupStateValidityCallbackFn(),
+      const kinematics::KinematicsQueryOptions& options = kinematics::KinematicsQueryOptions(),
+      const kinematics::KinematicsBase::IKCostFn& cost_function = kinematics::KinematicsBase::IKCostFn());
+
+  /** \brief Compute the sequence of joint values that correspond to a straight Cartesian path, for a particular link.
+
+     In contrast to the previous function, the translation vector is specified as a (unit) direction vector and
+     a distance. */
+  static Distance computeCartesianPath(
+      RobotState* start_state, const JointModelGroup* group, std::vector<std::shared_ptr<RobotState>>& traj,
+      const LinkModel* link, const Eigen::Vector3d& direction, bool global_reference_frame, double distance,
+      const MaxEEFStep& max_step, const JumpThreshold& jump_threshold,
+      const GroupStateValidityCallbackFn& validCallback = GroupStateValidityCallbackFn(),
+      const kinematics::KinematicsQueryOptions& options = kinematics::KinematicsQueryOptions(),
+      const kinematics::KinematicsBase::IKCostFn& cost_function = kinematics::KinematicsBase::IKCostFn())
+  {
+    return computeCartesianPath(start_state, group, traj, link, distance * direction, global_reference_frame, max_step,
+                                jump_threshold, validCallback, options, cost_function);
+  }
+
+  /** \brief Compute the sequence of joint values that correspond to a straight Cartesian path, for a particular frame.
 
      In contrast to the previous function, the Cartesian path is specified as a target frame to be reached (\e target)
-     for the origin of a robot link (\e link). The target frame is assumed to be either in a global reference frame or
-     in the local reference frame of the link. In the latter case (\e global_reference_frame is false) the \e target is
-     rotated accordingly. All other comments from the previous function apply. */
-  static double
-  computeCartesianPath(RobotState* start_state, const JointModelGroup* group,
-                       std::vector<std::shared_ptr<RobotState>>& traj, const LinkModel* link,
-                       const Eigen::Isometry3d& target, bool global_reference_frame, const MaxEEFStep& max_step,
-                       const JumpThreshold& jump_threshold,
-                       const GroupStateValidityCallbackFn& validCallback = GroupStateValidityCallbackFn(),
-                       const kinematics::KinematicsQueryOptions& options = kinematics::KinematicsQueryOptions());
+     for a virtual frame attached to the robot \e link with the given \e link_offset.
+     The target frame is assumed to be specified either w.r.t. to the global reference frame or the virtual link frame
+     (\e global_reference_frame is false). This function returns the percentage (0..1) of the path that was achieved.
+     All other comments from the previous function apply. */
+  static Percentage computeCartesianPath(
+      RobotState* start_state, const JointModelGroup* group, std::vector<std::shared_ptr<RobotState>>& traj,
+      const LinkModel* link, const Eigen::Isometry3d& target, bool global_reference_frame, const MaxEEFStep& max_step,
+      const JumpThreshold& jump_threshold,
+      const GroupStateValidityCallbackFn& validCallback = GroupStateValidityCallbackFn(),
+      const kinematics::KinematicsQueryOptions& options = kinematics::KinematicsQueryOptions(),
+      const kinematics::KinematicsBase::IKCostFn& cost_function = kinematics::KinematicsBase::IKCostFn(),
+      const Eigen::Isometry3d& link_offset = Eigen::Isometry3d::Identity());
 
   /** \brief Compute the sequence of joint values that perform a general Cartesian path.
 
      In contrast to the previous functions, the Cartesian path is specified as a set of \e waypoints to be sequentially
-     reached for the origin of a robot link (\e link). The waypoints are transforms given either in a global reference
-     frame or in the local reference frame of the link at the immediately preceeding waypoint. The link needs to move
-     in a straight line between two consecutive waypoints. All other comments apply. */
-  static double
-  computeCartesianPath(RobotState* start_state, const JointModelGroup* group,
-                       std::vector<std::shared_ptr<RobotState>>& traj, const LinkModel* link,
-                       const EigenSTL::vector_Isometry3d& waypoints, bool global_reference_frame,
-                       const MaxEEFStep& max_step, const JumpThreshold& jump_threshold,
-                       const GroupStateValidityCallbackFn& validCallback = GroupStateValidityCallbackFn(),
-                       const kinematics::KinematicsQueryOptions& options = kinematics::KinematicsQueryOptions());
+     reached by the virtual frame attached to the robot \e link. The waypoints are transforms given either w.r.t. the global
+     reference frame or the virtual frame at the immediately preceding waypoint. The virtual frame needs
+     to move in a straight line between two consecutive waypoints. All other comments apply. */
+  static Percentage computeCartesianPath(
+      RobotState* start_state, const JointModelGroup* group, std::vector<std::shared_ptr<RobotState>>& traj,
+      const LinkModel* link, const EigenSTL::vector_Isometry3d& waypoints, bool global_reference_frame,
+      const MaxEEFStep& max_step, const JumpThreshold& jump_threshold,
+      const GroupStateValidityCallbackFn& validCallback = GroupStateValidityCallbackFn(),
+      const kinematics::KinematicsQueryOptions& options = kinematics::KinematicsQueryOptions(),
+      const kinematics::KinematicsBase::IKCostFn& cost_function = kinematics::KinematicsBase::IKCostFn(),
+      const Eigen::Isometry3d& link_offset = Eigen::Isometry3d::Identity());
 
   /** \brief Tests joint space jumps of a trajectory.
 
@@ -180,8 +242,8 @@ public:
 
      TODO: move to more appropriate location
   */
-  static double checkJointSpaceJump(const JointModelGroup* group, std::vector<std::shared_ptr<RobotState>>& traj,
-                                    const JumpThreshold& jump_threshold);
+  static Percentage checkJointSpaceJump(const JointModelGroup* group, std::vector<std::shared_ptr<RobotState>>& traj,
+                                        const JumpThreshold& jump_threshold);
 
   /** \brief Tests for relative joint space jumps of the trajectory \e traj.
 
@@ -195,9 +257,9 @@ public:
 
      TODO: move to more appropriate location
    */
-  static double checkRelativeJointSpaceJump(const JointModelGroup* group,
-                                            std::vector<std::shared_ptr<RobotState>>& traj,
-                                            double jump_threshold_factor);
+  static Percentage checkRelativeJointSpaceJump(const JointModelGroup* group,
+                                                std::vector<std::shared_ptr<RobotState>>& traj,
+                                                double jump_threshold_factor);
 
   /** \brief Tests for absolute joint space jumps of the trajectory \e traj.
 
@@ -213,9 +275,9 @@ public:
 
      TODO: move to more appropriate location
   */
-  static double checkAbsoluteJointSpaceJump(const JointModelGroup* group,
-                                            std::vector<std::shared_ptr<RobotState>>& traj,
-                                            double revolute_jump_threshold, double prismatic_jump_threshold);
+  static Percentage checkAbsoluteJointSpaceJump(const JointModelGroup* group,
+                                                std::vector<std::shared_ptr<RobotState>>& traj,
+                                                double revolute_jump_threshold, double prismatic_jump_threshold);
 };
 
 }  // end of namespace core

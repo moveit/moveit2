@@ -1,4 +1,4 @@
-<library path="lib/libsequence_capability">
+<library path="sequence_capability">
   <class name="pilz_industrial_motion_planner/MoveGroupSequenceAction"
          type="pilz_industrial_motion_planner::MoveGroupSequenceAction"
          base_class_type="move_group::MoveGroupCapability">
@@ -8,6 +8,6 @@
   <class name="pilz_industrial_motion_planner/MoveGroupSequenceService"
          type="pilz_industrial_motion_planner::MoveGroupSequenceService"
          base_class_type="move_group::MoveGroupCapability">
-    <description>Plan a sequence of trajectory via ROS serivce</description>
+    <description>Plan a sequence of trajectory via ROS service</description>
   </class>
 </library>

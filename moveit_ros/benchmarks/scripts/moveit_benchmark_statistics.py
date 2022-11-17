@@ -112,6 +112,9 @@ def readRequiredMultilineValue(filevar):
 def readBenchmarkLog(dbname, filenames):
     """Parse benchmark log files and store the parsed data in a sqlite3 database."""
 
+    def isInvalidValue(value):
+        return len(value) == 0 or value in ["nan", "-nan", "inf", "-inf"]
+
     conn = sqlite3.connect(dbname)
     c = conn.cursor()
     c.execute("PRAGMA FOREIGN_KEYS = ON")
@@ -313,7 +316,7 @@ def readBenchmarkLog(dbname, filenames):
             runIds = []
             for j in range(numRuns):
                 runValues = [
-                    None if len(x) == 0 or x == "nan" or x == "inf" else x
+                    None if isInvalidValue(x) else x
                     for x in logfile.readline().split("; ")[:-1]
                 ]
                 values = tuple([experimentId, plannerId] + runValues)
@@ -334,7 +337,7 @@ def readBenchmarkLog(dbname, filenames):
                 c.execute("PRAGMA table_info(progress)")
                 columnNames = [col[1] for col in c.fetchall()]
 
-                # read progress properties and add columns as necesary
+                # read progress properties and add columns as necessary
                 numProgressProperties = int(nextLine.split()[0])
                 progressPropertyNames = ["runid"]
                 for i in range(numProgressProperties):
@@ -362,7 +365,7 @@ def readBenchmarkLog(dbname, filenames):
                         values = tuple(
                             [runIds[j]]
                             + [
-                                None if len(x) == 0 or x == "nan" or x == "inf" else x
+                                None if isInvalidValue(x) else x
                                 for x in dataSample.split(",")[:-1]
                             ]
                         )

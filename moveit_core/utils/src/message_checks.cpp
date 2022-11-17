@@ -53,9 +53,9 @@ bool isEmpty(const moveit_msgs::msg::PlanningSceneWorld& msg)
 
 bool isEmpty(const moveit_msgs::msg::RobotState& msg)
 {
-  /* a state is empty if it includes no information and it is a diff; if the state is not a diff, then the implicit
-     information is
-     that the set of attached bodies is empty, so they must be cleared from the state to be updated */
+  // a state is empty if it includes no information and it is a diff; if the state is not a diff, then the implicit
+  //   information is
+  //   that the set of attached bodies is empty, so they must be cleared from the state to be updated
   return static_cast<bool>(msg.is_diff) && msg.multi_dof_joint_state.joint_names.empty() &&
          msg.joint_state.name.empty() && msg.attached_collision_objects.empty() && msg.joint_state.position.empty() &&
          msg.joint_state.velocity.empty() && msg.joint_state.effort.empty() &&
@@ -67,6 +67,16 @@ bool isEmpty(const moveit_msgs::msg::Constraints& constr)
 {
   return constr.position_constraints.empty() && constr.orientation_constraints.empty() &&
          constr.visibility_constraints.empty() && constr.joint_constraints.empty();
+}
+
+bool isEmpty(const geometry_msgs::msg::Quaternion& msg)
+{
+  return msg.x == 0.0 && msg.y == 0.0 && msg.z == 0.0 && msg.w == 1.0;
+}
+
+bool isEmpty(const geometry_msgs::msg::Pose& msg)
+{
+  return msg.position.x == 0.0 && msg.position.y == 0.0 && msg.position.z == 0.0 && isEmpty(msg.orientation);
 }
 
 }  // namespace core

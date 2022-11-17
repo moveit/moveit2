@@ -35,11 +35,11 @@
 /* Author: Ioan Sucan */
 
 #include <boost/date_time/posix_time/posix_time.hpp>
-#include <boost/filesystem.hpp>
+#include <filesystem>
 #include <fstream>
 #include <moveit/ompl_interface/detail/constrained_sampler.h>
 #include <moveit/ompl_interface/detail/constraints_library.h>
-#include <moveit/profiler/profiler.h>
+
 #include <ompl/tools/config/SelfConfig.h>
 #include <utility>
 
@@ -54,7 +54,7 @@ void msgToHex(const T& msg, std::string& hex)
 {
   static const char SYMBOL[] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
   auto type_support = rosidl_typesupport_cpp::get_message_type_support_handle<T>();
-  rmw_serialized_message_t serialized_msg;
+  rmw_serialized_message_t serialized_msg = { nullptr, 0, 0, rcutils_get_default_allocator() };
   rmw_ret_t result = rmw_serialize(&msg, type_support, &serialized_msg);
   if (result != RMW_RET_OK)
   {
@@ -204,8 +204,10 @@ bool interpolateUsingStoredStates(const ConstraintApproximationStateStorage* sta
 ompl_interface::InterpolationFunction ompl_interface::ConstraintApproximation::getInterpolationFunction() const
 {
   if (explicit_motions_ && milestones_ > 0 && milestones_ < state_storage_->size())
-    return std::bind(&interpolateUsingStoredStates, state_storage_, std::placeholders::_1, std::placeholders::_2,
-                     std::placeholders::_3, std::placeholders::_4);
+    return
+        [this](const ompl::base::State* from, const ompl::base::State* to, const double t, ompl::base::State* state) {
+          return interpolateUsingStoredStates(state_storage_, from, to, t, state);
+        };
   return InterpolationFunction();
 }
 
@@ -219,7 +221,7 @@ allocConstraintApproximationStateSampler(const ob::StateSpace* space, const std:
   if (sig != expected_signature)
     return ompl::base::StateSamplerPtr();
   else
-    return ompl::base::StateSamplerPtr(new ConstraintApproximationStateSampler(space, state_storage, milestones));
+    return std::make_shared<ConstraintApproximationStateSampler>(space, state_storage, milestones);
 }
 }  // namespace ompl_interface
 
@@ -246,8 +248,9 @@ ompl_interface::ConstraintApproximation::getStateSamplerAllocator(const moveit_m
 {
   if (state_storage_->size() == 0)
     return ompl::base::StateSamplerAllocator();
-  return std::bind(&allocConstraintApproximationStateSampler, std::placeholders::_1, space_signature_, state_storage_,
-                   milestones_);
+  return [this](const ompl::base::StateSpace* ss) {
+    return allocConstraintApproximationStateSampler(ss, space_signature_, state_storage_, milestones_);
+  };
 }
 /*
 void ompl_interface::ConstraintApproximation::visualizeDistribution(const
@@ -343,9 +346,8 @@ void ompl_interface::ConstraintsLibrary::loadConstraintApproximations(const std:
     hexToMsg(serialization, msg);
     auto* cass = new ConstraintApproximationStateStorage(context_->getOMPLSimpleSetup()->getStateSpace());
     cass->load((std::string{ path }.append("/").append(filename)).c_str());
-    ConstraintApproximationPtr cap(new ConstraintApproximation(group, state_space_parameterization, explicit_motions,
-                                                               msg, filename, ompl::base::StateStoragePtr(cass),
-                                                               milestones));
+    auto cap = std::make_shared<ConstraintApproximation>(group, state_space_parameterization, explicit_motions, msg,
+                                                         filename, ompl::base::StateStoragePtr(cass), milestones);
     if (constraint_approximations_.find(cap->getName()) != constraint_approximations_.end())
       RCLCPP_WARN(LOGGER, "Overwriting constraint approximation named '%s'", cap->getName().c_str());
     constraint_approximations_[cap->getName()] = cap;
@@ -367,7 +369,7 @@ void ompl_interface::ConstraintsLibrary::saveConstraintApproximations(const std:
               (unsigned int)constraint_approximations_.size(), path.c_str());
   try
   {
-    boost::filesystem::create_directories(path);
+    std::filesystem::create_directory(path);
   }
   catch (...)
   {
@@ -378,14 +380,14 @@ void ompl_interface::ConstraintsLibrary::saveConstraintApproximations(const std:
     for (std::map<std::string, ConstraintApproximationPtr>::const_iterator it = constraint_approximations_.begin();
          it != constraint_approximations_.end(); ++it)
     {
-      fout << it->second->getGroup() << std::endl;
-      fout << it->second->getStateSpaceParameterization() << std::endl;
-      fout << it->second->hasExplicitMotions() << std::endl;
-      fout << it->second->getMilestoneCount() << std::endl;
+      fout << it->second->getGroup() << '\n';
+      fout << it->second->getStateSpaceParameterization() << '\n';
+      fout << it->second->hasExplicitMotions() << '\n';
+      fout << it->second->getMilestoneCount() << '\n';
       std::string serialization;
       msgToHex(it->second->getConstraintsMsg(), serialization);
-      fout << serialization << std::endl;
-      fout << it->second->getFilename() << std::endl;
+      fout << serialization << '\n';
+      fout << it->second->getFilename() << '\n';
       if (it->second->getStateStorage())
         it->second->getStateStorage()->store((path + "/" + it->second->getFilename()).c_str());
     }
@@ -404,13 +406,13 @@ void ompl_interface::ConstraintsLibrary::printConstraintApproximations(std::ostr
   for (const std::pair<const std::string, ConstraintApproximationPtr>& constraint_approximation :
        constraint_approximations_)
   {
-    out << constraint_approximation.second->getGroup() << std::endl;
-    out << constraint_approximation.second->getStateSpaceParameterization() << std::endl;
-    out << constraint_approximation.second->hasExplicitMotions() << std::endl;
-    out << constraint_approximation.second->getMilestoneCount() << std::endl;
-    out << constraint_approximation.second->getFilename() << std::endl;
+    out << constraint_approximation.second->getGroup() << '\n';
+    out << constraint_approximation.second->getStateSpaceParameterization() << '\n';
+    out << constraint_approximation.second->hasExplicitMotions() << '\n';
+    out << constraint_approximation.second->getMilestoneCount() << '\n';
+    out << constraint_approximation.second->getFilename() << '\n';
     // TODO(henningkayser): format print constraint message
-    // out << constraint_approximation.second->getConstraintsMsg() << std::endl;
+    // out << constraint_approximation.second->getConstraintsMsg() << '\n';
   }
 }
 
@@ -461,11 +463,11 @@ ompl_interface::ConstraintsLibrary::addConstraintApproximation(const moveit_msgs
   RCLCPP_INFO(LOGGER, "Spent %lf seconds constructing the database", (clock.now() - start).seconds());
   if (state_storage)
   {
-    ConstraintApproximationPtr constraint_approx(new ConstraintApproximation(
+    auto constraint_approx = std::make_shared<ConstraintApproximation>(
         group, options.state_space_parameterization, options.explicit_motions, constr_hard,
         group + "_" + boost::posix_time::to_iso_extended_string(boost::posix_time::microsec_clock::universal_time()) +
             ".ompldb",
-        state_storage, res.milestones));
+        state_storage, res.milestones);
     if (constraint_approximations_.find(constraint_approx->getName()) != constraint_approximations_.end())
       RCLCPP_WARN(LOGGER, "Overwriting constraint approximation named '%s'", constraint_approx->getName().c_str());
     constraint_approximations_[constraint_approx->getName()] = constraint_approx;

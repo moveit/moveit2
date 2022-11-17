@@ -54,11 +54,7 @@
 
 #include <gtest/gtest.h>
 
-#if __has_include(<tf2_eigen/tf2_eigen.hpp>)
 #include <tf2_eigen/tf2_eigen.hpp>
-#else
-#include <tf2_eigen/tf2_eigen.h>
-#endif
 
 #include <moveit/ompl_interface/planning_context_manager.h>
 #include <moveit/planning_scene/planning_scene.h>
@@ -168,7 +164,7 @@ public:
     // solution. We test all of them here.
     for (const robot_trajectory::RobotTrajectoryPtr& trajectory : response.trajectory_)
     {
-      for (std::size_t pt_index = 0; pt_index < trajectory->getWayPointCount(); pt_index++)
+      for (std::size_t pt_index = 0; pt_index < trajectory->getWayPointCount(); ++pt_index)
       {
         EXPECT_TRUE(path_constraints->decide(trajectory->getWayPoint(pt_index)).satisfied);
       }
@@ -203,7 +199,7 @@ public:
     // solution. We test all of them here.
     for (const robot_trajectory::RobotTrajectoryPtr& trajectory : response2.trajectory_)
     {
-      for (std::size_t pt_index = 0; pt_index < trajectory->getWayPointCount(); pt_index++)
+      for (std::size_t pt_index = 0; pt_index < trajectory->getWayPointCount(); ++pt_index)
       {
         EXPECT_TRUE(path_constraints->decide(trajectory->getWayPoint(pt_index)).satisfied);
       }

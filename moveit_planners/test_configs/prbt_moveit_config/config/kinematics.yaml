@@ -1,0 +1,5 @@
+manipulator:
+  kinematics_solver: prbt_manipulator/IKFastKinematicsPlugin
+  kinematics_solver_search_resolution: 0.005
+  kinematics_solver_timeout: 0.005
+  link_prefix: prbt_

@@ -46,7 +46,6 @@
 #include <moveit/utils/robot_model_test_utils.h>
 #include <gtest/gtest.h>
 #include <fstream>
-#include <boost/filesystem/path.hpp>
 
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.ompl_planning.test.test_state_space");
 
@@ -144,12 +143,12 @@ TEST_F(LoadPlanningModelsPr2, StateSpaceCopy)
         robot_state.getRobotModel()->getJointModelGroup(joint_model_state_space.getJointModelGroupName()));
     std::cout << (robot_state.getGlobalLinkTransform("r_wrist_roll_link").translation() -
                   robot_state2.getGlobalLinkTransform("r_wrist_roll_link").translation())
-              << std::endl;
+              << '\n';
     EXPECT_TRUE(robot_state.distance(robot_state2) > EPSILON);
     joint_model_state_space.copyToRobotState(robot_state, state);
     std::cout << (robot_state.getGlobalLinkTransform("r_wrist_roll_link").translation() -
                   robot_state2.getGlobalLinkTransform("r_wrist_roll_link").translation())
-              << std::endl;
+              << '\n';
     EXPECT_TRUE(robot_state.distance(robot_state2) < EPSILON);
   }
 

@@ -58,7 +58,7 @@ TEST_F(ServoFixture, SelfCollision)
   watchForStatus(moveit_servo::StatusCode::DECELERATE_FOR_COLLISION);
 
   // Publish some joint jog commands that will bring us to collision
-  rclcpp::Rate publish_loop_rate(test_parameters_->publish_hz);
+  rclcpp::WallRate publish_loop_rate(test_parameters_->publish_hz);
   log_time_start = node_->now();
   size_t iterations = 0;
   while (!sawTrackedStatus() && iterations++ < test_parameters_->timeout_iterations)
@@ -123,7 +123,7 @@ TEST_F(ServoFixture, ExternalCollision)
   watchForStatus(moveit_servo::StatusCode::DECELERATE_FOR_COLLISION);
 
   // Now publish twist commands that collide with the box
-  rclcpp::Rate publish_loop_rate(test_parameters_->publish_hz);
+  rclcpp::WallRate publish_loop_rate(test_parameters_->publish_hz);
   log_time_start = node_->now();
   size_t iterations = 0;
   while (!sawTrackedStatus() && iterations++ < test_parameters_->timeout_iterations)
@@ -145,7 +145,7 @@ TEST_F(ServoFixture, ExternalCollision)
 int main(int argc, char** argv)
 {
   // It is important we init ros before google test because we are going to
-  // create a node durring the google test init.
+  // create a node during the google test init.
   rclcpp::init(argc, argv);
   ::testing::InitGoogleTest(&argc, argv);
 

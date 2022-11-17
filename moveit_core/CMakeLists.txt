@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.10.2)
+cmake_minimum_required(VERSION 3.22)
 project(moveit_core LANGUAGES CXX)
 
 # Common cmake code applied to all moveit packages
@@ -9,9 +9,6 @@ find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(eigen3_cmake_module REQUIRED)
 find_package(Eigen3 REQUIRED)
-
-# Finds Boost Components
-include(ConfigExtras.cmake)
 
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(LIBFCL REQUIRED "fcl>=0.5.0")
@@ -52,13 +49,14 @@ find_package(pluginlib REQUIRED)
 # TODO: Port python bindings
 # find_package(pybind11 REQUIRED)
 
+# Finds Boost Components
+include(ConfigExtras.cmake)
+
 # Set target file path for version.h
 set(VERSION_FILE_PATH ${CMAKE_BINARY_DIR}/include)
 
 set(THIS_PACKAGE_INCLUDE_DIRS
-    background_processing/include
     exceptions/include
-    backtrace/include
     collision_detection/include
     collision_detection_fcl/include
     collision_detection_bullet/include
@@ -79,16 +77,13 @@ set(THIS_PACKAGE_INCLUDE_DIRS
     planning_interface/include
     planning_request_adapter/include
     planning_scene/include
-    profiler/include
     # TODO: Port python bindings
     # python/tools/include
-    sensor_manager/include
     trajectory_processing/include
     utils/include
 )
 
 set(THIS_PACKAGE_LIBRARIES
-    moveit_background_processing
     moveit_butterworth_filter
     moveit_collision_distance_field
     moveit_collision_detection
@@ -104,7 +99,6 @@ set(THIS_PACKAGE_LIBRARIES
     moveit_planning_interface
     moveit_planning_scene
     moveit_planning_request_adapter
-    moveit_profiler
     # TODO: Port python bindings
     # moveit_python_tools
     moveit_robot_model
@@ -158,8 +152,6 @@ message(STATUS " *** Building MoveIt ${MOVEIT_VERSION} ***")
 configure_file("version/version.h.in" "${VERSION_FILE_PATH}/moveit/version.h")
 install(FILES "${VERSION_FILE_PATH}/moveit/version.h" DESTINATION include/moveit)
 
-add_subdirectory(background_processing)
-add_subdirectory(backtrace)
 add_subdirectory(collision_distance_field)
 add_subdirectory(constraint_samplers)
 add_subdirectory(controller_manager)
@@ -174,11 +166,9 @@ add_subdirectory(online_signal_smoothing)
 add_subdirectory(planning_interface)
 add_subdirectory(planning_request_adapter)
 add_subdirectory(planning_scene)
-add_subdirectory(profiler)
 add_subdirectory(robot_model)
 add_subdirectory(robot_state)
 add_subdirectory(robot_trajectory)
-add_subdirectory(sensor_manager)
 add_subdirectory(trajectory_processing)
 add_subdirectory(transforms)
 add_subdirectory(utils)
@@ -218,15 +208,15 @@ add_subdirectory(collision_detection_fcl)
 
 install(
   TARGETS ${THIS_PACKAGE_LIBRARIES}
-  EXPORT export_${PROJECT_NAME}
+  EXPORT ${PROJECT_NAME}Targets
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
   RUNTIME DESTINATION bin
   INCLUDES DESTINATION include
 )
 
-ament_export_targets(export_${PROJECT_NAME} HAS_LIBRARY_TARGET)
-ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS})
+ament_export_targets(${PROJECT_NAME}Targets HAS_LIBRARY_TARGET)
+ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS} orocos_kdl_vendor)
 
 # Plugin exports
 pluginlib_export_plugin_description_file(moveit_core collision_detector_fcl_description.xml)
@@ -238,7 +228,6 @@ if(BUILD_TESTING)
 
   # These don't pass yet, disable them for now
   set(ament_cmake_copyright_FOUND TRUE)
-  set(ament_cmake_cppcheck_FOUND TRUE)
   set(ament_cmake_cpplint_FOUND TRUE)
   set(ament_cmake_flake8_FOUND TRUE)
   set(ament_cmake_uncrustify_FOUND TRUE)

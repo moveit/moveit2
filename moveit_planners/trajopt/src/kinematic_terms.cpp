@@ -44,7 +44,7 @@ MatrixXd JointVelJacobianCalculator::operator()(const VectorXd& var_vals) const
   int num_vels = half - 1;
   MatrixXd jac = MatrixXd::Zero(num_vels * 2, num_vals);
 
-  for (int i = 0; i < num_vels; i++)
+  for (int i = 0; i < num_vels; ++i)
   {
     // v = (j_i+1 - j_i)*(1/dt)
     // We calculate v with the dt from the second pt

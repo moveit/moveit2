@@ -40,18 +40,16 @@
 #include <moveit/robot_state/conversions.h>
 #include <moveit/collision_detection_fcl/collision_env_fcl.h>
 #include <geometric_shapes/check_isometry.h>
-#include <boost/math/constants/constants.hpp>
-#if __has_include(<tf2_eigen/tf2_eigen.hpp>)
+#include <rclcpp/logger.hpp>
+#include <rclcpp/logging.hpp>
+#include <rclcpp/time.hpp>
 #include <tf2_eigen/tf2_eigen.hpp>
-#else
-#include <tf2_eigen/tf2_eigen.h>
-#endif
-#include <boost/bind.hpp>
+#include <functional>
 #include <limits>
+#include <math.h>
 #include <memory>
 #include <typeinfo>
 
-#include "rclcpp/rclcpp.hpp"
 #include "rclcpp/clock.hpp"
 #include "rclcpp/duration.hpp"
 
@@ -62,11 +60,11 @@ static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_kinematic_constr
 
 static double normalizeAngle(double angle)
 {
-  double v = fmod(angle, 2.0 * boost::math::constants::pi<double>());
-  if (v < -boost::math::constants::pi<double>())
-    v += 2.0 * boost::math::constants::pi<double>();
-  else if (v > boost::math::constants::pi<double>())
-    v -= 2.0 * boost::math::constants::pi<double>();
+  double v = fmod(angle, 2.0 * M_PI);
+  if (v < -M_PI)
+    v += 2.0 * M_PI;
+  else if (v > M_PI)
+    v -= 2.0 * M_PI;
   return v;
 }
 
@@ -285,10 +283,10 @@ ConstraintEvaluationResult JointConstraint::decide(const moveit::core::RobotStat
   {
     dif = normalizeAngle(current_joint_position) - joint_position_;
 
-    if (dif > boost::math::constants::pi<double>())
-      dif = 2.0 * boost::math::constants::pi<double>() - dif;
-    else if (dif < -boost::math::constants::pi<double>())
-      dif += 2.0 * boost::math::constants::pi<double>();  // we include a sign change to have dif > 0
+    if (dif > M_PI)
+      dif = 2.0 * M_PI - dif;
+    else if (dif < -M_PI)
+      dif += 2.0 * M_PI;  // we include a sign change to have dif > 0
   }
   else
     dif = current_joint_position - joint_position_;
@@ -324,17 +322,17 @@ void JointConstraint::print(std::ostream& out) const
 {
   if (joint_model_)
   {
-    out << "Joint constraint for joint " << joint_variable_name_ << ": " << std::endl;
+    out << "Joint constraint for joint " << joint_variable_name_ << ": \n";
     out << "  value = ";
     out << joint_position_ << "; ";
     out << "  tolerance below = ";
     out << joint_tolerance_below_ << "; ";
     out << "  tolerance above = ";
     out << joint_tolerance_above_ << "; ";
-    out << std::endl;
+    out << '\n';
   }
   else
-    out << "No constraint" << std::endl;
+    out << "No constraint" << '\n';
 }
 
 bool PositionConstraint::configure(const moveit_msgs::msg::PositionConstraint& pc, const moveit::core::Transforms& tf)
@@ -536,9 +534,9 @@ ConstraintEvaluationResult PositionConstraint::decide(const moveit::core::RobotS
 void PositionConstraint::print(std::ostream& out) const
 {
   if (enabled())
-    out << "Position constraint on link '" << link_model_->getName() << "'" << std::endl;
+    out << "Position constraint on link '" << link_model_->getName() << "'" << '\n';
   else
-    out << "No constraint" << std::endl;
+    out << "No constraint" << '\n';
 }
 
 void PositionConstraint::clear()
@@ -604,7 +602,7 @@ bool OrientationConstraint::configure(const moveit_msgs::msg::OrientationConstra
 
   if (oc.weight <= std::numeric_limits<double>::epsilon())
   {
-    RCLCPP_WARN(LOGGER, "The weight on position constraint for link '%s' is near zero.  Setting to 1.0.",
+    RCLCPP_WARN(LOGGER, "The weight on orientation constraint for link '%s' is near zero.  Setting to 1.0.",
                 oc.link_name.c_str());
     constraint_weight_ = 1.0;
   }
@@ -749,16 +747,16 @@ void OrientationConstraint::print(std::ostream& out) const
 {
   if (link_model_)
   {
-    out << "Orientation constraint on link '" << link_model_->getName() << "'" << std::endl;
+    out << "Orientation constraint on link '" << link_model_->getName() << "'" << '\n';
     Eigen::Quaterniond q_des(desired_rotation_matrix_);
-    out << "Desired orientation:" << q_des.x() << "," << q_des.y() << "," << q_des.z() << "," << q_des.w() << std::endl;
+    out << "Desired orientation:" << q_des.x() << "," << q_des.y() << "," << q_des.z() << "," << q_des.w() << '\n';
   }
   else
-    out << "No constraint" << std::endl;
+    out << "No constraint" << '\n';
 }
 
 VisibilityConstraint::VisibilityConstraint(const moveit::core::RobotModelConstPtr& model)
-  : KinematicConstraint(model), collision_env_(new collision_detection::CollisionEnvFCL(model))
+  : KinematicConstraint(model), collision_env_(std::make_shared<collision_detection::CollisionEnvFCL>(model))
 {
   type_ = VISIBILITY_CONSTRAINT;
 }
@@ -801,7 +799,7 @@ bool VisibilityConstraint::configure(const moveit_msgs::msg::VisibilityConstrain
 
   // compute the points on the base circle of the cone that make up the cone sides
   points_.clear();
-  double delta = 2.0 * boost::math::constants::pi<double>() / (double)cone_sides_;
+  double delta = 2.0 * M_PI / (double)cone_sides_;
   double a = 0.0;
   for (unsigned int i = 0; i < cone_sides_; ++i, a += delta)
   {
@@ -906,7 +904,7 @@ shapes::Mesh* VisibilityConstraint::getVisibilityCone(const moveit::core::RobotS
   std::unique_ptr<EigenSTL::vector_Vector3d> temp_points;
   if (mobile_target_frame_)
   {
-    temp_points.reset(new EigenSTL::vector_Vector3d(points_.size()));
+    temp_points = std::make_unique<EigenSTL::vector_Vector3d>(points_.size());
     for (std::size_t i = 0; i < points_.size(); ++i)
       temp_points->at(i) = tp * points_[i];
     points = temp_points.get();
@@ -1117,8 +1115,9 @@ ConstraintEvaluationResult VisibilityConstraint::decide(const moveit::core::Robo
   collision_detection::CollisionRequest req;
   collision_detection::CollisionResult res;
   collision_detection::AllowedCollisionMatrix acm;
-  collision_detection::DecideContactFn fn =
-      std::bind(&VisibilityConstraint::decideContact, this, std::placeholders::_1);
+  collision_detection::DecideContactFn fn = [this](collision_detection::Contact& contact) {
+    return decideContact(contact);
+  };
   acm.setDefaultEntry(std::string("cone"), fn);
 
   req.contacts = true;
@@ -1168,11 +1167,11 @@ void VisibilityConstraint::print(std::ostream& out) const
   if (enabled())
   {
     out << "Visibility constraint for sensor in frame '" << sensor_frame_id_ << "' using target in frame '"
-        << target_frame_id_ << "'" << std::endl;
-    out << "Target radius: " << target_radius_ << ", using " << cone_sides_ << " sides." << std::endl;
+        << target_frame_id_ << "'" << '\n';
+    out << "Target radius: " << target_radius_ << ", using " << cone_sides_ << " sides." << '\n';
   }
   else
-    out << "No constraint" << std::endl;
+    out << "No constraint" << '\n';
 }
 
 void KinematicConstraintSet::clear()
@@ -1288,7 +1287,7 @@ ConstraintEvaluationResult KinematicConstraintSet::decide(const moveit::core::Ro
 
 void KinematicConstraintSet::print(std::ostream& out) const
 {
-  out << kinematic_constraints_.size() << " kinematic constraints" << std::endl;
+  out << kinematic_constraints_.size() << " kinematic constraints" << '\n';
   for (const KinematicConstraintPtr& kinematic_constraint : kinematic_constraints_)
     kinematic_constraint->print(out);
 }

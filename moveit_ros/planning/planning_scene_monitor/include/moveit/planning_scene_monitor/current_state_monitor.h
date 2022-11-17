@@ -39,10 +39,10 @@
 #include <chrono>
 #include <functional>
 #include <string>
+#include <condition_variable>
+#include <mutex>
 
 #include <boost/signals2.hpp>
-#include <boost/thread/condition_variable.hpp>
-#include <boost/thread/mutex.hpp>
 
 #include <rclcpp/rclcpp.hpp>
 #include <sensor_msgs/msg/joint_state.hpp>
@@ -148,18 +148,20 @@ public:
    *  @param middleware_handle   The ros middleware handle
    *  @param robot_model         The current kinematic model to build on
    *  @param tf_buffer           A pointer to the tf2_ros Buffer to use
+   *  @param use_sim_time        True when the time is abstracted
    */
   CurrentStateMonitor(std::unique_ptr<MiddlewareHandle> middleware_handle,
                       const moveit::core::RobotModelConstPtr& robot_model,
-                      const std::shared_ptr<tf2_ros::Buffer>& tf_buffer);
+                      const std::shared_ptr<tf2_ros::Buffer>& tf_buffer, bool use_sim_time);
 
   /** @brief Constructor.
    *  @param node          A shared_ptr to a node used for subscription to joint_states_topic
    *  @param robot_model   The current kinematic model to build on
    *  @param tf_buffer     A pointer to the tf2_ros Buffer to use
+   *  @param use_sim_time        True when the time is abstracted
    */
   CurrentStateMonitor(const rclcpp::Node::SharedPtr& node, const moveit::core::RobotModelConstPtr& robot_model,
-                      const std::shared_ptr<tf2_ros::Buffer>& tf_buffer);
+                      const std::shared_ptr<tf2_ros::Buffer>& tf_buffer, bool use_sim_time);
 
   ~CurrentStateMonitor();
 
@@ -301,7 +303,7 @@ public:
     return error_;
   }
 
-  /** @brief Allow the joint_state arrrays velocity and effort to be copied into the robot state
+  /** @brief Allow the joint_state arrays velocity and effort to be copied into the robot state
    *  this is useful in some but not all applications
    */
   void enableCopyDynamics(bool enabled)
@@ -313,9 +315,9 @@ private:
   bool haveCompleteStateHelper(const rclcpp::Time& oldest_allowed_update_time,
                                std::vector<std::string>* missing_joints) const;
 
-  void jointStateCallback(sensor_msgs::msg::JointState::ConstSharedPtr joint_state);
+  void jointStateCallback(const sensor_msgs::msg::JointState::ConstSharedPtr& joint_state);
   void updateMultiDofJoints();
-  void transformCallback(const tf2_msgs::msg::TFMessage::ConstSharedPtr msg, const bool is_static);
+  void transformCallback(const tf2_msgs::msg::TFMessage::ConstSharedPtr& msg, const bool is_static);
 
   std::unique_ptr<MiddlewareHandle> middleware_handle_;
   std::shared_ptr<tf2_ros::Buffer> tf_buffer_;
@@ -331,6 +333,8 @@ private:
   mutable std::mutex state_update_lock_;
   mutable std::condition_variable state_update_condition_;
   std::vector<JointStateUpdateCallback> update_callbacks_;
+
+  bool use_sim_time_;
 };
 
 MOVEIT_CLASS_FORWARD(CurrentStateMonitor);  // Defines CurrentStateMonitorPtr, ConstPtr, WeakPtr... etc

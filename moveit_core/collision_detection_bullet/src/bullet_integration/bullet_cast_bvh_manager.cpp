@@ -32,6 +32,9 @@
 /* Author: Levi Armstrong, Jens Petit */
 
 #include "moveit/collision_detection_bullet/bullet_integration/bullet_cast_bvh_manager.h"
+
+#include <rclcpp/logger.hpp>
+#include <rclcpp/logging.hpp>
 #include <map>
 #include <utility>
 
@@ -41,7 +44,7 @@ namespace collision_detection_bullet
 {
 BulletCastBVHManagerPtr BulletCastBVHManager::clone() const
 {
-  BulletCastBVHManagerPtr manager(new BulletCastBVHManager());
+  BulletCastBVHManagerPtr manager = std::make_shared<BulletCastBVHManager>();
 
   for (const std::pair<const std::string, collision_detection_bullet::CollisionObjectWrapperPtr>& cow : link2cow_)
   {
@@ -78,7 +81,7 @@ void BulletCastBVHManager::setCastCollisionObjectsTransform(const std::string& n
     cow->setWorldTransform(tf1);
     link2cow_[name]->setWorldTransform(tf1);
 
-    // If collision object is disabled dont proceed
+    // If collision object is disabled don't proceed
     if (cow->m_enabled)
     {
       if (btBroadphaseProxy::isConvex(cow->getCollisionShape()->getShapeType()))
@@ -133,7 +136,7 @@ void BulletCastBVHManager::setCastCollisionObjectsTransform(const std::string& n
 
 void BulletCastBVHManager::contactTest(collision_detection::CollisionResult& collisions,
                                        const collision_detection::CollisionRequest& req,
-                                       const collision_detection::AllowedCollisionMatrix* acm, bool self = false)
+                                       const collision_detection::AllowedCollisionMatrix* acm, bool /*self*/ = false)
 {
   ContactTestData cdata(active_, contact_distance_, collisions, req);
   broadphase_->calculateOverlappingPairs(dispatcher_.get());

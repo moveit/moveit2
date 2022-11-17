@@ -54,8 +54,8 @@ namespace moveit_servo
 class Servo
 {
 public:
-  Servo(const rclcpp::Node::SharedPtr& node, ServoParameters::SharedConstPtr parameters,
-        planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor);
+  Servo(const rclcpp::Node::SharedPtr& node, const ServoParameters::SharedConstPtr& parameters,
+        const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor);
 
   ~Servo();
 
@@ -98,8 +98,8 @@ private:
   // The stored servo parameters
   ServoParameters::SharedConstPtr parameters_;
 
-  std::unique_ptr<ServoCalcs> servo_calcs_;
-  std::unique_ptr<CollisionCheck> collision_checker_;
+  ServoCalcs servo_calcs_;
+  CollisionCheck collision_checker_;
 };
 
 // ServoPtr using alias

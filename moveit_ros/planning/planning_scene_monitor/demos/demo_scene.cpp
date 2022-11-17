@@ -36,8 +36,15 @@
 
 #include <moveit/planning_scene_monitor/planning_scene_monitor.h>
 #include <geometric_shapes/solid_primitive_dims.h>
-
-#include <rclcpp/rclcpp.hpp>
+#include <rclcpp/clock.hpp>
+#include <rclcpp/executors.hpp>
+#include <rclcpp/logger.hpp>
+#include <rclcpp/logging.hpp>
+#include <rclcpp/node.hpp>
+#include <rclcpp/publisher.hpp>
+#include <rclcpp/qos_event.hpp>
+#include <rclcpp/time.hpp>
+#include <rclcpp/utilities.hpp>
 
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_ros.planning_scene_monitor.demo_scene");
 
@@ -65,6 +72,7 @@ void sendKnife(const rclcpp::Node::SharedPtr& node)
   co.id = "knife";
   co.header.stamp = rclcpp::Clock().now();
   co.header.frame_id = aco.link_name;
+  co.pose.orientation.w = 1.0;
   co.operation = moveit_msgs::msg::CollisionObject::ADD;
   co.primitives.resize(1);
   co.primitives[0].type = shape_msgs::msg::SolidPrimitive::BOX;

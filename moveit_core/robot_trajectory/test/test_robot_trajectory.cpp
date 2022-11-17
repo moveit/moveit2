@@ -47,13 +47,16 @@ protected:
   moveit::core::RobotStatePtr robot_state_;
   const std::string robot_model_name_ = "panda";
   const std::string arm_jmg_name_ = "panda_arm";
+  const std::string arm_state_name_ = "ready";
 
 protected:
   void SetUp() override
   {
     robot_model_ = moveit::core::loadTestingRobotModel(robot_model_name_);
     robot_state_ = std::make_shared<moveit::core::RobotState>(robot_model_);
-    robot_state_->setToDefaultValues();
+    robot_state_->setToDefaultValues(arm_jmg_name_, arm_state_name_);
+    robot_state_->setVariableVelocity(/*index*/ 0, /*value*/ 1.0);
+    robot_state_->setVariableAcceleration(/*index*/ 0, /*value*/ -0.1);
     robot_state_->update();
   }
 
@@ -75,12 +78,13 @@ protected:
     double duration_from_previous = 0.1;
     std::size_t waypoint_count = 5;
     for (std::size_t ix = 0; ix < waypoint_count; ++ix)
-      trajectory->addSuffixWayPoint(robot_state_, duration_from_previous);
+      trajectory->addSuffixWayPoint(*robot_state_, duration_from_previous);
     // Quick check that getDuration is working correctly
     EXPECT_EQ(trajectory->getDuration(), duration_from_previous * waypoint_count)
         << "Generated trajectory duration incorrect";
     EXPECT_EQ(waypoint_count, trajectory->getWayPointDurations().size())
         << "Generated trajectory has the wrong number of waypoints";
+    EXPECT_EQ(waypoint_count, trajectory->size());
   }
 
   void copyTrajectory(const robot_trajectory::RobotTrajectoryPtr& trajectory,
@@ -113,6 +117,14 @@ protected:
     std::vector<double> trajectory_first_state_after_update;
     trajectory_first_waypoint_after_update->copyJointGroupPositions(arm_jmg_name_, trajectory_first_state_after_update);
     EXPECT_EQ(trajectory_first_state[0], trajectory_first_state_after_update[0]);
+
+    // Modify the first waypoint duration
+    double trajectory_first_duration_before_update = trajectory->getWayPointDurationFromPrevious(0);
+    double new_duration = trajectory_first_duration_before_update + 0.1;
+    trajectory->setWayPointDurationFromPrevious(0, new_duration);
+
+    // Check that the trajectory's first duration was updated
+    EXPECT_EQ(trajectory->getWayPointDurationFromPrevious(0), new_duration);
   }
 
   void modifyFirstWaypointAndCheckTrajectory(robot_trajectory::RobotTrajectoryPtr& trajectory)
@@ -152,6 +164,42 @@ TEST_F(RobotTrajectoryTestFixture, ModifyFirstWaypointByValue)
   modifyFirstWaypointAndCheckTrajectory(trajectory);
 }
 
+TEST_F(RobotTrajectoryTestFixture, DoubleReverse)
+{
+  robot_trajectory::RobotTrajectoryPtr trajectory;
+  initTestTrajectory(trajectory);
+  moveit_msgs::msg::RobotTrajectory initial_trajectory_msg;
+  trajectory->getRobotTrajectoryMsg(initial_trajectory_msg);
+
+  trajectory->reverse().reverse();
+
+  moveit_msgs::msg::RobotTrajectory edited_trajectory_msg;
+  trajectory->getRobotTrajectoryMsg(edited_trajectory_msg);
+
+  EXPECT_EQ(initial_trajectory_msg, edited_trajectory_msg);
+}
+
+TEST_F(RobotTrajectoryTestFixture, ChainEdits)
+{
+  robot_trajectory::RobotTrajectoryPtr initial_trajectory;
+  initTestTrajectory(initial_trajectory);
+  moveit_msgs::msg::RobotTrajectory initial_trajectory_msg;
+  initial_trajectory->getRobotTrajectoryMsg(initial_trajectory_msg);
+
+  robot_trajectory::RobotTrajectory trajectory(robot_model_);
+  trajectory.setGroupName(arm_jmg_name_)
+      .clear()
+      .setRobotTrajectoryMsg(*robot_state_, initial_trajectory_msg)
+      .reverse()
+      .addSuffixWayPoint(*robot_state_, 0.1)
+      .addPrefixWayPoint(*robot_state_, 0.1)
+      .insertWayPoint(1, *robot_state_, 0.1)
+      .append(*initial_trajectory, 0.1);
+
+  EXPECT_EQ(trajectory.getGroupName(), arm_jmg_name_);
+  EXPECT_EQ(trajectory.getWayPointCount(), initial_trajectory->getWayPointCount() * 2 + 3);
+}
+
 TEST_F(RobotTrajectoryTestFixture, RobotTrajectoryShallowCopy)
 {
   bool deepcopy = false;
@@ -174,7 +222,7 @@ TEST_F(RobotTrajectoryTestFixture, RobotTrajectoryShallowCopy)
   trajectory_copy_first_waypoint_after_update.copyJointGroupPositions(arm_jmg_name_,
                                                                       trajectory_copy_first_state_after_update);
 
-  // Check that we updated the value correctly in the trajectory
+  // Check that we updated the joint position correctly in the trajectory
   EXPECT_EQ(trajectory_first_state_after_update[0], trajectory_copy_first_state_after_update[0]);
 }
 
@@ -200,8 +248,89 @@ TEST_F(RobotTrajectoryTestFixture, RobotTrajectoryDeepCopy)
   trajectory_copy_first_waypoint_after_update.copyJointGroupPositions(arm_jmg_name_,
                                                                       trajectory_copy_first_state_after_update);
 
-  // Check that we updated the value correctly in the trajectory
+  // Check that joint positions changed in the original trajectory but not the deep copy
   EXPECT_NE(trajectory_first_state_after_update[0], trajectory_copy_first_state_after_update[0]);
+  // Check that the first waypoint duration changed in the original trajectory but not the deep copy
+  EXPECT_NE(trajectory->getWayPointDurationFromPrevious(0), trajectory_copy->getWayPointDurationFromPrevious(0));
+}
+
+TEST_F(RobotTrajectoryTestFixture, RobotTrajectoryIterator)
+{
+  robot_trajectory::RobotTrajectoryPtr trajectory;
+  initTestTrajectory(trajectory);
+
+  ASSERT_EQ(5u, trajectory->size());
+  std::vector<double> positions;
+
+  double start_pos = 0.0;
+
+  for (size_t i = 0; i < trajectory->size(); ++i)
+  {
+    auto waypoint = trajectory->getWayPointPtr(i);
+    // modify joint values
+    waypoint->copyJointGroupPositions(arm_jmg_name_, positions);
+    start_pos = positions[0];
+    positions[0] += 0.01 * i;
+    waypoint->setJointGroupPositions(arm_jmg_name_, positions);
+  }
+
+  unsigned int count = 0;
+  for (const auto& waypoint_and_duration : *trajectory)
+  {
+    const auto& waypoint = waypoint_and_duration.first;
+    waypoint->copyJointGroupPositions(arm_jmg_name_, positions);
+    EXPECT_EQ(start_pos + count * 0.01, positions[0]);
+    count++;
+  }
+
+  EXPECT_EQ(count, trajectory->size());
+
+  // Consistency checks
+  EXPECT_EQ(trajectory->begin(), trajectory->begin());
+  EXPECT_EQ(trajectory->end(), trajectory->end());
+
+  // trajectory has length 5; incrementing begin 5 times should reach the end
+  EXPECT_NE(trajectory->begin(), trajectory->end());
+  EXPECT_NE(++trajectory->begin(), trajectory->end());
+  EXPECT_NE(++(++trajectory->begin()), trajectory->end());
+  EXPECT_NE(++(++(++trajectory->begin())), trajectory->end());
+  EXPECT_NE(++(++(++(++trajectory->begin()))), trajectory->end());
+  EXPECT_EQ(++(++(++(++(++trajectory->begin())))), trajectory->end());
+}
+
+TEST_F(RobotTrajectoryTestFixture, RobotTrajectoryLength)
+{
+  robot_trajectory::RobotTrajectoryPtr trajectory;
+  initTestTrajectory(trajectory);
+  EXPECT_GT(robot_trajectory::path_length(*trajectory), 0.0);
+}
+
+TEST_F(RobotTrajectoryTestFixture, RobotTrajectorySmoothness)
+{
+  robot_trajectory::RobotTrajectoryPtr trajectory;
+  initTestTrajectory(trajectory);
+
+  const auto smoothness = robot_trajectory::smoothness(*trajectory);
+  ASSERT_TRUE(smoothness.has_value());
+  EXPECT_GT(smoothness.value(), 0.0);
+
+  // Check for empty trajectory
+  trajectory->clear();
+  EXPECT_FALSE(robot_trajectory::smoothness(*trajectory).has_value());
+}
+
+TEST_F(RobotTrajectoryTestFixture, RobotTrajectoryDensity)
+{
+  robot_trajectory::RobotTrajectoryPtr trajectory;
+  initTestTrajectory(trajectory);
+
+  const auto density = robot_trajectory::waypoint_density(*trajectory);
+  ASSERT_TRUE(density.has_value());
+  EXPECT_GT(density.value(), 0.0);
+
+  // Check for empty trajectory
+  trajectory->clear();
+  EXPECT_FALSE(robot_trajectory::waypoint_density(*trajectory).has_value());
 }
 
 int main(int argc, char** argv)

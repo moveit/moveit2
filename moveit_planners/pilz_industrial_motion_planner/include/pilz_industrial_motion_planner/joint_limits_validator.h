@@ -111,8 +111,8 @@ public:
 
 /**
  * @class ValidationJointMissingException
- * @brief Thrown the limits for a joint are defined in the urdf but not on the
- * parameter server (loaded from yaml)
+ * @brief Thrown the limits for a joint are defined in the urdf but not in the
+ * node parameters (loaded from yaml)
  *
  */
 class ValidationJointMissingException : public ValidationException

@@ -35,8 +35,12 @@
 /* Author: Ioan Sucan, E. Gil Jones */
 
 #include <moveit/robot_model_loader/robot_model_loader.h>
-#include <moveit/profiler/profiler.h>
-#include "rclcpp/rclcpp.hpp"
+#include <rclcpp/clock.hpp>
+#include <rclcpp/duration.hpp>
+#include <rclcpp/logger.hpp>
+#include <rclcpp/logging.hpp>
+#include <rclcpp/parameter_value.hpp>
+#include <rclcpp/time.hpp>
 #include <typeinfo>
 
 namespace robot_model_loader
@@ -99,26 +103,21 @@ bool canSpecifyPosition(const moveit::core::JointModel* jmodel, const unsigned i
 
 void RobotModelLoader::configure(const Options& opt)
 {
-  moveit::tools::Profiler::ScopedStart prof_start;
-  moveit::tools::Profiler::ScopedBlock prof_block("RobotModelLoader::configure");
-
   rclcpp::Clock clock;
   rclcpp::Time start = clock.now();
   if (!opt.urdf_string_.empty() && !opt.srdf_string_.empty())
-    rdf_loader_.reset(new rdf_loader::RDFLoader(opt.urdf_string_, opt.srdf_string_));
+    rdf_loader_ = std::make_shared<rdf_loader::RDFLoader>(opt.urdf_string_, opt.srdf_string_);
   else
-    rdf_loader_.reset(new rdf_loader::RDFLoader(node_, opt.robot_description_));
+    rdf_loader_ = std::make_shared<rdf_loader::RDFLoader>(node_, opt.robot_description_);
   if (rdf_loader_->getURDF())
   {
     const srdf::ModelSharedPtr& srdf =
-        rdf_loader_->getSRDF() ? rdf_loader_->getSRDF() : srdf::ModelSharedPtr(new srdf::Model());
-    model_.reset(new moveit::core::RobotModel(rdf_loader_->getURDF(), srdf));
+        rdf_loader_->getSRDF() ? rdf_loader_->getSRDF() : std::make_shared<srdf::Model>();
+    model_ = std::make_shared<moveit::core::RobotModel>(rdf_loader_->getURDF(), srdf);
   }
 
   if (model_ && !rdf_loader_->getRobotDescription().empty())
   {
-    moveit::tools::Profiler::ScopedBlock prof_block2("RobotModelLoader::configure joint limits");
-
     // if there are additional joint limits specified in some .yaml file, read those in
     for (moveit::core::JointModel* joint_model : model_->getJointModels())
     {
@@ -180,6 +179,15 @@ void RobotModelLoader::configure(const Options& opt)
           if (node_->get_parameter(param_name, has_acc_limits))
             joint_limit[joint_id].has_acceleration_limits = has_acc_limits;
 
+          param_name = prefix + "has_jerk_limits";
+          if (!node_->has_parameter(param_name))
+          {
+            node_->declare_parameter(param_name, rclcpp::ParameterType::PARAMETER_BOOL);
+          }
+          bool has_jerk_limits = false;
+          if (node_->get_parameter(param_name, has_jerk_limits))
+            joint_limit[joint_id].has_jerk_limits = has_jerk_limits;
+
           if (has_vel_limits)
           {
             param_name = prefix + "max_velocity";
@@ -209,6 +217,21 @@ void RobotModelLoader::configure(const Options& opt)
                            joint_limit[joint_id].joint_name.c_str());
             }
           }
+
+          if (has_jerk_limits)
+          {
+            param_name = prefix + "max_jerk";
+            if (!node_->has_parameter(param_name))
+            {
+              node_->declare_parameter(param_name, rclcpp::ParameterType::PARAMETER_DOUBLE);
+            }
+
+            if (!node_->get_parameter(param_name, joint_limit[joint_id].max_jerk))
+            {
+              RCLCPP_ERROR(LOGGER, "Specified a jerk limit for joint: %s but did not set a max jerk",
+                           joint_limit[joint_id].joint_name.c_str());
+            }
+          }
         }
         catch (const rclcpp::ParameterTypeException& e)
         {
@@ -227,17 +250,14 @@ void RobotModelLoader::configure(const Options& opt)
 
 void RobotModelLoader::loadKinematicsSolvers(const kinematics_plugin_loader::KinematicsPluginLoaderPtr& kloader)
 {
-  moveit::tools::Profiler::ScopedStart prof_start;
-  moveit::tools::Profiler::ScopedBlock prof_block("RobotModelLoader::loadKinematicsSolvers");
-
   if (rdf_loader_ && model_)
   {
     // load the kinematics solvers
     if (kloader)
       kinematics_loader_ = kloader;
     else
-      kinematics_loader_.reset(
-          new kinematics_plugin_loader::KinematicsPluginLoader(node_, rdf_loader_->getRobotDescription()));
+      kinematics_loader_ =
+          std::make_shared<kinematics_plugin_loader::KinematicsPluginLoader>(node_, rdf_loader_->getRobotDescription());
     moveit::core::SolverAllocatorFn kinematics_allocator =
         kinematics_loader_->getLoaderFunction(rdf_loader_->getSRDF());
     const std::vector<std::string>& groups = kinematics_loader_->getKnownGroups();
@@ -266,8 +286,9 @@ void RobotModelLoader::loadKinematicsSolvers(const kinematics_plugin_loader::Kin
         }
         else
         {
-          RCLCPP_ERROR(LOGGER, "Kinematics solver %s does not support joint group %s.  Error: %s",
-                       typeid(*solver).name(), group.c_str(), error_msg.c_str());
+          const auto& s = *solver;  // avoid clang-tidy's -Wpotentially-evaluated-expression
+          RCLCPP_ERROR(LOGGER, "Kinematics solver %s does not support joint group %s.  Error: %s", typeid(s).name(),
+                       group.c_str(), error_msg.c_str());
         }
       }
       else

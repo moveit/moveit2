@@ -33,7 +33,7 @@
  *********************************************************************/
 
 /* Author: Boston Cleek
-   Desc: move group interace ompl constrained planning capabilities for planning and execution
+   Desc: move group interface ompl constrained planning capabilities for planning and execution
 */
 
 // Testing
@@ -42,11 +42,7 @@
 // ROS
 #include <rclcpp/rclcpp.hpp>
 #include <tf2/LinearMath/Quaternion.h>
-#if __has_include(<tf2_eigen/tf2_eigen.hpp>)
 #include <tf2_eigen/tf2_eigen.hpp>
-#else
-#include <tf2_eigen/tf2_eigen.h>
-#endif
 
 // MoveIt
 #include <moveit/move_group_interface/move_group_interface.h>
@@ -54,7 +50,7 @@
 #include <moveit/macros/console_colors.h>
 #include <moveit_msgs/msg/constraints.hpp>
 
-// acuracy tested for position and orientation
+// accuracy tested for position and orientation
 static const double EPSILON = 1e-2;
 
 static const std::string PLANNING_GROUP = "panda_arm";
@@ -107,8 +103,8 @@ public:
     move_group_->setPathConstraints(path_constraint);
 
     moveit::planning_interface::MoveGroupInterface::Plan plan;
-    ASSERT_EQ(move_group_->plan(plan), moveit::planning_interface::MoveItErrorCode::SUCCESS);
-    ASSERT_EQ(move_group_->move(), moveit::planning_interface::MoveItErrorCode::SUCCESS);
+    ASSERT_EQ(move_group_->plan(plan), moveit::core::MoveItErrorCode::SUCCESS);
+    ASSERT_EQ(move_group_->move(), moveit::core::MoveItErrorCode::SUCCESS);
   }
 
   void testPose(const geometry_msgs::msg::PoseStamped& pose_goal_stamped)

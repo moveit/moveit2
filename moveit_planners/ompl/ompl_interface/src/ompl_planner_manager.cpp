@@ -60,10 +60,9 @@ public:
           case ompl::msg::LOG_DEV2:
           case ompl::msg::LOG_DEV1:
           case ompl::msg::LOG_DEBUG:
-            RCLCPP_DEBUG(OMPL_LOGGER, "%s:%i - %s", filename, line, text.c_str());
-            break;
           case ompl::msg::LOG_INFO:
-            RCLCPP_INFO(OMPL_LOGGER, "%s:%i - %s", filename, line, text.c_str());
+            // LOG_INFO too verbose for MoveIt usage, so we reduce the logger level to DEBUG
+            RCLCPP_DEBUG(OMPL_LOGGER, "%s:%i - %s", filename, line, text.c_str());
             break;
           case ompl::msg::LOG_WARN:
             RCLCPP_WARN(OMPL_LOGGER, "%s:%i - %s", filename, line, text.c_str());
@@ -79,15 +78,15 @@ public:
       }
     };
 
-    output_handler_.reset(new OutputHandler());
+    output_handler_ = std::make_shared<OutputHandler>();
     ompl::msg::useOutputHandler(output_handler_.get());
   }
 
   bool initialize(const moveit::core::RobotModelConstPtr& model, const rclcpp::Node::SharedPtr& node,
                   const std::string& parameter_namespace) override
   {
-    ompl_interface_.reset(new OMPLInterface(model, node, parameter_namespace));
-    config_settings_ = ompl_interface_->getPlannerConfigurations();
+    ompl_interface_ = std::make_unique<OMPLInterface>(model, node, parameter_namespace);
+    setPlannerConfigurations(ompl_interface_->getPlannerConfigurations());
     return true;
   }
 

@@ -1,0 +1,26 @@
+<library path="moveit_setup_srdf_plugins">
+  <class type="moveit_setup::srdf_setup::VirtualJointsWidget" base_class_type="moveit_setup::SetupStepWidget">
+    <description>Step where you can setup the virtual joints in your SRDF</description>
+  </class>
+  <class type="moveit_setup::srdf_setup::DefaultCollisionsWidget" base_class_type="moveit_setup::SetupStepWidget">
+    <description>Step to ignore self-colisions</description>
+  </class>
+  <class type="moveit_setup::srdf_setup::PlanningGroupsWidget" base_class_type="moveit_setup::SetupStepWidget">
+    <description>Step to configure planning groups</description>
+  </class>
+  <class type="moveit_setup::controllers::ControllersWidget" base_class_type="moveit_setup::SetupStepWidget">
+    <description>Step to configure robot controllers</description>
+  </class>
+  <class type="moveit_setup::srdf_setup::RobotPosesWidget" base_class_type="moveit_setup::SetupStepWidget">
+    <description>Step to configure robot poses</description>
+  </class>
+  <class type="moveit_setup::srdf_setup::EndEffectorsWidget" base_class_type="moveit_setup::SetupStepWidget">
+    <description>Step to configure end effectors</description>
+  </class>
+  <class type="moveit_setup::srdf_setup::PassiveJointsWidget" base_class_type="moveit_setup::SetupStepWidget">
+    <description>Step to configure passive joints (if any)</description>
+  </class>
+  <class type="moveit_setup::srdf_setup::GroupMetaConfig" base_class_type="moveit_setup::SetupConfig">
+    <description>Extra data associated with planning groups not found in srdf but used in config files</description>
+  </class>
+</library>

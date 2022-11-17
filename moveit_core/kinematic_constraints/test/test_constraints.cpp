@@ -38,13 +38,9 @@
 #include <gtest/gtest.h>
 #include <urdf_parser/urdf_parser.h>
 #include <fstream>
-#if __has_include(<tf2_eigen/tf2_eigen.hpp>)
 #include <tf2_eigen/tf2_eigen.hpp>
-#else
-#include <tf2_eigen/tf2_eigen.h>
-#endif
+#include <math.h>
 #include <moveit/utils/robot_model_test_utils.h>
-#include <boost/math/constants/constants.hpp>
 
 class LoadPlanningModelsPr2 : public testing::Test
 {
@@ -217,7 +213,7 @@ TEST_F(LoadPlanningModelsPr2, JointConstraintsCont)
   robot_state.setVariablePositions(jvals);
   EXPECT_TRUE(jc.decide(robot_state).satisfied);
 
-  // ouside the below tolerance
+  // outside the below tolerance
   jvals[jcm.joint_name] = -.03;
   robot_state.setVariablePositions(jvals);
   EXPECT_FALSE(jc.decide(robot_state).satisfied);
@@ -659,7 +655,7 @@ TEST_F(LoadPlanningModelsPr2, OrientationConstraintsSimple)
   EXPECT_FALSE(oc.decide(robot_state).satisfied);
 
   // rotation by pi does not wrap to zero
-  jvals["r_wrist_roll_joint"] = boost::math::constants::pi<double>();
+  jvals["r_wrist_roll_joint"] = M_PI;
   robot_state.setVariablePositions(jvals);
   robot_state.update();
   EXPECT_FALSE(oc.decide(robot_state).satisfied);
@@ -850,7 +846,7 @@ TEST_F(LoadPlanningModelsPr2, TestKinematicConstraintSet)
   jcv.back().joint_name = "no_joint";
   EXPECT_FALSE(kcs.add(jcv));
 
-  // but we can still evaluate it succesfully for the remaining constraint
+  // but we can still evaluate it successfully for the remaining constraint
   EXPECT_TRUE(kcs.decide(robot_state).satisfied);
 
   // violating the remaining good constraint changes this

@@ -36,8 +36,8 @@
 
 #pragma once
 
-#include <boost/array.hpp>
-#include <boost/function.hpp>
+#include <array>
+#include <functional>
 #include <vector>
 #include <string>
 #include <map>
@@ -97,8 +97,8 @@ struct Contact
 
   /** \brief The distance percentage between casted poses until collision.
    *
-   *  If the value is 0, then the collision occured in the start pose. If the value is 1, then the collision occured in
-   *  the end pose. */
+   *  If the value is 0, then the collision occurred in the start pose. If the value is 1, then the collision occurred
+   * in the end pose. */
   double percent_interpolation;
 
   /** \brief The two nearest points connecting the two bodies */
@@ -110,12 +110,12 @@ struct Contact
 struct CostSource
 {
   /// The minimum bound of the AABB defining the volume responsible for this partial cost
-  boost::array<double, 3> aabb_min;
+  std::array<double, 3> aabb_min;
 
   /// The maximum bound of the AABB defining the volume responsible for this partial cost
-  boost::array<double, 3> aabb_max;
+  std::array<double, 3> aabb_max;
 
-  /// The partial cost (the probability of existance for the object there is a collision with)
+  /// The partial cost (the probability of existence for the object there is a collision with)
   double cost;
 
   /// Get the volume of the AABB around the cost source
@@ -220,7 +220,7 @@ struct CollisionRequest
   std::size_t max_cost_sources;
 
   /** \brief Function call that decides whether collision detection should stop. */
-  boost::function<bool(const CollisionResult&)> is_done;
+  std::function<bool(const CollisionResult&)> is_done;
 
   /** \brief Flag indicating whether information about detected collisions should be reported */
   bool verbose;

@@ -37,11 +37,7 @@
 #include <moveit/robot_state/robot_state.h>
 #include <moveit/utils/robot_model_test_utils.h>
 #include <urdf_parser/urdf_parser.h>
-#if __has_include(<tf2_geometry_msgs/tf2_geometry_msgs.hpp>)
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
-#else
-#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
-#endif
 #include <gtest/gtest.h>
 #include <sstream>
 #include <algorithm>
@@ -52,6 +48,7 @@ namespace
 constexpr double EPSILON{ 1.e-9 };
 }
 
+#if 0  // unused function
 static bool sameStringIgnoringWS(const std::string& s1, const std::string& s2)
 {
   unsigned int i1 = 0;
@@ -76,6 +73,8 @@ static bool sameStringIgnoringWS(const std::string& s1, const std::string& s2)
   }
   return i1 == s1.size() && i2 == s2.size();
 }
+#endif
+
 static void expect_near(const Eigen::MatrixXd& x, const Eigen::MatrixXd& y,
                         double eps = std::numeric_limits<double>::epsilon())
 {
@@ -177,10 +176,8 @@ TEST(LoadingAndFK, SimpleRobot)
 
   state.setVariableAcceleration("base_joint/x", 0.0);
 
-  // making sure that values get copied
-  moveit::core::RobotState* new_state = new moveit::core::RobotState(state);
+  const auto new_state = std::make_unique<moveit::core::RobotState>(state);  // making sure that values get copied
   EXPECT_NEAR_TRACED(state.getGlobalLinkTransform("base_link").translation(), Eigen::Vector3d(10, 8, 0));
-  delete new_state;
 
   std::vector<double> jv(state.getVariableCount(), 0.0);
   jv[state.getRobotModel()->getVariableIndex("base_joint/x")] = 5.0;
@@ -371,9 +368,9 @@ protected:
         "</robot>";
 
     urdf::ModelInterfaceSharedPtr urdf_model = urdf::parseURDF(MODEL2);
-    srdf::ModelSharedPtr srdf_model(new srdf::Model());
+    auto srdf_model = std::make_shared<srdf::Model>();
     srdf_model->initString(*urdf_model, SMODEL2);
-    robot_model_.reset(new moveit::core::RobotModel(urdf_model, srdf_model));
+    robot_model_ = std::make_shared<moveit::core::RobotModel>(urdf_model, srdf_model);
   }
 
   void TearDown() override
@@ -556,21 +553,21 @@ TEST_F(OneRobot, testPrintCurrentPositionWithJointLimits)
 
   state.setToDefaultValues();
 
-  std::cout << "\nVisual inspection should show NO joints out of bounds:" << std::endl;
+  std::cout << "\nVisual inspection should show NO joints out of bounds:\n";
   state.printStatePositionsWithJointLimits(joint_model_group);
 
-  std::cout << "\nVisual inspection should show ONE joint out of bounds:" << std::endl;
+  std::cout << "\nVisual inspection should show ONE joint out of bounds:\n";
   std::vector<double> single_joint(1);
   single_joint[0] = -1.0;
   state.setJointPositions("joint_c", single_joint);
   state.printStatePositionsWithJointLimits(joint_model_group);
 
-  std::cout << "\nVisual inspection should show TWO joint out of bounds:" << std::endl;
+  std::cout << "\nVisual inspection should show TWO joint out of bounds:\n";
   single_joint[0] = 1.0;
   state.setJointPositions("joint_f", single_joint);
   state.printStatePositionsWithJointLimits(joint_model_group);
 
-  std::cout << "\nVisual inspection should show ONE joint out of bounds:" << std::endl;
+  std::cout << "\nVisual inspection should show ONE joint out of bounds:\n";
   single_joint[0] = 0.19;
   state.setJointPositions("joint_f", single_joint);
   state.printStatePositionsWithJointLimits(joint_model_group);
@@ -676,10 +673,43 @@ TEST_F(OneRobot, testInterpolation)
   }
   catch (std::exception& e)
   {
-    std::cout << "Caught expected exception: " << e.what() << std::endl;
+    std::cout << "Caught expected exception: " << e.what() << '\n';
     nan_exception = true;
   }
   EXPECT_TRUE(nan_exception) << "NaN interpolation parameter did not create expected exception.";
+}
+
+TEST_F(OneRobot, rigidlyConnectedParent)
+{
+  // link_e is its own rigidly-connected parent
+  const moveit::core::LinkModel* link_e{ robot_model_->getLinkModel("link_e") };
+  EXPECT_EQ(robot_model_->getRigidlyConnectedParentLinkModel(link_e), link_e);
+
+  // link_b is rigidly connected to its parent link_a
+  const moveit::core::LinkModel* link_a{ robot_model_->getLinkModel("link_a") };
+  const moveit::core::LinkModel* link_b{ robot_model_->getLinkModel("link_b") };
+  EXPECT_EQ(robot_model_->getRigidlyConnectedParentLinkModel(link_b), link_a);
+
+  moveit::core::RobotState state(robot_model_);
+
+  EXPECT_EQ(state.getRigidlyConnectedParentLinkModel("link_b"), link_a);
+
+  // attach "object" with "subframe" to link_b
+  state.attachBody(std::make_unique<moveit::core::AttachedBody>(
+      link_b, "object", Eigen::Isometry3d::Identity(), std::vector<shapes::ShapeConstPtr>{},
+      EigenSTL::vector_Isometry3d{}, std::set<std::string>{}, trajectory_msgs::msg::JointTrajectory{},
+      moveit::core::FixedTransformsMap{ { "subframe", Eigen::Isometry3d::Identity() } }));
+
+  // RobotState's version should resolve these too
+  EXPECT_EQ(link_a, state.getRigidlyConnectedParentLinkModel("object"));
+  EXPECT_EQ(link_a, state.getRigidlyConnectedParentLinkModel("object/subframe"));
+
+  // test failure cases
+  EXPECT_EQ(nullptr, state.getRigidlyConnectedParentLinkModel("no_object"));
+  EXPECT_EQ(nullptr, state.getRigidlyConnectedParentLinkModel("object/no_subframe"));
+  EXPECT_EQ(nullptr, state.getRigidlyConnectedParentLinkModel(""));
+  EXPECT_EQ(nullptr, state.getRigidlyConnectedParentLinkModel("object/"));
+  EXPECT_EQ(nullptr, state.getRigidlyConnectedParentLinkModel("/"));
 }
 
 int main(int argc, char** argv)

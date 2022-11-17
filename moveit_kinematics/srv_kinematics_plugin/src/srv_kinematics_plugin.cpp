@@ -64,6 +64,11 @@ bool SrvKinematicsPlugin::initialize(const rclcpp::Node::SharedPtr& node, const 
 
   RCLCPP_INFO(LOGGER, "SrvKinematicsPlugin initializing");
 
+  // Get Solver Parameters
+  std::string kinematics_param_prefix = "robot_description_kinematics." + group_name;
+  param_listener_ = std::make_shared<srv_kinematics::ParamListener>(node, kinematics_param_prefix);
+  params_ = param_listener_->get_params();
+
   storeValues(robot_model, group_name, base_frame, tip_frames, search_discretization);
   joint_model_group_ = robot_model_->getJointModelGroup(group_name);
   if (!joint_model_group_)
@@ -71,10 +76,10 @@ bool SrvKinematicsPlugin::initialize(const rclcpp::Node::SharedPtr& node, const 
 
   if (debug)
   {
-    std::cout << std::endl << "Joint Model Variable Names: ------------------------------------------- " << std::endl;
+    std::cout << "Joint Model Variable Names: ------------------------------------------- \n ";
     const std::vector<std::string> jm_names = joint_model_group_->getVariableNames();
     std::copy(jm_names.begin(), jm_names.end(), std::ostream_iterator<std::string>(std::cout, "\n"));
-    std::cout << std::endl;
+    std::cout << '\n';
   }
 
   // Get the dimension of the planning group
@@ -107,18 +112,13 @@ bool SrvKinematicsPlugin::initialize(const rclcpp::Node::SharedPtr& node, const 
     ik_group_info_.link_names.push_back(tip_frame);
   }
 
-  // Choose what ROS service to send IK requests to
-  RCLCPP_DEBUG(LOGGER, "Looking for ROS service name on rosparam server with param: "
-                       "/kinematics_solver_service_name");
-  std::string ik_service_name;
-  lookupParam(node_, "kinematics_solver_service_name", ik_service_name, std::string("solve_ik"));
-
   // Setup the joint state groups that we need
-  robot_state_.reset(new moveit::core::RobotState(robot_model_));
+  robot_state_ = std::make_shared<moveit::core::RobotState>(robot_model_);
   robot_state_->setToDefaultValues();
 
   // Create the ROS2 service client
-  ik_service_client_ = node_->create_client<moveit_msgs::srv::GetPositionIK>(ik_service_name);
+  RCLCPP_DEBUG(LOGGER, "IK Service client topic : %s", params_.kinematics_solver_service_name.c_str());
+  ik_service_client_ = node_->create_client<moveit_msgs::srv::GetPositionIK>(params_.kinematics_solver_service_name);
 
   if (!ik_service_client_->wait_for_service(std::chrono::seconds(1)))  // wait 0.1 seconds, blocking
     RCLCPP_WARN_STREAM(LOGGER,
@@ -158,7 +158,7 @@ bool SrvKinematicsPlugin::isRedundantJoint(unsigned int index) const
 
 int SrvKinematicsPlugin::getJointIndex(const std::string& name) const
 {
-  for (unsigned int i = 0; i < ik_group_info_.joint_names.size(); i++)
+  for (unsigned int i = 0; i < ik_group_info_.joint_names.size(); ++i)
   {
     if (ik_group_info_.joint_names[i] == name)
       return i;
@@ -333,7 +333,7 @@ bool SrvKinematicsPlugin::searchPositionIK(const std::vector<geometry_msgs::msg:
   // Convert the robot state message to our robot_state representation
   if (!moveit::core::robotStateMsgToRobotState(response->solution, *robot_state_))
   {
-    RCLCPP_ERROR(LOGGER, "An error occured converting received robot state message into internal robot state.");
+    RCLCPP_ERROR(LOGGER, "An error occurred converting received robot state message into internal robot state.");
     error_code.val = error_code.FAILURE;
     return false;
   }
@@ -342,7 +342,7 @@ bool SrvKinematicsPlugin::searchPositionIK(const std::vector<geometry_msgs::msg:
   robot_state_->copyJointGroupPositions(joint_model_group_, solution);
 
   // Run the solution callback (i.e. collision checker) if available
-  if (!solution_callback.empty())
+  if (solution_callback)
   {
     RCLCPP_DEBUG(LOGGER, "Calling solution callback on IK solution");
 

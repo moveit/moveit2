@@ -59,7 +59,7 @@ public:
    *  \param planning_scene_monitor: PSM should have scene monitor and state monitor
    *                                 already started when passed into this class
    */
-  CollisionCheck(rclcpp::Node::SharedPtr node, const ServoParameters::SharedConstPtr& parameters,
+  CollisionCheck(const rclcpp::Node::SharedPtr& node, const ServoParameters::SharedConstPtr& parameters,
                  const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor);
 
   ~CollisionCheck()
@@ -83,9 +83,6 @@ private:
   /** \brief Get a read-only copy of the planning scene */
   planning_scene_monitor::LockedPlanningSceneRO getLockedPlanningSceneRO() const;
 
-  /** \brief Callback for collision stopping time, from the thread that is aware of velocity and acceleration */
-  void worstCaseStopTimeCB(const std_msgs::msg::Float64::SharedPtr msg);
-
   // Pointer to the ROS node
   const std::shared_ptr<rclcpp::Node> node_;
 
@@ -97,7 +94,6 @@ private:
 
   // Robot state and collision matrix from planning scene
   std::shared_ptr<moveit::core::RobotState> current_state_;
-  collision_detection::AllowedCollisionMatrix acm_;
 
   // Scale robot velocity according to collision proximity and user-defined thresholds.
   // I scaled exponentially (cubic power) so velocity drops off quickly after the threshold.
@@ -107,9 +103,6 @@ private:
   double scene_collision_distance_ = 0;
   bool collision_detected_ = false;
   bool paused_ = false;
-
-  // Variables for stop-distance-based collision checking
-  double worst_case_stop_time_ = std::numeric_limits<double>::max();
 
   const double self_velocity_scale_coefficient_;
   const double scene_velocity_scale_coefficient_;
@@ -122,7 +115,6 @@ private:
   rclcpp::TimerBase::SharedPtr timer_;
   double period_;  // The loop period, in seconds
   rclcpp::Publisher<std_msgs::msg::Float64>::SharedPtr collision_velocity_scale_pub_;
-  rclcpp::Subscription<std_msgs::msg::Float64>::SharedPtr worst_case_stop_time_sub_;
 
   mutable std::mutex joint_state_mutex_;
   sensor_msgs::msg::JointState latest_joint_state_;

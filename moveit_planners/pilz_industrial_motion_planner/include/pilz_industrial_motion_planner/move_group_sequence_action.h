@@ -36,14 +36,15 @@
 
 #include <memory>
 
-#include <actionlib/server/simple_action_server.h>
+#include <rclcpp_action/rclcpp_action.hpp>
 #include <moveit/move_group/move_group_capability.h>
 
-#include <moveit_msgs/MoveGroupSequenceAction.h>
+#include <moveit_msgs/action/move_group_sequence.hpp>
 
 namespace pilz_industrial_motion_planner
 {
 class CommandListManager;
+using MoveGroupSequenceGoalHandle = rclcpp_action::ServerGoalHandle<moveit_msgs::action::MoveGroupSequence>;
 
 /**
  * @brief Provide action to handle multiple trajectories and execute the result
@@ -59,21 +60,22 @@ public:
 private:
   using ExecutableTrajs = std::vector<plan_execution::ExecutableTrajectory>;
 
-  using StartStateMsg = moveit_msgs::MotionSequenceResponse::_sequence_start_type;
-  using StartStatesMsg = std::vector<moveit_msgs::MotionSequenceResponse::_sequence_start_type>;
-  using PlannedTrajMsgs = moveit_msgs::MotionSequenceResponse::_planned_trajectories_type;
+  using StartStateMsg = moveit_msgs::msg::MotionSequenceResponse::_sequence_start_type;
+  using StartStatesMsg = std::vector<moveit_msgs::msg::MotionSequenceResponse::_sequence_start_type>;
+  using PlannedTrajMsgs = moveit_msgs::msg::MotionSequenceResponse::_planned_trajectories_type;
 
 private:
-  void executeSequenceCallback(const moveit_msgs::MoveGroupSequenceGoalConstPtr& goal);
-  void executeSequenceCallbackPlanAndExecute(const moveit_msgs::MoveGroupSequenceGoalConstPtr& goal,
-                                             moveit_msgs::MoveGroupSequenceResult& action_res);
-  void executeMoveCallbackPlanOnly(const moveit_msgs::MoveGroupSequenceGoalConstPtr& goal,
-                                   moveit_msgs::MoveGroupSequenceResult& res);
+  void executeSequenceCallback(const std::shared_ptr<MoveGroupSequenceGoalHandle>& goal_handle);
+  void
+  executeSequenceCallbackPlanAndExecute(const moveit_msgs::action::MoveGroupSequence::Goal::ConstSharedPtr& goal,
+                                        const moveit_msgs::action::MoveGroupSequence::Result::SharedPtr& action_res);
+  void executeMoveCallbackPlanOnly(const moveit_msgs::action::MoveGroupSequence::Goal::ConstSharedPtr& goal,
+                                   const moveit_msgs::action::MoveGroupSequence::Result::SharedPtr& res);
   void startMoveExecutionCallback();
   void startMoveLookCallback();
   void preemptMoveCallback();
   void setMoveState(move_group::MoveGroupState state);
-  bool planUsingSequenceManager(const moveit_msgs::MotionSequenceRequest& req,
+  bool planUsingSequenceManager(const moveit_msgs::msg::MotionSequenceRequest& req,
                                 plan_execution::ExecutableMotionPlan& plan);
 
 private:
@@ -81,8 +83,10 @@ private:
                            PlannedTrajMsgs& plannedTrajsMsgs);
 
 private:
-  std::unique_ptr<actionlib::SimpleActionServer<moveit_msgs::MoveGroupSequenceAction>> move_action_server_;
-  moveit_msgs::MoveGroupSequenceFeedback move_feedback_;
+  rclcpp::CallbackGroup::SharedPtr action_callback_group_;
+  std::shared_ptr<rclcpp_action::Server<moveit_msgs::action::MoveGroupSequence>> move_action_server_;
+  std::shared_ptr<MoveGroupSequenceGoalHandle> goal_handle_;
+  moveit_msgs::action::MoveGroupSequence::Feedback::SharedPtr move_feedback_;
 
   move_group::MoveGroupState move_state_{ move_group::IDLE };
   std::unique_ptr<pilz_industrial_motion_planner::CommandListManager> command_list_manager_;

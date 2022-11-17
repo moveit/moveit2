@@ -2,6 +2,168 @@
 Changelog for package moveit_ros_visualization
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.6.0 (2022-11-10)
+------------------
+* Check valid interactive marker pointer before trying to update pose (`#1581 <https://github.com/ros-planning/moveit2/issues/1581>`_)
+* Merge PR `#1553 <https://github.com/ros-planning/moveit2/issues/1553>`_: Improve cmake files
+* Use standard exported targets: export\_${PROJECT_NAME} -> ${PROJECT_NAME}Targets
+* Improve CMake usage (`#1550 <https://github.com/ros-planning/moveit2/issues/1550>`_)
+* Use pragma once as header include guard (`#1525 <https://github.com/ros-planning/moveit2/issues/1525>`_)
+* Remove __has_include statements (`#1481 <https://github.com/ros-planning/moveit2/issues/1481>`_)
+* Contributors: J. Javan, Robert Haschke, Sebastian Castro, Sebastian Jahr, Vatan Aksoy Tezer
+
+2.5.3 (2022-07-28)
+------------------
+
+2.5.2 (2022-07-18)
+------------------
+* Merge https://github.com/ros-planning/moveit/commit/c88f6fb64e9057a4b9a8f6fafc01060e8c48a216
+* Merge remote-tracking branch 'origin/main' into feature/msa
+* fix regression from `#1331 <https://github.com/ros-planning/moveit2/issues/1331>`_ (`#1384 <https://github.com/ros-planning/moveit2/issues/1384>`_)
+* Removing more boost usage (`#1372 <https://github.com/ros-planning/moveit2/issues/1372>`_)
+* Merge remote-tracking branch 'upstream/main' into feature/msa
+* Removing some boost usage (`#1331 <https://github.com/ros-planning/moveit2/issues/1331>`_)
+* Remove unnecessary rclcpp.hpp includes (`#1333 <https://github.com/ros-planning/moveit2/issues/1333>`_)
+* Fix rviz segfault when changing move group during execution (`#3123 <https://github.com/ros-planning/moveit2/issues/3123>`_)
+* Merge pull request `#3106 <https://github.com/ros-planning/moveit/issues/3106>`_ from v4hn/pr-master-bind-them-all / banish bind()
+* Fix clang-tidy
+* banish bind()
+* Replace obsolete distutils.core with setuptools (`#3103 <https://github.com/ros-planning/moveit2/issues/3103>`_)
+  http://wiki.ros.org/noetic/Migration#Setuptools_instead_of_Distutils
+* Contributors: Abishalini, David V. Lu, Henry Moore, Jafar, Michael Ferguson, Michael Görner, Robert Haschke, Vatan Aksoy Tezer, bsygo, v4hn
+
+2.5.1 (2022-05-31)
+------------------
+
+2.5.0 (2022-05-26)
+------------------
+* Declare the default_planning_pipeline parameter (`#1227 <https://github.com/ros-planning/moveit2/issues/1227>`_)
+  Co-authored-by: AndyZe <zelenak@picknik.ai>
+* Merge https://github.com/ros-planning/moveit/commit/72d919299796bffc21f5eb752d66177841dc3442
+* Enable cppcheck (`#1224 <https://github.com/ros-planning/moveit2/issues/1224>`_)
+  Co-authored-by: jeoseo <jeongwooseo2012@gmail.com>
+* Make TOTG the default time-parameterization algorithm everywhere (`#1218 <https://github.com/ros-planning/moveit2/issues/1218>`_)
+  Co-authored-by: Jafar <cafer.abdi@gmail.com>
+* Make moveit_common a 'depend' rather than 'build_depend' (`#1226 <https://github.com/ros-planning/moveit2/issues/1226>`_)
+* Avoid bind(), use lambdas instead (`#1204 <https://github.com/ros-planning/moveit2/issues/1204>`_)
+  Adaption of https://github.com/ros-planning/moveit/pull/3106
+* banish bind()
+  source:https://github.com/ros-planning/moveit/pull/3106/commits/a2911c80c28958c1fce8fb52333d770248c4ec05; required minor updates compared to original source commit in order to ensure compatibility with ROS2
+* Merge https://github.com/ros-planning/moveit/commit/424a5b7b8b774424f78346d1e98bf1c9a33f0e78
+* Remove new operators (`#1135 <https://github.com/ros-planning/moveit2/issues/1135>`_)
+  replace new operator with make_shared
+* Merge https://github.com/ros-planning/moveit/commit/a25515b73d682df03ed3eccd839110c296aa79fc
+* Remove include of OgrePrerequisites header (`#1099 <https://github.com/ros-planning/moveit2/issues/1099>`_)
+  * Remove OgrePrerequisites include
+  * octomap_render.h includes itself
+  * Include OgrePrerequisites.h
+* Merge https://github.com/ros-planning/moveit/commit/ab42a1d7017b27eb6c353fb29331b2da08ab0039
+* 1.1.9
+* moveit joy: add PS3 dual shock model (`#3025 <https://github.com/ros-planning/moveit2/issues/3025>`_)
+  * Added PS3 dual shock
+  * Simplified if-else statements with as one-liners
+* Compilation fixes for Jammy and bring back Rolling CI (`#1095 <https://github.com/ros-planning/moveit2/issues/1095>`_)
+  * Use jammy dockers and clang-format-12
+  * Fix unused depend, and move to python3-lxml
+  * add ompl to repos, fix versions and ogre
+  * Remove ogre keys
+  * Fix boolean node operator
+  * Stop building dockers on branch and fix servo null pointer
+  * update pre-commit to clang-format-12 and pre-commit fixes
+  * clang-format workaround and more pre-commit fixes
+* Add option to use simulation time for rviz trajectory display (`#3055 <https://github.com/ros-planning/moveit2/issues/3055>`_)
+* Fix object interactive marker in wrong pose after changing the fixed frame (`#680 <https://github.com/ros-planning/moveit2/issues/680>`_)
+* Merge https://github.com/ros-planning/moveit/commit/0d7462f140e03b4c319fa8cce04a47fe3f650c60
+* 1.1.8
+* Remove unused parameters. (`#1018 <https://github.com/ros-planning/moveit2/issues/1018>`_)
+  Co-authored-by: Tyler Weaver <tyler@picknik.ai>
+  Co-authored-by: Vatan Aksoy Tezer <vatan@picknik.ai>
+* 1.1.7
+* Move MoveItErrorCode class to moveit_core (`#3009 <https://github.com/ros-planning/moveit2/issues/3009>`_)
+  ... reducing code duplication and facilitating re-use
+* RobotState::attachBody: Migrate to unique_ptr argument (`#3011 <https://github.com/ros-planning/moveit2/issues/3011>`_)
+  ... to indicate transfer of ownership and simplify pointer handling
+* Merge PR `#2925 <https://github.com/ros-planning/moveit2/issues/2925>`_: Fix "ClassLoader: SEVERE WARNING" on reset of MPD
+  Resetting the MotionPlanningDisplay in rviz (or disabling+enabling it) issues a warning, because the IK plugin is unloaded (when resetting the RobotModelLoader) while there are still pending references to the RobotModel.
+* Remove all remaining usage of robot_model
+* Merge `#2944 <https://github.com/ros-planning/moveit2/issues/2944>`_: various fixes to the rviz plugins
+* Switch to std::bind (`#2967 <https://github.com/ros-planning/moveit2/issues/2967>`_)
+  * boost::bind -> std::bind
+  grep -rlI --exclude-dir=.git "boost::bind" | xargs sed -i 's/boost::bind/std::bind/g'
+  * Convert bind placeholders
+  grep -rlI --exclude-dir=.git " _[0-9]" | xargs sed -i 's/ _\([0-9]\)/ std::placeholders::_\1/g'
+  * Update bind include header
+  grep -rlI --exclude-dir=.git "boost/bind" | xargs sed -i 's#boost/bind.hpp#functional#'
+* MPD: Avoid flickering of the progress bar
+  The progress bar shows the number of pending background jobs.
+  If there is only one job pending, the progress bar is shown and
+  immediately hidden as soon as the process is finished.
+  Thus, we shouldn't show the progress bar if there is only one job
+  and thus no actual progress to show.
+  Use the default size and color scheme.
+* Joints widget: avoid flickering of the nullspace slider
+  Show a (disabled) dummy slider if there is no nullspace.
+  This avoids flickering between zero and one slider, which is the most common case.
+  Also provide some tooltips to explain the usage.
+* 1.1.6
+* Fix MotionPlanningFrame's namespace handling (`#2922 <https://github.com/ros-planning/moveit2/issues/2922>`_)
+  * waitForAction(): remove NodeHandle argument
+  * The NodeHandle was just for NodeHandle::ok(), which can be handled by ros::ok() as well.
+  * Fix initialization of params, etc. that depend on MoveGroupNS
+  * When the MoveGroupNS has changed, we should re-initialize all these
+  params, subscribers, and topics.
+  Thus having them in a central place is helpful ;-)
+  * Fix namespaces as pointed out by @v4hn
+  * Simplify nh\_ naming
+  * update comments
+* Fix ClassLoader: SEVERE WARNING
+  Clear all references to RobotModel before destroying the corresponding
+  RobotModelLoader.
+* Modernize: std::make_shared
+* Contributors: Abishalini, AndyZe, Cory Crean, Henning Kayser, Jafar, Jafar Abdi, JafarAbdi, Job van Dieten, Jochen Sprickerhof, Martin Oehler, Robert Haschke, Sencer Yazıcı, Stephanie Eng, Vatan Aksoy Tezer, jeoseo, pvanlaar, v4hn
+
+2.4.0 (2022-01-20)
+------------------
+* Move background_processing (`#997 <https://github.com/ros-planning/moveit2/issues/997>`_)
+* Merge https://github.com/ros-planning/moveit/commit/f3ac6070497da90da33551fc1dc3a68938340413
+* Merge https://github.com/ros-planning/moveit/commit/a0ee2020c4a40d03a48044d71753ed23853a665d
+* moveit_build_options()
+  Declare common build options like CMAKE_CXX_STANDARD, CMAKE_BUILD_TYPE,
+  and compiler options (namely warning flags) once.
+  Each package depending on moveit_core can use these via moveit_build_options().
+* MPD: do not save/restore warehouse parameters (`#2865 <https://github.com/ros-planning/moveit2/issues/2865>`_)
+  If we reload these values from the config, setting the ROS parameters is much less useful.
+  At least the *type* of warehouse_ros plugin (mongo or sqlite) cannot be selected
+  in the display, so you will probably need to meddle with the parameters anyway if you want
+  to connect to a different db.
+  search for parameters warehouse_host/port because they are usually set at the top level, but
+  you might want to set them differently for different move_groups.
+* PlanningSceneDisplay: always update the main scene node's pose (`#2876 <https://github.com/ros-planning/moveit2/issues/2876>`_)
+* Contributors: Abishalini, Michael Görner, Robert Haschke, Tyler Weaver
+
+2.3.2 (2021-12-29)
+------------------
+
+2.3.1 (2021-12-23)
+------------------
+* Convert to modern include guard `#882 <https://github.com/ros-planning/moveit2/issues/882>`_ (`#891 <https://github.com/ros-planning/moveit2/issues/891>`_)
+* Replaced C-Style Cast with C++ Style Cast. (`#935 <https://github.com/ros-planning/moveit2/issues/935>`_)
+* Add codespell to precommit, fix A LOT of spelling mistakes (`#934 <https://github.com/ros-planning/moveit2/issues/934>`_)
+* Get rid of "std::endl" (`#918 <https://github.com/ros-planning/moveit2/issues/918>`_)
+* changed post-increments in loops to preincrements (`#888 <https://github.com/ros-planning/moveit2/issues/888>`_)
+* Latched Strings for URDF and SRDF (`#765 <https://github.com/ros-planning/moveit2/issues/765>`_)
+* Consider simulated time (`#883 <https://github.com/ros-planning/moveit2/issues/883>`_)
+* Enforce package.xml format 3 Schema (`#779 <https://github.com/ros-planning/moveit2/issues/779>`_)
+* Update Maintainers of MoveIt package (`#697 <https://github.com/ros-planning/moveit2/issues/697>`_)
+* Reduce log verbosity, improved info message (`#714 <https://github.com/ros-planning/moveit2/issues/714>`_)
+* Fix Python2: convert keys() into list (`#2862 <https://github.com/ros-planning/moveit/issues/2862>`_)
+* MP panel: fix order of input widgets for shape size (`#2847 <https://github.com/ros-planning/moveit/issues/2847>`_)
+* Makes rviz trajectory visualization topic relative (`#2835 <https://github.com/ros-planning/moveit/issues/2835>`_)
+* MotionPlanningFrame: Gracefully handle undefined parent widget (`#2833 <https://github.com/ros-planning/moveit/issues/2833>`_)
+* more fixes for the clang-tidy job (`#2813 <https://github.com/ros-planning/moveit/issues/2813>`_)
+* clang-tidy: modernize-make-shared, modernize-make-unique (`#2762 <https://github.com/ros-planning/moveit/issues/2762>`_)
+* Contributors: Dave Coleman, David V. Lu!!, Felix von Drigalski, Gaël Écorchard, Henning Kayser, Kaustubh, Michael Görner, Parthasarathy Bana, Rick Staa, Robert Haschke, Sencer Yazıcı, Yuri Rocha, lorepieri8, predystopic-dev, pvanlaar
+
 2.3.0 (2021-10-08)
 ------------------
 * Support passing MoveGroup's namespace to MoveGroupInterface (`#533 <https://github.com/ros-planning/moveit2/issues/533>`_)

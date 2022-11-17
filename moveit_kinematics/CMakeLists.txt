@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.10.2)
+cmake_minimum_required(VERSION 3.22)
 project(moveit_kinematics)
 
 # Common cmake code applied to all moveit packages
@@ -17,6 +17,7 @@ find_package(pluginlib REQUIRED)
 find_package(moveit_core REQUIRED)
 find_package(moveit_ros_planning REQUIRED)
 find_package(moveit_msgs REQUIRED)
+find_package(generate_parameter_library REQUIRED)
 
 # Finds Boost Components
 include(ConfigExtras.cmake)
@@ -30,11 +31,15 @@ set(THIS_PACKAGE_INCLUDE_DIRS
 )
 
 set(THIS_PACKAGE_LIBRARIES
+  cached_ik_kinematics_parameters
   moveit_cached_ik_kinematics_base
   moveit_cached_ik_kinematics_plugin
+  kdl_kinematics_parameters
   moveit_kdl_kinematics_plugin
+  lma_kinematics_parameters
   moveit_lma_kinematics_plugin
   moveit_planar_kinematics_plugin
+  srv_kinematics_parameters
   moveit_srv_kinematics_plugin
 )
 
@@ -43,6 +48,7 @@ set(THIS_PACKAGE_INCLUDE_DEPENDS
   moveit_core
   moveit_ros_planning
   Boost
+  generate_parameter_library
 )
 
 pluginlib_export_plugin_description_file(moveit_core kdl_kinematics_plugin_description.xml)
@@ -63,22 +69,21 @@ add_subdirectory(test)
 
 install(
   TARGETS ${THIS_PACKAGE_LIBRARIES}
-  EXPORT export_${PROJECT_NAME}
+  EXPORT ${PROJECT_NAME}Targets
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
   RUNTIME DESTINATION bin
   INCLUDES DESTINATION include
 )
 
-ament_export_targets(export_${PROJECT_NAME} HAS_LIBRARY_TARGET)
-ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS})
+ament_export_targets(${PROJECT_NAME}Targets HAS_LIBRARY_TARGET)
+ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS} orocos_kdl_vendor)
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
 
   # These don't pass yet, disable them for now
   set(ament_cmake_copyright_FOUND TRUE)
-  set(ament_cmake_cppcheck_FOUND TRUE)
   set(ament_cmake_cpplint_FOUND TRUE)
   set(ament_cmake_flake8_FOUND TRUE)
   set(ament_cmake_pep257_FOUND TRUE)

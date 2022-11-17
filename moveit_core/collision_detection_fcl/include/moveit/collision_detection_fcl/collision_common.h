@@ -162,13 +162,13 @@ struct CollisionData
   /** \brief  If the collision request includes a group name, this set contains the pointers to the link models that
    *  are considered for collision.
    *
-   *  If the pointer is NULL, all collisions are considered. */
+   *  If the pointer is nullptr, all collisions are considered. */
   const std::set<const moveit::core::LinkModel*>* active_components_only_;
 
   /** \brief The user-specified response location. */
   CollisionResult* res_;
 
-  /** \brief The user-specified collision matrix (may be NULL). */
+  /** \brief The user-specified collision matrix (may be nullptr). */
   const AllowedCollisionMatrix* acm_;
 
   /** \brief Flag indicating whether collision checking is complete. */
@@ -206,21 +206,24 @@ struct FCLGeometry
 
   /** \brief Constructor for a robot link. */
   FCLGeometry(fcl::CollisionGeometryd* collision_geometry, const moveit::core::LinkModel* link, int shape_index)
-    : collision_geometry_(collision_geometry), collision_geometry_data_(new CollisionGeometryData(link, shape_index))
+    : collision_geometry_(collision_geometry)
+    , collision_geometry_data_(std::make_shared<CollisionGeometryData>(link, shape_index))
   {
     collision_geometry_->setUserData(collision_geometry_data_.get());
   }
 
   /** \brief Constructor for an attached body. */
   FCLGeometry(fcl::CollisionGeometryd* collision_geometry, const moveit::core::AttachedBody* ab, int shape_index)
-    : collision_geometry_(collision_geometry), collision_geometry_data_(new CollisionGeometryData(ab, shape_index))
+    : collision_geometry_(collision_geometry)
+    , collision_geometry_data_(std::make_shared<CollisionGeometryData>(ab, shape_index))
   {
     collision_geometry_->setUserData(collision_geometry_data_.get());
   }
 
   /** \brief Constructor for a world object. */
   FCLGeometry(fcl::CollisionGeometryd* collision_geometry, const World::Object* obj, int shape_index)
-    : collision_geometry_(collision_geometry), collision_geometry_data_(new CollisionGeometryData(obj, shape_index))
+    : collision_geometry_(collision_geometry)
+    , collision_geometry_data_(std::make_shared<CollisionGeometryData>(obj, shape_index))
   {
     collision_geometry_->setUserData(collision_geometry_data_.get());
   }
@@ -233,7 +236,7 @@ struct FCLGeometry
     if (!newType && collision_geometry_data_)
       if (collision_geometry_data_->ptr.raw == reinterpret_cast<const void*>(data))
         return;
-    collision_geometry_data_.reset(new CollisionGeometryData(data, shape_index));
+    collision_geometry_data_ = std::make_shared<CollisionGeometryData>(data, shape_index);
     collision_geometry_->setUserData(collision_geometry_data_.get());
   }
 

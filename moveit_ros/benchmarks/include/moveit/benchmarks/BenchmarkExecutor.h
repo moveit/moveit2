@@ -52,7 +52,7 @@
 #include <map>
 #include <vector>
 #include <string>
-#include <boost/function.hpp>
+#include <functional>
 
 namespace moveit_ros_benchmarks
 {
@@ -67,29 +67,29 @@ public:
   typedef std::vector<PlannerRunData> PlannerBenchmarkData;
 
   /// Definition of a query-start benchmark event function.  Invoked before a new query is benchmarked.
-  typedef boost::function<void(const moveit_msgs::msg::MotionPlanRequest& request, planning_scene::PlanningScenePtr)>
+  typedef std::function<void(const moveit_msgs::msg::MotionPlanRequest& request, planning_scene::PlanningScenePtr)>
       QueryStartEventFunction;
 
   /// Definition of a query-end benchmark event function.  Invoked after a query has finished benchmarking.
-  typedef boost::function<void(const moveit_msgs::msg::MotionPlanRequest& request, planning_scene::PlanningScenePtr)>
+  typedef std::function<void(const moveit_msgs::msg::MotionPlanRequest& request, planning_scene::PlanningScenePtr)>
       QueryCompletionEventFunction;
 
   /// Definition of a planner-switch benchmark event function. Invoked before a planner starts any runs for a particular
   /// query.
-  typedef boost::function<void(const moveit_msgs::msg::MotionPlanRequest& request, PlannerBenchmarkData& benchmark_data)>
+  typedef std::function<void(const moveit_msgs::msg::MotionPlanRequest& request, PlannerBenchmarkData& benchmark_data)>
       PlannerStartEventFunction;
 
   /// Definition of a planner-switch benchmark event function. Invoked after a planner completes all runs for a
   /// particular query.
-  typedef boost::function<void(const moveit_msgs::msg::MotionPlanRequest& request, PlannerBenchmarkData& benchmark_data)>
+  typedef std::function<void(const moveit_msgs::msg::MotionPlanRequest& request, PlannerBenchmarkData& benchmark_data)>
       PlannerCompletionEventFunction;
 
   /// Definition of a pre-run benchmark event function.  Invoked immediately before each planner calls solve().
-  typedef boost::function<void(moveit_msgs::msg::MotionPlanRequest& request)> PreRunEventFunction;
+  typedef std::function<void(moveit_msgs::msg::MotionPlanRequest& request)> PreRunEventFunction;
 
   /// Definition of a post-run benchmark event function.  Invoked immediately after each planner calls solve().
-  typedef boost::function<void(const moveit_msgs::msg::MotionPlanRequest& request,
-                               const planning_interface::MotionPlanDetailedResponse& response, PlannerRunData& run_data)>
+  typedef std::function<void(const moveit_msgs::msg::MotionPlanRequest& request,
+                             const planning_interface::MotionPlanDetailedResponse& response, PlannerRunData& run_data)>
       PostRunEventFunction;
 
   BenchmarkExecutor(const rclcpp::Node::SharedPtr& node,

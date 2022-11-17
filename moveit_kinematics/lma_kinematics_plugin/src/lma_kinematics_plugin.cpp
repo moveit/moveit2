@@ -38,11 +38,7 @@
 #include <kdl/chainfksolverpos_recursive.hpp>
 #include <kdl/chainiksolverpos_lma.hpp>
 
-#if __has_include(<tf2_kdl/tf2_kdl.hpp>)
 #include <tf2_kdl/tf2_kdl.hpp>
-#else
-#include <tf2_kdl/tf2_kdl.h>
-#endif
 #include <kdl_parser/kdl_parser.hpp>
 #include <kdl/frames_io.hpp>
 #include <kdl/kinfam_io.hpp>
@@ -88,6 +84,12 @@ bool LMAKinematicsPlugin::initialize(const rclcpp::Node::SharedPtr& node, const 
                                      const std::vector<std::string>& tip_frames, double search_discretization)
 {
   node_ = node;
+
+  // Get Solver Parameters
+  std::string kinematics_param_prefix = "robot_description_kinematics." + group_name;
+  param_listener_ = std::make_shared<lma_kinematics::ParamListener>(node, kinematics_param_prefix);
+  params_ = param_listener_->get_params();
+
   storeValues(robot_model, group_name, base_frame, tip_frames, search_discretization);
   joint_model_group_ = robot_model_->getJointModelGroup(group_name);
   if (!joint_model_group_)
@@ -127,22 +129,10 @@ bool LMAKinematicsPlugin::initialize(const rclcpp::Node::SharedPtr& node, const 
   }
   dimension_ = joints_.size();
 
-  // Get Solver Parameters
-  lookupParam(node_, "max_solver_iterations", max_solver_iterations_, 500);
-  lookupParam(node_, "epsilon", epsilon_, 1e-5);
-  lookupParam(node_, "orientation_vs_position", orientation_vs_position_weight_, 0.01);
-
-  bool position_ik;
-  lookupParam(node_, "position_only_ik", position_ik, false);
-  if (position_ik)  // position_only_ik overrules orientation_vs_position
-    orientation_vs_position_weight_ = 0.0;
-  if (orientation_vs_position_weight_ == 0.0)
-    RCLCPP_INFO(LOGGER, "Using position only ik");
-
   // Setup the joint state groups that we need
-  state_.reset(new moveit::core::RobotState(robot_model_));
+  state_ = std::make_shared<moveit::core::RobotState>(robot_model_);
 
-  fk_solver_.reset(new KDL::ChainFkSolverPos_recursive(kdl_chain_));
+  fk_solver_ = std::make_unique<KDL::ChainFkSolverPos_recursive>(kdl_chain_);
 
   initialized_ = true;
   RCLCPP_DEBUG(LOGGER, "LMA solver initialized");
@@ -245,13 +235,17 @@ bool LMAKinematicsPlugin::searchPositionIK(const geometry_msgs::msg::Pose& ik_po
     return false;
   }
 
+  const auto orientation_vs_position_weight = params_.position_only_ik ? 0.0 : params_.orientation_vs_position;
+  if (orientation_vs_position_weight == 0.0)
+    RCLCPP_INFO(LOGGER, "Using position only ik");
+
   Eigen::Matrix<double, 6, 1> cartesian_weights;
   cartesian_weights(0) = 1;
   cartesian_weights(1) = 1;
   cartesian_weights(2) = 1;
-  cartesian_weights(3) = orientation_vs_position_weight_;
-  cartesian_weights(4) = orientation_vs_position_weight_;
-  cartesian_weights(5) = orientation_vs_position_weight_;
+  cartesian_weights(3) = orientation_vs_position_weight;
+  cartesian_weights(4) = orientation_vs_position_weight;
+  cartesian_weights(5) = orientation_vs_position_weight;
 
   KDL::JntArray jnt_seed_state(dimension_);
   KDL::JntArray jnt_pos_in(dimension_);
@@ -259,7 +253,7 @@ bool LMAKinematicsPlugin::searchPositionIK(const geometry_msgs::msg::Pose& ik_po
   jnt_seed_state.data = Eigen::Map<const Eigen::VectorXd>(ik_seed_state.data(), ik_seed_state.size());
   jnt_pos_in = jnt_seed_state;
 
-  KDL::ChainIkSolverPos_LMA ik_solver_pos(kdl_chain_, cartesian_weights, epsilon_, max_solver_iterations_);
+  KDL::ChainIkSolverPos_LMA ik_solver_pos(kdl_chain_, cartesian_weights, params_.epsilon, params_.max_solver_iterations);
   solution.resize(dimension_);
 
   KDL::Frame pose_desired;
@@ -292,7 +286,7 @@ bool LMAKinematicsPlugin::searchPositionIK(const geometry_msgs::msg::Pose& ik_po
         continue;
 
       Eigen::Map<Eigen::VectorXd>(solution.data(), solution.size()) = jnt_pos_out.data;
-      if (!solution_callback.empty())
+      if (solution_callback)
       {
         solution_callback(ik_pose, solution, error_code);
         if (error_code.val != error_code.SUCCESS)
@@ -334,7 +328,7 @@ bool LMAKinematicsPlugin::getPositionFK(const std::vector<std::string>& link_nam
   jnt_pos_in.data = Eigen::Map<const Eigen::VectorXd>(joint_angles.data(), joint_angles.size());
 
   bool valid = true;
-  for (unsigned int i = 0; i < poses.size(); i++)
+  for (unsigned int i = 0; i < poses.size(); ++i)
   {
     if (fk_solver_->JntToCart(jnt_pos_in, p_out) >= 0)
     {

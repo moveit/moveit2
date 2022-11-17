@@ -1,69 +1,25 @@
 import os
-import yaml
 from launch import LaunchDescription
 from launch.actions import ExecuteProcess
 from launch_ros.actions import Node
 from ament_index_python.packages import get_package_share_directory
-import xacro
-
-
-def load_file(package_name, file_path):
-    package_path = get_package_share_directory(package_name)
-    absolute_file_path = os.path.join(package_path, file_path)
-
-    try:
-        with open(absolute_file_path, "r") as file:
-            return file.read()
-    except EnvironmentError:  # parent of IOError, OSError *and* WindowsError where available
-        return None
-
-
-def load_yaml(package_name, file_path):
-    package_path = get_package_share_directory(package_name)
-    absolute_file_path = os.path.join(package_path, file_path)
-
-    try:
-        with open(absolute_file_path, "r") as file:
-            return yaml.safe_load(file)
-    except EnvironmentError:  # parent of IOError, OSError *and* WindowsError where available
-        return None
+from moveit_configs_utils import MoveItConfigsBuilder
+from launch_param_builder import ParameterBuilder
 
 
 def generate_launch_description():
-    # Get URDF and SRDF
-    robot_description_config = xacro.process_file(
-        os.path.join(
-            get_package_share_directory("moveit_resources_panda_moveit_config"),
-            "config",
-            "panda.urdf.xacro",
-        )
+    moveit_config = (
+        MoveItConfigsBuilder("moveit_resources_panda")
+        .robot_description(file_path="config/panda.urdf.xacro")
+        .to_moveit_configs()
     )
-    robot_description = {"robot_description": robot_description_config.toxml()}
-
-    robot_description_semantic_config = load_file(
-        "moveit_resources_panda_moveit_config", "config/panda.srdf"
-    )
-    robot_description_semantic = {
-        "robot_description_semantic": robot_description_semantic_config
-    }
 
     # Get parameters for the Pose Tracking node
-    pose_tracking_yaml = load_yaml("moveit_servo", "config/pose_tracking_settings.yaml")
-    pose_tracking_params = {"moveit_servo": pose_tracking_yaml}
-
-    # Get parameters for the Servo node
-    servo_yaml = load_yaml(
-        "moveit_servo", "config/panda_simulated_config_pose_tracking.yaml"
-    )
-    servo_params = {"moveit_servo": servo_yaml}
-
-    kinematics_yaml = load_yaml(
-        "moveit_resources_panda_moveit_config", "config/kinematics.yaml"
-    )
-    joint_limits_yaml = {
-        "robot_description_planning": load_yaml(
-            "moveit_resources_panda_moveit_config", "config/joint_limits.yaml"
-        )
+    servo_params = {
+        "moveit_servo": ParameterBuilder("moveit_servo")
+        .yaml("config/pose_tracking_settings.yaml")
+        .yaml("config/panda_simulated_config_pose_tracking.yaml")
+        .to_dict()
     }
 
     # RViz
@@ -78,12 +34,7 @@ def generate_launch_description():
         # prefix=['xterm -e gdb -ex run --args'],
         output="log",
         arguments=["-d", rviz_config_file],
-        parameters=[
-            robot_description,
-            robot_description_semantic,
-            kinematics_yaml,
-            joint_limits_yaml,
-        ],
+        parameters=[moveit_config.to_dict()],
     )
 
     # Publishes tf's for the robot
@@ -91,7 +42,7 @@ def generate_launch_description():
         package="robot_state_publisher",
         executable="robot_state_publisher",
         output="screen",
-        parameters=[robot_description],
+        parameters=[moveit_config.robot_description],
     )
 
     # A node to publish world -> panda_link0 transform
@@ -109,12 +60,8 @@ def generate_launch_description():
         # prefix=['xterm -e gdb -ex run --args'],
         output="screen",
         parameters=[
-            robot_description,
-            robot_description_semantic,
-            kinematics_yaml,
-            pose_tracking_params,
+            moveit_config.to_dict(),
             servo_params,
-            joint_limits_yaml,
         ],
     )
 
@@ -122,28 +69,32 @@ def generate_launch_description():
     ros2_controllers_path = os.path.join(
         get_package_share_directory("moveit_resources_panda_moveit_config"),
         "config",
-        "panda_ros_controllers.yaml",
+        "ros2_controllers.yaml",
     )
     ros2_control_node = Node(
         package="controller_manager",
         executable="ros2_control_node",
-        parameters=[robot_description, ros2_controllers_path],
-        output={
-            "stdout": "screen",
-            "stderr": "screen",
-        },
+        parameters=[moveit_config.robot_description, ros2_controllers_path],
+        output="screen",
     )
 
-    # Load controllers
-    load_controllers = []
-    for controller in ["panda_arm_controller", "joint_state_broadcaster"]:
-        load_controllers += [
-            ExecuteProcess(
-                cmd=["ros2 run controller_manager spawner {}".format(controller)],
-                shell=True,
-                output="screen",
-            )
-        ]
+    joint_state_broadcaster_spawner = Node(
+        package="controller_manager",
+        executable="spawner",
+        arguments=[
+            "joint_state_broadcaster",
+            "--controller-manager-timeout",
+            "300",
+            "--controller-manager",
+            "/controller_manager",
+        ],
+    )
+
+    panda_arm_controller_spawner = Node(
+        package="controller_manager",
+        executable="spawner",
+        arguments=["panda_arm_controller", "-c", "/controller_manager"],
+    )
 
     return LaunchDescription(
         [
@@ -151,7 +102,8 @@ def generate_launch_description():
             static_tf,
             pose_tracking_node,
             ros2_control_node,
+            joint_state_broadcaster_spawner,
+            panda_arm_controller_spawner,
             robot_state_publisher,
         ]
-        + load_controllers
     )

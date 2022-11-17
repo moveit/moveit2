@@ -47,7 +47,7 @@ namespace moveit_servo
 {
 namespace
 {
-double getVelocityScalingFactor(const moveit::core::JointModelGroup* joint_model_group, const Eigen::ArrayXd& velocity)
+double getVelocityScalingFactor(const moveit::core::JointModelGroup* joint_model_group, const Eigen::VectorXd& velocity)
 {
   std::size_t joint_delta_index{ 0 };
   double velocity_scaling_factor{ 1.0 };
@@ -69,17 +69,30 @@ double getVelocityScalingFactor(const moveit::core::JointModelGroup* joint_model
 
 }  // namespace
 
-Eigen::ArrayXd enforceVelocityLimits(const moveit::core::JointModelGroup* joint_model_group, double publish_period,
-                                     const Eigen::ArrayXd& delta_theta)
+void enforceVelocityLimits(const moveit::core::JointModelGroup* joint_model_group, const double publish_period,
+                           sensor_msgs::msg::JointState& joint_state, const double override_velocity_scaling_factor)
 {
-  // Convert to joint angle velocities for checking and applying joint specific velocity limits.
-  Eigen::ArrayXd velocity = delta_theta / publish_period;
-
   // Get the velocity scaling factor
-  double velocity_scaling_factor = getVelocityScalingFactor(joint_model_group, velocity);
+  Eigen::VectorXd velocity =
+      Eigen::Map<Eigen::VectorXd, Eigen::Unaligned>(joint_state.velocity.data(), joint_state.velocity.size());
+  double velocity_scaling_factor = override_velocity_scaling_factor;
+  // if the override velocity scaling factor is approximately zero then the user is not overriding the value.
+  if (override_velocity_scaling_factor < 0.01)
+    velocity_scaling_factor = getVelocityScalingFactor(joint_model_group, velocity);
 
-  // Scale the resulting detas to avoid violating limits.
-  return velocity_scaling_factor * velocity * publish_period;
+  // Take a smaller step if the velocity scaling factor is less than 1
+  if (velocity_scaling_factor < 1)
+  {
+    Eigen::VectorXd velocity_residuals = (1 - velocity_scaling_factor) * velocity;
+    Eigen::VectorXd positions =
+        Eigen::Map<Eigen::VectorXd, Eigen::Unaligned>(joint_state.position.data(), joint_state.position.size());
+    positions -= velocity_residuals * publish_period;
+
+    velocity *= velocity_scaling_factor;
+    // Back to sensor_msgs type
+    joint_state.velocity = std::vector<double>(velocity.data(), velocity.data() + velocity.size());
+    joint_state.position = std::vector<double>(positions.data(), positions.data() + positions.size());
+  }
 }
 
 }  // namespace moveit_servo

@@ -138,7 +138,7 @@ public:
    * Return true if the execution is complete (whether successful or not).
    * Return false if timeout was reached.
    * If timeout is -1 (default argument), wait until the execution is complete (no timeout). */
-  virtual bool waitForExecution(const rclcpp::Duration& timeout = rclcpp::Duration(-1)) = 0;
+  virtual bool waitForExecution(const rclcpp::Duration& timeout = rclcpp::Duration::from_nanoseconds(-1)) = 0;
 
   /** \brief Return the execution status of the last trajectory sent to the controller. */
   virtual ExecutionStatus getLastExecutionStatus() = 0;
@@ -194,7 +194,7 @@ public:
   /** \brief Get the list of active controllers.
    *
    * If there is only one controller in the system, this will be active.  When multiple controllers exist,
-   * and they operate on overlaping sets of joints, not all controllers should be active at the same time. */
+   * and they operate on overlapping sets of joints, not all controllers should be active at the same time. */
   virtual void getActiveControllers(std::vector<std::string>& names) = 0;
 
   /** \brief Report the joints a controller operates on, given the controller name.

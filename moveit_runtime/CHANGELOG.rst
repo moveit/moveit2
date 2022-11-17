@@ -2,6 +2,44 @@
 Changelog for package moveit_runtime
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.6.0 (2022-11-10)
+------------------
+* Improve CMake usage (`#1550 <https://github.com/ros-planning/moveit2/issues/1550>`_)
+* Uncomment moveit_ros_perception dependency (`#1463 <https://github.com/ros-planning/moveit2/issues/1463>`_)
+* Contributors: AndyZe, Sebastian Jahr
+
+2.5.3 (2022-07-28)
+------------------
+
+2.5.2 (2022-07-18)
+------------------
+* Merge remote-tracking branch 'origin/main' into feature/msa
+* Remove manipulation from moveit_ros (`#1177 <https://github.com/ros-planning/moveit2/issues/1177>`_)
+* Contributors: Stephanie Eng, Vatan Aksoy Tezer
+
+2.5.1 (2022-05-31)
+------------------
+
+2.5.0 (2022-05-26)
+------------------
+* 1.1.9
+* 1.1.8
+* 1.1.7
+* 1.1.6
+* Contributors: Robert Haschke
+
+2.4.0 (2022-01-20)
+------------------
+
+2.3.2 (2021-12-29)
+------------------
+
+2.3.1 (2021-12-23)
+------------------
+* Enforce package.xml format 3 Schema (`#779 <https://github.com/ros-planning/moveit2/issues/779>`_)
+* Update Maintainers of MoveIt package (`#697 <https://github.com/ros-planning/moveit2/issues/697>`_)
+* Contributors: Dave Coleman, Henning Kayser
+
 2.3.0 (2021-10-08)
 ------------------
 

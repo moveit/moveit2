@@ -51,10 +51,10 @@
 #include <moveit_msgs/msg/constraints.hpp>
 #include <moveit_msgs/msg/planning_scene_components.hpp>
 #include <octomap_msgs/msg/octomap_with_pose.hpp>
-#include <boost/noncopyable.hpp>
-#include <boost/function.hpp>
-#include <boost/concept_check.hpp>
 #include <memory>
+#include <functional>
+#include <thread>
+#include <variant>
 #include "rclcpp/rclcpp.hpp"
 
 #include "moveit_planning_scene_export.h"
@@ -68,15 +68,14 @@ MOVEIT_CLASS_FORWARD(PlanningScene);  // Defines PlanningScenePtr, ConstPtr, Wea
    respecting constraints and collision avoidance).
     The first argument is the state to check the feasibility for, the second one is whether the check should be verbose
    or not. */
-typedef boost::function<bool(const moveit::core::RobotState&, bool)> StateFeasibilityFn;
+typedef std::function<bool(const moveit::core::RobotState&, bool)> StateFeasibilityFn;
 
 /** \brief This is the function signature for additional feasibility checks to be imposed on motions segments between
    states (in addition to respecting constraints and collision avoidance).
     The order of the arguments matters: the notion of feasibility is to be checked for motion segments that start at the
    first state and end at the second state. The third argument indicates
     whether the check should be verbose or not. */
-using MotionFeasibilityFn =
-    boost::function<bool(const moveit::core::RobotState&, const moveit::core::RobotState&, bool)>;
+using MotionFeasibilityFn = std::function<bool(const moveit::core::RobotState&, const moveit::core::RobotState&, bool)>;
 
 /** \brief A map from object names (e.g., attached bodies, collision objects) to their colors */
 using ObjectColorMap = std::map<std::string, std_msgs::msg::ColorRGBA>;
@@ -87,20 +86,27 @@ using ObjectTypeMap = std::map<std::string, object_recognition_msgs::msg::Object
 /** \brief This class maintains the representation of the
     environment as seen by a planning instance. The environment
     geometry, the robot geometry and state are maintained. */
-class MOVEIT_PLANNING_SCENE_EXPORT PlanningScene : private boost::noncopyable,
-                                                   public std::enable_shared_from_this<PlanningScene>
+class MOVEIT_PLANNING_SCENE_EXPORT PlanningScene : public std::enable_shared_from_this<PlanningScene>
 {
 public:
+  /**
+   * @brief PlanningScene cannot be copy-constructed
+   */
+  PlanningScene(const PlanningScene&) = delete;
+
+  /**
+   * @brief PlanningScene cannot be copy-assigned
+   */
+  PlanningScene& operator=(const PlanningScene&) = delete;
+
   /** \brief construct using an existing RobotModel */
-  PlanningScene(
-      const moveit::core::RobotModelConstPtr& robot_model,
-      const collision_detection::WorldPtr& world = collision_detection::WorldPtr(new collision_detection::World()));
+  PlanningScene(const moveit::core::RobotModelConstPtr& robot_model,
+                const collision_detection::WorldPtr& world = std::make_shared<collision_detection::World>());
 
   /** \brief construct using a urdf and srdf.
    * A RobotModel for the PlanningScene will be created using the urdf and srdf. */
-  PlanningScene(
-      const urdf::ModelInterfaceSharedPtr& urdf_model, const srdf::ModelConstSharedPtr& srdf_model,
-      const collision_detection::WorldPtr& world = collision_detection::WorldPtr(new collision_detection::World()));
+  PlanningScene(const urdf::ModelInterfaceSharedPtr& urdf_model, const srdf::ModelConstSharedPtr& srdf_model,
+                const collision_detection::WorldPtr& world = std::make_shared<collision_detection::World>());
 
   static const std::string OCTOMAP_NS;
   static const std::string DEFAULT_SCENE_NAME;
@@ -135,7 +141,7 @@ public:
    * has the diffs specified by \e msg applied. */
   PlanningScenePtr diff(const moveit_msgs::msg::PlanningScene& msg) const;
 
-  /** \brief Get the parent scene (whith respect to which the diffs are maintained). This may be empty */
+  /** \brief Get the parent scene (with respect to which the diffs are maintained). This may be empty */
   const PlanningSceneConstPtr& getParent() const
   {
     return parent_;
@@ -515,37 +521,42 @@ public:
     getCollidingPairs(contacts, getCurrentState(), getAllowedCollisionMatrix());
   }
 
-  /** \brief Get the names of the links that are involved in collisions for the state \e robot_state */
+  /** \brief Get the names of the links that are involved in collisions for the state \e robot_state.
+   *  Can be restricted to links part of or updated by \e group_name */
   void getCollidingPairs(collision_detection::CollisionResult::ContactMap& contacts,
-                         const moveit::core::RobotState& robot_state) const
+                         const moveit::core::RobotState& robot_state, const std::string& group_name = "") const
   {
-    getCollidingPairs(contacts, robot_state, getAllowedCollisionMatrix());
+    getCollidingPairs(contacts, robot_state, getAllowedCollisionMatrix(), group_name);
   }
 
   /** \brief Get the names of the links that are involved in collisions for the state \e robot_state.
-      Update the link transforms for \e robot_state if needed. */
+      Update the link transforms for \e robot_state if needed.
+      Can be restricted to links part of or updated by \e group_name */
   void getCollidingPairs(collision_detection::CollisionResult::ContactMap& contacts,
-                         moveit::core::RobotState& robot_state) const
+                         moveit::core::RobotState& robot_state, const std::string& group_name = "") const
   {
     robot_state.updateCollisionBodyTransforms();
-    getCollidingPairs(contacts, static_cast<const moveit::core::RobotState&>(robot_state), getAllowedCollisionMatrix());
+    getCollidingPairs(contacts, static_cast<const moveit::core::RobotState&>(robot_state), getAllowedCollisionMatrix(),
+                      group_name);
   }
 
   /** \brief  Get the names of the links that are involved in collisions for the state \e robot_state given the
-      allowed collision matrix (\e acm). Update the link transforms for \e robot_state if needed. */
+      allowed collision matrix (\e acm). Update the link transforms for \e robot_state if needed.
+      Can be restricted to links part of or updated by \e group_name*/
   void getCollidingPairs(collision_detection::CollisionResult::ContactMap& contacts,
-                         moveit::core::RobotState& robot_state,
-                         const collision_detection::AllowedCollisionMatrix& acm) const
+                         moveit::core::RobotState& robot_state, const collision_detection::AllowedCollisionMatrix& acm,
+                         const std::string& group_name = "") const
   {
     robot_state.updateCollisionBodyTransforms();
-    getCollidingPairs(contacts, static_cast<const moveit::core::RobotState&>(robot_state), acm);
+    getCollidingPairs(contacts, static_cast<const moveit::core::RobotState&>(robot_state), acm, group_name);
   }
 
   /** \brief  Get the names of the links that are involved in collisions for the state \e robot_state given the
-      allowed collision matrix (\e acm) */
+      allowed collision matrix (\e acm). Can be restricted to links part of or updated by \e group_name */
   void getCollidingPairs(collision_detection::CollisionResult::ContactMap& contacts,
                          const moveit::core::RobotState& robot_state,
-                         const collision_detection::AllowedCollisionMatrix& acm) const;
+                         const collision_detection::AllowedCollisionMatrix& acm,
+                         const std::string& group_name = "") const;
 
   /**@}*/
 
@@ -689,6 +700,15 @@ public:
   /** \brief Call setPlanningSceneMsg() or setPlanningSceneDiffMsg() depending on how the is_diff member of the message
    * is set */
   bool usePlanningSceneMsg(const moveit_msgs::msg::PlanningScene& scene);
+
+  /** \brief Takes the object message and returns the object pose, shapes and shape poses.
+   * If the object pose is empty (identity) but the shape pose is set, this uses the shape
+   * pose as the object pose. The shape pose becomes the identity instead.
+   */
+  bool shapesAndPosesFromCollisionObjectMessage(const moveit_msgs::msg::CollisionObject& object,
+                                                Eigen::Isometry3d& object_pose_in_header_frame,
+                                                std::vector<shapes::ShapeConstPtr>& shapes,
+                                                EigenSTL::vector_Isometry3d& shape_poses);
 
   bool processCollisionObjectMsg(const moveit_msgs::msg::CollisionObject& object);
   bool processAttachedCollisionObjectMsg(const moveit_msgs::msg::AttachedCollisionObject& object);
@@ -952,12 +972,16 @@ private:
   bool processCollisionObjectRemove(const moveit_msgs::msg::CollisionObject& object);
   bool processCollisionObjectMove(const moveit_msgs::msg::CollisionObject& object);
 
+  /* For exporting and importing the planning scene */
+  bool readPoseFromText(std::istream& in, Eigen::Isometry3d& pose) const;
+  void writePoseToText(std::ostream& out, const Eigen::Isometry3d& pose) const;
+
   /** convert Pose msg to Eigen::Isometry, normalizing the quaternion part if necessary. */
   static void poseMsgToEigen(const geometry_msgs::msg::Pose& msg, Eigen::Isometry3d& out);
 
   MOVEIT_STRUCT_FORWARD(CollisionDetector);
 
-  /* Construct a new CollisionDector from allocator, copy-construct environments from parent_detector if not null */
+  /* Construct a new CollisionDector from allocator, copy-construct environments from parent_detector if not nullptr */
   void allocateCollisionDetector(const collision_detection::CollisionDetectorAllocatorPtr& allocator,
                                  const CollisionDetectorPtr& parent_detector);
 
@@ -965,7 +989,7 @@ private:
   struct CollisionDetector
   {
     collision_detection::CollisionDetectorAllocatorPtr alloc_;
-    collision_detection::CollisionEnvPtr cenv_;  // never NULL
+    collision_detection::CollisionEnvPtr cenv_;  // never nullptr
     collision_detection::CollisionEnvConstPtr cenv_const_;
 
     collision_detection::CollisionEnvPtr cenv_unpadded_;
@@ -989,24 +1013,24 @@ private:
 
   moveit::core::RobotModelConstPtr robot_model_;  // Never null (may point to same model as parent)
 
-  moveit::core::RobotStatePtr robot_state_;  // if NULL use parent's
+  moveit::core::RobotStatePtr robot_state_;  // if nullptr use parent's
 
   // Called when changes are made to attached bodies
   moveit::core::AttachedBodyCallback current_state_attached_body_callback_;
 
   // This variable is not necessarily used by child planning scenes
   // This Transforms class is actually a SceneTransforms class
-  moveit::core::TransformsPtr scene_transforms_;  // if NULL use parent's
+  moveit::core::TransformsPtr scene_transforms_;  // if nullptr use parent's
 
-  collision_detection::WorldPtr world_;             // never NULL, never shared with parent/child
+  collision_detection::WorldPtr world_;             // never nullptr, never shared with parent/child
   collision_detection::WorldConstPtr world_const_;  // copy of world_
-  collision_detection::WorldDiffPtr world_diff_;    // NULL unless this is a diff scene
+  collision_detection::WorldDiffPtr world_diff_;    // nullptr unless this is a diff scene
   collision_detection::World::ObserverCallbackFn current_world_object_update_callback_;
   collision_detection::World::ObserverHandle current_world_object_update_observer_handle_;
 
-  CollisionDetectorPtr collision_detector_;  // Never NULL.
+  CollisionDetectorPtr collision_detector_;  // Never nullptr.
 
-  collision_detection::AllowedCollisionMatrixPtr acm_;  // if NULL use parent's
+  collision_detection::AllowedCollisionMatrixPtr acm_;  // if nullptr use parent's
 
   StateFeasibilityFn state_feasibility_;
   MotionFeasibilityFn motion_feasibility_;

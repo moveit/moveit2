@@ -36,13 +36,14 @@
  *   POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <rclcpp/logger.hpp>
+#include <rclcpp/logging.hpp>
 #include <limits>
 #include <Eigen/Geometry>
 #include <algorithm>
 #include <cmath>
 #include <moveit/trajectory_processing/time_optimal_trajectory_generation.h>
 #include <vector>
-#include "rclcpp/rclcpp.hpp"
 
 namespace trajectory_processing
 {
@@ -112,8 +113,10 @@ public:
 
     const Eigen::VectorXd start_direction = (intersection - start).normalized();
     const Eigen::VectorXd end_direction = (end - intersection).normalized();
+    const double start_dot_end = start_direction.dot(end_direction);
 
-    if ((start_direction - end_direction).norm() < 0.000001)
+    // catch division by 0 in computations below
+    if (start_dot_end > 0.999999 || start_dot_end < -0.999999)
     {
       length_ = 0.0;
       radius = 1.0;
@@ -123,8 +126,7 @@ public:
       return;
     }
 
-    // directions must be different at this point so angle is always non-zero
-    const double angle = acos(std::max(-1.0, start_direction.dot(end_direction)));
+    const double angle = acos(start_dot_end);
     const double start_distance = (start - intersection).norm();
     const double end_distance = (end - intersection).norm();
 
@@ -310,11 +312,6 @@ double Path::getNextSwitchingPoint(double s, bool& discontinuity) const
 std::list<std::pair<double, bool>> Path::getSwitchingPoints() const
 {
   return switching_points_;
-}
-
-static double squared(double d)
-{
-  return d * d;
 }
 
 Trajectory::Trajectory(const Path& path, const Eigen::VectorXd& max_velocity, const Eigen::VectorXd& max_acceleration,
@@ -868,10 +865,6 @@ TimeOptimalTrajectoryGeneration::TimeOptimalTrajectoryGeneration(const double pa
 {
 }
 
-TimeOptimalTrajectoryGeneration::~TimeOptimalTrajectoryGeneration()
-{
-}
-
 bool TimeOptimalTrajectoryGeneration::computeTimeStamps(robot_trajectory::RobotTrajectory& trajectory,
                                                         const double max_velocity_scaling_factor,
                                                         const double max_acceleration_scaling_factor) const
@@ -919,17 +912,11 @@ bool TimeOptimalTrajectoryGeneration::computeTimeStamps(robot_trajectory::RobotT
                 max_acceleration_scaling_factor, acceleration_scaling_factor);
   }
 
-  // This lib does not actually work properly when angles wrap around, so we need to unwind the path first
-  trajectory.unwind();
-
-  // This is pretty much copied from IterativeParabolicTimeParameterization::applyVelocityConstraints
   const std::vector<std::string>& vars = group->getVariableNames();
-  const std::vector<int>& idx = group->getVariableIndexList();
   const moveit::core::RobotModel& rmodel = group->getParentModel();
   const unsigned num_joints = group->getVariableCount();
-  const unsigned num_points = trajectory.getWayPointCount();
 
-  // Get the limits (we do this at same time, unlike IterativeParabolicTimeParameterization)
+  // Get the vel/accel limits
   Eigen::VectorXd max_velocity(num_joints);
   Eigen::VectorXd max_acceleration(num_joints);
   for (size_t j = 0; j < num_joints; ++j)
@@ -940,18 +927,153 @@ bool TimeOptimalTrajectoryGeneration::computeTimeStamps(robot_trajectory::RobotT
     max_velocity[j] = 1.0;
     if (bounds.velocity_bounded_)
     {
-      max_velocity[j] = std::min(fabs(bounds.max_velocity_), fabs(bounds.min_velocity_)) * velocity_scaling_factor;
-      max_velocity[j] = std::max(0.01, max_velocity[j]);
+      if (bounds.max_velocity_ <= 0.0)
+      {
+        RCLCPP_ERROR(LOGGER, "Invalid max_velocity %f specified for '%s', must be greater than 0.0",
+                     bounds.max_velocity_, vars[j].c_str());
+        return false;
+      }
+      max_velocity[j] =
+          std::min(std::fabs(bounds.max_velocity_), std::fabs(bounds.min_velocity_)) * velocity_scaling_factor;
+    }
+    else
+    {
+      RCLCPP_WARN_STREAM_ONCE(
+          LOGGER, "Joint velocity limits are not defined. Using the default "
+                      << max_velocity[j] << " rad/s. You can define velocity limits in the URDF or joint_limits.yaml.");
     }
 
     max_acceleration[j] = 1.0;
     if (bounds.acceleration_bounded_)
     {
-      max_acceleration[j] =
-          std::min(fabs(bounds.max_acceleration_), fabs(bounds.min_acceleration_)) * acceleration_scaling_factor;
-      max_acceleration[j] = std::max(0.01, max_acceleration[j]);
+      if (bounds.max_acceleration_ < 0.0)
+      {
+        RCLCPP_ERROR(LOGGER, "Invalid max_acceleration %f specified for '%s', must be greater than 0.0",
+                     bounds.max_acceleration_, vars[j].c_str());
+        return false;
+      }
+      max_acceleration[j] = std::min(std::fabs(bounds.max_acceleration_), std::fabs(bounds.min_acceleration_)) *
+                            acceleration_scaling_factor;
+    }
+    else
+    {
+      RCLCPP_WARN_STREAM_ONCE(LOGGER,
+                              "Joint acceleration limits are not defined. Using the default "
+                                  << max_acceleration[j]
+                                  << " rad/s^2. You can define acceleration limits in the URDF or joint_limits.yaml.");
     }
   }
+
+  return doTimeParameterizationCalculations(trajectory, max_velocity, max_acceleration);
+}
+
+bool TimeOptimalTrajectoryGeneration::computeTimeStamps(
+    robot_trajectory::RobotTrajectory& trajectory, const std::unordered_map<std::string, double>& velocity_limits,
+    const std::unordered_map<std::string, double>& acceleration_limits) const
+{
+  if (trajectory.empty())
+    return true;
+
+  // Get the default joint limits from the robot model, then overwrite any that are provided as arguments
+  const moveit::core::JointModelGroup* group = trajectory.getGroup();
+  if (!group)
+  {
+    RCLCPP_ERROR(LOGGER, "It looks like the planner did not set the group the plan was computed for");
+    return false;
+  }
+  const unsigned num_joints = group->getVariableCount();
+  const std::vector<std::string>& vars = group->getVariableNames();
+  const moveit::core::RobotModel& rmodel = group->getParentModel();
+
+  Eigen::VectorXd max_velocity(num_joints);
+  Eigen::VectorXd max_acceleration(num_joints);
+  for (size_t j = 0; j < num_joints; ++j)
+  {
+    const moveit::core::VariableBounds& bounds = rmodel.getVariableBounds(vars[j]);
+
+    // VELOCITY LIMIT
+    // Check if a custom limit was specified as an argument
+    bool set_velocity_limit = false;
+    auto it = velocity_limits.find(vars[j]);
+    if (it != velocity_limits.end())
+    {
+      max_velocity[j] = it->second;
+      set_velocity_limit = true;
+    }
+
+    if (bounds.velocity_bounded_ && !set_velocity_limit)
+    {
+      // Set the default velocity limit, from robot model
+      if (bounds.max_velocity_ < 0.0)
+      {
+        RCLCPP_ERROR(LOGGER, "Invalid max_velocity %f specified for '%s', must be greater than 0.0",
+                     bounds.max_velocity_, vars[j].c_str());
+        return false;
+      }
+      max_velocity[j] = std::min(std::fabs(bounds.max_velocity_), std::fabs(bounds.min_velocity_));
+      set_velocity_limit = true;
+    }
+
+    if (!set_velocity_limit)
+    {
+      max_velocity[j] = 1.0;
+      RCLCPP_WARN_STREAM_ONCE(
+          LOGGER, "Joint velocity limits are not defined. Using the default "
+                      << max_velocity[j] << " rad/s. You can define velocity limits in the URDF or joint_limits.yaml.");
+    }
+
+    // ACCELERATION LIMIT
+    // Check if a custom limit was specified as an argument
+    bool set_acceleration_limit = false;
+    it = acceleration_limits.find(vars[j]);
+    if (it != acceleration_limits.end())
+    {
+      max_acceleration[j] = it->second;
+      set_acceleration_limit = true;
+    }
+
+    if (bounds.acceleration_bounded_ && !set_acceleration_limit)
+    {
+      // Set the default acceleration limit, from robot model
+      if (bounds.max_acceleration_ < 0.0)
+      {
+        RCLCPP_ERROR(LOGGER, "Invalid max_acceleration %f specified for '%s', must be greater than 0.0",
+                     bounds.max_acceleration_, vars[j].c_str());
+        return false;
+      }
+      max_acceleration[j] = std::min(std::fabs(bounds.max_acceleration_), std::fabs(bounds.min_acceleration_));
+      set_acceleration_limit = true;
+    }
+    if (!set_acceleration_limit)
+    {
+      max_acceleration[j] = 1.0;
+      RCLCPP_WARN_STREAM_ONCE(LOGGER,
+                              "Joint acceleration limits are not defined. Using the default "
+                                  << max_acceleration[j]
+                                  << " rad/s^2. You can define acceleration limits in the URDF or joint_limits.yaml.");
+    }
+  }
+
+  return doTimeParameterizationCalculations(trajectory, max_velocity, max_acceleration);
+}
+
+bool TimeOptimalTrajectoryGeneration::doTimeParameterizationCalculations(robot_trajectory::RobotTrajectory& trajectory,
+                                                                         const Eigen::VectorXd& max_velocity,
+                                                                         const Eigen::VectorXd& max_acceleration) const
+{
+  // This lib does not actually work properly when angles wrap around, so we need to unwind the path first
+  trajectory.unwind();
+
+  const moveit::core::JointModelGroup* group = trajectory.getGroup();
+  if (!group)
+  {
+    RCLCPP_ERROR(LOGGER, "It looks like the planner did not set the group the plan was computed for");
+    return false;
+  }
+
+  const unsigned num_points = trajectory.getWayPointCount();
+  const std::vector<int>& idx = group->getVariableIndexList();
+  const unsigned num_joints = group->getVariableCount();
 
   // Have to convert into Eigen data structs and remove repeated points
   //  (https://github.com/tobiaskunz/trajectories/issues/3)
@@ -960,17 +1082,25 @@ bool TimeOptimalTrajectoryGeneration::computeTimeStamps(robot_trajectory::RobotT
   {
     moveit::core::RobotStatePtr waypoint = trajectory.getWayPointPtr(p);
     Eigen::VectorXd new_point(num_joints);
+    // The first point should always be kept
     bool diverse_point = (p == 0);
 
-    for (size_t j = 0; j < num_joints; j++)
+    for (size_t j = 0; j < num_joints; ++j)
     {
       new_point[j] = waypoint->getVariablePosition(idx[j]);
-      if (p > 0 && std::abs(new_point[j] - points.back()[j]) > min_angle_change_)
+      // If any joint angle is different, it's a unique waypoint
+      if (p > 0 && std::fabs(new_point[j] - points.back()[j]) > min_angle_change_)
+      {
         diverse_point = true;
+      }
     }
 
     if (diverse_point)
       points.push_back(new_point);
+    // If the last point is not a diverse_point we replace the last added point with it to make sure to always have the
+    // input end point as the last point
+    else if (p == num_points - 1)
+      points.back() = new_point;
   }
 
   // Return trajectory with only the first waypoint if there are not multiple diverse points

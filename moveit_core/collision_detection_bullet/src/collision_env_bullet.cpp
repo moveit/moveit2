@@ -38,8 +38,10 @@
 #include <moveit/collision_detection_bullet/collision_detector_allocator_bullet.h>
 #include <moveit/collision_detection_bullet/bullet_integration/ros_bullet_utils.h>
 #include <moveit/collision_detection_bullet/bullet_integration/contact_checker_common.h>
-#include <boost/bind.hpp>
+#include <functional>
 #include <bullet/btBulletCollisionCommon.h>
+#include <rclcpp/logger.hpp>
+#include <rclcpp/logging.hpp>
 
 namespace collision_detection
 {
@@ -51,7 +53,8 @@ CollisionEnvBullet::CollisionEnvBullet(const moveit::core::RobotModelConstPtr& m
   : CollisionEnv(model, padding, scale)
 {
   // request notifications about changes to new world
-  observer_handle_ = getWorld()->addObserver(boost::bind(&CollisionEnvBullet::notifyObjectChange, this, _1, _2));
+  observer_handle_ = getWorld()->addObserver(
+      [this](const World::ObjectConstPtr& object, World::Action action) { notifyObjectChange(object, action); });
 
   for (const std::pair<const std::string, urdf::LinkSharedPtr>& link : robot_model_->getURDF()->links_)
   {
@@ -64,7 +67,8 @@ CollisionEnvBullet::CollisionEnvBullet(const moveit::core::RobotModelConstPtr& m
   : CollisionEnv(model, world, padding, scale)
 {
   // request notifications about changes to new world
-  observer_handle_ = getWorld()->addObserver(boost::bind(&CollisionEnvBullet::notifyObjectChange, this, _1, _2));
+  observer_handle_ = getWorld()->addObserver(
+      [this](const World::ObjectConstPtr& object, World::Action action) { notifyObjectChange(object, action); });
 
   for (const std::pair<const std::string, urdf::LinkSharedPtr>& link : robot_model_->getURDF()->links_)
   {
@@ -77,15 +81,17 @@ CollisionEnvBullet::CollisionEnvBullet(const moveit::core::RobotModelConstPtr& m
 CollisionEnvBullet::CollisionEnvBullet(const CollisionEnvBullet& other, const WorldPtr& world)
   : CollisionEnv(other, world)
 {
-  // TODO(j-petit): Verify this constructor
-
   // request notifications about changes to new world
-  observer_handle_ = getWorld()->addObserver(boost::bind(&CollisionEnvBullet::notifyObjectChange, this, _1, _2));
+  observer_handle_ = getWorld()->addObserver(
+      [this](const World::ObjectConstPtr& object, World::Action action) { notifyObjectChange(object, action); });
 
   for (const std::pair<const std::string, urdf::LinkSharedPtr>& link : other.robot_model_->getURDF()->links_)
   {
     addLinkAsCollisionObject(link.second);
   }
+
+  // get notifications any objects already in the new world
+  getWorld()->notifyObserverAllObjects(observer_handle_, World::CREATE);
 }
 
 CollisionEnvBullet::~CollisionEnvBullet()
@@ -231,14 +237,14 @@ void CollisionEnvBullet::checkRobotCollisionHelperCCD(const CollisionRequest& re
   }
 }
 
-void CollisionEnvBullet::distanceSelf(const DistanceRequest& req, DistanceResult& res,
-                                      const moveit::core::RobotState& state) const
+void CollisionEnvBullet::distanceSelf(const DistanceRequest& /*req*/, DistanceResult& /*res*/,
+                                      const moveit::core::RobotState& /*state*/) const
 {
   RCLCPP_INFO(LOGGER, "distanceSelf is not implemented for Bullet.");
 }
 
-void CollisionEnvBullet::distanceRobot(const DistanceRequest& req, DistanceResult& res,
-                                       const moveit::core::RobotState& state) const
+void CollisionEnvBullet::distanceRobot(const DistanceRequest& /*req*/, DistanceResult& /*res*/,
+                                       const moveit::core::RobotState& /*state*/) const
 {
   RCLCPP_INFO(LOGGER, "distanceRobot is not implemented for Bullet.");
 }
@@ -255,9 +261,9 @@ void CollisionEnvBullet::addToManager(const World::Object* obj)
       collision_object_types.push_back(collision_detection_bullet::CollisionObjectType::USE_SHAPE_TYPE);
   }
 
-  collision_detection_bullet::CollisionObjectWrapperPtr cow(new collision_detection_bullet::CollisionObjectWrapper(
-      obj->id_, collision_detection::BodyType::WORLD_OBJECT, obj->shapes_, obj->shape_poses_, collision_object_types,
-      false));
+  auto cow = std::make_shared<collision_detection_bullet::CollisionObjectWrapper>(
+      obj->id_, collision_detection::BodyType::WORLD_OBJECT, obj->shapes_, obj->global_shape_poses_,
+      collision_object_types, false);
 
   manager_->addCollisionObject(cow);
   manager_CCD_->addCollisionObject(cow->clone());
@@ -300,7 +306,8 @@ void CollisionEnvBullet::setWorld(const WorldPtr& world)
   CollisionEnv::setWorld(world);
 
   // request notifications about changes to new world
-  observer_handle_ = getWorld()->addObserver(boost::bind(&CollisionEnvBullet::notifyObjectChange, this, _1, _2));
+  observer_handle_ = getWorld()->addObserver(
+      [this](const World::ObjectConstPtr& object, World::Action action) { notifyObjectChange(object, action); });
 
   // get notifications any objects already in the new world
   getWorld()->notifyObserverAllObjects(observer_handle_, World::CREATE);
@@ -335,9 +342,10 @@ void CollisionEnvBullet::addAttachedOjects(const moveit::core::RobotState& state
 
     try
     {
-      collision_detection_bullet::CollisionObjectWrapperPtr cow(new collision_detection_bullet::CollisionObjectWrapper(
-          body->getName(), collision_detection::BodyType::ROBOT_ATTACHED, body->getShapes(), attached_body_transform,
-          collision_object_types, body->getTouchLinks()));
+      collision_detection_bullet::CollisionObjectWrapperPtr cow =
+          std::make_shared<collision_detection_bullet::CollisionObjectWrapper>(
+              body->getName(), collision_detection::BodyType::ROBOT_ATTACHED, body->getShapes(),
+              attached_body_transform, collision_object_types, body->getTouchLinks());
       cows.push_back(cow);
     }
     catch (std::exception&)
@@ -422,8 +430,9 @@ void CollisionEnvBullet::addLinkAsCollisionObject(const urdf::LinkSharedPtr& lin
 
     try
     {
-      collision_detection_bullet::CollisionObjectWrapperPtr cow(new collision_detection_bullet::CollisionObjectWrapper(
-          link->name, collision_detection::BodyType::ROBOT_LINK, shapes, shape_poses, collision_object_types, true));
+      collision_detection_bullet::CollisionObjectWrapperPtr cow =
+          std::make_shared<collision_detection_bullet::CollisionObjectWrapper>(
+              link->name, collision_detection::BodyType::ROBOT_LINK, shapes, shape_poses, collision_object_types, true);
       manager_->addCollisionObject(cow);
       manager_CCD_->addCollisionObject(cow->clone());
       active_.push_back(cow->getName());
