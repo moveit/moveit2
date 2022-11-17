@@ -1,13 +1,11 @@
-set(MOVEIT_LIB_NAME moveit_distance_field)
-
-add_library(${MOVEIT_LIB_NAME} SHARED
+add_library(moveit_distance_field SHARED
   src/distance_field.cpp
   src/find_internal_points.cpp
   src/propagation_distance_field.cpp
 )
 
-set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
-ament_target_dependencies(${MOVEIT_LIB_NAME}
+set_target_properties(moveit_distance_field PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
+ament_target_dependencies(moveit_distance_field
   Boost
   urdfdom
   urdfdom_headers
@@ -23,8 +21,8 @@ if(BUILD_TESTING)
   find_package(ament_cmake_gtest REQUIRED)
 
   ament_add_gtest(test_voxel_grid test/test_voxel_grid.cpp)
-  target_link_libraries(test_voxel_grid ${MOVEIT_LIB_NAME})
+  target_link_libraries(test_voxel_grid moveit_distance_field)
 
   ament_add_gtest(test_distance_field test/test_distance_field.cpp)
-  target_link_libraries(test_distance_field ${MOVEIT_LIB_NAME})
+  target_link_libraries(test_distance_field moveit_distance_field)
 endif()

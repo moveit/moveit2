@@ -15,8 +15,6 @@ find_package(tf2_ros REQUIRED)
 find_package(rclcpp REQUIRED)
 
 
-set(MOVEIT_LIB_NAME moveit_robot_interaction)
-
 set(THIS_PACKAGE_INCLUDE_DEPENDS
   moveit_core
   moveit_ros_planning
@@ -26,7 +24,7 @@ set(THIS_PACKAGE_INCLUDE_DEPENDS
 
 include_directories(include)
 
-add_library(${MOVEIT_LIB_NAME} SHARED
+add_library(moveit_robot_interaction SHARED
   src/interactive_marker_helpers.cpp
   src/kinematic_options.cpp
   src/kinematic_options_map.cpp
@@ -35,19 +33,19 @@ add_library(${MOVEIT_LIB_NAME} SHARED
   src/robot_interaction.cpp
 )
 include(GenerateExportHeader)
-generate_export_header(${MOVEIT_LIB_NAME})
-target_include_directories(${MOVEIT_LIB_NAME} PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>)
-set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
-ament_target_dependencies(${MOVEIT_LIB_NAME} ${THIS_PACKAGE_INCLUDE_DEPENDS})
+generate_export_header(moveit_robot_interaction)
+target_include_directories(moveit_robot_interaction PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>)
+set_target_properties(moveit_robot_interaction PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
+ament_target_dependencies(moveit_robot_interaction ${THIS_PACKAGE_INCLUDE_DEPENDS})
 
 if(BUILD_TESTING)
   find_package(ament_cmake_gtest REQUIRED)
   ament_add_gtest(locked_robot_state_test test/locked_robot_state_test.cpp)
-  target_link_libraries(locked_robot_state_test ${MOVEIT_LIB_NAME})
+  target_link_libraries(locked_robot_state_test moveit_robot_interaction)
 endif()
 
 install(
-  TARGETS ${MOVEIT_LIB_NAME}
+  TARGETS moveit_robot_interaction
   EXPORT ${PROJECT_NAME}Targets
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
@@ -56,7 +54,7 @@ install(
 )
 
 install(DIRECTORY include/ DESTINATION include)
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${MOVEIT_LIB_NAME}_export.h DESTINATION include)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/moveit_robot_interaction_export.h DESTINATION include)
 
 install(DIRECTORY resources DESTINATION share/${PROJECT_NAME})
 
