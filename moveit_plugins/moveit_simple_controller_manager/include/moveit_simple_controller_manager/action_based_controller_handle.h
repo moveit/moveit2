@@ -138,10 +138,9 @@ public:
     }
     else
     {
-      const bool use_sim_time = node_->get_parameter("use_sim_time").as_bool();
-      if (use_sim_time)
+      std::future_status status;
+      if (node_->get_parameter("use_sim_time").as_bool())
       {
-        std::future_status status;
         const auto start = node_->now();
         do
         {
@@ -155,7 +154,7 @@ public:
       }
       else
       {
-        std::future_status status = result_future.wait_for(timeout.to_chrono<std::chrono::duration<double>>());
+        status = result_future.wait_for(timeout.to_chrono<std::chrono::duration<double>>());
         if (status == std::future_status::timeout)
         {
           RCLCPP_WARN(LOGGER, "waitForExecution timed out");
