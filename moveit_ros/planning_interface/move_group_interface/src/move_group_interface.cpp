@@ -786,7 +786,7 @@ public:
     if (code != rclcpp_action::ResultCode::SUCCEEDED)
     {
       RCLCPP_ERROR_STREAM(LOGGER, "MoveGroupInterface::plan() failed or timeout reached");
-      return false;
+      return res->error_code;
     }
 
     plan.trajectory_ = res->planned_trajectory;
@@ -866,7 +866,6 @@ public:
     if (code != rclcpp_action::ResultCode::SUCCEEDED)
     {
       RCLCPP_ERROR_STREAM(LOGGER, "MoveGroupInterface::move() failed or timeout reached");
-      return false;
     }
     return res->error_code;
   }
@@ -936,7 +935,6 @@ public:
     if (code != rclcpp_action::ResultCode::SUCCEEDED)
     {
       RCLCPP_ERROR_STREAM(LOGGER, "MoveGroupInterface::execute() failed or timeout reached");
-      return false;
     }
     return res->error_code;
   }

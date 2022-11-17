@@ -3,7 +3,7 @@
 
 ARG ROS_DISTRO=foxy
 FROM ros:${ROS_DISTRO}-ros-base-focal
-MAINTAINER Robert Haschke rhaschke@techfak.uni-bielefeld.de
+LABEL maintainer Robert Haschke rhaschke@techfak.uni-bielefeld.de
 
 ENV TERM xterm
 
@@ -18,7 +18,7 @@ COPY . src/moveit2
 RUN \
     # Update apt package list as previous containers clear the cache
     apt-get -q update && \
-    apt-get -q -y dist-upgrade && \
+    apt-get -q -y upgrade && \
     #
     # Install some base dependencies
     apt-get -q install --no-install-recommends -y \
@@ -28,8 +28,12 @@ RUN \
         clang clang-format-10 clang-tidy clang-tools \
         ccache && \
     #
+    # Globally disable git security
+    # https://github.blog/2022-04-12-git-security-vulnerability-announced
+    git config --global --add safe.directory "*" && \
+    #
     # Fetch all dependencies from moveit2.repos
-    vcs import src < src/moveit2/moveit2.repos && \
+    if [ -r src/moveit2/moveit2.repos ] ; then vcs import src < src/moveit2/moveit2.repos ; fi && \
     if [ -r src/moveit2/moveit2_${ROS_DISTRO}.repos ] ; then vcs import src < src/moveit2/moveit2_${ROS_DISTRO}.repos ; fi && \
     #
     # Download all dependencies of MoveIt

@@ -102,7 +102,14 @@ public:
         ActionBasedControllerHandleBasePtr new_handle;
         if (type == "GripperCommand")
         {
-          new_handle = std::make_shared<GripperControllerHandle>(node_, controller_name, action_ns);
+          double max_effort;
+          if (!node->get_parameter(PARAM_BASE_NAME + "." + controller_name + ".max_effort", max_effort))
+          {
+            RCLCPP_INFO_STREAM(LOGGER, "Max effort set to 0.0");
+            max_effort = 0.0;
+          }
+
+          new_handle = std::make_shared<GripperControllerHandle>(node_, controller_name, action_ns, max_effort);
           if (static_cast<GripperControllerHandle*>(new_handle.get())->isConnected())
           {
             bool parallel_gripper = false;

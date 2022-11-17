@@ -74,7 +74,7 @@ void MeshShape::beginTriangles()
   if (!started_)
   {
     started_ = true;
-    manual_object_->begin(material_name_, Ogre::RenderOperation::OT_TRIANGLE_LIST);
+    manual_object_->begin(material_name_, Ogre::RenderOperation::OT_TRIANGLE_LIST, "rviz_rendering");
   }
 }
 
@@ -126,7 +126,7 @@ void MeshShape::endTriangles()
     entity_ = scene_manager_->createEntity(name);
     if (entity_)
     {
-      entity_->setMaterialName(material_name_);
+      entity_->setMaterialName(material_name_, "rviz_rendering");
       offset_node_->attachObject(entity_);
     }
     else
