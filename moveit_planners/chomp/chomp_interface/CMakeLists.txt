@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.22)
 project(moveit_planners_chomp)
 
 # Common cmake code applied to all moveit packages
@@ -11,6 +11,7 @@ find_package(moveit_core REQUIRED)
 find_package(chomp_motion_planner REQUIRED)
 find_package(pluginlib REQUIRED)
 find_package(rclcpp REQUIRED)
+find_package(rsl REQUIRED)
 
 set(THIS_PACKAGE_INCLUDE_DEPENDS
   moveit_core
@@ -18,6 +19,7 @@ set(THIS_PACKAGE_INCLUDE_DEPENDS
   moveit_core
   pluginlib
   rclcpp
+  rsl
 )
 
 include_directories(
@@ -58,7 +60,6 @@ if(BUILD_TESTING)
 
   # These don't pass yet, disable them for now
   set(ament_cmake_copyright_FOUND TRUE)
-  set(ament_cmake_cppcheck_FOUND TRUE)
   set(ament_cmake_cpplint_FOUND TRUE)
   set(ament_cmake_flake8_FOUND TRUE)
   set(ament_cmake_uncrustify_FOUND TRUE)

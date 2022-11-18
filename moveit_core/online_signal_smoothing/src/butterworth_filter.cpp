@@ -37,6 +37,8 @@
  */
 
 #include <moveit/online_signal_smoothing/butterworth_filter.h>
+#include <rclcpp/clock.hpp>
+#include <rclcpp/logging.hpp>
 
 namespace online_signal_smoothing
 {
@@ -89,7 +91,7 @@ void ButterworthFilter::reset(const double data)
   previous_filtered_measurement_ = data;
 }
 
-bool ButterworthFilterPlugin::initialize(rclcpp::Node::SharedPtr node, moveit::core::RobotModelConstPtr robot_model,
+bool ButterworthFilterPlugin::initialize(rclcpp::Node::SharedPtr node, moveit::core::RobotModelConstPtr /* unused */,
                                          size_t num_joints)
 {
   node_ = node;

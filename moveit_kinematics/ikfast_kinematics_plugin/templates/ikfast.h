@@ -39,8 +39,7 @@
 #include <list>
 #include <stdexcept>
 
-#ifndef IKFAST_HEADER_COMMON
-#define IKFAST_HEADER_COMMON
+#pragma once
 
 /// should be the same as ikfast.__version__
 #define IKFAST_VERSION 61
@@ -308,8 +307,6 @@ protected:
   std::list<IkSolution<T> > _listsolutions;
 };
 }  // namespace ikfast
-
-#endif  // OPENRAVE_IKFAST_HEADER
 
 // The following code is dependent on the C++ library linking with.
 #ifdef IKFAST_HAS_LIBRARY

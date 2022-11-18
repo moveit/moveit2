@@ -43,30 +43,22 @@
 #include <kdl/utilities/error.h>
 #include <kdl/utilities/utility.h>
 #include <moveit/robot_state/conversions.h>
-#include <rclcpp/rclcpp.hpp>
-
 #include <tf2_eigen_kdl/tf2_eigen_kdl.hpp>
-#if __has_include(<tf2_eigen/tf2_eigen.hpp>)
+#include <rclcpp/logger.hpp>
+#include <rclcpp/logging.hpp>
 #include <tf2_eigen/tf2_eigen.hpp>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
-#else
-#include <tf2_eigen/tf2_eigen.h>
-#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
-#endif
 
 namespace pilz_industrial_motion_planner
 {
 static const rclcpp::Logger LOGGER =
     rclcpp::get_logger("moveit.pilz_industrial_motion_planner.trajectory_generator_circ");
 TrajectoryGeneratorCIRC::TrajectoryGeneratorCIRC(const moveit::core::RobotModelConstPtr& robot_model,
-                                                 const LimitsContainer& planner_limits)
+                                                 const LimitsContainer& planner_limits,
+                                                 const std::string& /*group_name*/)
   : TrajectoryGenerator::TrajectoryGenerator(robot_model, planner_limits)
 {
-  if (!planner_limits_.hasFullCartesianLimits())
-  {
-    throw TrajectoryGeneratorInvalidLimitsException(
-        "Cartesian limits are not fully set for CIRC trajectory generator.");
-  }
+  planner_limits_.printCartesianLimits();
 }
 
 void TrajectoryGeneratorCIRC::cmdSpecificRequestValidation(const planning_interface::MotionPlanRequest& req) const
@@ -149,12 +141,7 @@ void TrajectoryGeneratorCIRC::extractMotionPlanInfo(const planning_scene::Planni
     {
       frame_id = req.goal_constraints.front().position_constraints.front().header.frame_id;
     }
-    geometry_msgs::msg::Pose goal_pose_msg;
-    goal_pose_msg.position =
-        req.goal_constraints.front().position_constraints.front().constraint_region.primitive_poses.front().position;
-    goal_pose_msg.orientation = req.goal_constraints.front().orientation_constraints.front().orientation;
-    normalizeQuaternion(goal_pose_msg.orientation);
-    tf2::convert<geometry_msgs::msg::Pose, Eigen::Isometry3d>(goal_pose_msg, info.goal_pose);
+    info.goal_pose = getConstraintPose(req.goal_constraints.front());
   }
 
   assert(req.start_state.joint_state.name.size() == req.start_state.joint_state.position.size());
@@ -186,13 +173,23 @@ void TrajectoryGeneratorCIRC::extractMotionPlanInfo(const planning_scene::Planni
     // LCOV_EXCL_STOP // not able to trigger here since lots of checks before
     // are in place
   }
-
-  Eigen::Vector3d circ_path_point;
-  tf2::fromMsg(req.path_constraints.position_constraints.front().constraint_region.primitive_poses.front().position,
-               circ_path_point);
-
   info.circ_path_point.first = req.path_constraints.name;
-  info.circ_path_point.second = circ_path_point;
+  if (!req.goal_constraints.front().position_constraints.empty())
+  {
+    const moveit_msgs::msg::Constraints& goal = req.goal_constraints.front();
+    info.circ_path_point.second =
+        getConstraintPose(
+            req.path_constraints.position_constraints.front().constraint_region.primitive_poses.front().position,
+            goal.orientation_constraints.front().orientation, goal.position_constraints.front().target_point_offset)
+            .translation();
+  }
+  else
+  {
+    Eigen::Vector3d circ_path_point;
+    tf2::fromMsg(req.path_constraints.position_constraints.front().constraint_region.primitive_poses.front().position,
+                 circ_path_point);
+    info.circ_path_point.second = circ_path_point;
+  }
 }
 
 void TrajectoryGeneratorCIRC::plan(const planning_scene::PlanningSceneConstPtr& scene,
@@ -238,8 +235,8 @@ std::unique_ptr<KDL::Path> TrajectoryGeneratorCIRC::setPathCIRC(const MotionPlan
   // The KDL::Path implementation chooses the motion with the longer duration
   // (translation vs. rotation)
   // and uses eqradius as scaling factor between the distances.
-  double eqradius = planner_limits_.getCartesianLimits().getMaxTranslationalVelocity() /
-                    planner_limits_.getCartesianLimits().getMaxRotationalVelocity();
+  double eqradius =
+      planner_limits_.getCartesianLimits().max_trans_vel / planner_limits_.getCartesianLimits().max_rot_vel;
 
   try
   {

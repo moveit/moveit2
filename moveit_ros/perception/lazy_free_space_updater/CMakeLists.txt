@@ -10,7 +10,6 @@ endif()
 ament_target_dependencies(${MOVEIT_LIB_NAME}
   rclcpp
   moveit_ros_occupancy_map_monitor
-  Boost
   sensor_msgs
 )
 

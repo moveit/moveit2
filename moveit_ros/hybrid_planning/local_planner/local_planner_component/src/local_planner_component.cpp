@@ -48,6 +48,7 @@ using namespace std::chrono_literals;
 namespace
 {
 const rclcpp::Logger LOGGER = rclcpp::get_logger("local_planner_component");
+const auto JOIN_THREAD_TIMEOUT = std::chrono::seconds(1);
 
 // If the trajectory progress reaches more than 0.X the global goal state is considered as reached
 constexpr float PROGRESS_THRESHOLD = 0.995;
@@ -92,10 +93,9 @@ bool LocalPlannerComponent::initialize()
   }
 
   // Start state and scene monitors
-  RCLCPP_INFO(LOGGER, "Starting planning scene monitors");
-  planning_scene_monitor_->startSceneMonitor();
-  planning_scene_monitor_->startWorldGeometryMonitor();
-  planning_scene_monitor_->startStateMonitor();
+  planning_scene_monitor_->startSceneMonitor(config_.monitored_planning_scene_topic);
+  planning_scene_monitor_->startWorldGeometryMonitor(config_.collision_object_topic);
+  planning_scene_monitor_->startStateMonitor(config_.joint_states_topic);
 
   // Load trajectory operator plugin
   try
@@ -151,28 +151,57 @@ bool LocalPlannerComponent::initialize()
   }
 
   // Initialize local planning request action server
-  using namespace std::placeholders;
+  cb_group_ = node_->create_callback_group(rclcpp::CallbackGroupType::MutuallyExclusive);
   local_planning_request_server_ = rclcpp_action::create_server<moveit_msgs::action::LocalPlanner>(
       node_, config_.local_planning_action_name,
-      [](const rclcpp_action::GoalUUID& /*unused*/,
-         std::shared_ptr<const moveit_msgs::action::LocalPlanner::Goal> /*unused*/) {
+      // Goal callback
+      [this](const rclcpp_action::GoalUUID& /*unused*/,
+             const std::shared_ptr<const moveit_msgs::action::LocalPlanner::Goal>& /*unused*/) {
         RCLCPP_INFO(LOGGER, "Received local planning goal request");
+        // If another goal is active, cancel it and reject this goal
+        if (long_callback_thread_.joinable())
+        {
+          // Try to terminate the execution thread
+          auto future = std::async(std::launch::async, &std::thread::join, &long_callback_thread_);
+          if (future.wait_for(JOIN_THREAD_TIMEOUT) == std::future_status::timeout)
+          {
+            RCLCPP_WARN(LOGGER, "Another goal was running. Rejecting the new hybrid planning goal.");
+            return rclcpp_action::GoalResponse::REJECT;
+          }
+        }
         return rclcpp_action::GoalResponse::ACCEPT_AND_EXECUTE;
       },
-      [](const std::shared_ptr<rclcpp_action::ServerGoalHandle<moveit_msgs::action::LocalPlanner>>& /*unused*/) {
+      // Cancel callback
+      [this](const std::shared_ptr<rclcpp_action::ServerGoalHandle<moveit_msgs::action::LocalPlanner>>& /*unused*/) {
         RCLCPP_INFO(LOGGER, "Received request to cancel local planning goal");
+        state_ = LocalPlannerState::ABORT;
+        if (long_callback_thread_.joinable())
+        {
+          long_callback_thread_.join();
+        }
         return rclcpp_action::CancelResponse::ACCEPT;
       },
+      // Execution callback
       [this](std::shared_ptr<rclcpp_action::ServerGoalHandle<moveit_msgs::action::LocalPlanner>> goal_handle) {
         local_planning_goal_handle_ = std::move(goal_handle);
-        // Start local planning loop when an action request is received
-        timer_ = node_->create_wall_timer(1s / config_.local_planning_frequency,
-                                          std::bind(&LocalPlannerComponent::executeIteration, this));
-      });
+        // Check if a previous goal was running and needs to be cancelled.
+        if (long_callback_thread_.joinable())
+        {
+          long_callback_thread_.join();
+        }
+        // Start a local planning loop.
+        // This needs to return quickly to avoid blocking the executor, so run the local planner in a new thread.
+        auto local_planner_timer = [&]() {
+          timer_ =
+              node_->create_wall_timer(1s / config_.local_planning_frequency, [this]() { return executeIteration(); });
+        };
+        long_callback_thread_ = std::thread(local_planner_timer);
+      },
+      rcl_action_server_get_default_options(), cb_group_);
 
   // Initialize global trajectory listener
   global_solution_subscriber_ = node_->create_subscription<moveit_msgs::msg::MotionPlanResponse>(
-      config_.global_solution_topic, 1, [this](const moveit_msgs::msg::MotionPlanResponse::SharedPtr msg) {
+      config_.global_solution_topic, 1, [this](const moveit_msgs::msg::MotionPlanResponse::ConstSharedPtr& msg) {
         // Add received trajectory to internal reference trajectory
         robot_trajectory::RobotTrajectory new_trajectory(planning_scene_monitor_->getRobotModel(), msg->group_name);
         moveit::core::RobotState start_state(planning_scene_monitor_->getRobotModel());
@@ -222,7 +251,7 @@ void LocalPlannerComponent::executeIteration()
     // Wait for global solution to be published
     case LocalPlannerState::AWAIT_GLOBAL_TRAJECTORY:
       // Do nothing
-      break;
+      return;
     // Notify action client that local planning failed
     case LocalPlannerState::ABORT:
     {
@@ -230,26 +259,25 @@ void LocalPlannerComponent::executeIteration()
       result->error_message = "Local planner is in an aborted state. Resetting.";
       local_planning_goal_handle_->abort(result);
       reset();
-      break;
+      return;
     }
     // If the planner received an action request and a global solution it starts to plan locally
     case LocalPlannerState::LOCAL_PLANNING_ACTIVE:
     {
-      // Read current planning scene
       planning_scene_monitor_->updateSceneWithCurrentState();
-      planning_scene_monitor_->lockSceneRead();  // LOCK planning scene
-      planning_scene::PlanningScenePtr planning_scene = planning_scene_monitor_->getPlanningScene();
-      planning_scene_monitor_->unlockSceneRead();  // UNLOCK planning scene
 
-      // Get current state
-      auto current_robot_state = planning_scene->getCurrentStateNonConst();
+      // Read current robot state
+      const moveit::core::RobotState current_robot_state = [this] {
+        planning_scene_monitor::LockedPlanningSceneRO ls(planning_scene_monitor_);
+        return ls->getCurrentState();
+      }();
 
       // Check if the global goal is reached
       if (trajectory_operator_instance_->getTrajectoryProgress(current_robot_state) > PROGRESS_THRESHOLD)
       {
         local_planning_goal_handle_->succeed(result);
         reset();
-        break;
+        return;
       }
 
       // Get local goal trajectory to follow
@@ -263,6 +291,9 @@ void LocalPlannerComponent::executeIteration()
       if (!local_planner_feedback_->feedback.empty())
       {
         local_planning_goal_handle_->publish_feedback(local_planner_feedback_);
+        RCLCPP_ERROR(LOGGER, "Local planner somehow failed");
+        reset();
+        return;
       }
 
       // Solve local planning problem
@@ -277,6 +308,7 @@ void LocalPlannerComponent::executeIteration()
       if (!local_planner_feedback_->feedback.empty())
       {
         local_planning_goal_handle_->publish_feedback(local_planner_feedback_);
+        return;
       }
 
       // Use a configurable message interface like MoveIt servo
@@ -308,7 +340,7 @@ void LocalPlannerComponent::executeIteration()
       {
         // Local solution publisher is defined by the local constraint solver plugin
       }
-      break;
+      return;
     }
     default:
     {
@@ -317,7 +349,7 @@ void LocalPlannerComponent::executeIteration()
       local_planning_goal_handle_->abort(result);
       RCLCPP_ERROR(LOGGER, "Local planner somehow failed");  // TODO(sjahr) Add more detailed failure information
       reset();
-      break;
+      return;
     }
   }
 };

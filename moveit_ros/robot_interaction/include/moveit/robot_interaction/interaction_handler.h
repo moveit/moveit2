@@ -63,7 +63,7 @@ struct GenericInteraction;
 /// whether updates to the robot state performed in the
 /// InteractionHandler::handle* functions have switched from failing to
 /// succeeding or the other way around.
-typedef boost::function<void(InteractionHandler*, bool)> InteractionHandlerCallbackFn;
+typedef std::function<void(InteractionHandler*, bool)> InteractionHandlerCallbackFn;
 
 /// Manage interactive markers to control a RobotState.
 ///
@@ -227,23 +227,23 @@ protected:
   std::shared_ptr<tf2_ros::Buffer> tf_buffer_;
 
 private:
-  typedef boost::function<void(InteractionHandler*)> StateChangeCallbackFn;
+  typedef std::function<void(InteractionHandler*)> StateChangeCallbackFn;
 
   // Update RobotState using a generic interaction feedback message.
   // YOU MUST LOCK state_lock_ BEFORE CALLING THIS.
-  void updateStateGeneric(moveit::core::RobotState* state, const GenericInteraction* g,
-                          const visualization_msgs::msg::InteractiveMarkerFeedback::ConstSharedPtr* feedback,
-                          StateChangeCallbackFn* callback);
+  void updateStateGeneric(moveit::core::RobotState& state, const GenericInteraction& g,
+                          const visualization_msgs::msg::InteractiveMarkerFeedback::ConstSharedPtr& feedback,
+                          StateChangeCallbackFn& callback);
 
   // Update RobotState for a new pose of an eef.
   // YOU MUST LOCK state_lock_ BEFORE CALLING THIS.
-  void updateStateEndEffector(moveit::core::RobotState* state, const EndEffectorInteraction* eef,
-                              const geometry_msgs::msg::Pose* pose, StateChangeCallbackFn* callback);
+  void updateStateEndEffector(moveit::core::RobotState& state, const EndEffectorInteraction& eef,
+                              const geometry_msgs::msg::Pose& pose, StateChangeCallbackFn& callback);
 
   // Update RobotState for a new joint position.
   // YOU MUST LOCK state_lock_ BEFORE CALLING THIS.
-  void updateStateJoint(moveit::core::RobotState* state, const JointInteraction* vj,
-                        const geometry_msgs::msg::Pose* pose, StateChangeCallbackFn* callback);
+  void updateStateJoint(moveit::core::RobotState& state, const JointInteraction& vj,
+                        const geometry_msgs::msg::Pose& pose, StateChangeCallbackFn& callback);
 
   // Set the error state for \e name.
   // Returns true if the error state for \e name changed.
@@ -272,8 +272,8 @@ private:
   // PROTECTED BY pose_map_lock_
   std::map<std::string, geometry_msgs::msg::PoseStamped> pose_map_;
 
-  boost::mutex pose_map_lock_;
-  boost::mutex offset_map_lock_;
+  std::mutex pose_map_lock_;
+  std::mutex offset_map_lock_;
 
   // per group options for doing kinematics.
   // PROTECTED BY state_lock_ - The POINTER is protected by state_lock_.  The
@@ -299,7 +299,7 @@ private:
   //
   // PROTECTED BY state_lock_ - the function pointer is protected, but the call
   // is made without any lock held.
-  boost::function<void(InteractionHandler* handler, bool error_state_changed)> update_callback_;
+  std::function<void(InteractionHandler* handler, bool error_state_changed)> update_callback_;
 
   // PROTECTED BY state_lock_
   bool display_meshes_;

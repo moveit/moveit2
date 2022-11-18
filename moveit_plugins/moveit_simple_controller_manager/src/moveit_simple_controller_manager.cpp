@@ -35,12 +35,16 @@
 
 /* Author: Michael Ferguson, Ioan Sucan, E. Gil Jones */
 
-#include <rclcpp/rclcpp.hpp>
 #include <moveit_simple_controller_manager/action_based_controller_handle.h>
 #include <moveit_simple_controller_manager/gripper_controller_handle.h>
 #include <moveit_simple_controller_manager/follow_joint_trajectory_controller_handle.h>
 #include <boost/algorithm/string/join.hpp>
 #include <pluginlib/class_list_macros.hpp>
+#include <rclcpp/logger.hpp>
+#include <rclcpp/logging.hpp>
+#include <rclcpp/node.hpp>
+#include <rclcpp/parameter.hpp>
+#include <rclcpp/parameter_value.hpp>
 #include <algorithm>
 #include <map>
 
@@ -135,7 +139,15 @@ public:
         ActionBasedControllerHandleBasePtr new_handle;
         if (type == "GripperCommand")
         {
-          new_handle = std::make_shared<GripperControllerHandle>(node_, controller_name, action_ns);
+          double max_effort;
+          const std::string& max_effort_param = makeParameterName(PARAM_BASE_NAME, controller_name, "max_effort");
+          if (!node->get_parameter(max_effort_param, max_effort))
+          {
+            RCLCPP_INFO_STREAM(LOGGER, "Max effort set to 0.0");
+            max_effort = 0.0;
+          }
+
+          new_handle = std::make_shared<GripperControllerHandle>(node_, controller_name, action_ns, max_effort);
           bool parallel_gripper = false;
           if (node_->get_parameter(makeParameterName(PARAM_BASE_NAME, "parallel"), parallel_gripper) && parallel_gripper)
           {

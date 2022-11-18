@@ -11,7 +11,6 @@ ament_target_dependencies(${MOVEIT_LIB_NAME}_core
   tf2_geometry_msgs
   geometric_shapes
   moveit_ros_occupancy_map_monitor
-  Boost
 )
 target_link_libraries(${MOVEIT_LIB_NAME}_core moveit_lazy_free_space_updater moveit_mesh_filter)
 
@@ -26,7 +25,6 @@ ament_target_dependencies(${MOVEIT_LIB_NAME}
   tf2_geometry_msgs
   geometric_shapes
   moveit_ros_occupancy_map_monitor
-  Boost
   pluginlib
 )
 target_link_libraries(${MOVEIT_LIB_NAME} ${MOVEIT_LIB_NAME}_core)

@@ -38,19 +38,30 @@
 
 #include <thread>
 
-#include "rclcpp/rclcpp.hpp"
-#include "rclcpp_action/rclcpp_action.hpp"
-
 #include <moveit/planning_scene_monitor/planning_scene_monitor.h>
 #include <moveit/robot_model_loader/robot_model_loader.h>
 #include <moveit/planning_interface/planning_interface.h>
 #include <moveit/planning_scene/planning_scene.h>
 #include <moveit/kinematic_constraints/utils.h>
 #include <moveit/robot_state/conversions.h>
-
 #include <moveit_msgs/action/hybrid_planner.hpp>
 #include <moveit_msgs/msg/display_robot_state.hpp>
 #include <moveit_msgs/msg/motion_plan_response.hpp>
+#include <rclcpp/executors.hpp>
+#include <rclcpp/experimental/buffers/intra_process_buffer.hpp>
+#include <rclcpp/logger.hpp>
+#include <rclcpp/logging.hpp>
+#include <rclcpp/node.hpp>
+#include <rclcpp/node_options.hpp>
+#include <rclcpp/parameter_value.hpp>
+#include <rclcpp/qos.hpp>
+#include <rclcpp/qos_event.hpp>
+#include <rclcpp/subscription.hpp>
+#include <rclcpp/timer.hpp>
+#include <rclcpp/utilities.hpp>
+#include <rclcpp_action/client.hpp>
+#include <rclcpp_action/client_goal_handle.hpp>
+#include <rclcpp_action/create_client.hpp>
 
 using namespace std::chrono_literals;
 namespace
@@ -77,7 +88,6 @@ public:
     }
     hp_action_client_ =
         rclcpp_action::create_client<moveit_msgs::action::HybridPlanner>(node_, hybrid_planning_action_name);
-    robot_state_publisher_ = node_->create_publisher<moveit_msgs::msg::DisplayRobotState>("display_robot_state", 1);
 
     collision_object_1_.header.frame_id = "panda_link0";
     collision_object_1_.id = "box1";
@@ -97,7 +107,7 @@ public:
     // Add new collision object as soon as global trajectory is available.
     global_solution_subscriber_ = node_->create_subscription<moveit_msgs::msg::MotionPlanResponse>(
         "global_trajectory", rclcpp::SystemDefaultsQoS(),
-        [this](const moveit_msgs::msg::MotionPlanResponse::SharedPtr msg) {
+        [this](const moveit_msgs::msg::MotionPlanResponse::ConstSharedPtr& /* unused */) {
           // Remove old collision objects
           collision_object_1_.operation = collision_object_1_.REMOVE;
 
@@ -193,6 +203,12 @@ public:
 
     // Configure a valid robot state
     robot_state->setToDefaultValues(joint_model_group, "ready");
+    robot_state->update();
+    // Lock the planning scene as briefly as possible
+    {
+      planning_scene_monitor::LockedPlanningSceneRW locked_planning_scene(planning_scene_monitor_);
+      locked_planning_scene->setCurrentState(*robot_state);
+    }
 
     // Create desired motion goal
     moveit_msgs::msg::MotionPlanRequest goal_motion_request;
@@ -247,8 +263,8 @@ public:
           }
         };
     send_goal_options.feedback_callback =
-        [](rclcpp_action::ClientGoalHandle<moveit_msgs::action::HybridPlanner>::SharedPtr /*unused*/,
-           const std::shared_ptr<const moveit_msgs::action::HybridPlanner::Feedback> feedback) {
+        [](const rclcpp_action::ClientGoalHandle<moveit_msgs::action::HybridPlanner>::SharedPtr& /*unused*/,
+           const std::shared_ptr<const moveit_msgs::action::HybridPlanner::Feedback>& feedback) {
           RCLCPP_INFO(LOGGER, feedback->feedback.c_str());
         };
 
@@ -260,7 +276,6 @@ public:
 private:
   rclcpp::Node::SharedPtr node_;
   rclcpp_action::Client<moveit_msgs::action::HybridPlanner>::SharedPtr hp_action_client_;
-  rclcpp::Publisher<moveit_msgs::msg::DisplayRobotState>::SharedPtr robot_state_publisher_;
   rclcpp::Subscription<moveit_msgs::msg::MotionPlanResponse>::SharedPtr global_solution_subscriber_;
   planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor_;
   rclcpp::TimerBase::SharedPtr timer_;
@@ -285,6 +300,7 @@ int main(int argc, char** argv)
 
   HybridPlanningDemo demo(node);
   std::thread run_demo([&demo]() {
+    // This sleep isn't necessary but it gives humans time to process what's going on
     rclcpp::sleep_for(5s);
     demo.run();
   });

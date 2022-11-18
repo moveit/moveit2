@@ -1,6 +1,8 @@
 #! /usr/bin/env python
 from __future__ import print_function
 
+from symbol import parameters
+
 """
 IKFast Plugin Generator for MoveIt
 
@@ -180,6 +182,19 @@ def xmlElement(name, text=None, **attributes):
     return e
 
 
+def create_parameter_dict():
+    parameter_dict = {
+        "ikfast_kinematics": {
+            "link_prefix": {
+                "default_value": "",
+                "type": "string",
+                "description": "prefix added to tip- and baseframe to allow different namespaces or multi-robot setups",
+            }
+        }
+    }
+    return parameter_dict
+
+
 def create_ikfast_package(args):
     try:
         setattr(
@@ -223,6 +238,13 @@ def create_ikfast_package(args):
             pkg_xml_path, xml_declaration=True, pretty_print=True, encoding="UTF-8"
         )
         print("Created package.xml at: '%s'" % pkg_xml_path)
+
+    # Create parameter YAML in src folder
+    parameters_yaml_path = src_path + "ikfast_kinematics_parameters.yaml"
+    if not os.path.exists(parameters_yaml_path):
+        print("Create parameters.yaml at: '%s'" % parameters_yaml_path)
+        with open(parameters_yaml_path, "w") as file:
+            documents = yaml.dump(create_parameter_dict(), file)
 
 
 def find_template_dir():

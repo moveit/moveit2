@@ -50,9 +50,9 @@ public:
   void initialize() override;
 
 private:
-  bool computeService(const std::shared_ptr<rmw_request_id_t> request_header,
-                      const std::shared_ptr<moveit_msgs::srv::GetCartesianPath::Request> req,
-                      std::shared_ptr<moveit_msgs::srv::GetCartesianPath::Response> res);
+  bool computeService(const std::shared_ptr<rmw_request_id_t>& request_header,
+                      const std::shared_ptr<moveit_msgs::srv::GetCartesianPath::Request>& req,
+                      const std::shared_ptr<moveit_msgs::srv::GetCartesianPath::Response>& res);
 
   rclcpp::Service<moveit_msgs::srv::GetCartesianPath>::SharedPtr cartesian_path_service_;
   rclcpp::Publisher<moveit_msgs::msg::DisplayTrajectory>::SharedPtr display_path_;

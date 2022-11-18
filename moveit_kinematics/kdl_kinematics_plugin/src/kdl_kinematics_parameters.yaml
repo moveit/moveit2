@@ -1,0 +1,52 @@
+kdl_kinematics:
+  joints: {
+    type: string_array,
+    default_value: [],
+    description: "Joints names to assign weights",
+  }
+
+  __map_joints:
+    weight: {
+      type: double,
+      default_value: 1.0,
+      description: "Joint weight",
+      validation: {
+        gt<>: [ 0.0 ]
+      }
+    }
+
+  max_solver_iterations: {
+    type: int,
+    default_value: 500,
+    description: "Maximum solver iterations",
+    validation: {
+      gt_eq<>: [ 0.0 ]
+    }
+  }
+
+  epsilon: {
+    type: double,
+    default_value: 0.00001,
+    description: "Epsilon. Default is 1e-5",
+    validation: {
+      gt<>: [ 0.0 ]
+    }
+  }
+
+  orientation_vs_position: {
+    type: double,
+    default_value: 1.0,
+    description: "Weight of orientation error vs position error
+                  * < 1.0: orientation has less importance than position
+                  * > 1.0: orientation has more importance than position
+                  * = 0.0: perform position-only IK",
+    validation: {
+      gt_eq<>: [ 0.0 ]
+    }
+  }
+
+  position_only_ik: {
+    type: bool,
+    default_value: false,
+    description: "position_only_ik overrules orientation_vs_position. If true, sets orientation_vs_position weight to 0.0",
+  }

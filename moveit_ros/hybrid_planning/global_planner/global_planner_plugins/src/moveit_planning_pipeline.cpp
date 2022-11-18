@@ -67,6 +67,15 @@ bool MoveItPlanningPipeline::initialize(const rclcpp::Node::SharedPtr& node)
   node->declare_parameter<double>(PLAN_REQUEST_PARAM_NS + "max_acceleration_scaling_factor", 1.0);
   node->declare_parameter<std::string>("ompl.planning_plugin", "ompl_interface/OMPLPlanner");
 
+  // Planning Scene options
+  node->declare_parameter<std::string>(PLANNING_SCENE_MONITOR_NS + "name", UNDEFINED);
+  node->declare_parameter<std::string>(PLANNING_SCENE_MONITOR_NS + "robot_description", UNDEFINED);
+  node->declare_parameter<std::string>(PLANNING_SCENE_MONITOR_NS + "joint_state_topic", UNDEFINED);
+  node->declare_parameter<std::string>(PLANNING_SCENE_MONITOR_NS + "attached_collision_object_topic", UNDEFINED);
+  node->declare_parameter<std::string>(PLANNING_SCENE_MONITOR_NS + "publish_planning_scene_topic", UNDEFINED);
+  node->declare_parameter<std::string>(PLANNING_SCENE_MONITOR_NS + "monitored_planning_scene_topic", UNDEFINED);
+  node->declare_parameter<double>(PLANNING_SCENE_MONITOR_NS + "wait_for_initial_state_timeout", 10.0);
+
   // Trajectory Execution Functionality (required by the MoveItPlanningPipeline but not used within hybrid planning)
   node->declare_parameter<std::string>("moveit_controller_manager", UNDEFINED);
 
@@ -123,17 +132,17 @@ moveit_msgs::msg::MotionPlanResponse MoveItPlanningPipeline::plan(
 
   // Plan motion
   auto plan_solution = planning_components->plan(plan_params);
-  if (plan_solution.error_code != moveit_msgs::msg::MoveItErrorCodes::SUCCESS)
+  if (!bool(plan_solution.error_code_))
   {
-    response.error_code = plan_solution.error_code;
+    response.error_code = plan_solution.error_code_;
     return response;
   }
 
   // Transform solution into MotionPlanResponse and publish it
-  response.trajectory_start = plan_solution.start_state;
+  response.trajectory_start = plan_solution.start_state_;
   response.group_name = motion_plan_req.group_name;
-  plan_solution.trajectory->getRobotTrajectoryMsg(response.trajectory);
-  response.error_code = plan_solution.error_code;
+  plan_solution.trajectory_->getRobotTrajectoryMsg(response.trajectory);
+  response.error_code = plan_solution.error_code_;
 
   return response;
 }

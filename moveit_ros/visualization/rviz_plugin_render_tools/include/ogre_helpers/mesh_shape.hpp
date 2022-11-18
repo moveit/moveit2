@@ -27,8 +27,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OGRE_TOOLS_MESH_SHAPE_H
-#define OGRE_TOOLS_MESH_SHAPE_H
+#pragma once
 
 #include <rviz_rendering/objects/shape.hpp>
 
@@ -137,5 +136,3 @@ private:
 };
 
 }  // namespace rviz_rendering
-
-#endif

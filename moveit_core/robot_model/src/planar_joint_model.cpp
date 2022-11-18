@@ -35,12 +35,11 @@
 
 /* Author: Ioan Sucan */
 
-#include <moveit/robot_model/planar_joint_model.h>
-#include <geometric_shapes/check_isometry.h>
 #include <angles/angles.h>
-#include <boost/math/constants/constants.hpp>
-#include <limits>
 #include <cmath>
+#include <geometric_shapes/check_isometry.h>
+#include <limits>
+#include <moveit/robot_model/planar_joint_model.h>
 
 namespace moveit
 {
@@ -72,8 +71,8 @@ PlanarJointModel::PlanarJointModel(const std::string& name, size_t joint_index, 
   variable_bounds_[0].max_position_ = std::numeric_limits<double>::infinity();
   variable_bounds_[1].min_position_ = -std::numeric_limits<double>::infinity();
   variable_bounds_[1].max_position_ = std::numeric_limits<double>::infinity();
-  variable_bounds_[2].min_position_ = -boost::math::constants::pi<double>();
-  variable_bounds_[2].max_position_ = boost::math::constants::pi<double>();
+  variable_bounds_[2].min_position_ = -M_PI;
+  variable_bounds_[2].max_position_ = M_PI;
 
   computeVariableBoundsMsg();
 }
@@ -87,7 +86,7 @@ double PlanarJointModel::getMaximumExtent(const Bounds& other_bounds) const
 {
   double dx = other_bounds[0].max_position_ - other_bounds[0].min_position_;
   double dy = other_bounds[1].max_position_ - other_bounds[1].min_position_;
-  return sqrt(dx * dx + dy * dy) + boost::math::constants::pi<double>() * angular_distance_weight_;
+  return sqrt(dx * dx + dy * dy) + M_PI * angular_distance_weight_;
 }
 
 void PlanarJointModel::getVariableDefaultPositions(double* values, const Bounds& bounds) const
@@ -138,8 +137,8 @@ void PlanarJointModel::getVariableRandomPositionsNearBy(random_numbers::RandomNu
 
   double da = angular_distance_weight_ * distance;
   // limit the sampling range to 2pi to work correctly even if the distance is very large
-  if (da > boost::math::constants::pi<double>())
-    da = boost::math::constants::pi<double>();
+  if (da > M_PI)
+    da = M_PI;
   values[2] = rng.uniformReal(near[2] - da, near[2] + da);
   normalizeRotation(values);
 }
@@ -162,8 +161,7 @@ void computeTurnDriveTurnGeometry(const double* from, const double* to, const do
   const double angle_straight_diff = std::hypot(dx, dy) > min_translational_distance ?
                                          angles::shortest_angular_distance(from[2], std::atan2(dy, dx)) :
                                          0.0;
-  const double angle_backward_diff =
-      angles::normalize_angle(angle_straight_diff - boost::math::constants::pi<double>());
+  const double angle_backward_diff = angles::normalize_angle(angle_straight_diff - M_PI);
   const double move_straight_cost =
       std::abs(angle_straight_diff) + std::abs(angles::shortest_angular_distance(from[2] + angle_straight_diff, to[2]));
   const double move_backward_cost =
@@ -190,20 +188,20 @@ void PlanarJointModel::interpolate(const double* from, const double* to, const d
 
     // interpolate angle
     double diff = to[2] - from[2];
-    if (fabs(diff) <= boost::math::constants::pi<double>())
+    if (fabs(diff) <= M_PI)
       state[2] = from[2] + diff * t;
     else
     {
       if (diff > 0.0)
-        diff = 2.0 * boost::math::constants::pi<double>() - diff;
+        diff = 2.0 * M_PI - diff;
       else
-        diff = -2.0 * boost::math::constants::pi<double>() - diff;
+        diff = -2.0 * M_PI - diff;
       state[2] = from[2] - diff * t;
       // input states are within bounds, so the following check is sufficient
-      if (state[2] > boost::math::constants::pi<double>())
-        state[2] -= 2.0 * boost::math::constants::pi<double>();
-      else if (state[2] < -boost::math::constants::pi<double>())
-        state[2] += 2.0 * boost::math::constants::pi<double>();
+      if (state[2] > M_PI)
+        state[2] -= 2.0 * M_PI;
+      else if (state[2] < -M_PI)
+        state[2] += 2.0 * M_PI;
     }
   }
   else if (motion_model_ == DIFF_DRIVE)
@@ -254,7 +252,7 @@ double PlanarJointModel::distance(const double* values1, const double* values2) 
     double dy = values1[1] - values2[1];
 
     double d = fabs(values1[2] - values2[2]);
-    d = (d > boost::math::constants::pi<double>()) ? 2.0 * boost::math::constants::pi<double>() - d : d;
+    d = (d > M_PI) ? 2.0 * M_PI - d : d;
     return sqrt(dx * dx + dy * dy) + angular_distance_weight_ * d;
   }
   else if (motion_model_ == DIFF_DRIVE)
@@ -271,7 +269,7 @@ double PlanarJointModel::distance(const double* values1, const double* values2) 
 bool PlanarJointModel::satisfiesPositionBounds(const double* values, const Bounds& bounds, double margin) const
 {
   for (unsigned int i = 0; i < 3; ++i)
-    if (values[0] < bounds[0].min_position_ - margin || values[0] > bounds[0].max_position_ + margin)
+    if (values[i] < bounds[i].min_position_ - margin || values[i] > bounds[i].max_position_ + margin)
       return false;
   return true;
 }
@@ -279,13 +277,13 @@ bool PlanarJointModel::satisfiesPositionBounds(const double* values, const Bound
 bool PlanarJointModel::normalizeRotation(double* values) const
 {
   double& v = values[2];
-  if (v >= -boost::math::constants::pi<double>() && v <= boost::math::constants::pi<double>())
+  if (v >= -M_PI && v <= M_PI)
     return false;
-  v = fmod(v, 2.0 * boost::math::constants::pi<double>());
-  if (v < -boost::math::constants::pi<double>())
-    v += 2.0 * boost::math::constants::pi<double>();
-  else if (v > boost::math::constants::pi<double>())
-    v -= 2.0 * boost::math::constants::pi<double>();
+  v = fmod(v, 2.0 * M_PI);
+  if (v < -M_PI)
+    v += 2.0 * M_PI;
+  else if (v > M_PI)
+    v -= 2.0 * M_PI;
   return true;
 }
 

@@ -42,7 +42,6 @@
 
 #include <moveit/kinematic_constraints/utils.h>
 #include <moveit/plan_execution/plan_execution.h>
-#include <moveit/plan_execution/plan_with_sensing.h>
 #include <moveit/planning_pipeline/planning_pipeline.h>
 #include <moveit/robot_state/conversions.h>
 #include <moveit/trajectory_processing/trajectory_tools.h>
@@ -70,16 +69,16 @@ void MoveGroupSequenceAction::initialize()
   move_action_server_ = rclcpp_action::create_server<moveit_msgs::action::MoveGroupSequence>(
       context_->moveit_cpp_->getNode(), "sequence_move_group",
       [](const rclcpp_action::GoalUUID& /* unused */,
-         std::shared_ptr<const moveit_msgs::action::MoveGroupSequence::Goal> /* unused */) {
+         const std::shared_ptr<const moveit_msgs::action::MoveGroupSequence::Goal>& /* unused */) {
         RCLCPP_DEBUG(LOGGER, "Received action goal");
         return rclcpp_action::GoalResponse::ACCEPT_AND_EXECUTE;
       },
-      [this](const std::shared_ptr<MoveGroupSequenceGoalHandle> /* unused goal_handle */) {
+      [this](const std::shared_ptr<MoveGroupSequenceGoalHandle>& /* unused goal_handle */) {
         RCLCPP_DEBUG(LOGGER, "Canceling action goal");
         preemptMoveCallback();
         return rclcpp_action::CancelResponse::ACCEPT;
       },
-      [this](const std::shared_ptr<MoveGroupSequenceGoalHandle> goal_handle) {
+      [this](const std::shared_ptr<MoveGroupSequenceGoalHandle>& goal_handle) {
         RCLCPP_DEBUG(LOGGER, "Accepting new action goal");
         executeSequenceCallback(goal_handle);
       },
@@ -89,7 +88,7 @@ void MoveGroupSequenceAction::initialize()
       context_->moveit_cpp_->getNode(), context_->planning_scene_monitor_->getRobotModel());
 }
 
-void MoveGroupSequenceAction::executeSequenceCallback(const std::shared_ptr<MoveGroupSequenceGoalHandle> goal_handle)
+void MoveGroupSequenceAction::executeSequenceCallback(const std::shared_ptr<MoveGroupSequenceGoalHandle>& goal_handle)
 {
   // Notify that goal is being executed
   goal_handle_ = goal_handle;
@@ -161,15 +160,11 @@ void MoveGroupSequenceAction::executeSequenceCallbackPlanAndExecute(
   opt.replan_ = goal->planning_options.replan;
   opt.replan_attempts_ = goal->planning_options.replan_attempts;
   opt.replan_delay_ = goal->planning_options.replan_delay;
-  opt.before_execution_callback_ = boost::bind(&MoveGroupSequenceAction::startMoveExecutionCallback, this);
+  opt.before_execution_callback_ = [this] { startMoveExecutionCallback(); };
 
-  opt.plan_callback_ = boost::bind(&MoveGroupSequenceAction::planUsingSequenceManager, this, boost::cref(goal->request),
-                                   boost::placeholders::_1);
-
-  if (goal->planning_options.look_around && context_->plan_with_sensing_)
-  {
-    RCLCPP_WARN(LOGGER, "Plan with sensing not yet implemented/tested. This option is ignored.");  // LCOV_EXCL_LINE
-  }
+  [this, &request = goal->request](plan_execution::ExecutableMotionPlan& plan) {
+    return planUsingSequenceManager(request, plan);
+  };
 
   plan_execution::ExecutableMotionPlan plan;
   context_->plan_execution_->planAndExecute(plan, planning_scene_diff, opt);

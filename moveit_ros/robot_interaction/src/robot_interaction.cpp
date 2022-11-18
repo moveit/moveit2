@@ -42,23 +42,13 @@
 #include <moveit/transforms/transforms.h>
 #include <interactive_markers/interactive_marker_server.hpp>
 #include <interactive_markers/menu_handler.hpp>
-#if __has_include(<tf2_eigen/tf2_eigen.hpp>)
 #include <tf2_eigen/tf2_eigen.hpp>
-#else
-#include <tf2_eigen/tf2_eigen.h>
-#endif
-#if __has_include(<tf2_geometry_msgs/tf2_geometry_msgs.hpp>)
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
-#else
-#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
-#endif
 #include <tf2/LinearMath/Transform.h>
-#include <boost/lexical_cast.hpp>
-#include <boost/math/constants/constants.hpp>
-#include <boost/algorithm/string.hpp>
 
 #include <algorithm>
 #include <limits>
+#include <string>
 
 #include <Eigen/Core>
 #include <Eigen/Geometry>
@@ -73,7 +63,7 @@ const std::string RobotInteraction::INTERACTIVE_MARKER_TOPIC = "robot_interactio
 
 RobotInteraction::RobotInteraction(const moveit::core::RobotModelConstPtr& robot_model,
                                    const rclcpp::Node::SharedPtr& node, const std::string& ns)
-  : robot_model_(robot_model), kinematic_options_map_(new KinematicOptionsMap)
+  : robot_model_(robot_model), kinematic_options_map_(std::make_shared<KinematicOptionsMap>())
 {
   topic_ = ns.empty() ? INTERACTIVE_MARKER_TOPIC : ns + "/" + INTERACTIVE_MARKER_TOPIC;
   node_ = node;
@@ -81,7 +71,7 @@ RobotInteraction::RobotInteraction(const moveit::core::RobotModelConstPtr& robot
 
   // spin a thread that will process feedback events
   run_processing_thread_ = true;
-  processing_thread_ = std::make_unique<boost::thread>(boost::bind(&RobotInteraction::processingThread, this));
+  processing_thread_ = std::make_unique<std::thread>([this] { processingThread(); });
 }
 
 RobotInteraction::~RobotInteraction()
@@ -114,13 +104,13 @@ void RobotInteraction::addActiveComponent(const InteractiveMarkerConstructorFn& 
                                           const ProcessFeedbackFn& process, const InteractiveMarkerUpdateFn& update,
                                           const std::string& name)
 {
-  boost::unique_lock<boost::mutex> ulock(marker_access_lock_);
+  std::unique_lock<std::mutex> ulock(marker_access_lock_);
   GenericInteraction g;
   g.construct_marker = construct;
   g.update_pose = update;
   g.process_feedback = process;
   // compute the suffix that will be added to the generated markers
-  g.marker_name_suffix = "_" + name + "_" + boost::lexical_cast<std::string>(active_generic_.size());
+  g.marker_name_suffix = "_" + name + "_" + std::to_string(active_generic_.size());
   active_generic_.push_back(g);
 }
 
@@ -194,7 +184,7 @@ double RobotInteraction::computeGroupMarkerSize(const std::string& group)
 
 void RobotInteraction::decideActiveJoints(const std::string& group)
 {
-  boost::unique_lock<boost::mutex> ulock(marker_access_lock_);
+  std::unique_lock<std::mutex> ulock(marker_access_lock_);
   active_vj_.clear();
 
   if (group.empty())
@@ -270,7 +260,7 @@ void RobotInteraction::decideActiveEndEffectors(const std::string& group)
 
 void RobotInteraction::decideActiveEndEffectors(const std::string& group, InteractionStyle::InteractionStyle style)
 {
-  boost::unique_lock<boost::mutex> ulock(marker_access_lock_);
+  std::unique_lock<std::mutex> ulock(marker_access_lock_);
   active_eef_.clear();
 
   if (group.empty())
@@ -291,56 +281,56 @@ void RobotInteraction::decideActiveEndEffectors(const std::string& group, Intera
   const std::pair<moveit::core::JointModelGroup::KinematicsSolver, moveit::core::JointModelGroup::KinematicsSolverMap>&
       smap = jmg->getGroupKinematics();
 
-  // if we have an IK solver for the selected group, we check if there are any end effectors attached to this group
-  if (smap.first)
-  {
+  auto add_active_end_effectors_for_single_group = [&](const moveit::core::JointModelGroup* single_group) {
+    bool found_eef{ false };
     for (const srdf::Model::EndEffector& eef : eefs)
-      if ((jmg->hasLinkModel(eef.parent_link_) || jmg->getName() == eef.parent_group_) &&
-          jmg->canSetStateFromIK(eef.parent_link_))
+    {
+      if (single_group->hasLinkModel(eef.parent_link_) &&
+          (eef.parent_group_.empty() || single_group->getName() == eef.parent_group_) &&
+          single_group->canSetStateFromIK(eef.parent_link_))
       {
         // We found an end-effector whose parent is the group.
         EndEffectorInteraction ee;
-        ee.parent_group = group;
+        ee.parent_group = single_group->getName();
         ee.parent_link = eef.parent_link_;
         ee.eef_group = eef.component_group_;
         ee.interaction = style;
         active_eef_.push_back(ee);
+        found_eef = true;
       }
-
-    // No end effectors found.  Use last link in group as the "end effector".
-    if (active_eef_.empty() && !jmg->getLinkModelNames().empty())
-    {
-      EndEffectorInteraction ee;
-      ee.parent_group = group;
-      ee.parent_link = jmg->getLinkModelNames().back();
-      ee.eef_group = group;
-      ee.interaction = style;
-      active_eef_.push_back(ee);
     }
+
+    // No end effectors found. Use last link in group as the "end effector".
+    if (!found_eef && !single_group->getLinkModelNames().empty())
+    {
+      std::string last_link{ single_group->getLinkModelNames().back() };
+
+      if (single_group->canSetStateFromIK(last_link))
+      {
+        EndEffectorInteraction ee;
+        ee.parent_group = single_group->getName();
+        ee.parent_link = last_link;
+        ee.eef_group = single_group->getName();
+        ee.interaction = style;
+        active_eef_.push_back(ee);
+      }
+    }
+  };
+
+  // if we have an IK solver for the selected group, we check if there are any end effectors attached to this group
+  if (smap.first)
+  {
+    add_active_end_effectors_for_single_group(jmg);
   }
+  // if the group contains subgroups with IK, add markers for them individually
   else if (!smap.second.empty())
   {
     for (const std::pair<const moveit::core::JointModelGroup* const, moveit::core::JointModelGroup::KinematicsSolver>&
              it : smap.second)
-    {
-      for (const srdf::Model::EndEffector& eef : eefs)
-      {
-        if ((it.first->hasLinkModel(eef.parent_link_) || jmg->getName() == eef.parent_group_) &&
-            it.first->canSetStateFromIK(eef.parent_link_))
-        {
-          // We found an end-effector whose parent is a subgroup of the group.  (May be more than one)
-          EndEffectorInteraction ee;
-          ee.parent_group = it.first->getName();
-          ee.parent_link = eef.parent_link_;
-          ee.eef_group = eef.component_group_;
-          ee.interaction = style;
-          active_eef_.push_back(ee);
-          break;
-        }
-      }
-    }
+      add_active_end_effectors_for_single_group(it.first);
   }
 
+  // lastly determine automatic marker sizes
   for (EndEffectorInteraction& eef : active_eef_)
   {
     // if we have a separate group for the eef, we compute the scale based on it;
@@ -356,7 +346,7 @@ void RobotInteraction::decideActiveEndEffectors(const std::string& group, Intera
 
 void RobotInteraction::clear()
 {
-  boost::unique_lock<boost::mutex> ulock(marker_access_lock_);
+  std::unique_lock<std::mutex> ulock(marker_access_lock_);
   active_eef_.clear();
   active_vj_.clear();
   active_generic_.clear();
@@ -366,7 +356,7 @@ void RobotInteraction::clear()
 
 void RobotInteraction::clearInteractiveMarkers()
 {
-  boost::unique_lock<boost::mutex> ulock(marker_access_lock_);
+  std::unique_lock<std::mutex> ulock(marker_access_lock_);
   clearInteractiveMarkersUnsafe();
 }
 
@@ -462,7 +452,7 @@ void RobotInteraction::addInteractiveMarkers(const InteractionHandlerPtr& handle
   // If scale is left at default size of 0, scale will be based on end effector link size. a good value is between 0-1
   std::vector<visualization_msgs::msg::InteractiveMarker> ims;
   {
-    boost::unique_lock<boost::mutex> ulock(marker_access_lock_);
+    std::unique_lock<std::mutex> ulock(marker_access_lock_);
     moveit::core::RobotStateConstPtr s = handler->getState();
 
     for (std::size_t i = 0; i < active_generic_.size(); ++i)
@@ -551,8 +541,8 @@ void RobotInteraction::addInteractiveMarkers(const InteractionHandlerPtr& handle
   for (const visualization_msgs::msg::InteractiveMarker& im : ims)
   {
     int_marker_server_->insert(im);
-    int_marker_server_->setCallback(im.name, boost::bind(&RobotInteraction::processInteractiveMarkerFeedback, this,
-                                                         boost::placeholders::_1));
+    int_marker_server_->setCallback(im.name,
+                                    [this](const auto& feedback) { processInteractiveMarkerFeedback(feedback); });
 
     // Add menu handler to all markers that this interaction handler creates.
     if (std::shared_ptr<interactive_markers::MenuHandler> mh = handler->getMenuHandler())
@@ -573,7 +563,7 @@ void RobotInteraction::toggleMoveInteractiveMarkerTopic(bool enable)
 {
   if (enable)
   {
-    boost::unique_lock<boost::mutex> ulock(marker_access_lock_);
+    std::unique_lock<std::mutex> ulock(marker_access_lock_);
     if (int_marker_move_subscribers_.empty())
     {
       for (size_t i = 0; i < int_marker_move_topics_.size(); ++i)
@@ -581,8 +571,8 @@ void RobotInteraction::toggleMoveInteractiveMarkerTopic(bool enable)
         std::string topic_name = int_marker_move_topics_[i];
         std::string marker_name = int_marker_names_[i];
         std::function<void(const geometry_msgs::msg::PoseStamped::SharedPtr)> subscription_callback =
-            [this, marker_name](const geometry_msgs::msg::PoseStamped::SharedPtr msg) {
-              moveInteractiveMarker(marker_name, msg);
+            [this, marker_name](const geometry_msgs::msg::PoseStamped::SharedPtr& msg) {
+              moveInteractiveMarker(marker_name, *msg);
             };
         auto subscription =
             node_->create_subscription<geometry_msgs::msg::PoseStamped>(topic_name, 1, subscription_callback);
@@ -592,7 +582,7 @@ void RobotInteraction::toggleMoveInteractiveMarkerTopic(bool enable)
   }
   else
   {
-    boost::unique_lock<boost::mutex> ulock(marker_access_lock_);
+    std::unique_lock<std::mutex> ulock(marker_access_lock_);
     int_marker_move_subscribers_.clear();
   }
 }
@@ -631,7 +621,7 @@ void RobotInteraction::updateInteractiveMarkers(const InteractionHandlerPtr& han
   std::string root_link;
   std::map<std::string, geometry_msgs::msg::Pose> pose_updates;
   {
-    boost::unique_lock<boost::mutex> ulock(marker_access_lock_);
+    std::unique_lock<std::mutex> ulock(marker_access_lock_);
 
     moveit::core::RobotStateConstPtr s = handler->getState();
     root_link = s->getRobotModel()->getModelFrame();
@@ -674,7 +664,7 @@ void RobotInteraction::publishInteractiveMarkers()
 
 bool RobotInteraction::showingMarkers(const InteractionHandlerPtr& handler)
 {
-  boost::unique_lock<boost::mutex> ulock(marker_access_lock_);
+  std::unique_lock<std::mutex> ulock(marker_access_lock_);
 
   for (const EndEffectorInteraction& eef : active_eef_)
     if (shown_markers_.find(getMarkerName(handler, eef)) == shown_markers_.end())
@@ -688,21 +678,20 @@ bool RobotInteraction::showingMarkers(const InteractionHandlerPtr& handler)
   return true;
 }
 
-void RobotInteraction::moveInteractiveMarker(const std::string& name,
-                                             const geometry_msgs::msg::PoseStamped::ConstSharedPtr msg)
+void RobotInteraction::moveInteractiveMarker(const std::string& name, const geometry_msgs::msg::PoseStamped& msg)
 {
   std::map<std::string, std::size_t>::const_iterator it = shown_markers_.find(name);
   if (it != shown_markers_.end())
   {
     auto feedback = std::make_shared<visualization_msgs::msg::InteractiveMarkerFeedback>();
-    feedback->header = msg->header;
+    feedback->header = msg.header;
     feedback->marker_name = name;
-    feedback->pose = msg->pose;
+    feedback->pose = msg.pose;
     feedback->event_type = visualization_msgs::msg::InteractiveMarkerFeedback::POSE_UPDATE;
     processInteractiveMarkerFeedback(feedback);
     {
-      boost::unique_lock<boost::mutex> ulock(marker_access_lock_);
-      int_marker_server_->setPose(name, msg->pose, msg->header);  // move the interactive marker
+      std::unique_lock<std::mutex> ulock(marker_access_lock_);
+      int_marker_server_->setPose(name, msg.pose, msg.header);  // move the interactive marker
       int_marker_server_->applyChanges();
     }
   }
@@ -712,7 +701,7 @@ void RobotInteraction::processInteractiveMarkerFeedback(
     const visualization_msgs::msg::InteractiveMarkerFeedback::ConstSharedPtr& feedback)
 {
   // perform some validity checks
-  boost::unique_lock<boost::mutex> ulock(marker_access_lock_);
+  std::unique_lock<std::mutex> ulock(marker_access_lock_);
   std::map<std::string, std::size_t>::const_iterator it = shown_markers_.find(feedback->marker_name);
   if (it == shown_markers_.end())
   {
@@ -734,7 +723,7 @@ void RobotInteraction::processInteractiveMarkerFeedback(
 
 void RobotInteraction::processingThread()
 {
-  boost::unique_lock<boost::mutex> ulock(marker_access_lock_);
+  std::unique_lock<std::mutex> ulock(marker_access_lock_);
 
   while (run_processing_thread_ && rclcpp::ok())
   {

@@ -37,11 +37,7 @@
 #include <cmath>
 #include <moveit/pointcloud_octomap_updater/pointcloud_octomap_updater.h>
 #include <moveit/occupancy_map_monitor/occupancy_map_monitor.h>
-#if __has_include(<tf2_geometry_msgs/tf2_geometry_msgs.hpp>)
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
-#else
-#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
-#endif
 #include <tf2/LinearMath/Vector3.h>
 #include <tf2/LinearMath/Transform.h>
 #include <sensor_msgs/point_cloud2_iterator.hpp>
@@ -49,7 +45,6 @@
 #include <tf2_ros/create_timer_ros.h>
 
 #include <memory>
-#include <boost/bind.hpp>
 
 namespace occupancy_map_monitor
 {
@@ -73,6 +68,8 @@ PointCloudOctomapUpdater::~PointCloudOctomapUpdater()
 
 bool PointCloudOctomapUpdater::setParams(const std::string& name_space)
 {
+  // This parameter is optional
+  node_->get_parameter_or(name_space + ".ns", ns_, std::string());
   return node_->get_parameter(name_space + ".point_cloud_topic", point_cloud_topic_) &&
          node_->get_parameter(name_space + ".max_range", max_range_) &&
          node_->get_parameter(name_space + ".padding_offset", padding_) &&
@@ -91,16 +88,21 @@ bool PointCloudOctomapUpdater::initialize(const rclcpp::Node::SharedPtr& node)
   tf_buffer_->setCreateTimerInterface(create_timer_interface);
   tf_listener_ = std::make_shared<tf2_ros::TransformListener>(*tf_buffer_);
   shape_mask_ = std::make_unique<point_containment_filter::ShapeMask>();
-  shape_mask_->setTransformCallback(boost::bind(&PointCloudOctomapUpdater::getShapeTransform, this,
-                                                boost::placeholders::_1, boost::placeholders::_2));
-  last_update_time_ = node_->now();
+  shape_mask_->setTransformCallback(
+      [this](ShapeHandle shape, Eigen::Isometry3d& tf) { return getShapeTransform(shape, tf); });
+
   return true;
 }
 
 void PointCloudOctomapUpdater::start()
 {
+  std::string prefix = "";
+  if (!ns_.empty())
+    prefix = ns_ + "/";
+
   if (!filtered_cloud_topic_.empty())
-    filtered_cloud_publisher_ = node_->create_publisher<sensor_msgs::msg::PointCloud2>(filtered_cloud_topic_, 10);
+    filtered_cloud_publisher_ =
+        node_->create_publisher<sensor_msgs::msg::PointCloud2>(prefix + filtered_cloud_topic_, 10);
 
   if (point_cloud_subscriber_)
     return;
@@ -111,14 +113,14 @@ void PointCloudOctomapUpdater::start()
     point_cloud_filter_ = new tf2_ros::MessageFilter<sensor_msgs::msg::PointCloud2>(
         *point_cloud_subscriber_, *tf_buffer_, monitor_->getMapFrame(), 5, node_);
     point_cloud_filter_->registerCallback(
-        boost::bind(&PointCloudOctomapUpdater::cloudMsgCallback, this, boost::placeholders::_1));
+        [this](const sensor_msgs::msg::PointCloud2::ConstSharedPtr& cloud) { cloudMsgCallback(cloud); });
     RCLCPP_INFO(LOGGER, "Listening to '%s' using message filter with target frame '%s'", point_cloud_topic_.c_str(),
                 point_cloud_filter_->getTargetFramesString().c_str());
   }
   else
   {
     point_cloud_subscriber_->registerCallback(
-        boost::bind(&PointCloudOctomapUpdater::cloudMsgCallback, this, boost::placeholders::_1));
+        [this](const sensor_msgs::msg::PointCloud2::ConstSharedPtr& cloud) { cloudMsgCallback(cloud); });
     RCLCPP_INFO(LOGGER, "Listening to '%s'", point_cloud_topic_.c_str());
   }
 }
@@ -175,10 +177,9 @@ void PointCloudOctomapUpdater::cloudMsgCallback(const sensor_msgs::msg::PointClo
   if (max_update_rate_ > 0)
   {
     // ensure we are not updating the octomap representation too often
-    if ((rclcpp::Clock(RCL_ROS_TIME).now() - last_update_time_) <=
-        rclcpp::Duration(std::chrono::duration<double>(1.0 / max_update_rate_)))
+    if ((node_->now() - last_update_time_) <= rclcpp::Duration::from_seconds(1.0 / max_update_rate_))
       return;
-    last_update_time_ = rclcpp::Clock(RCL_ROS_TIME).now();
+    last_update_time_ = node_->now();
   }
 
   if (monitor_->getMapFrame().empty())

@@ -53,8 +53,7 @@ static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_ros_visualizatio
 
 void MotionPlanningFrame::databaseConnectButtonClicked()
 {
-  planning_display_->addBackgroundJob(boost::bind(&MotionPlanningFrame::computeDatabaseConnectButtonClicked, this),
-                                      "connect to database");
+  planning_display_->addBackgroundJob([this] { computeDatabaseConnectButtonClicked(); }, "connect to database");
 }
 
 void MotionPlanningFrame::planningPipelineIndexChanged(int index)
@@ -107,8 +106,8 @@ void MotionPlanningFrame::resetDbButtonClicked()
           QMessageBox::Yes | QMessageBox::No) == QMessageBox::No)
     return;
 
-  planning_display_->addBackgroundJob(
-      boost::bind(&MotionPlanningFrame::computeResetDbButtonClicked, this, response.toStdString()), "reset database");
+  planning_display_->addBackgroundJob([this, db = response.toStdString()] { computeResetDbButtonClicked(db); },
+                                      "reset database");
 }
 
 void MotionPlanningFrame::computeDatabaseConnectButtonClicked()
@@ -120,13 +119,11 @@ void MotionPlanningFrame::computeDatabaseConnectButtonClicked()
     planning_scene_storage_.reset();
     robot_state_storage_.reset();
     constraints_storage_.reset();
-    planning_display_->addMainLoopJob(
-        boost::bind(&MotionPlanningFrame::computeDatabaseConnectButtonClickedHelper, this, 1));
+    planning_display_->addMainLoopJob([this] { computeDatabaseConnectButtonClickedHelper(1); });
   }
   else
   {
-    planning_display_->addMainLoopJob(
-        boost::bind(&MotionPlanningFrame::computeDatabaseConnectButtonClickedHelper, this, 2));
+    planning_display_->addMainLoopJob([this] { computeDatabaseConnectButtonClickedHelper(2); });
     try
     {
       warehouse_ros::DatabaseConnection::Ptr conn = moveit_warehouse::loadDatabase(node_);
@@ -139,20 +136,17 @@ void MotionPlanningFrame::computeDatabaseConnectButtonClicked()
       }
       else
       {
-        planning_display_->addMainLoopJob(
-            boost::bind(&MotionPlanningFrame::computeDatabaseConnectButtonClickedHelper, this, 3));
+        planning_display_->addMainLoopJob([this] { computeDatabaseConnectButtonClickedHelper(3); });
         return;
       }
     }
     catch (std::exception& ex)
     {
-      planning_display_->addMainLoopJob(
-          boost::bind(&MotionPlanningFrame::computeDatabaseConnectButtonClickedHelper, this, 3));
+      planning_display_->addMainLoopJob([this] { computeDatabaseConnectButtonClickedHelper(3); });
       RCLCPP_ERROR(LOGGER, "%s", ex.what());
       return;
     }
-    planning_display_->addMainLoopJob(
-        boost::bind(&MotionPlanningFrame::computeDatabaseConnectButtonClickedHelper, this, 4));
+    planning_display_->addMainLoopJob([this] { computeDatabaseConnectButtonClickedHelper(4); });
   }
 }
 
@@ -206,8 +200,7 @@ void MotionPlanningFrame::computeDatabaseConnectButtonClickedHelper(int mode)
     if (move_group_)
     {
       move_group_->setConstraintsDatabase(ui_->database_host->text().toStdString(), ui_->database_port->value());
-      planning_display_->addBackgroundJob(boost::bind(&MotionPlanningFrame::populateConstraintsList, this),
-                                          "populateConstraintsList");
+      planning_display_->addBackgroundJob([this]() { populateConstraintsList(); }, "populateConstraintsList");
     }
   }
 }

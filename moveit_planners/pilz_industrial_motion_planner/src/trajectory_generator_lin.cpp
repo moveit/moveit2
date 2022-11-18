@@ -35,39 +35,28 @@
 #include "pilz_industrial_motion_planner/trajectory_generator_lin.h"
 
 #include <cassert>
-#include <rclcpp/rclcpp.hpp>
 #include <sstream>
 #include <time.h>
-
 #include <moveit/robot_state/conversions.h>
-
 #include <kdl/path_line.hpp>
 #include <kdl/trajectory_segment.hpp>
 #include <kdl/utilities/error.h>
-
 #include <tf2/convert.h>
 #include <tf2_eigen_kdl/tf2_eigen_kdl.hpp>
-#if __has_include(<tf2_eigen/tf2_eigen.hpp>)
+#include <rclcpp/logger.hpp>
+#include <rclcpp/logging.hpp>
 #include <tf2_eigen/tf2_eigen.hpp>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
-#else
-#include <tf2_eigen/tf2_eigen.h>
-#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
-#endif
 
 namespace pilz_industrial_motion_planner
 {
 static const rclcpp::Logger LOGGER =
     rclcpp::get_logger("moveit.pilz_industrial_motion_planner.trajectory_generator_lin");
 TrajectoryGeneratorLIN::TrajectoryGeneratorLIN(const moveit::core::RobotModelConstPtr& robot_model,
-                                               const LimitsContainer& planner_limits)
+                                               const LimitsContainer& planner_limits, const std::string& /*group_name*/)
   : TrajectoryGenerator::TrajectoryGenerator(robot_model, planner_limits)
 {
-  if (!planner_limits_.hasFullCartesianLimits())
-  {
-    RCLCPP_ERROR(LOGGER, "Cartesian limits not set for LIN trajectory generator.");
-    throw TrajectoryGeneratorInvalidLimitsException("Cartesian limits are not fully set for LIN trajectory generator.");
-  }
+  planner_limits_.printCartesianLimits();
 }
 
 void TrajectoryGeneratorLIN::extractMotionPlanInfo(const planning_scene::PlanningSceneConstPtr& scene,
@@ -124,12 +113,7 @@ void TrajectoryGeneratorLIN::extractMotionPlanInfo(const planning_scene::Plannin
     {
       frame_id = req.goal_constraints.front().position_constraints.front().header.frame_id;
     }
-    geometry_msgs::msg::Pose goal_pose_msg;
-    goal_pose_msg.position =
-        req.goal_constraints.front().position_constraints.front().constraint_region.primitive_poses.front().position;
-    goal_pose_msg.orientation = req.goal_constraints.front().orientation_constraints.front().orientation;
-    normalizeQuaternion(goal_pose_msg.orientation);
-    tf2::convert<geometry_msgs::msg::Pose, Eigen::Isometry3d>(goal_pose_msg, info.goal_pose);
+    info.goal_pose = getConstraintPose(req.goal_constraints.front());
   }
 
   assert(req.start_state.joint_state.name.size() == req.start_state.joint_state.position.size());
@@ -200,11 +184,12 @@ std::unique_ptr<KDL::Path> TrajectoryGeneratorLIN::setPathLIN(const Eigen::Affin
   KDL::Frame kdl_start_pose, kdl_goal_pose;
   tf2::transformEigenToKDL(start_pose, kdl_start_pose);
   tf2::transformEigenToKDL(goal_pose, kdl_goal_pose);
-  double eqradius = planner_limits_.getCartesianLimits().getMaxTranslationalVelocity() /
-                    planner_limits_.getCartesianLimits().getMaxRotationalVelocity();
+  double eqradius =
+      planner_limits_.getCartesianLimits().max_trans_vel / planner_limits_.getCartesianLimits().max_rot_vel;
   KDL::RotationalInterpolation* rot_interpo = new KDL::RotationalInterpolation_SingleAxis();
 
-  return std::unique_ptr<KDL::Path>(new KDL::Path_Line(kdl_start_pose, kdl_goal_pose, rot_interpo, eqradius, true));
+  return std::unique_ptr<KDL::Path>(
+      std::make_unique<KDL::Path_Line>(kdl_start_pose, kdl_goal_pose, rot_interpo, eqradius, true));
 }
 
 }  // namespace pilz_industrial_motion_planner

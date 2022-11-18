@@ -29,6 +29,9 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+# Usage: python moveit/moveit/scripts/create_readme_table.py > /tmp/table.md
+# First update supported_distro_ubuntu_dict below!
+
 
 from __future__ import print_function
 
@@ -77,7 +80,7 @@ def create_line(package, ros_ubuntu_dict):
             "U": ubuntu[0].upper(),
             "ubuntu": ubuntu.lower(),
             "package": package,
-            "base_url": "http://build.ros.org",
+            "base_url": "https://build.ros.org",
         }
         for target in ["src", "bin"]:
             define_urls(target, params)
@@ -102,7 +105,6 @@ def create_moveit_buildfarm_table():
     # remove {"indigo":"trusty"} and add {"noetic":"fbuntu"} with "fbuntu"
     # being whatever the 20.04 distro is named
     supported_distro_ubuntu_dict = {
-        "kinetic": "xenial",
         "melodic": "bionic",
         "noetic": "focal",
     }

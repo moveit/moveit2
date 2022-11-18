@@ -79,7 +79,8 @@ private:
   std::shared_ptr<tf2_ros::Buffer> tf_buffer_;
   std::shared_ptr<tf2_ros::TransformListener> tf_listener_;
 
-  rclcpp::Time last_update_time_;
+  // Initialize clock type to RCL_ROS_TIME to prevent exception about time sources mismatch
+  rclcpp::Time last_update_time_ = rclcpp::Time(0, 0, RCL_ROS_TIME);
 
   /* params */
   std::string point_cloud_topic_;
@@ -89,6 +90,7 @@ private:
   unsigned int point_subsample_;
   double max_update_rate_;
   std::string filtered_cloud_topic_;
+  std::string ns_;
   rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr filtered_cloud_publisher_;
 
   message_filters::Subscriber<sensor_msgs::msg::PointCloud2>* point_cloud_subscriber_;

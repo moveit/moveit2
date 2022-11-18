@@ -58,11 +58,7 @@
 #include <string>
 #include <tf2/LinearMath/Quaternion.h>
 #include <tf2/convert.h>
-#if __has_include(<tf2_geometry_msgs/tf2_geometry_msgs.hpp>)
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
-#else
-#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
-#endif
 #include <utility>
 
 namespace testutils
@@ -92,7 +88,7 @@ inline std::string getJointName(size_t joint_number, const std::string& joint_pr
  */
 pilz_industrial_motion_planner::JointLimitsContainer createFakeLimits(const std::vector<std::string>& joint_names);
 
-inline std::string demangel(char const* name)
+inline std::string demangle(char const* name)
 {
   return boost::core::demangle(name);
 }

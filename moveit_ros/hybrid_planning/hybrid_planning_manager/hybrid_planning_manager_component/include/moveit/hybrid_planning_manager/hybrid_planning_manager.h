@@ -60,6 +60,16 @@ public:
   /** \brief Constructor */
   HybridPlanningManager(const rclcpp::NodeOptions& options);
 
+  /** \brief Destructor */
+  ~HybridPlanningManager() override
+  {
+    // Join the thread used for long-running callbacks
+    if (long_callback_thread_.joinable())
+    {
+      long_callback_thread_.join();
+    }
+  }
+
   /**
    * Allows creation of a smart pointer that references to instances of this object
    * @return shared pointer of the HybridPlanningManager instance that called the function
@@ -76,10 +86,15 @@ public:
   bool initialize();
 
   /**
-   * Hybrid planning goal callback for hybrid planning request server
-   * @param goal_handle Hybrid planning goal handle to access feedback and response
+   * Cancel any active action goals, including global and local planners
    */
-  void hybridPlanningRequestCallback(
+  void cancelHybridManagerGoals() noexcept;
+
+  /**
+   * This handles execution of a hybrid planning goal in a new thread, to avoid blocking the executor.
+   * @param goal_handle The action server goal
+   */
+  void executeHybridPlannerGoal(
       std::shared_ptr<rclcpp_action::ServerGoalHandle<moveit_msgs::action::HybridPlanner>> goal_handle);
 
   /**
@@ -113,6 +128,9 @@ private:
   // Flag that indicates whether the manager is initialized
   bool initialized_;
 
+  // Flag that indicates hybrid planning has been canceled
+  std::atomic<bool> stop_hybrid_planning_;
+
   // Shared hybrid planning goal handle
   std::shared_ptr<rclcpp_action::ServerGoalHandle<moveit_msgs::action::HybridPlanner>> hybrid_planning_goal_handle_;
 
@@ -128,5 +146,11 @@ private:
 
   // Global solution subscriber
   rclcpp::Subscription<moveit_msgs::msg::MotionPlanResponse>::SharedPtr global_solution_sub_;
+
+  // This thread is used for long-running callbacks. It's a member so they do not go out of scope.
+  std::thread long_callback_thread_;
+
+  // A unique callback group, to avoid mixing callbacks with other action servers
+  rclcpp::CallbackGroup::SharedPtr cb_group_;
 };
 }  // namespace moveit::hybrid_planning

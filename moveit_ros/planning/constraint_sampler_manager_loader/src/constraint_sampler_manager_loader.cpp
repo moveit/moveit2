@@ -36,8 +36,10 @@
 
 #include <moveit/constraint_sampler_manager_loader/constraint_sampler_manager_loader.h>
 #include <pluginlib/class_loader.hpp>
-#include "rclcpp/rclcpp.hpp"
 #include <boost/tokenizer.hpp>
+#include <rclcpp/logger.hpp>
+#include <rclcpp/logging.hpp>
+#include <rclcpp/parameter_value.hpp>
 #include <memory>
 
 namespace constraint_sampler_manager_loader
@@ -91,7 +93,7 @@ private:
 ConstraintSamplerManagerLoader::ConstraintSamplerManagerLoader(
     const rclcpp::Node::SharedPtr& node, const constraint_samplers::ConstraintSamplerManagerPtr& csm)
   : constraint_sampler_manager_(csm ? csm : std::make_shared<constraint_samplers::ConstraintSamplerManager>())
-  , impl_(new Helper(node, constraint_sampler_manager_))
+  , impl_(std::make_shared<Helper>(node, constraint_sampler_manager_))
 {
 }
 }  // namespace constraint_sampler_manager_loader

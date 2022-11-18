@@ -42,55 +42,35 @@
 #include <chrono>
 #include <mutex>
 
+#include <controller_manager/realtime.hpp>
 #include <std_msgs/msg/bool.h>
+#include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
 
 // #include <moveit_servo/make_shared_from_pool.h> // TODO(adamp): create an issue about this
-#include <moveit_servo/servo_calcs.h>
 #include <moveit_servo/enforce_limits.hpp>
+#include <moveit_servo/servo_calcs.h>
+#include <moveit_servo/utilities.h>
 
 using namespace std::chrono_literals;  // for s, ms, etc.
-
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_servo.servo_calcs");
-constexpr auto ROS_LOG_THROTTLE_PERIOD = std::chrono::milliseconds(3000).count();
-static constexpr double STOPPED_VELOCITY_EPS = 1e-4;  // rad/s
 
 namespace moveit_servo
 {
 namespace
 {
-// Helper function for detecting zeroed message
-bool isNonZero(const geometry_msgs::msg::TwistStamped& msg)
-{
-  return msg.twist.linear.x != 0.0 || msg.twist.linear.y != 0.0 || msg.twist.linear.z != 0.0 ||
-         msg.twist.angular.x != 0.0 || msg.twist.angular.y != 0.0 || msg.twist.angular.z != 0.0;
-}
+constexpr char CONDITION_TOPIC[] = "~/condition";
 
-// Helper function for detecting zeroed message
-bool isNonZero(const control_msgs::msg::JointJog& msg)
-{
-  bool all_zeros = true;
-  for (double delta : msg.velocities)
-  {
-    all_zeros &= (delta == 0.0);
-  };
-  return !all_zeros;
-}
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_servo.servo_calcs");
+constexpr auto ROS_LOG_THROTTLE_PERIOD = std::chrono::milliseconds(3000).count();
+static constexpr double STOPPED_VELOCITY_EPS = 1e-4;  // rad/s
 
-// Helper function for converting Eigen::Isometry3d to geometry_msgs/TransformStamped
-geometry_msgs::msg::TransformStamped convertIsometryToTransform(const Eigen::Isometry3d& eigen_tf,
-                                                                const std::string& parent_frame,
-                                                                const std::string& child_frame)
-{
-  geometry_msgs::msg::TransformStamped output = tf2::eigenToTransform(eigen_tf);
-  output.header.frame_id = parent_frame;
-  output.child_frame_id = child_frame;
-
-  return output;
-}
+// This value is used when configuring the main loop to use SCHED_FIFO scheduling
+// We use a slightly lower priority than the ros2_control default in order to reduce jitter
+// Reference: https://man7.org/linux/man-pages/man2/sched_setparam.2.html
+int const THREAD_PRIORITY = 40;
 }  // namespace
 
 // Constructor for the class that handles servoing calculations
-ServoCalcs::ServoCalcs(rclcpp::Node::SharedPtr node,
+ServoCalcs::ServoCalcs(const rclcpp::Node::SharedPtr& node,
                        const std::shared_ptr<const moveit_servo::ServoParameters>& parameters,
                        const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor)
   : node_(node)
@@ -103,9 +83,10 @@ ServoCalcs::ServoCalcs(rclcpp::Node::SharedPtr node,
   , smoothing_loader_("moveit_core", "online_signal_smoothing::SmoothingBaseClass")
 {
   // Register callback for changes in robot_link_command_frame
-  bool callback_success = parameters_->registerSetParameterCallback(
-      parameters->ns + ".robot_link_command_frame",
-      std::bind(&ServoCalcs::robotLinkCommandFrameCallback, this, std::placeholders::_1));
+  bool callback_success = parameters_->registerSetParameterCallback(parameters->ns + ".robot_link_command_frame",
+                                                                    [this](const rclcpp::Parameter& parameter) {
+                                                                      return robotLinkCommandFrameCallback(parameter);
+                                                                    });
   if (!callback_success)
   {
     throw std::runtime_error("Failed to register setParameterCallback");
@@ -121,32 +102,40 @@ ServoCalcs::ServoCalcs(rclcpp::Node::SharedPtr node,
   }
 
   // Subscribe to command topics
-  using std::placeholders::_1;
-  using std::placeholders::_2;
-  twist_stamped_sub_ =
-      node_->create_subscription<geometry_msgs::msg::TwistStamped>(parameters_->cartesian_command_in_topic,
-                                                                   rclcpp::SystemDefaultsQoS(),
-                                                                   std::bind(&ServoCalcs::twistStampedCB, this, _1));
+  twist_stamped_sub_ = node_->create_subscription<geometry_msgs::msg::TwistStamped>(
+      parameters_->cartesian_command_in_topic, rclcpp::SystemDefaultsQoS(),
+      [this](const geometry_msgs::msg::TwistStamped::ConstSharedPtr& msg) { return twistStampedCB(msg); });
 
   joint_cmd_sub_ = node_->create_subscription<control_msgs::msg::JointJog>(
-      parameters_->joint_command_in_topic, rclcpp::SystemDefaultsQoS(), std::bind(&ServoCalcs::jointCmdCB, this, _1));
+      parameters_->joint_command_in_topic, rclcpp::SystemDefaultsQoS(),
+      [this](const control_msgs::msg::JointJog::ConstSharedPtr& msg) { return jointCmdCB(msg); });
 
   // ROS Server for allowing drift in some dimensions
   drift_dimensions_server_ = node_->create_service<moveit_msgs::srv::ChangeDriftDimensions>(
-      "~/change_drift_dimensions", std::bind(&ServoCalcs::changeDriftDimensions, this, _1, _2));
+      "~/change_drift_dimensions",
+      [this](const std::shared_ptr<moveit_msgs::srv::ChangeDriftDimensions::Request>& req,
+             const std::shared_ptr<moveit_msgs::srv::ChangeDriftDimensions::Response>& res) {
+        return changeDriftDimensions(req, res);
+      });
 
   // ROS Server for changing the control dimensions
   control_dimensions_server_ = node_->create_service<moveit_msgs::srv::ChangeControlDimensions>(
-      "~/change_control_dimensions", std::bind(&ServoCalcs::changeControlDimensions, this, _1, _2));
+      "~/change_control_dimensions",
+      [this](const std::shared_ptr<moveit_msgs::srv::ChangeControlDimensions::Request>& req,
+             const std::shared_ptr<moveit_msgs::srv::ChangeControlDimensions::Response>& res) {
+        return changeControlDimensions(req, res);
+      });
 
   // ROS Server to reset the status, e.g. so the arm can move again after a collision
   reset_servo_status_ = node_->create_service<std_srvs::srv::Empty>(
-      "~/reset_servo_status", std::bind(&ServoCalcs::resetServoStatus, this, _1, _2));
+      "~/reset_servo_status",
+      [this](const std::shared_ptr<std_srvs::srv::Empty::Request>& req,
+             const std::shared_ptr<std_srvs::srv::Empty::Response>& res) { return resetServoStatus(req, res); });
 
   // Subscribe to the collision_check topic
-  collision_velocity_scale_sub_ =
-      node_->create_subscription<std_msgs::msg::Float64>("~/collision_velocity_scale", rclcpp::SystemDefaultsQoS(),
-                                                         std::bind(&ServoCalcs::collisionVelocityScaleCB, this, _1));
+  collision_velocity_scale_sub_ = node_->create_subscription<std_msgs::msg::Float64>(
+      "~/collision_velocity_scale", rclcpp::SystemDefaultsQoS(),
+      [this](const std_msgs::msg::Float64::ConstSharedPtr& msg) { return collisionVelocityScaleCB(msg); });
 
   // Publish freshly-calculated joints to the robot.
   // Put the outgoing msg in the right format (trajectory_msgs/JointTrajectory or std_msgs/Float64MultiArray).
@@ -163,12 +152,12 @@ ServoCalcs::ServoCalcs(rclcpp::Node::SharedPtr node,
 
   // Publish status
   status_pub_ = node_->create_publisher<std_msgs::msg::Int8>(parameters_->status_topic, rclcpp::SystemDefaultsQoS());
-  condition_pub_ = node_->create_publisher<std_msgs::msg::Float64>("~/condition", rclcpp::SystemDefaultsQoS());
 
   internal_joint_state_.name = joint_model_group_->getActiveJointModelNames();
   num_joints_ = internal_joint_state_.name.size();
   internal_joint_state_.position.resize(num_joints_);
   internal_joint_state_.velocity.resize(num_joints_);
+  delta_theta_.setZero(num_joints_);
 
   for (std::size_t i = 0; i < num_joints_; ++i)
   {
@@ -200,6 +189,25 @@ ServoCalcs::ServoCalcs(rclcpp::Node::SharedPtr node,
   empty_matrix.setZero();
   tf_moveit_to_ee_frame_ = empty_matrix;
   tf_moveit_to_robot_cmd_frame_ = empty_matrix;
+
+  // Get the IK solver for the group
+  ik_solver_ = joint_model_group_->getSolverInstance();
+  if (!ik_solver_)
+  {
+    use_inv_jacobian_ = true;
+    RCLCPP_WARN(
+        LOGGER,
+        "No kinematics solver instantiated for group '%s'. Will use inverse Jacobian for servo calculations instead.",
+        joint_model_group_->getName().c_str());
+  }
+  else if (!ik_solver_->supportsGroup(joint_model_group_))
+  {
+    use_inv_jacobian_ = true;
+    RCLCPP_WARN(LOGGER,
+                "The loaded kinematics plugin does not support group '%s'. Will use inverse Jacobian for servo "
+                "calculations instead.",
+                joint_model_group_->getName().c_str());
+  }
 }
 
 ServoCalcs::~ServoCalcs()
@@ -238,13 +246,44 @@ void ServoCalcs::start()
   last_sent_command_ = std::move(initial_joint_trajectory);
 
   current_state_ = planning_scene_monitor_->getStateMonitor()->getCurrentState();
+
+  // Check that all links are known to the robot
+  auto check_link_is_known = [this](const std::string& frame_name) {
+    if (!current_state_->knowsFrameTransform(frame_name))
+    {
+      throw std::runtime_error{ "Unknown frame: " + frame_name };
+    }
+  };
+  check_link_is_known(parameters_->planning_frame);
+  check_link_is_known(parameters_->ee_frame_name);
+  check_link_is_known(robot_link_command_frame_);
+
   tf_moveit_to_ee_frame_ = current_state_->getGlobalLinkTransform(parameters_->planning_frame).inverse() *
                            current_state_->getGlobalLinkTransform(parameters_->ee_frame_name);
   tf_moveit_to_robot_cmd_frame_ = current_state_->getGlobalLinkTransform(parameters_->planning_frame).inverse() *
                                   current_state_->getGlobalLinkTransform(robot_link_command_frame_);
+  if (!use_inv_jacobian_)
+  {
+    ik_base_to_tip_frame_ = current_state_->getGlobalLinkTransform(ik_solver_->getBaseFrame()).inverse() *
+                            current_state_->getGlobalLinkTransform(ik_solver_->getTipFrame());
+  }
 
   stop_requested_ = false;
-  thread_ = std::thread([this] { mainCalcLoop(); });
+  thread_ = std::thread([this] {
+    // Check if a realtime kernel is installed. Set a higher thread priority, if so
+    if (controller_manager::has_realtime_kernel())
+    {
+      if (!controller_manager::configure_sched_fifo(THREAD_PRIORITY))
+      {
+        RCLCPP_WARN(LOGGER, "Could not enable FIFO RT scheduling policy");
+      }
+    }
+    else
+    {
+      RCLCPP_INFO(LOGGER, "RT kernel is recommended for better performance");
+    }
+    mainCalcLoop();
+  });
   new_input_cmd_ = false;
 }
 
@@ -271,7 +310,7 @@ void ServoCalcs::stop()
 
 void ServoCalcs::mainCalcLoop()
 {
-  rclcpp::Rate rate(1.0 / parameters_->publish_period);
+  rclcpp::WallRate rate(1.0 / parameters_->publish_period);
 
   while (rclcpp::ok() && !stop_requested_)
   {
@@ -353,6 +392,12 @@ void ServoCalcs::calculateSingleIteration()
   // Calculate this transform to ensure it is available via C++ API
   tf_moveit_to_ee_frame_ = current_state_->getGlobalLinkTransform(parameters_->planning_frame).inverse() *
                            current_state_->getGlobalLinkTransform(parameters_->ee_frame_name);
+
+  if (!use_inv_jacobian_)
+  {
+    ik_base_to_tip_frame_ = current_state_->getGlobalLinkTransform(ik_solver_->getBaseFrame()).inverse() *
+                            current_state_->getGlobalLinkTransform(ik_solver_->getTipFrame());
+  }
 
   have_nonzero_command_ = have_nonzero_twist_stamped_ || have_nonzero_joint_command_;
 
@@ -499,6 +544,16 @@ rcl_interfaces::msg::SetParametersResult ServoCalcs::robotLinkCommandFrameCallba
 {
   const std::lock_guard<std::mutex> lock(main_loop_mutex_);
   rcl_interfaces::msg::SetParametersResult result;
+
+  // Check that the new frame is known
+  if (!current_state_->knowsFrameTransform(parameter.as_string()))
+  {
+    RCLCPP_ERROR_STREAM(LOGGER, "Failed to change robot_link_command_frame. Passed frame '" << parameter.as_string()
+                                                                                            << "' is unknown");
+    result.successful = false;
+    return result;
+  }
+
   result.successful = true;
   robot_link_command_frame_ = parameter.as_string();
   RCLCPP_INFO_STREAM(LOGGER, "robot_link_command_frame changed to: " + robot_link_command_frame_);
@@ -541,7 +596,6 @@ bool ServoCalcs::cartesianServoCalcs(geometry_msgs::msg::TwistStamped& cmd,
       const auto tf_moveit_to_incoming_cmd_frame =
           current_state_->getGlobalLinkTransform(parameters_->planning_frame).inverse() *
           current_state_->getGlobalLinkTransform(cmd.header.frame_id);
-
       translation_vector = tf_moveit_to_incoming_cmd_frame.linear() * translation_vector;
       angular_vector = tf_moveit_to_incoming_cmd_frame.linear() * angular_vector;
     }
@@ -558,7 +612,6 @@ bool ServoCalcs::cartesianServoCalcs(geometry_msgs::msg::TwistStamped& cmd,
 
   Eigen::VectorXd delta_x = scaleCartesianCommand(cmd);
 
-  // Convert from cartesian commands to joint commands
   Eigen::MatrixXd jacobian = current_state_->getJacobian(joint_model_group_);
 
   removeDriftDimensions(jacobian, delta_x);
@@ -568,8 +621,76 @@ bool ServoCalcs::cartesianServoCalcs(geometry_msgs::msg::TwistStamped& cmd,
   Eigen::MatrixXd matrix_s = svd.singularValues().asDiagonal();
   Eigen::MatrixXd pseudo_inverse = svd.matrixV() * matrix_s.inverse() * svd.matrixU().transpose();
 
-  delta_theta_ = pseudo_inverse * delta_x;
-  delta_theta_ *= velocityScalingFactorForSingularity(delta_x, svd, pseudo_inverse);
+  // Convert from cartesian commands to joint commands
+  // Use an IK solver plugin if we have one, otherwise use inverse Jacobian.
+  if (!use_inv_jacobian_)
+  {
+    // get a transformation matrix with the desired position change &
+    // get a transformation matrix with desired orientation change
+    Eigen::Isometry3d tf_pos_delta(Eigen::Isometry3d::Identity());
+    tf_pos_delta.translate(Eigen::Vector3d(delta_x[0], delta_x[1], delta_x[2]));
+
+    Eigen::Isometry3d tf_rot_delta(Eigen::Isometry3d::Identity());
+    Eigen::Quaterniond q = Eigen::AngleAxisd(delta_x[3], Eigen::Vector3d::UnitX()) *
+                           Eigen::AngleAxisd(delta_x[4], Eigen::Vector3d::UnitY()) *
+                           Eigen::AngleAxisd(delta_x[5], Eigen::Vector3d::UnitZ());
+    tf_rot_delta.rotate(q);
+
+    // Poses passed to IK solvers are assumed to be in some tip link (usually EE) reference frame
+    // First, find the new tip link position without newly applied rotation
+
+    auto tf_no_new_rot = tf_pos_delta * ik_base_to_tip_frame_;
+    // we want the rotation to be applied in the requested reference frame,
+    // but we want the rotation to be about the EE point in space, not the origin.
+    // So, we need to translate to origin, rotate, then translate back
+    // Given T = transformation matrix from origin -> EE point in space (translation component of tf_no_new_rot)
+    // and T' as the opposite transformation, EE point in space -> origin (translation only)
+    // apply final transformation as T * R * T' * tf_no_new_rot
+    auto tf_translation = tf_no_new_rot.translation();
+    auto tf_neg_translation = Eigen::Isometry3d::Identity();  // T'
+    tf_neg_translation(0, 3) = -tf_translation(0, 0);
+    tf_neg_translation(1, 3) = -tf_translation(1, 0);
+    tf_neg_translation(2, 3) = -tf_translation(2, 0);
+    auto tf_pos_translation = Eigen::Isometry3d::Identity();  // T
+    tf_pos_translation(0, 3) = tf_translation(0, 0);
+    tf_pos_translation(1, 3) = tf_translation(1, 0);
+    tf_pos_translation(2, 3) = tf_translation(2, 0);
+
+    // T * R * T' * tf_no_new_rot
+    auto tf = tf_pos_translation * tf_rot_delta * tf_neg_translation * tf_no_new_rot;
+    geometry_msgs::msg::Pose next_pose = tf2::toMsg(tf);
+
+    // setup for IK call
+    std::vector<double> solution(num_joints_);
+    moveit_msgs::msg::MoveItErrorCodes err;
+    kinematics::KinematicsQueryOptions opts;
+    opts.return_approximate_solution = true;
+    if (ik_solver_->searchPositionIK(next_pose, internal_joint_state_.position, parameters_->publish_period / 2.0,
+                                     solution, err, opts))
+    {
+      // find the difference in joint positions that will get us to the desired pose
+      for (size_t i = 0; i < num_joints_; ++i)
+      {
+        delta_theta_.coeffRef(i) = solution.at(i) - internal_joint_state_.position.at(i);
+      }
+    }
+    else
+    {
+      RCLCPP_WARN(LOGGER, "Could not find IK solution for requested motion, got error code %d", err.val);
+      return false;
+    }
+  }
+  else
+  {
+    // no supported IK plugin, use inverse Jacobian
+    delta_theta_ = pseudo_inverse * delta_x;
+  }
+
+  delta_theta_ *= velocityScalingFactorForSingularity(joint_model_group_, delta_x, svd, pseudo_inverse,
+                                                      parameters_->hard_stop_singularity_threshold,
+                                                      parameters_->lower_singularity_threshold,
+                                                      parameters_->leaving_singularity_threshold_multiplier,
+                                                      *node_->get_clock(), current_state_, status_);
 
   return internalServoUpdate(delta_theta_, joint_trajectory, ServoType::CARTESIAN_SPACE);
 }
@@ -626,7 +747,8 @@ bool ServoCalcs::internalServoUpdate(Eigen::ArrayXd& delta_theta,
   updated_filters_ = true;
 
   // Enforce SRDF velocity limits
-  enforceVelocityLimits(joint_model_group_, parameters_->publish_period, internal_joint_state_);
+  enforceVelocityLimits(joint_model_group_, parameters_->publish_period, internal_joint_state_,
+                        parameters_->override_velocity_scaling_factor);
 
   // Enforce SRDF position limits, might halt if needed, set prev_vel to 0
   const auto joints_to_halt = enforcePositionLimits(internal_joint_state_);
@@ -734,80 +856,6 @@ void ServoCalcs::composeJointTrajMessage(const sensor_msgs::msg::JointState& joi
     point.accelerations = acceleration;
   }
   joint_trajectory.points.push_back(point);
-}
-
-// Possibly calculate a velocity scaling factor, due to proximity of singularity and direction of motion
-double ServoCalcs::velocityScalingFactorForSingularity(const Eigen::VectorXd& commanded_velocity,
-                                                       const Eigen::JacobiSVD<Eigen::MatrixXd>& svd,
-                                                       const Eigen::MatrixXd& pseudo_inverse)
-{
-  double velocity_scale = 1;
-  std::size_t num_dimensions = commanded_velocity.size();
-
-  // Find the direction away from nearest singularity.
-  // The last column of U from the SVD of the Jacobian points directly toward or away from the singularity.
-  // The sign can flip at any time, so we have to do some extra checking.
-  // Look ahead to see if the Jacobian's condition will decrease.
-  Eigen::VectorXd vector_toward_singularity = svd.matrixU().col(num_dimensions - 1);
-
-  double ini_condition = svd.singularValues()(0) / svd.singularValues()(svd.singularValues().size() - 1);
-
-  auto condition_msg = std::make_unique<std_msgs::msg::Float64>();
-  condition_msg->data = ini_condition;
-  condition_pub_->publish(std::move(condition_msg));
-
-  // This singular vector tends to flip direction unpredictably. See R. Bro,
-  // "Resolving the Sign Ambiguity in the Singular Value Decomposition".
-  // Look ahead to see if the Jacobian's condition will decrease in this
-  // direction. Start with a scaled version of the singular vector
-  Eigen::VectorXd delta_x(num_dimensions);
-  double scale = 100;
-  delta_x = vector_toward_singularity / scale;
-
-  // Calculate a small change in joints
-  Eigen::VectorXd new_theta;
-  current_state_->copyJointGroupPositions(joint_model_group_, new_theta);
-  new_theta += pseudo_inverse * delta_x;
-  current_state_->setJointGroupPositions(joint_model_group_, new_theta);
-  Eigen::MatrixXd new_jacobian = current_state_->getJacobian(joint_model_group_);
-
-  Eigen::JacobiSVD<Eigen::MatrixXd> new_svd(new_jacobian);
-  double new_condition = new_svd.singularValues()(0) / new_svd.singularValues()(new_svd.singularValues().size() - 1);
-  // If new_condition < ini_condition, the singular vector does point towards a
-  // singularity. Otherwise, flip its direction.
-  if (ini_condition >= new_condition)
-  {
-    vector_toward_singularity *= -1;
-  }
-
-  // If this dot product is positive, we're moving toward singularity ==> decelerate
-  double dot = vector_toward_singularity.dot(commanded_velocity);
-  if (dot > 0)
-  {
-    // Ramp velocity down linearly when the Jacobian condition is between lower_singularity_threshold and
-    // hard_stop_singularity_threshold, and we're moving towards the singularity
-    if ((ini_condition > parameters_->lower_singularity_threshold) &&
-        (ini_condition < parameters_->hard_stop_singularity_threshold))
-    {
-      velocity_scale =
-          1. - (ini_condition - parameters_->lower_singularity_threshold) /
-                   (parameters_->hard_stop_singularity_threshold - parameters_->lower_singularity_threshold);
-      status_ = StatusCode::DECELERATE_FOR_SINGULARITY;
-      rclcpp::Clock& clock = *node_->get_clock();
-      RCLCPP_WARN_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD, SERVO_STATUS_CODE_MAP.at(status_));
-    }
-
-    // Very close to singularity, so halt.
-    else if (ini_condition > parameters_->hard_stop_singularity_threshold)
-    {
-      velocity_scale = 0;
-      status_ = StatusCode::HALT_FOR_SINGULARITY;
-      rclcpp::Clock& clock = *node_->get_clock();
-      RCLCPP_WARN_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD, SERVO_STATUS_CODE_MAP.at(status_));
-    }
-  }
-
-  return velocity_scale;
 }
 
 std::vector<const moveit::core::JointModel*>
@@ -980,6 +1028,15 @@ bool ServoCalcs::checkValidCommand(const geometry_msgs::msg::TwistStamped& cmd)
     }
   }
 
+  // Check that the command frame is known
+  if (!cmd.header.frame_id.empty() && !current_state_->knowsFrameTransform(cmd.header.frame_id))
+  {
+    rclcpp::Clock& clock = *node_->get_clock();
+    RCLCPP_WARN_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD,
+                                "Commanded frame '" << cmd.header.frame_id << "' is unknown, skipping this command");
+    return false;
+  }
+
   return true;
 }
 
@@ -1147,7 +1204,7 @@ bool ServoCalcs::getEEFrameTransform(geometry_msgs::msg::TransformStamped& trans
   return true;
 }
 
-void ServoCalcs::twistStampedCB(const geometry_msgs::msg::TwistStamped::SharedPtr msg)
+void ServoCalcs::twistStampedCB(const geometry_msgs::msg::TwistStamped::ConstSharedPtr& msg)
 {
   const std::lock_guard<std::mutex> lock(main_loop_mutex_);
   latest_twist_stamped_ = msg;
@@ -1161,7 +1218,7 @@ void ServoCalcs::twistStampedCB(const geometry_msgs::msg::TwistStamped::SharedPt
   input_cv_.notify_all();
 }
 
-void ServoCalcs::jointCmdCB(const control_msgs::msg::JointJog::SharedPtr msg)
+void ServoCalcs::jointCmdCB(const control_msgs::msg::JointJog::ConstSharedPtr& msg)
 {
   const std::lock_guard<std::mutex> lock(main_loop_mutex_);
   latest_joint_cmd_ = msg;
@@ -1175,13 +1232,13 @@ void ServoCalcs::jointCmdCB(const control_msgs::msg::JointJog::SharedPtr msg)
   input_cv_.notify_all();
 }
 
-void ServoCalcs::collisionVelocityScaleCB(const std_msgs::msg::Float64::SharedPtr msg)
+void ServoCalcs::collisionVelocityScaleCB(const std_msgs::msg::Float64::ConstSharedPtr& msg)
 {
   collision_velocity_scale_ = msg.get()->data;
 }
 
-void ServoCalcs::changeDriftDimensions(const std::shared_ptr<moveit_msgs::srv::ChangeDriftDimensions::Request> req,
-                                       std::shared_ptr<moveit_msgs::srv::ChangeDriftDimensions::Response> res)
+void ServoCalcs::changeDriftDimensions(const std::shared_ptr<moveit_msgs::srv::ChangeDriftDimensions::Request>& req,
+                                       const std::shared_ptr<moveit_msgs::srv::ChangeDriftDimensions::Response>& res)
 {
   drift_dimensions_[0] = req->drift_x_translation;
   drift_dimensions_[1] = req->drift_y_translation;
@@ -1193,8 +1250,8 @@ void ServoCalcs::changeDriftDimensions(const std::shared_ptr<moveit_msgs::srv::C
   res->success = true;
 }
 
-void ServoCalcs::changeControlDimensions(const std::shared_ptr<moveit_msgs::srv::ChangeControlDimensions::Request> req,
-                                         std::shared_ptr<moveit_msgs::srv::ChangeControlDimensions::Response> res)
+void ServoCalcs::changeControlDimensions(const std::shared_ptr<moveit_msgs::srv::ChangeControlDimensions::Request>& req,
+                                         const std::shared_ptr<moveit_msgs::srv::ChangeControlDimensions::Response>& res)
 {
   control_dimensions_[0] = req->control_x_translation;
   control_dimensions_[1] = req->control_y_translation;
@@ -1206,8 +1263,8 @@ void ServoCalcs::changeControlDimensions(const std::shared_ptr<moveit_msgs::srv:
   res->success = true;
 }
 
-bool ServoCalcs::resetServoStatus(const std::shared_ptr<std_srvs::srv::Empty::Request> /*req*/,
-                                  std::shared_ptr<std_srvs::srv::Empty::Response> /*res*/)
+bool ServoCalcs::resetServoStatus(const std::shared_ptr<std_srvs::srv::Empty::Request>& /*req*/,
+                                  const std::shared_ptr<std_srvs::srv::Empty::Response>& /*res*/)
 {
   status_ = StatusCode::NO_WARNING;
   return true;

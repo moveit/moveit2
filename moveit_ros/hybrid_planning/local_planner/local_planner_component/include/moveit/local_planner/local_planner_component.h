@@ -118,6 +118,10 @@ public:
       declareOrGetParam<std::string>("local_solution_topic_type", local_solution_topic_type, undefined, node);
       declareOrGetParam<bool>("publish_joint_positions", publish_joint_positions, false, node);
       declareOrGetParam<bool>("publish_joint_velocities", publish_joint_velocities, false, node);
+      // Planning scene monitor options
+      declareOrGetParam<std::string>("monitored_planning_scene", monitored_planning_scene_topic, undefined, node);
+      declareOrGetParam<std::string>("collision_object_topic", collision_object_topic, undefined, node);
+      declareOrGetParam<std::string>("joint_states_topic", joint_states_topic, undefined, node);
     }
 
     std::string group_name;
@@ -133,10 +137,23 @@ public:
     bool publish_joint_positions;
     bool publish_joint_velocities;
     double local_planning_frequency;
+    std::string monitored_planning_scene_topic;
+    std::string collision_object_topic;
+    std::string joint_states_topic;
   };
 
   /** \brief Constructor */
   LocalPlannerComponent(const rclcpp::NodeOptions& options);
+
+  /** \brief Destructor */
+  ~LocalPlannerComponent()
+  {
+    // Join the thread used for long-running callbacks
+    if (long_callback_thread_.joinable())
+    {
+      long_callback_thread_.join();
+    }
+  }
 
   /**
    * Initialize and start planning scene monitor to listen to the planning scene topic.
@@ -167,8 +184,8 @@ private:
   // Planner configuration
   LocalPlannerConfig config_;
 
-  // Current planner state
-  LocalPlannerState state_;
+  // Current planner state. Must be thread-safe
+  std::atomic<LocalPlannerState> state_;
 
   // Timer to periodically call executeIteration()
   rclcpp::TimerBase::SharedPtr timer_;
@@ -207,5 +224,11 @@ private:
 
   // Trajectory_operator instance handle trajectory matching and blending
   std::shared_ptr<TrajectoryOperatorInterface> trajectory_operator_instance_;
+
+  // This thread is used for long-running callbacks. It's a member so they do not go out of scope.
+  std::thread long_callback_thread_;
+
+  // A unique callback group, to avoid mixing callbacks with other action servers
+  rclcpp::CallbackGroup::SharedPtr cb_group_;
 };
 }  // namespace moveit::hybrid_planning

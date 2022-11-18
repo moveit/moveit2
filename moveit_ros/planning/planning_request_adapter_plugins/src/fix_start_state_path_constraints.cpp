@@ -39,7 +39,9 @@
 #include <moveit/robot_state/conversions.h>
 #include <class_loader/class_loader.hpp>
 #include <moveit/trajectory_processing/trajectory_tools.h>
-#include <rclcpp/rclcpp.hpp>
+#include <rclcpp/logger.hpp>
+#include <rclcpp/logging.hpp>
+#include <rclcpp/node.hpp>
 
 namespace default_planner_request_adapters
 {
@@ -117,14 +119,16 @@ public:
           return true;
         }
         else
+        {
           return false;
+        }
       }
       else
       {
         RCLCPP_WARN(LOGGER, "Unable to plan to path constraints. Running usual motion plan.");
-        bool result = planner(planning_scene, req, res);
-        res.planning_time_ += res2.planning_time_;
-        return result;
+        res.error_code_.val = moveit_msgs::msg::MoveItErrorCodes::START_STATE_VIOLATES_PATH_CONSTRAINTS;
+        res.planning_time_ = res2.planning_time_;
+        return false;  // skip remaining adapters and/or planner
       }
     }
     else

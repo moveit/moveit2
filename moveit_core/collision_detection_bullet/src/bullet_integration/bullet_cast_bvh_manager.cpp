@@ -32,6 +32,9 @@
 /* Author: Levi Armstrong, Jens Petit */
 
 #include "moveit/collision_detection_bullet/bullet_integration/bullet_cast_bvh_manager.h"
+
+#include <rclcpp/logger.hpp>
+#include <rclcpp/logging.hpp>
 #include <map>
 #include <utility>
 
@@ -41,7 +44,7 @@ namespace collision_detection_bullet
 {
 BulletCastBVHManagerPtr BulletCastBVHManager::clone() const
 {
-  BulletCastBVHManagerPtr manager(new BulletCastBVHManager());
+  BulletCastBVHManagerPtr manager = std::make_shared<BulletCastBVHManager>();
 
   for (const std::pair<const std::string, collision_detection_bullet::CollisionObjectWrapperPtr>& cow : link2cow_)
   {

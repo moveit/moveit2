@@ -38,7 +38,6 @@
 #include <math.h>
 #include <string>
 #include <vector>
-#include <boost/thread.hpp>
 
 #include <Eigen/Geometry>
 #include <kdl/frames.hpp>
@@ -51,16 +50,8 @@
 #include <moveit/robot_model/joint_model_group.h>
 #include <moveit/robot_model/robot_model.h>
 #include <moveit/robot_model_loader/robot_model_loader.h>
-#if __has_include(<tf2_eigen/tf2_eigen.hpp>)
 #include <tf2_eigen/tf2_eigen.hpp>
-#else
-#include <tf2_eigen/tf2_eigen.h>
-#endif
-#if __has_include(<tf2_geometry_msgs/tf2_geometry_msgs.hpp>)
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
-#else
-#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
-#endif
 
 #include "pilz_industrial_motion_planner/cartesian_trajectory.h"
 #include "pilz_industrial_motion_planner/cartesian_trajectory_point.h"
@@ -151,7 +142,7 @@ protected:
   std::map<std::string, double> zero_state_;
 
   // random seed
-  boost::uint32_t random_seed_{ 100 };
+  uint32_t random_seed_{ 100 };
   random_numbers::RandomNumberGenerator rng_{ random_seed_ };
 };
 
@@ -466,7 +457,7 @@ TEST_F(TrajectoryFunctionsTestFlangeAndGripper, testComputePoseIKInvalidFrameId)
 //
 //   std::vector<double> ik_state;
 //   std::transform(ik_actual1.begin(), ik_actual1.end(), std::back_inserter(ik_state),
-//                  boost::bind(&std::map<std::string, double>::value_type::second, _1));
+//                  [](const auto& pair) { return pair.second; });
 //
 //   rstate.setJointGroupPositions(jmg, ik_state);
 //   rstate.update();
@@ -487,7 +478,7 @@ TEST_F(TrajectoryFunctionsTestFlangeAndGripper, testComputePoseIKInvalidFrameId)
 //
 //   std::vector<double> ik_state2;
 //   std::transform(ik_actual2.begin(), ik_actual2.end(), std::back_inserter(ik_state2),
-//                  boost::bind(&std::map<std::string, double>::value_type::second, _1));
+//                  [](const auto& pair) { return pair.second; });
 //   rstate.setJointGroupPositions(jmg, ik_state2);
 //   rstate.update();
 //

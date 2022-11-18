@@ -128,26 +128,33 @@ public:
    * @brief verify position limit of single joint
    * @param joint_name
    * @param joint_position
-   * @return
+   * @return true if within limits, false otherwise
    */
-  bool verifyVelocityLimit(const std::string& joint_name, const double& joint_velocity) const;
+  bool verifyPositionLimit(const std::string& joint_name, double joint_position) const;
 
   /**
-   * @brief verify position limit of single joint
+   * @brief verify velocity limit of single joint
    * @param joint_name
-   * @param joint_position
-   * @return
+   * @param joint_velocity
+   * @return true if within limits, false otherwise
    */
-  bool verifyPositionLimit(const std::string& joint_name, const double& joint_position) const;
+  bool verifyVelocityLimit(const std::string& joint_name, double joint_velocity) const;
 
   /**
-   * @brief verify position limits of multiple joints
-   * @param joint_names
-   * @param joint_positions
-   * @return
+   * @brief verify acceleration limit of single joint
+   * @param joint_name
+   * @param joint_acceleration
+   * @return true if within limits, false otherwise
    */
-  bool verifyPositionLimits(const std::vector<std::string>& joint_names,
-                            const std::vector<double>& joint_positions) const;
+  bool verifyAccelerationLimit(const std::string& joint_name, double joint_acceleration) const;
+
+  /**
+   * @brief verify deceleration limit of single joint
+   * @param joint_name
+   * @param joint_acceleration
+   * @return true if within limits, false otherwise
+   */
+  bool verifyDecelerationLimit(const std::string& joint_name, double joint_acceleration) const;
 
 private:
   /**

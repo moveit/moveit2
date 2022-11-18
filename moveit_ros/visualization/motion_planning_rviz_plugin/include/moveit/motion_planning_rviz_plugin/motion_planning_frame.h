@@ -108,6 +108,7 @@ public:
   MotionPlanningFrame(MotionPlanningDisplay* pdisplay, rviz_common::DisplayContext* context, QWidget* parent = nullptr);
   ~MotionPlanningFrame() override;
 
+  void clearRobotModel();
   void changePlanningGroup();
   void enable();
   void disable();
@@ -117,6 +118,7 @@ protected:
   static const int ITEM_TYPE_SCENE = 1;
   static const int ITEM_TYPE_QUERY = 2;
 
+  void initFromMoveGroupNS();
   void constructPlanningRequest(moveit_msgs::msg::MotionPlanRequest& mreq);
 
   void updateSceneMarkers(float wall_dt, float ros_dt);
@@ -295,7 +297,7 @@ private:
   std::string selected_support_surface_name_;
 
   rclcpp_action::Client<object_recognition_msgs::action::ObjectRecognition>::SharedPtr object_recognition_client_;
-  void listenDetectedObjects(const object_recognition_msgs::msg::RecognizedObjectArray::ConstSharedPtr msg);
+  void listenDetectedObjects(const object_recognition_msgs::msg::RecognizedObjectArray::ConstSharedPtr& msg);
   rclcpp::Subscription<object_recognition_msgs::msg::RecognizedObjectArray>::SharedPtr object_recognition_subscriber_;
 
   rclcpp::Subscription<std_msgs::msg::Empty>::SharedPtr plan_subscriber_;
@@ -311,13 +313,13 @@ private:
   shapes::ShapePtr loadMeshResource(const std::string& url);
   void loadStoredStates(const std::string& pattern);
 
-  void remotePlanCallback(const std_msgs::msg::Empty::ConstSharedPtr msg);
-  void remoteExecuteCallback(const std_msgs::msg::Empty::ConstSharedPtr msg);
-  void remoteStopCallback(const std_msgs::msg::Empty::ConstSharedPtr msg);
-  void remoteUpdateStartStateCallback(const std_msgs::msg::Empty::ConstSharedPtr msg);
-  void remoteUpdateGoalStateCallback(const std_msgs::msg::Empty::ConstSharedPtr msg);
-  void remoteUpdateCustomStartStateCallback(const moveit_msgs::msg::RobotState::ConstSharedPtr msg);
-  void remoteUpdateCustomGoalStateCallback(const moveit_msgs::msg::RobotState::ConstSharedPtr msg);
+  void remotePlanCallback(const std_msgs::msg::Empty::ConstSharedPtr& msg);
+  void remoteExecuteCallback(const std_msgs::msg::Empty::ConstSharedPtr& msg);
+  void remoteStopCallback(const std_msgs::msg::Empty::ConstSharedPtr& msg);
+  void remoteUpdateStartStateCallback(const std_msgs::msg::Empty::ConstSharedPtr& msg);
+  void remoteUpdateGoalStateCallback(const std_msgs::msg::Empty::ConstSharedPtr& msg);
+  void remoteUpdateCustomStartStateCallback(const moveit_msgs::msg::RobotState::ConstSharedPtr& msg);
+  void remoteUpdateCustomGoalStateCallback(const moveit_msgs::msg::RobotState::ConstSharedPtr& msg);
 
   /* Selects or unselects a item in a list by the item name */
   void setItemSelectionInList(const std::string& item_name, bool selection, QListWidget* list);

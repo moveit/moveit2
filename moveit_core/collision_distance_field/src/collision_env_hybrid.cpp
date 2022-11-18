@@ -47,7 +47,7 @@ CollisionEnvHybrid::CollisionEnvHybrid(
     double size_z, const Eigen::Vector3d& origin, bool use_signed_distance_field, double resolution,
     double collision_tolerance, double max_propogation_distance, double padding, double scale)
   : CollisionEnvFCL(robot_model)
-  , cenv_distance_(new collision_detection::CollisionEnvDistanceField(
+  , cenv_distance_(std::make_shared<collision_detection::CollisionEnvDistanceField>(
         robot_model, getWorld(), link_body_decompositions, size_x, size_y, size_z, origin, use_signed_distance_field,
         resolution, collision_tolerance, max_propogation_distance, padding, scale))
 {
@@ -59,7 +59,7 @@ CollisionEnvHybrid::CollisionEnvHybrid(
     double size_z, const Eigen::Vector3d& origin, bool use_signed_distance_field, double resolution,
     double collision_tolerance, double max_propogation_distance, double padding, double scale)
   : CollisionEnvFCL(robot_model, world, padding, scale)
-  , cenv_distance_(new collision_detection::CollisionEnvDistanceField(
+  , cenv_distance_(std::make_shared<collision_detection::CollisionEnvDistanceField>(
         robot_model, getWorld(), link_body_decompositions, size_x, size_y, size_z, origin, use_signed_distance_field,
         resolution, collision_tolerance, max_propogation_distance, padding, scale))
 {
@@ -67,7 +67,8 @@ CollisionEnvHybrid::CollisionEnvHybrid(
 
 CollisionEnvHybrid::CollisionEnvHybrid(const CollisionEnvHybrid& other, const WorldPtr& world)
   : CollisionEnvFCL(other, world)
-  , cenv_distance_(new collision_detection::CollisionEnvDistanceField(*other.getCollisionWorldDistanceField(), world))
+  , cenv_distance_(std::make_shared<collision_detection::CollisionEnvDistanceField>(
+        *other.getCollisionWorldDistanceField(), world))
 {
 }
 

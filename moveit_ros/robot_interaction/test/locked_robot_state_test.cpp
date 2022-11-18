@@ -222,7 +222,7 @@ static moveit::core::RobotModelPtr getModel()
   if (!model)
   {
     urdf::ModelInterfaceSharedPtr urdf(urdf::parseURDF(URDF_STR));
-    srdf::ModelSharedPtr srdf(new srdf::Model());
+    auto srdf = std::make_shared<srdf::Model>();
     srdf->initString(*urdf, SRDF_STR);
     model = std::make_shared<moveit::core::RobotModel>(urdf, srdf);
   }
@@ -240,7 +240,7 @@ TEST(LockedRobotState, load)
   state2.setToDefaultValues();
   robot_interaction::LockedRobotState ls2(state2);
 
-  robot_interaction::LockedRobotStatePtr ls4(new robot_interaction::LockedRobotState(model));
+  auto ls4 = std::make_shared<robot_interaction::LockedRobotState>(model);
 }
 
 // sanity test the URDF and enum
@@ -319,13 +319,13 @@ public:
 
 private:
   // helper function for modifyThreadFunc
-  void modifyFunc(moveit::core::RobotState* state, double val);
+  void modifyFunc(moveit::core::RobotState& state, double val);
 
   // Checks state for validity and self-consistancy.
   void checkState(robot_interaction::LockedRobotState& locked_state);
 
   // mutex protects quit_ and counter variables
-  boost::mutex cnt_lock_;
+  std::mutex cnt_lock_;
 
   // set to true by waitThreadFunc() when all counters have reached at least
   // max.
@@ -415,11 +415,11 @@ void MyInfo::setThreadFunc(robot_interaction::LockedRobotState* locked_state, in
 }
 
 // modify the state in place.  Used by MyInfo::modifyThreadFunc()
-void MyInfo::modifyFunc(moveit::core::RobotState* state, double val)
+void MyInfo::modifyFunc(moveit::core::RobotState& state, double val)
 {
-  state->setVariablePosition(JOINT_A, val + 0.00001);
-  state->setVariablePosition(JOINT_C, val + 0.00002);
-  state->setVariablePosition(JOINT_F, val + 0.00003);
+  state.setVariablePosition(JOINT_A, val + 0.00001);
+  state.setVariablePosition(JOINT_C, val + 0.00002);
+  state.setVariablePosition(JOINT_F, val + 0.00003);
 }
 
 // spin, modifying the state to different values
@@ -433,7 +433,7 @@ void MyInfo::modifyThreadFunc(robot_interaction::LockedRobotState* locked_state,
     {
       val += 0.0001;
 
-      locked_state->modifyState(boost::bind(&MyInfo::modifyFunc, this, boost::placeholders::_1, val));
+      locked_state->modifyState([this, val](moveit::core::RobotState* state) { modifyFunc(*state, val); });
     }
 
     cnt_lock_.lock();
@@ -484,7 +484,7 @@ static void runThreads(int ncheck, int nset, int nmod)
   int num = ncheck + nset + nmod;
 
   typedef int* int_ptr;
-  typedef boost::thread* thread_ptr;
+  typedef std::thread* thread_ptr;
   int* cnt = new int[num];
   int_ptr* counters = new int_ptr[num + 1];
   thread_ptr* threads = new thread_ptr[num];
@@ -497,7 +497,7 @@ static void runThreads(int ncheck, int nset, int nmod)
   {
     cnt[p] = 0;
     counters[p] = &cnt[p];
-    threads[p] = new boost::thread(&MyInfo::checkThreadFunc, &info, &ls1, &cnt[p]);
+    threads[p] = new std::thread(&MyInfo::checkThreadFunc, &info, &ls1, &cnt[p]);
     val += 0.1;
     p++;
   }
@@ -507,7 +507,7 @@ static void runThreads(int ncheck, int nset, int nmod)
   {
     cnt[p] = 0;
     counters[p] = &cnt[p];
-    threads[p] = new boost::thread(&MyInfo::setThreadFunc, &info, &ls1, &cnt[p], val);
+    threads[p] = new std::thread(&MyInfo::setThreadFunc, &info, &ls1, &cnt[p], val);
     val += 0.1;
     p++;
   }
@@ -517,7 +517,7 @@ static void runThreads(int ncheck, int nset, int nmod)
   {
     cnt[p] = 0;
     counters[p] = &cnt[p];
-    threads[p] = new boost::thread(&MyInfo::modifyThreadFunc, &info, &ls1, &cnt[p], val);
+    threads[p] = new std::thread(&MyInfo::modifyThreadFunc, &info, &ls1, &cnt[p], val);
     val += 0.1;
     p++;
   }
@@ -527,12 +527,18 @@ static void runThreads(int ncheck, int nset, int nmod)
 
   // this thread waits for all the other threads to make progress, then stops
   // everything.
-  boost::thread wthread(&MyInfo::waitThreadFunc, &info, &ls1, counters, 1000);
+  std::thread wthread(&MyInfo::waitThreadFunc, &info, &ls1, counters, 1000);
 
   // wait for all threads to finish
   for (int i = 0; i < p; ++i)
   {
-    threads[i]->join();
+    if (threads[i]->joinable())
+    {
+      threads[i]->join();
+    }
+  }
+  if (wthread.joinable())
+  {
     wthread.join();
   }
 
@@ -551,62 +557,70 @@ TEST(LockedRobotState, set1)
   runThreads(1, 1, 0);
 }
 
-TEST(LockedRobotState, set2)
+// skip all more complex locking checks when optimizations are disabled
+// they can easily outrun 20 minutes with Debug builds
+#ifdef NDEBUG
+#define OPT_TEST(F, N) TEST(F, N)
+#else
+#define OPT_TEST(F, N) TEST(F, DISABLED_##N)
+#endif
+
+OPT_TEST(LockedRobotState, set2)
 {
   runThreads(1, 2, 0);
 }
 
-TEST(LockedRobotState, set3)
+OPT_TEST(LockedRobotState, set3)
 {
   runThreads(1, 3, 0);
 }
 
-TEST(LockedRobotState, mod1)
+OPT_TEST(LockedRobotState, mod1)
 {
   runThreads(1, 0, 1);
 }
 
-TEST(LockedRobotState, mod2)
+OPT_TEST(LockedRobotState, mod2)
 {
   runThreads(1, 0, 1);
 }
 
-TEST(LockedRobotState, mod3)
+OPT_TEST(LockedRobotState, mod3)
 {
   runThreads(1, 0, 1);
 }
 
-TEST(LockedRobotState, set1mod1)
+OPT_TEST(LockedRobotState, set1mod1)
 {
   runThreads(1, 1, 1);
 }
 
-TEST(LockedRobotState, set2mod1)
+OPT_TEST(LockedRobotState, set2mod1)
 {
   runThreads(1, 2, 1);
 }
 
-TEST(LockedRobotState, set1mod2)
+OPT_TEST(LockedRobotState, set1mod2)
 {
   runThreads(1, 1, 2);
 }
 
-TEST(LockedRobotState, set3mod1)
+OPT_TEST(LockedRobotState, set3mod1)
 {
   runThreads(1, 3, 1);
 }
 
-TEST(LockedRobotState, set1mod3)
+OPT_TEST(LockedRobotState, set1mod3)
 {
   runThreads(1, 1, 3);
 }
 
-TEST(LockedRobotState, set3mod3)
+OPT_TEST(LockedRobotState, set3mod3)
 {
   runThreads(1, 3, 3);
 }
 
-TEST(LockedRobotState, set3mod3c3)
+OPT_TEST(LockedRobotState, set3mod3c3)
 {
   runThreads(3, 3, 3);
 }

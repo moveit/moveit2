@@ -36,11 +36,7 @@
 
 #include <moveit/depth_image_octomap_updater/depth_image_octomap_updater.h>
 #include <moveit/occupancy_map_monitor/occupancy_map_monitor.h>
-#if __has_include(<tf2_geometry_msgs/tf2_geometry_msgs.hpp>)
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
-#else
-#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
-#endif
 #include <tf2/LinearMath/Vector3.h>
 #include <tf2/LinearMath/Transform.h>
 #include <geometric_shapes/shape_operations.h>
@@ -48,7 +44,6 @@
 #include <stdint.h>
 
 #include <memory>
-#include <boost/bind.hpp>
 
 namespace occupancy_map_monitor
 {
@@ -97,7 +92,8 @@ bool DepthImageOctomapUpdater::setParams(const std::string& name_space)
         node_->get_parameter(name_space + ".max_update_rate", max_update_rate_) &&
         node_->get_parameter(name_space + ".skip_vertical_pixels", skip_vertical_pixels_) &&
         node_->get_parameter(name_space + ".skip_horizontal_pixels", skip_horizontal_pixels_) &&
-        node_->get_parameter(name_space + ".filtered_cloud_topic", filtered_cloud_topic_);
+        node_->get_parameter(name_space + ".filtered_cloud_topic", filtered_cloud_topic_) &&
+        node_->get_parameter(name_space + ".ns", ns_);
     return true;
   }
   catch (const rclcpp::exceptions::InvalidParameterTypeException& e)
@@ -125,11 +121,8 @@ bool DepthImageOctomapUpdater::initialize(const rclcpp::Node::SharedPtr& node)
   mesh_filter_->setShadowThreshold(shadow_threshold_);
   mesh_filter_->setPaddingOffset(padding_offset_);
   mesh_filter_->setPaddingScale(padding_scale_);
-  mesh_filter_->setTransformCallback(boost::bind(&DepthImageOctomapUpdater::getShapeTransform, this,
-                                                 boost::placeholders::_1, boost::placeholders::_2));
-
-  // init rclcpp time default value
-  last_update_time_ = node_->now();
+  mesh_filter_->setTransformCallback(
+      [this](mesh_filter::MeshHandle mesh, Eigen::Isometry3d& tf) { return getShapeTransform(mesh, tf); });
 
   return true;
 }
@@ -139,18 +132,25 @@ void DepthImageOctomapUpdater::start()
   rmw_qos_profile_t custom_qos = rmw_qos_profile_system_default;
   pub_model_depth_image_ = model_depth_transport_->advertiseCamera("model_depth", 1);
 
+  std::string prefix = "";
+  if (!ns_.empty())
+    prefix = ns_ + "/";
+
+  pub_model_depth_image_ = model_depth_transport_->advertiseCamera(prefix + "model_depth", 1);
   if (!filtered_cloud_topic_.empty())
-    pub_filtered_depth_image_ = filtered_depth_transport_->advertiseCamera(filtered_cloud_topic_, 1);
+    pub_filtered_depth_image_ = filtered_depth_transport_->advertiseCamera(prefix + filtered_cloud_topic_, 1);
   else
-    pub_filtered_depth_image_ = filtered_depth_transport_->advertiseCamera("filtered_depth", 1);
+    pub_filtered_depth_image_ = filtered_depth_transport_->advertiseCamera(prefix + "filtered_depth", 1);
 
-  pub_filtered_label_image_ = filtered_label_transport_->advertiseCamera("filtered_label", 1);
+  pub_filtered_label_image_ = filtered_label_transport_->advertiseCamera(prefix + "filtered_label", 1);
 
-  sub_depth_image_ =
-      image_transport::create_camera_subscription(node_.get(), image_topic_,
-                                                  boost::bind(&DepthImageOctomapUpdater::depthImageCallback, this,
-                                                              boost::placeholders::_1, boost::placeholders::_2),
-                                                  "raw", custom_qos);
+  sub_depth_image_ = image_transport::create_camera_subscription(
+      node_.get(), image_topic_,
+      [this](const sensor_msgs::msg::Image::ConstSharedPtr& depth_msg,
+             const sensor_msgs::msg::CameraInfo::ConstSharedPtr& info_msg) {
+        return depthImageCallback(depth_msg, info_msg);
+      },
+      "raw", custom_qos);
 }
 
 void DepthImageOctomapUpdater::stop()
@@ -225,7 +225,7 @@ void DepthImageOctomapUpdater::depthImageCallback(const sensor_msgs::msg::Image:
   if (max_update_rate_ > 0)
   {
     // ensure we are not updating the octomap representation too often
-    if (node_->now() - last_update_time_ <= rclcpp::Duration(std::chrono::duration<double>(1.0 / max_update_rate_)))
+    if (node_->now() - last_update_time_ <= rclcpp::Duration::from_seconds(1.0 / max_update_rate_))
       return;
     last_update_time_ = node_->now();
   }

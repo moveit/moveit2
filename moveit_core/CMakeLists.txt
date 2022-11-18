@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.10.2)
+cmake_minimum_required(VERSION 3.22)
 project(moveit_core LANGUAGES CXX)
 
 # Common cmake code applied to all moveit packages
@@ -77,10 +77,8 @@ set(THIS_PACKAGE_INCLUDE_DIRS
     planning_interface/include
     planning_request_adapter/include
     planning_scene/include
-    profiler/include
     # TODO: Port python bindings
     # python/tools/include
-    sensor_manager/include
     trajectory_processing/include
     utils/include
 )
@@ -101,7 +99,6 @@ set(THIS_PACKAGE_LIBRARIES
     moveit_planning_interface
     moveit_planning_scene
     moveit_planning_request_adapter
-    moveit_profiler
     # TODO: Port python bindings
     # moveit_python_tools
     moveit_robot_model
@@ -169,11 +166,9 @@ add_subdirectory(online_signal_smoothing)
 add_subdirectory(planning_interface)
 add_subdirectory(planning_request_adapter)
 add_subdirectory(planning_scene)
-add_subdirectory(profiler)
 add_subdirectory(robot_model)
 add_subdirectory(robot_state)
 add_subdirectory(robot_trajectory)
-add_subdirectory(sensor_manager)
 add_subdirectory(trajectory_processing)
 add_subdirectory(transforms)
 add_subdirectory(utils)
@@ -213,15 +208,15 @@ add_subdirectory(collision_detection_fcl)
 
 install(
   TARGETS ${THIS_PACKAGE_LIBRARIES}
-  EXPORT export_${PROJECT_NAME}
+  EXPORT ${PROJECT_NAME}Targets
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
   RUNTIME DESTINATION bin
   INCLUDES DESTINATION include
 )
 
-ament_export_targets(export_${PROJECT_NAME} HAS_LIBRARY_TARGET)
-ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS})
+ament_export_targets(${PROJECT_NAME}Targets HAS_LIBRARY_TARGET)
+ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS} orocos_kdl_vendor)
 
 # Plugin exports
 pluginlib_export_plugin_description_file(moveit_core collision_detector_fcl_description.xml)
@@ -233,7 +228,6 @@ if(BUILD_TESTING)
 
   # These don't pass yet, disable them for now
   set(ament_cmake_copyright_FOUND TRUE)
-  set(ament_cmake_cppcheck_FOUND TRUE)
   set(ament_cmake_cpplint_FOUND TRUE)
   set(ament_cmake_flake8_FOUND TRUE)
   set(ament_cmake_uncrustify_FOUND TRUE)

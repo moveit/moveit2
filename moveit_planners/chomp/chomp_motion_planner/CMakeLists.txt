@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.22)
 project(chomp_motion_planner)
 
 # Common cmake code applied to all moveit packages
@@ -9,11 +9,13 @@ moveit_package()
 find_package(ament_cmake REQUIRED)
 find_package(moveit_core REQUIRED)
 find_package(rclcpp REQUIRED)
+find_package(rsl REQUIRED)
 find_package(trajectory_msgs REQUIRED)
 
 set(THIS_PACKAGE_INCLUDE_DEPENDS
   moveit_core
   rclcpp
+  rsl
   trajectory_msgs
   visualization_msgs
 )
@@ -37,7 +39,6 @@ if(BUILD_TESTING)
 
   # These don't pass yet, disable them for now
   set(ament_cmake_copyright_FOUND TRUE)
-  set(ament_cmake_cppcheck_FOUND TRUE)
   set(ament_cmake_cpplint_FOUND TRUE)
   set(ament_cmake_flake8_FOUND TRUE)
   set(ament_cmake_uncrustify_FOUND TRUE)

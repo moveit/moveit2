@@ -66,6 +66,39 @@ TEST(RDFIntegration, topic_based)
   EXPECT_EQ("gonzo", loader.getSRDF()->getName());
 }
 
+TEST(RDFIntegration, executor)
+{
+  // RDFLoader should successfully load URDF and SRDF strings from a ROS topic when the node that is
+  // passed to it is spinning.
+  // GIVEN a node that has been added to an executor that is spinning on another thread
+  rclcpp::Node::SharedPtr node = std::make_shared<rclcpp::Node>("executor");
+
+  // Create a thread to spin an Executor.
+  rclcpp::executors::SingleThreadedExecutor executor;
+  executor.add_node(node);
+  std::thread spinning_thread([&executor] { executor.spin(); });
+
+  // WHEN the RDFLoader is created
+  rdf_loader::RDFLoader loader(node, "topic_description");
+
+  // THEN the RDFLoader should return non-null values for the URDF and SRDF model.
+  ASSERT_NE(nullptr, loader.getURDF());
+  EXPECT_EQ("gonzo", loader.getURDF()->name_);
+  ASSERT_NE(nullptr, loader.getSRDF());
+  EXPECT_EQ("gonzo", loader.getSRDF()->getName());
+  executor.cancel();
+  spinning_thread.join();
+}
+
+TEST(RDFIntegration, xacro_test)
+{
+  std::string output;
+  std::vector<std::string> xacro_args;
+  ASSERT_TRUE(rdf_loader::RDFLoader::loadPkgFileToString(output, "moveit_ros_planning",
+                                                         "rdf_loader/test/data/robin.srdf.xacro", xacro_args));
+  EXPECT_GT(output.size(), 0u);
+}
+
 int main(int argc, char** argv)
 {
   rclcpp::init(argc, argv);

@@ -1,0 +1,45 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>moveit_setup_assistant</name>
+  <version>2.6.0</version>
+  <description>Generates a configuration package that makes it easy to use MoveIt</description>
+  <maintainer email="henningkayser@picknik.ai">Henning Kayser</maintainer>
+  <maintainer email="tyler@picknik.ai">Tyler Weaver</maintainer>
+  <maintainer email="rhaschke@techfak.uni-bielefeld.de">Robert Haschke</maintainer>
+  <maintainer email="moveit_releasers@googlegroups.com">MoveIt Release Team</maintainer>
+  <maintainer email="davidvlu@gmail.com">David V. Lu!!</maintainer>
+
+  <license>BSD</license>
+
+  <url type="website">http://moveit.ros.org</url>
+  <url type="bugtracker">https://github.com/ros-planning/moveit2/issues</url>
+  <url type="repository">https://github.com/ros-planning/moveit2</url>
+
+  <author email="davidvlu@gmail.com">David V. Lu!!</author>
+  <author email="dave@picknik.ai">Dave Coleman</author>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <depend>ament_index_cpp</depend>
+  <depend>pluginlib</depend>
+  <depend>qtbase5-dev</depend>
+  <depend>rclcpp</depend>
+  <depend>moveit_setup_framework</depend>
+  <depend>moveit_setup_srdf_plugins</depend> <!-- For collision_updater executable -->
+  <exec_depend>moveit_setup_controllers</exec_depend>
+  <exec_depend>moveit_setup_core_plugins</exec_depend>
+  <exec_depend>moveit_setup_app_plugins</exec_depend>
+  <!-- TODO: Enable once https://github.com/ros-planning/moveit2/issues/1262 is resolved -->
+  <!-- <exec_depend>moveit_setup_simulation</exec_depend>  -->
+
+  <test_depend>ament_lint_auto</test_depend>
+  <test_depend>ament_clang_format</test_depend>
+  <test_depend>ament_cmake_lint_cmake</test_depend>
+  <test_depend>ament_cmake_xmllint</test_depend>
+  <test_depend>moveit_resources_panda_moveit_config</test_depend>
+  <test_depend>ament_cmake_gtest</test_depend>
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>

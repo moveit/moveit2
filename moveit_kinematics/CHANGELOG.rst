@@ -2,6 +2,73 @@
 Changelog for package moveit_kinematics
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.6.0 (2022-11-10)
+------------------
+* Use generate_parameter_library to load KDL kinematics parameters (`#1671 <https://github.com/ros-planning/moveit2/issues/1671>`_)
+* Use generate_parameter_library to load ikfast kinematics parameters (`#1675 <https://github.com/ros-planning/moveit2/issues/1675>`_)
+* Use generate_parameter_library to load cached IK kinematics parameters (`#1677 <https://github.com/ros-planning/moveit2/issues/1677>`_)
+* Use generate_parameter_library to load srv kinematics parameters (`#1674 <https://github.com/ros-planning/moveit2/issues/1674>`_)
+* Use generate_parameter_library to load LMA kinematics parameters (`#1673 <https://github.com/ros-planning/moveit2/issues/1673>`_)
+* Merge PR `#1553 <https://github.com/ros-planning/moveit2/issues/1553>`_: Improve cmake files
+* Use standard exported targets: export\_${PROJECT_NAME} -> ${PROJECT_NAME}Targets
+* Improve CMake usage (`#1550 <https://github.com/ros-planning/moveit2/issues/1550>`_)
+* Use pragma once as header include guard (`#1525 <https://github.com/ros-planning/moveit2/issues/1525>`_)
+* Unified code comment style (`#1053 <https://github.com/ros-planning/moveit2/issues/1053>`_)
+  * Changes the comment style from /**/ to //
+  Co-authored-by: JafarAbdi <cafer.abdi@gmail.com>
+  Co-authored-by: Henning Kayser <henningkayser@picknik.ai>
+* Remove __has_include statements (`#1481 <https://github.com/ros-planning/moveit2/issues/1481>`_)
+* Merge https://github.com/ros-planning/moveit/commit/a63580edd05b01d9480c333645036e5b2b222da9
+* Merge PR `#3172 <https://github.com/ros-planning/moveit2/issues/3172>`_: Fix CI
+* Fix test_ikfast_plugins.sh
+  - Create panda.urdf using catkin build panda_description
+  - Improve debug output
+* Fix run_quiet()
+  - Show output on error
+  - Restore both stdout and stderr
+* auto_create_ikfast_moveit_plugin.sh: allow xacro input
+* Contributors: Abishalini Sivaraman, J. Javan, Michael Marron, Robert Haschke, Sebastian Jahr, Vatan Aksoy Tezer, abishalini
+
+2.5.3 (2022-07-28)
+------------------
+
+2.5.2 (2022-07-18)
+------------------
+* Merge remote-tracking branch 'origin/main' into feature/msa
+* Removing more boost usage (`#1372 <https://github.com/ros-planning/moveit2/issues/1372>`_)
+* Merge remote-tracking branch 'upstream/main' into feature/msa
+* Removing some boost usage (`#1331 <https://github.com/ros-planning/moveit2/issues/1331>`_)
+  Co-authored-by: Vatan Aksoy Tezer <vatan@picknik.ai>
+* Update plugin library paths (`#1304 <https://github.com/ros-planning/moveit2/issues/1304>`_)
+* Switch to hpp headers of pluginlib
+* Merge pull request `#3106 <https://github.com/ros-planning/moveit2/issues/3106>`_ from v4hn/pr-master-bind-them-all / banish bind()
+* Fix clang-tidy
+* kinematics test: remove unused argument
+* Contributors: David V. Lu, Henry Moore, Jochen Sprickerhof, Michael Görner, Robert Haschke, Sebastian Jahr, Vatan Aksoy Tezer, v4hn
+
+2.5.1 (2022-05-31)
+------------------
+
+2.5.0 (2022-05-26)
+------------------
+* Fix reading joint weights in KDLKinematicsPlugin (`#1216 <https://github.com/ros-planning/moveit2/issues/1216>`_)
+* Make moveit_common a 'depend' rather than 'build_depend' (`#1226 <https://github.com/ros-planning/moveit2/issues/1226>`_)
+* Avoid bind(), use lambdas instead (`#1204 <https://github.com/ros-planning/moveit2/issues/1204>`_)
+  Adaption of https://github.com/ros-planning/moveit/pull/3106
+* remove unused arguments from kinematics test
+  source https://github.com/ros-planning/moveit/pull/3106/commits/ddb68b6178ecfde267b5c7c9734aa47f6c4c4a5f; I also had to amend moveit_msgs to moveit_msgs::msg in this commit, otherwise everything remains the same as source commit. When I ran the kinematics plugin test locally it threw an error both before and after this change. Hopefully we can revisit this point as part of the code review, the error related to the robot description.
+* Use orocos_kdl_vendor package (`#1207 <https://github.com/ros-planning/moveit2/issues/1207>`_)
+* Use a steady clock for timeout for IK (`#795 <https://github.com/ros-planning/moveit2/issues/795>`_)
+* Merge https://github.com/ros-planning/moveit/commit/a25515b73d682df03ed3eccd839110c296aa79fc
+* Merge https://github.com/ros-planning/moveit/commit/ab42a1d7017b27eb6c353fb29331b2da08ab0039
+* Compilation fixes for Jammy and bring back Rolling CI (`#1095 <https://github.com/ros-planning/moveit2/issues/1095>`_)
+* Add moveit_configs_utils package to simplify loading paramters (`#591 <https://github.com/ros-planning/moveit2/issues/591>`_)
+* round_collada_numbers.py: python 2/3 compatibility (`#2983 <https://github.com/ros-planning/moveit2/issues/2983>`_)
+  Python3 requires the files to be opened in binary mode read a bytes object instead of a string, which is needed in turn by etree.parse().
+  Co-authored-by: Robert Haschke <rhaschke@techfak.uni-bielefeld.de>
+* Switch to std::bind (`#2967 <https://github.com/ros-planning/moveit2/issues/2967>`_)
+* Contributors: Abishalini, Gaël Écorchard, Henning Kayser, Jafar, Jafar Abdi, Jochen Sprickerhof, Robert Haschke, Tomislav Bazina, Vatan Aksoy Tezer, jeoseo, v4hn
+
 2.4.0 (2022-01-20)
 ------------------
 * Fix IKFast test dependency (`#993 <https://github.com/ros-planning/moveit2/issues/993>`_)

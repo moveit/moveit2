@@ -49,7 +49,7 @@ constexpr size_t ROS_LOG_THROTTLE_PERIOD = 30 * 1000;  // Milliseconds to thrott
 namespace moveit_servo
 {
 // Constructor for the class that handles collision checking
-CollisionCheck::CollisionCheck(rclcpp::Node::SharedPtr node, const ServoParameters::SharedConstPtr& parameters,
+CollisionCheck::CollisionCheck(const rclcpp::Node::SharedPtr& node, const ServoParameters::SharedConstPtr& parameters,
                                const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor)
   : node_(node)
   , parameters_(parameters)
@@ -74,10 +74,6 @@ CollisionCheck::CollisionCheck(rclcpp::Node::SharedPtr node, const ServoParamete
   collision_velocity_scale_pub_ =
       node_->create_publisher<std_msgs::msg::Float64>("~/collision_velocity_scale", rclcpp::SystemDefaultsQoS());
 
-  worst_case_stop_time_sub_ = node_->create_subscription<std_msgs::msg::Float64>(
-      "~/worst_case_stop_time", rclcpp::SystemDefaultsQoS(),
-      std::bind(&CollisionCheck::worstCaseStopTimeCB, this, std::placeholders::_1));
-
   current_state_ = planning_scene_monitor_->getStateMonitor()->getCurrentState();
 }
 
@@ -88,7 +84,7 @@ planning_scene_monitor::LockedPlanningSceneRO CollisionCheck::getLockedPlanningS
 
 void CollisionCheck::start()
 {
-  timer_ = node_->create_wall_timer(std::chrono::duration<double>(period_), std::bind(&CollisionCheck::run, this));
+  timer_ = node_->create_wall_timer(std::chrono::duration<double>(period_), [this]() { return run(); });
 }
 
 void CollisionCheck::run()
@@ -155,11 +151,6 @@ void CollisionCheck::run()
     msg->data = velocity_scale_;
     collision_velocity_scale_pub_->publish(std::move(msg));
   }
-}
-
-void CollisionCheck::worstCaseStopTimeCB(const std_msgs::msg::Float64::SharedPtr msg)
-{
-  worst_case_stop_time_ = msg.get()->data;
 }
 
 void CollisionCheck::setPaused(bool paused)

@@ -8,9 +8,10 @@ local_solution_topic_type: "std_msgs/Float64MultiArray" # or trajectory_msgs/Joi
 publish_joint_positions: true
 publish_joint_velocities: false
 group_name: "panda_arm"
-
-# SimpleSampler param
-pass_through: false
+# Subscribe to this topic
+monitored_planning_scene: "/planning_scene"
+collision_object_topic: "/collision_object"
+joint_states_topic: "/joint_states"
 
 # ForwardTrajectory param
 stop_before_collision: true

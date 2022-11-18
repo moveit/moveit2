@@ -69,7 +69,7 @@ struct MockCurrentStateMonitorMiddlewareHandle : public planning_scene_monitor::
   MOCK_METHOD(void, resetTfSubscriptions, (), (override));
 };
 
-void waitFor(std::chrono::seconds timeout, std::function<bool()> done)
+void waitFor(std::chrono::seconds timeout, const std::function<bool()>& done)
 {
   const auto start = std::chrono::steady_clock::now();
   while ((std::chrono::steady_clock::now() - start) < timeout)
@@ -101,8 +101,8 @@ TEST(TrajectoryMonitorTests, SleepAtLeastOnce)
 
   // Set the trajectory monitor callback so we can block until at least one sample was taken.
   std::atomic<bool> callback_called{ false };
-  trajectory_monitor.setOnStateAddCallback(
-      [&](const moveit::core::RobotStateConstPtr& robot_state, const rclcpp::Time& time) { callback_called = true; });
+  trajectory_monitor.setOnStateAddCallback([&](const moveit::core::RobotStateConstPtr& /* unused */,
+                                               const rclcpp::Time& /* unused */) { callback_called = true; });
 
   // WHEN we call the startTrajectoryMonitor function
   trajectory_monitor.startTrajectoryMonitor();

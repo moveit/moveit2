@@ -103,7 +103,8 @@ TEST(CommandPlannerTestDirect, FailOnLoadContext)
   };
 
   /// Registered a found loader
-  pilz_industrial_motion_planner::PlanningContextLoaderPtr planning_context_loader(new TestPlanningContextLoader());
+  pilz_industrial_motion_planner::PlanningContextLoaderPtr planning_context_loader =
+      std::make_shared<TestPlanningContextLoader>();
   planner.registerContextLoader(planning_context_loader);
 
   moveit_msgs::msg::MotionPlanRequest req;

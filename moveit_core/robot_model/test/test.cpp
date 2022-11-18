@@ -38,8 +38,7 @@
 #include <urdf_parser/urdf_parser.h>
 #include <fstream>
 #include <gtest/gtest.h>
-#include <boost/filesystem/path.hpp>
-#include <moveit/profiler/profiler.h>
+
 #include <moveit/utils/robot_model_test_utils.h>
 
 class LoadPlanningModelsPr2 : public testing::Test
@@ -79,7 +78,6 @@ TEST_F(LoadPlanningModelsPr2, Model)
   {
     ASSERT_EQ(links[i]->getLinkIndex(), i);
   }
-  moveit::tools::Profiler::Status();
 
   // This joint has effort and velocity limits defined in the URDF. Nothing else.
   const std::string joint_name = "fl_caster_rotation_joint";
@@ -96,9 +94,9 @@ TEST_F(LoadPlanningModelsPr2, Model)
 
 TEST(SiblingAssociateLinks, SimpleYRobot)
 {
-  /* base_link - a - b - c
-                  \
-                   - d ~ e          */
+  // base_link - a - b - c  //
+  //               \        //
+  //               - d ~ e  //
   moveit::core::RobotModelBuilder builder("one_robot", "base_link");
   builder.addChain("base_link->a", "continuous");
   builder.addChain("a->b->c", "fixed");
@@ -127,6 +125,50 @@ TEST(SiblingAssociateLinks, SimpleYRobot)
     std::copy(actual_set.begin(), actual_set.end(), std::ostream_iterator<std::string>(actual, " "));
 
     EXPECT_EQ(expected.str(), actual.str());
+  }
+}
+
+TEST(FloatingJointTest, interpolation_test)
+{
+  // Create a simple floating joint model with some dummy parameters (these are not used by the test)
+  moveit::core::FloatingJointModel fjm("joint", 0, 0);
+
+  // We set some bounds where the joint position's translation component is bounded between -1 and 1 in all
+  // dimensions. This is necessary, otherwise we just get (0,0,0) translations.
+  moveit::core::JointModel::Bounds bounds;
+  bounds = fjm.getVariableBounds();
+  bounds[0].min_position_ = -1.0;
+  bounds[0].max_position_ = 1.0;
+  bounds[1].min_position_ = -1.0;
+  bounds[1].max_position_ = 1.0;
+  bounds[2].min_position_ = -1.0;
+  bounds[2].max_position_ = 1.0;
+
+  double jv1[7];
+  double jv2[7];
+  double intp[7];
+  random_numbers::RandomNumberGenerator rng;
+
+  for (size_t i = 0; i < 1000; ++i)
+  {
+    // Randomize the joint settings.
+    fjm.getVariableRandomPositions(rng, jv1, bounds);
+    fjm.getVariableRandomPositions(rng, jv2, bounds);
+
+    // Pick a random interpolation value
+    double t = rng.uniformReal(0.0, 1.0);
+
+    // Apply the interpolation
+    fjm.interpolate(jv1, jv2, t, intp);
+
+    // Get the distances between the two joint configurations
+    double d1 = fjm.distance(jv1, intp);
+    double d2 = fjm.distance(jv2, intp);
+    double t_total = fjm.distance(jv1, jv2);
+
+    // Check that the resulting distances match with the interpolation value
+    EXPECT_NEAR(d1, t_total * t, 1e-6);
+    EXPECT_NEAR(d2, t_total * (1.0 - t), 1e-6);
   }
 }
 

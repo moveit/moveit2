@@ -53,6 +53,8 @@
 
 #include "rclcpp/rclcpp.hpp"
 
+#include "cartesian_limits_parameters.hpp"
+
 const std::string PARAM_MODEL_NO_GRIPPER_NAME{ "robot_description" };
 const std::string PARAM_MODEL_WITH_GRIPPER_NAME{ "robot_description_pg70" };
 const std::string PARAM_NAMESPACE_LIMITS{ "robot_description_planning" };
@@ -121,17 +123,19 @@ protected:
     pilz_industrial_motion_planner::JointLimitsContainer joint_limits =
         pilz_industrial_motion_planner::JointLimitsAggregator::getAggregatedLimits(
             node_, PARAM_NAMESPACE_LIMITS, robot_model_->getActiveJointModels());
-    pilz_industrial_motion_planner::CartesianLimit cart_limits;
-    cart_limits.setMaxRotationalVelocity(0.5 * M_PI);
-    cart_limits.setMaxTranslationalAcceleration(2);
-    cart_limits.setMaxTranslationalDeceleration(2);
-    cart_limits.setMaxTranslationalVelocity(1);
+
+    cartesian_limits::Params cart_limits;
+    cart_limits.max_trans_vel = 0.5 * M_PI;
+    cart_limits.max_trans_acc = 2;
+    cart_limits.max_trans_dec = 2;
+    cart_limits.max_rot_vel = 1;
+
     pilz_industrial_motion_planner::LimitsContainer planner_limits;
     planner_limits.setJointLimits(joint_limits);
     planner_limits.setCartesianLimits(cart_limits);
 
     // create planner instance
-    trajectory_generator_ = std::unique_ptr<typename T::Type_>(new typename T::Type_(robot_model_, planner_limits));
+    trajectory_generator_ = std::make_unique<typename T::Type_>(robot_model_, planner_limits, planning_group_);
     ASSERT_NE(nullptr, trajectory_generator_) << "failed to create trajectory generator";
 
     // create a valid motion plan request with goal in joint space as basis for
@@ -141,7 +145,7 @@ protected:
     req_.max_acceleration_scaling_factor = 1.0;
     moveit::core::RobotState rstate(robot_model_);
     rstate.setToDefaultValues();
-    rstate.setJointGroupPositions(planning_group_, { 0, M_PI / 2, 0, M_PI / 2, 0, 0 });
+    rstate.setJointGroupPositions(planning_group_, std::vector<double>{ 0, M_PI / 2, 0, M_PI / 2, 0, 0 });
     rstate.setVariableVelocities(std::vector<double>(rstate.getVariableCount(), 0.0));
     moveit::core::robotStateToRobotStateMsg(rstate, req_.start_state, false);
     moveit_msgs::msg::Constraints goal_constraint;

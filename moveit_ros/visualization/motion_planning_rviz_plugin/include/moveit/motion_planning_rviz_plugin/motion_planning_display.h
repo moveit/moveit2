@@ -209,6 +209,7 @@ protected:
     OUTSIDE_BOUNDS_LINK
   };
 
+  void clearRobotModel() override;
   void onRobotModelLoaded() override;
   void onNewPlanningSceneState() override;
   void onSceneMonitorReceivedUpdate(planning_scene_monitor::PlanningSceneMonitor::SceneUpdateType update_type) override;
@@ -245,7 +246,7 @@ protected:
   void setQueryStateHelper(bool use_start_state, const std::string& v);
   void populateMenuHandler(std::shared_ptr<interactive_markers::MenuHandler>& mh);
 
-  void selectPlanningGroupCallback(const std_msgs::msg::String::ConstSharedPtr msg);
+  void selectPlanningGroupCallback(const std_msgs::msg::String::ConstSharedPtr& msg);
 
   // overrides from Display
   void onInitialize() override;
@@ -293,7 +294,7 @@ protected:
   // Metric calculations
   kinematics_metrics::KinematicsMetricsPtr kinematics_metrics_;
   std::map<std::string, dynamics_solver::DynamicsSolverPtr> dynamics_solver_;
-  boost::mutex update_metrics_lock_;
+  std::mutex update_metrics_lock_;
 
   // The trajectory playback component
   TrajectoryVisualizationPtr trajectory_visual_;

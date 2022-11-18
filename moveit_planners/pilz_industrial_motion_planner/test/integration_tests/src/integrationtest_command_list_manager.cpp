@@ -47,11 +47,7 @@
 #include <moveit_msgs/DisplayTrajectory.h>
 #include <moveit_msgs/MotionPlanResponse.h>
 
-#if __has_include(<tf2_eigen/tf2_eigen.hpp>)
 #include <tf2_eigen/tf2_eigen.hpp>
-#else
-#include <tf2_eigen/tf2_eigen.h>
-#endif
 
 #include <pilz_industrial_motion_planner_testutils/gripper.h>
 #include <pilz_industrial_motion_planner_testutils/lin.h>
@@ -628,13 +624,13 @@ TEST_F(IntegrationTestCommandListManager, TestGroupSpecificStartState)
   seq.erase(4, seq.size());
 
   Gripper& gripper{ seq.getCmd<Gripper>(0) };
-  gripper.getStartConfiguration().setCreateJointNameFunc(std::bind(&createGripperJointName, _1));
+  gripper.getStartConfiguration().setCreateJointNameFunc([](size_t n) { return createGripperJointName(n); });
   // By deleting the model we guarantee that the start state only consists
   // of joints of the gripper group without the manipulator
   gripper.getStartConfiguration().clearModel();
 
   PtpJointCart& ptp{ seq.getCmd<PtpJointCart>(1) };
-  ptp.getStartConfiguration().setCreateJointNameFunc(std::bind(&createManipulatorJointName, _1));
+  ptp.getStartConfiguration().setCreateJointNameFunc([](size_t n) { return createManipulatorJointName(n); });
   // By deleting the model we guarantee that the start state only consists
   // of joints of the manipulator group without the gripper
   ptp.getStartConfiguration().clearModel();

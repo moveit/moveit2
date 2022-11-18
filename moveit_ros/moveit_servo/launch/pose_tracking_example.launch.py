@@ -69,28 +69,32 @@ def generate_launch_description():
     ros2_controllers_path = os.path.join(
         get_package_share_directory("moveit_resources_panda_moveit_config"),
         "config",
-        "panda_ros_controllers.yaml",
+        "ros2_controllers.yaml",
     )
     ros2_control_node = Node(
         package="controller_manager",
         executable="ros2_control_node",
         parameters=[moveit_config.robot_description, ros2_controllers_path],
-        output={
-            "stdout": "screen",
-            "stderr": "screen",
-        },
+        output="screen",
     )
 
-    # Load controllers
-    load_controllers = []
-    for controller in ["panda_arm_controller", "joint_state_broadcaster"]:
-        load_controllers += [
-            ExecuteProcess(
-                cmd=["ros2 run controller_manager spawner {}".format(controller)],
-                shell=True,
-                output="screen",
-            )
-        ]
+    joint_state_broadcaster_spawner = Node(
+        package="controller_manager",
+        executable="spawner",
+        arguments=[
+            "joint_state_broadcaster",
+            "--controller-manager-timeout",
+            "300",
+            "--controller-manager",
+            "/controller_manager",
+        ],
+    )
+
+    panda_arm_controller_spawner = Node(
+        package="controller_manager",
+        executable="spawner",
+        arguments=["panda_arm_controller", "-c", "/controller_manager"],
+    )
 
     return LaunchDescription(
         [
@@ -98,7 +102,8 @@ def generate_launch_description():
             static_tf,
             pose_tracking_node,
             ros2_control_node,
+            joint_state_broadcaster_spawner,
+            panda_arm_controller_spawner,
             robot_state_publisher,
         ]
-        + load_controllers
     )

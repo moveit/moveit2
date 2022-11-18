@@ -34,8 +34,14 @@
 
 /* Author: Ioan Sucan */
 
-#include <rclcpp/rclcpp.hpp>
 #include <moveit/planning_scene_monitor/planning_scene_monitor.h>
+#include <rclcpp/duration.hpp>
+#include <rclcpp/executors/multi_threaded_executor.hpp>
+#include <rclcpp/node.hpp>
+#include <rclcpp/publisher.hpp>
+#include <rclcpp/qos_event.hpp>
+#include <rclcpp/time.hpp>
+#include <rclcpp/utilities.hpp>
 #include <memory>
 
 static const std::string ROBOT_DESCRIPTION = "robot_description";
@@ -107,7 +113,7 @@ int main(int argc, char** argv)
       t.translation() = Eigen::Vector3d(rng.uniformReal(aabb[0], aabb[1]), rng.uniformReal(aabb[2], aabb[3]),
                                         rng.uniformReal(aabb[4], aabb[5]));
       scene->getWorldNonConst()->clearObjects();
-      scene->getWorldNonConst()->addToObject("test", shapes::ShapeConstPtr(new shapes::Sphere(radius)), t);
+      scene->getWorldNonConst()->addToObject("test", std::make_shared<shapes::Sphere>(radius), t);
       collision_detection::CollisionResult res;
       scene->checkCollision(req, res);
       if (res.collision)

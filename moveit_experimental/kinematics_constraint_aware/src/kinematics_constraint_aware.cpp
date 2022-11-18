@@ -40,12 +40,8 @@
 #include <moveit/robot_model/robot_model.h>
 #include <moveit/planning_scene/planning_scene.h>
 #include <Eigen/Geometry.h>
-#if __has_include(<tf2_eigen/tf2_eigen.hpp>)
 #include <tf2_eigen/tf2_eigen.hpp>
-#else
-#include <tf2_eigen/tf2_eigen.h>
-#endif
-#include <boost/bind.hpp>
+#include <functional>
 
 namespace kinematics_constraint_aware
 {
@@ -164,8 +160,11 @@ bool KinematicsConstraintAware::getIK(const planning_scene::PlanningSceneConstPt
   EigenSTL::vector_Isometry3d goals =
       transformPoses(planning_scene, kinematic_state, request.pose_stamped_vector_, kinematic_model_->getModelFrame());
 
-  moveit::core::StateValidityCallbackFn constraint_callback_fn =
-      boost::bind(&KinematicsConstraintAware::validityCallbackFn, this, planning_scene, request, response, _1, _2);
+  moveit::core::StateValidityCallbackFn constraint_callback_fn = [this, &planning_scene, &request,
+                                                                  &response](moveit::core::JointStateGroup* jsg,
+                                                                             const std::vector<double>& jg_values) {
+    validityCallbackFn(planning_scene, request, response, jsg, jg_values);
+  };
 
   bool result = false;
   if (has_sub_groups_)

@@ -40,6 +40,7 @@
 #include <rcl_interfaces/msg/integer_range.hpp>
 #include <rcl_interfaces/msg/parameter_descriptor.hpp>
 #include <rcl_interfaces/msg/parameter_type.hpp>
+#include <limits>
 #include <string>
 
 namespace moveit_servo
@@ -73,7 +74,7 @@ public:
    *
    * @return     Reference to this object
    */
-  ParameterDescriptorBuilder& description(std::string description);
+  ParameterDescriptorBuilder& description(const std::string& description);
 
   /**
    * @brief      Set the additional constraints string (a description of any additional constraints which cannot be
@@ -83,7 +84,7 @@ public:
    *
    * @return     Reference to this object
    */
-  ParameterDescriptorBuilder& additionalConstraints(std::string additional_constraints);
+  ParameterDescriptorBuilder& additionalConstraints(const std::string& additional_constraints);
 
   /**
    * @brief      Sets the read only flag

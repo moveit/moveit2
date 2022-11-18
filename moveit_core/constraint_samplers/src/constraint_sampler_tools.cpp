@@ -36,6 +36,11 @@
 
 #include <moveit/constraint_samplers/constraint_sampler_tools.h>
 #include <moveit/constraint_samplers/constraint_sampler_manager.h>
+#include <rclcpp/clock.hpp>
+#include <rclcpp/duration.hpp>
+#include <rclcpp/logger.hpp>
+#include <rclcpp/logging.hpp>
+#include <rclcpp/time.hpp>
 
 namespace constraint_samplers
 {

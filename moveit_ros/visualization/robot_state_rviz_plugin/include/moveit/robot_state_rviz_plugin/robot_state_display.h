@@ -112,7 +112,7 @@ protected:
   void setLinkColor(rviz_default_plugins::robot::Robot* robot, const std::string& link_name, const QColor& color);
   void unsetLinkColor(rviz_default_plugins::robot::Robot* robot, const std::string& link_name);
 
-  void newRobotStateCallback(const moveit_msgs::msg::DisplayRobotState::ConstSharedPtr state);
+  void newRobotStateCallback(const moveit_msgs::msg::DisplayRobotState::ConstSharedPtr& state);
 
   void setRobotHighlights(const moveit_msgs::msg::DisplayRobotState::_highlight_links_type& highlight_links);
   void setHighlight(const std::string& link_name, const std_msgs::msg::ColorRGBA& color);

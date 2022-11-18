@@ -37,10 +37,7 @@ def generate_test_description():
         executable="unittest_trajectory_blender_transition_window",
         name="unittest_trajectory_blender_transition_window",
         parameters=[
-            test_config.robot_description,
-            test_config.robot_description_semantic,
-            test_config.robot_description_kinematics,
-            test_config.robot_description_planning,
+            test_config.to_dict(),
             test_param,
             testdata_file_name,
         ],

@@ -37,14 +37,13 @@
 
 #include <moveit/robot_model/robot_model.h>
 #include <geometric_shapes/shape_operations.h>
-#include <boost/math/constants/constants.hpp>
-#include <moveit/profiler/profiler.h>
+#include <rclcpp/logger.hpp>
 #include <algorithm>
 #include <limits>
 #include <cmath>
 #include <memory>
+
 #include "order_robot_model_items.inc"
-#include "rclcpp/rclcpp.hpp"
 
 namespace moveit
 {
@@ -82,9 +81,6 @@ const LinkModel* RobotModel::getRootLink() const
 
 void RobotModel::buildModel(const urdf::ModelInterface& urdf_model, const srdf::Model& srdf_model)
 {
-  moveit::tools::Profiler::ScopedStart prof_start;
-  moveit::tools::Profiler::ScopedBlock prof_block("RobotModel::buildModel");
-
   root_joint_ = nullptr;
   root_link_ = nullptr;
   link_geometry_count_ = 0;
@@ -250,9 +246,6 @@ void RobotModel::computeDescendants()
 
 void RobotModel::buildJointInfo()
 {
-  moveit::tools::Profiler::ScopedStart prof_start;
-  moveit::tools::Profiler::ScopedBlock prof_block("RobotModel::buildJointInfo");
-
   // construct additional maps for easy access by name
   variable_count_ = 0;
   active_joint_model_start_index_.reserve(joint_model_vector_.size());
@@ -926,10 +919,16 @@ JointModel* RobotModel::constructJointModel(const urdf::Link* child_link, const 
     {
       if (virtual_joint.child_link_ != child_link->name)
       {
-        RCLCPP_WARN(LOGGER,
-                    "Skipping virtual joint '%s' because its child frame '%s' "
-                    "does not match the URDF frame '%s'",
-                    virtual_joint.name_.c_str(), virtual_joint.child_link_.c_str(), child_link->name.c_str());
+        if (child_link->name == "world" && virtual_joint.type_ == "fixed" && child_link->collision_array.empty() &&
+            !child_link->collision && child_link->visual_array.empty() && !child_link->visual)
+          // Gazebo requires a fixed link from a dummy world link to the first robot's link
+          // Skip warning in this case and create a fixed joint with given name
+          new_joint_model = new FixedJointModel(virtual_joint.name_, joint_index, first_variable_index);
+        else
+          RCLCPP_WARN(LOGGER,
+                      "Skipping virtual joint '%s' because its child frame '%s' "
+                      "does not match the URDF frame '%s'",
+                      virtual_joint.name_.c_str(), virtual_joint.child_link_.c_str(), child_link->name.c_str());
       }
       else if (virtual_joint.parent_frame_.empty())
       {
@@ -1171,8 +1170,6 @@ LinkModel* RobotModel::constructLinkModel(const urdf::Link* urdf_link)
 
 shapes::ShapePtr RobotModel::constructShape(const urdf::Geometry* geom)
 {
-  moveit::tools::Profiler::ScopedBlock prof_block("RobotModel::constructShape");
-
   shapes::Shape* new_shape = nullptr;
   switch (geom->type)
   {

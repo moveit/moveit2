@@ -14,7 +14,7 @@ def generate_move_group_test_description(*args, gtest_name: SomeSubstitutionsTyp
     moveit_config = (
         MoveItConfigsBuilder("moveit_resources_panda")
         .robot_description(file_path="config/panda.urdf.xacro")
-        .trajectory_execution(file_path="config/panda_gripper_controllers.yaml")
+        .trajectory_execution(file_path="config/gripper_moveit_controllers.yaml")
         .to_moveit_configs()
     )
 
@@ -55,32 +55,36 @@ def generate_move_group_test_description(*args, gtest_name: SomeSubstitutionsTyp
     ros2_controllers_path = os.path.join(
         get_package_share_directory("moveit_resources_panda_moveit_config"),
         "config",
-        "panda_ros_controllers.yaml",
+        "ros2_controllers.yaml",
     )
     ros2_control_node = Node(
         package="controller_manager",
         executable="ros2_control_node",
         parameters=[moveit_config.robot_description, ros2_controllers_path],
-        output={
-            "stdout": "screen",
-            "stderr": "screen",
-        },
+        output="screen",
     )
 
-    # Load controllers
-    load_controllers = []
-    for controller in [
-        "panda_arm_controller",
-        "panda_hand_controller",
-        "joint_state_broadcaster",
-    ]:
-        load_controllers += [
-            ExecuteProcess(
-                cmd=["ros2 run controller_manager spawner {}".format(controller)],
-                shell=True,
-                output="screen",
-            )
-        ]
+    joint_state_broadcaster_spawner = Node(
+        package="controller_manager",
+        executable="spawner",
+        arguments=[
+            "joint_state_broadcaster",
+            "--controller-manager",
+            "/controller_manager",
+        ],
+    )
+
+    panda_arm_controller_spawner = Node(
+        package="controller_manager",
+        executable="spawner",
+        arguments=["panda_arm_controller", "-c", "/controller_manager"],
+    )
+
+    panda_hand_controller_spawner = Node(
+        package="controller_manager",
+        executable="spawner",
+        arguments=["panda_hand_controller", "-c", "/controller_manager"],
+    )
 
     # test executable
     ompl_constraint_test = launch_ros.actions.Node(
@@ -106,10 +110,12 @@ def generate_move_group_test_description(*args, gtest_name: SomeSubstitutionsTyp
             static_tf,
             robot_state_publisher,
             ros2_control_node,
+            joint_state_broadcaster_spawner,
+            panda_arm_controller_spawner,
+            panda_hand_controller_spawner,
             TimerAction(period=2.0, actions=[ompl_constraint_test]),
             launch_testing.actions.ReadyToTest(),
         ]
-        + load_controllers
     ), {
         "run_move_group_node": run_move_group_node,
         "static_tf": static_tf,

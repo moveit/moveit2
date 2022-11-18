@@ -37,18 +37,17 @@
 #include <moveit/robot_state/attached_body.h>
 #include <geometric_shapes/check_isometry.h>
 #include <geometric_shapes/shapes.h>
-#include <boost/algorithm/string/predicate.hpp>
 
 namespace moveit
 {
 namespace core
 {
-AttachedBody::AttachedBody(const LinkModel* parent_link_model, const std::string& id, const Eigen::Isometry3d& pose,
+AttachedBody::AttachedBody(const LinkModel* parent, const std::string& id, const Eigen::Isometry3d& pose,
                            const std::vector<shapes::ShapeConstPtr>& shapes,
                            const EigenSTL::vector_Isometry3d& shape_poses, const std::set<std::string>& touch_links,
                            const trajectory_msgs::msg::JointTrajectory& detach_posture,
                            const FixedTransformsMap& subframe_poses)
-  : parent_link_model_(parent_link_model)
+  : parent_link_model_(parent)
   , id_(id)
   , pose_(pose)
   , shapes_(shapes)
@@ -135,7 +134,7 @@ void AttachedBody::setPadding(double padding)
 
 const Eigen::Isometry3d& AttachedBody::getSubframeTransform(const std::string& frame_name, bool* found) const
 {
-  if (boost::starts_with(frame_name, id_) && frame_name[id_.length()] == '/')
+  if (frame_name.rfind(id_, 0) == 0 && frame_name[id_.length()] == '/')
   {
     auto it = subframe_poses_.find(frame_name.substr(id_.length() + 1));
     if (it != subframe_poses_.end())
@@ -153,7 +152,7 @@ const Eigen::Isometry3d& AttachedBody::getSubframeTransform(const std::string& f
 
 const Eigen::Isometry3d& AttachedBody::getGlobalSubframeTransform(const std::string& frame_name, bool* found) const
 {
-  if (boost::starts_with(frame_name, id_) && frame_name[id_.length()] == '/')
+  if (frame_name.rfind(id_, 0) == 0 && frame_name[id_.length()] == '/')
   {
     auto it = global_subframe_poses_.find(frame_name.substr(id_.length() + 1));
     if (it != global_subframe_poses_.end())

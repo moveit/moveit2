@@ -53,7 +53,7 @@ planning_pipeline::PlanningPipeline::PlanningPipeline(const moveit::core::RobotM
                                                       const std::string& parameter_namespace,
                                                       const std::string& planner_plugin_param_name,
                                                       const std::string& adapter_plugins_param_name)
-  : node_(node), parameter_namespace_(parameter_namespace), robot_model_(model)
+  : active_{ false }, node_(node), parameter_namespace_(parameter_namespace), robot_model_(model)
 {
   std::string planner_plugin_fullname = parameter_namespace_ + "." + planner_plugin_param_name;
   if (parameter_namespace_.empty())
@@ -85,7 +85,8 @@ planning_pipeline::PlanningPipeline::PlanningPipeline(const moveit::core::RobotM
                                                       const std::string& parameter_namespace,
                                                       const std::string& planner_plugin_name,
                                                       const std::vector<std::string>& adapter_plugin_names)
-  : node_(node)
+  : active_{ false }
+  , node_(node)
   , parameter_namespace_(parameter_namespace)
   , planner_plugin_name_(planner_plugin_name)
   , adapter_plugin_names_(adapter_plugin_names)
@@ -242,14 +243,22 @@ bool planning_pipeline::PlanningPipeline::generatePlan(const planning_scene::Pla
                                                        planning_interface::MotionPlanResponse& res,
                                                        std::vector<std::size_t>& adapter_added_state_index) const
 {
+  // Set planning pipeline active
+  active_ = true;
+
   // broadcast the request we are about to work on, if needed
   if (publish_received_requests_)
+  {
     received_request_publisher_->publish(req);
+  }
   adapter_added_state_index.clear();
 
   if (!planner_instance_)
   {
     RCLCPP_ERROR(LOGGER, "No planning plugin loaded. Cannot plan.");
+    // Set planning pipeline to inactive
+
+    active_ = false;
     return false;
   }
 
@@ -277,6 +286,9 @@ bool planning_pipeline::PlanningPipeline::generatePlan(const planning_scene::Pla
   catch (std::exception& ex)
   {
     RCLCPP_ERROR(LOGGER, "Exception caught: '%s'", ex.what());
+    // Set planning pipeline to inactive
+
+    active_ = false;
     return false;
   }
   bool valid = true;
@@ -287,6 +299,11 @@ bool planning_pipeline::PlanningPipeline::generatePlan(const planning_scene::Pla
     RCLCPP_DEBUG(LOGGER, "Motion planner reported a solution path with %ld states", state_count);
     if (check_solution_paths_)
     {
+      visualization_msgs::msg::MarkerArray arr;
+      visualization_msgs::msg::Marker m;
+      m.action = visualization_msgs::msg::Marker::DELETEALL;
+      arr.markers.push_back(m);
+
       std::vector<std::size_t> index;
       if (!planning_scene->isPathValid(*res.trajectory_, req.path_constraints, req.group_name, false, &index))
       {
@@ -327,7 +344,6 @@ bool planning_pipeline::PlanningPipeline::generatePlan(const planning_scene::Pla
                                             << contacts_publisher_->get_topic_name());
 
             // call validity checks in verbose mode for the problematic states
-            visualization_msgs::msg::MarkerArray arr;
             for (std::size_t it : index)
             {
               // check validity with verbose on
@@ -351,10 +367,6 @@ bool planning_pipeline::PlanningPipeline::generatePlan(const planning_scene::Pla
               }
             }
             RCLCPP_ERROR(LOGGER, "Completed listing of explanations for invalid states.");
-            if (!arr.markers.empty())
-            {
-              contacts_publisher_->publish(arr);
-            }
           }
         }
         else
@@ -366,6 +378,7 @@ bool planning_pipeline::PlanningPipeline::generatePlan(const planning_scene::Pla
       }
       else
         RCLCPP_DEBUG(LOGGER, "Planned path was found to be valid when rechecked");
+      contacts_publisher_->publish(arr);
     }
   }
 
@@ -399,11 +412,16 @@ bool planning_pipeline::PlanningPipeline::generatePlan(const planning_scene::Pla
                           "equivalent?");
   }
 
+  // Set planning pipeline to inactive
+
+  active_ = false;
   return solved && valid;
 }
 
 void planning_pipeline::PlanningPipeline::terminate() const
 {
   if (planner_instance_)
+  {
     planner_instance_->terminate();
+  }
 }

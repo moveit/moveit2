@@ -40,11 +40,7 @@
 #include <moveit/distance_field/propagation_distance_field.h>
 #include <moveit/distance_field/find_internal_points.h>
 #include <geometric_shapes/body_operations.h>
-#if __has_include(<tf2_eigen/tf2_eigen.hpp>)
 #include <tf2_eigen/tf2_eigen.hpp>
-#else
-#include <tf2_eigen/tf2_eigen.h>
-#endif
 #include <octomap/octomap.h>
 #include <memory>
 
@@ -908,7 +904,7 @@ TEST(TestSignedPropagationDistanceField, TestOcTree)
   std::cout << "Occupied cells " << countOccupiedCells(df_highres) << '\n';
 
   // testing adding shape that happens to be octree
-  std::shared_ptr<octomap::OcTree> tree_shape(new octomap::OcTree(.05));
+  auto tree_shape = std::make_shared<octomap::OcTree>(.05);
   octomap::point3d tpoint1(1.0, .5, 1.0);
   octomap::point3d tpoint2(1.7, .5, .5);
   octomap::point3d tpoint3(1.8, .5, .5);
@@ -916,7 +912,7 @@ TEST(TestSignedPropagationDistanceField, TestOcTree)
   tree_shape->updateNode(tpoint2, true);
   tree_shape->updateNode(tpoint3, true);
 
-  std::shared_ptr<shapes::OcTree> shape_oc(new shapes::OcTree(tree_shape));
+  auto shape_oc = std::make_shared<shapes::OcTree>(tree_shape);
 
   PropagationDistanceField df_test_shape_1(PERF_WIDTH, PERF_HEIGHT, PERF_DEPTH, PERF_RESOLUTION, PERF_ORIGIN_X,
                                            PERF_ORIGIN_Y, PERF_ORIGIN_Z, PERF_MAX_DIST, false);

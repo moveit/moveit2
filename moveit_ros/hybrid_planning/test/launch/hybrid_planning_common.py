@@ -1,5 +1,4 @@
 # Return a list of nodes we commonly launch for the demo. Nice for testing use.
-import launch
 import os
 import xacro
 import yaml
@@ -33,8 +32,7 @@ def load_yaml(package_name, file_path):
         return None
 
 
-def generate_common_hybrid_launch_description():
-    # Component yaml files are grouped in separate namespaces
+def get_robot_description():
     robot_description_config = xacro.process_file(
         os.path.join(
             get_package_share_directory("moveit_resources_panda_moveit_config"),
@@ -43,13 +41,23 @@ def generate_common_hybrid_launch_description():
         )
     )
     robot_description = {"robot_description": robot_description_config.toxml()}
+    return robot_description
 
+
+def get_robot_description_semantic():
     robot_description_semantic_config = load_file(
         "moveit_resources_panda_moveit_config", "config/panda.srdf"
     )
     robot_description_semantic = {
         "robot_description_semantic": robot_description_semantic_config
     }
+    return robot_description_semantic
+
+
+def generate_common_hybrid_launch_description():
+    robot_description = get_robot_description()
+
+    robot_description_semantic = get_robot_description_semantic()
 
     kinematics_yaml = load_yaml(
         "moveit_resources_panda_moveit_config", "config/kinematics.yaml"
@@ -69,7 +77,7 @@ def generate_common_hybrid_launch_description():
     planning_pipelines_config["ompl"].update(ompl_planning_yaml)
 
     moveit_simple_controllers_yaml = load_yaml(
-        "moveit_resources_panda_moveit_config", "config/panda_controllers.yaml"
+        "moveit_resources_panda_moveit_config", "config/moveit_controllers.yaml"
     )
     moveit_controllers = {
         "moveit_simple_controller_manager": moveit_simple_controllers_yaml,
@@ -178,36 +186,26 @@ def generate_common_hybrid_launch_description():
         package="controller_manager",
         executable="ros2_control_node",
         parameters=[robot_description, ros2_controllers_path],
-        output={
-            "stdout": "screen",
-            "stderr": "screen",
-        },
+        output="screen",
     )
 
-    # Load controllers
-    load_controllers = []
-    for controller in [
-        "joint_state_broadcaster",
-        "panda_joint_group_position_controller",
-    ]:
-        load_controllers += [
-            ExecuteProcess(
-                cmd=["ros2 run controller_manager spawner {}".format(controller)],
-                shell=True,
-                output="screen",
-            )
-        ]
+    joint_state_broadcaster_spawner = Node(
+        package="controller_manager",
+        executable="spawner",
+        arguments=[
+            "joint_state_broadcaster",
+            "--controller-manager",
+            "/controller_manager",
+        ],
+    )
 
-    # Demo node
-    demo_node = Node(
-        package="moveit_hybrid_planning",
-        executable="hybrid_planning_demo_node",
-        name="hybrid_planning_demo_node",
-        output="screen",
-        parameters=[
-            robot_description,
-            robot_description_semantic,
-            common_hybrid_planning_param,
+    panda_joint_group_position_controller_spawner = Node(
+        package="controller_manager",
+        executable="spawner",
+        arguments=[
+            "panda_joint_group_position_controller",
+            "-c",
+            "/controller_manager",
         ],
     )
 
@@ -216,8 +214,9 @@ def generate_common_hybrid_launch_description():
         static_tf,
         rviz_node,
         robot_state_publisher,
-        demo_node,
         ros2_control_node,
-    ] + load_controllers
+        joint_state_broadcaster_spawner,
+        panda_joint_group_position_controller_spawner,
+    ]
 
     return launched_nodes

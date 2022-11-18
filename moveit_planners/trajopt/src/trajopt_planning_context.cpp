@@ -17,7 +17,7 @@ TrajOptPlanningContext::TrajOptPlanningContext(const std::string& context_name, 
   : planning_interface::PlanningContext(context_name, group_name), robot_model_(model)
 {
   ROS_INFO(" ======================================= TrajOptPlanningContext is constructed");
-  trajopt_interface_ = TrajOptInterfacePtr(new TrajOptInterface());
+  trajopt_interface_ = std::make_shared<TrajOptInterface>();
 }
 
 bool TrajOptPlanningContext::solve(planning_interface::MotionPlanDetailedResponse& res)
@@ -28,8 +28,7 @@ bool TrajOptPlanningContext::solve(planning_interface::MotionPlanDetailedRespons
   if (trajopt_solved)
   {
     res.trajectory_.resize(1);
-    res.trajectory_[0] =
-        robot_trajectory::RobotTrajectoryPtr(new robot_trajectory::RobotTrajectory(robot_model_, getGroupName()));
+    res.trajectory_[0] = std::make_shared<robot_trajectory::RobotTrajectory>(robot_model_, getGroupName());
 
     moveit::core::RobotState start_state(robot_model_);
     moveit::core::robotStateMsgToRobotState(res_msg.trajectory_start, start_state);

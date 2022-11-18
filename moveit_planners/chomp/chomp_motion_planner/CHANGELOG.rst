@@ -2,6 +2,35 @@
 Changelog for package chomp_motion_planner
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.6.0 (2022-11-10)
+------------------
+* Replace C array with std::array in std::vector template argument to improve compatibility with clang compiler and libc++ (`#1612 <https://github.com/ros-planning/moveit2/issues/1612>`_)
+  Co-authored-by: Tyler Weaver <tyler@picknik.ai>
+* updated comment formatting for correct doxygen generation (`#1582 <https://github.com/ros-planning/moveit2/issues/1582>`_)
+* Improve CMake usage (`#1550 <https://github.com/ros-planning/moveit2/issues/1550>`_)
+* Remove __has_include statements (`#1481 <https://github.com/ros-planning/moveit2/issues/1481>`_)
+* Contributors: Michael Wrock, Sebastian Jahr, Vatan Aksoy Tezer, light-tech
+
+2.5.3 (2022-07-28)
+------------------
+
+2.5.2 (2022-07-18)
+------------------
+* Merge remote-tracking branch 'origin/main' into feature/msa
+* Removing more boost usage (`#1372 <https://github.com/ros-planning/moveit2/issues/1372>`_)
+* Remove unnecessary rclcpp.hpp includes (`#1333 <https://github.com/ros-planning/moveit2/issues/1333>`_)
+* Contributors: Henry Moore, Jafar, Vatan Aksoy Tezer
+
+2.5.1 (2022-05-31)
+------------------
+
+2.5.0 (2022-05-26)
+------------------
+* Make moveit_common a 'depend' rather than 'build_depend' (`#1226 <https://github.com/ros-planning/moveit2/issues/1226>`_)
+* Merge https://github.com/ros-planning/moveit/commit/424a5b7b8b774424f78346d1e98bf1c9a33f0e78
+* MSA: Add STOMP + OMPL-CHOMP configs (`#2955 <https://github.com/ros-planning/moveit2/issues/2955>`_)
+* Contributors: Abishalini, Jafar, Rick Staa, Robert Haschke, jeoseo
+
 2.4.0 (2022-01-20)
 ------------------
 * Replace NULL with nullptr (`#961 <https://github.com/ros-planning/moveit2/issues/961>`_)

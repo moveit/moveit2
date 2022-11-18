@@ -36,7 +36,6 @@
 
 #include <moveit/ompl_interface/detail/constrained_sampler.h>
 #include <moveit/ompl_interface/model_based_planning_context.h>
-#include <moveit/profiler/profiler.h>
 
 #include <utility>
 
@@ -63,8 +62,6 @@ double ompl_interface::ConstrainedSampler::getConstrainedSamplingRate() const
 
 bool ompl_interface::ConstrainedSampler::sampleC(ob::State* state)
 {
-  //  moveit::Profiler::ScopedBlock sblock("sampleWithConstraints");
-
   if (constraint_sampler_->sample(work_state_, planning_context_->getCompleteInitialRobotState(),
                                   planning_context_->getMaximumStateSamplingAttempts()))
   {
