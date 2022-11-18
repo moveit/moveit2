@@ -53,6 +53,8 @@
 
 #include "rclcpp/rclcpp.hpp"
 
+#include "cartesian_limits_parameters.hpp"
+
 const std::string PARAM_MODEL_NO_GRIPPER_NAME{ "robot_description" };
 const std::string PARAM_MODEL_WITH_GRIPPER_NAME{ "robot_description_pg70" };
 const std::string PARAM_NAMESPACE_LIMITS{ "robot_description_planning" };
@@ -121,11 +123,13 @@ protected:
     pilz_industrial_motion_planner::JointLimitsContainer joint_limits =
         pilz_industrial_motion_planner::JointLimitsAggregator::getAggregatedLimits(
             node_, PARAM_NAMESPACE_LIMITS, robot_model_->getActiveJointModels());
-    pilz_industrial_motion_planner::CartesianLimit cart_limits;
-    cart_limits.setMaxRotationalVelocity(0.5 * M_PI);
-    cart_limits.setMaxTranslationalAcceleration(2);
-    cart_limits.setMaxTranslationalDeceleration(2);
-    cart_limits.setMaxTranslationalVelocity(1);
+
+    cartesian_limits::Params cart_limits;
+    cart_limits.max_trans_vel = 0.5 * M_PI;
+    cart_limits.max_trans_acc = 2;
+    cart_limits.max_trans_dec = 2;
+    cart_limits.max_rot_vel = 1;
+
     pilz_industrial_motion_planner::LimitsContainer planner_limits;
     planner_limits.setJointLimits(joint_limits);
     planner_limits.setCartesianLimits(cart_limits);

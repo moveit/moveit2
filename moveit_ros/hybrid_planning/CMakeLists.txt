@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.10.2)
+cmake_minimum_required(VERSION 3.22)
 project(moveit_hybrid_planning)
 
 # Common cmake code applied to all moveit packages
@@ -12,7 +12,6 @@ find_package(moveit_msgs REQUIRED)
 find_package(moveit_ros_planning REQUIRED)
 find_package(moveit_ros_planning_interface REQUIRED)
 find_package(pluginlib REQUIRED)
-find_package(position_controllers REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(rclcpp_action REQUIRED)
 find_package(rclcpp_components REQUIRED)
@@ -36,14 +35,13 @@ set(LIBRARIES
 
 set(THIS_PACKAGE_INCLUDE_DEPENDS
   moveit_core
+  moveit_msgs
   moveit_ros_planning
   moveit_ros_planning_interface
-  moveit_msgs
-  position_controllers
-  rclcpp
-  rclcpp_components
-  rclcpp_action
   pluginlib
+  rclcpp
+  rclcpp_action
+  rclcpp_components
   std_msgs
   std_srvs
   tf2_ros
@@ -71,13 +69,13 @@ rclcpp_components_register_nodes(moveit_global_planner_component "moveit::hybrid
 rclcpp_components_register_nodes(moveit_local_planner_component "moveit::hybrid_planning::LocalPlannerComponent")
 
 install(TARGETS ${LIBRARIES}
-  EXPORT export_${PROJECT_NAME}
+  EXPORT ${PROJECT_NAME}Targets
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
-  RUNTIME DESTINATION lib/${PROJECT_NAME}
+  RUNTIME DESTINATION bin
   INCLUDES DESTINATION include)
 
-install(TARGETS hybrid_planning_demo_node
+install(TARGETS cancel_action hybrid_planning_demo_node
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION lib/${PROJECT_NAME}
@@ -94,9 +92,7 @@ pluginlib_export_plugin_description_file(moveit_hybrid_planning simple_sampler_p
 pluginlib_export_plugin_description_file(moveit_hybrid_planning replan_invalidated_trajectory_plugin.xml)
 pluginlib_export_plugin_description_file(moveit_hybrid_planning forward_trajectory_plugin.xml)
 
-ament_export_include_directories(include)
-ament_export_libraries(${LIBRARIES})
 ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS})
-ament_export_targets(export_${PROJECT_NAME} HAS_LIBRARY_TARGET)
+ament_export_targets(${PROJECT_NAME}Targets HAS_LIBRARY_TARGET)
 
 ament_package()

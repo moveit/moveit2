@@ -35,7 +35,9 @@
 /* Author: Ioan Sucan */
 
 #include <moveit/robot_model_loader/robot_model_loader.h>
-#include <rclcpp/rclcpp.hpp>
+#include <rclcpp/executors/multi_threaded_executor.hpp>
+#include <rclcpp/node.hpp>
+#include <rclcpp/utilities.hpp>
 
 static const std::string ROBOT_DESCRIPTION = "robot_description";
 

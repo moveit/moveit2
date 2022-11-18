@@ -2,6 +2,26 @@
 Changelog for package prbt_support
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.6.0 (2022-11-10)
+------------------
+* Improve CMake usage (`#1550 <https://github.com/ros-planning/moveit2/issues/1550>`_)
+* Contributors: Sebastian Jahr
+
+2.5.3 (2022-07-28)
+------------------
+
+2.5.2 (2022-07-18)
+------------------
+* Rename cartesian_limits.yaml (`#1422 <https://github.com/ros-planning/moveit2/issues/1422>`_)
+  Co-authored-by: Tyler Weaver <maybe@tylerjw.dev>
+* Contributors: AndyZe
+
+2.5.1 (2022-05-31)
+------------------
+
+2.5.0 (2022-05-26)
+------------------
+
 2.4.0 (2022-01-20)
 ------------------
 

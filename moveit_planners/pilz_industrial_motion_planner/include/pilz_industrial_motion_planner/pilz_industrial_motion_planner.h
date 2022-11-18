@@ -43,9 +43,9 @@
 #include <moveit/planning_interface/planning_interface.h>
 
 #include <pluginlib/class_loader.hpp>
+#include <memory>
 
-// Boost includes
-#include <boost/scoped_ptr.hpp>
+#include <cartesian_limits_parameters.hpp>
 
 namespace pilz_industrial_motion_planner
 {
@@ -138,6 +138,9 @@ private:
 
   /** @brief Configure the planners */
   void loadPlannerConfigurations();
+  
+  std::shared_ptr<cartesian_limits::ParamListener> param_listener_;
+  cartesian_limits::Params params_;
 };
 
 MOVEIT_CLASS_FORWARD(CommandPlanner);

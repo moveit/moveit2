@@ -46,11 +46,10 @@
 #include <moveit/planning_scene_monitor/current_state_monitor.h>
 #include <moveit/collision_plugin_loader/collision_plugin_loader.h>
 #include <moveit_msgs/srv/get_planning_scene.hpp>
-#include <boost/noncopyable.hpp>
-#include <boost/thread/shared_mutex.hpp>
-#include <boost/thread/recursive_mutex.hpp>
-#include <boost/thread/thread.hpp>
 #include <memory>
+#include <thread>
+#include <shared_mutex>
+#include <mutex>
 #include <thread>
 
 #include "moveit_planning_scene_monitor_export.h"
@@ -62,9 +61,19 @@ MOVEIT_CLASS_FORWARD(PlanningSceneMonitor);  // Defines PlanningSceneMonitorPtr,
 /**
  * @brief PlanningSceneMonitor
  * Subscribes to the topic \e planning_scene */
-class MOVEIT_PLANNING_SCENE_MONITOR_EXPORT PlanningSceneMonitor : private boost::noncopyable
+class MOVEIT_PLANNING_SCENE_MONITOR_EXPORT PlanningSceneMonitor
 {
 public:
+  /**
+   * @brief PlanningSceneMonitor cannot be copy-constructed
+   */
+  PlanningSceneMonitor(const PlanningSceneMonitor&) = delete;
+
+  /**
+   * @brief PlanningSceneMonitor cannot be copy-assigned
+   */
+  PlanningSceneMonitor& operator=(const PlanningSceneMonitor&) = delete;
+
   enum SceneUpdateType
   {
     /** \brief No update */
@@ -378,7 +387,7 @@ public:
   void stopWorldGeometryMonitor();
 
   /** @brief Add a function to be called when an update to the scene is received */
-  void addUpdateCallback(const boost::function<void(SceneUpdateType)>& fn);
+  void addUpdateCallback(const std::function<void(SceneUpdateType)>& fn);
 
   /** @brief Clear the functions to be called when an update to the scene is received */
   void clearUpdateCallbacks();
@@ -436,16 +445,16 @@ protected:
   void configureDefaultPadding();
 
   /** @brief Callback for a new collision object msg*/
-  void collisionObjectCallback(moveit_msgs::msg::CollisionObject::SharedPtr obj);
+  void collisionObjectCallback(const moveit_msgs::msg::CollisionObject::ConstSharedPtr& obj);
 
   /** @brief Callback for a new planning scene world*/
-  void newPlanningSceneWorldCallback(moveit_msgs::msg::PlanningSceneWorld::SharedPtr world);
+  void newPlanningSceneWorldCallback(const moveit_msgs::msg::PlanningSceneWorld::ConstSharedPtr& world);
 
   /** @brief Callback for octomap updates */
   void octomapUpdateCallback();
 
   /** @brief Callback for a new attached object msg*/
-  void attachObjectCallback(moveit_msgs::msg::AttachedCollisionObject::SharedPtr obj);
+  void attachObjectCallback(const moveit_msgs::msg::AttachedCollisionObject::ConstSharedPtr& obj);
 
   /** @brief Callback for a change for an attached object of the current state of the planning scene */
   void currentStateAttachedBodyUpdateCallback(moveit::core::AttachedBody* attached_body, bool just_attached);
@@ -476,7 +485,7 @@ protected:
   planning_scene::PlanningScenePtr scene_;
   planning_scene::PlanningSceneConstPtr scene_const_;
   planning_scene::PlanningScenePtr parent_scene_;  /// if diffs are monitored, this is the pointer to the parent scene
-  boost::shared_mutex scene_update_mutex_;         /// mutex for stored scene
+  std::shared_mutex scene_update_mutex_;           /// mutex for stored scene
   rclcpp::Time last_update_time_;                  /// Last time the state was updated
   rclcpp::Time last_robot_motion_time_;            /// Last time the robot has moved
 
@@ -509,11 +518,11 @@ protected:
 
   // variables for planning scene publishing
   rclcpp::Publisher<moveit_msgs::msg::PlanningScene>::SharedPtr planning_scene_publisher_;
-  std::unique_ptr<boost::thread> publish_planning_scene_;
+  std::unique_ptr<std::thread> publish_planning_scene_;
   double publish_planning_scene_frequency_;
   SceneUpdateType publish_update_types_;
   std::atomic<SceneUpdateType> new_scene_update_;
-  boost::condition_variable_any new_scene_update_condition_;
+  std::condition_variable_any new_scene_update_condition_;
 
   // subscribe to various sources of data
   rclcpp::Subscription<moveit_msgs::msg::PlanningScene>::SharedPtr planning_scene_subscriber_;
@@ -543,12 +552,12 @@ protected:
   LinkShapeHandles link_shape_handles_;
   AttachedBodyShapeHandles attached_body_shape_handles_;
   CollisionBodyShapeHandles collision_body_shape_handles_;
-  mutable boost::recursive_mutex shape_handles_lock_;
+  mutable std::recursive_mutex shape_handles_lock_;
 
   /// lock access to update_callbacks_
-  boost::recursive_mutex update_lock_;
-  std::vector<boost::function<void(SceneUpdateType)> > update_callbacks_;  /// List of callbacks to trigger when updates
-                                                                           /// are received
+  std::recursive_mutex update_lock_;
+  std::vector<std::function<void(SceneUpdateType)> > update_callbacks_;  /// List of callbacks to trigger when updates
+                                                                         /// are received
 
 private:
   void getUpdatedFrameTransforms(std::vector<geometry_msgs::msg::TransformStamped>& transforms);
@@ -563,11 +572,11 @@ private:
   void stateUpdateTimerCallback();
 
   // Callback for a new planning scene msg
-  void newPlanningSceneCallback(const moveit_msgs::msg::PlanningScene::SharedPtr scene);
+  void newPlanningSceneCallback(const moveit_msgs::msg::PlanningScene::ConstSharedPtr& scene);
 
   // Callback for requesting the full planning scene via service
-  void getPlanningSceneServiceCallback(moveit_msgs::srv::GetPlanningScene::Request::SharedPtr req,
-                                       moveit_msgs::srv::GetPlanningScene::Response::SharedPtr res);
+  void getPlanningSceneServiceCallback(const moveit_msgs::srv::GetPlanningScene::Request::SharedPtr& req,
+                                       const moveit_msgs::srv::GetPlanningScene::Response::SharedPtr& res);
 
   void updatePublishSettings(bool publish_geom_updates, bool publish_state_updates, bool publish_transform_updates,
                              bool publish_planning_scene, double publish_planning_scene_hz);

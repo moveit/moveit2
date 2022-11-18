@@ -69,7 +69,7 @@ In the catkin `package.xml` file for your plugin, you add these lines just befor
 
 Next, create the file my_ik_plugin.xml with the following contents:
 
-    <library path="lib/libmy_ik_plugin">
+    <library path="my_ik_plugin">
       <class name="cached_ik_kinematics_plugin/CachedMyKinematicsPlugin" type="cached_ik_kinematics_plugin::CachedIKKinematicsPlugin<my_kinematics_plugin::MyKinematicsPlugin>" base_class_type="kinematics::KinematicsBase">
         <description>
           A kinematics plugin for persistently caching IK solutions computed with the KDL kinematics plugin.

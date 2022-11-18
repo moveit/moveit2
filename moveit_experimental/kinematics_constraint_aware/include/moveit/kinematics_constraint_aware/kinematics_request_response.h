@@ -37,9 +37,6 @@
 
 #pragma once
 
-// System
-#include <boost/shared_ptr.hpp>
-
 // ROS msgs
 #include <geometry_msgs/PoseStamped.h>
 
@@ -49,6 +46,9 @@
 #include <moveit/robot_state/robot_state.h>
 #include <moveit/robot_model/robot_model.h>
 #include <moveit/kinematic_constraints/kinematic_constraint.h>
+
+// std
+#include <memory>
 
 namespace kinematics_constraint_aware
 {

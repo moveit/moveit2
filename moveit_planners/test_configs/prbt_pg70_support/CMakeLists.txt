@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.10.2)
+cmake_minimum_required(VERSION 3.22)
 project(moveit_resources_prbt_pg70_support)
 
 find_package(ament_cmake REQUIRED)

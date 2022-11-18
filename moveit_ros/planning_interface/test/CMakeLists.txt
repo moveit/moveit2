@@ -29,6 +29,7 @@ if(BUILD_TESTING)
   # add_rostest(python_move_group.test)
   # add_rostest(python_move_group_ns.test)
   # add_rostest(robot_state_update.test)
+  # add_rostest(dual_arm_robot_state_update.test)
   # add_rostest(cleanup.test)
 
 

@@ -72,13 +72,13 @@ public:
   }
 };
 
-class TestMoveItControllerManager : public moveit_controller_manager::MoveItControllerManager
+class TestRos2ControlManager : public moveit_controller_manager::Ros2ControlManager
 {
 public:
   static const int ACTIVE = 1;
   static const int DEFAULT = 2;
 
-  TestMoveItControllerManager()
+  TestRos2ControlManager()
   {
     controllers_["right_arm"] = DEFAULT;
     controllers_["left_arm"] = ACTIVE + DEFAULT;
@@ -138,10 +138,9 @@ public:
     joints = controller_joints_[name];
   }
 
-  moveit_controller_manager::MoveItControllerManager::ControllerState
-  getControllerState(const std::string& name) override
+  moveit_controller_manager::Ros2ControlManager::ControllerState getControllerState(const std::string& name) override
   {
-    moveit_controller_manager::MoveItControllerManager::ControllerState state;
+    moveit_controller_manager::Ros2ControlManager::ControllerState state;
     state.active_ = controllers_[name] & ACTIVE;
     state.default_ = false;
     return state;

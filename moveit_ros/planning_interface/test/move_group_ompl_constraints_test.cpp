@@ -42,11 +42,7 @@
 // ROS
 #include <rclcpp/rclcpp.hpp>
 #include <tf2/LinearMath/Quaternion.h>
-#if __has_include(<tf2_eigen/tf2_eigen.hpp>)
 #include <tf2_eigen/tf2_eigen.hpp>
-#else
-#include <tf2_eigen/tf2_eigen.h>
-#endif
 
 // MoveIt
 #include <moveit/move_group_interface/move_group_interface.h>
@@ -107,8 +103,8 @@ public:
     move_group_->setPathConstraints(path_constraint);
 
     moveit::planning_interface::MoveGroupInterface::Plan plan;
-    ASSERT_EQ(move_group_->plan(plan), moveit::planning_interface::MoveItErrorCode::SUCCESS);
-    ASSERT_EQ(move_group_->move(), moveit::planning_interface::MoveItErrorCode::SUCCESS);
+    ASSERT_EQ(move_group_->plan(plan), moveit::core::MoveItErrorCode::SUCCESS);
+    ASSERT_EQ(move_group_->move(), moveit::core::MoveItErrorCode::SUCCESS);
   }
 
   void testPose(const geometry_msgs::msg::PoseStamped& pose_goal_stamped)

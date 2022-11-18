@@ -36,7 +36,7 @@
 
 #include <limits>
 
-#include <joint_limits/joint_limits.hpp>
+#include <joint_limits_copy/joint_limits.hpp>
 
 #include <map>
 #include <string>

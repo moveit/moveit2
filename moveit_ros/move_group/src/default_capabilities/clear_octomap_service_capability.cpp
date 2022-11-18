@@ -47,16 +47,14 @@ move_group::ClearOctomapService::ClearOctomapService() : MoveGroupCapability("Cl
 
 void move_group::ClearOctomapService::initialize()
 {
-  using std::placeholders::_1;
-  using std::placeholders::_2;
-  using std::placeholders::_3;
-
   service_ = context_->moveit_cpp_->getNode()->create_service<std_srvs::srv::Empty>(
-      CLEAR_OCTOMAP_SERVICE_NAME, std::bind(&ClearOctomapService::clearOctomap, this, _1, _2));
+      CLEAR_OCTOMAP_SERVICE_NAME,
+      [this](const std::shared_ptr<std_srvs::srv::Empty::Request>& req,
+             const std::shared_ptr<std_srvs::srv::Empty::Response>& res) { return clearOctomap(req, res); });
 }
 
-void move_group::ClearOctomapService::clearOctomap(const std::shared_ptr<std_srvs::srv::Empty::Request> /*req*/,
-                                                   std::shared_ptr<std_srvs::srv::Empty::Response> /*res*/)
+void move_group::ClearOctomapService::clearOctomap(const std::shared_ptr<std_srvs::srv::Empty::Request>& /*req*/,
+                                                   const std::shared_ptr<std_srvs::srv::Empty::Response>& /*res*/)
 {
   if (!context_->planning_scene_monitor_)
     RCLCPP_ERROR(LOGGER, "Cannot clear octomap since planning_scene_monitor_ does not exist.");

@@ -35,20 +35,20 @@
 
 /* Author: Ioan Sucan, Sachin Chitta, Acorn Pooley, Mario Prats, Dave Coleman */
 
-#include <moveit/robot_state/robot_state.h>
-#include <moveit/robot_state/cartesian_interpolator.h>
-#include <moveit/transforms/transforms.h>
 #include <geometric_shapes/check_isometry.h>
 #include <geometric_shapes/shape_operations.h>
-#if __has_include(<tf2_eigen/tf2_eigen.hpp>)
+#include <moveit/robot_state/cartesian_interpolator.h>
+#include <moveit/robot_state/robot_state.h>
+#include <moveit/transforms/transforms.h>
+#include <rclcpp/clock.hpp>
+#include <rclcpp/logger.hpp>
+#include <rclcpp/logging.hpp>
+#include <rclcpp/time.hpp>
 #include <tf2_eigen/tf2_eigen.hpp>
-#else
-#include <tf2_eigen/tf2_eigen.h>
-#endif
-#include <moveit/macros/console_colors.h>
+#include <cassert>
 #include <functional>
+#include <moveit/macros/console_colors.h>
 #include <moveit/robot_model/aabb.h>
-#include "rclcpp/rclcpp.hpp"
 
 namespace moveit
 {
@@ -1129,7 +1129,7 @@ const Eigen::Isometry3d& RobotState::getFrameInfo(const std::string& frame_id, c
   }
   if ((robot_link = robot_model_->getLinkModel(frame_id, &frame_found)))
   {
-    BOOST_VERIFY(checkLinkTransforms());
+    assert(checkLinkTransforms());
     return global_link_transforms_[robot_link->getLinkIndex()];
   }
   robot_link = nullptr;
@@ -1141,7 +1141,7 @@ const Eigen::Isometry3d& RobotState::getFrameInfo(const std::string& frame_id, c
     const Eigen::Isometry3d& transform = jt->second->getGlobalPose();
     robot_link = jt->second->getAttachedLink();
     frame_found = true;
-    BOOST_VERIFY(checkLinkTransforms());
+    assert(checkLinkTransforms());
     return transform;
   }
 
@@ -1152,7 +1152,7 @@ const Eigen::Isometry3d& RobotState::getFrameInfo(const std::string& frame_id, c
     if (frame_found)
     {
       robot_link = body.second->getAttachedLink();
-      BOOST_VERIFY(checkLinkTransforms());
+      assert(checkLinkTransforms());
       return transform;
     }
   }
@@ -1281,7 +1281,7 @@ bool RobotState::getJacobian(const JointModelGroup* group, const LinkModel* link
                              const Eigen::Vector3d& reference_point_position, Eigen::MatrixXd& jacobian,
                              bool use_quaternion_representation) const
 {
-  BOOST_VERIFY(checkLinkTransforms());
+  assert(checkLinkTransforms());
 
   if (!group->isChain())
   {
@@ -1309,25 +1309,22 @@ bool RobotState::getJacobian(const JointModelGroup* group, const LinkModel* link
   Eigen::Isometry3d link_transform = reference_transform * getGlobalLinkTransform(link);  // valid isometry
   Eigen::Vector3d point_transform = link_transform * reference_point_position;
 
-  /*
-  RCLCPP_DEBUG(LOGGER, "Point from reference origin expressed in world coordinates: %f %f %f",
-           point_transform.x(),
-           point_transform.y(),
-           point_transform.z());
-  */
+  // RCLCPP_DEBUG(LOGGER, "Point from reference origin expressed in world coordinates: %f %f %f",
+  //         point_transform.x(),
+  //         point_transform.y(),
+  //         point_transform.z());
 
   Eigen::Vector3d joint_axis;
   Eigen::Isometry3d joint_transform;
 
   while (link)
   {
-    /*
-    RCLCPP_DEBUG(LOGGER, "Link: %s, %f %f %f",link_state->getName().c_str(),
-             link_state->getGlobalLinkTransform().translation().x(),
-             link_state->getGlobalLinkTransform().translation().y(),
-             link_state->getGlobalLinkTransform().translation().z());
-    RCLCPP_DEBUG(LOGGER, "Joint: %s",link_state->getParentJointState()->getName().c_str());
-    */
+    // RCLCPP_DEBUG(LOGGER, "Link: %s, %f %f %f",link_state->getName().c_str(),
+    //         link_state->getGlobalLinkTransform().translation().x(),
+    //         link_state->getGlobalLinkTransform().translation().y(),
+    //         link_state->getGlobalLinkTransform().translation().z());
+    // RCLCPP_DEBUG(LOGGER, "Joint: %s",link_state->getParentJointState()->getName().c_str());
+
     const JointModel* pjm = link->getParentJointModel();
     if (pjm->getVariableCount() > 0)
     {
@@ -1463,7 +1460,8 @@ bool RobotState::integrateVariableVelocity(const JointModelGroup* jmg, const Eig
 
 bool RobotState::setFromIK(const JointModelGroup* jmg, const geometry_msgs::msg::Pose& pose, double timeout,
                            const GroupStateValidityCallbackFn& constraint,
-                           const kinematics::KinematicsQueryOptions& options)
+                           const kinematics::KinematicsQueryOptions& options,
+                           const kinematics::KinematicsBase::IKCostFn& cost_function)
 {
   const kinematics::KinematicsBaseConstPtr& solver = jmg->getSolverInstance();
   if (!solver)
@@ -1471,22 +1469,24 @@ bool RobotState::setFromIK(const JointModelGroup* jmg, const geometry_msgs::msg:
     RCLCPP_ERROR(LOGGER, "No kinematics solver instantiated for group '%s'", jmg->getName().c_str());
     return false;
   }
-  return setFromIK(jmg, pose, solver->getTipFrame(), timeout, constraint, options);
+  return setFromIK(jmg, pose, solver->getTipFrame(), timeout, constraint, options, cost_function);
 }
 
 bool RobotState::setFromIK(const JointModelGroup* jmg, const geometry_msgs::msg::Pose& pose, const std::string& tip,
                            double timeout, const GroupStateValidityCallbackFn& constraint,
-                           const kinematics::KinematicsQueryOptions& options)
+                           const kinematics::KinematicsQueryOptions& options,
+                           const kinematics::KinematicsBase::IKCostFn& cost_function)
 {
   Eigen::Isometry3d mat;
   tf2::fromMsg(pose, mat);
   static std::vector<double> consistency_limits;
-  return setFromIK(jmg, mat, tip, consistency_limits, timeout, constraint, options);
+  return setFromIK(jmg, mat, tip, consistency_limits, timeout, constraint, options, cost_function);
 }
 
 bool RobotState::setFromIK(const JointModelGroup* jmg, const Eigen::Isometry3d& pose, double timeout,
                            const GroupStateValidityCallbackFn& constraint,
-                           const kinematics::KinematicsQueryOptions& options)
+                           const kinematics::KinematicsQueryOptions& options,
+                           const kinematics::KinematicsBase::IKCostFn& cost_function)
 {
   const kinematics::KinematicsBaseConstPtr& solver = jmg->getSolverInstance();
   if (!solver)
@@ -1495,15 +1495,16 @@ bool RobotState::setFromIK(const JointModelGroup* jmg, const Eigen::Isometry3d& 
     return false;
   }
   static std::vector<double> consistency_limits;
-  return setFromIK(jmg, pose, solver->getTipFrame(), consistency_limits, timeout, constraint, options);
+  return setFromIK(jmg, pose, solver->getTipFrame(), consistency_limits, timeout, constraint, options, cost_function);
 }
 
 bool RobotState::setFromIK(const JointModelGroup* jmg, const Eigen::Isometry3d& pose_in, const std::string& tip_in,
                            double timeout, const GroupStateValidityCallbackFn& constraint,
-                           const kinematics::KinematicsQueryOptions& options)
+                           const kinematics::KinematicsQueryOptions& options,
+                           const kinematics::KinematicsBase::IKCostFn& cost_function)
 {
   static std::vector<double> consistency_limits;
-  return setFromIK(jmg, pose_in, tip_in, consistency_limits, timeout, constraint, options);
+  return setFromIK(jmg, pose_in, tip_in, consistency_limits, timeout, constraint, options, cost_function);
 }
 
 namespace
@@ -1512,7 +1513,7 @@ bool ikCallbackFnAdapter(RobotState* state, const JointModelGroup* group,
                          const GroupStateValidityCallbackFn& constraint, const geometry_msgs::msg::Pose& /*unused*/,
                          const std::vector<double>& ik_sol, moveit_msgs::msg::MoveItErrorCodes& error_code)
 {
-  const std::vector<unsigned int>& bij = group->getKinematicsSolverJointBijection();
+  const std::vector<size_t>& bij = group->getKinematicsSolverJointBijection();
   std::vector<double> solution(bij.size());
   for (std::size_t i = 0; i < bij.size(); ++i)
     solution[bij[i]] = ik_sol[i];
@@ -1549,7 +1550,8 @@ bool RobotState::setToIKSolverFrame(Eigen::Isometry3d& pose, const std::string& 
 bool RobotState::setFromIK(const JointModelGroup* jmg, const Eigen::Isometry3d& pose_in, const std::string& tip_in,
                            const std::vector<double>& consistency_limits_in, double timeout,
                            const GroupStateValidityCallbackFn& constraint,
-                           const kinematics::KinematicsQueryOptions& options)
+                           const kinematics::KinematicsQueryOptions& options,
+                           const kinematics::KinematicsBase::IKCostFn& cost_function)
 {
   // Convert from single pose and tip to vectors
   EigenSTL::vector_Isometry3d poses;
@@ -1561,23 +1563,25 @@ bool RobotState::setFromIK(const JointModelGroup* jmg, const Eigen::Isometry3d& 
   std::vector<std::vector<double> > consistency_limits;
   consistency_limits.push_back(consistency_limits_in);
 
-  return setFromIK(jmg, poses, tips, consistency_limits, timeout, constraint, options);
+  return setFromIK(jmg, poses, tips, consistency_limits, timeout, constraint, options, cost_function);
 }
 
 bool RobotState::setFromIK(const JointModelGroup* jmg, const EigenSTL::vector_Isometry3d& poses_in,
                            const std::vector<std::string>& tips_in, double timeout,
                            const GroupStateValidityCallbackFn& constraint,
-                           const kinematics::KinematicsQueryOptions& options)
+                           const kinematics::KinematicsQueryOptions& options,
+                           const kinematics::KinematicsBase::IKCostFn& cost_function)
 {
   const std::vector<std::vector<double> > consistency_limits;
-  return setFromIK(jmg, poses_in, tips_in, consistency_limits, timeout, constraint, options);
+  return setFromIK(jmg, poses_in, tips_in, consistency_limits, timeout, constraint, options, cost_function);
 }
 
 bool RobotState::setFromIK(const JointModelGroup* jmg, const EigenSTL::vector_Isometry3d& poses_in,
                            const std::vector<std::string>& tips_in,
                            const std::vector<std::vector<double> >& consistency_limit_sets, double timeout,
                            const GroupStateValidityCallbackFn& constraint,
-                           const kinematics::KinematicsQueryOptions& options)
+                           const kinematics::KinematicsQueryOptions& options,
+                           const kinematics::KinematicsBase::IKCostFn& cost_function)
 {
   // Error check
   if (poses_in.size() != tips_in.size())
@@ -1776,11 +1780,14 @@ bool RobotState::setFromIK(const JointModelGroup* jmg, const EigenSTL::vector_Is
   // set callback function
   kinematics::KinematicsBase::IKCallbackFn ik_callback_fn;
   if (constraint)
-    ik_callback_fn = std::bind(&ikCallbackFnAdapter, this, jmg, constraint, std::placeholders::_1,
-                               std::placeholders::_2, std::placeholders::_3);
+    ik_callback_fn = ik_callback_fn = [this, jmg, constraint](const geometry_msgs::msg::Pose& pose,
+                                                              const std::vector<double>& joints,
+                                                              moveit_msgs::msg::MoveItErrorCodes& error_code) {
+      ikCallbackFnAdapter(this, jmg, constraint, pose, joints, error_code);
+    };
 
   // Bijection
-  const std::vector<unsigned int>& bij = jmg->getKinematicsSolverJointBijection();
+  const std::vector<size_t>& bij = jmg->getKinematicsSolverJointBijection();
 
   std::vector<double> initial_values;
   copyJointGroupPositions(jmg, initial_values);
@@ -1792,8 +1799,8 @@ bool RobotState::setFromIK(const JointModelGroup* jmg, const EigenSTL::vector_Is
   std::vector<double> ik_sol;
   moveit_msgs::msg::MoveItErrorCodes error;
 
-  if (solver->searchPositionIK(ik_queries, seed, timeout, consistency_limits, ik_sol, ik_callback_fn, error, options,
-                               this))
+  if (solver->searchPositionIK(ik_queries, seed, timeout, consistency_limits, ik_sol, ik_callback_fn, cost_function,
+                               error, options, this))
   {
     std::vector<double> solution(bij.size());
     for (std::size_t i = 0; i < bij.size(); ++i)
@@ -1920,8 +1927,10 @@ bool RobotState::setFromIKSubgroups(const JointModelGroup* jmg, const EigenSTL::
   std::vector<geometry_msgs::msg::Pose> ik_queries(poses_in.size());
   kinematics::KinematicsBase::IKCallbackFn ik_callback_fn;
   if (constraint)
-    ik_callback_fn = std::bind(&ikCallbackFnAdapter, this, jmg, constraint, std::placeholders::_1,
-                               std::placeholders::_2, std::placeholders::_3);
+    ik_callback_fn = [this, jmg, constraint](const geometry_msgs::msg::Pose pose, const std::vector<double>& joints,
+                                             moveit_msgs::msg::MoveItErrorCodes& error_code) {
+      ikCallbackFnAdapter(this, jmg, constraint, pose, joints, error_code);
+    };
 
   for (std::size_t i = 0; i < transformed_poses.size(); ++i)
   {
@@ -1952,7 +1961,7 @@ bool RobotState::setFromIKSubgroups(const JointModelGroup* jmg, const EigenSTL::
     bool found_solution = true;
     for (std::size_t sg = 0; sg < sub_groups.size(); ++sg)
     {
-      const std::vector<unsigned int>& bij = sub_groups[sg]->getKinematicsSolverJointBijection();
+      const std::vector<size_t>& bij = sub_groups[sg]->getKinematicsSolverJointBijection();
       std::vector<double> seed(bij.size());
       // the first seed is the initial state
       if (first_seed)
@@ -2041,7 +2050,7 @@ double RobotState::computeCartesianPath(const JointModelGroup* group, std::vecto
 
 void RobotState::computeAABB(std::vector<double>& aabb) const
 {
-  BOOST_VERIFY(checkLinkTransforms());
+  assert(checkLinkTransforms());
 
   core::AABB bounding_box;
   std::vector<const LinkModel*> links = robot_model_->getLinkModelsWithCollisionGeometry();

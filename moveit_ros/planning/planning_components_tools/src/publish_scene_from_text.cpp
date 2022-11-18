@@ -35,8 +35,14 @@
 /* Author: Ioan Sucan */
 
 #include <chrono>
-#include <rclcpp/rclcpp.hpp>
 #include <moveit/planning_scene_monitor/planning_scene_monitor.h>
+#include <rclcpp/executors/multi_threaded_executor.hpp>
+#include <rclcpp/logger.hpp>
+#include <rclcpp/logging.hpp>
+#include <rclcpp/node.hpp>
+#include <rclcpp/publisher.hpp>
+#include <rclcpp/qos_event.hpp>
+#include <rclcpp/utilities.hpp>
 
 using namespace std::chrono_literals;
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("publish_scene_from_text");

@@ -42,10 +42,10 @@
 #include <moveit_msgs/msg/robot_state.hpp>
 #include <deque>
 #include <memory>
+#include <optional>
 
 #include "rcl/error_handling.h"
 #include "rcl/time.h"
-#include "rclcpp/clock.hpp"
 #include "rclcpp/rclcpp.hpp"
 #include "rclcpp/time.hpp"
 #include "rclcpp/utilities.hpp"
@@ -313,8 +313,8 @@ public:
     std::deque<double>::iterator duration_iterator;
 
   public:
-    explicit Iterator(std::deque<moveit::core::RobotStatePtr>::iterator _waypoint_iterator,
-                      std::deque<double>::iterator _duration_iterator)
+    explicit Iterator(const std::deque<moveit::core::RobotStatePtr>::iterator& _waypoint_iterator,
+                      const std::deque<double>::iterator& _duration_iterator)
       : waypoint_iterator(_waypoint_iterator), duration_iterator(_duration_iterator)
     {
     }
@@ -330,11 +330,11 @@ public:
       ++(*this);
       return retval;
     }
-    bool operator==(Iterator other) const
+    bool operator==(const Iterator& other) const
     {
       return ((waypoint_iterator == other.waypoint_iterator) && (duration_iterator == other.duration_iterator));
     }
-    bool operator!=(Iterator other) const
+    bool operator!=(const Iterator& other) const
     {
       return !(*this == other);
     }
@@ -381,10 +381,29 @@ private:
   const moveit::core::JointModelGroup* group_;
   std::deque<moveit::core::RobotStatePtr> waypoints_;
   std::deque<double> duration_from_previous_;
-  rclcpp::Clock clock_ros_;
 };
 
 /** @brief Operator overload for printing trajectory to a stream */
 std::ostream& operator<<(std::ostream& out, const RobotTrajectory& trajectory);
+
+/// \brief Calculate the path length of a given trajectory based on the
+/// accumulated robot state distances.
+/// The distance between two robot states is calculated based on the sum of
+/// active joint distances between the two states (L1 norm).
+/// \param[in] trajectory Given robot trajectory
+/// \return Length of the robot trajectory [rad]
+[[nodiscard]] double path_length(RobotTrajectory const& trajectory);
+
+/// \brief Calculate the smoothness of a given trajectory
+/// \param[in] trajectory Given robot trajectory
+/// \return Smoothness of the given trajectory
+/// or nullopt if it is not possible to calculate the smoothness
+[[nodiscard]] std::optional<double> smoothness(RobotTrajectory const& trajectory);
+
+/// \brief Calculate the waypoint density of a trajectory
+/// \param[in] trajectory Given robot trajectory
+/// \return Waypoint density of the given trajectory
+/// or nullopt if it is not possible to calculate the density
+[[nodiscard]] std::optional<double> waypoint_density(RobotTrajectory const& trajectory);
 
 }  // namespace robot_trajectory

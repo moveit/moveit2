@@ -40,7 +40,7 @@
 #include <string>
 #include <vector>
 #include <map>
-#include <boost/function.hpp>
+#include <functional>
 #include <Eigen/Geometry>
 #include <eigen_stl_containers/eigen_stl_vector_container.h>
 #include <moveit/transforms/transforms.h>
@@ -298,7 +298,7 @@ public:
     friend class World;
   };
 
-  using ObserverCallbackFn = boost::function<void(const ObjectConstPtr&, Action)>;
+  using ObserverCallbackFn = std::function<void(const ObjectConstPtr&, Action)>;
 
   /** \brief register a callback function for notification of changes.
    * \e callback will be called right after any change occurs to any Object.

@@ -36,21 +36,22 @@
 
 // MoveIt
 #include <moveit/rdf_loader/rdf_loader.h>
-
-// ROS 2
-#include <rclcpp/rclcpp.hpp>
 #include <std_msgs/msg/string.hpp>
 #include <ament_index_cpp/get_package_prefix.hpp>
 #include <ament_index_cpp/get_package_share_directory.hpp>
 
-// Boost
-#include <boost/filesystem.hpp>
+#include <rclcpp/duration.hpp>
+#include <rclcpp/logger.hpp>
+#include <rclcpp/logging.hpp>
+#include <rclcpp/node.hpp>
+#include <rclcpp/time.hpp>
 
 // C++
 #include <fstream>
 #include <streambuf>
 #include <algorithm>
 #include <chrono>
+#include <filesystem>
 
 namespace rdf_loader
 {
@@ -62,14 +63,14 @@ RDFLoader::RDFLoader(const std::shared_ptr<rclcpp::Node>& node, const std::strin
 {
   auto start = node->now();
 
-  urdf_string_ =
-      urdf_ssp_.loadInitialValue(node, ros_name, std::bind(&RDFLoader::urdfUpdateCallback, this, std::placeholders::_1),
-                                 default_continuous_value, default_timeout);
+  urdf_string_ = urdf_ssp_.loadInitialValue(
+      node, ros_name, [this](const std::string& new_urdf_string) { return urdfUpdateCallback(new_urdf_string); },
+      default_continuous_value, default_timeout);
 
   const std::string srdf_name = ros_name + "_semantic";
-  srdf_string_ = srdf_ssp_.loadInitialValue(node, srdf_name,
-                                            std::bind(&RDFLoader::srdfUpdateCallback, this, std::placeholders::_1),
-                                            default_continuous_value, default_timeout);
+  srdf_string_ = srdf_ssp_.loadInitialValue(
+      node, srdf_name, [this](const std::string& new_srdf_string) { return srdfUpdateCallback(new_srdf_string); },
+      default_continuous_value, default_timeout);
 
   if (!loadFromStrings())
   {
@@ -125,7 +126,7 @@ bool RDFLoader::loadFileToString(std::string& buffer, const std::string& path)
     return false;
   }
 
-  if (!boost::filesystem::exists(path))
+  if (!std::filesystem::exists(path))
   {
     RCLCPP_ERROR(LOGGER, "File does not exist");
     return false;
@@ -158,7 +159,7 @@ bool RDFLoader::loadXacroFileToString(std::string& buffer, const std::string& pa
     return false;
   }
 
-  if (!boost::filesystem::exists(path))
+  if (!std::filesystem::exists(path))
   {
     RCLCPP_ERROR(LOGGER, "File does not exist");
     return false;
@@ -220,8 +221,7 @@ bool RDFLoader::loadPkgFileToString(std::string& buffer, const std::string& pack
     return false;
   }
 
-  boost::filesystem::path path(package_path);
-  // Use boost to cross-platform combine paths
+  std::filesystem::path path(package_path);
   path = path / relative_path;
 
   return loadXmlFileToString(buffer, path.string(), xacro_args);

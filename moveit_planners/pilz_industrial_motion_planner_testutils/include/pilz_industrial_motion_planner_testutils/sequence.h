@@ -43,6 +43,7 @@
 
 #include "command_types_typedef.h"
 #include "motioncmd.h"
+#include <variant>
 
 namespace pilz_industrial_motion_planner_testutils
 {
@@ -112,13 +113,13 @@ inline size_t Sequence::size() const
 template <class T>
 inline T& Sequence::getCmd(const size_t index_cmd)
 {
-  return boost::get<T>(cmds_.at(index_cmd).first);
+  return std::get<T>(cmds_.at(index_cmd).first);
 }
 
 template <class T>
 inline const T& Sequence::getCmd(const size_t index_cmd) const
 {
-  return boost::get<T>(cmds_.at(index_cmd).first);
+  return std::get<T>(cmds_.at(index_cmd).first);
 }
 
 inline double Sequence::getBlendRadius(const size_t index_cmd) const
@@ -139,6 +140,6 @@ inline void Sequence::setAllBlendRadiiToZero()
 template <class T>
 inline bool Sequence::cmdIsOfType(const size_t index_cmd) const
 {
-  return cmds_.at(index_cmd).first.type() == typeid(T);
+  return std::holds_alternative<T>(cmds_.at(index_cmd).first);
 }
 }  // namespace pilz_industrial_motion_planner_testutils

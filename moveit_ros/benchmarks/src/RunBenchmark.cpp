@@ -34,11 +34,16 @@
 
 /* Author: Ryan Luna */
 
-#include <rclcpp/rclcpp.hpp>
 #include <string>
 
 #include <moveit/benchmarks/BenchmarkOptions.h>
 #include <moveit/benchmarks/BenchmarkExecutor.h>
+#include <rclcpp/executors.hpp>
+#include <rclcpp/logger.hpp>
+#include <rclcpp/logging.hpp>
+#include <rclcpp/node.hpp>
+#include <rclcpp/node_options.hpp>
+#include <rclcpp/utilities.hpp>
 
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.ros.benchmarks.RunBenchmark");
 

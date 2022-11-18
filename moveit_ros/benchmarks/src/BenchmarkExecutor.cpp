@@ -37,11 +37,7 @@
 #include <moveit/benchmarks/BenchmarkExecutor.h>
 #include <moveit/utils/lexical_casts.h>
 #include <moveit/version.h>
-#if __has_include(<tf2_eigen/tf2_eigen.hpp>)
 #include <tf2_eigen/tf2_eigen.hpp>
-#else
-#include <tf2_eigen/tf2_eigen.h>
-#endif
 
 // TODO(henningkayser): Switch to boost/timer/progress_display.hpp with Boost 1.72
 // boost/progress.hpp is deprecated and will be replaced by boost/timer/progress_display.hpp in Boost 1.72.
@@ -50,10 +46,10 @@
 #include <boost/regex.hpp>
 #include <boost/progress.hpp>
 #undef BOOST_ALLOW_DEPRECATED_HEADERS
-#include <boost/math/constants/constants.hpp>
-#include <boost/filesystem.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
+#include <math.h>
 #include <limits>
+#include <filesystem>
 #ifndef _WIN32
 #include <unistd.h>
 #else
@@ -674,13 +670,13 @@ bool BenchmarkExecutor::loadStates(const std::string& regex, std::vector<StartSt
 {
   if (!regex.empty())
   {
-    boost::regex start_regex(regex);
+    std::regex start_regex(regex);
     std::vector<std::string> state_names;
     rs_->getKnownRobotStates(state_names);
     for (const std::string& state_name : state_names)
     {
-      boost::cmatch match;
-      if (boost::regex_match(state_name.c_str(), match, start_regex))
+      std::smatch match;
+      if (std::regex_match(state_name, match, start_regex))
       {
         moveit_warehouse::RobotStateWithMetadata robot_state;
         try
@@ -874,15 +870,14 @@ void BenchmarkExecutor::collectMetrics(PlannerRunData& metrics,
                                        double total_time)
 {
   metrics["time REAL"] = moveit::core::toString(total_time);
-  metrics["solved BOOLEAN"] = boost::lexical_cast<std::string>(solved);
+  metrics["solved BOOLEAN"] = solved ? "true" : "false";
 
   if (solved)
   {
     // Analyzing the trajectory(ies) geometrically
-    double traj_len = 0.0;    // trajectory length
-    double clearance = 0.0;   // trajectory clearance (average)
-    double smoothness = 0.0;  // trajectory smoothness (average)
-    bool correct = true;      // entire trajectory collision free and in bounds
+    double traj_len = 0.0;   // trajectory length
+    double clearance = 0.0;  // trajectory clearance (average)
+    bool correct = true;     // entire trajectory collision free and in bounds
 
     double process_time = total_time;
     for (std::size_t j = 0; j < mp_res.trajectory_.size(); ++j)
@@ -890,12 +885,10 @@ void BenchmarkExecutor::collectMetrics(PlannerRunData& metrics,
       correct = true;
       traj_len = 0.0;
       clearance = 0.0;
-      smoothness = 0.0;
       const robot_trajectory::RobotTrajectory& p = *mp_res.trajectory_[j];
 
       // compute path length
-      for (std::size_t k = 1; k < p.getWayPointCount(); ++k)
-        traj_len += p.getWayPoint(k - 1).distance(p.getWayPoint(k));
+      traj_len = robot_trajectory::path_length(p);
 
       // compute correctness and clearance
       collision_detection::CollisionRequest req;
@@ -914,38 +907,12 @@ void BenchmarkExecutor::collectMetrics(PlannerRunData& metrics,
       clearance /= (double)p.getWayPointCount();
 
       // compute smoothness
-      if (p.getWayPointCount() > 2)
-      {
-        double a = p.getWayPoint(0).distance(p.getWayPoint(1));
-        for (std::size_t k = 2; k < p.getWayPointCount(); ++k)
-        {
-          // view the path as a sequence of segments, and look at the triangles it forms:
-          //          s1
-          //          /\          s4
-          //      a  /  \ b       |
-          //        /    \        |
-          //       /......\_______|
-          //     s0    c   s2     s3
-          //
+      const auto smoothness = [&]() {
+        const auto s = robot_trajectory::smoothness(p);
+        return s.has_value() ? s.value() : 0.0;
+      }();
 
-          // use Pythagoras generalized theorem to find the cos of the angle between segments a and b
-          double b = p.getWayPoint(k - 1).distance(p.getWayPoint(k));
-          double cdist = p.getWayPoint(k - 2).distance(p.getWayPoint(k));
-          double acos_value = (a * a + b * b - cdist * cdist) / (2.0 * a * b);
-          if (acos_value > -1.0 && acos_value < 1.0)
-          {
-            // the smoothness is actually the outside angle of the one we compute
-            double angle = (boost::math::constants::pi<double>() - acos(acos_value));
-
-            // and we normalize by the length of the segments
-            double u = 2.0 * angle;  /// (a + b);
-            smoothness += u * u;
-          }
-          a = b;
-        }
-        smoothness /= (double)p.getWayPointCount();
-      }
-      metrics["path_" + mp_res.description_[j] + "_correct BOOLEAN"] = boost::lexical_cast<std::string>(correct);
+      metrics["path_" + mp_res.description_[j] + "_correct BOOLEAN"] = correct ? "true" : "false";
       metrics["path_" + mp_res.description_[j] + "_length REAL"] = moveit::core::toString(traj_len);
       metrics["path_" + mp_res.description_[j] + "_clearance REAL"] = moveit::core::toString(clearance);
       metrics["path_" + mp_res.description_[j] + "_smoothness REAL"] = moveit::core::toString(smoothness);
@@ -953,7 +920,7 @@ void BenchmarkExecutor::collectMetrics(PlannerRunData& metrics,
 
       if (j == mp_res.trajectory_.size() - 1)
       {
-        metrics["final_path_correct BOOLEAN"] = boost::lexical_cast<std::string>(correct);
+        metrics["final_path_correct BOOLEAN"] = correct ? "true" : "false";
         metrics["final_path_length REAL"] = moveit::core::toString(traj_len);
         metrics["final_path_clearance REAL"] = moveit::core::toString(clearance);
         metrics["final_path_smoothness REAL"] = moveit::core::toString(smoothness);
@@ -1100,7 +1067,7 @@ void BenchmarkExecutor::writeOutput(const BenchmarkRequest& brequest, const std:
     filename.append("/");
 
   // Ensure directories exist
-  boost::filesystem::create_directories(filename);
+  std::filesystem::create_directories(filename);
 
   filename += (options_.getBenchmarkName().empty() ? "" : options_.getBenchmarkName() + "_") + brequest.name + "_" +
               getHostname() + "_" + start_time + ".log";

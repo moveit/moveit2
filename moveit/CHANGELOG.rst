@@ -2,6 +2,27 @@
 Changelog for package moveit
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.6.0 (2022-11-10)
+------------------
+* Improve CMake usage (`#1550 <https://github.com/ros-planning/moveit2/issues/1550>`_)
+* Contributors: Sebastian Jahr
+
+2.5.3 (2022-07-28)
+------------------
+* Organize package xml of MSA (`#1454 <https://github.com/ros-planning/moveit2/issues/1454>`_)
+* Contributors: Vatan Aksoy Tezer
+
+2.5.2 (2022-07-18)
+------------------
+
+2.5.1 (2022-05-31)
+------------------
+
+2.5.0 (2022-05-26)
+------------------
+* Fix copyright notice in README script (`#1115 <https://github.com/ros-planning/moveit2/issues/1115>`_)
+* Contributors: Abishalini, Henning Kayser, Robert Haschke
+
 2.4.0 (2022-01-20)
 ------------------
 

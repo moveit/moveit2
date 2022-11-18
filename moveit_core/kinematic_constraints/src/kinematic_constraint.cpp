@@ -40,18 +40,16 @@
 #include <moveit/robot_state/conversions.h>
 #include <moveit/collision_detection_fcl/collision_env_fcl.h>
 #include <geometric_shapes/check_isometry.h>
-#include <boost/math/constants/constants.hpp>
-#if __has_include(<tf2_eigen/tf2_eigen.hpp>)
+#include <rclcpp/logger.hpp>
+#include <rclcpp/logging.hpp>
+#include <rclcpp/time.hpp>
 #include <tf2_eigen/tf2_eigen.hpp>
-#else
-#include <tf2_eigen/tf2_eigen.h>
-#endif
 #include <functional>
 #include <limits>
+#include <math.h>
 #include <memory>
 #include <typeinfo>
 
-#include "rclcpp/rclcpp.hpp"
 #include "rclcpp/clock.hpp"
 #include "rclcpp/duration.hpp"
 
@@ -62,11 +60,11 @@ static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_kinematic_constr
 
 static double normalizeAngle(double angle)
 {
-  double v = fmod(angle, 2.0 * boost::math::constants::pi<double>());
-  if (v < -boost::math::constants::pi<double>())
-    v += 2.0 * boost::math::constants::pi<double>();
-  else if (v > boost::math::constants::pi<double>())
-    v -= 2.0 * boost::math::constants::pi<double>();
+  double v = fmod(angle, 2.0 * M_PI);
+  if (v < -M_PI)
+    v += 2.0 * M_PI;
+  else if (v > M_PI)
+    v -= 2.0 * M_PI;
   return v;
 }
 
@@ -285,10 +283,10 @@ ConstraintEvaluationResult JointConstraint::decide(const moveit::core::RobotStat
   {
     dif = normalizeAngle(current_joint_position) - joint_position_;
 
-    if (dif > boost::math::constants::pi<double>())
-      dif = 2.0 * boost::math::constants::pi<double>() - dif;
-    else if (dif < -boost::math::constants::pi<double>())
-      dif += 2.0 * boost::math::constants::pi<double>();  // we include a sign change to have dif > 0
+    if (dif > M_PI)
+      dif = 2.0 * M_PI - dif;
+    else if (dif < -M_PI)
+      dif += 2.0 * M_PI;  // we include a sign change to have dif > 0
   }
   else
     dif = current_joint_position - joint_position_;
@@ -604,7 +602,7 @@ bool OrientationConstraint::configure(const moveit_msgs::msg::OrientationConstra
 
   if (oc.weight <= std::numeric_limits<double>::epsilon())
   {
-    RCLCPP_WARN(LOGGER, "The weight on position constraint for link '%s' is near zero.  Setting to 1.0.",
+    RCLCPP_WARN(LOGGER, "The weight on orientation constraint for link '%s' is near zero.  Setting to 1.0.",
                 oc.link_name.c_str());
     constraint_weight_ = 1.0;
   }
@@ -801,7 +799,7 @@ bool VisibilityConstraint::configure(const moveit_msgs::msg::VisibilityConstrain
 
   // compute the points on the base circle of the cone that make up the cone sides
   points_.clear();
-  double delta = 2.0 * boost::math::constants::pi<double>() / (double)cone_sides_;
+  double delta = 2.0 * M_PI / (double)cone_sides_;
   double a = 0.0;
   for (unsigned int i = 0; i < cone_sides_; ++i, a += delta)
   {
@@ -1117,8 +1115,9 @@ ConstraintEvaluationResult VisibilityConstraint::decide(const moveit::core::Robo
   collision_detection::CollisionRequest req;
   collision_detection::CollisionResult res;
   collision_detection::AllowedCollisionMatrix acm;
-  collision_detection::DecideContactFn fn =
-      std::bind(&VisibilityConstraint::decideContact, this, std::placeholders::_1);
+  collision_detection::DecideContactFn fn = [this](collision_detection::Contact& contact) {
+    return decideContact(contact);
+  };
   acm.setDefaultEntry(std::string("cone"), fn);
 
   req.contacts = true;

@@ -38,19 +38,30 @@
 
 #include <thread>
 
-#include "rclcpp/rclcpp.hpp"
-#include "rclcpp_action/rclcpp_action.hpp"
-
 #include <moveit/planning_scene_monitor/planning_scene_monitor.h>
 #include <moveit/robot_model_loader/robot_model_loader.h>
 #include <moveit/planning_interface/planning_interface.h>
 #include <moveit/planning_scene/planning_scene.h>
 #include <moveit/kinematic_constraints/utils.h>
 #include <moveit/robot_state/conversions.h>
-
 #include <moveit_msgs/action/hybrid_planner.hpp>
 #include <moveit_msgs/msg/display_robot_state.hpp>
 #include <moveit_msgs/msg/motion_plan_response.hpp>
+#include <rclcpp/executors.hpp>
+#include <rclcpp/experimental/buffers/intra_process_buffer.hpp>
+#include <rclcpp/logger.hpp>
+#include <rclcpp/logging.hpp>
+#include <rclcpp/node.hpp>
+#include <rclcpp/node_options.hpp>
+#include <rclcpp/parameter_value.hpp>
+#include <rclcpp/qos.hpp>
+#include <rclcpp/qos_event.hpp>
+#include <rclcpp/subscription.hpp>
+#include <rclcpp/timer.hpp>
+#include <rclcpp/utilities.hpp>
+#include <rclcpp_action/client.hpp>
+#include <rclcpp_action/client_goal_handle.hpp>
+#include <rclcpp_action/create_client.hpp>
 
 using namespace std::chrono_literals;
 namespace
@@ -96,7 +107,7 @@ public:
     // Add new collision object as soon as global trajectory is available.
     global_solution_subscriber_ = node_->create_subscription<moveit_msgs::msg::MotionPlanResponse>(
         "global_trajectory", rclcpp::SystemDefaultsQoS(),
-        [this](const moveit_msgs::msg::MotionPlanResponse::SharedPtr /* unused */) {
+        [this](const moveit_msgs::msg::MotionPlanResponse::ConstSharedPtr& /* unused */) {
           // Remove old collision objects
           collision_object_1_.operation = collision_object_1_.REMOVE;
 
@@ -252,8 +263,8 @@ public:
           }
         };
     send_goal_options.feedback_callback =
-        [](rclcpp_action::ClientGoalHandle<moveit_msgs::action::HybridPlanner>::SharedPtr /*unused*/,
-           const std::shared_ptr<const moveit_msgs::action::HybridPlanner::Feedback> feedback) {
+        [](const rclcpp_action::ClientGoalHandle<moveit_msgs::action::HybridPlanner>::SharedPtr& /*unused*/,
+           const std::shared_ptr<const moveit_msgs::action::HybridPlanner::Feedback>& feedback) {
           RCLCPP_INFO(LOGGER, feedback->feedback.c_str());
         };
 

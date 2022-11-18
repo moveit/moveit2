@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.10.2)
+cmake_minimum_required(VERSION 3.22)
 project(moveit_ros_perception)
 
 # Common cmake code applied to all moveit packages
@@ -6,10 +6,6 @@ find_package(moveit_common REQUIRED)
 moveit_package()
 
 option(WITH_OPENGL "Build the parts that depend on OpenGL" ON)
-
-if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-  add_compile_options(-Wpedantic)
-endif()
 
 if(WITH_OPENGL)
   # Prefer newer vendor-specific OpenGL library
@@ -116,14 +112,14 @@ add_subdirectory(semantic_world)
 
 install(
   TARGETS ${THIS_PACKAGE_LIBRARIES}
-  EXPORT export_${PROJECT_NAME}
+  EXPORT ${PROJECT_NAME}Targets
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
   RUNTIME DESTINATION bin
   INCLUDES DESTINATION include
 )
 
-ament_export_targets(export_${PROJECT_NAME} HAS_LIBRARY_TARGET)
+ament_export_targets(${PROJECT_NAME}Targets HAS_LIBRARY_TARGET)
 ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS})
 
 pluginlib_export_plugin_description_file(moveit_ros_occupancy_map_monitor "pointcloud_octomap_updater_plugin_description.xml")
@@ -134,7 +130,6 @@ if(BUILD_TESTING)
 
   # These don't pass yet, disable them for now
   set(ament_cmake_copyright_FOUND TRUE)
-  set(ament_cmake_cppcheck_FOUND TRUE)
   set(ament_cmake_cpplint_FOUND TRUE)
   set(ament_cmake_uncrustify_FOUND TRUE)
 

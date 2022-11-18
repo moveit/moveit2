@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.10.2)
+cmake_minimum_required(VERSION 3.22)
 project(pilz_industrial_motion_planner)
 
 # Common cmake code applied to all moveit packages
@@ -10,6 +10,7 @@ find_package(eigen3_cmake_module REQUIRED)
 find_package(Eigen3 REQUIRED)
 # TODO(henning): Enable when this is available
 # find_package(joint_limits_interface REQUIRED)
+find_package(generate_parameter_library REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(moveit_core REQUIRED)
 find_package(moveit_msgs REQUIRED)
@@ -62,6 +63,7 @@ set(THIS_PACKAGE_INCLUDE_DEPENDS
   Eigen3
   eigen3_cmake_module
   # joint_limits_interface
+  generate_parameter_library
   geometry_msgs
   moveit_core
   moveit_msgs
@@ -85,9 +87,15 @@ set(THIS_PACKAGE_INCLUDE_DEPENDS
 ## Libraries ##
 ###############
 
+generate_parameter_library(
+  cartesian_limits_parameters # cmake target name for the parameter library
+  src/cartesian_limits_parameters.yaml # path to input yaml file
+)
+
 add_library(planning_context_loader_base SHARED
   src/planning_context_loader.cpp
 )
+target_link_libraries(planning_context_loader_base cartesian_limits_parameters)
 ament_target_dependencies(planning_context_loader_base ${THIS_PACKAGE_INCLUDE_DEPENDS})
 
 add_library(joint_limits_common SHARED
@@ -95,9 +103,8 @@ add_library(joint_limits_common SHARED
   src/joint_limits_container.cpp
   src/joint_limits_validator.cpp
   src/limits_container.cpp
-  src/cartesian_limit.cpp
-  src/cartesian_limits_aggregator.cpp
 )
+target_link_libraries(joint_limits_common cartesian_limits_parameters)
 ament_target_dependencies(joint_limits_common ${THIS_PACKAGE_INCLUDE_DEPENDS})
 
 add_library(trajectory_generation_common SHARED
@@ -105,12 +112,14 @@ add_library(trajectory_generation_common SHARED
   src/trajectory_generator.cpp
   src/trajectory_blender_transition_window.cpp
 )
+target_link_libraries(trajectory_generation_common cartesian_limits_parameters)
 ament_target_dependencies(trajectory_generation_common ${THIS_PACKAGE_INCLUDE_DEPENDS})
 
 add_library(command_list_manager SHARED
   src/command_list_manager.cpp
   src/plan_components_builder.cpp
 )
+target_link_libraries(command_list_manager trajectory_generation_common joint_limits_common)
 ament_target_dependencies(command_list_manager ${THIS_PACKAGE_INCLUDE_DEPENDS})
 
 #############
@@ -161,13 +170,14 @@ target_link_libraries(sequence_capability joint_limits_common command_list_manag
 ## Install ##
 #############
 pluginlib_export_plugin_description_file(moveit_core plugins/pilz_industrial_motion_planner_plugin_description.xml)
-pluginlib_export_plugin_description_file(move_group plugins/sequence_capability_plugin_description.xml)
+pluginlib_export_plugin_description_file(moveit_ros_move_group plugins/sequence_capability_plugin_description.xml)
 pluginlib_export_plugin_description_file(pilz_industrial_motion_planner plugins/planning_context_plugin_description.xml)
 
 ## Mark libraries for installation
 install(
   TARGETS
     ${PROJECT_NAME}
+    cartesian_limits_parameters
     joint_limits_common
     planning_context_loader_base
     planning_context_loader_ptp
@@ -192,7 +202,7 @@ ament_export_include_directories(
   include
 )
 ament_export_targets(${PROJECT_NAME}Targets HAS_LIBRARY_TARGET)
-ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS})
+ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS} orocos_kdl_vendor)
 
 if(BUILD_TESTING)
   # Include Tests
@@ -202,7 +212,6 @@ if(BUILD_TESTING)
 
   # These don't pass yet, disable them for now
   set(ament_cmake_copyright_FOUND TRUE)
-  set(ament_cmake_cppcheck_FOUND TRUE)
   set(ament_cmake_cpplint_FOUND TRUE)
   set(ament_cmake_flake8_FOUND TRUE)
   set(ament_cmake_uncrustify_FOUND TRUE)
