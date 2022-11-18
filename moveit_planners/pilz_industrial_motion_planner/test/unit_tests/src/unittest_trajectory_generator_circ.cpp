@@ -40,16 +40,8 @@
 #include <moveit/robot_model/robot_model.h>
 #include <moveit/robot_model_loader/robot_model_loader.h>
 #include <moveit/robot_state/conversions.h>
-#if __has_include(<tf2_eigen/tf2_eigen.hpp>)
 #include <tf2_eigen/tf2_eigen.hpp>
-#else
-#include <tf2_eigen/tf2_eigen.h>
-#endif
-#if __has_include(<tf2_geometry_msgs/tf2_geometry_msgs.hpp>)
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
-#else
-#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
-#endif
 
 #include "pilz_industrial_motion_planner/joint_limits_aggregator.h"
 #include "pilz_industrial_motion_planner/trajectory_generator_circ.h"
@@ -114,16 +106,17 @@ protected:
     pilz_industrial_motion_planner::JointLimitsContainer joint_limits =
         pilz_industrial_motion_planner::JointLimitsAggregator::getAggregatedLimits(
             node_, PARAM_NAMESPACE_LIMITS, robot_model_->getActiveJointModels());
-    CartesianLimit cart_limits;
+
     // Cartesian limits are chose as such values to ease the manually compute the
     // trajectory
+    cartesian_limits::Params cartesian_limit;
+    cartesian_limit.max_trans_vel = 1.0 * M_PI;
+    cartesian_limit.max_trans_acc = 1.0 * M_PI;
+    cartesian_limit.max_trans_dec = 1.0 * M_PI;
+    cartesian_limit.max_rot_vel = 1.0 * M_PI;
 
-    cart_limits.setMaxRotationalVelocity(1 * M_PI);
-    cart_limits.setMaxTranslationalAcceleration(1 * M_PI);
-    cart_limits.setMaxTranslationalDeceleration(1 * M_PI);
-    cart_limits.setMaxTranslationalVelocity(1 * M_PI);
     planner_limits_.setJointLimits(joint_limits);
-    planner_limits_.setCartesianLimits(cart_limits);
+    planner_limits_.setCartesianLimits(cartesian_limit);
 
     // initialize the LIN trajectory generator
     circ_ = std::make_unique<TrajectoryGeneratorCIRC>(robot_model_, planner_limits_, planning_group_);
@@ -274,16 +267,6 @@ TEST_F(TrajectoryGeneratorCIRCTest, TestExceptionErrorCodeMapping)
     std::shared_ptr<CircInverseForGoalIncalculable> cifgi_ex{ new CircInverseForGoalIncalculable("") };
     EXPECT_EQ(cifgi_ex->getErrorCode(), moveit_msgs::msg::MoveItErrorCodes::NO_IK_SOLUTION);
   }
-}
-
-/**
- * @brief Construct a TrajectoryGeneratorCirc with no limits given
- */
-TEST_F(TrajectoryGeneratorCIRCTest, noLimits)
-{
-  LimitsContainer planner_limits;
-  EXPECT_THROW(TrajectoryGeneratorCIRC(this->robot_model_, planner_limits, planning_group_),
-               TrajectoryGeneratorInvalidLimitsException);
 }
 
 /**

@@ -19,7 +19,13 @@ class DeclareBooleanLaunchArg(DeclareLaunchArgument):
 
 
 def add_debuggable_node(
-    ld, package, executable, condition_name="debug", commands_file=None, **kwargs
+    ld,
+    package,
+    executable,
+    condition_name="debug",
+    commands_file=None,
+    extra_debug_args=None,
+    **kwargs,
 ):
     """Adds two versions of a Node to the launch description, one with gdb debugging, controlled by a launch config"""
     standard_node = Node(
@@ -36,11 +42,20 @@ def add_debuggable_node(
         dash_x_arg = ""
     prefix = [f"gdb {dash_x_arg}--ex run --args"]
 
+    if "arguments" in kwargs:
+        arguments = kwargs["arguments"]
+        if extra_debug_args:
+            arguments += extra_debug_args
+        del kwargs["arguments"]
+    else:
+        arguments = None
+
     debug_node = Node(
         package=package,
         executable=executable,
         condition=IfCondition(LaunchConfiguration(condition_name)),
         prefix=prefix,
+        arguments=arguments,
         **kwargs,
     )
     ld.add_action(debug_node)

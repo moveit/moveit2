@@ -40,11 +40,8 @@
 #include "pilz_industrial_motion_planner/planning_context_loader_ptp.h"
 #include "pilz_industrial_motion_planner/planning_exceptions.h"
 
-#include "pilz_industrial_motion_planner/cartesian_limits_aggregator.h"
+#include "cartesian_limits_parameters.hpp"
 #include "pilz_industrial_motion_planner/joint_limits_aggregator.h"
-
-// Boost includes
-#include <boost/scoped_ptr.hpp>
 
 #include <pluginlib/class_list_macros.hpp>
 
@@ -77,8 +74,9 @@ bool CommandPlanner::initialize(const moveit::core::RobotModelConstPtr& model, c
       node, PARAM_NAMESPACE_LIMITS, model->getActiveJointModels());
 
   // Obtain cartesian limits
-  cartesian_limit_ =
-      pilz_industrial_motion_planner::CartesianLimitsAggregator::getAggregatedLimits(node, PARAM_NAMESPACE_LIMITS);
+  param_listener_ =
+      std::make_shared<cartesian_limits::ParamListener>(node, PARAM_NAMESPACE_LIMITS + ".cartesian_limits");
+  params_ = param_listener_->get_params();
 
   // Load the planning context loader
   planner_context_loader = std::make_unique<pluginlib::ClassLoader<PlanningContextLoader>>(
@@ -102,7 +100,7 @@ bool CommandPlanner::initialize(const moveit::core::RobotModelConstPtr& model, c
 
     pilz_industrial_motion_planner::LimitsContainer limits;
     limits.setJointLimits(aggregated_limit_active_joints_);
-    limits.setCartesianLimits(cartesian_limit_);
+    limits.setCartesianLimits(params_);
 
     loader_pointer->setLimits(limits);
     loader_pointer->setModel(model_);

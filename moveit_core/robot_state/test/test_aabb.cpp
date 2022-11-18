@@ -39,13 +39,9 @@
 #include <moveit/robot_state/robot_state.h>
 #include <urdf_parser/urdf_parser.h>
 #include <fstream>
-#include <boost/filesystem.hpp>
+#include <string>
 #include <gtest/gtest.h>
-#if __has_include(<tf2_geometry_msgs/tf2_geometry_msgs.hpp>)
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
-#else
-#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
-#endif
 #include <tf2/LinearMath/Vector3.h>
 #include <moveit/utils/robot_model_test_utils.h>
 
@@ -241,7 +237,7 @@ TEST_F(TestAABB, TestPR2)
       aabb.extendWithTransformedBox(transforms[i], extents);
 
       // Publish AABB
-      msg->ns = (*it)->getName() + boost::lexical_cast<std::string>(i);
+      msg->ns = (*it)->getName() + std::to_string(i);
       msg->pose.position.x = transforms[i].translation()[0];
       msg->pose.position.y = transforms[i].translation()[1];
       msg->pose.position.z = transforms[i].translation()[2];

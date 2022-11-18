@@ -39,10 +39,17 @@
    Created   : 07/16/2020
 */
 
-// ROS
-#include <rclcpp/rclcpp.hpp>
 #include <geometry_msgs/msg/twist_stamped.hpp>
 #include <std_srvs/srv/trigger.hpp>
+#include <rclcpp/client.hpp>
+#include <rclcpp/executors.hpp>
+#include <rclcpp/logger.hpp>
+#include <rclcpp/node.hpp>
+#include <rclcpp/node_options.hpp>
+#include <rclcpp/publisher.hpp>
+#include <rclcpp/qos_event.hpp>
+#include <rclcpp/time.hpp>
+#include <rclcpp/utilities.hpp>
 
 using namespace std::chrono_literals;
 

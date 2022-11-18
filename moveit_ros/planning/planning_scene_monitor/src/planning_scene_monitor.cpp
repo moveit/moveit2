@@ -42,16 +42,8 @@
 
 #include <tf2/exceptions.h>
 #include <tf2/LinearMath/Transform.h>
-#if __has_include(<tf2_eigen/tf2_eigen.hpp>)
 #include <tf2_eigen/tf2_eigen.hpp>
-#else
-#include <tf2_eigen/tf2_eigen.h>
-#endif
-#if __has_include(<tf2_geometry_msgs/tf2_geometry_msgs.hpp>)
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
-#else
-#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
-#endif
 
 #include <boost/algorithm/string/join.hpp>
 #include <memory>
@@ -191,10 +183,13 @@ void PlanningSceneMonitor::initialize(const planning_scene::PlanningScenePtr& sc
     {
       // The scene_ is loaded on the collision loader only if it was correctly instantiated
       collision_loader_.setupScene(node_, scene_);
-      scene_->setAttachedBodyUpdateCallback(std::bind(&PlanningSceneMonitor::currentStateAttachedBodyUpdateCallback,
-                                                      this, std::placeholders::_1, std::placeholders::_2));
-      scene_->setCollisionObjectUpdateCallback(std::bind(&PlanningSceneMonitor::currentWorldObjectUpdateCallback, this,
-                                                         std::placeholders::_1, std::placeholders::_2));
+      scene_->setAttachedBodyUpdateCallback([this](moveit::core::AttachedBody* body, bool attached) {
+        currentStateAttachedBodyUpdateCallback(body, attached);
+      });
+      scene_->setCollisionObjectUpdateCallback(
+          [this](const collision_detection::World::ObjectConstPtr& object, collision_detection::World::Action action) {
+            currentWorldObjectUpdateCallback(object, action);
+          });
     }
   }
   else
@@ -220,8 +215,7 @@ void PlanningSceneMonitor::initialize(const planning_scene::PlanningScenePtr& sc
   state_update_pending_ = false;
   // Period for 0.1 sec
   using std::chrono::nanoseconds;
-  state_update_timer_ =
-      pnode_->create_wall_timer(dt_state_update_, std::bind(&PlanningSceneMonitor::stateUpdateTimerCallback, this));
+  state_update_timer_ = pnode_->create_wall_timer(dt_state_update_, [this]() { return stateUpdateTimerCallback(); });
   private_executor_->add_node(pnode_);
 
   // start executor on a different thread now
@@ -258,7 +252,7 @@ void PlanningSceneMonitor::initialize(const planning_scene::PlanningScenePtr& sc
     return;
   }
 
-  auto psm_parameter_set_callback = [this](std::vector<rclcpp::Parameter> parameters) -> auto
+  auto psm_parameter_set_callback = [this](const std::vector<rclcpp::Parameter>& parameters) -> auto
   {
     auto result = rcl_interfaces::msg::SetParametersResult();
     result.successful = true;
@@ -320,7 +314,7 @@ void PlanningSceneMonitor::monitorDiffs(bool flag)
   {
     if (flag)
     {
-      boost::unique_lock<boost::shared_mutex> ulock(scene_update_mutex_);
+      std::unique_lock<std::shared_mutex> ulock(scene_update_mutex_);
       if (scene_)
       {
         scene_->setAttachedBodyUpdateCallback(moveit::core::AttachedBodyCallback());
@@ -329,10 +323,12 @@ void PlanningSceneMonitor::monitorDiffs(bool flag)
         parent_scene_ = scene_;
         scene_ = parent_scene_->diff();
         scene_const_ = scene_;
-        scene_->setAttachedBodyUpdateCallback(std::bind(&PlanningSceneMonitor::currentStateAttachedBodyUpdateCallback,
-                                                        this, std::placeholders::_1, std::placeholders::_2));
-        scene_->setCollisionObjectUpdateCallback(std::bind(&PlanningSceneMonitor::currentWorldObjectUpdateCallback,
-                                                           this, std::placeholders::_1, std::placeholders::_2));
+        scene_->setAttachedBodyUpdateCallback([this](moveit::core::AttachedBody* body, bool attached) {
+          currentStateAttachedBodyUpdateCallback(body, attached);
+        });
+        scene_->setCollisionObjectUpdateCallback(
+            [this](const collision_detection::World::ObjectConstPtr& object,
+                   collision_detection::World::Action action) { currentWorldObjectUpdateCallback(object, action); });
       }
     }
     else
@@ -344,7 +340,7 @@ void PlanningSceneMonitor::monitorDiffs(bool flag)
         stopPublishingPlanningScene();
       }
       {
-        boost::unique_lock<boost::shared_mutex> ulock(scene_update_mutex_);
+        std::unique_lock<std::shared_mutex> ulock(scene_update_mutex_);
         if (scene_)
         {
           scene_->decoupleParent();
@@ -365,7 +361,7 @@ void PlanningSceneMonitor::stopPublishingPlanningScene()
 {
   if (publish_planning_scene_)
   {
-    std::unique_ptr<boost::thread> copy;
+    std::unique_ptr<std::thread> copy;
     copy.swap(publish_planning_scene_);
     new_scene_update_condition_.notify_all();
     copy->join();
@@ -384,8 +380,7 @@ void PlanningSceneMonitor::startPublishingPlanningScene(SceneUpdateType update_t
     planning_scene_publisher_ = pnode_->create_publisher<moveit_msgs::msg::PlanningScene>(planning_scene_topic, 100);
     RCLCPP_INFO(LOGGER, "Publishing maintained planning scene on '%s'", planning_scene_topic.c_str());
     monitorDiffs(true);
-    publish_planning_scene_ =
-        std::make_unique<boost::thread>(std::bind(&PlanningSceneMonitor::scenePublishingThread, this));
+    publish_planning_scene_ = std::make_unique<std::thread>([this] { scenePublishingThread(); });
   }
 }
 
@@ -413,7 +408,7 @@ void PlanningSceneMonitor::scenePublishingThread()
     bool is_full = false;
     rclcpp::Rate rate(publish_planning_scene_frequency_);
     {
-      boost::unique_lock<boost::shared_mutex> ulock(scene_update_mutex_);
+      std::unique_lock<std::shared_mutex> ulock(scene_update_mutex_);
       while (new_scene_update_ == UPDATE_NONE && publish_planning_scene_)
         new_scene_update_condition_.wait(ulock);
       if (new_scene_update_ != UPDATE_NONE)
@@ -434,19 +429,21 @@ void PlanningSceneMonitor::scenePublishingThread()
               msg.robot_state.is_diff = true;
             }
           }
-          boost::recursive_mutex::scoped_lock prevent_shape_cache_updates(shape_handles_lock_);  // we don't want the
-                                                                                                 // transform cache to
-                                                                                                 // update while we are
-                                                                                                 // potentially changing
-                                                                                                 // attached bodies
+          std::scoped_lock prevent_shape_cache_updates(shape_handles_lock_);  // we don't want the
+                                                                              // transform cache to
+                                                                              // update while we are
+                                                                              // potentially changing
+                                                                              // attached bodies
           scene_->setAttachedBodyUpdateCallback(moveit::core::AttachedBodyCallback());
           scene_->setCollisionObjectUpdateCallback(collision_detection::World::ObserverCallbackFn());
           scene_->pushDiffs(parent_scene_);
           scene_->clearDiffs();
-          scene_->setAttachedBodyUpdateCallback(std::bind(&PlanningSceneMonitor::currentStateAttachedBodyUpdateCallback,
-                                                          this, std::placeholders::_1, std::placeholders::_2));
-          scene_->setCollisionObjectUpdateCallback(std::bind(&PlanningSceneMonitor::currentWorldObjectUpdateCallback,
-                                                             this, std::placeholders::_1, std::placeholders::_2));
+          scene_->setAttachedBodyUpdateCallback([this](moveit::core::AttachedBody* body, bool attached) {
+            currentStateAttachedBodyUpdateCallback(body, attached);
+          });
+          scene_->setCollisionObjectUpdateCallback(
+              [this](const collision_detection::World::ObjectConstPtr& object,
+                     collision_detection::World::Action action) { currentWorldObjectUpdateCallback(object, action); });
           if (octomap_monitor_)
           {
             excludeAttachedBodiesFromOctree();  // in case updates have happened to the attached bodies, put them in
@@ -522,9 +519,9 @@ bool PlanningSceneMonitor::updatesScene(const planning_scene::PlanningSceneConst
 void PlanningSceneMonitor::triggerSceneUpdateEvent(SceneUpdateType update_type)
 {
   // do not modify update functions while we are calling them
-  boost::recursive_mutex::scoped_lock lock(update_lock_);
+  std::scoped_lock lock(update_lock_);
 
-  for (boost::function<void(SceneUpdateType)>& update_callback : update_callbacks_)
+  for (std::function<void(SceneUpdateType)>& update_callback : update_callbacks_)
     update_callback(update_type);
   new_scene_update_ = (SceneUpdateType)(static_cast<int>(new_scene_update_) | static_cast<int>(update_type));
   new_scene_update_condition_.notify_all();
@@ -579,12 +576,15 @@ void PlanningSceneMonitor::providePlanningSceneService(const std::string& servic
 {
   // Load the service
   get_scene_service_ = pnode_->create_service<moveit_msgs::srv::GetPlanningScene>(
-      service_name, std::bind(&PlanningSceneMonitor::getPlanningSceneServiceCallback, this, std::placeholders::_1,
-                              std::placeholders::_2));
+      service_name, [this](const moveit_msgs::srv::GetPlanningScene::Request::SharedPtr& req,
+                           const moveit_msgs::srv::GetPlanningScene::Response::SharedPtr& res) {
+        return getPlanningSceneServiceCallback(req, res);
+      });
 }
 
-void PlanningSceneMonitor::getPlanningSceneServiceCallback(moveit_msgs::srv::GetPlanningScene::Request::SharedPtr req,
-                                                           moveit_msgs::srv::GetPlanningScene::Response::SharedPtr res)
+void PlanningSceneMonitor::getPlanningSceneServiceCallback(
+    const moveit_msgs::srv::GetPlanningScene::Request::SharedPtr& req,
+    const moveit_msgs::srv::GetPlanningScene::Response::SharedPtr& res)
 {
   if (req->components.components & moveit_msgs::msg::PlanningSceneComponents::TRANSFORMS)
     updateFrameTransforms();
@@ -592,7 +592,7 @@ void PlanningSceneMonitor::getPlanningSceneServiceCallback(moveit_msgs::srv::Get
   moveit_msgs::msg::PlanningSceneComponents all_components;
   all_components.components = UINT_MAX;  // Return all scene components if nothing is specified.
 
-  boost::unique_lock<boost::shared_mutex> ulock(scene_update_mutex_);
+  std::unique_lock<std::shared_mutex> ulock(scene_update_mutex_);
   scene_->getPlanningSceneMsg(res->scene, req->components.components ? req->components : all_components);
 }
 
@@ -619,7 +619,7 @@ void PlanningSceneMonitor::updatePublishSettings(bool publish_geom_updates, bool
     stopPublishingPlanningScene();
 }
 
-void PlanningSceneMonitor::newPlanningSceneCallback(moveit_msgs::msg::PlanningScene::SharedPtr scene)
+void PlanningSceneMonitor::newPlanningSceneCallback(const moveit_msgs::msg::PlanningScene::ConstSharedPtr& scene)
 {
   newPlanningSceneMessage(*scene);
 }
@@ -628,7 +628,7 @@ void PlanningSceneMonitor::clearOctomap()
 {
   bool removed = false;
   {
-    boost::unique_lock<boost::shared_mutex> ulock(scene_update_mutex_);
+    std::unique_lock<std::shared_mutex> ulock(scene_update_mutex_);
     removed = scene_->getWorldNonConst()->removeObject(scene_->OCTOMAP_NS);
 
     if (octomap_monitor_)
@@ -657,9 +657,9 @@ bool PlanningSceneMonitor::newPlanningSceneMessage(const moveit_msgs::msg::Plann
   SceneUpdateType upd = UPDATE_SCENE;
   std::string old_scene_name;
   {
-    boost::unique_lock<boost::shared_mutex> ulock(scene_update_mutex_);
+    std::unique_lock<std::shared_mutex> ulock(scene_update_mutex_);
     // we don't want the transform cache to update while we are potentially changing attached bodies
-    boost::recursive_mutex::scoped_lock prevent_shape_cache_updates(shape_handles_lock_);
+    std::scoped_lock prevent_shape_cache_updates(shape_handles_lock_);
 
     last_update_time_ = rclcpp::Clock().now();
     last_robot_motion_time_ = scene.robot_state.joint_state.header.stamp;
@@ -687,10 +687,13 @@ bool PlanningSceneMonitor::newPlanningSceneMessage(const moveit_msgs::msg::Plann
       parent_scene_ = scene_;
       scene_ = parent_scene_->diff();
       scene_const_ = scene_;
-      scene_->setAttachedBodyUpdateCallback(std::bind(&PlanningSceneMonitor::currentStateAttachedBodyUpdateCallback,
-                                                      this, std::placeholders::_1, std::placeholders::_2));
-      scene_->setCollisionObjectUpdateCallback(std::bind(&PlanningSceneMonitor::currentWorldObjectUpdateCallback, this,
-                                                         std::placeholders::_1, std::placeholders::_2));
+      scene_->setAttachedBodyUpdateCallback([this](moveit::core::AttachedBody* body, bool attached) {
+        currentStateAttachedBodyUpdateCallback(body, attached);
+      });
+      scene_->setCollisionObjectUpdateCallback(
+          [this](const collision_detection::World::ObjectConstPtr& object, collision_detection::World::Action action) {
+            currentWorldObjectUpdateCallback(object, action);
+          });
     }
     if (octomap_monitor_)
     {
@@ -726,13 +729,14 @@ bool PlanningSceneMonitor::newPlanningSceneMessage(const moveit_msgs::msg::Plann
   return result;
 }
 
-void PlanningSceneMonitor::newPlanningSceneWorldCallback(moveit_msgs::msg::PlanningSceneWorld::SharedPtr world)
+void PlanningSceneMonitor::newPlanningSceneWorldCallback(
+    const moveit_msgs::msg::PlanningSceneWorld::ConstSharedPtr& world)
 {
   if (scene_)
   {
     updateFrameTransforms();
     {
-      boost::unique_lock<boost::shared_mutex> ulock(scene_update_mutex_);
+      std::unique_lock<std::shared_mutex> ulock(scene_update_mutex_);
       last_update_time_ = rclcpp::Clock().now();
       scene_->getWorldNonConst()->clearObjects();
       scene_->processPlanningSceneWorldMsg(*world);
@@ -750,14 +754,14 @@ void PlanningSceneMonitor::newPlanningSceneWorldCallback(moveit_msgs::msg::Plann
   }
 }
 
-void PlanningSceneMonitor::collisionObjectCallback(moveit_msgs::msg::CollisionObject::SharedPtr obj)
+void PlanningSceneMonitor::collisionObjectCallback(const moveit_msgs::msg::CollisionObject::ConstSharedPtr& obj)
 {
   if (!scene_)
     return;
 
   updateFrameTransforms();
   {
-    boost::unique_lock<boost::shared_mutex> ulock(scene_update_mutex_);
+    std::unique_lock<std::shared_mutex> ulock(scene_update_mutex_);
     last_update_time_ = rclcpp::Clock().now();
     if (!scene_->processCollisionObjectMsg(*obj))
       return;
@@ -765,13 +769,13 @@ void PlanningSceneMonitor::collisionObjectCallback(moveit_msgs::msg::CollisionOb
   triggerSceneUpdateEvent(UPDATE_GEOMETRY);
 }
 
-void PlanningSceneMonitor::attachObjectCallback(moveit_msgs::msg::AttachedCollisionObject::SharedPtr obj)
+void PlanningSceneMonitor::attachObjectCallback(const moveit_msgs::msg::AttachedCollisionObject::ConstSharedPtr& obj)
 {
   if (scene_)
   {
     updateFrameTransforms();
     {
-      boost::unique_lock<boost::shared_mutex> ulock(scene_update_mutex_);
+      std::unique_lock<std::shared_mutex> ulock(scene_update_mutex_);
       last_update_time_ = rclcpp::Clock().now();
       scene_->processAttachedCollisionObjectMsg(*obj);
     }
@@ -784,7 +788,7 @@ void PlanningSceneMonitor::excludeRobotLinksFromOctree()
   if (!octomap_monitor_)
     return;
 
-  boost::recursive_mutex::scoped_lock _(shape_handles_lock_);
+  std::scoped_lock _(shape_handles_lock_);
 
   includeRobotLinksInOctree();
   const std::vector<const moveit::core::LinkModel*>& links = getRobotModel()->getLinkModelsWithCollisionGeometry();
@@ -821,7 +825,7 @@ void PlanningSceneMonitor::includeRobotLinksInOctree()
   if (!octomap_monitor_)
     return;
 
-  boost::recursive_mutex::scoped_lock _(shape_handles_lock_);
+  std::scoped_lock _(shape_handles_lock_);
 
   for (std::pair<const moveit::core::LinkModel* const,
                  std::vector<std::pair<occupancy_map_monitor::ShapeHandle, std::size_t>>>& link_shape_handle :
@@ -836,7 +840,7 @@ void PlanningSceneMonitor::includeAttachedBodiesInOctree()
   if (!octomap_monitor_)
     return;
 
-  boost::recursive_mutex::scoped_lock _(shape_handles_lock_);
+  std::scoped_lock _(shape_handles_lock_);
 
   // clear information about any attached body, without referring to the AttachedBody* ptr (could be invalid)
   for (std::pair<const moveit::core::AttachedBody* const,
@@ -849,7 +853,7 @@ void PlanningSceneMonitor::includeAttachedBodiesInOctree()
 
 void PlanningSceneMonitor::excludeAttachedBodiesFromOctree()
 {
-  boost::recursive_mutex::scoped_lock _(shape_handles_lock_);
+  std::scoped_lock _(shape_handles_lock_);
 
   includeAttachedBodiesInOctree();
   // add attached objects again
@@ -864,7 +868,7 @@ void PlanningSceneMonitor::includeWorldObjectsInOctree()
   if (!octomap_monitor_)
     return;
 
-  boost::recursive_mutex::scoped_lock _(shape_handles_lock_);
+  std::scoped_lock _(shape_handles_lock_);
 
   // clear information about any attached object
   for (std::pair<const std::string, std::vector<std::pair<occupancy_map_monitor::ShapeHandle, const Eigen::Isometry3d*>>>&
@@ -877,7 +881,7 @@ void PlanningSceneMonitor::includeWorldObjectsInOctree()
 
 void PlanningSceneMonitor::excludeWorldObjectsFromOctree()
 {
-  boost::recursive_mutex::scoped_lock _(shape_handles_lock_);
+  std::scoped_lock _(shape_handles_lock_);
 
   includeWorldObjectsInOctree();
   for (const std::pair<const std::string, collision_detection::World::ObjectPtr>& it : *scene_->getWorld())
@@ -889,7 +893,7 @@ void PlanningSceneMonitor::excludeAttachedBodyFromOctree(const moveit::core::Att
   if (!octomap_monitor_)
     return;
 
-  boost::recursive_mutex::scoped_lock _(shape_handles_lock_);
+  std::scoped_lock _(shape_handles_lock_);
   bool found = false;
   for (std::size_t i = 0; i < attached_body->getShapes().size(); ++i)
   {
@@ -911,7 +915,7 @@ void PlanningSceneMonitor::includeAttachedBodyInOctree(const moveit::core::Attac
   if (!octomap_monitor_)
     return;
 
-  boost::recursive_mutex::scoped_lock _(shape_handles_lock_);
+  std::scoped_lock _(shape_handles_lock_);
 
   AttachedBodyShapeHandles::iterator it = attached_body_shape_handles_.find(attached_body);
   if (it != attached_body_shape_handles_.end())
@@ -928,7 +932,7 @@ void PlanningSceneMonitor::excludeWorldObjectFromOctree(const collision_detectio
   if (!octomap_monitor_)
     return;
 
-  boost::recursive_mutex::scoped_lock _(shape_handles_lock_);
+  std::scoped_lock _(shape_handles_lock_);
 
   bool found = false;
   for (std::size_t i = 0; i < obj->shapes_.size(); ++i)
@@ -951,7 +955,7 @@ void PlanningSceneMonitor::includeWorldObjectInOctree(const collision_detection:
   if (!octomap_monitor_)
     return;
 
-  boost::recursive_mutex::scoped_lock _(shape_handles_lock_);
+  std::scoped_lock _(shape_handles_lock_);
 
   CollisionBodyShapeHandles::iterator it = collision_body_shape_handles_.find(obj->id_);
   if (it != collision_body_shape_handles_.end())
@@ -1030,13 +1034,13 @@ bool PlanningSceneMonitor::waitForCurrentRobotState(const rclcpp::Time& t, doubl
   // As publishing planning scene updates is throttled (2Hz by default), a 1s timeout is a suitable default.
   auto start = node_->get_clock()->now();
   auto timeout = rclcpp::Duration::from_seconds(wait_time);
-  boost::shared_lock<boost::shared_mutex> lock(scene_update_mutex_);
+  std::shared_lock<std::shared_mutex> lock(scene_update_mutex_);
   rclcpp::Time prev_robot_motion_time = last_robot_motion_time_;
   while (last_robot_motion_time_ < t &&  // Wait until the state update actually reaches the scene.
          timeout > rclcpp::Duration(0, 0))
   {
     RCLCPP_DEBUG(LOGGER, "last robot motion: %f ago", (t - last_robot_motion_time_).seconds());
-    new_scene_update_condition_.wait_for(lock, boost::chrono::nanoseconds(timeout.nanoseconds()));
+    new_scene_update_condition_.wait_for(lock, std::chrono::nanoseconds(timeout.nanoseconds()));
     timeout = timeout - (node_->get_clock()->now() - start);  // compute remaining wait_time
   }
   bool success = last_robot_motion_time_ >= t;
@@ -1086,7 +1090,9 @@ void PlanningSceneMonitor::startSceneMonitor(const std::string& scene_topic)
   if (!scene_topic.empty())
   {
     planning_scene_subscriber_ = pnode_->create_subscription<moveit_msgs::msg::PlanningScene>(
-        scene_topic, 100, std::bind(&PlanningSceneMonitor::newPlanningSceneCallback, this, std::placeholders::_1));
+        scene_topic, 100, [this](const moveit_msgs::msg::PlanningScene::ConstSharedPtr& scene) {
+          return newPlanningSceneCallback(scene);
+        });
     RCLCPP_INFO(LOGGER, "Listening to '%s'", planning_scene_subscriber_->get_topic_name());
   }
 }
@@ -1105,7 +1111,7 @@ bool PlanningSceneMonitor::getShapeTransformCache(const std::string& target_fram
 {
   try
   {
-    boost::recursive_mutex::scoped_lock _(shape_handles_lock_);
+    std::scoped_lock _(shape_handles_lock_);
 
     for (const std::pair<const moveit::core::LinkModel* const,
                          std::vector<std::pair<occupancy_map_monitor::ShapeHandle, std::size_t>>>& link_shape_handle :
@@ -1173,15 +1179,16 @@ void PlanningSceneMonitor::startWorldGeometryMonitor(const std::string& collisio
   {
     collision_object_subscriber_ = pnode_->create_subscription<moveit_msgs::msg::CollisionObject>(
         collision_objects_topic, 1024,
-        std::bind(&PlanningSceneMonitor::collisionObjectCallback, this, std::placeholders::_1));
+        [this](const moveit_msgs::msg::CollisionObject::ConstSharedPtr& obj) { return collisionObjectCallback(obj); });
     RCLCPP_INFO(LOGGER, "Listening to '%s'", collision_objects_topic.c_str());
   }
 
   if (!planning_scene_world_topic.empty())
   {
     planning_scene_world_subscriber_ = pnode_->create_subscription<moveit_msgs::msg::PlanningSceneWorld>(
-        planning_scene_world_topic, 1,
-        std::bind(&PlanningSceneMonitor::newPlanningSceneWorldCallback, this, std::placeholders::_1));
+        planning_scene_world_topic, 1, [this](const moveit_msgs::msg::PlanningSceneWorld::ConstSharedPtr& world) {
+          return newPlanningSceneWorldCallback(world);
+        });
     RCLCPP_INFO(LOGGER, "Listening to '%s' for planning scene world geometry", planning_scene_world_topic.c_str());
   }
 
@@ -1196,10 +1203,11 @@ void PlanningSceneMonitor::startWorldGeometryMonitor(const std::string& collisio
       excludeAttachedBodiesFromOctree();
       excludeWorldObjectsFromOctree();
 
-      octomap_monitor_->setTransformCacheCallback(std::bind(&PlanningSceneMonitor::getShapeTransformCache, this,
-                                                            std::placeholders::_1, std::placeholders::_2,
-                                                            std::placeholders::_3));
-      octomap_monitor_->setUpdateCallback(std::bind(&PlanningSceneMonitor::octomapUpdateCallback, this));
+      octomap_monitor_->setTransformCacheCallback([this](const std::string& frame, const rclcpp::Time& stamp,
+                                                         occupancy_map_monitor::ShapeTransformCache& cache) {
+        return getShapeTransformCache(frame, stamp, cache);
+      });
+      octomap_monitor_->setUpdateCallback([this] { octomapUpdateCallback(); });
     }
     octomap_monitor_->startMonitor();
   }
@@ -1233,7 +1241,7 @@ void PlanningSceneMonitor::startStateMonitor(const std::string& joint_states_top
           std::make_shared<CurrentStateMonitor>(pnode_, getRobotModel(), tf_buffer_, use_sim_time_);
     }
     current_state_monitor_->addUpdateCallback(
-        std::bind(&PlanningSceneMonitor::onStateUpdate, this, std::placeholders::_1));
+        [this](const sensor_msgs::msg::JointState::ConstSharedPtr& joint_state) { return onStateUpdate(joint_state); });
     current_state_monitor_->startStateMonitor(joint_states_topic);
 
     {
@@ -1241,16 +1249,17 @@ void PlanningSceneMonitor::startStateMonitor(const std::string& joint_states_top
       if (dt_state_update_.count() > 0)
         // ROS original: state_update_timer_.start();
         // TODO: re-enable WallTimer start()
-        state_update_timer_ = pnode_->create_wall_timer(
-            dt_state_update_, std::bind(&PlanningSceneMonitor::stateUpdateTimerCallback, this));
+        state_update_timer_ =
+            pnode_->create_wall_timer(dt_state_update_, [this]() { return stateUpdateTimerCallback(); });
     }
 
     if (!attached_objects_topic.empty())
     {
       // using regular message filter as there's no header
       attached_collision_object_subscriber_ = pnode_->create_subscription<moveit_msgs::msg::AttachedCollisionObject>(
-          attached_objects_topic, 1024,
-          std::bind(&PlanningSceneMonitor::attachObjectCallback, this, std::placeholders::_1));
+          attached_objects_topic, 1024, [this](const moveit_msgs::msg::AttachedCollisionObject::ConstSharedPtr& obj) {
+            return attachObjectCallback(obj);
+          });
       RCLCPP_INFO(LOGGER, "Listening to '%s' for attached collision objects",
                   attached_collision_object_subscriber_->get_topic_name());
     }
@@ -1338,7 +1347,7 @@ void PlanningSceneMonitor::octomapUpdateCallback()
 
   updateFrameTransforms();
   {
-    boost::unique_lock<boost::shared_mutex> ulock(scene_update_mutex_);
+    std::unique_lock<std::shared_mutex> ulock(scene_update_mutex_);
     last_update_time_ = rclcpp::Clock().now();
     octomap_monitor_->getOcTreePtr()->lockRead();
     try
@@ -1364,8 +1373,7 @@ void PlanningSceneMonitor::setStateUpdateFrequency(double hz)
     dt_state_update_ = std::chrono::duration<double>(1.0 / hz);
     // ROS original: state_update_timer_.start();
     // TODO: re-enable WallTimer start()
-    state_update_timer_ =
-        pnode_->create_wall_timer(dt_state_update_, std::bind(&PlanningSceneMonitor::stateUpdateTimerCallback, this));
+    state_update_timer_ = pnode_->create_wall_timer(dt_state_update_, [this]() { return stateUpdateTimerCallback(); });
   }
   else
   {
@@ -1401,7 +1409,7 @@ void PlanningSceneMonitor::updateSceneWithCurrentState()
     }
 
     {
-      boost::unique_lock<boost::shared_mutex> ulock(scene_update_mutex_);
+      std::unique_lock<std::shared_mutex> ulock(scene_update_mutex_);
       last_update_time_ = last_robot_motion_time_ = current_state_monitor_->getCurrentStateTime();
       RCLCPP_DEBUG(LOGGER, "robot state update %f", fmod(last_robot_motion_time_.seconds(), 10.));
       current_state_monitor_->setToCurrentState(scene_->getCurrentStateNonConst());
@@ -1414,16 +1422,16 @@ void PlanningSceneMonitor::updateSceneWithCurrentState()
                           "State monitor is not active. Unable to set the planning scene state");
 }
 
-void PlanningSceneMonitor::addUpdateCallback(const boost::function<void(SceneUpdateType)>& fn)
+void PlanningSceneMonitor::addUpdateCallback(const std::function<void(SceneUpdateType)>& fn)
 {
-  boost::recursive_mutex::scoped_lock lock(update_lock_);
+  std::scoped_lock lock(update_lock_);
   if (fn)
     update_callbacks_.push_back(fn);
 }
 
 void PlanningSceneMonitor::clearUpdateCallbacks()
 {
-  boost::recursive_mutex::scoped_lock lock(update_lock_);
+  std::scoped_lock lock(update_lock_);
   update_callbacks_.clear();
 }
 
@@ -1469,7 +1477,7 @@ void PlanningSceneMonitor::updateFrameTransforms()
     std::vector<geometry_msgs::msg::TransformStamped> transforms;
     getUpdatedFrameTransforms(transforms);
     {
-      boost::unique_lock<boost::shared_mutex> ulock(scene_update_mutex_);
+      std::unique_lock<std::shared_mutex> ulock(scene_update_mutex_);
       scene_->getTransformsNonConst().setTransforms(transforms);
       last_update_time_ = rclcpp::Clock().now();
     }

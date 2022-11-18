@@ -36,7 +36,8 @@
 
 #include <pluginlib/class_loader.hpp>
 #include <moveit/planning_request_adapter/planning_request_adapter.h>
-#include <rclcpp/rclcpp.hpp>
+#include <rclcpp/node.hpp>
+#include <rclcpp/utilities.hpp>
 #include <memory>
 
 int main(int argc, char** argv)

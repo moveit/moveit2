@@ -35,12 +35,10 @@
 /* Author: Henning Kayser */
 
 #include <stdexcept>
+
+#include <moveit/controller_manager/controller_manager.h>
 #include <moveit/moveit_cpp/moveit_cpp.h>
-#if __has_include(<tf2_geometry_msgs/tf2_geometry_msgs.hpp>)
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
-#else
-#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
-#endif
 #include <geometry_msgs/msg/quaternion_stamped.hpp>
 
 namespace moveit_cpp
@@ -159,23 +157,6 @@ bool MoveItCpp::loadPlanningPipelines(const PlanningPipelineOptions& options)
     return false;
   }
 
-  // Retrieve group/pipeline mapping for faster lookup
-  std::vector<std::string> group_names = robot_model_->getJointModelGroupNames();
-  for (const auto& pipeline_entry : planning_pipelines_)
-  {
-    for (const auto& group_name : group_names)
-    {
-      const auto& pipeline = pipeline_entry.second;
-      for (const auto& planner_configuration : pipeline->getPlannerManager()->getPlannerConfigurations())
-      {
-        if (planner_configuration.second.group == group_name)
-        {
-          groups_pipelines_map_[group_name].insert(pipeline_entry.first);
-        }
-      }
-    }
-  }
-
   return true;
 }
 
@@ -215,18 +196,6 @@ const std::map<std::string, planning_pipeline::PlanningPipelinePtr>& MoveItCpp::
   return planning_pipelines_;
 }
 
-std::set<std::string> MoveItCpp::getPlanningPipelineNames(const std::string& group_name) const
-{
-  if (group_name.empty() || groups_pipelines_map_.count(group_name) == 0)
-  {
-    RCLCPP_ERROR(LOGGER, "No planning pipelines loaded for group '%s'. Check planning pipeline and controller setup.",
-                 group_name.c_str());
-    return {};  // empty
-  }
-
-  return groups_pipelines_map_.at(group_name);
-}
-
 const planning_scene_monitor::PlanningSceneMonitorPtr& MoveItCpp::getPlanningSceneMonitor() const
 {
   return planning_scene_monitor_;
@@ -247,33 +216,54 @@ trajectory_execution_manager::TrajectoryExecutionManagerPtr MoveItCpp::getTrajec
   return trajectory_execution_manager_;
 }
 
-bool MoveItCpp::execute(const std::string& group_name, const robot_trajectory::RobotTrajectoryPtr& robot_trajectory,
-                        bool blocking)
+moveit_controller_manager::ExecutionStatus
+MoveItCpp::execute(const std::string& group_name, const robot_trajectory::RobotTrajectoryPtr& robot_trajectory,
+                   bool blocking)
 {
   if (!robot_trajectory)
   {
     RCLCPP_ERROR(LOGGER, "Robot trajectory is undefined");
-    return false;
+    return moveit_controller_manager::ExecutionStatus::ABORTED;
   }
 
   // Check if there are controllers that can handle the execution
   if (!trajectory_execution_manager_->ensureActiveControllersForGroup(group_name))
   {
     RCLCPP_ERROR(LOGGER, "Execution failed! No active controllers configured for group '%s'", group_name.c_str());
-    return false;
+    return moveit_controller_manager::ExecutionStatus::ABORTED;
   }
 
   // Execute trajectory
   moveit_msgs::msg::RobotTrajectory robot_trajectory_msg;
   robot_trajectory->getRobotTrajectoryMsg(robot_trajectory_msg);
+  // TODO: cambel
+  // blocking is the only valid option right now. Add non-blocking use case
   if (blocking)
   {
     trajectory_execution_manager_->push(robot_trajectory_msg);
     trajectory_execution_manager_->execute();
     return trajectory_execution_manager_->waitForExecution();
   }
-  trajectory_execution_manager_->pushAndExecute(robot_trajectory_msg);
-  return true;
+  return moveit_controller_manager::ExecutionStatus::RUNNING;
+}
+
+bool MoveItCpp::terminatePlanningPipeline(const std::string& pipeline_name)
+{
+  try
+  {
+    const auto& planning_pipeline = planning_pipelines_.at(pipeline_name);
+    if (planning_pipeline->isActive())
+    {
+      planning_pipeline->terminate();
+    }
+    return true;
+  }
+  catch (const std::out_of_range& oor)
+  {
+    RCLCPP_ERROR(LOGGER, "Cannot terminate pipeline '%s' because no pipeline with that name exists",
+                 pipeline_name.c_str());
+    return false;
+  }
 }
 
 const std::shared_ptr<tf2_ros::Buffer>& MoveItCpp::getTFBuffer() const

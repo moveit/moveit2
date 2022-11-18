@@ -36,15 +36,9 @@
 
 #include <moveit/planning_scene/planning_scene.h>
 #include <tf2/LinearMath/Quaternion.h>
-
 #include <tf2_eigen_kdl/tf2_eigen_kdl.hpp>
-#if __has_include(<tf2_eigen/tf2_eigen.hpp>)
 #include <tf2_eigen/tf2_eigen.hpp>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
-#else
-#include <tf2_eigen/tf2_eigen.h>
-#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
-#endif
 
 namespace
 {
@@ -85,8 +79,12 @@ bool pilz_industrial_motion_planner::computePoseIK(const planning_scene::Plannin
   rstate.setVariablePositions(seed);
 
   moveit::core::GroupStateValidityCallbackFn ik_constraint_function;
-  ik_constraint_function = std::bind(&pilz_industrial_motion_planner::isStateColliding, check_self_collision, scene,
-                                     std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
+  ik_constraint_function = [check_self_collision, scene](moveit::core::RobotState* robot_state,
+                                                         const moveit::core::JointModelGroup* joint_group,
+                                                         const double* joint_group_variable_values) {
+    return pilz_industrial_motion_planner::isStateColliding(check_self_collision, scene, robot_state, joint_group,
+                                                            joint_group_variable_values);
+  };
 
   // call ik
   if (rstate.setFromIK(robot_model->getJointModelGroup(group_name), pose, link_name, timeout, ik_constraint_function))
@@ -176,8 +174,7 @@ bool pilz_industrial_motion_planner::verifySampleJointLimits(
     // acceleration case
     if (fabs(velocity_last.at(pos.first)) <= fabs(velocity_current))
     {
-      if (joint_limits.getLimit(pos.first).has_acceleration_limits &&
-          fabs(acceleration_current) > fabs(joint_limits.getLimit(pos.first).max_acceleration))
+      if (!joint_limits.verifyAccelerationLimit(pos.first, acceleration_current))
       {
         RCLCPP_ERROR_STREAM(LOGGER, "Joint acceleration limit of "
                                         << pos.first << " violated. Set the acceleration scaling factor lower!"
@@ -190,8 +187,7 @@ bool pilz_industrial_motion_planner::verifySampleJointLimits(
     // deceleration case
     else
     {
-      if (joint_limits.getLimit(pos.first).has_deceleration_limits &&
-          fabs(acceleration_current) > fabs(joint_limits.getLimit(pos.first).max_deceleration))
+      if (!joint_limits.verifyDecelerationLimit(pos.first, acceleration_current))
       {
         RCLCPP_ERROR_STREAM(LOGGER, "Joint deceleration limit of "
                                         << pos.first << " violated. Set the acceleration scaling factor lower!"

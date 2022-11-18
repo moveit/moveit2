@@ -39,6 +39,8 @@
 #include <moveit_msgs/srv/get_planning_scene.hpp>
 #include <moveit_msgs/srv/apply_planning_scene.hpp>
 #include <algorithm>
+#include <rclcpp/executors.hpp>
+#include <rclcpp/future_return_code.hpp>
 
 namespace moveit
 {
@@ -269,7 +271,7 @@ public:
   }
 
 private:
-  void waitForService(std::shared_ptr<rclcpp::ClientBase> srv)
+  void waitForService(const std::shared_ptr<rclcpp::ClientBase>& srv)
   {
     // rclcpp::Duration time_before_warning(5.0);
     // srv.waitForExistence(time_before_warning);

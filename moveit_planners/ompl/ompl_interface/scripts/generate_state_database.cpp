@@ -198,7 +198,9 @@ void computeDB(const rclcpp::Node::SharedPtr& node, const planning_scene::Planni
 int main(int argc, char** argv)
 {
   rclcpp::init(argc, argv);
-  std::shared_ptr<rclcpp::Node> node = rclcpp::Node::make_shared("generate_state_database");
+  rclcpp::NodeOptions opt;
+  opt.automatically_declare_parameters_from_overrides(true);
+  std::shared_ptr<rclcpp::Node> node = rclcpp::Node::make_shared("generate_state_database", opt);
 
   GenerateStateDatabaseParameters params;
   if (!params.setFromNode(node))

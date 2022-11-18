@@ -40,16 +40,16 @@
 #include <moveit/transforms/transforms.h>
 #include <geometric_shapes/check_isometry.h>
 #include <eigen_stl_containers/eigen_stl_containers.h>
-#include <boost/function.hpp>
 #include <trajectory_msgs/msg/joint_trajectory.hpp>
 #include <set>
+#include <functional>
 
 namespace moveit
 {
 namespace core
 {
 class AttachedBody;
-typedef boost::function<void(AttachedBody* body, bool attached)> AttachedBodyCallback;
+typedef std::function<void(AttachedBody* body, bool attached)> AttachedBodyCallback;
 
 /** @brief Object defining bodies that can be attached to robot links.
  *

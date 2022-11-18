@@ -7,6 +7,7 @@ from launch_ros.actions import ComposableNodeContainer
 from launch_ros.descriptions import ComposableNode
 from launch.actions import ExecuteProcess
 import xacro
+from moveit_configs_utils import MoveItConfigsBuilder
 
 
 def load_file(package_name, file_path):
@@ -32,26 +33,15 @@ def load_yaml(package_name, file_path):
 
 
 def generate_launch_description():
+    moveit_config = (
+        MoveItConfigsBuilder("moveit_resources_panda")
+        .robot_description(file_path="config/panda.urdf.xacro")
+        .to_moveit_configs()
+    )
+
     # Get parameters for the Servo node
     servo_yaml = load_yaml("moveit_servo", "config/panda_simulated_config.yaml")
     servo_params = {"moveit_servo": servo_yaml}
-
-    # Get URDF and SRDF
-    robot_description_config = xacro.process_file(
-        os.path.join(
-            get_package_share_directory("moveit_resources_panda_moveit_config"),
-            "config",
-            "panda.urdf.xacro",
-        )
-    )
-    robot_description = {"robot_description": robot_description_config.toxml()}
-
-    robot_description_semantic_config = load_file(
-        "moveit_resources_panda_moveit_config", "config/panda.srdf"
-    )
-    robot_description_semantic = {
-        "robot_description_semantic": robot_description_semantic_config
-    }
 
     # RViz
     rviz_config_file = (
@@ -63,35 +53,42 @@ def generate_launch_description():
         name="rviz2",
         output="log",
         arguments=["-d", rviz_config_file],
-        parameters=[robot_description, robot_description_semantic],
+        parameters=[
+            moveit_config.robot_description,
+            moveit_config.robot_description_semantic,
+        ],
     )
 
     # ros2_control using FakeSystem as hardware
     ros2_controllers_path = os.path.join(
         get_package_share_directory("moveit_resources_panda_moveit_config"),
         "config",
-        "panda_ros2_controllers.yaml",
+        "ros2_controllers.yaml",
     )
     ros2_control_node = Node(
         package="controller_manager",
         executable="ros2_control_node",
-        parameters=[robot_description, ros2_controllers_path],
-        output={
-            "stdout": "screen",
-            "stderr": "screen",
-        },
+        parameters=[moveit_config.robot_description, ros2_controllers_path],
+        output="screen",
     )
 
-    # Load controllers
-    load_controllers = []
-    for controller in ["panda_arm_controller", "joint_state_broadcaster"]:
-        load_controllers += [
-            ExecuteProcess(
-                cmd=["ros2 run controller_manager spawner {}".format(controller)],
-                shell=True,
-                output="screen",
-            )
-        ]
+    joint_state_broadcaster_spawner = Node(
+        package="controller_manager",
+        executable="spawner",
+        arguments=[
+            "joint_state_broadcaster",
+            "--controller-manager-timeout",
+            "300",
+            "--controller-manager",
+            "/controller_manager",
+        ],
+    )
+
+    panda_arm_controller_spawner = Node(
+        package="controller_manager",
+        executable="spawner",
+        arguments=["panda_arm_controller", "-c", "/controller_manager"],
+    )
 
     # Launch as much as possible in components
     container = ComposableNodeContainer(
@@ -108,15 +105,15 @@ def generate_launch_description():
             #     name="servo_server",
             #     parameters=[
             #         servo_params,
-            #         robot_description,
-            #         robot_description_semantic,
+            #         moveit_config.robot_description,
+            #         moveit_config.robot_description_semantic,
             #     ],
             # ),
             ComposableNode(
                 package="robot_state_publisher",
                 plugin="robot_state_publisher::RobotStatePublisher",
                 name="robot_state_publisher",
-                parameters=[robot_description],
+                parameters=[moveit_config.robot_description],
             ),
             ComposableNode(
                 package="tf2_ros",
@@ -144,15 +141,20 @@ def generate_launch_description():
         executable="servo_node_main",
         parameters=[
             servo_params,
-            robot_description,
-            robot_description_semantic,
+            moveit_config.robot_description,
+            moveit_config.robot_description_semantic,
+            moveit_config.robot_description_kinematics,
         ],
-        output={
-            "stdout": "screen",
-            "stderr": "screen",
-        },
+        output="screen",
     )
 
     return LaunchDescription(
-        [rviz_node, ros2_control_node, servo_node, container] + load_controllers
+        [
+            rviz_node,
+            ros2_control_node,
+            joint_state_broadcaster_spawner,
+            panda_arm_controller_spawner,
+            servo_node,
+            container,
+        ]
     )

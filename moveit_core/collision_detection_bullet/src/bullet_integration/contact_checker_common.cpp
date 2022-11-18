@@ -35,6 +35,9 @@
 
 #include "moveit/collision_detection_bullet/bullet_integration/contact_checker_common.h"
 
+#include <rclcpp/logger.hpp>
+#include <rclcpp/logging.hpp>
+
 static const rclcpp::Logger BULLET_LOGGER = rclcpp::get_logger("collision_detection.bullet");
 
 namespace collision_detection_bullet

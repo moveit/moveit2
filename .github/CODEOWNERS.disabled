@@ -54,7 +54,6 @@
 /moveit_core/robot_model/                                   @tylerjw
 /moveit_core/robot_state/                                   @rhaschke @mlautman @felixvd
 /moveit_core/robot_trajectory/                              @mlautman
-/moveit_core/sensor_manager/                                @mlautman
 /moveit_core/trajectory_processing/                         @mlautman
 /moveit_core/transforms/                                    @rhaschke
 /moveit_core/utils/                                         @mlautman
@@ -69,7 +68,6 @@
 /moveit_experimental/                                       @AndyZe
 
 /moveit_ros/perception/                                     @jliukkonen @RoboticsYY
-/moveit_ros/manipulation/                                   @v4hn @felixvd
 /moveit_ros/benchmarks/                                     @henningkayser @MohmadAyman
 /moveit_ros/planning_interface/                             @mintar @rhaschke @felixvd
 /moveit_ros/robot_interaction/                              @mikeferguson @rhaschke

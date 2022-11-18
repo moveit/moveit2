@@ -41,8 +41,9 @@
 #include <moveit/robot_model/link_model.h>
 #include <moveit/kinematics_base/kinematics_base.h>
 #include <srdfdom/model.h>
-#include <boost/function.hpp>
+#include <functional>
 #include <set>
+#include <string>
 
 namespace moveit
 {
@@ -52,7 +53,7 @@ class RobotModel;
 class JointModelGroup;
 
 /** \brief Function type that allocates a kinematics solver for a particular group */
-typedef boost::function<kinematics::KinematicsBasePtr(const JointModelGroup*)> SolverAllocatorFn;
+typedef std::function<kinematics::KinematicsBasePtr(const JointModelGroup*)> SolverAllocatorFn;
 
 /** \brief Map from group instances to allocator functions & bijections */
 using SolverAllocatorMapFn = std::map<const JointModelGroup*, SolverAllocatorFn>;
@@ -94,7 +95,7 @@ public:
         An element bijection[i] at index \e i in this array, maps the variable at index bijection[i] in this group to
        the variable at index
         i in the kinematic solver. */
-    std::vector<unsigned int> bijection_;
+    std::vector<size_t> bijection_;
 
     kinematics::KinematicsBasePtr solver_instance_;
 
@@ -565,7 +566,7 @@ public:
      kinematics solver.
       An element bijection[i] at index \e i in this array, maps the variable at index bijection[i] in this group to
       the variable at index i in the kinematic solver. */
-  const std::vector<unsigned int>& getKinematicsSolverJointBijection() const
+  const std::vector<size_t>& getKinematicsSolverJointBijection() const
   {
     return group_kinematics_.first.bijection_;
   }
@@ -582,8 +583,7 @@ public:
                            double dt) const;
 
 protected:
-  bool computeIKIndexBijection(const std::vector<std::string>& ik_jnames,
-                               std::vector<unsigned int>& joint_bijection) const;
+  bool computeIKIndexBijection(const std::vector<std::string>& ik_jnames, std::vector<size_t>& joint_bijection) const;
 
   /** \brief Update the variable values for the state of a group with respect to the mimic joints. This only updates
       mimic joints that have the parent in this group. If there is a joint mimicking one that is outside the group,

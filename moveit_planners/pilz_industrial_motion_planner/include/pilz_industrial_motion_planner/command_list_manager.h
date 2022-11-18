@@ -36,7 +36,8 @@
 
 #include <string>
 
-#include <boost/optional.hpp>
+#include <memory>
+#include <functional>
 
 #include <moveit/planning_interface/planning_interface.h>
 #include <moveit/planning_pipeline/planning_pipeline.h>
@@ -46,6 +47,8 @@
 #include "pilz_industrial_motion_planner/plan_components_builder.h"
 #include "pilz_industrial_motion_planner/trajectory_blender.h"
 #include "pilz_industrial_motion_planner/trajectory_generation_exceptions.h"
+
+#include <cartesian_limits_parameters.hpp>
 
 namespace pilz_industrial_motion_planner
 {
@@ -107,7 +110,7 @@ public:
 
 private:
   using MotionResponseCont = std::vector<planning_interface::MotionPlanResponse>;
-  using RobotState_OptRef = boost::optional<const moveit::core::RobotState&>;
+  using RobotState_OptRef = const std::optional<std::reference_wrapper<const moveit::core::RobotState>>;
   using RadiiCont = std::vector<double>;
   using GroupNamesCont = std::vector<std::string>;
 
@@ -217,6 +220,9 @@ private:
   //! @brief Builder to construct the container containing the final
   //! trajectories.
   PlanComponentsBuilder plan_comp_builder_;
+
+  std::shared_ptr<cartesian_limits::ParamListener> param_listener_;
+  cartesian_limits::Params params_;
 };
 
 inline void CommandListManager::checkLastBlendRadiusZero(const moveit_msgs::msg::MotionSequenceRequest& req_list)

@@ -35,7 +35,7 @@
 /* Author: Ioan Sucan */
 
 #include <boost/date_time/posix_time/posix_time.hpp>
-#include <boost/filesystem.hpp>
+#include <filesystem>
 #include <fstream>
 #include <moveit/ompl_interface/detail/constrained_sampler.h>
 #include <moveit/ompl_interface/detail/constraints_library.h>
@@ -54,7 +54,7 @@ void msgToHex(const T& msg, std::string& hex)
 {
   static const char SYMBOL[] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
   auto type_support = rosidl_typesupport_cpp::get_message_type_support_handle<T>();
-  rmw_serialized_message_t serialized_msg;
+  rmw_serialized_message_t serialized_msg = { nullptr, 0, 0, rcutils_get_default_allocator() };
   rmw_ret_t result = rmw_serialize(&msg, type_support, &serialized_msg);
   if (result != RMW_RET_OK)
   {
@@ -204,8 +204,10 @@ bool interpolateUsingStoredStates(const ConstraintApproximationStateStorage* sta
 ompl_interface::InterpolationFunction ompl_interface::ConstraintApproximation::getInterpolationFunction() const
 {
   if (explicit_motions_ && milestones_ > 0 && milestones_ < state_storage_->size())
-    return std::bind(&interpolateUsingStoredStates, state_storage_, std::placeholders::_1, std::placeholders::_2,
-                     std::placeholders::_3, std::placeholders::_4);
+    return
+        [this](const ompl::base::State* from, const ompl::base::State* to, const double t, ompl::base::State* state) {
+          return interpolateUsingStoredStates(state_storage_, from, to, t, state);
+        };
   return InterpolationFunction();
 }
 
@@ -246,8 +248,9 @@ ompl_interface::ConstraintApproximation::getStateSamplerAllocator(const moveit_m
 {
   if (state_storage_->size() == 0)
     return ompl::base::StateSamplerAllocator();
-  return std::bind(&allocConstraintApproximationStateSampler, std::placeholders::_1, space_signature_, state_storage_,
-                   milestones_);
+  return [this](const ompl::base::StateSpace* ss) {
+    return allocConstraintApproximationStateSampler(ss, space_signature_, state_storage_, milestones_);
+  };
 }
 /*
 void ompl_interface::ConstraintApproximation::visualizeDistribution(const
@@ -366,7 +369,7 @@ void ompl_interface::ConstraintsLibrary::saveConstraintApproximations(const std:
               (unsigned int)constraint_approximations_.size(), path.c_str());
   try
   {
-    boost::filesystem::create_directories(path);
+    std::filesystem::create_directory(path);
   }
   catch (...)
   {

@@ -35,12 +35,12 @@
 /* Author: Sachin Chitta */
 
 #include <moveit/dynamics_solver/dynamics_solver.h>
-
 // KDL
 #include <kdl/jntarray.hpp>
 #include <kdl_parser/kdl_parser.hpp>
 #include <kdl/tree.hpp>
-#include "rclcpp/rclcpp.hpp"
+#include <rclcpp/logger.hpp>
+#include <rclcpp/logging.hpp>
 
 namespace dynamics_solver
 {

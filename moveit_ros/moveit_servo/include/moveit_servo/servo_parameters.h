@@ -38,13 +38,12 @@
 
 #pragma once
 
+#include <rclcpp/node.hpp>
 #include <mutex>
 #include <thread>
 #include <vector>
 
 #include <moveit/planning_scene_monitor/planning_scene_monitor.h>
-#include <rclcpp/rclcpp.hpp>
-
 namespace moveit_servo
 {
 using SetParameterCallbackType = std::function<rcl_interfaces::msg::SetParametersResult(const rclcpp::Parameter&)>;
@@ -70,6 +69,8 @@ struct ServoParameters
   double linear_scale{ 0.4 };
   double rotational_scale{ 0.8 };
   double joint_scale{ 0.5 };
+  // Properties of Servo calculations
+  double override_velocity_scaling_factor{ 0.0 };
   // Properties of outgoing commands
   std::string command_out_topic{ "/panda_arm_controller/joint_trajectory" };
   double publish_period{ 0.034 };
@@ -96,6 +97,7 @@ struct ServoParameters
   // Configure handling of singularities and joint limits
   double lower_singularity_threshold{ 17.0 };
   double hard_stop_singularity_threshold{ 30.0 };
+  double leaving_singularity_threshold_multiplier{ 2.0 };
   double joint_limit_margin{ 0.1 };
   bool low_latency_mode{ false };
   // Collision checking
@@ -116,7 +118,7 @@ struct ServoParameters
    * @param dynamic_parameters Enable dynamic parameter handling. (default: true)
    * @return std::shared_ptr<ServoParameters> if all parameters were loaded and verified successfully, nullptr otherwise
    */
-  static SharedConstPtr makeServoParameters(const rclcpp::Node::SharedPtr& node, std::string ns = "moveit_servo",
+  static SharedConstPtr makeServoParameters(const rclcpp::Node::SharedPtr& node, const std::string& ns = "moveit_servo",
                                             bool dynamic_parameters = true);
 
   /**
@@ -126,7 +128,8 @@ struct ServoParameters
    * @param name Name of parameter (key used for callback in map)
    * @param callback function to call when parameter is changed
    */
-  [[nodiscard]] bool registerSetParameterCallback(const std::string name, SetParameterCallbackType callback) const
+  [[nodiscard]] bool registerSetParameterCallback(const std::string& name,
+                                                  const SetParameterCallbackType& callback) const
   {
     if (callback_handler_)
     {

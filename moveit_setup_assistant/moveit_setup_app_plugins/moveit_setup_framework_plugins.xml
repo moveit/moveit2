@@ -1,0 +1,14 @@
+<library path="moveit_setup_app_plugins">
+  <class type="moveit_setup::app::LaunchesWidget" base_class_type="moveit_setup::SetupStepWidget">
+    <description>Configures launches to generate</description>
+  </class>
+  <class type="moveit_setup::app::PerceptionWidget" base_class_type="moveit_setup::SetupStepWidget">
+    <description>Configures the sensor suite</description>
+  </class>
+  <class type="moveit_setup::app::LaunchesConfig" base_class_type="moveit_setup::SetupConfig">
+    <description>Data for Launch Files</description>
+  </class>
+  <class type="moveit_setup::app::PerceptionConfig" base_class_type="moveit_setup::SetupConfig">
+    <description>Data for perception step</description>
+  </class>
+</library>

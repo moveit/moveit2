@@ -37,11 +37,7 @@
 #include <moveit/robot_state/robot_state.h>
 #include <moveit/utils/robot_model_test_utils.h>
 #include <urdf_parser/urdf_parser.h>
-#if __has_include(<tf2_geometry_msgs/tf2_geometry_msgs.hpp>)
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
-#else
-#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
-#endif
 #include <gtest/gtest.h>
 #include <sstream>
 #include <algorithm>
@@ -180,10 +176,8 @@ TEST(LoadingAndFK, SimpleRobot)
 
   state.setVariableAcceleration("base_joint/x", 0.0);
 
-  // making sure that values get copied
-  moveit::core::RobotState* new_state = new moveit::core::RobotState(state);
+  const auto new_state = std::make_unique<moveit::core::RobotState>(state);  // making sure that values get copied
   EXPECT_NEAR_TRACED(state.getGlobalLinkTransform("base_link").translation(), Eigen::Vector3d(10, 8, 0));
-  delete new_state;
 
   std::vector<double> jv(state.getVariableCount(), 0.0);
   jv[state.getRobotModel()->getVariableIndex("base_joint/x")] = 5.0;
@@ -701,7 +695,7 @@ TEST_F(OneRobot, rigidlyConnectedParent)
   EXPECT_EQ(state.getRigidlyConnectedParentLinkModel("link_b"), link_a);
 
   // attach "object" with "subframe" to link_b
-  state.attachBody(new moveit::core::AttachedBody(
+  state.attachBody(std::make_unique<moveit::core::AttachedBody>(
       link_b, "object", Eigen::Isometry3d::Identity(), std::vector<shapes::ShapeConstPtr>{},
       EigenSTL::vector_Isometry3d{}, std::set<std::string>{}, trajectory_msgs::msg::JointTrajectory{},
       moveit::core::FixedTransformsMap{ { "subframe", Eigen::Isometry3d::Identity() } }));

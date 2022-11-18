@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="[ROBOT_NAME]">
+[MODIFIED_XACRO_ARGS]
+    <!-- Import [ROBOT_NAME] urdf file -->
+    <xacro:include filename="[URDF_LOCATION]" />
+
+[MODIFIED_XACRO_IMPORTS]
+[MODIFIED_XACRO_COMMANDS]
+</robot>

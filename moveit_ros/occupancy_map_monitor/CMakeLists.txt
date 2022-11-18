@@ -1,16 +1,10 @@
-cmake_minimum_required(VERSION 3.10.2)
+cmake_minimum_required(VERSION 3.22)
 project(moveit_ros_occupancy_map_monitor)
 set(MOVEIT_LIB_NAME ${PROJECT_NAME})
 
 # Common cmake code applied to all moveit packages
 find_package(moveit_common REQUIRED)
 moveit_package()
-
-# Disable -Wpedantic warnings due to the warnings in ros-dashing-octomap
-# TODO: add -Wpedantic warnings back when PR(https://github.com/OctoMap/octomap/pull/275) is merged
-if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-  add_compile_options(-Wno-pedantic)
-endif()
 
 if(APPLE)
   find_package(X11 REQUIRED)
@@ -24,8 +18,6 @@ find_package(octomap REQUIRED)
 find_package(geometric_shapes REQUIRED)
 find_package(tf2_ros REQUIRED)
 
-# Finds Boost Components
-include(ConfigExtras.cmake)
 
 include_directories(include)
 include_directories(SYSTEM
@@ -61,7 +53,7 @@ target_link_libraries(moveit_ros_occupancy_map_server ${MOVEIT_LIB_NAME})
 
 install(
   TARGETS ${MOVEIT_LIB_NAME}
-  EXPORT export_${PROJECT_NAME}
+  EXPORT ${PROJECT_NAME}Targets
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
   RUNTIME DESTINATION bin
@@ -69,11 +61,11 @@ install(
 )
 
 install(TARGETS moveit_ros_occupancy_map_server
-  DESTINATION lib/${PROJECT_NAME}/
+  DESTINATION lib/${PROJECT_NAME}
 )
 install(DIRECTORY include/ DESTINATION include)
 
-ament_export_targets(export_${PROJECT_NAME} HAS_LIBRARY_TARGET)
+ament_export_targets(${PROJECT_NAME}Targets HAS_LIBRARY_TARGET)
 ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS} eigen3_cmake_module)
 
 if(BUILD_TESTING)
@@ -81,7 +73,6 @@ if(BUILD_TESTING)
 
   # These don't pass yet, disable them for now
   set(ament_cmake_copyright_FOUND TRUE)
-  set(ament_cmake_cppcheck_FOUND TRUE)
   set(ament_cmake_cpplint_FOUND TRUE)
   set(ament_cmake_uncrustify_FOUND TRUE)
 
@@ -98,4 +89,4 @@ if(BUILD_TESTING)
   )
 endif()
 
-ament_package(CONFIG_EXTRAS ConfigExtras.cmake)
+ament_package()

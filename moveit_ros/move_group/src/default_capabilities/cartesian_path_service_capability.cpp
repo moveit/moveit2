@@ -39,17 +39,13 @@
 #include <moveit/robot_state/conversions.h>
 #include <moveit/utils/message_checks.h>
 #include <moveit/collision_detection/collision_tools.h>
-#if __has_include(<tf2_eigen/tf2_eigen.hpp>)
 #include <tf2_eigen/tf2_eigen.hpp>
-#else
-#include <tf2_eigen/tf2_eigen.h>
-#endif
 #include <moveit/move_group/capability_names.h>
 #include <moveit/planning_pipeline/planning_pipeline.h>
 #include <moveit/robot_state/robot_state.h>
 #include <moveit/robot_state/cartesian_interpolator.h>
 #include <moveit_msgs/msg/display_trajectory.hpp>
-#include <moveit/trajectory_processing/iterative_time_parameterization.h>
+#include <moveit/trajectory_processing/time_optimal_trajectory_generation.h>
 
 namespace
 {
@@ -76,20 +72,23 @@ MoveGroupCartesianPathService::MoveGroupCartesianPathService()
 
 void MoveGroupCartesianPathService::initialize()
 {
-  using std::placeholders::_1;
-  using std::placeholders::_2;
-  using std::placeholders::_3;
-
   display_path_ = context_->moveit_cpp_->getNode()->create_publisher<moveit_msgs::msg::DisplayTrajectory>(
       planning_pipeline::PlanningPipeline::DISPLAY_PATH_TOPIC, 10);
 
   cartesian_path_service_ = context_->moveit_cpp_->getNode()->create_service<moveit_msgs::srv::GetCartesianPath>(
-      CARTESIAN_PATH_SERVICE_NAME, std::bind(&MoveGroupCartesianPathService::computeService, this, _1, _2, _3));
+
+      CARTESIAN_PATH_SERVICE_NAME,
+      [this](const std::shared_ptr<rmw_request_id_t>& req_id,
+             const std::shared_ptr<moveit_msgs::srv::GetCartesianPath::Request>& req,
+             const std::shared_ptr<moveit_msgs::srv::GetCartesianPath::Response>& res) -> bool {
+        return computeService(req_id, req, res);
+      });
 }
 
-bool MoveGroupCartesianPathService::computeService(const std::shared_ptr<rmw_request_id_t> /* unused */,
-                                                   const std::shared_ptr<moveit_msgs::srv::GetCartesianPath::Request> req,
-                                                   std::shared_ptr<moveit_msgs::srv::GetCartesianPath::Response> res)
+bool MoveGroupCartesianPathService::computeService(
+    const std::shared_ptr<rmw_request_id_t>& /* unused */,
+    const std::shared_ptr<moveit_msgs::srv::GetCartesianPath::Request>& req,
+    const std::shared_ptr<moveit_msgs::srv::GetCartesianPath::Response>& res)
 {
   RCLCPP_INFO(LOGGER, "Received request to compute Cartesian path");
   context_->planning_scene_monitor_->updateFrameTransforms();
@@ -150,11 +149,14 @@ bool MoveGroupCartesianPathService::computeService(const std::shared_ptr<rmw_req
             ls = std::make_unique<planning_scene_monitor::LockedPlanningSceneRO>(context_->planning_scene_monitor_);
             kset = std::make_unique<kinematic_constraints::KinematicConstraintSet>((*ls)->getRobotModel());
             kset->add(req->path_constraints, (*ls)->getTransforms());
-            constraint_fn = std::bind(
-                &isStateValid,
-                req->avoid_collisions ? static_cast<const planning_scene::PlanningSceneConstPtr&>(*ls).get() : nullptr,
-                kset->empty() ? nullptr : kset.get(), std::placeholders::_1, std::placeholders::_2,
-                std::placeholders::_3);
+            constraint_fn =
+                [scene = req->avoid_collisions ? static_cast<const planning_scene::PlanningSceneConstPtr&>(*ls).get() :
+                                                 nullptr,
+                 kset = kset->empty() ? nullptr : kset.get()](moveit::core::RobotState* robot_state,
+                                                              const moveit::core::JointModelGroup* joint_group,
+                                                              const double* joint_group_variable_values) {
+                  return isStateValid(scene, kset, robot_state, joint_group, joint_group_variable_values);
+                };
           }
           bool global_frame = !moveit::core::Transforms::sameFrame(link_name, req->header.frame_id);
           RCLCPP_INFO(LOGGER,
@@ -174,7 +176,7 @@ bool MoveGroupCartesianPathService::computeService(const std::shared_ptr<rmw_req
 
           // time trajectory
           // \todo optionally compute timing to move the eef with constant speed
-          trajectory_processing::IterativeParabolicTimeParameterization time_param;
+          trajectory_processing::TimeOptimalTrajectoryGeneration time_param;
           time_param.computeTimeStamps(rt, 1.0);
 
           rt.getRobotTrajectoryMsg(res->solution);

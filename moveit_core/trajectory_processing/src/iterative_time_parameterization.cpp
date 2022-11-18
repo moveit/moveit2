@@ -37,6 +37,8 @@
 #include <moveit/trajectory_processing/iterative_time_parameterization.h>
 #include <moveit_msgs/msg/joint_limits.hpp>
 #include <moveit/robot_state/conversions.h>
+#include <rclcpp/logger.hpp>
+#include <rclcpp/logging.hpp>
 
 namespace trajectory_processing
 {
@@ -484,5 +486,14 @@ bool IterativeParabolicTimeParameterization::computeTimeStamps(robot_trajectory:
 
   updateTrajectory(trajectory, time_diff);
   return true;
+}
+
+bool IterativeParabolicTimeParameterization::computeTimeStamps(
+    robot_trajectory::RobotTrajectory& /*trajectory*/,
+    const std::unordered_map<std::string, double>& /*velocity_limits*/,
+    const std::unordered_map<std::string, double>& /*acceleration_limits*/) const
+{
+  RCLCPP_ERROR(LOGGER, "IPTP does not support this version of computeTimeStamps. Try TOTG instead?");
+  return false;
 }
 }  // namespace trajectory_processing
