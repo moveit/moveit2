@@ -48,7 +48,7 @@ MOVEIT_CLASS_FORWARD(CHOMPInterface);  // Defines CHOMPInterfacePtr, ConstPtr, W
 class CHOMPInterface : public chomp::ChompPlanner
 {
 public:
-  CHOMPInterface(const rclcpp::Node::SharedPtr node);
+  CHOMPInterface(const rclcpp::Node::SharedPtr& node);
 
   const chomp::ChompParameters& getParams() const
   {

@@ -51,8 +51,8 @@ public:
   struct Options
   {
     geometry_msgs::Point origin;
-    boost::array<double, 3> workspace_size;
-    boost::array<double, 3> resolution;
+    std::array<double, 3> workspace_size;
+    std::array<double, 3> resolution;
     unsigned int max_solutions_per_grid_location;
   };
 

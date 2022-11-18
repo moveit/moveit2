@@ -38,7 +38,7 @@
 #include <moveit/planning_scene_monitor/planning_scene_monitor.h>
 #include <boost/program_options/parsers.hpp>
 #include <boost/program_options/variables_map.hpp>
-#include <boost/thread.hpp>
+#include <thread>
 
 using namespace std::chrono_literals;
 
@@ -46,8 +46,8 @@ static const std::string ROBOT_DESCRIPTION = "robot_description";
 
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("evaluate_collision_checking_speed");
 
-void runCollisionDetection(unsigned int id, unsigned int trials, const planning_scene::PlanningScene* scene,
-                           const moveit::core::RobotState* state)
+void runCollisionDetection(unsigned int id, unsigned int trials, const planning_scene::PlanningScene& scene,
+                           const moveit::core::RobotState& state)
 {
   RCLCPP_INFO(LOGGER, "Starting thread %u", id);
   rclcpp::Clock clock(RCL_ROS_TIME);
@@ -56,7 +56,7 @@ void runCollisionDetection(unsigned int id, unsigned int trials, const planning_
   for (unsigned int i = 0; i < trials; ++i)
   {
     collision_detection::CollisionResult res;
-    scene->checkCollision(req, res, *state);
+    scene.checkCollision(req, res, state);
   }
   double duration = (clock.now() - start).seconds();
   RCLCPP_INFO(LOGGER, "Thread %u performed %lf collision checks per second", id, (double)trials / duration);
@@ -122,11 +122,12 @@ int main(int argc, char** argv)
       states.push_back(moveit::core::RobotStatePtr(state));
     }
 
-    std::vector<boost::thread*> threads;
-    runCollisionDetection(10, trials, psm.getPlanningScene().get(), states[0].get());
+    std::vector<std::thread*> threads;
+    runCollisionDetection(10, trials, *psm.getPlanningScene(), *states[0]);
     for (unsigned int i = 0; i < states.size(); ++i)
-      threads.push_back(new boost::thread(
-          std::bind(&runCollisionDetection, i, trials, psm.getPlanningScene().get(), states[i].get())));
+      threads.push_back(new std::thread([i, trials, &scene = *psm.getPlanningScene(), &state = *states[i]] {
+        return runCollisionDetection(i, trials, scene, state);
+      }));
 
     for (unsigned int i = 0; i < states.size(); ++i)
     {

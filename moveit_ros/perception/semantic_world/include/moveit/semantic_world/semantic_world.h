@@ -41,7 +41,7 @@
 #include <moveit/planning_scene/planning_scene.h>
 #include <object_recognition_msgs/msg/table_array.hpp>
 #include <moveit_msgs/msg/collision_object.hpp>
-#include <boost/thread/mutex.hpp>
+#include <mutex>
 
 namespace shapes
 {
@@ -61,13 +61,13 @@ class SemanticWorld
 {
 public:
   /** @brief The signature for a callback on receiving table messages*/
-  typedef boost::function<void()> TableCallbackFn;
+  typedef std::function<void()> TableCallbackFn;
 
   /**
    * @brief A (simple) semantic world representation for pick and place and other tasks.
    * Currently this is used only to represent tables.
    */
-  SemanticWorld(const rclcpp::Node::SharedPtr node, const planning_scene::PlanningSceneConstPtr& planning_scene);
+  SemanticWorld(const rclcpp::Node::SharedPtr& node, const planning_scene::PlanningSceneConstPtr& planning_scene);
 
   /**
    * @brief Get all the tables within a region of interest
@@ -136,7 +136,7 @@ private:
 
   shapes::Mesh* orientPlanarPolygon(const shapes::Mesh& polygon) const;
 
-  void tableCallback(const object_recognition_msgs::msg::TableArray::SharedPtr msg);
+  void tableCallback(const object_recognition_msgs::msg::TableArray::ConstSharedPtr& msg);
 
   void transformTableArray(object_recognition_msgs::msg::TableArray& table_array) const;
 
@@ -149,8 +149,6 @@ private:
   std::vector<geometry_msgs::msg::PoseStamped> place_poses_;
 
   std::map<std::string, object_recognition_msgs::msg::Table> current_tables_in_collision_world_;
-
-  //  boost::mutex table_lock_;
 
   rclcpp::Subscription<object_recognition_msgs::msg::TableArray>::SharedPtr table_subscriber_;
 

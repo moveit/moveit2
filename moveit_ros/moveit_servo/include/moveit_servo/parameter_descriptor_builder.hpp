@@ -74,7 +74,7 @@ public:
    *
    * @return     Reference to this object
    */
-  ParameterDescriptorBuilder& description(std::string description);
+  ParameterDescriptorBuilder& description(const std::string& description);
 
   /**
    * @brief      Set the additional constraints string (a description of any additional constraints which cannot be
@@ -84,7 +84,7 @@ public:
    *
    * @return     Reference to this object
    */
-  ParameterDescriptorBuilder& additionalConstraints(std::string additional_constraints);
+  ParameterDescriptorBuilder& additionalConstraints(const std::string& additional_constraints);
 
   /**
    * @brief      Sets the read only flag

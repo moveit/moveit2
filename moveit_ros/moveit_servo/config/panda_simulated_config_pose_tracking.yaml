@@ -48,6 +48,7 @@ num_outgoing_halt_msgs_to_publish: 4
 lower_singularity_threshold:  17.0  # Start decelerating when the condition number hits this (close to singularity)
 hard_stop_singularity_threshold: 30.0 # Stop when the condition number hits this
 joint_limit_margin: 0.1 # added as a buffer to joint limits [radians]. If moving quickly, make this larger.
+leaving_singularity_threshold_multiplier: 2.0 # Multiply the hard stop limit by this when leaving singularity (see https://github.com/ros-planning/moveit2/pull/620)
 
 ## Topic names
 cartesian_command_in_topic: ~/delta_twist_cmds  # Topic for incoming Cartesian twist commands
@@ -59,13 +60,5 @@ command_out_topic: /panda_arm_controller/joint_trajectory # Publish outgoing com
 ## Collision checking for the entire robot body
 check_collisions: true # Check collisions?
 collision_check_rate: 10.0 # [Hz] Collision-checking can easily bog down a CPU if done too often.
-# Two collision check algorithms are available:
-# "threshold_distance" begins slowing down when nearer than a specified distance. Good if you want to tune collision thresholds manually.
-# "stop_distance" stops if a collision is nearer than the worst-case stopping distance and the distance is decreasing. Requires joint acceleration limits
-collision_check_type: threshold_distance
-# Parameters for "threshold_distance"-type collision checking
 self_collision_proximity_threshold: 0.01 # Start decelerating when a self-collision is this far [m]
 scene_collision_proximity_threshold: 0.02 # Start decelerating when a scene collision is this far [m]
-# Parameters for "stop_distance"-type collision checking
-collision_distance_safety_factor: 1000.0 # Must be >= 1. A large safety factor is recommended to account for latency
-min_allowable_collision_distance: 0.01 # Stop if a collision is closer than this [m]

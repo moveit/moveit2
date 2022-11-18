@@ -2,6 +2,125 @@
 Changelog for package moveit_hybrid_planning
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.6.0 (2022-11-10)
+------------------
+* Parallel planning pipelines (`#1420 <https://github.com/ros-planning/moveit2/issues/1420>`_)
+  * Add setTrajectoryConstraints() to PlanningComponent
+  * Add planning time to PlanningComponent::PlanSolution
+  * Replace PlanSolution with MotionPlanResponse
+  * Address review
+  * Add MultiPipelinePlanRequestParameters
+  Add plan(const MultiPipelinePlanRequestParameters& parameters)
+  Add mutex to avoid segfaults
+  Add optional stop_criterion_callback and solution_selection_callback
+  Remove stop_criterion_callback
+  Make default solution_selection_callback = nullptr
+  Remove parameter handling copy&paste code in favor of a template
+  Add TODO to refactor pushBack() method into insert()
+  Fix selection criteria and add RCLCPP_INFO output
+  Changes due to rebase and formatting
+  Fix race condition and segfault when no solution is found
+  Satisfy clang tidy
+  Remove mutex and thread safety TODOs
+  Add stopping functionality to parallel planning
+  Remove unnecessary TODOs
+  * Fix unused plan solution with failure
+  * Add sanity check for number of parallel planning problems
+  * Check stopping criterion when new solution is generated + make thread safe
+  * Add terminatePlanningPipeline() to MoveItCpp interface
+  * Format!
+  * Bug fixes
+  * Move getShortestSolution callback into own function
+  * No east const
+  * Remove PlanSolutions and make planner_id accessible
+  * Make solution executable
+  * Rename update_last_solution to store_solution
+  * Alphabetize includes and include plan_solutions.hpp instead of .h
+  * Address review
+  * Add missing header
+  * Apply suggestions from code review
+  Co-authored-by: AndyZe <andyz@utexas.edu>
+  Co-authored-by: AndyZe <andyz@utexas.edu>
+* Merge PR `#1553 <https://github.com/ros-planning/moveit2/issues/1553>`_: Improve cmake files
+* Cleanup cmake files
+  - Replace ament_export_libraries() -> ament_export_targets(HAS_LIBRARY_TARGET)
+  - Replace ament_export_include_directories() -> INCLUDES DESTINATION include
+  See https://docs.ros.org/en/foxy/How-To-Guides/Ament-CMake-Documentation.html#building-a-library
+* Use standard exported targets: export\_${PROJECT_NAME} -> ${PROJECT_NAME}Targets
+* Improve CMake usage (`#1550 <https://github.com/ros-planning/moveit2/issues/1550>`_)
+* Contributors: Robert Haschke, Sebastian Jahr
+
+2.5.3 (2022-07-28)
+------------------
+
+2.5.2 (2022-07-18)
+------------------
+* Merge remote-tracking branch 'origin/main' into feature/msa
+* Launch file cleanup (`#1380 <https://github.com/ros-planning/moveit2/issues/1380>`_)
+* Remove unnecessary rclcpp.hpp includes (`#1333 <https://github.com/ros-planning/moveit2/issues/1333>`_)
+* [Hybrid Planning] Improve action cancellation (`#1272 <https://github.com/ros-planning/moveit2/issues/1272>`_)
+* Contributors: AndyZe, Jafar, Vatan Aksoy Tezer
+
+2.5.1 (2022-05-31)
+------------------
+* Remove position controllers from CMake (`#1285 <https://github.com/ros-planning/moveit2/issues/1285>`_)
+* Contributors: Vatan Aksoy Tezer
+
+2.5.0 (2022-05-26)
+------------------
+* Fix hybrid planning launching (`#1271 <https://github.com/ros-planning/moveit2/issues/1271>`_)
+* Enable cppcheck (`#1224 <https://github.com/ros-planning/moveit2/issues/1224>`_)
+  Co-authored-by: jeoseo <jeongwooseo2012@gmail.com>
+* Make moveit_common a 'depend' rather than 'build_depend' (`#1226 <https://github.com/ros-planning/moveit2/issues/1226>`_)
+* Avoid bind(), use lambdas instead (`#1204 <https://github.com/ros-planning/moveit2/issues/1204>`_)
+  Adaption of https://github.com/ros-planning/moveit/pull/3106
+* banish bind()
+  source:https://github.com/ros-planning/moveit/pull/3106/commits/a2911c80c28958c1fce8fb52333d770248c4ec05; required minor updates compared to original source commit in order to ensure compatibility with ROS2
+* RCLCPP Upgrade Bugfixes (`#1181 <https://github.com/ros-planning/moveit2/issues/1181>`_)
+* Enable rolling / jammy CI (again) (`#1134 <https://github.com/ros-planning/moveit2/issues/1134>`_)
+  * Use ros2_control binaries
+  * Use output screen instead of explicitly stating stderr
+* [hybrid planning] Adjust planning scene locking (`#1087 <https://github.com/ros-planning/moveit2/issues/1087>`_)
+  * Create a copy of the planning scene. const robot state.
+  * Use LockedPlanningSceneRO over lockSceneRead()
+  * Use lambda function
+* [Hybrid Planning] configurable planning scene topics (`#1052 <https://github.com/ros-planning/moveit2/issues/1052>`_)
+* [hybrid planning] Use a map of expected feedback codes (`#1065 <https://github.com/ros-planning/moveit2/issues/1065>`_)
+  * Use a map of expected feedback codes
+  * Use a constexpr function instead of unordered_map
+  * Don't need this #include
+  * Minor function renaming
+* Disable hybrid planning test, don't cache ci docker at all and don't cache upstream_ws if repos file is changed (`#1051 <https://github.com/ros-planning/moveit2/issues/1051>`_)
+  * Don't cache docker builds
+  * Don't cache upstream ws
+  * Use new action for getting the latest timestamp .repos file has been edited
+  * Debug
+  * Fix repos path
+  * Disable hybrid planning test
+  * Use more verbose name
+  Co-authored-by: Tyler Weaver <tylerjw@gmail.com>
+* [hybrid planning] Add action abortion and test; improve the existing test (`#980 <https://github.com/ros-planning/moveit2/issues/980>`_)
+  * Add action abortion and test; improve the existing test
+  * Add controller run-dependency
+  * Fix the clearing of robot trajectory when a collision would occur
+  * Fix replanning if local planner is stuck
+  * Lambda function everything
+  * Thread safety for stop_hybrid_planning\_
+  * Thread-safe state\_
+  * Clang tidy
+  * Update the planning scene properly
+  * Update Servo test initial_positions.yaml
+  Co-authored-by: Tyler Weaver <tyler@picknik.ai>
+* [hybrid planning] Delete the pass-through option (`#986 <https://github.com/ros-planning/moveit2/issues/986>`_)
+  * Delete the pass-through option
+  * Suppress clang warning
+  * Handle (waypoint_count < 0) possibility
+  Co-authored-by: Tyler Weaver <tyler@picknik.ai>
+* Remove unused parameters. (`#1018 <https://github.com/ros-planning/moveit2/issues/1018>`_)
+  Co-authored-by: Tyler Weaver <tyler@picknik.ai>
+  Co-authored-by: Vatan Aksoy Tezer <vatan@picknik.ai>
+* Contributors: AndyZe, Cory Crean, David V. Lu!!, Henning Kayser, Jafar, Vatan Aksoy Tezer, jeoseo, v4hn
+
 2.4.0 (2022-01-20)
 ------------------
 * hybrid_planning: Fix global_planner action name (`#960 <https://github.com/ros-planning/moveit2/issues/960>`_)

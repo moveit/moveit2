@@ -34,15 +34,16 @@
 
 #include "pilz_industrial_motion_planner/command_list_manager.h"
 
+#include <rclcpp/logger.hpp>
+#include <rclcpp/logging.hpp>
 #include <cassert>
 #include <functional>
 #include <sstream>
 
 #include <moveit/planning_pipeline/planning_pipeline.h>
 #include <moveit/robot_state/conversions.h>
-#include <rclcpp/rclcpp.hpp>
 
-#include "pilz_industrial_motion_planner/cartesian_limits_aggregator.h"
+#include "cartesian_limits_parameters.hpp"
 #include "pilz_industrial_motion_planner/joint_limits_aggregator.h"
 #include "pilz_industrial_motion_planner/tip_frame_getter.h"
 #include "pilz_industrial_motion_planner/trajectory_blend_request.h"
@@ -63,13 +64,13 @@ CommandListManager::CommandListManager(const rclcpp::Node::SharedPtr& node,
   aggregated_limit_active_joints = pilz_industrial_motion_planner::JointLimitsAggregator::getAggregatedLimits(
       node_, PARAM_NAMESPACE_LIMITS, model_->getActiveJointModels());
 
-  // Obtain cartesian limits
-  pilz_industrial_motion_planner::CartesianLimit cartesian_limit =
-      pilz_industrial_motion_planner::CartesianLimitsAggregator::getAggregatedLimits(node_, PARAM_NAMESPACE_LIMITS);
+  param_listener_ =
+      std::make_shared<cartesian_limits::ParamListener>(node, PARAM_NAMESPACE_LIMITS + ".cartesian_limits");
+  params_ = param_listener_->get_params();
 
   pilz_industrial_motion_planner::LimitsContainer limits;
   limits.setJointLimits(aggregated_limit_active_joints);
-  limits.setCartesianLimits(cartesian_limit);
+  limits.setCartesianLimits(params_);
 
   plan_comp_builder_.setModel(model);
   plan_comp_builder_.setBlender(std::unique_ptr<pilz_industrial_motion_planner::TrajectoryBlender>(
@@ -161,10 +162,10 @@ CommandListManager::getPreviousEndState(const MotionResponseCont& motion_plan_re
   {
     if (it->trajectory_->getGroupName() == group_name)
     {
-      return it->trajectory_->getLastWayPoint();
+      return std::reference_wrapper(it->trajectory_->getLastWayPoint());
     }
   }
-  return boost::none;
+  return {};
 }
 
 void CommandListManager::setStartState(const MotionResponseCont& motion_plan_responses, const std::string& group_name,

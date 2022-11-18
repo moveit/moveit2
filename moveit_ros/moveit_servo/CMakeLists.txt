@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.22)
 project(moveit_servo)
 
 # C++ Libraries #################################################
@@ -30,28 +30,10 @@ set(FAKE_SERVO_CMDS_NAME fake_command_publisher)
 find_package(moveit_common REQUIRED)
 moveit_package()
 
-find_package(ament_cmake REQUIRED)
-find_package(control_msgs REQUIRED)
-find_package(control_toolbox REQUIRED)
-find_package(geometry_msgs REQUIRED)
-find_package(moveit_core REQUIRED)
-find_package(moveit_msgs REQUIRED)
-find_package(moveit_ros_planning REQUIRED)
-find_package(pluginlib REQUIRED)
-find_package(rclcpp REQUIRED)
-find_package(rclcpp_components REQUIRED)
-find_package(sensor_msgs REQUIRED)
-find_package(std_msgs REQUIRED)
-find_package(std_srvs REQUIRED)
-find_package(tf2_eigen REQUIRED)
-find_package(trajectory_msgs REQUIRED)
-
-find_package(eigen3_cmake_module REQUIRED)
-find_package(Eigen3 REQUIRED)
-
 set(THIS_PACKAGE_INCLUDE_DEPENDS
   control_msgs
   control_toolbox
+  controller_manager
   geometry_msgs
   moveit_core
   moveit_msgs
@@ -65,6 +47,13 @@ set(THIS_PACKAGE_INCLUDE_DEPENDS
   tf2_eigen
   trajectory_msgs
 )
+
+find_package(ament_cmake REQUIRED)
+find_package(eigen3_cmake_module REQUIRED)
+find_package(Eigen3 REQUIRED)
+foreach(Dependency IN ITEMS ${THIS_PACKAGE_INCLUDE_DEPENDS})
+  find_package(${Dependency} REQUIRED)
+endforeach()
 
 include_directories(
   include
@@ -84,11 +73,11 @@ ament_target_dependencies(${SERVO_PARAM_LIB_NAME} ${THIS_PACKAGE_INCLUDE_DEPENDS
 
 # This library provides a C++ interface for sending realtime twist or joint commands to a robot
 add_library(${SERVO_LIB_NAME} SHARED
-  # These files are used to produce differential motion
   src/collision_check.cpp
   src/enforce_limits.cpp
   src/servo.cpp
   src/servo_calcs.cpp
+  src/utilities.cpp
 )
 set_target_properties(${SERVO_LIB_NAME} PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
 ament_target_dependencies(${SERVO_LIB_NAME} ${THIS_PACKAGE_INCLUDE_DEPENDS})
@@ -147,7 +136,7 @@ install(
     ${POSE_TRACKING}
     ${SERVO_COMPONENT_NODE}
     ${SERVO_CONTROLLER_INPUT}
-  EXPORT export_${PROJECT_NAME}
+  EXPORT ${PROJECT_NAME}Targets
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
   RUNTIME DESTINATION bin
@@ -171,7 +160,7 @@ install(DIRECTORY include/ DESTINATION include)
 install(DIRECTORY launch DESTINATION share/${PROJECT_NAME})
 install(DIRECTORY config DESTINATION share/${PROJECT_NAME})
 
-ament_export_targets(export_${PROJECT_NAME} HAS_LIBRARY_TARGET)
+ament_export_targets(${PROJECT_NAME}Targets HAS_LIBRARY_TARGET)
 ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS})
 
 #############
@@ -186,23 +175,12 @@ if(BUILD_TESTING)
 
   # These don't pass yet, disable them for now
   set(ament_cmake_copyright_FOUND TRUE)
-  set(ament_cmake_cppcheck_FOUND TRUE)
   set(ament_cmake_cpplint_FOUND TRUE)
   set(ament_cmake_flake8_FOUND TRUE)
   set(ament_cmake_uncrustify_FOUND TRUE)
 
   # Run all lint tests in package.xml except those listed above
   ament_lint_auto_find_test_dependencies()
-
-  # Unit test for ServoCalcs
-  # TODO (vatanaksoytezer): Rewrite this similar to enforce limits test
-  # ament_add_gtest_executable(
-  #   unit_test_servo_calcs
-  #   test/unit_test_servo_calcs.cpp
-  # )
-  # target_link_libraries(unit_test_servo_calcs ${SERVO_LIB_NAME})
-  # ament_target_dependencies(unit_test_servo_calcs ${THIS_PACKAGE_INCLUDE_DEPENDS} Boost)
-  # add_ros_test(test/launch/unit_test_servo_calcs.test.py TIMEOUT 120 ARGS "test_binary_dir:=${CMAKE_CURRENT_BINARY_DIR}")
 
   # Servo integration launch test
   ament_add_gtest_executable(test_servo_integration
@@ -222,15 +200,6 @@ if(BUILD_TESTING)
   ament_target_dependencies(test_servo_collision ${THIS_PACKAGE_INCLUDE_DEPENDS})
   add_ros_test(test/launch/test_servo_collision.test.py TIMEOUT 120 ARGS "test_binary_dir:=${CMAKE_CURRENT_BINARY_DIR}")
 
-  # Servo singularity checking integration test
-  ament_add_gtest_executable(test_servo_singularity
-        test/test_servo_singularity.cpp
-        test/servo_launch_test_common.hpp
-  )
-  target_link_libraries(test_servo_singularity ${SERVO_PARAM_LIB_NAME})
-  ament_target_dependencies(test_servo_singularity ${THIS_PACKAGE_INCLUDE_DEPENDS})
-  add_ros_test(test/launch/test_servo_singularity.test.py TIMEOUT 120 ARGS "test_binary_dir:=${CMAKE_CURRENT_BINARY_DIR}")
-
   # pose_tracking
   ament_add_gtest_executable(test_servo_pose_tracking
         test/pose_tracking_test.cpp
@@ -239,19 +208,11 @@ if(BUILD_TESTING)
   target_link_libraries(test_servo_pose_tracking ${POSE_TRACKING})
   add_ros_test(test/launch/test_servo_pose_tracking.test.py TIMEOUT 120 ARGS "test_binary_dir:=${CMAKE_CURRENT_BINARY_DIR}")
 
-  # basic_servo_tests
-  ament_add_gtest_executable(basic_servo_tests
-        test/basic_servo_tests.cpp
+  # Unit tests
+  ament_add_gtest(servo_calcs_unit_tests
+    test/servo_calcs_unit_tests.cpp
   )
-  ament_target_dependencies(basic_servo_tests ${THIS_PACKAGE_INCLUDE_DEPENDS})
-  target_link_libraries(basic_servo_tests ${POSE_TRACKING})
-  add_ros_test(test/launch/test_basic_servo.test.py TIMEOUT 120 ARGS "test_binary_dir:=${CMAKE_CURRENT_BINARY_DIR}")
-
-  # Enforce limits unit tests
-  ament_add_gtest(enforce_limits_tests
-    test/enforce_limits_tests.cpp
-  )
-  target_link_libraries(enforce_limits_tests ${SERVO_LIB_NAME})
+  target_link_libraries(servo_calcs_unit_tests ${SERVO_LIB_NAME})
 
 endif()
 

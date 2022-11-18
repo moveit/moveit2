@@ -18,9 +18,13 @@ panda=/tmp/resources/panda_description/urdf/panda.urdf
 export QUIET=${QUIET:=1}
 
 # Create ikfast plugins for Fanuc and Panda
+echo
+echo "Creating IKFast package for Fanuc robot"
 moveit_kinematics/ikfast_kinematics_plugin/scripts/auto_create_ikfast_moveit_plugin.sh \
 	--name fanuc --pkg $PWD/fanuc_ikfast_plugin $fanuc manipulator base_link tool0
 
+echo
+echo "Creating IKFast package for Panda robot"
 moveit_kinematics/ikfast_kinematics_plugin/scripts/auto_create_ikfast_moveit_plugin.sh \
 	--name panda --pkg $PWD/panda_ikfast_plugin $panda panda_arm panda_link0 panda_link8
 

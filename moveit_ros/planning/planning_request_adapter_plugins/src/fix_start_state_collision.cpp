@@ -38,7 +38,10 @@
 #include <moveit/robot_state/conversions.h>
 #include <moveit/trajectory_processing/trajectory_tools.h>
 #include <class_loader/class_loader.hpp>
-#include <rclcpp/rclcpp.hpp>
+#include <rclcpp/logger.hpp>
+#include <rclcpp/logging.hpp>
+#include <rclcpp/node.hpp>
+#include <rclcpp/parameter_value.hpp>
 
 namespace default_planner_request_adapters
 {
@@ -150,7 +153,8 @@ public:
                     "Unable to find a valid state nearby the start state (using jiggle fraction of %lf and %u sampling "
                     "attempts). Passing the original planning request to the planner.",
                     jiggle_fraction_, sampling_attempts_);
-        return planner(planning_scene, req, res);
+        res.error_code_.val = moveit_msgs::msg::MoveItErrorCodes::START_STATE_IN_COLLISION;
+        return false;  // skip remaining adapters and/or planner
       }
     }
     else

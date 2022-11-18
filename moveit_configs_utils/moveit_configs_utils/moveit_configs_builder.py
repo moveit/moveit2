@@ -13,9 +13,8 @@ robot_name_moveit_config/
         joint_limits.yaml -> Overriding position/velocity/acceleration limits from the URDF file
         moveit_cpp.yaml -> MoveItCpp related parameters
         *_planning.yaml -> planning pipelines parameters
-        cartesian_limits.yaml -> Pilz planner parameters
-        # TODO(JafarAbdi): Check to see if this is a good default value
-        robot_name_controllers.yaml -> trajectory execution manager's parameters
+        pilz_cartesian_limits.yaml -> Pilz planner parameters
+        moveit_controllers.yaml -> trajectory execution manager's parameters
         ...
 
 Example:
@@ -28,10 +27,11 @@ Example:
     moveit_configs.planning_pipelines
     moveit_configs.trajectory_execution
     moveit_configs.planning_scene_monitor
+    moveit_configs.sensors_3d
     moveit_configs.move_group_capabilities
     moveit_configs.joint_limits
     moveit_configs.moveit_cpp
-    moveit_configs.cartesian_limits
+    moveit_configs.pilz_cartesian_limits
     # Or to get all the parameters as a dictionary
     moveit_configs.to_dict()
 
@@ -51,141 +51,67 @@ Example:
 """
 
 from pathlib import Path
-from typing import Optional, List
+from typing import Optional, List, Dict
 import logging
+import re
+from dataclasses import dataclass, field
 from ament_index_python.packages import get_package_share_directory
 
 from launch_param_builder import ParameterBuilder, load_yaml, load_xacro
 
 
-class MoveItConfigs(object):
+moveit_configs_utils_path = Path(get_package_share_directory("moveit_configs_utils"))
+
+
+def get_pattern_matches(folder, pattern):
+    """Given all the files in the folder, find those that match the pattern.
+
+    If there are groups defined, the groups are returned. Otherwise the path to the matches are returned.
+    """
+    matches = []
+    if not folder.exists():
+        return matches
+    for child in folder.iterdir():
+        if not child.is_file():
+            continue
+        m = pattern.search(child.name)
+        if m:
+            groups = m.groups()
+            if groups:
+                matches.append(groups[0])
+            else:
+                matches.append(child)
+    return matches
+
+
+@dataclass(slots=True)
+class MoveItConfigs:
     """Class containing MoveIt related parameters."""
 
-    __slots__ = [
-        "__package_path",
-        "__robot_description",
-        "__robot_description_semantic",
-        "__robot_description_kinematics",
-        "__planning_pipelines",
-        "__trajectory_execution",
-        "__planning_scene_monitor",
-        "__move_group_capabilities",
-        "__joint_limits",
-        "__moveit_cpp",
-        "__cartesian_limits",
-    ]
-
-    def __init__(self):
-        # A pathlib Path to the moveit config package
-        self.package_path = None
-        # A dictionary that has the contents of the URDF file.
-        self.robot_description = {}
-        # A dictionary that has the contents of the SRDF file.
-        self.robot_description_semantic = {}
-        # A dictionary IK solver specific parameters.
-        self.robot_description_kinematics = {}
-        # A dictionary that contains the planning pipelines parameters.
-        self.planning_pipelines = {}
-        # A dictionary contains parameters for trajectory execution & moveit controller managers.
-        self.trajectory_execution = {}
-        # A dictionary that have the planning scene monitor's parameters.
-        self.planning_scene_monitor = {}
-        # A dictionary containing move_group's non-default capabilities.
-        self.move_group_capabilities = {}
-        # A dictionary containing the overridden position/velocity/acceleration limits.
-        self.joint_limits = {}
-        # A dictionary containing MoveItCpp related parameters.
-        self.moveit_cpp = {}
-        # A dictionary containing the cartesian limits for the Pilz planner.
-        self.cartesian_limits = {}
-
-    @property
-    def package_path(self):
-        return self.__package_path
-
-    @package_path.setter
-    def package_path(self, value):
-        self.__package_path = value
-
-    @property
-    def robot_description(self):
-        return self.__robot_description
-
-    @robot_description.setter
-    def robot_description(self, value):
-        self.__robot_description = value
-
-    @property
-    def robot_description_semantic(self):
-        return self.__robot_description_semantic
-
-    @robot_description_semantic.setter
-    def robot_description_semantic(self, value):
-        self.__robot_description_semantic = value
-
-    @property
-    def robot_description_kinematics(self):
-        return self.__robot_description_kinematics
-
-    @robot_description_kinematics.setter
-    def robot_description_kinematics(self, value):
-        self.__robot_description_kinematics = value
-
-    @property
-    def planning_pipelines(self):
-        return self.__planning_pipelines
-
-    @planning_pipelines.setter
-    def planning_pipelines(self, value):
-        self.__planning_pipelines = value
-
-    @property
-    def trajectory_execution(self):
-        return self.__trajectory_execution
-
-    @trajectory_execution.setter
-    def trajectory_execution(self, value):
-        self.__trajectory_execution = value
-
-    @property
-    def planning_scene_monitor(self):
-        return self.__planning_scene_monitor
-
-    @planning_scene_monitor.setter
-    def planning_scene_monitor(self, value):
-        self.__planning_scene_monitor = value
-
-    @property
-    def move_group_capabilities(self):
-        return self.__move_group_capabilities
-
-    @move_group_capabilities.setter
-    def move_group_capabilities(self, value):
-        self.__move_group_capabilities = value
-
-    @property
-    def joint_limits(self):
-        return self.__joint_limits
-
-    @joint_limits.setter
-    def joint_limits(self, value):
-        self.__joint_limits = value
-
-    @property
-    def moveit_cpp(self):
-        return self.__moveit_cpp
-
-    @moveit_cpp.setter
-    def moveit_cpp(self, value):
-        self.__moveit_cpp = value
-
-    @property
-    def cartesian_limits(self):
-        return self.__cartesian_limits
-
-    @cartesian_limits.setter
-    def cartesian_limits(self, value):
-        self.__cartesian_limits = value
+    # A pathlib Path to the moveit config package
+    package_path: Optional[str] = None
+    # A dictionary that has the contents of the URDF file.
+    robot_description: Dict = field(default_factory=dict)
+    # A dictionary that has the contents of the SRDF file.
+    robot_description_semantic: Dict = field(default_factory=dict)
+    # A dictionary IK solver specific parameters.
+    robot_description_kinematics: Dict = field(default_factory=dict)
+    # A dictionary that contains the planning pipelines parameters.
+    planning_pipelines: Dict = field(default_factory=dict)
+    # A dictionary contains parameters for trajectory execution & moveit controller managers.
+    trajectory_execution: Dict = field(default_factory=dict)
+    # A dictionary that has the planning scene monitor's parameters.
+    planning_scene_monitor: Dict = field(default_factory=dict)
+    # A dictionary that has the sensor 3d configuration parameters.
+    sensors_3d: Dict = field(default_factory=dict)
+    # A dictionary containing move_group's non-default capabilities.
+    move_group_capabilities: Dict = field(default_factory=dict)
+    # A dictionary containing the overridden position/velocity/acceleration limits.
+    joint_limits: Dict = field(default_factory=dict)
+    # A dictionary containing MoveItCpp related parameters.
+    moveit_cpp: Dict = field(default_factory=dict)
+    # A dictionary containing the cartesian limits for the Pilz planner.
+    pilz_cartesian_limits: Dict = field(default_factory=dict)
 
     def to_dict(self):
         parameters = {}
@@ -195,9 +121,14 @@ class MoveItConfigs(object):
         parameters.update(self.planning_pipelines)
         parameters.update(self.trajectory_execution)
         parameters.update(self.planning_scene_monitor)
+        parameters.update(self.sensors_3d)
         parameters.update(self.joint_limits)
         parameters.update(self.moveit_cpp)
-        parameters.update(self.cartesian_limits)
+        # Update robot_description_planning with pilz cartesian limits
+        if self.pilz_cartesian_limits:
+            parameters["robot_description_planning"].update(
+                self.pilz_cartesian_limits["robot_description_planning"]
+            )
         return parameters
 
 
@@ -215,42 +146,57 @@ class MoveItConfigsBuilder(ParameterBuilder):
     __config_dir_path = Path("config")
 
     # Look-up for robot_name_moveit_config package
-    def __init__(self, robot_name: str, robot_description="robot_description"):
-        super().__init__(robot_name + "_moveit_config")
+    def __init__(
+        self,
+        robot_name: str,
+        robot_description="robot_description",
+        package_name: Optional[str] = None,
+    ):
+        super().__init__(package_name or (robot_name + "_moveit_config"))
         self.__moveit_configs.package_path = self._package_path
         self.__robot_name = robot_name
         setup_assistant_file = self._package_path / ".setup_assistant"
-        if not setup_assistant_file.exists():
+
+        self.__urdf_package = None
+        self.__urdf_file_path = None
+        self.__srdf_file_path = None
+
+        modified_urdf_path = Path("config") / (self.__robot_name + ".urdf.xacro")
+        if (self._package_path / modified_urdf_path).exists():
+            self.__urdf_package = self._package_path
+            self.__urdf_file_path = modified_urdf_path
+
+        if setup_assistant_file.exists():
+            setup_assistant_yaml = load_yaml(setup_assistant_file)
+            config = setup_assistant_yaml.get("moveit_setup_assistant_config", {})
+            urdf_config = config.get("urdf", config.get("URDF"))
+            if urdf_config and self.__urdf_package is None:
+                self.__urdf_package = Path(
+                    get_package_share_directory(urdf_config["package"])
+                )
+                self.__urdf_file_path = Path(urdf_config["relative_path"])
+
+            srdf_config = config.get("srdf", config.get("SRDF"))
+            if srdf_config:
+                self.__srdf_file_path = Path(srdf_config["relative_path"])
+
+        if not self.__urdf_package or not self.__urdf_file_path:
             logging.warning(
-                f"\x1b[33;21mPackage `{self._package_path}` doesn't have `.setup_assistant` file "
-                f"-- using config/{robot_name}.urdf and config/{robot_name}.srdf\x1b[0m"
+                f"\x1b[33;21mCannot infer URDF from `{self._package_path}`. -- using config/{robot_name}.urdf\x1b[0m"
             )
             self.__urdf_package = self._package_path
             self.__urdf_file_path = self.__config_dir_path / (
                 self.__robot_name + ".urdf"
             )
+
+        if not self.__srdf_file_path:
+            logging.warning(
+                f"\x1b[33;21mCannot infer SRDF from `{self._package_path}`. -- using config/{robot_name}.srdf\x1b[0m"
+            )
             self.__srdf_file_path = self.__config_dir_path / (
                 self.__robot_name + ".srdf"
             )
-        else:
-            setup_assistant_yaml = load_yaml(setup_assistant_file)
-            self.__urdf_package = Path(
-                get_package_share_directory(
-                    setup_assistant_yaml["moveit_setup_assistant_config"]["URDF"][
-                        "package"
-                    ]
-                )
-            )
-            self.__urdf_file_path = Path(
-                setup_assistant_yaml["moveit_setup_assistant_config"]["URDF"][
-                    "relative_path"
-                ]
-            )
-            self.__srdf_file_path = Path(
-                setup_assistant_yaml["moveit_setup_assistant_config"]["SRDF"][
-                    "relative_path"
-                ]
-            )
+
         self.__robot_description = robot_description
 
     def robot_description(self, file_path: Optional[str] = None, mappings: dict = None):
@@ -345,15 +291,43 @@ class MoveItConfigsBuilder(ParameterBuilder):
         self.__moveit_configs.trajectory_execution = {
             "moveit_manage_controllers": moveit_manage_controllers,
         }
-        self.__moveit_configs.trajectory_execution.update(
-            load_yaml(
-                self._package_path
-                / (
-                    file_path
-                    or self.__config_dir_path / f"{self.__robot_name}_controllers.yaml"
+
+        # Find the most likely controller params as needed
+        if file_path is None:
+            config_folder = self._package_path / self.__config_dir_path
+            controller_pattern = re.compile("^(.*)_controllers.yaml$")
+            possible_names = get_pattern_matches(config_folder, controller_pattern)
+            if not possible_names:
+                # Warn the user instead of raising exception
+                logging.warning(
+                    "\x1b[33;20mtrajectory_execution: `Parameter file_path is undefined "
+                    f"and no matches for {config_folder}/*_controllers.yaml\x1b[0m"
                 )
-            )
-        )
+            else:
+                chosen_name = None
+                if len(possible_names) == 1:
+                    chosen_name = possible_names[0]
+                else:
+                    # Try a couple other common names, in order of precedence
+                    for name in ["moveit", "moveit2", self.__robot_name]:
+                        if name in possible_names:
+                            chosen_name = name
+                            break
+                    else:
+                        option_str = "\n - ".join(
+                            name + "_controllers.yaml" for name in possible_names
+                        )
+                        raise RuntimeError(
+                            "trajectory_execution: "
+                            f"Unable to guess which parameter file to load. Options:\n - {option_str}"
+                        )
+                file_path = config_folder / (chosen_name + "_controllers.yaml")
+
+        else:
+            file_path = self._package_path / file_path
+
+        if file_path:
+            self.__moveit_configs.trajectory_execution.update(load_yaml(file_path))
         return self
 
     def planning_scene_monitor(
@@ -362,6 +336,8 @@ class MoveItConfigsBuilder(ParameterBuilder):
         publish_geometry_updates: bool = True,
         publish_state_updates: bool = True,
         publish_transforms_updates: bool = True,
+        publish_robot_description: bool = False,
+        publish_robot_description_semantic: bool = False,
     ):
         self.__moveit_configs.planning_scene_monitor = {
             # TODO: Fix parameter namespace upstream -- see planning_scene_monitor.cpp:262
@@ -370,22 +346,63 @@ class MoveItConfigsBuilder(ParameterBuilder):
             "publish_geometry_updates": publish_geometry_updates,
             "publish_state_updates": publish_state_updates,
             "publish_transforms_updates": publish_transforms_updates,
+            "publish_robot_description": publish_robot_description,
+            "publish_robot_description_semantic": publish_robot_description_semantic,
             # }
         }
         return self
 
+    def sensors_3d(self, file_path: Optional[str] = None):
+        """Load sensors_3d parameters.
+
+        :param file_path: Absolute or relative path to the sensors_3d yaml file (w.r.t. robot_name_moveit_config).
+        :return: Instance of MoveItConfigsBuilder with robot_description_planning loaded.
+        """
+        sensors_path = self._package_path / (
+            file_path or self.__config_dir_path / "sensors_3d.yaml"
+        )
+        if sensors_path.exists():
+            sensors_data = load_yaml(sensors_path)
+            # TODO(mikeferguson): remove the second part of this check once
+            # https://github.com/ros-planning/moveit_resources/pull/141 has made through buildfarm
+            if len(sensors_data["sensors"]) > 0 and sensors_data["sensors"][0]:
+                self.__moveit_configs.sensors_3d = sensors_data
+        return self
+
     def planning_pipelines(
-        self, default_planning_pipeline: str = None, pipelines: List[str] = None
+        self,
+        default_planning_pipeline: str = None,
+        pipelines: List[str] = None,
+        load_all: bool = True,
     ):
         """Load planning pipelines parameters.
 
         :param default_planning_pipeline: Name of the default planning pipeline.
         :param pipelines: List of the planning pipelines to be loaded.
+        :param load_all: Only used if pipelines is None.
+                         If true, loads all pipelines defined in config package AND this package.
+                         If false, only loads the pipelines defined in config package.
         :return: Instance of MoveItConfigsBuilder with planning_pipelines loaded.
         """
+        config_folder = self._package_path / self.__config_dir_path
+        default_folder = moveit_configs_utils_path / "default_configs"
+
+        # If no pipelines are specified, search by filename
         if pipelines is None:
-            pipelines = ["ompl"]
-            default_planning_pipeline = pipelines[0]
+            planning_pattern = re.compile("^(.*)_planning.yaml$")
+            pipelines = get_pattern_matches(config_folder, planning_pattern)
+            if load_all:
+                for pipeline in get_pattern_matches(default_folder, planning_pattern):
+                    if pipeline not in pipelines:
+                        pipelines.append(pipeline)
+
+        # Define default pipeline as needed
+        if not default_planning_pipeline:
+            if "ompl" in pipelines:
+                default_planning_pipeline = "ompl"
+            else:
+                default_planning_pipeline = pipelines[0]
+
         if default_planning_pipeline not in pipelines:
             raise RuntimeError(
                 f"default_planning_pipeline: `{default_planning_pipeline}` doesn't name any of the input pipelines "
@@ -396,24 +413,40 @@ class MoveItConfigsBuilder(ParameterBuilder):
             "default_planning_pipeline": default_planning_pipeline,
         }
         for pipeline in pipelines:
+            parameter_file = config_folder / (pipeline + "_planning.yaml")
+            if not parameter_file.exists():
+                parameter_file = default_folder / (pipeline + "_planning.yaml")
             self.__moveit_configs.planning_pipelines[pipeline] = load_yaml(
-                self._package_path
-                / self.__config_dir_path
-                / (pipeline + "_planning.yaml")
+                parameter_file
             )
+
+        # Special rule to add ompl planner_configs
+        if "ompl" in self.__moveit_configs.planning_pipelines:
+            ompl_config = self.__moveit_configs.planning_pipelines["ompl"]
+            if "planner_configs" not in ompl_config:
+                ompl_config.update(load_yaml(default_folder / "ompl_defaults.yaml"))
+
         return self
 
-    def cartesian_limits(self, file_path: Optional[str] = None):
+    def pilz_cartesian_limits(self, file_path: Optional[str] = None):
         """Load cartesian limits.
 
         :param file_path: Absolute or relative path to the cartesian limits file (w.r.t. robot_name_moveit_config).
-        :return: Instance of MoveItConfigsBuilder with cartesian_limits loaded.
+        :return: Instance of MoveItConfigsBuilder with pilz_cartesian_limits loaded.
         """
-        self.__moveit_configs.cartesian_limits = {
+        deprecated_path = self._package_path / (
+            self.__config_dir_path / "cartesian_limits.yaml"
+        )
+        if deprecated_path.exists():
+            logging.warning(
+                f"\x1b[33;21mcartesian_limits.yaml is deprecated, please rename to pilz_cartesian_limits.yaml\x1b[0m"
+            )
+
+        self.__moveit_configs.pilz_cartesian_limits = {
             self.__robot_description
             + "_planning": load_yaml(
                 self._package_path
-                / (file_path or self.__config_dir_path / "cartesian_limits.yaml")
+                / (file_path or self.__config_dir_path / "pilz_cartesian_limits.yaml")
             )
         }
         return self
@@ -431,18 +464,20 @@ class MoveItConfigsBuilder(ParameterBuilder):
             self.robot_description_kinematics()
         if not self.__moveit_configs.planning_pipelines:
             self.planning_pipelines()
-        # TODO(JafarAbdi): Not sure if the default value for file_path makes sense
-        # if not self.__moveit_configs.trajectory_execution:
-        #     self.trajectory_execution()
+        if not self.__moveit_configs.trajectory_execution:
+            self.trajectory_execution()
         if not self.__moveit_configs.planning_scene_monitor:
             self.planning_scene_monitor()
+        if not self.__moveit_configs.sensors_3d:
+            self.sensors_3d()
         if not self.__moveit_configs.joint_limits:
             self.joint_limits()
         # TODO(JafarAbdi): We should have a default moveit_cpp.yaml as port of a moveit config package
         # if not self.__moveit_configs.moveit_cpp:
         #     self.moveit_cpp()
-        if not self.__moveit_configs.cartesian_limits:
-            self.cartesian_limits()
+        if "pilz_industrial_motion_planner" in self.__moveit_configs.planning_pipelines:
+            if not self.__moveit_configs.pilz_cartesian_limits:
+                self.pilz_cartesian_limits()
         return self.__moveit_configs
 
     def to_dict(self, include_moveit_configs: bool = True):

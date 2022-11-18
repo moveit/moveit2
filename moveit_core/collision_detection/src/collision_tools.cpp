@@ -35,12 +35,9 @@
 /* Author: Ioan Sucan */
 
 #include <moveit/collision_detection/collision_tools.h>
-
-#if __has_include(<tf2_eigen/tf2_eigen.hpp>)
+#include <rclcpp/clock.hpp>
+#include <rclcpp/time.hpp>
 #include <tf2_eigen/tf2_eigen.hpp>
-#else
-#include <tf2_eigen/tf2_eigen.h>
-#endif
 
 namespace collision_detection
 {
@@ -182,12 +179,12 @@ void intersectCostSources(std::set<CostSource>& cost_sources, const std::set<Cos
     }
 }
 
-void removeOverlapping(std::set<CostSource>& cost_sources, double overlap_fraction)
+void removeOverlapping(std::set<CostSource>& cost_sources, const double overlap_fraction)
 {
   double p[3], q[3];
   for (auto it = cost_sources.begin(); it != cost_sources.end(); ++it)
   {
-    double vol = it->getVolume() * overlap_fraction;
+    const double vol = it->getVolume() * overlap_fraction;
     std::vector<std::set<CostSource>::iterator> remove;
     auto it1 = it;
     for (auto jt = ++it1; jt != cost_sources.end(); ++jt)
@@ -203,7 +200,7 @@ void removeOverlapping(std::set<CostSource>& cost_sources, double overlap_fracti
       if (p[0] >= q[0] || p[1] >= q[1] || p[2] >= q[2])
         continue;
 
-      double intersect_volume = (q[0] - p[0]) * (q[1] - p[1]) * (q[2] - p[2]);
+      const double intersect_volume = (q[0] - p[0]) * (q[1] - p[1]) * (q[2] - p[2]);
       if (intersect_volume >= vol)
         remove.push_back(jt);
     }
@@ -213,7 +210,7 @@ void removeOverlapping(std::set<CostSource>& cost_sources, double overlap_fracti
 }
 
 void removeCostSources(std::set<CostSource>& cost_sources, const std::set<CostSource>& cost_sources_to_remove,
-                       double overlap_fraction)
+                       const double overlap_fraction)
 {
   // remove all the boxes that overlap with the intersection previously computed in \e rem
   double p[3], q[3];
@@ -234,7 +231,7 @@ void removeCostSources(std::set<CostSource>& cost_sources, const std::set<CostSo
       if (p[0] >= q[0] || p[1] >= q[1] || p[2] >= q[2])
         continue;
 
-      double intersect_volume = (q[0] - p[0]) * (q[1] - p[1]) * (q[2] - p[2]);
+      const double intersect_volume = (q[0] - p[0]) * (q[1] - p[1]) * (q[2] - p[2]);
       if (intersect_volume >= it->getVolume() * overlap_fraction)
         remove.push_back(it);
       else

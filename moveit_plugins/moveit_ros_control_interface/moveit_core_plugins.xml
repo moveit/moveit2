@@ -1,13 +1,24 @@
 <class_libraries>
   <library path="moveit_ros_control_interface_plugin">
-    <class name="moveit_ros_control_interface/MoveItControllerManager"
-           type="moveit_ros_control_interface::MoveItControllerManager"
+    <class name="moveit_ros_control_interface/Ros2ControlManager"
+           type="moveit_ros_control_interface::Ros2ControlManager"
            base_class_type="moveit_controller_manager::MoveItControllerManager">
         <description>ros_control controller manager interface for MoveIt</description>
     </class>
-    <class name="moveit_ros_control_interface/MoveItMultiControllerManager"
-           type="moveit_ros_control_interface::MoveItMultiControllerManager"
+    <class name="moveit_ros_control_interface/Ros2ControlMultiManager"
+           type="moveit_ros_control_interface::Ros2ControlMultiManager"
            base_class_type="moveit_controller_manager::MoveItControllerManager">
+        <description>multiple ros_control controller managers interface for MoveIt</description>
+    </class>
+    <!-- These are deprecated (Oct 2022) -->
+    <class name="moveit_ros_control_interface/MoveItControllerManager"
+          type="moveit_ros_control_interface::Ros2ControlManager"
+          base_class_type="moveit_controller_manager::MoveItControllerManager">
+        <description>ros_control controller manager interface for MoveIt</description>
+    </class>
+    <class name="moveit_ros_control_interface/MoveItMultiControllerManager"
+          type="moveit_ros_control_interface::Ros2ControlMultiManager"
+          base_class_type="moveit_controller_manager::MoveItControllerManager">
         <description>multiple ros_control controller managers interface for MoveIt</description>
     </class>
   </library>

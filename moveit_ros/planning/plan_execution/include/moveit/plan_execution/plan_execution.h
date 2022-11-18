@@ -41,7 +41,6 @@
 #include <moveit/trajectory_execution_manager/trajectory_execution_manager.h>
 #include <moveit/planning_scene_monitor/planning_scene_monitor.h>
 #include <moveit/planning_scene_monitor/trajectory_monitor.h>
-#include <moveit/sensor_manager/sensor_manager.h>
 #include <pluginlib/class_loader.hpp>
 
 #include <atomic>
@@ -82,12 +81,12 @@ public:
     /// one is the index of the last trajectory being executed (from the sequence of trajectories specified in the
     /// ExecutableMotionPlan) and the second
     /// one is the index of the closest waypoint along that trajectory.
-    boost::function<bool(ExecutableMotionPlan& plan_to_update, const std::pair<int, int>& trajectory_index)>
+    std::function<bool(ExecutableMotionPlan& plan_to_update, const std::pair<int, int>& trajectory_index)>
         repair_plan_callback_;
 
-    boost::function<void()> before_plan_callback_;
-    boost::function<void()> before_execution_callback_;
-    boost::function<void()> done_callback_;
+    std::function<void()> before_plan_callback_;
+    std::function<void()> before_execution_callback_;
+    std::function<void()> done_callback_;
   };
 
   PlanExecution(const rclcpp::Node::SharedPtr& node,
@@ -140,15 +139,13 @@ public:
 
   void stop();
 
-  std::string getErrorCodeString(const moveit_msgs::msg::MoveItErrorCodes& error_code);
-
 private:
   void planAndExecuteHelper(ExecutableMotionPlan& plan, const Options& opt);
   bool isRemainingPathValid(const ExecutableMotionPlan& plan, const std::pair<int, int>& path_segment);
 
   void planningSceneUpdatedCallback(const planning_scene_monitor::PlanningSceneMonitor::SceneUpdateType update_type);
   void doneWithTrajectoryExecution(const moveit_controller_manager::ExecutionStatus& status);
-  void successfulTrajectorySegmentExecution(const ExecutableMotionPlan* plan, std::size_t index);
+  void successfulTrajectorySegmentExecution(const ExecutableMotionPlan& plan, std::size_t index);
 
   const rclcpp::Node::SharedPtr node_;
   planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor_;

@@ -32,8 +32,7 @@
 *  POSSIBILITY OF SUCH DAMAGE.
 *********************************************************************/
 
-#ifndef MOVEIT_VERSION_
-#define MOVEIT_VERSION_
+#pragma once
 
 #define MOVEIT_VERSION_STR "@MOVEIT_VERSION@"
 
@@ -47,5 +46,3 @@
 
 /// Use like: #if MOVEIT_VERSION >= MOVEIT_VERSION_CHECK(1, 0, 0)
 #define MOVEIT_VERSION_CHECK(major, minor, patch) ((major << 16) | (minor << 8) | (patch))
-
-#endif

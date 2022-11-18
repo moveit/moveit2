@@ -2,10 +2,10 @@
 
 This package provides plugins of base class `moveit_controller_manager::MoveItControllerManager` and a new plugin base class for `moveit_controller_manager::MoveItControllerHandle` allocators.
 The allocator class is necessary because `moveit_controller_manager::MoveItControllerHandle` needs a name passed to the constructor.
-Two variantes are provided, `moveit_ros_control_interface::MoveItControllerManager` for interfacing a single ros_control node and `moveit_ros_control_interface::MoveItMultiControllerManager` for seamless integration with any number of ros_control nodes.
+Two variantes are provided, `moveit_ros_control_interface::Ros2ControlManager` for interfacing a single ros_control node and `moveit_ros_control_interface::Ros2ControlMultiManager` for seamless integration with any number of ros_control nodes.
 
 
-## moveit_ros_control_interface::MoveItControllerManager
+## moveit_ros_control_interface::Ros2ControlManager
 This plugin interfaces a single ros_control-driven node in the namespace given in the `~ros_control_namespace` ROS parameter.
 It polls all controllers via the `list_controllers` service and passes their properties to MoveIt.
 The polling is throttled to 1 Hertz.
@@ -19,11 +19,11 @@ Currently plugins for `position_controllers/JointTrajectoryController`, `velocit
 ### Setup
 In your MoveIt launch file (e.g. `ROBOT_moveit_config/launch/ROBOT_moveit_controller_manager.launch.xml`) set the `moveit_controller_manager` parameter:
 ```
-<param name="moveit_controller_manager" value="moveit_ros_control_interface::MoveItControllerManager" />
+<param name="moveit_controller_manager" value="moveit_ros_control_interface::Ros2ControlManager" />
 ```
 
 And make sure to set the `ros_control_namespace` parameter to the namespace (without the /controller_manager/ part) of the ros_control-based node you like to interface.
-If you are using the `moveit_setup_assistent` you can add it to `ROBOT_moveit_config/config/controllers.yaml`, e.g.:
+If you are using the `moveit_setup_assistent` you can add it to `ROBOT_moveit_config/config/moveit_controllers.yaml`, e.g.:
 ```
 ros_control_namespace: /ROS_CONTROL_NODE
 controller_list:
@@ -49,14 +49,14 @@ Since only controller names with registered allocator plugins are handed over to
 All controller names get prefixed by the namespace of the ros_control node.
 For this to work the controller names should not contain slashes. This is a strict requirement if the ros_control  namespace is `/`.
 
-## moveit_ros_control_interface::MoveItMultiControllerManager
+## moveit_ros_control_interface::Ros2ControlMultiManager
 
 This plugin does not need further configuration. It polls the ROS main for services and identifies ros_control nodes automatically.
-It spawns `moveit_ros_control_interface::MoveItControllerManager` instances with their namespace and takes cares of proper delegation.
+It spawns `moveit_ros_control_interface::Ros2ControlManager` instances with their namespace and takes cares of proper delegation.
 
 
 ### Setup
 Just set the `moveit_controller_manager` parameter in your MoveIt launch file (e.g. `ROBOT_moveit_config/launch/ROBOT_moveit_controller_manager.launch.xml`)
 ```
-<param name="moveit_controller_manager" value="moveit_ros_control_interface::MoveItMultiControllerManager" />
+<param name="moveit_controller_manager" value="moveit_ros_control_interface::Ros2ControlMultiManager" />
 ```

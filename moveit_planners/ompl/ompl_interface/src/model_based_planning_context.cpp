@@ -111,7 +111,7 @@ void ompl_interface::ModelBasedPlanningContext::configure(const rclcpp::Node::Sh
   complete_initial_robot_state_.update();
   ompl_simple_setup_->getStateSpace()->computeSignature(space_signature_);
   ompl_simple_setup_->getStateSpace()->setStateSamplerAllocator(
-      std::bind(&ModelBasedPlanningContext::allocPathConstrainedSampler, this, std::placeholders::_1));
+      [this](const ompl::base::StateSpace* ss) { return allocPathConstrainedSampler(ss); });
 
   if (spec_.constrained_state_space_)
   {
@@ -372,6 +372,14 @@ void ompl_interface::ModelBasedPlanningContext::useConfig()
     cfg.erase(it);
   }
 
+  // check whether the path returned by the planner should be simplified
+  it = cfg.find("simplify_solutions");
+  if (it != cfg.end())
+  {
+    simplify_solutions_ = boost::lexical_cast<bool>(it->second);
+    cfg.erase(it);
+  }
+
   // check whether solution paths from parallel planning should be hybridized
   it = cfg.find("hybridize");
   if (it != cfg.end())
@@ -393,7 +401,8 @@ void ompl_interface::ModelBasedPlanningContext::useConfig()
     cfg.erase(it);
     const std::string planner_name = getGroupName() + "/" + name_;
     ompl_simple_setup_->setPlannerAllocator(
-        std::bind(spec_.planner_selector_(type), std::placeholders::_1, planner_name, std::cref(spec_)));
+        [planner_name, &spec = this->spec_, allocator = spec_.planner_selector_(type)](
+            const ompl::base::SpaceInformationPtr& si) { return allocator(si, planner_name, spec); });
     RCLCPP_INFO(LOGGER,
                 "Planner configuration '%s' will use planner '%s'. "
                 "Additional configuration parameters will be set when the planner is constructed.",
@@ -745,15 +754,16 @@ void ompl_interface::ModelBasedPlanningContext::postSolve()
   int iv = ompl_simple_setup_->getSpaceInformation()->getMotionValidator()->getInvalidMotionCount();
   RCLCPP_DEBUG(LOGGER, "There were %d valid motions and %d invalid motions.", v, iv);
 
-  if (ompl_simple_setup_->getProblemDefinition()->hasApproximateSolution())
-  {
-    RCLCPP_WARN(LOGGER, "Computed solution is approximate");
-  }
+  // Debug OMPL setup and solution
+  std::stringstream debug_out;
+  ompl_simple_setup_->print(debug_out);
+  RCLCPP_DEBUG(LOGGER, "%s", rclcpp::get_c_string(debug_out.str()));
 }
 
 bool ompl_interface::ModelBasedPlanningContext::solve(planning_interface::MotionPlanResponse& res)
 {
-  if (solve(request_.allowed_planning_time, request_.num_planning_attempts))
+  res.error_code_ = solve(request_.allowed_planning_time, request_.num_planning_attempts);
+  if (res.error_code_.val == moveit_msgs::msg::MoveItErrorCodes::SUCCESS)
   {
     double ptime = getLastPlanTime();
     if (simplify_solutions_)
@@ -779,14 +789,15 @@ bool ompl_interface::ModelBasedPlanningContext::solve(planning_interface::Motion
   else
   {
     RCLCPP_INFO(LOGGER, "Unable to solve the planning problem");
-    res.error_code_.val = moveit_msgs::msg::MoveItErrorCodes::PLANNING_FAILED;
     return false;
   }
 }
 
 bool ompl_interface::ModelBasedPlanningContext::solve(planning_interface::MotionPlanDetailedResponse& res)
 {
-  if (solve(request_.allowed_planning_time, request_.num_planning_attempts))
+  moveit_msgs::msg::MoveItErrorCodes moveit_result =
+      solve(request_.allowed_planning_time, request_.num_planning_attempts);
+  if (moveit_result.val == moveit_msgs::msg::MoveItErrorCodes::SUCCESS)
   {
     res.trajectory_.reserve(3);
 
@@ -820,9 +831,9 @@ bool ompl_interface::ModelBasedPlanningContext::solve(planning_interface::Motion
       getSolutionPath(*res.trajectory_.back());
     }
 
-    // fill the response
     RCLCPP_DEBUG(LOGGER, "%s: Returning successful solution with %lu states", getName().c_str(),
                  getOMPLSimpleSetup()->getSolutionPath().getStateCount());
+    res.error_code_.val = moveit_result.val;
     return true;
   }
   else
@@ -833,20 +844,24 @@ bool ompl_interface::ModelBasedPlanningContext::solve(planning_interface::Motion
   }
 }
 
-bool ompl_interface::ModelBasedPlanningContext::solve(double timeout, unsigned int count)
+const moveit_msgs::msg::MoveItErrorCodes ompl_interface::ModelBasedPlanningContext::solve(double timeout,
+                                                                                          unsigned int count)
 {
   ompl::time::point start = ompl::time::now();
   preSolve();
 
-  bool result = false;
+  moveit_msgs::msg::MoveItErrorCodes result;
+  result.val = moveit_msgs::msg::MoveItErrorCodes::FAILURE;
   if (count <= 1 || multi_query_planning_enabled_)  // multi-query planners should always run in single instances
   {
     RCLCPP_DEBUG(LOGGER, "%s: Solving the planning problem once...", name_.c_str());
     ob::PlannerTerminationCondition ptc = constructPlannerTerminationCondition(timeout, start);
     registerTerminationCondition(ptc);
-    result = ompl_simple_setup_->solve(ptc) == ompl::base::PlannerStatus::EXACT_SOLUTION;
+    result.val = ompl_simple_setup_->solve(ptc) == ompl::base::PlannerStatus::EXACT_SOLUTION;
     last_plan_time_ = ompl_simple_setup_->getLastPlanComputationTime();
     unregisterTerminationCondition();
+    // fill the result status code
+    result.val = logPlannerStatus(ompl_simple_setup_);
   }
   else
   {
@@ -870,7 +885,10 @@ bool ompl_interface::ModelBasedPlanningContext::solve(double timeout, unsigned i
 
       ob::PlannerTerminationCondition ptc = constructPlannerTerminationCondition(timeout, start);
       registerTerminationCondition(ptc);
-      result = ompl_parallel_plan_.solve(ptc, 1, count, hybridize_) == ompl::base::PlannerStatus::EXACT_SOLUTION;
+      if (ompl_parallel_plan_.solve(ptc, 1, count, hybridize_) == ompl::base::PlannerStatus::EXACT_SOLUTION)
+      {
+        result.val = moveit_msgs::msg::MoveItErrorCodes::SUCCESS;
+      }
       last_plan_time_ = ompl::time::seconds(ompl::time::now() - start);
       unregisterTerminationCondition();
     }
@@ -879,7 +897,7 @@ bool ompl_interface::ModelBasedPlanningContext::solve(double timeout, unsigned i
       ob::PlannerTerminationCondition ptc = constructPlannerTerminationCondition(timeout, start);
       registerTerminationCondition(ptc);
       int n = count / max_planning_threads_;
-      result = true;
+      result.val = moveit_msgs::msg::MoveItErrorCodes::SUCCESS;
       for (int i = 0; i < n && !ptc(); ++i)
       {
         ompl_parallel_plan_.clearPlanners();
@@ -899,7 +917,10 @@ bool ompl_interface::ModelBasedPlanningContext::solve(double timeout, unsigned i
         }
 
         bool r = ompl_parallel_plan_.solve(ptc, 1, count, hybridize_) == ompl::base::PlannerStatus::EXACT_SOLUTION;
-        result = result && r;
+        // Was this latest call successful too?
+        result.val = (result.val == moveit_msgs::msg::MoveItErrorCodes::SUCCESS && r) ?
+                         moveit_msgs::msg::MoveItErrorCodes::SUCCESS :
+                         moveit_msgs::msg::MoveItErrorCodes::FAILURE;
       }
       n = count % max_planning_threads_;
       if (n && !ptc())
@@ -921,7 +942,10 @@ bool ompl_interface::ModelBasedPlanningContext::solve(double timeout, unsigned i
         }
 
         bool r = ompl_parallel_plan_.solve(ptc, 1, count, hybridize_) == ompl::base::PlannerStatus::EXACT_SOLUTION;
-        result = result && r;
+        // Was this latest call successful too?
+        result.val = (result.val == moveit_msgs::msg::MoveItErrorCodes::SUCCESS && r) ?
+                         moveit_msgs::msg::MoveItErrorCodes::SUCCESS :
+                         moveit_msgs::msg::MoveItErrorCodes::FAILURE;
       }
       last_plan_time_ = ompl::time::seconds(ompl::time::now() - start);
       unregisterTerminationCondition();
@@ -929,7 +953,6 @@ bool ompl_interface::ModelBasedPlanningContext::solve(double timeout, unsigned i
   }
 
   postSolve();
-
   return result;
 }
 
@@ -943,6 +966,55 @@ void ompl_interface::ModelBasedPlanningContext::unregisterTerminationCondition()
 {
   std::unique_lock<std::mutex> slock(ptc_lock_);
   ptc_ = nullptr;
+}
+
+int32_t ompl_interface::ModelBasedPlanningContext::logPlannerStatus(const og::SimpleSetupPtr& ompl_simple_setup)
+{
+  auto result = moveit_msgs::msg::MoveItErrorCodes::PLANNING_FAILED;
+  ompl::base::PlannerStatus ompl_status = ompl_simple_setup->getLastPlannerStatus();
+  switch (ompl::base::PlannerStatus::StatusType(ompl_status))
+  {
+    case ompl::base::PlannerStatus::UNKNOWN:
+      RCLCPP_WARN(LOGGER, "Motion planning failed for an unknown reason");
+      result = moveit_msgs::msg::MoveItErrorCodes::PLANNING_FAILED;
+      break;
+    case ompl::base::PlannerStatus::INVALID_START:
+      RCLCPP_WARN(LOGGER, "Invalid start state");
+      result = moveit_msgs::msg::MoveItErrorCodes::START_STATE_INVALID;
+      break;
+    case ompl::base::PlannerStatus::INVALID_GOAL:
+      RCLCPP_WARN(LOGGER, "Invalid goal state");
+      result = moveit_msgs::msg::MoveItErrorCodes::GOAL_STATE_INVALID;
+      break;
+    case ompl::base::PlannerStatus::UNRECOGNIZED_GOAL_TYPE:
+      RCLCPP_WARN(LOGGER, "Unrecognized goal type");
+      result = moveit_msgs::msg::MoveItErrorCodes::UNRECOGNIZED_GOAL_TYPE;
+      break;
+    case ompl::base::PlannerStatus::TIMEOUT:
+      RCLCPP_WARN(LOGGER, "Timed out");
+      result = moveit_msgs::msg::MoveItErrorCodes::TIMED_OUT;
+      break;
+    case ompl::base::PlannerStatus::APPROXIMATE_SOLUTION:
+      RCLCPP_WARN(LOGGER, "Solution is approximate");
+      result = moveit_msgs::msg::MoveItErrorCodes::SUCCESS;
+      break;
+    case ompl::base::PlannerStatus::EXACT_SOLUTION:
+      result = moveit_msgs::msg::MoveItErrorCodes::SUCCESS;
+      break;
+    case ompl::base::PlannerStatus::CRASH:
+      RCLCPP_WARN(LOGGER, "OMPL crashed!");
+      result = moveit_msgs::msg::MoveItErrorCodes::CRASH;
+      break;
+    case ompl::base::PlannerStatus::ABORT:
+      RCLCPP_WARN(LOGGER, "OMPL was aborted");
+      result = moveit_msgs::msg::MoveItErrorCodes::ABORT;
+      break;
+    default:
+      // This should never happen
+      RCLCPP_WARN(LOGGER, "Unexpected PlannerStatus code from OMPL.");
+      result = moveit_msgs::msg::MoveItErrorCodes::PLANNING_FAILED;
+  }
+  return result;
 }
 
 bool ompl_interface::ModelBasedPlanningContext::terminate()

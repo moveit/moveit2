@@ -34,11 +34,13 @@
 
 /* Author: Sachin Chitta */
 
-#include <moveit/kinematics_metrics/kinematics_metrics.h>
 #include <Eigen/Dense>
 #include <Eigen/Eigenvalues>
-#include <boost/math/constants/constants.hpp>
-#include "rclcpp/rclcpp.hpp"
+#include <limits>
+#include <math.h>
+#include <moveit/kinematics_metrics/kinematics_metrics.h>
+#include <rclcpp/logger.hpp>
+#include <rclcpp/logging.hpp>
 
 namespace kinematics_metrics
 {
@@ -47,7 +49,7 @@ static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_kinematics_metri
 double KinematicsMetrics::getJointLimitsPenalty(const moveit::core::RobotState& state,
                                                 const moveit::core::JointModelGroup* joint_model_group) const
 {
-  if (fabs(penalty_multiplier_) <= boost::math::tools::epsilon<double>())
+  if (fabs(penalty_multiplier_) <= std::numeric_limits<double>::min())
     return 1.0;
   double joint_limits_multiplier(1.0);
   const std::vector<const moveit::core::JointModel*>& joint_model_vector = joint_model_group->getJointModels();
@@ -66,9 +68,8 @@ double KinematicsMetrics::getJointLimitsPenalty(const moveit::core::RobotState& 
       if (bounds[0].min_position_ == -std::numeric_limits<double>::max() ||
           bounds[0].max_position_ == std::numeric_limits<double>::max() ||
           bounds[1].min_position_ == -std::numeric_limits<double>::max() ||
-          bounds[1].max_position_ == std::numeric_limits<double>::max() ||
-          bounds[2].min_position_ == -boost::math::constants::pi<double>() ||
-          bounds[2].max_position_ == boost::math::constants::pi<double>())
+          bounds[1].max_position_ == std::numeric_limits<double>::max() || bounds[2].min_position_ == -M_PI ||
+          bounds[2].max_position_ == M_PI)
         continue;
     }
     if (joint_model->getType() == moveit::core::JointModel::FLOATING)
@@ -87,7 +88,7 @@ double KinematicsMetrics::getJointLimitsPenalty(const moveit::core::RobotState& 
     double lower_bound_distance = joint_model->distance(joint_values, &lower_bounds[0]);
     double upper_bound_distance = joint_model->distance(joint_values, &upper_bounds[0]);
     double range = lower_bound_distance + upper_bound_distance;
-    if (range <= boost::math::tools::epsilon<double>())
+    if (range <= std::numeric_limits<double>::min())
       continue;
     joint_limits_multiplier *= (lower_bound_distance * upper_bound_distance / (range * range));
   }

@@ -78,6 +78,31 @@ TEST_F(RuckigTests, basic_trajectory)
       smoother_.applySmoothing(*trajectory_, 1.0 /* max vel scaling factor */, 1.0 /* max accel scaling factor */));
 }
 
+TEST_F(RuckigTests, basic_trajectory_with_custom_limits)
+{
+  // Check the version of computeTimeStamps that takes custom velocity/acceleration limits
+
+  moveit::core::RobotState robot_state(robot_model_);
+  robot_state.setToDefaultValues();
+  // First waypoint is default joint positions
+  trajectory_->addSuffixWayPoint(robot_state, DEFAULT_TIMESTEP);
+
+  // Second waypoint has slightly-different joint positions
+  std::vector<double> joint_positions;
+  robot_state.copyJointGroupPositions(JOINT_GROUP, joint_positions);
+  joint_positions.at(0) += 0.05;
+  robot_state.setJointGroupPositions(JOINT_GROUP, joint_positions);
+  robot_state.update();
+  trajectory_->addSuffixWayPoint(robot_state, DEFAULT_TIMESTEP);
+
+  // Custom velocity & acceleration limits for some joints
+  std::unordered_map<std::string, double> vel_limits{ { "panda_joint1", 1.3 } };
+  std::unordered_map<std::string, double> accel_limits{ { "panda_joint2", 2.3 }, { "panda_joint3", 3.3 } };
+  std::unordered_map<std::string, double> jerk_limits{ { "panda_joint5", 100.0 } };
+
+  EXPECT_TRUE(smoother_.applySmoothing(*trajectory_, vel_limits, accel_limits, jerk_limits));
+}
+
 TEST_F(RuckigTests, trajectory_duration)
 {
   // Compare against the OJET online trajectory generator: https://www.trajectorygenerator.com/ojet-online/
@@ -98,7 +123,7 @@ TEST_F(RuckigTests, trajectory_duration)
   EXPECT_TRUE(
       smoother_.applySmoothing(*trajectory_, 1.0 /* max vel scaling factor */, 1.0 /* max accel scaling factor */));
   EXPECT_GT(trajectory_->getWayPointDurationFromStart(trajectory_->getWayPointCount() - 1), 0.9999 * ideal_duration);
-  EXPECT_LT(trajectory_->getWayPointDurationFromStart(trajectory_->getWayPointCount() - 1), 1.3 * ideal_duration);
+  EXPECT_LT(trajectory_->getWayPointDurationFromStart(trajectory_->getWayPointCount() - 1), 1.5 * ideal_duration);
 }
 
 TEST_F(RuckigTests, single_waypoint)

@@ -44,11 +44,11 @@
 #include <std_msgs/msg/string.hpp>
 #include <rclcpp/rclcpp.hpp>
 #include <moveit/controller_manager/controller_manager.h>
-#include <boost/thread.hpp>
 #include <pluginlib/class_loader.hpp>
 
 #include <memory>
 #include <deque>
+#include <thread>
 
 #include "moveit_trajectory_execution_manager_export.h"
 
@@ -66,11 +66,11 @@ public:
 
   /// Definition of the function signature that is called when the execution of all the pushed trajectories completes.
   /// The status of the overall execution is passed as argument
-  typedef boost::function<void(const moveit_controller_manager::ExecutionStatus&)> ExecutionCompleteCallback;
+  typedef std::function<void(const moveit_controller_manager::ExecutionStatus&)> ExecutionCompleteCallback;
 
   /// Definition of the function signature that is called when the execution of a pushed trajectory completes
   /// successfully.
-  using PathSegmentCompleteCallback = boost::function<void(std::size_t)>;
+  using PathSegmentCompleteCallback = std::function<void(std::size_t)>;
 
   /// Data structure that represents information necessary to execute a trajectory
   struct TrajectoryExecutionContext
@@ -167,41 +167,6 @@ public:
   /// This is a blocking call for the execution of the passed in trajectories. This just calls execute() and
   /// waitForExecution()
   moveit_controller_manager::ExecutionStatus executeAndWait(bool auto_clear = true);
-
-  /// Add a trajectory for immediate execution. Optionally specify a controller to use for the trajectory. If no
-  /// controller is specified, a default is used. This call is non-blocking.
-  bool pushAndExecute(const moveit_msgs::msg::RobotTrajectory& trajectory, const std::string& controller = "");
-
-  /// Add a trajectory for immediate execution. Optionally specify a controller to use for the trajectory. If no
-  /// controller is specified, a default is used. This call is non-blocking.
-  bool pushAndExecute(const trajectory_msgs::msg::JointTrajectory& trajectory, const std::string& controller = "");
-
-  /// Add a trajectory that consists of a single state for immediate execution. Optionally specify a controller to use
-  /// for the trajectory.
-  /// If no controller is specified, a default is used. This call is non-blocking.
-  bool pushAndExecute(const sensor_msgs::msg::JointState& state, const std::string& controller = "");
-
-  /// Add a trajectory for immediate execution. Optionally specify a set of controllers to consider using for the
-  /// trajectory. Multiple controllers can be used simultaneously
-  /// to execute the different parts of the trajectory. If multiple controllers can be used, preference is given to the
-  /// already loaded ones.
-  /// If no controller is specified, a default is used. This call is non-blocking.
-  bool pushAndExecute(const trajectory_msgs::msg::JointTrajectory& trajectory,
-                      const std::vector<std::string>& controllers);
-
-  /// Add a trajectory for immediate execution. Optionally specify a set of controllers to consider using for the
-  /// trajectory. Multiple controllers can be used simultaneously
-  /// to execute the different parts of the trajectory. If multiple controllers can be used, preference is given to the
-  /// already loaded ones.
-  /// If no controller is specified, a default is used. This call is non-blocking.
-  bool pushAndExecute(const moveit_msgs::msg::RobotTrajectory& trajectory, const std::vector<std::string>& controllers);
-
-  /// Add a trajectory that consists of a single state for immediate execution. Optionally specify a set of controllers
-  /// to consider using for the trajectory.
-  /// Multiple controllers can be used simultaneously to execute the different parts of the trajectory. If multiple
-  /// controllers can be used, preference
-  /// is given to the already loaded ones. If no controller is specified, a default is used. This call is non-blocking.
-  bool pushAndExecute(const sensor_msgs::msg::JointState& state, const std::vector<std::string>& controllers);
 
   /// Wait until the execution is complete. This only works for executions started by execute().  If you call this after
   /// pushAndExecute(), it will immediately stop execution.
@@ -302,11 +267,10 @@ private:
                      bool auto_clear);
   bool executePart(std::size_t part_index);
   bool waitForRobotToStop(const TrajectoryExecutionContext& context, double wait_time = 1.0);
-  void continuousExecutionThread();
 
   void stopExecutionInternal();
 
-  void receiveEvent(const std_msgs::msg::String::SharedPtr event);
+  void receiveEvent(const std_msgs::msg::String::ConstSharedPtr& event);
 
   void loadControllerParams();
 
@@ -324,31 +288,22 @@ private:
   bool manage_controllers_;
 
   // thread used to execute trajectories using the execute() command
-  std::unique_ptr<boost::thread> execution_thread_;
+  std::unique_ptr<std::thread> execution_thread_;
 
-  // thread used to execute trajectories using pushAndExecute()
-  std::unique_ptr<boost::thread> continuous_execution_thread_;
-
-  boost::mutex execution_state_mutex_;
-  boost::mutex continuous_execution_mutex_;
-  boost::mutex execution_thread_mutex_;
-
-  boost::condition_variable continuous_execution_condition_;
+  std::mutex execution_state_mutex_;
+  std::mutex execution_thread_mutex_;
 
   // this condition is used to notify the completion of execution for given trajectories
-  boost::condition_variable execution_complete_condition_;
+  std::condition_variable execution_complete_condition_;
 
   moveit_controller_manager::ExecutionStatus last_execution_status_;
   std::vector<moveit_controller_manager::MoveItControllerHandlePtr> active_handles_;
   int current_context_;
   std::vector<rclcpp::Time> time_index_;  // used to find current expected trajectory location
-  mutable boost::mutex time_index_mutex_;
+  mutable std::mutex time_index_mutex_;
   bool execution_complete_;
 
-  bool stop_continuous_execution_;
-  bool run_continuous_execution_thread_;
   std::vector<TrajectoryExecutionContext*> trajectories_;
-  std::deque<TrajectoryExecutionContext*> continuous_execution_queue_;
 
   std::unique_ptr<pluginlib::ClassLoader<moveit_controller_manager::MoveItControllerManager> > controller_manager_loader_;
   moveit_controller_manager::MoveItControllerManagerPtr controller_manager_;

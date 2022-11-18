@@ -131,7 +131,7 @@ private:
 
     const moveit::core::JointModelGroup* subgroup_;
     kinematics::KinematicsBasePtr kinematics_solver_;
-    std::vector<unsigned int> bijection_;
+    std::vector<size_t> bijection_;
     ompl::base::StateSpacePtr state_space_;
     std::vector<std::string> fk_link_;
   };

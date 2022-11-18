@@ -4,6 +4,11 @@
         <description></description>
     </class>
   </library>
+  <library path="moveit_ros_control_interface_empty_plugin">
+    <class name="admittance_controller/AdmittanceController" type="moveit_ros_control_interface::EmptyControllerAllocator" base_class_type="moveit_ros_control_interface::ControllerHandleAllocator">
+      <description></description>
+    </class>
+  </library>
   <library path="moveit_ros_control_interface_gripper_plugin">
     <class name="position_controllers/GripperActionController" type="moveit_ros_control_interface::GripperControllerAllocator" base_class_type="moveit_ros_control_interface::ControllerHandleAllocator">
         <description></description>

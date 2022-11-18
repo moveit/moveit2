@@ -41,8 +41,8 @@
 #include <moveit/collision_distance_field/collision_common_distance_field.h>
 #include <moveit/collision_detection/collision_env.h>
 #include <moveit/planning_scene/planning_scene.h>
-#include <boost/thread/mutex.hpp>
 #include "rclcpp/rclcpp.hpp"
+#include <mutex>
 
 namespace collision_detection
 {
@@ -281,7 +281,7 @@ protected:
   bool getEnvironmentProximityGradients(const distance_field::DistanceFieldConstPtr& env_distance_field,
                                         GroupStateRepresentationPtr& gsr) const;
 
-  static void notifyObjectChange(CollisionEnvDistanceField* self, const ObjectConstPtr& obj, World::Action action);
+  void notifyObjectChange(const ObjectConstPtr& obj, World::Action action);
 
   // Logger
   static const rclcpp::Logger LOGGER;
@@ -296,14 +296,14 @@ protected:
   std::vector<BodyDecompositionConstPtr> link_body_decomposition_vector_;
   std::map<std::string, unsigned int> link_body_decomposition_index_map_;
 
-  mutable boost::mutex update_cache_lock_;
+  mutable std::mutex update_cache_lock_;
   DistanceFieldCacheEntryPtr distance_field_cache_entry_;
   std::map<std::string, std::map<std::string, bool>> in_group_update_map_;
   std::map<std::string, GroupStateRepresentationPtr> pregenerated_group_state_representation_map_;
 
   planning_scene::PlanningScenePtr planning_scene_;
 
-  mutable boost::mutex update_cache_lock_world_;
+  mutable std::mutex update_cache_lock_world_;
   DistanceFieldCacheEntryWorldPtr distance_field_cache_entry_world_;
   GroupStateRepresentationPtr last_gsr_;
   World::ObserverHandle observer_handle_;

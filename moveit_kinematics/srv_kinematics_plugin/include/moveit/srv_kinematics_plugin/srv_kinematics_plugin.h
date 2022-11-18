@@ -43,6 +43,7 @@
 
 // ROS2
 #include <rclcpp/rclcpp.hpp>
+#include <srv_kinematics_parameters.hpp>
 
 // System
 #include <memory>
@@ -151,5 +152,8 @@ private:
   rclcpp::Client<moveit_msgs::srv::GetPositionIK>::SharedPtr ik_service_client_;
 
   rclcpp::Node::SharedPtr node_;
+
+  std::shared_ptr<srv_kinematics::ParamListener> param_listener_;
+  srv_kinematics::Params params_;
 };
 }  // namespace srv_kinematics_plugin

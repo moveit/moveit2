@@ -1,7 +1,7 @@
 import launch_testing
 import pytest
 import unittest
-from ament_index_python.packages import get_package_share_directory
+
 from launch import LaunchDescription
 from launch_ros.actions import Node
 from launch_testing.util import KeepAliveProc
@@ -29,10 +29,7 @@ def generate_test_description():
         executable="unittest_joint_limits_aggregator",
         name="unittest_joint_limits_aggregator",
         parameters=[
-            test_config.robot_description,
-            test_config.robot_description_semantic,
-            test_config.robot_description_kinematics,
-            test_config.robot_description_planning,
+            test_config.to_dict(),
             test_param,
         ],
         output="screen",

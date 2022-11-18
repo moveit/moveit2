@@ -39,10 +39,11 @@
 #include <moveit/robot_model/joint_model_group.h>
 #include <moveit/robot_model/revolute_joint_model.h>
 #include <moveit/exceptions/exceptions.h>
-#include <boost/lexical_cast.hpp>
+#include <rclcpp/logger.hpp>
+#include <rclcpp/logging.hpp>
 #include <algorithm>
+
 #include "order_robot_model_items.inc"
-#include "rclcpp/rclcpp.hpp"
 
 namespace moveit
 {
@@ -367,9 +368,9 @@ void JointModelGroup::getVariableRandomPositionsNearBy(random_numbers::RandomNum
 {
   assert(active_joint_bounds.size() == active_joint_model_vector_.size());
   if (distances.size() != active_joint_model_vector_.size())
-    throw Exception("When sampling random values nearby for group '" + name_ + "', distances vector should be of size " +
-                    boost::lexical_cast<std::string>(active_joint_model_vector_.size()) + ", but it is of size " +
-                    boost::lexical_cast<std::string>(distances.size()));
+    throw Exception("When sampling random values nearby for group '" + name_ +
+                    "', distances vector should be of size " + std::to_string(active_joint_model_vector_.size()) +
+                    ", but it is of size " + std::to_string(distances.size()));
   for (std::size_t i = 0; i < active_joint_model_vector_.size(); ++i)
     active_joint_model_vector_[i]->getVariableRandomPositionsNearBy(rng, values + active_joint_model_start_index_[i],
                                                                     *active_joint_bounds[i],
@@ -565,7 +566,7 @@ void JointModelGroup::setDefaultIKTimeout(double ik_timeout)
 }
 
 bool JointModelGroup::computeIKIndexBijection(const std::vector<std::string>& ik_jnames,
-                                              std::vector<unsigned int>& joint_bijection) const
+                                              std::vector<size_t>& joint_bijection) const
 {
   joint_bijection.clear();
   for (const std::string& ik_jname : ik_jnames)
@@ -583,7 +584,7 @@ bool JointModelGroup::computeIKIndexBijection(const std::vector<std::string>& ik
       return false;
     }
     const JointModel* jm = getJointModel(ik_jname);
-    for (unsigned int k = 0; k < jm->getVariableCount(); ++k)
+    for (size_t k = 0; k < jm->getVariableCount(); ++k)
       joint_bijection.push_back(it->second + k);
   }
   return true;
@@ -741,7 +742,7 @@ bool JointModelGroup::isValidVelocityMove(const double* from_joint_pose, const d
                                           std::size_t array_size, double dt) const
 {
   const std::vector<const JointModel::Bounds*>& bounds = getActiveJointModelsBounds();
-  const std::vector<unsigned int>& bij = getKinematicsSolverJointBijection();
+  const std::vector<size_t>& bij = getKinematicsSolverJointBijection();
 
   for (std::size_t i = 0; i < array_size; ++i)
   {

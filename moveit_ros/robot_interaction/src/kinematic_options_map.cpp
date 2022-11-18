@@ -48,7 +48,7 @@ robot_interaction::KinematicOptionsMap::KinematicOptionsMap()
 // worry about locking.
 robot_interaction::KinematicOptions robot_interaction::KinematicOptionsMap::getOptions(const std::string& key) const
 {
-  boost::mutex::scoped_lock lock(lock_);
+  std::scoped_lock lock(lock_);
 
   if (&key == &DEFAULT)
     return defaults_;
@@ -62,7 +62,7 @@ robot_interaction::KinematicOptions robot_interaction::KinematicOptionsMap::getO
 void robot_interaction::KinematicOptionsMap::setOptions(const std::string& key, const KinematicOptions& options_delta,
                                                         KinematicOptions::OptionBitmask fields)
 {
-  boost::mutex::scoped_lock lock(lock_);
+  std::scoped_lock lock(lock_);
 
   if (&key == &ALL)
   {
@@ -113,12 +113,12 @@ void robot_interaction::KinematicOptionsMap::merge(const KinematicOptionsMap& ot
 
   // need to lock in consistent order to avoid deadlock.
   // Lock the one with lower address first.
-  boost::mutex* m1 = &lock_;
-  boost::mutex* m2 = &other.lock_;
+  std::mutex* m1 = &lock_;
+  std::mutex* m2 = &other.lock_;
   if (m2 < m1)
     std::swap(m1, m2);
-  boost::mutex::scoped_lock lock1(*m1);
-  boost::mutex::scoped_lock lock2(*m2);
+  std::scoped_lock lock1(*m1);
+  std::scoped_lock lock2(*m2);
 
   defaults_ = other.defaults_;
   for (const std::pair<const std::string, KinematicOptions>& option : other.options_)
