@@ -649,7 +649,7 @@ public:
   //      locations.push_back(location);
   //    }
   //    RCLCPP_DEBUG(LOGGER, "Move group interface has %u place locations",
-  //                    (unsigned int)locations.size());
+  //                    static_cast<unsigned int>(locations.size()));
   //    return locations;
   //  }
 

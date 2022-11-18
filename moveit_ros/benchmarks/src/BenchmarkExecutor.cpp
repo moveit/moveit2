@@ -904,7 +904,7 @@ void BenchmarkExecutor::collectMetrics(PlannerRunData& metrics,
         if (d > 0.0)  // in case of collision, distance is negative
           clearance += d;
       }
-      clearance /= (double)p.getWayPointCount();
+      clearance /= static_cast<double>(p.getWayPointCount());
 
       // compute smoothness
       const auto smoothness = [&]() {
