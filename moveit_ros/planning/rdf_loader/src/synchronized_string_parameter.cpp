@@ -39,7 +39,8 @@
 namespace rdf_loader
 {
 std::string SynchronizedStringParameter::loadInitialValue(const std::shared_ptr<rclcpp::Node>& node,
-                                                          const std::string& name, StringCallback parent_callback,
+                                                          const std::string& name,
+                                                          const StringCallback& parent_callback,
                                                           bool default_continuous_value, double default_timeout)
 {
   node_ = node;
@@ -117,13 +118,13 @@ bool SynchronizedStringParameter::shouldPublish()
   return publish_string;
 }
 
-bool SynchronizedStringParameter::waitForMessage(const rclcpp::Duration timeout)
+bool SynchronizedStringParameter::waitForMessage(const rclcpp::Duration& timeout)
 {
   auto const nd_name = std::string(node_->get_name()).append("_ssp_").append(name_);
   auto const temp_node = std::make_shared<rclcpp::Node>(nd_name);
   string_subscriber_ = temp_node->create_subscription<std_msgs::msg::String>(
       name_, rclcpp::QoS(1).transient_local().reliable(),
-      [this](const std_msgs::msg::String::SharedPtr msg) { return stringCallback(msg); });
+      [this](const std_msgs::msg::String::ConstSharedPtr& msg) { return stringCallback(msg); });
 
   rclcpp::WaitSet wait_set;
   wait_set.add_subscription(string_subscriber_);
@@ -142,7 +143,7 @@ bool SynchronizedStringParameter::waitForMessage(const rclcpp::Duration timeout)
   return false;
 }
 
-void SynchronizedStringParameter::stringCallback(const std_msgs::msg::String::SharedPtr msg)
+void SynchronizedStringParameter::stringCallback(const std_msgs::msg::String::ConstSharedPtr& msg)
 {
   if (msg->data == content_)
   {

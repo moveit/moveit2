@@ -49,9 +49,9 @@ public:
   void initialize() override;
 
 private:
-  bool computeService(const std::shared_ptr<rmw_request_id_t> request_header,
-                      const std::shared_ptr<moveit_msgs::srv::GetStateValidity::Request> req,
-                      std::shared_ptr<moveit_msgs::srv::GetStateValidity::Response> res);
+  bool computeService(const std::shared_ptr<rmw_request_id_t>& request_header,
+                      const std::shared_ptr<moveit_msgs::srv::GetStateValidity::Request>& req,
+                      const std::shared_ptr<moveit_msgs::srv::GetStateValidity::Response>& res);
 
   rclcpp::Service<moveit_msgs::srv::GetStateValidity>::SharedPtr validity_service_;
 };

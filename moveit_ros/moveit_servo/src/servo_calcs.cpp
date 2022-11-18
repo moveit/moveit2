@@ -70,7 +70,7 @@ int const THREAD_PRIORITY = 40;
 }  // namespace
 
 // Constructor for the class that handles servoing calculations
-ServoCalcs::ServoCalcs(rclcpp::Node::SharedPtr node,
+ServoCalcs::ServoCalcs(const rclcpp::Node::SharedPtr& node,
                        const std::shared_ptr<const moveit_servo::ServoParameters>& parameters,
                        const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor)
   : node_(node)
@@ -104,37 +104,38 @@ ServoCalcs::ServoCalcs(rclcpp::Node::SharedPtr node,
   // Subscribe to command topics
   twist_stamped_sub_ = node_->create_subscription<geometry_msgs::msg::TwistStamped>(
       parameters_->cartesian_command_in_topic, rclcpp::SystemDefaultsQoS(),
-      [this](const geometry_msgs::msg::TwistStamped::SharedPtr msg) { return twistStampedCB(msg); });
+      [this](const geometry_msgs::msg::TwistStamped::ConstSharedPtr& msg) { return twistStampedCB(msg); });
 
   joint_cmd_sub_ = node_->create_subscription<control_msgs::msg::JointJog>(
       parameters_->joint_command_in_topic, rclcpp::SystemDefaultsQoS(),
-      [this](const control_msgs::msg::JointJog::SharedPtr msg) { return jointCmdCB(msg); });
+      [this](const control_msgs::msg::JointJog::ConstSharedPtr& msg) { return jointCmdCB(msg); });
 
   // ROS Server for allowing drift in some dimensions
   drift_dimensions_server_ = node_->create_service<moveit_msgs::srv::ChangeDriftDimensions>(
-      "~/change_drift_dimensions", [this](const std::shared_ptr<moveit_msgs::srv::ChangeDriftDimensions::Request> req,
-                                          std::shared_ptr<moveit_msgs::srv::ChangeDriftDimensions::Response> res) {
+      "~/change_drift_dimensions",
+      [this](const std::shared_ptr<moveit_msgs::srv::ChangeDriftDimensions::Request>& req,
+             const std::shared_ptr<moveit_msgs::srv::ChangeDriftDimensions::Response>& res) {
         return changeDriftDimensions(req, res);
       });
 
   // ROS Server for changing the control dimensions
   control_dimensions_server_ = node_->create_service<moveit_msgs::srv::ChangeControlDimensions>(
       "~/change_control_dimensions",
-      [this](const std::shared_ptr<moveit_msgs::srv::ChangeControlDimensions::Request> req,
-             std::shared_ptr<moveit_msgs::srv::ChangeControlDimensions::Response> res) {
+      [this](const std::shared_ptr<moveit_msgs::srv::ChangeControlDimensions::Request>& req,
+             const std::shared_ptr<moveit_msgs::srv::ChangeControlDimensions::Response>& res) {
         return changeControlDimensions(req, res);
       });
 
   // ROS Server to reset the status, e.g. so the arm can move again after a collision
   reset_servo_status_ = node_->create_service<std_srvs::srv::Empty>(
       "~/reset_servo_status",
-      [this](const std::shared_ptr<std_srvs::srv::Empty::Request> req,
-             std::shared_ptr<std_srvs::srv::Empty::Response> res) { return resetServoStatus(req, res); });
+      [this](const std::shared_ptr<std_srvs::srv::Empty::Request>& req,
+             const std::shared_ptr<std_srvs::srv::Empty::Response>& res) { return resetServoStatus(req, res); });
 
   // Subscribe to the collision_check topic
   collision_velocity_scale_sub_ = node_->create_subscription<std_msgs::msg::Float64>(
       "~/collision_velocity_scale", rclcpp::SystemDefaultsQoS(),
-      [this](const std_msgs::msg::Float64::SharedPtr msg) { return collisionVelocityScaleCB(msg); });
+      [this](const std_msgs::msg::Float64::ConstSharedPtr& msg) { return collisionVelocityScaleCB(msg); });
 
   // Publish freshly-calculated joints to the robot.
   // Put the outgoing msg in the right format (trajectory_msgs/JointTrajectory or std_msgs/Float64MultiArray).
@@ -245,6 +246,18 @@ void ServoCalcs::start()
   last_sent_command_ = std::move(initial_joint_trajectory);
 
   current_state_ = planning_scene_monitor_->getStateMonitor()->getCurrentState();
+
+  // Check that all links are known to the robot
+  auto check_link_is_known = [this](const std::string& frame_name) {
+    if (!current_state_->knowsFrameTransform(frame_name))
+    {
+      throw std::runtime_error{ "Unknown frame: " + frame_name };
+    }
+  };
+  check_link_is_known(parameters_->planning_frame);
+  check_link_is_known(parameters_->ee_frame_name);
+  check_link_is_known(robot_link_command_frame_);
+
   tf_moveit_to_ee_frame_ = current_state_->getGlobalLinkTransform(parameters_->planning_frame).inverse() *
                            current_state_->getGlobalLinkTransform(parameters_->ee_frame_name);
   tf_moveit_to_robot_cmd_frame_ = current_state_->getGlobalLinkTransform(parameters_->planning_frame).inverse() *
@@ -531,6 +544,16 @@ rcl_interfaces::msg::SetParametersResult ServoCalcs::robotLinkCommandFrameCallba
 {
   const std::lock_guard<std::mutex> lock(main_loop_mutex_);
   rcl_interfaces::msg::SetParametersResult result;
+
+  // Check that the new frame is known
+  if (!current_state_->knowsFrameTransform(parameter.as_string()))
+  {
+    RCLCPP_ERROR_STREAM(LOGGER, "Failed to change robot_link_command_frame. Passed frame '" << parameter.as_string()
+                                                                                            << "' is unknown");
+    result.successful = false;
+    return result;
+  }
+
   result.successful = true;
   robot_link_command_frame_ = parameter.as_string();
   RCLCPP_INFO_STREAM(LOGGER, "robot_link_command_frame changed to: " + robot_link_command_frame_);
@@ -1005,6 +1028,15 @@ bool ServoCalcs::checkValidCommand(const geometry_msgs::msg::TwistStamped& cmd)
     }
   }
 
+  // Check that the command frame is known
+  if (!cmd.header.frame_id.empty() && !current_state_->knowsFrameTransform(cmd.header.frame_id))
+  {
+    rclcpp::Clock& clock = *node_->get_clock();
+    RCLCPP_WARN_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD,
+                                "Commanded frame '" << cmd.header.frame_id << "' is unknown, skipping this command");
+    return false;
+  }
+
   return true;
 }
 
@@ -1172,7 +1204,7 @@ bool ServoCalcs::getEEFrameTransform(geometry_msgs::msg::TransformStamped& trans
   return true;
 }
 
-void ServoCalcs::twistStampedCB(const geometry_msgs::msg::TwistStamped::SharedPtr msg)
+void ServoCalcs::twistStampedCB(const geometry_msgs::msg::TwistStamped::ConstSharedPtr& msg)
 {
   const std::lock_guard<std::mutex> lock(main_loop_mutex_);
   latest_twist_stamped_ = msg;
@@ -1186,7 +1218,7 @@ void ServoCalcs::twistStampedCB(const geometry_msgs::msg::TwistStamped::SharedPt
   input_cv_.notify_all();
 }
 
-void ServoCalcs::jointCmdCB(const control_msgs::msg::JointJog::SharedPtr msg)
+void ServoCalcs::jointCmdCB(const control_msgs::msg::JointJog::ConstSharedPtr& msg)
 {
   const std::lock_guard<std::mutex> lock(main_loop_mutex_);
   latest_joint_cmd_ = msg;
@@ -1200,13 +1232,13 @@ void ServoCalcs::jointCmdCB(const control_msgs::msg::JointJog::SharedPtr msg)
   input_cv_.notify_all();
 }
 
-void ServoCalcs::collisionVelocityScaleCB(const std_msgs::msg::Float64::SharedPtr msg)
+void ServoCalcs::collisionVelocityScaleCB(const std_msgs::msg::Float64::ConstSharedPtr& msg)
 {
   collision_velocity_scale_ = msg.get()->data;
 }
 
-void ServoCalcs::changeDriftDimensions(const std::shared_ptr<moveit_msgs::srv::ChangeDriftDimensions::Request> req,
-                                       std::shared_ptr<moveit_msgs::srv::ChangeDriftDimensions::Response> res)
+void ServoCalcs::changeDriftDimensions(const std::shared_ptr<moveit_msgs::srv::ChangeDriftDimensions::Request>& req,
+                                       const std::shared_ptr<moveit_msgs::srv::ChangeDriftDimensions::Response>& res)
 {
   drift_dimensions_[0] = req->drift_x_translation;
   drift_dimensions_[1] = req->drift_y_translation;
@@ -1218,8 +1250,8 @@ void ServoCalcs::changeDriftDimensions(const std::shared_ptr<moveit_msgs::srv::C
   res->success = true;
 }
 
-void ServoCalcs::changeControlDimensions(const std::shared_ptr<moveit_msgs::srv::ChangeControlDimensions::Request> req,
-                                         std::shared_ptr<moveit_msgs::srv::ChangeControlDimensions::Response> res)
+void ServoCalcs::changeControlDimensions(const std::shared_ptr<moveit_msgs::srv::ChangeControlDimensions::Request>& req,
+                                         const std::shared_ptr<moveit_msgs::srv::ChangeControlDimensions::Response>& res)
 {
   control_dimensions_[0] = req->control_x_translation;
   control_dimensions_[1] = req->control_y_translation;
@@ -1231,8 +1263,8 @@ void ServoCalcs::changeControlDimensions(const std::shared_ptr<moveit_msgs::srv:
   res->success = true;
 }
 
-bool ServoCalcs::resetServoStatus(const std::shared_ptr<std_srvs::srv::Empty::Request> /*req*/,
-                                  std::shared_ptr<std_srvs::srv::Empty::Response> /*res*/)
+bool ServoCalcs::resetServoStatus(const std::shared_ptr<std_srvs::srv::Empty::Request>& /*req*/,
+                                  const std::shared_ptr<std_srvs::srv::Empty::Response>& /*res*/)
 {
   status_ = StatusCode::NO_WARNING;
   return true;

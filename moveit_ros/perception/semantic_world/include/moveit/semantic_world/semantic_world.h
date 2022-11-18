@@ -67,7 +67,7 @@ public:
    * @brief A (simple) semantic world representation for pick and place and other tasks.
    * Currently this is used only to represent tables.
    */
-  SemanticWorld(const rclcpp::Node::SharedPtr node, const planning_scene::PlanningSceneConstPtr& planning_scene);
+  SemanticWorld(const rclcpp::Node::SharedPtr& node, const planning_scene::PlanningSceneConstPtr& planning_scene);
 
   /**
    * @brief Get all the tables within a region of interest
@@ -136,7 +136,7 @@ private:
 
   shapes::Mesh* orientPlanarPolygon(const shapes::Mesh& polygon) const;
 
-  void tableCallback(const object_recognition_msgs::msg::TableArray::SharedPtr msg);
+  void tableCallback(const object_recognition_msgs::msg::TableArray::ConstSharedPtr& msg);
 
   void transformTableArray(object_recognition_msgs::msg::TableArray& table_array) const;
 

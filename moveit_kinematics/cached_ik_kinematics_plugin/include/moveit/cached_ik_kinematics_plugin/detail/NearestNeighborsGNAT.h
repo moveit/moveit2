@@ -39,6 +39,7 @@
 #pragma once
 
 #include <moveit/exceptions/exceptions.h>
+#include <rsl/random.hpp>
 #include <algorithm>
 #include <queue>
 #include <unordered_set>
@@ -498,7 +499,8 @@ protected:
       {
         // make sure degree lies between minDegree_ and maxDegree_
         children_[i]->degree_ =
-            std::min(std::max((unsigned int)((degree_ * children_[i]->data_.size()) / data_.size()), gnat.minDegree_),
+            std::min(std::max(static_cast<unsigned int>(((degree_ * children_[i]->data_.size()) / data_.size())),
+                              gnat.minDegree_),
                      gnat.maxDegree_);
         // singleton
         if (children_[i]->minRadius_ >= std::numeric_limits<double>::infinity())
@@ -552,7 +554,7 @@ protected:
         std::vector<int> permutation(children_.size());
         for (unsigned int i = 0; i < permutation.size(); ++i)
           permutation[i] = i;
-        std::random_shuffle(permutation.begin(), permutation.end());
+        std::shuffle(permutation.begin(), permutation.end(), rsl::rng());
 
         for (unsigned int i = 0; i < children_.size(); ++i)
           if (permutation[i] >= 0)
@@ -606,7 +608,7 @@ protected:
         std::vector<int> permutation(children_.size());
         for (unsigned int i = 0; i < permutation.size(); ++i)
           permutation[i] = i;
-        std::random_shuffle(permutation.begin(), permutation.end());
+        std::shuffle(permutation.begin(), permutation.end(), rsl::rng());
 
         for (unsigned int i = 0; i < children_.size(); ++i)
           if (permutation[i] >= 0)

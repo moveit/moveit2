@@ -799,7 +799,7 @@ bool VisibilityConstraint::configure(const moveit_msgs::msg::VisibilityConstrain
 
   // compute the points on the base circle of the cone that make up the cone sides
   points_.clear();
-  double delta = 2.0 * M_PI / (double)cone_sides_;
+  double delta = 2.0 * M_PI / static_cast<double>(cone_sides_);
   double a = 0.0;
   for (unsigned int i = 0; i < cone_sides_; ++i, a += delta)
   {

@@ -114,10 +114,10 @@ private:
   void unsubscribe();
 
   /// Called by InteractiveMarkerClient when successfully initialized.
-  void initializeCallback(visualization_msgs::srv::GetInteractiveMarkers::Response::SharedPtr /*msg*/);
+  void initializeCallback(const visualization_msgs::srv::GetInteractiveMarkers::Response::SharedPtr& /*msg*/);
 
   /// Called by InteractiveMarkerClient when an update from a server is received.
-  void updateCallback(visualization_msgs::msg::InteractiveMarkerUpdate::ConstSharedPtr msg);
+  void updateCallback(const visualization_msgs::msg::InteractiveMarkerUpdate::ConstSharedPtr& msg);
 
   /// Called by InteractiveMarkerClient when it resets.
   void resetCallback();

@@ -19,6 +19,7 @@
 
   <depend>moveit_core</depend>
   <depend>rclcpp</depend>
+  <depend>rsl</depend>
   <depend>trajectory_msgs</depend>
 
   <test_depend>ament_lint_auto</test_depend>

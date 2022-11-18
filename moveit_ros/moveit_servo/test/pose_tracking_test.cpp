@@ -159,7 +159,7 @@ TEST_F(PoseTrackingFixture, OutgoingMsgTest)
   // and test some conditions
   trajectory_msgs::msg::JointTrajectory last_received_msg;
   std::function<void(const trajectory_msgs::msg::JointTrajectory::ConstSharedPtr)> traj_callback =
-      [&/* this */](const trajectory_msgs::msg::JointTrajectory::ConstSharedPtr msg) {
+      [&/* this */](const trajectory_msgs::msg::JointTrajectory::ConstSharedPtr& msg) {
         EXPECT_EQ(msg->header.frame_id, "panda_link0");
 
         // Exact joint positions may vary based on IK solver

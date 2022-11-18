@@ -270,7 +270,7 @@ private:
 
   void stopExecutionInternal();
 
-  void receiveEvent(const std_msgs::msg::String::SharedPtr event);
+  void receiveEvent(const std_msgs::msg::String::ConstSharedPtr& event);
 
   void loadControllerParams();
 

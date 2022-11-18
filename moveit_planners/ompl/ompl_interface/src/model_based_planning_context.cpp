@@ -968,7 +968,7 @@ void ompl_interface::ModelBasedPlanningContext::unregisterTerminationCondition()
   ptc_ = nullptr;
 }
 
-int32_t ompl_interface::ModelBasedPlanningContext::logPlannerStatus(og::SimpleSetupPtr ompl_simple_setup)
+int32_t ompl_interface::ModelBasedPlanningContext::logPlannerStatus(const og::SimpleSetupPtr& ompl_simple_setup)
 {
   auto result = moveit_msgs::msg::MoveItErrorCodes::PLANNING_FAILED;
   ompl::base::PlannerStatus ompl_status = ompl_simple_setup->getLastPlannerStatus();

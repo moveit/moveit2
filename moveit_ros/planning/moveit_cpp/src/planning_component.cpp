@@ -57,7 +57,6 @@ PlanningComponent::PlanningComponent(const std::string& group_name, const MoveIt
     RCLCPP_FATAL_STREAM(LOGGER, error);
     throw std::runtime_error(error);
   }
-  planning_pipeline_names_ = moveit_cpp_->getPlanningPipelineNames(group_name);
   plan_request_parameters_.load(node_);
   RCLCPP_DEBUG_STREAM(
       LOGGER, "Default plan request parameters loaded with --"
@@ -79,7 +78,6 @@ PlanningComponent::PlanningComponent(const std::string& group_name, const rclcpp
     RCLCPP_FATAL_STREAM(LOGGER, error);
     throw std::runtime_error(error);
   }
-  planning_pipeline_names_ = moveit_cpp_->getPlanningPipelineNames(group_name);
 }
 
 const std::vector<std::string> PlanningComponent::getNamedTargetStates()
@@ -178,7 +176,9 @@ planning_interface::MotionPlanResponse PlanningComponent::plan(const PlanRequest
 
   // Run planning attempt
   ::planning_interface::MotionPlanResponse res;
-  if (planning_pipeline_names_.find(parameters.planning_pipeline) == planning_pipeline_names_.end())
+  const auto& pipelines = moveit_cpp_->getPlanningPipelines();
+  auto it = pipelines.find(parameters.planning_pipeline);
+  if (it == pipelines.end())
   {
     RCLCPP_ERROR(LOGGER, "No planning pipeline available for name '%s'", parameters.planning_pipeline.c_str());
     plan_solution.error_code_ = moveit::core::MoveItErrorCode::FAILURE;
@@ -188,8 +188,7 @@ planning_interface::MotionPlanResponse PlanningComponent::plan(const PlanRequest
     }
     return plan_solution;
   }
-  const planning_pipeline::PlanningPipelinePtr pipeline =
-      moveit_cpp_->getPlanningPipelines().at(parameters.planning_pipeline);
+  const planning_pipeline::PlanningPipelinePtr pipeline = it->second;
   pipeline->generatePlan(planning_scene, req, res);
 
   plan_solution.error_code_ = res.error_code_;
@@ -227,9 +226,10 @@ planning_interface::MotionPlanResponse PlanningComponent::plan(const PlanRequest
   return plan_solution;
 }
 
-planning_interface::MotionPlanResponse PlanningComponent::plan(const MultiPipelinePlanRequestParameters& parameters,
-                                                               SolutionCallbackFunction solution_selection_callback,
-                                                               StoppingCriterionFunction stopping_criterion_callback)
+planning_interface::MotionPlanResponse
+PlanningComponent::plan(const MultiPipelinePlanRequestParameters& parameters,
+                        const SolutionCallbackFunction& solution_selection_callback,
+                        StoppingCriterionFunction stopping_criterion_callback)
 {
   // Create solutions container
   PlanSolutions planning_solutions{ parameters.multi_plan_request_parameters.size() };

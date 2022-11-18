@@ -41,8 +41,9 @@
 
 namespace moveit_setup
 {
-RVizPanel::RVizPanel(QWidget* parent, rviz_common::ros_integration::RosNodeAbstractionIface::WeakPtr node_abstraction,
-                     DataWarehousePtr config_data)
+RVizPanel::RVizPanel(QWidget* parent,
+                     const rviz_common::ros_integration::RosNodeAbstractionIface::WeakPtr& node_abstraction,
+                     const DataWarehousePtr& config_data)
   : QWidget(parent)
   , parent_(parent)
   , node_abstraction_(node_abstraction)

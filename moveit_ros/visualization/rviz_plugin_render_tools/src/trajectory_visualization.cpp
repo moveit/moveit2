@@ -185,7 +185,7 @@ void TrajectoryVisualization::onInitialize(const rclcpp::Node::SharedPtr& node, 
 
   trajectory_topic_sub_ = node_->create_subscription<moveit_msgs::msg::DisplayTrajectory>(
       trajectory_topic_property_->getStdString(), 2,
-      [this](const moveit_msgs::msg::DisplayTrajectory::ConstSharedPtr msg) { return incomingDisplayTrajectory(msg); });
+      [this](const moveit_msgs::msg::DisplayTrajectory::ConstSharedPtr& msg) { return incomingDisplayTrajectory(msg); });
 }
 
 void TrajectoryVisualization::setName(const QString& name)
@@ -294,7 +294,7 @@ void TrajectoryVisualization::changedTrajectoryTopic()
   {
     trajectory_topic_sub_ = node_->create_subscription<moveit_msgs::msg::DisplayTrajectory>(
         trajectory_topic_property_->getStdString(), 2,
-        [this](const moveit_msgs::msg::DisplayTrajectory::ConstSharedPtr msg) {
+        [this](const moveit_msgs::msg::DisplayTrajectory::ConstSharedPtr& msg) {
           return incomingDisplayTrajectory(msg);
         });
   }
@@ -536,7 +536,7 @@ void TrajectoryVisualization::update(float wall_dt, float sim_dt)
                                    (trajectory_slider_panel_ && trajectory_slider_panel_->isVisible())));
 }
 
-void TrajectoryVisualization::incomingDisplayTrajectory(const moveit_msgs::msg::DisplayTrajectory::ConstSharedPtr msg)
+void TrajectoryVisualization::incomingDisplayTrajectory(const moveit_msgs::msg::DisplayTrajectory::ConstSharedPtr& msg)
 {
   // Error check
   if (!robot_state_ || !robot_model_)

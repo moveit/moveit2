@@ -107,7 +107,7 @@ public:
     // Add new collision object as soon as global trajectory is available.
     global_solution_subscriber_ = node_->create_subscription<moveit_msgs::msg::MotionPlanResponse>(
         "global_trajectory", rclcpp::SystemDefaultsQoS(),
-        [this](const moveit_msgs::msg::MotionPlanResponse::SharedPtr /* unused */) {
+        [this](const moveit_msgs::msg::MotionPlanResponse::ConstSharedPtr& /* unused */) {
           // Remove old collision objects
           collision_object_1_.operation = collision_object_1_.REMOVE;
 
@@ -263,8 +263,8 @@ public:
           }
         };
     send_goal_options.feedback_callback =
-        [](rclcpp_action::ClientGoalHandle<moveit_msgs::action::HybridPlanner>::SharedPtr /*unused*/,
-           const std::shared_ptr<const moveit_msgs::action::HybridPlanner::Feedback> feedback) {
+        [](const rclcpp_action::ClientGoalHandle<moveit_msgs::action::HybridPlanner>::SharedPtr& /*unused*/,
+           const std::shared_ptr<const moveit_msgs::action::HybridPlanner::Feedback>& feedback) {
           RCLCPP_INFO(LOGGER, feedback->feedback.c_str());
         };
 

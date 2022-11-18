@@ -40,7 +40,7 @@ namespace chomp_interface
 {
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("chomp_optimizer");
 
-CHOMPInterface::CHOMPInterface(rclcpp::Node::SharedPtr node) : ChompPlanner(), node_(node)
+CHOMPInterface::CHOMPInterface(const rclcpp::Node::SharedPtr& node) : ChompPlanner(), node_(node)
 {
   loadParams();
 }

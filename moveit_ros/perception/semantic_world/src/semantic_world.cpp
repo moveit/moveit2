@@ -60,14 +60,14 @@ namespace semantic_world
 {
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.ros.perception.semantic_world");
 
-SemanticWorld::SemanticWorld(const rclcpp::Node::SharedPtr node,
+SemanticWorld::SemanticWorld(const rclcpp::Node::SharedPtr& node,
                              const planning_scene::PlanningSceneConstPtr& planning_scene)
   : planning_scene_(planning_scene), node_handle_(node)
 
 {
   table_subscriber_ = node_handle_->create_subscription<object_recognition_msgs::msg::TableArray>(
       "table_array", 1,
-      [this](const object_recognition_msgs::msg::TableArray::SharedPtr msg) { return tableCallback(msg); });
+      [this](const object_recognition_msgs::msg::TableArray::ConstSharedPtr& msg) { return tableCallback(msg); });
   visualization_publisher_ =
       node_handle_->create_publisher<visualization_msgs::msg::MarkerArray>("visualize_place", 20);
   collision_object_publisher_ =
@@ -377,7 +377,8 @@ SemanticWorld::generatePlacePoses(const object_recognition_msgs::msg::Table& tab
         double result = cv::pointPolygonTest(contours[0], point2f, true);
         if (static_cast<int>(result) >= static_cast<int>(min_distance_from_edge * scale_factor))
         {
-          Eigen::Vector3d point((double)(point_x) / scale_factor + x_min, (double)(point_y) / scale_factor + y_min,
+          Eigen::Vector3d point(static_cast<double>(point_x) / scale_factor + x_min,
+                                static_cast<double>(point_y) / scale_factor + y_min,
                                 height_above_table + mm * delta_height);
           Eigen::Isometry3d pose;
           tf2::fromMsg(table.pose, pose);
@@ -473,7 +474,7 @@ std::string SemanticWorld::findObjectTable(const geometry_msgs::msg::Pose& pose,
   return std::string();
 }
 
-void SemanticWorld::tableCallback(const object_recognition_msgs::msg::TableArray::SharedPtr msg)
+void SemanticWorld::tableCallback(const object_recognition_msgs::msg::TableArray::ConstSharedPtr& msg)
 {
   table_array_ = *msg;
   RCLCPP_INFO(LOGGER, "Table callback with %d tables", static_cast<int>(table_array_.tables.size()));

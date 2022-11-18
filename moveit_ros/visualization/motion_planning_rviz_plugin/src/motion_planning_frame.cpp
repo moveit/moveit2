@@ -268,25 +268,25 @@ void MotionPlanningFrame::allowExternalProgramCommunication(bool enable)
     using std::placeholders::_1;
     plan_subscriber_ = node_->create_subscription<std_msgs::msg::Empty>(
         "/rviz/moveit/plan", 1,
-        [this](const std_msgs::msg::Empty::ConstSharedPtr msg) { return remotePlanCallback(msg); });
+        [this](const std_msgs::msg::Empty::ConstSharedPtr& msg) { return remotePlanCallback(msg); });
     execute_subscriber_ = node_->create_subscription<std_msgs::msg::Empty>(
         "/rviz/moveit/execute", 1,
-        [this](const std_msgs::msg::Empty::ConstSharedPtr msg) { return remoteExecuteCallback(msg); });
+        [this](const std_msgs::msg::Empty::ConstSharedPtr& msg) { return remoteExecuteCallback(msg); });
     stop_subscriber_ = node_->create_subscription<std_msgs::msg::Empty>(
         "/rviz/moveit/stop", 1,
-        [this](const std_msgs::msg::Empty::ConstSharedPtr msg) { return remoteStopCallback(msg); });
+        [this](const std_msgs::msg::Empty::ConstSharedPtr& msg) { return remoteStopCallback(msg); });
     update_start_state_subscriber_ = node_->create_subscription<std_msgs::msg::Empty>(
         "/rviz/moveit/update_start_state", 1,
-        [this](const std_msgs::msg::Empty::ConstSharedPtr msg) { return remoteUpdateStartStateCallback(msg); });
+        [this](const std_msgs::msg::Empty::ConstSharedPtr& msg) { return remoteUpdateStartStateCallback(msg); });
     update_goal_state_subscriber_ = node_->create_subscription<std_msgs::msg::Empty>(
         "/rviz/moveit/update_goal_state", 1,
-        [this](const std_msgs::msg::Empty::ConstSharedPtr msg) { return remoteUpdateGoalStateCallback(msg); });
+        [this](const std_msgs::msg::Empty::ConstSharedPtr& msg) { return remoteUpdateGoalStateCallback(msg); });
     update_custom_start_state_subscriber_ = node_->create_subscription<moveit_msgs::msg::RobotState>(
-        "/rviz/moveit/update_custom_start_state", 1, [this](const moveit_msgs::msg::RobotState::ConstSharedPtr msg) {
+        "/rviz/moveit/update_custom_start_state", 1, [this](const moveit_msgs::msg::RobotState::ConstSharedPtr& msg) {
           return remoteUpdateCustomStartStateCallback(msg);
         });
     update_custom_goal_state_subscriber_ = node_->create_subscription<moveit_msgs::msg::RobotState>(
-        "/rviz/moveit/update_custom_goal_state", 1, [this](const moveit_msgs::msg::RobotState::ConstSharedPtr msg) {
+        "/rviz/moveit/update_custom_goal_state", 1, [this](const moveit_msgs::msg::RobotState::ConstSharedPtr& msg) {
           return remoteUpdateCustomGoalStateCallback(msg);
         });
   }
@@ -611,7 +611,7 @@ void MotionPlanningFrame::initFromMoveGroupNS()
 
   object_recognition_subscriber_ = node_->create_subscription<object_recognition_msgs::msg::RecognizedObjectArray>(
       "recognized_object_array", 1,
-      [this](const object_recognition_msgs::msg::RecognizedObjectArray::ConstSharedPtr msg) {
+      [this](const object_recognition_msgs::msg::RecognizedObjectArray::ConstSharedPtr& msg) {
         return listenDetectedObjects(msg);
       });
 

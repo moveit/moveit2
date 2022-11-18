@@ -1,3 +1,4 @@
+find_package(rsl REQUIRED)
 find_package(trac_ik_kinematics_plugin QUIET)
 find_package(ur_kinematics QUIET)
 
@@ -27,6 +28,7 @@ ament_target_dependencies(${MOVEIT_LIB_NAME}
   rclcpp
   moveit_core
   moveit_msgs
+  rsl
 )
 target_link_libraries(${MOVEIT_LIB_NAME}
     cached_ik_kinematics_parameters

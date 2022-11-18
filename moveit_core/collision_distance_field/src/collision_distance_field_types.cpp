@@ -450,8 +450,9 @@ void getProximityGradientMarkers(const std::string& frame_id, const std::string&
   rclcpp::Clock ros_clock;
   if (gradients.size() != posed_decompositions.size() + posed_vector_decompositions.size())
   {
-    RCLCPP_WARN(LOGGER, "Size mismatch between gradients %u and decompositions %u", (unsigned int)gradients.size(),
-                (unsigned int)(posed_decompositions.size() + posed_vector_decompositions.size()));
+    RCLCPP_WARN(LOGGER, "Size mismatch between gradients %u and decompositions %u",
+                static_cast<unsigned int>(gradients.size()),
+                static_cast<unsigned int>((posed_decompositions.size() + posed_vector_decompositions.size())));
     return;
   }
   for (unsigned int i{ 0 }; i < gradients.size(); ++i)

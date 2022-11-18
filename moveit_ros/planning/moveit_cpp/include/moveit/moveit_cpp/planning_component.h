@@ -197,7 +197,7 @@ public:
    * provided PlanRequestParameters. */
   planning_interface::MotionPlanResponse
   plan(const MultiPipelinePlanRequestParameters& parameters,
-       SolutionCallbackFunction solution_selection_callback = &getShortestSolution,
+       const SolutionCallbackFunction& solution_selection_callback = &getShortestSolution,
        StoppingCriterionFunction stopping_criterion_callback = nullptr);
 
   /** \brief Execute the latest computed solution trajectory computed by plan(). By default this function terminates
@@ -216,7 +216,6 @@ private:
   const moveit::core::JointModelGroup* joint_model_group_;
 
   // Planning
-  std::set<std::string> planning_pipeline_names_;
   // The start state used in the planning motion request
   moveit::core::RobotStatePtr considered_start_state_;
   std::vector<moveit_msgs::msg::Constraints> current_goal_constraints_;
