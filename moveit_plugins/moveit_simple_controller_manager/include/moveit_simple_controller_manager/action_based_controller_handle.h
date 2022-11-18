@@ -45,6 +45,8 @@
 
 namespace moveit_simple_controller_manager
 {
+using namespace std::chrono_literals;
+
 /*
  * This exist solely to inject addJoint/getJoints into base non-templated class.
  */
@@ -153,11 +155,28 @@ public:
     }
     else
     {
-      std::future_status status = result_future.wait_for(timeout.to_chrono<std::chrono::duration<double>>());
-      if (status == std::future_status::timeout)
+      std::future_status status;
+      if (node_->get_parameter("use_sim_time").as_bool())
       {
-        RCLCPP_WARN(LOGGER, "waitForExecution timed out");
-        return false;
+        const auto start = node_->now();
+        do
+        {
+          status = result_future.wait_for(50ms);
+          if ((status == std::future_status::timeout) and ((node_->now() - start) > timeout))
+          {
+            RCLCPP_WARN(LOGGER, "waitForExecution timed out");
+            return false;
+          }
+        } while (status == std::future_status::timeout);
+      }
+      else
+      {
+        status = result_future.wait_for(timeout.to_chrono<std::chrono::duration<double>>());
+        if (status == std::future_status::timeout)
+        {
+          RCLCPP_WARN(LOGGER, "waitForExecution timed out");
+          return false;
+        }
       }
     }
     // To accommodate for the delay after the future for the result is ready and the time controllerDoneCallback takes to finish
@@ -181,7 +200,28 @@ public:
   }
 
 protected:
+<<<<<<< HEAD
   const rclcpp::Node::SharedPtr node_;
+=======
+  /**
+   * @brief A pointer to the node, required to read parameters and get the time.
+   */
+  const rclcpp::Node::SharedPtr node_;
+
+  /**
+   * @brief Check if the controller's action server is ready to receive action goals.
+   * @return True if the action server is ready, false if it is not ready or does not exist.
+   */
+  bool isConnected() const
+  {
+    return controller_action_client_->action_server_is_ready();
+  }
+
+  /**
+   * @brief Get the full name of the action using the action namespace and base name.
+   * @return The action name.
+   */
+>>>>>>> b6fcac805 (Use emulated time in action-based controller (#899))
   std::string getActionName() const
   {
     if (namespace_.empty())
