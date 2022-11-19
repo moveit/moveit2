@@ -34,9 +34,14 @@
 
 /* Author: Ioan Sucan */
 
+<<<<<<< HEAD
 #include "moveit/py_bindings_tools/roscpp_initializer.h"
 #include "moveit/py_bindings_tools/py_conversions.h"
 #include <boost/thread.hpp>
+=======
+#include <moveit/py_bindings_tools/roscpp_initializer.h>
+#include <moveit/py_bindings_tools/py_conversions.h>
+>>>>>>> 7a1f2a101 (Use <> for non-local headers (#1734))
 #include <ros/ros.h>
 #include <memory>
 

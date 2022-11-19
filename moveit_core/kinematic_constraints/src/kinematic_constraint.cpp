@@ -51,9 +51,14 @@
 #include <memory>
 #include <typeinfo>
 
+<<<<<<< HEAD
 #include "rclcpp/rclcpp.hpp"
 #include "rclcpp/clock.hpp"
 #include "rclcpp/duration.hpp"
+=======
+#include <rclcpp/clock.hpp>
+#include <rclcpp/duration.hpp>
+>>>>>>> 7a1f2a101 (Use <> for non-local headers (#1734))
 
 namespace kinematic_constraints
 {

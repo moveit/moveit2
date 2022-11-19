@@ -43,12 +43,20 @@
 #include <deque>
 #include <memory>
 
+<<<<<<< HEAD
 #include "rcl/error_handling.h"
 #include "rcl/time.h"
 #include "rclcpp/clock.hpp"
 #include "rclcpp/rclcpp.hpp"
 #include "rclcpp/time.hpp"
 #include "rclcpp/utilities.hpp"
+=======
+#include <rcl/error_handling.h>
+#include <rcl/time.h>
+#include <rclcpp/rclcpp.hpp>
+#include <rclcpp/time.hpp>
+#include <rclcpp/utilities.hpp>
+>>>>>>> 7a1f2a101 (Use <> for non-local headers (#1734))
 
 namespace robot_trajectory
 {

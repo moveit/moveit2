@@ -24,8 +24,13 @@
 #include <limits>
 #include <string>
 
+<<<<<<< HEAD:moveit_planners/pilz_industrial_motion_planner/include/joint_limits/joint_limits_rosparam.hpp
 #include "joint_limits/joint_limits.hpp"
 #include "rclcpp/rclcpp.hpp"
+=======
+#include <joint_limits_copy/joint_limits.hpp>
+#include <rclcpp/rclcpp.hpp>
+>>>>>>> 7a1f2a101 (Use <> for non-local headers (#1734)):moveit_planners/pilz_industrial_motion_planner/include/joint_limits_copy/joint_limits_rosparam.hpp
 
 namespace joint_limits
 {

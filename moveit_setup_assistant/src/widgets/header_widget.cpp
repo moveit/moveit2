@@ -34,7 +34,11 @@
 
 /* Author: Dave Coleman */
 
+<<<<<<< HEAD:moveit_setup_assistant/src/widgets/header_widget.cpp
 #include "header_widget.h"
+=======
+#include <moveit_setup_framework/qt/helper_widgets.hpp>
+>>>>>>> 7a1f2a101 (Use <> for non-local headers (#1734)):moveit_setup_assistant/moveit_setup_framework/src/helper_widgets.cpp
 #include <QFileDialog>
 #include <QFont>
 #include <QLabel>

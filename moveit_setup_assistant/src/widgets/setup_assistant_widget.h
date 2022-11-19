@@ -40,6 +40,7 @@
 class QSplitter;
 
 // Setup Assistant
+<<<<<<< HEAD:moveit_setup_assistant/src/widgets/setup_assistant_widget.h
 #include "navigation_widget.h"
 #include "start_screen_widget.h"
 #include "default_collisions_widget.h"
@@ -53,6 +54,12 @@ class QSplitter;
 #include "configuration_files_widget.h"
 #include "perception_widget.h"
 #include "ros_controllers_widget.h"
+=======
+#include <moveit_setup_framework/qt/setup_step_widget.hpp>
+#include <moveit_setup_framework/qt/rviz_panel.hpp>
+#include <moveit_setup_framework/data_warehouse.hpp>
+#include <moveit_setup_assistant/navigation_widget.hpp>
+>>>>>>> 7a1f2a101 (Use <> for non-local headers (#1734)):moveit_setup_assistant/moveit_setup_assistant/include/moveit_setup_assistant/setup_assistant_widget.hpp
 
 #ifndef Q_MOC_RUN
 #include <moveit/setup_assistant/tools/moveit_config_data.h>

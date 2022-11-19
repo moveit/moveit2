@@ -39,7 +39,13 @@
 #include <moveit/constraint_samplers/constraint_sampler.h>
 #include <moveit/macros/class_forward.h>
 #include <random_numbers/random_numbers.h>
+<<<<<<< HEAD
 #include "rclcpp/rclcpp.hpp"
+=======
+#include <rclcpp/rclcpp.hpp>
+#include <string>
+#include <Eigen/Geometry>
+>>>>>>> 7a1f2a101 (Use <> for non-local headers (#1734))
 
 namespace constraint_samplers
 {

@@ -32,7 +32,7 @@
    Project   : moveit_servo
 */
 
-#include "moveit_servo/parameter_descriptor_builder.hpp"
+#include <moveit_servo/parameter_descriptor_builder.hpp>
 
 namespace moveit_servo
 {

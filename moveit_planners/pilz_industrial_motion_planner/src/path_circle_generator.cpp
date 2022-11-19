@@ -32,7 +32,7 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#include "pilz_industrial_motion_planner/path_circle_generator.h"
+#include <pilz_industrial_motion_planner/path_circle_generator.h>
 
 namespace pilz_industrial_motion_planner
 {

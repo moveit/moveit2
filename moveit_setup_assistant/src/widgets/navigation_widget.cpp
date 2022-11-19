@@ -34,7 +34,11 @@
 
 /* Author: Dave Coleman */
 
+<<<<<<< HEAD:moveit_setup_assistant/src/widgets/navigation_widget.cpp
 #include "navigation_widget.h"
+=======
+#include <moveit_setup_assistant/navigation_widget.hpp>
+>>>>>>> 7a1f2a101 (Use <> for non-local headers (#1734)):moveit_setup_assistant/moveit_setup_assistant/src/navigation_widget.cpp
 #include <QApplication>
 #include <QPainter>
 #include <QScrollBar>

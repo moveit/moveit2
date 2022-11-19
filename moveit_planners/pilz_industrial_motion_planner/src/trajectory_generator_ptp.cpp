@@ -32,9 +32,14 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
+<<<<<<< HEAD
 #include "pilz_industrial_motion_planner/trajectory_generator_ptp.h"
 #include "moveit/robot_state/conversions.h"
 #include <rclcpp/rclcpp.hpp>
+=======
+#include <pilz_industrial_motion_planner/trajectory_generator_ptp.h>
+#include <moveit/robot_state/conversions.h>
+>>>>>>> 7a1f2a101 (Use <> for non-local headers (#1734))
 
 #include <iostream>
 #include <sstream>

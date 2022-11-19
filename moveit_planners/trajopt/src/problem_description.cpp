@@ -46,8 +46,8 @@
 #include <trajopt_utils/logging.hpp>
 #include <trajopt_utils/vector_ops.hpp>
 
-#include "trajopt_interface/problem_description.h"
-#include "trajopt_interface/kinematic_terms.h"
+#include <trajopt_interface/problem_description.h>
+#include <trajopt_interface/kinematic_terms.h>
 
 /**
  * @brief Checks the size of the parameter given and throws if incorrect

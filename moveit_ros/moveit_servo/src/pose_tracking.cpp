@@ -32,8 +32,8 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#include "moveit_servo/pose_tracking.h"
-#include "moveit_servo/servo_parameters.h"
+#include <moveit_servo/pose_tracking.h>
+#include <moveit_servo/servo_parameters.h>
 
 #include <chrono>
 using namespace std::literals;

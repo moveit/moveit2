@@ -36,6 +36,13 @@
 
 #pragma once
 
+<<<<<<< HEAD:moveit_setup_assistant/src/widgets/configuration_files_widget.h
+=======
+#include <moveit_setup_core_plugins/configuration_files.hpp>
+#include <moveit_setup_framework/qt/setup_step_widget.hpp>
+#include <moveit_setup_framework/qt/helper_widgets.hpp>
+
+>>>>>>> 7a1f2a101 (Use <> for non-local headers (#1734)):moveit_setup_assistant/moveit_setup_core_plugins/include/moveit_setup_core_plugins/configuration_files_widget.hpp
 #include <QList>
 class QLabel;
 class QListWidget;

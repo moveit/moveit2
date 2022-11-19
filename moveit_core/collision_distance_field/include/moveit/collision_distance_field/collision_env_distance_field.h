@@ -41,8 +41,13 @@
 #include <moveit/collision_distance_field/collision_common_distance_field.h>
 #include <moveit/collision_detection/collision_env.h>
 #include <moveit/planning_scene/planning_scene.h>
+<<<<<<< HEAD
 #include <boost/thread/mutex.hpp>
 #include "rclcpp/rclcpp.hpp"
+=======
+#include <rclcpp/rclcpp.hpp>
+#include <mutex>
+>>>>>>> 7a1f2a101 (Use <> for non-local headers (#1734))
 
 namespace collision_detection
 {

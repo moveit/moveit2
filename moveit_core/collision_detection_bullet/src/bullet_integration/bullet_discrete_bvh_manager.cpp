@@ -31,7 +31,7 @@
 
 /* Author: Levi Armstrong, Jens Petit */
 
-#include "moveit/collision_detection_bullet/bullet_integration/bullet_discrete_bvh_manager.h"
+#include <moveit/collision_detection_bullet/bullet_integration/bullet_discrete_bvh_manager.h>
 
 static const rclcpp::Logger BULLET_LOGGER = rclcpp::get_logger("collision_detection.bullet");
 

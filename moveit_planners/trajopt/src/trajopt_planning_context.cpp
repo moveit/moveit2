@@ -7,8 +7,8 @@
 
 #include <Eigen/Geometry>
 
-#include "trajopt_interface/trajopt_planning_context.h"
-#include "trajopt_interface/trajopt_interface.h"
+#include <trajopt_interface/trajopt_planning_context.h>
+#include <trajopt_interface/trajopt_interface.h>
 
 namespace trajopt_interface
 {

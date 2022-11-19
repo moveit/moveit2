@@ -32,7 +32,12 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
+<<<<<<< HEAD
 #include "pilz_industrial_motion_planner/joint_limits_container.h"
+=======
+#include <pilz_industrial_motion_planner/joint_limits_container.h>
+#include <cmath>
+>>>>>>> 7a1f2a101 (Use <> for non-local headers (#1734))
 
 #include "rclcpp/rclcpp.hpp"
 #include <stdexcept>

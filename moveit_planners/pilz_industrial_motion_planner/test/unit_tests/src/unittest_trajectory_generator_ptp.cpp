@@ -36,8 +36,8 @@
 
 #include <gtest/gtest.h>
 
-#include "pilz_industrial_motion_planner/joint_limits_aggregator.h"
-#include "pilz_industrial_motion_planner/trajectory_generator_ptp.h"
+#include <pilz_industrial_motion_planner/joint_limits_aggregator.h>
+#include <pilz_industrial_motion_planner/trajectory_generator_ptp.h>
 #include "test_utils.h"
 
 #include <moveit/kinematic_constraints/utils.h>
@@ -45,7 +45,7 @@
 #include <moveit/robot_model_loader/robot_model_loader.h>
 #include <pluginlib/class_loader.hpp>
 
-#include "rclcpp/rclcpp.hpp"
+#include <rclcpp/rclcpp.hpp>
 
 // parameters from parameter server
 const std::string PARAM_PLANNING_GROUP_NAME("planning_group");

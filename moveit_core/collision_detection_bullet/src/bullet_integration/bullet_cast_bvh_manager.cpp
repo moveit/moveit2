@@ -31,7 +31,14 @@
 
 /* Author: Levi Armstrong, Jens Petit */
 
+<<<<<<< HEAD
 #include "moveit/collision_detection_bullet/bullet_integration/bullet_cast_bvh_manager.h"
+=======
+#include <moveit/collision_detection_bullet/bullet_integration/bullet_cast_bvh_manager.h>
+
+#include <rclcpp/logger.hpp>
+#include <rclcpp/logging.hpp>
+>>>>>>> 7a1f2a101 (Use <> for non-local headers (#1734))
 #include <map>
 #include <utility>
 

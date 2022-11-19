@@ -42,10 +42,10 @@
 #include <moveit/robot_model/robot_model.h>
 #include <moveit/robot_model_loader/robot_model_loader.h>
 
-#include "pilz_industrial_motion_planner/joint_limits_container.h"
-#include "pilz_industrial_motion_planner/planning_context_circ.h"
-#include "pilz_industrial_motion_planner/planning_context_lin.h"
-#include "pilz_industrial_motion_planner/planning_context_ptp.h"
+#include <pilz_industrial_motion_planner/joint_limits_container.h>
+#include <pilz_industrial_motion_planner/planning_context_circ.h>
+#include <pilz_industrial_motion_planner/planning_context_lin.h>
+#include <pilz_industrial_motion_planner/planning_context_ptp.h>
 
 #include "test_utils.h"
 

@@ -38,7 +38,12 @@
 #pragma once
 
 #include <moveit/robot_trajectory/robot_trajectory.h>
+<<<<<<< HEAD
 #include "rclcpp/rclcpp.hpp"
+=======
+#include <rclcpp/rclcpp.hpp>
+#include <moveit/trajectory_processing/time_parameterization.h>
+>>>>>>> 7a1f2a101 (Use <> for non-local headers (#1734))
 
 namespace trajectory_processing
 {

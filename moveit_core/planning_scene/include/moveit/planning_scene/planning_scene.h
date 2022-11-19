@@ -55,9 +55,16 @@
 #include <boost/function.hpp>
 #include <boost/concept_check.hpp>
 #include <memory>
+<<<<<<< HEAD
 #include "rclcpp/rclcpp.hpp"
+=======
+#include <functional>
+#include <thread>
+#include <variant>
+#include <rclcpp/rclcpp.hpp>
+>>>>>>> 7a1f2a101 (Use <> for non-local headers (#1734))
 
-#include "moveit_planning_scene_export.h"
+#include <moveit_planning_scene_export.h>
 
 /** \brief This namespace includes the central class for representing planning contexts */
 namespace planning_scene

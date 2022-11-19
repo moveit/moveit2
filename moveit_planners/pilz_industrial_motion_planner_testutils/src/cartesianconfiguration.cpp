@@ -32,7 +32,7 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#include "pilz_industrial_motion_planner_testutils/cartesianconfiguration.h"
+#include <pilz_industrial_motion_planner_testutils/cartesianconfiguration.h>
 
 #include <stdexcept>
 #if __has_include(<tf2_eigen/tf2_eigen.hpp>)

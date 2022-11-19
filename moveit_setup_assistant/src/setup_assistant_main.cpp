@@ -34,8 +34,13 @@
 
 /* Author: Dave Coleman */
 
+<<<<<<< HEAD:moveit_setup_assistant/src/setup_assistant_main.cpp
 #include "widgets/setup_assistant_widget.h"
 #include <ros/ros.h>
+=======
+#include <moveit_setup_assistant/setup_assistant_widget.hpp>
+#include <rviz_common/ros_integration/ros_client_abstraction.hpp>
+>>>>>>> 7a1f2a101 (Use <> for non-local headers (#1734)):moveit_setup_assistant/moveit_setup_assistant/src/main.cpp
 #include <QApplication>
 #include <QMessageBox>
 #include <boost/program_options.hpp>

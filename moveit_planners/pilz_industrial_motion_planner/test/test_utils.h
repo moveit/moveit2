@@ -43,10 +43,10 @@
 #endif
 
 #include <moveit_msgs/msg/motion_sequence_request.hpp>
-#include "pilz_industrial_motion_planner/limits_container.h"
-#include "pilz_industrial_motion_planner/trajectory_blend_request.h"
-#include "pilz_industrial_motion_planner/trajectory_blend_response.h"
-#include "pilz_industrial_motion_planner/trajectory_generator.h"
+#include <pilz_industrial_motion_planner/limits_container.h>
+#include <pilz_industrial_motion_planner/trajectory_blend_request.h>
+#include <pilz_industrial_motion_planner/trajectory_blend_response.h>
+#include <pilz_industrial_motion_planner/trajectory_generator.h>
 #include <boost/core/demangle.hpp>
 #include <math.h>
 #include <moveit/kinematic_constraints/utils.h>

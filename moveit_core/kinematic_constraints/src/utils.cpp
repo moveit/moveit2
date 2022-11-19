@@ -37,7 +37,16 @@
 #include <geometric_shapes/solid_primitive_dims.h>
 #include <moveit/kinematic_constraints/utils.h>
 #include <moveit/utils/message_checks.h>
+<<<<<<< HEAD
 #if __has_include(<tf2_geometry_msgs/tf2_geometry_msgs.hpp>)
+=======
+#include <rclcpp/logger.hpp>
+#include <rclcpp/logging.hpp>
+#include <rclcpp/node.hpp>
+#include <rclcpp/parameter_value.hpp>
+
+#include <rclcpp/node.hpp>
+>>>>>>> 7a1f2a101 (Use <> for non-local headers (#1734))
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
 #else
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>

@@ -33,7 +33,7 @@
  * Author: Levi Armstrong
  */
 
-#include "moveit/collision_detection_bullet/bullet_integration/contact_checker_common.h"
+#include <moveit/collision_detection_bullet/bullet_integration/contact_checker_common.h>
 
 static const rclcpp::Logger BULLET_LOGGER = rclcpp::get_logger("collision_detection.bullet");
 

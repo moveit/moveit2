@@ -53,7 +53,7 @@
 #include <memory>
 #include <thread>
 
-#include "moveit_planning_scene_monitor_export.h"
+#include <moveit_planning_scene_monitor_export.h>
 
 namespace planning_scene_monitor
 {

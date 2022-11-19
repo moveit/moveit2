@@ -34,14 +34,19 @@
 
 #include <rclcpp/logging.hpp>
 
-#include "pilz_industrial_motion_planner/pilz_industrial_motion_planner.h"
+#include <pilz_industrial_motion_planner/pilz_industrial_motion_planner.h>
 
-#include "pilz_industrial_motion_planner/planning_context_loader.h"
-#include "pilz_industrial_motion_planner/planning_context_loader_ptp.h"
-#include "pilz_industrial_motion_planner/planning_exceptions.h"
+#include <pilz_industrial_motion_planner/planning_context_loader.h>
+#include <pilz_industrial_motion_planner/planning_context_loader_ptp.h>
+#include <pilz_industrial_motion_planner/planning_exceptions.h>
 
+<<<<<<< HEAD
 #include "pilz_industrial_motion_planner/cartesian_limits_aggregator.h"
 #include "pilz_industrial_motion_planner/joint_limits_aggregator.h"
+=======
+#include "cartesian_limits_parameters.hpp"
+#include <pilz_industrial_motion_planner/joint_limits_aggregator.h>
+>>>>>>> 7a1f2a101 (Use <> for non-local headers (#1734))
 
 // Boost includes
 #include <boost/scoped_ptr.hpp>

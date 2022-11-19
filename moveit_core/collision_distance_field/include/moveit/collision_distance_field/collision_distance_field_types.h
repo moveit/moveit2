@@ -50,10 +50,19 @@
 #include <moveit/distance_field/distance_field.h>
 #include <moveit/distance_field/propagation_distance_field.h>
 #include <visualization_msgs/msg/marker_array.hpp>
+<<<<<<< HEAD
 #include "rclcpp/clock.hpp"
 #include "rclcpp/rclcpp.hpp"
 #include "rclcpp/time.hpp"
 #include "rclcpp/utilities.hpp"
+=======
+#include <rclcpp/duration.hpp>
+#include <rclcpp/logging.hpp>
+#include <rclcpp/clock.hpp>
+#include <rclcpp/rclcpp.hpp>
+#include <rclcpp/time.hpp>
+#include <rclcpp/utilities.hpp>
+>>>>>>> 7a1f2a101 (Use <> for non-local headers (#1734))
 
 namespace collision_detection
 {
