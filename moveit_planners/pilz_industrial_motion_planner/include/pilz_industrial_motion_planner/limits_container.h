@@ -34,8 +34,12 @@
 
 #pragma once
 
+<<<<<<< HEAD
 #include "pilz_industrial_motion_planner/cartesian_limit.h"
 #include "pilz_industrial_motion_planner/joint_limits_container.h"
+=======
+#include <pilz_industrial_motion_planner/joint_limits_container.h>
+>>>>>>> 7a1f2a101 (Use <> for non-local headers (#1734))
 #include <math.h>
 
 namespace pilz_industrial_motion_planner

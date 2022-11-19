@@ -34,7 +34,7 @@
 
 #pragma once
 
-#include "pilz_industrial_motion_planner/limits_container.h"
+#include <pilz_industrial_motion_planner/limits_container.h>
 
 #include <rclcpp/rclcpp.hpp>
 
@@ -44,8 +44,8 @@
 #include <atomic>
 #include <thread>
 
-#include "pilz_industrial_motion_planner/planning_context_base.h"
-#include "pilz_industrial_motion_planner/trajectory_generator_ptp.h"
+#include <pilz_industrial_motion_planner/planning_context_base.h>
+#include <pilz_industrial_motion_planner/trajectory_generator_ptp.h>
 
 namespace pilz_industrial_motion_planner
 {

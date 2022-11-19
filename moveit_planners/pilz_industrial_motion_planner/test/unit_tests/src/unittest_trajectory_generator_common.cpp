@@ -42,16 +42,16 @@
 #include <moveit/robot_state/conversions.h>
 #include <moveit/robot_state/robot_state.h>
 
-#include "pilz_industrial_motion_planner/joint_limits_aggregator.h"
-#include "pilz_industrial_motion_planner/joint_limits_container.h"
-#include "pilz_industrial_motion_planner/trajectory_generator_circ.h"
-#include "pilz_industrial_motion_planner/trajectory_generator_lin.h"
-#include "pilz_industrial_motion_planner/trajectory_generator_ptp.h"
-#include "pilz_industrial_motion_planner/trajectory_blender_transition_window.h"
+#include <pilz_industrial_motion_planner/joint_limits_aggregator.h>
+#include <pilz_industrial_motion_planner/joint_limits_container.h>
+#include <pilz_industrial_motion_planner/trajectory_generator_circ.h>
+#include <pilz_industrial_motion_planner/trajectory_generator_lin.h>
+#include <pilz_industrial_motion_planner/trajectory_generator_ptp.h>
+#include <pilz_industrial_motion_planner/trajectory_blender_transition_window.h>
 
 #include "test_utils.h"
 
-#include "rclcpp/rclcpp.hpp"
+#include <rclcpp/rclcpp.hpp>
 
 const std::string PARAM_MODEL_NO_GRIPPER_NAME{ "robot_description" };
 const std::string PARAM_MODEL_WITH_GRIPPER_NAME{ "robot_description_pg70" };

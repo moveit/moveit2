@@ -45,7 +45,7 @@
 
 #include <memory>
 
-#include "moveit_planning_pipeline_export.h"
+#include <moveit_planning_pipeline_export.h>
 
 /** \brief Planning pipeline */
 namespace planning_pipeline

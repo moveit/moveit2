@@ -32,7 +32,7 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#include "pilz_industrial_motion_planner/planning_context_loader.h"
+#include <pilz_industrial_motion_planner/planning_context_loader.h>
 
 pilz_industrial_motion_planner::PlanningContextLoader::PlanningContextLoader() : limits_set_(false), model_set_(false)
 {

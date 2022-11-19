@@ -32,7 +32,12 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
+<<<<<<< HEAD
 #include "pilz_industrial_motion_planner/limits_container.h"
+=======
+#include <pilz_industrial_motion_planner/limits_container.h>
+#include <rclcpp/logger.hpp>
+>>>>>>> 7a1f2a101 (Use <> for non-local headers (#1734))
 
 pilz_industrial_motion_planner::LimitsContainer::LimitsContainer()
   : has_joint_limits_(false), has_cartesian_limits_(false)

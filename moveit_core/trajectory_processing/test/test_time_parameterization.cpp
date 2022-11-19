@@ -42,7 +42,7 @@
 #include <moveit/trajectory_processing/iterative_spline_parameterization.h>
 #include <moveit/trajectory_processing/iterative_time_parameterization.h>
 #include <moveit/utils/robot_model_test_utils.h>
-#include "rclcpp/rclcpp.hpp"
+#include <rclcpp/rclcpp.hpp>
 
 // Logger
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_trajectory_processing.test.test_time_parameterization");

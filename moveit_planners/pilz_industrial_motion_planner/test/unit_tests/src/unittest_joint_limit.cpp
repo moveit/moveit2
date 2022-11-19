@@ -36,8 +36,8 @@
 
 #include <gtest/gtest.h>
 
-#include "pilz_industrial_motion_planner/joint_limits_extension.h"
-#include "pilz_industrial_motion_planner/joint_limits_interface_extension.h"
+#include <pilz_industrial_motion_planner/joint_limits_extension.h>
+#include <pilz_industrial_motion_planner/joint_limits_interface_extension.h>
 
 using namespace pilz_industrial_motion_planner;
 using namespace pilz_industrial_motion_planner::joint_limits_interface;
