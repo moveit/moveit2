@@ -36,7 +36,7 @@
 
 // Modified by Pilz GmbH & Co. KG
 
-#include "pilz_industrial_motion_planner/move_group_sequence_action.h"
+#include <pilz_industrial_motion_planner/move_group_sequence_action.h>
 
 #include <time.h>
 
@@ -48,8 +48,8 @@
 #include <moveit/utils/message_checks.h>
 #include <moveit/moveit_cpp/moveit_cpp.h>
 
-#include "pilz_industrial_motion_planner/command_list_manager.h"
-#include "pilz_industrial_motion_planner/trajectory_generation_exceptions.h"
+#include <pilz_industrial_motion_planner/command_list_manager.h>
+#include <pilz_industrial_motion_planner/trajectory_generation_exceptions.h>
 
 namespace pilz_industrial_motion_planner
 {

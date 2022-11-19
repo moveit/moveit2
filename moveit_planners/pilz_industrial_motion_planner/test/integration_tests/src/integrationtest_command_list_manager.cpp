@@ -56,8 +56,8 @@
 
 #include "test_utils.h"
 
-#include "pilz_industrial_motion_planner/command_list_manager.h"
-#include "pilz_industrial_motion_planner/tip_frame_getter.h"
+#include <pilz_industrial_motion_planner/command_list_manager.h>
+#include <pilz_industrial_motion_planner/tip_frame_getter.h>
 
 const std::string ROBOT_DESCRIPTION_STR{ "robot_description" };
 const std::string EMPTY_VALUE{ "" };

@@ -34,7 +34,7 @@
 
 /* Author: Dave Coleman */
 
-#include "moveit_setup_assistant/navigation_widget.hpp"
+#include <moveit_setup_assistant/navigation_widget.hpp>
 #include <QApplication>
 #include <QPainter>
 #include <QScrollBar>

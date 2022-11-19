@@ -32,7 +32,7 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#include "pilz_industrial_motion_planner/trajectory_functions.h"
+#include <pilz_industrial_motion_planner/trajectory_functions.h>
 
 #include <moveit/planning_scene/planning_scene.h>
 #include <tf2/LinearMath/Quaternion.h>

@@ -60,11 +60,11 @@
 #include <ompl/base/terminationconditions/IterationTerminationCondition.h>
 #include <ompl/base/terminationconditions/CostConvergenceTerminationCondition.h>
 
-#include "ompl/base/objectives/PathLengthOptimizationObjective.h"
-#include "ompl/base/objectives/MechanicalWorkOptimizationObjective.h"
-#include "ompl/base/objectives/MinimaxObjective.h"
-#include "ompl/base/objectives/StateCostIntegralObjective.h"
-#include "ompl/base/objectives/MaximizeMinClearanceObjective.h"
+#include <ompl/base/objectives/PathLengthOptimizationObjective.h>
+#include <ompl/base/objectives/MechanicalWorkOptimizationObjective.h>
+#include <ompl/base/objectives/MinimaxObjective.h>
+#include <ompl/base/objectives/StateCostIntegralObjective.h>
+#include <ompl/base/objectives/MaximizeMinClearanceObjective.h>
 #include <ompl/geometric/planners/prm/LazyPRM.h>
 
 namespace ompl_interface
