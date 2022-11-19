@@ -260,7 +260,10 @@ bool OccupancyMapMonitor::getShapeTransformCache(std::size_t index, const std::s
         if (jt == mesh_handles_[index].end())
         {
           rclcpp::Clock steady_clock(RCL_STEADY_TIME);
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wold-style-cast"
           RCLCPP_ERROR_THROTTLE(LOGGER, steady_clock, 1000, "Incorrect mapping of mesh handles");
+#pragma GCC diagnostic pop
           return false;
         }
         else

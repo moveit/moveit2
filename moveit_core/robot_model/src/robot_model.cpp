@@ -1072,11 +1072,11 @@ JointModel* RobotModel::constructJointModel(const urdf::Link* child_link, const 
 
         if (new_joint_model->getType() == JointModel::JointType::PLANAR)
         {
-          ((PlanarJointModel*)new_joint_model)->setAngularDistanceWeight(angular_distance_weight);
+          static_cast<PlanarJointModel*>(new_joint_model)->setAngularDistanceWeight(angular_distance_weight);
         }
         else if (new_joint_model->getType() == JointModel::JointType::FLOATING)
         {
-          ((FloatingJointModel*)new_joint_model)->setAngularDistanceWeight(angular_distance_weight);
+          static_cast<FloatingJointModel*>(new_joint_model)->setAngularDistanceWeight(angular_distance_weight);
         }
         else
         {
@@ -1111,7 +1111,7 @@ JointModel* RobotModel::constructJointModel(const urdf::Link* child_link, const 
           continue;
         }
 
-        ((PlanarJointModel*)new_joint_model)->setMotionModel(motion_model);
+        static_cast<PlanarJointModel*>(new_joint_model)->setMotionModel(motion_model);
       }
       else if (property.property_name_ == "min_translational_distance")
       {
@@ -1141,7 +1141,7 @@ JointModel* RobotModel::constructJointModel(const urdf::Link* child_link, const 
           continue;
         }
 
-        ((PlanarJointModel*)new_joint_model)->setMinTranslationalDistance(min_translational_distance);
+        static_cast<PlanarJointModel*>(new_joint_model)->setMinTranslationalDistance(min_translational_distance);
       }
       else
       {

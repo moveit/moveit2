@@ -658,7 +658,7 @@ bool PropagationDistanceField::writeToStream(std::ostream& os) const
             bs[zi] = 1;
           }
         }
-        out.write((char*)&bs, sizeof(char));
+        out.write(reinterpret_cast<char*>(&bs), sizeof(char));
       }
     }
   }

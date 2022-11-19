@@ -625,7 +625,7 @@ ompl::base::StateStoragePtr ompl_interface::ConstraintsLibrary::constructConstra
           continue;
         unsigned int isteps =
             std::min<unsigned int>(options.max_explicit_points, d / options.explicit_points_resolution);
-        double step = 1.0 / (double)isteps;
+        double step = 1.0 / static_cast<double>(isteps);
         bool ok = true;
         space->interpolate(state_storage->getState(i), sj, step, int_states[0]);
         for (unsigned int k = 1; k < isteps; ++k)

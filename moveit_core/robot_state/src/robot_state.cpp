@@ -110,8 +110,8 @@ void RobotState::allocMemory()
   // make the memory for transforms align at EIGEN_MAX_ALIGN_BYTES
   // https://eigen.tuxfamily.org/dox/classEigen_1_1aligned__allocator.html
   // NOLINTNEXTLINE(performance-no-int-to-ptr)
-  variable_joint_transforms_ = reinterpret_cast<Eigen::Isometry3d*>(((uintptr_t)memory_ + extra_alignment_bytes) &
-                                                                    ~(uintptr_t)extra_alignment_bytes);
+  variable_joint_transforms_ = reinterpret_cast<Eigen::Isometry3d*>(
+      (reinterpret_cast<uintptr_t>(memory_) + extra_alignment_bytes) & ~static_cast<uintptr_t>(extra_alignment_bytes));
   global_link_transforms_ = variable_joint_transforms_ + robot_model_->getJointModelCount();
   global_collision_body_transforms_ = global_link_transforms_ + robot_model_->getLinkModelCount();
   dirty_joint_transforms_ =
@@ -173,7 +173,7 @@ void RobotState::copyFrom(const RobotState& other)
             (robot_model_->getVariableCount() * (1 + ((has_velocity_ || has_acceleration_ || has_effort_) ? 1 : 0) +
                                                  ((has_acceleration_ || has_effort_) ? 1 : 0)) +
              nr_doubles_for_dirty_joint_transforms);
-    memcpy((void*)variable_joint_transforms_, (void*)other.variable_joint_transforms_, bytes);
+    memcpy(static_cast<void*>(variable_joint_transforms_), other.variable_joint_transforms_, bytes);
   }
 
   // copy attached bodies

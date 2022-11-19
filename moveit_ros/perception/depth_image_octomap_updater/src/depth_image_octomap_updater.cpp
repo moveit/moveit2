@@ -247,8 +247,8 @@ void DepthImageOctomapUpdater::depthImageCallback(const sensor_msgs::msg::Image:
       }
       else
       {
-        average_callback_dt_ =
-            ((image_callback_count_ - 1) * average_callback_dt_ + dt_start) / (double)image_callback_count_;
+        average_callback_dt_ = ((image_callback_count_ - 1) * average_callback_dt_ + dt_start) /
+                               static_cast<double>(image_callback_count_);
       }
     }
   }
@@ -314,15 +314,21 @@ void DepthImageOctomapUpdater::depthImageCallback(const sensor_msgs::msg::Image:
         failed_tf_++;
         if (failed_tf_ > good_tf_)
         {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wold-style-cast"
           RCLCPP_WARN_THROTTLE(LOGGER, *node_->get_clock(), 1000,
                                "More than half of the image messages discarded due to TF being unavailable (%u%%). "
                                "Transform error of sensor data: %s; quitting callback.",
                                (100 * failed_tf_) / (good_tf_ + failed_tf_), err.c_str());
+#pragma GCC diagnostic pop
         }
         else
         {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wold-style-cast"
           RCLCPP_DEBUG_THROTTLE(LOGGER, *node_->get_clock(), 1000,
                                 "Transform error of sensor data: %s; quitting callback", err.c_str());
+#pragma GCC diagnostic pop
         }
         if (failed_tf_ > MAX_TF_COUNTER)
         {
@@ -341,7 +347,12 @@ void DepthImageOctomapUpdater::depthImageCallback(const sensor_msgs::msg::Image:
     return;
 
   if (depth_msg->is_bigendian && !HOST_IS_BIG_ENDIAN)
+  {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wold-style-cast"
     RCLCPP_ERROR_THROTTLE(LOGGER, *node_->get_clock(), 1000, "endian problem: received image data does not match host");
+#pragma GCC diagnostic pop
+  }
 
   const int w = depth_msg->width;
   const int h = depth_msg->height;
@@ -360,8 +371,11 @@ void DepthImageOctomapUpdater::depthImageCallback(const sensor_msgs::msg::Image:
   {
     if (depth_msg->encoding != sensor_msgs::image_encodings::TYPE_32FC1)
     {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wold-style-cast"
       RCLCPP_ERROR_THROTTLE(LOGGER, *node_->get_clock(), 1000, "Unexpected encoding type: '%s'. Ignoring input.",
                             depth_msg->encoding.c_str());
+#pragma GCC diagnostic pop
       return;
     }
     mesh_filter_->filter(&depth_msg->data[0], GL_FLOAT);
@@ -502,7 +516,7 @@ void DepthImageOctomapUpdater::depthImageCallback(const sensor_msgs::msg::Image:
           // not filtered
           if (labels_row[x] == mesh_filter::MeshFilterBase::BACKGROUND)
           {
-            float zz = (float)input_row[x] * 1e-3;  // scale from mm to m
+            float zz = static_cast<float>(input_row[x]) * 1e-3;  // scale from mm to m
             float yy = y_cache_[y] * zz;
             float xx = x_cache_[x] * zz;
             /* transform to map frame */

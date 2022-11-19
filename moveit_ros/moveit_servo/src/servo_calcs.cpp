@@ -51,6 +51,10 @@
 #include <moveit_servo/servo_calcs.h>
 #include <moveit_servo/utilities.h>
 
+// Disable -Wold-style-cast because all _THROTTLE macros trigger this
+// It would be too noisy to disable on a per-callsite basis
+#pragma GCC diagnostic ignored "-Wold-style-cast"
+
 using namespace std::chrono_literals;  // for s, ms, etc.
 
 namespace moveit_servo

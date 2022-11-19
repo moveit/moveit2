@@ -142,7 +142,10 @@ double velocityScalingFactorForSingularity(const moveit::core::JointModelGroup* 
         1. - (ini_condition - lower_singularity_threshold) / (upper_threshold - lower_singularity_threshold);
     status =
         dot > 0 ? StatusCode::DECELERATE_FOR_APPROACHING_SINGULARITY : StatusCode::DECELERATE_FOR_LEAVING_SINGULARITY;
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wold-style-cast"
     RCLCPP_WARN_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD, SERVO_STATUS_CODE_MAP.at(status));
+#pragma GCC diagnostic pop
   }
 
   // Very close to singularity, so halt.
@@ -150,7 +153,10 @@ double velocityScalingFactorForSingularity(const moveit::core::JointModelGroup* 
   {
     velocity_scale = 0;
     status = StatusCode::HALT_FOR_SINGULARITY;
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wold-style-cast"
     RCLCPP_WARN_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD, SERVO_STATUS_CODE_MAP.at(status));
+#pragma GCC diagnostic pop
   }
 
   return velocity_scale;

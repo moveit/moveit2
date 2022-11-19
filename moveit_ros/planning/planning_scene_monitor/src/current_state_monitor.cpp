@@ -248,8 +248,11 @@ bool CurrentStateMonitor::waitForCurrentState(const rclcpp::Time& t, double wait
         /* We cannot know if the reason of timeout is slow time or absence of
          * state messages, warn the user. */
         rclcpp::Clock steady_clock(RCL_STEADY_TIME);
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wold-style-cast"
         RCLCPP_WARN_SKIPFIRST_THROTTLE(LOGGER, steady_clock, 1000,
                                        "No state update received within 100ms of system clock");
+#pragma GCC diagnostic pop
       }
       else
       {
@@ -321,9 +324,12 @@ void CurrentStateMonitor::jointStateCallback(const sensor_msgs::msg::JointState:
   if (joint_state->name.size() != joint_state->position.size())
   {
     rclcpp::Clock steady_clock(RCL_STEADY_TIME);
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wold-style-cast"
     RCLCPP_ERROR_THROTTLE(LOGGER, steady_clock, 1000,
                           "State monitor received invalid joint state (number of joint names does not match number of "
                           "positions)");
+#pragma GCC diagnostic pop
     return;
   }
   bool update = false;

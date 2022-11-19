@@ -66,8 +66,11 @@ CollisionCheck::CollisionCheck(const rclcpp::Node::SharedPtr& node, const ServoP
   if (parameters_->collision_check_rate < MIN_RECOMMENDED_COLLISION_RATE)
   {
     auto& clk = *node_->get_clock();
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wold-style-cast"
     RCLCPP_WARN_STREAM_THROTTLE(LOGGER, clk, ROS_LOG_THROTTLE_PERIOD,
                                 "Collision check rate is low, increase it in yaml file if CPU allows");
+#pragma GCC diagnostic pop
   }
 
   // ROS pubs/subs

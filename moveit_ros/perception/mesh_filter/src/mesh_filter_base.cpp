@@ -221,8 +221,8 @@ void mesh_filter::MeshFilterBase::setShadowThreshold(float threshold)
 
 void mesh_filter::MeshFilterBase::getModelLabels(LabelType* labels) const
 {
-  JobPtr job(
-      new FilterJob<void>([&renderer = *mesh_renderer_, labels] { renderer.getColorBuffer((unsigned char*)labels); }));
+  JobPtr job(new FilterJob<void>(
+      [&renderer = *mesh_renderer_, labels] { renderer.getColorBuffer(reinterpret_cast<unsigned char*>(labels)); }));
   addJob(job);
   job->wait();
 }
@@ -261,7 +261,7 @@ void mesh_filter::MeshFilterBase::getFilteredDepth(float* depth) const
 void mesh_filter::MeshFilterBase::getFilteredLabels(LabelType* labels) const
 {
   JobPtr job = std::make_shared<FilterJob<void>>(
-      [&filter = *depth_filter_, labels] { filter.getColorBuffer((unsigned char*)labels); });
+      [&filter = *depth_filter_, labels] { filter.getColorBuffer(reinterpret_cast<unsigned char*>(labels)); });
   addJob(job);
   job->wait();
 }

@@ -541,7 +541,7 @@ void PlanningSceneMonitor::triggerSceneUpdateEvent(SceneUpdateType update_type)
 
   for (std::function<void(SceneUpdateType)>& update_callback : update_callbacks_)
     update_callback(update_type);
-  new_scene_update_ = (SceneUpdateType)(static_cast<int>(new_scene_update_) | static_cast<int>(update_type));
+  new_scene_update_ = static_cast<SceneUpdateType>(static_cast<int>(new_scene_update_) | static_cast<int>(update_type));
   new_scene_update_condition_.notify_all();
 }
 
@@ -621,18 +621,18 @@ void PlanningSceneMonitor::updatePublishSettings(bool publish_geom_updates, bool
   PlanningSceneMonitor::SceneUpdateType event = PlanningSceneMonitor::UPDATE_NONE;
   if (publish_geom_updates)
   {
-    event = (PlanningSceneMonitor::SceneUpdateType)(static_cast<int>(event) |
-                                                    static_cast<int>(PlanningSceneMonitor::UPDATE_GEOMETRY));
+    event = static_cast<PlanningSceneMonitor::SceneUpdateType>(static_cast<int>(event) |
+                                                               static_cast<int>(PlanningSceneMonitor::UPDATE_GEOMETRY));
   }
   if (publish_state_updates)
   {
-    event = (PlanningSceneMonitor::SceneUpdateType)(static_cast<int>(event) |
-                                                    static_cast<int>(PlanningSceneMonitor::UPDATE_STATE));
+    event = static_cast<PlanningSceneMonitor::SceneUpdateType>(static_cast<int>(event) |
+                                                               static_cast<int>(PlanningSceneMonitor::UPDATE_STATE));
   }
   if (publish_transform_updates)
   {
-    event = (PlanningSceneMonitor::SceneUpdateType)(static_cast<int>(event) |
-                                                    static_cast<int>(PlanningSceneMonitor::UPDATE_TRANSFORMS));
+    event = static_cast<PlanningSceneMonitor::SceneUpdateType>(
+        static_cast<int>(event) | static_cast<int>(PlanningSceneMonitor::UPDATE_TRANSFORMS));
   }
   if (publish_planning_scene)
   {
@@ -736,16 +736,16 @@ bool PlanningSceneMonitor::newPlanningSceneMessage(const moveit_msgs::msg::Plann
     {
       upd = UPDATE_NONE;
       if (!moveit::core::isEmpty(scene.world))
-        upd = (SceneUpdateType)(static_cast<int>(upd) | static_cast<int>(UPDATE_GEOMETRY));
+        upd = static_cast<SceneUpdateType>(static_cast<int>(upd) | static_cast<int>(UPDATE_GEOMETRY));
 
       if (!scene.fixed_frame_transforms.empty())
-        upd = (SceneUpdateType)(static_cast<int>(upd) | static_cast<int>(UPDATE_TRANSFORMS));
+        upd = static_cast<SceneUpdateType>(static_cast<int>(upd) | static_cast<int>(UPDATE_TRANSFORMS));
 
       if (!moveit::core::isEmpty(scene.robot_state))
       {
-        upd = (SceneUpdateType)(static_cast<int>(upd) | static_cast<int>(UPDATE_STATE));
+        upd = static_cast<SceneUpdateType>(static_cast<int>(upd) | static_cast<int>(UPDATE_STATE));
         if (!scene.robot_state.attached_collision_objects.empty() || !scene.robot_state.is_diff)
-          upd = (SceneUpdateType)(static_cast<int>(upd) | static_cast<int>(UPDATE_GEOMETRY));
+          upd = static_cast<SceneUpdateType>(static_cast<int>(upd) | static_cast<int>(UPDATE_GEOMETRY));
       }
     }
   }
@@ -1204,7 +1204,10 @@ bool PlanningSceneMonitor::getShapeTransformCache(const std::string& target_fram
   catch (tf2::TransformException& ex)
   {
     rclcpp::Clock steady_clock = rclcpp::Clock();
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wold-style-cast"
     RCLCPP_ERROR_THROTTLE(LOGGER, steady_clock, 1000, "Transform error: %s", ex.what());
+#pragma GCC diagnostic pop
     return false;
   }
   return true;
@@ -1450,8 +1453,11 @@ void PlanningSceneMonitor::updateSceneWithCurrentState()
         (time - current_state_monitor_->getMonitorStartTime()).seconds() > 1.0)
     {
       std::string missing_str = boost::algorithm::join(missing, ", ");
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wold-style-cast"
       RCLCPP_WARN_THROTTLE(LOGGER, steady_clock, 1000, "The complete state of the robot is not yet known.  Missing %s",
                            missing_str.c_str());
+#pragma GCC diagnostic pop
     }
 
     {
@@ -1465,8 +1471,11 @@ void PlanningSceneMonitor::updateSceneWithCurrentState()
   }
   else
   {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wold-style-cast"
     RCLCPP_ERROR_THROTTLE(LOGGER, steady_clock, 1000,
                           "State monitor is not active. Unable to set the planning scene state");
+#pragma GCC diagnostic pop
   }
 }
 
