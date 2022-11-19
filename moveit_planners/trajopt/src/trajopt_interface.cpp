@@ -53,8 +53,8 @@
 #include <Eigen/Geometry>
 #include <unordered_map>
 
-#include "trajopt_interface/trajopt_interface.h"
-#include "trajopt_interface/problem_description.h"
+#include <trajopt_interface/trajopt_interface.h>
+#include <trajopt_interface/problem_description.h>
 
 namespace trajopt_interface
 {

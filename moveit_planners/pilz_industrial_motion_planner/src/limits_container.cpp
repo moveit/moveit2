@@ -32,7 +32,7 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#include "pilz_industrial_motion_planner/limits_container.h"
+#include <pilz_industrial_motion_planner/limits_container.h>
 
 pilz_industrial_motion_planner::LimitsContainer::LimitsContainer()
   : has_joint_limits_(false), has_cartesian_limits_(false)

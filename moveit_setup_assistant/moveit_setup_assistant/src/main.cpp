@@ -34,7 +34,7 @@
 
 /* Author: Dave Coleman */
 
-#include "moveit_setup_assistant/setup_assistant_widget.hpp"
+#include <moveit_setup_assistant/setup_assistant_widget.hpp>
 #include <rviz_common/ros_integration/ros_client_abstraction.hpp>
 #include <QApplication>
 #include <QMessageBox>

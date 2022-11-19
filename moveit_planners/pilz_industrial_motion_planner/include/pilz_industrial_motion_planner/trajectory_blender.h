@@ -34,12 +34,12 @@
 
 #pragma once
 
-#include "pilz_industrial_motion_planner/limits_container.h"
+#include <pilz_industrial_motion_planner/limits_container.h>
 #include <moveit/robot_model/robot_model.h>
 #include <moveit/planning_interface/planning_interface.h>
 
-#include "pilz_industrial_motion_planner/trajectory_blend_request.h"
-#include "pilz_industrial_motion_planner/trajectory_blend_response.h"
+#include <pilz_industrial_motion_planner/trajectory_blend_request.h>
+#include <pilz_industrial_motion_planner/trajectory_blend_response.h>
 
 namespace pilz_industrial_motion_planner
 {

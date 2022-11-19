@@ -36,8 +36,8 @@
 
 #include <rclcpp/rclcpp.hpp>
 
-#include "pilz_industrial_motion_planner/cartesian_limit.h"
-#include "pilz_industrial_motion_planner/cartesian_limits_aggregator.h"
+#include <pilz_industrial_motion_planner/cartesian_limit.h>
+#include <pilz_industrial_motion_planner/cartesian_limits_aggregator.h>
 
 /**
  * @brief Unittest of the CartesianLimitsAggregator class

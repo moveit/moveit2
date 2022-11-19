@@ -35,7 +35,7 @@
 /* Author: Dave Coleman */
 
 // SA
-#include "moveit_setup_assistant/setup_assistant_widget.hpp"
+#include <moveit_setup_assistant/setup_assistant_widget.hpp>
 
 // Qt
 #include <QApplication>

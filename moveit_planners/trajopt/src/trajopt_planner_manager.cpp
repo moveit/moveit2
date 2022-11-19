@@ -38,11 +38,11 @@
 
 #include <moveit/planning_interface/planning_interface.h>
 
-#include "moveit/collision_detection_fcl/collision_detector_allocator_fcl.h"
+#include <moveit/collision_detection_fcl/collision_detector_allocator_fcl.h>
 
 #include <class_loader/class_loader.hpp>
 
-#include "trajopt_interface/trajopt_planning_context.h"
+#include <trajopt_interface/trajopt_planning_context.h>
 
 namespace trajopt_interface
 {

@@ -39,11 +39,11 @@
 #include <moveit/robot_model/robot_model.h>
 #include <moveit/robot_model_loader/robot_model_loader.h>
 
-#include "pilz_industrial_motion_planner/planning_context_loader.h"
+#include <pilz_industrial_motion_planner/planning_context_loader.h>
 
 #include "test_utils.h"
 
-#include "rclcpp/rclcpp.hpp"
+#include <rclcpp/rclcpp.hpp>
 
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("unittest_planning_context_loader");
 

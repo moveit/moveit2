@@ -32,7 +32,7 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#include "pilz_industrial_motion_planner/trajectory_blender_transition_window.h"
+#include <pilz_industrial_motion_planner/trajectory_blender_transition_window.h>
 
 #include <algorithm>
 #include <memory>
