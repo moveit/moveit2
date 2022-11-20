@@ -1,10 +1,4 @@
 repositories:
-  # TODO(andyz): remove this once a sync containing 35b93c8 happens
-  moveit_msgs:
-    type: git
-    url: https://github.com/ros-planning/moveit_msgs.git
-    version: ros2
-  # https://github.com/ros-planning/moveit_resources/pull/147
   moveit_resources:
     type: git
     url: https://github.com/ros-planning/moveit_resources.git
