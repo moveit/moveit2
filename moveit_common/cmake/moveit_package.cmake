@@ -45,7 +45,7 @@ macro(moveit_package)
     # Enable warnings
     add_compile_options(-Wall -Wextra
       -Wwrite-strings -Wunreachable-code -Wpointer-arith -Wredundant-decls -Wcast-qual
-      -Wno-unused-parameter -Wno-unused-function)
+      -Wno-unused-parameter)
   else()
     # Defaults for Microsoft C++ compiler
     add_compile_options(/W3 /wd4251 /wd4068 /wd4275)
