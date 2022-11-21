@@ -431,12 +431,12 @@ bool IKFastKinematicsPlugin::initialize(const rclcpp::Node::SharedPtr& node, con
     RCLCPP_ERROR_STREAM(LOGGER, "prefixed tip frame '" << params_.link_prefix + IKFAST_TIP_FRAME_
                                                        << "' does not exist. "
                                                           "Please check your link_prefix parameter.");
-}
+  }
   if (!robot_model.hasLinkModel(params_.link_prefix + IKFAST_BASE_FRAME_)) {
     RCLCPP_ERROR_STREAM(LOGGER, "prefixed base frame '" << params_.link_prefix + IKFAST_BASE_FRAME_
                                                         << "' does not exist. "
                                                            "Please check your link_prefix parameter.");
-}
+  }
   // This IKFast solution was generated with IKFAST_TIP_FRAME_ and IKFAST_BASE_FRAME_.
   // It is often the case that fixed joints are added to these links to model things like
   // a robot mounted on a table or a robot with an end effector attached to the last link.
@@ -510,7 +510,7 @@ bool IKFastKinematicsPlugin::initialize(const rclcpp::Node::SharedPtr& node, con
     RCLCPP_DEBUG_STREAM(LOGGER, joint_names_[joint_id] << " " << joint_min_vector_[joint_id] << " "
                                                     << joint_max_vector_[joint_id] << " "
                                                     << joint_has_limits_vector_[joint_id]);
-}
+  }
 
   initialized_ = true;
   return true;
@@ -1055,7 +1055,7 @@ bool IKFastKinematicsPlugin::searchPositionIK(const geometry_msgs::msg::Pose& ik
             else {
               // Return first feasible solution
               return true;
-}
+            }
           }
         }
       }
