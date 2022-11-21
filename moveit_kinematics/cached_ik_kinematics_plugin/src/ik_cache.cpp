@@ -262,7 +262,7 @@ void IKCache::verifyCache(kdl_kinematics_plugin::KDLKinematicsPlugin& fk) const
     for (unsigned int i = 0; i < poses.size(); ++i)
       error += entry.first[i].distance(poses[i]);
     if (!poses.empty())
-      error /= (double)poses.size();
+      error /= static_cast<double>(poses.size());
     if (error > max_error)
       max_error = error;
     if (error > 1e-4)

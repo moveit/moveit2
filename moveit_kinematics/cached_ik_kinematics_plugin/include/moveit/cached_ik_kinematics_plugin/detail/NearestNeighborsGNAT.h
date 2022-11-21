@@ -509,7 +509,8 @@ protected:
       {
         // make sure degree lies between minDegree_ and maxDegree_
         children_[i]->degree_ =
-            std::min(std::max((unsigned int)((degree_ * children_[i]->data_.size()) / data_.size()), gnat.minDegree_),
+            std::min(std::max(static_cast<unsigned int>(((degree_ * children_[i]->data_.size()) / data_.size())),
+                              gnat.minDegree_),
                      gnat.maxDegree_);
         // singleton
         if (children_[i]->minRadius_ >= std::numeric_limits<double>::infinity())

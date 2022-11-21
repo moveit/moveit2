@@ -110,16 +110,16 @@ TEST(Loading, SimpleRobot)
   EXPECT_EQ(new_state.getVariablePosition("base_joint/rot_w"), 1.0);
 
   EXPECT_EQ(std::string("myrobot"), model->getName());
-  EXPECT_EQ((unsigned int)7, new_state.getVariableCount());
+  EXPECT_EQ(7u, new_state.getVariableCount());
 
   const std::vector<moveit::core::LinkModel*>& links = model->getLinkModels();
-  EXPECT_EQ((unsigned int)1, links.size());
+  EXPECT_EQ(1u, links.size());
 
   const std::vector<moveit::core::JointModel*>& joints = model->getJointModels();
-  EXPECT_EQ((unsigned int)1, joints.size());
+  EXPECT_EQ(1u, joints.size());
 
   const std::vector<std::string>& pgroups = model->getJointModelGroupNames();
-  EXPECT_EQ((unsigned int)0, pgroups.size());
+  EXPECT_EQ(0u, pgroups.size());
 }
 
 TEST(LoadingAndFK, SimpleRobot)
@@ -153,12 +153,12 @@ TEST(LoadingAndFK, SimpleRobot)
   moveit::core::RobotModelPtr model = builder.build();
   moveit::core::RobotState state(model);
 
-  EXPECT_EQ((unsigned int)3, state.getVariableCount());
+  EXPECT_EQ(3u, state.getVariableCount());
 
   state.setToDefaultValues();
 
-  EXPECT_EQ((unsigned int)1, (unsigned int)model->getJointModelCount());
-  EXPECT_EQ((unsigned int)3, (unsigned int)model->getJointModels()[0]->getLocalVariableNames().size());
+  EXPECT_EQ(1u, static_cast<unsigned int>(model->getJointModelCount()));
+  EXPECT_EQ(3u, static_cast<unsigned int>(model->getJointModels()[0]->getLocalVariableNames().size()));
 
   std::map<std::string, double> joint_values;
   joint_values["base_joint/x"] = 10.0;
@@ -452,7 +452,7 @@ TEST_F(OneRobot, FK)
 
   moveit::core::RobotState state(model);
 
-  EXPECT_EQ((unsigned int)7, state.getVariableCount());
+  EXPECT_EQ(7u, state.getVariableCount());
 
   state.setToDefaultValues();
 

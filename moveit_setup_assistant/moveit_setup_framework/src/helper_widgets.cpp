@@ -34,7 +34,7 @@
 
 /* Author: Dave Coleman */
 
-#include "moveit_setup_framework/qt/helper_widgets.hpp"
+#include <moveit_setup_framework/qt/helper_widgets.hpp>
 #include <QFileDialog>
 #include <QFont>
 #include <QLabel>

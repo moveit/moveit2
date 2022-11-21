@@ -831,13 +831,13 @@ TEST(TestSignedPropagationDistanceField, TestPerformance)
   dt = std::chrono::system_clock::now();
   worstdfu.addPointsToField(bad_vec);
   std::chrono::duration<double> wd = std::chrono::system_clock::now() - dt;
-  printf("Time for unsigned adding %u uniform points is %g average %g\n", (unsigned int)bad_vec.size(), wd.count(),
-         wd.count() / (bad_vec.size() * 1.0));
+  printf("Time for unsigned adding %u uniform points is %g average %g\n", static_cast<unsigned int>(bad_vec.size()),
+         wd.count(), wd.count() / (bad_vec.size() * 1.0));
   dt = std::chrono::system_clock::now();
   worstdfs.addPointsToField(bad_vec);
   wd = std::chrono::system_clock::now() - dt;
-  printf("Time for signed adding %u uniform points is %g average %g\n", (unsigned int)bad_vec.size(), wd.count(),
-         wd.count() / (bad_vec.size() * 1.0));
+  printf("Time for signed adding %u uniform points is %g average %g\n", static_cast<unsigned int>(bad_vec.size()),
+         wd.count(), wd.count() / (bad_vec.size() * 1.0));
 }
 
 TEST(TestSignedPropagationDistanceField, TestOcTree)

@@ -48,7 +48,7 @@
 #include <QSplitter>
 #include <QVBoxLayout>
 
-#include "moveit_setup_core_plugins/configuration_files_widget.hpp"
+#include <moveit_setup_core_plugins/configuration_files_widget.hpp>
 
 // Boost
 #include <boost/algorithm/string.hpp>  // string trim

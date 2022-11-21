@@ -59,7 +59,7 @@ void runCollisionDetection(unsigned int id, unsigned int trials, const planning_
     scene.checkCollision(req, res, state);
   }
   double duration = (clock.now() - start).seconds();
-  RCLCPP_INFO(LOGGER, "Thread %u performed %lf collision checks per second", id, (double)trials / duration);
+  RCLCPP_INFO(LOGGER, "Thread %u performed %lf collision checks per second", id, static_cast<double>(trials) / duration);
 }
 
 int main(int argc, char** argv)

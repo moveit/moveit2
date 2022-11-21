@@ -60,7 +60,7 @@ double ompl_interface::ConstrainedSampler::getConstrainedSamplingRate() const
   }
   else
   {
-    return (double)constrained_success_ / (double)(constrained_success_ + constrained_failure_);
+    return static_cast<double>(constrained_success_) / static_cast<double>(constrained_success_ + constrained_failure_);
   }
 }
 

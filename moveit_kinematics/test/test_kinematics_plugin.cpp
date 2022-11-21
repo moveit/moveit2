@@ -571,7 +571,7 @@ TEST_F(KinematicsTest, searchIK)
 
   if (num_ik_cb_tests_ > 0)
   {
-    RCLCPP_INFO_STREAM(LOGGER, "Success Rate: " << (double)success / num_ik_tests_);
+    RCLCPP_INFO_STREAM(LOGGER, "Success Rate: " << static_cast<double>(success) / num_ik_tests_);
   }
   EXPECT_GE(success, EXPECTED_SUCCESS_RATE * num_ik_tests_);
 }
@@ -621,7 +621,7 @@ TEST_F(KinematicsTest, searchIKWithCallback)
 
   if (num_ik_cb_tests_ > 0)
   {
-    RCLCPP_INFO_STREAM(LOGGER, "Success Rate: " << (double)success / num_ik_cb_tests_);
+    RCLCPP_INFO_STREAM(LOGGER, "Success Rate: " << static_cast<double>(success) / num_ik_cb_tests_);
   }
   EXPECT_GE(success, EXPECTED_SUCCESS_RATE * num_ik_cb_tests_);
 }
@@ -696,7 +696,7 @@ TEST_F(KinematicsTest, getIKMultipleSolutions)
 
   if (num_ik_cb_tests_ > 0)
   {
-    RCLCPP_INFO_STREAM(LOGGER, "Success Rate: " << (double)success / num_ik_multiple_tests_);
+    RCLCPP_INFO_STREAM(LOGGER, "Success Rate: " << static_cast<double>(success) / num_ik_multiple_tests_);
   }
   EXPECT_GE(success, EXPECTED_SUCCESS_RATE * num_ik_multiple_tests_);
 }

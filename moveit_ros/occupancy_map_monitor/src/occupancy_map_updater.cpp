@@ -65,7 +65,7 @@ void OccupancyMapUpdater::setMonitor(OccupancyMapMonitor* monitor)
 //     if (params[param_name].getType() == XmlRpc::XmlRpcValue::TypeInt)
 //       *value = static_cast<int>(params[param_name]);
 //     else
-//       *value = (double)params[param_name];
+//       *value = static_cast<double>(params[param_name]);
 //   }
 // }
 

@@ -51,7 +51,7 @@
 #include <std_msgs/msg/float64.hpp>
 #include <std_msgs/msg/float64_multi_array.hpp>
 
-#include "trajectory_msgs/msg/joint_trajectory.hpp"
+#include <trajectory_msgs/msg/joint_trajectory.hpp>
 
 #include <moveit/planning_scene_monitor/planning_scene_monitor.h>
 #include <moveit/robot_model_loader/robot_model_loader.h>

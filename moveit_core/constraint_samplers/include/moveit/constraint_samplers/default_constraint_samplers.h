@@ -39,7 +39,7 @@
 #include <moveit/constraint_samplers/constraint_sampler.h>
 #include <moveit/macros/class_forward.h>
 #include <random_numbers/random_numbers.h>
-#include "rclcpp/rclcpp.hpp"
+#include <rclcpp/rclcpp.hpp>
 #include <string>
 #include <Eigen/Geometry>
 

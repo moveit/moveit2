@@ -44,7 +44,7 @@
 #include <string>
 #include <functional>
 
-#include "moveit_kinematics_base_export.h"
+#include <moveit_kinematics_base_export.h>
 
 namespace moveit
 {

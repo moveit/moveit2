@@ -674,7 +674,7 @@ std::optional<double> smoothness(RobotTrajectory const& trajectory)
       }
       a = b;
     }
-    smoothness /= (double)trajectory.getWayPointCount();
+    smoothness /= static_cast<double>(trajectory.getWayPointCount());
     return smoothness;
   }
   // In case the path is to short, no value is returned
@@ -690,7 +690,7 @@ std::optional<double> waypoint_density(RobotTrajectory const& trajectory)
     auto const length = path_length(trajectory);
     if (length > 0.0)
     {
-      auto density = (double)trajectory.getWayPointCount() / length;
+      auto density = static_cast<double>(trajectory.getWayPointCount()) / length;
       return density;
     }
   }
