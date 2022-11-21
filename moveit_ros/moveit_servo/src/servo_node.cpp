@@ -99,9 +99,13 @@ ServoNode::ServoNode(const rclcpp::NodeOptions& options)
   // or secondary planning scene monitors can fetch the scene, otherwise we request the planning scene from the
   // primary planning scene monitor (e.g. move_group)
   if (servo_parameters->is_primary_planning_scene_monitor)
+  {
     planning_scene_monitor_->providePlanningSceneService();
+  }
   else
+  {
     planning_scene_monitor_->requestPlanningSceneState();
+  }
 
   // Create Servo
   servo_ = std::make_unique<moveit_servo::Servo>(node_, servo_parameters, planning_scene_monitor_);

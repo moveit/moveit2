@@ -150,9 +150,13 @@ bool convertJoyToCmd(const std::vector<float>& axes, const std::vector<int>& but
 void updateCmdFrame(std::string& frame_name, const std::vector<int>& buttons)
 {
   if (buttons[CHANGE_VIEW] && frame_name == EEF_FRAME_ID)
+  {
     frame_name = BASE_FRAME_ID;
+  }
   else if (buttons[MENU] && frame_name == BASE_FRAME_ID)
+  {
     frame_name = EEF_FRAME_ID;
+  }
 }
 
 namespace moveit_servo

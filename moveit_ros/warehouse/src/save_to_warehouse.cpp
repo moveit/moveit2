@@ -71,8 +71,10 @@ void onSceneUpdate(planning_scene_monitor::PlanningSceneMonitor& psm, moveit_war
       pss.addPlanningScene(psmsg);
     }
     else
+    {
       RCLCPP_INFO(LOGGER, "Scene '%s' was previously added. Not adding again.",
                   psm.getPlanningScene()->getName().c_str());
+    }
   }
   else
     RCLCPP_INFO(LOGGER, "Scene name is empty. Not saving.");
@@ -168,7 +170,9 @@ int main(int argc, char** argv)
   std::vector<std::string> names;
   pss.getPlanningSceneNames(names);
   if (names.empty())
+  {
     RCLCPP_INFO(LOGGER, "There are no previously stored scenes");
+  }
   else
   {
     RCLCPP_INFO(LOGGER, "Previously stored scenes:");
@@ -177,7 +181,9 @@ int main(int argc, char** argv)
   }
   cs.getKnownConstraints(names);
   if (names.empty())
+  {
     RCLCPP_INFO(LOGGER, "There are no previously stored constraints");
+  }
   else
   {
     RCLCPP_INFO(LOGGER, "Previously stored constraints:");
@@ -186,7 +192,9 @@ int main(int argc, char** argv)
   }
   rs.getKnownRobotStates(names);
   if (names.empty())
+  {
     RCLCPP_INFO(LOGGER, "There are no previously stored robot states");
+  }
   else
   {
     RCLCPP_INFO(LOGGER, "Previously stored robot states:");

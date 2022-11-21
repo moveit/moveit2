@@ -178,9 +178,9 @@ public:
   {
     for (std::size_t i = 0; i < _vbasesol.size(); ++i)
     {
-      if (_vbasesol[i].freeind < 0)
+      if (_vbasesol[i].freeind < 0) {
         solution[i] = _vbasesol[i].foffset;
-      else
+      } else
       {
         solution[i] = freevalues[_vbasesol[i].freeind] * _vbasesol[i].fmul + _vbasesol[i].foffset;
         if (solution[i] > T(3.14159265358979))

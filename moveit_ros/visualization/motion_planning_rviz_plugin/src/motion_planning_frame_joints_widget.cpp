@@ -57,9 +57,13 @@ JMGItemModel::JMGItemModel(const moveit::core::RobotState& robot_state, const st
 int JMGItemModel::rowCount(const QModelIndex& /*parent*/) const
 {
   if (!jmg_)
+  {
     return robot_state_.getVariableCount();
+  }
   else
+  {
     return jmg_->getVariableCount();
+  }
 }
 
 int JMGItemModel::columnCount(const QModelIndex& /*parent*/) const
@@ -270,9 +274,13 @@ void MotionPlanningFrameJointsWidget::setActiveModel(JMGItemModel* model)
 void MotionPlanningFrameJointsWidget::triggerUpdate(JMGItemModel* model)
 {
   if (model == start_state_model_.get())
+  {
     planning_display_->setQueryStartState(model->getRobotState());
+  }
   else
+  {
     planning_display_->setQueryGoalState(model->getRobotState());
+  }
 }
 
 // Find matching key vector in columns of haystack and return the best-aligned column index.

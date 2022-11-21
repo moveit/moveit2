@@ -68,9 +68,13 @@ void PrismaticJointModel::getVariableDefaultPositions(double* values, const Boun
 {
   // if zero is a valid value
   if (bounds[0].min_position_ <= 0.0 && bounds[0].max_position_ >= 0.0)
+  {
     values[0] = 0.0;
+  }
   else
+  {
     values[0] = (bounds[0].min_position_ + bounds[0].max_position_) / 2.0;
+  }
 }
 
 bool PrismaticJointModel::satisfiesPositionBounds(const double* values, const Bounds& bounds, double margin) const

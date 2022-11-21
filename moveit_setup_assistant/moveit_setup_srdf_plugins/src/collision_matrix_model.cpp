@@ -148,11 +148,15 @@ bool CollisionMatrixModel::setData(const QModelIndex& index, const QVariant& val
 
     // Handle USER Reasons: 1) pair is disabled by user
     if (item->second.disable_check && item->second.reason == NOT_DISABLED)
+    {
       item->second.reason = USER;
 
-    // Handle USER Reasons: 2) pair was disabled by user and now is enabled (not checked)
+      // Handle USER Reasons: 2) pair was disabled by user and now is enabled (not checked)
+    }
     else if (!item->second.disable_check && item->second.reason == USER)
+    {
       item->second.reason = NOT_DISABLED;
+    }
 
     QModelIndex mirror = this->index(index.column(), index.row());
     Q_EMIT dataChanged(index, index);

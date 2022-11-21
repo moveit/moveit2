@@ -289,7 +289,9 @@ GLuint mesh_filter::GLRenderer::createShader(GLuint shaderType, const string& Sh
 void mesh_filter::GLRenderer::readShaderCodeFromFile(const string& filename, string& shader) const
 {
   if (filename.empty())
+  {
     shader = "";
+  }
   else
   {
     string shader_code;

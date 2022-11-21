@@ -302,7 +302,9 @@ const IKCache::IKEntry& IKCacheMap::getBestApproximateIKSolution(const std::vect
   auto key(getKey(fixed, active));
   auto it = find(key);
   if (it != end())
+  {
     return it->second->getBestApproximateIKSolution(poses);
+  }
   else
   {
     static IKEntry dummy = std::make_pair(poses, std::vector<double>(num_joints_, 0.));
@@ -317,7 +319,9 @@ void IKCacheMap::updateCache(const IKEntry& nearest, const std::vector<std::stri
   auto key(getKey(fixed, active));
   auto it = find(key);
   if (it != end())
+  {
     it->second->updateCache(nearest, poses, config);
+  }
   else
   {
     value_type val = std::make_pair(key, nullptr);

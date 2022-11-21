@@ -95,9 +95,13 @@ public:
       planning_scene->checkCollision(vcreq, vcres, start_state);
 
       if (creq.group_name.empty())
+      {
         RCLCPP_INFO(LOGGER, "Start state appears to be in collision");
+      }
       else
+      {
         RCLCPP_INFO(LOGGER, "Start state appears to be in collision with respect to group %s", creq.group_name.c_str());
+      }
 
       auto prefix_state = std::make_shared<moveit::core::RobotState>(start_state);
       random_numbers::RandomNumberGenerator& rng = prefix_state->getRandomNumberGenerator();
@@ -160,9 +164,13 @@ public:
     else
     {
       if (creq.group_name.empty())
+      {
         RCLCPP_DEBUG(LOGGER, "Start state is valid");
+      }
       else
+      {
         RCLCPP_DEBUG(LOGGER, "Start state is valid with respect to group %s", creq.group_name.c_str());
+      }
       return planner(planning_scene, req, res);
     }
   }

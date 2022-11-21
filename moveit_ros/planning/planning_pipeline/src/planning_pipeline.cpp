@@ -164,6 +164,7 @@ void planning_pipeline::PlanningPipeline::configure()
     }
 
     if (adapter_plugin_loader_)
+    {
       for (const std::string& adapter_plugin_name : adapter_plugin_names_)
       {
         planning_request_adapter::PlanningRequestAdapterPtr ad;
@@ -182,6 +183,7 @@ void planning_pipeline::PlanningPipeline::configure()
           ads.push_back(std::move(ad));
         }
       }
+    }
     if (!ads.empty())
     {
       adapter_chain_ = std::make_unique<planning_request_adapter::PlanningRequestAdapterChain>();
@@ -199,7 +201,9 @@ void planning_pipeline::PlanningPipeline::configure()
 void planning_pipeline::PlanningPipeline::displayComputedMotionPlans(bool flag)
 {
   if (display_computed_motion_plans_ && !flag)
+  {
     display_path_publisher_.reset();
+  }
   else if (!display_computed_motion_plans_ && flag)
   {
     display_path_publisher_ = node_->create_publisher<moveit_msgs::msg::DisplayTrajectory>(DISPLAY_PATH_TOPIC, 10);
@@ -210,7 +214,9 @@ void planning_pipeline::PlanningPipeline::displayComputedMotionPlans(bool flag)
 void planning_pipeline::PlanningPipeline::publishReceivedRequests(bool flag)
 {
   if (publish_received_requests_ && !flag)
+  {
     received_request_publisher_.reset();
+  }
   else if (!publish_received_requests_ && flag)
   {
     received_request_publisher_ =
@@ -222,7 +228,9 @@ void planning_pipeline::PlanningPipeline::publishReceivedRequests(bool flag)
 void planning_pipeline::PlanningPipeline::checkSolutionPaths(bool flag)
 {
   if (check_solution_paths_ && !flag)
+  {
     contacts_publisher_.reset();
+  }
   else if (!check_solution_paths_ && flag)
   {
     contacts_publisher_ = node_->create_publisher<visualization_msgs::msg::MarkerArray>(MOTION_CONTACTS_TOPIC, 10);
@@ -314,11 +322,13 @@ bool planning_pipeline::PlanningPipeline::generatePlan(const planning_scene::Pla
         {
           bool found = false;
           for (std::size_t added_index : adapter_added_state_index)
+          {
             if (index[i] == added_index)
             {
               found = true;
               break;
             }
+          }
           if (!found)
             problem = true;
         }
@@ -406,10 +416,12 @@ bool planning_pipeline::PlanningPipeline::generatePlan(const planning_scene::Pla
         stacked_constraints = true;
     }
     if (stacked_constraints)
+    {
       RCLCPP_WARN(LOGGER, "More than one constraint is set. If your move_group does not have multiple end "
                           "effectors/arms, this is "
                           "unusual. Are you using a move_group_interface and forgetting to call clearPoseTargets() or "
                           "equivalent?");
+    }
   }
 
   // Set planning pipeline to inactive

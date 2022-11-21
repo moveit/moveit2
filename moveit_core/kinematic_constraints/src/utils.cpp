@@ -64,6 +64,7 @@ moveit_msgs::msg::Constraints mergeConstraints(const moveit_msgs::msg::Constrain
   {
     bool add = true;
     for (const moveit_msgs::msg::JointConstraint& jc_second : second.joint_constraints)
+    {
       if (jc_second.joint_name == jc_first.joint_name)
       {
         add = false;
@@ -90,6 +91,7 @@ moveit_msgs::msg::Constraints mergeConstraints(const moveit_msgs::msg::Constrain
         }
         break;
       }
+    }
     if (add)
       r.joint_constraints.push_back(jc_first);
   }
@@ -99,11 +101,13 @@ moveit_msgs::msg::Constraints mergeConstraints(const moveit_msgs::msg::Constrain
   {
     bool add = true;
     for (const moveit_msgs::msg::JointConstraint& jc_first : first.joint_constraints)
+    {
       if (jc_second.joint_name == jc_first.joint_name)
       {
         add = false;
         break;
       }
+    }
     if (add)
       r.joint_constraints.push_back(jc_second);
   }

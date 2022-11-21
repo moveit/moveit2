@@ -101,7 +101,9 @@ bool IterativeSplineParameterization::computeTimeStamps(robot_trajectory::RobotT
 
   // Set scaling factors
   if (max_velocity_scaling_factor > 0.0 && max_velocity_scaling_factor <= 1.0)
+  {
     velocity_scaling_factor = max_velocity_scaling_factor;
+  }
   else if (max_velocity_scaling_factor == 0.0)
   {
     RCLCPP_DEBUG(LOGGER, "A max_velocity_scaling_factor of 0.0 was specified, defaulting to %f instead.",
@@ -113,7 +115,9 @@ bool IterativeSplineParameterization::computeTimeStamps(robot_trajectory::RobotT
                 max_velocity_scaling_factor, velocity_scaling_factor);
   }
   if (max_acceleration_scaling_factor > 0.0 && max_acceleration_scaling_factor <= 1.0)
+  {
     acceleration_scaling_factor = max_acceleration_scaling_factor;
+  }
   else if (max_acceleration_scaling_factor == 0.0)
   {
     RCLCPP_DEBUG(LOGGER, "A max_acceleration_scaling_factor of 0.0 was specified, defaulting to %f instead.",
@@ -472,9 +476,13 @@ static void init_times(const int n, double dt[], const double x[], const double 
     double time;
     double dx = x[i + 1] - x[i];
     if (dx >= 0.0)
+    {
       time = (dx / max_velocity);
+    }
     else
+    {
       time = (dx / min_velocity);
+    }
     time += std::numeric_limits<double>::epsilon();  // prevent divide-by-zero
 
     if (dt[i] < time)

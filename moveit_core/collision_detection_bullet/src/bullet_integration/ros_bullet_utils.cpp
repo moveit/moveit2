@@ -57,9 +57,13 @@ static void getActiveLinkNamesRecursive(std::vector<std::string>& active_links,
     {
       const urdf::LinkConstSharedPtr child_link = urdf_link->child_links[i];
       if ((child_link->parent_joint) && (child_link->parent_joint->type != urdf::Joint::FIXED))
+      {
         getActiveLinkNamesRecursive(active_links, child_link, true);
+      }
       else
+      {
         getActiveLinkNamesRecursive(active_links, child_link, active);
+      }
     }
   }
 }

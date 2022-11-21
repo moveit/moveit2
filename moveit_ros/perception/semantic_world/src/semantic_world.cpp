@@ -331,13 +331,21 @@ SemanticWorld::generatePlacePoses(const object_recognition_msgs::msg::Table& tab
   for (std::size_t j = 1; j < table.convex_hull.size(); ++j)
   {
     if (table.convex_hull[j].x < x_min)
+    {
       x_min = table.convex_hull[j].x;
+    }
     else if (table.convex_hull[j].x > x_max)
+    {
       x_max = table.convex_hull[j].x;
+    }
     if (table.convex_hull[j].y < y_min)
+    {
       y_min = table.convex_hull[j].y;
+    }
     else if (table.convex_hull[j].y > y_max)
+    {
       y_max = table.convex_hull[j].y;
+    }
   }
   for (const geometry_msgs::msg::Point& vertex : table.convex_hull)
     table_contour.push_back(cv::Point((vertex.x - x_min) * scale_factor, (vertex.y - y_min) * scale_factor));
@@ -407,13 +415,21 @@ bool SemanticWorld::isInsideTableContour(const geometry_msgs::msg::Pose& pose,
   for (std::size_t j = 1; j < table.convex_hull.size(); ++j)
   {
     if (table.convex_hull[j].x < x_min)
+    {
       x_min = table.convex_hull[j].x;
+    }
     else if (table.convex_hull[j].x > x_max)
+    {
       x_max = table.convex_hull[j].x;
+    }
     if (table.convex_hull[j].y < y_min)
+    {
       y_min = table.convex_hull[j].y;
+    }
     else if (table.convex_hull[j].y > y_max)
+    {
       y_max = table.convex_hull[j].y;
+    }
   }
   const int scale_factor = 100;
   std::vector<cv::Point2f> table_contour;
@@ -626,10 +642,14 @@ shapes::Mesh* SemanticWorld::createSolidMeshFromPlanarPolygon(const shapes::Mesh
     Eigen::Vector3d triangle_normal = vec2.cross(vec1);
 
     if (triangle_normal.dot(normal) < 0.0)
+    {
       std::swap(solid->triangles[t_idx * 3 + 1], solid->triangles[t_idx * 3 + 2]);
+    }
     else
+    {
       std::swap(solid->triangles[(t_idx + polygon.triangle_count) * 3 + 1],
                 solid->triangles[(t_idx + polygon.triangle_count) * 3 + 2]);
+    }
   }
 
   for (unsigned v_idx = 0; v_idx < polygon.vertex_count; ++v_idx)

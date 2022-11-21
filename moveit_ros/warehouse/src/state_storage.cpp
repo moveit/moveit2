@@ -108,8 +108,10 @@ void moveit_warehouse::RobotStateStorage::getKnownRobotStates(std::vector<std::s
     q->append(ROBOT_NAME, robot);
   std::vector<RobotStateWithMetadata> constr = state_collection_->queryList(q, true, STATE_NAME, true);
   for (RobotStateWithMetadata& state : constr)
+  {
     if (state->lookupField(STATE_NAME))
       names.push_back(state->lookupString(STATE_NAME));
+  }
 }
 
 bool moveit_warehouse::RobotStateStorage::getRobotState(RobotStateWithMetadata& msg_m, const std::string& name,
@@ -121,7 +123,9 @@ bool moveit_warehouse::RobotStateStorage::getRobotState(RobotStateWithMetadata& 
     q->append(ROBOT_NAME, robot);
   std::vector<RobotStateWithMetadata> constr = state_collection_->queryList(q, false);
   if (constr.empty())
+  {
     return false;
+  }
   else
   {
     msg_m = constr.front();

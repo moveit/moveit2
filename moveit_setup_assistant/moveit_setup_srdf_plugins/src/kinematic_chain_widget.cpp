@@ -208,9 +208,13 @@ void KinematicChainWidget::tipLinkTreeClick()
 void KinematicChainWidget::alterTree(const QString& link)
 {
   if (link.contains("expand"))
+  {
     link_tree_->expandAll();
+  }
   else
+  {
     link_tree_->collapseAll();
+  }
 }
 
 // ******************************************************************************************

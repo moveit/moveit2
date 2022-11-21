@@ -134,9 +134,13 @@ public:
           index = md.first[rng_.uniformInt(0, md.first.size() - 1)];
         } while (dirty_.find(index) != dirty_.end() && ++att < matt);
         if (att >= matt)
+        {
           index = -1;
+        }
         else
+        {
           dirty_.insert(index);
+        }
       }
     }
     if (index < 0)
@@ -176,7 +180,9 @@ bool interpolateUsingStoredStates(const ConstraintApproximationStateStorage* sta
     return false;
 
   if (tag_from == tag_to)
+  {
     state_storage->getStateSpace()->copyState(state, to);
+  }
   else
   {
     const ConstrainedStateMetadata& md = state_storage->getMetadata(tag_from);
@@ -188,14 +194,20 @@ bool interpolateUsingStoredStates(const ConstraintApproximationStateStorage* sta
     std::size_t index = (std::size_t)((istates.second - istates.first + 2) * t + 0.5);
 
     if (index == 0)
+    {
       state_storage->getStateSpace()->copyState(state, from);
+    }
     else
     {
       --index;
       if (index >= istates.second - istates.first)
+      {
         state_storage->getStateSpace()->copyState(state, to);
+      }
       else
+      {
         state_storage->getStateSpace()->copyState(state, state_storage->getState(istates.first + index));
+      }
     }
   }
   return true;
@@ -204,10 +216,12 @@ bool interpolateUsingStoredStates(const ConstraintApproximationStateStorage* sta
 ompl_interface::InterpolationFunction ompl_interface::ConstraintApproximation::getInterpolationFunction() const
 {
   if (explicit_motions_ && milestones_ > 0 && milestones_ < state_storage_->size())
+  {
     return
         [this](const ompl::base::State* from, const ompl::base::State* to, const double t, ompl::base::State* state) {
           return interpolateUsingStoredStates(state_storage_, from, to, t, state);
         };
+  }
   return InterpolationFunction();
 }
 
@@ -219,9 +233,13 @@ allocConstraintApproximationStateSampler(const ob::StateSpace* space, const std:
   std::vector<int> sig;
   space->computeSignature(sig);
   if (sig != expected_signature)
+  {
     return ompl::base::StateSamplerPtr();
+  }
   else
+  {
     return std::make_shared<ConstraintApproximationStateSampler>(space, state_storage, milestones);
+  }
 }
 }  // namespace ompl_interface
 
@@ -377,6 +395,7 @@ void ompl_interface::ConstraintsLibrary::saveConstraintApproximations(const std:
 
   std::ofstream fout((path + "/manifest").c_str());
   if (fout.good())
+  {
     for (std::map<std::string, ConstraintApproximationPtr>::const_iterator it = constraint_approximations_.begin();
          it != constraint_approximations_.end(); ++it)
     {
@@ -391,8 +410,11 @@ void ompl_interface::ConstraintsLibrary::saveConstraintApproximations(const std:
       if (it->second->getStateStorage())
         it->second->getStateStorage()->store((path + "/" + it->second->getFilename()).c_str());
     }
+  }
   else
+  {
     RCLCPP_ERROR(LOGGER, "Unable to save constraint approximation to '%s'", path.c_str());
+  }
   fout.close();
 }
 
