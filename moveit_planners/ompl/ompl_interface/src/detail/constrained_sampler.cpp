@@ -55,9 +55,13 @@ ompl_interface::ConstrainedSampler::ConstrainedSampler(const ModelBasedPlanningC
 double ompl_interface::ConstrainedSampler::getConstrainedSamplingRate() const
 {
   if (constrained_success_ == 0)
+  {
     return 0.0;
+  }
   else
-    return (double)constrained_success_ / (double)(constrained_success_ + constrained_failure_);
+  {
+    return static_cast<double>(constrained_success_) / static_cast<double>(constrained_success_ + constrained_failure_);
+  }
 }
 
 bool ompl_interface::ConstrainedSampler::sampleC(ob::State* state)

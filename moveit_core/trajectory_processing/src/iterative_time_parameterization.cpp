@@ -112,7 +112,9 @@ void IterativeParabolicTimeParameterization::applyVelocityConstraints(robot_traj
   double velocity_scaling_factor = 1.0;
 
   if (max_velocity_scaling_factor > 0.0 && max_velocity_scaling_factor <= 1.0)
+  {
     velocity_scaling_factor = max_velocity_scaling_factor;
+  }
   else if (max_velocity_scaling_factor == 0.0)
   {
     RCLCPP_DEBUG(LOGGER, "A max_velocity_scaling_factor of 0.0 was specified, defaulting to %f instead.",
@@ -133,8 +135,10 @@ void IterativeParabolicTimeParameterization::applyVelocityConstraints(robot_traj
       double v_max = DEFAULT_VEL_MAX;
       const moveit::core::VariableBounds& b = rmodel.getVariableBounds(vars[j]);
       if (b.velocity_bounded_)
+      {
         v_max =
             std::min(fabs(b.max_velocity_ * velocity_scaling_factor), fabs(b.min_velocity_ * velocity_scaling_factor));
+      }
       const double dq1 = curr_waypoint->getVariablePosition(idx[j]);
       const double dq2 = next_waypoint->getVariablePosition(idx[j]);
       const double t_min = std::abs(dq2 - dq1) / v_max;
@@ -211,8 +215,10 @@ void updateTrajectory(robot_trajectory::RobotTrajectory& rob_trajectory, const s
 
   // Times
   for (int i = 1; i < num_points; ++i)
+  {
     // Update the time between the waypoints in the robot_trajectory.
     rob_trajectory.setWayPointDurationFromPrevious(i, time_diff[i - 1]);
+  }
 
   // Return if there is only one point in the trajectory!
   if (num_points <= 1)
@@ -329,7 +335,9 @@ void IterativeParabolicTimeParameterization::applyAccelerationConstraints(
   double acceleration_scaling_factor = 1.0;
 
   if (max_acceleration_scaling_factor > 0.0 && max_acceleration_scaling_factor <= 1.0)
+  {
     acceleration_scaling_factor = max_acceleration_scaling_factor;
+  }
   else if (max_acceleration_scaling_factor == 0.0)
   {
     RCLCPP_DEBUG(LOGGER, "A max_acceleration_scaling_factor of 0.0 was specified, defaulting to %f instead.",
@@ -368,8 +376,10 @@ void IterativeParabolicTimeParameterization::applyAccelerationConstraints(
           double a_max = DEFAULT_ACCEL_MAX;
           const moveit::core::VariableBounds& b = rmodel.getVariableBounds(vars[j]);
           if (b.acceleration_bounded_)
+          {
             a_max = std::min(fabs(b.max_acceleration_ * acceleration_scaling_factor),
                              fabs(b.min_acceleration_ * acceleration_scaling_factor));
+          }
 
           if (index == 0)
           {

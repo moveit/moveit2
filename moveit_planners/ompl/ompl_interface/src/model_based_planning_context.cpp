@@ -60,11 +60,11 @@
 #include <ompl/base/terminationconditions/IterationTerminationCondition.h>
 #include <ompl/base/terminationconditions/CostConvergenceTerminationCondition.h>
 
-#include "ompl/base/objectives/PathLengthOptimizationObjective.h"
-#include "ompl/base/objectives/MechanicalWorkOptimizationObjective.h"
-#include "ompl/base/objectives/MinimaxObjective.h"
-#include "ompl/base/objectives/StateCostIntegralObjective.h"
-#include "ompl/base/objectives/MaximizeMinClearanceObjective.h"
+#include <ompl/base/objectives/PathLengthOptimizationObjective.h>
+#include <ompl/base/objectives/MechanicalWorkOptimizationObjective.h>
+#include <ompl/base/objectives/MinimaxObjective.h>
+#include <ompl/base/objectives/StateCostIntegralObjective.h>
+#include <ompl/base/objectives/MaximizeMinClearanceObjective.h>
 #include <ompl/geometric/planners/prm/LazyPRM.h>
 
 namespace ompl_interface
@@ -165,12 +165,16 @@ ompl_interface::ModelBasedPlanningContext::getProjectionEvaluator(const std::str
   {
     std::string link_name = peval.substr(5, peval.length() - 6);
     if (getRobotModel()->hasLinkModel(link_name))
+    {
       return std::make_shared<ProjectionEvaluatorLinkPose>(this, link_name);
+    }
     else
+    {
       RCLCPP_ERROR(LOGGER,
                    "Attempted to set projection evaluator with respect to position of link '%s', "
                    "but that link is not known to the kinematic model.",
                    link_name.c_str());
+    }
   }
   else if (peval.find_first_of("joints(") == 0 && peval[peval.length() - 1] == ')')
   {
@@ -259,8 +263,10 @@ ompl_interface::ModelBasedPlanningContext::allocPathConstrainedSampler(const omp
 
     constraint_samplers::ConstraintSamplerPtr constraint_sampler;
     if (spec_.constraint_sampler_manager_)
+    {
       constraint_sampler = spec_.constraint_sampler_manager_->selectSampler(getPlanningScene(), getGroupName(),
                                                                             path_constraints_->getAllConstraints());
+    }
 
     if (constraint_sampler)
     {
@@ -871,10 +877,12 @@ const moveit_msgs::msg::MoveItErrorCodes ompl_interface::ModelBasedPlanningConte
     {
       ompl_parallel_plan_.clearPlanners();
       if (ompl_simple_setup_->getPlannerAllocator())
+      {
         for (unsigned int i = 0; i < count; ++i)
         {
           ompl_parallel_plan_.addPlannerAllocator(ompl_simple_setup_->getPlannerAllocator());
         }
+      }
       else
       {
         for (unsigned int i = 0; i < count; ++i)

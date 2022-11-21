@@ -112,19 +112,31 @@ void printNeg(PropagationDistanceField& pdf, int numX, int numY, int numZ)
 void printPointCoords(const Eigen::Vector3i& p)
 {
   if (p.x() < 0)
+  {
     std::cout << '-';
+  }
   else
+  {
     std::cout << p.x();
+  }
 
   if (p.y() < 0)
+  {
     std::cout << '-';
+  }
   else
+  {
     std::cout << p.y();
+  }
 
   if (p.z() < 0)
+  {
     std::cout << '-';
+  }
   else
+  {
     std::cout << p.z();
+  }
 
   std::cout << " ";
 }
@@ -819,13 +831,13 @@ TEST(TestSignedPropagationDistanceField, TestPerformance)
   dt = std::chrono::system_clock::now();
   worstdfu.addPointsToField(bad_vec);
   std::chrono::duration<double> wd = std::chrono::system_clock::now() - dt;
-  printf("Time for unsigned adding %u uniform points is %g average %g\n", (unsigned int)bad_vec.size(), wd.count(),
-         wd.count() / (bad_vec.size() * 1.0));
+  printf("Time for unsigned adding %u uniform points is %g average %g\n", static_cast<unsigned int>(bad_vec.size()),
+         wd.count(), wd.count() / (bad_vec.size() * 1.0));
   dt = std::chrono::system_clock::now();
   worstdfs.addPointsToField(bad_vec);
   wd = std::chrono::system_clock::now() - dt;
-  printf("Time for signed adding %u uniform points is %g average %g\n", (unsigned int)bad_vec.size(), wd.count(),
-         wd.count() / (bad_vec.size() * 1.0));
+  printf("Time for signed adding %u uniform points is %g average %g\n", static_cast<unsigned int>(bad_vec.size()),
+         wd.count(), wd.count() / (bad_vec.size() * 1.0));
 }
 
 TEST(TestSignedPropagationDistanceField, TestOcTree)

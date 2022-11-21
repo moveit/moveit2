@@ -100,9 +100,13 @@ bool KinematicsMetrics::getManipulabilityIndex(const moveit::core::RobotState& s
 {
   const moveit::core::JointModelGroup* joint_model_group = robot_model_->getJointModelGroup(group_name);
   if (joint_model_group)
+  {
     return getManipulabilityIndex(state, joint_model_group, manipulability_index, translation);
+  }
   else
+  {
     return false;
+  }
 }
 
 bool KinematicsMetrics::getManipulabilityIndex(const moveit::core::RobotState& state,
@@ -172,9 +176,13 @@ bool KinematicsMetrics::getManipulabilityEllipsoid(const moveit::core::RobotStat
 {
   const moveit::core::JointModelGroup* joint_model_group = robot_model_->getJointModelGroup(group_name);
   if (joint_model_group)
+  {
     return getManipulabilityEllipsoid(state, joint_model_group, eigen_values, eigen_vectors);
+  }
   else
+  {
     return false;
+  }
 }
 
 bool KinematicsMetrics::getManipulabilityEllipsoid(const moveit::core::RobotState& state,
@@ -201,9 +209,13 @@ bool KinematicsMetrics::getManipulability(const moveit::core::RobotState& state,
 {
   const moveit::core::JointModelGroup* joint_model_group = robot_model_->getJointModelGroup(group_name);
   if (joint_model_group)
+  {
     return getManipulability(state, joint_model_group, manipulability, translation);
+  }
   else
+  {
     return false;
+  }
 }
 
 bool KinematicsMetrics::getManipulability(const moveit::core::RobotState& state,

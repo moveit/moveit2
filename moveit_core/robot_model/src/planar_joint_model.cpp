@@ -95,9 +95,13 @@ void PlanarJointModel::getVariableDefaultPositions(double* values, const Bounds&
   {
     // if zero is a valid value
     if (bounds[i].min_position_ <= 0.0 && bounds[i].max_position_ >= 0.0)
+    {
       values[i] = 0.0;
+    }
     else
+    {
       values[i] = (bounds[i].min_position_ + bounds[i].max_position_) / 2.0;
+    }
   }
   values[2] = 0.0;
 }
@@ -107,14 +111,22 @@ void PlanarJointModel::getVariableRandomPositions(random_numbers::RandomNumberGe
 {
   if (bounds[0].max_position_ >= std::numeric_limits<double>::infinity() ||
       bounds[0].min_position_ <= -std::numeric_limits<double>::infinity())
+  {
     values[0] = 0.0;
+  }
   else
+  {
     values[0] = rng.uniformReal(bounds[0].min_position_, bounds[0].max_position_);
+  }
   if (bounds[1].max_position_ >= std::numeric_limits<double>::infinity() ||
       bounds[1].min_position_ <= -std::numeric_limits<double>::infinity())
+  {
     values[1] = 0.0;
+  }
   else
+  {
     values[1] = rng.uniformReal(bounds[1].min_position_, bounds[1].max_position_);
+  }
   values[2] = rng.uniformReal(bounds[2].min_position_, bounds[2].max_position_);
 }
 
@@ -124,16 +136,24 @@ void PlanarJointModel::getVariableRandomPositionsNearBy(random_numbers::RandomNu
 {
   if (bounds[0].max_position_ >= std::numeric_limits<double>::infinity() ||
       bounds[0].min_position_ <= -std::numeric_limits<double>::infinity())
+  {
     values[0] = 0.0;
+  }
   else
+  {
     values[0] = rng.uniformReal(std::max(bounds[0].min_position_, near[0] - distance),
                                 std::min(bounds[0].max_position_, near[0] + distance));
+  }
   if (bounds[1].max_position_ >= std::numeric_limits<double>::infinity() ||
       bounds[1].min_position_ <= -std::numeric_limits<double>::infinity())
+  {
     values[1] = 0.0;
+  }
   else
+  {
     values[1] = rng.uniformReal(std::max(bounds[1].min_position_, near[1] - distance),
                                 std::min(bounds[1].max_position_, near[1] + distance));
+  }
 
   double da = angular_distance_weight_ * distance;
   // limit the sampling range to 2pi to work correctly even if the distance is very large
@@ -189,19 +209,29 @@ void PlanarJointModel::interpolate(const double* from, const double* to, const d
     // interpolate angle
     double diff = to[2] - from[2];
     if (fabs(diff) <= M_PI)
+    {
       state[2] = from[2] + diff * t;
+    }
     else
     {
       if (diff > 0.0)
+      {
         diff = 2.0 * M_PI - diff;
+      }
       else
+      {
         diff = -2.0 * M_PI - diff;
+      }
       state[2] = from[2] - diff * t;
       // input states are within bounds, so the following check is sufficient
       if (state[2] > M_PI)
+      {
         state[2] -= 2.0 * M_PI;
+      }
       else if (state[2] < -M_PI)
+      {
         state[2] += 2.0 * M_PI;
+      }
     }
   }
   else if (motion_model_ == DIFF_DRIVE)
@@ -269,8 +299,10 @@ double PlanarJointModel::distance(const double* values1, const double* values2) 
 bool PlanarJointModel::satisfiesPositionBounds(const double* values, const Bounds& bounds, double margin) const
 {
   for (unsigned int i = 0; i < 3; ++i)
+  {
     if (values[i] < bounds[i].min_position_ - margin || values[i] > bounds[i].max_position_ + margin)
       return false;
+  }
   return true;
 }
 
@@ -281,9 +313,13 @@ bool PlanarJointModel::normalizeRotation(double* values) const
     return false;
   v = fmod(v, 2.0 * M_PI);
   if (v < -M_PI)
+  {
     v += 2.0 * M_PI;
+  }
   else if (v > M_PI)
+  {
     v -= 2.0 * M_PI;
+  }
   return true;
 }
 
@@ -322,7 +358,9 @@ void PlanarJointModel::computeVariablePositions(const Eigen::Isometry3d& transf,
   // taken from Bullet
   double s_squared = 1.0 - (q.w() * q.w());
   if (s_squared < 10.0 * std::numeric_limits<double>::epsilon())
+  {
     joint_values[2] = 0.0;
+  }
   else
   {
     double s = 1.0 / sqrt(s_squared);

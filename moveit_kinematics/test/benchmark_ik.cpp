@@ -93,9 +93,13 @@ int main(int argc, char* argv[])
   std::vector<std::string> end_effectors;
 
   if (group == "all")
+  {
     groups = kinematic_model->getJointModelGroups();
+  }
   else
+  {
     groups.push_back(kinematic_model->getJointModelGroup(group));
+  }
 
   for (const auto& group : groups)
   {
@@ -107,9 +111,13 @@ int main(int argc, char* argv[])
     }
 
     if (tip == "default")
+    {
       group->getEndEffectorTips(end_effectors);
+    }
     else
+    {
       end_effectors = std::vector<std::string>(1, tip);
+    }
 
     // perform first IK call to load the cache, so that the time for loading is not included in
     // average IK call time
@@ -118,9 +126,13 @@ int main(int argc, char* argv[])
     for (const auto& end_effector : end_effectors)
       default_eef_states.push_back(kinematic_state.getGlobalLinkTransform(end_effector));
     if (end_effectors.size() == 1)
+    {
       kinematic_state.setFromIK(group, default_eef_states[0], end_effectors[0], 0.1);
+    }
     else
+    {
       kinematic_state.setFromIK(group, default_eef_states, end_effectors, 0.1);
+    }
 
     bool found_ik;
     unsigned int num_failed_calls = 0, num_self_collisions = 0;
@@ -142,22 +154,29 @@ int main(int argc, char* argv[])
         kinematic_state.setToDefaultValues();
       start = std::chrono::system_clock::now();
       if (end_effectors.size() == 1)
+      {
         found_ik = kinematic_state.setFromIK(group, end_effector_states[0], end_effectors[0], 0.1);
+      }
       else
+      {
         found_ik = kinematic_state.setFromIK(group, end_effector_states, end_effectors, 0.1);
+      }
       ik_time += std::chrono::system_clock::now() - start;
       if (!found_ik)
         num_failed_calls++;
       ++i;
       if (i % 100 == 0)
+      {
         RCLCPP_INFO(LOGGER,
                     "Avg. time per IK solver call is %g after %d calls. %g%% of calls failed to return a solution. "
                     "%g%% of random joint configurations were ignored due to self-collisions.",
-                    ik_time.count() / (double)i, i, 100. * num_failed_calls / i,
+                    ik_time.count() / static_cast<double>(i), i, 100. * num_failed_calls / i,
                     100. * num_self_collisions / (num_self_collisions + i));
+      }
     }
-    RCLCPP_INFO(LOGGER, "Summary for group %s: %g %g %g", group->getName().c_str(), ik_time.count() / (double)i,
-                100. * num_failed_calls / i, 100. * num_self_collisions / (num_self_collisions + i));
+    RCLCPP_INFO(LOGGER, "Summary for group %s: %g %g %g", group->getName().c_str(),
+                ik_time.count() / static_cast<double>(i), 100. * num_failed_calls / i,
+                100. * num_self_collisions / (num_self_collisions + i));
   }
 
   rclcpp::shutdown();

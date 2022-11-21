@@ -32,7 +32,7 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#include "pilz_industrial_motion_planner_testutils/jointconfiguration.h"
+#include <pilz_industrial_motion_planner_testutils/jointconfiguration.h>
 
 #include <moveit/kinematic_constraints/utils.h>
 

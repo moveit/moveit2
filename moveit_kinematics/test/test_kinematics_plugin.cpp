@@ -240,9 +240,11 @@ public:
                                             const std::vector<geometry_msgs::msg::Pose>& val2, double abs_error)
   {
     if (val1.size() != val2.size())
+    {
       return testing::AssertionFailure() << "Different vector sizes"
                                          << "\nExpected: " << expr1 << " (" << val1.size() << ")"
                                          << "\nActual: " << expr2 << " (" << val2.size() << ")";
+    }
 
     for (size_t i = 0; i < val1.size(); ++i)
     {
@@ -273,9 +275,13 @@ public:
 
     EXPECT_GT(poses[0].position.z, 0.0f);
     if (poses[0].position.z > 0.0)
+    {
       error_code.val = error_code.SUCCESS;
+    }
     else
+    {
       error_code.val = error_code.PLANNING_FAILED;
+    }
   }
 
 public:
@@ -508,12 +514,18 @@ TEST_F(KinematicsTest, unitIK)
     std::string pose_type = "pose_type_relative";
     node_->get_parameter_or(pose_param + ".type", pose_type, pose_type);
     if (pose_type == pose_type_relative)
+    {
       goal = goal * pose;
+    }
     else if (pose_type == pose_type_absolute)
+    {
       goal = pose;
+    }
     else
+    {
       FAIL() << "Found invalid 'type' in " << pose_name << ": should be one of '" << pose_type_relative << "' or '"
              << pose_type_absolute << "'";
+    }
 
     std::string desc;
     {
@@ -544,9 +556,13 @@ TEST_F(KinematicsTest, searchIK)
 
     kinematics_solver_->searchPositionIK(poses[0], seed, timeout_, solution, error_code);
     if (error_code.val == error_code.SUCCESS)
+    {
       success++;
+    }
     else
+    {
       continue;
+    }
 
     std::vector<geometry_msgs::msg::Pose> reached_poses;
     kinematics_solver_->getPositionFK(fk_names, solution, reached_poses);
@@ -555,7 +571,7 @@ TEST_F(KinematicsTest, searchIK)
 
   if (num_ik_cb_tests_ > 0)
   {
-    RCLCPP_INFO_STREAM(LOGGER, "Success Rate: " << (double)success / num_ik_tests_);
+    RCLCPP_INFO_STREAM(LOGGER, "Success Rate: " << static_cast<double>(success) / num_ik_tests_);
   }
   EXPECT_GE(success, EXPECTED_SUCCESS_RATE * num_ik_tests_);
 }
@@ -590,9 +606,13 @@ TEST_F(KinematicsTest, searchIKWithCallback)
                moveit_msgs::msg::MoveItErrorCodes& error_code) { searchIKCallback(joints, error_code); },
         error_code);
     if (error_code.val == error_code.SUCCESS)
+    {
       success++;
+    }
     else
+    {
       continue;
+    }
 
     std::vector<geometry_msgs::msg::Pose> reached_poses;
     kinematics_solver_->getPositionFK(fk_names, solution, reached_poses);
@@ -601,7 +621,7 @@ TEST_F(KinematicsTest, searchIKWithCallback)
 
   if (num_ik_cb_tests_ > 0)
   {
-    RCLCPP_INFO_STREAM(LOGGER, "Success Rate: " << (double)success / num_ik_cb_tests_);
+    RCLCPP_INFO_STREAM(LOGGER, "Success Rate: " << static_cast<double>(success) / num_ik_cb_tests_);
   }
   EXPECT_GE(success, EXPECTED_SUCCESS_RATE * num_ik_cb_tests_);
 }
@@ -658,9 +678,13 @@ TEST_F(KinematicsTest, getIKMultipleSolutions)
     kinematics_solver_->getPositionIK(poses, fk_values, solutions, result, options);
 
     if (result.kinematic_error == kinematics::KinematicErrors::OK)
+    {
       success += solutions.empty() ? 0 : 1;
+    }
     else
+    {
       continue;
+    }
 
     std::vector<geometry_msgs::msg::Pose> reached_poses;
     for (const auto& s : solutions)
@@ -672,7 +696,7 @@ TEST_F(KinematicsTest, getIKMultipleSolutions)
 
   if (num_ik_cb_tests_ > 0)
   {
-    RCLCPP_INFO_STREAM(LOGGER, "Success Rate: " << (double)success / num_ik_multiple_tests_);
+    RCLCPP_INFO_STREAM(LOGGER, "Success Rate: " << static_cast<double>(success) / num_ik_multiple_tests_);
   }
   EXPECT_GE(success, EXPECTED_SUCCESS_RATE * num_ik_multiple_tests_);
 }

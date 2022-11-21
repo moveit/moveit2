@@ -48,7 +48,7 @@
 #include <QSplitter>
 #include <QVBoxLayout>
 
-#include "moveit_setup_core_plugins/configuration_files_widget.hpp"
+#include <moveit_setup_core_plugins/configuration_files_widget.hpp>
 
 // Boost
 #include <boost/algorithm/string.hpp>  // string trim
@@ -329,8 +329,10 @@ void ConfigurationFilesWidget::focusGiven()
                 "but we recommend you check the list and enable the checkbox next to files you would like to "
                 "overwrite. ");
     if (setup_step_.hasConflictingFiles())
+    {
       msg += "<br/><font color='red'>Attention:</font> Some files (<font color='red'>marked red</font>) are changed "
              "both, externally and in Setup Assistant.";
+    }
     QMessageBox::information(this, "Files Modified", msg);
   }
 }

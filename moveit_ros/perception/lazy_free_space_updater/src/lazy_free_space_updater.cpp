@@ -138,18 +138,26 @@ void LazyFreeSpaceUpdater::processThread()
       {
         /* compute the free cells along each ray that ends at an occupied cell */
         for (std::pair<const octomap::OcTreeKey, unsigned int>& it : *process_occupied_cells_set_)
+        {
           if (tree_->computeRayKeys(process_sensor_origin_, tree_->keyToCoord(it.first), key_ray1))
+          {
             for (octomap::OcTreeKey& jt : key_ray1)
               free_cells1[jt] += it.second;
+          }
+        }
       }
 
 #pragma omp section
       {
         /* compute the free cells along each ray that ends at a model cell */
         for (const octomap::OcTreeKey& it : *process_model_cells_set_)
+        {
           if (tree_->computeRayKeys(process_sensor_origin_, tree_->keyToCoord(it), key_ray2))
+          {
             for (octomap::OcTreeKey& jt : key_ray2)
               free_cells2[jt]++;
+          }
+        }
       }
     }
 

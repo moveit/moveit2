@@ -123,9 +123,13 @@ public:
   std::string resolveServoTopicName(std::string topic_name)
   {
     if (topic_name.at(0) == '~')
+    {
       return topic_name.replace(0, 1, test_parameters_->servo_node_name);
+    }
     else
+    {
       return topic_name;
+    }
   }
 
   // Set up for callbacks (so they aren't run for EVERY test)

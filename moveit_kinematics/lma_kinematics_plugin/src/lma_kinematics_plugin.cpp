@@ -74,8 +74,10 @@ bool LMAKinematicsPlugin::checkConsistency(const Eigen::VectorXd& seed_state,
                                            const Eigen::VectorXd& solution) const
 {
   for (std::size_t i = 0; i < dimension_; ++i)
+  {
     if (fabs(seed_state(i) - solution(i)) > consistency_limits[i])
       return false;
+  }
   return true;
 }
 
@@ -200,8 +202,10 @@ bool LMAKinematicsPlugin::obeysLimits(const Eigen::VectorXd& values) const
 {
   size_t i = 0;
   for (const auto& jm : joints_)
+  {
     if (!jm->satisfiesPositionBounds(&values[i++]))
       return false;
+  }
   return true;
 }
 
@@ -270,9 +274,13 @@ bool LMAKinematicsPlugin::searchPositionIK(const geometry_msgs::msg::Pose& ik_po
     if (attempt > 1)  // randomly re-seed after first attempt
     {
       if (!consistency_limits.empty())
+      {
         getRandomConfiguration(jnt_seed_state.data, consistency_limits, jnt_pos_in.data);
+      }
       else
+      {
         getRandomConfiguration(jnt_pos_in.data);
+      }
       RCLCPP_DEBUG_STREAM(LOGGER, "New random configuration (" << attempt << "): " << jnt_pos_in);
     }
 

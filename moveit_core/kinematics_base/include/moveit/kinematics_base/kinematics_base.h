@@ -44,7 +44,7 @@
 #include <string>
 #include <functional>
 
-#include "moveit_kinematics_base_export.h"
+#include <moveit_kinematics_base_export.h>
 
 namespace moveit
 {
@@ -434,8 +434,10 @@ public:
   virtual const std::string& getTipFrame() const
   {
     if (tip_frames_.size() > 1)
+    {
       RCLCPP_ERROR(LOGGER, "This kinematic solver has more than one tip frame, "
                            "do not call getTipFrame()");
+    }
 
     return tip_frames_[0];
   }

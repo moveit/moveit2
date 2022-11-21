@@ -90,9 +90,13 @@ bool hasRequiredAttributes(const tinyxml2::XMLElement& e, const std::vector<XMLA
       continue;  // attribute not required
     const char* value = e.Attribute(attr.name);
     if (value && strcmp(attr.value, value) == 0)
+    {
       continue;  // attribute has required value
+    }
     else
+    {
       return false;
+    }
   }
   return true;
 };

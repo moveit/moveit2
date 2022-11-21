@@ -47,10 +47,10 @@
 class QSplitter;
 
 // Setup Assistant
-#include "moveit_setup_framework/qt/setup_step_widget.hpp"
-#include "moveit_setup_framework/qt/rviz_panel.hpp"
-#include "moveit_setup_framework/data_warehouse.hpp"
-#include "moveit_setup_assistant/navigation_widget.hpp"
+#include <moveit_setup_framework/qt/setup_step_widget.hpp>
+#include <moveit_setup_framework/qt/rviz_panel.hpp>
+#include <moveit_setup_framework/data_warehouse.hpp>
+#include <moveit_setup_assistant/navigation_widget.hpp>
 
 #ifndef Q_MOC_RUN
 // Other

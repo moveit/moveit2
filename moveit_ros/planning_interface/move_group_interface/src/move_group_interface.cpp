@@ -412,7 +412,9 @@ public:
   moveit::core::RobotStatePtr getStartState()
   {
     if (considered_start_state_)
+    {
       return considered_start_state_;
+    }
     else
     {
       moveit::core::RobotStatePtr s;
@@ -447,8 +449,10 @@ public:
 
       // if no frame transforms are needed, call IK directly
       if (frame.empty() || moveit::core::Transforms::sameFrame(frame, getRobotModel()->getModelFrame()))
+      {
         return getTargetRobotState().setFromIK(getJointModelGroup(), eef_pose, eef, 0.0,
                                                moveit::core::GroupStateValidityCallbackFn(), o);
+      }
       else
       {
         // transform the pose into the model frame, then do IK
@@ -500,8 +504,10 @@ public:
       const std::vector<std::string>& possible_eefs =
           getRobotModel()->getJointModelGroup(opt_.group_name_)->getAttachedEndEffectorNames();
       for (const std::string& possible_eef : possible_eefs)
+      {
         if (getRobotModel()->getEndEffector(possible_eef)->hasLinkModel(end_effector_link_))
           return possible_eef;
+      }
     }
     static std::string empty;
     return empty;
@@ -539,8 +545,10 @@ public:
     // if multiple pose targets are set, return the first one
     std::map<std::string, std::vector<geometry_msgs::msg::PoseStamped>>::const_iterator jt = pose_targets_.find(eef);
     if (jt != pose_targets_.end())
+    {
       if (!jt->second.empty())
         return jt->second.at(0);
+    }
 
     // or return an error
     static const geometry_msgs::msg::PoseStamped UNKNOWN;
@@ -554,8 +562,10 @@ public:
 
     std::map<std::string, std::vector<geometry_msgs::msg::PoseStamped>>::const_iterator jt = pose_targets_.find(eef);
     if (jt != pose_targets_.end())
+    {
       if (!jt->second.empty())
         return jt->second;
+    }
 
     // or return an error
     static const std::vector<geometry_msgs::msg::PoseStamped> EMPTY;
@@ -649,7 +659,7 @@ public:
   //      locations.push_back(location);
   //    }
   //    RCLCPP_DEBUG(LOGGER, "Move group interface has %u place locations",
-  //                    (unsigned int)locations.size());
+  //                    static_cast<unsigned int>(locations.size()));
   //    return locations;
   //  }
 
@@ -971,9 +981,13 @@ public:
     moveit_msgs::srv::GetCartesianPath::Response::SharedPtr response;
 
     if (considered_start_state_)
+    {
       moveit::core::robotStateToRobotStateMsg(*considered_start_state_, req->start_state);
+    }
     else
+    {
       req->start_state.is_diff = true;
+    }
 
     req->group_name = opt_.group_name_;
     req->header.frame_id = getPoseReferenceFrame();
@@ -1033,9 +1047,13 @@ public:
     aco.object.id = object;
     aco.link_name.swap(l);
     if (touch_links.empty())
+    {
       aco.touch_links.push_back(aco.link_name);
+    }
     else
+    {
       aco.touch_links = touch_links;
+    }
     aco.object.operation = moveit_msgs::msg::CollisionObject::ADD;
     attached_object_publisher_->publish(aco);
     return true;
@@ -1046,9 +1064,13 @@ public:
     moveit_msgs::msg::AttachedCollisionObject aco;
     // if name is a link
     if (!name.empty() && joint_model_group_->hasLinkModel(name))
+    {
       aco.link_name = name;
+    }
     else
+    {
       aco.object.id = name;
+    }
     aco.object.operation = moveit_msgs::msg::CollisionObject::REMOVE;
     if (aco.link_name.empty() && aco.object.id.empty())
     {
@@ -1120,9 +1142,13 @@ public:
     request.workspace_parameters = workspace_parameters_;
 
     if (considered_start_state_)
+    {
       moveit::core::robotStateToRobotStateMsg(*considered_start_state_, request.start_state);
+    }
     else
+    {
       request.start_state.is_diff = true;
+    }
 
     if (active_target_ == JOINT)
     {
@@ -1282,17 +1308,25 @@ public:
   moveit_msgs::msg::Constraints getPathConstraints() const
   {
     if (path_constraints_)
+    {
       return *path_constraints_;
+    }
     else
+    {
       return moveit_msgs::msg::Constraints();
+    }
   }
 
   moveit_msgs::msg::TrajectoryConstraints getTrajectoryConstraints() const
   {
     if (trajectory_constraints_)
+    {
       return *trajectory_constraints_;
+    }
     else
+    {
       return moveit_msgs::msg::TrajectoryConstraints();
+    }
   }
 
   void initializeConstraintsStorage(const std::string& host, unsigned int port)
@@ -1643,7 +1677,9 @@ void MoveGroupInterface::setStartState(const moveit_msgs::msg::RobotState& start
 {
   moveit::core::RobotStatePtr rs;
   if (start_state.is_diff)
+  {
     impl_->getCurrentState(rs);
+  }
   else
   {
     rs = std::make_shared<moveit::core::RobotState>(getRobotModel());
@@ -2143,7 +2179,9 @@ geometry_msgs::msg::PoseStamped MoveGroupInterface::getRandomPose(const std::str
   Eigen::Isometry3d pose;
   pose.setIdentity();
   if (eef.empty())
+  {
     RCLCPP_ERROR(LOGGER, "No end-effector specified");
+  }
   else
   {
     moveit::core::RobotStatePtr current_state;
@@ -2168,7 +2206,9 @@ geometry_msgs::msg::PoseStamped MoveGroupInterface::getCurrentPose(const std::st
   Eigen::Isometry3d pose;
   pose.setIdentity();
   if (eef.empty())
+  {
     RCLCPP_ERROR(LOGGER, "No end-effector specified");
+  }
   else
   {
     moveit::core::RobotStatePtr current_state;
@@ -2191,7 +2231,9 @@ std::vector<double> MoveGroupInterface::getCurrentRPY(const std::string& end_eff
   std::vector<double> result;
   const std::string& eef = end_effector_link.empty() ? getEndEffectorLink() : end_effector_link;
   if (eef.empty())
+  {
     RCLCPP_ERROR(LOGGER, "No end-effector specified");
+  }
   else
   {
     moveit::core::RobotStatePtr current_state;

@@ -85,6 +85,7 @@ CollisionEnvFCL::CollisionEnvFCL(const moveit::core::RobotModelConstPtr& model, 
   robot_fcl_objs_.resize(robot_model_->getLinkGeometryCount());
   // we keep the same order of objects as what RobotState *::getLinkState() returns
   for (auto link : links)
+  {
     for (std::size_t j{ 0 }; j < link->getShapes().size(); ++j)
     {
       FCLGeometryConstPtr link_geometry = createCollisionGeometry(link->getShapes()[j], getLinkScale(link->getName()),
@@ -104,6 +105,7 @@ CollisionEnvFCL::CollisionEnvFCL(const moveit::core::RobotModelConstPtr& model, 
       else
         RCLCPP_ERROR(LOGGER, "Unable to construct collision geometry for link '%s'", link->getName().c_str());
     }
+  }
 
   manager_ = std::make_unique<fcl::DynamicAABBTreeCollisionManagerd>();
 
@@ -122,6 +124,7 @@ CollisionEnvFCL::CollisionEnvFCL(const moveit::core::RobotModelConstPtr& model, 
   robot_fcl_objs_.resize(robot_model_->getLinkGeometryCount());
   // we keep the same order of objects as what RobotState *::getLinkState() returns
   for (auto link : links)
+  {
     for (std::size_t j{ 0 }; j < link->getShapes().size(); ++j)
     {
       FCLGeometryConstPtr g = createCollisionGeometry(link->getShapes()[j], getLinkScale(link->getName()),
@@ -140,6 +143,7 @@ CollisionEnvFCL::CollisionEnvFCL(const moveit::core::RobotModelConstPtr& model, 
       else
         RCLCPP_ERROR(LOGGER, "Unable to construct collision geometry for link '%s'", link->getName().c_str());
     }
+  }
 
   manager_ = std::make_unique<fcl::DynamicAABBTreeCollisionManagerd>();
 
@@ -206,6 +210,7 @@ void CollisionEnvFCL::constructFCLObjectRobot(const moveit::core::RobotState& st
   fcl::Transform3d fcl_tf;
 
   for (std::size_t i{ 0 }; i < robot_geoms_.size(); ++i)
+  {
     if (robot_geoms_[i] && robot_geoms_[i]->collision_geometry_)
     {
       transform2fcl(state.getCollisionBodyTransform(robot_geoms_[i]->collision_geometry_data_->ptr.link,
@@ -216,6 +221,7 @@ void CollisionEnvFCL::constructFCLObjectRobot(const moveit::core::RobotState& st
       coll_obj->computeAABB();
       fcl_obj.collision_objects_.push_back(FCLCollisionObjectPtr(coll_obj));
     }
+  }
 
   // TODO: Implement a method for caching fcl::CollisionObject's for moveit::core::AttachedBody's
   std::vector<const moveit::core::AttachedBody*> ab;
@@ -226,6 +232,7 @@ void CollisionEnvFCL::constructFCLObjectRobot(const moveit::core::RobotState& st
     getAttachedBodyObjects(body, objs);
     const EigenSTL::vector_Isometry3d& ab_t = body->getGlobalCollisionBodyTransforms();
     for (std::size_t k = 0; k < objs.size(); ++k)
+    {
       if (objs[k]->collision_geometry_)
       {
         transform2fcl(ab_t[k], fcl_tf);
@@ -235,6 +242,7 @@ void CollisionEnvFCL::constructFCLObjectRobot(const moveit::core::RobotState& st
         // and would be destroyed when objs goes out of scope.
         fcl_obj.collision_geometry_.push_back(objs[k]);
       }
+    }
   }
 }
 

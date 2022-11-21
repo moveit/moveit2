@@ -111,11 +111,13 @@ bool ompl_interface::ConstrainedGoalSampler::sampleUsingConstraintSampler(const 
   {
     bool verbose = false;
     if (gls->getStateCount() == 0 && a >= max_attempts_div2)
+    {
       if (verbose_display_ < 1)
       {
         verbose = true;
         verbose_display_++;
       }
+    }
 
     if (constraint_sampler_)
     {

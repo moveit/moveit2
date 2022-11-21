@@ -72,7 +72,9 @@ void parseStart(std::istream& in, planning_scene_monitor::PlanningSceneMonitor* 
         {
           in >> marker;
           if (marker != "=")
+          {
             joint = ".";
+          }
           else
           {
             in >> value;
@@ -173,9 +175,13 @@ void parseGoal(std::istream& in, planning_scene_monitor::PlanningSceneMonitor* p
       if (in.good() && !in.eof())
       {
         if (type == "link_constraint")
+        {
           parseLinkConstraint(in, psm, cs);
+        }
         else
+        {
           RCLCPP_INFO(LOGGER, "Unknown goal type: '%s'", type.c_str());
+        }
       }
     }
   }
@@ -194,11 +200,17 @@ void parseQueries(std::istream& in, planning_scene_monitor::PlanningSceneMonitor
     if (in.good() && !in.eof())
     {
       if (type == "start")
+      {
         parseStart(in, psm, rs);
+      }
       else if (type == "goal")
+      {
         parseGoal(in, psm, cs);
+      }
       else
+      {
         RCLCPP_ERROR(LOGGER, "Unknown query type: '%s'", type.c_str());
+      }
     }
   }
 }

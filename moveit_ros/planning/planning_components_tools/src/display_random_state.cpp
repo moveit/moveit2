@@ -85,9 +85,13 @@ int main(int argc, char** argv)
 
     std::cout << "Type a number and hit Enter. That number of ";
     if (valid)
+    {
       std::cout << "valid ";
+    }
     else if (invalid)
+    {
       std::cout << "invalid ";
+    }
     std::cout << "states will be randomly generated at an interval of one second and published as a planning scene."
               << '\n';
     std::size_t n;
