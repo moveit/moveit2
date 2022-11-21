@@ -160,9 +160,13 @@ public:
   double getWayPointDurationFromPrevious(std::size_t index) const
   {
     if (duration_from_previous_.size() > index)
+    {
       return duration_from_previous_[index];
+    }
     else
+    {
       return 0.0;
+    }
   }
 
   RobotTrajectory& setWayPointDurationFromPrevious(std::size_t index, double value)

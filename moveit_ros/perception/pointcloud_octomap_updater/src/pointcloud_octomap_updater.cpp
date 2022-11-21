@@ -101,8 +101,10 @@ void PointCloudOctomapUpdater::start()
     prefix = ns_ + "/";
 
   if (!filtered_cloud_topic_.empty())
+  {
     filtered_cloud_publisher_ =
         node_->create_publisher<sensor_msgs::msg::PointCloud2>(prefix + filtered_cloud_topic_, 10);
+  }
 
   if (point_cloud_subscriber_)
     return;
@@ -142,9 +144,13 @@ ShapeHandle PointCloudOctomapUpdater::excludeShape(const shapes::ShapeConstPtr& 
 {
   ShapeHandle h = 0;
   if (shape_mask_)
+  {
     h = shape_mask_->addShape(shape, scale_, padding_);
+  }
   else
+  {
     RCLCPP_ERROR(LOGGER, "Shape filter not yet initialized!");
+  }
   return h;
 }
 
@@ -188,7 +194,9 @@ void PointCloudOctomapUpdater::cloudMsgCallback(const sensor_msgs::msg::PointClo
   /* get transform for cloud into map frame */
   tf2::Stamped<tf2::Transform> map_h_sensor;
   if (monitor_->getMapFrame() == cloud_msg->header.frame_id)
+  {
     map_h_sensor.setIdentity();
+  }
   else
   {
     if (tf_buffer_)
@@ -304,18 +312,24 @@ void PointCloudOctomapUpdater::cloudMsgCallback(const sensor_msgs::msg::PointClo
 
     /* compute the free cells along each ray that ends at an occupied cell */
     for (const octomap::OcTreeKey& occupied_cell : occupied_cells)
+    {
       if (tree_->computeRayKeys(sensor_origin, tree_->keyToCoord(occupied_cell), key_ray_))
         free_cells.insert(key_ray_.begin(), key_ray_.end());
+    }
 
     /* compute the free cells along each ray that ends at a model cell */
     for (const octomap::OcTreeKey& model_cell : model_cells)
+    {
       if (tree_->computeRayKeys(sensor_origin, tree_->keyToCoord(model_cell), key_ray_))
         free_cells.insert(key_ray_.begin(), key_ray_.end());
+    }
 
     /* compute the free cells along each ray that ends at a clipped cell */
     for (const octomap::OcTreeKey& clip_cell : clip_cells)
+    {
       if (tree_->computeRayKeys(sensor_origin, tree_->keyToCoord(clip_cell), key_ray_))
         free_cells.insert(key_ray_.begin(), key_ray_.end());
+    }
   }
   catch (...)
   {

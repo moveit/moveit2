@@ -221,9 +221,13 @@ bool CurrentStateMonitor::haveCompleteStateHelper(const rclcpp::Time& oldest_all
       continue;
 
     if (missing_joints)
+    {
       missing_joints->push_back(joint->getName());
+    }
     else
+    {
       return false;
+    }
   }
   return (missing_joints == nullptr) || missing_joints->empty();
 }
@@ -301,8 +305,10 @@ bool CurrentStateMonitor::waitForCompleteState(const std::string& group, double 
       const std::vector<std::string>& names = jmg->getJointModelNames();
       bool ok = true;
       for (std::size_t i = 0; ok && i < names.size(); ++i)
+      {
         if (mj.find(names[i]) != mj.end())
           ok = false;
+      }
     }
     else
       ok = false;
@@ -345,8 +351,10 @@ void CurrentStateMonitor::jointStateCallback(const sensor_msgs::msg::JointState:
 
         // continuous joints wrap, so we don't modify them (even if they are outside bounds!)
         if (jm->getType() == moveit::core::JointModel::REVOLUTE)
+        {
           if (static_cast<const moveit::core::RevoluteJointModel*>(jm)->isContinuous())
             continue;
+        }
 
         const moveit::core::VariableBounds& b =
             jm->getVariableBounds()[0];  // only one variable in the joint, so we get its bounds
@@ -354,9 +362,13 @@ void CurrentStateMonitor::jointStateCallback(const sensor_msgs::msg::JointState:
         // if the read variable is 'almost' within bounds (up to error_ difference), then consider it to be within
         // bounds
         if (joint_state->position[i] < b.min_position_ && joint_state->position[i] >= b.min_position_ - error_)
+        {
           robot_state_.setJointPositions(jm, &b.min_position_);
+        }
         else if (joint_state->position[i] > b.max_position_ && joint_state->position[i] <= b.max_position_ + error_)
+        {
           robot_state_.setJointPositions(jm, &b.max_position_);
+        }
       }
 
       // optionally copy velocities and effort
@@ -383,8 +395,10 @@ void CurrentStateMonitor::jointStateCallback(const sensor_msgs::msg::JointState:
 
   // callbacks, if needed
   if (update)
+  {
     for (JointStateUpdateCallback& update_callback : update_callbacks_)
       update_callback(joint_state);
+  }
 
   // notify waitForCurrentState() *after* potential update callbacks
   state_update_condition_.notify_all();
@@ -433,10 +447,14 @@ void CurrentStateMonitor::updateMultiDofJoints()
       std::vector<double> new_values(joint->getStateSpaceDimension());
       const moveit::core::LinkModel* link = joint->getChildLinkModel();
       if (link->jointOriginTransformIsIdentity())
+      {
         joint->computeVariablePositions(tf2::transformToEigen(transf), new_values.data());
+      }
       else
+      {
         joint->computeVariablePositions(link->getJointOriginTransform().inverse() * tf2::transformToEigen(transf),
                                         new_values.data());
+      }
 
       if (joint->distance(new_values.data(), robot_state_.getJointPositions(joint)) > 1e-5)
       {

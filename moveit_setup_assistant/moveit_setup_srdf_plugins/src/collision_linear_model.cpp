@@ -107,23 +107,35 @@ QVariant CollisionLinearModel::data(const QModelIndex& index, int role) const
   {
     case 0:  // link name 1
       if (role != Qt::DisplayRole)
+      {
         return QVariant();
+      }
       else
+      {
         return this->sourceModel()->headerData(src_index.row(), Qt::Horizontal, Qt::DisplayRole);
+      }
     case 1:  // link name 2
       if (role != Qt::DisplayRole)
         return QVariant();
       return this->sourceModel()->headerData(src_index.column(), Qt::Vertical, Qt::DisplayRole);
     case 2:  // checkbox
       if (role != Qt::CheckStateRole)
+      {
         return QVariant();
+      }
       else
+      {
         return this->sourceModel()->data(src_index, Qt::CheckStateRole);
+      }
     case 3:  // reason
       if (role != Qt::DisplayRole)
+      {
         return QVariant();
+      }
       else
+      {
         return this->sourceModel()->data(src_index, Qt::ToolTipRole);
+      }
   }
   return QVariant();
 }
@@ -161,9 +173,13 @@ void CollisionLinearModel::setEnabled(const QItemSelection& selection, bool valu
 Qt::ItemFlags CollisionLinearModel::flags(const QModelIndex& index) const
 {
   if (index.column() == 2)
+  {
     return Qt::ItemIsUserCheckable | QAbstractItemModel::flags(index);
+  }
   else
+  {
     return QAbstractItemModel::flags(index);
+  }
 }
 
 QVariant CollisionLinearModel::headerData(int section, Qt::Orientation orientation, int role) const
@@ -206,9 +222,13 @@ SortFilterProxyModel::SortFilterProxyModel(QObject* parent) : QSortFilterProxyMo
 QVariant SortFilterProxyModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
   if (role == Qt::DisplayRole && orientation == Qt::Vertical)
+  {
     return section + 1;  // simply enumerate rows
+  }
   else
+  {
     return QSortFilterProxyModel::headerData(section, orientation, role);
+  }
 }
 
 void SortFilterProxyModel::setEnabled(const QItemSelection& selection, bool value)
@@ -256,9 +276,13 @@ bool SortFilterProxyModel::filterAcceptsRow(int source_row, const QModelIndex& s
 bool compareVariants(const QVariant& left, const QVariant& right)
 {
   if (left.userType() == QVariant::Type::Int)
+  {
     return left.toInt() < right.toInt();
+  }
   else
+  {
     return left.toString() < right.toString();
+  }
 }
 
 bool SortFilterProxyModel::lessThan(const QModelIndex& src_left, const QModelIndex& src_right) const
@@ -289,7 +313,9 @@ void SortFilterProxyModel::sort(int column, Qt::SortOrder order)
 {
   beginResetModel();
   if (column < 0)
+  {
     initSorting();
+  }
   else
   {
     // remember sorting history

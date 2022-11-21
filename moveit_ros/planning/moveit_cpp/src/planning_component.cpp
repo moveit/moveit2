@@ -310,7 +310,9 @@ bool PlanningComponent::setStartState(const moveit::core::RobotState& start_stat
 moveit::core::RobotStatePtr PlanningComponent::getStartState()
 {
   if (considered_start_state_)
+  {
     return considered_start_state_;
+  }
   else
   {
     moveit::core::RobotStatePtr s;

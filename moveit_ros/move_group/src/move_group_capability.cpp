@@ -125,22 +125,32 @@ std::string move_group::MoveGroupCapability::getActionResultString(const moveit_
   {
     case moveit_msgs::msg::MoveItErrorCodes::SUCCESS:
       if (planned_trajectory_empty)
+      {
         return "Requested path and goal constraints are already met.";
+      }
       else
       {
         if (plan_only)
+        {
           return "Motion plan was computed successfully.";
+        }
         else
+        {
           return "Solution was found and executed.";
+        }
       }
     case moveit_msgs::msg::MoveItErrorCodes::INVALID_GROUP_NAME:
       return "Invalid group in motion plan request";
     case moveit_msgs::msg::MoveItErrorCodes::PLANNING_FAILED:
     case moveit_msgs::msg::MoveItErrorCodes::INVALID_MOTION_PLAN:
       if (planned_trajectory_empty)
+      {
         return "No motion plan found. No execution attempted.";
+      }
       else
+      {
         return "Motion plan was found but it seems to be invalid (possibly due to postprocessing). Not executing.";
+      }
     case moveit_msgs::msg::MoveItErrorCodes::UNABLE_TO_AQUIRE_SENSOR_DATA:
       return "Motion plan was found but it seems to be too costly and looking around did not help.";
     case moveit_msgs::msg::MoveItErrorCodes::MOTION_PLAN_INVALIDATED_BY_ENVIRONMENT_CHANGE:

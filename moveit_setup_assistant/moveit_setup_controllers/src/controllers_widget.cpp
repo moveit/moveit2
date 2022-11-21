@@ -781,9 +781,13 @@ void ControllersWidget::changeScreen(int index)
 void ControllersWidget::alterTree(const QString& link)
 {
   if (link.contains("expand"))
+  {
     controllers_tree_->expandAll();
+  }
   else
+  {
     controllers_tree_->collapseAll();
+  }
 }
 
 void ControllersWidget::itemSelectionChanged()

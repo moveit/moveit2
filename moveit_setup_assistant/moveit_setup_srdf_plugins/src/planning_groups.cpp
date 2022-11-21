@@ -229,10 +229,14 @@ void PlanningGroups::setChain(const std::string& group_name, const std::string& 
     for (const std::string& link : links)
     {
       // Check if string matches either of user specified links
-      if (link.compare(tip) == 0)  // they are same
+      if (link.compare(tip) == 0)
+      {  // they are same
         found_tip = true;
-      else if (link.compare(base) == 0)  // they are same
+      }
+      else if (link.compare(base) == 0)
+      {  // they are same
         found_base = true;
+      }
 
       // Check if we are done searching
       if (found_tip && found_base)

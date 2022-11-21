@@ -204,9 +204,13 @@ protected:
   std::string getActionName() const
   {
     if (namespace_.empty())
+    {
       return name_;
+    }
     else
+    {
       return name_ + "/" + namespace_;
+    }
   }
 
   /**
@@ -218,15 +222,25 @@ protected:
   {
     RCLCPP_DEBUG_STREAM(LOGGER, "Controller " << name_ << " is done with state " << static_cast<int>(state));
     if (state == rclcpp_action::ResultCode::SUCCEEDED)
+    {
       last_exec_ = moveit_controller_manager::ExecutionStatus::SUCCEEDED;
+    }
     else if (state == rclcpp_action::ResultCode::ABORTED)
+    {
       last_exec_ = moveit_controller_manager::ExecutionStatus::ABORTED;
+    }
     else if (state == rclcpp_action::ResultCode::CANCELED)
+    {
       last_exec_ = moveit_controller_manager::ExecutionStatus::PREEMPTED;
+    }
     else if (state == rclcpp_action::ResultCode::UNKNOWN)
+    {
       last_exec_ = moveit_controller_manager::ExecutionStatus::UNKNOWN;
+    }
     else
+    {
       last_exec_ = moveit_controller_manager::ExecutionStatus::FAILED;
+    }
     done_ = true;
   }
 

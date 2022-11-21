@@ -107,9 +107,13 @@ public:
   double getTrajectoryStateRecordingFrequency() const
   {
     if (trajectory_monitor_)
+    {
       return trajectory_monitor_->getSamplingFrequency();
+    }
     else
+    {
       return 0.0;
+    }
   }
 
   void setTrajectoryStateRecordingFrequency(double freq)

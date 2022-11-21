@@ -46,8 +46,10 @@ using shapes::Mesh;
 mesh_filter::GLMesh::GLMesh(const Mesh& mesh, unsigned int mesh_label)
 {
   if (!mesh.vertex_normals)
+  {
     throw std::runtime_error("Vertex normals are not computed for input mesh. Call computeVertexNormals() before "
                              "passing as input to mesh_filter.");
+  }
 
   mesh_label_ = mesh_label;
   list_ = glGenLists(1);
@@ -83,9 +85,13 @@ void mesh_filter::GLMesh::render(const Isometry3d& transform) const
   glMatrixMode(GL_MODELVIEW);
   glPushMatrix();
   if (!(transform.matrix().Flags & RowMajorBit))
+  {
     glMultMatrixd(transform.matrix().data());
+  }
   else
+  {
     glMultTransposeMatrixd(transform.matrix().data());
+  }
   glCallList(list_);
   glPopMatrix();
 }

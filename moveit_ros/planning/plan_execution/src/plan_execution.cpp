@@ -83,8 +83,10 @@ plan_execution::PlanExecution::PlanExecution(
   : node_(node), planning_scene_monitor_(planning_scene_monitor), trajectory_execution_manager_(trajectory_execution)
 {
   if (!trajectory_execution_manager_)
+  {
     trajectory_execution_manager_ = std::make_shared<trajectory_execution_manager::TrajectoryExecutionManager>(
         node_, planning_scene_monitor_->getRobotModel(), planning_scene_monitor_->getStateMonitor());
+  }
 
   default_max_replan_attempts_ = 5;
 
@@ -122,7 +124,9 @@ void plan_execution::PlanExecution::planAndExecute(ExecutableMotionPlan& plan,
                                                    const Options& opt)
 {
   if (moveit::core::isEmpty(scene_diff))
+  {
     planAndExecute(plan, opt);
+  }
   else
   {
     plan.planning_scene_monitor_ = planning_scene_monitor_;
@@ -191,9 +195,13 @@ void plan_execution::PlanExecution::planAndExecuteHelper(ExecutableMotionPlan& p
 
     // abort if no plan was found
     if (solved)
+    {
       previously_solved = true;
+    }
     else
+    {
       break;
+    }
 
     if (plan.error_code_.val == moveit_msgs::msg::MoveItErrorCodes::SUCCESS)
     {
@@ -213,7 +221,9 @@ void plan_execution::PlanExecution::planAndExecuteHelper(ExecutableMotionPlan& p
 
     // if execution succeeded or failed in a manner that we do not consider recoverable, we exit the loop (with failure)
     if (plan.error_code_.val != moveit_msgs::msg::MoveItErrorCodes::MOTION_PLAN_INVALIDATED_BY_ENVIRONMENT_CHANGE)
+    {
       break;
+    }
     else
     {
       // otherwise, we wait (if needed)
@@ -273,9 +283,13 @@ bool plan_execution::PlanExecution::isRemainingPathValid(const ExecutableMotionP
     {
       collision_detection::CollisionResult res;
       if (acm)
+      {
         plan.planning_scene_->checkCollisionUnpadded(req, res, t.getWayPoint(i), *acm);
+      }
       else
+      {
         plan.planning_scene_->checkCollisionUnpadded(req, res, t.getWayPoint(i));
+      }
 
       if (res.collision || !plan.planning_scene_->isStateFeasible(t.getWayPoint(i), false))
       {
@@ -288,9 +302,13 @@ bool plan_execution::PlanExecution::isRemainingPathValid(const ExecutableMotionP
         req.verbose = true;
         res.clear();
         if (acm)
+        {
           plan.planning_scene_->checkCollisionUnpadded(req, res, t.getWayPoint(i), *acm);
+        }
         else
+        {
           plan.planning_scene_->checkCollisionUnpadded(req, res, t.getWayPoint(i));
+        }
         return false;
       }
     }
@@ -340,6 +358,7 @@ moveit_msgs::msg::MoveItErrorCodes plan_execution::PlanExecution::executeAndMoni
 
     bool unwound = false;
     for (std::size_t j = 0; j < i; ++j)
+    {
       // if we ran unwind on a path for the same group
       if (plan.plan_components_[j].trajectory_ &&
           plan.plan_components_[j].trajectory_->getGroup() == plan.plan_components_[i].trajectory_->getGroup() &&
@@ -349,17 +368,22 @@ moveit_msgs::msg::MoveItErrorCodes plan_execution::PlanExecution::executeAndMoni
         unwound = true;
         break;
       }
+    }
 
     if (!unwound)
     {
       // unwind the path to execute based on the current state of the system
       if (prev < 0)
+      {
         plan.plan_components_[i].trajectory_->unwind(
             plan.planning_scene_monitor_ && plan.planning_scene_monitor_->getStateMonitor() ?
                 *plan.planning_scene_monitor_->getStateMonitor()->getCurrentState() :
                 plan.planning_scene_->getCurrentState());
+      }
       else
+      {
         plan.plan_components_[i].trajectory_->unwind(plan.plan_components_[prev].trajectory_->getLastWayPoint());
+      }
     }
 
     if (plan.plan_components_[i].trajectory_ && !plan.plan_components_[i].trajectory_->empty())
@@ -452,7 +476,9 @@ moveit_msgs::msg::MoveItErrorCodes plan_execution::PlanExecution::executeAndMoni
 
   // decide return value
   if (path_became_invalid_)
+  {
     result.val = moveit_msgs::msg::MoveItErrorCodes::MOTION_PLAN_INVALIDATED_BY_ENVIRONMENT_CHANGE;
+  }
   else
   {
     if (preempt_requested)
@@ -463,12 +489,18 @@ moveit_msgs::msg::MoveItErrorCodes plan_execution::PlanExecution::executeAndMoni
     {
       if (trajectory_execution_manager_->getLastExecutionStatus() ==
           moveit_controller_manager::ExecutionStatus::SUCCEEDED)
+      {
         result.val = moveit_msgs::msg::MoveItErrorCodes::SUCCESS;
+      }
       else if (trajectory_execution_manager_->getLastExecutionStatus() ==
                moveit_controller_manager::ExecutionStatus::TIMED_OUT)
+      {
         result.val = moveit_msgs::msg::MoveItErrorCodes::TIMED_OUT;
+      }
       else
+      {
         result.val = moveit_msgs::msg::MoveItErrorCodes::CONTROL_FAILED;
+      }
     }
   }
   return result;
@@ -500,6 +532,7 @@ void plan_execution::PlanExecution::successfulTrajectorySegmentExecution(const E
   // if any side-effects are associated to the trajectory part that just completed, execute them
   RCLCPP_DEBUG(LOGGER, "Completed '%s'", plan.plan_components_[index].description_.c_str());
   if (plan.plan_components_[index].effect_on_success_)
+  {
     if (!plan.plan_components_[index].effect_on_success_(&plan))
     {
       // execution of side-effect failed
@@ -507,6 +540,7 @@ void plan_execution::PlanExecution::successfulTrajectorySegmentExecution(const E
       preempt_.request();
       return;
     }
+  }
 
   // if there is a next trajectory, check it for validity, before we start execution
   ++index;

@@ -55,9 +55,13 @@ bool FollowJointTrajectoryControllerHandle::sendTrajectory(const moveit_msgs::ms
   }
 
   if (done_)
+  {
     RCLCPP_INFO_STREAM(LOGGER, "sending trajectory to " << name_);
+  }
   else
+  {
     RCLCPP_INFO_STREAM(LOGGER, "sending continuation for the currently executed trajectory to " << name_);
+  }
 
   control_msgs::action::FollowJointTrajectory::Goal goal = goal_template_;
   goal.trajectory = trajectory.joint_trajectory;
@@ -70,9 +74,13 @@ bool FollowJointTrajectoryControllerHandle::sendTrajectory(const moveit_msgs::ms
           const rclcpp_action::Client<control_msgs::action::FollowJointTrajectory>::GoalHandle::SharedPtr& goal_handle) {
         RCLCPP_INFO_STREAM(LOGGER, name_ << " started execution");
         if (!goal_handle)
+        {
           RCLCPP_WARN(LOGGER, "Goal request rejected");
+        }
         else
+        {
           RCLCPP_INFO(LOGGER, "Goal request accepted!");
+        }
       };
 
   done_ = false;
@@ -220,13 +228,19 @@ void FollowJointTrajectoryControllerHandle::controllerDoneCallback(
 {
   // Output custom error message for FollowJointTrajectoryResult if necessary
   if (!wrapped_result.result)
+  {
     RCLCPP_WARN_STREAM(LOGGER, "Controller '" << name_ << "' done, no result returned");
+  }
   else if (wrapped_result.result->error_code == control_msgs::action::FollowJointTrajectory::Result::SUCCESSFUL)
+  {
     RCLCPP_INFO_STREAM(LOGGER, "Controller '" << name_ << "' successfully finished");
+  }
   else
+  {
     RCLCPP_WARN_STREAM(LOGGER, "Controller '" << name_ << "' failed with error "
                                               << errorCodeToMessage(wrapped_result.result->error_code) << ": "
                                               << wrapped_result.result->error_string);
+  }
   finishControllerExecution(wrapped_result.code);
 }
 

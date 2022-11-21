@@ -53,9 +53,13 @@ bool callPlannerInterfaceSolve(const planning_interface::PlannerManager& planner
 {
   planning_interface::PlanningContextPtr context = planner.getPlanningContext(planning_scene, req, res.error_code_);
   if (context)
+  {
     return context->solve(res);
+  }
   else
+  {
     return false;
+  }
 }
 
 bool callAdapter(const PlanningRequestAdapter& adapter, const PlanningRequestAdapter::PlannerFn& planner,
@@ -152,13 +156,17 @@ bool PlanningRequestAdapterChain::adaptAndPlan(const planning_interface::Planner
 
     // merge the index values from each adapter
     for (std::vector<std::size_t>& added_states_by_each_adapter : added_path_index_each)
+    {
       for (std::size_t& added_index : added_states_by_each_adapter)
       {
         for (std::size_t& index_in_path : added_path_index)
+        {
           if (added_index <= index_in_path)
             index_in_path++;
+        }
         added_path_index.push_back(added_index);
       }
+    }
     std::sort(added_path_index.begin(), added_path_index.end());
     return result;
   }

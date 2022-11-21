@@ -125,9 +125,11 @@ int main(int argc, char** argv)
     std::vector<std::thread*> threads;
     runCollisionDetection(10, trials, *psm.getPlanningScene(), *states[0]);
     for (unsigned int i = 0; i < states.size(); ++i)
+    {
       threads.push_back(new std::thread([i, trials, &scene = *psm.getPlanningScene(), &state = *states[i]] {
         return runCollisionDetection(i, trials, scene, state);
       }));
+    }
 
     for (unsigned int i = 0; i < states.size(); ++i)
     {

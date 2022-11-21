@@ -127,6 +127,7 @@ CartesianInterpolator::Percentage CartesianInterpolator::computeCartesianPath(
   // To limit absolute joint-space jumps, we pass consistency limits to the IK solver
   std::vector<double> consistency_limits;
   if (jump_threshold.prismatic > 0 || jump_threshold.revolute > 0)
+  {
     for (const JointModel* jm : group->getActiveJointModels())
     {
       double limit;
@@ -145,6 +146,7 @@ CartesianInterpolator::Percentage CartesianInterpolator::computeCartesianPath(
         limit = jm->getMaximumExtent();
       consistency_limits.push_back(limit);
     }
+  }
 
   traj.clear();
   traj.push_back(std::make_shared<moveit::core::RobotState>(*start_state));
@@ -161,9 +163,13 @@ CartesianInterpolator::Percentage CartesianInterpolator::computeCartesianPath(
     // Random seeding (of additional attempts) would probably create IK jumps.
     if (start_state->setFromIK(group, pose * offset, link->getName(), consistency_limits, 0.0, validCallback, options,
                                cost_function))
+    {
       traj.push_back(std::make_shared<moveit::core::RobotState>(*start_state));
+    }
     else
+    {
       break;
+    }
 
     last_valid_percentage = percentage;
   }
@@ -256,6 +262,7 @@ CartesianInterpolator::Percentage CartesianInterpolator::checkRelativeJointSpace
   // compute the average distance between the states we looked at
   double thres = jump_threshold_factor * (total_dist / static_cast<double>(dist_vector.size()));
   for (std::size_t i = 0; i < dist_vector.size(); ++i)
+  {
     if (dist_vector[i] > thres)
     {
       RCLCPP_DEBUG(LOGGER, "Truncating Cartesian path due to detected jump in joint-space distance");
@@ -263,6 +270,7 @@ CartesianInterpolator::Percentage CartesianInterpolator::checkRelativeJointSpace
       traj.resize(i + 1);
       break;
     }
+  }
 
   return CartesianInterpolator::Percentage(percentage);
 }

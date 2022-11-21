@@ -168,17 +168,29 @@ void RobotModelBuilder::addChain(const std::string& section, const std::string& 
     joint->parent_link_name = link_names[i - 1];
     joint->child_link_name = link_names[i];
     if (type == "planar")
+    {
       joint->type = urdf::Joint::PLANAR;
+    }
     else if (type == "floating")
+    {
       joint->type = urdf::Joint::FLOATING;
+    }
     else if (type == "revolute")
+    {
       joint->type = urdf::Joint::REVOLUTE;
+    }
     else if (type == "continuous")
+    {
       joint->type = urdf::Joint::CONTINUOUS;
+    }
     else if (type == "prismatic")
+    {
       joint->type = urdf::Joint::PRISMATIC;
+    }
     else if (type == "fixed")
+    {
       joint->type = urdf::Joint::FIXED;
+    }
     else
     {
       RCLCPP_ERROR(LOGGER, "No such joint type as %s", type.c_str());
@@ -316,9 +328,13 @@ void RobotModelBuilder::addVirtualJoint(const std::string& parent_frame, const s
 {
   srdf::Model::VirtualJoint new_virtual_joint;
   if (name.empty())
+  {
     new_virtual_joint.name_ = parent_frame + "-" + child_link + "-virtual_joint";
+  }
   else
+  {
     new_virtual_joint.name_ = name;
+  }
   new_virtual_joint.type_ = type;
   new_virtual_joint.parent_frame_ = parent_frame;
   new_virtual_joint.child_link_ = child_link;
@@ -329,9 +345,13 @@ void RobotModelBuilder::addGroupChain(const std::string& base_link, const std::s
 {
   srdf::Model::Group new_group;
   if (name.empty())
+  {
     new_group.name_ = base_link + "-" + tip_link + "-chain-group";
+  }
   else
+  {
     new_group.name_ = name;
+  }
   new_group.chains_.push_back(std::make_pair(base_link, tip_link));
   srdf_writer_->groups_.push_back(new_group);
 }

@@ -64,12 +64,16 @@ ButterworthFilter::ButterworthFilter(double low_pass_filter_coeff)
     throw std::length_error("online_signal_smoothing::ButterworthFilter: infinite scale_term_");
 
   if (low_pass_filter_coeff < 1)
+  {
     throw std::length_error(
         "online_signal_smoothing::ButterworthFilter: Filter coefficient < 1. makes the lowpass filter unstable");
+  }
 
   if (std::abs(feedback_term_) < EPSILON)
+  {
     throw std::length_error(
         "online_signal_smoothing::ButterworthFilter: Filter coefficient value resulted in feedback term of 0");
+  }
 }
 
 double ButterworthFilter::filter(double new_measurement)

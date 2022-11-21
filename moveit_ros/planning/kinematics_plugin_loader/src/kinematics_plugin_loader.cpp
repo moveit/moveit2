@@ -222,9 +222,13 @@ private:
 void KinematicsPluginLoader::status() const
 {
   if (loader_)
+  {
     loader_->status();
+  }
   else
+  {
     RCLCPP_INFO(LOGGER, "Loader function was never required");
+  }
 }
 
 moveit::core::SolverAllocatorFn KinematicsPluginLoader::getLoaderFunction(const srdf::ModelSharedPtr& srdf_model)

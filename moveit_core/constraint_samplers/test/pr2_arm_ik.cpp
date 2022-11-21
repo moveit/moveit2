@@ -783,11 +783,17 @@ bool PR2ArmIK::checkJointLimits(const double& joint_value, const int& joint_num)
 {
   double jv;
   if (continuous_joint_[joint_num])
+  {
     jv = angles::normalize_angle(joint_value * angle_multipliers_[joint_num]);
+  }
   else if (joint_num == 2)
+  {
     jv = joint_value * angle_multipliers_[joint_num];
+  }
   else
+  {
     jv = angles::normalize_angle(joint_value * angle_multipliers_[joint_num]);
+  }
 
   return !(jv < min_angles_[joint_num] || jv > max_angles_[joint_num]);
 }

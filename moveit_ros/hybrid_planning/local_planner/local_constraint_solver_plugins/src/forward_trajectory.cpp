@@ -53,9 +53,13 @@ bool ForwardTrajectory::initialize(const rclcpp::Node::SharedPtr& node,
 {
   // Load parameter & initialize member variables
   if (node->has_parameter("stop_before_collision"))
+  {
     node->get_parameter<bool>("stop_before_collision", stop_before_collision_);
+  }
   else
+  {
     stop_before_collision_ = node->declare_parameter<bool>("stop_before_collision", false);
+  }
   planning_scene_monitor_ = planning_scene_monitor;
   node_ = node;
   path_invalidation_event_send_ = false;

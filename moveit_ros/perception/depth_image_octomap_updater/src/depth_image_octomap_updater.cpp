@@ -138,9 +138,13 @@ void DepthImageOctomapUpdater::start()
 
   pub_model_depth_image_ = model_depth_transport_->advertiseCamera(prefix + "model_depth", 1);
   if (!filtered_cloud_topic_.empty())
+  {
     pub_filtered_depth_image_ = filtered_depth_transport_->advertiseCamera(prefix + filtered_cloud_topic_, 1);
+  }
   else
+  {
     pub_filtered_depth_image_ = filtered_depth_transport_->advertiseCamera(prefix + "filtered_depth", 1);
+  }
 
   pub_filtered_label_image_ = filtered_label_transport_->advertiseCamera(prefix + "filtered_label", 1);
 
@@ -169,7 +173,9 @@ mesh_filter::MeshHandle DepthImageOctomapUpdater::excludeShape(const shapes::Sha
   if (mesh_filter_)
   {
     if (shape->type == shapes::MESH)
+    {
       h = mesh_filter_->addMesh(static_cast<const shapes::Mesh&>(*shape));
+    }
     else
     {
       std::unique_ptr<shapes::Mesh> m(shapes::createMeshFromShape(shape.get()));
@@ -237,16 +243,22 @@ void DepthImageOctomapUpdater::depthImageCallback(const sensor_msgs::msg::Image:
     {
       const double dt_start = (start - last_depth_callback_start_).seconds();
       if (image_callback_count_ < 2)
+      {
         average_callback_dt_ = dt_start;
+      }
       else
+      {
         average_callback_dt_ =
             ((image_callback_count_ - 1) * average_callback_dt_ + dt_start) / (double)image_callback_count_;
+      }
     }
   }
   else
+  {
     // every 1000 updates we reset the counter almost to the beginning (use 2 so we don't have so much of a ripple in
     // the measured average)
     image_callback_count_ = 2;
+  }
   last_depth_callback_start_ = start;
   ++image_callback_count_;
 
@@ -256,7 +268,9 @@ void DepthImageOctomapUpdater::depthImageCallback(const sensor_msgs::msg::Image:
   /* get transform for cloud into map frame */
   tf2::Stamped<tf2::Transform> map_h_sensor;
   if (monitor_->getMapFrame() == depth_msg->header.frame_id)
+  {
     map_h_sensor.setIdentity();
+  }
   else
   {
     if (tf_buffer_)
@@ -268,6 +282,7 @@ void DepthImageOctomapUpdater::depthImageCallback(const sensor_msgs::msg::Image:
       bool found = false;
       std::string err;
       for (int t = 0; t < nt; ++t)
+      {
         try
         {
           tf2::fromMsg(tf_buffer_->lookupTransform(monitor_->getMapFrame(), depth_msg->header.frame_id,
@@ -283,6 +298,7 @@ void DepthImageOctomapUpdater::depthImageCallback(const sensor_msgs::msg::Image:
           err = ex.what();
           std::this_thread::sleep_for(D.to_chrono<std::chrono::seconds>());
         }
+      }
       static const unsigned int MAX_TF_COUNTER = 1000;  // so we avoid int overflow
       if (found)
       {
@@ -298,13 +314,17 @@ void DepthImageOctomapUpdater::depthImageCallback(const sensor_msgs::msg::Image:
       {
         failed_tf_++;
         if (failed_tf_ > good_tf_)
+        {
           RCLCPP_WARN_THROTTLE(LOGGER, *node_->get_clock(), 1000,
                                "More than half of the image messages discarded due to TF being unavailable (%u%%). "
                                "Transform error of sensor data: %s; quitting callback.",
                                (100 * failed_tf_) / (good_tf_ + failed_tf_), err.c_str());
+        }
         else
+        {
           RCLCPP_DEBUG_THROTTLE(LOGGER, *node_->get_clock(), 1000,
                                 "Transform error of sensor data: %s; quitting callback", err.c_str());
+        }
         if (failed_tf_ > MAX_TF_COUNTER)
         {
           const unsigned int div = MAX_TF_COUNTER / 10;
@@ -334,7 +354,9 @@ void DepthImageOctomapUpdater::depthImageCallback(const sensor_msgs::msg::Image:
 
   const bool is_u_short = depth_msg->encoding == sensor_msgs::image_encodings::TYPE_16UC1;
   if (is_u_short)
+  {
     mesh_filter_->filter(&depth_msg->data[0], GL_UNSIGNED_SHORT);
+  }
   else
   {
     if (depth_msg->encoding != sensor_msgs::image_encodings::TYPE_32FC1)
@@ -475,6 +497,7 @@ void DepthImageOctomapUpdater::depthImageCallback(const sensor_msgs::msg::Image:
       const uint16_t* input_row = reinterpret_cast<const uint16_t*>(&depth_msg->data[0]);
 
       for (int y = skip_vertical_pixels_; y < h_bound; ++y, labels_row += w, input_row += w)
+      {
         for (int x = skip_horizontal_pixels_; x < w_bound; ++x)
         {
           // not filtered
@@ -499,12 +522,14 @@ void DepthImageOctomapUpdater::depthImageCallback(const sensor_msgs::msg::Image:
             model_cells.insert(tree_->coordToKey(point_tf.getX(), point_tf.getY(), point_tf.getZ()));
           }
         }
+      }
     }
     else
     {
       const float* input_row = reinterpret_cast<const float*>(&depth_msg->data[0]);
 
       for (int y = skip_vertical_pixels_; y < h_bound; ++y, labels_row += w, input_row += w)
+      {
         for (int x = skip_horizontal_pixels_; x < w_bound; ++x)
         {
           if (labels_row[x] == mesh_filter::MeshFilterBase::BACKGROUND)
@@ -527,6 +552,7 @@ void DepthImageOctomapUpdater::depthImageCallback(const sensor_msgs::msg::Image:
             model_cells.insert(tree_->coordToKey(point_tf.getX(), point_tf.getY(), point_tf.getZ()));
           }
         }
+      }
     }
   }
   catch (...)

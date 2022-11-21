@@ -71,9 +71,13 @@ void declareOrGetParam(const std::string& param_name, T& output_value, const T& 
   try
   {
     if (node->has_parameter(param_name))
+    {
       node->get_parameter<T>(param_name, output_value);
+    }
     else
+    {
       output_value = node->declare_parameter<T>(param_name, default_value);
+    }
   }
   catch (const rclcpp::exceptions::InvalidParameterTypeException& e)
   {

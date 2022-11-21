@@ -308,7 +308,9 @@ void MotionPlanningFrame::placeObjectButtonClicked()
   std::string group_name = planning_display_->getCurrentPlanningGroup();
 
   if (!sel_table.empty())
+  {
     support_surface_name_ = sel_table[0]->text().toStdString();
+  }
   else
   {
     support_surface_name_.clear();

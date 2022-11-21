@@ -194,9 +194,13 @@ private:
       const rclcpp_action::ClientGoalHandle<control_msgs::action::GripperCommand>::WrappedResult& wrapped_result) override
   {
     if (wrapped_result.code == rclcpp_action::ResultCode::ABORTED && allow_failure_)
+    {
       finishControllerExecution(rclcpp_action::ResultCode::SUCCEEDED);
+    }
     else
+    {
       finishControllerExecution(wrapped_result.code);
+    }
   }
 
   /*
