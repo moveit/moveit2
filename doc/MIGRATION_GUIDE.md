@@ -35,7 +35,7 @@ For instance, the file `joint_model_group.cpp` inside the library `moveit_robot_
 
     static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_robot_model.joint_model_group");
 
-For finding the `LIBRARY_NAME` refer to the line `set(MOVEIT_LIB_NAME LIBRARY_NAME)` at the top of the library's `CMakeLists.txt`.
+For finding the `LIBRARY_NAME` refer to the line `add_library(LIBRARY_NAME ...)` in the library's `CMakeLists.txt`.
 If the source file name is the same or very similar to the library name it is sufficient to only use the source file name.
 
 ### Logging in header files

@@ -1,16 +1,14 @@
-set(MOVEIT_LIB_NAME moveit_kinematics_cache)
-
-add_library(${MOVEIT_LIB_NAME}
+add_library(moveit_kinematics_cache
   src/kinematics_cache.cpp
 )
-set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
+set_target_properties(moveit_kinematics_cache PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
 # This line is needed to ensure that messages are done being built before this is built
-add_dependencies(${MOVEIT_LIB_NAME} ${catkin_EXPORTED_TARGETS})
+add_dependencies(moveit_kinematics_cache ${catkin_EXPORTED_TARGETS})
 
-target_link_libraries(${MOVEIT_LIB_NAME} moveit_robot_model ${catkin_LIBRARIES})
+target_link_libraries(moveit_kinematics_cache moveit_robot_model ${catkin_LIBRARIES})
 
-install(TARGETS ${MOVEIT_LIB_NAME}
-        EXPORT ${MOVEIT_LIB_NAME}
+install(TARGETS moveit_kinematics_cache
+        EXPORT moveit_kinematics_cache
         LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
         ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
         RUNTIME DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION})
