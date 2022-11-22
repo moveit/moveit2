@@ -68,7 +68,7 @@ jobs:
     env:
       GH_IMAGE: ghcr.io/ros-planning/moveit2:${{ matrix.ROS_DISTRO }}-${{ github.job }}
       DH_IMAGE: moveit/moveit2:${{ matrix.ROS_DISTRO }}-${{ github.job }}
-      PUSH: ${{ (github.event_name != 'pull_request') && (github.repository == 'ros-planning/moveit2') }}
+      PUSH: ${{ (github.repository == 'ros-planning/moveit2') }}
 
     steps:
       - name: Set up Docker Buildx
@@ -110,7 +110,7 @@ jobs:
     env:
       GH_IMAGE: ghcr.io/ros-planning/moveit2:${{ matrix.ROS_DISTRO }}-${{ github.job }}
       DH_IMAGE: moveit/moveit2:${{ matrix.ROS_DISTRO }}-${{ github.job }}
-      PUSH: ${{ (github.event_name != 'pull_request') && (github.repository == 'ros-planning/moveit2') }}
+      PUSH: ${{ (github.repository == 'ros-planning/moveit2') }}
 
     steps:
       - name: Set up Docker Buildx
