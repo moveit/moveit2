@@ -144,7 +144,7 @@ public:
     return waypoints_.front();
   }
 
-  const std::deque<double>& getWayPointDurations() const
+  const std::deque<rclcpp::Duration>& getWayPointDurations() const
   {
     return duration_from_previous_;
   }
@@ -153,11 +153,11 @@ public:
    *  @param  The waypoint index.
    *  @return The duration from start; returns overall duration if index is out of range.
    */
-  double getWayPointDurationFromStart(std::size_t index) const;
+  rclcpp::Duration getWayPointDurationFromStart(std::size_t index) const;
 
-  [[deprecated]] double getWaypointDurationFromStart(std::size_t index) const;
+  [[deprecated]] rclcpp::Duration getWaypointDurationFromStart(std::size_t index) const;
 
-  double getWayPointDurationFromPrevious(std::size_t index) const
+  rclcpp::Duration getWayPointDurationFromPrevious(std::size_t index) const
   {
     if (duration_from_previous_.size() > index)
     {
@@ -169,7 +169,7 @@ public:
     }
   }
 
-  RobotTrajectory& setWayPointDurationFromPrevious(std::size_t index, double value)
+  RobotTrajectory& setWayPointDurationFromPrevious(std::size_t index, rclcpp::Duration value)
   {
     if (duration_from_previous_.size() <= index)
       duration_from_previous_.resize(index + 1, 0.0);
@@ -187,7 +187,7 @@ public:
    * \param state - current robot state
    * \param dt - duration from previous
    */
-  RobotTrajectory& addSuffixWayPoint(const moveit::core::RobotState& state, double dt)
+  RobotTrajectory& addSuffixWayPoint(const moveit::core::RobotState& state, rclcpp::Duration dt)
   {
     return addSuffixWayPoint(std::make_shared<moveit::core::RobotState>(state), dt);
   }
@@ -197,7 +197,7 @@ public:
    * \param state - current robot state
    * \param dt - duration from previous
    */
-  RobotTrajectory& addSuffixWayPoint(const moveit::core::RobotStatePtr& state, double dt)
+  RobotTrajectory& addSuffixWayPoint(const moveit::core::RobotStatePtr& state, rclcpp::Duration dt)
   {
     state->update();
     waypoints_.push_back(state);
@@ -205,12 +205,12 @@ public:
     return *this;
   }
 
-  RobotTrajectory& addPrefixWayPoint(const moveit::core::RobotState& state, double dt)
+  RobotTrajectory& addPrefixWayPoint(const moveit::core::RobotState& state, rclcpp::Duration dt)
   {
     return addPrefixWayPoint(std::make_shared<moveit::core::RobotState>(state), dt);
   }
 
-  RobotTrajectory& addPrefixWayPoint(const moveit::core::RobotStatePtr& state, double dt)
+  RobotTrajectory& addPrefixWayPoint(const moveit::core::RobotStatePtr& state, rclcpp::Duration dt)
   {
     state->update();
     waypoints_.push_front(state);
@@ -218,12 +218,12 @@ public:
     return *this;
   }
 
-  RobotTrajectory& insertWayPoint(std::size_t index, const moveit::core::RobotState& state, double dt)
+  RobotTrajectory& insertWayPoint(std::size_t index, const moveit::core::RobotState& state, rclcpp::Duration dt)
   {
     return insertWayPoint(index, std::make_shared<moveit::core::RobotState>(state), dt);
   }
 
-  RobotTrajectory& insertWayPoint(std::size_t index, const moveit::core::RobotStatePtr& state, double dt)
+  RobotTrajectory& insertWayPoint(std::size_t index, const moveit::core::RobotStatePtr& state, rclcpp::Duration dt)
   {
     state->update();
     waypoints_.insert(waypoints_.begin() + index, state);
@@ -241,7 +241,7 @@ public:
    * \param end_index - index of last traj point of the part to append from the source traj, the default is to add until
    * the end of the source traj
    */
-  RobotTrajectory& append(const RobotTrajectory& source, double dt, size_t start_index = 0,
+  RobotTrajectory& append(const RobotTrajectory& source, rclcpp::Duration dt, size_t start_index = 0,
                           size_t end_index = std::numeric_limits<std::size_t>::max());
 
   void swap(robot_trajectory::RobotTrajectory& other);
@@ -253,9 +253,9 @@ public:
     return *this;
   }
 
-  double getDuration() const;
+  rclcpp::Duration getDuration() const;
 
-  double getAverageSegmentDuration() const;
+  rclcpp::Duration getAverageSegmentDuration() const;
 
   void getRobotTrajectoryMsg(moveit_msgs::msg::RobotTrajectory& trajectory,
                              const std::vector<std::string>& joint_filter = std::vector<std::string>()) const;
@@ -300,7 +300,8 @@ public:
    *  @param The waypoint index after (or equal to) the supplied duration.
    *  @param The progress (0 to 1) between the two waypoints, based on time (not based on joint distances).
    */
-  void findWayPointIndicesForDurationAfterStart(const double& duration, int& before, int& after, double& blend) const;
+  void findWayPointIndicesForDurationAfterStart(const rclcpp::Duration& duration, int& before, int& after,
+                                                rclcpp::Duration& blend) const;
 
   // TODO support visitor function for interpolation, or at least different types.
   /** @brief Gets a robot state corresponding to a supplied duration from start for the trajectory, using linear time
@@ -309,7 +310,8 @@ public:
    *  @param The resulting robot state.
    *  @return True if state is valid, false otherwise (trajectory is empty).
    */
-  bool getStateAtDurationFromStart(const double request_duration, moveit::core::RobotStatePtr& output_state) const;
+  bool getStateAtDurationFromStart(const rclcpp::Duration request_duration,
+                                   moveit::core::RobotStatePtr& output_state) const;
 
   class Iterator
   {
@@ -384,7 +386,7 @@ private:
   moveit::core::RobotModelConstPtr robot_model_;
   const moveit::core::JointModelGroup* group_;
   std::deque<moveit::core::RobotStatePtr> waypoints_;
-  std::deque<double> duration_from_previous_;
+  std::deque<rclcpp::Duration> duration_from_previous_;
 };
 
 /** @brief Operator overload for printing trajectory to a stream */
