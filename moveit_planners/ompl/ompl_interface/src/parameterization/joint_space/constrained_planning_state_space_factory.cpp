@@ -45,9 +45,9 @@ ConstrainedPlanningStateSpaceFactory::ConstrainedPlanningStateSpaceFactory() : M
   type_ = ConstrainedPlanningStateSpace::PARAMETERIZATION_TYPE;
 }
 
-int ConstrainedPlanningStateSpaceFactory::canRepresentProblem(const std::string& group,
-                                                              const moveit_msgs::msg::MotionPlanRequest& req,
-                                                              const moveit::core::RobotModelConstPtr& robot_model) const
+int ConstrainedPlanningStateSpaceFactory::canRepresentProblem(
+    const std::string& /*group*/, const moveit_msgs::msg::MotionPlanRequest& req,
+    const moveit::core::RobotModelConstPtr& /*robot_model*/) const
 {
   // If we have exactly one position or orientation constraint, prefer the constrained planning state space
   auto num_constraints =
