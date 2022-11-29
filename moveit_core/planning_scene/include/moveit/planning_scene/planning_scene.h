@@ -291,8 +291,18 @@ public:
   {
     return acm_ ? *acm_ : parent_->getAllowedCollisionMatrix();
   }
-  /** \brief Get the allowed collision matrix */
-  collision_detection::AllowedCollisionMatrix& getAllowedCollisionMatrixNonConst();
+
+  /** \brief Update the allowed collision matrix */
+  void update(collision_detection::AllowedCollisionMatrix const& new_acm);
+
+  /** \brief Clear the allowed collision matrix */
+  void clearAllowedCollisionMatrix();
+
+  /** \brief Update one entry in the allowed collision matrix */
+  void updateAllowedCollisionMatrixEntry(const std::string& link, bool value);
+  void updateAllowedCollisionMatrixEntry(const std::string& link_1, const std::string& link_2, bool value);
+  void updateAllowedCollisionMatrixEntry(const std::vector<std::string>& link_1, const std::vector<std::string>& link_2,
+                                         bool value);
 
   /**@}*/
 

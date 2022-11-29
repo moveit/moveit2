@@ -329,7 +329,9 @@ void PlanningScene::pushDiffs(const PlanningScenePtr& scene)
   }
 
   if (acm_)
-    scene->getAllowedCollisionMatrixNonConst() = *acm_;
+  {
+    scene->update(*acm_);
+  }
 
   collision_detection::CollisionEnvPtr active_cenv = scene->getCollisionEnvNonConst();
   active_cenv->setLinkPadding(collision_detector_->cenv_->getLinkPadding());
@@ -532,11 +534,40 @@ void PlanningScene::setCollisionObjectUpdateCallback(const collision_detection::
   current_world_object_update_callback_ = callback;
 }
 
-collision_detection::AllowedCollisionMatrix& PlanningScene::getAllowedCollisionMatrixNonConst()
+void PlanningScene::update(collision_detection::AllowedCollisionMatrix const& new_acm)
 {
-  if (!acm_)
-    acm_ = std::make_shared<collision_detection::AllowedCollisionMatrix>(parent_->getAllowedCollisionMatrix());
-  return *acm_;
+  acm_ = std::make_shared<collision_detection::AllowedCollisionMatrix>(new_acm);
+}
+
+void PlanningScene::clearAllowedCollisionMatrix()
+{
+  if (acm_)
+    acm_->clear();
+}
+
+void PlanningScene::updateAllowedCollisionMatrixEntry(const std::string& link, bool value)
+{
+  if (acm_)
+  {
+    acm_->setEntry(link, value);
+  }
+}
+
+void PlanningScene::updateAllowedCollisionMatrixEntry(const std::string& link_1, const std::string& link_2, bool value)
+{
+  if (acm_)
+  {
+    acm_->setEntry(link_1, link_2, value);
+  }
+}
+
+void PlanningScene::updateAllowedCollisionMatrixEntry(const std::vector<std::string>& link_1,
+                                                      const std::vector<std::string>& link_2, bool value)
+{
+  if (acm_)
+  {
+    acm_->setEntry(link_1, link_2, value);
+  }
 }
 
 const moveit::core::Transforms& PlanningScene::getTransforms()

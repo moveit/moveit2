@@ -160,7 +160,7 @@ void DefaultCollisions::generateCollisionTable(unsigned int num_trials, double m
   const bool include_never_colliding = true;
 
   // clear previously loaded collision matrix entries
-  srdf_config_->getPlanningScene()->getAllowedCollisionMatrixNonConst().clear();
+  srdf_config_->getPlanningScene()->clearAllowedCollisionMatrix();
 
   // Find the default collision matrix - all links that are allowed to collide
   link_pairs_ = computeDefaultCollisions(srdf_config_->getPlanningScene(), &progress_, include_never_colliding,
