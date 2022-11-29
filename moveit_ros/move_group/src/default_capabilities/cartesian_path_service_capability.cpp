@@ -73,7 +73,7 @@ MoveGroupCartesianPathService::MoveGroupCartesianPathService()
 void MoveGroupCartesianPathService::initialize()
 {
   display_path_ = context_->moveit_cpp_->getNode()->create_publisher<moveit_msgs::msg::DisplayTrajectory>(
-      planning_pipeline::PlanningPipeline::DISPLAY_PATH_TOPIC, 10);
+      planning_pipeline::DISPLAY_PATH_TOPIC, 10);
 
   cartesian_path_service_ = context_->moveit_cpp_->getNode()->create_service<moveit_msgs::srv::GetCartesianPath>(
 

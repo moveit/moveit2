@@ -82,9 +82,6 @@ public:
   class MiddlewareHandle
   {
   public:
-    /**
-     * @brief      Destroys the object.
-     */
     virtual ~MiddlewareHandle() = default;
 
     virtual bool has_parameter(const std::string& name) const = 0;
@@ -136,9 +133,8 @@ public:
 
     /**
      * @brief     Create a planner plugin
-     * @param[in] name plugin name
      */
-    virtual void createPlannerPlugin(const std::string& name, const moveit::core::RobotModelConstPtr& robot_model) = 0;
+    virtual void createPlannerPlugin(const moveit::core::RobotModelConstPtr& robot_model) = 0;
 
     virtual const planning_interface::PlannerManagerPtr& getPlannerManager() const = 0;
 
@@ -255,7 +251,10 @@ public:
   void terminate() const;
 
   /** \brief Get the name of the planning plugin used */
-  const std::string& getPlannerPluginName() const;
+  const std::string& getPlannerPluginName() const
+  {
+    return planner_plugin_name_;
+  }
 
   /** \brief Get the names of the planning request adapter plugins used */
   const std::vector<std::string>& getAdapterPluginNames() const
@@ -267,7 +266,10 @@ public:
   const planning_interface::PlannerManagerPtr& getPlannerManager();
 
   /** \brief Get the robot model that this pipeline is using */
-  const moveit::core::RobotModelConstPtr& getRobotModel() const;
+  const moveit::core::RobotModelConstPtr& getRobotModel() const
+  {
+    return robot_model_;
+  }
 
   /** \brief Get current status of the planning pipeline */
   [[nodiscard]] bool isActive() const
@@ -278,10 +280,14 @@ public:
 private:
   void configure();
 
+  void checkSolutionPath(const planning_scene::PlanningSceneConstPtr& planning_scene,
+                         const planning_interface::MotionPlanRequest& req, planning_interface::MotionPlanResponse& res);
+
   // Flag that indicates whether or not the planning pipeline is currently solving a planning problem
   mutable std::atomic<bool> is_active_;
 
-  std::shared_ptr<rclcpp::Node> node_;
+  std::unique_ptr<PlanningPipeline::MiddlewareHandle> middleware_handle_;
+
   std::string parameter_namespace_;
   /// Flag indicating whether motion plans should be published as a moveit_msgs::msg::DisplayTrajectory
   bool is_displaying_computed_motion_plans_;

@@ -27,18 +27,6 @@ if(BUILD_TESTING)
     test/planning_pipeline_tests.cpp
   )
   target_link_libraries(planning_pipeline_tests
-    ${MOVEIT_LIB_NAME}
-  )
-endif()
-
-if(BUILD_TESTING)
-  find_package(ament_cmake_gtest REQUIRED)
-  find_package(ament_cmake_gmock REQUIRED)
-
-  ament_add_gmock(planning_pipeline_tests
-    test/planning_pipeline_tests.cpp
-  )
-  target_link_libraries(planning_pipeline_tests
     moveit_planning_pipeline
   )
 endif()

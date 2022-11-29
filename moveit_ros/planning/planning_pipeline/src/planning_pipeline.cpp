@@ -50,8 +50,8 @@ planning_pipeline::PlanningPipeline::PlanningPipeline(
     const moveit::core::RobotModelConstPtr& model,
     std::unique_ptr<PlanningPipeline::MiddlewareHandle> middleware_handle, const std::string& parameter_namespace,
     const std::string& planner_plugin_param_name, const std::string& adapter_plugins_param_name)
-  : middleware_handle_(std::move(middleware_handle))
-  , active_{ false }
+  : is_active_{ false }
+  , middleware_handle_(std::move(middleware_handle))
   , parameter_namespace_(parameter_namespace)
   , robot_model_(std::move(model))
 {
@@ -94,8 +94,8 @@ planning_pipeline::PlanningPipeline::PlanningPipeline(
     const moveit::core::RobotModelConstPtr& model,
     std::unique_ptr<PlanningPipeline::MiddlewareHandle> middleware_handle, const std::string& parameter_namespace,
     const std::string& planner_plugin_name, const std::vector<std::string>& adapter_plugin_names)
-  : middleware_handle_(std::move(middleware_handle))
-  , active_{ false }
+  : is_active_{ false }
+  , middleware_handle_(std::move(middleware_handle))
   , parameter_namespace_(parameter_namespace)
   , planner_plugin_name_(planner_plugin_name)
   , adapter_plugin_names_(adapter_plugin_names)
@@ -194,8 +194,17 @@ bool planning_pipeline::PlanningPipeline::generatePlan(const planning_scene::Pla
                                                        planning_interface::MotionPlanResponse& res,
                                                        std::vector<std::size_t>& adapter_added_state_index) const
 {
+  if (!middleware_handle_->getPlannerManager())
+  {
+    RCLCPP_ERROR(LOGGER, "No planning plugin loaded. Cannot plan.");
+    // Set planning pipeline to inactive
+
+    is_active_ = false;
+    return false;
+  }
+
   // Set planning pipeline active
-  active_ = true;
+  is_active_ = true;
 
   // broadcast the request we are about to work on, if needed
   if (is_publishing_received_requests_)
@@ -205,22 +214,16 @@ bool planning_pipeline::PlanningPipeline::generatePlan(const planning_scene::Pla
   adapter_added_state_index.clear();
 
   const auto is_solved = middleware_handle_->plan(planning_scene, req, res, adapter_added_state_index);
-  if (!planner_instance_)
-  {
-    RCLCPP_ERROR(LOGGER, "No planning plugin loaded. Cannot plan.");
-    // Set planning pipeline to inactive
-
-    active_ = false;
-    return false;
-  }
 
   if (!is_solved)
   {
     // This should alert the user if planning failed because of contradicting constraints.
     // Could be checked more thoroughly, but it is probably not worth going to that length.
-    const auto is_stacked_constraints{ false };
+    auto is_stacked_constraints{ false };
     if (req.path_constraints.position_constraints.size() > 1 || req.path_constraints.orientation_constraints.size() > 1)
+    {
       is_stacked_constraints = true;
+    }
     for (const auto& constraint : req.goal_constraints)
     {
       if (constraint.position_constraints.size() > 1 || constraint.orientation_constraints.size() > 1)
@@ -231,6 +234,17 @@ bool planning_pipeline::PlanningPipeline::generatePlan(const planning_scene::Pla
                           "effectors/arms, this is "
                           "unusual. Are you using a move_group_interface and forgetting to call clearPoseTargets() or "
                           "equivalent?");
+  }
+
+  // display solution path if needed
+  if (is_displaying_computed_motion_plans_)
+  {
+    moveit_msgs::msg::DisplayTrajectory disp;
+    disp.model_id = robot_model_->getName();
+    disp.trajectory.resize(1);
+    res.trajectory_->getRobotTrajectoryMsg(disp.trajectory[0]);
+    moveit::core::robotStateToRobotStateMsg(res.trajectory_->getFirstWayPoint(), disp.trajectory_start);
+    middleware_handle_->publishDisplayPathTrejectory(disp);
   }
 
   if (res.trajectory_)
@@ -244,42 +258,38 @@ bool planning_pipeline::PlanningPipeline::generatePlan(const planning_scene::Pla
       m.action = visualization_msgs::msg::Marker::DELETEALL;
       arr.markers.push_back(m);
 
-      std::vector<std::size_t> indices;
-      if (!planning_scene->isPathValid(*res.trajectory_, req.path_constraints, req.group_name, false, &indices))
+      std::vector<std::size_t> index;
+      if (!planning_scene->isPathValid(*res.trajectory_, req.path_constraints, req.group_name, false, &index))
       {
-        if (index.size() == 1 && index[0] == 0)
-        {  // ignore cases when the robot starts at invalid location
-          RCLCPP_DEBUG(LOGGER, "It appears the robot is starting at an invalid state, but that is ok.");
-          continue;
-        }
         // check to see if there is any problem with the states that are found to be invalid
         // they are considered ok if they were added by a planning request adapter
-        auto is_problem{ false };
-        for (const auto index : indices)
+        bool problem = false;
+        for (std::size_t i = 0; i < index.size() && !problem; ++i)
         {
-          is_problem = !std::find(adapter_added_state_index.cbegin(), adapter_added_state_index.cend(), index));
-          if (!is_problem)
-          {
-            break;
-          }
-          if (!is_found)
-          {
-            is_problem = true;
-          }
+          bool found = false;
+          for (std::size_t added_index : adapter_added_state_index)
+            if (index[i] == added_index)
+            {
+              found = true;
+              break;
+            }
+          if (!found)
+            problem = true;
         }
-        if (is_problem)
+        if (problem)
         {
+          if (index.size() == 1 && index[0] == 0)
+          {  // ignore cases when the robot starts at invalid location
+            RCLCPP_DEBUG(LOGGER, "It appears the robot is starting at an invalid state, but that is ok.");
+          }
           else
           {
-            is_solved = false;
             res.error_code_.val = moveit_msgs::msg::MoveItErrorCodes::INVALID_MOTION_PLAN;
 
             // display error messages
             std::stringstream ss;
             for (std::size_t it : index)
-            {
               ss << it << " ";
-            }
 
             RCLCPP_ERROR_STREAM(LOGGER, "Computed path is not valid. Invalid states at index locations: [ "
                                             << ss.str() << "] out of " << state_count
@@ -311,6 +321,8 @@ bool planning_pipeline::PlanningPipeline::generatePlan(const planning_scene::Pla
             }
             RCLCPP_ERROR(LOGGER, "Completed listing of explanations for invalid states.");
           }
+          is_active_ = false;
+          return false;
         }
         else
         {
@@ -319,6 +331,7 @@ bool planning_pipeline::PlanningPipeline::generatePlan(const planning_scene::Pla
                        "adapters, but that is ok.");
         }
       }
+
       else
       {
         RCLCPP_DEBUG(LOGGER, "Planned path was found to be valid when rechecked");
@@ -327,20 +340,7 @@ bool planning_pipeline::PlanningPipeline::generatePlan(const planning_scene::Pla
     }
   }
 
-  // display solution path if needed
-  if (is_displaying_computed_motion_plans_)
-  {
-    moveit_msgs::msg::DisplayTrajectory disp;
-    disp.model_id = robot_model_->getName();
-    disp.trajectory.resize(1);
-    res.trajectory_->getRobotTrajectoryMsg(disp.trajectory[0]);
-    moveit::core::robotStateToRobotStateMsg(res.trajectory_->getFirstWayPoint(), disp.trajectory_start);
-    middleware_handle_->publishDisplayPathTrejectory(disp);
-  }
-
-  // Set planning pipeline to inactive
-
-  active_ = false;
+  is_active_ = false;
   return is_solved;
 }
 

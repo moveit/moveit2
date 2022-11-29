@@ -91,7 +91,7 @@ public:
    * @param[in] pluginName name of plugin that has parameter
    * @param[in] parameters container for parameter names
    */
-  void get_parameters(const std::string& pluginName, std::string& parameters) const override;
+  void get_parameter(const std::string& pluginName, std::string& parameter) const override;
 
   /**
    * @brief     Create a planner plugin
@@ -117,7 +117,6 @@ public:
    * @param[in] res The resulting motion plan
    * @param[in] adapter_added_state_index
    */
-
   bool plan(const planning_scene::PlanningSceneConstPtr& planning_scene,
             const planning_interface::MotionPlanRequest& req, planning_interface::MotionPlanResponse& res,
             std::vector<std::size_t>& adapter_added_state_index) override;

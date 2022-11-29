@@ -93,9 +93,9 @@ bool PlanningPipelineMiddlewareHandle::has_parameter(const std::string& name) co
   return node_->has_parameter(name);
 }
 
-void PlanningPipelineMiddlewareHandle::get_parameters(const std::string& plugin_name, std::string& parameters) const
+void PlanningPipelineMiddlewareHandle::get_parameter(const std::string& plugin_name, std::string& parameter) const
 {
-  node_->get_parameter(pluginName, plugin);
+  node_->get_parameter(plugin_name, parameter);
 }
 
 void PlanningPipelineMiddlewareHandle::createPlannerPlugin(const moveit::core::RobotModelConstPtr& robot_model)
@@ -150,8 +150,8 @@ void PlanningPipelineMiddlewareHandle::createAdapterPlugins(const std::vector<st
     try
     {
       adapter_plugin_loader_ =
-            std::make_unique<pluginlib::ClassLoader<planning_request_adapter::PlanningRequestAdapter>>(
-                "moveit_core", "planning_request_adapter::PlanningRequestAdapter");
+          std::make_unique<pluginlib::ClassLoader<planning_request_adapter::PlanningRequestAdapter>>(
+              "moveit_core", "planning_request_adapter::PlanningRequestAdapter");
     }
     catch (pluginlib::PluginlibException& ex)
     {
@@ -165,8 +165,8 @@ void PlanningPipelineMiddlewareHandle::createAdapterPlugins(const std::vector<st
         try
         {
           auto adapter = adapter_plugin_loader_->createUniqueInstance(adapter_plugin_name);
-          ad->initialize(node_, parameter_namespace_);
-          ads.push_back(std::move(ad));
+          adapter->initialize(node_, parameter_namespace_);
+          ads.push_back(std::move(adapter));
         }
         catch (pluginlib::PluginlibException& ex)
         {

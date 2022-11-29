@@ -39,26 +39,28 @@
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
-#include <moveit/planning_pipeline/planning_pipeline.h>
+#include "moveit/planning_pipeline/planning_pipeline.h"
 #include "moveit/utils/robot_model_test_utils.h"
 #include "rclcpp/node_interfaces/node_clock_interface.hpp"
 #include "rclcpp/node_interfaces/node_topics_interface.hpp"
 #include "rclcpp/rclcpp.hpp"
 #include "tf2_ros/buffer.h"
+#include "moveit/planning_scene/planning_scene.h"
 
-struct MockPlanningPipelineMiddlewareHandle : public planning_scene_monitor::PlanningPipeline::MiddlewareHandle
+using ::testing::_;
+using ::testing::Return;
+struct MockPlanningPipelineMiddlewareHandle : public planning_pipeline::PlanningPipeline::MiddlewareHandle
 {
-  MOCK_METHOD(void, createDisplayPathPublisher, (const std::string&, bool), (override));
-  MOCK_METHOD(void, createReceivedRequestPublisher, (const std::string&, bool), (override));
-  MOCK_METHOD(void, createContactsPublisher, (const std::string&, bool), (override));
+  MOCK_METHOD(void, createDisplayPathPublisher, (const std::string&), (override));
+  MOCK_METHOD(void, createReceivedRequestPublisher, (const std::string&), (override));
+  MOCK_METHOD(void, createContactsPublisher, (const std::string&), (override));
   MOCK_METHOD(std::string, getContactsTopicName, (), (const, override));
   MOCK_METHOD(void, resetDisplayPathPublisher, (), (override));
   MOCK_METHOD(void, resetReceivedRequestPublisher, (), (override));
   MOCK_METHOD(void, resetContactsPublisher, (), (override));
   MOCK_METHOD(bool, has_parameter, (const std::string&), (const, override));
-  MOCK_METHOD(void, get_parameter, (const std::string&, const std::string&), (const, override));
-  MOCK_METHOD(void, createPlannerPlugin, (const std::string&, const moveit::core::RobotModelConstPtr&), (override));
-  MOCK_METHOD(void, get_parameter, (const std::string&, const std::string&), (const, override));
+  MOCK_METHOD(void, get_parameter, (const std::string&, std::string&), (const, override));
+  MOCK_METHOD(void, createPlannerPlugin, (const moveit::core::RobotModelConstPtr&), (override));
   MOCK_METHOD(const planning_interface::PlannerManagerPtr&, getPlannerManager, (), (const, override));
   MOCK_METHOD(void, createAdapterPlugins, (const std::vector<std::string>&), (override));
   MOCK_METHOD(bool, plan,
@@ -71,52 +73,22 @@ struct MockPlanningPipelineMiddlewareHandle : public planning_scene_monitor::Pla
   MOCK_METHOD(void, publishDisplayPathTrejectory, (const moveit_msgs::msg::DisplayTrajectory&), (override));
 };
 
-TEST(PlanningPipelineTests, GeneratePlan)
+TEST(PlanningPipelineTests, construction)
 {
-  auto mock_middleware_handle = std::make_unique<MockPlanningPipelineMiddlewareHandle>();
+  auto mock_middleware_handle{ std::make_unique<MockPlanningPipelineMiddlewareHandle>() };
 
-  EXPECT_CALL(*mock_middleware_handle, publishReceivedRequest);
-  EXPECT_CALL(*mock_middleware_handle, plan);
-  EXPECT_CALL(*mock_middleware_handle, publishDisplayPathTrejectory);
+  const auto parameter_namespace{ "Test" };
 
-  const std::string parameter_namespace = "Test"
+  EXPECT_CALL(*mock_middleware_handle, createPlannerPlugin(_)).Times(1);
+  EXPECT_CALL(*mock_middleware_handle, createAdapterPlugins(_)).Times(1);
+  EXPECT_CALL(*mock_middleware_handle, resetDisplayPathPublisher).Times(0);
+  EXPECT_CALL(*mock_middleware_handle, createDisplayPathPublisher(_)).Times(1);
+  EXPECT_CALL(*mock_middleware_handle, resetContactsPublisher).Times(0);
+  EXPECT_CALL(*mock_middleware_handle, createContactsPublisher(_)).Times(1);
 
-  planning_scene_monitor::PlanningPipeline planning_pipeline{
-    moveit::core::loadTestingRobotModel("panda"), std::move(mock_middleware_handle),
-    parameter_namespace)
-  };
-
-  planning_pipeline.generatePlan();
-}
-
-TEST(PlanningPipelineTests, displayComputedMotionPlans)
-{
-  auto mock_middleware_handle = std::make_unique<MockPlanningPipelineMiddlewareHandle>();
-
-  EXPECT_CALL(*mock_middleware_handle, resetDisplayPathPublisher);
-  EXPECT_CALL(*mock_middleware_handle, createDisplayPathPublisher);
-
-  const std::string parameter_namespace = "Test"
-
-  planning_scene_monitor::PlanningPipeline planning_pipeline{
-    moveit::core::loadTestingRobotModel("panda"), std::move(mock_middleware_handle),
-    parameter_namespace)
-  };
-}
-
-TEST(PlanningPipelineTests, publishReceivedRequests)
-{
-  auto mock_middleware_handle = std::make_unique<MockPlanningPipelineMiddlewareHandle>();
-}
-
-TEST(PlanningPipelineTests, checkSolutionPaths)
-{
-  auto mock_middleware_handle = std::make_unique<MockPlanningPipelineMiddlewareHandle>();
-}
-
-TEST(PlanningPipelineTests, terminate)
-{
-  auto mock_middleware_handle = std::make_unique<MockPlanningPipelineMiddlewareHandle>();
+  // PlanningPipeline::configure is called during construction.
+  planning_pipeline::PlanningPipeline pp{ moveit::core::loadTestingRobotModel("panda"),
+                                          std::move(mock_middleware_handle), parameter_namespace };
 }
 
 int main(int argc, char** argv)
