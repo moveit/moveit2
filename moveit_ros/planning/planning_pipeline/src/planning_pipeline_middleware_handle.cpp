@@ -142,11 +142,10 @@ const planning_interface::PlannerManagerPtr& PlanningPipelineMiddlewareHandle::g
   return planner_instance_;
 }
 
-void PlanningPipelineMiddlewareHandle::createAdapterPlugins(const std::vector<std::string>& name)
+void PlanningPipelineMiddlewareHandle::createAdapterPlugins(const std::vector<std::string>& names)
 {  // load the planner request adapters
-  if (!adapter_plugin_names_.empty())
+  if (!names.empty())
   {
-    std::vector<planning_request_adapter::PlanningRequestAdapterConstPtr> ads;
     try
     {
       adapter_plugin_loader_ =
@@ -158,9 +157,11 @@ void PlanningPipelineMiddlewareHandle::createAdapterPlugins(const std::vector<st
       RCLCPP_ERROR(LOGGER, "Exception while creating planning plugin loader %s", ex.what());
     }
 
+    std::vector<planning_request_adapter::PlanningRequestAdapterConstPtr> ads;
+
     if (adapter_plugin_loader_)
     {
-      for (const auto& adapter_plugin_name : adapter_plugin_names_)
+      for (const auto& adapter_plugin_name : names)
       {
         try
         {
@@ -177,7 +178,7 @@ void PlanningPipelineMiddlewareHandle::createAdapterPlugins(const std::vector<st
     }
     if (!ads.empty())
     {
-      adapter_chain_.reset(new planning_request_adapter::PlanningRequestAdapterChain());
+      adapter_chain_ = std::make_unique<planning_request_adapter::PlanningRequestAdapterChain>();
       for (planning_request_adapter::PlanningRequestAdapterConstPtr& ad : ads)
       {
         RCLCPP_INFO(LOGGER, "Using planning request adapter '%s'", ad->getDescription().c_str());

@@ -140,9 +140,8 @@ public:
 
     /**
      * @brief     Create a adapter plugin
-     * @param[in] name plugin name
      */
-    virtual void createAdapterPlugins(const std::vector<std::string>& name) = 0;
+    virtual void createAdapterPlugins(const std::vector<std::string>& names) = 0;
 
     virtual bool plan(const planning_scene::PlanningSceneConstPtr& planning_scene,
                       const planning_interface::MotionPlanRequest& req, planning_interface::MotionPlanResponse& res,
