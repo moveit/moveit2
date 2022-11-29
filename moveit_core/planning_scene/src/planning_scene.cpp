@@ -328,9 +328,6 @@ void PlanningScene::pushDiffs(const PlanningScenePtr& scene)
     }
   }
 
-  if (acm_)
-    scene->getAllowedCollisionMatrixNonConst() = *acm_;
-
   collision_detection::CollisionEnvPtr active_cenv = scene->getCollisionEnvNonConst();
   active_cenv->setLinkPadding(collision_detector_->cenv_->getLinkPadding());
   active_cenv->setLinkScale(collision_detector_->cenv_->getLinkScale());
