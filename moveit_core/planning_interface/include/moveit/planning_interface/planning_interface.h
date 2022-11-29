@@ -42,7 +42,7 @@
 #include <rclcpp/node.hpp>
 #include <string>
 #include <map>
-#include "rclcpp/rclcpp.hpp"
+#include <rclcpp/rclcpp.hpp>
 
 namespace planning_scene
 {

@@ -53,10 +53,10 @@
 #include <tf2_eigen/tf2_eigen.hpp>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
 
-#include "pilz_industrial_motion_planner/cartesian_trajectory.h"
-#include "pilz_industrial_motion_planner/cartesian_trajectory_point.h"
-#include "pilz_industrial_motion_planner/limits_container.h"
-#include "pilz_industrial_motion_planner/trajectory_functions.h"
+#include <pilz_industrial_motion_planner/cartesian_trajectory.h>
+#include <pilz_industrial_motion_planner/cartesian_trajectory_point.h>
+#include <pilz_industrial_motion_planner/limits_container.h>
+#include <pilz_industrial_motion_planner/trajectory_functions.h>
 #include "test_utils.h"
 
 #define _USE_MATH_DEFINES

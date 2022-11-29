@@ -43,8 +43,8 @@
 #include <trajectory_msgs/msg/multi_dof_joint_trajectory.hpp>
 #include <moveit/planning_scene/planning_scene.h>
 
-#include "pilz_industrial_motion_planner/cartesian_trajectory.h"
-#include "pilz_industrial_motion_planner/limits_container.h"
+#include <pilz_industrial_motion_planner/cartesian_trajectory.h>
+#include <pilz_industrial_motion_planner/limits_container.h>
 
 namespace pilz_industrial_motion_planner
 {

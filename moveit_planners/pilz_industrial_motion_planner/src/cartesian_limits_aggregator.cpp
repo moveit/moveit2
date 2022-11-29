@@ -38,7 +38,7 @@
 #include <rclcpp/parameter_value.hpp>
 #include <limits>
 
-#include "pilz_industrial_motion_planner/cartesian_limits_aggregator.h"
+#include <pilz_industrial_motion_planner/cartesian_limits_aggregator.h>
 
 static const std::string PARAM_CARTESIAN_LIMITS_NS = "cartesian_limits";
 

@@ -34,8 +34,8 @@
 
 /* Author: Ioan Sucan */
 
-#include "moveit/py_bindings_tools/roscpp_initializer.h"
-#include "moveit/py_bindings_tools/py_conversions.h"
+#include <moveit/py_bindings_tools/roscpp_initializer.h>
+#include <moveit/py_bindings_tools/py_conversions.h>
 #include <ros/ros.h>
 #include <memory>
 #include <thread>
