@@ -1,8 +1,6 @@
-set(MOVEIT_LIB_NAME moveit_exceptions)
-
-add_library(${MOVEIT_LIB_NAME} SHARED src/exceptions.cpp)
-set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
-ament_target_dependencies(${MOVEIT_LIB_NAME}
+add_library(moveit_exceptions SHARED src/exceptions.cpp)
+set_target_properties(moveit_exceptions PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
+ament_target_dependencies(moveit_exceptions
   Boost
   rclcpp
   urdfdom

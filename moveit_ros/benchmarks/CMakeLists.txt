@@ -1,8 +1,6 @@
 cmake_minimum_required(VERSION 3.22)
 project(moveit_ros_benchmarks)
 
-set(MOVEIT_LIB_NAME moveit_ros_benchmarks)
-
 # Common cmake code applied to all moveit packages
 find_package(moveit_common REQUIRED)
 moveit_package()
@@ -30,33 +28,33 @@ set(THIS_PACKAGE_INCLUDE_DEPENDS
   pluginlib
 )
 
-add_library(${MOVEIT_LIB_NAME} SHARED
+add_library(moveit_ros_benchmarks SHARED
   src/BenchmarkOptions.cpp
   src/BenchmarkExecutor.cpp
 )
-set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
+set_target_properties(moveit_ros_benchmarks PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
 if(WIN32)
   set(EXTRA_LIB ws2_32.lib)
 endif()
-ament_target_dependencies(${MOVEIT_LIB_NAME}
+ament_target_dependencies(moveit_ros_benchmarks
   ${THIS_PACKAGE_INCLUDE_DEPENDS}
 )
-target_link_libraries(${MOVEIT_LIB_NAME} ${EXTRA_LIB})
+target_link_libraries(moveit_ros_benchmarks ${EXTRA_LIB})
 
 add_executable(moveit_run_benchmark src/RunBenchmark.cpp)
 ament_target_dependencies(moveit_run_benchmark
   ${THIS_PACKAGE_INCLUDE_DEPENDS}
 )
-target_link_libraries(moveit_run_benchmark ${MOVEIT_LIB_NAME})
+target_link_libraries(moveit_run_benchmark moveit_ros_benchmarks)
 
 add_executable(moveit_combine_predefined_poses_benchmark src/simple_benchmarks/CombinePredefinedPosesBenchmark.cpp)
 ament_target_dependencies(moveit_combine_predefined_poses_benchmark
   ${THIS_PACKAGE_INCLUDE_DEPENDS}
 )
-target_link_libraries(moveit_combine_predefined_poses_benchmark ${MOVEIT_LIB_NAME})
+target_link_libraries(moveit_combine_predefined_poses_benchmark moveit_ros_benchmarks)
 
 install(
-  TARGETS ${MOVEIT_LIB_NAME}
+  TARGETS moveit_ros_benchmarks
   EXPORT ${PROJECT_NAME}Targets
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib

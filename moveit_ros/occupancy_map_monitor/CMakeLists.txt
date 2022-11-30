@@ -1,6 +1,5 @@
 cmake_minimum_required(VERSION 3.22)
 project(moveit_ros_occupancy_map_monitor)
-set(MOVEIT_LIB_NAME ${PROJECT_NAME})
 
 # Common cmake code applied to all moveit packages
 find_package(moveit_common REQUIRED)
@@ -35,13 +34,13 @@ set(THIS_PACKAGE_INCLUDE_DEPENDS
   Boost
 )
 
-add_library(${MOVEIT_LIB_NAME} SHARED
+add_library(moveit_ros_occupancy_map_monitor SHARED
   src/occupancy_map_monitor.cpp
   src/occupancy_map_monitor_middleware_handle.cpp
   src/occupancy_map_updater.cpp
 )
-set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
-ament_target_dependencies(${MOVEIT_LIB_NAME}
+set_target_properties(moveit_ros_occupancy_map_monitor PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
+ament_target_dependencies(moveit_ros_occupancy_map_monitor
   ${THIS_PACKAGE_INCLUDE_DEPENDS}
 )
 
@@ -49,10 +48,10 @@ add_executable(moveit_ros_occupancy_map_server src/occupancy_map_server.cpp)
 ament_target_dependencies(moveit_ros_occupancy_map_server
   ${THIS_PACKAGE_INCLUDE_DEPENDS}
 )
-target_link_libraries(moveit_ros_occupancy_map_server ${MOVEIT_LIB_NAME})
+target_link_libraries(moveit_ros_occupancy_map_server moveit_ros_occupancy_map_monitor)
 
 install(
-  TARGETS ${MOVEIT_LIB_NAME}
+  TARGETS moveit_ros_occupancy_map_monitor
   EXPORT ${PROJECT_NAME}Targets
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
@@ -85,7 +84,7 @@ if(BUILD_TESTING)
     test/occupancy_map_monitor_tests.cpp
   )
   target_link_libraries(occupancy_map_monitor_tests
-    ${MOVEIT_LIB_NAME}
+    moveit_ros_occupancy_map_monitor
   )
 endif()
 
