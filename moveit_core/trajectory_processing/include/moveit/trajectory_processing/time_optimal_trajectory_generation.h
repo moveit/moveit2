@@ -174,13 +174,20 @@ public:
                          const std::unordered_map<std::string, double>& velocity_limits,
                          const std::unordered_map<std::string, double>& acceleration_limits) const override;
 
+  /**
+   * \brief Compute a trajectory with the given number of waypoints
+   */
+  bool computeTimeStamps(robot_trajectory::RobotTrajectory& trajectory, const size_t num_waypoints,
+                         const double max_velocity_scaling_factor = 1.0,
+                         const double max_acceleration_scaling_factor = 1.0);
+
 private:
   bool doTimeParameterizationCalculations(robot_trajectory::RobotTrajectory& trajectory,
                                           const Eigen::VectorXd& max_velocity,
                                           const Eigen::VectorXd& max_acceleration) const;
 
   const double path_tolerance_;
-  const double resample_dt_;
+  double resample_dt_;
   const double min_angle_change_;
 };
 }  // namespace trajectory_processing
