@@ -88,12 +88,12 @@ void PlanningPipelineMiddlewareHandle::resetContactsPublisher()
   contacts_publisher_.reset();
 }
 
-bool PlanningPipelineMiddlewareHandle::has_parameter(const std::string& name) const
+bool PlanningPipelineMiddlewareHandle::hasParameter(const std::string& name) const
 {
   return node_->has_parameter(name);
 }
 
-void PlanningPipelineMiddlewareHandle::get_parameter(const std::string& plugin_name, std::string& parameter) const
+void PlanningPipelineMiddlewareHandle::getParameter(const std::string& plugin_name, std::string& parameter) const
 {
   node_->get_parameter(plugin_name, parameter);
 }
@@ -102,8 +102,8 @@ void PlanningPipelineMiddlewareHandle::createPlannerPlugin(const moveit::core::R
 {
   try
   {
-    planner_plugin_loader_.reset(new pluginlib::ClassLoader<planning_interface::PlannerManager>(
-        "moveit_core", "planning_interface::PlannerManager"));
+    planner_plugin_loader_ = std::make_unique<pluginlib::ClassLoader<planning_interface::PlannerManager>>(
+        "moveit_core", "planning_interface::PlannerManager");
   }
   catch (pluginlib::PluginlibException& ex)
   {
@@ -193,7 +193,7 @@ bool PlanningPipelineMiddlewareHandle::plan(const planning_scene::PlanningSceneC
                                             planning_interface::MotionPlanResponse& res,
                                             std::vector<std::size_t>& adapter_added_state_index)
 {
-  bool isSolved = false;
+  bool is_solved = false;
   if (!planner_instance_)
   {
     RCLCPP_ERROR(LOGGER, "No planning plugin loaded. Cannot plan.");
@@ -203,7 +203,7 @@ bool PlanningPipelineMiddlewareHandle::plan(const planning_scene::PlanningSceneC
   {
     if (adapter_chain_)
     {
-      isSolved = adapter_chain_->adaptAndPlan(planner_instance_, planning_scene, req, res, adapter_added_state_index);
+      is_solved = adapter_chain_->adaptAndPlan(planner_instance_, planning_scene, req, res, adapter_added_state_index);
       if (!adapter_added_state_index.empty())
       {
         std::stringstream ss;
@@ -218,7 +218,7 @@ bool PlanningPipelineMiddlewareHandle::plan(const planning_scene::PlanningSceneC
     {
       planning_interface::PlanningContextPtr context =
           planner_instance_->getPlanningContext(planning_scene, req, res.error_code_);
-      isSolved = context ? context->solve(res) : false;
+      is_solved = context ? context->solve(res) : false;
     }
   }
   catch (std::exception& ex)
@@ -226,7 +226,7 @@ bool PlanningPipelineMiddlewareHandle::plan(const planning_scene::PlanningSceneC
     RCLCPP_ERROR(LOGGER, "Exception caught: '%s'", ex.what());
     return false;
   }
-  return isSolved;
+  return is_solved;
 }
 
 void PlanningPipelineMiddlewareHandle::terminatePlannerPlugin()

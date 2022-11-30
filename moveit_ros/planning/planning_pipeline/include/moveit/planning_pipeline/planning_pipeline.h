@@ -84,14 +84,14 @@ public:
   public:
     virtual ~MiddlewareHandle() = default;
 
-    virtual bool has_parameter(const std::string& name) const = 0;
+    virtual bool hasParameter(const std::string& name) const = 0;
 
     /**
      * @brief     Get parameter of specific plugin
      * @param[in] pluginName name of plugin that has parameter
      * @param[in] parameter name of parameter to be retrieved
      */
-    virtual void get_parameter(const std::string& pluginName, std::string& parameter) const = 0;
+    virtual void getParameter(const std::string& pluginName, std::string& parameter) const = 0;
     /**
      * @brief     Create a display path publisher
      * @param[in] topic the topic

@@ -51,30 +51,36 @@ planning_pipeline::PlanningPipeline::PlanningPipeline(
     std::unique_ptr<PlanningPipeline::MiddlewareHandle> middleware_handle, const std::string& parameter_namespace,
     const std::string& planner_plugin_param_name, const std::string& adapter_plugins_param_name)
   : is_active_{ false }
-  , middleware_handle_(std::move(middleware_handle))
-  , parameter_namespace_(parameter_namespace)
-  , robot_model_(std::move(model))
+  , middleware_handle_{ std::move(middleware_handle) }
+  , parameter_namespace_{ parameter_namespace }
+  , robot_model_{ model }
 {
   std::string planner_plugin_fullname = parameter_namespace_ + "." + planner_plugin_param_name;
   if (parameter_namespace_.empty())
-    planner_plugin_fullname = planner_plugin_param_name;
-  if (middleware_handle_->has_parameter(planner_plugin_fullname))
   {
-    middleware_handle_->get_parameter(planner_plugin_fullname, planner_plugin_name_);
+    planner_plugin_fullname = planner_plugin_param_name;
+  }
+  if (middleware_handle_->hasParameter(planner_plugin_fullname))
+  {
+    middleware_handle_->getParameter(planner_plugin_fullname, planner_plugin_name_);
   }
 
   std::string adapter_plugins_fullname = parameter_namespace_ + "." + adapter_plugins_param_name;
   if (parameter_namespace_.empty())
+  {
     adapter_plugins_fullname = adapter_plugins_param_name;
+  }
 
   std::string adapters;
-  if (middleware_handle_->has_parameter(adapter_plugins_fullname))
+  if (middleware_handle_->hasParameter(adapter_plugins_fullname))
   {
-    middleware_handle_->get_parameter(adapter_plugins_fullname, adapters);
+    middleware_handle_->getParameter(adapter_plugins_fullname, adapters);
     boost::char_separator<char> sep(" ");
     boost::tokenizer<boost::char_separator<char>> tok(adapters, sep);
     for (boost::tokenizer<boost::char_separator<char>>::iterator beg = tok.begin(); beg != tok.end(); ++beg)
+    {
       adapter_plugin_names_.push_back(*beg);
+    }
   }
 
   configure();
@@ -85,8 +91,8 @@ planning_pipeline::PlanningPipeline::PlanningPipeline(const moveit::core::RobotM
                                                       const std::string& parameter_namespace,
                                                       const std::string& planner_plugin_param_name,
                                                       const std::string& adapter_plugins_param_name)
-  : PlanningPipeline(model, std::make_unique<PlanningPipelineMiddlewareHandle>(node), parameter_namespace,
-                     planner_plugin_param_name, adapter_plugins_param_name)
+  : PlanningPipeline{ model, std::make_unique<PlanningPipelineMiddlewareHandle>(node), parameter_namespace,
+                      planner_plugin_param_name, adapter_plugins_param_name }
 {
 }
 
@@ -95,11 +101,11 @@ planning_pipeline::PlanningPipeline::PlanningPipeline(
     std::unique_ptr<PlanningPipeline::MiddlewareHandle> middleware_handle, const std::string& parameter_namespace,
     const std::string& planner_plugin_name, const std::vector<std::string>& adapter_plugin_names)
   : is_active_{ false }
-  , middleware_handle_(std::move(middleware_handle))
-  , parameter_namespace_(parameter_namespace)
-  , planner_plugin_name_(planner_plugin_name)
-  , adapter_plugin_names_(adapter_plugin_names)
-  , robot_model_(std::move(model))
+  , middleware_handle_{ std::move(middleware_handle) }
+  , parameter_namespace_{ parameter_namespace }
+  , planner_plugin_name_{ planner_plugin_name }
+  , adapter_plugin_names_{ adapter_plugin_names }
+  , robot_model_{ model }
 {
   configure();
 }
@@ -109,8 +115,8 @@ planning_pipeline::PlanningPipeline::PlanningPipeline(const moveit::core::RobotM
                                                       const std::string& parameter_namespace,
                                                       const std::string& planner_plugin_name,
                                                       const std::vector<std::string>& adapter_plugin_names)
-  : PlanningPipeline(model, std::make_unique<PlanningPipelineMiddlewareHandle>(node), parameter_namespace,
-                     planner_plugin_name, adapter_plugin_names)
+  : PlanningPipeline{ model, std::make_unique<PlanningPipelineMiddlewareHandle>(node), parameter_namespace,
+                      planner_plugin_name, adapter_plugin_names }
 {
 }
 
@@ -227,13 +233,17 @@ bool planning_pipeline::PlanningPipeline::generatePlan(const planning_scene::Pla
     for (const auto& constraint : req.goal_constraints)
     {
       if (constraint.position_constraints.size() > 1 || constraint.orientation_constraints.size() > 1)
+      {
         is_stacked_constraints = true;
+      }
     }
     if (is_stacked_constraints)
+    {
       RCLCPP_WARN(LOGGER, "More than one constraint is set. If your move_group does not have multiple end "
                           "effectors/arms, this is "
                           "unusual. Are you using a move_group_interface and forgetting to call clearPoseTargets() or "
                           "equivalent?");
+    }
   }
 
   // display solution path if needed
@@ -263,20 +273,24 @@ bool planning_pipeline::PlanningPipeline::generatePlan(const planning_scene::Pla
       {
         // check to see if there is any problem with the states that are found to be invalid
         // they are considered ok if they were added by a planning request adapter
-        bool problem = false;
-        for (std::size_t i = 0; i < index.size() && !problem; ++i)
+        bool is_problem = false;
+        for (std::size_t i = 0; i < index.size() && !is_problem; ++i)
         {
-          bool found = false;
+          bool is_found = false;
           for (std::size_t added_index : adapter_added_state_index)
+          {
             if (index[i] == added_index)
             {
-              found = true;
+              is_found = true;
               break;
             }
-          if (!found)
-            problem = true;
+            if (!is_found)
+            {
+              is_problem = true;
+            }
+          }
         }
-        if (problem)
+        if (is_problem)
         {
           if (index.size() == 1 && index[0] == 0)
           {  // ignore cases when the robot starts at invalid location
@@ -289,8 +303,9 @@ bool planning_pipeline::PlanningPipeline::generatePlan(const planning_scene::Pla
             // display error messages
             std::stringstream ss;
             for (std::size_t it : index)
+            {
               ss << it << " ";
-
+            }
             RCLCPP_ERROR_STREAM(LOGGER, "Computed path is not valid. Invalid states at index locations: [ "
                                             << ss.str() << "] out of " << state_count
                                             << ". Explanations follow in command line. Contacts are published on "

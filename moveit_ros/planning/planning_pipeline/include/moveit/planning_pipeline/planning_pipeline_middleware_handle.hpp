@@ -84,14 +84,14 @@ public:
   /**
    * @brief     Check if parameter exists
    */
-  bool has_parameter(const std::string& name) const override;
+  bool hasParameter(const std::string& name) const override;
 
   /**
    * @brief     Get parameter of specific plugin
    * @param[in] pluginName name of plugin that has parameter
    * @param[in] parameters container for parameter names
    */
-  void get_parameter(const std::string& pluginName, std::string& parameter) const override;
+  void getParameter(const std::string& pluginName, std::string& parameter) const override;
 
   /**
    * @brief     Create a planner plugin

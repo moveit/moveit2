@@ -58,8 +58,8 @@ struct MockPlanningPipelineMiddlewareHandle : public planning_pipeline::Planning
   MOCK_METHOD(void, resetDisplayPathPublisher, (), (override));
   MOCK_METHOD(void, resetReceivedRequestPublisher, (), (override));
   MOCK_METHOD(void, resetContactsPublisher, (), (override));
-  MOCK_METHOD(bool, has_parameter, (const std::string&), (const, override));
-  MOCK_METHOD(void, get_parameter, (const std::string&, std::string&), (const, override));
+  MOCK_METHOD(bool, hasParameter, (const std::string&), (const, override));
+  MOCK_METHOD(void, getParameter, (const std::string&, std::string&), (const, override));
   MOCK_METHOD(void, createPlannerPlugin, (const moveit::core::RobotModelConstPtr&), (override));
   MOCK_METHOD(const planning_interface::PlannerManagerPtr&, getPlannerManager, (), (const, override));
   MOCK_METHOD(void, createAdapterPlugins, (const std::vector<std::string>&), (override));
