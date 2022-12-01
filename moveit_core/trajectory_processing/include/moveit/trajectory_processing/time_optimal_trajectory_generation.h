@@ -177,7 +177,8 @@ public:
   // clang-format off
   /**
    * \brief Compute a trajectory with the given number of waypoints (plus or minus 1, due to rounding).
-   * Resampling the trajectory to get the desired num_waypoints doesn't change the shape of the trajectory,
+   * Resampling the trajectory to get the desired num_waypoints doesn't change the start and goal point,
+   * and all re-sampled waypoints will be on the path of the original trajectory (within the configured tolerances)
    * but controller execution may deviate from the intended path if waypoint spacing is too sparse.
    * \param num_waypoints The desired number of waypoints.
    * \param[in,out] trajectory A path which needs time-parameterization. It's OK if this path has already been
