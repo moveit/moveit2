@@ -138,7 +138,6 @@ bool DepthImageOctomapUpdater::initialize(const rclcpp::Node::SharedPtr& node)
 
 void DepthImageOctomapUpdater::start()
 {
-  rmw_qos_profile_t custom_qos = rmw_qos_profile_system_default;
   pub_model_depth_image_ = model_depth_transport_->advertiseCamera("model_depth", 1);
 
   std::string prefix = "";
@@ -159,7 +158,7 @@ void DepthImageOctomapUpdater::start()
              const sensor_msgs::msg::CameraInfo::ConstSharedPtr& info_msg) {
         return depthImageCallback(depth_msg, info_msg);
       },
-      "raw", custom_qos);
+      "raw", rmw_qos_profile_sensor_data);
 }
 
 void DepthImageOctomapUpdater::stop()
