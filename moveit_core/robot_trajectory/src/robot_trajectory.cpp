@@ -216,9 +216,13 @@ RobotTrajectory& RobotTrajectory::unwind(const moveit::core::RobotState& state)
     double last_value = waypoints_[0]->getJointPositions(cont_joint)[0];
     cont_joint->enforcePositionBounds(&last_value);
     if (last_value > reference_value + M_PI)
+    {
       running_offset -= 2.0 * M_PI;
+    }
     else if (last_value < reference_value - M_PI)
+    {
       running_offset += 2.0 * M_PI;
+    }
     double current_start_value = last_value + running_offset;
     waypoints_[0]->setJointPositions(cont_joint, &current_start_value);
 
