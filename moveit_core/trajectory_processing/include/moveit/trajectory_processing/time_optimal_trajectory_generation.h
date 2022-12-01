@@ -175,7 +175,7 @@ public:
                          const std::unordered_map<std::string, double>& acceleration_limits) const override;
 
   /**
-   * \brief Compute a trajectory with the given number of waypoints
+   * \brief Compute a trajectory with the given number of waypoints (plus or minus 1, due to rounding)
    */
   bool computeTimeStamps(robot_trajectory::RobotTrajectory& trajectory, const size_t num_waypoints,
                          const double max_velocity_scaling_factor = 1.0,
