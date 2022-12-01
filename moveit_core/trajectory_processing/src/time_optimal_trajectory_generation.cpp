@@ -1068,6 +1068,12 @@ bool TimeOptimalTrajectoryGeneration::computeTimeStamps(const size_t num_waypoin
   //      new_delta_t = duration/(n-1)     // subtract one for the initial waypoint
   // 3. Run TOTG again with the new timestep. This should give the exact num_waypoints you want
 
+  if (num_waypoints < 2)
+  {
+    RCLCPP_ERROR(LOGGER, "computeTimeStamps() requires num_waypoints > 1");
+    return false;
+  }
+
   computeTimeStamps(trajectory, max_velocity_scaling_factor, max_acceleration_scaling_factor);
   double optimal_duration = trajectory.getDuration();
   resample_dt_ = optimal_duration / (num_waypoints - 1);
