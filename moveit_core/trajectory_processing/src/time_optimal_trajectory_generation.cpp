@@ -1068,19 +1068,10 @@ bool TimeOptimalTrajectoryGeneration::computeTimeStamps(const size_t num_waypoin
   //      new_delta_t = duration/(n-1)     // subtract one for the initial waypoint
   // 3. Run TOTG again with the new timestep. This should give the exact num_waypoints you want
 
-  // auto input_trajectory = robot_trajectory::RobotTrajectory(trajectory, true /* deep copy */);
-
-  // computeTimeStamps(input_trajectory, max_velocity_scaling_factor, max_acceleration_scaling_factor);
-  // double optimal_duration = input_trajectory.getDuration();
-
   computeTimeStamps(trajectory, max_velocity_scaling_factor, max_acceleration_scaling_factor);
   double optimal_duration = trajectory.getDuration();
-
-  std::cout << "Optimal duration: " << optimal_duration << std::endl;
   resample_dt_ = optimal_duration / (num_waypoints - 1);
-  std::cout << "resample_dt_: " << resample_dt_ << std::endl;
   computeTimeStamps(trajectory, max_velocity_scaling_factor, max_acceleration_scaling_factor);
-  std::cout << "Output num_waypoints: " << trajectory.getWayPointCount() << std::endl;
   return true;
 }
 
