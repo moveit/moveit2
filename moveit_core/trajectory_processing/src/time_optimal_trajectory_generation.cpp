@@ -1057,8 +1057,8 @@ bool TimeOptimalTrajectoryGeneration::computeTimeStamps(
   return doTimeParameterizationCalculations(trajectory, max_velocity, max_acceleration);
 }
 
-bool TimeOptimalTrajectoryGeneration::computeTimeStamps(robot_trajectory::RobotTrajectory& trajectory,
-                                                        const size_t num_waypoints,
+bool TimeOptimalTrajectoryGeneration::computeTimeStamps(const size_t num_waypoints,
+                                                        robot_trajectory::RobotTrajectory& trajectory,
                                                         const double max_velocity_scaling_factor,
                                                         const double max_acceleration_scaling_factor)
 {
@@ -1081,6 +1081,7 @@ bool TimeOptimalTrajectoryGeneration::computeTimeStamps(robot_trajectory::RobotT
   std::cout << "resample_dt_: " << resample_dt_ << std::endl;
   computeTimeStamps(trajectory, max_velocity_scaling_factor, max_acceleration_scaling_factor);
   std::cout << "Output num_waypoints: " << trajectory.getWayPointCount() << std::endl;
+  return true;
 }
 
 bool TimeOptimalTrajectoryGeneration::doTimeParameterizationCalculations(robot_trajectory::RobotTrajectory& trajectory,
