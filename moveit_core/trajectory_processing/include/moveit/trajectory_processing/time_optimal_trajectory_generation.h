@@ -174,10 +174,17 @@ public:
                          const std::unordered_map<std::string, double>& velocity_limits,
                          const std::unordered_map<std::string, double>& acceleration_limits) const override;
 
+  // clang-format off
   /**
    * \brief Compute a trajectory with the given number of waypoints (plus or minus 1, due to rounding).
    * Caution: if the waypoint spacing is sparse, execution of the trajectory may vary from the expected path.
+   * \param num_waypoints The desired number of waypoints.
+   * \param[in,out] trajectory A path which needs time-parameterization. It's OK if this path has already been
+   * time-parameterized; this function will re-time-parameterize it.
+   * \param max_velocity_scaling_factor Joint velocity limits are scaled by this factor.
+   * \param max_acceleration_scaling_factor Joint acceleration limits are scaled by this factor.
    */
+  // clang-format on
   bool computeTimeStamps(const size_t num_waypoints, robot_trajectory::RobotTrajectory& trajectory,
                          const double max_velocity_scaling_factor = 1.0,
                          const double max_acceleration_scaling_factor = 1.0);
