@@ -1057,6 +1057,30 @@ bool TimeOptimalTrajectoryGeneration::computeTimeStamps(
   return doTimeParameterizationCalculations(trajectory, max_velocity, max_acceleration);
 }
 
+bool TimeOptimalTrajectoryGeneration::computeTimeStamps(const size_t num_waypoints,
+                                                        robot_trajectory::RobotTrajectory& trajectory,
+                                                        const double max_velocity_scaling_factor,
+                                                        const double max_acceleration_scaling_factor)
+{
+  // The algorithm is:
+  // 1. Run TOTG once to figure out the optimal trajectory duration
+  // 2. Calculate the timestep to get the desired num_waypoints:
+  //      new_delta_t = duration/(n-1)     // subtract one for the initial waypoint
+  // 3. Run TOTG again with the new timestep. This should give the exact num_waypoints you want
+
+  if (num_waypoints < 2)
+  {
+    RCLCPP_ERROR(LOGGER, "computeTimeStamps() requires num_waypoints > 1");
+    return false;
+  }
+
+  computeTimeStamps(trajectory, max_velocity_scaling_factor, max_acceleration_scaling_factor);
+  double optimal_duration = trajectory.getDuration();
+  resample_dt_ = optimal_duration / (num_waypoints - 1);
+  computeTimeStamps(trajectory, max_velocity_scaling_factor, max_acceleration_scaling_factor);
+  return true;
+}
+
 bool TimeOptimalTrajectoryGeneration::doTimeParameterizationCalculations(robot_trajectory::RobotTrajectory& trajectory,
                                                                          const Eigen::VectorXd& max_velocity,
                                                                          const Eigen::VectorXd& max_acceleration) const
