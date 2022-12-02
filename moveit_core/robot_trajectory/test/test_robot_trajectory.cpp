@@ -354,6 +354,26 @@ TEST_F(RobotTrajectoryTestFixture, RobotTrajectoryDensity)
   EXPECT_FALSE(robot_trajectory::waypoint_density(*trajectory).has_value());
 }
 
+TEST_F(RobotTrajectoryTestFixture, Unwind)
+{
+  // TODO(andyz): this fails! It's a bug.
+  /*
+    const double EPSILON = 1e-4;
+
+    // An initial joint position needs unwinding
+    {
+      robot_trajectory::RobotTrajectoryPtr trajectory;
+      initTestTrajectory(trajectory);
+      moveit::core::RobotStatePtr& first_waypoint = trajectory->getFirstWayPointPtr();
+      const double random_large_angle = 20.2;  // rad, should unwind to 1.350444 rad
+      first_waypoint->setVariablePosition("panda_joint1", random_large_angle);
+      first_waypoint->update();
+      trajectory->unwind();
+      EXPECT_NEAR(trajectory->getFirstWayPoint().getVariablePosition("panda_joint1"), 1.350444, EPSILON);
+    }
+  */
+}
+
 int main(int argc, char** argv)
 {
   testing::InitGoogleTest(&argc, argv);

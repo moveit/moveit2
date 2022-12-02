@@ -191,7 +191,9 @@ RobotTrajectory& RobotTrajectory::unwind()
     }
   }
   for (moveit::core::RobotStatePtr& waypoint : waypoints_)
+  {
     waypoint->update();
+  }
 
   return *this;
 }
