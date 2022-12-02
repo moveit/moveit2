@@ -81,7 +81,10 @@ ForwardTrajectory::solve(const robot_trajectory::RobotTrajectory& local_trajecto
                          trajectory_msgs::msg::JointTrajectory& local_solution)
 {
   // A message every once in awhile is useful in case the local planner gets stuck
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wold-style-cast"
   RCLCPP_INFO_THROTTLE(LOGGER, *node_->get_clock(), 2000 /* ms */, "The local planner is solving...");
+#pragma GCC diagnostic pop
 
   // Create controller command trajectory
   robot_trajectory::RobotTrajectory robot_command(local_trajectory.getRobotModel(), local_trajectory.getGroupName());

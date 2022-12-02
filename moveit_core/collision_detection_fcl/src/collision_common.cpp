@@ -279,7 +279,7 @@ bool collisionCallback(fcl::CollisionObjectd* o1, fcl::CollisionObjectd* o2, voi
         int num_contacts_initial = num_contacts;
 
         // make sure we don't get more contacts than we want
-        if (want_contact_count >= (std::size_t)num_contacts)
+        if (want_contact_count >= static_cast<std::size_t>(num_contacts))
         {
           want_contact_count -= num_contacts;
         }

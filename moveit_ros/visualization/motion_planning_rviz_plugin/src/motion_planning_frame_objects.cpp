@@ -154,7 +154,7 @@ void MotionPlanningFrame::clearScene()
 
 void MotionPlanningFrame::sceneScaleChanged(int value)
 {
-  const double scaling_factor = (double)value / 100.0;  // The GUI slider gives percent values
+  const double scaling_factor = static_cast<double>(value) / 100.0;  // The GUI slider gives percent values
   if (scaled_object_)
   {
     planning_scene_monitor::LockedPlanningSceneRW ps = planning_display_->getPlanningSceneRW();

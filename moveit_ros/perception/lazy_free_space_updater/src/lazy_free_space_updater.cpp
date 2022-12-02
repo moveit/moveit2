@@ -73,7 +73,8 @@ void LazyFreeSpaceUpdater::pushLazyUpdate(octomap::KeySet* occupied_cells, octom
                                           const octomap::point3d& sensor_origin)
 {
   RCLCPP_DEBUG(LOGGER, "Pushing %lu occupied cells and %lu model cells for lazy updating...",
-               (long unsigned int)occupied_cells->size(), (long unsigned int)model_cells->size());
+               static_cast<long unsigned int>(occupied_cells->size()),
+               static_cast<long unsigned int>(model_cells->size()));
   std::scoped_lock _(update_cell_sets_lock_);
   occupied_cells_sets_.push_back(occupied_cells);
   model_cells_sets_.push_back(model_cells);
@@ -125,8 +126,8 @@ void LazyFreeSpaceUpdater::processThread()
 
     RCLCPP_DEBUG(LOGGER,
                  "Begin processing batched update: marking free cells due to %lu occupied cells and %lu model cells",
-                 (long unsigned int)process_occupied_cells_set_->size(),
-                 (long unsigned int)process_model_cells_set_->size());
+                 static_cast<long unsigned int>(process_occupied_cells_set_->size()),
+                 static_cast<long unsigned int>(process_model_cells_set_->size()));
 
     rclcpp::Clock clock;
     rclcpp::Time start = clock.now();
@@ -174,7 +175,8 @@ void LazyFreeSpaceUpdater::processThread()
       free_cells1.erase(it);
       free_cells2.erase(it);
     }
-    RCLCPP_DEBUG(LOGGER, "Marking %lu cells as free...", (long unsigned int)(free_cells1.size() + free_cells2.size()));
+    RCLCPP_DEBUG(LOGGER, "Marking %lu cells as free...",
+                 static_cast<long unsigned int>(free_cells1.size() + free_cells2.size()));
 
     tree_->lockWrite();
 

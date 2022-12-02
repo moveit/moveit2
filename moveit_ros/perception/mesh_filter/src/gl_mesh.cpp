@@ -55,7 +55,7 @@ mesh_filter::GLMesh::GLMesh(const Mesh& mesh, unsigned int mesh_label)
   list_ = glGenLists(1);
   glNewList(list_, GL_COMPILE);
   glBegin(GL_TRIANGLES);
-  glColor4ubv((GLubyte*)&mesh_label_);
+  glColor4ubv(reinterpret_cast<GLubyte*>(&mesh_label_));
   for (unsigned t_idx = 0; t_idx < mesh.triangle_count; ++t_idx)
   {
     unsigned v1 = 3 * mesh.triangles[3 * t_idx];

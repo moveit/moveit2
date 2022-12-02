@@ -159,9 +159,9 @@ TEST(time_optimal_trajectory_generation, test_custom_limits)
   constexpr auto group_name{ "panda_arm" };
 
   auto robot_model = moveit::core::loadTestingRobotModel(robot_name);
-  ASSERT_TRUE((bool)robot_model) << "Failed to load robot model" << robot_name;
+  ASSERT_TRUE(robot_model) << "Failed to load robot model" << robot_name;
   auto group = robot_model->getJointModelGroup(group_name);
-  ASSERT_TRUE((bool)group) << "Failed to load joint model group " << group_name;
+  ASSERT_TRUE(group) << "Failed to load joint model group " << group_name;
   moveit::core::RobotState waypoint_state(robot_model);
   waypoint_state.setToDefaultValues();
 
@@ -263,9 +263,9 @@ TEST(time_optimal_trajectory_generation, testLastWaypoint)
   constexpr auto group_name{ "hand" };
 
   auto robot_model = moveit::core::loadTestingRobotModel(robot_name);
-  ASSERT_TRUE((bool)robot_model) << "Failed to load robot model" << robot_name;
+  ASSERT_TRUE(robot_model) << "Failed to load robot model" << robot_name;
   auto group = robot_model->getJointModelGroup(group_name);
-  ASSERT_TRUE((bool)group) << "Failed to load joint model group " << group_name;
+  ASSERT_TRUE(group) << "Failed to load joint model group " << group_name;
   moveit::core::RobotState waypoint_state(robot_model);
   waypoint_state.setToDefaultValues();
 
@@ -383,9 +383,9 @@ TEST(time_optimal_trajectory_generation, testPluginAPI)
   constexpr auto group_name{ "panda_arm" };
 
   auto robot_model = moveit::core::loadTestingRobotModel(robot_name);
-  ASSERT_TRUE((bool)robot_model) << "Failed to load robot model" << robot_name;
+  ASSERT_TRUE(robot_model) << "Failed to load robot model" << robot_name;
   auto group = robot_model->getJointModelGroup(group_name);
-  ASSERT_TRUE((bool)group) << "Failed to load joint model group " << group_name;
+  ASSERT_TRUE(group) << "Failed to load joint model group " << group_name;
   moveit::core::RobotState waypoint_state(robot_model);
   waypoint_state.setToDefaultValues();
 
@@ -505,9 +505,9 @@ TEST(time_optimal_trajectory_generation, testFixedNumWaypoints)
   constexpr auto group_name{ "panda_arm" };
 
   auto robot_model = moveit::core::loadTestingRobotModel(robot_name);
-  ASSERT_TRUE((bool)robot_model) << "Failed to load robot model" << robot_name;
+  ASSERT_TRUE(robot_model) << "Failed to load robot model" << robot_name;
   auto group = robot_model->getJointModelGroup(group_name);
-  ASSERT_TRUE((bool)group) << "Failed to load joint model group " << group_name;
+  ASSERT_TRUE(group) << "Failed to load joint model group " << group_name;
   moveit::core::RobotState waypoint_state(robot_model);
   waypoint_state.setToDefaultValues();
 
