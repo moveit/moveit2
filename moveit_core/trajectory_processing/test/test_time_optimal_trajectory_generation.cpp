@@ -519,7 +519,8 @@ TEST(time_optimal_trajectory_generation, testFixedNumWaypoints)
   trajectory.addSuffixWayPoint(waypoint_state, delta_t);
 
   TimeOptimalTrajectoryGeneration totg;
-  ASSERT_TRUE(totg.computeTimeStamps(desired_num_waypoints, trajectory)) << "Failed to compute time stamps";
+  ASSERT_TRUE(trajectory_processing::computeTimeStamps(desired_num_waypoints, trajectory))
+      << "Failed to compute time stamps";
   // Allow +/-1 waypoint due to floating point error
   EXPECT_NEAR(trajectory.getWayPointCount(), desired_num_waypoints, 1);
 }
