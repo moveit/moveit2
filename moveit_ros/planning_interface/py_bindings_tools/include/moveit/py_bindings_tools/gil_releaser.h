@@ -82,7 +82,7 @@ public:
   GILReleaser& operator=(GILReleaser&& other) noexcept
   {
     GILReleaser copy(std::move(other));
-    this->swap(copy);
+    swap(copy);
     return *this;
   }
 

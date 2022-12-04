@@ -60,7 +60,7 @@ LocalPlannerComponent::LocalPlannerComponent(const rclcpp::NodeOptions& options)
   state_ = LocalPlannerState::UNCONFIGURED;
   local_planner_feedback_ = std::make_shared<moveit_msgs::action::LocalPlanner::Feedback>();
 
-  if (!this->initialize())
+  if (!initialize())
   {
     throw std::runtime_error("Failed to initialize local planner component");
   }

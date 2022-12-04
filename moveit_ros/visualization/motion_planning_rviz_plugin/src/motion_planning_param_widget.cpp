@@ -67,7 +67,7 @@ void MotionPlanningParamWidget::setMoveGroup(const mpi::MoveGroupInterfacePtr& m
 void MotionPlanningParamWidget::setGroupName(const std::string& group_name)
 {
   group_name_ = group_name;
-  this->setModel(nullptr);
+  setModel(nullptr);
   if (property_tree_model_)
     delete property_tree_model_;
   property_tree_model_ = nullptr;
@@ -134,7 +134,7 @@ void MotionPlanningParamWidget::setPlannerId(const std::string& planner_id)
   rviz_common::properties::PropertyTreeModel* old_model = property_tree_model_;
   rviz_common::properties::Property* root = createPropertyTree();
   property_tree_model_ = root ? new rviz_common::properties::PropertyTreeModel(root) : nullptr;
-  this->setModel(property_tree_model_);
+  setModel(property_tree_model_);
   if (old_model)
     delete old_model;
 }

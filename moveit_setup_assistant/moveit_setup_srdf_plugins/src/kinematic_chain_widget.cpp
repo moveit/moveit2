@@ -131,7 +131,7 @@ KinematicChainWidget::KinematicChainWidget(QWidget* parent, RVizPanel* rviz_pane
   layout->addLayout(controls_layout);
 
   // Finish Layout --------------------------------------------------
-  this->setLayout(layout);
+  setLayout(layout);
 
   // Remember that we have no loaded the chains yet
   kinematic_chain_loaded_ = false;
