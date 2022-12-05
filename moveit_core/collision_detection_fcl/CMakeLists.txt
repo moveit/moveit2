@@ -2,6 +2,10 @@ add_library(moveit_collision_detection_fcl SHARED
   src/collision_common.cpp
   src/collision_env_fcl.cpp
 )
+target_include_directories(moveit_collision_detection_fcl PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include/moveit_core>
+)
 include(GenerateExportHeader)
 generate_export_header(moveit_collision_detection_fcl)
 target_include_directories(moveit_collision_detection_fcl PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>)
@@ -33,8 +37,8 @@ target_link_libraries(collision_detector_fcl_plugin
   moveit_planning_scene
 )
 
-install(DIRECTORY include/ DESTINATION include)
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/moveit_collision_detection_fcl_export.h DESTINATION include)
+install(DIRECTORY include/ DESTINATION include/moveit_core)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/moveit_collision_detection_fcl_export.h DESTINATION include/moveit_core)
 
 if(BUILD_TESTING)
   if(WIN32)
