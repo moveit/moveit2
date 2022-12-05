@@ -198,7 +198,7 @@ private:
   * \param max_acceleration_scaling_factor Joint acceleration limits are scaled by this factor.
   */
 // clang-format on
-bool computeTimeStamps(const size_t num_waypoints, robot_trajectory::RobotTrajectory& trajectory,
-                       const double max_velocity_scaling_factor = 1.0,
-                       const double max_acceleration_scaling_factor = 1.0);
+bool totgComputeTimeStamps(const size_t num_waypoints, robot_trajectory::RobotTrajectory& trajectory,
+                           const double max_velocity_scaling_factor = 1.0,
+                           const double max_acceleration_scaling_factor = 1.0);
 }  // namespace trajectory_processing

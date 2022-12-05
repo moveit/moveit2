@@ -1057,8 +1057,8 @@ bool TimeOptimalTrajectoryGeneration::computeTimeStamps(
   return doTimeParameterizationCalculations(trajectory, max_velocity, max_acceleration);
 }
 
-bool computeTimeStamps(const size_t num_waypoints, robot_trajectory::RobotTrajectory& trajectory,
-                       const double max_velocity_scaling_factor, const double max_acceleration_scaling_factor)
+bool totgComputeTimeStamps(const size_t num_waypoints, robot_trajectory::RobotTrajectory& trajectory,
+                           const double max_velocity_scaling_factor, const double max_acceleration_scaling_factor)
 {
   // The algorithm is:
   // 1. Run TOTG with default settings once to find the optimal trajectory duration
