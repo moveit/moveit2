@@ -92,6 +92,14 @@ RobotTrajCont CommandListManager::solve(const planning_scene::PlanningSceneConst
 
   MotionResponseCont resp_cont{ solveSequenceItems(planning_scene, planning_pipeline, req_list) };
 
+  if (planning_pipeline->getPlannerPluginName() == "ompl_interface/OMPLPlanner")
+  {
+    for (MotionResponseCont::size_type i = 0; i < resp_cont.size(); ++i)
+    {
+      resp_cont.at(i).trajectory_->getLastWayPointPtr()->zeroAccelerations();
+    }
+  }
+  
   assert(model_);
   RadiiCont radii{ extractBlendRadii(*model_, req_list) };
   checkForOverlappingRadii(resp_cont, radii);
