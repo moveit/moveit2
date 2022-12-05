@@ -293,7 +293,7 @@ void InteractionHandler::updateStateGeneric(
   bool error_state_changed = setErrorState(g.marker_name_suffix, !ok);
   if (update_callback_)
   {
-    callback = [cb = this->update_callback_, error_state_changed](robot_interaction::InteractionHandler* handler) {
+    callback = [cb = update_callback_, error_state_changed](robot_interaction::InteractionHandler* handler) {
       cb(handler, error_state_changed);
     };
   }
@@ -311,7 +311,7 @@ void InteractionHandler::updateStateEndEffector(moveit::core::RobotState& state,
   bool error_state_changed = setErrorState(eef.parent_group, !ok);
   if (update_callback_)
   {
-    callback = [cb = this->update_callback_, error_state_changed](robot_interaction::InteractionHandler* handler) {
+    callback = [cb = update_callback_, error_state_changed](robot_interaction::InteractionHandler* handler) {
       cb(handler, error_state_changed);
     };
   }
@@ -332,7 +332,7 @@ void InteractionHandler::updateStateJoint(moveit::core::RobotState& state, const
   state.update();
 
   if (update_callback_)
-    callback = [cb = this->update_callback_](robot_interaction::InteractionHandler* handler) { cb(handler, false); };
+    callback = [cb = update_callback_](robot_interaction::InteractionHandler* handler) { cb(handler, false); };
 }
 
 bool InteractionHandler::inError(const EndEffectorInteraction& eef) const

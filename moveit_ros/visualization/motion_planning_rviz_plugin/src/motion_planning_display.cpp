@@ -239,7 +239,7 @@ void MotionPlanningDisplay::onInitialize()
   rviz_common::WindowManagerInterface* window_context = context_->getWindowManager();
   frame_ = new MotionPlanningFrame(this, context_, window_context ? window_context->getParentWindow() : nullptr);
 
-  connect(frame_, SIGNAL(configChanged()), this->getModel(), SIGNAL(configChanged()));
+  connect(frame_, SIGNAL(configChanged()), getModel(), SIGNAL(configChanged()));
   resetStatusTextColor();
   addStatusText("Initialized.");
 
@@ -311,7 +311,7 @@ void MotionPlanningDisplay::reset()
   // Planned Path Display
   trajectory_visual_->reset();
 
-  bool enabled = this->isEnabled();
+  bool enabled = isEnabled();
   frame_->disable();
   if (enabled)
   {

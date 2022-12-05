@@ -559,7 +559,7 @@ CollisionObjectWrapper::CollisionObjectWrapper(const std::string& name, const co
     throw std::exception();
   }
 
-  this->setContactProcessingThreshold(BULLET_DEFAULT_CONTACT_DISTANCE);
+  setContactProcessingThreshold(BULLET_DEFAULT_CONTACT_DISTANCE);
   assert(!name.empty());
 
   if (active)

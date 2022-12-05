@@ -68,10 +68,10 @@ RobotTrajectory::RobotTrajectory(const RobotTrajectory& other, bool deepcopy)
   *this = other;  // default assignment operator performs a shallow copy
   if (deepcopy)
   {
-    this->waypoints_.clear();
+    waypoints_.clear();
     for (const auto& waypoint : other.waypoints_)
     {
-      this->waypoints_.emplace_back(std::make_shared<moveit::core::RobotState>(*waypoint));
+      waypoints_.emplace_back(std::make_shared<moveit::core::RobotState>(*waypoint));
     }
   }
 }
