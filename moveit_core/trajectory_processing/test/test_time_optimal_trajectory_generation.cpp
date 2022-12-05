@@ -518,7 +518,6 @@ TEST(time_optimal_trajectory_generation, testFixedNumWaypoints)
   waypoint_state.setJointGroupPositions(group, std::vector<double>{ -0.45, -3.2, 1.2, -2.4, -0.8, 0.6, 0.0 });
   trajectory.addSuffixWayPoint(waypoint_state, delta_t);
 
-  TimeOptimalTrajectoryGeneration totg;
   ASSERT_TRUE(trajectory_processing::computeTimeStamps(desired_num_waypoints, trajectory))
       << "Failed to compute time stamps";
   // Allow +/-1 waypoint due to floating point error
