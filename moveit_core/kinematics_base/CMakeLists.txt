@@ -1,6 +1,9 @@
-cmake_minimum_required(VERSION 3.22)
-
 add_library(moveit_kinematics_base SHARED src/kinematics_base.cpp)
+target_include_directories(moveit_kinematics_base PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include/moveit_core>
+)
+target_link_libraries(moveit_kinematics_base moveit_macros moveit_robot_model)
 include(GenerateExportHeader)
 generate_export_header(moveit_kinematics_base)
 target_include_directories(moveit_kinematics_base PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>)  # for this library
@@ -16,5 +19,5 @@ ament_target_dependencies(
   geometry_msgs
 )
 
-install(DIRECTORY include/ DESTINATION include)
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/moveit_kinematics_base_export.h DESTINATION include)
+install(DIRECTORY include/ DESTINATION include/moveit_core)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/moveit_kinematics_base_export.h DESTINATION include/moveit_core)

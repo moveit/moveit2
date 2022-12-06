@@ -5,7 +5,10 @@ add_library(moveit_trajectory_processing SHARED
   src/trajectory_tools.cpp
   src/time_optimal_trajectory_generation.cpp
 )
-
+target_include_directories(moveit_trajectory_processing PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include/moveit_core>
+)
 set_target_properties(moveit_trajectory_processing PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
 ament_target_dependencies(moveit_trajectory_processing
   rclcpp
@@ -22,7 +25,7 @@ target_link_libraries(moveit_trajectory_processing
   ruckig::ruckig
 )
 
-install(DIRECTORY include/ DESTINATION include)
+install(DIRECTORY include/ DESTINATION include/moveit_core)
 
 if(BUILD_TESTING)
   if(WIN32)

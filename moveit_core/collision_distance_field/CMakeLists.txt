@@ -4,6 +4,10 @@ add_library(moveit_collision_distance_field SHARED
   src/collision_env_distance_field.cpp
   src/collision_env_hybrid.cpp
 )
+target_include_directories(moveit_collision_distance_field PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include/moveit_core>
+)
 include(GenerateExportHeader)
 generate_export_header(moveit_collision_distance_field)
 target_include_directories(moveit_collision_distance_field PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>)
@@ -24,8 +28,8 @@ target_link_libraries(moveit_collision_distance_field
   moveit_robot_state
 )
 
-install(DIRECTORY include/ DESTINATION include)
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/moveit_collision_distance_field_export.h DESTINATION include)
+install(DIRECTORY include/ DESTINATION include/moveit_core)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/moveit_collision_distance_field_export.h DESTINATION include/moveit_core)
 
 if(BUILD_TESTING)
   find_package(ament_cmake_gtest REQUIRED)
