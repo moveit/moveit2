@@ -59,6 +59,8 @@ install(TARGETS moveit_collision_detection_bullet collision_detector_bullet_plug
 ament_export_targets(export_moveit_collision_detection_bullet HAS_LIBRARY_TARGET)
 
 if(BUILD_TESTING)
+  find_package(ament_cmake_gtest REQUIRED)
+
   if(WIN32)
     # set(append_library_dirs "$<TARGET_FILE_DIR:${PROJECT_NAME}>;$<TARGET_FILE_DIR:${PROJECT_NAME}_TestPlugins1>")
   else()
