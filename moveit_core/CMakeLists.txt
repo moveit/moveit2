@@ -116,7 +116,7 @@ set(MOVEIT_VERSION_EXTRA "Alpha")
 set(MOVEIT_VERSION "${MOVEIT_VERSION_MAJOR}.${MOVEIT_VERSION_MINOR}.${MOVEIT_VERSION_PATCH}-${MOVEIT_VERSION_EXTRA}")
 message(STATUS " *** Building MoveIt ${MOVEIT_VERSION} ***")
 configure_file("version/version.h.in" "${VERSION_FILE_PATH}/moveit/version.h")
-install(FILES "${VERSION_FILE_PATH}/moveit/version.h" DESTINATION include/moveit)
+install(FILES "${VERSION_FILE_PATH}/moveit/version.h" DESTINATION include/moveit_core/moveit)
 
 add_subdirectory(collision_distance_field)
 add_subdirectory(constraint_samplers)
