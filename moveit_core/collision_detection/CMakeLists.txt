@@ -9,6 +9,10 @@ add_library(moveit_collision_detection SHARED
   src/collision_env.cpp
   src/collision_plugin_cache.cpp
 )
+target_include_directories(moveit_collision_detection PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include/moveit_core>
+)
 include(GenerateExportHeader)
 generate_export_header(moveit_collision_detection)
 
@@ -54,5 +58,5 @@ if(BUILD_TESTING)
   target_link_libraries(test_all_valid moveit_collision_detection moveit_robot_model)
 endif()
 
-install(DIRECTORY include/ DESTINATION include)
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/moveit_collision_detection_export.h DESTINATION include)
+install(DIRECTORY include/ DESTINATION include/moveit_core)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/moveit_collision_detection_export.h DESTINATION include/moveit_core)

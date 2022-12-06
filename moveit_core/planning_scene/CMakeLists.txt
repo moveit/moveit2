@@ -1,4 +1,8 @@
 add_library(moveit_planning_scene SHARED src/planning_scene.cpp)
+target_include_directories(moveit_planning_scene PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include/moveit_core>
+)
 include(GenerateExportHeader)
 generate_export_header(moveit_planning_scene)
 target_include_directories(moveit_planning_scene PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>)
@@ -26,8 +30,8 @@ target_link_libraries(moveit_planning_scene
   moveit_utils
 )
 
-install(DIRECTORY include/ DESTINATION include)
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/moveit_planning_scene_export.h DESTINATION include)
+install(DIRECTORY include/ DESTINATION include/moveit_core)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/moveit_planning_scene_export.h DESTINATION include/moveit_core)
 
 if(BUILD_TESTING)
   find_package(ament_cmake_gtest REQUIRED)

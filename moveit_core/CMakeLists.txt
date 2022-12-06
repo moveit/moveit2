@@ -55,34 +55,6 @@ include(ConfigExtras.cmake)
 # Set target file path for version.h
 set(VERSION_FILE_PATH ${CMAKE_BINARY_DIR}/include)
 
-set(THIS_PACKAGE_INCLUDE_DIRS
-    exceptions/include
-    collision_detection/include
-    collision_detection_fcl/include
-    collision_detection_bullet/include
-    constraint_samplers/include
-    controller_manager/include
-    distance_field/include
-    collision_distance_field/include
-    dynamics_solver/include
-    kinematics_base/include
-    kinematics_metrics/include
-    robot_model/include
-    transforms/include
-    robot_state/include
-    robot_trajectory/include
-    kinematic_constraints/include
-    macros/include
-    online_signal_smoothing/include
-    planning_interface/include
-    planning_request_adapter/include
-    planning_scene/include
-    # TODO: Port python bindings
-    # python/tools/include
-    trajectory_processing/include
-    utils/include
-)
-
 set(THIS_PACKAGE_LIBRARIES
     moveit_butterworth_filter
     moveit_collision_distance_field
@@ -96,6 +68,7 @@ set(THIS_PACKAGE_LIBRARIES
     moveit_kinematics_base
     moveit_kinematic_constraints
     moveit_kinematics_metrics
+    moveit_macros
     moveit_planning_interface
     moveit_planning_scene
     moveit_planning_request_adapter
@@ -134,13 +107,6 @@ set(THIS_PACKAGE_INCLUDE_DEPENDS
   Bullet
   ruckig
 )
-
-include_directories(SYSTEM ${EIGEN3_INCLUDE_DIRS}
-  ${LIBFCL_INCLUDE_DIRS}
-)
-
-include_directories(${THIS_PACKAGE_INCLUDE_DIRS}
-                    ${VERSION_FILE_PATH})
 
 # Generate and install version.h
 string(REGEX REPLACE "^([0-9]+)\\..*" "\\1" MOVEIT_VERSION_MAJOR "${${PROJECT_NAME}_VERSION}")

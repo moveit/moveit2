@@ -74,7 +74,7 @@ public:
   {
     ASSERT_TRUE(servo_parameters_.get() != nullptr);
     executor_->add_node(node_);
-    executor_thread_ = std::thread([this]() { this->executor_->spin(); });
+    executor_thread_ = std::thread([this]() { executor_->spin(); });
   }
 
   ServoFixture()

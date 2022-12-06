@@ -5,6 +5,10 @@ add_library(moveit_constraint_samplers SHARED
   src/default_constraint_samplers.cpp
   src/union_constraint_sampler.cpp
 )
+target_include_directories(moveit_constraint_samplers PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include/moveit_core>
+)
 set_target_properties(moveit_constraint_samplers PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
 ament_target_dependencies(moveit_constraint_samplers
   urdf
@@ -20,7 +24,7 @@ target_link_libraries(moveit_constraint_samplers
   moveit_planning_scene
 )
 
-install(DIRECTORY include/ DESTINATION include)
+install(DIRECTORY include/ DESTINATION include/moveit_core)
 
 if(BUILD_TESTING)
   find_package(ament_cmake_gmock REQUIRED)

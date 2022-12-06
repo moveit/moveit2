@@ -168,17 +168,17 @@ public:
     : Node("joy_to_twist_publisher", options), frame_to_publish_(BASE_FRAME_ID)
   {
     // Setup pub/sub
-    joy_sub_ = this->create_subscription<sensor_msgs::msg::Joy>(
-        JOY_TOPIC, rclcpp::SystemDefaultsQoS(),
-        [this](const sensor_msgs::msg::Joy::ConstSharedPtr& msg) { return joyCB(msg); });
+    joy_sub_ = create_subscription<sensor_msgs::msg::Joy>(JOY_TOPIC, rclcpp::SystemDefaultsQoS(),
+                                                          [this](const sensor_msgs::msg::Joy::ConstSharedPtr& msg) {
+                                                            return joyCB(msg);
+                                                          });
 
-    twist_pub_ = this->create_publisher<geometry_msgs::msg::TwistStamped>(TWIST_TOPIC, rclcpp::SystemDefaultsQoS());
-    joint_pub_ = this->create_publisher<control_msgs::msg::JointJog>(JOINT_TOPIC, rclcpp::SystemDefaultsQoS());
-    collision_pub_ =
-        this->create_publisher<moveit_msgs::msg::PlanningScene>("/planning_scene", rclcpp::SystemDefaultsQoS());
+    twist_pub_ = create_publisher<geometry_msgs::msg::TwistStamped>(TWIST_TOPIC, rclcpp::SystemDefaultsQoS());
+    joint_pub_ = create_publisher<control_msgs::msg::JointJog>(JOINT_TOPIC, rclcpp::SystemDefaultsQoS());
+    collision_pub_ = create_publisher<moveit_msgs::msg::PlanningScene>("/planning_scene", rclcpp::SystemDefaultsQoS());
 
     // Create a service client to start the ServoNode
-    servo_start_client_ = this->create_client<std_srvs::srv::Trigger>("/servo_node/start_servo");
+    servo_start_client_ = create_client<std_srvs::srv::Trigger>("/servo_node/start_servo");
     servo_start_client_->wait_for_service(std::chrono::seconds(1));
     servo_start_client_->async_send_request(std::make_shared<std_srvs::srv::Trigger::Request>());
 
@@ -244,13 +244,13 @@ public:
     {
       // publish the TwistStamped
       twist_msg->header.frame_id = frame_to_publish_;
-      twist_msg->header.stamp = this->now();
+      twist_msg->header.stamp = now();
       twist_pub_->publish(std::move(twist_msg));
     }
     else
     {
       // publish the JointJog
-      joint_msg->header.stamp = this->now();
+      joint_msg->header.stamp = now();
       joint_msg->header.frame_id = "panda_link3";
       joint_pub_->publish(std::move(joint_msg));
     }

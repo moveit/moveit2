@@ -503,7 +503,7 @@ ProgressBarEditor::ProgressBarEditor(QWidget* parent, float min, float max, int 
 {
   // if left mouse button is pressed, grab all future mouse events until button(s) released
   if (QApplication::mouseButtons() & Qt::LeftButton)
-    this->grabMouse();
+    grabMouse();
 }
 
 void ProgressBarEditor::paintEvent(QPaintEvent* /*event*/)
@@ -512,7 +512,7 @@ void ProgressBarEditor::paintEvent(QPaintEvent* /*event*/)
 
   QStyleOptionProgressBar opt;
   opt.rect = rect();
-  opt.palette = this->palette();
+  opt.palette = palette();
   opt.minimum = 0;
   opt.maximum = 1000;
   opt.progress = 1000. * (value_ - min_) / (max_ - min_);

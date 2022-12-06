@@ -112,13 +112,13 @@ planning_interface::MotionPlanRequest BaseCmd<StartType, GoalType>::toRequest() 
 {
   planning_interface::MotionPlanRequest req;
   req.planner_id = getPlannerId();
-  req.group_name = this->planning_group_;
+  req.group_name = planning_group_;
 
-  req.max_velocity_scaling_factor = this->vel_scale_;
-  req.max_acceleration_scaling_factor = this->acc_scale_;
+  req.max_velocity_scaling_factor = vel_scale_;
+  req.max_acceleration_scaling_factor = acc_scale_;
 
-  req.start_state = this->start_.toMoveitMsgsRobotState();
-  req.goal_constraints.push_back(this->goal_.toGoalConstraints());
+  req.start_state = start_.toMoveitMsgsRobotState();
+  req.goal_constraints.push_back(goal_.toGoalConstraints());
 
   return req;
 }

@@ -189,7 +189,7 @@ public:
     clone_cow->m_enabled = m_enabled;
     clone_cow->setBroadphaseHandle(nullptr);
     clone_cow->m_touch_links = m_touch_links;
-    clone_cow->setContactProcessingThreshold(this->getContactProcessingThreshold());
+    clone_cow->setContactProcessingThreshold(getContactProcessingThreshold());
     return clone_cow;
   }
 
