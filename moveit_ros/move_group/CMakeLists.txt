@@ -54,10 +54,10 @@ add_library(moveit_move_group_default_capabilities SHARED
   src/default_capabilities/tf_publisher_capability.cpp)
 
 set_target_properties(moveit_move_group_capabilities_base
-  PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
+  PROPERTIES VERSION ${PROJECT_VERSION})
 
 set_target_properties(moveit_move_group_default_capabilities
-  PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
+  PROPERTIES VERSION ${PROJECT_VERSION})
 
 ament_target_dependencies(moveit_move_group_capabilities_base ${THIS_PACKAGE_INCLUDE_DEPENDS})
 

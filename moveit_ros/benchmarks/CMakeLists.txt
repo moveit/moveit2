@@ -32,7 +32,7 @@ add_library(moveit_ros_benchmarks SHARED
   src/BenchmarkOptions.cpp
   src/BenchmarkExecutor.cpp
 )
-set_target_properties(moveit_ros_benchmarks PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
+set_target_properties(moveit_ros_benchmarks PROPERTIES VERSION ${PROJECT_VERSION})
 if(WIN32)
   set(EXTRA_LIB ws2_32.lib)
 endif()

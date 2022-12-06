@@ -9,7 +9,7 @@ target_include_directories(moveit_collision_detection_fcl PUBLIC
 include(GenerateExportHeader)
 generate_export_header(moveit_collision_detection_fcl)
 target_include_directories(moveit_collision_detection_fcl PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>)
-set_target_properties(moveit_collision_detection_fcl PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
+set_target_properties(moveit_collision_detection_fcl PROPERTIES VERSION ${PROJECT_VERSION})
 ament_target_dependencies(moveit_collision_detection_fcl
   rclcpp
   rmw_implementation
@@ -24,7 +24,7 @@ target_link_libraries(moveit_collision_detection_fcl
 )
 
 add_library(collision_detector_fcl_plugin SHARED src/collision_detector_fcl_plugin_loader.cpp)
-set_target_properties(collision_detector_fcl_plugin PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
+set_target_properties(collision_detector_fcl_plugin PROPERTIES VERSION ${PROJECT_VERSION})
 ament_target_dependencies(collision_detector_fcl_plugin
   rclcpp
   urdf

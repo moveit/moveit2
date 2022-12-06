@@ -35,7 +35,7 @@ add_library(moveit_robot_interaction SHARED
 include(GenerateExportHeader)
 generate_export_header(moveit_robot_interaction)
 target_include_directories(moveit_robot_interaction PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>)
-set_target_properties(moveit_robot_interaction PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
+set_target_properties(moveit_robot_interaction PROPERTIES VERSION ${PROJECT_VERSION})
 ament_target_dependencies(moveit_robot_interaction ${THIS_PACKAGE_INCLUDE_DEPENDS})
 
 if(BUILD_TESTING)

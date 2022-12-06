@@ -32,7 +32,7 @@ add_library(${PROJECT_NAME} SHARED
   src/follow_joint_trajectory_controller_handle.cpp
 )
 
-set_target_properties(${PROJECT_NAME} PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
+set_target_properties(${PROJECT_NAME} PROPERTIES VERSION ${PROJECT_VERSION})
 
 ament_target_dependencies(${PROJECT_NAME}
   ${THIS_PACKAGE_INCLUDE_DEPENDS}

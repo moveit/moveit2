@@ -1,5 +1,5 @@
 add_library(moveit_rdf_loader SHARED src/rdf_loader.cpp src/synchronized_string_parameter.cpp)
-set_target_properties(moveit_rdf_loader PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
+set_target_properties(moveit_rdf_loader PROPERTIES VERSION ${PROJECT_VERSION})
 ament_target_dependencies(moveit_rdf_loader
       rclcpp
       ament_index_cpp

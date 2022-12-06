@@ -2,5 +2,5 @@
 add_library(moveit_local_planner_component SHARED
   src/local_planner_component.cpp
 )
-set_target_properties(moveit_local_planner_component PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
+set_target_properties(moveit_local_planner_component PROPERTIES VERSION ${PROJECT_VERSION})
 ament_target_dependencies(moveit_local_planner_component ${THIS_PACKAGE_INCLUDE_DEPENDS})

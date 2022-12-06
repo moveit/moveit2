@@ -1,5 +1,5 @@
 add_library(moveit_kinematics_plugin_loader SHARED src/kinematics_plugin_loader.cpp)
-set_target_properties(moveit_kinematics_plugin_loader PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
+set_target_properties(moveit_kinematics_plugin_loader PROPERTIES VERSION ${PROJECT_VERSION})
 ament_target_dependencies(moveit_kinematics_plugin_loader
   rclcpp
   urdf

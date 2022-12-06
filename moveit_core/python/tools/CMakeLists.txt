@@ -3,7 +3,7 @@ add_library(moveit_python_tools
 )
 #add_dependencies(moveit_python_tools ${catkin_EXPORTED_TARGETS})
 target_link_libraries(moveit_python_tools ${catkin_LIBRARIES}) # TODO: Fix
-set_target_properties(moveit_python_tools PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
+set_target_properties(moveit_python_tools PROPERTIES VERSION ${PROJECT_VERSION})
 
 install(
   TARGETS

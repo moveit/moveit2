@@ -2,7 +2,7 @@ add_library(moveit_trajectory_execution_manager SHARED src/trajectory_execution_
 include(GenerateExportHeader)
 generate_export_header(moveit_trajectory_execution_manager)
 target_include_directories(moveit_trajectory_execution_manager PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>)
-set_target_properties(moveit_trajectory_execution_manager PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
+set_target_properties(moveit_trajectory_execution_manager PROPERTIES VERSION ${PROJECT_VERSION})
 ament_target_dependencies(moveit_trajectory_execution_manager
   moveit_core
   moveit_ros_occupancy_map_monitor
@@ -23,7 +23,7 @@ install(FILES ${CMAKE_CURRENT_BINARY_DIR}/moveit_trajectory_execution_manager_ex
 if(CATKIN_ENABLE_TESTING)
 ## This needs further cleanup before it can run
 # add_library(test_controller_manager_plugin test/test_moveit_controller_manager_plugin.cpp)
-# set_target_properties(test_controller_manager_plugin PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
+# set_target_properties(test_controller_manager_plugin PROPERTIES VERSION ${PROJECT_VERSION})
 # target_link_libraries(test_controller_manager_plugin moveit_trajectory_execution_manager ${catkin_LIBRARIES} ${Boost_LIBRARIES})
 #
 # find_package(moveit_resources_panda_moveit_config REQUIRED)

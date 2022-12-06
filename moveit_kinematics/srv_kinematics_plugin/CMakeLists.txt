@@ -4,7 +4,7 @@ generate_parameter_library(
 )
 
 add_library(moveit_srv_kinematics_plugin SHARED src/srv_kinematics_plugin.cpp)
-set_target_properties(moveit_srv_kinematics_plugin PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
+set_target_properties(moveit_srv_kinematics_plugin PROPERTIES VERSION ${PROJECT_VERSION})
 
 ament_target_dependencies(moveit_srv_kinematics_plugin
   rclcpp

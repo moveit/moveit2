@@ -19,7 +19,7 @@ add_library(moveit_ompl_interface SHARED
   src/detail/constrained_sampler.cpp
   src/detail/constrained_goal_sampler.cpp
 )
-set_target_properties(moveit_ompl_interface PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
+set_target_properties(moveit_ompl_interface PROPERTIES VERSION ${PROJECT_VERSION})
 
 find_package(OpenMP REQUIRED)
 
@@ -48,7 +48,7 @@ set_target_properties(moveit_generate_state_database PROPERTIES LINK_FLAGS "${Op
 set_target_properties(moveit_generate_state_database PROPERTIES OUTPUT_NAME "generate_state_database")
 
 add_library(moveit_ompl_planner_plugin SHARED src/ompl_planner_manager.cpp)
-set_target_properties(moveit_ompl_planner_plugin PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
+set_target_properties(moveit_ompl_planner_plugin PROPERTIES VERSION ${PROJECT_VERSION})
 ament_target_dependencies(moveit_ompl_planner_plugin
   moveit_core
   moveit_ros_planning

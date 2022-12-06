@@ -5,7 +5,7 @@ add_library(moveit_planning_scene_rviz_plugin_core SHARED
 include(GenerateExportHeader)
 generate_export_header(moveit_planning_scene_rviz_plugin_core)
 target_include_directories(moveit_planning_scene_rviz_plugin_core PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>)
-set_target_properties(moveit_planning_scene_rviz_plugin_core PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
+set_target_properties(moveit_planning_scene_rviz_plugin_core PROPERTIES VERSION ${PROJECT_VERSION})
 target_link_libraries(moveit_planning_scene_rviz_plugin_core moveit_rviz_plugin_render_tools)
 ament_target_dependencies(moveit_planning_scene_rviz_plugin_core
     rclcpp
@@ -19,7 +19,7 @@ ament_target_dependencies(moveit_planning_scene_rviz_plugin_core
 target_include_directories(moveit_planning_scene_rviz_plugin_core PRIVATE "${OGRE_PREFIX_DIR}/include")
 
 add_library(moveit_planning_scene_rviz_plugin SHARED src/plugin_init.cpp)
-set_target_properties(moveit_planning_scene_rviz_plugin PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
+set_target_properties(moveit_planning_scene_rviz_plugin PROPERTIES VERSION ${PROJECT_VERSION})
 target_link_libraries(moveit_planning_scene_rviz_plugin moveit_planning_scene_rviz_plugin_core  Qt5::Widgets)
 ament_target_dependencies(moveit_planning_scene_rviz_plugin
     pluginlib

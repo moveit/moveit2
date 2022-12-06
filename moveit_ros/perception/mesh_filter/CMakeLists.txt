@@ -8,7 +8,7 @@ add_library(moveit_mesh_filter SHARED
 include(GenerateExportHeader)
 generate_export_header(moveit_mesh_filter)
 target_include_directories(moveit_mesh_filter PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>)
-set_target_properties(moveit_mesh_filter PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
+set_target_properties(moveit_mesh_filter PROPERTIES VERSION ${PROJECT_VERSION})
 ament_target_dependencies(moveit_mesh_filter
   rclcpp
   moveit_core
@@ -23,7 +23,7 @@ target_link_libraries(moveit_mesh_filter ${gl_LIBS} ${SYSTEM_GL_LIBRARIES})
 #   src/depth_self_filter_nodelet.cpp
 #   src/transform_provider.cpp
 # )
-# set_target_properties(moveit_depth_self_filter PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
+# set_target_properties(moveit_depth_self_filter PROPERTIES VERSION ${PROJECT_VERSION})
 #
 # target_link_libraries(moveit_depth_self_filter ${catkin_LIBRARIES} moveit_mesh_filter)
 

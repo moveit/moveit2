@@ -1,5 +1,5 @@
 add_library(moveit_kinematics_constraint_aware src/kinematics_constraint_aware.cpp)
-set_target_properties(moveit_kinematics_constraint_aware PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
+set_target_properties(moveit_kinematics_constraint_aware PROPERTIES VERSION ${PROJECT_VERSION})
 # This line is needed to ensure that messages are done being built before this is built
 add_dependencies(moveit_kinematics_constraint_aware ${catkin_EXPORTED_TARGETS})
 

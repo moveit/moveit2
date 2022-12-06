@@ -31,7 +31,7 @@ ament_target_dependencies(moveit_collision_detection
 target_include_directories(moveit_collision_detection BEFORE PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>)
 target_include_directories(moveit_collision_detection PUBLIC $<TARGET_PROPERTY:moveit_planning_scene,INCLUDE_DIRECTORIES>)
 
-set_target_properties(moveit_collision_detection PROPERTIES VERSION ${${PROJECT_NAME}_VERSION})
+set_target_properties(moveit_collision_detection PROPERTIES VERSION ${PROJECT_VERSION})
 
 target_link_libraries(moveit_collision_detection
   moveit_robot_state

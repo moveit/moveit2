@@ -1,5 +1,5 @@
 add_library(moveit_pointcloud_octomap_updater_core SHARED src/pointcloud_octomap_updater.cpp)
-set_target_properties(moveit_pointcloud_octomap_updater_core PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
+set_target_properties(moveit_pointcloud_octomap_updater_core PROPERTIES VERSION ${PROJECT_VERSION})
 ament_target_dependencies(moveit_pointcloud_octomap_updater_core
   rclcpp
   moveit_core
@@ -15,7 +15,7 @@ set_target_properties(moveit_pointcloud_octomap_updater_core PROPERTIES COMPILE_
 set_target_properties(moveit_pointcloud_octomap_updater_core PROPERTIES LINK_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
 
 add_library(moveit_pointcloud_octomap_updater SHARED src/plugin_init.cpp)
-set_target_properties(moveit_pointcloud_octomap_updater PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
+set_target_properties(moveit_pointcloud_octomap_updater PROPERTIES VERSION ${PROJECT_VERSION})
 ament_target_dependencies(moveit_pointcloud_octomap_updater
   rclcpp
   moveit_core

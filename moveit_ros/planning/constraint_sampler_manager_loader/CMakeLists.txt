@@ -1,7 +1,7 @@
 add_library(moveit_constraint_sampler_manager_loader SHARED
     src/constraint_sampler_manager_loader.cpp)
 
-set_target_properties(moveit_constraint_sampler_manager_loader PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
+set_target_properties(moveit_constraint_sampler_manager_loader PROPERTIES VERSION ${PROJECT_VERSION})
 ament_target_dependencies(moveit_constraint_sampler_manager_loader
   moveit_core
   rclcpp

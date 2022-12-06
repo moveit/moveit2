@@ -7,7 +7,7 @@ include(GenerateExportHeader)
 generate_export_header(moveit_planning_scene)
 target_include_directories(moveit_planning_scene PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>)
 #TODO: Fix the versioning
-set_target_properties(moveit_planning_scene PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
+set_target_properties(moveit_planning_scene PROPERTIES VERSION ${PROJECT_VERSION})
 ament_target_dependencies(moveit_planning_scene
   Boost
   rclcpp

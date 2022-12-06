@@ -39,7 +39,7 @@ add_library(moveit_ros_occupancy_map_monitor SHARED
   src/occupancy_map_monitor_middleware_handle.cpp
   src/occupancy_map_updater.cpp
 )
-set_target_properties(moveit_ros_occupancy_map_monitor PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
+set_target_properties(moveit_ros_occupancy_map_monitor PROPERTIES VERSION ${PROJECT_VERSION})
 ament_target_dependencies(moveit_ros_occupancy_map_monitor
   ${THIS_PACKAGE_INCLUDE_DEPENDS}
 )

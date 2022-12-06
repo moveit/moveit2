@@ -3,7 +3,7 @@ target_include_directories(moveit_kinematics_metrics PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include/moveit_core>
 )
-set_target_properties(moveit_kinematics_metrics PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
+set_target_properties(moveit_kinematics_metrics PROPERTIES VERSION ${PROJECT_VERSION})
 
 ament_target_dependencies(moveit_kinematics_metrics
   urdf

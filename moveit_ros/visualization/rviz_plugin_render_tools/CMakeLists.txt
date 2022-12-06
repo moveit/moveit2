@@ -22,7 +22,7 @@ add_library(moveit_rviz_plugin_render_tools SHARED
   src/mesh_shape.cpp
   ${HEADERS}
 )
-set_target_properties(moveit_rviz_plugin_render_tools PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
+set_target_properties(moveit_rviz_plugin_render_tools PROPERTIES VERSION ${PROJECT_VERSION})
 
 target_link_libraries(moveit_rviz_plugin_render_tools
     Qt5::Widgets

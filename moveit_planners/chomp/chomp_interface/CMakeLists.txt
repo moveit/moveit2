@@ -29,7 +29,7 @@ include_directories(
 add_library(moveit_chomp_interface SHARED
   src/chomp_interface.cpp
   src/chomp_planning_context.cpp)
-set_target_properties(moveit_chomp_interface PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
+set_target_properties(moveit_chomp_interface PROPERTIES VERSION ${PROJECT_VERSION})
 ament_target_dependencies(moveit_chomp_interface ${THIS_PACKAGE_INCLUDE_DEPENDS})
 
 add_library(moveit_chomp_planner_plugin SHARED src/chomp_plugin.cpp)

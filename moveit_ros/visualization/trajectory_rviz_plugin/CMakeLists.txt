@@ -10,7 +10,7 @@ add_library(moveit_trajectory_rviz_plugin_core SHARED
   src/trajectory_display.cpp
   ${HEADERS}
 )
-set_target_properties(moveit_trajectory_rviz_plugin_core PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
+set_target_properties(moveit_trajectory_rviz_plugin_core PROPERTIES VERSION ${PROJECT_VERSION})
 target_link_libraries(moveit_trajectory_rviz_plugin_core
   moveit_rviz_plugin_render_tools
   moveit_planning_scene_rviz_plugin_core
@@ -29,7 +29,7 @@ target_include_directories(moveit_trajectory_rviz_plugin_core PRIVATE "${OGRE_PR
 
 # Plugin Initializer
 add_library(moveit_trajectory_rviz_plugin SHARED src/plugin_init.cpp)
-set_target_properties(moveit_trajectory_rviz_plugin PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
+set_target_properties(moveit_trajectory_rviz_plugin PROPERTIES VERSION ${PROJECT_VERSION})
 target_link_libraries(moveit_trajectory_rviz_plugin moveit_trajectory_rviz_plugin_core)
 ament_target_dependencies(moveit_trajectory_rviz_plugin
     rclcpp

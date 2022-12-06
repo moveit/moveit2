@@ -1,5 +1,5 @@
 add_library(moveit_depth_image_octomap_updater_core SHARED src/depth_image_octomap_updater.cpp)
-set_target_properties(moveit_depth_image_octomap_updater_core PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
+set_target_properties(moveit_depth_image_octomap_updater_core PROPERTIES VERSION ${PROJECT_VERSION})
 ament_target_dependencies(moveit_depth_image_octomap_updater_core
   rclcpp
   moveit_core
@@ -13,7 +13,7 @@ ament_target_dependencies(moveit_depth_image_octomap_updater_core
 target_link_libraries(moveit_depth_image_octomap_updater_core moveit_lazy_free_space_updater moveit_mesh_filter)
 
 add_library(moveit_depth_image_octomap_updater SHARED src/updater_plugin.cpp)
-set_target_properties(moveit_depth_image_octomap_updater PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
+set_target_properties(moveit_depth_image_octomap_updater PROPERTIES VERSION ${PROJECT_VERSION})
 ament_target_dependencies(moveit_depth_image_octomap_updater
   rclcpp
   moveit_core

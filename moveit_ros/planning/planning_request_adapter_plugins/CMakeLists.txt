@@ -11,7 +11,7 @@ set(SOURCE_FILES
 
 add_library(moveit_default_planning_request_adapter_plugins SHARED ${SOURCE_FILES})
 
-set_target_properties(moveit_default_planning_request_adapter_plugins PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
+set_target_properties(moveit_default_planning_request_adapter_plugins PROPERTIES VERSION ${PROJECT_VERSION})
 ament_target_dependencies(moveit_default_planning_request_adapter_plugins
   Boost
   moveit_core

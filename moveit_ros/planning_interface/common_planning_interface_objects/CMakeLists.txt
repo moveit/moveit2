@@ -1,5 +1,5 @@
 add_library(moveit_common_planning_interface_objects SHARED src/common_objects.cpp)
-set_target_properties(moveit_common_planning_interface_objects PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
+set_target_properties(moveit_common_planning_interface_objects PROPERTIES VERSION ${PROJECT_VERSION})
 ament_target_dependencies(moveit_common_planning_interface_objects
     rclcpp
     moveit_ros_planning

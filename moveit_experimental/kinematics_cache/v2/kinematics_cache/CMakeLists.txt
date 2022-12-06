@@ -1,7 +1,7 @@
 add_library(moveit_kinematics_cache
   src/kinematics_cache.cpp
 )
-set_target_properties(moveit_kinematics_cache PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
+set_target_properties(moveit_kinematics_cache PROPERTIES VERSION ${PROJECT_VERSION})
 # This line is needed to ensure that messages are done being built before this is built
 add_dependencies(moveit_kinematics_cache ${catkin_EXPORTED_TARGETS})
 

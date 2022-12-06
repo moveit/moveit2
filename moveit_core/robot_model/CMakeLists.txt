@@ -16,7 +16,7 @@ target_include_directories(moveit_robot_model PUBLIC
   $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/kinematics_base> # Ditto but for finding the export header
   $<INSTALL_INTERFACE:include/moveit_core>
 )
-set_target_properties(moveit_robot_model PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
+set_target_properties(moveit_robot_model PROPERTIES VERSION ${PROJECT_VERSION})
 ament_target_dependencies(moveit_robot_model
   angles
   moveit_msgs

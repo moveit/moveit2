@@ -11,7 +11,7 @@ target_include_directories(moveit_collision_distance_field PUBLIC
 include(GenerateExportHeader)
 generate_export_header(moveit_collision_distance_field)
 target_include_directories(moveit_collision_distance_field PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>)
-set_target_properties(moveit_collision_distance_field PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
+set_target_properties(moveit_collision_distance_field PROPERTIES VERSION ${PROJECT_VERSION})
 
 ament_target_dependencies(moveit_collision_distance_field
   urdf

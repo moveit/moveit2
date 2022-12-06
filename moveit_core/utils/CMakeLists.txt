@@ -8,7 +8,7 @@ target_include_directories(moveit_utils PUBLIC
   $<INSTALL_INTERFACE:include/moveit_core>
 )
 ament_target_dependencies(moveit_utils Boost moveit_msgs)
-set_target_properties(moveit_utils PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
+set_target_properties(moveit_utils PROPERTIES VERSION ${PROJECT_VERSION})
 
 install(DIRECTORY include/ DESTINATION include/moveit_core)
 
@@ -29,4 +29,4 @@ ament_target_dependencies(moveit_test_utils
   urdfdom
   urdfdom_headers
 )
-set_target_properties(moveit_test_utils PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
+set_target_properties(moveit_test_utils PROPERTIES VERSION ${PROJECT_VERSION})

@@ -8,7 +8,7 @@ add_library(moveit_planning_scene_monitor SHARED
 include(GenerateExportHeader)
 generate_export_header(moveit_planning_scene_monitor)
 target_include_directories(moveit_planning_scene_monitor PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>)
-set_target_properties(moveit_planning_scene_monitor PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
+set_target_properties(moveit_planning_scene_monitor PROPERTIES VERSION ${PROJECT_VERSION})
 ament_target_dependencies(moveit_planning_scene_monitor
   moveit_ros_occupancy_map_monitor
   message_filters

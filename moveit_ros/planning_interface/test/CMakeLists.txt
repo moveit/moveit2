@@ -35,7 +35,7 @@ if(BUILD_TESTING)
 
   # SET(HELPER_LIB moveit_planning_interface_test_serialize_msg_cpp_helper)
   # add_library(${HELPER_LIB} serialize_msg_python_cpp_helpers.cpp)
-  # set_target_properties(${HELPER_LIB} PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
+  # set_target_properties(${HELPER_LIB} PROPERTIES VERSION ${PROJECT_VERSION})
   # target_link_libraries(${HELPER_LIB} ${PYTHON_LIBRARIES} ${catkin_LIBRARIES} ${Boost_LIBRARIES} moveit_py_bindings_tools)
   # set_target_properties(${HELPER_LIB} PROPERTIES OUTPUT_NAME "_${HELPER_LIB}" PREFIX "")
   # set_target_properties(${HELPER_LIB} PROPERTIES LIBRARY_OUTPUT_DIRECTORY "${CATKIN_DEVEL_PREFIX}/${CATKIN_PACKAGE_PYTHON_DESTINATION}")

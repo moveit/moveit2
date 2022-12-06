@@ -26,7 +26,7 @@ include(ConfigExtras.cmake)
 add_library(${PROJECT_NAME}_plugin SHARED
   src/controller_manager_plugin.cpp
 )
-set_target_properties(${PROJECT_NAME}_plugin PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
+set_target_properties(${PROJECT_NAME}_plugin PROPERTIES VERSION ${PROJECT_VERSION})
 target_include_directories(${PROJECT_NAME}_plugin PRIVATE include)
 ament_target_dependencies(${PROJECT_NAME}_plugin
     ${THIS_PACKAGE_INCLUDE_DEPENDS}
@@ -36,7 +36,7 @@ ament_target_dependencies(${PROJECT_NAME}_plugin
 add_library(${PROJECT_NAME}_trajectory_plugin SHARED
   src/joint_trajectory_controller_plugin.cpp
 )
-set_target_properties(${PROJECT_NAME}_trajectory_plugin PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
+set_target_properties(${PROJECT_NAME}_trajectory_plugin PROPERTIES VERSION ${PROJECT_VERSION})
 target_include_directories(${PROJECT_NAME}_trajectory_plugin PRIVATE include)
 ament_target_dependencies(${PROJECT_NAME}_trajectory_plugin
     ${THIS_PACKAGE_INCLUDE_DEPENDS}
@@ -46,7 +46,7 @@ ament_target_dependencies(${PROJECT_NAME}_trajectory_plugin
 add_library(${PROJECT_NAME}_gripper_plugin SHARED
   src/gripper_controller_plugin.cpp
 )
-set_target_properties(${PROJECT_NAME}_gripper_plugin PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
+set_target_properties(${PROJECT_NAME}_gripper_plugin PROPERTIES VERSION ${PROJECT_VERSION})
 target_include_directories(${PROJECT_NAME}_gripper_plugin PRIVATE include)
 ament_target_dependencies(${PROJECT_NAME}_gripper_plugin
     ${THIS_PACKAGE_INCLUDE_DEPENDS}
@@ -56,7 +56,7 @@ ament_target_dependencies(${PROJECT_NAME}_gripper_plugin
 add_library(${PROJECT_NAME}_empty_plugin SHARED
   src/empty_controller_plugin.cpp
 )
-set_target_properties(${PROJECT_NAME}_empty_plugin PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
+set_target_properties(${PROJECT_NAME}_empty_plugin PROPERTIES VERSION ${PROJECT_VERSION})
 target_include_directories(${PROJECT_NAME}_empty_plugin PRIVATE include)
 ament_target_dependencies(${PROJECT_NAME}_empty_plugin
     ${THIS_PACKAGE_INCLUDE_DEPENDS}
