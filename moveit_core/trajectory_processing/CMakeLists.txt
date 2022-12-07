@@ -41,4 +41,9 @@ if(BUILD_TESTING)
     moveit_trajectory_processing
     moveit_test_utils
   )
+
+  ament_add_gtest(test_linear_path_segment test/test_linear_path_segment.cpp)
+  target_link_libraries(test_linear_path_segment
+    moveit_trajectory_processing
+  )
 endif()

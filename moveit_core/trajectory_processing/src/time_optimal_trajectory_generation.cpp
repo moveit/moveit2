@@ -36,13 +36,15 @@
  *   POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <moveit/trajectory_processing/time_optimal_trajectory_generation.h>
+#include <moveit/trajectory_processing/linear_path_segment.hpp>
+
 #include <rclcpp/logger.hpp>
 #include <rclcpp/logging.hpp>
 #include <limits>
 #include <Eigen/Geometry>
 #include <algorithm>
 #include <cmath>
-#include <moveit/trajectory_processing/time_optimal_trajectory_generation.h>
 #include <vector>
 
 namespace trajectory_processing
@@ -54,46 +56,6 @@ static const rclcpp::Logger LOGGER =
 constexpr double DEFAULT_TIMESTEP = 1e-3;
 constexpr double EPS = 1e-6;
 }  // namespace
-
-class LinearPathSegment : public PathSegment
-{
-public:
-  LinearPathSegment(const Eigen::VectorXd& start, const Eigen::VectorXd& end)
-    : PathSegment((end - start).norm()), end_(end), start_(start)
-  {
-  }
-
-  Eigen::VectorXd getConfig(double s) const override
-  {
-    s /= length_;
-    s = std::max(0.0, std::min(1.0, s));
-    return (1.0 - s) * start_ + s * end_;
-  }
-
-  Eigen::VectorXd getTangent(double /* s */) const override
-  {
-    return (end_ - start_) / length_;
-  }
-
-  Eigen::VectorXd getCurvature(double /* s */) const override
-  {
-    return Eigen::VectorXd::Zero(start_.size());
-  }
-
-  std::list<double> getSwitchingPoints() const override
-  {
-    return std::list<double>();
-  }
-
-  LinearPathSegment* clone() const override
-  {
-    return new LinearPathSegment(*this);
-  }
-
-private:
-  Eigen::VectorXd end_;
-  Eigen::VectorXd start_;
-};
 
 class CircularPathSegment : public PathSegment
 {
