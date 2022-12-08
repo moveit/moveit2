@@ -7,7 +7,6 @@ target_include_directories(moveit_collision_detection_fcl PUBLIC
   $<INSTALL_INTERFACE:include/moveit_core>
 )
 target_include_directories(moveit_collision_detection_fcl PUBLIC $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}>)
-set_target_properties(moveit_collision_detection_fcl PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
 ament_target_dependencies(moveit_collision_detection_fcl
   rclcpp
   rmw_implementation
@@ -22,7 +21,6 @@ target_link_libraries(moveit_collision_detection_fcl
 )
 
 add_library(collision_detector_fcl_plugin SHARED src/collision_detector_fcl_plugin_loader.cpp)
-set_target_properties(collision_detector_fcl_plugin PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
 ament_target_dependencies(collision_detector_fcl_plugin
   rclcpp
   urdf

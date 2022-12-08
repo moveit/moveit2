@@ -12,7 +12,6 @@ target_include_directories(moveit_collision_detection_bullet PUBLIC
   $<INSTALL_INTERFACE:include/moveit_core>
 )
 target_include_directories(moveit_collision_detection_bullet PUBLIC $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}>)
-set_target_properties(moveit_collision_detection_bullet PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
 ament_target_dependencies(moveit_collision_detection_bullet SYSTEM
   BULLET
 )
@@ -30,7 +29,6 @@ target_link_libraries(moveit_collision_detection_bullet
 )
 
 add_library(collision_detector_bullet_plugin SHARED src/collision_detector_bullet_plugin_loader.cpp)
-set_target_properties(collision_detector_bullet_plugin PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
 ament_target_dependencies(collision_detector_bullet_plugin SYSTEM
   BULLET
 )

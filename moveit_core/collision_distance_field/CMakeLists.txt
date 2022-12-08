@@ -9,7 +9,6 @@ target_include_directories(moveit_collision_distance_field PUBLIC
   $<INSTALL_INTERFACE:include/moveit_core>
 )
 target_include_directories(moveit_collision_distance_field PUBLIC $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}>)
-set_target_properties(moveit_collision_distance_field PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
 
 ament_target_dependencies(moveit_collision_distance_field
   urdf

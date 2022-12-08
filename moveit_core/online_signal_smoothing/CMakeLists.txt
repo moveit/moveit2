@@ -8,9 +8,6 @@ target_include_directories(moveit_smoothing_base PUBLIC
   $<INSTALL_INTERFACE:include/moveit_core>
 )
 target_link_libraries(moveit_smoothing_base moveit_macros)
-set_target_properties(moveit_smoothing_base PROPERTIES VERSION
-  "${${PROJECT_NAME}_VERSION}"
-)
 ament_target_dependencies(moveit_smoothing_base
   rclcpp
 )
@@ -21,9 +18,6 @@ add_library(moveit_butterworth_filter SHARED
 )
 target_include_directories(moveit_butterworth_filter PUBLIC
   $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}>
-)
-set_target_properties(moveit_butterworth_filter PROPERTIES VERSION
-  "${${PROJECT_NAME}_VERSION}"
 )
 target_link_libraries(moveit_butterworth_filter
   moveit_smoothing_base

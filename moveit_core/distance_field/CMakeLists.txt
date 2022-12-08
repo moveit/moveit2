@@ -8,7 +8,6 @@ target_include_directories(moveit_distance_field PUBLIC
   $<INSTALL_INTERFACE:include/moveit_core>
 )
 target_link_libraries(moveit_distance_field moveit_macros)
-set_target_properties(moveit_distance_field PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
 ament_target_dependencies(moveit_distance_field
   Boost
   urdfdom

@@ -4,7 +4,6 @@ target_include_directories(moveit_transforms PUBLIC
   $<INSTALL_INTERFACE:include/moveit_core>
 )
 target_link_libraries(moveit_transforms moveit_macros)
-set_target_properties(moveit_transforms PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
 ament_target_dependencies(moveit_transforms
   geometric_shapes
   tf2_eigen

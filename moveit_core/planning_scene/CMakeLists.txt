@@ -4,8 +4,6 @@ target_include_directories(moveit_planning_scene PUBLIC
   $<INSTALL_INTERFACE:include/moveit_core>
 )
 target_include_directories(moveit_planning_scene PUBLIC $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}>)
-#TODO: Fix the versioning
-set_target_properties(moveit_planning_scene PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
 ament_target_dependencies(moveit_planning_scene
   Boost
   rclcpp
