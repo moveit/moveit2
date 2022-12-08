@@ -8,7 +8,6 @@ target_include_directories(moveit_smoothing_base PUBLIC
   $<INSTALL_INTERFACE:include/moveit_core>
 )
 target_link_libraries(moveit_smoothing_base moveit_macros)
-include(GenerateExportHeader)
 generate_export_header(moveit_smoothing_base)
 set_target_properties(moveit_smoothing_base PROPERTIES VERSION
   "${${PROJECT_NAME}_VERSION}"

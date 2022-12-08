@@ -3,7 +3,6 @@ target_include_directories(moveit_planning_scene PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include/moveit_core>
 )
-include(GenerateExportHeader)
 generate_export_header(moveit_planning_scene)
 target_include_directories(moveit_planning_scene PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>)
 #TODO: Fix the versioning

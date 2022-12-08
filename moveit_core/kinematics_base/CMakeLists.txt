@@ -4,7 +4,6 @@ target_include_directories(moveit_kinematics_base PUBLIC
   $<INSTALL_INTERFACE:include/moveit_core>
 )
 target_link_libraries(moveit_kinematics_base moveit_macros moveit_robot_model)
-include(GenerateExportHeader)
 generate_export_header(moveit_kinematics_base)
 target_include_directories(moveit_kinematics_base PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>)  # for this library
 

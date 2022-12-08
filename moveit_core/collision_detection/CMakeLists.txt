@@ -13,7 +13,6 @@ target_include_directories(moveit_collision_detection PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include/moveit_core>
 )
-include(GenerateExportHeader)
 generate_export_header(moveit_collision_detection)
 
 ament_target_dependencies(moveit_collision_detection

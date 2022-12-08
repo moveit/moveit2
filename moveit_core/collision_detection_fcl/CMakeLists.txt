@@ -6,7 +6,6 @@ target_include_directories(moveit_collision_detection_fcl PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include/moveit_core>
 )
-include(GenerateExportHeader)
 generate_export_header(moveit_collision_detection_fcl)
 target_include_directories(moveit_collision_detection_fcl PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>)
 set_target_properties(moveit_collision_detection_fcl PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")

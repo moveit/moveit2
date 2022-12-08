@@ -57,8 +57,8 @@ find_package(visualization_msgs REQUIRED)
 # TODO: Port python bindings
 # find_package(pybind11 REQUIRED)
 
-# Finds Boost Components
-include(ConfigExtras.cmake)
+include(ConfigExtras.cmake) # Finds Boost Components
+include(GenerateExportHeader)
 
 add_subdirectory(collision_detection_bullet)
 add_subdirectory(collision_detection_fcl)
