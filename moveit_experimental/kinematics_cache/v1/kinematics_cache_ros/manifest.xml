@@ -5,7 +5,7 @@
 
   </description>
   <author>Sachin Chitta</author>
-  <license>BSD</license>
+  <license>BSD-3-Clause</license>
   <review status="unreviewed" notes=""/>
   <url>http://ros.org/wiki/kinematics_cache_ros</url>
   <depend package="kinematics_cache"/>

@@ -5,7 +5,7 @@
 
   </description>
   <author>E. Gil Jones</author>
-  <license>BSD</license>
+  <license>BSD-3-Clause</license>
   <review status="unreviewed" notes=""/>
   <url>http://ros.org/wiki/collision_distance_field_ros</url>
   <depend package="collision_distance_field"/>

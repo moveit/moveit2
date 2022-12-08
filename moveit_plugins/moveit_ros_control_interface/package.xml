@@ -8,7 +8,7 @@
   <maintainer email="tyler@picknik.ai">Tyler Weaver</maintainer>
   <maintainer email="moveit_releasers@googlegroups.com">MoveIt Release Team</maintainer>
 
-  <license>BSD</license>
+  <license>BSD-3-Clause</license>
 
   <author email="mathias.luedtke@ipa.fraunhofer.de">Mathias Lüdtke</author>
 
