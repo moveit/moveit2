@@ -4,11 +4,10 @@ add_library(moveit_smoothing_base SHARED
 )
 target_include_directories(moveit_smoothing_base PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-  $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
+  $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}>
   $<INSTALL_INTERFACE:include/moveit_core>
 )
 target_link_libraries(moveit_smoothing_base moveit_macros)
-generate_export_header(moveit_smoothing_base)
 set_target_properties(moveit_smoothing_base PROPERTIES VERSION
   "${${PROJECT_NAME}_VERSION}"
 )
@@ -20,9 +19,8 @@ ament_target_dependencies(moveit_smoothing_base
 add_library(moveit_butterworth_filter SHARED
   src/butterworth_filter.cpp
 )
-generate_export_header(moveit_butterworth_filter)
 target_include_directories(moveit_butterworth_filter PUBLIC
-  $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
+  $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}>
 )
 set_target_properties(moveit_butterworth_filter PROPERTIES VERSION
   "${${PROJECT_NAME}_VERSION}"
@@ -38,8 +36,6 @@ ament_target_dependencies(moveit_butterworth_filter
 # Installation
 
 install(DIRECTORY include/ DESTINATION include/moveit_core)
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/moveit_smoothing_base_export.h DESTINATION include/moveit_core)
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/moveit_butterworth_filter_export.h DESTINATION include/moveit_core)
 
 # Testing
 

@@ -39,12 +39,12 @@
 #include <moveit/collision_detection/collision_detector_allocator.h>
 #include <moveit/collision_detection_fcl/collision_env_fcl.h>
 
-#include <moveit_collision_detection_fcl_export.h>
+#include <moveit_core_export.h>
 
 namespace collision_detection
 {
 /** \brief An allocator for FCL collision detectors */
-class MOVEIT_COLLISION_DETECTION_FCL_EXPORT CollisionDetectorAllocatorFCL
+class MOVEIT_CORE_EXPORT CollisionDetectorAllocatorFCL
   : public CollisionDetectorAllocatorTemplate<CollisionEnvFCL, CollisionDetectorAllocatorFCL>
 {
 public:

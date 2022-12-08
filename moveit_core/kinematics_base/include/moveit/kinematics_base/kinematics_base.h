@@ -44,7 +44,7 @@
 #include <string>
 #include <functional>
 
-#include <moveit_kinematics_base_export.h>
+#include <moveit_core_export.h>
 
 namespace moveit
 {
@@ -143,7 +143,7 @@ MOVEIT_CLASS_FORWARD(KinematicsBase);  // Defines KinematicsBasePtr, ConstPtr, W
  * @class KinematicsBase
  * @brief Provides an interface for kinematics solvers.
  */
-class MOVEIT_KINEMATICS_BASE_EXPORT KinematicsBase
+class MOVEIT_CORE_EXPORT KinematicsBase
 {
 public:
   static const rclcpp::Logger LOGGER;

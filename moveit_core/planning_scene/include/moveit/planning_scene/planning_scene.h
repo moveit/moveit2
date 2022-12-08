@@ -57,7 +57,7 @@
 #include <variant>
 #include <rclcpp/rclcpp.hpp>
 
-#include <moveit_planning_scene_export.h>
+#include <moveit_core_export.h>
 
 /** \brief This namespace includes the central class for representing planning contexts */
 namespace planning_scene
@@ -86,7 +86,7 @@ using ObjectTypeMap = std::map<std::string, object_recognition_msgs::msg::Object
 /** \brief This class maintains the representation of the
     environment as seen by a planning instance. The environment
     geometry, the robot geometry and state are maintained. */
-class MOVEIT_PLANNING_SCENE_EXPORT PlanningScene : public std::enable_shared_from_this<PlanningScene>
+class MOVEIT_CORE_EXPORT PlanningScene : public std::enable_shared_from_this<PlanningScene>
 {
 public:
   /**

@@ -13,7 +13,6 @@ target_include_directories(moveit_collision_detection PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include/moveit_core>
 )
-generate_export_header(moveit_collision_detection)
 
 ament_target_dependencies(moveit_collision_detection
   rclcpp
@@ -27,7 +26,7 @@ ament_target_dependencies(moveit_collision_detection
   geometric_shapes
   OCTOMAP
 )
-target_include_directories(moveit_collision_detection BEFORE PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>)
+target_include_directories(moveit_collision_detection BEFORE PUBLIC $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}>)
 target_include_directories(moveit_collision_detection PUBLIC $<TARGET_PROPERTY:moveit_planning_scene,INCLUDE_DIRECTORIES>)
 
 set_target_properties(moveit_collision_detection PROPERTIES VERSION ${${PROJECT_NAME}_VERSION})
@@ -58,4 +57,3 @@ if(BUILD_TESTING)
 endif()
 
 install(DIRECTORY include/ DESTINATION include/moveit_core)
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/moveit_collision_detection_export.h DESTINATION include/moveit_core)

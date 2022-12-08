@@ -60,6 +60,10 @@ find_package(visualization_msgs REQUIRED)
 include(ConfigExtras.cmake) # Finds Boost Components
 include(GenerateExportHeader)
 
+add_library(moveit_core dummy.cpp)
+add_library(moveit::core ALIAS moveit_core)
+generate_export_header(moveit_core)
+
 add_subdirectory(collision_detection_bullet)
 add_subdirectory(collision_detection_fcl)
 add_subdirectory(collision_detection)
@@ -85,8 +89,6 @@ add_subdirectory(transforms)
 add_subdirectory(utils)
 add_subdirectory(version)
 
-add_library(moveit_core INTERFACE)
-add_library(moveit::core ALIAS moveit_core)
 target_link_libraries(moveit_core INTERFACE
   moveit_collision_detection
   moveit_collision_detection_bullet
@@ -112,6 +114,9 @@ target_link_libraries(moveit_core INTERFACE
   moveit_transforms
   moveit_utils
 )
+set_target_properties(moveit_core PROPERTIES VERSION ${moveit_core_VERSION})
+
+install(FILES ${PROJECT_BINARY_DIR}/moveit_core_export.h DESTINATION include/moveit_core)
 
 # TODO: Port python bindings
 # add_subdirectory(python)

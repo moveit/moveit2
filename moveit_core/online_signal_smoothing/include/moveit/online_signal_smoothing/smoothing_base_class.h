@@ -41,7 +41,7 @@
 #include <rclcpp/rclcpp.hpp>
 #include <moveit/macros/class_forward.h>
 
-#include <moveit_smoothing_base_export.h>
+#include <moveit_core_export.h>
 
 namespace moveit
 {

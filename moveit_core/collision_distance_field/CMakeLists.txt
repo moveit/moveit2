@@ -8,8 +8,7 @@ target_include_directories(moveit_collision_distance_field PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include/moveit_core>
 )
-generate_export_header(moveit_collision_distance_field)
-target_include_directories(moveit_collision_distance_field PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>)
+target_include_directories(moveit_collision_distance_field PUBLIC $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}>)
 set_target_properties(moveit_collision_distance_field PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
 
 ament_target_dependencies(moveit_collision_distance_field
@@ -28,7 +27,6 @@ target_link_libraries(moveit_collision_distance_field
 )
 
 install(DIRECTORY include/ DESTINATION include/moveit_core)
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/moveit_collision_distance_field_export.h DESTINATION include/moveit_core)
 
 if(BUILD_TESTING)
   find_package(ament_cmake_gtest REQUIRED)

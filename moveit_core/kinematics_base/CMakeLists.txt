@@ -4,8 +4,7 @@ target_include_directories(moveit_kinematics_base PUBLIC
   $<INSTALL_INTERFACE:include/moveit_core>
 )
 target_link_libraries(moveit_kinematics_base moveit_macros moveit_robot_model)
-generate_export_header(moveit_kinematics_base)
-target_include_directories(moveit_kinematics_base PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>)  # for this library
+target_include_directories(moveit_kinematics_base PUBLIC $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}>)  # for this library
 
 # This line ensures that messages are built before the library is built
 ament_target_dependencies(
@@ -19,4 +18,3 @@ ament_target_dependencies(
 )
 
 install(DIRECTORY include/ DESTINATION include/moveit_core)
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/moveit_kinematics_base_export.h DESTINATION include/moveit_core)

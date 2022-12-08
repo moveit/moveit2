@@ -13,7 +13,7 @@ add_library(moveit_robot_model SHARED
 target_include_directories(moveit_robot_model PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/kinematics_base/include> # Work around cyclic dependency between this and kinematics base
-  $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/kinematics_base> # Ditto but for finding the export header
+  $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}> # Ditto but for finding the export header
   $<INSTALL_INTERFACE:include/moveit_core>
 )
 set_target_properties(moveit_robot_model PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
