@@ -85,6 +85,34 @@ add_subdirectory(transforms)
 add_subdirectory(utils)
 add_subdirectory(version)
 
+add_library(moveit_core INTERFACE)
+add_library(moveit::core ALIAS moveit_core)
+target_link_libraries(moveit_core INTERFACE
+  moveit_collision_detection
+  moveit_collision_detection_bullet
+  moveit_collision_detection_fcl
+  moveit_collision_distance_field
+  moveit_constraint_samplers
+  moveit_distance_field
+  moveit_dynamics_solver
+  moveit_exceptions
+  moveit_kinematic_constraints
+  moveit_kinematics_base
+  moveit_kinematics_metrics
+  moveit_macros
+  moveit_planning_interface
+  moveit_planning_request_adapter
+  moveit_planning_scene
+  moveit_robot_model
+  moveit_robot_state
+  moveit_robot_trajectory
+  moveit_smoothing_base
+  moveit_test_utils
+  moveit_trajectory_processing
+  moveit_transforms
+  moveit_utils
+)
+
 # TODO: Port python bindings
 # add_subdirectory(python)
 # set(pymoveit_libs
