@@ -11,8 +11,6 @@ ament_target_dependencies(moveit_utils Boost moveit_msgs)
 
 install(DIRECTORY include/ DESTINATION include/moveit_core)
 
-
-find_package(ament_index_cpp REQUIRED)
 add_library(moveit_test_utils SHARED src/robot_model_test_utils.cpp)
 target_include_directories(moveit_test_utils PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>

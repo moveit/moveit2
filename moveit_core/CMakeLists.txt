@@ -24,7 +24,9 @@ foreach(LIBFCL_LIBRARY ${LIBFCL_LIBRARIES})
 endforeach()
 set(LIBFCL_LIBRARIES "${LIBFCL_LIBRARIES_FULL}")
 
+
 find_package(ament_cmake REQUIRED)
+find_package(ament_index_cpp REQUIRED)
 find_package(angles REQUIRED)
 find_package(Bullet 2.87 REQUIRED)
 find_package(common_interfaces REQUIRED)
