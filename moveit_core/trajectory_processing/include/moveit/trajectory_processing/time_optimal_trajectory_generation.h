@@ -180,8 +180,9 @@ public:
   /**
    * \brief Compute a trajectory with the given number of waypoints (plus or minus 1, due to rounding).
    * Resampling the trajectory to get the desired num_waypoints doesn't change the start and goal point,
-   * and all re-sampled waypoints will be on the path of the original trajectory (within path_tolerance_)
-   * but controller execution may deviate from the intended path if waypoint spacing is too sparse.
+   * and all re-sampled waypoints will be on the path of the original trajectory (within path_tolerance_).
+   * path_tolerance_ is defined in configuration space, so the unit is usually radians.
+   * But controller execution may deviate from the intended path if waypoint spacing is too sparse.
    * \param num_waypoints The desired number of waypoints.
    * \param[in,out] trajectory A path which needs time-parameterization. It's OK if this path has already been
    * time-parameterized; this function will re-time-parameterize it.
