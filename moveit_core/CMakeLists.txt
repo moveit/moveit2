@@ -66,6 +66,7 @@ add_library(moveit_core SHARED)
 add_library(moveit::core ALIAS moveit_core)
 generate_export_header(moveit_core)
 target_include_directories(moveit_core PUBLIC
+  $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
   $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}>
   $<INSTALL_INTERFACE:include/moveit_core>
 )
@@ -103,14 +104,12 @@ add_subdirectory(collision_detection_fcl)
 add_subdirectory(collision_detection)
 add_subdirectory(collision_distance_field)
 add_subdirectory(constraint_samplers)
-add_subdirectory(controller_manager)
 add_subdirectory(distance_field)
 add_subdirectory(dynamics_solver)
 add_subdirectory(exceptions)
 add_subdirectory(kinematic_constraints)
 add_subdirectory(kinematics_base)
 add_subdirectory(kinematics_metrics)
-add_subdirectory(macros)
 add_subdirectory(online_signal_smoothing)
 add_subdirectory(planning_interface)
 add_subdirectory(planning_request_adapter)
@@ -140,6 +139,7 @@ add_subdirectory(version)
 # #catkin_lint: ignore_once undefined_target (pymoveit_core is defined by pybind_add_module)
 # install(TARGETS pymoveit_core LIBRARY DESTINATION ${CATKIN_GLOBAL_PYTHON_DESTINATION})
 
+install(DIRECTORY include/ DESTINATION include/moveit_core)
 install(FILES ${PROJECT_BINARY_DIR}/moveit_core_export.h DESTINATION include/moveit_core)
 
 install(

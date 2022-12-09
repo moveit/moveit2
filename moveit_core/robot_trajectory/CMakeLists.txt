@@ -1,9 +1,4 @@
 target_sources(moveit_core PRIVATE src/robot_trajectory.cpp)
-target_include_directories(moveit_core PUBLIC
-  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-)
-
-install(DIRECTORY include/ DESTINATION include/moveit_core)
 
 if(BUILD_TESTING)
   ament_add_gtest(test_robot_trajectory test/test_robot_trajectory.cpp)

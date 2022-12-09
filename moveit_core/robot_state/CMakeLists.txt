@@ -4,11 +4,6 @@ target_sources(moveit_core PRIVATE
   src/robot_state.cpp
   src/cartesian_interpolator.cpp
 )
-target_include_directories(moveit_core PUBLIC
-  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-)
-
-install(DIRECTORY include/ DESTINATION include/moveit_core)
 
 # Unit tests
 if(BUILD_TESTING)

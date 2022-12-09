@@ -4,11 +4,6 @@ target_sources(moveit_core PRIVATE
   src/collision_env_distance_field.cpp
   src/collision_env_hybrid.cpp
 )
-target_include_directories(moveit_core PUBLIC
-  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-)
-
-install(DIRECTORY include/ DESTINATION include/moveit_core)
 
 if(BUILD_TESTING)
   find_package(ament_cmake_gtest REQUIRED)

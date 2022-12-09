@@ -1,14 +1,8 @@
 target_sources(moveit_core PRIVATE
   src/collision_common.cpp
   src/collision_env_fcl.cpp
+  src/collision_detector_fcl_plugin_loader.cpp
 )
-target_include_directories(moveit_core PUBLIC
-  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-)
-
-target_sources(moveit_core PRIVATE src/collision_detector_fcl_plugin_loader.cpp)
-
-install(DIRECTORY include/ DESTINATION include/moveit_core)
 
 if(BUILD_TESTING)
   if(WIN32)

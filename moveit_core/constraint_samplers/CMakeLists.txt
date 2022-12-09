@@ -5,11 +5,6 @@ target_sources(moveit_core PRIVATE
   src/default_constraint_samplers.cpp
   src/union_constraint_sampler.cpp
 )
-target_include_directories(moveit_core PUBLIC
-  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-)
-
-install(DIRECTORY include/ DESTINATION include/moveit_core)
 
 if(BUILD_TESTING)
   find_package(ament_cmake_gmock REQUIRED)

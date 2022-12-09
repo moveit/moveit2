@@ -3,11 +3,6 @@ target_sources(moveit_core PRIVATE
   src/trajectory_tools.cpp
   src/time_optimal_trajectory_generation.cpp
 )
-target_include_directories(moveit_core PUBLIC
-  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-)
-
-install(DIRECTORY include/ DESTINATION include/moveit_core)
 
 if(BUILD_TESTING)
   if(WIN32)

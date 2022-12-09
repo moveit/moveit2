@@ -10,10 +10,6 @@ target_sources(moveit_core PRIVATE
   src/revolute_joint_model.cpp
   src/robot_model.cpp
 )
-target_include_directories(moveit_core PUBLIC
-  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-  $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/kinematics_base/include> # Work around cyclic dependency between this and kinematics base
-)
 
 if(BUILD_TESTING)
   find_package(ament_cmake_gtest REQUIRED)
@@ -23,5 +19,3 @@ if(BUILD_TESTING)
   )
   target_link_libraries(test_robot_model moveit::core)
 endif()
-
-install(DIRECTORY include/ DESTINATION include/moveit_core)

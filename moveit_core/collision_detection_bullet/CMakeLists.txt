@@ -7,13 +7,7 @@ target_sources(moveit_core PRIVATE
   src/bullet_integration/contact_checker_common.cpp
   src/bullet_integration/ros_bullet_utils.cpp
 )
-target_include_directories(moveit_core PUBLIC
-  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-)
-
 target_sources(moveit_core PRIVATE src/collision_detector_bullet_plugin_loader.cpp)
-
-install(DIRECTORY include/ DESTINATION include/moveit_core)
 
 if(BUILD_TESTING)
   find_package(ament_cmake_gtest REQUIRED)

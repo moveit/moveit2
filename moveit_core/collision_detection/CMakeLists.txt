@@ -9,9 +9,6 @@ target_sources(moveit_core PRIVATE
   src/collision_env.cpp
   src/collision_plugin_cache.cpp
 )
-target_include_directories(moveit_core PUBLIC
-  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-)
 
 # unit tests
 if(BUILD_TESTING)
@@ -33,5 +30,3 @@ if(BUILD_TESTING)
     APPEND_LIBRARY_DIRS "${append_library_dirs}")
   target_link_libraries(test_all_valid moveit::core)
 endif()
-
-install(DIRECTORY include/ DESTINATION include/moveit_core)
