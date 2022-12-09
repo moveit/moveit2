@@ -173,7 +173,8 @@ public:
   * Resampling the trajectory doesn't change the start and goal point,
   * and all re-sampled waypoints will be on the path of the original trajectory (within path_tolerance_).
   * However, controller execution is separate from MoveIt and may deviate from the intended path between waypoints.
-  * path_tolerance_ is defined in configuration space, so the unit is usually radians.
+  * path_tolerance_ is defined in configuration space, so the unit is rad for revolute joints,
+  * meters for prismatic joints.
   * \param[in,out] trajectory A path which needs time-parameterization. It's OK if this path has already been
   * time-parameterized; this function will re-time-parameterize it.
   * \param max_velocity_scaling_factor A factor in the range [0,1] which can slow down the trajectory.
@@ -189,7 +190,8 @@ public:
   * Resampling the trajectory doesn't change the start and goal point,
   * and all re-sampled waypoints will be on the path of the original trajectory (within path_tolerance_).
   * However, controller execution is separate from MoveIt and may deviate from the intended path between waypoints.
-  * path_tolerance_ is defined in configuration space, so the unit is usually radians.
+  * path_tolerance_ is defined in configuration space, so the unit is rad for revolute joints,
+  * meters for prismatic joints.
   * \param[in,out] trajectory A path which needs time-parameterization. It's OK if this path has already been
   * time-parameterized; this function will re-time-parameterize it.
   * \param velocity_limits Joint names and velocity limits in rad/s
@@ -216,7 +218,8 @@ private:
   * Resampling the trajectory doesn't change the start and goal point,
   * and all re-sampled waypoints will be on the path of the original trajectory (within path_tolerance_).
   * However, controller execution is separate from MoveIt and may deviate from the intended path between waypoints.
-  * path_tolerance_ is defined in configuration space, so the unit is usually radians.
+  * path_tolerance_ is defined in configuration space, so the unit is rad for revolute joints,
+  * meters for prismatic joints.
   * This is a free function because it needs to modify the const resample_dt_ member of TimeOptimalTrajectoryGeneration class.
   * \param num_waypoints The desired number of waypoints (plus or minus one due to numerical rounding).
   * \param[in,out] trajectory A path which needs time-parameterization. It's OK if this path has already been
