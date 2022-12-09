@@ -1,13 +1,12 @@
-add_library(moveit_trajectory_processing SHARED
+target_sources(moveit_core PRIVATE
   src/ruckig_traj_smoothing.cpp
   src/trajectory_tools.cpp
   src/time_optimal_trajectory_generation.cpp
 )
-target_include_directories(moveit_trajectory_processing PUBLIC
+target_include_directories(moveit_core PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-  $<INSTALL_INTERFACE:include/moveit_core>
 )
-ament_target_dependencies(moveit_trajectory_processing
+ament_target_dependencies(moveit_core
   rclcpp
   rmw_implementation
   urdf
@@ -16,11 +15,7 @@ ament_target_dependencies(moveit_trajectory_processing
   visualization_msgs
   Boost
 )
-target_link_libraries(moveit_trajectory_processing
-  moveit_robot_state
-  moveit_robot_trajectory
-  ruckig::ruckig
-)
+target_link_libraries(moveit_core ruckig::ruckig)
 
 install(DIRECTORY include/ DESTINATION include/moveit_core)
 
@@ -33,11 +28,10 @@ if(BUILD_TESTING)
   endif()
 
   ament_add_gtest(test_time_optimal_trajectory_generation test/test_time_optimal_trajectory_generation.cpp)
-  target_link_libraries(test_time_optimal_trajectory_generation moveit_test_utils moveit_trajectory_processing)
+  target_link_libraries(test_time_optimal_trajectory_generation moveit_core)
 
   ament_add_gtest(test_ruckig_traj_smoothing test/test_ruckig_traj_smoothing.cpp)
   target_link_libraries(test_ruckig_traj_smoothing
-    moveit_trajectory_processing
-    moveit_test_utils
+    moveit_core
   )
 endif()

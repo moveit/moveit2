@@ -4,16 +4,15 @@ else()
   set(append_library_dirs "${CMAKE_CURRENT_BINARY_DIR};${CMAKE_CURRENT_BINARY_DIR}/../utils;${CMAKE_CURRENT_BINARY_DIR}/../robot_model;${CMAKE_CURRENT_BINARY_DIR}/../robot_state;${CMAKE_CURRENT_BINARY_DIR}/../collision_detection_fcl")
 endif()
 
-add_library(moveit_kinematic_constraints SHARED
+target_sources(moveit_core PRIVATE
   src/kinematic_constraint.cpp
   src/utils.cpp
 )
-target_include_directories(moveit_kinematic_constraints PUBLIC
+target_include_directories(moveit_core PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-  $<INSTALL_INTERFACE:include/moveit_core>
 )
 
-ament_target_dependencies(moveit_kinematic_constraints
+ament_target_dependencies(moveit_core
   urdf
   urdfdom
   urdfdom_headers
@@ -21,14 +20,6 @@ ament_target_dependencies(moveit_kinematic_constraints
   geometry_msgs
   visualization_msgs
   tf2_eigen
-)
-
-target_link_libraries(moveit_kinematic_constraints
-  moveit_collision_detection_fcl
-  moveit_kinematics_base
-  moveit_robot_state
-  moveit_robot_model
-  moveit_utils
 )
 
 install(DIRECTORY include/ DESTINATION include/moveit_core)
@@ -39,8 +30,8 @@ if(BUILD_TESTING)
   ament_add_gtest(test_constraints test/test_constraints.cpp
     APPEND_LIBRARY_DIRS "${append_library_dirs}"
   )
-  target_link_libraries(test_constraints moveit_test_utils moveit_kinematic_constraints)
+  target_link_libraries(test_constraints moveit_core)
 
   ament_add_gtest(test_orientation_constraints test/test_orientation_constraints.cpp)
-  target_link_libraries(test_orientation_constraints moveit_test_utils moveit_kinematic_constraints)
+  target_link_libraries(test_orientation_constraints moveit_core)
 endif()

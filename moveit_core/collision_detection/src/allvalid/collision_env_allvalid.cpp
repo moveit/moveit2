@@ -40,7 +40,7 @@
 #include <rclcpp/logging.hpp>
 
 // Logger
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_collision_detection.collision_world_allvalid");
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_core.collision_world_allvalid");
 
 const std::string collision_detection::CollisionDetectorAllocatorAllValid::NAME("ALL_VALID");
 

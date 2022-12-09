@@ -44,7 +44,7 @@
 
 namespace constraint_samplers
 {
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_constraint_samplers.constraint_sampler_tools");
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_core.constraint_sampler_tools");
 
 void visualizeDistribution(const moveit_msgs::msg::Constraints& constr,
                            const planning_scene::PlanningSceneConstPtr& scene, const std::string& group,

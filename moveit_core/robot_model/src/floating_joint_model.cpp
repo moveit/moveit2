@@ -46,7 +46,7 @@ namespace moveit
 {
 namespace core
 {
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_robot_model.floating_joint_model");
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_core.floating_joint_model");
 namespace
 {
 constexpr size_t STATE_SPACE_DIMENSION = 7;

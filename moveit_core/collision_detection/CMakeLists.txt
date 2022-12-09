@@ -1,4 +1,4 @@
-add_library(moveit_collision_detection SHARED
+target_sources(moveit_core PRIVATE
   src/allvalid/collision_env_allvalid.cpp
   src/collision_common.cpp
   src/collision_matrix.cpp
@@ -9,12 +9,11 @@ add_library(moveit_collision_detection SHARED
   src/collision_env.cpp
   src/collision_plugin_cache.cpp
 )
-target_include_directories(moveit_collision_detection PUBLIC
+target_include_directories(moveit_core PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-  $<INSTALL_INTERFACE:include/moveit_core>
 )
 
-ament_target_dependencies(moveit_collision_detection
+ament_target_dependencies(moveit_core
   rclcpp
   rmw_implementation
   urdf
@@ -25,12 +24,6 @@ ament_target_dependencies(moveit_collision_detection
   tf2_eigen
   geometric_shapes
   OCTOMAP
-)
-target_include_directories(moveit_collision_detection BEFORE PUBLIC $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}>)
-target_include_directories(moveit_collision_detection PUBLIC $<TARGET_PROPERTY:moveit_planning_scene,INCLUDE_DIRECTORIES>)
-
-target_link_libraries(moveit_collision_detection
-  moveit_robot_state
 )
 
 # unit tests
@@ -43,15 +36,15 @@ if(BUILD_TESTING)
 
   ament_add_gtest(test_world test/test_world.cpp
     APPEND_LIBRARY_DIRS "${append_library_dirs}")
-  target_link_libraries(test_world moveit_collision_detection)
+  target_link_libraries(test_world moveit_core)
 
   ament_add_gtest(test_world_diff test/test_world_diff.cpp
     APPEND_LIBRARY_DIRS "${append_library_dirs}")
-  target_link_libraries(test_world_diff moveit_collision_detection)
+  target_link_libraries(test_world_diff moveit_core)
 
   ament_add_gtest(test_all_valid test/test_all_valid.cpp
     APPEND_LIBRARY_DIRS "${append_library_dirs}")
-  target_link_libraries(test_all_valid moveit_collision_detection moveit_robot_model)
+  target_link_libraries(test_all_valid moveit_core)
 endif()
 
 install(DIRECTORY include/ DESTINATION include/moveit_core)

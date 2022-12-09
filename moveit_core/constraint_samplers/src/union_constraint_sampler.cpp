@@ -42,7 +42,7 @@
 
 namespace constraint_samplers
 {
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_constraint_samplers.union_constraint_sampler");
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_core.union_constraint_sampler");
 
 struct OrderSamplers
 {

@@ -40,7 +40,7 @@
 
 namespace constraint_samplers
 {
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_constraint_samplers.constraint_sampler");
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_core.constraint_sampler");
 
 constraint_samplers::ConstraintSampler::ConstraintSampler(const planning_scene::PlanningSceneConstPtr& scene,
                                                           const std::string& group_name)

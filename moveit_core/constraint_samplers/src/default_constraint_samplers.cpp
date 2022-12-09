@@ -42,7 +42,7 @@
 
 namespace constraint_samplers
 {
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_constraint_samplers.default_constraint_samplers");
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_core.default_constraint_samplers");
 
 bool JointConstraintSampler::configure(const moveit_msgs::msg::Constraints& constr)
 {

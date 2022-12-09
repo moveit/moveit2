@@ -1,13 +1,11 @@
-add_library(moveit_collision_detection_fcl SHARED
+target_sources(moveit_core PRIVATE
   src/collision_common.cpp
   src/collision_env_fcl.cpp
 )
-target_include_directories(moveit_collision_detection_fcl PUBLIC
+target_include_directories(moveit_core PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-  $<INSTALL_INTERFACE:include/moveit_core>
 )
-target_include_directories(moveit_collision_detection_fcl PUBLIC $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}>)
-ament_target_dependencies(moveit_collision_detection_fcl
+ament_target_dependencies(moveit_core
   rclcpp
   rmw_implementation
   urdf
@@ -16,21 +14,14 @@ ament_target_dependencies(moveit_collision_detection_fcl
   LIBFCL
   visualization_msgs
 )
-target_link_libraries(moveit_collision_detection_fcl
-  moveit_collision_detection
-)
 
-add_library(collision_detector_fcl_plugin SHARED src/collision_detector_fcl_plugin_loader.cpp)
-ament_target_dependencies(collision_detector_fcl_plugin
+target_sources(moveit_core PRIVATE src/collision_detector_fcl_plugin_loader.cpp)
+ament_target_dependencies(moveit_core
   rclcpp
   urdf
   visualization_msgs
   pluginlib
   rmw_implementation
-)
-target_link_libraries(collision_detector_fcl_plugin
-  moveit_collision_detection_fcl
-  moveit_planning_scene
 )
 
 install(DIRECTORY include/ DESTINATION include/moveit_core)
@@ -48,11 +39,11 @@ if(BUILD_TESTING)
   endif()
 
   ament_add_gtest(test_fcl_collision_env test/test_fcl_env.cpp)
-  target_link_libraries(test_fcl_collision_env moveit_test_utils moveit_collision_detection_fcl)
+  target_link_libraries(test_fcl_collision_env moveit_core)
 
   ament_add_gtest(test_fcl_collision_detection test/test_fcl_collision_detection_pr2.cpp)
-  target_link_libraries(test_fcl_collision_detection moveit_test_utils moveit_collision_detection_fcl)
+  target_link_libraries(test_fcl_collision_detection moveit_core)
 
   ament_add_gtest(test_fcl_collision_detection_panda test/test_fcl_collision_detection_panda.cpp)
-  target_link_libraries(test_fcl_collision_detection_panda moveit_test_utils moveit_collision_detection_fcl)
+  target_link_libraries(test_fcl_collision_detection_panda moveit_core)
 endif()

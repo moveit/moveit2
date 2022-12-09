@@ -54,7 +54,7 @@
 
 namespace planning_scene
 {
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_planning_scene.planning_scene");
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_core.planning_scene");
 
 const std::string PlanningScene::OCTOMAP_NS = "<octomap>";
 const std::string PlanningScene::DEFAULT_SCENE_NAME = "(noname)";

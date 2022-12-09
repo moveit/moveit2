@@ -1,4 +1,4 @@
-add_library(moveit_robot_model SHARED
+target_sources(moveit_core PRIVATE
   src/aabb.cpp
   src/fixed_joint_model.cpp
   src/floating_joint_model.cpp
@@ -10,13 +10,12 @@ add_library(moveit_robot_model SHARED
   src/revolute_joint_model.cpp
   src/robot_model.cpp
 )
-target_include_directories(moveit_robot_model PUBLIC
+target_include_directories(moveit_core PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/kinematics_base/include> # Work around cyclic dependency between this and kinematics base
-  $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}> # Ditto but for finding the export header
-  $<INSTALL_INTERFACE:include/moveit_core>
+
 )
-ament_target_dependencies(moveit_robot_model
+ament_target_dependencies(moveit_core
   angles
   moveit_msgs
   Eigen3
@@ -26,10 +25,6 @@ ament_target_dependencies(moveit_robot_model
   srdfdom
   visualization_msgs
 )
-target_link_libraries(moveit_robot_model
-  moveit_exceptions
-  moveit_macros
-)
 
 if(BUILD_TESTING)
   find_package(ament_cmake_gtest REQUIRED)
@@ -37,7 +32,7 @@ if(BUILD_TESTING)
   ament_target_dependencies(test_robot_model
     rclcpp
   )
-  target_link_libraries(test_robot_model moveit_test_utils moveit_robot_model)
+  target_link_libraries(test_robot_model moveit_core)
 endif()
 
 install(DIRECTORY include/ DESTINATION include/moveit_core)

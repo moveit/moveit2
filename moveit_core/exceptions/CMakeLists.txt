@@ -1,9 +1,8 @@
-add_library(moveit_exceptions SHARED src/exceptions.cpp)
-target_include_directories(moveit_exceptions PUBLIC
+target_sources(moveit_core PRIVATE src/exceptions.cpp)
+target_include_directories(moveit_core PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-  $<INSTALL_INTERFACE:include/moveit_core>
 )
-ament_target_dependencies(moveit_exceptions
+ament_target_dependencies(moveit_core
   Boost
   rclcpp
   urdfdom

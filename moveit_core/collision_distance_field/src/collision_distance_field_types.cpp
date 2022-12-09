@@ -47,8 +47,7 @@ const static double EPSILON{ 0.0001 };
 
 namespace collision_detection
 {
-static const rclcpp::Logger LOGGER =
-    rclcpp::get_logger("moveit_collision_distance_field.collision_distance_field_types");
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_core.collision_distance_field_types");
 
 std::vector<CollisionSphere> determineCollisionSpheres(const bodies::Body* body, Eigen::Isometry3d& relative_transform)
 {

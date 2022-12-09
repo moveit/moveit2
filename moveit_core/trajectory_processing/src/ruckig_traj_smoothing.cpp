@@ -46,7 +46,7 @@ namespace trajectory_processing
 {
 namespace
 {
-const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_trajectory_processing.ruckig_traj_smoothing");
+const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_core.ruckig_traj_smoothing");
 constexpr double DEFAULT_MAX_VELOCITY = 5;       // rad/s
 constexpr double DEFAULT_MAX_ACCELERATION = 10;  // rad/s^2
 constexpr double DEFAULT_MAX_JERK = 1000;        // rad/s^3

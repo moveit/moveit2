@@ -41,7 +41,7 @@
 // Logger
 namespace moveit
 {
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_exceptions.exceptions");
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_core.exceptions");
 
 ConstructException::ConstructException(const std::string& what_arg) : std::runtime_error(what_arg)
 {

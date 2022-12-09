@@ -48,7 +48,7 @@
 
 namespace collision_detection
 {
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_collision_detection_fcl.collision_env_fcl");
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_core.collision_env_fcl");
 const std::string CollisionDetectorAllocatorFCL::NAME("FCL");
 
 namespace

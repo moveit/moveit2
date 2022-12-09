@@ -56,7 +56,7 @@
 namespace collision_detection
 {
 // Logger
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_collision_detection_fcl.collision_common");
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_core.collision_common");
 
 bool collisionCallback(fcl::CollisionObjectd* o1, fcl::CollisionObjectd* o2, void* data)
 {

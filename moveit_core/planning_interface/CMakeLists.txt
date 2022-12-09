@@ -1,21 +1,15 @@
-add_library(moveit_planning_interface SHARED
+target_sources(moveit_core PRIVATE
   src/planning_interface.cpp
   src/planning_response.cpp
 )
-target_include_directories(moveit_planning_interface PUBLIC
+target_include_directories(moveit_core PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-  $<INSTALL_INTERFACE:include/moveit_core>
 )
-ament_target_dependencies(moveit_planning_interface
+ament_target_dependencies(moveit_core
   moveit_msgs
   urdf
   urdfdom
   urdfdom_headers
-)
-target_link_libraries(moveit_planning_interface
-  moveit_robot_trajectory
-  moveit_robot_state
-  moveit_utils
 )
 
 install(DIRECTORY include/ DESTINATION include/moveit_core)

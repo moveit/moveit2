@@ -1,10 +1,8 @@
-add_library(moveit_transforms SHARED src/transforms.cpp)
-target_include_directories(moveit_transforms PUBLIC
+target_sources(moveit_core PRIVATE src/transforms.cpp)
+target_include_directories(moveit_core PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-  $<INSTALL_INTERFACE:include/moveit_core>
 )
-target_link_libraries(moveit_transforms moveit_macros)
-ament_target_dependencies(moveit_transforms
+ament_target_dependencies(moveit_core
   geometric_shapes
   tf2_eigen
   rclcpp
@@ -20,5 +18,5 @@ install(DIRECTORY include/ DESTINATION include/moveit_core)
 if(BUILD_TESTING)
   find_package(ament_cmake_gtest REQUIRED)
   ament_add_gtest(test_transforms test/test_transforms.cpp)
-  target_link_libraries(test_transforms moveit_transforms)
+  target_link_libraries(test_transforms moveit_core)
 endif()

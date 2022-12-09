@@ -62,9 +62,13 @@ find_package(visualization_msgs REQUIRED)
 include(ConfigExtras.cmake) # Finds Boost Components
 include(GenerateExportHeader)
 
-add_library(moveit_core dummy.cpp)
+add_library(moveit_core SHARED)
 add_library(moveit::core ALIAS moveit_core)
 generate_export_header(moveit_core)
+target_include_directories(moveit_core PUBLIC
+  $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}>
+  $<INSTALL_INTERFACE:include/moveit_core>
+)
 
 add_subdirectory(collision_detection_bullet)
 add_subdirectory(collision_detection_fcl)
@@ -91,47 +95,12 @@ add_subdirectory(transforms)
 add_subdirectory(utils)
 add_subdirectory(version)
 
-target_link_libraries(moveit_core INTERFACE
-  moveit_collision_detection
-  moveit_collision_detection_bullet
-  moveit_collision_detection_fcl
-  moveit_collision_distance_field
-  moveit_constraint_samplers
-  moveit_distance_field
-  moveit_dynamics_solver
-  moveit_exceptions
-  moveit_kinematic_constraints
-  moveit_kinematics_base
-  moveit_kinematics_metrics
-  moveit_macros
-  moveit_planning_interface
-  moveit_planning_request_adapter
-  moveit_planning_scene
-  moveit_robot_model
-  moveit_robot_state
-  moveit_robot_trajectory
-  moveit_smoothing_base
-  moveit_test_utils
-  moveit_trajectory_processing
-  moveit_transforms
-  moveit_utils
-)
 set_target_properties(moveit_core PROPERTIES VERSION ${moveit_core_VERSION})
 
 install(FILES ${PROJECT_BINARY_DIR}/moveit_core_export.h DESTINATION include/moveit_core)
 
 # TODO: Port python bindings
 # add_subdirectory(python)
-# set(pymoveit_libs
-#   moveit_collision_detection
-#   moveit_kinematic_constraints
-#   moveit_planning_scene
-#   moveit_python_tools
-#   moveit_robot_model
-#   moveit_robot_state
-#   moveit_transforms
-# )
-#
 # pybind_add_module(pymoveit_core
 #     python/pymoveit_core.cpp
 #     collision_detection/src/pycollision_detection.cpp
@@ -142,38 +111,14 @@ install(FILES ${PROJECT_BINARY_DIR}/moveit_core_export.h DESTINATION include/mov
 #     kinematic_constraints/src/pykinematic_constraint.cpp
 # )
 # target_include_directories(pymoveit_core SYSTEM PRIVATE ${catkin_INCLUDE_DIRS})
-# target_link_libraries(pymoveit_core PRIVATE ${pymoveit_libs} ${catkin_LIBRARIES})
+# target_link_libraries(pymoveit_core PRIVATE moveit::core ${catkin_LIBRARIES})
 #
 # #catkin_lint: ignore_once undefined_target (pymoveit_core is defined by pybind_add_module)
 # install(TARGETS pymoveit_core LIBRARY DESTINATION ${CATKIN_GLOBAL_PYTHON_DESTINATION})
 
 
 install(
-  TARGETS
-    moveit_butterworth_filter
-    moveit_collision_distance_field
-    moveit_collision_detection
-    moveit_collision_detection_fcl
-    moveit_collision_detection_bullet
-    moveit_dynamics_solver
-    moveit_constraint_samplers
-    moveit_distance_field
-    moveit_exceptions
-    moveit_kinematics_base
-    moveit_kinematic_constraints
-    moveit_kinematics_metrics
-    moveit_macros
-    moveit_planning_interface
-    moveit_planning_scene
-    moveit_planning_request_adapter
-    moveit_robot_model
-    moveit_robot_state
-    moveit_robot_trajectory
-    moveit_smoothing_base
-    moveit_test_utils
-    moveit_trajectory_processing
-    moveit_transforms
-    moveit_utils
+  TARGETS moveit_core
   EXPORT moveit_coreTargets
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib

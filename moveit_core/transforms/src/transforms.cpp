@@ -46,7 +46,7 @@ namespace moveit
 namespace core
 {
 // Logger
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_transforms.transforms");
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_core.transforms");
 
 Transforms::Transforms(const std::string& target_frame) : target_frame_(target_frame)
 {

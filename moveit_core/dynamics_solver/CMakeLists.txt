@@ -1,18 +1,14 @@
-add_library(moveit_dynamics_solver SHARED src/dynamics_solver.cpp)
-target_include_directories(moveit_dynamics_solver PUBLIC
+target_sources(moveit_core PRIVATE src/dynamics_solver.cpp)
+target_include_directories(moveit_core PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-  $<INSTALL_INTERFACE:include/moveit_core>
 )
 
-ament_target_dependencies(moveit_dynamics_solver
+ament_target_dependencies(moveit_core
   urdf
   urdfdom_headers
   orocos_kdl
   visualization_msgs
   kdl_parser
-)
-target_link_libraries(moveit_dynamics_solver
-  moveit_robot_state
 )
 
 install(DIRECTORY include/ DESTINATION include/moveit_core)

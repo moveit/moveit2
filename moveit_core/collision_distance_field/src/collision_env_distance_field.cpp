@@ -52,7 +52,7 @@
 namespace collision_detection
 {
 const rclcpp::Logger CollisionEnvDistanceField::LOGGER =
-    rclcpp::get_logger("moveit_collision_distance_field.collision_robot_distance_field");
+    rclcpp::get_logger("moveit_core.collision_robot_distance_field");
 const double EPSILON = 0.001f;
 
 const std::string collision_detection::CollisionDetectorAllocatorDistanceField::NAME("DISTANCE_FIELD");

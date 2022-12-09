@@ -49,7 +49,7 @@ namespace moveit
 {
 namespace core
 {
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_robot_model.robot_model");
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_core.robot_model");
 
 RobotModel::RobotModel(const urdf::ModelInterfaceSharedPtr& urdf_model, const srdf::ModelConstSharedPtr& srdf_model)
 {

@@ -37,7 +37,7 @@
 #include <rclcpp/logger.hpp>
 #include <rclcpp/logging.hpp>
 
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_collision_detection.collision_common");
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_core.collision_common");
 constexpr size_t LOG_THROTTLE_PERIOD{ 5 };
 
 namespace collision_detection

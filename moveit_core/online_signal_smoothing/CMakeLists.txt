@@ -1,30 +1,20 @@
 # Base class
-add_library(moveit_smoothing_base SHARED
+target_sources(moveit_core PRIVATE
   src/smoothing_base_class.cpp
 )
-target_include_directories(moveit_smoothing_base PUBLIC
+target_include_directories(moveit_core PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-  $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}>
-  $<INSTALL_INTERFACE:include/moveit_core>
 )
-target_link_libraries(moveit_smoothing_base moveit_macros)
-ament_target_dependencies(moveit_smoothing_base
+ament_target_dependencies(moveit_core
   rclcpp
 )
 
 # Plugin implementations
-add_library(moveit_butterworth_filter SHARED
+target_sources(moveit_core PRIVATE
   src/butterworth_filter.cpp
 )
-target_include_directories(moveit_butterworth_filter PUBLIC
-  $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}>
-)
-target_link_libraries(moveit_butterworth_filter
-  moveit_smoothing_base
-  moveit_robot_model
-)
-ament_target_dependencies(moveit_butterworth_filter
-  srdfdom  # include dependency from moveit_robot_model
+ament_target_dependencies(moveit_core
+  srdfdom 
 )
 
 # Installation
@@ -39,5 +29,5 @@ if(BUILD_TESTING)
 
   # Lowpass filter unit test
   ament_add_gtest(test_butterworth_filter test/test_butterworth_filter.cpp)
-  target_link_libraries(test_butterworth_filter moveit_butterworth_filter)
+  target_link_libraries(test_butterworth_filter moveit_core)
 endif()

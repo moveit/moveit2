@@ -1,4 +1,4 @@
-add_library(moveit_collision_detection_bullet SHARED
+target_sources(moveit_core PRIVATE
   src/bullet_integration/bullet_utils.cpp
   src/bullet_integration/bullet_discrete_bvh_manager.cpp
   src/bullet_integration/bullet_cast_bvh_manager.cpp
@@ -7,15 +7,13 @@ add_library(moveit_collision_detection_bullet SHARED
   src/bullet_integration/contact_checker_common.cpp
   src/bullet_integration/ros_bullet_utils.cpp
 )
-target_include_directories(moveit_collision_detection_bullet PUBLIC
+target_include_directories(moveit_core PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-  $<INSTALL_INTERFACE:include/moveit_core>
 )
-target_include_directories(moveit_collision_detection_bullet PUBLIC $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}>)
-ament_target_dependencies(moveit_collision_detection_bullet SYSTEM
+ament_target_dependencies(moveit_core SYSTEM
   BULLET
 )
-ament_target_dependencies(moveit_collision_detection_bullet
+ament_target_dependencies(moveit_core
   rclcpp
   rmw_implementation
   urdf
@@ -24,15 +22,12 @@ ament_target_dependencies(moveit_collision_detection_bullet
   visualization_msgs
   octomap_msgs
 )
-target_link_libraries(moveit_collision_detection_bullet
-  moveit_collision_detection
-)
 
-add_library(collision_detector_bullet_plugin SHARED src/collision_detector_bullet_plugin_loader.cpp)
-ament_target_dependencies(collision_detector_bullet_plugin SYSTEM
+target_sources(moveit_core PRIVATE src/collision_detector_bullet_plugin_loader.cpp)
+ament_target_dependencies(moveit_core SYSTEM
   BULLET
 )
-ament_target_dependencies(collision_detector_bullet_plugin
+ament_target_dependencies(moveit_core
   rclcpp
   urdf
   visualization_msgs
@@ -40,18 +35,8 @@ ament_target_dependencies(collision_detector_bullet_plugin
   rmw_implementation
   octomap_msgs
 )
-target_link_libraries(collision_detector_bullet_plugin
-  moveit_collision_detection_bullet
-  moveit_planning_scene
-)
 
 install(DIRECTORY include/ DESTINATION include/moveit_core)
-install(TARGETS moveit_collision_detection_bullet collision_detector_bullet_plugin EXPORT export_moveit_collision_detection_bullet
-  LIBRARY DESTINATION lib
-  ARCHIVE DESTINATION lib
-  RUNTIME DESTINATION bin
-)
-ament_export_targets(export_moveit_collision_detection_bullet HAS_LIBRARY_TARGET)
 
 if(BUILD_TESTING)
   find_package(ament_cmake_gtest REQUIRED)
@@ -68,11 +53,11 @@ if(BUILD_TESTING)
   endif()
 
   ament_add_gtest(test_bullet_collision_detection test/test_bullet_collision_detection_pr2.cpp)
-  target_link_libraries(test_bullet_collision_detection moveit_test_utils moveit_collision_detection_bullet)
+  target_link_libraries(test_bullet_collision_detection moveit_core)
 
   ament_add_gtest(test_bullet_collision_detection_panda test/test_bullet_collision_detection_panda.cpp)
-  target_link_libraries(test_bullet_collision_detection_panda moveit_test_utils moveit_collision_detection_bullet)
+  target_link_libraries(test_bullet_collision_detection_panda moveit_core)
 
   ament_add_gtest(test_bullet_continuous_collision_checking test/test_bullet_continuous_collision_checking.cpp)
-  target_link_libraries(test_bullet_continuous_collision_checking moveit_test_utils moveit_collision_detection_bullet)
+  target_link_libraries(test_bullet_continuous_collision_checking moveit_core)
 endif()

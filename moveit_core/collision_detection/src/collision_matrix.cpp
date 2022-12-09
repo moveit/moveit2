@@ -43,7 +43,7 @@
 namespace collision_detection
 {
 // Logger
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_collision_detection.collision_matrix");
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_core.collision_matrix");
 
 AllowedCollisionMatrix::AllowedCollisionMatrix()
 {
