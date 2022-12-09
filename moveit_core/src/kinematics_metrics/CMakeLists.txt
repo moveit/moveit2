@@ -1,0 +1,1 @@
+target_sources(moveit_core PRIVATE kinematics_metrics.cpp)

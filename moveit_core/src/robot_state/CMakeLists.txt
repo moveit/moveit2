@@ -1,0 +1,37 @@
+target_sources(moveit_core PRIVATE
+  attached_body.cpp
+  conversions.cpp
+  robot_state.cpp
+  cartesian_interpolator.cpp
+)
+
+# Unit tests
+if(BUILD_TESTING)
+  find_package(ament_cmake_gtest REQUIRED)
+  find_package(tf2_geometry_msgs REQUIRED)
+  find_package(resource_retriever REQUIRED)
+
+  if(WIN32)
+    # TODO add windows paths
+  else()
+    set(append_library_dirs "${CMAKE_CURRENT_BINARY_DIR};${CMAKE_CURRENT_BINARY_DIR}/../utils")
+  endif()
+
+  ament_add_gtest(test_robot_state test/robot_state_test.cpp
+    APPEND_LIBRARY_DIRS "${append_library_dirs}")
+
+  target_link_libraries(test_robot_state moveit::core)
+
+  # As an executable, this benchmark is not run as a test by default
+  ament_add_gtest(test_robot_state_benchmark test/robot_state_benchmark.cpp)
+  target_link_libraries(test_robot_state_benchmark moveit::core)
+
+  ament_add_gtest(test_robot_state_complex test/test_kinematic_complex.cpp)
+  target_link_libraries(test_robot_state_complex moveit::core)
+
+  ament_add_gtest(test_aabb test/test_aabb.cpp)
+  target_link_libraries(test_aabb moveit::core)
+
+  ament_add_gtest(test_cartesian_interpolator test/test_cartesian_interpolator.cpp)
+  target_link_libraries(test_cartesian_interpolator moveit::core)
+endif()

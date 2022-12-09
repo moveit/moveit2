@@ -1,1 +1,0 @@
-target_sources(moveit_core PRIVATE src/planning_request_adapter.cpp)
