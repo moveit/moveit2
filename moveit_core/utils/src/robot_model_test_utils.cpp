@@ -34,14 +34,14 @@
 
 /* Author: Bryce Willey */
 
-#include <boost/algorithm/string_regex.hpp>
-#include <geometry_msgs/msg/pose.hpp>
-#include <urdf_parser/urdf_parser.h>
-#include <moveit/utils/robot_model_test_utils.h>
 #include <ament_index_cpp/get_package_share_directory.hpp>
+#include <boost/algorithm/string_regex.hpp>
 #include <filesystem>
+#include <geometry_msgs/msg/pose.hpp>
+#include <moveit/utils/robot_model_test_utils.h>
 #include <rclcpp/logger.hpp>
 #include <rclcpp/logging.hpp>
+#include <urdf_parser/urdf_parser.h>
 
 namespace moveit
 {
