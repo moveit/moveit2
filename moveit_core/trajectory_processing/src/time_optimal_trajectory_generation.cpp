@@ -1096,6 +1096,12 @@ bool TimeOptimalTrajectoryGeneration::doTimeParameterizationCalculations(robot_t
     return false;
   }
 
+  if (!checkMixedUnits(group))
+  {
+    RCLCPP_ERROR(LOGGER, "TOTG cannot process a combination of revolute and prismatic joints");
+    return false;
+  }
+
   const unsigned num_points = trajectory.getWayPointCount();
   const std::vector<int>& idx = group->getVariableIndexList();
   const unsigned num_joints = group->getVariableCount();
@@ -1177,6 +1183,25 @@ bool TimeOptimalTrajectoryGeneration::doTimeParameterizationCalculations(robot_t
     last_t = t;
   }
 
+  return true;
+}
+
+bool TimeOptimalTrajectoryGeneration::checkMixedUnits(const moveit::core::JointModelGroup* group) const
+{
+  const std::vector<const moveit::core::JointModel*>& joint_models = group->getJointModels();
+
+  bool have_prismatic =
+      std::any_of(joint_models.cbegin(), joint_models.cend(), [](const moveit::core::JointModel* joint_model) {
+        return joint_model->getType() == moveit::core::JointModel::JointType::PRISMATIC;
+      });
+
+  bool have_revolute =
+      std::any_of(joint_models.cbegin(), joint_models.cend(), [](const moveit::core::JointModel* joint_model) {
+        return joint_model->getType() == moveit::core::JointModel::JointType::REVOLUTE;
+      });
+
+  if (have_prismatic && have_revolute)
+    return false;
   return true;
 }
 }  // namespace trajectory_processing

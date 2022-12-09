@@ -207,6 +207,9 @@ private:
                                           const Eigen::VectorXd& max_velocity,
                                           const Eigen::VectorXd& max_acceleration) const;
 
+  /// @brief Check if a combination of revolute and prismatic joints is used. path_tolerance_ is not valid, if so.
+  bool checkMixedUnits(const moveit::core::JointModelGroup* group) const;
+
   const double path_tolerance_;
   const double resample_dt_;
   const double min_angle_change_;
