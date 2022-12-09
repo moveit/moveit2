@@ -5,16 +5,10 @@ target_sources(moveit_core PRIVATE
 target_include_directories(moveit_core PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
 )
-ament_target_dependencies(moveit_core
-  rclcpp
-)
 
 # Plugin implementations
 target_sources(moveit_core PRIVATE
   src/butterworth_filter.cpp
-)
-ament_target_dependencies(moveit_core
-  srdfdom 
 )
 
 # Installation
@@ -29,5 +23,5 @@ if(BUILD_TESTING)
 
   # Lowpass filter unit test
   ament_add_gtest(test_butterworth_filter test/test_butterworth_filter.cpp)
-  target_link_libraries(test_butterworth_filter moveit_core)
+  target_link_libraries(test_butterworth_filter moveit::core)
 endif()

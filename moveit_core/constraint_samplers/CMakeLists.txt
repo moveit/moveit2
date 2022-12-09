@@ -8,12 +8,6 @@ target_sources(moveit_core PRIVATE
 target_include_directories(moveit_core PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
 )
-ament_target_dependencies(moveit_core
-  urdf
-  urdfdom
-  urdfdom_headers
-  visualization_msgs
-)
 
 install(DIRECTORY include/ DESTINATION include/moveit_core)
 
@@ -39,5 +33,5 @@ if(BUILD_TESTING)
     ${geometry_msgs_INCLUDE_DIRS}
   )
   ament_target_dependencies(test_constraint_samplers kdl_parser)
-  target_link_libraries(test_constraint_samplers moveit_core)
+  target_link_libraries(test_constraint_samplers moveit::core)
 endif()

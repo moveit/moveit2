@@ -12,16 +12,6 @@ target_include_directories(moveit_core PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
 )
 
-ament_target_dependencies(moveit_core
-  urdf
-  urdfdom
-  urdfdom_headers
-  tf2_geometry_msgs
-  geometry_msgs
-  visualization_msgs
-  tf2_eigen
-)
-
 install(DIRECTORY include/ DESTINATION include/moveit_core)
 
 if(BUILD_TESTING)
@@ -30,8 +20,8 @@ if(BUILD_TESTING)
   ament_add_gtest(test_constraints test/test_constraints.cpp
     APPEND_LIBRARY_DIRS "${append_library_dirs}"
   )
-  target_link_libraries(test_constraints moveit_core)
+  target_link_libraries(test_constraints moveit::core)
 
   ament_add_gtest(test_orientation_constraints test/test_orientation_constraints.cpp)
-  target_link_libraries(test_orientation_constraints moveit_core)
+  target_link_libraries(test_orientation_constraints moveit::core)
 endif()

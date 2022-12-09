@@ -13,19 +13,6 @@ target_include_directories(moveit_core PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
 )
 
-ament_target_dependencies(moveit_core
-  rclcpp
-  rmw_implementation
-  urdf
-  urdfdom
-  urdfdom_headers
-  srdfdom
-  visualization_msgs
-  tf2_eigen
-  geometric_shapes
-  OCTOMAP
-)
-
 # unit tests
 if(BUILD_TESTING)
   if(WIN32)
@@ -36,15 +23,15 @@ if(BUILD_TESTING)
 
   ament_add_gtest(test_world test/test_world.cpp
     APPEND_LIBRARY_DIRS "${append_library_dirs}")
-  target_link_libraries(test_world moveit_core)
+  target_link_libraries(test_world moveit::core)
 
   ament_add_gtest(test_world_diff test/test_world_diff.cpp
     APPEND_LIBRARY_DIRS "${append_library_dirs}")
-  target_link_libraries(test_world_diff moveit_core)
+  target_link_libraries(test_world_diff moveit::core)
 
   ament_add_gtest(test_all_valid test/test_all_valid.cpp
     APPEND_LIBRARY_DIRS "${append_library_dirs}")
-  target_link_libraries(test_all_valid moveit_core)
+  target_link_libraries(test_all_valid moveit::core)
 endif()
 
 install(DIRECTORY include/ DESTINATION include/moveit_core)

@@ -69,6 +69,34 @@ target_include_directories(moveit_core PUBLIC
   $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}>
   $<INSTALL_INTERFACE:include/moveit_core>
 )
+target_link_libraries(moveit_core ruckig::ruckig)
+ament_target_dependencies(moveit_core SYSTEM
+  ament_index_cpp
+  angles
+  Boost
+  BULLET
+  Eigen3
+  geometric_shapes
+  geometry_msgs
+  kdl_parser
+  LIBFCL
+  moveit_msgs
+  OCTOMAP
+  octomap_msgs
+  orocos_kdl
+  pluginlib
+  rclcpp
+  rmw_implementation
+  srdfdom
+  srdfdom moveit_msgs
+  tf2_eigen
+  tf2_geometry_msgs
+  urdf
+  urdfdom
+  urdfdom_headers
+  visualization_msgs
+)
+set_target_properties(moveit_core PROPERTIES VERSION ${moveit_core_VERSION})
 
 add_subdirectory(collision_detection_bullet)
 add_subdirectory(collision_detection_fcl)
@@ -95,10 +123,6 @@ add_subdirectory(transforms)
 add_subdirectory(utils)
 add_subdirectory(version)
 
-set_target_properties(moveit_core PROPERTIES VERSION ${moveit_core_VERSION})
-
-install(FILES ${PROJECT_BINARY_DIR}/moveit_core_export.h DESTINATION include/moveit_core)
-
 # TODO: Port python bindings
 # add_subdirectory(python)
 # pybind_add_module(pymoveit_core
@@ -116,6 +140,7 @@ install(FILES ${PROJECT_BINARY_DIR}/moveit_core_export.h DESTINATION include/mov
 # #catkin_lint: ignore_once undefined_target (pymoveit_core is defined by pybind_add_module)
 # install(TARGETS pymoveit_core LIBRARY DESTINATION ${CATKIN_GLOBAL_PYTHON_DESTINATION})
 
+install(FILES ${PROJECT_BINARY_DIR}/moveit_core_export.h DESTINATION include/moveit_core)
 
 install(
   TARGETS moveit_core

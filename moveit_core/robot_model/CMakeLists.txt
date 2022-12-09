@@ -13,17 +13,6 @@ target_sources(moveit_core PRIVATE
 target_include_directories(moveit_core PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/kinematics_base/include> # Work around cyclic dependency between this and kinematics base
-
-)
-ament_target_dependencies(moveit_core
-  angles
-  moveit_msgs
-  Eigen3
-  geometric_shapes
-  urdf
-  urdfdom_headers
-  srdfdom
-  visualization_msgs
 )
 
 if(BUILD_TESTING)
@@ -32,7 +21,7 @@ if(BUILD_TESTING)
   ament_target_dependencies(test_robot_model
     rclcpp
   )
-  target_link_libraries(test_robot_model moveit_core)
+  target_link_libraries(test_robot_model moveit::core)
 endif()
 
 install(DIRECTORY include/ DESTINATION include/moveit_core)

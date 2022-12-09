@@ -8,14 +8,6 @@ target_include_directories(moveit_core PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
 )
 
-ament_target_dependencies(moveit_core
-  urdf
-  visualization_msgs
-  tf2_eigen
-  geometric_shapes
-  OCTOMAP
-)
-
 install(DIRECTORY include/ DESTINATION include/moveit_core)
 
 if(BUILD_TESTING)
@@ -29,5 +21,5 @@ if(BUILD_TESTING)
     srdfdom
     resource_retriever
   )
-  target_link_libraries(test_collision_distance_field moveit_core)
+  target_link_libraries(test_collision_distance_field moveit::core)
 endif()
