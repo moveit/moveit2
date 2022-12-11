@@ -560,7 +560,7 @@ TEST_F(RobotTrajectoryTestFixture, RobotTrajectoryDensity)
 
 TEST_F(OneRobot, Unwind)
 {
-  const double EPSILON = 1e-4;
+  const double epsilon = 1e-4;
 
   // An initial joint position needs unwinding
   {
@@ -571,7 +571,7 @@ TEST_F(OneRobot, Unwind)
     first_waypoint->setVariablePosition("panda_joint0", random_large_angle);
     first_waypoint->update();
     trajectory->unwind();
-    EXPECT_NEAR(trajectory->getFirstWayPoint().getVariablePosition("panda_joint0"), 1.350444, EPSILON);
+    EXPECT_NEAR(trajectory->getFirstWayPoint().getVariablePosition("panda_joint0"), 1.350444, epsilon);
   }
 }
 
