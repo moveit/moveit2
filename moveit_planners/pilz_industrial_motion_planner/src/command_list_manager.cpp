@@ -99,7 +99,7 @@ RobotTrajCont CommandListManager::solve(const planning_scene::PlanningSceneConst
       resp_cont.at(i).trajectory_->getLastWayPointPtr()->zeroAccelerations();
     }
   }
-  
+
   assert(model_);
   RadiiCont radii{ extractBlendRadii(*model_, req_list) };
   checkForOverlappingRadii(resp_cont, radii);
