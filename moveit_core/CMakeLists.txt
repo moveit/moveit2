@@ -22,7 +22,6 @@ foreach(LIBFCL_LIBRARY ${LIBFCL_LIBRARIES})
 endforeach()
 set(LIBFCL_LIBRARIES "${LIBFCL_LIBRARIES_FULL}")
 
-
 find_package(ament_cmake REQUIRED)
 find_package(ament_index_cpp REQUIRED)
 find_package(angles REQUIRED)
@@ -62,10 +61,10 @@ include(GenerateExportHeader)
 
 add_library(moveit_core SHARED)
 add_library(moveit::core ALIAS moveit_core)
-generate_export_header(moveit_core)
+generate_export_header(moveit_core EXPORT_FILE_NAME include/moveit/export.h)
 target_include_directories(moveit_core PUBLIC
   $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
-  $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}>
+  $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/include>
   $<INSTALL_INTERFACE:include/moveit_core>
 )
 target_link_libraries(moveit_core ruckig::ruckig)
@@ -115,8 +114,8 @@ add_subdirectory(src)
 # #catkin_lint: ignore_once undefined_target (pymoveit_core is defined by pybind_add_module)
 # install(TARGETS pymoveit_core LIBRARY DESTINATION ${CATKIN_GLOBAL_PYTHON_DESTINATION})
 
-install(DIRECTORY include/ DESTINATION include/moveit_core)
-install(FILES ${PROJECT_BINARY_DIR}/moveit_core_export.h DESTINATION include/moveit_core)
+install(DIRECTORY ${PROJECT_SOURCE_DIR}/include/ DESTINATION include/moveit_core)
+install(DIRECTORY ${PROJECT_BINARY_DIR}/include/ DESTINATION include/moveit_core)
 
 install(
   TARGETS moveit_core

@@ -57,7 +57,7 @@
 #include <variant>
 #include <rclcpp/rclcpp.hpp>
 
-#include <moveit_core_export.h>
+#include <moveit/export.h>
 
 /** \brief This namespace includes the central class for representing planning contexts */
 namespace planning_scene

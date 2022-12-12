@@ -44,7 +44,7 @@
 #include <string>
 #include <functional>
 
-#include <moveit_core_export.h>
+#include <moveit/export.h>
 
 namespace moveit
 {
