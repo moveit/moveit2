@@ -575,6 +575,25 @@ TEST_F(OneRobot, Unwind)
   }
 }
 
+TEST_F(OneRobot, UnwindFromState)
+{
+  const double EPSILON = 1e-4;
+
+  // Unwind a trajectory from a robot state
+  {
+    robot_trajectory::RobotTrajectoryPtr trajectory;
+    initTestTrajectory(trajectory);
+    moveit::core::RobotState first_waypoint = trajectory->getFirstWayPoint();
+    // Wrap the continuous joint by 4PI as if this happened to be the current state of the robot
+    const double wrapped_angle = first_waypoint.getVariablePosition("panda_joint0") + 12.566371;
+    first_waypoint.setVariablePosition("panda_joint0", wrapped_angle);
+    first_waypoint.update();
+    // Unwind the trajectory from the wound up robot state
+    trajectory->unwind(first_waypoint);
+    EXPECT_NEAR(trajectory->getFirstWayPoint().getVariablePosition("panda_joint0"), wrapped_angle, EPSILON);
+  }
+}
+
 int main(int argc, char** argv)
 {
   testing::InitGoogleTest(&argc, argv);
