@@ -316,6 +316,7 @@ protected:
     robot_model_ = std::make_shared<moveit::core::RobotModel>(urdf_model, srdf_model);
     robot_state_ = std::make_shared<moveit::core::RobotState>(robot_model_);
     robot_state_->setToDefaultValues();
+    robot_state_->setVariablePositions({ "panda_joint0" }, { -3.1416 });
     robot_state_->setVariableVelocity(/*index*/ 0, /*value*/ 1.0);
     robot_state_->setVariableAcceleration(/*index*/ 0, /*value*/ -0.1);
     robot_state_->update();
