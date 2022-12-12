@@ -56,9 +56,9 @@ namespace pilz_industrial_motion_planner
 static const rclcpp::Logger LOGGER =
     rclcpp::get_logger("moveit.pilz_industrial_motion_planner.move_group_sequence_action");
 
-MoveGroupSequenceAction::MoveGroupSequenceAction() : 
-    MoveGroupCapability("SequenceAction"),
-    move_feedback_(std::make_shared<moveit_msgs::action::MoveGroupSequence::Feedback>())
+MoveGroupSequenceAction::MoveGroupSequenceAction()
+  : MoveGroupCapability("SequenceAction")
+  , move_feedback_(std::make_shared<moveit_msgs::action::MoveGroupSequence::Feedback>())
 {
 }
 
