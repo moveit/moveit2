@@ -577,7 +577,7 @@ TEST_F(OneRobot, Unwind)
 
 TEST_F(OneRobot, UnwindFromState)
 {
-  const double EPSILON = 1e-4;
+  const double epsilon = 1e-4;
 
   // Unwind a trajectory from a robot state
   {
@@ -590,7 +590,7 @@ TEST_F(OneRobot, UnwindFromState)
     first_waypoint.update();
     // Unwind the trajectory from the wound up robot state
     trajectory->unwind(first_waypoint);
-    EXPECT_NEAR(trajectory->getFirstWayPoint().getVariablePosition("panda_joint0"), wrapped_angle, EPSILON);
+    EXPECT_NEAR(trajectory->getFirstWayPoint().getVariablePosition("panda_joint0"), wrapped_angle, epsilon);
   }
 }
 
