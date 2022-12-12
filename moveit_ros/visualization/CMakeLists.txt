@@ -48,9 +48,6 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 add_definitions(-DQT_NO_KEYWORDS)
 
-# catkin_install_python(PROGRAMS scripts/moveit_joy.py DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
-# catkin_python_setup()
-
 set(THIS_PACKAGE_LIBRARIES
   moveit_motion_planning_rviz_plugin
   moveit_motion_planning_rviz_plugin_core
@@ -106,11 +103,6 @@ pluginlib_export_plugin_description_file(rviz_common motion_planning_rviz_plugin
 pluginlib_export_plugin_description_file(rviz_common trajectory_rviz_plugin_description.xml)
 pluginlib_export_plugin_description_file(rviz_common planning_scene_rviz_plugin_description.xml)
 pluginlib_export_plugin_description_file(rviz_common robot_state_rviz_plugin_description.xml)
-
-#if (CATKIN_ENABLE_TESTING)
-#  find_package(rostest REQUIRED)
-#  add_rostest(test/moveit_joy.test)
-#endif()
 
 install(
   TARGETS ${THIS_PACKAGE_LIBRARIES}
