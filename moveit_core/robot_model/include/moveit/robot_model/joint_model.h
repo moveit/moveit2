@@ -287,7 +287,7 @@ public:
   virtual bool satisfiesPositionBounds(const double* values, const Bounds& other_bounds, double margin) const = 0;
 
   /** \brief Force the specified values to be inside bounds and normalized. Quaternions are normalized, continuous
-     joints are made between -Pi and Pi.
+     revolute joints are made between -Pi and Pi.
       Returns true if changes were made. */
   bool enforcePositionBounds(double* values) const
   {
@@ -295,7 +295,7 @@ public:
   }
 
   /** \brief Force the specified values to be inside bounds and normalized. Quaternions are normalized, continuous
-     joints are made between -Pi and Pi.
+     revolute joints are made between -Pi and Pi.
       Return true if changes were made. */
   virtual bool enforcePositionBounds(double* values, const Bounds& other_bounds) const = 0;
 
