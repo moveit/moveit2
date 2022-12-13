@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Iterable, Text
+from typing import Iterable, Text, Optional
 
 from launch.frontend import expose_substitution
 from launch.launch_context import LaunchContext
@@ -17,7 +17,7 @@ class Xacro(Substitution):
         self,
         file_path: SomeSubstitutionsType,
         *,
-        mappings: dict[SomeSubstitutionsType, SomeSubstitutionsType] | None = None,
+        mappings: Optional[dict[SomeSubstitutionsType, SomeSubstitutionsType]] = None,
     ) -> None:
         """Create a Xacro substitution."""
         super().__init__()
