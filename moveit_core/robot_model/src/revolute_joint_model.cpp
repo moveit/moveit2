@@ -231,7 +231,6 @@ bool RevoluteJointModel::enforcePositionBounds(double* values, const Bounds& bou
       {
         v -= 2.0 * M_PI;
       }
-      return true;
     }
   }
   else
@@ -239,15 +238,13 @@ bool RevoluteJointModel::enforcePositionBounds(double* values, const Bounds& bou
     if (values[0] < bounds[0].min_position_)
     {
       values[0] = bounds[0].min_position_;
-      return true;
     }
     else if (values[0] > bounds[0].max_position_)
     {
       values[0] = bounds[0].max_position_;
-      return true;
     }
   }
-  return false;
+  return true;
 }
 
 void RevoluteJointModel::computeTransform(const double* joint_values, Eigen::Isometry3d& transf) const
