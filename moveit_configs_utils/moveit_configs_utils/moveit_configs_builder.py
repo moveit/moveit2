@@ -58,7 +58,7 @@ from dataclasses import dataclass, field
 from ament_index_python.packages import get_package_share_directory
 
 from launch_param_builder import ParameterBuilder, load_yaml, load_xacro
-
+from launch_param_builder.utils import ParameterBuilderFileNotFoundError
 
 moveit_configs_utils_path = Path(get_package_share_directory("moveit_configs_utils"))
 
@@ -206,15 +206,24 @@ class MoveItConfigsBuilder(ParameterBuilder):
         :param mappings: mappings to be passed when loading the xacro file.
         :return: Instance of MoveItConfigsBuilder with robot_description loaded.
         """
-        if file_path is None:
-            robot_description_file_path = self.__urdf_package / self.__urdf_file_path
-        else:
-            robot_description_file_path = self._package_path / file_path
-        self.__moveit_configs.robot_description = {
-            self.__robot_description: load_xacro(
-                robot_description_file_path, mappings=mappings
+        try:
+            if file_path is None:
+                robot_description_file_path = (
+                    self.__urdf_package / self.__urdf_file_path
+                )
+            else:
+                robot_description_file_path = self._package_path / file_path
+            self.__moveit_configs.robot_description = {
+                self.__robot_description: load_xacro(
+                    robot_description_file_path, mappings=mappings
+                )
+            }
+        except ParameterBuilderFileNotFoundError as e:
+            logging.warning(f"\x1b[33;21m{e}\x1b[0m")
+            logging.warning(
+                f"\x1b[33;21mThe robot description will be loaded from /robot_description topic \x1b[0m"
             )
-        }
+
         return self
 
     def robot_description_semantic(
