@@ -133,7 +133,7 @@ class MoveItConfigs:
 
 
 class MoveItConfigsBuilder(ParameterBuilder):
-    __moveit_configs = MoveItConfigs()
+    __moveit_configs: MoveItConfigs
     __robot_name: str
     __urdf_package: Path
     # Relative path of the URDF file w.r.t. __urdf_package
@@ -153,7 +153,7 @@ class MoveItConfigsBuilder(ParameterBuilder):
         package_name: Optional[str] = None,
     ):
         super().__init__(package_name or (robot_name + "_moveit_config"))
-        self.__moveit_configs.package_path = self._package_path
+        self.__moveit_configs = MoveItConfigs(package_path=self._package_path)
         self.__robot_name = robot_name
         setup_assistant_file = self._package_path / ".setup_assistant"
 
