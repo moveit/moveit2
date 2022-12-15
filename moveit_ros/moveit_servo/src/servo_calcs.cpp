@@ -1059,27 +1059,27 @@ Eigen::VectorXd ServoCalcs::scaleCartesianCommand(const geometry_msgs::msg::Twis
   // Add a user-defined, constant delay to the timestep.
   // This can help if ramp-up / ramp-down of the low-level controllers cause jitter, or to account for network latency.
   // Effectively it moves the target pose farther ahead.
-  double timestep = parameters_->publish_period + parameters_->target_pose_lookahead_time;
+  double timestep = parameters_->publish_period + parameters_->lookahead_time;
 
   // Apply user-defined scaling if inputs are unitless [-1:1]
   if (parameters_->command_in_type == "unitless")
   {
-    result[0] = parameters_->linear_scale * parameters_->publish_period * command.twist.linear.x;
-    result[1] = parameters_->linear_scale * parameters_->publish_period * command.twist.linear.y;
-    result[2] = parameters_->linear_scale * parameters_->publish_period * command.twist.linear.z;
-    result[3] = parameters_->rotational_scale * parameters_->publish_period * command.twist.angular.x;
-    result[4] = parameters_->rotational_scale * parameters_->publish_period * command.twist.angular.y;
-    result[5] = parameters_->rotational_scale * parameters_->publish_period * command.twist.angular.z;
+    result[0] = parameters_->linear_scale * timestep * command.twist.linear.x;
+    result[1] = parameters_->linear_scale * timestep * command.twist.linear.y;
+    result[2] = parameters_->linear_scale * timestep * command.twist.linear.z;
+    result[3] = parameters_->rotational_scale * timestep * command.twist.angular.x;
+    result[4] = parameters_->rotational_scale * timestep * command.twist.angular.y;
+    result[5] = parameters_->rotational_scale * timestep * command.twist.angular.z;
   }
   // Otherwise, commands are in m/s and rad/s
   else if (parameters_->command_in_type == "speed_units")
   {
-    result[0] = command.twist.linear.x * parameters_->publish_period;
-    result[1] = command.twist.linear.y * parameters_->publish_period;
-    result[2] = command.twist.linear.z * parameters_->publish_period;
-    result[3] = command.twist.angular.x * parameters_->publish_period;
-    result[4] = command.twist.angular.y * parameters_->publish_period;
-    result[5] = command.twist.angular.z * parameters_->publish_period;
+    result[0] = command.twist.linear.x * timestep;
+    result[1] = command.twist.linear.y * timestep;
+    result[2] = command.twist.linear.z * timestep;
+    result[3] = command.twist.angular.x * timestep;
+    result[4] = command.twist.angular.y * timestep;
+    result[5] = command.twist.angular.z * timestep;
   }
   else
   {
@@ -1098,7 +1098,7 @@ Eigen::VectorXd ServoCalcs::scaleJointCommand(const control_msgs::msg::JointJog&
   // Add a user-defined, constant delay to the timestep.
   // This can help if ramp-up / ramp-down of the low-level controllers cause jitter, or to account for network latency.
   // Effectively it moves the target pose farther ahead.
-  double timestep = parameters_->publish_period + parameters_->target_pose_lookahead_time;
+  double timestep = parameters_->publish_period + parameters_->lookahead_time;
 
   std::size_t c;
   for (std::size_t m = 0; m < command.joint_names.size(); ++m)
@@ -1116,12 +1116,12 @@ Eigen::VectorXd ServoCalcs::scaleJointCommand(const control_msgs::msg::JointJog&
     // Apply user-defined scaling if inputs are unitless [-1:1]
     if (parameters_->command_in_type == "unitless")
     {
-      result[c] = command.velocities[m] * parameters_->joint_scale * parameters_->publish_period;
+      result[c] = command.velocities[m] * parameters_->joint_scale * timestep;
       // Otherwise, commands are in m/s and rad/s
     }
     else if (parameters_->command_in_type == "speed_units")
     {
-      result[c] = command.velocities[m] * parameters_->publish_period;
+      result[c] = command.velocities[m] * timestep;
     }
     else
     {

@@ -146,12 +146,12 @@ void ServoParameters::declare(const std::string& ns,
                                          .description("Override constant scalar of how fast the robot should jog."
                                                       "Valid values are between 0-1.0"));
 
-  node_parameters->declare_parameter(
-      ns + ".target_pose_lookahead_time", ParameterValue{ parameters.target_pose_lookahead_time },
-      ParameterDescriptorBuilder{}
-          .type(PARAMETER_DOUBLE)
-          .description("An optional parameter to smooth jitter due to latency in the system "
-                       "or low-level controller ramp up / ramp down"));
+  node_parameters->declare_parameter(ns + ".lookahead_time", ParameterValue{ parameters.lookahead_time },
+                                     ParameterDescriptorBuilder{}
+                                         .type(PARAMETER_DOUBLE)
+                                         .description(
+                                             "An optional parameter to smooth jitter due to latency in the system "
+                                             "or low-level controller ramp up / ramp down"));
 
   // Properties of outgoing commands
   node_parameters->declare_parameter(

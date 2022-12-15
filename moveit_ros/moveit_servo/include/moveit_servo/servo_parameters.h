@@ -71,7 +71,7 @@ struct ServoParameters
   double joint_scale{ 0.5 };
   // Properties of Servo calculations
   double override_velocity_scaling_factor{ 0.0 };
-  double target_pose_lookahead_time{ 0.0 };
+  double lookahead_time{ 0.0 };
   // Properties of outgoing commands
   std::string command_out_topic{ "/panda_arm_controller/joint_trajectory" };
   double publish_period{ 0.034 };
