@@ -82,8 +82,11 @@ bool RuckigSmoothing::applySmoothing(robot_trajectory::RobotTrajectory& trajecto
   }
 
   auto ruckig_result = runRuckigInBatches(num_waypoints, trajectory, ruckig_input);
-  trajectory = ruckig_result.value();
-  return ruckig_result.has_value();
+  if (ruckig_result.has_value())
+  {
+    trajectory = ruckig_result.value();
+  }
+  return ruckig_result.has_value();  // Ruckig failed to smooth the trajectory
 }
 
 bool RuckigSmoothing::applySmoothing(robot_trajectory::RobotTrajectory& trajectory,
@@ -142,8 +145,11 @@ bool RuckigSmoothing::applySmoothing(robot_trajectory::RobotTrajectory& trajecto
   }
 
   auto ruckig_result = runRuckigInBatches(num_waypoints, trajectory, ruckig_input);
-  trajectory = ruckig_result.value();
-  return ruckig_result.has_value();
+  if (ruckig_result.has_value())
+  {
+    trajectory = ruckig_result.value();
+  }
+  return ruckig_result.has_value();  // Ruckig failed to smooth the trajectory
 }
 
 std::optional<robot_trajectory::RobotTrajectory>
