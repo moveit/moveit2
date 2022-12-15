@@ -150,16 +150,13 @@ std::optional<robot_trajectory::RobotTrajectory>
 RuckigSmoothing::runRuckigInBatches(const size_t num_waypoints, const robot_trajectory::RobotTrajectory& trajectory,
                                     ruckig::InputParameter<ruckig::DynamicDOFs>& ruckig_input)
 {
-  // runRuckig() stretches all input waypoints in time until all kinematic limits are obeyed. This works but it can
-  // slow the trajectory more than necessary. It's better to feed in just a few waypoints at once, so that only the
-  // waypoints needing it get stretched.
-  // Here, break the trajectory waypoints into batches so the output is closer to time-optimal.
-  // There is a trade-off between time-optimality of the output trajectory and runtime of the smoothing algorithm.
   // We take the batch size as the lesser of 0.1*num_waypoints or 100, to keep a balance between run time and
   // time-optimality.
-  size_t temp_batch_size = std::min(size_t(0.1 * num_waypoints), size_t(100));
-  // But we need at least 2 waypoints
-  size_t waypoint_batch_size = std::max(size_t(2), temp_batch_size);
+  const size_t waypoint_batch_size = [num_waypoints]() {
+    const size_t temp_batch_size = std::min(size_t(0.1 * num_waypoints), size_t(100));
+    // We need at least 2 waypoints
+    return std::max(size_t(2), temp_batch_size);
+  }();
   size_t batch_start_idx = 0;
   size_t batch_end_idx = waypoint_batch_size - 1;
   const size_t full_traj_final_idx = num_waypoints - 1;
