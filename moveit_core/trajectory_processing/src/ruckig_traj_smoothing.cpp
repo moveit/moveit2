@@ -152,6 +152,7 @@ RuckigSmoothing::runRuckigInBatches(const size_t num_waypoints, const robot_traj
 {
   // We take the batch size as the lesser of 0.1*num_waypoints or 100, to keep a balance between run time and
   // time-optimality.
+  // TODO(andyz): parameterize as MIN_BATCH_SIZE and BATCH_SCALING_FACTOR or something like that
   const size_t waypoint_batch_size = [num_waypoints]() {
     const size_t temp_batch_size = std::min(size_t(0.1 * num_waypoints), size_t(100));
     // We need at least 2 waypoints
