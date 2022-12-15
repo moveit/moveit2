@@ -98,6 +98,15 @@ private:
                                     ruckig::OutputParameter<ruckig::DynamicDOFs>& ruckig_output);
 
   /**
+   * \brief Break the `trajectory` parameter into batches of reasonable size, run Ruckig on each of them, then
+   * re-combine into a single trajectory again.
+   * \param[in, out] trajectory      Trajectory to smooth.
+   * \param[in, out] ruckig_input    Necessary input for Ruckig smoothing. Contains kinematic limits (vel, accel, jerk)
+   */
+  static bool runRuckigInBatches(const size_t num_waypoints, robot_trajectory::RobotTrajectory& trajectory,
+                                 ruckig::InputParameter<ruckig::DynamicDOFs>& ruckig_input);
+
+  /**
    * \brief A utility function to instantiate and run Ruckig for a series of waypoints.
    * \param[in, out] trajectory      Trajectory to smooth.
    * \param[in, out] ruckig_input    Necessary input for Ruckig smoothing. Contains kinematic limits (vel, accel, jerk)
