@@ -81,7 +81,9 @@ bool RuckigSmoothing::applySmoothing(robot_trajectory::RobotTrajectory& trajecto
     return false;
   }
 
-  return runRuckigInBatches(num_waypoints, trajectory, ruckig_input);
+  auto ruckig_result = runRuckigInBatches(num_waypoints, trajectory, ruckig_input);
+  trajectory = ruckig_result.value();
+  return ruckig_result.has_value();
 }
 
 bool RuckigSmoothing::applySmoothing(robot_trajectory::RobotTrajectory& trajectory,
@@ -139,11 +141,14 @@ bool RuckigSmoothing::applySmoothing(robot_trajectory::RobotTrajectory& trajecto
     }
   }
 
-  return runRuckigInBatches(num_waypoints, trajectory, ruckig_input);
+  auto ruckig_result = runRuckigInBatches(num_waypoints, trajectory, ruckig_input);
+  trajectory = ruckig_result.value();
+  return ruckig_result.has_value();
 }
 
-bool RuckigSmoothing::runRuckigInBatches(const size_t num_waypoints, robot_trajectory::RobotTrajectory& trajectory,
-                                         ruckig::InputParameter<ruckig::DynamicDOFs>& ruckig_input)
+std::optional<robot_trajectory::RobotTrajectory>
+RuckigSmoothing::runRuckigInBatches(const size_t num_waypoints, const robot_trajectory::RobotTrajectory& trajectory,
+                                    ruckig::InputParameter<ruckig::DynamicDOFs>& ruckig_input)
 {
   // runRuckig() stretches all input waypoints in time until all kinematic limits are obeyed. This works but it can
   // slow the trajectory more than necessary. It's better to feed in just a few waypoints at once, so that only the
@@ -184,8 +189,7 @@ bool RuckigSmoothing::runRuckigInBatches(const size_t num_waypoints, robot_traje
 
     if (!runRuckig(sub_trajectory, ruckig_input))
     {
-      // If Ruckig fails, the trajectory is returned without modification
-      return false;
+      return std::nullopt;
     }
 
     // Skip appending the first waypoint in sub_trajectory if it was smoothed in
@@ -203,9 +207,7 @@ bool RuckigSmoothing::runRuckigInBatches(const size_t num_waypoints, robot_traje
     batch_end_idx += waypoint_batch_size;
   }
 
-  // For output
-  trajectory = robot_trajectory::RobotTrajectory(output_trajectory, true /* deep copy */);
-  return true;
+  return std::make_optional<robot_trajectory::RobotTrajectory>(output_trajectory, true /* deep copy */);
 }
 
 bool RuckigSmoothing::validateGroup(const robot_trajectory::RobotTrajectory& trajectory)

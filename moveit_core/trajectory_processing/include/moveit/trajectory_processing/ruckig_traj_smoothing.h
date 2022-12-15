@@ -103,8 +103,9 @@ private:
    * \param[in, out] trajectory      Trajectory to smooth.
    * \param[in, out] ruckig_input    Necessary input for Ruckig smoothing. Contains kinematic limits (vel, accel, jerk)
    */
-  static bool runRuckigInBatches(const size_t num_waypoints, robot_trajectory::RobotTrajectory& trajectory,
-                                 ruckig::InputParameter<ruckig::DynamicDOFs>& ruckig_input);
+  static std::optional<robot_trajectory::RobotTrajectory>
+  runRuckigInBatches(const size_t num_waypoints, const robot_trajectory::RobotTrajectory& trajectory,
+                     ruckig::InputParameter<ruckig::DynamicDOFs>& ruckig_input);
 
   /**
    * \brief A utility function to instantiate and run Ruckig for a series of waypoints.
