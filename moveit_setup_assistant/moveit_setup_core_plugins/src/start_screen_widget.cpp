@@ -50,7 +50,7 @@
 #include <QVBoxLayout>
 
 // SA
-#include "moveit_setup_core_plugins/start_screen_widget.hpp"
+#include <moveit_setup_core_plugins/start_screen_widget.hpp>
 // C
 #include <fstream>  // for reading in urdf
 #include <streambuf>
@@ -178,7 +178,7 @@ void StartScreenWidget::onInit()
   layout->addLayout(load_files_layout);
 
   setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
-  this->setLayout(layout);
+  setLayout(layout);
 
   // Debug mode: auto load the configuration file by clicking button after a timeout
   if (debug_)

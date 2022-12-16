@@ -1,21 +1,26 @@
-set(MOVEIT_LIB_NAME moveit_utils)
-
-add_library(${MOVEIT_LIB_NAME} SHARED
+add_library(moveit_utils SHARED
   src/lexical_casts.cpp
   src/message_checks.cpp
   src/rclcpp_utils.cpp
 )
-ament_target_dependencies(${MOVEIT_LIB_NAME} Boost moveit_msgs)
-set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
+target_include_directories(moveit_utils PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include/moveit_core>
+)
+ament_target_dependencies(moveit_utils Boost moveit_msgs)
+set_target_properties(moveit_utils PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
 
-install(DIRECTORY include/ DESTINATION include)
+install(DIRECTORY include/ DESTINATION include/moveit_core)
 
 
 find_package(ament_index_cpp REQUIRED)
-set(MOVEIT_TEST_LIB_NAME moveit_test_utils)
-add_library(${MOVEIT_TEST_LIB_NAME} SHARED src/robot_model_test_utils.cpp)
-target_link_libraries(${MOVEIT_TEST_LIB_NAME} moveit_robot_model)
-ament_target_dependencies(${MOVEIT_TEST_LIB_NAME}
+add_library(moveit_test_utils SHARED src/robot_model_test_utils.cpp)
+target_include_directories(moveit_test_utils PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include/moveit_core>
+)
+target_link_libraries(moveit_test_utils moveit_robot_model)
+ament_target_dependencies(moveit_test_utils
   ament_index_cpp
   Boost
   geometry_msgs
@@ -24,4 +29,4 @@ ament_target_dependencies(${MOVEIT_TEST_LIB_NAME}
   urdfdom
   urdfdom_headers
 )
-set_target_properties(${MOVEIT_TEST_LIB_NAME} PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
+set_target_properties(moveit_test_utils PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")

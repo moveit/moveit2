@@ -44,11 +44,11 @@
 #include <memory>
 #include <optional>
 
-#include "rcl/error_handling.h"
-#include "rcl/time.h"
-#include "rclcpp/rclcpp.hpp"
-#include "rclcpp/time.hpp"
-#include "rclcpp/utilities.hpp"
+#include <rcl/error_handling.h>
+#include <rcl/time.h>
+#include <rclcpp/rclcpp.hpp>
+#include <rclcpp/time.hpp>
+#include <rclcpp/utilities.hpp>
 
 namespace robot_trajectory
 {
@@ -160,9 +160,13 @@ public:
   double getWayPointDurationFromPrevious(std::size_t index) const
   {
     if (duration_from_previous_.size() > index)
+    {
       return duration_from_previous_[index];
+    }
     else
+    {
       return 0.0;
+    }
   }
 
   RobotTrajectory& setWayPointDurationFromPrevious(std::size_t index, double value)

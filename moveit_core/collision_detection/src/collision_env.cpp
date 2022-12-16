@@ -161,9 +161,13 @@ double CollisionEnv::getLinkPadding(const std::string& link_name) const
 {
   auto it = link_padding_.find(link_name);
   if (it != link_padding_.end())
+  {
     return it->second;
+  }
   else
+  {
     return 0.0;
+  }
 }
 
 void CollisionEnv::setLinkPadding(const std::map<std::string, double>& padding)
@@ -202,9 +206,13 @@ double CollisionEnv::getLinkScale(const std::string& link_name) const
 {
   const auto it = link_scale_.find(link_name);
   if (it != link_scale_.end())
+  {
     return it->second;
+  }
   else
+  {
     return 1.0;
+  }
 }
 
 void CollisionEnv::setLinkScale(const std::map<std::string, double>& scale)

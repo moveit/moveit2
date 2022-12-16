@@ -9,7 +9,7 @@
   <maintainer email="me@v4hn.de">Michael Görner</maintainer>
   <maintainer email="rhaschke@techfak.uni-bielefeld.de">Robert Haschke</maintainer>
 
-  <license>BSD</license>
+  <license>BSD-3-Clause</license>
 
   <url type="website">http://moveit.ros.org</url>
   <url type="repository">https://github.com/ros-planning/moveit2</url>

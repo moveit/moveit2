@@ -334,9 +334,13 @@ void RobotStateDisplay::newRobotStateCallback(const moveit_msgs::msg::DisplayRob
   {
     robot_->setVisible(!state_msg->hide);
     if (robot_->isVisible())
+    {
       setStatus(rviz_common::properties::StatusProperty::Ok, "RobotState", "");
+    }
     else
+    {
       setStatus(rviz_common::properties::StatusProperty::Warn, "RobotState", "Hidden");
+    }
   }
 
   update_state_ = true;

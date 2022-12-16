@@ -112,19 +112,31 @@ void printNeg(PropagationDistanceField& pdf, int numX, int numY, int numZ)
 void printPointCoords(const Eigen::Vector3i& p)
 {
   if (p.x() < 0)
+  {
     std::cout << '-';
+  }
   else
+  {
     std::cout << p.x();
+  }
 
   if (p.y() < 0)
+  {
     std::cout << '-';
+  }
   else
+  {
     std::cout << p.y();
+  }
 
   if (p.z() < 0)
+  {
     std::cout << '-';
+  }
   else
+  {
     std::cout << p.z();
+  }
 
   std::cout << " ";
 }

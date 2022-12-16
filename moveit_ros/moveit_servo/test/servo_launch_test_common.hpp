@@ -74,7 +74,7 @@ public:
   {
     ASSERT_TRUE(servo_parameters_.get() != nullptr);
     executor_->add_node(node_);
-    executor_thread_ = std::thread([this]() { this->executor_->spin(); });
+    executor_thread_ = std::thread([this]() { executor_->spin(); });
   }
 
   ServoFixture()
@@ -123,9 +123,13 @@ public:
   std::string resolveServoTopicName(std::string topic_name)
   {
     if (topic_name.at(0) == '~')
+    {
       return topic_name.replace(0, 1, test_parameters_->servo_node_name);
+    }
     else
+    {
       return topic_name;
+    }
   }
 
   // Set up for callbacks (so they aren't run for EVERY test)

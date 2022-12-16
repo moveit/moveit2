@@ -53,10 +53,10 @@
 #include <tf2_eigen/tf2_eigen.hpp>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
 
-#include "pilz_industrial_motion_planner/cartesian_trajectory.h"
-#include "pilz_industrial_motion_planner/cartesian_trajectory_point.h"
-#include "pilz_industrial_motion_planner/limits_container.h"
-#include "pilz_industrial_motion_planner/trajectory_functions.h"
+#include <pilz_industrial_motion_planner/cartesian_trajectory.h>
+#include <pilz_industrial_motion_planner/cartesian_trajectory_point.h>
+#include <pilz_industrial_motion_planner/limits_container.h>
+#include <pilz_industrial_motion_planner/trajectory_functions.h>
 #include "test_utils.h"
 
 #define _USE_MATH_DEFINES
@@ -150,11 +150,13 @@ bool TrajectoryFunctionsTestBase::tfNear(const Eigen::Isometry3d& pose1, const E
                                          const double& epsilon)
 {
   for (std::size_t i = 0; i < 3; ++i)
+  {
     for (std::size_t j = 0; j < 4; ++j)
     {
       if (fabs(pose1(i, j) - pose2(i, j)) > fabs(epsilon))
         return false;
     }
+  }
   return true;
 }
 
@@ -232,9 +234,13 @@ TEST_F(TrajectoryFunctionsTestFlangeAndGripper, testIKSolver)
     {
       ik_expect.push_back(rstate.getVariablePosition(joint_name));
       if (rstate.getVariablePosition(joint_name) > 0)
+      {
         ik_seed.push_back(rstate.getVariablePosition(joint_name) - IK_SEED_OFFSET);
+      }
       else
+      {
         ik_seed.push_back(rstate.getVariablePosition(joint_name) + IK_SEED_OFFSET);
+      }
     }
 
     std::vector<std::vector<double>> ik_solutions;
@@ -282,9 +288,13 @@ TEST_F(TrajectoryFunctionsTestFlangeAndGripper, testIKRobotState)
     {
       ik_expect[joint_name] = rstate.getVariablePosition(joint_name);
       if (rstate.getVariablePosition(joint_name) > 0)
+      {
         ik_seed[joint_name] = rstate.getVariablePosition(joint_name) - IK_SEED_OFFSET;
+      }
       else
+      {
         ik_seed[joint_name] = rstate.getVariablePosition(joint_name) + IK_SEED_OFFSET;
+      }
     }
 
     rstate.setVariablePositions(ik_seed);

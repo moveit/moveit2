@@ -84,9 +84,11 @@ void MoveGroupMoveAction::executeMoveCallback(const std::shared_ptr<MGActionGoal
   if (goal->get_goal()->planning_options.plan_only || !context_->allow_trajectory_execution_)
   {
     if (!goal->get_goal()->planning_options.plan_only)
+    {
       RCLCPP_WARN(LOGGER, "This instance of MoveGroup is not allowed to execute trajectories "
                           "but the goal request has plan_only set to false. "
                           "Only a motion plan will be computed anyway.");
+    }
     executeMoveCallbackPlanOnly(goal, action_res);
   }
   else
@@ -97,11 +99,17 @@ void MoveGroupMoveAction::executeMoveCallback(const std::shared_ptr<MGActionGoal
   RCLCPP_INFO_STREAM(LOGGER, getActionResultString(action_res->error_code, planned_trajectory_empty,
                                                    goal->get_goal()->planning_options.plan_only));
   if (action_res->error_code.val == moveit_msgs::msg::MoveItErrorCodes::SUCCESS)
+  {
     goal->succeed(action_res);
+  }
   else if (action_res->error_code.val == moveit_msgs::msg::MoveItErrorCodes::PREEMPTED)
+  {
     goal->canceled(action_res);
+  }
   else
+  {
     goal->abort(action_res);
+  }
 
   setMoveState(IDLE, goal);
   preempt_requested_ = false;
@@ -120,6 +128,7 @@ void MoveGroupMoveAction::executeMoveCallbackPlanAndExecute(const std::shared_pt
 
     // check to see if the desired constraints are already met
     for (std::size_t i = 0; i < goal->get_goal()->request.goal_constraints.size(); ++i)
+    {
       if (lscene->isStateConstrained(
               current_state, kinematic_constraints::mergeConstraints(goal->get_goal()->request.goal_constraints[i],
                                                                      goal->get_goal()->request.path_constraints)))
@@ -128,6 +137,7 @@ void MoveGroupMoveAction::executeMoveCallbackPlanAndExecute(const std::shared_pt
         action_res->error_code.val = moveit_msgs::msg::MoveItErrorCodes::SUCCESS;
         return;
       }
+    }
   }
 
   plan_execution::PlanExecution::Options opt;

@@ -74,8 +74,10 @@ bool KDLKinematicsPlugin::checkConsistency(const Eigen::VectorXd& seed_state,
                                            const Eigen::VectorXd& solution) const
 {
   for (std::size_t i = 0; i < dimension_; ++i)
+  {
     if (fabs(seed_state(i) - solution(i)) > consistency_limits[i])
       return false;
+  }
   return true;
 }
 
@@ -359,9 +361,13 @@ bool KDLKinematicsPlugin::searchPositionIK(const geometry_msgs::msg::Pose& ik_po
     if (attempt > 1)  // randomly re-seed after first attempt
     {
       if (!consistency_limits_mimic.empty())
+      {
         getRandomConfiguration(jnt_seed_state.data, consistency_limits_mimic, jnt_pos_in.data);
+      }
       else
+      {
         getRandomConfiguration(jnt_pos_in.data);
+      }
       RCLCPP_DEBUG_STREAM(LOGGER, "New random configuration (" << attempt << "): " << jnt_pos_in);
     }
 
@@ -487,11 +493,17 @@ void KDLKinematicsPlugin::clipToJointLimits(const KDL::JntArray& q, KDL::JntArra
     const double delta_max = joint_max_(i) - q(i);
     const double delta_min = joint_min_(i) - q(i);
     if (q_delta(i) > delta_max)
+    {
       q_delta(i) = delta_max;
+    }
     else if (q_delta(i) < delta_min)
+    {
       q_delta(i) = delta_min;
+    }
     else
+    {
       continue;
+    }
 
     weighting[mimic_joints_[i].map_index] = 0.01;
   }

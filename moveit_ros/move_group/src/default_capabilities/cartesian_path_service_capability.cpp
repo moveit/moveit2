@@ -112,14 +112,18 @@ bool MoveGroupCartesianPathService::computeService(
     for (std::size_t i = 0; i < req->waypoints.size(); ++i)
     {
       if (no_transform)
+      {
         tf2::fromMsg(req->waypoints[i], waypoints[i]);
+      }
       else
       {
         geometry_msgs::msg::PoseStamped p;
         p.header = req->header;
         p.pose = req->waypoints[i];
         if (performTransform(p, default_frame))
+        {
           tf2::fromMsg(p.pose, waypoints[i]);
+        }
         else
         {
           RCLCPP_ERROR(LOGGER, "Error encountered transforming waypoints to frame '%s'", default_frame.c_str());

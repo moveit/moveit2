@@ -9,7 +9,7 @@
   <maintainer email="tyler@picknik.ai">Tyler Weaver</maintainer>
   <maintainer email="henningkayser@picknik.ai">Henning Kayser</maintainer>
 
-  <license>BSD 3-Clause</license>
+  <license>BSD-3-Clause</license>
 
   <url type="website">https://ros-planning.github.io/moveit_tutorials</url>
 

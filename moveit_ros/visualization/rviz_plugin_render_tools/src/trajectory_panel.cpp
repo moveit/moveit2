@@ -131,9 +131,13 @@ void TrajectoryPanel::sliderValueChanged(int value)
 void TrajectoryPanel::buttonClicked()
 {
   if (paused_)
+  {
     pauseButton(false);
+  }
   else
+  {
     pauseButton(true);
+  }
 }
 
 }  // namespace moveit_rviz_plugin

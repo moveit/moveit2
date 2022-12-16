@@ -21,7 +21,8 @@ jobs:
             ROS_DISTRO: rolling
           - IMAGE: rolling-ci-testing
             ROS_DISTRO: rolling
-            IKFAST_TEST: true
+            # Disabled: https://github.com/ros-planning/moveit2/issues/1773
+            # IKFAST_TEST: true
             CLANG_TIDY: pedantic
           - IMAGE: humble-ci
             ROS_DISTRO: humble

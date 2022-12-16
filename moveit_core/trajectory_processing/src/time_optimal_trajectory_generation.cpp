@@ -1057,6 +1057,31 @@ bool TimeOptimalTrajectoryGeneration::computeTimeStamps(
   return doTimeParameterizationCalculations(trajectory, max_velocity, max_acceleration);
 }
 
+bool totgComputeTimeStamps(const size_t num_waypoints, robot_trajectory::RobotTrajectory& trajectory,
+                           const double max_velocity_scaling_factor, const double max_acceleration_scaling_factor)
+{
+  // The algorithm is:
+  // 1. Run TOTG with default settings once to find the optimal trajectory duration
+  // 2. Calculate the timestep to get the desired num_waypoints:
+  //      new_delta_t = duration/(n-1)     // subtract one for the initial waypoint
+  // 3. Run TOTG again with the new timestep. This gives the exact num_waypoints you want (plus or minus one due to
+  // numerical rounding)
+
+  if (num_waypoints < 2)
+  {
+    RCLCPP_ERROR(LOGGER, "computeTimeStamps() requires num_waypoints > 1");
+    return false;
+  }
+
+  TimeOptimalTrajectoryGeneration default_totg(0.1 /* default path tolerance */, 0.1 /* default resample_dt */);
+  default_totg.computeTimeStamps(trajectory, max_velocity_scaling_factor, max_acceleration_scaling_factor);
+  double optimal_duration = trajectory.getDuration();
+  double new_resample_dt = optimal_duration / (num_waypoints - 1);
+  TimeOptimalTrajectoryGeneration resample_totg(0.1 /* path tolerance */, new_resample_dt);
+  resample_totg.computeTimeStamps(trajectory, max_velocity_scaling_factor, max_acceleration_scaling_factor);
+  return true;
+}
+
 bool TimeOptimalTrajectoryGeneration::doTimeParameterizationCalculations(robot_trajectory::RobotTrajectory& trajectory,
                                                                          const Eigen::VectorXd& max_velocity,
                                                                          const Eigen::VectorXd& max_acceleration) const
@@ -1069,6 +1094,12 @@ bool TimeOptimalTrajectoryGeneration::doTimeParameterizationCalculations(robot_t
   {
     RCLCPP_ERROR(LOGGER, "It looks like the planner did not set the group the plan was computed for");
     return false;
+  }
+
+  if (hasMixedJointTypes(group))
+  {
+    RCLCPP_WARN(LOGGER, "There is a combination of revolute and prismatic joints in the robot model. TOTG's "
+                        "`path_tolerance` will not function correctly.");
   }
 
   const unsigned num_points = trajectory.getWayPointCount();
@@ -1096,11 +1127,15 @@ bool TimeOptimalTrajectoryGeneration::doTimeParameterizationCalculations(robot_t
     }
 
     if (diverse_point)
+    {
       points.push_back(new_point);
-    // If the last point is not a diverse_point we replace the last added point with it to make sure to always have the
-    // input end point as the last point
+      // If the last point is not a diverse_point we replace the last added point with it to make sure to always have
+      // the input end point as the last point
+    }
     else if (p == num_points - 1)
+    {
       points.back() = new_point;
+    }
   }
 
   // Return trajectory with only the first waypoint if there are not multiple diverse points
@@ -1149,5 +1184,22 @@ bool TimeOptimalTrajectoryGeneration::doTimeParameterizationCalculations(robot_t
   }
 
   return true;
+}
+
+bool TimeOptimalTrajectoryGeneration::hasMixedJointTypes(const moveit::core::JointModelGroup* group) const
+{
+  const std::vector<const moveit::core::JointModel*>& joint_models = group->getJointModels();
+
+  bool have_prismatic =
+      std::any_of(joint_models.cbegin(), joint_models.cend(), [](const moveit::core::JointModel* joint_model) {
+        return joint_model->getType() == moveit::core::JointModel::JointType::PRISMATIC;
+      });
+
+  bool have_revolute =
+      std::any_of(joint_models.cbegin(), joint_models.cend(), [](const moveit::core::JointModel* joint_model) {
+        return joint_model->getType() == moveit::core::JointModel::JointType::REVOLUTE;
+      });
+
+  return have_prismatic && have_revolute;
 }
 }  // namespace trajectory_processing

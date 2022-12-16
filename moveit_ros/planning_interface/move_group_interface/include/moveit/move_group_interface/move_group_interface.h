@@ -61,7 +61,7 @@
 #include <utility>
 #include <tf2_ros/buffer.h>
 
-#include "moveit_move_group_interface_export.h"
+#include <moveit_move_group_interface_export.h>
 
 namespace moveit
 {

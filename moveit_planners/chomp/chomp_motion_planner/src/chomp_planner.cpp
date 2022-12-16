@@ -124,11 +124,17 @@ bool ChompPlanner::solve(const planning_scene::PlanningSceneConstPtr& planning_s
 
   // fill in an initial trajectory based on user choice from the chomp_config.yaml file
   if (params.trajectory_initialization_method_.compare("quintic-spline") == 0)
+  {
     trajectory.fillInMinJerk();
+  }
   else if (params.trajectory_initialization_method_.compare("linear") == 0)
+  {
     trajectory.fillInLinearInterpolation();
+  }
   else if (params.trajectory_initialization_method_.compare("cubic") == 0)
+  {
     trajectory.fillInCubicInterpolation();
+  }
   else if (params.trajectory_initialization_method_.compare("fillTrajectory") == 0)
   {
     if (!(trajectory.fillInFromTrajectory(*res.trajectory_[0])))

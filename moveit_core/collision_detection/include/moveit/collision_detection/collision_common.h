@@ -258,9 +258,13 @@ struct DistanceRequest
   void enableGroup(const moveit::core::RobotModelConstPtr& robot_model)
   {
     if (robot_model->hasJointModelGroup(group_name))
+    {
       active_components_only = &robot_model->getJointModelGroup(group_name)->getUpdatedLinkModelsSet();
+    }
     else
+    {
       active_components_only = nullptr;
+    }
   }
 
   /// Indicate if nearest point information should be calculated

@@ -32,8 +32,8 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#include "moveit_servo/pose_tracking.h"
-#include "moveit_servo/servo_parameters.h"
+#include <moveit_servo/pose_tracking.h>
+#include <moveit_servo/servo_parameters.h>
 
 #include <chrono>
 using namespace std::literals;
@@ -169,7 +169,10 @@ PoseTrackingStatusCode PoseTracking::moveToPose(const Eigen::Vector3d& positiona
 
     if (!loop_rate_.sleep())
     {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wold-style-cast"
       RCLCPP_WARN_STREAM_THROTTLE(LOGGER, *node_->get_clock(), LOG_THROTTLE_PERIOD, "Target control rate was missed");
+#pragma GCC diagnostic pop
     }
   }
 

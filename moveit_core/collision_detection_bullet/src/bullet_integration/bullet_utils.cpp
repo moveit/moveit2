@@ -32,7 +32,7 @@
 
 /* Authors: John Schulman, Levi Armstrong */
 
-#include "moveit/collision_detection_bullet/bullet_integration/bullet_utils.h"
+#include <moveit/collision_detection_bullet/bullet_integration/bullet_utils.h>
 
 #include <BulletCollision/CollisionDispatch/btConvexConvexAlgorithm.h>
 #include <BulletCollision/CollisionShapes/btShapeHull.h>
@@ -148,8 +148,10 @@ btCollisionShape* createShapePrimitive(const shapes::Mesh* geom, const Collision
 
         btConvexHullShape* subshape = new btConvexHullShape();
         for (const Eigen::Vector3d& v : vertices)
+        {
           subshape->addPoint(
               btVector3(static_cast<btScalar>(v[0]), static_cast<btScalar>(v[1]), static_cast<btScalar>(v[2])));
+        }
 
         return subshape;
       }
@@ -454,18 +456,24 @@ bool BroadphaseFilterCallback::needBroadphaseCollision(btBroadphaseProxy* proxy0
 
   if (cow0->getTypeID() == collision_detection::BodyType::ROBOT_ATTACHED &&
       cow1->getTypeID() == collision_detection::BodyType::ROBOT_LINK)
+  {
     if (cow0->m_touch_links.find(cow1->getName()) != cow0->m_touch_links.end())
       return false;
+  }
 
   if (cow1->getTypeID() == collision_detection::BodyType::ROBOT_ATTACHED &&
       cow0->getTypeID() == collision_detection::BodyType::ROBOT_LINK)
+  {
     if (cow1->m_touch_links.find(cow0->getName()) != cow1->m_touch_links.end())
       return false;
+  }
 
   if (cow0->getTypeID() == collision_detection::BodyType::ROBOT_ATTACHED &&
       cow1->getTypeID() == collision_detection::BodyType::ROBOT_ATTACHED)
+  {
     if (cow0->m_touch_links == cow1->m_touch_links)
       return false;
+  }
 
   RCLCPP_DEBUG_STREAM(BULLET_LOGGER, "Broadphase pass " << cow0->getName() << " vs " << cow1->getName());
   return true;
@@ -551,7 +559,7 @@ CollisionObjectWrapper::CollisionObjectWrapper(const std::string& name, const co
     throw std::exception();
   }
 
-  this->setContactProcessingThreshold(BULLET_DEFAULT_CONTACT_DISTANCE);
+  setContactProcessingThreshold(BULLET_DEFAULT_CONTACT_DISTANCE);
   assert(!name.empty());
 
   if (active)

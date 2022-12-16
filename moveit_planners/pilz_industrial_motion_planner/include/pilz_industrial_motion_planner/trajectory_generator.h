@@ -44,10 +44,10 @@
 #include <moveit/robot_model/robot_model.h>
 #include <moveit/planning_scene/planning_scene.h>
 
-#include "pilz_industrial_motion_planner/joint_limits_extension.h"
-#include "pilz_industrial_motion_planner/limits_container.h"
-#include "pilz_industrial_motion_planner/trajectory_functions.h"
-#include "pilz_industrial_motion_planner/trajectory_generation_exceptions.h"
+#include <pilz_industrial_motion_planner/joint_limits_extension.h>
+#include <pilz_industrial_motion_planner/limits_container.h>
+#include <pilz_industrial_motion_planner/trajectory_functions.h>
+#include <pilz_industrial_motion_planner/trajectory_generation_exceptions.h>
 
 namespace pilz_industrial_motion_planner
 {

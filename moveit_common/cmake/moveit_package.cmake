@@ -44,8 +44,7 @@ macro(moveit_package)
   if(NOT CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     # Enable warnings
     add_compile_options(-Wall -Wextra
-      -Wwrite-strings -Wunreachable-code -Wpointer-arith -Wredundant-decls -Wcast-qual
-      -Wno-unused-parameter -Wno-unused-function)
+      -Wwrite-strings -Wunreachable-code -Wpointer-arith -Wredundant-decls -Wcast-qual -Wold-style-cast)
   else()
     # Defaults for Microsoft C++ compiler
     add_compile_options(/W3 /wd4251 /wd4068 /wd4275)

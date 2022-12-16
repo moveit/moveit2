@@ -86,18 +86,24 @@ bool OccupancyMapUpdater::updateTransformCache(const std::string& target_frame, 
     if (!success)
     {
       rclcpp::Clock steady_clock(RCL_STEADY_TIME);
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wold-style-cast"
       RCLCPP_ERROR_THROTTLE(
           LOGGER, steady_clock, 1000,
           "Transform cache was not updated. Self-filtering may fail. If transforms were not available yet, consider "
           "setting robot_description_planning.shape_transform_cache_lookup_wait_time to wait longer for transforms");
+#pragma GCC diagnostic pop
     }
     return success;
   }
   else
   {
     rclcpp::Clock steady_clock(RCL_STEADY_TIME);
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wold-style-cast"
     RCLCPP_WARN_THROTTLE(LOGGER, steady_clock, 1000,
                          "No callback provided for updating the transform cache for octomap updaters");
+#pragma GCC diagnostic pop
     return false;
   }
 }

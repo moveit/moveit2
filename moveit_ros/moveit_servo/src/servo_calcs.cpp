@@ -51,6 +51,10 @@
 #include <moveit_servo/servo_calcs.h>
 #include <moveit_servo/utilities.h>
 
+// Disable -Wold-style-cast because all _THROTTLE macros trigger this
+// It would be too noisy to disable on a per-callsite basis
+#pragma GCC diagnostic ignored "-Wold-style-cast"
+
 using namespace std::chrono_literals;  // for s, ms, etc.
 
 namespace moveit_servo
@@ -228,8 +232,10 @@ void ServoCalcs::start()
   trajectory_msgs::msg::JointTrajectoryPoint point;
   point.time_from_start = rclcpp::Duration::from_seconds(parameters_->publish_period);
   if (parameters_->publish_joint_positions)
+  {
     planning_scene_monitor_->getStateMonitor()->getCurrentState()->copyJointGroupPositions(joint_model_group_,
                                                                                            point.positions);
+  }
   if (parameters_->publish_joint_velocities)
   {
     std::vector<double> velocity(num_joints_);
@@ -527,9 +533,13 @@ void ServoCalcs::calculateSingleIteration()
     {
       auto joints = std::make_unique<std_msgs::msg::Float64MultiArray>();
       if (parameters_->publish_joint_positions && !joint_trajectory->points.empty())
+      {
         joints->data = joint_trajectory->points[0].positions;
+      }
       else if (parameters_->publish_joint_velocities && !joint_trajectory->points.empty())
+      {
         joints->data = joint_trajectory->points[0].velocities;
+      }
       *last_sent_command_ = *joint_trajectory;
       multiarray_outgoing_cmd_pub_->publish(std::move(joints));
     }
@@ -1095,10 +1105,14 @@ Eigen::VectorXd ServoCalcs::scaleJointCommand(const control_msgs::msg::JointJog&
     }
     // Apply user-defined scaling if inputs are unitless [-1:1]
     if (parameters_->command_in_type == "unitless")
+    {
       result[c] = command.velocities[m] * parameters_->joint_scale * parameters_->publish_period;
-    // Otherwise, commands are in m/s and rad/s
+      // Otherwise, commands are in m/s and rad/s
+    }
     else if (parameters_->command_in_type == "speed_units")
+    {
       result[c] = command.velocities[m] * parameters_->publish_period;
+    }
     else
     {
       rclcpp::Clock& clock = *node_->get_clock();

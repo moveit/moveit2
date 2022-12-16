@@ -44,7 +44,7 @@
 #include <Eigen/Geometry>
 #include <eigen_stl_containers/eigen_stl_containers.h>
 #include <moveit/macros/class_forward.h>
-#include "rclcpp/rclcpp.hpp"
+#include <rclcpp/rclcpp.hpp>
 
 namespace shapes
 {

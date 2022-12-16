@@ -98,10 +98,14 @@ public:
       if (context_->status())
       {
         if (capabilities_.empty())
+        {
           printf(MOVEIT_CONSOLE_COLOR_BLUE "\nmove_group is running but no capabilities are "
                                            "loaded.\n\n" MOVEIT_CONSOLE_COLOR_RESET);
+        }
         else
+        {
           printf(MOVEIT_CONSOLE_COLOR_GREEN "\nYou can start planning now!\n\n" MOVEIT_CONSOLE_COLOR_RESET);
+        }
         fflush(stdout);
       }
     }
@@ -280,16 +284,22 @@ int main(int argc, char** argv)
   {
     bool debug = false;
     for (int i = 1; i < argc; ++i)
+    {
       if (strncmp(argv[i], "--debug", 7) == 0)
       {
         debug = true;
         break;
       }
+    }
     debug = true;
     if (debug)
+    {
       RCLCPP_INFO(LOGGER, "MoveGroup debug mode is ON");
+    }
     else
+    {
       RCLCPP_INFO(LOGGER, "MoveGroup debug mode is OFF");
+    }
 
     rclcpp::executors::MultiThreadedExecutor executor;
 

@@ -127,9 +127,13 @@ DynamicsSolver::DynamicsSolver(const moveit::core::RobotModelConstPtr& robot_mod
   {
     const urdf::Joint* ujoint = urdf_model->getJoint(joint_model_name).get();
     if (ujoint && ujoint->limits)
+    {
       max_torques_.push_back(ujoint->limits->effort);
+    }
     else
+    {
       max_torques_.push_back(0.0);
+    }
   }
 
   KDL::Vector gravity(gravity_vector.x, gravity_vector.y,

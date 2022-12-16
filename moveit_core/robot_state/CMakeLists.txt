@@ -1,26 +1,28 @@
-set(MOVEIT_LIB_NAME moveit_robot_state)
-
-add_library(${MOVEIT_LIB_NAME} SHARED
+add_library(moveit_robot_state SHARED
   src/attached_body.cpp
   src/conversions.cpp
   src/robot_state.cpp
   src/cartesian_interpolator.cpp
 )
-set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES VERSION ${${PROJECT_NAME}_VERSION})
-ament_target_dependencies(${MOVEIT_LIB_NAME}
+target_include_directories(moveit_robot_state PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include/moveit_core>
+)
+set_target_properties(moveit_robot_state PROPERTIES VERSION ${${PROJECT_NAME}_VERSION})
+ament_target_dependencies(moveit_robot_state
   urdf
   tf2_geometry_msgs
   geometric_shapes
   urdfdom_headers
   Boost
 )
-target_link_libraries(${MOVEIT_LIB_NAME}
+target_link_libraries(moveit_robot_state
   moveit_robot_model
   moveit_kinematics_base
   moveit_transforms
 )
 
-install(DIRECTORY include/ DESTINATION include)
+install(DIRECTORY include/ DESTINATION include/moveit_core)
 
 # Unit tests
 if(BUILD_TESTING)
@@ -41,7 +43,7 @@ if(BUILD_TESTING)
     moveit_test_utils
     moveit_utils
     moveit_exceptions
-    ${MOVEIT_LIB_NAME}
+    moveit_robot_state
   )
 
   # As an executable, this benchmark is not run as a test by default
@@ -50,7 +52,7 @@ if(BUILD_TESTING)
     moveit_test_utils
     moveit_utils
     moveit_exceptions
-    ${MOVEIT_LIB_NAME}
+    moveit_robot_state
   )
 
   ament_add_gtest(test_robot_state_complex test/test_kinematic_complex.cpp)
@@ -58,7 +60,7 @@ if(BUILD_TESTING)
     moveit_test_utils
     moveit_utils
     moveit_exceptions
-    ${MOVEIT_LIB_NAME}
+    moveit_robot_state
   )
 
   ament_add_gtest(test_aabb test/test_aabb.cpp)
@@ -66,12 +68,12 @@ if(BUILD_TESTING)
     moveit_test_utils
     moveit_utils
     moveit_exceptions
-    ${MOVEIT_LIB_NAME}
+    moveit_robot_state
   )
 
   ament_add_gtest(test_cartesian_interpolator test/test_cartesian_interpolator.cpp)
   target_link_libraries(test_cartesian_interpolator
     moveit_test_utils
-    ${MOVEIT_LIB_NAME}
+    moveit_robot_state
   )
 endif()

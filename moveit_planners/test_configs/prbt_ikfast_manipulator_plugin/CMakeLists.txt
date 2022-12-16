@@ -7,7 +7,6 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 if(NOT WIN32)
   add_compile_options(-Wall)
   add_compile_options(-Wextra)
-  add_compile_options(-Wno-unused-parameter)
   add_compile_options(-Wno-unused-variable)
 endif()
 

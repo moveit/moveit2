@@ -99,6 +99,7 @@ bool JointModel::enforceVelocityBounds(double* values, const Bounds& other_bound
 {
   bool change = false;
   for (std::size_t i = 0; i < other_bounds.size(); ++i)
+  {
     if (other_bounds[i].max_velocity_ < values[i])
     {
       values[i] = other_bounds[i].max_velocity_;
@@ -109,16 +110,23 @@ bool JointModel::enforceVelocityBounds(double* values, const Bounds& other_bound
       values[i] = other_bounds[i].min_velocity_;
       change = true;
     }
+  }
   return change;
 }
 
 bool JointModel::satisfiesVelocityBounds(const double* values, const Bounds& other_bounds, double margin) const
 {
   for (std::size_t i = 0; i < other_bounds.size(); ++i)
+  {
     if (other_bounds[i].max_velocity_ + margin < values[i])
+    {
       return false;
+    }
     else if (other_bounds[i].min_velocity_ - margin > values[i])
+    {
       return false;
+    }
+  }
   return true;
 }
 
@@ -136,7 +144,9 @@ void JointModel::setVariableBounds(const std::string& variable, const VariableBo
 void JointModel::setVariableBounds(const std::vector<moveit_msgs::msg::JointLimits>& jlim)
 {
   for (std::size_t j = 0; j < variable_names_.size(); ++j)
+  {
     for (const moveit_msgs::msg::JointLimits& joint_limit : jlim)
+    {
       if (joint_limit.joint_name == variable_names_[j])
       {
         variable_bounds_[j].position_bounded_ = joint_limit.has_position_limits;
@@ -165,6 +175,8 @@ void JointModel::setVariableBounds(const std::vector<moveit_msgs::msg::JointLimi
         }
         break;
       }
+    }
+  }
   computeVariableBoundsMsg();
 }
 
@@ -218,11 +230,17 @@ namespace
 inline void printBoundHelper(std::ostream& out, double v)
 {
   if (v <= -std::numeric_limits<double>::infinity())
+  {
     out << "-inf";
+  }
   else if (v >= std::numeric_limits<double>::infinity())
+  {
     out << "inf";
+  }
   else
+  {
     out << v;
+  }
 }
 }  // namespace
 

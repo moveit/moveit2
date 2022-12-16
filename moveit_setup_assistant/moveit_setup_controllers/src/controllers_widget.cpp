@@ -73,7 +73,7 @@ void ControllersWidget::onInit()
   layout->setAlignment(Qt::AlignTop);
 
   // Title
-  this->setWindowTitle("Controller Configuration");  // title of window
+  setWindowTitle("Controller Configuration");  // title of window
 
   // Top Header Area ------------------------------------------------
   auto header = new HeaderWidget("Setup " + setup_step_->getName(), setup_step_->getInstructions(), this);
@@ -112,7 +112,7 @@ void ControllersWidget::onInit()
   stacked_widget_->addWidget(joint_groups_widget_);      // screen index 3
   layout->addWidget(stacked_widget_);
 
-  this->setLayout(layout);
+  setLayout(layout);
 }
 
 // ******************************************************************************************
@@ -781,9 +781,13 @@ void ControllersWidget::changeScreen(int index)
 void ControllersWidget::alterTree(const QString& link)
 {
   if (link.contains("expand"))
+  {
     controllers_tree_->expandAll();
+  }
   else
+  {
     controllers_tree_->collapseAll();
+  }
 }
 
 void ControllersWidget::itemSelectionChanged()

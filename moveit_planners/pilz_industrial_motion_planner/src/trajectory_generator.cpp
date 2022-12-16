@@ -32,7 +32,7 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#include "pilz_industrial_motion_planner/trajectory_generator.h"
+#include <pilz_industrial_motion_planner/trajectory_generator.h>
 
 #include <cassert>
 
@@ -43,7 +43,7 @@
 #include <kdl/velocityprofile_trap.hpp>
 #include <moveit/robot_state/conversions.h>
 
-#include "pilz_industrial_motion_planner/limits_container.h"
+#include <pilz_industrial_motion_planner/limits_container.h>
 
 namespace pilz_industrial_motion_planner
 {
@@ -144,7 +144,7 @@ void TrajectoryGenerator::checkStartState(const moveit_msgs::msg::RobotState& st
 
   // does not allow start velocity
   if (!std::all_of(group_start_state.velocity.begin(), group_start_state.velocity.end(),
-                   [this](double v) { return std::fabs(v) < this->VELOCITY_TOLERANCE; }))
+                   [this](double v) { return std::fabs(v) < VELOCITY_TOLERANCE; }))
   {
     throw NonZeroVelocityInStartState("Trajectory Generator does not allow non-zero start velocity");
   }

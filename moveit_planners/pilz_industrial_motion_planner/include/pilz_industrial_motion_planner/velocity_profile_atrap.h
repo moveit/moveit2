@@ -34,7 +34,7 @@
 
 #pragma once
 
-#include "kdl/velocityprofile.hpp"
+#include <kdl/velocityprofile.hpp>
 #include <iostream>
 
 namespace pilz_industrial_motion_planner

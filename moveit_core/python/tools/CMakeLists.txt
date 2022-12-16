@@ -1,17 +1,15 @@
-set(MOVEIT_LIB_NAME moveit_python_tools)
-
-add_library(${MOVEIT_LIB_NAME}
+add_library(moveit_python_tools
   src/pybind_rosmsg_typecasters.cpp
 )
-#add_dependencies(${MOVEIT_LIB_NAME} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(${MOVEIT_LIB_NAME} ${catkin_LIBRARIES}) # TODO: Fix
-set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
+#add_dependencies(moveit_python_tools ${catkin_EXPORTED_TARGETS})
+target_link_libraries(moveit_python_tools ${catkin_LIBRARIES}) # TODO: Fix
+set_target_properties(moveit_python_tools PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
 
 install(
   TARGETS
-    ${MOVEIT_LIB_NAME}
+    moveit_python_tools
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
   RUNTIME DESTINATION bin)
 
-install(DIRECTORY include/ DESTINATION include)
+install(DIRECTORY include/ DESTINATION include/moveit_core)

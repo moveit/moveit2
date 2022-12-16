@@ -216,9 +216,13 @@ public:
   {
     std::map<std::string, ActionBasedControllerHandleBasePtr>::const_iterator it = controllers_.find(name);
     if (it != controllers_.end())
+    {
       return static_cast<moveit_controller_manager::MoveItControllerHandlePtr>(it->second);
+    }
     else
+    {
       RCLCPP_FATAL_STREAM(LOGGER, "No such controller: " << name);
+    }
     return moveit_controller_manager::MoveItControllerHandlePtr();
   }
 

@@ -5,7 +5,7 @@
   <version>2.6.0</version>
   <description>Python library for loading moveit config parameters in launch files</description>
   <maintainer email="moveit_releasers@googlegroups.com">MoveIt Release Team</maintainer>
-  <license>BSD</license>
+  <license>BSD-3-Clause</license>
   <author email="jafar@picknik.ai">Jafar Abdi</author>
   <author email="davidvlu@gmail.com">David V. Lu!!</author>
 
