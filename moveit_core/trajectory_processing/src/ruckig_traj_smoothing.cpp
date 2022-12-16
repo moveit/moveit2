@@ -200,8 +200,11 @@ RuckigSmoothing::runRuckigInBatches(const size_t num_waypoints, const robot_traj
     size_t first_new_waypoint = first_point_previously_smoothed ? 1 : 0;
 
     // Add smoothed waypoints to the output
-    double initial_dt = sub_trajectory.getWayPointDurationFromPrevious(first_new_waypoint);
-    output_trajectory.append(sub_trajectory, initial_dt, first_new_waypoint, sub_trajectory.getWayPointCount() - 1);
+    for (size_t waypoint_idx = first_new_waypoint; waypoint_idx < sub_trajectory.getWayPointCount(); ++waypoint_idx)
+    {
+      output_trajectory.addSuffixWayPoint(sub_trajectory.getWayPoint(waypoint_idx),
+                                          sub_trajectory.getWayPointDurationFromPrevious(waypoint_idx));
+    }
 
     batch_start_idx += batch_size;
     batch_end_idx += batch_size;
