@@ -259,6 +259,13 @@ moveit::core::SolverAllocatorFn KinematicsPluginLoader::getLoaderFunction(const 
 
         std::string kinematics_solver_param_name = kinematics_param_prefix + ".kinematics_solver";
         const auto kinematics_solver = group_params_.at(known_group.name_).kinematics_solver;
+
+        if (kinematics_solver.empty())
+        {
+          RCLCPP_DEBUG(LOGGER, "No kinematics solver specified for group '%s'.", known_group.name_.c_str());
+          continue;
+        }
+
         possible_kinematics_solvers[known_group.name_] = kinematics_solver;
         RCLCPP_DEBUG(LOGGER, "Found kinematics solver '%s' for group '%s'.", kinematics_solver.c_str(),
                      known_group.name_.c_str());
