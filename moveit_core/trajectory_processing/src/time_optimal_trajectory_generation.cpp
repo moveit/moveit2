@@ -924,7 +924,6 @@ bool TimeOptimalTrajectoryGeneration::computeTimeStamps(robot_trajectory::RobotT
     const moveit::core::VariableBounds& bounds = rmodel.getVariableBounds(vars[j]);
 
     // Limits need to be non-zero, otherwise we never exit
-    max_velocity[j] = 1.0;
     if (bounds.velocity_bounded_)
     {
       if (bounds.max_velocity_ <= 0.0)
@@ -938,12 +937,12 @@ bool TimeOptimalTrajectoryGeneration::computeTimeStamps(robot_trajectory::RobotT
     }
     else
     {
-      RCLCPP_WARN_STREAM_ONCE(
-          LOGGER, "Joint velocity limits are not defined. Using the default "
-                      << max_velocity[j] << " rad/s. You can define velocity limits in the URDF or joint_limits.yaml.");
+      RCLCPP_ERROR_STREAM(LOGGER, "No velocity limit was defined for joint "
+                                      << vars[j].c_str()
+                                      << "! You have to define velocity limits in the URDF or joint_limits.yaml");
+      return false;
     }
 
-    max_acceleration[j] = 1.0;
     if (bounds.acceleration_bounded_)
     {
       if (bounds.max_acceleration_ < 0.0)
@@ -957,10 +956,11 @@ bool TimeOptimalTrajectoryGeneration::computeTimeStamps(robot_trajectory::RobotT
     }
     else
     {
-      RCLCPP_WARN_STREAM_ONCE(LOGGER,
-                              "Joint acceleration limits are not defined. Using the default "
-                                  << max_acceleration[j]
-                                  << " rad/s^2. You can define acceleration limits in the URDF or joint_limits.yaml.");
+      RCLCPP_ERROR_STREAM(LOGGER, "No acceleration limit was defined for joint "
+                                      << vars[j].c_str()
+                                      << "! You have to define acceleration limits in the URDF or "
+                                         "joint_limits.yaml");
+      return false;
     }
   }
 
@@ -1016,10 +1016,11 @@ bool TimeOptimalTrajectoryGeneration::computeTimeStamps(
 
     if (!set_velocity_limit)
     {
-      max_velocity[j] = 1.0;
-      RCLCPP_WARN_STREAM_ONCE(
-          LOGGER, "Joint velocity limits are not defined. Using the default "
-                      << max_velocity[j] << " rad/s. You can define velocity limits in the URDF or joint_limits.yaml.");
+      RCLCPP_ERROR_STREAM(LOGGER, "No velocity limit was defined for joint "
+                                      << vars[j].c_str()
+                                      << "! You have to define velocity limits in the URDF or "
+                                         "joint_limits.yaml");
+      return false;
     }
 
     // ACCELERATION LIMIT
@@ -1046,11 +1047,11 @@ bool TimeOptimalTrajectoryGeneration::computeTimeStamps(
     }
     if (!set_acceleration_limit)
     {
-      max_acceleration[j] = 1.0;
-      RCLCPP_WARN_STREAM_ONCE(LOGGER,
-                              "Joint acceleration limits are not defined. Using the default "
-                                  << max_acceleration[j]
-                                  << " rad/s^2. You can define acceleration limits in the URDF or joint_limits.yaml.");
+      RCLCPP_ERROR_STREAM(LOGGER, "No acceleration limit was defined for joint "
+                                      << vars[j].c_str()
+                                      << "! You have to define acceleration limits in the URDF or "
+                                         "joint_limits.yaml");
+      return false;
     }
   }
 
