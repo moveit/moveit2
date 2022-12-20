@@ -939,7 +939,7 @@ bool TimeOptimalTrajectoryGeneration::computeTimeStamps(robot_trajectory::RobotT
     {
       RCLCPP_ERROR_STREAM(LOGGER, "No velocity limit was defined for joint "
                                       << vars[j].c_str()
-                                      << "! You can define velocity limits in the URDF or joint_limits.yaml");
+                                      << "! You have to define velocity limits in the URDF or joint_limits.yaml");
       return false;
     }
 
@@ -958,7 +958,7 @@ bool TimeOptimalTrajectoryGeneration::computeTimeStamps(robot_trajectory::RobotT
     {
       RCLCPP_ERROR_STREAM(LOGGER, "No acceleration limit was defined for joint "
                                       << vars[j].c_str()
-                                      << "! You can define acceleration limits in the URDF or "
+                                      << "! You have to define acceleration limits in the URDF or "
                                          "joint_limits.yaml");
       return false;
     }
@@ -1018,8 +1018,9 @@ bool TimeOptimalTrajectoryGeneration::computeTimeStamps(
     {
       RCLCPP_ERROR_STREAM(LOGGER, "No velocity limit was defined for joint "
                                       << vars[j].c_str()
-                                      << "! You can define velocity limits in the URDF or "
+                                      << "! You have to define velocity limits in the URDF or "
                                          "joint_limits.yaml");
+      return false;
     }
 
     // ACCELERATION LIMIT
@@ -1048,8 +1049,9 @@ bool TimeOptimalTrajectoryGeneration::computeTimeStamps(
     {
       RCLCPP_ERROR_STREAM(LOGGER, "No acceleration limit was defined for joint "
                                       << vars[j].c_str()
-                                      << "! You can define acceleration limits in the URDF or "
+                                      << "! You have to define acceleration limits in the URDF or "
                                          "joint_limits.yaml");
+      return false;
     }
   }
 
