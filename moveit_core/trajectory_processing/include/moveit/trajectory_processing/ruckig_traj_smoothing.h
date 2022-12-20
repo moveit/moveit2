@@ -98,6 +98,21 @@ private:
                                     ruckig::OutputParameter<ruckig::DynamicDOFs>& ruckig_output);
 
   /**
+   * \brief Break the `trajectory` parameter into batches of reasonable size (~100), run Ruckig on each of them, then
+   * re-combine into a single trajectory again.
+   * runRuckig() stretches all input waypoints in time until all kinematic limits are obeyed. This works but it can
+   * slow the trajectory more than necessary. It's better to feed in just a few waypoints at once, so that only the
+   * waypoints needing it get stretched.
+   * Here, break the trajectory waypoints into batches so the output is closer to time-optimal.
+   * There is a trade-off between time-optimality of the output trajectory and runtime of the smoothing algorithm.
+   * \param[in, out] trajectory      Trajectory to smooth.
+   * \param[in, out] ruckig_input    Necessary input for Ruckig smoothing. Contains kinematic limits (vel, accel, jerk)
+   */
+  static std::optional<robot_trajectory::RobotTrajectory>
+  runRuckigInBatches(const size_t num_waypoints, const robot_trajectory::RobotTrajectory& trajectory,
+                     ruckig::InputParameter<ruckig::DynamicDOFs>& ruckig_input, size_t batch_size = 100);
+
+  /**
    * \brief A utility function to instantiate and run Ruckig for a series of waypoints.
    * \param[in, out] trajectory      Trajectory to smooth.
    * \param[in, out] ruckig_input    Necessary input for Ruckig smoothing. Contains kinematic limits (vel, accel, jerk)
