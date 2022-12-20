@@ -55,6 +55,7 @@
   <depend>tf2</depend>
   <depend>tf2_eigen</depend>
   <depend>tf2_geometry_msgs</depend>
+  <depend>tf2_kdl</depend>
   <depend>trajectory_msgs</depend>
   <depend>visualization_msgs</depend>
   <depend>ruckig</depend>
@@ -64,7 +65,6 @@
   <test_depend>moveit_resources_panda_moveit_config</test_depend>
   <test_depend>moveit_resources_pr2_description</test_depend>
   <test_depend>angles</test_depend>
-  <test_depend>tf2_kdl</test_depend>
   <test_depend>orocos_kdl_vendor</test_depend>
   <test_depend>ament_cmake_gtest</test_depend>
   <test_depend>ament_cmake_gmock</test_depend>
