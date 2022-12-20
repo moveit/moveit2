@@ -107,7 +107,7 @@ void KDLKinematicsPlugin::getJointWeights()
 
   RCLCPP_INFO_STREAM(
       LOGGER, "Joint weights for group '"
-                  << getGroupName() << "': \n"
+                  << getGroupName() << "': "
                   << Eigen::Map<const Eigen::VectorXd>(joint_weights_.data(), joint_weights_.size()).transpose());
 }
 
