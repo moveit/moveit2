@@ -311,7 +311,7 @@ bool ChompOptimizer::optimize()
     double s_cost = getSmoothnessCost();
     double cost = c_cost + s_cost;
 
-    RCLCPP_INFO(LOGGER, "Collision cost %f, smoothness cost: %f", c_cost, s_cost);
+    RCLCPP_DEBUG(LOGGER, "Collision cost %f, smoothness cost: %f", c_cost, s_cost);
 
     /// TODO: HMC BASED COMMENTED CODE BELOW, Need to uncomment and perform extensive testing by varying the HMC
     /// parameters values in the chomp_planning.yaml file so that CHOMP can find optimal paths
@@ -371,7 +371,7 @@ bool ChompOptimizer::optimize()
 
     if (iteration_ % 10 == 0)
     {
-      RCLCPP_INFO(LOGGER, "iteration: %d", iteration_);
+      RCLCPP_DEBUG(LOGGER, "iteration: %d", iteration_);
       if (isCurrentTrajectoryMeshToMeshCollisionFree())
       {
         num_collision_free_iterations_ = 0;
@@ -418,7 +418,7 @@ bool ChompOptimizer::optimize()
       }
       else
       {
-        RCLCPP_INFO(LOGGER, "cCost %f over threshold %f", c_cost, parameters_->collision_threshold_);
+        RCLCPP_DEBUG(LOGGER, "cCost %f over threshold %f", c_cost, parameters_->collision_threshold_);
       }
     }
 

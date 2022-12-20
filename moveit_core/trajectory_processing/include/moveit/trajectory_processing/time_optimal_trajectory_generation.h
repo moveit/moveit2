@@ -167,9 +167,37 @@ public:
   TimeOptimalTrajectoryGeneration(const double path_tolerance = 0.1, const double resample_dt = 0.1,
                                   const double min_angle_change = 0.001);
 
+  // clang-format off
+/**
+  * \brief Compute a trajectory with waypoints spaced equally in time (according to resample_dt_).
+  * Resampling the trajectory doesn't change the start and goal point,
+  * and all re-sampled waypoints will be on the path of the original trajectory (within path_tolerance_).
+  * However, controller execution is separate from MoveIt and may deviate from the intended path between waypoints.
+  * path_tolerance_ is defined in configuration space, so the unit is rad for revolute joints,
+  * meters for prismatic joints.
+  * \param[in,out] trajectory A path which needs time-parameterization. It's OK if this path has already been
+  * time-parameterized; this function will re-time-parameterize it.
+  * \param max_velocity_scaling_factor A factor in the range [0,1] which can slow down the trajectory.
+  * \param max_acceleration_scaling_factor A factor in the range [0,1] which can slow down the trajectory.
+  */
+  // clang-format on
   bool computeTimeStamps(robot_trajectory::RobotTrajectory& trajectory, const double max_velocity_scaling_factor = 1.0,
                          const double max_acceleration_scaling_factor = 1.0) const override;
 
+  // clang-format off
+/**
+  * \brief Compute a trajectory with waypoints spaced equally in time (according to resample_dt_).
+  * Resampling the trajectory doesn't change the start and goal point,
+  * and all re-sampled waypoints will be on the path of the original trajectory (within path_tolerance_).
+  * However, controller execution is separate from MoveIt and may deviate from the intended path between waypoints.
+  * path_tolerance_ is defined in configuration space, so the unit is rad for revolute joints,
+  * meters for prismatic joints.
+  * \param[in,out] trajectory A path which needs time-parameterization. It's OK if this path has already been
+  * time-parameterized; this function will re-time-parameterize it.
+  * \param velocity_limits Joint names and velocity limits in rad/s
+  * \param acceleration_limits Joint names and acceleration limits in rad/s^2
+  */
+  // clang-format on
   bool computeTimeStamps(robot_trajectory::RobotTrajectory& trajectory,
                          const std::unordered_map<std::string, double>& velocity_limits,
                          const std::unordered_map<std::string, double>& acceleration_limits) const override;
@@ -179,6 +207,13 @@ private:
                                           const Eigen::VectorXd& max_velocity,
                                           const Eigen::VectorXd& max_acceleration) const;
 
+  /**
+   * @brief Check if a combination of revolute and prismatic joints is used. path_tolerance_ is not valid, if so.
+   * \param group The JointModelGroup to check.
+   * \return true if there are mixed joints.
+   */
+  bool hasMixedJointTypes(const moveit::core::JointModelGroup* group) const;
+
   const double path_tolerance_;
   const double resample_dt_;
   const double min_angle_change_;
@@ -186,16 +221,18 @@ private:
 
 // clang-format off
 /**
-  * \brief Compute a trajectory with the given number of waypoints (plus or minus 1, due to rounding).
-  * Resampling the trajectory to get the desired num_waypoints doesn't change the start and goal point,
-  * and all re-sampled waypoints will be on the path of the original trajectory (within the configured tolerances)
-  * but controller execution may deviate from the intended path if waypoint spacing is too sparse.
+  * \brief Compute a trajectory with the desired number of waypoints.
+  * Resampling the trajectory doesn't change the start and goal point,
+  * and all re-sampled waypoints will be on the path of the original trajectory (within path_tolerance_).
+  * However, controller execution is separate from MoveIt and may deviate from the intended path between waypoints.
+  * path_tolerance_ is defined in configuration space, so the unit is rad for revolute joints,
+  * meters for prismatic joints.
   * This is a free function because it needs to modify the const resample_dt_ member of TimeOptimalTrajectoryGeneration class.
-  * \param num_waypoints The desired number of waypoints.
+  * \param num_waypoints The desired number of waypoints (plus or minus one due to numerical rounding).
   * \param[in,out] trajectory A path which needs time-parameterization. It's OK if this path has already been
   * time-parameterized; this function will re-time-parameterize it.
-  * \param max_velocity_scaling_factor Joint velocity limits are scaled by this factor.
-  * \param max_acceleration_scaling_factor Joint acceleration limits are scaled by this factor.
+  * \param max_velocity_scaling_factor A factor in the range [0,1] which can slow down the trajectory.
+  * \param max_acceleration_scaling_factor A factor in the range [0,1] which can slow down the trajectory.
   */
 // clang-format on
 bool totgComputeTimeStamps(const size_t num_waypoints, robot_trajectory::RobotTrajectory& trajectory,

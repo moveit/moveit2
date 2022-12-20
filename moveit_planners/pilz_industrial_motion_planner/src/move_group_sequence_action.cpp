@@ -56,7 +56,9 @@ namespace pilz_industrial_motion_planner
 static const rclcpp::Logger LOGGER =
     rclcpp::get_logger("moveit.pilz_industrial_motion_planner.move_group_sequence_action");
 
-MoveGroupSequenceAction::MoveGroupSequenceAction() : MoveGroupCapability("SequenceAction")
+MoveGroupSequenceAction::MoveGroupSequenceAction()
+  : MoveGroupCapability("SequenceAction")
+  , move_feedback_(std::make_shared<moveit_msgs::action::MoveGroupSequence::Feedback>())
 {
 }
 
@@ -93,7 +95,6 @@ void MoveGroupSequenceAction::executeSequenceCallback(const std::shared_ptr<Move
   // Notify that goal is being executed
   goal_handle_ = goal_handle;
   const auto goal = goal_handle->get_goal();
-  goal_handle->execute();
 
   setMoveState(move_group::PLANNING);
 
@@ -162,7 +163,7 @@ void MoveGroupSequenceAction::executeSequenceCallbackPlanAndExecute(
   opt.replan_delay_ = goal->planning_options.replan_delay;
   opt.before_execution_callback_ = [this] { startMoveExecutionCallback(); };
 
-  [this, &request = goal->request](plan_execution::ExecutableMotionPlan& plan) {
+  opt.plan_callback_ = [this, &request = goal->request](plan_execution::ExecutableMotionPlan& plan) {
     return planUsingSequenceManager(request, plan);
   };
 
