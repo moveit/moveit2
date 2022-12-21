@@ -168,10 +168,13 @@ RobotTrajectory& RobotTrajectory::unwind()
     // unwrap continuous joints
     double running_offset = 0.0;
     double last_value = waypoints_[0]->getJointPositions(cont_joint)[0];
+    cont_joint->enforcePositionBounds(&last_value);
+    waypoints_[0]->setJointPositions(cont_joint, &last_value);
 
     for (std::size_t j = 1; j < waypoints_.size(); ++j)
     {
       double current_value = waypoints_[j]->getJointPositions(cont_joint)[0];
+      cont_joint->enforcePositionBounds(&current_value);
       if (last_value > current_value + M_PI)
       {
         running_offset += 2.0 * M_PI;
@@ -182,16 +185,14 @@ RobotTrajectory& RobotTrajectory::unwind()
       }
 
       last_value = current_value;
-      if (running_offset > std::numeric_limits<double>::epsilon() ||
-          running_offset < -std::numeric_limits<double>::epsilon())
-      {
-        current_value += running_offset;
-        waypoints_[j]->setJointPositions(cont_joint, &current_value);
-      }
+      current_value += running_offset;
+      waypoints_[j]->setJointPositions(cont_joint, &current_value);
     }
   }
   for (moveit::core::RobotStatePtr& waypoint : waypoints_)
+  {
     waypoint->update();
+  }
 
   return *this;
 }
@@ -214,16 +215,22 @@ RobotTrajectory& RobotTrajectory::unwind(const moveit::core::RobotState& state)
     double running_offset = reference_value0 - reference_value;
 
     double last_value = waypoints_[0]->getJointPositions(cont_joint)[0];
-    if (running_offset > std::numeric_limits<double>::epsilon() ||
-        running_offset < -std::numeric_limits<double>::epsilon())
+    cont_joint->enforcePositionBounds(&last_value);
+    if (last_value > reference_value + M_PI)
     {
-      double current_value = last_value + running_offset;
-      waypoints_[0]->setJointPositions(cont_joint, &current_value);
+      running_offset -= 2.0 * M_PI;
     }
+    else if (last_value < reference_value - M_PI)
+    {
+      running_offset += 2.0 * M_PI;
+    }
+    double current_start_value = last_value + running_offset;
+    waypoints_[0]->setJointPositions(cont_joint, &current_start_value);
 
     for (std::size_t j = 1; j < waypoints_.size(); ++j)
     {
       double current_value = waypoints_[j]->getJointPositions(cont_joint)[0];
+      cont_joint->enforcePositionBounds(&current_value);
       if (last_value > current_value + M_PI)
       {
         running_offset += 2.0 * M_PI;
@@ -234,16 +241,14 @@ RobotTrajectory& RobotTrajectory::unwind(const moveit::core::RobotState& state)
       }
 
       last_value = current_value;
-      if (running_offset > std::numeric_limits<double>::epsilon() ||
-          running_offset < -std::numeric_limits<double>::epsilon())
-      {
-        current_value += running_offset;
-        waypoints_[j]->setJointPositions(cont_joint, &current_value);
-      }
+      current_value += running_offset;
+      waypoints_[j]->setJointPositions(cont_joint, &current_value);
     }
   }
   for (moveit::core::RobotStatePtr& waypoint : waypoints_)
+  {
     waypoint->update();
+  }
 
   return *this;
 }

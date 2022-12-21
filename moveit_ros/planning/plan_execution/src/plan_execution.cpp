@@ -349,7 +349,7 @@ moveit_msgs::msg::MoveItErrorCodes plan_execution::PlanExecution::executeAndMoni
 
   // push the trajectories we have slated for execution to the trajectory execution manager
   int prev = -1;
-  for (std::size_t i = 0; i < plan.plan_components_.size(); ++i)
+  for (size_t component_idx = 0; component_idx < plan.plan_components_.size(); ++component_idx)
   {
     // \todo should this be in trajectory_execution ? Maybe. Then that will have to use kinematic_trajectory too;
     // splitting trajectories for controllers becomes interesting: tied to groups instead of joints. this could cause
@@ -357,15 +357,19 @@ moveit_msgs::msg::MoveItErrorCodes plan_execution::PlanExecution::executeAndMoni
     // in the meantime we do a hack:
 
     bool unwound = false;
-    for (std::size_t j = 0; j < i; ++j)
+    for (int prev_component = component_idx - 1; prev_component >= 0; --prev_component)
     {
-      // if we ran unwind on a path for the same group
-      if (plan.plan_components_[j].trajectory_ &&
-          plan.plan_components_[j].trajectory_->getGroup() == plan.plan_components_[i].trajectory_->getGroup() &&
-          !plan.plan_components_[j].trajectory_->empty())
+      // Search backward for a previous component having the same group.
+      // If the group is the same, unwind this component based on the last waypoint of the previous one.
+      if (plan.plan_components_.at(prev_component).trajectory_ &&
+          plan.plan_components_.at(prev_component).trajectory_->getGroup() ==
+              plan.plan_components_.at(prev_component).trajectory_->getGroup() &&
+          !plan.plan_components_.at(prev_component).trajectory_->empty())
       {
-        plan.plan_components_[i].trajectory_->unwind(plan.plan_components_[j].trajectory_->getLastWayPoint());
+        plan.plan_components_.at(component_idx)
+            .trajectory_->unwind(plan.plan_components_.at(prev_component).trajectory_->getLastWayPoint());
         unwound = true;
+        // Break so each component is only unwound once
         break;
       }
     }
@@ -375,24 +379,25 @@ moveit_msgs::msg::MoveItErrorCodes plan_execution::PlanExecution::executeAndMoni
       // unwind the path to execute based on the current state of the system
       if (prev < 0)
       {
-        plan.plan_components_[i].trajectory_->unwind(
+        plan.plan_components_[component_idx].trajectory_->unwind(
             plan.planning_scene_monitor_ && plan.planning_scene_monitor_->getStateMonitor() ?
                 *plan.planning_scene_monitor_->getStateMonitor()->getCurrentState() :
                 plan.planning_scene_->getCurrentState());
       }
       else
       {
-        plan.plan_components_[i].trajectory_->unwind(plan.plan_components_[prev].trajectory_->getLastWayPoint());
+        plan.plan_components_[component_idx].trajectory_->unwind(
+            plan.plan_components_[prev].trajectory_->getLastWayPoint());
       }
     }
 
-    if (plan.plan_components_[i].trajectory_ && !plan.plan_components_[i].trajectory_->empty())
-      prev = i;
+    if (plan.plan_components_[component_idx].trajectory_ && !plan.plan_components_[component_idx].trajectory_->empty())
+      prev = component_idx;
 
     // convert to message, pass along
     moveit_msgs::msg::RobotTrajectory msg;
-    plan.plan_components_[i].trajectory_->getRobotTrajectoryMsg(msg);
-    if (!trajectory_execution_manager_->push(msg, plan.plan_components_[i].controller_names_))
+    plan.plan_components_[component_idx].trajectory_->getRobotTrajectoryMsg(msg);
+    if (!trajectory_execution_manager_->push(msg, plan.plan_components_[component_idx].controller_names_))
     {
       trajectory_execution_manager_->clear();
       RCLCPP_ERROR(LOGGER, "Apparently trajectory initialization failed");
