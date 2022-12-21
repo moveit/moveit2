@@ -576,8 +576,6 @@ ompl_interface::ModelBasedPlanningContext::constructPlannerTerminationCondition(
       RCLCPP_ERROR(LOGGER, "Missing argument to Iteration termination condition");
     }
   }
-// TODO: remove when ROS Melodic and older are no longer supported
-#if OMPL_VERSION_VALUE >= 1005000
   // Terminate if the cost has converged or a timeout occurs.
   // Only useful for anytime/optimizing planners.
   else if (termination_and_params[0] == "CostConvergence")
@@ -596,7 +594,6 @@ ompl_interface::ModelBasedPlanningContext::constructPlannerTerminationCondition(
         ob::timedPlannerTerminationCondition(timeout - ompl::time::seconds(ompl::time::now() - start)),
         ob::CostConvergenceTerminationCondition(ompl_simple_setup_->getProblemDefinition(), solutions_window, epsilon));
   }
-#endif
   // Terminate as soon as an exact solution is found or a timeout occurs.
   // This modifies the behavior of anytime/optimizing planners to terminate upon discovering
   // the first feasible solution.
@@ -627,8 +624,6 @@ void ompl_interface::ModelBasedPlanningContext::clear()
   {
     ompl_simple_setup_->clear();
   }
-// TODO: remove when ROS Melodic and older are no longer supported
-#if OMPL_VERSION_VALUE >= 1005000
   else
   {
     // For LazyPRM and LazyPRMstar we assume that the environment *could* have changed
@@ -641,7 +636,6 @@ void ompl_interface::ModelBasedPlanningContext::clear()
       planner->clearValidity();
     }
   }
-#endif
   ompl_simple_setup_->clearStartStates();
   ompl_simple_setup_->setGoal(ob::GoalPtr());
   ompl_simple_setup_->setStateValidityChecker(ob::StateValidityCheckerPtr());
