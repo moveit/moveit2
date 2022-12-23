@@ -395,7 +395,7 @@ void PlanningSceneDisplay::changedPlanningSceneTopic()
     planning_scene_monitor_->startSceneMonitor(planning_scene_topic_property_->getStdString());
     std::string service_name = planning_scene_monitor::PlanningSceneMonitor::DEFAULT_PLANNING_SCENE_SERVICE;
     if (!getMoveGroupNS().empty())
-      service_name = rclcpp::names::append(getMoveGroupNS(), service_name);
+      service_name = rclcpp::names::appendAndSanitizeGraphResourceName(getMoveGroupNS(), service_name);
     auto bg_func = [=]() {
       if (planning_scene_monitor_->requestPlanningSceneState(service_name))
         addMainLoopJob([this] { onNewPlanningSceneState(); });

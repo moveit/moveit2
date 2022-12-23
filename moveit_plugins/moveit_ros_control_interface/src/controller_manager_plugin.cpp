@@ -228,7 +228,7 @@ class MoveItControllerManager : public moveit_controller_manager::MoveItControll
    */
   std::string getAbsName(const std::string& name)
   {
-    return rclcpp::names::append(ns_, name);
+    return rclcpp::names::appendAndSanitizeGraphResourceName(ns_, name);
   }
 
 public:

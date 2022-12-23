@@ -34,8 +34,21 @@ namespace rclcpp
 {
 namespace names
 {
-std::string clean(const std::string& name);
+/**
+ * Removes instances of "//" and trailing '/' characters from a string.
+ *
+ * @param name The graph resource name string.
+ * @return The modified graph resource name string.
+ */
+std::string sanitizeGraphResourceName(const std::string& name);
 
-std::string append(const std::string& left, const std::string& right);
+/**
+ * Concatenates two strings with a "/" then removes instances of "//" and trailing '/' characters from a string.
+ *
+ * @param left The first string.
+ * @param right The second string.
+ * @return The modified string.
+ */
+std::string appendAndSanitizeGraphResourceName(const std::string& left, const std::string& right);
 }  // namespace names
 }  // namespace rclcpp

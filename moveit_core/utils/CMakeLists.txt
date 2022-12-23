@@ -25,3 +25,10 @@ ament_target_dependencies(${MOVEIT_TEST_LIB_NAME}
   urdfdom_headers
 )
 set_target_properties(${MOVEIT_TEST_LIB_NAME} PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
+
+if(BUILD_TESTING)
+  find_package(ament_cmake_gtest REQUIRED)
+
+  ament_add_gtest(test_rclcpp_utils test/test_rclcpp_utils.cpp)
+  target_link_libraries(test_rclcpp_utils ${MOVEIT_LIB_NAME})
+endif()

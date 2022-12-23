@@ -33,24 +33,30 @@ namespace names
 {
 std::string clean(const std::string& name)
 {
+  // Initialize a new string "clean" to be a copy of "name"
   std::string clean = name;
 
+  // Search for the substring "//" in "clean"
   size_t pos = clean.find("//");
+
+  // While the substring is found, remove the first '/' character and update the search position
   while (pos != std::string::npos)
   {
     clean.erase(pos, 1);
     pos = clean.find("//", pos);
   }
 
+  // If the last character of "clean" is a '/', remove it
   if (!name.empty() && *clean.rbegin() == '/')
   {
     clean.erase(clean.size() - 1, 1);
   }
 
+  // Return the modified string
   return clean;
 }
 
-std::string append(const std::string& left, const std::string& right)
+std::string appendAndSanitizeGraphResourceName(const std::string& left, const std::string& right)
 {
   return clean(left + "/" + right);
 }

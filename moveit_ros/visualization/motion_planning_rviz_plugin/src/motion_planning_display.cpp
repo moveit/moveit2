@@ -1141,7 +1141,7 @@ void MotionPlanningDisplay::onRobotModelLoaded()
   trajectory_visual_->onRobotModelLoaded(getRobotModel());
 
   robot_interaction_ = std::make_shared<robot_interaction::RobotInteraction>(
-      getRobotModel(), node_, rclcpp::names::append(getMoveGroupNS(), "rviz_moveit_motion_planning_display"));
+      getRobotModel(), node_, rclcpp::names::appendAndSanitizeGraphResourceName(getMoveGroupNS(), "rviz_moveit_motion_planning_display"));
   robot_interaction::KinematicOptions o;
   o.state_validity_callback_ = [this](moveit::core::RobotState* robot_state,
                                       const moveit::core::JointModelGroup* joint_group,

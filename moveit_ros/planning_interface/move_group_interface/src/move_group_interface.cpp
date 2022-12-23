@@ -144,35 +144,35 @@ public:
     pose_reference_frame_ = getRobotModel()->getModelFrame();
     // Append the slash between two topic components
     trajectory_event_publisher_ = node_->create_publisher<std_msgs::msg::String>(
-        rclcpp::names::append(opt_.move_group_namespace_,
+        rclcpp::names::appendAndSanitizeGraphResourceName(opt_.move_group_namespace_,
                               trajectory_execution_manager::TrajectoryExecutionManager::EXECUTION_EVENT_TOPIC),
         1);
     attached_object_publisher_ = node_->create_publisher<moveit_msgs::msg::AttachedCollisionObject>(
-        rclcpp::names::append(opt_.move_group_namespace_,
+        rclcpp::names::appendAndSanitizeGraphResourceName(opt_.move_group_namespace_,
                               planning_scene_monitor::PlanningSceneMonitor::DEFAULT_ATTACHED_COLLISION_OBJECT_TOPIC),
         1);
 
     current_state_monitor_ = getSharedStateMonitor(node_, robot_model_, tf_buffer_);
 
     move_action_client_ = rclcpp_action::create_client<moveit_msgs::action::MoveGroup>(
-        node_, rclcpp::names::append(opt_.move_group_namespace_, move_group::MOVE_ACTION), callback_group_);
+        node_, rclcpp::names::appendAndSanitizeGraphResourceName(opt_.move_group_namespace_, move_group::MOVE_ACTION), callback_group_);
     move_action_client_->wait_for_action_server(wait_for_servers.to_chrono<std::chrono::duration<double>>());
     execute_action_client_ = rclcpp_action::create_client<moveit_msgs::action::ExecuteTrajectory>(
-        node_, rclcpp::names::append(opt_.move_group_namespace_, move_group::EXECUTE_ACTION_NAME), callback_group_);
+        node_, rclcpp::names::appendAndSanitizeGraphResourceName(opt_.move_group_namespace_, move_group::EXECUTE_ACTION_NAME), callback_group_);
     execute_action_client_->wait_for_action_server(wait_for_servers.to_chrono<std::chrono::duration<double>>());
 
     query_service_ = node_->create_client<moveit_msgs::srv::QueryPlannerInterfaces>(
-        rclcpp::names::append(opt_.move_group_namespace_, move_group::QUERY_PLANNERS_SERVICE_NAME),
+        rclcpp::names::appendAndSanitizeGraphResourceName(opt_.move_group_namespace_, move_group::QUERY_PLANNERS_SERVICE_NAME),
         rmw_qos_profile_services_default, callback_group_);
     get_params_service_ = node_->create_client<moveit_msgs::srv::GetPlannerParams>(
-        rclcpp::names::append(opt_.move_group_namespace_, move_group::GET_PLANNER_PARAMS_SERVICE_NAME),
+        rclcpp::names::appendAndSanitizeGraphResourceName(opt_.move_group_namespace_, move_group::GET_PLANNER_PARAMS_SERVICE_NAME),
         rmw_qos_profile_services_default, callback_group_);
     set_params_service_ = node_->create_client<moveit_msgs::srv::SetPlannerParams>(
-        rclcpp::names::append(opt_.move_group_namespace_, move_group::SET_PLANNER_PARAMS_SERVICE_NAME),
+        rclcpp::names::appendAndSanitizeGraphResourceName(opt_.move_group_namespace_, move_group::SET_PLANNER_PARAMS_SERVICE_NAME),
         rmw_qos_profile_services_default, callback_group_);
 
     cartesian_path_service_ = node_->create_client<moveit_msgs::srv::GetCartesianPath>(
-        rclcpp::names::append(opt_.move_group_namespace_, move_group::CARTESIAN_PATH_SERVICE_NAME),
+        rclcpp::names::appendAndSanitizeGraphResourceName(opt_.move_group_namespace_, move_group::CARTESIAN_PATH_SERVICE_NAME),
         rmw_qos_profile_services_default, callback_group_);
 
     // plan_grasps_service_ = pnode_->create_client<moveit_msgs::srv::GraspPlanning>(GRASP_PLANNING_SERVICE_NAME);
