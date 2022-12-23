@@ -35,7 +35,7 @@ namespace rclcpp
 namespace names
 {
 /**
- * Removes instances of "//" and trailing '/' characters from a string.
+ * Replaces instances of "//" with "/" and removes trailing '/' characters from a string.
  *
  * @param name The graph resource name string.
  * @return The modified graph resource name string.
@@ -43,7 +43,7 @@ namespace names
 std::string sanitizeGraphResourceName(const std::string& name);
 
 /**
- * Concatenates two strings with a "/" then removes instances of "//" and trailing '/' characters from a string.
+ * Concatenates two strings with a "/" then replaces instances of "//" with "/" and removes trailing '/' characters.
  *
  * @param left The first string.
  * @param right The second string.

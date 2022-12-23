@@ -37,22 +37,18 @@ std::string clean(const std::string& name)
   std::string clean = name;
 
   // Search for the substring "//" in "clean"
-  size_t pos = clean.find("//");
-
-  // While the substring is found, remove the first '/' character and update the search position
-  while (pos != std::string::npos)
+  while (auto pos = clean.find("//"); pos != std::string::npos)
   {
+    // While the substring is found, remove the first '/' character
     clean.erase(pos, 1);
-    pos = clean.find("//", pos);
   }
 
   // If the last character of "clean" is a '/', remove it
-  if (!name.empty() && *clean.rbegin() == '/')
+  if (!name.empty() && *std::rbegin(clean) == '/')
   {
-    clean.erase(clean.size() - 1, 1);
+    clean.pop_back();
   }
 
-  // Return the modified string
   return clean;
 }
 
