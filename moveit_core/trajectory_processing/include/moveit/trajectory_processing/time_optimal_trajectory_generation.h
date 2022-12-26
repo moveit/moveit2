@@ -196,11 +196,15 @@ public:
   * time-parameterized; this function will re-time-parameterize it.
   * \param velocity_limits Joint names and velocity limits in rad/s
   * \param acceleration_limits Joint names and acceleration limits in rad/s^2
+  * \param max_velocity_scaling_factor A factor in the range [0,1] which can slow down the trajectory.
+  * \param max_acceleration_scaling_factor A factor in the range [0,1] which can slow down the trajectory.
   */
   // clang-format on
   bool computeTimeStamps(robot_trajectory::RobotTrajectory& trajectory,
                          const std::unordered_map<std::string, double>& velocity_limits,
-                         const std::unordered_map<std::string, double>& acceleration_limits) const override;
+                         const std::unordered_map<std::string, double>& acceleration_limits,
+                         const double max_velocity_scaling_factor = 1.0,
+                         const double max_acceleration_scaling_factor = 1.0) const override;
 
 private:
   bool doTimeParameterizationCalculations(robot_trajectory::RobotTrajectory& trajectory,

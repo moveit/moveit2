@@ -969,7 +969,8 @@ bool TimeOptimalTrajectoryGeneration::computeTimeStamps(robot_trajectory::RobotT
 
 bool TimeOptimalTrajectoryGeneration::computeTimeStamps(
     robot_trajectory::RobotTrajectory& trajectory, const std::unordered_map<std::string, double>& velocity_limits,
-    const std::unordered_map<std::string, double>& acceleration_limits) const
+    const std::unordered_map<std::string, double>& acceleration_limits, const double max_velocity_scaling_factor,
+    const double max_acceleration_scaling_factor) const
 {
   if (trajectory.empty())
     return true;
@@ -981,6 +982,40 @@ bool TimeOptimalTrajectoryGeneration::computeTimeStamps(
     RCLCPP_ERROR(LOGGER, "It looks like the planner did not set the group the plan was computed for");
     return false;
   }
+
+  // Validate scaling
+  double velocity_scaling_factor = 1.0;
+  if (max_velocity_scaling_factor > 0.0 && max_velocity_scaling_factor <= 1.0)
+  {
+    velocity_scaling_factor = max_velocity_scaling_factor;
+  }
+  else if (max_velocity_scaling_factor == 0.0)
+  {
+    RCLCPP_DEBUG(LOGGER, "A max_velocity_scaling_factor of 0.0 was specified, defaulting to %f instead.",
+                 velocity_scaling_factor);
+  }
+  else
+  {
+    RCLCPP_WARN(LOGGER, "Invalid max_velocity_scaling_factor %f specified, defaulting to %f instead.",
+                max_velocity_scaling_factor, velocity_scaling_factor);
+  }
+
+  double acceleration_scaling_factor = 1.0;
+  if (max_acceleration_scaling_factor > 0.0 && max_acceleration_scaling_factor <= 1.0)
+  {
+    acceleration_scaling_factor = max_acceleration_scaling_factor;
+  }
+  else if (max_acceleration_scaling_factor == 0.0)
+  {
+    RCLCPP_DEBUG(LOGGER, "A max_acceleration_scaling_factor of 0.0 was specified, defaulting to %f instead.",
+                 acceleration_scaling_factor);
+  }
+  else
+  {
+    RCLCPP_WARN(LOGGER, "Invalid max_acceleration_scaling_factor %f specified, defaulting to %f instead.",
+                max_acceleration_scaling_factor, acceleration_scaling_factor);
+  }
+
   const unsigned num_joints = group->getVariableCount();
   const std::vector<std::string>& vars = group->getVariableNames();
   const moveit::core::RobotModel& rmodel = group->getParentModel();
@@ -997,7 +1032,7 @@ bool TimeOptimalTrajectoryGeneration::computeTimeStamps(
     auto it = velocity_limits.find(vars[j]);
     if (it != velocity_limits.end())
     {
-      max_velocity[j] = it->second;
+      max_velocity[j] = it->second * velocity_scaling_factor;
       set_velocity_limit = true;
     }
 
@@ -1010,7 +1045,8 @@ bool TimeOptimalTrajectoryGeneration::computeTimeStamps(
                      bounds.max_velocity_, vars[j].c_str());
         return false;
       }
-      max_velocity[j] = std::min(std::fabs(bounds.max_velocity_), std::fabs(bounds.min_velocity_));
+      max_velocity[j] =
+          std::min(std::fabs(bounds.max_velocity_), std::fabs(bounds.min_velocity_)) * velocity_scaling_factor;
       set_velocity_limit = true;
     }
 
@@ -1029,7 +1065,7 @@ bool TimeOptimalTrajectoryGeneration::computeTimeStamps(
     it = acceleration_limits.find(vars[j]);
     if (it != acceleration_limits.end())
     {
-      max_acceleration[j] = it->second;
+      max_acceleration[j] = it->second * acceleration_scaling_factor;
       set_acceleration_limit = true;
     }
 
@@ -1042,7 +1078,8 @@ bool TimeOptimalTrajectoryGeneration::computeTimeStamps(
                      bounds.max_acceleration_, vars[j].c_str());
         return false;
       }
-      max_acceleration[j] = std::min(std::fabs(bounds.max_acceleration_), std::fabs(bounds.min_acceleration_));
+      max_acceleration[j] = std::min(std::fabs(bounds.max_acceleration_), std::fabs(bounds.min_acceleration_)) *
+                            acceleration_scaling_factor;
       set_acceleration_limit = true;
     }
     if (!set_acceleration_limit)

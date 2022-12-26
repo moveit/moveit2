@@ -52,7 +52,9 @@ public:
   static bool applySmoothing(robot_trajectory::RobotTrajectory& trajectory,
                              const std::unordered_map<std::string, double>& velocity_limits,
                              const std::unordered_map<std::string, double>& acceleration_limits,
-                             const std::unordered_map<std::string, double>& jerk_limits);
+                             const std::unordered_map<std::string, double>& jerk_limits,
+                             const double max_velocity_scaling_factor = 1.0,
+                             const double max_acceleration_scaling_factor = 1.0);
 
 private:
   /**
