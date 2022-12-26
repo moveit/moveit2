@@ -967,6 +967,28 @@ bool TimeOptimalTrajectoryGeneration::computeTimeStamps(robot_trajectory::RobotT
   return doTimeParameterizationCalculations(trajectory, max_velocity, max_acceleration);
 }
 
+bool TimeOptimalTrajectoryGeneration::computeTimeStamps(robot_trajectory::RobotTrajectory& trajectory,
+                                                        const std::vector<moveit_msgs::msg::JointLimits>& joint_limits,
+                                                        const double max_velocity_scaling_factor,
+                                                        const double max_acceleration_scaling_factor) const
+{
+  std::unordered_map<std::string, double> velocity_limits;
+  std::unordered_map<std::string, double> acceleration_limits;
+  for (const auto& limit : joint_limits)
+  {
+    if (limit.has_velocity_limits)
+    {
+      velocity_limits[limit.joint_name] = limit.max_velocity;
+    }
+    if (limit.has_acceleration_limits)
+    {
+      acceleration_limits[limit.joint_name] = limit.max_acceleration;
+    }
+  }
+  return computeTimeStamps(trajectory, velocity_limits, acceleration_limits, max_velocity_scaling_factor,
+                           max_acceleration_scaling_factor);
+}
+
 bool TimeOptimalTrajectoryGeneration::computeTimeStamps(
     robot_trajectory::RobotTrajectory& trajectory, const std::unordered_map<std::string, double>& velocity_limits,
     const std::unordered_map<std::string, double>& acceleration_limits, const double max_velocity_scaling_factor,

@@ -56,6 +56,11 @@ public:
                              const double max_velocity_scaling_factor = 1.0,
                              const double max_acceleration_scaling_factor = 1.0);
 
+  static bool applySmoothing(robot_trajectory::RobotTrajectory& trajectory,
+                             const std::vector<moveit_msgs::msg::JointLimits>& joint_limits,
+                             const double max_velocity_scaling_factor = 1.0,
+                             const double max_acceleration_scaling_factor = 1.0);
+
 private:
   /**
    * \brief A utility function to check if the group is defined.
