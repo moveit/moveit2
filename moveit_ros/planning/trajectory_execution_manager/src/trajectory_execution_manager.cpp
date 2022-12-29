@@ -1262,7 +1262,6 @@ bool TrajectoryExecutionManager::executePart(std::size_t part_index)
           }
           active_handles_[i] = h;
         }
-        handles = active_handles_;  // keep a copy for later, to avoid thread safety issues
         for (std::size_t i = 0; i < context.trajectory_parts_.size(); ++i)
         {
           bool ok = false;
