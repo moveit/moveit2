@@ -77,6 +77,7 @@ bool PointCloudOctomapUpdater::setParams(const std::string& name_space)
          node_->get_parameter(name_space + ".point_subsample", point_subsample_) &&
          node_->get_parameter(name_space + ".max_update_rate", max_update_rate_) &&
          node_->get_parameter(name_space + ".filtered_cloud_topic", filtered_cloud_topic_);
+
 }
 
 bool PointCloudOctomapUpdater::initialize(const rclcpp::Node::SharedPtr& node)
@@ -90,6 +91,7 @@ bool PointCloudOctomapUpdater::initialize(const rclcpp::Node::SharedPtr& node)
   shape_mask_ = std::make_unique<point_containment_filter::ShapeMask>();
   shape_mask_->setTransformCallback(
       [this](ShapeHandle shape, Eigen::Isometry3d& tf) { return getShapeTransform(shape, tf); });
+
 
   return true;
 }
@@ -243,9 +245,8 @@ void PointCloudOctomapUpdater::cloudMsgCallback(const sensor_msgs::msg::PointClo
     iter_filtered_x = std::make_unique<sensor_msgs::PointCloud2Iterator<float>>(*filtered_cloud, "x");
     iter_filtered_y = std::make_unique<sensor_msgs::PointCloud2Iterator<float>>(*filtered_cloud, "y");
     iter_filtered_z = std::make_unique<sensor_msgs::PointCloud2Iterator<float>>(*filtered_cloud, "z");
-  }
+  } 
   size_t filtered_cloud_size = 0;
-
   tree_->lockRead();
 
   try
@@ -278,7 +279,7 @@ void PointCloudOctomapUpdater::cloudMsgCallback(const sensor_msgs::msg::PointClo
           else if (mask_[row_c + col] == point_containment_filter::ShapeMask::CLIP)
           {
             tf2::Vector3 clipped_point_tf =
-                map_h_sensor * (tf2::Vector3(pt_iter[0], pt_iter[1], pt_iter[2]).normalize() * max_range_);
+                map_h_sensor * (tf2::Vector3(pt_iter[0], pt_iter[1], pt_iter[2]).normalize() * max_range_); 
             clip_cells.insert(
                 tree_->coordToKey(clipped_point_tf.getX(), clipped_point_tf.getY(), clipped_point_tf.getZ()));
           }
@@ -333,6 +334,10 @@ void PointCloudOctomapUpdater::cloudMsgCallback(const sensor_msgs::msg::PointClo
   for (const octomap::OcTreeKey& occupied_cell : occupied_cells)
     free_cells.erase(occupied_cell);
 
+  /* clipped cells are not free*/
+  for (const octomap::OcTreeKey& clip_cell : clip_cells){ 
+    occupied_cells.erase(clip_cell);}
+
   tree_->lockWrite();
 
   try
@@ -345,10 +350,15 @@ void PointCloudOctomapUpdater::cloudMsgCallback(const sensor_msgs::msg::PointClo
     for (const octomap::OcTreeKey& occupied_cell : occupied_cells)
       tree_->updateNode(occupied_cell, true);
 
+    
     // set the logodds to the minimum for the cells that are part of the model
     const float lg = tree_->getClampingThresMinLog() - tree_->getClampingThresMaxLog();
     for (const octomap::OcTreeKey& model_cell : model_cells)
       tree_->updateNode(model_cell, lg);
+
+    // mark clipped cells as free
+    for (const octomap::OcTreeKey& clip_cell : clip_cells){ 
+      tree_->updateNode(clip_cell, false);}
   }
   catch (...)
   {
