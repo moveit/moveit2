@@ -334,7 +334,7 @@ void PointCloudOctomapUpdater::cloudMsgCallback(const sensor_msgs::msg::PointClo
   for (const octomap::OcTreeKey& occupied_cell : occupied_cells)
     free_cells.erase(occupied_cell);
 
-  /* clipped cells are not free*/
+  /* clipped cells are not occupied*/
   for (const octomap::OcTreeKey& clip_cell : clip_cells){ 
     occupied_cells.erase(clip_cell);}
 
