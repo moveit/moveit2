@@ -60,7 +60,7 @@
 #include <moveit/utils/rclcpp_utils.h>
 
 #include <std_msgs/msg/string.hpp>
-#include <geometry_msgs/msg/transform_stamped.h>
+#include <geometry_msgs/msg/transform_stamped.hpp>
 #include <tf2/utils.h>
 #include <tf2_eigen/tf2_eigen.hpp>
 #include <tf2_ros/transform_listener.h>
