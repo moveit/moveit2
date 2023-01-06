@@ -396,6 +396,25 @@ bool PlanningComponent::setGoal(const std::string& goal_state_name)
   return setGoal(goal_state);
 }
 
+bool PlanningComponent::execute(bool blocking)
+{
+  if (!last_plan_solution_)
+  {
+    RCLCPP_ERROR(LOGGER, "There is no successful plan to execute");
+    return false;
+  }
+
+  // TODO(henningkayser): parameterize timestamps if required
+  // trajectory_processing::TimeOptimalTrajectoryGeneration totg;
+  // if (!totg.computeTimeStamps(*last_solution_trajectory_, max_velocity_scaling_factor_,
+  // max_acceleration_scaling_factor_))
+  //{
+  //  RCLCPP_ERROR("Failed to parameterize trajectory");
+  //  return false;
+  //}
+  return moveit_cpp_->execute(group_name_, last_plan_solution_.trajectory_, blocking);
+}
+
 const planning_interface::MotionPlanResponse& PlanningComponent::getLastMotionPlanResponse()
 {
   return last_plan_solution_;
