@@ -37,7 +37,11 @@
 
 #pragma once
 
+<<<<<<< HEAD
 #include <rclcpp/rclcpp.hpp>
+=======
+#include <geometry_msgs/msg/pose_stamped.hpp>
+>>>>>>> 4765028fc (Cleanup msg includes: Use C++ instead of C header (#1844))
 #include <moveit/moveit_cpp/moveit_cpp.h>
 #include <moveit/robot_state/robot_state.h>
 #include <geometry_msgs/msg/pose_stamped.h>
