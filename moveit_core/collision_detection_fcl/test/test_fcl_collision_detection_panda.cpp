@@ -47,9 +47,15 @@ INSTANTIATE_TYPED_TEST_SUITE_P(FCLCollisionCheckPanda, CollisionDetectorPandaTes
 #if MOVEIT_FCL_VERSION >= FCL_VERSION_CHECK(0, 6, 0)
 INSTANTIATE_TYPED_TEST_SUITE_P(FCLDistanceCheckPanda, DistanceFullPandaTest,
                                collision_detection::CollisionDetectorAllocatorFCL);
+#ifdef GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST
+GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(DistanceCheckPandaTest);
+#endif
 #else
 INSTANTIATE_TYPED_TEST_SUITE_P(FCLDistanceCheckPanda, DistanceCheckPandaTest,
                                collision_detection::CollisionDetectorAllocatorFCL);
+#ifdef GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST
+GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(DistanceFullPandaTest);
+#endif
 #endif
 
 int main(int argc, char* argv[])

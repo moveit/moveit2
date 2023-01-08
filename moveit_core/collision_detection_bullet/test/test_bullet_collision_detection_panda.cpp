@@ -40,6 +40,12 @@
 INSTANTIATE_TYPED_TEST_SUITE_P(BulletCollisionCheckPanda, CollisionDetectorPandaTest,
                                collision_detection::CollisionDetectorAllocatorBullet);
 
+// These are not instantiated, because be don't yet have distance checking for Bullet
+#ifdef GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST
+GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(DistanceCheckPandaTest);
+GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(DistanceFullPandaTest);
+#endif
+
 int main(int argc, char* argv[])
 {
   testing::InitGoogleTest(&argc, argv);
