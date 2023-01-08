@@ -60,6 +60,7 @@ namespace moveit::hybrid_planning
 class TrajectoryOperatorInterface
 {
 public:
+  virtual ~TrajectoryOperatorInterface() = default;
   /**
    * Initialize trajectory operator
    * @param node Node handle to access parameters

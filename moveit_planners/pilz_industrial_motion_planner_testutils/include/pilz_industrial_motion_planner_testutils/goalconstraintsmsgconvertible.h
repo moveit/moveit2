@@ -48,6 +48,7 @@ namespace pilz_industrial_motion_planner_testutils
 class GoalConstraintMsgConvertible
 {
 public:
+  virtual ~GoalConstraintMsgConvertible() = default;
   virtual moveit_msgs::msg::Constraints toGoalConstraints() const = 0;
 };
 }  // namespace pilz_industrial_motion_planner_testutils

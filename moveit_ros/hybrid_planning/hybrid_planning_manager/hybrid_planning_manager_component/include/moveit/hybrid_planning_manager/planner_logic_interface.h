@@ -104,6 +104,8 @@ class HybridPlanningManager;  // Forward declaration
 class PlannerLogicInterface
 {
 public:
+  virtual ~PlannerLogicInterface() = default;
+
   /**
    * Initialize the planner logic
    * @param hybrid_planning_manager The hybrid planning manager instance to initialize this logic with.

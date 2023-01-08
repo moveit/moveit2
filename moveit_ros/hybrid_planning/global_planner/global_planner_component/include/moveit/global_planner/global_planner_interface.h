@@ -55,6 +55,7 @@ namespace moveit::hybrid_planning
 class GlobalPlannerInterface
 {
 public:
+  virtual ~GlobalPlannerInterface() = default;
   /**
    * Initialize global planner
    * @return True if initialization was successful

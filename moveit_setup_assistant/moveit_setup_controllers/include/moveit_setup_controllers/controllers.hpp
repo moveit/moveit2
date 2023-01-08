@@ -54,6 +54,8 @@ public:
   {
   }
 
+  virtual ~AdditionalControllerField() = default;
+
   /**
    * @brief Overridable method for changing the default value based on the controller_type
    */
