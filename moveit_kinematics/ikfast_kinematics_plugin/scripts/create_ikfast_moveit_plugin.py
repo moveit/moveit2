@@ -1,8 +1,6 @@
 #! /usr/bin/env python
 from __future__ import print_function
 
-from symbol import parameters
-
 """
 IKFast Plugin Generator for MoveIt
 
