@@ -61,8 +61,6 @@ namespace moveit_servo
 {
 namespace
 {
-constexpr char CONDITION_TOPIC[] = "~/condition";
-
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_servo.servo_calcs");
 constexpr auto ROS_LOG_THROTTLE_PERIOD = std::chrono::milliseconds(3000).count();
 static constexpr double STOPPED_VELOCITY_EPS = 1e-4;  // rad/s
