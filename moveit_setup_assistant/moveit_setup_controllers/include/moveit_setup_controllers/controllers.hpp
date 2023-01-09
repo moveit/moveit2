@@ -54,6 +54,10 @@ public:
   {
   }
 
+  AdditionalControllerField(const AdditionalControllerField&) = default;
+  AdditionalControllerField(AdditionalControllerField&&) = default;
+  AdditionalControllerField& operator=(const AdditionalControllerField&) = default;
+  AdditionalControllerField& operator=(AdditionalControllerField&&) = default;
   virtual ~AdditionalControllerField() = default;
 
   /**

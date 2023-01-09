@@ -48,6 +48,10 @@ namespace pilz_industrial_motion_planner_testutils
 class GoalConstraintMsgConvertible
 {
 public:
+  GoalConstraintMsgConvertible(const GoalConstraintMsgConvertible&) = default;
+  GoalConstraintMsgConvertible(GoalConstraintMsgConvertible&&) = default;
+  GoalConstraintMsgConvertible& operator=(const GoalConstraintMsgConvertible&) = default;
+  GoalConstraintMsgConvertible& operator=(GoalConstraintMsgConvertible&&) = default;
   virtual ~GoalConstraintMsgConvertible() = default;
   virtual moveit_msgs::msg::Constraints toGoalConstraints() const = 0;
 };

@@ -59,6 +59,10 @@ namespace moveit::hybrid_planning
 class LocalConstraintSolverInterface
 {
 public:
+  LocalConstraintSolverInterface(const LocalConstraintSolverInterface&) = default;
+  LocalConstraintSolverInterface(LocalConstraintSolverInterface&&) = default;
+  LocalConstraintSolverInterface& operator=(const LocalConstraintSolverInterface&) = default;
+  LocalConstraintSolverInterface& operator=(LocalConstraintSolverInterface&&) = default;
   virtual ~LocalConstraintSolverInterface() = default;
   /**
    * Initialize local constraint solver

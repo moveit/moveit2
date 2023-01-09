@@ -46,6 +46,10 @@ namespace moveit_setup
 class SetupStep
 {
 public:
+  SetupStep(const SetupStep&) = default;
+  SetupStep(SetupStep&&) = default;
+  SetupStep& operator=(const SetupStep&) = default;
+  SetupStep& operator=(SetupStep&&) = default;
   virtual ~SetupStep() = default;
 
   /**

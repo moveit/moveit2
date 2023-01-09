@@ -144,6 +144,10 @@ struct TermInfo
   using MakerFunc = TermInfoPtr (*)(void);
   static void RegisterMaker(const std::string& type, MakerFunc);
 
+  TermInfo(const TermInfo&) = default;
+  TermInfo(TermInfo&&) = default;
+  TermInfo& operator=(const TermInfo&) = default;
+  TermInfo& operator=(TermInfo&&) = default;
   virtual ~TermInfo() = default;
 
 protected:

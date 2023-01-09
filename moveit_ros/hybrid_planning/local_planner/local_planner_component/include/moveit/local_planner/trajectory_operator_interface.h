@@ -60,6 +60,10 @@ namespace moveit::hybrid_planning
 class TrajectoryOperatorInterface
 {
 public:
+  TrajectoryOperatorInterface(const TrajectoryOperatorInterface&) = default;
+  TrajectoryOperatorInterface(TrajectoryOperatorInterface&&) = default;
+  TrajectoryOperatorInterface& operator=(const TrajectoryOperatorInterface&) = default;
+  TrajectoryOperatorInterface& operator=(TrajectoryOperatorInterface&&) = default;
   virtual ~TrajectoryOperatorInterface() = default;
   /**
    * Initialize trajectory operator

@@ -66,6 +66,10 @@ MOVEIT_CLASS_FORWARD(GeneratedFile);  // Defines GeneratedFilePtr, ConstPtr, Wea
 class GeneratedFile : public std::enable_shared_from_this<GeneratedFile>
 {
 public:
+  GeneratedFile(const GeneratedFile&) = default;
+  GeneratedFile(GeneratedFile&&) = default;
+  GeneratedFile& operator=(const GeneratedFile&) = default;
+  GeneratedFile& operator=(GeneratedFile&&) = default;
   virtual ~GeneratedFile() = default;
 
   GeneratedFile(const std::filesystem::path& package_path, const GeneratedTime& last_gen_time)

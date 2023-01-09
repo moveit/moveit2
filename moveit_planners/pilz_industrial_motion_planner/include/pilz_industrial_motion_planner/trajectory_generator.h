@@ -98,6 +98,10 @@ public:
   {
   }
 
+  TrajectoryGenerator(const TrajectoryGenerator&) = default;
+  TrajectoryGenerator(TrajectoryGenerator&&) = default;
+  TrajectoryGenerator& operator=(const TrajectoryGenerator&) = default;
+  TrajectoryGenerator& operator=(TrajectoryGenerator&&) = default;
   virtual ~TrajectoryGenerator() = default;
 
   /**

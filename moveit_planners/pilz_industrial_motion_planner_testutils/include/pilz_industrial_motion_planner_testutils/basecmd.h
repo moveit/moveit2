@@ -44,10 +44,11 @@ template <class StartType, class GoalType>
 class BaseCmd : public MotionCmd
 {
 public:
-  BaseCmd() : MotionCmd()
-  {
-  }
-
+  BaseCmd() = default;
+  BaseCmd(const BaseCmd&) = default;
+  BaseCmd(BaseCmd&&) = default;
+  BaseCmd& operator=(const BaseCmd&) = default;
+  BaseCmd& operator=(BaseCmd&&) = default;
   virtual ~BaseCmd() = default;
 
 public:

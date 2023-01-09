@@ -52,7 +52,10 @@ public:
   typedef std::function<double(const _T&, const _T&)> DistanceFunction;
 
   NearestNeighbors() = default;
-
+  NearestNeighbors(const NearestNeighbors&) = default;
+  NearestNeighbors(NearestNeighbors&&) = default;
+  NearestNeighbors& operator=(const NearestNeighbors&) = default;
+  NearestNeighbors& operator=(NearestNeighbors&&) = default;
   virtual ~NearestNeighbors() = default;
 
   /** \brief Set the distance function to use */

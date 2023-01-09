@@ -57,6 +57,10 @@ MOVEIT_CLASS_FORWARD(SetupConfig);  // Defines SetupConfigPtr, ConstPtr, WeakPtr
 class SetupConfig
 {
 public:
+  SetupConfig(const SetupConfig&) = default;
+  SetupConfig(SetupConfig&&) = default;
+  SetupConfig& operator=(const SetupConfig&) = default;
+  SetupConfig& operator=(SetupConfig&&) = default;
   virtual ~SetupConfig() = default;
 
   /**

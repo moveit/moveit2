@@ -104,6 +104,10 @@ class HybridPlanningManager;  // Forward declaration
 class PlannerLogicInterface
 {
 public:
+  PlannerLogicInterface(const PlannerLogicInterface&) = default;
+  PlannerLogicInterface(PlannerLogicInterface&&) = default;
+  PlannerLogicInterface& operator=(const PlannerLogicInterface&) = default;
+  PlannerLogicInterface& operator=(PlannerLogicInterface&&) = default;
   virtual ~PlannerLogicInterface() = default;
 
   /**
