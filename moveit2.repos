@@ -1,4 +1,8 @@
 repositories:
+  moveit_msgs:
+    type: git
+    url: https://github.com/ros-planning/moveit_msgs.git
+    version: ros2
   moveit_resources:
     type: git
     url: https://github.com/ros-planning/moveit_resources.git
