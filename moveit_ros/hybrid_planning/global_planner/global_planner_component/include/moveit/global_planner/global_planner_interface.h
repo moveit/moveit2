@@ -55,6 +55,7 @@ namespace moveit::hybrid_planning
 class GlobalPlannerInterface
 {
 public:
+  GlobalPlannerInterface() = default;
   GlobalPlannerInterface(const GlobalPlannerInterface&) = default;
   GlobalPlannerInterface(GlobalPlannerInterface&&) = default;
   GlobalPlannerInterface& operator=(const GlobalPlannerInterface&) = default;

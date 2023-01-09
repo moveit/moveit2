@@ -46,6 +46,7 @@ namespace pilz_industrial_motion_planner_testutils
 class RobotStateMsgConvertible
 {
 public:
+  RobotStateMsgConvertible() = default;
   RobotStateMsgConvertible(const RobotStateMsgConvertible&) = default;
   RobotStateMsgConvertible(RobotStateMsgConvertible&&) = default;
   RobotStateMsgConvertible& operator=(const RobotStateMsgConvertible&) = default;

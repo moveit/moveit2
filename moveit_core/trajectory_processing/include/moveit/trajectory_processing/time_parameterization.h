@@ -11,6 +11,7 @@ MOVEIT_CLASS_FORWARD(TimeParameterization);
 class TimeParameterization
 {
 public:
+  TimeParameterization() = default;
   TimeParameterization(const TimeParameterization&) = default;
   TimeParameterization(TimeParameterization&&) = default;
   TimeParameterization& operator=(const TimeParameterization&) = default;

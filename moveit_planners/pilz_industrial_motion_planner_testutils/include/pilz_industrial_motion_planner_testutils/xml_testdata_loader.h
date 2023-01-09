@@ -184,6 +184,7 @@ public:
   class AbstractCmdGetterAdapter
   {
   public:
+    AbstractCmdGetterAdapter() = default;
     AbstractCmdGetterAdapter(const AbstractCmdGetterAdapter&) = default;
     AbstractCmdGetterAdapter(AbstractCmdGetterAdapter&&) = default;
     AbstractCmdGetterAdapter& operator=(const AbstractCmdGetterAdapter&) = default;
