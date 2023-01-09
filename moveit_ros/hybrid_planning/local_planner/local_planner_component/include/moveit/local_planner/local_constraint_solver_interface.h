@@ -49,7 +49,7 @@
 
 #include <moveit_msgs/action/local_planner.hpp>
 
-#include <trajectory_msgs/msg/joint_trajectory.h>
+#include <trajectory_msgs/msg/joint_trajectory.hpp>
 
 namespace moveit::hybrid_planning
 {

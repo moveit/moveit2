@@ -40,7 +40,7 @@
 #include <rclcpp/rclcpp.hpp>
 #include <moveit/moveit_cpp/moveit_cpp.h>
 #include <moveit/robot_state/robot_state.h>
-#include <geometry_msgs/msg/pose_stamped.h>
+#include <geometry_msgs/msg/pose_stamped.hpp>
 #include <moveit/robot_state/conversions.h>
 #include <moveit/utils/moveit_error_code.h>
 
