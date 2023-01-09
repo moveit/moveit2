@@ -46,9 +46,9 @@ class BaseCmd : public MotionCmd
 public:
   BaseCmd() = default;
   BaseCmd(const BaseCmd&) = default;
-  BaseCmd(BaseCmd&&) = default;
+  BaseCmd(BaseCmd&&) noexcept = default;
   BaseCmd& operator=(const BaseCmd&) = default;
-  BaseCmd& operator=(BaseCmd&&) = default;
+  BaseCmd& operator=(BaseCmd&&) noexcept = default;
   virtual ~BaseCmd() = default;
 
 public:

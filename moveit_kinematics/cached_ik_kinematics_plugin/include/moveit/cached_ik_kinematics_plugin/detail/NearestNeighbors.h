@@ -53,9 +53,9 @@ public:
 
   NearestNeighbors() = default;
   NearestNeighbors(const NearestNeighbors&) = default;
-  NearestNeighbors(NearestNeighbors&&) = default;
+  NearestNeighbors(NearestNeighbors&&) noexcept = default;
   NearestNeighbors& operator=(const NearestNeighbors&) = default;
-  NearestNeighbors& operator=(NearestNeighbors&&) = default;
+  NearestNeighbors& operator=(NearestNeighbors&&) noexcept = default;
   virtual ~NearestNeighbors() = default;
 
   /** \brief Set the distance function to use */
