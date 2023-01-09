@@ -17,6 +17,7 @@ Overview of your issue here.
 * Source or Binary build?
 * If binary, which release version?
 * If source, which branch?
+* Which RMW (Fast DDS or Cyclone DDS)? Humble or Rolling should be using Cyclone.
 
 ### Steps to reproduce
 Tell us how to reproduce this issue. Attempt to provide a working demo, perhaps using Docker.
