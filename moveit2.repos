@@ -1,4 +1,5 @@
 repositories:
+  # Keep moveit_* repos here because they are released with moveit
   moveit_msgs:
     type: git
     url: https://github.com/ros-planning/moveit_msgs.git
