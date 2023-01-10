@@ -42,8 +42,8 @@
 #include <chrono>
 #include <mutex>
 
-#include <controller_manager/realtime.hpp>
-#include <std_msgs/msg/bool.h>
+#include <realtime_tools/thread_priority.hpp>
+#include <std_msgs/msg/bool.hpp>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
 
 // #include <moveit_servo/make_shared_from_pool.h> // TODO(adamp): create an issue about this
@@ -277,9 +277,9 @@ void ServoCalcs::start()
   stop_requested_ = false;
   thread_ = std::thread([this] {
     // Check if a realtime kernel is installed. Set a higher thread priority, if so
-    if (controller_manager::has_realtime_kernel())
+    if (realtime_tools::has_realtime_kernel())
     {
-      if (!controller_manager::configure_sched_fifo(THREAD_PRIORITY))
+      if (!realtime_tools::configure_sched_fifo(THREAD_PRIORITY))
       {
         RCLCPP_WARN(LOGGER, "Could not enable FIFO RT scheduling policy");
       }

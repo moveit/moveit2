@@ -53,7 +53,7 @@
 #include <moveit_msgs/action/execute_trajectory.hpp>
 
 #include <moveit_msgs/msg/motion_plan_request.hpp>
-#include <geometry_msgs/msg/pose_stamped.h>
+#include <geometry_msgs/msg/pose_stamped.hpp>
 
 #include <rclcpp_action/rclcpp_action.hpp>
 

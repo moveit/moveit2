@@ -81,7 +81,12 @@ bool RuckigSmoothing::applySmoothing(robot_trajectory::RobotTrajectory& trajecto
     return false;
   }
 
-  return runRuckig(trajectory, ruckig_input);
+  auto ruckig_result = runRuckigInBatches(num_waypoints, trajectory, ruckig_input);
+  if (ruckig_result.has_value())
+  {
+    trajectory = ruckig_result.value();
+  }
+  return ruckig_result.has_value();  // Ruckig failed to smooth the trajectory
 }
 
 bool RuckigSmoothing::applySmoothing(robot_trajectory::RobotTrajectory& trajectory,
@@ -139,7 +144,73 @@ bool RuckigSmoothing::applySmoothing(robot_trajectory::RobotTrajectory& trajecto
     }
   }
 
-  return runRuckig(trajectory, ruckig_input);
+  auto ruckig_result = runRuckigInBatches(num_waypoints, trajectory, ruckig_input);
+  if (ruckig_result.has_value())
+  {
+    trajectory = ruckig_result.value();
+  }
+  return ruckig_result.has_value();  // Ruckig failed to smooth the trajectory
+}
+
+std::optional<robot_trajectory::RobotTrajectory>
+RuckigSmoothing::runRuckigInBatches(const size_t num_waypoints, const robot_trajectory::RobotTrajectory& trajectory,
+                                    ruckig::InputParameter<ruckig::DynamicDOFs>& ruckig_input, size_t batch_size)
+{
+  // We take the batch size as the lesser of 0.1*num_waypoints or batch_size, to keep a balance between run time and
+  // time-optimality.
+  batch_size = [num_waypoints, batch_size]() {
+    const size_t temp_batch_size = std::min(size_t(0.1 * num_waypoints), size_t(batch_size));
+    // We need at least 2 waypoints
+    return std::max(size_t(2), temp_batch_size);
+  }();
+  size_t batch_start_idx = 0;
+  size_t batch_end_idx = batch_size - 1;
+  const size_t full_traj_final_idx = num_waypoints - 1;
+  // A deep copy is not needed since the waypoints are cleared immediately
+  robot_trajectory::RobotTrajectory sub_trajectory =
+      robot_trajectory::RobotTrajectory(trajectory, false /* deep copy */);
+  robot_trajectory::RobotTrajectory output_trajectory =
+      robot_trajectory::RobotTrajectory(trajectory, false /* deep copy */);
+  output_trajectory.clear();
+
+  while (batch_end_idx <= full_traj_final_idx)
+  {
+    sub_trajectory.clear();
+    for (size_t waypoint_idx = batch_start_idx; waypoint_idx <= batch_end_idx; ++waypoint_idx)
+    {
+      sub_trajectory.addSuffixWayPoint(trajectory.getWayPoint(waypoint_idx),
+                                       trajectory.getWayPointDurationFromPrevious(waypoint_idx));
+    }
+
+    // When starting a new batch, set the last Ruckig output equal to the new, starting robot state
+    bool first_point_previously_smoothed = false;
+    if (output_trajectory.getWayPointCount() > 0)
+    {
+      sub_trajectory.addPrefixWayPoint(output_trajectory.getLastWayPoint(), 0);
+      first_point_previously_smoothed = true;
+    }
+
+    if (!runRuckig(sub_trajectory, ruckig_input))
+    {
+      return std::nullopt;
+    }
+
+    // Skip appending the first waypoint in sub_trajectory if it was smoothed in
+    // the previous iteration
+    size_t first_new_waypoint = first_point_previously_smoothed ? 1 : 0;
+
+    // Add smoothed waypoints to the output
+    for (size_t waypoint_idx = first_new_waypoint; waypoint_idx < sub_trajectory.getWayPointCount(); ++waypoint_idx)
+    {
+      output_trajectory.addSuffixWayPoint(sub_trajectory.getWayPoint(waypoint_idx),
+                                          sub_trajectory.getWayPointDurationFromPrevious(waypoint_idx));
+    }
+
+    batch_start_idx += batch_size;
+    batch_end_idx += batch_size;
+  }
+
+  return std::make_optional<robot_trajectory::RobotTrajectory>(output_trajectory, true /* deep copy */);
 }
 
 bool RuckigSmoothing::validateGroup(const robot_trajectory::RobotTrajectory& trajectory)

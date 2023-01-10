@@ -292,6 +292,8 @@ public:
   RobotTrajectory& reverse();
 
   RobotTrajectory& unwind();
+
+  /** @brief Unwind, starting from an initial state **/
   RobotTrajectory& unwind(const moveit::core::RobotState& state);
 
   /** @brief Finds the waypoint indices before and after a duration from start.

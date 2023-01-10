@@ -33,7 +33,6 @@ moveit_package()
 set(THIS_PACKAGE_INCLUDE_DEPENDS
   control_msgs
   control_toolbox
-  controller_manager
   geometry_msgs
   moveit_core
   moveit_msgs
@@ -41,6 +40,7 @@ set(THIS_PACKAGE_INCLUDE_DEPENDS
   pluginlib
   rclcpp
   rclcpp_components
+  realtime_tools
   sensor_msgs
   std_msgs
   std_srvs

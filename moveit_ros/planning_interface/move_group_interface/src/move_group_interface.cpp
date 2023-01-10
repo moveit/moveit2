@@ -51,7 +51,6 @@
 #include <moveit/common_planning_interface_objects/common_objects.h>
 #include <moveit/robot_state/conversions.h>
 #include <moveit_msgs/action/execute_trajectory.hpp>
-#include <moveit_msgs/srv/execute_known_trajectory.hpp>
 #include <moveit_msgs/srv/query_planner_interfaces.hpp>
 #include <moveit_msgs/srv/get_cartesian_path.hpp>
 #include <moveit_msgs/srv/grasp_planning.hpp>
@@ -60,7 +59,7 @@
 #include <moveit/utils/rclcpp_utils.h>
 
 #include <std_msgs/msg/string.hpp>
-#include <geometry_msgs/msg/transform_stamped.h>
+#include <geometry_msgs/msg/transform_stamped.hpp>
 #include <tf2/utils.h>
 #include <tf2_eigen/tf2_eigen.hpp>
 #include <tf2_ros/transform_listener.h>

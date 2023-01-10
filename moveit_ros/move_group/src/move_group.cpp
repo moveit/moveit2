@@ -99,12 +99,12 @@ public:
       {
         if (capabilities_.empty())
         {
-          printf(MOVEIT_CONSOLE_COLOR_BLUE "\nmove_group is running but no capabilities are "
-                                           "loaded.\n\n" MOVEIT_CONSOLE_COLOR_RESET);
+          printf("\n" MOVEIT_CONSOLE_COLOR_BLUE
+                 "move_group is running but no capabilities are loaded." MOVEIT_CONSOLE_COLOR_RESET "\n\n");
         }
         else
         {
-          printf(MOVEIT_CONSOLE_COLOR_GREEN "\nYou can start planning now!\n\n" MOVEIT_CONSOLE_COLOR_RESET);
+          printf("\n" MOVEIT_CONSOLE_COLOR_GREEN "You can start planning now!" MOVEIT_CONSOLE_COLOR_RESET "\n\n");
         }
         fflush(stdout);
       }
@@ -175,7 +175,7 @@ private:
     {
       try
       {
-        printf(MOVEIT_CONSOLE_COLOR_CYAN "Loading '%s'...\n" MOVEIT_CONSOLE_COLOR_RESET, capability.c_str());
+        printf(MOVEIT_CONSOLE_COLOR_CYAN "Loading '%s'..." MOVEIT_CONSOLE_COLOR_RESET "\n", capability.c_str());
         MoveGroupCapabilityPtr cap = capability_plugin_loader_->createUniqueInstance(capability);
         cap->setContext(context_);
         cap->initialize();
