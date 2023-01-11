@@ -217,14 +217,22 @@ trajectory_execution_manager::TrajectoryExecutionManagerPtr MoveItCpp::getTrajec
 }
 
 moveit_controller_manager::ExecutionStatus
-MoveItCpp::execute(const std::string& group_name, const robot_trajectory::RobotTrajectoryPtr& robot_trajectory,
-                   bool blocking, const std::vector<std::string>& controllers)
+MoveItCpp::execute(const std::string& /* group_name */, const robot_trajectory::RobotTrajectoryPtr& robot_trajectory,
+                   bool blocking)
+{
+  return execute(robot_trajectory, blocking);
+}
+
+moveit_controller_manager::ExecutionStatus
+MoveItCpp::execute(const robot_trajectory::RobotTrajectoryPtr& robot_trajectory, bool blocking)
 {
   if (!robot_trajectory)
   {
     RCLCPP_ERROR(LOGGER, "Robot trajectory is undefined");
     return moveit_controller_manager::ExecutionStatus::ABORTED;
   }
+
+  const std::string group_name = robot_trajectory->getGroupName();
 
   // Check if there are controllers that can handle the execution
   if (!trajectory_execution_manager_->ensureActiveControllersForGroup(group_name))

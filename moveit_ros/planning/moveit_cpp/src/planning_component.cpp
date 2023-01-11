@@ -412,7 +412,7 @@ bool PlanningComponent::execute(bool blocking)
   //  RCLCPP_ERROR("Failed to parameterize trajectory");
   //  return false;
   //}
-  return moveit_cpp_->execute(group_name_, last_plan_solution_.trajectory_, blocking);
+  return moveit_cpp_->execute(last_plan_solution_.trajectory_, blocking);
 }
 
 const planning_interface::MotionPlanResponse& PlanningComponent::getLastMotionPlanResponse()
