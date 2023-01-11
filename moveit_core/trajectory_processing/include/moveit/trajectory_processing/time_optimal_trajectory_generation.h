@@ -45,6 +45,13 @@
 
 namespace trajectory_processing
 {
+enum LimitType
+{
+  VELOCITY,
+  ACCELERATION
+};
+
+std::unordered_map<LimitType, std::string> LIMIT_TYPES = { { VELOCITY, "velocity" }, { ACCELERATION, "acceleration" } };
 class PathSegment
 {
 public:
@@ -216,7 +223,7 @@ public:
   * meters for prismatic joints.
   * \param[in,out] trajectory A path which needs time-parameterization. It's OK if this path has already been
   * time-parameterized; this function will re-time-parameterize it.
-  * \param joint_limits Joint names and corresponding velocity limits in rad/s and acceleration limits in rad/S^2
+  * \param joint_limits Joint names and corresponding velocity limits in rad/s and acceleration limits in rad/s^2
   * \param max_velocity_scaling_factor A factor in the range [0,1] which can slow down the trajectory.
   * \param max_acceleration_scaling_factor A factor in the range [0,1] which can slow down the trajectory.
   */
@@ -237,6 +244,15 @@ private:
    * \return true if there are mixed joints.
    */
   bool hasMixedJointTypes(const moveit::core::JointModelGroup* group) const;
+
+  /**
+   * @brief Check if the max scaling factor is valid and if not, set it to the specified default value
+   * \param[in,out] scaling_factor The default scaling factor that should be applied
+   * if the `max_scaling_factor` is invalid
+   * \param max_scaling_factor The desired maximum scaling factor to apply to the velocity or acceleration limits
+   * \param limit_type Whether the velocity or acceleration scaling factor is being verified
+   */
+  void verifyScalingFactor(double& scaling_factor, const double max_scaling_factor, const LimitType limit_type) const;
 
   const double path_tolerance_;
   const double resample_dt_;
