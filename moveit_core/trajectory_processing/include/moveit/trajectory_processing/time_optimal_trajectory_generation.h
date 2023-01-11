@@ -51,7 +51,8 @@ enum LimitType
   ACCELERATION
 };
 
-std::unordered_map<LimitType, std::string> LIMIT_TYPES = { { VELOCITY, "velocity" }, { ACCELERATION, "acceleration" } };
+const std::unordered_map<LimitType, std::string> LIMIT_TYPES = { { VELOCITY, "velocity" },
+                                                                 { ACCELERATION, "acceleration" } };
 class PathSegment
 {
 public:
