@@ -175,7 +175,7 @@ public:
    */
   moveit_controller_manager::ExecutionStatus
   execute(const std::string& group_name, const robot_trajectory::RobotTrajectoryPtr& robot_trajectory,
-          bool blocking = true, const std::vector<std::string>& controllers = std::vector<std::string>(1, ""));
+          bool blocking = true, const std::vector<std::string>& controllers = std::vector<std::string>());
 
   /** \brief Utility to terminate the given planning pipeline */
   bool terminatePlanningPipeline(const std::string& pipeline_name);
