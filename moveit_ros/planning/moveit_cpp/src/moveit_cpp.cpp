@@ -218,7 +218,7 @@ trajectory_execution_manager::TrajectoryExecutionManagerPtr MoveItCpp::getTrajec
 
 moveit_controller_manager::ExecutionStatus
 MoveItCpp::execute(const std::string& group_name, const robot_trajectory::RobotTrajectoryPtr& robot_trajectory,
-                   bool blocking)
+                   bool blocking, const std::vector<std::string>& controllers)
 {
   if (!robot_trajectory)
   {
@@ -240,7 +240,7 @@ MoveItCpp::execute(const std::string& group_name, const robot_trajectory::RobotT
   // blocking is the only valid option right now. Add non-blocking use case
   if (blocking)
   {
-    trajectory_execution_manager_->push(robot_trajectory_msg);
+    trajectory_execution_manager_->push(robot_trajectory_msg, controllers);
     trajectory_execution_manager_->execute();
     return trajectory_execution_manager_->waitForExecution();
   }
