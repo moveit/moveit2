@@ -41,6 +41,7 @@
 #include <rclcpp/rclcpp.hpp>
 #include <tf2_eigen/tf2_eigen.hpp>
 
+#include <moveit_servo/servo_parameters.h>
 #include <moveit_servo/status_codes.h>
 
 namespace moveit_servo
@@ -77,5 +78,10 @@ double velocityScalingFactorForSingularity(const moveit::core::JointModelGroup* 
                                            const double lower_singularity_threshold,
                                            const double leaving_singularity_threshold_multiplier, rclcpp::Clock& clock,
                                            const moveit::core::RobotStatePtr& current_state, StatusCode& status);
+
+/** \brief Compose a JointTrajectory message from a JointState */
+void composeJointTrajMessage(const std::shared_ptr<const moveit_servo::ServoParameters>& parameters,
+                             const sensor_msgs::msg::JointState& joint_state,
+                             trajectory_msgs::msg::JointTrajectory& joint_trajectory);
 
 }  // namespace moveit_servo

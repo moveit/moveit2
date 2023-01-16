@@ -62,3 +62,10 @@ check_collisions: true # Check collisions?
 collision_check_rate: 10.0 # [Hz] Collision-checking can easily bog down a CPU if done too often.
 self_collision_proximity_threshold: 0.01 # Start decelerating when a self-collision is this far [m]
 scene_collision_proximity_threshold: 0.02 # Start decelerating when a scene collision is this far [m]
+
+## Joint drift thresholding
+# Joints of certain robots such as Kinova and Ignition simulations tend to drift over time.
+# It often manifests as a slow sag due to gravity.
+# This enables a special mode to prevent joint drift by only updating positions of the actuated joints.
+# A value of false is fine for most arms with good position control such as UR robots.
+apply_anti_drift: false

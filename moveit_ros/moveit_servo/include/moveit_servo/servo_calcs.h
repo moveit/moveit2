@@ -176,10 +176,6 @@ protected:
    */
   std::vector<const moveit::core::JointModel*> enforcePositionLimits(sensor_msgs::msg::JointState& joint_state) const;
 
-  /** \brief Compose the outgoing JointTrajectory message */
-  void composeJointTrajMessage(const sensor_msgs::msg::JointState& joint_state,
-                               trajectory_msgs::msg::JointTrajectory& joint_trajectory);
-
   /** \brief Set the filters to the specified values */
   void resetLowPassFilters(const sensor_msgs::msg::JointState& joint_state);
 

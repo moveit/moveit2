@@ -162,4 +162,31 @@ double velocityScalingFactorForSingularity(const moveit::core::JointModelGroup* 
   return velocity_scale;
 }
 
+void composeJointTrajMessage(const std::shared_ptr<const moveit_servo::ServoParameters>& parameters,
+                             const sensor_msgs::msg::JointState& joint_state,
+                             trajectory_msgs::msg::JointTrajectory& joint_trajectory)
+{
+  // When a joint_trajectory_controller receives a new command, a stamp of 0 indicates "begin immediately"
+  // See http://wiki.ros.org/joint_trajectory_controller#Trajectory_replacement
+  joint_trajectory.header.stamp = rclcpp::Time(0);
+  joint_trajectory.header.frame_id = parameters->planning_frame;
+  joint_trajectory.joint_names = joint_state.name;
+
+  trajectory_msgs::msg::JointTrajectoryPoint point;
+  point.time_from_start = rclcpp::Duration::from_seconds(parameters->publish_period);
+  if (parameters->publish_joint_positions)
+    point.positions = joint_state.position;
+  if (parameters->publish_joint_velocities)
+    point.velocities = joint_state.velocity;
+  if (parameters->publish_joint_accelerations)
+  {
+    // I do not know of a robot that takes acceleration commands.
+    // However, some controllers check that this data is non-empty.
+    // Send all zeros, for now.
+    std::vector<double> acceleration(point.velocities.size());
+    point.accelerations = acceleration;
+  }
+  joint_trajectory.points.push_back(point);
+}
+
 }  // namespace moveit_servo

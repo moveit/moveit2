@@ -262,6 +262,11 @@ void ServoParameters::declare(const std::string& ns,
                                      ParameterDescriptorBuilder{}
                                          .type(PARAMETER_DOUBLE)
                                          .description("Start decelerating when a scene collision is this far [m]"));
+
+  // Joint drift_velocity threshold
+  node_parameters->declare_parameter(
+      ns + ".apply_anti_drift", ParameterValue{ parameters.apply_anti_drift },
+      ParameterDescriptorBuilder{}.type(PARAMETER_BOOL).description("Enable a special mode to mitigate joint drift"));
 }
 
 ServoParameters ServoParameters::get(const std::string& ns,
@@ -347,6 +352,9 @@ ServoParameters ServoParameters::get(const std::string& ns,
       node_parameters->get_parameter(ns + ".self_collision_proximity_threshold").as_double();
   parameters.scene_collision_proximity_threshold =
       node_parameters->get_parameter(ns + ".scene_collision_proximity_threshold").as_double();
+
+  // Joint drift thresholding
+  parameters.apply_anti_drift = node_parameters->get_parameter(ns + ".apply_anti_drift").as_bool();
 
   return parameters;
 }
@@ -450,6 +458,7 @@ std::optional<ServoParameters> ServoParameters::validate(ServoParameters paramet
                         "greater than zero. Check yaml file.");
     return std::nullopt;
   }
+
   return parameters;
 }
 

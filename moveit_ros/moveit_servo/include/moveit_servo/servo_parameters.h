@@ -105,6 +105,8 @@ struct ServoParameters
   double collision_check_rate{ 10.0 };
   double self_collision_proximity_threshold{ 0.01 };
   double scene_collision_proximity_threshold{ 0.02 };
+  // Joint drift thresholding
+  bool apply_anti_drift{ false };
 
   /**
    * Declares, reads, and validates parameters used for moveit_servo

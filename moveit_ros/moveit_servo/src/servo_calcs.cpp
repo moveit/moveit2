@@ -777,7 +777,7 @@ bool ServoCalcs::internalServoUpdate(Eigen::ArrayXd& delta_theta,
   }
 
   // compose outgoing message
-  composeJointTrajMessage(internal_joint_state_, joint_trajectory);
+  composeJointTrajMessage(parameters_, internal_joint_state_, joint_trajectory);
 
   // Modify the output message if we are using gazebo
   if (parameters_->use_gazebo)
@@ -802,8 +802,24 @@ bool ServoCalcs::applyJointUpdate(const Eigen::ArrayXd& delta_theta, sensor_msgs
 
   for (std::size_t i = 0; i < joint_state.position.size(); ++i)
   {
-    // Increment joint
-    joint_state.position[i] += delta_theta[i];
+    // Increment joints
+
+    // If no joint drift thresholding, simply increment all joints
+    if (!parameters_->apply_anti_drift)
+    {
+      joint_state.position.at(i) += delta_theta[i];
+    }
+    // Else, increment if Servo is actuating the joint, i.e. delta_theta[i] != 0
+    else if (delta_theta[i] != 0)
+    {
+      joint_state.position.at(i) += delta_theta[i];
+    }
+    // Else, keep the joint's original position from original_joint_state_
+    // This is what mitigates drift.
+    else
+    {
+      joint_state.position.at(i) = original_joint_state_.position.at(i);
+    }
   }
 
   smoother_->doSmoothing(joint_state.position);
@@ -811,7 +827,7 @@ bool ServoCalcs::applyJointUpdate(const Eigen::ArrayXd& delta_theta, sensor_msgs
   for (std::size_t i = 0; i < joint_state.position.size(); ++i)
   {
     // Calculate joint velocity
-    joint_state.velocity[i] =
+    joint_state.velocity.at(i) =
         (joint_state.position.at(i) - original_joint_state_.position.at(i)) / parameters_->publish_period;
   }
 
@@ -840,32 +856,6 @@ void ServoCalcs::resetLowPassFilters(const sensor_msgs::msg::JointState& joint_s
 {
   smoother_->reset(joint_state.position);
   updated_filters_ = true;
-}
-
-void ServoCalcs::composeJointTrajMessage(const sensor_msgs::msg::JointState& joint_state,
-                                         trajectory_msgs::msg::JointTrajectory& joint_trajectory)
-{
-  // When a joint_trajectory_controller receives a new command, a stamp of 0 indicates "begin immediately"
-  // See http://wiki.ros.org/joint_trajectory_controller#Trajectory_replacement
-  joint_trajectory.header.stamp = rclcpp::Time(0);
-  joint_trajectory.header.frame_id = parameters_->planning_frame;
-  joint_trajectory.joint_names = joint_state.name;
-
-  trajectory_msgs::msg::JointTrajectoryPoint point;
-  point.time_from_start = rclcpp::Duration::from_seconds(parameters_->publish_period);
-  if (parameters_->publish_joint_positions)
-    point.positions = joint_state.position;
-  if (parameters_->publish_joint_velocities)
-    point.velocities = joint_state.velocity;
-  if (parameters_->publish_joint_accelerations)
-  {
-    // I do not know of a robot that takes acceleration commands.
-    // However, some controllers check that this data is non-empty.
-    // Send all zeros, for now.
-    std::vector<double> acceleration(num_joints_);
-    point.accelerations = acceleration;
-  }
-  joint_trajectory.points.push_back(point);
 }
 
 std::vector<const moveit::core::JointModel*>
