@@ -779,8 +779,12 @@ public:
     // wait until send_goal_opts.result_callback is called
     while (!done)
     {
+<<<<<<< HEAD
       rclcpp::spin_some(pnode_);
       std::this_thread::sleep_for(std::chrono::milliseconds(100));
+=======
+      std::this_thread::sleep_for(std::chrono::milliseconds(1));
+>>>>>>> 0642ef064 (400% speed up to move group interface (#1865))
     }
 
     if (code != rclcpp_action::ResultCode::SUCCEEDED)
@@ -859,8 +863,12 @@ public:
     // wait until send_goal_opts.result_callback is called
     while (!done)
     {
+<<<<<<< HEAD
       rclcpp::spin_some(pnode_);
       std::this_thread::sleep_for(std::chrono::milliseconds(100));
+=======
+      std::this_thread::sleep_for(std::chrono::milliseconds(1));
+>>>>>>> 0642ef064 (400% speed up to move group interface (#1865))
     }
 
     if (code != rclcpp_action::ResultCode::SUCCEEDED)
@@ -928,8 +936,12 @@ public:
     // wait until send_goal_opts.result_callback is called
     while (!done)
     {
+<<<<<<< HEAD
       rclcpp::spin_some(pnode_);
       std::this_thread::sleep_for(std::chrono::milliseconds(100));
+=======
+      std::this_thread::sleep_for(std::chrono::milliseconds(1));
+>>>>>>> 0642ef064 (400% speed up to move group interface (#1865))
     }
 
     if (code != rclcpp_action::ResultCode::SUCCEEDED)
