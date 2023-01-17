@@ -223,6 +223,7 @@ bool RuckigSmoothing::applySmoothing(robot_trajectory::RobotTrajectory& trajecto
   std::unordered_map<std::string, double> jerk_limits;
   for (const auto& limit : joint_limits)
   {
+    // If custom limits are not defined here, they will be supplied from getRobotModelBounds() later
     if (limit.has_velocity_limits)
     {
       velocity_limits[limit.joint_name] = limit.max_velocity;

@@ -948,6 +948,7 @@ bool TimeOptimalTrajectoryGeneration::computeTimeStamps(robot_trajectory::RobotT
   std::unordered_map<std::string, double> acceleration_limits;
   for (const auto& limit : joint_limits)
   {
+    // If custom limits are not defined here, they will be supplied from getRobotModelBounds() later
     if (limit.has_velocity_limits)
     {
       velocity_limits[limit.joint_name] = limit.max_velocity;
