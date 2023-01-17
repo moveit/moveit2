@@ -793,7 +793,7 @@ public:
     // wait until send_goal_opts.result_callback is called
     while (!done)
     {
-      std::this_thread::sleep_for(std::chrono::milliseconds(100));
+      std::this_thread::sleep_for(std::chrono::milliseconds(1));
     }
 
     if (code != rclcpp_action::ResultCode::SUCCEEDED)
@@ -871,7 +871,7 @@ public:
     // wait until send_goal_opts.result_callback is called
     while (!done)
     {
-      std::this_thread::sleep_for(std::chrono::milliseconds(100));
+      std::this_thread::sleep_for(std::chrono::milliseconds(1));
     }
 
     if (code != rclcpp_action::ResultCode::SUCCEEDED)
@@ -937,7 +937,7 @@ public:
     // wait until send_goal_opts.result_callback is called
     while (!done)
     {
-      std::this_thread::sleep_for(std::chrono::milliseconds(100));
+      std::this_thread::sleep_for(std::chrono::milliseconds(1));
     }
 
     if (code != rclcpp_action::ResultCode::SUCCEEDED)
