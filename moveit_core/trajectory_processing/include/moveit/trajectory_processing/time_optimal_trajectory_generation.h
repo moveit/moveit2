@@ -247,13 +247,12 @@ private:
   bool hasMixedJointTypes(const moveit::core::JointModelGroup* group) const;
 
   /**
-   * @brief Check if the max scaling factor is valid and if not, set it to the specified default value
-   * \param[in,out] scaling_factor The default scaling factor that should be applied
-   * if the `max_scaling_factor` is invalid
-   * \param max_scaling_factor The desired maximum scaling factor to apply to the velocity or acceleration limits
+   * @brief Check if the requested scaling factor is valid and if not, return 1.0.
+   * \param requested_scaling_factor The desired maximum scaling factor to apply to the velocity or acceleration limits
    * \param limit_type Whether the velocity or acceleration scaling factor is being verified
+   * \return The user requested scaling factor, if it is valid. Otherwise, return 1.0.
    */
-  void verifyScalingFactor(double& scaling_factor, const double max_scaling_factor, const LimitType limit_type) const;
+  double verifyScalingFactor(const double requested_scaling_factor, const LimitType limit_type) const;
 
   const double path_tolerance_;
   const double resample_dt_;
