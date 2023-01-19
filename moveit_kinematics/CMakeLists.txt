@@ -6,18 +6,19 @@ find_package(moveit_common REQUIRED)
 moveit_package()
 
 find_package(ament_cmake REQUIRED)
+
 find_package(Eigen3 REQUIRED)
-find_package(orocos_kdl REQUIRED)
-find_package(tf2_kdl REQUIRED)
-find_package(kdl_parser REQUIRED)
-find_package(rclcpp REQUIRED)
-find_package(random_numbers REQUIRED)
 find_package(class_loader REQUIRED)
-find_package(pluginlib REQUIRED)
-find_package(moveit_core REQUIRED)
-find_package(moveit_ros_planning REQUIRED)
-find_package(moveit_msgs REQUIRED)
 find_package(generate_parameter_library REQUIRED)
+find_package(kdl_parser REQUIRED)
+find_package(moveit_core REQUIRED)
+find_package(moveit_msgs REQUIRED)
+find_package(moveit_ros_planning REQUIRED)
+find_package(orocos_kdl REQUIRED)
+find_package(pluginlib REQUIRED)
+find_package(random_numbers REQUIRED)
+find_package(rclcpp REQUIRED)
+find_package(tf2_kdl REQUIRED)
 
 # Finds Boost Components
 include(ConfigExtras.cmake)
@@ -42,11 +43,17 @@ set(THIS_PACKAGE_LIBRARIES
 )
 
 set(THIS_PACKAGE_INCLUDE_DEPENDS
-  pluginlib
-  moveit_core
-  moveit_ros_planning
   Boost
+  class_loader
   generate_parameter_library
+  kdl_parser
+  moveit_core
+  moveit_msgs
+  moveit_ros_planning
+  pluginlib
+  random_numbers
+  rclcpp
+  tf2_kdl
 )
 
 pluginlib_export_plugin_description_file(moveit_core kdl_kinematics_plugin_description.xml)
