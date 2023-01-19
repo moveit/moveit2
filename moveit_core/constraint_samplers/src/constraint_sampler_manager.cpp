@@ -121,20 +121,20 @@ ConstraintSamplerPtr ConstraintSamplerManager::selectDefaultSampler(const planni
       }
     }
     else
-        // if a smaller set of joints has been specified, keep the constraint sampler around, but use it only if no IK
-        // sampler has been specified.
-        if (!jc.empty())
-    {
-      JointConstraintSamplerPtr sampler = std::make_shared<JointConstraintSampler>(scene, jmg->getName());
-      if (sampler->configure(jc))
+      // if a smaller set of joints has been specified, keep the constraint sampler around, but use it only if no IK
+      // sampler has been specified.
+      if (!jc.empty())
       {
-        RCLCPP_DEBUG(LOGGER,
-                     "Temporary sampler satisfying joint constraints for group '%s' allocated. "
-                     "Looking for different types of constraints before returning though.",
-                     jmg->getName().c_str());
-        joint_sampler = sampler;
+        JointConstraintSamplerPtr sampler = std::make_shared<JointConstraintSampler>(scene, jmg->getName());
+        if (sampler->configure(jc))
+        {
+          RCLCPP_DEBUG(LOGGER,
+                       "Temporary sampler satisfying joint constraints for group '%s' allocated. "
+                       "Looking for different types of constraints before returning though.",
+                       jmg->getName().c_str());
+          joint_sampler = sampler;
+        }
       }
-    }
   }
 
   std::vector<ConstraintSamplerPtr> samplers;
