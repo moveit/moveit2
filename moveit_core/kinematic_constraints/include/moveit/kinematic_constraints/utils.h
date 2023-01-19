@@ -66,9 +66,6 @@ namespace kinematic_constraints
 moveit_msgs::msg::Constraints mergeConstraints(const moveit_msgs::msg::Constraints& first,
                                                const moveit_msgs::msg::Constraints& second);
 
-/** \brief Check if any constraints were specified */
-[[deprecated("Use moveit/utils/message_checks.h instead")]] bool isEmpty(const moveit_msgs::msg::Constraints& constr);
-
 std::size_t countIndividualConstraints(const moveit_msgs::msg::Constraints& constr);
 
 /**
@@ -78,8 +75,8 @@ std::size_t countIndividualConstraints(const moveit_msgs::msg::Constraints& cons
  *
  * @param [in] state The state from which to generate goal joint constraints
  * @param [in] jmg The group for which to generate goal joint constraints
- * @param [in] tolerance_below The below tolerance to apply to all constraints
- * @param [in] tolerance_above The above tolerance to apply to all constraints
+ * @param [in] tolerance_below The below tolerance to apply to all constraints [rad or meters for prismatic joints]
+ * @param [in] tolerance_above The above tolerance to apply to all constraints [rad or meters for prismatic joints]
  *
  * @return A full constraint message containing all the joint constraints
  */
@@ -94,7 +91,8 @@ moveit_msgs::msg::Constraints constructGoalConstraints(const moveit::core::Robot
  *
  * @param [in] state The state from which to generate goal joint constraints
  * @param [in] jmg The group for which to generate joint constraints
- * @param [in] tolerance A tolerance to apply both above and below for all constraints
+ * @param [in] tolerance An angular tolerance to apply both above and below for all constraints [rad or meters for
+ * prismatic joints]
  *
  * @return A full constraint message containing all the joint constraints
  */
@@ -111,8 +109,7 @@ moveit_msgs::msg::Constraints constructGoalConstraints(const moveit::core::Robot
  *
  * @param [in] link_name The link name for both constraints
  * @param [in] pose The pose stamped to be used for the target region.
- * @param [in] tolerance_pos The dimension of the sphere associated with the target region of the \ref
- *PositionConstraint
+ * @param [in] tolerance_pos The radius of a sphere defining a \ref PositionConstraint
  * @param [in] tolerance_angle The value to assign to the absolute tolerances of the \ref OrientationConstraint
  *
  * @return A full constraint message containing both constraints
@@ -165,7 +162,7 @@ moveit_msgs::msg::Constraints constructGoalConstraints(const std::string& link_n
  * @param [in] link_name The link name for the \ref PositionConstraint
  * @param [in] reference_point A point corresponding to the target_point_offset of the \ref PositionConstraint
  * @param [in] goal_point The position associated with the constraint region
- * @param [in] tolerance The radius associated with the sphere volume associated with the constraint region
+ * @param [in] tolerance The radius of a sphere defining a \ref PositionConstraint
  *
  * @return A full constraint message containing the position constraint
  */
@@ -182,7 +179,7 @@ moveit_msgs::msg::Constraints constructGoalConstraints(const std::string& link_n
  *
  * @param [in] link_name The link name for the \ref PositionConstraint
  * @param [in] goal_point The position associated with the constraint region
- * @param [in] tolerance The radius associated with the sphere volume associated with the constraint region
+ * @param [in] tolerance The radius of a sphere defining a \ref PositionConstraint
  *
  * @return A full constraint message containing the position constraint
  */

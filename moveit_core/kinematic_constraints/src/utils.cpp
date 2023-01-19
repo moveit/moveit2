@@ -128,11 +128,6 @@ moveit_msgs::msg::Constraints mergeConstraints(const moveit_msgs::msg::Constrain
   return r;
 }
 
-bool isEmpty(const moveit_msgs::msg::Constraints& constr)
-{
-  return moveit::core::isEmpty(constr);
-}
-
 std::size_t countIndividualConstraints(const moveit_msgs::msg::Constraints& constr)
 {
   return constr.position_constraints.size() + constr.orientation_constraints.size() +
