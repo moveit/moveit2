@@ -374,7 +374,7 @@ bool PlanningComponent::setGoal(const std::string& goal_state_name)
   return setGoal(goal_state);
 }
 
-bool PlanningComponent::execute(bool blocking)
+bool PlanningComponent::execute(bool /*blocking*/)
 {
   RCLCPP_ERROR(LOGGER, "There is no successful plan to execute");
   return false;
