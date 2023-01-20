@@ -419,4 +419,23 @@ const planning_interface::MotionPlanResponse& PlanningComponent::getLastMotionPl
 {
   return last_plan_solution_;
 }
+
+bool PlanningComponent::stopAtFirstSolution(
+    PlanSolutions const& plan_solutions,
+    PlanningComponent::MultiPipelinePlanRequestParameters const& /*plan_request_parameters*/)
+{
+  // Stop at the first successful plan
+  for (auto const& solution : plan_solutions.getSolutions())
+  {
+    // bool(solution) is shorthand to evaluate the error code of the solution, checking for SUCCESS
+    if (bool(solution))
+    {
+      // Return true to abort the other pipelines
+      return true;
+    }
+  }
+  // Return false when parallel planning should continue because it hasn't found a successful solution yet
+  return false;
+}
+
 }  // namespace moveit_cpp

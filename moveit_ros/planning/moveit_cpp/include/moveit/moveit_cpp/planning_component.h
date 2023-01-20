@@ -49,6 +49,7 @@
 namespace moveit_cpp
 {
 MOVEIT_CLASS_FORWARD(PlanningComponent);  // Defines PlanningComponentPtr, ConstPtr, WeakPtr... etc
+
 class PlanningComponent
 {
 public:
@@ -194,7 +195,8 @@ public:
   planning_interface::MotionPlanResponse plan(const PlanRequestParameters& parameters, const bool store_solution = true);
 
   /** \brief Run a plan from start or current state to fulfill the last goal constraints provided by setGoal() using the
-   * provided PlanRequestParameters. */
+   * provided PlanRequestParameters. This defaults to taking the full planning time (null stopping_criterion_callback)
+   * and finding the shortest solution in joint space. */
   planning_interface::MotionPlanResponse
   plan(const MultiPipelinePlanRequestParameters& parameters,
        const SolutionCallbackFunction& solution_selection_callback = &getShortestSolution,
@@ -208,6 +210,11 @@ public:
   const planning_interface::MotionPlanResponse& getLastMotionPlanResponse();
 
 private:
+  /** \brief A callback function that is used as the default parallel planning stop criterion.
+   *          It stops parallel planning as soon as any planner finds a solution. */
+  static bool stopAtFirstSolution(PlanSolutions const& plan_solutions,
+                                  PlanningComponent::MultiPipelinePlanRequestParameters const& plan_request_parameters);
+
   // Core properties and instances
   rclcpp::Node::SharedPtr node_;
   MoveItCppPtr moveit_cpp_;
