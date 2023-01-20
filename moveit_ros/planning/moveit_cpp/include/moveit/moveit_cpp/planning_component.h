@@ -209,11 +209,6 @@ public:
   const planning_interface::MotionPlanResponse& getLastMotionPlanResponse();
 
 private:
-  /** \brief A callback function that is used as the default parallel planning stop criterion.
-   *          It stops parallel planning as soon as any planner finds a solution. */
-  static bool stopAtFirstSolution(PlanSolutions const& plan_solutions,
-                                  PlanningComponent::MultiPipelinePlanRequestParameters const& plan_request_parameters);
-
   // Core properties and instances
   rclcpp::Node::SharedPtr node_;
   MoveItCppPtr moveit_cpp_;
