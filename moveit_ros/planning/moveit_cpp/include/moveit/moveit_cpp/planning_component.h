@@ -53,7 +53,6 @@ MOVEIT_CLASS_FORWARD(PlanningComponent);  // Defines PlanningComponentPtr, Const
 class PlanningComponent
 {
 public:
-  using MoveItErrorCode [[deprecated("Use moveit::core::MoveItErrorCode")]] = moveit::core::MoveItErrorCode;
   /// Planner parameters provided with the MotionPlanRequest
   struct PlanRequestParameters
   {
