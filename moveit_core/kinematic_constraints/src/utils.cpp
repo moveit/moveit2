@@ -34,6 +34,8 @@
 
 /* Author: Ioan Sucan */
 
+#include <algorithm>
+
 #include <geometric_shapes/solid_primitive_dims.h>
 #include <moveit/kinematic_constraints/utils.h>
 #include <moveit/utils/message_checks.h>
@@ -158,6 +160,28 @@ moveit_msgs::msg::Constraints constructGoalConstraints(const moveit::core::Robot
   }
 
   return goal;
+}
+
+bool updateJointConstraints(moveit_msgs::msg::Constraints& constraints, const moveit::core::RobotState& state,
+                            const moveit::core::JointModelGroup* jmg)
+{
+  const std::vector<std::string>& jmg_active_joints = jmg->getActiveJointModelNames();
+
+  // For each constraint, update it if the joint is found within jmg
+  for (auto& constraint : constraints.joint_constraints)
+  {
+    const auto itr = find(jmg_active_joints.begin(), jmg_active_joints.end(), constraint.joint_name);
+    if (itr != jmg_active_joints.end())
+    {
+      constraint.position = state.getVariablePosition(constraint.joint_name);
+    }
+    // The joint was not found within jmg
+    else
+    {
+      return false;
+    }
+  }
+  return true;
 }
 
 moveit_msgs::msg::Constraints constructGoalConstraints(const std::string& link_name,
@@ -527,10 +551,8 @@ bool constructConstraints(const rclcpp::Node::SharedPtr& node, const std::string
 
   return collectConstraints(node, constraint_ids, constraints);
 }
-}  // namespace kinematic_constraints
 
-bool kinematic_constraints::resolveConstraintFrames(const moveit::core::RobotState& state,
-                                                    moveit_msgs::msg::Constraints& constraints)
+bool resolveConstraintFrames(const moveit::core::RobotState& state, moveit_msgs::msg::Constraints& constraints)
 {
   for (auto& c : constraints.position_constraints)
   {
@@ -576,3 +598,4 @@ bool kinematic_constraints::resolveConstraintFrames(const moveit::core::RobotSta
   }
   return true;
 }
+}  // namespace kinematic_constraints

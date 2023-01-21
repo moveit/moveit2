@@ -101,6 +101,18 @@ moveit_msgs::msg::Constraints constructGoalConstraints(const moveit::core::Robot
                                                        double tolerance = std::numeric_limits<double>::epsilon());
 
 /**
+ * \brief Update joint constraints with a new JointModelGroup state
+ *
+ * @param [in, out] constraints Previously-constructed constraints to update
+ * @param [in] state The new target state
+ * @param [in] jmg Specify which JointModelGroup to update
+ *
+ * @return true if successful, false if any joint_constraint within constraints was not able to be updated
+ */
+bool updateJointConstraints(moveit_msgs::msg::Constraints& constraints, const moveit::core::RobotState& state,
+                            const moveit::core::JointModelGroup* jmg);
+
+/**
  * \brief Generates a constraint message intended to be used as a goal
  * constraint for a given link.  The full constraint will contain a
  * \ref PositionConstraint and a \ref OrientationConstraint,
