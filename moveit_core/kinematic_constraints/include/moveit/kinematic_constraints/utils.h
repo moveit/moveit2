@@ -107,7 +107,7 @@ moveit_msgs::msg::Constraints constructGoalConstraints(const moveit::core::Robot
  * @param [in] state The new target state
  * @param [in] jmg Specify which JointModelGroup to update
  *
- * @return true if successful, false if any joint_constraint within constraints was not able to be updated
+ * @return true if all joint constraints were updated
  */
 bool updateJointConstraints(moveit_msgs::msg::Constraints& constraints, const moveit::core::RobotState& state,
                             const moveit::core::JointModelGroup* jmg);
@@ -151,6 +151,18 @@ moveit_msgs::msg::Constraints constructGoalConstraints(const std::string& link_n
                                                        const std::vector<double>& tolerance_angle);
 
 /**
+ * \brief Update a pose constraint for one link with a new pose
+ *
+ * @param [in, out] constraints Previously-constructed constraints to update
+ * @param [in] link The link to update for
+ * @param [in] pose The new target pose
+ *
+ * @return true if the constraint was updated
+ */
+bool updatePoseConstraint(moveit_msgs::msg::Constraints& constraints, const std::string& link_name,
+                          const geometry_msgs::msg::PoseStamped& pose);
+
+/**
  * \brief Generates a constraint message intended to be used as a goal
  * constraint for a given link. The full constraint message will
  * contain only an \ref OrientationConstraint.
@@ -164,6 +176,18 @@ moveit_msgs::msg::Constraints constructGoalConstraints(const std::string& link_n
 moveit_msgs::msg::Constraints constructGoalConstraints(const std::string& link_name,
                                                        const geometry_msgs::msg::QuaternionStamped& quat,
                                                        double tolerance = 1e-2);
+
+/**
+ * \brief Update an orientation constraint for one link with a new quaternion
+ *
+ * @param [in, out] constraints Previously-constructed constraints to update
+ * @param [in] link The link to update for
+ * @param [in] quat The new target quaternion
+ *
+ * @return true if the constraint was updated
+ */
+bool updateOrientationConstraint(moveit_msgs::msg::Constraints& constraints, const std::string& link_name,
+                                 const geometry_msgs::msg::QuaternionStamped& quat);
 
 /**
  * \brief Generates a constraint message intended to be used as a goal
@@ -198,6 +222,18 @@ moveit_msgs::msg::Constraints constructGoalConstraints(const std::string& link_n
 moveit_msgs::msg::Constraints constructGoalConstraints(const std::string& link_name,
                                                        const geometry_msgs::msg::PointStamped& goal_point,
                                                        double tolerance = 1e-3);
+
+/**
+ * \brief Update a position constraint for one link with a new position
+ *
+ * @param [in, out] constraints Previously-constructed constraints to update
+ * @param [in] link The link to update for
+ * @param [in] goal_point The new target point
+ *
+ * @return true if the constraint was updated
+ */
+bool updatePositionConstraint(moveit_msgs::msg::Constraints& constraints, const std::string& link_name,
+                              const geometry_msgs::msg::PointStamped& goal_point);
 
 /**
  * \brief extract constraint message from node parameters.

@@ -246,6 +246,36 @@ moveit_msgs::msg::Constraints constructGoalConstraints(const std::string& link_n
   return goal;
 }
 
+bool updatePoseConstraint(moveit_msgs::msg::Constraints& constraints, const std::string& link_name,
+                          const geometry_msgs::msg::PoseStamped& pose)
+{
+  // For each constraint, update it if the link matches
+  bool updated_position = false;
+  for (auto& constraint : constraints.position_constraints)
+  {
+    if (constraint.link_name == link_name)
+    {
+      constraint.constraint_region.primitive_poses.at(0).position = pose.pose.position;
+      updated_position = true;
+      break;
+    }
+  }
+  if (!updated_position)
+  {
+    return false;
+  }
+
+  for (auto& constraint : constraints.orientation_constraints)
+  {
+    if (constraint.link_name == link_name)
+    {
+      constraint.orientation = pose.pose.orientation;
+      return true;
+    }
+  }
+  return false;
+}
+
 moveit_msgs::msg::Constraints constructGoalConstraints(const std::string& link_name,
                                                        const geometry_msgs::msg::QuaternionStamped& quat,
                                                        double tolerance)
@@ -263,6 +293,20 @@ moveit_msgs::msg::Constraints constructGoalConstraints(const std::string& link_n
   return goal;
 }
 
+bool updateOrientationConstraint(moveit_msgs::msg::Constraints& constraints, const std::string& link_name,
+                                 const geometry_msgs::msg::QuaternionStamped& quat)
+{
+  for (auto& constraint : constraints.orientation_constraints)
+  {
+    if (constraint.link_name == link_name)
+    {
+      constraint.orientation = quat.quaternion;
+      return true;
+    }
+  }
+  return false;
+}
+
 moveit_msgs::msg::Constraints constructGoalConstraints(const std::string& link_name,
                                                        const geometry_msgs::msg::PointStamped& goal_point,
                                                        double tolerance)
@@ -272,6 +316,22 @@ moveit_msgs::msg::Constraints constructGoalConstraints(const std::string& link_n
   p.y = 0;
   p.z = 0;
   return constructGoalConstraints(link_name, p, goal_point, tolerance);
+}
+
+bool updatePositionConstraint(moveit_msgs::msg::Constraints& constraints, const std::string& link_name,
+                              const geometry_msgs::msg::PointStamped& goal_point)
+{
+  for (auto& constraint : constraints.position_constraints)
+  {
+    if (constraint.link_name == link_name)
+    {
+      constraint.constraint_region.primitive_poses.at(0).position.x = goal_point.point.x;
+      constraint.constraint_region.primitive_poses.at(0).position.y = goal_point.point.y;
+      constraint.constraint_region.primitive_poses.at(0).position.z = goal_point.point.z;
+      return true;
+    }
+  }
+  return false;
 }
 
 moveit_msgs::msg::Constraints constructGoalConstraints(const std::string& link_name,
