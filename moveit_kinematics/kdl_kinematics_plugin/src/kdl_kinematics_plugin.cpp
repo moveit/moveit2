@@ -350,9 +350,9 @@ bool KDLKinematicsPlugin::searchPositionIK(const geometry_msgs::msg::Pose& ik_po
   tf2::fromMsg(ik_pose, pose_desired);
 
   RCLCPP_DEBUG_STREAM(LOGGER, "searchPositionIK: Position request pose is "
-                                  << ik_pose.position.x << " " << ik_pose.position.y << " " << ik_pose.position.z << " "
-                                  << ik_pose.orientation.x << " " << ik_pose.orientation.y << " "
-                                  << ik_pose.orientation.z << " " << ik_pose.orientation.w);
+                                  << ik_pose.position.x << ' ' << ik_pose.position.y << ' ' << ik_pose.position.z << ' '
+                                  << ik_pose.orientation.x << ' ' << ik_pose.orientation.y << ' '
+                                  << ik_pose.orientation.z << ' ' << ik_pose.orientation.w);
 
   unsigned int attempt = 0;
   do

@@ -82,7 +82,7 @@ bool CommandPlanner::initialize(const moveit::core::RobotModelConstPtr& model, c
   std::stringstream ss;
   for (const auto& factory : factories)
   {
-    ss << factory << " ";
+    ss << factory << ' ';
   }
 
   RCLCPP_INFO_STREAM(LOGGER, "Available plugins: " << ss.str());
@@ -166,7 +166,7 @@ void CommandPlanner::registerContextLoader(
   if (context_loader_map_.find(planning_context_loader->getAlgorithm()) == context_loader_map_.end())
   {
     context_loader_map_[planning_context_loader->getAlgorithm()] = planning_context_loader;
-    RCLCPP_INFO_STREAM(LOGGER, "Registered Algorithm [" << planning_context_loader->getAlgorithm() << "]");
+    RCLCPP_INFO_STREAM(LOGGER, "Registered Algorithm [" << planning_context_loader->getAlgorithm() << ']');
   }
   else
   {

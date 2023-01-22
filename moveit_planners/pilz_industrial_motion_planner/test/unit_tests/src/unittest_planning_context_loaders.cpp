@@ -165,7 +165,7 @@ TEST_P(PlanningContextLoadersTest, LoadContext)
   }
   catch (std::exception& ex)
   {
-    FAIL() << "Exception!" << ex.what() << " " << typeid(ex).name();
+    FAIL() << "Exception!" << ex.what() << ' ' << typeid(ex).name();
   }
 
   EXPECT_EQ(true, res) << "Context could not be loaded!";

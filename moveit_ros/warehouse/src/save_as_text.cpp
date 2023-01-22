@@ -162,7 +162,7 @@ int main(int argc, char** argv)
             moveit::core::RobotState ks(km);
             moveit::core::robotStateMsgToRobotState(*robot_state, ks, false);
             ks.printStateInfo(qfout);
-            qfout << "." << '\n';
+            qfout << '.' << '\n';
           }
         }
 
@@ -185,12 +185,12 @@ int main(int argc, char** argv)
               std::string link_name = iter.first;
               LinkConstraintPair lcp = iter.second;
               qfout << link_name << '\n';
-              qfout << "xyz " << lcp.first.x << " " << lcp.first.y << " " << lcp.first.z << '\n';
+              qfout << "xyz " << lcp.first.x << ' ' << lcp.first.y << ' ' << lcp.first.z << '\n';
               Eigen::Quaterniond orientation(lcp.second.w, lcp.second.x, lcp.second.y, lcp.second.z);
               Eigen::Vector3d rpy = orientation.matrix().eulerAngles(0, 1, 2);
-              qfout << "rpy " << rpy[0] << " " << rpy[1] << " " << rpy[2] << '\n';
+              qfout << "rpy " << rpy[0] << ' ' << rpy[1] << ' ' << rpy[2] << '\n';
             }
-            qfout << "." << '\n';
+            qfout << '.' << '\n';
           }
         }
         qfout.close();

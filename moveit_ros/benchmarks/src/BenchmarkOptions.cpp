@@ -234,7 +234,7 @@ void BenchmarkOptions::readBenchmarkParameters(const rclcpp::Node::SharedPtr& no
                                  << workspace_.min_corner.x << ", " << workspace_.min_corner.y << ", "
                                  << workspace_.min_corner.z << "], "
                                  << "max_corner: [" << workspace_.max_corner.x << ", " << workspace_.max_corner.y
-                                 << ", " << workspace_.max_corner.z << "]");
+                                 << ", " << workspace_.max_corner.z << ']');
 }
 
 void BenchmarkOptions::readWorkspaceParameters(const rclcpp::Node::SharedPtr& node)

@@ -149,12 +149,12 @@ public:
           std::stringstream joint_bounds_hi;
           const double* p = start_state.getJointPositions(jmodel);
           for (std::size_t k = 0; k < jmodel->getVariableCount(); ++k)
-            joint_values << p[k] << " ";
+            joint_values << p[k] << ' ';
           const moveit::core::JointModel::Bounds& b = jmodel->getVariableBounds();
           for (const moveit::core::VariableBounds& variable_bounds : b)
           {
-            joint_bounds_low << variable_bounds.min_position_ << " ";
-            joint_bounds_hi << variable_bounds.max_position_ << " ";
+            joint_bounds_low << variable_bounds.min_position_ << ' ';
+            joint_bounds_hi << variable_bounds.max_position_ << ' ';
           }
           RCLCPP_WARN(LOGGER,
                       "Joint '%s' from the starting state is outside bounds by a significant margin: [%s] should be in "

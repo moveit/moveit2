@@ -160,14 +160,14 @@ TEST_F(TrajectoryTest, goalTolerance)
     planner_instance.reset(planner_plugin_loader->createUnmanagedInstance(planner_plugin_name));
     if (!planner_instance->initialize(robot_model_, node_handle_.getNamespace()))
       ROS_FATAL_STREAM_NAMED(NODE_NAME, "Could not initialize planner instance");
-    ROS_INFO_STREAM_NAMED(NODE_NAME, "Using planning interface '" << planner_instance->getDescription() << "'");
+    ROS_INFO_STREAM_NAMED(NODE_NAME, "Using planning interface '" << planner_instance->getDescription() << '\'');
   }
   catch (pluginlib::PluginlibException& ex)
   {
     const std::vector<std::string>& classes = planner_plugin_loader->getDeclaredClasses();
     std::stringstream ss;
     for (std::size_t i = 0; i < classes.size(); ++i)
-      ss << classes[i] << " ";
+      ss << classes[i] << ' ';
     ROS_ERROR_STREAM_NAMED(NODE_NAME, "Exception while loading planner '" << planner_plugin_name << "': " << ex.what()
                                                                           << '\n'
                                                                           << "Available plugins: " << ss.str());

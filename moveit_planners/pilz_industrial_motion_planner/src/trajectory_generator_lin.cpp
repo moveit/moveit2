@@ -80,7 +80,7 @@ void TrajectoryGeneratorLIN::extractMotionPlanInfo(const planning_scene::Plannin
       os << "Number of joints in goal does not match number of joints of group "
             "(Number joints goal: "
          << req.goal_constraints.front().joint_constraints.size() << " | Number of joints of group: "
-         << robot_model_->getJointModelGroup(req.group_name)->getActiveJointModelNames().size() << ")";
+         << robot_model_->getJointModelGroup(req.group_name)->getActiveJointModelNames().size() << ')';
       throw JointNumberMismatch(os.str());
     }
     // initializing all joints of the model
