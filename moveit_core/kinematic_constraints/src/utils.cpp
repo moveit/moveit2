@@ -249,31 +249,17 @@ moveit_msgs::msg::Constraints constructGoalConstraints(const std::string& link_n
 bool updatePoseConstraint(moveit_msgs::msg::Constraints& constraints, const std::string& link_name,
                           const geometry_msgs::msg::PoseStamped& pose)
 {
-  // For each constraint, update it if the link matches
-  bool updated_position = false;
-  for (auto& constraint : constraints.position_constraints)
-  {
-    if (constraint.link_name == link_name)
-    {
-      constraint.constraint_region.primitive_poses.at(0).position = pose.pose.position;
-      updated_position = true;
-      break;
-    }
-  }
-  if (!updated_position)
-  {
-    return false;
-  }
+  // Convert message types so the existing functions can be used
+  geometry_msgs::msg::PointStamped point;
+  point.point.x = pose.pose.position.x;
+  point.point.y = pose.pose.position.y;
+  point.point.z = pose.pose.position.z;
 
-  for (auto& constraint : constraints.orientation_constraints)
-  {
-    if (constraint.link_name == link_name)
-    {
-      constraint.orientation = pose.pose.orientation;
-      return true;
-    }
-  }
-  return false;
+  geometry_msgs::msg::QuaternionStamped quat_stamped;
+  quat_stamped.quaternion = pose.pose.orientation;
+
+  return updatePositionConstraint(constraints, link_name, point) &&
+         updateOrientationConstraint(constraints, link_name, quat_stamped);
 }
 
 moveit_msgs::msg::Constraints constructGoalConstraints(const std::string& link_name,
