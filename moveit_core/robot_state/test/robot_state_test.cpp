@@ -82,7 +82,12 @@ static void expect_near(const Eigen::MatrixXd& x, const Eigen::MatrixXd& y,
   ASSERT_EQ(x.cols(), y.cols());
   for (int r = 0; r < x.rows(); ++r)
     for (int c = 0; c < x.cols(); ++c)
+<<<<<<< HEAD
       EXPECT_NEAR(x(r, c), y(r, c), eps) << "(r,c) = (" << r << "," << c << ")";
+=======
+      EXPECT_NEAR(x(r, c), y(r, c), eps) << "(r,c) = (" << r << ',' << c << ')';
+  }
+>>>>>>> dc8a663bf (converted characters from string format to character format (#1881))
 }
 
 // clang-format off

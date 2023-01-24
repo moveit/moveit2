@@ -120,7 +120,7 @@ ServoCalcs::ServoCalcs(const rclcpp::Node::SharedPtr& node,
   joint_model_group_ = current_state_->getJointModelGroup(parameters_->move_group_name);
   if (joint_model_group_ == nullptr)
   {
-    RCLCPP_ERROR_STREAM(LOGGER, "Invalid move group name: `" << parameters_->move_group_name << "`");
+    RCLCPP_ERROR_STREAM(LOGGER, "Invalid move group name: `" << parameters_->move_group_name << '`');
     throw std::runtime_error("Invalid move group name");
   }
 
@@ -335,7 +335,7 @@ void ServoCalcs::mainCalcLoop()
       rclcpp::Clock& clock = *node_->get_clock();
       RCLCPP_WARN_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD,
                                   "run_duration: " << run_duration.seconds() << " (" << parameters_->publish_period
-                                                   << ")");
+                                                   << ')');
     }
 
     // normal mode, unlock input mutex and wait for the period of the loop
@@ -965,7 +965,7 @@ ServoCalcs::enforcePositionLimits(sensor_msgs::msg::JointState& joint_state) con
     joints_names << joints_to_halt.back()->getName();
     RCLCPP_WARN_STREAM_THROTTLE(LOGGER, *node_->get_clock(), ROS_LOG_THROTTLE_PERIOD,
                                 node_->get_name()
-                                    << " " << joints_names.str() << " close to a position limit. Halting.");
+                                    << ' ' << joints_names.str() << " close to a position limit. Halting.");
   }
   return joints_to_halt;
 }

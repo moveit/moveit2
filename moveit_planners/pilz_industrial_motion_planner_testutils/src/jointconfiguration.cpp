@@ -153,7 +153,7 @@ std::ostream& operator<<(std::ostream& os, const JointConfiguration& obj)
       os << ", ";
     }
   }
-  os << "]";
+  os << ']';
 
   return os;
 }

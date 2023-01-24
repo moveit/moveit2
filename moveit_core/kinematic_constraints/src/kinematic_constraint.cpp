@@ -534,7 +534,13 @@ ConstraintEvaluationResult PositionConstraint::decide(const moveit::core::RobotS
 void PositionConstraint::print(std::ostream& out) const
 {
   if (enabled())
+<<<<<<< HEAD
     out << "Position constraint on link '" << link_model_->getName() << "'" << '\n';
+=======
+  {
+    out << "Position constraint on link '" << link_model_->getName() << '\'' << '\n';
+  }
+>>>>>>> dc8a663bf (converted characters from string format to character format (#1881))
   else
     out << "No constraint" << '\n';
 }
@@ -747,9 +753,9 @@ void OrientationConstraint::print(std::ostream& out) const
 {
   if (link_model_)
   {
-    out << "Orientation constraint on link '" << link_model_->getName() << "'" << '\n';
+    out << "Orientation constraint on link '" << link_model_->getName() << '\'' << '\n';
     Eigen::Quaterniond q_des(desired_rotation_matrix_);
-    out << "Desired orientation:" << q_des.x() << "," << q_des.y() << "," << q_des.z() << "," << q_des.w() << '\n';
+    out << "Desired orientation:" << q_des.x() << ',' << q_des.y() << ',' << q_des.z() << ',' << q_des.w() << '\n';
   }
   else
     out << "No constraint" << '\n';
@@ -1167,7 +1173,7 @@ void VisibilityConstraint::print(std::ostream& out) const
   if (enabled())
   {
     out << "Visibility constraint for sensor in frame '" << sensor_frame_id_ << "' using target in frame '"
-        << target_frame_id_ << "'" << '\n';
+        << target_frame_id_ << '\'' << '\n';
     out << "Target radius: " << target_radius_ << ", using " << cone_sides_ << " sides." << '\n';
   }
   else

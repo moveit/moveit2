@@ -117,7 +117,7 @@ public:
         if (!node_->get_parameter(action_ns_param, action_ns))
         {
           RCLCPP_ERROR_STREAM(LOGGER, "No action namespace specified for controller `"
-                                          << controller_name << "` through parameter `" << action_ns_param << "`");
+                                          << controller_name << "` through parameter `" << action_ns_param << '`');
           continue;
         }
 

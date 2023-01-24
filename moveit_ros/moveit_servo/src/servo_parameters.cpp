@@ -68,7 +68,7 @@ ServoParameters::CallbackHandler::setParametersCallback(const std::vector<rclcpp
     if (search != set_parameter_callbacks_.end())
     {
       RCLCPP_INFO_STREAM(LOGGER, "setParametersCallback - "
-                                     << parameter.get_name() << "<" << parameter.get_type_name()
+                                     << parameter.get_name() << '<' << parameter.get_type_name()
                                      << ">: " << rclcpp::to_string(parameter.get_parameter_value()));
       for (const auto& callback : search->second)
       {

@@ -2087,7 +2087,7 @@ void RobotState::printStatePositions(std::ostream& out) const
 {
   const std::vector<std::string>& nm = robot_model_->getVariableNames();
   for (std::size_t i = 0; i < nm.size(); ++i)
-    out << nm[i] << "=" << position_[i] << '\n';
+    out << nm[i] << '=' << position_[i] << '\n';
 }
 
 void RobotState::printStatePositionsWithJointLimits(const moveit::core::JointModelGroup* jmg, std::ostream& out) const
@@ -2114,7 +2114,7 @@ void RobotState::printStatePositionsWithJointLimits(const moveit::core::JointMod
     if (out_of_bounds)
       out << MOVEIT_CONSOLE_COLOR_RED;
 
-    out << "   " << std::fixed << std::setprecision(5) << bound.min_position_ << "\t";
+    out << "   " << std::fixed << std::setprecision(5) << bound.min_position_ << '\t';
     double delta = bound.max_position_ - bound.min_position_;
     double step = delta / 20.0;
 
@@ -2124,14 +2124,14 @@ void RobotState::printStatePositionsWithJointLimits(const moveit::core::JointMod
       // show marker of current value
       if (!marker_shown && current_value < value)
       {
-        out << "|";
+        out << '|';
         marker_shown = true;
       }
       else
-        out << "-";
+        out << '-';
     }
     if (!marker_shown)
-      out << "|";
+      out << '|';
 
     // show max position
     out << " \t" << std::fixed << std::setprecision(5) << bound.max_position_ << "  \t" << joint->getName()
@@ -2163,7 +2163,7 @@ void RobotState::printStateInfo(std::ostream& out) const
   {
     out << "  * Position: ";
     for (std::size_t i = 0; i < n; ++i)
-      out << position_[i] << " ";
+      out << position_[i] << ' ';
     out << '\n';
   }
   else
@@ -2173,7 +2173,7 @@ void RobotState::printStateInfo(std::ostream& out) const
   {
     out << "  * Velocity: ";
     for (std::size_t i = 0; i < n; ++i)
-      out << velocity_[i] << " ";
+      out << velocity_[i] << ' ';
     out << '\n';
   }
   else
@@ -2183,7 +2183,7 @@ void RobotState::printStateInfo(std::ostream& out) const
   {
     out << "  * Acceleration: ";
     for (std::size_t i = 0; i < n; ++i)
-      out << acceleration_[i] << " ";
+      out << acceleration_[i] << ' ';
     out << '\n';
   }
   else
@@ -2203,7 +2203,7 @@ void RobotState::printTransform(const Eigen::Isometry3d& transform, std::ostream
     Eigen::Quaterniond q(transform.linear());
     out << "T.xyz = [" << transform.translation().x() << ", " << transform.translation().y() << ", "
         << transform.translation().z() << "], Q.xyzw = [" << q.x() << ", " << q.y() << ", " << q.z() << ", " << q.w()
-        << "]";
+        << ']';
   }
   else
   {
@@ -2211,7 +2211,7 @@ void RobotState::printTransform(const Eigen::Isometry3d& transform, std::ostream
         << transform.matrix().format(
                Eigen::IOFormat(Eigen::StreamPrecision, Eigen::DontAlignCols, ", ", "; ", "", "", "[", "]"));
   }
-  out << "\n";
+  out << '\n';
 }
 
 void RobotState::printTransforms(std::ostream& out) const
@@ -2261,7 +2261,7 @@ void getPoseString(std::ostream& ss, const Eigen::Isometry3d& pose, const std::s
     ss << pfx;
     for (int x = 0; x < 4; ++x)
     {
-      ss << std::setw(8) << pose(y, x) << " ";
+      ss << std::setw(8) << pose(y, x) << ' ';
     }
     ss << '\n';
   }

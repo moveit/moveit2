@@ -176,7 +176,7 @@ public:
 
     // plan_grasps_service_ = pnode_->create_client<moveit_msgs::srv::GraspPlanning>(GRASP_PLANNING_SERVICE_NAME);
 
-    RCLCPP_INFO_STREAM(LOGGER, "Ready to take commands for planning group " << opt.group_name_ << ".");
+    RCLCPP_INFO_STREAM(LOGGER, "Ready to take commands for planning group " << opt.group_name_ << '.');
   }
 
   ~MoveGroupInterfaceImpl()
@@ -317,7 +317,7 @@ public:
     if (!pipeline_id.empty())
       param_name << "/planning_pipelines/" << pipeline_id;
     if (!group.empty())
-      param_name << "." << group;
+      param_name << '.' << group;
     param_name << ".default_planner_config";
 
     std::string default_planner_config;

@@ -108,7 +108,7 @@ OccupancyMapMonitorMiddlewareHandle::OccupancyMapMonitorMiddlewareHandle(const r
 
     if (sensor_plugin.empty() || sensor_plugin[0] == '~')
     {
-      RCLCPP_INFO_STREAM(LOGGER, "Skipping octomap updater plugin '" << sensor_plugin << "'");
+      RCLCPP_INFO_STREAM(LOGGER, "Skipping octomap updater plugin '" << sensor_plugin << '\'');
       continue;
     }
     else

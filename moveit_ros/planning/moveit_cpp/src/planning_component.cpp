@@ -59,12 +59,21 @@ PlanningComponent::PlanningComponent(const std::string& group_name, const MoveIt
   planning_pipeline_names_ = moveit_cpp_->getPlanningPipelineNames(group_name);
   plan_request_parameters_.load(node_);
   RCLCPP_DEBUG_STREAM(
+<<<<<<< HEAD
       LOGGER, "Plan request parameters loaded with --"
                   << " planning_pipeline: " << plan_request_parameters_.planning_pipeline << ","
                   << " planner_id: " << plan_request_parameters_.planner_id << ","
                   << " planning_time: " << plan_request_parameters_.planning_time << ","
                   << " planning_attempts: " << plan_request_parameters_.planning_attempts << ","
                   << " max_velocity_scaling_factor: " << plan_request_parameters_.max_velocity_scaling_factor << ","
+=======
+      LOGGER, "Default plan request parameters loaded with --"
+                  << " planning_pipeline: " << plan_request_parameters_.planning_pipeline << ','
+                  << " planner_id: " << plan_request_parameters_.planner_id << ','
+                  << " planning_time: " << plan_request_parameters_.planning_time << ','
+                  << " planning_attempts: " << plan_request_parameters_.planning_attempts << ','
+                  << " max_velocity_scaling_factor: " << plan_request_parameters_.max_velocity_scaling_factor << ','
+>>>>>>> dc8a663bf (converted characters from string format to character format (#1881))
                   << " max_acceleration_scaling_factor: " << plan_request_parameters_.max_acceleration_scaling_factor);
 }
 
@@ -192,7 +201,81 @@ PlanningComponent::PlanSolution PlanningComponent::plan(const PlanRequestParamet
   return *last_plan_solution_;
 }
 
+<<<<<<< HEAD
 PlanningComponent::PlanSolution PlanningComponent::plan()
+=======
+planning_interface::MotionPlanResponse
+PlanningComponent::plan(const MultiPipelinePlanRequestParameters& parameters,
+                        const SolutionCallbackFunction& solution_selection_callback,
+                        StoppingCriterionFunction stopping_criterion_callback)
+{
+  // Create solutions container
+  PlanSolutions planning_solutions{ parameters.multi_plan_request_parameters.size() };
+  std::vector<std::thread> planning_threads;
+  planning_threads.reserve(parameters.multi_plan_request_parameters.size());
+
+  // Print a warning if more parallel planning problems than available concurrent threads are defined. If
+  // std::thread::hardware_concurrency() is not defined, the command returns 0 so the check does not work
+  auto const hardware_concurrency = std::thread::hardware_concurrency();
+  if (parameters.multi_plan_request_parameters.size() > hardware_concurrency && hardware_concurrency != 0)
+  {
+    RCLCPP_WARN(
+        LOGGER,
+        "More parallel planning problems defined ('%ld') than possible to solve concurrently with the hardware ('%d')",
+        parameters.multi_plan_request_parameters.size(), hardware_concurrency);
+  }
+
+  // Launch planning threads
+  for (const auto& plan_request_parameter : parameters.multi_plan_request_parameters)
+  {
+    auto planning_thread = std::thread([&]() {
+      auto plan_solution = planning_interface::MotionPlanResponse();
+      try
+      {
+        plan_solution = plan(plan_request_parameter, false);
+      }
+      catch (const std::exception& e)
+      {
+        RCLCPP_ERROR_STREAM(LOGGER, "Planning pipeline '" << plan_request_parameter.planning_pipeline.c_str()
+                                                          << "' threw exception '" << e.what() << '\'');
+        plan_solution = planning_interface::MotionPlanResponse();
+        plan_solution.error_code_ = moveit::core::MoveItErrorCode::FAILURE;
+      }
+      plan_solution.planner_id_ = plan_request_parameter.planner_id;
+      planning_solutions.pushBack(plan_solution);
+
+      if (stopping_criterion_callback != nullptr)
+      {
+        if (stopping_criterion_callback(planning_solutions, parameters))
+        {
+          // Terminate planning pipelines
+          RCLCPP_ERROR_STREAM(LOGGER, "Stopping criterion met: Terminating planning pipelines that are still active");
+          for (const auto& plan_request_parameter : parameters.multi_plan_request_parameters)
+          {
+            moveit_cpp_->terminatePlanningPipeline(plan_request_parameter.planning_pipeline);
+          }
+        }
+      }
+    });
+    planning_threads.push_back(std::move(planning_thread));
+  }
+
+  // Wait for threads to finish
+  for (auto& planning_thread : planning_threads)
+  {
+    if (planning_thread.joinable())
+    {
+      planning_thread.join();
+    }
+  }
+
+  // Return best solution determined by user defined callback (Default: Shortest path)
+  last_plan_solution_ = solution_selection_callback(planning_solutions.getSolutions());
+  return last_plan_solution_;
+}
+
+planning_interface::MotionPlanResponse PlanningComponent::plan()
+>>>>>>> dc8a663bf (converted characters from string format to character format (#1881))
 {
   return plan(plan_request_parameters_);
 }

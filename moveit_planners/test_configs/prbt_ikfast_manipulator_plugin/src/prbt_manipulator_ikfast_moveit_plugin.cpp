@@ -414,6 +414,7 @@ bool IKFastKinematicsPlugin::initialize(const rclcpp::Node::SharedPtr& node, con
   }
 
   storeValues(robot_model, group_name, base_frame, tip_frames, search_discretization);
+<<<<<<< HEAD
   if (!lookupParam(node, "link_prefix", link_prefix_, std::string("")))
   {
     RCLCPP_INFO(LOGGER, "Using empty link_prefix.");
@@ -422,6 +423,10 @@ bool IKFastKinematicsPlugin::initialize(const rclcpp::Node::SharedPtr& node, con
   {
     RCLCPP_INFO_STREAM(LOGGER, "Using link_prefix: '" << link_prefix_ << "'");
   }
+=======
+
+  RCLCPP_INFO_STREAM(LOGGER, "Using link_prefix: '" << params_.link_prefix << '\'');
+>>>>>>> dc8a663bf (converted characters from string format to character format (#1881))
 
   // verbose error output. subsequent checks in computeRelativeTransform return false then
   if (!robot_model.hasLinkModel(tip_frames_[0]))
@@ -506,9 +511,15 @@ bool IKFastKinematicsPlugin::initialize(const rclcpp::Node::SharedPtr& node, con
   std::reverse(joint_max_vector_.begin(), joint_max_vector_.end());
   std::reverse(joint_has_limits_vector_.begin(), joint_has_limits_vector_.end());
 
+<<<<<<< HEAD
   for (size_t joint_id = 0; joint_id < num_joints_; ++joint_id)
     RCLCPP_DEBUG_STREAM(LOGGER, joint_names_[joint_id] << " " << joint_min_vector_[joint_id] << " "
                                                     << joint_max_vector_[joint_id] << " "
+=======
+  for (size_t joint_id = 0; joint_id < num_joints_; ++joint_id) {
+    RCLCPP_DEBUG_STREAM(LOGGER, joint_names_[joint_id] << ' ' << joint_min_vector_[joint_id] << ' '
+                                                    << joint_max_vector_[joint_id] << ' '
+>>>>>>> dc8a663bf (converted characters from string format to character format (#1881))
                                                     << joint_has_limits_vector_[joint_id]);
 
   initialized_ = true;
@@ -1070,7 +1081,7 @@ bool IKFastKinematicsPlugin::searchPositionIK(const geometry_msgs::msg::Pose& ik
     // RCLCPP_DEBUG_STREAM(LOGGER,"Attempt " << counter << " with 0th free joint having value " << vfree[0]);
   }
 
-  RCLCPP_DEBUG_STREAM(LOGGER, "Valid solutions: " << nvalid << "/" << nattempts);
+  RCLCPP_DEBUG_STREAM(LOGGER, "Valid solutions: " << nvalid << '/' << nattempts);
 
   if ((search_mode & OPTIMIZE_MAX_JOINT) && best_costs != -1.0)
   {
