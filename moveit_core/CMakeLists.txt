@@ -5,15 +5,6 @@ project(moveit_core LANGUAGES CXX)
 find_package(moveit_common REQUIRED)
 moveit_package()
 
-# Generate and install version.h
-string(REGEX REPLACE "^([0-9]+)\\..*" "\\1" MOVEIT_VERSION_MAJOR "${moveit_core_VERSION}")
-string(REGEX REPLACE "^[0-9]+\\.([0-9]+).*" "\\1" MOVEIT_VERSION_MINOR "${moveit_core_VERSION}")
-string(REGEX REPLACE "^[0-9]+\\.[0-9]+\\.([0-9]+).*" "\\1" MOVEIT_VERSION_PATCH "${moveit_core_VERSION}")
-set(MOVEIT_VERSION "${MOVEIT_VERSION_MAJOR}.${MOVEIT_VERSION_MINOR}.${MOVEIT_VERSION_PATCH}")
-message(STATUS " *** Building MoveIt ${MOVEIT_VERSION} ***")
-configure_file("version/version.h.in" "${CMAKE_BINARY_DIR}/include/moveit/version.h")
-install(FILES "${CMAKE_BINARY_DIR}/include/moveit/version.h" DESTINATION include/moveit_core/moveit)
-
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(LIBFCL REQUIRED "fcl>=0.5.0")
 # replace LIBFCL_LIBRARIES with full paths to the libraries
