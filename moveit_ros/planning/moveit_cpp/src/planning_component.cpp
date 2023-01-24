@@ -60,11 +60,11 @@ PlanningComponent::PlanningComponent(const std::string& group_name, const MoveIt
   plan_request_parameters_.load(node_);
   RCLCPP_DEBUG_STREAM(
       LOGGER, "Default plan request parameters loaded with --"
-                  << " planning_pipeline: " << plan_request_parameters_.planning_pipeline << ","
-                  << " planner_id: " << plan_request_parameters_.planner_id << ","
-                  << " planning_time: " << plan_request_parameters_.planning_time << ","
-                  << " planning_attempts: " << plan_request_parameters_.planning_attempts << ","
-                  << " max_velocity_scaling_factor: " << plan_request_parameters_.max_velocity_scaling_factor << ","
+                  << " planning_pipeline: " << plan_request_parameters_.planning_pipeline << ','
+                  << " planner_id: " << plan_request_parameters_.planner_id << ','
+                  << " planning_time: " << plan_request_parameters_.planning_time << ','
+                  << " planning_attempts: " << plan_request_parameters_.planning_attempts << ','
+                  << " max_velocity_scaling_factor: " << plan_request_parameters_.max_velocity_scaling_factor << ','
                   << " max_acceleration_scaling_factor: " << plan_request_parameters_.max_acceleration_scaling_factor);
 }
 
@@ -259,7 +259,7 @@ PlanningComponent::plan(const MultiPipelinePlanRequestParameters& parameters,
       catch (const std::exception& e)
       {
         RCLCPP_ERROR_STREAM(LOGGER, "Planning pipeline '" << plan_request_parameter.planning_pipeline.c_str()
-                                                          << "' threw exception '" << e.what() << "'");
+                                                          << "' threw exception '" << e.what() << '\'');
         plan_solution = planning_interface::MotionPlanResponse();
         plan_solution.error_code_ = moveit::core::MoveItErrorCode::FAILURE;
       }

@@ -596,14 +596,14 @@ void RobotTrajectory::print(std::ostream& out, std::vector<int> variable_indexes
     out << " pos ";
     for (int index : variable_indexes)
     {
-      out << std::setw(6) << point.getVariablePosition(index) << " ";
+      out << std::setw(6) << point.getVariablePosition(index) << ' ';
     }
     if (point.hasVelocities())
     {
       out << "vel ";
       for (int index : variable_indexes)
       {
-        out << std::setw(6) << point.getVariableVelocity(index) << " ";
+        out << std::setw(6) << point.getVariableVelocity(index) << ' ';
       }
     }
     if (point.hasAccelerations())
@@ -611,7 +611,7 @@ void RobotTrajectory::print(std::ostream& out, std::vector<int> variable_indexes
       out << "acc ";
       for (int index : variable_indexes)
       {
-        out << std::setw(6) << point.getVariableAcceleration(index) << " ";
+        out << std::setw(6) << point.getVariableAcceleration(index) << ' ';
       }
     }
     if (point.hasEffort())
@@ -619,10 +619,10 @@ void RobotTrajectory::print(std::ostream& out, std::vector<int> variable_indexes
       out << "eff ";
       for (int index : variable_indexes)
       {
-        out << std::setw(6) << point.getVariableEffort(index) << " ";
+        out << std::setw(6) << point.getVariableEffort(index) << ' ';
       }
     }
-    out << "\n";
+    out << '\n';
   }
 
   out.flags(old_settings);

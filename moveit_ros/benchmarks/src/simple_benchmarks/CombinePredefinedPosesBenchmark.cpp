@@ -87,7 +87,7 @@ public:
     const auto& joint_model_group = psm_->getRobotModel()->getJointModelGroup(predefined_poses_group);
     if (!joint_model_group)
     {
-      RCLCPP_ERROR_STREAM(LOGGER, "Robot model has no joint model group named '" << predefined_poses_group << "'");
+      RCLCPP_ERROR_STREAM(LOGGER, "Robot model has no joint model group named '" << predefined_poses_group << '\'');
       return false;
     }
 
@@ -99,7 +99,7 @@ public:
     {
       if (!robot_state.setToDefaultValues(joint_model_group, pose_id))
       {
-        RCLCPP_WARN_STREAM(LOGGER, "Failed to set robot state to named target '" << pose_id << "'");
+        RCLCPP_WARN_STREAM(LOGGER, "Failed to set robot state to named target '" << pose_id << '\'');
         continue;
       }
       // Create start state

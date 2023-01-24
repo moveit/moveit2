@@ -510,7 +510,7 @@ void SemanticWorld::transformTableArray(object_recognition_msgs::msg::TableArray
     std::string original_frame = table.header.frame_id;
     if (table.convex_hull.empty())
       continue;
-    RCLCPP_INFO_STREAM(LOGGER, "Original pose: " << table.pose.position.x << "," << table.pose.position.y << ","
+    RCLCPP_INFO_STREAM(LOGGER, "Original pose: " << table.pose.position.x << ',' << table.pose.position.y << ','
                                                  << table.pose.position.z);
     std::string error_text;
     const Eigen::Isometry3d& original_transform = planning_scene_->getFrameTransform(original_frame);
@@ -521,7 +521,7 @@ void SemanticWorld::transformTableArray(object_recognition_msgs::msg::TableArray
     table.header.frame_id = planning_scene_->getTransforms().getTargetFrame();
     RCLCPP_INFO_STREAM(LOGGER, "Successfully transformed table array from " << original_frame << "to "
                                                                             << table.header.frame_id);
-    RCLCPP_INFO_STREAM(LOGGER, "Transformed pose: " << table.pose.position.x << "," << table.pose.position.y << ","
+    RCLCPP_INFO_STREAM(LOGGER, "Transformed pose: " << table.pose.position.x << ',' << table.pose.position.y << ','
                                                     << table.pose.position.z);
   }
 }
