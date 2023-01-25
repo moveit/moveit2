@@ -16,4 +16,4 @@ target_link_libraries(moveit_srv_kinematics_plugin
   srv_kinematics_parameters
 )
 
-install(DIRECTORY include/ DESTINATION include)
+install(DIRECTORY include/ DESTINATION include/moveit_kinematics)
