@@ -217,6 +217,7 @@ install(
   EXPORT export_${PROJECT_NAME}
 =======
   TARGETS
+    collision_detector_bullet_plugin
     moveit_butterworth_filter
     moveit_collision_detection
     moveit_collision_detection_bullet
