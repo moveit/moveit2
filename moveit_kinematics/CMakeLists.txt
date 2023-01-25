@@ -43,13 +43,14 @@ set(THIS_PACKAGE_LIBRARIES
 )
 
 set(THIS_PACKAGE_INCLUDE_DEPENDS
-  Boost
+  Eigen3
   class_loader
   generate_parameter_library
   kdl_parser
   moveit_core
   moveit_msgs
   moveit_ros_planning
+  orocos_kdl_vendor
   pluginlib
   random_numbers
   rclcpp
@@ -80,7 +81,7 @@ install(
 )
 
 ament_export_targets(${PROJECT_NAME}Targets HAS_LIBRARY_TARGET)
-ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS} orocos_kdl_vendor)
+ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS})
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
