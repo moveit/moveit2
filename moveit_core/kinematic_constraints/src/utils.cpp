@@ -251,11 +251,13 @@ bool updatePoseConstraint(moveit_msgs::msg::Constraints& constraints, const std:
 {
   // Convert message types so the existing functions can be used
   geometry_msgs::msg::PointStamped point;
+  point.header = pose.header;
   point.point.x = pose.pose.position.x;
   point.point.y = pose.pose.position.y;
   point.point.z = pose.pose.position.z;
 
   geometry_msgs::msg::QuaternionStamped quat_stamped;
+  quat_stamped.header = pose.header;
   quat_stamped.quaternion = pose.pose.orientation;
 
   return updatePositionConstraint(constraints, link_name, point) &&
@@ -286,6 +288,12 @@ bool updateOrientationConstraint(moveit_msgs::msg::Constraints& constraints, con
   {
     if (constraint.link_name == link_name)
     {
+      if (quat.header.frame_id.empty())
+      {
+        RCLCPP_ERROR(LOGGER, "Cannot update orientation constraint, frame_id in the header is empty");
+        return false;
+      }
+      constraint.header = quat.header;
       constraint.orientation = quat.quaternion;
       return true;
     }
@@ -311,6 +319,12 @@ bool updatePositionConstraint(moveit_msgs::msg::Constraints& constraints, const 
   {
     if (constraint.link_name == link_name)
     {
+      if (goal_point.header.frame_id.empty())
+      {
+        RCLCPP_ERROR(LOGGER, "Cannot update position constraint, frame_id in the header is empty");
+        return false;
+      }
+      constraint.header = goal_point.header;
       constraint.constraint_region.primitive_poses.at(0).position.x = goal_point.point.x;
       constraint.constraint_region.primitive_poses.at(0).position.y = goal_point.point.y;
       constraint.constraint_region.primitive_poses.at(0).position.z = goal_point.point.z;
