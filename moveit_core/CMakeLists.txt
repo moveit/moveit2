@@ -106,22 +106,23 @@ add_subdirectory(version)
 
 install(
   TARGETS
+    collision_detector_bullet_plugin
     moveit_butterworth_filter
-    moveit_collision_distance_field
     moveit_collision_detection
-    moveit_collision_detection_fcl
     moveit_collision_detection_bullet
-    moveit_dynamics_solver
+    moveit_collision_detection_fcl
+    moveit_collision_distance_field
     moveit_constraint_samplers
     moveit_distance_field
+    moveit_dynamics_solver
     moveit_exceptions
-    moveit_kinematics_base
     moveit_kinematic_constraints
+    moveit_kinematics_base
     moveit_kinematics_metrics
     moveit_macros
     moveit_planning_interface
-    moveit_planning_scene
     moveit_planning_request_adapter
+    moveit_planning_scene
     moveit_robot_model
     moveit_robot_state
     moveit_robot_trajectory

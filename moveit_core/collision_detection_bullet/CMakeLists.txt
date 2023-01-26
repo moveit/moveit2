@@ -51,12 +51,6 @@ target_link_libraries(collision_detector_bullet_plugin
 
 install(DIRECTORY include/ DESTINATION include/moveit_core)
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/moveit_collision_detection_bullet_export.h DESTINATION include/moveit_core)
-install(TARGETS moveit_collision_detection_bullet collision_detector_bullet_plugin EXPORT export_moveit_collision_detection_bullet
-  LIBRARY DESTINATION lib
-  ARCHIVE DESTINATION lib
-  RUNTIME DESTINATION bin
-)
-ament_export_targets(export_moveit_collision_detection_bullet HAS_LIBRARY_TARGET)
 
 if(BUILD_TESTING)
   find_package(ament_cmake_gtest REQUIRED)
