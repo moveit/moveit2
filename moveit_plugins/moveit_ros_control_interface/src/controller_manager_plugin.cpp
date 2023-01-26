@@ -256,9 +256,13 @@ public:
     if (!ns_.empty())
     {
       if (!node_->has_parameter("ros_control_namespace"))
+      {
         ns_ = node_->declare_parameter<std::string>("ros_control_namespace", "/");
+      }
       else
+      {
         node_->get_parameter<std::string>("ros_control_namespace", ns_);
+      }
     }
     else if(node->has_parameter("ros_control_namespace"))
     {
