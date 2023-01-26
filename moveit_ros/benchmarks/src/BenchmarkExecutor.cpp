@@ -1133,7 +1133,7 @@ void BenchmarkExecutor::writeOutput(const BenchmarkRequest& brequest, const std:
     for (std::size_t i = 0; i < pipeline.second.size(); ++i, ++run_id)
     {
       // Write the name of the planner and the used pipeline
-      out << pipeline.second[i] << " (" << pipeline.first << ")" << '\n';
+      out << pipeline.second[i] << " (" << pipeline.first << ')' << '\n';
 
       // in general, we could have properties specific for a planner;
       // right now, we do not include such properties
@@ -1170,7 +1170,7 @@ void BenchmarkExecutor::writeOutput(const BenchmarkRequest& brequest, const std:
         }
         out << '\n';  // end of the run
       }
-      out << "." << '\n';  // end the planner
+      out << '.' << '\n';  // end the planner
     }
   }
 

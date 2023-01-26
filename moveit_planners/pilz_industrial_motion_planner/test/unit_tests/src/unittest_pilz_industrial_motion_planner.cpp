@@ -98,7 +98,7 @@ protected:
     }
     catch (pluginlib::PluginlibException& ex)
     {
-      FAIL() << "Could not create planner " << ex.what() << "\n";
+      FAIL() << "Could not create planner " << ex.what() << '\n';
     }
   }
 

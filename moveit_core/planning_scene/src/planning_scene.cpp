@@ -929,7 +929,7 @@ void PlanningScene::saveGeometryToStream(std::ostream& out) const
           if (hasObjectColor(id))
           {
             const std_msgs::msg::ColorRGBA& c = getObjectColor(id);
-            out << c.r << " " << c.g << " " << c.b << " " << c.a << '\n';
+            out << c.r << ' ' << c.g << ' ' << c.b << ' ' << c.a << '\n';
           }
           else
             out << "0 0 0 0" << '\n';
@@ -945,7 +945,7 @@ void PlanningScene::saveGeometryToStream(std::ostream& out) const
       }
     }
   }
-  out << "." << '\n';
+  out << '.' << '\n';
 }
 
 bool PlanningScene::loadGeometryFromStream(std::istream& in)
@@ -1097,9 +1097,9 @@ bool PlanningScene::readPoseFromText(std::istream& in, Eigen::Isometry3d& pose) 
 
 void PlanningScene::writePoseToText(std::ostream& out, const Eigen::Isometry3d& pose) const
 {
-  out << pose.translation().x() << " " << pose.translation().y() << " " << pose.translation().z() << '\n';
+  out << pose.translation().x() << ' ' << pose.translation().y() << ' ' << pose.translation().z() << '\n';
   Eigen::Quaterniond r(pose.linear());
-  out << r.x() << " " << r.y() << " " << r.z() << " " << r.w() << '\n';
+  out << r.x() << ' ' << r.y() << ' ' << r.z() << ' ' << r.w() << '\n';
 }
 
 void PlanningScene::setCurrentState(const moveit_msgs::msg::RobotState& state)
@@ -2353,13 +2353,13 @@ void PlanningScene::printKnownObjects(std::ostream& out) const
   out << "  - Collision World Objects:\n ";
   for (const std::string& object : objects)
   {
-    out << "\t- " << object << "\n";
+    out << "\t- " << object << '\n';
   }
 
   out << "  - Attached Bodies:\n";
   for (const moveit::core::AttachedBody* attached_body : attached_bodies)
   {
-    out << "\t- " << attached_body->getName() << "\n";
+    out << "\t- " << attached_body->getName() << '\n';
   }
   out << "-----------------------------------------\n";
 }

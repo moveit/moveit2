@@ -282,7 +282,7 @@ TEST(time_optimal_trajectory_generation, testLargeAccel)
 
     ASSERT_EQ(acceleration.size(), 6);
     for (std::size_t i = 0; i < 6; ++i)
-      EXPECT_NEAR(acceleration(i), 0.0, 100.0) << "Invalid acceleration at position " << sample_count << "\n";
+      EXPECT_NEAR(acceleration(i), 0.0, 100.0) << "Invalid acceleration at position " << sample_count << '\n';
   }
 }
 

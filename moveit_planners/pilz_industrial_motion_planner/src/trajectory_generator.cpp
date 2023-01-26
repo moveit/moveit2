@@ -144,7 +144,7 @@ void TrajectoryGenerator::checkStartState(const moveit_msgs::msg::RobotState& st
 
   // does not allow start velocity
   if (!std::all_of(group_start_state.velocity.begin(), group_start_state.velocity.end(),
-                   [this](double v) { return std::fabs(v) < VELOCITY_TOLERANCE; }))
+                   [](double v) { return std::fabs(v) < VELOCITY_TOLERANCE; }))
   {
     throw NonZeroVelocityInStartState("Trajectory Generator does not allow non-zero start velocity");
   }
@@ -168,7 +168,7 @@ void TrajectoryGenerator::checkJointGoalConstraint(const moveit_msgs::msg::Const
     if (!robot_model_->getJointModelGroup(group_name)->hasJointModel(curr_joint_name))
     {
       std::ostringstream os;
-      os << "Joint \"" << curr_joint_name << "\" does not belong to group \"" << group_name << "\"";
+      os << "Joint \"" << curr_joint_name << "\" does not belong to group \"" << group_name << '\"';
       throw JointConstraintDoesNotBelongToGroup(os.str());
     }
 
@@ -211,7 +211,7 @@ void TrajectoryGenerator::checkCartesianGoalConstraint(const moveit_msgs::msg::C
   if (!robot_model_->getJointModelGroup(group_name)->canSetStateFromIK(pos_constraint.link_name))
   {
     std::ostringstream os;
-    os << "No IK solver available for link: \"" << pos_constraint.link_name << "\"";
+    os << "No IK solver available for link: \"" << pos_constraint.link_name << '\"';
     throw NoIKSolverAvailable(os.str());
   }
 

@@ -46,6 +46,12 @@ namespace pilz_industrial_motion_planner_testutils
 class RobotStateMsgConvertible
 {
 public:
+  RobotStateMsgConvertible() = default;
+  RobotStateMsgConvertible(const RobotStateMsgConvertible&) = default;
+  RobotStateMsgConvertible(RobotStateMsgConvertible&&) = default;
+  RobotStateMsgConvertible& operator=(const RobotStateMsgConvertible&) = default;
+  RobotStateMsgConvertible& operator=(RobotStateMsgConvertible&&) = default;
+  virtual ~RobotStateMsgConvertible() = default;
   virtual moveit_msgs::msg::RobotState toMoveitMsgsRobotState() const = 0;
 };
 }  // namespace pilz_industrial_motion_planner_testutils

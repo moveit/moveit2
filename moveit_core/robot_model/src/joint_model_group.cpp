@@ -726,14 +726,14 @@ void JointModelGroup::printGroupInfo(std::ostream& out) const
         << (jm->getFirstVariableIndex() + jm->getLocalVariableIndex(variable_name)) << " in full state, index "
         << local_idx << " in group state";
     if (jm->getMimic())
-      out << ", mimic '" << jm->getMimic()->getName() << "'";
+      out << ", mimic '" << jm->getMimic()->getName() << '\'';
     out << '\n';
     out << "        " << parent_model_->getVariableBounds(variable_name) << '\n';
   }
   out << "  * Variables Index List:\n";
   out << "    ";
   for (int variable_index : variable_index_list_)
-    out << variable_index << " ";
+    out << variable_index << ' ';
   if (is_contiguous_index_list_)
   {
     out << "(contiguous)";
@@ -748,7 +748,7 @@ void JointModelGroup::printGroupInfo(std::ostream& out) const
     out << "  * Kinematics solver bijection:\n";
     out << "    ";
     for (unsigned int index : group_kinematics_.first.bijection_)
-      out << index << " ";
+      out << index << ' ';
     out << '\n';
   }
   if (!group_kinematics_.second.empty())
@@ -756,9 +756,9 @@ void JointModelGroup::printGroupInfo(std::ostream& out) const
     out << "  * Compound kinematics solver:\n";
     for (const std::pair<const JointModelGroup* const, KinematicsSolver>& it : group_kinematics_.second)
     {
-      out << "    " << it.first->getName() << ":";
+      out << "    " << it.first->getName() << ':';
       for (unsigned int index : it.second.bijection_)
-        out << " " << index;
+        out << ' ' << index;
       out << '\n';
     }
   }

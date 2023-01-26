@@ -347,10 +347,10 @@ bool KinematicsCache::writeToFile(const std::string& filename)
     std::string group_name = kinematics_solver_->getGroupName();
     file << group_name << '\n';
 
-    file << options_.origin.x << " " << options_.origin.y << " " << options_.origin.z << '\n';
-    file << options_.workspace_size[0] << " " << options_.workspace_size[1] << " " << options_.workspace_size[2]
+    file << options_.origin.x << ' ' << options_.origin.y << ' ' << options_.origin.z << '\n';
+    file << options_.workspace_size[0] << ' ' << options_.workspace_size[1] << ' ' << options_.workspace_size[2]
          << '\n';
-    file << options_.resolution[0] << " " << options_.resolution[1] << " " << options_.resolution[2] << '\n';
+    file << options_.resolution[0] << ' ' << options_.resolution[1] << ' ' << options_.resolution[2] << '\n';
     file << options_.max_solutions_per_grid_location << '\n';
     file << min_squared_distance_ << '\n';
     file << max_squared_distance_ << '\n';

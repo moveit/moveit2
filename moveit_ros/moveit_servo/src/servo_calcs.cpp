@@ -61,8 +61,6 @@ namespace moveit_servo
 {
 namespace
 {
-constexpr char CONDITION_TOPIC[] = "~/condition";
-
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_servo.servo_calcs");
 constexpr auto ROS_LOG_THROTTLE_PERIOD = std::chrono::milliseconds(3000).count();
 static constexpr double STOPPED_VELOCITY_EPS = 1e-4;  // rad/s
@@ -101,7 +99,7 @@ ServoCalcs::ServoCalcs(const rclcpp::Node::SharedPtr& node,
   joint_model_group_ = current_state_->getJointModelGroup(parameters_->move_group_name);
   if (joint_model_group_ == nullptr)
   {
-    RCLCPP_ERROR_STREAM(LOGGER, "Invalid move group name: `" << parameters_->move_group_name << "`");
+    RCLCPP_ERROR_STREAM(LOGGER, "Invalid move group name: `" << parameters_->move_group_name << '`');
     throw std::runtime_error("Invalid move group name");
   }
 
@@ -343,7 +341,7 @@ void ServoCalcs::mainCalcLoop()
       rclcpp::Clock& clock = *node_->get_clock();
       RCLCPP_WARN_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD,
                                   "run_duration: " << run_duration.seconds() << " (" << parameters_->publish_period
-                                                   << ")");
+                                                   << ')');
     }
 
     // normal mode, unlock input mutex and wait for the period of the loop
@@ -916,7 +914,7 @@ ServoCalcs::enforcePositionLimits(sensor_msgs::msg::JointState& joint_state) con
     joints_names << joints_to_halt.back()->getName();
     RCLCPP_WARN_STREAM_THROTTLE(LOGGER, *node_->get_clock(), ROS_LOG_THROTTLE_PERIOD,
                                 node_->get_name()
-                                    << " " << joints_names.str() << " close to a position limit. Halting.");
+                                    << ' ' << joints_names.str() << " close to a position limit. Halting.");
   }
   return joints_to_halt;
 }
@@ -1222,10 +1220,10 @@ void ServoCalcs::twistStampedCB(const geometry_msgs::msg::TwistStamped::ConstSha
 {
   const std::lock_guard<std::mutex> lock(main_loop_mutex_);
   latest_twist_stamped_ = msg;
-  latest_twist_cmd_is_nonzero_ = isNonZero(*latest_twist_stamped_.get());
+  latest_twist_cmd_is_nonzero_ = isNonZero(*latest_twist_stamped_);
 
-  if (msg.get()->header.stamp != rclcpp::Time(0.))
-    latest_twist_command_stamp_ = msg.get()->header.stamp;
+  if (msg->header.stamp != rclcpp::Time(0.))
+    latest_twist_command_stamp_ = msg->header.stamp;
 
   // notify that we have a new input
   new_input_cmd_ = true;
@@ -1236,10 +1234,10 @@ void ServoCalcs::jointCmdCB(const control_msgs::msg::JointJog::ConstSharedPtr& m
 {
   const std::lock_guard<std::mutex> lock(main_loop_mutex_);
   latest_joint_cmd_ = msg;
-  latest_joint_cmd_is_nonzero_ = isNonZero(*latest_joint_cmd_.get());
+  latest_joint_cmd_is_nonzero_ = isNonZero(*latest_joint_cmd_);
 
-  if (msg.get()->header.stamp != rclcpp::Time(0.))
-    latest_joint_command_stamp_ = msg.get()->header.stamp;
+  if (msg->header.stamp != rclcpp::Time(0.))
+    latest_joint_command_stamp_ = msg->header.stamp;
 
   // notify that we have a new input
   new_input_cmd_ = true;
@@ -1248,7 +1246,7 @@ void ServoCalcs::jointCmdCB(const control_msgs::msg::JointJog::ConstSharedPtr& m
 
 void ServoCalcs::collisionVelocityScaleCB(const std_msgs::msg::Float64::ConstSharedPtr& msg)
 {
-  collision_velocity_scale_ = msg.get()->data;
+  collision_velocity_scale_ = msg->data;
 }
 
 void ServoCalcs::changeDriftDimensions(const std::shared_ptr<moveit_msgs::srv::ChangeDriftDimensions::Request>& req,

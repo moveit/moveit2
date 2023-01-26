@@ -280,7 +280,7 @@ bool planning_pipeline::PlanningPipeline::generatePlan(const planning_scene::Pla
       {
         std::stringstream ss;
         for (std::size_t added_index : adapter_added_state_index)
-          ss << added_index << " ";
+          ss << added_index << ' ';
         RCLCPP_INFO(LOGGER, "Planning adapters have added states at index positions: [ %s]", ss.str().c_str());
       }
     }
@@ -346,7 +346,7 @@ bool planning_pipeline::PlanningPipeline::generatePlan(const planning_scene::Pla
             // display error messages
             std::stringstream ss;
             for (std::size_t it : index)
-              ss << it << " ";
+              ss << it << ' ';
 
             RCLCPP_ERROR_STREAM(LOGGER, "Computed path is not valid. Invalid states at index locations: [ "
                                             << ss.str() << "] out of " << state_count

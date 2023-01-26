@@ -521,7 +521,7 @@ void MotionPlanningDisplay::computeMetricsInternal(std::map<std::string, double>
       for (std::size_t i = 0; i < joint_torques.size(); ++i)
       {
         std::stringstream stream;
-        stream << "torque[" << i << "]";
+        stream << "torque[" << i << ']';
         metrics[stream.str()] = joint_torques[i];
       }
     }
@@ -584,7 +584,7 @@ void MotionPlanningDisplay::displayMetrics(bool start)
       for (size_t j = 0; j < nj; ++j)
       {
         std::stringstream stream;
-        stream << "torque[" << j << "]";
+        stream << "torque[" << j << ']';
         copyItemIfExists(metrics_table, text_table, stream.str());
       }
     }

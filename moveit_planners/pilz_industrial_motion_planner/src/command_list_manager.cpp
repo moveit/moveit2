@@ -247,7 +247,7 @@ CommandListManager::solveSequenceItems(const planning_scene::PlanningSceneConstP
       throw PlanningPipelineException(os.str(), res.error_code_.val);
     }
     motion_plan_responses.emplace_back(res);
-    RCLCPP_DEBUG_STREAM(LOGGER, "Solved [" << ++curr_req_index << "/" << num_req << "]");
+    RCLCPP_DEBUG_STREAM(LOGGER, "Solved [" << ++curr_req_index << '/' << num_req << ']');
   }
   return motion_plan_responses;
 }

@@ -80,7 +80,7 @@ private:
  *  \param [in] solutions Vector of solutions to chose the shortest one from
  *  \return Shortest solution, trajectory_ of the returned MotionPlanResponse is a nullptr if no solution is found!
  */
-planning_interface::MotionPlanResponse
+static inline planning_interface::MotionPlanResponse
 getShortestSolution(const std::vector<planning_interface::MotionPlanResponse>& solutions)
 {
   // Find trajectory with minimal path

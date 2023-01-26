@@ -111,7 +111,7 @@ struct GenerateStateDatabaseParameters
     {
       RCLCPP_FATAL_STREAM(LOGGER,
                           "Could not find valid constraint description in parameter '"
-                              << node->get_fully_qualified_name() << "." << CONSTRAINT_PARAMETER
+                              << node->get_fully_qualified_name() << '.' << CONSTRAINT_PARAMETER
                               << "'. "
                                  "Please upload correct correct constraint description or remap the parameter.");
       return false;
@@ -166,7 +166,7 @@ void computeDB(const rclcpp::Node::SharedPtr& node, const planning_scene::Planni
   context->getConstraintsLibraryNonConst()->saveConstraintApproximations(params.output_folder);
   RCLCPP_INFO_STREAM(LOGGER, "Successfully generated Joint Space Constraint Approximation Database for constraint:\n"
                                  << params.constraints.name);
-  RCLCPP_INFO_STREAM(LOGGER, "The database has been saved in your local folder '" << params.output_folder << "'");
+  RCLCPP_INFO_STREAM(LOGGER, "The database has been saved in your local folder '" << params.output_folder << '\'');
 }
 
 /**
