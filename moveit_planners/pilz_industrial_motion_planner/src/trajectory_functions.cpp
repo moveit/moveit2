@@ -72,7 +72,7 @@ bool pilz_industrial_motion_planner::computePoseIK(const planning_scene::Plannin
     return false;
   }
 
-  moveit::core::RobotState rstate = planning_scene::PlanningScene::clone(scene)->getCurrentStateNonConst();
+  moveit::core::RobotState rstate{ scene->getCurrentState() };
   rstate.setVariablePositions(seed);
 
   moveit::core::GroupStateValidityCallbackFn ik_constraint_function;
@@ -120,7 +120,7 @@ bool pilz_industrial_motion_planner::computeLinkFK(const planning_scene::Plannin
                                                    const std::map<std::string, double>& joint_state,
                                                    Eigen::Isometry3d& pose)
 {  // take robot state from the current scene
-  moveit::core::RobotState rstate = planning_scene::PlanningScene::clone(scene)->getCurrentStateNonConst();
+  moveit::core::RobotState rstate{ scene->getCurrentState() };
 
   // check the reference frame of the target pose
   if (!rstate.knowsFrameTransform(link_name))
