@@ -264,7 +264,7 @@ public:
         node_->get_parameter<std::string>("ros_control_namespace", ns_);
       }
     }
-    else if(node->has_parameter("ros_control_namespace"))
+    else if (node->has_parameter("ros_control_namespace"))
     {
       node_->get_parameter<std::string>("ros_control_namespace", ns_);
       RCLCPP_INFO_STREAM(LOGGER, "Namespace for controller manager was specified, namespace: " << ns_);
