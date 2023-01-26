@@ -373,10 +373,4 @@ bool PlanningComponent::setGoal(const std::string& goal_state_name)
   goal_state.setToDefaultValues(joint_model_group_, goal_state_name);
   return setGoal(goal_state);
 }
-
-bool PlanningComponent::execute(bool /*blocking*/)
-{
-  RCLCPP_ERROR(LOGGER, "There is no successful plan to execute");
-  return false;
-}
 }  // namespace moveit_cpp
