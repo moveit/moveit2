@@ -45,12 +45,6 @@
 
 namespace moveit_servo
 {
-// Helper function for detecting zeroed message
-bool isNonZero(const geometry_msgs::msg::TwistStamped& msg);
-
-// Helper function for detecting zeroed message
-bool isNonZero(const control_msgs::msg::JointJog& msg);
-
 // Helper function for converting Eigen::Isometry3d to geometry_msgs/TransformStamped
 geometry_msgs::msg::TransformStamped convertIsometryToTransform(const Eigen::Isometry3d& eigen_tf,
                                                                 const std::string& parent_frame,

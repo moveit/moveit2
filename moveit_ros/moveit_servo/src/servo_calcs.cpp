@@ -400,8 +400,6 @@ void ServoCalcs::calculateSingleIteration()
                             current_state_->getGlobalLinkTransform(ik_solver_->getTipFrame());
   }
 
-  have_nonzero_command_ = latest_twist_cmd_is_nonzero_ || latest_joint_cmd_is_nonzero_;
-
   // Don't end this function without updating the filters
   updated_filters_ = false;
 
@@ -425,8 +423,8 @@ void ServoCalcs::calculateSingleIteration()
   auto joint_trajectory = std::make_unique<trajectory_msgs::msg::JointTrajectory>();
 
   // Prioritize cartesian servoing above joint servoing
-  // Only run commands if not stale and nonzero
-  if (latest_twist_cmd_is_nonzero_ && !twist_command_is_stale_)
+  // Only run commands if not stale
+  if (!twist_command_is_stale_)
   {
     if (!cartesianServoCalcs(twist_stamped_cmd_, *joint_trajectory))
     {
@@ -434,7 +432,7 @@ void ServoCalcs::calculateSingleIteration()
       return;
     }
   }
-  else if (latest_joint_cmd_is_nonzero_ && !joint_command_is_stale_)
+  else if (!joint_command_is_stale_)
   {
     if (!jointServoCalcs(joint_servo_cmd_, *joint_trajectory))
     {
@@ -444,7 +442,7 @@ void ServoCalcs::calculateSingleIteration()
   }
   else
   {
-    // Joint trajectory is not populated with anything, so set it to the last positions and 0 velocity
+    // TODO: Joint trajectory is not populated with anything, so set it to the current robot position and 0 velocity
     *joint_trajectory = *last_sent_command_;
     for (auto& point : joint_trajectory->points)
     {
@@ -462,17 +460,8 @@ void ServoCalcs::calculateSingleIteration()
     done_stopping_ = false;
   }
 
-  // Skip the servoing publication if all inputs have been zero for several cycles in a row.
-  // num_outgoing_halt_msgs_to_publish == 0 signifies that we should keep republishing forever.
-  if (!have_nonzero_command_ && done_stopping_ && (parameters_->num_outgoing_halt_msgs_to_publish != 0) &&
-      (zero_velocity_count_ > parameters_->num_outgoing_halt_msgs_to_publish))
-  {
-    ok_to_publish_ = false;
-    rclcpp::Clock& clock = *node_->get_clock();
-    RCLCPP_DEBUG_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD, "All-zero command. Doing nothing.");
-  }
   // Skip servoing publication if both types of commands are stale.
-  else if (twist_command_is_stale_ && joint_command_is_stale_)
+  if (twist_command_is_stale_ && joint_command_is_stale_)
   {
     ok_to_publish_ = false;
     rclcpp::Clock& clock = *node_->get_clock();
@@ -482,19 +471,6 @@ void ServoCalcs::calculateSingleIteration()
   else
   {
     ok_to_publish_ = true;
-  }
-
-  // Store last zero-velocity message flag to prevent superfluous warnings.
-  // Cartesian and joint commands must both be zero.
-  if (!have_nonzero_command_ && done_stopping_)
-  {
-    // Avoid overflow
-    if (zero_velocity_count_ < std::numeric_limits<int>::max())
-      ++zero_velocity_count_;
-  }
-  else
-  {
-    zero_velocity_count_ = 0;
   }
 
   if (ok_to_publish_ && !paused_)
@@ -1217,7 +1193,6 @@ void ServoCalcs::twistStampedCB(const geometry_msgs::msg::TwistStamped::ConstSha
 {
   const std::lock_guard<std::mutex> lock(main_loop_mutex_);
   latest_twist_stamped_ = msg;
-  latest_twist_cmd_is_nonzero_ = isNonZero(*latest_twist_stamped_);
 
   if (msg->header.stamp != rclcpp::Time(0.))
     latest_twist_command_stamp_ = msg->header.stamp;
@@ -1231,7 +1206,6 @@ void ServoCalcs::jointCmdCB(const control_msgs::msg::JointJog::ConstSharedPtr& m
 {
   const std::lock_guard<std::mutex> lock(main_loop_mutex_);
   latest_joint_cmd_ = msg;
-  latest_joint_cmd_is_nonzero_ = isNonZero(*latest_joint_cmd_);
 
   if (msg->header.stamp != rclcpp::Time(0.))
     latest_joint_command_stamp_ = msg->header.stamp;
