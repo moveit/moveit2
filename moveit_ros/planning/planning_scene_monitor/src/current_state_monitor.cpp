@@ -271,7 +271,7 @@ bool CurrentStateMonitor::waitForCurrentState(const rclcpp::Time& t, double wait
                   wait_time_s, t.seconds(), current_state_time_.seconds());
       return false;
     }
-    if (!rclcpp::ok())
+    if (!middleware_handle_->ok())
     {
       RCLCPP_DEBUG(LOGGER, "ROS context shut down while waiting for current robot state.");
       return false;
