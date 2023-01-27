@@ -305,14 +305,12 @@ protected:
   // Main tracking / result publisher loop
   std::thread thread_;
   bool stop_requested_;
-  std::atomic<bool> done_stopping_;
 
   // Status
   StatusCode status_ = StatusCode::NO_WARNING;
   std::atomic<bool> paused_;
   bool twist_command_is_stale_ = false;
   bool joint_command_is_stale_ = false;
-  bool ok_to_publish_ = false;
   double collision_velocity_scale_ = 1.0;
 
   // Use ArrayXd type to enable more coefficient-wise operations

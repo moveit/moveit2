@@ -79,7 +79,6 @@ ServoCalcs::ServoCalcs(const rclcpp::Node::SharedPtr& node,
   , parameters_(parameters)
   , planning_scene_monitor_(planning_scene_monitor)
   , stop_requested_(true)
-  , done_stopping_(false)
   , paused_(false)
   , robot_link_command_frame_(parameters->robot_link_command_frame)
   , smoothing_loader_("moveit_core", "online_signal_smoothing::SmoothingBaseClass")
@@ -440,40 +439,17 @@ void ServoCalcs::calculateSingleIteration()
       return;
     }
   }
-  else
-  {
-    // TODO: Joint trajectory is not populated with anything, so set it to the current robot position and 0 velocity
-    *joint_trajectory = *last_sent_command_;
-    for (auto& point : joint_trajectory->points)
-    {
-      point.velocities.assign(point.velocities.size(), 0);
-    }
-  }
-
-  // Print a warning to the user if both are stale
-  if (twist_command_is_stale_ && joint_command_is_stale_)
-  {
-    filteredHalt(*joint_trajectory);
-  }
-  else
-  {
-    done_stopping_ = false;
-  }
 
   // Skip servoing publication if both types of commands are stale.
   if (twist_command_is_stale_ && joint_command_is_stale_)
   {
-    ok_to_publish_ = false;
     rclcpp::Clock& clock = *node_->get_clock();
     RCLCPP_DEBUG_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD,
                                  "Skipping publishing because incoming commands are stale.");
-  }
-  else
-  {
-    ok_to_publish_ = true;
+    filteredHalt(*joint_trajectory);
   }
 
-  if (ok_to_publish_ && !paused_)
+  if (!paused_)
   {
     // Clear out position commands if user did not request them (can cause interpolation issues)
     if (!parameters_->publish_joint_positions)
@@ -897,17 +873,17 @@ void ServoCalcs::filteredHalt(trajectory_msgs::msg::JointTrajectory& joint_traje
   // Prepare the joint trajectory message to stop the robot
   joint_trajectory.points.clear();
   joint_trajectory.points.emplace_back();
+  joint_trajectory.joint_names = joint_model_group_->getActiveJointModelNames();
 
   // Deceleration algorithm:
   // Set positions to original_joint_state_
   // Filter
   // Calculate velocities
   // Check if velocities are close to zero. Round to zero, if so.
-  // Set done_stopping_ flag
   assert(original_joint_state_.position.size() >= num_joints_);
   joint_trajectory.points[0].positions = original_joint_state_.position;
   smoother_->doSmoothing(joint_trajectory.points[0].positions);
-  done_stopping_ = true;
+  bool done_stopping = true;
   if (parameters_->publish_joint_velocities)
   {
     joint_trajectory.points[0].velocities = std::vector<double>(num_joints_, 0);
@@ -919,11 +895,11 @@ void ServoCalcs::filteredHalt(trajectory_msgs::msg::JointTrajectory& joint_traje
       // If velocity is very close to zero, round to zero
       if (joint_trajectory.points[0].velocities.at(i) > STOPPED_VELOCITY_EPS)
       {
-        done_stopping_ = false;
+        done_stopping = false;
       }
     }
     // If every joint is very close to stopped, round velocity to zero
-    if (done_stopping_)
+    if (done_stopping)
     {
       std::fill(joint_trajectory.points[0].velocities.begin(), joint_trajectory.points[0].velocities.end(), 0);
     }
