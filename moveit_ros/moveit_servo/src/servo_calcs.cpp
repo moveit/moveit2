@@ -382,9 +382,6 @@ void ServoCalcs::calculateSingleIteration()
   joint_command_is_stale_ = ((node_->now() - latest_joint_command_stamp_) >=
                              rclcpp::Duration::from_seconds(parameters_->incoming_command_timeout));
 
-  have_nonzero_twist_stamped_ = latest_twist_cmd_is_nonzero_;
-  have_nonzero_joint_command_ = latest_joint_cmd_is_nonzero_;
-
   // Get the transform from MoveIt planning frame to servoing command frame
   // Calculate this transform to ensure it is available via C++ API
   // We solve (planning_frame -> base -> robot_link_command_frame)
@@ -403,7 +400,7 @@ void ServoCalcs::calculateSingleIteration()
                             current_state_->getGlobalLinkTransform(ik_solver_->getTipFrame());
   }
 
-  have_nonzero_command_ = have_nonzero_twist_stamped_ || have_nonzero_joint_command_;
+  have_nonzero_command_ = latest_twist_cmd_is_nonzero_ || latest_joint_cmd_is_nonzero_;
 
   // Don't end this function without updating the filters
   updated_filters_ = false;
@@ -429,7 +426,7 @@ void ServoCalcs::calculateSingleIteration()
 
   // Prioritize cartesian servoing above joint servoing
   // Only run commands if not stale and nonzero
-  if (have_nonzero_twist_stamped_ && !twist_command_is_stale_)
+  if (latest_twist_cmd_is_nonzero_ && !twist_command_is_stale_)
   {
     if (!cartesianServoCalcs(twist_stamped_cmd_, *joint_trajectory))
     {
@@ -437,7 +434,7 @@ void ServoCalcs::calculateSingleIteration()
       return;
     }
   }
-  else if (have_nonzero_joint_command_ && !joint_command_is_stale_)
+  else if (latest_joint_cmd_is_nonzero_ && !joint_command_is_stale_)
   {
     if (!jointServoCalcs(joint_servo_cmd_, *joint_trajectory))
     {

@@ -274,11 +274,6 @@ protected:
   // Flag saying if the filters were updated during the timer callback
   bool updated_filters_ = false;
 
-  // Nonzero status flags
-  bool have_nonzero_twist_stamped_ = false;
-  bool have_nonzero_joint_command_ = false;
-  bool have_nonzero_command_ = false;
-
   // Incoming command messages
   geometry_msgs::msg::TwistStamped twist_stamped_cmd_;
   control_msgs::msg::JointJog joint_servo_cmd_;
@@ -345,8 +340,11 @@ protected:
   control_msgs::msg::JointJog::ConstSharedPtr latest_joint_cmd_;
   rclcpp::Time latest_twist_command_stamp_ = rclcpp::Time(0., RCL_ROS_TIME);
   rclcpp::Time latest_joint_command_stamp_ = rclcpp::Time(0., RCL_ROS_TIME);
-  bool latest_twist_cmd_is_nonzero_ = false;
-  bool latest_joint_cmd_is_nonzero_ = false;
+
+  // Nonzero status flags
+  std::atomic<bool> latest_twist_cmd_is_nonzero_{ false };
+  std::atomic<bool> latest_joint_cmd_is_nonzero_{ false };
+  bool have_nonzero_command_ = false;
 
   // input condition variable used for low latency mode
   std::condition_variable input_cv_;
