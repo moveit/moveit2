@@ -2,6 +2,37 @@
 Changelog for package moveit_core
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.5.5 (2023-01-28)
+------------------
+* Switch to clang-format-14 (`#1877 <https://github.com/ros-planning/moveit2/issues/1877>`_) (`#1880 <https://github.com/ros-planning/moveit2/issues/1880>`_)
+  * Switch to clang-format-14
+  * Fix clang-format-14
+  (cherry picked from commit 7fa5eaf1ac21ab8a99c5adae53bd0a2d4abf98f6)
+  Co-authored-by: Henning Kayser <henningkayser@picknik.ai>
+* Cleanup msg includes: Use C++ instead of C header (backport `#1844 <https://github.com/ros-planning/moveit2/issues/1844>`_)
+  * Cleanup msg includes: Use C++ instead of C header
+  * Remove obsolete include: moveit_msgs/srv/execute_known_trajectory.hpp
+* Fix moveit_core dependency on tf2_kdl (`#1817 <https://github.com/ros-planning/moveit2/issues/1817>`_) (`#1823 <https://github.com/ros-planning/moveit2/issues/1823>`_)
+  This is a proper dependency, and not only a test dependency. It is still
+  needed when building moveit_core with -DBUILD_TESTING=OFF.
+  (cherry picked from commit 9f7d6df9cac9b55d10f6fee6c29e41ff1d1bf44c)
+  Co-authored-by: Scott K Logan <logans@cottsay.net>
+* Use <> for non-local headers (`#1765 <https://github.com/ros-planning/moveit2/issues/1765>`_)
+  Unless a header lives in the same or a child directory of the file
+  including it, it's recommended to use <> for the #include statement.
+  For more information, see the C++ Core Guidelines item SF.12
+  https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#sf12-prefer-the-quoted-form-of-include-for-files-relative-to-the-including-file-and-the-angle-bracket-form-everywhere-else
+  (cherry picked from commit 7a1f2a101f9aeb8557e8a31656bbe1a6d53b430e)
+* Add `-Wunused-function` (`#1754 <https://github.com/ros-planning/moveit2/issues/1754>`_) (`#1755 <https://github.com/ros-planning/moveit2/issues/1755>`_)
+  (cherry picked from commit ed9c3317bc1335b66afb0b2e7478b95ddb5c4b33)
+  Co-authored-by: Chris Thrasher <chrisjthrasher@gmail.com>
+* Re-enable clang-tidy check `performance-unnecessary-value-param` (backport `#1703 <https://github.com/ros-planning/moveit2/issues/1703>`_)
+  * Re-enable clang-tidy check performance-unnecessary-value-param (`#1703 <https://github.com/ros-planning/moveit2/issues/1703>`_)
+  * Fix clang-tidy issues (`#1706 <https://github.com/ros-planning/moveit2/issues/1706>`_)
+  Co-authored-by: Henning Kayser <henningkayser@picknik.ai>
+  Co-authored-by: Robert Haschke <rhaschke@users.noreply.github.com>
+* Contributors: Chris Thrasher, Robert Haschke, mergify[bot]
+
 2.5.4 (2022-11-04)
 ------------------
 * Free functions for calculating properties of trajectories (`#1503 <https://github.com/ros-planning/moveit2/issues/1503>`_) (`#1657 <https://github.com/ros-planning/moveit2/issues/1657>`_)

@@ -2,6 +2,27 @@
 Changelog for package pilz_industrial_motion_planner
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.5.5 (2023-01-28)
+------------------
+* fix: resolve bugs in MoveGroupSequenceAction class (main branch) (`#1797 <https://github.com/ros-planning/moveit2/issues/1797>`_) (`#1809 <https://github.com/ros-planning/moveit2/issues/1809>`_)
+  * fix: resolve bugs in MoveGroupSequenceAction class
+  * style: adopt .clang-format
+  Co-authored-by: Marco Magri <marco.magri@fraunhofer.it>
+  (cherry picked from commit fca8e9bd3f41e6bff5aadbf75c494b5cc3fa25ee)
+  Co-authored-by: Marco Magri <94347649+MarcoMagriDev@users.noreply.github.com>
+* Use <> for non-local headers (`#1765 <https://github.com/ros-planning/moveit2/issues/1765>`_)
+  Unless a header lives in the same or a child directory of the file
+  including it, it's recommended to use <> for the #include statement.
+  For more information, see the C++ Core Guidelines item SF.12
+  https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#sf12-prefer-the-quoted-form-of-include-for-files-relative-to-the-including-file-and-the-angle-bracket-form-everywhere-else
+  (cherry picked from commit 7a1f2a101f9aeb8557e8a31656bbe1a6d53b430e)
+* Re-enable clang-tidy check `performance-unnecessary-value-param` (backport `#1703 <https://github.com/ros-planning/moveit2/issues/1703>`_)
+  * Re-enable clang-tidy check performance-unnecessary-value-param (`#1703 <https://github.com/ros-planning/moveit2/issues/1703>`_)
+  * Fix clang-tidy issues (`#1706 <https://github.com/ros-planning/moveit2/issues/1706>`_)
+  Co-authored-by: Henning Kayser <henningkayser@picknik.ai>
+  Co-authored-by: Robert Haschke <rhaschke@users.noreply.github.com>
+* Contributors: Chris Thrasher, mergify[bot]
+
 2.5.4 (2022-11-04)
 ------------------
 * Backport to Humble (`#1642 <https://github.com/ros-planning/moveit2/issues/1642>`_)

@@ -2,6 +2,12 @@
 Changelog for package moveit_configs_utils
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.5.5 (2023-01-28)
+------------------
+* Add support for multiple MoveItConfigBuilder instaces (`#1807 <https://github.com/ros-planning/moveit2/issues/1807>`_) (`#1808 <https://github.com/ros-planning/moveit2/issues/1808>`_)
+  (cherry picked from commit 25d086cee9a7cf1c95a15ea12a27e5b7cbe50a1f)
+  Co-authored-by: Marco Magri <94347649+MarcoMagriDev@users.noreply.github.com>
+
 2.5.4 (2022-11-04)
 ------------------
 * Use MoveItConfigsBuilder in Pilz test launch file (`#1571 <https://github.com/ros-planning/moveit2/issues/1571>`_) (`#1662 <https://github.com/ros-planning/moveit2/issues/1662>`_)
