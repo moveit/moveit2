@@ -2,7 +2,7 @@
 # CI image using the ROS testing repository
 
 ARG ROS_DISTRO=rolling
-FROM ros-planning/moveit2:${ROS_DISTRO}-ci
+FROM moveit/moveit2:${ROS_DISTRO}-ci
 LABEL maintainer Robert Haschke rhaschke@techfak.uni-bielefeld.de
 
 # Switch to ros-testing
