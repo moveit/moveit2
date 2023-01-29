@@ -2,7 +2,7 @@
 # CI image using the ROS testing repository
 
 ARG ROS_DISTRO=rolling
-FROM osrf/ros2:testing
+FROM moveit/moveit2:${ROS_DISTRO}-ci
 LABEL maintainer Robert Haschke rhaschke@techfak.uni-bielefeld.de
 
 ENV TERM xterm
