@@ -2,7 +2,11 @@
 # CI image using the ROS testing repository
 
 ARG ROS_DISTRO=rolling
+<<<<<<< HEAD
 FROM osrf/ros2:testing
+=======
+FROM moveit/moveit2:${ROS_DISTRO}-ci
+>>>>>>> 39d371453 (Temporarily switch to dockerhub for CI jobs (#1908))
 LABEL maintainer Robert Haschke rhaschke@techfak.uni-bielefeld.de
 
 ENV TERM xterm
