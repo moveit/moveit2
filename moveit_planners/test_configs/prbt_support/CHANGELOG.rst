@@ -2,6 +2,9 @@
 Changelog for package prbt_support
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.7.0 (2023-01-29)
+------------------
+
 2.6.0 (2022-11-10)
 ------------------
 * Improve CMake usage (`#1550 <https://github.com/ros-planning/moveit2/issues/1550>`_)

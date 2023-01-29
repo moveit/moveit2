@@ -2,6 +2,46 @@
 Changelog for package moveit_servo
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.7.0 (2023-01-29)
+------------------
+* Merge PR `#1712 <https://github.com/ros-planning/moveit2/issues/1712>`_: fix clang compiler warnings + stricter CI
+* converted characters from string format to character format (`#1881 <https://github.com/ros-planning/moveit2/issues/1881>`_)
+* Update the Servo dependency on realtime_tools (`#1791 <https://github.com/ros-planning/moveit2/issues/1791>`_)
+  * Update the Servo dependency on realtime_tools
+  * Update .repos
+  * Add comment
+* Fix more clang warnings
+* Fix warning: passing by value
+* Cleanup msg includes: Use C++ instead of C header (`#1844 <https://github.com/ros-planning/moveit2/issues/1844>`_)
+* Fix BSD license in package.xml (`#1796 <https://github.com/ros-planning/moveit2/issues/1796>`_)
+  * fix BSD license in package.xml
+  * this must also be spdx compliant
+* Minimize use of `this->` (`#1784 <https://github.com/ros-planning/moveit2/issues/1784>`_)
+  It's often unnecessary. MoveIt already avoids this in most cases
+  so this PR better cements that existing pattern.
+* Enable `-Wold-style-cast` (`#1770 <https://github.com/ros-planning/moveit2/issues/1770>`_)
+* Add braces around blocks. (`#999 <https://github.com/ros-planning/moveit2/issues/999>`_)
+* Use <> for non-local headers (`#1734 <https://github.com/ros-planning/moveit2/issues/1734>`_)
+  Unless a header lives in the same or a child directory of the file
+  including it, it's recommended to use <> for the #include statement.
+  For more information, see the C++ Core Guidelines item SF.12
+  https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#sf12-prefer-the-quoted-form-of-include-for-files-relative-to-the-including-file-and-the-angle-bracket-form-everywhere-else
+* Servo: Check frames are known before getting their TFs (`#612 <https://github.com/ros-planning/moveit2/issues/612>`_)
+  * Check frames are known before getting their TFs
+  * Allow empty command frame - fixes tests
+  * Address Jere's feedback
+  Co-authored-by: AndyZe <andyz@utexas.edu>
+* Fix clang-tidy issues (`#1706 <https://github.com/ros-planning/moveit2/issues/1706>`_)
+  * Blindly apply automatic clang-tidy fixes
+  * Exemplarily cleanup a few automatic clang-tidy fixes
+  * Clang-tidy fixups
+  * Missed const-ref fixups
+  * Fix unsupported non-const -> const
+  * More fixes
+  Co-authored-by: Henning Kayser <henningkayser@picknik.ai>
+* Remove unused function in Servo (`#1709 <https://github.com/ros-planning/moveit2/issues/1709>`_)
+* Contributors: AdamPettinger, AndyZe, Chris Thrasher, Christian Henkel, Cory Crean, Henning Kayser, Robert Haschke, Sameer Gupta
+
 2.6.0 (2022-11-10)
 ------------------
 * Fix dead tutorial link (`#1701 <https://github.com/ros-planning/moveit2/issues/1701>`_)
