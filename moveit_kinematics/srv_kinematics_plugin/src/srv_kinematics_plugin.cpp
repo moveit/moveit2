@@ -78,7 +78,7 @@ bool SrvKinematicsPlugin::initialize(const rclcpp::Node::SharedPtr& node, const 
   {
     std::cout << "Joint Model Variable Names: ------------------------------------------- \n ";
     const std::vector<std::string> jm_names = joint_model_group_->getVariableNames();
-    std::copy(jm_names.begin(), jm_names.end(), std::ostream_iterator<std::string>(std::cout, "\n"));
+    std::copy(jm_names.begin(), jm_names.end(), std::ostream_iterator<std::string>(std::cout, '\n'));
     std::cout << '\n';
   }
 
@@ -98,7 +98,7 @@ bool SrvKinematicsPlugin::initialize(const rclcpp::Node::SharedPtr& node, const 
   if (debug)
   {
     RCLCPP_ERROR(LOGGER, "tip links available:");
-    std::copy(tip_frames_.begin(), tip_frames_.end(), std::ostream_iterator<std::string>(std::cout, "\n"));
+    std::copy(tip_frames_.begin(), tip_frames_.end(), std::ostream_iterator<std::string>(std::cout, '\n'));
   }
 
   // Make sure all the tip links are in the link_names vector

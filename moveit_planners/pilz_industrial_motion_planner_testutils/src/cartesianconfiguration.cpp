@@ -127,7 +127,7 @@ std::ostream& operator<<(std::ostream& os, const CartesianConfiguration& obj)
   os << "Group name: \"" << obj.getGroupName() << '\"';
   os << " | link name: \"" << obj.getLinkName() << '\"';
   // TODO(henning): fix pose msg serialization
-  // os << "\n" << obj.getPose();
+  // os << '\n' << obj.getPose();
   return os;
 }
 

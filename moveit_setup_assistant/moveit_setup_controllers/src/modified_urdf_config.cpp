@@ -130,7 +130,7 @@ void ModifiedUrdfConfig::collectVariables(std::vector<TemplateVariable>& variabl
     {
       commands += "    ";
       commands += command;
-      commands += "\n";
+      commands += '\n';
     }
   }
 

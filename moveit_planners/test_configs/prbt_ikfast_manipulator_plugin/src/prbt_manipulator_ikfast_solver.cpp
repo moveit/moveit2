@@ -20109,7 +20109,7 @@ int main(int argc, char** argv)
         sol.GetSolution(&solvalues[0],vsolfree.size()>0?&vsolfree[0]:nullptr);
         for( std::size_t j = 0; j < solvalues.size(); ++j)
             printf("%.15f, ", solvalues[j]);
-        printf("\n");
+        printf('\n');
     }
     return 0;
 }

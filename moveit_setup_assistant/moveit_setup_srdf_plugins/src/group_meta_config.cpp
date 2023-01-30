@@ -185,7 +185,7 @@ void GroupMetaConfig::collectVariables(std::vector<TemplateVariable>& variables)
 
     // add a linebreak if we have more than one entry
     if (!kinematics_parameters_files_block.empty())
-      kinematics_parameters_files_block += "\n";
+      kinematics_parameters_files_block += '\n';
 
     std::string line = "    <rosparam command=\"load\" ns=\"" + groups.first + "\" file=\"" +
                        groups.second.kinematics_parameters_file_ + "\"/>";
