@@ -1,7 +1,6 @@
 import os
 from launch import LaunchDescription
-from launch.actions import ExecuteProcess
-from launch_ros.actions import Node
+import launch_ros
 from ament_index_python.packages import get_package_share_directory
 from moveit_configs_utils import MoveItConfigsBuilder
 from launch_param_builder import ParameterBuilder
@@ -27,7 +26,7 @@ def generate_launch_description():
         get_package_share_directory("moveit_servo")
         + "/config/demo_rviz_pose_tracking.rviz"
     )
-    rviz_node = Node(
+    rviz_node = launch_ros.actions.Node(
         package="rviz2",
         executable="rviz2",
         name="rviz2",
@@ -38,7 +37,7 @@ def generate_launch_description():
     )
 
     # Publishes tf's for the robot
-    robot_state_publisher = Node(
+    robot_state_publisher = launch_ros.actions.Node(
         package="robot_state_publisher",
         executable="robot_state_publisher",
         output="screen",
@@ -46,7 +45,7 @@ def generate_launch_description():
     )
 
     # A node to publish world -> panda_link0 transform
-    static_tf = Node(
+    static_tf = launch_ros.actions.Node(
         package="tf2_ros",
         executable="static_transform_publisher",
         name="static_transform_publisher",
@@ -54,7 +53,7 @@ def generate_launch_description():
         arguments=["0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "world", "panda_link0"],
     )
 
-    pose_tracking_node = Node(
+    pose_tracking_node = launch_ros.actions.Node(
         package="moveit_servo",
         executable="servo_pose_tracking_demo",
         # prefix=['xterm -e gdb -ex run --args'],
@@ -71,14 +70,14 @@ def generate_launch_description():
         "config",
         "ros2_controllers.yaml",
     )
-    ros2_control_node = Node(
+    ros2_control_node = launch_ros.actions.Node(
         package="controller_manager",
         executable="ros2_control_node",
         parameters=[moveit_config.robot_description, ros2_controllers_path],
         output="screen",
     )
 
-    joint_state_broadcaster_spawner = Node(
+    joint_state_broadcaster_spawner = launch_ros.actions.Node(
         package="controller_manager",
         executable="spawner",
         arguments=[
@@ -90,7 +89,7 @@ def generate_launch_description():
         ],
     )
 
-    panda_arm_controller_spawner = Node(
+    panda_arm_controller_spawner = launch_ros.actions.Node(
         package="controller_manager",
         executable="spawner",
         arguments=["panda_arm_controller", "-c", "/controller_manager"],
