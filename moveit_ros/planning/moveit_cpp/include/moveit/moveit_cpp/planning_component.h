@@ -49,10 +49,10 @@
 namespace moveit_cpp
 {
 MOVEIT_CLASS_FORWARD(PlanningComponent);  // Defines PlanningComponentPtr, ConstPtr, WeakPtr... etc
+
 class PlanningComponent
 {
 public:
-  using MoveItErrorCode [[deprecated("Use moveit::core::MoveItErrorCode")]] = moveit::core::MoveItErrorCode;
   /// Planner parameters provided with the MotionPlanRequest
   struct PlanRequestParameters
   {
@@ -194,7 +194,8 @@ public:
   planning_interface::MotionPlanResponse plan(const PlanRequestParameters& parameters, const bool store_solution = true);
 
   /** \brief Run a plan from start or current state to fulfill the last goal constraints provided by setGoal() using the
-   * provided PlanRequestParameters. */
+   * provided PlanRequestParameters. This defaults to taking the full planning time (null stopping_criterion_callback)
+   * and finding the shortest solution in joint space. */
   planning_interface::MotionPlanResponse
   plan(const MultiPipelinePlanRequestParameters& parameters,
        const SolutionCallbackFunction& solution_selection_callback = &getShortestSolution,

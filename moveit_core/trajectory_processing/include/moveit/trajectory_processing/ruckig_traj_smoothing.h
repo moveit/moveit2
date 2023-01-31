@@ -45,14 +45,44 @@ namespace trajectory_processing
 class RuckigSmoothing
 {
 public:
+  /**
+   * \brief Apply smoothing to a time-parameterized trajectory so that jerk limits are not violated.
+   * \param[in,out] trajectory A path which needs smoothing.
+   * \param max_velocity_scaling_factor A factor in the range [0,1] which can slow down the trajectory.
+   * \param max_acceleration_scaling_factor A factor in the range [0,1] which can slow down the trajectory.
+   */
   static bool applySmoothing(robot_trajectory::RobotTrajectory& trajectory,
                              const double max_velocity_scaling_factor = 1.0,
                              const double max_acceleration_scaling_factor = 1.0);
 
+  /**
+   * \brief Apply smoothing to a time-parameterized trajectory so that jerk limits are not violated.
+   * \param[in,out] trajectory A path which needs smoothing.
+   * \param velocity_limits Joint names and velocity limits in rad/s
+   * \param acceleration_limits Joint names and acceleration limits in rad/s^2
+   * \param jerk_limits Joint names and jerk limits in rad/s^3
+   * \param max_velocity_scaling_factor A factor in the range [0,1] which can slow down the trajectory.
+   * \param max_acceleration_scaling_factor A factor in the range [0,1] which can slow down the trajectory.
+   */
   static bool applySmoothing(robot_trajectory::RobotTrajectory& trajectory,
                              const std::unordered_map<std::string, double>& velocity_limits,
                              const std::unordered_map<std::string, double>& acceleration_limits,
-                             const std::unordered_map<std::string, double>& jerk_limits);
+                             const std::unordered_map<std::string, double>& jerk_limits,
+                             const double max_velocity_scaling_factor = 1.0,
+                             const double max_acceleration_scaling_factor = 1.0);
+
+  /**
+   * \brief Apply smoothing to a time-parameterized trajectory so that jerk limits are not violated.
+   * \param[in,out] trajectory A path which needs smoothing.
+   * \param joint_limits Joint names and corresponding velocity limits in rad/s, acceleration limits in rad/s^2,
+   * and jerk limits in rad/s^3
+   * \param max_velocity_scaling_factor A factor in the range [0,1] which can slow down the trajectory.
+   * \param max_acceleration_scaling_factor A factor in the range [0,1] which can slow down the trajectory.
+   */
+  static bool applySmoothing(robot_trajectory::RobotTrajectory& trajectory,
+                             const std::vector<moveit_msgs::msg::JointLimits>& joint_limits,
+                             const double max_velocity_scaling_factor = 1.0,
+                             const double max_acceleration_scaling_factor = 1.0);
 
 private:
   /**

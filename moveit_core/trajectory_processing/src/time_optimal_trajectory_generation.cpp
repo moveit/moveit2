@@ -53,6 +53,7 @@ static const rclcpp::Logger LOGGER =
     rclcpp::get_logger("moveit_trajectory_processing.time_optimal_trajectory_generation");
 constexpr double DEFAULT_TIMESTEP = 1e-3;
 constexpr double EPS = 1e-6;
+constexpr double DEFAULT_SCALING_FACTOR = 1.0;
 }  // namespace
 
 class LinearPathSegment : public PathSegment
@@ -880,37 +881,8 @@ bool TimeOptimalTrajectoryGeneration::computeTimeStamps(robot_trajectory::RobotT
   }
 
   // Validate scaling
-  double velocity_scaling_factor = 1.0;
-  if (max_velocity_scaling_factor > 0.0 && max_velocity_scaling_factor <= 1.0)
-  {
-    velocity_scaling_factor = max_velocity_scaling_factor;
-  }
-  else if (max_velocity_scaling_factor == 0.0)
-  {
-    RCLCPP_DEBUG(LOGGER, "A max_velocity_scaling_factor of 0.0 was specified, defaulting to %f instead.",
-                 velocity_scaling_factor);
-  }
-  else
-  {
-    RCLCPP_WARN(LOGGER, "Invalid max_velocity_scaling_factor %f specified, defaulting to %f instead.",
-                max_velocity_scaling_factor, velocity_scaling_factor);
-  }
-
-  double acceleration_scaling_factor = 1.0;
-  if (max_acceleration_scaling_factor > 0.0 && max_acceleration_scaling_factor <= 1.0)
-  {
-    acceleration_scaling_factor = max_acceleration_scaling_factor;
-  }
-  else if (max_acceleration_scaling_factor == 0.0)
-  {
-    RCLCPP_DEBUG(LOGGER, "A max_acceleration_scaling_factor of 0.0 was specified, defaulting to %f instead.",
-                 acceleration_scaling_factor);
-  }
-  else
-  {
-    RCLCPP_WARN(LOGGER, "Invalid max_acceleration_scaling_factor %f specified, defaulting to %f instead.",
-                max_acceleration_scaling_factor, acceleration_scaling_factor);
-  }
+  double velocity_scaling_factor = verifyScalingFactor(max_velocity_scaling_factor, VELOCITY);
+  double acceleration_scaling_factor = verifyScalingFactor(max_acceleration_scaling_factor, ACCELERATION);
 
   const std::vector<std::string>& vars = group->getVariableNames();
   const moveit::core::RobotModel& rmodel = group->getParentModel();
@@ -967,9 +939,33 @@ bool TimeOptimalTrajectoryGeneration::computeTimeStamps(robot_trajectory::RobotT
   return doTimeParameterizationCalculations(trajectory, max_velocity, max_acceleration);
 }
 
+bool TimeOptimalTrajectoryGeneration::computeTimeStamps(robot_trajectory::RobotTrajectory& trajectory,
+                                                        const std::vector<moveit_msgs::msg::JointLimits>& joint_limits,
+                                                        const double max_velocity_scaling_factor,
+                                                        const double max_acceleration_scaling_factor) const
+{
+  std::unordered_map<std::string, double> velocity_limits;
+  std::unordered_map<std::string, double> acceleration_limits;
+  for (const auto& limit : joint_limits)
+  {
+    // If custom limits are not defined here, they will be supplied from getRobotModelBounds() later
+    if (limit.has_velocity_limits)
+    {
+      velocity_limits[limit.joint_name] = limit.max_velocity;
+    }
+    if (limit.has_acceleration_limits)
+    {
+      acceleration_limits[limit.joint_name] = limit.max_acceleration;
+    }
+  }
+  return computeTimeStamps(trajectory, velocity_limits, acceleration_limits, max_velocity_scaling_factor,
+                           max_acceleration_scaling_factor);
+}
+
 bool TimeOptimalTrajectoryGeneration::computeTimeStamps(
     robot_trajectory::RobotTrajectory& trajectory, const std::unordered_map<std::string, double>& velocity_limits,
-    const std::unordered_map<std::string, double>& acceleration_limits) const
+    const std::unordered_map<std::string, double>& acceleration_limits, const double max_velocity_scaling_factor,
+    const double max_acceleration_scaling_factor) const
 {
   if (trajectory.empty())
     return true;
@@ -981,6 +977,11 @@ bool TimeOptimalTrajectoryGeneration::computeTimeStamps(
     RCLCPP_ERROR(LOGGER, "It looks like the planner did not set the group the plan was computed for");
     return false;
   }
+
+  // Validate scaling
+  double velocity_scaling_factor = verifyScalingFactor(max_velocity_scaling_factor, VELOCITY);
+  double acceleration_scaling_factor = verifyScalingFactor(max_acceleration_scaling_factor, ACCELERATION);
+
   const unsigned num_joints = group->getVariableCount();
   const std::vector<std::string>& vars = group->getVariableNames();
   const moveit::core::RobotModel& rmodel = group->getParentModel();
@@ -997,7 +998,7 @@ bool TimeOptimalTrajectoryGeneration::computeTimeStamps(
     auto it = velocity_limits.find(vars[j]);
     if (it != velocity_limits.end())
     {
-      max_velocity[j] = it->second;
+      max_velocity[j] = it->second * velocity_scaling_factor;
       set_velocity_limit = true;
     }
 
@@ -1010,7 +1011,8 @@ bool TimeOptimalTrajectoryGeneration::computeTimeStamps(
                      bounds.max_velocity_, vars[j].c_str());
         return false;
       }
-      max_velocity[j] = std::min(std::fabs(bounds.max_velocity_), std::fabs(bounds.min_velocity_));
+      max_velocity[j] =
+          std::min(std::fabs(bounds.max_velocity_), std::fabs(bounds.min_velocity_)) * velocity_scaling_factor;
       set_velocity_limit = true;
     }
 
@@ -1029,7 +1031,7 @@ bool TimeOptimalTrajectoryGeneration::computeTimeStamps(
     it = acceleration_limits.find(vars[j]);
     if (it != acceleration_limits.end())
     {
-      max_acceleration[j] = it->second;
+      max_acceleration[j] = it->second * acceleration_scaling_factor;
       set_acceleration_limit = true;
     }
 
@@ -1042,7 +1044,8 @@ bool TimeOptimalTrajectoryGeneration::computeTimeStamps(
                      bounds.max_acceleration_, vars[j].c_str());
         return false;
       }
-      max_acceleration[j] = std::min(std::fabs(bounds.max_acceleration_), std::fabs(bounds.min_acceleration_));
+      max_acceleration[j] = std::min(std::fabs(bounds.max_acceleration_), std::fabs(bounds.min_acceleration_)) *
+                            acceleration_scaling_factor;
       set_acceleration_limit = true;
     }
     if (!set_acceleration_limit)
@@ -1202,5 +1205,29 @@ bool TimeOptimalTrajectoryGeneration::hasMixedJointTypes(const moveit::core::Joi
       });
 
   return have_prismatic && have_revolute;
+}
+
+double TimeOptimalTrajectoryGeneration::verifyScalingFactor(const double requested_scaling_factor,
+                                                            const LimitType limit_type) const
+{
+  std::string limit_type_str;
+  double scaling_factor = DEFAULT_SCALING_FACTOR;
+
+  const auto limit_type_it = LIMIT_TYPES.find(limit_type);
+  if (limit_type_it != LIMIT_TYPES.end())
+  {
+    limit_type_str = limit_type_it->second + "_";
+  }
+
+  if (requested_scaling_factor > 0.0 && requested_scaling_factor <= 1.0)
+  {
+    scaling_factor = requested_scaling_factor;
+  }
+  else
+  {
+    RCLCPP_WARN(LOGGER, "Invalid max_%sscaling_factor %f specified, defaulting to %f instead.", limit_type_str.c_str(),
+                requested_scaling_factor, scaling_factor);
+  }
+  return scaling_factor;
 }
 }  // namespace trajectory_processing

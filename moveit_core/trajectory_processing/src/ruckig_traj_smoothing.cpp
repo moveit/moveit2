@@ -92,7 +92,9 @@ bool RuckigSmoothing::applySmoothing(robot_trajectory::RobotTrajectory& trajecto
 bool RuckigSmoothing::applySmoothing(robot_trajectory::RobotTrajectory& trajectory,
                                      const std::unordered_map<std::string, double>& velocity_limits,
                                      const std::unordered_map<std::string, double>& acceleration_limits,
-                                     const std::unordered_map<std::string, double>& jerk_limits)
+                                     const std::unordered_map<std::string, double>& jerk_limits,
+                                     const double max_velocity_scaling_factor,
+                                     const double max_acceleration_scaling_factor)
 {
   if (!validateGroup(trajectory))
   {
@@ -111,8 +113,6 @@ bool RuckigSmoothing::applySmoothing(robot_trajectory::RobotTrajectory& trajecto
   moveit::core::JointModelGroup const* const group = trajectory.getGroup();
   const size_t num_dof = group->getVariableCount();
   ruckig::InputParameter<ruckig::DynamicDOFs> ruckig_input{ num_dof };
-  double max_velocity_scaling_factor = 1.0;
-  double max_acceleration_scaling_factor = 1.0;
   if (!getRobotModelBounds(max_velocity_scaling_factor, max_acceleration_scaling_factor, group, ruckig_input))
   {
     RCLCPP_ERROR(LOGGER, "Error while retrieving kinematic limits (vel/accel/jerk) from RobotModel.");
@@ -128,13 +128,13 @@ bool RuckigSmoothing::applySmoothing(robot_trajectory::RobotTrajectory& trajecto
     auto it = velocity_limits.find(vars[j]);
     if (it != velocity_limits.end())
     {
-      ruckig_input.max_velocity.at(j) = it->second;
+      ruckig_input.max_velocity.at(j) = it->second * max_velocity_scaling_factor;
     }
     // Acceleration
     it = acceleration_limits.find(vars[j]);
     if (it != acceleration_limits.end())
     {
-      ruckig_input.max_acceleration.at(j) = it->second;
+      ruckig_input.max_acceleration.at(j) = it->second * max_acceleration_scaling_factor;
     }
     // Jerk
     it = jerk_limits.find(vars[j]);
@@ -211,6 +211,34 @@ RuckigSmoothing::runRuckigInBatches(const size_t num_waypoints, const robot_traj
   }
 
   return std::make_optional<robot_trajectory::RobotTrajectory>(output_trajectory, true /* deep copy */);
+}
+
+bool RuckigSmoothing::applySmoothing(robot_trajectory::RobotTrajectory& trajectory,
+                                     const std::vector<moveit_msgs::msg::JointLimits>& joint_limits,
+                                     const double max_velocity_scaling_factor,
+                                     const double max_acceleration_scaling_factor)
+{
+  std::unordered_map<std::string, double> velocity_limits;
+  std::unordered_map<std::string, double> acceleration_limits;
+  std::unordered_map<std::string, double> jerk_limits;
+  for (const auto& limit : joint_limits)
+  {
+    // If custom limits are not defined here, they will be supplied from getRobotModelBounds() later
+    if (limit.has_velocity_limits)
+    {
+      velocity_limits[limit.joint_name] = limit.max_velocity;
+    }
+    if (limit.has_acceleration_limits)
+    {
+      acceleration_limits[limit.joint_name] = limit.max_acceleration;
+    }
+    if (limit.has_jerk_limits)
+    {
+      jerk_limits[limit.joint_name] = limit.max_jerk;
+    }
+  }
+  return applySmoothing(trajectory, velocity_limits, acceleration_limits, jerk_limits, max_velocity_scaling_factor,
+                        max_acceleration_scaling_factor);
 }
 
 bool RuckigSmoothing::validateGroup(const robot_trajectory::RobotTrajectory& trajectory)

@@ -137,7 +137,12 @@ bool ChompPlanner::solve(const planning_scene::PlanningSceneConstPtr& planning_s
   }
   else if (params.trajectory_initialization_method_.compare("fillTrajectory") == 0)
   {
-    if (!(trajectory.fillInFromTrajectory(*res.trajectory_[0])))
+    if (res.trajectory_.empty())
+    {
+      RCLCPP_ERROR(LOGGER, "No input trajectory specified");
+      return false;
+    }
+    else if (!(trajectory.fillInFromTrajectory(*res.trajectory_[0])))
     {
       RCLCPP_ERROR(LOGGER, "Input trajectory has less than 2 points, "
                            "trajectory must contain at least start and goal state");
@@ -251,6 +256,8 @@ bool ChompPlanner::solve(const planning_scene::PlanningSceneConstPtr& planning_s
 
   res.trajectory_.resize(1);
   res.trajectory_[0] = result;
+  res.description_.resize(1);
+  res.description_[0] = "plan";
 
   RCLCPP_DEBUG(LOGGER, "Bottom took %ld sec to create", (std::chrono::system_clock::now() - create_time).count());
   RCLCPP_DEBUG(LOGGER, "Serviced planning request in %ld wall-seconds",

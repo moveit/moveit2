@@ -69,9 +69,9 @@ public:
   int max_iterations_after_collision_free_; /*!< maximum iterations to be performed after a collision free path is found. */
   double smoothness_cost_weight_; /*!< smoothness_cost_weight parameters controls its weight in the final cost that
                                      CHOMP is actually optimizing over */
+  double obstacle_cost_weight_; /*!< controls the weight to be given to obstacles towards the final cost CHOMP optimizes over */
   double
-      obstacle_cost_weight_; /*!< controls the weight to be given to obstacles towards the final cost CHOMP optimizes over */
-  double learning_rate_; /*!< learning rate used by the optimizer to find the local / global minima while reducing the total cost */
+      learning_rate_; /*!< learning rate used by the optimizer to find the local / global minima while reducing the total cost */
   double smoothness_cost_velocity_;     /*!< variables associated with the cost in velocity */
   double smoothness_cost_acceleration_; /*!< variables associated with the cost in acceleration */
   double smoothness_cost_jerk_;         /*!< variables associated with the cost in jerk */

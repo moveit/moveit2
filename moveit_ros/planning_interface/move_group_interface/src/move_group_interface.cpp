@@ -817,7 +817,7 @@ public:
     // wait until send_goal_opts.result_callback is called
     while (!done)
     {
-      std::this_thread::sleep_for(std::chrono::milliseconds(100));
+      std::this_thread::sleep_for(std::chrono::milliseconds(1));
     }
 
     if (code != rclcpp_action::ResultCode::SUCCEEDED)
@@ -895,7 +895,7 @@ public:
     // wait until send_goal_opts.result_callback is called
     while (!done)
     {
-      std::this_thread::sleep_for(std::chrono::milliseconds(100));
+      std::this_thread::sleep_for(std::chrono::milliseconds(1));
     }
 
     if (code != rclcpp_action::ResultCode::SUCCEEDED)
@@ -961,7 +961,7 @@ public:
     // wait until send_goal_opts.result_callback is called
     while (!done)
     {
-      std::this_thread::sleep_for(std::chrono::milliseconds(100));
+      std::this_thread::sleep_for(std::chrono::milliseconds(1));
     }
 
     if (code != rclcpp_action::ResultCode::SUCCEEDED)
@@ -1797,6 +1797,11 @@ bool MoveGroupInterface::setJointValueTarget(const std::map<std::string, double>
 bool MoveGroupInterface::setJointValueTarget(const std::vector<std::string>& variable_names,
                                              const std::vector<double>& variable_values)
 {
+  if (variable_names.size() != variable_values.size())
+  {
+    RCLCPP_ERROR_STREAM(LOGGER, "sizes of name and position arrays do not match");
+    return false;
+  }
   const auto& allowed = impl_->getJointModelGroup()->getVariableNames();
   for (const auto& variable_name : variable_names)
   {

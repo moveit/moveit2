@@ -1,7 +1,7 @@
 /*********************************************************************
  * Software License Agreement (BSD License)
  *
- *  Copyright (c) 2019, Jens Petit
+ *  Copyright (c) 2023, PickNik Inc.
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *     copyright notice, this list of conditions and the following
  *     disclaimer in the documentation and/or other materials provided
  *     with the distribution.
- *   * Neither the name of the copyright holder nor the names of its
+ *   * Neither the name of PickNik Inc. nor the names of its
  *     contributors may be used to endorse or promote products derived
  *     from this software without specific prior written permission.
  *
@@ -32,22 +32,28 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-/* Author: Jens Petit */
+/* Author: Sebastian Jahr */
 
-#include <moveit/collision_detection_bullet/collision_detector_allocator_bullet.h>
-#include <moveit/collision_detection/test_collision_common_panda.h>
+#include <moveit/moveit_cpp/parallel_planning_callbacks.hpp>
 
-INSTANTIATE_TYPED_TEST_SUITE_P(BulletCollisionCheckPanda, CollisionDetectorPandaTest,
-                               collision_detection::CollisionDetectorAllocatorBullet);
-
-// These are not instantiated, because be don't yet have distance checking for Bullet
-#ifdef GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST
-GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(DistanceCheckPandaTest);
-GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(DistanceFullPandaTest);
-#endif
-
-int main(int argc, char* argv[])
+namespace moveit_cpp
 {
-  testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
+/** \brief A callback function that can be used as a parallel planning stop criterion.
+ *          It stops parallel planning as soon as any planner finds a solution. */
+bool stopAtFirstSolution(PlanSolutions const& plan_solutions,
+                         PlanningComponent::MultiPipelinePlanRequestParameters const& /*plan_request_parameters*/)
+{
+  // Stop at the first successful plan
+  for (auto const& solution : plan_solutions.getSolutions())
+  {
+    // bool(solution) is shorthand to evaluate the error code of the solution, checking for SUCCESS
+    if (bool(solution))
+    {
+      // Return true to abort the other pipelines
+      return true;
+    }
+  }
+  // Return false when parallel planning should continue because it hasn't found a successful solution yet
+  return false;
 }
+}  // namespace moveit_cpp
