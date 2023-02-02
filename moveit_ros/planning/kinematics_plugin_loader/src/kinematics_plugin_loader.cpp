@@ -142,6 +142,11 @@ public:
     std::scoped_lock slock(lock_);
     for (auto const& [group, solver] : possible_kinematics_solvers_)
     {
+      // Don't bother trying to load a solver for the wrong group
+      if (group != jmg->getName())
+      {
+        continue;
+      }
       try
       {
         result = kinematics_loader_->createUniqueInstance(solver);
