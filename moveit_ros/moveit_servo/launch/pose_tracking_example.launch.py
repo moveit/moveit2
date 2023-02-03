@@ -26,7 +26,7 @@ def generate_launch_description():
         get_package_share_directory("moveit_servo")
         + "/config/demo_rviz_pose_tracking.rviz"
     )
-    rviz_node = launch_ros.actions.Node(
+    rviz_node = Node(
         package="rviz2",
         executable="rviz2",
         name="rviz2",
@@ -37,7 +37,7 @@ def generate_launch_description():
     )
 
     # Publishes tf's for the robot
-    robot_state_publisher = launch_ros.actions.Node(
+    robot_state_publisher = Node(
         package="robot_state_publisher",
         executable="robot_state_publisher",
         output="screen",
@@ -45,7 +45,7 @@ def generate_launch_description():
     )
 
     # A node to publish world -> panda_link0 transform
-    static_tf = launch_ros.actions.Node(
+    static_tf = Node(
         package="tf2_ros",
         executable="static_transform_publisher",
         name="static_transform_publisher",
@@ -53,7 +53,7 @@ def generate_launch_description():
         arguments=["0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "world", "panda_link0"],
     )
 
-    pose_tracking_node = launch_ros.actions.Node(
+    pose_tracking_node = Node(
         package="moveit_servo",
         executable="servo_pose_tracking_demo",
         # prefix=['xterm -e gdb -ex run --args'],
@@ -70,14 +70,14 @@ def generate_launch_description():
         "config",
         "ros2_controllers.yaml",
     )
-    ros2_control_node = launch_ros.actions.Node(
+    ros2_control_node = Node(
         package="controller_manager",
         executable="ros2_control_node",
         parameters=[moveit_config.robot_description, ros2_controllers_path],
         output="screen",
     )
 
-    joint_state_broadcaster_spawner = launch_ros.actions.Node(
+    joint_state_broadcaster_spawner = Node(
         package="controller_manager",
         executable="spawner",
         arguments=[
@@ -89,7 +89,7 @@ def generate_launch_description():
         ],
     )
 
-    panda_arm_controller_spawner = launch_ros.actions.Node(
+    panda_arm_controller_spawner = Node(
         package="controller_manager",
         executable="spawner",
         arguments=["panda_arm_controller", "-c", "/controller_manager"],
