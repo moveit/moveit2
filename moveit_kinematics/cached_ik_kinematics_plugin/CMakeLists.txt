@@ -56,5 +56,5 @@ if(ur_kinematics_FOUND)
     endforeach()
 endif()
 
-install(DIRECTORY include/ DESTINATION include)
+install(DIRECTORY include/ DESTINATION include/moveit_kinematics)
 install(DIRECTORY launch DESTINATION share/${PROJECT_NAME})
