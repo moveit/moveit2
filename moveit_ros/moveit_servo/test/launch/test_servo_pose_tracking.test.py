@@ -9,7 +9,9 @@ from launch_param_builder import ParameterBuilder
 from moveit_configs_utils import MoveItConfigsBuilder
 
 
-def generate_servo_test_description(*args, gtest_name: launch.some_substitutions_type.SomeSubstitutionsType):
+def generate_servo_test_description(
+    *args, gtest_name: launch.some_substitutions_type.SomeSubstitutionsType
+):
     moveit_config = (
         MoveItConfigsBuilder("moveit_resources_panda")
         .robot_description(file_path="config/panda.urdf.xacro")
