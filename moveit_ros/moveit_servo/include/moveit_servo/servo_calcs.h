@@ -264,20 +264,11 @@ protected:
   // Pointer to the collision environment
   planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor_;
 
-  // Track the number of cycles during which motion has not occurred.
-  // Will avoid re-publishing zero velocities endlessly.
-  int zero_velocity_count_ = 0;
-
   // Flag for staying inactive while there are no incoming commands
   bool wait_for_servo_commands_ = true;
 
   // Flag saying if the filters were updated during the timer callback
   bool updated_filters_ = false;
-
-  // Nonzero status flags
-  bool have_nonzero_twist_stamped_ = false;
-  bool have_nonzero_joint_command_ = false;
-  bool have_nonzero_command_ = false;
 
   // Incoming command messages
   geometry_msgs::msg::TwistStamped twist_stamped_cmd_;
@@ -314,14 +305,12 @@ protected:
   // Main tracking / result publisher loop
   std::thread thread_;
   bool stop_requested_;
-  std::atomic<bool> done_stopping_;
 
   // Status
   StatusCode status_ = StatusCode::NO_WARNING;
   std::atomic<bool> paused_;
   bool twist_command_is_stale_ = false;
   bool joint_command_is_stale_ = false;
-  bool ok_to_publish_ = false;
   double collision_velocity_scale_ = 1.0;
 
   // Use ArrayXd type to enable more coefficient-wise operations
@@ -345,8 +334,6 @@ protected:
   control_msgs::msg::JointJog::ConstSharedPtr latest_joint_cmd_;
   rclcpp::Time latest_twist_command_stamp_ = rclcpp::Time(0., RCL_ROS_TIME);
   rclcpp::Time latest_joint_command_stamp_ = rclcpp::Time(0., RCL_ROS_TIME);
-  bool latest_twist_cmd_is_nonzero_ = false;
-  bool latest_joint_cmd_is_nonzero_ = false;
 
   // input condition variable used for low latency mode
   std::condition_variable input_cv_;
