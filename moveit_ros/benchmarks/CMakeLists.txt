@@ -32,7 +32,7 @@ add_library(moveit_ros_benchmarks SHARED
   src/BenchmarkOptions.cpp
   src/BenchmarkExecutor.cpp
 )
-set_target_properties(moveit_ros_benchmarks PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
+set_target_properties(moveit_ros_benchmarks PROPERTIES VERSION "${moveit_ros_benchmarks_VERSION}")
 if(WIN32)
   set(EXTRA_LIB ws2_32.lib)
 endif()
@@ -69,7 +69,7 @@ install(
   TARGETS
     moveit_run_benchmark
     moveit_combine_predefined_poses_benchmark
-  DESTINATION lib/moveit_ros_benchmarks 
+  DESTINATION lib/moveit_ros_benchmarks
 )
 
 install(DIRECTORY include/
@@ -77,11 +77,11 @@ install(DIRECTORY include/
 )
 
 install(PROGRAMS scripts/moveit_benchmark_statistics.py
-  DESTINATION lib/moveit_ros_benchmarks 
+  DESTINATION lib/moveit_ros_benchmarks
 )
 
 install(DIRECTORY examples/
-  DESTINATION share/moveit_ros_benchmarks 
+  DESTINATION share/moveit_ros_benchmarks
 )
 
 if(BUILD_TESTING)

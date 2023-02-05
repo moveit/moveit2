@@ -26,7 +26,7 @@ include(ConfigExtras.cmake)
 add_library(moveit_ros_control_interface_plugin SHARED
   src/controller_manager_plugin.cpp
 )
-set_target_properties(moveit_ros_control_interface_plugin PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
+set_target_properties(moveit_ros_control_interface_plugin PROPERTIES VERSION "${moveit_ros_control_interface_VERSION}")
 target_include_directories(moveit_ros_control_interface_plugin PRIVATE include)
 ament_target_dependencies(moveit_ros_control_interface_plugin
     ${THIS_PACKAGE_INCLUDE_DEPENDS}
@@ -36,7 +36,7 @@ ament_target_dependencies(moveit_ros_control_interface_plugin
 add_library(moveit_ros_control_interface_trajectory_plugin SHARED
   src/joint_trajectory_controller_plugin.cpp
 )
-set_target_properties(moveit_ros_control_interface_trajectory_plugin PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
+set_target_properties(moveit_ros_control_interface_trajectory_plugin PROPERTIES VERSION "${moveit_ros_control_interface_VERSION}")
 target_include_directories(moveit_ros_control_interface_trajectory_plugin PRIVATE include)
 ament_target_dependencies(moveit_ros_control_interface_trajectory_plugin
     ${THIS_PACKAGE_INCLUDE_DEPENDS}
@@ -46,7 +46,7 @@ ament_target_dependencies(moveit_ros_control_interface_trajectory_plugin
 add_library(moveit_ros_control_interface_gripper_plugin SHARED
   src/gripper_controller_plugin.cpp
 )
-set_target_properties(moveit_ros_control_interface_gripper_plugin PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
+set_target_properties(moveit_ros_control_interface_gripper_plugin PROPERTIES VERSION "${moveit_ros_control_interface_VERSION}")
 target_include_directories(moveit_ros_control_interface_gripper_plugin PRIVATE include)
 ament_target_dependencies(moveit_ros_control_interface_gripper_plugin
     ${THIS_PACKAGE_INCLUDE_DEPENDS}
@@ -56,7 +56,7 @@ ament_target_dependencies(moveit_ros_control_interface_gripper_plugin
 add_library(moveit_ros_control_interface_empty_plugin SHARED
   src/empty_controller_plugin.cpp
 )
-set_target_properties(moveit_ros_control_interface_empty_plugin PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
+set_target_properties(moveit_ros_control_interface_empty_plugin PROPERTIES VERSION "${moveit_ros_control_interface_VERSION}")
 target_include_directories(moveit_ros_control_interface_empty_plugin PRIVATE include)
 ament_target_dependencies(moveit_ros_control_interface_empty_plugin
     ${THIS_PACKAGE_INCLUDE_DEPENDS}

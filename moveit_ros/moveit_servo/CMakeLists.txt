@@ -68,7 +68,7 @@ add_library(${SERVO_PARAM_LIB_NAME} SHARED
   src/servo_parameters.cpp
   src/parameter_descriptor_builder.cpp
 )
-set_target_properties(${SERVO_PARAM_LIB_NAME} PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
+set_target_properties(${SERVO_PARAM_LIB_NAME} PROPERTIES VERSION "${moveit_servo_VERSION}")
 ament_target_dependencies(${SERVO_PARAM_LIB_NAME} ${THIS_PACKAGE_INCLUDE_DEPENDS})
 
 # This library provides a C++ interface for sending realtime twist or joint commands to a robot
@@ -79,7 +79,7 @@ add_library(${SERVO_LIB_NAME} SHARED
   src/servo_calcs.cpp
   src/utilities.cpp
 )
-set_target_properties(${SERVO_LIB_NAME} PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
+set_target_properties(${SERVO_LIB_NAME} PROPERTIES VERSION "${moveit_servo_VERSION}")
 ament_target_dependencies(${SERVO_LIB_NAME} ${THIS_PACKAGE_INCLUDE_DEPENDS})
 target_link_libraries(${SERVO_LIB_NAME} ${SERVO_PARAM_LIB_NAME})
 
@@ -152,7 +152,7 @@ install(
     ${FAKE_SERVO_CMDS_NAME}
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
-  RUNTIME DESTINATION lib/moveit_servo 
+  RUNTIME DESTINATION lib/moveit_servo
 )
 
 # Install include, launch, config directories

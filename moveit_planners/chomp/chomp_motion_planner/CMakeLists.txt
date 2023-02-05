@@ -31,7 +31,7 @@ add_library(chomp_motion_planner SHARED
   src/chomp_optimizer.cpp
   src/chomp_planner.cpp
 )
-set_target_properties(chomp_motion_planner PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
+set_target_properties(chomp_motion_planner PROPERTIES VERSION "${chomp_motion_planner_VERSION}")
 ament_target_dependencies(chomp_motion_planner ${THIS_PACKAGE_INCLUDE_DEPENDS})
 
 if(BUILD_TESTING)

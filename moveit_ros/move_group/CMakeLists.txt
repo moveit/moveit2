@@ -55,10 +55,10 @@ add_library(moveit_move_group_default_capabilities SHARED
 )
 
 set_target_properties(moveit_move_group_capabilities_base
-  PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
+  PROPERTIES VERSION "${moveit_ros_move_group_VERSION}")
 
 set_target_properties(moveit_move_group_default_capabilities
-  PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
+  PROPERTIES VERSION "${moveit_ros_move_group_VERSION}")
 
 ament_target_dependencies(moveit_move_group_capabilities_base ${THIS_PACKAGE_INCLUDE_DEPENDS})
 
@@ -100,7 +100,7 @@ install(
   PROGRAMS
     scripts/load_map
     scripts/save_map
-  DESTINATION lib/moveit_ros_move_group 
+  DESTINATION lib/moveit_ros_move_group
 )
 
 pluginlib_export_plugin_description_file(moveit_ros_move_group  default_capabilities_plugin_description.xml)

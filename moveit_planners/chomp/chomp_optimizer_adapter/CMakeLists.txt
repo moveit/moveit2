@@ -21,7 +21,7 @@ set(THIS_PACKAGE_INCLUDE_DEPENDS
 )
 
 add_library(moveit_chomp_optimizer_adapter SHARED src/chomp_optimizer_adapter.cpp)
-set_target_properties(moveit_chomp_optimizer_adapter PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
+set_target_properties(moveit_chomp_optimizer_adapter PROPERTIES VERSION "${moveit_chomp_optimizer_adapter_VERSION}")
 ament_target_dependencies(moveit_chomp_optimizer_adapter ${THIS_PACKAGE_INCLUDE_DEPENDS})
 
 install(

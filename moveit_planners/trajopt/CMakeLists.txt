@@ -55,12 +55,12 @@ set_target_properties(
   moveit_planners_trajopt
   PROPERTIES
   VERSION
-  "${${PROJECT_NAME}_VERSION}"
+  "${moveit_planners_trajopt_VERSION}"
 )
 
 # TrajOpt planning plugin
 add_library(moveit_trajopt_planner_plugin src/trajopt_planner_manager.cpp)
-set_target_properties(moveit_trajopt_planner_plugin PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
+set_target_properties(moveit_trajopt_planner_plugin PROPERTIES VERSION "${moveit_planners_trajopt_VERSION}")
 target_link_libraries(moveit_trajopt_planner_plugin moveit_planners_trajopt ${catkin_LIBRARIES})
 
 #############

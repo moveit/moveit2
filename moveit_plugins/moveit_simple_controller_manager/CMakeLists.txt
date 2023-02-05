@@ -32,7 +32,7 @@ add_library(moveit_simple_controller_manager SHARED
   src/follow_joint_trajectory_controller_handle.cpp
 )
 
-set_target_properties(moveit_simple_controller_manager PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
+set_target_properties(moveit_simple_controller_manager PROPERTIES VERSION "${moveit_simple_controller_manager_VERSION}")
 
 ament_target_dependencies(moveit_simple_controller_manager
   ${THIS_PACKAGE_INCLUDE_DEPENDS}
