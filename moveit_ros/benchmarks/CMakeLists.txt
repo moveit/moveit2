@@ -55,21 +55,21 @@ target_link_libraries(moveit_combine_predefined_poses_benchmark moveit_ros_bench
 
 install(
   TARGETS moveit_ros_benchmarks
-  EXPORT ${PROJECT_NAME}Targets
+  EXPORT moveit_ros_benchmarks Targets
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
   RUNTIME DESTINATION bin
   INCLUDES DESTINATION include
 )
 
-ament_export_targets(${PROJECT_NAME}Targets HAS_LIBRARY_TARGET)
+ament_export_targets(moveit_ros_benchmarks Targets HAS_LIBRARY_TARGET)
 ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS})
 
 install(
   TARGETS
     moveit_run_benchmark
     moveit_combine_predefined_poses_benchmark
-  DESTINATION lib/${PROJECT_NAME}
+  DESTINATION lib/moveit_ros_benchmarks 
 )
 
 install(DIRECTORY include/
@@ -77,11 +77,11 @@ install(DIRECTORY include/
 )
 
 install(PROGRAMS scripts/moveit_benchmark_statistics.py
-  DESTINATION lib/${PROJECT_NAME}
+  DESTINATION lib/moveit_ros_benchmarks 
 )
 
 install(DIRECTORY examples/
-  DESTINATION share/${PROJECT_NAME}
+  DESTINATION share/moveit_ros_benchmarks 
 )
 
 if(BUILD_TESTING)

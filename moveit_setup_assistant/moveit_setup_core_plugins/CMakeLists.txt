@@ -25,7 +25,7 @@ qt5_wrap_cpp(MOC_FILES
     include/moveit_setup_core_plugins/author_information_widget.hpp
 )
 
-add_library(${PROJECT_NAME}
+add_library(moveit_setup_core_plugins
     src/start_screen.cpp
     src/start_screen_widget.cpp
     src/configuration_files.cpp
@@ -34,11 +34,11 @@ add_library(${PROJECT_NAME}
     src/author_information_widget.cpp
     ${MOC_FILES}
 )
-target_include_directories(${PROJECT_NAME} PUBLIC
+target_include_directories(moveit_setup_core_plugins PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>
 )
-ament_target_dependencies(${PROJECT_NAME}
+ament_target_dependencies(moveit_setup_core_plugins
   ament_index_cpp
   moveit_ros_visualization
   moveit_setup_framework
@@ -53,21 +53,21 @@ if(BUILD_TESTING)
   ament_lint_auto_find_test_dependencies()
 endif()
 
-install(TARGETS ${PROJECT_NAME}
-        EXPORT ${PROJECT_NAME}Targets
+install(TARGETS moveit_setup_core_plugins
+        EXPORT moveit_setup_core_plugins Targets
         ARCHIVE DESTINATION lib
         LIBRARY DESTINATION lib
         RUNTIME DESTINATION bin
         INCLUDES DESTINATION include
 )
 install(FILES moveit_setup_framework_plugins.xml
-        DESTINATION share/${PROJECT_NAME}
+        DESTINATION share/moveit_setup_core_plugins
 )
 install(DIRECTORY include/
         DESTINATION include
 )
 
-ament_export_targets(${PROJECT_NAME}Targets HAS_LIBRARY_TARGET)
+ament_export_targets(moveit_setup_core_plugins Targets HAS_LIBRARY_TARGET)
 pluginlib_export_plugin_description_file(moveit_setup_framework moveit_setup_framework_plugins.xml)
 
 ament_package()

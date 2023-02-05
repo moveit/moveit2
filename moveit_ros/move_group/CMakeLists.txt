@@ -78,13 +78,13 @@ install(
     move_group
     list_move_group_capabilities
   RUNTIME
-  DESTINATION lib/${PROJECT_NAME})
+  DESTINATION lib/moveit_ros_move_group )
 
 install(
   TARGETS
     moveit_move_group_default_capabilities
     moveit_move_group_capabilities_base
-  EXPORT ${PROJECT_NAME}Targets
+  EXPORT moveit_ros_move_group Targets
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
   RUNTIME DESTINATION bin
@@ -93,17 +93,17 @@ install(
 
 install(DIRECTORY include/ DESTINATION include)
 
-ament_export_targets(${PROJECT_NAME}Targets HAS_LIBRARY_TARGET)
+ament_export_targets(moveit_ros_move_group Targets HAS_LIBRARY_TARGET)
 ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS})
 
 install(
   PROGRAMS
     scripts/load_map
     scripts/save_map
-  DESTINATION lib/${PROJECT_NAME}
+  DESTINATION lib/moveit_ros_move_group 
 )
 
-pluginlib_export_plugin_description_file(${PROJECT_NAME} default_capabilities_plugin_description.xml)
+pluginlib_export_plugin_description_file(moveit_ros_move_group  default_capabilities_plugin_description.xml)
 
 if(BUILD_TESTING)
 # TODO(henningkayser): enable rostests

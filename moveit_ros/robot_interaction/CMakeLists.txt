@@ -46,7 +46,7 @@ endif()
 
 install(
   TARGETS moveit_robot_interaction
-  EXPORT ${PROJECT_NAME}Targets
+  EXPORT moveit_ros_robot_interaction Targets
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
   RUNTIME DESTINATION bin
@@ -56,9 +56,9 @@ install(
 install(DIRECTORY include/ DESTINATION include)
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/moveit_robot_interaction_export.h DESTINATION include)
 
-install(DIRECTORY resources DESTINATION share/${PROJECT_NAME})
+install(DIRECTORY resources DESTINATION share/moveit_ros_robot_interaction)
 
-ament_export_targets(${PROJECT_NAME}Targets HAS_LIBRARY_TARGET)
+ament_export_targets(moveit_ros_robot_interaction Targets HAS_LIBRARY_TARGET)
 ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS})
 
 if(BUILD_TESTING)

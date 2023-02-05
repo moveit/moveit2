@@ -52,7 +52,7 @@ target_link_libraries(moveit_ros_occupancy_map_server moveit_ros_occupancy_map_m
 
 install(
   TARGETS moveit_ros_occupancy_map_monitor
-  EXPORT ${PROJECT_NAME}Targets
+  EXPORT moveit_ros_occupancy_map_monitor Targets
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
   RUNTIME DESTINATION bin
@@ -60,11 +60,11 @@ install(
 )
 
 install(TARGETS moveit_ros_occupancy_map_server
-  DESTINATION lib/${PROJECT_NAME}
+  DESTINATION lib/moveit_ros_occupancy_map_monitor 
 )
 install(DIRECTORY include/ DESTINATION include)
 
-ament_export_targets(${PROJECT_NAME}Targets HAS_LIBRARY_TARGET)
+ament_export_targets(moveit_ros_occupancy_map_monitor Targets HAS_LIBRARY_TARGET)
 ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS} eigen3_cmake_module)
 
 if(BUILD_TESTING)
