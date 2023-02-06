@@ -133,14 +133,6 @@ public:
     return shape_poses_in_link_frame_;
   }
 
-  /** \brief Get the fixed transforms (the transforms to the shapes of this body, relative to the link). The returned
-   *  transforms are guaranteed to be valid isometries.
-   * Deprecated. Use getShapePosesInLinkFrame instead. */
-  [[deprecated]] const EigenSTL::vector_Isometry3d& getFixedTransforms() const
-  {
-    return shape_poses_in_link_frame_;
-  }
-
   /** \brief Get subframes of this object (relative to the object pose). The returned transforms are guaranteed to be
    * valid isometries. */
   const moveit::core::FixedTransformsMap& getSubframes() const

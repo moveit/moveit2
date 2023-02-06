@@ -188,9 +188,6 @@ public:
    */
   void addShapeToField(const shapes::Shape* shape, const Eigen::Isometry3d& pose);
 
-  // DEPRECATED form
-  [[deprecated]] void addShapeToField(const shapes::Shape* shape, const geometry_msgs::msg::Pose& pose);
-
   /**
    * \brief Adds an octree to the distance field.  Cells that are
    * occupied in the octree that lie within the voxel grid are added
@@ -227,10 +224,6 @@ public:
   void moveShapeInField(const shapes::Shape* shape, const Eigen::Isometry3d& old_pose,
                         const Eigen::Isometry3d& new_pose);
 
-  // DEPRECATED form
-  [[deprecated]] void moveShapeInField(const shapes::Shape* shape, const geometry_msgs::msg::Pose& old_pose,
-                                       const geometry_msgs::msg::Pose& new_pose);
-
   /**
    * \brief All points corresponding to the shape are removed from the
    * distance field.
@@ -241,9 +234,6 @@ public:
    * @param [in] pose The pose of the shape to remove
    */
   void removeShapeFromField(const shapes::Shape* shape, const Eigen::Isometry3d& pose);
-
-  // DEPRECATED form
-  [[deprecated]] void removeShapeFromField(const shapes::Shape* shape, const geometry_msgs::msg::Pose& pose);
 
   /**
    * \brief Resets all points in the distance field to an uninitialize
