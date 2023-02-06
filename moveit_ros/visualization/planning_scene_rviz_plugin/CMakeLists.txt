@@ -27,5 +27,5 @@ ament_target_dependencies(moveit_planning_scene_rviz_plugin
 )
 target_include_directories(moveit_planning_scene_rviz_plugin PRIVATE "${OGRE_PREFIX_DIR}/include")
 
-install(DIRECTORY include/ DESTINATION include)
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/moveit_planning_scene_rviz_plugin_core_export.h DESTINATION include)
+install(DIRECTORY include/ DESTINATION include/moveit_ros_visualization)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/moveit_planning_scene_rviz_plugin_core_export.h DESTINATION include/moveit_ros_visualization)
