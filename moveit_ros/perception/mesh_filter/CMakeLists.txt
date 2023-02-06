@@ -39,5 +39,5 @@ target_link_libraries(moveit_mesh_filter ${gl_LIBS} ${SYSTEM_GL_LIBRARIES})
 #   endif()
 # endif()
 
-install(DIRECTORY include/ DESTINATION include)
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/moveit_mesh_filter_export.h DESTINATION include)
+install(DIRECTORY include/ DESTINATION include/moveit_ros_perception)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/moveit_mesh_filter_export.h DESTINATION include/moveit_ros_perception)
