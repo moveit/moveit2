@@ -14,4 +14,4 @@ ament_target_dependencies(moveit_semantic_world
 )
 target_link_libraries(moveit_semantic_world ${OpenCV_LIBRARIES})
 
-install(DIRECTORY include/ DESTINATION include)
+install(DIRECTORY include/ DESTINATION include/moveit_ros_perception)

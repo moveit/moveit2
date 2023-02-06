@@ -50,11 +50,11 @@ install(
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
   RUNTIME DESTINATION bin
-  INCLUDES DESTINATION include
+  INCLUDES DESTINATION include/moveit_ros_robot_interaction
 )
 
-install(DIRECTORY include/ DESTINATION include)
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/moveit_robot_interaction_export.h DESTINATION include)
+install(DIRECTORY include/ DESTINATION include/moveit_ros_robot_interaction)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/moveit_robot_interaction_export.h DESTINATION include/moveit_ros_robot_interaction)
 
 install(DIRECTORY resources DESTINATION share/${PROJECT_NAME})
 

@@ -13,7 +13,7 @@ target_link_libraries(moveit_cpp
   moveit_planning_pipeline
   moveit_trajectory_execution_manager)
 
-install(DIRECTORY include/ DESTINATION include)
+install(DIRECTORY include/ DESTINATION include/moveit_ros_planning)
 
 # TODO: Port MoveItCpp test
 #if (BUILD_TESTING)
