@@ -1,3 +1,7 @@
+project(moveit_trajectory_execution_manager
+  VERSION 1.0.2
+  LANGUAGES CXX
+)
 add_library(moveit_trajectory_execution_manager SHARED src/trajectory_execution_manager.cpp)
 include(GenerateExportHeader)
 generate_export_header(moveit_trajectory_execution_manager)

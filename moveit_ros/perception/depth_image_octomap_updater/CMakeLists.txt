@@ -1,3 +1,7 @@
+project(moveit_depth_image_octomap_updater_core
+  VERSION 1.0.2
+  LANGUAGES CXX
+)
 add_library(moveit_depth_image_octomap_updater_core SHARED src/depth_image_octomap_updater.cpp)
 set_target_properties(moveit_depth_image_octomap_updater_core PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
 ament_target_dependencies(moveit_depth_image_octomap_updater_core

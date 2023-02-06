@@ -1,3 +1,7 @@
+project(moveit_planning_scene_monitor
+  VERSION 1.0.2
+  LANGUAGES CXX
+)
 add_library(moveit_planning_scene_monitor SHARED
   src/planning_scene_monitor.cpp
   src/current_state_monitor.cpp

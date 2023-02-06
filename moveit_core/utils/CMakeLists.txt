@@ -1,3 +1,7 @@
+project(moveit_utils
+  VERSION 1.0.2
+  LANGUAGES CXX
+)
 add_library(moveit_utils SHARED
   src/lexical_casts.cpp
   src/message_checks.cpp

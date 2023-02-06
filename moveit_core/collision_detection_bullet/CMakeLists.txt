@@ -1,3 +1,7 @@
+project(moveit_collision_detection_bullet
+  VERSION 1.0.2
+  LANGUAGES CXX
+)
 add_library(moveit_collision_detection_bullet SHARED
   src/bullet_integration/bullet_utils.cpp
   src/bullet_integration/bullet_discrete_bvh_manager.cpp

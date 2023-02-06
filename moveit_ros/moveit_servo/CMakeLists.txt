@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.22)
-project(moveit_servo)
+project(moveit_servo LANGUAGES CXX)
 
 # C++ Libraries #################################################
 

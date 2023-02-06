@@ -1,3 +1,7 @@
+project(moveit_collision_detection
+  VERSION 1.0.2
+  LANGUAGES CXX
+)
 add_library(moveit_collision_detection SHARED
   src/allvalid/collision_env_allvalid.cpp
   src/collision_common.cpp

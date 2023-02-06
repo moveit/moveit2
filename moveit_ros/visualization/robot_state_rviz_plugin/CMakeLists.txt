@@ -1,3 +1,7 @@
+project(moveit_robot_state_rviz_plugin_core
+  VERSION 1.0.2
+  LANGUAGES CXX
+)
 add_library(moveit_robot_state_rviz_plugin_core SHARED
   src/robot_state_display.cpp
   include/moveit/robot_state_rviz_plugin/robot_state_display.h)

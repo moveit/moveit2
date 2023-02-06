@@ -19,7 +19,10 @@ generate_parameter_library(
   cached_ik_kinematics_parameters # cmake target name for the parameter library
   include/moveit/cached_ik_kinematics_plugin/cached_ik_kinematics_parameters.yaml # path to input yaml file
 )
-
+project(moveit_cached_ik_kinematics_plugin
+  VERSION 1.0.2
+  LANGUAGES CXX
+)
 add_library(moveit_cached_ik_kinematics_plugin SHARED src/cached_ik_kinematics_plugin.cpp)
 set_target_properties(moveit_cached_ik_kinematics_plugin PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
 ament_target_dependencies(moveit_cached_ik_kinematics_plugin

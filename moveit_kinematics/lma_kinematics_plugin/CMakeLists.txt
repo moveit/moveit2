@@ -1,3 +1,7 @@
+project(moveit_lma_kinematics_plugin
+  VERSION 1.0.2
+  LANGUAGES CXX
+)
 generate_parameter_library(
   lma_kinematics_parameters # cmake target name for the parameter library
   src/lma_kinematics_parameters.yaml # path to input yaml file

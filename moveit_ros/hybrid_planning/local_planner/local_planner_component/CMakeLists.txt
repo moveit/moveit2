@@ -1,4 +1,8 @@
 # Local_planner_component
+project(moveit_local_planner_component
+  VERSION 1.0.2
+  LANGUAGES CXX
+)
 add_library(moveit_local_planner_component SHARED
   src/local_planner_component.cpp
 )

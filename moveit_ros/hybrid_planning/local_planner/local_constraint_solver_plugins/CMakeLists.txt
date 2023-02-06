@@ -1,3 +1,7 @@
+project(forward_trajectory_plugin
+  VERSION 1.0.2
+  LANGUAGES CXX
+)
 add_library(forward_trajectory_plugin SHARED
   src/forward_trajectory.cpp
 )

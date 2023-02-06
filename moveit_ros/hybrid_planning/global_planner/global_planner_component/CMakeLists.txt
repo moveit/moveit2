@@ -1,4 +1,8 @@
 # Global planner component
+project(moveit_global_planner_component
+  VERSION 1.0.2
+  LANGUAGES CXX
+)
 add_library(moveit_global_planner_component SHARED
   src/global_planner_component.cpp
 )

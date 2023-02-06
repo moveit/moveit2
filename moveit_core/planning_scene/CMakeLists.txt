@@ -1,3 +1,7 @@
+project(moveit_planning_scene
+  VERSION 1.0.2
+  LANGUAGES CXX
+)
 add_library(moveit_planning_scene SHARED src/planning_scene.cpp)
 target_include_directories(moveit_planning_scene PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>

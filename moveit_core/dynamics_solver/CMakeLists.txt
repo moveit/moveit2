@@ -1,3 +1,7 @@
+project(moveit_dynamics_solver
+  VERSION 1.0.2
+  LANGUAGES CXX
+)
 add_library(moveit_dynamics_solver SHARED src/dynamics_solver.cpp)
 target_include_directories(moveit_dynamics_solver PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>

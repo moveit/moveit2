@@ -1,3 +1,7 @@
+project(moveit_robot_interface_python
+  VERSION 1.0.2
+  LANGUAGES CXX
+)
 add_library(moveit_robot_interface_python src/wrap_python_robot_interface.cpp)
 target_link_libraries(moveit_robot_interface_python ${PYTHON_LIBRARIES} ${catkin_LIBRARIES} ${Boost_LIBRARIES}
   moveit_common_planning_interface_objects moveit_py_bindings_tools

@@ -1,3 +1,7 @@
+project(moveit_collision_distance_field
+  VERSION 1.0.2
+  LANGUAGES CXX
+)
 add_library(moveit_collision_distance_field SHARED
   src/collision_distance_field_types.cpp
   src/collision_common_distance_field.cpp

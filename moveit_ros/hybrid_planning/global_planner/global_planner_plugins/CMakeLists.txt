@@ -1,3 +1,7 @@
+project(motion_planning_pipeline_plugin
+  VERSION 1.0.2
+  LANGUAGES CXX
+)
 add_library(motion_planning_pipeline_plugin SHARED
   src/moveit_planning_pipeline.cpp
 )

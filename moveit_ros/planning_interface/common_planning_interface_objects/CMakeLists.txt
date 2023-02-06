@@ -1,3 +1,7 @@
+project(moveit_common_planning_interface_objects
+  VERSION 1.0.2
+  LANGUAGES CXX
+)
 add_library(moveit_common_planning_interface_objects SHARED src/common_objects.cpp)
 set_target_properties(moveit_common_planning_interface_objects PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
 ament_target_dependencies(moveit_common_planning_interface_objects

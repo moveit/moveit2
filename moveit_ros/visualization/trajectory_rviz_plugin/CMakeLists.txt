@@ -6,6 +6,10 @@ set(HEADERS
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 # Trajectory Display
+project(moveit_trajectory_rviz_plugin_core
+  VERSION 1.0.2
+  LANGUAGES CXX
+)
 add_library(moveit_trajectory_rviz_plugin_core SHARED
   src/trajectory_display.cpp
   ${HEADERS}

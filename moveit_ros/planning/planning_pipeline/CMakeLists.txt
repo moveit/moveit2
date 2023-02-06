@@ -1,3 +1,7 @@
+project(moveit_planning_pipeline
+  VERSION 1.0.2
+  LANGUAGES CXX
+)
 add_library(moveit_planning_pipeline SHARED src/planning_pipeline.cpp)
 include(GenerateExportHeader)
 generate_export_header(moveit_planning_pipeline)

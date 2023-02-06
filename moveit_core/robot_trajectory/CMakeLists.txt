@@ -1,3 +1,7 @@
+project(moveit_robot_trajectory
+  VERSION 1.0.2
+  LANGUAGES CXX
+)
 add_library(moveit_robot_trajectory SHARED src/robot_trajectory.cpp)
 target_include_directories(moveit_robot_trajectory PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>

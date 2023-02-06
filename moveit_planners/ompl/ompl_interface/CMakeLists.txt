@@ -1,3 +1,7 @@
+project(moveit_ompl_interface
+  VERSION 1.0.2
+  LANGUAGES CXX
+)
 add_library(moveit_ompl_interface SHARED
   src/ompl_interface.cpp
   src/planning_context_manager.cpp

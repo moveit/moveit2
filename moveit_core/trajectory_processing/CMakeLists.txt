@@ -1,3 +1,7 @@
+project(moveit_trajectory_processing
+  VERSION 1.0.2
+  LANGUAGES CXX
+)
 add_library(moveit_trajectory_processing SHARED
   src/ruckig_traj_smoothing.cpp
   src/trajectory_tools.cpp

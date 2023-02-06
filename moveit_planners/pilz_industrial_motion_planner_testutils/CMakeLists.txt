@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.22)
-project(pilz_industrial_motion_planner_testutils)
+project(pilz_industrial_motion_planner_testutils LANGUAGES CXX)
 
 # Common cmake code applied to all moveit packages
 find_package(moveit_common REQUIRED)

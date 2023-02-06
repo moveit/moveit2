@@ -1,3 +1,7 @@
+project(moveit_cpp
+  VERSION 1.0.2
+  LANGUAGES CXX
+)
 add_library(moveit_cpp SHARED
   src/moveit_cpp.cpp
   src/parallel_planning_callbacks.cpp

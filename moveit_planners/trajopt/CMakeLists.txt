@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.22)
-project(moveit_planners_trajopt)
+project(moveit_planners_trajopt LANGUAGES CXX)
 
 find_package(catkin REQUIRED
     COMPONENTS

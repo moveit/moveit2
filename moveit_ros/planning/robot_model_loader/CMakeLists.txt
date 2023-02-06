@@ -2,6 +2,10 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
   add_compile_options(-Wno-potentially-evaluated-expression)
 endif()
 
+project(moveit_robot_model_loader
+  VERSION 1.0.2
+  LANGUAGES CXX
+)
 add_library(moveit_robot_model_loader SHARED src/robot_model_loader.cpp)
 set_target_properties(moveit_robot_model_loader PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
 ament_target_dependencies(moveit_robot_model_loader

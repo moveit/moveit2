@@ -9,6 +9,10 @@ set(SOURCE_FILES
   src/resolve_constraint_frames.cpp
 )
 
+project(moveit_default_planning_request_adapter_plugins
+  VERSION 1.0.2
+  LANGUAGES CXX
+)
 add_library(moveit_default_planning_request_adapter_plugins SHARED ${SOURCE_FILES})
 
 set_target_properties(moveit_default_planning_request_adapter_plugins PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")

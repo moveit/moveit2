@@ -1,3 +1,7 @@
+project(moveit_constraint_sampler_manager_loader
+  VERSION 1.0.2
+  LANGUAGES CXX
+)
 add_library(moveit_constraint_sampler_manager_loader SHARED
     src/constraint_sampler_manager_loader.cpp)
 

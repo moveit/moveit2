@@ -28,6 +28,10 @@ set(SOURCE_FILES
   src/icons/icons.qrc
 )
 
+project(moveit_motion_planning_rviz_plugin_core
+  VERSION 1.0.2
+  LANGUAGES CXX
+)
 add_library(moveit_motion_planning_rviz_plugin_core SHARED ${SOURCE_FILES} ${HEADERS} ${UIC_FILES})
 set_target_properties(moveit_motion_planning_rviz_plugin_core PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
 target_link_libraries(moveit_motion_planning_rviz_plugin_core moveit_rviz_plugin_render_tools moveit_planning_scene_rviz_plugin)

@@ -1,3 +1,7 @@
+project(moveit_point_containment_filter
+  VERSION 1.0.2
+  LANGUAGES CXX
+)
 add_library(moveit_point_containment_filter SHARED src/shape_mask.cpp)
 set_target_properties(moveit_point_containment_filter PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
 set_target_properties(moveit_point_containment_filter PROPERTIES COMPILE_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")

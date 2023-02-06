@@ -1,3 +1,7 @@
+project(moveit_planning_scene_interface
+  VERSION 1.0.2
+  LANGUAGES CXX
+)
 add_library(moveit_planning_scene_interface SHARED src/planning_scene_interface.cpp)
 set_target_properties(moveit_planning_scene_interface PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
 ament_target_dependencies(moveit_planning_scene_interface moveit_msgs moveit_core moveit_ros_move_group)

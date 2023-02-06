@@ -1,3 +1,7 @@
+project(moveit_kinematics_metrics
+  VERSION 1.0.2
+  LANGUAGES CXX
+)
 add_library(moveit_kinematics_metrics SHARED src/kinematics_metrics.cpp)
 target_include_directories(moveit_kinematics_metrics PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>

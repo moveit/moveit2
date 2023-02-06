@@ -1,3 +1,7 @@
+project(moveit_distance_field
+  VERSION 1.0.2
+  LANGUAGES CXX
+)
 add_library(moveit_distance_field SHARED
   src/distance_field.cpp
   src/find_internal_points.cpp

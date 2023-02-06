@@ -11,6 +11,10 @@ set(HEADERS
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
+project(moveit_rviz_plugin_render_tools
+  VERSION 1.0.2
+  LANGUAGES CXX
+)
 add_library(moveit_rviz_plugin_render_tools SHARED
   src/render_shapes.cpp
   src/robot_state_visualization.cpp
