@@ -140,7 +140,7 @@ install(
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
   RUNTIME DESTINATION bin
-  INCLUDES DESTINATION include
+  INCLUDES DESTINATION include/moveit_servo
 )
 
 # Install Binaries
@@ -156,7 +156,7 @@ install(
 )
 
 # Install include, launch, config directories
-install(DIRECTORY include/ DESTINATION include)
+install(DIRECTORY include/ DESTINATION include/moveit_servo)
 install(DIRECTORY launch DESTINATION share/${PROJECT_NAME})
 install(DIRECTORY config DESTINATION share/${PROJECT_NAME})
 

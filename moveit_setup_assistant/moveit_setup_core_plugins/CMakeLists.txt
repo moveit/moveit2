@@ -36,7 +36,7 @@ add_library(${PROJECT_NAME}
 )
 target_include_directories(${PROJECT_NAME} PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-  $<INSTALL_INTERFACE:include>
+  $<INSTALL_INTERFACE:include/moveit_setup_core_plugins>
 )
 ament_target_dependencies(${PROJECT_NAME}
   ament_index_cpp
@@ -58,13 +58,13 @@ install(TARGETS ${PROJECT_NAME}
         ARCHIVE DESTINATION lib
         LIBRARY DESTINATION lib
         RUNTIME DESTINATION bin
-        INCLUDES DESTINATION include
+        INCLUDES DESTINATION include/moveit_setup_core_plugins
 )
 install(FILES moveit_setup_framework_plugins.xml
         DESTINATION share/${PROJECT_NAME}
 )
 install(DIRECTORY include/
-        DESTINATION include
+        DESTINATION include/moveit_setup_core_plugins
 )
 
 ament_export_targets(${PROJECT_NAME}Targets HAS_LIBRARY_TARGET)
