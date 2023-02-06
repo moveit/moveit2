@@ -57,8 +57,8 @@ target_link_libraries(moveit_setup_assistant
   ${Boost_LIBRARIES}
 )
 
-add_executable(moveit_setup_assistant _updater src/collisions_updater.cpp)
-target_include_directories(moveit_setup_assistant _updater PUBLIC
+add_executable(moveit_setup_assistant_updater src/collisions_updater.cpp)
+target_include_directories(moveit_setup_assistant_updater PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include/moveit_setup_assistant>)
 
@@ -68,7 +68,7 @@ ament_target_dependencies(
 )
 
 set_target_properties(
-  moveit_setup_assistant _updater
+  moveit_setup_assistant_updater
   PROPERTIES OUTPUT_NAME collisions_updater
   PREFIX ""
 )
@@ -76,7 +76,7 @@ set_target_properties(
 install(
   TARGETS
     moveit_setup_assistant
-    moveit_setup_assistant _updater
+    moveit_setup_assistant_updater
   EXPORT moveit_setup_assistantTargets
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
