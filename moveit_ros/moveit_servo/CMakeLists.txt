@@ -136,7 +136,7 @@ install(
     ${POSE_TRACKING}
     ${SERVO_COMPONENT_NODE}
     ${SERVO_CONTROLLER_INPUT}
-  EXPORT moveit_servo Targets
+  EXPORT moveit_servoTargets
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
   RUNTIME DESTINATION bin
@@ -160,7 +160,7 @@ install(DIRECTORY include/ DESTINATION include)
 install(DIRECTORY launch DESTINATION share/moveit_servo )
 install(DIRECTORY config DESTINATION share/moveit_servo )
 
-ament_export_targets(moveit_servo Targets HAS_LIBRARY_TARGET)
+ament_export_targets(moveit_servoTargets HAS_LIBRARY_TARGET)
 ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS})
 
 #############

@@ -40,13 +40,13 @@ target_link_libraries(moveit_chomp_planner_plugin
 
 install(
   TARGETS moveit_chomp_interface moveit_chomp_planner_plugin
-  EXPORT moveit_planners_chomp Targets
+  EXPORT moveit_planners_chompTargets
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
   RUNTIME DESTINATION bin
 )
 
-ament_export_targets(moveit_planners_chomp Targets HAS_LIBRARY_TARGET)
+ament_export_targets(moveit_planners_chompTargets HAS_LIBRARY_TARGET)
 ament_export_dependencies(
   ${THIS_PACKAGE_INCLUDE_DEPENDS}
 )

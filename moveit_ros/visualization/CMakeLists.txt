@@ -106,14 +106,14 @@ pluginlib_export_plugin_description_file(rviz_common robot_state_rviz_plugin_des
 
 install(
   TARGETS ${THIS_PACKAGE_LIBRARIES}
-  EXPORT moveit_ros_visualization Targets
+  EXPORT moveit_ros_visualizationTargets
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
   RUNTIME DESTINATION bin
   INCLUDES DESTINATION include
 )
 
-ament_export_targets(moveit_ros_visualization Targets HAS_LIBRARY_TARGET)
+ament_export_targets(moveit_ros_visualizationTargets HAS_LIBRARY_TARGET)
 ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS})
 
 if(BUILD_TESTING)

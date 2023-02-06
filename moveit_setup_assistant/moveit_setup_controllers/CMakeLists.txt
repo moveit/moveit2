@@ -60,7 +60,7 @@ endif()
 install(DIRECTORY templates DESTINATION share/moveit_setup_controllers)
 
 install(TARGETS moveit_setup_controllers
-        EXPORT moveit_setup_controllers Targets
+        EXPORT moveit_setup_controllersTargets
         ARCHIVE DESTINATION lib
         LIBRARY DESTINATION lib
         RUNTIME DESTINATION bin
@@ -76,7 +76,7 @@ install(DIRECTORY launch
         DESTINATION share/moveit_setup_controllers
 )
 
-ament_export_targets(moveit_setup_controllers Targets HAS_LIBRARY_TARGET)
+ament_export_targets(moveit_setup_controllersTargets HAS_LIBRARY_TARGET)
 pluginlib_export_plugin_description_file(moveit_setup_framework moveit_setup_framework_plugins.xml)
 
 ament_package()

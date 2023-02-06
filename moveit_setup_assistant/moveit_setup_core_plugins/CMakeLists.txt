@@ -54,7 +54,7 @@ if(BUILD_TESTING)
 endif()
 
 install(TARGETS moveit_setup_core_plugins
-        EXPORT moveit_setup_core_plugins Targets
+        EXPORT moveit_setup_core_pluginsTargets
         ARCHIVE DESTINATION lib
         LIBRARY DESTINATION lib
         RUNTIME DESTINATION bin
@@ -67,7 +67,7 @@ install(DIRECTORY include/
         DESTINATION include
 )
 
-ament_export_targets(moveit_setup_core_plugins Targets HAS_LIBRARY_TARGET)
+ament_export_targets(moveit_setup_core_pluginsTargets HAS_LIBRARY_TARGET)
 pluginlib_export_plugin_description_file(moveit_setup_framework moveit_setup_framework_plugins.xml)
 
 ament_package()

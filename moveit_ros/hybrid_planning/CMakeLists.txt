@@ -69,7 +69,7 @@ rclcpp_components_register_nodes(moveit_global_planner_component "moveit::hybrid
 rclcpp_components_register_nodes(moveit_local_planner_component "moveit::hybrid_planning::LocalPlannerComponent")
 
 install(TARGETS ${LIBRARIES}
-  EXPORT moveit_hybrid_planning Targets
+  EXPORT moveit_hybrid_planningTargets
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION bin
@@ -78,7 +78,7 @@ install(TARGETS ${LIBRARIES}
 install(TARGETS cancel_action hybrid_planning_demo_node
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
-  RUNTIME DESTINATION lib/moveit_hybrid_planning 
+  RUNTIME DESTINATION lib/moveit_hybrid_planning
   INCLUDES DESTINATION include)
 
 install(DIRECTORY ${THIS_PACKAGE_INCLUDE_DIRS} DESTINATION include)
@@ -93,6 +93,6 @@ pluginlib_export_plugin_description_file(moveit_hybrid_planning replan_invalidat
 pluginlib_export_plugin_description_file(moveit_hybrid_planning forward_trajectory_plugin.xml)
 
 ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS})
-ament_export_targets(moveit_hybrid_planning Targets HAS_LIBRARY_TARGET)
+ament_export_targets(moveit_hybrid_planningTargets HAS_LIBRARY_TARGET)
 
 ament_package()

@@ -84,7 +84,7 @@ install(
   TARGETS
     moveit_move_group_default_capabilities
     moveit_move_group_capabilities_base
-  EXPORT moveit_ros_move_group Targets
+  EXPORT moveit_ros_move_groupTargets
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
   RUNTIME DESTINATION bin
@@ -93,7 +93,7 @@ install(
 
 install(DIRECTORY include/ DESTINATION include)
 
-ament_export_targets(moveit_ros_move_group Targets HAS_LIBRARY_TARGET)
+ament_export_targets(moveit_ros_move_groupTargets HAS_LIBRARY_TARGET)
 ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS})
 
 install(

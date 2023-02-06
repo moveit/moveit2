@@ -74,9 +74,9 @@ install(FILES moveit_setup_framework_plugins.xml
 
 install(DIRECTORY templates DESTINATION share/moveit_setup_framework)
 
-ament_export_targets(moveit_setup_framework Targets HAS_LIBRARY_TARGET)
+ament_export_targets(moveit_setup_frameworkTargets HAS_LIBRARY_TARGET)
 install(TARGETS moveit_setup_framework
-        EXPORT moveit_setup_framework Targets
+        EXPORT moveit_setup_frameworkTargets
         LIBRARY DESTINATION lib
         ARCHIVE DESTINATION lib
         RUNTIME DESTINATION bin

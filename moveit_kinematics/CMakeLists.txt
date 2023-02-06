@@ -65,14 +65,14 @@ add_subdirectory(test)
 
 install(
   TARGETS ${THIS_PACKAGE_LIBRARIES}
-  EXPORT moveit_kinematics Targets
+  EXPORT moveit_kinematicsTargets
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
   RUNTIME DESTINATION bin
   INCLUDES DESTINATION include/moveit_kinematics
 )
 
-ament_export_targets(moveit_kinematics Targets HAS_LIBRARY_TARGET)
+ament_export_targets(moveit_kinematicsTargets HAS_LIBRARY_TARGET)
 ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS} orocos_kdl_vendor)
 
 if(BUILD_TESTING)

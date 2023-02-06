@@ -85,14 +85,14 @@ install(FILES ${CMAKE_CURRENT_BINARY_DIR}/moveit_warehouse_export.h DESTINATION 
 
 install(
   TARGETS moveit_warehouse
-  EXPORT moveit_ros_warehouse Targets
+  EXPORT moveit_ros_warehouseTargets
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
   RUNTIME DESTINATION bin
   INCLUDES DESTINATION include
 )
 
-ament_export_targets(moveit_ros_warehouse Targets HAS_LIBRARY_TARGET)
+ament_export_targets(moveit_ros_warehouseTargets HAS_LIBRARY_TARGET)
 ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS})
 
 if(BUILD_TESTING)

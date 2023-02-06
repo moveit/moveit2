@@ -186,7 +186,7 @@ install(
     command_list_manager
     sequence_capability
     trajectory_generation_common
-  EXPORT pilz_industrial_motion_planner Targets
+  EXPORT pilz_industrial_motion_plannerTargets
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
   RUNTIME DESTINATION bin

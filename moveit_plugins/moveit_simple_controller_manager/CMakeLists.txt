@@ -41,7 +41,7 @@ ament_target_dependencies(moveit_simple_controller_manager
 
 install(
   TARGETS moveit_simple_controller_manager
-  EXPORT moveit_simple_controller_manager Targets
+  EXPORT moveit_simple_controller_managerTargets
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
   RUNTIME DESTINATION bin
@@ -49,7 +49,7 @@ install(
 )
 install(DIRECTORY include/ DESTINATION include/moveit_simple_controller_manager)
 
-ament_export_targets(moveit_simple_controller_manager Targets HAS_LIBRARY_TARGET)
+ament_export_targets(moveit_simple_controller_managerTargets HAS_LIBRARY_TARGET)
 ament_export_dependencies(
   ${THIS_PACKAGE_INCLUDE_DEPENDS}
   Boost

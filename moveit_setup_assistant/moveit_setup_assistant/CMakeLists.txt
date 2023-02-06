@@ -77,7 +77,7 @@ install(
   TARGETS
     moveit_setup_assistant
     moveit_setup_assistant _updater
-  EXPORT moveit_setup_assistant Targets
+  EXPORT moveit_setup_assistantTargets
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION lib/moveit_setup_assistant
@@ -89,7 +89,7 @@ install(DIRECTORY include/
 ament_export_include_directories(include)
 install(DIRECTORY launch DESTINATION share/moveit_setup_assistant)
 install(DIRECTORY resources DESTINATION share/moveit_setup_assistant)
-ament_export_targets(moveit_setup_assistant Targets HAS_LIBRARY_TARGET)
+ament_export_targets(moveit_setup_assistantTargets HAS_LIBRARY_TARGET)
 ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS})
 
 # Unit tests

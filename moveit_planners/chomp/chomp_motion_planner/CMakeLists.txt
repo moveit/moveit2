@@ -50,7 +50,7 @@ endif()
 
 install(
   TARGETS chomp_motion_planner
-  EXPORT chomp_motion_planner Targets
+  EXPORT chomp_motion_plannerTargets
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
   RUNTIME DESTINATION bin
@@ -58,7 +58,7 @@ install(
 )
 install(DIRECTORY include/ DESTINATION include/chomp_motion_planner)
 
-ament_export_targets(chomp_motion_planner Targets HAS_LIBRARY_TARGET)
+ament_export_targets(chomp_motion_plannerTargets HAS_LIBRARY_TARGET)
 ament_export_dependencies(${THIS_PACKAGE_EXPORT_DEPENDS})
 
 ament_package()
