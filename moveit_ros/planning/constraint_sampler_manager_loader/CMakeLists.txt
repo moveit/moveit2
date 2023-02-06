@@ -12,4 +12,4 @@ target_link_libraries(moveit_constraint_sampler_manager_loader
   moveit_rdf_loader
 )
 
-install(DIRECTORY include/ DESTINATION include)
+install(DIRECTORY include/ DESTINATION include/moveit_ros_planning)

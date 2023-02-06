@@ -38,8 +38,8 @@ install(TARGETS demo_scene
   DESTINATION lib/${PROJECT_NAME}
 )
 
-install(DIRECTORY include/ DESTINATION include)
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/moveit_planning_scene_monitor_export.h DESTINATION include)
+install(DIRECTORY include/ DESTINATION include/moveit_ros_planning)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/moveit_planning_scene_monitor_export.h DESTINATION include/moveit_ros_planning)
 
 if(BUILD_TESTING)
   find_package(ament_cmake_gtest REQUIRED)
