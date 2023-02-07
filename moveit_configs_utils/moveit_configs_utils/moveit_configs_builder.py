@@ -58,14 +58,10 @@ from dataclasses import dataclass, field
 from ament_index_python.packages import get_package_share_directory
 
 from launch_param_builder import ParameterBuilder, load_yaml, load_xacro
-<<<<<<< HEAD
-
-=======
 from launch_param_builder.utils import ParameterBuilderFileNotFoundError
 from moveit_configs_utils.substitutions import Xacro
 from launch.some_substitutions_type import SomeSubstitutionsType
 from launch_ros.parameter_descriptions import ParameterValue
->>>>>>> 4bc83c3c9 (Add xacro subsititution class and use it for loading urdf & srdf (#1805))
 
 moveit_configs_utils_path = Path(get_package_share_directory("moveit_configs_utils"))
 
@@ -220,13 +216,6 @@ class MoveItConfigsBuilder(ParameterBuilder):
             robot_description_file_path = self.__urdf_package / self.__urdf_file_path
         else:
             robot_description_file_path = self._package_path / file_path
-<<<<<<< HEAD
-        self.__moveit_configs.robot_description = {
-            self.__robot_description: load_xacro(
-                robot_description_file_path, mappings=mappings
-            )
-        }
-=======
         if (mappings is None) or all(
             (isinstance(key, str) and isinstance(value, str))
             for key, value in mappings.items()
@@ -250,7 +239,6 @@ class MoveItConfigsBuilder(ParameterBuilder):
                     value_type=str,
                 )
             }
->>>>>>> 4bc83c3c9 (Add xacro subsititution class and use it for loading urdf & srdf (#1805))
         return self
 
     def robot_description_semantic(
