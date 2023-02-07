@@ -1,4 +1,4 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 from glob import glob
 
 package_name = "moveit_configs_utils"
@@ -6,7 +6,7 @@ package_name = "moveit_configs_utils"
 setup(
     name=package_name,
     version="2.5.3",
-    packages=[package_name],
+    packages=find_packages(),
     data_files=[
         ("share/ament_index/resource_index/packages", ["resource/" + package_name]),
         ("share/" + package_name, ["package.xml"]),
