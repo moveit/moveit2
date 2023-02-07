@@ -1,7 +1,3 @@
-project(moveit_planning_request_adapter
-  VERSION 1.0.2
-  LANGUAGES CXX
-)
 add_library(moveit_planning_request_adapter SHARED src/planning_request_adapter.cpp)
 target_include_directories(moveit_planning_request_adapter PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>

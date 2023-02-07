@@ -1,7 +1,3 @@
-project(moveit_kdl_kinematics_plugin
-  VERSION 1.0.2
-  LANGUAGES CXX
-)
 generate_parameter_library(
   kdl_kinematics_parameters # cmake target name for the parameter library
   src/kdl_kinematics_parameters.yaml # path to input yaml file

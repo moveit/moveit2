@@ -1,7 +1,3 @@
-project(moveit_srv_kinematics_plugin
-  VERSION 1.0.2
-  LANGUAGES CXX
-)
 generate_parameter_library(
   srv_kinematics_parameters # cmake target name for the parameter library
   src/srv_kinematics_parameters.yaml # path to input yaml file

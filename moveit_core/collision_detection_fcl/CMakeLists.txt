@@ -1,7 +1,3 @@
-project(moveit_collision_detection_fcl
-  VERSION 1.0.2
-  LANGUAGES CXX
-)
 add_library(moveit_collision_detection_fcl SHARED
   src/collision_common.cpp
   src/collision_env_fcl.cpp

@@ -1,7 +1,3 @@
-project(moveit_python_tools
-  VERSION 1.0.2
-  LANGUAGES CXX
-)
 add_library(moveit_python_tools
   src/pybind_rosmsg_typecasters.cpp
 )

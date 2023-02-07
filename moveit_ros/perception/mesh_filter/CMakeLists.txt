@@ -1,7 +1,3 @@
-project(moveit_mesh_filter
-  VERSION 1.0.2
-  LANGUAGES CXX
-)
 add_library(moveit_mesh_filter SHARED
   src/mesh_filter_base.cpp
   src/sensor_model.cpp

@@ -1,7 +1,3 @@
-project(moveit_py_bindings_tools
-  VERSION 1.0.2
-  LANGUAGES CXX
-)
 add_library(moveit_py_bindings_tools src/roscpp_initializer.cpp)
 set_target_properties(moveit_py_bindings_tools PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
 target_link_libraries(moveit_py_bindings_tools ${catkin_LIBRARIES} ${Boost_LIBRARIES} ${PYTHON_LIBRARIES})

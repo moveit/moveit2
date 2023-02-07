@@ -1,7 +1,3 @@
-project(single_plan_execution_plugin
-  VERSION 1.0.2
-  LANGUAGES CXX
-)
 add_library(single_plan_execution_plugin SHARED
   src/single_plan_execution.cpp
 )

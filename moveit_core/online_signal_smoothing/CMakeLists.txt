@@ -1,8 +1,4 @@
 # Base class
-project(moveit_smoothing_base
-  VERSION 1.0.2
-  LANGUAGES CXX
-)
 add_library(moveit_smoothing_base SHARED
   src/smoothing_base_class.cpp
 )

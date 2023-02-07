@@ -1,7 +1,3 @@
-project(moveit_plan_execution
-  VERSION 1.0.2
-  LANGUAGES CXX
-)
 add_library(moveit_plan_execution SHARED
   src/plan_execution.cpp)
 set_target_properties(moveit_plan_execution PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")

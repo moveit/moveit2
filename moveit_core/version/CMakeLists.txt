@@ -1,8 +1,4 @@
 # Generate and install version.h
-project(moveit_version
-  VERSION 1.0.2
-  LANGUAGES CXX
-)
 if(NOT "$ENV{USER}" STREQUAL "buildfarm") # Don't define version postfix on buildfarm
   set(MOVEIT_VERSION_EXTRA "devel" CACHE STRING "version string postfix")
 endif()

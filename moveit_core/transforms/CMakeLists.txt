@@ -1,7 +1,3 @@
-project(moveit_transforms
-  VERSION 1.0.2
-  LANGUAGES CXX
-)
 add_library(moveit_transforms SHARED src/transforms.cpp)
 target_include_directories(moveit_transforms PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>

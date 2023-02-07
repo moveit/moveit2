@@ -1,7 +1,3 @@
-project(moveit_planning_interface
-  VERSION 1.0.2
-  LANGUAGES CXX
-)
 add_library(moveit_planning_interface SHARED
   src/planning_interface.cpp
   src/planning_response.cpp

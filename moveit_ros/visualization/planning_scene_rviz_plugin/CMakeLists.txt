@@ -1,7 +1,3 @@
-project(moveit_planning_scene_rviz_plugin_core
-  VERSION 1.0.2
-  LANGUAGES CXX
-)
 add_library(moveit_planning_scene_rviz_plugin_core SHARED
   src/planning_scene_display.cpp
   src/background_processing.cpp

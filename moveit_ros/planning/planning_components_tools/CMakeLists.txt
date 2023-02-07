@@ -1,10 +1,6 @@
 # NOTE: For some reason ament_lint_cmake [linelength] only complains about this file
 # TODO(henningkayser): Disable linelength filter once number of digits is configurable - set to 120
 # lint_cmake: -linelength
-project(moveit_print_planning_model_info
-  VERSION 1.0.2
-  LANGUAGES CXX
-)
 add_executable(moveit_print_planning_model_info src/print_planning_model_info.cpp)
 target_link_libraries(moveit_print_planning_model_info moveit_robot_model_loader)
 ament_target_dependencies(moveit_print_planning_model_info

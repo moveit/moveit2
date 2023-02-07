@@ -1,7 +1,3 @@
-project(moveit_constraint_samplers
-  VERSION 1.0.2
-  LANGUAGES CXX
-)
 add_library(moveit_constraint_samplers SHARED
   src/constraint_sampler.cpp
   src/constraint_sampler_manager.cpp

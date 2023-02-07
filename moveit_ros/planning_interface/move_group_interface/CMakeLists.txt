@@ -1,7 +1,3 @@
-project(moveit_move_group_interface
-  VERSION 1.0.2
-  LANGUAGES CXX
-)
 add_library(moveit_move_group_interface SHARED src/move_group_interface.cpp)
 include(GenerateExportHeader)
 generate_export_header(moveit_move_group_interface)

@@ -1,7 +1,3 @@
-project(moveit_kinematics_base
-  VERSION 1.0.2
-  LANGUAGES CXX
-)
 add_library(moveit_kinematics_base SHARED src/kinematics_base.cpp)
 target_include_directories(moveit_kinematics_base PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>

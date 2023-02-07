@@ -4,10 +4,6 @@ else()
   set(append_library_dirs "${CMAKE_CURRENT_BINARY_DIR};${CMAKE_CURRENT_BINARY_DIR}/../utils;${CMAKE_CURRENT_BINARY_DIR}/../robot_model;${CMAKE_CURRENT_BINARY_DIR}/../robot_state;${CMAKE_CURRENT_BINARY_DIR}/../collision_detection_fcl")
 endif()
 
-project(moveit_kinematic_constraints
-  VERSION 1.0.2
-  LANGUAGES CXX
-)
 add_library(moveit_kinematic_constraints SHARED
   src/kinematic_constraint.cpp
   src/utils.cpp

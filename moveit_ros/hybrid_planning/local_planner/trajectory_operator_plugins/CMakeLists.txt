@@ -1,7 +1,3 @@
-project(simple_sampler_plugin
-  VERSION 1.0.2
-  LANGUAGES CXX
-)
 add_library(simple_sampler_plugin SHARED
   src/simple_sampler.cpp
 )
