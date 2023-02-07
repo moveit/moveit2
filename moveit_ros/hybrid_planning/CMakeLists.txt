@@ -73,15 +73,15 @@ install(TARGETS ${LIBRARIES}
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION bin
-  INCLUDES DESTINATION include)
+  INCLUDES DESTINATION include/moveit_hybrid_planning)
 
 install(TARGETS cancel_action hybrid_planning_demo_node
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION lib/moveit_hybrid_planning
-  INCLUDES DESTINATION include)
+  INCLUDES DESTINATION include/moveit_hybrid_planning)
 
-install(DIRECTORY ${THIS_PACKAGE_INCLUDE_DIRS} DESTINATION include)
+install(DIRECTORY ${THIS_PACKAGE_INCLUDE_DIRS} DESTINATION include/moveit_hybrid_planning)
 
 install(DIRECTORY test/launch DESTINATION share/moveit_hybrid_planning )
 install(DIRECTORY test/config DESTINATION share/moveit_hybrid_planning )

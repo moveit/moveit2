@@ -44,7 +44,7 @@ add_library(moveit_setup_framework
 )
 target_include_directories(moveit_setup_framework PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-  $<INSTALL_INTERFACE:include>
+  $<INSTALL_INTERFACE:include/moveit_setup_framework>
 )
 ament_target_dependencies(moveit_setup_framework
   ament_index_cpp
@@ -66,7 +66,7 @@ if(BUILD_TESTING)
   ament_lint_auto_find_test_dependencies()
 endif()
 install(DIRECTORY include/
-        DESTINATION include
+        DESTINATION include/moveit_setup_framework
 )
 install(FILES moveit_setup_framework_plugins.xml
         DESTINATION share/moveit_setup_framework
@@ -80,7 +80,7 @@ install(TARGETS moveit_setup_framework
         LIBRARY DESTINATION lib
         ARCHIVE DESTINATION lib
         RUNTIME DESTINATION bin
-        INCLUDES DESTINATION include
+        INCLUDES DESTINATION include/moveit_setup_framework
 )
 
 ament_export_dependencies(rclcpp)

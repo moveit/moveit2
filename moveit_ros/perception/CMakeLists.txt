@@ -116,7 +116,7 @@ install(
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
   RUNTIME DESTINATION bin
-  INCLUDES DESTINATION include
+  INCLUDES DESTINATION include/moveit_ros_perception
 )
 
 ament_export_targets(moveit_ros_perceptionTargets HAS_LIBRARY_TARGET)

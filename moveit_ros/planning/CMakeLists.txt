@@ -96,7 +96,7 @@ install(
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
   RUNTIME DESTINATION bin
-  INCLUDES DESTINATION include
+  INCLUDES DESTINATION include/moveit_ros_planning
 )
 
 ament_export_targets(moveit_ros_planningTargets HAS_LIBRARY_TARGET)

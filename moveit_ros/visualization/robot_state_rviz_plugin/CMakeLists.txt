@@ -27,4 +27,4 @@ ament_target_dependencies(moveit_robot_state_rviz_plugin
 )
 target_include_directories(moveit_robot_state_rviz_plugin PRIVATE "${OGRE_PREFIX_DIR}/include")
 
-install(DIRECTORY include/ DESTINATION include)
+install(DIRECTORY include/ DESTINATION include/moveit_ros_visualization)

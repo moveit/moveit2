@@ -29,4 +29,4 @@ ament_target_dependencies(moveit_pointcloud_octomap_updater
 )
 target_link_libraries(moveit_pointcloud_octomap_updater moveit_pointcloud_octomap_updater_core)
 
-install(DIRECTORY include/ DESTINATION include)
+install(DIRECTORY include/ DESTINATION include/moveit_ros_perception)

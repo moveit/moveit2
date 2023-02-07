@@ -140,7 +140,7 @@ install(
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
   RUNTIME DESTINATION bin
-  INCLUDES DESTINATION include
+  INCLUDES DESTINATION include/moveit_servo
 )
 
 # Install Binaries
@@ -156,9 +156,11 @@ install(
 )
 
 # Install include, launch, config directories
-install(DIRECTORY include/ DESTINATION include)
-install(DIRECTORY launch DESTINATION share/moveit_servo )
-install(DIRECTORY config DESTINATION share/moveit_servo )
+
+install(DIRECTORY include/ DESTINATION include/moveit_servo)
+install(DIRECTORY launch DESTINATION share/moveit_servo)
+install(DIRECTORY config DESTINATION share/moveit_servo)
+
 
 ament_export_targets(moveit_servoTargets HAS_LIBRARY_TARGET)
 ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS})

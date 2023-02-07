@@ -27,7 +27,7 @@ add_library(moveit_setup_simulation
 )
 target_include_directories(moveit_setup_simulation PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-  $<INSTALL_INTERFACE:include>
+  $<INSTALL_INTERFACE:include/moveit_setup_simulation>
 )
 ament_target_dependencies(moveit_setup_simulation
   ament_index_cpp
@@ -48,13 +48,13 @@ install(TARGETS moveit_setup_simulation
         ARCHIVE DESTINATION lib
         LIBRARY DESTINATION lib
         RUNTIME DESTINATION bin
-        INCLUDES DESTINATION include
+        INCLUDES DESTINATION include/moveit_setup_simulation
 )
 install(FILES moveit_setup_framework_plugins.xml
         DESTINATION share/moveit_setup_simulation
 )
 install(DIRECTORY include/
-        DESTINATION include
+        DESTINATION include/moveit_setup_simulation
 )
 
 ament_export_targets(moveit_setup_simulationTargets HAS_LIBRARY_TARGET)

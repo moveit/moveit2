@@ -16,4 +16,4 @@ endif()
 #  EXPORT moveit_planning_scene_interface_python
 #  DESTINATION bin)
 
-install(DIRECTORY include/ DESTINATION include)
+install(DIRECTORY include/ DESTINATION include/moveit_ros_planning_interface)

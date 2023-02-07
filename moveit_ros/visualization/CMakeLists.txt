@@ -110,7 +110,7 @@ install(
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
   RUNTIME DESTINATION bin
-  INCLUDES DESTINATION include
+  INCLUDES DESTINATION include/moveit_ros_visualization
 )
 
 ament_export_targets(moveit_ros_visualizationTargets HAS_LIBRARY_TARGET)
