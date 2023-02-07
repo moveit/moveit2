@@ -251,10 +251,6 @@ protected:
   void changeControlDimensions(const std::shared_ptr<moveit_msgs::srv::ChangeControlDimensions::Request>& req,
                                const std::shared_ptr<moveit_msgs::srv::ChangeControlDimensions::Response>& res);
 
-  /** \brief Service callback to reset Servo status, e.g. so the arm can move again after a collision */
-  bool resetServoStatus(const std::shared_ptr<std_srvs::srv::Empty::Request>& req,
-                        const std::shared_ptr<std_srvs::srv::Empty::Response>& res);
-
   // Pointer to the ROS node
   std::shared_ptr<rclcpp::Node> node_;
 

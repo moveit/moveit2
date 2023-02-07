@@ -127,12 +127,6 @@ ServoCalcs::ServoCalcs(const rclcpp::Node::SharedPtr& node,
         return changeControlDimensions(req, res);
       });
 
-  // ROS Server to reset the status, e.g. so the arm can move again after a collision
-  reset_servo_status_ = node_->create_service<std_srvs::srv::Empty>(
-      "~/reset_servo_status",
-      [this](const std::shared_ptr<std_srvs::srv::Empty::Request>& req,
-             const std::shared_ptr<std_srvs::srv::Empty::Response>& res) { return resetServoStatus(req, res); });
-
   // Subscribe to the collision_check topic
   collision_velocity_scale_sub_ = node_->create_subscription<std_msgs::msg::Float64>(
       "~/collision_velocity_scale", rclcpp::SystemDefaultsQoS(),
@@ -401,6 +395,12 @@ void ServoCalcs::calculateSingleIteration()
 
   // Don't end this function without updating the filters
   updated_filters_ = false;
+
+  // Reflect paused status
+  if (paused_)
+  {
+    status_ = StatusCode::PAUSED;
+  }
 
   // If paused or while waiting for initial servo commands, just keep the low-pass filters up to date with current
   // joints so a jump doesn't occur when restarting
@@ -1220,13 +1220,6 @@ void ServoCalcs::changeControlDimensions(const std::shared_ptr<moveit_msgs::srv:
   control_dimensions_[5] = req->control_z_rotation;
 
   res->success = true;
-}
-
-bool ServoCalcs::resetServoStatus(const std::shared_ptr<std_srvs::srv::Empty::Request>& /*req*/,
-                                  const std::shared_ptr<std_srvs::srv::Empty::Response>& /*res*/)
-{
-  status_ = StatusCode::NO_WARNING;
-  return true;
 }
 
 void ServoCalcs::setPaused(bool paused)
