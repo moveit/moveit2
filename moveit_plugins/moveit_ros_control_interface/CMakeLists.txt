@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.22)
-project(moveit_ros_control_interface)
+project(moveit_ros_control_interface LANGUAGES CXX)
 
 find_package(ament_cmake REQUIRED)
 
