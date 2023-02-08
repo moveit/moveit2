@@ -56,7 +56,7 @@ bool ChompPlanner::solve(const planning_scene::PlanningSceneConstPtr& planning_s
   if (!planning_scene)
   {
     RCLCPP_ERROR(LOGGER, "No planning scene initialized.");
-    res.error_code_.val = moveit_msgs::msg::MoveItErrorCodes::FAILURE;
+    res.error_code.val = moveit_msgs::msg::MoveItErrorCodes::FAILURE;
     return false;
   }
 
@@ -67,7 +67,7 @@ bool ChompPlanner::solve(const planning_scene::PlanningSceneConstPtr& planning_s
   if (!start_state.satisfiesBounds())
   {
     RCLCPP_ERROR(LOGGER, "Start state violates joint limits");
-    res.error_code_.val = moveit_msgs::msg::MoveItErrorCodes::INVALID_ROBOT_STATE;
+    res.error_code.val = moveit_msgs::msg::MoveItErrorCodes::INVALID_ROBOT_STATE;
     return false;
   }
 
@@ -77,7 +77,7 @@ bool ChompPlanner::solve(const planning_scene::PlanningSceneConstPtr& planning_s
   if (req.goal_constraints.size() != 1)
   {
     RCLCPP_ERROR(LOGGER, "Expecting exactly one goal constraint, got: %zd", req.goal_constraints.size());
-    res.error_code_.val = moveit_msgs::msg::MoveItErrorCodes::INVALID_GOAL_CONSTRAINTS;
+    res.error_code.val = moveit_msgs::msg::MoveItErrorCodes::INVALID_GOAL_CONSTRAINTS;
     return false;
   }
 
@@ -85,7 +85,7 @@ bool ChompPlanner::solve(const planning_scene::PlanningSceneConstPtr& planning_s
       !req.goal_constraints[0].orientation_constraints.empty())
   {
     RCLCPP_ERROR(LOGGER, "Only joint-space goals are supported");
-    res.error_code_.val = moveit_msgs::msg::MoveItErrorCodes::INVALID_GOAL_CONSTRAINTS;
+    res.error_code.val = moveit_msgs::msg::MoveItErrorCodes::INVALID_GOAL_CONSTRAINTS;
     return false;
   }
 
@@ -96,7 +96,7 @@ bool ChompPlanner::solve(const planning_scene::PlanningSceneConstPtr& planning_s
   if (!goal_state.satisfiesBounds())
   {
     RCLCPP_ERROR(LOGGER, "Goal state violates joint limits");
-    res.error_code_.val = moveit_msgs::msg::MoveItErrorCodes::INVALID_ROBOT_STATE;
+    res.error_code.val = moveit_msgs::msg::MoveItErrorCodes::INVALID_ROBOT_STATE;
     return false;
   }
   robotStateToArray(goal_state, req.group_name, trajectory.getTrajectoryPoint(goal_index));
@@ -137,12 +137,12 @@ bool ChompPlanner::solve(const planning_scene::PlanningSceneConstPtr& planning_s
   }
   else if (params.trajectory_initialization_method_.compare("fillTrajectory") == 0)
   {
-    if (res.trajectory_.empty())
+    if (res.trajectory.empty())
     {
       RCLCPP_ERROR(LOGGER, "No input trajectory specified");
       return false;
     }
-    else if (!(trajectory.fillInFromTrajectory(*res.trajectory_[0])))
+    else if (!(trajectory.fillInFromTrajectory(*res.trajectory[0])))
     {
       RCLCPP_ERROR(LOGGER, "Input trajectory has less than 2 points, "
                            "trajectory must contain at least start and goal state");
@@ -195,7 +195,7 @@ bool ChompPlanner::solve(const planning_scene::PlanningSceneConstPtr& planning_s
     if (!optimizer->isInitialized())
     {
       RCLCPP_ERROR(LOGGER, "Could not initialize optimizer");
-      res.error_code_.val = moveit_msgs::msg::MoveItErrorCodes::PLANNING_FAILED;
+      res.error_code.val = moveit_msgs::msg::MoveItErrorCodes::PLANNING_FAILED;
       return false;
     }
 
@@ -254,24 +254,24 @@ bool ChompPlanner::solve(const planning_scene::PlanningSceneConstPtr& planning_s
     result->addSuffixWayPoint(state, 0.0);
   }
 
-  res.trajectory_.resize(1);
-  res.trajectory_[0] = result;
-  res.description_.resize(1);
-  res.description_[0] = "plan";
+  res.trajectory.resize(1);
+  res.trajectory[0] = result;
+  res.description.resize(1);
+  res.description[0] = "plan";
 
   RCLCPP_DEBUG(LOGGER, "Bottom took %ld sec to create", (std::chrono::system_clock::now() - create_time).count());
   RCLCPP_DEBUG(LOGGER, "Serviced planning request in %ld wall-seconds",
                (std::chrono::system_clock::now() - start_time).count());
 
-  res.error_code_.val = moveit_msgs::msg::MoveItErrorCodes::SUCCESS;
-  res.processing_time_.resize(1);
-  res.processing_time_[0] = std::chrono::duration<double>(std::chrono::system_clock::now() - start_time).count();
+  res.error_code.val = moveit_msgs::msg::MoveItErrorCodes::SUCCESS;
+  res.processing_time.resize(1);
+  res.processing_time[0] = std::chrono::duration<double>(std::chrono::system_clock::now() - start_time).count();
 
   // report planning failure if path has collisions
   if (not optimizer->isCollisionFree())
   {
     RCLCPP_ERROR(LOGGER, "Motion plan is invalid.");
-    res.error_code_.val = moveit_msgs::msg::MoveItErrorCodes::INVALID_MOTION_PLAN;
+    res.error_code.val = moveit_msgs::msg::MoveItErrorCodes::INVALID_MOTION_PLAN;
     return false;
   }
 
@@ -283,13 +283,13 @@ bool ChompPlanner::solve(const planning_scene::PlanningSceneConstPtr& planning_s
     if (!jc.configure(constraint) || !jc.decide(last_state).satisfied)
     {
       RCLCPP_ERROR(LOGGER, "Goal constraints are violated: %s", constraint.joint_name.c_str());
-      res.error_code_.val = moveit_msgs::msg::MoveItErrorCodes::GOAL_CONSTRAINTS_VIOLATED;
+      res.error_code.val = moveit_msgs::msg::MoveItErrorCodes::GOAL_CONSTRAINTS_VIOLATED;
       return false;
     }
   }
 
-  res.processing_time_.resize(1);
-  res.processing_time_[0] = std::chrono::duration<double>(std::chrono::system_clock::now() - start_time).count();
+  res.processing_time.resize(1);
+  res.processing_time[0] = std::chrono::duration<double>(std::chrono::system_clock::now() - start_time).count();
 
   return true;
 }

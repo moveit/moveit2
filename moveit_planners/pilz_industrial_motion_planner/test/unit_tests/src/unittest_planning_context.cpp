@@ -204,7 +204,7 @@ TYPED_TEST(PlanningContextTest, NoRequest)
   bool result = this->planning_context_->solve(res);
 
   EXPECT_FALSE(result) << testutils::demangle(typeid(TypeParam).name());
-  EXPECT_EQ(moveit_msgs::msg::MoveItErrorCodes::INVALID_MOTION_PLAN, res.error_code_.val)
+  EXPECT_EQ(moveit_msgs::msg::MoveItErrorCodes::INVALID_MOTION_PLAN, res.error_code.val)
       << testutils::demangle(typeid(TypeParam).name());
 }
 
@@ -222,14 +222,14 @@ TYPED_TEST(PlanningContextTest, SolveValidRequest)
   bool result = this->planning_context_->solve(res);
 
   EXPECT_TRUE(result) << testutils::demangle(typeid(TypeParam).name());
-  EXPECT_EQ(moveit_msgs::msg::MoveItErrorCodes::SUCCESS, res.error_code_.val)
+  EXPECT_EQ(moveit_msgs::msg::MoveItErrorCodes::SUCCESS, res.error_code.val)
       << testutils::demangle(typeid(TypeParam).name());
 
   planning_interface::MotionPlanDetailedResponse res_detailed;
   bool result_detailed = this->planning_context_->solve(res_detailed);
 
   EXPECT_TRUE(result_detailed) << testutils::demangle(typeid(TypeParam).name());
-  EXPECT_EQ(moveit_msgs::msg::MoveItErrorCodes::SUCCESS, res.error_code_.val)
+  EXPECT_EQ(moveit_msgs::msg::MoveItErrorCodes::SUCCESS, res.error_code.val)
       << testutils::demangle(typeid(TypeParam).name());
 }
 
@@ -245,7 +245,7 @@ TYPED_TEST(PlanningContextTest, SolveValidRequestDetailedResponse)
   bool result = this->planning_context_->solve(res);
 
   EXPECT_TRUE(result) << testutils::demangle(typeid(TypeParam).name());
-  EXPECT_EQ(moveit_msgs::msg::MoveItErrorCodes::SUCCESS, res.error_code_.val)
+  EXPECT_EQ(moveit_msgs::msg::MoveItErrorCodes::SUCCESS, res.error_code.val)
       << testutils::demangle(typeid(TypeParam).name());
 }
 
@@ -265,7 +265,7 @@ TYPED_TEST(PlanningContextTest, SolveOnTerminated)
   bool result = this->planning_context_->solve(res);
   EXPECT_FALSE(result) << testutils::demangle(typeid(TypeParam).name());
 
-  EXPECT_EQ(moveit_msgs::msg::MoveItErrorCodes::PLANNING_FAILED, res.error_code_.val)
+  EXPECT_EQ(moveit_msgs::msg::MoveItErrorCodes::PLANNING_FAILED, res.error_code.val)
       << testutils::demangle(typeid(TypeParam).name());
 }
 

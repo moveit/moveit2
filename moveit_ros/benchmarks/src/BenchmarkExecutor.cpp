@@ -841,12 +841,12 @@ void BenchmarkExecutor::runBenchmark(moveit_msgs::msg::MotionPlanRequest request
           // The planning pipeline does not support MotionPlanDetailedResponse
           planning_interface::MotionPlanResponse response;
           solved[j] = planning_pipeline->generatePlan(planning_scene_, request, response);
-          responses[j].error_code_ = response.error_code_;
-          if (response.trajectory_)
+          responses[j].error_code = response.error_code;
+          if (response.trajectory)
           {
-            responses[j].description_.push_back("plan");
-            responses[j].trajectory_.push_back(response.trajectory_);
-            responses[j].processing_time_.push_back(response.planning_time_);
+            responses[j].description.push_back("plan");
+            responses[j].trajectory.push_back(response.trajectory);
+            responses[j].processing_time.push_back(response.planning_time);
           }
         }
         std::chrono::duration<double> dt = std::chrono::system_clock::now() - start;
@@ -892,12 +892,12 @@ void BenchmarkExecutor::collectMetrics(PlannerRunData& metrics,
     bool correct = true;     // entire trajectory collision free and in bounds
 
     double process_time = total_time;
-    for (std::size_t j = 0; j < mp_res.trajectory_.size(); ++j)
+    for (std::size_t j = 0; j < mp_res.trajectory.size(); ++j)
     {
       correct = true;
       traj_len = 0.0;
       clearance = 0.0;
-      const robot_trajectory::RobotTrajectory& p = *mp_res.trajectory_[j];
+      const robot_trajectory::RobotTrajectory& p = *mp_res.trajectory[j];
 
       // compute path length
       traj_len = robot_trajectory::path_length(p);
@@ -924,21 +924,21 @@ void BenchmarkExecutor::collectMetrics(PlannerRunData& metrics,
         return s.has_value() ? s.value() : 0.0;
       }();
 
-      metrics["path_" + mp_res.description_[j] + "_correct BOOLEAN"] = correct ? "true" : "false";
-      metrics["path_" + mp_res.description_[j] + "_length REAL"] = moveit::core::toString(traj_len);
-      metrics["path_" + mp_res.description_[j] + "_clearance REAL"] = moveit::core::toString(clearance);
-      metrics["path_" + mp_res.description_[j] + "_smoothness REAL"] = moveit::core::toString(smoothness);
-      metrics["path_" + mp_res.description_[j] + "_time REAL"] = moveit::core::toString(mp_res.processing_time_[j]);
+      metrics["path_" + mp_res.description[j] + "_correct BOOLEAN"] = correct ? "true" : "false";
+      metrics["path_" + mp_res.description[j] + "_length REAL"] = moveit::core::toString(traj_len);
+      metrics["path_" + mp_res.description[j] + "_clearance REAL"] = moveit::core::toString(clearance);
+      metrics["path_" + mp_res.description[j] + "_smoothness REAL"] = moveit::core::toString(smoothness);
+      metrics["path_" + mp_res.description[j] + "_time REAL"] = moveit::core::toString(mp_res.processing_time[j]);
 
-      if (j == mp_res.trajectory_.size() - 1)
+      if (j == mp_res.trajectory.size() - 1)
       {
         metrics["final_path_correct BOOLEAN"] = correct ? "true" : "false";
         metrics["final_path_length REAL"] = moveit::core::toString(traj_len);
         metrics["final_path_clearance REAL"] = moveit::core::toString(clearance);
         metrics["final_path_smoothness REAL"] = moveit::core::toString(smoothness);
-        metrics["final_path_time REAL"] = moveit::core::toString(mp_res.processing_time_[j]);
+        metrics["final_path_time REAL"] = moveit::core::toString(mp_res.processing_time[j]);
       }
-      process_time -= mp_res.processing_time_[j];
+      process_time -= mp_res.processing_time[j];
     }
     if (process_time <= 0.0)
       process_time = 0.0;
@@ -970,8 +970,8 @@ void BenchmarkExecutor::computeAveragePathSimilarities(
         continue;
 
       // Get final trajectories
-      const robot_trajectory::RobotTrajectory& traj_first = *responses[first_traj_i].trajectory_.back();
-      const robot_trajectory::RobotTrajectory& traj_second = *responses[second_traj_i].trajectory_.back();
+      const robot_trajectory::RobotTrajectory& traj_first = *responses[first_traj_i].trajectory.back();
+      const robot_trajectory::RobotTrajectory& traj_second = *responses[second_traj_i].trajectory.back();
 
       // Compute trajectory distance
       double trajectory_distance;

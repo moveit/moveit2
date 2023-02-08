@@ -211,12 +211,12 @@ void MoveGroupMoveAction::executeMoveCallbackPlanOnly(const std::shared_ptr<MGAc
   catch (std::exception& ex)
   {
     RCLCPP_ERROR(LOGGER, "Planning pipeline threw an exception: %s", ex.what());
-    res.error_code_.val = moveit_msgs::msg::MoveItErrorCodes::FAILURE;
+    res.error_code.val = moveit_msgs::msg::MoveItErrorCodes::FAILURE;
   }
 
-  convertToMsg(res.trajectory_, action_res->trajectory_start, action_res->planned_trajectory);
-  action_res->error_code = res.error_code_;
-  action_res->planning_time = res.planning_time_;
+  convertToMsg(res.trajectory, action_res->trajectory_start, action_res->planned_trajectory);
+  action_res->error_code = res.error_code;
+  action_res->planning_time = res.planning_time;
 }
 
 bool MoveGroupMoveAction::planUsingPlanningPipeline(const planning_interface::MotionPlanRequest& req,
@@ -231,7 +231,7 @@ bool MoveGroupMoveAction::planUsingPlanningPipeline(const planning_interface::Mo
   const planning_pipeline::PlanningPipelinePtr planning_pipeline = resolvePlanningPipeline(req.pipeline_id);
   if (!planning_pipeline)
   {
-    res.error_code_.val = moveit_msgs::msg::MoveItErrorCodes::FAILURE;
+    res.error_code.val = moveit_msgs::msg::MoveItErrorCodes::FAILURE;
     return solved;
   }
 
@@ -243,15 +243,15 @@ bool MoveGroupMoveAction::planUsingPlanningPipeline(const planning_interface::Mo
   catch (std::exception& ex)
   {
     RCLCPP_ERROR(LOGGER, "Planning pipeline threw an exception: %s", ex.what());
-    res.error_code_.val = moveit_msgs::msg::MoveItErrorCodes::FAILURE;
+    res.error_code.val = moveit_msgs::msg::MoveItErrorCodes::FAILURE;
   }
-  if (res.trajectory_)
+  if (res.trajectory)
   {
     plan.plan_components_.resize(1);
-    plan.plan_components_[0].trajectory_ = res.trajectory_;
+    plan.plan_components_[0].trajectory_ = res.trajectory;
     plan.plan_components_[0].description_ = "plan";
   }
-  plan.error_code_ = res.error_code_;
+  plan.error_code_ = res.error_code;
 
   return solved;
 }
