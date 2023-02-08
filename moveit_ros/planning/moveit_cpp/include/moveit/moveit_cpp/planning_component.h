@@ -191,7 +191,7 @@ public:
   planning_interface::MotionPlanResponse plan();
   /** \brief Run a plan from start or current state to fulfill the last goal constraints provided by setGoal() using the
    * provided PlanRequestParameters. */
-  planning_interface::MotionPlanResponse plan(const PlanRequestParameters& parameters, const bool store_solution = true);
+  planning_interface::MotionPlanResponse plan(const PlanRequestParameters& parameters);
 
   /** \brief Run a plan from start or current state to fulfill the last goal constraints provided by setGoal() using the
    * provided PlanRequestParameters. This defaults to taking the full planning time (null stopping_criterion_callback)
@@ -203,10 +203,10 @@ public:
 
   /** \brief Execute the latest computed solution trajectory computed by plan(). By default this function terminates
    * after the execution is complete. The execution can be run in background by setting blocking to false. */
-  [[deprecated("Use MoveItCpp::execute()")]] bool execute(bool blocking = true);
-
-  /** \brief Return the last plan solution*/
-  const planning_interface::MotionPlanResponse& getLastMotionPlanResponse();
+  [[deprecated("Use MoveItCpp::execute()")]] bool execute(bool /*blocking */)
+  {
+    return false;
+  };
 
 private:
   // Core properties and instances
@@ -225,7 +225,6 @@ private:
   PlanRequestParameters plan_request_parameters_;
   moveit_msgs::msg::WorkspaceParameters workspace_parameters_;
   bool workspace_parameters_set_ = false;
-  planning_interface::MotionPlanResponse last_plan_solution_;
 
   // common properties for goals
   // TODO(henningkayser): support goal tolerances
@@ -237,12 +236,3 @@ private:
   // std::unique_ptr<moveit_msgs::msg::TrajectoryConstraints> trajectory_constraints_;
 };
 }  // namespace moveit_cpp
-
-namespace moveit
-{
-namespace planning_interface
-{
-using PlanningComponent [[deprecated("use moveit_cpp")]] = moveit_cpp::PlanningComponent;
-[[deprecated("use moveit_cpp")]] MOVEIT_DECLARE_PTR(PlanningComponent, moveit_cpp::PlanningComponent);
-}  // namespace planning_interface
-}  // namespace moveit
