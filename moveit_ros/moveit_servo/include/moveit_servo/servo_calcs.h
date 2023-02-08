@@ -296,7 +296,6 @@ protected:
   rclcpp::Publisher<std_msgs::msg::Float64MultiArray>::SharedPtr multiarray_outgoing_cmd_pub_;
   rclcpp::Service<moveit_msgs::srv::ChangeControlDimensions>::SharedPtr control_dimensions_server_;
   rclcpp::Service<moveit_msgs::srv::ChangeDriftDimensions>::SharedPtr drift_dimensions_server_;
-  rclcpp::Service<std_srvs::srv::Empty>::SharedPtr reset_servo_status_;
 
   // Main tracking / result publisher loop
   std::thread thread_;
