@@ -238,6 +238,7 @@ bool CurrentStateMonitor::waitForCurrentState(const rclcpp::Time& t, double wait
   rclcpp::Duration elapsed(0, 0);
   rclcpp::Duration timeout = rclcpp::Duration::from_seconds(wait_time_s);
 
+  rclcpp::Clock steady_clock(RCL_STEADY_TIME);
   std::unique_lock<std::mutex> lock(state_update_lock_);
   while (current_state_time_ < t)
   {
@@ -247,30 +248,32 @@ bool CurrentStateMonitor::waitForCurrentState(const rclcpp::Time& t, double wait
       {
         /* We cannot know if the reason of timeout is slow time or absence of
          * state messages, warn the user. */
-        rclcpp::Clock steady_clock(RCL_STEADY_TIME);
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wold-style-cast"
         RCLCPP_WARN_SKIPFIRST_THROTTLE(LOGGER, steady_clock, 1000,
-                                       "No state update received within 100ms of system clock");
+                                       "No state update received within 100ms of system clock. "
+                                       "Have been waiting for %fs, timeout is %fs",
+                                       elapsed.seconds(), wait_time_s);
 #pragma GCC diagnostic pop
-      }
-      else
-      {
-        elapsed = middleware_handle_->now() - start;
       }
     }
     else
     {
       state_update_condition_.wait_for(lock, (timeout - elapsed).to_chrono<std::chrono::duration<double>>());
-      elapsed = middleware_handle_->now() - start;
     }
+    elapsed = middleware_handle_->now() - start;
     if (elapsed > timeout)
     {
       RCLCPP_INFO(LOGGER,
-                  "Didn't received robot state (joint angles) with recent timestamp within "
-                  "%f seconds.\n"
+                  "Didn't receive robot state (joint angles) with recent timestamp within "
+                  "%f seconds. Requested time %f, but latest received state has time %f.\n"
                   "Check clock synchronization if your are running ROS across multiple machines!",
-                  wait_time_s);
+                  wait_time_s, t.seconds(), current_state_time_.seconds());
+      return false;
+    }
+    if (!middleware_handle_->ok())
+    {
+      RCLCPP_DEBUG(LOGGER, "ROS context shut down while waiting for current robot state.");
       return false;
     }
   }
