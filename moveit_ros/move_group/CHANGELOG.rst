@@ -2,6 +2,29 @@
 Changelog for package moveit_ros_move_group
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.7.0 (2023-01-29)
+------------------
+* move_group: Delete unused execute_trajectory_service_capability (`#1836 <https://github.com/ros-planning/moveit2/issues/1836>`_)
+* keep printf color change on same line (`#1828 <https://github.com/ros-planning/moveit2/issues/1828>`_)
+  This ensures the color reset is applied because printing the color
+  reset after new lines seems to preven the color from actually being reset.
+  Co-authored-by: William Wedler <william.wedler@resquared.com>
+* Fix BSD license in package.xml (`#1796 <https://github.com/ros-planning/moveit2/issues/1796>`_)
+  * fix BSD license in package.xml
+  * this must also be spdx compliant
+* Add braces around blocks. (`#999 <https://github.com/ros-planning/moveit2/issues/999>`_)
+* Used C++ style cast instead of C style cast  (`#1628 <https://github.com/ros-planning/moveit2/issues/1628>`_)
+  Co-authored-by: Henning Kayser <henningkayser@picknik.ai>
+* Fix clang-tidy issues (`#1706 <https://github.com/ros-planning/moveit2/issues/1706>`_)
+  * Blindly apply automatic clang-tidy fixes
+  * Exemplarily cleanup a few automatic clang-tidy fixes
+  * Clang-tidy fixups
+  * Missed const-ref fixups
+  * Fix unsupported non-const -> const
+  * More fixes
+  Co-authored-by: Henning Kayser <henningkayser@picknik.ai>
+* Contributors: Abhijeet Das Gupta, AndyZe, Christian Henkel, Cory Crean, Robert Haschke, Will
+
 2.6.0 (2022-11-10)
 ------------------
 * Short-circuit planning adapters (`#1694 <https://github.com/ros-planning/moveit2/issues/1694>`_)

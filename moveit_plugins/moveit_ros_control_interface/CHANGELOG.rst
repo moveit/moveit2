@@ -2,6 +2,16 @@
 Changelog for package moveit_ros_control_interface
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.7.0 (2023-01-29)
+------------------
+* Fix parameters for ros2_control namespaces (`#1833 <https://github.com/ros-planning/moveit2/issues/1833>`_)
+  Co-authored-by: AndyZe <andyz@utexas.edu>
+  Co-authored-by: Henning Kayser <henningkayser@picknik.ai>
+* Fix BSD license in package.xml (`#1796 <https://github.com/ros-planning/moveit2/issues/1796>`_)
+  * fix BSD license in package.xml
+  * this must also be spdx compliant
+* Contributors: Christian Henkel, Pablo Iñigo Blasco
+
 2.6.0 (2022-11-10)
 ------------------
 * Rename MoveItControllerManager. Add deprecation warning (`#1601 <https://github.com/ros-planning/moveit2/issues/1601>`_)

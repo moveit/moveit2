@@ -2,6 +2,16 @@
 Changelog for package moveit_resources_prbt_ikfast_manipulator_plugin
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.7.0 (2023-01-29)
+------------------
+* converted characters from string format to character format (`#1881 <https://github.com/ros-planning/moveit2/issues/1881>`_)
+* Used C++ style casting for int type (`#1627 <https://github.com/ros-planning/moveit2/issues/1627>`_)
+* Add `-Wunused-parameter` (`#1756 <https://github.com/ros-planning/moveit2/issues/1756>`_)
+* Add braces around blocks. (`#999 <https://github.com/ros-planning/moveit2/issues/999>`_)
+* Used C++ style cast instead of C style cast  (`#1628 <https://github.com/ros-planning/moveit2/issues/1628>`_)
+  Co-authored-by: Henning Kayser <henningkayser@picknik.ai>
+* Contributors: Abhijeet Das Gupta, Chris Thrasher, Cory Crean, Sameer Gupta
+
 2.6.0 (2022-11-10)
 ------------------
 * Add missing depend (`#1684 <https://github.com/ros-planning/moveit2/issues/1684>`_)

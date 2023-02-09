@@ -2,6 +2,32 @@
 Changelog for package moveit_setup_controllers
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.7.0 (2023-01-29)
+------------------
+* Merge PR `#1712 <https://github.com/ros-planning/moveit2/issues/1712>`_: fix clang compiler warnings + stricter CI
+* Add default constructors
+  ... as they are not implicitly declared anymore
+* Add default copy/move constructors/assignment operators
+  As a user-declared destructor deletes any implicitly-defined move constructor/assignment operator,
+  we need to declared them manually. This in turn requires to declare the copy constructor/assignment as well.
+* Fix -Wdelete-non-abstract-non-virtual-dtor
+* Fix BSD license in package.xml (`#1796 <https://github.com/ros-planning/moveit2/issues/1796>`_)
+  * fix BSD license in package.xml
+  * this must also be spdx compliant
+* Minimize use of `this->` (`#1784 <https://github.com/ros-planning/moveit2/issues/1784>`_)
+  It's often unnecessary. MoveIt already avoids this in most cases
+  so this PR better cements that existing pattern.
+* Add braces around blocks. (`#999 <https://github.com/ros-planning/moveit2/issues/999>`_)
+* Fix clang-tidy issues (`#1706 <https://github.com/ros-planning/moveit2/issues/1706>`_)
+  * Blindly apply automatic clang-tidy fixes
+  * Exemplarily cleanup a few automatic clang-tidy fixes
+  * Clang-tidy fixups
+  * Missed const-ref fixups
+  * Fix unsupported non-const -> const
+  * More fixes
+  Co-authored-by: Henning Kayser <henningkayser@picknik.ai>
+* Contributors: Chris Thrasher, Christian Henkel, Cory Crean, Robert Haschke
+
 2.6.0 (2022-11-10)
 ------------------
 * Merge PR `#1553 <https://github.com/ros-planning/moveit2/issues/1553>`_: Improve cmake files

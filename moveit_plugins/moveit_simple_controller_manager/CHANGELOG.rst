@@ -2,6 +2,24 @@
 Changelog for package moveit_simple_controller_manager
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.7.0 (2023-01-29)
+------------------
+* converted characters from string format to character format (`#1881 <https://github.com/ros-planning/moveit2/issues/1881>`_)
+* Fix BSD license in package.xml (`#1796 <https://github.com/ros-planning/moveit2/issues/1796>`_)
+  * fix BSD license in package.xml
+  * this must also be spdx compliant
+* Add braces around blocks. (`#999 <https://github.com/ros-planning/moveit2/issues/999>`_)
+* Use emulated time in action-based controller (`#899 <https://github.com/ros-planning/moveit2/issues/899>`_)
+* Fix clang-tidy issues (`#1706 <https://github.com/ros-planning/moveit2/issues/1706>`_)
+  * Blindly apply automatic clang-tidy fixes
+  * Exemplarily cleanup a few automatic clang-tidy fixes
+  * Clang-tidy fixups
+  * Missed const-ref fixups
+  * Fix unsupported non-const -> const
+  * More fixes
+  Co-authored-by: Henning Kayser <henningkayser@picknik.ai>
+* Contributors: Christian Henkel, Cory Crean, Gaël Écorchard, Robert Haschke, Sameer Gupta
+
 2.6.0 (2022-11-10)
 ------------------
 * Merge PR `#1553 <https://github.com/ros-planning/moveit2/issues/1553>`_: Improve cmake files
