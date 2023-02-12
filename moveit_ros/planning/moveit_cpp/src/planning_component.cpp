@@ -240,15 +240,8 @@ planning_interface::MotionPlanResponse PlanningComponent::plan(
       auto plan_solution = planning_interface::MotionPlanResponse();
       try
       {
-        // Use planning scene if provided, otherwise get planning scene from planning scene monitor
-        if (planning_scene)
-        {
-          plan_solution = plan(plan_request_parameter, false, planning_scene);
-        }
-        else
-        {
-          plan_solution = plan(plan_request_parameter, false, planning_scene);
-        }
+        // Use planning scene if provided, otherwise the planning scene from planning scene monitor is used
+        plan_solution = plan(plan_request_parameter, planning_scene);
       }
       catch (const std::exception& e)
       {

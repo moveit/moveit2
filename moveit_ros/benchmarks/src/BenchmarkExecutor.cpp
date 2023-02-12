@@ -860,7 +860,7 @@ void BenchmarkExecutor::runBenchmark(moveit_msgs::msg::MotionPlanRequest request
         std::chrono::system_clock::time_point start = std::chrono::system_clock::now();
 
         // Planning pipeline benchmark
-        auto const response = planning_component->plan(plan_req_params, false, planning_scene_);
+        auto const response = planning_component->plan(plan_req_params, planning_scene_);
 
         solved[j] = bool(response.error_code_);
 
