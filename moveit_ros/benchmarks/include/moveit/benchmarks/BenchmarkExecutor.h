@@ -196,12 +196,12 @@ protected:
   /// Execute the given motion plan request on the set of planners for the set number of runs
   void runBenchmark(moveit_msgs::msg::MotionPlanRequest request);
 
-  planning_scene_monitor::PlanningSceneMonitor* planning_scene_monitor_;
-  moveit_warehouse::PlanningSceneStorage* planning_scene_storage_;
-  moveit_warehouse::PlanningSceneWorldStorage* planning_scene_world_storage_;
-  moveit_warehouse::RobotStateStorage* robot_state_storage_;
-  moveit_warehouse::ConstraintsStorage* constraints_storage_;
-  moveit_warehouse::TrajectoryConstraintsStorage* trajectory_constraints_storage_;
+  std::shared_ptr<planning_scene_monitor::PlanningSceneMonitor> planning_scene_monitor_;
+  std::shared_ptr<moveit_warehouse::PlanningSceneStorage> planning_scene_storage_;
+  std::shared_ptr<moveit_warehouse::PlanningSceneWorldStorage> planning_scene_world_storage_;
+  std::shared_ptr<moveit_warehouse::RobotStateStorage> robot_state_storage_;
+  std::shared_ptr<moveit_warehouse::ConstraintsStorage> constraints_storage_;
+  std::shared_ptr<moveit_warehouse::TrajectoryConstraintsStorage> trajectory_constraints_storage_;
 
   rclcpp::Node::SharedPtr node_;
   warehouse_ros::DatabaseLoader db_loader;

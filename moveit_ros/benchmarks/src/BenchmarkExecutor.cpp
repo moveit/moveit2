@@ -98,25 +98,21 @@ static std::string getHostname()
 }
 
 BenchmarkExecutor::BenchmarkExecutor(const rclcpp::Node::SharedPtr& node, const std::string& robot_description_param)
-  : node_(node), db_loader(node)
+  : planning_scene_monitor_{ std::make_shared<planning_scene_monitor::PlanningSceneMonitor>(node,
+                                                                                            robot_description_param) }
+  , planning_scene_storage_{ nullptr }
+  , planning_scene_world_storage_{ nullptr }
+  , robot_state_storage_{ nullptr }
+  , constraints_storage_{ nullptr }
+  , trajectory_constraints_storage_{ nullptr }
+  , db_loader{ node }
+  , node_{ node }
 {
-  planning_scene_storage_ = nullptr;
-  planning_scene_world_storage_ = nullptr;
-  robot_state_storage_ = nullptr;
-  constraints_storage_ = nullptr;
-  trajectory_constraints_storage_ = nullptr;
-  planning_scene_monitor_ = new planning_scene_monitor::PlanningSceneMonitor(node, robot_description_param);
   planning_scene_ = planning_scene_monitor_->getPlanningScene();
 }
 
 BenchmarkExecutor::~BenchmarkExecutor()
 {
-  delete planning_scene_storage_;
-  delete planning_scene_world_storage_;
-  delete robot_state_storage_;
-  delete constraints_storage_;
-  delete trajectory_constraints_storage_;
-  delete planning_scene_monitor_;
 }
 
 [[nodiscard]] bool BenchmarkExecutor::initialize(const std::vector<std::string>& planning_pipeline_names)
@@ -164,28 +160,23 @@ void BenchmarkExecutor::clear()
 {
   if (planning_scene_storage_)
   {
-    delete planning_scene_storage_;
-    planning_scene_storage_ = nullptr;
+    planning_scene_storage_.reset();
   }
   if (planning_scene_world_storage_)
   {
-    delete planning_scene_world_storage_;
-    planning_scene_world_storage_ = nullptr;
+    planning_scene_world_storage_.reset();
   }
   if (robot_state_storage_)
   {
-    delete robot_state_storage_;
-    robot_state_storage_ = nullptr;
+    robot_state_storage_.reset();
   }
   if (constraints_storage_)
   {
-    delete constraints_storage_;
-    constraints_storage_ = nullptr;
+    constraints_storage_.reset();
   }
   if (trajectory_constraints_storage_)
   {
-    delete trajectory_constraints_storage_;
-    trajectory_constraints_storage_ = nullptr;
+    trajectory_constraints_storage_.reset();
   }
 
   benchmark_data_.clear();
@@ -429,11 +420,13 @@ bool BenchmarkExecutor::loadBenchmarkQueryData(
     warehouse_connection->setParams(options.getHostName(), options.getPort(), 20);
     if (warehouse_connection->connect())
     {
-      planning_scene_storage_ = new moveit_warehouse::PlanningSceneStorage(warehouse_connection);
-      planning_scene_world_storage_ = new moveit_warehouse::PlanningSceneWorldStorage(warehouse_connection);
-      robot_state_storage_ = new moveit_warehouse::RobotStateStorage(warehouse_connection);
-      constraints_storage_ = new moveit_warehouse::ConstraintsStorage(warehouse_connection);
-      trajectory_constraints_storage_ = new moveit_warehouse::TrajectoryConstraintsStorage(warehouse_connection);
+      planning_scene_storage_ = std::make_shared<moveit_warehouse::PlanningSceneStorage>(warehouse_connection);
+      planning_scene_world_storage_ =
+          std::make_shared<moveit_warehouse::PlanningSceneWorldStorage>(warehouse_connection);
+      robot_state_storage_ = std::make_shared<moveit_warehouse::RobotStateStorage>(warehouse_connection);
+      constraints_storage_ = std::make_shared<moveit_warehouse::ConstraintsStorage>(warehouse_connection);
+      trajectory_constraints_storage_ =
+          std::make_shared<moveit_warehouse::TrajectoryConstraintsStorage>(warehouse_connection);
       RCLCPP_INFO(LOGGER, "Connected to DB");
     }
     else
