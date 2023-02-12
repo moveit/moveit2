@@ -60,7 +60,7 @@ def generate_launch_description():
     ompl_planning_pipeline_config["ompl_rrtc"].update(ompl_planning_yaml)
 
     sqlite_database = (
-        get_package_share_directory("moveit_ros_benchmarks") + "/panda_test_db.sqlite"
+        get_package_share_directory("moveit_resources") + "/panda_test_db.sqlite"
     )
 
     warehouse_ros_config = {
