@@ -46,6 +46,9 @@ BenchmarkOptions::BenchmarkOptions(const rclcpp::Node::SharedPtr& node)
   {
     throw(std::runtime_error("Failed to initialize BenchmarkOptions"));
   }
+
+  // x, y, z, roll, pitch, yaw
+  goal_offsets.resize(6);
 }
 
 bool BenchmarkOptions::readBenchmarkOptions(const rclcpp::Node::SharedPtr& node)
@@ -53,37 +56,37 @@ bool BenchmarkOptions::readBenchmarkOptions(const rclcpp::Node::SharedPtr& node)
   if (node->has_parameter("benchmark_config.parameters.name"))
   {
     // Read warehouse options
-    node->get_parameter_or(std::string("benchmark_config.warehouse.host"), hostname_, std::string("127.0.0.1"));
-    node->get_parameter_or(std::string("benchmark_config.warehouse.port"), port_, 33829);
+    node->get_parameter_or(std::string("benchmark_config.warehouse.host"), hostname, std::string("127.0.0.1"));
+    node->get_parameter_or(std::string("benchmark_config.warehouse.port"), port, 33829);
 
-    if (!node->get_parameter("benchmark_config.warehouse.scene_name", scene_name_))
+    if (!node->get_parameter("benchmark_config.warehouse.scene_name", scene_name))
     {
       RCLCPP_WARN(LOGGER, "Benchmark scene_name NOT specified");
     }
 
-    RCLCPP_INFO(LOGGER, "Benchmark host: %s", hostname_.c_str());
-    RCLCPP_INFO(LOGGER, "Benchmark port: %d", port_);
-    RCLCPP_INFO(LOGGER, "Benchmark scene: %s", scene_name_.c_str());
+    RCLCPP_INFO(LOGGER, "Benchmark host: %s", hostname.c_str());
+    RCLCPP_INFO(LOGGER, "Benchmark port: %d", port);
+    RCLCPP_INFO(LOGGER, "Benchmark scene: %s", scene_name.c_str());
     // Read benchmark parameters
-    node->get_parameter_or(std::string("benchmark_config.parameters.name"), benchmark_name_, std::string(""));
-    node->get_parameter_or(std::string("benchmark_config.parameters.runs"), runs_, 10);
-    node->get_parameter_or(std::string("benchmark_config.parameters.timeout"), timeout_, 10.0);
-    node->get_parameter_or(std::string("benchmark_config.parameters.output_directory"), output_directory_,
+    node->get_parameter_or(std::string("benchmark_config.parameters.name"), benchmark_name, std::string(""));
+    node->get_parameter_or(std::string("benchmark_config.parameters.runs"), runs, 10);
+    node->get_parameter_or(std::string("benchmark_config.parameters.timeout"), timeout, 10.0);
+    node->get_parameter_or(std::string("benchmark_config.parameters.output_directory"), output_directory,
                            std::string(""));
-    node->get_parameter_or(std::string("benchmark_config.parameters.queries_regex"), query_regex_, std::string(".*"));
-    node->get_parameter_or(std::string("benchmark_config.parameters.start_states_regex"), start_state_regex_,
+    node->get_parameter_or(std::string("benchmark_config.parameters.queries_regex"), query_regex, std::string(".*"));
+    node->get_parameter_or(std::string("benchmark_config.parameters.start_states_regex"), start_state_regex,
                            std::string(""));
-    node->get_parameter_or(std::string("benchmark_config.parameters.goal_constraints_regex"), goal_constraint_regex_,
+    node->get_parameter_or(std::string("benchmark_config.parameters.goal_constraints_regex"), goal_constraint_regex,
                            std::string(""));
-    node->get_parameter_or(std::string("benchmark_config.parameters.path_constraints_regex"), path_constraint_regex_,
+    node->get_parameter_or(std::string("benchmark_config.parameters.path_constraints_regex"), path_constraint_regex,
                            std::string(""));
     node->get_parameter_or(std::string("benchmark_config.parameters.trajectory_constraints_regex"),
-                           trajectory_constraint_regex_, std::string(""));
-    node->get_parameter_or(std::string("benchmark_config.parameters.predefined_poses"), predefined_poses_, {});
-    node->get_parameter_or(std::string("benchmark_config.parameters.predefined_poses_group"), predefined_poses_group_,
+                           trajectory_constraint_regex, std::string(""));
+    node->get_parameter_or(std::string("benchmark_config.parameters.predefined_poses"), predefined_poses, {});
+    node->get_parameter_or(std::string("benchmark_config.parameters.predefined_poses_group"), predefined_poses_group,
                            std::string(""));
 
-    if (!node->get_parameter(std::string("benchmark_config.parameters.group"), group_name_))
+    if (!node->get_parameter(std::string("benchmark_config.parameters.group"), group_name))
     {
       RCLCPP_INFO(LOGGER, "Benchmark group NOT specified");
     }
@@ -92,26 +95,26 @@ bool BenchmarkOptions::readBenchmarkOptions(const rclcpp::Node::SharedPtr& node)
     {
       // Read workspace parameters
       // Make sure all params exist
-      if (!node->get_parameter("benchmark_config.parameters.workspace.frame_id", workspace_.header.frame_id))
+      if (!node->get_parameter("benchmark_config.parameters.workspace.frame_id", workspace.header.frame_id))
       {
         RCLCPP_WARN(LOGGER, "Workspace frame_id not specified in benchmark config");
       }
 
-      node->get_parameter_or(std::string("benchmark_config.parameters.workspace.min_corner.x"), workspace_.min_corner.x,
+      node->get_parameter_or(std::string("benchmark_config.parameters.workspace.min_corner.x"), workspace.min_corner.x,
                              0.0);
-      node->get_parameter_or(std::string("benchmark_config.parameters.workspace.min_corner.y"), workspace_.min_corner.y,
+      node->get_parameter_or(std::string("benchmark_config.parameters.workspace.min_corner.y"), workspace.min_corner.y,
                              0.0);
-      node->get_parameter_or(std::string("benchmark_config.parameters.workspace.min_corner.z"), workspace_.min_corner.z,
-                             0.0);
-
-      node->get_parameter_or(std::string("benchmark_config.parameters.workspace.max_corner.x"), workspace_.max_corner.x,
-                             0.0);
-      node->get_parameter_or(std::string("benchmark_config.parameters.workspace.max_corner.y"), workspace_.max_corner.y,
-                             0.0);
-      node->get_parameter_or(std::string("benchmark_config.parameters.workspace.max_corner.z"), workspace_.max_corner.z,
+      node->get_parameter_or(std::string("benchmark_config.parameters.workspace.min_corner.z"), workspace.min_corner.z,
                              0.0);
 
-      workspace_.header.stamp = rclcpp::Clock().now();
+      node->get_parameter_or(std::string("benchmark_config.parameters.workspace.max_corner.x"), workspace.max_corner.x,
+                             0.0);
+      node->get_parameter_or(std::string("benchmark_config.parameters.workspace.max_corner.y"), workspace.max_corner.y,
+                             0.0);
+      node->get_parameter_or(std::string("benchmark_config.parameters.workspace.max_corner.z"), workspace.max_corner.z,
+                             0.0);
+
+      workspace.header.stamp = rclcpp::Clock().now();
     }
 
     // Reading in goal_offset (or defaulting to zero)
@@ -122,22 +125,22 @@ bool BenchmarkOptions::readBenchmarkOptions(const rclcpp::Node::SharedPtr& node)
     node->get_parameter_or(std::string("benchmark_config.parameters.goal_offset.pitch"), goal_offsets[4], 0.0);
     node->get_parameter_or(std::string("benchmark_config.parameters.goal_offset.yaw"), goal_offsets[5], 0.0);
 
-    RCLCPP_INFO(LOGGER, "Benchmark name: '%s'", benchmark_name_.c_str());
-    RCLCPP_INFO(LOGGER, "Benchmark #runs: %d", runs_);
-    RCLCPP_INFO(LOGGER, "Benchmark timeout: %f secs", timeout_);
-    RCLCPP_INFO(LOGGER, "Benchmark group: %s", group_name_.c_str());
-    RCLCPP_INFO(LOGGER, "Benchmark query regex: '%s'", query_regex_.c_str());
-    RCLCPP_INFO(LOGGER, "Benchmark start state regex: '%s':", start_state_regex_.c_str());
-    RCLCPP_INFO(LOGGER, "Benchmark goal constraint regex: '%s':", goal_constraint_regex_.c_str());
-    RCLCPP_INFO(LOGGER, "Benchmark path constraint regex: '%s':", path_constraint_regex_.c_str());
+    RCLCPP_INFO(LOGGER, "Benchmark name: '%s'", benchmark_name.c_str());
+    RCLCPP_INFO(LOGGER, "Benchmark #runs: %d", runs);
+    RCLCPP_INFO(LOGGER, "Benchmark timeout: %f secs", timeout);
+    RCLCPP_INFO(LOGGER, "Benchmark group: %s", group_name.c_str());
+    RCLCPP_INFO(LOGGER, "Benchmark query regex: '%s'", query_regex.c_str());
+    RCLCPP_INFO(LOGGER, "Benchmark start state regex: '%s':", start_state_regex.c_str());
+    RCLCPP_INFO(LOGGER, "Benchmark goal constraint regex: '%s':", goal_constraint_regex.c_str());
+    RCLCPP_INFO(LOGGER, "Benchmark path constraint regex: '%s':", path_constraint_regex.c_str());
     RCLCPP_INFO(LOGGER, "Benchmark goal offsets (%f %f %f, %f %f %f)", goal_offsets[0], goal_offsets[1],
                 goal_offsets[2], goal_offsets[3], goal_offsets[4], goal_offsets[5]);
-    RCLCPP_INFO(LOGGER, "Benchmark output directory: %s", output_directory_.c_str());
+    RCLCPP_INFO(LOGGER, "Benchmark output directory: %s", output_directory.c_str());
     RCLCPP_INFO_STREAM(LOGGER, "Benchmark workspace: min_corner: ["
-                                   << workspace_.min_corner.x << ", " << workspace_.min_corner.y << ", "
-                                   << workspace_.min_corner.z << "], "
-                                   << "max_corner: [" << workspace_.max_corner.x << ", " << workspace_.max_corner.y
-                                   << ", " << workspace_.max_corner.z << ']');
+                                   << workspace.min_corner.x << ", " << workspace.min_corner.y << ", "
+                                   << workspace.min_corner.z << "], "
+                                   << "max_corner: [" << workspace.max_corner.x << ", " << workspace.max_corner.y
+                                   << ", " << workspace.max_corner.z << ']');
     // Read planner configuration
     if (!readPlannerConfigs(node))
     {
@@ -152,122 +155,20 @@ bool BenchmarkOptions::readBenchmarkOptions(const rclcpp::Node::SharedPtr& node)
   return true;
 }
 
-const std::string& BenchmarkOptions::getHostName() const
-{
-  return hostname_;
-}
-
-int BenchmarkOptions::getPort() const
-{
-  return port_;
-}
-
-const std::string& BenchmarkOptions::getSceneName() const
-{
-  return scene_name_;
-}
-
-int BenchmarkOptions::getNumRuns() const
-{
-  return runs_;
-}
-
-double BenchmarkOptions::getTimeout() const
-{
-  return timeout_;
-}
-
-const std::string& BenchmarkOptions::getBenchmarkName() const
-{
-  return benchmark_name_;
-}
-
-const std::string& BenchmarkOptions::getGroupName() const
-{
-  return group_name_;
-}
-
-const std::string& BenchmarkOptions::getOutputDirectory() const
-{
-  return output_directory_;
-}
-
-const std::string& BenchmarkOptions::getQueryRegex() const
-{
-  return query_regex_;
-}
-
-const std::string& BenchmarkOptions::getStartStateRegex() const
-{
-  return start_state_regex_;
-}
-
-const std::string& BenchmarkOptions::getGoalConstraintRegex() const
-{
-  return goal_constraint_regex_;
-}
-
-const std::string& BenchmarkOptions::getPathConstraintRegex() const
-{
-  return path_constraint_regex_;
-}
-
-const std::string& BenchmarkOptions::getTrajectoryConstraintRegex() const
-{
-  return trajectory_constraint_regex_;
-}
-
-const std::vector<std::string>& BenchmarkOptions::getPredefinedPoses() const
-{
-  return predefined_poses_;
-}
-
-const std::string& BenchmarkOptions::getPredefinedPosesGroup() const
-{
-  return predefined_poses_group_;
-}
-
-void BenchmarkOptions::getGoalOffsets(std::vector<double>& offsets) const
-{
-  offsets.resize(6);
-  memcpy(&offsets[0], goal_offsets, 6 * sizeof(double));
-}
-
-const std::map<std::string, std::vector<std::string>>& BenchmarkOptions::getPlanningPipelineConfigurations() const
-{
-  return planning_pipelines_;
-}
-
-const std::map<std::string, std::vector<std::pair<std::string, std::string>>>&
-BenchmarkOptions::getParallelPipelineConfigurations() const
-{
-  return parallel_planning_pipelines_;
-}
-
 void BenchmarkOptions::getPlanningPipelineNames(std::vector<std::string>& planning_pipeline_names) const
 {
   planning_pipeline_names.clear();
-  for (const std::pair<const std::string, std::vector<std::string>>& planning_pipeline : planning_pipelines_)
+  for (const std::pair<const std::string, std::vector<std::string>>& planning_pipeline : planning_pipelines)
   {
     planning_pipeline_names.push_back(planning_pipeline.first);
   }
-}
-
-const std::string& BenchmarkOptions::getWorkspaceFrameID() const
-{
-  return workspace_.header.frame_id;
-}
-
-const moveit_msgs::msg::WorkspaceParameters& BenchmarkOptions::getWorkspaceParameters() const
-{
-  return workspace_;
 }
 
 bool BenchmarkOptions::readPlannerConfigs(const rclcpp::Node::SharedPtr& node)
 {
   const std::string ns = "benchmark_config.planning_pipelines";
   // pipelines
-  planning_pipelines_.clear();
+  planning_pipelines.clear();
 
   std::vector<std::string> pipelines;
   if (!node->get_parameter(ns + ".pipelines", pipelines))
@@ -303,11 +204,11 @@ bool BenchmarkOptions::readPlannerConfigs(const rclcpp::Node::SharedPtr& node)
         RCLCPP_INFO(LOGGER, "  %s", planner.c_str());
       }
 
-      planning_pipelines_[pipeline_name] = planners;
+      planning_pipelines[pipeline_name] = planners;
     }
   }
   // parallel pipelines
-  parallel_planning_pipelines_.clear();
+  parallel_planning_pipelines.clear();
 
   std::vector<std::string> parallel_pipelines;
   if (!node->get_parameter(ns + ".parallel_pipelines", parallel_pipelines))
@@ -355,9 +256,9 @@ bool BenchmarkOptions::readPlannerConfigs(const rclcpp::Node::SharedPtr& node)
         pipeline_planner_id_pairs.push_back(std::pair<std::string, std::string>(pipelines[i], planner_ids[i]));
       }
 
-      parallel_planning_pipelines_[parallel_pipeline] = pipeline_planner_id_pairs;
+      parallel_planning_pipelines[parallel_pipeline] = pipeline_planner_id_pairs;
 
-      for (auto const& entry : parallel_planning_pipelines_)
+      for (auto const& entry : parallel_planning_pipelines)
       {
         RCLCPP_INFO(LOGGER, "Parallel planning pipeline '%s'", entry.first.c_str());
         for (auto const& pair : entry.second)

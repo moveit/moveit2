@@ -81,22 +81,6 @@ boost::posix_time::ptime toBoost(const std::chrono::time_point<Clock, Duration>&
 #endif
 }
 
-static std::string getHostname()
-{
-  static const int BUF_SIZE = 1024;
-  char buffer[BUF_SIZE];
-  int err = gethostname(buffer, sizeof(buffer));
-  if (err != 0)
-  {
-    return std::string();
-  }
-  else
-  {
-    buffer[BUF_SIZE - 1] = '\0';
-    return std::string(buffer);
-  }
-}
-
 BenchmarkExecutor::BenchmarkExecutor(const rclcpp::Node::SharedPtr& node, const std::string& robot_description_param)
   : planning_scene_monitor_{ std::make_shared<planning_scene_monitor::PlanningSceneMonitor>(node,
                                                                                             robot_description_param) }
@@ -277,7 +261,7 @@ bool BenchmarkExecutor::initializeBenchmarks(const BenchmarkOptions& options,
                                              moveit_msgs::msg::PlanningScene& scene_msg,
                                              std::vector<BenchmarkRequest>& requests)
 {
-  if (!plannerConfigurationsExist(options.getPlanningPipelineConfigurations(), options.getGroupName()))
+  if (!plannerConfigurationsExist(options.planning_pipelines, options.group_name))
   {
     return false;
   }
@@ -300,7 +284,7 @@ bool BenchmarkExecutor::initializeBenchmarks(const BenchmarkOptions& options,
       "Benchmark loaded %lu starts, %lu goals, %lu path constraints, %lu trajectory constraints, and %lu queries",
       start_states.size(), goal_constraints.size(), path_constraints.size(), traj_constraints.size(), queries.size());
 
-  moveit_msgs::msg::WorkspaceParameters workspace_parameters = options.getWorkspaceParameters();
+  moveit_msgs::msg::WorkspaceParameters workspace_parameters = options.workspace;
   // Make sure that workspace_parameters are set
   if (workspace_parameters.min_corner.x == workspace_parameters.max_corner.x &&
       workspace_parameters.min_corner.x == 0.0 &&
@@ -314,9 +298,6 @@ bool BenchmarkExecutor::initializeBenchmarks(const BenchmarkOptions& options,
     workspace_parameters.max_corner.x = workspace_parameters.max_corner.y = workspace_parameters.max_corner.z = 5.0;
   }
 
-  std::vector<double> goal_offset;
-  options.getGoalOffsets(goal_offset);
-
   // Create the combinations of BenchmarkRequests
 
   // 1) Create requests for combinations of start states,
@@ -328,8 +309,8 @@ bool BenchmarkExecutor::initializeBenchmarks(const BenchmarkOptions& options,
     benchmark_request.name = goal_constraint.name;
     benchmark_request.request.workspace_parameters = workspace_parameters;
     benchmark_request.request.goal_constraints = goal_constraint.constraints;
-    benchmark_request.request.group_name = options.getGroupName();
-    benchmark_request.request.allowed_planning_time = options.getTimeout();
+    benchmark_request.request.group_name = options.group_name;
+    benchmark_request.request.allowed_planning_time = options.timeout;
     benchmark_request.request.num_planning_attempts = 1;
 
     if (benchmark_request.request.goal_constraints.size() == 1 &&
@@ -338,7 +319,7 @@ bool BenchmarkExecutor::initializeBenchmarks(const BenchmarkOptions& options,
         benchmark_request.request.goal_constraints[0].visibility_constraints.empty() &&
         benchmark_request.request.goal_constraints[0].joint_constraints.empty())
     {
-      shiftConstraintsByOffset(benchmark_request.request.goal_constraints[0], goal_offset);
+      shiftConstraintsByOffset(benchmark_request.request.goal_constraints[0], options.goal_offsets);
     }
 
     std::vector<BenchmarkRequest> request_combos;
@@ -354,8 +335,8 @@ bool BenchmarkExecutor::initializeBenchmarks(const BenchmarkOptions& options,
     BenchmarkRequest benchmark_request;
     benchmark_request.name = query.name;
     benchmark_request.request = query.request;
-    benchmark_request.request.group_name = options.getGroupName();
-    benchmark_request.request.allowed_planning_time = options.getTimeout();
+    benchmark_request.request.group_name = options.group_name;
+    benchmark_request.request.allowed_planning_time = options.timeout;
     benchmark_request.request.num_planning_attempts = 1;
 
     // Make sure that workspace_parameters are set
@@ -386,8 +367,8 @@ bool BenchmarkExecutor::initializeBenchmarks(const BenchmarkOptions& options,
     BenchmarkRequest benchmark_request;
     benchmark_request.name = traj_constraint.name;
     benchmark_request.request.trajectory_constraints = traj_constraint.constraints;
-    benchmark_request.request.group_name = options.getGroupName();
-    benchmark_request.request.allowed_planning_time = options.getTimeout();
+    benchmark_request.request.group_name = options.group_name;
+    benchmark_request.request.allowed_planning_time = options.timeout;
     benchmark_request.request.num_planning_attempts = 1;
 
     if (benchmark_request.request.trajectory_constraints.constraints.size() == 1 &&
@@ -396,7 +377,7 @@ bool BenchmarkExecutor::initializeBenchmarks(const BenchmarkOptions& options,
         benchmark_request.request.trajectory_constraints.constraints[0].visibility_constraints.empty() &&
         benchmark_request.request.trajectory_constraints.constraints[0].joint_constraints.empty())
     {
-      shiftConstraintsByOffset(benchmark_request.request.trajectory_constraints.constraints[0], goal_offset);
+      shiftConstraintsByOffset(benchmark_request.request.trajectory_constraints.constraints[0], options.goal_offsets);
     }
 
     std::vector<BenchmarkRequest> request_combos;
@@ -415,7 +396,7 @@ bool BenchmarkExecutor::loadBenchmarkQueryData(
   try
   {
     warehouse_ros::DatabaseConnection::Ptr warehouse_connection = db_loader.loadDatabase();
-    warehouse_connection->setParams(options.getHostName(), options.getPort(), 20);
+    warehouse_connection->setParams(options.hostname, options.port, 20);
     if (warehouse_connection->connect())
     {
       planning_scene_storage_ = std::make_shared<moveit_warehouse::PlanningSceneStorage>(warehouse_connection);
@@ -439,29 +420,29 @@ bool BenchmarkExecutor::loadBenchmarkQueryData(
     return false;
   }
 
-  if (!loadPlanningScene(options.getSceneName(), scene_msg))
+  if (!loadPlanningScene(options.scene_name, scene_msg))
   {
     RCLCPP_ERROR(LOGGER, "Failed to load the planning scene");
     return false;
   }
-  if (!loadStates(options.getStartStateRegex(), start_states))
+  if (!loadStates(options.start_state_regex, start_states))
   {
     RCLCPP_ERROR(LOGGER, "Failed to load the states");
     return false;
   }
-  if (!loadPathConstraints(options.getGoalConstraintRegex(), goal_constraints))
+  if (!loadPathConstraints(options.goal_constraint_regex, goal_constraints))
   {
     RCLCPP_ERROR(LOGGER, "Failed to load the goal constraints");
   }
-  if (!loadPathConstraints(options.getPathConstraintRegex(), path_constraints))
+  if (!loadPathConstraints(options.path_constraint_regex, path_constraints))
   {
     RCLCPP_ERROR(LOGGER, "Failed to load the path constraints");
   }
-  if (!loadTrajectoryConstraints(options.getTrajectoryConstraintRegex(), traj_constraints))
+  if (!loadTrajectoryConstraints(options.trajectory_constraint_regex, traj_constraints))
   {
     RCLCPP_ERROR(LOGGER, "Failed to load the trajectory constraints");
   }
-  if (!loadQueries(options.getQueryRegex(), options.getSceneName(), queries))
+  if (!loadQueries(options.query_regex, options.scene_name, queries))
   {
     RCLCPP_ERROR(LOGGER, "Failed to get a query regex");
   }
@@ -819,30 +800,27 @@ void BenchmarkExecutor::runBenchmark(moveit_msgs::msg::MotionPlanRequest request
 {
   benchmark_data_.clear();
 
-  auto const& pipeline_map = options.getPlanningPipelineConfigurations();
-  auto const& parallel_pipeline_map = options.getParallelPipelineConfigurations();
-
   auto num_planners = 0;
-  for (const std::pair<const std::string, std::vector<std::string>>& pipeline_entry : pipeline_map)
+  for (const std::pair<const std::string, std::vector<std::string>>& pipeline_entry : options.planning_pipelines)
   {
     num_planners += pipeline_entry.second.size();
   }
-  num_planners += parallel_pipeline_map.size();
+  num_planners += options.parallel_planning_pipelines.size();
 
-  boost::progress_display progress(num_planners * options.getNumRuns(), std::cout);
+  boost::progress_display progress(num_planners * options.runs, std::cout);
 
   // Iterate through all planning pipelines
   auto planning_pipelines = moveit_cpp_->getPlanningPipelines();
-  for (const std::pair<const std::string, std::vector<std::string>>& pipeline_entry : pipeline_map)
+  for (const std::pair<const std::string, std::vector<std::string>>& pipeline_entry : options.planning_pipelines)
   {
     // Iterate through all planners configured for the pipeline
     for (const std::string& planner_id : pipeline_entry.second)
     {
       // This container stores all of the benchmark data for this planner
-      PlannerBenchmarkData planner_data(options.getNumRuns());
+      PlannerBenchmarkData planner_data(options.runs);
       // This vector stores all motion plan results for further evaluation
-      std::vector<planning_interface::MotionPlanDetailedResponse> responses(options.getNumRuns());
-      std::vector<bool> solved(options.getNumRuns());
+      std::vector<planning_interface::MotionPlanDetailedResponse> responses(options.runs);
+      std::vector<bool> solved(options.runs);
 
       request.planner_id = planner_id;
 
@@ -862,7 +840,7 @@ void BenchmarkExecutor::runBenchmark(moveit_msgs::msg::MotionPlanRequest request
       };
 
       // Iterate runs
-      for (int j = 0; j < options.getNumRuns(); ++j)
+      for (int j = 0; j < options.runs; ++j)
       {
         // Pre-run events
         for (PreRunEventFunction& pre_event_function : pre_event_functions_)
@@ -925,17 +903,17 @@ void BenchmarkExecutor::runBenchmark(moveit_msgs::msg::MotionPlanRequest request
     }
   }
 
-  if (!parallel_pipeline_map.empty())
+  if (!options.parallel_planning_pipelines.empty())
   {
     // Iterate through all parallel pipelines
     for (const std::pair<const std::string, std::vector<std::pair<std::string, std::string>>>& parallel_pipeline_entry :
-         parallel_pipeline_map)
+         options.parallel_planning_pipelines)
     {
       // This container stores all of the benchmark data for this planner
-      PlannerBenchmarkData planner_data(options.getNumRuns());
+      PlannerBenchmarkData planner_data(options.runs);
       // This vector stores all motion plan results for further evaluation
-      std::vector<planning_interface::MotionPlanDetailedResponse> responses(options.getNumRuns());
-      std::vector<bool> solved(options.getNumRuns());
+      std::vector<planning_interface::MotionPlanDetailedResponse> responses(options.runs);
+      std::vector<bool> solved(options.runs);
 
       // Planner start events
       for (PlannerStartEventFunction& planner_start_function : planner_start_functions_)
@@ -959,7 +937,7 @@ void BenchmarkExecutor::runBenchmark(moveit_msgs::msg::MotionPlanRequest request
       }
 
       // Iterate runs
-      for (int j = 0; j < options.getNumRuns(); ++j)
+      for (int j = 0; j < options.runs; ++j)
       {
         // Pre-run events
         for (PreRunEventFunction& pre_event_function : pre_event_functions_)
@@ -1216,25 +1194,35 @@ bool BenchmarkExecutor::computeTrajectoryDistance(const robot_trajectory::RobotT
 void BenchmarkExecutor::writeOutput(const BenchmarkRequest& benchmark_request, const std::string& start_time,
                                     double benchmark_duration, const BenchmarkOptions& options)
 {
-  auto const& pipelines = options.getPlanningPipelineConfigurations();
-  auto const& parallel_pipelines = options.getParallelPipelineConfigurations();
-
   // Count number of benchmarked planners
   size_t num_planners = 0;
-  for (const std::pair<const std::string, std::vector<std::string>>& pipeline : pipelines)
+  for (const std::pair<const std::string, std::vector<std::string>>& pipeline : options.planning_pipelines)
   {
     num_planners += pipeline.second.size();
   }
-  num_planners += parallel_pipelines.size();
+  num_planners += options.parallel_planning_pipelines.size();
 
-  std::string hostname = getHostname();
+  std::string hostname = [&]() {
+    static const int BUF_SIZE = 1024;
+    char buffer[BUF_SIZE];
+    int err = gethostname(buffer, sizeof(buffer));
+    if (err != 0)
+    {
+      return std::string();
+    }
+    else
+    {
+      buffer[BUF_SIZE - 1] = '\0';
+      return std::string(buffer);
+    }
+  }();
   if (hostname.empty())
   {
     hostname = "UNKNOWN";
   }
 
   // Set output directory name
-  std::string filename = options.getOutputDirectory();
+  std::string filename = options.output_directory;
   if (!filename.empty() && filename[filename.size() - 1] != '/')
   {
     filename.append("/");
@@ -1244,8 +1232,8 @@ void BenchmarkExecutor::writeOutput(const BenchmarkRequest& benchmark_request, c
   std::filesystem::create_directories(filename);
 
   // Create output log file name
-  filename += (options.getBenchmarkName().empty() ? "" : options.getBenchmarkName() + "_") + benchmark_request.name +
-              "_" + getHostname() + "_" + start_time + ".log";
+  filename += (options.benchmark_name.empty() ? "" : options.benchmark_name + "_") + benchmark_request.name + "_" +
+              hostname + "_" + start_time + ".log";
 
   // Write benchmark results to file
   std::ofstream out(filename.c_str());
@@ -1280,7 +1268,7 @@ void BenchmarkExecutor::writeOutput(const BenchmarkRequest& benchmark_request, c
   out << benchmark_request.request.allowed_planning_time << " seconds per run" << '\n';
   // There is no memory cap
   out << "-1 MB per run" << '\n';
-  out << options.getNumRuns() << " runs per planner" << '\n';
+  out << options.runs << " runs per planner" << '\n';
   out << benchmark_duration << " seconds spent to collect the data" << '\n';
 
   // No enum types
@@ -1292,7 +1280,7 @@ void BenchmarkExecutor::writeOutput(const BenchmarkRequest& benchmark_request, c
   size_t run_id = 0;
 
   // Write data for individual planners to the output file
-  for (const std::pair<const std::string, std::vector<std::string>>& pipeline : pipelines)
+  for (const std::pair<const std::string, std::vector<std::string>>& pipeline : options.planning_pipelines)
   {
     for (std::size_t i = 0; i < pipeline.second.size(); ++i, ++run_id)
     {
@@ -1340,7 +1328,7 @@ void BenchmarkExecutor::writeOutput(const BenchmarkRequest& benchmark_request, c
 
   // Write results for parallel planning pipelines to output file
   for (const std::pair<const std::string, std::vector<std::pair<std::string, std::string>>>& parallel_pipeline :
-       parallel_pipelines)
+       options.parallel_planning_pipelines)
   {
     // Write the name of the planner and the used pipeline
     out << parallel_pipeline.first << " (" << parallel_pipeline.first << ")" << '\n';

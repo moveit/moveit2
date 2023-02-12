@@ -194,7 +194,7 @@ protected:
                                  std::vector<BenchmarkRequest>& combos);
 
   /// Execute the given motion plan request on the set of planners for the set number of runs
-  void runBenchmark(moveit_msgs::msg::MotionPlanRequest request,const BenchmarkOptions& options);
+  void runBenchmark(moveit_msgs::msg::MotionPlanRequest request, const BenchmarkOptions& options);
 
   std::shared_ptr<planning_scene_monitor::PlanningSceneMonitor> planning_scene_monitor_;
   std::shared_ptr<moveit_warehouse::PlanningSceneStorage> planning_scene_storage_;

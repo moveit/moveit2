@@ -79,44 +79,6 @@ struct BenchmarkOptions
   /** \brief Constructor */
   BenchmarkOptions(const rclcpp::Node::SharedPtr& node);
 
-  /** \brief Get the name of the warehouse database host server */
-  const std::string& getHostName() const;
-  /** \brief Get the port of the warehouse database host server */
-  int getPort() const;
-  /** \brief Get the reference name of the planning scene stored inside the warehouse database */
-  const std::string& getSceneName() const;
-
-  /** \brief Get the specified number of benchmark query runs */
-  int getNumRuns() const;
-  /** \brief Get the maximum timeout per planning attempt */
-  double getTimeout() const;
-  /** \brief Get the reference name of the benchmark */
-  const std::string& getBenchmarkName() const;
-  /** \brief Get the name of the planning group to run the benchmark with */
-  const std::string& getGroupName() const;
-  /** \brief Get the target directory for the generated benchmark result data */
-  const std::string& getOutputDirectory() const;
-  /** \brief Get the regex expression for matching the names of all queries to run */
-  const std::string& getQueryRegex() const;
-  /** \brief Get the regex expression for matching the names of all start states to plan from */
-  const std::string& getStartStateRegex() const;
-  /** \brief Get the regex expression for matching the names of all goal constraints to plan to */
-  const std::string& getGoalConstraintRegex() const;
-  /** \brief Get the regex expression for matching the names of all path constraints to plan with */
-  const std::string& getPathConstraintRegex() const;
-  /** \brief Get the regex expression for matching the names of all trajectory constraints to plan with */
-  const std::string& getTrajectoryConstraintRegex() const;
-  /** \brief Get the names of all predefined poses to consider for planning */
-  const std::vector<std::string>& getPredefinedPoses() const;
-  /** \brief Get the name of the planning group for which the predefined poses are defined */
-  const std::string& getPredefinedPosesGroup() const;
-  /** \brief Get the constant position/orientation offset to be used for shifting all goal constraints */
-  void getGoalOffsets(std::vector<double>& offsets) const;
-  /** \brief Get all planning pipeline names mapped to their parameter configuration */
-  const std::map<std::string, std::vector<std::string>>& getPlanningPipelineConfigurations() const;
-  /** \brief Get all parallel planning pipeline names mapped to their parameter configuration */
-  const std::map<std::string, std::vector<std::pair<std::string, std::string>>>&
-  getParallelPipelineConfigurations() const;
   /** \brief Get all planning pipeline names */
   void getPlanningPipelineNames(std::vector<std::string>& planning_pipeline_names) const;
 
@@ -131,30 +93,30 @@ struct BenchmarkOptions
   void readWorkspaceParameters(const rclcpp::Node::SharedPtr& node);
   void readGoalOffset(const rclcpp::Node::SharedPtr& node);
 
-  /// warehouse parameters
-  std::string hostname_;
-  int port_;
-  std::string scene_name_;
+  /// Warehouse parameters
+  std::string hostname;    // Host address for warehouse
+  int port;                // Port name for warehouse
+  std::string scene_name;  // Scene name to load for this experiment
 
-  /// benchmark parameters
-  int runs_;
-  double timeout_;
-  std::string benchmark_name_;
-  std::string group_name_;
-  std::string output_directory_;
-  std::string query_regex_;
-  std::string start_state_regex_;
-  std::string goal_constraint_regex_;
-  std::string path_constraint_regex_;
-  std::string trajectory_constraint_regex_;
-  std::vector<std::string> predefined_poses_;
-  std::string predefined_poses_group_;
-  double goal_offsets[6];
+  /// Benchmark parameters
+  int runs;                                   // Number of experiment runs
+  double timeout;                             // Experiment timeout
+  std::string benchmark_name;                 // Experiment name
+  std::string group_name;                     // Joint group name
+  std::string output_directory;               // Output directory for results file
+  std::string query_regex;                    // Regex for queries in database
+  std::string start_state_regex;              // Regex for start_states in database
+  std::string goal_constraint_regex;          // Regex for goal_constraints in database
+  std::string path_constraint_regex;          // Regex for path_constraints in database
+  std::string trajectory_constraint_regex;    // Regex for trajectory_constraint in database
+  std::vector<std::string> predefined_poses;  // List of named targets
+  std::string predefined_poses_group;         // Group where the predefined poses are specified
+  std::vector<double> goal_offsets;
 
   /// planner configurations
-  std::map<std::string, std::vector<std::string>> planning_pipelines_;
-  std::map<std::string, std::vector<std::pair<std::string, std::string>>> parallel_planning_pipelines_;
+  std::map<std::string, std::vector<std::string>> planning_pipelines;
+  std::map<std::string, std::vector<std::pair<std::string, std::string>>> parallel_planning_pipelines;
 
-  moveit_msgs::msg::WorkspaceParameters workspace_;
+  moveit_msgs::msg::WorkspaceParameters workspace;
 };
 }  // namespace moveit_ros_benchmarks

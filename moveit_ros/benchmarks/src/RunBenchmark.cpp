@@ -69,14 +69,14 @@ int main(int argc, char** argv)
     return 1;
   }
 
-  if (options.scene_name_.empty())
+  if (options.scene_name.empty())
   {
     std::vector<std::string> scene_names;
     try
     {
       warehouse_ros::DatabaseLoader db_loader(node);
       warehouse_ros::DatabaseConnection::Ptr warehouse_connection = db_loader.loadDatabase();
-      warehouse_connection->setParams(options.getHostName(), options.getPort(), 20);
+      warehouse_connection->setParams(options.hostname, options.port, 20);
       if (warehouse_connection->connect())
       {
         auto planning_scene_storage = moveit_warehouse::PlanningSceneStorage(warehouse_connection);
@@ -99,7 +99,7 @@ int main(int argc, char** argv)
     // Running benchmarks
     for (auto const& name : scene_names)
     {
-      options.scene_name_ = name;
+      options.scene_name = name;
       if (!server.runBenchmarks(options))
       {
         RCLCPP_ERROR(LOGGER, "Failed to run all benchmarks");
