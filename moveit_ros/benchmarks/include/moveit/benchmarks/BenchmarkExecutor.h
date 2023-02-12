@@ -165,7 +165,7 @@ protected:
                                  const robot_trajectory::RobotTrajectory& traj_second, double& result_distance);
 
   virtual void writeOutput(const BenchmarkRequest& benchmark_request, const std::string& start_time,
-                           double benchmark_duration);
+                           double benchmark_duration, const BenchmarkOptions& options);
 
   void shiftConstraintsByOffset(moveit_msgs::msg::Constraints& constraints, const std::vector<double>& offset);
 
@@ -194,7 +194,7 @@ protected:
                                  std::vector<BenchmarkRequest>& combos);
 
   /// Execute the given motion plan request on the set of planners for the set number of runs
-  void runBenchmark(moveit_msgs::msg::MotionPlanRequest request);
+  void runBenchmark(moveit_msgs::msg::MotionPlanRequest request,const BenchmarkOptions& options);
 
   std::shared_ptr<planning_scene_monitor::PlanningSceneMonitor> planning_scene_monitor_;
   std::shared_ptr<moveit_warehouse::PlanningSceneStorage> planning_scene_storage_;
@@ -206,9 +206,6 @@ protected:
   rclcpp::Node::SharedPtr node_;
   warehouse_ros::DatabaseLoader db_loader;
   planning_scene::PlanningScenePtr planning_scene_;
-
-  BenchmarkOptions options_;
-
   std::shared_ptr<moveit_cpp::MoveItCpp> moveit_cpp_;
 
   std::vector<PlannerBenchmarkData> benchmark_data_;

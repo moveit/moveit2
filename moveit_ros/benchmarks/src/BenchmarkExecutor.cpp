@@ -107,7 +107,6 @@ BenchmarkExecutor::BenchmarkExecutor(const rclcpp::Node::SharedPtr& node, const 
   , trajectory_constraints_storage_{ nullptr }
   , node_{ node }
   , db_loader{ node }
-  , options_{ node }
 {
   planning_scene_ = planning_scene_monitor_->getPlanningScene();
 }
@@ -257,7 +256,7 @@ bool BenchmarkExecutor::runBenchmarks(const BenchmarkOptions& options)
 
       RCLCPP_INFO(LOGGER, "Benchmarking query '%s' (%lu of %lu)", queries[i].name.c_str(), i + 1, queries.size());
       std::chrono::system_clock::time_point start_time = std::chrono::system_clock::now();
-      runBenchmark(queries[i].request);
+      runBenchmark(queries[i].request, options);
       std::chrono::duration<double> dt = std::chrono::system_clock::now() - start_time;
       double duration = dt.count();
 
@@ -266,7 +265,7 @@ bool BenchmarkExecutor::runBenchmarks(const BenchmarkOptions& options)
         query_end_fn(queries[i].request, planning_scene_);
       }
 
-      writeOutput(queries[i], boost::posix_time::to_iso_extended_string(toBoost(start_time)), duration);
+      writeOutput(queries[i], boost::posix_time::to_iso_extended_string(toBoost(start_time)), duration, options);
     }
 
     return true;
@@ -405,8 +404,6 @@ bool BenchmarkExecutor::initializeBenchmarks(const BenchmarkOptions& options,
     createRequestCombinations(benchmark_request, start_states, no_path_constraints, request_combos);
     requests.insert(requests.end(), request_combos.begin(), request_combos.end());
   }
-
-  options_ = options;
   return true;
 }
 
@@ -818,12 +815,12 @@ bool BenchmarkExecutor::loadTrajectoryConstraints(const std::string& regex,
   return true;
 }
 
-void BenchmarkExecutor::runBenchmark(moveit_msgs::msg::MotionPlanRequest request)
+void BenchmarkExecutor::runBenchmark(moveit_msgs::msg::MotionPlanRequest request, const BenchmarkOptions& options)
 {
   benchmark_data_.clear();
 
-  auto const& pipeline_map = options_.getPlanningPipelineConfigurations();
-  auto const& parallel_pipeline_map = options_.getParallelPipelineConfigurations();
+  auto const& pipeline_map = options.getPlanningPipelineConfigurations();
+  auto const& parallel_pipeline_map = options.getParallelPipelineConfigurations();
 
   auto num_planners = 0;
   for (const std::pair<const std::string, std::vector<std::string>>& pipeline_entry : pipeline_map)
@@ -832,7 +829,7 @@ void BenchmarkExecutor::runBenchmark(moveit_msgs::msg::MotionPlanRequest request
   }
   num_planners += parallel_pipeline_map.size();
 
-  boost::progress_display progress(num_planners * options_.getNumRuns(), std::cout);
+  boost::progress_display progress(num_planners * options.getNumRuns(), std::cout);
 
   // Iterate through all planning pipelines
   auto planning_pipelines = moveit_cpp_->getPlanningPipelines();
@@ -842,10 +839,10 @@ void BenchmarkExecutor::runBenchmark(moveit_msgs::msg::MotionPlanRequest request
     for (const std::string& planner_id : pipeline_entry.second)
     {
       // This container stores all of the benchmark data for this planner
-      PlannerBenchmarkData planner_data(options_.getNumRuns());
+      PlannerBenchmarkData planner_data(options.getNumRuns());
       // This vector stores all motion plan results for further evaluation
-      std::vector<planning_interface::MotionPlanDetailedResponse> responses(options_.getNumRuns());
-      std::vector<bool> solved(options_.getNumRuns());
+      std::vector<planning_interface::MotionPlanDetailedResponse> responses(options.getNumRuns());
+      std::vector<bool> solved(options.getNumRuns());
 
       request.planner_id = planner_id;
 
@@ -865,7 +862,7 @@ void BenchmarkExecutor::runBenchmark(moveit_msgs::msg::MotionPlanRequest request
       };
 
       // Iterate runs
-      for (int j = 0; j < options_.getNumRuns(); ++j)
+      for (int j = 0; j < options.getNumRuns(); ++j)
       {
         // Pre-run events
         for (PreRunEventFunction& pre_event_function : pre_event_functions_)
@@ -935,10 +932,10 @@ void BenchmarkExecutor::runBenchmark(moveit_msgs::msg::MotionPlanRequest request
          parallel_pipeline_map)
     {
       // This container stores all of the benchmark data for this planner
-      PlannerBenchmarkData planner_data(options_.getNumRuns());
+      PlannerBenchmarkData planner_data(options.getNumRuns());
       // This vector stores all motion plan results for further evaluation
-      std::vector<planning_interface::MotionPlanDetailedResponse> responses(options_.getNumRuns());
-      std::vector<bool> solved(options_.getNumRuns());
+      std::vector<planning_interface::MotionPlanDetailedResponse> responses(options.getNumRuns());
+      std::vector<bool> solved(options.getNumRuns());
 
       // Planner start events
       for (PlannerStartEventFunction& planner_start_function : planner_start_functions_)
@@ -962,7 +959,7 @@ void BenchmarkExecutor::runBenchmark(moveit_msgs::msg::MotionPlanRequest request
       }
 
       // Iterate runs
-      for (int j = 0; j < options_.getNumRuns(); ++j)
+      for (int j = 0; j < options.getNumRuns(); ++j)
       {
         // Pre-run events
         for (PreRunEventFunction& pre_event_function : pre_event_functions_)
@@ -1217,10 +1214,10 @@ bool BenchmarkExecutor::computeTrajectoryDistance(const robot_trajectory::RobotT
 }
 
 void BenchmarkExecutor::writeOutput(const BenchmarkRequest& benchmark_request, const std::string& start_time,
-                                    double benchmark_duration)
+                                    double benchmark_duration, const BenchmarkOptions& options)
 {
-  auto const& pipelines = options_.getPlanningPipelineConfigurations();
-  auto const& parallel_pipelines = options_.getParallelPipelineConfigurations();
+  auto const& pipelines = options.getPlanningPipelineConfigurations();
+  auto const& parallel_pipelines = options.getParallelPipelineConfigurations();
 
   // Count number of benchmarked planners
   size_t num_planners = 0;
@@ -1237,7 +1234,7 @@ void BenchmarkExecutor::writeOutput(const BenchmarkRequest& benchmark_request, c
   }
 
   // Set output directory name
-  std::string filename = options_.getOutputDirectory();
+  std::string filename = options.getOutputDirectory();
   if (!filename.empty() && filename[filename.size() - 1] != '/')
   {
     filename.append("/");
@@ -1247,7 +1244,7 @@ void BenchmarkExecutor::writeOutput(const BenchmarkRequest& benchmark_request, c
   std::filesystem::create_directories(filename);
 
   // Create output log file name
-  filename += (options_.getBenchmarkName().empty() ? "" : options_.getBenchmarkName() + "_") + benchmark_request.name +
+  filename += (options.getBenchmarkName().empty() ? "" : options.getBenchmarkName() + "_") + benchmark_request.name +
               "_" + getHostname() + "_" + start_time + ".log";
 
   // Write benchmark results to file
@@ -1283,7 +1280,7 @@ void BenchmarkExecutor::writeOutput(const BenchmarkRequest& benchmark_request, c
   out << benchmark_request.request.allowed_planning_time << " seconds per run" << '\n';
   // There is no memory cap
   out << "-1 MB per run" << '\n';
-  out << options_.getNumRuns() << " runs per planner" << '\n';
+  out << options.getNumRuns() << " runs per planner" << '\n';
   out << benchmark_duration << " seconds spent to collect the data" << '\n';
 
   // No enum types
