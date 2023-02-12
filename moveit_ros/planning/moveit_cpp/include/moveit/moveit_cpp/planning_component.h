@@ -201,7 +201,7 @@ public:
   planning_interface::MotionPlanResponse plan();
   /** \brief Run a plan from start or current state to fulfill the last goal constraints provided by setGoal() using the
    * provided PlanRequestParameters. */
-  planning_interface::MotionPlanResponse plan(const PlanRequestParameters& parameters, const bool store_solution = true,
+  planning_interface::MotionPlanResponse plan(const PlanRequestParameters& parameters,
                                               planning_scene::PlanningScenePtr const_planning_scene = nullptr);
 
   /** \brief Run a plan from start or current state to fulfill the last goal constraints provided by setGoal() using the

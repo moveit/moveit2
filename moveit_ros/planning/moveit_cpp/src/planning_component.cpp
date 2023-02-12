@@ -113,7 +113,6 @@ bool PlanningComponent::setTrajectoryConstraints(const moveit_msgs::msg::Traject
 }
 
 planning_interface::MotionPlanResponse PlanningComponent::plan(const PlanRequestParameters& parameters,
-                                                               const bool store_solution,
                                                                planning_scene::PlanningScenePtr planning_scene)
 {
   auto plan_solution = planning_interface::MotionPlanResponse();
