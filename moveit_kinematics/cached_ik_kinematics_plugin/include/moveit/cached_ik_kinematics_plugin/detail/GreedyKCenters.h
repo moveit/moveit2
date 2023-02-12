@@ -57,7 +57,10 @@ public:
   using Matrix = Eigen::MatrixXd;
 
   GreedyKCenters() = default;
-
+  GreedyKCenters(const GreedyKCenters&) = default;
+  GreedyKCenters(GreedyKCenters&&) noexcept = default;
+  GreedyKCenters& operator=(const GreedyKCenters&) = default;
+  GreedyKCenters& operator=(GreedyKCenters&&) noexcept = default;
   virtual ~GreedyKCenters() = default;
 
   /** \brief Set the distance function to use */

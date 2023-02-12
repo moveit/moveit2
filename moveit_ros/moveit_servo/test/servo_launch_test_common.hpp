@@ -160,7 +160,7 @@ public:
     // Status sub (we need this to check that we've started / stopped)
     sub_servo_status_ = node_->create_subscription<std_msgs::msg::Int8>(
         resolveServoTopicName(servo_parameters_->status_topic), rclcpp::SystemDefaultsQoS(),
-        [this](const std_msgs::msg::Int8::SharedPtr msg) { return statusCB(msg); });
+        [this](const std_msgs::msg::Int8::ConstSharedPtr& msg) { return statusCB(msg); });
     return true;
   }
 
@@ -234,7 +234,7 @@ public:
   {
     sub_collision_scale_ = node_->create_subscription<std_msgs::msg::Float64>(
         resolveServoTopicName("~/collision_velocity_scale"), rclcpp::SystemDefaultsQoS(),
-        [this](const std_msgs::msg::Float64::SharedPtr msg) { return collisionScaleCB(msg); });
+        [this](const std_msgs::msg::Float64::ConstSharedPtr& msg) { return collisionScaleCB(msg); });
     return true;
   }
 
@@ -244,14 +244,14 @@ public:
     {
       sub_trajectory_cmd_output_ = node_->create_subscription<trajectory_msgs::msg::JointTrajectory>(
           resolveServoTopicName(servo_parameters_->command_out_topic), rclcpp::SystemDefaultsQoS(),
-          [this](const trajectory_msgs::msg::JointTrajectory::SharedPtr msg) { return trajectoryCommandCB(msg); });
+          [this](const trajectory_msgs::msg::JointTrajectory::ConstSharedPtr& msg) { return trajectoryCommandCB(msg); });
       return true;
     }
     else if (command_type == "std_msgs/Float64MultiArray")
     {
       sub_array_cmd_output_ = node_->create_subscription<std_msgs::msg::Float64MultiArray>(
           resolveServoTopicName(servo_parameters_->command_out_topic), rclcpp::SystemDefaultsQoS(),
-          [this](const std_msgs::msg::Float64MultiArray::SharedPtr msg) { return arrayCommandCB(msg); });
+          [this](const std_msgs::msg::Float64MultiArray::ConstSharedPtr& msg) { return arrayCommandCB(msg); });
       return true;
     }
     else
@@ -269,20 +269,20 @@ public:
     return true;
   }
 
-  void statusCB(const std_msgs::msg::Int8::SharedPtr& msg)
+  void statusCB(const std_msgs::msg::Int8::ConstSharedPtr& msg)
   {
     const std::lock_guard<std::mutex> lock(latest_state_mutex_);
     ++num_status_;
-    latest_status_ = static_cast<StatusCode>(msg.get()->data);
+    latest_status_ = static_cast<StatusCode>(msg->data);
     if (latest_status_ == status_tracking_code_)
       status_seen_ = true;
   }
 
-  void collisionScaleCB(const std_msgs::msg::Float64::SharedPtr& msg)
+  void collisionScaleCB(const std_msgs::msg::Float64::ConstSharedPtr& msg)
   {
     const std::lock_guard<std::mutex> lock(latest_state_mutex_);
     ++num_collision_scale_;
-    latest_collision_scale_ = msg.get()->data;
+    latest_collision_scale_ = msg->data;
   }
 
   void jointStateCB(const sensor_msgs::msg::JointState::ConstSharedPtr& msg)
@@ -292,14 +292,14 @@ public:
     latest_joint_state_ = msg;
   }
 
-  void trajectoryCommandCB(const trajectory_msgs::msg::JointTrajectory::SharedPtr& msg)
+  void trajectoryCommandCB(const trajectory_msgs::msg::JointTrajectory::ConstSharedPtr& msg)
   {
     const std::lock_guard<std::mutex> lock(latest_state_mutex_);
     ++num_commands_;
     latest_traj_cmd_ = msg;
   }
 
-  void arrayCommandCB(const std_msgs::msg::Float64MultiArray::SharedPtr& msg)
+  void arrayCommandCB(const std_msgs::msg::Float64MultiArray::ConstSharedPtr& msg)
   {
     const std::lock_guard<std::mutex> lock(latest_state_mutex_);
     ++num_commands_;
@@ -488,7 +488,7 @@ protected:
   sensor_msgs::msg::JointState::ConstSharedPtr latest_joint_state_;
 
   size_t num_commands_;
-  trajectory_msgs::msg::JointTrajectory::SharedPtr latest_traj_cmd_;
+  trajectory_msgs::msg::JointTrajectory::ConstSharedPtr latest_traj_cmd_;
   std_msgs::msg::Float64MultiArray::ConstSharedPtr latest_array_cmd_;
 
   bool status_seen_;

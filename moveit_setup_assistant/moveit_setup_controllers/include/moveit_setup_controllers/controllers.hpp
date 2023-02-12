@@ -54,6 +54,13 @@ public:
   {
   }
 
+  AdditionalControllerField() = default;
+  AdditionalControllerField(const AdditionalControllerField&) = default;
+  AdditionalControllerField(AdditionalControllerField&&) = default;
+  AdditionalControllerField& operator=(const AdditionalControllerField&) = default;
+  AdditionalControllerField& operator=(AdditionalControllerField&&) = default;
+  virtual ~AdditionalControllerField() = default;
+
   /**
    * @brief Overridable method for changing the default value based on the controller_type
    */
