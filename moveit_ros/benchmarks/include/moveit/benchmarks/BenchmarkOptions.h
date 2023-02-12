@@ -42,6 +42,8 @@
 #include <vector>
 #include <moveit_msgs/msg/workspace_parameters.hpp>
 
+static constexpr int CARTESIAN_DOF = 6;
+
 namespace moveit_ros_benchmarks
 {
 /// \brief Options to configure a benchmark experiment. The configuration is provided via ROS2 parameters
@@ -111,7 +113,8 @@ struct BenchmarkOptions
   std::string trajectory_constraint_regex;    // Regex for trajectory_constraint in database
   std::vector<std::string> predefined_poses;  // List of named targets
   std::string predefined_poses_group;         // Group where the predefined poses are specified
-  std::vector<double> goal_offsets;
+  std::vector<double> goal_offsets =
+      std::vector<double>(CARTESIAN_DOF);  // Offset applied to goal constraints: x, y, z, roll, pitch, yaw
 
   /// planner configurations
   std::map<std::string, std::vector<std::string>> planning_pipelines;

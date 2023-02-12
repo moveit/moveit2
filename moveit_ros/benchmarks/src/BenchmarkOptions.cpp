@@ -46,9 +46,6 @@ BenchmarkOptions::BenchmarkOptions(const rclcpp::Node::SharedPtr& node)
   {
     throw(std::runtime_error("Failed to initialize BenchmarkOptions"));
   }
-
-  // x, y, z, roll, pitch, yaw
-  goal_offsets.resize(6);
 }
 
 bool BenchmarkOptions::readBenchmarkOptions(const rclcpp::Node::SharedPtr& node)
@@ -88,7 +85,7 @@ bool BenchmarkOptions::readBenchmarkOptions(const rclcpp::Node::SharedPtr& node)
 
     if (!node->get_parameter(std::string("benchmark_config.parameters.group"), group_name))
     {
-      RCLCPP_INFO(LOGGER, "Benchmark group NOT specified");
+      RCLCPP_WARN(LOGGER, "Benchmark group NOT specified");
     }
 
     if (node->has_parameter("benchmark_config.parameters.workspace"))
@@ -118,12 +115,12 @@ bool BenchmarkOptions::readBenchmarkOptions(const rclcpp::Node::SharedPtr& node)
     }
 
     // Reading in goal_offset (or defaulting to zero)
-    node->get_parameter_or(std::string("benchmark_config.parameters.goal_offset.x"), goal_offsets[0], 0.0);
-    node->get_parameter_or(std::string("benchmark_config.parameters.goal_offset.y"), goal_offsets[1], 0.0);
-    node->get_parameter_or(std::string("benchmark_config.parameters.goal_offset.z"), goal_offsets[2], 0.0);
-    node->get_parameter_or(std::string("benchmark_config.parameters.goal_offset.roll"), goal_offsets[3], 0.0);
-    node->get_parameter_or(std::string("benchmark_config.parameters.goal_offset.pitch"), goal_offsets[4], 0.0);
-    node->get_parameter_or(std::string("benchmark_config.parameters.goal_offset.yaw"), goal_offsets[5], 0.0);
+    node->get_parameter_or(std::string("benchmark_config.parameters.goal_offset.x"), goal_offsets.at(0), 0.0);
+    node->get_parameter_or(std::string("benchmark_config.parameters.goal_offset.y"), goal_offsets.at(1), 0.0);
+    node->get_parameter_or(std::string("benchmark_config.parameters.goal_offset.z"), goal_offsets.at(2), 0.0);
+    node->get_parameter_or(std::string("benchmark_config.parameters.goal_offset.roll"), goal_offsets.at(3), 0.0);
+    node->get_parameter_or(std::string("benchmark_config.parameters.goal_offset.pitch"), goal_offsets.at(4), 0.0);
+    node->get_parameter_or(std::string("benchmark_config.parameters.goal_offset.yaw"), goal_offsets.at(5), 0.0);
 
     RCLCPP_INFO(LOGGER, "Benchmark name: '%s'", benchmark_name.c_str());
     RCLCPP_INFO(LOGGER, "Benchmark #runs: %d", runs);
@@ -133,8 +130,8 @@ bool BenchmarkOptions::readBenchmarkOptions(const rclcpp::Node::SharedPtr& node)
     RCLCPP_INFO(LOGGER, "Benchmark start state regex: '%s':", start_state_regex.c_str());
     RCLCPP_INFO(LOGGER, "Benchmark goal constraint regex: '%s':", goal_constraint_regex.c_str());
     RCLCPP_INFO(LOGGER, "Benchmark path constraint regex: '%s':", path_constraint_regex.c_str());
-    RCLCPP_INFO(LOGGER, "Benchmark goal offsets (%f %f %f, %f %f %f)", goal_offsets[0], goal_offsets[1],
-                goal_offsets[2], goal_offsets[3], goal_offsets[4], goal_offsets[5]);
+    RCLCPP_INFO(LOGGER, "Benchmark goal offsets (%f %f %f, %f %f %f)", goal_offsets.at(0), goal_offsets.at(1),
+                goal_offsets.at(2), goal_offsets.at(3), goal_offsets.at(4), goal_offsets.at(5));
     RCLCPP_INFO(LOGGER, "Benchmark output directory: %s", output_directory.c_str());
     RCLCPP_INFO_STREAM(LOGGER, "Benchmark workspace: min_corner: ["
                                    << workspace.min_corner.x << ", " << workspace.min_corner.y << ", "

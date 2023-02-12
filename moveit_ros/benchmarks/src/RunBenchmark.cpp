@@ -114,6 +114,7 @@ int main(int argc, char** argv)
     }
   }
 
+  RCLCPP_INFO(LOGGER, "Finished benchmarking");
   rclcpp::spin(node);
   rclcpp::shutdown();
   return 0;

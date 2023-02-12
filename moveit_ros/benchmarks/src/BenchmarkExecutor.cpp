@@ -314,12 +314,12 @@ bool BenchmarkExecutor::initializeBenchmarks(const BenchmarkOptions& options,
     benchmark_request.request.num_planning_attempts = 1;
 
     if (benchmark_request.request.goal_constraints.size() == 1 &&
-        benchmark_request.request.goal_constraints[0].position_constraints.size() == 1 &&
-        benchmark_request.request.goal_constraints[0].orientation_constraints.size() == 1 &&
-        benchmark_request.request.goal_constraints[0].visibility_constraints.empty() &&
-        benchmark_request.request.goal_constraints[0].joint_constraints.empty())
+        benchmark_request.request.goal_constraints.at(0).position_constraints.size() == 1 &&
+        benchmark_request.request.goal_constraints.at(0).orientation_constraints.size() == 1 &&
+        benchmark_request.request.goal_constraints.at(0).visibility_constraints.empty() &&
+        benchmark_request.request.goal_constraints.at(0).joint_constraints.empty())
     {
-      shiftConstraintsByOffset(benchmark_request.request.goal_constraints[0], options.goal_offsets);
+      shiftConstraintsByOffset(benchmark_request.request.goal_constraints.at(0), options.goal_offsets);
     }
 
     std::vector<BenchmarkRequest> request_combos;
@@ -372,12 +372,12 @@ bool BenchmarkExecutor::initializeBenchmarks(const BenchmarkOptions& options,
     benchmark_request.request.num_planning_attempts = 1;
 
     if (benchmark_request.request.trajectory_constraints.constraints.size() == 1 &&
-        benchmark_request.request.trajectory_constraints.constraints[0].position_constraints.size() == 1 &&
-        benchmark_request.request.trajectory_constraints.constraints[0].orientation_constraints.size() == 1 &&
-        benchmark_request.request.trajectory_constraints.constraints[0].visibility_constraints.empty() &&
-        benchmark_request.request.trajectory_constraints.constraints[0].joint_constraints.empty())
+        benchmark_request.request.trajectory_constraints.constraints.at(0).position_constraints.size() == 1 &&
+        benchmark_request.request.trajectory_constraints.constraints.at(0).orientation_constraints.size() == 1 &&
+        benchmark_request.request.trajectory_constraints.constraints.at(0).visibility_constraints.empty() &&
+        benchmark_request.request.trajectory_constraints.constraints.at(0).joint_constraints.empty())
     {
-      shiftConstraintsByOffset(benchmark_request.request.trajectory_constraints.constraints[0], options.goal_offsets);
+      shiftConstraintsByOffset(benchmark_request.request.trajectory_constraints.constraints.at(0), options.goal_offsets);
     }
 
     std::vector<BenchmarkRequest> request_combos;
@@ -452,14 +452,15 @@ bool BenchmarkExecutor::loadBenchmarkQueryData(
 void BenchmarkExecutor::shiftConstraintsByOffset(moveit_msgs::msg::Constraints& constraints,
                                                  const std::vector<double>& offset)
 {
-  Eigen::Isometry3d offset_tf(Eigen::AngleAxis<double>(offset[3], Eigen::Vector3d::UnitX()) *
-                              Eigen::AngleAxis<double>(offset[4], Eigen::Vector3d::UnitY()) *
-                              Eigen::AngleAxis<double>(offset[5], Eigen::Vector3d::UnitZ()));
-  offset_tf.translation() = Eigen::Vector3d(offset[0], offset[1], offset[2]);
+  Eigen::Isometry3d offset_tf(Eigen::AngleAxis<double>(offset.at(3), Eigen::Vector3d::UnitX()) *
+                              Eigen::AngleAxis<double>(offset.at(4), Eigen::Vector3d::UnitY()) *
+                              Eigen::AngleAxis<double>(offset.at(5), Eigen::Vector3d::UnitZ()));
+  offset_tf.translation() = Eigen::Vector3d(offset.at(0), offset.at(1), offset.at(2));
 
   geometry_msgs::msg::Pose constraint_pose_msg;
-  constraint_pose_msg.position = constraints.position_constraints[0].constraint_region.primitive_poses[0].position;
-  constraint_pose_msg.orientation = constraints.orientation_constraints[0].orientation;
+  constraint_pose_msg.position =
+      constraints.position_constraints.at(0).constraint_region.primitive_poses.at(0).position;
+  constraint_pose_msg.orientation = constraints.orientation_constraints.at(0).orientation;
   Eigen::Isometry3d constraint_pose;
   tf2::fromMsg(constraint_pose_msg, constraint_pose);
 
@@ -467,8 +468,8 @@ void BenchmarkExecutor::shiftConstraintsByOffset(moveit_msgs::msg::Constraints& 
   geometry_msgs::msg::Pose new_pose_msg;
   new_pose_msg = tf2::toMsg(new_pose);
 
-  constraints.position_constraints[0].constraint_region.primitive_poses[0].position = new_pose_msg.position;
-  constraints.orientation_constraints[0].orientation = new_pose_msg.orientation;
+  constraints.position_constraints.at(0).constraint_region.primitive_poses.at(0).position = new_pose_msg.position;
+  constraints.orientation_constraints.at(0).orientation = new_pose_msg.orientation;
 }
 
 void BenchmarkExecutor::createRequestCombinations(const BenchmarkRequest& benchmark_request,
@@ -483,7 +484,7 @@ void BenchmarkExecutor::createRequestCombinations(const BenchmarkRequest& benchm
     for (const PathConstraints& path_constraint : path_constraints)
     {
       BenchmarkRequest new_benchmark_request = benchmark_request;
-      new_benchmark_request.request.path_constraints = path_constraint.constraints[0];
+      new_benchmark_request.request.path_constraints = path_constraint.constraints.at(0);
       new_benchmark_request.name = benchmark_request.name + "_" + path_constraint.name;
       requests.push_back(new_benchmark_request);
     }
@@ -507,7 +508,7 @@ void BenchmarkExecutor::createRequestCombinations(const BenchmarkRequest& benchm
       // Duplicate the request for each of the path constraints
       for (const PathConstraints& path_constraint : path_constraints)
       {
-        new_benchmark_request.request.path_constraints = path_constraint.constraints[0];
+        new_benchmark_request.request.path_constraints = path_constraint.constraints.at(0);
         new_benchmark_request.name = start_state.name + "_" + new_benchmark_request.name + "_" + path_constraint.name;
         requests.push_back(new_benchmark_request);
       }
