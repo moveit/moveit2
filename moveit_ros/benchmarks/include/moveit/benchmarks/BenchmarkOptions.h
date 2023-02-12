@@ -77,14 +77,7 @@ namespace moveit_ros_benchmarks
 struct BenchmarkOptions
 {
   /** \brief Constructor */
-  BenchmarkOptions();
-  /** \brief Constructor accepting a custom namespace for parameter lookup */
   BenchmarkOptions(const rclcpp::Node::SharedPtr& node);
-  /** \brief Destructor */
-  virtual ~BenchmarkOptions();
-
-  /** \brief Set the ROS namespace the node handle should use for parameter lookup */
-  // void setNamespace(const std::string& ros_namespace);
 
   /** \brief Get the name of the warehouse database host server */
   const std::string& getHostName() const;
@@ -132,10 +125,7 @@ struct BenchmarkOptions
   /* \brief Get the parameter set of the planning workspace */
   const moveit_msgs::msg::WorkspaceParameters& getWorkspaceParameters() const;
 
-  void readBenchmarkOptions(const rclcpp::Node::SharedPtr& node);
-
-  void readWarehouseOptions(const rclcpp::Node::SharedPtr& node);
-  void readBenchmarkParameters(const rclcpp::Node::SharedPtr& node);
+  bool readBenchmarkOptions(const rclcpp::Node::SharedPtr& node);
   bool readPlannerConfigs(const rclcpp::Node::SharedPtr& node);
 
   void readWorkspaceParameters(const rclcpp::Node::SharedPtr& node);

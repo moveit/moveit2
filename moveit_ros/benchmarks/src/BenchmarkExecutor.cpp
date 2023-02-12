@@ -105,8 +105,9 @@ BenchmarkExecutor::BenchmarkExecutor(const rclcpp::Node::SharedPtr& node, const 
   , robot_state_storage_{ nullptr }
   , constraints_storage_{ nullptr }
   , trajectory_constraints_storage_{ nullptr }
-  , db_loader{ node }
   , node_{ node }
+  , db_loader{ node }
+  , options_{ node }
 {
   planning_scene_ = planning_scene_monitor_->getPlanningScene();
 }

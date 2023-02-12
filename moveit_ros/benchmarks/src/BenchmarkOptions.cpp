@@ -40,34 +40,116 @@ using namespace moveit_ros_benchmarks;
 
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.ros.benchmarks.BenchmarkOptions");
 
-BenchmarkOptions::BenchmarkOptions()
-{
-}
-
 BenchmarkOptions::BenchmarkOptions(const rclcpp::Node::SharedPtr& node)
 {
-  readBenchmarkOptions(node);
+  if (!readBenchmarkOptions(node))
+  {
+    throw(std::runtime_error("Failed to initialize BenchmarkOptions"));
+  }
 }
 
-BenchmarkOptions::~BenchmarkOptions() = default;
-
-// void BenchmarkOptions::setNamespace(const std::string& ros_namespace)
-// {
-//   readBenchmarkOptions(ros_namespace);
-// }
-
-void BenchmarkOptions::readBenchmarkOptions(const rclcpp::Node::SharedPtr& node)
+bool BenchmarkOptions::readBenchmarkOptions(const rclcpp::Node::SharedPtr& node)
 {
   if (node->has_parameter("benchmark_config.parameters.name"))
   {
-    readWarehouseOptions(node);
-    readBenchmarkParameters(node);
-    readPlannerConfigs(node);
+    // Read warehouse options
+    node->get_parameter_or(std::string("benchmark_config.warehouse.host"), hostname_, std::string("127.0.0.1"));
+    node->get_parameter_or(std::string("benchmark_config.warehouse.port"), port_, 33829);
+
+    if (!node->get_parameter("benchmark_config.warehouse.scene_name", scene_name_))
+    {
+      RCLCPP_WARN(LOGGER, "Benchmark scene_name NOT specified");
+    }
+
+    RCLCPP_INFO(LOGGER, "Benchmark host: %s", hostname_.c_str());
+    RCLCPP_INFO(LOGGER, "Benchmark port: %d", port_);
+    RCLCPP_INFO(LOGGER, "Benchmark scene: %s", scene_name_.c_str());
+    // Read benchmark parameters
+    node->get_parameter_or(std::string("benchmark_config.parameters.name"), benchmark_name_, std::string(""));
+    node->get_parameter_or(std::string("benchmark_config.parameters.runs"), runs_, 10);
+    node->get_parameter_or(std::string("benchmark_config.parameters.timeout"), timeout_, 10.0);
+    node->get_parameter_or(std::string("benchmark_config.parameters.output_directory"), output_directory_,
+                           std::string(""));
+    node->get_parameter_or(std::string("benchmark_config.parameters.queries_regex"), query_regex_, std::string(".*"));
+    node->get_parameter_or(std::string("benchmark_config.parameters.start_states_regex"), start_state_regex_,
+                           std::string(""));
+    node->get_parameter_or(std::string("benchmark_config.parameters.goal_constraints_regex"), goal_constraint_regex_,
+                           std::string(""));
+    node->get_parameter_or(std::string("benchmark_config.parameters.path_constraints_regex"), path_constraint_regex_,
+                           std::string(""));
+    node->get_parameter_or(std::string("benchmark_config.parameters.trajectory_constraints_regex"),
+                           trajectory_constraint_regex_, std::string(""));
+    node->get_parameter_or(std::string("benchmark_config.parameters.predefined_poses"), predefined_poses_, {});
+    node->get_parameter_or(std::string("benchmark_config.parameters.predefined_poses_group"), predefined_poses_group_,
+                           std::string(""));
+
+    if (!node->get_parameter(std::string("benchmark_config.parameters.group"), group_name_))
+    {
+      RCLCPP_INFO(LOGGER, "Benchmark group NOT specified");
+    }
+
+    if (node->has_parameter("benchmark_config.parameters.workspace"))
+    {
+      // Read workspace parameters
+      // Make sure all params exist
+      if (!node->get_parameter("benchmark_config.parameters.workspace.frame_id", workspace_.header.frame_id))
+      {
+        RCLCPP_WARN(LOGGER, "Workspace frame_id not specified in benchmark config");
+      }
+
+      node->get_parameter_or(std::string("benchmark_config.parameters.workspace.min_corner.x"), workspace_.min_corner.x,
+                             0.0);
+      node->get_parameter_or(std::string("benchmark_config.parameters.workspace.min_corner.y"), workspace_.min_corner.y,
+                             0.0);
+      node->get_parameter_or(std::string("benchmark_config.parameters.workspace.min_corner.z"), workspace_.min_corner.z,
+                             0.0);
+
+      node->get_parameter_or(std::string("benchmark_config.parameters.workspace.max_corner.x"), workspace_.max_corner.x,
+                             0.0);
+      node->get_parameter_or(std::string("benchmark_config.parameters.workspace.max_corner.y"), workspace_.max_corner.y,
+                             0.0);
+      node->get_parameter_or(std::string("benchmark_config.parameters.workspace.max_corner.z"), workspace_.max_corner.z,
+                             0.0);
+
+      workspace_.header.stamp = rclcpp::Clock().now();
+    }
+
+    // Reading in goal_offset (or defaulting to zero)
+    node->get_parameter_or(std::string("benchmark_config.parameters.goal_offset.x"), goal_offsets[0], 0.0);
+    node->get_parameter_or(std::string("benchmark_config.parameters.goal_offset.y"), goal_offsets[1], 0.0);
+    node->get_parameter_or(std::string("benchmark_config.parameters.goal_offset.z"), goal_offsets[2], 0.0);
+    node->get_parameter_or(std::string("benchmark_config.parameters.goal_offset.roll"), goal_offsets[3], 0.0);
+    node->get_parameter_or(std::string("benchmark_config.parameters.goal_offset.pitch"), goal_offsets[4], 0.0);
+    node->get_parameter_or(std::string("benchmark_config.parameters.goal_offset.yaw"), goal_offsets[5], 0.0);
+
+    RCLCPP_INFO(LOGGER, "Benchmark name: '%s'", benchmark_name_.c_str());
+    RCLCPP_INFO(LOGGER, "Benchmark #runs: %d", runs_);
+    RCLCPP_INFO(LOGGER, "Benchmark timeout: %f secs", timeout_);
+    RCLCPP_INFO(LOGGER, "Benchmark group: %s", group_name_.c_str());
+    RCLCPP_INFO(LOGGER, "Benchmark query regex: '%s'", query_regex_.c_str());
+    RCLCPP_INFO(LOGGER, "Benchmark start state regex: '%s':", start_state_regex_.c_str());
+    RCLCPP_INFO(LOGGER, "Benchmark goal constraint regex: '%s':", goal_constraint_regex_.c_str());
+    RCLCPP_INFO(LOGGER, "Benchmark path constraint regex: '%s':", path_constraint_regex_.c_str());
+    RCLCPP_INFO(LOGGER, "Benchmark goal offsets (%f %f %f, %f %f %f)", goal_offsets[0], goal_offsets[1],
+                goal_offsets[2], goal_offsets[3], goal_offsets[4], goal_offsets[5]);
+    RCLCPP_INFO(LOGGER, "Benchmark output directory: %s", output_directory_.c_str());
+    RCLCPP_INFO_STREAM(LOGGER, "Benchmark workspace: min_corner: ["
+                                   << workspace_.min_corner.x << ", " << workspace_.min_corner.y << ", "
+                                   << workspace_.min_corner.z << "], "
+                                   << "max_corner: [" << workspace_.max_corner.x << ", " << workspace_.max_corner.y
+                                   << ", " << workspace_.max_corner.z << ']');
+    // Read planner configuration
+    if (!readPlannerConfigs(node))
+    {
+      return false;
+    }
   }
   else
   {
-    RCLCPP_WARN(LOGGER, "No benchmark_config found on param server");
+    RCLCPP_ERROR(LOGGER, "No benchmark_config found on param server");
+    return false;
   }
+  return true;
 }
 
 const std::string& BenchmarkOptions::getHostName() const
@@ -179,96 +261,6 @@ const std::string& BenchmarkOptions::getWorkspaceFrameID() const
 const moveit_msgs::msg::WorkspaceParameters& BenchmarkOptions::getWorkspaceParameters() const
 {
   return workspace_;
-}
-
-void BenchmarkOptions::readWarehouseOptions(const rclcpp::Node::SharedPtr& node)
-{
-  node->get_parameter_or(std::string("benchmark_config.warehouse.host"), hostname_, std::string("127.0.0.1"));
-  node->get_parameter_or(std::string("benchmark_config.warehouse.port"), port_, 33829);
-
-  if (!node->get_parameter("benchmark_config.warehouse.scene_name", scene_name_))
-  {
-    RCLCPP_WARN(LOGGER, "Benchmark scene_name NOT specified");
-  }
-
-  RCLCPP_INFO(LOGGER, "Benchmark host: %s", hostname_.c_str());
-  RCLCPP_INFO(LOGGER, "Benchmark port: %d", port_);
-  RCLCPP_INFO(LOGGER, "Benchmark scene: %s", scene_name_.c_str());
-}
-
-void BenchmarkOptions::readBenchmarkParameters(const rclcpp::Node::SharedPtr& node)
-{
-  node->get_parameter_or(std::string("benchmark_config.parameters.name"), benchmark_name_, std::string(""));
-  node->get_parameter_or(std::string("benchmark_config.parameters.runs"), runs_, 10);
-  node->get_parameter_or(std::string("benchmark_config.parameters.timeout"), timeout_, 10.0);
-  node->get_parameter_or(std::string("benchmark_config.parameters.output_directory"), output_directory_,
-                         std::string(""));
-  node->get_parameter_or(std::string("benchmark_config.parameters.queries_regex"), query_regex_, std::string(".*"));
-  node->get_parameter_or(std::string("benchmark_config.parameters.start_states_regex"), start_state_regex_,
-                         std::string(""));
-  node->get_parameter_or(std::string("benchmark_config.parameters.goal_constraints_regex"), goal_constraint_regex_,
-                         std::string(""));
-  node->get_parameter_or(std::string("benchmark_config.parameters.path_constraints_regex"), path_constraint_regex_,
-                         std::string(""));
-  node->get_parameter_or(std::string("benchmark_config.parameters.trajectory_constraints_regex"),
-                         trajectory_constraint_regex_, std::string(""));
-  node->get_parameter_or(std::string("benchmark_config.parameters.predefined_poses"), predefined_poses_, {});
-  node->get_parameter_or(std::string("benchmark_config.parameters.predefined_poses_group"), predefined_poses_group_,
-                         std::string(""));
-
-  if (!node->get_parameter(std::string("benchmark_config.parameters.group"), group_name_))
-    RCLCPP_INFO(LOGGER, "Benchmark group NOT specified");
-
-  if (node->has_parameter("benchmark_config.parameters.workspace"))
-    readWorkspaceParameters(node);
-
-  // Reading in goal_offset (or defaulting to zero)
-  node->get_parameter_or(std::string("benchmark_config.parameters.goal_offset.x"), goal_offsets[0], 0.0);
-  node->get_parameter_or(std::string("benchmark_config.parameters.goal_offset.y"), goal_offsets[1], 0.0);
-  node->get_parameter_or(std::string("benchmark_config.parameters.goal_offset.z"), goal_offsets[2], 0.0);
-  node->get_parameter_or(std::string("benchmark_config.parameters.goal_offset.roll"), goal_offsets[3], 0.0);
-  node->get_parameter_or(std::string("benchmark_config.parameters.goal_offset.pitch"), goal_offsets[4], 0.0);
-  node->get_parameter_or(std::string("benchmark_config.parameters.goal_offset.yaw"), goal_offsets[5], 0.0);
-
-  RCLCPP_INFO(LOGGER, "Benchmark name: '%s'", benchmark_name_.c_str());
-  RCLCPP_INFO(LOGGER, "Benchmark #runs: %d", runs_);
-  RCLCPP_INFO(LOGGER, "Benchmark timeout: %f secs", timeout_);
-  RCLCPP_INFO(LOGGER, "Benchmark group: %s", group_name_.c_str());
-  RCLCPP_INFO(LOGGER, "Benchmark query regex: '%s'", query_regex_.c_str());
-  RCLCPP_INFO(LOGGER, "Benchmark start state regex: '%s':", start_state_regex_.c_str());
-  RCLCPP_INFO(LOGGER, "Benchmark goal constraint regex: '%s':", goal_constraint_regex_.c_str());
-  RCLCPP_INFO(LOGGER, "Benchmark path constraint regex: '%s':", path_constraint_regex_.c_str());
-  RCLCPP_INFO(LOGGER, "Benchmark goal offsets (%f %f %f, %f %f %f)", goal_offsets[0], goal_offsets[1], goal_offsets[2],
-              goal_offsets[3], goal_offsets[4], goal_offsets[5]);
-  RCLCPP_INFO(LOGGER, "Benchmark output directory: %s", output_directory_.c_str());
-  RCLCPP_INFO_STREAM(LOGGER, "Benchmark workspace: min_corner: ["
-                                 << workspace_.min_corner.x << ", " << workspace_.min_corner.y << ", "
-                                 << workspace_.min_corner.z << "], "
-                                 << "max_corner: [" << workspace_.max_corner.x << ", " << workspace_.max_corner.y
-                                 << ", " << workspace_.max_corner.z << ']');
-}
-
-void BenchmarkOptions::readWorkspaceParameters(const rclcpp::Node::SharedPtr& node)
-{
-  // Make sure all params exist
-  if (!node->get_parameter("benchmark_config.parameters.workspace.frame_id", workspace_.header.frame_id))
-    RCLCPP_WARN(LOGGER, "Workspace frame_id not specified in benchmark config");
-
-  node->get_parameter_or(std::string("benchmark_config.parameters.workspace.min_corner.x"), workspace_.min_corner.x,
-                         0.0);
-  node->get_parameter_or(std::string("benchmark_config.parameters.workspace.min_corner.y"), workspace_.min_corner.y,
-                         0.0);
-  node->get_parameter_or(std::string("benchmark_config.parameters.workspace.min_corner.z"), workspace_.min_corner.z,
-                         0.0);
-
-  node->get_parameter_or(std::string("benchmark_config.parameters.workspace.max_corner.x"), workspace_.max_corner.x,
-                         0.0);
-  node->get_parameter_or(std::string("benchmark_config.parameters.workspace.max_corner.y"), workspace_.max_corner.y,
-                         0.0);
-  node->get_parameter_or(std::string("benchmark_config.parameters.workspace.max_corner.z"), workspace_.max_corner.z,
-                         0.0);
-
-  workspace_.header.stamp = rclcpp::Clock().now();
 }
 
 bool BenchmarkOptions::readPlannerConfigs(const rclcpp::Node::SharedPtr& node)
