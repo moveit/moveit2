@@ -2,6 +2,31 @@
 Changelog for package chomp_motion_planner
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.7.0 (2023-01-29)
+------------------
+* Merge https://github.com/ros-planning/moveit/commit/9225971216885490e933ece25390c63ca14f8a58
+* Switch to clang-format-14 (`#1877 <https://github.com/ros-planning/moveit2/issues/1877>`_)
+  * Switch to clang-format-14
+  * Fix clang-format-14
+* Change log level of CHOMP runtime output and change kdl print (`#1818 <https://github.com/ros-planning/moveit2/issues/1818>`_)
+* Fix BSD license in package.xml (`#1796 <https://github.com/ros-planning/moveit2/issues/1796>`_)
+  * fix BSD license in package.xml
+  * this must also be spdx compliant
+* Minimize use of `this->` (`#1784 <https://github.com/ros-planning/moveit2/issues/1784>`_)
+  It's often unnecessary. MoveIt already avoids this in most cases
+  so this PR better cements that existing pattern.
+* Add braces around blocks. (`#999 <https://github.com/ros-planning/moveit2/issues/999>`_)
+* Used C++ style cast instead of C style cast  (`#1628 <https://github.com/ros-planning/moveit2/issues/1628>`_)
+  Co-authored-by: Henning Kayser <henningkayser@picknik.ai>
+* Use a stronger source of randomness (`#1721 <https://github.com/ros-planning/moveit2/issues/1721>`_)
+  * Remove use of deprecated `std::random_shuffle`
+  * Replace random number generators with `rsl::rng`
+  * Utilize `rsl::uniform_real`
+* Fix segfaults in CHOMP (`#3204 <https://github.com/ros-planning/moveit2/issues/3204>`_)
+  * due to missing description\_
+  * in case of an unspecified input trajectory
+* Contributors: Abhijeet Das Gupta, Abishalini, Chris Thrasher, Christian Henkel, Cory Crean, Henning Kayser, Robert Haschke, Sebastian Jahr
+
 2.6.0 (2022-11-10)
 ------------------
 * Replace C array with std::array in std::vector template argument to improve compatibility with clang compiler and libc++ (`#1612 <https://github.com/ros-planning/moveit2/issues/1612>`_)

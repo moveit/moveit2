@@ -2,6 +2,48 @@
 Changelog for package moveit_ros_planning_interface
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.7.0 (2023-01-29)
+------------------
+* Merge https://github.com/ros-planning/moveit/commit/9225971216885490e933ece25390c63ca14f8a58
+* converted characters from string format to character format (`#1881 <https://github.com/ros-planning/moveit2/issues/1881>`_)
+* 400% speed up to move group interface (`#1865 <https://github.com/ros-planning/moveit2/issues/1865>`_)
+* GHA: Build moveit_msgs from source (`#1853 <https://github.com/ros-planning/moveit2/issues/1853>`_)
+  * Revert `#1739 <https://github.com/ros-planning/moveit2/issues/1739>`_: moveit_msgs no longer needs to be built from source
+  This reverts commit 6e0fce31cfe94ef8c6d5ebccb4d865f0c144b6e1.
+  * Remove obsolete include: moveit_msgs/srv/execute_known_trajectory.hpp
+  * Cleanup moveit2.repos
+* Cleanup msg includes: Use C++ instead of C header (`#1844 <https://github.com/ros-planning/moveit2/issues/1844>`_)
+* Fix BSD license in package.xml (`#1796 <https://github.com/ros-planning/moveit2/issues/1796>`_)
+  * fix BSD license in package.xml
+  * this must also be spdx compliant
+* Minimize use of `this->` (`#1784 <https://github.com/ros-planning/moveit2/issues/1784>`_)
+  It's often unnecessary. MoveIt already avoids this in most cases
+  so this PR better cements that existing pattern.
+* Remove `MOVEIT_LIB_NAME` (`#1751 <https://github.com/ros-planning/moveit2/issues/1751>`_)
+  It's more readable and searchable if we just spell out the target
+  name.
+* Add braces around blocks. (`#999 <https://github.com/ros-planning/moveit2/issues/999>`_)
+* Use <> for non-local headers (`#1734 <https://github.com/ros-planning/moveit2/issues/1734>`_)
+  Unless a header lives in the same or a child directory of the file
+  including it, it's recommended to use <> for the #include statement.
+  For more information, see the C++ Core Guidelines item SF.12
+  https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#sf12-prefer-the-quoted-form-of-include-for-files-relative-to-the-including-file-and-the-angle-bracket-form-everywhere-else
+* Used C++ style cast instead of C style cast  (`#1628 <https://github.com/ros-planning/moveit2/issues/1628>`_)
+  Co-authored-by: Henning Kayser <henningkayser@picknik.ai>
+* Fix clang-tidy issues (`#1706 <https://github.com/ros-planning/moveit2/issues/1706>`_)
+  * Blindly apply automatic clang-tidy fixes
+  * Exemplarily cleanup a few automatic clang-tidy fixes
+  * Clang-tidy fixups
+  * Missed const-ref fixups
+  * Fix unsupported non-const -> const
+  * More fixes
+  Co-authored-by: Henning Kayser <henningkayser@picknik.ai>
+* Test `moveit_commander.set_joint_value_target` with JointState argument (`#3187 <https://github.com/ros-planning/moveit2/issues/3187>`_)
+  * Test with JointState argument
+  * Check size of name and position fields
+  Co-authored-by: Robert Haschke <rhaschke@techfak.uni-bielefeld.de>
+* Contributors: Abhijeet Das Gupta, Abishalini, Chris Thrasher, Christian Henkel, Cory Crean, Filip Sund, Robert Haschke, Sameer Gupta, azalutsky
+
 2.6.0 (2022-11-10)
 ------------------
 * Log error when named joint state target does not exist (`#1580 <https://github.com/ros-planning/moveit2/issues/1580>`_)

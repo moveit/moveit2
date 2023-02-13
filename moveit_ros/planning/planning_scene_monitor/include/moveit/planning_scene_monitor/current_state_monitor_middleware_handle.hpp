@@ -111,6 +111,13 @@ public:
   bool sleepFor(const std::chrono::nanoseconds& nanoseconds) const override;
 
   /**
+   * @brief      Uses rclcpp::ok to check the context status
+   *
+   * @return     Return of rclcpp::ok
+   */
+  bool ok() const override;
+
+  /**
    * @brief      Get the static transform topic name
    *
    * @return     The static transform topic name.

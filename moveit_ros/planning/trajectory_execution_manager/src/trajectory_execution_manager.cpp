@@ -74,10 +74,10 @@ TrajectoryExecutionManager::TrajectoryExecutionManager(const rclcpp::Node::Share
 TrajectoryExecutionManager::~TrajectoryExecutionManager()
 {
   stopExecution(true);
-  private_executor_->cancel();
+  if (private_executor_)
+    private_executor_->cancel();
   if (private_executor_thread_.joinable())
     private_executor_thread_.join();
-  private_executor_.reset();
 }
 
 void TrajectoryExecutionManager::initialize()
@@ -130,6 +130,7 @@ void TrajectoryExecutionManager::initialize()
         RCLCPP_FATAL(LOGGER, "Parameter '~moveit_controller_manager' not specified. This is needed to "
                              "identify the plugin to use for interacting with controllers. No paths can "
                              "be executed.");
+        return;
       }
     }
 

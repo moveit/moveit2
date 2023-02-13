@@ -2,20 +2,16 @@ import os
 import pytest
 import launch
 import launch_ros
-import launch_testing.actions
-import launch_testing.asserts
+import launch_testing
 import unittest
 from ament_index_python.packages import get_package_share_directory
-from launch_ros.actions import Node, ComposableNodeContainer
-from launch_ros.descriptions import ComposableNode
-from launch.actions import ExecuteProcess, TimerAction
-from launch.some_substitutions_type import SomeSubstitutionsType
-from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
 from launch_param_builder import ParameterBuilder
 from moveit_configs_utils import MoveItConfigsBuilder
 
 
-def generate_servo_test_description(*args, gtest_name: SomeSubstitutionsType):
+def generate_servo_test_description(
+    *args, gtest_name: launch.some_substitutions_type.SomeSubstitutionsType
+):
     moveit_config = (
         MoveItConfigsBuilder("moveit_resources_panda")
         .robot_description(file_path="config/panda.urdf.xacro")
@@ -36,14 +32,14 @@ def generate_servo_test_description(*args, gtest_name: SomeSubstitutionsType):
         "config",
         "ros2_controllers.yaml",
     )
-    ros2_control_node = Node(
+    ros2_control_node = launch_ros.actions.Node(
         package="controller_manager",
         executable="ros2_control_node",
         parameters=[moveit_config.robot_description, ros2_controllers_path],
         output="screen",
     )
 
-    joint_state_broadcaster_spawner = Node(
+    joint_state_broadcaster_spawner = launch_ros.actions.Node(
         package="controller_manager",
         executable="spawner",
         arguments=[
@@ -55,26 +51,26 @@ def generate_servo_test_description(*args, gtest_name: SomeSubstitutionsType):
         ],
     )
 
-    panda_arm_controller_spawner = Node(
+    panda_arm_controller_spawner = launch_ros.actions.Node(
         package="controller_manager",
         executable="spawner",
         arguments=["panda_arm_controller", "-c", "/controller_manager"],
     )
 
     # Component nodes for tf and Servo
-    test_container = ComposableNodeContainer(
+    test_container = launch_ros.actions.ComposableNodeContainer(
         name="test_pose_tracking_container",
         namespace="/",
         package="rclcpp_components",
         executable="component_container_mt",
         composable_node_descriptions=[
-            ComposableNode(
+            launch_ros.descriptions.ComposableNode(
                 package="robot_state_publisher",
                 plugin="robot_state_publisher::RobotStatePublisher",
                 name="robot_state_publisher",
                 parameters=[moveit_config.robot_description],
             ),
-            ComposableNode(
+            launch_ros.descriptions.ComposableNode(
                 package="tf2_ros",
                 plugin="tf2_ros::StaticTransformBroadcasterNode",
                 name="static_tf2_broadcaster",
@@ -85,8 +81,8 @@ def generate_servo_test_description(*args, gtest_name: SomeSubstitutionsType):
     )
 
     pose_tracking_gtest = launch_ros.actions.Node(
-        executable=PathJoinSubstitution(
-            [LaunchConfiguration("test_binary_dir"), gtest_name]
+        executable=launch.substitutions.PathJoinSubstitution(
+            [launch.substitutions.LaunchConfiguration("test_binary_dir"), gtest_name]
         ),
         parameters=[
             moveit_config.to_dict(),
@@ -106,7 +102,7 @@ def generate_servo_test_description(*args, gtest_name: SomeSubstitutionsType):
             joint_state_broadcaster_spawner,
             panda_arm_controller_spawner,
             test_container,
-            TimerAction(period=2.0, actions=[pose_tracking_gtest]),
+            launch.actions.TimerAction(period=2.0, actions=[pose_tracking_gtest]),
             launch_testing.actions.ReadyToTest(),
         ]
     ), {

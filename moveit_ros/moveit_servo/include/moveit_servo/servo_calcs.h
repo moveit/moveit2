@@ -251,10 +251,6 @@ protected:
   void changeControlDimensions(const std::shared_ptr<moveit_msgs::srv::ChangeControlDimensions::Request>& req,
                                const std::shared_ptr<moveit_msgs::srv::ChangeControlDimensions::Response>& res);
 
-  /** \brief Service callback to reset Servo status, e.g. so the arm can move again after a collision */
-  bool resetServoStatus(const std::shared_ptr<std_srvs::srv::Empty::Request>& req,
-                        const std::shared_ptr<std_srvs::srv::Empty::Response>& res);
-
   // Pointer to the ROS node
   std::shared_ptr<rclcpp::Node> node_;
 
@@ -300,7 +296,6 @@ protected:
   rclcpp::Publisher<std_msgs::msg::Float64MultiArray>::SharedPtr multiarray_outgoing_cmd_pub_;
   rclcpp::Service<moveit_msgs::srv::ChangeControlDimensions>::SharedPtr control_dimensions_server_;
   rclcpp::Service<moveit_msgs::srv::ChangeDriftDimensions>::SharedPtr drift_dimensions_server_;
-  rclcpp::Service<std_srvs::srv::Empty>::SharedPtr reset_servo_status_;
 
   // Main tracking / result publisher loop
   std::thread thread_;
