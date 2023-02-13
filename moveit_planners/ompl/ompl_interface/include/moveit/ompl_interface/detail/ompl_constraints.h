@@ -481,7 +481,7 @@ struct EigenIsometry3dWrapper
 
   bool operator!=(const EigenIsometry3dWrapper& other) const
   {
-    return (*this) != other;
+    return !(tform_.isApprox(other.tform_));
   }
 
   Eigen::Isometry3d tform_;
