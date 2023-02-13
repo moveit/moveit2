@@ -130,7 +130,7 @@ bool pilz_industrial_motion_planner::PlanningContextBase<GeneratorT>::solve(plan
     }
     bool result = generator_.generate(getPlanningScene(), request_, res);
     return result;
-    // res.error_code_.val = moveit_msgs::msg::MoveItErrorCodes::INVALID_MOTION_PLAN;
+    // res.error_code.val = moveit_msgs::msg::MoveItErrorCodes::INVALID_MOTION_PLAN;
     // return false; // TODO
   }
 

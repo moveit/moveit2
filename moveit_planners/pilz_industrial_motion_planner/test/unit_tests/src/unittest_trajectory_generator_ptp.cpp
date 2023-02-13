@@ -179,14 +179,14 @@ TEST_F(TrajectoryGeneratorPTPTest, noLimits)
 }
 
 /**
- * @brief Send an empty request, define res.trajectory_
+ * @brief Send an empty request, define res.trajectory
  *
  *  - Test Sequence:
  *    1. Create request, define a trajectory in the result
  *    2. assign at least one joint limit will all required limits
  *
  *  - Expected Results:
- *    1. the res.trajectory_ should be cleared (contain no waypoints)
+ *    1. the res.trajectory should be cleared (contain no waypoints)
  */
 TEST_F(TrajectoryGeneratorPTPTest, emptyRequest)
 {

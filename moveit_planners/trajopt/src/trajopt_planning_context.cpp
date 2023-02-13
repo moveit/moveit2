@@ -37,12 +37,12 @@ bool TrajOptPlanningContext::solve(planning_interface::MotionPlanDetailedRespons
     res.description.push_back("plan");
     // TODO: Add the initial trajectory to res (MotionPlanDetailedResponse)
     res.processing_time = res_msg.processing_time;
-    res.error_code_ = res_msg.error_code;
+    res.error_code = res_msg.error_code;
     return true;
   }
   else
   {
-    res.error_code_ = res_msg.error_code;
+    res.error_code = res_msg.error_code;
     return false;
   }
 }
@@ -52,7 +52,7 @@ bool TrajOptPlanningContext::solve(planning_interface::MotionPlanResponse& res)
   planning_interface::MotionPlanDetailedResponse res_detailed;
   bool planning_success = solve(res_detailed);
 
-  res.error_code = res_detailed.error_code_;
+  res.error_code = res_detailed.error_code;
 
   if (planning_success)
   {
