@@ -152,4 +152,5 @@ protected:
 private:
   constraint_sampler_manager_loader::ConstraintSamplerManagerLoaderPtr constraint_sampler_manager_loader_;
 };
+
 }  // namespace ompl_interface

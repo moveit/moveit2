@@ -39,10 +39,13 @@
 #include <ostream>
 
 #include <ompl/base/Constraint.h>
+#include <ompl/datastructures/GreedyKCenters.h>
+#include <ompl/datastructures/NearestNeighborsGNAT.h>
 
 #include <moveit/ompl_interface/detail/threadsafe_state_storage.h>
 #include <moveit/robot_model/robot_model.h>
 #include <moveit/macros/class_forward.h>
+#include <moveit_msgs/msg/cartesian_trajectory.hpp>
 #include <moveit_msgs/msg/constraints.hpp>
 
 namespace ompl_interface
@@ -458,5 +461,58 @@ inline Eigen::Matrix3d angularVelocityToAngleAxis(const double& angle, const Eig
 
   return Eigen::Matrix3d::Identity() - 0.5 * r_skew + (r_skew * r_skew / (t * t)) * c;
 }
+
+/******************************************
+ * Tool path constraint
+ * ****************************************/
+/** \brief Helper struct that wraps Eigen::Isometry3d to be used with OMPL's nearest neighbors implementation
+ */
+struct EigenIsometry3dWrapper
+{
+  EigenIsometry3dWrapper(){};
+  EigenIsometry3dWrapper(const Eigen::Isometry3d& tform) : tform_{ tform }
+  {
+  }
+
+  bool operator==(const EigenIsometry3dWrapper& other) const
+  {
+    return tform_.isApprox(other.tform_);
+  }
+
+  bool operator!=(const EigenIsometry3dWrapper& other) const
+  {
+    return (*this) != other;
+  }
+
+  Eigen::Isometry3d tform_;
+};
+
+/**
+ * @brief Interpolate between two poses
+ * @param pose1 - first pose
+ * @param pose2 - second pose
+ * @param step - step from first pose to pose 2 [0 1]
+ * @return Interpolated pose
+ */
+Eigen::Isometry3d interpolatePose(const Eigen::Isometry3d& pose1, const Eigen::Isometry3d& pose2, double step);
+
+/** \brief A path constraint for the EEF useful for sanding, painting, drawing, welding, etc
+ * */
+class ToolPathConstraint : public BaseConstraint
+{
+public:
+  ToolPathConstraint(const moveit::core::RobotModelConstPtr& robot_model, const std::string& group,
+                     unsigned int num_dofs, const unsigned int num_cons = 6, double step = 0.01);
+
+  void parseConstraintMsg(const moveit_msgs::msg::Constraints& constraints) override;
+
+  void setPath(const moveit_msgs::msg::CartesianTrajectory& msg);
+
+  void function(const Eigen::Ref<const Eigen::VectorXd>& joint_values, Eigen::Ref<Eigen::VectorXd> out) const override;
+
+private:
+  mutable ompl::NearestNeighborsGNAT<EigenIsometry3dWrapper> pose_nn_;  // store poses
+  const double step_;                                                   // step size between each waypoint
+};
 
 }  // namespace ompl_interface

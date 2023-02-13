@@ -408,4 +408,106 @@ ompl::base::ConstraintPtr createOMPLConstraints(const moveit::core::RobotModelCo
   }
   return std::make_shared<ompl::base::ConstraintIntersection>(num_dofs, ompl_constraints);
 }
+
+/******************************************
+ * Toolpath Constraint
+ * ****************************************/
+ToolPathConstraint::ToolPathConstraint(const moveit::core::RobotModelConstPtr& robot_model, const std::string& group,
+                                       unsigned int num_dofs, const unsigned int num_cons, double step)
+  : BaseConstraint(robot_model, group, num_dofs, num_cons), step_(step)
+{
+  pose_nn_.setDistanceFunction([this](const EigenIsometry3dWrapper& pose1, const EigenIsometry3dWrapper& pose2) {
+    double translation_distance = (pose1.tform_.translation() - pose2.tform_.translation()).norm();
+    double rotation_distance = 0.0;  // TODO
+    return translation_distance + rotation_distance;
+  });
+}
+
+void ToolPathConstraint::parseConstraintMsg(const moveit_msgs::msg::Constraints& constraints)
+{
+  // TODO: Is this needed? Can this be done using setPath()?
+}
+
+void ToolPathConstraint::setPath(const moveit_msgs::msg::CartesianTrajectory& msg)
+{
+  // Clear previous path
+  pose_nn_.clear();
+
+  // Convert to EigenIsometry3dWrapper vector
+  const auto num_pts = msg.points.size();
+  std::vector<EigenIsometry3dWrapper> tform_vec;
+  tform_vec.reserve(num_pts);
+  for (size_t i = 0; i < num_pts; i++)
+  {
+    Eigen::Isometry3d tform;
+    tf2::fromMsg(msg.points[i].point.pose, tform);
+    tform_vec.push_back(EigenIsometry3dWrapper(tform));
+  }
+
+  // Interpolate along waypoints and insert into pose_nn_;
+  for (size_t i = 0; i < num_pts - 1; i++)
+  {
+    // Insert waypoints
+    pose_nn_.add(tform_vec[i]);
+
+    // TODO: Consider arc length between the poses to determine the number of interpolation steps
+    // Linearly determine the number of steps
+    const auto distance = (tform_vec[i].tform_.translation() - tform_vec[i + 1].tform_.translation()).norm();
+    const auto num_steps = static_cast<unsigned int>(distance / step_);
+
+    // Insert interpolated poses
+    auto delta = step_;
+    for (size_t j = 0; j < num_steps - 1; j++)
+    {
+      const auto pose = interpolatePose(tform_vec[i].tform_, tform_vec[i + 1].tform_, delta);
+      pose_nn_.add(EigenIsometry3dWrapper(pose));
+      delta += step_;
+    }
+  }
+
+  // Insert last waypoint
+  pose_nn_.add(tform_vec[num_pts - 1]);
+}
+
+void ToolPathConstraint::function(const Eigen::Ref<const Eigen::VectorXd>& joint_values,
+                                  Eigen::Ref<Eigen::VectorXd> out) const
+{
+  // TODO: try setting num_dim = 1 in BaseConstraint and using poseDistance as the constraint function
+  // Ideal: F(q_actual) - F(q_nearest_pose) = 0
+
+  // Actual end-effector pose
+  const Eigen::Isometry3d eef_pose = forwardKinematics(joint_values);
+  const Eigen::Vector3d trans = eef_pose.translation();
+  const Eigen::Quaterniond eef_quat(eef_pose.rotation());
+  const Eigen::AngleAxisd eef_aa(eef_quat);
+  const Eigen::Vector3d eef_aa_vec = eef_aa.axis() * eef_aa.angle();
+
+  // Nearest end-effector pose in trajectory
+  const Eigen::Isometry3d eef_nearest_pose = pose_nn_.nearest(EigenIsometry3dWrapper(eef_pose)).tform_;
+  const Eigen::Quaterniond eef_nearest_quat = Eigen::Quaterniond(eef_nearest_pose.rotation());
+  const Eigen::AngleAxisd eef_nearest_aa(eef_nearest_quat);
+  const Eigen::Vector3d eef_nearest_aa_vec = eef_nearest_aa.axis() * eef_nearest_aa.angle();
+  const auto eef_pose_error = eef_pose.translation() - eef_nearest_pose.translation();
+
+  // should be allocated to size coDim, by default this is 6
+  out[0] = eef_pose_error.x();
+  out[1] = eef_pose_error.y();
+  out[2] = eef_pose_error.z();
+  out[3] = eef_aa_vec(0) - eef_nearest_aa_vec(0);
+  out[4] = eef_aa_vec(1) - eef_nearest_aa_vec(1);
+  out[5] = eef_aa_vec(2) - eef_nearest_aa_vec(2);
+}
+
+Eigen::Isometry3d interpolatePose(const Eigen::Isometry3d& pose1, const Eigen::Isometry3d& pose2, double step)
+{
+  const Eigen::Translation3d interp_translation =
+      Eigen::Translation3d((1.0 - step) * pose1.translation() + step * pose2.translation());
+
+  const auto q1 = Eigen::Quaterniond(pose1.rotation());
+  const auto q2 = Eigen::Quaterniond(pose2.rotation());
+  const Eigen::Quaterniond interp_orientation = q1.slerp(step, q2);
+
+  return interp_translation * interp_orientation;
+}
+
 }  // namespace ompl_interface
