@@ -46,6 +46,7 @@ static constexpr int CARTESIAN_DOF = 6;
 
 namespace moveit_ros_benchmarks
 {
+/// TODO(sjahr): Replace with generate_parameter_library config
 /// \brief Options to configure a benchmark experiment. The configuration is provided via ROS2 parameters
 /// \details Parameter configuration example:
 /// benchmark_config: # Benchmark param namespace
