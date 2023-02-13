@@ -417,8 +417,8 @@ ToolPathConstraint::ToolPathConstraint(const moveit::core::RobotModelConstPtr& r
   : BaseConstraint(robot_model, group, num_dofs, num_cons), step_(step)
 {
   pose_nn_.setDistanceFunction([this](const EigenIsometry3dWrapper& pose1, const EigenIsometry3dWrapper& pose2) {
-    double translation_distance = (pose1.tform_.translation() - pose2.tform_.translation()).norm();
-    double rotation_distance = 0.0;  // TODO
+    const double translation_distance = (pose1.tform_.translation() - pose2.tform_.translation()).norm();
+    const double rotation_distance = arcLength(pose1.tform_, pose2.tform_);
     return translation_distance + rotation_distance;
   });
 }
@@ -426,6 +426,7 @@ ToolPathConstraint::ToolPathConstraint(const moveit::core::RobotModelConstPtr& r
 void ToolPathConstraint::parseConstraintMsg(const moveit_msgs::msg::Constraints& constraints)
 {
   // TODO: Is this needed? Can this be done using setPath()?
+  (void)constraints;  // Suppress compiler warning / error
 }
 
 void ToolPathConstraint::setPath(const moveit_msgs::msg::CartesianTrajectory& msg)
@@ -477,7 +478,6 @@ void ToolPathConstraint::function(const Eigen::Ref<const Eigen::VectorXd>& joint
 
   // Actual end-effector pose
   const Eigen::Isometry3d eef_pose = forwardKinematics(joint_values);
-  const Eigen::Vector3d trans = eef_pose.translation();
   const Eigen::Quaterniond eef_quat(eef_pose.rotation());
   const Eigen::AngleAxisd eef_aa(eef_quat);
   const Eigen::Vector3d eef_aa_vec = eef_aa.axis() * eef_aa.angle();
@@ -496,6 +496,13 @@ void ToolPathConstraint::function(const Eigen::Ref<const Eigen::VectorXd>& joint
   out[3] = eef_aa_vec(0) - eef_nearest_aa_vec(0);
   out[4] = eef_aa_vec(1) - eef_nearest_aa_vec(1);
   out[5] = eef_aa_vec(2) - eef_nearest_aa_vec(2);
+}
+
+double arcLength(const Eigen::Isometry3d& pose1, const Eigen::Isometry3d& pose2)
+{
+  const auto q1 = Eigen::Quaterniond(pose1.rotation());
+  const auto q2 = Eigen::Quaterniond(pose2.rotation());
+  return std::acos(std::abs(std::clamp(q1.dot(q2), -1.0, 1.0)));
 }
 
 Eigen::Isometry3d interpolatePose(const Eigen::Isometry3d& pose1, const Eigen::Isometry3d& pose2, double step)

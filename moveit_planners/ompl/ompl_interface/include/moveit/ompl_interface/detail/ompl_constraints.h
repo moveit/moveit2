@@ -488,6 +488,14 @@ struct EigenIsometry3dWrapper
 };
 
 /**
+ * @brief Find arc length between two quaternions
+ * @param pose1 - first pose
+ * @param pose2 - second pose
+ * @return Arc length
+ */
+double arcLength(const Eigen::Isometry3d& pose1, const Eigen::Isometry3d& pose2);
+
+/**
  * @brief Interpolate between two poses
  * @param pose1 - first pose
  * @param pose2 - second pose
