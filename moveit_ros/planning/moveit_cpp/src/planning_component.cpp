@@ -120,7 +120,7 @@ planning_interface::MotionPlanResponse PlanningComponent::plan(const PlanRequest
   if (!joint_model_group_)
   {
     RCLCPP_ERROR(LOGGER, "Failed to retrieve joint model group for name '%s'.", group_name_.c_str());
-    plan_solution.error_code_ = moveit::core::MoveItErrorCode::INVALID_GROUP_NAME;
+    plan_solution.error_code = moveit::core::MoveItErrorCode::INVALID_GROUP_NAME;
     return plan_solution;
   }
 
@@ -156,7 +156,7 @@ planning_interface::MotionPlanResponse PlanningComponent::plan(const PlanRequest
   if (current_goal_constraints_.empty())
   {
     RCLCPP_ERROR(LOGGER, "No goal constraints set for planning request");
-    plan_solution.error_code_ = moveit::core::MoveItErrorCode::INVALID_GOAL_CONSTRAINTS;
+    plan_solution.error_code = moveit::core::MoveItErrorCode::INVALID_GOAL_CONSTRAINTS;
     return plan_solution;
   }
   req.goal_constraints = current_goal_constraints_;
@@ -172,22 +172,22 @@ planning_interface::MotionPlanResponse PlanningComponent::plan(const PlanRequest
   if (it == pipelines.end())
   {
     RCLCPP_ERROR(LOGGER, "No planning pipeline available for name '%s'", parameters.planning_pipeline.c_str());
-    plan_solution.error_code_ = moveit::core::MoveItErrorCode::FAILURE;
+    plan_solution.error_code = moveit::core::MoveItErrorCode::FAILURE;
     return plan_solution;
   }
   const planning_pipeline::PlanningPipelinePtr pipeline = it->second;
   pipeline->generatePlan(planning_scene, req, res);
 
-  plan_solution.error_code_ = res.error_code_;
-  if (res.error_code_.val != res.error_code_.SUCCESS)
+  plan_solution.error_code = res.error_code;
+  if (res.error_code.val != res.error_code.SUCCESS)
   {
     RCLCPP_ERROR(LOGGER, "Could not compute plan successfully");
     return plan_solution;
   }
-  plan_solution.trajectory_ = res.trajectory_;
-  plan_solution.planning_time_ = res.planning_time_;
-  plan_solution.start_state_ = req.start_state;
-  plan_solution.error_code_ = res.error_code_.val;
+  plan_solution.trajectory = res.trajectory;
+  plan_solution.planning_time = res.planning_time;
+  plan_solution.start_state = req.start_state;
+  plan_solution.error_code = res.error_code.val;
 
   // TODO(henningkayser): Visualize trajectory
   // std::vector<const moveit::core::LinkModel*> eef_links;
@@ -240,9 +240,9 @@ PlanningComponent::plan(const MultiPipelinePlanRequestParameters& parameters,
         RCLCPP_ERROR_STREAM(LOGGER, "Planning pipeline '" << plan_request_parameter.planning_pipeline.c_str()
                                                           << "' threw exception '" << e.what() << '\'');
         plan_solution = planning_interface::MotionPlanResponse();
-        plan_solution.error_code_ = moveit::core::MoveItErrorCode::FAILURE;
+        plan_solution.error_code = moveit::core::MoveItErrorCode::FAILURE;
       }
-      plan_solution.planner_id_ = plan_request_parameter.planner_id;
+      plan_solution.planner_id = plan_request_parameter.planner_id;
       planning_solutions.pushBack(plan_solution);
 
       if (stopping_criterion_callback != nullptr)

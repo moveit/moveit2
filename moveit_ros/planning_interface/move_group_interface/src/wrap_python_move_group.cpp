@@ -479,7 +479,7 @@ public:
       res = MoveGroupInterface::plan(plan);
     }
     return bp::make_tuple(py_bindings_tools::serializeMsg(res), py_bindings_tools::serializeMsg(plan.trajectory_),
-                          plan.planning_time_);
+                          plan.planning_time);
   }
 
   py_bindings_tools::ByteString constructMotionPlanRequestPython()

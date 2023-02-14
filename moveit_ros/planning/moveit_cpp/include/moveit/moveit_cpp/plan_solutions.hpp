@@ -78,7 +78,7 @@ private:
 
 /** \brief Function that returns the shortest solution out of a vector of solutions based on robot_trajectory::path_length(...)
  *  \param [in] solutions Vector of solutions to chose the shortest one from
- *  \return Shortest solution, trajectory_ of the returned MotionPlanResponse is a nullptr if no solution is found!
+ *  \return Shortest solution, trajectory of the returned MotionPlanResponse is a nullptr if no solution is found!
  */
 static inline planning_interface::MotionPlanResponse
 getShortestSolution(const std::vector<planning_interface::MotionPlanResponse>& solutions)
@@ -90,8 +90,8 @@ getShortestSolution(const std::vector<planning_interface::MotionPlanResponse>& s
                                                       // If both solutions were successful, check which path is shorter
                                                       if (solution_a && solution_b)
                                                       {
-                                                        return robot_trajectory::path_length(*solution_a.trajectory_) <
-                                                               robot_trajectory::path_length(*solution_b.trajectory_);
+                                                        return robot_trajectory::path_length(*solution_a.trajectory) <
+                                                               robot_trajectory::path_length(*solution_b.trajectory);
                                                       }
                                                       // If only solution a is successful, return a
                                                       else if (solution_a)

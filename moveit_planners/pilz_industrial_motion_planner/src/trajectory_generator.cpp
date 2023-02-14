@@ -265,19 +265,19 @@ void TrajectoryGenerator::setSuccessResponse(const moveit::core::RobotState& sta
   auto rt = std::make_shared<robot_trajectory::RobotTrajectory>(robot_model_, group_name);
   rt->setRobotTrajectoryMsg(start_state, joint_trajectory);
 
-  res.trajectory_ = rt;
-  res.error_code_.val = moveit_msgs::msg::MoveItErrorCodes::SUCCESS;
-  res.planning_time_ = (clock_->now() - planning_start).seconds();
+  res.trajectory = rt;
+  res.error_code.val = moveit_msgs::msg::MoveItErrorCodes::SUCCESS;
+  res.planning_time = (clock_->now() - planning_start).seconds();
 }
 
 void TrajectoryGenerator::setFailureResponse(const rclcpp::Time& planning_start,
                                              planning_interface::MotionPlanResponse& res) const
 {
-  if (res.trajectory_)
+  if (res.trajectory)
   {
-    res.trajectory_->clear();
+    res.trajectory->clear();
   }
-  res.planning_time_ = (clock_->now() - planning_start).seconds();
+  res.planning_time = (clock_->now() - planning_start).seconds();
 }
 
 std::unique_ptr<KDL::VelocityProfile>
@@ -314,7 +314,7 @@ bool TrajectoryGenerator::generate(const planning_scene::PlanningSceneConstPtr& 
   catch (const MoveItErrorCodeException& ex)
   {
     RCLCPP_ERROR_STREAM(LOGGER, ex.what());
-    res.error_code_.val = ex.getErrorCode();
+    res.error_code.val = ex.getErrorCode();
     setFailureResponse(planning_begin, res);
     return false;
   }
@@ -326,7 +326,7 @@ bool TrajectoryGenerator::generate(const planning_scene::PlanningSceneConstPtr& 
   catch (const MoveItErrorCodeException& ex)
   {
     RCLCPP_ERROR_STREAM(LOGGER, ex.what());
-    res.error_code_.val = ex.getErrorCode();
+    res.error_code.val = ex.getErrorCode();
     setFailureResponse(planning_begin, res);
     return false;
   }
@@ -339,7 +339,7 @@ bool TrajectoryGenerator::generate(const planning_scene::PlanningSceneConstPtr& 
   catch (const MoveItErrorCodeException& ex)
   {
     RCLCPP_ERROR_STREAM(LOGGER, ex.what());
-    res.error_code_.val = ex.getErrorCode();
+    res.error_code.val = ex.getErrorCode();
     setFailureResponse(planning_begin, res);
     return false;
   }
@@ -352,7 +352,7 @@ bool TrajectoryGenerator::generate(const planning_scene::PlanningSceneConstPtr& 
   catch (const MoveItErrorCodeException& ex)
   {
     RCLCPP_ERROR_STREAM(LOGGER, ex.what());
-    res.error_code_.val = ex.getErrorCode();
+    res.error_code.val = ex.getErrorCode();
     setFailureResponse(planning_begin, res);
     return false;
   }
