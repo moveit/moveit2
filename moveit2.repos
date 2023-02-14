@@ -1,9 +1,11 @@
 repositories:
   # Keep moveit_* repos here because they are released with moveit
+  # TODO: DO NOT MERGE WITH THIS! #
+  # Wait until https://github.com/ros-planning/moveit_msgs/pull/152 is merged
   moveit_msgs:
     type: git
-    url: https://github.com/ros-planning/moveit_msgs.git
-    version: ros2
+    url: https://github.com/sea-bass/moveit_msgs.git
+    version: pr-add-path-constraint
   moveit_resources:
     type: git
     url: https://github.com/ros-planning/moveit_resources.git

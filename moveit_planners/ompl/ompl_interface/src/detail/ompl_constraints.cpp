@@ -323,98 +323,12 @@ Eigen::MatrixXd OrientationConstraint::calcErrorJacobian(const Eigen::Ref<const 
   return -angularVelocityToAngleAxis(aa.angle(), aa.axis()) * robotGeometricJacobian(x).bottomRows(3);
 }
 
-/************************************
- * MoveIt constraint message parsing
- * **********************************/
-Bounds positionConstraintMsgToBoundVector(const moveit_msgs::msg::PositionConstraint& pos_con)
-{
-  auto dims = pos_con.constraint_region.primitives.at(0).dimensions;
-
-  // dimension of -1 signifies unconstrained parameter, so set to infinity
-  for (auto& dim : dims)
-  {
-    if (dim == -1)
-    {
-      dim = std::numeric_limits<double>::infinity();
-    }
-  }
-
-  return { { -dims.at(0) / 2.0, -dims.at(1) / 2.0, -dims.at(2) / 2.0 },
-           { dims.at(0) / 2.0, dims.at(1) / 2.0, dims.at(2) / 2.0 } };
-}
-
-Bounds orientationConstraintMsgToBoundVector(const moveit_msgs::msg::OrientationConstraint& ori_con)
-{
-  std::vector<double> dims = { ori_con.absolute_x_axis_tolerance * 2.0, ori_con.absolute_y_axis_tolerance * 2.0,
-                               ori_con.absolute_z_axis_tolerance * 2.0 };
-
-  // dimension of -1 signifies unconstrained parameter, so set to infinity
-  for (auto& dim : dims)
-  {
-    if (dim == -1)
-      dim = std::numeric_limits<double>::infinity();
-  }
-  return { { -dims[0], -dims[1], -dims[2] }, { dims[0], dims[1], dims[2] } };
-}
-
-/******************************************
- * OMPL Constraints Factory
- * ****************************************/
-ompl::base::ConstraintPtr createOMPLConstraints(const moveit::core::RobotModelConstPtr& robot_model,
-                                                const std::string& group,
-                                                const moveit_msgs::msg::Constraints& constraints)
-{
-  // TODO(bostoncleek): does this reach the end w/o a return ?
-
-  const std::size_t num_dofs = robot_model->getJointModelGroup(group)->getVariableCount();
-  const std::size_t num_pos_con = constraints.position_constraints.size();
-  const std::size_t num_ori_con = constraints.orientation_constraints.size();
-
-  // This factory method contains template code to support position and/or orientation constraints.
-  // If the specified constraints are invalid, a nullptr is returned.
-  std::vector<ompl::base::ConstraintPtr> ompl_constraints;
-  if (num_pos_con > 1)
-  {
-    RCLCPP_WARN(LOGGER, "Only a single position constraint is supported. Using the first one.");
-  }
-  if (num_ori_con > 1)
-  {
-    RCLCPP_WARN(LOGGER, "Only a single orientation constraint is supported. Using the first one.");
-  }
-  if (num_pos_con > 0)
-  {
-    BaseConstraintPtr pos_con;
-    if (constraints.name == "use_equality_constraints")
-    {
-      pos_con = std::make_shared<EqualityPositionConstraint>(robot_model, group, num_dofs);
-    }
-    else
-    {
-      pos_con = std::make_shared<BoxConstraint>(robot_model, group, num_dofs);
-    }
-    pos_con->init(constraints);
-    ompl_constraints.emplace_back(pos_con);
-  }
-  if (num_ori_con > 0)
-  {
-    auto ori_con = std::make_shared<OrientationConstraint>(robot_model, group, num_dofs);
-    ori_con->init(constraints);
-    ompl_constraints.emplace_back(ori_con);
-  }
-  if (num_pos_con < 1 && num_ori_con < 1)
-  {
-    RCLCPP_ERROR(LOGGER, "No path constraints found in planning request.");
-    return nullptr;
-  }
-  return std::make_shared<ompl::base::ConstraintIntersection>(num_dofs, ompl_constraints);
-}
-
 /******************************************
  * Toolpath Constraint
  * ****************************************/
 ToolPathConstraint::ToolPathConstraint(const moveit::core::RobotModelConstPtr& robot_model, const std::string& group,
-                                       unsigned int num_dofs, const unsigned int num_cons, double step)
-  : BaseConstraint(robot_model, group, num_dofs, num_cons), step_(step)
+                                       unsigned int num_dofs, const unsigned int num_cons)
+  : BaseConstraint(robot_model, group, num_dofs, num_cons)
 {
   pose_nn_.setDistanceFunction([this](const EigenIsometry3dWrapper& pose1, const EigenIsometry3dWrapper& pose2) {
     const double translation_distance = (pose1.tform_.translation() - pose2.tform_.translation()).norm();
@@ -425,49 +339,67 @@ ToolPathConstraint::ToolPathConstraint(const moveit::core::RobotModelConstPtr& r
 
 void ToolPathConstraint::parseConstraintMsg(const moveit_msgs::msg::Constraints& constraints)
 {
-  // TODO: Is this needed? Can this be done using setPath()?
-  (void)constraints;  // Suppress compiler warning / error
+  setPath(constraints.path_constraints.at(0));
 }
 
-void ToolPathConstraint::setPath(const moveit_msgs::msg::CartesianTrajectory& msg)
+void ToolPathConstraint::setPath(const moveit_msgs::msg::PathConstraint& path_constraint)
 {
   // Clear previous path
+  path_.clear();
   pose_nn_.clear();
 
-  // Convert to EigenIsometry3dWrapper vector
-  const auto num_pts = msg.points.size();
-  std::vector<EigenIsometry3dWrapper> tform_vec;
-  tform_vec.reserve(num_pts);
-  for (size_t i = 0; i < num_pts; i++)
+  // Create the new path
+  const auto num_pts = path_constraint.path.size();
+  if (num_pts > 1)
   {
-    Eigen::Isometry3d tform;
-    tf2::fromMsg(msg.points[i].point.pose, tform);
-    tform_vec.push_back(EigenIsometry3dWrapper(tform));
+    path_.reserve(num_pts);
+    for (const auto& pose : path_constraint.path)
+    {
+      Eigen::Isometry3d pose_eigen;
+      tf2::fromMsg(pose, pose_eigen);
+      path_.emplace_back(EigenIsometry3dWrapper(pose_eigen));
+    }
+  }
+  else
+  {
+    RCLCPP_ERROR_STREAM(LOGGER, "Path constraint must specify at least 2 points!");
+    return;
+  }
+
+  // Extract the interpolation distance
+  if (path_constraint.interp_distance > 0.0)
+  {
+    interp_distance_ = path_constraint.interp_distance;
+  }
+  else
+  {
+    RCLCPP_WARN_STREAM(LOGGER, "Cannot use zero interpolation distance. Defaulting to 0.01.");
+    interp_distance_ = 0.01;
   }
 
   // Interpolate along waypoints and insert into pose_nn_;
   for (size_t i = 0; i < num_pts - 1; i++)
   {
     // Insert waypoints
-    pose_nn_.add(tform_vec[i]);
+    pose_nn_.add(path_[i]);
 
     // TODO: Consider arc length between the poses to determine the number of interpolation steps
     // Linearly determine the number of steps
-    const auto distance = (tform_vec[i].tform_.translation() - tform_vec[i + 1].tform_.translation()).norm();
-    const auto num_steps = static_cast<unsigned int>(distance / step_);
+    const auto path_length = (path_[i].tform_.translation() - path_[i + 1].tform_.translation()).norm();
+    const auto num_steps = static_cast<unsigned int>(path_length / interp_distance_);
 
     // Insert interpolated poses
-    auto delta = step_;
+    auto delta = interp_distance_;
     for (size_t j = 0; j < num_steps - 1; j++)
     {
-      const auto pose = interpolatePose(tform_vec[i].tform_, tform_vec[i + 1].tform_, delta);
+      const auto pose = interpolatePose(path_[i].tform_, path_[i + 1].tform_, delta);
       pose_nn_.add(EigenIsometry3dWrapper(pose));
-      delta += step_;
+      delta += interp_distance_;
     }
   }
 
   // Insert last waypoint
-  pose_nn_.add(tform_vec[num_pts - 1]);
+  pose_nn_.add(path_[num_pts - 1]);
 }
 
 void ToolPathConstraint::function(const Eigen::Ref<const Eigen::VectorXd>& joint_values,
@@ -515,6 +447,105 @@ Eigen::Isometry3d interpolatePose(const Eigen::Isometry3d& pose1, const Eigen::I
   const Eigen::Quaterniond interp_orientation = q1.slerp(step, q2);
 
   return interp_translation * interp_orientation;
+}
+
+/************************************
+ * MoveIt constraint message parsing
+ * **********************************/
+Bounds positionConstraintMsgToBoundVector(const moveit_msgs::msg::PositionConstraint& pos_con)
+{
+  auto dims = pos_con.constraint_region.primitives.at(0).dimensions;
+
+  // dimension of -1 signifies unconstrained parameter, so set to infinity
+  for (auto& dim : dims)
+  {
+    if (dim == -1)
+    {
+      dim = std::numeric_limits<double>::infinity();
+    }
+  }
+
+  return { { -dims.at(0) / 2.0, -dims.at(1) / 2.0, -dims.at(2) / 2.0 },
+           { dims.at(0) / 2.0, dims.at(1) / 2.0, dims.at(2) / 2.0 } };
+}
+
+Bounds orientationConstraintMsgToBoundVector(const moveit_msgs::msg::OrientationConstraint& ori_con)
+{
+  std::vector<double> dims = { ori_con.absolute_x_axis_tolerance * 2.0, ori_con.absolute_y_axis_tolerance * 2.0,
+                               ori_con.absolute_z_axis_tolerance * 2.0 };
+
+  // dimension of -1 signifies unconstrained parameter, so set to infinity
+  for (auto& dim : dims)
+  {
+    if (dim == -1)
+      dim = std::numeric_limits<double>::infinity();
+  }
+  return { { -dims[0], -dims[1], -dims[2] }, { dims[0], dims[1], dims[2] } };
+}
+
+/******************************************
+ * OMPL Constraints Factory
+ * ****************************************/
+ompl::base::ConstraintPtr createOMPLConstraints(const moveit::core::RobotModelConstPtr& robot_model,
+                                                const std::string& group,
+                                                const moveit_msgs::msg::Constraints& constraints)
+{
+  // TODO(bostoncleek): does this reach the end w/o a return ?
+
+  const std::size_t num_dofs = robot_model->getJointModelGroup(group)->getVariableCount();
+  const std::size_t num_pos_con = constraints.position_constraints.size();
+  const std::size_t num_ori_con = constraints.orientation_constraints.size();
+  const std::size_t num_path_con = constraints.path_constraints.size();
+
+  // This factory method contains template code to support constraints.
+  // If the specified constraints are invalid, a nullptr is returned.
+  std::vector<ompl::base::ConstraintPtr> ompl_constraints;
+  if (num_pos_con > 1)
+  {
+    RCLCPP_WARN(LOGGER, "Only a single position constraint is supported. Using the first one.");
+  }
+  if (num_ori_con > 1)
+  {
+    RCLCPP_WARN(LOGGER, "Only a single orientation constraint is supported. Using the first one.");
+  }
+  if (num_path_con > 1)
+  {
+    RCLCPP_WARN(LOGGER, "Only a single path constraint is supported. Using the first one.");
+  }
+
+  if (num_pos_con > 0)
+  {
+    BaseConstraintPtr pos_con;
+    if (constraints.name == "use_equality_constraints")
+    {
+      pos_con = std::make_shared<EqualityPositionConstraint>(robot_model, group, num_dofs);
+    }
+    else
+    {
+      pos_con = std::make_shared<BoxConstraint>(robot_model, group, num_dofs);
+    }
+    pos_con->init(constraints);
+    ompl_constraints.emplace_back(pos_con);
+  }
+  if (num_ori_con > 0)
+  {
+    auto ori_con = std::make_shared<OrientationConstraint>(robot_model, group, num_dofs);
+    ori_con->init(constraints);
+    ompl_constraints.emplace_back(ori_con);
+  }
+  if (num_path_con > 0)
+  {
+    auto path_con = std::make_shared<ToolPathConstraint>(robot_model, group, num_dofs);
+    path_con->init(constraints);
+    ompl_constraints.emplace_back(path_con);
+  }
+
+  if (num_pos_con < 1 && num_ori_con < 1 && num_path_con < 1)
+  {
+    RCLCPP_ERROR(LOGGER, "No constraints found in planning request.");
+    return nullptr;
+  }
+  return std::make_shared<ompl::base::ConstraintIntersection>(num_dofs, ompl_constraints);
 }
 
 }  // namespace ompl_interface

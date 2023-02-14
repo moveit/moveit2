@@ -45,8 +45,8 @@
 #include <moveit/ompl_interface/detail/threadsafe_state_storage.h>
 #include <moveit/robot_model/robot_model.h>
 #include <moveit/macros/class_forward.h>
-#include <moveit_msgs/msg/cartesian_trajectory.hpp>
 #include <moveit_msgs/msg/constraints.hpp>
+#include <moveit_msgs/msg/path_constraint.hpp>
 
 namespace ompl_interface
 {
@@ -504,23 +504,30 @@ double arcLength(const Eigen::Isometry3d& pose1, const Eigen::Isometry3d& pose2)
  */
 Eigen::Isometry3d interpolatePose(const Eigen::Isometry3d& pose1, const Eigen::Isometry3d& pose2, double step);
 
-/** \brief A path constraint for the EEF useful for sanding, painting, drawing, welding, etc
+/** \brief A Cartesian path constraint a specified link, useful for appliations such as sanding, painting, drawing,
+ * welding, etc.
  * */
 class ToolPathConstraint : public BaseConstraint
 {
 public:
   ToolPathConstraint(const moveit::core::RobotModelConstPtr& robot_model, const std::string& group,
-                     unsigned int num_dofs, const unsigned int num_cons = 6, double step = 0.01);
+                     unsigned int num_dofs, const unsigned int num_cons = 6);
 
   void parseConstraintMsg(const moveit_msgs::msg::Constraints& constraints) override;
 
-  void setPath(const moveit_msgs::msg::CartesianTrajectory& msg);
+  void setPath(const moveit_msgs::msg::PathConstraint& msg);
 
   void function(const Eigen::Ref<const Eigen::VectorXd>& joint_values, Eigen::Ref<Eigen::VectorXd> out) const override;
 
 private:
+  // Nearest-neighbors structure
   mutable ompl::NearestNeighborsGNAT<EigenIsometry3dWrapper> pose_nn_;  // store poses
-  const double step_;                                                   // step size between each waypoint
+
+  // Path representation
+  std::vector<EigenIsometry3dWrapper> path_;
+
+  // Interpolation distance for path
+  double interp_distance_;
 };
 
 }  // namespace ompl_interface
