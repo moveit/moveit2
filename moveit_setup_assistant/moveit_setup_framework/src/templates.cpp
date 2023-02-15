@@ -40,7 +40,7 @@
 
 namespace moveit_setup
 {
-std::vector<TemplateVariable> TemplatedGeneratedFile::variables_;
+std::vector<TemplateVariable> TemplatedGeneratedFile::VARIABLES;
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_setup.templates");
 
 bool TemplatedGeneratedFile::write()

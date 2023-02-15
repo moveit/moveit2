@@ -204,7 +204,7 @@ protected:
   std::shared_ptr<moveit_warehouse::TrajectoryConstraintsStorage> trajectory_constraints_storage_;
 
   rclcpp::Node::SharedPtr node_;
-  warehouse_ros::DatabaseLoader db_loader;
+  warehouse_ros::DatabaseLoader db_loader_;
   planning_scene::PlanningScenePtr planning_scene_;
   std::shared_ptr<moveit_cpp::MoveItCpp> moveit_cpp_;
 

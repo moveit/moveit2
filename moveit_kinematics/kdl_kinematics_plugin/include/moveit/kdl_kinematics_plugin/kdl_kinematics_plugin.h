@@ -160,7 +160,7 @@ private:
   /// clip q_delta such that joint limits will not be violated
   void clipToJointLimits(const KDL::JntArray& q, KDL::JntArray& q_delta, Eigen::ArrayXd& weighting) const;
 
-  static rclcpp::Clock steady_clock_;
+  static rclcpp::Clock STEADY_CLOCK;
 
   bool initialized_;  ///< Internal variable that indicates whether solver is configured and ready
 

@@ -319,9 +319,9 @@ public:
     std::deque<double>::iterator duration_iterator_;
 
   public:
-    explicit Iterator(const std::deque<moveit::core::RobotStatePtr>::iterator& waypoint_iterator,
-                      const std::deque<double>::iterator& duration_iterator)
-      : waypoint_iterator_(waypoint_iterator), duration_iterator_(duration_iterator)
+    explicit Iterator(const std::deque<moveit::core::RobotStatePtr>::iterator& _waypoint_iterator,
+                      const std::deque<double>::iterator& _duration_iterator)
+      : waypoint_iterator_(_waypoint_iterator), duration_iterator_(_duration_iterator)
     {
     }
     Iterator& operator++()

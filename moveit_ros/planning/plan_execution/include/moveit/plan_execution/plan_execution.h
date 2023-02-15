@@ -161,7 +161,7 @@ private:
   class
   {
   private:
-    std::atomic<bool> preemption_requested{ false };
+    std::atomic<bool> preemption_requested_{ false };
 
   public:
     /** \brief check *and clear* the preemption flag
@@ -169,11 +169,11 @@ private:
         A true return value has to trigger full execution stop, as it consumes the request */
     inline bool checkAndClear()
     {
-      return preemption_requested.exchange(false);
+      return preemption_requested_.exchange(false);
     }
     inline void request()
     {
-      preemption_requested.store(true);
+      preemption_requested_.store(true);
     }
   } preempt_;
 
