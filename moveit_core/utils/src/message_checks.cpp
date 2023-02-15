@@ -66,7 +66,7 @@ bool isEmpty(const moveit_msgs::msg::RobotState& msg)
 bool isEmpty(const moveit_msgs::msg::Constraints& constr)
 {
   return constr.position_constraints.empty() && constr.orientation_constraints.empty() &&
-         constr.visibility_constraints.empty() && constr.joint_constraints.empty();
+         constr.visibility_constraints.empty() && constr.joint_constraints.empty() && constr.path_constraints.empty();
 }
 
 bool isEmpty(const geometry_msgs::msg::Quaternion& msg)

@@ -339,7 +339,10 @@ ToolPathConstraint::ToolPathConstraint(const moveit::core::RobotModelConstPtr& r
 
 void ToolPathConstraint::parseConstraintMsg(const moveit_msgs::msg::Constraints& constraints)
 {
-  setPath(constraints.path_constraints.at(0));
+  const auto path_constraint = constraints.path_constraints.at(0);
+  link_name_ = path_constraint.link_name;
+  bounds_ = pathConstraintMsgToBoundVector(path_constraint);
+  setPath(path_constraint);
 }
 
 void ToolPathConstraint::setPath(const moveit_msgs::msg::PathConstraint& path_constraint)
@@ -402,10 +405,8 @@ void ToolPathConstraint::setPath(const moveit_msgs::msg::PathConstraint& path_co
   pose_nn_.add(path_[num_pts - 1]);
 }
 
-void ToolPathConstraint::function(const Eigen::Ref<const Eigen::VectorXd>& joint_values,
-                                  Eigen::Ref<Eigen::VectorXd> out) const
+Eigen::VectorXd ToolPathConstraint::calcError(const Eigen::Ref<const Eigen::VectorXd>& joint_values) const
 {
-  // TODO: try setting num_dim = 1 in BaseConstraint and using poseDistance as the constraint function
   // Ideal: F(q_actual) - F(q_nearest_pose) = 0
 
   // Actual end-effector pose
@@ -421,13 +422,14 @@ void ToolPathConstraint::function(const Eigen::Ref<const Eigen::VectorXd>& joint
   const Eigen::Vector3d eef_nearest_aa_vec = eef_nearest_aa.axis() * eef_nearest_aa.angle();
   const auto eef_pose_error = eef_pose.translation() - eef_nearest_pose.translation();
 
-  // should be allocated to size coDim, by default this is 6
+  Eigen::VectorXd out(6);
   out[0] = eef_pose_error.x();
   out[1] = eef_pose_error.y();
   out[2] = eef_pose_error.z();
   out[3] = eef_aa_vec(0) - eef_nearest_aa_vec(0);
   out[4] = eef_aa_vec(1) - eef_nearest_aa_vec(1);
   out[5] = eef_aa_vec(2) - eef_nearest_aa_vec(2);
+  return out;
 }
 
 double arcLength(const Eigen::Isometry3d& pose1, const Eigen::Isometry3d& pose2)
@@ -483,6 +485,12 @@ Bounds orientationConstraintMsgToBoundVector(const moveit_msgs::msg::Orientation
   return { { -dims[0], -dims[1], -dims[2] }, { dims[0], dims[1], dims[2] } };
 }
 
+Bounds pathConstraintMsgToBoundVector(const moveit_msgs::msg::PathConstraint& path_con)
+{
+  // TODO: Implement using the actual path bounds.
+  return { { -3.0, -3.0, -3.0, -3.0, -3.0, -3.0 }, { 3.0, 3.0, 3.0, 3.0, 3.0, 3.0 } };
+}
+
 /******************************************
  * OMPL Constraints Factory
  * ****************************************/
@@ -491,7 +499,6 @@ ompl::base::ConstraintPtr createOMPLConstraints(const moveit::core::RobotModelCo
                                                 const moveit_msgs::msg::Constraints& constraints)
 {
   // TODO(bostoncleek): does this reach the end w/o a return ?
-
   const std::size_t num_dofs = robot_model->getJointModelGroup(group)->getVariableCount();
   const std::size_t num_pos_con = constraints.position_constraints.size();
   const std::size_t num_ori_con = constraints.orientation_constraints.size();

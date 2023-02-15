@@ -439,6 +439,10 @@ Bounds positionConstraintMsgToBoundVector(const moveit_msgs::msg::PositionConstr
  * */
 Bounds orientationConstraintMsgToBoundVector(const moveit_msgs::msg::OrientationConstraint& ori_con);
 
+/** \brief TODO docstring
+ * */
+Bounds pathConstraintMsgToBoundVector(const moveit_msgs::msg::PathConstraint& path_con);
+
 /** \brief Factory to create constraints based on what is in the MoveIt constraint message. **/
 ompl::base::ConstraintPtr createOMPLConstraints(const moveit::core::RobotModelConstPtr& robot_model,
                                                 const std::string& group,
@@ -517,7 +521,7 @@ public:
 
   void setPath(const moveit_msgs::msg::PathConstraint& msg);
 
-  void function(const Eigen::Ref<const Eigen::VectorXd>& joint_values, Eigen::Ref<Eigen::VectorXd> out) const override;
+  Eigen::VectorXd calcError(const Eigen::Ref<const Eigen::VectorXd>& joint_values) const override;
 
 private:
   // Nearest-neighbors structure

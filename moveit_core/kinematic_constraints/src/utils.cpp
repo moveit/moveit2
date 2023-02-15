@@ -127,13 +127,17 @@ moveit_msgs::msg::Constraints mergeConstraints(const moveit_msgs::msg::Constrain
   for (const moveit_msgs::msg::VisibilityConstraint& visibility_constraint : second.visibility_constraints)
     r.visibility_constraints.push_back(visibility_constraint);
 
+  r.path_constraints = first.path_constraints;
+  for (const moveit_msgs::msg::PathConstraint& path_constraint : second.path_constraints)
+    r.path_constraints.push_back(path_constraint);
+
   return r;
 }
 
 std::size_t countIndividualConstraints(const moveit_msgs::msg::Constraints& constr)
 {
   return constr.position_constraints.size() + constr.orientation_constraints.size() +
-         constr.visibility_constraints.size() + constr.joint_constraints.size();
+         constr.visibility_constraints.size() + constr.joint_constraints.size() + constr.path_constraints.size();
 }
 
 moveit_msgs::msg::Constraints constructGoalConstraints(const moveit::core::RobotState& state,
@@ -548,6 +552,19 @@ static bool constructConstraint(const rclcpp::Node::SharedPtr& node, const std::
   return true;
 }
 
+// Initialize a PathConstraint message from node parameters specified at constraint_param.
+static bool constructConstraint(const rclcpp::Node::SharedPtr& node, const std::string& constraint_param,
+                                moveit_msgs::msg::PathConstraint& constraint)
+{
+  node->get_parameter(constraint_param + ".frame_id", constraint.header.frame_id);
+  node->get_parameter(constraint_param + ".weight", constraint.weight);
+  node->get_parameter(constraint_param + ".link_name", constraint.link_name);
+
+  // TODO: Implement this
+
+  return true;
+}
+
 // Initialize a Constraints message containing constraints specified by node parameters under constraint_ids.
 static bool collectConstraints(const rclcpp::Node::SharedPtr& node, const std::vector<std::string>& constraint_ids,
                                moveit_msgs::msg::Constraints& constraints)
@@ -586,6 +603,13 @@ static bool collectConstraints(const rclcpp::Node::SharedPtr& node, const std::v
       if (!constructConstraint(node, constraint_param, constraints.visibility_constraints.back()))
         return false;
     }
+    // TODO: Implement for Path Constraint
+    // else if (constraint_type == "path")
+    // {
+    //   constraints.path_constraints.emplace_back();
+    //   if (!constructConstraint(node, constraint_param, constraints.path_constraints.back()))
+    //     return false;
+    // }
     else
     {
       RCLCPP_ERROR_STREAM(LOGGER, "Unable to process unknown constraint type: " << constraint_type);
