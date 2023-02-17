@@ -198,17 +198,17 @@ public:
 
   // the methods below are specifically for debugging and testing
 
-  const std::string& getLinkName()
+  const std::string& getLinkName() const
   {
     return link_name_;
   }
 
-  const Eigen::Vector3d getTargetPosition()
+  const Eigen::Vector3d getTargetPosition() const
   {
     return target_position_;
   }
 
-  const Eigen::Quaterniond getTargetOrientation()
+  const Eigen::Quaterniond getTargetOrientation() const
   {
     return target_orientation_;
   }
@@ -474,20 +474,22 @@ inline Eigen::Matrix3d angularVelocityToAngleAxis(const double& angle, const Eig
 struct EigenIsometry3dWrapper
 {
   EigenIsometry3dWrapper(){};
-  EigenIsometry3dWrapper(const Eigen::Isometry3d& tform) : tform_{ tform }
+  EigenIsometry3dWrapper(const Eigen::Isometry3d& tform, const size_t path_idx = 0)
+    : tform_{ tform }, path_idx_{ path_idx }
   {
   }
 
   bool operator==(const EigenIsometry3dWrapper& other) const
   {
-    return tform_.isApprox(other.tform_);
+    return tform_.isApprox(other.tform_, 0.0001);
   }
 
   bool operator!=(const EigenIsometry3dWrapper& other) const
   {
-    return !(tform_.isApprox(other.tform_));
+    return !(tform_.isApprox(other.tform_, 0.0001));
   }
 
+  size_t path_idx_ = 0;
   Eigen::Isometry3d tform_;
 };
 
@@ -515,13 +517,15 @@ class ToolPathConstraint : public BaseConstraint
 {
 public:
   ToolPathConstraint(const moveit::core::RobotModelConstPtr& robot_model, const std::string& group,
-                     unsigned int num_dofs, const unsigned int num_cons = 6);
+                     unsigned int num_dofs, const unsigned int num_cons = 3);
 
   void parseConstraintMsg(const moveit_msgs::msg::Constraints& constraints) override;
 
   void setPath(const moveit_msgs::msg::PathConstraint& msg);
 
-  Eigen::VectorXd calcError(const Eigen::Ref<const Eigen::VectorXd>& joint_values) const override;
+  void function(const Eigen::Ref<const Eigen::VectorXd>& joint_values, Eigen::Ref<Eigen::VectorXd> out) const override;
+
+  void jacobian(const Eigen::Ref<const Eigen::VectorXd>& joint_values, Eigen::Ref<Eigen::MatrixXd> out) const override;
 
 private:
   // Nearest-neighbors structure
@@ -532,6 +536,12 @@ private:
 
   // Interpolation distance for path
   double interp_distance_;
+
+  // Data members (TODO document)
+  moveit::core::RobotModelConstPtr robot_model_;
+  std::string group_;
+  unsigned int num_dofs_;
+  std::vector<std::shared_ptr<BoxConstraint>> box_constraints_;
 };
 
 }  // namespace ompl_interface

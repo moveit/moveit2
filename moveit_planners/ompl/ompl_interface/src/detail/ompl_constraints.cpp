@@ -329,6 +329,9 @@ Eigen::MatrixXd OrientationConstraint::calcErrorJacobian(const Eigen::Ref<const 
 ToolPathConstraint::ToolPathConstraint(const moveit::core::RobotModelConstPtr& robot_model, const std::string& group,
                                        unsigned int num_dofs, const unsigned int num_cons)
   : BaseConstraint(robot_model, group, num_dofs, num_cons)
+  , robot_model_{ robot_model }
+  , group_{ group }
+  , num_dofs_{ num_dofs }
 {
   pose_nn_.setDistanceFunction([this](const EigenIsometry3dWrapper& pose1, const EigenIsometry3dWrapper& pose2) {
     const double translation_distance = (pose1.tform_.translation() - pose2.tform_.translation()).norm();
@@ -341,8 +344,8 @@ void ToolPathConstraint::parseConstraintMsg(const moveit_msgs::msg::Constraints&
 {
   const auto path_constraint = constraints.path_constraints.at(0);
   link_name_ = path_constraint.link_name;
-  bounds_ = pathConstraintMsgToBoundVector(path_constraint);
   setPath(path_constraint);
+  setTolerance(path_constraint.interp_distance * 2.0);
 }
 
 void ToolPathConstraint::setPath(const moveit_msgs::msg::PathConstraint& path_constraint)
@@ -350,17 +353,50 @@ void ToolPathConstraint::setPath(const moveit_msgs::msg::PathConstraint& path_co
   // Clear previous path
   path_.clear();
   pose_nn_.clear();
+  box_constraints_.clear();
 
   // Create the new path
   const auto num_pts = path_constraint.path.size();
   if (num_pts > 1)
   {
     path_.reserve(num_pts);
-    for (const auto& pose : path_constraint.path)
+    for (size_t i = 0; i < num_pts; i++)
     {
+      const auto pose = path_constraint.path.at(i);
       Eigen::Isometry3d pose_eigen;
       tf2::fromMsg(pose, pose_eigen);
-      path_.emplace_back(EigenIsometry3dWrapper(pose_eigen));
+      path_.emplace_back(EigenIsometry3dWrapper(pose_eigen, std::min(i, num_pts - 2)));
+    }
+
+    // Add box constraints
+    for (size_t i = 0; i < num_pts - 1; i++)
+    {
+      const auto pose = path_.at(i).tform_;
+      const auto next_pose = path_.at(i + 1).tform_;
+
+      auto pos_con = std::make_shared<BoxConstraint>(robot_model_, group_, num_dofs_);
+      moveit_msgs::msg::PositionConstraint box_constraint;
+      box_constraint.header.frame_id = "world";
+      box_constraint.link_name = path_constraint.link_name;
+      shape_msgs::msg::SolidPrimitive box;
+      box.type = shape_msgs::msg::SolidPrimitive::BOX;
+      box.dimensions = { 0.01, 0.2, 0.01 };  // TODO: Set proper dimensions
+      box_constraint.constraint_region.primitives.push_back(box);
+
+      geometry_msgs::msg::Pose box_pose;
+      box_pose.position.x = 0.5 * (pose.translation().x() + next_pose.translation().x());
+      box_pose.position.y = 0.5 * (pose.translation().y() + next_pose.translation().y());
+      box_pose.position.z = 0.5 * (pose.translation().z() + next_pose.translation().z());
+      box_pose.orientation.w = 1.0;  // TODO: Orient the box
+      box_constraint.constraint_region.primitive_poses.push_back(box_pose);
+      box_constraint.weight = 1.0;
+
+      moveit_msgs::msg::Constraints constr;
+      constr.position_constraints.push_back(box_constraint);
+
+      pos_con->init(constr);
+      box_constraints_.emplace_back(pos_con);
+      // std::cout << "Made box constraint index " << i << std::endl;
     }
   }
   else
@@ -396,7 +432,7 @@ void ToolPathConstraint::setPath(const moveit_msgs::msg::PathConstraint& path_co
     for (size_t j = 0; j < num_steps - 1; j++)
     {
       const auto pose = interpolatePose(path_[i].tform_, path_[i + 1].tform_, delta);
-      pose_nn_.add(EigenIsometry3dWrapper(pose));
+      pose_nn_.add(EigenIsometry3dWrapper(pose, i));
       delta += interp_distance_;
     }
   }
@@ -405,38 +441,34 @@ void ToolPathConstraint::setPath(const moveit_msgs::msg::PathConstraint& path_co
   pose_nn_.add(path_[num_pts - 1]);
 }
 
-Eigen::VectorXd ToolPathConstraint::calcError(const Eigen::Ref<const Eigen::VectorXd>& joint_values) const
+void ToolPathConstraint::function(const Eigen::Ref<const Eigen::VectorXd>& joint_values,
+                                  Eigen::Ref<Eigen::VectorXd> out) const
 {
-  // Ideal: F(q_actual) - F(q_nearest_pose) = 0
-
-  // Actual end-effector pose
   const Eigen::Isometry3d eef_pose = forwardKinematics(joint_values);
-  const Eigen::Quaterniond eef_quat(eef_pose.rotation());
-  const Eigen::AngleAxisd eef_aa(eef_quat);
-  const Eigen::Vector3d eef_aa_vec = eef_aa.axis() * eef_aa.angle();
 
-  // Nearest end-effector pose in trajectory
-  const Eigen::Isometry3d eef_nearest_pose = pose_nn_.nearest(EigenIsometry3dWrapper(eef_pose)).tform_;
-  const Eigen::Quaterniond eef_nearest_quat = Eigen::Quaterniond(eef_nearest_pose.rotation());
-  const Eigen::AngleAxisd eef_nearest_aa(eef_nearest_quat);
-  const Eigen::Vector3d eef_nearest_aa_vec = eef_nearest_aa.axis() * eef_nearest_aa.angle();
-  const auto eef_pose_error = eef_pose.translation() - eef_nearest_pose.translation();
+  const auto eef_nearest = pose_nn_.nearest(EigenIsometry3dWrapper(eef_pose));
+  // std::cout << "Function, nearest: " << eef_nearest.path_idx_ << std::endl;
 
-  Eigen::VectorXd out(6);
-  out[0] = eef_pose_error.x();
-  out[1] = eef_pose_error.y();
-  out[2] = eef_pose_error.z();
-  out[3] = eef_aa_vec(0) - eef_nearest_aa_vec(0);
-  out[4] = eef_aa_vec(1) - eef_nearest_aa_vec(1);
-  out[5] = eef_aa_vec(2) - eef_nearest_aa_vec(2);
-  return out;
+  const auto bc = box_constraints_.at(eef_nearest.path_idx_);
+  bc->function(joint_values, out);
+}
+
+void ToolPathConstraint::jacobian(const Eigen::Ref<const Eigen::VectorXd>& joint_values,
+                                  Eigen::Ref<Eigen::MatrixXd> out) const
+{
+  const Eigen::Isometry3d eef_pose = forwardKinematics(joint_values);
+  const auto eef_nearest = pose_nn_.nearest(EigenIsometry3dWrapper(eef_pose));
+  // std::cout << "Jacobian, nearest: " << eef_nearest.path_idx_ << std::endl;
+
+  const auto bc = box_constraints_.at(eef_nearest.path_idx_);
+  bc->jacobian(joint_values, out);
 }
 
 double arcLength(const Eigen::Isometry3d& pose1, const Eigen::Isometry3d& pose2)
 {
   const auto q1 = Eigen::Quaterniond(pose1.rotation());
   const auto q2 = Eigen::Quaterniond(pose2.rotation());
-  return std::acos(std::abs(std::clamp(q1.dot(q2), -1.0, 1.0)));
+  return q1.angularDistance(q2);
 }
 
 Eigen::Isometry3d interpolatePose(const Eigen::Isometry3d& pose1, const Eigen::Isometry3d& pose2, double step)
@@ -483,12 +515,6 @@ Bounds orientationConstraintMsgToBoundVector(const moveit_msgs::msg::Orientation
       dim = std::numeric_limits<double>::infinity();
   }
   return { { -dims[0], -dims[1], -dims[2] }, { dims[0], dims[1], dims[2] } };
-}
-
-Bounds pathConstraintMsgToBoundVector(const moveit_msgs::msg::PathConstraint& path_con)
-{
-  // TODO: Implement using the actual path bounds.
-  return { { -3.0, -3.0, -3.0, -3.0, -3.0, -3.0 }, { 3.0, 3.0, 3.0, 3.0, 3.0, 3.0 } };
 }
 
 /******************************************
