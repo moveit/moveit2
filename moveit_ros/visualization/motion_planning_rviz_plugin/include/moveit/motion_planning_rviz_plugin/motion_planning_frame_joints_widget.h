@@ -183,7 +183,7 @@ private Q_SLOTS:
 class ProgressBarEditor : public QWidget
 {
   Q_OBJECT
-  Q_PROPERTY(float value READ value WRITE setValue NOTIFY valueChanged USER true)
+  Q_PROPERTY(float value READ getValue WRITE setValue NOTIFY valueChanged USER true)
 
 public:
   /// Create a progressbar-like slider for editing values in range mix..max
@@ -193,7 +193,7 @@ public:
   {
     value_ = value;
   }
-  float value() const
+  float getValue() const
   {
     return value_;
   }
