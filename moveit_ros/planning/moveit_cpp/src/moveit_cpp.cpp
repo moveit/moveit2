@@ -247,13 +247,17 @@ MoveItCpp::execute(const robot_trajectory::RobotTrajectoryPtr& robot_trajectory,
   robot_trajectory->getRobotTrajectoryMsg(robot_trajectory_msg);
   // TODO: cambel
   // blocking is the only valid option right now. Add non-blocking use case
-  if (blocking)
+  if (!blocking)
+  {
+    RCLCPP_ERROR(LOGGER, "Currently, the `blocking` parameter must be true. Not executing the trajectory.");
+    return moveit_controller_manager::ExecutionStatus::FAILED;
+  }
+  else
   {
     trajectory_execution_manager_->push(robot_trajectory_msg, controllers);
     trajectory_execution_manager_->execute();
     return trajectory_execution_manager_->waitForExecution();
   }
-  return moveit_controller_manager::ExecutionStatus::RUNNING;
 }
 
 bool MoveItCpp::terminatePlanningPipeline(const std::string& pipeline_name)
