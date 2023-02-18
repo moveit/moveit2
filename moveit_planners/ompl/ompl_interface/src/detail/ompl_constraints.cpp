@@ -345,7 +345,7 @@ void ToolPathConstraint::parseConstraintMsg(const moveit_msgs::msg::Constraints&
   const auto path_constraint = constraints.path_constraints.at(0);
   link_name_ = path_constraint.link_name;
   setPath(path_constraint);
-  setTolerance(path_constraint.interp_distance * 2.0);
+  setTolerance(path_constraint.interp_distance * 2.5);
 }
 
 void ToolPathConstraint::setPath(const moveit_msgs::msg::PathConstraint& path_constraint)
@@ -376,11 +376,12 @@ void ToolPathConstraint::setPath(const moveit_msgs::msg::PathConstraint& path_co
 
       auto pos_con = std::make_shared<BoxConstraint>(robot_model_, group_, num_dofs_);
       moveit_msgs::msg::PositionConstraint box_constraint;
-      box_constraint.header.frame_id = "world";
+      box_constraint.header = path_constraint.header;
       box_constraint.link_name = path_constraint.link_name;
       shape_msgs::msg::SolidPrimitive box;
       box.type = shape_msgs::msg::SolidPrimitive::BOX;
-      box.dimensions = { 0.01, 0.2, 0.01 };  // TODO: Set proper dimensions
+      box.dimensions = { 0.05, (pose.translation() - next_pose.translation()).norm() + 0.05,
+                         0.005 };  // TODO: Set proper dimensions
       box_constraint.constraint_region.primitives.push_back(box);
 
       geometry_msgs::msg::Pose box_pose;

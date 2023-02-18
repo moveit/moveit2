@@ -481,16 +481,17 @@ struct EigenIsometry3dWrapper
 
   bool operator==(const EigenIsometry3dWrapper& other) const
   {
-    return tform_.isApprox(other.tform_, 0.0001);
+    return tform_.isApprox(other.tform_, EQUALITY_CONSTRAINT_THRESHOLD);
   }
 
   bool operator!=(const EigenIsometry3dWrapper& other) const
   {
-    return !(tform_.isApprox(other.tform_, 0.0001));
+    return !(tform_.isApprox(other.tform_, EQUALITY_CONSTRAINT_THRESHOLD));
   }
 
   size_t path_idx_ = 0;
   Eigen::Isometry3d tform_;
+  static constexpr double EQUALITY_CONSTRAINT_THRESHOLD{ 0.001 };
 };
 
 /**
