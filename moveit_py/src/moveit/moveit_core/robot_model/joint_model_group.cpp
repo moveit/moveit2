@@ -61,6 +61,7 @@ void init_joint_model_group(py::module& m)
                     str: The name of the joint model group.
                     )")
 
+      .def_property_readonly("link_model_names", &moveit::core::JointModelGroup::getLinkModelNames)
       .def_property("joint_model_names", &moveit::core::JointModelGroup::getJointModelNames, nullptr,
                     R"(
                     list[str]: The names of the joint models in the group.
@@ -68,6 +69,8 @@ void init_joint_model_group(py::module& m)
       .def_property("active_joint_model_names", &moveit::core::JointModelGroup::getActiveJointModelNames, nullptr)
       .def_property("active_joint_model_bounds", &moveit::core::JointModelGroup::getActiveJointModelsBounds, nullptr,
                     py::return_value_policy::reference_internal)
+      .def("get_only_one_end_effector_tip",
+           [](const moveit::core::JointModelGroup* self) { return self->getOnlyOneEndEffectorTip()->getName(); })
       .def("satisfies_position_bounds", &moveit_py::bind_robot_model::satisfies_position_bounds, py::arg("values"),
            py::arg("margin") = 0.0);
 }
