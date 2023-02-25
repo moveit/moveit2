@@ -308,6 +308,7 @@ bool PlanningComponent::setStartState(const std::string& start_state_name)
     return false;
   }
   moveit::core::RobotState start_state(moveit_cpp_->getRobotModel());
+  start_state.setToDefaultValues();  // required to ensure all joints are initialized
   start_state.setToDefaultValues(joint_model_group_, start_state_name);
   return setStartState(start_state);
 }
