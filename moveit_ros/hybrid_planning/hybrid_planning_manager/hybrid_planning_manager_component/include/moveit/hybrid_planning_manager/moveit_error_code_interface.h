@@ -55,7 +55,7 @@ public:
   {
     val = code.val;
   }
-  explicit operator bool() const
+  operator bool() const
   {
     return val == moveit_msgs::msg::MoveItErrorCodes::SUCCESS;
   }

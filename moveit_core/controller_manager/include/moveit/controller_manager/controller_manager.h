@@ -59,7 +59,7 @@ struct ExecutionStatus
     FAILED
   };
 
-  ExecutionStatus(Value value = UNKNOWN) : status_(value)
+  explicit ExecutionStatus(Value value = UNKNOWN) : status_(value)
   {
   }
 
@@ -68,7 +68,7 @@ struct ExecutionStatus
     return status_;
   }
 
-  explicit operator bool() const
+  operator bool() const
   {
     return status_ == SUCCEEDED;
   }
@@ -106,7 +106,7 @@ class MoveItControllerHandle
 {
 public:
   /** \brief Each controller has a name. The handle is initialized with that name */
-  MoveItControllerHandle(const std::string& name) : name_(name)
+  explicit MoveItControllerHandle(const std::string& name) : name_(name)
   {
   }
 

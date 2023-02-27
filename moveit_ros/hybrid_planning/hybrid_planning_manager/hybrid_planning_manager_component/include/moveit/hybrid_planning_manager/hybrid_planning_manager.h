@@ -58,7 +58,7 @@ class HybridPlanningManager : public rclcpp::Node
 {
 public:
   /** \brief Constructor */
-  HybridPlanningManager(const rclcpp::NodeOptions& options);
+  explicit HybridPlanningManager(const rclcpp::NodeOptions& options);
 
   /** \brief Destructor */
   ~HybridPlanningManager() override

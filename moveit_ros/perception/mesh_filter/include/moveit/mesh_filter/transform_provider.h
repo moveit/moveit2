@@ -60,7 +60,7 @@ public:
    * \author Suat Gedikli (gedikli@willowgarage.com)
    * \param[in] update_rate update rate in Hz
    */
-  TransformProvider(double update_rate = 30.);
+  explicit TransformProvider(double update_rate = 30.);
 
   /** \brief Destructor */
   ~TransformProvider();
@@ -126,7 +126,7 @@ private:
   class TransformContext
   {
   public:
-    TransformContext(const std::string& name) : frame_id_(name)
+    explicit TransformContext(const std::string& name) : frame_id_(name)
     {
       transformation_.matrix().setZero();
     }

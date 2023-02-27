@@ -187,7 +187,7 @@ class TrajOptProblem : public sco::OptProb
 {
 public:
   TrajOptProblem();
-  TrajOptProblem(const ProblemInfo& problem_info);
+  explicit TrajOptProblem(const ProblemInfo& problem_info);
   virtual ~TrajOptProblem() = default;
   /** @brief Returns the values of the specified joints (start_col to num_col) for the specified timestep i.*/
   sco::VarVector GetVarRow(int i, int start_col, int num_col)

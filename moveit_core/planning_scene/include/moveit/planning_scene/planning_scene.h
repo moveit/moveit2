@@ -957,7 +957,7 @@ public:
 
 private:
   /* Private constructor used by the diff() methods. */
-  PlanningScene(const PlanningSceneConstPtr& parent);
+  explicit PlanningScene(const PlanningSceneConstPtr& parent);
 
   /* Initialize the scene.  This should only be called by the constructors.
    * Requires a valid robot_model_ */

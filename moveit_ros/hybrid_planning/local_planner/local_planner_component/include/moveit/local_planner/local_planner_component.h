@@ -147,7 +147,7 @@ public:
   };
 
   /** \brief Constructor */
-  LocalPlannerComponent(const rclcpp::NodeOptions& options);
+  explicit LocalPlannerComponent(const rclcpp::NodeOptions& options);
 
   /** \brief Destructor */
   ~LocalPlannerComponent()

@@ -129,7 +129,7 @@ protected:
 class AggregationException : public std::runtime_error
 {
 public:
-  AggregationException(const std::string& error_desc) : std::runtime_error(error_desc)
+  explicit AggregationException(const std::string& error_desc) : std::runtime_error(error_desc)
   {
   }
 };
@@ -143,7 +143,7 @@ public:
 class AggregationBoundsViolationException : public AggregationException
 {
 public:
-  AggregationBoundsViolationException(const std::string& error_desc) : AggregationException(error_desc)
+  explicit AggregationBoundsViolationException(const std::string& error_desc) : AggregationException(error_desc)
   {
   }
 };

@@ -51,10 +51,10 @@ public:
   WorldDiff();
 
   /** \brief Constructor */
-  WorldDiff(const WorldPtr& world);
+  explicit WorldDiff(const WorldPtr& world);
 
   /** \brief copy constructor. */
-  WorldDiff(WorldDiff& other);
+  explicit WorldDiff(WorldDiff& other);
 
   ~WorldDiff();
 

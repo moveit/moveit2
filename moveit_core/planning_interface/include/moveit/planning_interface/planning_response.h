@@ -66,7 +66,7 @@ struct MotionPlanResponse
   std::string planner_id;
 
   // \brief Enable checking of query success or failure, for example if(response) ...
-  explicit operator bool() const
+  operator bool() const
   {
     return bool(error_code);
   }

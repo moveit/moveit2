@@ -51,7 +51,7 @@ namespace pilz_industrial_motion_planner_testutils
 class JointConfigurationException : public std::runtime_error
 {
 public:
-  JointConfigurationException(const std::string& error_desc) : std::runtime_error(error_desc)
+  explicit JointConfigurationException(const std::string& error_desc) : std::runtime_error(error_desc)
   {
   }
 };

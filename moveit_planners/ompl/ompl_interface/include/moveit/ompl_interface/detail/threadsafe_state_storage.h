@@ -45,8 +45,8 @@ namespace ompl_interface
 class TSStateStorage
 {
 public:
-  TSStateStorage(const moveit::core::RobotModelPtr& robot_model);
-  TSStateStorage(const moveit::core::RobotState& start_state);
+  explicit TSStateStorage(const moveit::core::RobotModelPtr& robot_model);
+  explicit TSStateStorage(const moveit::core::RobotState& start_state);
   ~TSStateStorage();
 
   moveit::core::RobotState* getStateStorage() const;

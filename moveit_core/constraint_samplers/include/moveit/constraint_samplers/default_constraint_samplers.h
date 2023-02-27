@@ -241,7 +241,7 @@ struct IKSamplingPose
    * @param pc The pose constraint that will be copied into the internal variable
    *
    */
-  IKSamplingPose(const kinematic_constraints::PositionConstraint& pc);
+  explicit IKSamplingPose(const kinematic_constraints::PositionConstraint& pc);
 
   /**
    * \brief Constructor that takes a single orientation constraint, doing a copy
@@ -250,7 +250,7 @@ struct IKSamplingPose
    *
    * @return
    */
-  IKSamplingPose(const kinematic_constraints::OrientationConstraint& oc);
+  explicit IKSamplingPose(const kinematic_constraints::OrientationConstraint& oc);
 
   /**
    * \brief Constructor that takes both a position and an orientation
@@ -271,7 +271,7 @@ struct IKSamplingPose
    *
    * @return
    */
-  IKSamplingPose(const kinematic_constraints::PositionConstraintPtr& pc);
+  explicit IKSamplingPose(const kinematic_constraints::PositionConstraintPtr& pc);
 
   /**
    * \brief Constructor that takes a pointer to a orientation constraint.
@@ -280,7 +280,7 @@ struct IKSamplingPose
    *
    * @return
    */
-  IKSamplingPose(const kinematic_constraints::OrientationConstraintPtr& oc);
+  explicit IKSamplingPose(const kinematic_constraints::OrientationConstraintPtr& oc);
 
   /**
    * \brief Constructor that takes a pointer to both position and orientation constraints.

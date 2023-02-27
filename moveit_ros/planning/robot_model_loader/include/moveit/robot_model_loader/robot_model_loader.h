@@ -52,7 +52,7 @@ public:
   /** @brief Structure that encodes the options to be passed to the RobotModelLoader constructor */
   struct Options
   {
-    Options(const std::string& robot_description = "robot_description")
+    explicit Options(const std::string& robot_description = "robot_description")
       : robot_description(robot_description), load_kinematics_solvers(true)
     {
     }

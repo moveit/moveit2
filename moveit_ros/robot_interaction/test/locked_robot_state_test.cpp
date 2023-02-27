@@ -257,7 +257,7 @@ TEST(LockedRobotState, URDF_sanity)
 class Super1 : public robot_interaction::LockedRobotState
 {
 public:
-  Super1(const moveit::core::RobotModelPtr& model) : LockedRobotState(model), cnt_(0)
+  explicit Super1(const moveit::core::RobotModelPtr& model) : LockedRobotState(model), cnt_(0)
   {
   }
 

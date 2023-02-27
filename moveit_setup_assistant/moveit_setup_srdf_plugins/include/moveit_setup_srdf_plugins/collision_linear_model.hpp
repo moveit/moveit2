@@ -85,7 +85,7 @@ class SortFilterProxyModel : public QSortFilterProxyModel
   Q_OBJECT
 
 public:
-  SortFilterProxyModel(QObject* parent = nullptr);
+  explicit SortFilterProxyModel(QObject* parent = nullptr);
   QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
   void sort(int column, Qt::SortOrder order) override;
   void setShowAll(bool show_all);

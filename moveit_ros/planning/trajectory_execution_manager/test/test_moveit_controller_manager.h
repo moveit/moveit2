@@ -46,7 +46,7 @@ namespace test_moveit_controller_manager
 class TestMoveItControllerHandle : public moveit_controller_manager::MoveItControllerHandle
 {
 public:
-  TestMoveItControllerHandle(const std::string& name) : MoveItControllerHandle(name)
+  explicit TestMoveItControllerHandle(const std::string& name) : MoveItControllerHandle(name)
   {
   }
 

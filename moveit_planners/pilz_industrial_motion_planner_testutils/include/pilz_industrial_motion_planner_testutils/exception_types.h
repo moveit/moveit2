@@ -42,7 +42,7 @@ namespace pilz_industrial_motion_planner_testutils
 class TestDataLoaderReadingException : public std::runtime_error
 {
 public:
-  TestDataLoaderReadingException(const std::string& error_desc) : std::runtime_error(error_desc)
+  explicit TestDataLoaderReadingException(const std::string& error_desc) : std::runtime_error(error_desc)
   {
   }
 };

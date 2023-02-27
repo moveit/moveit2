@@ -80,7 +80,11 @@ namespace moveit_ros_benchmarks
 struct BenchmarkOptions
 {
   /** \brief Constructor */
-  BenchmarkOptions(const rclcpp::Node::SharedPtr& node);
+  BenchmarkOptions();
+  /** \brief Constructor accepting a custom namespace for parameter lookup */
+  explicit BenchmarkOptions(const rclcpp::Node::SharedPtr& node);
+  /** \brief Destructor */
+  virtual ~BenchmarkOptions();
 
   /** \brief Get all planning pipeline names */
   void getPlanningPipelineNames(std::vector<std::string>& planning_pipeline_names) const;

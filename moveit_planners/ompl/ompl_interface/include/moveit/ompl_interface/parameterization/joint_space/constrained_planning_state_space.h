@@ -64,7 +64,7 @@ class ConstrainedPlanningStateSpace : public ModelBasedStateSpace
 public:
   static const std::string PARAMETERIZATION_TYPE;
 
-  ConstrainedPlanningStateSpace(const ModelBasedStateSpaceSpecification& spec);
+  explicit ConstrainedPlanningStateSpace(const ModelBasedStateSpaceSpecification& spec);
 
   const std::string& getParameterizationType() const override
   {

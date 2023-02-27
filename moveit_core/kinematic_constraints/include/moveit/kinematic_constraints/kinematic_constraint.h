@@ -92,7 +92,7 @@ public:
    *
    * @param [in] model The kinematic model used for constraint evaluation
    */
-  KinematicConstraint(const moveit::core::RobotModelConstPtr& model);
+  explicit KinematicConstraint(const moveit::core::RobotModelConstPtr& model);
   virtual ~KinematicConstraint();
 
   /** \brief Clear the stored constraint */
@@ -207,7 +207,7 @@ public:
    *
    * @param [in] model The kinematic model used for constraint evaluation
    */
-  JointConstraint(const moveit::core::RobotModelConstPtr& model)
+  explicit JointConstraint(const moveit::core::RobotModelConstPtr& model)
     : KinematicConstraint(model), joint_model_(nullptr), joint_variable_index_(-1)
   {
     type_ = JOINT_CONSTRAINT;
@@ -355,7 +355,7 @@ public:
    *
    * @param [in] model The kinematic model used for constraint evaluation
    */
-  OrientationConstraint(const moveit::core::RobotModelConstPtr& model)
+  explicit OrientationConstraint(const moveit::core::RobotModelConstPtr& model)
     : KinematicConstraint(model), link_model_(nullptr)
   {
     type_ = ORIENTATION_CONSTRAINT;
@@ -522,7 +522,8 @@ public:
    *
    * @param [in] model The kinematic model used for constraint evaluation
    */
-  PositionConstraint(const moveit::core::RobotModelConstPtr& model) : KinematicConstraint(model), link_model_(nullptr)
+  explicit PositionConstraint(const moveit::core::RobotModelConstPtr& model)
+    : KinematicConstraint(model), link_model_(nullptr)
   {
     type_ = POSITION_CONSTRAINT;
   }
@@ -768,7 +769,7 @@ public:
    *
    * @param [in] model The kinematic model used for constraint evaluation
    */
-  VisibilityConstraint(const moveit::core::RobotModelConstPtr& model);
+  explicit VisibilityConstraint(const moveit::core::RobotModelConstPtr& model);
 
   /**
    * \brief Configure the constraint based on a
@@ -879,7 +880,7 @@ public:
    *
    * @param [in] model The kinematic model used for constraint evaluation
    */
-  KinematicConstraintSet(const moveit::core::RobotModelConstPtr& model) : robot_model_(model)
+  explicit KinematicConstraintSet(const moveit::core::RobotModelConstPtr& model) : robot_model_(model)
   {
   }
 

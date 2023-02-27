@@ -56,7 +56,7 @@ class GlobalPlannerComponent
 {
 public:
   /** \brief Constructor */
-  GlobalPlannerComponent(const rclcpp::NodeOptions& options);
+  explicit GlobalPlannerComponent(const rclcpp::NodeOptions& options);
 
   /** \brief Destructor */
   ~GlobalPlannerComponent()

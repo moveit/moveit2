@@ -46,7 +46,7 @@ namespace moveit_setup
 class XmlSyntaxHighlighter : public QSyntaxHighlighter
 {
 public:
-  XmlSyntaxHighlighter(QTextDocument* parent = nullptr);
+  explicit XmlSyntaxHighlighter(QTextDocument* parent = nullptr);
   void addTag(const QString& tag, const QTextCharFormat& format, const QString& parent = QString());
 
 protected:
