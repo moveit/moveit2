@@ -165,7 +165,6 @@ public:
   /** \brief Execute a trajectory on the planning group specified by group_name using the trajectory execution manager.
    *  \param [in] group_name MoveIt group to execute for.
    *  \param [in] robot_trajectory Contains trajectory info as well as metadata such as a RobotModel.
-   *  \param [in] blocking If blocking, wait for the trajectory to execute before continuing. Defaults to `true`.
    *  \param [in] controllers An optional list of ros2_controllers to execute with. If none, MoveIt will attempt to find
    * a controller. The exact behavior of finding a controller depends on which MoveItControllerManager plugin is active.
    * \return moveit_controller_manager::ExecutionStatus::SUCCEEDED if successful
@@ -176,7 +175,7 @@ public:
           bool blocking = true, const std::vector<std::string>& controllers = std::vector<std::string>());
 
   moveit_controller_manager::ExecutionStatus
-  execute(const robot_trajectory::RobotTrajectoryPtr& robot_trajectory, bool blocking = true,
+  execute(const robot_trajectory::RobotTrajectoryPtr& robot_trajectory, 
           const std::vector<std::string>& controllers = std::vector<std::string>());
 
   /** \brief Utility to terminate the given planning pipeline */
