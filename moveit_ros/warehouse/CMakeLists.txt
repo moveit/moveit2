@@ -41,7 +41,7 @@ add_library(moveit_warehouse SHARED
 include(GenerateExportHeader)
 generate_export_header(moveit_warehouse)
 target_include_directories(moveit_warehouse PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>)
-set_target_properties(moveit_warehouse PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
+set_target_properties(moveit_warehouse PROPERTIES VERSION moveit_ros_warehouse_VERSION)
 ament_target_dependencies(moveit_warehouse ${THIS_PACKAGE_INCLUDE_DEPENDS})
 
 
@@ -85,14 +85,14 @@ install(FILES ${CMAKE_CURRENT_BINARY_DIR}/moveit_warehouse_export.h DESTINATION 
 
 install(
   TARGETS moveit_warehouse
-  EXPORT ${PROJECT_NAME}Targets
+  EXPORT moveit_ros_warehouseTargets
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
   RUNTIME DESTINATION bin
   INCLUDES DESTINATION include/moveit_ros_warehouse
 )
 
-ament_export_targets(${PROJECT_NAME}Targets HAS_LIBRARY_TARGET)
+ament_export_targets(moveit_ros_warehouseTargets HAS_LIBRARY_TARGET)
 ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS})
 
 if(BUILD_TESTING)
