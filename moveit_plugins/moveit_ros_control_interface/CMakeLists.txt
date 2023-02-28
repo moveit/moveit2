@@ -80,8 +80,8 @@ endif()
 #############
 
 ## Mark executables and/or libraries for installation
-install(TARGETS 
-  moveit_ros_control_interface_plugin
+install(
+  TARGETS moveit_ros_control_interface_plugin
   moveit_ros_control_interface_trajectory_plugin
   moveit_ros_control_interface_gripper_plugin
   moveit_ros_control_interface_empty_plugin
