@@ -786,7 +786,9 @@ void OrientationConstraint::print(std::ostream& out) const
 }
 
 VisibilityConstraint::VisibilityConstraint(const moveit::core::RobotModelConstPtr& model)
-  : KinematicConstraint(model), collision_env_(std::make_shared<collision_detection::CollisionEnvFCL>(model))
+  : KinematicConstraint(model)
+  // , collision_env_(std::make_shared<collision_detection::CollisionEnvFCL>(model))
+  , robot_model_{ model }
 {
   type_ = VISIBILITY_CONSTRAINT;
 }
@@ -1072,25 +1074,27 @@ void VisibilityConstraint::getMarkers(const moveit::core::RobotState& state,
 ConstraintEvaluationResult VisibilityConstraint::decide(const moveit::core::RobotState& state, bool verbose) const
 {
   if (target_radius_ <= std::numeric_limits<double>::epsilon())
+  {
     return ConstraintEvaluationResult(true, 0.0);
+  }
 
   if (max_view_angle_ > 0.0 || max_range_angle_ > 0.0)
   {
     // getFrameTransform() returns a valid isometry by contract
     // sensor_pose_ is valid isometry (checked in configure())
-    const Eigen::Isometry3d& sp =
+    const Eigen::Isometry3d& tform_world_to_sensor =
         mobile_sensor_frame_ ? state.getFrameTransform(sensor_frame_id_) * sensor_pose_ : sensor_pose_;
     // target_pose_ is valid isometry (checked in configure())
-    const Eigen::Isometry3d& tp =
+    const Eigen::Isometry3d& tform_world_to_target =
         mobile_target_frame_ ? state.getFrameTransform(target_frame_id_) * target_pose_ : target_pose_;
 
     // necessary to do subtraction as SENSOR_Z is 0 and SENSOR_X is 2
-    const Eigen::Vector3d& normal2 = sp.linear().col(2 - sensor_view_direction_);
+    const Eigen::Vector3d& sensor_view_axis = tform_world_to_sensor.linear().col(2 - sensor_view_direction_);
 
     if (max_view_angle_ > 0.0)
     {
-      const Eigen::Vector3d& normal1 = tp.linear().col(2) * -1.0;  // along Z axis and inverted
-      double dp = normal2.dot(normal1);
+      const Eigen::Vector3d& normal1 = tform_world_to_target.linear().col(2) * -1.0;  // along Z axis and inverted
+      double dp = sensor_view_axis.dot(normal1);
       double ang = acos(dp);
       if (dp < 0.0)
       {
@@ -1115,8 +1119,8 @@ ConstraintEvaluationResult VisibilityConstraint::decide(const moveit::core::Robo
     }
     if (max_range_angle_ > 0.0)
     {
-      const Eigen::Vector3d& dir = (tp.translation() - sp.translation()).normalized();
-      double dp = normal2.dot(dir);
+      const Eigen::Vector3d& dir = (tform_world_to_target.translation() - tform_world_to_sensor.translation()).normalized();
+      double dp = sensor_view_axis.dot(dir);
       if (dp < 0.0)
       {
         if (verbose)
@@ -1142,12 +1146,17 @@ ConstraintEvaluationResult VisibilityConstraint::decide(const moveit::core::Robo
     }
   }
 
+  const auto collision_env_local = std::make_shared<collision_detection::CollisionEnvFCL>(robot_model_);
+
   shapes::Mesh* m = getVisibilityCone(state);
   if (!m)
+  {
+    RCLCPP_ERROR(LOGGER, "Visibility constraint is violated because we could not create the visibility cone mesh.");
     return ConstraintEvaluationResult(false, 0.0);
+  }
 
   // add the visibility cone as an object
-  collision_env_->getWorld()->addToObject("cone", shapes::ShapeConstPtr(m), Eigen::Isometry3d::Identity());
+  collision_env_local->getWorld()->addToObject("cone", shapes::ShapeConstPtr(m), Eigen::Isometry3d::Identity());
 
   // check for collisions between the robot and the cone
   collision_detection::CollisionRequest req;
@@ -1161,7 +1170,7 @@ ConstraintEvaluationResult VisibilityConstraint::decide(const moveit::core::Robo
   req.contacts = true;
   req.verbose = verbose;
   req.max_contacts = 1;
-  collision_env_->checkRobotCollision(req, res, state, acm);
+  collision_env_local->checkRobotCollision(req, res, state, acm);
 
   if (verbose)
   {
@@ -1171,7 +1180,7 @@ ConstraintEvaluationResult VisibilityConstraint::decide(const moveit::core::Robo
                 res.collision ? "not " : "", ss.str().c_str());
   }
 
-  collision_env_->getWorld()->removeObject("cone");
+  collision_env_local->getWorld()->removeObject("cone");
 
   return ConstraintEvaluationResult(!res.collision, res.collision ? res.contacts.begin()->second.front().depth : 0.0);
 }
