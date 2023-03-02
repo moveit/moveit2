@@ -1073,11 +1073,6 @@ void VisibilityConstraint::getMarkers(const moveit::core::RobotState& state,
 
 ConstraintEvaluationResult VisibilityConstraint::decide(const moveit::core::RobotState& state, bool verbose) const
 {
-  if (target_radius_ <= std::numeric_limits<double>::epsilon())
-  {
-    return ConstraintEvaluationResult(true, 0.0);
-  }
-
   if (max_view_angle_ > 0.0 || max_range_angle_ > 0.0)
   {
     // getFrameTransform() returns a valid isometry by contract
@@ -1146,43 +1141,49 @@ ConstraintEvaluationResult VisibilityConstraint::decide(const moveit::core::Robo
     }
   }
 
-  const auto collision_env_local = std::make_shared<collision_detection::CollisionEnvFCL>(robot_model_);
-
-  shapes::Mesh* m = getVisibilityCone(state);
-  if (!m)
+  if (target_radius_ > std::numeric_limits<double>::epsilon())
   {
-    RCLCPP_ERROR(LOGGER, "Visibility constraint is violated because we could not create the visibility cone mesh.");
-    return ConstraintEvaluationResult(false, 0.0);
+    const auto collision_env_local = std::make_shared<collision_detection::CollisionEnvFCL>(robot_model_);
+
+    shapes::Mesh* m = getVisibilityCone(state);
+    if (!m)
+    {
+      RCLCPP_ERROR(LOGGER, "Visibility constraint is violated because we could not create the visibility cone mesh.");
+      return ConstraintEvaluationResult(false, 0.0);
+    }
+
+    // add the visibility cone as an object
+    collision_env_local->getWorld()->addToObject("cone", shapes::ShapeConstPtr(m), Eigen::Isometry3d::Identity());
+
+    // check for collisions between the robot and the cone
+    collision_detection::CollisionRequest req;
+    collision_detection::CollisionResult res;
+    collision_detection::AllowedCollisionMatrix acm;
+    collision_detection::DecideContactFn fn = [this](collision_detection::Contact& contact) {
+      return decideContact(contact);
+    };
+    acm.setDefaultEntry(std::string("cone"), fn);
+
+    req.contacts = true;
+    req.verbose = verbose;
+    req.max_contacts = 1;
+    collision_env_local->checkRobotCollision(req, res, state, acm);
+
+    if (verbose)
+    {
+      std::stringstream ss;
+      m->print(ss);
+      RCLCPP_INFO(LOGGER, "Visibility constraint %ssatisfied. Visibility cone approximation:\n %s",
+                  res.collision ? "not " : "", ss.str().c_str());
+    }
+
+    collision_env_local->getWorld()->removeObject("cone");
+
+    return ConstraintEvaluationResult(!res.collision, res.collision ? res.contacts.begin()->second.front().depth : 0.0);
   }
 
-  // add the visibility cone as an object
-  collision_env_local->getWorld()->addToObject("cone", shapes::ShapeConstPtr(m), Eigen::Isometry3d::Identity());
-
-  // check for collisions between the robot and the cone
-  collision_detection::CollisionRequest req;
-  collision_detection::CollisionResult res;
-  collision_detection::AllowedCollisionMatrix acm;
-  collision_detection::DecideContactFn fn = [this](collision_detection::Contact& contact) {
-    return decideContact(contact);
-  };
-  acm.setDefaultEntry(std::string("cone"), fn);
-
-  req.contacts = true;
-  req.verbose = verbose;
-  req.max_contacts = 1;
-  collision_env_local->checkRobotCollision(req, res, state, acm);
-
-  if (verbose)
-  {
-    std::stringstream ss;
-    m->print(ss);
-    RCLCPP_INFO(LOGGER, "Visibility constraint %ssatisfied. Visibility cone approximation:\n %s",
-                res.collision ? "not " : "", ss.str().c_str());
-  }
-
-  collision_env_local->getWorld()->removeObject("cone");
-
-  return ConstraintEvaluationResult(!res.collision, res.collision ? res.contacts.begin()->second.front().depth : 0.0);
+  // Constraint evaluation succeeded if we made it here
+  return ConstraintEvaluationResult(true, 0.0);
 }
 
 bool VisibilityConstraint::decideContact(const collision_detection::Contact& contact) const
