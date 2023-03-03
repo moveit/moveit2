@@ -202,6 +202,9 @@ public:
    */
   double getResolution() const;
 
+  /** \brief deprecated.  Use the version with no arguments. */
+  double getResolution(Dimension dim) const;
+
   /**
    * \brief Gets the origin (minimum point) of the indicated dimension
    *
@@ -433,6 +436,12 @@ inline double VoxelGrid<T>::getSize(Dimension dim) const
 
 template <typename T>
 inline double VoxelGrid<T>::getResolution() const
+{
+  return resolution_;
+}
+
+template <typename T>
+inline double VoxelGrid<T>::getResolution(Dimension /*dim*/) const
 {
   return resolution_;
 }
