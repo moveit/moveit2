@@ -787,7 +787,6 @@ void OrientationConstraint::print(std::ostream& out) const
 
 VisibilityConstraint::VisibilityConstraint(const moveit::core::RobotModelConstPtr& model)
   : KinematicConstraint(model)
-  // , collision_env_(std::make_shared<collision_detection::CollisionEnvFCL>(model))
   , robot_model_{ model }
 {
   type_ = VISIBILITY_CONSTRAINT;

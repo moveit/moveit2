@@ -842,10 +842,8 @@ protected:
    */
   bool decideContact(const collision_detection::Contact& contact) const;
 
-  // collision_detection::CollisionEnvPtr collision_env_; /**< \brief A copy of the collision robot maintained for
-  //                                                             collision checking the cone against robot links */
-
-  moveit::core::RobotModelConstPtr robot_model_;
+  moveit::core::RobotModelConstPtr robot_model_; /**< \brief A copy of the robot model used to create collision
+                                                             environments to check the cone against robot links */
 
   bool mobile_sensor_frame_;      /**< \brief True if the sensor is a non-fixed frame relative to the transform frame */
   bool mobile_target_frame_;      /**< \brief True if the target is a non-fixed frame relative to the transform frame */
