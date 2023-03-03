@@ -786,8 +786,7 @@ void OrientationConstraint::print(std::ostream& out) const
 }
 
 VisibilityConstraint::VisibilityConstraint(const moveit::core::RobotModelConstPtr& model)
-  : KinematicConstraint(model)
-  , robot_model_{ model }
+  : KinematicConstraint(model), robot_model_{ model }
 {
   type_ = VISIBILITY_CONSTRAINT;
 }
@@ -1113,7 +1112,8 @@ ConstraintEvaluationResult VisibilityConstraint::decide(const moveit::core::Robo
     }
     if (max_range_angle_ > 0.0)
     {
-      const Eigen::Vector3d& dir = (tform_world_to_target.translation() - tform_world_to_sensor.translation()).normalized();
+      const Eigen::Vector3d& dir =
+          (tform_world_to_target.translation() - tform_world_to_sensor.translation()).normalized();
       double dp = sensor_view_axis.dot(dir);
       if (dp < 0.0)
       {
