@@ -202,9 +202,6 @@ public:
    */
   double getResolution() const;
 
-  /** \brief deprecated.  Use the version with no arguments. */
-  double getResolution(Dimension dim) const;
-
   /**
    * \brief Gets the origin (minimum point) of the indicated dimension
    *
