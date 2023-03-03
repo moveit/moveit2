@@ -248,7 +248,6 @@ MoveItCpp::execute(const robot_trajectory::RobotTrajectoryPtr& robot_trajectory,
   trajectory_execution_manager_->push(robot_trajectory_msg, controllers);
   trajectory_execution_manager_->execute();
   return trajectory_execution_manager_->waitForExecution();
-  
 }
 
 bool MoveItCpp::terminatePlanningPipeline(const std::string& pipeline_name)
