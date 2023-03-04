@@ -1067,7 +1067,6 @@ public:
   bool setFromDiffIK(const JointModelGroup* group, const geometry_msgs::msg::Twist& twist, const std::string& tip,
                      double dt, const GroupStateValidityCallbackFn& constraint = GroupStateValidityCallbackFn());
 
-
   /** \brief Compute the Jacobian with reference to a particular point on a given link, for a specified group.
    * \param group The group to compute the Jacobian for
    * \param link The link model to compute the Jacobian for
@@ -1527,27 +1526,6 @@ public:
    * detected against it.
    **/
   void attachBody(std::unique_ptr<AttachedBody> attached_body);
-
-  /** \brief Add an attached body to this state. Ownership of the
-   * memory for the attached body is assumed by the state.
-   *
-   * This only adds the given body to this RobotState
-   * instance.  It does not change anything about other
-   * representations of the object elsewhere in the system.  So if the
-   * body represents an object in a collision_detection::World (like
-   * from a planning_scene::PlanningScene), you will likely need to remove the
-   * corresponding object from that world to avoid having collisions
-   * detected against it.
-   *
-   * \note This version of the function (taking an AttachedBody
-   * pointer) does not copy the AttachedBody object, it just uses it
-   * directly.  The AttachedBody object stores its position data
-   * internally.  This means you should <b>never attach a single
-   * AttachedBody instance to multiple RobotState instances</b>, or
-   * the body positions will get corrupted.  You need to make a fresh
-   * copy of the AttachedBody object for each RobotState you attach it
-   * to.*/
-
 
   /** @brief Add an attached body to a link
    * @param id The string id associated with the attached body
