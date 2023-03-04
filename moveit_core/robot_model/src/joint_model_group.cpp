@@ -138,7 +138,9 @@ JointModelGroup::JointModelGroup(const std::string& group_name, const srdf::Mode
       if (vc > 1)
         is_single_dof_ = false;
       const std::vector<std::string>& name_order = joint_model->getVariableNames();
-      if (joint_model->getMimic() == nullptr)
+
+      const bool is_active = (joint_model->getMimic() == nullptr);
+      if (is_active)
       {
         active_joint_model_vector_.push_back(joint_model);
         active_joint_model_name_vector_.push_back(joint_model->getName());
@@ -152,12 +154,20 @@ JointModelGroup::JointModelGroup(const std::string& group_name, const srdf::Mode
       {
         variable_names_.push_back(name);
         variable_names_set_.insert(name);
+        if (is_active)
+        {
+          active_variable_names_.push_back(name);
+        }
       }
 
       int first_index = joint_model->getFirstVariableIndex();
       for (std::size_t j = 0; j < name_order.size(); ++j)
       {
         variable_index_list_.push_back(first_index + j);
+        if (is_active)
+        {
+          active_variable_index_list_.push_back(first_index + j);
+        }
         joint_variables_index_map_[name_order[j]] = variable_count_ + j;
       }
       joint_variables_index_map_[joint_model->getName()] = variable_count_;
@@ -730,8 +740,7 @@ void JointModelGroup::printGroupInfo(std::ostream& out) const
     out << '\n';
     out << "        " << parent_model_->getVariableBounds(variable_name) << '\n';
   }
-  out << "  * Variables Index List:\n";
-  out << "    ";
+  out << "  * Variables Index List:\n    ";
   for (int variable_index : variable_index_list_)
     out << variable_index << ' ';
   if (is_contiguous_index_list_)
@@ -742,6 +751,10 @@ void JointModelGroup::printGroupInfo(std::ostream& out) const
   {
     out << "(non-contiguous)";
   }
+  out << '\n';
+  out << "  * Active Variables Index List:\n    ";
+  for (int active_variable_index : active_variable_index_list_)
+    out << active_variable_index << ' ';
   out << '\n';
   if (group_kinematics_.first)
   {

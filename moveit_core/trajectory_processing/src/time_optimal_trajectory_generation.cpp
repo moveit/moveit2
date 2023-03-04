@@ -884,11 +884,11 @@ bool TimeOptimalTrajectoryGeneration::computeTimeStamps(robot_trajectory::RobotT
   double velocity_scaling_factor = verifyScalingFactor(max_velocity_scaling_factor, VELOCITY);
   double acceleration_scaling_factor = verifyScalingFactor(max_acceleration_scaling_factor, ACCELERATION);
 
-  const std::vector<std::string>& vars = group->getVariableNames();
+  // Get the velocity and acceleration limits for all active joints
   const moveit::core::RobotModel& rmodel = group->getParentModel();
-  const unsigned num_joints = group->getVariableCount();
+  const std::vector<std::string>& vars = group->getActiveVariableNames();
+  const unsigned num_joints = group->getActiveVariableCount();
 
-  // Get the vel/accel limits
   Eigen::VectorXd max_velocity(num_joints);
   Eigen::VectorXd max_acceleration(num_joints);
   for (size_t j = 0; j < num_joints; ++j)
@@ -982,9 +982,9 @@ bool TimeOptimalTrajectoryGeneration::computeTimeStamps(
   double velocity_scaling_factor = verifyScalingFactor(max_velocity_scaling_factor, VELOCITY);
   double acceleration_scaling_factor = verifyScalingFactor(max_acceleration_scaling_factor, ACCELERATION);
 
-  const unsigned num_joints = group->getVariableCount();
-  const std::vector<std::string>& vars = group->getVariableNames();
   const moveit::core::RobotModel& rmodel = group->getParentModel();
+  const std::vector<std::string>& vars = group->getActiveVariableNames();
+  const unsigned num_joints = group->getActiveVariableCount();
 
   Eigen::VectorXd max_velocity(num_joints);
   Eigen::VectorXd max_acceleration(num_joints);
@@ -1192,7 +1192,7 @@ bool TimeOptimalTrajectoryGeneration::doTimeParameterizationCalculations(robot_t
 
 bool TimeOptimalTrajectoryGeneration::hasMixedJointTypes(const moveit::core::JointModelGroup* group) const
 {
-  const std::vector<const moveit::core::JointModel*>& joint_models = group->getJointModels();
+  const std::vector<const moveit::core::JointModel*>& joint_models = group->getActiveJointModels();
 
   bool have_prismatic =
       std::any_of(joint_models.cbegin(), joint_models.cend(), [](const moveit::core::JointModel* joint_model) {

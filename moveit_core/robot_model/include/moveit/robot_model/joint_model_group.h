@@ -166,6 +166,19 @@ public:
     return active_joint_model_name_vector_;
   }
 
+  /** \brief Get the names of the active variables that make up the joints included in this group. The number of
+      returned elements is always equal to getVariableCount(). This does not include mimic joints. */
+  const std::vector<std::string>& getActiveVariableNames() const
+  {
+    return active_variable_names_;
+  }
+
+  /** \brief Get the active index locations in the complete robot state for all the variables in this group */
+  const std::vector<int>& getActiveVariableIndexList() const
+  {
+    return active_variable_index_list_;
+  }
+
   /** \brief Get the fixed joints that are part of this group */
   const std::vector<const JointModel*>& getFixedJointModels() const
   {
@@ -624,6 +637,14 @@ protected:
   /** \brief The names of the DOF that make up this group (this is just a sequence of joint variable names; not
       necessarily joint names!) */
   std::set<std::string> variable_names_set_;
+
+  /** \brief The names of the active DOF that make up this group (this is just a sequence of joint variable names;
+      not necessarily joint names!) */
+  std::vector<std::string> active_variable_names_;
+
+  /** \brief The list of active index values this group includes, with respect to a full robot state;
+      this does not include mimic joints. */
+  std::vector<int> active_variable_index_list_;
 
   /** \brief A map from joint names to their instances. This includes all joints in the group. */
   JointModelMapConst joint_model_map_;
