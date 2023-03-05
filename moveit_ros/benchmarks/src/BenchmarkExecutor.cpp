@@ -81,9 +81,9 @@ boost::posix_time::ptime toBoost(const std::chrono::time_point<Clock, Duration>&
 #endif
 }
 
-BenchmarkExecutor::BenchmarkExecutor(const rclcpp::Node::SharedPtr& node, const std::string& robot_description_param)
+BenchmarkExecutor::BenchmarkExecutor(const rclcpp::Node::SharedPtr& node, const std::string& robot_descriptionparam)
   : planning_scene_monitor_{ std::make_shared<planning_scene_monitor::PlanningSceneMonitor>(node,
-                                                                                            robot_description_param) }
+                                                                                            robot_descriptionparam) }
   , planning_scene_storage_{ nullptr }
   , planning_scene_world_storage_{ nullptr }
   , robot_state_storage_{ nullptr }
@@ -863,14 +863,14 @@ void BenchmarkExecutor::runBenchmark(moveit_msgs::msg::MotionPlanRequest request
         // Planning pipeline benchmark
         auto const response = planning_component->plan(plan_req_params, planning_scene_);
 
-        solved[j] = bool(response.error_code_);
+        solved[j] = bool(response.error_code);
 
-        responses[j].error_code_ = response.error_code_;
-        if (response.trajectory_)
+        responses[j].error_code = response.error_code;
+        if (response.trajectory)
         {
-          responses[j].description_.push_back("plan");
-          responses[j].trajectory_.push_back(response.trajectory_);
-          responses[j].processing_time_.push_back(response.planning_time_);
+          responses[j].description.push_back("plan");
+          responses[j].trajectory.push_back(response.trajectory);
+          responses[j].processing_time.push_back(response.planning_time);
         }
 
         std::chrono::duration<double> dt = std::chrono::system_clock::now() - start;
@@ -964,15 +964,14 @@ void BenchmarkExecutor::runBenchmark(moveit_msgs::msg::MotionPlanRequest request
                                                        nullptr, planning_scene_);
         auto const t2 = std::chrono::system_clock::now();
 
-        solved[j] = bool(response.error_code_);
+        solved[j] = bool(response.error_code);
 
-        responses[j].error_code_ = response.error_code_;
-        if (response.trajectory_)
+        responses[j].error_code = response.error_code;
+        if (response.trajectory)
         {
-          responses[j].description_.push_back("plan");
-          responses[j].trajectory_.push_back(response.trajectory_);
-          responses[j].processing_time_.push_back(
-              std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count());
+          responses[j].description.push_back("plan");
+          responses[j].trajectory.push_back(response.trajectory);
+          responses[j].processing_time.push_back(std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count());
         }
 
         std::chrono::duration<double> dt = std::chrono::system_clock::now() - start;
@@ -1022,12 +1021,12 @@ void BenchmarkExecutor::collectMetrics(PlannerRunData& metrics,
     bool correct = true;     // entire trajectory collision free and in bounds
 
     double process_time = total_time;
-    for (std::size_t j = 0; j < motion_plan_response.trajectory_.size(); ++j)
+    for (std::size_t j = 0; j < motion_plan_response.trajectory.size(); ++j)
     {
       correct = true;
       traj_len = 0.0;
       clearance = 0.0;
-      const robot_trajectory::RobotTrajectory& p = *motion_plan_response.trajectory_[j];
+      const robot_trajectory::RobotTrajectory& p = *motion_plan_response.trajectory[j];
 
       // compute path length
       traj_len = robot_trajectory::path_length(p);
@@ -1054,22 +1053,22 @@ void BenchmarkExecutor::collectMetrics(PlannerRunData& metrics,
         return s.has_value() ? s.value() : 0.0;
       }();
 
-      metrics["path_" + motion_plan_response.description_[j] + "_correct BOOLEAN"] = correct ? "true" : "false";
-      metrics["path_" + motion_plan_response.description_[j] + "_length REAL"] = moveit::core::toString(traj_len);
-      metrics["path_" + motion_plan_response.description_[j] + "_clearance REAL"] = moveit::core::toString(clearance);
-      metrics["path_" + motion_plan_response.description_[j] + "_smoothness REAL"] = moveit::core::toString(smoothness);
-      metrics["path_" + motion_plan_response.description_[j] + "_time REAL"] =
-          moveit::core::toString(motion_plan_response.processing_time_[j]);
+      metrics["path_" + motion_plan_response.description[j] + "_correct BOOLEAN"] = correct ? "true" : "false";
+      metrics["path_" + motion_plan_response.description[j] + "_length REAL"] = moveit::core::toString(traj_len);
+      metrics["path_" + motion_plan_response.description[j] + "_clearance REAL"] = moveit::core::toString(clearance);
+      metrics["path_" + motion_plan_response.description[j] + "_smoothness REAL"] = moveit::core::toString(smoothness);
+      metrics["path_" + motion_plan_response.description[j] + "_time REAL"] =
+          moveit::core::toString(motion_plan_response.processing_time[j]);
 
-      if (j == motion_plan_response.trajectory_.size() - 1)
+      if (j == motion_plan_response.trajectory.size() - 1)
       {
         metrics["final_path_correct BOOLEAN"] = correct ? "true" : "false";
         metrics["final_path_length REAL"] = moveit::core::toString(traj_len);
         metrics["final_path_clearance REAL"] = moveit::core::toString(clearance);
         metrics["final_path_smoothness REAL"] = moveit::core::toString(smoothness);
-        metrics["final_path_time REAL"] = moveit::core::toString(motion_plan_response.processing_time_[j]);
+        metrics["final_path_time REAL"] = moveit::core::toString(motion_plan_response.processing_time[j]);
       }
-      process_time -= motion_plan_response.processing_time_[j];
+      process_time -= motion_plan_response.processing_time[j];
     }
     if (process_time <= 0.0)
       process_time = 0.0;
