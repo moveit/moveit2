@@ -61,3 +61,6 @@ qtcreator-*
 
 _build
 _autosummary
+
+# VSCode Devcontainer
+.devcontainer

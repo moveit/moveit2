@@ -381,8 +381,8 @@ void MotionPlanningFrame::changePlanningGroupHelper()
                 planning_display_->getMoveGroupNS().c_str());
     moveit::planning_interface::MoveGroupInterface::Options opt(
         group, moveit::planning_interface::MoveGroupInterface::ROBOT_DESCRIPTION, planning_display_->getMoveGroupNS());
-    opt.robot_model_ = robot_model;
-    opt.robot_description_.clear();
+    opt.robot_model = robot_model;
+    opt.robot_description.clear();
     try
     {
 #ifdef RVIZ_TF1

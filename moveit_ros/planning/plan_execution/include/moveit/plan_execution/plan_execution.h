@@ -55,22 +55,22 @@ class PlanExecution
 public:
   struct Options
   {
-    Options() : replan_(false), replan_attempts_(0), replan_delay_(0.0)
+    Options() : replan(false), replan_attemps(0), replan_delay(0.0)
     {
     }
 
     /// Flag indicating whether replanning is allowed
-    bool replan_;
+    bool replan;
 
     /// If replanning is allowed, this variable specifies how many replanning attempts there can be, at most, before
     /// failure
-    unsigned int replan_attempts_;
+    unsigned int replan_attemps;
 
     /// The amount of time to wait in between replanning attempts (in seconds)
-    double replan_delay_;
+    double replan_delay;
 
     /// Callback for computing motion plans. This callback must always be specified.
-    ExecutableMotionPlanComputationFn plan_callback_;
+    ExecutableMotionPlanComputationFn plan_callback;
 
     /// Callback for repairing motion plans. This is optional. A new plan is re-computed if repairing routines are not
     /// specified.

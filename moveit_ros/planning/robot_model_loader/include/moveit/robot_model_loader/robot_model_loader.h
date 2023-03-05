@@ -53,27 +53,27 @@ public:
   struct Options
   {
     Options(const std::string& robot_description = "robot_description")
-      : robot_description_(robot_description), load_kinematics_solvers_(true)
+      : robot_description(robot_description), load_kinematics_solvers(true)
     {
     }
 
     Options(const std::string& urdf_string, const std::string& srdf_string)
-      : urdf_string_(urdf_string), srdf_string_(srdf_string), load_kinematics_solvers_(true)
+      : urdf_string_(urdf_string), srdf_string(srdf_string), load_kinematics_solvers(true)
     {
     }
 
     /**  @brief The string name corresponding to the ROS param where the URDF is loaded; Using the same parameter name
        plus the "_planning" suffix, additional configuration can be specified (e.g., additional joint limits).
          Loading from the param server is attempted only if loading from string fails. */
-    std::string robot_description_;
+    std::string robot_description;
 
     /** @brief The string content of the URDF and SRDF documents. Loading from string is attempted only if loading from
      * XML fails */
-    std::string urdf_string_, srdf_string_;
+    std::string urdf_string_, srdf_string;
 
     /** @brief Flag indicating whether the kinematics solvers should be loaded as well, using specified ROS parameters
      */
-    bool load_kinematics_solvers_;
+    bool load_kinematics_solvers;
   };
 
   /** @brief Default constructor */

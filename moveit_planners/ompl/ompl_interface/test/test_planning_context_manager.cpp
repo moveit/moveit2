@@ -162,7 +162,7 @@ public:
     // Check if all the states in the solution satisfy the path constraints.
     // A detailed response returns 3 solutions: the ompl solution, the simplified solution and the interpolated
     // solution. We test all of them here.
-    for (const robot_trajectory::RobotTrajectoryPtr& trajectory : response.trajectory_)
+    for (const robot_trajectory::RobotTrajectoryPtr& trajectory : response.trajectory)
     {
       for (std::size_t pt_index = 0; pt_index < trajectory->getWayPointCount(); ++pt_index)
       {
@@ -197,7 +197,7 @@ public:
     // Check if all the states in the solution satisfy the path constraints.
     // A detailed response returns 3 solutions: the ompl solution, the simplified solution and the interpolated
     // solution. We test all of them here.
-    for (const robot_trajectory::RobotTrajectoryPtr& trajectory : response2.trajectory_)
+    for (const robot_trajectory::RobotTrajectoryPtr& trajectory : response2.trajectory)
     {
       for (std::size_t pt_index = 0; pt_index < trajectory->getWayPointCount(); ++pt_index)
       {

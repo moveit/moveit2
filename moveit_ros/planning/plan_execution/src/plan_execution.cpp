@@ -114,8 +114,8 @@ void plan_execution::PlanExecution::stop()
 
 void plan_execution::PlanExecution::planAndExecute(ExecutableMotionPlan& plan, const Options& opt)
 {
-  plan.planning_scene_monitor_ = planning_scene_monitor_;
-  plan.planning_scene_ = planning_scene_monitor_->getPlanningScene();
+  plan.planning_scene_monitor = planning_scene_monitor_;
+  plan.planning_scene = planning_scene_monitor_->getPlanningScene();
   planAndExecuteHelper(plan, opt);
 }
 
@@ -129,13 +129,13 @@ void plan_execution::PlanExecution::planAndExecute(ExecutableMotionPlan& plan,
   }
   else
   {
-    plan.planning_scene_monitor_ = planning_scene_monitor_;
+    plan.planning_scene_monitor = planning_scene_monitor_;
     {
       planning_scene_monitor::LockedPlanningSceneRO lscene(planning_scene_monitor_);  // lock the scene so that it does
                                                                                       // not modify the world
                                                                                       // representation while diff() is
                                                                                       // called
-      plan.planning_scene_ = lscene->diff(scene_diff);
+      plan.planning_scene = lscene->diff(scene_diff);
     }
     planAndExecuteHelper(plan, opt);
   }
@@ -150,7 +150,7 @@ void plan_execution::PlanExecution::planAndExecuteHelper(ExecutableMotionPlan& p
 
   // run the actual motion plan & execution
   unsigned int max_replan_attempts =
-      opt.replan_ ? (opt.replan_attempts_ > 0 ? opt.replan_attempts_ : default_max_replan_attempts_) : 1;
+      opt.replan ? (opt.replan_attemps > 0 ? opt.replan_attemps : default_max_replan_attempts_) : 1;
   unsigned int replan_attempts = 0;
   bool previously_solved = false;
 
@@ -171,7 +171,7 @@ void plan_execution::PlanExecution::planAndExecuteHelper(ExecutableMotionPlan& p
     // try to repair the plan we previously had;
     bool solved =
         (!previously_solved || !opt.repair_plan_callback_) ?
-            opt.plan_callback_(plan) :
+            opt.plan_callback(plan) :
             opt.repair_plan_callback_(plan, trajectory_execution_manager_->getCurrentExpectedTrajectoryIndex());
 
     preempt_requested = preempt_.checkAndClear();
@@ -180,14 +180,14 @@ void plan_execution::PlanExecution::planAndExecuteHelper(ExecutableMotionPlan& p
 
     // if planning fails in a manner that is not recoverable, we exit the loop,
     // otherwise, we attempt to continue, if replanning attempts are left
-    if (plan.error_code_.val == moveit_msgs::msg::MoveItErrorCodes::PLANNING_FAILED ||
-        plan.error_code_.val == moveit_msgs::msg::MoveItErrorCodes::INVALID_MOTION_PLAN ||
-        plan.error_code_.val == moveit_msgs::msg::MoveItErrorCodes::UNABLE_TO_AQUIRE_SENSOR_DATA)
+    if (plan.error_code.val == moveit_msgs::msg::MoveItErrorCodes::PLANNING_FAILED ||
+        plan.error_code.val == moveit_msgs::msg::MoveItErrorCodes::INVALID_MOTION_PLAN ||
+        plan.error_code.val == moveit_msgs::msg::MoveItErrorCodes::UNABLE_TO_AQUIRE_SENSOR_DATA)
     {
-      if (plan.error_code_.val == moveit_msgs::msg::MoveItErrorCodes::UNABLE_TO_AQUIRE_SENSOR_DATA &&
-          opt.replan_delay_ > 0.0)
+      if (plan.error_code.val == moveit_msgs::msg::MoveItErrorCodes::UNABLE_TO_AQUIRE_SENSOR_DATA &&
+          opt.replan_delay > 0.0)
       {
-        auto replan_delay_seconds = std::chrono::duration<double>(opt.replan_delay_);
+        auto replan_delay_seconds = std::chrono::duration<double>(opt.replan_delay);
         rclcpp::sleep_for(std::chrono::duration_cast<std::chrono::nanoseconds>(replan_delay_seconds));
       }
       continue;
@@ -203,7 +203,7 @@ void plan_execution::PlanExecution::planAndExecuteHelper(ExecutableMotionPlan& p
       break;
     }
 
-    if (plan.error_code_.val == moveit_msgs::msg::MoveItErrorCodes::SUCCESS)
+    if (plan.error_code.val == moveit_msgs::msg::MoveItErrorCodes::SUCCESS)
     {
       if (opt.before_execution_callback_)
         opt.before_execution_callback_();
@@ -213,24 +213,24 @@ void plan_execution::PlanExecution::planAndExecuteHelper(ExecutableMotionPlan& p
         break;
 
       // execute the trajectory, and monitor its execution
-      plan.error_code_ = executeAndMonitor(plan, false);
+      plan.error_code = executeAndMonitor(plan, false);
     }
 
-    if (plan.error_code_.val == moveit_msgs::msg::MoveItErrorCodes::PREEMPTED)
+    if (plan.error_code.val == moveit_msgs::msg::MoveItErrorCodes::PREEMPTED)
       preempt_requested = true;
 
     // if execution succeeded or failed in a manner that we do not consider recoverable, we exit the loop (with failure)
-    if (plan.error_code_.val != moveit_msgs::msg::MoveItErrorCodes::MOTION_PLAN_INVALIDATED_BY_ENVIRONMENT_CHANGE)
+    if (plan.error_code.val != moveit_msgs::msg::MoveItErrorCodes::MOTION_PLAN_INVALIDATED_BY_ENVIRONMENT_CHANGE)
     {
       break;
     }
     else
     {
       // otherwise, we wait (if needed)
-      if (opt.replan_delay_ > 0.0)
+      if (opt.replan_delay > 0.0)
       {
-        RCLCPP_INFO(LOGGER, "Waiting for a %lf seconds before attempting a new plan ...", opt.replan_delay_);
-        auto replan_delay_seconds = std::chrono::duration<double>(opt.replan_delay_);
+        RCLCPP_INFO(LOGGER, "Waiting for a %lf seconds before attempting a new plan ...", opt.replan_delay);
+        auto replan_delay_seconds = std::chrono::duration<double>(opt.replan_delay);
         rclcpp::sleep_for(std::chrono::duration_cast<std::chrono::nanoseconds>(replan_delay_seconds));
         RCLCPP_INFO(node_->get_logger(), "Done waiting");
       }
@@ -245,20 +245,20 @@ void plan_execution::PlanExecution::planAndExecuteHelper(ExecutableMotionPlan& p
   if (preempt_requested)
   {
     RCLCPP_DEBUG(LOGGER, "PlanExecution was preempted");
-    plan.error_code_.val = moveit_msgs::msg::MoveItErrorCodes::PREEMPTED;
+    plan.error_code.val = moveit_msgs::msg::MoveItErrorCodes::PREEMPTED;
   }
 
   if (opt.done_callback_)
     opt.done_callback_();
 
-  if (plan.error_code_.val == moveit_msgs::msg::MoveItErrorCodes::SUCCESS)
+  if (plan.error_code.val == moveit_msgs::msg::MoveItErrorCodes::SUCCESS)
   {
     RCLCPP_DEBUG(LOGGER, "PlanExecution finished successfully.");
   }
   else
   {
-    RCLCPP_DEBUG(LOGGER, "PlanExecution terminating with error code %d - '%s'", plan.error_code_.val,
-                 moveit::core::error_code_to_string(plan.error_code_).c_str());
+    RCLCPP_DEBUG(LOGGER, "PlanExecution terminating with error code %d - '%s'", plan.error_code.val,
+                 moveit::core::error_code_to_string(plan.error_code).c_str());
   }
 }
 
@@ -266,16 +266,16 @@ bool plan_execution::PlanExecution::isRemainingPathValid(const ExecutableMotionP
                                                          const std::pair<int, int>& path_segment)
 {
   if (path_segment.first >= 0 &&
-      plan.plan_components_[path_segment.first].trajectory_monitoring_)  // If path_segment.second <= 0, the function
-                                                                         // will fallback to check the entire trajectory
+      plan.plan_components[path_segment.first].trajectory_monitoring)  // If path_segment.second <= 0, the function
+                                                                       // will fallback to check the entire trajectory
   {
-    planning_scene_monitor::LockedPlanningSceneRO lscene(plan.planning_scene_monitor_);  // lock the scene so that it
-                                                                                         // does not modify the world
-                                                                                         // representation while
-                                                                                         // isStateValid() is called
-    const robot_trajectory::RobotTrajectory& t = *plan.plan_components_[path_segment.first].trajectory_;
+    planning_scene_monitor::LockedPlanningSceneRO lscene(plan.planning_scene_monitor);  // lock the scene so that it
+                                                                                        // does not modify the world
+                                                                                        // representation while
+                                                                                        // isStateValid() is called
+    const robot_trajectory::RobotTrajectory& t = *plan.plan_components[path_segment.first].trajectory;
     const collision_detection::AllowedCollisionMatrix* acm =
-        plan.plan_components_[path_segment.first].allowed_collision_matrix_.get();
+        plan.plan_components[path_segment.first].allowed_collision_matrix.get();
     std::size_t wpc = t.getWayPointCount();
     collision_detection::CollisionRequest req;
     req.group_name = t.getGroupName();
@@ -284,30 +284,30 @@ bool plan_execution::PlanExecution::isRemainingPathValid(const ExecutableMotionP
       collision_detection::CollisionResult res;
       if (acm)
       {
-        plan.planning_scene_->checkCollisionUnpadded(req, res, t.getWayPoint(i), *acm);
+        plan.planning_scene->checkCollisionUnpadded(req, res, t.getWayPoint(i), *acm);
       }
       else
       {
-        plan.planning_scene_->checkCollisionUnpadded(req, res, t.getWayPoint(i));
+        plan.planning_scene->checkCollisionUnpadded(req, res, t.getWayPoint(i));
       }
 
-      if (res.collision || !plan.planning_scene_->isStateFeasible(t.getWayPoint(i), false))
+      if (res.collision || !plan.planning_scene->isStateFeasible(t.getWayPoint(i), false))
       {
         // Dave's debacle
         RCLCPP_INFO(LOGGER, "Trajectory component '%s' is invalid",
-                    plan.plan_components_[path_segment.first].description_.c_str());
+                    plan.plan_components[path_segment.first].description.c_str());
 
         // call the same functions again, in verbose mode, to show what issues have been detected
-        plan.planning_scene_->isStateFeasible(t.getWayPoint(i), true);
+        plan.planning_scene->isStateFeasible(t.getWayPoint(i), true);
         req.verbose = true;
         res.clear();
         if (acm)
         {
-          plan.planning_scene_->checkCollisionUnpadded(req, res, t.getWayPoint(i), *acm);
+          plan.planning_scene->checkCollisionUnpadded(req, res, t.getWayPoint(i), *acm);
         }
         else
         {
-          plan.planning_scene_->checkCollisionUnpadded(req, res, t.getWayPoint(i));
+          plan.planning_scene->checkCollisionUnpadded(req, res, t.getWayPoint(i));
         }
         return false;
       }
@@ -322,10 +322,10 @@ moveit_msgs::msg::MoveItErrorCodes plan_execution::PlanExecution::executeAndMoni
   if (reset_preempted)
     preempt_.checkAndClear();
 
-  if (!plan.planning_scene_monitor_)
-    plan.planning_scene_monitor_ = planning_scene_monitor_;
-  if (!plan.planning_scene_)
-    plan.planning_scene_ = planning_scene_monitor_->getPlanningScene();
+  if (!plan.planning_scene_monitor)
+    plan.planning_scene_monitor = planning_scene_monitor_;
+  if (!plan.planning_scene)
+    plan.planning_scene = planning_scene_monitor_->getPlanningScene();
 
   moveit_msgs::msg::MoveItErrorCodes result;
 
@@ -339,7 +339,7 @@ moveit_msgs::msg::MoveItErrorCodes plan_execution::PlanExecution::executeAndMoni
     return result;
   }
 
-  if (plan.plan_components_.empty())
+  if (plan.plan_components.empty())
   {
     result.val = moveit_msgs::msg::MoveItErrorCodes::SUCCESS;
     return result;
@@ -349,7 +349,7 @@ moveit_msgs::msg::MoveItErrorCodes plan_execution::PlanExecution::executeAndMoni
 
   // push the trajectories we have slated for execution to the trajectory execution manager
   int prev = -1;
-  for (size_t component_idx = 0; component_idx < plan.plan_components_.size(); ++component_idx)
+  for (size_t component_idx = 0; component_idx < plan.plan_components.size(); ++component_idx)
   {
     // \todo should this be in trajectory_execution ? Maybe. Then that will have to use kinematic_trajectory too;
     // splitting trajectories for controllers becomes interesting: tied to groups instead of joints. this could cause
@@ -361,13 +361,13 @@ moveit_msgs::msg::MoveItErrorCodes plan_execution::PlanExecution::executeAndMoni
     {
       // Search backward for a previous component having the same group.
       // If the group is the same, unwind this component based on the last waypoint of the previous one.
-      if (plan.plan_components_.at(prev_component).trajectory_ &&
-          plan.plan_components_.at(prev_component).trajectory_->getGroup() ==
-              plan.plan_components_.at(prev_component).trajectory_->getGroup() &&
-          !plan.plan_components_.at(prev_component).trajectory_->empty())
+      if (plan.plan_components.at(prev_component).trajectory &&
+          plan.plan_components.at(prev_component).trajectory->getGroup() ==
+              plan.plan_components.at(prev_component).trajectory->getGroup() &&
+          !plan.plan_components.at(prev_component).trajectory->empty())
       {
-        plan.plan_components_.at(component_idx)
-            .trajectory_->unwind(plan.plan_components_.at(prev_component).trajectory_->getLastWayPoint());
+        plan.plan_components.at(component_idx)
+            .trajectory->unwind(plan.plan_components.at(prev_component).trajectory->getLastWayPoint());
         unwound = true;
         // Break so each component is only unwound once
         break;
@@ -379,25 +379,24 @@ moveit_msgs::msg::MoveItErrorCodes plan_execution::PlanExecution::executeAndMoni
       // unwind the path to execute based on the current state of the system
       if (prev < 0)
       {
-        plan.plan_components_[component_idx].trajectory_->unwind(
-            plan.planning_scene_monitor_ && plan.planning_scene_monitor_->getStateMonitor() ?
-                *plan.planning_scene_monitor_->getStateMonitor()->getCurrentState() :
-                plan.planning_scene_->getCurrentState());
+        plan.plan_components[component_idx].trajectory->unwind(
+            plan.planning_scene_monitor && plan.planning_scene_monitor->getStateMonitor() ?
+                *plan.planning_scene_monitor->getStateMonitor()->getCurrentState() :
+                plan.planning_scene->getCurrentState());
       }
       else
       {
-        plan.plan_components_[component_idx].trajectory_->unwind(
-            plan.plan_components_[prev].trajectory_->getLastWayPoint());
+        plan.plan_components[component_idx].trajectory->unwind(plan.plan_components[prev].trajectory->getLastWayPoint());
       }
     }
 
-    if (plan.plan_components_[component_idx].trajectory_ && !plan.plan_components_[component_idx].trajectory_->empty())
+    if (plan.plan_components[component_idx].trajectory && !plan.plan_components[component_idx].trajectory->empty())
       prev = component_idx;
 
     // convert to message, pass along
     moveit_msgs::msg::RobotTrajectory msg;
-    plan.plan_components_[component_idx].trajectory_->getRobotTrajectoryMsg(msg);
-    if (!trajectory_execution_manager_->push(msg, plan.plan_components_[component_idx].controller_names_))
+    plan.plan_components[component_idx].trajectory->getRobotTrajectoryMsg(msg);
+    if (!trajectory_execution_manager_->push(msg, plan.plan_components[component_idx].controller_name))
     {
       trajectory_execution_manager_->clear();
       RCLCPP_ERROR(LOGGER, "Apparently trajectory initialization failed");
@@ -440,7 +439,7 @@ moveit_msgs::msg::MoveItErrorCodes plan_execution::PlanExecution::executeAndMoni
       if (!isRemainingPathValid(plan, current_index))
       {
         RCLCPP_INFO(LOGGER, "Trajectory component '%s' is invalid after scene update",
-                    plan.plan_components_[current_index.first].description_.c_str());
+                    plan.plan_components[current_index.first].description.c_str());
         path_became_invalid_ = true;
         break;
       }
@@ -474,9 +473,9 @@ moveit_msgs::msg::MoveItErrorCodes plan_execution::PlanExecution::executeAndMoni
   if (trajectory_monitor_)
   {
     trajectory_monitor_->stopTrajectoryMonitor();
-    plan.executed_trajectory_ =
+    plan.executed_trajectory =
         std::make_shared<robot_trajectory::RobotTrajectory>(planning_scene_monitor_->getRobotModel(), "");
-    trajectory_monitor_->swapTrajectory(*plan.executed_trajectory_);
+    trajectory_monitor_->swapTrajectory(*plan.executed_trajectory);
   }
 
   // decide return value
@@ -528,17 +527,17 @@ void plan_execution::PlanExecution::doneWithTrajectoryExecution(
 void plan_execution::PlanExecution::successfulTrajectorySegmentExecution(const ExecutableMotionPlan& plan,
                                                                          std::size_t index)
 {
-  if (plan.plan_components_.empty())
+  if (plan.plan_components.empty())
   {
     RCLCPP_WARN(LOGGER, "Length of provided motion plan is zero.");
     return;
   }
 
   // if any side-effects are associated to the trajectory part that just completed, execute them
-  RCLCPP_DEBUG(LOGGER, "Completed '%s'", plan.plan_components_[index].description_.c_str());
-  if (plan.plan_components_[index].effect_on_success_)
+  RCLCPP_DEBUG(LOGGER, "Completed '%s'", plan.plan_components[index].description.c_str());
+  if (plan.plan_components[index].effect_on_success)
   {
-    if (!plan.plan_components_[index].effect_on_success_(&plan))
+    if (!plan.plan_components[index].effect_on_success(&plan))
     {
       // execution of side-effect failed
       RCLCPP_ERROR(LOGGER, "Execution of path-completion side-effect failed. Preempting.");
@@ -549,14 +548,14 @@ void plan_execution::PlanExecution::successfulTrajectorySegmentExecution(const E
 
   // if there is a next trajectory, check it for validity, before we start execution
   ++index;
-  if (index < plan.plan_components_.size() && plan.plan_components_[index].trajectory_ &&
-      !plan.plan_components_[index].trajectory_->empty())
+  if (index < plan.plan_components.size() && plan.plan_components[index].trajectory &&
+      !plan.plan_components[index].trajectory->empty())
   {
     std::pair<int, int> next_index(static_cast<int>(index), 0);
     if (!isRemainingPathValid(plan, next_index))
     {
       RCLCPP_INFO(LOGGER, "Upcoming trajectory component '%s' is invalid",
-                  plan.plan_components_[next_index.first].description_.c_str());
+                  plan.plan_components[next_index.first].description.c_str());
       path_became_invalid_ = true;
     }
   }
