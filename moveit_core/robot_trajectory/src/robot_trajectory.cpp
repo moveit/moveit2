@@ -538,11 +538,6 @@ double RobotTrajectory::getWayPointDurationFromStart(std::size_t index) const
   return time;
 }
 
-double RobotTrajectory::getWaypointDurationFromStart(std::size_t index) const
-{
-  return getWayPointDurationFromStart(index);
-}
-
 bool RobotTrajectory::getStateAtDurationFromStart(const double request_duration,
                                                   moveit::core::RobotStatePtr& output_state) const
 {
