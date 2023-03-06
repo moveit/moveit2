@@ -363,7 +363,7 @@ bool RuckigSmoothing::runRuckig(robot_trajectory::RobotTrajectory& trajectory,
                                  original_trajectory);
 
         initializeRuckigState(*trajectory.getFirstWayPointPtr(), group, ruckig_input, ruckig_output);
-        // Begin the for() loop again
+        // Continue the loop from failed segment, but with increased duration extension factor
         break;
       }
       ++waypoint_idx;
@@ -384,10 +384,9 @@ void RuckigSmoothing::extendTrajectoryDuration(const double duration_extension_f
                                                const robot_trajectory::RobotTrajectory& original_trajectory,
                                                robot_trajectory::RobotTrajectory& trajectory)
 {
-
-  trajectory.setWayPointDurationFromPrevious(
-      waypoint_idx + 1,
-      duration_extension_factor * original_trajectory.getWayPointDurationFromPrevious(waypoint_idx + 1));
+  trajectory.setWayPointDurationFromPrevious(waypoint_idx + 1,
+                                             duration_extension_factor *
+                                                 original_trajectory.getWayPointDurationFromPrevious(waypoint_idx + 1));
   // re-calculate waypoint velocity and acceleration
   auto target_state = trajectory.getWayPointPtr(waypoint_idx + 1);
   const auto prev_state = trajectory.getWayPointPtr(waypoint_idx);
