@@ -355,8 +355,6 @@ bool RuckigSmoothing::runRuckig(robot_trajectory::RobotTrajectory& trajectory,
       if (ruckig_result != ruckig::Result::Working && ruckig_result != ruckig::Result::Finished)
       {
         duration_extension_factor *= DURATION_EXTENSION_FRACTION;
-        // Reset the trajectory
-        trajectory = robot_trajectory::RobotTrajectory(original_trajectory, true /* deep copy */);
 
         const std::vector<int>& move_group_idx = group->getVariableIndexList();
         extendTrajectoryDuration(duration_extension_factor, waypoint_idx, num_dof, move_group_idx, trajectory,
