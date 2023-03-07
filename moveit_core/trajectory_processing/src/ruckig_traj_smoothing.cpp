@@ -323,9 +323,10 @@ bool RuckigSmoothing::runRuckig(robot_trajectory::RobotTrajectory& trajectory,
   {
     while (waypoint_idx < num_waypoints - 1)
     {
+      moveit::core::RobotStatePtr curr_waypoint = trajectory.getWayPointPtr(waypoint_idx);
       moveit::core::RobotStatePtr next_waypoint = trajectory.getWayPointPtr(waypoint_idx + 1);
 
-      getNextRuckigInput(trajectory.getWayPointPtr(waypoint_idx), next_waypoint, group, ruckig_input);
+      getNextRuckigInput(curr_waypoint, next_waypoint, group, ruckig_input);
 
       // Run Ruckig
       ruckig_result = ruckig.update(ruckig_input, ruckig_output);
