@@ -7,6 +7,9 @@ LABEL maintainer Robert Haschke rhaschke@techfak.uni-bielefeld.de
 
 ENV TERM xterm
 
+# Setup (temporary) ROS workspace
+WORKDIR /root/ws_moveit
+
 # Install ROS 2 base packages and build tools
 # We are installing ros-<distro>-ros-base here to mimic the behavior of the ros:<distro>-ros-base images.
 # This step is split into a separate layer so that we can rely on cached dependencies instead of having
@@ -23,7 +26,7 @@ RUN \
         # Preferred build tools
         clang clang-format-14 clang-tidy clang-tools \
         ccache \
-        ros-${ROS_DISTRO}-ros-base && \
+        ros-"$ROS_DISTRO"-ros-base && \
     #
     # Clear apt-cache to reduce image size
     rm -rf /var/lib/apt/lists/* && \
@@ -31,9 +34,6 @@ RUN \
     # Globally disable git security
     # https://github.blog/2022-04-12-git-security-vulnerability-announced
     git config --global --add safe.directory "*" && \
-
-# Setup (temporary) ROS workspace
-WORKDIR /root/ws_moveit
 
 # Copy MoveIt sources from docker context
 COPY . src/moveit2
@@ -47,12 +47,12 @@ RUN \
     #
     # Fetch all dependencies from moveit2.repos
     vcs import src < src/moveit2/moveit2.repos && \
-    if [ -r src/moveit2/moveit2_${ROS_DISTRO}.repos ] ; then vcs import src < src/moveit2/moveit2_${ROS_DISTRO}.repos ; fi && \
+    if [ -r src/moveit2/moveit2_"$ROS_DISTRO".repos ] ; then vcs import src < src/moveit2/moveit2_"$ROS_DISTRO".repos ; fi && \
     #
     # Download all dependencies of MoveIt
     rosdep update && \
     DEBIAN_FRONTEND=noninteractive \
-    rosdep install -y --from-paths src --ignore-src --rosdistro ${ROS_DISTRO} --as-root=apt:false && \
+    rosdep install -y --from-paths src --ignore-src --rosdistro "$ROS_DISTRO" --as-root=apt:false && \
     # Remove the source code from this container
     rm -rf src && \
     #
