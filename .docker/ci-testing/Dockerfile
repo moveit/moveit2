@@ -26,11 +26,7 @@ RUN \
         ros-"$ROS_DISTRO"-ros-base && \
     #
     # Clear apt-cache to reduce image size
-    rm -rf /var/lib/apt/lists/* && \
-    #
-    # Globally disable git security
-    # https://github.blog/2022-04-12-git-security-vulnerability-announced
-    git config --global --add safe.directory "*" \
+    rm -rf /var/lib/apt/lists/*
 
 # Setup (temporary) ROS workspace
 WORKDIR /root/ws_moveit
@@ -44,6 +40,10 @@ RUN \
     # Update apt package list as previous containers clear the cache
     apt-get -q update && \
     apt-get -q -y upgrade && \
+    #
+    # Globally disable git security
+    # https://github.blog/2022-04-12-git-security-vulnerability-announced
+    git config --global --add safe.directory "*" && \
     #
     # Fetch all dependencies from moveit2.repos
     vcs import src < src/moveit2/moveit2.repos && \
