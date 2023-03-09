@@ -2,20 +2,11 @@
 # CI image using the ROS testing repository
 
 ARG ROS_DISTRO=rolling
-<<<<<<< HEAD
-FROM ghcr.io/ros-planning/moveit2:${ROS_DISTRO}-ci
-=======
 FROM osrf/ros2:testing
->>>>>>> caac9da54 (Fix ci-testing docker image (#1994))
 LABEL maintainer Robert Haschke rhaschke@techfak.uni-bielefeld.de
 
 ENV TERM xterm
 
-<<<<<<< HEAD
-# Upgrade packages to ros-shadow-fixed and clean apt-cache within one RUN command
-RUN apt-get -qq update && \
-    apt-get -qq upgrade && \
-=======
 # Install ROS 2 base packages and build tools
 # We are installing ros-<distro>-ros-base here to mimic the behavior of the ros:<distro>-ros-base images.
 # This step is split into a separate layer so that we can rely on cached dependencies instead of having
@@ -64,7 +55,6 @@ RUN \
     rosdep install -y --from-paths src --ignore-src --rosdistro "$ROS_DISTRO" --as-root=apt:false && \
     # Remove the source code from this container
     rm -rf src && \
->>>>>>> caac9da54 (Fix ci-testing docker image (#1994))
     #
     # Clear apt-cache to reduce image size
     rm -rf /var/lib/apt/lists/*
