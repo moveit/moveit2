@@ -98,7 +98,6 @@ jobs:
             ${{ env.DH_IMAGE }}
 
   ci-testing:
-    needs: ci
     strategy:
       fail-fast: false
       matrix:
