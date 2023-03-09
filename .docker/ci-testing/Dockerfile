@@ -7,9 +7,6 @@ LABEL maintainer Robert Haschke rhaschke@techfak.uni-bielefeld.de
 
 ENV TERM xterm
 
-# Setup (temporary) ROS workspace
-WORKDIR /root/ws_moveit
-
 # Install ROS 2 base packages and build tools
 # We are installing ros-<distro>-ros-base here to mimic the behavior of the ros:<distro>-ros-base images.
 # This step is split into a separate layer so that we can rely on cached dependencies instead of having
@@ -33,7 +30,10 @@ RUN \
     #
     # Globally disable git security
     # https://github.blog/2022-04-12-git-security-vulnerability-announced
-    git config --global --add safe.directory "*" && \
+    git config --global --add safe.directory "*" \
+
+# Setup (temporary) ROS workspace
+WORKDIR /root/ws_moveit
 
 # Copy MoveIt sources from docker context
 COPY . src/moveit2
