@@ -244,19 +244,10 @@ bool CurrentStateMonitor::waitForCurrentState(const rclcpp::Time& t, double wait
       {
         /* We cannot know if the reason of timeout is slow time or absence of
          * state messages, warn the user. */
-<<<<<<< HEAD
-        rclcpp::Clock steady_clock(RCL_STEADY_TIME);
-        RCLCPP_WARN_SKIPFIRST_THROTTLE(LOGGER, steady_clock, 1000,
-                                       "No state update received within 100ms of system clock");
-=======
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wold-style-cast"
         RCLCPP_WARN_SKIPFIRST_THROTTLE(LOGGER, steady_clock, 1000,
                                        "No state update received within 100ms of system clock. "
                                        "Have been waiting for %fs, timeout is %fs",
                                        elapsed.seconds(), wait_time_s);
-#pragma GCC diagnostic pop
->>>>>>> 2c48478ac (Fix timeout in waitForCurrentState (#1899))
       }
     }
     else
