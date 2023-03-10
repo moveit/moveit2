@@ -279,7 +279,7 @@ bool MoveItCpp::terminatePlanningPipeline(const std::string& pipeline_name)
 
 std::shared_ptr<const tf2_ros::Buffer> MoveItCpp::getTFBuffer() const
 {
-  return tf_buffer_;
+  return planning_scene_monitor_->getTFClient();
 }
 std::shared_ptr<tf2_ros::Buffer> MoveItCpp::getTFBuffer()
 {
