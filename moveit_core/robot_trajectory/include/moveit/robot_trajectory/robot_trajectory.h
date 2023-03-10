@@ -315,19 +315,19 @@ public:
 
   class Iterator
   {
-    std::deque<moveit::core::RobotStatePtr>::iterator waypoint_iterator;
-    std::deque<double>::iterator duration_iterator;
+    std::deque<moveit::core::RobotStatePtr>::iterator waypoint_iterator_;
+    std::deque<double>::iterator duration_iterator_;
 
   public:
-    explicit Iterator(const std::deque<moveit::core::RobotStatePtr>::iterator& _waypoint_iterator,
-                      const std::deque<double>::iterator& _duration_iterator)
-      : waypoint_iterator(_waypoint_iterator), duration_iterator(_duration_iterator)
+    explicit Iterator(const std::deque<moveit::core::RobotStatePtr>::iterator& waypoint_iterator,
+                      const std::deque<double>::iterator& duration_iterator)
+      : waypoint_iterator_(waypoint_iterator), duration_iterator_(duration_iterator)
     {
     }
     Iterator& operator++()
     {
-      waypoint_iterator++;
-      duration_iterator++;
+      waypoint_iterator_++;
+      duration_iterator_++;
       return *this;
     }
     Iterator operator++(int)
@@ -338,7 +338,7 @@ public:
     }
     bool operator==(const Iterator& other) const
     {
-      return ((waypoint_iterator == other.waypoint_iterator) && (duration_iterator == other.duration_iterator));
+      return ((waypoint_iterator_ == other.waypoint_iterator_) && (duration_iterator_ == other.duration_iterator_));
     }
     bool operator!=(const Iterator& other) const
     {
@@ -346,7 +346,7 @@ public:
     }
     std::pair<moveit::core::RobotStatePtr, double> operator*() const
     {
-      return std::pair{ *waypoint_iterator, *duration_iterator };
+      return std::pair{ *waypoint_iterator_, *duration_iterator_ };
     }
 
     // iterator traits
