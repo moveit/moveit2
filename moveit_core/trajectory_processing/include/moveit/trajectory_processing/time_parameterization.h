@@ -11,6 +11,11 @@ MOVEIT_CLASS_FORWARD(TimeParameterization);
 class TimeParameterization
 {
 public:
+  TimeParameterization() = default;
+  TimeParameterization(const TimeParameterization&) = default;
+  TimeParameterization(TimeParameterization&&) = default;
+  TimeParameterization& operator=(const TimeParameterization&) = default;
+  TimeParameterization& operator=(TimeParameterization&&) = default;
   virtual ~TimeParameterization() = default;
   virtual bool computeTimeStamps(robot_trajectory::RobotTrajectory& trajectory,
                                  const double max_velocity_scaling_factor = 1.0,
