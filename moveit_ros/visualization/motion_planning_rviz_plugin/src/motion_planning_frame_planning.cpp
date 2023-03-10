@@ -188,7 +188,7 @@ void MotionPlanningFrame::computePlanButtonClicked()
 
   if (success)
   {
-    ui_->ebxecute_button->setEnabled(true);
+    ui_->execute_button->setEnabled(true);
     ui_->result_label->setText(QString("Time: ").append(QString::number(current_plan_->planning_time, 'f', 3)));
   }
   else
