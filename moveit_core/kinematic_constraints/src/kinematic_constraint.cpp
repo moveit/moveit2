@@ -917,17 +917,19 @@ bool VisibilityConstraint::equal(const KinematicConstraint& other, double margin
 
 bool VisibilityConstraint::enabled() const
 {
-  return target_radius_ > std::numeric_limits<double>::epsilon();
+  return (target_radius_ > std::numeric_limits<double>::epsilon()) ||
+         (max_view_angle_ > std::numeric_limits<double>::epsilon()) ||
+         (max_range_angle_ > std::numeric_limits<double>::epsilon());
 }
 
-shapes::Mesh* VisibilityConstraint::getVisibilityCone(const moveit::core::RobotState& state) const
+shapes::Mesh* VisibilityConstraint::getVisibilityCone(const Eigen::Isometry3d& tform_world_to_sensor,
+                                                      const Eigen::Isometry3d& tform_world_to_target) const
 {
   // the current pose of the sensor
+  const Eigen::Isometry3d& sp = tform_world_to_sensor;
 
-  const Eigen::Isometry3d& sp =
-      mobile_sensor_frame_ ? state.getFrameTransform(sensor_frame_id_) * sensor_pose_ : sensor_pose_;
-  const Eigen::Isometry3d& tp =
-      mobile_target_frame_ ? state.getFrameTransform(target_frame_id_) * target_pose_ : target_pose_;
+  // the current pose of the target
+  const Eigen::Isometry3d& tp = tform_world_to_target;
 
   // transform the points on the disc to the desired target frame
   const EigenSTL::vector_Vector3d* points = &points_;
@@ -997,7 +999,15 @@ shapes::Mesh* VisibilityConstraint::getVisibilityCone(const moveit::core::RobotS
 void VisibilityConstraint::getMarkers(const moveit::core::RobotState& state,
                                       visualization_msgs::msg::MarkerArray& markers) const
 {
-  shapes::Mesh* m = getVisibilityCone(state);
+  // getFrameTransform() returns a valid isometry by contract
+  // sensor_pose_ is valid isometry (checked in configure())
+  const Eigen::Isometry3d& sp =
+      mobile_sensor_frame_ ? state.getFrameTransform(sensor_frame_id_) * sensor_pose_ : sensor_pose_;
+  // target_pose_ is valid isometry (checked in configure())
+  const Eigen::Isometry3d& tp =
+      mobile_target_frame_ ? state.getFrameTransform(target_frame_id_) * target_pose_ : target_pose_;
+
+  shapes::Mesh* m = getVisibilityCone(sp, tp);
   visualization_msgs::msg::Marker mk;
   shapes::constructMarkerFromShape(m, mk);
   delete m;
@@ -1022,14 +1032,6 @@ void VisibilityConstraint::getMarkers(const moveit::core::RobotState& state,
   mk.color.b = 0.0;
 
   markers.markers.push_back(mk);
-
-  // getFrameTransform() returns a valid isometry by contract
-  // sensor_pose_ is valid isometry (checked in configure())
-  const Eigen::Isometry3d& sp =
-      mobile_sensor_frame_ ? state.getFrameTransform(sensor_frame_id_) * sensor_pose_ : sensor_pose_;
-  // target_pose_ is valid isometry (checked in configure())
-  const Eigen::Isometry3d& tp =
-      mobile_target_frame_ ? state.getFrameTransform(target_frame_id_) * target_pose_ : target_pose_;
 
   visualization_msgs::msg::Marker mka;
   mka.type = visualization_msgs::msg::Marker::ARROW;
@@ -1071,80 +1073,77 @@ void VisibilityConstraint::getMarkers(const moveit::core::RobotState& state,
 
 ConstraintEvaluationResult VisibilityConstraint::decide(const moveit::core::RobotState& state, bool verbose) const
 {
-  if (max_view_angle_ > 0.0 || max_range_angle_ > 0.0)
+  // getFrameTransform() returns a valid isometry by contract
+  // sensor_pose_ is valid isometry (checked in configure())
+  const Eigen::Isometry3d& tform_world_to_sensor = state.getFrameTransform(sensor_frame_id_) * sensor_pose_;
+  // target_pose_ is valid isometry (checked in configure())
+  const Eigen::Isometry3d& tform_world_to_target = state.getFrameTransform(target_frame_id_) * target_pose_;
+
+  // necessary to do subtraction as SENSOR_Z is 0 and SENSOR_X is 2
+  const Eigen::Vector3d& sensor_view_axis = tform_world_to_sensor.linear().col(2 - sensor_view_direction_);
+
+  // Check view angle constraint
+  if (max_view_angle_ > std::numeric_limits<double>::epsilon())
   {
-    // getFrameTransform() returns a valid isometry by contract
-    // sensor_pose_ is valid isometry (checked in configure())
-    const Eigen::Isometry3d& tform_world_to_sensor =
-        mobile_sensor_frame_ ? state.getFrameTransform(sensor_frame_id_) * sensor_pose_ : sensor_pose_;
-    // target_pose_ is valid isometry (checked in configure())
-    const Eigen::Isometry3d& tform_world_to_target =
-        mobile_target_frame_ ? state.getFrameTransform(target_frame_id_) * target_pose_ : target_pose_;
-
-    // necessary to do subtraction as SENSOR_Z is 0 and SENSOR_X is 2
-    const Eigen::Vector3d& sensor_view_axis = tform_world_to_sensor.linear().col(2 - sensor_view_direction_);
-
-    if (max_view_angle_ > 0.0)
+    const Eigen::Vector3d& normal1 = tform_world_to_target.linear().col(2) * -1.0;  // along Z axis and inverted
+    double dp = sensor_view_axis.dot(normal1);
+    double ang = acos(dp);
+    if (dp < 0.0)
     {
-      const Eigen::Vector3d& normal1 = tform_world_to_target.linear().col(2) * -1.0;  // along Z axis and inverted
-      double dp = sensor_view_axis.dot(normal1);
-      double ang = acos(dp);
-      if (dp < 0.0)
+      if (verbose)
       {
-        if (verbose)
-        {
-          RCLCPP_INFO(LOGGER, "Visibility constraint is violated because the sensor is looking at "
-                              "the wrong side");
-        }
-        return ConstraintEvaluationResult(false, 0.0);
+        RCLCPP_INFO(LOGGER, "Visibility constraint is violated because the sensor is looking at "
+                            "the wrong side");
       }
-      if (max_view_angle_ < ang)
-      {
-        if (verbose)
-        {
-          RCLCPP_INFO(LOGGER,
-                      "Visibility constraint is violated because the view angle is %lf "
-                      "(above the maximum allowed of %lf)",
-                      ang, max_view_angle_);
-        }
-        return ConstraintEvaluationResult(false, 0.0);
-      }
+      return ConstraintEvaluationResult(false, 0.0);
     }
-    if (max_range_angle_ > 0.0)
+    if (max_view_angle_ < ang)
     {
-      const Eigen::Vector3d& dir =
-          (tform_world_to_target.translation() - tform_world_to_sensor.translation()).normalized();
-      double dp = sensor_view_axis.dot(dir);
-      if (dp < 0.0)
+      if (verbose)
       {
-        if (verbose)
-        {
-          RCLCPP_INFO(LOGGER, "Visibility constraint is violated because the sensor is looking at "
-                              "the wrong side");
-        }
-        return ConstraintEvaluationResult(false, 0.0);
+        RCLCPP_INFO(LOGGER,
+                    "Visibility constraint is violated because the view angle is %lf "
+                    "(above the maximum allowed of %lf)",
+                    ang, max_view_angle_);
       }
-
-      double ang = acos(dp);
-      if (max_range_angle_ < ang)
-      {
-        if (verbose)
-        {
-          RCLCPP_INFO(LOGGER,
-                      "Visibility constraint is violated because the range angle is %lf "
-                      "(above the maximum allowed of %lf)",
-                      ang, max_range_angle_);
-        }
-        return ConstraintEvaluationResult(false, 0.0);
-      }
+      return ConstraintEvaluationResult(false, 0.0);
     }
   }
 
+  // Check range angle constraint
+  if (max_range_angle_ > std::numeric_limits<double>::epsilon())
+  {
+    const Eigen::Vector3d& dir =
+        (tform_world_to_target.translation() - tform_world_to_sensor.translation()).normalized();
+    double dp = sensor_view_axis.dot(dir);
+    if (dp < 0.0)
+    {
+      if (verbose)
+      {
+        RCLCPP_INFO(LOGGER, "Visibility constraint is violated because the sensor is looking at "
+                            "the wrong side");
+      }
+      return ConstraintEvaluationResult(false, 0.0);
+    }
+
+    double ang = acos(dp);
+    if (max_range_angle_ < ang)
+    {
+      if (verbose)
+      {
+        RCLCPP_INFO(LOGGER,
+                    "Visibility constraint is violated because the range angle is %lf "
+                    "(above the maximum allowed of %lf)",
+                    ang, max_range_angle_);
+      }
+      return ConstraintEvaluationResult(false, 0.0);
+    }
+  }
+
+  // Check visibility cone collision constraint
   if (target_radius_ > std::numeric_limits<double>::epsilon())
   {
-    const auto collision_env_local = std::make_shared<collision_detection::CollisionEnvFCL>(robot_model_);
-
-    shapes::Mesh* m = getVisibilityCone(state);
+    shapes::Mesh* m = getVisibilityCone(tform_world_to_sensor, tform_world_to_target);
     if (!m)
     {
       RCLCPP_ERROR(LOGGER, "Visibility constraint is violated because we could not create the visibility cone mesh.");
@@ -1152,6 +1151,7 @@ ConstraintEvaluationResult VisibilityConstraint::decide(const moveit::core::Robo
     }
 
     // add the visibility cone as an object
+    const auto collision_env_local = std::make_shared<collision_detection::CollisionEnvFCL>(robot_model_);
     collision_env_local->getWorld()->addToObject("cone", shapes::ShapeConstPtr(m), Eigen::Isometry3d::Identity());
 
     // check for collisions between the robot and the cone

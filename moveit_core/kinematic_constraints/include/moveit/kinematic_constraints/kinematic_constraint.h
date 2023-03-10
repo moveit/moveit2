@@ -811,7 +811,8 @@ public:
    *
    * @return The shape associated with the cone
    */
-  shapes::Mesh* getVisibilityCone(const moveit::core::RobotState& state) const;
+  shapes::Mesh* getVisibilityCone(const Eigen::Isometry3d& tform_world_to_sensor,
+                                  const Eigen::Isometry3d& tform_world_to_target) const;
 
   /**
    * \brief Adds markers associated with the visibility cone, sensor
