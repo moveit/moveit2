@@ -48,15 +48,15 @@ NoiseGeneratorFn get_normal_distribution_generator(size_t num_timesteps, std::ve
     r = std::make_shared<math::MultivariateGaussian>(Eigen::VectorXd::Zero(num_timesteps), covariance);
   }
 
+  auto raw_noise = std::make_shared<Eigen::VectorXd>(num_timesteps);
   NoiseGeneratorFn noise_generator_fn = [=](const Eigen::MatrixXd& values, Eigen::MatrixXd& noisy_values,
                                             Eigen::MatrixXd& noise) {
-    static thread_local Eigen::VectorXd raw_noise(num_timesteps);
     for (int i = 0; i < values.rows(); ++i)
     {
-      rand_generators[i]->sample(raw_noise);
-      raw_noise.head(1).setZero();
-      raw_noise.tail(1).setZero();  // zeroing out the start and end noise values
-      noise.row(i).transpose() = stddev[i] * raw_noise;
+      rand_generators[i]->sample(*raw_noise);
+      raw_noise->head(1).setZero();
+      raw_noise->tail(1).setZero();  // zeroing out the start and end noise values
+      noise.row(i).transpose() = stddev[i] * (*raw_noise);
       noisy_values.row(i) = values.row(i) + noise.row(i);
     }
     return true;

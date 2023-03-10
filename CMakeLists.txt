@@ -23,6 +23,7 @@ include_directories(stomp_moveit PUBLIC
 add_library(stomp_moveit_plugin SHARED
   src/stomp_moveit_planner_plugin.cpp
   src/stomp_moveit_planning_context.cpp
+  src/stomp_moveit_smoothing_adapter.cpp
 )
 ament_target_dependencies(stomp_moveit_plugin
   moveit_core

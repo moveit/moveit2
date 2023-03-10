@@ -3,4 +3,10 @@
     <description>
     </description>
   </class>
+  <class name="stomp_moveit/StompSmoothingAdapter" type="stomp_moveit::StompSmoothingAdapter"
+         base_class_type="planning_request_adapter::PlanningRequestAdapter">
+    <description>
+      Stomp Smoothing Adapter
+    </description>
+  </class>
 </library>
