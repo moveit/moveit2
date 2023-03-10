@@ -69,7 +69,7 @@ static const std::unordered_map<DisabledReason, QVariant> LONG_REASONS_TO_BRUSH 
     ( NOT_DISABLED, QBrush());  // clang-format on
 
 CollisionMatrixModel::CollisionMatrixModel(LinkPairMap& pairs, const std::vector<std::string>& names, QObject* parent)
-  : QAbstractTableModel(parent), pairs(pairs), std_names_(names)
+  : QAbstractTableModel(parent), pairs_(pairs), std_names_(names)
 {
   int idx = 0;
   for (std::vector<std::string>::const_iterator it = names.begin(), end = names.end(); it != end; ++it, ++idx)
@@ -87,7 +87,7 @@ LinkPairMap::iterator CollisionMatrixModel::item(const QModelIndex& index)
     return pairs_.end();
 
   // setLinkPair() actually inserts the pair (A,B) where A < B
-  if (std_names[r] >= std_names_[c])
+  if (std_names_[r] >= std_names_[c])
     std::swap(r, c);
 
   return pairs_.find(std::make_pair(std_names_[r], std_names_[c]));
@@ -201,8 +201,8 @@ void CollisionMatrixModel::setFilterRegExp(const QString& filter)
   visual_to_index_.clear();
   for (int idx = 0, end = q_names_.size(); idx != end; ++idx)
   {
-    if (q_names[idx].contains(regexp))
-      visual_to_index << idx;
+    if (q_names_[idx].contains(regexp))
+      visual_to_index_ << idx;
   }
   endResetModel();
 }
@@ -210,7 +210,7 @@ void CollisionMatrixModel::setFilterRegExp(const QString& filter)
 QVariant CollisionMatrixModel::headerData(int section, Qt::Orientation /*orientation*/, int role) const
 {
   if (role == Qt::DisplayRole)
-    return q_names[visual_to_index[section]];
+    return q_names_[visual_to_index_[section]];
   return QVariant();
 }
 

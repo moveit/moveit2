@@ -457,21 +457,21 @@ bool BroadphaseFilterCallback::needBroadphaseCollision(btBroadphaseProxy* proxy0
   if (cow0->getTypeID() == collision_detection::BodyType::ROBOT_ATTACHED &&
       cow1->getTypeID() == collision_detection::BodyType::ROBOT_LINK)
   {
-    if (cow0->m_touch_links.find(cow1->getName()) != cow0->m_touch_links.end())
+    if (cow0->touch_links.find(cow1->getName()) != cow0->touch_links.end())
       return false;
   }
 
   if (cow1->getTypeID() == collision_detection::BodyType::ROBOT_ATTACHED &&
       cow0->getTypeID() == collision_detection::BodyType::ROBOT_LINK)
   {
-    if (cow1->m_touch_links.find(cow0->getName()) != cow1->m_touch_links.end())
+    if (cow1->touch_links.find(cow0->getName()) != cow1->touch_links.end())
       return false;
   }
 
   if (cow0->getTypeID() == collision_detection::BodyType::ROBOT_ATTACHED &&
       cow1->getTypeID() == collision_detection::BodyType::ROBOT_ATTACHED)
   {
-    if (cow0->m_touch_links == cow1->m_touch_links)
+    if (cow0->touch_links == cow1->touch_links)
       return false;
   }
 
