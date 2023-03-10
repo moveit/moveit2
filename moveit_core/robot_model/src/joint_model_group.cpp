@@ -641,7 +641,7 @@ void JointModelGroup::setSolverAllocators(const std::pair<SolverAllocatorFn, Sol
     {
       group_kinematics_.first.solver_instance_->setDefaultTimeout(group_kinematics_.first.default_ik_timeout_);
       if (!computeJointVariableIndices(group_kinematics_.first.solver_instance_->getJointNames(),
-                                   group_kinematics_.first.bijection_))
+                                       group_kinematics_.first.bijection_))
         group_kinematics_.first.reset();
     }
   }
