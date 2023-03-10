@@ -18,7 +18,7 @@ jobs:
     name: Add new issues and pull-requests to project
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/add-to-project@0.4.1
+      - uses: actions/add-to-project@main
         with:
           project-url: https://github.com/orgs/ros-planning/projects/5
           github-token: ${{ secrets.GITHUB_TOKEN }}
