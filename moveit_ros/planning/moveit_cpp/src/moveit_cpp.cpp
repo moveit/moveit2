@@ -60,8 +60,7 @@ MoveItCpp::MoveItCpp(const rclcpp::Node::SharedPtr& node, const Options& options
     throw std::runtime_error(error);
   }
 
-  robot_model_ = planning_scene_monitor_->getRobotModel();
-  if (!robot_model_)
+  if (!getRobotModel())
   {
     const std::string error = "Unable to construct robot model. Please make sure all needed information is on the "
                               "parameter server.";
@@ -78,7 +77,7 @@ MoveItCpp::MoveItCpp(const rclcpp::Node::SharedPtr& node, const Options& options
   }
 
   trajectory_execution_manager_ = std::make_shared<trajectory_execution_manager::TrajectoryExecutionManager>(
-      node_, robot_model_, planning_scene_monitor_->getStateMonitor());
+      node_, getRobotModel(), planning_scene_monitor_->getStateMonitor());
 
   RCLCPP_DEBUG(LOGGER, "MoveItCpp running");
 }
@@ -86,7 +85,6 @@ MoveItCpp::MoveItCpp(const rclcpp::Node::SharedPtr& node, const Options& options
 MoveItCpp::~MoveItCpp()
 {
   RCLCPP_INFO(LOGGER, "Deleting MoveItCpp");
-  clearContents();
 }
 
 bool MoveItCpp::loadPlanningSceneMonitor(const PlanningSceneMonitorOptions& options)
@@ -139,7 +137,7 @@ bool MoveItCpp::loadPlanningPipelines(const PlanningPipelineOptions& options)
     }
     RCLCPP_INFO(LOGGER, "Loading planning pipeline '%s'", planning_pipeline_name.c_str());
     planning_pipeline::PlanningPipelinePtr pipeline;
-    pipeline = std::make_shared<planning_pipeline::PlanningPipeline>(robot_model_, node_, planning_pipeline_name,
+    pipeline = std::make_shared<planning_pipeline::PlanningPipeline>(getRobotModel(), node_, planning_pipeline_name,
                                                                      PLANNING_PLUGIN_PARAM);
 
     if (!pipeline->getPlannerManager())
@@ -162,7 +160,7 @@ bool MoveItCpp::loadPlanningPipelines(const PlanningPipelineOptions& options)
 
 moveit::core::RobotModelConstPtr MoveItCpp::getRobotModel() const
 {
-  return robot_model_;
+  return planning_scene_monitor_->getRobotModel();
 }
 
 const rclcpp::Node::SharedPtr& MoveItCpp::getNode() const
@@ -288,10 +286,4 @@ std::shared_ptr<tf2_ros::Buffer> MoveItCpp::getTFBuffer()
   return planning_scene_monitor_->getTFClient();
 }
 
-void MoveItCpp::clearContents()
-{
-  planning_scene_monitor_.reset();
-  robot_model_.reset();
-  planning_pipelines_.clear();
-}
 }  // namespace moveit_cpp
