@@ -139,8 +139,7 @@ JointModelGroup::JointModelGroup(const std::string& group_name, const srdf::Mode
         is_single_dof_ = false;
       const std::vector<std::string>& name_order = joint_model->getVariableNames();
 
-      const bool is_active = (joint_model->getMimic() == nullptr);
-      if (is_active)
+      if (joint_model->getMimic() == nullptr)
       {
         active_joint_model_vector_.push_back(joint_model);
         active_joint_model_name_vector_.push_back(joint_model->getName());
@@ -154,20 +153,12 @@ JointModelGroup::JointModelGroup(const std::string& group_name, const srdf::Mode
       {
         variable_names_.push_back(name);
         variable_names_set_.insert(name);
-        if (is_active)
-        {
-          active_variable_names_.push_back(name);
-        }
       }
 
       int first_index = joint_model->getFirstVariableIndex();
       for (std::size_t j = 0; j < name_order.size(); ++j)
       {
         variable_index_list_.push_back(first_index + j);
-        if (is_active)
-        {
-          active_variable_index_list_.push_back(first_index + j);
-        }
         joint_variables_index_map_[name_order[j]] = variable_count_ + j;
       }
       joint_variables_index_map_[joint_model->getName()] = variable_count_;
@@ -615,25 +606,25 @@ void JointModelGroup::setDefaultIKTimeout(double ik_timeout)
     it.second.default_ik_timeout_ = ik_timeout;
 }
 
-bool JointModelGroup::computeIKIndexBijection(const std::vector<std::string>& ik_jnames,
-                                              std::vector<size_t>& joint_bijection) const
+bool JointModelGroup::computeJointVariableIndices(const std::vector<std::string>& joint_names,
+                                                  std::vector<size_t>& joint_bijection) const
 {
   joint_bijection.clear();
-  for (const std::string& ik_jname : ik_jnames)
+  for (const std::string& joint_name : joint_names)
   {
-    VariableIndexMap::const_iterator it = joint_variables_index_map_.find(ik_jname);
+    VariableIndexMap::const_iterator it = joint_variables_index_map_.find(joint_name);
     if (it == joint_variables_index_map_.end())
     {
       // skip reported fixed joints
-      if (hasJointModel(ik_jname) && getJointModel(ik_jname)->getType() == JointModel::FIXED)
+      if (hasJointModel(joint_name) && getJointModel(joint_name)->getType() == JointModel::FIXED)
         continue;
       RCLCPP_ERROR(LOGGER,
-                   "IK solver computes joint values for joint '%s' "
+                   "Looking for variables for joint '%s', "
                    "but group '%s' does not contain such a joint.",
-                   ik_jname.c_str(), getName().c_str());
+                   joint_name.c_str(), getName().c_str());
       return false;
     }
-    const JointModel* jm = getJointModel(ik_jname);
+    const JointModel* jm = getJointModel(joint_name);
     for (size_t k = 0; k < jm->getVariableCount(); ++k)
       joint_bijection.push_back(it->second + k);
   }
@@ -649,7 +640,7 @@ void JointModelGroup::setSolverAllocators(const std::pair<SolverAllocatorFn, Sol
     if (group_kinematics_.first.solver_instance_)
     {
       group_kinematics_.first.solver_instance_->setDefaultTimeout(group_kinematics_.first.default_ik_timeout_);
-      if (!computeIKIndexBijection(group_kinematics_.first.solver_instance_->getJointNames(),
+      if (!computeJointVariableIndices(group_kinematics_.first.solver_instance_->getJointNames(),
                                    group_kinematics_.first.bijection_))
         group_kinematics_.first.reset();
     }
@@ -665,7 +656,7 @@ void JointModelGroup::setSolverAllocators(const std::pair<SolverAllocatorFn, Sol
         ks.allocator_ = it.second;
         ks.solver_instance_ = const_cast<JointModelGroup*>(it.first)->getSolverInstance();
         ks.default_ik_timeout_ = group_kinematics_.first.default_ik_timeout_;
-        if (!computeIKIndexBijection(ks.solver_instance_->getJointNames(), ks.bijection_))
+        if (!computeJointVariableIndices(ks.solver_instance_->getJointNames(), ks.bijection_))
         {
           group_kinematics_.second.clear();
           break;
@@ -751,10 +742,6 @@ void JointModelGroup::printGroupInfo(std::ostream& out) const
   {
     out << "(non-contiguous)";
   }
-  out << '\n';
-  out << "  * Active Variables Index List:\n    ";
-  for (int active_variable_index : active_variable_index_list_)
-    out << active_variable_index << ' ';
   out << '\n';
   if (group_kinematics_.first)
   {

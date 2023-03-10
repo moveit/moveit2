@@ -166,19 +166,6 @@ public:
     return active_joint_model_name_vector_;
   }
 
-  /** \brief Get the names of the active variables that make up the joints included in this group. The number of
-      returned elements is always equal to getVariableCount(). This does not include mimic joints. */
-  const std::vector<std::string>& getActiveVariableNames() const
-  {
-    return active_variable_names_;
-  }
-
-  /** \brief Get the active index locations in the complete robot state for all the variables in this group */
-  const std::vector<int>& getActiveVariableIndexList() const
-  {
-    return active_variable_index_list_;
-  }
-
   /** \brief Get the fixed joints that are part of this group */
   const std::vector<const JointModel*>& getFixedJointModels() const
   {
@@ -595,9 +582,11 @@ public:
   bool isValidVelocityMove(const double* from_joint_pose, const double* to_joint_pose, std::size_t array_size,
                            double dt) const;
 
-protected:
-  bool computeIKIndexBijection(const std::vector<std::string>& ik_jnames, std::vector<size_t>& joint_bijection) const;
+  /** \brief Computes the indices of joint variables given a vector of joint names to look up */
+  bool computeJointVariableIndices(const std::vector<std::string>& joint_names,
+                                   std::vector<size_t>& joint_bijection) const;
 
+protected:
   /** \brief Update the variable values for the state of a group with respect to the mimic joints. This only updates
       mimic joints that have the parent in this group. If there is a joint mimicking one that is outside the group,
       there are no values to be read (\e values is only the group state) */
@@ -637,14 +626,6 @@ protected:
   /** \brief The names of the DOF that make up this group (this is just a sequence of joint variable names; not
       necessarily joint names!) */
   std::set<std::string> variable_names_set_;
-
-  /** \brief The names of the active DOF that make up this group (this is just a sequence of joint variable names;
-      not necessarily joint names!) */
-  std::vector<std::string> active_variable_names_;
-
-  /** \brief The list of active index values this group includes, with respect to a full robot state;
-      this does not include mimic joints. */
-  std::vector<int> active_variable_index_list_;
 
   /** \brief A map from joint names to their instances. This includes all joints in the group. */
   JointModelMapConst joint_model_map_;
