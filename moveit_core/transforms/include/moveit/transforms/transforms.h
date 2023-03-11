@@ -61,7 +61,7 @@ public:
   /**
    * @brief Transforms cannot be copy-constructed
    */
-  Transforms(const Transforms&) = delete;
+  explicit Transforms(const Transforms&) = delete;
 
   /**
    * @brief Transforms cannot be copy-assigned
@@ -71,7 +71,7 @@ public:
   /**
    * @brief Construct a transform list
    */
-  Transforms(const std::string& target_frame);
+  explicit Transforms(const std::string& target_frame);
 
   /**
    * @brief Destructor

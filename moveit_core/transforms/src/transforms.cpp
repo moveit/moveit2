@@ -48,7 +48,7 @@ namespace core
 // Logger
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_transforms.transforms");
 
-Transforms::Transforms(const std::string& target_frame) : target_frame_(target_frame)
+explicit Transforms::Transforms(const std::string& target_frame) : target_frame_(target_frame)
 {
   boost::trim(target_frame_);
   if (target_frame_.empty())
@@ -70,7 +70,7 @@ bool Transforms::sameFrame(const std::string& frame1, const std::string& frame2)
 
 Transforms::~Transforms() = default;
 
-const std::string& Transforms::getTargetFrame() const
+explicit const std::string& Transforms::getTargetFrame() const
 {
   return target_frame_;
 }

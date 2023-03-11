@@ -57,7 +57,7 @@ namespace core
 // Logger
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_robot_state.robot_state");
 
-RobotState::RobotState(const RobotModelConstPtr& robot_model)
+explicit RobotState::RobotState(const RobotModelConstPtr& robot_model)
   : robot_model_(robot_model)
   , has_velocity_(false)
   , has_acceleration_(false)
@@ -76,7 +76,7 @@ RobotState::RobotState(const RobotModelConstPtr& robot_model)
   initTransforms();
 }
 
-RobotState::RobotState(const RobotState& other) : rng_(nullptr)
+explicit RobotState::RobotState(const RobotState& other) : rng_(nullptr)
 {
   robot_model_ = other.robot_model_;
   allocMemory();
