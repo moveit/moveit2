@@ -659,7 +659,7 @@ public:
     return planning_scene_monitor_;
   }
 
-  operator bool() const
+  explicit operator bool() const
   {
     return planning_scene_monitor_ && planning_scene_monitor_->getPlanningScene();
   }

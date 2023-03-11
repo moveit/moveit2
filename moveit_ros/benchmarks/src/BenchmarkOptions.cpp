@@ -44,7 +44,7 @@ BenchmarkOptions::BenchmarkOptions()
 {
 }
 
-BenchmarkOptions::BenchmarkOptions(const rclcpp::Node::SharedPtr& node)
+explicit BenchmarkOptions::BenchmarkOptions(const rclcpp::Node::SharedPtr& node)
 {
   readBenchmarkOptions(node);
 }

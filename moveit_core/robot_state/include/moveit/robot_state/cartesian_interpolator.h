@@ -103,7 +103,7 @@ public:
       if (value < 0.0 || value > 1.0)
         throw std::runtime_error("Percentage values must be between 0 and 1, inclusive");
     }
-    operator double()
+    explicit operator double()
     {
       return value;
     }
@@ -124,7 +124,7 @@ public:
     Distance(double meters) : meters(meters)
     {
     }
-    operator double()
+    explicit operator double()
     {
       return meters;
     }
