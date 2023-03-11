@@ -85,7 +85,7 @@ bool acmCheck(const std::string& body_1, const std::string& body_2,
 
 btCollisionShape* createShapePrimitive(const shapes::Box* geom, const CollisionObjectType& collision_object_type)
 {
-  (void)(collision_object_type);
+  static_cast<void>(collision_object_type);
   assert(collision_object_type == CollisionObjectType::USE_SHAPE_TYPE);
   const double* size = geom->size;
   btScalar a = static_cast<btScalar>(size[0] / 2);
@@ -97,14 +97,14 @@ btCollisionShape* createShapePrimitive(const shapes::Box* geom, const CollisionO
 
 btCollisionShape* createShapePrimitive(const shapes::Sphere* geom, const CollisionObjectType& collision_object_type)
 {
-  (void)(collision_object_type);
+  static_cast<void>(collision_object_type);
   assert(collision_object_type == CollisionObjectType::USE_SHAPE_TYPE);
   return (new btSphereShape(static_cast<btScalar>(geom->radius)));
 }
 
 btCollisionShape* createShapePrimitive(const shapes::Cylinder* geom, const CollisionObjectType& collision_object_type)
 {
-  (void)(collision_object_type);
+  static_cast<void>(collision_object_type);
   assert(collision_object_type == CollisionObjectType::USE_SHAPE_TYPE);
   btScalar r = static_cast<btScalar>(geom->radius);
   btScalar l = static_cast<btScalar>(geom->length / 2);
@@ -113,7 +113,7 @@ btCollisionShape* createShapePrimitive(const shapes::Cylinder* geom, const Colli
 
 btCollisionShape* createShapePrimitive(const shapes::Cone* geom, const CollisionObjectType& collision_object_type)
 {
-  (void)(collision_object_type);
+  static_cast<void>(collision_object_type);
   assert(collision_object_type == CollisionObjectType::USE_SHAPE_TYPE);
   btScalar r = static_cast<btScalar>(geom->radius);
   btScalar l = static_cast<btScalar>(geom->length);
