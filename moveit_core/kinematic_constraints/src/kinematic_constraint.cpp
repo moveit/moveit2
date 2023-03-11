@@ -793,8 +793,6 @@ VisibilityConstraint::VisibilityConstraint(const moveit::core::RobotModelConstPt
 
 void VisibilityConstraint::clear()
 {
-  mobile_sensor_frame_ = false;
-  mobile_target_frame_ = false;
   target_frame_id_ = "";
   sensor_frame_id_ = "";
   sensor_pose_ = Eigen::Isometry3d::Identity();
@@ -845,15 +843,10 @@ bool VisibilityConstraint::configure(const moveit_msgs::msg::VisibilityConstrain
   {
     tf.transformPose(vc.target_pose.header.frame_id, target_pose_, target_pose_);
     target_frame_id_ = tf.getTargetFrame();
-    mobile_target_frame_ = false;
-    // transform won't change, so apply it now
-    for (Eigen::Vector3d& point : points_)
-      point = target_pose_ * point;
   }
   else
   {
     target_frame_id_ = vc.target_pose.header.frame_id;
-    mobile_target_frame_ = true;
   }
 
   tf2::fromMsg(vc.sensor_pose.pose, sensor_pose_);
@@ -863,12 +856,10 @@ bool VisibilityConstraint::configure(const moveit_msgs::msg::VisibilityConstrain
   {
     tf.transformPose(vc.sensor_pose.header.frame_id, sensor_pose_, sensor_pose_);
     sensor_frame_id_ = tf.getTargetFrame();
-    mobile_sensor_frame_ = false;
   }
   else
   {
     sensor_frame_id_ = vc.sensor_pose.header.frame_id;
-    mobile_sensor_frame_ = true;
   }
 
   if (vc.weight <= std::numeric_limits<double>::epsilon())
@@ -883,7 +874,7 @@ bool VisibilityConstraint::configure(const moveit_msgs::msg::VisibilityConstrain
   max_range_angle_ = vc.max_range_angle;
   sensor_view_direction_ = vc.sensor_view_direction;
 
-  return target_radius_ > std::numeric_limits<double>::epsilon();
+  return enabled();
 }
 
 bool VisibilityConstraint::equal(const KinematicConstraint& other, double margin) const
@@ -934,13 +925,13 @@ shapes::Mesh* VisibilityConstraint::getVisibilityCone(const Eigen::Isometry3d& t
   // transform the points on the disc to the desired target frame
   const EigenSTL::vector_Vector3d* points = &points_;
   std::unique_ptr<EigenSTL::vector_Vector3d> temp_points;
-  if (mobile_target_frame_)
+
+  temp_points = std::make_unique<EigenSTL::vector_Vector3d>(points_.size());
+  for (std::size_t i = 0; i < points_.size(); ++i)
   {
-    temp_points = std::make_unique<EigenSTL::vector_Vector3d>(points_.size());
-    for (std::size_t i = 0; i < points_.size(); ++i)
-      temp_points->at(i) = tp * points_[i];
-    points = temp_points.get();
+    temp_points->at(i) = tp * points_[i];
   }
+  points = temp_points.get();
 
   // allocate memory for a mesh to represent the visibility cone
   shapes::Mesh* m = new shapes::Mesh();
@@ -1001,11 +992,9 @@ void VisibilityConstraint::getMarkers(const moveit::core::RobotState& state,
 {
   // getFrameTransform() returns a valid isometry by contract
   // sensor_pose_ is valid isometry (checked in configure())
-  const Eigen::Isometry3d& sp =
-      mobile_sensor_frame_ ? state.getFrameTransform(sensor_frame_id_) * sensor_pose_ : sensor_pose_;
+  const Eigen::Isometry3d& sp = state.getFrameTransform(sensor_frame_id_) * sensor_pose_;
   // target_pose_ is valid isometry (checked in configure())
-  const Eigen::Isometry3d& tp =
-      mobile_target_frame_ ? state.getFrameTransform(target_frame_id_) * target_pose_ : target_pose_;
+  const Eigen::Isometry3d& tp = state.getFrameTransform(target_frame_id_) * target_pose_;
 
   shapes::Mesh* m = getVisibilityCone(sp, tp);
   visualization_msgs::msg::Marker mk;
@@ -1155,17 +1144,18 @@ ConstraintEvaluationResult VisibilityConstraint::decide(const moveit::core::Robo
     collision_env_local->getWorld()->addToObject("cone", shapes::ShapeConstPtr(m), Eigen::Isometry3d::Identity());
 
     // check for collisions between the robot and the cone
-    collision_detection::CollisionRequest req;
-    collision_detection::CollisionResult res;
     collision_detection::AllowedCollisionMatrix acm;
     collision_detection::DecideContactFn fn = [this](collision_detection::Contact& contact) {
       return decideContact(contact);
     };
     acm.setDefaultEntry(std::string("cone"), fn);
 
+    collision_detection::CollisionRequest req;
     req.contacts = true;
     req.verbose = verbose;
     req.max_contacts = 1;
+
+    collision_detection::CollisionResult res;
     collision_env_local->checkRobotCollision(req, res, state, acm);
 
     if (verbose)
