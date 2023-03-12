@@ -270,7 +270,7 @@ public:
     Action(int v) : action_(v)
     {
     }
-    operator ActionBits() const
+    explicit operator ActionBits() const
     {
       return ActionBits(action_);
     }
@@ -291,7 +291,7 @@ public:
     }
 
   private:
-    ObserverHandle(const Observer* o) : observer_(o)
+    explicit ObserverHandle(const Observer* o) : observer_(o)
     {
     }
     const Observer* observer_;

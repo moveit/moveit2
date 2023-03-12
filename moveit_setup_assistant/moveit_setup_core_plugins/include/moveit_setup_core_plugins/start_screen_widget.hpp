@@ -150,7 +150,7 @@ private:
 private Q_SLOTS:
 
 public:
-  SelectModeWidget(QWidget* parent);
+  explicit SelectModeWidget(QWidget* parent);
 
   // Load file button
   QPushButton* btn_new_;

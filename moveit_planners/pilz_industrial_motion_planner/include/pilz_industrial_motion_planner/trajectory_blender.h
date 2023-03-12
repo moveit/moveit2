@@ -49,7 +49,8 @@ namespace pilz_industrial_motion_planner
 class TrajectoryBlender
 {
 public:
-  TrajectoryBlender(const pilz_industrial_motion_planner::LimitsContainer& planner_limits) : limits_(planner_limits)
+  explicit TrajectoryBlender(const pilz_industrial_motion_planner::LimitsContainer& planner_limits)
+    : limits_(planner_limits)
   {
   }
 

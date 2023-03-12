@@ -49,7 +49,7 @@ namespace pilz_industrial_motion_planner_testutils
 class CmdReader
 {
 public:
-  CmdReader(const pt::ptree::value_type& node) : cmd_node_(node)
+  explicit CmdReader(const pt::ptree::value_type& node) : cmd_node_(node)
   {
   }
 
@@ -120,7 +120,7 @@ class CmdGetterAdapter : public XmlTestdataLoader::AbstractCmdGetterAdapter
 public:
   using FuncType = std::function<CmdType(const std::string&)>;
 
-  CmdGetterAdapter(FuncType func) : AbstractCmdGetterAdapter(), func_(func)
+  explicit CmdGetterAdapter(FuncType func) : AbstractCmdGetterAdapter(), func_(func)
   {
   }
 

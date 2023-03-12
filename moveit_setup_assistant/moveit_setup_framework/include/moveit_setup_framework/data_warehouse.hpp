@@ -52,7 +52,7 @@ MOVEIT_CLASS_FORWARD(DataWarehouse);  // Defines DataWarehousePtr, ConstPtr, Wea
 class DataWarehouse : public std::enable_shared_from_this<DataWarehouse>
 {
 public:
-  DataWarehouse(const rclcpp::Node::SharedPtr& parent_node);
+  explicit DataWarehouse(const rclcpp::Node::SharedPtr& parent_node);
 
   void preloadWithURDFPath(const std::filesystem::path& urdf_path);
   void preloadWithFullConfig(const std::string& package_path_or_name);

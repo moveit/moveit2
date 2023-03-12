@@ -72,7 +72,7 @@ std::ostream& operator<<(std::ostream& os, const std::vector<double>& v)
 class DummyConstraint : public ompl::base::Constraint
 {
 public:
-  DummyConstraint(const unsigned int num_dofs) : ompl::base::Constraint(num_dofs, 1)
+  explicit DummyConstraint(const unsigned int num_dofs) : ompl::base::Constraint(num_dofs, 1)
   {
   }
   void function(const Eigen::Ref<const Eigen::VectorXd>& /*unused*/, Eigen::Ref<Eigen::VectorXd> out) const override
