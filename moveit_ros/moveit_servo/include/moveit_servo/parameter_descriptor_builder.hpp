@@ -53,7 +53,7 @@ public:
   /**
    * @brief      Rcl_interfaces::msg::parameterdescriptor conversion operator.
    */
-  explicit operator rcl_interfaces::msg::ParameterDescriptor() const
+  operator rcl_interfaces::msg::ParameterDescriptor() const
   {
     return msg_;
   }

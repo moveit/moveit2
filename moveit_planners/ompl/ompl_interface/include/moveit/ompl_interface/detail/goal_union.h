@@ -44,7 +44,7 @@ class GoalSampleableRegionMux : public ompl::base::GoalSampleableRegion
 public:
   /** @brief Constructor
    *  @param goals The input set of goals*/
-  explicit GoalSampleableRegionMux(const std::vector<ompl::base::GoalPtr>& goals);
+  GoalSampleableRegionMux(const std::vector<ompl::base::GoalPtr>& goals);
 
   ~GoalSampleableRegionMux() override
   {

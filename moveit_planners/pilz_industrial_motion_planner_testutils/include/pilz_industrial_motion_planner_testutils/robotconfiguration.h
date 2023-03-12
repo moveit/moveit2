@@ -52,7 +52,7 @@ class RobotConfiguration : public RobotStateMsgConvertible, public GoalConstrain
 public:
   RobotConfiguration();
 
-  explicit RobotConfiguration(const std::string& group_name);
+  RobotConfiguration(const std::string& group_name);
 
   RobotConfiguration(const std::string& group_name, const moveit::core::RobotModelConstPtr& robot_model);
 

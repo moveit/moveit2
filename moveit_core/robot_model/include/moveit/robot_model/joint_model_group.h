@@ -76,7 +76,7 @@ public:
     }
 
     /// Return a flag indicating whether the state of the solver is initialized
-    explicit operator bool() const
+    operator bool() const
     {
       return allocator_ && !bijection_.empty() && solver_instance_;
     }

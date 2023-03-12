@@ -161,7 +161,7 @@ MOVEIT_CLASS_FORWARD(ConstraintsLibrary);  // Defines ConstraintsLibraryPtr, Con
 class ConstraintsLibrary
 {
 public:
-  explicit ConstraintsLibrary(ModelBasedPlanningContext* pcontext) : context_(pcontext)
+  ConstraintsLibrary(ModelBasedPlanningContext* pcontext) : context_(pcontext)
   {
   }
 
