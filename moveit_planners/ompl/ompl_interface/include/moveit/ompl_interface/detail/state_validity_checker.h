@@ -60,7 +60,7 @@ class ModelBasedPlanningContext;
 class StateValidityChecker : public ompl::base::StateValidityChecker
 {
 public:
-  StateValidityChecker(const ModelBasedPlanningContext* planning_context);
+  explicit StateValidityChecker(const ModelBasedPlanningContext* planning_context);
 
   bool isValid(const ompl::base::State* state) const override
   {
@@ -123,7 +123,7 @@ public:
   using StateValidityChecker::isValid;
 
 public:
-  ConstrainedPlanningStateValidityChecker(const ModelBasedPlanningContext* planning_context)
+  explicit ConstrainedPlanningStateValidityChecker(const ModelBasedPlanningContext* planning_context)
     : StateValidityChecker(planning_context)
   {
   }

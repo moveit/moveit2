@@ -119,7 +119,7 @@ namespace pilz_industrial_motion_planner_testutils
 class XmlTestdataLoader : public TestdataLoader
 {
 public:
-  XmlTestdataLoader(const std::string& path_filename);
+  explicit XmlTestdataLoader(const std::string& path_filename);
   XmlTestdataLoader(const std::string& path_filename, const moveit::core::RobotModelConstPtr& robot_model);
   ~XmlTestdataLoader() override;
 

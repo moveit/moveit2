@@ -52,7 +52,7 @@ namespace pilz_industrial_motion_planner
 class TrajectoryBlenderTransitionWindow : public TrajectoryBlender
 {
 public:
-  TrajectoryBlenderTransitionWindow(const LimitsContainer& planner_limits)
+  explicit TrajectoryBlenderTransitionWindow(const LimitsContainer& planner_limits)
     : TrajectoryBlender::TrajectoryBlender(planner_limits)
   {
   }
