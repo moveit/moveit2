@@ -52,12 +52,16 @@ class TeleopDevice(ABC, Node):
     This class expects both the `publish_command` and `record` methods to be overridden by inheriting classes.
     """
 
-    def __init__(self, node_name, device_name, device_config, ee_frame_name):
+    def __init__(self, node_name, device_name, device_config):
         super().__init__(node_name=node_name)
         self.device_name = device_name
         self.device_config = device_config
-        self.ee_frame_name = ee_frame_name
-
+        self.declare_parameters(
+            namespace=node_name, parameters=[("ee_frame_name", "panda_link8")]
+        )
+        self.ee_frame_name = (
+            self.get_parameter("ee_frame_name").get_parameter_value().string_value
+        )
         # default subscriber and publisher setup
         self.joy_subscriber = self.create_subscription(
             Joy, "/joy", self.publish_command, 10
