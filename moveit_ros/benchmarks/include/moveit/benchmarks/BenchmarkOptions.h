@@ -50,7 +50,7 @@ public:
   /** \brief Constructor */
   BenchmarkOptions();
   /** \brief Constructor accepting a custom namespace for parameter lookup */
-  explicit BenchmarkOptions(const rclcpp::Node::SharedPtr& node);
+  BenchmarkOptions(const rclcpp::Node::SharedPtr& node);
   /** \brief Destructor */
   virtual ~BenchmarkOptions();
 
