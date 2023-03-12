@@ -47,7 +47,7 @@ MOVEIT_CLASS_FORWARD(TrajOptInterface);  // Defines TrajOptInterfacePtr, ConstPt
 class TrajOptInterface
 {
 public:
-  explicit TrajOptInterface(const ros::NodeHandle& nh = ros::NodeHandle("~"));
+  TrajOptInterface(const ros::NodeHandle& nh = ros::NodeHandle("~"));
 
   const sco::BasicTrustRegionSQPParameters& getParams() const
   {

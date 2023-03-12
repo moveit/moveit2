@@ -47,7 +47,7 @@ namespace pilz_industrial_motion_planner
 class MoveItErrorCodeException : public std::runtime_error
 {
 public:
-  explicit MoveItErrorCodeException(const std::string& msg);
+  MoveItErrorCodeException(const std::string& msg);
 
 protected:
   MoveItErrorCodeException(const MoveItErrorCodeException&) = default;
@@ -65,7 +65,7 @@ template <moveit_msgs::msg::MoveItErrorCodes::_val_type ERROR_CODE = moveit_msgs
 class TemplatedMoveItErrorCodeException : public MoveItErrorCodeException
 {
 public:
-  explicit TemplatedMoveItErrorCodeException(const std::string& msg);
+  TemplatedMoveItErrorCodeException(const std::string& msg);
   TemplatedMoveItErrorCodeException(const std::string& msg,
                                     const moveit_msgs::msg::MoveItErrorCodes::_val_type& error_code);
 

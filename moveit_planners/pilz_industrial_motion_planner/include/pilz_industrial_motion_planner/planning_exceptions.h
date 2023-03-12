@@ -46,7 +46,7 @@ namespace pilz_industrial_motion_planner
 class PlanningException : public std::runtime_error
 {
 public:
-  explicit PlanningException(const std::string& error_desc) : std::runtime_error(error_desc)
+  PlanningException(const std::string& error_desc) : std::runtime_error(error_desc)
   {
   }
 };
@@ -63,7 +63,7 @@ public:
 class ContextLoaderRegistrationException : public PlanningException
 {
 public:
-  explicit ContextLoaderRegistrationException(const std::string& error_desc) : PlanningException(error_desc)
+  ContextLoaderRegistrationException(const std::string& error_desc) : PlanningException(error_desc)
   {
   }
 };

@@ -63,7 +63,7 @@ struct ExecutionStatus
   {
   }
 
-  explicit operator Value() const
+  operator Value() const
   {
     return status_;
   }

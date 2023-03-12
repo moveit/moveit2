@@ -88,13 +88,13 @@ public:
   AllowedCollisionMatrix(const std::vector<std::string>& names, bool allowed = false);
 
   /** @brief Construct from an SRDF representation */
-  explicit AllowedCollisionMatrix(const srdf::Model& srdf);
+  AllowedCollisionMatrix(const srdf::Model& srdf);
 
   /** @brief Construct the structure from a message representation */
-  explicit AllowedCollisionMatrix(const moveit_msgs::msg::AllowedCollisionMatrix& msg);
+  AllowedCollisionMatrix(const moveit_msgs::msg::AllowedCollisionMatrix& msg);
 
   /** @brief Copy constructor */
-  explicit AllowedCollisionMatrix(const AllowedCollisionMatrix& acm) = default;
+  AllowedCollisionMatrix(const AllowedCollisionMatrix& acm) = default;
 
   /** @brief Copy assignment */
   AllowedCollisionMatrix& operator=(const AllowedCollisionMatrix&) = default;
