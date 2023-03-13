@@ -63,38 +63,38 @@ public:
 
   bool sendTrajectory(const moveit_msgs::msg::RobotTrajectory& trajectory) override
   {
-    RCLCPP_DEBUG_STREAM(LOGGER, "Received new trajectory for " << name_);
+    RCLCPP_DEBUG_STREAM(logger_, "Received new trajectory for " << name_);
 
     if (!controller_action_client_)
       return false;
 
     if (!isConnected())
     {
-      RCLCPP_ERROR_STREAM(LOGGER, "Action client not connected to action server: " << getActionName());
+      RCLCPP_ERROR_STREAM(logger_, "Action client not connected to action server: " << getActionName());
       return false;
     }
 
     if (!trajectory.multi_dof_joint_trajectory.points.empty())
     {
-      RCLCPP_ERROR(LOGGER, "Gripper cannot execute multi-dof trajectories.");
+      RCLCPP_ERROR(logger_, "Gripper cannot execute multi-dof trajectories.");
       return false;
     }
 
     if (trajectory.joint_trajectory.points.empty())
     {
-      RCLCPP_ERROR(LOGGER, "GripperController requires at least one joint trajectory point.");
+      RCLCPP_ERROR(logger_, "GripperController requires at least one joint trajectory point.");
       return false;
     }
 
     // TODO(JafarAbdi): Enable when msg streaming operator is available
     // if (trajectory.joint_trajectory.points.size() > 1)
     // {
-    //   RCLCPP_DEBUG_STREAM(LOGGER, "Trajectory: " << trajectory.joint_trajectory);
+    //   RCLCPP_DEBUG_STREAM(logger_, "Trajectory: " << trajectory.joint_trajectory);
     // }
 
     if (trajectory.joint_trajectory.joint_names.empty())
     {
-      RCLCPP_ERROR(LOGGER, "No joint names specified");
+      RCLCPP_ERROR(logger_, "No joint names specified");
       return false;
     }
 
@@ -111,7 +111,7 @@ public:
 
     if (gripper_joint_indexes.empty())
     {
-      RCLCPP_WARN(LOGGER, "No command_joint was specified for the MoveIt controller gripper handle. \
+      RCLCPP_WARN(logger_, "No command_joint was specified for the MoveIt controller gripper handle. \
                       Please see GripperControllerHandle::addCommandJoint() and \
                       GripperControllerHandle::setCommandJoint(). Assuming index 0.");
       gripper_joint_indexes.push_back(0);
@@ -123,14 +123,14 @@ public:
 
     // send last point
     int tpoint = trajectory.joint_trajectory.points.size() - 1;
-    RCLCPP_DEBUG(LOGGER, "Sending command from trajectory point %d", tpoint);
+    RCLCPP_DEBUG(logger_, "Sending command from trajectory point %d", tpoint);
 
     // fill in goal from last point
     for (std::size_t idx : gripper_joint_indexes)
     {
       if (trajectory.joint_trajectory.points[tpoint].positions.size() <= idx)
       {
-        RCLCPP_ERROR(LOGGER, "GripperController expects a joint trajectory with one \
+        RCLCPP_ERROR(logger_, "GripperController expects a joint trajectory with one \
                          point that specifies at least the position of joint \
                          '%s', but insufficient positions provided",
                      trajectory.joint_trajectory.joint_names[idx].c_str());
@@ -151,13 +151,13 @@ public:
     // Active callback
     send_goal_options.goal_response_callback =
         [this](const rclcpp_action::Client<control_msgs::action::GripperCommand>::GoalHandle::SharedPtr&
-               /* unused-arg */) { RCLCPP_DEBUG_STREAM(LOGGER, name_ << " started execution"); };
+               /* unused-arg */) { RCLCPP_DEBUG_STREAM(logger_, name_ << " started execution"); };
     // Send goal
     auto current_goal_future = controller_action_client_->async_send_goal(goal, send_goal_options);
     current_goal_ = current_goal_future.get();
     if (!current_goal_)
     {
-      RCLCPP_ERROR(LOGGER, "Goal was rejected by server");
+      RCLCPP_ERROR(logger_, "Goal was rejected by server");
       return false;
     }
 

@@ -53,29 +53,29 @@ namespace py_bindings_tools
  */
 class GILReleaser
 {
-  PyThreadState* m_thread_state;
+  PyThreadState* thread_state_;
 
 public:
   /** \brief Release the GIL on construction  */
   GILReleaser() noexcept
   {
-    m_thread_state = PyEval_SaveThread();
+    thread_state_ = PyEval_SaveThread();
   }
   /** \brief Reacquire the GIL on destruction  */
   ~GILReleaser() noexcept
   {
-    if (m_thread_state)
+    if (thread_state_)
     {
-      PyEval_RestoreThread(m_thread_state);
-      m_thread_state = nullptr;
+      PyEval_RestoreThread(thread_state_);
+      thread_state_ = nullptr;
     }
   }
 
   GILReleaser(const GILReleaser&) = delete;
   GILReleaser(GILReleaser&& other) noexcept
   {
-    m_thread_state = other.m_thread_state;
-    other.m_thread_state = nullptr;
+    thread_state_ = other.thread_state_;
+    other.thread_state_ = nullptr;
   }
 
   GILReleaser& operator=(const GILReleaser&) = delete;
@@ -88,7 +88,7 @@ public:
 
   void swap(GILReleaser& other) noexcept
   {
-    std::swap(other.m_thread_state, m_thread_state);
+    std::swap(other.thread_state_, thread_state_);
   }
 };
 
