@@ -26,7 +26,7 @@
 using namespace ikfast;
 
 // check if the included ikfast version matches what this file was compiled with
-#define IKFAST_COMPILE_ASSERT(x) extern int __dummy[(int)x]
+#define IKFAST_COMPILE_ASSERT(x) extern int __dummy[static_cast<int>(x)]
 IKFAST_COMPILE_ASSERT(IKFAST_VERSION==0x1000004a);
 
 #include <cmath>
@@ -50,7 +50,7 @@ IKFAST_COMPILE_ASSERT(IKFAST_VERSION==0x1000004a);
 #define __PRETTY_FUNCTION__ __func__
 #endif
 
-#define IKFAST_ASSERT(b) { if( !(b) ) { std::stringstream ss; ss << "ikfast exception: " << __FILE__ << ":" << __LINE__ << ": " <<__PRETTY_FUNCTION__ << ": Assertion '" << #b << "' failed"; throw std::runtime_error(ss.str()); } }
+#define IKFAST_ASSERT(b) { if( !(b) ) { std::stringstream ss; ss << "ikfast exception: " << __FILE__ << ':' << __LINE__ << ": " <<__PRETTY_FUNCTION__ << ": Assertion '" << #b << "' failed"; throw std::runtime_error(ss.str()); } }
 
 #endif
 
@@ -20100,11 +20100,11 @@ int main(int argc, char** argv)
         return -1;
     }
 
-    printf("Found %d ik solutions:\n", (int)solutions.GetNumSolutions());
+    printf("Found %d ik solutions:\n", static_cast<int>(solutions.GetNumSolutions()));
     std::vector<IkReal> solvalues(GetNumJoints());
     for(std::size_t i = 0; i < solutions.GetNumSolutions(); ++i) {
         const IkSolutionBase<IkReal>& sol = solutions.GetSolution(i);
-        printf("sol%d (free=%d): ", (int)i, (int)sol.GetFree().size());
+        printf("sol%d (free=%d): ", static_cast<int>(i), static_cast<int>(sol.GetFree().size()));
         std::vector<IkReal> vsolfree(sol.GetFree().size());
         sol.GetSolution(&solvalues[0],vsolfree.size()>0?&vsolfree[0]:nullptr);
         for( std::size_t j = 0; j < solvalues.size(); ++j)

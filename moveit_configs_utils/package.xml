@@ -2,10 +2,10 @@
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
   <name>moveit_configs_utils</name>
-  <version>2.6.0</version>
+  <version>2.7.0</version>
   <description>Python library for loading moveit config parameters in launch files</description>
   <maintainer email="moveit_releasers@googlegroups.com">MoveIt Release Team</maintainer>
-  <license>BSD</license>
+  <license>BSD-3-Clause</license>
   <author email="jafar@picknik.ai">Jafar Abdi</author>
   <author email="davidvlu@gmail.com">David V. Lu!!</author>
 

@@ -2,6 +2,79 @@
 Changelog for package moveit_ros_planning
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.7.0 (2023-01-29)
+------------------
+* converted characters from string format to character format (`#1881 <https://github.com/ros-planning/moveit2/issues/1881>`_)
+* Add a default stopping criterion for parallel planning (`#1876 <https://github.com/ros-planning/moveit2/issues/1876>`_)
+  * Add a default callback for parallel planning termination
+  * Delete long-deprecated "using"
+  * A new translation unit for the new callback
+  * inline
+* Switch to clang-format-14 (`#1877 <https://github.com/ros-planning/moveit2/issues/1877>`_)
+  * Switch to clang-format-14
+  * Fix clang-format-14
+* Do not allow traj execution from PlanningComponent (`#1835 <https://github.com/ros-planning/moveit2/issues/1835>`_)
+  * Do not allow traj execution from PlanningComponent
+  * Deprecate, don't delete
+  * Get the group_name from RobotTrajectory
+  * Rebase
+* Add optional list of controllers to MoveItCpp::execute() (`#1838 <https://github.com/ros-planning/moveit2/issues/1838>`_)
+  * Add optional list of controllers
+  * The default is an empty vector
+* Cleanup msg includes: Use C++ instead of C header (`#1844 <https://github.com/ros-planning/moveit2/issues/1844>`_)
+* Fix trajectory unwind bug (`#1772 <https://github.com/ros-planning/moveit2/issues/1772>`_)
+  * ensure trajectory starting point's position is enforced
+  * fix angle jump bug
+  * handle bounds enforcement edge case
+  * clang tidy
+  * Minor renaming, better comment, use .at() over []
+  * First shot at a unit test
+  * fix other unwind bugs
+  * test should succeed now
+  * unwind test needs a model with a continuous joint
+  * clang tidy
+  * add test for unwinding from wound up robot state
+  * clang tidy
+  * tweak test for special case to show that it will fail without these changes
+  Co-authored-by: Michael Wiznitzer <michael.wiznitzer@resquared.com>
+  Co-authored-by: AndyZe <zelenak@picknik.ai>
+* No default IK solver (`#1816 <https://github.com/ros-planning/moveit2/issues/1816>`_)
+* Fix BSD license in package.xml (`#1796 <https://github.com/ros-planning/moveit2/issues/1796>`_)
+  * fix BSD license in package.xml
+  * this must also be spdx compliant
+* Remove Iterative Spline and Iterative Parabola time-param algorithms (v2) (`#1780 <https://github.com/ros-planning/moveit2/issues/1780>`_)
+  * Iterative parabolic parameterization fails for nonzero initial/final conditions
+  * Iterative spline parameterization fails, too
+  * Delete Iterative Spline & Iterative Parabola algorithms
+* Enable `-Wold-style-cast` (`#1770 <https://github.com/ros-planning/moveit2/issues/1770>`_)
+* Remove `MOVEIT_LIB_NAME` (`#1751 <https://github.com/ros-planning/moveit2/issues/1751>`_)
+  It's more readable and searchable if we just spell out the target
+  name.
+* Add braces around blocks. (`#999 <https://github.com/ros-planning/moveit2/issues/999>`_)
+* Use <> for non-local headers (`#1734 <https://github.com/ros-planning/moveit2/issues/1734>`_)
+  Unless a header lives in the same or a child directory of the file
+  including it, it's recommended to use <> for the #include statement.
+  For more information, see the C++ Core Guidelines item SF.12
+  https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#sf12-prefer-the-quoted-form-of-include-for-files-relative-to-the-including-file-and-the-angle-bracket-form-everywhere-else
+* Used C++ style cast instead of C style cast  (`#1628 <https://github.com/ros-planning/moveit2/issues/1628>`_)
+  Co-authored-by: Henning Kayser <henningkayser@picknik.ai>
+* Cleanup lookup of planning pipelines in MoveItCpp (`#1710 <https://github.com/ros-planning/moveit2/issues/1710>`_)
+  * Revert "Add planner configurations to CHOMP and PILZ (`#1522 <https://github.com/ros-planning/moveit2/issues/1522>`_)"
+  * Cleanup lookup of planning pipelines
+  Remove MoveItCpp::getPlanningPipelineNames(), which was obviously intended initially to provide a planning-group-based filter for all available planning pipelines: A pipeline was discarded for a group, if there were no `planner_configs` defined for that group on the parameter server.
+  As pointed out in `#1522 <https://github.com/ros-planning/moveit2/issues/1522>`_, only OMPL actually explicitly declares planner_configs on the parameter server.
+  To enable all other pipelines as well (and thus circumventing the original filter mechanism), `#1522 <https://github.com/ros-planning/moveit2/issues/1522>`_ introduced empty dummy planner_configs for all other planners as well (CHOMP + Pilz).
+  This, obviously, renders the whole filter mechanism useless. Thus, here we just remove the function getPlanningPipelineNames() and the corresponding member groups_pipelines_map\_.
+* Fix clang-tidy issues (`#1706 <https://github.com/ros-planning/moveit2/issues/1706>`_)
+  * Blindly apply automatic clang-tidy fixes
+  * Exemplarily cleanup a few automatic clang-tidy fixes
+  * Clang-tidy fixups
+  * Missed const-ref fixups
+  * Fix unsupported non-const -> const
+  * More fixes
+  Co-authored-by: Henning Kayser <henningkayser@picknik.ai>
+* Contributors: Abhijeet Das Gupta, AndyZe, Chris Thrasher, Christian Henkel, Cory Crean, Henning Kayser, Michael Wiznitzer, Robert Haschke, Sameer Gupta, Tyler Weaver
+
 2.6.0 (2022-11-10)
 ------------------
 * Short-circuit planning adapters (`#1694 <https://github.com/ros-planning/moveit2/issues/1694>`_)

@@ -42,7 +42,7 @@
 
 namespace planning_request_adapter
 {
-rclcpp::Logger LOGGER = rclcpp::get_logger("moveit").get_child("planning_request_adapter");
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.planning_request_adapter");
 
 namespace
 {
@@ -51,7 +51,7 @@ bool callPlannerInterfaceSolve(const planning_interface::PlannerManager& planner
                                const planning_interface::MotionPlanRequest& req,
                                planning_interface::MotionPlanResponse& res)
 {
-  planning_interface::PlanningContextPtr context = planner.getPlanningContext(planning_scene, req, res.error_code_);
+  planning_interface::PlanningContextPtr context = planner.getPlanningContext(planning_scene, req, res.error_code);
   if (context)
   {
     return context->solve(res);
@@ -70,7 +70,7 @@ bool callAdapter(const PlanningRequestAdapter& adapter, const PlanningRequestAda
   try
   {
     bool result = adapter.adaptAndPlan(planner, planning_scene, req, res, added_path_index);
-    RCLCPP_DEBUG_STREAM(LOGGER, adapter.getDescription() << ": " << moveit::core::error_code_to_string(res.error_code_));
+    RCLCPP_DEBUG_STREAM(LOGGER, adapter.getDescription() << ": " << moveit::core::error_code_to_string(res.error_code));
     return result;
   }
   catch (std::exception& ex)

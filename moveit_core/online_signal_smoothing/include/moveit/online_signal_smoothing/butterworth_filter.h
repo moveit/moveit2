@@ -34,6 +34,7 @@
 
 /* Author: Andy Zelenak
    Description: A first-order Butterworth low-pass filter. There is only one parameter to tune.
+   The first-order Butterworth filter has the nice property that it will not overshoot.
  */
 
 #pragma once
@@ -50,15 +51,24 @@ namespace online_signal_smoothing
  * This is a first-order Butterworth low-pass filter. First-order was chosen for 2 reasons:
  * - It doesn't overshoot
  * - Computational efficiency
+ * This filter has been parameterized so there is only one parameter to tune.
+ * See "Digital Implementation of Butterworth First–Order Filter Type IIR" by
+ * Horvath, Cervenanska, and Kotianova, 2019 and
+ * Mienkina, M., Filter-Based Algorithm for Metering Applications,
+ * https://www.nxp.com/docs/en/application-note/AN4265.pdf, 2016
+ * It comes from finding the bilinear transform equivalent of the analog transfer function and
+ * further applying the inverse z-transform.
+ * The parameter "low_pass_filter_coeff" equals (2*pi / tan(omega_d * T))
+ * where omega_d is the cutoff frequency and T is the samping period in sec.
  */
 class ButterworthFilter
 {
 public:
   /**
    * Constructor.
-   * @param low_pass_filter_coeff Larger filter_coeff-> more smoothing of servo commands, but more lag.
-   * Rough plot, with cutoff frequency on the y-axis:
-   * https://www.wolframalpha.com/input/?i=plot+arccot(c)
+   * @param low_pass_filter_coeff Larger filter_coeff-> more smoothing of commands, but more lag.
+   * low_pass_filter_coeff = (2*pi / tan(omega_d * T))
+   * where omega_d is the cutoff frequency and T is the samping period in sec.
    */
   ButterworthFilter(double low_pass_filter_coeff);
   ButterworthFilter() = delete;

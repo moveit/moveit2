@@ -2,14 +2,14 @@
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
   <name>moveit_servo</name>
-  <version>2.6.0</version>
+  <version>2.7.0</version>
   <description>Provides real-time manipulator Cartesian and joint servoing.</description>
   <maintainer email="blakeanderson@utexas.edu">Blake Anderson</maintainer>
   <maintainer email="andyz@utexas.edu">Andy Zelenak</maintainer>
   <maintainer email="tyler@picknik.ai">Tyler Weaver</maintainer>
   <maintainer email="henningkayser@picknik.ai">Henning Kayser</maintainer>
 
-  <license>BSD 3-Clause</license>
+  <license>BSD-3-Clause</license>
 
   <url type="website">https://ros-planning.github.io/moveit_tutorials</url>
 
@@ -25,18 +25,19 @@
 
   <depend>control_msgs</depend>
   <depend>control_toolbox</depend>
-  <depend>controller_manager</depend>
   <depend>geometry_msgs</depend>
   <depend>moveit_msgs</depend>
   <depend>moveit_core</depend>
   <depend>moveit_ros_planning_interface</depend>
   <depend>pluginlib</depend>
+  <depend>realtime_tools</depend>
   <depend>sensor_msgs</depend>
   <depend>std_msgs</depend>
   <depend>std_srvs</depend>
   <depend>tf2_eigen</depend>
   <depend>trajectory_msgs</depend>
 
+  <exec_depend>controller_manager</exec_depend>
   <exec_depend>gripper_controllers</exec_depend>
   <exec_depend>joint_state_broadcaster</exec_depend>
   <exec_depend>joint_trajectory_controller</exec_depend>
@@ -49,7 +50,6 @@
   <test_depend>ament_cmake_gtest</test_depend>
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>
-  <test_depend>controller_manager</test_depend>
   <test_depend>moveit_resources_panda_moveit_config</test_depend>
   <test_depend>ros_testing</test_depend>
 

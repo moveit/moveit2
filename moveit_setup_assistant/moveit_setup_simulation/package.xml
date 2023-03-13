@@ -5,7 +5,7 @@
   <version>2.5.1</version>
   <description>MoveIt Setup Steps for Simulation</description>
   <maintainer email="davidvlu@gmail.com">David V. Lu!!</maintainer>
-  <license>BSD</license>
+  <license>BSD-3-Clause</license>
   <author email="davidvlu@gmail.com">David V. Lu!!</author>
 
   <buildtool_depend>ament_cmake</buildtool_depend>

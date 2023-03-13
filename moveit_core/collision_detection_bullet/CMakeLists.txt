@@ -7,6 +7,10 @@ add_library(moveit_collision_detection_bullet SHARED
   src/bullet_integration/contact_checker_common.cpp
   src/bullet_integration/ros_bullet_utils.cpp
 )
+target_include_directories(moveit_collision_detection_bullet PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include/moveit_core>
+)
 include(GenerateExportHeader)
 generate_export_header(moveit_collision_detection_bullet)
 target_include_directories(moveit_collision_detection_bullet PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>)
@@ -45,16 +49,12 @@ target_link_libraries(collision_detector_bullet_plugin
   moveit_planning_scene
 )
 
-install(DIRECTORY include/ DESTINATION include)
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/moveit_collision_detection_bullet_export.h DESTINATION include)
-install(TARGETS moveit_collision_detection_bullet collision_detector_bullet_plugin EXPORT export_moveit_collision_detection_bullet
-  LIBRARY DESTINATION lib
-  ARCHIVE DESTINATION lib
-  RUNTIME DESTINATION bin
-)
-ament_export_targets(export_moveit_collision_detection_bullet HAS_LIBRARY_TARGET)
+install(DIRECTORY include/ DESTINATION include/moveit_core)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/moveit_collision_detection_bullet_export.h DESTINATION include/moveit_core)
 
 if(BUILD_TESTING)
+  find_package(ament_cmake_gtest REQUIRED)
+
   if(WIN32)
     # set(append_library_dirs "$<TARGET_FILE_DIR:${PROJECT_NAME}>;$<TARGET_FILE_DIR:${PROJECT_NAME}_TestPlugins1>")
   else()

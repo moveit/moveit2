@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.22)
-project(moveit_ros_warehouse)
+project(moveit_ros_warehouse LANGUAGES CXX)
 
 # Common cmake code applied to all moveit packages
 find_package(moveit_common REQUIRED)
@@ -80,8 +80,8 @@ install(
     moveit_warehouse_services
   RUNTIME DESTINATION lib/${PROJECT_NAME}
 )
-install(DIRECTORY include/ DESTINATION include)
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/moveit_warehouse_export.h DESTINATION include)
+install(DIRECTORY include/ DESTINATION include/moveit_ros_warehouse)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/moveit_warehouse_export.h DESTINATION include/moveit_ros_warehouse)
 
 install(
   TARGETS moveit_warehouse
@@ -89,7 +89,7 @@ install(
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
   RUNTIME DESTINATION bin
-  INCLUDES DESTINATION include
+  INCLUDES DESTINATION include/moveit_ros_warehouse
 )
 
 ament_export_targets(${PROJECT_NAME}Targets HAS_LIBRARY_TARGET)

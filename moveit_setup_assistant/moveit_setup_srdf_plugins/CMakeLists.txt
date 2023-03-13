@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.22)
-project(moveit_setup_srdf_plugins)
+project(moveit_setup_srdf_plugins LANGUAGES CXX)
 
 # Common cmake code applied to all moveit packages
 find_package(moveit_common REQUIRED)
@@ -48,7 +48,7 @@ add_library(${PROJECT_NAME}
 )
 target_include_directories(${PROJECT_NAME} PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-  $<INSTALL_INTERFACE:include>
+  $<INSTALL_INTERFACE:include/moveit_setup_srdf_plugins>
 )
 ament_target_dependencies(${PROJECT_NAME}
   moveit_setup_framework
@@ -69,13 +69,13 @@ install(TARGETS ${PROJECT_NAME}
         ARCHIVE DESTINATION lib
         LIBRARY DESTINATION lib
         RUNTIME DESTINATION bin
-        INCLUDES DESTINATION include
+        INCLUDES DESTINATION include/moveit_setup_srdf_plugins
 )
 install(FILES moveit_setup_framework_plugins.xml
         DESTINATION share/${PROJECT_NAME}
 )
 install(DIRECTORY include/
-        DESTINATION include
+        DESTINATION include/moveit_setup_srdf_plugins
 )
 
 ament_export_targets(${PROJECT_NAME}Targets HAS_LIBRARY_TARGET)

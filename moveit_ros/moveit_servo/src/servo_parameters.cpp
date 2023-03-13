@@ -68,7 +68,7 @@ ServoParameters::CallbackHandler::setParametersCallback(const std::vector<rclcpp
     if (search != set_parameter_callbacks_.end())
     {
       RCLCPP_INFO_STREAM(LOGGER, "setParametersCallback - "
-                                     << parameter.get_name() << "<" << parameter.get_type_name()
+                                     << parameter.get_name() << '<' << parameter.get_type_name()
                                      << ">: " << rclcpp::to_string(parameter.get_parameter_value()));
       for (const auto& callback : search->second)
       {
@@ -212,9 +212,6 @@ void ServoParameters::declare(const std::string& ns,
                        "if the robot is stationary.Otherwise, specify num.to publish. Important because ROS may drop "
                        "some messages and we need the robot to halt reliably."));
   node_parameters->declare_parameter(
-      ns + ".num_outgoing_halt_msgs_to_publish", ParameterValue{ parameters.num_outgoing_halt_msgs_to_publish },
-      ParameterDescriptorBuilder{}.type(PARAMETER_INTEGER).description("Num outgoing halt msgs to publish"));
-  node_parameters->declare_parameter(
       ns + ".halt_all_joints_in_joint_mode", ParameterValue{ parameters.halt_all_joints_in_joint_mode },
       ParameterDescriptorBuilder{}.type(PARAMETER_BOOL).description("Halt all joints in joint mode"));
   node_parameters->declare_parameter(
@@ -313,8 +310,6 @@ ServoParameters ServoParameters::get(const std::string& ns,
 
   // Stopping behaviour
   parameters.incoming_command_timeout = node_parameters->get_parameter(ns + ".incoming_command_timeout").as_double();
-  parameters.num_outgoing_halt_msgs_to_publish =
-      node_parameters->get_parameter(ns + ".num_outgoing_halt_msgs_to_publish").as_int();
   parameters.halt_all_joints_in_joint_mode =
       node_parameters->get_parameter(ns + ".halt_all_joints_in_joint_mode").as_bool();
   parameters.halt_all_joints_in_cartesian_mode =
@@ -358,11 +353,6 @@ std::optional<ServoParameters> ServoParameters::validate(ServoParameters paramet
   {
     RCLCPP_WARN(LOGGER, "Parameter 'publish_period' should be "
                         "greater than zero. Check yaml file.");
-    return std::nullopt;
-  }
-  if (parameters.num_outgoing_halt_msgs_to_publish < 0)
-  {
-    RCLCPP_WARN(LOGGER, "Parameter 'num_outgoing_halt_msgs_to_publish' should be greater than zero. Check yaml file.");
     return std::nullopt;
   }
   if (parameters.leaving_singularity_threshold_multiplier <= 0)

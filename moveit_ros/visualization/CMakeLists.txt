@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.22)
-project(moveit_ros_visualization)
+project(moveit_ros_visualization LANGUAGES CXX)
 
 # Common cmake code applied to all moveit packages
 find_package(moveit_common REQUIRED)
@@ -47,9 +47,6 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 add_definitions(-DQT_NO_KEYWORDS)
-
-# catkin_install_python(PROGRAMS scripts/moveit_joy.py DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
-# catkin_python_setup()
 
 set(THIS_PACKAGE_LIBRARIES
   moveit_motion_planning_rviz_plugin
@@ -107,18 +104,13 @@ pluginlib_export_plugin_description_file(rviz_common trajectory_rviz_plugin_desc
 pluginlib_export_plugin_description_file(rviz_common planning_scene_rviz_plugin_description.xml)
 pluginlib_export_plugin_description_file(rviz_common robot_state_rviz_plugin_description.xml)
 
-#if (CATKIN_ENABLE_TESTING)
-#  find_package(rostest REQUIRED)
-#  add_rostest(test/moveit_joy.test)
-#endif()
-
 install(
   TARGETS ${THIS_PACKAGE_LIBRARIES}
   EXPORT ${PROJECT_NAME}Targets
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
   RUNTIME DESTINATION bin
-  INCLUDES DESTINATION include
+  INCLUDES DESTINATION include/moveit_ros_visualization
 )
 
 ament_export_targets(${PROJECT_NAME}Targets HAS_LIBRARY_TARGET)

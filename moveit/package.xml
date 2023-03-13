@@ -2,14 +2,14 @@
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
   <name>moveit</name>
-  <version>2.6.0</version>
+  <version>2.7.0</version>
   <description>Meta package that contains all essential packages of MoveIt 2</description>
   <maintainer email="henningkayser@picknik.ai">Henning Kayser</maintainer>
   <maintainer email="tyler@picknik.ai">Tyler Weaver</maintainer>
   <maintainer email="me@v4hn.de">Michael Görner</maintainer>
   <maintainer email="rhaschke@techfak.uni-bielefeld.de">Robert Haschke</maintainer>
 
-  <license>BSD</license>
+  <license>BSD-3-Clause</license>
 
   <url type="website">http://moveit.ros.org</url>
   <url type="repository">https://github.com/ros-planning/moveit2</url>

@@ -2,7 +2,7 @@
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
   <name>moveit_core</name>
-  <version>2.6.0</version>
+  <version>2.7.0</version>
   <description>Core libraries used by MoveIt</description>
 
   <maintainer email="henningkayser@picknik.ai">Henning Kayser</maintainer>
@@ -10,7 +10,7 @@
   <maintainer email="me@v4hn.de">Michael Görner</maintainer>
   <maintainer email="moveit_releasers@googlegroups.com">MoveIt Release Team</maintainer>
 
-  <license>BSD</license>
+  <license>BSD-3-Clause</license>
 
   <url type="website">http://moveit.ros.org</url>
   <url type="bugtracker">https://github.com/ros-planning/moveit2/issues</url>
@@ -55,6 +55,7 @@
   <depend>tf2</depend>
   <depend>tf2_eigen</depend>
   <depend>tf2_geometry_msgs</depend>
+  <depend>tf2_kdl</depend>
   <depend>trajectory_msgs</depend>
   <depend>visualization_msgs</depend>
   <depend>ruckig</depend>
@@ -64,7 +65,6 @@
   <test_depend>moveit_resources_panda_moveit_config</test_depend>
   <test_depend>moveit_resources_pr2_description</test_depend>
   <test_depend>angles</test_depend>
-  <test_depend>tf2_kdl</test_depend>
   <test_depend>orocos_kdl_vendor</test_depend>
   <test_depend>ament_cmake_gtest</test_depend>
   <test_depend>ament_cmake_gmock</test_depend>

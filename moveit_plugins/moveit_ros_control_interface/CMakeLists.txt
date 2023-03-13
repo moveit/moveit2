@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.22)
-project(moveit_ros_control_interface)
+project(moveit_ros_control_interface LANGUAGES CXX)
 
 find_package(ament_cmake REQUIRED)
 
@@ -85,12 +85,12 @@ install(TARGETS ${PROJECT_NAME}_plugin ${PROJECT_NAME}_trajectory_plugin ${PROJE
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION bin
-  INCLUDES DESTINATION include
+  INCLUDES DESTINATION include/moveit_ros_control_interface
 )
 
 ## Mark cpp header files for installation
 install(DIRECTORY include/
-  DESTINATION include
+  DESTINATION include/moveit_ros_control_interface
 )
 
 pluginlib_export_plugin_description_file(moveit_core moveit_core_plugins.xml)

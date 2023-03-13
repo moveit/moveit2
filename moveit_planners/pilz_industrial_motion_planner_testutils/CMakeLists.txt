@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.22)
-project(pilz_industrial_motion_planner_testutils)
+project(pilz_industrial_motion_planner_testutils LANGUAGES CXX)
 
 # Common cmake code applied to all moveit packages
 find_package(moveit_common REQUIRED)
@@ -52,10 +52,10 @@ install(
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
   RUNTIME DESTINATION bin
-  INCLUDES DESTINATION include
+  INCLUDES DESTINATION include/pilz_industrial_motion_planner_testutils
 )
 
-install(DIRECTORY include/ DESTINATION include)
+install(DIRECTORY include/ DESTINATION include/pilz_industrial_motion_planner_testutils)
 
 ament_export_targets(${PROJECT_NAME}Targets HAS_LIBRARY_TARGET)
 ament_export_dependencies(rclcpp moveit_core moveit_msgs tf2_eigen)

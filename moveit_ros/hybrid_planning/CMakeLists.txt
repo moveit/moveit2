@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.22)
-project(moveit_hybrid_planning)
+project(moveit_hybrid_planning LANGUAGES CXX)
 
 # Common cmake code applied to all moveit packages
 find_package(moveit_common REQUIRED)
@@ -73,15 +73,15 @@ install(TARGETS ${LIBRARIES}
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION bin
-  INCLUDES DESTINATION include)
+  INCLUDES DESTINATION include/moveit_hybrid_planning)
 
 install(TARGETS cancel_action hybrid_planning_demo_node
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION lib/${PROJECT_NAME}
-  INCLUDES DESTINATION include)
+  INCLUDES DESTINATION include/moveit_hybrid_planning)
 
-install(DIRECTORY ${THIS_PACKAGE_INCLUDE_DIRS} DESTINATION include)
+install(DIRECTORY ${THIS_PACKAGE_INCLUDE_DIRS} DESTINATION include/moveit_hybrid_planning)
 
 install(DIRECTORY test/launch DESTINATION share/${PROJECT_NAME})
 install(DIRECTORY test/config DESTINATION share/${PROJECT_NAME})

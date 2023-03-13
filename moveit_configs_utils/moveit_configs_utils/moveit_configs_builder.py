@@ -58,7 +58,10 @@ from dataclasses import dataclass, field
 from ament_index_python.packages import get_package_share_directory
 
 from launch_param_builder import ParameterBuilder, load_yaml, load_xacro
-
+from launch_param_builder.utils import ParameterBuilderFileNotFoundError
+from moveit_configs_utils.substitutions import Xacro
+from launch.some_substitutions_type import SomeSubstitutionsType
+from launch_ros.parameter_descriptions import ParameterValue
 
 moveit_configs_utils_path = Path(get_package_share_directory("moveit_configs_utils"))
 
@@ -133,7 +136,7 @@ class MoveItConfigs:
 
 
 class MoveItConfigsBuilder(ParameterBuilder):
-    __moveit_configs = MoveItConfigs()
+    __moveit_configs: MoveItConfigs
     __robot_name: str
     __urdf_package: Path
     # Relative path of the URDF file w.r.t. __urdf_package
@@ -153,7 +156,7 @@ class MoveItConfigsBuilder(ParameterBuilder):
         package_name: Optional[str] = None,
     ):
         super().__init__(package_name or (robot_name + "_moveit_config"))
-        self.__moveit_configs.package_path = self._package_path
+        self.__moveit_configs = MoveItConfigs(package_path=self._package_path)
         self.__robot_name = robot_name
         setup_assistant_file = self._package_path / ".setup_assistant"
 
@@ -199,7 +202,11 @@ class MoveItConfigsBuilder(ParameterBuilder):
 
         self.__robot_description = robot_description
 
-    def robot_description(self, file_path: Optional[str] = None, mappings: dict = None):
+    def robot_description(
+        self,
+        file_path: Optional[str] = None,
+        mappings: dict[SomeSubstitutionsType, SomeSubstitutionsType] = None,
+    ):
         """Load robot description.
 
         :param file_path: Absolute or relative path to the URDF file (w.r.t. robot_name_moveit_config).
@@ -210,15 +217,35 @@ class MoveItConfigsBuilder(ParameterBuilder):
             robot_description_file_path = self.__urdf_package / self.__urdf_file_path
         else:
             robot_description_file_path = self._package_path / file_path
-        self.__moveit_configs.robot_description = {
-            self.__robot_description: load_xacro(
-                robot_description_file_path, mappings=mappings
-            )
-        }
+        if (mappings is None) or all(
+            (isinstance(key, str) and isinstance(value, str))
+            for key, value in mappings.items()
+        ):
+            try:
+                self.__moveit_configs.robot_description = {
+                    self.__robot_description: load_xacro(
+                        robot_description_file_path, mappings=mappings
+                    )
+                }
+            except ParameterBuilderFileNotFoundError as e:
+                logging.warning(f"\x1b[33;21m{e}\x1b[0m")
+                logging.warning(
+                    f"\x1b[33;21mThe robot description will be loaded from /robot_description topic \x1b[0m"
+                )
+
+        else:
+            self.__moveit_configs.robot_description = {
+                self.__robot_description: ParameterValue(
+                    Xacro(str(robot_description_file_path), mappings=mappings),
+                    value_type=str,
+                )
+            }
         return self
 
     def robot_description_semantic(
-        self, file_path: Optional[str] = None, mappings: dict = None
+        self,
+        file_path: Optional[str] = None,
+        mappings: dict[SomeSubstitutionsType, SomeSubstitutionsType] = None,
     ):
         """Load semantic robot description.
 
@@ -226,13 +253,29 @@ class MoveItConfigsBuilder(ParameterBuilder):
         :param mappings: mappings to be passed when loading the xacro file.
         :return: Instance of MoveItConfigsBuilder with robot_description_semantic loaded.
         """
-        self.__moveit_configs.robot_description_semantic = {
-            self.__robot_description
-            + "_semantic": load_xacro(
-                self._package_path / (file_path or self.__srdf_file_path),
-                mappings=mappings,
-            )
-        }
+
+        if (mappings is None) or all(
+            (isinstance(key, str) and isinstance(value, str))
+            for key, value in mappings.items()
+        ):
+            self.__moveit_configs.robot_description_semantic = {
+                self.__robot_description
+                + "_semantic": load_xacro(
+                    self._package_path / (file_path or self.__srdf_file_path),
+                    mappings=mappings,
+                )
+            }
+        else:
+            self.__moveit_configs.robot_description_semantic = {
+                self.__robot_description
+                + "_semantic": ParameterValue(
+                    Xacro(
+                        str(self._package_path / (file_path or self.__srdf_file_path)),
+                        mappings=mappings,
+                    ),
+                    value_type=str,
+                )
+            }
         return self
 
     def robot_description_kinematics(self, file_path: Optional[str] = None):

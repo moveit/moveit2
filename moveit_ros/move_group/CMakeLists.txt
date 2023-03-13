@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.22)
-project(moveit_ros_move_group)
+project(moveit_ros_move_group LANGUAGES CXX)
 
 # Common cmake code applied to all moveit packages
 find_package(moveit_common REQUIRED)
@@ -41,17 +41,18 @@ add_library(moveit_move_group_capabilities_base SHARED
 )
 
 add_library(moveit_move_group_default_capabilities SHARED
+  src/default_capabilities/apply_planning_scene_service_capability.cpp
+  src/default_capabilities/cartesian_path_service_capability.cpp
+  src/default_capabilities/clear_octomap_service_capability.cpp
+  src/default_capabilities/execute_trajectory_action_capability.cpp
+  src/default_capabilities/get_planning_scene_service_capability.cpp
+  src/default_capabilities/kinematics_service_capability.cpp
   src/default_capabilities/move_action_capability.cpp
   src/default_capabilities/plan_service_capability.cpp
-  src/default_capabilities/execute_trajectory_action_capability.cpp
   src/default_capabilities/query_planners_service_capability.cpp
-  src/default_capabilities/kinematics_service_capability.cpp
   src/default_capabilities/state_validation_service_capability.cpp
-  src/default_capabilities/cartesian_path_service_capability.cpp
-  src/default_capabilities/get_planning_scene_service_capability.cpp
-  src/default_capabilities/apply_planning_scene_service_capability.cpp
-  src/default_capabilities/clear_octomap_service_capability.cpp
-  src/default_capabilities/tf_publisher_capability.cpp)
+  src/default_capabilities/tf_publisher_capability.cpp
+)
 
 set_target_properties(moveit_move_group_capabilities_base
   PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
@@ -87,10 +88,10 @@ install(
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
   RUNTIME DESTINATION bin
-  INCLUDES DESTINATION include
+  INCLUDES DESTINATION include/moveit_ros_move_group
 )
 
-install(DIRECTORY include/ DESTINATION include)
+install(DIRECTORY include/ DESTINATION include/moveit_ros_move_group)
 
 ament_export_targets(${PROJECT_NAME}Targets HAS_LIBRARY_TARGET)
 ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS})

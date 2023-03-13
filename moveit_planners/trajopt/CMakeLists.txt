@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.22)
-project(moveit_planners_trajopt)
+project(moveit_planners_trajopt LANGUAGES CXX)
 
 find_package(catkin REQUIRED
     COMPONENTS
@@ -10,8 +10,8 @@ find_package(catkin REQUIRED
       pluginlib
       roscpp
       rosparam_shortcuts
-      trajopt
 )
+find_package(trajopt REQUIRED)
 
 catkin_package(
     INCLUDE_DIRS include
@@ -48,6 +48,7 @@ target_link_libraries(
   ${PROJECT_NAME}
   ${catkin_LIBRARIES}
   ${Boost_LIBRARIES}
+  trajopt::trajopt
 )
 
 set_target_properties(

@@ -138,7 +138,7 @@ protected:
       // for first)
       if (index > 0)
       {
-        moveit::core::robotStateToRobotStateMsg(responses[index - 1].trajectory_->getLastWayPoint(), req.start_state);
+        moveit::core::robotStateToRobotStateMsg(responses[index - 1].trajectory->getLastWayPoint(), req.start_state);
       }
       // generate trajectory
       planning_interface::MotionPlanResponse resp;
@@ -192,8 +192,8 @@ TEST_F(TrajectoryBlenderTransitionWindowTest, testInvalidGroupName)
 
   blend_req.group_name = "invalid_group_name";
   blend_req.link_name = target_link_;
-  blend_req.first_trajectory = res.at(0).trajectory_;
-  blend_req.second_trajectory = res.at(1).trajectory_;
+  blend_req.first_trajectory = res.at(0).trajectory;
+  blend_req.second_trajectory = res.at(1).trajectory;
 
   blend_req.blend_radius = seq.getBlendRadius(0);
   EXPECT_FALSE(blender_->blend(planning_scene_, blend_req, blend_res));
@@ -221,8 +221,8 @@ TEST_F(TrajectoryBlenderTransitionWindowTest, testInvalidTargetLink)
 
   blend_req.group_name = planning_group_;
   blend_req.link_name = "invalid_target_link";
-  blend_req.first_trajectory = res.at(0).trajectory_;
-  blend_req.second_trajectory = res.at(1).trajectory_;
+  blend_req.first_trajectory = res.at(0).trajectory;
+  blend_req.second_trajectory = res.at(1).trajectory;
 
   blend_req.blend_radius = seq.getBlendRadius(0);
   EXPECT_FALSE(blender_->blend(planning_scene_, blend_req, blend_res));
@@ -251,8 +251,8 @@ TEST_F(TrajectoryBlenderTransitionWindowTest, testNegativeRadius)
 
   blend_req.group_name = planning_group_;
   blend_req.link_name = target_link_;
-  blend_req.first_trajectory = res.at(0).trajectory_;
-  blend_req.second_trajectory = res.at(1).trajectory_;
+  blend_req.first_trajectory = res.at(0).trajectory;
+  blend_req.second_trajectory = res.at(1).trajectory;
 
   blend_req.blend_radius = -0.1;
   EXPECT_FALSE(blender_->blend(planning_scene_, blend_req, blend_res));
@@ -280,8 +280,8 @@ TEST_F(TrajectoryBlenderTransitionWindowTest, testZeroRadius)
 
   blend_req.group_name = planning_group_;
   blend_req.link_name = target_link_;
-  blend_req.first_trajectory = res.at(0).trajectory_;
-  blend_req.second_trajectory = res.at(1).trajectory_;
+  blend_req.first_trajectory = res.at(0).trajectory;
+  blend_req.second_trajectory = res.at(1).trajectory;
 
   blend_req.blend_radius = 0.;
   EXPECT_FALSE(blender_->blend(planning_scene_, blend_req, blend_res));
@@ -314,7 +314,7 @@ TEST_F(TrajectoryBlenderTransitionWindowTest, testDifferentSamplingTimes)
     // for first)
     if (index > 0)
     {
-      moveit::core::robotStateToRobotStateMsg(responses[index - 1].trajectory_->getLastWayPoint(), req.start_state);
+      moveit::core::robotStateToRobotStateMsg(responses[index - 1].trajectory->getLastWayPoint(), req.start_state);
       sampling_time_ *= 2;
     }
     // generate trajectory
@@ -331,8 +331,8 @@ TEST_F(TrajectoryBlenderTransitionWindowTest, testDifferentSamplingTimes)
 
   blend_req.group_name = planning_group_;
   blend_req.link_name = target_link_;
-  blend_req.first_trajectory = responses[0].trajectory_;
-  blend_req.second_trajectory = responses[1].trajectory_;
+  blend_req.first_trajectory = responses[0].trajectory;
+  blend_req.second_trajectory = responses[1].trajectory;
   blend_req.blend_radius = seq.getBlendRadius(0);
   EXPECT_FALSE(blender_->blend(planning_scene_, blend_req, blend_res));
 }
@@ -358,16 +358,16 @@ TEST_F(TrajectoryBlenderTransitionWindowTest, testNonUniformSamplingTime)
   std::vector<planning_interface::MotionPlanResponse> res{ generateLinTrajs(seq, 2) };
 
   // Modify first time interval
-  EXPECT_GT(res[0].trajectory_->getWayPointCount(), 2u);
-  res[0].trajectory_->setWayPointDurationFromPrevious(1, 2 * sampling_time_);
+  EXPECT_GT(res[0].trajectory->getWayPointCount(), 2u);
+  res[0].trajectory->setWayPointDurationFromPrevious(1, 2 * sampling_time_);
 
   pilz_industrial_motion_planner::TrajectoryBlendRequest blend_req;
   pilz_industrial_motion_planner::TrajectoryBlendResponse blend_res;
 
   blend_req.group_name = planning_group_;
   blend_req.link_name = target_link_;
-  blend_req.first_trajectory = res.at(0).trajectory_;
-  blend_req.second_trajectory = res.at(1).trajectory_;
+  blend_req.first_trajectory = res.at(0).trajectory;
+  blend_req.second_trajectory = res.at(1).trajectory;
   blend_req.blend_radius = seq.getBlendRadius(0);
   EXPECT_FALSE(blender_->blend(planning_scene_, blend_req, blend_res));
 }
@@ -396,10 +396,10 @@ TEST_F(TrajectoryBlenderTransitionWindowTest, testNotIntersectingTrajectories)
 
   blend_req.group_name = planning_group_;
   blend_req.link_name = target_link_;
-  blend_req.first_trajectory = res.at(0).trajectory_;
+  blend_req.first_trajectory = res.at(0).trajectory;
   // replace the second trajectory to make the two trajectories timely not
   // intersect
-  blend_req.second_trajectory = res.at(0).trajectory_;
+  blend_req.second_trajectory = res.at(0).trajectory;
   blend_req.blend_radius = seq.getBlendRadius(0);
   EXPECT_FALSE(blender_->blend(planning_scene_, blend_req, blend_res));
 }
@@ -429,8 +429,8 @@ TEST_F(TrajectoryBlenderTransitionWindowTest, testNonStationaryPoint)
   blend_req.link_name = target_link_;
   blend_req.blend_radius = seq.getBlendRadius(0);
 
-  blend_req.first_trajectory = res.at(0).trajectory_;
-  blend_req.second_trajectory = res.at(1).trajectory_;
+  blend_req.first_trajectory = res.at(0).trajectory;
+  blend_req.second_trajectory = res.at(1).trajectory;
 
   // Modify last waypoint of first trajectory and first point of second
   // trajectory
@@ -460,8 +460,8 @@ TEST_F(TrajectoryBlenderTransitionWindowTest, testTraj1InsideBlendRadius)
   std::vector<planning_interface::MotionPlanResponse> res{ generateLinTrajs(seq, 2) };
 
   double lin1_distance;
-  lin1_distance = (res[0].trajectory_->getFirstWayPoint().getFrameTransform(target_link_).translation() -
-                   res[0].trajectory_->getLastWayPoint().getFrameTransform(target_link_).translation())
+  lin1_distance = (res[0].trajectory->getFirstWayPoint().getFrameTransform(target_link_).translation() -
+                   res[0].trajectory->getLastWayPoint().getFrameTransform(target_link_).translation())
                       .norm();
 
   pilz_industrial_motion_planner::TrajectoryBlendRequest blend_req;
@@ -471,8 +471,8 @@ TEST_F(TrajectoryBlenderTransitionWindowTest, testTraj1InsideBlendRadius)
   blend_req.link_name = target_link_;
   blend_req.blend_radius = 1.1 * lin1_distance;
 
-  blend_req.first_trajectory = res.at(0).trajectory_;
-  blend_req.second_trajectory = res.at(1).trajectory_;
+  blend_req.first_trajectory = res.at(0).trajectory;
+  blend_req.second_trajectory = res.at(1).trajectory;
 
   EXPECT_FALSE(blender_->blend(planning_scene_, blend_req, blend_res));
 }
@@ -503,8 +503,8 @@ TEST_F(TrajectoryBlenderTransitionWindowTest, testTraj2InsideBlendRadius)
   blend_req.link_name = target_link_;
   blend_req.blend_radius = seq.getBlendRadius(0);
 
-  blend_req.first_trajectory = res.at(0).trajectory_;
-  blend_req.second_trajectory = res.at(1).trajectory_;
+  blend_req.first_trajectory = res.at(0).trajectory;
+  blend_req.second_trajectory = res.at(1).trajectory;
 
   EXPECT_FALSE(blender_->blend(planning_scene_, blend_req, blend_res));
 }
@@ -540,8 +540,8 @@ TEST_F(TrajectoryBlenderTransitionWindowTest, testLinLinBlending)
   blend_req.link_name = target_link_;
   blend_req.blend_radius = seq.getBlendRadius(0);
 
-  blend_req.first_trajectory = res.at(0).trajectory_;
-  blend_req.second_trajectory = res.at(1).trajectory_;
+  blend_req.first_trajectory = res.at(0).trajectory;
+  blend_req.second_trajectory = res.at(1).trajectory;
 
   EXPECT_TRUE(blender_->blend(planning_scene_, blend_req, blend_res));
 
@@ -583,8 +583,8 @@ TEST_F(TrajectoryBlenderTransitionWindowTest, testOverlappingBlendTrajectories)
 
   blend_req.group_name = planning_group_;
   blend_req.link_name = target_link_;
-  blend_req.first_trajectory = res.at(0).trajectory_;
-  blend_req.second_trajectory = res.at(1).trajectory_;
+  blend_req.first_trajectory = res.at(0).trajectory;
+  blend_req.second_trajectory = res.at(1).trajectory;
   blend_req.blend_radius = seq.getBlendRadius(0);
   EXPECT_TRUE(blender_->blend(planning_scene_, blend_req, blend_res));
 
@@ -630,7 +630,7 @@ TEST_F(TrajectoryBlenderTransitionWindowTest, testNonLinearBlending)
 
   for (size_t traj_index = 0; traj_index < 2; ++traj_index)
   {
-    auto lin_traj{ res.at(traj_index).trajectory_ };
+    auto lin_traj{ res.at(traj_index).trajectory };
 
     CartesianTrajectory cart_traj;
     trajectory_msgs::msg::JointTrajectory joint_traj;

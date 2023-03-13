@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.22)
-project(moveit_setup_assistant)
+project(moveit_setup_assistant LANGUAGES CXX)
 
 # Common cmake code applied to all moveit packages
 find_package(moveit_common REQUIRED)
@@ -47,7 +47,7 @@ add_executable(moveit_setup_assistant
 )
 target_include_directories(moveit_setup_assistant PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-  $<INSTALL_INTERFACE:include>
+  $<INSTALL_INTERFACE:include/moveit_setup_assistant>
 )
 ament_target_dependencies(
   moveit_setup_assistant
@@ -60,7 +60,7 @@ target_link_libraries(moveit_setup_assistant
 add_executable(${PROJECT_NAME}_updater src/collisions_updater.cpp)
 target_include_directories(${PROJECT_NAME}_updater PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-  $<INSTALL_INTERFACE:include>)
+  $<INSTALL_INTERFACE:include/moveit_setup_assistant>)
 
 ament_target_dependencies(
   ${PROJECT_NAME}_updater
@@ -81,10 +81,10 @@ install(
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION lib/${PROJECT_NAME}
-  INCLUDES DESTINATION include
+  INCLUDES DESTINATION include/moveit_setup_assistant
 )
 install(DIRECTORY include/
-        DESTINATION include
+        DESTINATION include/moveit_setup_assistant
 )
 ament_export_include_directories(include)
 install(DIRECTORY launch DESTINATION share/${PROJECT_NAME})

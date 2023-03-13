@@ -174,7 +174,7 @@ void ConfigurationFilesWidget::onInit()
   layout->addLayout(hlayout3);
 
   // Finish Layout --------------------------------------------------
-  this->setLayout(layout);
+  setLayout(layout);
 }
 
 void ConfigurationFilesWidget::setCheckSelected(bool checked)

@@ -97,7 +97,7 @@ class SharedData
     node_options.automatically_declare_parameters_from_overrides(true);
     node_ = rclcpp::Node::make_shared("moveit_kinematics_test", node_options);
 
-    RCLCPP_INFO_STREAM(LOGGER, "Loading robot model from " << node_->get_name() << "." << ROBOT_DESCRIPTION_PARAM);
+    RCLCPP_INFO_STREAM(LOGGER, "Loading robot model from " << node_->get_name() << '.' << ROBOT_DESCRIPTION_PARAM);
     // load robot model
     rdf_loader::RDFLoader rdf_loader(node_, ROBOT_DESCRIPTION_PARAM);
     robot_model_ = std::make_shared<moveit::core::RobotModel>(rdf_loader.getURDF(), rdf_loader.getSRDF());
@@ -215,7 +215,7 @@ public:
     return testing::AssertionFailure()
         << std::setprecision(std::numeric_limits<double>::digits10 + 2)
         << "Expected: " << expr1 << " [" << val1.x << ", " << val1.y << ", " << val1.z << "]\n"
-        << "Actual: " << expr2 << " [" << val2.x << ", " << val2.y << ", " << val2.z << "]";
+        << "Actual: " << expr2 << " [" << val2.x << ", " << val2.y << ", " << val2.z << ']';
     // clang-format on
   }
   testing::AssertionResult isNear(const char* expr1, const char* expr2, const char* /*abs_error_expr*/,
@@ -232,7 +232,7 @@ public:
     return testing::AssertionFailure()
         << std::setprecision(std::numeric_limits<double>::digits10 + 2)
         << "Expected: " << expr1 << " [" << val1.w << ", " << val1.x << ", " << val1.y << ", " << val1.z << "]\n"
-        << "Actual: " << expr2 << " [" << val2.w << ", " << val2.x << ", " << val2.y << ", " << val2.z << "]";
+        << "Actual: " << expr2 << " [" << val2.w << ", " << val2.x << ", " << val2.y << ", " << val2.z << ']';
     // clang-format on
   }
   testing::AssertionResult expectNearHelper(const char* expr1, const char* expr2, const char* abs_error_expr,
@@ -242,20 +242,20 @@ public:
     if (val1.size() != val2.size())
     {
       return testing::AssertionFailure() << "Different vector sizes"
-                                         << "\nExpected: " << expr1 << " (" << val1.size() << ")"
-                                         << "\nActual: " << expr2 << " (" << val2.size() << ")";
+                                         << "\nExpected: " << expr1 << " (" << val1.size() << ')'
+                                         << "\nActual: " << expr2 << " (" << val2.size() << ')';
     }
 
     for (size_t i = 0; i < val1.size(); ++i)
     {
       ::std::stringstream ss;
-      ss << "[" << i << "].position";
+      ss << '[' << i << "].position";
       GTEST_ASSERT_(isNear((expr1 + ss.str()).c_str(), (expr2 + ss.str()).c_str(), abs_error_expr, val1[i].position,
                            val2[i].position, abs_error),
                     GTEST_NONFATAL_FAILURE_);
 
       ss.str("");
-      ss << "[" << i << "].orientation";
+      ss << '[' << i << "].orientation";
       GTEST_ASSERT_(isNear((expr1 + ss.str()).c_str(), (expr2 + ss.str()).c_str(), abs_error_expr, val1[i].orientation,
                            val2[i].orientation, abs_error),
                     GTEST_NONFATAL_FAILURE_);
@@ -524,7 +524,7 @@ TEST_F(KinematicsTest, unitIK)
     else
     {
       FAIL() << "Found invalid 'type' in " << pose_name << ": should be one of '" << pose_type_relative << "' or '"
-             << pose_type_absolute << "'";
+             << pose_type_absolute << '\'';
     }
 
     std::string desc;

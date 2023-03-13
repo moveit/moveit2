@@ -87,7 +87,9 @@ bool RuckigSmoothing::applySmoothing(robot_trajectory::RobotTrajectory& trajecto
 bool RuckigSmoothing::applySmoothing(robot_trajectory::RobotTrajectory& trajectory,
                                      const std::unordered_map<std::string, double>& velocity_limits,
                                      const std::unordered_map<std::string, double>& acceleration_limits,
-                                     const std::unordered_map<std::string, double>& jerk_limits)
+                                     const std::unordered_map<std::string, double>& jerk_limits,
+                                     const double max_velocity_scaling_factor,
+                                     const double max_acceleration_scaling_factor)
 {
   if (!validateGroup(trajectory))
   {
@@ -106,8 +108,6 @@ bool RuckigSmoothing::applySmoothing(robot_trajectory::RobotTrajectory& trajecto
   moveit::core::JointModelGroup const* const group = trajectory.getGroup();
   const size_t num_dof = group->getVariableCount();
   ruckig::InputParameter<ruckig::DynamicDOFs> ruckig_input{ num_dof };
-  double max_velocity_scaling_factor = 1.0;
-  double max_acceleration_scaling_factor = 1.0;
   if (!getRobotModelBounds(max_velocity_scaling_factor, max_acceleration_scaling_factor, group, ruckig_input))
   {
     RCLCPP_ERROR(LOGGER, "Error while retrieving kinematic limits (vel/accel/jerk) from RobotModel.");
@@ -123,13 +123,13 @@ bool RuckigSmoothing::applySmoothing(robot_trajectory::RobotTrajectory& trajecto
     auto it = velocity_limits.find(vars[j]);
     if (it != velocity_limits.end())
     {
-      ruckig_input.max_velocity.at(j) = it->second;
+      ruckig_input.max_velocity.at(j) = it->second * max_velocity_scaling_factor;
     }
     // Acceleration
     it = acceleration_limits.find(vars[j]);
     if (it != acceleration_limits.end())
     {
-      ruckig_input.max_acceleration.at(j) = it->second;
+      ruckig_input.max_acceleration.at(j) = it->second * max_acceleration_scaling_factor;
     }
     // Jerk
     it = jerk_limits.find(vars[j]);
@@ -140,6 +140,95 @@ bool RuckigSmoothing::applySmoothing(robot_trajectory::RobotTrajectory& trajecto
   }
 
   return runRuckig(trajectory, ruckig_input);
+}
+
+std::optional<robot_trajectory::RobotTrajectory>
+RuckigSmoothing::runRuckigInBatches(const size_t num_waypoints, const robot_trajectory::RobotTrajectory& trajectory,
+                                    ruckig::InputParameter<ruckig::DynamicDOFs>& ruckig_input, size_t batch_size)
+{
+  // We take the batch size as the lesser of 0.1*num_waypoints or batch_size, to keep a balance between run time and
+  // time-optimality.
+  batch_size = [num_waypoints, batch_size]() {
+    const size_t temp_batch_size = std::min(size_t(0.1 * num_waypoints), size_t(batch_size));
+    // We need at least 2 waypoints
+    return std::max(size_t(2), temp_batch_size);
+  }();
+  size_t batch_start_idx = 0;
+  size_t batch_end_idx = batch_size - 1;
+  const size_t full_traj_final_idx = num_waypoints - 1;
+  // A deep copy is not needed since the waypoints are cleared immediately
+  robot_trajectory::RobotTrajectory sub_trajectory =
+      robot_trajectory::RobotTrajectory(trajectory, false /* deep copy */);
+  robot_trajectory::RobotTrajectory output_trajectory =
+      robot_trajectory::RobotTrajectory(trajectory, false /* deep copy */);
+  output_trajectory.clear();
+
+  while (batch_end_idx <= full_traj_final_idx)
+  {
+    sub_trajectory.clear();
+    for (size_t waypoint_idx = batch_start_idx; waypoint_idx <= batch_end_idx; ++waypoint_idx)
+    {
+      sub_trajectory.addSuffixWayPoint(trajectory.getWayPoint(waypoint_idx),
+                                       trajectory.getWayPointDurationFromPrevious(waypoint_idx));
+    }
+
+    // When starting a new batch, set the last Ruckig output equal to the new, starting robot state
+    bool first_point_previously_smoothed = false;
+    if (output_trajectory.getWayPointCount() > 0)
+    {
+      sub_trajectory.addPrefixWayPoint(output_trajectory.getLastWayPoint(), 0);
+      first_point_previously_smoothed = true;
+    }
+
+    if (!runRuckig(sub_trajectory, ruckig_input))
+    {
+      return std::nullopt;
+    }
+
+    // Skip appending the first waypoint in sub_trajectory if it was smoothed in
+    // the previous iteration
+    size_t first_new_waypoint = first_point_previously_smoothed ? 1 : 0;
+
+    // Add smoothed waypoints to the output
+    for (size_t waypoint_idx = first_new_waypoint; waypoint_idx < sub_trajectory.getWayPointCount(); ++waypoint_idx)
+    {
+      output_trajectory.addSuffixWayPoint(sub_trajectory.getWayPoint(waypoint_idx),
+                                          sub_trajectory.getWayPointDurationFromPrevious(waypoint_idx));
+    }
+
+    batch_start_idx += batch_size;
+    batch_end_idx += batch_size;
+  }
+
+  return std::make_optional<robot_trajectory::RobotTrajectory>(output_trajectory, true /* deep copy */);
+}
+
+bool RuckigSmoothing::applySmoothing(robot_trajectory::RobotTrajectory& trajectory,
+                                     const std::vector<moveit_msgs::msg::JointLimits>& joint_limits,
+                                     const double max_velocity_scaling_factor,
+                                     const double max_acceleration_scaling_factor)
+{
+  std::unordered_map<std::string, double> velocity_limits;
+  std::unordered_map<std::string, double> acceleration_limits;
+  std::unordered_map<std::string, double> jerk_limits;
+  for (const auto& limit : joint_limits)
+  {
+    // If custom limits are not defined here, they will be supplied from getRobotModelBounds() later
+    if (limit.has_velocity_limits)
+    {
+      velocity_limits[limit.joint_name] = limit.max_velocity;
+    }
+    if (limit.has_acceleration_limits)
+    {
+      acceleration_limits[limit.joint_name] = limit.max_acceleration;
+    }
+    if (limit.has_jerk_limits)
+    {
+      jerk_limits[limit.joint_name] = limit.max_jerk;
+    }
+  }
+  return applySmoothing(trajectory, velocity_limits, acceleration_limits, jerk_limits, max_velocity_scaling_factor,
+                        max_acceleration_scaling_factor);
 }
 
 bool RuckigSmoothing::validateGroup(const robot_trajectory::RobotTrajectory& trajectory)
@@ -214,15 +303,12 @@ bool RuckigSmoothing::runRuckig(robot_trajectory::RobotTrajectory& trajectory,
   moveit::core::JointModelGroup const* const group = trajectory.getGroup();
   const size_t num_dof = group->getVariableCount();
   ruckig::OutputParameter<ruckig::DynamicDOFs> ruckig_output{ num_dof };
-  const std::vector<int>& move_group_idx = group->getVariableIndexList();
 
   // This lib does not work properly when angles wrap, so we need to unwind the path first
   trajectory.unwind();
 
   // Initialize the smoother
-  double timestep = trajectory.getAverageSegmentDuration();
-  std::unique_ptr<ruckig::Ruckig<ruckig::DynamicDOFs>> ruckig_ptr;
-  ruckig_ptr = std::make_unique<ruckig::Ruckig<ruckig::DynamicDOFs>>(num_dof, timestep);
+  ruckig::Ruckig<ruckig::DynamicDOFs> ruckig(num_dof, trajectory.getAverageSegmentDuration());
   initializeRuckigState(*trajectory.getFirstWayPointPtr(), group, ruckig_input, ruckig_output);
 
   // Cache the trajectory in case we need to reset it
@@ -241,56 +327,82 @@ bool RuckigSmoothing::runRuckig(robot_trajectory::RobotTrajectory& trajectory,
       getNextRuckigInput(trajectory.getWayPointPtr(waypoint_idx), next_waypoint, group, ruckig_input);
 
       // Run Ruckig
-      ruckig_result = ruckig_ptr->update(ruckig_input, ruckig_output);
+      ruckig_result = ruckig.update(ruckig_input, ruckig_output);
 
-      if ((waypoint_idx == num_waypoints - 2) && ruckig_result == ruckig::Result::Finished)
+      // The difference between Result::Working and Result::Finished is that Finished can be reached in one
+      // Ruckig timestep (constructor parameter). Both are acceptable for trajectories.
+      // (The difference is only relevant for streaming mode.)
+
+      // If successful and at the last trajectory segment
+      if ((waypoint_idx == num_waypoints - 2) &&
+          (ruckig_result == ruckig::Result::Working || ruckig_result == ruckig::Result::Finished))
       {
+        trajectory.setWayPointDurationFromPrevious(waypoint_idx + 1, ruckig_output.trajectory.get_duration());
         smoothing_complete = true;
         break;
       }
 
+      // TODO(andyz): why doesn't this work?
+      // // If successful, on to the next waypoint
+      // if (ruckig_result == ruckig::Result::Working || ruckig_result == ruckig::Result::Finished)
+      // {
+      //   trajectory.setWayPointDurationFromPrevious(waypoint_idx + 1, ruckig_output.trajectory.get_duration());
+      //   continue;
+      // }
+
       // Extend the trajectory duration if Ruckig could not reach the waypoint successfully
-      if (ruckig_result != ruckig::Result::Finished)
+      if (ruckig_result != ruckig::Result::Working && ruckig_result != ruckig::Result::Finished)
       {
         duration_extension_factor *= DURATION_EXTENSION_FRACTION;
         // Reset the trajectory
         trajectory = robot_trajectory::RobotTrajectory(original_trajectory, true /* deep copy */);
-        for (size_t time_stretch_idx = 1; time_stretch_idx < num_waypoints; ++time_stretch_idx)
-        {
-          trajectory.setWayPointDurationFromPrevious(
-              time_stretch_idx,
-              duration_extension_factor * original_trajectory.getWayPointDurationFromPrevious(time_stretch_idx));
-          // re-calculate waypoint velocity and acceleration
-          auto target_state = trajectory.getWayPointPtr(time_stretch_idx);
-          const auto prev_state = trajectory.getWayPointPtr(time_stretch_idx - 1);
-          timestep = trajectory.getAverageSegmentDuration();
-          for (size_t joint = 0; joint < num_dof; ++joint)
-          {
-            target_state->setVariableVelocity(move_group_idx.at(joint),
-                                              (1 / duration_extension_factor) *
-                                                  target_state->getVariableVelocity(move_group_idx.at(joint)));
 
-            double prev_velocity = prev_state->getVariableVelocity(move_group_idx.at(joint));
-            double curr_velocity = target_state->getVariableVelocity(move_group_idx.at(joint));
-            target_state->setVariableAcceleration(move_group_idx.at(joint), (curr_velocity - prev_velocity) / timestep);
-          }
-          target_state->update();
-        }
-        ruckig_ptr = std::make_unique<ruckig::Ruckig<ruckig::DynamicDOFs>>(num_dof, timestep);
+        const std::vector<int>& move_group_idx = group->getVariableIndexList();
+        extendTrajectoryDuration(duration_extension_factor, num_waypoints, num_dof, move_group_idx, trajectory,
+                                 original_trajectory);
+
         initializeRuckigState(*trajectory.getFirstWayPointPtr(), group, ruckig_input, ruckig_output);
-        // Begin the while() loop again
+        // Begin the for() loop again
         break;
       }
     }
   }
 
-  if (ruckig_result != ruckig::Result::Finished)
+  if (ruckig_result != ruckig::Result::Working && ruckig_result != ruckig::Result::Finished)
   {
     RCLCPP_ERROR_STREAM(LOGGER, "Ruckig trajectory smoothing failed. Ruckig error: " << ruckig_result);
     return false;
   }
 
   return true;
+}
+
+void RuckigSmoothing::extendTrajectoryDuration(const double duration_extension_factor, size_t num_waypoints,
+                                               const size_t num_dof, const std::vector<int>& move_group_idx,
+                                               const robot_trajectory::RobotTrajectory& original_trajectory,
+                                               robot_trajectory::RobotTrajectory& trajectory)
+{
+  for (size_t time_stretch_idx = 1; time_stretch_idx < num_waypoints; ++time_stretch_idx)
+  {
+    trajectory.setWayPointDurationFromPrevious(
+        time_stretch_idx,
+        duration_extension_factor * original_trajectory.getWayPointDurationFromPrevious(time_stretch_idx));
+    // re-calculate waypoint velocity and acceleration
+    auto target_state = trajectory.getWayPointPtr(time_stretch_idx);
+    const auto prev_state = trajectory.getWayPointPtr(time_stretch_idx - 1);
+    double timestep = trajectory.getAverageSegmentDuration();
+    for (size_t joint = 0; joint < num_dof; ++joint)
+    {
+      target_state->setVariableVelocity(move_group_idx.at(joint),
+                                        (1 / duration_extension_factor) *
+                                            target_state->getVariableVelocity(move_group_idx.at(joint)));
+
+      double prev_velocity = prev_state->getVariableVelocity(move_group_idx.at(joint));
+      double curr_velocity = target_state->getVariableVelocity(move_group_idx.at(joint));
+      target_state->setVariableAcceleration(move_group_idx.at(joint), (curr_velocity - prev_velocity) / timestep);
+    }
+    target_state->update();
+  }
 }
 
 void RuckigSmoothing::initializeRuckigState(const moveit::core::RobotState& first_waypoint,
@@ -325,8 +437,8 @@ void RuckigSmoothing::initializeRuckigState(const moveit::core::RobotState& firs
   ruckig_output.new_acceleration = ruckig_input.current_acceleration;
 }
 
-void RuckigSmoothing::getNextRuckigInput(const moveit::core::RobotStatePtr& current_waypoint,
-                                         const moveit::core::RobotStatePtr& next_waypoint,
+void RuckigSmoothing::getNextRuckigInput(const moveit::core::RobotStateConstPtr& current_waypoint,
+                                         const moveit::core::RobotStateConstPtr& next_waypoint,
                                          const moveit::core::JointModelGroup* joint_group,
                                          ruckig::InputParameter<ruckig::DynamicDOFs>& ruckig_input)
 {

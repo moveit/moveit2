@@ -14,4 +14,4 @@ ament_target_dependencies(moveit_plan_execution
   pluginlib
 )
 
-install(DIRECTORY include/ DESTINATION include)
+install(DIRECTORY include/ DESTINATION include/moveit_ros_planning)

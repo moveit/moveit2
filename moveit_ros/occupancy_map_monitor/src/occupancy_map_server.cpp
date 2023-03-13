@@ -66,11 +66,19 @@ static void publishOctomap(const rclcpp::Publisher<octomap_msgs::msg::Octomap>::
   try
   {
     if (!octomap_msgs::binaryMapToMsgData(*server.getOcTreePtr(), map.data))
+    {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wold-style-cast"
       RCLCPP_ERROR_THROTTLE(LOGGER, steady_clock, 1000, "Could not generate OctoMap message");
+#pragma GCC diagnostic pop
+    }
   }
   catch (...)
   {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wold-style-cast"
     RCLCPP_ERROR_THROTTLE(LOGGER, steady_clock, 1000, "Exception thrown while generating OctoMap message");
+#pragma GCC diagnostic pop
   }
   server.getOcTreePtr()->unlockRead();
 

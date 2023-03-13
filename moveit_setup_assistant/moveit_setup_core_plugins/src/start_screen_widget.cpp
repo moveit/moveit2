@@ -178,7 +178,7 @@ void StartScreenWidget::onInit()
   layout->addLayout(load_files_layout);
 
   setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
-  this->setLayout(layout);
+  setLayout(layout);
 
   // Debug mode: auto load the configuration file by clicking button after a timeout
   if (debug_)

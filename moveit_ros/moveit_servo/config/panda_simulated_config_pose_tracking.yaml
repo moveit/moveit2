@@ -40,9 +40,6 @@ robot_link_command_frame:  panda_hand  # commands must be given in the frame of 
 
 ## Stopping behaviour
 incoming_command_timeout:  0.1  # Stop servoing if X seconds elapse without a new command
-# If 0, republish commands forever even if the robot is stationary. Otherwise, specify num. to publish.
-# Important because ROS may drop some messages and we need the robot to halt reliably.
-num_outgoing_halt_msgs_to_publish: 4
 
 ## Configure handling of singularities and joint limits
 lower_singularity_threshold:  17.0  # Start decelerating when the condition number hits this (close to singularity)

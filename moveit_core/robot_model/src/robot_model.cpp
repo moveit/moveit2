@@ -379,7 +379,7 @@ void RobotModel::buildGroupStates(const srdf::Model& srdf_model)
         }
         RCLCPP_WARN_STREAM(LOGGER, "Group state '" << group_state.name_
                                                    << "' doesn't specify all group joints in group '"
-                                                   << group_state.group_ << "'. " << missing.str() << " "
+                                                   << group_state.group_ << "'. " << missing.str() << ' '
                                                    << (remaining_joints.size() > 1 ? "are" : "is") << " missing.");
       }
       if (!state.empty())
@@ -1059,24 +1059,24 @@ JointModel* RobotModel::constructJointModel(const urdf::Link* child_link, const 
           {
             RCLCPP_WARN_STREAM(LOGGER, "Extra characters after property " << property.property_name_ << " for joint "
                                                                           << property.joint_name_ << " as double: '"
-                                                                          << property.value_.substr(sz) << "'");
+                                                                          << property.value_.substr(sz) << '\'');
           }
         }
         catch (const std::invalid_argument& e)
         {
           RCLCPP_ERROR_STREAM(LOGGER, "Unable to parse property " << property.property_name_ << " for joint "
                                                                   << property.joint_name_ << " as double: '"
-                                                                  << property.value_ << "'");
+                                                                  << property.value_ << '\'');
           continue;
         }
 
         if (new_joint_model->getType() == JointModel::JointType::PLANAR)
         {
-          ((PlanarJointModel*)new_joint_model)->setAngularDistanceWeight(angular_distance_weight);
+          static_cast<PlanarJointModel*>(new_joint_model)->setAngularDistanceWeight(angular_distance_weight);
         }
         else if (new_joint_model->getType() == JointModel::JointType::FLOATING)
         {
-          ((FloatingJointModel*)new_joint_model)->setAngularDistanceWeight(angular_distance_weight);
+          static_cast<FloatingJointModel*>(new_joint_model)->setAngularDistanceWeight(angular_distance_weight);
         }
         else
         {
@@ -1106,12 +1106,12 @@ JointModel* RobotModel::constructJointModel(const urdf::Link* child_link, const 
         {
           RCLCPP_ERROR_STREAM(LOGGER, "Unknown value for property " << property.property_name_ << " ("
                                                                     << property.joint_name_ << "): '" << property.value_
-                                                                    << "'");
+                                                                    << '\'');
           RCLCPP_ERROR(LOGGER, "Valid values are 'holonomic' and 'diff_drive'");
           continue;
         }
 
-        ((PlanarJointModel*)new_joint_model)->setMotionModel(motion_model);
+        static_cast<PlanarJointModel*>(new_joint_model)->setMotionModel(motion_model);
       }
       else if (property.property_name_ == "min_translational_distance")
       {
@@ -1130,18 +1130,18 @@ JointModel* RobotModel::constructJointModel(const urdf::Link* child_link, const 
           {
             RCLCPP_WARN_STREAM(LOGGER, "Extra characters after property " << property.property_name_ << " for joint "
                                                                           << property.joint_name_ << " as double: '"
-                                                                          << property.value_.substr(sz) << "'");
+                                                                          << property.value_.substr(sz) << '\'');
           }
         }
         catch (const std::invalid_argument& e)
         {
           RCLCPP_ERROR_STREAM(LOGGER, "Unable to parse property " << property.property_name_ << " for joint "
                                                                   << property.joint_name_ << " as double: '"
-                                                                  << property.value_ << "'");
+                                                                  << property.value_ << '\'');
           continue;
         }
 
-        ((PlanarJointModel*)new_joint_model)->setMinTranslationalDistance(min_translational_distance);
+        static_cast<PlanarJointModel*>(new_joint_model)->setMinTranslationalDistance(min_translational_distance);
       }
       else
       {
@@ -1435,7 +1435,7 @@ size_t RobotModel::getVariableIndex(const std::string& variable) const
 {
   VariableIndexMap::const_iterator it = joint_variables_index_map_.find(variable);
   if (it == joint_variables_index_map_.end())
-    throw Exception("Variable '" + variable + "' is not known to model '" + model_name_ + "'");
+    throw Exception("Variable '" + variable + "' is not known to model '" + model_name_ + '\'');
   return it->second;
 }
 
@@ -1565,7 +1565,7 @@ void RobotModel::setKinematicsAllocators(const std::map<std::string, SolverAlloc
         std::stringstream ss;
         for (const JointModelGroup* sub : subs)
         {
-          ss << sub->getName() << " ";
+          ss << sub->getName() << ' ';
           solver_allocator_pair.second[sub] = allocators.find(sub->getName())->second;
         }
         RCLCPP_DEBUG(LOGGER, "Added sub-group IK allocators for group '%s': [ %s]", jmg->getName().c_str(),
@@ -1596,7 +1596,7 @@ void RobotModel::printModelInfo(std::ostream& out) const
     {
       out << "     * '" << it << "', index " << idx++ << " in full state";
       if (joint_model->getMimic())
-        out << ", mimic '" << joint_model->getMimic()->getName() << "'";
+        out << ", mimic '" << joint_model->getMimic()->getName() << '\'';
       if (joint_model->isPassive())
         out << ", passive";
       out << '\n';

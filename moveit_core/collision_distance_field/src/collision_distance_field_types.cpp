@@ -92,7 +92,7 @@ bool PosedDistanceField::getCollisionSphereGradients(const std::vector<Collision
     Eigen::Vector3d p = sphere_centers[i];
     Eigen::Vector3d grad(0, 0, 0);
     bool in_bounds;
-    double dist = this->getDistanceGradient(p.x(), p.y(), p.z(), grad.x(), grad.y(), grad.z(), in_bounds);
+    double dist = getDistanceGradient(p.x(), p.y(), p.z(), grad.x(), grad.y(), grad.z(), in_bounds);
     if (!in_bounds && grad.norm() > 0)
     {
       // out of bounds

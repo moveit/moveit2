@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.22)
-project(moveit_setup_framework)
+project(moveit_setup_framework LANGUAGES CXX)
 
 # Common cmake code applied to all moveit packages
 find_package(moveit_common REQUIRED)
@@ -44,7 +44,7 @@ add_library(${PROJECT_NAME}
 )
 target_include_directories(${PROJECT_NAME} PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-  $<INSTALL_INTERFACE:include>
+  $<INSTALL_INTERFACE:include/moveit_setup_framework>
 )
 ament_target_dependencies(${PROJECT_NAME}
   ament_index_cpp
@@ -66,7 +66,7 @@ if(BUILD_TESTING)
   ament_lint_auto_find_test_dependencies()
 endif()
 install(DIRECTORY include/
-        DESTINATION include
+        DESTINATION include/moveit_setup_framework
 )
 install(FILES moveit_setup_framework_plugins.xml
         DESTINATION share/${PROJECT_NAME}
@@ -80,7 +80,7 @@ install(TARGETS ${PROJECT_NAME}
         LIBRARY DESTINATION lib
         ARCHIVE DESTINATION lib
         RUNTIME DESTINATION bin
-        INCLUDES DESTINATION include
+        INCLUDES DESTINATION include/moveit_setup_framework
 )
 
 ament_export_dependencies(rclcpp)

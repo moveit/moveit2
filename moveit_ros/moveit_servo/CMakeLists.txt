@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.22)
-project(moveit_servo)
+project(moveit_servo LANGUAGES CXX)
 
 # C++ Libraries #################################################
 
@@ -33,7 +33,6 @@ moveit_package()
 set(THIS_PACKAGE_INCLUDE_DEPENDS
   control_msgs
   control_toolbox
-  controller_manager
   geometry_msgs
   moveit_core
   moveit_msgs
@@ -41,6 +40,7 @@ set(THIS_PACKAGE_INCLUDE_DEPENDS
   pluginlib
   rclcpp
   rclcpp_components
+  realtime_tools
   sensor_msgs
   std_msgs
   std_srvs
@@ -140,7 +140,7 @@ install(
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
   RUNTIME DESTINATION bin
-  INCLUDES DESTINATION include
+  INCLUDES DESTINATION include/moveit_servo
 )
 
 # Install Binaries
@@ -156,7 +156,7 @@ install(
 )
 
 # Install include, launch, config directories
-install(DIRECTORY include/ DESTINATION include)
+install(DIRECTORY include/ DESTINATION include/moveit_servo)
 install(DIRECTORY launch DESTINATION share/${PROJECT_NAME})
 install(DIRECTORY config DESTINATION share/${PROJECT_NAME})
 

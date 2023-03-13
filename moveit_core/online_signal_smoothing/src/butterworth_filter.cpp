@@ -114,8 +114,11 @@ bool ButterworthFilterPlugin::doSmoothing(std::vector<double>& position_vector)
 {
   if (position_vector.size() != position_filters_.size())
   {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wold-style-cast"
     RCLCPP_ERROR_THROTTLE(node_->get_logger(), *node_->get_clock(), 1000,
                           "Position vector to be smoothed does not have the right length.");
+#pragma GCC diagnostic pop
     return false;
   }
   for (size_t i = 0; i < position_vector.size(); ++i)
@@ -130,8 +133,11 @@ bool ButterworthFilterPlugin::reset(const std::vector<double>& joint_positions)
 {
   if (joint_positions.size() != position_filters_.size())
   {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wold-style-cast"
     RCLCPP_ERROR_THROTTLE(node_->get_logger(), *node_->get_clock(), 1000,
                           "Position vector to be reset does not have the right length.");
+#pragma GCC diagnostic pop
     return false;
   }
   for (size_t joint_idx = 0; joint_idx < joint_positions.size(); ++joint_idx)

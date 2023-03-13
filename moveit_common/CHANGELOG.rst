@@ -2,6 +2,16 @@
 Changelog for package moveit_common
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.7.0 (2023-01-29)
+------------------
+* Fix BSD license in package.xml (`#1796 <https://github.com/ros-planning/moveit2/issues/1796>`_)
+  * fix BSD license in package.xml
+  * this must also be spdx compliant
+* Enable `-Wold-style-cast` (`#1770 <https://github.com/ros-planning/moveit2/issues/1770>`_)
+* Add `-Wunused-parameter` (`#1756 <https://github.com/ros-planning/moveit2/issues/1756>`_)
+* Add `-Wunused-function` (`#1754 <https://github.com/ros-planning/moveit2/issues/1754>`_)
+* Contributors: Chris Thrasher, Christian Henkel
+
 2.6.0 (2022-11-10)
 ------------------
 * Improve CMake usage (`#1550 <https://github.com/ros-planning/moveit2/issues/1550>`_)

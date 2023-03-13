@@ -71,7 +71,7 @@ void checkFCLCapabilities(const DistanceRequest& req)
                           FCL_MAJOR_VERSION, FCL_MINOR_VERSION, FCL_PATCH_VERSION);
   }
 #else
-  (void)(req);  // silent -Wunused-parameter
+  static_cast<void>(req);  // silent -Wunused-parameter
 #endif
 }
 }  // namespace
