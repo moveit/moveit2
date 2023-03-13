@@ -49,7 +49,7 @@ constexpr double COLLISION_THRESHOLD = 0.01;  // Stop if closer than this [meter
 namespace moveit::hybrid_planning
 {
 bool ForwardTrajectory::initialize(const rclcpp::Node::SharedPtr& node,
-                                   const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor,
+                                   const planning_scene_monitor::PlanningSceneMonitorConstPtr& planning_scene_monitor,
                                    const std::string& /* unused */)
 {
   // Load parameter & initialize member variables
@@ -65,12 +65,7 @@ bool ForwardTrajectory::initialize(const rclcpp::Node::SharedPtr& node,
   path_invalidation_event_send_ = false;
   num_iterations_stuck_ = 0;
 
-  planning_scene_monitor_ = std::make_shared<planning_scene_monitor::PlanningSceneMonitor>(node, "robot_description");
-  planning_scene_monitor_->startSceneMonitor("/monitored_planning_scene");
-  planning_scene_monitor_->startWorldGeometryMonitor("/collision_object");
-  planning_scene_monitor_->startStateMonitor("/joint_states", "/attached_collision_object");
-  planning_scene_monitor_->monitorDiffs(true);
-  planning_scene_monitor_->stopPublishingPlanningScene();
+  planning_scene_monitor_ = planning_scene_monitor;
 
   collision_request_.distance = true;   // enable distance-based collision checking
   collision_request_.contacts = false;  // Record the names of collision pairs
