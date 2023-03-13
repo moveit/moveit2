@@ -41,7 +41,7 @@
 
 namespace planning_request_adapter
 {
-rclcpp::Logger LOGGER = rclcpp::get_logger("moveit").get_child("planning_request_adapter");
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.planning_request_adapter");
 
 namespace
 {
