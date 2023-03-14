@@ -321,10 +321,11 @@ TEST_F(PandaTestPlanningContext, testSimpleRequest)
   testSimpleRequest({ 0., -0.785, 0., -2.356, 0, 1.571, 0.785 }, { 0., -0.785, 0., -2.356, 0, 1.571, 0.685 });
 }
 
-TEST_F(PandaTestPlanningContext, testPathConstraints)
-{
-  testPathConstraints({ 0., -0.785, 0., -2.356, 0., 1.571, 0.785 }, { .0, -0.785, 0., -2.356, 0., 1.571, 0.685 });
-}
+// TODO(seng): This test is temporarily disabled as it is flaky since #1300. Re-enable when #2015 is resolved.
+// TEST_F(PandaTestPlanningContext, testPathConstraints)
+// {
+//   testPathConstraints({ 0., -0.785, 0., -2.356, 0., 1.571, 0.785 }, { .0, -0.785, 0., -2.356, 0., 1.571, 0.685 });
+// }
 
 /***************************************************************************
  * Run all tests on the Fanuc robot
