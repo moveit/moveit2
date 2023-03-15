@@ -13,4 +13,4 @@ install(
   ARCHIVE DESTINATION lib
   RUNTIME DESTINATION bin)
 
-install(DIRECTORY include/ DESTINATION include/moveit_py_utils)
+install(DIRECTORY include/ DESTINATION include/moveit_py)
