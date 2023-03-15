@@ -214,57 +214,57 @@ protected:
 TEST_F(TrajectoryGeneratorCIRCTest, TestExceptionErrorCodeMapping)
 {
   {
-    std::shared_ptr<CircleNoPlane> cnp_ex{ new CircleNoPlane("") };
+    auto cnp_ex = std::make_shared<CircleNoPlane>("");
     EXPECT_EQ(cnp_ex->getErrorCode(), moveit_msgs::msg::MoveItErrorCodes::INVALID_MOTION_PLAN);
   }
 
   {
-    std::shared_ptr<CircleToSmall> cts_ex{ new CircleToSmall("") };
+    auto cts_ex = std::make_shared<CircleToSmall>("");
     EXPECT_EQ(cts_ex->getErrorCode(), moveit_msgs::msg::MoveItErrorCodes::INVALID_MOTION_PLAN);
   }
 
   {
-    std::shared_ptr<CenterPointDifferentRadius> cpdr_ex{ new CenterPointDifferentRadius("") };
+    auto cpdr_ex = std::make_shared<CenterPointDifferentRadius>("");
     EXPECT_EQ(cpdr_ex->getErrorCode(), moveit_msgs::msg::MoveItErrorCodes::INVALID_MOTION_PLAN);
   }
 
   {
-    std::shared_ptr<CircTrajectoryConversionFailure> ctcf_ex{ new CircTrajectoryConversionFailure("") };
+    auto ctcf_ex = std::make_shared<CircTrajectoryConversionFailure>("");
     EXPECT_EQ(ctcf_ex->getErrorCode(), moveit_msgs::msg::MoveItErrorCodes::INVALID_MOTION_PLAN);
   }
 
   {
-    std::shared_ptr<UnknownPathConstraintName> upcn_ex{ new UnknownPathConstraintName("") };
+    auto upcn_ex = std::make_shared<UnknownPathConstraintName>("");
     EXPECT_EQ(upcn_ex->getErrorCode(), moveit_msgs::msg::MoveItErrorCodes::INVALID_MOTION_PLAN);
   }
 
   {
-    std::shared_ptr<NoPositionConstraints> npc_ex{ new NoPositionConstraints("") };
+    auto npc_ex = std::make_shared<NoPositionConstraints>("");
     EXPECT_EQ(npc_ex->getErrorCode(), moveit_msgs::msg::MoveItErrorCodes::INVALID_MOTION_PLAN);
   }
 
   {
-    std::shared_ptr<NoPrimitivePose> npp_ex{ new NoPrimitivePose("") };
+    auto npp_ex = std::make_shared<NoPrimitivePose>("");
     EXPECT_EQ(npp_ex->getErrorCode(), moveit_msgs::msg::MoveItErrorCodes::INVALID_MOTION_PLAN);
   }
 
   {
-    std::shared_ptr<UnknownLinkNameOfAuxiliaryPoint> ulnoap_ex{ new UnknownLinkNameOfAuxiliaryPoint("") };
+    auto ulnoap_ex = std::make_shared<UnknownLinkNameOfAuxiliaryPoint>("");
     EXPECT_EQ(ulnoap_ex->getErrorCode(), moveit_msgs::msg::MoveItErrorCodes::INVALID_LINK_NAME);
   }
 
   {
-    std::shared_ptr<NumberOfConstraintsMismatch> nocm_ex{ new NumberOfConstraintsMismatch("") };
+    auto nocm_ex = std::make_shared<NumberOfConstraintsMismatch>("");
     EXPECT_EQ(nocm_ex->getErrorCode(), moveit_msgs::msg::MoveItErrorCodes::INVALID_GOAL_CONSTRAINTS);
   }
 
   {
-    std::shared_ptr<CircJointMissingInStartState> cjmiss_ex{ new CircJointMissingInStartState("") };
+    auto cjmiss_ex = std::make_shared<CircJointMissingInStartState>("");
     EXPECT_EQ(cjmiss_ex->getErrorCode(), moveit_msgs::msg::MoveItErrorCodes::INVALID_ROBOT_STATE);
   }
 
   {
-    std::shared_ptr<CircInverseForGoalIncalculable> cifgi_ex{ new CircInverseForGoalIncalculable("") };
+    auto cifgi_ex = std::make_shared<CircInverseForGoalIncalculable>("");
     EXPECT_EQ(cifgi_ex->getErrorCode(), moveit_msgs::msg::MoveItErrorCodes::NO_IK_SOLUTION);
   }
 }

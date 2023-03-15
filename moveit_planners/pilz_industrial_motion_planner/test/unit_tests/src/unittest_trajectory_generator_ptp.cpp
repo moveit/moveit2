@@ -158,12 +158,12 @@ protected:
 TEST_F(TrajectoryGeneratorPTPTest, TestExceptionErrorCodeMapping)
 {
   {
-    std::shared_ptr<PtpVelocityProfileSyncFailed> pvpsf_ex{ new PtpVelocityProfileSyncFailed("") };
+    auto pvpsf_ex = std::make_shared<PtpVelocityProfileSyncFailed>("");
     EXPECT_EQ(pvpsf_ex->getErrorCode(), moveit_msgs::msg::MoveItErrorCodes::FAILURE);
   }
 
   {
-    std::shared_ptr<PtpNoIkSolutionForGoalPose> pnisfgp_ex{ new PtpNoIkSolutionForGoalPose("") };
+    auto pnisfgp_ex = std::make_shared<PtpNoIkSolutionForGoalPose>("");
     EXPECT_EQ(pnisfgp_ex->getErrorCode(), moveit_msgs::msg::MoveItErrorCodes::NO_IK_SOLUTION);
   }
 }
@@ -294,8 +294,8 @@ TEST_F(TrajectoryGeneratorPTPTest, testInsufficientLimit)
 
   EXPECT_THROW(
       {
-        std::unique_ptr<TrajectoryGeneratorPTP> ptp_error(
-            new TrajectoryGeneratorPTP(robot_model_, insufficient_planner_limits, planning_group_));
+        auto ptp_error =
+            std::make_unique<TrajectoryGeneratorPTP>(robot_model_, insufficient_planner_limits, planning_group_);
       },
       TrajectoryGeneratorInvalidLimitsException);
 
@@ -333,8 +333,8 @@ TEST_F(TrajectoryGeneratorPTPTest, testInsufficientLimit)
   sufficient_planner_limits.setJointLimits(sufficient_joint_limits);
 
   EXPECT_NO_THROW({
-    std::unique_ptr<TrajectoryGeneratorPTP> ptp_no_error(
-        new TrajectoryGeneratorPTP(robot_model_, sufficient_planner_limits, planning_group_));
+    auto ptp_no_error =
+        std::make_unique<TrajectoryGeneratorPTP>(robot_model_, sufficient_planner_limits, planning_group_);
   });
 }
 
