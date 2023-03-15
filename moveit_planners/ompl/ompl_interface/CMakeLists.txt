@@ -63,7 +63,7 @@ target_link_libraries(moveit_ompl_planner_plugin moveit_ompl_interface)
 install(TARGETS moveit_generate_state_database
   RUNTIME DESTINATION lib/${PROJECT_NAME}
 )
-install(DIRECTORY include/ DESTINATION include)
+install(DIRECTORY include/ DESTINATION include/moveit_planners)
 
 if(BUILD_TESTING)
   find_package(ament_cmake_gtest REQUIRED)
