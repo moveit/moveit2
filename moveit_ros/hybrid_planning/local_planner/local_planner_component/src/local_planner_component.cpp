@@ -266,8 +266,6 @@ void LocalPlannerComponent::executeIteration()
     // If the planner received an action request and a global solution it starts to plan locally
     case LocalPlannerState::LOCAL_PLANNING_ACTIVE:
     {
-      planning_scene_monitor_->updateSceneWithCurrentState();
-
       // Read current robot state
       const moveit::core::RobotState current_robot_state = [this] {
         planning_scene_monitor::LockedPlanningSceneRO ls(planning_scene_monitor_);
