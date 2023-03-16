@@ -183,22 +183,22 @@ protected:
 TEST_F(TrajectoryGeneratorLINTest, TestExceptionErrorCodeMapping)
 {
   {
-    std::shared_ptr<LinTrajectoryConversionFailure> ltcf_ex{ new LinTrajectoryConversionFailure("") };
+    auto ltcf_ex = std::make_shared<LinTrajectoryConversionFailure>("");
     EXPECT_EQ(ltcf_ex->getErrorCode(), moveit_msgs::msg::MoveItErrorCodes::FAILURE);
   }
 
   {
-    std::shared_ptr<JointNumberMismatch> jnm_ex{ new JointNumberMismatch("") };
+    auto jnm_ex = std::make_shared<JointNumberMismatch>("");
     EXPECT_EQ(jnm_ex->getErrorCode(), moveit_msgs::msg::MoveItErrorCodes::INVALID_GOAL_CONSTRAINTS);
   }
 
   {
-    std::shared_ptr<LinJointMissingInStartState> ljmiss_ex{ new LinJointMissingInStartState("") };
+    auto ljmiss_ex = std::make_shared<LinJointMissingInStartState>("");
     EXPECT_EQ(ljmiss_ex->getErrorCode(), moveit_msgs::msg::MoveItErrorCodes::INVALID_ROBOT_STATE);
   }
 
   {
-    std::shared_ptr<LinInverseForGoalIncalculable> lifgi_ex{ new LinInverseForGoalIncalculable("") };
+    auto lifgi_ex = std::make_shared<LinInverseForGoalIncalculable>("");
     EXPECT_EQ(lifgi_ex->getErrorCode(), moveit_msgs::msg::MoveItErrorCodes::NO_IK_SOLUTION);
   }
 }
