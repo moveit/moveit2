@@ -68,7 +68,7 @@ add_library(${SERVO_PARAM_LIB_NAME} SHARED
   src/servo_parameters.cpp
   src/parameter_descriptor_builder.cpp
 )
-set_target_properties(${SERVO_PARAM_LIB_NAME} PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
+set_target_properties(${SERVO_PARAM_LIB_NAME} PROPERTIES VERSION "${moveit_servo_VERSION}")
 ament_target_dependencies(${SERVO_PARAM_LIB_NAME} ${THIS_PACKAGE_INCLUDE_DEPENDS})
 
 # This library provides a C++ interface for sending realtime twist or joint commands to a robot
@@ -79,7 +79,7 @@ add_library(${SERVO_LIB_NAME} SHARED
   src/servo_calcs.cpp
   src/utilities.cpp
 )
-set_target_properties(${SERVO_LIB_NAME} PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
+set_target_properties(${SERVO_LIB_NAME} PROPERTIES VERSION "${moveit_servo_VERSION}")
 ament_target_dependencies(${SERVO_LIB_NAME} ${THIS_PACKAGE_INCLUDE_DEPENDS})
 target_link_libraries(${SERVO_LIB_NAME} ${SERVO_PARAM_LIB_NAME})
 
@@ -136,7 +136,7 @@ install(
     ${POSE_TRACKING}
     ${SERVO_COMPONENT_NODE}
     ${SERVO_CONTROLLER_INPUT}
-  EXPORT ${PROJECT_NAME}Targets
+  EXPORT moveit_servoTargets
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
   RUNTIME DESTINATION bin
@@ -152,15 +152,15 @@ install(
     ${FAKE_SERVO_CMDS_NAME}
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
-  RUNTIME DESTINATION lib/${PROJECT_NAME}
+  RUNTIME DESTINATION lib/moveit_servo
 )
 
 # Install include, launch, config directories
 install(DIRECTORY include/ DESTINATION include/moveit_servo)
-install(DIRECTORY launch DESTINATION share/${PROJECT_NAME})
-install(DIRECTORY config DESTINATION share/${PROJECT_NAME})
+install(DIRECTORY launch DESTINATION share/moveit_servo)
+install(DIRECTORY config DESTINATION share/moveit_servo)
 
-ament_export_targets(${PROJECT_NAME}Targets HAS_LIBRARY_TARGET)
+ament_export_targets(moveit_servoTargets HAS_LIBRARY_TARGET)
 ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS})
 
 #############
