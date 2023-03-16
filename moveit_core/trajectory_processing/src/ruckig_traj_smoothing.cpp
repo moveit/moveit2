@@ -402,7 +402,6 @@ void RuckigSmoothing::extendTrajectoryDuration(const double duration_extension_f
     double curr_velocity = target_state->getVariableVelocity(move_group_idx.at(joint));
     target_state->setVariableAcceleration(move_group_idx.at(joint), (curr_velocity - prev_velocity) / timestep);
   }
-  target_state->update();
 }
 
 void RuckigSmoothing::initializeRuckigState(const moveit::core::RobotState& first_waypoint,
