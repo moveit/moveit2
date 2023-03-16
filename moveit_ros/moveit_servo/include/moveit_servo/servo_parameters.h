@@ -54,7 +54,7 @@ struct ServoParameters
   using SharedConstPtr = std::shared_ptr<const ServoParameters>;
 
   // Parameter namespace
-  const std::string ns;
+  std::string ns;
 
   // ROS Parameters
   // Note that all of these are effectively const because the only way to create one of these
