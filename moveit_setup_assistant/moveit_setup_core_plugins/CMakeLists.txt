@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.22)
 project(moveit_setup_core_plugins LANGUAGES CXX)
 
 # Common cmake code applied to all moveit packages
-find_package(moveit_setup_framework REQUIRED)
+find_package(moveit_common REQUIRED)
 moveit_package()
 
 find_package(ament_cmake REQUIRED)
@@ -25,7 +25,7 @@ qt5_wrap_cpp(MOC_FILES
     include/moveit_setup_core_plugins/author_information_widget.hpp
 )
 
-add_library(moveit_setup_framework
+add_library(${PROJECT_NAME}
     src/start_screen.cpp
     src/start_screen_widget.cpp
     src/configuration_files.cpp
@@ -34,11 +34,11 @@ add_library(moveit_setup_framework
     src/author_information_widget.cpp
     ${MOC_FILES}
 )
-target_include_directories(moveit_setup_framework PUBLIC
+target_include_directories(${PROJECT_NAME} PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include/moveit_setup_core_plugins>
 )
-ament_target_dependencies(moveit_setup_framework
+ament_target_dependencies(${PROJECT_NAME}
   ament_index_cpp
   moveit_ros_visualization
   moveit_setup_framework
@@ -53,15 +53,15 @@ if(BUILD_TESTING)
   ament_lint_auto_find_test_dependencies()
 endif()
 
-install(TARGETS moveit_setup_framework
-        EXPORT moveit_setup_frameworkTargets
+install(TARGETS moveit_setup_core_plugins
+        EXPORT moveit_setup_core_pluginsTargets
         ARCHIVE DESTINATION lib
         LIBRARY DESTINATION lib
         RUNTIME DESTINATION bin
         INCLUDES DESTINATION include/moveit_setup_core_plugins
 )
 install(FILES moveit_setup_framework_plugins.xml
-        DESTINATION share/moveit_setup_framework
+        DESTINATION share/${PROJECT_NAME}
 )
 install(DIRECTORY include/
         DESTINATION include/moveit_setup_core_plugins
