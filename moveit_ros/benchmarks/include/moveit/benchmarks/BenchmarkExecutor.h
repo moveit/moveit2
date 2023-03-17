@@ -45,7 +45,7 @@
 #include <moveit/warehouse/state_storage.h>
 #include <moveit/warehouse/constraints_storage.h>
 #include <moveit/warehouse/trajectory_constraints_storage.h>
-#include <moveit/planning_pipeline/planning_pipeline.h>
+#include <moveit/moveit_cpp/moveit_cpp.h>
 #include <warehouse_ros/database_loader.h>
 #include <pluginlib/class_loader.hpp>
 
@@ -98,7 +98,7 @@ public:
 
   // Initialize the benchmark executor by loading planning pipelines from the
   // given set of classes
-  void initialize(const std::vector<std::string>& plugin_classes);
+  [[nodiscard]] bool initialize(const std::vector<std::string>& plugin_classes);
 
   void addPreRunEvent(const PreRunEventFunction& func);
   void addPostRunEvent(const PostRunEventFunction& func);
@@ -109,7 +109,7 @@ public:
 
   virtual void clear();
 
-  virtual bool runBenchmarks(const BenchmarkOptions& opts);
+  virtual bool runBenchmarks(const BenchmarkOptions& options);
 
 protected:
   struct BenchmarkRequest
@@ -136,19 +136,20 @@ protected:
     std::string name;
   };
 
-  virtual bool initializeBenchmarks(const BenchmarkOptions& opts, moveit_msgs::msg::PlanningScene& scene_msg,
+  virtual bool initializeBenchmarks(const BenchmarkOptions& options, moveit_msgs::msg::PlanningScene& scene_msg,
                                     std::vector<BenchmarkRequest>& queries);
 
   /// Initialize benchmark query data from start states and constraints
-  virtual bool loadBenchmarkQueryData(const BenchmarkOptions& opts, moveit_msgs::msg::PlanningScene& scene_msg,
+  virtual bool loadBenchmarkQueryData(const BenchmarkOptions& options, moveit_msgs::msg::PlanningScene& scene_msg,
                                       std::vector<StartState>& start_states,
                                       std::vector<PathConstraints>& path_constraints,
                                       std::vector<PathConstraints>& goal_constraints,
                                       std::vector<TrajectoryConstraints>& traj_constraints,
                                       std::vector<BenchmarkRequest>& queries);
 
-  virtual void collectMetrics(PlannerRunData& metrics, const planning_interface::MotionPlanDetailedResponse& mp_res,
-                              bool solved, double total_time);
+  virtual void collectMetrics(PlannerRunData& metrics,
+                              const planning_interface::MotionPlanDetailedResponse& motion_plan_response, bool solved,
+                              double total_time);
 
   /// Compute the similarity of each (final) trajectory to all other (final) trajectories in the experiment and write
   /// the results to planner_data metrics
@@ -163,17 +164,14 @@ protected:
   bool computeTrajectoryDistance(const robot_trajectory::RobotTrajectory& traj_first,
                                  const robot_trajectory::RobotTrajectory& traj_second, double& result_distance);
 
-  virtual void writeOutput(const BenchmarkRequest& brequest, const std::string& start_time, double benchmark_duration);
+  virtual void writeOutput(const BenchmarkRequest& benchmark_request, const std::string& start_time,
+                           double benchmark_duration, const BenchmarkOptions& options);
 
   void shiftConstraintsByOffset(moveit_msgs::msg::Constraints& constraints, const std::vector<double>& offset);
 
   /// Check that the desired planner plugins and algorithms exist for the given group
   bool plannerConfigurationsExist(const std::map<std::string, std::vector<std::string>>& planners,
                                   const std::string& group_name);
-
-  /// Check that the given requests can be run on the set of planner plugins and algorithms
-  bool queriesAndPlannersCompatible(const std::vector<BenchmarkRequest>& requests,
-                                    const std::map<std::string, std::vector<std::string>>& planners);
 
   /// Load the planning scene with the given name from the warehouse
   bool loadPlanningScene(const std::string& scene_name, moveit_msgs::msg::PlanningScene& scene_msg);
@@ -191,36 +189,32 @@ protected:
   bool loadQueries(const std::string& regex, const std::string& scene_name, std::vector<BenchmarkRequest>& queries);
 
   /// Duplicate the given benchmark request for all combinations of start states and path constraints
-  void createRequestCombinations(const BenchmarkRequest& brequest, const std::vector<StartState>& start_states,
+  void createRequestCombinations(const BenchmarkRequest& benchmark_request, const std::vector<StartState>& start_states,
                                  const std::vector<PathConstraints>& path_constraints,
                                  std::vector<BenchmarkRequest>& combos);
 
   /// Execute the given motion plan request on the set of planners for the set number of runs
-  void runBenchmark(moveit_msgs::msg::MotionPlanRequest request,
-                    const std::map<std::string, std::vector<std::string>>& planners, int runs);
+  void runBenchmark(moveit_msgs::msg::MotionPlanRequest request, const BenchmarkOptions& options);
 
-  planning_scene_monitor::PlanningSceneMonitor* psm_;
-  moveit_warehouse::PlanningSceneStorage* pss_;
-  moveit_warehouse::PlanningSceneWorldStorage* psws_;
-  moveit_warehouse::RobotStateStorage* rs_;
-  moveit_warehouse::ConstraintsStorage* cs_;
-  moveit_warehouse::TrajectoryConstraintsStorage* tcs_;
+  std::shared_ptr<planning_scene_monitor::PlanningSceneMonitor> planning_scene_monitor_;
+  std::shared_ptr<moveit_warehouse::PlanningSceneStorage> planning_scene_storage_;
+  std::shared_ptr<moveit_warehouse::PlanningSceneWorldStorage> planning_scene_world_storage_;
+  std::shared_ptr<moveit_warehouse::RobotStateStorage> robot_state_storage_;
+  std::shared_ptr<moveit_warehouse::ConstraintsStorage> constraints_storage_;
+  std::shared_ptr<moveit_warehouse::TrajectoryConstraintsStorage> trajectory_constraints_storage_;
 
   rclcpp::Node::SharedPtr node_;
-  warehouse_ros::DatabaseLoader dbloader;
+  warehouse_ros::DatabaseLoader db_loader_;
   planning_scene::PlanningScenePtr planning_scene_;
-
-  BenchmarkOptions options_;
-
-  std::map<std::string, planning_pipeline::PlanningPipelinePtr> planning_pipelines_;
+  std::shared_ptr<moveit_cpp::MoveItCpp> moveit_cpp_;
 
   std::vector<PlannerBenchmarkData> benchmark_data_;
 
-  std::vector<PreRunEventFunction> pre_event_fns_;
-  std::vector<PostRunEventFunction> post_event_fns_;
-  std::vector<PlannerStartEventFunction> planner_start_fns_;
-  std::vector<PlannerCompletionEventFunction> planner_completion_fns_;
-  std::vector<QueryStartEventFunction> query_start_fns_;
-  std::vector<QueryCompletionEventFunction> query_end_fns_;
+  std::vector<PreRunEventFunction> pre_event_functions_;
+  std::vector<PostRunEventFunction> post_event_functions_;
+  std::vector<PlannerStartEventFunction> planner_start_functions_;
+  std::vector<PlannerCompletionEventFunction> planner_completion_functions_;
+  std::vector<QueryStartEventFunction> query_start_functions_;
+  std::vector<QueryCompletionEventFunction> query_end_functions_;
 };
 }  // namespace moveit_ros_benchmarks

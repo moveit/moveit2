@@ -582,9 +582,11 @@ public:
   bool isValidVelocityMove(const double* from_joint_pose, const double* to_joint_pose, std::size_t array_size,
                            double dt) const;
 
-protected:
-  bool computeIKIndexBijection(const std::vector<std::string>& ik_jnames, std::vector<size_t>& joint_bijection) const;
+  /** \brief Computes the indices of joint variables given a vector of joint names to look up */
+  bool computeJointVariableIndices(const std::vector<std::string>& joint_names,
+                                   std::vector<size_t>& joint_bijection) const;
 
+protected:
   /** \brief Update the variable values for the state of a group with respect to the mimic joints. This only updates
       mimic joints that have the parent in this group. If there is a joint mimicking one that is outside the group,
       there are no values to be read (\e values is only the group state) */

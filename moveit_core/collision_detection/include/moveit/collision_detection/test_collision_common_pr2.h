@@ -90,7 +90,7 @@ protected:
 #ifdef NDEBUG
 #define EXPECT_TIME_LT(EXPR, VAL) EXPECT_LT(EXPR, VAL)
 #else  // Don't perform timing checks in Debug mode (but evaluate expression)
-#define EXPECT_TIME_LT(EXPR, VAL) (void)(EXPR)
+#define EXPECT_TIME_LT(EXPR, VAL) static_cast<void>(EXPR)
 #endif
 
 TYPED_TEST_CASE_P(CollisionDetectorTest);

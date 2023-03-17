@@ -18,7 +18,7 @@ We're interested in helping you take the first step, and can answer questions an
 
 We know that creating a pull request is the biggest barrier for new contributors. This issue is for you 💝
 
-If you have contributed before, **consider leaving this PR for someone new**, and looking through our general [bug](https://github.com/ros-planning/moveit/labels/bug) issues. Thanks!
+If you have contributed before, **consider leaving this PR for someone new**, and looking through our general [bug](https://github.com/ros-planning/moveit2/labels/bug) issues. Thanks!
 
 ### 🤔 What you will need to know.
 
@@ -38,7 +38,7 @@ Nothing. This issue is meant to welcome you to Open Source :) We are happy to wa
 $DIFF
 ```
 
-- [ ] 🤖 **Apply `clang-format-10`** auto formatting, [following these instructions](https://moveit.ros.org//documentation/contributing/code/?#clang-format-auto-code-formatting)
+- [ ] 🤖 **Apply `clang-format-14`** auto formatting, [following these instructions](https://moveit.picknik.ai/main/doc/how_to_contribute/how_to_contribute_to_site.html)
 
 - [ ] 💾 **Commit and Push** your changes
 
@@ -59,8 +59,8 @@ $DIFF
 Don’t hesitate to ask questions or to get help if you feel like you are getting stuck. For example leave a comment below!
 Furthermore, you find helpful resources here:
 * [MoveIt FAQ](https://moveit.ros.org/documentation/faqs/)
-* [MoveIt Tutorials](https://ros-planning.github.io/moveit_tutorials/)
-* [MoveIt contribution guide](https://moveit.ros.org/documentation/contributing/)
+* [MoveIt Tutorials](https://moveit.picknik.ai/main/doc/tutorials/tutorials.html)
+* [MoveIt contribution guide](https://moveit.picknik.ai/main/doc/how_to_contribute/how_to_contribute.html)
 * [ROS Tutorials](https://wiki.ros.org/ROS/Tutorials)
 * [ROS Answers](https://answers.ros.org/questions/)
 
