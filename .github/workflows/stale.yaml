@@ -1,5 +1,4 @@
 name: 'Stale issues and PRs'
-description: 'Labels inactive issues and PRs as stale, and only closes stale issues after ongoing inactivity'
 on:
   workflow_dispatch:
   schedule:
