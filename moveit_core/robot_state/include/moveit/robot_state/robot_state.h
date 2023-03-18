@@ -241,8 +241,9 @@ public:
 
   /** \brief Get const access to the velocities of the variables that make up this state. The values are in the same
    * order as reported by getVariableNames() */
-  const double* getVariableVelocities() const
+  const double* getVariableVelocities(const std::vector<double> velocity_) const
   {
+
     return velocity_;
   }
 
