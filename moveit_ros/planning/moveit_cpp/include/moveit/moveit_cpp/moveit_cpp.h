@@ -174,10 +174,6 @@ public:
   execute(const std::string& group_name, const robot_trajectory::RobotTrajectoryPtr& robot_trajectory,
           bool blocking = true, const std::vector<std::string>& controllers = std::vector<std::string>());
 
-  [[deprecated("MoveItCpp::execute() no longer requires a blocking parameter")]] moveit_controller_manager::ExecutionStatus
-  execute(const robot_trajectory::RobotTrajectoryPtr& robot_trajectory, bool blocking = true,
-          const std::vector<std::string>& controllers = std::vector<std::string>());
-
   moveit_controller_manager::ExecutionStatus
   execute(const robot_trajectory::RobotTrajectoryPtr& robot_trajectory,
           const std::vector<std::string>& controllers = std::vector<std::string>());
