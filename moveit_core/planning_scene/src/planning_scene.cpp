@@ -36,6 +36,7 @@
 
 #include <boost/algorithm/string.hpp>
 #include <moveit/planning_scene/planning_scene.h>
+#include <moveit/planning_scene/utilities.hpp>
 #include <moveit/collision_detection/occupancy_map.h>
 #include <moveit/collision_detection_fcl/collision_detector_allocator_fcl.h>
 #include <geometric_shapes/shape_operations.h>
@@ -161,17 +162,6 @@ void PlanningScene::initialize()
   acm_ = std::make_shared<collision_detection::AllowedCollisionMatrix>(*getRobotModel()->getSRDF());
 
   allocateCollisionDetector(collision_detection::CollisionDetectorAllocatorFCL::create());
-}
-
-// return nullptr on failure
-moveit::core::RobotModelPtr PlanningScene::createRobotModel(const urdf::ModelInterfaceSharedPtr& urdf_model,
-                                                            const srdf::ModelConstSharedPtr& srdf_model)
-{
-  auto robot_model = std::make_shared<moveit::core::RobotModel>(urdf_model, srdf_model);
-  if (!robot_model || !robot_model->getRootJoint())
-    return moveit::core::RobotModelPtr();
-
-  return robot_model;
 }
 
 PlanningScene::PlanningScene(const PlanningSceneConstPtr& parent) : parent_(parent)
@@ -1078,30 +1068,6 @@ bool PlanningScene::loadGeometryFromStream(std::istream& in, const Eigen::Isomet
   } while (true);
 }
 
-bool PlanningScene::readPoseFromText(std::istream& in, Eigen::Isometry3d& pose) const
-{
-  double x, y, z, rx, ry, rz, rw;
-  if (!(in >> x >> y >> z))
-  {
-    RCLCPP_ERROR(LOGGER, "Improperly formatted translation in scene geometry file");
-    return false;
-  }
-  if (!(in >> rx >> ry >> rz >> rw))
-  {
-    RCLCPP_ERROR(LOGGER, "Improperly formatted rotation in scene geometry file");
-    return false;
-  }
-  pose = Eigen::Translation3d(x, y, z) * Eigen::Quaterniond(rw, rx, ry, rz);
-  return true;
-}
-
-void PlanningScene::writePoseToText(std::ostream& out, const Eigen::Isometry3d& pose) const
-{
-  out << pose.translation().x() << ' ' << pose.translation().y() << ' ' << pose.translation().z() << '\n';
-  Eigen::Quaterniond r(pose.linear());
-  out << r.x() << ' ' << r.y() << ' ' << r.z() << ' ' << r.w() << '\n';
-}
-
 void PlanningScene::setCurrentState(const moveit_msgs::msg::RobotState& state)
 {
   // The attached bodies will be processed separately by processAttachedCollisionObjectMsgs
@@ -1379,7 +1345,7 @@ void PlanningScene::processOctomapMsg(const octomap_msgs::msg::OctomapWithPose& 
 
   const Eigen::Isometry3d& t = getFrameTransform(map.header.frame_id);
   Eigen::Isometry3d p;
-  PlanningScene::poseMsgToEigen(map.origin, p);
+  poseMsgToEigen(map.origin, p);
   p = t * p;
   world_->addToObject(OCTOMAP_NS, std::make_shared<const shapes::OcTree>(om), p);
 }
@@ -1497,7 +1463,7 @@ bool PlanningScene::processAttachedCollisionObjectMsg(const moveit_msgs::msg::At
         Eigen::Isometry3d subframe_pose;
         for (std::size_t i = 0; i < object.object.subframe_poses.size(); ++i)
         {
-          PlanningScene::poseMsgToEigen(object.object.subframe_poses[i], subframe_pose);
+          poseMsgToEigen(object.object.subframe_poses[i], subframe_pose);
           std::string name = object.object.subframe_names[i];
           subframe_poses[name] = subframe_pose;
         }
@@ -1673,22 +1639,6 @@ bool PlanningScene::processCollisionObjectMsg(const moveit_msgs::msg::CollisionO
   return false;
 }
 
-void PlanningScene::poseMsgToEigen(const geometry_msgs::msg::Pose& msg, Eigen::Isometry3d& out)
-{
-  Eigen::Translation3d translation(msg.position.x, msg.position.y, msg.position.z);
-  Eigen::Quaterniond quaternion(msg.orientation.w, msg.orientation.x, msg.orientation.y, msg.orientation.z);
-  if ((quaternion.x() == 0) && (quaternion.y() == 0) && (quaternion.z() == 0) && (quaternion.w() == 0))
-  {
-    RCLCPP_WARN(LOGGER, "Empty quaternion found in pose message. Setting to neutral orientation.");
-    quaternion.setIdentity();
-  }
-  else
-  {
-    quaternion.normalize();
-  }
-  out = translation * quaternion;
-}
-
 bool PlanningScene::shapesAndPosesFromCollisionObjectMessage(const moveit_msgs::msg::CollisionObject& object,
                                                              Eigen::Isometry3d& object_pose,
                                                              std::vector<shapes::ShapeConstPtr>& shapes,
@@ -1714,7 +1664,7 @@ bool PlanningScene::shapesAndPosesFromCollisionObjectMessage(const moveit_msgs::
   shapes.reserve(num_shapes);
   shape_poses.reserve(num_shapes);
 
-  PlanningScene::poseMsgToEigen(object.pose, object_pose);
+  poseMsgToEigen(object.pose, object_pose);
 
   bool switch_object_pose_and_shape_pose = false;
   if (num_shapes == 1)
@@ -1731,7 +1681,7 @@ bool PlanningScene::shapesAndPosesFromCollisionObjectMessage(const moveit_msgs::
     if (!s)
       return;
     Eigen::Isometry3d pose;
-    PlanningScene::poseMsgToEigen(pose_msg, pose);
+    poseMsgToEigen(pose_msg, pose);
     if (!switch_object_pose_and_shape_pose)
     {
       shape_poses.emplace_back(std::move(pose));
@@ -1812,7 +1762,7 @@ bool PlanningScene::processCollisionObjectAdd(const moveit_msgs::msg::CollisionO
   Eigen::Isometry3d subframe_pose;
   for (std::size_t i = 0; i < object.subframe_poses.size(); ++i)
   {
-    PlanningScene::poseMsgToEigen(object.subframe_poses[i], subframe_pose);
+    poseMsgToEigen(object.subframe_poses[i], subframe_pose);
     std::string name = object.subframe_names[i];
     subframes[name] = subframe_pose;
   }
@@ -1854,7 +1804,7 @@ bool PlanningScene::processCollisionObjectMove(const moveit_msgs::msg::Collision
     const Eigen::Isometry3d& world_to_object_header_transform = getFrameTransform(object.header.frame_id);
     Eigen::Isometry3d header_to_pose_transform;
 
-    PlanningScene::poseMsgToEigen(object.pose, header_to_pose_transform);
+    poseMsgToEigen(object.pose, header_to_pose_transform);
 
     const Eigen::Isometry3d object_frame_transform = world_to_object_header_transform * header_to_pose_transform;
     world_->setObjectPose(object.id, object_frame_transform);

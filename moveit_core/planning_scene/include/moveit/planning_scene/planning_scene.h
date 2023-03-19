@@ -963,21 +963,10 @@ private:
    * Requires a valid robot_model_ */
   void initialize();
 
-  /* helper function to create a RobotModel from a urdf/srdf. */
-  static moveit::core::RobotModelPtr createRobotModel(const urdf::ModelInterfaceSharedPtr& urdf_model,
-                                                      const srdf::ModelConstSharedPtr& srdf_model);
-
   /* Helper functions for processing collision objects */
   bool processCollisionObjectAdd(const moveit_msgs::msg::CollisionObject& object);
   bool processCollisionObjectRemove(const moveit_msgs::msg::CollisionObject& object);
   bool processCollisionObjectMove(const moveit_msgs::msg::CollisionObject& object);
-
-  /* For exporting and importing the planning scene */
-  bool readPoseFromText(std::istream& in, Eigen::Isometry3d& pose) const;
-  void writePoseToText(std::ostream& out, const Eigen::Isometry3d& pose) const;
-
-  /** convert Pose msg to Eigen::Isometry, normalizing the quaternion part if necessary. */
-  static void poseMsgToEigen(const geometry_msgs::msg::Pose& msg, Eigen::Isometry3d& out);
 
   MOVEIT_STRUCT_FORWARD(CollisionDetector);
 
