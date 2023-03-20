@@ -742,7 +742,7 @@ bool RobotModel::addJointModelGroup(const srdf::Model::Group& gc)
       {
         // add all joints (including ones that have base_link in them) to the chain
         cj.push_back(lm->getParentJointModel());
-        if (lm == base_link) // if we have reached base_link we are done searching
+        if (lm == base_link)  // if we have reached base_link we are done searching
           break;
         lm = lm->getParentJointModel()->getParentLinkModel();
       }
