@@ -740,9 +740,10 @@ bool RobotModel::addJointModelGroup(const srdf::Model::Group& gc)
       std::vector<const JointModel*> cj;
       while (lm)
       {
-        if (lm == base_link)
-          break;
+        // add all joints (including ones that have base_link in them) to the chain
         cj.push_back(lm->getParentJointModel());
+        if (lm == base_link) // if we have reached base_link we are done searching
+          break;
         lm = lm->getParentJointModel()->getParentLinkModel();
       }
       // if we did not find the base_link, we could have a chain like e.g.,
