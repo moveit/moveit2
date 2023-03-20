@@ -884,16 +884,10 @@ bool TimeOptimalTrajectoryGeneration::computeTimeStamps(robot_trajectory::RobotT
   double velocity_scaling_factor = verifyScalingFactor(max_velocity_scaling_factor, VELOCITY);
   double acceleration_scaling_factor = verifyScalingFactor(max_acceleration_scaling_factor, ACCELERATION);
 
-  // Get the velocity and acceleration limits for all active joints
+  // Get the velocity and acceleration limits for all joints
   const moveit::core::RobotModel& rmodel = group->getParentModel();
   const std::vector<std::string>& vars = group->getVariableNames();
-  std::vector<size_t> indices;
-  if (!group->computeJointVariableIndices(group->getActiveJointModelNames(), indices))
-  {
-    RCLCPP_ERROR(LOGGER, "Failed to get active variable indices.");
-  }
-
-  const size_t num_joints = indices.size();
+  const size_t num_joints = group->getVariableCount();
   Eigen::VectorXd max_velocity(num_joints);
   Eigen::VectorXd max_acceleration(num_joints);
   for (size_t idx = 0; idx < num_joints; ++idx)
