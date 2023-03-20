@@ -1,0 +1,26 @@
+name: 'Stale issues and PRs'
+on:
+  workflow_dispatch:
+  schedule:
+    # UTC noon every workday
+    - cron: '0 12 * * MON-FRI'
+
+jobs:
+  stale:
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      pull-requests: write
+    steps:
+      - uses: actions/stale@v7
+        with:
+          stale-issue-label: 'stale'
+          stale-pr-label: 'stale'
+          stale-issue-message: 'This issue is being labeled as stale because it has been open 45 days with no activity. It will be automatically closed after another 45 days without follow-ups.'
+          close-issue-message: 'This issue was closed because it has been stalled for 45 days with no activity.'
+          stale-pr-message: 'This PR is stale because it has been open for 45 days with no activity. Please tag a maintainer for help on completing this PR, or close it if you think it has become obsolete.'
+          days-before-stale: 45
+          days-before-close: 45
+          days-before-pr-close: -1
+          exempt-all-milestones: true
+          exempt-issue-labels: good first issue,persistent,release,roadmap,Epic
