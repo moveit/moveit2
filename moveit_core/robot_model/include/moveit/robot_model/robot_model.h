@@ -429,10 +429,23 @@ public:
     return variable_names_;
   }
 
-  /** \brief Get the bounds for a specific variable. Throw an exception of variable is not found. */
+  /** \brief Get the bounds for a specific variable. Throw an exception of variable is not found.
+   *  \details If the variable is a mimic joint, look for the bounds of the mimicked joint variable.
+   */
   const VariableBounds& getVariableBounds(const std::string& variable) const
   {
-    return getJointOfVariable(variable)->getVariableBounds(variable);
+    const auto joint = getJointOfVariable(variable);
+    const auto mimic = joint->getMimic();
+    if (!mimic)
+    {
+      return joint->getVariableBounds(variable);
+    }
+    else
+    {
+      const auto orig_idx = joint->getLocalVariableIndex(variable);
+      const auto var_names = mimic->getVariableNames();
+      return mimic->getVariableBounds(var_names.at(orig_idx));
+    }
   }
 
   /** \brief Get the bounds for all the active joints */

@@ -896,7 +896,7 @@ bool TimeOptimalTrajectoryGeneration::computeTimeStamps(robot_trajectory::RobotT
   const size_t num_joints = indices.size();
   Eigen::VectorXd max_velocity(num_joints);
   Eigen::VectorXd max_acceleration(num_joints);
-  for (const auto idx : indices)
+  for (size_t idx=0; idx < num_joints; ++idx)
   {
     const moveit::core::VariableBounds& bounds = rmodel.getVariableBounds(vars[idx]);
 
