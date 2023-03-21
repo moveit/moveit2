@@ -54,7 +54,7 @@ inline std::filesystem::path getSharePath(const std::string& package_name)
   {
     return std::filesystem::path(ament_index_cpp::get_package_share_directory(package_name));
   }
-  catch (const ament_index_cpp::PackageNotFoundError& e)
+  catch (const std::runtime_error& e)
   {
     return std::filesystem::path();
   }
