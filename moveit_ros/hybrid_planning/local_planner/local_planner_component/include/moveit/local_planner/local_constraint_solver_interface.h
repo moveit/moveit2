@@ -70,7 +70,7 @@ public:
    * @return True if initialization was successful
    */
   virtual bool initialize(const rclcpp::Node::SharedPtr& node,
-                          const planning_scene_monitor::PlanningSceneMonitorConstPtr& planning_scene_monitor,
+                          const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor,
                           const std::string& group_name) = 0;
 
   /**

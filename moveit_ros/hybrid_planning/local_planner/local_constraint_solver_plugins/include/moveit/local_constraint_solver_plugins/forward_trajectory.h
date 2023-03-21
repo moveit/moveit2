@@ -51,7 +51,7 @@ public:
   ForwardTrajectory() = default;
   ~ForwardTrajectory() override = default;
   bool initialize(const rclcpp::Node::SharedPtr& node,
-                  const planning_scene_monitor::PlanningSceneMonitorConstPtrPtr& planning_scene_monitor,
+                  const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor,
                   const std::string& /* unused */) override;
   bool reset() override;
 
@@ -62,7 +62,7 @@ public:
 
 private:
   rclcpp::Node::SharedPtr node_;
-  planning_scene_monitor::PlanningSceneMonitorConstPtrPtr planning_scene_monitor_;
+  planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor_;
   bool path_invalidation_event_send_;  // Send path invalidation event only once
   bool stop_before_collision_;
 

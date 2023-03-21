@@ -49,7 +49,7 @@ constexpr double COLLISION_THRESHOLD = 0.01;  // Stop if closer than this [meter
 namespace moveit::hybrid_planning
 {
 bool ForwardTrajectory::initialize(const rclcpp::Node::SharedPtr& node,
-                                   const planning_scene_monitor::PlanningSceneMonitorConstPtr& planning_scene_monitor,
+                                   const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor,
                                    const std::string& /* unused */)
 {
   // Load parameter & initialize member variables
