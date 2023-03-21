@@ -312,8 +312,8 @@ void StartScreenWidget::onUrdfPathChanged(const QString& path)
   }
   catch (const std::runtime_error& e)
   {
-    RCLCPP_ERROR(setup_step_.getLogger(), "%s", e.what());
-    QMessageBox::warning(this, "Error Loading URDF path", QString(e.what()));
+    RCLCPP_ERROR(setup_step_.getLogger(), "Error Loading URDF Path. %s", e.what());
+    QMessageBox::warning(this, "Error Loading URDF Path", QString(e.what()));
   }
 }
 
@@ -351,7 +351,7 @@ bool StartScreenWidget::loadExistingFiles()
   }
   catch (const std::runtime_error& e)
   {
-    RCLCPP_ERROR(setup_step_.getLogger(), "%s", e.what());
+    RCLCPP_ERROR(setup_step_.getLogger(), "Error Loading SRDF. %s", e.what());
     QMessageBox::warning(this, "Error Loading SRDF", QString(e.what()));
     return false;
   }

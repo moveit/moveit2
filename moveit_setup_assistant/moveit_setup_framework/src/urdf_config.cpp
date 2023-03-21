@@ -131,7 +131,7 @@ void URDFConfig::load()
     throw std::runtime_error("URDF/COLLADA file not found: " + urdf_path_.string());
   }
 
-  if (urdf_pkg_name_ == "")
+  if (urdf_pkg_name_.empty())
   {
     throw std::runtime_error("URDF/COLLADA package not found for file path: " + urdf_path_.string());
   }
