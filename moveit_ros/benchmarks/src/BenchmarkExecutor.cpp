@@ -90,7 +90,7 @@ BenchmarkExecutor::BenchmarkExecutor(const rclcpp::Node::SharedPtr& node, const 
   , constraints_storage_{ nullptr }
   , trajectory_constraints_storage_{ nullptr }
   , node_{ node }
-  , db_loader{ node }
+  , db_loader_{ node }
 {
   planning_scene_ = planning_scene_monitor_->getPlanningScene();
 }
@@ -395,7 +395,7 @@ bool BenchmarkExecutor::loadBenchmarkQueryData(
 {
   try
   {
-    warehouse_ros::DatabaseConnection::Ptr warehouse_connection = db_loader.loadDatabase();
+    warehouse_ros::DatabaseConnection::Ptr warehouse_connection = db_loader_.loadDatabase();
     warehouse_connection->setParams(options.hostname, options.port, 20);
     if (warehouse_connection->connect())
     {

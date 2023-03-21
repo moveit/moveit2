@@ -81,6 +81,7 @@ ServoCalcs::ServoCalcs(const rclcpp::Node::SharedPtr& node,
   , stop_requested_(true)
   , paused_(false)
   , robot_link_command_frame_(parameters->robot_link_command_frame)
+  , override_velocity_scaling_factor_(parameters->override_velocity_scaling_factor)
   , smoothing_loader_("moveit_core", "online_signal_smoothing::SmoothingBaseClass")
 {
   // Register callback for changes in robot_link_command_frame
@@ -90,7 +91,16 @@ ServoCalcs::ServoCalcs(const rclcpp::Node::SharedPtr& node,
                                                                     });
   if (!callback_success)
   {
-    throw std::runtime_error("Failed to register setParameterCallback");
+    throw std::runtime_error("Failed to register setParameterCallback for robot_link_command_frame");
+  }
+
+  // Register callback for changes in override_velocity_scaling_factor
+  callback_success = parameters_->registerSetParameterCallback(
+      parameters->ns + ".override_velocity_scaling_factor",
+      [this](const rclcpp::Parameter& parameter) { return overrideVelocityScalingFactorCallback(parameter); });
+  if (!callback_success)
+  {
+    throw std::runtime_error("Failed to register setParameterCallback for override_velocity_scaling_factor");
   }
 
   // MoveIt Setup
@@ -517,6 +527,18 @@ rcl_interfaces::msg::SetParametersResult ServoCalcs::robotLinkCommandFrameCallba
   return result;
 };
 
+rcl_interfaces::msg::SetParametersResult
+ServoCalcs::overrideVelocityScalingFactorCallback(const rclcpp::Parameter& parameter)
+{
+  const std::lock_guard<std::mutex> lock(main_loop_mutex_);
+  rcl_interfaces::msg::SetParametersResult result;
+  result.successful = true;
+  override_velocity_scaling_factor_ = parameter.as_double();
+  RCLCPP_INFO_STREAM(LOGGER, "override_velocity_scaling_factor changed to: "
+                                 << std::to_string(override_velocity_scaling_factor_));
+  return result;
+};
+
 // Perform the servoing calculations
 bool ServoCalcs::cartesianServoCalcs(geometry_msgs::msg::TwistStamped& cmd,
                                      trajectory_msgs::msg::JointTrajectory& joint_trajectory)
@@ -705,7 +727,7 @@ bool ServoCalcs::internalServoUpdate(Eigen::ArrayXd& delta_theta,
 
   // Enforce SRDF velocity limits
   enforceVelocityLimits(joint_model_group_, parameters_->publish_period, internal_joint_state_,
-                        parameters_->override_velocity_scaling_factor);
+                        override_velocity_scaling_factor_);
 
   // Enforce SRDF position limits, might halt if needed, set prev_vel to 0
   const auto joints_to_halt = enforcePositionLimits(internal_joint_state_);

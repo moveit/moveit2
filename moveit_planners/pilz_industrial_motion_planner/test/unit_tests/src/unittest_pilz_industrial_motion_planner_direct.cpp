@@ -44,8 +44,8 @@ using namespace pilz_industrial_motion_planner;
 
 TEST(CommandPlannerTestDirect, ExceptionCoverage)
 {
-  std::shared_ptr<PlanningException> p_ex{ new PlanningException("") };
-  std::shared_ptr<ContextLoaderRegistrationException> clr_ex{ new ContextLoaderRegistrationException("") };
+  auto p_ex = std::make_shared<PlanningException>("");
+  auto clr_ex = std::make_shared<ContextLoaderRegistrationException>("");
 }
 
 /**
