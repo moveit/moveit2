@@ -6,4 +6,5 @@ set_target_properties(moveit_parallel_planning_interface PROPERTIES VERSION "${$
 ament_target_dependencies(moveit_parallel_planning_interface
   moveit_core
   moveit_msgs
+  moveit_ros_planning
 )
