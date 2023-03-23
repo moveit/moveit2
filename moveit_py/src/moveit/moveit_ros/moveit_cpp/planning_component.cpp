@@ -45,7 +45,7 @@ planning_interface::MotionPlanResponse
 plan(std::shared_ptr<moveit_cpp::PlanningComponent>& planning_component,
      std::shared_ptr<moveit_cpp::PlanningComponent::PlanRequestParameters>& single_plan_parameters,
      std::shared_ptr<moveit_cpp::PlanningComponent::MultiPipelinePlanRequestParameters>& multi_plan_parameters,
-     std::optional<const moveit_cpp::PlanningComponent::SolutionCallbackFunction> solution_selection_callback,
+     std::optional<const moveit_cpp::PlanningComponent::SolutionCallbackFunction> solution_selection_function,
      std::optional<moveit_cpp::PlanningComponent::StoppingCriterionFunction> stopping_criterion_callback)
 {
   // parameter argument checking
@@ -70,14 +70,14 @@ plan(std::shared_ptr<moveit_cpp::PlanningComponent>& planning_component,
         std::const_pointer_cast<const moveit_cpp::PlanningComponent::MultiPipelinePlanRequestParameters>(
             multi_plan_parameters);
 
-    if (solution_selection_callback && stopping_criterion_callback)
+    if (solution_selection_function && stopping_criterion_callback)
     {
-      return planning_component->plan(*const_multi_plan_parameters, std::ref(*solution_selection_callback),
+      return planning_component->plan(*const_multi_plan_parameters, std::ref(*solution_selection_function),
                                       *stopping_criterion_callback);
     }
-    else if (solution_selection_callback)
+    else if (solution_selection_function)
     {
-      return planning_component->plan(*const_multi_plan_parameters, std::ref(*solution_selection_callback));
+      return planning_component->plan(*const_multi_plan_parameters, std::ref(*solution_selection_function));
     }
     else if (stopping_criterion_callback)
     {
@@ -320,7 +320,7 @@ void init_planning_component(py::module& m)
 
       // TODO (peterdavidfagan): improve the plan API
       .def("plan", &moveit_py::bind_planning_component::plan, py::arg("single_plan_parameters") = nullptr,
-           py::arg("multi_plan_parameters") = nullptr, py::arg("solution_selection_callback") = nullptr,
+           py::arg("multi_plan_parameters") = nullptr, py::arg("solution_selection_function") = nullptr,
            py::arg("stopping_criterion_callback") = nullptr, py::return_value_policy::move,
            R"(
       	   Plan a motion plan using the current start and goal states.

@@ -57,15 +57,6 @@ PlanningComponent::PlanningComponent(const std::string& group_name, const MoveIt
     RCLCPP_FATAL_STREAM(LOGGER, error);
     throw std::runtime_error(error);
   }
-  plan_request_parameters_.load(node_);
-  RCLCPP_DEBUG_STREAM(
-      LOGGER, "Default plan request parameters loaded with --"
-                  << " planning_pipeline: " << plan_request_parameters_.planning_pipeline << ','
-                  << " planner_id: " << plan_request_parameters_.planner_id << ','
-                  << " planning_time: " << plan_request_parameters_.planning_time << ','
-                  << " planning_attempts: " << plan_request_parameters_.planning_attempts << ','
-                  << " max_velocity_scaling_factor: " << plan_request_parameters_.max_velocity_scaling_factor << ','
-                  << " max_acceleration_scaling_factor: " << plan_request_parameters_.max_acceleration_scaling_factor);
 }
 
 PlanningComponent::PlanningComponent(const std::string& group_name, const rclcpp::Node::SharedPtr& node)
@@ -125,6 +116,14 @@ planning_interface::MotionPlanResponse PlanningComponent::plan(const PlanRequest
     return plan_solution;
   }
 
+  // Check if goal constraints exist
+  if (current_goal_constraints_.empty())
+  {
+    RCLCPP_ERROR(LOGGER, "No goal constraints set for planning request");
+    plan_solution.error_code = moveit::core::MoveItErrorCode::INVALID_GOAL_CONSTRAINTS;
+    return plan_solution;
+  }
+
   if (!planning_scene)
   {  // Clone current planning scene
     planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor = moveit_cpp_->getPlanningSceneMonitor();
@@ -136,85 +135,18 @@ planning_interface::MotionPlanResponse PlanningComponent::plan(const PlanRequest
     planning_scene_monitor.reset();  // release this pointer}
   }
   // Init MotionPlanRequest
-  ::planning_interface::MotionPlanRequest req;
-  req.group_name = group_name_;
-  req.planner_id = parameters.planner_id;
-  req.num_planning_attempts = std::max(1, parameters.planning_attempts);
-  req.allowed_planning_time = parameters.planning_time;
-  req.max_velocity_scaling_factor = parameters.max_velocity_scaling_factor;
-  req.max_acceleration_scaling_factor = parameters.max_acceleration_scaling_factor;
-
-  if (workspace_parameters_set_)
-  {
-    req.workspace_parameters = workspace_parameters_;
-  }
+  ::planning_interface::MotionPlanRequest request = getMotionPlanRequest(parameters, workspace_parameters_set_);
 
   // Set start state
-  moveit::core::RobotStatePtr start_state = considered_start_state_;
-  if (!start_state)
-  {
-    start_state = moveit_cpp_->getCurrentState();
-  }
-  start_state->update();
-  moveit::core::robotStateToRobotStateMsg(*start_state, req.start_state);
-  planning_scene->setCurrentState(*start_state);
-
-  // Set goal constraints
-  if (current_goal_constraints_.empty())
-  {
-    RCLCPP_ERROR(LOGGER, "No goal constraints set for planning request");
-    plan_solution.error_code = moveit::core::MoveItErrorCode::INVALID_GOAL_CONSTRAINTS;
-    return plan_solution;
-  }
-  req.goal_constraints = current_goal_constraints_;
-  // Set path constraints
-  req.path_constraints = current_path_constraints_;
-  // Set trajectory constraints
-  req.trajectory_constraints = current_trajectory_constraints_;
+  planning_scene->setCurrentState(request.start_state);
 
   // Run planning attempt
-  const auto& pipelines = moveit_cpp_->getPlanningPipelines();
-  auto it = pipelines.find(parameters.planning_pipeline);
-  if (it == pipelines.end())
-  {
-    RCLCPP_ERROR(LOGGER, "No planning pipeline available for name '%s'", parameters.planning_pipeline.c_str());
-    plan_solution.error_code = moveit::core::MoveItErrorCode::FAILURE;
-    return plan_solution;
-  }
-  const planning_pipeline::PlanningPipelinePtr pipeline = it->second;
-
-  ::planning_interface::MotionPlanResponse res;
-  pipeline->generatePlan(planning_scene, req, res);
-
-  plan_solution.error_code = res.error_code;
-  if (res.error_code.val != res.error_code.SUCCESS)
-  {
-    RCLCPP_ERROR(LOGGER, "Could not compute plan successfully");
-    return plan_solution;
-  }
-  plan_solution.trajectory = res.trajectory;
-  plan_solution.planning_time = res.planning_time;
-  plan_solution.start_state = req.start_state;
-  plan_solution.error_code = res.error_code.val;
-
-  // TODO(henningkayser): Visualize trajectory
-  // std::vector<const moveit::core::LinkModel*> eef_links;
-  // if (joint_model_group->getEndEffectorTips(eef_links))
-  //{
-  //  for (const auto& eef_link : eef_links)
-  //  {
-  //    RCLCPP_INFO_STREAM("Publishing trajectory for end effector " << eef_link->getName());
-  //    visual_tools_->publishTrajectoryLine(last_solution_trajectory_, eef_link);
-  //    visual_tools_->publishTrajectoryPath(last_solution_trajectory_, false);
-  //    visual_tools_->publishRobotState(last_solution_trajectory_->getLastWayPoint(), rviz_visual_tools::TRANSLUCENT);
-  //  }
-  //}
-
-  return plan_solution;
+  return moveit::planning_interface::planWithSinglePipeline(request, planning_scene,
+                                                            moveit_cpp_->getPlanningPipelines());
 }
 
 planning_interface::MotionPlanResponse PlanningComponent::plan(
-    const MultiPipelinePlanRequestParameters& parameters, const SolutionCallbackFunction& solution_selection_callback,
+    const MultiPipelinePlanRequestParameters& parameters, const SolutionCallbackFunction& solution_selection_function,
     StoppingCriterionFunction stopping_criterion_callback, const planning_scene::PlanningScenePtr planning_scene)
 {
   // Create solutions container
@@ -279,12 +211,22 @@ planning_interface::MotionPlanResponse PlanningComponent::plan(
   }
 
   // Return best solution determined by user defined callback (Default: Shortest path)
-  return solution_selection_callback(planning_solutions.getSolutions());
+  return solution_selection_function(planning_solutions.getSolutions());
 }
 
 planning_interface::MotionPlanResponse PlanningComponent::plan()
 {
-  return plan(plan_request_parameters_);
+  PlanRequestParameters parameters;
+  plan_request_parameters.load(node_);
+  RCLCPP_DEBUG_STREAM(
+      LOGGER, "Default plan request parameters loaded with --"
+                  << " planning_pipeline: " << plan_request_parameters_.planning_pipeline << ','
+                  << " planner_id: " << plan_request_parameters_.planner_id << ','
+                  << " planning_time: " << plan_request_parameters_.planning_time << ','
+                  << " planning_attempts: " << plan_request_parameters_.planning_attempts << ','
+                  << " max_velocity_scaling_factor: " << plan_request_parameters_.max_velocity_scaling_factor << ','
+                  << " max_acceleration_scaling_factor: " << plan_request_parameters_.max_acceleration_scaling_factor);
+  return plan(plan_request_parameters);
 }
 
 bool PlanningComponent::setStartState(const moveit::core::RobotState& start_state)
@@ -381,5 +323,45 @@ bool PlanningComponent::setGoal(const std::string& goal_state_name)
   moveit::core::RobotState goal_state(moveit_cpp_->getRobotModel());
   goal_state.setToDefaultValues(joint_model_group_, goal_state_name);
   return setGoal(goal_state);
+
+  ::planning_interface::MotionPlanRequest getMotionPlanRequest(const PlanRequestParameters& plan_request_parameters,
+                                                               bool use_workspace_parameters)
+  {
+    ::planning_interface::MotionPlanRequest request : request.group_name = group_name_;
+    request.planner_id = plan_request_parameters.planner_id;
+    request.num_planning_attempts = std::max(1, plan_request_parameters.planning_attempts);
+    request.allowed_planning_time = plan_request_parameters.planning_time;
+    request.max_velocity_scaling_factor = plan_request_parameters.max_velocity_scaling_factor;
+    request.max_acceleration_scaling_factor = plan_request_parameters.max_acceleration_scaling_factor;
+    if (workspace_parameters_set_)
+    {
+      request.workspace_parameters = workspace_parameters_;
+    }
+    request.goal_constraints = current_goal_constraints_;
+    request.path_constraints = current_path_constraints_;
+    request.trajectory_constraints = current_trajectory_constraints_;
+
+    // Set start state
+    moveit::core::RobotStatePtr start_state = considered_start_state_;
+    if (!start_state)
+    {
+      start_state = moveit_cpp_->getCurrentState();
+    }
+    start_state->update();
+    moveit::core::robotStateToRobotStateMsg(*start_state, request.start_state);
+    return request;
+  }
+
+  std::vector<::planning_interface::MotionPlanRequest> getMotionPlanRequestVector(
+      const MultiPipelinePlanRequestParameters& multi_pipeline_plan_request_parameters, bool use_workspace_parameters)
+  {
+    std::vector<::planning_interface::MotionPlanRequest> motion_plan_requests;
+    motion_plan_requests.reserve(multi_pipeline_plan_request_parameters.plan_request_parameter_vector.size());
+    for (auto const& plan_request_parameters : plan_request_parameter_vector)
+    {
+      motion_plan_requests.push_back(getMotionPlanRequest(plan_request_parameters, use_workspace_parameters));
+    }
+    return motion_plan_requests;
+  }
 }
 }  // namespace moveit_cpp

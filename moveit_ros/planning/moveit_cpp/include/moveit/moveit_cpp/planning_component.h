@@ -39,7 +39,9 @@
 
 #include <geometry_msgs/msg/pose_stamped.hpp>
 #include <moveit/moveit_cpp/moveit_cpp.h>
-#include <moveit/moveit_cpp/plan_solutions.hpp>
+#include <moveit/planning_interface/planning_response.h>
+#include <moveit/planning_interface/pipeline_planning_interface.h>
+#include <moveit/planning_interface/solution_selection_functions.h>
 #include <moveit/planning_interface/planning_response.h>
 #include <moveit/robot_state/conversions.h>
 #include <moveit/robot_state/robot_state.h>
@@ -106,13 +108,13 @@ public:
     MultiPipelinePlanRequestParameters(const rclcpp::Node::SharedPtr& node,
                                        const std::vector<std::string>& planning_pipeline_names)
     {
-      multi_plan_request_parameters.reserve(planning_pipeline_names.size());
+      plan_request_parameter_vector.reserve(planning_pipeline_names.size());
 
       for (const auto& planning_pipeline_name : planning_pipeline_names)
       {
         PlanRequestParameters parameters;
         parameters.load(node, planning_pipeline_name);
-        multi_plan_request_parameters.push_back(parameters);
+        plan_request_parameter_vector.push_back(parameters);
       }
     }
 
@@ -122,17 +124,8 @@ public:
     }
 
     // Plan request parameters for the individual planning pipelines which run concurrently
-    std::vector<PlanRequestParameters> multi_plan_request_parameters;
+    std::vector<PlanRequestParameters> plan_request_parameter_vector;
   };
-
-  /** \brief A solution callback function type for the parallel planning API of planning component  */
-  typedef std::function<planning_interface::MotionPlanResponse(
-      const std::vector<planning_interface::MotionPlanResponse>& solutions)>
-      SolutionCallbackFunction;
-  /** \brief A stopping criterion callback function for the parallel planning API of planning component */
-  typedef std::function<bool(const PlanSolutions& solutions,
-                             const MultiPipelinePlanRequestParameters& plan_request_parameters)>
-      StoppingCriterionFunction;
 
   /** \brief Constructor */
   PlanningComponent(const std::string& group_name, const rclcpp::Node::SharedPtr& node);
@@ -209,7 +202,7 @@ public:
    * and finding the shortest solution in joint space. */
   planning_interface::MotionPlanResponse
   plan(const MultiPipelinePlanRequestParameters& parameters,
-       const SolutionCallbackFunction& solution_selection_callback = &getShortestSolution,
+       const SolutionSelectionFunction& solution_selection_function = &planning_interface::getShortestSolution,
        StoppingCriterionFunction stopping_criterion_callback = nullptr,
        const planning_scene::PlanningScenePtr planning_scene = nullptr);
 
@@ -219,6 +212,12 @@ public:
   {
     return false;
   };
+
+  ::planning_interface::MotionPlanRequest getMotionPlanRequest(const PlanRequestParameters& plan_request_parameters,
+                                                               bool use_workspace_parameters = false);
+  ::planning_interface::MotionPlanRequest
+  getMotionPlanRequestVector(const MultiPipelinePlanRequestParameters& multi_pipeline_plan_request_parameters,
+                             bool use_workspace_parameters = false);
 
 private:
   // Core properties and instances
@@ -234,7 +233,6 @@ private:
   std::vector<moveit_msgs::msg::Constraints> current_goal_constraints_;
   moveit_msgs::msg::Constraints current_path_constraints_;
   moveit_msgs::msg::TrajectoryConstraints current_trajectory_constraints_;
-  PlanRequestParameters plan_request_parameters_;
   moveit_msgs::msg::WorkspaceParameters workspace_parameters_;
   bool workspace_parameters_set_ = false;
 

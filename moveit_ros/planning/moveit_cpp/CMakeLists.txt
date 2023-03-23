@@ -1,6 +1,5 @@
 add_library(moveit_cpp SHARED
   src/moveit_cpp.cpp
-  src/parallel_planning_callbacks.cpp
   src/planning_component.cpp
 )
 set_target_properties(moveit_cpp PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
