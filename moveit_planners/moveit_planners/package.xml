@@ -2,7 +2,7 @@
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
   <name>moveit_planners</name>
-  <version>2.7.0</version>
+  <version>2.7.1</version>
   <description>Meta package that installs all available planners for MoveIt</description>
   <maintainer email="henningkayser@picknik.ai">Henning Kayser</maintainer>
   <maintainer email="tyler@picknik.ai">Tyler Weaver</maintainer>

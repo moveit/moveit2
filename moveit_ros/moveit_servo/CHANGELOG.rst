@@ -2,6 +2,11 @@
 Changelog for package moveit_servo
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.7.1 (2023-03-23)
+------------------
+* Add callback for velocity scaling override + fix params namespace not being set (`#2021 <https://github.com/ros-planning/moveit2/issues/2021>`_)
+* Contributors: Sebastian Castro
+
 2.7.0 (2023-01-29)
 ------------------
 * Merge PR `#1712 <https://github.com/ros-planning/moveit2/issues/1712>`_: fix clang compiler warnings + stricter CI
