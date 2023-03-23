@@ -36,7 +36,7 @@
 /* Author: Sebastian Jahr
    Desc: TODO */
 
-#include <moveit/parallel_planning_interface/parallel_planning_interface.hpp>
+#include <moveit/pipeline_planning_interface/pipeline_planning_interface.hpp>
 
 #include <thread>
 
@@ -44,7 +44,7 @@ namespace moveit
 {
 namespace planning_interface
 {
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.::planning_interface.parallel_planning_interface");
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.::planning_interface.pipeline_planning_interface");
 
 ::planning_interface::MotionPlanResponse
 planWithSinglePipeline(const ::planning_interface::MotionPlanRequest& motion_plan_request,
@@ -142,6 +142,12 @@ planWithParallelPipelines(const std::vector<::planning_interface::MotionPlanRequ
     }
   }
 
+  // If a solution selection function is provided, it is used to compute the return value
+  if(solution_selection_function){
+    return solution_selection_function(plan_responses_container.getSolutions());
+  }
+
+  // Otherwise, just return the unordered list of solutions
   return plan_responses_container.getSolutions();
 }
 
