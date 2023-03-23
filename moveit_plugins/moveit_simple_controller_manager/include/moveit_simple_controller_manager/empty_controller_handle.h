@@ -49,13 +49,13 @@ class EmptyControllerHandle : public moveit_controller_manager::MoveItController
 public:
   /* Topics will map to name/ns/goal, name/ns/result, etc */
   EmptyControllerHandle(const std::string& name, const std::string& logger_name)
-    : moveit_controller_manager::MoveItControllerHandle(name), LOGGER(rclcpp::get_logger(logger_name))
+    : moveit_controller_manager::MoveItControllerHandle(name), logger_(rclcpp::get_logger(logger_name))
   {
   }
 
   bool sendTrajectory(const moveit_msgs::msg::RobotTrajectory& trajectory) override
   {
-    RCLCPP_ERROR_STREAM(LOGGER, "This controller handle does not support trajectory execution.");
+    RCLCPP_ERROR_STREAM(logger_, "This controller handle does not support trajectory execution.");
     return false;
   }
 
@@ -83,7 +83,7 @@ public:
   }
 
 private:
-  const rclcpp::Logger LOGGER;
+  const rclcpp::Logger logger_;
 };
 
 }  // end namespace moveit_simple_controller_manager

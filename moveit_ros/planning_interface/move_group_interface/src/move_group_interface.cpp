@@ -119,7 +119,7 @@ public:
     callback_executor_.add_callback_group(callback_group_, node->get_node_base_interface());
     callback_thread_ = std::thread([this]() { callback_executor_.spin(); });
 
-    robot_model = opt.robot_model ? opt.robot_model : getSharedRobotModel(node_, opt.robot_description);
+    robot_model_ = opt.robot_model ? opt.robot_model : getSharedRobotModel(node_, opt.robot_description);
     if (!getRobotModel())
     {
       std::string error = "Unable to construct robot model. Please make sure all needed information is on the "
@@ -169,7 +169,7 @@ public:
                               planning_scene_monitor::PlanningSceneMonitor::DEFAULT_ATTACHED_COLLISION_OBJECT_TOPIC),
         1);
 
-    current_state_monitor_ = getSharedStateMonitor(node_, robot_model, tf_buffer_);
+    current_state_monitor_ = getSharedStateMonitor(node_, robot_model_, tf_buffer_);
 
     move_action_client_ = rclcpp_action::create_client<moveit_msgs::action::MoveGroup>(
         node_, rclcpp::names::append(opt_.move_group_namespace, move_group::MOVE_ACTION), callback_group_);
@@ -217,7 +217,7 @@ public:
 
   const moveit::core::RobotModelConstPtr& getRobotModel() const
   {
-    return robot_model;
+    return robot_model_;
   }
 
   const moveit::core::JointModelGroup* getJointModelGroup() const
@@ -1263,7 +1263,7 @@ public:
     if (constraints_storage_)
     {
       moveit_warehouse::ConstraintsWithMetadata msg_m;
-      if (constraints_storage_->getConstraints(msg_m, constraint, robot_model->getName(), opt_.group_name))
+      if (constraints_storage_->getConstraints(msg_m, constraint, robot_model_->getName(), opt_.group_name))
       {
         path_constraints_ =
             std::make_unique<moveit_msgs::msg::Constraints>(static_cast<moveit_msgs::msg::Constraints>(*msg_m));
@@ -1301,7 +1301,7 @@ public:
 
     std::vector<std::string> c;
     if (constraints_storage_)
-      constraints_storage_->getKnownConstraints(c, robot_model->getName(), opt_.group_name);
+      constraints_storage_->getKnownConstraints(c, robot_model_->getName(), opt_.group_name);
 
     return c;
   }
@@ -1382,7 +1382,7 @@ private:
   rclcpp::executors::SingleThreadedExecutor callback_executor_;
   std::thread callback_thread_;
   std::shared_ptr<tf2_ros::Buffer> tf_buffer_;
-  moveit::core::RobotModelConstPtr robot_model;
+  moveit::core::RobotModelConstPtr robot_model_;
   planning_scene_monitor::CurrentStateMonitorPtr current_state_monitor_;
 
   std::shared_ptr<rclcpp_action::Client<moveit_msgs::action::MoveGroup>> move_action_client_;

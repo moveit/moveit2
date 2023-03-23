@@ -99,6 +99,10 @@ public:
   /// Planner parameters provided with the MotionPlanRequest
   struct MultiPipelinePlanRequestParameters
   {
+    /** Constructor, load MultiPipelinePlanRequestParameters as defined in the node's ROS parameters
+     * \param [in] node Node access the ROS parameters
+     * \param [in] planning_pipeline_names A vector with the names of the pipelines that should be used in parallel
+     */
     MultiPipelinePlanRequestParameters(const rclcpp::Node::SharedPtr& node,
                                        const std::vector<std::string>& planning_pipeline_names)
     {
@@ -111,6 +115,12 @@ public:
         multi_plan_request_parameters.push_back(parameters);
       }
     }
+
+    // Additional constructor to create an empty MultiPipelinePlanRequestParameters instance
+    MultiPipelinePlanRequestParameters()
+    {
+    }
+
     // Plan request parameters for the individual planning pipelines which run concurrently
     std::vector<PlanRequestParameters> multi_plan_request_parameters;
   };
@@ -191,7 +201,8 @@ public:
   planning_interface::MotionPlanResponse plan();
   /** \brief Run a plan from start or current state to fulfill the last goal constraints provided by setGoal() using the
    * provided PlanRequestParameters. */
-  planning_interface::MotionPlanResponse plan(const PlanRequestParameters& parameters);
+  planning_interface::MotionPlanResponse plan(const PlanRequestParameters& parameters,
+                                              planning_scene::PlanningScenePtr const_planning_scene = nullptr);
 
   /** \brief Run a plan from start or current state to fulfill the last goal constraints provided by setGoal() using the
    * provided PlanRequestParameters. This defaults to taking the full planning time (null stopping_criterion_callback)
@@ -199,7 +210,8 @@ public:
   planning_interface::MotionPlanResponse
   plan(const MultiPipelinePlanRequestParameters& parameters,
        const SolutionCallbackFunction& solution_selection_callback = &getShortestSolution,
-       StoppingCriterionFunction stopping_criterion_callback = nullptr);
+       StoppingCriterionFunction stopping_criterion_callback = nullptr,
+       const planning_scene::PlanningScenePtr planning_scene = nullptr);
 
   /** \brief Execute the latest computed solution trajectory computed by plan(). By default this function terminates
    * after the execution is complete. The execution can be run in background by setting blocking to false. */

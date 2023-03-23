@@ -105,10 +105,10 @@ public:
     if ((intersection - start).norm() < 0.000001 || (end - intersection).norm() < 0.000001)
     {
       length_ = 0.0;
-      radius = 1.0;
-      center = intersection;
-      x = Eigen::VectorXd::Zero(start.size());
-      y = Eigen::VectorXd::Zero(start.size());
+      radius_ = 1.0;
+      center_ = intersection;
+      x_ = Eigen::VectorXd::Zero(start.size());
+      y_ = Eigen::VectorXd::Zero(start.size());
       return;
     }
 
@@ -120,10 +120,10 @@ public:
     if (start_dot_end > 0.999999 || start_dot_end < -0.999999)
     {
       length_ = 0.0;
-      radius = 1.0;
-      center = intersection;
-      x = Eigen::VectorXd::Zero(start.size());
-      y = Eigen::VectorXd::Zero(start.size());
+      radius_ = 1.0;
+      center_ = intersection;
+      x_ = Eigen::VectorXd::Zero(start.size());
+      y_ = Eigen::VectorXd::Zero(start.size());
       return;
     }
 
@@ -135,44 +135,44 @@ public:
     double distance = std::min(start_distance, end_distance);
     distance = std::min(distance, max_deviation * sin(0.5 * angle) / (1.0 - cos(0.5 * angle)));
 
-    radius = distance / tan(0.5 * angle);
-    length_ = angle * radius;
+    radius_ = distance / tan(0.5 * angle);
+    length_ = angle * radius_;
 
-    center = intersection + (end_direction - start_direction).normalized() * radius / cos(0.5 * angle);
-    x = (intersection - distance * start_direction - center).normalized();
-    y = start_direction;
+    center_ = intersection + (end_direction - start_direction).normalized() * radius_ / cos(0.5 * angle);
+    x_ = (intersection - distance * start_direction - center_).normalized();
+    y_ = start_direction;
   }
 
   Eigen::VectorXd getConfig(double s) const override
   {
-    const double angle = s / radius;
-    return center + radius * (x * cos(angle) + y * sin(angle));
+    const double angle = s / radius_;
+    return center_ + radius_ * (x_ * cos(angle) + y_ * sin(angle));
   }
 
   Eigen::VectorXd getTangent(double s) const override
   {
-    const double angle = s / radius;
-    return -x * sin(angle) + y * cos(angle);
+    const double angle = s / radius_;
+    return -x_ * sin(angle) + y_ * cos(angle);
   }
 
   Eigen::VectorXd getCurvature(double s) const override
   {
-    const double angle = s / radius;
-    return -1.0 / radius * (x * cos(angle) + y * sin(angle));
+    const double angle = s / radius_;
+    return -1.0 / radius_ * (x_ * cos(angle) + y_ * sin(angle));
   }
 
   std::list<double> getSwitchingPoints() const override
   {
     std::list<double> switching_points;
-    const double dim = x.size();
+    const double dim = x_.size();
     for (unsigned int i = 0; i < dim; ++i)
     {
-      double switching_angle = atan2(y[i], x[i]);
+      double switching_angle = atan2(y_[i], x_[i]);
       if (switching_angle < 0.0)
       {
         switching_angle += M_PI;
       }
-      const double switching_point = switching_angle * radius;
+      const double switching_point = switching_angle * radius_;
       if (switching_point < length_)
       {
         switching_points.push_back(switching_point);
@@ -188,10 +188,10 @@ public:
   }
 
 private:
-  double radius;
-  Eigen::VectorXd center;
-  Eigen::VectorXd x;
-  Eigen::VectorXd y;
+  double radius_;
+  Eigen::VectorXd center_;
+  Eigen::VectorXd x_;
+  Eigen::VectorXd y_;
 };
 
 Path::Path(const std::list<Eigen::VectorXd>& path, double max_deviation) : length_(0.0)
@@ -884,16 +884,21 @@ bool TimeOptimalTrajectoryGeneration::computeTimeStamps(robot_trajectory::RobotT
   double velocity_scaling_factor = verifyScalingFactor(max_velocity_scaling_factor, VELOCITY);
   double acceleration_scaling_factor = verifyScalingFactor(max_acceleration_scaling_factor, ACCELERATION);
 
-  const std::vector<std::string>& vars = group->getVariableNames();
+  // Get the velocity and acceleration limits for all active joints
   const moveit::core::RobotModel& rmodel = group->getParentModel();
-  const unsigned num_joints = group->getVariableCount();
+  const std::vector<std::string>& vars = group->getVariableNames();
+  std::vector<size_t> indices;
+  if (!group->computeJointVariableIndices(group->getActiveJointModelNames(), indices))
+  {
+    RCLCPP_ERROR(LOGGER, "Failed to get active variable indices.");
+  }
 
-  // Get the vel/accel limits
+  const size_t num_joints = indices.size();
   Eigen::VectorXd max_velocity(num_joints);
   Eigen::VectorXd max_acceleration(num_joints);
-  for (size_t j = 0; j < num_joints; ++j)
+  for (const auto idx : indices)
   {
-    const moveit::core::VariableBounds& bounds = rmodel.getVariableBounds(vars[j]);
+    const moveit::core::VariableBounds& bounds = rmodel.getVariableBounds(vars[idx]);
 
     // Limits need to be non-zero, otherwise we never exit
     if (bounds.velocity_bounded_)
@@ -901,16 +906,16 @@ bool TimeOptimalTrajectoryGeneration::computeTimeStamps(robot_trajectory::RobotT
       if (bounds.max_velocity_ <= 0.0)
       {
         RCLCPP_ERROR(LOGGER, "Invalid max_velocity %f specified for '%s', must be greater than 0.0",
-                     bounds.max_velocity_, vars[j].c_str());
+                     bounds.max_velocity_, vars[idx].c_str());
         return false;
       }
-      max_velocity[j] =
+      max_velocity[idx] =
           std::min(std::fabs(bounds.max_velocity_), std::fabs(bounds.min_velocity_)) * velocity_scaling_factor;
     }
     else
     {
       RCLCPP_ERROR_STREAM(LOGGER, "No velocity limit was defined for joint "
-                                      << vars[j].c_str()
+                                      << vars[idx].c_str()
                                       << "! You have to define velocity limits in the URDF or joint_limits.yaml");
       return false;
     }
@@ -920,16 +925,16 @@ bool TimeOptimalTrajectoryGeneration::computeTimeStamps(robot_trajectory::RobotT
       if (bounds.max_acceleration_ < 0.0)
       {
         RCLCPP_ERROR(LOGGER, "Invalid max_acceleration %f specified for '%s', must be greater than 0.0",
-                     bounds.max_acceleration_, vars[j].c_str());
+                     bounds.max_acceleration_, vars[idx].c_str());
         return false;
       }
-      max_acceleration[j] = std::min(std::fabs(bounds.max_acceleration_), std::fabs(bounds.min_acceleration_)) *
-                            acceleration_scaling_factor;
+      max_acceleration[idx] = std::min(std::fabs(bounds.max_acceleration_), std::fabs(bounds.min_acceleration_)) *
+                              acceleration_scaling_factor;
     }
     else
     {
       RCLCPP_ERROR_STREAM(LOGGER, "No acceleration limit was defined for joint "
-                                      << vars[j].c_str()
+                                      << vars[idx].c_str()
                                       << "! You have to define acceleration limits in the URDF or "
                                          "joint_limits.yaml");
       return false;
@@ -982,23 +987,30 @@ bool TimeOptimalTrajectoryGeneration::computeTimeStamps(
   double velocity_scaling_factor = verifyScalingFactor(max_velocity_scaling_factor, VELOCITY);
   double acceleration_scaling_factor = verifyScalingFactor(max_acceleration_scaling_factor, ACCELERATION);
 
-  const unsigned num_joints = group->getVariableCount();
-  const std::vector<std::string>& vars = group->getVariableNames();
+  // Get the velocity and acceleration limits for specified joints
   const moveit::core::RobotModel& rmodel = group->getParentModel();
+  const std::vector<std::string>& vars = group->getVariableNames();
+  std::vector<size_t> indices;
+  if (!group->computeJointVariableIndices(group->getActiveJointModelNames(), indices))
+  {
+    RCLCPP_ERROR(LOGGER, "Failed to get active variable indices.");
+  }
+
+  const size_t num_joints = indices.size();
 
   Eigen::VectorXd max_velocity(num_joints);
   Eigen::VectorXd max_acceleration(num_joints);
-  for (size_t j = 0; j < num_joints; ++j)
+  for (const auto idx : indices)
   {
-    const moveit::core::VariableBounds& bounds = rmodel.getVariableBounds(vars[j]);
+    const moveit::core::VariableBounds& bounds = rmodel.getVariableBounds(vars[idx]);
 
     // VELOCITY LIMIT
     // Check if a custom limit was specified as an argument
     bool set_velocity_limit = false;
-    auto it = velocity_limits.find(vars[j]);
+    auto it = velocity_limits.find(vars[idx]);
     if (it != velocity_limits.end())
     {
-      max_velocity[j] = it->second * velocity_scaling_factor;
+      max_velocity[idx] = it->second * velocity_scaling_factor;
       set_velocity_limit = true;
     }
 
@@ -1008,10 +1020,10 @@ bool TimeOptimalTrajectoryGeneration::computeTimeStamps(
       if (bounds.max_velocity_ < 0.0)
       {
         RCLCPP_ERROR(LOGGER, "Invalid max_velocity %f specified for '%s', must be greater than 0.0",
-                     bounds.max_velocity_, vars[j].c_str());
+                     bounds.max_velocity_, vars[idx].c_str());
         return false;
       }
-      max_velocity[j] =
+      max_velocity[idx] =
           std::min(std::fabs(bounds.max_velocity_), std::fabs(bounds.min_velocity_)) * velocity_scaling_factor;
       set_velocity_limit = true;
     }
@@ -1019,7 +1031,7 @@ bool TimeOptimalTrajectoryGeneration::computeTimeStamps(
     if (!set_velocity_limit)
     {
       RCLCPP_ERROR_STREAM(LOGGER, "No velocity limit was defined for joint "
-                                      << vars[j].c_str()
+                                      << vars[idx].c_str()
                                       << "! You have to define velocity limits in the URDF or "
                                          "joint_limits.yaml");
       return false;
@@ -1028,10 +1040,10 @@ bool TimeOptimalTrajectoryGeneration::computeTimeStamps(
     // ACCELERATION LIMIT
     // Check if a custom limit was specified as an argument
     bool set_acceleration_limit = false;
-    it = acceleration_limits.find(vars[j]);
+    it = acceleration_limits.find(vars[idx]);
     if (it != acceleration_limits.end())
     {
-      max_acceleration[j] = it->second * acceleration_scaling_factor;
+      max_acceleration[idx] = it->second * acceleration_scaling_factor;
       set_acceleration_limit = true;
     }
 
@@ -1041,17 +1053,17 @@ bool TimeOptimalTrajectoryGeneration::computeTimeStamps(
       if (bounds.max_acceleration_ < 0.0)
       {
         RCLCPP_ERROR(LOGGER, "Invalid max_acceleration %f specified for '%s', must be greater than 0.0",
-                     bounds.max_acceleration_, vars[j].c_str());
+                     bounds.max_acceleration_, vars[idx].c_str());
         return false;
       }
-      max_acceleration[j] = std::min(std::fabs(bounds.max_acceleration_), std::fabs(bounds.min_acceleration_)) *
-                            acceleration_scaling_factor;
+      max_acceleration[idx] = std::min(std::fabs(bounds.max_acceleration_), std::fabs(bounds.min_acceleration_)) *
+                              acceleration_scaling_factor;
       set_acceleration_limit = true;
     }
     if (!set_acceleration_limit)
     {
       RCLCPP_ERROR_STREAM(LOGGER, "No acceleration limit was defined for joint "
-                                      << vars[j].c_str()
+                                      << vars[idx].c_str()
                                       << "! You have to define acceleration limits in the URDF or "
                                          "joint_limits.yaml");
       return false;
@@ -1192,7 +1204,7 @@ bool TimeOptimalTrajectoryGeneration::doTimeParameterizationCalculations(robot_t
 
 bool TimeOptimalTrajectoryGeneration::hasMixedJointTypes(const moveit::core::JointModelGroup* group) const
 {
-  const std::vector<const moveit::core::JointModel*>& joint_models = group->getJointModels();
+  const std::vector<const moveit::core::JointModel*>& joint_models = group->getActiveJointModels();
 
   bool have_prismatic =
       std::any_of(joint_models.cbegin(), joint_models.cend(), [](const moveit::core::JointModel* joint_model) {
