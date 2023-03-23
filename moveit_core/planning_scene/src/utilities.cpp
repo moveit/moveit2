@@ -44,29 +44,11 @@ namespace
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_planning_scene.utilities");
 }
 
-moveit::core::RobotModelPtr createRobotModel(const urdf::ModelInterfaceSharedPtr& urdf_model,
-                                             const srdf::ModelConstSharedPtr& srdf_model)
-{
-  auto robot_model = std::make_shared<moveit::core::RobotModel>(urdf_model, srdf_model);
-  if (!robot_model || !robot_model->getRootJoint())
-    return moveit::core::RobotModelPtr();
-
-  return robot_model;
-}
-
 void poseMsgToEigen(const geometry_msgs::msg::Pose& msg, Eigen::Isometry3d& out)
 {
   Eigen::Translation3d translation(msg.position.x, msg.position.y, msg.position.z);
   Eigen::Quaterniond quaternion(msg.orientation.w, msg.orientation.x, msg.orientation.y, msg.orientation.z);
-  if ((quaternion.x() == 0) && (quaternion.y() == 0) && (quaternion.z() == 0) && (quaternion.w() == 0))
-  {
-    RCLCPP_WARN(LOGGER, "Empty quaternion found in pose message. Setting to neutral orientation.");
-    quaternion.setIdentity();
-  }
-  else
-  {
-    quaternion.normalize();
-  }
+  quaternion.normalize();
   out = translation * quaternion;
 }
 

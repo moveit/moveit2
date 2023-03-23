@@ -42,16 +42,6 @@
 
 namespace planning_scene
 {
-
-/**
- * Helper function to create a RobotModel from a urdf/srdf.
- * @param urdf_model The universal robot description
- * @param srdf_model The semantic robot description
- * @return nullptr on failure
- */
-moveit::core::RobotModelPtr createRobotModel(const urdf::ModelInterfaceSharedPtr& urdf_model,
-                                             const srdf::ModelConstSharedPtr& srdf_model);
-
 /**
  * convert Pose msg to Eigen::Isometry, normalizing the quaternion part if necessary.
  * @param msg Input message

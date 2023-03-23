@@ -136,9 +136,12 @@ PlanningScene::PlanningScene(const urdf::ModelInterfaceSharedPtr& urdf_model,
   if (!srdf_model)
     throw moveit::ConstructException("The SRDF model cannot be nullptr");
 
-  robot_model_ = createRobotModel(urdf_model, srdf_model);
-  if (!robot_model_)
+  robot_model_ = std::make_shared<moveit::core::RobotModel>(urdf_model, srdf_model);
+  if (!robot_model_ || !robot_model_->getRootJoint())
+  {
+    robot_model_ = nullptr;
     throw moveit::ConstructException("Could not create RobotModel");
+  }
 
   initialize();
 }
