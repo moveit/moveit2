@@ -35,35 +35,38 @@
 /* Author: Sebastian Jahr
    Desc: TODO */
 
-#include <moveit/pipeline_planning_interface/solution_selection_functions.hpp>
+#pragma once
+
+#include <moveit/planning_pipeline_interfaces/plan_responses_container.hpp>
+#include <moveit/planning_interface/planning_response.h>
+#include <moveit/planning_interface/planning_request.h>
+#include <moveit/planning_pipeline/planning_pipeline.h>
+#include <moveit/planning_scene/planning_scene.h>
 
 namespace moveit
 {
-namespace planning_interface
+namespace planning_pipeline_interfaces
 {
-::planning_interface::MotionPlanResponse
-getShortestSolution(const std::vector<::planning_interface::MotionPlanResponse>& solutions)
-{
-  // Find trajectory with minimal path
-  auto const shortest_trajectory = std::min_element(solutions.begin(), solutions.end(),
-                                                    [](const ::planning_interface::MotionPlanResponse& solution_a,
-                                                       const ::planning_interface::MotionPlanResponse& solution_b) {
-                                                      // If both solutions were successful, check which path is shorter
-                                                      if (solution_a && solution_b)
-                                                      {
-                                                        return robot_trajectory::path_length(*solution_a.trajectory) <
-                                                               robot_trajectory::path_length(*solution_b.trajectory);
-                                                      }
-                                                      // If only solution a is successful, return a
-                                                      else if (solution_a)
-                                                      {
-                                                        return true;
-                                                      }
-                                                      // Else return solution b, either because it is successful or not
-                                                      return false;
-                                                    });
-  return *shortest_trajectory;
-}
+/** \brief A stopping criterion callback function for the parallel planning API of planning component */
+typedef std::function<bool(const PlanResponsesContainer& plan_responses_container,
+                           const std::vector<::planning_interface::MotionPlanRequest>& plan_requests)>
+    StoppingCriterionFunction;
 
-}  // namespace planning_interface
+/** \brief A solution callback function type for the parallel planning API of planning component  */
+typedef std::function<::planning_interface::MotionPlanResponse(
+    const std::vector<::planning_interface::MotionPlanResponse>& solutions)>
+    SolutionSelectionFunction;
+
+::planning_interface::MotionPlanResponse
+planWithSinglePipeline(const ::planning_interface::MotionPlanRequest& motion_plan_requests,
+                       ::planning_scene::PlanningSceneConstPtr planning_scene,
+                       const std::map<std::string, planning_pipeline::PlanningPipelinePtr>& planning_pipelines);
+
+const std::vector<::planning_interface::MotionPlanResponse>
+planWithParallelPipelines(const std::vector<::planning_interface::MotionPlanRequest>& motion_plan_requests,
+                          ::planning_scene::PlanningSceneConstPtr planning_scene,
+                          const std::map<std::string, planning_pipeline::PlanningPipelinePtr>& planning_pipelines,
+                          StoppingCriterionFunction stopping_criterion_callback = nullptr,
+                          SolutionSelectionFunction solution_selection_function = nullptr);
+}  // namespace planning_pipeline_interfaces
 }  // namespace moveit

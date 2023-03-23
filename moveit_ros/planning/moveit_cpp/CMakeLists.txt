@@ -10,6 +10,7 @@ ament_target_dependencies(moveit_cpp
 target_link_libraries(moveit_cpp
   moveit_planning_scene_monitor
   moveit_planning_pipeline
+  moveit_planning_pipeline_interfaces
   moveit_trajectory_execution_manager)
 
 install(DIRECTORY include/ DESTINATION include/moveit_ros_planning)

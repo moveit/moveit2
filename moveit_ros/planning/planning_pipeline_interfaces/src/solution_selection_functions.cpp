@@ -35,27 +35,35 @@
 /* Author: Sebastian Jahr
    Desc: TODO */
 
-#include <moveit/pipeline_planning_interface/stopping_criterion_functions.hpp>
+#include <moveit/planning_pipeline_interfaces/solution_selection_functions.hpp>
 
 namespace moveit
 {
-namespace planning_interface
+namespace planning_pipeline_interfaces
 {
-bool stopAtFirstSolution(const PlanResponsesContainer& plan_responses_container,
-                         const std::vector<::planning_interface::MotionPlanRequest>& /*plan_requests*/)
+::planning_interface::MotionPlanResponse
+getShortestSolution(const std::vector<::planning_interface::MotionPlanResponse>& solutions)
 {
-  // Stop at the first successful plan
-  for (auto const& solution : plan_responses_container.getSolutions())
-  {
-    // bool(solution) is shorthand to evaluate the error code of the solution, checking for SUCCESS
-    if (bool(solution))
-    {
-      // Return true to abort the other pipelines
-      return true;
-    }
-  }
-  // Return false when parallel planning should continue because it hasn't found a successful solution yet
-  return false;
+  // Find trajectory with minimal path
+  auto const shortest_trajectory = std::min_element(solutions.begin(), solutions.end(),
+                                                    [](const ::planning_interface::MotionPlanResponse& solution_a,
+                                                       const ::planning_interface::MotionPlanResponse& solution_b) {
+                                                      // If both solutions were successful, check which path is shorter
+                                                      if (solution_a && solution_b)
+                                                      {
+                                                        return robot_trajectory::path_length(*solution_a.trajectory) <
+                                                               robot_trajectory::path_length(*solution_b.trajectory);
+                                                      }
+                                                      // If only solution a is successful, return a
+                                                      else if (solution_a)
+                                                      {
+                                                        return true;
+                                                      }
+                                                      // Else return solution b, either because it is successful or not
+                                                      return false;
+                                                    });
+  return *shortest_trajectory;
 }
-}  // namespace planning_interface
+
+}  // namespace planning_pipeline_interfaces
 }  // namespace moveit

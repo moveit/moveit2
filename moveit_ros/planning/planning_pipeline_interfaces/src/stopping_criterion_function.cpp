@@ -35,20 +35,27 @@
 /* Author: Sebastian Jahr
    Desc: TODO */
 
-#pragma once
-
-#include <moveit/pipeline_planning_interface/pipeline_planning_interface.hpp>
+#include <moveit/planning_pipeline_interfaces/stopping_criterion_functions.hpp>
 
 namespace moveit
 {
-namespace planning_interface
+namespace planning_pipeline_interfaces
 {
-/** \brief Function that returns the shortest solution out of a vector of solutions based on robot_trajectory::path_length(...)
- *  \param [in] solutions Vector of solutions to chose the shortest one from
- *  \return Shortest solution, trajectory of the returned MotionPlanResponse is a nullptr if no solution is found!
- */
-::planning_interface::MotionPlanResponse
-getShortestSolution(const std::vector<::planning_interface::MotionPlanResponse>& solutions);
-
-}  // namespace planning_interface
+bool stopAtFirstSolution(const PlanResponsesContainer& plan_responses_container,
+                         const std::vector<::planning_interface::MotionPlanRequest>& /*plan_requests*/)
+{
+  // Stop at the first successful plan
+  for (auto const& solution : plan_responses_container.getSolutions())
+  {
+    // bool(solution) is shorthand to evaluate the error code of the solution, checking for SUCCESS
+    if (bool(solution))
+    {
+      // Return true to abort the other pipelines
+      return true;
+    }
+  }
+  // Return false when parallel planning should continue because it hasn't found a successful solution yet
+  return false;
+}
+}  // namespace planning_pipeline_interfaces
 }  // namespace moveit

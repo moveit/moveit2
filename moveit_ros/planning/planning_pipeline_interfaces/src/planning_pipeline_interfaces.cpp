@@ -35,15 +35,15 @@
 /* Author: Sebastian Jahr
    Desc: TODO */
 
-#include <moveit/pipeline_planning_interface/pipeline_planning_interface.hpp>
+#include <moveit/planning_pipeline_interfaces/planning_pipeline_interfaces.hpp>
 
 #include <thread>
 
 namespace moveit
 {
-namespace planning_interface
+namespace planning_pipeline_interfaces
 {
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.::planning_interface.pipeline_planning_interface");
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.::planning_interface.planning_pipeline_interfaces");
 
 ::planning_interface::MotionPlanResponse
 planWithSinglePipeline(const ::planning_interface::MotionPlanRequest& motion_plan_request,
@@ -155,5 +155,5 @@ planWithParallelPipelines(const std::vector<::planning_interface::MotionPlanRequ
   return plan_responses_container.getSolutions();
 }
 
-}  // namespace planning_interface
+}  // namespace planning_pipeline_interfaces
 }  // namespace moveit

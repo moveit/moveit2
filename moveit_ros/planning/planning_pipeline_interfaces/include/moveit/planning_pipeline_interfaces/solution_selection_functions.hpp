@@ -37,36 +37,18 @@
 
 #pragma once
 
-#include <moveit/pipeline_planning_interface/plan_responses_container.hpp>
-#include <moveit/planning_interface/planning_response.h>
-#include <moveit/planning_interface/planning_request.h>
-#include <moveit/planning_pipeline/planning_pipeline.h>
-#include <moveit/planning_scene/planning_scene.h>
+#include <moveit/planning_pipeline_interfaces/planning_pipeline_interfaces.hpp>
 
 namespace moveit
 {
-namespace planning_interface
+namespace planning_pipeline_interfaces
 {
-/** \brief A stopping criterion callback function for the parallel planning API of planning component */
-typedef std::function<bool(const PlanResponsesContainer& plan_responses_container,
-                           const std::vector<::planning_interface::MotionPlanRequest>& plan_requests)>
-    StoppingCriterionFunction;
-
-/** \brief A solution callback function type for the parallel planning API of planning component  */
-typedef std::function<::planning_interface::MotionPlanResponse(
-    const std::vector<::planning_interface::MotionPlanResponse>& solutions)>
-    SolutionSelectionFunction;
-
+/** \brief Function that returns the shortest solution out of a vector of solutions based on robot_trajectory::path_length(...)
+ *  \param [in] solutions Vector of solutions to chose the shortest one from
+ *  \return Shortest solution, trajectory of the returned MotionPlanResponse is a nullptr if no solution is found!
+ */
 ::planning_interface::MotionPlanResponse
-planWithSinglePipeline(const ::planning_interface::MotionPlanRequest& motion_plan_requests,
-                       ::planning_scene::PlanningSceneConstPtr planning_scene,
-                       const std::map<std::string, planning_pipeline::PlanningPipelinePtr>& planning_pipelines);
+getShortestSolution(const std::vector<::planning_interface::MotionPlanResponse>& solutions);
 
-const std::vector<::planning_interface::MotionPlanResponse>
-planWithParallelPipelines(const std::vector<::planning_interface::MotionPlanRequest>& motion_plan_requests,
-                          ::planning_scene::PlanningSceneConstPtr planning_scene,
-                          const std::map<std::string, planning_pipeline::PlanningPipelinePtr>& planning_pipelines,
-                          StoppingCriterionFunction stopping_criterion_callback = nullptr,
-                          SolutionSelectionFunction solution_selection_function = nullptr);
-}  // namespace planning_interface
+}  // namespace planning_pipeline_interfaces
 }  // namespace moveit

@@ -37,15 +37,32 @@
 
 #pragma once
 
-#include <moveit/pipeline_planning_interface/pipeline_planning_interface.hpp>
+#include <moveit/planning_interface/planning_response.h>
+#include <moveit/planning_interface/planning_request.h>
 
 namespace moveit
 {
-namespace planning_interface
+namespace planning_pipeline_interfaces
 {
-/** \brief A callback function that can be used as a parallel planning stop criterion.
- *          It stops parallel planning as soon as any planner finds a solution. */
-bool stopAtFirstSolution(const PlanResponsesContainer& plan_responses_container,
-                         const std::vector<::planning_interface::MotionPlanRequest>& plan_requests);
-}  // namespace planning_interface
+MOVEIT_CLASS_FORWARD(PlanResponsesContainer);  // Defines PlanningComponentPtr, ConstPtr, WeakPtr... etc
+/** \brief A container to thread-safely store multiple MotionPlanResponses for later usage */
+class PlanResponsesContainer
+{
+public:
+  PlanResponsesContainer(const size_t expected_size = 0);
+
+  /** \brief Thread safe method to add PlanResponsesContainer to this data structure TODO(sjahr): Refactor this method to an
+   * insert method similar to https://github.com/ompl/ompl/blob/main/src/ompl/base/src/ProblemDefinition.cpp#L54-L161.
+   * This way, it is possible to create a sorted container e.g. according to a user specified criteria
+   */
+  void pushBack(const ::planning_interface::MotionPlanResponse& plan_solution);
+
+  /** \brief Get solutions */
+  const std::vector<::planning_interface::MotionPlanResponse>& getSolutions() const;
+
+private:
+  std::vector<::planning_interface::MotionPlanResponse> solutions_;
+  std::mutex solutions_mutex_;
+};
+}  // namespace planning_pipeline_interfaces
 }  // namespace moveit
