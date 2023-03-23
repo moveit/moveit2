@@ -49,7 +49,9 @@ bool satisfies_position_bounds(const moveit::core::JointModelGroup* jmg, const E
 
 void init_joint_model_group(py::module& m)
 {
-  py::class_<moveit::core::JointModelGroup>(m, "JointModelGroup",
+  py::module robot_model = m.def_submodule("robot_model");
+
+  py::class_<moveit::core::JointModelGroup>(robot_model, "JointModelGroup",
                                             R"(
           Representation of a group of joints that are part of a robot model.
           )")
