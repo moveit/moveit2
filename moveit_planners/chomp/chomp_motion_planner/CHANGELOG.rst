@@ -2,6 +2,13 @@
 Changelog for package chomp_motion_planner
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.7.1 (2023-03-23)
+------------------
+* remove underscore from public member in MotionPlanResponse (`#1939 <https://github.com/ros-planning/moveit2/issues/1939>`_)
+  * remove underscore from private members
+  * fix more uses of the suffix notation
+* Contributors: AlexWebb
+
 2.7.0 (2023-01-29)
 ------------------
 * Merge https://github.com/ros-planning/moveit/commit/9225971216885490e933ece25390c63ca14f8a58
