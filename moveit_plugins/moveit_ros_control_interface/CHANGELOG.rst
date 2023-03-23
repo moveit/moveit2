@@ -2,6 +2,15 @@
 Changelog for package moveit_ros_control_interface
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.7.1 (2023-03-23)
+------------------
+* Add Warning Message for Out of Date Controller Information (`#1983 <https://github.com/ros-planning/moveit2/issues/1983>`_)
+  Co-authored-by: Joseph Schornak <joe.schornak@gmail.com>
+  Co-authored-by: Joseph Schornak <joe.schornak@gmail.com>
+* Update SwitchController API usage (`#1996 <https://github.com/ros-planning/moveit2/issues/1996>`_)
+  Fixes deprecated and now removed message fields https://github.com/ros-controls/ros2_control/pull/948
+* Contributors: Erik Holum, Henning Kayser
+
 2.7.0 (2023-01-29)
 ------------------
 * Fix parameters for ros2_control namespaces (`#1833 <https://github.com/ros-planning/moveit2/issues/1833>`_)
