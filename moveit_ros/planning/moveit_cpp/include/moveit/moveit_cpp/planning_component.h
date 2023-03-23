@@ -40,8 +40,8 @@
 #include <geometry_msgs/msg/pose_stamped.hpp>
 #include <moveit/moveit_cpp/moveit_cpp.h>
 #include <moveit/planning_interface/planning_response.h>
-#include <moveit/planning_interface/pipeline_planning_interface.h>
-#include <moveit/planning_interface/solution_selection_functions.h>
+#include <moveit/planning_pipeline_interfaces/planning_pipeline_interfaces.hpp>
+#include <moveit/planning_pipeline_interfaces/solution_selection_functions.hpp>
 #include <moveit/planning_interface/planning_response.h>
 #include <moveit/robot_state/conversions.h>
 #include <moveit/robot_state/robot_state.h>
@@ -195,16 +195,17 @@ public:
   /** \brief Run a plan from start or current state to fulfill the last goal constraints provided by setGoal() using the
    * provided PlanRequestParameters. */
   planning_interface::MotionPlanResponse plan(const PlanRequestParameters& parameters,
-                                              planning_scene::PlanningScenePtr const_planning_scene = nullptr);
+                                              planning_scene::PlanningScenePtr planning_scene = nullptr);
 
   /** \brief Run a plan from start or current state to fulfill the last goal constraints provided by setGoal() using the
    * provided PlanRequestParameters. This defaults to taking the full planning time (null stopping_criterion_callback)
    * and finding the shortest solution in joint space. */
   planning_interface::MotionPlanResponse
   plan(const MultiPipelinePlanRequestParameters& parameters,
-       const SolutionSelectionFunction& solution_selection_function = &planning_interface::getShortestSolution,
-       StoppingCriterionFunction stopping_criterion_callback = nullptr,
-       const planning_scene::PlanningScenePtr planning_scene = nullptr);
+       const moveit::planning_pipeline_interfaces::SolutionSelectionFunction& solution_selection_function =
+           &moveit::planning_pipeline_interfaces::getShortestSolution,
+       moveit::planning_pipeline_interfaces::StoppingCriterionFunction stopping_criterion_callback = nullptr,
+       planning_scene::PlanningScenePtr planning_scene = nullptr);
 
   /** \brief Execute the latest computed solution trajectory computed by plan(). By default this function terminates
    * after the execution is complete. The execution can be run in background by setting blocking to false. */
@@ -213,11 +214,10 @@ public:
     return false;
   };
 
-  ::planning_interface::MotionPlanRequest getMotionPlanRequest(const PlanRequestParameters& plan_request_parameters,
-                                                               bool use_workspace_parameters = false);
-  ::planning_interface::MotionPlanRequest
-  getMotionPlanRequestVector(const MultiPipelinePlanRequestParameters& multi_pipeline_plan_request_parameters,
-                             bool use_workspace_parameters = false);
+  ::planning_interface::MotionPlanRequest getMotionPlanRequest(const PlanRequestParameters& plan_request_parameters);
+
+  std::vector<::planning_interface::MotionPlanRequest>
+  getMotionPlanRequestVector(const MultiPipelinePlanRequestParameters& multi_pipeline_plan_request_parameters);
 
 private:
   // Core properties and instances
