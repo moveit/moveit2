@@ -1,4 +1,3 @@
-
 /*********************************************************************
  * Software License Agreement (BSD License)
  *
@@ -54,7 +53,7 @@ typedef std::function<bool(const PlanResponsesContainer& plan_responses_containe
     StoppingCriterionFunction;
 
 /** \brief A solution callback function type for the parallel planning API of planning component  */
-typedef std::function<std::vector<::planning_interface::MotionPlanResponse>(
+typedef std::function<::planning_interface::MotionPlanResponse(
     const std::vector<::planning_interface::MotionPlanResponse>& solutions)>
     SolutionSelectionFunction;
 

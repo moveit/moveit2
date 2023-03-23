@@ -1,4 +1,3 @@
-
 /*********************************************************************
  * Software License Agreement (BSD License)
  *
@@ -36,31 +35,27 @@
 /* Author: Sebastian Jahr
    Desc: TODO */
 
-#include <moveit/pipeline_planning_interface/plan_responses_container.hpp>
+#include <moveit/pipeline_planning_interface/stopping_criterion_functions.hpp>
 
 namespace moveit
 {
 namespace planning_interface
 {
-PlanResponsesContainer::PlanResponsesContainer(const size_t expected_size)
+bool stopAtFirstSolution(const PlanResponsesContainer& plan_responses_container,
+                         const std::vector<::planning_interface::MotionPlanRequest>& /*plan_requests*/)
 {
-  solutions_.reserve(expected_size);
-}
-
-/** \brief Thread safe method to add PlanResponsesContainer to this data structure TODO(sjahr): Refactor this method to
- * an insert method similar to https://github.com/ompl/ompl/blob/main/src/ompl/base/src/ProblemDefinition.cpp#L54-L161.
- * This way, it is possible to create a sorted container e.g. according to a user specified criteria
- */
-void PlanResponsesContainer::pushBack(const ::planning_interface::MotionPlanResponse& plan_solution)
-{
-  std::lock_guard<std::mutex> lock_guard(solutions_mutex_);
-  solutions_.push_back(plan_solution);
-}
-
-/** \brief Get solutions */
-const std::vector<::planning_interface::MotionPlanResponse>& PlanResponsesContainer::getSolutions() const
-{
-  return solutions_;
+  // Stop at the first successful plan
+  for (auto const& solution : plan_responses_container.getSolutions())
+  {
+    // bool(solution) is shorthand to evaluate the error code of the solution, checking for SUCCESS
+    if (bool(solution))
+    {
+      // Return true to abort the other pipelines
+      return true;
+    }
+  }
+  // Return false when parallel planning should continue because it hasn't found a successful solution yet
+  return false;
 }
 }  // namespace planning_interface
 }  // namespace moveit

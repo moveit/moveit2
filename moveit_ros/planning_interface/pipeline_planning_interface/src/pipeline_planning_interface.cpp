@@ -145,7 +145,10 @@ planWithParallelPipelines(const std::vector<::planning_interface::MotionPlanRequ
   // If a solution selection function is provided, it is used to compute the return value
   if (solution_selection_function)
   {
-    return solution_selection_function(plan_responses_container.getSolutions());
+    std::vector<::planning_interface::MotionPlanResponse> solutions;
+    solutions.reserve(1);
+    solutions.push_back(solution_selection_function(plan_responses_container.getSolutions()));
+    return solutions;
   }
 
   // Otherwise, just return the unordered list of solutions
