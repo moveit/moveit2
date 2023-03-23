@@ -1,4 +1,3 @@
-
 /*********************************************************************
  * Software License Agreement (BSD License)
  *
@@ -68,7 +67,8 @@ const std::vector<::planning_interface::MotionPlanResponse>
 planWithParallelPipelines(const std::vector<::planning_interface::MotionPlanRequest>& motion_plan_requests,
                           planning_scene::PlanningSceneConstPtr planning_scene,
                           const std::map<std::string, planning_pipeline::PlanningPipelinePtr>& planning_pipelines,
-                          StoppingCriterionFunction stopping_criterion_callback)
+                          StoppingCriterionFunction stopping_criterion_callback,
+                          SolutionSelectionFunction solution_selection_function)
 {
   // Create solutions container
   PlanResponsesContainer plan_responses_container{ motion_plan_requests.size() };
@@ -124,7 +124,7 @@ planWithParallelPipelines(const std::vector<::planning_interface::MotionPlanRequ
             catch (const std::out_of_range&)
             {
               RCLCPP_WARN(LOGGER, "Cannot terminate pipeline '%s' because no pipeline with that name exists",
-                           request.pipeline_id.c_str());
+                          request.pipeline_id.c_str());
             }
           }
         }
@@ -143,7 +143,8 @@ planWithParallelPipelines(const std::vector<::planning_interface::MotionPlanRequ
   }
 
   // If a solution selection function is provided, it is used to compute the return value
-  if(solution_selection_function){
+  if (solution_selection_function)
+  {
     return solution_selection_function(plan_responses_container.getSolutions());
   }
 

@@ -45,6 +45,7 @@ namespace moveit
 {
 namespace planning_interface
 {
+MOVEIT_CLASS_FORWARD(PlanResponsesContainer);  // Defines PlanningComponentPtr, ConstPtr, WeakPtr... etc
 /** \brief A container to thread-safely store multiple MotionPlanResponses for later usage */
 class PlanResponsesContainer
 {
@@ -55,17 +56,10 @@ public:
    * insert method similar to https://github.com/ompl/ompl/blob/main/src/ompl/base/src/ProblemDefinition.cpp#L54-L161.
    * This way, it is possible to create a sorted container e.g. according to a user specified criteria
    */
-  void pushBack(const ::planning_interface::MotionPlanResponse& plan_solution)
-  {
-    std::lock_guard<std::mutex> lock_guard(solutions_mutex_);
-    solutions_.push_back(plan_solution);
-  }
+  void pushBack(const ::planning_interface::MotionPlanResponse& plan_solution);
 
   /** \brief Get solutions */
-  const std::vector<::planning_interface::MotionPlanResponse>& getSolutions() const
-  {
-    return solutions_;
-  }
+  const std::vector<::planning_interface::MotionPlanResponse>& getSolutions() const;
 
 private:
   std::vector<::planning_interface::MotionPlanResponse> solutions_;

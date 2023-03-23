@@ -1,4 +1,4 @@
-add_library(moveit_pipeline_planning_interface SHARED src/pipeline_planning_interface.cpp)
+add_library(moveit_pipeline_planning_interface SHARED src/pipeline_planning_interface.cpp src/plan_responses_container.cpp)
 include(GenerateExportHeader)
 generate_export_header(moveit_pipeline_planning_interface)
 target_include_directories(moveit_pipeline_planning_interface PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>)

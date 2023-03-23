@@ -36,38 +36,32 @@
 /* Author: Sebastian Jahr
    Desc: TODO */
 
-#pragma once
-
 #include <moveit/pipeline_planning_interface/plan_responses_container.hpp>
-#include <moveit/planning_interface/planning_response.h>
-#include <moveit/planning_interface/planning_request.h>
-#include <moveit/planning_pipeline/planning_pipeline.h>
-#include <moveit/planning_scene/planning_scene.h>
 
 namespace moveit
 {
 namespace planning_interface
 {
-/** \brief A stopping criterion callback function for the parallel planning API of planning component */
-typedef std::function<bool(const PlanResponsesContainer& plan_responses_container,
-                           const std::vector<::planning_interface::MotionPlanRequest>& plan_requests)>
-    StoppingCriterionFunction;
+PlanResponsesContainer::PlanResponsesContainer(const size_t expected_size)
+{
+  solutions_.reserve(expected_size);
+}
 
-/** \brief A solution callback function type for the parallel planning API of planning component  */
-typedef std::function<std::vector<::planning_interface::MotionPlanResponse>(
-    const std::vector<::planning_interface::MotionPlanResponse>& solutions)>
-    SolutionSelectionFunction;
+/** \brief Thread safe method to add PlanResponsesContainer to this data structure TODO(sjahr): Refactor this method to
+ * an insert method similar to https://github.com/ompl/ompl/blob/main/src/ompl/base/src/ProblemDefinition.cpp#L54-L161.
+ * This way, it is possible to create a sorted container e.g. according to a user specified criteria
+ */
+void PlanResponsesContainer::pushBack(const ::planning_interface::MotionPlanResponse& plan_solution)
+{
+  std::lock_guard<std::mutex> lock_guard(solutions_mutex_);
+  solutions_.push_back(plan_solution);
+}
 
-::planning_interface::MotionPlanResponse
-planWithSinglePipeline(const ::planning_interface::MotionPlanRequest& motion_plan_requests,
-                       ::planning_scene::PlanningSceneConstPtr planning_scene,
-                       const std::map<std::string, planning_pipeline::PlanningPipelinePtr>& planning_pipelines);
+/** \brief Get solutions */
+const std::vector<::planning_interface::MotionPlanResponse>& PlanResponsesContainer::getSolutions() const
+{
+  return solutions_;
+}
 
-const std::vector<::planning_interface::MotionPlanResponse>
-planWithParallelPipelines(const std::vector<::planning_interface::MotionPlanRequest>& motion_plan_requests,
-                          ::planning_scene::PlanningSceneConstPtr planning_scene,
-                          const std::map<std::string, planning_pipeline::PlanningPipelinePtr>& planning_pipelines,
-                          StoppingCriterionFunction stopping_criterion_callback = nullptr,
-                          SolutionSelectionFunction solution_selection_function = nullptr);
 }  // namespace planning_interface
 }  // namespace moveit
