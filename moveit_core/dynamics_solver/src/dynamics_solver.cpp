@@ -215,7 +215,7 @@ bool DynamicsSolver::getTorques(const std::vector<double>& joint_angles, const s
   return true;
 }
 
-bool DynamicsSolver::getMaxPayload(const std::vector<double>& joint_angles, double& payload,
+bool DynamicsSolver::getMaxPayload(const std::vector<double>& joint_angles, double& payload, // Same here, non-pure function
                                    unsigned int& joint_saturated) const
 {
   if (!joint_model_group_)
