@@ -45,19 +45,25 @@ namespace moveit
 namespace planning_pipeline_interfaces
 {
 MOVEIT_CLASS_FORWARD(PlanResponsesContainer);  // Defines PlanningComponentPtr, ConstPtr, WeakPtr... etc
-/** \brief A container to thread-safely store multiple MotionPlanResponses for later usage */
+/** \brief A container to thread-safely store multiple MotionPlanResponses */
 class PlanResponsesContainer
 {
 public:
+  /** \brief Constructor
+   * \param [in] expected_size Number of expected solutions
+   */
   PlanResponsesContainer(const size_t expected_size = 0);
 
   /** \brief Thread safe method to add PlanResponsesContainer to this data structure TODO(sjahr): Refactor this method to an
    * insert method similar to https://github.com/ompl/ompl/blob/main/src/ompl/base/src/ProblemDefinition.cpp#L54-L161.
    * This way, it is possible to create a sorted container e.g. according to a user specified criteria
+   * \param [in] plan_solution MotionPlanResponse to push back into the vector
    */
   void pushBack(const ::planning_interface::MotionPlanResponse& plan_solution);
 
-  /** \brief Get solutions */
+  /** \brief Get solutions
+   * \return Read-only access to the responses vector
+   */
   const std::vector<::planning_interface::MotionPlanResponse>& getSolutions() const;
 
 private:

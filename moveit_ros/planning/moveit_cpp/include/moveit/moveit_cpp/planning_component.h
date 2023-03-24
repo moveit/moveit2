@@ -214,8 +214,12 @@ public:
     return false;
   };
 
+  /** \brief Utility function to get a MotionPlanRequest from PlanRequestParameters and the internal state of the
+   * PlanningComponent instance */
   ::planning_interface::MotionPlanRequest getMotionPlanRequest(const PlanRequestParameters& plan_request_parameters);
 
+  /** \brief Utility function to get a Vector of MotionPlanRequest from a vector of PlanRequestParameters and the
+   * internal state of the PlanningComponent instance */
   std::vector<::planning_interface::MotionPlanRequest>
   getMotionPlanRequestVector(const MultiPipelinePlanRequestParameters& multi_pipeline_plan_request_parameters);
 
