@@ -3,7 +3,7 @@
 <package format="3">
   <name>moveit_ros_planning_interface</name>
   <version>2.7.1</version>
-  <description>Components of MoveIt that offer simpler remote (From another ROS 2 node to a node that is running MoveIt 2) interfaces to planning and execution</description>
+  <description>Components of MoveIt that offer simpler remote (as from another ROS 2 node) interfaces to planning and execution</description>
   <maintainer email="henningkayser@picknik.ai">Henning Kayser</maintainer>
   <maintainer email="tyler@picknik.ai">Tyler Weaver</maintainer>
   <maintainer email="me@v4hn.de">Michael Görner</maintainer>
