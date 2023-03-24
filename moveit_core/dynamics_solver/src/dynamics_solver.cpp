@@ -281,7 +281,7 @@ bool DynamicsSolver::getMaxPayload(const std::vector<double>& joint_angles, doub
 }
 
 bool DynamicsSolver::getPayloadTorques(const std::vector<double>& joint_angles, double payload,
-                                       std::vector<double>& joint_torques) const
+                                       std::vector<double>& joint_torques) const // NonPure, and again they depend on the joint_model_group_ boolean variable
 {
   if (!joint_model_group_)
   {
