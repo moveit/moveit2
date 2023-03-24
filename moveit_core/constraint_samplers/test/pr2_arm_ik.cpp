@@ -198,7 +198,7 @@ void PR2ArmIK::getSolverInfo(moveit_msgs::msg::KinematicSolverInfo& info)
   info = solver_info_;
 }
 
-void PR2ArmIK::computeIKShoulderPan(const Eigen::Isometry3f& g_in, const double& t1_in,
+void PR2ArmIK::computeIKShoulderPan(const Eigen::Isometry3f& g_in, const double t1_in,
                                     std::vector<std::vector<double> >& solution) const
 {
   // t1 = shoulder/turret pan is specified
@@ -463,7 +463,7 @@ void PR2ArmIK::computeIKShoulderPan(const Eigen::Isometry3f& g_in, const double&
   }
 }
 
-void PR2ArmIK::computeIKShoulderRoll(const Eigen::Isometry3f& g_in, const double& t3,
+void PR2ArmIK::computeIKShoulderRoll(const Eigen::Isometry3f& g_in, const double t3,
                                      std::vector<std::vector<double> >& solution) const
 {
   std::vector<double> solution_ik(NUM_JOINTS_ARM7DOF, 0.0);
@@ -779,7 +779,7 @@ bool PR2ArmIK::checkJointLimits(const std::vector<double>& joint_values) const
   return true;
 }
 
-bool PR2ArmIK::checkJointLimits(const double& joint_value, const int& joint_num) const
+bool PR2ArmIK::checkJointLimits(const double joint_value, const int joint_num) const
 {
   double jv;
   if (continuous_joint_[joint_num])

@@ -136,8 +136,8 @@ protected:
    * The trap profile returns uses the longer distance of translational and
    * rotational motion.
    */
-  std::unique_ptr<KDL::VelocityProfile> cartesianTrapVelocityProfile(const double& max_velocity_scaling_factor,
-                                                                     const double& max_acceleration_scaling_factor,
+  std::unique_ptr<KDL::VelocityProfile> cartesianTrapVelocityProfile(const double max_velocity_scaling_factor,
+                                                                     const double max_acceleration_scaling_factor,
                                                                      const std::unique_ptr<KDL::Path>& path) const;
 
 private:
@@ -157,7 +157,7 @@ private:
 
   virtual void plan(const planning_scene::PlanningSceneConstPtr& scene,
                     const planning_interface::MotionPlanRequest& req, const MotionPlanInfo& plan_info,
-                    const double& sampling_time, trajectory_msgs::msg::JointTrajectory& joint_trajectory) = 0;
+                    const double sampling_time, trajectory_msgs::msg::JointTrajectory& joint_trajectory) = 0;
 
 private:
   /**
@@ -247,9 +247,9 @@ private:
   /**
    * @return True if scaling factor is valid, otherwise false.
    */
-  static bool isScalingFactorValid(const double& scaling_factor);
-  static void checkVelocityScaling(const double& scaling_factor);
-  static void checkAccelerationScaling(const double& scaling_factor);
+  static bool isScalingFactorValid(const double scaling_factor);
+  static void checkVelocityScaling(const double scaling_factor);
+  static void checkAccelerationScaling(const double scaling_factor);
 
   /**
    * @return True if ONE position + ONE orientation constraint given,
@@ -277,7 +277,7 @@ protected:
   const std::unique_ptr<rclcpp::Clock> clock_;
 };
 
-inline bool TrajectoryGenerator::isScalingFactorValid(const double& scaling_factor)
+inline bool TrajectoryGenerator::isScalingFactorValid(const double scaling_factor)
 {
   return (scaling_factor > MIN_SCALING_FACTOR && scaling_factor <= MAX_SCALING_FACTOR);
 }

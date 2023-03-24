@@ -59,7 +59,7 @@ struct ContactTestData
 {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-  ContactTestData(const std::vector<std::string>& active, const double& contact_distance,
+  ContactTestData(const std::vector<std::string>& active, const double contact_distance,
                   collision_detection::CollisionResult& res, const collision_detection::CollisionRequest& req)
     : active(active), contact_distance(contact_distance), res(res), req(req), done(false), pair_done(false)
   {
@@ -68,7 +68,7 @@ struct ContactTestData
   const std::vector<std::string>& active;
 
   /** \brief If after a positive broadphase check the distance is below this threshold, a contact is added. */
-  const double& contact_distance;
+  const double contact_distance;
 
   collision_detection::CollisionResult& res;
   const collision_detection::CollisionRequest& req;
