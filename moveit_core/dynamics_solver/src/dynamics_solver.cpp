@@ -149,7 +149,7 @@ bool DynamicsSolver::getTorques(const std::vector<double>& joint_angles, const s
                                 const std::vector<geometry_msgs::msg::Wrench>& wrenches,
                                 std::vector<double>& torques) const
 {
-  if (!joint_model_group_)
+  if (!joint_model_group_) // Example on a nonPure function, we need to move this condition higher in hierarchy
   {
     RCLCPP_DEBUG(LOGGER, "Did not construct DynamicsSolver object properly. "
                          "Check error logs.");
