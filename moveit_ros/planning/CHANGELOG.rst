@@ -2,6 +2,30 @@
 Changelog for package moveit_ros_planning
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.7.1 (2023-03-23)
+------------------
+* Fix member naming (`#1949 <https://github.com/ros-planning/moveit2/issues/1949>`_)
+  * Update clang-tidy rules for readability-identifier-naming
+  Co-authored-by: Sebastian Jahr <sebastian.jahr@picknik.ai>
+* Benchmark parallel planning pipelines (`#1539 <https://github.com/ros-planning/moveit2/issues/1539>`_)
+  * Remove launch and config files (moved to moveit_resources)
+* Merge pull request `#1546 <https://github.com/ros-planning/moveit2/issues/1546>`_ from peterdavidfagan/moveit_py
+  Python Bindings - moveit_py
+* add new python bindings
+  Co-authored-by: Henning Kayser <henningkayser@picknik.ai>
+  Co-authored-by: Michael Gorner <me@v4hn.de>
+  Co-authored-by: Robert Haschke <rhaschke@techfak.uni-bielefeld.de>
+  Co-authored-by: AndyZe <zelenak@picknik.ai>
+  Co-authored-by: Peter Mitrano <mitranopeter@gmail.com>
+  Co-authored-by: Sebastian Castro <4603398+sea-bass@users.noreply.github.com>
+  Co-authored-by: Jafar <jafar.uruc@gmail.com>
+  Co-authored-by: Shahwas Khan <shahwazk@usc.edu>
+* moveit_cpp: handle the case where blocking==false (`#1834 <https://github.com/ros-planning/moveit2/issues/1834>`_)
+* remove underscore from public member in MotionPlanResponse (`#1939 <https://github.com/ros-planning/moveit2/issues/1939>`_)
+  * remove underscore from private members
+  * fix more uses of the suffix notation
+* Contributors: AlexWebb, AndyZe, Jafar, Robert Haschke, Sebastian Jahr, peterdavidfagan
+
 2.7.0 (2023-01-29)
 ------------------
 * converted characters from string format to character format (`#1881 <https://github.com/ros-planning/moveit2/issues/1881>`_)
