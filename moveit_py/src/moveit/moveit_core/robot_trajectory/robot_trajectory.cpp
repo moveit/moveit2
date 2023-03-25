@@ -50,6 +50,13 @@ get_robot_trajectory_msg(const robot_trajectory::RobotTrajectoryConstPtr& robot_
   return msg;
 }
 
+robot_trajectory::RobotTrajectory set_robot_trajectory_msg(const std::shared_ptr<robot_trajectory::RobotTrajectory>& robot_trajectory,
+                        const moveit::core::RobotState& robot_state,
+                        const moveit_msgs::msg::RobotTrajectory& msg)
+{
+    return robot_trajectory->setRobotTrajectoryMsg(robot_state, msg);
+}
+
 void init_robot_trajectory(py::module& m)
 {
   py::module robot_trajectory = m.def_submodule("robot_trajectory");
@@ -60,6 +67,14 @@ void init_robot_trajectory(py::module& m)
                                                     Maintains a sequence of waypoints and the durations between these waypoints.
                                                     )")
 
+      .def(py::init<const std::shared_ptr<const moveit::core::RobotModel>&>(),
+           R"(
+           Initializes an empty robot trajectory from a robot model.
+
+           Args:
+               :py:class:`moveit_py.core.RobotModel`: The robot model associated to the instantiated robot state.
+
+           )")
       .def("__getitem__", &robot_trajectory::RobotTrajectory::getWayPoint, py::arg("idx"),
            R"(
            Get the waypoint at the specified index in the trajectory.
@@ -124,6 +139,12 @@ void init_robot_trajectory(py::module& m)
            Get the trajectory as a `moveit_msgs.msg.RobotTrajectory` message.
            Returns:
                moveit_msgs.msg.RobotTrajectory: A ROS robot trajectory message.
+           )")
+     .def("set_robot_trajectory_msg", &moveit_py::bind_robot_trajectory::set_robot_trajectory_msg,
+           py::arg("robot_state"),
+           py::arg("msg"),
+           R"(
+           Set the trajectory from a `moveit_msgs.msg.RobotTrajectory` message.
            )");
   // TODO (peterdavidfagan): support other methods such as appending trajectories
 }
