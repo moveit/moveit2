@@ -112,13 +112,11 @@ ForwardTrajectory::solve(const robot_trajectory::RobotTrajectory& local_trajecto
     bool is_path_valid = false;
     // Lock the planning scene as briefly as possible
     {
+      planning_scene_monitor_->updateSceneWithCurrentState();
       planning_scene_monitor::LockedPlanningSceneRO locked_planning_scene(planning_scene_monitor_);
       current_state = std::make_shared<moveit::core::RobotState>(locked_planning_scene->getCurrentState());
-      current_state->updateCollisionBodyTransforms();
       collision_result_.clear();
-      collision_request_.group_name = local_trajectory.getGroupName();
-      locked_planning_scene->getCollisionEnv()->checkRobotCollision(collision_request_, collision_result_,
-                                                                    *current_state);
+      locked_planning_scene->checkCollision(collision_request_, collision_result_);
       is_path_valid = (!(collision_result_.collision || (collision_result_.distance < COLLISION_THRESHOLD)));
     }
 

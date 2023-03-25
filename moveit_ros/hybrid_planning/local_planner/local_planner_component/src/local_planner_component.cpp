@@ -93,8 +93,6 @@ bool LocalPlannerComponent::initialize()
   }
 
   // Start state and scene monitors
-  // Set frequency faster than local planner frequency (If we don't call this it would default to 100Hz)
-  planning_scene_monitor_->setStateUpdateFrequency(1.1 * config_.local_planning_frequency);
   planning_scene_monitor_->startSceneMonitor(config_.monitored_planning_scene_topic);
   planning_scene_monitor_->startWorldGeometryMonitor(config_.collision_object_topic);
   planning_scene_monitor_->startStateMonitor(config_.joint_states_topic, "/attached_collision_object");
