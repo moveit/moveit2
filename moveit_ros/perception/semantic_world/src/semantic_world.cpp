@@ -146,7 +146,7 @@ bool SemanticWorld::addTablesToCollisionWorld()
       triangles[i3] = j + 1;
     }
 
-    shapes::Shape* table_shape = shapes::createMeshFromVertices(vertices, triangles);
+    shapes::Shape* table_shape = shapes::createMeshFromVertices(vertices, triangles); // We could move this part to a new function to keep the function pure
     if (!table_shape)
       continue;
 
