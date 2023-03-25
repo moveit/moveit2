@@ -53,8 +53,7 @@ get_robot_trajectory_msg(const robot_trajectory::RobotTrajectoryConstPtr& robot_
                          const std::vector<std::string>& joint_filter);
 robot_trajectory::RobotTrajectory
 set_robot_trajectory_msg(const std::shared_ptr<robot_trajectory::RobotTrajectory>& robot_trajectory,
-                        const moveit::core::RobotState& robot_state,
-                        const moveit_msgs::msg::RobotTrajectory& msg);
+                         const moveit::core::RobotState& robot_state, const moveit_msgs::msg::RobotTrajectory& msg);
 
 void init_robot_trajectory(py::module& m);
 }  // namespace bind_robot_trajectory
