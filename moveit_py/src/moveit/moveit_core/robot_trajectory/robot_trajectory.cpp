@@ -50,11 +50,11 @@ get_robot_trajectory_msg(const robot_trajectory::RobotTrajectoryConstPtr& robot_
   return msg;
 }
 
-robot_trajectory::RobotTrajectory set_robot_trajectory_msg(const std::shared_ptr<robot_trajectory::RobotTrajectory>& robot_trajectory,
-                        const moveit::core::RobotState& robot_state,
-                        const moveit_msgs::msg::RobotTrajectory& msg)
+robot_trajectory::RobotTrajectory
+set_robot_trajectory_msg(const std::shared_ptr<robot_trajectory::RobotTrajectory>& robot_trajectory,
+                         const moveit::core::RobotState& robot_state, const moveit_msgs::msg::RobotTrajectory& msg)
 {
-    return robot_trajectory->setRobotTrajectoryMsg(robot_state, msg);
+  return robot_trajectory->setRobotTrajectoryMsg(robot_state, msg);
 }
 
 void init_robot_trajectory(py::module& m)
@@ -140,9 +140,8 @@ void init_robot_trajectory(py::module& m)
            Returns:
                moveit_msgs.msg.RobotTrajectory: A ROS robot trajectory message.
            )")
-     .def("set_robot_trajectory_msg", &moveit_py::bind_robot_trajectory::set_robot_trajectory_msg,
-           py::arg("robot_state"),
-           py::arg("msg"),
+      .def("set_robot_trajectory_msg", &moveit_py::bind_robot_trajectory::set_robot_trajectory_msg,
+           py::arg("robot_state"), py::arg("msg"),
            R"(
            Set the trajectory from a `moveit_msgs.msg.RobotTrajectory` message.
            )");
