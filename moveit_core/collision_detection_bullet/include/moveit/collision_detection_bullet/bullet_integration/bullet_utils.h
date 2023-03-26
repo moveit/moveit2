@@ -138,28 +138,28 @@ public:
   bool m_enabled{ true };
 
   /** \brief The robot links the collision objects is allowed to touch */
-  std::set<std::string> m_touch_links;
+  std::set<std::string> touch_links;
 
   /** @brief Get the collision object name */
   const std::string& getName() const
   {
-    return m_name;
+    return name_;
   }
 
   /** @brief Get a user defined type */
   const collision_detection::BodyType& getTypeID() const
   {
-    return m_type_id;
+    return type_id_;
   }
 
   /** \brief Check if two CollisionObjectWrapper objects point to the same source object
    *  \return True if same objects, false otherwise */
   bool sameObject(const CollisionObjectWrapper& other) const
   {
-    return m_name == other.m_name && m_type_id == other.m_type_id && m_shapes.size() == other.m_shapes.size() &&
-           m_shape_poses.size() == other.m_shape_poses.size() &&
-           std::equal(m_shapes.begin(), m_shapes.end(), other.m_shapes.begin()) &&
-           std::equal(m_shape_poses.begin(), m_shape_poses.end(), other.m_shape_poses.begin(),
+    return name_ == other.name_ && type_id_ == other.type_id_ && shapes_.size() == other.shapes_.size() &&
+           shape_poses_.size() == other.shape_poses_.size() &&
+           std::equal(shapes_.begin(), shapes_.end(), other.shapes_.begin()) &&
+           std::equal(shape_poses_.begin(), shape_poses_.end(), other.shape_poses_.begin(),
                       [](const Eigen::Isometry3d& t1, const Eigen::Isometry3d& t2) { return t1.isApprox(t2); });
   }
 
@@ -181,14 +181,14 @@ public:
   std::shared_ptr<CollisionObjectWrapper> clone()
   {
     std::shared_ptr<CollisionObjectWrapper> clone_cow(
-        new CollisionObjectWrapper(m_name, m_type_id, m_shapes, m_shape_poses, m_collision_object_types, m_data));
+        new CollisionObjectWrapper(name_, type_id_, shapes_, shape_poses_, collision_object_types_, data_));
     clone_cow->setCollisionShape(getCollisionShape());
     clone_cow->setWorldTransform(getWorldTransform());
     clone_cow->m_collisionFilterGroup = m_collisionFilterGroup;
     clone_cow->m_collisionFilterMask = m_collisionFilterMask;
     clone_cow->m_enabled = m_enabled;
     clone_cow->setBroadphaseHandle(nullptr);
-    clone_cow->m_touch_links = m_touch_links;
+    clone_cow->touch_links = touch_links;
     clone_cow->setContactProcessingThreshold(getContactProcessingThreshold());
     return clone_cow;
   }
@@ -197,14 +197,14 @@ public:
   template <class T>
   void manage(T* t)
   {
-    m_data.push_back(std::shared_ptr<T>(t));
+    data_.push_back(std::shared_ptr<T>(t));
   }
 
   /** \brief Manage memory of a shared pointer shape */
   template <class T>
   void manage(std::shared_ptr<T> t)
   {
-    m_data.push_back(t);
+    data_.push_back(t);
   }
 
 protected:
@@ -216,21 +216,21 @@ protected:
                          const std::vector<std::shared_ptr<void>>& data);
 
   /** \brief The name of the object, must be unique. */
-  std::string m_name;
+  std::string name_;
 
-  collision_detection::BodyType m_type_id;
+  collision_detection::BodyType type_id_;
 
   /** @brief The shapes that define the collision object */
-  std::vector<shapes::ShapeConstPtr> m_shapes;
+  std::vector<shapes::ShapeConstPtr> shapes_;
 
   /** @brief The poses of the shapes, must be same length as m_shapes */
-  AlignedVector<Eigen::Isometry3d> m_shape_poses;
+  AlignedVector<Eigen::Isometry3d> shape_poses_;
 
   /** @brief The shape collision object type to be used. */
-  std::vector<CollisionObjectType> m_collision_object_types;
+  std::vector<CollisionObjectType> collision_object_types_;
 
   /** @brief Manages the collision shape pointer so they get destroyed */
-  std::vector<std::shared_ptr<void>> m_data;
+  std::vector<std::shared_ptr<void>> data_;
 };
 
 /** @brief Casted collision shape used for checking if an object is collision free between two discrete poses
@@ -244,24 +244,23 @@ public:
   btConvexShape* m_shape;
 
   /** \brief Transformation from the first pose to the second pose */
-  btTransform m_shape_transform;
+  btTransform shape_transform;
 
-  CastHullShape(btConvexShape* shape, const btTransform& t01) : m_shape(shape), m_shape_transform(t01)
+  CastHullShape(btConvexShape* shape, const btTransform& t01) : m_shape(shape), shape_transform(t01)
   {
     m_shapeType = CUSTOM_CONVEX_SHAPE_TYPE;
   }
 
   void updateCastTransform(const btTransform& cast_transform)
   {
-    m_shape_transform = cast_transform;
+    shape_transform = cast_transform;
   }
 
   /** \brief From both shape poses computes the support vertex and returns the larger one. */
   btVector3 localGetSupportingVertex(const btVector3& vec) const override
   {
     btVector3 support_vector_0 = m_shape->localGetSupportingVertex(vec);
-    btVector3 support_vector_1 =
-        m_shape_transform * m_shape->localGetSupportingVertex(vec * m_shape_transform.getBasis());
+    btVector3 support_vector_1 = shape_transform * m_shape->localGetSupportingVertex(vec * shape_transform.getBasis());
     return (vec.dot(support_vector_0) > vec.dot(support_vector_1)) ? support_vector_0 : support_vector_1;
   }
 
@@ -279,7 +278,7 @@ public:
   {
     m_shape->getAabb(transform_world, aabbMin, aabbMax);
     btVector3 min1, max1;
-    m_shape->getAabb(transform_world * m_shape_transform, min1, max1);
+    m_shape->getAabb(transform_world * shape_transform, min1, max1);
     aabbMin.setMin(min1);
     aabbMax.setMax(max1);
   }
@@ -471,7 +470,7 @@ inline btScalar addCastSingleResult(btManifoldPoint& cp, const btCollisionObject
   const CastHullShape* shape = static_cast<const CastHullShape*>(first_col_obj_wrap->getCollisionShape());
 
   tf_world0 = first_col_obj_wrap->getWorldTransform();
-  tf_world1 = first_col_obj_wrap->getWorldTransform() * shape->m_shape_transform;
+  tf_world1 = first_col_obj_wrap->getWorldTransform() * shape->shape_transform;
 
   // transform normals into pose local coordinate systems
   btVector3 normal_local0 = normal_world_from_cast * tf_world0.getBasis();

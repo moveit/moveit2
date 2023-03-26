@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format2.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>moveit_py</name>
+  <version>2.7.1</version>
+  <description>Python binding for MoveIt 2</description>
+
+  <maintainer email="peterdavidfagan@gmail.com">Peter David Fagan</maintainer>
+
+  <license>BSD</license>
+
+  <author email="peterdavidfagan@gmail.com">Peter David Fagan</author>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <build_depend>pybind11_vendor</build_depend>
+
+  <exec_depend>ament_index_python</exec_depend>
+
+  <depend>rclcpp</depend>
+  <depend>rclpy</depend>
+  <depend>geometry_msgs</depend>
+  <depend>octomap_msgs</depend>
+  <depend>moveit_ros_planning_interface</depend>
+  <depend>moveit_ros_planning</depend>
+  <depend>moveit_core</depend>
+
+  <test_depend>ament_cmake_pytest</test_depend>
+  <test_depend>python3-pytest</test_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>

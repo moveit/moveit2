@@ -47,12 +47,6 @@ ament_target_dependencies(moveit_run_benchmark
 )
 target_link_libraries(moveit_run_benchmark moveit_ros_benchmarks)
 
-add_executable(moveit_combine_predefined_poses_benchmark src/simple_benchmarks/CombinePredefinedPosesBenchmark.cpp)
-ament_target_dependencies(moveit_combine_predefined_poses_benchmark
-  ${THIS_PACKAGE_INCLUDE_DEPENDS}
-)
-target_link_libraries(moveit_combine_predefined_poses_benchmark moveit_ros_benchmarks)
-
 install(
   TARGETS moveit_ros_benchmarks
   EXPORT moveit_ros_benchmarksTargets
@@ -79,6 +73,7 @@ install(DIRECTORY include/
 install(PROGRAMS scripts/moveit_benchmark_statistics.py
   DESTINATION lib/moveit_ros_benchmarks
 )
+
 
 install(DIRECTORY examples/
   DESTINATION share/moveit_ros_benchmarks

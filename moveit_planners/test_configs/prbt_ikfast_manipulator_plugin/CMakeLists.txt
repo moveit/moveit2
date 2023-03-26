@@ -61,7 +61,7 @@ install(
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
   RUNTIME DESTINATION bin
-  INCLUDES DESTINATION include
+  INCLUDES DESTINATION include/moveit_resources_prbt_ikfast_manipulator_plugin
 )
 
 ament_export_targets(moveit_resources_prbt_ikfast_manipulator_pluginTargets HAS_LIBRARY_TARGET)

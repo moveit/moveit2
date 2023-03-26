@@ -74,11 +74,11 @@ bool CommandPlanner::initialize(const moveit::core::RobotModelConstPtr& model, c
   params_ = param_listener_->get_params();
 
   // Load the planning context loader
-  planner_context_loader = std::make_unique<pluginlib::ClassLoader<PlanningContextLoader>>(
+  planner_context_loader_ = std::make_unique<pluginlib::ClassLoader<PlanningContextLoader>>(
       "pilz_industrial_motion_planner", "pilz_industrial_motion_planner::PlanningContextLoader");
 
   // List available plugins
-  const std::vector<std::string>& factories = planner_context_loader->getDeclaredClasses();
+  const std::vector<std::string>& factories = planner_context_loader_->getDeclaredClasses();
   std::stringstream ss;
   for (const auto& factory : factories)
   {
@@ -91,7 +91,7 @@ bool CommandPlanner::initialize(const moveit::core::RobotModelConstPtr& model, c
   for (const auto& factory : factories)
   {
     RCLCPP_INFO_STREAM(LOGGER, "About to load: " << factory);
-    PlanningContextLoaderPtr loader_pointer(planner_context_loader->createSharedInstance(factory));
+    PlanningContextLoaderPtr loader_pointer(planner_context_loader_->createSharedInstance(factory));
 
     pilz_industrial_motion_planner::LimitsContainer limits;
     limits.setJointLimits(aggregated_limit_active_joints_);

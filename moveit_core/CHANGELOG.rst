@@ -2,6 +2,36 @@
 Changelog for package moveit_core
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.7.1 (2023-03-23)
+------------------
+* Ruckig-smoothing : reduce number of  duration extensions (`#1990 <https://github.com/ros-planning/moveit2/issues/1990>`_)
+  * extend duration only for failed segment
+  * update comment
+  * Remove trajectory reset before extension
+  * readability improvement
+  * Remove call to RobotState update
+  ---------
+  Co-authored-by: ibrahiminfinite <ibrahimjkd@@gmail.com>
+  Co-authored-by: AndyZe <andyz@utexas.edu>
+* Fix mimic joints with TOTG (`#1989 <https://github.com/ros-planning/moveit2/issues/1989>`_)
+* changed C style cast to C++ style cast for void type (`#2010 <https://github.com/ros-planning/moveit2/issues/2010>`_)
+  (void) -> static_cast<void>
+* Fix member naming (`#1949 <https://github.com/ros-planning/moveit2/issues/1949>`_)
+  * Update clang-tidy rules for readability-identifier-naming
+  Co-authored-by: Sebastian Jahr <sebastian.jahr@picknik.ai>
+* Fix Ruckig termination condition (`#1963 <https://github.com/ros-planning/moveit2/issues/1963>`_)
+* Fix ci-testing build issues (`#1998 <https://github.com/ros-planning/moveit2/issues/1998>`_)
+* Fix invalid case style for private member in RobotTrajectory
+* Fix unreachable child logger instance
+* Document the Butterworth filter better (`#1961 <https://github.com/ros-planning/moveit2/issues/1961>`_)
+* Merge pull request `#1546 <https://github.com/ros-planning/moveit2/issues/1546>`_ from peterdavidfagan/moveit_py
+  Python Bindings - moveit_py
+* remove old python bindings
+* remove underscore from public member in MotionPlanResponse (`#1939 <https://github.com/ros-planning/moveit2/issues/1939>`_)
+  * remove underscore from private members
+  * fix more uses of the suffix notation
+* Contributors: AlexWebb, AndyZe, Henning Kayser, Jafar, Robert Haschke, Sebastian Castro, Shobuj Paul, V Mohammed Ibrahim, peterdavidfagan
+
 2.7.0 (2023-01-29)
 ------------------
 * Merge PR `#1712 <https://github.com/ros-planning/moveit2/issues/1712>`_: fix clang compiler warnings + stricter CI

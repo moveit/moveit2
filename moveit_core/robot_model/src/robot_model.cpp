@@ -1550,7 +1550,7 @@ void RobotModel::setKinematicsAllocators(const std::map<std::string, SolverAlloc
           std::set_difference(joints.begin(), joints.end(), sub_joints.begin(), sub_joints.end(),
                               std::inserter(joint_model_set, joint_model_set.end()));
           // TODO: instead of maintaining disjoint joint sets here,
-          // should we leave that work to JMG's setSolverAllocators() / computeIKIndexBijection()?
+          // should we leave that work to JMG's setSolverAllocators() / computeJointVariableIndices()?
           // There, a disjoint bijection from joints to solvers is computed anyway.
           // Underlying question: How do we resolve overlaps? Now the first considered sub group "wins"
           // But, if the overlap only involves fixed joints, we could consider all sub groups

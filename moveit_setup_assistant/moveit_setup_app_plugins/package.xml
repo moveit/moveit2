@@ -2,7 +2,7 @@
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
   <name>moveit_setup_app_plugins</name>
-  <version>2.7.0</version>
+  <version>2.7.1</version>
   <description>Various specialty plugins for MoveIt Setup Assistant</description>
   <maintainer email="davidvlu@gmail.com">David V. Lu!!</maintainer>
   <license>BSD-3-Clause</license>
@@ -11,6 +11,7 @@
   <buildtool_depend>ament_cmake</buildtool_depend>
 
   <depend>ament_index_cpp</depend>
+  <depend>moveit_configs_utils</depend>
   <depend>moveit_ros_visualization</depend>
   <depend>moveit_setup_framework</depend>
   <depend>pluginlib</depend>
