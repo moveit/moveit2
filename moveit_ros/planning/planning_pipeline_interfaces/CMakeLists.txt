@@ -3,7 +3,8 @@ add_library(moveit_planning_pipeline_interfaces SHARED
   src/plan_responses_container.cpp
   src/solution_selection_functions.cpp
   src/stopping_criterion_function.cpp
-  )
+)
+
 include(GenerateExportHeader)
 generate_export_header(moveit_planning_pipeline_interfaces)
 target_include_directories(moveit_planning_pipeline_interfaces PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>)
