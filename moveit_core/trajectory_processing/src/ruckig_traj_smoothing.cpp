@@ -52,6 +52,7 @@ constexpr double DEFAULT_MAX_ACCELERATION = 10;  // rad/s^2
 constexpr double DEFAULT_MAX_JERK = 1000;        // rad/s^3
 constexpr double MAX_DURATION_EXTENSION_FACTOR = 10.0;
 constexpr double DURATION_EXTENSION_FRACTION = 1.1;
+// If "mitigate_overshoot" is enabled, overshoot is checked with this timestep
 constexpr double OVERSHOOT_CHECK_PERIOD = 0.01;  // sec
 }  // namespace
 
@@ -427,7 +428,7 @@ bool RuckigSmoothing::checkOvershoot(ruckig::Trajectory<ruckig::DynamicDOFs, ruc
     {
       // If the sign of the error changed and the threshold difference was exceeded
       double error = new_position[joint] - ruckig_input.target_position.at(joint);
-      if (((error / (ruckig_input.current_position.at(joint) - ruckig_input.target_position.at(joint))) < 0) &&
+      if (((error / (ruckig_input.current_position.at(joint) - ruckig_input.target_position.at(joint))) < 0.0) &&
           std::fabs(error) > overshoot_threshold)
       {
         return true;

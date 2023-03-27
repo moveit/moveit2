@@ -128,7 +128,6 @@ private:
    * \param first_waypoint  The Ruckig input/output parameters are initialized to the values at this waypoint
    * \param joint_group     The MoveIt JointModelGroup of interest
    * \param[out] rucking_input   Input parameters to Ruckig. Initialized here.
-   * \param[out] ruckig_output   Output from the Ruckig algorithm. Initialized here.
    */
   static void initializeRuckigState(const moveit::core::RobotState& first_waypoint,
                                     const moveit::core::JointModelGroup* joint_group,
