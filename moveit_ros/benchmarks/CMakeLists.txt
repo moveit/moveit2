@@ -62,7 +62,6 @@ ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS})
 install(
   TARGETS
     moveit_run_benchmark
-    moveit_combine_predefined_poses_benchmark
   DESTINATION lib/moveit_ros_benchmarks
 )
 
