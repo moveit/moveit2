@@ -75,14 +75,15 @@ planWithSinglePipeline(const ::planning_interface::MotionPlanRequest& motion_pla
                        ::planning_scene::PlanningSceneConstPtr planning_scene,
                        const std::map<std::string, planning_pipeline::PlanningPipelinePtr>& planning_pipelines);
 
-/** \brief Function to solve multiple planning problems in parallel threads with multiple planning pipelines at the same time
+/** \brief Function to solve multiple planning problems in parallel threads with multiple planning pipelines at the same
+ time
  * \param [in] motion_plan_request Motion planning problems to be solved
  * \param [in] planning_scene Planning scene for which the given planning problem needs to be solved
  * \param [in] planning_pipelines Pipelines available to solve the problems, if a requested pipeline is not provided the
  MotionPlanResponse will be FAILURE
  * \param [in] stopping_criterion_callback If this function returns true, the planning pipelines that are still running
- will be terminated and the existing solutions will be evaluated. If no callback is provided, all planning pipelines terminate
- after the max. planning time defined in the MotionPlanningRequest is reached.
+ will be terminated and the existing solutions will be evaluated. If no callback is provided, all planning pipelines
+ terminate after the max. planning time defined in the MotionPlanningRequest is reached.
  * \param [in] solution_selection_function Function to select a specific solution out of all available solution. If no
  function is provided, all solutions are returned.
  + \return If a solution_selection_function is provided a vector containing the selected response is returned, otherwise

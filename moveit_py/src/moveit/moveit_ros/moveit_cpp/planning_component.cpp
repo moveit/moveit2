@@ -45,8 +45,8 @@ planning_interface::MotionPlanResponse
 plan(std::shared_ptr<moveit_cpp::PlanningComponent>& planning_component,
      std::shared_ptr<moveit_cpp::PlanningComponent::PlanRequestParameters>& single_plan_parameters,
      std::shared_ptr<moveit_cpp::PlanningComponent::MultiPipelinePlanRequestParameters>& multi_plan_parameters,
-     std::optional<const moveit_cpp::PlanningComponent::SolutionCallbackFunction> solution_selection_function,
-     std::optional<moveit_cpp::PlanningComponent::StoppingCriterionFunction> stopping_criterion_callback)
+     std::optional<const moveit::planning_pipeline_interfaces::SolutionSelectionFunction> solution_selection_function,
+     std::optional<moveit::planning_pipeline_interfaces::StoppingCriterionFunction> stopping_criterion_callback)
 {
   // parameter argument checking
   if (single_plan_parameters && multi_plan_parameters)
@@ -81,7 +81,8 @@ plan(std::shared_ptr<moveit_cpp::PlanningComponent>& planning_component,
     }
     else if (stopping_criterion_callback)
     {
-      return planning_component->plan(*const_multi_plan_parameters, moveit_cpp::getShortestSolution,
+      return planning_component->plan(*const_multi_plan_parameters,
+                                      moveit::planning_pipeline_interfaces::getShortestSolution,
                                       *stopping_criterion_callback);
     }
     else
@@ -241,7 +242,7 @@ void init_multi_plan_request_parameters(py::module& m)
         return params;
       }))
       .def_readonly("multi_plan_request_parameters",
-                    &moveit_cpp::PlanningComponent::MultiPipelinePlanRequestParameters::multi_plan_request_parameters);
+                    &moveit_cpp::PlanningComponent::MultiPipelinePlanRequestParameters::plan_request_parameter_vector);
 }
 void init_planning_component(py::module& m)
 {
