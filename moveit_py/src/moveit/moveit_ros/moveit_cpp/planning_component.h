@@ -45,7 +45,6 @@
 #include <moveit_py/moveit_py_utils/ros_msg_typecasters.h>
 #include <moveit/moveit_cpp/moveit_cpp.h>
 #include <moveit/moveit_cpp/planning_component.h>
-#include <moveit/moveit_cpp/plan_solutions.hpp>
 #include <geometry_msgs/msg/pose_stamped.hpp>
 #include <moveit_msgs/msg/constraints.hpp>
 
