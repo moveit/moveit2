@@ -2,6 +2,17 @@
 Changelog for package moveit_ros_visualization
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.7.1 (2023-03-23)
+------------------
+* Doxygen tag (`#1955 <https://github.com/ros-planning/moveit2/issues/1955>`_)
+  * Generate Doxygen Tag
+  * Install tagfile in output directory
+  * Fix problematic override for Doxygen linking
+* remove underscore from public member in MotionPlanResponse (`#1939 <https://github.com/ros-planning/moveit2/issues/1939>`_)
+  * remove underscore from private members
+  * fix more uses of the suffix notation
+* Contributors: AlexWebb, Henning Kayser
+
 2.7.0 (2023-01-29)
 ------------------
 * converted characters from string format to character format (`#1881 <https://github.com/ros-planning/moveit2/issues/1881>`_)

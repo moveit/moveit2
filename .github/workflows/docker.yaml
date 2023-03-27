@@ -131,7 +131,7 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           file: .docker/${{ github.job }}/Dockerfile
-          build-args: ROS_DISTRO=${{ matrix.ROS_DISTRO }}
+          build-args: OUR_ROS_DISTRO=${{ matrix.ROS_DISTRO }}
           push: ${{ env.PUSH }}
           no-cache: true
           tags: |
