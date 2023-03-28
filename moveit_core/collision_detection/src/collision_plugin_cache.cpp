@@ -58,7 +58,7 @@ public:
     }
   }
 
-  CollisionPluginPtr load(const std::string& name)
+  CollisionPluginPtr load(const std::string& name) // depends on cache, which makes it impure
   {
     CollisionPluginPtr plugin;
     try
@@ -73,7 +73,7 @@ public:
     return plugin;
   }
 
-  bool activate(const std::string& name, const planning_scene::PlanningScenePtr& scene)
+  bool activate(const std::string& name, const planning_scene::PlanningScenePtr& scene) // depends on plugins which depends on cache. Impure but don't know how to enhance it actually, needs assistance.
   {
     std::map<std::string, CollisionPluginPtr>::iterator it = plugins_.find(name);
     if (it == plugins_.end())
