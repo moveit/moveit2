@@ -149,7 +149,7 @@ bool DynamicsSolver::getTorques(const std::vector<double>& joint_angles, const s
                                 const std::vector<geometry_msgs::msg::Wrench>& wrenches,
                                 std::vector<double>& torques) const
 {
-  if (!joint_model_group_) // Example on a nonPure function, we need to move this condition higher in hierarchy
+  if (!joint_model_group_)
   {
     RCLCPP_DEBUG(LOGGER, "Did not construct DynamicsSolver object properly. "
                          "Check error logs.");
@@ -215,7 +215,7 @@ bool DynamicsSolver::getTorques(const std::vector<double>& joint_angles, const s
   return true;
 }
 
-bool DynamicsSolver::getMaxPayload(const std::vector<double>& joint_angles, double& payload, // Same here, non-pure function
+bool DynamicsSolver::getMaxPayload(const std::vector<double>& joint_angles, double& payload,
                                    unsigned int& joint_saturated) const
 {
   if (!joint_model_group_)
@@ -281,7 +281,7 @@ bool DynamicsSolver::getMaxPayload(const std::vector<double>& joint_angles, doub
 }
 
 bool DynamicsSolver::getPayloadTorques(const std::vector<double>& joint_angles, double payload,
-                                       std::vector<double>& joint_torques) const // NonPure, and again they depend on the joint_model_group_ boolean variable
+                                       std::vector<double>& joint_torques) const
 {
   if (!joint_model_group_)
   {

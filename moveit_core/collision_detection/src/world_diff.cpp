@@ -96,7 +96,7 @@ void WorldDiff::reset(const WorldPtr& world)
 void WorldDiff::setWorld(const WorldPtr& world)
 {
   WorldPtr old_world = world_.lock();
-  if (old_world) // Variable world_ is encapsulated in the class, this is important. But not being a parameter it causes impure function
+  if (old_world)
   {
     old_world->notifyObserverAllObjects(observer_handle_, World::DESTROY);
     old_world->removeObserver(observer_handle_);

@@ -48,6 +48,7 @@
 /** \brief This namespace includes the dynamics_solver library */
 namespace dynamics_solver
 {
+// Warning: many of these functions are "impure", meaning their output depends on the state of member variables in a non-transparent way. For example, `getMaxPayload()` depends on `joint_model_group_`.
 MOVEIT_CLASS_FORWARD(DynamicsSolver);  // Defines DynamicsSolverPtr, ConstPtr, WeakPtr... etc
 
 /**

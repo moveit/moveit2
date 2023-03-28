@@ -39,7 +39,7 @@
 #include <rclcpp/time.hpp>
 #include <tf2_eigen/tf2_eigen.hpp>
 
-namespace collision_detection // This namespace is perfectly pure, nothing to be modified actually, perfect.
+namespace collision_detection
 {
 void getCostMarkers(visualization_msgs::msg::MarkerArray& arr, const std::string& frame_id,
                     std::set<CostSource>& cost_sources)

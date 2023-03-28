@@ -48,6 +48,7 @@
 
 namespace collision_detection
 {
+// Perfectly "pure" helper functions
 void getCollisionMarkersFromContacts(visualization_msgs::msg::MarkerArray& arr, const std::string& frame_id,
                                      const CollisionResult::ContactMap& con, const std_msgs::msg::ColorRGBA& color,
                                      const rclcpp::Duration& lifetime, const double radius = 0.035);
