@@ -47,7 +47,7 @@ static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.::planning_inter
 
 ::planning_interface::MotionPlanResponse
 planWithSinglePipeline(const ::planning_interface::MotionPlanRequest& motion_plan_request,
-                       planning_scene::PlanningSceneConstPtr planning_scene,
+                       ::planning_scene::PlanningSceneConstPtr planning_scene,
                        const std::map<std::string, planning_pipeline::PlanningPipelinePtr>& planning_pipelines)
 {
   ::planning_interface::MotionPlanResponse motion_plan_response;
@@ -65,10 +65,10 @@ planWithSinglePipeline(const ::planning_interface::MotionPlanRequest& motion_pla
 
 const std::vector<::planning_interface::MotionPlanResponse>
 planWithParallelPipelines(const std::vector<::planning_interface::MotionPlanRequest>& motion_plan_requests,
-                          planning_scene::PlanningSceneConstPtr planning_scene,
+                          const ::planning_scene::PlanningSceneConstPtr& planning_scene,
                           const std::map<std::string, planning_pipeline::PlanningPipelinePtr>& planning_pipelines,
-                          StoppingCriterionFunction stopping_criterion_callback,
-                          SolutionSelectionFunction solution_selection_function)
+                          const StoppingCriterionFunction& stopping_criterion_callback,
+                          const SolutionSelectionFunction& solution_selection_function)
 {
   // Create solutions container
   PlanResponsesContainer plan_responses_container{ motion_plan_requests.size() };

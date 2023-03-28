@@ -91,9 +91,9 @@ planWithSinglePipeline(const ::planning_interface::MotionPlanRequest& motion_pla
 */
 const std::vector<::planning_interface::MotionPlanResponse>
 planWithParallelPipelines(const std::vector<::planning_interface::MotionPlanRequest>& motion_plan_requests,
-                          ::planning_scene::PlanningSceneConstPtr planning_scene,
+                          const ::planning_scene::PlanningSceneConstPtr& planning_scene,
                           const std::map<std::string, planning_pipeline::PlanningPipelinePtr>& planning_pipelines,
-                          StoppingCriterionFunction stopping_criterion_callback = nullptr,
-                          SolutionSelectionFunction solution_selection_function = nullptr);
+                          const StoppingCriterionFunction& stopping_criterion_callback = nullptr,
+                          const SolutionSelectionFunction& solution_selection_function = nullptr);
 }  // namespace planning_pipeline_interfaces
 }  // namespace moveit
