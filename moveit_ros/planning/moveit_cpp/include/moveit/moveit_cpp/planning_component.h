@@ -204,7 +204,7 @@ public:
   plan(const MultiPipelinePlanRequestParameters& parameters,
        const moveit::planning_pipeline_interfaces::SolutionSelectionFunction& solution_selection_function =
            &moveit::planning_pipeline_interfaces::getShortestSolution,
-       moveit::planning_pipeline_interfaces::StoppingCriterionFunction stopping_criterion_callback = nullptr,
+       const moveit::planning_pipeline_interfaces::StoppingCriterionFunction& stopping_criterion_callback = nullptr,
        planning_scene::PlanningScenePtr planning_scene = nullptr);
 
   /** \brief Execute the latest computed solution trajectory computed by plan(). By default this function terminates

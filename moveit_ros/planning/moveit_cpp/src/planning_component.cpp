@@ -148,7 +148,7 @@ planning_interface::MotionPlanResponse PlanningComponent::plan(const PlanRequest
 planning_interface::MotionPlanResponse PlanningComponent::plan(
     const MultiPipelinePlanRequestParameters& parameters,
     const moveit::planning_pipeline_interfaces::SolutionSelectionFunction& solution_selection_function,
-    moveit::planning_pipeline_interfaces::StoppingCriterionFunction stopping_criterion_callback,
+    const moveit::planning_pipeline_interfaces::StoppingCriterionFunction& stopping_criterion_callback,
     planning_scene::PlanningScenePtr planning_scene)
 {
   auto plan_solution = planning_interface::MotionPlanResponse();
@@ -189,8 +189,8 @@ planning_interface::MotionPlanResponse PlanningComponent::plan(
   }
 
   auto const motion_plan_response_vector = moveit::planning_pipeline_interfaces::planWithParallelPipelines(
-      requests, planning_scene, moveit_cpp_->getPlanningPipelines(), std::move(stopping_criterion_callback),
-      std::move(solution_selection_function));
+      requests, planning_scene, moveit_cpp_->getPlanningPipelines(), stopping_criterion_callback,
+      solution_selection_function);
 
   try
   {

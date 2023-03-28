@@ -72,7 +72,7 @@ typedef std::function<::planning_interface::MotionPlanResponse(
  */
 ::planning_interface::MotionPlanResponse
 planWithSinglePipeline(const ::planning_interface::MotionPlanRequest& motion_plan_request,
-                       ::planning_scene::PlanningSceneConstPtr planning_scene,
+                       const ::planning_scene::PlanningSceneConstPtr& planning_scene,
                        const std::map<std::string, planning_pipeline::PlanningPipelinePtr>& planning_pipelines);
 
 /** \brief Function to solve multiple planning problems in parallel threads with multiple planning pipelines at the same
