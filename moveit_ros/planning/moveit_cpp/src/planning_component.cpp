@@ -183,14 +183,14 @@ planning_interface::MotionPlanResponse PlanningComponent::plan(
   std::vector<::planning_interface::MotionPlanRequest> requests = getMotionPlanRequestVector(parameters);
 
   // Set start state
-  for (auto request : requests)
+  for (const auto& request : requests)
   {
     planning_scene->setCurrentState(request.start_state);
   }
 
   auto const motion_plan_response_vector = moveit::planning_pipeline_interfaces::planWithParallelPipelines(
-      requests, planning_scene, moveit_cpp_->getPlanningPipelines(), stopping_criterion_callback,
-      solution_selection_function);
+      requests, planning_scene, moveit_cpp_->getPlanningPipelines(), std::move(stopping_criterion_callback),
+      std::move(solution_selection_function));
 
   try
   {

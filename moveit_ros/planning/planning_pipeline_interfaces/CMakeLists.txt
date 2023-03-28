@@ -15,8 +15,6 @@ ament_target_dependencies(moveit_planning_pipeline_interfaces
   moveit_core
   moveit_msgs
   rclcpp
-  Boost
-  pluginlib
 )
 
 install(DIRECTORY include/ DESTINATION include/moveit_ros_planning)
