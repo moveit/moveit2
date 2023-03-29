@@ -70,10 +70,10 @@ typedef std::function<::planning_interface::MotionPlanResponse(
  * \param [in] planning_pipelines Pipelines available to solve the problem, if the requested pipeline is not provided
  * the MotionPlanResponse will be FAILURE \return MotionPlanResponse for the given planning problem
  */
-::planning_interface::MotionPlanResponse
-planWithSinglePipeline(const ::planning_interface::MotionPlanRequest& motion_plan_request,
-                       const ::planning_scene::PlanningSceneConstPtr& planning_scene,
-                       const std::map<std::string, planning_pipeline::PlanningPipelinePtr>& planning_pipelines);
+::planning_interface::MotionPlanResponse planWithSinglePipeline(
+    const ::planning_interface::MotionPlanRequest& motion_plan_request,
+    const ::planning_scene::PlanningSceneConstPtr& planning_scene,
+    const std::unordered_map<std::string, planning_pipeline::PlanningPipelinePtr>& planning_pipelines);
 
 /** \brief Function to solve multiple planning problems in parallel threads with multiple planning pipelines at the same
  time
@@ -89,11 +89,25 @@ planWithSinglePipeline(const ::planning_interface::MotionPlanRequest& motion_pla
  + \return If a solution_selection_function is provided a vector containing the selected response is returned, otherwise
  the vector contains all solutions produced.
 */
-const std::vector<::planning_interface::MotionPlanResponse>
-planWithParallelPipelines(const std::vector<::planning_interface::MotionPlanRequest>& motion_plan_requests,
-                          const ::planning_scene::PlanningSceneConstPtr& planning_scene,
-                          const std::map<std::string, planning_pipeline::PlanningPipelinePtr>& planning_pipelines,
-                          const StoppingCriterionFunction& stopping_criterion_callback = nullptr,
-                          const SolutionSelectionFunction& solution_selection_function = nullptr);
+const std::vector<::planning_interface::MotionPlanResponse> planWithParallelPipelines(
+    const std::vector<::planning_interface::MotionPlanRequest>& motion_plan_requests,
+    const ::planning_scene::PlanningSceneConstPtr& planning_scene,
+    const std::unordered_map<std::string, planning_pipeline::PlanningPipelinePtr>& planning_pipelines,
+    const StoppingCriterionFunction& stopping_criterion_callback = nullptr,
+    const SolutionSelectionFunction& solution_selection_function = nullptr);
+
+/** \brief Utility function to create a map of named planning pipelines
+ * \param [in] pipeline_names Vector of planning pipeline names to be used. Each name is also the namespace from which
+ * the pipeline parameters are loaded \param [in] robot_model Robot model used to initialize the pipelines \param [in]
+ * node Node used to load parameters \param [in] parameter_namespace Optional prefix for the pipeline parameter
+ * namespace. Empty by default, so only the pipeline name is used as namespace \param [in] planning_plugin_param_name
+ * Optional name of the planning plugin namespace \param [in] adapter_plugins_param_name Optional name of the adapter
+ * plugin namespace \return Map of PlanningPipelinePtr's associated with a name for faster look-up
+ */
+std::unordered_map<std::string, planning_pipeline::PlanningPipelinePtr>
+createPlanningPipelineMap(const std::vector<std::string>& pipeline_names, moveit::core::RobotModelConstPtr robot_model,
+                          const rclcpp::Node::SharedPtr& node, const std::string& parameter_namespace = std::string(),
+                          const std::string& planning_plugin_param_name = "planning_plugin",
+                          const std::string& adapter_plugins_param_name = "request_adapters");
 }  // namespace planning_pipeline_interfaces
 }  // namespace moveit

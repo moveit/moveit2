@@ -48,7 +48,7 @@ static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.::planning_inter
 ::planning_interface::MotionPlanResponse
 planWithSinglePipeline(const ::planning_interface::MotionPlanRequest& motion_plan_request,
                        const ::planning_scene::PlanningSceneConstPtr& planning_scene,
-                       const std::map<std::string, planning_pipeline::PlanningPipelinePtr>& planning_pipelines)
+                       const std::unordered_map<std::string, planning_pipeline::PlanningPipelinePtr>& planning_pipelines)
 {
   ::planning_interface::MotionPlanResponse motion_plan_response;
   auto it = planning_pipelines.find(motion_plan_request.pipeline_id);
@@ -63,12 +63,12 @@ planWithSinglePipeline(const ::planning_interface::MotionPlanRequest& motion_pla
   return motion_plan_response;
 }
 
-const std::vector<::planning_interface::MotionPlanResponse>
-planWithParallelPipelines(const std::vector<::planning_interface::MotionPlanRequest>& motion_plan_requests,
-                          const ::planning_scene::PlanningSceneConstPtr& planning_scene,
-                          const std::map<std::string, planning_pipeline::PlanningPipelinePtr>& planning_pipelines,
-                          const StoppingCriterionFunction& stopping_criterion_callback,
-                          const SolutionSelectionFunction& solution_selection_function)
+const std::vector<::planning_interface::MotionPlanResponse> planWithParallelPipelines(
+    const std::vector<::planning_interface::MotionPlanRequest>& motion_plan_requests,
+    const ::planning_scene::PlanningSceneConstPtr& planning_scene,
+    const std::unordered_map<std::string, planning_pipeline::PlanningPipelinePtr>& planning_pipelines,
+    const StoppingCriterionFunction& stopping_criterion_callback,
+    const SolutionSelectionFunction& solution_selection_function)
 {
   // Create solutions container
   PlanResponsesContainer plan_responses_container{ motion_plan_requests.size() };
@@ -153,6 +153,39 @@ planWithParallelPipelines(const std::vector<::planning_interface::MotionPlanRequ
 
   // Otherwise, just return the unordered list of solutions
   return plan_responses_container.getSolutions();
+}
+
+std::unordered_map<std::string, planning_pipeline::PlanningPipelinePtr>
+createPlanningPipelineMap(const std::vector<std::string>& pipeline_names, moveit::core::RobotModelConstPtr robot_model,
+                          const rclcpp::Node::SharedPtr& node, const std::string& parameter_namespace,
+                          const std::string& planning_plugin_param_name, const std::string& adapter_plugins_param_name)
+{
+  std::unordered_map<std::string, planning_pipeline::PlanningPipelinePtr> planning_pipelines;
+  for (const auto& planning_pipeline_name : pipeline_names)
+  {
+    // Check if pipeline already exists
+    if (planning_pipelines.count(planning_pipeline_name) > 0)
+    {
+      RCLCPP_WARN(LOGGER, "Skipping duplicate entry for planning pipeline '%s'.", planning_pipeline_name.c_str());
+      continue;
+    }
+
+    // Create planning pipeline
+    planning_pipeline::PlanningPipelinePtr pipeline =
+        std::make_shared<planning_pipeline::PlanningPipeline>(robot_model, node,
+                                                              parameter_namespace + planning_pipeline_name,
+                                                              planning_plugin_param_name, adapter_plugins_param_name);
+
+    if (!pipeline->getPlannerManager())
+    {
+      RCLCPP_ERROR(LOGGER, "Failed to initialize planning pipeline '%s'.", planning_pipeline_name.c_str());
+      continue;
+    }
+
+    planning_pipelines[planning_pipeline_name] = pipeline;
+  }
+
+  return planning_pipelines;
 }
 
 }  // namespace planning_pipeline_interfaces
