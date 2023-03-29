@@ -98,11 +98,15 @@ const std::vector<::planning_interface::MotionPlanResponse> planWithParallelPipe
 
 /** \brief Utility function to create a map of named planning pipelines
  * \param [in] pipeline_names Vector of planning pipeline names to be used. Each name is also the namespace from which
- * the pipeline parameters are loaded \param [in] robot_model Robot model used to initialize the pipelines \param [in]
- * node Node used to load parameters \param [in] parameter_namespace Optional prefix for the pipeline parameter
- * namespace. Empty by default, so only the pipeline name is used as namespace \param [in] planning_plugin_param_name
- * Optional name of the planning plugin namespace \param [in] adapter_plugins_param_name Optional name of the adapter
- * plugin namespace \return Map of PlanningPipelinePtr's associated with a name for faster look-up
+ * the pipeline parameters are loaded
+ * \param [in] robot_model Robot model used to initialize the pipelines
+ * \param [in] node Node used to load parameters
+ * \param [in] parameter_namespace Optional prefix for the pipeline parameter
+ * namespace. Empty by default, so only the pipeline name is used as namespace
+ * \param [in] planning_plugin_param_name
+ * Optional name of the planning plugin namespace
+ * \param [in] adapter_plugins_param_name Optional name of the adapter plugin namespace
+ * \return Map of PlanningPipelinePtr's associated with a name for faster look-up
  */
 std::unordered_map<std::string, planning_pipeline::PlanningPipelinePtr>
 createPlanningPipelineMap(const std::vector<std::string>& pipeline_names, moveit::core::RobotModelConstPtr robot_model,
