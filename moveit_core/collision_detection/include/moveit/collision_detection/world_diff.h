@@ -59,9 +59,9 @@ public:
   ~WorldDiff();
 
   /** \brief Set which world to record.  Records all objects in old world (if
-   * any) as DESTROYED and all objects in new world as CREATED and ADD_SHAPE
-   * */
-  // Warning: function output depends on the class member `world_`. This makes it an "impure function"
+   * any) as DESTROYED and all objects in new world as CREATED and ADD_SHAPE.
+   * Warning: function output depends on the class member `world_`. This makes it an "impure function"
+   **/
   void setWorld(const WorldPtr& world);
 
   /** \brief Set which world to record.  Erases all previously recorded
