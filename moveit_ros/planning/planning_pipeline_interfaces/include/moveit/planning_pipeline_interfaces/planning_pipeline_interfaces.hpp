@@ -109,8 +109,9 @@ const std::vector<::planning_interface::MotionPlanResponse> planWithParallelPipe
  * \return Map of PlanningPipelinePtr's associated with a name for faster look-up
  */
 std::unordered_map<std::string, planning_pipeline::PlanningPipelinePtr>
-createPlanningPipelineMap(const std::vector<std::string>& pipeline_names, const moveit::core::RobotModelConstPtr& robot_model,
-                          const rclcpp::Node::SharedPtr& node, const std::string& parameter_namespace = std::string(),
+createPlanningPipelineMap(const std::vector<std::string>& pipeline_names,
+                          const moveit::core::RobotModelConstPtr& robot_model, const rclcpp::Node::SharedPtr& node,
+                          const std::string& parameter_namespace = std::string(),
                           const std::string& planning_plugin_param_name = "planning_plugin",
                           const std::string& adapter_plugins_param_name = "request_adapters");
 }  // namespace planning_pipeline_interfaces

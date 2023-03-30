@@ -156,9 +156,10 @@ const std::vector<::planning_interface::MotionPlanResponse> planWithParallelPipe
 }
 
 std::unordered_map<std::string, planning_pipeline::PlanningPipelinePtr>
-createPlanningPipelineMap(const std::vector<std::string>& pipeline_names, const moveit::core::RobotModelConstPtr& robot_model,
-                          const rclcpp::Node::SharedPtr& node, const std::string& parameter_namespace,
-                          const std::string& planning_plugin_param_name, const std::string& adapter_plugins_param_name)
+createPlanningPipelineMap(const std::vector<std::string>& pipeline_names,
+                          const moveit::core::RobotModelConstPtr& robot_model, const rclcpp::Node::SharedPtr& node,
+                          const std::string& parameter_namespace, const std::string& planning_plugin_param_name,
+                          const std::string& adapter_plugins_param_name)
 {
   std::unordered_map<std::string, planning_pipeline::PlanningPipelinePtr> planning_pipelines;
   for (const auto& planning_pipeline_name : pipeline_names)
