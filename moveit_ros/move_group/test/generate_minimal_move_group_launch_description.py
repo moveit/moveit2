@@ -75,10 +75,7 @@ def get_ompl_planning_pipeline():
 
 
 def generate_minimal_move_group_launch_description():
-    """
-    :return: A LaunchDescription for the integration test scenario
-    """
-
+    """:return: A LaunchDescription for the integration test scenario."""
     robot_description = get_robot_description()
 
     robot_description_semantic = get_robot_description_semantic()
