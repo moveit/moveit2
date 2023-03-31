@@ -1,18 +1,20 @@
-<?xml version="1.0"?>
-<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<!-- This XML code describes a ROS package named moveit_runtime -->
+
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd"?>
+
 <package format="3">
   <name>moveit_runtime</name>
   <version>2.7.1</version>
   <description>moveit_runtime meta package contains MoveIt packages that are essential for its runtime (e.g. running MoveIt on robots).</description>
-  <maintainer email="henningkayser@picknik.ai">Henning Kayser</maintainer>
-  <maintainer email="tyler@picknik.ai">Tyler Weaver</maintainer>
+  <maintainer email="example_maintainer1@example.com">Henning Kayser</maintainer>
+  <maintainer email="example_maintainer2@example.com">Tyler Weaver</maintainer>
 
   <license>BSD-3-Clause</license>
 
   <url type="website">http://moveit.ros.org</url>
   <url type="website">http://wiki.ros.org/moveit_runtime</url>
 
-  <author email="gm130s@gmail.com">Isaac I. Y. Saito</author>
+  <author email="example_author@example.com">Isaac I. Y. Saito</author>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
   <exec_depend>moveit_core</exec_depend>
