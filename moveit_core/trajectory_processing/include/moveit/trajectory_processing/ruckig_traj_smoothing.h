@@ -50,10 +50,14 @@ public:
    * \param[in,out] trajectory A path which needs smoothing.
    * \param max_velocity_scaling_factor A factor in the range [0,1] which can slow down the trajectory.
    * \param max_acceleration_scaling_factor A factor in the range [0,1] which can slow down the trajectory.
+   * \param mitigate_overshoot If true, overshoot is mitigated by extending trajectory duration.
+   * \param overshoot_threshold If an overshoot is greater than this, duration is extended (radians, for a single joint)
+   * \return true if successful.
    */
   static bool applySmoothing(robot_trajectory::RobotTrajectory& trajectory,
                              const double max_velocity_scaling_factor = 1.0,
-                             const double max_acceleration_scaling_factor = 1.0);
+                             const double max_acceleration_scaling_factor = 1.0, const bool mitigate_overshoot = false,
+                             const double overshoot_threshold = 0.01);
 
   /**
    * \brief Apply smoothing to a time-parameterized trajectory so that jerk limits are not violated.
@@ -63,13 +67,17 @@ public:
    * \param jerk_limits Joint names and jerk limits in rad/s^3
    * \param max_velocity_scaling_factor A factor in the range [0,1] which can slow down the trajectory.
    * \param max_acceleration_scaling_factor A factor in the range [0,1] which can slow down the trajectory.
+   * \param mitigate_overshoot If true, overshoot is mitigated by extending trajectory duration.
+   * \param overshoot_threshold If an overshoot is greater than this, duration is extended (radians, for a single joint)
+   * \return true if successful.
    */
   static bool applySmoothing(robot_trajectory::RobotTrajectory& trajectory,
                              const std::unordered_map<std::string, double>& velocity_limits,
                              const std::unordered_map<std::string, double>& acceleration_limits,
                              const std::unordered_map<std::string, double>& jerk_limits,
                              const double max_velocity_scaling_factor = 1.0,
-                             const double max_acceleration_scaling_factor = 1.0);
+                             const double max_acceleration_scaling_factor = 1.0, const bool mitigate_overshoot = false,
+                             const double overshoot_threshold = 0.01);
 
   /**
    * \brief Apply smoothing to a time-parameterized trajectory so that jerk limits are not violated.
@@ -120,35 +128,21 @@ private:
    * \param first_waypoint  The Ruckig input/output parameters are initialized to the values at this waypoint
    * \param joint_group     The MoveIt JointModelGroup of interest
    * \param[out] rucking_input   Input parameters to Ruckig. Initialized here.
-   * \param[out] ruckig_output   Output from the Ruckig algorithm. Initialized here.
    */
   static void initializeRuckigState(const moveit::core::RobotState& first_waypoint,
                                     const moveit::core::JointModelGroup* joint_group,
-                                    ruckig::InputParameter<ruckig::DynamicDOFs>& ruckig_input,
-                                    ruckig::OutputParameter<ruckig::DynamicDOFs>& ruckig_output);
-
-  /**
-   * \brief Break the `trajectory` parameter into batches of reasonable size (~100), run Ruckig on each of them, then
-   * re-combine into a single trajectory again.
-   * runRuckig() stretches all input waypoints in time until all kinematic limits are obeyed. This works but it can
-   * slow the trajectory more than necessary. It's better to feed in just a few waypoints at once, so that only the
-   * waypoints needing it get stretched.
-   * Here, break the trajectory waypoints into batches so the output is closer to time-optimal.
-   * There is a trade-off between time-optimality of the output trajectory and runtime of the smoothing algorithm.
-   * \param[in, out] trajectory      Trajectory to smooth.
-   * \param[in, out] ruckig_input    Necessary input for Ruckig smoothing. Contains kinematic limits (vel, accel, jerk)
-   */
-  static std::optional<robot_trajectory::RobotTrajectory>
-  runRuckigInBatches(const size_t num_waypoints, const robot_trajectory::RobotTrajectory& trajectory,
-                     ruckig::InputParameter<ruckig::DynamicDOFs>& ruckig_input, size_t batch_size = 100);
+                                    ruckig::InputParameter<ruckig::DynamicDOFs>& ruckig_input);
 
   /**
    * \brief A utility function to instantiate and run Ruckig for a series of waypoints.
    * \param[in, out] trajectory      Trajectory to smooth.
    * \param[in, out] ruckig_input    Necessary input for Ruckig smoothing. Contains kinematic limits (vel, accel, jerk)
+   * \param mitigate_overshoot If true, overshoot is mitigated by extending trajectory duration.
+   * \param overshoot_threshold If an overshoot is greater than this, duration is extended (radians, for a single joint)
    */
   [[nodiscard]] static bool runRuckig(robot_trajectory::RobotTrajectory& trajectory,
-                                      ruckig::InputParameter<ruckig::DynamicDOFs>& ruckig_input);
+                                      ruckig::InputParameter<ruckig::DynamicDOFs>& ruckig_input,
+                                      const bool mitigate_overshoot = false, const double overshoot_threshold = 0.01);
 
   /**
    * \brief Extend the duration of every trajectory segment
@@ -163,5 +157,10 @@ private:
                                        const size_t num_dof, const std::vector<int>& move_group_idx,
                                        const robot_trajectory::RobotTrajectory& original_trajectory,
                                        robot_trajectory::RobotTrajectory& trajectory);
+
+  /** \brief Check if a trajectory out of Ruckig overshoots the target state */
+  static bool checkOvershoot(ruckig::Trajectory<ruckig::DynamicDOFs, ruckig::StandardVector>& ruckig_trajectory,
+                             const size_t num_dof, ruckig::InputParameter<ruckig::DynamicDOFs>& ruckig_input,
+                             const double overshoot_threshold);
 };
 }  // namespace trajectory_processing
