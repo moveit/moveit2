@@ -53,6 +53,11 @@ def get_launch_params_filepath():
     """
     try:
         cli_args = sys.argv
-        return sys.argv[sys.argv.index("--params-file") + 1]
-    except ValueError:
-        return "Failed to parse params file path from command line arguments. Check that --params-file command line argument is specified."
+        if "--params-file" in cli_args:
+            return sys.argv[sys.argv.index("--params-file") + 1]
+        else:
+            raise ValueError("--params-file command line argument is not specified.")
+    except ValueError as e:
+        print(f"Error: {e}")
+        traceback.print_exc()
+        sys.exit(1)
