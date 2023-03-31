@@ -35,6 +35,15 @@ from __future__ import print_function
 import os
 import sys
 import webbrowser
+import logging
+
+# ...
+
+logging.info("++ Templating '{0}'".format(src))
+
+# ...
+
+logging.info("++ Webpage ready at '{0}'".format(dst))
 
 from catkin_pkg.packages import find_packages
 
@@ -203,3 +212,7 @@ def list_moveit_packages():
 
 if __name__ == "__main__":
     sys.exit(list_moveit_packages())
+try:
+    webbrowser.open(dst)
+except Exception as e:
+    logging.error("Failed to open webpage: {0}".format(e))
