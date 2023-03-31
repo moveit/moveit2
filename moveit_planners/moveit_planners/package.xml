@@ -1,36 +1,45 @@
 <?xml version="1.0"?>
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
+  <!-- Name of the ROS package -->
   <name>moveit_planners</name>
+  
+  <!-- Version number of the package -->
   <version>2.7.1</version>
+  
+  <!-- Description of the package -->
   <description>Meta package that installs all available planners for MoveIt</description>
+  
+  <!-- Package maintainer(s) -->
   <maintainer email="henningkayser@picknik.ai">Henning Kayser</maintainer>
   <maintainer email="tyler@picknik.ai">Tyler Weaver</maintainer>
   <maintainer email="moveit_releasers@googlegroups.com">MoveIt Release Team</maintainer>
 
+  <!-- License for the package -->
   <license>BSD-3-Clause</license>
 
+  <!-- URLs for the package, including website, bug tracker, and repository -->
   <url type="website">http://moveit.ros.org</url>
   <url type="bugtracker">https://github.com/ros-planning/moveit2/issues</url>
   <url type="repository">https://github.com/ros-planning/moveit2</url>
 
+  <!-- Authors of the package -->
   <author email="isucan@google.com">Ioan Sucan</author>
   <author email="sachinc@willowgarage.com">Sachin Chitta</author>
 
+  <!-- Build tool dependency -->
   <buildtool_depend>ament_cmake</buildtool_depend>
 
-  <!--
-  <exec_depend>chomp_motion_planner</exec_depend>
-  <exec_depend>moveit_planners_chomp</exec_depend>
-  -->
+  <!-- Dependencies required to run the package -->
   <exec_depend>moveit_planners_ompl</exec_depend>
   <exec_depend>pilz_industrial_motion_planner</exec_depend>
 
+  <!-- Dependencies required for testing the package -->
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>
 
+  <!-- Exported build type for the package -->
   <export>
     <build_type>ament_cmake</build_type>
   </export>
-
 </package>
