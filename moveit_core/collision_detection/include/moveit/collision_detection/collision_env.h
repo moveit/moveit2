@@ -47,7 +47,10 @@ namespace collision_detection
 {
 MOVEIT_CLASS_FORWARD(CollisionEnv);  // Defines CollisionEnvPtr, ConstPtr, WeakPtr... etc
 
-/** \brief Provides the interface to the individual collision checking libraries. */
+/** \brief Provides the interface to the individual collision checking libraries.
+ * Some of these functions are impure, they depend on some shared variable .
+ *  The world_ variable for example is controlling the return value though it
+ *  is not a parameter. */
 class CollisionEnv
 {
 public:
