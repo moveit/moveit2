@@ -34,6 +34,9 @@
 
 /* Author: Peter David Fagan */
 
+#include <pybind11/pybind11.h>
+#include <pybind11/stl.h>
+
 #include "moveit_core/collision_detection/collision_common.h"
 #include "moveit_core/collision_detection/collision_matrix.h"
 #include "moveit_core/collision_detection/world.h"
@@ -47,17 +50,18 @@
 #include "moveit_core/robot_state/robot_state.h"
 #include "moveit_core/robot_trajectory/robot_trajectory.h"
 
-PYBIND11_MODULE(core, m)
+// Rename the module to "moveit_core_py" to avoid naming conflicts
+PYBIND11_MODULE(moveit_core_py, m)
 {
   m.doc() = R"(
-            Python bindings for moveit_core functionalities.
+            Python bindings for MoveIt Core functionalities.
             )";
 
-  // Provide custom function signatures
+  // Disable function signatures for cleaner docstrings
   py::options options;
   options.disable_function_signatures();
 
-  // Construct module classes
+  // Bind all necessary classes
   moveit_py::bind_collision_detection::init_collision_request(m);
   moveit_py::bind_collision_detection::init_collision_result(m);
   moveit_py::bind_collision_detection::init_world(m);
@@ -71,6 +75,7 @@ PYBIND11_MODULE(core, m)
   moveit_py::bind_robot_model::init_robot_model(m);
   moveit_py::bind_robot_state::init_robot_state(m);
   moveit_py::bind_robot_trajectory::init_robot_trajectory(m);
+
   // TODO (peterdavidfagan): complete LinkModel bindings
   // LinkModel
   // py::class_<moveit::core::LinkModel>(m, "LinkModel");
