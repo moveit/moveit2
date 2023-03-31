@@ -1,10 +1,10 @@
-repositories:
-  # Keep moveit_* repos here because they are released with moveit
-  moveit_msgs:
-    type: git
-    url: https://github.com/ros-planning/moveit_msgs.git
-    version: ros2
-  moveit_resources:
-    type: git
-    url: https://github.com/ros-planning/moveit_resources.git
-    version: ros2
+# MoveIt-related repositories
+moveit_msgs:
+  type: git
+  url: https://github.com/ros-planning/moveit_msgs.git
+  version: ros2
+
+moveit_resources:
+  type: git
+  url: https://github.com/ros-planning/moveit_resources.git
+  version: ros2
