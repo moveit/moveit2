@@ -43,13 +43,28 @@ namespace moveit
 {
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_exceptions.exceptions");
 
-ConstructException::ConstructException(const std::string& what_arg) : std::runtime_error(what_arg)
+class MotionPlanningException : public std::runtime_error
 {
-  RCLCPP_ERROR(LOGGER, "Error during construction of object: %s\nException thrown.", what_arg.c_str());
-}
+public:
+  MotionPlanningException(const std::string& what_arg, const char* file, int line)
+    : std::runtime_error(what_arg)
+  {
+    std::ostringstream oss;
+    oss << "Motion planning error in " << file << " (line " << line << "): " << what_arg;
+    RCLCPP_ERROR(LOGGER, "%s\nException thrown.", oss.str().c_str());
+  }
+};
 
-Exception::Exception(const std::string& what_arg) : std::runtime_error(what_arg)
+class MotionPlanningRuntimeError : public std::runtime_error
 {
-  RCLCPP_ERROR(LOGGER, "%s\nException thrown.", what_arg.c_str());
-}
+public:
+  MotionPlanningRuntimeError(const std::string& what_arg, const char* file, int line)
+    : std::runtime_error(what_arg)
+  {
+    std::ostringstream oss;
+    oss << "Motion planning runtime error in " << file << " (line " << line << "): " << what_arg;
+    RCLCPP_ERROR(LOGGER, "%s\nException thrown.", oss.str().c_str());
+  }
+};
+
 }  // namespace moveit
