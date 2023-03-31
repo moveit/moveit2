@@ -37,104 +37,101 @@
 */
 
 #include <moveit/planning_interface/planning_interface.h>
-
 #include <moveit/collision_detection_fcl/collision_detector_allocator_fcl.h>
-
 #include <class_loader/class_loader.hpp>
-
 #include <trajopt_interface/trajopt_planning_context.h>
 
 namespace trajopt_interface
 {
-class TrajOptPlannerManager : public planning_interface::PlannerManager
-{
-public:
-  TrajOptPlannerManager() : planning_interface::PlannerManager()
+  class TrajOptPlannerManager : public planning_interface::PlannerManager
   {
-  }
-
-  bool initialize(const moveit::core::RobotModelConstPtr& model, const std::string& ns) override
-  {
-    ROS_INFO(" ======================================= initialize gets called");
-
-    if (!ns.empty())
-      nh_ = ros::NodeHandle(ns);
-    std::string trajopt_ns = ns.empty() ? "trajopt" : ns + "/trajopt";
-
-    for (const std::string& gpName : model->getJointModelGroupNames())
+  public:
+    TrajOptPlannerManager() : planning_interface::PlannerManager()
     {
-      ROS_INFO(" ======================================= group name: %s, robot model: %s", gpName.c_str(),
-               model->getName().c_str());
-      planning_contexts_[gpName] = std::make_shared<TrajOptPlanningContext>("trajopt_planning_context", gpName, model);
     }
 
-    return true;
-  }
-
-  bool canServiceRequest(const moveit_msgs::MotionPlanRequest& req) const override
-  {
-    return req.trajectory_constraints.constraints.empty();
-  }
-
-  std::string getDescription() const override
-  {
-    return "TrajOpt";
-  }
-
-  void getPlanningAlgorithms(std::vector<std::string>& algs) const override
-  {
-    algs.clear();
-    algs.push_back("trajopt");
-  }
-
-  planning_interface::PlanningContextPtr getPlanningContext(const planning_scene::PlanningSceneConstPtr& planning_scene,
-                                                            const planning_interface::MotionPlanRequest& req,
-                                                            moveit_msgs::MoveItErrorCodes& error_code) const override
-  {
-    ROS_INFO(" ======================================= getPlanningContext() is called ");
-    error_code.val = moveit_msgs::MoveItErrorCodes::SUCCESS;
-
-    if (req.group_name.empty())
+    bool initialize(const moveit::core::RobotModelConstPtr& model, const std::string& ns) override
     {
-      ROS_ERROR("No group specified to plan for");
-      error_code.val = moveit_msgs::MoveItErrorCodes::INVALID_GROUP_NAME;
-      return planning_interface::PlanningContextPtr();
+      ROS_INFO(" ======================================= initialize gets called");
+
+      if (!ns.empty())
+        nh_ = ros::NodeHandle(ns);
+
+      std::string trajopt_ns = ns.empty() ? "trajopt" : ns + "/trajopt";
+      for (const std::string& gpName : model->getJointModelGroupNames())
+      {
+        ROS_INFO(" ======================================= group name: %s, robot model: %s", gpName.c_str(),
+                 model->getName().c_str());
+        planning_contexts_[gpName] = std::make_shared<TrajOptPlanningContext>("trajopt_planning_context", gpName, model);
+      }
+
+      return true;
     }
 
-    if (!planning_scene)
+    bool canServiceRequest(const planning_interface::MotionPlanRequest& req) const override
     {
-      ROS_ERROR("No planning scene supplied as input");
-      error_code.val = moveit_msgs::MoveItErrorCodes::FAILURE;
-      return planning_interface::PlanningContextPtr();
+      return req.trajectory_constraints.constraints.empty();
     }
 
-    // create PlanningScene using hybrid collision detector
-    planning_scene::PlanningScenePtr ps = planning_scene->diff();
+    std::string getDescription() const override
+    {
+      return "TrajOpt";
+    }
 
-    // set FCL for the collision
-    ps->allocateCollisionDetector(collision_detection::CollisionDetectorAllocatorFCL::create());
+    void getPlanningAlgorithms(std::vector<std::string>& algs) const override
+    {
+      algs.clear();
+      algs.push_back("trajopt");
+    }
 
-    // retrieve and configure existing context
-    const TrajOptPlanningContextPtr& context = planning_contexts_.at(req.group_name);
+    planning_interface::PlanningContextPtr getPlanningContext(const planning_scene::PlanningSceneConstPtr& planning_scene,
+                                                              const planning_interface::MotionPlanRequest& req,
+                                                              moveit_msgs::MoveItErrorCodes& error_code) const override
+    {
+      ROS_INFO(" ======================================= getPlanningContext() is called ");
+      error_code.val = moveit_msgs::MoveItErrorCodes::SUCCESS;
 
-    ROS_INFO(" ======================================= context is made ");
+      if (req.group_name.empty())
+      {
+        ROS_ERROR("No group specified to plan for");
+        error_code.val = moveit_msgs::MoveItErrorCodes::INVALID_GROUP_NAME;
+        return planning_interface::PlanningContextPtr();
+      }
 
-    context->setPlanningScene(ps);
-    context->setMotionPlanRequest(req);
+      if (!planning_scene)
+      {
+        ROS_ERROR("No planning scene supplied as input");
+        error_code.val = moveit_msgs::MoveItErrorCodes::FAILURE;
+        return planning_interface::PlanningContextPtr();
+      }
 
-    error_code.val = moveit_msgs::MoveItErrorCodes::SUCCESS;
+      // create PlanningScene using hybrid collision detector
+      planning_scene::PlanningScenePtr ps = planning_scene->diff();
 
-    return context;
-  }
+      // set FCL for the collision
+      ps->getCollisionDetectionPlugin()->initialize("FCL");
 
-private:
-  ros::NodeHandle nh_;
+      // retrieve and configure existing context
+      const TrajOptPlanningContextPtr& context = planning_contexts_.at(req.group_name);
 
-protected:
-  std::map<std::string, TrajOptPlanningContextPtr> planning_contexts_;
-};
+      ROS_INFO(" ======================================= context is made ");
 
+      context->setPlanningScene(ps);
+      context->setMotionPlanRequest(req);
+
+      error_code.val = moveit_msgs::MoveItErrorCodes::SUCCESS;
+
+      return context;
+    }
+
+  private:
+    ros::NodeHandle nh_;
+
+  protected:
+    std::map<std::string, TrajOptPlanningContextPtr> planning_contexts_;
+  };
 }  // namespace trajopt_interface
 
 // register the TrajOptPlannerManager class as a plugin
 CLASS_LOADER_REGISTER_CLASS(trajopt_interface::TrajOptPlannerManager, planning_interface::PlannerManager);
+
