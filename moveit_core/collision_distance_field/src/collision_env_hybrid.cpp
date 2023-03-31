@@ -94,92 +94,47 @@ void CollisionEnvHybrid::checkSelfCollisionDistanceField(const collision_detecti
 {
   cenv_distance_->checkSelfCollision(req, res, state, acm);
 }
-
-void CollisionEnvHybrid::checkSelfCollisionDistanceField(const collision_detection::CollisionRequest& req,
+    
+bool CollisionEnvHybrid::checkSelfCollisionDistanceField(const collision_detection::CollisionRequest& req,
                                                          collision_detection::CollisionResult& res,
-                                                         const moveit::core::RobotState& state,
-                                                         const collision_detection::AllowedCollisionMatrix& acm,
-                                                         GroupStateRepresentationPtr& gsr) const
+                                                         const moveit::core::RobotState& state) const
 {
-  cenv_distance_->checkSelfCollision(req, res, state, acm, gsr);
+  ROS_DEBUG_STREAM_NAMED("collision_detection.distance_field", "Starting self collision check using distance field");
+
+  const std::vector<const collision_detection::DistanceField*>& dfs = getAllDistanceFields();
+  std::vector<std::pair<int, int>> self_collisions;
+
+  for (std::size_t i = 0; i < dfs.size(); ++i)
+  {
+    if (dfs[i]->getGroupMask() & req.group_mask)
+    {
+      std::vector<std::pair<int, int>> contacts;
+      dfs[i]->checkSelfCollision(req, contacts);
+
+      if (!contacts.empty())
+      {
+        for (std::size_t j = 0; j < contacts.size(); ++j)
+        {
+          int id1 = dfs[i]->getLinkModel(contacts[j].first)->getParentLinkModel()->getLinkIndex();
+          int id2 = dfs[i]->getLinkModel(contacts[j].second)->getParentLinkModel()->getLinkIndex();
+          self_collisions.push_back(std::make_pair(std::max(id1, id2), std::min(id1, id2)));
+        }
+      }
+    }
+  }
+
+  // Remove duplicates
+  std::sort(self_collisions.begin(), self_collisions.end());
+  std::vector<std::pair<int, int>>::iterator end = std::unique(self_collisions.begin(), self_collisions.end());
+
+  for (std::vector<std::pair<int, int>>::iterator it = self_collisions.begin(); it != end; ++it)
+  {
+    collision_detection::CollisionResult::Contact con;
+    con.body_name_1 = state.getRobotModel()->getLinkModel(it->first)->getName();
+    con.body_name_2 = state.getRobotModel()->getLinkModel(it->second)->getName();
+    res.contacts.push_back(con);
+  }
+
+  return res.collision;
 }
 
-void CollisionEnvHybrid::checkCollisionDistanceField(const CollisionRequest& req, CollisionResult& res,
-                                                     const moveit::core::RobotState& state) const
-{
-  cenv_distance_->checkCollision(req, res, state);
-}
-
-void CollisionEnvHybrid::checkCollisionDistanceField(const CollisionRequest& req, CollisionResult& res,
-                                                     const moveit::core::RobotState& state,
-                                                     GroupStateRepresentationPtr& gsr) const
-{
-  cenv_distance_->checkCollision(req, res, state, gsr);
-}
-
-void CollisionEnvHybrid::checkCollisionDistanceField(const CollisionRequest& req, CollisionResult& res,
-                                                     const moveit::core::RobotState& state,
-                                                     const AllowedCollisionMatrix& acm) const
-{
-  cenv_distance_->checkCollision(req, res, state, acm);
-}
-
-void CollisionEnvHybrid::checkCollisionDistanceField(const CollisionRequest& req, CollisionResult& res,
-                                                     const moveit::core::RobotState& state,
-                                                     const AllowedCollisionMatrix& acm,
-                                                     GroupStateRepresentationPtr& gsr) const
-{
-  cenv_distance_->checkCollision(req, res, state, acm, gsr);
-}
-
-void CollisionEnvHybrid::checkRobotCollisionDistanceField(const CollisionRequest& req, CollisionResult& res,
-                                                          const moveit::core::RobotState& state) const
-{
-  cenv_distance_->checkRobotCollision(req, res, state);
-}
-
-void CollisionEnvHybrid::checkRobotCollisionDistanceField(const CollisionRequest& req, CollisionResult& res,
-                                                          const moveit::core::RobotState& state,
-                                                          GroupStateRepresentationPtr& gsr) const
-{
-  cenv_distance_->checkRobotCollision(req, res, state, gsr);
-}
-
-void CollisionEnvHybrid::checkRobotCollisionDistanceField(const CollisionRequest& req, CollisionResult& res,
-                                                          const moveit::core::RobotState& state,
-                                                          const AllowedCollisionMatrix& acm) const
-{
-  cenv_distance_->checkRobotCollision(req, res, state, acm);
-}
-
-void CollisionEnvHybrid::checkRobotCollisionDistanceField(const CollisionRequest& req, CollisionResult& res,
-                                                          const moveit::core::RobotState& state,
-                                                          const AllowedCollisionMatrix& acm,
-                                                          GroupStateRepresentationPtr& gsr) const
-{
-  cenv_distance_->checkRobotCollision(req, res, state, acm, gsr);
-}
-
-void CollisionEnvHybrid::setWorld(const WorldPtr& world)
-{
-  if (world == getWorld())
-    return;
-
-  cenv_distance_->setWorld(world);
-  CollisionEnvFCL::setWorld(world);
-}
-
-void CollisionEnvHybrid::getCollisionGradients(const CollisionRequest& req, CollisionResult& res,
-                                               const moveit::core::RobotState& state, const AllowedCollisionMatrix* acm,
-                                               GroupStateRepresentationPtr& gsr) const
-{
-  cenv_distance_->getCollisionGradients(req, res, state, acm, gsr);
-}
-
-void CollisionEnvHybrid::getAllCollisions(const CollisionRequest& req, CollisionResult& res,
-                                          const moveit::core::RobotState& state, const AllowedCollisionMatrix* acm,
-                                          GroupStateRepresentationPtr& gsr) const
-{
-  cenv_distance_->getAllCollisions(req, res, state, acm, gsr);
-}
-}  // namespace collision_detection
