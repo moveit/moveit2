@@ -458,6 +458,120 @@ TEST(World, ObjectPoseAndSubframes)
   EXPECT_EQ(1.0, pose(2, 3));  // z
 }
 
+TEST(World, JointLimitParameters)
+{
+  World world;
+
+  TestAction ta;
+  World::ObserverHandle observer_ta;
+  observer_ta = world.addObserver([&ta](const World::ObjectConstPtr& object, World::Action action) {
+    return TrackChangesNotify(ta, object, action);
+  });
+
+  // Create a simple robot model
+  moveit::core::RobotModelBuilder builder("test_robot", "base_link");
+  builder.addChain("base_link->joint1->link1->joint2->link2");
+
+  // Set joint limits
+  builder.setJointLimits("joint1", { -M_PI, M_PI, 1.0, 2.0 });  // position, velocity, acceleration limits
+  builder.setJointLimits("joint2", { -M_PI / 2, M_PI / 2, 0.5, 1.0 });
+
+  moveit::core::RobotModelConstPtr robot_model = builder.build();
+
+  // Load the robot model into the world
+  world.setRobotModel(robot_model);
+
+  // Get the joint model group
+  const moveit::core::JointModelGroup* jmg = robot_model->getJointModelGroup("chain");
+
+  // Set joint values within limits
+  std::vector<double> joint_values1 = { 0.0, 0.0 };
+  robot_state::RobotState state1(robot_model);
+  state1.setJointGroupPositions(jmg, joint_values1);
+
+  // Check joint values are set correctly
+  std::vector<double> check_joint_values1;
+  state1.copyJointGroupPositions(jmg, check_joint_values1);
+  EXPECT_EQ(joint_values1, check_joint_values1);
+
+  // Set joint values beyond limits
+  std::vector<double> joint_values2 = { M_PI + 0.1, -M_PI / 2 - 0.1 };
+  robot_state::RobotState state2(robot_model);
+  state2.setJointGroupPositions(jmg, joint_values2);
+
+  // Check joint values are set correctly
+  std::vector<double> check_joint_values2;
+  state2.copyJointGroupPositions(jmg, check_joint_values2);
+  EXPECT_EQ(joint_values2, check_joint_values2);
+
+  // Enforce joint limits
+  state2.enforceBounds();
+
+  // Check joint values are now within limits
+  std::vector<double> joint_values_after_enforce;
+  state2.copyJointGroupPositions(jmg, joint_values_after_enforce);
+  EXPECT_NEAR(M_PI, joint_values_after_enforce[0], 1e-6);
+  EXPECT_NEAR(-M_PI / 2, joint_values_after_enforce[1], 1e-6);
+
+  // Check joint velocity and acceleration limits
+  const std::vector<const moveit::core::JointModel*>& joint_models = jmg->getJointModels();
+  for (const moveit::core::JointModel* joint_model : joint_models)
+  {
+    const moveit::core::VariableBounds& velocity_bounds = joint_model->getVariableBounds("velocity");
+    const moveit::core::VariableBounds& acceleration_bounds = joint_model->getVariableBounds("acceleration");
+
+    if (joint_model->getName() == "joint1")
+    {
+      EXPECT_NEAR(1.0, velocity_bounds.max_position_, 1e-6);
+      EXPECT_NEAR(2.0, acceleration_bounds.max_position_, 1e-6);
+    }
+    else if (joint_model->getName() == "joint2")
+    {
+      EXPECT_NEAR(0.5, velocity_bounds.max_position_, 1e-6);
+      EXPECT_NEAR(1.0, acceleration_bounds.max_position_, 1e-6);
+    }
+  }
+
+  // Set joint velocities and accelerations within limits
+  std::vector<double> joint_velocities1 = { 0.5, 0.25 };
+  std::vector<double> joint_accelerations1 = { 1.0, 0.5 };
+  state1.setJointGroupVelocities(jmg, joint_velocities1);
+  state1.setJointGroupAccelerations(jmg, joint_accelerations1);
+
+  // Check joint velocities and accelerations are set correctly
+  std::vector<double> check_joint_velocities1, check_joint_accelerations1;
+  state1.copyJointGroupVelocities(jmg, check_joint_velocities1);
+  state1.copyJointGroupAccelerations(jmg, check_joint_accelerations1);
+  EXPECT_EQ(joint_velocities1, check_joint_velocities1);
+  EXPECT_EQ(joint_accelerations1, check_joint_accelerations1);
+
+  // Set joint velocities and accelerations beyond limits
+  std::vector<double> joint_velocities2 = { 1.5, 0.75 };
+  std::vector<double> joint_accelerations2 = { 2.5, 1.5 };
+  state2.setJointGroupVelocities(jmg, joint_velocities2);
+  state2.setJointGroupAccelerations(jmg, joint_accelerations2);
+
+  // Check joint velocities and accelerations are set correctly
+  std::vector<double> check_joint_velocities2, check_joint_accelerations2;
+  state2.copyJointGroupVelocities(jmg, check_joint_velocities2);
+  state2.copyJointGroupAccelerations(jmg, check_joint_accelerations2);
+  EXPECT_EQ(joint_velocities2, check_joint_velocities2);
+  EXPECT_EQ(joint_accelerations2, check_joint_accelerations2);
+
+  // Enforce joint velocity and acceleration limits
+  state2.enforceVelocityBounds();
+  state2.enforceAccelerationBounds();
+
+  // Check joint velocities and accelerations are now within limits
+  std::vector<double> joint_velocities_after_enforce, joint_accelerations_after_enforce;
+  state2.copyJointGroupVelocities(jmg, joint_velocities_after_enforce);
+  state2.copyJointGroupAccelerations(jmg, joint_accelerations_after_enforce);
+  EXPECT_NEAR(1.0, joint_velocities_after_enforce[0], 1e-6);
+  EXPECT_NEAR(0.5, joint_velocities_after_enforce[1], 1e-6);
+  EXPECT_NEAR(2.0, joint_accelerations_after_enforce[0], 1e-6);
+  EXPECT_NEAR(1.0, joint_accelerations_after_enforce[1], 1e-6);
+}
+
 int main(int argc, char** argv)
 {
   testing::InitGoogleTest(&argc, argv);
