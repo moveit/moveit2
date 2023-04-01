@@ -2,6 +2,24 @@
 Changelog for package moveit_planners_ompl
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.7.1 (2023-03-23)
+------------------
+* Fix include install destination (`#2008 <https://github.com/ros-planning/moveit2/issues/2008>`_)
+  Co-authored-by: Henning Kayser <henningkayser@picknik.ai>
+  Co-authored-by: Tyler Weaver <maybe@tylerjw.dev>
+* Temporarily disable TestPathConstraints with the Panda robot (`#2016 <https://github.com/ros-planning/moveit2/issues/2016>`_)
+  This test has become flaky since it was modified to use the OMPL constrained state space (https://github.com/ros-planning/moveit2/issues/2015).
+* Increase priority for constrained planning state space (`#1300 <https://github.com/ros-planning/moveit2/issues/1300>`_)
+  * Change priority for the constrained planning state space
+  * Fix constrained planning tests
+  * Use PRM instead of RRTConnect
+  ---------
+  Co-authored-by: Sebastian Jahr <sebastian.jahr@picknik.ai>
+* remove underscore from public member in MotionPlanResponse (`#1939 <https://github.com/ros-planning/moveit2/issues/1939>`_)
+  * remove underscore from private members
+  * fix more uses of the suffix notation
+* Contributors: Abhijeet Dasgupta, AlexWebb, Stephanie Eng
+
 2.7.0 (2023-01-29)
 ------------------
 * converted characters from string format to character format (`#1881 <https://github.com/ros-planning/moveit2/issues/1881>`_)

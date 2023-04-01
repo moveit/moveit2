@@ -2,6 +2,13 @@
 Changelog for package moveit_resources_prbt_ikfast_manipulator_plugin
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.7.1 (2023-03-23)
+------------------
+* Fix include install destination (`#2008 <https://github.com/ros-planning/moveit2/issues/2008>`_)
+  Co-authored-by: Henning Kayser <henningkayser@picknik.ai>
+  Co-authored-by: Tyler Weaver <maybe@tylerjw.dev>
+* Contributors: Abhijeet Dasgupta
+
 2.7.0 (2023-01-29)
 ------------------
 * converted characters from string format to character format (`#1881 <https://github.com/ros-planning/moveit2/issues/1881>`_)
