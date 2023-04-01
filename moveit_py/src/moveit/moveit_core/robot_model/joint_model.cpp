@@ -44,7 +44,9 @@ namespace bind_robot_model
 
 void init_joint_model(py::module& m)
 {
-  py::class_<moveit::core::VariableBounds, std::shared_ptr<moveit::core::VariableBounds>>(m, "VariableBounds")
+  py::module robot_model = m.def_submodule("robot_model");
+
+  py::class_<moveit::core::VariableBounds, std::shared_ptr<moveit::core::VariableBounds>>(robot_model, "VariableBounds")
       .def_readonly("min_position", &moveit::core::VariableBounds::min_position_)
       .def_readonly("max_position", &moveit::core::VariableBounds::max_position_)
       .def_readonly("position_bounded", &moveit::core::VariableBounds::position_bounded_)

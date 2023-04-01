@@ -12,13 +12,22 @@ find_package(Python3 REQUIRED COMPONENTS Interpreter Development)
 find_package(pybind11_vendor REQUIRED)
 find_package(pybind11 REQUIRED)
 
+# enables using the Python extensions from the build space for testing
+file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/test_moveit/__init__.py" "")
+
 add_subdirectory(src/moveit/moveit_py_utils)
 
 ament_python_install_package(moveit)
 
 # Set the build location and install location for a CPython extension
 function(configure_build_install_location _library_name)
-  install(TARGETS ${_library_name}
+    # Install into test_moveit folder in build space for unit tests to import
+    set_target_properties(${_library_name} PROPERTIES
+        # Use generator expression to avoid prepending a build type specific directory on Windows
+        LIBRARY_OUTPUT_DIRECTORY $<1:${CMAKE_CURRENT_BINARY_DIR}/test_moveit>
+        RUNTIME_OUTPUT_DIRECTORY $<1:${CMAKE_CURRENT_BINARY_DIR}/test_moveit>)
+
+    install(TARGETS ${_library_name}
     DESTINATION "${PYTHON_INSTALL_DIR}/moveit"
   )
 endfunction()
@@ -63,5 +72,22 @@ target_link_libraries(planning PRIVATE moveit_ros_planning::moveit_cpp
 				       rclcpp::rclcpp
 				       moveit_py_utils)
 configure_build_install_location(planning)
+
+
+if(BUILD_TESTING)
+  find_package(ament_cmake_pytest REQUIRED)
+  set(_pytest_tests
+    test/unit/test_robot_model.py
+    test/unit/test_robot_state.py
+  )
+  foreach(_test_path ${_pytest_tests})
+	  get_filename_component(_test_name ${_test_path} NAME_WE)
+	  ament_add_pytest_test(${_test_name} ${_test_path}
+	  APPEND_ENV AMENT_PREFIX_INDEX=${ament_index_build_path} PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}
+	  TIMEOUT 60
+	  WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
+   	  )
+  endforeach()
+endif()
 
 ament_package()

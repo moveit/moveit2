@@ -2,6 +2,9 @@
 Changelog for package moveit_configs_utils
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.7.1 (2023-03-23)
+------------------
+
 2.7.0 (2023-01-29)
 ------------------
 * feat: adds compatibility to robot_description from topic instead of parameter (`#1806 <https://github.com/ros-planning/moveit2/issues/1806>`_)

@@ -2,6 +2,19 @@
 Changelog for package moveit_kinematics
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.7.1 (2023-03-23)
+------------------
+* Fix member naming (`#1949 <https://github.com/ros-planning/moveit2/issues/1949>`_)
+  * Update clang-tidy rules for readability-identifier-naming
+  Co-authored-by: Sebastian Jahr <sebastian.jahr@picknik.ai>
+* Add ament export (`#1887 <https://github.com/ros-planning/moveit2/issues/1887>`_)
+  * Add ament export
+  Also sort `find_package` entries alphabetically.
+  * Minor cleanup
+  ---------
+  Co-authored-by: AndyZe <andyz@utexas.edu>
+* Contributors: Gaël Écorchard, Robert Haschke
+
 2.7.0 (2023-01-29)
 ------------------
 * Merge PR `#1712 <https://github.com/ros-planning/moveit2/issues/1712>`_: fix clang compiler warnings + stricter CI
