@@ -366,3 +366,4 @@ REGISTER_TYPED_TEST_SUITE_P(CollisionDetectorPandaTest, InitOK, DefaultNotInColl
 REGISTER_TYPED_TEST_SUITE_P(DistanceCheckPandaTest, DistanceSingle);
 
 REGISTER_TYPED_TEST_SUITE_P(DistanceFullPandaTest, DistancePoints);
+// namespace collision_detection

@@ -567,3 +567,4 @@ TYPED_TEST_P(CollisionDetectorTest, TestChangingShapeSize)
 REGISTER_TYPED_TEST_SUITE_P(CollisionDetectorTest, InitOK, DefaultNotInCollision, LinksInCollision, ContactReporting,
                             ContactPositions, AttachedBodyTester, DiffSceneTester, ConvertObjectToAttached,
                             TestCollisionMapAdditionSpeed, MoveMesh, TestChangingShapeSize);
+// namespace collision_detection
