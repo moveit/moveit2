@@ -57,7 +57,7 @@ class TeleopDevice(ABC, Node):
         self.device_name = device_name
         self.device_config = device_config
         self.declare_parameters(
-            namespace=node_name, parameters=[("ee_frame_name", "panda_link8")]
+            namespace=node_name, parameters=[("ee_frame_name", None)]
         )
         self.ee_frame_name = (
             self.get_parameter("ee_frame_name").get_parameter_value().string_value
