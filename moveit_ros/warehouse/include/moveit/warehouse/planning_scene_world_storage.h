@@ -41,7 +41,8 @@
 
 namespace moveit_warehouse
 {
-// Warning: some of these functions are "impure", meaning their output depends on the state of member variables in a non-transparent way. For example, `getPlanningSceneWorld()` depends on `planning_scene_world_collection_`.
+// Warning: some of these functions are "impure", meaning their output depends on the state of member variables in a
+// non-transparent way. For example, `getPlanningSceneWorld()` depends on `planning_scene_world_collection_`.
 typedef warehouse_ros::MessageWithMetadata<moveit_msgs::msg::PlanningSceneWorld>::ConstPtr PlanningSceneWorldWithMetadata;
 typedef warehouse_ros::MessageCollection<moveit_msgs::msg::PlanningSceneWorld>::Ptr PlanningSceneWorldCollection;
 
