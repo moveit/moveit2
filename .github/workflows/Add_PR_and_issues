@@ -1,0 +1,21 @@
+name: Add To GitHub projects
+description: Automatically add issues and PRs to GitHub projects
+author: GitHub
+branding:
+  icon: table
+inputs:
+  project-url:
+    required: true
+    description: URL of the project to add issues to
+  github-token:
+    required: true
+    description: A GitHub personal access token with write access to the project
+  labeled:
+    required: false
+    description: A comma-separated list of labels to use as a filter for issue to be added
+  label-operator:
+    required: false
+    description: The behavior of the labels filter, AND to match all labels, OR to match any label, NOT to exclude any listed label (default is OR)
+runs:
+  using: 'node16'
+  main: 'dist/index.js'
