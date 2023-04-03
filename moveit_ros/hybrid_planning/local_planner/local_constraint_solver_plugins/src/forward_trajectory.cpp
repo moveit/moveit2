@@ -43,7 +43,6 @@ const rclcpp::Logger LOGGER = rclcpp::get_logger("local_planner_component");
 // If stuck for this many iterations or more, abort the local planning action
 constexpr size_t STUCK_ITERATIONS_THRESHOLD = 5;
 constexpr double STUCK_THRESHOLD_RAD = 1e-4;  // L1-norm sum across all joints
-constexpr double COLLISION_THRESHOLD = 0.01;  // Stop if closer than this [meters]
 }  // namespace
 
 namespace moveit::hybrid_planning
@@ -66,9 +65,6 @@ bool ForwardTrajectory::initialize(const rclcpp::Node::SharedPtr& node,
   num_iterations_stuck_ = 0;
 
   planning_scene_monitor_ = planning_scene_monitor;
-
-  collision_request_.distance = true;   // enable distance-based collision checking
-  collision_request_.contacts = false;  // Record the names of collision pairs
 
   return true;
 }
@@ -115,9 +111,7 @@ ForwardTrajectory::solve(const robot_trajectory::RobotTrajectory& local_trajecto
       planning_scene_monitor_->updateSceneWithCurrentState();
       planning_scene_monitor::LockedPlanningSceneRO locked_planning_scene(planning_scene_monitor_);
       current_state = std::make_shared<moveit::core::RobotState>(locked_planning_scene->getCurrentState());
-      collision_result_.clear();
-      locked_planning_scene->checkCollision(collision_request_, collision_result_);
-      is_path_valid = (!(collision_result_.collision || (collision_result_.distance < COLLISION_THRESHOLD)));
+      is_path_valid = locked_planning_scene->isPathValid(local_trajectory, local_trajectory.getGroupName(), false);
     }
 
     // Check if path is valid

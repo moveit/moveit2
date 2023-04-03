@@ -69,8 +69,5 @@ private:
   // Detect when the local planner gets stuck
   size_t num_iterations_stuck_;
   moveit::core::RobotStatePtr prev_waypoint_target_;
-
-  collision_detection::CollisionRequest collision_request_;
-  collision_detection::CollisionResult collision_result_;
 };
 }  // namespace moveit::hybrid_planning
