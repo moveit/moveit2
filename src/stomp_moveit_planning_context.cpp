@@ -105,7 +105,8 @@ stomp::TaskPtr createStompTask(const stomp::StompConfiguration& config, const St
   using namespace stomp_moveit;
   auto noise_generator_fn = noise::get_normal_distribution_generator(num_timesteps, stddev);
   auto cost_fn = costs::get_collision_cost_function(planning_scene, group, collision_penalty);
-  auto filter_fn = filters::simple_smoothing_matrix(num_timesteps);
+  auto filter_fn =
+      filters::chain({ filters::simple_smoothing_matrix(num_timesteps), filters::enforce_position_bounds(group) });
   // TODO: enable support for visualization
   // auto iteration_callback_fn = visualization::get_iteration_path_publisher(visual_tools, group);
   // auto done_callback_fn = visualization::get_success_trajectory_publisher(visual_tools, group);
