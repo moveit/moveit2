@@ -84,7 +84,7 @@ int main(int argc, char* argv[])
   // const moveit::core::RobotModelPtr& kinematic_model = robot_model_loader.getModel();
   const moveit::core::RobotModelPtr& kinematic_model = moveit::core::loadTestingRobotModel("panda");
   planning_scene::PlanningScene planning_scene(kinematic_model);
-  moveit::core::RobotState& kinematic_state = planning_scene.getCurrentStateNonConst();
+  moveit::core::RobotState& robot_state = planning_scene.getCurrentStateNonConst();
   collision_detection::CollisionRequest collision_request;
   collision_detection::CollisionResult collision_result;
   std::chrono::duration<double> ik_time(0);
@@ -121,17 +121,17 @@ int main(int argc, char* argv[])
 
     // perform first IK call to load the cache, so that the time for loading is not included in
     // average IK call time
-    kinematic_state.setToDefaultValues();
+    robot_state.setToDefaultValues();
     EigenSTL::vector_Isometry3d default_eef_states;
     for (const auto& end_effector : end_effectors)
-      default_eef_states.push_back(kinematic_state.getGlobalLinkTransform(end_effector));
+      default_eef_states.push_back(robot_state.getGlobalLinkTransform(end_effector));
     if (end_effectors.size() == 1)
     {
-      kinematic_state.setFromIK(group, default_eef_states[0], end_effectors[0], 0.1);
+      robot_state.setFromIK(group, default_eef_states[0], end_effectors[0], 0.1);
     }
     else
     {
-      kinematic_state.setFromIK(group, default_eef_states, end_effectors, 0.1);
+      robot_state.setFromIK(group, default_eef_states, end_effectors, 0.1);
     }
 
     bool found_ik;
@@ -140,7 +140,7 @@ int main(int argc, char* argv[])
     unsigned int i = 0;
     while (i < num)
     {
-      kinematic_state.setToRandomPositions(group);
+      robot_state.setToRandomPositions(group);
       collision_result.clear();
       planning_scene.checkSelfCollision(collision_request, collision_result);
       if (collision_result.collision)
@@ -149,17 +149,17 @@ int main(int argc, char* argv[])
         continue;
       }
       for (unsigned j = 0; j < end_effectors.size(); ++j)
-        end_effector_states[j] = kinematic_state.getGlobalLinkTransform(end_effectors[j]);
+        end_effector_states[j] = robot_state.getGlobalLinkTransform(end_effectors[j]);
       if (reset_to_default)
-        kinematic_state.setToDefaultValues();
+        robot_state.setToDefaultValues();
       start = std::chrono::system_clock::now();
       if (end_effectors.size() == 1)
       {
-        found_ik = kinematic_state.setFromIK(group, end_effector_states[0], end_effectors[0], 0.1);
+        found_ik = robot_state.setFromIK(group, end_effector_states[0], end_effectors[0], 0.1);
       }
       else
       {
-        found_ik = kinematic_state.setFromIK(group, end_effector_states, end_effectors, 0.1);
+        found_ik = robot_state.setFromIK(group, end_effector_states, end_effectors, 0.1);
       }
       ik_time += std::chrono::system_clock::now() - start;
       if (!found_ik)
