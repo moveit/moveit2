@@ -168,7 +168,7 @@ int main(int argc, char** argv)
                                    << moveit_servo::POSE_TRACKING_STATUS_CODE_MAP.at(tracking_status));
   });
 
-  rclcpp::Rate loop_rate(50);
+  rclcpp::WallRate loop_rate(50);
   for (size_t i = 0; i < 500; ++i)
   {
     // Modify the pose target a little bit each cycle
