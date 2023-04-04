@@ -777,12 +777,14 @@ bool ServoCalcs::applyJointUpdate(const Eigen::ArrayXd& delta_theta, sensor_msgs
 
   smoother_->doSmoothing(joint_state.position);
 
-  for (std::size_t i = 0; i < joint_state.position.size(); ++i)
-  {
-    // Calculate joint velocity
-    joint_state.velocity[i] =
-        (joint_state.position.at(i) - original_joint_state_.position.at(i)) / parameters_->publish_period;
-  }
+  // Lambda that calculates velocity using central difference.
+  auto compute_velocity = [&](const double& next_pos, const double& previous_pos) {
+    return (next_pos - previous_pos) / parameters_->publish_period;
+  };
+
+  // Transform that applies the lambda to all joints.
+  std::transform(joint_state.position.begin(), joint_state.position.end(),
+                 last_sent_command_->points.back().positions.begin(), joint_state.velocity.begin(), compute_velocity);
 
   return true;
 }
