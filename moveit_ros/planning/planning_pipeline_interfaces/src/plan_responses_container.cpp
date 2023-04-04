@@ -33,8 +33,7 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-/* Author: Sebastian Jahr
-   Desc: TODO */
+/* Author: Sebastian Jahr */
 
 #include <moveit/planning_pipeline_interfaces/plan_responses_container.hpp>
 

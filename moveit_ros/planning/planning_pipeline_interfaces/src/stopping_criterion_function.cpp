@@ -32,8 +32,7 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-/* Author: Sebastian Jahr
-   Desc: TODO */
+/* Author: Sebastian Jahr */
 
 #include <moveit/planning_pipeline_interfaces/stopping_criterion_functions.hpp>
 
