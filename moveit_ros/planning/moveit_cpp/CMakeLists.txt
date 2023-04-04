@@ -1,6 +1,5 @@
 add_library(moveit_cpp SHARED
   src/moveit_cpp.cpp
-  src/parallel_planning_callbacks.cpp
   src/planning_component.cpp
 )
 set_target_properties(moveit_cpp PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
@@ -11,6 +10,7 @@ ament_target_dependencies(moveit_cpp
 target_link_libraries(moveit_cpp
   moveit_planning_scene_monitor
   moveit_planning_pipeline
+  moveit_planning_pipeline_interfaces
   moveit_trajectory_execution_manager)
 
 install(DIRECTORY include/ DESTINATION include/moveit_ros_planning)
