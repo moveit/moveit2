@@ -33,7 +33,7 @@
  *********************************************************************/
 
 /* Author: Sebastian Jahr
-   Desc: TODO */
+   Desc: A thread safe container to store motion plan responses */
 
 #pragma once
 

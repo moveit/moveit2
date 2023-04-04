@@ -33,7 +33,7 @@
  *********************************************************************/
 
 /* Author: Sebastian Jahr
-   Desc: TODO */
+   Desc: Functions to create and use a map of PlanningPipelines to solve MotionPlanRequests */
 
 #pragma once
 

@@ -32,8 +32,8 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-/* Author: Sebastian Jahr
-   Desc: TODO */
+/* Author: AndyZe, Sebastian Jahr
+   Desc: Stopping criterion function implementations */
 
 #pragma once
 

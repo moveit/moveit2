@@ -33,7 +33,7 @@
  *********************************************************************/
 
 /* Author: Sebastian Jahr
-   Desc: TODO */
+   Desc: Solution selection function implementations */
 
 #pragma once
 
