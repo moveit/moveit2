@@ -368,7 +368,7 @@ void ServoCalcs::calculateSingleIteration()
 
   // original_joint_state_ contains state x(t - 1)
   // internal_joint_state_ will be updated with the state x(t + dt) in this iteration.
-  // last_joint_state_ will preserve the state x(t - dt) for next iteration to be used in for central difference.
+  // last_joint_state_ will preserve the state x(t - dt) for this iteration to be used in central difference.
   // original_joint_state_ will get updated with current state x(t) in updateJoints()
   last_joint_state_ = original_joint_state_;
 
