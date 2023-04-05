@@ -1,7 +1,7 @@
 /*********************************************************************
  * Software License Agreement (BSD License)
  *
- *  Copyright (c) 2008, Willow Garage, Inc.
+ *  Copyright (c) 2023, PickNik Inc.
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *     copyright notice, this list of conditions and the following
  *     disclaimer in the documentation and/or other materials provided
  *     with the distribution.
- *   * Neither the name of Willow Garage nor the names of its
+ *   * Neither the name of PickNik Inc. nor the names of its
  *     contributors may be used to endorse or promote products derived
  *     from this software without specific prior written permission.
  *
@@ -32,28 +32,43 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-/* Author: Ioan Sucan */
+/* Author: Sebastian Jahr
+   Desc: A thread safe container to store motion plan responses */
 
 #pragma once
 
-#include <rviz_default_plugins/robot/link_updater.hpp>
-#include <moveit/robot_state/robot_state.h>
+#include <moveit/planning_interface/planning_response.h>
+#include <moveit/planning_interface/planning_request.h>
 
-namespace moveit_rviz_plugin
+namespace moveit
 {
-/** \brief Update the links of an rviz::Robot using a moveit::core::RobotState */
-class PlanningLinkUpdater : public rviz_default_plugins::robot::LinkUpdater
+namespace planning_pipeline_interfaces
+{
+MOVEIT_CLASS_FORWARD(PlanResponsesContainer);  // Defines PlanningComponentPtr, ConstPtr, WeakPtr... etc
+/** \brief A container to thread-safely store multiple MotionPlanResponses */
+class PlanResponsesContainer
 {
 public:
-  PlanningLinkUpdater(const moveit::core::RobotStateConstPtr& state) : robot_state_(state)
-  {
-  }
+  /** \brief Constructor
+   * \param [in] expected_size Number of expected solutions
+   */
+  PlanResponsesContainer(const size_t expected_size = 0);
 
-  bool getLinkTransforms(const std::string& link_name, Ogre::Vector3& visual_position,
-                         Ogre::Quaternion& visual_orientation, Ogre::Vector3& collision_position,
-                         Ogre::Quaternion& collision_orientation) const override;
+  /** \brief Thread safe method to add PlanResponsesContainer to this data structure TODO(sjahr): Refactor this method to an
+   * insert method similar to https://github.com/ompl/ompl/blob/main/src/ompl/base/src/ProblemDefinition.cpp#L54-L161.
+   * This way, it is possible to create a sorted container e.g. according to a user specified criteria
+   * \param [in] plan_solution MotionPlanResponse to push back into the vector
+   */
+  void pushBack(const ::planning_interface::MotionPlanResponse& plan_solution);
+
+  /** \brief Get solutions
+   * \return Read-only access to the responses vector
+   */
+  const std::vector<::planning_interface::MotionPlanResponse>& getSolutions() const;
 
 private:
-  moveit::core::RobotStateConstPtr robot_state_;
+  std::vector<::planning_interface::MotionPlanResponse> solutions_;
+  std::mutex solutions_mutex_;
 };
-}  // namespace moveit_rviz_plugin
+}  // namespace planning_pipeline_interfaces
+}  // namespace moveit

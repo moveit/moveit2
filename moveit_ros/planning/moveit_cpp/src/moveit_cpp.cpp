@@ -37,6 +37,7 @@
 #include <stdexcept>
 
 #include <moveit/controller_manager/controller_manager.h>
+#include <moveit/planning_pipeline_interfaces/planning_pipeline_interfaces.hpp>
 #include <moveit/moveit_cpp/moveit_cpp.h>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
 #include <geometry_msgs/msg/quaternion_stamped.hpp>
@@ -44,7 +45,6 @@
 namespace moveit_cpp
 {
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.ros_planning_interface.moveit_cpp");
-constexpr char PLANNING_PLUGIN_PARAM[] = "planning_plugin";
 
 MoveItCpp::MoveItCpp(const rclcpp::Node::SharedPtr& node) : MoveItCpp(node, Options(node))
 {
@@ -129,34 +129,13 @@ bool MoveItCpp::loadPlanningSceneMonitor(const PlanningSceneMonitorOptions& opti
 bool MoveItCpp::loadPlanningPipelines(const PlanningPipelineOptions& options)
 {
   // TODO(henningkayser): Use parent namespace for planning pipeline config lookup
-  // ros::NodeHandle node_handle(options.parent_namespace.empty() ? "~" : options.parent_namespace);
-  for (const auto& planning_pipeline_name : options.pipeline_names)
-  {
-    if (planning_pipelines_.count(planning_pipeline_name) > 0)
-    {
-      RCLCPP_WARN(LOGGER, "Skipping duplicate entry for planning pipeline '%s'.", planning_pipeline_name.c_str());
-      continue;
-    }
-    RCLCPP_INFO(LOGGER, "Loading planning pipeline '%s'", planning_pipeline_name.c_str());
-    planning_pipeline::PlanningPipelinePtr pipeline;
-    pipeline = std::make_shared<planning_pipeline::PlanningPipeline>(robot_model_, node_, planning_pipeline_name,
-                                                                     PLANNING_PLUGIN_PARAM);
-
-    if (!pipeline->getPlannerManager())
-    {
-      RCLCPP_ERROR(LOGGER, "Failed to initialize planning pipeline '%s'.", planning_pipeline_name.c_str());
-      continue;
-    }
-
-    planning_pipelines_[planning_pipeline_name] = pipeline;
-  }
-
+  planning_pipelines_ =
+      moveit::planning_pipeline_interfaces::createPlanningPipelineMap(options.pipeline_names, robot_model_, node_);
   if (planning_pipelines_.empty())
   {
     RCLCPP_ERROR(LOGGER, "Failed to load any planning pipelines.");
     return false;
   }
-
   return true;
 }
 
@@ -191,7 +170,7 @@ moveit::core::RobotStatePtr MoveItCpp::getCurrentState(double wait)
   return current_state;
 }
 
-const std::map<std::string, planning_pipeline::PlanningPipelinePtr>& MoveItCpp::getPlanningPipelines() const
+const std::unordered_map<std::string, planning_pipeline::PlanningPipelinePtr>& MoveItCpp::getPlanningPipelines() const
 {
   return planning_pipelines_;
 }
