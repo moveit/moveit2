@@ -220,7 +220,7 @@ moveit_controller_manager::ExecutionStatus
 MoveItCpp::execute(const robot_trajectory::RobotTrajectoryPtr& robot_trajectory, bool /* blocking */,
                    const std::vector<std::string>& /* controllers */)
 {
-  return execute(robot_trajectory, true);
+  return execute(robot_trajectory);
 }
 
 moveit_controller_manager::ExecutionStatus
