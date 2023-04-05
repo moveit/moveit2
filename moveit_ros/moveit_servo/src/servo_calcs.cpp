@@ -785,7 +785,7 @@ bool ServoCalcs::applyJointUpdate(const Eigen::ArrayXd& delta_theta, sensor_msgs
 
   // Lambda that calculates velocity using central difference.
   // (q(t + dt) - q(t - dt)) / ( 2 * dt )
-  auto compute_velocity = [&](const double& next_pos, const double& previous_pos) {
+  auto compute_velocity = [&](const double next_pos, const double previous_pos) {
     return (next_pos - previous_pos) / (2 * parameters_->publish_period);
   };
 
