@@ -129,6 +129,18 @@ void CollisionEnv::setPadding(const double padding)
     updatedPaddingOrScaling(u);
 }
 
+std::vector<std::string> CollisionEnv::compareWithScale(const double scale)
+{
+  std::vector<std::string> u;
+  const std::vector<const moveit::core::LinkModel*>& links = robot_model_->getLinkModelsWithCollisionGeometry();
+  for (const auto link : links)
+  {
+    if (getLinkScale(link->getName()) != scale)
+      u.push_back(link->getName());
+  }
+  return u;
+}
+
 void CollisionEnv::setScale(const double scale)
 {
   if (!validateScale(scale))
@@ -137,10 +149,9 @@ void CollisionEnv::setScale(const double scale)
   const std::vector<const moveit::core::LinkModel*>& links = robot_model_->getLinkModelsWithCollisionGeometry();
   for (const auto link : links)
   {
-    if (getLinkScale(link->getName()) != scale)
-      u.push_back(link->getName());
     link_scale_[link->getName()] = scale;
   }
+  u = compareWithScale(scale);
   if (!u.empty())
     updatedPaddingOrScaling(u);
 }
