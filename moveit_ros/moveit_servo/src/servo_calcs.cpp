@@ -366,6 +366,12 @@ void ServoCalcs::calculateSingleIteration()
   // After we publish, status, reset it back to no warnings
   status_ = StatusCode::NO_WARNING;
 
+  // original_joint_state_ contains state x(t - 1)
+  // internal_joint_state_ will be updated with the state x(t + dt) in this iteration.
+  // last_joint_state_ will preserve the state x(t - dt) for next iteration to be used in for central difference.
+  // original_joint_state_ will get updated with current state x(t) in updateJoints()
+  last_joint_state_ = original_joint_state_;
+
   // Always update the joints and end-effector transform for 2 reasons:
   // 1) in case the getCommandFrameTransform() method is being used
   // 2) so the low-pass filters are up to date and don't cause a jump
@@ -971,11 +977,6 @@ void ServoCalcs::updateJoints()
 
   // Cache the original joints in case they need to be reset
   original_joint_state_ = internal_joint_state_;
-
-  // original_joint_state_ contains current state x(t)
-  // internal_joint_state_ will be updated with the state x(t + dt) in this iteration.
-  // last_joint_state_ will preserve the current state x(t) for next iteration to be used as x(t - dt) for central difference.
-  last_joint_state_ = original_joint_state_;
 }
 
 bool ServoCalcs::checkValidCommand(const control_msgs::msg::JointJog& cmd)
