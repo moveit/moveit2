@@ -778,13 +778,16 @@ bool ServoCalcs::applyJointUpdate(const Eigen::ArrayXd& delta_theta, sensor_msgs
   smoother_->doSmoothing(joint_state.position);
 
   // Lambda that calculates velocity using central difference.
+  // (x(t + dt) - x(t - dt)) / ( 2 * dt )
   auto compute_velocity = [&](const double& next_pos, const double& previous_pos) {
     return (next_pos - previous_pos) / (2 * parameters_->publish_period);
   };
 
   // Transform that applies the lambda to all joints.
-  std::transform(joint_state.position.begin(), joint_state.position.end(),
-                 last_sent_command_->points.front().positions.begin(), joint_state.velocity.begin(), compute_velocity);
+  // joint_state contains the future position x(t + dt)
+  // last_joint_state contains past position x(t - dt)
+  std::transform(joint_state.position.begin(), joint_state.position.end(), last_joint_state_.position.begin(),
+                 joint_state.velocity.begin(), compute_velocity);
 
   return true;
 }
@@ -968,6 +971,11 @@ void ServoCalcs::updateJoints()
 
   // Cache the original joints in case they need to be reset
   original_joint_state_ = internal_joint_state_;
+
+  // original_joint_state_ contains current state x(t)
+  // internal_joint_state_ will be updated with the state x(t + dt) in this iteration.
+  // last_joint_state_ will preserve the current state x(t) for next iteration to be used as x(t - dt) for central difference.
+  last_joint_state_ = original_joint_state_;
 }
 
 bool ServoCalcs::checkValidCommand(const control_msgs::msg::JointJog& cmd)
