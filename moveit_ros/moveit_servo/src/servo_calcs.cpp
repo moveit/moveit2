@@ -366,10 +366,10 @@ void ServoCalcs::calculateSingleIteration()
   // After we publish, status, reset it back to no warnings
   status_ = StatusCode::NO_WARNING;
 
-  // original_joint_state_ contains state x(t - 1)
-  // internal_joint_state_ will be updated with the state x(t + dt) in this iteration.
-  // last_joint_state_ will preserve the state x(t - dt) for this iteration to be used in central difference.
-  // original_joint_state_ will get updated with current state x(t) in updateJoints()
+  // original_joint_state_ contains state q(t - dt)
+  // internal_joint_state_ will be updated with the state q(t + dt) in this iteration.
+  // last_joint_state_ will preserve the state q(t - dt) for this iteration to be used in central difference.
+  // original_joint_state_ will get updated with current state q(t) in updateJoints()
   last_joint_state_ = original_joint_state_;
 
   // Always update the joints and end-effector transform for 2 reasons:
@@ -784,14 +784,14 @@ bool ServoCalcs::applyJointUpdate(const Eigen::ArrayXd& delta_theta, sensor_msgs
   smoother_->doSmoothing(joint_state.position);
 
   // Lambda that calculates velocity using central difference.
-  // (x(t + dt) - x(t - dt)) / ( 2 * dt )
+  // (q(t + dt) - q(t - dt)) / ( 2 * dt )
   auto compute_velocity = [&](const double& next_pos, const double& previous_pos) {
     return (next_pos - previous_pos) / (2 * parameters_->publish_period);
   };
 
   // Transform that applies the lambda to all joints.
-  // joint_state contains the future position x(t + dt)
-  // last_joint_state contains past position x(t - dt)
+  // joint_state contains the future position q(t + dt)
+  // last_joint_state contains past position q(t - dt)
   std::transform(joint_state.position.begin(), joint_state.position.end(), last_joint_state_.position.begin(),
                  joint_state.velocity.begin(), compute_velocity);
 
