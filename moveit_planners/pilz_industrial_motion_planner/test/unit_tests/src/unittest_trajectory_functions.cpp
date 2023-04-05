@@ -216,7 +216,8 @@ TEST_F(TrajectoryFunctionsTestFlangeAndGripper, testIKSolver)
   const moveit::core::JointModelGroup* jmg = robot_model_->getJointModelGroup(planning_group_);
   const kinematics::KinematicsBaseConstPtr& solver = jmg->getSolverInstance();
 
-  if(!solver){
+  if (!solver)
+  {
     throw("No IK solver configured for group '" + planning_group_ + "'");
   }
   // robot state
