@@ -1,7 +1,7 @@
 /*********************************************************************
  * Software License Agreement (BSD License)
  *
- *  Copyright (c) 2022, Peter David Fagan
+ *  Copyright (c) 2023, PickNik Inc.
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -32,29 +32,43 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-/* Author: Peter David Fagan */
+/* Author: Sebastian Jahr
+   Desc: A thread safe container to store motion plan responses */
 
 #pragma once
 
-#include <pybind11/pybind11.h>
-#include <pybind11/stl.h>
-#include <pybind11/eigen.h>
-#include <moveit/robot_trajectory/robot_trajectory.h>
-#include <moveit_msgs/msg/robot_trajectory.hpp>
+#include <moveit/planning_interface/planning_response.h>
+#include <moveit/planning_interface/planning_request.h>
 
-namespace py = pybind11;
-
-namespace moveit_py
+namespace moveit
 {
-namespace bind_robot_trajectory
+namespace planning_pipeline_interfaces
 {
-moveit_msgs::msg::RobotTrajectory
-get_robot_trajectory_msg(const robot_trajectory::RobotTrajectoryConstPtr& robot_trajectory,
-                         const std::vector<std::string>& joint_filter);
-robot_trajectory::RobotTrajectory
-set_robot_trajectory_msg(const std::shared_ptr<robot_trajectory::RobotTrajectory>& robot_trajectory,
-                         const moveit::core::RobotState& robot_state, const moveit_msgs::msg::RobotTrajectory& msg);
+MOVEIT_CLASS_FORWARD(PlanResponsesContainer);  // Defines PlanningComponentPtr, ConstPtr, WeakPtr... etc
+/** \brief A container to thread-safely store multiple MotionPlanResponses */
+class PlanResponsesContainer
+{
+public:
+  /** \brief Constructor
+   * \param [in] expected_size Number of expected solutions
+   */
+  PlanResponsesContainer(const size_t expected_size = 0);
 
-void init_robot_trajectory(py::module& m);
-}  // namespace bind_robot_trajectory
-}  // namespace moveit_py
+  /** \brief Thread safe method to add PlanResponsesContainer to this data structure TODO(sjahr): Refactor this method to an
+   * insert method similar to https://github.com/ompl/ompl/blob/main/src/ompl/base/src/ProblemDefinition.cpp#L54-L161.
+   * This way, it is possible to create a sorted container e.g. according to a user specified criteria
+   * \param [in] plan_solution MotionPlanResponse to push back into the vector
+   */
+  void pushBack(const ::planning_interface::MotionPlanResponse& plan_solution);
+
+  /** \brief Get solutions
+   * \return Read-only access to the responses vector
+   */
+  const std::vector<::planning_interface::MotionPlanResponse>& getSolutions() const;
+
+private:
+  std::vector<::planning_interface::MotionPlanResponse> solutions_;
+  std::mutex solutions_mutex_;
+};
+}  // namespace planning_pipeline_interfaces
+}  // namespace moveit
