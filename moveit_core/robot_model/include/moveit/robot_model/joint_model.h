@@ -334,6 +334,15 @@ public:
   /** \brief Check if the set of accelerations for the variables of this joint are within bounds, up to some margin. */
   virtual bool satisfiesAccelerationBounds(const double* values, const Bounds& other_bounds, double margin) const;
 
+  /** \brief Check if the set of jerks for the variables of this joint are within bounds. */
+  bool satisfiesJerkBounds(const double* values, double margin = 0.0) const
+  {
+    return satisfiesJerkBounds(values, variable_bounds_, margin);
+  }
+
+  /** \brief Check if the set of jerks for the variables of this joint are within bounds, up to some margin. */
+  virtual bool satisfiesJerkBounds(const double* values, const Bounds& other_bounds, double margin) const;
+
   /** \brief Get the bounds for a variable. Throw an exception if the variable was not found */
   const VariableBounds& getVariableBounds(const std::string& variable) const;
 

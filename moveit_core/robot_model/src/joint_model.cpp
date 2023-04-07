@@ -132,10 +132,22 @@ bool JointModel::satisfiesVelocityBounds(const double* values, const Bounds& oth
 
 bool JointModel::satisfiesAccelerationBounds(const double* values, const Bounds& other_bounds, double margin) const
 {
+  // TODO: check if there are acceleration bounds
   for (std::size_t i = 0; i < other_bounds.size(); ++i)
     if (other_bounds[i].max_acceleration_ + margin < values[i])
       return false;
     else if (other_bounds[i].min_acceleration_ - margin > values[i])
+      return false;
+  return true;
+}
+
+bool JointModel::satisfiesJerkBounds(const double* values, const Bounds& other_bounds, double margin) const
+{
+  // TODO: check if there are jerk bounds
+  for (std::size_t i = 0; i < other_bounds.size(); ++i)
+    if (other_bounds[i].max_jerk_ + margin < values[i])
+      return false;
+    else if (other_bounds[i].min_jerk_ - margin > values[i])
       return false;
   return true;
 }
