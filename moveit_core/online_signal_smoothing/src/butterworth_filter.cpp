@@ -100,12 +100,12 @@ bool ButterworthFilterPlugin::initialize(rclcpp::Node::SharedPtr node, moveit::c
 {
   node_ = node;
   num_joints_ = num_joints;
-
+  auto param_listener = std::make_shared<online_signal_smoothing::ParamListener>(node_);
+  auto params = param_listener->get_params();
+  double filter_coeff = params.butterworth_filter_coeff;
   for (std::size_t i = 0; i < num_joints_; ++i)
   {
-    // Low-pass filters for the joint positions
-    // TODO(andyz): read a parameter
-    position_filters_.emplace_back(1.5 /* filter coefficient, should be >1 */);
+    position_filters_.emplace_back(filter_coeff);
   }
   return true;
 };
