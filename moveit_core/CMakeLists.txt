@@ -16,6 +16,7 @@ endforeach()
 set(LIBFCL_LIBRARIES "${LIBFCL_LIBRARIES_FULL}")
 
 find_package(ament_cmake REQUIRED)
+find_package(generate_parameter_library REQUIRED)
 find_package(angles REQUIRED)
 find_package(Bullet 2.87 REQUIRED)
 find_package(common_interfaces REQUIRED)
@@ -44,6 +45,7 @@ find_package(urdf REQUIRED)
 find_package(urdfdom REQUIRED)
 find_package(urdfdom_headers REQUIRED)
 find_package(visualization_msgs REQUIRED)
+
 
 # TODO: Port python bindings
 # find_package(pybind11 REQUIRED)
@@ -139,6 +141,7 @@ install(
 
 ament_export_targets(moveit_coreTargets HAS_LIBRARY_TARGET)
 ament_export_dependencies(
+  generate_parameter_library
   angles
   Bullet
   common_interfaces
