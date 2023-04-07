@@ -38,6 +38,7 @@
 
 #include <moveit/online_signal_smoothing/butterworth_filter.h>
 #include <rclcpp/clock.hpp>
+#include <rclcpp/rclcpp.hpp>
 #include <rclcpp/logging.hpp>
 
 namespace online_signal_smoothing
@@ -100,13 +101,14 @@ bool ButterworthFilterPlugin::initialize(rclcpp::Node::SharedPtr node, moveit::c
 {
   node_ = node;
   num_joints_ = num_joints;
-  auto param_listener = std::make_shared<online_signal_smoothing::ParamListener>(node_);
-  auto params = param_listener->get_params();
-  double filter_coeff = params.butterworth_filter_coeff;
+  param_listener_ = std::make_shared<online_signal_smoothing::ParamListener>(node_);
+  auto filter_coeff = param_listener_->get_params().butterworth_filter_coeff;
+
   for (std::size_t i = 0; i < num_joints_; ++i)
   {
     position_filters_.emplace_back(filter_coeff);
   }
+  RCLCPP_INFO(node_->get_logger(), "Butterworth filter coeff set to : %f", filter_coeff);
   return true;
 };
 
