@@ -108,7 +108,6 @@ bool ButterworthFilterPlugin::initialize(rclcpp::Node::SharedPtr node, moveit::c
   {
     position_filters_.emplace_back(filter_coeff);
   }
-  RCLCPP_INFO(node_->get_logger(), "Butterworth filter coeff set to : %f", filter_coeff);
   return true;
 };
 
