@@ -33,7 +33,10 @@ servo:
   command_in_type: {
     type: string,
     default_value: "unitless",
-    description: "The unit of the incoming command."
+    description: "The unit of the incoming command.",
+    validation: {
+      one_of<>: ["unitless", "speed_units"]
+    }
   }
 
   linear_scale: {
@@ -72,35 +75,187 @@ servo:
     default_value: 0.034,
     description: " 1 / (Nominal publish rate) [seconds]",
     validation: {
-      <>gt : 0.0
+      gt<>: 0.0
     }
   }
 
   command_out_type: {
     type: string,
     default_value: "trajectory_msgs/JointTrajectory",
-    description: "The type of command that servo will publish \
-                  Currently supported are std_msgs/Float64MultiArray or trajectory_msgs/JointTrajectory"
+    description: "The type of command that servo will publish",
+    validation: {
+      one_of<>: ["trajectory_msgs/JointTrajectory", "std_msgs/Float64MultiArray"]
+    }
   }
 
   publish_joint_positions: {
     type: bool,
     default_value: true,
-    description: "If true servo will publish joint positions in the output command."
+    description: "If true servo will publish joint positions in the output command"
   }
 
   publish_joint_velocities: {
     type: bool,
     default_value: true,
-    description: "If true servo will publish joint velocities in the output command."
+    description: "If true servo will publish joint velocities in the output command"
   }
 
   publish_joint_accelerations: {
     type: bool,
     default_value: false,
-    description: "If true servo will publish joint accelerations in the output command."
+    description: "If true servo will publish joint accelerations in the output command"
   }
 
+  joint_topic: {
+    type: string,
+    default_value: "/joint_states",
+    description: "The topic on which joint states can be monitored"
+  }
 
-  
+  smoothing_filter_plugin_name: {
+    type: string,
+    default_value: "online_signal_smoothing::ButterworthFilterPlugin",
+    description: "The name of the smoothing plugin to be used"
+  }
 
+  move_group_name: {
+    type: string,
+    default_value: "panda_arm",
+    description: "The name of the moveit move_group of your robot"
+  }
+
+  planning_frame: {
+    type: string,
+    default_value: "panda_link_0",
+    description: "The name of moveit planning frame."
+  }
+
+  ee_frame_name: {
+    type: string,
+    default_value: "panda_link8",
+    description: "The name of end-effector frame of your robot"
+  }
+
+  is_primary_planning_scene_monitor: {
+    type: bool,
+    default_value: true,
+    description: "If is_primary_planning_scene_monitor is set to true, \
+                  the Servo server's PlanningScene advertises the /get_planning_scene service, \
+                  which other nodes can use to get information about the planning environment. \
+                  If a different node in your system will be publishing the planning scene, \
+                  this should be set to false"
+  }
+
+  monitored_planning_scene_topic: {
+    type: string,
+    default_value: "/planning_scene",
+    description: "The name of the planning scene topic. \
+                  planning_scene_monitor::PlanningSceneMonitor::DEFAULT_PLANNING_SCENE_TOPIC"
+  }
+
+  incoming_command_timeout: {
+    type: double,
+    default_value: 0.1,
+    description: "Stop servoing if X seconds elapse without a new command. \
+                  If 0, republish commands forever even if the robot is stationary. \
+                  Otherwise, specify num. to publish. Important because ROS may drop \
+                  some messages and we need the robot to halt reliably."
+  }
+
+  num_outgoing_halt_msgs_to_publish: {
+    type: int,
+    default_value: 4,
+    description: "If 0, republish commands forever even if the robot is stationary. \
+                  Otherwise, specify num. to publish. Important because ROS may drop \
+                  some messages and we need the robot to halt reliably."
+  }
+
+  halt_all_joints_in_joint_mode: {
+    type: bool,
+    default_value: true,
+    description: "Halt all joints in joint mode"
+  }
+
+  halt_all_joints_in_cartesian_mode: {
+    type: bool,
+    default_value: true,
+    description: "Halt all joints in cartesian mode"
+  }
+
+  lower_singularity_threshold: {
+    type: double,
+    default_value: 17.0,
+    description: "Start decelerating when the condition number hits this (close to singularity)",
+    validation: {
+      gt<>: 0.0
+    }
+  }
+
+  hard_stop_singularity_threshold: {
+    type: double,
+    default_value: 90.0,
+    description: "Stop when the condition number hits this",
+    validation: {
+      gt<>: lower_singularity_threshold,
+    }
+  }
+
+  leaving_singularity_threshold_multiplier: {
+    type: double,
+    default_value: 2.0,
+    description: "When 'lower_singularity_threshold' is triggered, \
+                  but we are moving away from singularity, move this many times faster \
+                  than if we were moving further into singularity",
+    validation: {
+      gt<>: 0.0
+    }
+  }
+
+  joint_limit_margin: {
+    type: double,
+    default_value: 0.1,
+    description: "Added as a buffer to joint limits [radians]. If moving quickly, make this larger.",
+    validation: {
+      gt<>: 0.0
+    }
+  }
+
+  low_latency_mode: {
+    type: bool,
+    default_value: false,
+    description: "If true , low latency mode is enabled."
+  }
+
+  check_collisions: {
+    type: bool,
+    default_value: true,
+    description: "If true, servo will check for collision using the planning scene monitor."
+  }
+
+  collision_check_rate: {
+    type: double,
+    default_value: 10.0,
+    description: "[Hz] Collision-checking can easily bog down a CPU if done too often. \
+                  Collision checking begins slowing down when nearer than a specified distance.",
+    validation: {
+      gt_eq<>: 0.0
+    }
+  }
+
+  self_collision_proximity_threshold: {
+    type: double,
+    default_value: 0.01,
+    description: "Start decelerating when a self-collision is this far [m]",
+    validation: { 
+      gt<>: 0.0
+    }
+  }
+
+  scene_collision_proximity_threshold: {
+    type: double,
+    default_value: 0.02,
+    description: "Start decelerating when a collision is this far [m]",
+    validation: { 
+      gt<>: self_collision_proximity_threshold
+    }    
+  }
