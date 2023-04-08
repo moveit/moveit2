@@ -17,7 +17,7 @@ Changelog for package moveit_ros_move_group
 * move_group: Delete unused execute_trajectory_service_capability (`#1836 <https://github.com/ros-planning/moveit2/issues/1836>`_)
 * keep printf color change on same line (`#1828 <https://github.com/ros-planning/moveit2/issues/1828>`_)
   This ensures the color reset is applied because printing the color
-  reset after new lines seems to preven the color from actually being reset.
+  reset after new lines seems to prevent the color from actually being reset.
   Co-authored-by: William Wedler <william.wedler@resquared.com>
 * Fix BSD license in package.xml (`#1796 <https://github.com/ros-planning/moveit2/issues/1796>`_)
   * fix BSD license in package.xml
@@ -199,7 +199,7 @@ Changelog for package moveit_ros_move_group
 1.1.0 (2020-09-04)
 ------------------
 * [feature] Start new joint_state_publisher_gui on param use_gui (`#2257 <https://github.com/ros-planning/moveit/issues/2257>`_)
-* [feature] TfPublisher: fixup and add attached collsion objects (`#1792 <https://github.com/ros-planning/moveit/issues/1792>`_)
+* [feature] TfPublisher: fixup and add attached collision objects (`#1792 <https://github.com/ros-planning/moveit/issues/1792>`_)
 * [feature] move_group capability for publishing planning scene frames to the tf system (`#1761 <https://github.com/ros-planning/moveit/issues/1761>`_)
 * [feature] get_planning_scene_service: return full scene when nothing was requested (`#1424 <https://github.com/ros-planning/moveit/issues/1424>`_)
 * [feature] Separate source file for CartesianInterpolator (`#1149 <https://github.com/ros-planning/moveit/issues/1149>`_)
@@ -216,7 +216,7 @@ Changelog for package moveit_ros_move_group
 
 1.0.6 (2020-08-19)
 ------------------
-* [maint] Adapt repository for splitted moveit_resources layout (`#2199 <https://github.com/ros-planning/moveit/issues/2199>`_)
+* [maint] Adapt repository for split moveit_resources layout (`#2199 <https://github.com/ros-planning/moveit/issues/2199>`_)
 * [maint] Migrate to clang-format-10
 * Contributors: Robert Haschke, Michael Görner
 
@@ -286,7 +286,7 @@ Changelog for package moveit_ros_move_group
 0.9.10 (2017-12-09)
 -------------------
 * [fix] always return true in MoveGroupPlanService callback `#674 <https://github.com/ros-planning/moveit/pull/674>`_
-* [improve] adding swp's to gitignore and removing redundant capabilites from capability_names.h (`#704 <https://github.com/ros-planning/moveit/issues/704>`_)
+* [improve] adding swp's to gitignore and removing redundant capabilities from capability_names.h (`#704 <https://github.com/ros-planning/moveit/issues/704>`_)
 * Contributors: Mike Lautman, Shingo Kitagawa
 
 0.9.9 (2017-08-06)

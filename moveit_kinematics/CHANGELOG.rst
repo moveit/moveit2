@@ -104,7 +104,7 @@ Changelog for package moveit_kinematics
 * Merge https://github.com/ros-planning/moveit/commit/a25515b73d682df03ed3eccd839110c296aa79fc
 * Merge https://github.com/ros-planning/moveit/commit/ab42a1d7017b27eb6c353fb29331b2da08ab0039
 * Compilation fixes for Jammy and bring back Rolling CI (`#1095 <https://github.com/ros-planning/moveit2/issues/1095>`_)
-* Add moveit_configs_utils package to simplify loading paramters (`#591 <https://github.com/ros-planning/moveit2/issues/591>`_)
+* Add moveit_configs_utils package to simplify loading parameters (`#591 <https://github.com/ros-planning/moveit2/issues/591>`_)
 * round_collada_numbers.py: python 2/3 compatibility (`#2983 <https://github.com/ros-planning/moveit2/issues/2983>`_)
   Python3 requires the files to be opened in binary mode read a bytes object instead of a string, which is needed in turn by etree.parse().
   Co-authored-by: Robert Haschke <rhaschke@techfak.uni-bielefeld.de>
@@ -234,7 +234,7 @@ Changelog for package moveit_kinematics
 
 1.0.6 (2020-08-19)
 ------------------
-* [maint] Adapt repository for splitted moveit_resources layout (`#2199 <https://github.com/ros-planning/moveit/issues/2199>`_)
+* [maint] Adapt repository for split moveit_resources layout (`#2199 <https://github.com/ros-planning/moveit/issues/2199>`_)
 * [maint] Migrate to clang-format-10
 * [maint] Optimize includes (`#2229 <https://github.com/ros-planning/moveit/issues/2229>`_)
 * Contributors: Markus Vieth, Robert Haschke, Michael Görner

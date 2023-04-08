@@ -8,7 +8,7 @@ Changelog for package moveit_configs_utils
 2.7.0 (2023-01-29)
 ------------------
 * feat: adds compatibility to robot_description from topic instead of parameter (`#1806 <https://github.com/ros-planning/moveit2/issues/1806>`_)
-* Add support for multiple MoveItConfigBuilder instaces (`#1807 <https://github.com/ros-planning/moveit2/issues/1807>`_)
+* Add support for multiple MoveItConfigBuilder instances (`#1807 <https://github.com/ros-planning/moveit2/issues/1807>`_)
 * Fix BSD license in package.xml (`#1796 <https://github.com/ros-planning/moveit2/issues/1796>`_)
   * fix BSD license in package.xml
   * this must also be spdx compliant
@@ -67,7 +67,7 @@ Changelog for package moveit_configs_utils
   * Some Basic Launch Files
   * Remove circular dependencies
 * [moveit_configs_utils] Minor fixes (`#1103 <https://github.com/ros-planning/moveit2/issues/1103>`_)
-* Add moveit_configs_utils package to simplify loading paramters (`#591 <https://github.com/ros-planning/moveit2/issues/591>`_)
+* Add moveit_configs_utils package to simplify loading parameters (`#591 <https://github.com/ros-planning/moveit2/issues/591>`_)
   Co-authored-by: AndyZe <zelenak@picknik.ai>
   Co-authored-by: Stephanie Eng <stephanie-eng@users.noreply.github.com>
   Co-authored-by: Tyler Weaver <tyler@picknik.ai>

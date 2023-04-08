@@ -66,7 +66,7 @@ Changelog for package moveit_planners_ompl
 * simplify_solution per planning context (`#1437 <https://github.com/ros-planning/moveit2/issues/1437>`_)
   * Allowing to dynamically change the parameter simplify_solutions
   * Delete this configuration because it overrides the configuration loaded
-  The parameters simplify_solutions is passed to the context trough the configuration of each planner but this function overrides it and seems to be contradictory to rest of the implementation. simplify_solutions shouldn't be considered as the rest of the other parameters, like interpolate or hybridize ?
+  The parameters simplify_solutions is passed to the context through the configuration of each planner but this function overrides it and seems to be contradictory to rest of the implementation. simplify_solutions shouldn't be considered as the rest of the other parameters, like interpolate or hybridize ?
   * Remove simplify_solutions\_ from OMPL interface and all its setter/getter
   * Clean-up code without ConfigureContext and unneeded code related to simplify_solution
 * correctly initialize rmw_serialized_message_t
@@ -237,7 +237,7 @@ Changelog for package moveit_planners_ompl
 
 1.0.6 (2020-08-19)
 ------------------
-* [maint] Adapt repository for splitted moveit_resources layout (`#2199 <https://github.com/ros-planning/moveit/issues/2199>`_)
+* [maint] Adapt repository for split moveit_resources layout (`#2199 <https://github.com/ros-planning/moveit/issues/2199>`_)
 * [maint] Migrate to clang-format-10
 * [maint] Optimize includes (`#2229 <https://github.com/ros-planning/moveit/issues/2229>`_)
 * [fix]   Fix memcpy bug in copyJointToOMPLState in ompl interface (`#2239 <https://github.com/ros-planning/moveit/issues/2239>`_)
@@ -364,7 +364,7 @@ Changelog for package moveit_planners_ompl
 * Removed trailing whitespace from entire repository
 * Fixed include directory order to make ros package shadowing work.
 * fixing internal storing of config settings
-* Make sure an overlayed OMPL is used instead of the ROS one.
+* Make sure an overlaid OMPL is used instead of the ROS one.
 * fix simplifySolutions(bool) setter
   The method simplifySolutions(bool) always set the simplify_solutions member to true and the input variable "flag" was ignored.
   The method is fixed by setting the simplify_solutions member to the value of the input variable "flag".
@@ -497,7 +497,7 @@ Changelog for package moveit_planners_ompl
 
 0.3.4 (2012-12-20 23:59)
 ------------------------
-* dynamic_reconfigure workaroung
+* dynamic_reconfigure workaround
 
 0.3.3 (2012-12-20 21:51)
 ------------------------
@@ -557,7 +557,7 @@ Changelog for package moveit_planners_ompl
 
 0.2.0 (2012-11-05)
 ------------------
-* udpate install targets
+* update install targets
 
 0.1.2 (2012-11-01)
 ------------------

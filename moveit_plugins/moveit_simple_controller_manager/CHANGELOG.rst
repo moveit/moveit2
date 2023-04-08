@@ -49,7 +49,7 @@ Changelog for package moveit_simple_controller_manager
   * load controller dependencies
   * start chained controllers in switch
   * reverse order of activate controllers
-  * prevent stoppping controller twice
+  * prevent stopping controller twice
   * revert all debug changes
   * add ROS error if a controller chains to more than one
   * use loop to index chained connections

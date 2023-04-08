@@ -26,7 +26,7 @@ Changelog for package moveit_ros_visualization
 * Enable `-Wold-style-cast` (`#1770 <https://github.com/ros-planning/moveit2/issues/1770>`_)
 * Migrate to Ogre.h (`#1764 <https://github.com/ros-planning/moveit2/issues/1764>`_)
   * Migrate to Ogre.h
-  * Remove includ for OgreQuaternion.h, included in Ogre.h
+  * Remove include for OgreQuaternion.h, included in Ogre.h
 * Remove `MOVEIT_LIB_NAME` (`#1751 <https://github.com/ros-planning/moveit2/issues/1751>`_)
   It's more readable and searchable if we just spell out the target
   name.
@@ -645,7 +645,7 @@ Changelog for package moveit_ros_visualization
 * moved planning_attempts down one row in gui to maintain gui width
 * Added field next to planning_time for planning_attempts
   Now, ParallelPlanner terminates either due to timeout, or due to this many attempts.
-  Note, that ParallelPlanner run's Dijkstra's on all the nodes of all the sucessful plans (hybridize==true).
+  Note, that ParallelPlanner run's Dijkstra's on all the nodes of all the successful plans (hybridize==true).
 * adding PoseStamped topic to move the interactive marker from other ros nodes
   such as joystick programs.
 * motion_planning_rviz_plugin: add move_group namespace option

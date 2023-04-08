@@ -119,7 +119,7 @@ Changelog for package pilz_industrial_motion_planner
   void setJointGroupPositions(const JointModelGroup* group, const std::vector<double>&) and
   void setJointGroupPositions(const JointModelGroup* group, const Eigen::VectorXd&)
 * Add missing test dependencies (`#1027 <https://github.com/ros-planning/moveit2/issues/1027>`_)
-* Add moveit_configs_utils package to simplify loading paramters (`#591 <https://github.com/ros-planning/moveit2/issues/591>`_)
+* Add moveit_configs_utils package to simplify loading parameters (`#591 <https://github.com/ros-planning/moveit2/issues/591>`_)
 * Merge pr `#3000 <https://github.com/ros-planning/moveit2/issues/3000>`_: Pilz planner: improve reporting of invalid start joints
 * pilz: restrict start state check to active group
 * pilz: report joint name with invalid limits in start state

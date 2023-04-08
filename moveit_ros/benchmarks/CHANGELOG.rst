@@ -83,7 +83,7 @@ Changelog for package moveit_ros_benchmarks
 * Remove unused parameters. (`#1018 <https://github.com/ros-planning/moveit2/issues/1018>`_)
   Co-authored-by: Tyler Weaver <tyler@picknik.ai>
   Co-authored-by: Vatan Aksoy Tezer <vatan@picknik.ai>
-* Add moveit_configs_utils package to simplify loading paramters (`#591 <https://github.com/ros-planning/moveit2/issues/591>`_)
+* Add moveit_configs_utils package to simplify loading parameters (`#591 <https://github.com/ros-planning/moveit2/issues/591>`_)
   Co-authored-by: AndyZe <zelenak@picknik.ai>
   Co-authored-by: Stephanie Eng <stephanie-eng@users.noreply.github.com>
   Co-authored-by: Tyler Weaver <tyler@picknik.ai>
@@ -193,7 +193,7 @@ Changelog for package moveit_ros_benchmarks
 
 1.0.6 (2020-08-19)
 ------------------
-* [maint] Adapt repository for splitted moveit_resources layout (`#2199 <https://github.com/ros-planning/moveit/issues/2199>`_)
+* [maint] Adapt repository for split moveit_resources layout (`#2199 <https://github.com/ros-planning/moveit/issues/2199>`_)
 * [maint] Migrate to clang-format-10, Fix warnings
 * [maint] Optimize includes (`#2229 <https://github.com/ros-planning/moveit/issues/2229>`_)
 * Contributors: Markus Vieth, Robert Haschke
@@ -363,7 +363,7 @@ Changelog for package moveit_ros_benchmarks
   Reason why doing this:
   - catkin_generate_changelog gets stuck for some reason so batch generating changelog isn't possible now.
   - Since this is the first release since 6 month ago for Indigo, lots of commit logs since then that shouldn't be wasted.
-  - Decided to bump version of all packages uniformely to 0.7.4 in the hope for catkin_generate_changelog to function...
+  - Decided to bump version of all packages uniformly to 0.7.4 in the hope for catkin_generate_changelog to function...
   - Turned out the accumulated commit logs are not retrieved...But we might as well want to move forward to fix https://github.com/ros-planning/moveit/issues/386
 * Contributors: Isaac I.Y. Saito
 
@@ -493,7 +493,7 @@ Changelog for package moveit_ros_benchmarks
 * 0.3.32
 * 0.3.31
 * Changed for fractional factorial analysis
-* More advanced parameter sweeping implmented, workspace bounds added
+* More advanced parameter sweeping implemented, workspace bounds added
 * Added parameter sweeping to benchmarking
 * Added ability to store the goal name - the query, constraint, traj constraint, etc
 * Added new command line arguments and ability to export all experiments to csv file
@@ -525,7 +525,7 @@ Changelog for package moveit_ros_benchmarks
 * 0.3.24
 * remove alignment tag from .ui, only supported in recent versions
 * 0.3.23
-* added goal existance checks
+* added goal existence checks
 * show progress bar when loading a robot
 * benchmark tool now includes goal offsets in the output config file
 * Multiple fixes in benchmark tool. Added end effector offsets
@@ -584,7 +584,7 @@ Changelog for package moveit_ros_benchmarks
 * API updates needed for planning interface changes in moveit_core; more importantly, plan_execution is now split into plan_with_sensing plan_execution; there is now the notion of an ExecutableMotionPlan, which can also represent results from pick& place actions; this allows us to reuse the replanning code & looking around code we had for planning in pick& place. Added callbacks for repairing motion plans
 * 0.3.15
 * Author names
-* upadte build flags
+* update build flags
 * 0.3.14
 * 0.3.13
 * fixing typo

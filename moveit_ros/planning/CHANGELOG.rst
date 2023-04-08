@@ -525,7 +525,7 @@ Changelog for package moveit_ros_planning
 * [fix] Various fixes for upcoming Noetic release (`#2180 <https://github.com/ros-planning/moveit/issues/2180>`_)
 * [fix] Initialize zero dynamics in CurrentStateMonitor (`#1883 <https://github.com/ros-planning/moveit/issues/1883>`_)
 * [fix] memory leak (`#1526 <https://github.com/ros-planning/moveit/issues/1526>`_)
-* [maint] Adapt repository for splitted moveit_resources layout (`#2199 <https://github.com/ros-planning/moveit/issues/2199>`_)
+* [maint] Adapt repository for split moveit_resources layout (`#2199 <https://github.com/ros-planning/moveit/issues/2199>`_)
 * [maint] partially transition unused test bin to rostest (`#2158 <https://github.com/ros-planning/moveit/issues/2158>`_)
 * [maint] Optional cpp version setting (`#2166 <https://github.com/ros-planning/moveit/issues/2166>`_)
 * [maint] clang-tidy fixes (`#2050 <https://github.com/ros-planning/moveit/issues/2050>`_, `#2004 <https://github.com/ros-planning/moveit/issues/2004>`_, `#1419 <https://github.com/ros-planning/moveit/issues/1419>`_)
@@ -925,7 +925,7 @@ Changelog for package moveit_ros_planning
 
 0.4.5 (2013-07-03)
 ------------------
-* Namespaced ROS_* log messages for better debug fitering - added 'kdl' namespace
+* Namespaced ROS_* log messages for better debug filtering - added 'kdl' namespace
 * remove dep
 * make searchPositionIK actually const, and thread-safe
 * Made debug output look better
