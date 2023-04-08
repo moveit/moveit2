@@ -49,17 +49,20 @@ constexpr double ROBOT_STATE_WAIT_TIME = 10.0;  // seconds
 }  // namespace
 
 Servo::Servo(const rclcpp::Node::SharedPtr& node, const ServoParameters::SharedConstPtr& parameters,
-             const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor)
+             const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor,
+             std::shared_ptr<servo::ParamListener>& servo_param_listener)
   : planning_scene_monitor_{ planning_scene_monitor }
   , parameters_{ parameters }
-  , servo_calcs_{ node, parameters, planning_scene_monitor_ }
-  , collision_checker_{ node, parameters, planning_scene_monitor_ }
+  , servo_calcs_{ node, parameters, planning_scene_monitor_, servo_param_listener}
+  , collision_checker_{ node, parameters, planning_scene_monitor_}
+  , servo_param_listener_{servo_param_listener}
 {
+  servo_params_ = servo_param_listener_->get_params();
 }
 
 void Servo::start()
 {
-  if (!planning_scene_monitor_->getStateMonitor()->waitForCompleteState(parameters_->move_group_name,
+  if (!planning_scene_monitor_->getStateMonitor()->waitForCompleteState(servo_params_.move_group_name,
                                                                         ROBOT_STATE_WAIT_TIME))
   {
     RCLCPP_ERROR(LOGGER, "Timeout waiting for current state");
@@ -72,7 +75,8 @@ void Servo::start()
   servo_calcs_.start();
 
   // Check collisions in this timer
-  if (parameters_->check_collisions)
+  RCLCPP_INFO(LOGGER, "SERVO Check Collision : %d", servo_params_.check_collisions);
+  if (servo_params_.check_collisions)
     collision_checker_.start();
 }
 

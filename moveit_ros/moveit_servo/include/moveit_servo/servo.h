@@ -45,6 +45,7 @@
 #include <moveit_servo/collision_check.h>
 #include <moveit_servo/servo_parameters.h>
 #include <moveit_servo/servo_calcs.h>
+#include <moveit_servo_lib_parameter_lib.hpp>
 
 namespace moveit_servo
 {
@@ -55,7 +56,8 @@ class Servo
 {
 public:
   Servo(const rclcpp::Node::SharedPtr& node, const ServoParameters::SharedConstPtr& parameters,
-        const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor);
+        const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor,
+        std::shared_ptr<servo::ParamListener>& servo_param_listener);
 
   ~Servo();
 
@@ -97,6 +99,9 @@ private:
 
   // The stored servo parameters
   ServoParameters::SharedConstPtr parameters_;
+  std::shared_ptr<servo::ParamListener> servo_param_listener_;
+  servo::Params servo_params_;
+  
 
   ServoCalcs servo_calcs_;
   CollisionCheck collision_checker_;
