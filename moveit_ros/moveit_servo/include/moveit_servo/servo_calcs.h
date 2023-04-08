@@ -67,6 +67,7 @@
 #include <moveit_servo/servo_parameters.h>
 #include <moveit_servo/status_codes.h>
 #include <moveit/online_signal_smoothing/smoothing_base_class.h>
+#include <moveit_servo_lib_parameter_lib.hpp>
 
 namespace moveit_servo
 {
@@ -81,7 +82,8 @@ class ServoCalcs
 public:
   ServoCalcs(const rclcpp::Node::SharedPtr& node,
              const std::shared_ptr<const moveit_servo::ServoParameters>& parameters,
-             const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor);
+             const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor,
+             std::shared_ptr<servo::ParamListener>& servo_param_listener);
 
   ~ServoCalcs();
 
@@ -248,6 +250,8 @@ protected:
 
   // Parameters from yaml
   const std::shared_ptr<const moveit_servo::ServoParameters> parameters_;
+  std::shared_ptr<servo::ParamListener> servo_param_listener_;
+  servo::Params servo_params_;
 
   // Pointer to the collision environment
   planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor_;
