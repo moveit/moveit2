@@ -126,7 +126,7 @@ servo:
 
   planning_frame: {
     type: string,
-    default_value: "panda_link_0",
+    default_value: "panda_link0",
     description: "The name of moveit planning frame."
   }
 
