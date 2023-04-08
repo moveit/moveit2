@@ -35,7 +35,7 @@ servo:
     default_value: "unitless",
     description: "The unit of the incoming command.",
     validation: {
-      one_of<>: ["unitless", "speed_units"]
+      one_of<>: [["unitless", "speed_units"]]
     }
   }
 
@@ -84,7 +84,7 @@ servo:
     default_value: "trajectory_msgs/JointTrajectory",
     description: "The type of command that servo will publish",
     validation: {
-      one_of<>: ["trajectory_msgs/JointTrajectory", "std_msgs/Float64MultiArray"]
+      one_of<>: [["trajectory_msgs/JointTrajectory", "std_msgs/Float64MultiArray"]]
     }
   }
 
@@ -196,7 +196,7 @@ servo:
     default_value: 90.0,
     description: "Stop when the condition number hits this",
     validation: {
-      gt<>: lower_singularity_threshold,
+      gt<>: 0.0,
     }
   }
 
@@ -256,6 +256,6 @@ servo:
     default_value: 0.02,
     description: "Start decelerating when a collision is this far [m]",
     validation: { 
-      gt<>: self_collision_proximity_threshold
+      gt<>: 0.0
     }    
   }
