@@ -1,0 +1,106 @@
+servo:
+
+  use_gazebo: {
+    type: bool,
+    default_value: false,
+    description: "Whether the robot is started in a Gazebo simulation environment"
+  }
+
+  status_topic: {
+    type: string,
+    default_value: "~/status",
+    description: "The topic to which the status will be published"
+  }
+
+  cartesian_command_in_topic: {
+    type: string,
+    default_value: "~/delta_twist_cmds",
+    description: "The topic on which servo will receive the twist commands"
+  }
+
+  joint_command_in_topic: {
+    type: string,
+    default_value: "~/delta_joint_cmds",
+    description: "The topic on which servo will receive the joint jog commands"
+  }
+
+  robot_link_command_frame: {
+    type: string,
+    default_value: "panda_link0",
+    description: "The frame of incoming command, change this to your own value when using a different robot."
+  }
+
+  command_in_type: {
+    type: string,
+    default_value: "unitless",
+    description: "The unit of the incoming command."
+  }
+
+  linear_scale: {
+    type: double,
+    default_value: 0.4,
+    description: "Max linear velocity. Unit is [m/s]. Only used for Cartesian commands."
+  }
+
+  rotational_scale: {
+    type: double,
+    default_value: 0.8,
+    description: "Max angular velocity. Unit is [rad/s]. Only used for Cartesian commands"
+  }
+
+  joint_scale: {
+    type: double,
+    default_value: 0.5,
+    description: "Max joint angular/linear velocity. Only used for joint commands on joint_command_in_topic"
+  }
+
+  override_velocity_scaling_factor: {
+    type: double,
+    default_value: 0.0,
+    description: "Scaling factor when servo overrides the velocity (eg: near singularities)"
+  }
+
+  command_out_topic: {
+    type: string,
+    default_value: "/panda_arm_controller/joint_trajectory",
+    description: "The topic on which servo will publish the joint trajectory \
+                  Change this to the topic your controller requires."
+  }
+
+  publish_period: {
+    type: double,
+    default_value: 0.034,
+    description: " 1 / (Nominal publish rate) [seconds]",
+    validation: {
+      <>gt : 0.0
+    }
+  }
+
+  command_out_type: {
+    type: string,
+    default_value: "trajectory_msgs/JointTrajectory",
+    description: "The type of command that servo will publish \
+                  Currently supported are std_msgs/Float64MultiArray or trajectory_msgs/JointTrajectory"
+  }
+
+  publish_joint_positions: {
+    type: bool,
+    default_value: true,
+    description: "If true servo will publish joint positions in the output command."
+  }
+
+  publish_joint_velocities: {
+    type: bool,
+    default_value: true,
+    description: "If true servo will publish joint velocities in the output command."
+  }
+
+  publish_joint_accelerations: {
+    type: bool,
+    default_value: false,
+    description: "If true servo will publish joint accelerations in the output command."
+  }
+
+
+  
+
