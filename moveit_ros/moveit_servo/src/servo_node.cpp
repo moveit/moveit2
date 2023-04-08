@@ -78,6 +78,9 @@ ServoNode::ServoNode(const rclcpp::NodeOptions& options)
   node_->get_parameter_or("robot_description_name", robot_description_name, robot_description_name);
 
   // Get the servo parameters
+  auto param_listener = std::make_shared<servo::ParamListener>(node_);
+  auto sparams = param_listener->get_params();
+  RCLCPP_INFO(LOGGER, "Got servo param : %f", sparams.rotational_scale);
   auto servo_parameters = moveit_servo::ServoParameters::makeServoParameters(node_);
   if (servo_parameters == nullptr)
   {
