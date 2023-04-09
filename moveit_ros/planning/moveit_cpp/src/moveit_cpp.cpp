@@ -60,8 +60,7 @@ MoveItCpp::MoveItCpp(const rclcpp::Node::SharedPtr& node, const Options& options
     throw std::runtime_error(error);
   }
 
-  robot_model_ = planning_scene_monitor_->getRobotModel();
-  if (!robot_model_)
+  if (!getRobotModel())
   {
     const std::string error = "Unable to construct robot model. Please make sure all needed information is on the "
                               "parameter server.";
@@ -78,7 +77,7 @@ MoveItCpp::MoveItCpp(const rclcpp::Node::SharedPtr& node, const Options& options
   }
 
   trajectory_execution_manager_ = std::make_shared<trajectory_execution_manager::TrajectoryExecutionManager>(
-      node_, robot_model_, planning_scene_monitor_->getStateMonitor());
+      node_, getRobotModel(), planning_scene_monitor_->getStateMonitor());
 
   RCLCPP_DEBUG(LOGGER, "MoveItCpp running");
 }
@@ -86,7 +85,6 @@ MoveItCpp::MoveItCpp(const rclcpp::Node::SharedPtr& node, const Options& options
 MoveItCpp::~MoveItCpp()
 {
   RCLCPP_INFO(LOGGER, "Deleting MoveItCpp");
-  clearContents();
 }
 
 bool MoveItCpp::loadPlanningSceneMonitor(const PlanningSceneMonitorOptions& options)
@@ -130,7 +128,8 @@ bool MoveItCpp::loadPlanningPipelines(const PlanningPipelineOptions& options)
 {
   // TODO(henningkayser): Use parent namespace for planning pipeline config lookup
   planning_pipelines_ =
-      moveit::planning_pipeline_interfaces::createPlanningPipelineMap(options.pipeline_names, robot_model_, node_);
+      moveit::planning_pipeline_interfaces::createPlanningPipelineMap(options.pipeline_names, getRobotModel(), node_);
+
   if (planning_pipelines_.empty())
   {
     RCLCPP_ERROR(LOGGER, "Failed to load any planning pipelines.");
@@ -141,7 +140,7 @@ bool MoveItCpp::loadPlanningPipelines(const PlanningPipelineOptions& options)
 
 moveit::core::RobotModelConstPtr MoveItCpp::getRobotModel() const
 {
-  return robot_model_;
+  return planning_scene_monitor_->getRobotModel();
 }
 
 const rclcpp::Node::SharedPtr& MoveItCpp::getNode() const
@@ -175,7 +174,7 @@ const std::unordered_map<std::string, planning_pipeline::PlanningPipelinePtr>& M
   return planning_pipelines_;
 }
 
-const planning_scene_monitor::PlanningSceneMonitorPtr& MoveItCpp::getPlanningSceneMonitor() const
+planning_scene_monitor::PlanningSceneMonitorConstPtr MoveItCpp::getPlanningSceneMonitor() const
 {
   return planning_scene_monitor_;
 }
@@ -185,7 +184,7 @@ planning_scene_monitor::PlanningSceneMonitorPtr MoveItCpp::getPlanningSceneMonit
   return planning_scene_monitor_;
 }
 
-const trajectory_execution_manager::TrajectoryExecutionManagerPtr& MoveItCpp::getTrajectoryExecutionManager() const
+trajectory_execution_manager::TrajectoryExecutionManagerConstPtr MoveItCpp::getTrajectoryExecutionManager() const
 {
   return trajectory_execution_manager_;
 }
@@ -258,15 +257,13 @@ bool MoveItCpp::terminatePlanningPipeline(const std::string& pipeline_name)
   }
 }
 
-const std::shared_ptr<tf2_ros::Buffer>& MoveItCpp::getTFBuffer() const
+std::shared_ptr<const tf2_ros::Buffer> MoveItCpp::getTFBuffer() const
+{
+  return planning_scene_monitor_->getTFClient();
+}
+std::shared_ptr<tf2_ros::Buffer> MoveItCpp::getTFBuffer()
 {
   return planning_scene_monitor_->getTFClient();
 }
 
-void MoveItCpp::clearContents()
-{
-  planning_scene_monitor_.reset();
-  robot_model_.reset();
-  planning_pipelines_.clear();
-}
 }  // namespace moveit_cpp
