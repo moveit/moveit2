@@ -1,7 +1,8 @@
+
 /*********************************************************************
  * Software License Agreement (BSD License)
  *
- *  Copyright (c) 2022, Peter David Fagan
+ *  Copyright (c) 2023, PickNik Inc.
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -32,29 +33,28 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-/* Author: Peter David Fagan */
+/* Author: Sebastian Jahr */
 
-#pragma once
+#include <moveit/planning_pipeline_interfaces/plan_responses_container.hpp>
 
-#include <pybind11/pybind11.h>
-#include <pybind11/stl.h>
-#include <pybind11/eigen.h>
-#include <moveit/robot_trajectory/robot_trajectory.h>
-#include <moveit_msgs/msg/robot_trajectory.hpp>
-
-namespace py = pybind11;
-
-namespace moveit_py
+namespace moveit
 {
-namespace bind_robot_trajectory
+namespace planning_pipeline_interfaces
 {
-moveit_msgs::msg::RobotTrajectory
-get_robot_trajectory_msg(const robot_trajectory::RobotTrajectoryConstPtr& robot_trajectory,
-                         const std::vector<std::string>& joint_filter);
-robot_trajectory::RobotTrajectory
-set_robot_trajectory_msg(const std::shared_ptr<robot_trajectory::RobotTrajectory>& robot_trajectory,
-                         const moveit::core::RobotState& robot_state, const moveit_msgs::msg::RobotTrajectory& msg);
+PlanResponsesContainer::PlanResponsesContainer(const size_t expected_size)
+{
+  solutions_.reserve(expected_size);
+}
 
-void init_robot_trajectory(py::module& m);
-}  // namespace bind_robot_trajectory
-}  // namespace moveit_py
+void PlanResponsesContainer::pushBack(const ::planning_interface::MotionPlanResponse& plan_solution)
+{
+  std::lock_guard<std::mutex> lock_guard(solutions_mutex_);
+  solutions_.push_back(plan_solution);
+}
+
+const std::vector<::planning_interface::MotionPlanResponse>& PlanResponsesContainer::getSolutions() const
+{
+  return solutions_;
+}
+}  // namespace planning_pipeline_interfaces
+}  // namespace moveit

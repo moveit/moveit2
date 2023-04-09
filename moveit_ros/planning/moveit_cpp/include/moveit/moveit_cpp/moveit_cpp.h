@@ -150,7 +150,7 @@ public:
   moveit::core::RobotStatePtr getCurrentState(double wait_seconds = 0.0);
 
   /** \brief Get all loaded planning pipeline instances mapped to their reference names */
-  const std::map<std::string, planning_pipeline::PlanningPipelinePtr>& getPlanningPipelines() const;
+  const std::unordered_map<std::string, planning_pipeline::PlanningPipelinePtr>& getPlanningPipelines() const;
 
   /** \brief Get the stored instance of the planning scene monitor */
   const planning_scene_monitor::PlanningSceneMonitorPtr& getPlanningSceneMonitor() const;
@@ -189,8 +189,8 @@ private:
   planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor_;
 
   // Planning
-  std::map<std::string, planning_pipeline::PlanningPipelinePtr> planning_pipelines_;
-  std::map<std::string, std::set<std::string>> groups_algorithms_map_;
+  std::unordered_map<std::string, planning_pipeline::PlanningPipelinePtr> planning_pipelines_;
+  std::unordered_map<std::string, std::set<std::string>> groups_algorithms_map_;
 
   // Execution
   trajectory_execution_manager::TrajectoryExecutionManagerPtr trajectory_execution_manager_;

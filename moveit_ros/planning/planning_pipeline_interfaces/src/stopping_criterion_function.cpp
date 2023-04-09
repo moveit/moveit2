@@ -1,7 +1,7 @@
 /*********************************************************************
  * Software License Agreement (BSD License)
  *
- *  Copyright (c) 2022, Peter David Fagan
+ *  Copyright (c) 2023, PickNik Inc.
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -32,29 +32,29 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-/* Author: Peter David Fagan */
+/* Author: Sebastian Jahr */
 
-#pragma once
+#include <moveit/planning_pipeline_interfaces/stopping_criterion_functions.hpp>
 
-#include <pybind11/pybind11.h>
-#include <pybind11/stl.h>
-#include <pybind11/eigen.h>
-#include <moveit/robot_trajectory/robot_trajectory.h>
-#include <moveit_msgs/msg/robot_trajectory.hpp>
-
-namespace py = pybind11;
-
-namespace moveit_py
+namespace moveit
 {
-namespace bind_robot_trajectory
+namespace planning_pipeline_interfaces
 {
-moveit_msgs::msg::RobotTrajectory
-get_robot_trajectory_msg(const robot_trajectory::RobotTrajectoryConstPtr& robot_trajectory,
-                         const std::vector<std::string>& joint_filter);
-robot_trajectory::RobotTrajectory
-set_robot_trajectory_msg(const std::shared_ptr<robot_trajectory::RobotTrajectory>& robot_trajectory,
-                         const moveit::core::RobotState& robot_state, const moveit_msgs::msg::RobotTrajectory& msg);
-
-void init_robot_trajectory(py::module& m);
-}  // namespace bind_robot_trajectory
-}  // namespace moveit_py
+bool stopAtFirstSolution(const PlanResponsesContainer& plan_responses_container,
+                         const std::vector<::planning_interface::MotionPlanRequest>& /*plan_requests*/)
+{
+  // Stop at the first successful plan
+  for (auto const& solution : plan_responses_container.getSolutions())
+  {
+    // bool(solution) is shorthand to evaluate the error code of the solution, checking for SUCCESS
+    if (bool(solution))
+    {
+      // Return true to abort the other pipelines
+      return true;
+    }
+  }
+  // Return false when parallel planning should continue because it hasn't found a successful solution yet
+  return false;
+}
+}  // namespace planning_pipeline_interfaces
+}  // namespace moveit
