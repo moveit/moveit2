@@ -39,6 +39,17 @@ def generate_launch_description():
     servo_yaml = load_yaml("moveit_servo", "config/panda_simulated_config.yaml")
     servo_params = {"moveit_servo": servo_yaml}
 
+    # Get the ee_frame_name parameter
+    ee_frame_name_servo_param = servo_params["moveit_servo"]["ee_frame_name"]
+
+    # Declare ee_frame_name launch parameter
+    ee_frame_name_launch_arg = launch.actions.DeclareLaunchArgument(
+        "ee_frame_name",
+        default_value=launch.substitutions.TextSubstitution(
+            text=ee_frame_name_servo_param
+        ),
+    )
+
     # RViz
     rviz_config_file = (
         get_package_share_directory("moveit_servo") + "/config/demo_rviz_config.rviz"
@@ -137,6 +148,11 @@ def generate_launch_description():
         executable="servo_node_main",
         parameters=[
             servo_params,
+            {
+                "ee_frame_name": launch.substitutions.LaunchConfiguration(
+                    "ee_frame_name"
+                )
+            },
             moveit_config.robot_description,
             moveit_config.robot_description_semantic,
             moveit_config.robot_description_kinematics,
@@ -146,6 +162,7 @@ def generate_launch_description():
 
     return launch.LaunchDescription(
         [
+            ee_frame_name_launch_arg,
             rviz_node,
             ros2_control_node,
             joint_state_broadcaster_spawner,
