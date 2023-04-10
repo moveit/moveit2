@@ -144,7 +144,7 @@ public:
 
      The Cartesian path to be followed is specified as a \e translation vector to be followed by the robot \e link.
      This vector is assumed to be specified either in the global reference frame or in the local
-     reference frame of the link (\e global_reference_frame is false).
+     reference frame of the link.
      The resulting joint values are stored in the vector \e traj, one by one. The maximum distance in
      Cartesian space between consecutive points on the resulting path is specified in the \e MaxEEFStep struct which
      provides two fields: translation and rotation. If a \e validCallback is specified, this is passed to the internal
