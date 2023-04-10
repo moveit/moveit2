@@ -110,6 +110,7 @@ install(
   TARGETS
     collision_detector_bullet_plugin
     moveit_butterworth_filter
+    butterworth_parameters
     moveit_collision_detection
     moveit_collision_detection_bullet
     moveit_collision_detection_fcl
