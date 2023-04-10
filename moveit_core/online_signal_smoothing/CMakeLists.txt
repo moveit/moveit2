@@ -29,12 +29,12 @@ set_target_properties(moveit_butterworth_filter PROPERTIES VERSION
   "${${PROJECT_NAME}_VERSION}"
 )
 
-generate_parameter_library(butterworth_parameters src/butterworth_parameters.yaml)
+generate_parameter_library(moveit_butterworth_parameters src/butterworth_parameters.yaml)
 
 target_link_libraries(moveit_butterworth_filter
   moveit_smoothing_base
   moveit_robot_model
-  butterworth_parameters
+  moveit_butterworth_parameters
 )
 ament_target_dependencies(moveit_butterworth_filter
   srdfdom  # include dependency from moveit_robot_model
