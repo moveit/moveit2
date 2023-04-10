@@ -73,20 +73,19 @@ int const THREAD_PRIORITY = 40;
 
 // Constructor for the class that handles servoing calculations
 ServoCalcs::ServoCalcs(const rclcpp::Node::SharedPtr& node,
-                       const std::shared_ptr<const moveit_servo::ServoParameters>& parameters,
                        const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor,
                        std::shared_ptr<servo::ParamListener>& servo_param_listener)
   : node_(node)
-  , parameters_(parameters)
-  , planning_scene_monitor_(planning_scene_monitor)
-  , stop_requested_(true)
-  , paused_(false)
-  , smoothing_loader_("moveit_core", "online_signal_smoothing::SmoothingBaseClass")
   , servo_param_listener_(servo_param_listener)
+  , servo_params_(servo_param_listener_->get_params())
+  , stop_requested_(true)
+  , planning_scene_monitor_(planning_scene_monitor)
+  , smoothing_loader_("moveit_core", "online_signal_smoothing::SmoothingBaseClass")
+  , paused_(false)
+
 {
  
   //Get the params
-  servo_params_ = servo_param_listener_->get_params();
   RCLCPP_INFO(LOGGER, "[SERVO CALCS] got params %f: ", servo_params_.rotational_scale);
 
   // MoveIt Setup
@@ -751,7 +750,7 @@ bool ServoCalcs::internalServoUpdate(Eigen::ArrayXd& delta_theta,
 
 // Spam several redundant points into the trajectory. The first few may be skipped if the
 // time stamp is in the past when it reaches the client. Needed for gazebo simulation.
-// Start from 1 because the first point's timestamp is already 1*parameters_->publish_period
+// Start from 1 because the first point's timestamp is already 1*servo_parameters_.publish_period
 void ServoCalcs::insertRedundantPointsIntoTrajectory(trajectory_msgs::msg::JointTrajectory& joint_trajectory,
                                                      int count) const
 {
