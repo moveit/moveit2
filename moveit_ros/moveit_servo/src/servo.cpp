@@ -48,14 +48,14 @@ const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_servo.servo");
 constexpr double ROBOT_STATE_WAIT_TIME = 10.0;  // seconds
 }  // namespace
 
-Servo::Servo(const rclcpp::Node::SharedPtr& node, const ServoParameters::SharedConstPtr& parameters,
+Servo::Servo(const rclcpp::Node::SharedPtr& node,
              const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor,
              std::shared_ptr<servo::ParamListener>& servo_param_listener)
   : planning_scene_monitor_{ planning_scene_monitor }
-  , parameters_{ parameters }
-  , servo_calcs_{ node, parameters, planning_scene_monitor_, servo_param_listener}
-  , collision_checker_{ node, parameters, planning_scene_monitor_}
-  , servo_param_listener_{servo_param_listener}
+  , servo_param_listener_{ servo_param_listener}
+  , servo_calcs_{ node, planning_scene_monitor_, servo_param_listener_}
+  , collision_checker_{ node, servo_param_listener_, planning_scene_monitor_}
+
 {
   servo_params_ = servo_param_listener_->get_params();
 }
@@ -111,9 +111,9 @@ bool Servo::getEEFrameTransform(geometry_msgs::msg::TransformStamped& transform)
   return servo_calcs_.getEEFrameTransform(transform);
 }
 
-const ServoParameters::SharedConstPtr& Servo::getParameters() const
+const servo::Params Servo::getParameters() const
 {
-  return parameters_;
+  return servo_param_listener_->get_params();
 }
 
 }  // namespace moveit_servo

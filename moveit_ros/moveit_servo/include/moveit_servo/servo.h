@@ -43,7 +43,6 @@
 
 // Moveit2
 #include <moveit_servo/collision_check.h>
-#include <moveit_servo/servo_parameters.h>
 #include <moveit_servo/servo_calcs.h>
 #include <moveit_servo_lib_parameter_lib.hpp>
 
@@ -55,7 +54,7 @@ namespace moveit_servo
 class Servo
 {
 public:
-  Servo(const rclcpp::Node::SharedPtr& node, const ServoParameters::SharedConstPtr& parameters,
+  Servo(const rclcpp::Node::SharedPtr& node,
         const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor,
         std::shared_ptr<servo::ParamListener>& servo_param_listener);
 
@@ -88,7 +87,7 @@ public:
   bool getEEFrameTransform(geometry_msgs::msg::TransformStamped& transform);
 
   /** \brief Get the parameters used by servo node. */
-  const ServoParameters::SharedConstPtr& getParameters() const;
+  const servo::Params getParameters() const;
 
   // Give test access to private/protected methods
   friend class ServoFixture;
@@ -97,8 +96,7 @@ private:
   // Pointer to the collision environment
   planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor_;
 
-  // The stored servo parameters
-  ServoParameters::SharedConstPtr parameters_;
+  // The servo parameters
   std::shared_ptr<servo::ParamListener> servo_param_listener_;
   servo::Params servo_params_;
   
