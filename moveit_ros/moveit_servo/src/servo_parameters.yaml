@@ -246,7 +246,7 @@ servo:
     type: double,
     default_value: 0.01,
     description: "Start decelerating when a self-collision is this far [m]",
-    validation: { 
+    validation: {
       gt<>: 0.0
     }
   }
@@ -255,7 +255,7 @@ servo:
     type: double,
     default_value: 0.02,
     description: "Start decelerating when a collision is this far [m]",
-    validation: { 
+    validation: {
       gt<>: 0.0
-    }    
+    }
   }

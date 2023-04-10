@@ -99,7 +99,6 @@ private:
   // The servo parameters
   std::shared_ptr<servo::ParamListener> servo_param_listener_;
   servo::Params servo_params_;
-  
 
   ServoCalcs servo_calcs_;
   CollisionCheck collision_checker_;
