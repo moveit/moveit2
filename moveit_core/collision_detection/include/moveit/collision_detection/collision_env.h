@@ -287,8 +287,16 @@ public:
   /** @brief Set the link padding (for every link)*/
   void setPadding(double padding);
 
+  /** @brief setPadding helper compares padding with link padding (for every link)*/
+  std::vector<std::string> compareWithPadding(const double padding, 
+                                              const std::vector<const moveit::core::LinkModel*>& links);
+
   /** @brief Set the link scaling (for every link)*/
   void setScale(double scale);
+
+  /** @brief setScale helper compares scale with link scale (for every link)*/
+  std::vector<std::string> compareWithScale(const double scale,
+                                            const std::vector<const moveit::core::LinkModel*>& links)
 
   /** @brief Set the link padding from a vector of messages*/
   void setPadding(const std::vector<moveit_msgs::msg::LinkPadding>& padding);
