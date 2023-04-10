@@ -48,7 +48,7 @@ set_target_properties(moveit_servo_lib_parameters PROPERTIES VERSION "${moveit_s
 ament_target_dependencies(moveit_servo_lib_parameters ${THIS_PACKAGE_INCLUDE_DEPENDS})
 
 generate_parameter_library(
-  ${SERVO_PARAM_LIB2_NAME}
+  ${SERVO_PARAM_LIB_NAME}
   src/servo_parameters.yaml
 )
 

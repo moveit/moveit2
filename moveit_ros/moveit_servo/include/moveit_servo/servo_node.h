@@ -42,7 +42,7 @@
 
 #include <moveit_servo/servo.h>
 #include <std_srvs/srv/trigger.hpp>
-#include <moveit_servo_lib_parameter_lib.hpp>
+#include <moveit_servo_lib_parameters.hpp>
 
 namespace moveit_servo
 {

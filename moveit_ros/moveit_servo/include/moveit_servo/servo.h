@@ -44,7 +44,7 @@
 // Moveit2
 #include <moveit_servo/collision_check.h>
 #include <moveit_servo/servo_calcs.h>
-#include <moveit_servo_lib_parameter_lib.hpp>
+#include <moveit_servo_lib_parameters.hpp>
 
 namespace moveit_servo
 {
