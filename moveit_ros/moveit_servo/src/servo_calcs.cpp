@@ -81,8 +81,6 @@ ServoCalcs::ServoCalcs(const rclcpp::Node::SharedPtr& node,
   , planning_scene_monitor_(planning_scene_monitor)
   , stop_requested_(true)
   , paused_(false)
-  , robot_link_command_frame_(parameters->robot_link_command_frame)
-  , override_velocity_scaling_factor_(parameters->override_velocity_scaling_factor)
   , smoothing_loader_("moveit_core", "online_signal_smoothing::SmoothingBaseClass")
   , servo_param_listener_(servo_param_listener)
 {
@@ -90,24 +88,6 @@ ServoCalcs::ServoCalcs(const rclcpp::Node::SharedPtr& node,
   //Get the params
   servo_params_ = servo_param_listener_->get_params();
   RCLCPP_INFO(LOGGER, "[SERVO CALCS] got params %f: ", servo_params_.rotational_scale);
-  // Register callback for changes in robot_link_command_frame
-  bool callback_success = parameters_->registerSetParameterCallback(parameters->ns + ".robot_link_command_frame",
-                                                                    [this](const rclcpp::Parameter& parameter) {
-                                                                      return robotLinkCommandFrameCallback(parameter);
-                                                                    });
-  if (!callback_success)
-  {
-    throw std::runtime_error("Failed to register setParameterCallback for robot_link_command_frame");
-  }
-
-  // Register callback for changes in override_velocity_scaling_factor
-  callback_success = parameters_->registerSetParameterCallback(
-      parameters->ns + ".override_velocity_scaling_factor",
-      [this](const rclcpp::Parameter& parameter) { return overrideVelocityScalingFactorCallback(parameter); });
-  if (!callback_success)
-  {
-    throw std::runtime_error("Failed to register setParameterCallback for override_velocity_scaling_factor");
-  }
 
   // MoveIt Setup
   current_state_ = planning_scene_monitor_->getStateMonitor()->getCurrentState();
@@ -273,12 +253,12 @@ void ServoCalcs::start()
   };
   check_link_is_known(servo_params_.planning_frame);
   check_link_is_known(servo_params_.ee_frame_name);
-  check_link_is_known(robot_link_command_frame_);
+  check_link_is_known(servo_params_.robot_link_command_frame);
 
   tf_moveit_to_ee_frame_ = current_state_->getGlobalLinkTransform(servo_params_.planning_frame).inverse() *
                            current_state_->getGlobalLinkTransform(servo_params_.ee_frame_name);
   tf_moveit_to_robot_cmd_frame_ = current_state_->getGlobalLinkTransform(servo_params_.planning_frame).inverse() *
-                                  current_state_->getGlobalLinkTransform(robot_link_command_frame_);
+                                  current_state_->getGlobalLinkTransform(servo_params_.robot_link_command_frame);
   if (!use_inv_jacobian_)
   {
     ik_base_to_tip_frame_ = current_state_->getGlobalLinkTransform(ik_solver_->getBaseFrame()).inverse() *
@@ -343,6 +323,36 @@ void ServoCalcs::mainCalcLoop()
     // reset new_input_cmd_ flag
     new_input_cmd_ = false;
 
+    // Check if any parameters changed
+    // TODO : Remove debug info here
+    if (servo_param_listener_->is_old(servo_params_)) 
+    {
+      auto params_ = servo_param_listener_->get_params();
+      if (params_.override_velocity_scaling_factor != servo_params_.override_velocity_scaling_factor)
+      {
+          RCLCPP_INFO_STREAM(LOGGER, "override_velocity_scaling_factor changed to : "
+                                 << std::to_string(params_.override_velocity_scaling_factor));
+          
+      }
+
+      if (params_.robot_link_command_frame != servo_params_.robot_link_command_frame)
+      {
+          if (current_state_->knowsFrameTransform(params_.robot_link_command_frame))
+          {            
+            RCLCPP_INFO_STREAM(LOGGER, "robot_link_command_frame changed to : " << params_.robot_link_command_frame);
+          }
+          else
+          {
+            RCLCPP_ERROR_STREAM(LOGGER, "Failed to change robot_link_command_frame. Passed frame '" << params_.robot_link_command_frame
+                                                                                  << "' is unknown, will keep using old command frame.");
+            // Replace frame in new param set with old frame value
+            // TODO : Is there a better behaviour here ?                                                                            
+            params_.robot_link_command_frame = servo_params_.robot_link_command_frame;
+          }
+      }
+      servo_params_ = params_;
+    }
+
     // run servo calcs
     const auto start_time = node_->now();
     calculateSingleIteration();
@@ -405,7 +415,7 @@ void ServoCalcs::calculateSingleIteration()
   // We solve (planning_frame -> base -> robot_link_command_frame)
   // by computing (base->planning_frame)^-1 * (base->robot_link_command_frame)
   tf_moveit_to_robot_cmd_frame_ = current_state_->getGlobalLinkTransform(servo_params_.planning_frame).inverse() *
-                                  current_state_->getGlobalLinkTransform(robot_link_command_frame_);
+                                  current_state_->getGlobalLinkTransform(servo_params_.robot_link_command_frame);
 
   // Calculate the transform from MoveIt planning frame to End Effector frame
   // Calculate this transform to ensure it is available via C++ API
@@ -522,38 +532,6 @@ void ServoCalcs::calculateSingleIteration()
     resetLowPassFilters(current_joint_state_);
 }
 
-rcl_interfaces::msg::SetParametersResult ServoCalcs::robotLinkCommandFrameCallback(const rclcpp::Parameter& parameter)
-{
-  const std::lock_guard<std::mutex> lock(main_loop_mutex_);
-  rcl_interfaces::msg::SetParametersResult result;
-
-  // Check that the new frame is known
-  if (!current_state_->knowsFrameTransform(parameter.as_string()))
-  {
-    RCLCPP_ERROR_STREAM(LOGGER, "Failed to change robot_link_command_frame. Passed frame '" << parameter.as_string()
-                                                                                            << "' is unknown");
-    result.successful = false;
-    return result;
-  }
-
-  result.successful = true;
-  robot_link_command_frame_ = parameter.as_string();
-  RCLCPP_INFO_STREAM(LOGGER, "robot_link_command_frame changed to: " + robot_link_command_frame_);
-  return result;
-};
-
-rcl_interfaces::msg::SetParametersResult
-ServoCalcs::overrideVelocityScalingFactorCallback(const rclcpp::Parameter& parameter)
-{
-  const std::lock_guard<std::mutex> lock(main_loop_mutex_);
-  rcl_interfaces::msg::SetParametersResult result;
-  result.successful = true;
-  override_velocity_scaling_factor_ = parameter.as_double();
-  RCLCPP_INFO_STREAM(LOGGER, "override_velocity_scaling_factor changed to: "
-                                 << std::to_string(override_velocity_scaling_factor_));
-  return result;
-};
-
 // Perform the servoing calculations
 bool ServoCalcs::cartesianServoCalcs(geometry_msgs::msg::TwistStamped& cmd,
                                      trajectory_msgs::msg::JointTrajectory& joint_trajectory)
@@ -572,7 +550,7 @@ bool ServoCalcs::cartesianServoCalcs(geometry_msgs::msg::TwistStamped& cmd,
     Eigen::Vector3d angular_vector(cmd.twist.angular.x, cmd.twist.angular.y, cmd.twist.angular.z);
 
     // If the incoming frame is empty or is the command frame, we use the previously calculated tf
-    if (cmd.header.frame_id.empty() || cmd.header.frame_id == robot_link_command_frame_)
+    if (cmd.header.frame_id.empty() || cmd.header.frame_id == servo_params_.robot_link_command_frame)
     {
       translation_vector = tf_moveit_to_robot_cmd_frame_.linear() * translation_vector;
       angular_vector = tf_moveit_to_robot_cmd_frame_.linear() * angular_vector;
@@ -740,7 +718,7 @@ bool ServoCalcs::internalServoUpdate(Eigen::ArrayXd& delta_theta,
 
   // Enforce SRDF velocity limits
   enforceVelocityLimits(joint_model_group_, servo_params_.publish_period, next_joint_state_,
-                        override_velocity_scaling_factor_);
+                        servo_params_.override_velocity_scaling_factor);
 
   // Enforce SRDF position limits, might halt if needed, set prev_vel to 0
   const auto joints_to_halt = enforcePositionLimits(next_joint_state_);
@@ -1133,7 +1111,7 @@ bool ServoCalcs::getCommandFrameTransform(geometry_msgs::msg::TransformStamped& 
   }
 
   transform =
-      convertIsometryToTransform(tf_moveit_to_robot_cmd_frame_, servo_params_.planning_frame, robot_link_command_frame_);
+      convertIsometryToTransform(tf_moveit_to_robot_cmd_frame_, servo_params_.planning_frame, servo_params_.robot_link_command_frame);
   return true;
 }
 

@@ -331,12 +331,6 @@ protected:
   std::condition_variable input_cv_;
   bool new_input_cmd_ = false;
 
-  // dynamic parameters
-  std::string robot_link_command_frame_;
-  rcl_interfaces::msg::SetParametersResult robotLinkCommandFrameCallback(const rclcpp::Parameter& parameter);
-  double override_velocity_scaling_factor_;
-  rcl_interfaces::msg::SetParametersResult overrideVelocityScalingFactorCallback(const rclcpp::Parameter& parameter);
-
   // Load a smoothing plugin
   pluginlib::ClassLoader<online_signal_smoothing::SmoothingBaseClass> smoothing_loader_;
 
