@@ -38,7 +38,6 @@
 
 #include <moveit/online_signal_smoothing/butterworth_filter.h>
 #include <rclcpp/clock.hpp>
-#include <rclcpp/rclcpp.hpp>
 #include <rclcpp/logging.hpp>
 
 namespace online_signal_smoothing
