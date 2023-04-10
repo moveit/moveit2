@@ -16,13 +16,13 @@ endforeach()
 set(LIBFCL_LIBRARIES "${LIBFCL_LIBRARIES_FULL}")
 
 find_package(ament_cmake REQUIRED)
-find_package(generate_parameter_library REQUIRED)
 find_package(angles REQUIRED)
 find_package(Bullet 2.87 REQUIRED)
 find_package(common_interfaces REQUIRED)
 find_package(eigen_stl_containers REQUIRED)
 find_package(Eigen3 REQUIRED)
 find_package(eigen3_cmake_module REQUIRED)
+find_package(generate_parameter_library REQUIRED)
 find_package(geometric_shapes REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(kdl_parser REQUIRED)
@@ -141,13 +141,13 @@ install(
 
 ament_export_targets(moveit_coreTargets HAS_LIBRARY_TARGET)
 ament_export_dependencies(
-  generate_parameter_library
   angles
   Bullet
   common_interfaces
   eigen_stl_containers
   Eigen3
   eigen3_cmake_module
+  generate_parameter_library
   geometric_shapes
   geometry_msgs
   kdl_parser
