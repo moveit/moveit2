@@ -100,7 +100,7 @@ bool ButterworthFilterPlugin::initialize(rclcpp::Node::SharedPtr node, moveit::c
 {
   node_ = node;
   num_joints_ = num_joints;
-  param_listener_ = std::make_shared<online_signal_smoothing::ParamListener>(node_);
+  auto param_listener_ = std::make_unique<online_signal_smoothing::ParamListener>(node_);
   auto filter_coeff = param_listener_->get_params().butterworth_filter_coeff;
 
   for (std::size_t i = 0; i < num_joints_; ++i)

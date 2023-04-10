@@ -118,7 +118,6 @@ public:
 private:
   rclcpp::Node::SharedPtr node_;
   // Parameter listener
-  std::shared_ptr<online_signal_smoothing::ParamListener> param_listener_;
   std::vector<ButterworthFilter> position_filters_;
   size_t num_joints_;
 };
