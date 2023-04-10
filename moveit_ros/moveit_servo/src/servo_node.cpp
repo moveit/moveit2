@@ -38,7 +38,6 @@
  */
 
 #include <moveit_servo/servo_node.h>
-#include <moveit_servo/servo_parameters.h>
 
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_servo.servo_node");
 
@@ -81,12 +80,6 @@ ServoNode::ServoNode(const rclcpp::NodeOptions& options)
   auto param_listener = std::make_shared<servo::ParamListener>(node_);
   auto servo_parameters = param_listener->get_params();
   RCLCPP_INFO(LOGGER, "Got servo lib param : %f", servo_parameters.rotational_scale);
-  auto sparams = moveit_servo::ServoParameters::makeServoParameters(node_);
-  if (sparams == nullptr)
-  {
-    RCLCPP_ERROR(LOGGER, "Failed to load the servo parameters");
-    throw std::runtime_error("Failed to load the servo parameters");
-  }
 
   // Set up planning_scene_monitor
   planning_scene_monitor_ = std::make_shared<planning_scene_monitor::PlanningSceneMonitor>(
@@ -111,7 +104,7 @@ ServoNode::ServoNode(const rclcpp::NodeOptions& options)
   }
 
   // Create Servo
-  servo_ = std::make_unique<moveit_servo::Servo>(node_, sparams, planning_scene_monitor_, param_listener);
+  servo_ = std::make_unique<moveit_servo::Servo>(node_, planning_scene_monitor_, param_listener);
 }
 
 void ServoNode::startCB(const std::shared_ptr<std_srvs::srv::Trigger::Request>& /* unused */,
