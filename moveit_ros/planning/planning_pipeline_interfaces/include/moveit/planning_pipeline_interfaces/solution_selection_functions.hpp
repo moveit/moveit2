@@ -32,28 +32,23 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-/* Author: Sebastian Jahr */
+/* Author: Sebastian Jahr
+   Desc: Solution selection function implementations */
 
-#include <moveit/moveit_cpp/parallel_planning_callbacks.hpp>
+#pragma once
 
-namespace moveit_cpp
+#include <moveit/planning_pipeline_interfaces/planning_pipeline_interfaces.hpp>
+
+namespace moveit
 {
-/** \brief A callback function that can be used as a parallel planning stop criterion.
- *          It stops parallel planning as soon as any planner finds a solution. */
-bool stopAtFirstSolution(PlanSolutions const& plan_solutions,
-                         PlanningComponent::MultiPipelinePlanRequestParameters const& /*plan_request_parameters*/)
+namespace planning_pipeline_interfaces
 {
-  // Stop at the first successful plan
-  for (auto const& solution : plan_solutions.getSolutions())
-  {
-    // bool(solution) is shorthand to evaluate the error code of the solution, checking for SUCCESS
-    if (bool(solution))
-    {
-      // Return true to abort the other pipelines
-      return true;
-    }
-  }
-  // Return false when parallel planning should continue because it hasn't found a successful solution yet
-  return false;
-}
-}  // namespace moveit_cpp
+/** \brief Function that returns the shortest solution out of a vector of solutions based on robot_trajectory::path_length(...)
+ *  \param [in] solutions Vector of solutions to chose the shortest one from
+ *  \return Shortest solution, trajectory of the returned MotionPlanResponse is a nullptr if no solution is found!
+ */
+::planning_interface::MotionPlanResponse
+getShortestSolution(const std::vector<::planning_interface::MotionPlanResponse>& solutions);
+
+}  // namespace planning_pipeline_interfaces
+}  // namespace moveit

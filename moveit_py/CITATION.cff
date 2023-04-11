@@ -1,0 +1,8 @@
+cff-version: 1.2.0
+authors:
+  - family-names: Fagan
+    given-names: Peter David
+date-released: 2023-03-20
+message: "If you use this software, please cite it as below."
+title: "MoveIt 2 Python Library: A Software Library for Robotics Education and Research"
+url: "https://github.com/ros-planning/moveit2/tree/main/moveit_py"

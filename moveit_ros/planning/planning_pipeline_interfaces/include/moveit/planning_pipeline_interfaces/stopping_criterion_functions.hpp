@@ -32,17 +32,20 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-/* Author: Sebastian Jahr
-   Desc: Common callback functions for parallel planning */
+/* Author: AndyZe, Sebastian Jahr
+   Desc: Stopping criterion function implementations */
 
 #pragma once
 
-#include <moveit/moveit_cpp/planning_component.h>
+#include <moveit/planning_pipeline_interfaces/planning_pipeline_interfaces.hpp>
 
-namespace moveit_cpp
+namespace moveit
+{
+namespace planning_pipeline_interfaces
 {
 /** \brief A callback function that can be used as a parallel planning stop criterion.
  *          It stops parallel planning as soon as any planner finds a solution. */
-bool stopAtFirstSolution(PlanSolutions const& plan_solutions,
-                         PlanningComponent::MultiPipelinePlanRequestParameters const& /*plan_request_parameters*/);
-}  // namespace moveit_cpp
+bool stopAtFirstSolution(const PlanResponsesContainer& plan_responses_container,
+                         const std::vector<::planning_interface::MotionPlanRequest>& plan_requests);
+}  // namespace planning_pipeline_interfaces
+}  // namespace moveit
