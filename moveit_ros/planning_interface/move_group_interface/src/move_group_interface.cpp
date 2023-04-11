@@ -1662,6 +1662,7 @@ double MoveGroupInterface::computeCartesianPath(const std::vector<geometry_msgs:
   else
   {
     moveit_msgs::msg::MoveItErrorCodes err_tmp;
+    err_tmp.val = moveit_msgs::msg::MoveItErrorCodes::SUCCESS;
     moveit_msgs::msg::MoveItErrorCodes& err = error_code ? *error_code : err_tmp;
     return impl_->computeCartesianPath(waypoints, eef_step, jump_threshold, trajectory, path_constraints,
                                        avoid_collisions, err);
