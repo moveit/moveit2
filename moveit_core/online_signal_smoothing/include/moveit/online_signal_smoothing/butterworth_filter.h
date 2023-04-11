@@ -117,7 +117,6 @@ public:
 
 private:
   rclcpp::Node::SharedPtr node_;
-  // Parameter listener
   std::vector<ButterworthFilter> position_filters_;
   size_t num_joints_;
 };
