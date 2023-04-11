@@ -115,7 +115,7 @@ void init_moveit_py(py::module& m)
 
              if (provide_planning_service)
              {
-               moveit_cpp_ptr->getPlanningSceneMonitor()->providePlanningSceneService();
+               moveit_cpp_ptr->getPlanningSceneMonitorNonConst()->providePlanningSceneService();
              };
 
              return moveit_cpp_ptr;
