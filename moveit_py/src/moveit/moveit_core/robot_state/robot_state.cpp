@@ -79,8 +79,7 @@ Eigen::MatrixXd get_global_link_transform(const moveit::core::RobotState* self, 
 
 geometry_msgs::msg::Pose get_pose(const moveit::core::RobotState* self, const std::string& link_name)
 {
-  Eigen::Isometry3d pose = self->getGlobalLinkTransform(link_name);
-  return tf2::toMsg(pose);
+  return tf2::toMsg(self->getGlobalLinkTransform(link_name));
 }
 
 std::map<std::string, double> get_joint_positions(const moveit::core::RobotState* self)
@@ -236,8 +235,8 @@ void init_robot_state(py::module& m)
 
            )")
       .def("__copy__", [](const moveit::core::RobotState* self) { return moveit::core::RobotState{ *self }; })
-      .def("__deepcopy__",
-           [](const moveit::core::RobotState* self, py::dict /* memo */) { return moveit::core::RobotState{ *self }; })
+      .def("__deepcopy__", [](const moveit::core::RobotState* self,
+                              py::dict /* memo */) { return moveit::core::RobotState{ *self }; })  // NOLINT
 
       // Get underlying robot model, frame transformations and jacobian
       .def_property("robot_model", &moveit::core::RobotState::getRobotModel, nullptr,

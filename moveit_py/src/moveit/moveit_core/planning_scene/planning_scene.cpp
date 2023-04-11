@@ -119,7 +119,7 @@ void init_planning_scene(py::module& m)
              return planning_scene::PlanningScene::clone(self->shared_from_this());
            })
       .def("__deepcopy__",
-           [](const planning_scene::PlanningScene* self, py::dict /* memo */) {
+           [](const planning_scene::PlanningScene* self, py::dict /* memo */) {  // NOLINT
              return planning_scene::PlanningScene::clone(self->shared_from_this());
            })
       .def("knows_frame_transform",
