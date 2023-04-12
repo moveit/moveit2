@@ -22,7 +22,8 @@ get_iteration_path_publisher(moveit_visual_tools::MoveItVisualTools& visual_tool
     reference_state = std::make_shared<moveit::core::RobotState>(scene->getCurrentState());
   }
 
-  PostIterationFn path_publisher = [=, &visual_tools](int iteration_number, double cost, const Eigen::MatrixXd& values) {
+  PostIterationFn path_publisher = [=, &visual_tools](int /*iteration_number*/, double /*cost*/,
+                                                      const Eigen::MatrixXd& values) {
     static thread_local robot_trajectory::RobotTrajectory trajectory(visual_tools.getRobotModel(), group);
     fill_robot_trajectory(values, *reference_state, trajectory);
     visual_tools.publishTrajectoryLine(trajectory, group, color);
@@ -44,7 +45,7 @@ DoneFn get_success_trajectory_publisher(moveit_visual_tools::MoveItVisualTools& 
     reference_state = std::make_shared<moveit::core::RobotState>(scene->getCurrentState());
   }
 
-  DoneFn path_publisher = [=, &visual_tools](bool success, int total_iterations, double final_cost,
+  DoneFn path_publisher = [=, &visual_tools](bool success, int /*total_iterations*/, double /*final_cost*/,
                                              const Eigen::MatrixXd& values) {
     static thread_local robot_trajectory::RobotTrajectory trajectory(reference_state->getRobotModel(), group);
     if (success)

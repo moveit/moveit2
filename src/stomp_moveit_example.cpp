@@ -52,10 +52,10 @@ int main(int argc, char** argv)
 
   // Setup MoveIt, MVT
   auto moveit_cpp = std::make_shared<moveit_cpp::MoveItCpp>(node);
-  moveit_cpp->getPlanningSceneMonitor()->waitForCurrentRobotState(node->now(), 1.0 /* seconds */);
-  moveit_cpp->getPlanningSceneMonitor()->providePlanningSceneService();
+  moveit_cpp->getPlanningSceneMonitorNonConst()->waitForCurrentRobotState(node->now(), 1.0 /* seconds */);
+  moveit_cpp->getPlanningSceneMonitorNonConst()->providePlanningSceneService();
   moveit_visual_tools::MoveItVisualTools visual_tools(node, "panda_link0", "stomp_moveit",
-                                                      moveit_cpp->getPlanningSceneMonitor());
+                                                      moveit_cpp->getPlanningSceneMonitorNonConst());
   const auto robot_model = moveit_cpp->getRobotModel();
   const auto group = robot_model->getJointModelGroup("panda_arm");
   const auto joints = group->getActiveJointModels();
@@ -67,7 +67,7 @@ int main(int argc, char** argv)
 
   // Copy planning scene for collision checking
   const auto planning_scene =
-      planning_scene_monitor::LockedPlanningSceneRO(moveit_cpp->getPlanningSceneMonitor())->diff();
+      planning_scene_monitor::LockedPlanningSceneRO(moveit_cpp->getPlanningSceneMonitorNonConst())->diff();
   planning_scene->decoupleParent();
 
   // Start and Goal States

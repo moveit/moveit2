@@ -65,14 +65,14 @@ public:
     param_listener_ = std::make_shared<stomp_moveit::ParamListener>(node, parameter_namespace);
   }
 
-  virtual std::string getDescription() const override
+  std::string getDescription() const override
   {
     return "Stomp Smoothing Adapter";
   }
 
   bool adaptAndPlan(const PlannerFn& planner, const planning_scene::PlanningSceneConstPtr& ps,
                     const planning_interface::MotionPlanRequest& req, planning_interface::MotionPlanResponse& res,
-                    std::vector<std::size_t>& added_path_index) const override
+                    std::vector<std::size_t>& /*added_path_index*/) const override
   {
     // Following call to planner() calls the motion planner defined for the pipeline and stores the trajectory inside
     // the MotionPlanResponse res variable which is then passed to STOMP for optimization

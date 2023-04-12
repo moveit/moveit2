@@ -38,9 +38,9 @@ public:
    * @param noise             The noise applied to the parameters
    * @return True if cost were properly computed, otherwise false
    */
-  bool generateNoisyParameters(const Eigen::MatrixXd& parameters, std::size_t start_timestep, std::size_t num_timesteps,
-                               int iteration_number, int rollout_number, Eigen::MatrixXd& parameters_noise,
-                               Eigen::MatrixXd& noise) override
+  bool generateNoisyParameters(const Eigen::MatrixXd& parameters, std::size_t /*start_timestep*/,
+                               std::size_t /*num_timesteps*/, int /*iteration_number*/, int /*rollout_number*/,
+                               Eigen::MatrixXd& parameters_noise, Eigen::MatrixXd& noise) override
   {
     return noise_generator_fn_(parameters, parameters_noise, noise);
   }
@@ -55,8 +55,8 @@ public:
    * @param validity          Whether or not the trajectory is valid
    * @return True if cost were properly computed, otherwise false
    */
-  bool computeCosts(const Eigen::MatrixXd& parameters, std::size_t start_timestep, std::size_t num_timesteps,
-                    int iteration_number, Eigen::VectorXd& costs, bool& validity) override
+  bool computeCosts(const Eigen::MatrixXd& parameters, std::size_t /*start_timestep*/, std::size_t /*num_timesteps*/,
+                    int /*iteration_number*/, Eigen::VectorXd& costs, bool& validity) override
   {
     return cost_fn_(parameters, costs, validity);
   }
@@ -72,8 +72,9 @@ public:
    * @param validity          Whether or not the trajectory is valid
    * @return True if cost were properly computed, otherwise false
    */
-  bool computeNoisyCosts(const Eigen::MatrixXd& parameters, std::size_t start_timestep, std::size_t num_timesteps,
-                         int iteration_number, int rollout_number, Eigen::VectorXd& costs, bool& validity) override
+  bool computeNoisyCosts(const Eigen::MatrixXd& parameters, std::size_t /*start_timestep*/,
+                         std::size_t /*num_timesteps*/, int /*iteration_number*/, int /*rollout_number*/,
+                         Eigen::VectorXd& costs, bool& validity) override
   {
     return cost_fn_(parameters, costs, validity);
   }
@@ -89,7 +90,7 @@ public:
    * @param updates           The updates to the parameters
    * @return                  True if successful, otherwise false
    */
-  bool filterParameterUpdates(std::size_t start_timestep, std::size_t num_timesteps, int iteration_number,
+  bool filterParameterUpdates(std::size_t /*start_timestep*/, std::size_t /*num_timesteps*/, int /*iteration_number*/,
                               const Eigen::MatrixXd& parameters, Eigen::MatrixXd& updates) override
   {
     return filter_fn_(parameters, updates);
@@ -104,7 +105,7 @@ public:
    * @param parameters        The value of the parameters at the end of the current iteration [num_dimensions x
    * num_timesteps].
    */
-  void postIteration(std::size_t start_timestep, std::size_t num_timesteps, int iteration_number, double cost,
+  void postIteration(std::size_t /*start_timestep*/, std::size_t /*num_timesteps*/, int iteration_number, double cost,
                      const Eigen::MatrixXd& parameters) override
   {
     post_iteration_fn_(iteration_number, cost, parameters);

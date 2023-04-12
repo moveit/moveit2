@@ -13,12 +13,8 @@ using namespace planning_interface;
 class StompPlannerManager : public PlannerManager
 {
 public:
-  StompPlannerManager()
-  {
-  }
-  ~StompPlannerManager()
-  {
-  }
+  StompPlannerManager() = default;
+  ~StompPlannerManager() override = default;
 
   bool initialize(const moveit::core::RobotModelConstPtr& model, const rclcpp::Node::SharedPtr& node,
                   const std::string& parameter_namespace) override
@@ -94,7 +90,7 @@ public:
     return true;
   }
 
-  void setPlannerConfigurations(const PlannerConfigurationMap& pcs) override
+  void setPlannerConfigurations(const PlannerConfigurationMap& /*pcs*/) override
   {
   }
 

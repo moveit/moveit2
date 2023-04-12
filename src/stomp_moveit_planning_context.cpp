@@ -95,7 +95,7 @@ stomp::TaskPtr createStompTask(const stomp::StompConfiguration& config, const St
 {
   const size_t num_timesteps = config.num_timesteps;
   const double collision_penalty = 1.0;
-  const auto planning_scene = context.getPlanningScene();
+  const auto& planning_scene = context.getPlanningScene();
   const auto group = planning_scene->getRobotModel()->getJointModelGroup(context.getGroupName());
   const std::vector<double> stddev(group->getActiveJointModels().size(), 0.1);
 
@@ -206,7 +206,7 @@ bool StompPlanningContext::solve(planning_interface::MotionPlanResponse& res)
   return res.error_code.val == moveit_msgs::msg::MoveItErrorCodes::SUCCESS;
 }
 
-bool StompPlanningContext::solve(planning_interface::MotionPlanDetailedResponse& res)
+bool StompPlanningContext::solve(planning_interface::MotionPlanDetailedResponse& /*res*/)
 {
   return false;
 }
