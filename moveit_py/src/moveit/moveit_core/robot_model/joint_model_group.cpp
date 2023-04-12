@@ -35,6 +35,7 @@
 /* Author: Peter David Fagan */
 
 #include "joint_model_group.h"
+#include <exception>
 
 namespace moveit_py
 {
@@ -69,8 +70,15 @@ void init_joint_model_group(py::module& m)
       .def_property("active_joint_model_names", &moveit::core::JointModelGroup::getActiveJointModelNames, nullptr)
       .def_property("active_joint_model_bounds", &moveit::core::JointModelGroup::getActiveJointModelsBounds, nullptr,
                     py::return_value_policy::reference_internal)
-      .def("get_only_one_end_effector_tip",
-           [](const moveit::core::JointModelGroup* self) { return self->getOnlyOneEndEffectorTip()->getName(); })
+      .def_property_readonly("eef_name",
+                             [](const moveit::core::JointModelGroup* self) {
+                               const auto eef = self->getOnlyOneEndEffectorTip();
+                               if (!eef)
+                               {
+                                 throw std::runtime_error("Error getting the end effector name - see log for details");
+                               }
+                               return eef->getName();
+                             })
       .def("satisfies_position_bounds", &moveit_py::bind_robot_model::satisfies_position_bounds, py::arg("values"),
            py::arg("margin") = 0.0);
 }
