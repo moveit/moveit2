@@ -150,7 +150,7 @@ void init_moveit_py(py::module& m)
           Shutdown the moveit_cpp node.
           )")
 
-      .def("get_planning_scene_monitor", &moveit_cpp::MoveItCpp::getPlanningSceneMonitor,
+      .def("get_planning_scene_monitor", &moveit_cpp::MoveItCpp::getPlanningSceneMonitorNonConst,
            py::return_value_policy::reference,
            R"(
            Returns the planning scene monitor.
