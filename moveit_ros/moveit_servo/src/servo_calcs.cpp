@@ -163,8 +163,6 @@ ServoCalcs::ServoCalcs(const rclcpp::Node::SharedPtr& node,
   current_joint_state_.position.resize(num_joints_);
   current_joint_state_.velocity.resize(num_joints_);
   delta_theta_.setZero(num_joints_);
-  // set previous state to same as current state for t = 0
-  previous_joint_state_ = current_joint_state_;
 
   for (std::size_t i = 0; i < num_joints_; ++i)
   {
@@ -255,6 +253,10 @@ void ServoCalcs::start()
   last_sent_command_ = std::move(initial_joint_trajectory);
 
   current_state_ = planning_scene_monitor_->getStateMonitor()->getCurrentState();
+  current_state_->copyJointGroupPositions(joint_model_group_, current_joint_state_.position);
+  current_state_->copyJointGroupVelocities(joint_model_group_, current_joint_state_.velocity);
+  // set previous state to same as current state for t = 0
+  previous_joint_state_ = current_joint_state_;
 
   // Check that all links are known to the robot
   auto check_link_is_known = [this](const std::string& frame_name) {
@@ -367,12 +369,6 @@ void ServoCalcs::calculateSingleIteration()
 
   // After we publish, status, reset it back to no warnings
   status_ = StatusCode::NO_WARNING;
-
-  // original_joint_state_ contains state q(t - dt)
-  // internal_joint_state_ will be updated with the state q(t + dt) in this iteration.
-  // last_joint_state_ will preserve the state q(t - dt) for this iteration to be used in central difference.
-  // original_joint_state_ will get updated with current state q(t) in updateJoints()
-  last_joint_state_ = original_joint_state_;
 
   // Always update the joints and end-effector transform for 2 reasons:
   // 1) in case the getCommandFrameTransform() method is being used
@@ -795,10 +791,10 @@ bool ServoCalcs::applyJointUpdate(const Eigen::ArrayXd& delta_theta, sensor_msgs
   };
 
   // Transform that applies the lambda to all joints.
-  // joint_state contains the future position q(t + dt)
-  // last_joint_state contains past position q(t - dt)
-  std::transform(joint_state.position.begin(), joint_state.position.end(), last_joint_state_.position.begin(),
-                 joint_state.velocity.begin(), compute_velocity);
+  // next_joint_state contains the future position q(t + dt)
+  // previous_joint_state_ contains past position q(t - dt)
+  std::transform(next_joint_state.position.begin(), next_joint_state.position.end(),
+                 previous_joint_state_.position.begin(), next_joint_state.velocity.begin(), compute_velocity);
 
   return true;
 }
