@@ -132,9 +132,6 @@ protected:
   /** \brief Do servoing calculations for direct commands to a joint. */
   bool jointServoCalcs(const control_msgs::msg::JointJog& cmd, trajectory_msgs::msg::JointTrajectory& joint_trajectory);
 
-  /** \brief Parse the incoming joint msg for the joints of our MoveGroup */
-  void updateJoints();
-
   /**
    * Checks a JointJog msg for valid (non-NaN) velocities
    * @param cmd the desired joint servo command
