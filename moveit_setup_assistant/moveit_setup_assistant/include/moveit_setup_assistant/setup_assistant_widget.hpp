@@ -87,7 +87,7 @@ public:
 
   /**
    * Qt close event function for reminding user to save
-   * @param event A Qt parameter
+   * @param event A Qt paramenter
    */
   void closeEvent(QCloseEvent* event) override;
 

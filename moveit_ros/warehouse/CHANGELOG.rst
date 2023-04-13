@@ -37,7 +37,7 @@ Changelog for package moveit_ros_warehouse
 * Restructure moveit warehouse package (`#1551 <https://github.com/ros-planning/moveit2/issues/1551>`_)
   * Restructure warhouse package to match other packages, remove manifest.xml
   * Cleanup CMakeLists.txt file
-  * Remove duplicate install command
+  * Remove dublicate install command
   * Export ${PROJECT_NAME}Targets
 * Merge PR `#1553 <https://github.com/ros-planning/moveit2/issues/1553>`_: Improve cmake files
 * Use standard exported targets: export\_${PROJECT_NAME} -> ${PROJECT_NAME}Targets
@@ -229,7 +229,7 @@ Changelog for package moveit_ros_warehouse
 
 0.10.2 (2018-10-24)
 -------------------
-* [fix] Text references to MoveIt (`#1020 <https://github.com/ros-planning/moveit/issues/1020>`_)
+* [fix] Text refrences to MoveIt (`#1020 <https://github.com/ros-planning/moveit/issues/1020>`_)
 * [enhancement] warehouse: added params for timeout + #retries (`#1008 <https://github.com/ros-planning/moveit/issues/1008>`_)
 * [maintenance] various compiler warnings (`#1038 <https://github.com/ros-planning/moveit/issues/1038>`_)
 * Contributors: Mohmmad Ayman, Robert Haschke, dg-shadow, mike lautman

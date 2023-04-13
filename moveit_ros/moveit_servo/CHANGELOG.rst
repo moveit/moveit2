@@ -161,7 +161,7 @@ Changelog for package moveit_servo
   Co-authored-by: Tyler Weaver <tyler@picknik.ai>
 * Remove unused parameters. (`#1018 <https://github.com/ros-planning/moveit2/issues/1018>`_)
   Co-authored-by: Tyler Weaver <tyler@picknik.ai>
-* Add moveit_configs_utils package to simplify loading parameters (`#591 <https://github.com/ros-planning/moveit2/issues/591>`_)
+* Add moveit_configs_utils package to simplify loading paramters (`#591 <https://github.com/ros-planning/moveit2/issues/591>`_)
   Co-authored-by: AndyZe <zelenak@picknik.ai>
   Co-authored-by: Stephanie Eng <stephanie-eng@users.noreply.github.com>
   Co-authored-by: Tyler Weaver <tyler@picknik.ai>
@@ -348,7 +348,7 @@ Changelog for package moveit_servo
 * [feature] Check collisions during joint motions, too (`#2204 <https://github.com/ros-planning/moveit/issues/2204>`_)
 * [fix]     Correctly set velocities to zero when stale (`#2255 <https://github.com/ros-planning/moveit/issues/2255>`_)
 * [maint]   Remove unused yaml param (`#2232 <https://github.com/ros-planning/moveit/issues/2232>`_)
-* [maint]   Adapt repository for split moveit_resources layout (`#2199 <https://github.com/ros-planning/moveit/issues/2199>`_)
+* [maint]   Adapt repository for splitted moveit_resources layout (`#2199 <https://github.com/ros-planning/moveit/issues/2199>`_)
 * [maint]   Migrate to clang-format-10
 * Contributors: AndyZe, Robert Haschke, Ruofan Xu, Michael Görner
 
@@ -362,7 +362,7 @@ Changelog for package moveit_servo
   * Fixes to drift dimensions, singularity velocity scaling
   * tf name changes, const fixes, slight logic changes
   * Move ROS_LOG_THROTTLE_PERIOD to cpp files
-  * Track staleness of joint and twist separately
+  * Track staleness of joint and twist seperately
   * Ensure joint_trajectory output is always populated with something, even when no jog
   * Fix joint trajectory redundant points for gazebo pub
   * Fix crazy joint jog from bad Eigen init

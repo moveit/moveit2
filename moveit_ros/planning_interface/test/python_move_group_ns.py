@@ -35,7 +35,7 @@
 # Author: William Baker
 #
 # This test is used to ensure planning with a MoveGroupInterface is
-# possible if the robot's move_group node is in a different namespace
+# possbile if the robot's move_group node is in a different namespace
 
 import unittest
 import numpy as np

@@ -74,7 +74,7 @@ public:
   }
 };
 
-/** \brief Robot independent implementation of the tests.  **/
+/** \brief Robot indepentent implementation of the tests.  **/
 class TestConstrainedStateSpace : public ompl_interface_testing::LoadTestRobot, public testing::Test
 {
 protected:

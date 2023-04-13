@@ -265,8 +265,8 @@ Changelog for package moveit_core
   * Augment reference to argument global_reference_frame
   Co-authored-by: AndyZe <andyz@utexas.edu>
 * Remove unused clock from RobotTrajectory (`#1639 <https://github.com/ros-planning/moveit2/issues/1639>`_)
-* Added brace initialization in moveit_core/collision_detection_fcl & moveit_core/collision_detection_field (`#1622 <https://github.com/ros-planning/moveit2/issues/1622>`_)
-* added brace initialization (`#1615 <https://github.com/ros-planning/moveit2/issues/1615>`_)
+* Added brace intialization in moveit_core/collision_detection_fcl & moveit_core/collision_detection_field (`#1622 <https://github.com/ros-planning/moveit2/issues/1622>`_)
+* added brace intialization (`#1615 <https://github.com/ros-planning/moveit2/issues/1615>`_)
 * Merge PR `#1553 <https://github.com/ros-planning/moveit2/issues/1553>`_: Improve cmake files
 * Use standard exported targets: export\_${PROJECT_NAME} -> ${PROJECT_NAME}Targets
 * moveit_core/collision_detection: fix include order
@@ -407,7 +407,7 @@ Changelog for package moveit_core
 * Merge https://github.com/ros-planning/moveit/commit/0d7462f140e03b4c319fa8cce04a47fe3f650c60
 * Avoid downgrading default C++ standard (`#3043 <https://github.com/ros-planning/moveit2/issues/3043>`_)
 * Delete profiler (`#998 <https://github.com/ros-planning/moveit2/issues/998>`_)
-* Initialize RobotState in Ruckig test (`#1032 <https://github.com/ros-planning/moveit2/issues/1032>`_)
+* Initalize RobotState in Ruckig test (`#1032 <https://github.com/ros-planning/moveit2/issues/1032>`_)
 * Remove unused parameters. (`#1018 <https://github.com/ros-planning/moveit2/issues/1018>`_)
 * Merge PR `#2938 <https://github.com/ros-planning/moveit2/issues/2938>`_: Rework ACM
   Implement ACM defaults as a fallback instead of an override.
@@ -884,7 +884,7 @@ Changelog for package moveit_core
 
 1.0.6 (2020-08-19)
 ------------------
-* [maint] Adapt repository for split moveit_resources layout (`ros-planning:moveit#2199 <https://github.com/ros-planning/moveit/issues/2199>`_)
+* [maint] Adapt repository for splitted moveit_resources layout (`ros-planning:moveit#2199 <https://github.com/ros-planning/moveit/issues/2199>`_)
 * [maint] Migrate to clang-format-10, Fix warnings
 * [maint] Optimize includes (`ros-planning:moveit#2229 <https://github.com/ros-planning/moveit/issues/2229>`_)
 * [maint] Fix docs in robot_state.h (`ros-planning:moveit#2215 <https://github.com/ros-planning/moveit/issues/2215>`_)
@@ -1013,7 +1013,7 @@ Changelog for package moveit_core
 * [fix] Eigen alignment issuses due to missing aligned allocation (`ros-planning:moveit#1039 <https://github.com/ros-planning/moveit/issues/1039>`_)
 * [fix] illegal pointer access (`ros-planning:moveit#989 <https://github.com/ros-planning/moveit/issues/989>`_)
 * [fix] reset moveit_msgs::RobotState.is_diff to false (`ros-planning:moveit#968 <https://github.com/ros-planning/moveit/issues/968>`_) This fixes a regression introduced in `ros-planning:moveit#939 <https://github.com/ros-planning/moveit/issues/939>`_.
-* [fix] continuous joint limits are always satisfied (`ros-planning:moveit#729 <https://github.com/ros-planning/moveit/issues/729>`_)
+* [fix] continous joint limits are always satisfied (`ros-planning:moveit#729 <https://github.com/ros-planning/moveit/issues/729>`_)
 * [maintenance] using LOGNAME variable rather than strings (`ros-planning:moveit#1079 <https://github.com/ros-planning/moveit/issues/1079>`_)
 * [capability][chomp] Addition of CHOMP planning adapter for optimizing result of other planners (`ros-planning:moveit#1012 <https://github.com/ros-planning/moveit/issues/1012>`_)
 * [enhancement] Add missing distance check functions to allValid collision checker (`ros-planning:moveit#986 <https://github.com/ros-planning/moveit/issues/986>`_)
@@ -1296,7 +1296,7 @@ Changelog for package moveit_core
 * Fixed asymmetry between planning scene read and write.
 * Improved error output for state conversion
 * Added doxygen for RobotState::attachBody() warning of danger.
-* Improved error output for state conversion
+* Improved error output for state converstion
 * Debug and documentation
 * Added new virtual getName() function to constraint samplers
 * Made getName() const with static variable

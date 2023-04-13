@@ -64,6 +64,7 @@ def doRound(values, decimal_places):
 # -----------------------------------------------------------------------------
 
 if __name__ == "__main__":
+
     # Check input arguments
     try:
         input_file = sys.argv[1]

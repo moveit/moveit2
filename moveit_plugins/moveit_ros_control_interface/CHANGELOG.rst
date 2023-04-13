@@ -48,7 +48,7 @@ Changelog for package moveit_ros_control_interface
   * load controller dependencies
   * start chained controllers in switch
   * reverse order of activate controllers
-  * prevent stopping controller twice
+  * prevent stoppping controller twice
   * revert all debug changes
   * add ROS error if a controller chains to more than one
   * use loop to index chained connections
@@ -236,7 +236,7 @@ Changelog for package moveit_ros_control_interface
 ------------------
 * C++03 conforming nested templates
 * fixed typo, added example config
-* added brief description tags
+* added brief decription tags
 * formatted code to roscpp style
 * improved documentation
 * introduced getAbsName
@@ -245,5 +245,5 @@ Changelog for package moveit_ros_control_interface
 * fixed typos
 * set version to match the others
 * fixed a lot of typos
-* Initial version of moveit_ros_control_interface package
+* Intitial version of moveit_ros_control_interface package
 * Contributors: Mathias Luedtke

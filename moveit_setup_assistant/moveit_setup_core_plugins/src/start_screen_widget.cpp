@@ -280,7 +280,7 @@ void StartScreenWidget::loadFilesClick()
   // Check if there was a failure loading files
   if (!result)
   {
-    // Re-enable components
+    // Renable components
     urdf_file_->setDisabled(false);
     // srdf_file_->setDisabled(false);
     stack_path_->setDisabled(false);

@@ -131,7 +131,7 @@ Changelog for package moveit_ros_planning_interface
   * Ignore flake8 tests
 * 1.1.9
 * 1.1.8
-* Add moveit_configs_utils package to simplify loading parameters (`#591 <https://github.com/ros-planning/moveit2/issues/591>`_)
+* Add moveit_configs_utils package to simplify loading paramters (`#591 <https://github.com/ros-planning/moveit2/issues/591>`_)
   Co-authored-by: AndyZe <zelenak@picknik.ai>
   Co-authored-by: Stephanie Eng <stephanie-eng@users.noreply.github.com>
   Co-authored-by: Tyler Weaver <tyler@picknik.ai>
@@ -327,7 +327,7 @@ Changelog for package moveit_ros_planning_interface
 
 1.0.6 (2020-08-19)
 ------------------
-* [maint]   Adapt repository for split moveit_resources layout (`ros-planning:moveit#2199 <https://github.com/ros-planning/moveit/issues/2199>`_)
+* [maint]   Adapt repository for splitted moveit_resources layout (`ros-planning:moveit#2199 <https://github.com/ros-planning/moveit/issues/2199>`_)
 * [maint]   Migrate to clang-format-10, Fix warnings
 * [maint]   Optimize includes (`ros-planning:moveit#2229 <https://github.com/ros-planning/moveit/issues/2229>`_)
 * [feature] Exposed parameter wait_for_servers and getPlannerId() API in MoveGroup's Python API (`ros-planning:moveit#2201 <https://github.com/ros-planning/moveit/issues/2201>`_)
@@ -369,7 +369,7 @@ Changelog for package moveit_ros_planning_interface
 * [maint]   Use CMAKE_CXX_STANDARD to enforce c++14 (`ros-planning:moveit#1607 <https://github.com/ros-planning/moveit/issues/1607>`_)
 * [maint]   Updated deprecation method: MOVEIT_DEPRECATED -> [[deprecated]] (`ros-planning:moveit#1748 <https://github.com/ros-planning/moveit/issues/1748>`_)
 * [maint]   `eigenpy`: switched to system package (`ros-planning:moveit#1737 <https://github.com/ros-planning/moveit/issues/1737>`_)
-* [feature]  `PlanningSceneInterface`: wait for its two services
+* [featue]  `PlanningSceneInterface`: wait for its two services
 * [feature] Select time parametrization algorithm in retime_trajectory (`ros-planning:moveit#1508 <https://github.com/ros-planning/moveit/issues/1508>`_)
 * Contributors: Bjar Ne, Felix von Drigalski, Kunal Tyagi, Luca Rinelli, Masaki Murooka, Michael Görner, Niklas Fiedler, Robert Haschke, Sean Yen, Yu, Yan, mvieth, v4hn
 
@@ -509,7 +509,7 @@ Changelog for package moveit_ros_planning_interface
 * Added python wrapper for MoveGroup.asyncExecute()
 * Add retime_trajectory to moveit python wrapper
 * add getHandle to move_group_interface
-* Updated documentation on move() to inform the user that an asynchronous spinner is required. Commonly new users don't do this and move() blocks permanently
+* Updated documentation on move() to inform the user that an asynchronus spinner is required. Commonly new users don't do this and move() blocks permanently
 * Contributors: Dave Coleman, Dave Hershberger, Isaac I.Y. Saito, Kei Okada, Michael Stevens, Robert Haschke, Sachin Chitta, Scott, Yoan Mollard, dg, ferherranz
 
 0.6.5 (2015-01-24)

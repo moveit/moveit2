@@ -178,7 +178,7 @@ Changelog for package moveit_setup_assistant
   Only unpause simulation when robot model was loaded.
   This ensures that the initial pose is actually held.
 * gazebo.yaml: Allow initial_joint_positions
-* gazebo.launch: Load URDF via xacro if necessary
+* gazebo.launch: Load URDF via xacro if neccessary
 * Modularize demo_gazebo.launch: draw on demo.launch
 * demo.launch: start joint + robot-state publishers in fake mode only
   This will facilitate re-use of demo.launch.
@@ -335,7 +335,7 @@ Changelog for package moveit_setup_assistant
 
 1.0.6 (2020-08-19)
 ------------------
-* [maint] Adapt repository for split moveit_resources layout (`#2199 <https://github.com/ros-planning/moveit/issues/2199>`_)
+* [maint] Adapt repository for splitted moveit_resources layout (`#2199 <https://github.com/ros-planning/moveit/issues/2199>`_)
 * [maint] Migrate to clang-format-10, fix warnings
 * [fix]   Define planning adapters for chomp planning pipeline (`#2242 <https://github.com/ros-planning/moveit/issues/2242>`_)
 * [maint] Remove urdf package as build_depend from package.xml (`#2207 <https://github.com/ros-planning/moveit/issues/2207>`_)
@@ -427,8 +427,8 @@ Changelog for package moveit_setup_assistant
 * [enhancement][GUI] added a setup assistant window icon (`#1028 <https://github.com/ros-planning/moveit/issues/1028>`_)
 * [enhancement][GUI] Planning Groups screen (`#1017 <https://github.com/ros-planning/moveit/issues/1017>`_)
 * [enhancement] use panda for test, and write test file in tmp dir (`#1042 <https://github.com/ros-planning/moveit/issues/1042>`_)
-* [enhancement] Added capabilities as arg to move_group.launch (`#998 <https://github.com/ros-planning/moveit/issues/998>`_)
-* [enhancement] Add moveit_setup_assistant as dependency of all *_moveit_config pkgs (`#1029 <https://github.com/ros-planning/moveit/issues/1029>`_)
+* [enhancement] Added capabilties as arg to move_group.launch (`#998 <https://github.com/ros-planning/moveit/issues/998>`_)
+* [enhancement] Add moveit_setup_assistant as depenency of all *_moveit_config pkgs (`#1029 <https://github.com/ros-planning/moveit/issues/1029>`_)
 * [maintenance] various compiler warnings (`#1038 <https://github.com/ros-planning/moveit/issues/1038>`_)
 * [enhancement] Improving gazebo integration. (`#956 <https://github.com/ros-planning/moveit/issues/956>`_, `#936 <https://github.com/ros-planning/moveit/issues/936>`_)
 * [maintenance] Renamed wedgits in setup assistant wedgit to follow convention (`#995 <https://github.com/ros-planning/moveit/issues/995>`_)
@@ -559,8 +559,8 @@ Changelog for package moveit_setup_assistant
 * Joint limits comments
 * Removed velocity scaling factor
 * Added a new 'velocity_scaling_factor' parameter to evenly reduce max joint velocity for all joints. Added documentation.
-* Simply renamed kin_model to robot_model for more proper naming convention
-* Added new launch file for control Rviz with joystick
+* Simply renamed kin_model to robot_model for more proper naming convension
+* Added new launch file for controll Rviz with joystick
 * use relative instead of absolute names for topics (to allow for namespaces)
 * Added planner specific parameters to ompl_planning.yaml emitter.
 * Added space after every , in function calls

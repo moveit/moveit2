@@ -15,6 +15,7 @@ from common_parameters import load_moveit_config, load_yaml
 
 @pytest.mark.rostest
 def generate_test_description():
+
     # Load the context
     test_config = load_moveit_config()
 
