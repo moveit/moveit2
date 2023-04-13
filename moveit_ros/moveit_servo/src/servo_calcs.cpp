@@ -163,6 +163,8 @@ ServoCalcs::ServoCalcs(const rclcpp::Node::SharedPtr& node,
   current_joint_state_.position.resize(num_joints_);
   current_joint_state_.velocity.resize(num_joints_);
   delta_theta_.setZero(num_joints_);
+  // set previous state to same as current state for t = 0
+  previous_joint_state_ = current_joint_state_;
 
   for (std::size_t i = 0; i < num_joints_; ++i)
   {
