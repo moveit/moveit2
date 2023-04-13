@@ -197,7 +197,7 @@ struct CollisionRequest
   {
   }
 
-  /** \brief The group name to check collisions for (optional; if empty, assume the complete robot) */
+  /** \brief The group name to check collisions for (optional; if empty, assume the complete robot). Descendent links are included. */
   std::string group_name;
 
   /** \brief If true, compute proximity distance */
@@ -254,7 +254,9 @@ struct DistanceRequest
   {
   }
 
-  /// Compute \e active_components_only_ based on \e req_
+  /*** \brief Compute \e active_components_only_ based on \e req_. This
+      includes links that are in the kinematic model but outside this group, if those links are descendants of
+      joints in this group that have their values updated. */
   void enableGroup(const moveit::core::RobotModelConstPtr& robot_model)
   {
     if (robot_model->hasJointModelGroup(group_name))
