@@ -1,7 +1,8 @@
+
 /*********************************************************************
  * Software License Agreement (BSD License)
  *
- *  Copyright (c) 2008, Willow Garage, Inc.
+ *  Copyright (c) 2023, PickNik Inc.
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -14,7 +15,7 @@
  *     copyright notice, this list of conditions and the following
  *     disclaimer in the documentation and/or other materials provided
  *     with the distribution.
- *   * Neither the name of Willow Garage nor the names of its
+ *   * Neither the name of PickNik Inc. nor the names of its
  *     contributors may be used to endorse or promote products derived
  *     from this software without specific prior written permission.
  *
@@ -32,28 +33,28 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-/* Author: Ioan Sucan */
+/* Author: Sebastian Jahr */
 
-#pragma once
+#include <moveit/planning_pipeline_interfaces/plan_responses_container.hpp>
 
-#include <rviz_default_plugins/robot/link_updater.hpp>
-#include <moveit/robot_state/robot_state.h>
-
-namespace moveit_rviz_plugin
+namespace moveit
 {
-/** \brief Update the links of an rviz::Robot using a moveit::core::RobotState */
-class PlanningLinkUpdater : public rviz_default_plugins::robot::LinkUpdater
+namespace planning_pipeline_interfaces
 {
-public:
-  PlanningLinkUpdater(const moveit::core::RobotStateConstPtr& state) : robot_state_(state)
-  {
-  }
+PlanResponsesContainer::PlanResponsesContainer(const size_t expected_size)
+{
+  solutions_.reserve(expected_size);
+}
 
-  bool getLinkTransforms(const std::string& link_name, Ogre::Vector3& visual_position,
-                         Ogre::Quaternion& visual_orientation, Ogre::Vector3& collision_position,
-                         Ogre::Quaternion& collision_orientation) const override;
+void PlanResponsesContainer::pushBack(const ::planning_interface::MotionPlanResponse& plan_solution)
+{
+  std::lock_guard<std::mutex> lock_guard(solutions_mutex_);
+  solutions_.push_back(plan_solution);
+}
 
-private:
-  moveit::core::RobotStateConstPtr robot_state_;
-};
-}  // namespace moveit_rviz_plugin
+const std::vector<::planning_interface::MotionPlanResponse>& PlanResponsesContainer::getSolutions() const
+{
+  return solutions_;
+}
+}  // namespace planning_pipeline_interfaces
+}  // namespace moveit
