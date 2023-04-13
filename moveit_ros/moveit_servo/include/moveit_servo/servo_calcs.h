@@ -274,7 +274,7 @@ protected:
 
   moveit::core::RobotStatePtr current_state_;
 
-  // There variables are mutex protected
+  // These variables are mutex protected
   // previous_joint_state holds the state q(t - 1)
   // current_joint_state holds the  state q(t)
   // next_joint_state holds the computed state q(t + 1)
