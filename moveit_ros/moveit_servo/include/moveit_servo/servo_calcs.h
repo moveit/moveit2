@@ -278,7 +278,8 @@ protected:
   // internal_joint_state_ is used in servo calculations. It shouldn't be relied on to be accurate.
   // original_joint_state_ is the same as incoming_joint_state_ except it only contains the joints the servo node acts
   // on.
-  sensor_msgs::msg::JointState internal_joint_state_, original_joint_state_;
+  // last_joint_state_ caches the previous `original_joint_state_`
+  sensor_msgs::msg::JointState internal_joint_state_, original_joint_state_, last_joint_state_;
   std::map<std::string, std::size_t> joint_state_name_map_;
 
   // Smoothing algorithm (loads a plugin)
