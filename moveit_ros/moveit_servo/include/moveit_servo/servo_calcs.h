@@ -199,7 +199,7 @@ protected:
    * @param previous_vel Eigen vector of previous velocities being updated
    * @return Returns false if there is a problem, true otherwise
    */
-  bool applyJointUpdate(const Eigen::ArrayXd& delta_theta, sensor_msgs::msg::JointState& joint_state);
+  bool applyJointUpdate(const Eigen::ArrayXd& delta_theta, sensor_msgs::msg::JointState& next_joint_state);
 
   /** \brief Gazebo simulations have very strict message timestamp requirements.
    * Satisfy Gazebo by stuffing multiple messages into one.
@@ -274,12 +274,12 @@ protected:
 
   moveit::core::RobotStatePtr current_state_;
 
-  // (mutex protected below)
-  // internal_joint_state_ is used in servo calculations. It shouldn't be relied on to be accurate.
-  // original_joint_state_ is the same as incoming_joint_state_ except it only contains the joints the servo node acts
-  // on.
-  // last_joint_state_ caches the previous `original_joint_state_`
-  sensor_msgs::msg::JointState internal_joint_state_, original_joint_state_, last_joint_state_;
+  // There variables are mutex protected
+  // previous_joint_state holds the state q(t - 1)
+  // current_joint_state holds the  state q(t)
+  // next_joint_state holds the computed state q(t + 1)
+
+  sensor_msgs::msg::JointState previous_joint_state_, current_joint_state_, next_joint_state_;
   std::map<std::string, std::size_t> joint_state_name_map_;
 
   // Smoothing algorithm (loads a plugin)
