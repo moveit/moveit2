@@ -50,5 +50,5 @@ repos:
     rev: v2.2.4
     hooks:
       - id: codespell
-        args: ['--write-changes', '--ignore-words=.codespell_words']
+        args: ['--write-changes', '--ignore-words=.codespell_words', '--skip="*.eps"']
         exclude: CHANGELOG.rst
