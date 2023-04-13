@@ -11,6 +11,7 @@ import roslib.packages
 PKGNAME = "moveit_ros_planning_interface"
 NODENAME = "moveit_cleanup_tests"
 
+
 # As issue #592 is related to a crash during program exit,
 # we cannot perform a standard unit test.
 # We have to check the return value of the called program.
