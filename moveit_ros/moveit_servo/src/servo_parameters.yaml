@@ -1,5 +1,11 @@
 servo:
 
+  enable_parameter_update: {
+    type: bool,
+    default_value: false,
+    description: "If true, continuous check for parameter update is enabled"
+  }
+
   use_gazebo: {
     type: bool,
     default_value: false,
