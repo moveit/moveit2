@@ -41,7 +41,6 @@
 #include <atomic>
 #include <control_toolbox/pid.hpp>
 #include <moveit_servo/make_shared_from_pool.h>
-#include <moveit_servo/servo_parameters.h>
 #include <moveit_servo/servo.h>
 #include <optional>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>

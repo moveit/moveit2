@@ -303,6 +303,37 @@ void ServoCalcs::stop()
   }
 }
 
+void ServoCalcs::updateParams()
+{
+  if (servo_param_listener_->is_old(servo_params_))
+  {
+    auto params_ = servo_param_listener_->get_params();
+    if (params_.override_velocity_scaling_factor != servo_params_.override_velocity_scaling_factor)
+    {
+      RCLCPP_INFO_STREAM(LOGGER, "override_velocity_scaling_factor changed to : "
+                                     << std::to_string(params_.override_velocity_scaling_factor));
+    }
+
+    if (params_.robot_link_command_frame != servo_params_.robot_link_command_frame)
+    {
+      if (current_state_->knowsFrameTransform(params_.robot_link_command_frame))
+      {
+        RCLCPP_INFO_STREAM(LOGGER, "robot_link_command_frame changed to : " << params_.robot_link_command_frame);
+      }
+      else
+      {
+        RCLCPP_ERROR_STREAM(LOGGER, "Failed to change robot_link_command_frame. Passed frame '"
+                                        << params_.robot_link_command_frame
+                                        << "' is unknown, will keep using old command frame.");
+        // Replace frame in new param set with old frame value
+        // TODO : Is there a better behaviour here ?
+        params_.robot_link_command_frame = servo_params_.robot_link_command_frame;
+      }
+    }
+    servo_params_ = params_;
+  }
+}
+
 void ServoCalcs::mainCalcLoop()
 {
   rclcpp::WallRate rate(1.0 / servo_params_.publish_period);
@@ -322,33 +353,9 @@ void ServoCalcs::mainCalcLoop()
     new_input_cmd_ = false;
 
     // Check if any parameters changed
-    // TODO : Remove debug info here
-    if (servo_param_listener_->is_old(servo_params_))
+    if (servo_params_.enable_parameter_update)
     {
-      auto params_ = servo_param_listener_->get_params();
-      if (params_.override_velocity_scaling_factor != servo_params_.override_velocity_scaling_factor)
-      {
-        RCLCPP_INFO_STREAM(LOGGER, "override_velocity_scaling_factor changed to : "
-                                       << std::to_string(params_.override_velocity_scaling_factor));
-      }
-
-      if (params_.robot_link_command_frame != servo_params_.robot_link_command_frame)
-      {
-        if (current_state_->knowsFrameTransform(params_.robot_link_command_frame))
-        {
-          RCLCPP_INFO_STREAM(LOGGER, "robot_link_command_frame changed to : " << params_.robot_link_command_frame);
-        }
-        else
-        {
-          RCLCPP_ERROR_STREAM(LOGGER, "Failed to change robot_link_command_frame. Passed frame '"
-                                          << params_.robot_link_command_frame
-                                          << "' is unknown, will keep using old command frame.");
-          // Replace frame in new param set with old frame value
-          // TODO : Is there a better behaviour here ?
-          params_.robot_link_command_frame = servo_params_.robot_link_command_frame;
-        }
-      }
-      servo_params_ = params_;
+      updateParams();
     }
 
     // run servo calcs

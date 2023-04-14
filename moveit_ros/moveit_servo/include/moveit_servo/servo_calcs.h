@@ -93,6 +93,12 @@ public:
   void start();
 
   /**
+   * Check for parameter update, and apply updates if any
+   *
+   */
+  void updateParams();
+
+  /**
    * Get the MoveIt planning link transform.
    * The transform from the MoveIt planning frame to robot_link_command_frame
    *

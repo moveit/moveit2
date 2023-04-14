@@ -42,8 +42,6 @@
 #include <moveit_servo/servo.h>
 #include <moveit_servo/pose_tracking.h>
 #include <moveit_servo/status_codes.h>
-#include <moveit_servo/servo_parameters.h>
-#include <moveit_servo/servo_parameters.h>
 #include <moveit_servo/make_shared_from_pool.h>
 #include <thread>
 
