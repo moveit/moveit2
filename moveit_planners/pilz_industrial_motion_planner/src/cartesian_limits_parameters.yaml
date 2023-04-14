@@ -9,7 +9,7 @@ cartesian_limits:
   }
   max_trans_dec: {
     type: double,
-    description: "Max translation decceleration",
+    description: "Max translation deceleration",
   }
   max_rot_vel: {
     type: double,
