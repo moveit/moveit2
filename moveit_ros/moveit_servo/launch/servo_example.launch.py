@@ -143,10 +143,10 @@ def generate_launch_description():
         executable="servo_node_main",
         parameters=[
             servo_params,
+            low_pass_filter_coeff,
             moveit_config.robot_description,
             moveit_config.robot_description_semantic,
             moveit_config.robot_description_kinematics,
-            low_pass_filter_coeff,
         ],
         output="screen",
     )
