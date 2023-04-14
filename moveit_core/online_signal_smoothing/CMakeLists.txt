@@ -28,16 +28,19 @@ target_include_directories(moveit_butterworth_filter PUBLIC
 set_target_properties(moveit_butterworth_filter PROPERTIES VERSION
   "${${PROJECT_NAME}_VERSION}"
 )
+
+generate_parameter_library(moveit_butterworth_parameters src/butterworth_parameters.yaml)
+
 target_link_libraries(moveit_butterworth_filter
-  moveit_smoothing_base
+  moveit_butterworth_parameters
   moveit_robot_model
+  moveit_smoothing_base
 )
 ament_target_dependencies(moveit_butterworth_filter
   srdfdom  # include dependency from moveit_robot_model
 )
 
 # Installation
-
 install(DIRECTORY include/ DESTINATION include/moveit_core)
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/moveit_smoothing_base_export.h DESTINATION include/moveit_core)
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/moveit_butterworth_filter_export.h DESTINATION include/moveit_core)
