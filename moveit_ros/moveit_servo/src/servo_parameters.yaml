@@ -199,7 +199,7 @@ servo:
 
   hard_stop_singularity_threshold: {
     type: double,
-    default_value: 90.0,
+    default_value: 30.0,
     description: "Stop when the condition number hits this",
     validation: {
       gt<>: 0.0,
