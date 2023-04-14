@@ -69,8 +69,9 @@ void MoveGroupMoveAction::initialize()
         preemptMoveCallback();
         return rclcpp_action::CancelResponse::ACCEPT;
       },
-      [this](std::shared_ptr<MGActionGoal> goal) { std::thread{ std::bind( & MoveGroupMoveAction::executeMoveCallback, this, std::placeholders::_1), goal }.detach();
- });
+      [this](std::shared_ptr<MGActionGoal> goal) {
+        std::thread{ std::bind(&MoveGroupMoveAction::executeMoveCallback, this, std::placeholders::_1), goal }.detach();
+      });
 }
 
 void MoveGroupMoveAction::executeMoveCallback(const std::shared_ptr<MGActionGoal>& goal)
