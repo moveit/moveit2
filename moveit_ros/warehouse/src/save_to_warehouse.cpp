@@ -50,7 +50,7 @@
 #include <rclcpp/logging.hpp>
 #include <rclcpp/node.hpp>
 #include <rclcpp/node_options.hpp>
-#include <rclcpp/qos_event.hpp>
+#include <rclcpp/event_handler.hpp>
 #include <rclcpp/subscription.hpp>
 #include <rclcpp/utilities.hpp>
 

@@ -39,7 +39,7 @@
 #include <rclcpp/executors/multi_threaded_executor.hpp>
 #include <rclcpp/node.hpp>
 #include <rclcpp/publisher.hpp>
-#include <rclcpp/qos_event.hpp>
+#include <rclcpp/event_handler.hpp>
 #include <rclcpp/time.hpp>
 #include <rclcpp/utilities.hpp>
 #include <memory>
