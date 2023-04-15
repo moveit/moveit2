@@ -272,9 +272,9 @@ protected:
   moveit::core::RobotStatePtr current_state_;
 
   // These variables are mutex protected
-  // previous_joint_state holds the state q(t - 1)
-  // current_joint_state holds the  state q(t)
-  // next_joint_state holds the computed state q(t + 1)
+  // previous_joint_state holds the state q(t - dt)
+  // current_joint_state holds the  state q(t) as retrieved from the planning scene monitor.
+  // next_joint_state holds the computed state q(t + dt)
 
   sensor_msgs::msg::JointState previous_joint_state_, current_joint_state_, next_joint_state_;
   std::map<std::string, std::size_t> joint_state_name_map_;

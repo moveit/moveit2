@@ -379,8 +379,8 @@ void ServoCalcs::calculateSingleIteration()
   current_state_->copyJointGroupVelocities(joint_model_group_, current_joint_state_.velocity);
 
   // copy current state to temp state to use for calculating next state
-  // This is done so that current_state_ is preserved and can be used as backup.
-  // All computations related to computing state q(t + 1) acts only on next_joint_state_ variable.
+  // This is done so that current_joint_state_ is preserved and can be used as backup.
+  // All computations related to computing state q(t + dt) acts only on next_joint_state_ variable.
   next_joint_state_ = current_joint_state_;
 
   if (latest_twist_stamped_)
