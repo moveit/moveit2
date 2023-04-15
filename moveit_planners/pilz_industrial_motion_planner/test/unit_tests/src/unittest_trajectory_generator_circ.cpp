@@ -650,7 +650,7 @@ TEST_F(TrajectoryGeneratorCIRCTest, CenterPointPoseGoal)
 }
 
 /**
- * @brief Set a frame id only on the position constrainst
+ * @brief Set a frame id only on the position constraints
  */
 TEST_F(TrajectoryGeneratorCIRCTest, CenterPointPoseGoalFrameIdPositionConstraints)
 {
@@ -667,7 +667,7 @@ TEST_F(TrajectoryGeneratorCIRCTest, CenterPointPoseGoalFrameIdPositionConstraint
 }
 
 /**
- * @brief Set a frame id only on the orientation constrainst
+ * @brief Set a frame id only on the orientation constraints
  */
 TEST_F(TrajectoryGeneratorCIRCTest, CenterPointPoseGoalFrameIdOrientationConstraints)
 {

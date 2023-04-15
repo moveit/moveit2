@@ -178,7 +178,7 @@ bool TrajOptInterface::solve(const planning_scene::PlanningSceneConstPtr& planni
   for (auto goal_cnt : req.goal_constraints)
   {
     JointPoseTermInfoPtr joint_pos_term = std::make_shared<JointPoseTermInfo>();
-    // When using MotionPlanning Display in RViz, the created request has no name for the constriant
+    // When using MotionPlanning Display in RViz, the created request has no name for the constraint
     setJointPoseTermInfoParams(joint_pos_term, (goal_cnt.name != "") ? goal_cnt.name : "goal_tmp");
 
     trajopt::DblVec joint_goal_constraints;
