@@ -243,7 +243,6 @@ public:
    * order as reported by getVariableNames() */
   const double* getVariableVelocities() const
   {
-
     return velocity_;
   }
 
