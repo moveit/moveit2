@@ -78,8 +78,8 @@ void init_planning_scene(py::module& m)
   py::class_<planning_scene::PlanningScene, std::shared_ptr<planning_scene::PlanningScene>>(planning_scene,
                                                                                             "PlanningScene",
                                                                                             R"(
-      		     Representation of the environment as seen by a planning instance. The environment geometry, the robot geometry and state are maintained.
-      		     )")
+                     Representation of the environment as seen by a planning instance. The environment geometry, the robot geometry and state are maintained.
+                     )")
 
       .def(py::init<const moveit::core::RobotModelConstPtr&, const collision_detection::WorldPtr&>(),
            py::arg("robot_model"), py::arg("world") = std::make_shared<collision_detection::World>())
@@ -119,7 +119,7 @@ void init_planning_scene(py::module& m)
              return planning_scene::PlanningScene::clone(self->shared_from_this());
            })
       .def("__deepcopy__",
-           [](const planning_scene::PlanningScene* self, py::dict /* memo */) {
+           [](const planning_scene::PlanningScene* self, py::dict /* memo */) {  // NOLINT
              return planning_scene::PlanningScene::clone(self->shared_from_this());
            })
       .def("knows_frame_transform",
@@ -127,12 +127,13 @@ void init_planning_scene(py::module& m)
                &planning_scene::PlanningScene::knowsFrameTransform, py::const_),
            py::arg("robot_state"), py::arg("frame_id"),
            R"(
-           Check if a transform to the frame id is known.
-           This will be known if id is a link name, an attached body id or a collision object.
-           Args:
+           Check if a transform to the frame id is known. This will be known if id is a link name, an attached body id or a collision object.
+
+	   Args:
                robot_state (:py:class:`moveit_py.core.RobotState`): The robot state to check.
                frame_id (str): The frame id to check.
-           Returns:
+
+	   Returns:
                bool: True if the transform is known, false otherwise.
            )")
 
@@ -140,11 +141,12 @@ void init_planning_scene(py::module& m)
            py::overload_cast<const std::string&>(&planning_scene::PlanningScene::knowsFrameTransform, py::const_),
            py::arg("frame_id"),
            R"(
-           Check if a transform to the frame id is known.
-           This will be known if id is a link name, an attached body id or a collision object.
-           Args:
+           Check if a transform to the frame id is known. This will be known if id is a link name, an attached body id or a collision object.
+
+	   Args:
                frame_id (str): The frame id to check.
-           Returns:
+
+	   Returns:
                bool: True if the transform is known, false otherwise.
            )")
 
@@ -152,42 +154,49 @@ void init_planning_scene(py::module& m)
            R"(
            Get the transform corresponding to the frame id.
            This will be known if id is a link name, an attached body id or a collision object. Return identity when no transform is available.
-           Args:
+
+	   Args:
                frame_id (str): The frame id to get the transform for.
-           Returns:
+
+	   Returns:
                :py:class:`numpy.ndarray`: The transform corresponding to the frame id.
            )")
 
       // writing to the planning scene
       .def("process_planning_scene_world", &planning_scene::PlanningScene::processPlanningSceneWorldMsg, py::arg("msg"),
            R"(
-	   Process a planning scene world message.
+           Process a planning scene world message.
+
 	   Args:
-	       msg (:py:class:`moveit_msgs.msg.PlanningSceneWorld`): The planning scene world message.
-	   )")
+               msg (:py:class:`moveit_msgs.msg.PlanningSceneWorld`): The planning scene world message.
+           )")
 
       .def("apply_collision_object", &moveit_py::bind_planning_scene::apply_collision_object,
            py::arg("collision_object_msg"), py::arg("color_msg") = nullptr,
            R"(
            Apply a collision object to the planning scene.
-           Args:
-	   	object (moveit_msgs.msg.CollisionObject): The collision object to apply to the planning scene.
-		color (moveit_msgs.msg.ObjectColor, optional): The color of the collision object. Defaults to None if not specified.
+
+	   Args:
+               object (moveit_msgs.msg.CollisionObject): The collision object to apply to the planning scene.
+               color (moveit_msgs.msg.ObjectColor, optional): The color of the collision object. Defaults to None if not specified.
            )")
 
       .def("set_object_color", &planning_scene::PlanningScene::setObjectColor, py::arg("object_id"),
-           py::arg("color_msg"), R"(
-	   Set the color of a collision object.
+           py::arg("color_msg"),
+           R"(
+           Set the color of a collision object.
+
 	   Args:
-	       object_id (str): The id of the collision object to set the color of.
-	       color (std_msgs.msg.ObjectColor): The color of the collision object.
-	   )")
+               object_id (str): The id of the collision object to set the color of.
+               color (std_msgs.msg.ObjectColor): The color of the collision object.
+           )")
 
       .def("process_attached_collision_object", &planning_scene::PlanningScene::processAttachedCollisionObjectMsg,
            py::arg("object"),
            R"(
            Apply an attached collision object to the planning scene.
-           Args:
+
+	   Args:
                object (moveit_msgs.msg.AttachedCollisionObject): The attached collision object to apply to the planning scene.
            )")
 
@@ -196,14 +205,15 @@ void init_planning_scene(py::module& m)
            py::arg("msg"),
            R"(
            Apply an octomap to the planning scene.
-           Args:
+
+	   Args:
                octomap (moveit_msgs.msg.Octomap): The octomap to apply to the planning scene.
            )")
 
       .def("remove_all_collision_objects", &planning_scene::PlanningScene::removeAllCollisionObjects,
            R"(
            Removes collision objects from the planning scene.
-	   This method will remove all collision object from the scene except for attached collision objects.
+           This method will remove all collision object from the scene except for attached collision objects.
            )")
 
       // checking state validity
@@ -216,7 +226,8 @@ void init_planning_scene(py::module& m)
            py::arg("joint_model_group_name"), py::arg("verbose") = false,
            R"(
            Check if the robot state is in collision.
-           Args:
+
+	   Args:
                joint_model_group_name (str): The name of the group to check collision for.
                verbose (bool): If true, print the link names of the links in collision.
            Returns:
@@ -229,7 +240,8 @@ void init_planning_scene(py::module& m)
            py::arg("robot_state"), py::arg("joint_model_group_name"), py::arg("verbose") = false,
            R"(
            Check if the robot state is in collision.
-           Args:
+
+	   Args:
                robot_state (:py:class:`moveit_py.core.RobotState`): The robot state to check collision for.
                joint_model_group_name (str): The name of the group to check collision for.
                verbose (bool): If true, print the link names of the links in collision.
@@ -243,10 +255,11 @@ void init_planning_scene(py::module& m)
            py::arg("state"), py::arg("constraints"), py::arg("verbose") = false,
            R"(
            Check if the robot state fulfills the passed constraints
-           Args:
+
+	   Args:
                state (moveit_py.core.RobotState): The robot state to check constraints for.
-	       constraints (moveit_msgs.msg.Constraints): The constraints to check.
-	       verbose (bool):
+               constraints (moveit_msgs.msg.Constraints): The constraints to check.
+               verbose (bool):
            Returns:
                bool: true if state is constrained otherwise false.
            )")
@@ -257,14 +270,15 @@ void init_planning_scene(py::module& m)
            py::arg("trajectory"), py::arg("joint_model_group_name"), py::arg("verbose") = false,
            py::arg("invalid_index") = nullptr,
            R"(
-           Check if a given path is valid.
-           Each state is checked for validity (collision avoidance and feasibility)
-           Args:
+           Check if a given path is valid. Each state is checked for validity (collision avoidance and feasibility)
+
+	   Args:
                trajectory (:py:class:`moveit_py.core.RobotTrajectory`): The trajectory to check.
                joint_model_group_name (str): The joint model group to check the path against.
                verbose (bool):
-	       invalid_index (list):
-           Returns:
+               invalid_index (list):
+
+	   Returns:
                bool: true if the path is valid otherwise false.
            )")
 
@@ -276,10 +290,12 @@ void init_planning_scene(py::module& m)
            py::arg("collision_request"), py::arg("collision_result"),
            R"(
            Check whether the current state is in collision, and if needed, updates the collision transforms of the current state before the computation.
-           Args:
+
+	   Args:
                collision_request (:py:class:`moveit_py.core.CollisionRequest`): The collision request to use.
                collision_result (:py:class:`moveit_py.core.CollisionResult`): The collision result to update
-           Returns:
+
+	   Returns:
                bool: true if state is in collision otherwise false.
            )")
 
@@ -289,11 +305,13 @@ void init_planning_scene(py::module& m)
            py::arg("collision_request"), py::arg("collision_result"), py::arg("state"),
            R"(
            Check if the robot state is in collision.
-           Args:
+
+	   Args:
                collision_request ():
                collision_result ():
                state ():
-           Returns:
+
+	   Returns:
                bool: true if state is in collision otherwise false.
            )")
 
@@ -304,12 +322,14 @@ void init_planning_scene(py::module& m)
            py::arg("collision_request"), py::arg("collision_result"), py::arg("state"), py::arg("acm"),
            R"(
            Check if the robot state is in collision.
-           Args:
+
+	   Args:
                collision_request ():
                collision_result ():
                state ():
-           acm ():
-           Returns:
+               acm ():
+
+	   Returns:
                bool: true if state is in collision otherwise false.
            )")
 
@@ -319,10 +339,12 @@ void init_planning_scene(py::module& m)
            py::arg("req"), py::arg("result"),
            R"(
            Check if the robot state is in collision.
-           Args:
+
+	   Args:
                collision_request ():
                collision_result ():
-           Returns:
+
+	   Returns:
                bool: true if state is in collision otherwise false.
            )")
 
@@ -333,11 +355,13 @@ void init_planning_scene(py::module& m)
            py::arg("collision_request"), py::arg("collision_result"), py::arg("state"),
            R"(
            Check if the robot state is in collision.
-           Args:
+
+	   Args:
                collision_request ():
                collision_result ():
                state ():
-           Returns:
+
+	   Returns:
                bool: true if state is in collision otherwise false.
            )")
 
@@ -348,12 +372,14 @@ void init_planning_scene(py::module& m)
            py::arg("collision_request"), py::arg("collision_result"), py::arg("state"), py::arg("acm"),
            R"(
            Check if the robot state is in collision.
-           Args:
+
+	   Args:
                collision_request ():
                collision_result ():
                state ():
-           acm ():
-           Returns:
+               acm ():
+
+	   Returns:
                bool: true if state is in collision otherwise false.
            )")
 
@@ -363,10 +389,12 @@ void init_planning_scene(py::module& m)
            py::arg("collision_request"), py::arg("collision_result"),
            R"(
            Check if the robot state is in collision.
-           Args:
+
+	   Args:
                collision_request ():
                collision_result ():
-           Returns:
+
+	   Returns:
                bool: true if state is in collision otherwise false.
            )")
 
@@ -376,11 +404,13 @@ void init_planning_scene(py::module& m)
            py::arg("collision_request"), py::arg("collision_result"), py::arg("state"),
            R"(
            Check if the robot state is in collision.
-           Args:
+
+	   Args:
                collision request ():
                collision_result ():
                state ():
-           Returns:
+
+	   Returns:
                bool: true if state is in self collision otherwise false.
            )")
 
@@ -391,12 +421,14 @@ void init_planning_scene(py::module& m)
            py::arg("collision_request"), py::arg("collision_result"), py::arg("state"), py::arg("acm"),
            R"(
            Check if the robot state is in collision.
-           Args:
+
+	   Args:
                collision request ():
                collision_result ():
                state ():
-           acm():
-           Returns:
+               acm():
+
+	   Returns:
                bool: true if state is in self collision otherwise false.
            )");
 }

@@ -189,7 +189,7 @@ public:
     // As the joint_model_group_ has exactly one constraint, we expect a constrained planning state space
     EXPECT_NE(dynamic_cast<ompl_interface::ConstrainedPlanningStateSpace*>(pc->getOMPLStateSpace().get()), nullptr);
 
-    // Create a new response, because the solve method does not clear the given respone
+    // Create a new response, because the solve method does not clear the given response
     planning_interface::MotionPlanDetailedResponse response2;
     ASSERT_TRUE(pc->solve(response2));
 
