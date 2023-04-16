@@ -50,7 +50,11 @@
 #include <rclcpp/logging.hpp>
 #include <rclcpp/node.hpp>
 #include <rclcpp/node_options.hpp>
+#if MOVEIT_ROLLING
 #include <rclcpp/event_handler.hpp>
+#elif MOVEIT_HUMBLE
+#include <rclcpp/qos_event.hpp>
+#endif
 #include <rclcpp/subscription.hpp>
 #include <rclcpp/utilities.hpp>
 

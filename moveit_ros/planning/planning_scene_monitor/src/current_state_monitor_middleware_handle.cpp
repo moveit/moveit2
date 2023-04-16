@@ -39,7 +39,11 @@
 #include <rclcpp/experimental/buffers/intra_process_buffer.hpp>
 #include <rclcpp/node.hpp>
 #include <rclcpp/qos.hpp>
+#if MOVEIT_ROLLING
 #include <rclcpp/event_handler.hpp>
+#elif MOVEIT_HUMBLE
+#include <rclcpp/qos_event.hpp>
+#endif
 #include <rclcpp/subscription.hpp>
 #include <rclcpp/time.hpp>
 #include <rclcpp/utilities.hpp>
