@@ -43,6 +43,7 @@
 #include <pluginlib/class_list_macros.hpp>
 #include <pluginlib/class_loader.hpp>
 #include <boost/bimap.hpp>
+#include <boost/bimap/unordered_multiset_of.hpp>
 #include <rclcpp/client.hpp>
 #include <rclcpp/duration.hpp>
 #include <rclcpp/logger.hpp>
@@ -402,7 +403,25 @@ public:
     std::scoped_lock<std::mutex> lock(controllers_mutex_);
     discover(true);
 
-    typedef boost::bimap<std::string, std::string> resources_bimap;
+    // Holds the list of controllers that are currently active and their resources
+    // Example:
+    // controller1:
+    //  - controller1_joint1
+    //  - controller1_joint2
+    //  ...
+    // controller2:
+    //  - controller2_joint1
+    //  - controller2_joint2
+    //  ...
+    // ...
+    // The left type have to be an unordered_multiset_of, because each controller can claim multiple resources
+    // {{ "controller1", "controller1_joint1" },
+    //  { "controller1", "controller1_joint2" },
+    //  ...,
+    //  { "controller2", "controller2_joint1" },
+    //  { "controller2", "controller2_joint2" },
+    //  ...}
+    typedef boost::bimap<boost::bimaps::unordered_multiset_of<std::string>, std::string> resources_bimap;
 
     resources_bimap claimed_resources;
 
@@ -423,7 +442,7 @@ public:
       if (c != managed_controllers_.end())
       {  // controller belongs to this manager
         request->deactivate_controllers.push_back(c->second.name);
-        claimed_resources.right.erase(c->second.name);  // remove resources
+        claimed_resources.left.erase(c->second.name);  // remove resources
       }
     }
 
