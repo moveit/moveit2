@@ -42,7 +42,7 @@ macro(moveit_package)
   set(CMAKE_CXX_EXTENSIONS OFF)
 
   if(NOT DEFINED ENV{ROS_DISTRO})
-    message(FATAL_ERROR "ROS_DISTRO is not defined. Maybe you forgot to source /opt/ros/ROS_DISTRO/setup.bash?" )
+    message(FATAL_ERROR "ROS_DISTRO is not defined. Maybe you forgot to source /opt/ros/ROS_DISTRO/setup.bash?")
   endif()
   add_library(moveit_compatibility INTERFACE)
   if("$ENV{ROS_DISTRO}" STREQUAL "humble")
