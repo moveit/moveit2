@@ -92,14 +92,14 @@ void init_robot_trajectory(py::module& m)
 
       .def("__len__", &robot_trajectory::RobotTrajectory::getWayPointCount,
            R"(
-                    Returns:
-                        int: The number of waypoints in the trajectory.
+	   Returns:
+	       int: The number of waypoints in the trajectory.
                     )")
 
       .def("__reverse__", &robot_trajectory::RobotTrajectory::reverse,
            R"(
-     	   Reverse the trajectory.
-     	   )")
+           Reverse the trajectory.
+           )")
 
       .def_property("joint_model_group_name", &robot_trajectory::RobotTrajectory::getGroupName,
                     &robot_trajectory::RobotTrajectory::setGroupName,
@@ -125,25 +125,27 @@ void init_robot_trajectory(py::module& m)
       .def("unwind", py::overload_cast<>(&robot_trajectory::RobotTrajectory::unwind),
            R"(
            Unwind the trajectory.
-      	   )")
+           )")
 
       .def("get_waypoint_durations", &robot_trajectory::RobotTrajectory::getWayPointDurations,
            R"(
            Get the durations from the previous waypoint in the trajectory.
+
            Returns:
                list of float: The duration from previous of each waypoint in the trajectory.
            )")
       .def("get_robot_trajectory_msg", &moveit_py::bind_robot_trajectory::get_robot_trajectory_msg,
            py::arg("joint_filter") = std::vector<std::string>(),
            R"(
-           Get the trajectory as a `moveit_msgs.msg.RobotTrajectory` message.
-           Returns:
+           Get the trajectory as a moveit_msgs.msg.RobotTrajectory message.
+
+	   Returns:
                moveit_msgs.msg.RobotTrajectory: A ROS robot trajectory message.
            )")
       .def("set_robot_trajectory_msg", &moveit_py::bind_robot_trajectory::set_robot_trajectory_msg,
            py::arg("robot_state"), py::arg("msg"),
            R"(
-           Set the trajectory from a `moveit_msgs.msg.RobotTrajectory` message.
+           Set the trajectory from a moveit_msgs.msg.RobotTrajectory message.
            )");
   // TODO (peterdavidfagan): support other methods such as appending trajectories
 }

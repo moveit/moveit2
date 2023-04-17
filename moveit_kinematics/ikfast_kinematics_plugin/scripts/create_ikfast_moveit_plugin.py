@@ -63,6 +63,7 @@ except ImportError:
     print(
         "Failed to import ament_index_python. No ROS2 environment available? Trying without."
     )
+
     # define stubs
     class PackageNotFoundError(Exception):
         pass
