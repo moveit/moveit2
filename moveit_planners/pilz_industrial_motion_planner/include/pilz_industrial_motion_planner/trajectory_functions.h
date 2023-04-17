@@ -126,7 +126,7 @@ bool verifySampleJointLimits(const std::map<std::string, double>& position_last,
 bool generateJointTrajectory(const planning_scene::PlanningSceneConstPtr& scene,
                              const JointLimitsContainer& joint_limits, const KDL::Trajectory& trajectory,
                              const std::string& group_name, const std::string& link_name,
-                             const std::map<std::string, double>& initial_joint_position, const double& sampling_time,
+                             const std::map<std::string, double>& initial_joint_position, const double sampling_time,
                              trajectory_msgs::msg::JointTrajectory& joint_trajectory,
                              moveit_msgs::msg::MoveItErrorCodes& error_code, bool check_self_collision = false);
 
@@ -196,11 +196,11 @@ bool isRobotStateStationary(const moveit::core::RobotState& state, const std::st
  * @param index The intersection index which has to be determined.
  */
 bool linearSearchIntersectionPoint(const std::string& link_name, const Eigen::Vector3d& center_position,
-                                   const double& r, const robot_trajectory::RobotTrajectoryPtr& traj, bool inverseOrder,
+                                   const double r, const robot_trajectory::RobotTrajectoryPtr& traj, bool inverseOrder,
                                    std::size_t& index);
 
 bool intersectionFound(const Eigen::Vector3d& p_center, const Eigen::Vector3d& p_current, const Eigen::Vector3d& p_next,
-                       const double& r);
+                       const double r);
 
 /**
  * @brief Checks if current robot state is in self collision.

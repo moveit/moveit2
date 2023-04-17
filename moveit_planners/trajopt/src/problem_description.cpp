@@ -58,7 +58,7 @@
  * @param apply_first If true and only one value is given, broadcast value to length of expected_size
  */
 void checkParameterSize(trajopt::DblVec& parameter, const unsigned int& expected_size, const std::string& name,
-                        const bool& apply_first = true)
+                        const bool apply_first = true)
 {
   if (apply_first == true && parameter.size() == 1)
   {
@@ -242,7 +242,7 @@ TrajOptProblemPtr ConstructProblem(const ProblemInfo& pci)
   // Apply constraint to each fixed dof to its initial value for all timesteps (freeze that column)
   if (!bi.dofs_fixed.empty())
   {
-    for (const int& dof_ind : bi.dofs_fixed)
+    for (const int dof_ind : bi.dofs_fixed)
     {
       for (int i = 1; i < prob->GetNumSteps(); ++i)
       {

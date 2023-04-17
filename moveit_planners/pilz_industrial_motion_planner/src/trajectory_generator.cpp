@@ -79,7 +79,7 @@ void TrajectoryGenerator::cmdSpecificRequestValidation(const planning_interface:
   // to provide a command specific request validation.
 }
 
-void TrajectoryGenerator::checkVelocityScaling(const double& scaling_factor)
+void TrajectoryGenerator::checkVelocityScaling(const double scaling_factor)
 {
   if (!isScalingFactorValid(scaling_factor))
   {
@@ -90,7 +90,7 @@ void TrajectoryGenerator::checkVelocityScaling(const double& scaling_factor)
   }
 }
 
-void TrajectoryGenerator::checkAccelerationScaling(const double& scaling_factor)
+void TrajectoryGenerator::checkAccelerationScaling(const double scaling_factor)
 {
   if (!isScalingFactorValid(scaling_factor))
   {
@@ -281,8 +281,8 @@ void TrajectoryGenerator::setFailureResponse(const rclcpp::Time& planning_start,
 }
 
 std::unique_ptr<KDL::VelocityProfile>
-TrajectoryGenerator::cartesianTrapVelocityProfile(const double& max_velocity_scaling_factor,
-                                                  const double& max_acceleration_scaling_factor,
+TrajectoryGenerator::cartesianTrapVelocityProfile(const double max_velocity_scaling_factor,
+                                                  const double max_acceleration_scaling_factor,
                                                   const std::unique_ptr<KDL::Path>& path) const
 {
   std::unique_ptr<KDL::VelocityProfile> vp_trans = std::make_unique<KDL::VelocityProfile_Trap>(
