@@ -446,7 +446,7 @@ ompl::base::ConstraintPtr createOMPLConstraints(const moveit::core::RobotModelCo
  * https://ethz.ch/content/dam/ethz/special-interest/mavt/robotics-n-intelligent-systems/rsl-dam/documents/RobotDynamics2016/RD2016script.pdf
  * Eq. 2.107
  * */
-inline Eigen::Matrix3d angularVelocityToAngleAxis(const double& angle, const Eigen::Ref<const Eigen::Vector3d>& axis)
+inline Eigen::Matrix3d angularVelocityToAngleAxis(const double angle, const Eigen::Ref<const Eigen::Vector3d>& axis)
 {
   double t{ std::abs(angle) };
   Eigen::Matrix3d r_skew;

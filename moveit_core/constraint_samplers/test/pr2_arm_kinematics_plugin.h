@@ -80,7 +80,7 @@ public:
    *  to return multiple solutions from an inverse kinematics computation.
    */
   PR2ArmIKSolver(const urdf::ModelInterface& robot_model, const std::string& root_frame_name,
-                 const std::string& tip_frame_name, const double& search_discretization_angle, const int& free_angle);
+                 const std::string& tip_frame_name, const double search_discretization_angle, const int free_angle);
 
   ~PR2ArmIKSolver() override{};
 
@@ -98,7 +98,7 @@ public:
 
   int CartToJnt(const KDL::JntArray& q_init, const KDL::Frame& p_in, KDL::JntArray& q_out) override;
 
-  int cartToJntSearch(const KDL::JntArray& q_in, const KDL::Frame& p_in, KDL::JntArray& q_out, const double& timeout);
+  int cartToJntSearch(const KDL::JntArray& q_in, const KDL::Frame& p_in, KDL::JntArray& q_out, const double timeout);
 
   void getSolverInfo(moveit_msgs::msg::KinematicSolverInfo& response)
   {
@@ -106,7 +106,7 @@ public:
   }
 
 private:
-  bool getCount(int& count, const int& max_count, const int& min_count);
+  bool getCount(int& count, const int max_count, const int min_count);
 
   double search_discretization_angle_;
 

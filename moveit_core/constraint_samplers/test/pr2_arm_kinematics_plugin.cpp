@@ -50,7 +50,7 @@ namespace pr2_arm_kinematics
 {
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_constraint_samplers.test.pr2_arm_kinematics_plugin");
 
-bool PR2ArmIKSolver::getCount(int& count, const int& max_count, const int& min_count)
+bool PR2ArmIKSolver::getCount(int& count, const int max_count, const int min_count)
 {
   if (count > 0)
   {
@@ -87,8 +87,8 @@ bool PR2ArmIKSolver::getCount(int& count, const int& max_count, const int& min_c
 }
 
 PR2ArmIKSolver::PR2ArmIKSolver(const urdf::ModelInterface& robot_model, const std::string& root_frame_name,
-                               const std::string& tip_frame_name, const double& search_discretization_angle,
-                               const int& free_angle)
+                               const std::string& tip_frame_name, const double search_discretization_angle,
+                               const int free_angle)
   : ChainIkSolverPos()
 {
   search_discretization_angle_ = search_discretization_angle;
@@ -160,7 +160,7 @@ int PR2ArmIKSolver::CartToJnt(const KDL::JntArray& q_init, const KDL::Frame& p_i
 }
 
 int PR2ArmIKSolver::cartToJntSearch(const KDL::JntArray& q_in, const KDL::Frame& p_in, KDL::JntArray& q_out,
-                                    const double& timeout)
+                                    const double timeout)
 {
   const bool verbose = false;
   KDL::JntArray q_init = q_in;
