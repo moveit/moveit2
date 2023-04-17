@@ -13,7 +13,9 @@ def load_file(package_name, file_path):
     try:
         with open(absolute_file_path, "r") as file:
             return file.read()
-    except EnvironmentError:  # parent of IOError, OSError *and* WindowsError where available
+    except (
+        EnvironmentError
+    ):  # parent of IOError, OSError *and* WindowsError where available
         return None
 
 
@@ -24,7 +26,9 @@ def load_yaml(package_name, file_path):
     try:
         with open(absolute_file_path, "r") as file:
             return yaml.safe_load(file)
-    except EnvironmentError:  # parent of IOError, OSError *and* WindowsError where available
+    except (
+        EnvironmentError
+    ):  # parent of IOError, OSError *and* WindowsError where available
         return None
 
 
@@ -38,6 +42,8 @@ def generate_launch_description():
     # Get parameters for the Servo node
     servo_yaml = load_yaml("moveit_servo", "config/panda_simulated_config.yaml")
     servo_params = {"moveit_servo": servo_yaml}
+    # This filter parameter should be >1. Increase it for greater smoothing but slower motion.
+    low_pass_filter_coeff = {"butterworth_filter_coeff": 1.5}
 
     # RViz
     rviz_config_file = (
@@ -137,6 +143,7 @@ def generate_launch_description():
         executable="servo_node_main",
         parameters=[
             servo_params,
+            low_pass_filter_coeff,
             moveit_config.robot_description,
             moveit_config.robot_description_semantic,
             moveit_config.robot_description_kinematics,

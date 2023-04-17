@@ -50,6 +50,7 @@ import numpy as np
 from math import floor
 from optparse import OptionParser, OptionGroup
 
+
 # Given a text line, split it into tokens (by space) and return the token
 # at the desired index. Additionally, test that some expected tokens exist.
 # Return None if they do not.
