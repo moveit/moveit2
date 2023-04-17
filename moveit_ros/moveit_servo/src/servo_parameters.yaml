@@ -265,3 +265,83 @@ servo:
       gt<>: 0.0
     }
   }
+
+############### POSE TRACKING PARAMETERS #########################
+
+  windup_limit: {
+    type: double,
+    default_value: 0.05,
+    description: "Maximum value of error integral for all PID controllers"
+  }
+
+  x_proportional_gain: {
+    type: double,
+    default_value: 1.5,
+    description: "Proportional gain value for the controller in x direction"
+  }
+
+  y_proportional_gain: {
+    type: double,
+    default_value: 1.5,
+    description: "Proportional gain value for the controller in y direction"
+  }
+
+  z_proportional_gain: {
+    type: double,
+    default_value: 1.5,
+    description: "Proportional gain value for the controller in z direction"
+  }
+
+  x_integral_gain: {
+    type: double,
+    default_value: 0.0,
+    description: "Integral gain value for the controller in x direction"
+  }
+
+  y_integral_gain: {
+    type: double,
+    default_value: 0.0,
+    description: "Integral gain value for the controller in y direction"
+  }
+
+  z_integral_gain: {
+    type: double,
+    default_value: 0.0,
+    description: "Integral gain value for the controller in z direction"
+  }
+
+  x_derivative_gain: {
+    type: double,
+    default_value: 0.0,
+    description: "Derivative gain value for the controller in x direction"
+  }
+
+  y_derivative_gain: {
+    type: double,
+    default_value: 0.0,
+    description: "Derivative gain value for the controller in y direction"
+  }
+
+  z_derivative_gain: {
+    type: double,
+    default_value: 0.0,
+    description: "Derivative gain value for the controller in z direction"
+  }
+
+  angular_proportional_gain: {
+    type: double,
+    default_value: 0.5,
+    description: "Proportional gain value for angular control"
+  }
+
+  angular_integral_gain: {
+    type: double,
+    default_value: 0.0,
+    description: "Integral gain value for angular control"
+  }
+
+  angular_derivative_gain: {
+    type: double,
+    default_value: 0.0,
+    description: "Derivative gain value for angular control"
+  }
