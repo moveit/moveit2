@@ -78,10 +78,10 @@ ServoCalcs::ServoCalcs(const rclcpp::Node::SharedPtr& node,
   : node_(node)
   , servo_param_listener_(servo_param_listener)
   , servo_params_(servo_param_listener_->get_params())
-  , stop_requested_(true)
   , planning_scene_monitor_(planning_scene_monitor)
-  , smoothing_loader_("moveit_core", "online_signal_smoothing::SmoothingBaseClass")
+  , stop_requested_(true)
   , paused_(false)
+  , smoothing_loader_("moveit_core", "online_signal_smoothing::SmoothingBaseClass")
 
 {
   // Get the params
