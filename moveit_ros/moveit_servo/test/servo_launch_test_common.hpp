@@ -80,7 +80,7 @@ public:
     : node_(std::make_shared<rclcpp::Node>("servo_testing"))
     , executor_(std::make_shared<rclcpp::executors::SingleThreadedExecutor>())
   {
-    auto servo_param_listener = std::make_shared<servo::ParamListener>(node_);
+    auto servo_param_listener = std::make_shared<const servo::ParamListener>(node_);
     servo_parameters_ = servo_param_listener->get_params();
     // store test constants as shared pointer to constant struct
     {

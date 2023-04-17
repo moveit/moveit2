@@ -77,7 +77,7 @@ ServoNode::ServoNode(const rclcpp::NodeOptions& options)
   node_->get_parameter_or("robot_description_name", robot_description_name, robot_description_name);
 
   // Get the servo parameters
-  auto param_listener = std::make_shared<servo::ParamListener>(node_);
+  auto param_listener = std::make_shared<const servo::ParamListener>(node_);
   auto servo_parameters = param_listener->get_params();
 
   // Set up planning_scene_monitor

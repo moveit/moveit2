@@ -50,7 +50,7 @@ constexpr double ROBOT_STATE_WAIT_TIME = 10.0;  // seconds
 
 Servo::Servo(const rclcpp::Node::SharedPtr& node,
              const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor,
-             std::shared_ptr<servo::ParamListener>& servo_param_listener)
+             std::shared_ptr<const servo::ParamListener>& servo_param_listener)
   : planning_scene_monitor_{ planning_scene_monitor }
   , servo_param_listener_{ servo_param_listener }
   , servo_calcs_{ node, planning_scene_monitor_, servo_param_listener_ }

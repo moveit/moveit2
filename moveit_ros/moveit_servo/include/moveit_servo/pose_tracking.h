@@ -87,7 +87,7 @@ class PoseTracking
 {
 public:
   /** \brief Constructor. Loads ROS parameters under the given namespace. */
-  PoseTracking(const rclcpp::Node::SharedPtr& node, std::shared_ptr<servo::ParamListener>& servo_param_listener,
+  PoseTracking(const rclcpp::Node::SharedPtr& node, std::shared_ptr<const servo::ParamListener>& servo_param_listener,
                const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor);
 
   PoseTrackingStatusCode moveToPose(const Eigen::Vector3d& positional_tolerance, const double angular_tolerance,

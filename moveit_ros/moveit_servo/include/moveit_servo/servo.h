@@ -56,7 +56,7 @@ class Servo
 public:
   Servo(const rclcpp::Node::SharedPtr& node,
         const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor,
-        std::shared_ptr<servo::ParamListener>& servo_param_listener);
+        std::shared_ptr<const servo::ParamListener>& servo_param_listener);
 
   ~Servo();
 
@@ -97,7 +97,7 @@ private:
   planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor_;
 
   // The servo parameters
-  std::shared_ptr<servo::ParamListener> servo_param_listener_;
+  std::shared_ptr<const servo::ParamListener> servo_param_listener_;
   servo::Params servo_params_;
 
   ServoCalcs servo_calcs_;

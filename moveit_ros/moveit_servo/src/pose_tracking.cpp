@@ -72,7 +72,7 @@ void declareOrGetParam(T& output_value, const std::string& param_name, const rcl
 namespace moveit_servo
 {
 PoseTracking::PoseTracking(const rclcpp::Node::SharedPtr& node,
-                           std::shared_ptr<servo::ParamListener>& servo_param_listener,
+                           std::shared_ptr<const servo::ParamListener>& servo_param_listener,
                            const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor)
   : node_(node)
   , servo_parameters_(servo_param_listener->get_params())
