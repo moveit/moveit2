@@ -195,8 +195,8 @@ bool isRobotStateStationary(const moveit::core::RobotState& state, const std::st
  * smallest index of trajectroy.
  * @param index The intersection index which has to be determined.
  */
-bool linearSearchIntersectionPoint(const std::string& link_name, const Eigen::Vector3d& center_position,
-                                   const double r, const robot_trajectory::RobotTrajectoryPtr& traj, bool inverseOrder,
+bool linearSearchIntersectionPoint(const std::string& link_name, const Eigen::Vector3d& center_position, const double r,
+                                   const robot_trajectory::RobotTrajectoryPtr& traj, bool inverseOrder,
                                    std::size_t& index);
 
 bool intersectionFound(const Eigen::Vector3d& p_center, const Eigen::Vector3d& p_current, const Eigen::Vector3d& p_next,
