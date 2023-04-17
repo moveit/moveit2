@@ -84,9 +84,6 @@ ServoCalcs::ServoCalcs(const rclcpp::Node::SharedPtr& node,
   , smoothing_loader_("moveit_core", "online_signal_smoothing::SmoothingBaseClass")
 
 {
-  // Get the params
-  RCLCPP_INFO(LOGGER, "[SERVO CALCS] got params %f: ", servo_params_.rotational_scale);
-
   // MoveIt Setup
   current_state_ = planning_scene_monitor_->getStateMonitor()->getCurrentState();
   joint_model_group_ = current_state_->getJointModelGroup(servo_params_.move_group_name);

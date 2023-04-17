@@ -79,7 +79,6 @@ ServoNode::ServoNode(const rclcpp::NodeOptions& options)
   // Get the servo parameters
   auto param_listener = std::make_shared<servo::ParamListener>(node_);
   auto servo_parameters = param_listener->get_params();
-  RCLCPP_INFO(LOGGER, "Got servo lib param : %f", servo_parameters.rotational_scale);
 
   // Set up planning_scene_monitor
   planning_scene_monitor_ = std::make_shared<planning_scene_monitor::PlanningSceneMonitor>(

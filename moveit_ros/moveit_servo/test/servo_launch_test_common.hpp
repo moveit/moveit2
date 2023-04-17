@@ -72,7 +72,6 @@ class ServoFixture : public ::testing::Test
 public:
   void SetUp() override
   {
-    ASSERT_TRUE(servo_parameters_.rotational_scale != 2.0);
     executor_->add_node(node_);
     executor_thread_ = std::thread([this]() { executor_->spin(); });
   }
@@ -81,16 +80,8 @@ public:
     : node_(std::make_shared<rclcpp::Node>("servo_testing"))
     , executor_(std::make_shared<rclcpp::executors::SingleThreadedExecutor>())
   {
-    // read parameters and store them in shared pointer to constant
-    // servo_parameters_ = moveit_servo::ServoParameters::makeServoParameters(node_, "moveit_servo", false);
     auto servo_param_listener = std::make_shared<servo::ParamListener>(node_);
     servo_parameters_ = servo_param_listener->get_params();
-    // if (servo_parameters_ == nullptr)
-    // {
-    //   RCLCPP_FATAL(LOGGER, "Failed to load the servo parameters");
-    //   return;
-    // }
-
     // store test constants as shared pointer to constant struct
     {
       auto test_parameters = std::make_shared<struct TestParameters>();

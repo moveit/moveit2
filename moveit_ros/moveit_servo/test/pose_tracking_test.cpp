@@ -68,12 +68,6 @@ public:
     auto servo_param_listener = std::make_shared<servo::ParamListener>(node_);
     servo_parameters_ = servo_param_listener->get_params();
 
-    // if (servo_parameters_ == nullptr)
-    // {
-    //   RCLCPP_FATAL(LOGGER, "Could not get servo parameters!");
-    //   exit(EXIT_FAILURE);
-    // }
-
     // store test constants as shared pointer to constant struct
     {
       auto test_parameters = std::make_shared<struct TestParameters>();
