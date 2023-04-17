@@ -1,23 +1,68 @@
 servo:
-
-  enable_parameter_update: {
-    type: bool,
-    default_value: false,
-    description: "If true, continuous check for parameter update is enabled"
+################################ ROBOT SPECIFIC CONFIG #############################
+  move_group_name: {
+    type: string,
+    default_value: "panda_arm",
+    description: "The name of the moveit move_group of your robot"
   }
 
-  use_gazebo: {
-    type: bool,
-    default_value: false,
-    description: "Whether the robot is started in a Gazebo simulation environment"
+  planning_frame: {
+    type: string,
+    default_value: "panda_link0",
+    description: "The name of moveit planning frame."
   }
 
+  ee_frame_name: {
+    type: string,
+    default_value: "panda_link8",
+    description: "The name of end-effector frame of your robot"
+  }
+
+  robot_link_command_frame: {
+    type: string,
+    default_value: "panda_link0",
+    description: "The frame of incoming command, change this to your own value when using a different robot."
+  }
+
+  monitored_planning_scene_topic: {
+    type: string,
+    default_value: "/planning_scene",
+    description: "The name of the planning scene topic. \
+                  planning_scene_monitor::PlanningSceneMonitor::DEFAULT_PLANNING_SCENE_TOPIC"
+  }
+
+################################ OUTPUTS #########################################
   status_topic: {
     type: string,
     default_value: "~/status",
     description: "The topic to which the status will be published"
   }
 
+  command_out_topic: {
+    type: string,
+    default_value: "/panda_arm_controller/joint_trajectory",
+    description: "The topic on which servo will publish the joint trajectory \
+                  Change this to the topic your controller requires."
+  }
+
+  command_out_type: {
+    type: string,
+    default_value: "trajectory_msgs/JointTrajectory",
+    description: "The type of command that servo will publish",
+    validation: {
+      one_of<>: [["trajectory_msgs/JointTrajectory", "std_msgs/Float64MultiArray"]]
+    }
+  }
+
+  num_outgoing_halt_msgs_to_publish: {
+    type: int,
+    default_value: 4,
+    description: "If 0, republish commands forever even if the robot is stationary. \
+                  Otherwise, specify num. to publish. Important because ROS may drop \
+                  some messages and we need the robot to halt reliably."
+  }
+
+################################ INPUTS  #############################
   cartesian_command_in_topic: {
     type: string,
     default_value: "~/delta_twist_cmds",
@@ -30,12 +75,6 @@ servo:
     description: "The topic on which servo will receive the joint jog commands"
   }
 
-  robot_link_command_frame: {
-    type: string,
-    default_value: "panda_link0",
-    description: "The frame of incoming command, change this to your own value when using a different robot."
-  }
-
   command_in_type: {
     type: string,
     default_value: "unitless",
@@ -43,6 +82,25 @@ servo:
     validation: {
       one_of<>: [["unitless", "speed_units"]]
     }
+  }
+
+  joint_topic: {
+    type: string,
+    default_value: "/joint_states",
+    description: "The topic on which joint states can be monitored"
+  }
+
+################################ GENERAL CONFIG #############################
+  enable_parameter_update: {
+    type: bool,
+    default_value: false,
+    description: "If true, continuous check for parameter update is enabled"
+  }
+
+  use_gazebo: {
+    type: bool,
+    default_value: false,
+    description: "Whether the robot is started in a Gazebo simulation environment"
   }
 
   linear_scale: {
@@ -69,28 +127,12 @@ servo:
     description: "Scaling factor when servo overrides the velocity (eg: near singularities)"
   }
 
-  command_out_topic: {
-    type: string,
-    default_value: "/panda_arm_controller/joint_trajectory",
-    description: "The topic on which servo will publish the joint trajectory \
-                  Change this to the topic your controller requires."
-  }
-
   publish_period: {
     type: double,
     default_value: 0.034,
     description: " 1 / (Nominal publish rate) [seconds]",
     validation: {
       gt<>: 0.0
-    }
-  }
-
-  command_out_type: {
-    type: string,
-    default_value: "trajectory_msgs/JointTrajectory",
-    description: "The type of command that servo will publish",
-    validation: {
-      one_of<>: [["trajectory_msgs/JointTrajectory", "std_msgs/Float64MultiArray"]]
     }
   }
 
@@ -112,34 +154,10 @@ servo:
     description: "If true servo will publish joint accelerations in the output command"
   }
 
-  joint_topic: {
-    type: string,
-    default_value: "/joint_states",
-    description: "The topic on which joint states can be monitored"
-  }
-
   smoothing_filter_plugin_name: {
     type: string,
     default_value: "online_signal_smoothing::ButterworthFilterPlugin",
     description: "The name of the smoothing plugin to be used"
-  }
-
-  move_group_name: {
-    type: string,
-    default_value: "panda_arm",
-    description: "The name of the moveit move_group of your robot"
-  }
-
-  planning_frame: {
-    type: string,
-    default_value: "panda_link0",
-    description: "The name of moveit planning frame."
-  }
-
-  ee_frame_name: {
-    type: string,
-    default_value: "panda_link8",
-    description: "The name of end-effector frame of your robot"
   }
 
   is_primary_planning_scene_monitor: {
@@ -152,26 +170,11 @@ servo:
                   this should be set to false"
   }
 
-  monitored_planning_scene_topic: {
-    type: string,
-    default_value: "/planning_scene",
-    description: "The name of the planning scene topic. \
-                  planning_scene_monitor::PlanningSceneMonitor::DEFAULT_PLANNING_SCENE_TOPIC"
-  }
-
   incoming_command_timeout: {
     type: double,
     default_value: 0.1,
     description: "Stop servoing if X seconds elapse without a new command. \
                   If 0, republish commands forever even if the robot is stationary. \
-                  Otherwise, specify num. to publish. Important because ROS may drop \
-                  some messages and we need the robot to halt reliably."
-  }
-
-  num_outgoing_halt_msgs_to_publish: {
-    type: int,
-    default_value: 4,
-    description: "If 0, republish commands forever even if the robot is stationary. \
                   Otherwise, specify num. to publish. Important because ROS may drop \
                   some messages and we need the robot to halt reliably."
   }
