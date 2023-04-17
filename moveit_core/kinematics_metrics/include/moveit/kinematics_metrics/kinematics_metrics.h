@@ -129,7 +129,7 @@ public:
     penalty_multiplier_ = fabs(multiplier);
   }
 
-  const double getPenaltyMultiplier() const
+  double getPenaltyMultiplier() const
   {
     return penalty_multiplier_;
   }
