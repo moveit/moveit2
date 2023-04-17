@@ -73,7 +73,7 @@ bool TemplatedGeneratedFile::write()
   // Replace keywords in string ------------------------------------------------------------
   for (const auto& variable : variables_)
   {
-    std::string key_with_brackets = "[" + variable.key + "]";
+    std::string key_with_brackets = '[' + variable.key + ']';
     boost::replace_all(template_string, key_with_brackets, variable.value);
   }
 

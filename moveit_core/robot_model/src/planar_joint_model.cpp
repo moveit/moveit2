@@ -58,7 +58,7 @@ PlanarJointModel::PlanarJointModel(const std::string& name, size_t joint_index, 
   local_variable_names_.push_back("theta");
   for (int i = 0; i < 3; ++i)
   {
-    variable_names_.push_back(getName() + "/" + local_variable_names_[i]);
+    variable_names_.push_back(getName() + '/' + local_variable_names_[i]);
     variable_index_map_[variable_names_.back()] = i;
   }
 

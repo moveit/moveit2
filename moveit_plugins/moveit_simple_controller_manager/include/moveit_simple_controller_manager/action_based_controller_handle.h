@@ -209,7 +209,7 @@ protected:
     }
     else
     {
-      return name_ + "/" + namespace_;
+      return name_ + '/' + namespace_;
     }
   }
 

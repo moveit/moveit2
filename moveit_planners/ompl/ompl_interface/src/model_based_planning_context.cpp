@@ -405,7 +405,7 @@ void ompl_interface::ModelBasedPlanningContext::useConfig()
   {
     std::string type = it->second;
     cfg.erase(it);
-    const std::string planner_name = getGroupName() + "/" + name_;
+    const std::string planner_name = getGroupName() + '/' + name_;
     ompl_simple_setup_->setPlannerAllocator(
         [planner_name, &spec = spec_, allocator = spec_.planner_selector_(type)](
             const ompl::base::SpaceInformationPtr& si) { return allocator(si, planner_name, spec); });

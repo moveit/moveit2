@@ -392,7 +392,7 @@ public:
         for (const auto& dependency : dependency_map_[controller])
         {
           queue.push_back(dependency);
-          controllers->push_back("/" + dependency);
+          controllers->push_back('/' + dependency);
         }
       }
     }

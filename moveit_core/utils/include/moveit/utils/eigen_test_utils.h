@@ -43,7 +43,7 @@ template <typename _Scalar, int _Dim, int _Mode, int _Options>
 std::ostream& operator<<(std::ostream& s, const Eigen::Transform<_Scalar, _Dim, _Mode, _Options>& t)
 {
   return s << "p=[" << t.translation().transpose() << "] q=[" << Eigen::Quaterniond(t.linear()).coeffs().transpose()
-           << "]";
+           << ']';
 }
 
 /** Predicate to compare two Eigen entities */

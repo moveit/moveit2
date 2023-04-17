@@ -409,7 +409,7 @@ void ompl_interface::ConstraintsLibrary::saveConstraintApproximations(const std:
       fout << serialization << '\n';
       fout << it->second->getFilename() << '\n';
       if (it->second->getStateStorage())
-        it->second->getStateStorage()->store((path + "/" + it->second->getFilename()).c_str());
+        it->second->getStateStorage()->store((path + '/' + it->second->getFilename()).c_str());
     }
   }
   else

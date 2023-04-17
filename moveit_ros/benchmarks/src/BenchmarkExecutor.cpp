@@ -563,7 +563,7 @@ bool BenchmarkExecutor::plannerConfigurationsExist(
       for (const std::pair<const std::string, planning_interface::PlannerConfigurationSettings>& config_entry :
            config_map)
       {
-        std::string planner_name = group_name + "[" + entry.second[i] + "]";
+        std::string planner_name = group_name + '[' + entry.second[i] + ']';
         planner_exists = (config_entry.second.group == group_name && config_entry.second.name == planner_name);
       }
 

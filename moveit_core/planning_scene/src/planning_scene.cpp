@@ -214,7 +214,7 @@ PlanningScene::PlanningScene(const PlanningSceneConstPtr& parent) : parent_(pare
     throw moveit::ConstructException("nullptr parent pointer for planning scene");
 
   if (!parent_->getName().empty())
-    name_ = parent_->getName() + "+";
+    name_ = parent_->getName() + '+';
 
   robot_model_ = parent_->robot_model_;
 

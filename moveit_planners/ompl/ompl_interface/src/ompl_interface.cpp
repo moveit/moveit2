@@ -131,7 +131,7 @@ bool OMPLInterface::loadPlannerConfiguration(const std::string& group_name, cons
     return false;
   }
 
-  planner_config.name = group_name + "[" + planner_id + "]";
+  planner_config.name = group_name + '[' + planner_id + ']';
   planner_config.group = group_name;
 
   // default to specified parameters of the group (overridden by configuration specific parameters)

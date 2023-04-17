@@ -65,7 +65,7 @@ RobotInteraction::RobotInteraction(const moveit::core::RobotModelConstPtr& robot
                                    const rclcpp::Node::SharedPtr& node, const std::string& ns)
   : robot_model_(robot_model), kinematic_options_map_(std::make_shared<KinematicOptionsMap>())
 {
-  topic_ = ns.empty() ? INTERACTIVE_MARKER_TOPIC : ns + "/" + INTERACTIVE_MARKER_TOPIC;
+  topic_ = ns.empty() ? INTERACTIVE_MARKER_TOPIC : ns + '/' + INTERACTIVE_MARKER_TOPIC;
   node_ = node;
   int_marker_server_ = new interactive_markers::InteractiveMarkerServer(topic_, node_);
 

@@ -98,7 +98,7 @@ void PointCloudOctomapUpdater::start()
 {
   std::string prefix = "";
   if (!ns_.empty())
-    prefix = ns_ + "/";
+    prefix = ns_ + '/';
 
   rclcpp::QoS qos(rclcpp::QoSInitialization::from_rmw(rmw_qos_profile_sensor_data));
   if (!filtered_cloud_topic_.empty())
