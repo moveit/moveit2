@@ -39,7 +39,11 @@
 #include <rclcpp/executors/multi_threaded_executor.hpp>
 #include <rclcpp/node.hpp>
 #include <rclcpp/publisher.hpp>
+#if MOVEIT_ROLLING
+#include <rclcpp/event_handler.hpp>
+#elif MOVEIT_HUMBLE
 #include <rclcpp/qos_event.hpp>
+#endif
 #include <rclcpp/time.hpp>
 #include <rclcpp/utilities.hpp>
 #include <memory>
