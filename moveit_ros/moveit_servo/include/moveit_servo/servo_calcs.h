@@ -189,15 +189,6 @@ protected:
   bool internalServoUpdate(Eigen::ArrayXd& delta_theta, trajectory_msgs::msg::JointTrajectory& joint_trajectory,
                            const ServoType servo_type);
 
-  /** \brief Joint-wise update of a sensor_msgs::msg::JointState with given delta's
-   * Also filters and calculates the previous velocity
-   * @param delta_theta Eigen vector of joint delta's
-   * @param joint_state The joint state msg being updated
-   * @param previous_vel Eigen vector of previous velocities being updated
-   * @return Returns false if there is a problem, true otherwise
-   */
-  bool applyJointUpdate(const Eigen::ArrayXd& delta_theta, sensor_msgs::msg::JointState& next_joint_state);
-
   /** \brief Gazebo simulations have very strict message timestamp requirements.
    * Satisfy Gazebo by stuffing multiple messages into one.
    */

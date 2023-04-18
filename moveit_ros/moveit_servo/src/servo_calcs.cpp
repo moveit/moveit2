@@ -725,7 +725,8 @@ bool ServoCalcs::internalServoUpdate(Eigen::ArrayXd& delta_theta,
   delta_theta *= collision_scale;
 
   // Loop through joints and update them, calculate velocities, and filter
-  if (!applyJointUpdate(delta_theta, next_joint_state_))
+  if (!applyJointUpdate(*node_->get_clock(), parameters_->publish_period, delta_theta, previous_joint_state_,
+                        next_joint_state_, smoother_))
     return false;
 
   // Mark the lowpass filters as updated for this cycle
@@ -761,41 +762,6 @@ bool ServoCalcs::internalServoUpdate(Eigen::ArrayXd& delta_theta,
   }
 
   previous_joint_state_ = current_joint_state_;
-  return true;
-}
-
-bool ServoCalcs::applyJointUpdate(const Eigen::ArrayXd& delta_theta, sensor_msgs::msg::JointState& next_joint_state)
-{
-  // All the sizes must match
-  if (next_joint_state.position.size() != static_cast<std::size_t>(delta_theta.size()) ||
-      next_joint_state.velocity.size() != next_joint_state.position.size())
-  {
-    rclcpp::Clock& clock = *node_->get_clock();
-    RCLCPP_ERROR_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD,
-                                 "Lengths of output and increments do not match.");
-    return false;
-  }
-
-  for (std::size_t i = 0; i < next_joint_state.position.size(); ++i)
-  {
-    // Increment joint
-    next_joint_state.position[i] += delta_theta[i];
-  }
-
-  smoother_->doSmoothing(next_joint_state.position);
-
-  // Lambda that calculates velocity using central difference.
-  // (q(t + dt) - q(t - dt)) / ( 2 * dt )
-  auto compute_velocity = [&](const double next_pos, const double previous_pos) {
-    return (next_pos - previous_pos) / (2 * parameters_->publish_period);
-  };
-
-  // Transform that applies the lambda to all joints.
-  // next_joint_state contains the future position q(t + dt)
-  // previous_joint_state_ contains past position q(t - dt)
-  std::transform(next_joint_state.position.begin(), next_joint_state.position.end(),
-                 previous_joint_state_.position.begin(), next_joint_state.velocity.begin(), compute_velocity);
-
   return true;
 }
 
