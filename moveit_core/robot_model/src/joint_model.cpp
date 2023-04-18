@@ -253,7 +253,9 @@ void JointModel::setMimic(const JointModel* mimic, double factor, double offset)
 
   // Scale and offset the variable bounds based on the mimic joint.
   if (getVariableCount() != mimic->getVariableCount())
+  {
     throw Exception("Variable counts of this joint and mimic joint do not match.");
+  }
 
   const auto other_variable_bounds = mimic_->getVariableBounds();
   for (std::size_t i = 0; i < variable_bounds_.size(); ++i)
