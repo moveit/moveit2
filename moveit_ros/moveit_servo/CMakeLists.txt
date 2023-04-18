@@ -43,7 +43,7 @@ add_library(moveit_servo_lib_parameters SHARED
   src/servo_parameters.cpp
   src/parameter_descriptor_builder.cpp
 )
-set_target_properties(moveit_servo_lib_parameters PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
+set_target_properties(moveit_servo_lib_parameters PROPERTIES VERSION "${moveit_servo_VERSION}")
 ament_target_dependencies(moveit_servo_lib_parameters ${THIS_PACKAGE_INCLUDE_DEPENDS})
 
 # This library provides a C++ interface for sending realtime twist or joint commands to a robot
@@ -54,7 +54,7 @@ add_library(moveit_servo_lib SHARED
   src/servo_calcs.cpp
   src/utilities.cpp
 )
-set_target_properties(moveit_servo_lib PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
+set_target_properties(moveit_servo_lib PROPERTIES VERSION "${moveit_servo_VERSION}")
 ament_target_dependencies(moveit_servo_lib ${THIS_PACKAGE_INCLUDE_DEPENDS})
 target_link_libraries(moveit_servo_lib moveit_servo_lib_parameters)
 
@@ -74,7 +74,7 @@ rclcpp_components_register_nodes(servo_node "moveit_servo::ServoNode")
 
 # Add executable for using a controller
 add_library(servo_controller_input SHARED src/teleop_demo/joystick_servo_example.cpp)
-ament_target_dependencies(servo_controller_input ${THIS_PACKAGE_INCLUDE_DEPENDS})
+ament_target_dependencies(servo_controller_input PUBLIC ${THIS_PACKAGE_INCLUDE_DEPENDS})
 target_link_libraries(servo_controller_input PRIVATE moveit_compatibility)
 rclcpp_components_register_nodes(servo_controller_input "moveit_servo::JoyToServoPub")
 
@@ -84,19 +84,18 @@ rclcpp_components_register_nodes(servo_controller_input "moveit_servo::JoyToServ
 
 # An executable node for the servo server
 add_executable(servo_node_main src/servo_node_main.cpp)
-target_link_libraries(servo_node_main PRIVATE servo_node)
+target_link_libraries(servo_node_main servo_node)
 ament_target_dependencies(servo_node_main ${THIS_PACKAGE_INCLUDE_DEPENDS})
 
 # An example of pose tracking
 add_executable(servo_pose_tracking_demo src/cpp_interface_demo/pose_tracking_demo.cpp)
-target_link_libraries(servo_pose_tracking_demo PRIVATE pose_tracking)
+target_link_libraries(servo_pose_tracking_demo pose_tracking)
 ament_target_dependencies(servo_pose_tracking_demo ${THIS_PACKAGE_INCLUDE_DEPENDS})
 
 # Add executable to publish fake servo commands for testing/demo purposes
 add_executable(fake_command_publisher test/publish_fake_jog_commands.cpp)
-target_link_libraries(fake_command_publisher PRIVATE moveit_compatibility)
+target_link_libraries(fake_command_publisher moveit_compatibility)
 ament_target_dependencies(fake_command_publisher
-  PRIVATE
   rclcpp
   geometry_msgs
   std_srvs
@@ -114,7 +113,7 @@ install(
     pose_tracking
     servo_node
     servo_controller_input
-  EXPORT ${PROJECT_NAME}Targets
+  EXPORT moveit_servoTargets
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
   RUNTIME DESTINATION bin
@@ -125,20 +124,19 @@ install(
 install(
   TARGETS
     servo_node_main
-    CPP_DEMO_NAME
     servo_pose_tracking_demo
     fake_command_publisher
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
-  RUNTIME DESTINATION lib/${PROJECT_NAME}
+  RUNTIME DESTINATION lib/moveit_servo
 )
 
 # Install include, launch, config directories
 install(DIRECTORY include/ DESTINATION include/moveit_servo)
-install(DIRECTORY launch DESTINATION share/${PROJECT_NAME})
-install(DIRECTORY config DESTINATION share/${PROJECT_NAME})
+install(DIRECTORY launch DESTINATION share/moveit_servo)
+install(DIRECTORY config DESTINATION share/moveit_servo)
 
-ament_export_targets(${PROJECT_NAME}Targets HAS_LIBRARY_TARGET)
+ament_export_targets(moveit_servoTargets HAS_LIBRARY_TARGET)
 ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS})
 
 #############
