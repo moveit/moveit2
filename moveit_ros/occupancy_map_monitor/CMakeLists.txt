@@ -49,8 +49,9 @@ ament_target_dependencies(moveit_ros_occupancy_map_server
   PUBLIC ${THIS_PACKAGE_INCLUDE_DEPENDS}
 )
 target_link_libraries(moveit_ros_occupancy_map_server
-  PUBLIC moveit_ros_occupancy_map_monitor
-  PRIVATE moveit_compatibility)
+  PRIVATE
+  moveit_ros_occupancy_map_monitor
+  moveit_compatibility)
 
 install(
   TARGETS moveit_ros_occupancy_map_monitor
