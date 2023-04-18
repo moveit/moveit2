@@ -43,7 +43,6 @@ add_library(moveit_servo_lib_parameters SHARED
   src/servo_parameters.cpp
   src/parameter_descriptor_builder.cpp
 )
-
 set_target_properties(moveit_servo_lib_parameters PROPERTIES VERSION "${moveit_servo_VERSION}")
 ament_target_dependencies(moveit_servo_lib_parameters ${THIS_PACKAGE_INCLUDE_DEPENDS})
 
@@ -55,7 +54,6 @@ add_library(moveit_servo_lib SHARED
   src/servo_calcs.cpp
   src/utilities.cpp
 )
-
 set_target_properties(moveit_servo_lib PROPERTIES VERSION "${moveit_servo_VERSION}")
 ament_target_dependencies(moveit_servo_lib ${THIS_PACKAGE_INCLUDE_DEPENDS})
 target_link_libraries(moveit_servo_lib moveit_servo_lib_parameters)
