@@ -143,9 +143,13 @@ bool JointModel::satisfiesAccelerationBounds(const double* values, const Bounds&
       continue;
     }
     if (other_bounds[i].max_acceleration_ + margin < values[i])
+    {
       return false;
+    }
     else if (other_bounds[i].min_acceleration_ - margin > values[i])
+    {
       return false;
+    }
   }
   return true;
 }
@@ -159,9 +163,13 @@ bool JointModel::satisfiesJerkBounds(const double* values, const Bounds& other_b
       continue;
     }
     if (other_bounds[i].max_jerk_ + margin < values[i])
+    {
       return false;
+    }
     else if (other_bounds[i].min_jerk_ - margin > values[i])
+    {
       return false;
+    }
   }
   return true;
 }
