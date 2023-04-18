@@ -250,30 +250,6 @@ void JointModel::setMimic(const JointModel* mimic, double factor, double offset)
   mimic_ = mimic;
   mimic_factor_ = factor;
   mimic_offset_ = offset;
-
-  // Scale and offset the variable bounds based on the mimic joint.
-  if (getVariableCount() != mimic->getVariableCount())
-  {
-    throw Exception("Variable counts of this joint and mimic joint do not match.");
-  }
-
-  const auto other_variable_bounds = mimic_->getVariableBounds();
-  for (std::size_t i = 0; i < variable_bounds_.size(); ++i)
-  {
-    const auto other_bound = other_variable_bounds[i];
-    variable_bounds_[i].position_bounded_ = other_bound.position_bounded_;
-    variable_bounds_[i].min_position_ = other_bound.min_position_ * factor + offset;
-    variable_bounds_[i].max_position_ = other_bound.max_position_ * factor + offset;
-    variable_bounds_[i].velocity_bounded_ = other_bound.velocity_bounded_;
-    variable_bounds_[i].min_velocity_ = other_bound.min_velocity_ * factor;
-    variable_bounds_[i].max_velocity_ = other_bound.max_velocity_ * factor;
-    variable_bounds_[i].acceleration_bounded_ = other_bound.acceleration_bounded_;
-    variable_bounds_[i].min_acceleration_ = other_bound.min_acceleration_ * factor;
-    variable_bounds_[i].max_acceleration_ = other_bound.max_acceleration_ * factor;
-    variable_bounds_[i].jerk_bounded_ = other_bound.jerk_bounded_;
-    variable_bounds_[i].min_jerk_ = other_bound.min_jerk_ * factor;
-    variable_bounds_[i].max_jerk_ = other_bound.max_jerk_ * factor;
-  }
 }
 
 void JointModel::addMimicRequest(const JointModel* joint)
