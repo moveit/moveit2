@@ -185,6 +185,7 @@ protected:
    * Handles limit enforcement, internal state updated, collision scaling, and publishing the commands
    * @param delta_theta Eigen vector of joint delta's, from joint or Cartesian servo calcs
    * @param joint_trajectory Output trajectory message
+   * @param servo_type The type of servoing command being used
    */
   bool internalServoUpdate(Eigen::ArrayXd& delta_theta, trajectory_msgs::msg::JointTrajectory& joint_trajectory,
                            const ServoType servo_type);
