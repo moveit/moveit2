@@ -52,7 +52,7 @@ macro(moveit_package)
     message(STATUS "Build for ROS2 Rolling")
     target_compile_definitions(moveit_compatibility INTERFACE MOVEIT_ROLLING)
   else()
-    message(FATAL_ERROR "Unsupported ROS Distribution: " "$ENV{ROS_DISTRO}")
+    message(FATAL_ERROR "Unsupported ROS Distribution: $ENV{ROS_DISTRO}")
   endif()
 
   if(NOT CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
