@@ -49,12 +49,10 @@ constexpr size_t ROS_LOG_THROTTLE_PERIOD = 30 * 1000;  // Milliseconds to thrott
 namespace moveit_servo
 {
 // Constructor for the class that handles collision checking
-CollisionCheck::CollisionCheck(const rclcpp::Node::SharedPtr& node,
-                               std::shared_ptr<const servo::ParamListener> servo_param_listener,
+CollisionCheck::CollisionCheck(const rclcpp::Node::SharedPtr& node, const servo::Params servo_params,
                                const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor)
   : node_(node)
-  , servo_param_listener_(servo_param_listener)
-  , servo_params_(servo_param_listener_->get_params())
+  , servo_params_(servo_params)
   , planning_scene_monitor_(planning_scene_monitor)
   , self_velocity_scale_coefficient_(-log(0.001) / servo_params_.self_collision_proximity_threshold)
   , scene_velocity_scale_coefficient_(-log(0.001) / servo_params_.scene_collision_proximity_threshold)

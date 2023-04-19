@@ -59,7 +59,7 @@ public:
    *  \param planning_scene_monitor: PSM should have scene monitor and state monitor
    *                                 already started when passed into this class
    */
-  CollisionCheck(const rclcpp::Node::SharedPtr& node, std::shared_ptr<const servo::ParamListener> servo_param_listener,
+  CollisionCheck(const rclcpp::Node::SharedPtr& node, const servo::Params servo_params,
                  const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor);
 
   ~CollisionCheck()
@@ -87,7 +87,6 @@ private:
   const std::shared_ptr<rclcpp::Node> node_;
 
   // The servo parameters
-  std::shared_ptr<const servo::ParamListener> servo_param_listener_;
   servo::Params servo_params_;
 
   // Pointer to the collision environment

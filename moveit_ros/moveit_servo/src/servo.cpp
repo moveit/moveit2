@@ -54,7 +54,7 @@ Servo::Servo(const rclcpp::Node::SharedPtr& node,
   : planning_scene_monitor_{ planning_scene_monitor }
   , servo_param_listener_{ servo_param_listener }
   , servo_calcs_{ node, planning_scene_monitor_, servo_param_listener_ }
-  , collision_checker_{ node, servo_param_listener_, planning_scene_monitor_ }
+  , collision_checker_{ node, servo_param_listener->get_params(), planning_scene_monitor_ }
 
 {
   servo_params_ = servo_param_listener_->get_params();
