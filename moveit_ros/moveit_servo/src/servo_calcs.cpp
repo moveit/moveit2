@@ -154,7 +154,7 @@ ServoCalcs::ServoCalcs(const rclcpp::Node::SharedPtr& node,
   // Load the smoothing plugin
   try
   {
-    smoother_ = smoothing_loader_.createUniqueInstance(parameters_->smoothing_filter_plugin_name);
+    smoother_ = smoothing_loader_.createUniqueInstance(servo_params_.smoothing_filter_plugin_name);
   }
   catch (pluginlib::PluginlibException& ex)
   {
@@ -209,7 +209,7 @@ void ServoCalcs::start()
   // Set up the "last" published message, in case we need to send it first
   auto initial_joint_trajectory = std::make_unique<trajectory_msgs::msg::JointTrajectory>();
   initial_joint_trajectory->header.stamp = node_->now();
-  initial_joint_trajectory->header.frame_id = parameters_->planning_frame;
+  initial_joint_trajectory->header.frame_id = servo_params_.planning_frame;
   initial_joint_trajectory->joint_names = current_joint_state_.name;
   trajectory_msgs::msg::JointTrajectoryPoint point;
   point.time_from_start = rclcpp::Duration::from_seconds(servo_params_.publish_period);
@@ -639,7 +639,7 @@ bool ServoCalcs::cartesianServoCalcs(geometry_msgs::msg::TwistStamped& cmd,
     moveit_msgs::msg::MoveItErrorCodes err;
     kinematics::KinematicsQueryOptions opts;
     opts.return_approximate_solution = true;
-    if (ik_solver_->searchPositionIK(next_pose, current_joint_state_.position, parameters_->publish_period / 2.0,
+    if (ik_solver_->searchPositionIK(next_pose, current_joint_state_.position, servo_params_.publish_period / 2.0,
                                      solution, err, opts))
     {
       // find the difference in joint positions that will get us to the desired pose
@@ -711,7 +711,7 @@ bool ServoCalcs::internalServoUpdate(Eigen::ArrayXd& delta_theta,
   delta_theta *= collision_scale;
 
   // Loop through joints and update them, calculate velocities, and filter
-  if (!applyJointUpdate(*node_->get_clock(), parameters_->publish_period, delta_theta, previous_joint_state_,
+  if (!applyJointUpdate(*node_->get_clock(), servo_params_.publish_period, delta_theta, previous_joint_state_,
                         next_joint_state_, smoother_))
     return false;
 

@@ -40,15 +40,8 @@ include_directories(
 ###################
 
 # This library provides a way of loading parameters for servo
-add_library(moveit_servo_lib_parameters SHARED
-  src/servo_parameters.cpp
-  src/parameter_descriptor_builder.cpp
-)
-set_target_properties(moveit_servo_lib_parameters PROPERTIES VERSION "${moveit_servo_VERSION}")
-ament_target_dependencies(moveit_servo_lib_parameters ${THIS_PACKAGE_INCLUDE_DEPENDS})
-
 generate_parameter_library(
-  ${SERVO_PARAM_LIB_NAME}
+  moveit_servo_lib_parameters
   src/servo_parameters.yaml
 )
 
