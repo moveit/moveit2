@@ -173,7 +173,7 @@ ServoCalcs::ServoCalcs(const rclcpp::Node::SharedPtr& node,
   // Load the smoothing plugin
   try
   {
-    smoother_ = smoothing_loader_.createSharedInstance(parameters_->smoothing_filter_plugin_name);
+    smoother_ = smoothing_loader_.createUniqueInstance(parameters_->smoothing_filter_plugin_name);
   }
   catch (pluginlib::PluginlibException& ex)
   {

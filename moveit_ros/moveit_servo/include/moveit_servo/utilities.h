@@ -38,6 +38,7 @@
 #include <geometry_msgs/msg/twist_stamped.hpp>
 #include <moveit/robot_model/joint_model_group.h>
 #include <moveit/robot_state/robot_state.h>
+#include <pluginlib/class_loader.hpp>
 #include <rclcpp/rclcpp.hpp>
 #include <tf2_eigen/tf2_eigen.hpp>
 
@@ -86,5 +87,5 @@ double velocityScalingFactorForSingularity(const moveit::core::JointModelGroup* 
 bool applyJointUpdate(rclcpp::Clock& clock, const double publish_period, const Eigen::ArrayXd& delta_theta,
                       const sensor_msgs::msg::JointState& previous_joint_state,
                       sensor_msgs::msg::JointState& next_joint_state,
-                      std::shared_ptr<online_signal_smoothing::SmoothingBaseClass>& smoother);
+                      pluginlib::UniquePtr<online_signal_smoothing::SmoothingBaseClass>& smoother);
 }  // namespace moveit_servo

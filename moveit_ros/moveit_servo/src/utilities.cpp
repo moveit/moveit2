@@ -34,12 +34,16 @@
 
 #include <moveit_servo/utilities.h>
 
+// Disable -Wold-style-cast because all _THROTTLE macros trigger this
+// It would be too noisy to disable on a per-callsite basis
+#pragma GCC diagnostic ignored "-Wold-style-cast"
+
 namespace moveit_servo
 {
 namespace
 {
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_servo.utilities");
-constexpr auto ROS_LOG_THROTTLE_PERIOD = static_cast<rcutils_duration_value_t>(std::chrono::milliseconds(3000).count());
+constexpr auto ROS_LOG_THROTTLE_PERIOD = std::chrono::milliseconds(3000).count();
 }  // namespace
 
 /** \brief Helper function for converting Eigen::Isometry3d to geometry_msgs/TransformStamped **/
@@ -141,7 +145,7 @@ double velocityScalingFactorForSingularity(const moveit::core::JointModelGroup* 
 bool applyJointUpdate(rclcpp::Clock& clock, const double publish_period, const Eigen::ArrayXd& delta_theta,
                       const sensor_msgs::msg::JointState& previous_joint_state,
                       sensor_msgs::msg::JointState& next_joint_state,
-                      std::shared_ptr<online_signal_smoothing::SmoothingBaseClass>& smoother)
+                      pluginlib::UniquePtr<online_signal_smoothing::SmoothingBaseClass>& smoother)
 {
   // All the sizes must match
   if (next_joint_state.position.size() != static_cast<std::size_t>(delta_theta.size()) ||

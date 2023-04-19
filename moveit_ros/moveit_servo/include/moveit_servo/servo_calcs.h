@@ -272,7 +272,7 @@ protected:
   std::map<std::string, std::size_t> joint_state_name_map_;
 
   // Smoothing algorithm (loads a plugin)
-  std::shared_ptr<online_signal_smoothing::SmoothingBaseClass> smoother_;
+  pluginlib::UniquePtr<online_signal_smoothing::SmoothingBaseClass> smoother_;
 
   trajectory_msgs::msg::JointTrajectory::SharedPtr last_sent_command_;
 
