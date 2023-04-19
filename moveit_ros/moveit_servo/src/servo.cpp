@@ -75,7 +75,6 @@ void Servo::start()
   servo_calcs_.start();
 
   // Check collisions in this timer
-  RCLCPP_INFO(LOGGER, "SERVO Check Collision : %d", servo_params_.check_collisions);
   if (servo_params_.check_collisions)
     collision_checker_.start();
 }

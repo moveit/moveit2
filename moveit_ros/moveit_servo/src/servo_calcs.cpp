@@ -340,6 +340,12 @@ void ServoCalcs::mainCalcLoop()
     // lock the input state mutex
     std::unique_lock<std::mutex> main_loop_lock(main_loop_mutex_);
 
+    // Check if any parameters changed
+    if (servo_params_.enable_parameter_update)
+    {
+      updateParams();
+    }
+
     // low latency mode -- begin calculations as soon as a new command is received.
     if (servo_params_.low_latency_mode)
     {
@@ -348,12 +354,6 @@ void ServoCalcs::mainCalcLoop()
 
     // reset new_input_cmd_ flag
     new_input_cmd_ = false;
-
-    // Check if any parameters changed
-    if (servo_params_.enable_parameter_update)
-    {
-      updateParams();
-    }
 
     // run servo calcs
     const auto start_time = node_->now();

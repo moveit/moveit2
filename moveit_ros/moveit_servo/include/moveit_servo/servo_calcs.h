@@ -94,7 +94,7 @@ public:
 
   /**
    * Check for parameter update, and apply updates if any
-   *
+   * All dynamic parameters must be checked and updated within this method.
    */
   void updateParams();
 
