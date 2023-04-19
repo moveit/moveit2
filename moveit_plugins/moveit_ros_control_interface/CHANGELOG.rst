@@ -2,6 +2,9 @@
 Changelog for package moveit_ros_control_interface
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.7.2 (2023-04-18)
+------------------
+
 2.7.1 (2023-03-23)
 ------------------
 * Add Warning Message for Out of Date Controller Information (`#1983 <https://github.com/ros-planning/moveit2/issues/1983>`_)
