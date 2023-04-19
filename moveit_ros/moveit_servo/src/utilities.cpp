@@ -39,7 +39,7 @@ namespace moveit_servo
 namespace
 {
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_servo.utilities");
-constexpr auto ROS_LOG_THROTTLE_PERIOD = std::chrono::milliseconds(3000).count();
+constexpr auto ROS_LOG_THROTTLE_PERIOD = static_cast<rcutils_duration_value_t>(std::chrono::milliseconds(3000).count());
 }  // namespace
 
 /** \brief Helper function for converting Eigen::Isometry3d to geometry_msgs/TransformStamped **/
@@ -124,10 +124,7 @@ double velocityScalingFactorForSingularity(const moveit::core::JointModelGroup* 
         1. - (ini_condition - lower_singularity_threshold) / (upper_threshold - lower_singularity_threshold);
     status =
         dot > 0 ? StatusCode::DECELERATE_FOR_APPROACHING_SINGULARITY : StatusCode::DECELERATE_FOR_LEAVING_SINGULARITY;
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wold-style-cast"
     RCLCPP_WARN_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD, SERVO_STATUS_CODE_MAP.at(status));
-#pragma GCC diagnostic pop
   }
 
   // Very close to singularity, so halt.
@@ -135,10 +132,7 @@ double velocityScalingFactorForSingularity(const moveit::core::JointModelGroup* 
   {
     velocity_scale = 0;
     status = StatusCode::HALT_FOR_SINGULARITY;
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wold-style-cast"
     RCLCPP_WARN_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD, SERVO_STATUS_CODE_MAP.at(status));
-#pragma GCC diagnostic pop
   }
 
   return velocity_scale;
@@ -153,11 +147,8 @@ bool applyJointUpdate(rclcpp::Clock& clock, const double publish_period, const E
   if (next_joint_state.position.size() != static_cast<std::size_t>(delta_theta.size()) ||
       next_joint_state.velocity.size() != next_joint_state.position.size())
   {
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wold-style-cast"
     RCLCPP_ERROR_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD,
                                  "Lengths of output and increments do not match.");
-#pragma GCC diagnostic pop
     return false;
   }
 
