@@ -59,6 +59,7 @@
 
 // Servo
 #include <moveit_servo/status_codes.h>
+// Auto-generated
 #include <moveit_servo_lib_parameters.hpp>
 
 #pragma once

@@ -46,7 +46,7 @@
 #include <moveit/planning_scene_monitor/planning_scene_monitor.h>
 #include <sensor_msgs/msg/joint_state.hpp>
 #include <std_msgs/msg/float64.hpp>
-
+// Auto-generated
 #include <moveit_servo_lib_parameters.hpp>
 
 namespace moveit_servo
@@ -86,7 +86,6 @@ private:
   // Pointer to the ROS node
   const std::shared_ptr<rclcpp::Node> node_;
 
-  // The servo parameters
   servo::Params servo_params_;
 
   // Pointer to the collision environment
