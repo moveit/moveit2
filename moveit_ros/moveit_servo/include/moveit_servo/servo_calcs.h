@@ -112,7 +112,10 @@ public:
   bool getEEFrameTransform(Eigen::Isometry3d& transform);
   bool getEEFrameTransform(geometry_msgs::msg::TransformStamped& transform);
 
-  /** \brief Pause or unpause processing servo commands while keeping the timers alive */
+  /**
+   * Pause or unpause the processing of servo commands while keeping the timers alive.
+   * If paused, commands to hold the robot at its current position will continue to be published at the configured rate.
+   */
   void setPaused(bool paused);
 
 protected:
