@@ -54,14 +54,6 @@ servo:
     }
   }
 
-  num_outgoing_halt_msgs_to_publish: {
-    type: int,
-    default_value: 4,
-    description: "If 0, republish commands forever even if the robot is stationary. \
-                  Otherwise, specify num. to publish. Important because ROS may drop \
-                  some messages and we need the robot to halt reliably."
-  }
-
 ################################ INPUTS  #############################
   cartesian_command_in_topic: {
     type: string,
