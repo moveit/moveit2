@@ -132,9 +132,6 @@ protected:
   /** \brief Do servoing calculations for direct commands to a joint. */
   bool jointServoCalcs(const control_msgs::msg::JointJog& cmd, trajectory_msgs::msg::JointTrajectory& joint_trajectory);
 
-  /** \brief Parse the incoming joint msg for the joints of our MoveGroup */
-  void updateJoints();
-
   /**
    * Checks a JointJog msg for valid (non-NaN) velocities
    * @param cmd the desired joint servo command
@@ -188,18 +185,10 @@ protected:
    * Handles limit enforcement, internal state updated, collision scaling, and publishing the commands
    * @param delta_theta Eigen vector of joint delta's, from joint or Cartesian servo calcs
    * @param joint_trajectory Output trajectory message
+   * @param servo_type The type of servoing command being used
    */
   bool internalServoUpdate(Eigen::ArrayXd& delta_theta, trajectory_msgs::msg::JointTrajectory& joint_trajectory,
                            const ServoType servo_type);
-
-  /** \brief Joint-wise update of a sensor_msgs::msg::JointState with given delta's
-   * Also filters and calculates the previous velocity
-   * @param delta_theta Eigen vector of joint delta's
-   * @param joint_state The joint state msg being updated
-   * @param previous_vel Eigen vector of previous velocities being updated
-   * @return Returns false if there is a problem, true otherwise
-   */
-  bool applyJointUpdate(const Eigen::ArrayXd& delta_theta, sensor_msgs::msg::JointState& joint_state);
 
   /** \brief Gazebo simulations have very strict message timestamp requirements.
    * Satisfy Gazebo by stuffing multiple messages into one.
@@ -274,16 +263,16 @@ protected:
 
   moveit::core::RobotStatePtr current_state_;
 
-  // (mutex protected below)
-  // internal_joint_state_ is used in servo calculations. It shouldn't be relied on to be accurate.
-  // original_joint_state_ is the same as incoming_joint_state_ except it only contains the joints the servo node acts
-  // on.
-  // last_joint_state_ caches the previous `original_joint_state_`
-  sensor_msgs::msg::JointState internal_joint_state_, original_joint_state_, last_joint_state_;
+  // These variables are mutex protected
+  // previous_joint_state holds the state q(t - dt)
+  // current_joint_state holds the  state q(t) as retrieved from the planning scene monitor.
+  // next_joint_state holds the computed state q(t + dt)
+
+  sensor_msgs::msg::JointState previous_joint_state_, current_joint_state_, next_joint_state_;
   std::map<std::string, std::size_t> joint_state_name_map_;
 
   // Smoothing algorithm (loads a plugin)
-  std::shared_ptr<online_signal_smoothing::SmoothingBaseClass> smoother_;
+  pluginlib::UniquePtr<online_signal_smoothing::SmoothingBaseClass> smoother_;
 
   trajectory_msgs::msg::JointTrajectory::SharedPtr last_sent_command_;
 
