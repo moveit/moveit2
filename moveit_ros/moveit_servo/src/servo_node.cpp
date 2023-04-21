@@ -77,7 +77,7 @@ ServoNode::ServoNode(const rclcpp::NodeOptions& options)
   node_->get_parameter_or("robot_description_name", robot_description_name, robot_description_name);
 
   // Get the servo parameters
-  auto param_listener = std::make_shared<const servo::ParamListener>(node_);
+  auto param_listener = std::make_unique<const servo::ParamListener>(node_);
   auto servo_parameters = param_listener->get_params();
 
   // Set up planning_scene_monitor
@@ -103,7 +103,7 @@ ServoNode::ServoNode(const rclcpp::NodeOptions& options)
   }
 
   // Create Servo
-  servo_ = std::make_unique<moveit_servo::Servo>(node_, planning_scene_monitor_, param_listener);
+  servo_ = std::make_unique<moveit_servo::Servo>(node_, planning_scene_monitor_, std::move(param_listener));
 }
 
 void ServoNode::startCB(const std::shared_ptr<std_srvs::srv::Trigger::Request>& /* unused */,

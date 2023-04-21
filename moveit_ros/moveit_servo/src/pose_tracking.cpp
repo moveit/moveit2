@@ -72,7 +72,7 @@ void declareOrGetParam(T& output_value, const std::string& param_name, const rcl
 namespace moveit_servo
 {
 PoseTracking::PoseTracking(const rclcpp::Node::SharedPtr& node,
-                           std::shared_ptr<const servo::ParamListener>& servo_param_listener,
+                           std::unique_ptr<const servo::ParamListener> servo_param_listener,
                            const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor)
   : node_(node)
   , servo_parameters_(servo_param_listener->get_params())
@@ -91,10 +91,6 @@ PoseTracking::PoseTracking(const rclcpp::Node::SharedPtr& node,
   initializePID(z_pid_config_, cartesian_position_pids_);
   initializePID(angular_pid_config_, cartesian_orientation_pids_);
 
-  // Use the C++ interface that Servo provides
-  servo_ = std::make_unique<moveit_servo::Servo>(node_, planning_scene_monitor_, servo_param_listener);
-  servo_->start();
-
   // Connect to Servo ROS interfaces
   target_pose_sub_ = node_->create_subscription<geometry_msgs::msg::PoseStamped>(
       "target_pose", rclcpp::SystemDefaultsQoS(),
@@ -102,7 +98,11 @@ PoseTracking::PoseTracking(const rclcpp::Node::SharedPtr& node,
 
   // Publish outgoing twist commands to the Servo object
   twist_stamped_pub_ = node_->create_publisher<geometry_msgs::msg::TwistStamped>(
-      servo_->getParameters().cartesian_command_in_topic, rclcpp::SystemDefaultsQoS());
+      servo_parameters_.cartesian_command_in_topic, rclcpp::SystemDefaultsQoS());
+
+  // Use the C++ interface that Servo provides
+  servo_ = std::make_unique<moveit_servo::Servo>(node_, planning_scene_monitor_, std::move(servo_param_listener));
+  servo_->start();
 }
 
 PoseTrackingStatusCode PoseTracking::moveToPose(const Eigen::Vector3d& positional_tolerance,

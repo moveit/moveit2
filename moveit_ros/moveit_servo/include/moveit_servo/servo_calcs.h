@@ -81,7 +81,7 @@ class ServoCalcs
 public:
   ServoCalcs(const rclcpp::Node::SharedPtr& node,
              const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor,
-             std::shared_ptr<const servo::ParamListener>& servo_param_listener);
+             std::unique_ptr<const servo::ParamListener> servo_param_listener);
 
   ~ServoCalcs();
 
@@ -253,7 +253,7 @@ protected:
   std::shared_ptr<rclcpp::Node> node_;
 
   // Servo parameters
-  std::shared_ptr<const servo::ParamListener> servo_param_listener_;
+  std::unique_ptr<const servo::ParamListener> servo_param_listener_;
   servo::Params servo_params_;
 
   // Pointer to the collision environment

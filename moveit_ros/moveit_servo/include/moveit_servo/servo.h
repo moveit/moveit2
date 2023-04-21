@@ -56,7 +56,7 @@ class Servo
 public:
   Servo(const rclcpp::Node::SharedPtr& node,
         const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor,
-        std::shared_ptr<const servo::ParamListener>& servo_param_listener);
+        std::unique_ptr<const servo::ParamListener> servo_param_listener);
 
   ~Servo();
 
@@ -86,19 +86,13 @@ public:
   bool getEEFrameTransform(Eigen::Isometry3d& transform);
   bool getEEFrameTransform(geometry_msgs::msg::TransformStamped& transform);
 
-  /** \brief Get the parameters used by servo node. */
-  const servo::Params getParameters() const;
-
   // Give test access to private/protected methods
   friend class ServoFixture;
 
 private:
+  servo::Params servo_params_;
   // Pointer to the collision environment
   planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor_;
-
-  // The servo parameters
-  std::shared_ptr<const servo::ParamListener> servo_param_listener_;
-  servo::Params servo_params_;
 
   ServoCalcs servo_calcs_;
   CollisionCheck collision_checker_;

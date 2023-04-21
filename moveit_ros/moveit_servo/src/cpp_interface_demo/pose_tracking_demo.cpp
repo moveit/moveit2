@@ -89,7 +89,7 @@ int main(int argc, char** argv)
   executor.add_node(node);
   std::thread executor_thread([&executor]() { executor.spin(); });
 
-  auto servo_param_listener = std::make_shared<const servo::ParamListener>(node);
+  auto servo_param_listener = std::make_unique<const servo::ParamListener>(node);
   auto servo_parameters = servo_param_listener->get_params();
 
   // Load the planning scene monitor
@@ -118,7 +118,7 @@ int main(int argc, char** argv)
   }
 
   // Create the pose tracker
-  moveit_servo::PoseTracking tracker(node, servo_param_listener, planning_scene_monitor);
+  moveit_servo::PoseTracking tracker(node, std::move(servo_param_listener), planning_scene_monitor);
 
   // Make a publisher for sending pose commands
   auto target_pose_pub =

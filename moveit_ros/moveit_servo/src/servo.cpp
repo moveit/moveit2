@@ -50,14 +50,13 @@ constexpr double ROBOT_STATE_WAIT_TIME = 10.0;  // seconds
 
 Servo::Servo(const rclcpp::Node::SharedPtr& node,
              const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor,
-             std::shared_ptr<const servo::ParamListener>& servo_param_listener)
-  : planning_scene_monitor_{ planning_scene_monitor }
-  , servo_param_listener_{ servo_param_listener }
-  , servo_calcs_{ node, planning_scene_monitor_, servo_param_listener_ }
-  , collision_checker_{ node, servo_param_listener->get_params(), planning_scene_monitor_ }
+             std::unique_ptr<const servo::ParamListener> servo_param_listener)
+  : servo_params_{ servo_param_listener->get_params() }
+  , planning_scene_monitor_{ planning_scene_monitor }
+  , servo_calcs_{ node, planning_scene_monitor_, std::move(servo_param_listener) }
+  , collision_checker_{ node, servo_params_, planning_scene_monitor_ }
 
 {
-  servo_params_ = servo_param_listener_->get_params();
 }
 
 void Servo::start()
@@ -108,11 +107,6 @@ bool Servo::getEEFrameTransform(Eigen::Isometry3d& transform)
 bool Servo::getEEFrameTransform(geometry_msgs::msg::TransformStamped& transform)
 {
   return servo_calcs_.getEEFrameTransform(transform);
-}
-
-const servo::Params Servo::getParameters() const
-{
-  return servo_param_listener_->get_params();
 }
 
 }  // namespace moveit_servo

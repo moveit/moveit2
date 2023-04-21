@@ -65,7 +65,7 @@ public:
     executor_->add_node(node_);
     executor_thread_ = std::thread([this]() { this->executor_->spin(); });
 
-    auto servo_param_listener = std::make_shared<const servo::ParamListener>(node_);
+    auto servo_param_listener = std::make_unique<const servo::ParamListener>(node_);
     servo_parameters_ = servo_param_listener->get_params();
 
     // store test constants as shared pointer to constant struct
@@ -100,7 +100,8 @@ public:
       exit(EXIT_FAILURE);
     }
 
-    tracker_ = std::make_shared<moveit_servo::PoseTracking>(node_, servo_param_listener, planning_scene_monitor_);
+    tracker_ =
+        std::make_shared<moveit_servo::PoseTracking>(node_, std::move(servo_param_listener), planning_scene_monitor_);
 
     // Tolerance for pose seeking
     translation_tolerance_ << TRANSLATION_TOLERANCE, TRANSLATION_TOLERANCE, TRANSLATION_TOLERANCE;

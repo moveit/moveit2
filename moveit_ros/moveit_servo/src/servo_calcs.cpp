@@ -74,9 +74,9 @@ int const THREAD_PRIORITY = 40;
 // Constructor for the class that handles servoing calculations
 ServoCalcs::ServoCalcs(const rclcpp::Node::SharedPtr& node,
                        const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor,
-                       std::shared_ptr<const servo::ParamListener>& servo_param_listener)
+                       std::unique_ptr<const servo::ParamListener> servo_param_listener)
   : node_(node)
-  , servo_param_listener_(servo_param_listener)
+  , servo_param_listener_(std::move(servo_param_listener))
   , servo_params_(servo_param_listener_->get_params())
   , planning_scene_monitor_(planning_scene_monitor)
   , stop_requested_(true)
