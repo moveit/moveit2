@@ -63,6 +63,12 @@ private:
   std::shared_ptr<tf2_ros::Buffer> tf_buffer_;
   std::shared_ptr<planning_scene_monitor::PlanningSceneMonitor> planning_scene_monitor_;
 
+  /***
+   * \brief Most of parameters are validated using the validation methods provided by the generate_paramter_library
+   * This method validates only the parameters that need to be checked against another parameter
+   */
+  void validateParams(const servo::Params);
+
   /** \brief Start the servo loop. Must be called once to begin Servoing. */
   void startCB(const std::shared_ptr<std_srvs::srv::Trigger::Request>& request,
                const std::shared_ptr<std_srvs::srv::Trigger::Response>& response);

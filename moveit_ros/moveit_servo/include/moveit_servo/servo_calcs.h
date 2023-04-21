@@ -92,14 +92,9 @@ public:
    */
   void start();
 
-  /***
-   * Validate the parameter values
-   */
-  void validateParams();
-
   /**
    * Check for parameter update, and apply updates if any
-   * All dynamic parameters must be checked and updated within this method.
+   * All dynamic parameters must be checked and updated within this method
    */
   void updateParams();
 
