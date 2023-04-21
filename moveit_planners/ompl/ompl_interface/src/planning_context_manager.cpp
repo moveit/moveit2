@@ -118,11 +118,11 @@ ompl::base::PlannerPtr MultiQueryPlannerAllocator::allocatePlanner(const ob::Spa
   if (multi_query_planning_enabled)
   {
     // If we already have an instance, use that one
-    auto planner_map_it = planners_.find(new_name);
-    if (planner_map_it != planners_.end())
-    {
-      return planner_map_it->second;
-    }
+    // auto planner_map_it = planners_.find(new_name);
+    // if (planner_map_it != planners_.end())
+    // {
+    //   return planner_map_it->second;
+    // }
 
     // Certain multi-query planners allow loading and storing the generated planner data. This feature can be
     // selectively enabled for loading and storing using the bool parameters 'load_planner_data' and
