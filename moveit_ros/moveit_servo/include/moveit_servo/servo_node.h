@@ -64,8 +64,9 @@ private:
   std::shared_ptr<planning_scene_monitor::PlanningSceneMonitor> planning_scene_monitor_;
 
   /***
-   * \brief Most servo parameters are individually validated using the validation methods in `generate_parameter_library`, with limits specified in the parameters YAML file.
-   * This method performs additional validation for parameters whose values depend on each other. 
+   * \brief Most servo parameters are individually validated using the validation methods in
+   * `generate_parameter_library`, with limits specified in the parameters YAML file. This method performs additional
+   * validation for parameters whose values depend on each other.
    */
   void validateParams(const servo::Params);
 

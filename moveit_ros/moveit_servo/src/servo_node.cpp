@@ -113,42 +113,42 @@ void ServoNode::validateParams(const servo::Params servo_params)
   bool has_error = false;
   if (servo_params.hard_stop_singularity_threshold <= servo_params.lower_singularity_threshold)
   {
-    RCLCPP_WARN(LOGGER, "Parameter 'hard_stop_singularity_threshold' "
-                        "should be greater than 'lower_singularity_threshold.' "
-                        "Check the parameters YAML file used to launch this node.");
+    RCLCPP_ERROR(LOGGER, "Parameter 'hard_stop_singularity_threshold' "
+                         "should be greater than 'lower_singularity_threshold.' "
+                         "Check the parameters YAML file used to launch this node.");
     has_error = true;
   }
 
   if (!servo_params.publish_joint_positions && !servo_params.publish_joint_velocities &&
       !servo_params.publish_joint_accelerations)
   {
-    RCLCPP_WARN(LOGGER, "At least one of publish_joint_positions / "
-                        "publish_joint_velocities / "
-                        "publish_joint_accelerations must be true. "
-                        "Check the parameters YAML file used to launch this node.");
+    RCLCPP_ERROR(LOGGER, "At least one of publish_joint_positions / "
+                         "publish_joint_velocities / "
+                         "publish_joint_accelerations must be true. "
+                         "Check the parameters YAML file used to launch this node.");
     has_error = true;
   }
 
   if ((servo_params.command_out_type == "std_msgs/Float64MultiArray") && servo_params.publish_joint_positions &&
       servo_params.publish_joint_velocities)
   {
-    RCLCPP_WARN(LOGGER, "When publishing a std_msgs/Float64MultiArray, "
-                        "you must select positions OR velocities."
-                        "Check the parameters YAML file used to launch this node.");
+    RCLCPP_ERROR(LOGGER, "When publishing a std_msgs/Float64MultiArray, "
+                         "you must select positions OR velocities."
+                         "Check the parameters YAML file used to launch this node.");
     has_error = true;
   }
 
   if (servo_params.scene_collision_proximity_threshold < servo_params.self_collision_proximity_threshold)
   {
-    RCLCPP_WARN(LOGGER, "Parameter 'self_collision_proximity_threshold' should probably be less "
-                        "than or equal to 'scene_collision_proximity_threshold'."
-                        "Check the parameters YAML file used to launch this node.");
+    RCLCPP_ERROR(LOGGER, "Parameter 'self_collision_proximity_threshold' should probably be less "
+                         "than or equal to 'scene_collision_proximity_threshold'."
+                         "Check the parameters YAML file used to launch this node.");
     has_error = true;
   }
 
   if (has_error)
   {
-    throw std::runtime_error("Failed to initialize servo");
+    throw std::runtime_error("Servo failed to initialize : Invalid parameter values");
   }
 }
 
