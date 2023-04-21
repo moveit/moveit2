@@ -84,6 +84,9 @@ ServoCalcs::ServoCalcs(const rclcpp::Node::SharedPtr& node,
   , smoothing_loader_("moveit_core", "online_signal_smoothing::SmoothingBaseClass")
 
 {
+  // Validate the parameters first.
+  validateParams();
+
   // MoveIt Setup
   current_state_ = planning_scene_monitor_->getStateMonitor()->getCurrentState();
   joint_model_group_ = current_state_->getJointModelGroup(servo_params_.move_group_name);
@@ -297,6 +300,38 @@ void ServoCalcs::stop()
   if (thread_.joinable())
   {
     thread_.join();
+  }
+}
+
+void ServoCalcs::validateParams()
+{
+  if (servo_params_.hard_stop_singularity_threshold <= servo_params_.lower_singularity_threshold)
+  {
+    RCLCPP_ERROR(LOGGER, "Parameter 'hard_stop_singularity_threshold' "
+                         "should be greater than 'lower_singularity_threshold.' "
+                         "Check yaml file.");
+  }
+
+  if (!servo_params_.publish_joint_positions && !servo_params_.publish_joint_velocities &&
+      !servo_params_.publish_joint_accelerations)
+  {
+    RCLCPP_ERROR(LOGGER, "At least one of publish_joint_positions / "
+                         "publish_joint_velocities / "
+                         "publish_joint_accelerations must be true. Check "
+                         "yaml file.");
+  }
+
+  if ((servo_params_.command_out_type == "std_msgs/Float64MultiArray") && servo_params_.publish_joint_positions &&
+      servo_params_.publish_joint_velocities)
+  {
+    RCLCPP_ERROR(LOGGER, "When publishing a std_msgs/Float64MultiArray, "
+                         "you must select positions OR velocities.");
+  }
+
+  if (servo_params_.scene_collision_proximity_threshold < servo_params_.self_collision_proximity_threshold)
+  {
+    RCLCPP_ERROR(LOGGER, "Parameter 'self_collision_proximity_threshold' should probably be less "
+                         "than or equal to 'scene_collision_proximity_threshold'. Check yaml file.");
   }
 }
 
