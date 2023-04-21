@@ -31,6 +31,7 @@ find_package(tf2_eigen REQUIRED)
 find_package(tf2_kdl REQUIRED)
 find_package(tf2_geometry_msgs REQUIRED)
 find_package(eigen_stl_containers REQUIRED)
+find_package(generate_parameter_library REQUIRED)
 find_package(geometric_shapes REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(kdl_parser REQUIRED)
@@ -46,7 +47,6 @@ find_package(trajectory_msgs REQUIRED)
 find_package(visualization_msgs REQUIRED)
 find_package(common_interfaces REQUIRED)
 find_package(pluginlib REQUIRED)
-find_package(generate_parameter_library REQUIRED)
 # TODO: Port python bindings
 # find_package(pybind11 REQUIRED)
 
@@ -116,8 +116,8 @@ set(THIS_PACKAGE_LIBRARIES
 
 set(THIS_PACKAGE_INCLUDE_DEPENDS
   angles
-  generate_parameter_library
   eigen_stl_containers
+  generate_parameter_library
   geometric_shapes
   geometry_msgs
   kdl_parser
