@@ -46,6 +46,7 @@ find_package(trajectory_msgs REQUIRED)
 find_package(visualization_msgs REQUIRED)
 find_package(common_interfaces REQUIRED)
 find_package(pluginlib REQUIRED)
+find_package(generate_parameter_library REQUIRED)
 # TODO: Port python bindings
 # find_package(pybind11 REQUIRED)
 
@@ -86,6 +87,7 @@ set(THIS_PACKAGE_INCLUDE_DIRS
 
 set(THIS_PACKAGE_LIBRARIES
     moveit_butterworth_filter
+    moveit_butterworth_parameters
     moveit_collision_distance_field
     moveit_collision_detection
     moveit_collision_detection_fcl
@@ -114,6 +116,7 @@ set(THIS_PACKAGE_LIBRARIES
 
 set(THIS_PACKAGE_INCLUDE_DEPENDS
   angles
+  generate_parameter_library
   eigen_stl_containers
   geometric_shapes
   geometry_msgs
