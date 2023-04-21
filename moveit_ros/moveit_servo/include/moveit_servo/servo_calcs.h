@@ -112,7 +112,10 @@ public:
   bool getEEFrameTransform(Eigen::Isometry3d& transform);
   bool getEEFrameTransform(geometry_msgs::msg::TransformStamped& transform);
 
-  /** \brief Pause or unpause processing servo commands while keeping the timers alive */
+  /**
+   * Pause or unpause the processing of servo commands while keeping the timers alive.
+   * If paused, commands to hold the robot at its current position will continue to be published at the configured rate.
+   */
   void setPaused(bool paused);
 
 protected:
@@ -185,18 +188,10 @@ protected:
    * Handles limit enforcement, internal state updated, collision scaling, and publishing the commands
    * @param delta_theta Eigen vector of joint delta's, from joint or Cartesian servo calcs
    * @param joint_trajectory Output trajectory message
+   * @param servo_type The type of servoing command being used
    */
   bool internalServoUpdate(Eigen::ArrayXd& delta_theta, trajectory_msgs::msg::JointTrajectory& joint_trajectory,
                            const ServoType servo_type);
-
-  /** \brief Joint-wise update of a sensor_msgs::msg::JointState with given delta's
-   * Also filters and calculates the previous velocity
-   * @param delta_theta Eigen vector of joint delta's
-   * @param joint_state The joint state msg being updated
-   * @param previous_vel Eigen vector of previous velocities being updated
-   * @return Returns false if there is a problem, true otherwise
-   */
-  bool applyJointUpdate(const Eigen::ArrayXd& delta_theta, sensor_msgs::msg::JointState& next_joint_state);
 
   /** \brief Gazebo simulations have very strict message timestamp requirements.
    * Satisfy Gazebo by stuffing multiple messages into one.
@@ -280,7 +275,7 @@ protected:
   std::map<std::string, std::size_t> joint_state_name_map_;
 
   // Smoothing algorithm (loads a plugin)
-  std::shared_ptr<online_signal_smoothing::SmoothingBaseClass> smoother_;
+  pluginlib::UniquePtr<online_signal_smoothing::SmoothingBaseClass> smoother_;
 
   trajectory_msgs::msg::JointTrajectory::SharedPtr last_sent_command_;
 
