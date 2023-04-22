@@ -2,25 +2,21 @@ servo:
 ################################ ROBOT SPECIFIC CONFIG #############################
   move_group_name: {
     type: string,
-    default_value: "panda_arm",
     description: "The name of the moveit move_group of your robot"
   }
 
   planning_frame: {
     type: string,
-    default_value: "panda_link0",
     description: "The name of moveit planning frame."
   }
 
   ee_frame_name: {
     type: string,
-    default_value: "panda_link8",
     description: "The name of end-effector frame of your robot"
   }
 
   robot_link_command_frame: {
     type: string,
-    default_value: "panda_link0",
     description: "The frame of incoming command, change this to your own value when using a different robot."
   }
 
