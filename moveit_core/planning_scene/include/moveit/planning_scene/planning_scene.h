@@ -95,24 +95,12 @@ public:
   /** \brief Get the object color */
   const std_msgs::msg::ColorRGBA& getObjectColor(const std::string& id, const PlanningSceneConstPtr parent) const;
 
-  /** \brief Get the object color assuming no parent planning scene */
-  const std_msgs::msg::ColorRGBA& getObjectColor(const std::string& id) const
-  {
-    return getObjectColor(id, nullptr);
-  }
-
   /** \brief Construct a vector of messages (\e object_colors) with the colors of the objects from the planning_scene */
   void getObjectColorMsgs(std::vector<moveit_msgs::msg::ObjectColor>& object_colors,
                           const PlanningSceneConstPtr parent) const;
 
   /** \brief Check if an object has color */
   bool hasObjectColor(const std::string& id, const PlanningSceneConstPtr parent) const;
-
-  /** \brief Check if an object has color assuming no parent planning scene */
-  bool hasObjectColor(const std::string& id) const
-  {
-    return hasObjectColor(id, nullptr);
-  }
 
   const ObjectColorMap& getConstObjectColorMap() const
   {
