@@ -114,6 +114,17 @@ public:
     return hasObjectColor(id, nullptr);
   }
 
+  const ObjectColorMap& getConstObjectColorMap() const
+  {
+    return color_map_;
+  }
+
+  ObjectColorMap& getNonConstObjectColorMap()
+  {
+    return color_map_;
+  }
+
+private:
   ObjectColorMap color_map_;
 };
 

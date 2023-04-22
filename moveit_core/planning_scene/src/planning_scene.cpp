@@ -634,9 +634,9 @@ void PlanningScene::getPlanningSceneDiffMsg(moveit_msgs::msg::PlanningScene& sce
   scene_msg.object_colors.clear();
 
   unsigned int i = 0;
-  scene_msg.object_colors.resize(object_colors_.color_map_.size());
-  for (ObjectColorMap::const_iterator it = object_colors_.color_map_.begin(); it != object_colors_.color_map_.end();
-       ++it, ++i)
+  scene_msg.object_colors.resize(object_colors_.getConstObjectColorMap().size());
+  for (ObjectColorMap::const_iterator it = object_colors_.getConstObjectColorMap().begin();
+       it != object_colors_.getConstObjectColorMap().end(); ++it, ++i)
   {
     scene_msg.object_colors[i].id = it->first;
     scene_msg.object_colors[i].color = it->second;
@@ -1173,9 +1173,9 @@ void PlanningScene::decoupleParent()
 
   world_diff_.reset();
 
-  if (object_colors_.color_map_.empty())
+  if (object_colors_.getConstObjectColorMap().empty())
   {
-    parent_->getPlanningSceneColorsConst()->getKnownObjectColors(object_colors_.color_map_, nullptr);
+    parent_->getPlanningSceneColorsConst()->getKnownObjectColors(object_colors_.getNonConstObjectColorMap(), nullptr);
   }
   else
   {
@@ -1183,8 +1183,8 @@ void PlanningScene::decoupleParent()
     parent_->object_colors_.getKnownObjectColors(kc, nullptr);
     for (ObjectColorMap::const_iterator it = kc.begin(); it != kc.end(); ++it)
     {
-      if (object_colors_.color_map_.find(it->first) == object_colors_.color_map_.end())
-        object_colors_.color_map_[it->first] = it->second;
+      if (object_colors_.getConstObjectColorMap().find(it->first) == object_colors_.getConstObjectColorMap().end())
+        object_colors_.getNonConstObjectColorMap()[it->first] = it->second;
     }
   }
 
