@@ -77,11 +77,45 @@ typedef std::function<bool(const moveit::core::RobotState&, bool)> StateFeasibil
     whether the check should be verbose or not. */
 using MotionFeasibilityFn = std::function<bool(const moveit::core::RobotState&, const moveit::core::RobotState&, bool)>;
 
+/** \brief A map from object names (e.g., attached bodies, collision objects) to their types */
+using ObjectTypeMap = std::map<std::string, object_recognition_msgs::msg::ObjectType>;
+
 /** \brief A map from object names (e.g., attached bodies, collision objects) to their colors */
 using ObjectColorMap = std::map<std::string, std_msgs::msg::ColorRGBA>;
 
-/** \brief A map from object names (e.g., attached bodies, collision objects) to their types */
-using ObjectTypeMap = std::map<std::string, object_recognition_msgs::msg::ObjectType>;
+MOVEIT_CLASS_FORWARD(PlanningSceneColors);
+
+class PlanningSceneColors
+{
+public:
+  void setObjectColor(const std::string& id, const std_msgs::msg::ColorRGBA& color);
+  void removeObjectColor(const std::string& id);
+  void getKnownObjectColors(ObjectColorMap& kc, const PlanningSceneConstPtr parent) const;
+
+  /** \brief Get the object color */
+  const std_msgs::msg::ColorRGBA& getObjectColor(const std::string& id, const PlanningSceneConstPtr parent) const;
+
+  /** \brief Get the object color assuming no parent planning scene */
+  const std_msgs::msg::ColorRGBA& getObjectColor(const std::string& id) const
+  {
+    return getObjectColor(id, nullptr);
+  }
+
+  /** \brief Construct a vector of messages (\e object_colors) with the colors of the objects from the planning_scene */
+  void getObjectColorMsgs(std::vector<moveit_msgs::msg::ObjectColor>& object_colors,
+                          const PlanningSceneConstPtr parent) const;
+
+  /** \brief Check if an object has color */
+  bool hasObjectColor(const std::string& id, const PlanningSceneConstPtr parent) const;
+
+  /** \brief Check if an object has color assuming no parent planning scene */
+  bool hasObjectColor(const std::string& id) const
+  {
+    return hasObjectColor(id, nullptr);
+  }
+
+  ObjectColorMap color_map_;
+};
 
 /** \brief This class maintains the representation of the
     environment as seen by a planning instance. The environment
@@ -684,9 +718,6 @@ public:
   /** \brief Construct a message (\e octomap) with the octomap data from the planning_scene */
   bool getOctomapMsg(octomap_msgs::msg::OctomapWithPose& octomap) const;
 
-  /** \brief Construct a vector of messages (\e object_colors) with the colors of the objects from the planning_scene */
-  void getObjectColorMsgs(std::vector<moveit_msgs::msg::ObjectColor>& object_colors) const;
-
   /** \brief Apply changes to this planning scene as diffs, even if the message itself is not marked as being a diff
      (is_diff
       member). A parent is not required to exist. However, the existing data in the planning instance is not cleared.
@@ -738,13 +769,6 @@ public:
 
   /** \brief Set the callback to be triggered when changes are made to the current scene world */
   void setCollisionObjectUpdateCallback(const collision_detection::World::ObserverCallbackFn& callback);
-
-  bool hasObjectColor(const std::string& id) const;
-
-  const std_msgs::msg::ColorRGBA& getObjectColor(const std::string& id) const;
-  void setObjectColor(const std::string& id, const std_msgs::msg::ColorRGBA& color);
-  void removeObjectColor(const std::string& id);
-  void getKnownObjectColors(ObjectColorMap& kc) const;
 
   bool hasObjectType(const std::string& id) const;
 
@@ -960,6 +984,11 @@ public:
     allocateCollisionDetector(allocator, nullptr /* no parent_detector */);
   }
 
+  PlanningSceneColorsConstPtr getPlanningSceneColorsConst() const
+  {
+    return std::make_shared<const PlanningSceneColors>(object_colors_);
+  }
+
 private:
   /* Private constructor used by the diff() methods. */
   PlanningScene(const PlanningSceneConstPtr& parent);
@@ -1029,9 +1058,8 @@ private:
   StateFeasibilityFn state_feasibility_;
   MotionFeasibilityFn motion_feasibility_;
 
-  std::unique_ptr<ObjectColorMap> object_colors_;
+  PlanningSceneColors object_colors_;
 
-  // a map of object types
   std::unique_ptr<ObjectTypeMap> object_types_;
 };
 }  // namespace planning_scene

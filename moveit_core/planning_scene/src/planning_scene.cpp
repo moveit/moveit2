@@ -335,7 +335,6 @@ void PlanningScene::clearDiffs()
   scene_transforms_.reset();
   robot_state_.reset();
   acm_.reset();
-  object_colors_.reset();
   object_types_.reset();
 }
 
@@ -357,8 +356,9 @@ void PlanningScene::pushDiffs(const PlanningScenePtr& scene)
     {
       if (hasObjectType(attached_obj->getName()))
         scene->setObjectType(attached_obj->getName(), getObjectType(attached_obj->getName()));
-      if (hasObjectColor(attached_obj->getName()))
-        scene->setObjectColor(attached_obj->getName(), getObjectColor(attached_obj->getName()));
+      if (object_colors_.hasObjectColor(attached_obj->getName(), parent_))
+        scene->object_colors_.setObjectColor(attached_obj->getName(),
+                                             object_colors_.getObjectColor(attached_obj->getName(), parent_));
     }
   }
 
@@ -376,7 +376,7 @@ void PlanningScene::pushDiffs(const PlanningScenePtr& scene)
       if (it.second == collision_detection::World::DESTROY)
       {
         scene->world_->removeObject(it.first);
-        scene->removeObjectColor(it.first);
+        scene->object_colors_.removeObjectColor(it.first);
         scene->removeObjectType(it.first);
       }
       else
@@ -384,8 +384,8 @@ void PlanningScene::pushDiffs(const PlanningScenePtr& scene)
         const collision_detection::World::Object& obj = *world_->getObject(it.first);
         scene->world_->removeObject(obj.id_);
         scene->world_->addToObject(obj.id_, obj.pose_, obj.shapes_, obj.shape_poses_);
-        if (hasObjectColor(it.first))
-          scene->setObjectColor(it.first, getObjectColor(it.first));
+        if (object_colors_.hasObjectColor(it.first, parent_))
+          scene->object_colors_.setObjectColor(it.first, object_colors_.getObjectColor(it.first, parent_));
         if (hasObjectType(it.first))
           scene->setObjectType(it.first, getObjectType(it.first));
 
@@ -632,15 +632,14 @@ void PlanningScene::getPlanningSceneDiffMsg(moveit_msgs::msg::PlanningScene& sce
   collision_detector_->cenv_->getScale(scene_msg.link_scale);
 
   scene_msg.object_colors.clear();
-  if (object_colors_)
+
+  unsigned int i = 0;
+  scene_msg.object_colors.resize(object_colors_.color_map_.size());
+  for (ObjectColorMap::const_iterator it = object_colors_.color_map_.begin(); it != object_colors_.color_map_.end();
+       ++it, ++i)
   {
-    unsigned int i = 0;
-    scene_msg.object_colors.resize(object_colors_->size());
-    for (ObjectColorMap::const_iterator it = object_colors_->begin(); it != object_colors_->end(); ++it, ++i)
-    {
-      scene_msg.object_colors[i].id = it->first;
-      scene_msg.object_colors[i].color = it->second;
-    }
+    scene_msg.object_colors[i].id = it->first;
+    scene_msg.object_colors[i].color = it->second;
   }
 
   scene_msg.world.collision_objects.clear();
@@ -832,13 +831,14 @@ bool PlanningScene::getOctomapMsg(octomap_msgs::msg::OctomapWithPose& octomap) c
   return false;
 }
 
-void PlanningScene::getObjectColorMsgs(std::vector<moveit_msgs::msg::ObjectColor>& object_colors) const
+void PlanningSceneColors::getObjectColorMsgs(std::vector<moveit_msgs::msg::ObjectColor>& object_colors,
+                                             const PlanningSceneConstPtr parent) const
 {
   object_colors.clear();
 
   unsigned int i = 0;
   ObjectColorMap cmap;
-  getKnownObjectColors(cmap);
+  getKnownObjectColors(cmap, parent);
   object_colors.resize(cmap.size());
   for (ObjectColorMap::const_iterator it = cmap.begin(); it != cmap.end(); ++it, ++i)
   {
@@ -859,7 +859,7 @@ void PlanningScene::getPlanningSceneMsg(moveit_msgs::msg::PlanningScene& scene_m
   getCollisionEnv()->getPadding(scene_msg.link_padding);
   getCollisionEnv()->getScale(scene_msg.link_scale);
 
-  getObjectColorMsgs(scene_msg.object_colors);
+  object_colors_.getObjectColorMsgs(scene_msg.object_colors, parent_);
 
   // add collision objects
   getCollisionObjectMsgs(scene_msg.world.collision_objects);
@@ -908,7 +908,7 @@ void PlanningScene::getPlanningSceneMsg(moveit_msgs::msg::PlanningScene& scene_m
   }
 
   if (comp.components & moveit_msgs::msg::PlanningSceneComponents::OBJECT_COLORS)
-    getObjectColorMsgs(scene_msg.object_colors);
+    object_colors_.getObjectColorMsgs(scene_msg.object_colors, parent_);
 
   // add collision objects
   if (comp.components & moveit_msgs::msg::PlanningSceneComponents::WORLD_OBJECT_GEOMETRY)
@@ -960,9 +960,9 @@ void PlanningScene::saveGeometryToStream(std::ostream& out) const
           shapes::saveAsText(obj->shapes_[j].get(), out);
           // shape_poses_ is valid isometry by contract
           utilities::writePoseToText(out, obj->shape_poses_[j]);
-          if (hasObjectColor(id))
+          if (object_colors_.hasObjectColor(id, parent_))
           {
-            const std_msgs::msg::ColorRGBA& c = getObjectColor(id);
+            const std_msgs::msg::ColorRGBA& c = object_colors_.getObjectColor(id, parent_);
             out << c.r << ' ' << c.g << ' ' << c.b << ' ' << c.a << '\n';
           }
           else
@@ -1074,7 +1074,7 @@ bool PlanningScene::loadGeometryFromStream(std::istream& in, const Eigen::Isomet
             color.g = g;
             color.b = b;
             color.a = a;
-            setObjectColor(object_id, color);
+            object_colors_.setObjectColor(object_id, color);
           }
         }
       }
@@ -1173,20 +1173,18 @@ void PlanningScene::decoupleParent()
 
   world_diff_.reset();
 
-  if (!object_colors_)
+  if (object_colors_.color_map_.empty())
   {
-    ObjectColorMap kc;
-    parent_->getKnownObjectColors(kc);
-    object_colors_ = std::make_unique<ObjectColorMap>(kc);
+    parent_->getPlanningSceneColorsConst()->getKnownObjectColors(object_colors_.color_map_, nullptr);
   }
   else
   {
     ObjectColorMap kc;
-    parent_->getKnownObjectColors(kc);
+    parent_->object_colors_.getKnownObjectColors(kc, nullptr);
     for (ObjectColorMap::const_iterator it = kc.begin(); it != kc.end(); ++it)
     {
-      if (object_colors_->find(it->first) == object_colors_->end())
-        (*object_colors_)[it->first] = it->second;
+      if (object_colors_.color_map_.find(it->first) == object_colors_.color_map_.end())
+        object_colors_.color_map_[it->first] = it->second;
     }
   }
 
@@ -1250,7 +1248,7 @@ bool PlanningScene::setPlanningSceneDiffMsg(const moveit_msgs::msg::PlanningScen
 
   // if any colors have been specified, replace the ones we have with the specified ones
   for (const moveit_msgs::msg::ObjectColor& object_color : scene_msg.object_colors)
-    setObjectColor(object_color.id, object_color.color);
+    object_colors_.setObjectColor(object_color.id, object_color.color);
 
   // process collision object updates
   for (const moveit_msgs::msg::CollisionObject& collision_object : scene_msg.world.collision_objects)
@@ -1283,9 +1281,9 @@ bool PlanningScene::setPlanningSceneMsg(const moveit_msgs::msg::PlanningScene& s
   acm_ = std::make_shared<collision_detection::AllowedCollisionMatrix>(scene_msg.allowed_collision_matrix);
   collision_detector_->cenv_->setPadding(scene_msg.link_padding);
   collision_detector_->cenv_->setScale(scene_msg.link_scale);
-  object_colors_ = std::make_unique<ObjectColorMap>();
+  object_colors_ = PlanningSceneColors();
   for (const moveit_msgs::msg::ObjectColor& object_color : scene_msg.object_colors)
-    setObjectColor(object_color.id, object_color.color);
+    object_colors_.setObjectColor(object_color.id, object_color.color);
   world_->clearObjects();
   return processPlanningSceneWorldMsg(scene_msg.world);
 }
@@ -1365,7 +1363,7 @@ void PlanningScene::removeAllCollisionObjects()
     if (object_id != OCTOMAP_NS)
     {
       world_->removeObject(object_id);
-      removeObjectColor(object_id);
+      object_colors_.removeObjectColor(object_id);
       removeObjectType(object_id);
     }
   }
@@ -1829,7 +1827,7 @@ bool PlanningScene::processCollisionObjectRemove(const moveit_msgs::msg::Collisi
       return false;
     }
 
-    removeObjectColor(object.id);
+    object_colors_.removeObjectColor(object.id);
     removeObjectType(object.id);
   }
   return true;
@@ -1964,60 +1962,58 @@ void PlanningScene::getKnownObjectTypes(ObjectTypeMap& kc) const
   }
 }
 
-bool PlanningScene::hasObjectColor(const std::string& object_id) const
+bool PlanningSceneColors::hasObjectColor(const std::string& object_id, const PlanningSceneConstPtr parent) const
 {
-  if (object_colors_)
+  if (!color_map_.empty())
   {
-    if (object_colors_->find(object_id) != object_colors_->end())
+    if (color_map_.find(object_id) != color_map_.end())
       return true;
   }
-  if (parent_)
-    return parent_->hasObjectColor(object_id);
+  if (parent)
+    return parent->getPlanningSceneColorsConst()->hasObjectColor(object_id, nullptr);
   return false;
 }
 
-const std_msgs::msg::ColorRGBA& PlanningScene::getObjectColor(const std::string& object_id) const
+const std_msgs::msg::ColorRGBA& PlanningSceneColors::getObjectColor(const std::string& object_id,
+                                                                    const PlanningSceneConstPtr parent) const
 {
-  if (object_colors_)
+  if (!color_map_.empty())
   {
-    ObjectColorMap::const_iterator it = object_colors_->find(object_id);
-    if (it != object_colors_->end())
+    ObjectColorMap::const_iterator it = color_map_.find(object_id);
+    if (it != color_map_.end())
       return it->second;
   }
-  if (parent_)
-    return parent_->getObjectColor(object_id);
+  if (parent)
+    return parent->getPlanningSceneColorsConst()->getObjectColor(object_id, nullptr);
   static const std_msgs::msg::ColorRGBA EMPTY;
   return EMPTY;
 }
 
-void PlanningScene::getKnownObjectColors(ObjectColorMap& kc) const
+void PlanningSceneColors::getKnownObjectColors(ObjectColorMap& kc, const PlanningSceneConstPtr parent) const
 {
   kc.clear();
-  if (parent_)
-    parent_->getKnownObjectColors(kc);
-  if (object_colors_)
+  if (parent)
+    parent->getPlanningSceneColorsConst()->getKnownObjectColors(kc, nullptr);
+  if (!color_map_.empty())
   {
-    for (ObjectColorMap::const_iterator it = object_colors_->begin(); it != object_colors_->end(); ++it)
+    for (ObjectColorMap::const_iterator it = color_map_.begin(); it != color_map_.end(); ++it)
       kc[it->first] = it->second;
   }
 }
 
-void PlanningScene::setObjectColor(const std::string& object_id, const std_msgs::msg::ColorRGBA& color)
+void PlanningSceneColors::setObjectColor(const std::string& object_id, const std_msgs::msg::ColorRGBA& color)
 {
   if (object_id.empty())
   {
     RCLCPP_ERROR(LOGGER, "Cannot set color of object with empty object_id.");
     return;
   }
-  if (!object_colors_)
-    object_colors_ = std::make_unique<ObjectColorMap>();
-  (*object_colors_)[object_id] = color;
+  color_map_[object_id] = color;
 }
 
-void PlanningScene::removeObjectColor(const std::string& object_id)
+void PlanningSceneColors::removeObjectColor(const std::string& object_id)
 {
-  if (object_colors_)
-    object_colors_->erase(object_id);
+  color_map_.erase(object_id);
 }
 
 bool PlanningScene::isStateColliding(const moveit_msgs::msg::RobotState& state, const std::string& group,

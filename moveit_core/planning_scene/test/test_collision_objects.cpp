@@ -130,14 +130,15 @@ TEST(PlanningScene, rememberMetadataWhenAttached)
   color.color.a = 1.0;
   scene_msg.object_colors.push_back(color);
 
-  EXPECT_FALSE(scene.hasObjectColor(co.id)) << "scene knows color before adding it(?)";
+  EXPECT_FALSE(scene.getPlanningSceneColorsConst()->hasObjectColor(co.id)) << "scene knows color before adding it(?)";
   EXPECT_FALSE(scene.hasObjectType(co.id)) << "scene knows type before adding it(?)";
 
   // add object to scene
   scene.usePlanningSceneMsg(scene_msg);
 
-  EXPECT_TRUE(scene.hasObjectColor(co.id)) << "scene failed to add object color";
-  EXPECT_EQ(scene.getObjectColor(co.id), color.color) << "scene added wrong object color";
+  EXPECT_TRUE(scene.getPlanningSceneColorsConst()->hasObjectColor(co.id)) << "scene failed to add object color";
+  EXPECT_EQ(scene.getPlanningSceneColorsConst()->getObjectColor(co.id), color.color)
+      << "scene added wrong object color";
   EXPECT_TRUE(scene.hasObjectType(co.id)) << "scene failed to add object type";
   EXPECT_EQ(scene.getObjectType(co.id), co.type) << "scene added wrong object type";
 
@@ -148,7 +149,8 @@ TEST(PlanningScene, rememberMetadataWhenAttached)
   aco.link_name = robot_model->getModelFrame();
   scene.processAttachedCollisionObjectMsg(aco);
 
-  EXPECT_EQ(scene.getObjectColor(co.id), color.color) << "scene forgot object color after it got attached";
+  EXPECT_EQ(scene.getPlanningSceneColorsConst()->getObjectColor(co.id), color.color)
+      << "scene forgot object color after it got attached";
   EXPECT_EQ(scene.getObjectType(co.id), co.type) << "scene forgot object type after it got attached";
 
   // trying to remove object from the scene while it is attached is expected to fail
@@ -160,7 +162,8 @@ TEST(PlanningScene, rememberMetadataWhenAttached)
   aco.object.operation = moveit_msgs::msg::CollisionObject::REMOVE;
   scene.processAttachedCollisionObjectMsg(aco);
 
-  EXPECT_EQ(scene.getObjectColor(co.id), color.color) << "scene forgot specified color after attach/detach";
+  EXPECT_EQ(scene.getPlanningSceneColorsConst()->getObjectColor(co.id), color.color)
+      << "scene forgot specified color after attach/detach";
   EXPECT_EQ(scene.getObjectType(co.id), co.type) << "scene forgot specified type after attach/detach";
 }
 
