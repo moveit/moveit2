@@ -27,13 +27,13 @@ include_directories(SYSTEM
 add_subdirectory(ompl_interface)
 
 install(TARGETS moveit_ompl_interface moveit_ompl_planner_plugin
-  EXPORT ${PROJECT_NAME}Targets
+  EXPORT moveit_planners_omplTargets
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
   RUNTIME DESTINATION bin
   INCLUDES DESTINATION include/moveit_planners_ompl
 )
-ament_export_targets(${PROJECT_NAME}Targets HAS_LIBRARY_TARGET)
+ament_export_targets(moveit_planners_omplTargets HAS_LIBRARY_TARGET)
 ament_export_dependencies(moveit_core ompl)
 
 pluginlib_export_plugin_description_file(moveit_core ompl_interface_plugin_description.xml)

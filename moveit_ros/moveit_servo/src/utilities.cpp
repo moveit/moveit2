@@ -34,6 +34,10 @@
 
 #include <moveit_servo/utilities.h>
 
+// Disable -Wold-style-cast because all _THROTTLE macros trigger this
+// It would be too noisy to disable on a per-callsite basis
+#pragma GCC diagnostic ignored "-Wold-style-cast"
+
 namespace moveit_servo
 {
 namespace
@@ -124,10 +128,7 @@ double velocityScalingFactorForSingularity(const moveit::core::JointModelGroup* 
         1. - (ini_condition - lower_singularity_threshold) / (upper_threshold - lower_singularity_threshold);
     status =
         dot > 0 ? StatusCode::DECELERATE_FOR_APPROACHING_SINGULARITY : StatusCode::DECELERATE_FOR_LEAVING_SINGULARITY;
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wold-style-cast"
     RCLCPP_WARN_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD, SERVO_STATUS_CODE_MAP.at(status));
-#pragma GCC diagnostic pop
   }
 
   // Very close to singularity, so halt.
@@ -135,13 +136,47 @@ double velocityScalingFactorForSingularity(const moveit::core::JointModelGroup* 
   {
     velocity_scale = 0;
     status = StatusCode::HALT_FOR_SINGULARITY;
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wold-style-cast"
     RCLCPP_WARN_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD, SERVO_STATUS_CODE_MAP.at(status));
-#pragma GCC diagnostic pop
   }
 
   return velocity_scale;
+}
+
+bool applyJointUpdate(rclcpp::Clock& clock, const double publish_period, const Eigen::ArrayXd& delta_theta,
+                      const sensor_msgs::msg::JointState& previous_joint_state,
+                      sensor_msgs::msg::JointState& next_joint_state,
+                      pluginlib::UniquePtr<online_signal_smoothing::SmoothingBaseClass>& smoother)
+{
+  // All the sizes must match
+  if (next_joint_state.position.size() != static_cast<std::size_t>(delta_theta.size()) ||
+      next_joint_state.velocity.size() != next_joint_state.position.size())
+  {
+    RCLCPP_ERROR_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD,
+                                 "Lengths of output and increments do not match.");
+    return false;
+  }
+
+  for (std::size_t i = 0; i < next_joint_state.position.size(); ++i)
+  {
+    // Increment joint
+    next_joint_state.position[i] += delta_theta[i];
+  }
+
+  smoother->doSmoothing(next_joint_state.position);
+
+  // Lambda that calculates velocity using central difference.
+  // (q(t + dt) - q(t - dt)) / ( 2 * dt )
+  auto compute_velocity = [&](const double next_pos, const double previous_pos) {
+    return (next_pos - previous_pos) / (2 * publish_period);
+  };
+
+  // Transform that applies the lambda to all joints.
+  // next_joint_state contains the future position q(t + dt)
+  // previous_joint_state_ contains past position q(t - dt)
+  std::transform(next_joint_state.position.begin(), next_joint_state.position.end(),
+                 previous_joint_state.position.begin(), next_joint_state.velocity.begin(), compute_velocity);
+
+  return true;
 }
 
 }  // namespace moveit_servo
