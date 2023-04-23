@@ -988,6 +988,11 @@ public:
     return std::make_shared<const PlanningSceneColors>(object_colors_);
   }
 
+  PlanningSceneColorsPtr getPlanningSceneColors()
+  {
+    return std::make_shared<PlanningSceneColors>(object_colors_);
+  }
+
 private:
   /* Private constructor used by the diff() methods. */
   PlanningScene(const PlanningSceneConstPtr& parent);

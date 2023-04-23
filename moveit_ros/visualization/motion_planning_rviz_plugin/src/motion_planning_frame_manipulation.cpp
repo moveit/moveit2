@@ -126,9 +126,9 @@ void MotionPlanningFrame::selectedDetectedObjectChanged()
   if (ps)
   {
     if (!selected_object_name_.empty())
-      ps->removeObjectColor(selected_object_name_);
+      ps->getPlanningSceneColors()->removeObjectColor(selected_object_name_);
     selected_object_name_ = sel[0]->text().toStdString();
-    ps->setObjectColor(selected_object_name_, pick_object_color);
+    ps->getPlanningSceneColors()->setObjectColor(selected_object_name_, pick_object_color);
   }
 }
 
@@ -222,9 +222,9 @@ void MotionPlanningFrame::selectedSupportSurfaceChanged()
   if (ps)
   {
     if (!selected_support_surface_name_.empty())
-      ps->removeObjectColor(selected_support_surface_name_);
+      ps->getPlanningSceneColors()->removeObjectColor(selected_support_surface_name_);
     selected_support_surface_name_ = sel[0]->text().toStdString();
-    ps->setObjectColor(selected_support_surface_name_, selected_support_surface_color);
+    ps->getPlanningSceneColors()->setObjectColor(selected_support_surface_name_, selected_support_surface_color);
   }
 }
 

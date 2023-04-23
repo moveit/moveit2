@@ -53,7 +53,7 @@ void apply_collision_object(std::shared_ptr<planning_scene::PlanningScene>& plan
   if (color_msg.has_value())
   {
     // set object color
-    planning_scene->setObjectColor(color_msg.value().id, color_msg.value().color);
+    planning_scene->getPlanningSceneColors()->setObjectColor(color_msg.value().id, color_msg.value().color);
   }
 }
 
@@ -181,15 +181,15 @@ void init_planning_scene(py::module& m)
                color (moveit_msgs.msg.ObjectColor, optional): The color of the collision object. Defaults to None if not specified.
            )")
 
-      .def("set_object_color", &planning_scene::PlanningScene::setObjectColor, py::arg("object_id"),
-           py::arg("color_msg"),
-           R"(
-           Set the color of a collision object.
+      //  .def("set_object_color", &planning_scene::PlanningScene::setObjectColor, py::arg("object_id"),
+      //       py::arg("color_msg"),
+      //       R"(
+      //       Set the color of a collision object.
 
-	   Args:
-               object_id (str): The id of the collision object to set the color of.
-               color (std_msgs.msg.ObjectColor): The color of the collision object.
-           )")
+      //    Args:
+      //           object_id (str): The id of the collision object to set the color of.
+      //           color (std_msgs.msg.ObjectColor): The color of the collision object.
+      //       )")
 
       .def("process_attached_collision_object", &planning_scene::PlanningScene::processAttachedCollisionObjectMsg,
            py::arg("object"),
