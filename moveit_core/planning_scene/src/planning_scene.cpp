@@ -357,8 +357,10 @@ void PlanningScene::pushDiffs(const PlanningScenePtr& scene)
       if (hasObjectType(attached_obj->getName()))
         scene->setObjectType(attached_obj->getName(), getObjectType(attached_obj->getName()));
       if (object_colors_.hasObjectColor(attached_obj->getName(), parent_))
+      {
         scene->object_colors_.setObjectColor(attached_obj->getName(),
                                              object_colors_.getObjectColor(attached_obj->getName(), parent_));
+      }
     }
   }
 
@@ -832,7 +834,7 @@ bool PlanningScene::getOctomapMsg(octomap_msgs::msg::OctomapWithPose& octomap) c
 }
 
 void PlanningSceneColors::getObjectColorMsgs(std::vector<moveit_msgs::msg::ObjectColor>& object_colors,
-                                             const PlanningSceneConstPtr parent) const
+                                             const PlanningSceneConstPtr& parent) const
 {
   object_colors.clear();
 
@@ -1962,7 +1964,7 @@ void PlanningScene::getKnownObjectTypes(ObjectTypeMap& kc) const
   }
 }
 
-bool PlanningSceneColors::hasObjectColor(const std::string& object_id, const PlanningSceneConstPtr parent) const
+bool PlanningSceneColors::hasObjectColor(const std::string& object_id, const PlanningSceneConstPtr& parent) const
 {
   if (!color_map_.empty())
   {
@@ -1975,7 +1977,7 @@ bool PlanningSceneColors::hasObjectColor(const std::string& object_id, const Pla
 }
 
 const std_msgs::msg::ColorRGBA& PlanningSceneColors::getObjectColor(const std::string& object_id,
-                                                                    const PlanningSceneConstPtr parent) const
+                                                                    const PlanningSceneConstPtr& parent) const
 {
   if (!color_map_.empty())
   {
@@ -1989,15 +1991,18 @@ const std_msgs::msg::ColorRGBA& PlanningSceneColors::getObjectColor(const std::s
   return EMPTY;
 }
 
-void PlanningSceneColors::getKnownObjectColors(ObjectColorMap& kc, const PlanningSceneConstPtr parent) const
+void PlanningSceneColors::getKnownObjectColors(ObjectColorMap& kc, const PlanningSceneConstPtr& parent) const
 {
   kc.clear();
   if (parent)
     parent->getPlanningSceneColorsConst()->getKnownObjectColors(kc, nullptr);
   if (!color_map_.empty())
   {
+    // NOLINTNEXTLINE
     for (ObjectColorMap::const_iterator it = color_map_.begin(); it != color_map_.end(); ++it)
+    {
       kc[it->first] = it->second;
+    }
   }
 }
 

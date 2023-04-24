@@ -90,17 +90,17 @@ class PlanningSceneColors
 public:
   void setObjectColor(const std::string& id, const std_msgs::msg::ColorRGBA& color);
   void removeObjectColor(const std::string& id);
-  void getKnownObjectColors(ObjectColorMap& kc, const PlanningSceneConstPtr parent) const;
+  void getKnownObjectColors(ObjectColorMap& kc, const PlanningSceneConstPtr& parent) const;
 
   /** \brief Get the object color */
-  const std_msgs::msg::ColorRGBA& getObjectColor(const std::string& id, const PlanningSceneConstPtr parent) const;
+  const std_msgs::msg::ColorRGBA& getObjectColor(const std::string& id, const PlanningSceneConstPtr& parent) const;
 
   /** \brief Construct a vector of messages (\e object_colors) with the colors of the objects from the planning_scene */
   void getObjectColorMsgs(std::vector<moveit_msgs::msg::ObjectColor>& object_colors,
-                          const PlanningSceneConstPtr parent) const;
+                          const PlanningSceneConstPtr& parent) const;
 
   /** \brief Check if an object has color */
-  bool hasObjectColor(const std::string& id, const PlanningSceneConstPtr parent) const;
+  bool hasObjectColor(const std::string& id, const PlanningSceneConstPtr& parent) const;
 
   const ObjectColorMap& getConstObjectColorMap() const
   {
