@@ -57,18 +57,18 @@ target_link_libraries(moveit_setup_assistant
   ${Boost_LIBRARIES}
 )
 
-add_executable(${PROJECT_NAME}_updater src/collisions_updater.cpp)
-target_include_directories(${PROJECT_NAME}_updater PUBLIC
+add_executable(moveit_setup_assistant_updater src/collisions_updater.cpp)
+target_include_directories(moveit_setup_assistant_updater PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include/moveit_setup_assistant>)
 
 ament_target_dependencies(
-  ${PROJECT_NAME}_updater
+  moveit_setup_assistant_updater
   ${THIS_PACKAGE_INCLUDE_DEPENDS}
 )
 
 set_target_properties(
-  ${PROJECT_NAME}_updater
+  moveit_setup_assistant_updater
   PROPERTIES OUTPUT_NAME collisions_updater
   PREFIX ""
 )
@@ -76,20 +76,20 @@ set_target_properties(
 install(
   TARGETS
     moveit_setup_assistant
-    ${PROJECT_NAME}_updater
-  EXPORT ${PROJECT_NAME}Targets
+    moveit_setup_assistant_updater
+  EXPORT moveit_setup_assistantTargets
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
-  RUNTIME DESTINATION lib/${PROJECT_NAME}
+  RUNTIME DESTINATION lib/moveit_setup_assistant
   INCLUDES DESTINATION include/moveit_setup_assistant
 )
 install(DIRECTORY include/
         DESTINATION include/moveit_setup_assistant
 )
 ament_export_include_directories(include)
-install(DIRECTORY launch DESTINATION share/${PROJECT_NAME})
-install(DIRECTORY resources DESTINATION share/${PROJECT_NAME})
-ament_export_targets(${PROJECT_NAME}Targets HAS_LIBRARY_TARGET)
+install(DIRECTORY launch DESTINATION share/moveit_setup_assistant)
+install(DIRECTORY resources DESTINATION share/moveit_setup_assistant)
+ament_export_targets(moveit_setup_assistantTargets HAS_LIBRARY_TARGET)
 ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS})
 
 # Unit tests

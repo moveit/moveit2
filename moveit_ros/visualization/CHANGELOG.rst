@@ -2,6 +2,11 @@
 Changelog for package moveit_ros_visualization
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.7.2 (2023-04-18)
+------------------
+* Readability: kinematic_state -> robot_state (`#2078 <https://github.com/ros-planning/moveit2/issues/2078>`_)
+* Contributors: Sebastian Jahr
+
 2.7.1 (2023-03-23)
 ------------------
 * Doxygen tag (`#1955 <https://github.com/ros-planning/moveit2/issues/1955>`_)
