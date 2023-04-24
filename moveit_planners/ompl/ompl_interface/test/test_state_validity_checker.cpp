@@ -72,7 +72,7 @@ std::ostream& operator<<(std::ostream& os, const std::vector<double>& v)
 {
   os << "( ";
   for (auto value : v)
-    os << value << ", ";
+    os << value << ',' << ' ';
   os << " )";
   return os;
 }

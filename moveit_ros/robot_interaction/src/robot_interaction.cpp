@@ -456,17 +456,17 @@ void RobotInteraction::addEndEffectorMarkers(const InteractionHandlerPtr& handle
 
 static inline std::string getMarkerName(const InteractionHandlerPtr& handler, const EndEffectorInteraction& eef)
 {
-  return "EE:" + handler->getName() + "_" + eef.parent_link;
+  return "EE:" + handler->getName() + '_' + eef.parent_link;
 }
 
 static inline std::string getMarkerName(const InteractionHandlerPtr& handler, const JointInteraction& vj)
 {
-  return "JJ:" + handler->getName() + "_" + vj.connecting_link;
+  return "JJ:" + handler->getName() + '_' + vj.connecting_link;
 }
 
 static inline std::string getMarkerName(const InteractionHandlerPtr& handler, const GenericInteraction& g)
 {
-  return "GG:" + handler->getName() + "_" + g.marker_name_suffix;
+  return "GG:" + handler->getName() + '_' + g.marker_name_suffix;
 }
 
 void RobotInteraction::addInteractiveMarkers(const InteractionHandlerPtr& handler, const double marker_scale)
@@ -557,7 +557,7 @@ void RobotInteraction::addInteractiveMarkers(const InteractionHandlerPtr& handle
         }
       }
       ims.push_back(im);
-      registerMoveInteractiveMarkerTopic(marker_name, handler->getName() + "_" + active_vj_[i].connecting_link);
+      registerMoveInteractiveMarkerTopic(marker_name, handler->getName() + '_' + active_vj_[i].connecting_link);
       RCLCPP_DEBUG(LOGGER, "Publishing interactive marker %s (size = %lf)", marker_name.c_str(), mscale);
     }
     handlers_[handler->getName()] = handler;

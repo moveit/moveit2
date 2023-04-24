@@ -488,7 +488,7 @@ ompl_interface::ConstraintsLibrary::addConstraintApproximation(const moveit_msgs
   {
     auto constraint_approx = std::make_shared<ConstraintApproximation>(
         group, options.state_space_parameterization, options.explicit_motions, constr_hard,
-        group + "_" + boost::posix_time::to_iso_extended_string(boost::posix_time::microsec_clock::universal_time()) +
+        group + '_' + boost::posix_time::to_iso_extended_string(boost::posix_time::microsec_clock::universal_time()) +
             ".ompldb",
         state_storage, res.milestones);
     if (constraint_approximations_.find(constraint_approx->getName()) != constraint_approximations_.end())

@@ -284,22 +284,22 @@ std::ostream& operator<<(std::ostream& out, const VariableBounds& b)
 {
   out << "P." << (b.position_bounded_ ? "bounded" : "unbounded") << " [";
   printBoundHelper(out, b.min_position_);
-  out << ", ";
+  out << ',' << ' ';
   printBoundHelper(out, b.max_position_);
   out << "]; "
       << "V." << (b.velocity_bounded_ ? "bounded" : "unbounded") << " [";
   printBoundHelper(out, b.min_velocity_);
-  out << ", ";
+  out << ',' << ' ';
   printBoundHelper(out, b.max_velocity_);
   out << "]; "
       << "A." << (b.acceleration_bounded_ ? "bounded" : "unbounded") << " [";
   printBoundHelper(out, b.min_acceleration_);
-  out << ", ";
+  out << ',' << ' ';
   printBoundHelper(out, b.max_acceleration_);
   out << "]; "
       << "J." << (b.jerk_bounded_ ? "bounded" : "unbounded") << " [";
   printBoundHelper(out, b.min_jerk_);
-  out << ", ";
+  out << ',' << ' ';
   printBoundHelper(out, b.max_jerk_);
   out << "];";
   return out;

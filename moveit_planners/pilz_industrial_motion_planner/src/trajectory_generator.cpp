@@ -84,7 +84,7 @@ void TrajectoryGenerator::checkVelocityScaling(const double& scaling_factor)
   if (!isScalingFactorValid(scaling_factor))
   {
     std::ostringstream os;
-    os << "Velocity scaling not in range [" << MIN_SCALING_FACTOR << ", " << MAX_SCALING_FACTOR << "], "
+    os << "Velocity scaling not in range [" << MIN_SCALING_FACTOR << ',' << ' ' << MAX_SCALING_FACTOR << "], "
        << "actual value is: " << scaling_factor;
     throw VelocityScalingIncorrect(os.str());
   }
@@ -95,7 +95,7 @@ void TrajectoryGenerator::checkAccelerationScaling(const double& scaling_factor)
   if (!isScalingFactorValid(scaling_factor))
   {
     std::ostringstream os;
-    os << "Acceleration scaling not in range [" << MIN_SCALING_FACTOR << ", " << MAX_SCALING_FACTOR << "], "
+    os << "Acceleration scaling not in range [" << MIN_SCALING_FACTOR << ',' << ' ' << MAX_SCALING_FACTOR << "], "
        << "actual value is: " << scaling_factor;
     throw AccelerationScalingIncorrect(os.str());
   }

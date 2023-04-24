@@ -423,7 +423,7 @@ int KDLKinematicsPlugin::CartToJnt(KDL::ChainIkSolverVelMimicSVD& ik_solver, con
   {
     fk_solver_->JntToCart(q_out, f);
     delta_twist = diff(f, p_in);
-    RCLCPP_DEBUG_STREAM(LOGGER, "[" << std::setw(3) << i << "] delta_twist: " << delta_twist);
+    RCLCPP_DEBUG_STREAM(LOGGER, '[' << std::setw(3) << i << "] delta_twist: " << delta_twist);
 
     // check norms of position and orientation errors
     const double position_error = delta_twist.vel.Norm();

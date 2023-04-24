@@ -642,9 +642,9 @@ bool testutils::checkOriginalTrajectoryAfterBlending(const pilz_industrial_motio
                 req.second_trajectory->getWayPointDurationFromStart(size_second_original - i - 2))) > time_tolerance)
       {
         std::cout << size_second - i - 1 << "th time from start of the second trajectory is not same."
-                  << res.second_trajectory->getWayPointDurationFromStart(size_second - i - 1) << ", "
-                  << res.second_trajectory->getWayPointDurationFromStart(size_second - i - 2) << ", "
-                  << req.second_trajectory->getWayPointDurationFromStart(size_second_original - i - 1) << ", "
+                  << res.second_trajectory->getWayPointDurationFromStart(size_second - i - 1) << ',' << ' '
+                  << res.second_trajectory->getWayPointDurationFromStart(size_second - i - 2) << ',' << ' '
+                  << req.second_trajectory->getWayPointDurationFromStart(size_second_original - i - 1) << ',' << ' '
                   << req.second_trajectory->getWayPointDurationFromStart(size_second_original - i - 2) << '\n';
         return false;
       }
@@ -656,7 +656,7 @@ bool testutils::checkOriginalTrajectoryAfterBlending(const pilz_industrial_motio
                 req.second_trajectory->getWayPointDurationFromStart(size_second_original - i - 2))) > time_tolerance)
       {
         std::cout << size_second - i - 1 << "th time from start of the second trajectory is not same."
-                  << res.second_trajectory->getWayPointDurationFromStart(size_second - i - 1) << ", "
+                  << res.second_trajectory->getWayPointDurationFromStart(size_second - i - 1) << ',' << ' '
                   << req.second_trajectory->getWayPointDurationFromStart(size_second_original - i - 1) -
                          req.second_trajectory->getWayPointDurationFromStart(size_second_original - i - 2)
                   << '\n';
@@ -735,9 +735,9 @@ bool testutils::checkBlendingJointSpaceContinuity(const pilz_industrial_motion_p
     std::cout << "Different sizes of the position/velocity/acceleration "
                  "between first trajectory and blend trajectory."
               << '\n'
-              << blend_end.positions.size() << ", " << second_start.positions.size() << '\n'
-              << blend_end.velocities.size() << ", " << second_start.positions.size() << '\n'
-              << blend_end.accelerations.size() << ", " << second_start.accelerations.size() << '\n';
+              << blend_end.positions.size() << ',' << ' ' << second_start.positions.size() << '\n'
+              << blend_end.velocities.size() << ',' << ' ' << second_start.positions.size() << '\n'
+              << blend_end.accelerations.size() << ',' << ' ' << second_start.accelerations.size() << '\n';
     return false;
   }
 
@@ -870,7 +870,7 @@ bool testutils::checkBlendingCartSpaceContinuity(const pilz_industrial_motion_pl
   {
     std::cout << "Translational acceleration between first trajectory and "
                  "blend trajectory exceeds the limit."
-              << "Actual acceleration (norm): " << a_1.norm() << ", " << a_1.norm() << "; "
+              << "Actual acceleration (norm): " << a_1.norm() << ',' << ' ' << a_1.norm() << "; "
               << "Limits: " << max_trans_acc << '\n';
   }
 
@@ -881,7 +881,7 @@ bool testutils::checkBlendingCartSpaceContinuity(const pilz_industrial_motion_pl
   {
     std::cout << "Rotational acceleration between first trajectory and blend "
                  "trajectory exceeds the limit."
-              << "Actual acceleration (norm): " << a_1.norm() << ", " << a_1.norm() << "; "
+              << "Actual acceleration (norm): " << a_1.norm() << ',' << ' ' << a_1.norm() << "; "
               << "Limits: " << max_rot_acc << '\n';
   }
 
@@ -909,7 +909,7 @@ bool testutils::checkBlendingCartSpaceContinuity(const pilz_industrial_motion_pl
   {
     std::cout << "Translational acceleration between blend trajectory and "
                  "second trajectory exceeds the limit."
-              << "Actual acceleration (norm): " << a_1.norm() << ", " << a_1.norm() << "; "
+              << "Actual acceleration (norm): " << a_1.norm() << ',' << ' ' << a_1.norm() << "; "
               << "Limits: " << max_trans_acc << '\n';
   }
   // check rotational acceleration
@@ -919,7 +919,7 @@ bool testutils::checkBlendingCartSpaceContinuity(const pilz_industrial_motion_pl
   {
     std::cout << "Rotational acceleration between blend trajectory and second "
                  "trajectory exceeds the limit."
-              << "Actual acceleration (norm): " << a_1.norm() << ", " << a_1.norm() << "; "
+              << "Actual acceleration (norm): " << a_1.norm() << ',' << ' ' << a_1.norm() << "; "
               << "Limits: " << max_rot_acc << '\n';
   }
 

@@ -214,8 +214,8 @@ public:
 
     return testing::AssertionFailure()
         << std::setprecision(std::numeric_limits<double>::digits10 + 2)
-        << "Expected: " << expr1 << " [" << val1.x << ", " << val1.y << ", " << val1.z << "]\n"
-        << "Actual: " << expr2 << " [" << val2.x << ", " << val2.y << ", " << val2.z << ']';
+        << "Expected: " << expr1 << " [" << val1.x << ',' << ' ' << val1.y << ',' << ' ' << val1.z << "]\n"
+        << "Actual: " << expr2 << " [" << val2.x << ',' << ' ' << val2.y << ',' << ' ' << val2.z << ']';
     // clang-format on
   }
   testing::AssertionResult isNear(const char* expr1, const char* expr2, const char* /*abs_error_expr*/,
@@ -231,8 +231,8 @@ public:
     // clang-format off
     return testing::AssertionFailure()
         << std::setprecision(std::numeric_limits<double>::digits10 + 2)
-        << "Expected: " << expr1 << " [" << val1.w << ", " << val1.x << ", " << val1.y << ", " << val1.z << "]\n"
-        << "Actual: " << expr2 << " [" << val2.w << ", " << val2.x << ", " << val2.y << ", " << val2.z << ']';
+        << "Expected: " << expr1 << " [" << val1.w << ',' << ' ' << val1.x << ',' << ' ' << val1.y << ',' << ' ' << val1.z << "]\n"
+        << "Actual: " << expr2 << " [" << val2.w << ',' << ' ' << val2.x << ", " << val2.y << ',' << ' ' << val2.z << ']';
     // clang-format on
   }
   testing::AssertionResult expectNearHelper(const char* expr1, const char* expr2, const char* abs_error_expr,
@@ -308,7 +308,7 @@ public:
 };
 
 #define EXPECT_NEAR_POSES(lhs, rhs, near)                                                                              \
-  SCOPED_TRACE("EXPECT_NEAR_POSES(" #lhs ", " #rhs ")");                                                               \
+  SCOPED_TRACE("EXPECT_NEAR_POSES(" #lhs ',' << ' ' #rhs ")");                                                         \
   GTEST_ASSERT_(expectNearHelper(#lhs, #rhs, #near, lhs, rhs, near), GTEST_NONFATAL_FAILURE_);
 
 TEST_F(KinematicsTest, getFK)

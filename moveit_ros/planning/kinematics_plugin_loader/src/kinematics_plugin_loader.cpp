@@ -105,7 +105,7 @@ public:
     std::stringstream tip_debug;
     tip_debug << "Planning group '" << jmg->getName() << "' has tip(s): ";
     for (const auto& tip : tips)
-      tip_debug << tip << ", ";
+      tip_debug << tip << ',' << ' ';
     RCLCPP_DEBUG_STREAM(LOGGER, tip_debug.str());
 
     return tips;

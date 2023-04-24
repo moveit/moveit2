@@ -59,7 +59,7 @@ void CollisionResult::print() const
     for (const auto& contact : contacts)
     {
       RCLCPP_DEBUG_STREAM_THROTTLE(LOGGER, clock, LOG_THROTTLE_PERIOD,
-                                   "\t" << contact.first.first << ", " << contact.first.second);
+                                   "\t" << contact.first.first << ',' << ' ' << contact.first.second);
     }
 #pragma GCC diagnostic pop
   }

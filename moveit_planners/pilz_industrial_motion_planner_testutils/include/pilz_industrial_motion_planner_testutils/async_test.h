@@ -143,7 +143,7 @@ inline bool AsyncTest::barricade(std::initializer_list<std::string> clear_events
   std::stringstream events_stringstream;
   for (const auto& event : clear_events)
   {
-    events_stringstream << event << ", ";
+    events_stringstream << event << ',' << ' ';
   }
   RCLCPP_DEBUG(LOGGER, "Adding Barricade[%s]", events_stringstream.str().c_str());
 
