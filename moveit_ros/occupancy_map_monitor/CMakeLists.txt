@@ -50,8 +50,7 @@ ament_target_dependencies(moveit_ros_occupancy_map_server
 )
 target_link_libraries(moveit_ros_occupancy_map_server
   PRIVATE
-  moveit_ros_occupancy_map_monitor
-  moveit_compatibility)
+  moveit_ros_occupancy_map_monitor)
 
 install(
   TARGETS moveit_ros_occupancy_map_monitor
