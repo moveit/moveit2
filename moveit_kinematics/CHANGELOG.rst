@@ -2,6 +2,9 @@
 Changelog for package moveit_kinematics
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.7.3 (2023-04-24)
+------------------
+
 2.7.2 (2023-04-18)
 ------------------
 * Fix moveit_kinematics dependency on moveit_ros_planning (`#2109 <https://github.com/ros-planning/moveit2/issues/2109>`_)
