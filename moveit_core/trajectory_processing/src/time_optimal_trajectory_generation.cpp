@@ -885,19 +885,19 @@ bool TimeOptimalTrajectoryGeneration::computeTimeStamps(robot_trajectory::RobotT
   // Get the velocity and acceleration limits for all active joints
   const moveit::core::RobotModel& rmodel = group->getParentModel();
   const std::vector<std::string>& vars = group->getVariableNames();
-  std::vector<size_t> indices;
-  if (!group->computeJointVariableIndices(group->getActiveJointModelNames(), indices))
+  std::vector<size_t> active_joint_indices;
+  if (!group->computeJointVariableIndices(group->getActiveJointModelNames(), active_joint_indices))
   {
     RCLCPP_ERROR(LOGGER, "Failed to get active variable indices.");
   }
 
-  const size_t num_active_joints = indices.size();
+  const size_t num_active_joints = active_joint_indices.size();
   Eigen::VectorXd max_velocity(num_active_joints);
   Eigen::VectorXd max_acceleration(num_active_joints);
-  for (size_t active_joint_idx = 0; active_joint_idx < num_active_joints; ++active_joint_idx)
+  for (size_t idx = 0; idx < num_active_joints; ++idx)
   {
     // For active joints only (skip mimic joints and other types)
-    const moveit::core::VariableBounds& bounds = rmodel.getVariableBounds(vars[indices[active_joint_idx]]);
+    const moveit::core::VariableBounds& bounds = rmodel.getVariableBounds(vars[active_joint_indices[idx]]);
 
     // Limits need to be non-zero, otherwise we never exit
     if (bounds.velocity_bounded_)
