@@ -2319,7 +2319,7 @@ void RobotState::printTransforms(std::ostream& out) const
     const int idx = joint->getJointIndex();
     if (dirty_joint_transforms_[idx])
       out << " [dirty]";
-    out << ":" << ' ';
+    out << ':' << ' ';
     printTransform(variable_joint_transforms_[idx], out);
   }
 
