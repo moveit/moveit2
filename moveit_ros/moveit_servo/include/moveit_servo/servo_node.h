@@ -74,7 +74,9 @@ private:
               const std::shared_ptr<std_srvs::srv::Trigger::Response>& response);
   rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr stop_servo_service_;
 
-  /** \brief Pause the servo loop but continue monitoring joint state so we can resume easily. */
+  /** \brief Pause the servo loop but continue monitoring joint state so we can resume easily.
+   * Commands to hold the robot at its current position will continue to be published at the configured rate.
+   */
   void pauseCB(const std::shared_ptr<std_srvs::srv::Trigger::Request>& request,
                const std::shared_ptr<std_srvs::srv::Trigger::Response>& response);
   rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr pause_servo_service_;

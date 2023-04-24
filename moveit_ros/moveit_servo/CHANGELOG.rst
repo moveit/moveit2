@@ -2,6 +2,19 @@
 Changelog for package moveit_servo
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.7.3 (2023-04-24)
+------------------
+* Replace check for the ROS_DISTRO env variable with a check for the rclcpp version (`#2135 <https://github.com/ros-planning/moveit2/issues/2135>`_)
+* Document pausing better (`#2128 <https://github.com/ros-planning/moveit2/issues/2128>`_)
+* [Servo] Make `applyJointUpdate()` a free function (`#2121 <https://github.com/ros-planning/moveit2/issues/2121>`_)
+  * Change variable names for improved readability
+  * Fix issues from rebase
+  * Move applyJointUpdate() to utilities
+  * Fix comment
+  * Fix old-style-cast
+  * Use pluginlib::UniquePtr for smoothing class
+* Contributors: AndyZe, Jafar, V Mohammed Ibrahim
+
 2.7.2 (2023-04-18)
 ------------------
 * Switch from qos_event.hpp to event_handler.hpp (`#2111 <https://github.com/ros-planning/moveit2/issues/2111>`_)
