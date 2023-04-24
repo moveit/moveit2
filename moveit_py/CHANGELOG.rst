@@ -2,6 +2,9 @@
 Changelog for package moveit_py
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.7.3 (2023-04-24)
+------------------
+
 2.7.2 (2023-04-18)
 ------------------
 * Fix Formatting in Python Documentation (`#2085 <https://github.com/ros-planning/moveit2/issues/2085>`_)
