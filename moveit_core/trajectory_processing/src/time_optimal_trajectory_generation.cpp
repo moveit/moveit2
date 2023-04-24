@@ -894,9 +894,10 @@ bool TimeOptimalTrajectoryGeneration::computeTimeStamps(robot_trajectory::RobotT
   const size_t num_active_joints = indices.size();
   Eigen::VectorXd max_velocity(num_active_joints);
   Eigen::VectorXd max_acceleration(num_active_joints);
-  for (size_t idx = 0; idx < num_active_joints; ++idx)
+  for (size_t active_joint_idx = 0; active_joint_idx < num_active_joints; ++active_joint_idx)
   {
-    const moveit::core::VariableBounds& bounds = rmodel.getVariableBounds(vars[indices[idx]]);
+    // For active joints only (skip mimic joints and other types)
+    const moveit::core::VariableBounds& bounds = rmodel.getVariableBounds(vars[indices[active_joint_idx]]);
 
     // Limits need to be non-zero, otherwise we never exit
     if (bounds.velocity_bounded_)
