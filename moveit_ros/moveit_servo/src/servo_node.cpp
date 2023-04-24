@@ -162,7 +162,7 @@ void ServoNode::startCB(const std::shared_ptr<std_srvs::srv::Trigger::Request>& 
 void ServoNode::stopCB(const std::shared_ptr<std_srvs::srv::Trigger::Request>& /* unused */,
                        const std::shared_ptr<std_srvs::srv::Trigger::Response>& response)
 {
-  servo_->setPaused(true);
+  servo_->stop();
   response->success = true;
 }
 
