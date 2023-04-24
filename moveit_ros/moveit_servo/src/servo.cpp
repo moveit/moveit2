@@ -78,6 +78,12 @@ void Servo::start()
     collision_checker_.start();
 }
 
+void Servo::stop()
+{
+  servo_calcs_.stop();
+  collision_checker_.stop();
+}
+
 Servo::~Servo()
 {
   setPaused(true);

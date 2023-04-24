@@ -64,14 +64,14 @@ public:
 
   ~CollisionCheck()
   {
-    if (timer_)
-    {
-      timer_->cancel();
-    }
+    stop();
   }
 
-  /** \brief start the Timer that regulates collision check rate */
+  /** \brief Start the Timer that regulates collision check rate */
   void start();
+
+  /** \brief Stop the Timer that regulates collision check rate */
+  void stop();
 
   /** \brief Pause or unpause processing servo commands while keeping the timers alive */
   void setPaused(bool paused);

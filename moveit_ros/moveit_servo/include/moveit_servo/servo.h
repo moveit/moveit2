@@ -60,8 +60,11 @@ public:
 
   ~Servo();
 
-  /** \brief start servo node */
+  /** \brief Start servo node */
   void start();
+
+  /** \brief Stop servo node */
+  void stop();
 
   /** \brief Pause or unpause processing servo commands while keeping the timers alive */
   void setPaused(bool paused);

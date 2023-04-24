@@ -90,6 +90,14 @@ void CollisionCheck::start()
   timer_ = node_->create_wall_timer(std::chrono::duration<double>(period_), [this]() { return run(); });
 }
 
+void CollisionCheck::stop()
+{
+  if (timer_)
+  {
+    timer_->cancel();
+  }
+}
+
 void CollisionCheck::run()
 {
   if (paused_)

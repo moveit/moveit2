@@ -92,6 +92,9 @@ public:
    */
   void start();
 
+  /** \brief Stop the currently running thread */
+  void stop();
+
   /**
    * Check for parameter update, and apply updates if any
    * All dynamic parameters must be checked and updated within this method
@@ -130,9 +133,6 @@ protected:
 
   /** \brief Do calculations for a single iteration. Publish one outgoing command */
   void calculateSingleIteration();
-
-  /** \brief Stop the currently running thread */
-  void stop();
 
   /** \brief Do servoing calculations for Cartesian twist commands. */
   bool cartesianServoCalcs(geometry_msgs::msg::TwistStamped& cmd,
