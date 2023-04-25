@@ -108,7 +108,7 @@ ServoNode::ServoNode(const rclcpp::NodeOptions& options)
   servo_ = std::make_unique<moveit_servo::Servo>(node_, planning_scene_monitor_, std::move(param_listener));
 }
 
-void ServoNode::validateParams(const servo::Params servo_params)
+void ServoNode::validateParams(const servo::Params& servo_params)
 {
   bool has_error = false;
   if (servo_params.hard_stop_singularity_threshold <= servo_params.lower_singularity_threshold)

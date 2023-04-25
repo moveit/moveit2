@@ -68,7 +68,7 @@ private:
    * `generate_parameter_library`, with limits specified in the parameters YAML file. This method performs additional
    * validation for parameters whose values depend on each other.
    */
-  void validateParams(const servo::Params);
+  void validateParams(const servo::Params&);
 
   /** \brief Start the servo loop. Must be called once to begin Servoing. */
   void startCB(const std::shared_ptr<std_srvs::srv::Trigger::Request>& request,
