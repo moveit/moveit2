@@ -74,7 +74,6 @@ rclcpp_components_register_nodes(servo_node "moveit_servo::ServoNode")
 # Add executable for using a controller
 add_library(servo_controller_input SHARED src/teleop_demo/joystick_servo_example.cpp)
 ament_target_dependencies(servo_controller_input PUBLIC ${THIS_PACKAGE_INCLUDE_DEPENDS})
-target_link_libraries(servo_controller_input PRIVATE moveit_compatibility)
 rclcpp_components_register_nodes(servo_controller_input "moveit_servo::JoyToServoPub")
 
 ######################
@@ -93,7 +92,6 @@ ament_target_dependencies(servo_pose_tracking_demo ${THIS_PACKAGE_INCLUDE_DEPEND
 
 # Add executable to publish fake servo commands for testing/demo purposes
 add_executable(fake_command_publisher test/publish_fake_jog_commands.cpp)
-target_link_libraries(fake_command_publisher moveit_compatibility)
 ament_target_dependencies(fake_command_publisher
   rclcpp
   geometry_msgs

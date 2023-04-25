@@ -55,9 +55,10 @@
 #include <rclcpp/node_options.hpp>
 #include <rclcpp/parameter_value.hpp>
 #include <rclcpp/qos.hpp>
-#if MOVEIT_ROLLING
+#include <rclcpp/version.h>
+#if RCLCPP_VERSION_GTE(20, 0, 0)
 #include <rclcpp/event_handler.hpp>
-#elif MOVEIT_HUMBLE
+#else
 #include <rclcpp/qos_event.hpp>
 #endif
 #include <rclcpp/subscription.hpp>

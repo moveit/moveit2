@@ -39,9 +39,10 @@
 #include <rclcpp/experimental/buffers/intra_process_buffer.hpp>
 #include <rclcpp/node.hpp>
 #include <rclcpp/qos.hpp>
-#if MOVEIT_ROLLING
+#include <rclcpp/version.h>
+#if RCLCPP_VERSION_GTE(20, 0, 0)
 #include <rclcpp/event_handler.hpp>
-#elif MOVEIT_HUMBLE
+#else
 #include <rclcpp/qos_event.hpp>
 #endif
 #include <rclcpp/subscription.hpp>
