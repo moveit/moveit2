@@ -2,6 +2,11 @@
 Changelog for package moveit_setup_framework
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.7.3 (2023-04-24)
+------------------
+* Replace Variable PROJECT_NAME in CMakeLists.txt with the actual name (`#2020 <https://github.com/ros-planning/moveit2/issues/2020>`_)
+* Contributors: Shobuj Paul
+
 2.7.2 (2023-04-18)
 ------------------
 * Add URDF Loader Exceptions and Fix Infinite While-Loop when URDF file isn't in a ROS Package (`#2032 <https://github.com/ros-planning/moveit2/issues/2032>`_)
