@@ -55,13 +55,7 @@ public:
       std::function<bool(const planning_scene::PlanningSceneConstPtr&, const planning_interface::MotionPlanRequest&,
                          planning_interface::MotionPlanResponse&)>;
 
-  PlanningRequestAdapter()
-  {
-  }
-
-  virtual ~PlanningRequestAdapter()
-  {
-  }
+  virtual ~PlanningRequestAdapter() = default;
 
   /** \brief Initialize parameters using the passed Node and parameter namespace.
       If no initialization is needed, simply implement as empty */
