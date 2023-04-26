@@ -46,7 +46,7 @@ ConstrainedPlanningStateSpaceFactory::ConstrainedPlanningStateSpaceFactory() : M
 }
 
 int ConstrainedPlanningStateSpaceFactory::canRepresentProblem(
-    const std::string& /*group*/, const moveit_msgs::msg::MotionPlanRequest& req,
+    const std::string& /*group*/, const planning_interface::MotionPlanRequest& req,
     const moveit::core::RobotModelConstPtr& /*robot_model*/) const
 {
   // If we have exactly one position or orientation constraint, prefer the constrained planning state space

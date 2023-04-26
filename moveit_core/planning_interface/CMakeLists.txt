@@ -1,6 +1,7 @@
 add_library(moveit_planning_interface SHARED
   src/planning_interface.cpp
   src/planning_response.cpp
+  src/planning_request.cpp
 )
 target_include_directories(moveit_planning_interface PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>

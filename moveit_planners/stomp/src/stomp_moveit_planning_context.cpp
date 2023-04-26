@@ -151,16 +151,19 @@ stomp::TaskPtr createStompTask(const stomp::StompConfiguration& config, StompPla
   // Cost, noise and filter functions are provided for planning.
   // TODO(henningkayser): parameterize cost penalties
   using namespace stomp_moveit;
-  CostFn cost_fn;
+  std::vector<CostFn> cost_functions;
+  cost_functions.push_back(costs::getCollisionCostFunction(planning_scene, group, 1.0 /* collision penalty */));
+
   if (!constraints.empty())
   {
-    cost_fn = costs::sum({ costs::getCollisionCostFunction(planning_scene, group, 1.0 /* collision penalty */),
-                           costs::getConstraintsCostFunction(planning_scene, group, constraints.getAllConstraints(),
-                                                             1.0 /* constraint penalty */) });
+    cost_functions.push_back(costs::getConstraintsCostFunction(planning_scene, group, constraints.getAllConstraints(),
+                                                               1.0 /* constraint penalty */));
   }
-  else
+
+  if (context.getMotionPlanRequest().state_cost_function != nullptr)
   {
-    cost_fn = costs::getCollisionCostFunction(planning_scene, group, 1.0 /* collision penalty */);
+    cost_functions.push_back(
+        costs::getCostFunctionFromMoveitStateCostFn(context.getMotionPlanRequest().state_cost_function));
   }
 
   // TODO(henningkayser): parameterize stddev
@@ -174,8 +177,8 @@ stomp::TaskPtr createStompTask(const stomp::StompConfiguration& config, StompPla
       visualization::getSuccessTrajectoryPublisher(context.getPathPublisher(), planning_scene, group);
 
   // Initialize and return STOMP task
-  stomp::TaskPtr task =
-      std::make_shared<ComposableTask>(noise_generator_fn, cost_fn, filter_fn, iteration_callback_fn, done_callback_fn);
+  stomp::TaskPtr task = std::make_shared<ComposableTask>(noise_generator_fn, costs::sum(cost_functions), filter_fn,
+                                                         iteration_callback_fn, done_callback_fn);
   return task;
 }
 

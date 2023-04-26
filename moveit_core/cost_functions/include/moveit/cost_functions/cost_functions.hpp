@@ -1,7 +1,7 @@
 /*********************************************************************
  * Software License Agreement (BSD License)
  *
- *  Copyright (c) 2012, Willow Garage, Inc.
+ *  Copyright (c) 2023, PickNik Inc.
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *     copyright notice, this list of conditions and the following
  *     disclaimer in the documentation and/or other materials provided
  *     with the distribution.
- *   * Neither the name of Willow Garage nor the names of its
+ *   * Neither the name of PickNik Inc. nor the names of its
  *     contributors may be used to endorse or promote products derived
  *     from this software without specific prior written permission.
  *
@@ -32,24 +32,25 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-/* Author: Ioan Sucan */
+/* Author: Sebastian Jahr
+   Desc: Cost functions for MoveIt */
 
 #pragma once
 
-#include <Eigen/Core>
-#include <moveit_msgs/msg/motion_plan_request.hpp>
+#include <moveit/planning_interface/planning_interface.h>
+#include <moveit/planning_interface/planning_request.h>
+#include <moveit/planning_scene/planning_scene.h>
 
-namespace planning_interface
+namespace moveit
 {
-
-/** \brief Definition for a cost function to measure the cost of a single state during motion planning */
-using StateCostFn = std::function<double(const Eigen::VectorXd& state_vector)>;
-
-struct MotionPlanRequest : moveit_msgs::msg::MotionPlanRequest
+namespace cost_functions
 {
-  MotionPlanRequest(moveit_msgs::msg::MotionPlanRequest request_msg = moveit_msgs::msg::MotionPlanRequest(),
-                    planning_interface::StateCostFn state_cost_function = nullptr);
-  planning_interface::StateCostFn state_cost_function = nullptr;
-};
+[[nodiscard]] ::planning_interface::StateCostFn
+createMinJointDisplacementCostFn(moveit::core::RobotState& robot_state, const std::string& group_name,
+                                 const planning_scene::PlanningSceneConstPtr& planning_scene);
 
-}  // namespace planning_interface
+[[nodiscard]] ::planning_interface::StateCostFn
+createClearanceCostFn(moveit::core::RobotState& robot_state, const std::string& group_name,
+                      const planning_scene::PlanningSceneConstPtr& planning_scene);
+}  // namespace cost_functions
+}  // namespace moveit

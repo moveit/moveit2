@@ -41,6 +41,7 @@
 
 #include <Eigen/Geometry>
 
+#include <moveit/planning_interface/planning_interface.h>
 #include <moveit/planning_scene/planning_scene.h>
 #include <moveit/kinematic_constraints/kinematic_constraint.h>
 
@@ -88,8 +89,8 @@ CostFn getCostFunctionFromStateValidator(const StateValidatorFn& state_validator
     // with a gaussian, penalizing neighboring valid states as well.
     for (int timestep = 0; timestep < values.cols() - 1; ++timestep)
     {
-      Eigen::VectorXd current = values.col(timestep);
-      Eigen::VectorXd next = values.col(timestep + 1);
+      const Eigen::VectorXd& current = values.col(timestep);
+      const Eigen::VectorXd& next = values.col(timestep + 1);
       const double segment_distance = (next - current).norm();
       double interpolation_fraction = 0.0;
       const double interpolation_step = std::min(0.5, interpolation_step_size / segment_distance);
@@ -219,7 +220,28 @@ CostFn getConstraintsCostFunction(const std::shared_ptr<const planning_scene::Pl
 }
 
 /**
- * Creates a cost function that computes the summed waypoint penalites over a vector of cost functions.
+ * Creates a STOMP cost function from
+ *
+ * @param state_cost_function The planning scene instance to use for computing transforms
+ *
+ * @return                    STOMP Cost function based on MoveIt state cost function
+ */
+CostFn getCostFunctionFromMoveitStateCostFn(const ::planning_interface::StateCostFn& state_cost_function)
+{
+  CostFn cost_fn = [&](const Eigen::MatrixXd& values, Eigen::VectorXd& costs, bool& validity) {
+    validity = true;  // TODO(sjahr): Discuss if that is always the case
+    for (int timestep = 0; timestep < values.cols(); ++timestep)
+    {
+      Eigen::VectorXd current_state_vector = values.col(timestep);
+      costs(timestep) = state_cost_function(current_state_vector);
+    }
+    return true;
+  };
+  return cost_fn;
+}
+
+/**
+ * Creates a cost function that computes the summed waypoint penalties over a vector of cost functions.
  *
  * @param cost_functions A vector of cost functions
  *

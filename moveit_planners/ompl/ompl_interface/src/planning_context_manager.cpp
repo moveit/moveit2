@@ -334,7 +334,7 @@ void PlanningContextManager::setPlannerConfigurations(const planning_interface::
 ModelBasedPlanningContextPtr
 PlanningContextManager::getPlanningContext(const planning_interface::PlannerConfigurationSettings& config,
                                            const ModelBasedStateSpaceFactoryPtr& factory,
-                                           const moveit_msgs::msg::MotionPlanRequest& req) const
+                                           const planning_interface::MotionPlanRequest& req) const
 {
   // Check for a cached planning context
   ModelBasedPlanningContextPtr context;
@@ -439,7 +439,7 @@ const ModelBasedStateSpaceFactoryPtr& PlanningContextManager::getStateSpaceFacto
 
 const ModelBasedStateSpaceFactoryPtr&
 PlanningContextManager::getStateSpaceFactory(const std::string& group,
-                                             const moveit_msgs::msg::MotionPlanRequest& req) const
+                                             const planning_interface::MotionPlanRequest& req) const
 {
   // find the problem representation to use
   auto best = state_space_factories_.end();
@@ -469,7 +469,7 @@ PlanningContextManager::getStateSpaceFactory(const std::string& group,
 }
 
 ModelBasedPlanningContextPtr PlanningContextManager::getPlanningContext(
-    const planning_scene::PlanningSceneConstPtr& planning_scene, const moveit_msgs::msg::MotionPlanRequest& req,
+    const planning_scene::PlanningSceneConstPtr& planning_scene, const planning_interface::MotionPlanRequest& req,
     moveit_msgs::msg::MoveItErrorCodes& error_code, const rclcpp::Node::SharedPtr& node,
     bool use_constraints_approximation) const
 {

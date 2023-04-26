@@ -341,6 +341,8 @@ PlanningComponent::getMotionPlanRequest(const PlanRequestParameters& plan_reques
   request.path_constraints = current_path_constraints_;
   request.trajectory_constraints = current_trajectory_constraints_;
 
+  request.state_cost_function = state_cost_function_;
+
   // Set start state
   moveit::core::RobotStatePtr start_state = considered_start_state_;
   if (!start_state)

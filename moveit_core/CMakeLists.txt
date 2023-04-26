@@ -51,6 +51,7 @@ add_subdirectory(collision_detection)
 add_subdirectory(collision_distance_field)
 add_subdirectory(constraint_samplers)
 add_subdirectory(controller_manager)
+add_subdirectory(cost_functions)
 add_subdirectory(distance_field)
 add_subdirectory(dynamics_solver)
 add_subdirectory(exceptions)
@@ -107,6 +108,7 @@ install(
     moveit_collision_detection_fcl
     moveit_collision_distance_field
     moveit_constraint_samplers
+    moveit_cost_functions
     moveit_distance_field
     moveit_dynamics_solver
     moveit_exceptions

@@ -40,6 +40,7 @@
 #include <moveit/ompl_interface/parameterization/model_based_state_space_factory.h>
 #include <moveit/constraint_samplers/constraint_sampler_manager.h>
 #include <moveit/macros/class_forward.h>
+#include <moveit/planning_interface/planning_request.h>
 
 #include <ompl/base/PlannerDataStorage.h>
 
@@ -218,11 +219,11 @@ protected:
   /** \brief This is the function that constructs new planning contexts if no previous ones exist that are suitable */
   ModelBasedPlanningContextPtr getPlanningContext(const planning_interface::PlannerConfigurationSettings& config,
                                                   const ModelBasedStateSpaceFactoryPtr& factory,
-                                                  const moveit_msgs::msg::MotionPlanRequest& req) const;
+                                                  const planning_interface::MotionPlanRequest& req) const;
 
   const ModelBasedStateSpaceFactoryPtr& getStateSpaceFactory(const std::string& factory_type) const;
   const ModelBasedStateSpaceFactoryPtr& getStateSpaceFactory(const std::string& group_name,
-                                                             const moveit_msgs::msg::MotionPlanRequest& req) const;
+                                                             const planning_interface::MotionPlanRequest& req) const;
 
   /** \brief The kinematic model for which motion plans are computed */
   moveit::core::RobotModelConstPtr robot_model_;

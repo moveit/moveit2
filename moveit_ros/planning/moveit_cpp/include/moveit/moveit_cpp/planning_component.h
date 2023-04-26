@@ -39,6 +39,7 @@
 
 #include <geometry_msgs/msg/pose_stamped.hpp>
 #include <moveit/moveit_cpp/moveit_cpp.h>
+#include <moveit/planning_interface/planning_interface.h>
 #include <moveit/planning_interface/planning_response.h>
 #include <moveit/planning_pipeline_interfaces/planning_pipeline_interfaces.hpp>
 #include <moveit/planning_pipeline_interfaces/solution_selection_functions.hpp>
@@ -189,6 +190,13 @@ public:
   /** \brief Set the trajectory constraints generated from a moveit msg Constraints */
   bool setTrajectoryConstraints(const moveit_msgs::msg::TrajectoryConstraints& trajectory_constraints);
 
+  /** \brief Set planning cost function */
+  bool setStateCostFunction(const planning_interface::StateCostFn& state_cost_function)
+  {
+    state_cost_function_ = state_cost_function;
+    return true;
+  };
+
   /** \brief Run a plan from start or current state to fulfill the last goal constraints provided by setGoal() using
    * default parameters. */
   planning_interface::MotionPlanResponse plan();
@@ -230,6 +238,7 @@ private:
   const std::string group_name_;
   // The robot_model_ member variable of MoveItCpp class will manually free the joint_model_group_ resources
   const moveit::core::JointModelGroup* joint_model_group_;
+  planning_interface::StateCostFn state_cost_function_ = nullptr;
 
   // Planning
   // The start state used in the planning motion request

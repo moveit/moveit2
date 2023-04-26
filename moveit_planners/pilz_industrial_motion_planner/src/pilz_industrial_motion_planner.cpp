@@ -126,7 +126,7 @@ void CommandPlanner::getPlanningAlgorithms(std::vector<std::string>& algs) const
 
 planning_interface::PlanningContextPtr
 CommandPlanner::getPlanningContext(const planning_scene::PlanningSceneConstPtr& planning_scene,
-                                   const moveit_msgs::msg::MotionPlanRequest& req,
+                                   const planning_interface::MotionPlanRequest& req,
                                    moveit_msgs::msg::MoveItErrorCodes& error_code) const
 {
   // TODO(henningkayser): print req
@@ -157,7 +157,7 @@ CommandPlanner::getPlanningContext(const planning_scene::PlanningSceneConstPtr& 
   }
 }
 
-bool CommandPlanner::canServiceRequest(const moveit_msgs::msg::MotionPlanRequest& req) const
+bool CommandPlanner::canServiceRequest(const planning_interface::MotionPlanRequest& req) const
 {
   if (context_loader_map_.find(req.planner_id) == context_loader_map_.end())
   {
