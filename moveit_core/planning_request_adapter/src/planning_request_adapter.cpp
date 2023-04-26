@@ -145,7 +145,7 @@ bool PlanningRequestAdapterChain::adaptAndPlan(const planning_interface::Planner
     return callPlannerInterfaceSolve(planner, scene, req, res);
   };
 
-  for (std::size_t i = adapters_.size() - 1; i >= 0; --i)
+  for (int i = adapters_.size() - 1; i >= 0; --i)
   {
     fn = [&adapter = *adapters_[i], fn, &added_path_index = added_path_index_each[i]](
              const planning_scene::PlanningSceneConstPtr& scene, const planning_interface::MotionPlanRequest& req,
