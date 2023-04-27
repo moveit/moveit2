@@ -2327,7 +2327,7 @@ void RobotState::printTransforms(std::ostream& out) const
   const std::vector<const LinkModel*>& link_model = robot_model_->getLinkModels();
   for (const LinkModel* link : link_model)
   {
-    out << "  " << link->getName() << ':' << " ";
+    out << "  " << link->getName() << ": ";
     printTransform(global_link_transforms_[link->getLinkIndex()], out);
   }
 }
