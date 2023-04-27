@@ -136,8 +136,8 @@ bool BenchmarkOptions::readBenchmarkOptions(const rclcpp::Node::SharedPtr& node)
     RCLCPP_INFO_STREAM(LOGGER, "Benchmark workspace: min_corner: ["
                                    << workspace.min_corner.x << ", " << workspace.min_corner.y << ", "
                                    << workspace.min_corner.z << "], "
-                                   << "max_corner: [" << workspace.max_corner.x << ", " << workspace.max_corner.y << ','
-                                   << ' ' << workspace.max_corner.z << ']');
+                                   << "max_corner: [" << workspace.max_corner.x << ", " << workspace.max_corner.y
+                                   << ", " << workspace.max_corner.z << ']');
     // Read planner configuration
     if (!readPlannerConfigs(node))
     {
