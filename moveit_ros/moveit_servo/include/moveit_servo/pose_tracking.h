@@ -41,8 +41,8 @@
 #include <atomic>
 #include <control_toolbox/pid.hpp>
 #include <moveit_servo/make_shared_from_pool.h>
-#include <moveit_servo/servo_parameters.h>
 #include <moveit_servo/servo.h>
+#include <moveit_servo_lib_parameters.hpp>
 #include <optional>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
 #include <tf2_ros/transform_listener.h>
@@ -87,7 +87,7 @@ class PoseTracking
 {
 public:
   /** \brief Constructor. Loads ROS parameters under the given namespace. */
-  PoseTracking(const rclcpp::Node::SharedPtr& node, const ServoParameters::SharedConstPtr& servo_parameters,
+  PoseTracking(const rclcpp::Node::SharedPtr& node, std::unique_ptr<const servo::ParamListener> servo_param_listener,
                const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor);
 
   PoseTrackingStatusCode moveToPose(const Eigen::Vector3d& positional_tolerance, const double angular_tolerance,
@@ -152,7 +152,7 @@ private:
   void doPostMotionReset();
 
   rclcpp::Node::SharedPtr node_;
-  moveit_servo::ServoParameters::SharedConstPtr servo_parameters_;
+  servo::Params servo_parameters_;
 
   planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor_;
   moveit::core::RobotModelConstPtr robot_model_;

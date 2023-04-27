@@ -25,6 +25,7 @@
 
   <depend>control_msgs</depend>
   <depend>control_toolbox</depend>
+  <depend>generate_parameter_library</depend>
   <depend>geometry_msgs</depend>
   <depend>moveit_msgs</depend>
   <depend>moveit_core</depend>

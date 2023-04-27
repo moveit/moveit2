@@ -64,9 +64,9 @@
 #include <moveit/kinematics_base/kinematics_base.h>
 
 // moveit_servo
-#include <moveit_servo/servo_parameters.h>
 #include <moveit_servo/status_codes.h>
 #include <moveit/online_signal_smoothing/smoothing_base_class.h>
+#include <moveit_servo_lib_parameters.hpp>
 
 namespace moveit_servo
 {
@@ -80,8 +80,8 @@ class ServoCalcs
 {
 public:
   ServoCalcs(const rclcpp::Node::SharedPtr& node,
-             const std::shared_ptr<const moveit_servo::ServoParameters>& parameters,
-             const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor);
+             const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor,
+             std::unique_ptr<const servo::ParamListener> servo_param_listener);
 
   ~ServoCalcs();
 
@@ -91,6 +91,12 @@ public:
    * @exception can throw a std::runtime_error if the setup was not completed
    */
   void start();
+
+  /**
+   * Check for parameter update, and apply updates if any
+   * All dynamic parameters must be checked and updated within this method
+   */
+  void updateParams();
 
   /**
    * Get the MoveIt planning link transform.
@@ -246,8 +252,9 @@ protected:
   // Pointer to the ROS node
   std::shared_ptr<rclcpp::Node> node_;
 
-  // Parameters from yaml
-  const std::shared_ptr<const moveit_servo::ServoParameters> parameters_;
+  // Servo parameters
+  std::unique_ptr<const servo::ParamListener> servo_param_listener_;
+  servo::Params servo_params_;
 
   // Pointer to the collision environment
   planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor_;
@@ -326,12 +333,6 @@ protected:
   // input condition variable used for low latency mode
   std::condition_variable input_cv_;
   bool new_input_cmd_ = false;
-
-  // dynamic parameters
-  std::string robot_link_command_frame_;
-  rcl_interfaces::msg::SetParametersResult robotLinkCommandFrameCallback(const rclcpp::Parameter& parameter);
-  double override_velocity_scaling_factor_;
-  rcl_interfaces::msg::SetParametersResult overrideVelocityScalingFactorCallback(const rclcpp::Parameter& parameter);
 
   // Load a smoothing plugin
   pluginlib::ClassLoader<online_signal_smoothing::SmoothingBaseClass> smoothing_loader_;
