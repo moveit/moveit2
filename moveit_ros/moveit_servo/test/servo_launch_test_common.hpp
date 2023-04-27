@@ -162,38 +162,6 @@ public:
     return true;
   }
 
-  bool setupPauseClient()
-  {
-    client_servo_pause_ = node_->create_client<std_srvs::srv::Trigger>(resolveServoTopicName("~/pause_servo"));
-    while (!client_servo_pause_->service_is_ready())
-    {
-      if (!rclcpp::ok())
-      {
-        RCLCPP_ERROR(LOGGER, "Interrupted while waiting for the service. Exiting.");
-        return false;
-      }
-      RCLCPP_INFO(LOGGER, "client_servo_pause_ service not available, waiting again...");
-      rclcpp::sleep_for(std::chrono::milliseconds(500));
-    }
-    return true;
-  }
-
-  bool setupUnpauseClient()
-  {
-    client_servo_unpause_ = node_->create_client<std_srvs::srv::Trigger>(resolveServoTopicName("~/unpause_servo"));
-    while (!client_servo_unpause_->service_is_ready())
-    {
-      if (!rclcpp::ok())
-      {
-        RCLCPP_ERROR(LOGGER, "Interrupted while waiting for the service. Exiting.");
-        return false;
-      }
-      RCLCPP_INFO(LOGGER, "client_servo_unpause_ service not available, waiting again...");
-      rclcpp::sleep_for(std::chrono::milliseconds(500));
-    }
-    return true;
-  }
-
   bool setupControlDimsClient()
   {
     client_change_control_dims_ = node_->create_client<moveit_msgs::srv::ChangeControlDimensions>(
@@ -459,8 +427,6 @@ protected:
   // Service Clients
   rclcpp::Client<std_srvs::srv::Trigger>::SharedPtr client_servo_start_;
   rclcpp::Client<std_srvs::srv::Trigger>::SharedPtr client_servo_stop_;
-  rclcpp::Client<std_srvs::srv::Trigger>::SharedPtr client_servo_pause_;
-  rclcpp::Client<std_srvs::srv::Trigger>::SharedPtr client_servo_unpause_;
   rclcpp::Client<moveit_msgs::srv::ChangeControlDimensions>::SharedPtr client_change_control_dims_;
   rclcpp::Client<moveit_msgs::srv::ChangeDriftDimensions>::SharedPtr client_change_drift_dims_;
 

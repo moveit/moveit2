@@ -121,12 +121,6 @@ public:
   bool getEEFrameTransform(Eigen::Isometry3d& transform);
   bool getEEFrameTransform(geometry_msgs::msg::TransformStamped& transform);
 
-  /**
-   * Pause or unpause the processing of servo commands while keeping the timers alive.
-   * If paused, commands to hold the robot at its current position will continue to be published at the configured rate.
-   */
-  void setPaused(bool paused);
-
 protected:
   /** \brief Run the main calculation loop */
   void mainCalcLoop();
@@ -303,7 +297,6 @@ protected:
 
   // Status
   StatusCode status_ = StatusCode::NO_WARNING;
-  std::atomic<bool> paused_;
   bool twist_command_is_stale_ = false;
   bool joint_command_is_stale_ = false;
   double collision_velocity_scale_ = 1.0;
