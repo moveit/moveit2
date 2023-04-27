@@ -112,7 +112,7 @@ std::ostream& operator<<(std::ostream& os, const ompl_interface::Bounds& bounds)
   os << "Bounds:\n";
   for (std::size_t i{ 0 }; i < bounds.size(); ++i)
   {
-    os << "( " << bounds.lower_[i] << ',' << ' ' << bounds.upper_[i] << " )\n";
+    os << "( " << bounds.lower_[i] << ", " << bounds.upper_[i] << " )\n";
   }
   return os;
 }

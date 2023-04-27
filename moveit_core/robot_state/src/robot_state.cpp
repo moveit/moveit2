@@ -1805,7 +1805,7 @@ bool RobotState::setFromIK(const JointModelGroup* jmg, const EigenSTL::vector_Is
       // Debug available tip frames
       std::stringstream ss;
       for (solver_tip_id = 0; solver_tip_id < solver_tip_frames.size(); ++solver_tip_id)
-        ss << solver_tip_frames[solver_tip_id] << ',' << ' ';
+        ss << solver_tip_frames[solver_tip_id] << ", ";
       RCLCPP_ERROR(LOGGER, "Available tip frames: [%s]", ss.str().c_str());
       return false;
     }
@@ -2290,9 +2290,9 @@ void RobotState::printTransform(const Eigen::Isometry3d& transform, std::ostream
   if (checkIsometry(transform, CHECK_ISOMETRY_PRECISION, false))
   {
     Eigen::Quaterniond q(transform.linear());
-    out << "T.xyz = [" << transform.translation().x() << ',' << ' ' << transform.translation().y() << ',' << ' '
-        << transform.translation().z() << "], Q.xyzw = [" << q.x() << ',' << ' ' << q.y() << ',' << ' ' << q.z() << ','
-        << ' ' << q.w() << ']';
+    out << "T.xyz = [" << transform.translation().x() << ", " << transform.translation().y() << ", "
+        << transform.translation().z() << "], Q.xyzw = [" << q.x() << ", " << q.y() << ", " << q.z() << ", " << q.w()
+        << ']';
   }
   else
   {
@@ -2315,11 +2315,11 @@ void RobotState::printTransforms(std::ostream& out) const
   const std::vector<const JointModel*>& jm = robot_model_->getJointModels();
   for (const JointModel* joint : jm)
   {
-    out << ' ' << ' ' << joint->getName();
+    out << "  " << joint->getName();
     const int idx = joint->getJointIndex();
     if (dirty_joint_transforms_[idx])
       out << " [dirty]";
-    out << ':' << ' ';
+    out << ": ";
     printTransform(variable_joint_transforms_[idx], out);
   }
 
@@ -2327,7 +2327,7 @@ void RobotState::printTransforms(std::ostream& out) const
   const std::vector<const LinkModel*>& link_model = robot_model_->getLinkModels();
   for (const LinkModel* link : link_model)
   {
-    out << ' ' << ' ' << link->getName() << ':' << " ";
+    out << "  " << link->getName() << ':' << " ";
     printTransform(global_link_transforms_[link->getLinkIndex()], out);
   }
 }

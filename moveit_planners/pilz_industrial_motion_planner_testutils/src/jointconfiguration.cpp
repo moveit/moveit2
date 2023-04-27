@@ -150,7 +150,7 @@ std::ostream& operator<<(std::ostream& os, const JointConfiguration& obj)
     os << obj.getJoint(i);
     if (i != n - 1)
     {
-      os << ',' << ' ';
+      os << ", ";
     }
   }
   os << ']';
