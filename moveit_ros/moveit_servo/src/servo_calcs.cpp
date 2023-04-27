@@ -254,11 +254,6 @@ void ServoCalcs::start()
                            current_state_->getGlobalLinkTransform(servo_params_.ee_frame_name);
   tf_moveit_to_robot_cmd_frame_ = current_state_->getGlobalLinkTransform(servo_params_.planning_frame).inverse() *
                                   current_state_->getGlobalLinkTransform(servo_params_.robot_link_command_frame);
-  if (!use_inv_jacobian_)
-  {
-    ik_base_to_tip_frame_ = current_state_->getGlobalLinkTransform(ik_solver_->getBaseFrame()).inverse() *
-                            current_state_->getGlobalLinkTransform(ik_solver_->getTipFrame());
-  }
 
   stop_requested_ = false;
   thread_ = std::thread([this] {
@@ -423,12 +418,6 @@ void ServoCalcs::calculateSingleIteration()
   // Calculate this transform to ensure it is available via C++ API
   tf_moveit_to_ee_frame_ = current_state_->getGlobalLinkTransform(servo_params_.planning_frame).inverse() *
                            current_state_->getGlobalLinkTransform(servo_params_.ee_frame_name);
-
-  if (!use_inv_jacobian_)
-  {
-    ik_base_to_tip_frame_ = current_state_->getGlobalLinkTransform(ik_solver_->getBaseFrame()).inverse() *
-                            current_state_->getGlobalLinkTransform(ik_solver_->getTipFrame());
-  }
 
   // Don't end this function without updating the filters
   updated_filters_ = false;
@@ -612,7 +601,8 @@ bool ServoCalcs::cartesianServoCalcs(geometry_msgs::msg::TwistStamped& cmd,
 
     // Poses passed to IK solvers are assumed to be in some tip link (usually EE) reference frame
     // First, find the new tip link position without newly applied rotation
-
+    ik_base_to_tip_frame_ = current_state_->getGlobalLinkTransform(ik_solver_->getBaseFrame()).inverse() *
+                            current_state_->getGlobalLinkTransform(ik_solver_->getTipFrame());
     auto tf_no_new_rot = tf_pos_delta * ik_base_to_tip_frame_;
     // we want the rotation to be applied in the requested reference frame,
     // but we want the rotation to be about the EE point in space, not the origin.
