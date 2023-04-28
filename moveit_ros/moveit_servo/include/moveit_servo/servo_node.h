@@ -42,6 +42,7 @@
 
 #include <moveit_servo/servo.h>
 #include <std_srvs/srv/trigger.hpp>
+#include <moveit_servo_lib_parameters.hpp>
 
 namespace moveit_servo
 {
@@ -61,6 +62,13 @@ private:
   std::unique_ptr<moveit_servo::Servo> servo_;
   std::shared_ptr<tf2_ros::Buffer> tf_buffer_;
   std::shared_ptr<planning_scene_monitor::PlanningSceneMonitor> planning_scene_monitor_;
+
+  /***
+   * \brief Most servo parameters are individually validated using the validation methods in
+   * `generate_parameter_library`, with limits specified in the parameters YAML file. This method performs additional
+   * validation for parameters whose values depend on each other.
+   */
+  void validateParams(const servo::Params& servo_params);
 
   /** \brief Start the servo loop. Must be called once to begin Servoing. */
   void startCB(const std::shared_ptr<std_srvs::srv::Trigger::Request>& request,
