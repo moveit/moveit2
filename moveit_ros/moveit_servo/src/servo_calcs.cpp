@@ -187,7 +187,7 @@ ServoCalcs::ServoCalcs(const rclcpp::Node::SharedPtr& node,
   }
   else if (!ik_solver_->supportsGroup(joint_model_group_))
   {
-    ik_solver_ = NULL;
+    ik_solver_ = nullptr;
     RCLCPP_WARN(LOGGER,
                 "The loaded kinematics plugin does not support group '%s'. Will use inverse Jacobian for servo "
                 "calculations instead.",

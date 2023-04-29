@@ -43,6 +43,7 @@
 #include <mutex>
 #include <thread>
 #include <atomic>
+#include <optional>
 
 // ROS
 #include <control_msgs/msg/joint_jog.hpp>
@@ -337,6 +338,6 @@ protected:
   // Load a smoothing plugin
   pluginlib::ClassLoader<online_signal_smoothing::SmoothingBaseClass> smoothing_loader_;
 
-  kinematics::KinematicsBaseConstPtr ik_solver_ = NULL;
+  kinematics::KinematicsBaseConstPtr ik_solver_ = nullptr;
 };
 }  // namespace moveit_servo
