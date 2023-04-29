@@ -180,7 +180,6 @@ ServoCalcs::ServoCalcs(const rclcpp::Node::SharedPtr& node,
   ik_solver_ = joint_model_group_->getSolverInstance();
   if (!ik_solver_)
   {
-    use_inv_jacobian_ = true;
     RCLCPP_WARN(
         LOGGER,
         "No kinematics solver instantiated for group '%s'. Will use inverse Jacobian for servo calculations instead.",
@@ -188,7 +187,7 @@ ServoCalcs::ServoCalcs(const rclcpp::Node::SharedPtr& node,
   }
   else if (!ik_solver_->supportsGroup(joint_model_group_))
   {
-    use_inv_jacobian_ = true;
+    ik_solver_ = NULL;
     RCLCPP_WARN(LOGGER,
                 "The loaded kinematics plugin does not support group '%s'. Will use inverse Jacobian for servo "
                 "calculations instead.",
@@ -586,7 +585,7 @@ bool ServoCalcs::cartesianServoCalcs(geometry_msgs::msg::TwistStamped& cmd,
 
   // Convert from cartesian commands to joint commands
   // Use an IK solver plugin if we have one, otherwise use inverse Jacobian.
-  if (!use_inv_jacobian_)
+  if (ik_solver_)
   {
     // get a transformation matrix with the desired position change &
     // get a transformation matrix with desired orientation change

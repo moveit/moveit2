@@ -337,7 +337,6 @@ protected:
   // Load a smoothing plugin
   pluginlib::ClassLoader<online_signal_smoothing::SmoothingBaseClass> smoothing_loader_;
 
-  kinematics::KinematicsBaseConstPtr ik_solver_;
-  bool use_inv_jacobian_ = false;
+  kinematics::KinematicsBaseConstPtr ik_solver_ = NULL;
 };
 }  // namespace moveit_servo
