@@ -536,40 +536,7 @@ bool ServoCalcs::cartesianServoCalcs(geometry_msgs::msg::TwistStamped& cmd,
   // Transform the command to the MoveGroup planning frame
   if (cmd.header.frame_id != servo_params_.planning_frame)
   {
-    Eigen::Vector3d translation_vector(cmd.twist.linear.x, cmd.twist.linear.y, cmd.twist.linear.z);
-    Eigen::Vector3d angular_vector(cmd.twist.angular.x, cmd.twist.angular.y, cmd.twist.angular.z);
-
-    // If the incoming frame is empty or is the command frame, we use the previously calculated tf
-    if (cmd.header.frame_id.empty() || cmd.header.frame_id == servo_params_.robot_link_command_frame)
-    {
-      translation_vector = tf_moveit_to_robot_cmd_frame_.linear() * translation_vector;
-      angular_vector = tf_moveit_to_robot_cmd_frame_.linear() * angular_vector;
-    }
-    else if (cmd.header.frame_id == servo_params_.ee_frame_name)
-    {
-      // If the frame is the EE frame, we already have that transform as well
-      translation_vector = tf_moveit_to_ee_frame_.linear() * translation_vector;
-      angular_vector = tf_moveit_to_ee_frame_.linear() * angular_vector;
-    }
-    else
-    {
-      // We solve (planning_frame -> base -> cmd.header.frame_id)
-      // by computing (base->planning_frame)^-1 * (base->cmd.header.frame_id)
-      const auto tf_moveit_to_incoming_cmd_frame =
-          current_state_->getGlobalLinkTransform(servo_params_.planning_frame).inverse() *
-          current_state_->getGlobalLinkTransform(cmd.header.frame_id);
-      translation_vector = tf_moveit_to_incoming_cmd_frame.linear() * translation_vector;
-      angular_vector = tf_moveit_to_incoming_cmd_frame.linear() * angular_vector;
-    }
-
-    // Put these components back into a TwistStamped
-    cmd.header.frame_id = servo_params_.planning_frame;
-    cmd.twist.linear.x = translation_vector(0);
-    cmd.twist.linear.y = translation_vector(1);
-    cmd.twist.linear.z = translation_vector(2);
-    cmd.twist.angular.x = angular_vector(0);
-    cmd.twist.angular.y = angular_vector(1);
-    cmd.twist.angular.z = angular_vector(2);
+    commandToMoveGroupFrame(cmd, servo_params_, tf_moveit_to_robot_cmd_frame_, tf_moveit_to_ee_frame_, current_state_);
   }
 
   Eigen::VectorXd delta_x = scaleCartesianCommand(cmd);
@@ -603,26 +570,8 @@ bool ServoCalcs::cartesianServoCalcs(geometry_msgs::msg::TwistStamped& cmd,
     Eigen::Isometry3d ik_base_to_tip_frame =
         current_state_->getGlobalLinkTransform(ik_solver_->getBaseFrame()).inverse() *
         current_state_->getGlobalLinkTransform(ik_solver_->getTipFrame());
-    auto tf_no_new_rot = tf_pos_delta * ik_base_to_tip_frame;
-    // we want the rotation to be applied in the requested reference frame,
-    // but we want the rotation to be about the EE point in space, not the origin.
-    // So, we need to translate to origin, rotate, then translate back
-    // Given T = transformation matrix from origin -> EE point in space (translation component of tf_no_new_rot)
-    // and T' as the opposite transformation, EE point in space -> origin (translation only)
-    // apply final transformation as T * R * T' * tf_no_new_rot
-    auto tf_translation = tf_no_new_rot.translation();
-    auto tf_neg_translation = Eigen::Isometry3d::Identity();  // T'
-    tf_neg_translation(0, 3) = -tf_translation(0, 0);
-    tf_neg_translation(1, 3) = -tf_translation(1, 0);
-    tf_neg_translation(2, 3) = -tf_translation(2, 0);
-    auto tf_pos_translation = Eigen::Isometry3d::Identity();  // T
-    tf_pos_translation(0, 3) = tf_translation(0, 0);
-    tf_pos_translation(1, 3) = tf_translation(1, 0);
-    tf_pos_translation(2, 3) = tf_translation(2, 0);
 
-    // T * R * T' * tf_no_new_rot
-    auto tf = tf_pos_translation * tf_rot_delta * tf_neg_translation * tf_no_new_rot;
-    geometry_msgs::msg::Pose next_pose = tf2::toMsg(tf);
+    geometry_msgs::msg::Pose next_pose = deltaToPose(delta_x, ik_base_to_tip_frame);
 
     // setup for IK call
     std::vector<double> solution(num_joints_);

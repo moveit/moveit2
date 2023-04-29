@@ -44,6 +44,7 @@
 
 #include <moveit_servo/status_codes.h>
 #include <moveit/online_signal_smoothing/smoothing_base_class.h>
+#include <moveit_servo_lib_parameters.hpp>
 
 namespace moveit_servo
 {
@@ -88,4 +89,22 @@ bool applyJointUpdate(rclcpp::Clock& clock, const double publish_period, const E
                       const sensor_msgs::msg::JointState& previous_joint_state,
                       sensor_msgs::msg::JointState& next_joint_state,
                       pluginlib::UniquePtr<online_signal_smoothing::SmoothingBaseClass>& smoother);
+
+/** \brief Converts a twist command from the command frame to the MoveGroup planning frame of the robot
+ * @param cmd The twist command
+ * @param servo_params The servo parameters
+ * @param tf_moveit_to_robot_cmd_frame Transform from MoveIt planning frame to servoing command frame
+ * @param tf_moveit_to_ee_frame Transform from MoveIt planning frame to end-effector frame
+ * @param current_state The state of the robot
+ */
+void commandToMoveGroupFrame(geometry_msgs::msg::TwistStamped& cmd, servo::Params& servo_params,
+                             Eigen::Isometry3d& tf_moveit_to_robot_cmd_frame, Eigen::Isometry3d& tf_moveit_to_ee_frame,
+                             moveit::core::RobotStatePtr current_state);
+
+/** \brief Converts the delta_x (change in cartesian position) to a pose to be used with IK solver.
+ * @param delta_x The change in cartesian position
+ * @param ik_base_to_tip_frame The transform from base of the robot to its end-effector
+ * @return Returns the resulting pose after applying delta_x
+ */
+geometry_msgs::msg::Pose deltaToPose(Eigen::VectorXd delta_x, Eigen::Isometry3d ik_base_to_tip_frame);
 }  // namespace moveit_servo
