@@ -182,7 +182,7 @@ bool applyJointUpdate(rclcpp::Clock& clock, const double publish_period, const E
 void commandToMoveGroupFrame(geometry_msgs::msg::TwistStamped& cmd, const servo::Params& servo_params,
                              const Eigen::Isometry3d& tf_moveit_to_robot_cmd_frame,
                              const Eigen::Isometry3d& tf_moveit_to_ee_frame,
-                             const moveit::core::RobotStatePtr current_state)
+                             const moveit::core::RobotStatePtr& current_state)
 {
   Eigen::Vector3d translation_vector(cmd.twist.linear.x, cmd.twist.linear.y, cmd.twist.linear.z);
   Eigen::Vector3d angular_vector(cmd.twist.angular.x, cmd.twist.angular.y, cmd.twist.angular.z);
@@ -220,7 +220,7 @@ void commandToMoveGroupFrame(geometry_msgs::msg::TwistStamped& cmd, const servo:
   cmd.twist.angular.z = angular_vector(2);
 }
 
-geometry_msgs::msg::Pose deltaToPose(const Eigen::VectorXd delta_x, const Eigen::Isometry3d ik_base_to_tip_frame)
+geometry_msgs::msg::Pose deltaToPose(const Eigen::VectorXd& delta_x, const Eigen::Isometry3d& ik_base_to_tip_frame)
 {
   // get a transformation matrix with the desired position change &
   // get a transformation matrix with desired orientation change
