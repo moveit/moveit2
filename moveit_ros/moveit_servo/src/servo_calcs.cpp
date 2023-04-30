@@ -600,10 +600,10 @@ bool ServoCalcs::cartesianServoCalcs(geometry_msgs::msg::TwistStamped& cmd,
 
     // Poses passed to IK solvers are assumed to be in some tip link (usually EE) reference frame
     // First, find the new tip link position without newly applied rotation
-    Eigen::Isometry3d ik_base_to_tip_frame_ =
+    Eigen::Isometry3d ik_base_to_tip_frame =
         current_state_->getGlobalLinkTransform(ik_solver_->getBaseFrame()).inverse() *
         current_state_->getGlobalLinkTransform(ik_solver_->getTipFrame());
-    auto tf_no_new_rot = tf_pos_delta * ik_base_to_tip_frame_;
+    auto tf_no_new_rot = tf_pos_delta * ik_base_to_tip_frame;
     // we want the rotation to be applied in the requested reference frame,
     // but we want the rotation to be about the EE point in space, not the origin.
     // So, we need to translate to origin, rotate, then translate back

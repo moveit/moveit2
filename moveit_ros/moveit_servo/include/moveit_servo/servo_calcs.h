@@ -39,11 +39,11 @@
 #pragma once
 
 // C++
+#include <atomic>
 #include <condition_variable>
 #include <mutex>
-#include <thread>
-#include <atomic>
 #include <optional>
+#include <thread>
 
 // ROS
 #include <control_msgs/msg/joint_jog.hpp>
