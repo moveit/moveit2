@@ -554,20 +554,7 @@ bool ServoCalcs::cartesianServoCalcs(geometry_msgs::msg::TwistStamped& cmd,
   // Use an IK solver plugin if we have one, otherwise use inverse Jacobian.
   if (ik_solver_)
   {
-    // get a transformation matrix with the desired position change &
-    // get a transformation matrix with desired orientation change
-    Eigen::Isometry3d tf_pos_delta(Eigen::Isometry3d::Identity());
-    tf_pos_delta.translate(Eigen::Vector3d(delta_x[0], delta_x[1], delta_x[2]));
-
-    Eigen::Isometry3d tf_rot_delta(Eigen::Isometry3d::Identity());
-    Eigen::Quaterniond q = Eigen::AngleAxisd(delta_x[3], Eigen::Vector3d::UnitX()) *
-                           Eigen::AngleAxisd(delta_x[4], Eigen::Vector3d::UnitY()) *
-                           Eigen::AngleAxisd(delta_x[5], Eigen::Vector3d::UnitZ());
-    tf_rot_delta.rotate(q);
-
-    // Poses passed to IK solvers are assumed to be in some tip link (usually EE) reference frame
-    // First, find the new tip link position without newly applied rotation
-    Eigen::Isometry3d ik_base_to_tip_frame =
+    const Eigen::Isometry3d ik_base_to_tip_frame =
         current_state_->getGlobalLinkTransform(ik_solver_->getBaseFrame()).inverse() *
         current_state_->getGlobalLinkTransform(ik_solver_->getTipFrame());
 

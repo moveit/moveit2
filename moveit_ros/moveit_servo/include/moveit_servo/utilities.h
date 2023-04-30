@@ -97,14 +97,15 @@ bool applyJointUpdate(rclcpp::Clock& clock, const double publish_period, const E
  * @param tf_moveit_to_ee_frame Transform from MoveIt planning frame to end-effector frame
  * @param current_state The state of the robot
  */
-void commandToMoveGroupFrame(geometry_msgs::msg::TwistStamped& cmd, servo::Params& servo_params,
-                             Eigen::Isometry3d& tf_moveit_to_robot_cmd_frame, Eigen::Isometry3d& tf_moveit_to_ee_frame,
-                             moveit::core::RobotStatePtr current_state);
+void commandToMoveGroupFrame(geometry_msgs::msg::TwistStamped& cmd, const servo::Params& servo_params,
+                             const Eigen::Isometry3d& tf_moveit_to_robot_cmd_frame,
+                             const Eigen::Isometry3d& tf_moveit_to_ee_frame,
+                             const moveit::core::RobotStatePtr current_state);
 
 /** \brief Converts the delta_x (change in cartesian position) to a pose to be used with IK solver.
  * @param delta_x The change in cartesian position
  * @param ik_base_to_tip_frame The transform from base of the robot to its end-effector
  * @return Returns the resulting pose after applying delta_x
  */
-geometry_msgs::msg::Pose deltaToPose(Eigen::VectorXd delta_x, Eigen::Isometry3d ik_base_to_tip_frame);
+geometry_msgs::msg::Pose deltaToPose(const Eigen::VectorXd delta_x, const Eigen::Isometry3d ik_base_to_tip_frame);
 }  // namespace moveit_servo
