@@ -33,7 +33,7 @@ ament_target_dependencies(demo_scene
   message_filters
   pluginlib
 )
-target_link_libraries(demo_scene PRIVATE moveit_planning_scene_monitor moveit_compatibility)
+target_link_libraries(demo_scene PRIVATE moveit_planning_scene_monitor)
 
 install(TARGETS demo_scene
   DESTINATION lib/${PROJECT_NAME}
