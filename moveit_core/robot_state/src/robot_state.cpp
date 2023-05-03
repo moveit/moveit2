@@ -1436,15 +1436,17 @@ bool RobotState::getJacobian(const JointModelGroup* group, const LinkModel* link
   }
   if (use_quaternion_representation)
   {  // Quaternion representation
-    // From "Advanced Dynamics and Motion Simulation" by Paul Mitiguy
+    // From "Quaternion kinematics for the error-state KF" 1.7.2 Global perturbations
+    // https://hal.science/hal-01122406v4/file/kinematics.pdf
+    // dq/qt = 0.5 * wg ⊗ q
     // d/dt ( [w] ) = 1/2 * [ -x -y -z ]  * [ omega_1 ]
-    //        [x]           [  w -z  y ]    [ omega_2 ]
-    //        [y]           [  z  w -x ]    [ omega_3 ]
-    //        [z]           [ -y  x  w ]
+    //        [x]           [  w  z -y ]    [ omega_2 ]
+    //        [y]           [ -z  w  x ]    [ omega_3 ]
+    //        [z]           [  y -x  w ]
     Eigen::Quaterniond q(link_transform.linear());
     double w = q.w(), x = q.x(), y = q.y(), z = q.z();
     Eigen::MatrixXd quaternion_update_matrix(4, 3);
-    quaternion_update_matrix << -x, -y, -z, w, -z, y, z, w, -x, -y, x, w;
+    quaternion_update_matrix << -x, -y, -z, w, z, -y, -z, w, x, y, -x, w;
     jacobian.block(3, 0, 4, columns) = 0.5 * quaternion_update_matrix * jacobian.block(3, 0, 3, columns);
   }
   return true;
