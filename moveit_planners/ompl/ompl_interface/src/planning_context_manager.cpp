@@ -123,7 +123,8 @@ ompl::base::PlannerPtr MultiQueryPlannerAllocator::allocatePlanner(const ob::Spa
     {
       ob::PlannerData data(si);
       planner_map_it->second->getPlannerData(data);
-      RCLCPP_INFO_STREAM(LOGGER, "Reusing planner data. NumEdges: " << data.numEdges() << ", numVertices: " << data.numVertices() );
+      RCLCPP_INFO_STREAM(LOGGER, "Reusing planner data. NumEdges: " << data.numEdges()
+                                                                    << ", numVertices: " << data.numVertices() );
       planners_[planner_map_it->first] = std::shared_ptr<ob::Planner>{ allocatePersistentPlanner<T>(data) };
       return planners_[planner_map_it->first];
     }
