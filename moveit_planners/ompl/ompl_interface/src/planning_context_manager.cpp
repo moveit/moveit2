@@ -117,12 +117,16 @@ ompl::base::PlannerPtr MultiQueryPlannerAllocator::allocatePlanner(const ob::Spa
   }
   if (multi_query_planning_enabled)
   {
-    // If we already have an instance, use that one
-    // auto planner_map_it = planners_.find(new_name);
-    // if (planner_map_it != planners_.end())
-    // {
-    //   return planner_map_it->second;
-    // }
+    // If we already have an instance, reuse it's planning data
+    auto planner_map_it = planners_.find(new_name);
+    if (planner_map_it != planners_.end())
+    {
+      ob::PlannerData data(si);
+      planner_map_it->second->getPlannerData(data);
+      RCLCPP_INFO_STREAM(LOGGER, "Reusing planner data. NumEdges: " << data.numEdges() << ", numVertices: " << data.numVertices() );
+      planners_[planner_map_it->first] = std::shared_ptr<ob::Planner>{ allocatePersistentPlanner<T>(data) };
+      return planners_[planner_map_it->first];
+    }
 
     // Certain multi-query planners allow loading and storing the generated planner data. This feature can be
     // selectively enabled for loading and storing using the bool parameters 'load_planner_data' and
