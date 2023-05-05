@@ -32,7 +32,7 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#include "pilz_industrial_motion_planner/trajectory_functions.h"
+#include <pilz_industrial_motion_planner/trajectory_functions.h>
 
 #include <moveit/planning_scene/planning_scene.h>
 #include <tf2/LinearMath/Quaternion.h>
@@ -68,7 +68,7 @@ bool pilz_industrial_motion_planner::computePoseIK(const planning_scene::Plannin
   if (frame_id != robot_model->getModelFrame())
   {
     RCLCPP_ERROR_STREAM(LOGGER, "Given frame (" << frame_id << ") is unequal to model frame("
-                                                << robot_model->getModelFrame() << ")");
+                                                << robot_model->getModelFrame() << ')');
     return false;
   }
 

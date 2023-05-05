@@ -337,12 +337,14 @@ PlanningContextManager::getPlanningContext(const planning_interface::PlannerConf
     if (cached_contexts != cached_contexts_->contexts_.end())
     {
       for (const ModelBasedPlanningContextPtr& cached_context : cached_contexts->second)
+      {
         if (cached_context.unique())
         {
           RCLCPP_DEBUG(LOGGER, "Reusing cached planning context");
           context = cached_context;
           break;
         }
+      }
     }
   }
 

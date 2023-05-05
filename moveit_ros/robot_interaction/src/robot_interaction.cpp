@@ -35,7 +35,7 @@
 
 /* Author: Ioan Sucan, Adam Leeper */
 
-#include "moveit/robot_interaction/robot_interaction.h"
+#include <moveit/robot_interaction/robot_interaction.h>
 #include <moveit/robot_interaction/interaction_handler.h>
 #include <moveit/robot_interaction/interactive_marker_helpers.h>
 #include <moveit/robot_interaction/kinematic_options_map.h>
@@ -94,10 +94,12 @@ void RobotInteraction::decideActiveComponents(const std::string& group, Interact
   decideActiveEndEffectors(group, style);
   decideActiveJoints(group);
   if (!group.empty() && active_eef_.empty() && active_vj_.empty() && active_generic_.empty())
+  {
     RCLCPP_INFO(LOGGER,
                 "No active joints or end effectors found for group '%s'. "
                 "Make sure that kinematics.yaml is loaded in this node's namespace.",
                 group.c_str());
+  }
 }
 
 void RobotInteraction::addActiveComponent(const InteractiveMarkerConstructorFn& construct,
@@ -134,9 +136,13 @@ double RobotInteraction::computeLinkMarkerSize(const std::string& link)
     // process kinematic chain upwards (but only following fixed joints)
     // to find a link with some non-empty shape (to ignore virtual links)
     if (lm->getParentJointModel()->getType() == moveit::core::JointModel::FIXED)
+    {
       lm = lm->getParentLinkModel();
+    }
     else
+    {
       lm = nullptr;
+    }
   }
   if (!lm)
     return DEFAULT_SCALE;  // no link with non-zero shape extends found
@@ -208,6 +214,7 @@ void RobotInteraction::decideActiveJoints(const std::string& group)
 
     const std::vector<srdf::Model::VirtualJoint>& vj = srdf->getVirtualJoints();
     for (const srdf::Model::VirtualJoint& joint : vj)
+    {
       if (joint.name_ == robot_model_->getRootJointName())
       {
         if (joint.type_ == "planar" || joint.type_ == "floating")
@@ -219,15 +226,20 @@ void RobotInteraction::decideActiveJoints(const std::string& group)
             v.parent_frame = v.parent_frame.substr(1);
           v.joint_name = joint.name_;
           if (joint.type_ == "planar")
+          {
             v.dof = 3;
+          }
           else
+          {
             v.dof = 6;
+          }
           // take the max of the X, Y, Z extent
           v.size = std::max(std::max(aabb[1] - aabb[0], aabb[3] - aabb[2]), aabb[5] - aabb[4]);
           active_vj_.push_back(v);
           used.insert(v.joint_name);
         }
       }
+    }
   }
 
   const std::vector<const moveit::core::JointModel*>& joints = jmg->getJointModels();
@@ -243,9 +255,13 @@ void RobotInteraction::decideActiveJoints(const std::string& group)
         v.parent_frame = joint->getParentLinkModel()->getName();
       v.joint_name = joint->getName();
       if (joint->getType() == moveit::core::JointModel::PLANAR)
+      {
         v.dof = 3;
+      }
       else
+      {
         v.dof = 6;
+      }
       // take the max of the X, Y, Z extent
       v.size = computeGroupMarkerSize(group);
       active_vj_.push_back(v);
@@ -390,11 +406,17 @@ void RobotInteraction::addEndEffectorMarkers(const InteractionHandlerPtr& handle
   visualization_msgs::msg::InteractiveMarkerControl m_control;
   m_control.always_visible = false;
   if (position && orientation)
+  {
     m_control.interaction_mode = m_control.MOVE_ROTATE_3D;
+  }
   else if (orientation)
+  {
     m_control.interaction_mode = m_control.ROTATE_3D;
+  }
   else
+  {
     m_control.interaction_mode = m_control.MOVE_3D;
+  }
 
   std_msgs::msg::ColorRGBA marker_color;
   const float* color = handler->inError(eef) ? END_EFFECTOR_UNREACHABLE_COLOR : END_EFFECTOR_REACHABLE_COLOR;
@@ -501,9 +523,11 @@ void RobotInteraction::addInteractiveMarkers(const InteractionHandlerPtr& handle
       }
       if (handler && handler->getMeshesVisible() &&
           (active_eef_[i].interaction & (InteractionStyle::POSITION_EEF | InteractionStyle::ORIENTATION_EEF)))
+      {
         addEndEffectorMarkers(handler, active_eef_[i], control_to_eef_tf, im,
                               active_eef_[i].interaction & InteractionStyle::POSITION_EEF,
                               active_eef_[i].interaction & InteractionStyle::ORIENTATION_EEF);
+      }
       ims.push_back(im);
       registerMoveInteractiveMarkerTopic(marker_name, handler->getName() + "_" + active_eef_[i].parent_link);
       RCLCPP_DEBUG(LOGGER, "Publishing interactive marker %s (size = %lf)", marker_name.c_str(), mscale);
@@ -523,10 +547,14 @@ void RobotInteraction::addInteractiveMarkers(const InteractionHandlerPtr& handle
       visualization_msgs::msg::InteractiveMarker im = makeEmptyInteractiveMarker(marker_name, pose, mscale);
       if (handler && handler->getControlsVisible())
       {
-        if (active_vj_[i].dof == 3)  // planar joint
+        if (active_vj_[i].dof == 3)
+        {  // planar joint
           addPlanarXYControl(im, false);
+        }
         else
+        {
           add6DOFControl(im, false);
+        }
       }
       ims.push_back(im);
       registerMoveInteractiveMarkerTopic(marker_name, handler->getName() + "_" + active_vj_[i].connecting_link);
@@ -571,7 +599,7 @@ void RobotInteraction::toggleMoveInteractiveMarkerTopic(bool enable)
         std::string topic_name = int_marker_move_topics_[i];
         std::string marker_name = int_marker_names_[i];
         std::function<void(const geometry_msgs::msg::PoseStamped::SharedPtr)> subscription_callback =
-            [this, marker_name](const geometry_msgs::msg::PoseStamped::SharedPtr msg) {
+            [this, marker_name](const geometry_msgs::msg::PoseStamped::SharedPtr& msg) {
               moveInteractiveMarker(marker_name, *msg);
             };
         auto subscription =
@@ -667,14 +695,20 @@ bool RobotInteraction::showingMarkers(const InteractionHandlerPtr& handler)
   std::unique_lock<std::mutex> ulock(marker_access_lock_);
 
   for (const EndEffectorInteraction& eef : active_eef_)
+  {
     if (shown_markers_.find(getMarkerName(handler, eef)) == shown_markers_.end())
       return false;
+  }
   for (const JointInteraction& vj : active_vj_)
+  {
     if (shown_markers_.find(getMarkerName(handler, vj)) == shown_markers_.end())
       return false;
+  }
   for (const GenericInteraction& gi : active_generic_)
+  {
     if (shown_markers_.find(getMarkerName(handler, gi)) == shown_markers_.end())
       return false;
+  }
   return true;
 }
 
@@ -812,8 +846,10 @@ void RobotInteraction::processingThread()
           marker_access_lock_.lock();
         }
         else
+        {
           RCLCPP_ERROR(LOGGER, "Unknown marker class ('%s') for marker '%s'", marker_class.c_str(),
                        feedback->marker_name.c_str());
+        }
       }
       catch (std::exception& ex)
       {

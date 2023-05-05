@@ -36,16 +36,16 @@
 
 #include <gtest/gtest.h>
 
-#include "pilz_industrial_motion_planner/pilz_industrial_motion_planner.h"
-#include "pilz_industrial_motion_planner/planning_context_loader_ptp.h"
-#include "pilz_industrial_motion_planner/planning_exceptions.h"
+#include <pilz_industrial_motion_planner/pilz_industrial_motion_planner.h>
+#include <pilz_industrial_motion_planner/planning_context_loader_ptp.h>
+#include <pilz_industrial_motion_planner/planning_exceptions.h>
 
 using namespace pilz_industrial_motion_planner;
 
 TEST(CommandPlannerTestDirect, ExceptionCoverage)
 {
-  std::shared_ptr<PlanningException> p_ex{ new PlanningException("") };
-  std::shared_ptr<ContextLoaderRegistrationException> clr_ex{ new ContextLoaderRegistrationException("") };
+  auto p_ex = std::make_shared<PlanningException>("");
+  auto clr_ex = std::make_shared<ContextLoaderRegistrationException>("");
 }
 
 /**

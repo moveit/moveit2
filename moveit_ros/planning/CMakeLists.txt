@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.22)
-project(moveit_ros_planning)
+project(moveit_ros_planning LANGUAGES CXX)
 
 # Common cmake code applied to all moveit packages
 find_package(moveit_common REQUIRED)
@@ -33,6 +33,7 @@ set(THIS_PACKAGE_INCLUDE_DIRS
     robot_model_loader/include
     constraint_sampler_manager_loader/include
     planning_pipeline/include
+    planning_pipeline_interfaces/include
     planning_scene_monitor/include
     trajectory_execution_manager/include
     plan_execution/include
@@ -46,6 +47,7 @@ set(THIS_PACKAGE_LIBRARIES
   moveit_robot_model_loader
   moveit_constraint_sampler_manager_loader
   moveit_planning_pipeline
+  moveit_planning_pipeline_interfaces
   moveit_trajectory_execution_manager
   moveit_plan_execution
   moveit_planning_scene_monitor
@@ -83,6 +85,7 @@ add_subdirectory(kinematics_plugin_loader)
 add_subdirectory(robot_model_loader)
 add_subdirectory(constraint_sampler_manager_loader)
 add_subdirectory(planning_pipeline)
+add_subdirectory(planning_pipeline_interfaces)
 add_subdirectory(planning_request_adapter_plugins)
 add_subdirectory(planning_scene_monitor)
 add_subdirectory(planning_components_tools)
@@ -92,14 +95,14 @@ add_subdirectory(moveit_cpp)
 
 install(
   TARGETS ${THIS_PACKAGE_LIBRARIES}
-  EXPORT ${PROJECT_NAME}Targets
+  EXPORT moveit_ros_planningTargets
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
   RUNTIME DESTINATION bin
-  INCLUDES DESTINATION include
+  INCLUDES DESTINATION include/moveit_ros_planning
 )
 
-ament_export_targets(${PROJECT_NAME}Targets HAS_LIBRARY_TARGET)
+ament_export_targets(moveit_ros_planningTargets HAS_LIBRARY_TARGET)
 ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS})
 
 pluginlib_export_plugin_description_file(moveit_core "planning_request_adapters_plugin_description.xml")

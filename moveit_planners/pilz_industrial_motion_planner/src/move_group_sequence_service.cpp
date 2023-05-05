@@ -36,11 +36,11 @@
 
 // Modified by Pilz GmbH & Co. KG
 
-#include "pilz_industrial_motion_planner/move_group_sequence_service.h"
+#include <pilz_industrial_motion_planner/move_group_sequence_service.h>
 
-#include "pilz_industrial_motion_planner/capability_names.h"
-#include "pilz_industrial_motion_planner/command_list_manager.h"
-#include "pilz_industrial_motion_planner/trajectory_generation_exceptions.h"
+#include <pilz_industrial_motion_planner/capability_names.h>
+#include <pilz_industrial_motion_planner/command_list_manager.h>
+#include <pilz_industrial_motion_planner/trajectory_generation_exceptions.h>
 
 #include <moveit/moveit_cpp/moveit_cpp.h>
 namespace pilz_industrial_motion_planner
@@ -62,12 +62,12 @@ void MoveGroupSequenceService::initialize()
 
   sequence_service_ = context_->moveit_cpp_->getNode()->create_service<moveit_msgs::srv::GetMotionSequence>(
       SEQUENCE_SERVICE_NAME,
-      [this](const moveit_msgs::srv::GetMotionSequence::Request::SharedPtr req,
-             moveit_msgs::srv::GetMotionSequence::Response::SharedPtr res) { return plan(req, res); });
+      [this](const moveit_msgs::srv::GetMotionSequence::Request::SharedPtr& req,
+             const moveit_msgs::srv::GetMotionSequence::Response::SharedPtr& res) { return plan(req, res); });
 }
 
-bool MoveGroupSequenceService::plan(const moveit_msgs::srv::GetMotionSequence::Request::SharedPtr req,
-                                    moveit_msgs::srv::GetMotionSequence::Response::SharedPtr res)
+bool MoveGroupSequenceService::plan(const moveit_msgs::srv::GetMotionSequence::Request::SharedPtr& req,
+                                    const moveit_msgs::srv::GetMotionSequence::Response::SharedPtr& res)
 {
   // Handle empty requests
   if (req->request.items.empty())

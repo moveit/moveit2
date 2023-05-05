@@ -59,7 +59,7 @@ void runCollisionDetection(unsigned int id, unsigned int trials, const planning_
     scene.checkCollision(req, res, state);
   }
   double duration = (clock.now() - start).seconds();
-  RCLCPP_INFO(LOGGER, "Thread %u performed %lf collision checks per second", id, (double)trials / duration);
+  RCLCPP_INFO(LOGGER, "Thread %u performed %lf collision checks per second", id, static_cast<double>(trials) / duration);
 }
 
 int main(int argc, char** argv)
@@ -125,9 +125,11 @@ int main(int argc, char** argv)
     std::vector<std::thread*> threads;
     runCollisionDetection(10, trials, *psm.getPlanningScene(), *states[0]);
     for (unsigned int i = 0; i < states.size(); ++i)
+    {
       threads.push_back(new std::thread([i, trials, &scene = *psm.getPlanningScene(), &state = *states[i]] {
         return runCollisionDetection(i, trials, scene, state);
       }));
+    }
 
     for (unsigned int i = 0; i < states.size(); ++i)
     {

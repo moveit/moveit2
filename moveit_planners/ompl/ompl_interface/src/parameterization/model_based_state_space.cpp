@@ -90,10 +90,12 @@ double ompl_interface::ModelBasedStateSpace::getTagSnapToSegment() const
 void ompl_interface::ModelBasedStateSpace::setTagSnapToSegment(double snap)
 {
   if (snap < 0.0 || snap > 1.0)
+  {
     RCLCPP_WARN(LOGGER,
                 "Snap to segment for tags is a ratio. It's value must be between 0.0 and 1.0. "
                 "Value remains as previously set (%lf)",
                 tag_snap_to_segment_);
+  }
   else
   {
     tag_snap_to_segment_ = snap;
@@ -170,18 +172,24 @@ double ompl_interface::ModelBasedStateSpace::distance(const ompl::base::State* s
                                                       const ompl::base::State* state2) const
 {
   if (distance_function_)
+  {
     return distance_function_(state1, state2);
+  }
   else
+  {
     return spec_.joint_model_group_->distance(state1->as<StateType>()->values, state2->as<StateType>()->values);
+  }
 }
 
 bool ompl_interface::ModelBasedStateSpace::equalStates(const ompl::base::State* state1,
                                                        const ompl::base::State* state2) const
 {
   for (unsigned int i = 0; i < variable_count_; ++i)
+  {
     if (fabs(state1->as<StateType>()->values[i] - state2->as<StateType>()->values[i]) >
         std::numeric_limits<double>::epsilon())
       return false;
+  }
   return true;
 }
 
@@ -210,11 +218,17 @@ void ompl_interface::ModelBasedStateSpace::interpolate(const ompl::base::State* 
 
     // compute tag
     if (from->as<StateType>()->tag >= 0 && t < 1.0 - tag_snap_to_segment_)
+    {
       state->as<StateType>()->tag = from->as<StateType>()->tag;
+    }
     else if (to->as<StateType>()->tag >= 0 && t > tag_snap_to_segment_)
+    {
       state->as<StateType>()->tag = to->as<StateType>()->tag;
+    }
     else
+    {
       state->as<StateType>()->tag = -1;
+    }
   }
 }
 
@@ -230,6 +244,7 @@ void ompl_interface::ModelBasedStateSpace::setPlanningVolume(double minX, double
                                                              double minZ, double maxZ)
 {
   for (std::size_t i = 0; i < joint_model_vector_.size(); ++i)
+  {
     if (joint_model_vector_[i]->getType() == moveit::core::JointModel::PLANAR)
     {
       joint_bounds_storage_[i][0].min_position_ = minX;
@@ -246,6 +261,7 @@ void ompl_interface::ModelBasedStateSpace::setPlanningVolume(double minX, double
       joint_bounds_storage_[i][2].min_position_ = minZ;
       joint_bounds_storage_[i][2].max_position_ = maxZ;
     }
+  }
 }
 
 ompl::base::StateSamplerPtr ompl_interface::ModelBasedStateSpace::allocDefaultStateSampler() const
@@ -300,7 +316,7 @@ void ompl_interface::ModelBasedStateSpace::printState(const ompl::base::State* s
     const int idx = spec_.joint_model_group_->getVariableGroupIndex(j->getName());
     const int vc = j->getVariableCount();
     for (int i = 0; i < vc; ++i)
-      out << state->as<StateType>()->values[idx + i] << " ";
+      out << state->as<StateType>()->values[idx + i] << ' ';
     out << '\n';
   }
 
@@ -311,9 +327,13 @@ void ompl_interface::ModelBasedStateSpace::printState(const ompl::base::State* s
   if (state->as<StateType>()->isValidityKnown())
   {
     if (state->as<StateType>()->isMarkedValid())
+    {
       out << "* valid state \n";
+    }
     else
+    {
       out << "* invalid state \n";
+    }
   }
   out << "Tag: " << state->as<StateType>()->tag << '\n';
 }

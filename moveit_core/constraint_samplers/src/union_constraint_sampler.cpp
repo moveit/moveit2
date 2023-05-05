@@ -69,19 +69,27 @@ struct OrderSamplers
     const std::vector<std::string>& fda = a->getFrameDependency();
     const std::vector<std::string>& fdb = b->getFrameDependency();
     for (std::size_t i = 0; i < fda.size() && !a_depends_on_b; ++i)
+    {
       for (const std::string& blink : blinks)
+      {
         if (blink == fda[i])
         {
           a_depends_on_b = true;
           break;
         }
+      }
+    }
     for (std::size_t i = 0; i < fdb.size() && !b_depends_on_a; ++i)
+    {
       for (const std::string& alink : alinks)
+      {
         if (alink == fdb[i])
         {
           b_depends_on_a = true;
           break;
         }
+      }
+    }
     if (b_depends_on_a && a_depends_on_b)
     {
       RCLCPP_WARN(LOGGER,

@@ -10,7 +10,6 @@ from launch_param_builder import ParameterBuilder
 
 @pytest.mark.rostest
 def generate_test_description():
-
     moveit_configs = MoveItConfigsBuilder("moveit_resources_fanuc").to_dict()
     test_param = (
         ParameterBuilder("moveit_kinematics")

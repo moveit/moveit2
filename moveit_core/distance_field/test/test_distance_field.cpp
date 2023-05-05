@@ -72,7 +72,7 @@ void print(PropagationDistanceField& pdf, int numX, int numY, int numZ)
     {
       for (int x = 0; x < numX; ++x)
       {
-        std::cout << pdf.getCell(x, y, z).distance_square_ << " ";
+        std::cout << pdf.getCell(x, y, z).distance_square_ << ' ';
       }
       std::cout << '\n';
     }
@@ -101,7 +101,7 @@ void printNeg(PropagationDistanceField& pdf, int numX, int numY, int numZ)
     {
       for (int x = 0; x < numX; ++x)
       {
-        std::cout << pdf.getCell(x, y, z).negative_distance_square_ << " ";
+        std::cout << pdf.getCell(x, y, z).negative_distance_square_ << ' ';
       }
       std::cout << '\n';
     }
@@ -112,21 +112,33 @@ void printNeg(PropagationDistanceField& pdf, int numX, int numY, int numZ)
 void printPointCoords(const Eigen::Vector3i& p)
 {
   if (p.x() < 0)
+  {
     std::cout << '-';
+  }
   else
+  {
     std::cout << p.x();
+  }
 
   if (p.y() < 0)
+  {
     std::cout << '-';
+  }
   else
+  {
     std::cout << p.y();
+  }
 
   if (p.z() < 0)
+  {
     std::cout << '-';
+  }
   else
+  {
     std::cout << p.z();
+  }
 
-  std::cout << " ";
+  std::cout << ' ';
 }
 
 void printBoth(PropagationDistanceField& pdf, int numX, int numY, int numZ)
@@ -139,12 +151,12 @@ void printBoth(PropagationDistanceField& pdf, int numX, int numY, int numZ)
     {
       for (int x = 0; x < numX; ++x)
       {
-        std::cout << pdf.getCell(x, y, z).distance_square_ << " ";
+        std::cout << pdf.getCell(x, y, z).distance_square_ << ' ';
       }
       std::cout << "   ";
       for (int x = 0; x < numX; ++x)
       {
-        std::cout << pdf.getCell(x, y, z).negative_distance_square_ << " ";
+        std::cout << pdf.getCell(x, y, z).negative_distance_square_ << ' ';
       }
       std::cout << "     ";
       for (int x = 0; x < numX; ++x)
@@ -232,14 +244,14 @@ bool checkOctomapVersusDistanceField(const PropagationDistanceField& df, const o
             }
             if (!result)
             {
-              std::cout << "No point at potential boundary query " << query.x() << " " << query.y() << " " << query.z()
+              std::cout << "No point at potential boundary query " << query.x() << ' ' << query.y() << ' ' << query.z()
                         << '\n';
               return false;
             }
           }
           if (!octree.isNodeOccupied(result))
           {
-            std::cout << "Disagreement at " << qx << " " << qy << " " << qz << '\n';
+            std::cout << "Disagreement at " << qx << ' ' << qy << ' ' << qz << '\n';
             return false;
           }
         }
@@ -275,7 +287,7 @@ unsigned int countLeafNodes(const octomap::OcTree& octree)
   {
     if (octree.isNodeOccupied(*it))
     {
-      std::cout << "Leaf node " << it.getX() << " " << it.getY() << " " << it.getZ() << '\n';
+      std::cout << "Leaf node " << it.getX() << ' ' << it.getY() << ' ' << it.getZ() << '\n';
       count++;
     }
   }
@@ -315,9 +327,9 @@ void check_distance_field(const PropagationDistanceField& df, const EigenSTL::ve
           }
           if (do_negs)
           {
-            ASSERT_GT(ndsq, 0) << "Obstacle point " << x << " " << y << " " << z << " has zero negative value";
+            ASSERT_GT(ndsq, 0) << "Obstacle point " << x << ' ' << y << ' ' << z << " has zero negative value";
           }
-          ASSERT_TRUE(found) << "Obstacle point " << x << " " << y << " " << z << " not found";
+          ASSERT_TRUE(found) << "Obstacle point " << x << ' ' << y << ' ' << z << " not found";
         }
       }
     }
@@ -390,7 +402,7 @@ TEST(TestPropagationDistanceField, TestAddRemovePoints)
         Eigen::Vector3d grad(0.0, 0.0, 0.0);
         bool grad_in_bounds;
         double dist_grad = df.getDistanceGradient(wx, wy, wz, grad.x(), grad.y(), grad.z(), grad_in_bounds);
-        ASSERT_TRUE(grad_in_bounds) << x << " " << y << " " << z;
+        ASSERT_TRUE(grad_in_bounds) << x << ' ' << y << ' ' << z;
         ASSERT_NEAR(dist, dist_grad, .0001);
         if (dist > 0 && dist < MAX_DIST)
         {
@@ -405,20 +417,20 @@ TEST(TestPropagationDistanceField, TestAddRemovePoints)
           {
             first = false;
             std::cout << "Dist " << dist << '\n';
-            std::cout << "Cell " << x << " " << y << " " << z << " " << wx << " " << wy << " " << wz << '\n';
-            std::cout << "Scale " << xscale << " " << yscale << " " << zscale << '\n';
-            std::cout << "Grad " << grad.x() << " " << grad.y() << " " << grad.z() << " comp " << comp_x << " "
-                      << comp_y << " " << comp_z << '\n';
+            std::cout << "Cell " << x << ' ' << y << ' ' << z << ' ' << wx << ' ' << wy << ' ' << wz << '\n';
+            std::cout << "Scale " << xscale << ' ' << yscale << ' ' << zscale << '\n';
+            std::cout << "Grad " << grad.x() << ' ' << grad.y() << ' ' << grad.z() << " comp " << comp_x << ' '
+                      << comp_y << ' ' << comp_z << '\n';
           }
           ASSERT_NEAR(comp_x, POINT1.x(), RESOLUTION)
-              << dist << x << " " << y << " " << z << " " << grad.x() << " " << grad.y() << " " << grad.z() << " "
-              << xscale << " " << yscale << " " << zscale << '\n';
+              << dist << x << ' ' << y << ' ' << z << ' ' << grad.x() << ' ' << grad.y() << ' ' << grad.z() << ' '
+              << xscale << ' ' << yscale << ' ' << zscale << '\n';
           ASSERT_NEAR(comp_y, POINT1.y(), RESOLUTION)
-              << x << " " << y << " " << z << " " << grad.x() << " " << grad.y() << " " << grad.z() << " " << xscale
-              << " " << yscale << " " << zscale << '\n';
+              << x << ' ' << y << ' ' << z << ' ' << grad.x() << ' ' << grad.y() << ' ' << grad.z() << ' ' << xscale
+              << ' ' << yscale << ' ' << zscale << '\n';
           ASSERT_NEAR(comp_z, POINT1.z(), RESOLUTION)
-              << x << " " << y << " " << z << " " << grad.x() << " " << grad.y() << " " << grad.z() << " " << xscale
-              << " " << yscale << " " << zscale << '\n';
+              << x << ' ' << y << ' ' << z << ' ' << grad.x() << ' ' << grad.y() << ' ' << grad.z() << ' ' << xscale
+              << ' ' << yscale << ' ' << zscale << '\n';
         }
       }
     }
@@ -530,35 +542,35 @@ TEST(TestSignedPropagationDistanceField, TestSignedAddRemovePoints)
           if (ncell_dist > 0)
           {
             EXPECT_GE(ncell_dist, gradient_df.getUninitializedDistance())
-                << "dist=" << dist << " xyz=" << x << " " << y << " " << z << " ncell=" << ncell_pos.x() << " "
-                << ncell_pos.y() << " " << ncell_pos.z() << '\n';
+                << "dist=" << dist << " xyz=" << x << ' ' << y << ' ' << z << " ncell=" << ncell_pos.x() << ' '
+                << ncell_pos.y() << ' ' << ncell_pos.z() << '\n';
           }
           else if (ncell_dist < 0)
           {
             EXPECT_LE(ncell_dist, -gradient_df.getUninitializedDistance())
-                << "dist=" << dist << " xyz=" << x << " " << y << " " << z << " ncell=" << ncell_pos.x() << " "
-                << ncell_pos.y() << " " << ncell_pos.z() << '\n';
+                << "dist=" << dist << " xyz=" << x << ' ' << y << ' ' << z << " ncell=" << ncell_pos.x() << ' '
+                << ncell_pos.y() << ' ' << ncell_pos.z() << '\n';
           }
         }
 
         if (gradient_df.getCell(x, y, z).negative_distance_square_ > 0)
         {
-          ASSERT_LT(dist, 0) << "Pos " << gradient_df.getCell(x, y, z).distance_square_ << " "
+          ASSERT_LT(dist, 0) << "Pos " << gradient_df.getCell(x, y, z).distance_square_ << ' '
                              << gradient_df.getCell(x, y, z).negative_distance_square_;
           double wx, wy, wz;
           df.gridToWorld(x, y, z, wx, wy, wz);
           Eigen::Vector3d grad(0.0, 0.0, 0.0);
           bool grad_in_bounds;
           double dist_grad = gradient_df.getDistanceGradient(wx, wy, wz, grad.x(), grad.y(), grad.z(), grad_in_bounds);
-          ASSERT_TRUE(grad_in_bounds) << x << " " << y << " " << z;
+          ASSERT_TRUE(grad_in_bounds) << x << ' ' << y << ' ' << z;
           ASSERT_NEAR(dist, dist_grad, .0001);
 
           if (!ncell)
             continue;
 
           EXPECT_GE(gradient_df.getCell(ncell_pos.x(), ncell_pos.y(), ncell_pos.z()).distance_square_, 1)
-              << "dist=" << dist << " xyz=" << x << " " << y << " " << z << " grad=" << grad.x() << " " << grad.y()
-              << " " << grad.z() << " ncell=" << ncell_pos.x() << " " << ncell_pos.y() << " " << ncell_pos.z() << '\n';
+              << "dist=" << dist << " xyz=" << x << ' ' << y << ' ' << z << " grad=" << grad.x() << ' ' << grad.y()
+              << ' ' << grad.z() << " ncell=" << ncell_pos.x() << ' ' << ncell_pos.y() << ' ' << ncell_pos.z() << '\n';
 
           double grad_size_sq = grad.squaredNorm();
           if (grad_size_sq < std::numeric_limits<double>::epsilon())
@@ -586,8 +598,8 @@ TEST(TestSignedPropagationDistanceField, TestSignedAddRemovePoints)
           EXPECT_EQ(ncell, cell);
 #endif
           EXPECT_GE(cell->distance_square_, 1)
-              << dist << " " << x << " " << y << " " << z << " " << grad.x() << " " << grad.y() << " " << grad.z()
-              << " " << xscale << " " << yscale << " " << zscale << " cell " << comp_x << " " << comp_y << " " << comp_z
+              << dist << ' ' << x << ' ' << y << ' ' << z << ' ' << grad.x() << ' ' << grad.y() << ' ' << grad.z()
+              << ' ' << xscale << ' ' << yscale << ' ' << zscale << " cell " << comp_x << ' ' << comp_y << ' ' << comp_z
               << '\n';
         }
       }
@@ -819,13 +831,13 @@ TEST(TestSignedPropagationDistanceField, TestPerformance)
   dt = std::chrono::system_clock::now();
   worstdfu.addPointsToField(bad_vec);
   std::chrono::duration<double> wd = std::chrono::system_clock::now() - dt;
-  printf("Time for unsigned adding %u uniform points is %g average %g\n", (unsigned int)bad_vec.size(), wd.count(),
-         wd.count() / (bad_vec.size() * 1.0));
+  printf("Time for unsigned adding %u uniform points is %g average %g\n", static_cast<unsigned int>(bad_vec.size()),
+         wd.count(), wd.count() / (bad_vec.size() * 1.0));
   dt = std::chrono::system_clock::now();
   worstdfs.addPointsToField(bad_vec);
   wd = std::chrono::system_clock::now() - dt;
-  printf("Time for signed adding %u uniform points is %g average %g\n", (unsigned int)bad_vec.size(), wd.count(),
-         wd.count() / (bad_vec.size() * 1.0));
+  printf("Time for signed adding %u uniform points is %g average %g\n", static_cast<unsigned int>(bad_vec.size()),
+         wd.count(), wd.count() / (bad_vec.size() * 1.0));
 }
 
 TEST(TestSignedPropagationDistanceField, TestOcTree)

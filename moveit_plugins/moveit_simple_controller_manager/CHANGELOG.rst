@@ -2,6 +2,89 @@
 Changelog for package moveit_simple_controller_manager
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.7.3 (2023-04-24)
+------------------
+* Replace Variable PROJECT_NAME in CMakeLists.txt with the actual name (`#2020 <https://github.com/ros-planning/moveit2/issues/2020>`_)
+* Contributors: Shobuj Paul
+
+2.7.2 (2023-04-18)
+------------------
+
+2.7.1 (2023-03-23)
+------------------
+* Fix member naming (`#1949 <https://github.com/ros-planning/moveit2/issues/1949>`_)
+  * Update clang-tidy rules for readability-identifier-naming
+  Co-authored-by: Sebastian Jahr <sebastian.jahr@picknik.ai>
+* Contributors: Robert Haschke
+
+2.7.0 (2023-01-29)
+------------------
+* converted characters from string format to character format (`#1881 <https://github.com/ros-planning/moveit2/issues/1881>`_)
+* Fix BSD license in package.xml (`#1796 <https://github.com/ros-planning/moveit2/issues/1796>`_)
+  * fix BSD license in package.xml
+  * this must also be spdx compliant
+* Add braces around blocks. (`#999 <https://github.com/ros-planning/moveit2/issues/999>`_)
+* Use emulated time in action-based controller (`#899 <https://github.com/ros-planning/moveit2/issues/899>`_)
+* Fix clang-tidy issues (`#1706 <https://github.com/ros-planning/moveit2/issues/1706>`_)
+  * Blindly apply automatic clang-tidy fixes
+  * Exemplarily cleanup a few automatic clang-tidy fixes
+  * Clang-tidy fixups
+  * Missed const-ref fixups
+  * Fix unsupported non-const -> const
+  * More fixes
+  Co-authored-by: Henning Kayser <henningkayser@picknik.ai>
+* Contributors: Christian Henkel, Cory Crean, Gaël Écorchard, Robert Haschke, Sameer Gupta
+
+2.6.0 (2022-11-10)
+------------------
+* Merge PR `#1553 <https://github.com/ros-planning/moveit2/issues/1553>`_: Improve cmake files
+* Use standard exported targets: export\_${PROJECT_NAME} -> ${PROJECT_NAME}Targets
+* Improve CMake usage (`#1550 <https://github.com/ros-planning/moveit2/issues/1550>`_)
+* Support chained controllers (`#1482 <https://github.com/ros-planning/moveit2/issues/1482>`_)
+  * fix controller list if chained controllers exist
+  * add comments and clean code
+  * added additional comments
+  * fix formatting
+  * fix white space
+  * add const reference and chhnage variable name
+  * simplify logic to only  work with one layer chain
+  * Don't return false when not finding optional parameter
+  * Update moveit_ros/perception/pointcloud_octomap_updater/src/pointcloud_octomap_updater.cpp
+  Co-authored-by: AndyZe <andyz@utexas.edu>
+  * add debug information
+  * print controller names
+  * print controllers with not known type
+  * load controller dependencies
+  * start chained controllers in switch
+  * reverse order of activate controllers
+  * prevent stoppping controller twice
+  * revert all debug changes
+  * add ROS error if a controller chains to more than one
+  * use loop to index chained connections
+  * update ros_control
+  * add empty controller allocator for admittance controller
+  * fix plugin xml
+  * Update moveit_plugins/moveit_ros_control_interface/src/controller_manager_plugin.cpp
+  Co-authored-by: AndyZe <andyz@utexas.edu>
+  * Update moveit_plugins/moveit_ros_control_interface/src/controller_manager_plugin.cpp
+  Co-authored-by: AndyZe <andyz@utexas.edu>
+  * Update moveit_plugins/moveit_ros_control_interface/src/controller_manager_plugin.cpp
+  Co-authored-by: AndyZe <andyz@utexas.edu>
+  * Update moveit_plugins/moveit_ros_control_interface/src/controller_manager_plugin.cpp
+  Co-authored-by: AndyZe <andyz@utexas.edu>
+  * fix map indexing
+  * add comment
+  * Update moveit_plugins/moveit_ros_control_interface/src/controller_manager_plugin.cpp
+  Co-authored-by: Tyler Weaver <squirrel428@protonmail.com>
+  * Typos
+  Co-authored-by: JafarAbdi <cafer.abdi@gmail.com>
+  Co-authored-by: Jafar <jafar.uruc@gmail.com>
+  Co-authored-by: AndyZe <andyz@utexas.edu>
+  Co-authored-by: Vatan Aksoy Tezer <vatan@picknik.ai>
+  Co-authored-by: Tyler Weaver <squirrel428@protonmail.com>
+  Co-authored-by: AndyZe <zelenak@picknik.ai>
+* Contributors: Paul Gesel, Robert Haschke, Sebastian Jahr
+
 2.5.3 (2022-07-28)
 ------------------
 

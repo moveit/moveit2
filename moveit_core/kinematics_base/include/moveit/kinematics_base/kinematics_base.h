@@ -44,7 +44,7 @@
 #include <string>
 #include <functional>
 
-#include "moveit_kinematics_base_export.h"
+#include <moveit_kinematics_base_export.h>
 
 namespace moveit
 {
@@ -351,7 +351,7 @@ public:
   virtual bool
   searchPositionIK(const std::vector<geometry_msgs::msg::Pose>& ik_poses, const std::vector<double>& ik_seed_state,
                    double timeout, const std::vector<double>& consistency_limits, std::vector<double>& solution,
-                   const IKCallbackFn& solution_callback, IKCostFn cost_function,
+                   const IKCallbackFn& solution_callback, const IKCostFn& cost_function,
                    moveit_msgs::msg::MoveItErrorCodes& error_code,
                    const kinematics::KinematicsQueryOptions& options = kinematics::KinematicsQueryOptions(),
                    const moveit::core::RobotState* context_state = nullptr) const
@@ -434,8 +434,10 @@ public:
   virtual const std::string& getTipFrame() const
   {
     if (tip_frames_.size() > 1)
+    {
       RCLCPP_ERROR(LOGGER, "This kinematic solver has more than one tip frame, "
                            "do not call getTipFrame()");
+    }
 
     return tip_frames_[0];
   }

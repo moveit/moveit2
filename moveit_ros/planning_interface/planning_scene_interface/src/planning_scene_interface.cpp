@@ -88,8 +88,10 @@ public:
     if (with_type)
     {
       for (const moveit_msgs::msg::CollisionObject& collision_object : response->scene.world.collision_objects)
+      {
         if (!collision_object.type.key.empty())
           result.push_back(collision_object.id);
+      }
     }
     else
     {
@@ -123,13 +125,16 @@ public:
         continue;
       bool good = true;
       for (const geometry_msgs::msg::Pose& mesh_pose : collision_object.mesh_poses)
+      {
         if (!(mesh_pose.position.x >= minx && mesh_pose.position.x <= maxx && mesh_pose.position.y >= miny &&
               mesh_pose.position.y <= maxy && mesh_pose.position.z >= minz && mesh_pose.position.z <= maxz))
         {
           good = false;
           break;
         }
+      }
       for (const geometry_msgs::msg::Pose& primitive_pose : collision_object.primitive_poses)
+      {
         if (!(primitive_pose.position.x >= minx && primitive_pose.position.x <= maxx &&
               primitive_pose.position.y >= miny && primitive_pose.position.y <= maxy &&
               primitive_pose.position.z >= minz && primitive_pose.position.z <= maxz))
@@ -137,6 +142,7 @@ public:
           good = false;
           break;
         }
+      }
       if (good)
       {
         result.push_back(collision_object.id);
@@ -247,9 +253,13 @@ public:
     for (size_t i = 0; i < planning_scene.object_colors.size(); ++i)
     {
       if (planning_scene.object_colors[i].id.empty() && i < collision_objects.size())
+      {
         planning_scene.object_colors[i].id = collision_objects[i].id;
+      }
       else
+      {
         break;
+      }
     }
 
     planning_scene.is_diff = true;
@@ -271,7 +281,7 @@ public:
   }
 
 private:
-  void waitForService(std::shared_ptr<rclcpp::ClientBase> srv)
+  void waitForService(const std::shared_ptr<rclcpp::ClientBase>& srv)
   {
     // rclcpp::Duration time_before_warning(5.0);
     // srv.waitForExistence(time_before_warning);
@@ -370,9 +380,13 @@ bool PlanningSceneInterface::applyCollisionObjects(
   for (size_t i = 0; i < ps.object_colors.size(); ++i)
   {
     if (ps.object_colors[i].id.empty() && i < collision_objects.size())
+    {
       ps.object_colors[i].id = collision_objects[i].id;
+    }
     else
+    {
       break;
+    }
   }
 
   return applyPlanningScene(ps);

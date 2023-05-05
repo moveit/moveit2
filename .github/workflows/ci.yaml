@@ -23,6 +23,10 @@ jobs:
             ROS_DISTRO: rolling
             IKFAST_TEST: true
             CLANG_TIDY: pedantic
+            # Silent gmock/gtest warnings: https://github.com/ament/googletest/pull/21
+            AFTER_BUILD_UPSTREAM_WORKSPACE: |
+              git clone --quiet --branch clalancette/update-to-gtest-1.11 https://github.com/ament/googletest "${BASEDIR}/upstream_ws/src/googletest"
+              builder_run_build "/opt/ros/${ROS_DISTRO}" "${BASEDIR}/upstream_ws" --packages-select gtest_vendor gmock_vendor
           - IMAGE: humble-ci
             ROS_DISTRO: humble
           - IMAGE: humble-ci-testing
@@ -31,8 +35,10 @@ jobs:
       CXXFLAGS: >-
         -Wall -Wextra -Wwrite-strings -Wunreachable-code -Wpointer-arith -Wredundant-decls
       CLANG_TIDY_ARGS: --fix --fix-errors --format-style=file
-      DOCKER_IMAGE: ghcr.io/ros-planning/moveit2:${{ matrix.env.IMAGE }}
-      UPSTREAM_WORKSPACE: moveit2.repos $(f="moveit2_$(sed 's/-.*$//' <<< "${{ matrix.env.IMAGE }}").repos"; test -r $f && echo $f)
+      DOCKER_IMAGE: moveit/moveit2:${{ matrix.env.IMAGE }}
+      UPSTREAM_WORKSPACE: >
+        moveit2.repos
+        $(f="moveit2_$(sed 's/-.*$//' <<< "${{ matrix.env.IMAGE }}").repos"; test -r $f && echo $f)
       # Pull any updates to the upstream workspace (after restoring it from cache)
       AFTER_SETUP_UPSTREAM_WORKSPACE: vcs pull $BASEDIR/upstream_ws/src
       AFTER_SETUP_DOWNSTREAM_WORKSPACE: vcs pull $BASEDIR/downstream_ws/src
@@ -41,13 +47,13 @@ jobs:
       BEFORE_BUILD_UPSTREAM_WORKSPACE: ccache -z
       AFTER_BUILD_TARGET_WORKSPACE: ccache -s
       # Changing linker to lld as ld has a behavior where it takes a long time to finish
-      # Compile CCOV with Debug. Enable -Werror (except CLANG_TIDY=pedantic, which makes the clang-tidy step fail on warnings)
+      # Compile CCOV with Debug. Enable -Werror.
       TARGET_CMAKE_ARGS: >
         -DCMAKE_EXE_LINKER_FLAGS=-fuse-ld=lld
         -DCMAKE_SHARED_LINKER_FLAGS=-fuse-ld=lld
         -DCMAKE_MODULE_LINKER_FLAGS=-fuse-ld=lld
         -DCMAKE_BUILD_TYPE=${{ matrix.env.CCOV && 'Debug' || 'Release'}}
-        -DCMAKE_CXX_FLAGS="${{ matrix.env.CLANG_TIDY != 'pedantic' && '-Werror ' || '' }}$CXXFLAGS${{ matrix.env.CCOV && ' --coverage -O2 -fno-omit-frame-pointer'}}"
+        -DCMAKE_CXX_FLAGS="-Werror $CXXFLAGS${{ matrix.env.CCOV && ' --coverage -O2 -fno-omit-frame-pointer'}}"
       UPSTREAM_CMAKE_ARGS: "-DCMAKE_CXX_FLAGS=''"
       DOWNSTREAM_CMAKE_ARGS: -DCMAKE_CXX_FLAGS="-Wall -Wextra"
       CCACHE_DIR: ${{ github.workspace }}/.ccache

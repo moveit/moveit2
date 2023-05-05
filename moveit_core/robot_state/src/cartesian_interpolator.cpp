@@ -58,7 +58,7 @@ CartesianInterpolator::Distance CartesianInterpolator::computeCartesianPath(
     RobotState* start_state, const JointModelGroup* group, std::vector<RobotStatePtr>& traj, const LinkModel* link,
     const Eigen::Vector3d& translation, bool global_reference_frame, const MaxEEFStep& max_step,
     const JumpThreshold& jump_threshold, const GroupStateValidityCallbackFn& validCallback,
-    const kinematics::KinematicsQueryOptions& options, kinematics::KinematicsBase::IKCostFn cost_function)
+    const kinematics::KinematicsQueryOptions& options, const kinematics::KinematicsBase::IKCostFn& cost_function)
 {
   const double distance = translation.norm();
   // The target pose is obtained by adding the translation vector to the link's current pose
@@ -77,7 +77,7 @@ CartesianInterpolator::Percentage CartesianInterpolator::computeCartesianPath(
     RobotState* start_state, const JointModelGroup* group, std::vector<RobotStatePtr>& traj, const LinkModel* link,
     const Eigen::Isometry3d& target, bool global_reference_frame, const MaxEEFStep& max_step,
     const JumpThreshold& jump_threshold, const GroupStateValidityCallbackFn& validCallback,
-    const kinematics::KinematicsQueryOptions& options, kinematics::KinematicsBase::IKCostFn cost_function,
+    const kinematics::KinematicsQueryOptions& options, const kinematics::KinematicsBase::IKCostFn& cost_function,
     const Eigen::Isometry3d& link_offset)
 {
   // check unsanitized inputs for non-isometry
@@ -127,6 +127,7 @@ CartesianInterpolator::Percentage CartesianInterpolator::computeCartesianPath(
   // To limit absolute joint-space jumps, we pass consistency limits to the IK solver
   std::vector<double> consistency_limits;
   if (jump_threshold.prismatic > 0 || jump_threshold.revolute > 0)
+  {
     for (const JointModel* jm : group->getActiveJointModels())
     {
       double limit;
@@ -145,6 +146,7 @@ CartesianInterpolator::Percentage CartesianInterpolator::computeCartesianPath(
         limit = jm->getMaximumExtent();
       consistency_limits.push_back(limit);
     }
+  }
 
   traj.clear();
   traj.push_back(std::make_shared<moveit::core::RobotState>(*start_state));
@@ -152,7 +154,7 @@ CartesianInterpolator::Percentage CartesianInterpolator::computeCartesianPath(
   double last_valid_percentage = 0.0;
   for (std::size_t i = 1; i <= steps; ++i)
   {
-    double percentage = (double)i / (double)steps;
+    double percentage = static_cast<double>(i) / static_cast<double>(steps);
 
     Eigen::Isometry3d pose(start_quaternion.slerp(percentage, target_quaternion));
     pose.translation() = percentage * rotated_target.translation() + (1 - percentage) * start_pose.translation();
@@ -161,9 +163,13 @@ CartesianInterpolator::Percentage CartesianInterpolator::computeCartesianPath(
     // Random seeding (of additional attempts) would probably create IK jumps.
     if (start_state->setFromIK(group, pose * offset, link->getName(), consistency_limits, 0.0, validCallback, options,
                                cost_function))
+    {
       traj.push_back(std::make_shared<moveit::core::RobotState>(*start_state));
+    }
     else
+    {
       break;
+    }
 
     last_valid_percentage = percentage;
   }
@@ -177,7 +183,7 @@ CartesianInterpolator::Percentage CartesianInterpolator::computeCartesianPath(
     RobotState* start_state, const JointModelGroup* group, std::vector<RobotStatePtr>& traj, const LinkModel* link,
     const EigenSTL::vector_Isometry3d& waypoints, bool global_reference_frame, const MaxEEFStep& max_step,
     const JumpThreshold& jump_threshold, const GroupStateValidityCallbackFn& validCallback,
-    const kinematics::KinematicsQueryOptions& options, kinematics::KinematicsBase::IKCostFn cost_function,
+    const kinematics::KinematicsQueryOptions& options, const kinematics::KinematicsBase::IKCostFn& cost_function,
     const Eigen::Isometry3d& link_offset)
 {
   double percentage_solved = 0.0;
@@ -191,7 +197,7 @@ CartesianInterpolator::Percentage CartesianInterpolator::computeCartesianPath(
                              NO_JOINT_SPACE_JUMP_TEST, validCallback, options, cost_function, link_offset);
     if (fabs(wp_percentage_solved - 1.0) < std::numeric_limits<double>::epsilon())
     {
-      percentage_solved = (double)(i + 1) / (double)waypoints.size();
+      percentage_solved = static_cast<double>((i + 1)) / static_cast<double>(waypoints.size());
       std::vector<RobotStatePtr>::iterator start = waypoint_traj.begin();
       if (i > 0 && !waypoint_traj.empty())
         std::advance(start, 1);
@@ -199,7 +205,7 @@ CartesianInterpolator::Percentage CartesianInterpolator::computeCartesianPath(
     }
     else
     {
-      percentage_solved += wp_percentage_solved / (double)waypoints.size();
+      percentage_solved += wp_percentage_solved / static_cast<double>(waypoints.size());
       std::vector<RobotStatePtr>::iterator start = waypoint_traj.begin();
       if (i > 0 && !waypoint_traj.empty())
         std::advance(start, 1);
@@ -254,15 +260,17 @@ CartesianInterpolator::Percentage CartesianInterpolator::checkRelativeJointSpace
 
   double percentage = 1.0;
   // compute the average distance between the states we looked at
-  double thres = jump_threshold_factor * (total_dist / (double)dist_vector.size());
+  double thres = jump_threshold_factor * (total_dist / static_cast<double>(dist_vector.size()));
   for (std::size_t i = 0; i < dist_vector.size(); ++i)
+  {
     if (dist_vector[i] > thres)
     {
       RCLCPP_DEBUG(LOGGER, "Truncating Cartesian path due to detected jump in joint-space distance");
-      percentage = (double)(i + 1) / (double)(traj.size());
+      percentage = static_cast<double>(i + 1) / static_cast<double>(traj.size());
       traj.resize(i + 1);
       break;
     }
+  }
 
   return CartesianInterpolator::Percentage(percentage);
 }
@@ -315,7 +323,7 @@ CartesianInterpolator::Percentage CartesianInterpolator::checkAbsoluteJointSpace
 
     if (!still_valid)
     {
-      double percent_valid = (double)(traj_ix + 1) / (double)(traj.size());
+      double percent_valid = static_cast<double>(traj_ix + 1) / static_cast<double>(traj.size());
       traj.resize(traj_ix + 1);
       return CartesianInterpolator::Percentage(percent_valid);
     }

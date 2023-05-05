@@ -2,6 +2,44 @@
 Changelog for package moveit_setup_app_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.7.3 (2023-04-24)
+------------------
+* Replace Variable PROJECT_NAME in CMakeLists.txt with the actual name (`#2020 <https://github.com/ros-planning/moveit2/issues/2020>`_)
+* Contributors: Shobuj Paul
+
+2.7.2 (2023-04-18)
+------------------
+
+2.7.1 (2023-03-23)
+------------------
+* add missing dependencies on config utils (`#1962 <https://github.com/ros-planning/moveit2/issues/1962>`_)
+  when installing ros-humble-moveit-setup-assistant from debs,
+  the package cannot currently run due to this missing depend
+* Contributors: Michael Ferguson
+
+2.7.0 (2023-01-29)
+------------------
+* Merge PR `#1712 <https://github.com/ros-planning/moveit2/issues/1712>`_: fix clang compiler warnings + stricter CI
+* Declare selected classes as final
+* Fix BSD license in package.xml (`#1796 <https://github.com/ros-planning/moveit2/issues/1796>`_)
+  * fix BSD license in package.xml
+  * this must also be spdx compliant
+* Minimize use of `this->` (`#1784 <https://github.com/ros-planning/moveit2/issues/1784>`_)
+  It's often unnecessary. MoveIt already avoids this in most cases
+  so this PR better cements that existing pattern.
+* Contributors: Chris Thrasher, Christian Henkel, Robert Haschke
+
+2.6.0 (2022-11-10)
+------------------
+* Merge PR `#1553 <https://github.com/ros-planning/moveit2/issues/1553>`_: Improve cmake files
+* Cleanup cmake files
+  - Replace ament_export_libraries() -> ament_export_targets(HAS_LIBRARY_TARGET)
+  - Replace ament_export_include_directories() -> INCLUDES DESTINATION include
+  See https://docs.ros.org/en/foxy/How-To-Guides/Ament-CMake-Documentation.html#building-a-library
+* Use standard exported targets: export\_${PROJECT_NAME} -> ${PROJECT_NAME}Targets
+* Improve CMake usage (`#1550 <https://github.com/ros-planning/moveit2/issues/1550>`_)
+* Contributors: Robert Haschke, Sebastian Jahr
+
 2.5.3 (2022-07-28)
 ------------------
 

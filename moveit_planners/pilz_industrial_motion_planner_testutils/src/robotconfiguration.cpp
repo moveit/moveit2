@@ -32,7 +32,7 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#include "pilz_industrial_motion_planner_testutils/robotconfiguration.h"
+#include <pilz_industrial_motion_planner_testutils/robotconfiguration.h>
 
 #include <stdexcept>
 

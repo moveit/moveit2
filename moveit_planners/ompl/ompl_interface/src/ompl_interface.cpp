@@ -181,17 +181,25 @@ void OMPLInterface::loadPlannerConfigurations()
         {
           RCLCPP_ERROR_STREAM(LOGGER, "Invalid type for parameter '" << name << "' expected ["
                                                                      << rclcpp::to_string(type) << "] got ["
-                                                                     << rclcpp::to_string(parameter.get_type()) << "]");
+                                                                     << rclcpp::to_string(parameter.get_type()) << ']');
           continue;
         }
         if (parameter.get_type() == rclcpp::ParameterType::PARAMETER_STRING)
+        {
           specific_group_params[name] = parameter.as_string();
+        }
         else if (parameter.get_type() == rclcpp::ParameterType::PARAMETER_DOUBLE)
+        {
           specific_group_params[name] = moveit::core::toString(parameter.as_double());
+        }
         else if (parameter.get_type() == rclcpp::ParameterType::PARAMETER_INTEGER)
+        {
           specific_group_params[name] = std::to_string(parameter.as_int());
+        }
         else if (parameter.get_type() == rclcpp::ParameterType::PARAMETER_BOOL)
+        {
           specific_group_params[name] = std::to_string(parameter.as_bool());
+        }
       }
     }
 

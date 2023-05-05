@@ -42,8 +42,6 @@
 #include <moveit_servo/servo.h>
 #include <moveit_servo/pose_tracking.h>
 #include <moveit_servo/status_codes.h>
-#include <moveit_servo/servo_parameters.h>
-#include <moveit_servo/servo_parameters.h>
 #include <moveit_servo/make_shared_from_pool.h>
 #include <thread>
 
@@ -56,13 +54,13 @@ public:
   StatusMonitor(const rclcpp::Node::SharedPtr& node, const std::string& topic)
   {
     sub_ = node->create_subscription<std_msgs::msg::Int8>(topic, rclcpp::SystemDefaultsQoS(),
-                                                          [this](const std_msgs::msg::Int8::ConstSharedPtr msg) {
+                                                          [this](const std_msgs::msg::Int8::ConstSharedPtr& msg) {
                                                             return statusCB(msg);
                                                           });
   }
 
 private:
-  void statusCB(const std_msgs::msg::Int8::ConstSharedPtr msg)
+  void statusCB(const std_msgs::msg::Int8::ConstSharedPtr& msg)
   {
     moveit_servo::StatusCode latest_status = static_cast<moveit_servo::StatusCode>(msg->data);
     if (latest_status != status_)
@@ -91,13 +89,8 @@ int main(int argc, char** argv)
   executor.add_node(node);
   std::thread executor_thread([&executor]() { executor.spin(); });
 
-  auto servo_parameters = moveit_servo::ServoParameters::makeServoParameters(node);
-
-  if (servo_parameters == nullptr)
-  {
-    RCLCPP_FATAL(LOGGER, "Could not get servo parameters!");
-    exit(EXIT_FAILURE);
-  }
+  auto servo_param_listener = std::make_unique<const servo::ParamListener>(node);
+  auto servo_parameters = servo_param_listener->get_params();
 
   // Load the planning scene monitor
   planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor;
@@ -114,7 +107,7 @@ int main(int argc, char** argv)
       planning_scene_monitor::PlanningSceneMonitor::DEFAULT_COLLISION_OBJECT_TOPIC,
       planning_scene_monitor::PlanningSceneMonitor::DEFAULT_PLANNING_SCENE_WORLD_TOPIC,
       false /* skip octomap monitor */);
-  planning_scene_monitor->startStateMonitor(servo_parameters->joint_topic);
+  planning_scene_monitor->startStateMonitor(servo_parameters.joint_topic);
   planning_scene_monitor->startPublishingPlanningScene(planning_scene_monitor::PlanningSceneMonitor::UPDATE_SCENE);
 
   // Wait for Planning Scene Monitor to setup
@@ -125,14 +118,14 @@ int main(int argc, char** argv)
   }
 
   // Create the pose tracker
-  moveit_servo::PoseTracking tracker(node, servo_parameters, planning_scene_monitor);
+  moveit_servo::PoseTracking tracker(node, std::move(servo_param_listener), planning_scene_monitor);
 
   // Make a publisher for sending pose commands
   auto target_pose_pub =
       node->create_publisher<geometry_msgs::msg::PoseStamped>("target_pose", rclcpp::SystemDefaultsQoS());
 
   // Subscribe to servo status (and log it when it changes)
-  StatusMonitor status_monitor(node, servo_parameters->status_topic);
+  StatusMonitor status_monitor(node, servo_parameters.status_topic);
 
   Eigen::Vector3d lin_tol{ 0.001, 0.001, 0.001 };
   double rot_tol = 0.01;

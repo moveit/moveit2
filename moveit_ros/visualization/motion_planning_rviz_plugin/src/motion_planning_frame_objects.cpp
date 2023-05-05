@@ -154,7 +154,7 @@ void MotionPlanningFrame::clearScene()
 
 void MotionPlanningFrame::sceneScaleChanged(int value)
 {
-  const double scaling_factor = (double)value / 100.0;  // The GUI slider gives percent values
+  const double scaling_factor = static_cast<double>(value) / 100.0;  // The GUI slider gives percent values
   if (scaled_object_)
   {
     planning_scene_monitor::LockedPlanningSceneRW ps = planning_display_->getPlanningSceneRW();
@@ -223,10 +223,16 @@ void MotionPlanningFrame::removeSceneObject()
   if (ps)
   {
     for (int i = 0; i < sel.count(); ++i)
+    {
       if (sel[i]->checkState() == Qt::Unchecked)
+      {
         ps->getWorldNonConst()->removeObject(sel[i]->text().toStdString());
+      }
       else
+      {
         ps->getCurrentStateNonConst().clearAttachedBody(sel[i]->text().toStdString());
+      }
+    }
     scene_marker_.reset();
     setLocalSceneEdited();
     planning_display_->addMainLoopJob([this] { populateCollisionObjectsList(); });
@@ -238,14 +244,18 @@ static QString decideStatusText(const collision_detection::CollisionEnv::ObjectC
 {
   QString status_text = "'" + QString::fromStdString(obj->id_) + "' is a collision object with ";
   if (obj->shapes_.empty())
+  {
     status_text += "no geometry";
+  }
   else
   {
     std::vector<QString> shape_names;
     for (const shapes::ShapeConstPtr& shape : obj->shapes_)
       shape_names.push_back(QString::fromStdString(shapes::shapeStringName(shape.get())));
     if (shape_names.size() == 1)
+    {
       status_text += "one " + shape_names[0];
+    }
     else
     {
       status_text += QString::fromStdString(std::to_string(shape_names.size())) + " shapes:";
@@ -369,9 +379,13 @@ void MotionPlanningFrame::selectedCollisionObjectChanged()
       const moveit::core::AttachedBody* attached_body =
           ps->getCurrentState().getAttachedBody(sel[0]->text().toStdString());
       if (attached_body)
+      {
         ui_->object_status->setText(decideStatusText(attached_body));
+      }
       else
+      {
         ui_->object_status->setText("ERROR: '" + sel[0]->text() + "' should be an attached object but it is not");
+      }
     }
   }
 }
@@ -424,7 +438,9 @@ void MotionPlanningFrame::collisionObjectChanged(QListWidgetItem* item)
   {
     // if we have a name change
     if (known_collision_objects_[item->type()].first != item->text().toStdString())
+    {
       renameCollisionObject(item);
+    }
     else
     {
       bool checked = item->checkState() == Qt::Checked;
@@ -707,8 +723,10 @@ void MotionPlanningFrame::computeLoadSceneButtonClicked()
             planning_scene_publisher_->publish(static_cast<const moveit_msgs::msg::PlanningScene&>(*scene_m));
         }
         else
+        {
           RCLCPP_WARN(LOGGER, "Failed to load scene '%s'. Has the message format changed since the scene was saved?",
                       scene.c_str());
+        }
       }
     }
   }
@@ -748,6 +766,7 @@ void MotionPlanningFrame::computeLoadQueryButtonClicked()
 
           auto goal_state = std::make_shared<moveit::core::RobotState>(*planning_display_->getQueryGoalState());
           for (const moveit_msgs::msg::Constraints& goal_constraint : mp->goal_constraints)
+          {
             if (!goal_constraint.joint_constraints.empty())
             {
               std::map<std::string, double> vals;
@@ -756,12 +775,15 @@ void MotionPlanningFrame::computeLoadQueryButtonClicked()
               goal_state->setVariablePositions(vals);
               break;
             }
+          }
           planning_display_->setQueryGoalState(*goal_state);
         }
         else
+        {
           RCLCPP_ERROR(LOGGER,
                        "Failed to load planning query '%s'. Has the message format changed since the query was saved?",
                        query_name.c_str());
+        }
       }
     }
   }
@@ -926,11 +948,13 @@ void MotionPlanningFrame::attachDetachCollisionObject(QListWidgetItem* item)
     planning_scene_monitor::LockedPlanningSceneRW ps = planning_display_->getPlanningSceneRW();
     // we loop through the list in case updates were received since the start of the function
     for (std::pair<std::string, bool>& known_collision_object : known_collision_objects_)
+    {
       if (known_collision_object.first == data.first)
       {
         known_collision_object.second = checked;
         break;
       }
+    }
     ps->processAttachedCollisionObjectMsg(aco);
     rs = ps->getCurrentState();
   }
@@ -1009,8 +1033,10 @@ void MotionPlanningFrame::exportGeometryAsTextButtonClicked()
   QString path =
       QFileDialog::getSaveFileName(this, tr("Export Scene Geometry"), tr(""), tr("Scene Geometry (*.scene)"));
   if (!path.isEmpty())
+  {
     planning_display_->addBackgroundJob([this, path = path.toStdString()] { computeExportGeometryAsText(path); },
                                         "export as text");
+  }
 }
 
 void MotionPlanningFrame::computeExportGeometryAsText(const std::string& path)
@@ -1058,7 +1084,9 @@ void MotionPlanningFrame::importGeometryFromTextButtonClicked()
   QString path =
       QFileDialog::getOpenFileName(this, tr("Import Scene Geometry"), tr(""), tr("Scene Geometry (*.scene)"));
   if (!path.isEmpty())
+  {
     planning_display_->addBackgroundJob([this, path = path.toStdString()] { computeImportGeometryFromText(path); },
                                         "import from text");
+  }
 }
 }  // namespace moveit_rviz_plugin

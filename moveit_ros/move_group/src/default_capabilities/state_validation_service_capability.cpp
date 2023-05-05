@@ -50,17 +50,17 @@ MoveGroupStateValidationService::MoveGroupStateValidationService() : MoveGroupCa
 void MoveGroupStateValidationService::initialize()
 {
   validity_service_ = context_->moveit_cpp_->getNode()->create_service<moveit_msgs::srv::GetStateValidity>(
-      STATE_VALIDITY_SERVICE_NAME, [this](const std::shared_ptr<rmw_request_id_t> request_header,
-                                          const std::shared_ptr<moveit_msgs::srv::GetStateValidity::Request> req,
-                                          std::shared_ptr<moveit_msgs::srv::GetStateValidity::Response> res) {
+      STATE_VALIDITY_SERVICE_NAME, [this](const std::shared_ptr<rmw_request_id_t>& request_header,
+                                          const std::shared_ptr<moveit_msgs::srv::GetStateValidity::Request>& req,
+                                          const std::shared_ptr<moveit_msgs::srv::GetStateValidity::Response>& res) {
         return computeService(request_header, req, res);
       });
 }
 
 bool MoveGroupStateValidationService::computeService(
-    const std::shared_ptr<rmw_request_id_t> /* unused */,
-    const std::shared_ptr<moveit_msgs::srv::GetStateValidity::Request> req,
-    std::shared_ptr<moveit_msgs::srv::GetStateValidity::Response> res)
+    const std::shared_ptr<rmw_request_id_t>& /* unused */,
+    const std::shared_ptr<moveit_msgs::srv::GetStateValidity::Request>& req,
+    const std::shared_ptr<moveit_msgs::srv::GetStateValidity::Response>& res)
 {
   planning_scene_monitor::LockedPlanningSceneRO ls(context_->planning_scene_monitor_);
   moveit::core::RobotState rs = ls->getCurrentState();
@@ -89,6 +89,7 @@ bool MoveGroupStateValidationService::computeService(
     res->valid = false;
     for (collision_detection::CollisionResult::ContactMap::const_iterator it = cres.contacts.begin();
          it != cres.contacts.end(); ++it)
+    {
       for (const collision_detection::Contact& contact : it->second)
       {
         res->contacts.resize(res->contacts.size() + 1);
@@ -96,6 +97,7 @@ bool MoveGroupStateValidationService::computeService(
         res->contacts.back().header.frame_id = ls->getPlanningFrame();
         res->contacts.back().header.stamp = time_now;
       }
+    }
   }
 
   // copy cost sources

@@ -2,6 +2,50 @@
 Changelog for package moveit_setup_core_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.7.3 (2023-04-24)
+------------------
+* Replace Variable PROJECT_NAME in CMakeLists.txt with the actual name (`#2020 <https://github.com/ros-planning/moveit2/issues/2020>`_)
+* Contributors: Shobuj Paul
+
+2.7.2 (2023-04-18)
+------------------
+* Update pre-commit (`#2094 <https://github.com/ros-planning/moveit2/issues/2094>`_)
+* Add URDF Loader Exceptions and Fix Infinite While-Loop when URDF file isn't in a ROS Package (`#2032 <https://github.com/ros-planning/moveit2/issues/2032>`_)
+  * Fixed infinite while loop in utilities.cpp and added some exception handling to start screen widget
+  * Fix trailing whitespace, fix getSharePath exception catch on empty request
+  * Fix clang tidy suggestion and error message updates based on pr comments
+* Contributors: Chance Cardona, Shobuj Paul
+
+2.7.1 (2023-03-23)
+------------------
+
+2.7.0 (2023-01-29)
+------------------
+* Fix BSD license in package.xml (`#1796 <https://github.com/ros-planning/moveit2/issues/1796>`_)
+  * fix BSD license in package.xml
+  * this must also be spdx compliant
+* Minimize use of `this->` (`#1784 <https://github.com/ros-planning/moveit2/issues/1784>`_)
+  It's often unnecessary. MoveIt already avoids this in most cases
+  so this PR better cements that existing pattern.
+* Add braces around blocks. (`#999 <https://github.com/ros-planning/moveit2/issues/999>`_)
+* Use <> for non-local headers (`#1734 <https://github.com/ros-planning/moveit2/issues/1734>`_)
+  Unless a header lives in the same or a child directory of the file
+  including it, it's recommended to use <> for the #include statement.
+  For more information, see the C++ Core Guidelines item SF.12
+  https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#sf12-prefer-the-quoted-form-of-include-for-files-relative-to-the-including-file-and-the-angle-bracket-form-everywhere-else
+* Contributors: Chris Thrasher, Christian Henkel, Cory Crean
+
+2.6.0 (2022-11-10)
+------------------
+* Merge PR `#1553 <https://github.com/ros-planning/moveit2/issues/1553>`_: Improve cmake files
+* Cleanup cmake files
+  - Replace ament_export_libraries() -> ament_export_targets(HAS_LIBRARY_TARGET)
+  - Replace ament_export_include_directories() -> INCLUDES DESTINATION include
+  See https://docs.ros.org/en/foxy/How-To-Guides/Ament-CMake-Documentation.html#building-a-library
+* Use standard exported targets: export\_${PROJECT_NAME} -> ${PROJECT_NAME}Targets
+* Improve CMake usage (`#1550 <https://github.com/ros-planning/moveit2/issues/1550>`_)
+* Contributors: Robert Haschke, Sebastian Jahr
+
 2.5.3 (2022-07-28)
 ------------------
 

@@ -42,7 +42,12 @@
 #include <rclcpp/logging.hpp>
 #include <rclcpp/node.hpp>
 #include <rclcpp/publisher.hpp>
+#include <rclcpp/version.h>
+#if RCLCPP_VERSION_GTE(20, 0, 0)
+#include <rclcpp/event_handler.hpp>
+#else
 #include <rclcpp/qos_event.hpp>
+#endif
 #include <rclcpp/time.hpp>
 #include <rclcpp/utilities.hpp>
 

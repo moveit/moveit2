@@ -35,7 +35,7 @@
 /* Author: Mrinal Kalakrishnan, Ken Anderson */
 
 #include <moveit/distance_field/propagation_distance_field.h>
-#include <visualization_msgs/msg/marker.h>
+#include <visualization_msgs/msg/marker.hpp>
 #include <boost/iostreams/filtering_stream.hpp>
 #include <boost/iostreams/copy.hpp>
 #include <boost/iostreams/filter/zlib.hpp>
@@ -106,7 +106,7 @@ void PropagationDistanceField::print(const VoxelSet& set)
     Eigen::Vector3i loc1 = *it;
     RCLCPP_DEBUG(LOGGER, "%d, %d, %d ", loc1.x(), loc1.y(), loc1.z());
   }
-  RCLCPP_DEBUG(LOGGER, "] size=%u\n", (unsigned int)set.size());
+  RCLCPP_DEBUG(LOGGER, "] size=%u\n", static_cast<unsigned int>(set.size()));
 }
 
 void PropagationDistanceField::print(const EigenSTL::vector_Vector3d& points)
@@ -118,7 +118,7 @@ void PropagationDistanceField::print(const EigenSTL::vector_Vector3d& points)
     Eigen::Vector3d loc1 = *it;
     RCLCPP_DEBUG(LOGGER, "%g, %g, %g ", loc1.x(), loc1.y(), loc1.z());
   }
-  RCLCPP_DEBUG(LOGGER, "] size=%u\n", (unsigned int)points.size());
+  RCLCPP_DEBUG(LOGGER, "] size=%u\n", static_cast<unsigned int>(points.size()));
 }
 
 void PropagationDistanceField::updatePointsInField(const EigenSTL::vector_Vector3d& old_points,
@@ -649,7 +649,7 @@ bool PropagationDistanceField::writeToStream(std::ostream& os) const
       for (unsigned int z = 0; z < static_cast<unsigned int>(getZNumCells()); z += 8)
       {
         std::bitset<8> bs(0);
-        unsigned int zv = std::min((unsigned int)8, getZNumCells() - z);
+        unsigned int zv = std::min(8u, getZNumCells() - z);
         for (unsigned int zi = 0; zi < zv; ++zi)
         {
           if (getCell(x, y, z + zi).distance_square_ == 0)
@@ -658,7 +658,7 @@ bool PropagationDistanceField::writeToStream(std::ostream& os) const
             bs[zi] = 1;
           }
         }
-        out.write((char*)&bs, sizeof(char));
+        out.write(reinterpret_cast<char*>(&bs), sizeof(char));
       }
     }
   }
@@ -736,8 +736,8 @@ bool PropagationDistanceField::readFromStream(std::istream& is)
           return false;
         }
         in.get(inchar);
-        std::bitset<8> inbit((unsigned long long)inchar);
-        unsigned int zv = std::min((unsigned int)8, getZNumCells() - z);
+        std::bitset<8> inbit(static_cast<unsigned long long>(inchar));
+        unsigned int zv = std::min(8u, getZNumCells() - z);
         for (unsigned int zi = 0; zi < zv; ++zi)
         {
           if (inbit[zi] == 1)

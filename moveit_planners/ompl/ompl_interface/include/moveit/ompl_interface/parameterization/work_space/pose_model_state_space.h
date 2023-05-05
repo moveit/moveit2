@@ -73,17 +73,25 @@ public:
     void setJointsComputed(bool value)
     {
       if (value)
+      {
         flags |= JOINTS_COMPUTED;
+      }
       else
+      {
         flags &= ~JOINTS_COMPUTED;
+      }
     }
 
     void setPoseComputed(bool value)
     {
       if (value)
+      {
         flags |= POSE_COMPUTED;
+      }
       else
+      {
         flags &= ~POSE_COMPUTED;
+      }
     }
 
     ompl::base::SE3StateSpace::StateType** poses;

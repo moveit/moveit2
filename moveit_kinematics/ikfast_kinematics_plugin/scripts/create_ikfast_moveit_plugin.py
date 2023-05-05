@@ -1,8 +1,6 @@
 #! /usr/bin/env python
 from __future__ import print_function
 
-from symbol import parameters
-
 """
 IKFast Plugin Generator for MoveIt
 
@@ -65,6 +63,7 @@ except ImportError:
     print(
         "Failed to import ament_index_python. No ROS2 environment available? Trying without."
     )
+
     # define stubs
     class PackageNotFoundError(Exception):
         pass

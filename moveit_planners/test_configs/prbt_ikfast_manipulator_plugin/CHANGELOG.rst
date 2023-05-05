@@ -2,6 +2,42 @@
 Changelog for package moveit_resources_prbt_ikfast_manipulator_plugin
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.7.3 (2023-04-24)
+------------------
+* Replace Variable PROJECT_NAME in CMakeLists.txt with the actual name (`#2020 <https://github.com/ros-planning/moveit2/issues/2020>`_)
+* Contributors: Shobuj Paul
+
+2.7.2 (2023-04-18)
+------------------
+
+2.7.1 (2023-03-23)
+------------------
+* Fix include install destination (`#2008 <https://github.com/ros-planning/moveit2/issues/2008>`_)
+  Co-authored-by: Henning Kayser <henningkayser@picknik.ai>
+  Co-authored-by: Tyler Weaver <maybe@tylerjw.dev>
+* Contributors: Abhijeet Dasgupta
+
+2.7.0 (2023-01-29)
+------------------
+* converted characters from string format to character format (`#1881 <https://github.com/ros-planning/moveit2/issues/1881>`_)
+* Used C++ style casting for int type (`#1627 <https://github.com/ros-planning/moveit2/issues/1627>`_)
+* Add `-Wunused-parameter` (`#1756 <https://github.com/ros-planning/moveit2/issues/1756>`_)
+* Add braces around blocks. (`#999 <https://github.com/ros-planning/moveit2/issues/999>`_)
+* Used C++ style cast instead of C style cast  (`#1628 <https://github.com/ros-planning/moveit2/issues/1628>`_)
+  Co-authored-by: Henning Kayser <henningkayser@picknik.ai>
+* Contributors: Abhijeet Das Gupta, Chris Thrasher, Cory Crean, Sameer Gupta
+
+2.6.0 (2022-11-10)
+------------------
+* Add missing depend (`#1684 <https://github.com/ros-planning/moveit2/issues/1684>`_)
+* Use generate_parameter_library to load prbt ikfast kinematics parameters (`#1680 <https://github.com/ros-planning/moveit2/issues/1680>`_)
+* Merge PR `#1553 <https://github.com/ros-planning/moveit2/issues/1553>`_: Improve cmake files
+* Use standard exported targets: export\_${PROJECT_NAME} -> ${PROJECT_NAME}Targets
+* Improve CMake usage (`#1550 <https://github.com/ros-planning/moveit2/issues/1550>`_)
+* Use pragma once as header include guard (`#1525 <https://github.com/ros-planning/moveit2/issues/1525>`_)
+* Remove __has_include statements (`#1481 <https://github.com/ros-planning/moveit2/issues/1481>`_)
+* Contributors: Abishalini Sivaraman, J. Javan, Robert Haschke, Sebastian Jahr, Vatan Aksoy Tezer
+
 2.5.3 (2022-07-28)
 ------------------
 

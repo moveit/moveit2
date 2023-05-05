@@ -2,6 +2,39 @@
 Changelog for package moveit_configs_utils
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.7.3 (2023-04-24)
+------------------
+
+2.7.2 (2023-04-18)
+------------------
+* Update pre-commit (`#2094 <https://github.com/ros-planning/moveit2/issues/2094>`_)
+* Use $DISPLAY rather than assuming :0 (`#2049 <https://github.com/ros-planning/moveit2/issues/2049>`_)
+  * Use $DISPLAY rather than assuming :
+  * Double quotes
+  ---------
+  Co-authored-by: Sebastian Jahr <sebastian.jahr@picknik.ai>
+* Contributors: Shobuj Paul, Stephanie Eng
+
+2.7.1 (2023-03-23)
+------------------
+
+2.7.0 (2023-01-29)
+------------------
+* feat: adds compatibility to robot_description from topic instead of parameter (`#1806 <https://github.com/ros-planning/moveit2/issues/1806>`_)
+* Add support for multiple MoveItConfigBuilder instaces (`#1807 <https://github.com/ros-planning/moveit2/issues/1807>`_)
+* Fix BSD license in package.xml (`#1796 <https://github.com/ros-planning/moveit2/issues/1796>`_)
+  * fix BSD license in package.xml
+  * this must also be spdx compliant
+* Contributors: Christian Henkel, Marco Magri
+
+2.6.0 (2022-11-10)
+------------------
+* Do not add Pilz parameters to MoveIt Configs Utils if Pilz is not used (`#1583 <https://github.com/ros-planning/moveit2/issues/1583>`_)
+* Use MoveItConfigsBuilder in Pilz test launch file (`#1571 <https://github.com/ros-planning/moveit2/issues/1571>`_)
+* Only require Cartesian limits if Pilz is used (`#1519 <https://github.com/ros-planning/moveit2/issues/1519>`_)
+* Typo fix (`#1518 <https://github.com/ros-planning/moveit2/issues/1518>`_)
+* Contributors: Abishalini Sivaraman, Stephanie Eng
+
 2.5.3 (2022-07-28)
 ------------------
 

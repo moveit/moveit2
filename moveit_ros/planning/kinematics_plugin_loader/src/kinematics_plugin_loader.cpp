@@ -142,6 +142,11 @@ public:
     std::scoped_lock slock(lock_);
     for (auto const& [group, solver] : possible_kinematics_solvers_)
     {
+      // Don't bother trying to load a solver for the wrong group
+      if (group != jmg->getName())
+      {
+        continue;
+      }
       try
       {
         result = kinematics_loader_->createUniqueInstance(solver);
@@ -222,9 +227,13 @@ private:
 void KinematicsPluginLoader::status() const
 {
   if (loader_)
+  {
     loader_->status();
+  }
   else
+  {
     RCLCPP_INFO(LOGGER, "Loader function was never required");
+  }
 }
 
 moveit::core::SolverAllocatorFn KinematicsPluginLoader::getLoaderFunction(const srdf::ModelSharedPtr& srdf_model)
@@ -246,8 +255,6 @@ moveit::core::SolverAllocatorFn KinematicsPluginLoader::getLoaderFunction(const 
       // read the list of plugin names for possible kinematics solvers
       for (const srdf::Model::Group& known_group : known_groups)
       {
-        groups_.push_back(known_group.name_);
-
         std::string kinematics_param_prefix = robot_description_ + "_kinematics." + known_group.name_;
         group_param_listener_.try_emplace(known_group.name_,
                                           std::make_shared<kinematics::ParamListener>(node_, kinematics_param_prefix));
@@ -255,6 +262,16 @@ moveit::core::SolverAllocatorFn KinematicsPluginLoader::getLoaderFunction(const 
 
         std::string kinematics_solver_param_name = kinematics_param_prefix + ".kinematics_solver";
         const auto kinematics_solver = group_params_.at(known_group.name_).kinematics_solver;
+
+        if (kinematics_solver.empty())
+        {
+          RCLCPP_DEBUG(LOGGER, "No kinematics solver specified for group '%s'.", known_group.name_.c_str());
+          continue;
+        }
+
+        // Only push back a group if it has a kinematics solver.
+        groups_.push_back(known_group.name_);
+
         possible_kinematics_solvers[known_group.name_] = kinematics_solver;
         RCLCPP_DEBUG(LOGGER, "Found kinematics solver '%s' for group '%s'.", kinematics_solver.c_str(),
                      known_group.name_.c_str());

@@ -36,8 +36,8 @@
 
 #include <rclcpp/rclcpp.hpp>
 
-#include "pilz_industrial_motion_planner/joint_limits_extension.h"
-#include "pilz_industrial_motion_planner/planning_context_loader.h"
+#include <pilz_industrial_motion_planner/joint_limits_extension.h>
+#include <pilz_industrial_motion_planner/planning_context_loader.h>
 
 #include <moveit/macros/class_forward.h>
 #include <moveit/planning_interface/planning_interface.h>
@@ -117,15 +117,9 @@ public:
    */
   void registerContextLoader(const pilz_industrial_motion_planner::PlanningContextLoaderPtr& planning_context_loader);
 
-  /**
-   * @brief Specify the settings to be used for an algorithms
-   * @param pcs Map of planner configurations
-   */
-  void setPlannerConfigurations(const planning_interface::PlannerConfigurationMap& pcs) override;
-
 private:
   /// Plugin loader
-  std::unique_ptr<pluginlib::ClassLoader<PlanningContextLoader>> planner_context_loader;
+  std::unique_ptr<pluginlib::ClassLoader<PlanningContextLoader>> planner_context_loader_;
 
   /// Mapping from command to loader
   std::map<std::string, pilz_industrial_motion_planner::PlanningContextLoaderPtr> context_loader_map_;

@@ -38,19 +38,15 @@
 #include <geometry_msgs/msg/twist_stamped.hpp>
 #include <moveit/robot_model/joint_model_group.h>
 #include <moveit/robot_state/robot_state.h>
+#include <pluginlib/class_loader.hpp>
 #include <rclcpp/rclcpp.hpp>
 #include <tf2_eigen/tf2_eigen.hpp>
 
 #include <moveit_servo/status_codes.h>
+#include <moveit/online_signal_smoothing/smoothing_base_class.h>
 
 namespace moveit_servo
 {
-// Helper function for detecting zeroed message
-bool isNonZero(const geometry_msgs::msg::TwistStamped& msg);
-
-// Helper function for detecting zeroed message
-bool isNonZero(const control_msgs::msg::JointJog& msg);
-
 // Helper function for converting Eigen::Isometry3d to geometry_msgs/TransformStamped
 geometry_msgs::msg::TransformStamped convertIsometryToTransform(const Eigen::Isometry3d& eigen_tf,
                                                                 const std::string& parent_frame,
@@ -76,6 +72,20 @@ double velocityScalingFactorForSingularity(const moveit::core::JointModelGroup* 
                                            const double hard_stop_singularity_threshold,
                                            const double lower_singularity_threshold,
                                            const double leaving_singularity_threshold_multiplier, rclcpp::Clock& clock,
-                                           moveit::core::RobotStatePtr current_state, StatusCode& status);
+                                           const moveit::core::RobotStatePtr& current_state, StatusCode& status);
 
+/** \brief Joint-wise update of a sensor_msgs::msg::JointState with given delta's
+ * Also filters and calculates the previous velocity
+ * @param clock A ROS clock, for logging
+ * @param publish_period The publishing rate for servo command
+ * @param delta_theta Eigen vector of joint delta's
+ * @param previous_joint_state The previous joint state
+ * @param next_joint_state The joint state object which will hold the next joint state.
+ * @param smoother The trajectory smoother to be used.
+ * @return Returns false if there is a problem, true otherwise
+ */
+bool applyJointUpdate(rclcpp::Clock& clock, const double publish_period, const Eigen::ArrayXd& delta_theta,
+                      const sensor_msgs::msg::JointState& previous_joint_state,
+                      sensor_msgs::msg::JointState& next_joint_state,
+                      pluginlib::UniquePtr<online_signal_smoothing::SmoothingBaseClass>& smoother);
 }  // namespace moveit_servo

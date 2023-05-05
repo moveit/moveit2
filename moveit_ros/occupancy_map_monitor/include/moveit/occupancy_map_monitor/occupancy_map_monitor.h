@@ -283,9 +283,9 @@ private:
    *
    * @return     True on success, False otherwise.
    */
-  bool saveMapCallback(const std::shared_ptr<rmw_request_id_t> request_header,
-                       const std::shared_ptr<moveit_msgs::srv::SaveMap::Request> request,
-                       std::shared_ptr<moveit_msgs::srv::SaveMap::Response> response);
+  bool saveMapCallback(const std::shared_ptr<rmw_request_id_t>& request_header,
+                       const std::shared_ptr<moveit_msgs::srv::SaveMap::Request>& request,
+                       const std::shared_ptr<moveit_msgs::srv::SaveMap::Response>& response);
 
   /**
    * @brief      Load octree from a binary file (gets rid of current octree data)
@@ -296,9 +296,9 @@ private:
    *
    * @return     True on success, False otherwise.
    */
-  bool loadMapCallback(const std::shared_ptr<rmw_request_id_t> request_header,
-                       const std::shared_ptr<moveit_msgs::srv::LoadMap::Request> request,
-                       std::shared_ptr<moveit_msgs::srv::LoadMap::Response> response);
+  bool loadMapCallback(const std::shared_ptr<rmw_request_id_t>& request_header,
+                       const std::shared_ptr<moveit_msgs::srv::LoadMap::Request>& request,
+                       const std::shared_ptr<moveit_msgs::srv::LoadMap::Response>& response);
 
   /**
    * @brief      Gets the shape transform cache.

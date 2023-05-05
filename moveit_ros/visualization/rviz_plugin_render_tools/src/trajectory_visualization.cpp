@@ -185,7 +185,7 @@ void TrajectoryVisualization::onInitialize(const rclcpp::Node::SharedPtr& node, 
 
   trajectory_topic_sub_ = node_->create_subscription<moveit_msgs::msg::DisplayTrajectory>(
       trajectory_topic_property_->getStdString(), 2,
-      [this](const moveit_msgs::msg::DisplayTrajectory::ConstSharedPtr msg) { return incomingDisplayTrajectory(msg); });
+      [this](const moveit_msgs::msg::DisplayTrajectory::ConstSharedPtr& msg) { return incomingDisplayTrajectory(msg); });
 }
 
 void TrajectoryVisualization::setName(const QString& name)
@@ -256,7 +256,8 @@ void TrajectoryVisualization::changedShowTrail()
 
   int stepsize = trail_step_size_property_->getInt();
   // always include last trajectory point
-  trajectory_trail_.resize(static_cast<int>(std::ceil((t->getWayPointCount() + stepsize - 1) / (float)stepsize)));
+  trajectory_trail_.resize(
+      static_cast<int>(std::ceil((t->getWayPointCount() + stepsize - 1) / static_cast<float>(stepsize))));
   for (std::size_t i = 0; i < trajectory_trail_.size(); ++i)
   {
     int waypoint_i = std::min(i * stepsize, t->getWayPointCount() - 1);  // limit to last trajectory point
@@ -294,7 +295,7 @@ void TrajectoryVisualization::changedTrajectoryTopic()
   {
     trajectory_topic_sub_ = node_->create_subscription<moveit_msgs::msg::DisplayTrajectory>(
         trajectory_topic_property_->getStdString(), 2,
-        [this](const moveit_msgs::msg::DisplayTrajectory::ConstSharedPtr msg) {
+        [this](const moveit_msgs::msg::DisplayTrajectory::ConstSharedPtr& msg) {
           return incomingDisplayTrajectory(msg);
         });
   }
@@ -447,9 +448,13 @@ void TrajectoryVisualization::update(float wall_dt, float sim_dt)
       {
         if (static_cast<unsigned int>(trajectory_slider_panel_->getSliderPosition()) >=
             displaying_trajectory_message_->getWayPointCount() - 1)
+        {
           return;  // nothing more to do
+        }
         else
+        {
           animating_path_ = true;
+        }
       }
     }
     trajectory_message_to_display_.reset();
@@ -515,15 +520,19 @@ void TrajectoryVisualization::update(float wall_dt, float sim_dt)
         trajectory_slider_panel_->setSliderPosition(current_state_);
       display_path_robot_->update(displaying_trajectory_message_->getWayPointPtr(current_state_));
       for (std::size_t i = 0; i < trajectory_trail_.size(); ++i)
+      {
         trajectory_trail_[i]->setVisible(
             std::min(waypoint_count - 1, static_cast<int>(i) * trail_step_size_property_->getInt()) <= current_state_);
+      }
     }
     else
     {
-      animating_path_ = false;       // animation finished
-      if (trajectory_slider_panel_)  // make sure we move the slider to the end
-                                     // so the user can re-play
+      animating_path_ = false;  // animation finished
+      if (trajectory_slider_panel_)
+      {  // make sure we move the slider to the end
+         // so the user can re-play
         trajectory_slider_panel_->setSliderPosition(waypoint_count);
+      }
       display_path_robot_->update(displaying_trajectory_message_->getWayPointPtr(waypoint_count - 1));
       display_path_robot_->setVisible(loop_display_property_->getBool());
       if (!loop_display_property_->getBool() && trajectory_slider_panel_)
@@ -536,7 +545,7 @@ void TrajectoryVisualization::update(float wall_dt, float sim_dt)
                                    (trajectory_slider_panel_ && trajectory_slider_panel_->isVisible())));
 }
 
-void TrajectoryVisualization::incomingDisplayTrajectory(const moveit_msgs::msg::DisplayTrajectory::ConstSharedPtr msg)
+void TrajectoryVisualization::incomingDisplayTrajectory(const moveit_msgs::msg::DisplayTrajectory::ConstSharedPtr& msg)
 {
   // Error check
   if (!robot_state_ || !robot_model_)
@@ -546,8 +555,10 @@ void TrajectoryVisualization::incomingDisplayTrajectory(const moveit_msgs::msg::
   }
 
   if (!msg->model_id.empty() && msg->model_id != robot_model_->getName())
+  {
     RCLCPP_WARN(LOGGER, "Received a trajectory to display for model '%s' but model '%s' was expected",
                 msg->model_id.c_str(), robot_model_->getName().c_str());
+  }
 
   trajectory_message_to_display_.reset();
 
@@ -593,9 +604,13 @@ void TrajectoryVisualization::changedRobotColor()
 void TrajectoryVisualization::enabledRobotColor()
 {
   if (enable_robot_color_property_->getBool())
+  {
     setRobotColor(&(display_path_robot_->getRobot()), robot_color_property_->getColor());
+  }
   else
+  {
     unsetRobotColor(&(display_path_robot_->getRobot()));
+  }
 }
 
 void TrajectoryVisualization::unsetRobotColor(rviz_default_plugins::robot::Robot* robot)
@@ -632,9 +647,13 @@ void TrajectoryVisualization::trajectorySliderPanelVisibilityChange(bool enable)
     return;
 
   if (enable)
+  {
     trajectory_slider_panel_->onEnable();
+  }
   else
+  {
     trajectory_slider_panel_->onDisable();
+  }
 }
 
 void TrajectoryVisualization::clearRobotModel()

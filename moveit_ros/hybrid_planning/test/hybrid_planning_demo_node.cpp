@@ -55,7 +55,12 @@
 #include <rclcpp/node_options.hpp>
 #include <rclcpp/parameter_value.hpp>
 #include <rclcpp/qos.hpp>
+#include <rclcpp/version.h>
+#if RCLCPP_VERSION_GTE(20, 0, 0)
+#include <rclcpp/event_handler.hpp>
+#else
 #include <rclcpp/qos_event.hpp>
+#endif
 #include <rclcpp/subscription.hpp>
 #include <rclcpp/timer.hpp>
 #include <rclcpp/utilities.hpp>
@@ -107,7 +112,7 @@ public:
     // Add new collision object as soon as global trajectory is available.
     global_solution_subscriber_ = node_->create_subscription<moveit_msgs::msg::MotionPlanResponse>(
         "global_trajectory", rclcpp::SystemDefaultsQoS(),
-        [this](const moveit_msgs::msg::MotionPlanResponse::SharedPtr /* unused */) {
+        [this](const moveit_msgs::msg::MotionPlanResponse::ConstSharedPtr& /* unused */) {
           // Remove old collision objects
           collision_object_1_.operation = collision_object_1_.REMOVE;
 
@@ -263,9 +268,9 @@ public:
           }
         };
     send_goal_options.feedback_callback =
-        [](rclcpp_action::ClientGoalHandle<moveit_msgs::action::HybridPlanner>::SharedPtr /*unused*/,
-           const std::shared_ptr<const moveit_msgs::action::HybridPlanner::Feedback> feedback) {
-          RCLCPP_INFO(LOGGER, feedback->feedback.c_str());
+        [](const rclcpp_action::ClientGoalHandle<moveit_msgs::action::HybridPlanner>::SharedPtr& /*unused*/,
+           const std::shared_ptr<const moveit_msgs::action::HybridPlanner::Feedback>& feedback) {
+          RCLCPP_INFO_STREAM(LOGGER, feedback->feedback);
         };
 
     RCLCPP_INFO(LOGGER, "Sending hybrid planning goal");

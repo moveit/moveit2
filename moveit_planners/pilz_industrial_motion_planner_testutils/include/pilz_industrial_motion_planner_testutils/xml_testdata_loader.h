@@ -42,7 +42,7 @@
 
 #include <boost/property_tree/ptree.hpp>
 
-#include "pilz_industrial_motion_planner_testutils/testdata_loader.h"
+#include <pilz_industrial_motion_planner_testutils/testdata_loader.h>
 
 namespace pt = boost::property_tree;
 namespace pilz_industrial_motion_planner_testutils
@@ -184,8 +184,14 @@ public:
   class AbstractCmdGetterAdapter
   {
   public:
-    virtual CmdVariant getCmd(const std::string& /*cmd_name*/) const = 0;
+    AbstractCmdGetterAdapter() = default;
+    AbstractCmdGetterAdapter(const AbstractCmdGetterAdapter&) = default;
+    AbstractCmdGetterAdapter(AbstractCmdGetterAdapter&&) = default;
+    AbstractCmdGetterAdapter& operator=(const AbstractCmdGetterAdapter&) = default;
+    AbstractCmdGetterAdapter& operator=(AbstractCmdGetterAdapter&&) = default;
     virtual ~AbstractCmdGetterAdapter() = default;
+
+    virtual CmdVariant getCmd(const std::string& /*cmd_name*/) const = 0;
   };
 
 private:

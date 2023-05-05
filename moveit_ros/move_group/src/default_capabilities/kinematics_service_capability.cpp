@@ -53,15 +53,15 @@ MoveGroupKinematicsService::MoveGroupKinematicsService() : MoveGroupCapability("
 void MoveGroupKinematicsService::initialize()
 {
   fk_service_ = context_->moveit_cpp_->getNode()->create_service<moveit_msgs::srv::GetPositionFK>(
-      FK_SERVICE_NAME, [this](const std::shared_ptr<rmw_request_id_t> req_header,
-                              const std::shared_ptr<moveit_msgs::srv::GetPositionFK::Request> req,
-                              std::shared_ptr<moveit_msgs::srv::GetPositionFK::Response> res) {
+      FK_SERVICE_NAME, [this](const std::shared_ptr<rmw_request_id_t>& req_header,
+                              const std::shared_ptr<moveit_msgs::srv::GetPositionFK::Request>& req,
+                              const std::shared_ptr<moveit_msgs::srv::GetPositionFK::Response>& res) {
         return computeFKService(req_header, req, res);
       });
   ik_service_ = context_->moveit_cpp_->getNode()->create_service<moveit_msgs::srv::GetPositionIK>(
-      IK_SERVICE_NAME, [this](const std::shared_ptr<rmw_request_id_t> req_header,
-                              const std::shared_ptr<moveit_msgs::srv::GetPositionIK::Request> req,
-                              std::shared_ptr<moveit_msgs::srv::GetPositionIK::Response> res) {
+      IK_SERVICE_NAME, [this](const std::shared_ptr<rmw_request_id_t>& req_header,
+                              const std::shared_ptr<moveit_msgs::srv::GetPositionIK::Request>& req,
+                              const std::shared_ptr<moveit_msgs::srv::GetPositionIK::Response>& res) {
         return computeIKService(req_header, req, res);
       });
 }
@@ -106,9 +106,13 @@ void MoveGroupKinematicsService::computeIK(moveit_msgs::msg::PositionIKRequest& 
       {
         bool result_ik = false;
         if (ik_link.empty())
+        {
           result_ik = rs.setFromIK(jmg, req_pose.pose, req.timeout.sec, constraint);
+        }
         else
+        {
           result_ik = rs.setFromIK(jmg, req_pose.pose, ik_link, req.timeout.sec, constraint);
+        }
 
         if (result_ik)
         {
@@ -124,7 +128,9 @@ void MoveGroupKinematicsService::computeIK(moveit_msgs::msg::PositionIKRequest& 
     else
     {
       if (req.pose_stamped_vector.size() != req.ik_link_names.size())
+      {
         error_code.val = moveit_msgs::msg::MoveItErrorCodes::INVALID_LINK_NAME;
+      }
       else
       {
         bool ok = true;
@@ -133,7 +139,9 @@ void MoveGroupKinematicsService::computeIK(moveit_msgs::msg::PositionIKRequest& 
         {
           geometry_msgs::msg::PoseStamped msg = req.pose_stamped_vector[k];
           if (performTransform(msg, default_frame))
+          {
             tf2::fromMsg(msg.pose, req_poses[k]);
+          }
           else
           {
             error_code.val = moveit_msgs::msg::MoveItErrorCodes::FRAME_TRANSFORM_FAILURE;
@@ -158,9 +166,9 @@ void MoveGroupKinematicsService::computeIK(moveit_msgs::msg::PositionIKRequest& 
     error_code.val = moveit_msgs::msg::MoveItErrorCodes::INVALID_GROUP_NAME;
 }
 
-bool MoveGroupKinematicsService::computeIKService(const std::shared_ptr<rmw_request_id_t> /* unused */,
-                                                  const std::shared_ptr<moveit_msgs::srv::GetPositionIK::Request> req,
-                                                  std::shared_ptr<moveit_msgs::srv::GetPositionIK::Response> res)
+bool MoveGroupKinematicsService::computeIKService(const std::shared_ptr<rmw_request_id_t>& /* unused */,
+                                                  const std::shared_ptr<moveit_msgs::srv::GetPositionIK::Request>& req,
+                                                  const std::shared_ptr<moveit_msgs::srv::GetPositionIK::Response>& res)
 {
   context_->planning_scene_monitor_->updateFrameTransforms();
 
@@ -192,9 +200,9 @@ bool MoveGroupKinematicsService::computeIKService(const std::shared_ptr<rmw_requ
   return true;
 }
 
-bool MoveGroupKinematicsService::computeFKService(const std::shared_ptr<rmw_request_id_t> /* unused */,
-                                                  const std::shared_ptr<moveit_msgs::srv::GetPositionFK::Request> req,
-                                                  std::shared_ptr<moveit_msgs::srv::GetPositionFK::Response> res)
+bool MoveGroupKinematicsService::computeFKService(const std::shared_ptr<rmw_request_id_t>& /* unused */,
+                                                  const std::shared_ptr<moveit_msgs::srv::GetPositionFK::Request>& req,
+                                                  const std::shared_ptr<moveit_msgs::srv::GetPositionFK::Response>& res)
 {
   if (req->fk_link_names.empty())
   {
@@ -215,6 +223,7 @@ bool MoveGroupKinematicsService::computeFKService(const std::shared_ptr<rmw_requ
       planning_scene_monitor::LockedPlanningSceneRO(context_->planning_scene_monitor_)->getCurrentState();
   moveit::core::robotStateMsgToRobotState(req->robot_state, rs);
   for (std::size_t i = 0; i < req->fk_link_names.size(); ++i)
+  {
     if (rs.getRobotModel()->hasLinkModel(req->fk_link_names[i]))
     {
       res->pose_stamped.resize(res->pose_stamped.size() + 1);
@@ -222,16 +231,25 @@ bool MoveGroupKinematicsService::computeFKService(const std::shared_ptr<rmw_requ
       res->pose_stamped.back().header.frame_id = default_frame;
       res->pose_stamped.back().header.stamp = context_->moveit_cpp_->getNode()->get_clock()->now();
       if (do_transform)
+      {
         if (!performTransform(res->pose_stamped.back(), req->header.frame_id))
           tf_problem = true;
+      }
       res->fk_link_names.push_back(req->fk_link_names[i]);
     }
+  }
   if (tf_problem)
+  {
     res->error_code.val = moveit_msgs::msg::MoveItErrorCodes::FRAME_TRANSFORM_FAILURE;
+  }
   else if (res->fk_link_names.size() == req->fk_link_names.size())
+  {
     res->error_code.val = moveit_msgs::msg::MoveItErrorCodes::SUCCESS;
+  }
   else
+  {
     res->error_code.val = moveit_msgs::msg::MoveItErrorCodes::INVALID_LINK_NAME;
+  }
   return true;
 }
 }  // namespace move_group

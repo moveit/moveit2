@@ -52,7 +52,7 @@ RobotModelLoader::RobotModelLoader(const rclcpp::Node::SharedPtr& node, const st
   : node_(node)
 {
   Options opt(robot_description);
-  opt.load_kinematics_solvers_ = load_kinematics_solvers;
+  opt.load_kinematics_solvers = load_kinematics_solvers;
   configure(opt);
 }
 
@@ -105,10 +105,14 @@ void RobotModelLoader::configure(const Options& opt)
 {
   rclcpp::Clock clock;
   rclcpp::Time start = clock.now();
-  if (!opt.urdf_string_.empty() && !opt.srdf_string_.empty())
-    rdf_loader_ = std::make_shared<rdf_loader::RDFLoader>(opt.urdf_string_, opt.srdf_string_);
+  if (!opt.urdf_string_.empty() && !opt.srdf_string.empty())
+  {
+    rdf_loader_ = std::make_shared<rdf_loader::RDFLoader>(opt.urdf_string_, opt.srdf_string);
+  }
   else
-    rdf_loader_ = std::make_shared<rdf_loader::RDFLoader>(node_, opt.robot_description_);
+  {
+    rdf_loader_ = std::make_shared<rdf_loader::RDFLoader>(node_, opt.robot_description);
+  }
   if (rdf_loader_->getURDF())
   {
     const srdf::ModelSharedPtr& srdf =
@@ -242,7 +246,7 @@ void RobotModelLoader::configure(const Options& opt)
     }
   }
 
-  if (model_ && opt.load_kinematics_solvers_)
+  if (model_ && opt.load_kinematics_solvers)
     loadKinematicsSolvers();
 
   RCLCPP_DEBUG(node_->get_logger(), "Loaded kinematic model in %f seconds", (clock.now() - start).seconds());
@@ -254,10 +258,14 @@ void RobotModelLoader::loadKinematicsSolvers(const kinematics_plugin_loader::Kin
   {
     // load the kinematics solvers
     if (kloader)
+    {
       kinematics_loader_ = kloader;
+    }
     else
+    {
       kinematics_loader_ =
           std::make_shared<kinematics_plugin_loader::KinematicsPluginLoader>(node_, rdf_loader_->getRobotDescription());
+    }
     moveit::core::SolverAllocatorFn kinematics_allocator =
         kinematics_loader_->getLoaderFunction(rdf_loader_->getSRDF());
     const std::vector<std::string>& groups = kinematics_loader_->getKnownGroups();

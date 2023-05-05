@@ -92,7 +92,7 @@ bool PosedDistanceField::getCollisionSphereGradients(const std::vector<Collision
     Eigen::Vector3d p = sphere_centers[i];
     Eigen::Vector3d grad(0, 0, 0);
     bool in_bounds;
-    double dist = this->getDistanceGradient(p.x(), p.y(), p.z(), grad.x(), grad.y(), grad.z(), in_bounds);
+    double dist = getDistanceGradient(p.x(), p.y(), p.z(), grad.x(), grad.y(), grad.z(), in_bounds);
     if (!in_bounds && grad.norm() > 0)
     {
       // out of bounds
@@ -450,8 +450,9 @@ void getProximityGradientMarkers(const std::string& frame_id, const std::string&
   rclcpp::Clock ros_clock;
   if (gradients.size() != posed_decompositions.size() + posed_vector_decompositions.size())
   {
-    RCLCPP_WARN(LOGGER, "Size mismatch between gradients %u and decompositions %u", (unsigned int)gradients.size(),
-                (unsigned int)(posed_decompositions.size() + posed_vector_decompositions.size()));
+    RCLCPP_WARN(LOGGER, "Size mismatch between gradients %u and decompositions %u",
+                static_cast<unsigned int>(gradients.size()),
+                static_cast<unsigned int>((posed_decompositions.size() + posed_vector_decompositions.size())));
     return;
   }
   for (unsigned int i{ 0 }; i < gradients.size(); ++i)

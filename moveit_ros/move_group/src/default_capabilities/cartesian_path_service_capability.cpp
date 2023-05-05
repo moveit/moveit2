@@ -78,16 +78,17 @@ void MoveGroupCartesianPathService::initialize()
   cartesian_path_service_ = context_->moveit_cpp_->getNode()->create_service<moveit_msgs::srv::GetCartesianPath>(
 
       CARTESIAN_PATH_SERVICE_NAME,
-      [this](const std::shared_ptr<rmw_request_id_t> req_id,
-             const std::shared_ptr<moveit_msgs::srv::GetCartesianPath::Request> req,
-             std::shared_ptr<moveit_msgs::srv::GetCartesianPath::Response> res) -> bool {
+      [this](const std::shared_ptr<rmw_request_id_t>& req_id,
+             const std::shared_ptr<moveit_msgs::srv::GetCartesianPath::Request>& req,
+             const std::shared_ptr<moveit_msgs::srv::GetCartesianPath::Response>& res) -> bool {
         return computeService(req_id, req, res);
       });
 }
 
-bool MoveGroupCartesianPathService::computeService(const std::shared_ptr<rmw_request_id_t> /* unused */,
-                                                   const std::shared_ptr<moveit_msgs::srv::GetCartesianPath::Request> req,
-                                                   std::shared_ptr<moveit_msgs::srv::GetCartesianPath::Response> res)
+bool MoveGroupCartesianPathService::computeService(
+    const std::shared_ptr<rmw_request_id_t>& /* unused */,
+    const std::shared_ptr<moveit_msgs::srv::GetCartesianPath::Request>& req,
+    const std::shared_ptr<moveit_msgs::srv::GetCartesianPath::Response>& res)
 {
   RCLCPP_INFO(LOGGER, "Received request to compute Cartesian path");
   context_->planning_scene_monitor_->updateFrameTransforms();
@@ -111,14 +112,18 @@ bool MoveGroupCartesianPathService::computeService(const std::shared_ptr<rmw_req
     for (std::size_t i = 0; i < req->waypoints.size(); ++i)
     {
       if (no_transform)
+      {
         tf2::fromMsg(req->waypoints[i], waypoints[i]);
+      }
       else
       {
         geometry_msgs::msg::PoseStamped p;
         p.header = req->header;
         p.pose = req->waypoints[i];
         if (performTransform(p, default_frame))
+        {
           tf2::fromMsg(p.pose, waypoints[i]);
+        }
         else
         {
           RCLCPP_ERROR(LOGGER, "Error encountered transforming waypoints to frame '%s'", default_frame.c_str());
@@ -161,8 +166,8 @@ bool MoveGroupCartesianPathService::computeService(const std::shared_ptr<rmw_req
           RCLCPP_INFO(LOGGER,
                       "Attempting to follow %u waypoints for link '%s' using a step of %lf m "
                       "and jump threshold %lf (in %s reference frame)",
-                      (unsigned int)waypoints.size(), link_name.c_str(), req->max_step, req->jump_threshold,
-                      global_frame ? "global" : "link");
+                      static_cast<unsigned int>(waypoints.size()), link_name.c_str(), req->max_step,
+                      req->jump_threshold, global_frame ? "global" : "link");
           std::vector<moveit::core::RobotStatePtr> traj;
           res->fraction = moveit::core::CartesianInterpolator::computeCartesianPath(
               &start_state, jmg, traj, start_state.getLinkModel(link_name), waypoints, global_frame,
@@ -180,7 +185,7 @@ bool MoveGroupCartesianPathService::computeService(const std::shared_ptr<rmw_req
 
           rt.getRobotTrajectoryMsg(res->solution);
           RCLCPP_INFO(LOGGER, "Computed Cartesian path with %u points (followed %lf%% of requested trajectory)",
-                      (unsigned int)traj.size(), res->fraction * 100.0);
+                      static_cast<unsigned int>(traj.size()), res->fraction * 100.0);
           if (display_computed_paths_ && rt.getWayPointCount() > 0)
           {
             moveit_msgs::msg::DisplayTrajectory disp;

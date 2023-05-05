@@ -160,8 +160,9 @@ void CurrentStateMonitor::startStateMonitor(const std::string& joint_states_topi
     else
     {
       middleware_handle_->createJointStateSubscription(
-          joint_states_topic,
-          [this](sensor_msgs::msg::JointState::ConstSharedPtr joint_state) { return jointStateCallback(joint_state); });
+          joint_states_topic, [this](const sensor_msgs::msg::JointState::ConstSharedPtr& joint_state) {
+            return jointStateCallback(joint_state);
+          });
     }
     if (tf_buffer_ && !robot_model_->getMultiDOFJointModels().empty())
     {
@@ -220,9 +221,13 @@ bool CurrentStateMonitor::haveCompleteStateHelper(const rclcpp::Time& oldest_all
       continue;
 
     if (missing_joints)
+    {
       missing_joints->push_back(joint->getName());
+    }
     else
+    {
       return false;
+    }
   }
   return (missing_joints == nullptr) || missing_joints->empty();
 }
@@ -233,6 +238,7 @@ bool CurrentStateMonitor::waitForCurrentState(const rclcpp::Time& t, double wait
   rclcpp::Duration elapsed(0, 0);
   rclcpp::Duration timeout = rclcpp::Duration::from_seconds(wait_time_s);
 
+  rclcpp::Clock steady_clock(RCL_STEADY_TIME);
   std::unique_lock<std::mutex> lock(state_update_lock_);
   while (current_state_time_ < t)
   {
@@ -242,27 +248,32 @@ bool CurrentStateMonitor::waitForCurrentState(const rclcpp::Time& t, double wait
       {
         /* We cannot know if the reason of timeout is slow time or absence of
          * state messages, warn the user. */
-        rclcpp::Clock steady_clock(RCL_STEADY_TIME);
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wold-style-cast"
         RCLCPP_WARN_SKIPFIRST_THROTTLE(LOGGER, steady_clock, 1000,
-                                       "No state update received within 100ms of system clock");
-      }
-      else
-      {
-        elapsed = middleware_handle_->now() - start;
+                                       "No state update received within 100ms of system clock. "
+                                       "Have been waiting for %fs, timeout is %fs",
+                                       elapsed.seconds(), wait_time_s);
+#pragma GCC diagnostic pop
       }
     }
     else
     {
       state_update_condition_.wait_for(lock, (timeout - elapsed).to_chrono<std::chrono::duration<double>>());
-      elapsed = middleware_handle_->now() - start;
     }
+    elapsed = middleware_handle_->now() - start;
     if (elapsed > timeout)
     {
       RCLCPP_INFO(LOGGER,
-                  "Didn't received robot state (joint angles) with recent timestamp within "
-                  "%f seconds.\n"
+                  "Didn't receive robot state (joint angles) with recent timestamp within "
+                  "%f seconds. Requested time %f, but latest received state has time %f.\n"
                   "Check clock synchronization if your are running ROS across multiple machines!",
-                  wait_time_s);
+                  wait_time_s, t.seconds(), current_state_time_.seconds());
+      return false;
+    }
+    if (!middleware_handle_->ok())
+    {
+      RCLCPP_DEBUG(LOGGER, "ROS context shut down while waiting for current robot state.");
       return false;
     }
   }
@@ -300,8 +311,10 @@ bool CurrentStateMonitor::waitForCompleteState(const std::string& group, double 
       const std::vector<std::string>& names = jmg->getJointModelNames();
       bool ok = true;
       for (std::size_t i = 0; ok && i < names.size(); ++i)
+      {
         if (mj.find(names[i]) != mj.end())
           ok = false;
+      }
     }
     else
       ok = false;
@@ -309,14 +322,17 @@ bool CurrentStateMonitor::waitForCompleteState(const std::string& group, double 
   return ok;
 }
 
-void CurrentStateMonitor::jointStateCallback(sensor_msgs::msg::JointState::ConstSharedPtr joint_state)
+void CurrentStateMonitor::jointStateCallback(const sensor_msgs::msg::JointState::ConstSharedPtr& joint_state)
 {
   if (joint_state->name.size() != joint_state->position.size())
   {
     rclcpp::Clock steady_clock(RCL_STEADY_TIME);
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wold-style-cast"
     RCLCPP_ERROR_THROTTLE(LOGGER, steady_clock, 1000,
                           "State monitor received invalid joint state (number of joint names does not match number of "
                           "positions)");
+#pragma GCC diagnostic pop
     return;
   }
   bool update = false;
@@ -344,8 +360,10 @@ void CurrentStateMonitor::jointStateCallback(sensor_msgs::msg::JointState::Const
 
         // continuous joints wrap, so we don't modify them (even if they are outside bounds!)
         if (jm->getType() == moveit::core::JointModel::REVOLUTE)
+        {
           if (static_cast<const moveit::core::RevoluteJointModel*>(jm)->isContinuous())
             continue;
+        }
 
         const moveit::core::VariableBounds& b =
             jm->getVariableBounds()[0];  // only one variable in the joint, so we get its bounds
@@ -353,9 +371,13 @@ void CurrentStateMonitor::jointStateCallback(sensor_msgs::msg::JointState::Const
         // if the read variable is 'almost' within bounds (up to error_ difference), then consider it to be within
         // bounds
         if (joint_state->position[i] < b.min_position_ && joint_state->position[i] >= b.min_position_ - error_)
+        {
           robot_state_.setJointPositions(jm, &b.min_position_);
+        }
         else if (joint_state->position[i] > b.max_position_ && joint_state->position[i] <= b.max_position_ + error_)
+        {
           robot_state_.setJointPositions(jm, &b.max_position_);
+        }
       }
 
       // optionally copy velocities and effort
@@ -382,8 +404,10 @@ void CurrentStateMonitor::jointStateCallback(sensor_msgs::msg::JointState::Const
 
   // callbacks, if needed
   if (update)
+  {
     for (JointStateUpdateCallback& update_callback : update_callbacks_)
       update_callback(joint_state);
+  }
 
   // notify waitForCurrentState() *after* potential update callbacks
   state_update_condition_.notify_all();
@@ -432,10 +456,14 @@ void CurrentStateMonitor::updateMultiDofJoints()
       std::vector<double> new_values(joint->getStateSpaceDimension());
       const moveit::core::LinkModel* link = joint->getChildLinkModel();
       if (link->jointOriginTransformIsIdentity())
+      {
         joint->computeVariablePositions(tf2::transformToEigen(transf), new_values.data());
+      }
       else
+      {
         joint->computeVariablePositions(link->getJointOriginTransform().inverse() * tf2::transformToEigen(transf),
                                         new_values.data());
+      }
 
       if (joint->distance(new_values.data(), robot_state_.getJointPositions(joint)) > 1e-5)
       {
@@ -465,7 +493,7 @@ void CurrentStateMonitor::updateMultiDofJoints()
 }
 
 // Copied from https://github.com/ros2/geometry2/blob/ros2/tf2_ros/src/transform_listener.cpp
-void CurrentStateMonitor::transformCallback(const tf2_msgs::msg::TFMessage::ConstSharedPtr msg, const bool is_static)
+void CurrentStateMonitor::transformCallback(const tf2_msgs::msg::TFMessage::ConstSharedPtr& msg, const bool is_static)
 {
   for (const auto& transform : msg->transforms)
   {

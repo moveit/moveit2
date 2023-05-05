@@ -42,7 +42,7 @@
 #include <rclcpp/node.hpp>
 #include <string>
 #include <map>
-#include "rclcpp/rclcpp.hpp"
+#include <rclcpp/rclcpp.hpp>
 
 namespace planning_scene
 {
@@ -194,7 +194,7 @@ public:
   virtual bool canServiceRequest(const MotionPlanRequest& req) const = 0;
 
   /// \brief Specify the settings to be used for specific algorithms
-  virtual void setPlannerConfigurations(const PlannerConfigurationMap& pcs) = 0;
+  virtual void setPlannerConfigurations(const PlannerConfigurationMap& pcs);
 
   /// \brief Get the settings for a specific algorithm
   const PlannerConfigurationMap& getPlannerConfigurations() const

@@ -70,9 +70,13 @@ bool includesParent(const JointModel* joint, const JointModelGroup* group)
     {
       const JointModel* mjoint = joint->getMimic();
       if (group->hasJointModel(mjoint->getName()) && mjoint->getVariableCount() > 0 && mjoint->getMimic() == nullptr)
+      {
         found = true;
+      }
       else if (includesParent(mjoint, group))
+      {
         found = true;
+      }
       if (found)
         break;
     }
@@ -91,9 +95,13 @@ bool jointPrecedes(const JointModel* a, const JointModel* b)
     if (p == b)
       return true;
     if (p->getType() == JointModel::FIXED)
+    {
       p = p->getParentLinkModel() ? p->getParentLinkModel()->getParentJointModel() : nullptr;
+    }
     else
+    {
       break;
+    }
   }
 
   return false;
@@ -130,6 +138,7 @@ JointModelGroup::JointModelGroup(const std::string& group_name, const srdf::Mode
       if (vc > 1)
         is_single_dof_ = false;
       const std::vector<std::string>& name_order = joint_model->getVariableNames();
+
       if (joint_model->getMimic() == nullptr)
       {
         active_joint_model_vector_.push_back(joint_model);
@@ -176,17 +185,24 @@ JointModelGroup::JointModelGroup(const std::string& group_name, const srdf::Mode
   // when updating this group within a state, it is useful to know
   // if the full state of a group is contiguous within the full state of the robot
   if (variable_index_list_.empty())
+  {
     is_contiguous_index_list_ = false;
+  }
   else
+  {
     for (std::size_t i = 1; i < variable_index_list_.size(); ++i)
+    {
       if (variable_index_list_[i] != variable_index_list_[i - 1] + 1)
       {
         is_contiguous_index_list_ = false;
         break;
       }
+    }
+  }
 
   // when updating/sampling a group state only, only mimic joints that have their parent within the group get updated.
   for (const JointModel* mimic_joint : mimic_joints_)
+  {
     // if the joint we mimic is also in this group, we will need to do updates when sampling
     if (hasJointModel(mimic_joint->getMimic()->getName()))
     {
@@ -195,6 +211,7 @@ JointModelGroup::JointModelGroup(const std::string& group_name, const srdf::Mode
       GroupMimicUpdate mu(src, dest, mimic_joint->getMimicFactor(), mimic_joint->getMimicOffset());
       group_mimic_update_.push_back(mu);
     }
+  }
 
   // now we need to make another pass for group links (we include the fixed joints here)
   std::set<const LinkModel*> group_links_set;
@@ -255,11 +272,13 @@ JointModelGroup::JointModelGroup(const std::string& group_name, const srdf::Mode
     // due to our sorting, the joints are sorted in a DF fashion, so looking at them in reverse,
     // we should always get to the parent.
     for (std::size_t k = joint_model_vector_.size() - 1; k > 0; --k)
+    {
       if (!jointPrecedes(joint_model_vector_[k], joint_model_vector_[k - 1]))
       {
         chain = false;
         break;
       }
+    }
     if (chain)
       is_chain_ = true;
   }
@@ -319,8 +338,10 @@ void JointModelGroup::getVariableRandomPositions(random_numbers::RandomNumberGen
 {
   assert(active_joint_bounds.size() == active_joint_model_vector_.size());
   for (std::size_t i = 0; i < active_joint_model_vector_.size(); ++i)
+  {
     active_joint_model_vector_[i]->getVariableRandomPositions(rng, values + active_joint_model_start_index_[i],
                                                               *active_joint_bounds[i]);
+  }
 
   updateMimicJoints(values);
 }
@@ -331,10 +352,12 @@ void JointModelGroup::getVariableRandomPositionsNearBy(random_numbers::RandomNum
 {
   assert(active_joint_bounds.size() == active_joint_model_vector_.size());
   for (std::size_t i = 0; i < active_joint_model_vector_.size(); ++i)
+  {
     active_joint_model_vector_[i]->getVariableRandomPositionsNearBy(rng, values + active_joint_model_start_index_[i],
                                                                     *active_joint_bounds[i],
                                                                     near + active_joint_model_start_index_[i],
                                                                     distance);
+  }
   updateMimicJoints(values);
 }
 
@@ -349,7 +372,9 @@ void JointModelGroup::getVariableRandomPositionsNearBy(random_numbers::RandomNum
     std::map<JointModel::JointType, double>::const_iterator iter =
         distance_map.find(active_joint_model_vector_[i]->getType());
     if (iter != distance_map.end())
+    {
       distance = iter->second;
+    }
     else
     {
       RCLCPP_WARN(LOGGER, "Did not pass in distance for '%s'", active_joint_model_vector_[i]->getName().c_str());
@@ -368,14 +393,18 @@ void JointModelGroup::getVariableRandomPositionsNearBy(random_numbers::RandomNum
 {
   assert(active_joint_bounds.size() == active_joint_model_vector_.size());
   if (distances.size() != active_joint_model_vector_.size())
+  {
     throw Exception("When sampling random values nearby for group '" + name_ +
                     "', distances vector should be of size " + std::to_string(active_joint_model_vector_.size()) +
                     ", but it is of size " + std::to_string(distances.size()));
+  }
   for (std::size_t i = 0; i < active_joint_model_vector_.size(); ++i)
+  {
     active_joint_model_vector_[i]->getVariableRandomPositionsNearBy(rng, values + active_joint_model_start_index_[i],
                                                                     *active_joint_bounds[i],
                                                                     near + active_joint_model_start_index_[i],
                                                                     distances[i]);
+  }
   updateMimicJoints(values);
 }
 
@@ -384,9 +413,11 @@ bool JointModelGroup::satisfiesPositionBounds(const double* state, const JointBo
 {
   assert(active_joint_bounds.size() == active_joint_model_vector_.size());
   for (std::size_t i = 0; i < active_joint_model_vector_.size(); ++i)
+  {
     if (!active_joint_model_vector_[i]->satisfiesPositionBounds(state + active_joint_model_start_index_[i],
                                                                 *active_joint_bounds[i], margin))
       return false;
+  }
   return true;
 }
 
@@ -395,9 +426,11 @@ bool JointModelGroup::enforcePositionBounds(double* state, const JointBoundsVect
   assert(active_joint_bounds.size() == active_joint_model_vector_.size());
   bool change = false;
   for (std::size_t i = 0; i < active_joint_model_vector_.size(); ++i)
+  {
     if (active_joint_model_vector_[i]->enforcePositionBounds(state + active_joint_model_start_index_[i],
                                                              *active_joint_bounds[i]))
       change = true;
+  }
   if (change)
     updateMimicJoints(state);
   return change;
@@ -407,8 +440,10 @@ double JointModelGroup::getMaximumExtent(const JointBoundsVector& active_joint_b
 {
   double max_distance = 0.0;
   for (std::size_t j = 0; j < active_joint_model_vector_.size(); ++j)
+  {
     max_distance += active_joint_model_vector_[j]->getMaximumExtent(*active_joint_bounds[j]) *
                     active_joint_model_vector_[j]->getDistanceFactor();
+  }
   return max_distance;
 }
 
@@ -416,9 +451,11 @@ double JointModelGroup::distance(const double* state1, const double* state2) con
 {
   double d = 0.0;
   for (std::size_t i = 0; i < active_joint_model_vector_.size(); ++i)
+  {
     d += active_joint_model_vector_[i]->getDistanceFactor() *
          active_joint_model_vector_[i]->distance(state1 + active_joint_model_start_index_[i],
                                                  state2 + active_joint_model_start_index_[i]);
+  }
   return d;
 }
 
@@ -426,9 +463,11 @@ void JointModelGroup::interpolate(const double* from, const double* to, double t
 {
   // we interpolate values only for active joint models (non-mimic)
   for (std::size_t i = 0; i < active_joint_model_vector_.size(); ++i)
+  {
     active_joint_model_vector_[i]->interpolate(from + active_joint_model_start_index_[i],
                                                to + active_joint_model_start_index_[i], t,
                                                state + active_joint_model_start_index_[i]);
+  }
 
   // now we update mimic as needed
   updateMimicJoints(state);
@@ -533,7 +572,9 @@ const LinkModel* JointModelGroup::getOnlyOneEndEffectorTip() const
   std::vector<const LinkModel*> tips;
   getEndEffectorTips(tips);
   if (tips.size() == 1)
+  {
     return tips.front();
+  }
   else if (tips.size() > 1)
   {
     RCLCPP_ERROR(LOGGER, "More than one end effector tip found for joint model group, so cannot return only one");
@@ -565,25 +606,25 @@ void JointModelGroup::setDefaultIKTimeout(double ik_timeout)
     it.second.default_ik_timeout_ = ik_timeout;
 }
 
-bool JointModelGroup::computeIKIndexBijection(const std::vector<std::string>& ik_jnames,
-                                              std::vector<size_t>& joint_bijection) const
+bool JointModelGroup::computeJointVariableIndices(const std::vector<std::string>& joint_names,
+                                                  std::vector<size_t>& joint_bijection) const
 {
   joint_bijection.clear();
-  for (const std::string& ik_jname : ik_jnames)
+  for (const std::string& joint_name : joint_names)
   {
-    VariableIndexMap::const_iterator it = joint_variables_index_map_.find(ik_jname);
+    VariableIndexMap::const_iterator it = joint_variables_index_map_.find(joint_name);
     if (it == joint_variables_index_map_.end())
     {
       // skip reported fixed joints
-      if (hasJointModel(ik_jname) && getJointModel(ik_jname)->getType() == JointModel::FIXED)
+      if (hasJointModel(joint_name) && getJointModel(joint_name)->getType() == JointModel::FIXED)
         continue;
       RCLCPP_ERROR(LOGGER,
-                   "IK solver computes joint values for joint '%s' "
+                   "Looking for variables for joint '%s', "
                    "but group '%s' does not contain such a joint.",
-                   ik_jname.c_str(), getName().c_str());
+                   joint_name.c_str(), getName().c_str());
       return false;
     }
-    const JointModel* jm = getJointModel(ik_jname);
+    const JointModel* jm = getJointModel(joint_name);
     for (size_t k = 0; k < jm->getVariableCount(); ++k)
       joint_bijection.push_back(it->second + k);
   }
@@ -599,26 +640,30 @@ void JointModelGroup::setSolverAllocators(const std::pair<SolverAllocatorFn, Sol
     if (group_kinematics_.first.solver_instance_)
     {
       group_kinematics_.first.solver_instance_->setDefaultTimeout(group_kinematics_.first.default_ik_timeout_);
-      if (!computeIKIndexBijection(group_kinematics_.first.solver_instance_->getJointNames(),
-                                   group_kinematics_.first.bijection_))
+      if (!computeJointVariableIndices(group_kinematics_.first.solver_instance_->getJointNames(),
+                                       group_kinematics_.first.bijection_))
         group_kinematics_.first.reset();
     }
   }
   else
+  {
     // we now compute a joint bijection only if we have a solver map
     for (const std::pair<const JointModelGroup* const, SolverAllocatorFn>& it : solvers.second)
+    {
       if (it.first->getSolverInstance())
       {
         KinematicsSolver& ks = group_kinematics_.second[it.first];
         ks.allocator_ = it.second;
         ks.solver_instance_ = const_cast<JointModelGroup*>(it.first)->getSolverInstance();
         ks.default_ik_timeout_ = group_kinematics_.first.default_ik_timeout_;
-        if (!computeIKIndexBijection(ks.solver_instance_->getJointNames(), ks.bijection_))
+        if (!computeJointVariableIndices(ks.solver_instance_->getJointNames(), ks.bijection_))
         {
           group_kinematics_.second.clear();
           break;
         }
       }
+    }
+  }
 }
 
 bool JointModelGroup::canSetStateFromIK(const std::string& tip) const
@@ -682,25 +727,28 @@ void JointModelGroup::printGroupInfo(std::ostream& out) const
         << (jm->getFirstVariableIndex() + jm->getLocalVariableIndex(variable_name)) << " in full state, index "
         << local_idx << " in group state";
     if (jm->getMimic())
-      out << ", mimic '" << jm->getMimic()->getName() << "'";
+      out << ", mimic '" << jm->getMimic()->getName() << '\'';
     out << '\n';
     out << "        " << parent_model_->getVariableBounds(variable_name) << '\n';
   }
-  out << "  * Variables Index List:\n";
-  out << "    ";
+  out << "  * Variables Index List:\n    ";
   for (int variable_index : variable_index_list_)
-    out << variable_index << " ";
+    out << variable_index << ' ';
   if (is_contiguous_index_list_)
+  {
     out << "(contiguous)";
+  }
   else
+  {
     out << "(non-contiguous)";
+  }
   out << '\n';
   if (group_kinematics_.first)
   {
     out << "  * Kinematics solver bijection:\n";
     out << "    ";
     for (unsigned int index : group_kinematics_.first.bijection_)
-      out << index << " ";
+      out << index << ' ';
     out << '\n';
   }
   if (!group_kinematics_.second.empty())
@@ -708,9 +756,9 @@ void JointModelGroup::printGroupInfo(std::ostream& out) const
     out << "  * Compound kinematics solver:\n";
     for (const std::pair<const JointModelGroup* const, KinematicsSolver>& it : group_kinematics_.second)
     {
-      out << "    " << it.first->getName() << ":";
+      out << "    " << it.first->getName() << ':';
       for (unsigned int index : it.second.bijection_)
-        out << " " << index;
+        out << ' ' << index;
       out << '\n';
     }
   }
@@ -719,8 +767,10 @@ void JointModelGroup::printGroupInfo(std::ostream& out) const
   {
     out << "  * Local Mimic Updates:\n";
     for (const GroupMimicUpdate& mimic_update : group_mimic_update_)
+    {
       out << "    [" << mimic_update.dest << "] = " << mimic_update.factor << " * [" << mimic_update.src << "] + "
           << mimic_update.offset << '\n';
+    }
   }
   out << '\n';
 }

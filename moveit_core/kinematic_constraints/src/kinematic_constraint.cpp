@@ -50,8 +50,8 @@
 #include <memory>
 #include <typeinfo>
 
-#include "rclcpp/clock.hpp"
-#include "rclcpp/duration.hpp"
+#include <rclcpp/clock.hpp>
+#include <rclcpp/duration.hpp>
 
 namespace kinematic_constraints
 {
@@ -62,9 +62,13 @@ static double normalizeAngle(double angle)
 {
   double v = fmod(angle, 2.0 * M_PI);
   if (v < -M_PI)
+  {
     v += 2.0 * M_PI;
+  }
   else if (v > M_PI)
+  {
     v -= 2.0 * M_PI;
+  }
   return v;
 }
 
@@ -143,7 +147,9 @@ bool JointConstraint::configure(const moveit_msgs::msg::JointConstraint& jc)
   joint_variable_name_ = jc.joint_name;
   local_variable_name_.clear();
   if (robot_model_->hasJointModel(joint_variable_name_))
+  {
     joint_model_ = robot_model_->getJointModel(joint_variable_name_);
+  }
   else
   {
     std::size_t pos = jc.joint_name.find_last_of('/');
@@ -181,11 +187,13 @@ bool JointConstraint::configure(const moveit_msgs::msg::JointConstraint& jc)
       int found = -1;
       const std::vector<std::string>& local_var_names = joint_model_->getLocalVariableNames();
       for (std::size_t i = 0; i < local_var_names.size(); ++i)
+      {
         if (local_var_names[i] == local_variable_name_)
         {
           found = i;
           break;
         }
+      }
       if (found < 0)
       {
         RCLCPP_ERROR(LOGGER, "Local variable name '%s' is not known to joint '%s'", local_variable_name_.c_str(),
@@ -264,9 +272,11 @@ bool JointConstraint::equal(const KinematicConstraint& other, double margin) con
     return false;
   const JointConstraint& o = static_cast<const JointConstraint&>(other);
   if (o.joint_model_ == joint_model_ && o.local_variable_name_ == local_variable_name_)
+  {
     return fabs(joint_position_ - o.joint_position_) <= margin &&
            fabs(joint_tolerance_above_ - o.joint_tolerance_above_) <= margin &&
            fabs(joint_tolerance_below_ - o.joint_tolerance_below_) <= margin;
+  }
   return false;
 }
 
@@ -284,9 +294,13 @@ ConstraintEvaluationResult JointConstraint::decide(const moveit::core::RobotStat
     dif = normalizeAngle(current_joint_position) - joint_position_;
 
     if (dif > M_PI)
+    {
       dif = 2.0 * M_PI - dif;
+    }
     else if (dif < -M_PI)
+    {
       dif += 2.0 * M_PI;  // we include a sign change to have dif > 0
+    }
   }
   else
     dif = current_joint_position - joint_position_;
@@ -295,11 +309,13 @@ ConstraintEvaluationResult JointConstraint::decide(const moveit::core::RobotStat
   bool result = dif <= (joint_tolerance_above_ + 2.0 * std::numeric_limits<double>::epsilon()) &&
                 dif >= (-joint_tolerance_below_ - 2.0 * std::numeric_limits<double>::epsilon());
   if (verbose)
+  {
     RCLCPP_INFO(LOGGER,
                 "Constraint %s:: Joint name: '%s', actual value: %f, desired value: %f, "
                 "tolerance_above: %f, tolerance_below: %f",
                 result ? "satisfied" : "violated", joint_variable_name_.c_str(), current_joint_position,
                 joint_position_, joint_tolerance_above_, joint_tolerance_below_);
+  }
   return ConstraintEvaluationResult(result, constraint_weight_ * fabs(dif));
 }
 
@@ -469,8 +485,10 @@ bool PositionConstraint::equal(const KinematicConstraint& other, double margin) 
         return false;
     }
     for (std::size_t i = 0; i < o.constraint_region_.size(); ++i)
+    {
       if (!other_region_matches_this[i])
         return false;
+    }
     return true;
   }
   return false;
@@ -508,11 +526,15 @@ ConstraintEvaluationResult PositionConstraint::decide(const moveit::core::RobotS
       Eigen::Isometry3d tmp = state.getFrameTransform(constraint_frame_id_) * constraint_region_pose_[i];
       bool result = constraint_region_[i]->cloneAt(tmp)->containsPoint(pt, verbose);
       if (result || (i + 1 == constraint_region_pose_.size()))
+      {
         return finishPositionConstraintDecision(pt, tmp.translation(), link_model_->getName(), constraint_weight_,
                                                 result, verbose);
+      }
       else
+      {
         finishPositionConstraintDecision(pt, tmp.translation(), link_model_->getName(), constraint_weight_, result,
                                          verbose);
+      }
     }
   }
   else
@@ -521,11 +543,15 @@ ConstraintEvaluationResult PositionConstraint::decide(const moveit::core::RobotS
     {
       bool result = constraint_region_[i]->containsPoint(pt, true);
       if (result || (i + 1 == constraint_region_.size()))
+      {
         return finishPositionConstraintDecision(pt, constraint_region_[i]->getPose().translation(),
                                                 link_model_->getName(), constraint_weight_, result, verbose);
+      }
       else
+      {
         finishPositionConstraintDecision(pt, constraint_region_[i]->getPose().translation(), link_model_->getName(),
                                          constraint_weight_, result, verbose);
+      }
     }
   }
   return ConstraintEvaluationResult(false, 0.0);
@@ -534,9 +560,13 @@ ConstraintEvaluationResult PositionConstraint::decide(const moveit::core::RobotS
 void PositionConstraint::print(std::ostream& out) const
 {
   if (enabled())
-    out << "Position constraint on link '" << link_model_->getName() << "'" << '\n';
+  {
+    out << "Position constraint on link '" << link_model_->getName() << '\'' << '\n';
+  }
   else
+  {
     out << "No constraint" << '\n';
+  }
 }
 
 void PositionConstraint::clear()
@@ -747,9 +777,9 @@ void OrientationConstraint::print(std::ostream& out) const
 {
   if (link_model_)
   {
-    out << "Orientation constraint on link '" << link_model_->getName() << "'" << '\n';
+    out << "Orientation constraint on link '" << link_model_->getName() << '\'' << '\n';
     Eigen::Quaterniond q_des(desired_rotation_matrix_);
-    out << "Desired orientation:" << q_des.x() << "," << q_des.y() << "," << q_des.z() << "," << q_des.w() << '\n';
+    out << "Desired orientation:" << q_des.x() << ',' << q_des.y() << ',' << q_des.z() << ',' << q_des.w() << '\n';
   }
   else
     out << "No constraint" << '\n';
@@ -799,7 +829,7 @@ bool VisibilityConstraint::configure(const moveit_msgs::msg::VisibilityConstrain
 
   // compute the points on the base circle of the cone that make up the cone sides
   points_.clear();
-  double delta = 2.0 * M_PI / (double)cone_sides_;
+  double delta = 2.0 * M_PI / static_cast<double>(cone_sides_);
   double a = 0.0;
   for (unsigned int i = 0; i < cone_sides_; ++i, a += delta)
   {
@@ -1065,17 +1095,21 @@ ConstraintEvaluationResult VisibilityConstraint::decide(const moveit::core::Robo
       if (dp < 0.0)
       {
         if (verbose)
+        {
           RCLCPP_INFO(LOGGER, "Visibility constraint is violated because the sensor is looking at "
                               "the wrong side");
+        }
         return ConstraintEvaluationResult(false, 0.0);
       }
       if (max_view_angle_ < ang)
       {
         if (verbose)
+        {
           RCLCPP_INFO(LOGGER,
                       "Visibility constraint is violated because the view angle is %lf "
                       "(above the maximum allowed of %lf)",
                       ang, max_view_angle_);
+        }
         return ConstraintEvaluationResult(false, 0.0);
       }
     }
@@ -1086,8 +1120,10 @@ ConstraintEvaluationResult VisibilityConstraint::decide(const moveit::core::Robo
       if (dp < 0.0)
       {
         if (verbose)
+        {
           RCLCPP_INFO(LOGGER, "Visibility constraint is violated because the sensor is looking at "
                               "the wrong side");
+        }
         return ConstraintEvaluationResult(false, 0.0);
       }
 
@@ -1095,10 +1131,12 @@ ConstraintEvaluationResult VisibilityConstraint::decide(const moveit::core::Robo
       if (max_range_angle_ < ang)
       {
         if (verbose)
+        {
           RCLCPP_INFO(LOGGER,
                       "Visibility constraint is violated because the range angle is %lf "
                       "(above the maximum allowed of %lf)",
                       ang, max_range_angle_);
+        }
         return ConstraintEvaluationResult(false, 0.0);
       }
     }
@@ -1167,7 +1205,7 @@ void VisibilityConstraint::print(std::ostream& out) const
   if (enabled())
   {
     out << "Visibility constraint for sensor in frame '" << sensor_frame_id_ << "' using target in frame '"
-        << target_frame_id_ << "'" << '\n';
+        << target_frame_id_ << '\'' << '\n';
     out << "Target radius: " << target_radius_ << ", using " << cone_sides_ << " sides." << '\n';
   }
   else

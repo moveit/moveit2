@@ -126,9 +126,11 @@ TEST_P(CollisionDetectorTests, Threaded)
   }
 
   for (unsigned int i = 0; i < THREADS; ++i)
+  {
     threads.emplace_back(std::thread([i, &scene = *planning_scene_, &state = states[i], expected = collisions[i]] {
       return runCollisionDetectionAssert(i, TRIALS, scene, state, expected);
     }));
+  }
 
   for (unsigned int i = 0; i < states.size(); ++i)
   {

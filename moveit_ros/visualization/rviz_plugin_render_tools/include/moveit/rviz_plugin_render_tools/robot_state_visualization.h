@@ -61,13 +61,13 @@ public:
   void load(const urdf::ModelInterface& descr, bool visual = true, bool collision = true);
   void clear();
 
-  void update(const moveit::core::RobotStateConstPtr& kinematic_state);
-  void update(const moveit::core::RobotStateConstPtr& kinematic_state,
+  void update(const moveit::core::RobotStateConstPtr& robot_state);
+  void update(const moveit::core::RobotStateConstPtr& robot_state,
               const std_msgs::msg::ColorRGBA& default_attached_object_color);
-  void update(const moveit::core::RobotStateConstPtr& kinematic_state,
+  void update(const moveit::core::RobotStateConstPtr& robot_state,
               const std_msgs::msg::ColorRGBA& default_attached_object_color,
               const std::map<std::string, std_msgs::msg::ColorRGBA>& color_map);
-  void updateKinematicState(const moveit::core::RobotStateConstPtr& kinematic_state);
+  void updateKinematicState(const moveit::core::RobotStateConstPtr& robot_state);
   void setDefaultAttachedObjectColor(const std_msgs::msg::ColorRGBA& default_attached_object_color);
   /// update color of all attached object shapes
   void updateAttachedObjectColors(const std_msgs::msg::ColorRGBA& attached_object_color);
@@ -98,7 +98,7 @@ public:
   void setAlpha(float alpha);
 
 private:
-  void updateHelper(const moveit::core::RobotStateConstPtr& kinematic_state,
+  void updateHelper(const moveit::core::RobotStateConstPtr& robot_state,
                     const std_msgs::msg::ColorRGBA& default_attached_object_color,
                     const std::map<std::string, std_msgs::msg::ColorRGBA>* color_map);
   rviz_default_plugins::robot::Robot robot_;

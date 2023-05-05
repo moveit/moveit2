@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.22)
-project(moveit_simple_controller_manager)
+project(moveit_simple_controller_manager LANGUAGES CXX)
 
 # Common cmake code applied to all moveit packages
 find_package(moveit_common REQUIRED)
@@ -27,29 +27,29 @@ include_directories(
   include
 )
 
-add_library(${PROJECT_NAME} SHARED
+add_library(moveit_simple_controller_manager SHARED
   src/moveit_simple_controller_manager.cpp
   src/follow_joint_trajectory_controller_handle.cpp
 )
 
-set_target_properties(${PROJECT_NAME} PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
+set_target_properties(moveit_simple_controller_manager PROPERTIES VERSION "${moveit_simple_controller_manager_VERSION}")
 
-ament_target_dependencies(${PROJECT_NAME}
+ament_target_dependencies(moveit_simple_controller_manager
   ${THIS_PACKAGE_INCLUDE_DEPENDS}
   Boost
 )
 
 install(
-  TARGETS ${PROJECT_NAME}
-  EXPORT ${PROJECT_NAME}Targets
+  TARGETS moveit_simple_controller_manager
+  EXPORT moveit_simple_controller_managerTargets
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
   RUNTIME DESTINATION bin
-  INCLUDES DESTINATION include
+  INCLUDES DESTINATION include/moveit_simple_controller_manager
 )
-install(DIRECTORY include/ DESTINATION include)
+install(DIRECTORY include/ DESTINATION include/moveit_simple_controller_manager)
 
-ament_export_targets(${PROJECT_NAME}Targets HAS_LIBRARY_TARGET)
+ament_export_targets(moveit_simple_controller_managerTargets HAS_LIBRARY_TARGET)
 ament_export_dependencies(
   ${THIS_PACKAGE_INCLUDE_DEPENDS}
   Boost

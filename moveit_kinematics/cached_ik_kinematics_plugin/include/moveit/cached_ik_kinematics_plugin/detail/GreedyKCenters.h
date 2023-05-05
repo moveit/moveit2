@@ -57,7 +57,10 @@ public:
   using Matrix = Eigen::MatrixXd;
 
   GreedyKCenters() = default;
-
+  GreedyKCenters(const GreedyKCenters&) = default;
+  GreedyKCenters(GreedyKCenters&&) noexcept = default;
+  GreedyKCenters& operator=(const GreedyKCenters&) = default;
+  GreedyKCenters& operator=(GreedyKCenters&&) noexcept = default;
   virtual ~GreedyKCenters() = default;
 
   /** \brief Set the distance function to use */
@@ -88,10 +91,10 @@ public:
 
     centers.clear();
     centers.reserve(k);
-    if (((long unsigned int)dists.rows()) < data.size() || ((long unsigned int)dists.cols()) < k)
-      dists.resize(std::max(2 * ((long unsigned int)dists.rows()) + 1, data.size()), k);
+    if (static_cast<long unsigned int>(dists.rows()) < data.size() || static_cast<long unsigned int>(dists.cols()) < k)
+      dists.resize(std::max(2 * static_cast<long unsigned int>(dists.rows()) + 1, data.size()), k);
     // first center is picked randomly
-    centers.push_back(std::uniform_int_distribution<size_t>{ 0, data.size() - 1 }(generator_));
+    centers.push_back(std::uniform_int_distribution<size_t>{ 0, data.size() - 1 }(rsl::rng()));
     for (unsigned i = 1; i < k; ++i)
     {
       unsigned ind = 0;
@@ -123,8 +126,5 @@ public:
 protected:
   /** \brief The used distance function */
   DistanceFunction distFun_;
-
-  /** Random number generator used to select first center */
-  std::mt19937 generator_{ std::random_device{}() };
 };
 }  // namespace cached_ik_kinematics_plugin

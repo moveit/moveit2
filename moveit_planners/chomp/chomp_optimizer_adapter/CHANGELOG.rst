@@ -2,6 +2,65 @@
 Changelog for package moveit_chomp_optimizer_adapter
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.7.3 (2023-04-24)
+------------------
+* Replace Variable PROJECT_NAME in CMakeLists.txt with the actual name (`#2020 <https://github.com/ros-planning/moveit2/issues/2020>`_)
+* Contributors: Shobuj Paul
+
+2.7.2 (2023-04-18)
+------------------
+
+2.7.1 (2023-03-23)
+------------------
+* remove underscore from public member in MotionPlanResponse (`#1939 <https://github.com/ros-planning/moveit2/issues/1939>`_)
+  * remove underscore from private members
+  * fix more uses of the suffix notation
+* Contributors: AlexWebb
+
+2.7.0 (2023-01-29)
+------------------
+* Fix BSD license in package.xml (`#1796 <https://github.com/ros-planning/moveit2/issues/1796>`_)
+  * fix BSD license in package.xml
+  * this must also be spdx compliant
+* Use a stronger source of randomness (`#1721 <https://github.com/ros-planning/moveit2/issues/1721>`_)
+  * Remove use of deprecated `std::random_shuffle`
+  * Replace random number generators with `rsl::rng`
+  * Utilize `rsl::uniform_real`
+* Contributors: Chris Thrasher, Christian Henkel
+
+2.6.0 (2022-11-10)
+------------------
+* Short-circuit planning adapters (`#1694 <https://github.com/ros-planning/moveit2/issues/1694>`_)
+  * Revert "Planning request adapters: short-circuit if failure, return code rather than bool (`#1605 <https://github.com/ros-planning/moveit2/issues/1605>`_)"
+  This reverts commit 66a64b4a72b6ddef1af2329f20ed8162554d5bcb.
+  * Add debug message in call stack of planning_request_adapters
+  * Short-circuit planning request adapters
+  * Replace if-elseif cascade with switch
+  * Cleanup translation of MoveItErrorCode to string
+  - Move default code to moveit_core/utils
+  - Override defaults in existing getActionResultString()
+  - Provide translations for all error codes defined in moveit_msgs
+  * Fix comment according to review
+  * Add braces
+  Co-authored-by: Henning Kayser <henningkayser@picknik.ai>
+  * Add braces
+  Co-authored-by: Henning Kayser <henningkayser@picknik.ai>
+  Co-authored-by: Henning Kayser <henningkayser@picknik.ai>
+  Co-authored-by: AndyZe <andyz@utexas.edu>
+* Planning request adapters: short-circuit if failure, return code rather than bool (`#1605 <https://github.com/ros-planning/moveit2/issues/1605>`_)
+  * Return code rather than bool
+  * Remove all debug prints
+  * Small fixup
+  * Minor cleanup of comment and error handling
+  * void return from PlannerFn
+  * Control reaches end of non-void function
+  * Use a MoveItErrorCode cast
+  * More efficient callAdapter()
+  * More MoveItErrorCode
+  * CI fixup attempt
+* Improve CMake usage (`#1550 <https://github.com/ros-planning/moveit2/issues/1550>`_)
+* Contributors: AndyZe, Robert Haschke, Sebastian Jahr
+
 2.5.3 (2022-07-28)
 ------------------
 

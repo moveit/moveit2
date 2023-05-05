@@ -34,7 +34,7 @@
 
 /* Author: Dave Coleman */
 
-#include "moveit_setup_framework/qt/helper_widgets.hpp"
+#include <moveit_setup_framework/qt/helper_widgets.hpp>
 #include <QFileDialog>
 #include <QFont>
 #include <QLabel>
@@ -74,10 +74,10 @@ HeaderWidget::HeaderWidget(const std::string& title, const std::string& instruct
   // Margin on bottom
   layout->setContentsMargins(0, 0, 0, 0);  // last 15
 
-  this->setLayout(layout);
+  setLayout(layout);
 
   // For some reason, this style sheet setting affects the placement layout!?
-  this->setStyleSheet(QString("background-color:%1;").arg(QWidget::palette().color(QWidget::backgroundRole()).name()));
+  setStyleSheet(QString("background-color:%1;").arg(QWidget::palette().color(QWidget::backgroundRole()).name()));
 }
 
 // ******************************************************************************************

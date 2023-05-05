@@ -39,6 +39,7 @@
 #pragma once
 
 #include <moveit/exceptions/exceptions.h>
+#include <rsl/random.hpp>
 #include <algorithm>
 #include <queue>
 #include <unordered_set>
@@ -159,7 +160,9 @@ public:
   void add(const std::vector<_T>& data) override
   {
     if (tree_)
+    {
       NearestNeighbors<_T>::add(data);
+    }
     else if (!data.empty())
     {
       tree_ = new Node(degree_, maxNumPtsPerLeaf_, data[0]);
@@ -284,8 +287,10 @@ public:
     {
       unsigned int i;
       for (i = 0; i < lst.size(); ++i)
+      {
         if (lst[i] == **it)
           break;
+      }
       if (i == lst.size())
       {
         // an element marked for removal is not actually in the tree
@@ -431,7 +436,9 @@ protected:
         if (needToSplit(gnat))
         {
           if (!gnat.removed_.empty())
+          {
             gnat.rebuildDataStructure();
+          }
           else if (gnat.size_ >= gnat.rebuildSize_)
           {
             gnat.rebuildSize_ <<= 1;
@@ -448,11 +455,13 @@ protected:
         int min_ind = 0;
 
         for (unsigned int i = 1; i < children_.size(); ++i)
+        {
           if ((dist[i] = gnat.distFun_(data, children_[i]->pivot_)) < min_dist)
           {
             min_dist = dist[i];
             min_ind = i;
           }
+        }
         for (unsigned int i = 0; i < children_.size(); ++i)
           children_[i]->updateRange(min_ind, dist[i]);
         children_[min_ind]->updateRadius(min_dist);
@@ -482,8 +491,10 @@ protected:
       {
         unsigned int k = 0;
         for (unsigned int i = 1; i < degree_; ++i)
+        {
           if (dists(j, i) < dists(j, k))
             k = i;
+        }
         Node* child = children_[k];
         if (j != pivots[k])
         {
@@ -498,7 +509,8 @@ protected:
       {
         // make sure degree lies between minDegree_ and maxDegree_
         children_[i]->degree_ =
-            std::min(std::max((unsigned int)((degree_ * children_[i]->data_.size()) / data_.size()), gnat.minDegree_),
+            std::min(std::max(static_cast<unsigned int>(((degree_ * children_[i]->data_.size()) / data_.size())),
+                              gnat.minDegree_),
                      gnat.maxDegree_);
         // singleton
         if (children_[i]->minRadius_ >= std::numeric_limits<double>::infinity())
@@ -509,8 +521,10 @@ protected:
       data_.swap(tmp);
       // check if new leaves need to be split
       for (unsigned int i = 0; i < degree_; ++i)
+      {
         if (children_[i]->needToSplit(gnat))
           children_[i]->split(gnat);
+      }
     }
 
     // Insert data in nbh if it is a near neighbor. Return true iff data was added to nbh.
@@ -539,11 +553,13 @@ protected:
                   bool& isPivot) const
     {
       for (unsigned int i = 0; i < data_.size(); ++i)
+      {
         if (!gnat.isRemoved(data_[i]))
         {
           if (insertNeighborK(nbh, k, data_[i], data, gnat.distFun_(data, data_[i])))
             isPivot = false;
         }
+      }
       if (!children_.empty())
       {
         double dist;
@@ -552,9 +568,10 @@ protected:
         std::vector<int> permutation(children_.size());
         for (unsigned int i = 0; i < permutation.size(); ++i)
           permutation[i] = i;
-        std::random_shuffle(permutation.begin(), permutation.end());
+        std::shuffle(permutation.begin(), permutation.end(), rsl::rng());
 
         for (unsigned int i = 0; i < children_.size(); ++i)
+        {
           if (permutation[i] >= 0)
           {
             child = children_[permutation[i]];
@@ -565,15 +582,19 @@ protected:
             {
               dist = nbh.top().second;  // note difference with nearestR
               for (unsigned int j = 0; j < children_.size(); ++j)
+              {
                 if (permutation[j] >= 0 && i != j &&
                     (dist_to_pivot[permutation[i]] - dist > child->maxRange_[permutation[j]] ||
                      dist_to_pivot[permutation[i]] + dist < child->minRange_[permutation[j]]))
                   permutation[j] = -1;
+              }
             }
           }
+        }
 
         dist = nbh.top().second;
         for (unsigned int i = 0; i < children_.size(); ++i)
+        {
           if (permutation[i] >= 0)
           {
             child = children_[permutation[i]];
@@ -581,6 +602,7 @@ protected:
                                    dist_to_pivot[permutation[i]] + dist >= child->minRadius_))
               nodeQueue.push(std::make_pair(child, dist_to_pivot[permutation[i]]));
           }
+        }
       }
     }
     // Insert data in nbh if it is a near neighbor.
@@ -597,8 +619,10 @@ protected:
       double dist = r;  // note difference with nearestK
 
       for (unsigned int i = 0; i < data_.size(); ++i)
+      {
         if (!gnat.isRemoved(data_[i]))
           insertNeighborR(nbh, r, data_[i], gnat.distFun_(data, data_[i]));
+      }
       if (!children_.empty())
       {
         Node* child;
@@ -606,28 +630,34 @@ protected:
         std::vector<int> permutation(children_.size());
         for (unsigned int i = 0; i < permutation.size(); ++i)
           permutation[i] = i;
-        std::random_shuffle(permutation.begin(), permutation.end());
+        std::shuffle(permutation.begin(), permutation.end(), rsl::rng());
 
         for (unsigned int i = 0; i < children_.size(); ++i)
+        {
           if (permutation[i] >= 0)
           {
             child = children_[permutation[i]];
             dist_to_pivot[i] = gnat.distFun_(data, child->pivot_);
             insertNeighborR(nbh, r, child->pivot_, dist_to_pivot[i]);
             for (unsigned int j = 0; j < children_.size(); ++j)
+            {
               if (permutation[j] >= 0 && i != j &&
                   (dist_to_pivot[i] - dist > child->maxRange_[permutation[j]] ||
                    dist_to_pivot[i] + dist < child->minRange_[permutation[j]]))
                 permutation[j] = -1;
+            }
           }
+        }
 
         for (unsigned int i = 0; i < children_.size(); ++i)
+        {
           if (permutation[i] >= 0)
           {
             child = children_[permutation[i]];
             if (dist_to_pivot[i] - dist <= child->maxRadius_ && dist_to_pivot[i] + dist >= child->minRadius_)
               nodeQueue.push(std::make_pair(child, dist_to_pivot[i]));
           }
+        }
       }
     }
 
@@ -636,8 +666,10 @@ protected:
       if (!gnat.isRemoved(pivot_))
         data.push_back(pivot_);
       for (unsigned int i = 0; i < data_.size(); ++i)
+      {
         if (!gnat.isRemoved(data_[i]))
           data.push_back(data_[i]);
+      }
       for (unsigned int i = 0; i < children_.size(); ++i)
         children_[i]->list(gnat, data);
     }

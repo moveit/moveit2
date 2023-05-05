@@ -34,7 +34,7 @@
 
 #pragma once
 
-#include <moveit_msgs/msg/move_it_error_codes.h>
+#include <moveit_msgs/msg/move_it_error_codes.hpp>
 #include <string>
 
 namespace moveit
@@ -47,11 +47,7 @@ namespace core
 class MoveItErrorCode : public moveit_msgs::msg::MoveItErrorCodes
 {
 public:
-  MoveItErrorCode()
-  {
-    val = 0;
-  }
-  MoveItErrorCode(int code)
+  MoveItErrorCode(int code = 0)
   {
     val = code;
   }
