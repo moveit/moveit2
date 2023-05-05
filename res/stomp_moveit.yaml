@@ -57,3 +57,8 @@ stomp_moveit:
     description: "Assumed time change between consecutive points - used for computing control costs",
     default_value: 0.1,
   }
+  path_marker_topic: {
+    type: string,
+    description: "Name of the topic RVIZ subscribes to to visualize the EE path",
+    default_value: "",
+  }

@@ -4,7 +4,7 @@
 #include <stomp/stomp.h>
 
 #include <stomp_moveit/stomp_moveit_planning_context.hpp>
-// #include <stomp_moveit/trajectory_visualization.hpp>
+#include <stomp_moveit/trajectory_visualization.hpp>
 #include <stomp_moveit/filter_functions.hpp>
 #include <stomp_moveit/noise_generators.hpp>
 #include <stomp_moveit/cost_functions.hpp>
@@ -91,7 +91,7 @@ bool extractSeedTrajectory(const planning_interface::MotionPlanRequest& req,
   return !seed->empty();
 }
 
-stomp::TaskPtr createStompTask(const stomp::StompConfiguration& config, const StompPlanningContext& context)
+stomp::TaskPtr createStompTask(const stomp::StompConfiguration& config, StompPlanningContext& context)
 {
   const size_t num_timesteps = config.num_timesteps;
   const double collision_penalty = 1.0;
@@ -107,11 +107,11 @@ stomp::TaskPtr createStompTask(const stomp::StompConfiguration& config, const St
   auto cost_fn = costs::get_collision_cost_function(planning_scene, group, collision_penalty);
   auto filter_fn =
       filters::chain({ filters::simple_smoothing_matrix(num_timesteps), filters::enforce_position_bounds(group) });
-  // TODO: enable support for visualization
-  // auto iteration_callback_fn = visualization::get_iteration_path_publisher(visual_tools, group);
-  // auto done_callback_fn = visualization::get_success_trajectory_publisher(visual_tools, group);
-  PostIterationFn iteration_callback_fn = [](auto, auto, const auto&) {};
-  DoneFn done_callback_fn = [](auto, auto, auto, const auto&) {};
+
+  auto iteration_callback_fn =
+      visualization::get_iteration_path_publisher(context.getPathPublisher(), planning_scene, group);
+  auto done_callback_fn =
+      visualization::get_success_trajectory_publisher(context.getPathPublisher(), planning_scene, group);
   stomp::TaskPtr task =
       std::make_shared<ComposableTask>(noise_generator_fn, cost_fn, filter_fn, iteration_callback_fn, done_callback_fn);
   return task;
@@ -225,5 +225,16 @@ bool StompPlanningContext::terminate()
 
 void StompPlanningContext::clear()
 {
+}
+
+void StompPlanningContext::setPathPublisher(
+    std::shared_ptr<rclcpp::Publisher<visualization_msgs::msg::MarkerArray>> path_publisher)
+{
+  path_publisher_ = path_publisher;
+}
+
+std::shared_ptr<rclcpp::Publisher<visualization_msgs::msg::MarkerArray>> StompPlanningContext::getPathPublisher()
+{
+  return path_publisher_;
 }
 }  // namespace stomp_moveit

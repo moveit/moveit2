@@ -8,9 +8,12 @@
 #include <stomp_moveit/cost_functions.hpp>
 #include <stomp_moveit/stomp_moveit_task.hpp>
 
-// MoveItCpp
+// MoveIt
 #include <moveit/moveit_cpp/moveit_cpp.h>
 #include <moveit/moveit_cpp/planning_component.h>
+#include <moveit_visual_tools/moveit_visual_tools.h>
+
+using namespace std::chrono_literals;
 
 stomp::StompConfiguration getStompConfiguration(size_t num_dimensions)
 {
@@ -56,6 +59,11 @@ int main(int argc, char** argv)
   moveit_cpp->getPlanningSceneMonitorNonConst()->providePlanningSceneService();
   moveit_visual_tools::MoveItVisualTools visual_tools(node, "panda_link0", "stomp_moveit",
                                                       moveit_cpp->getPlanningSceneMonitorNonConst());
+
+  auto markers_publisher =
+      node->create_publisher<visualization_msgs::msg::MarkerArray>("/stomp_moveit", rclcpp::SystemDefaultsQoS());
+  rclcpp::sleep_for(2s);
+
   const auto robot_model = moveit_cpp->getRobotModel();
   const auto group = robot_model->getJointModelGroup("panda_arm");
   const auto joints = group->getActiveJointModels();
@@ -88,8 +96,8 @@ int main(int argc, char** argv)
   auto cost_fn = costs::get_collision_cost_function(planning_scene, group, 1.0 /* collision penalty */);
   auto filter_fn = filters::chain(
       { filters::simple_smoothing_matrix(config.num_timesteps), filters::enforce_position_bounds(group) });
-  auto iteration_callback_fn = visualization::get_iteration_path_publisher(visual_tools, group);
-  auto done_callback_fn = visualization::get_success_trajectory_publisher(visual_tools, group);
+  auto iteration_callback_fn = visualization::get_iteration_path_publisher(markers_publisher, planning_scene, group);
+  auto done_callback_fn = visualization::get_success_trajectory_publisher(markers_publisher, planning_scene, group);
   stomp::TaskPtr task =
       std::make_shared<ComposableTask>(noise_generator_fn, cost_fn, filter_fn, iteration_callback_fn, done_callback_fn);
 

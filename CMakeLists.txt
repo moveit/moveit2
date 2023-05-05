@@ -7,11 +7,13 @@ moveit_package()
 
 # find dependencies
 find_package(ament_cmake REQUIRED)
-find_package(stomp REQUIRED)
-find_package(moveit_core REQUIRED)
-find_package(moveit_ros REQUIRED)
-find_package(moveit_visual_tools REQUIRED)
 find_package(generate_parameter_library REQUIRED)
+find_package(moveit_core REQUIRED)
+find_package(moveit_visual_tools REQUIRED)
+find_package(std_msgs REQUIRED)
+find_package(stomp REQUIRED)
+find_package(visualization_msgs REQUIRED)
+find_package(tf2_eigen REQUIRED)
 
 generate_parameter_library(stomp_moveit_parameters res/stomp_moveit.yaml)
 
@@ -27,6 +29,9 @@ add_library(stomp_moveit_plugin SHARED
 )
 ament_target_dependencies(stomp_moveit_plugin
   moveit_core
+  std_msgs
+  tf2_eigen
+  visualization_msgs
 )
 target_link_libraries(stomp_moveit_plugin stomp::stomp stomp_moveit_parameters)
 
@@ -44,8 +49,10 @@ install(TARGETS stomp_moveit_plugin stomp_moveit_parameters
 add_executable(stomp_moveit_example src/stomp_moveit_example.cpp)
 ament_target_dependencies(stomp_moveit_example
   moveit_core
-  moveit_ros
   moveit_visual_tools
+  std_msgs
+  tf2_eigen
+  visualization_msgs
 )
 target_link_libraries(stomp_moveit_example stomp::stomp)
 

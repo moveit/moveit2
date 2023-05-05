@@ -25,8 +25,12 @@ public:
 
   void clear() override;
 
+  void setPathPublisher(std::shared_ptr<rclcpp::Publisher<visualization_msgs::msg::MarkerArray>> path_publisher);
+  std::shared_ptr<rclcpp::Publisher<visualization_msgs::msg::MarkerArray>> getPathPublisher();
+
 private:
   const stomp_moveit::Params params_;
   std::shared_ptr<stomp::Stomp> stomp_;
+  std::shared_ptr<rclcpp::Publisher<visualization_msgs::msg::MarkerArray>> path_publisher_;
 };
 }  // namespace stomp_moveit

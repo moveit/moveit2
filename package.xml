@@ -18,8 +18,10 @@
   <depend>stomp</depend>
   <depend>moveit_common</depend>
   <depend>moveit_core</depend>
-  <depend>moveit_ros</depend>
   <depend>moveit_visual_tools</depend>
+  <depend>std_msgs</depend>
+  <depend>tf2_eigen</depend>
+  <depend>visualization_msgs</depend>
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>
