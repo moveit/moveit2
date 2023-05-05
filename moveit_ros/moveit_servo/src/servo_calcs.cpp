@@ -180,7 +180,6 @@ ServoCalcs::ServoCalcs(const rclcpp::Node::SharedPtr& node,
   ik_solver_ = joint_model_group_->getSolverInstance();
   if (!ik_solver_)
   {
-    use_inv_jacobian_ = true;
     RCLCPP_WARN(
         LOGGER,
         "No kinematics solver instantiated for group '%s'. Will use inverse Jacobian for servo calculations instead.",
@@ -188,7 +187,7 @@ ServoCalcs::ServoCalcs(const rclcpp::Node::SharedPtr& node,
   }
   else if (!ik_solver_->supportsGroup(joint_model_group_))
   {
-    use_inv_jacobian_ = true;
+    ik_solver_ = nullptr;
     RCLCPP_WARN(LOGGER,
                 "The loaded kinematics plugin does not support group '%s'. Will use inverse Jacobian for servo "
                 "calculations instead.",
@@ -254,11 +253,6 @@ void ServoCalcs::start()
                            current_state_->getGlobalLinkTransform(servo_params_.ee_frame_name);
   tf_moveit_to_robot_cmd_frame_ = current_state_->getGlobalLinkTransform(servo_params_.planning_frame).inverse() *
                                   current_state_->getGlobalLinkTransform(servo_params_.robot_link_command_frame);
-  if (!use_inv_jacobian_)
-  {
-    ik_base_to_tip_frame_ = current_state_->getGlobalLinkTransform(ik_solver_->getBaseFrame()).inverse() *
-                            current_state_->getGlobalLinkTransform(ik_solver_->getTipFrame());
-  }
 
   stop_requested_ = false;
   thread_ = std::thread([this] {
@@ -423,12 +417,6 @@ void ServoCalcs::calculateSingleIteration()
   // Calculate this transform to ensure it is available via C++ API
   tf_moveit_to_ee_frame_ = current_state_->getGlobalLinkTransform(servo_params_.planning_frame).inverse() *
                            current_state_->getGlobalLinkTransform(servo_params_.ee_frame_name);
-
-  if (!use_inv_jacobian_)
-  {
-    ik_base_to_tip_frame_ = current_state_->getGlobalLinkTransform(ik_solver_->getBaseFrame()).inverse() *
-                            current_state_->getGlobalLinkTransform(ik_solver_->getTipFrame());
-  }
 
   // Don't end this function without updating the filters
   updated_filters_ = false;
@@ -597,7 +585,7 @@ bool ServoCalcs::cartesianServoCalcs(geometry_msgs::msg::TwistStamped& cmd,
 
   // Convert from cartesian commands to joint commands
   // Use an IK solver plugin if we have one, otherwise use inverse Jacobian.
-  if (!use_inv_jacobian_)
+  if (ik_solver_)
   {
     // get a transformation matrix with the desired position change &
     // get a transformation matrix with desired orientation change
@@ -612,8 +600,10 @@ bool ServoCalcs::cartesianServoCalcs(geometry_msgs::msg::TwistStamped& cmd,
 
     // Poses passed to IK solvers are assumed to be in some tip link (usually EE) reference frame
     // First, find the new tip link position without newly applied rotation
-
-    auto tf_no_new_rot = tf_pos_delta * ik_base_to_tip_frame_;
+    Eigen::Isometry3d ik_base_to_tip_frame =
+        current_state_->getGlobalLinkTransform(ik_solver_->getBaseFrame()).inverse() *
+        current_state_->getGlobalLinkTransform(ik_solver_->getTipFrame());
+    auto tf_no_new_rot = tf_pos_delta * ik_base_to_tip_frame;
     // we want the rotation to be applied in the requested reference frame,
     // but we want the rotation to be about the EE point in space, not the origin.
     // So, we need to translate to origin, rotate, then translate back
