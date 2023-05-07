@@ -179,39 +179,31 @@ bool applyJointUpdate(rclcpp::Clock& clock, const double publish_period, const E
   return true;
 }
 
-void commandToMoveGroupFrame(geometry_msgs::msg::TwistStamped& cmd, const servo::Params& servo_params,
-                             const Eigen::Isometry3d& tf_moveit_to_robot_cmd_frame,
-                             const Eigen::Isometry3d& tf_moveit_to_ee_frame,
-                             const moveit::core::RobotStatePtr& current_state)
+void transformTwistToPlanningFrame(geometry_msgs::msg::TwistStamped& cmd, const std::string& planning_frame,
+                                   const moveit::core::RobotStatePtr& current_state, rclcpp::Clock& clock)
 {
+  if (cmd.header.frame_id.empty())
+  {
+    RCLCPP_WARN_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD,
+                                "No frame specified for command ,will use planning_frame");
+    cmd.header.frame_id = planning_frame;
+  }
+
+  // We solve (planning_frame -> base -> cmd.header.frame_id)
+  // by computing (base->planning_frame)^-1 * (base->cmd.header.frame_id)
+  const Eigen::Isometry3d tf_moveit_to_incoming_cmd_frame =
+      current_state->getGlobalLinkTransform(planning_frame).inverse() *
+      current_state->getGlobalLinkTransform(cmd.header.frame_id);
+
+  // Apply the transform to linear and angular velocities
+  // v' = R * v  and w' = R * w
   Eigen::Vector3d translation_vector(cmd.twist.linear.x, cmd.twist.linear.y, cmd.twist.linear.z);
   Eigen::Vector3d angular_vector(cmd.twist.angular.x, cmd.twist.angular.y, cmd.twist.angular.z);
+  translation_vector = tf_moveit_to_incoming_cmd_frame.linear() * translation_vector;
+  angular_vector = tf_moveit_to_incoming_cmd_frame.linear() * angular_vector;
 
-  // If the incoming frame is empty or is the command frame, we use the previously calculated tf
-  if (cmd.header.frame_id.empty() || cmd.header.frame_id == servo_params.robot_link_command_frame)
-  {
-    translation_vector = tf_moveit_to_robot_cmd_frame.linear() * translation_vector;
-    angular_vector = tf_moveit_to_robot_cmd_frame.linear() * angular_vector;
-  }
-  else if (cmd.header.frame_id == servo_params.ee_frame_name)
-  {
-    // If the frame is the EE frame, we already have that transform as well
-    translation_vector = tf_moveit_to_ee_frame.linear() * translation_vector;
-    angular_vector = tf_moveit_to_ee_frame.linear() * angular_vector;
-  }
-  else
-  {
-    // We solve (planning_frame -> base -> cmd.header.frame_id)
-    // by computing (base->planning_frame)^-1 * (base->cmd.header.frame_id)
-    const auto tf_moveit_to_incoming_cmd_frame =
-        current_state->getGlobalLinkTransform(servo_params.planning_frame).inverse() *
-        current_state->getGlobalLinkTransform(cmd.header.frame_id);
-    translation_vector = tf_moveit_to_incoming_cmd_frame.linear() * translation_vector;
-    angular_vector = tf_moveit_to_incoming_cmd_frame.linear() * angular_vector;
-  }
-
-  // Put these components back into a TwistStamped
-  cmd.header.frame_id = servo_params.planning_frame;
+  // Update the values of the original command message to reflect the change in frame
+  cmd.header.frame_id = planning_frame;
   cmd.twist.linear.x = translation_vector(0);
   cmd.twist.linear.y = translation_vector(1);
   cmd.twist.linear.z = translation_vector(2);
@@ -220,7 +212,8 @@ void commandToMoveGroupFrame(geometry_msgs::msg::TwistStamped& cmd, const servo:
   cmd.twist.angular.z = angular_vector(2);
 }
 
-geometry_msgs::msg::Pose deltaToPose(const Eigen::VectorXd& delta_x, const Eigen::Isometry3d& ik_base_to_tip_frame)
+geometry_msgs::msg::Pose poseFromCartesianDelta(const Eigen::VectorXd& delta_x,
+                                                const Eigen::Isometry3d& base_to_tip_frame_transform)
 {
   // get a transformation matrix with the desired position change &
   // get a transformation matrix with desired orientation change
@@ -233,9 +226,8 @@ geometry_msgs::msg::Pose deltaToPose(const Eigen::VectorXd& delta_x, const Eigen
                          Eigen::AngleAxisd(delta_x[5], Eigen::Vector3d::UnitZ());
   tf_rot_delta.rotate(q);
 
-  // Poses passed to IK solvers are assumed to be in some tip link (usually EE) reference frame
-  // First, find the new tip link position without newly applied rotation
-  auto tf_no_new_rot = tf_pos_delta * ik_base_to_tip_frame;
+  // Find the new tip link position without newly applied rotation
+  const Eigen::Isometry3d tf_no_new_rot = tf_pos_delta * base_to_tip_frame_transform;
 
   // we want the rotation to be applied in the requested reference frame,
   // but we want the rotation to be about the EE point in space, not the origin.
@@ -243,12 +235,12 @@ geometry_msgs::msg::Pose deltaToPose(const Eigen::VectorXd& delta_x, const Eigen
   // Given T = transformation matrix from origin -> EE point in space (translation component of tf_no_new_rot)
   // and T' as the opposite transformation, EE point in space -> origin (translation only)
   // apply final transformation as T * R * T' * tf_no_new_rot
-  auto tf_translation = tf_no_new_rot.translation();
-  auto tf_neg_translation = Eigen::Isometry3d::Identity();  // T'
+  const Eigen::Matrix<double, 3, 1> tf_translation = tf_no_new_rot.translation();
+  Eigen::Isometry3d tf_neg_translation = Eigen::Isometry3d::Identity();  // T'
   tf_neg_translation(0, 3) = -tf_translation(0, 0);
   tf_neg_translation(1, 3) = -tf_translation(1, 0);
   tf_neg_translation(2, 3) = -tf_translation(2, 0);
-  auto tf_pos_translation = Eigen::Isometry3d::Identity();  // T
+  Eigen::Isometry3d tf_pos_translation = Eigen::Isometry3d::Identity();  // T
   tf_pos_translation(0, 3) = tf_translation(0, 0);
   tf_pos_translation(1, 3) = tf_translation(1, 0);
   tf_pos_translation(2, 3) = tf_translation(2, 0);

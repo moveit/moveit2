@@ -91,21 +91,19 @@ bool applyJointUpdate(rclcpp::Clock& clock, const double publish_period, const E
                       pluginlib::UniquePtr<online_signal_smoothing::SmoothingBaseClass>& smoother);
 
 /** \brief Converts a twist command from the command frame to the MoveGroup planning frame of the robot
- * @param cmd The twist command
- * @param servo_params The servo parameters
- * @param tf_moveit_to_robot_cmd_frame Transform from MoveIt planning frame to servoing command frame
- * @param tf_moveit_to_ee_frame Transform from MoveIt planning frame to end-effector frame
+ * @param cmd The twist command received from the user
+ * @param planning_frame Moveit planning frame of the robot
  * @param current_state The state of the robot
+ * @param clock A ROS clock, for logging
  */
-void commandToMoveGroupFrame(geometry_msgs::msg::TwistStamped& cmd, const servo::Params& servo_params,
-                             const Eigen::Isometry3d& tf_moveit_to_robot_cmd_frame,
-                             const Eigen::Isometry3d& tf_moveit_to_ee_frame,
-                             const moveit::core::RobotStatePtr& current_state);
+void transformTwistToPlanningFrame(geometry_msgs::msg::TwistStamped& cmd, const std::string& planning_frame,
+                                   const moveit::core::RobotStatePtr& current_state, rclcpp::Clock& clock);
 
 /** \brief Converts the delta_x (change in cartesian position) to a pose to be used with IK solver.
  * @param delta_x The change in cartesian position
- * @param ik_base_to_tip_frame The transform from base of the robot to its end-effector
+ * @param base_to_tip_frame_transform The transform from base of the robot to its end-effector
  * @return Returns the resulting pose after applying delta_x
  */
-geometry_msgs::msg::Pose deltaToPose(const Eigen::VectorXd& delta_x, const Eigen::Isometry3d& ik_base_to_tip_frame);
+geometry_msgs::msg::Pose poseFromCartesianDelta(const Eigen::VectorXd& delta_x,
+                                                const Eigen::Isometry3d& base_to_tip_frame_transform);
 }  // namespace moveit_servo

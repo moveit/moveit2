@@ -536,7 +536,7 @@ bool ServoCalcs::cartesianServoCalcs(geometry_msgs::msg::TwistStamped& cmd,
   // Transform the command to the MoveGroup planning frame
   if (cmd.header.frame_id != servo_params_.planning_frame)
   {
-    commandToMoveGroupFrame(cmd, servo_params_, tf_moveit_to_robot_cmd_frame_, tf_moveit_to_ee_frame_, current_state_);
+    transformTwistToPlanningFrame(cmd, servo_params_.planning_frame, current_state_, *node_->get_clock());
   }
 
   Eigen::VectorXd delta_x = scaleCartesianCommand(cmd);
@@ -554,11 +554,11 @@ bool ServoCalcs::cartesianServoCalcs(geometry_msgs::msg::TwistStamped& cmd,
   // Use an IK solver plugin if we have one, otherwise use inverse Jacobian.
   if (ik_solver_)
   {
-    const Eigen::Isometry3d ik_base_to_tip_frame =
+    const Eigen::Isometry3d base_to_tip_frame_transform =
         current_state_->getGlobalLinkTransform(ik_solver_->getBaseFrame()).inverse() *
         current_state_->getGlobalLinkTransform(ik_solver_->getTipFrame());
 
-    geometry_msgs::msg::Pose next_pose = deltaToPose(delta_x, ik_base_to_tip_frame);
+    geometry_msgs::msg::Pose next_pose = poseFromCartesianDelta(delta_x, base_to_tip_frame_transform);
 
     // setup for IK call
     std::vector<double> solution(num_joints_);
