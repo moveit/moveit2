@@ -89,7 +89,7 @@ bool applyJointUpdate(rclcpp::Clock& clock, const double publish_period, const E
                       sensor_msgs::msg::JointState& next_joint_state,
                       pluginlib::UniquePtr<online_signal_smoothing::SmoothingBaseClass>& smoother);
 
-/** \brief Converts a twist command from the command frame to the MoveGroup planning frame of the robot
+/** \brief Converts a twist command from the command frame to the MoveIt planning frame of the robot
  * @param cmd The twist command received from the user
  * @param planning_frame Moveit planning frame of the robot
  * @param current_state The state of the robot
