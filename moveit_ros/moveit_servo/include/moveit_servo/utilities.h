@@ -44,7 +44,6 @@
 
 #include <moveit_servo/status_codes.h>
 #include <moveit/online_signal_smoothing/smoothing_base_class.h>
-#include <moveit_servo_lib_parameters.hpp>
 
 namespace moveit_servo
 {
