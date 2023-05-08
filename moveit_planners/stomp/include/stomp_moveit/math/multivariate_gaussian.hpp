@@ -32,12 +32,17 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-/** \author Mrinal Kalakrishnan */
+/** @file
+ * @author Mrinal Kalakrishnan
+ * @brief Implementation of a multi-variate Gaussian used for randomizing path waypoints
+ */
 
 #pragma once
 
 #include <Eigen/Core>
 #include <Eigen/Cholesky>
+
+// TODO(#2166): Replace with std types
 #include <boost/random/variate_generator.hpp>
 #include <boost/random/normal_distribution.hpp>
 #include <boost/random/mersenne_twister.hpp>

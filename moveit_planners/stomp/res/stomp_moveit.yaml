@@ -59,6 +59,6 @@ stomp_moveit:
   }
   path_marker_topic: {
     type: string,
-    description: "Name of the topic RVIZ subscribes to to visualize the EE path",
+    description: "Name of the topic RVIZ subscribes to to visualize the EE path. An empty string disables the publisher.",
     default_value: "",
   }
