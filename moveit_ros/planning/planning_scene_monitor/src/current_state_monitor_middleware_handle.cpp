@@ -95,6 +95,11 @@ bool CurrentStateMonitorMiddlewareHandle::sleepFor(const std::chrono::nanosecond
   return rclcpp::sleep_for(nanoseconds);
 }
 
+bool CurrentStateMonitorMiddlewareHandle::ok() const
+{
+  return rclcpp::ok();
+}
+
 void CurrentStateMonitorMiddlewareHandle::createDynamicTfSubscription(TfCallback callback)
 {
   transform_subscriber_ =
