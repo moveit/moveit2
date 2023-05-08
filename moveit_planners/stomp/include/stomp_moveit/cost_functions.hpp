@@ -73,8 +73,8 @@ constexpr double CONSTRAINT_CHECK_DISTANCE = 0.1;
  *
  * @return                        Cost function that computes smooth costs for binary validity conditions
  */
-CostFn get_cost_function_from_state_validator(const StateValidatorFn state_validator_fn, double interpolation_step_size,
-                                              double penalty)
+CostFn get_cost_function_from_state_validator(const StateValidatorFn& state_validator_fn,
+                                              double interpolation_step_size, double penalty)
 {
   CostFn cost_fn = [=](const Eigen::MatrixXd& values, Eigen::VectorXd& costs, bool& validity) {
     costs.setZero(values.cols());
@@ -202,11 +202,10 @@ CostFn get_constraints_cost_function(const std::shared_ptr<const planning_scene:
 {
   const auto& joints = group ? group->getActiveJointModels() : planning_scene->getRobotModel()->getActiveJointModels();
 
-  kinematic_constraints::KinematicConstraintSet constraints_set(planning_scene->getRobotModel());
-  constraints_set.add(constraints_msg, planning_scene->getTransforms());
+  kinematic_constraints::KinematicConstraintSet constraints(planning_scene->getRobotModel());
+  constraints.add(constraints_msg, planning_scene->getTransforms());
 
-  StateValidatorFn constraints_validator_fn = [=, constraints =
-                                                      std::move(constraints_set)](const Eigen::VectorXd& positions) {
+  StateValidatorFn constraints_validator_fn = [=](const Eigen::VectorXd& positions) {
     static moveit::core::RobotState state(planning_scene->getCurrentState());
 
     // Update robot state values

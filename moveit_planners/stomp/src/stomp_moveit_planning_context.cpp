@@ -66,7 +66,9 @@ bool solveWithStomp(const std::shared_ptr<stomp::Stomp>& stomp, const moveit::co
   const auto& joints = group->getActiveJointModels();
   bool success = false;
   if (!input_trajectory || input_trajectory->empty())
+  {
     success = stomp->solve(get_positions(start_state, joints), get_positions(goal_state, joints), waypoints);
+  }
   else
   {
     auto input = robot_trajectory_to_matrix(*input_trajectory);
@@ -83,7 +85,7 @@ bool solveWithStomp(const std::shared_ptr<stomp::Stomp>& stomp, const moveit::co
 
 // @brief Extract a robot trajectory from the seed waypoints passed with a motion plan request
 bool extractSeedTrajectory(const planning_interface::MotionPlanRequest& req,
-                           const moveit::core::RobotModelConstPtr robot_model,
+                           const moveit::core::RobotModelConstPtr& robot_model,
                            robot_trajectory::RobotTrajectoryPtr& seed)
 {
   if (req.trajectory_constraints.constraints.empty())
@@ -293,7 +295,7 @@ void StompPlanningContext::clear()
 }
 
 void StompPlanningContext::setPathPublisher(
-    std::shared_ptr<rclcpp::Publisher<visualization_msgs::msg::MarkerArray>> path_publisher)
+    const std::shared_ptr<rclcpp::Publisher<visualization_msgs::msg::MarkerArray>>& path_publisher)
 {
   path_publisher_ = path_publisher;
 }

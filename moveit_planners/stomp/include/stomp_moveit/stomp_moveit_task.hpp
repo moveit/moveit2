@@ -80,11 +80,11 @@ class ComposableTask final : public stomp::Task
 public:
   ComposableTask(NoiseGeneratorFn noise_generator_fn, CostFn cost_fn, FilterFn filter_fn,
                  PostIterationFn post_iteration_fn, DoneFn done_fn)
-    : noise_generator_fn_(noise_generator_fn)
-    , cost_fn_(cost_fn)
-    , filter_fn_(filter_fn)
-    , post_iteration_fn_(post_iteration_fn)
-    , done_fn_(done_fn)
+    : noise_generator_fn_(std::move(noise_generator_fn))
+    , cost_fn_(std::move(cost_fn))
+    , filter_fn_(std::move(filter_fn))
+    , post_iteration_fn_(std::move(post_iteration_fn))
+    , done_fn_(std::move(done_fn))
   {
   }
 

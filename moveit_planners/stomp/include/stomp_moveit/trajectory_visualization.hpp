@@ -117,8 +117,8 @@ createTrajectoryMarkerArray(const robot_trajectory::RobotTrajectory& robot_traje
  * returned. Otherwise, a function that does nothing.
  */
 PostIterationFn
-get_iteration_path_publisher(rclcpp::Publisher<visualization_msgs::msg::MarkerArray>::SharedPtr marker_publisher,
-                             std::shared_ptr<const planning_scene::PlanningScene> planning_scene,
+get_iteration_path_publisher(const rclcpp::Publisher<visualization_msgs::msg::MarkerArray>::SharedPtr& marker_publisher,
+                             const std::shared_ptr<const planning_scene::PlanningScene>& planning_scene,
                              const moveit::core::JointModelGroup* group)
 {
   assert(group != nullptr);
