@@ -128,9 +128,9 @@ void init_moveit_py(py::module& m)
            Initialize moveit_cpp node and the planning scene service.
            )")
       .def("execute",
-           py::overload_cast<const robot_trajectory::RobotTrajectoryPtr&, bool, const std::vector<std::string>&>(
+           py::overload_cast<const robot_trajectory::RobotTrajectoryPtr&, const std::vector<std::string>&>(
                &moveit_cpp::MoveItCpp::execute),
-           py::arg("robot_trajectory"), py::arg("blocking") = true, py::arg("controllers"),
+           py::arg("robot_trajectory"), py::arg("controllers"),
            R"(
 	   Execute a trajectory (planning group is inferred from robot trajectory object).
 	   )")
