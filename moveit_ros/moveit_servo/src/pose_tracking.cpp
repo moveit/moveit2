@@ -33,7 +33,6 @@
  *********************************************************************/
 
 #include <moveit_servo/pose_tracking.h>
-#include <moveit_servo/servo_parameters.h>
 
 #include <chrono>
 using namespace std::literals;
@@ -72,18 +71,18 @@ void declareOrGetParam(T& output_value, const std::string& param_name, const rcl
 
 namespace moveit_servo
 {
-PoseTracking::PoseTracking(const rclcpp::Node::SharedPtr& node, const ServoParameters::SharedConstPtr& servo_parameters,
+PoseTracking::PoseTracking(const rclcpp::Node::SharedPtr& node,
+                           std::unique_ptr<const servo::ParamListener> servo_param_listener,
                            const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor)
   : node_(node)
-  , servo_parameters_(servo_parameters)
+  , servo_parameters_(servo_param_listener->get_params())
   , planning_scene_monitor_(planning_scene_monitor)
-  , loop_rate_(1.0 / servo_parameters->publish_period)
+  , loop_rate_(1.0 / servo_parameters_.publish_period)
   , transform_buffer_(node_->get_clock())
   , transform_listener_(transform_buffer_)
   , stop_requested_(false)
 {
   readROSParams();
-
   robot_model_ = planning_scene_monitor_->getRobotModel();
 
   // Initialize PID controllers
@@ -92,10 +91,6 @@ PoseTracking::PoseTracking(const rclcpp::Node::SharedPtr& node, const ServoParam
   initializePID(z_pid_config_, cartesian_position_pids_);
   initializePID(angular_pid_config_, cartesian_orientation_pids_);
 
-  // Use the C++ interface that Servo provides
-  servo_ = std::make_unique<moveit_servo::Servo>(node_, servo_parameters_, planning_scene_monitor_);
-  servo_->start();
-
   // Connect to Servo ROS interfaces
   target_pose_sub_ = node_->create_subscription<geometry_msgs::msg::PoseStamped>(
       "target_pose", rclcpp::SystemDefaultsQoS(),
@@ -103,7 +98,11 @@ PoseTracking::PoseTracking(const rclcpp::Node::SharedPtr& node, const ServoParam
 
   // Publish outgoing twist commands to the Servo object
   twist_stamped_pub_ = node_->create_publisher<geometry_msgs::msg::TwistStamped>(
-      servo_->getParameters()->cartesian_command_in_topic, rclcpp::SystemDefaultsQoS());
+      servo_parameters_.cartesian_command_in_topic, rclcpp::SystemDefaultsQoS());
+
+  // Use the C++ interface that Servo provides
+  servo_ = std::make_unique<moveit_servo::Servo>(node_, planning_scene_monitor_, std::move(servo_param_listener));
+  servo_->start();
 }
 
 PoseTrackingStatusCode PoseTracking::moveToPose(const Eigen::Vector3d& positional_tolerance,
@@ -182,45 +181,39 @@ PoseTrackingStatusCode PoseTracking::moveToPose(const Eigen::Vector3d& positiona
 
 void PoseTracking::readROSParams()
 {
-  const std::string ns = "moveit_servo";
-
-  declareOrGetParam(planning_frame_, ns + ".planning_frame", node_, LOGGER);
-  declareOrGetParam(move_group_name_, ns + ".move_group_name", node_, LOGGER);
+  planning_frame_ = servo_parameters_.planning_frame;
+  move_group_name_ = servo_parameters_.move_group_name;
 
   if (!planning_scene_monitor_->getRobotModel()->hasJointModelGroup(move_group_name_))
   {
     RCLCPP_ERROR_STREAM(LOGGER, "Unable to find the specified joint model group: " << move_group_name_);
   }
 
-  double publish_period;
-  declareOrGetParam(publish_period, ns + ".publish_period", node_, LOGGER);
+  x_pid_config_.dt = servo_parameters_.publish_period;
+  y_pid_config_.dt = servo_parameters_.publish_period;
+  z_pid_config_.dt = servo_parameters_.publish_period;
+  angular_pid_config_.dt = servo_parameters_.publish_period;
 
-  x_pid_config_.dt = publish_period;
-  y_pid_config_.dt = publish_period;
-  z_pid_config_.dt = publish_period;
-  angular_pid_config_.dt = publish_period;
+  x_pid_config_.windup_limit = servo_parameters_.windup_limit;
+  y_pid_config_.windup_limit = servo_parameters_.windup_limit;
+  z_pid_config_.windup_limit = servo_parameters_.windup_limit;
+  angular_pid_config_.windup_limit = servo_parameters_.windup_limit;
 
-  double windup_limit;
-  declareOrGetParam(windup_limit, ns + ".windup_limit", node_, LOGGER);
-  x_pid_config_.windup_limit = windup_limit;
-  y_pid_config_.windup_limit = windup_limit;
-  z_pid_config_.windup_limit = windup_limit;
-  angular_pid_config_.windup_limit = windup_limit;
+  x_pid_config_.k_p = servo_parameters_.x_proportional_gain;
+  x_pid_config_.k_i = servo_parameters_.x_integral_gain;
+  x_pid_config_.k_d = servo_parameters_.x_derivative_gain;
 
-  declareOrGetParam(x_pid_config_.k_p, ns + ".x_proportional_gain", node_, LOGGER);
-  declareOrGetParam(x_pid_config_.k_p, ns + ".x_proportional_gain", node_, LOGGER);
-  declareOrGetParam(y_pid_config_.k_p, ns + ".y_proportional_gain", node_, LOGGER);
-  declareOrGetParam(z_pid_config_.k_p, ns + ".z_proportional_gain", node_, LOGGER);
-  declareOrGetParam(x_pid_config_.k_i, ns + ".x_integral_gain", node_, LOGGER);
-  declareOrGetParam(y_pid_config_.k_i, ns + ".y_integral_gain", node_, LOGGER);
-  declareOrGetParam(z_pid_config_.k_i, ns + ".z_integral_gain", node_, LOGGER);
-  declareOrGetParam(x_pid_config_.k_d, ns + ".x_derivative_gain", node_, LOGGER);
-  declareOrGetParam(y_pid_config_.k_d, ns + ".y_derivative_gain", node_, LOGGER);
-  declareOrGetParam(z_pid_config_.k_d, ns + ".z_derivative_gain", node_, LOGGER);
+  y_pid_config_.k_p = servo_parameters_.y_proportional_gain;
+  y_pid_config_.k_i = servo_parameters_.y_integral_gain;
+  y_pid_config_.k_d = servo_parameters_.y_derivative_gain;
 
-  declareOrGetParam(angular_pid_config_.k_p, ns + ".angular_proportional_gain", node_, LOGGER);
-  declareOrGetParam(angular_pid_config_.k_i, ns + ".angular_integral_gain", node_, LOGGER);
-  declareOrGetParam(angular_pid_config_.k_d, ns + ".angular_derivative_gain", node_, LOGGER);
+  z_pid_config_.k_p = servo_parameters_.z_proportional_gain;
+  z_pid_config_.k_i = servo_parameters_.z_integral_gain;
+  z_pid_config_.k_d = servo_parameters_.z_derivative_gain;
+
+  angular_pid_config_.k_p = servo_parameters_.angular_proportional_gain;
+  angular_pid_config_.k_i = servo_parameters_.angular_integral_gain;
+  angular_pid_config_.k_d = servo_parameters_.angular_derivative_gain;
 }
 
 void PoseTracking::initializePID(const PIDConfig& pid_config, std::vector<control_toolbox::Pid>& pid_vector)

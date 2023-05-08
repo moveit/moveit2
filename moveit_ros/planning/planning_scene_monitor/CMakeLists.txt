@@ -25,6 +25,7 @@ target_link_libraries(moveit_planning_scene_monitor
 
 add_executable(demo_scene demos/demo_scene.cpp)
 ament_target_dependencies(demo_scene
+  PUBLIC
   rclcpp
   Boost
   moveit_msgs
@@ -32,7 +33,7 @@ ament_target_dependencies(demo_scene
   message_filters
   pluginlib
 )
-target_link_libraries(demo_scene moveit_planning_scene_monitor)
+target_link_libraries(demo_scene PRIVATE moveit_planning_scene_monitor)
 
 install(TARGETS demo_scene
   DESTINATION lib/${PROJECT_NAME}

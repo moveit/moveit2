@@ -13,11 +13,11 @@ def generate_servo_test_description(
     start_position_path: launch.some_substitutions_type.SomeSubstitutionsType = ""
 ):
     # Get parameters using the demo config file
-    servo_params = {
-        "moveit_servo": ParameterBuilder("moveit_servo")
+    servo_params = (
+        ParameterBuilder("moveit_servo")
         .yaml("config/panda_simulated_config.yaml")
         .to_dict()
-    }
+    )
 
     # Get URDF and SRDF
     if start_position_path:
