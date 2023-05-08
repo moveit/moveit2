@@ -62,15 +62,6 @@ ServoNode::ServoNode(const rclcpp::NodeOptions& options)
       "~/stop_servo",
       [this](const std::shared_ptr<std_srvs::srv::Trigger::Request>& request,
              const std::shared_ptr<std_srvs::srv::Trigger::Response>& response) { return stopCB(request, response); });
-  pause_servo_service_ = node_->create_service<std_srvs::srv::Trigger>(
-      "~/pause_servo",
-      [this](const std::shared_ptr<std_srvs::srv::Trigger::Request>& request,
-             const std::shared_ptr<std_srvs::srv::Trigger::Response>& response) { return pauseCB(request, response); });
-  unpause_servo_service_ = node_->create_service<std_srvs::srv::Trigger>(
-      "~/unpause_servo", [this](const std::shared_ptr<std_srvs::srv::Trigger::Request>& request,
-                                const std::shared_ptr<std_srvs::srv::Trigger::Response>& response) {
-        return unpauseCB(request, response);
-      });
 
   // Can set robot_description name from parameters
   std::string robot_description_name = "robot_description";
@@ -162,24 +153,9 @@ void ServoNode::startCB(const std::shared_ptr<std_srvs::srv::Trigger::Request>& 
 void ServoNode::stopCB(const std::shared_ptr<std_srvs::srv::Trigger::Request>& /* unused */,
                        const std::shared_ptr<std_srvs::srv::Trigger::Response>& response)
 {
-  servo_->setPaused(true);
+  servo_->stop();
   response->success = true;
 }
-
-void ServoNode::pauseCB(const std::shared_ptr<std_srvs::srv::Trigger::Request>& /* unused */,
-                        const std::shared_ptr<std_srvs::srv::Trigger::Response>& response)
-{
-  servo_->setPaused(true);
-  response->success = true;
-}
-
-void ServoNode::unpauseCB(const std::shared_ptr<std_srvs::srv::Trigger::Request>& /* unused */,
-                          const std::shared_ptr<std_srvs::srv::Trigger::Response>& response)
-{
-  servo_->setPaused(false);
-  response->success = true;
-}
-
 }  // namespace moveit_servo
 
 // Register the component with class_loader
