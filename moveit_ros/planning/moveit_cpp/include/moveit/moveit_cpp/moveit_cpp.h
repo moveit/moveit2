@@ -163,10 +163,11 @@ public:
   trajectory_execution_manager::TrajectoryExecutionManagerPtr getTrajectoryExecutionManagerNonConst();
 
   /** \brief Execute a trajectory on the planning group specified by the robot's trajectory using the trajectory
-   * execution manager. \param [in] robot_trajectory Contains trajectory info as well as metadata such as a RobotModel.
+   * execution manager.
+   *  \param [in] robot_trajectory Contains trajectory info as well as metadata such as a RobotModel.
    *  \param [in] controllers An optional list of ros2_controllers to execute with. If none, MoveIt will attempt to find
    * a controller. The exact behavior of finding a controller depends on which MoveItControllerManager plugin is active.
-   * \return moveit_controller_manager::ExecutionStatus::SUCCEEDED if successful
+   *  \return moveit_controller_manager::ExecutionStatus::SUCCEEDED if successful
    */
   [[deprecated("MoveItCpp::execute() no longer requires a blocking parameter")]] moveit_controller_manager::ExecutionStatus
   execute(const robot_trajectory::RobotTrajectoryPtr& robot_trajectory, bool blocking,
