@@ -18,7 +18,6 @@
   <depend>stomp</depend>
   <depend>moveit_common</depend>
   <depend>moveit_core</depend>
-  <depend>moveit_visual_tools</depend>
   <depend>std_msgs</depend>
   <depend>tf2_eigen</depend>
   <depend>visualization_msgs</depend>

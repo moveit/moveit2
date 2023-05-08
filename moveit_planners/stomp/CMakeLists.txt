@@ -9,7 +9,6 @@ moveit_package()
 find_package(ament_cmake REQUIRED)
 find_package(generate_parameter_library REQUIRED)
 find_package(moveit_core REQUIRED)
-find_package(moveit_visual_tools REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(stomp REQUIRED)
 find_package(visualization_msgs REQUIRED)
@@ -42,22 +41,6 @@ install(TARGETS stomp_moveit_plugin stomp_moveit_parameters
   RUNTIME DESTINATION bin
   INCLUDES DESTINATION include
 )
-
-# Demo Executable
-add_executable(stomp_moveit_example src/stomp_moveit_example.cpp)
-ament_target_dependencies(stomp_moveit_example
-  moveit_core
-  moveit_visual_tools
-  std_msgs
-  tf2_eigen
-  visualization_msgs
-)
-target_link_libraries(stomp_moveit_example stomp::stomp)
-
-install(TARGETS stomp_moveit_example
-  DESTINATION lib/moveit_planners_stomp)
-
-install(DIRECTORY launch DESTINATION share/moveit_planners_stomp)
 
 ament_export_targets(moveit_planners_stompTargets HAS_LIBRARY_TARGET)
 ament_export_dependencies(moveit_core stomp generate_parameter_library)
