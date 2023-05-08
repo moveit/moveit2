@@ -88,4 +88,21 @@ bool applyJointUpdate(rclcpp::Clock& clock, const double publish_period, const E
                       const sensor_msgs::msg::JointState& previous_joint_state,
                       sensor_msgs::msg::JointState& next_joint_state,
                       pluginlib::UniquePtr<online_signal_smoothing::SmoothingBaseClass>& smoother);
+
+/** \brief Converts a twist command from the command frame to the MoveIt planning frame of the robot
+ * @param cmd The twist command received from the user
+ * @param planning_frame Moveit planning frame of the robot
+ * @param current_state The state of the robot
+ * @param clock A ROS clock, for logging
+ */
+void transformTwistToPlanningFrame(geometry_msgs::msg::TwistStamped& cmd, const std::string& planning_frame,
+                                   const moveit::core::RobotStatePtr& current_state, rclcpp::Clock& clock);
+
+/** \brief Converts the delta_x (change in cartesian position) to a pose to be used with IK solver.
+ * @param delta_x The change in cartesian position
+ * @param base_to_tip_frame_transform The transform from base of the robot to its end-effector
+ * @return Returns the resulting pose after applying delta_x
+ */
+geometry_msgs::msg::Pose poseFromCartesianDelta(const Eigen::VectorXd& delta_x,
+                                                const Eigen::Isometry3d& base_to_tip_frame_transform);
 }  // namespace moveit_servo
