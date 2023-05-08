@@ -1,14 +1,14 @@
 <?xml version="1.0"?>
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
-  <name>stomp_moveit</name>
+  <name>moveit_planners_stomp</name>
   <version>0.0.1</version>
   <description>STOMP Motion Planner for MoveIt</description>
   <maintainer email="henningkayser@picknik.ai">Henning Kayser</maintainer>
   <license>BSD-3-Clause</license>
 
-  <url type="bugtracker">https://github.com/ros-planning/stomp_moveit/issues</url>
-  <url type="repository">https://github.com/ros-planning/stomp_moveit</url>
+  <url type="bugtracker">https://github.com/ros-planning/moveit2/issues</url>
+  <url type="repository">https://github.com/ros-planning/moveit2</url>
 
   <author email="henningkayser@picknik.ai">Henning Kayser</author>
 

@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.22)
-project(stomp_moveit)
+project(moveit_planners_stomp)
 
 # Common cmake code applied to all moveit packages
 find_package(moveit_common REQUIRED)
@@ -17,9 +17,7 @@ find_package(tf2_eigen REQUIRED)
 
 generate_parameter_library(stomp_moveit_parameters res/stomp_moveit.yaml)
 
-include_directories(stomp_moveit PUBLIC
-  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-  $<INSTALL_INTERFACE:include>)
+include_directories(include)
 
 # Planner Plugin
 add_library(stomp_moveit_plugin SHARED
@@ -38,7 +36,7 @@ target_link_libraries(stomp_moveit_plugin stomp::stomp stomp_moveit_parameters)
 pluginlib_export_plugin_description_file(moveit_core stomp_moveit_plugin_description.xml)
 
 install(TARGETS stomp_moveit_plugin stomp_moveit_parameters
-  EXPORT ${PROJECT_NAME}Targets
+  EXPORT moveit_planners_stompTargets
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
   RUNTIME DESTINATION bin
@@ -57,11 +55,11 @@ ament_target_dependencies(stomp_moveit_example
 target_link_libraries(stomp_moveit_example stomp::stomp)
 
 install(TARGETS stomp_moveit_example
-  DESTINATION lib/${PROJECT_NAME})
+  DESTINATION lib/moveit_planners_stomp)
 
-install(DIRECTORY launch DESTINATION share/${PROJECT_NAME})
+install(DIRECTORY launch DESTINATION share/moveit_planners_stomp)
 
-ament_export_targets(${PROJECT_NAME}Targets HAS_LIBRARY_TARGET)
+ament_export_targets(moveit_planners_stompTargets HAS_LIBRARY_TARGET)
 ament_export_dependencies(moveit_core stomp generate_parameter_library)
 
 if(BUILD_TESTING)

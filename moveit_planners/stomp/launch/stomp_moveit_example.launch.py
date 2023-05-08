@@ -20,7 +20,7 @@ def generate_launch_description():
     # MoveItCpp demo executable
     moveit_cpp_node = Node(
         name="stomp_moveit",
-        package="stomp_moveit",
+        package="moveit_planners_stomp",
         executable="stomp_moveit_example",
         output="screen",
         # prefix=["xterm -e gdb -ex run --args"],
@@ -29,7 +29,7 @@ def generate_launch_description():
 
     # RViz
     rviz_config_file = (
-        get_package_share_directory("stomp_moveit") + "/launch/stomp_moveit.rviz"
+        get_package_share_directory("moveit_planners_stomp") + "/launch/stomp_moveit.rviz"
     )
     rviz_node = Node(
         package="rviz2",
