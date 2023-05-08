@@ -11,8 +11,8 @@ from launch_ros.descriptions import ComposableNode
 from launch.actions import ExecuteProcess, TimerAction
 from launch.some_substitutions_type import SomeSubstitutionsType
 from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
-from moveit_configs_utils import MoveItConfigsBuilder
 from launch_param_builder import ParameterBuilder
+from moveit_configs_utils import MoveItConfigsBuilder
 
 
 def generate_servo_test_description(*args, gtest_name: SomeSubstitutionsType):

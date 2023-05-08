@@ -159,7 +159,7 @@ private:
   // Joint group used for controlling the motions
   std::string move_group_name_;
 
-  rclcpp::Rate loop_rate_;
+  rclcpp::WallRate loop_rate_;
 
   // ROS interface to Servo
   rclcpp::Publisher<geometry_msgs::msg::TwistStamped>::SharedPtr twist_stamped_pub_;
