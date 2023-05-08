@@ -65,6 +65,7 @@ class PS4DualShockTeleop(TeleopDevice):
     logger: RCUtilsLogger
     def __init__(
         self,
+        ee_frame_name: str,
         node_name: str = ...,
         device_name: str = ...,
         device_config: PS4DualShock = ...,

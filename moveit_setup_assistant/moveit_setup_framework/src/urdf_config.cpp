@@ -98,18 +98,15 @@ void URDFConfig::setPackageName()
     urdf_pkg_name_ = "";
     urdf_pkg_relative_path_ = urdf_path_;  // just the absolute path
   }
-  else
-  {
-    // Check that ROS can find the package
-    const std::filesystem::path robot_desc_pkg_path = getSharePath(urdf_pkg_name_);
+  // Check that ROS can find the package
+  const std::filesystem::path robot_desc_pkg_path = getSharePath(urdf_pkg_name_);
 
-    if (robot_desc_pkg_path.empty())
-    {
-      RCLCPP_WARN(*logger_,
-                  "Package Not Found In ROS Workspace. ROS was unable to find the package name '%s'"
-                  " within the ROS workspace. This may cause issues later.",
-                  urdf_pkg_name_.c_str());
-    }
+  if (robot_desc_pkg_path.empty())
+  {
+    RCLCPP_WARN(*logger_,
+                "Package Not Found In ROS Workspace. ROS was unable to find the package name '%s'"
+                " within the ROS workspace. This may cause issues later.",
+                urdf_pkg_name_.c_str());
   }
 }
 
@@ -132,6 +129,11 @@ void URDFConfig::load()
   if (!rdf_loader::RDFLoader::loadXmlFileToString(urdf_string_, urdf_path_, xacro_args_vec_))
   {
     throw std::runtime_error("URDF/COLLADA file not found: " + urdf_path_.string());
+  }
+
+  if (urdf_pkg_name_.empty())
+  {
+    throw std::runtime_error("URDF/COLLADA package not found for file path: " + urdf_path_.string());
   }
 
   if (urdf_string_.empty() && rdf_loader::RDFLoader::isXacroFile(urdf_path_))

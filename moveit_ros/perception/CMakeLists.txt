@@ -112,14 +112,14 @@ add_subdirectory(semantic_world)
 
 install(
   TARGETS ${THIS_PACKAGE_LIBRARIES}
-  EXPORT ${PROJECT_NAME}Targets
+  EXPORT moveit_ros_perceptionTargets
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
   RUNTIME DESTINATION bin
   INCLUDES DESTINATION include/moveit_ros_perception
 )
 
-ament_export_targets(${PROJECT_NAME}Targets HAS_LIBRARY_TARGET)
+ament_export_targets(moveit_ros_perceptionTargets HAS_LIBRARY_TARGET)
 ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS})
 
 pluginlib_export_plugin_description_file(moveit_ros_occupancy_map_monitor "pointcloud_octomap_updater_plugin_description.xml")

@@ -997,6 +997,8 @@ public:
     req->path_constraints = path_constraints;
     req->avoid_collisions = avoid_collisions;
     req->link_name = getEndEffectorLink();
+    req->max_velocity_scaling_factor = max_velocity_scaling_factor_;
+    req->max_acceleration_scaling_factor = max_acceleration_scaling_factor_;
 
     auto future_response = cartesian_path_service_->async_send_request(req);
     if (future_response.valid())
@@ -1645,8 +1647,8 @@ double MoveGroupInterface::computeCartesianPath(const std::vector<geometry_msgs:
                                                 bool avoid_collisions, moveit_msgs::msg::MoveItErrorCodes* error_code)
 {
   moveit_msgs::msg::Constraints path_constraints_tmp;
-  return computeCartesianPath(waypoints, eef_step, jump_threshold, trajectory, path_constraints_tmp, avoid_collisions,
-                              error_code);
+  return computeCartesianPath(waypoints, eef_step, jump_threshold, trajectory, moveit_msgs::msg::Constraints(),
+                              avoid_collisions, error_code);
 }
 
 double MoveGroupInterface::computeCartesianPath(const std::vector<geometry_msgs::msg::Pose>& waypoints, double eef_step,
@@ -1661,9 +1663,11 @@ double MoveGroupInterface::computeCartesianPath(const std::vector<geometry_msgs:
   }
   else
   {
-    moveit_msgs::msg::MoveItErrorCodes error_code_tmp;
+    moveit_msgs::msg::MoveItErrorCodes err_tmp;
+    err_tmp.val = moveit_msgs::msg::MoveItErrorCodes::SUCCESS;
+    moveit_msgs::msg::MoveItErrorCodes& err = error_code ? *error_code : err_tmp;
     return impl_->computeCartesianPath(waypoints, eef_step, jump_threshold, trajectory, path_constraints,
-                                       avoid_collisions, error_code_tmp);
+                                       avoid_collisions, err);
   }
 }
 
