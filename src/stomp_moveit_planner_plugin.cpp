@@ -80,18 +80,6 @@ public:
       return false;
     }
 
-    const auto& pc = req.path_constraints;
-    if (!(pc.joint_constraints.empty() && pc.position_constraints.empty() && pc.orientation_constraints.empty() &&
-          pc.visibility_constraints.empty()))
-    {
-      RCLCPP_WARN(LOGGER, "Ignoring path constraints - not implemented!");
-    }
-
-    if (!req.trajectory_constraints.constraints.empty())
-    {
-      RCLCPP_WARN(LOGGER, "Ignoring trajectory constraints - not implemented!");
-    }
-
     if (!req.reference_trajectories.empty())
     {
       RCLCPP_WARN(LOGGER, "Ignoring reference trajectories - not implemented!");

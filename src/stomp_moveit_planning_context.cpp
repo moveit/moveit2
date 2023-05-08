@@ -94,24 +94,41 @@ bool extractSeedTrajectory(const planning_interface::MotionPlanRequest& req,
 stomp::TaskPtr createStompTask(const stomp::StompConfiguration& config, StompPlanningContext& context)
 {
   const size_t num_timesteps = config.num_timesteps;
-  const double collision_penalty = 1.0;
-  const auto& planning_scene = context.getPlanningScene();
+  const auto planning_scene = context.getPlanningScene();
   const auto group = planning_scene->getRobotModel()->getJointModelGroup(context.getGroupName());
-  const std::vector<double> stddev(group->getActiveJointModels().size(), 0.1);
 
-  // Create STOMP planning task
-  // Noise, cost, and filter functions are provided for planning.
-  // The iteration and done callbacks are used for path and trajectory visualization.
+  // Check if we do have path constraints
+  const auto& req = context.getMotionPlanRequest();
+  kinematic_constraints::KinematicConstraintSet constraints(planning_scene->getRobotModel());
+  constraints.add(req.path_constraints, planning_scene->getTransforms());
+
+  // Create callback functions for STOMP task
+  // Cost, noise and filter functions are provided for planning.
+  // TODO(henningkayser): parameterize cost penalties
   using namespace stomp_moveit;
+  CostFn cost_fn;
+  if (!constraints.empty())
+  {
+    cost_fn = costs::sum({ costs::get_collision_cost_function(planning_scene, group, 1.0 /* collision penalty */),
+                           costs::get_constraints_cost_function(planning_scene, group, constraints.getAllConstraints(),
+                                                                1.0 /* constraint penalty */) });
+  }
+  else
+  {
+    cost_fn = costs::get_collision_cost_function(planning_scene, group, 1.0 /* collision penalty */);
+  }
+
+  // TODO(henningkayser): parameterize stddev
+  const std::vector<double> stddev(group->getActiveJointModels().size(), 0.1);
   auto noise_generator_fn = noise::get_normal_distribution_generator(num_timesteps, stddev);
-  auto cost_fn = costs::get_collision_cost_function(planning_scene, group, collision_penalty);
   auto filter_fn =
       filters::chain({ filters::simple_smoothing_matrix(num_timesteps), filters::enforce_position_bounds(group) });
-
   auto iteration_callback_fn =
       visualization::get_iteration_path_publisher(context.getPathPublisher(), planning_scene, group);
   auto done_callback_fn =
       visualization::get_success_trajectory_publisher(context.getPathPublisher(), planning_scene, group);
+
+  // Initialize and return STOMP task
   stomp::TaskPtr task =
       std::make_shared<ComposableTask>(noise_generator_fn, cost_fn, filter_fn, iteration_callback_fn, done_callback_fn);
   return task;
