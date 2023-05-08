@@ -179,7 +179,6 @@ ServoCalcs::ServoCalcs(const rclcpp::Node::SharedPtr& node,
   ik_solver_ = joint_model_group_->getSolverInstance();
   if (!ik_solver_)
   {
-    use_inv_jacobian_ = true;
     RCLCPP_WARN(
         LOGGER,
         "No kinematics solver instantiated for group '%s'. Will use inverse Jacobian for servo calculations instead.",
@@ -187,7 +186,7 @@ ServoCalcs::ServoCalcs(const rclcpp::Node::SharedPtr& node,
   }
   else if (!ik_solver_->supportsGroup(joint_model_group_))
   {
-    use_inv_jacobian_ = true;
+    ik_solver_ = nullptr;
     RCLCPP_WARN(LOGGER,
                 "The loaded kinematics plugin does not support group '%s'. Will use inverse Jacobian for servo "
                 "calculations instead.",
@@ -253,11 +252,6 @@ void ServoCalcs::start()
                            current_state_->getGlobalLinkTransform(servo_params_.ee_frame_name);
   tf_moveit_to_robot_cmd_frame_ = current_state_->getGlobalLinkTransform(servo_params_.planning_frame).inverse() *
                                   current_state_->getGlobalLinkTransform(servo_params_.robot_link_command_frame);
-  if (!use_inv_jacobian_)
-  {
-    ik_base_to_tip_frame_ = current_state_->getGlobalLinkTransform(ik_solver_->getBaseFrame()).inverse() *
-                            current_state_->getGlobalLinkTransform(ik_solver_->getTipFrame());
-  }
 
   stop_requested_ = false;
   thread_ = std::thread([this] {
@@ -423,12 +417,6 @@ void ServoCalcs::calculateSingleIteration()
   tf_moveit_to_ee_frame_ = current_state_->getGlobalLinkTransform(servo_params_.planning_frame).inverse() *
                            current_state_->getGlobalLinkTransform(servo_params_.ee_frame_name);
 
-  if (!use_inv_jacobian_)
-  {
-    ik_base_to_tip_frame_ = current_state_->getGlobalLinkTransform(ik_solver_->getBaseFrame()).inverse() *
-                            current_state_->getGlobalLinkTransform(ik_solver_->getTipFrame());
-  }
-
   // Don't end this function without updating the filters
   updated_filters_ = false;
 
@@ -538,40 +526,7 @@ bool ServoCalcs::cartesianServoCalcs(geometry_msgs::msg::TwistStamped& cmd,
   // Transform the command to the MoveGroup planning frame
   if (cmd.header.frame_id != servo_params_.planning_frame)
   {
-    Eigen::Vector3d translation_vector(cmd.twist.linear.x, cmd.twist.linear.y, cmd.twist.linear.z);
-    Eigen::Vector3d angular_vector(cmd.twist.angular.x, cmd.twist.angular.y, cmd.twist.angular.z);
-
-    // If the incoming frame is empty or is the command frame, we use the previously calculated tf
-    if (cmd.header.frame_id.empty() || cmd.header.frame_id == servo_params_.robot_link_command_frame)
-    {
-      translation_vector = tf_moveit_to_robot_cmd_frame_.linear() * translation_vector;
-      angular_vector = tf_moveit_to_robot_cmd_frame_.linear() * angular_vector;
-    }
-    else if (cmd.header.frame_id == servo_params_.ee_frame_name)
-    {
-      // If the frame is the EE frame, we already have that transform as well
-      translation_vector = tf_moveit_to_ee_frame_.linear() * translation_vector;
-      angular_vector = tf_moveit_to_ee_frame_.linear() * angular_vector;
-    }
-    else
-    {
-      // We solve (planning_frame -> base -> cmd.header.frame_id)
-      // by computing (base->planning_frame)^-1 * (base->cmd.header.frame_id)
-      const auto tf_moveit_to_incoming_cmd_frame =
-          current_state_->getGlobalLinkTransform(servo_params_.planning_frame).inverse() *
-          current_state_->getGlobalLinkTransform(cmd.header.frame_id);
-      translation_vector = tf_moveit_to_incoming_cmd_frame.linear() * translation_vector;
-      angular_vector = tf_moveit_to_incoming_cmd_frame.linear() * angular_vector;
-    }
-
-    // Put these components back into a TwistStamped
-    cmd.header.frame_id = servo_params_.planning_frame;
-    cmd.twist.linear.x = translation_vector(0);
-    cmd.twist.linear.y = translation_vector(1);
-    cmd.twist.linear.z = translation_vector(2);
-    cmd.twist.angular.x = angular_vector(0);
-    cmd.twist.angular.y = angular_vector(1);
-    cmd.twist.angular.z = angular_vector(2);
+    transformTwistToPlanningFrame(cmd, servo_params_.planning_frame, current_state_, *node_->get_clock());
   }
 
   Eigen::VectorXd delta_x = scaleCartesianCommand(cmd);
@@ -587,42 +542,13 @@ bool ServoCalcs::cartesianServoCalcs(geometry_msgs::msg::TwistStamped& cmd,
 
   // Convert from cartesian commands to joint commands
   // Use an IK solver plugin if we have one, otherwise use inverse Jacobian.
-  if (!use_inv_jacobian_)
+  if (ik_solver_)
   {
-    // get a transformation matrix with the desired position change &
-    // get a transformation matrix with desired orientation change
-    Eigen::Isometry3d tf_pos_delta(Eigen::Isometry3d::Identity());
-    tf_pos_delta.translate(Eigen::Vector3d(delta_x[0], delta_x[1], delta_x[2]));
+    const Eigen::Isometry3d base_to_tip_frame_transform =
+        current_state_->getGlobalLinkTransform(ik_solver_->getBaseFrame()).inverse() *
+        current_state_->getGlobalLinkTransform(ik_solver_->getTipFrame());
 
-    Eigen::Isometry3d tf_rot_delta(Eigen::Isometry3d::Identity());
-    Eigen::Quaterniond q = Eigen::AngleAxisd(delta_x[3], Eigen::Vector3d::UnitX()) *
-                           Eigen::AngleAxisd(delta_x[4], Eigen::Vector3d::UnitY()) *
-                           Eigen::AngleAxisd(delta_x[5], Eigen::Vector3d::UnitZ());
-    tf_rot_delta.rotate(q);
-
-    // Poses passed to IK solvers are assumed to be in some tip link (usually EE) reference frame
-    // First, find the new tip link position without newly applied rotation
-
-    auto tf_no_new_rot = tf_pos_delta * ik_base_to_tip_frame_;
-    // we want the rotation to be applied in the requested reference frame,
-    // but we want the rotation to be about the EE point in space, not the origin.
-    // So, we need to translate to origin, rotate, then translate back
-    // Given T = transformation matrix from origin -> EE point in space (translation component of tf_no_new_rot)
-    // and T' as the opposite transformation, EE point in space -> origin (translation only)
-    // apply final transformation as T * R * T' * tf_no_new_rot
-    auto tf_translation = tf_no_new_rot.translation();
-    auto tf_neg_translation = Eigen::Isometry3d::Identity();  // T'
-    tf_neg_translation(0, 3) = -tf_translation(0, 0);
-    tf_neg_translation(1, 3) = -tf_translation(1, 0);
-    tf_neg_translation(2, 3) = -tf_translation(2, 0);
-    auto tf_pos_translation = Eigen::Isometry3d::Identity();  // T
-    tf_pos_translation(0, 3) = tf_translation(0, 0);
-    tf_pos_translation(1, 3) = tf_translation(1, 0);
-    tf_pos_translation(2, 3) = tf_translation(2, 0);
-
-    // T * R * T' * tf_no_new_rot
-    auto tf = tf_pos_translation * tf_rot_delta * tf_neg_translation * tf_no_new_rot;
-    geometry_msgs::msg::Pose next_pose = tf2::toMsg(tf);
+    geometry_msgs::msg::Pose next_pose = poseFromCartesianDelta(delta_x, base_to_tip_frame_transform);
 
     // setup for IK call
     std::vector<double> solution(num_joints_);

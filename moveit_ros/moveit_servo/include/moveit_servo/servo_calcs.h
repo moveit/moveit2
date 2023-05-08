@@ -39,10 +39,10 @@
 #pragma once
 
 // C++
+#include <atomic>
 #include <condition_variable>
 #include <mutex>
 #include <thread>
-#include <atomic>
 
 // ROS
 #include <control_msgs/msg/joint_jog.hpp>
@@ -330,8 +330,6 @@ protected:
   // Load a smoothing plugin
   pluginlib::ClassLoader<online_signal_smoothing::SmoothingBaseClass> smoothing_loader_;
 
-  kinematics::KinematicsBaseConstPtr ik_solver_;
-  Eigen::Isometry3d ik_base_to_tip_frame_;
-  bool use_inv_jacobian_ = false;
+  kinematics::KinematicsBaseConstPtr ik_solver_ = nullptr;
 };
 }  // namespace moveit_servo
