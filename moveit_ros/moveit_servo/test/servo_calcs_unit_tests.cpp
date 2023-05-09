@@ -42,7 +42,6 @@
 
 #include <moveit_servo/enforce_limits.hpp>
 #include <moveit_servo/servo_calcs.h>
-#include <moveit_servo/servo_parameters.h>
 #include <moveit_servo/status_codes.h>
 #include <moveit_servo/utilities.h>
 
