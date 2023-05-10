@@ -2,6 +2,9 @@
 Changelog for package moveit_core
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.7.3 (2023-04-24)
+------------------
+
 2.7.2 (2023-04-18)
 ------------------
 * Add JointModel::satisfiesAccelerationBounds() (`#2092 <https://github.com/ros-planning/moveit2/issues/2092>`_)

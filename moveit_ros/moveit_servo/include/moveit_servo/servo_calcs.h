@@ -39,10 +39,10 @@
 #pragma once
 
 // C++
+#include <atomic>
 #include <condition_variable>
 #include <mutex>
 #include <thread>
-#include <atomic>
 
 // ROS
 #include <control_msgs/msg/joint_jog.hpp>
@@ -64,9 +64,9 @@
 #include <moveit/kinematics_base/kinematics_base.h>
 
 // moveit_servo
-#include <moveit_servo/servo_parameters.h>
 #include <moveit_servo/status_codes.h>
 #include <moveit/online_signal_smoothing/smoothing_base_class.h>
+#include <moveit_servo_lib_parameters.hpp>
 
 namespace moveit_servo
 {
@@ -80,8 +80,8 @@ class ServoCalcs
 {
 public:
   ServoCalcs(const rclcpp::Node::SharedPtr& node,
-             const std::shared_ptr<const moveit_servo::ServoParameters>& parameters,
-             const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor);
+             const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor,
+             std::unique_ptr<const servo::ParamListener> servo_param_listener);
 
   ~ServoCalcs();
 
@@ -91,6 +91,15 @@ public:
    * @exception can throw a std::runtime_error if the setup was not completed
    */
   void start();
+
+  /** \brief Stop the currently running thread */
+  void stop();
+
+  /**
+   * Check for parameter update, and apply updates if any
+   * All dynamic parameters must be checked and updated within this method
+   */
+  void updateParams();
 
   /**
    * Get the MoveIt planning link transform.
@@ -112,21 +121,12 @@ public:
   bool getEEFrameTransform(Eigen::Isometry3d& transform);
   bool getEEFrameTransform(geometry_msgs::msg::TransformStamped& transform);
 
-  /**
-   * Pause or unpause the processing of servo commands while keeping the timers alive.
-   * If paused, commands to hold the robot at its current position will continue to be published at the configured rate.
-   */
-  void setPaused(bool paused);
-
 protected:
   /** \brief Run the main calculation loop */
   void mainCalcLoop();
 
   /** \brief Do calculations for a single iteration. Publish one outgoing command */
   void calculateSingleIteration();
-
-  /** \brief Stop the currently running thread */
-  void stop();
 
   /** \brief Do servoing calculations for Cartesian twist commands. */
   bool cartesianServoCalcs(geometry_msgs::msg::TwistStamped& cmd,
@@ -246,8 +246,9 @@ protected:
   // Pointer to the ROS node
   std::shared_ptr<rclcpp::Node> node_;
 
-  // Parameters from yaml
-  const std::shared_ptr<const moveit_servo::ServoParameters> parameters_;
+  // Servo parameters
+  std::unique_ptr<const servo::ParamListener> servo_param_listener_;
+  servo::Params servo_params_;
 
   // Pointer to the collision environment
   planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor_;
@@ -296,7 +297,6 @@ protected:
 
   // Status
   StatusCode status_ = StatusCode::NO_WARNING;
-  std::atomic<bool> paused_;
   bool twist_command_is_stale_ = false;
   bool joint_command_is_stale_ = false;
   double collision_velocity_scale_ = 1.0;
@@ -327,17 +327,9 @@ protected:
   std::condition_variable input_cv_;
   bool new_input_cmd_ = false;
 
-  // dynamic parameters
-  std::string robot_link_command_frame_;
-  rcl_interfaces::msg::SetParametersResult robotLinkCommandFrameCallback(const rclcpp::Parameter& parameter);
-  double override_velocity_scaling_factor_;
-  rcl_interfaces::msg::SetParametersResult overrideVelocityScalingFactorCallback(const rclcpp::Parameter& parameter);
-
   // Load a smoothing plugin
   pluginlib::ClassLoader<online_signal_smoothing::SmoothingBaseClass> smoothing_loader_;
 
-  kinematics::KinematicsBaseConstPtr ik_solver_;
-  Eigen::Isometry3d ik_base_to_tip_frame_;
-  bool use_inv_jacobian_ = false;
+  kinematics::KinematicsBaseConstPtr ik_solver_ = nullptr;
 };
 }  // namespace moveit_servo
