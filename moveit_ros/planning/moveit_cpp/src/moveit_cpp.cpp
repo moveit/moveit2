@@ -37,6 +37,7 @@
 #include <stdexcept>
 
 #include <moveit/controller_manager/controller_manager.h>
+#include <moveit/planning_pipeline_interfaces/planning_pipeline_interfaces.hpp>
 #include <moveit/moveit_cpp/moveit_cpp.h>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
 #include <geometry_msgs/msg/quaternion_stamped.hpp>
@@ -44,7 +45,6 @@
 namespace moveit_cpp
 {
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.ros_planning_interface.moveit_cpp");
-constexpr char PLANNING_PLUGIN_PARAM[] = "planning_plugin";
 
 MoveItCpp::MoveItCpp(const rclcpp::Node::SharedPtr& node) : MoveItCpp(node, Options(node))
 {
@@ -60,8 +60,7 @@ MoveItCpp::MoveItCpp(const rclcpp::Node::SharedPtr& node, const Options& options
     throw std::runtime_error(error);
   }
 
-  robot_model_ = planning_scene_monitor_->getRobotModel();
-  if (!robot_model_)
+  if (!getRobotModel())
   {
     const std::string error = "Unable to construct robot model. Please make sure all needed information is on the "
                               "parameter server.";
@@ -78,7 +77,7 @@ MoveItCpp::MoveItCpp(const rclcpp::Node::SharedPtr& node, const Options& options
   }
 
   trajectory_execution_manager_ = std::make_shared<trajectory_execution_manager::TrajectoryExecutionManager>(
-      node_, robot_model_, planning_scene_monitor_->getStateMonitor());
+      node_, getRobotModel(), planning_scene_monitor_->getStateMonitor());
 
   RCLCPP_DEBUG(LOGGER, "MoveItCpp running");
 }
@@ -86,7 +85,6 @@ MoveItCpp::MoveItCpp(const rclcpp::Node::SharedPtr& node, const Options& options
 MoveItCpp::~MoveItCpp()
 {
   RCLCPP_INFO(LOGGER, "Deleting MoveItCpp");
-  clearContents();
 }
 
 bool MoveItCpp::loadPlanningSceneMonitor(const PlanningSceneMonitorOptions& options)
@@ -129,40 +127,20 @@ bool MoveItCpp::loadPlanningSceneMonitor(const PlanningSceneMonitorOptions& opti
 bool MoveItCpp::loadPlanningPipelines(const PlanningPipelineOptions& options)
 {
   // TODO(henningkayser): Use parent namespace for planning pipeline config lookup
-  // ros::NodeHandle node_handle(options.parent_namespace.empty() ? "~" : options.parent_namespace);
-  for (const auto& planning_pipeline_name : options.pipeline_names)
-  {
-    if (planning_pipelines_.count(planning_pipeline_name) > 0)
-    {
-      RCLCPP_WARN(LOGGER, "Skipping duplicate entry for planning pipeline '%s'.", planning_pipeline_name.c_str());
-      continue;
-    }
-    RCLCPP_INFO(LOGGER, "Loading planning pipeline '%s'", planning_pipeline_name.c_str());
-    planning_pipeline::PlanningPipelinePtr pipeline;
-    pipeline = std::make_shared<planning_pipeline::PlanningPipeline>(robot_model_, node_, planning_pipeline_name,
-                                                                     PLANNING_PLUGIN_PARAM);
-
-    if (!pipeline->getPlannerManager())
-    {
-      RCLCPP_ERROR(LOGGER, "Failed to initialize planning pipeline '%s'.", planning_pipeline_name.c_str());
-      continue;
-    }
-
-    planning_pipelines_[planning_pipeline_name] = pipeline;
-  }
+  planning_pipelines_ =
+      moveit::planning_pipeline_interfaces::createPlanningPipelineMap(options.pipeline_names, getRobotModel(), node_);
 
   if (planning_pipelines_.empty())
   {
     RCLCPP_ERROR(LOGGER, "Failed to load any planning pipelines.");
     return false;
   }
-
   return true;
 }
 
 moveit::core::RobotModelConstPtr MoveItCpp::getRobotModel() const
 {
-  return robot_model_;
+  return planning_scene_monitor_->getRobotModel();
 }
 
 const rclcpp::Node::SharedPtr& MoveItCpp::getNode() const
@@ -191,12 +169,12 @@ moveit::core::RobotStatePtr MoveItCpp::getCurrentState(double wait)
   return current_state;
 }
 
-const std::map<std::string, planning_pipeline::PlanningPipelinePtr>& MoveItCpp::getPlanningPipelines() const
+const std::unordered_map<std::string, planning_pipeline::PlanningPipelinePtr>& MoveItCpp::getPlanningPipelines() const
 {
   return planning_pipelines_;
 }
 
-const planning_scene_monitor::PlanningSceneMonitorPtr& MoveItCpp::getPlanningSceneMonitor() const
+planning_scene_monitor::PlanningSceneMonitorConstPtr MoveItCpp::getPlanningSceneMonitor() const
 {
   return planning_scene_monitor_;
 }
@@ -206,7 +184,7 @@ planning_scene_monitor::PlanningSceneMonitorPtr MoveItCpp::getPlanningSceneMonit
   return planning_scene_monitor_;
 }
 
-const trajectory_execution_manager::TrajectoryExecutionManagerPtr& MoveItCpp::getTrajectoryExecutionManager() const
+trajectory_execution_manager::TrajectoryExecutionManagerConstPtr MoveItCpp::getTrajectoryExecutionManager() const
 {
   return trajectory_execution_manager_;
 }
@@ -217,14 +195,14 @@ trajectory_execution_manager::TrajectoryExecutionManagerPtr MoveItCpp::getTrajec
 }
 
 moveit_controller_manager::ExecutionStatus
-MoveItCpp::execute(const std::string& /* group_name */, const robot_trajectory::RobotTrajectoryPtr& robot_trajectory,
-                   bool blocking, const std::vector<std::string>& /* controllers */)
+MoveItCpp::execute(const robot_trajectory::RobotTrajectoryPtr& robot_trajectory, bool /* blocking */,
+                   const std::vector<std::string>& /* controllers */)
 {
-  return execute(robot_trajectory, blocking);
+  return execute(robot_trajectory);
 }
 
 moveit_controller_manager::ExecutionStatus
-MoveItCpp::execute(const robot_trajectory::RobotTrajectoryPtr& robot_trajectory, bool blocking,
+MoveItCpp::execute(const robot_trajectory::RobotTrajectoryPtr& robot_trajectory,
                    const std::vector<std::string>& controllers)
 {
   if (!robot_trajectory)
@@ -245,19 +223,9 @@ MoveItCpp::execute(const robot_trajectory::RobotTrajectoryPtr& robot_trajectory,
   // Execute trajectory
   moveit_msgs::msg::RobotTrajectory robot_trajectory_msg;
   robot_trajectory->getRobotTrajectoryMsg(robot_trajectory_msg);
-  // TODO: cambel
-  // blocking is the only valid option right now. Add non-blocking use case
-  if (!blocking)
-  {
-    RCLCPP_ERROR(LOGGER, "Currently, the `blocking` parameter must be true. Not executing the trajectory.");
-    return moveit_controller_manager::ExecutionStatus::FAILED;
-  }
-  else
-  {
-    trajectory_execution_manager_->push(robot_trajectory_msg, controllers);
-    trajectory_execution_manager_->execute();
-    return trajectory_execution_manager_->waitForExecution();
-  }
+  trajectory_execution_manager_->push(robot_trajectory_msg, controllers);
+  trajectory_execution_manager_->execute();
+  return trajectory_execution_manager_->waitForExecution();
 }
 
 bool MoveItCpp::terminatePlanningPipeline(const std::string& pipeline_name)
@@ -279,15 +247,13 @@ bool MoveItCpp::terminatePlanningPipeline(const std::string& pipeline_name)
   }
 }
 
-const std::shared_ptr<tf2_ros::Buffer>& MoveItCpp::getTFBuffer() const
+std::shared_ptr<const tf2_ros::Buffer> MoveItCpp::getTFBuffer() const
+{
+  return planning_scene_monitor_->getTFClient();
+}
+std::shared_ptr<tf2_ros::Buffer> MoveItCpp::getTFBuffer()
 {
   return planning_scene_monitor_->getTFClient();
 }
 
-void MoveItCpp::clearContents()
-{
-  planning_scene_monitor_.reset();
-  robot_model_.reset();
-  planning_pipelines_.clear();
-}
 }  // namespace moveit_cpp

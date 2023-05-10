@@ -115,7 +115,7 @@ void init_moveit_py(py::module& m)
 
              if (provide_planning_service)
              {
-               moveit_cpp_ptr->getPlanningSceneMonitor()->providePlanningSceneService();
+               moveit_cpp_ptr->getPlanningSceneMonitorNonConst()->providePlanningSceneService();
              };
 
              return moveit_cpp_ptr;
@@ -128,9 +128,9 @@ void init_moveit_py(py::module& m)
            Initialize moveit_cpp node and the planning scene service.
            )")
       .def("execute",
-           py::overload_cast<const robot_trajectory::RobotTrajectoryPtr&, bool, const std::vector<std::string>&>(
+           py::overload_cast<const robot_trajectory::RobotTrajectoryPtr&, const std::vector<std::string>&>(
                &moveit_cpp::MoveItCpp::execute),
-           py::arg("robot_trajectory"), py::arg("blocking") = true, py::arg("controllers"),
+           py::arg("robot_trajectory"), py::arg("controllers"),
            R"(
 	   Execute a trajectory (planning group is inferred from robot trajectory object).
 	   )")
@@ -150,7 +150,7 @@ void init_moveit_py(py::module& m)
           Shutdown the moveit_cpp node.
           )")
 
-      .def("get_planning_scene_monitor", &moveit_cpp::MoveItCpp::getPlanningSceneMonitor,
+      .def("get_planning_scene_monitor", &moveit_cpp::MoveItCpp::getPlanningSceneMonitorNonConst,
            py::return_value_policy::reference,
            R"(
            Returns the planning scene monitor.

@@ -45,7 +45,7 @@ namespace moveit_rviz_plugin
 class PlanningLinkUpdater : public rviz_default_plugins::robot::LinkUpdater
 {
 public:
-  PlanningLinkUpdater(const moveit::core::RobotStateConstPtr& state) : kinematic_state_(state)
+  PlanningLinkUpdater(const moveit::core::RobotStateConstPtr& state) : robot_state_(state)
   {
   }
 
@@ -54,6 +54,6 @@ public:
                          Ogre::Quaternion& collision_orientation) const override;
 
 private:
-  moveit::core::RobotStateConstPtr kinematic_state_;
+  moveit::core::RobotStateConstPtr robot_state_;
 };
 }  // namespace moveit_rviz_plugin

@@ -2,6 +2,60 @@
 Changelog for package moveit_core
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.7.3 (2023-04-24)
+------------------
+
+2.7.2 (2023-04-18)
+------------------
+* Add JointModel::satisfiesAccelerationBounds() (`#2092 <https://github.com/ros-planning/moveit2/issues/2092>`_)
+  * Add JointModel::satisfiesAccelerationBounds()
+  * Check Jerk bounds too
+  * Check if bounds exist
+  ---------
+  Co-authored-by: Sebastian Jahr <sebastian.jahr@picknik.ai>
+* A ROS param for Servo filter coefficient (`#2091 <https://github.com/ros-planning/moveit2/issues/2091>`_)
+  * Add generate_parameter_library as dependency
+  * Generate and export parameter target
+  * Update butterworth filter to use params
+  * Move param listener declaration to header
+  * Formatting
+  * Remove unnecessary rclcpp include
+  * Fix alphabetical order
+  * Make param listener local
+  * Fix target exporting in cmake
+  * Add moveit\_ prefix to parameter library target
+  * Remove obsolete comment
+  * Member variable naming
+  * Alphabetize
+  ---------
+  Co-authored-by: AndyZe <andyz@utexas.edu>
+* Merge pull request `#1900 <https://github.com/ros-planning/moveit2/issues/1900>`_ from Abishalini/pr-sync-1245f15
+  Sync with MoveIt1
+* Readd comment and assign error code
+* Merge https://github.com/ros-planning/moveit/commit/1245f151393fe09023efec3e1faead2d26737227
+* Add test and debug issue where TOTG returns accels > limit (`#2084 <https://github.com/ros-planning/moveit2/issues/2084>`_)
+* Move stateless PlanningScene helper functions out of the class (`#2025 <https://github.com/ros-planning/moveit2/issues/2025>`_)
+* Document how collision checking includes descendent links (`#2058 <https://github.com/ros-planning/moveit2/issues/2058>`_)
+* Optionally mitigate Ruckig overshoot (`#2051 <https://github.com/ros-planning/moveit2/issues/2051>`_)
+  * Optionally mitigate Ruckig overshoot
+  * Cleanup
+* Delete the Ruckig "batches" option, deprecated by `#1990 <https://github.com/ros-planning/moveit2/issues/1990>`_ (`#2028 <https://github.com/ros-planning/moveit2/issues/2028>`_)
+* Merge PR `#3197 <https://github.com/ros-planning/moveit2/issues/3197>`_: Improve computeCartesianPath()
+* Gracefully handle gtest 1.8 (Melodic)
+  gtest 1.8 doesn't provide SetUpTestSuite().
+  Thus, we cannot share the RobotModel across tests.
+* Add unit tests for computeCartesianPath()
+* Add utils to simplify (approximate) equality checks for Eigen entities
+* robot_model_test_utils: Add loadIKPluginForGroup()
+* Simplify test_cartesian_interpolator.cpp
+* Generalize computeCartesianPath() to consider a link_offset
+  This allows performing a circular motion about a non-link origin.
+* Cleanup CartesianInterpolator
+  - Fixup doc comments
+  - Add API providing the translation vector = direction * distance
+  - Simplify implementation
+* Contributors: Abishalini, Abishalini Sivaraman, AndyZe, Robert Haschke, V Mohammed Ibrahim
+
 2.7.1 (2023-03-23)
 ------------------
 * Ruckig-smoothing : reduce number of  duration extensions (`#1990 <https://github.com/ros-planning/moveit2/issues/1990>`_)

@@ -39,10 +39,10 @@
 #pragma once
 
 // C++
+#include <atomic>
 #include <condition_variable>
 #include <mutex>
 #include <thread>
-#include <atomic>
 
 // ROS
 #include <control_msgs/msg/joint_jog.hpp>
@@ -64,9 +64,9 @@
 #include <moveit/kinematics_base/kinematics_base.h>
 
 // moveit_servo
-#include <moveit_servo/servo_parameters.h>
 #include <moveit_servo/status_codes.h>
 #include <moveit/online_signal_smoothing/smoothing_base_class.h>
+#include <moveit_servo_lib_parameters.hpp>
 
 namespace moveit_servo
 {
@@ -80,8 +80,8 @@ class ServoCalcs
 {
 public:
   ServoCalcs(const rclcpp::Node::SharedPtr& node,
-             const std::shared_ptr<const moveit_servo::ServoParameters>& parameters,
-             const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor);
+             const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor,
+             std::unique_ptr<const servo::ParamListener> servo_param_listener);
 
   ~ServoCalcs();
 
@@ -91,6 +91,15 @@ public:
    * @exception can throw a std::runtime_error if the setup was not completed
    */
   void start();
+
+  /** \brief Stop the currently running thread */
+  void stop();
+
+  /**
+   * Check for parameter update, and apply updates if any
+   * All dynamic parameters must be checked and updated within this method
+   */
+  void updateParams();
 
   /**
    * Get the MoveIt planning link transform.
@@ -112,9 +121,6 @@ public:
   bool getEEFrameTransform(Eigen::Isometry3d& transform);
   bool getEEFrameTransform(geometry_msgs::msg::TransformStamped& transform);
 
-  /** \brief Pause or unpause processing servo commands while keeping the timers alive */
-  void setPaused(bool paused);
-
 protected:
   /** \brief Run the main calculation loop */
   void mainCalcLoop();
@@ -122,18 +128,12 @@ protected:
   /** \brief Do calculations for a single iteration. Publish one outgoing command */
   void calculateSingleIteration();
 
-  /** \brief Stop the currently running thread */
-  void stop();
-
   /** \brief Do servoing calculations for Cartesian twist commands. */
   bool cartesianServoCalcs(geometry_msgs::msg::TwistStamped& cmd,
                            trajectory_msgs::msg::JointTrajectory& joint_trajectory);
 
   /** \brief Do servoing calculations for direct commands to a joint. */
   bool jointServoCalcs(const control_msgs::msg::JointJog& cmd, trajectory_msgs::msg::JointTrajectory& joint_trajectory);
-
-  /** \brief Parse the incoming joint msg for the joints of our MoveGroup */
-  void updateJoints();
 
   /**
    * Checks a JointJog msg for valid (non-NaN) velocities
@@ -188,18 +188,10 @@ protected:
    * Handles limit enforcement, internal state updated, collision scaling, and publishing the commands
    * @param delta_theta Eigen vector of joint delta's, from joint or Cartesian servo calcs
    * @param joint_trajectory Output trajectory message
+   * @param servo_type The type of servoing command being used
    */
   bool internalServoUpdate(Eigen::ArrayXd& delta_theta, trajectory_msgs::msg::JointTrajectory& joint_trajectory,
                            const ServoType servo_type);
-
-  /** \brief Joint-wise update of a sensor_msgs::msg::JointState with given delta's
-   * Also filters and calculates the previous velocity
-   * @param delta_theta Eigen vector of joint delta's
-   * @param joint_state The joint state msg being updated
-   * @param previous_vel Eigen vector of previous velocities being updated
-   * @return Returns false if there is a problem, true otherwise
-   */
-  bool applyJointUpdate(const Eigen::ArrayXd& delta_theta, sensor_msgs::msg::JointState& joint_state);
 
   /** \brief Gazebo simulations have very strict message timestamp requirements.
    * Satisfy Gazebo by stuffing multiple messages into one.
@@ -254,8 +246,9 @@ protected:
   // Pointer to the ROS node
   std::shared_ptr<rclcpp::Node> node_;
 
-  // Parameters from yaml
-  const std::shared_ptr<const moveit_servo::ServoParameters> parameters_;
+  // Servo parameters
+  std::unique_ptr<const servo::ParamListener> servo_param_listener_;
+  servo::Params servo_params_;
 
   // Pointer to the collision environment
   planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor_;
@@ -274,15 +267,16 @@ protected:
 
   moveit::core::RobotStatePtr current_state_;
 
-  // (mutex protected below)
-  // internal_joint_state_ is used in servo calculations. It shouldn't be relied on to be accurate.
-  // original_joint_state_ is the same as incoming_joint_state_ except it only contains the joints the servo node acts
-  // on.
-  sensor_msgs::msg::JointState internal_joint_state_, original_joint_state_;
+  // These variables are mutex protected
+  // previous_joint_state holds the state q(t - dt)
+  // current_joint_state holds the  state q(t) as retrieved from the planning scene monitor.
+  // next_joint_state holds the computed state q(t + dt)
+
+  sensor_msgs::msg::JointState previous_joint_state_, current_joint_state_, next_joint_state_;
   std::map<std::string, std::size_t> joint_state_name_map_;
 
   // Smoothing algorithm (loads a plugin)
-  std::shared_ptr<online_signal_smoothing::SmoothingBaseClass> smoother_;
+  pluginlib::UniquePtr<online_signal_smoothing::SmoothingBaseClass> smoother_;
 
   trajectory_msgs::msg::JointTrajectory::SharedPtr last_sent_command_;
 
@@ -303,7 +297,6 @@ protected:
 
   // Status
   StatusCode status_ = StatusCode::NO_WARNING;
-  std::atomic<bool> paused_;
   bool twist_command_is_stale_ = false;
   bool joint_command_is_stale_ = false;
   double collision_velocity_scale_ = 1.0;
@@ -334,17 +327,9 @@ protected:
   std::condition_variable input_cv_;
   bool new_input_cmd_ = false;
 
-  // dynamic parameters
-  std::string robot_link_command_frame_;
-  rcl_interfaces::msg::SetParametersResult robotLinkCommandFrameCallback(const rclcpp::Parameter& parameter);
-  double override_velocity_scaling_factor_;
-  rcl_interfaces::msg::SetParametersResult overrideVelocityScalingFactorCallback(const rclcpp::Parameter& parameter);
-
   // Load a smoothing plugin
   pluginlib::ClassLoader<online_signal_smoothing::SmoothingBaseClass> smoothing_loader_;
 
-  kinematics::KinematicsBaseConstPtr ik_solver_;
-  Eigen::Isometry3d ik_base_to_tip_frame_;
-  bool use_inv_jacobian_ = false;
+  kinematics::KinematicsBaseConstPtr ik_solver_ = nullptr;
 };
 }  // namespace moveit_servo
