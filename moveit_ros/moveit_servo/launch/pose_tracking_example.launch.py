@@ -14,7 +14,7 @@ def generate_launch_description():
     )
 
     # Get parameters for the Pose Tracking node
-    pid_params = {
+    pose_tracker_params = {
         "moveit_servo": ParameterBuilder("moveit_servo")
         .yaml("config/pose_tracking_settings.yaml")
         .to_dict()
@@ -63,7 +63,7 @@ def generate_launch_description():
         executable="servo_pose_tracking_demo",
         # prefix=['xterm -e gdb -ex run --args'],
         output="screen",
-        parameters=[moveit_config.to_dict(), servo_params, pid_params],
+        parameters=[moveit_config.to_dict(), servo_params, pose_tracker_params],
     )
 
     # ros2_control using FakeSystem as hardware
