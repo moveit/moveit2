@@ -89,7 +89,7 @@ int main(int argc, char** argv)
   executor.add_node(node);
   std::thread executor_thread([&executor]() { executor.spin(); });
 
-  auto servo_param_listener = std::make_unique<const servo::ParamListener>(node);
+  auto servo_param_listener = std::make_unique<const servo::ParamListener>(node, "moveit_servo");
   auto servo_parameters = servo_param_listener->get_params();
 
   // Load the planning scene monitor

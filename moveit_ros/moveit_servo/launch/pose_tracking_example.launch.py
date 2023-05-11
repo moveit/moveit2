@@ -14,16 +14,17 @@ def generate_launch_description():
     )
 
     # Get parameters for the Pose Tracking node
-    pid_params = (
-        ParameterBuilder("moveit_servo")
+    pid_params = {
+        "moveit_servo": ParameterBuilder("moveit_servo")
         .yaml("config/pose_tracking_settings.yaml")
         .to_dict()
-    )
-    servo_params = (
-        ParameterBuilder("moveit_servo")
+    }
+
+    servo_params = {
+        "moveit_servo": ParameterBuilder("moveit_servo")
         .yaml("config/panda_simulated_config_pose_tracking.yaml")
         .to_dict()
-    )
+    }
 
     # RViz
     rviz_config_file = (

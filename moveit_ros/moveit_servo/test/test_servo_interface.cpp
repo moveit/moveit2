@@ -169,7 +169,8 @@ TEST_F(ServoFixture, DynamicParameterTest)
   auto request = std::make_shared<rcl_interfaces::srv::SetParameters::Request>();
 
   // This is a dynamic parameter
-  request->parameters.push_back(rclcpp::Parameter("robot_link_command_frame", "panda_link4").to_parameter_msg());
+  request->parameters.push_back(
+      rclcpp::Parameter("moveit_servo.robot_link_command_frame", "panda_link4").to_parameter_msg());
 
   // This is not even a parameter that is declared (it should fail)
   request->parameters.push_back(rclcpp::Parameter("moveit_servo.not_set_parameter", 1.0).to_parameter_msg());

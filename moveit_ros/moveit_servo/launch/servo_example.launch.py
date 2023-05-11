@@ -19,6 +19,7 @@ def generate_launch_description():
         .yaml("config/panda_simulated_config.yaml")
         .to_dict()
     )
+    servo_params = {"moveit_servo": servo_params}
     # This filter parameter should be >1. Increase it for greater smoothing but slower motion.
     low_pass_filter_coeff = {"butterworth_filter_coeff": 1.5}
 
