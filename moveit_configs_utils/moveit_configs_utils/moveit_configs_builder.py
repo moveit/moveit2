@@ -162,6 +162,7 @@ class MoveItConfigsBuilder(ParameterBuilder):
 
         self.__urdf_package = None
         self.__urdf_file_path = None
+        self.__urdf_xacro_args = None
         self.__srdf_file_path = None
 
         modified_urdf_path = Path("config") / (self.__robot_name + ".urdf.xacro")
@@ -178,6 +179,9 @@ class MoveItConfigsBuilder(ParameterBuilder):
                     get_package_share_directory(urdf_config["package"])
                 )
                 self.__urdf_file_path = Path(urdf_config["relative_path"])
+                
+                if "xacro_args" in urdf_config:
+                    self.__urdf_xacro_args = dict(arg.split(":=") for arg in urdf_config["xacro_args"].split(' '))
 
             srdf_config = config.get("srdf", config.get("SRDF"))
             if srdf_config:
@@ -217,6 +221,7 @@ class MoveItConfigsBuilder(ParameterBuilder):
             robot_description_file_path = self.__urdf_package / self.__urdf_file_path
         else:
             robot_description_file_path = self._package_path / file_path
+        mappings = self.__urdf_xacro_args
         if (mappings is None) or all(
             (isinstance(key, str) and isinstance(value, str))
             for key, value in mappings.items()
@@ -253,7 +258,6 @@ class MoveItConfigsBuilder(ParameterBuilder):
         :param mappings: mappings to be passed when loading the xacro file.
         :return: Instance of MoveItConfigsBuilder with robot_description_semantic loaded.
         """
-
         if (mappings is None) or all(
             (isinstance(key, str) and isinstance(value, str))
             for key, value in mappings.items()
