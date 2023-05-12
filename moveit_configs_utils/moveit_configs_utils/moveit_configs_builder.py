@@ -223,7 +223,6 @@ class MoveItConfigsBuilder(ParameterBuilder):
             robot_description_file_path = self.__urdf_package / self.__urdf_file_path
         else:
             robot_description_file_path = self._package_path / file_path
-        mappings = self.__urdf_xacro_args
         if (mappings is None) or all(
             (isinstance(key, str) and isinstance(value, str))
             for key, value in mappings.items()
