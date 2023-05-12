@@ -179,9 +179,11 @@ class MoveItConfigsBuilder(ParameterBuilder):
                     get_package_share_directory(urdf_config["package"])
                 )
                 self.__urdf_file_path = Path(urdf_config["relative_path"])
-                
+
                 if "xacro_args" in urdf_config:
-                    self.__urdf_xacro_args = dict(arg.split(":=") for arg in urdf_config["xacro_args"].split(' '))
+                    self.__urdf_xacro_args = dict(
+                        arg.split(":=") for arg in urdf_config["xacro_args"].split(" ")
+                    )
 
             srdf_config = config.get("srdf", config.get("SRDF"))
             if srdf_config:
