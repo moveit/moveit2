@@ -48,36 +48,61 @@ namespace planning_request_adapter
 {
 MOVEIT_CLASS_FORWARD(PlanningRequestAdapter);  // Defines PlanningRequestAdapterPtr, ConstPtr, WeakPtr... etc
 
+/** @brief Concept in MoveIt which can be used to modify the planning problem and resulting trajectory (pre-processing
+ * and/or post-processing) for a motion planner. PlanningRequestAdapter enable using multiple motion planning and
+ * trajectory generation algorithms in sequence to produce robust motion plans.
+ */
 class PlanningRequestAdapter
 {
 public:
+  /// \brief Functional interface to call a planning function
   using PlannerFn =
       std::function<bool(const planning_scene::PlanningSceneConstPtr&, const planning_interface::MotionPlanRequest&,
                          planning_interface::MotionPlanResponse&)>;
 
-  PlanningRequestAdapter()
-  {
-  }
-
-  virtual ~PlanningRequestAdapter()
-  {
-  }
+  virtual ~PlanningRequestAdapter() = default;
 
   /** \brief Initialize parameters using the passed Node and parameter namespace.
+   *  @param node Node instance used by the adapter
+   *  @param parameter_namespace Parameter namespace for adapter
       If no initialization is needed, simply implement as empty */
   virtual void initialize(const rclcpp::Node::SharedPtr& node, const std::string& parameter_namespace) = 0;
 
-  /// Get a short string that identifies the planning request adapter
+  /** \brief Get a description of this adapter
+   *  @return Returns a short string that identifies the planning request adapter
+   */
   virtual std::string getDescription() const
   {
     return "";
   }
 
+  /** \brief Adapt the planning request if needed, call the planner
+      function \e planner and update the planning response if
+      needed.
+   *  @param planner Pointer to the planner used to solve the passed problem
+   *  @param planning_scene Representation of the environment for the planning
+   *  @param req Motion planning request with a set of constraints
+   *  @param res Reference to which the generated motion plan response is written to
+   *  @return True if response got generated correctly */
   bool adaptAndPlan(const planning_interface::PlannerManagerPtr& planner,
                     const planning_scene::PlanningSceneConstPtr& planning_scene,
                     const planning_interface::MotionPlanRequest& req,
                     planning_interface::MotionPlanResponse& res) const;
 
+  /** \brief Adapt the planning request if needed, call the planner
+      function \e planner and update the planning response if
+      needed. If the response is changed, the index values of the
+      states added without planning are added to \e
+      added_path_index
+   *  @param planner Pointer to the planner used to solve the passed problem
+   *  @param planning_scene Representation of the environment for the planning
+   *  @param req Motion planning request with a set of constraints
+   *  @param res Reference to which the generated motion plan response is written to
+   *  @param added_path_index Sometimes planning request adapters may add states on the solution path (e.g.,
+     add the current state of the robot as prefix, when the robot started to plan only from near that state, as the
+     current state itself appears to touch obstacles). This is helpful because the added states should not be considered
+     invalid in all situations.
+   *  @return True if response got generated correctly */
   bool adaptAndPlan(const planning_interface::PlannerManagerPtr& planner,
                     const planning_scene::PlanningSceneConstPtr& planning_scene,
                     const planning_interface::MotionPlanRequest& req, planning_interface::MotionPlanResponse& res,
@@ -87,7 +112,16 @@ public:
       function \e planner and update the planning response if
       needed. If the response is changed, the index values of the
       states added without planning are added to \e
-      added_path_index */
+      added_path_index
+   *  @param planner Pointer to the planner used to solve the passed problem
+   *  @param planning_scene Representation of the environment for the planning
+   *  @param req Motion planning request with a set of constraints
+   *  @param res Reference to which the generated motion plan response is written to
+   *  @param added_path_index Sometimes planning request adapters may add states on the solution path (e.g.,
+        add the current state of the robot as prefix, when the robot started to plan only from near that state, as the
+        current state itself appears to touch obstacles). This is helpful because the added states should not be
+   considered invalid in all situations.
+   *  @return True if response got generated correctly */
   virtual bool adaptAndPlan(const PlannerFn& planner, const planning_scene::PlanningSceneConstPtr& planning_scene,
                             const planning_interface::MotionPlanRequest& req,
                             planning_interface::MotionPlanResponse& res,
@@ -115,24 +149,35 @@ protected:
   }
 };
 
-/// Apply a sequence of adapters to a motion plan
+/** \brief Apply a sequence of adapters to a motion plan */
 class PlanningRequestAdapterChain
 {
 public:
-  PlanningRequestAdapterChain()
-  {
-  }
+  /** \brief Add new adapter to the back of the chain
+   *  @param adapter Adapter to be added */
+  void addAdapter(const PlanningRequestAdapterConstPtr& adapter);
 
-  void addAdapter(const PlanningRequestAdapterConstPtr& adapter)
-  {
-    adapters_.push_back(adapter);
-  }
-
+  /** \brief Iterate through the chain and call all adapters and planners in the correct order
+   *  @param planner Pointer to the planner used to solve the passed problem
+   *  @param planning_scene Representation of the environment for the planning
+   *  @param req Motion planning request with a set of constraints
+   *  @param res Reference to which the generated motion plan response is written to
+   *  @return True if response got generated correctly */
   bool adaptAndPlan(const planning_interface::PlannerManagerPtr& planner,
                     const planning_scene::PlanningSceneConstPtr& planning_scene,
                     const planning_interface::MotionPlanRequest& req,
                     planning_interface::MotionPlanResponse& res) const;
 
+  /** \brief Iterate through the chain and call all adapters and planners in the correct order
+   *  @param planner Pointer to the planner used to solve the passed problem
+   *  @param planning_scene Representation of the environment for the planning
+   *  @param req Motion planning request with a set of constraints
+   *  @param res Reference to which the generated motion plan response is written to
+   *  @param added_path_index Sometimes planning request adapters may add states on the solution path (e.g.,
+          add the current state of the robot as prefix, when the robot started to plan only from near that state, as the
+          current state itself appears to touch obstacles). This is helpful because the added states should not be
+          considered invalid in all situations.
+   *  @return True if response got generated correctly */
   bool adaptAndPlan(const planning_interface::PlannerManagerPtr& planner,
                     const planning_scene::PlanningSceneConstPtr& planning_scene,
                     const planning_interface::MotionPlanRequest& req, planning_interface::MotionPlanResponse& res,
