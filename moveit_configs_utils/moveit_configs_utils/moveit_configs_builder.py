@@ -231,7 +231,8 @@ class MoveItConfigsBuilder(ParameterBuilder):
             try:
                 self.__moveit_configs.robot_description = {
                     self.__robot_description: load_xacro(
-                        robot_description_file_path, mappings=mappings
+                        robot_description_file_path,
+                        mappings=mappings or self.__urdf_xacro_args,
                     )
                 }
             except ParameterBuilderFileNotFoundError as e:
