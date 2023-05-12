@@ -19,12 +19,12 @@ def generate_servo_test_description(
     )
 
     # Get parameters for the Pose Tracking and Servo nodes
-    servo_params = (
-        ParameterBuilder("moveit_servo")
+    servo_params = {
+        "moveit_servo": ParameterBuilder("moveit_servo")
         .yaml("config/pose_tracking_settings.yaml")
         .yaml("config/panda_simulated_config_pose_tracking.yaml")
         .to_dict()
-    )
+    }
 
     # ros2_control using FakeSystem as hardware
     ros2_controllers_path = os.path.join(

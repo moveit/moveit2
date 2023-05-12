@@ -68,7 +68,7 @@ ServoNode::ServoNode(const rclcpp::NodeOptions& options)
   node_->get_parameter_or("robot_description_name", robot_description_name, robot_description_name);
 
   // Get the servo parameters
-  auto param_listener = std::make_unique<const servo::ParamListener>(node_);
+  auto param_listener = std::make_unique<const servo::ParamListener>(node_, "moveit_servo");
   auto servo_parameters = param_listener->get_params();
   // Validate the parameters first.
   validateParams(servo_parameters);
