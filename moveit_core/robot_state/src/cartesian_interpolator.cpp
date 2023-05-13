@@ -450,12 +450,12 @@ CartesianInterpolator::Percentage CartesianInterpolator::computeCartesianPath(
     Eigen::Isometry3d pose(start_quaternion.slerp(percentage, target_quaternion));
     pose.translation() = percentage * rotated_target.translation() + (1 - percentage) * start_pose.translation();
 
-    // Explicitly use a single IK attempt only (by setting a timeout of 0.0), using the current state as the seed.
-    // Random seeding (of additional attempts) would create large joint-space jumps.
-    if (start_state->setFromIK(group, pose * offset, link->getName(), consistency_limits, 0.0, validCallback, options,
-                               cost_function))
+    // Explicitly use a single IK attempt only: We want a smooth trajectory.
+    // Random seeding (of additional attempts) would probably create IK jumps.
+    if (start_state->setFromIK(group, pose * offset, link->getName(), consistency_limits, 0.0, validCallback, options))
     {
-      path.push_back(std::make_shared<moveit::core::RobotState>(*start_state));
+      start_state->update();
+      traj.push_back(std::make_shared<moveit::core::RobotState>(*start_state));
     }
     else
     {

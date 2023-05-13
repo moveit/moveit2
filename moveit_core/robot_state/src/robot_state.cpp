@@ -907,7 +907,8 @@ void RobotState::updateStateWithLinkAt(const LinkModel* link, const Eigen::Isome
   }
 }
 
-const LinkModel* RobotState::getRigidlyConnectedParentLinkModel(const std::string& frame) const
+const LinkModel* RobotState::getRigidlyConnectedParentLinkModel(const std::string& frame, Eigen::Isometry3d* transform,
+                                                                const moveit::core::JointModelGroup* jmg) const
 {
   const LinkModel* link{ nullptr };
 
@@ -920,16 +921,35 @@ const LinkModel* RobotState::getRigidlyConnectedParentLinkModel(const std::strin
     auto body{ getAttachedBody(object) };
     if (!body->hasSubframeTransform(frame))
       return nullptr;
+    if (transform)
+      *transform = body->getGlobalSubframeTransform(frame);
     link = body->getAttachedLink();
   }
   else if (hasAttachedBody(frame))
   {
-    link = getAttachedBody(frame)->getAttachedLink();
+    auto body{ getAttachedBody(frame) };
+    if (transform)
+      *transform = body->getGlobalPose();
+    link = body->getAttachedLink();
   }
   else if (getRobotModel()->hasLinkModel(frame))
+  {
     link = getLinkModel(frame);
-
-  return getRobotModel()->getRigidlyConnectedParentLinkModel(link);
+    if (transform)
+    {
+      BOOST_VERIFY(checkLinkTransforms());
+      *transform = global_link_transforms_[link->getLinkIndex()];
+    }
+  }
+  // link is valid and transform describes pose of frame w.r.t. global frame
+  auto* parent = getRobotModel()->getRigidlyConnectedParentLinkModel(link, jmg);
+  if (parent && transform)
+  {
+    BOOST_VERIFY(checkLinkTransforms());
+    // compute transform from parent link to frame
+    *transform = global_link_transforms_[parent->getLinkIndex()].inverse() * *transform;
+  }
+  return parent;
 }
 
 const Eigen::Isometry3d& RobotState::getJointTransform(const JointModel* joint)
@@ -1872,8 +1892,7 @@ bool RobotState::setFromIK(const JointModelGroup* jmg, const EigenSTL::vector_Is
     if (!setToIKSolverFrame(pose, solver))
       return false;
 
-    // try all of the solver's possible tip frames to see if they uniquely align with any of our passed in pose tip
-    // frames
+    // try all of the solver's possible tip frames to see if they match with any of the passed-in pose tip frames
     bool found_valid_frame = false;
     std::size_t solver_tip_id;  // our current index
     for (solver_tip_id = 0; solver_tip_id < solver_tip_frames.size(); ++solver_tip_id)
@@ -1892,20 +1911,20 @@ bool RobotState::setFromIK(const JointModelGroup* jmg, const EigenSTL::vector_Is
 
       if (pose_frame != solver_tip_frame)
       {
-        auto* pose_parent = getRigidlyConnectedParentLinkModel(pose_frame);
+        Eigen::Isometry3d pose_parent_to_frame;
+        auto* pose_parent = getRigidlyConnectedParentLinkModel(pose_frame, &pose_parent_to_frame, jmg);
         if (!pose_parent)
         {
-          RCLCPP_ERROR_STREAM(getLogger(), "The following Pose Frame does not exist: " << pose_frame);
+          ROS_ERROR_STREAM_NAMED(LOGNAME, "Pose frame '" << pose_frame << "' does not exist.");
           return false;
         }
-        Eigen::Isometry3d pose_parent_to_frame = getFrameTransform(pose_frame);
-        auto* tip_parent = getRigidlyConnectedParentLinkModel(solver_tip_frame);
+        Eigen::Isometry3d tip_parent_to_tip;
+        auto* tip_parent = getRigidlyConnectedParentLinkModel(solver_tip_frame, &tip_parent_to_tip, jmg);
         if (!tip_parent)
         {
-          RCLCPP_ERROR_STREAM(getLogger(), "The following Solver Tip Frame does not exist: " << solver_tip_frame);
+          ROS_ERROR_STREAM_NAMED(LOGNAME, "Solver tip frame '" << solver_tip_frame << "' does not exist.");
           return false;
         }
-        Eigen::Isometry3d tip_parent_to_tip = getFrameTransform(solver_tip_frame);
         if (pose_parent == tip_parent)
         {
           // transform goal pose as target for solver_tip_frame (instead of pose_frame)
@@ -1918,8 +1937,8 @@ bool RobotState::setFromIK(const JointModelGroup* jmg, const EigenSTL::vector_Is
       {
         found_valid_frame = true;
         break;
-      }  // end if pose_frame
-    }    // end for solver_tip_frames
+      }
+    }  // end for solver_tip_frames
 
     // Make sure one of the tip frames worked
     if (!found_valid_frame)
