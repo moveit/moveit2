@@ -191,11 +191,6 @@ protected:
   bool internalServoUpdate(Eigen::ArrayXd& delta_theta, trajectory_msgs::msg::JointTrajectory& joint_trajectory,
                            const ServoType servo_type);
 
-  /** \brief Gazebo simulations have very strict message timestamp requirements.
-   * Satisfy Gazebo by stuffing multiple messages into one.
-   */
-  void insertRedundantPointsIntoTrajectory(trajectory_msgs::msg::JointTrajectory& joint_trajectory, int count) const;
-
   /* \brief Command callbacks */
   void twistStampedCB(const geometry_msgs::msg::TwistStamped::ConstSharedPtr& msg);
   void jointCmdCB(const control_msgs::msg::JointJog::ConstSharedPtr& msg);
@@ -259,8 +254,6 @@ protected:
 
   // Use ArrayXd type to enable more coefficient-wise operations
   Eigen::ArrayXd delta_theta_;
-
-  const int gazebo_redundant_message_count_ = 30;
 
   unsigned int num_joints_;
 

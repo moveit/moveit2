@@ -636,32 +636,8 @@ bool ServoCalcs::internalServoUpdate(Eigen::ArrayXd& delta_theta,
   // compose outgoing message
   composeJointTrajMessage(next_joint_state_, joint_trajectory);
 
-  // Modify the output message if we are using gazebo
-  if (servo_params_.use_gazebo)
-  {
-    insertRedundantPointsIntoTrajectory(joint_trajectory, gazebo_redundant_message_count_);
-  }
-
   previous_joint_state_ = current_joint_state_;
   return true;
-}
-
-// Spam several redundant points into the trajectory. The first few may be skipped if the
-// time stamp is in the past when it reaches the client. Needed for gazebo simulation.
-// Start from 1 because the first point's timestamp is already 1*servo_parameters_.publish_period
-void ServoCalcs::insertRedundantPointsIntoTrajectory(trajectory_msgs::msg::JointTrajectory& joint_trajectory,
-                                                     int count) const
-{
-  if (count < 2)
-    return;
-  joint_trajectory.points.resize(count);
-  auto point = joint_trajectory.points[0];
-  // Start from 1 because we already have the first point. End at count+1 so (total #) == count
-  for (int i = 1; i < count; ++i)
-  {
-    point.time_from_start = rclcpp::Duration::from_seconds((i + 1) * servo_params_.publish_period);
-    joint_trajectory.points[i] = point;
-  }
 }
 
 void ServoCalcs::resetLowPassFilters(const sensor_msgs::msg::JointState& joint_state)
