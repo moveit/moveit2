@@ -76,7 +76,7 @@ DepthImageOctomapUpdater::DepthImageOctomapUpdater()
 
 DepthImageOctomapUpdater::~DepthImageOctomapUpdater()
 {
-  stopHelper();
+  sub_depth_image_.shutdown();
 }
 
 bool DepthImageOctomapUpdater::setParams(const std::string& name_space)
@@ -159,11 +159,6 @@ void DepthImageOctomapUpdater::start()
 
 void DepthImageOctomapUpdater::stop()
 {
-  stopHelper();
-}
-
-void DepthImageOctomapUpdater::stopHelper()
-{
   sub_depth_image_.shutdown();
 }
 
@@ -208,18 +203,15 @@ bool DepthImageOctomapUpdater::getShapeTransform(mesh_filter::MeshHandle h, Eige
 
 namespace
 {
-bool host_is_big_endian()
-{
+const bool HOST_IS_BIG_ENDIAN = []() {
   union
   {
     uint32_t i;
     char c[sizeof(uint32_t)];
   } bint = { 0x01020304 };
   return bint.c[0] == 1;
-}
+}();
 }  // namespace
-
-static const bool HOST_IS_BIG_ENDIAN = host_is_big_endian();
 
 void DepthImageOctomapUpdater::depthImageCallback(const sensor_msgs::msg::Image::ConstSharedPtr& depth_msg,
                                                   const sensor_msgs::msg::CameraInfo::ConstSharedPtr& info_msg)

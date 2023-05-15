@@ -258,7 +258,7 @@ void plan_execution::PlanExecution::planAndExecuteHelper(ExecutableMotionPlan& p
   else
   {
     RCLCPP_DEBUG(LOGGER, "PlanExecution terminating with error code %d - '%s'", plan.error_code.val,
-                 moveit::core::error_code_to_string(plan.error_code).c_str());
+                 moveit::core::errorCodeToString(plan.error_code).c_str());
   }
 }
 

@@ -115,7 +115,7 @@ private:
   std::string root_frame_name_;
 };
 
-Eigen::Isometry3f KDLToEigenMatrix(const KDL::Frame& p);
+Eigen::Isometry3f kdlToEigenMatrix(const KDL::Frame& p);
 double computeEuclideanDistance(const std::vector<double>& array_1, const KDL::JntArray& array_2);
 void getKDLChainInfo(const KDL::Chain& chain, moveit_msgs::msg::KinematicSolverInfo& chain_info);
 

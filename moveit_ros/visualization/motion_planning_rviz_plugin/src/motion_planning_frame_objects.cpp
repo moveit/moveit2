@@ -57,7 +57,7 @@
 
 namespace
 {
-QString subframe_poses_to_qstring(const moveit::core::FixedTransformsMap& subframes)
+QString subframePosesToQstring(const moveit::core::FixedTransformsMap& subframes)
 {
   QString status_text = "\nIt has the subframes '";
   for (const auto& subframe : subframes)
@@ -266,7 +266,7 @@ static QString decideStatusText(const collision_detection::CollisionEnv::ObjectC
   }
   if (!obj->subframe_poses_.empty())
   {
-    status_text += subframe_poses_to_qstring(obj->subframe_poses_);
+    status_text += subframePosesToQstring(obj->subframe_poses_);
   }
   return status_text;
 }
@@ -277,7 +277,7 @@ static QString decideStatusText(const moveit::core::AttachedBody* attached_body)
                         QString::fromStdString(attached_body->getAttachedLinkName()) + "'.";
   if (!attached_body->getSubframes().empty())
   {
-    status_text += subframe_poses_to_qstring(attached_body->getSubframes());
+    status_text += subframePosesToQstring(attached_body->getSubframes());
   }
   return status_text;
 }

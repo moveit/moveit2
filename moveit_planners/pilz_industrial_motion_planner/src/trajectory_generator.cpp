@@ -47,7 +47,10 @@
 
 namespace pilz_industrial_motion_planner
 {
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.pilz_industrial_motion_planner.trajectory_generator");
+namespace
+{
+const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.pilz_industrial_motion_planner.trajectory_generator");
+}
 
 sensor_msgs::msg::JointState TrajectoryGenerator::filterGroupValues(const sensor_msgs::msg::JointState& robot_state,
                                                                     const std::string& group) const

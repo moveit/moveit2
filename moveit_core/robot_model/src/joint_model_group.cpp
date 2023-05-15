@@ -51,7 +51,7 @@ namespace core
 {
 namespace
 {
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_robot_model.joint_model_group");
+const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_robot_model.joint_model_group");
 
 // check if a parent or ancestor of joint is included in this group
 bool includesParent(const JointModel* joint, const JointModelGroup* group)

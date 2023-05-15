@@ -50,7 +50,7 @@ using namespace std::chrono_literals;
 
 namespace
 {
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_ros.current_state_monitor");
+const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_ros.current_state_monitor");
 }
 
 CurrentStateMonitor::CurrentStateMonitor(std::unique_ptr<CurrentStateMonitor::MiddlewareHandle> middleware_handle,

@@ -52,13 +52,13 @@ inline bool declareParameters(const std::string& joint_name, const std::string& 
   return joint_limits::declare_parameters(joint_name, node, param_ns);
 }
 /**
- * @see joint_limits::get_joint_limits(...)
+ * @see joint_limits::getJointLimits(...)
  */
 inline bool getJointLimits(const std::string& joint_name, const std::string& param_ns,
                            const rclcpp::Node::SharedPtr& node, joint_limits_interface::JointLimits& limits)
 {
   // Load the existing limits
-  if (!joint_limits::get_joint_limits(joint_name, node, param_ns, limits))
+  if (!joint_limits::getJointLimits(joint_name, node, param_ns, limits))
   {
     return false;  // LCOV_EXCL_LINE // The case where getJointLimits returns
                    // false is covered above.

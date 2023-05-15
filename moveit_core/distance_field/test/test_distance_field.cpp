@@ -59,7 +59,7 @@ static const Eigen::Vector3d POINT1(0.1, 0.0, 0.0);
 static const Eigen::Vector3d POINT2(0.0, 0.1, 0.2);
 static const Eigen::Vector3d POINT3(0.4, 0.0, 0.0);
 
-int dist_sq(int x, int y, int z)
+int distanceSequence(int x, int y, int z)
 {
   return x * x + y * y + z * z;
 }
@@ -295,8 +295,8 @@ unsigned int countLeafNodes(const octomap::OcTree& octree)
 }
 
 // points should contain all occupied points
-void check_distance_field(const PropagationDistanceField& df, const EigenSTL::vector_Vector3d& points, int numX,
-                          int numY, int numZ, bool do_negs)
+void checkDistanceField(const PropagationDistanceField& df, const EigenSTL::vector_Vector3d& points, int numX, int numY,
+                        int numZ, bool do_negs)
 {
   EigenSTL::vector_Vector3i points_ind(points.size());
   for (unsigned int i = 0; i < points.size(); ++i)
@@ -374,7 +374,7 @@ TEST(TestPropagationDistanceField, TestAddRemovePoints)
   // std::cout << "One removal, one addition" << '\n';
   // print(df, numX, numY, numZ);
   // printNeg(df, numX, numY, numZ);
-  check_distance_field(df, points, num_x, num_y, num_z, false);
+  checkDistanceField(df, points, num_x, num_y, num_z, false);
 
   // Remove
   points.clear();
@@ -382,7 +382,7 @@ TEST(TestPropagationDistanceField, TestAddRemovePoints)
   df.removePointsFromField(points);
   points.clear();
   points.push_back(POINT3);
-  check_distance_field(df, points, num_x, num_y, num_z, false);
+  checkDistanceField(df, points, num_x, num_y, num_z, false);
 
   // now testing gradient calls
   df.reset();
@@ -455,7 +455,7 @@ TEST(TestSignedPropagationDistanceField, TestSignedAddRemovePoints)
   // print(df, numX, numY, numZ);
 
   // TODO - check initial values
-  // EXPECT_EQ( df.getCell(0,0,0).distance_square_, max_dist_sq_in_voxels );
+  // EXPECT_EQ( df.getCell(0,0,0).distance_square_, max_distanceSequence_in_voxels );
 
   // Add points to the grid
   double lwx, lwy, lwz;
@@ -627,7 +627,7 @@ TEST(TestSignedPropagationDistanceField, TestShape)
   EigenSTL::vector_Vector3d point_vec;
   findInternalPointsConvex(*body, RESOLUTION, point_vec);
   delete body;
-  check_distance_field(df, point_vec, num_x, num_y, num_z, true);
+  checkDistanceField(df, point_vec, num_x, num_y, num_z, true);
 
   // std::cout << "Shape pos "<< '\n';
   // print(df, numX, numY, numZ);
@@ -644,12 +644,12 @@ TEST(TestSignedPropagationDistanceField, TestShape)
   delete body;
   EigenSTL::vector_Vector3d point_vec_union = point_vec_2;
   point_vec_union.insert(point_vec_union.end(), point_vec.begin(), point_vec.end());
-  check_distance_field(df, point_vec_union, num_x, num_y, num_z, true);
+  checkDistanceField(df, point_vec_union, num_x, num_y, num_z, true);
 
   // should get rid of old pose
   df.moveShapeInField(&sphere, p, np);
 
-  check_distance_field(df, point_vec_2, num_x, num_y, num_z, true);
+  checkDistanceField(df, point_vec_2, num_x, num_y, num_z, true);
 
   // should be equivalent to just adding second shape
   PropagationDistanceField test_df(WIDTH, HEIGHT, DEPTH, RESOLUTION, ORIGIN_X, ORIGIN_Y, ORIGIN_Z, MAX_DIST, true);

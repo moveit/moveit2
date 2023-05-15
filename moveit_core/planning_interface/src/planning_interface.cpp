@@ -53,9 +53,9 @@ struct ActiveContexts
   std::set<PlanningContext*> contexts_;
 };
 
-static ActiveContexts& getActiveContexts()
+ActiveContexts& getActiveContexts()
 {
-  static ActiveContexts ac;
+  ActiveContexts ac;
   return ac;
 }
 }  // namespace

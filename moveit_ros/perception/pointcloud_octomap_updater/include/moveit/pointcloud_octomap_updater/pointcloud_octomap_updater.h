@@ -52,7 +52,7 @@ class PointCloudOctomapUpdater : public OccupancyMapUpdater
 {
 public:
   PointCloudOctomapUpdater();
-  ~PointCloudOctomapUpdater() override;
+  ~PointCloudOctomapUpdater() override{};
 
   bool setParams(const std::string& name_space) override;
 
@@ -69,7 +69,6 @@ protected:
 private:
   bool getShapeTransform(ShapeHandle h, Eigen::Isometry3d& transform) const;
   void cloudMsgCallback(const sensor_msgs::msg::PointCloud2::ConstSharedPtr& cloud_msg);
-  void stopHelper();
 
   // TODO: Enable private node for publishing filtered point cloud
   // ros::NodeHandle root_nh_;

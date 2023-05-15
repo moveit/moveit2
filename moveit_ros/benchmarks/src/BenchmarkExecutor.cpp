@@ -1026,7 +1026,7 @@ void BenchmarkExecutor::collectMetrics(PlannerRunData& metrics,
       const robot_trajectory::RobotTrajectory& p = *motion_plan_response.trajectory[j];
 
       // compute path length
-      traj_len = robot_trajectory::path_length(p);
+      traj_len = robot_trajectory::pathLength(p);
 
       // compute correctness and clearance
       collision_detection::CollisionRequest req;

@@ -61,11 +61,6 @@ PointCloudOctomapUpdater::PointCloudOctomapUpdater()
 {
 }
 
-PointCloudOctomapUpdater::~PointCloudOctomapUpdater()
-{
-  stopHelper();
-}
-
 bool PointCloudOctomapUpdater::setParams(const std::string& name_space)
 {
   // This parameter is optional
@@ -129,15 +124,10 @@ void PointCloudOctomapUpdater::start()
   }
 }
 
-void PointCloudOctomapUpdater::stopHelper()
+void PointCloudOctomapUpdater::stop()
 {
   delete point_cloud_filter_;
   delete point_cloud_subscriber_;
-}
-
-void PointCloudOctomapUpdater::stop()
-{
-  stopHelper();
   point_cloud_filter_ = nullptr;
   point_cloud_subscriber_ = nullptr;
 }

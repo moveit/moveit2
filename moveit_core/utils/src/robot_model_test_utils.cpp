@@ -104,7 +104,7 @@ srdf::ModelSharedPtr loadSRDFModel(const std::string& robot_name)
   return srdf_model;
 }
 
-void loadIKPluginForGroup(rclcpp::Node::SharedPtr node, JointModelGroup* jmg, const std::string& base_link,
+void loadIKPluginForGroup(const rclcpp::Node::SharedPtr& node, JointModelGroup* jmg, const std::string& base_link,
                           const std::string& tip_link, std::string plugin, double timeout)
 {
   using LoaderType = pluginlib::ClassLoader<kinematics::KinematicsBase>;
