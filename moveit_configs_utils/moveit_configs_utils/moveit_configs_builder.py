@@ -162,6 +162,7 @@ class MoveItConfigsBuilder(ParameterBuilder):
 
         self.__urdf_package = None
         self.__urdf_file_path = None
+        self.__urdf_xacro_args = None
         self.__srdf_file_path = None
 
         modified_urdf_path = Path("config") / (self.__robot_name + ".urdf.xacro")
@@ -178,6 +179,11 @@ class MoveItConfigsBuilder(ParameterBuilder):
                     get_package_share_directory(urdf_config["package"])
                 )
                 self.__urdf_file_path = Path(urdf_config["relative_path"])
+
+                if (xacro_args := urdf_config.get("xacro_args")) is not None:
+                    self.__urdf_xacro_args = dict(
+                        arg.split(":=") for arg in xacro_args.split(" ") if arg
+                    )
 
             srdf_config = config.get("srdf", config.get("SRDF"))
             if srdf_config:
@@ -224,7 +230,8 @@ class MoveItConfigsBuilder(ParameterBuilder):
             try:
                 self.__moveit_configs.robot_description = {
                     self.__robot_description: load_xacro(
-                        robot_description_file_path, mappings=mappings
+                        robot_description_file_path,
+                        mappings=mappings or self.__urdf_xacro_args,
                     )
                 }
             except ParameterBuilderFileNotFoundError as e:
