@@ -46,8 +46,6 @@
 #include <std_msgs/msg/bool.hpp>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
 
-// #include <moveit_servo/make_shared_from_pool.h> // TODO(adamp): create an issue about this
-#include <moveit_servo/enforce_limits.hpp>
 #include <moveit_servo/servo_calcs.h>
 #include <moveit_servo/utilities.h>
 
@@ -618,7 +616,8 @@ bool ServoCalcs::internalServoUpdate(Eigen::ArrayXd& delta_theta,
                         servo_params_.override_velocity_scaling_factor);
 
   // Enforce SRDF position limits, might halt if needed, set prev_vel to 0
-  const auto joints_to_halt = enforcePositionLimits(next_joint_state_);
+  const auto joints_to_halt = enforcePositionLimits(next_joint_state_, servo_params_.joint_limit_margin,
+                                                    joint_model_group_, *node_->get_clock());
   if (!joints_to_halt.empty())
   {
     status_ = StatusCode::JOINT_BOUND;
@@ -670,59 +669,6 @@ void ServoCalcs::composeJointTrajMessage(const sensor_msgs::msg::JointState& joi
     point.accelerations = acceleration;
   }
   joint_trajectory.points.push_back(point);
-}
-
-std::vector<const moveit::core::JointModel*>
-ServoCalcs::enforcePositionLimits(sensor_msgs::msg::JointState& joint_state) const
-{
-  // Halt if we're past a joint margin and joint velocity is moving even farther past
-  double joint_angle = 0;
-  std::vector<const moveit::core::JointModel*> joints_to_halt;
-  for (auto joint : joint_model_group_->getActiveJointModels())
-  {
-    for (std::size_t c = 0; c < joint_state.name.size(); ++c)
-    {
-      // Use the most recent robot joint state
-      if (joint_state.name[c] == joint->getName())
-      {
-        joint_angle = joint_state.position.at(c);
-        break;
-      }
-    }
-
-    if (!joint->satisfiesPositionBounds(&joint_angle, -servo_params_.joint_limit_margin))
-    {
-      const std::vector<moveit_msgs::msg::JointLimits>& limits = joint->getVariableBoundsMsg();
-
-      // Joint limits are not defined for some joints. Skip them.
-      if (!limits.empty())
-      {
-        // Check if pending velocity command is moving in the right direction
-        auto joint_itr = std::find(joint_state.name.begin(), joint_state.name.end(), joint->getName());
-        auto joint_idx = std::distance(joint_state.name.begin(), joint_itr);
-
-        if ((joint_state.velocity.at(joint_idx) < 0 &&
-             (joint_angle < (limits[0].min_position + servo_params_.joint_limit_margin))) ||
-            (joint_state.velocity.at(joint_idx) > 0 &&
-             (joint_angle > (limits[0].max_position - servo_params_.joint_limit_margin))))
-        {
-          joints_to_halt.push_back(joint);
-        }
-      }
-    }
-  }
-  if (!joints_to_halt.empty())
-  {
-    std::ostringstream joints_names;
-    std::transform(joints_to_halt.cbegin(), std::prev(joints_to_halt.cend()),
-                   std::ostream_iterator<std::string>(joints_names, ", "),
-                   [](const auto& joint) { return joint->getName(); });
-    joints_names << joints_to_halt.back()->getName();
-    RCLCPP_WARN_STREAM_THROTTLE(LOGGER, *node_->get_clock(), ROS_LOG_THROTTLE_PERIOD,
-                                node_->get_name()
-                                    << ' ' << joints_names.str() << " close to a position limit. Halting.");
-  }
-  return joints_to_halt;
 }
 
 void ServoCalcs::filteredHalt(trajectory_msgs::msg::JointTrajectory& joint_trajectory)

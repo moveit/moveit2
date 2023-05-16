@@ -39,8 +39,6 @@
 #include <gtest/gtest.h>
 
 #include <moveit/utils/robot_model_test_utils.h>
-
-#include <moveit_servo/enforce_limits.hpp>
 #include <moveit_servo/servo_calcs.h>
 #include <moveit_servo/status_codes.h>
 #include <moveit_servo/utilities.h>

@@ -249,4 +249,101 @@ geometry_msgs::msg::Pose poseFromCartesianDelta(const Eigen::VectorXd& delta_x,
   return tf2::toMsg(tf_pos_translation * tf_rot_delta * tf_neg_translation * tf_no_new_rot);
 }
 
+double getVelocityScalingFactor(const moveit::core::JointModelGroup* joint_model_group, const Eigen::VectorXd& velocity)
+{
+  std::size_t joint_delta_index{ 0 };
+  double velocity_scaling_factor{ 1.0 };
+  for (const moveit::core::JointModel* joint : joint_model_group->getActiveJointModels())
+  {
+    const auto& bounds = joint->getVariableBounds(joint->getName());
+    if (bounds.velocity_bounded_ && velocity(joint_delta_index) != 0.0)
+    {
+      const double unbounded_velocity = velocity(joint_delta_index);
+      // Clamp each joint velocity to a joint specific [min_velocity, max_velocity] range.
+      const auto bounded_velocity = std::min(std::max(unbounded_velocity, bounds.min_velocity_), bounds.max_velocity_);
+      velocity_scaling_factor = std::min(velocity_scaling_factor, bounded_velocity / unbounded_velocity);
+    }
+    ++joint_delta_index;
+  }
+
+  return velocity_scaling_factor;
+}
+
+void enforceVelocityLimits(const moveit::core::JointModelGroup* joint_model_group, const double publish_period,
+                           sensor_msgs::msg::JointState& joint_state, const double override_velocity_scaling_factor)
+{
+  // Get the velocity scaling factor
+  Eigen::VectorXd velocity =
+      Eigen::Map<Eigen::VectorXd, Eigen::Unaligned>(joint_state.velocity.data(), joint_state.velocity.size());
+  double velocity_scaling_factor = override_velocity_scaling_factor;
+  // if the override velocity scaling factor is approximately zero then the user is not overriding the value.
+  if (override_velocity_scaling_factor < 0.01)
+    velocity_scaling_factor = getVelocityScalingFactor(joint_model_group, velocity);
+
+  // Take a smaller step if the velocity scaling factor is less than 1
+  if (velocity_scaling_factor < 1)
+  {
+    Eigen::VectorXd velocity_residuals = (1 - velocity_scaling_factor) * velocity;
+    Eigen::VectorXd positions =
+        Eigen::Map<Eigen::VectorXd, Eigen::Unaligned>(joint_state.position.data(), joint_state.position.size());
+    positions -= velocity_residuals * publish_period;
+
+    velocity *= velocity_scaling_factor;
+    // Back to sensor_msgs type
+    joint_state.velocity = std::vector<double>(velocity.data(), velocity.data() + velocity.size());
+    joint_state.position = std::vector<double>(positions.data(), positions.data() + positions.size());
+  }
+}
+
+std::vector<const moveit::core::JointModel*>
+enforcePositionLimits(sensor_msgs::msg::JointState& joint_state, double joint_limit_margin,
+                      const moveit::core::JointModelGroup* joint_model_group, rclcpp::Clock& clock)
+{
+  // Halt if we're past a joint margin and joint velocity is moving even farther past
+  double joint_angle = 0;
+  std::vector<const moveit::core::JointModel*> joints_to_halt;
+  for (auto joint : joint_model_group->getActiveJointModels())
+  {
+    for (std::size_t c = 0; c < joint_state.name.size(); ++c)
+    {
+      // Use the most recent robot joint state
+      if (joint_state.name[c] == joint->getName())
+      {
+        joint_angle = joint_state.position.at(c);
+        break;
+      }
+    }
+
+    if (!joint->satisfiesPositionBounds(&joint_angle, -joint_limit_margin))
+    {
+      const std::vector<moveit_msgs::msg::JointLimits>& limits = joint->getVariableBoundsMsg();
+
+      // Joint limits are not defined for some joints. Skip them.
+      if (!limits.empty())
+      {
+        // Check if pending velocity command is moving in the right direction
+        auto joint_itr = std::find(joint_state.name.begin(), joint_state.name.end(), joint->getName());
+        auto joint_idx = std::distance(joint_state.name.begin(), joint_itr);
+
+        if ((joint_state.velocity.at(joint_idx) < 0 && (joint_angle < (limits[0].min_position + joint_limit_margin))) ||
+            (joint_state.velocity.at(joint_idx) > 0 && (joint_angle > (limits[0].max_position - joint_limit_margin))))
+        {
+          joints_to_halt.push_back(joint);
+        }
+      }
+    }
+  }
+  if (!joints_to_halt.empty())
+  {
+    std::ostringstream joints_names;
+    std::transform(joints_to_halt.cbegin(), std::prev(joints_to_halt.cend()),
+                   std::ostream_iterator<std::string>(joints_names, ", "),
+                   [](const auto& joint) { return joint->getName(); });
+    joints_names << joints_to_halt.back()->getName();
+    RCLCPP_WARN_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD,
+                                joints_names.str() << " close to a position limit. Halting.");
+  }
+  return joints_to_halt;
+}
+
 }  // namespace moveit_servo
