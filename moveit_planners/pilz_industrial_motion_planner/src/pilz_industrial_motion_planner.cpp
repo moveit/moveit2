@@ -163,7 +163,20 @@ bool CommandPlanner::canServiceRequest(const moveit_msgs::msg::MotionPlanRequest
     return false;
   }
 
-  if (model_->getJointModelGroup(req.group_name)->getSolverInstance() == nullptr)
+  if(req.group_name.empty()){
+    RCLCPP_ERROR(LOGGER, "Cannot service planning request because group name is not specified.");
+    return false;
+  }
+
+  auto joint_mode_group_ptr = model_->getJointModelGroup(req.group_name);
+  if (joint_mode_group_ptr == nullptr)
+  {
+    RCLCPP_ERROR(LOGGER, "Cannot service planning request because group '%s' does not exist.",
+                 req.group_name.c_str());
+    return false;
+  }
+
+  if (joint_mode_group_ptr->getSolverInstance() == nullptr)
   {
     RCLCPP_ERROR(LOGGER, "Cannot service planning request because group '%s' does have an IK solver instance.",
                  req.group_name.c_str());
