@@ -64,17 +64,21 @@ void MoveGroupMoveAction::initialize()
         RCLCPP_INFO(LOGGER, "Received request");
         return rclcpp_action::GoalResponse::ACCEPT_AND_EXECUTE;
       },
-      [](const std::shared_ptr<MGActionGoal>& /*unused*/) {
+      [this](const std::shared_ptr<MGActionGoal>& /*unused*/) {
         RCLCPP_INFO(LOGGER, "Received request to cancel goal");
+        preemptMoveCallback();
         return rclcpp_action::CancelResponse::ACCEPT;
       },
-      [this](const std::shared_ptr<MGActionGoal>& goal) { return executeMoveCallback(goal); });
+      [this](std::shared_ptr<MGActionGoal> goal) {
+        std::thread{ std::bind(&MoveGroupMoveAction::executeMoveCallback, this, std::placeholders::_1), goal }.detach();
+      });
 }
 
 void MoveGroupMoveAction::executeMoveCallback(const std::shared_ptr<MGActionGoal>& goal)
 {
+  goal_ = goal;
   RCLCPP_INFO(LOGGER, "executing..");
-  setMoveState(PLANNING, goal);
+  setMoveState(PLANNING, goal_);
   // before we start planning, ensure that we have the latest robot state received...
   auto node = context_->moveit_cpp_->getNode();
   context_->planning_scene_monitor_->waitForCurrentRobotState(node->get_clock()->now());
@@ -111,8 +115,9 @@ void MoveGroupMoveAction::executeMoveCallback(const std::shared_ptr<MGActionGoal
     goal->abort(action_res);
   }
 
-  setMoveState(IDLE, goal);
+  setMoveState(IDLE, goal_);
   preempt_requested_ = false;
+  goal_.reset();
 }
 
 void MoveGroupMoveAction::executeMoveCallbackPlanAndExecute(const std::shared_ptr<MGActionGoal>& goal,
@@ -222,7 +227,7 @@ void MoveGroupMoveAction::executeMoveCallbackPlanOnly(const std::shared_ptr<MGAc
 bool MoveGroupMoveAction::planUsingPlanningPipeline(const planning_interface::MotionPlanRequest& req,
                                                     plan_execution::ExecutableMotionPlan& plan)
 {
-  setMoveState(PLANNING, nullptr);
+  setMoveState(PLANNING, goal_);
 
   bool solved = false;
   planning_interface::MotionPlanResponse res;
@@ -258,12 +263,12 @@ bool MoveGroupMoveAction::planUsingPlanningPipeline(const planning_interface::Mo
 
 void MoveGroupMoveAction::startMoveExecutionCallback()
 {
-  setMoveState(MONITOR, nullptr);
+  setMoveState(MONITOR, goal_);
 }
 
 void MoveGroupMoveAction::startMoveLookCallback()
 {
-  setMoveState(LOOK, nullptr);
+  setMoveState(LOOK, goal_);
 }
 
 void MoveGroupMoveAction::preemptMoveCallback()

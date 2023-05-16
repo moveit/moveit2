@@ -90,13 +90,16 @@ void CollisionCheck::start()
   timer_ = node_->create_wall_timer(std::chrono::duration<double>(period_), [this]() { return run(); });
 }
 
+void CollisionCheck::stop()
+{
+  if (timer_)
+  {
+    timer_->cancel();
+  }
+}
+
 void CollisionCheck::run()
 {
-  if (paused_)
-  {
-    return;
-  }
-
   // Update to the latest current state
   current_state_ = planning_scene_monitor_->getStateMonitor()->getCurrentState();
   current_state_->updateCollisionBodyTransforms();
@@ -155,10 +158,4 @@ void CollisionCheck::run()
     collision_velocity_scale_pub_->publish(std::move(msg));
   }
 }
-
-void CollisionCheck::setPaused(bool paused)
-{
-  paused_ = paused;
-}
-
 }  // namespace moveit_servo

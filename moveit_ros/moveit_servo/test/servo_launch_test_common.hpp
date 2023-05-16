@@ -81,7 +81,7 @@ public:
     : node_(std::make_shared<rclcpp::Node>("servo_testing"))
     , executor_(std::make_shared<rclcpp::executors::SingleThreadedExecutor>())
   {
-    auto servo_param_listener = std::make_unique<const servo::ParamListener>(node_);
+    auto servo_param_listener = std::make_unique<const servo::ParamListener>(node_, "moveit_servo");
     servo_parameters_ = servo_param_listener->get_params();
     // store test constants as shared pointer to constant struct
     {
@@ -159,38 +159,6 @@ public:
     sub_servo_status_ = node_->create_subscription<std_msgs::msg::Int8>(
         resolveServoTopicName(servo_parameters_.status_topic), rclcpp::SystemDefaultsQoS(),
         [this](const std_msgs::msg::Int8::ConstSharedPtr& msg) { return statusCB(msg); });
-    return true;
-  }
-
-  bool setupPauseClient()
-  {
-    client_servo_pause_ = node_->create_client<std_srvs::srv::Trigger>(resolveServoTopicName("~/pause_servo"));
-    while (!client_servo_pause_->service_is_ready())
-    {
-      if (!rclcpp::ok())
-      {
-        RCLCPP_ERROR(LOGGER, "Interrupted while waiting for the service. Exiting.");
-        return false;
-      }
-      RCLCPP_INFO(LOGGER, "client_servo_pause_ service not available, waiting again...");
-      rclcpp::sleep_for(std::chrono::milliseconds(500));
-    }
-    return true;
-  }
-
-  bool setupUnpauseClient()
-  {
-    client_servo_unpause_ = node_->create_client<std_srvs::srv::Trigger>(resolveServoTopicName("~/unpause_servo"));
-    while (!client_servo_unpause_->service_is_ready())
-    {
-      if (!rclcpp::ok())
-      {
-        RCLCPP_ERROR(LOGGER, "Interrupted while waiting for the service. Exiting.");
-        return false;
-      }
-      RCLCPP_INFO(LOGGER, "client_servo_unpause_ service not available, waiting again...");
-      rclcpp::sleep_for(std::chrono::milliseconds(500));
-    }
     return true;
   }
 
@@ -459,8 +427,6 @@ protected:
   // Service Clients
   rclcpp::Client<std_srvs::srv::Trigger>::SharedPtr client_servo_start_;
   rclcpp::Client<std_srvs::srv::Trigger>::SharedPtr client_servo_stop_;
-  rclcpp::Client<std_srvs::srv::Trigger>::SharedPtr client_servo_pause_;
-  rclcpp::Client<std_srvs::srv::Trigger>::SharedPtr client_servo_unpause_;
   rclcpp::Client<moveit_msgs::srv::ChangeControlDimensions>::SharedPtr client_change_control_dims_;
   rclcpp::Client<moveit_msgs::srv::ChangeDriftDimensions>::SharedPtr client_change_drift_dims_;
 

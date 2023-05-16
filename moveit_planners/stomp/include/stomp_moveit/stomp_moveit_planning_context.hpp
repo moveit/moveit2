@@ -1,7 +1,7 @@
 /*********************************************************************
  * Software License Agreement (BSD License)
  *
- *  Copyright (c) 2020, PickNik Inc.
+ *  Copyright (c) 2023, PickNik Inc.
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -32,52 +32,44 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-/*      Title     : servo_node.h
- *      Project   : moveit_servo
- *      Created   : 07/13/2020
- *      Author    : Adam Pettinger
- */
+/** @file
+ * @author Henning Kayser
+ * @brief Planning Context implementation for STOMP
+ **/
 
 #pragma once
 
-#include <moveit_servo/servo.h>
-#include <std_srvs/srv/trigger.hpp>
-#include <moveit_servo_lib_parameters.hpp>
+#include <moveit/planning_interface/planning_interface.h>
 
-namespace moveit_servo
+#include <stomp_moveit_parameters.hpp>
+
+// Forward declaration
+namespace stomp
 {
-class ServoNode
+class Stomp;
+}
+
+namespace stomp_moveit
+{
+class StompPlanningContext : public planning_interface::PlanningContext
 {
 public:
-  ServoNode(const rclcpp::NodeOptions& options);
+  StompPlanningContext(const std::string& name, const std::string& group_name, const stomp_moveit::Params& params);
 
-  // NOLINTNEXTLINE(readability-identifier-naming)
-  rclcpp::node_interfaces::NodeBaseInterface::SharedPtr get_node_base_interface()
-  {
-    return node_->get_node_base_interface();
-  }
+  bool solve(planning_interface::MotionPlanResponse& res) override;
+
+  bool solve(planning_interface::MotionPlanDetailedResponse& res) override;
+
+  bool terminate() override;
+
+  void clear() override;
+
+  void setPathPublisher(const std::shared_ptr<rclcpp::Publisher<visualization_msgs::msg::MarkerArray>>& path_publisher);
+  std::shared_ptr<rclcpp::Publisher<visualization_msgs::msg::MarkerArray>> getPathPublisher();
 
 private:
-  std::shared_ptr<rclcpp::Node> node_;
-  std::unique_ptr<moveit_servo::Servo> servo_;
-  std::shared_ptr<tf2_ros::Buffer> tf_buffer_;
-  std::shared_ptr<planning_scene_monitor::PlanningSceneMonitor> planning_scene_monitor_;
-
-  /***
-   * \brief Most servo parameters are individually validated using the validation methods in
-   * `generate_parameter_library`, with limits specified in the parameters YAML file. This method performs additional
-   * validation for parameters whose values depend on each other.
-   */
-  void validateParams(const servo::Params& servo_params);
-
-  /** \brief Start the servo loop. Must be called once to begin Servoing. */
-  void startCB(const std::shared_ptr<std_srvs::srv::Trigger::Request>& request,
-               const std::shared_ptr<std_srvs::srv::Trigger::Response>& response);
-  rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr start_servo_service_;
-
-  /** \brief Stop the servo loop. */
-  void stopCB(const std::shared_ptr<std_srvs::srv::Trigger::Request>& request,
-              const std::shared_ptr<std_srvs::srv::Trigger::Response>& response);
-  rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr stop_servo_service_;
+  const stomp_moveit::Params params_;
+  std::shared_ptr<stomp::Stomp> stomp_;
+  std::shared_ptr<rclcpp::Publisher<visualization_msgs::msg::MarkerArray>> path_publisher_;
 };
-}  // namespace moveit_servo
+}  // namespace stomp_moveit
