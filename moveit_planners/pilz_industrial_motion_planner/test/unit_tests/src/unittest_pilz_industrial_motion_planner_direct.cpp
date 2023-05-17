@@ -109,6 +109,7 @@ TEST(CommandPlannerTestDirect, FailOnLoadContext)
 
   moveit_msgs::msg::MotionPlanRequest req;
   req.planner_id = "Test_Algorithm";
+  req.group_name = "manipulator";
 
   moveit_msgs::msg::MoveItErrorCodes error_code;
   EXPECT_FALSE(planner.getPlanningContext(nullptr, req, error_code));
