@@ -49,15 +49,19 @@ ompl_interface::ConstrainedSampler::ConstrainedSampler(const ModelBasedPlanningC
   , constrained_success_(0)
   , constrained_failure_(0)
 {
-  inv_dim_ = space_->getDimension() > 0 ? 1.0 / (double)space_->getDimension() : 1.0;
+  inv_dim_ = space_->getDimension() > 0 ? 1.0 / static_cast<double>(space_->getDimension()) : 1.0;
 }
 
 double ompl_interface::ConstrainedSampler::getConstrainedSamplingRate() const
 {
   if (constrained_success_ == 0)
+  {
     return 0.0;
+  }
   else
-    return (double)constrained_success_ / (double)(constrained_success_ + constrained_failure_);
+  {
+    return static_cast<double>(constrained_success_) / static_cast<double>(constrained_success_ + constrained_failure_);
+  }
 }
 
 bool ompl_interface::ConstrainedSampler::sampleC(ob::State* state)

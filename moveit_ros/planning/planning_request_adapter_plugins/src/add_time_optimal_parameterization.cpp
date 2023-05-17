@@ -69,12 +69,11 @@ public:
                     std::vector<std::size_t>& /*added_path_index*/) const override
   {
     bool result = planner(planning_scene, req, res);
-    if (result && res.trajectory_)
+    if (result && res.trajectory)
     {
       RCLCPP_DEBUG(LOGGER, " Running '%s'", getDescription().c_str());
       TimeOptimalTrajectoryGeneration totg(path_tolerance_, resample_dt_, min_angle_change_);
-      if (!totg.computeTimeStamps(*res.trajectory_, req.max_velocity_scaling_factor,
-                                  req.max_acceleration_scaling_factor))
+      if (!totg.computeTimeStamps(*res.trajectory, req.max_velocity_scaling_factor, req.max_acceleration_scaling_factor))
       {
         RCLCPP_WARN(LOGGER, " Time parametrization for the solution path failed.");
         result = false;

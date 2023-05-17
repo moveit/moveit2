@@ -46,7 +46,7 @@ TEST_F(ServoFixture, SendTwistStampedTest)
 {
   auto log_time_start = node_->now();
   ASSERT_TRUE(setupStartClient());
-  ASSERT_TRUE(setupCommandSub(servo_parameters_->command_out_type));
+  ASSERT_TRUE(setupCommandSub(servo_parameters_.command_out_type));
   auto log_time_end = node_->now();
   RCLCPP_INFO_STREAM(LOGGER, "Setup time: " << (log_time_end - log_time_start).seconds());
 
@@ -76,7 +76,7 @@ TEST_F(ServoFixture, SendTwistStampedTest)
   auto num_received = getNumCommands();
 
   // Compare actual number received to expected number
-  auto num_expected = (time_end - time_start).seconds() / servo_parameters_->publish_period;
+  auto num_expected = (time_end - time_start).seconds() / servo_parameters_.publish_period;
   RCLCPP_INFO_STREAM(LOGGER, "Wait publish messages: " << (time_end - time_start).seconds());
 
   EXPECT_GT(num_received, 0.5 * num_expected);
@@ -87,7 +87,7 @@ TEST_F(ServoFixture, SendJointServoTest)
 {
   auto log_time_start = node_->now();
   ASSERT_TRUE(setupStartClient());
-  ASSERT_TRUE(setupCommandSub(servo_parameters_->command_out_type));
+  ASSERT_TRUE(setupCommandSub(servo_parameters_.command_out_type));
   auto log_time_end = node_->now();
   RCLCPP_INFO_STREAM(LOGGER, "Setup time: " << (log_time_end - log_time_start).seconds());
 
@@ -118,7 +118,7 @@ TEST_F(ServoFixture, SendJointServoTest)
   auto num_received = getNumCommands();
 
   // Compare actual number received to expected number
-  auto num_expected = (time_end - time_start).seconds() / servo_parameters_->publish_period;
+  auto num_expected = (time_end - time_start).seconds() / servo_parameters_.publish_period;
   log_time_end = node_->now();
   RCLCPP_INFO_STREAM(LOGGER, "Wait publish messages: " << (time_end - time_start).seconds());
 
@@ -131,7 +131,7 @@ TEST_F(ServoFixture, SendJointServoTest)
   log_time_start = node_->now();
 
   // Allow the last command to go stale and measure the output position
-  const int sleep_time = 1.5 * 1000 * servo_parameters_->incoming_command_timeout;
+  const int sleep_time = 1.5 * 1000 * servo_parameters_.incoming_command_timeout;
   rclcpp::sleep_for(std::chrono::milliseconds(sleep_time));
   double joint_position_first = getLatestTrajCommand().points[0].positions[0];
 

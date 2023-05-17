@@ -60,14 +60,14 @@ void move_group::MoveGroupCapability::convertToMsg(const std::vector<plan_execut
     trajectory_msg.resize(trajectory.size());
     for (std::size_t i = 0; i < trajectory.size(); ++i)
     {
-      if (trajectory[i].trajectory_)
+      if (trajectory[i].trajectory)
       {
-        if (first && !trajectory[i].trajectory_->empty())
+        if (first && !trajectory[i].trajectory->empty())
         {
-          moveit::core::robotStateToRobotStateMsg(trajectory[i].trajectory_->getFirstWayPoint(), first_state_msg);
+          moveit::core::robotStateToRobotStateMsg(trajectory[i].trajectory->getFirstWayPoint(), first_state_msg);
           first = false;
         }
-        trajectory[i].trajectory_->getRobotTrajectoryMsg(trajectory_msg[i]);
+        trajectory[i].trajectory->getRobotTrajectoryMsg(trajectory_msg[i]);
       }
     }
   }
@@ -91,7 +91,7 @@ void move_group::MoveGroupCapability::convertToMsg(const std::vector<plan_execut
   if (trajectory.size() > 1)
     RCLCPP_ERROR_STREAM(LOGGER, "Internal logic error: trajectory component ignored. !!! THIS IS A SERIOUS ERROR !!!");
   if (!trajectory.empty())
-    convertToMsg(trajectory[0].trajectory_, first_state_msg, trajectory_msg);
+    convertToMsg(trajectory[0].trajectory, first_state_msg, trajectory_msg);
 }
 
 planning_interface::MotionPlanRequest
@@ -125,22 +125,32 @@ std::string move_group::MoveGroupCapability::getActionResultString(const moveit_
   {
     case moveit_msgs::msg::MoveItErrorCodes::SUCCESS:
       if (planned_trajectory_empty)
+      {
         return "Requested path and goal constraints are already met.";
+      }
       else
       {
         if (plan_only)
+        {
           return "Motion plan was computed successfully.";
+        }
         else
+        {
           return "Solution was found and executed.";
+        }
       }
     case moveit_msgs::msg::MoveItErrorCodes::INVALID_GROUP_NAME:
       return "Invalid group in motion plan request";
     case moveit_msgs::msg::MoveItErrorCodes::PLANNING_FAILED:
     case moveit_msgs::msg::MoveItErrorCodes::INVALID_MOTION_PLAN:
       if (planned_trajectory_empty)
+      {
         return "No motion plan found. No execution attempted.";
+      }
       else
+      {
         return "Motion plan was found but it seems to be invalid (possibly due to postprocessing). Not executing.";
+      }
     case moveit_msgs::msg::MoveItErrorCodes::UNABLE_TO_AQUIRE_SENSOR_DATA:
       return "Motion plan was found but it seems to be too costly and looking around did not help.";
     case moveit_msgs::msg::MoveItErrorCodes::MOTION_PLAN_INVALIDATED_BY_ENVIRONMENT_CHANGE:

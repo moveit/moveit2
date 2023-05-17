@@ -39,10 +39,10 @@
 #include <moveit/robot_model/robot_model.h>
 #include <moveit/robot_model_loader/robot_model_loader.h>
 
-#include "pilz_industrial_motion_planner/pilz_industrial_motion_planner.h"
+#include <pilz_industrial_motion_planner/pilz_industrial_motion_planner.h>
 #include "test_utils.h"
 
-#include "rclcpp/rclcpp.hpp"
+#include <rclcpp/rclcpp.hpp>
 
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("unittest_pilz_industrial_motion_planner");
 
@@ -98,7 +98,7 @@ protected:
     }
     catch (pluginlib::PluginlibException& ex)
     {
-      FAIL() << "Could not create planner " << ex.what() << "\n";
+      FAIL() << "Could not create planner " << ex.what() << '\n';
     }
   }
 

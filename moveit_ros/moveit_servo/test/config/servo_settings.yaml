@@ -1,7 +1,6 @@
 ###############################################
 # Modify all parameters related to servoing here
 ###############################################
-use_gazebo: false # Whether the robot is started in a Gazebo simulation environment
 
 ## Properties of incoming commands
 command_in_type: "speed_units" # "unitless"> in the range [-1:1], as if from joystick. "speed_units"> cmds are in m/s and rad/s
@@ -39,9 +38,6 @@ robot_link_command_frame:  panda_link0  # commands must be given in the frame of
 
 ## Stopping behaviour
 incoming_command_timeout:  1.0  # Stop servoing if X seconds elapse without a new command
-# If 0, republish commands forever even if the robot is stationary. Otherwise, specify num. to publish.
-# Important because ROS may drop some messages and we need the robot to halt reliably.
-num_outgoing_halt_msgs_to_publish: 1
 
 ## Configure handling of singularities and joint limits
 lower_singularity_threshold:  30.0  # Start decelerating when the condition number hits this (close to singularity)

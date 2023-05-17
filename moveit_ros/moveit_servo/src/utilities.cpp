@@ -34,6 +34,10 @@
 
 #include <moveit_servo/utilities.h>
 
+// Disable -Wold-style-cast because all _THROTTLE macros trigger this
+// It would be too noisy to disable on a per-callsite basis
+#pragma GCC diagnostic ignored "-Wold-style-cast"
+
 namespace moveit_servo
 {
 namespace
@@ -41,24 +45,6 @@ namespace
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_servo.utilities");
 constexpr auto ROS_LOG_THROTTLE_PERIOD = std::chrono::milliseconds(3000).count();
 }  // namespace
-
-/** \brief Helper function for detecting zeroed message **/
-bool isNonZero(const geometry_msgs::msg::TwistStamped& msg)
-{
-  return msg.twist.linear.x != 0.0 || msg.twist.linear.y != 0.0 || msg.twist.linear.z != 0.0 ||
-         msg.twist.angular.x != 0.0 || msg.twist.angular.y != 0.0 || msg.twist.angular.z != 0.0;
-}
-
-/** \brief Helper function for detecting zeroed message **/
-bool isNonZero(const control_msgs::msg::JointJog& msg)
-{
-  bool all_zeros = true;
-  for (double delta : msg.velocities)
-  {
-    all_zeros &= (delta == 0.0);
-  }
-  return !all_zeros;
-}
 
 /** \brief Helper function for converting Eigen::Isometry3d to geometry_msgs/TransformStamped **/
 geometry_msgs::msg::TransformStamped convertIsometryToTransform(const Eigen::Isometry3d& eigen_tf,
@@ -154,6 +140,113 @@ double velocityScalingFactorForSingularity(const moveit::core::JointModelGroup* 
   }
 
   return velocity_scale;
+}
+
+bool applyJointUpdate(rclcpp::Clock& clock, const double publish_period, const Eigen::ArrayXd& delta_theta,
+                      const sensor_msgs::msg::JointState& previous_joint_state,
+                      sensor_msgs::msg::JointState& next_joint_state,
+                      pluginlib::UniquePtr<online_signal_smoothing::SmoothingBaseClass>& smoother)
+{
+  // All the sizes must match
+  if (next_joint_state.position.size() != static_cast<std::size_t>(delta_theta.size()) ||
+      next_joint_state.velocity.size() != next_joint_state.position.size())
+  {
+    RCLCPP_ERROR_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD,
+                                 "Lengths of output and increments do not match.");
+    return false;
+  }
+
+  for (std::size_t i = 0; i < next_joint_state.position.size(); ++i)
+  {
+    // Increment joint
+    next_joint_state.position[i] += delta_theta[i];
+  }
+
+  smoother->doSmoothing(next_joint_state.position);
+
+  // Lambda that calculates velocity using central difference.
+  // (q(t + dt) - q(t - dt)) / ( 2 * dt )
+  auto compute_velocity = [&](const double next_pos, const double previous_pos) {
+    return (next_pos - previous_pos) / (2 * publish_period);
+  };
+
+  // Transform that applies the lambda to all joints.
+  // next_joint_state contains the future position q(t + dt)
+  // previous_joint_state_ contains past position q(t - dt)
+  std::transform(next_joint_state.position.begin(), next_joint_state.position.end(),
+                 previous_joint_state.position.begin(), next_joint_state.velocity.begin(), compute_velocity);
+
+  return true;
+}
+
+void transformTwistToPlanningFrame(geometry_msgs::msg::TwistStamped& cmd, const std::string& planning_frame,
+                                   const moveit::core::RobotStatePtr& current_state, rclcpp::Clock& clock)
+{
+  if (cmd.header.frame_id.empty())
+  {
+    RCLCPP_WARN_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD,
+                                "No frame specified for command ,will use planning_frame");
+    cmd.header.frame_id = planning_frame;
+  }
+
+  // We solve (planning_frame -> base -> cmd.header.frame_id)
+  // by computing (base->planning_frame)^-1 * (base->cmd.header.frame_id)
+  const Eigen::Isometry3d tf_moveit_to_incoming_cmd_frame =
+      current_state->getGlobalLinkTransform(planning_frame).inverse() *
+      current_state->getGlobalLinkTransform(cmd.header.frame_id);
+
+  // Apply the transform to linear and angular velocities
+  // v' = R * v  and w' = R * w
+  Eigen::Vector3d translation_vector(cmd.twist.linear.x, cmd.twist.linear.y, cmd.twist.linear.z);
+  Eigen::Vector3d angular_vector(cmd.twist.angular.x, cmd.twist.angular.y, cmd.twist.angular.z);
+  translation_vector = tf_moveit_to_incoming_cmd_frame.linear() * translation_vector;
+  angular_vector = tf_moveit_to_incoming_cmd_frame.linear() * angular_vector;
+
+  // Update the values of the original command message to reflect the change in frame
+  cmd.header.frame_id = planning_frame;
+  cmd.twist.linear.x = translation_vector(0);
+  cmd.twist.linear.y = translation_vector(1);
+  cmd.twist.linear.z = translation_vector(2);
+  cmd.twist.angular.x = angular_vector(0);
+  cmd.twist.angular.y = angular_vector(1);
+  cmd.twist.angular.z = angular_vector(2);
+}
+
+geometry_msgs::msg::Pose poseFromCartesianDelta(const Eigen::VectorXd& delta_x,
+                                                const Eigen::Isometry3d& base_to_tip_frame_transform)
+{
+  // get a transformation matrix with the desired position change &
+  // get a transformation matrix with desired orientation change
+  Eigen::Isometry3d tf_pos_delta(Eigen::Isometry3d::Identity());
+  tf_pos_delta.translate(Eigen::Vector3d(delta_x[0], delta_x[1], delta_x[2]));
+
+  Eigen::Isometry3d tf_rot_delta(Eigen::Isometry3d::Identity());
+  Eigen::Quaterniond q = Eigen::AngleAxisd(delta_x[3], Eigen::Vector3d::UnitX()) *
+                         Eigen::AngleAxisd(delta_x[4], Eigen::Vector3d::UnitY()) *
+                         Eigen::AngleAxisd(delta_x[5], Eigen::Vector3d::UnitZ());
+  tf_rot_delta.rotate(q);
+
+  // Find the new tip link position without newly applied rotation
+  const Eigen::Isometry3d tf_no_new_rot = tf_pos_delta * base_to_tip_frame_transform;
+
+  // we want the rotation to be applied in the requested reference frame,
+  // but we want the rotation to be about the EE point in space, not the origin.
+  // So, we need to translate to origin, rotate, then translate back
+  // Given T = transformation matrix from origin -> EE point in space (translation component of tf_no_new_rot)
+  // and T' as the opposite transformation, EE point in space -> origin (translation only)
+  // apply final transformation as T * R * T' * tf_no_new_rot
+  const Eigen::Matrix<double, 3, 1> tf_translation = tf_no_new_rot.translation();
+  Eigen::Isometry3d tf_neg_translation = Eigen::Isometry3d::Identity();  // T'
+  tf_neg_translation(0, 3) = -tf_translation(0, 0);
+  tf_neg_translation(1, 3) = -tf_translation(1, 0);
+  tf_neg_translation(2, 3) = -tf_translation(2, 0);
+  Eigen::Isometry3d tf_pos_translation = Eigen::Isometry3d::Identity();  // T
+  tf_pos_translation(0, 3) = tf_translation(0, 0);
+  tf_pos_translation(1, 3) = tf_translation(1, 0);
+  tf_pos_translation(2, 3) = tf_translation(2, 0);
+
+  // T * R * T' * tf_no_new_rot
+  return tf2::toMsg(tf_pos_translation * tf_rot_delta * tf_neg_translation * tf_no_new_rot);
 }
 
 }  // namespace moveit_servo

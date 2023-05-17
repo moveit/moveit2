@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.22)
-project(moveit_resources_prbt_ikfast_manipulator_plugin)
+project(moveit_resources_prbt_ikfast_manipulator_plugin LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_EXTENSIONS OFF)
@@ -7,7 +7,6 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 if(NOT WIN32)
   add_compile_options(-Wall)
   add_compile_options(-Wextra)
-  add_compile_options(-Wno-unused-parameter)
   add_compile_options(-Wno-unused-variable)
 endif()
 
@@ -58,14 +57,14 @@ pluginlib_export_plugin_description_file(moveit_core prbt_manipulator_moveit_ikf
 
 install(
   TARGETS prbt_manipulator_moveit_ikfast_plugin prbt_ikfast_kinematics_parameters
-  EXPORT ${PROJECT_NAME}Targets
+  EXPORT moveit_resources_prbt_ikfast_manipulator_pluginTargets
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
   RUNTIME DESTINATION bin
-  INCLUDES DESTINATION include
+  INCLUDES DESTINATION include/moveit_resources_prbt_ikfast_manipulator_plugin
 )
 
-ament_export_targets(${PROJECT_NAME}Targets HAS_LIBRARY_TARGET)
+ament_export_targets(moveit_resources_prbt_ikfast_manipulator_pluginTargets HAS_LIBRARY_TARGET)
 ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS} generate_parameter_library)
 
 ament_package()

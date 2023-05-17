@@ -64,12 +64,16 @@ ButterworthFilter::ButterworthFilter(double low_pass_filter_coeff)
     throw std::length_error("online_signal_smoothing::ButterworthFilter: infinite scale_term_");
 
   if (low_pass_filter_coeff < 1)
+  {
     throw std::length_error(
         "online_signal_smoothing::ButterworthFilter: Filter coefficient < 1. makes the lowpass filter unstable");
+  }
 
   if (std::abs(feedback_term_) < EPSILON)
+  {
     throw std::length_error(
         "online_signal_smoothing::ButterworthFilter: Filter coefficient value resulted in feedback term of 0");
+  }
 }
 
 double ButterworthFilter::filter(double new_measurement)
@@ -97,11 +101,12 @@ bool ButterworthFilterPlugin::initialize(rclcpp::Node::SharedPtr node, moveit::c
   node_ = node;
   num_joints_ = num_joints;
 
+  online_signal_smoothing::ParamListener param_listener(node_);
+  double filter_coeff = param_listener.get_params().butterworth_filter_coeff;
+
   for (std::size_t i = 0; i < num_joints_; ++i)
   {
-    // Low-pass filters for the joint positions
-    // TODO(andyz): read a parameter
-    position_filters_.emplace_back(1.5 /* filter coefficient, should be >1 */);
+    position_filters_.emplace_back(filter_coeff);
   }
   return true;
 };
@@ -110,8 +115,11 @@ bool ButterworthFilterPlugin::doSmoothing(std::vector<double>& position_vector)
 {
   if (position_vector.size() != position_filters_.size())
   {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wold-style-cast"
     RCLCPP_ERROR_THROTTLE(node_->get_logger(), *node_->get_clock(), 1000,
                           "Position vector to be smoothed does not have the right length.");
+#pragma GCC diagnostic pop
     return false;
   }
   for (size_t i = 0; i < position_vector.size(); ++i)
@@ -126,8 +134,11 @@ bool ButterworthFilterPlugin::reset(const std::vector<double>& joint_positions)
 {
   if (joint_positions.size() != position_filters_.size())
   {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wold-style-cast"
     RCLCPP_ERROR_THROTTLE(node_->get_logger(), *node_->get_clock(), 1000,
                           "Position vector to be reset does not have the right length.");
+#pragma GCC diagnostic pop
     return false;
   }
   for (size_t joint_idx = 0; joint_idx < joint_positions.size(); ++joint_idx)

@@ -82,7 +82,7 @@ void AuthorInformationWidget::onInit()
   layout->addWidget(email_edit_);
 
   // Finish Layout --------------------------------------------------
-  this->setLayout(layout);
+  setLayout(layout);
 }
 
 // ******************************************************************************************
@@ -91,18 +91,18 @@ void AuthorInformationWidget::onInit()
 void AuthorInformationWidget::focusGiven()
 {
   // Allow list box to populate
-  this->name_edit_->setText(QString::fromStdString(setup_step_.getAuthorName()));
-  this->email_edit_->setText(QString::fromStdString(setup_step_.getAuthorEmail()));
+  name_edit_->setText(QString::fromStdString(setup_step_.getAuthorName()));
+  email_edit_->setText(QString::fromStdString(setup_step_.getAuthorEmail()));
 }
 
 void AuthorInformationWidget::editedName()
 {
-  setup_step_.setAuthorName(this->name_edit_->text().toStdString());
+  setup_step_.setAuthorName(name_edit_->text().toStdString());
 }
 
 void AuthorInformationWidget::editedEmail()
 {
-  setup_step_.setAuthorEmail(this->email_edit_->text().toStdString());
+  setup_step_.setAuthorEmail(email_edit_->text().toStdString());
 }
 
 }  // namespace core

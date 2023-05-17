@@ -774,9 +774,13 @@ public:
    * \brief Configure the constraint based on a
    * moveit_msgs::msg::VisibilityConstraint
    *
-   * For the configure command to be successful, the target radius
-   * must be non-zero (negative values will have the absolute value
-   * taken).  If cone sides are less than 3, a value of 3 will be used.
+   * For the configure command to be successful, one of the three possible
+   * constraint criteria must be set to a non-zero value:
+   * - The target radius (negative values will have the absolute value taken).
+   * - The range angle.
+   * - The view angle.
+   *
+   * If cone sides are less than 3, a value of 3 will be used.
    *
    * @param [in] vc moveit_msgs::msg::VisibilityConstraint for configuration
    *
@@ -807,11 +811,13 @@ public:
   /**
    * \brief Gets a trimesh shape representing the visibility cone
    *
-   * @param [in] state The state from which to produce the cone
+   * @param [in] tform_world_to_sensor Transform from the world to the sensor frame
+   * @param [in] tform_world_to_target Transform from the world to the target frame
    *
    * @return The shape associated with the cone
    */
-  shapes::Mesh* getVisibilityCone(const moveit::core::RobotState& state) const;
+  shapes::Mesh* getVisibilityCone(const Eigen::Isometry3d& tform_world_to_sensor,
+                                  const Eigen::Isometry3d& tform_world_to_target) const;
 
   /**
    * \brief Adds markers associated with the visibility cone, sensor
@@ -842,16 +848,15 @@ protected:
    */
   bool decideContact(const collision_detection::Contact& contact) const;
 
-  collision_detection::CollisionEnvPtr collision_env_; /**< \brief A copy of the collision robot maintained for
-                                                              collision checking the cone against robot links */
-  bool mobile_sensor_frame_;      /**< \brief True if the sensor is a non-fixed frame relative to the transform frame */
-  bool mobile_target_frame_;      /**< \brief True if the target is a non-fixed frame relative to the transform frame */
-  std::string target_frame_id_;   /**< \brief The target frame id */
-  std::string sensor_frame_id_;   /**< \brief The sensor frame id */
-  Eigen::Isometry3d sensor_pose_; /**< \brief The sensor pose transformed into the transform frame */
-  int sensor_view_direction_;     /**< \brief Storage for the sensor view direction */
-  Eigen::Isometry3d target_pose_; /**< \brief The target pose transformed into the transform frame */
-  unsigned int cone_sides_;       /**< \brief Storage for the cone sides  */
+  moveit::core::RobotModelConstPtr robot_model_; /**< \brief A copy of the robot model used to create collision
+                                                             environments to check the cone against robot links */
+
+  std::string target_frame_id_;      /**< \brief The target frame id */
+  std::string sensor_frame_id_;      /**< \brief The sensor frame id */
+  Eigen::Isometry3d sensor_pose_;    /**< \brief The sensor pose transformed into the transform frame */
+  int sensor_view_direction_;        /**< \brief Storage for the sensor view direction */
+  Eigen::Isometry3d target_pose_;    /**< \brief The target pose transformed into the transform frame */
+  unsigned int cone_sides_;          /**< \brief Storage for the cone sides  */
   EigenSTL::vector_Vector3d points_; /**< \brief A set of points along the base of the circle */
   double target_radius_;             /**< \brief Storage for the target radius */
   double max_view_angle_;            /**< \brief Storage for the max view angle */

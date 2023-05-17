@@ -32,7 +32,7 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#include "pilz_industrial_motion_planner_testutils/cartesianconfiguration.h"
+#include <pilz_industrial_motion_planner_testutils/cartesianconfiguration.h>
 
 #include <stdexcept>
 #include <tf2_eigen/tf2_eigen.hpp>
@@ -112,7 +112,7 @@ moveit_msgs::msg::RobotState CartesianConfiguration::toMoveitMsgsRobotState() co
   if (!rstate.setFromIK(rstate.getRobotModel()->getJointModelGroup(group_name_), start_pose, link_name_))
   {
     std::ostringstream os;
-    os << "No solution for ik \n" << start_pose.translation() << "\n" << start_pose.linear();
+    os << "No solution for ik \n" << start_pose.translation() << '\n' << start_pose.linear();
     throw std::runtime_error(os.str());
   }
 
@@ -124,8 +124,8 @@ moveit_msgs::msg::RobotState CartesianConfiguration::toMoveitMsgsRobotState() co
 
 std::ostream& operator<<(std::ostream& os, const CartesianConfiguration& obj)
 {
-  os << "Group name: \"" << obj.getGroupName() << "\"";
-  os << " | link name: \"" << obj.getLinkName() << "\"";
+  os << "Group name: \"" << obj.getGroupName() << '\"';
+  os << " | link name: \"" << obj.getLinkName() << '\"';
   // TODO(henning): fix pose msg serialization
   // os << "\n" << obj.getPose();
   return os;

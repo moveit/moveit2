@@ -112,9 +112,13 @@ World::ObjectConstPtr World::getObject(const std::string& object_id) const
 {
   const auto it = objects_.find(object_id);
   if (it == objects_.end())
+  {
     return ObjectConstPtr();
+  }
   else
+  {
     return it->second;
+  }
 }
 
 void World::ensureUnique(ObjectPtr& obj)
@@ -133,7 +137,9 @@ bool World::knowsTransform(const std::string& name) const
   // Check object names first
   const std::map<std::string, ObjectPtr>::const_iterator it = objects_.find(name);
   if (it != objects_.end())
+  {
     return true;
+  }
   else  // Then objects' subframes
   {
     for (const std::pair<const std::string, ObjectPtr>& object : objects_)
@@ -230,6 +236,7 @@ bool World::moveShapeInObject(const std::string& object_id, const shapes::ShapeC
   {
     const unsigned int n = it->second->shapes_.size();
     for (unsigned int i = 0; i < n; ++i)
+    {
       if (it->second->shapes_[i] == shape)
       {
         ensureUnique(it->second);
@@ -240,6 +247,7 @@ bool World::moveShapeInObject(const std::string& object_id, const shapes::ShapeC
         notify(it->second, MOVE_SHAPE);
         return true;
       }
+    }
   }
   return false;
 }
@@ -285,6 +293,7 @@ bool World::removeShapeFromObject(const std::string& object_id, const shapes::Sh
   {
     const unsigned int n = it->second->shapes_.size();
     for (unsigned int i = 0; i < n; ++i)
+    {
       if (it->second->shapes_[i] == shape)
       {
         ensureUnique(it->second);
@@ -303,6 +312,7 @@ bool World::removeShapeFromObject(const std::string& object_id, const shapes::Sh
         }
         return true;
       }
+    }
   }
   return false;
 }
@@ -346,8 +356,10 @@ void World::updateGlobalPosesInternal(ObjectPtr& obj, bool update_shape_poses, b
 {
   // Update global shape poses
   if (update_shape_poses)
+  {
     for (unsigned int i = 0; i < obj->global_shape_poses_.size(); ++i)
       obj->global_shape_poses_[i] = obj->pose_ * obj->shape_poses_[i];
+  }
 
   // Update global subframe poses
   if (update_subframe_poses)

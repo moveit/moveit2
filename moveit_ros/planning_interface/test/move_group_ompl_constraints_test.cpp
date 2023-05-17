@@ -76,7 +76,7 @@ public:
     ee_link_ = move_group_->getEndEffectorLink();
 
     executor_->add_node(node_);
-    executor_thread_ = std::thread([this]() { this->executor_->spin(); });
+    executor_thread_ = std::thread([this]() { executor_->spin(); });
   }
 
   ConstrainedPlanningTestFixture()

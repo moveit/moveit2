@@ -1,0 +1,9 @@
+online_signal_smoothing:
+  butterworth_filter_coeff: {
+        type: double,
+        default_value: 1.5,
+        description: "Filter coefficient for the Butterworth filter",
+        validation: {
+          gt<>: 1.0
+        }
+      }

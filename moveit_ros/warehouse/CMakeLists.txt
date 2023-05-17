@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.22)
-project(moveit_ros_warehouse)
+project(moveit_ros_warehouse LANGUAGES CXX)
 
 # Common cmake code applied to all moveit packages
 find_package(moveit_common REQUIRED)
@@ -41,7 +41,7 @@ add_library(moveit_warehouse SHARED
 include(GenerateExportHeader)
 generate_export_header(moveit_warehouse)
 target_include_directories(moveit_warehouse PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>)
-set_target_properties(moveit_warehouse PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
+set_target_properties(moveit_warehouse PROPERTIES VERSION "${moveit_ros_warehouse_VERSION}")
 ament_target_dependencies(moveit_warehouse ${THIS_PACKAGE_INCLUDE_DEPENDS})
 
 
@@ -78,21 +78,21 @@ install(
     moveit_warehouse_save_as_text
     moveit_init_demo_warehouse
     moveit_warehouse_services
-  RUNTIME DESTINATION lib/${PROJECT_NAME}
+  RUNTIME DESTINATION lib/moveit_ros_warehouse
 )
-install(DIRECTORY include/ DESTINATION include)
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/moveit_warehouse_export.h DESTINATION include)
+install(DIRECTORY include/ DESTINATION include/moveit_ros_warehouse)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/moveit_warehouse_export.h DESTINATION include/moveit_ros_warehouse)
 
 install(
   TARGETS moveit_warehouse
-  EXPORT ${PROJECT_NAME}Targets
+  EXPORT moveit_ros_warehouseTargets
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
   RUNTIME DESTINATION bin
-  INCLUDES DESTINATION include
+  INCLUDES DESTINATION include/moveit_ros_warehouse
 )
 
-ament_export_targets(${PROJECT_NAME}Targets HAS_LIBRARY_TARGET)
+ament_export_targets(moveit_ros_warehouseTargets HAS_LIBRARY_TARGET)
 ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS})
 
 if(BUILD_TESTING)

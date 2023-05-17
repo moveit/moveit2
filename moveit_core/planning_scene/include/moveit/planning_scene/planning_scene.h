@@ -55,9 +55,9 @@
 #include <functional>
 #include <thread>
 #include <variant>
-#include "rclcpp/rclcpp.hpp"
+#include <rclcpp/rclcpp.hpp>
 
-#include "moveit_planning_scene_export.h"
+#include <moveit_planning_scene_export.h>
 
 /** \brief This namespace includes the central class for representing planning contexts */
 namespace planning_scene
@@ -302,13 +302,14 @@ public:
   /**@{*/
 
   /** \brief Check if the current state is in collision (with the environment or self collision).
-      If a group name is specified, collision checking is done for that group only.
+      If a group name is specified, collision checking is done for that group only (plus descendent links).
       Since the function is non-const, the current state transforms are updated before the collision check. */
   bool isStateColliding(const std::string& group = "", bool verbose = false);
 
   /** \brief Check if the current state is in collision (with the environment or self collision).  If a group name is
      specified,
-      collision checking is done for that group only. It is expected the current state transforms are up to date. */
+      collision checking is done for that group only (plus descendent links). It is expected the current state
+     transforms are up to date. */
   bool isStateColliding(const std::string& group = "", bool verbose = false) const
   {
     return isStateColliding(getCurrentState(), group, verbose);
@@ -316,8 +317,8 @@ public:
 
   /** \brief Check if a given state is in collision (with the environment or self collision) If a group name is
      specified,
-      collision checking is done for that group only. The link transforms for \e state are updated before the collision
-     check. */
+      collision checking is done for that group only (plus descendent links). The link transforms for \e state are
+     updated before the collision check. */
   bool isStateColliding(moveit::core::RobotState& state, const std::string& group = "", bool verbose = false) const
   {
     state.updateCollisionBodyTransforms();
@@ -325,13 +326,13 @@ public:
   }
 
   /** \brief Check if a given state is in collision (with the environment or self collision)
-      If a group name is specified, collision checking is done for that group only. It is expected that the link
-      transforms of \e state are up to date. */
+      If a group name is specified, collision checking is done for that group only (plus descendent links). It is
+     expected that the link transforms of \e state are up to date. */
   bool isStateColliding(const moveit::core::RobotState& state, const std::string& group = "",
                         bool verbose = false) const;
 
   /** \brief Check if a given state is in collision (with the environment or self collision)
-      If a group name is specified, collision checking is done for that group only. */
+      If a group name is specified, collision checking is done for that group only (plus descendent links). */
   bool isStateColliding(const moveit_msgs::msg::RobotState& state, const std::string& group = "",
                         bool verbose = false) const;
 
@@ -522,7 +523,7 @@ public:
   }
 
   /** \brief Get the names of the links that are involved in collisions for the state \e robot_state.
-   *  Can be restricted to links part of or updated by \e group_name */
+   *  Can be restricted to links part of or updated by \e group_name (plus descendent links) */
   void getCollidingPairs(collision_detection::CollisionResult::ContactMap& contacts,
                          const moveit::core::RobotState& robot_state, const std::string& group_name = "") const
   {
@@ -531,7 +532,7 @@ public:
 
   /** \brief Get the names of the links that are involved in collisions for the state \e robot_state.
       Update the link transforms for \e robot_state if needed.
-      Can be restricted to links part of or updated by \e group_name */
+      Can be restricted to links part of or updated by \e group_name (plus descendent links) */
   void getCollidingPairs(collision_detection::CollisionResult::ContactMap& contacts,
                          moveit::core::RobotState& robot_state, const std::string& group_name = "") const
   {
@@ -542,7 +543,7 @@ public:
 
   /** \brief  Get the names of the links that are involved in collisions for the state \e robot_state given the
       allowed collision matrix (\e acm). Update the link transforms for \e robot_state if needed.
-      Can be restricted to links part of or updated by \e group_name*/
+      Can be restricted to links part of or updated by \e group_name (plus descendent links) */
   void getCollidingPairs(collision_detection::CollisionResult::ContactMap& contacts,
                          moveit::core::RobotState& robot_state, const collision_detection::AllowedCollisionMatrix& acm,
                          const std::string& group_name = "") const
@@ -552,7 +553,7 @@ public:
   }
 
   /** \brief  Get the names of the links that are involved in collisions for the state \e robot_state given the
-      allowed collision matrix (\e acm). Can be restricted to links part of or updated by \e group_name */
+      allowed collision matrix (\e acm). Can be restricted to links part of or updated by \e group_name (plus descendent links) */
   void getCollidingPairs(collision_detection::CollisionResult::ContactMap& contacts,
                          const moveit::core::RobotState& robot_state,
                          const collision_detection::AllowedCollisionMatrix& acm,
@@ -821,43 +822,46 @@ public:
   bool isStateConstrained(const moveit::core::RobotState& state,
                           const kinematic_constraints::KinematicConstraintSet& constr, bool verbose = false) const;
 
-  /** \brief Check if a given state is valid. This means checking for collisions and feasibility */
+  /** \brief Check if a given state is valid. This means checking for collisions and feasibility. Includes descendent
+   * links of \e group. */
   bool isStateValid(const moveit_msgs::msg::RobotState& state, const std::string& group = "",
                     bool verbose = false) const;
 
-  /** \brief Check if a given state is valid. This means checking for collisions and feasibility */
+  /** \brief Check if a given state is valid. This means checking for collisions and feasibility. Includes descendent
+   * links of \e group. */
   bool isStateValid(const moveit::core::RobotState& state, const std::string& group = "", bool verbose = false) const;
 
   /** \brief Check if a given state is valid. This means checking for collisions, feasibility  and whether the user
-   * specified validity conditions hold as well */
+   * specified validity conditions hold as well. Includes descendent links of \e group. */
   bool isStateValid(const moveit_msgs::msg::RobotState& state, const moveit_msgs::msg::Constraints& constr,
                     const std::string& group = "", bool verbose = false) const;
 
   /** \brief Check if a given state is valid. This means checking for collisions, feasibility  and whether the user
-   * specified validity conditions hold as well */
+   * specified validity conditions hold as well. Includes descendent links of \e group. */
   bool isStateValid(const moveit::core::RobotState& state, const moveit_msgs::msg::Constraints& constr,
                     const std::string& group = "", bool verbose = false) const;
 
   /** \brief Check if a given state is valid. This means checking for collisions, feasibility  and whether the user
-   * specified validity conditions hold as well */
+   * specified validity conditions hold as well. Includes descendent links of \e group. */
   bool isStateValid(const moveit::core::RobotState& state, const kinematic_constraints::KinematicConstraintSet& constr,
                     const std::string& group = "", bool verbose = false) const;
 
-  /** \brief Check if a given path is valid. Each state is checked for validity (collision avoidance and feasibility) */
+  /** \brief Check if a given path is valid. Each state is checked for validity (collision avoidance and feasibility).
+   * Includes descendent links of \e group. */
   bool isPathValid(const moveit_msgs::msg::RobotState& start_state, const moveit_msgs::msg::RobotTrajectory& trajectory,
                    const std::string& group = "", bool verbose = false,
                    std::vector<std::size_t>* invalid_index = nullptr) const;
 
   /** \brief Check if a given path is valid. Each state is checked for validity (collision avoidance, feasibility and
    * constraint satisfaction). It is also checked that the goal constraints are satisfied by the last state on the
-   * passed in trajectory. */
+   * passed in trajectory.  Includes descendent links of \e group. */
   bool isPathValid(const moveit_msgs::msg::RobotState& start_state, const moveit_msgs::msg::RobotTrajectory& trajectory,
                    const moveit_msgs::msg::Constraints& path_constraints, const std::string& group = "",
                    bool verbose = false, std::vector<std::size_t>* invalid_index = nullptr) const;
 
   /** \brief Check if a given path is valid. Each state is checked for validity (collision avoidance, feasibility and
    * constraint satisfaction). It is also checked that the goal constraints are satisfied by the last state on the
-   * passed in trajectory. */
+   * passed in trajectory. Includes descendent links of \e group. */
   bool isPathValid(const moveit_msgs::msg::RobotState& start_state, const moveit_msgs::msg::RobotTrajectory& trajectory,
                    const moveit_msgs::msg::Constraints& path_constraints,
                    const moveit_msgs::msg::Constraints& goal_constraints, const std::string& group = "",
@@ -865,7 +869,7 @@ public:
 
   /** \brief Check if a given path is valid. Each state is checked for validity (collision avoidance, feasibility and
    * constraint satisfaction). It is also checked that the goal constraints are satisfied by the last state on the
-   * passed in trajectory. */
+   * passed in trajectory. Includes descendent links of \e group. */
   bool isPathValid(const moveit_msgs::msg::RobotState& start_state, const moveit_msgs::msg::RobotTrajectory& trajectory,
                    const moveit_msgs::msg::Constraints& path_constraints,
                    const std::vector<moveit_msgs::msg::Constraints>& goal_constraints, const std::string& group = "",
@@ -873,7 +877,7 @@ public:
 
   /** \brief Check if a given path is valid. Each state is checked for validity (collision avoidance, feasibility and
    * constraint satisfaction). It is also checked that the goal constraints are satisfied by the last state on the
-   * passed in trajectory. */
+   * passed in trajectory. Includes descendent links of \e group. */
   bool isPathValid(const robot_trajectory::RobotTrajectory& trajectory,
                    const moveit_msgs::msg::Constraints& path_constraints,
                    const std::vector<moveit_msgs::msg::Constraints>& goal_constraints, const std::string& group = "",
@@ -881,19 +885,20 @@ public:
 
   /** \brief Check if a given path is valid. Each state is checked for validity (collision avoidance, feasibility and
    * constraint satisfaction). It is also checked that the goal constraints are satisfied by the last state on the
-   * passed in trajectory. */
+   * passed in trajectory. Includes descendent links of \e group. */
   bool isPathValid(const robot_trajectory::RobotTrajectory& trajectory,
                    const moveit_msgs::msg::Constraints& path_constraints,
                    const moveit_msgs::msg::Constraints& goal_constraints, const std::string& group = "",
                    bool verbose = false, std::vector<std::size_t>* invalid_index = nullptr) const;
 
   /** \brief Check if a given path is valid. Each state is checked for validity (collision avoidance, feasibility and
-   * constraint satisfaction). */
+   * constraint satisfaction). Includes descendent links of \e group. */
   bool isPathValid(const robot_trajectory::RobotTrajectory& trajectory,
                    const moveit_msgs::msg::Constraints& path_constraints, const std::string& group = "",
                    bool verbose = false, std::vector<std::size_t>* invalid_index = nullptr) const;
 
-  /** \brief Check if a given path is valid. Each state is checked for validity (collision avoidance and feasibility) */
+  /** \brief Check if a given path is valid. Each state is checked for validity (collision avoidance and feasibility).
+   * Includes descendent links of \e group. */
   bool isPathValid(const robot_trajectory::RobotTrajectory& trajectory, const std::string& group = "",
                    bool verbose = false, std::vector<std::size_t>* invalid_index = nullptr) const;
 
@@ -902,8 +907,8 @@ public:
   void getCostSources(const robot_trajectory::RobotTrajectory& trajectory, std::size_t max_costs,
                       std::set<collision_detection::CostSource>& costs, double overlap_fraction = 0.9) const;
 
-  /** \brief Get the top \e max_costs cost sources for a specified trajectory, but only for group \e group_name. The
-   * resulting costs are stored in \e costs */
+  /** \brief Get the top \e max_costs cost sources for a specified trajectory, but only for group \e group_name (plus
+   * descendent links). The resulting costs are stored in \e costs */
   void getCostSources(const robot_trajectory::RobotTrajectory& trajectory, std::size_t max_costs,
                       const std::string& group_name, std::set<collision_detection::CostSource>& costs,
                       double overlap_fraction = 0.9) const;
@@ -912,8 +917,8 @@ public:
   void getCostSources(const moveit::core::RobotState& state, std::size_t max_costs,
                       std::set<collision_detection::CostSource>& costs) const;
 
-  /** \brief Get the top \e max_costs cost sources for a specified state, but only for group \e group_name. The
-   * resulting costs are stored in \e costs */
+  /** \brief Get the top \e max_costs cost sources for a specified state, but only for group \e group_name (plus
+   * descendent links). The resulting costs are stored in \e costs */
   void getCostSources(const moveit::core::RobotState& state, std::size_t max_costs, const std::string& group_name,
                       std::set<collision_detection::CostSource>& costs) const;
 
@@ -963,21 +968,10 @@ private:
    * Requires a valid robot_model_ */
   void initialize();
 
-  /* helper function to create a RobotModel from a urdf/srdf. */
-  static moveit::core::RobotModelPtr createRobotModel(const urdf::ModelInterfaceSharedPtr& urdf_model,
-                                                      const srdf::ModelConstSharedPtr& srdf_model);
-
   /* Helper functions for processing collision objects */
   bool processCollisionObjectAdd(const moveit_msgs::msg::CollisionObject& object);
   bool processCollisionObjectRemove(const moveit_msgs::msg::CollisionObject& object);
   bool processCollisionObjectMove(const moveit_msgs::msg::CollisionObject& object);
-
-  /* For exporting and importing the planning scene */
-  bool readPoseFromText(std::istream& in, Eigen::Isometry3d& pose) const;
-  void writePoseToText(std::ostream& out, const Eigen::Isometry3d& pose) const;
-
-  /** convert Pose msg to Eigen::Isometry, normalizing the quaternion part if necessary. */
-  static void poseMsgToEigen(const geometry_msgs::msg::Pose& msg, Eigen::Isometry3d& out);
 
   MOVEIT_STRUCT_FORWARD(CollisionDetector);
 

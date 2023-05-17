@@ -32,7 +32,9 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#include "pilz_industrial_motion_planner/trajectory_generator_lin.h"
+#include <pilz_industrial_motion_planner/trajectory_generator_lin.h>
+
+#include <pilz_industrial_motion_planner/tip_frame_getter.h>
 
 #include <cassert>
 #include <sstream>
@@ -71,7 +73,7 @@ void TrajectoryGeneratorLIN::extractMotionPlanInfo(const planning_scene::Plannin
   // goal given in joint space
   if (!req.goal_constraints.front().joint_constraints.empty())
   {
-    info.link_name = robot_model_->getJointModelGroup(req.group_name)->getSolverInstance()->getTipFrame();
+    info.link_name = getSolverTipFrame(robot_model_->getJointModelGroup(req.group_name));
 
     if (req.goal_constraints.front().joint_constraints.size() !=
         robot_model_->getJointModelGroup(req.group_name)->getActiveJointModelNames().size())
@@ -80,7 +82,7 @@ void TrajectoryGeneratorLIN::extractMotionPlanInfo(const planning_scene::Plannin
       os << "Number of joints in goal does not match number of joints of group "
             "(Number joints goal: "
          << req.goal_constraints.front().joint_constraints.size() << " | Number of joints of group: "
-         << robot_model_->getJointModelGroup(req.group_name)->getActiveJointModelNames().size() << ")";
+         << robot_model_->getJointModelGroup(req.group_name)->getActiveJointModelNames().size() << ')';
       throw JointNumberMismatch(os.str());
     }
     // initializing all joints of the model

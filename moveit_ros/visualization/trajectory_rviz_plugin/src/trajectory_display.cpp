@@ -80,11 +80,11 @@ void TrajectoryDisplay::loadRobotModel()
 
     if (!rdf_loader_->getURDF())
     {
-      this->setStatus(rviz_common::properties::StatusProperty::Error, "Robot Model",
-                      "Failed to load from parameter " + robot_description_property_->getString());
+      setStatus(rviz_common::properties::StatusProperty::Error, "Robot Model",
+                "Failed to load from parameter " + robot_description_property_->getString());
       return;
     }
-    this->setStatus(rviz_common::properties::StatusProperty::Ok, "Robot Model", "Successfully loaded");
+    setStatus(rviz_common::properties::StatusProperty::Ok, "Robot Model", "Successfully loaded");
 
     const srdf::ModelSharedPtr& srdf =
         rdf_loader_->getSRDF() ? rdf_loader_->getSRDF() : std::make_shared<srdf::Model>();
@@ -137,9 +137,13 @@ void TrajectoryDisplay::update(float wall_dt, float ros_dt)
 void TrajectoryDisplay::changedRobotDescription()
 {
   if (isEnabled())
+  {
     reset();
+  }
   else
+  {
     loadRobotModel();
+  }
 }
 
 }  // namespace moveit_rviz_plugin

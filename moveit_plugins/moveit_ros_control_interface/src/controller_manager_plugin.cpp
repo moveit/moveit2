@@ -43,6 +43,7 @@
 #include <pluginlib/class_list_macros.hpp>
 #include <pluginlib/class_loader.hpp>
 #include <boost/bimap.hpp>
+#include <boost/bimap/unordered_multiset_of.hpp>
 #include <rclcpp/client.hpp>
 #include <rclcpp/duration.hpp>
 #include <rclcpp/logger.hpp>
@@ -133,7 +134,11 @@ class Ros2ControlManager : public moveit_controller_manager::MoveItControllerMan
   {
     // Skip if controller stamp is too new for new discovery, enforce update if force==true
     if (!force && ((node_->now() - controllers_stamp_) < CONTROLLER_INFORMATION_VALIDITY_AGE))
+    {
+      RCLCPP_WARN_STREAM(LOGGER, "Controller information from " << list_controllers_service_->get_service_name()
+                                                                << " is out of date, skipping discovery");
       return;
+    }
 
     controllers_stamp_ = node_->now();
 
@@ -256,8 +261,20 @@ public:
     if (!ns_.empty())
     {
       if (!node_->has_parameter("ros_control_namespace"))
+      {
         ns_ = node_->declare_parameter<std::string>("ros_control_namespace", "/");
+      }
+      else
+      {
+        node_->get_parameter<std::string>("ros_control_namespace", ns_);
+      }
     }
+    else if (node->has_parameter("ros_control_namespace"))
+    {
+      node_->get_parameter<std::string>("ros_control_namespace", ns_);
+      RCLCPP_INFO_STREAM(LOGGER, "Namespace for controller manager was specified, namespace: " << ns_);
+    }
+
     list_controllers_service_ = node_->create_client<controller_manager_msgs::srv::ListControllers>(
         getAbsName("controller_manager/list_controllers"));
     switch_controller_service_ = node_->create_client<controller_manager_msgs::srv::SwitchController>(
@@ -386,7 +403,25 @@ public:
     std::scoped_lock<std::mutex> lock(controllers_mutex_);
     discover(true);
 
-    typedef boost::bimap<std::string, std::string> resources_bimap;
+    // Holds the list of controllers that are currently active and their resources
+    // Example:
+    // controller1:
+    //  - controller1_joint1
+    //  - controller1_joint2
+    //  ...
+    // controller2:
+    //  - controller2_joint1
+    //  - controller2_joint2
+    //  ...
+    // ...
+    // The left type have to be an unordered_multiset_of, because each controller can claim multiple resources
+    // {{ "controller1", "controller1_joint1" },
+    //  { "controller1", "controller1_joint2" },
+    //  ...,
+    //  { "controller2", "controller2_joint1" },
+    //  { "controller2", "controller2_joint2" },
+    //  ...}
+    typedef boost::bimap<boost::bimaps::unordered_multiset_of<std::string>, std::string> resources_bimap;
 
     resources_bimap claimed_resources;
 
@@ -406,8 +441,8 @@ public:
       ControllersMap::iterator c = managed_controllers_.find(it);
       if (c != managed_controllers_.end())
       {  // controller belongs to this manager
-        request->stop_controllers.push_back(c->second.name);
-        claimed_resources.right.erase(c->second.name);  // remove resources
+        request->deactivate_controllers.push_back(c->second.name);
+        claimed_resources.left.erase(c->second.name);  // remove resources
       }
     }
 
@@ -418,16 +453,16 @@ public:
       ControllersMap::iterator c = managed_controllers_.find(it);
       if (c != managed_controllers_.end())
       {  // controller belongs to this manager
-        request->start_controllers.push_back(c->second.name);
+        request->activate_controllers.push_back(c->second.name);
         for (const auto& required_resource : c->second.required_command_interfaces)
         {
           resources_bimap::right_const_iterator res = claimed_resources.right.find(required_resource);
           if (res != claimed_resources.right.end())
           {  // resource is claimed
-            if (std::find(request->stop_controllers.begin(), request->stop_controllers.end(), res->second) ==
-                request->stop_controllers.end())
+            if (std::find(request->deactivate_controllers.begin(), request->deactivate_controllers.end(),
+                          res->second) == request->deactivate_controllers.end())
             {
-              request->stop_controllers.push_back(res->second);  // add claiming controller to stop list
+              request->deactivate_controllers.push_back(res->second);  // add claiming controller to stop list
             }
             claimed_resources.left.erase(res->second);  // remove claimed resources
           }
@@ -439,7 +474,7 @@ public:
     // successfully activated or deactivated.
     request->strictness = controller_manager_msgs::srv::SwitchController::Request::STRICT;
 
-    if (!request->start_controllers.empty() || !request->stop_controllers.empty())
+    if (!request->activate_controllers.empty() || !request->deactivate_controllers.empty())
     {  // something to switch?
       auto result_future = switch_controller_service_->async_send_request(request);
       if (result_future.wait_for(std::chrono::duration<double>(SERVICE_CALL_TIMEOUT)) == std::future_status::timeout)

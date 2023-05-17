@@ -292,9 +292,11 @@ void InteractionHandler::updateStateGeneric(
   bool ok = g.process_feedback(state, feedback);
   bool error_state_changed = setErrorState(g.marker_name_suffix, !ok);
   if (update_callback_)
-    callback = [cb = this->update_callback_, error_state_changed](robot_interaction::InteractionHandler* handler) {
+  {
+    callback = [cb = update_callback_, error_state_changed](robot_interaction::InteractionHandler* handler) {
       cb(handler, error_state_changed);
     };
+  }
 }
 
 // MUST hold state_lock_ when calling this!
@@ -308,9 +310,11 @@ void InteractionHandler::updateStateEndEffector(moveit::core::RobotState& state,
   bool ok = kinematic_options.setStateFromIK(state, eef.parent_group, eef.parent_link, pose);
   bool error_state_changed = setErrorState(eef.parent_group, !ok);
   if (update_callback_)
-    callback = [cb = this->update_callback_, error_state_changed](robot_interaction::InteractionHandler* handler) {
+  {
+    callback = [cb = update_callback_, error_state_changed](robot_interaction::InteractionHandler* handler) {
       cb(handler, error_state_changed);
     };
+  }
 }
 
 // MUST hold state_lock_ when calling this!
@@ -328,7 +332,7 @@ void InteractionHandler::updateStateJoint(moveit::core::RobotState& state, const
   state.update();
 
   if (update_callback_)
-    callback = [cb = this->update_callback_](robot_interaction::InteractionHandler* handler) { cb(handler, false); };
+    callback = [cb = update_callback_](robot_interaction::InteractionHandler* handler) { cb(handler, false); };
 }
 
 bool InteractionHandler::inError(const EndEffectorInteraction& eef) const
@@ -362,9 +366,13 @@ bool InteractionHandler::setErrorState(const std::string& name, bool new_error_s
     return false;
 
   if (new_error_state)
+  {
     error_state_.insert(name);
+  }
   else
+  {
     error_state_.erase(name);
+  }
 
   return true;
 }
@@ -384,6 +392,7 @@ bool InteractionHandler::transformFeedbackPose(
   if (feedback->header.frame_id != planning_frame_)
   {
     if (tf_buffer_)
+    {
       try
       {
         geometry_msgs::msg::PoseStamped spose(tpose);
@@ -401,6 +410,7 @@ bool InteractionHandler::transformFeedbackPose(
                      planning_frame_.c_str());
         return false;
       }
+    }
     else
     {
       RCLCPP_ERROR(LOGGER, "Cannot transform from frame '%s' to frame '%s' (no TF instance provided)",

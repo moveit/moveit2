@@ -419,7 +419,7 @@ bool IKFastKinematicsPlugin::initialize(const rclcpp::Node::SharedPtr& node, con
 
   storeValues(robot_model, group_name, base_frame, tip_frames, search_discretization);
 
-  RCLCPP_INFO_STREAM(LOGGER, "Using link_prefix: '" << params_.link_prefix << "'");
+  RCLCPP_INFO_STREAM(LOGGER, "Using link_prefix: '" << params_.link_prefix << '\'');
 
   // verbose error output. subsequent checks in computeRelativeTransform return false then
   if (!robot_model.hasLinkModel(tip_frames_[0]))
@@ -427,14 +427,16 @@ bool IKFastKinematicsPlugin::initialize(const rclcpp::Node::SharedPtr& node, con
   if (!robot_model.hasLinkModel(base_frame_))
     RCLCPP_ERROR_STREAM(LOGGER, "base_frame '" << base_frame_ << "' does not exist.");
 
-  if (!robot_model.hasLinkModel(params_.link_prefix + IKFAST_TIP_FRAME_))
+  if (!robot_model.hasLinkModel(params_.link_prefix + IKFAST_TIP_FRAME_)) {
     RCLCPP_ERROR_STREAM(LOGGER, "prefixed tip frame '" << params_.link_prefix + IKFAST_TIP_FRAME_
                                                        << "' does not exist. "
                                                           "Please check your link_prefix parameter.");
-  if (!robot_model.hasLinkModel(params_.link_prefix + IKFAST_BASE_FRAME_))
+  }
+  if (!robot_model.hasLinkModel(params_.link_prefix + IKFAST_BASE_FRAME_)) {
     RCLCPP_ERROR_STREAM(LOGGER, "prefixed base frame '" << params_.link_prefix + IKFAST_BASE_FRAME_
                                                         << "' does not exist. "
                                                            "Please check your link_prefix parameter.");
+  }
   // This IKFast solution was generated with IKFAST_TIP_FRAME_ and IKFAST_BASE_FRAME_.
   // It is often the case that fixed joints are added to these links to model things like
   // a robot mounted on a table or a robot with an end effector attached to the last link.
@@ -504,10 +506,11 @@ bool IKFastKinematicsPlugin::initialize(const rclcpp::Node::SharedPtr& node, con
   std::reverse(joint_max_vector_.begin(), joint_max_vector_.end());
   std::reverse(joint_has_limits_vector_.begin(), joint_has_limits_vector_.end());
 
-  for (size_t joint_id = 0; joint_id < num_joints_; ++joint_id)
-    RCLCPP_DEBUG_STREAM(LOGGER, joint_names_[joint_id] << " " << joint_min_vector_[joint_id] << " "
-                                                    << joint_max_vector_[joint_id] << " "
+  for (size_t joint_id = 0; joint_id < num_joints_; ++joint_id) {
+    RCLCPP_DEBUG_STREAM(LOGGER, joint_names_[joint_id] << ' ' << joint_min_vector_[joint_id] << ' '
+                                                    << joint_max_vector_[joint_id] << ' '
                                                     << joint_has_limits_vector_[joint_id]);
+  }
 
   initialized_ = true;
   return true;
@@ -1049,9 +1052,10 @@ bool IKFastKinematicsPlugin::searchPositionIK(const geometry_msgs::msg::Pose& ik
                 best_solution = solution;
               }
             }
-            else
+            else {
               // Return first feasible solution
               return true;
+            }
           }
         }
       }
@@ -1068,7 +1072,7 @@ bool IKFastKinematicsPlugin::searchPositionIK(const geometry_msgs::msg::Pose& ik
     // RCLCPP_DEBUG_STREAM(LOGGER,"Attempt " << counter << " with 0th free joint having value " << vfree[0]);
   }
 
-  RCLCPP_DEBUG_STREAM(LOGGER, "Valid solutions: " << nvalid << "/" << nattempts);
+  RCLCPP_DEBUG_STREAM(LOGGER, "Valid solutions: " << nvalid << '/' << nattempts);
 
   if ((search_mode & OPTIMIZE_MAX_JOINT) && best_costs != -1.0)
   {

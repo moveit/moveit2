@@ -32,8 +32,8 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#include "pilz_industrial_motion_planner/trajectory_generator_circ.h"
-#include "pilz_industrial_motion_planner/path_circle_generator.h"
+#include <pilz_industrial_motion_planner/trajectory_generator_circ.h>
+#include <pilz_industrial_motion_planner/path_circle_generator.h>
 
 #include <cassert>
 #include <sstream>

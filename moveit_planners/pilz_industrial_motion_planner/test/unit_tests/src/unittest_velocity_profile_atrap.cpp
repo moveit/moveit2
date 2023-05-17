@@ -34,7 +34,7 @@
 
 #include <gtest/gtest.h>
 
-#include "pilz_industrial_motion_planner/velocity_profile_atrap.h"
+#include <pilz_industrial_motion_planner/velocity_profile_atrap.h>
 
 // Modultest Level1 of Class VelocityProfileATrap
 #define EPSILON 1.0e-10

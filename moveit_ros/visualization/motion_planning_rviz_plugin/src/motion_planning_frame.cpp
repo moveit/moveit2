@@ -381,8 +381,8 @@ void MotionPlanningFrame::changePlanningGroupHelper()
                 planning_display_->getMoveGroupNS().c_str());
     moveit::planning_interface::MoveGroupInterface::Options opt(
         group, moveit::planning_interface::MoveGroupInterface::ROBOT_DESCRIPTION, planning_display_->getMoveGroupNS());
-    opt.robot_model_ = robot_model;
-    opt.robot_description_.clear();
+    opt.robot_model = robot_model;
+    opt.robot_description.clear();
     try
     {
 #ifdef RVIZ_TF1
@@ -491,12 +491,16 @@ void MotionPlanningFrame::addSceneObject()
     case shapes::MESH:
     {
       QUrl url;
-      if (ui_->shapes_combo_box->currentText().contains("file"))  // open from file
+      if (ui_->shapes_combo_box->currentText().contains("file"))
+      {  // open from file
         url = QFileDialog::getOpenFileUrl(this, tr("Import Object Mesh"), QString(),
                                           "CAD files (*.stl *.obj *.dae);;All files (*.*)");
-      else  // open from URL
+      }
+      else
+      {  // open from URL
         url = QInputDialog::getText(this, tr("Import Object Mesh"), tr("URL for file to import from:"),
                                     QLineEdit::Normal, QString("http://"));
+      }
       if (!url.isEmpty())
         shape = loadMeshResource(url.toString().toStdString());
       if (!shape)
@@ -658,9 +662,13 @@ void MotionPlanningFrame::disable()
 void MotionPlanningFrame::tabChanged(int index)
 {
   if (scene_marker_ && ui_->tabWidget->tabText(index).toStdString() != TAB_OBJECTS)
+  {
     scene_marker_.reset();
+  }
   else if (ui_->tabWidget->tabText(index).toStdString() == TAB_OBJECTS)
+  {
     selectedCollisionObjectChanged();
+  }
 }
 
 void MotionPlanningFrame::updateSceneMarkers(float /*wall_dt*/, float /*ros_dt*/)

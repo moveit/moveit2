@@ -60,7 +60,7 @@ LocalPlannerComponent::LocalPlannerComponent(const rclcpp::NodeOptions& options)
   state_ = LocalPlannerState::UNCONFIGURED;
   local_planner_feedback_ = std::make_shared<moveit_msgs::action::LocalPlanner::Feedback>();
 
-  if (!this->initialize())
+  if (!initialize())
   {
     throw std::runtime_error("Failed to initialize local planner component");
   }
@@ -95,7 +95,9 @@ bool LocalPlannerComponent::initialize()
   // Start state and scene monitors
   planning_scene_monitor_->startSceneMonitor(config_.monitored_planning_scene_topic);
   planning_scene_monitor_->startWorldGeometryMonitor(config_.collision_object_topic);
-  planning_scene_monitor_->startStateMonitor(config_.joint_states_topic);
+  planning_scene_monitor_->startStateMonitor(config_.joint_states_topic, "/attached_collision_object");
+  planning_scene_monitor_->monitorDiffs(true);
+  planning_scene_monitor_->stopPublishingPlanningScene();
 
   // Load trajectory operator plugin
   try
@@ -264,8 +266,6 @@ void LocalPlannerComponent::executeIteration()
     // If the planner received an action request and a global solution it starts to plan locally
     case LocalPlannerState::LOCAL_PLANNING_ACTIVE:
     {
-      planning_scene_monitor_->updateSceneWithCurrentState();
-
       // Read current robot state
       const moveit::core::RobotState current_robot_state = [this] {
         planning_scene_monitor::LockedPlanningSceneRO ls(planning_scene_monitor_);

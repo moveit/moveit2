@@ -164,6 +164,7 @@ void planning_pipeline::PlanningPipeline::configure()
     }
 
     if (adapter_plugin_loader_)
+    {
       for (const std::string& adapter_plugin_name : adapter_plugin_names_)
       {
         planning_request_adapter::PlanningRequestAdapterPtr ad;
@@ -182,6 +183,7 @@ void planning_pipeline::PlanningPipeline::configure()
           ads.push_back(std::move(ad));
         }
       }
+    }
     if (!ads.empty())
     {
       adapter_chain_ = std::make_unique<planning_request_adapter::PlanningRequestAdapterChain>();
@@ -199,7 +201,9 @@ void planning_pipeline::PlanningPipeline::configure()
 void planning_pipeline::PlanningPipeline::displayComputedMotionPlans(bool flag)
 {
   if (display_computed_motion_plans_ && !flag)
+  {
     display_path_publisher_.reset();
+  }
   else if (!display_computed_motion_plans_ && flag)
   {
     display_path_publisher_ = node_->create_publisher<moveit_msgs::msg::DisplayTrajectory>(DISPLAY_PATH_TOPIC, 10);
@@ -210,7 +214,9 @@ void planning_pipeline::PlanningPipeline::displayComputedMotionPlans(bool flag)
 void planning_pipeline::PlanningPipeline::publishReceivedRequests(bool flag)
 {
   if (publish_received_requests_ && !flag)
+  {
     received_request_publisher_.reset();
+  }
   else if (!publish_received_requests_ && flag)
   {
     received_request_publisher_ =
@@ -222,7 +228,9 @@ void planning_pipeline::PlanningPipeline::publishReceivedRequests(bool flag)
 void planning_pipeline::PlanningPipeline::checkSolutionPaths(bool flag)
 {
   if (check_solution_paths_ && !flag)
+  {
     contacts_publisher_.reset();
+  }
   else if (!check_solution_paths_ && flag)
   {
     contacts_publisher_ = node_->create_publisher<visualization_msgs::msg::MarkerArray>(MOTION_CONTACTS_TOPIC, 10);
@@ -272,14 +280,14 @@ bool planning_pipeline::PlanningPipeline::generatePlan(const planning_scene::Pla
       {
         std::stringstream ss;
         for (std::size_t added_index : adapter_added_state_index)
-          ss << added_index << " ";
+          ss << added_index << ' ';
         RCLCPP_INFO(LOGGER, "Planning adapters have added states at index positions: [ %s]", ss.str().c_str());
       }
     }
     else
     {
       planning_interface::PlanningContextPtr context =
-          planner_instance_->getPlanningContext(planning_scene, req, res.error_code_);
+          planner_instance_->getPlanningContext(planning_scene, req, res.error_code);
       solved = context ? context->solve(res) : false;
     }
   }
@@ -293,9 +301,9 @@ bool planning_pipeline::PlanningPipeline::generatePlan(const planning_scene::Pla
   }
   bool valid = true;
 
-  if (solved && res.trajectory_)
+  if (solved && res.trajectory)
   {
-    std::size_t state_count = res.trajectory_->getWayPointCount();
+    std::size_t state_count = res.trajectory->getWayPointCount();
     RCLCPP_DEBUG(LOGGER, "Motion planner reported a solution path with %ld states", state_count);
     if (check_solution_paths_)
     {
@@ -305,7 +313,7 @@ bool planning_pipeline::PlanningPipeline::generatePlan(const planning_scene::Pla
       arr.markers.push_back(m);
 
       std::vector<std::size_t> index;
-      if (!planning_scene->isPathValid(*res.trajectory_, req.path_constraints, req.group_name, false, &index))
+      if (!planning_scene->isPathValid(*res.trajectory, req.path_constraints, req.group_name, false, &index))
       {
         // check to see if there is any problem with the states that are found to be invalid
         // they are considered ok if they were added by a planning request adapter
@@ -314,11 +322,13 @@ bool planning_pipeline::PlanningPipeline::generatePlan(const planning_scene::Pla
         {
           bool found = false;
           for (std::size_t added_index : adapter_added_state_index)
+          {
             if (index[i] == added_index)
             {
               found = true;
               break;
             }
+          }
           if (!found)
             problem = true;
         }
@@ -331,12 +341,12 @@ bool planning_pipeline::PlanningPipeline::generatePlan(const planning_scene::Pla
           else
           {
             valid = false;
-            res.error_code_.val = moveit_msgs::msg::MoveItErrorCodes::INVALID_MOTION_PLAN;
+            res.error_code.val = moveit_msgs::msg::MoveItErrorCodes::INVALID_MOTION_PLAN;
 
             // display error messages
             std::stringstream ss;
             for (std::size_t it : index)
-              ss << it << " ";
+              ss << it << ' ';
 
             RCLCPP_ERROR_STREAM(LOGGER, "Computed path is not valid. Invalid states at index locations: [ "
                                             << ss.str() << "] out of " << state_count
@@ -347,7 +357,7 @@ bool planning_pipeline::PlanningPipeline::generatePlan(const planning_scene::Pla
             for (std::size_t it : index)
             {
               // check validity with verbose on
-              const moveit::core::RobotState& robot_state = res.trajectory_->getWayPoint(it);
+              const moveit::core::RobotState& robot_state = res.trajectory->getWayPoint(it);
               planning_scene->isStateValid(robot_state, req.path_constraints, req.group_name, true);
 
               // compute the contacts if any
@@ -388,8 +398,8 @@ bool planning_pipeline::PlanningPipeline::generatePlan(const planning_scene::Pla
     moveit_msgs::msg::DisplayTrajectory disp;
     disp.model_id = robot_model_->getName();
     disp.trajectory.resize(1);
-    res.trajectory_->getRobotTrajectoryMsg(disp.trajectory[0]);
-    moveit::core::robotStateToRobotStateMsg(res.trajectory_->getFirstWayPoint(), disp.trajectory_start);
+    res.trajectory->getRobotTrajectoryMsg(disp.trajectory[0]);
+    moveit::core::robotStateToRobotStateMsg(res.trajectory->getFirstWayPoint(), disp.trajectory_start);
     display_path_publisher_->publish(disp);
   }
 
@@ -406,10 +416,12 @@ bool planning_pipeline::PlanningPipeline::generatePlan(const planning_scene::Pla
         stacked_constraints = true;
     }
     if (stacked_constraints)
+    {
       RCLCPP_WARN(LOGGER, "More than one constraint is set. If your move_group does not have multiple end "
                           "effectors/arms, this is "
                           "unusual. Are you using a move_group_interface and forgetting to call clearPoseTargets() or "
                           "equivalent?");
+    }
   }
 
   // Set planning pipeline to inactive

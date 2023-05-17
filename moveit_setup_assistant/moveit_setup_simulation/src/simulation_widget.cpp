@@ -122,7 +122,7 @@ void SimulationWidget::onInit()
   layout->addWidget(copy_urdf_);
 
   // Finish Layout --------------------------------------------------
-  this->setLayout(layout);
+  setLayout(layout);
 }
 
 void SimulationWidget::focusGiven()

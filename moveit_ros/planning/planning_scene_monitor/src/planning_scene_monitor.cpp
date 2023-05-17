@@ -207,8 +207,10 @@ void PlanningSceneMonitor::initialize(const planning_scene::PlanningScenePtr& sc
   double temp_wait_time = 0.05;
 
   if (!robot_description_.empty())
+  {
     node_->get_parameter_or(robot_description_ + "_planning.shape_transform_cache_lookup_wait_time", temp_wait_time,
                             temp_wait_time);
+  }
 
   shape_transform_cache_lookup_wait_time_ = rclcpp::Duration::from_seconds(temp_wait_time);
 
@@ -288,20 +290,32 @@ void PlanningSceneMonitor::initialize(const planning_scene::PlanningScenePtr& sc
 
       // Update parameter values
       if (name == "planning_scene_monitor.publish_planning_scene")
+      {
         publish_planning_scene = parameter.as_bool();
+      }
       else if (name == "planning_scene_monitor.publish_geometry_updates")
+      {
         publish_geometry_updates = parameter.as_bool();
+      }
       else if (name == "planning_scene_monitor.publish_state_updates")
+      {
         publish_state_updates = parameter.as_bool();
+      }
       else if (name == "planning_scene_monitor.publish_transforms_updates")
+      {
         publish_transform_updates = parameter.as_bool();
+      }
       else if (name == "planning_scene_monitor.publish_planning_scene_hz")
+      {
         publish_planning_scene_hz = parameter.as_double();
+      }
     }
 
     if (result.successful)
+    {
       updatePublishSettings(publish_geometry_updates, publish_state_updates, publish_transform_updates,
                             publish_planning_scene, publish_planning_scene_hz);
+    }
     return result;
   };
 
@@ -416,7 +430,9 @@ void PlanningSceneMonitor::scenePublishingThread()
         if ((publish_update_types_ & new_scene_update_) || new_scene_update_ == UPDATE_SCENE)
         {
           if (new_scene_update_ == UPDATE_SCENE)
+          {
             is_full = true;
+          }
           else
           {
             collision_detection::OccMapTree::ReadLock lock;
@@ -486,9 +502,11 @@ void PlanningSceneMonitor::getMonitoredTopics(std::vector<std::string>& topics) 
   if (planning_scene_subscriber_)
     topics.push_back(planning_scene_subscriber_->get_topic_name());
   if (collision_object_subscriber_)
+  {
     // TODO (anasarrak) This has been changed to subscriber on Moveit, look at
     // https://github.com/ros-planning/moveit/pull/1406/files/cb9488312c00e9c8949d89b363766f092330954d#diff-fb6e26ecc9a73d59dbdae3f3e08145e6
     topics.push_back(collision_object_subscriber_->get_topic_name());
+  }
   if (planning_scene_world_subscriber_)
     topics.push_back(planning_scene_world_subscriber_->get_topic_name());
 }
@@ -523,7 +541,7 @@ void PlanningSceneMonitor::triggerSceneUpdateEvent(SceneUpdateType update_type)
 
   for (std::function<void(SceneUpdateType)>& update_callback : update_callbacks_)
     update_callback(update_type);
-  new_scene_update_ = (SceneUpdateType)(static_cast<int>(new_scene_update_) | static_cast<int>(update_type));
+  new_scene_update_ = static_cast<SceneUpdateType>(static_cast<int>(new_scene_update_) | static_cast<int>(update_type));
   new_scene_update_condition_.notify_all();
 }
 
@@ -531,7 +549,7 @@ bool PlanningSceneMonitor::requestPlanningSceneState(const std::string& service_
 {
   if (get_scene_service_ && get_scene_service_->get_service_name() == service_name)
   {
-    RCLCPP_FATAL_STREAM(LOGGER, "requestPlanningSceneState() to self-provided service '" << service_name << "'");
+    RCLCPP_FATAL_STREAM(LOGGER, "requestPlanningSceneState() to self-provided service '" << service_name << '\'');
     throw std::runtime_error("requestPlanningSceneState() to self-provided service: " + service_name);
   }
   // use global namespace for service
@@ -602,14 +620,20 @@ void PlanningSceneMonitor::updatePublishSettings(bool publish_geom_updates, bool
 {
   PlanningSceneMonitor::SceneUpdateType event = PlanningSceneMonitor::UPDATE_NONE;
   if (publish_geom_updates)
-    event = (PlanningSceneMonitor::SceneUpdateType)(static_cast<int>(event) |
-                                                    static_cast<int>(PlanningSceneMonitor::UPDATE_GEOMETRY));
+  {
+    event = static_cast<PlanningSceneMonitor::SceneUpdateType>(static_cast<int>(event) |
+                                                               static_cast<int>(PlanningSceneMonitor::UPDATE_GEOMETRY));
+  }
   if (publish_state_updates)
-    event = (PlanningSceneMonitor::SceneUpdateType)(static_cast<int>(event) |
-                                                    static_cast<int>(PlanningSceneMonitor::UPDATE_STATE));
+  {
+    event = static_cast<PlanningSceneMonitor::SceneUpdateType>(static_cast<int>(event) |
+                                                               static_cast<int>(PlanningSceneMonitor::UPDATE_STATE));
+  }
   if (publish_transform_updates)
-    event = (PlanningSceneMonitor::SceneUpdateType)(static_cast<int>(event) |
-                                                    static_cast<int>(PlanningSceneMonitor::UPDATE_TRANSFORMS));
+  {
+    event = static_cast<PlanningSceneMonitor::SceneUpdateType>(
+        static_cast<int>(event) | static_cast<int>(PlanningSceneMonitor::UPDATE_TRANSFORMS));
+  }
   if (publish_planning_scene)
   {
     setPlanningScenePublishingFrequency(publish_planning_scene_hz);
@@ -712,16 +736,16 @@ bool PlanningSceneMonitor::newPlanningSceneMessage(const moveit_msgs::msg::Plann
     {
       upd = UPDATE_NONE;
       if (!moveit::core::isEmpty(scene.world))
-        upd = (SceneUpdateType)(static_cast<int>(upd) | static_cast<int>(UPDATE_GEOMETRY));
+        upd = static_cast<SceneUpdateType>(static_cast<int>(upd) | static_cast<int>(UPDATE_GEOMETRY));
 
       if (!scene.fixed_frame_transforms.empty())
-        upd = (SceneUpdateType)(static_cast<int>(upd) | static_cast<int>(UPDATE_TRANSFORMS));
+        upd = static_cast<SceneUpdateType>(static_cast<int>(upd) | static_cast<int>(UPDATE_TRANSFORMS));
 
       if (!moveit::core::isEmpty(scene.robot_state))
       {
-        upd = (SceneUpdateType)(static_cast<int>(upd) | static_cast<int>(UPDATE_STATE));
+        upd = static_cast<SceneUpdateType>(static_cast<int>(upd) | static_cast<int>(UPDATE_STATE));
         if (!scene.robot_state.attached_collision_objects.empty() || !scene.robot_state.is_diff)
-          upd = (SceneUpdateType)(static_cast<int>(upd) | static_cast<int>(UPDATE_GEOMETRY));
+          upd = static_cast<SceneUpdateType>(static_cast<int>(upd) | static_cast<int>(UPDATE_GEOMETRY));
       }
     }
   }
@@ -830,8 +854,10 @@ void PlanningSceneMonitor::includeRobotLinksInOctree()
   for (std::pair<const moveit::core::LinkModel* const,
                  std::vector<std::pair<occupancy_map_monitor::ShapeHandle, std::size_t>>>& link_shape_handle :
        link_shape_handles_)
+  {
     for (std::pair<occupancy_map_monitor::ShapeHandle, std::size_t>& it : link_shape_handle.second)
       octomap_monitor_->forgetShape(it.first);
+  }
   link_shape_handles_.clear();
 }
 
@@ -846,8 +872,10 @@ void PlanningSceneMonitor::includeAttachedBodiesInOctree()
   for (std::pair<const moveit::core::AttachedBody* const,
                  std::vector<std::pair<occupancy_map_monitor::ShapeHandle, std::size_t>>>& attached_body_shape_handle :
        attached_body_shape_handles_)
+  {
     for (std::pair<occupancy_map_monitor::ShapeHandle, std::size_t>& it : attached_body_shape_handle.second)
       octomap_monitor_->forgetShape(it.first);
+  }
   attached_body_shape_handles_.clear();
 }
 
@@ -873,9 +901,11 @@ void PlanningSceneMonitor::includeWorldObjectsInOctree()
   // clear information about any attached object
   for (std::pair<const std::string, std::vector<std::pair<occupancy_map_monitor::ShapeHandle, const Eigen::Isometry3d*>>>&
            collision_body_shape_handle : collision_body_shape_handles_)
+  {
     for (std::pair<occupancy_map_monitor::ShapeHandle, const Eigen::Isometry3d*>& it :
          collision_body_shape_handle.second)
       octomap_monitor_->forgetShape(it.first);
+  }
   collision_body_shape_handles_.clear();
 }
 
@@ -974,9 +1004,13 @@ void PlanningSceneMonitor::currentStateAttachedBodyUpdateCallback(moveit::core::
     return;
 
   if (just_attached)
+  {
     excludeAttachedBodyFromOctree(attached_body);
+  }
   else
+  {
     includeAttachedBodyInOctree(attached_body);
+  }
 }
 
 void PlanningSceneMonitor::currentWorldObjectUpdateCallback(const collision_detection::World::ObjectConstPtr& obj,
@@ -988,9 +1022,13 @@ void PlanningSceneMonitor::currentWorldObjectUpdateCallback(const collision_dete
     return;
 
   if (action & collision_detection::World::CREATE)
+  {
     excludeWorldObjectFromOctree(obj);
+  }
   else if (action & collision_detection::World::DESTROY)
+  {
     includeWorldObjectInOctree(obj);
+  }
   else
   {
     excludeWorldObjectFromOctree(obj);
@@ -1123,8 +1161,10 @@ bool PlanningSceneMonitor::getShapeTransformCache(const std::string& target_fram
         Eigen::Isometry3d ttr = tf2::transformToEigen(
             tf_buffer_->lookupTransform(target_frame, link_shape_handle.first->getName(), target_time));
         for (std::size_t j = 0; j < link_shape_handle.second.size(); ++j)
+        {
           cache[link_shape_handle.second[j].first] =
               ttr * link_shape_handle.first->getCollisionOriginTransforms()[link_shape_handle.second[j].second];
+        }
       }
     }
     for (const std::pair<const moveit::core::AttachedBody* const,
@@ -1137,9 +1177,11 @@ bool PlanningSceneMonitor::getShapeTransformCache(const std::string& target_fram
         Eigen::Isometry3d transform = tf2::transformToEigen(tf_buffer_->lookupTransform(
             target_frame, attached_body_shape_handle.first->getAttachedLinkName(), target_time));
         for (std::size_t k = 0; k < attached_body_shape_handle.second.size(); ++k)
+        {
           cache[attached_body_shape_handle.second[k].first] =
               transform *
               attached_body_shape_handle.first->getShapePosesInLinkFrame()[attached_body_shape_handle.second[k].second];
+        }
       }
     }
     {
@@ -1151,16 +1193,21 @@ bool PlanningSceneMonitor::getShapeTransformCache(const std::string& target_fram
         for (const std::pair<const std::string,
                              std::vector<std::pair<occupancy_map_monitor::ShapeHandle, const Eigen::Isometry3d*>>>&
                  collision_body_shape_handle : collision_body_shape_handles_)
+        {
           for (const std::pair<occupancy_map_monitor::ShapeHandle, const Eigen::Isometry3d*>& it :
                collision_body_shape_handle.second)
             cache[it.first] = transform * (*it.second);
+        }
       }
     }
   }
   catch (tf2::TransformException& ex)
   {
     rclcpp::Clock steady_clock = rclcpp::Clock();
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wold-style-cast"
     RCLCPP_ERROR_THROTTLE(LOGGER, steady_clock, 1000, "Transform error: %s", ex.what());
+#pragma GCC diagnostic pop
     return false;
   }
   return true;
@@ -1247,10 +1294,12 @@ void PlanningSceneMonitor::startStateMonitor(const std::string& joint_states_top
     {
       std::unique_lock<std::mutex> lock(state_pending_mutex_);
       if (dt_state_update_.count() > 0)
+      {
         // ROS original: state_update_timer_.start();
         // TODO: re-enable WallTimer start()
         state_update_timer_ =
             pnode_->create_wall_timer(dt_state_update_, [this]() { return stateUpdateTimerCallback(); });
+      }
     }
 
     if (!attached_objects_topic.empty())
@@ -1404,8 +1453,11 @@ void PlanningSceneMonitor::updateSceneWithCurrentState()
         (time - current_state_monitor_->getMonitorStartTime()).seconds() > 1.0)
     {
       std::string missing_str = boost::algorithm::join(missing, ", ");
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wold-style-cast"
       RCLCPP_WARN_THROTTLE(LOGGER, steady_clock, 1000, "The complete state of the robot is not yet known.  Missing %s",
                            missing_str.c_str());
+#pragma GCC diagnostic pop
     }
 
     {
@@ -1418,8 +1470,13 @@ void PlanningSceneMonitor::updateSceneWithCurrentState()
     triggerSceneUpdateEvent(UPDATE_STATE);
   }
   else
+  {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wold-style-cast"
     RCLCPP_ERROR_THROTTLE(LOGGER, steady_clock, 1000,
                           "State monitor is not active. Unable to set the planning scene state");
+#pragma GCC diagnostic pop
+  }
 }
 
 void PlanningSceneMonitor::addUpdateCallback(const std::function<void(SceneUpdateType)>& fn)
@@ -1502,7 +1559,9 @@ void PlanningSceneMonitor::configureCollisionMatrix(const planning_scene::Planni
 
   // first we do default collision operations
   if (!node_->has_parameter(robot_description_ + "_planning.default_collision_operations"))
+  {
     RCLCPP_DEBUG(LOGGER, "No additional default collision operations specified");
+  }
   else
   {
     RCLCPP_DEBUG(LOGGER, "Reading additional default collision operations");

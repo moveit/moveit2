@@ -39,7 +39,7 @@
 #include <moveit/mesh_filter/sensor_model.h>
 #include <string>
 
-#include "moveit_mesh_filter_export.h"
+#include <moveit_mesh_filter_export.h>
 
 namespace mesh_filter
 {

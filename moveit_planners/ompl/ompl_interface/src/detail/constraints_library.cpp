@@ -109,7 +109,7 @@ public:
     : ob::StateSampler(space), state_storage_(state_storage)
   {
     max_index_ = milestones - 1;
-    inv_dim_ = space->getDimension() > 0 ? 1.0 / (double)space->getDimension() : 1.0;
+    inv_dim_ = space->getDimension() > 0 ? 1.0 / static_cast<double>(space->getDimension()) : 1.0;
   }
 
   void sampleUniform(ob::State* state) override
@@ -134,9 +134,13 @@ public:
           index = md.first[rng_.uniformInt(0, md.first.size() - 1)];
         } while (dirty_.find(index) != dirty_.end() && ++att < matt);
         if (att >= matt)
+        {
           index = -1;
+        }
         else
+        {
           dirty_.insert(index);
+        }
       }
     }
     if (index < 0)
@@ -176,7 +180,9 @@ bool interpolateUsingStoredStates(const ConstraintApproximationStateStorage* sta
     return false;
 
   if (tag_from == tag_to)
+  {
     state_storage->getStateSpace()->copyState(state, to);
+  }
   else
   {
     const ConstrainedStateMetadata& md = state_storage->getMetadata(tag_from);
@@ -185,17 +191,23 @@ bool interpolateUsingStoredStates(const ConstraintApproximationStateStorage* sta
     if (it == md.second.end())
       return false;
     const std::pair<std::size_t, std::size_t>& istates = it->second;
-    std::size_t index = (std::size_t)((istates.second - istates.first + 2) * t + 0.5);
+    std::size_t index = static_cast<std::size_t>((istates.second - istates.first + 2) * t + 0.5);
 
     if (index == 0)
+    {
       state_storage->getStateSpace()->copyState(state, from);
+    }
     else
     {
       --index;
       if (index >= istates.second - istates.first)
+      {
         state_storage->getStateSpace()->copyState(state, to);
+      }
       else
+      {
         state_storage->getStateSpace()->copyState(state, state_storage->getState(istates.first + index));
+      }
     }
   }
   return true;
@@ -204,10 +216,12 @@ bool interpolateUsingStoredStates(const ConstraintApproximationStateStorage* sta
 ompl_interface::InterpolationFunction ompl_interface::ConstraintApproximation::getInterpolationFunction() const
 {
   if (explicit_motions_ && milestones_ > 0 && milestones_ < state_storage_->size())
+  {
     return
         [this](const ompl::base::State* from, const ompl::base::State* to, const double t, ompl::base::State* state) {
           return interpolateUsingStoredStates(state_storage_, from, to, t, state);
         };
+  }
   return InterpolationFunction();
 }
 
@@ -219,9 +233,13 @@ allocConstraintApproximationStateSampler(const ob::StateSpace* space, const std:
   std::vector<int> sig;
   space->computeSignature(sig);
   if (sig != expected_signature)
+  {
     return ompl::base::StateSamplerPtr();
+  }
   else
+  {
     return std::make_shared<ConstraintApproximationStateSampler>(space, state_storage, milestones);
+  }
 }
 }  // namespace ompl_interface
 
@@ -357,8 +375,9 @@ void ompl_interface::ConstraintsLibrary::loadConstraintApproximations(const std:
     RCLCPP_INFO(LOGGER,
                 "Loaded %lu states (%lu milestones) and %lu connections (%0.1lf per state) "
                 "for constraint named '%s'%s",
-                cass->size(), cap->getMilestoneCount(), sum, (double)sum / (double)cap->getMilestoneCount(),
-                msg.name.c_str(), explicit_motions ? ". Explicit motions included." : "");
+                cass->size(), cap->getMilestoneCount(), sum,
+                static_cast<double>(sum) / static_cast<double>(cap->getMilestoneCount()), msg.name.c_str(),
+                explicit_motions ? ". Explicit motions included." : "");
   }
   RCLCPP_INFO(LOGGER, "Done loading constrained space approximations.");
 }
@@ -366,7 +385,7 @@ void ompl_interface::ConstraintsLibrary::loadConstraintApproximations(const std:
 void ompl_interface::ConstraintsLibrary::saveConstraintApproximations(const std::string& path)
 {
   RCLCPP_INFO(LOGGER, "Saving %u constrained space approximations to '%s'",
-              (unsigned int)constraint_approximations_.size(), path.c_str());
+              static_cast<unsigned int>(constraint_approximations_.size()), path.c_str());
   try
   {
     std::filesystem::create_directory(path);
@@ -377,6 +396,7 @@ void ompl_interface::ConstraintsLibrary::saveConstraintApproximations(const std:
 
   std::ofstream fout((path + "/manifest").c_str());
   if (fout.good())
+  {
     for (std::map<std::string, ConstraintApproximationPtr>::const_iterator it = constraint_approximations_.begin();
          it != constraint_approximations_.end(); ++it)
     {
@@ -391,8 +411,11 @@ void ompl_interface::ConstraintsLibrary::saveConstraintApproximations(const std:
       if (it->second->getStateStorage())
         it->second->getStateStorage()->store((path + "/" + it->second->getFilename()).c_str());
     }
+  }
   else
+  {
     RCLCPP_ERROR(LOGGER, "Unable to save constraint approximation to '%s'", path.c_str());
+  }
   fout.close();
 }
 
@@ -529,7 +552,7 @@ ompl::base::StateStoragePtr ompl_interface::ConstraintsLibrary::constructConstra
     {
       done = done_now;
       RCLCPP_INFO(LOGGER, "%d%% complete (kept %0.1lf%% sampled states)", done,
-                  100.0 * (double)state_storage->size() / (double)attempts);
+                  100.0 * static_cast<double>(state_storage->size()) / static_cast<double>(attempts));
     }
 
     if (!slow_warn && attempts > 10 && attempts > state_storage->size() * 100)
@@ -557,7 +580,7 @@ ompl::base::StateStoragePtr ompl_interface::ConstraintsLibrary::constructConstra
   }
 
   result.state_sampling_time = ompl::time::seconds(ompl::time::now() - start);
-  RCLCPP_INFO(LOGGER, "Generated %u states in %lf seconds", (unsigned int)state_storage->size(),
+  RCLCPP_INFO(LOGGER, "Generated %u states in %lf seconds", static_cast<unsigned int>(state_storage->size()),
               result.state_sampling_time);
   if (constrained_sampler)
   {
@@ -602,7 +625,7 @@ ompl::base::StateStoragePtr ompl_interface::ConstraintsLibrary::constructConstra
           continue;
         unsigned int isteps =
             std::min<unsigned int>(options.max_explicit_points, d / options.explicit_points_resolution);
-        double step = 1.0 / (double)isteps;
+        double step = 1.0 / static_cast<double>(isteps);
         bool ok = true;
         space->interpolate(state_storage->getState(i), sj, step, int_states[0]);
         for (unsigned int k = 1; k < isteps; ++k)

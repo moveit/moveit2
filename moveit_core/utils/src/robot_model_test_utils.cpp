@@ -34,14 +34,18 @@
 
 /* Author: Bryce Willey */
 
-#include <boost/algorithm/string_regex.hpp>
-#include <geometry_msgs/msg/pose.hpp>
-#include <urdf_parser/urdf_parser.h>
-#include <moveit/utils/robot_model_test_utils.h>
 #include <ament_index_cpp/get_package_share_directory.hpp>
+#include <boost/algorithm/string_regex.hpp>
 #include <filesystem>
+#include <geometry_msgs/msg/pose.hpp>
+#include <moveit/utils/robot_model_test_utils.h>
 #include <rclcpp/logger.hpp>
 #include <rclcpp/logging.hpp>
+#include <urdf_parser/urdf_parser.h>
+
+#include <pluginlib/class_loader.hpp>
+
+#include <moveit/kinematics_base/kinematics_base.h>
 
 namespace moveit
 {
@@ -98,6 +102,32 @@ srdf::ModelSharedPtr loadSRDFModel(const std::string& robot_name)
   }
   srdf_model->initFile(*urdf_model, srdf_path);
   return srdf_model;
+}
+
+void loadIKPluginForGroup(rclcpp::Node::SharedPtr node, JointModelGroup* jmg, const std::string& base_link,
+                          const std::string& tip_link, std::string plugin, double timeout)
+{
+  using LoaderType = pluginlib::ClassLoader<kinematics::KinematicsBase>;
+  static std::weak_ptr<LoaderType> cached_loader;
+  std::shared_ptr<LoaderType> loader = cached_loader.lock();
+  if (!loader)
+  {
+    loader = std::make_shared<LoaderType>("moveit_core", "kinematics::KinematicsBase");
+    cached_loader = loader;
+  }
+
+  // translate short to long names
+  if (plugin == "KDL")
+    plugin = "kdl_kinematics_plugin/KDLKinematicsPlugin";
+
+  jmg->setSolverAllocators(
+      [=](const JointModelGroup* jmg) -> kinematics::KinematicsBasePtr {
+        kinematics::KinematicsBasePtr result = loader->createUniqueInstance(plugin);
+        result->initialize(node, jmg->getParentModel(), jmg->getName(), base_link, { tip_link }, 0.0);
+        result->setDefaultTimeout(timeout);
+        return result;
+      },
+      SolverAllocatorMapFn());
 }
 
 RobotModelBuilder::RobotModelBuilder(const std::string& name, const std::string& base_link_name)
@@ -168,17 +198,29 @@ void RobotModelBuilder::addChain(const std::string& section, const std::string& 
     joint->parent_link_name = link_names[i - 1];
     joint->child_link_name = link_names[i];
     if (type == "planar")
+    {
       joint->type = urdf::Joint::PLANAR;
+    }
     else if (type == "floating")
+    {
       joint->type = urdf::Joint::FLOATING;
+    }
     else if (type == "revolute")
+    {
       joint->type = urdf::Joint::REVOLUTE;
+    }
     else if (type == "continuous")
+    {
       joint->type = urdf::Joint::CONTINUOUS;
+    }
     else if (type == "prismatic")
+    {
       joint->type = urdf::Joint::PRISMATIC;
+    }
     else if (type == "fixed")
+    {
       joint->type = urdf::Joint::FIXED;
+    }
     else
     {
       RCLCPP_ERROR(LOGGER, "No such joint type as %s", type.c_str());
@@ -316,9 +358,13 @@ void RobotModelBuilder::addVirtualJoint(const std::string& parent_frame, const s
 {
   srdf::Model::VirtualJoint new_virtual_joint;
   if (name.empty())
+  {
     new_virtual_joint.name_ = parent_frame + "-" + child_link + "-virtual_joint";
+  }
   else
+  {
     new_virtual_joint.name_ = name;
+  }
   new_virtual_joint.type_ = type;
   new_virtual_joint.parent_frame_ = parent_frame;
   new_virtual_joint.child_link_ = child_link;
@@ -329,9 +375,13 @@ void RobotModelBuilder::addGroupChain(const std::string& base_link, const std::s
 {
   srdf::Model::Group new_group;
   if (name.empty())
+  {
     new_group.name_ = base_link + "-" + tip_link + "-chain-group";
+  }
   else
+  {
     new_group.name_ = name;
+  }
   new_group.chains_.push_back(std::make_pair(base_link, tip_link));
   srdf_writer_->groups_.push_back(new_group);
 }

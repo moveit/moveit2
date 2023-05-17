@@ -12,11 +12,12 @@ assignees: ''
 Overview of your issue here.
 
 ### Your environment
-* ROS Distro: [Kinetic|Melodic|Noetic]
-* OS Version: e.g. Ubuntu 18.04
+* ROS Distro: [Foxy|Humble|Rolling]
+* OS Version: e.g. Ubuntu 22.04
 * Source or Binary build?
 * If binary, which release version?
 * If source, which branch?
+* Which RMW (Fast DDS or Cyclone DDS)? Humble or Rolling should be using Cyclone.
 
 ### Steps to reproduce
 Tell us how to reproduce this issue. Attempt to provide a working demo, perhaps using Docker.

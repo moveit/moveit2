@@ -42,12 +42,13 @@
 #include <trajopt/trajectory_costs.hpp>
 #include <trajopt_sco/expr_op_overloads.hpp>
 #include <trajopt_sco/expr_ops.hpp>
+#include <trajopt_utils/eigen_conversions.hpp>
 #include <trajopt_utils/eigen_slicing.hpp>
 #include <trajopt_utils/logging.hpp>
 #include <trajopt_utils/vector_ops.hpp>
 
-#include "trajopt_interface/problem_description.h"
-#include "trajopt_interface/kinematic_terms.h"
+#include <trajopt_interface/problem_description.h>
+#include <trajopt_interface/kinematic_terms.h>
 
 /**
  * @brief Checks the size of the parameter given and throws if incorrect
@@ -291,13 +292,15 @@ void CartPoseTermInfo::addObjectiveTerms(TrajOptProblem& prob)
   }
   else if ((term_type & TT_COST) && ~(term_type | ~TT_USE_TIME))
   {
-    sco::VectorOfVectorPtr f = std::make_shared<CartPoseErrCalculator>(input_pose, prob.GetPlanningScene(), link, tcp);
+    sco::VectorOfVector::Ptr f =
+        std::make_shared<CartPoseErrCalculator>(input_pose, prob.GetPlanningScene(), link, tcp);
     prob.addCost(std::make_shared<sco::CostFromErrFunc>(f, prob.GetVarRow(timestep, 0, n_dof),
                                                         concatVector(rot_coeffs, pos_coeffs), sco::ABS, name));
   }
   else if ((term_type & TT_CNT) && ~(term_type | ~TT_USE_TIME))
   {
-    sco::VectorOfVectorPtr f = std::make_shared<CartPoseErrCalculator>(input_pose, prob.GetPlanningScene(), link, tcp);
+    sco::VectorOfVector::Ptr f =
+        std::make_shared<CartPoseErrCalculator>(input_pose, prob.GetPlanningScene(), link, tcp);
     prob.addConstraint(std::make_shared<sco::ConstraintFromErrFunc>(
         f, prob.GetVarRow(timestep, 0, n_dof), concatVector(rot_coeffs, pos_coeffs), sco::EQ, name));
   }

@@ -66,7 +66,7 @@ int main(int argc, char** argv)
   executor.add_node(node);
 
   robot_model_loader::RobotModelLoader::Options opt;
-  opt.robot_description_ = "robot_description";
+  opt.robot_description = "robot_description";
   auto rml = std::make_shared<robot_model_loader::RobotModelLoader>(node, opt);
   planning_scene_monitor::PlanningSceneMonitor psm(node, rml);
   psm.startWorldGeometryMonitor();
@@ -85,9 +85,13 @@ int main(int argc, char** argv)
 
     std::cout << "Type a number and hit Enter. That number of ";
     if (valid)
+    {
       std::cout << "valid ";
+    }
     else if (invalid)
+    {
       std::cout << "invalid ";
+    }
     std::cout << "states will be randomly generated at an interval of one second and published as a planning scene."
               << '\n';
     std::size_t n;
