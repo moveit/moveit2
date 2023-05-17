@@ -163,7 +163,8 @@ bool CommandPlanner::canServiceRequest(const moveit_msgs::msg::MotionPlanRequest
     return false;
   }
 
-  if(req.group_name.empty()){
+  if (req.group_name.empty())
+  {
     RCLCPP_ERROR(LOGGER, "Cannot service planning request because group name is not specified.");
     return false;
   }
@@ -171,8 +172,7 @@ bool CommandPlanner::canServiceRequest(const moveit_msgs::msg::MotionPlanRequest
   auto joint_mode_group_ptr = model_->getJointModelGroup(req.group_name);
   if (joint_mode_group_ptr == nullptr)
   {
-    RCLCPP_ERROR(LOGGER, "Cannot service planning request because group '%s' does not exist.",
-                 req.group_name.c_str());
+    RCLCPP_ERROR(LOGGER, "Cannot service planning request because group '%s' does not exist.", req.group_name.c_str());
     return false;
   }
 

@@ -155,8 +155,40 @@ TEST_F(CommandPlannerTest, CheckValidAlgorithmsForServiceRequest)
   {
     planning_interface::MotionPlanRequest req;
     req.planner_id = alg;
+    req.group_name = "manipulator";
 
     EXPECT_TRUE(planner_instance_->canServiceRequest(req));
+  }
+}
+
+TEST_F(CommandPlannerTest, CheckEmptyGroupNameForServiceRequest)
+{
+  // Check for the algorithms
+  std::vector<std::string> algs;
+  planner_instance_->getPlanningAlgorithms(algs);
+
+  for (const auto& alg : algs)
+  {
+    planning_interface::MotionPlanRequest req;
+    req.planner_id = alg;
+
+    EXPECT_FALSE(planner_instance_->canServiceRequest(req));
+  }
+}
+
+TEST_F(CommandPlannerTest, CheckInvalidGroupNameForServiceRequest)
+{
+  // Check for the algorithms
+  std::vector<std::string> algs;
+  planner_instance_->getPlanningAlgorithms(algs);
+
+  for (const auto& alg : algs)
+  {
+    planning_interface::MotionPlanRequest req;
+    req.planner_id = alg;
+    req.group_name = "1234manipulator";
+
+    EXPECT_FALSE(planner_instance_->canServiceRequest(req));
   }
 }
 
@@ -168,6 +200,7 @@ TEST_F(CommandPlannerTest, CheckInvalidAlgorithmsForServiceRequest)
 {
   planning_interface::MotionPlanRequest req;
   req.planner_id = "NON_EXISTEND_ALGORITHM_HASH_da39a3ee5e6b4b0d3255bfef95601890afd80709";
+  req.group_name = "manipulator";
 
   EXPECT_FALSE(planner_instance_->canServiceRequest(req));
 }
@@ -179,6 +212,7 @@ TEST_F(CommandPlannerTest, CheckEmptyPlannerIdForServiceRequest)
 {
   planning_interface::MotionPlanRequest req;
   req.planner_id = "";
+  req.group_name = "manipulator";
 
   EXPECT_FALSE(planner_instance_->canServiceRequest(req));
 }
