@@ -96,12 +96,6 @@ servo:
                   2. robot_link_command_frame"
   }
 
-  use_gazebo: {
-    type: bool,
-    default_value: false,
-    description: "Whether the robot is started in a Gazebo simulation environment"
-  }
-
   linear_scale: {
     type: double,
     default_value: 0.4,

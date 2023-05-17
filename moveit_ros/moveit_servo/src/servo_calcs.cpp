@@ -101,22 +101,6 @@ ServoCalcs::ServoCalcs(const rclcpp::Node::SharedPtr& node,
       servo_params_.joint_command_in_topic, rclcpp::SystemDefaultsQoS(),
       [this](const control_msgs::msg::JointJog::ConstSharedPtr& msg) { return jointCmdCB(msg); });
 
-  // ROS Server for allowing drift in some dimensions
-  drift_dimensions_server_ = node_->create_service<moveit_msgs::srv::ChangeDriftDimensions>(
-      "~/change_drift_dimensions",
-      [this](const std::shared_ptr<moveit_msgs::srv::ChangeDriftDimensions::Request>& req,
-             const std::shared_ptr<moveit_msgs::srv::ChangeDriftDimensions::Response>& res) {
-        return changeDriftDimensions(req, res);
-      });
-
-  // ROS Server for changing the control dimensions
-  control_dimensions_server_ = node_->create_service<moveit_msgs::srv::ChangeControlDimensions>(
-      "~/change_control_dimensions",
-      [this](const std::shared_ptr<moveit_msgs::srv::ChangeControlDimensions::Request>& req,
-             const std::shared_ptr<moveit_msgs::srv::ChangeControlDimensions::Response>& res) {
-        return changeControlDimensions(req, res);
-      });
-
   // Subscribe to the collision_check topic
   collision_velocity_scale_sub_ = node_->create_subscription<std_msgs::msg::Float64>(
       "~/collision_velocity_scale", rclcpp::SystemDefaultsQoS(),
@@ -520,9 +504,6 @@ bool ServoCalcs::cartesianServoCalcs(geometry_msgs::msg::TwistStamped& cmd,
   if (!checkValidCommand(cmd))
     return false;
 
-  // Set uncontrolled dimensions to 0 in command frame
-  enforceControlDimensions(cmd);
-
   // Transform the command to the MoveGroup planning frame
   if (cmd.header.frame_id != servo_params_.planning_frame)
   {
@@ -532,8 +513,6 @@ bool ServoCalcs::cartesianServoCalcs(geometry_msgs::msg::TwistStamped& cmd,
   Eigen::VectorXd delta_x = scaleCartesianCommand(cmd);
 
   Eigen::MatrixXd jacobian = current_state_->getJacobian(joint_model_group_);
-
-  removeDriftDimensions(jacobian, delta_x);
 
   Eigen::JacobiSVD<Eigen::MatrixXd> svd =
       Eigen::JacobiSVD<Eigen::MatrixXd>(jacobian, Eigen::ComputeThinU | Eigen::ComputeThinV);
@@ -657,32 +636,8 @@ bool ServoCalcs::internalServoUpdate(Eigen::ArrayXd& delta_theta,
   // compose outgoing message
   composeJointTrajMessage(next_joint_state_, joint_trajectory);
 
-  // Modify the output message if we are using gazebo
-  if (servo_params_.use_gazebo)
-  {
-    insertRedundantPointsIntoTrajectory(joint_trajectory, gazebo_redundant_message_count_);
-  }
-
   previous_joint_state_ = current_joint_state_;
   return true;
-}
-
-// Spam several redundant points into the trajectory. The first few may be skipped if the
-// time stamp is in the past when it reaches the client. Needed for gazebo simulation.
-// Start from 1 because the first point's timestamp is already 1*servo_parameters_.publish_period
-void ServoCalcs::insertRedundantPointsIntoTrajectory(trajectory_msgs::msg::JointTrajectory& joint_trajectory,
-                                                     int count) const
-{
-  if (count < 2)
-    return;
-  joint_trajectory.points.resize(count);
-  auto point = joint_trajectory.points[0];
-  // Start from 1 because we already have the first point. End at count+1 so (total #) == count
-  for (int i = 1; i < count; ++i)
-  {
-    point.time_from_start = rclcpp::Duration::from_seconds((i + 1) * servo_params_.publish_period);
-    joint_trajectory.points[i] = point;
-  }
 }
 
 void ServoCalcs::resetLowPassFilters(const sensor_msgs::msg::JointState& joint_state)
@@ -962,54 +917,6 @@ Eigen::VectorXd ServoCalcs::scaleJointCommand(const control_msgs::msg::JointJog&
   return result;
 }
 
-void ServoCalcs::removeDimension(Eigen::MatrixXd& jacobian, Eigen::VectorXd& delta_x, unsigned int row_to_remove) const
-{
-  unsigned int num_rows = jacobian.rows() - 1;
-  unsigned int num_cols = jacobian.cols();
-
-  if (row_to_remove < num_rows)
-  {
-    jacobian.block(row_to_remove, 0, num_rows - row_to_remove, num_cols) =
-        jacobian.block(row_to_remove + 1, 0, num_rows - row_to_remove, num_cols);
-    delta_x.segment(row_to_remove, num_rows - row_to_remove) =
-        delta_x.segment(row_to_remove + 1, num_rows - row_to_remove);
-  }
-  jacobian.conservativeResize(num_rows, num_cols);
-  delta_x.conservativeResize(num_rows);
-}
-
-void ServoCalcs::removeDriftDimensions(Eigen::MatrixXd& matrix, Eigen::VectorXd& delta_x)
-{
-  // May allow some dimensions to drift, based on drift_dimensions
-  // i.e. take advantage of task redundancy.
-  // Remove the Jacobian rows corresponding to True in the vector drift_dimensions
-  // Work backwards through the 6-vector so indices don't get out of order
-  for (auto dimension = matrix.rows() - 1; dimension >= 0; --dimension)
-  {
-    if (drift_dimensions_[dimension] && matrix.rows() > 1)
-    {
-      removeDimension(matrix, delta_x, dimension);
-    }
-  }
-}
-
-void ServoCalcs::enforceControlDimensions(geometry_msgs::msg::TwistStamped& command)
-{
-  // Can't loop through the message, so check them all
-  if (!control_dimensions_[0])
-    command.twist.linear.x = 0;
-  if (!control_dimensions_[1])
-    command.twist.linear.y = 0;
-  if (!control_dimensions_[2])
-    command.twist.linear.z = 0;
-  if (!control_dimensions_[3])
-    command.twist.angular.x = 0;
-  if (!control_dimensions_[4])
-    command.twist.angular.y = 0;
-  if (!control_dimensions_[5])
-    command.twist.angular.z = 0;
-}
-
 bool ServoCalcs::getCommandFrameTransform(Eigen::Isometry3d& transform)
 {
   const std::lock_guard<std::mutex> lock(main_loop_mutex_);
@@ -1087,29 +994,4 @@ void ServoCalcs::collisionVelocityScaleCB(const std_msgs::msg::Float64::ConstSha
   collision_velocity_scale_ = msg->data;
 }
 
-void ServoCalcs::changeDriftDimensions(const std::shared_ptr<moveit_msgs::srv::ChangeDriftDimensions::Request>& req,
-                                       const std::shared_ptr<moveit_msgs::srv::ChangeDriftDimensions::Response>& res)
-{
-  drift_dimensions_[0] = req->drift_x_translation;
-  drift_dimensions_[1] = req->drift_y_translation;
-  drift_dimensions_[2] = req->drift_z_translation;
-  drift_dimensions_[3] = req->drift_x_rotation;
-  drift_dimensions_[4] = req->drift_y_rotation;
-  drift_dimensions_[5] = req->drift_z_rotation;
-
-  res->success = true;
-}
-
-void ServoCalcs::changeControlDimensions(const std::shared_ptr<moveit_msgs::srv::ChangeControlDimensions::Request>& req,
-                                         const std::shared_ptr<moveit_msgs::srv::ChangeControlDimensions::Response>& res)
-{
-  control_dimensions_[0] = req->control_x_translation;
-  control_dimensions_[1] = req->control_y_translation;
-  control_dimensions_[2] = req->control_z_translation;
-  control_dimensions_[3] = req->control_x_rotation;
-  control_dimensions_[4] = req->control_y_rotation;
-  control_dimensions_[5] = req->control_z_rotation;
-
-  res->success = true;
-}
 }  // namespace moveit_servo
