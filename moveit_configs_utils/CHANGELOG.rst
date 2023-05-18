@@ -2,6 +2,13 @@
 Changelog for package moveit_configs_utils
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.7.4 (2023-05-18)
+------------------
+* Parse xacro args from .setup_assistant config in MoveIt Configs Builder (`#2172 <https://github.com/ros-planning/moveit2/issues/2172>`_)
+  Co-authored-by: Jafar <jafar.uruc@gmail.com>
+* Update default planning configs to use AddTimeOptimalParameterization (`#2167 <https://github.com/ros-planning/moveit2/issues/2167>`_)
+* Contributors: Anthony Baker
+
 2.7.3 (2023-04-24)
 ------------------
 
