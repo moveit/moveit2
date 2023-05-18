@@ -172,7 +172,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: sonar-scanner --define sonar.cfamily.compile-commands=${{ env.BASEDIR }}/target_ws/build/compile_commands.json --define sonar.projectKey=ros-planning_moveit2 --define sonar.organization=moveit --define sonar.python.version=3 --define sonar.sources=src
+        run: sonar-scanner --define project.settings=src/moveit2/sonar-project.properties
         working-directory: ${{ env.BASEDIR }}/target_ws
       - name: Upload clang-tidy changes
         uses: rhaschke/upload-git-patch-action@main
