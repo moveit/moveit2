@@ -43,7 +43,9 @@ using namespace trajectory_processing;
 
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_ros.add_traj_smoothing");
 
-/** @brief This adapter uses the time-optimal trajectory generation method */
+/** @brief This adapter uses ruckig (https://github.com/pantor/ruckig) to adapt the trajectory to be jerk-constrained and
+ * time-optimal. It is necessary to run another trajectory generation algorithm before this adapter, because the
+ * algorithm requires a fully configured trajectory as initial guess. */
 class AddRuckigTrajectorySmoothing : public planning_request_adapter::PlanningRequestAdapter
 {
 public:

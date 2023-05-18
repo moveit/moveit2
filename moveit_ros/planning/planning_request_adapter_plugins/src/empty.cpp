@@ -39,6 +39,7 @@
 
 namespace default_planner_request_adapters
 {
+/** @brief Empty adapter that just calls the planner. */
 class Empty : public planning_request_adapter::PlanningRequestAdapter
 {
 public:
