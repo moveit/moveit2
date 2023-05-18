@@ -182,7 +182,7 @@ class IKFastKinematicsPlugin : public kinematics::KinematicsBase
   Eigen::Isometry3d group_tip_to_chain_tip_;
 
   bool initialized_;  // Internal variable that indicates whether solvers are configured and ready
-  const rclcpp::Logger LOGGER = rclcpp::get_logger("_ROBOT_NAME___GROUP_NAME__ikfast_solver");
+  static const rclcpp::Logger LOGGER = rclcpp::get_logger("_ROBOT_NAME___GROUP_NAME__ikfast_solver");
 
   const std::vector<std::string>& getJointNames() const override
   {
