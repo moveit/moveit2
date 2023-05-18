@@ -49,6 +49,8 @@ jobs:
       # Changing linker to lld as ld has a behavior where it takes a long time to finish
       # Compile CCOV with Debug. Enable -Werror.
       TARGET_CMAKE_ARGS: >
+        --no-warn-unused-cli
+        -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
         -DCMAKE_EXE_LINKER_FLAGS=-fuse-ld=lld
         -DCMAKE_SHARED_LINKER_FLAGS=-fuse-ld=lld
         -DCMAKE_MODULE_LINKER_FLAGS=-fuse-ld=lld
@@ -162,6 +164,16 @@ jobs:
         if: always() && matrix.env.CCOV && steps.ici.outputs.target_test_results == '0'
         with:
           files: ${{ env.BASEDIR }}/target_ws/coverage.info
+      - name: Install sonar-scanner and build-wrapper
+        if: always() && matrix.env.CCOV && steps.ici.outputs.target_test_results == '0'
+        uses: SonarSource/sonarcloud-github-c-cpp@v1
+      - name: Run sonar-scanner
+        if: always() && matrix.env.CCOV && steps.ici.outputs.target_test_results == '0'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: sonar-scanner --define sonar.cfamily.compile-commands=${{ env.BASEDIR }}/target_ws/build/compile_commands.json --define sonar.projectKey=ros-planning_moveit2 --define sonar.organization=moveit --define sonar.python.version=3 --define sonar.sources=src
+        working-directory: ${{ env.BASEDIR }}/target_ws
       - name: Upload clang-tidy changes
         uses: rhaschke/upload-git-patch-action@main
         if: always() && matrix.env.CLANG_TIDY
