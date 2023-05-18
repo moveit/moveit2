@@ -2,6 +2,13 @@
 Changelog for package moveit_py
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.7.4 (2023-05-18)
+------------------
+* Rename named_target_state_values to get_named_target_state_values (`#2181 <https://github.com/ros-planning/moveit2/issues/2181>`_)
+* Deprecate MoveItCpp::execute() use of blocking flag (`#1984 <https://github.com/ros-planning/moveit2/issues/1984>`_)
+* Add Python binding for link_model_names and get_only_one_end_effector_tip + update stubs (`#1985 <https://github.com/ros-planning/moveit2/issues/1985>`_)
+* Contributors: Jafar, Lucas Wendland
+
 2.7.3 (2023-04-24)
 ------------------
 
