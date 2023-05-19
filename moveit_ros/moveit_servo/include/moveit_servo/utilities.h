@@ -65,14 +65,12 @@ geometry_msgs::msg::TransformStamped convertIsometryToTransform(const Eigen::Iso
  * @param[in, out] current_state  The state of the robot. Used in internal calculations.
  * @param[out] status             Singularity status
  */
-double velocityScalingFactorForSingularity(const moveit::core::JointModelGroup* joint_model_group,
-                                           const Eigen::VectorXd& commanded_twist,
-                                           const Eigen::JacobiSVD<Eigen::MatrixXd>& svd,
-                                           const Eigen::MatrixXd& pseudo_inverse,
-                                           const double hard_stop_singularity_threshold,
-                                           const double lower_singularity_threshold,
-                                           const double leaving_singularity_threshold_multiplier, rclcpp::Clock& clock,
-                                           const moveit::core::RobotStatePtr& current_state, StatusCode& status);
+double velocityScalingFactorForSingularity(
+    const moveit::core::JointModelGroup* joint_model_group, const Eigen::VectorXd& commanded_twist,
+    const Eigen::JacobiSVD<Eigen::MatrixXd>& svd, const Eigen::MatrixXd& pseudo_inverse,
+    const double hard_stop_singularity_threshold, const double lower_singularity_threshold,
+    const double leaving_singularity_threshold_multiplier, const rclcpp::Clock& clock,
+    const moveit::core::RobotStatePtr& current_state, StatusCode& status);
 
 /** \brief Joint-wise update of a sensor_msgs::msg::JointState with given delta's
  * Also filters and calculates the previous velocity
@@ -84,7 +82,7 @@ double velocityScalingFactorForSingularity(const moveit::core::JointModelGroup* 
  * @param smoother The trajectory smoother to be used.
  * @return Returns false if there is a problem, true otherwise
  */
-bool applyJointUpdate(rclcpp::Clock& clock, const double publish_period, const Eigen::ArrayXd& delta_theta,
+bool applyJointUpdate(const rclcpp::Clock& clock, const double publish_period, const Eigen::ArrayXd& delta_theta,
                       const sensor_msgs::msg::JointState& previous_joint_state,
                       sensor_msgs::msg::JointState& next_joint_state,
                       pluginlib::UniquePtr<online_signal_smoothing::SmoothingBaseClass>& smoother);
@@ -96,7 +94,7 @@ bool applyJointUpdate(rclcpp::Clock& clock, const double publish_period, const E
  * @param clock A ROS clock, for logging
  */
 void transformTwistToPlanningFrame(geometry_msgs::msg::TwistStamped& cmd, const std::string& planning_frame,
-                                   const moveit::core::RobotStatePtr& current_state, rclcpp::Clock& clock);
+                                   const moveit::core::RobotStatePtr& current_state, const rclcpp::Clock& clock);
 
 /** \brief Converts the delta_x (change in cartesian position) to a pose to be used with IK solver.
  * @param delta_x The change in cartesian position
@@ -135,6 +133,6 @@ void enforceVelocityLimits(const moveit::core::JointModelGroup* joint_model_grou
  */
 std::vector<const moveit::core::JointModel*>
 enforcePositionLimits(sensor_msgs::msg::JointState& joint_state, const double joint_limit_margin,
-                      const moveit::core::JointModelGroup* joint_model_group, rclcpp::Clock& clock);
+                      const moveit::core::JointModelGroup* joint_model_group, const rclcpp::Clock& clock);
 
 }  // namespace moveit_servo

@@ -71,14 +71,12 @@ geometry_msgs::msg::TransformStamped convertIsometryToTransform(const Eigen::Iso
  * @param[in, out] current_state  The state of the robot. Used in internal calculations.
  * @param[out] status             Singularity status
  */
-double velocityScalingFactorForSingularity(const moveit::core::JointModelGroup* joint_model_group,
-                                           const Eigen::VectorXd& commanded_twist,
-                                           const Eigen::JacobiSVD<Eigen::MatrixXd>& svd,
-                                           const Eigen::MatrixXd& pseudo_inverse,
-                                           const double hard_stop_singularity_threshold,
-                                           const double lower_singularity_threshold,
-                                           const double leaving_singularity_threshold_multiplier, rclcpp::Clock& clock,
-                                           const moveit::core::RobotStatePtr& current_state, StatusCode& status)
+double velocityScalingFactorForSingularity(
+    const moveit::core::JointModelGroup* joint_model_group, const Eigen::VectorXd& commanded_twist,
+    const Eigen::JacobiSVD<Eigen::MatrixXd>& svd, const Eigen::MatrixXd& pseudo_inverse,
+    const double hard_stop_singularity_threshold, const double lower_singularity_threshold,
+    const double leaving_singularity_threshold_multiplier, const rclcpp::Clock& clock,
+    const moveit::core::RobotStatePtr& current_state, StatusCode& status)
 {
   double velocity_scale = 1;
   std::size_t num_dimensions = commanded_twist.size();
@@ -142,7 +140,7 @@ double velocityScalingFactorForSingularity(const moveit::core::JointModelGroup* 
   return velocity_scale;
 }
 
-bool applyJointUpdate(rclcpp::Clock& clock, const double publish_period, const Eigen::ArrayXd& delta_theta,
+bool applyJointUpdate(const rclcpp::Clock& clock, const double publish_period, const Eigen::ArrayXd& delta_theta,
                       const sensor_msgs::msg::JointState& previous_joint_state,
                       sensor_msgs::msg::JointState& next_joint_state,
                       pluginlib::UniquePtr<online_signal_smoothing::SmoothingBaseClass>& smoother)
@@ -180,7 +178,7 @@ bool applyJointUpdate(rclcpp::Clock& clock, const double publish_period, const E
 }
 
 void transformTwistToPlanningFrame(geometry_msgs::msg::TwistStamped& cmd, const std::string& planning_frame,
-                                   const moveit::core::RobotStatePtr& current_state, rclcpp::Clock& clock)
+                                   const moveit::core::RobotStatePtr& current_state, const rclcpp::Clock& clock)
 {
   if (cmd.header.frame_id.empty())
   {
@@ -297,7 +295,7 @@ void enforceVelocityLimits(const moveit::core::JointModelGroup* joint_model_grou
 
 std::vector<const moveit::core::JointModel*>
 enforcePositionLimits(sensor_msgs::msg::JointState& joint_state, const double joint_limit_margin,
-                      const moveit::core::JointModelGroup* joint_model_group, rclcpp::Clock& clock)
+                      const moveit::core::JointModelGroup* joint_model_group, const rclcpp::Clock& clock)
 {
   // Halt if we're past a joint margin and joint velocity is moving even farther past
   double joint_angle = 0;
