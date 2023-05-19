@@ -172,8 +172,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: sonar-scanner -X --define project.settings=src/moveit2/sonar-project.properties
-        working-directory: ${{ env.BASEDIR }}/target_ws
+        run: sonar-scanner -X --define project.settings=target_ws/src/moveit2/sonar-project.properties
+        working-directory: ${{ env.BASEDIR }}
       - name: Upload clang-tidy changes
         uses: rhaschke/upload-git-patch-action@main
         if: always() && matrix.env.CLANG_TIDY
