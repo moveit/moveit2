@@ -503,9 +503,15 @@ bool ServoCalcs::cartesianServoCalcs(geometry_msgs::msg::TwistStamped& cmd,
     return false;
 
   // Transform the command to the MoveGroup planning frame
+  if (cmd.header.frame_id.empty())
+  {
+    RCLCPP_WARN_STREAM_THROTTLE(LOGGER, *node_->get_clock(), ROS_LOG_THROTTLE_PERIOD,
+                                "No frame specified for command ,will use planning_frame");
+    cmd.header.frame_id = servo_params_.planning_frame;
+  }
   if (cmd.header.frame_id != servo_params_.planning_frame)
   {
-    transformTwistToPlanningFrame(cmd, servo_params_.planning_frame, current_state_, *node_->get_clock());
+    transformTwistToPlanningFrame(cmd, servo_params_.planning_frame, current_state_);
   }
 
   Eigen::VectorXd delta_x = scaleCartesianCommand(cmd);
@@ -604,9 +610,12 @@ bool ServoCalcs::internalServoUpdate(Eigen::ArrayXd& delta_theta,
   delta_theta *= collision_scale;
 
   // Loop through joints and update them, calculate velocities, and filter
-  if (!applyJointUpdate(*node_->get_clock(), servo_params_.publish_period, delta_theta, previous_joint_state_,
-                        next_joint_state_, smoother_))
+  if (!applyJointUpdate(servo_params_.publish_period, delta_theta, previous_joint_state_, next_joint_state_, smoother_))
+  {
+    RCLCPP_ERROR_STREAM_THROTTLE(LOGGER, *node_->get_clock(), ROS_LOG_THROTTLE_PERIOD,
+                                 "Lengths of output and increments do not match.");
     return false;
+  }
 
   // Mark the lowpass filters as updated for this cycle
   updated_filters_ = true;
@@ -616,8 +625,8 @@ bool ServoCalcs::internalServoUpdate(Eigen::ArrayXd& delta_theta,
                         servo_params_.override_velocity_scaling_factor);
 
   // Enforce SRDF position limits, might halt if needed, set prev_vel to 0
-  const auto joints_to_halt = enforcePositionLimits(next_joint_state_, servo_params_.joint_limit_margin,
-                                                    joint_model_group_, *node_->get_clock());
+  const auto joints_to_halt =
+      enforcePositionLimits(next_joint_state_, servo_params_.joint_limit_margin, joint_model_group_);
 
   if (!joints_to_halt.empty())
   {

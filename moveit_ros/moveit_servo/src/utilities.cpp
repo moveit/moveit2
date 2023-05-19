@@ -140,7 +140,7 @@ double velocityScalingFactorForSingularity(
   return velocity_scale;
 }
 
-bool applyJointUpdate(const rclcpp::Clock& clock, const double publish_period, const Eigen::ArrayXd& delta_theta,
+bool applyJointUpdate(const double publish_period, const Eigen::ArrayXd& delta_theta,
                       const sensor_msgs::msg::JointState& previous_joint_state,
                       sensor_msgs::msg::JointState& next_joint_state,
                       pluginlib::UniquePtr<online_signal_smoothing::SmoothingBaseClass>& smoother)
@@ -149,7 +149,6 @@ bool applyJointUpdate(const rclcpp::Clock& clock, const double publish_period, c
   if (next_joint_state.position.size() != static_cast<std::size_t>(delta_theta.size()) ||
       next_joint_state.velocity.size() != next_joint_state.position.size())
   {
-    RCLCPP_ERROR_STREAM(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD, "Lengths of output and increments do not match.");
     return false;
   }
 
@@ -177,15 +176,8 @@ bool applyJointUpdate(const rclcpp::Clock& clock, const double publish_period, c
 }
 
 void transformTwistToPlanningFrame(geometry_msgs::msg::TwistStamped& cmd, const std::string& planning_frame,
-                                   const moveit::core::RobotStatePtr& current_state, const rclcpp::Clock& clock)
+                                   const moveit::core::RobotStatePtr& current_state)
 {
-  if (cmd.header.frame_id.empty())
-  {
-    RCLCPP_WARN_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD,
-                                "No frame specified for command ,will use planning_frame");
-    cmd.header.frame_id = planning_frame;
-  }
-
   // We solve (planning_frame -> base -> cmd.header.frame_id)
   // by computing (base->planning_frame)^-1 * (base->cmd.header.frame_id)
   const Eigen::Isometry3d tf_moveit_to_incoming_cmd_frame =

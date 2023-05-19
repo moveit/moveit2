@@ -82,7 +82,7 @@ double velocityScalingFactorForSingularity(
  * @param smoother The trajectory smoother to be used.
  * @return Returns false if there is a problem, true otherwise
  */
-bool applyJointUpdate(const rclcpp::Clock& clock, const double publish_period, const Eigen::ArrayXd& delta_theta,
+bool applyJointUpdate(const double publish_period, const Eigen::ArrayXd& delta_theta,
                       const sensor_msgs::msg::JointState& previous_joint_state,
                       sensor_msgs::msg::JointState& next_joint_state,
                       pluginlib::UniquePtr<online_signal_smoothing::SmoothingBaseClass>& smoother);
@@ -94,7 +94,7 @@ bool applyJointUpdate(const rclcpp::Clock& clock, const double publish_period, c
  * @param clock A ROS clock, for logging
  */
 void transformTwistToPlanningFrame(geometry_msgs::msg::TwistStamped& cmd, const std::string& planning_frame,
-                                   const moveit::core::RobotStatePtr& current_state, const rclcpp::Clock& clock);
+                                   const moveit::core::RobotStatePtr& current_state);
 
 /** \brief Converts the delta_x (change in cartesian position) to a pose to be used with IK solver.
  * @param delta_x The change in cartesian position
