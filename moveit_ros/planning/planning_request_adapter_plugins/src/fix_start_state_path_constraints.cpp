@@ -51,7 +51,6 @@ static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_ros.fix_start_st
  * perturb the values by is specified by the jiggle_fraction parameter that controls the perturbation as a percentage of
  * the total range of motion for the joint. The other parameter for this adapter specifies how many random perturbations
  * the adapter will sample before giving up.*/
-
 class FixStartStatePathConstraints : public planning_request_adapter::PlanningRequestAdapter
 {
 public:
