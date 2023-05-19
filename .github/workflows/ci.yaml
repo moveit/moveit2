@@ -76,7 +76,7 @@ jobs:
       - name: "Free up disk space"
         if: matrix.env.CCOV
         run: |
-          sudo apt-get -qq purge build-essential "ghc*"
+          sudo apt-get -qq purge "ghc*"
           sudo apt-get clean
           # cleanup docker images not used by us
           docker system prune -af
@@ -88,7 +88,7 @@ jobs:
           sudo rm -rf /usr/local
           df -h
       - name: Install ccache
-        run: sudo apt install ccache
+        run: sudo apt install ccache build-essential
       - uses: actions/checkout@v3
       - uses: testspace-com/setup-testspace@v1
         if: github.repository == 'ros-planning/moveit2'
