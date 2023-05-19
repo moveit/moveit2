@@ -506,7 +506,8 @@ bool ServoCalcs::cartesianServoCalcs(geometry_msgs::msg::TwistStamped& cmd,
   if (cmd.header.frame_id.empty())
   {
     RCLCPP_WARN_STREAM_THROTTLE(LOGGER, *node_->get_clock(), ROS_LOG_THROTTLE_PERIOD,
-                                "No frame specified for command ,will use planning_frame");
+                                "No frame specified for command, will use planning_frame : "
+                                    << servo_params_.planning_frame);
     cmd.header.frame_id = servo_params_.planning_frame;
   }
   if (cmd.header.frame_id != servo_params_.planning_frame)
@@ -565,7 +566,7 @@ bool ServoCalcs::cartesianServoCalcs(geometry_msgs::msg::TwistStamped& cmd,
                                                       servo_params_.lower_singularity_threshold,
                                                       servo_params_.leaving_singularity_threshold_multiplier,
                                                       current_state_, status_);
-  // Status will have changed if approcaching singularity
+  // Status will have changed if approaching  singularity
   if (last_status != status_)
   {
     RCLCPP_WARN_STREAM_THROTTLE(LOGGER, *node_->get_clock(), ROS_LOG_THROTTLE_PERIOD, SERVO_STATUS_CODE_MAP.at(status_));
@@ -636,13 +637,14 @@ bool ServoCalcs::internalServoUpdate(Eigen::ArrayXd& delta_theta,
 
   if (!joints_to_halt.empty())
   {
-    std::ostringstream joints_names;
+    std::ostringstream joint_names;
     std::transform(joints_to_halt.cbegin(), std::prev(joints_to_halt.cend()),
-                   std::ostream_iterator<std::string>(joints_names, ", "),
-                   [](const auto& joint) { return joint->getName(); });
-    joints_names << joints_to_halt.back()->getName();
+                   std::ostream_iterator<std::string>(joint_names, " "),
+                   [](const auto& joint) { return " '" + joint->getName() + "' "; });
+
+    joint_names << joints_to_halt.back()->getName();
     RCLCPP_WARN_STREAM_THROTTLE(LOGGER, *node_->get_clock(), ROS_LOG_THROTTLE_PERIOD,
-                                joints_names.str() << " close to a position limit. Halting.");
+                                joint_names.str() << " close to a position limit. Halting.");
 
     status_ = StatusCode::JOINT_BOUND;
     if ((servo_type == ServoType::JOINT_SPACE && !servo_params_.halt_all_joints_in_joint_mode) ||

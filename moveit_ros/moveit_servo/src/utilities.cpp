@@ -40,11 +40,6 @@
 
 namespace moveit_servo
 {
-namespace
-{
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_servo.utilities");
-constexpr auto ROS_LOG_THROTTLE_PERIOD = std::chrono::milliseconds(3000).count();
-}  // namespace
 
 /** \brief Helper function for converting Eigen::Isometry3d to geometry_msgs/TransformStamped **/
 geometry_msgs::msg::TransformStamped convertIsometryToTransform(const Eigen::Isometry3d& eigen_tf,
