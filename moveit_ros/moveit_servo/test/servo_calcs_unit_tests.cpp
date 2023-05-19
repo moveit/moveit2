@@ -158,9 +158,10 @@ TEST_F(ServoCalcsUnitTests, SingularityScaling)
   rclcpp::Clock clock;
   moveit_servo::StatusCode status;
 
-  double scaling_factor = moveit_servo::velocityScalingFactorForSingularity(
-      joint_model_group_, commanded_twist, svd, pseudo_inverse, hard_stop_singularity_threshold,
-      lower_singularity_threshold, leaving_singularity_threshold_multiplier, clock, robot_state, status);
+  double scaling_factor =
+      moveit_servo::velocityScalingFactorForSingularity(joint_model_group_, commanded_twist, svd, pseudo_inverse,
+                                                        hard_stop_singularity_threshold, lower_singularity_threshold,
+                                                        leaving_singularity_threshold_multiplier, robot_state, status);
 
   EXPECT_EQ(scaling_factor, 0);
 }
