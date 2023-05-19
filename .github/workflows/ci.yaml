@@ -164,6 +164,12 @@ jobs:
         if: always() && matrix.env.CCOV && steps.ici.outputs.target_test_results == '0'
         with:
           files: ${{ env.BASEDIR }}/target_ws/coverage.info
+      - name: Print compile-commands.json database
+        if: always() && matrix.env.CCOV && steps.ici.outputs.target_test_results == '0'
+        run: cat ${{ github.workspace }}/.work/target_ws/build/compile_commands.json
+      - name: tree build directory
+        if: always() && matrix.env.CCOV && steps.ici.outputs.target_test_results == '0'
+        run: tree ${{ github.workspace }}/.work/target_ws/build
       - name: Install sonar-scanner and build-wrapper
         if: always() && matrix.env.CCOV && steps.ici.outputs.target_test_results == '0'
         uses: SonarSource/sonarcloud-github-c-cpp@v1
