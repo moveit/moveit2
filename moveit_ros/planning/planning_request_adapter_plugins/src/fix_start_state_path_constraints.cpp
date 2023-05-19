@@ -46,6 +46,7 @@
 namespace default_planner_request_adapters
 {
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_ros.fix_start_state_path_constraints");
+
 /** @brief This fix start state collision adapter will attempt to sample a new collision-free configuration near a
  * specified configuration (in collision) by perturbing the joint values by a small amount. The amount that it will
  * perturb the values by is specified by the jiggle_fraction parameter that controls the perturbation as a percentage of
