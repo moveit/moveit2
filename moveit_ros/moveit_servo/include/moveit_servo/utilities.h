@@ -133,6 +133,6 @@ void enforceVelocityLimits(const moveit::core::JointModelGroup* joint_model_grou
  */
 std::vector<const moveit::core::JointModel*>
 enforcePositionLimits(sensor_msgs::msg::JointState& joint_state, const double joint_limit_margin,
-                      const moveit::core::JointModelGroup* joint_model_group, const rclcpp::Clock& clock);
+                      const moveit::core::JointModelGroup* joint_model_group);
 
 }  // namespace moveit_servo

@@ -149,8 +149,7 @@ bool applyJointUpdate(const rclcpp::Clock& clock, const double publish_period, c
   if (next_joint_state.position.size() != static_cast<std::size_t>(delta_theta.size()) ||
       next_joint_state.velocity.size() != next_joint_state.position.size())
   {
-    RCLCPP_ERROR_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD,
-                                 "Lengths of output and increments do not match.");
+    RCLCPP_ERROR_STREAM(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD, "Lengths of output and increments do not match.");
     return false;
   }
 
@@ -295,7 +294,7 @@ void enforceVelocityLimits(const moveit::core::JointModelGroup* joint_model_grou
 
 std::vector<const moveit::core::JointModel*>
 enforcePositionLimits(sensor_msgs::msg::JointState& joint_state, const double joint_limit_margin,
-                      const moveit::core::JointModelGroup* joint_model_group, const rclcpp::Clock& clock)
+                      const moveit::core::JointModelGroup* joint_model_group)
 {
   // Halt if we're past a joint margin and joint velocity is moving even farther past
   double joint_angle = 0;
@@ -330,16 +329,6 @@ enforcePositionLimits(sensor_msgs::msg::JointState& joint_state, const double jo
         }
       }
     }
-  }
-  if (!joints_to_halt.empty())
-  {
-    std::ostringstream joints_names;
-    std::transform(joints_to_halt.cbegin(), std::prev(joints_to_halt.cend()),
-                   std::ostream_iterator<std::string>(joints_names, ", "),
-                   [](const auto& joint) { return joint->getName(); });
-    joints_names << joints_to_halt.back()->getName();
-    RCLCPP_WARN_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD,
-                                joints_names.str() << " close to a position limit. Halting.");
   }
   return joints_to_halt;
 }

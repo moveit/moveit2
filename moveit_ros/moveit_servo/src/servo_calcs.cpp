@@ -618,8 +618,17 @@ bool ServoCalcs::internalServoUpdate(Eigen::ArrayXd& delta_theta,
   // Enforce SRDF position limits, might halt if needed, set prev_vel to 0
   const auto joints_to_halt = enforcePositionLimits(next_joint_state_, servo_params_.joint_limit_margin,
                                                     joint_model_group_, *node_->get_clock());
+
   if (!joints_to_halt.empty())
   {
+    std::ostringstream joints_names;
+    std::transform(joints_to_halt.cbegin(), std::prev(joints_to_halt.cend()),
+                   std::ostream_iterator<std::string>(joints_names, ", "),
+                   [](const auto& joint) { return joint->getName(); });
+    joints_names << joints_to_halt.back()->getName();
+    RCLCPP_WARN_STREAM_THROTTLE(LOGGER, *node_->get_clock(), ROS_LOG_THROTTLE_PERIOD,
+                                joints_names.str() << " close to a position limit. Halting.");
+
     status_ = StatusCode::JOINT_BOUND;
     if ((servo_type == ServoType::JOINT_SPACE && !servo_params_.halt_all_joints_in_joint_mode) ||
         (servo_type == ServoType::CARTESIAN_SPACE && !servo_params_.halt_all_joints_in_cartesian_mode))
