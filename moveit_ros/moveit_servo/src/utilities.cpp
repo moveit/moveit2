@@ -58,25 +58,14 @@ geometry_msgs::msg::TransformStamped convertIsometryToTransform(const Eigen::Iso
   return output;
 }
 
-/** \brief Possibly calculate a velocity scaling factor, due to proximity of
- * singularity and direction of motion
- * @param[in] joint_model_group   The MoveIt group
- * @param[in] commanded_twist     The commanded Cartesian twist
- * @param[in] svd                 A singular value decomposition of the Jacobian
- * @param[in] pseudo_inverse      The pseudo-inverse of the Jacobian
- * @param[in] hard_stop_singularity_threshold  Halt if condition(Jacobian) > hard_stop_singularity_threshold
- * @param[in] lower_singularity_threshold      Decelerate if condition(Jacobian) > lower_singularity_threshold
- * @param[in] leaving_singularity_threshold_multiplier      Allow faster motion away from singularity
- * @param[in, out] clock          A ROS clock, for logging
- * @param[in, out] current_state  The state of the robot. Used in internal calculations.
- * @param[out] status             Singularity status
- */
-double velocityScalingFactorForSingularity(
-    const moveit::core::JointModelGroup* joint_model_group, const Eigen::VectorXd& commanded_twist,
-    const Eigen::JacobiSVD<Eigen::MatrixXd>& svd, const Eigen::MatrixXd& pseudo_inverse,
-    const double hard_stop_singularity_threshold, const double lower_singularity_threshold,
-    const double leaving_singularity_threshold_multiplier, const rclcpp::Clock& clock,
-    const moveit::core::RobotStatePtr& current_state, StatusCode& status)
+double velocityScalingFactorForSingularity(const moveit::core::JointModelGroup* joint_model_group,
+                                           const Eigen::VectorXd& commanded_twist,
+                                           const Eigen::JacobiSVD<Eigen::MatrixXd>& svd,
+                                           const Eigen::MatrixXd& pseudo_inverse,
+                                           const double hard_stop_singularity_threshold,
+                                           const double lower_singularity_threshold,
+                                           const double leaving_singularity_threshold_multiplier,
+                                           const moveit::core::RobotStatePtr& current_state, StatusCode& status)
 {
   double velocity_scale = 1;
   std::size_t num_dimensions = commanded_twist.size();
@@ -126,7 +115,6 @@ double velocityScalingFactorForSingularity(
         1. - (ini_condition - lower_singularity_threshold) / (upper_threshold - lower_singularity_threshold);
     status =
         dot > 0 ? StatusCode::DECELERATE_FOR_APPROACHING_SINGULARITY : StatusCode::DECELERATE_FOR_LEAVING_SINGULARITY;
-    RCLCPP_WARN_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD, SERVO_STATUS_CODE_MAP.at(status));
   }
 
   // Very close to singularity, so halt.
@@ -134,7 +122,6 @@ double velocityScalingFactorForSingularity(
   {
     velocity_scale = 0;
     status = StatusCode::HALT_FOR_SINGULARITY;
-    RCLCPP_WARN_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD, SERVO_STATUS_CODE_MAP.at(status));
   }
 
   return velocity_scale;

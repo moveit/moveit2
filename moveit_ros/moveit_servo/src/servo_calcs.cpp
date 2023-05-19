@@ -559,11 +559,17 @@ bool ServoCalcs::cartesianServoCalcs(geometry_msgs::msg::TwistStamped& cmd,
     delta_theta_ = pseudo_inverse * delta_x;
   }
 
+  auto last_status = status_;
   delta_theta_ *= velocityScalingFactorForSingularity(joint_model_group_, delta_x, svd, pseudo_inverse,
                                                       servo_params_.hard_stop_singularity_threshold,
                                                       servo_params_.lower_singularity_threshold,
                                                       servo_params_.leaving_singularity_threshold_multiplier,
-                                                      *node_->get_clock(), current_state_, status_);
+                                                      current_state_, status_);
+  // Status will have changed if approcaching singularity
+  if (last_status != status_)
+  {
+    RCLCPP_WARN_STREAM_THROTTLE(LOGGER, *node_->get_clock(), ROS_LOG_THROTTLE_PERIOD, SERVO_STATUS_CODE_MAP.at(status_));
+  }
 
   return internalServoUpdate(delta_theta_, joint_trajectory, ServoType::CARTESIAN_SPACE);
 }

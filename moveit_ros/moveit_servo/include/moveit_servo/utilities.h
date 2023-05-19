@@ -61,20 +61,20 @@ geometry_msgs::msg::TransformStamped convertIsometryToTransform(const Eigen::Iso
  * @param[in] hard_stop_singularity_threshold  Halt if condition(Jacobian) > hard_stop_singularity_threshold
  * @param[in] lower_singularity_threshold      Decelerate if condition(Jacobian) > lower_singularity_threshold
  * @param[in] leaving_singularity_threshold_multiplier      Allow faster motion away from singularity
- * @param[in, out] clock          A ROS clock, for logging
  * @param[in, out] current_state  The state of the robot. Used in internal calculations.
  * @param[out] status             Singularity status
  */
-double velocityScalingFactorForSingularity(
-    const moveit::core::JointModelGroup* joint_model_group, const Eigen::VectorXd& commanded_twist,
-    const Eigen::JacobiSVD<Eigen::MatrixXd>& svd, const Eigen::MatrixXd& pseudo_inverse,
-    const double hard_stop_singularity_threshold, const double lower_singularity_threshold,
-    const double leaving_singularity_threshold_multiplier, const rclcpp::Clock& clock,
-    const moveit::core::RobotStatePtr& current_state, StatusCode& status);
+double velocityScalingFactorForSingularity(const moveit::core::JointModelGroup* joint_model_group,
+                                           const Eigen::VectorXd& commanded_twist,
+                                           const Eigen::JacobiSVD<Eigen::MatrixXd>& svd,
+                                           const Eigen::MatrixXd& pseudo_inverse,
+                                           const double hard_stop_singularity_threshold,
+                                           const double lower_singularity_threshold,
+                                           const double leaving_singularity_threshold_multiplier,
+                                           const moveit::core::RobotStatePtr& current_state, StatusCode& status);
 
 /** \brief Joint-wise update of a sensor_msgs::msg::JointState with given delta's
  * Also filters and calculates the previous velocity
- * @param clock A ROS clock, for logging
  * @param publish_period The publishing rate for servo command
  * @param delta_theta Eigen vector of joint delta's
  * @param previous_joint_state The previous joint state
@@ -91,7 +91,6 @@ bool applyJointUpdate(const double publish_period, const Eigen::ArrayXd& delta_t
  * @param cmd The twist command received from the user
  * @param planning_frame Moveit planning frame of the robot
  * @param current_state The state of the robot
- * @param clock A ROS clock, for logging
  */
 void transformTwistToPlanningFrame(geometry_msgs::msg::TwistStamped& cmd, const std::string& planning_frame,
                                    const moveit::core::RobotStatePtr& current_state);
@@ -128,7 +127,6 @@ void enforceVelocityLimits(const moveit::core::JointModelGroup* joint_model_grou
  * @param joint_state The joint state to be checked
  * @param joint_limit_margin The allowed margin for joint limit. This is a buffer, prior to the actual limit.
  * @param joint_model_group The MoveIt group
- * @param clock The ROS clock of the calling node
  * @return Vector of the joints that would move farther past position margin limits
  */
 std::vector<const moveit::core::JointModel*>
