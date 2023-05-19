@@ -560,13 +560,13 @@ bool ServoCalcs::cartesianServoCalcs(geometry_msgs::msg::TwistStamped& cmd,
     delta_theta_ = pseudo_inverse * delta_x;
   }
 
-  auto last_status = status_;
+  const StatusCode last_status = status_;
   delta_theta_ *= velocityScalingFactorForSingularity(joint_model_group_, delta_x, svd, pseudo_inverse,
                                                       servo_params_.hard_stop_singularity_threshold,
                                                       servo_params_.lower_singularity_threshold,
                                                       servo_params_.leaving_singularity_threshold_multiplier,
                                                       current_state_, status_);
-  // Status will have changed if approaching  singularity
+  // Status will have changed if approaching singularity
   if (last_status != status_)
   {
     RCLCPP_WARN_STREAM_THROTTLE(LOGGER, *node_->get_clock(), ROS_LOG_THROTTLE_PERIOD, SERVO_STATUS_CODE_MAP.at(status_));
@@ -639,12 +639,12 @@ bool ServoCalcs::internalServoUpdate(Eigen::ArrayXd& delta_theta,
   {
     std::ostringstream joint_names;
     std::transform(joints_to_halt.cbegin(), std::prev(joints_to_halt.cend()),
-                   std::ostream_iterator<std::string>(joint_names, " "),
-                   [](const auto& joint) { return " '" + joint->getName() + "' "; });
+                   std::ostream_iterator<std::string>(joint_names, ""),
+                   [](const auto& joint) { return " '" + joint->getName() + "'"; });
 
     joint_names << joints_to_halt.back()->getName();
     RCLCPP_WARN_STREAM_THROTTLE(LOGGER, *node_->get_clock(), ROS_LOG_THROTTLE_PERIOD,
-                                joint_names.str() << " close to a position limit. Halting.");
+                                "Joints" << joint_names.str() << " close to a position limit. Halting.");
 
     status_ = StatusCode::JOINT_BOUND;
     if ((servo_type == ServoType::JOINT_SPACE && !servo_params_.halt_all_joints_in_joint_mode) ||
