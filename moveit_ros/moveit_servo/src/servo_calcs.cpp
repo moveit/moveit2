@@ -506,7 +506,7 @@ bool ServoCalcs::cartesianServoCalcs(geometry_msgs::msg::TwistStamped& cmd,
   if (cmd.header.frame_id.empty())
   {
     RCLCPP_WARN_STREAM_THROTTLE(LOGGER, *node_->get_clock(), ROS_LOG_THROTTLE_PERIOD,
-                                "No frame specified for command, will use planning_frame : "
+                                "No frame specified for command, will use planning_frame: "
                                     << servo_params_.planning_frame);
     cmd.header.frame_id = servo_params_.planning_frame;
   }
@@ -638,11 +638,9 @@ bool ServoCalcs::internalServoUpdate(Eigen::ArrayXd& delta_theta,
   if (!joints_to_halt.empty())
   {
     std::ostringstream joint_names;
-    std::transform(joints_to_halt.cbegin(), std::prev(joints_to_halt.cend()),
-                   std::ostream_iterator<std::string>(joint_names, ""),
+    std::transform(joints_to_halt.cbegin(), joints_to_halt.cend(), std::ostream_iterator<std::string>(joint_names, ""),
                    [](const auto& joint) { return " '" + joint->getName() + "'"; });
 
-    joint_names << joints_to_halt.back()->getName();
     RCLCPP_WARN_STREAM_THROTTLE(LOGGER, *node_->get_clock(), ROS_LOG_THROTTLE_PERIOD,
                                 "Joints" << joint_names.str() << " close to a position limit. Halting.");
 
