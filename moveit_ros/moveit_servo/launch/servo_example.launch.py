@@ -79,16 +79,16 @@ def generate_launch_description():
         composable_node_descriptions=[
             # Example of launching Servo as a node component
             # Assuming ROS2 intraprocess communications works well, this is a more efficient way.
-            # ComposableNode(
-            #     package="moveit_servo",
-            #     plugin="moveit_servo::ServoServer",
-            #     name="servo_server",
-            #     parameters=[
-            #         servo_params,
-            #         moveit_config.robot_description,
-            #         moveit_config.robot_description_semantic,
-            #     ],
-            # ),
+            launch_ros.descriptions.ComposableNode(
+                package="moveit_servo",
+                plugin="moveit_servo::ServoNode",
+                name="servo_node",
+                parameters=[
+                    servo_params,
+                    moveit_config.robot_description,
+                    moveit_config.robot_description_semantic,
+                ],
+            ),
             launch_ros.descriptions.ComposableNode(
                 package="robot_state_publisher",
                 plugin="robot_state_publisher::RobotStatePublisher",
@@ -116,18 +116,18 @@ def generate_launch_description():
     )
     # Launch a standalone Servo node.
     # As opposed to a node component, this may be necessary (for example) if Servo is running on a different PC
-    servo_node = launch_ros.actions.Node(
-        package="moveit_servo",
-        executable="servo_node_main",
-        parameters=[
-            servo_params,
-            low_pass_filter_coeff,
-            moveit_config.robot_description,
-            moveit_config.robot_description_semantic,
-            moveit_config.robot_description_kinematics,
-        ],
-        output="screen",
-    )
+    # servo_node = launch_ros.actions.Node(
+    #     package="moveit_servo",
+    #     executable="servo_node_main",
+    #     parameters=[
+    #         servo_params,
+    #         low_pass_filter_coeff,
+    #         moveit_config.robot_description,
+    #         moveit_config.robot_description_semantic,
+    #         moveit_config.robot_description_kinematics,
+    #     ],
+    #     output="screen",
+    # )
 
     return launch.LaunchDescription(
         [
@@ -135,7 +135,8 @@ def generate_launch_description():
             ros2_control_node,
             joint_state_broadcaster_spawner,
             panda_arm_controller_spawner,
-            servo_node,
+            # Uncomment if launching Servo as a standalone node
+            # servo_node,
             container,
         ]
     )
