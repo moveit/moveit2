@@ -59,8 +59,9 @@ public:
    *  \param planning_scene_monitor: PSM should have scene monitor and state monitor
    *                                 already started when passed into this class
    */
-  CollisionCheck(const rclcpp::Node::SharedPtr& node, const servo::Params& servo_params,
-                 const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor);
+  CollisionCheck(const rclcpp::Node::SharedPtr& node,
+                 const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor,
+                 const std::shared_ptr<const servo::ParamListener>& servo_param_listener);
 
   ~CollisionCheck()
   {
@@ -83,6 +84,8 @@ private:
   // Pointer to the ROS node
   const std::shared_ptr<rclcpp::Node> node_;
 
+  // Servo parameters
+  const std::shared_ptr<const servo::ParamListener> servo_param_listener_;
   servo::Params servo_params_;
 
   // Pointer to the collision environment
@@ -94,9 +97,9 @@ private:
   // Scale robot velocity according to collision proximity and user-defined thresholds.
   // I scaled exponentially (cubic power) so velocity drops off quickly after the threshold.
   // Proximity decreasing --> decelerate
-  double velocity_scale_ = 1;
-  double self_collision_distance_ = 0;
-  double scene_collision_distance_ = 0;
+  double velocity_scale_ = 1.0;
+  double self_collision_distance_ = 0.0;
+  double scene_collision_distance_ = 0.0;
   bool collision_detected_ = false;
 
   const double self_velocity_scale_coefficient_;
