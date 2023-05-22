@@ -79,7 +79,7 @@ class ServoCalcs
 public:
   ServoCalcs(const rclcpp::Node::SharedPtr& node,
              const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor,
-             const std::shared_ptr<const servo::ParamListener> servo_param_listener);
+             const std::shared_ptr<const servo::ParamListener>& servo_param_listener);
 
   ~ServoCalcs();
 
