@@ -78,7 +78,7 @@ def generate_launch_description():
         executable="component_container_mt",
         composable_node_descriptions=[
             # Example of launching Servo as a node component
-            # Assuming ROS2 intraprocess communications works well, this is a more efficient way.
+            # Launching as a node component makes ROS 2 intraprocess communication more efficient.
             launch_ros.descriptions.ComposableNode(
                 package="moveit_servo",
                 plugin="moveit_servo::ServoNode",
