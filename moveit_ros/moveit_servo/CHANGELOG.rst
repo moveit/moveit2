@@ -2,6 +2,92 @@
 Changelog for package moveit_servo
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.7.4 (2023-05-18)
+------------------
+* [Servo] Remove soon-to-be obsolete functions (`#2175 <https://github.com/ros-planning/moveit2/issues/2175>`_)
+  * Remove unused functions
+  * Remove drift and control dimension client in tests
+  * Remove gazebo specific message redundancy
+* [Servo] Restore namespace to parameters (`#2171 <https://github.com/ros-planning/moveit2/issues/2171>`_)
+  * Add  namespace to parameters
+  * Minor cleanups
+* [Servo] Fix stop callback, delete pause/unpause mode (`#2139 <https://github.com/ros-planning/moveit2/issues/2139>`_)
+  Co-authored-by: AndyZe <andyz@utexas.edu>
+* [Servo] Make conversion operations into free functions (`#2149 <https://github.com/ros-planning/moveit2/issues/2149>`_)
+  * Move conversion operations to free functions
+  * Optimizations
+  * Fix const references
+  * Readability updates
+  * Remove unused header
+  * Comment update
+  ---------
+  Co-authored-by: AndyZe <andyz@utexas.edu>
+* [Servo] Avoid unnecessary checks for initializing `ik_base_to_tip_frame` (`#2146 <https://github.com/ros-planning/moveit2/issues/2146>`_)
+  * Avoid unnecessary check
+  * Make ik_base_to_tip_frame\_ local
+  * Remove use_inv_jacobian flag
+  * Use nullptr instead of NULL
+  * Alphabetize + clang-tidy
+  * Remove unused header
+* [Servo] Update MoveIt Servo to use generate_parameter_library (`#2096 <https://github.com/ros-planning/moveit2/issues/2096>`_)
+  * Add generate_parameter_library as dependency
+  * Add parameters file
+  * Update parameters file
+  * Fix one_of syntax
+  * Add parameter generation
+  * Include servo param header
+  * Test if parameters are loaded
+  * Make servo_node partially use ParamListener
+  * Make Servo partially use ParamListener
+  * Make ServoCalcs partially use ParamListener
+  * Fix frame name
+  * Handle parameter updates
+  * Remove old param lib dependency in CollisionCheck
+  * Remove old param lib dependency in ServoCalcs
+  * Remove old param lib dependency in Servo
+  * Remove old param lib dependency in ServoNode
+  * Remove old parameter librarysources
+  * Remove parameter_descriptor_builder sources
+  * Update parameter library header name
+  * Formatting
+  * Remove old param lib headers
+  * Add parameter to enable/disable continous parameter update check
+  * Update pose tracking demo
+  * Fix launch time parameter loading for pose tracking
+  * Move PID parameters to generate_parameter_library
+  * Fix launch time parameter loading for servo example
+  * Fix unit tests
+  * Fix interface test
+  * Fix pose tracking test
+  * Redorder member variable initialization
+  * Cleanup
+  * Group parameters
+  * Make parameter listener const
+  * Revert disabled lint tests
+  * Fix issues from rebase
+  * Apply performance suggestion from CI
+  * Apply variable naming suggestion from CI
+  * Apply pass params by reference suggestion by CI
+  * Apply review suggestions
+  * Apply review suggestions
+  * Remove unused parameter
+  * Change parameter listener to unique_ptr
+  * Add validations for some parameters
+  * Changes from review
+  * Make docstring more informative
+  Co-authored-by: Sebastian Castro <4603398+sea-bass@users.noreply.github.com>
+  * Change validation failure from warning to error
+  * Fix parameter loading in test launch files
+  * Remove defaults for robot specific params
+  * Update description for params with no default value
+  * Pass by reference
+  * Clang-tidy
+  Co-authored-by: Sebastian Castro <4603398+sea-bass@users.noreply.github.com>
+  ---------
+  Co-authored-by: Sebastian Castro <4603398+sea-bass@users.noreply.github.com>
+  Co-authored-by: AndyZe <andyz@utexas.edu>
+* Contributors: Sebastian Castro, V Mohammed Ibrahim
+
 2.7.3 (2023-04-24)
 ------------------
 * Replace check for the ROS_DISTRO env variable with a check for the rclcpp version (`#2135 <https://github.com/ros-planning/moveit2/issues/2135>`_)
