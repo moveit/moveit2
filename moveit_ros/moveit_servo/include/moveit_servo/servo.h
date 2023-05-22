@@ -56,7 +56,7 @@ class Servo
 public:
   Servo(const rclcpp::Node::SharedPtr& node,
         const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor,
-        std::shared_ptr<const servo::ParamListener> servo_param_listener);
+        const std::shared_ptr<const servo::ParamListener> servo_param_listener);
 
   /** \brief Start servo node */
   void start();
@@ -89,7 +89,7 @@ public:
 
 private:
   // Servo parameters
-  std::shared_ptr<const servo::ParamListener> servo_param_listener_;
+  const std::shared_ptr<const servo::ParamListener> servo_param_listener_;
   servo::Params servo_params_;
 
   // Pointer to the collision environment

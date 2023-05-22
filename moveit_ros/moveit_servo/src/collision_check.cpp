@@ -51,7 +51,7 @@ namespace moveit_servo
 // Constructor for the class that handles collision checking
 CollisionCheck::CollisionCheck(const rclcpp::Node::SharedPtr& node,
                                const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor,
-                               std::shared_ptr<const servo::ParamListener> servo_param_listener)
+                               const std::shared_ptr<const servo::ParamListener> servo_param_listener)
   : node_(node)
   , servo_param_listener_(std::move(servo_param_listener))
   , servo_params_(servo_param_listener_->get_params())
