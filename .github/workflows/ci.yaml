@@ -49,8 +49,6 @@ jobs:
       # Changing linker to lld as ld has a behavior where it takes a long time to finish
       # Compile CCOV with Debug. Enable -Werror.
       TARGET_CMAKE_ARGS: >
-        --no-warn-unused-cli
-        -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
         -DCMAKE_EXE_LINKER_FLAGS=-fuse-ld=lld
         -DCMAKE_SHARED_LINKER_FLAGS=-fuse-ld=lld
         -DCMAKE_MODULE_LINKER_FLAGS=-fuse-ld=lld
@@ -87,8 +85,6 @@ jobs:
           # free up a lot of stuff from /usr/local
           sudo rm -rf /usr/local
           df -h
-      - name: Install ccache
-        run: sudo apt install ccache build-essential
       - uses: actions/checkout@v3
       - uses: testspace-com/setup-testspace@v1
         if: github.repository == 'ros-planning/moveit2'
@@ -166,22 +162,6 @@ jobs:
         if: always() && matrix.env.CCOV && steps.ici.outputs.target_test_results == '0'
         with:
           files: ${{ env.BASEDIR }}/target_ws/coverage.info
-      - name: Print compile-commands.json database
-        if: always() && matrix.env.CCOV && steps.ici.outputs.target_test_results == '0'
-        run: cat ${{ github.workspace }}/.work/target_ws/build/compile_commands.json
-      - name: tree build directory
-        if: always() && matrix.env.CCOV && steps.ici.outputs.target_test_results == '0'
-        run: tree ${{ github.workspace }}/.work/target_ws/build
-      - name: Install sonar-scanner and build-wrapper
-        if: always() && matrix.env.CCOV && steps.ici.outputs.target_test_results == '0'
-        uses: SonarSource/sonarcloud-github-c-cpp@v1
-      - name: Run sonar-scanner
-        if: always() && matrix.env.CCOV && steps.ici.outputs.target_test_results == '0'
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: sonar-scanner -X --define project.settings=.work/target_ws/src/moveit2/sonar-project.properties
-        working-directory: ${{ github.workspace }}
       - name: Upload clang-tidy changes
         uses: rhaschke/upload-git-patch-action@main
         if: always() && matrix.env.CLANG_TIDY
