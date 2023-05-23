@@ -50,12 +50,12 @@ constexpr double ROBOT_STATE_WAIT_TIME = 10.0;  // seconds
 
 Servo::Servo(const rclcpp::Node::SharedPtr& node,
              const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor,
-             std::unique_ptr<const servo::ParamListener> servo_param_listener)
-  : servo_params_{ servo_param_listener->get_params() }
+             const std::shared_ptr<const servo::ParamListener>& servo_param_listener)
+  : servo_param_listener_(servo_param_listener)
+  , servo_params_{ servo_param_listener_->get_params() }
   , planning_scene_monitor_{ planning_scene_monitor }
-  , servo_calcs_{ node, planning_scene_monitor_, std::move(servo_param_listener) }
-  , collision_checker_{ node, servo_params_, planning_scene_monitor_ }
-
+  , servo_calcs_{ node, planning_scene_monitor_, servo_param_listener_ }
+  , collision_checker_{ node, planning_scene_monitor_, servo_param_listener_ }
 {
 }
 
@@ -67,6 +67,8 @@ void Servo::start()
     RCLCPP_ERROR(LOGGER, "Timeout waiting for current state");
     return;
   }
+
+  servo_params_ = servo_param_listener_->get_params();
 
   // Crunch the numbers in this timer
   servo_calcs_.start();
