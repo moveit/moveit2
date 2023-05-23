@@ -32,7 +32,10 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-/* Author: Ioan Sucan */
+/* Author: Ioan Sucan
+ * Desc: A fix workspace bounds adapter which will specify a default workspace for planning: a cube of size 10 m x 10 m x
+ * 10 m. This workspace will only be specified if the planning request to the planner does not have these fields filled in.
+ */
 
 #include <moveit/planning_request_adapter/planning_request_adapter.h>
 #include <class_loader/class_loader.hpp>
