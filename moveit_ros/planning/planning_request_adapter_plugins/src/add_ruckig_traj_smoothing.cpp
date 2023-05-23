@@ -31,7 +31,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *******************************************************************************/
 
-/* Author: Jack Center, Wyatt Rees, Andy Zelenak */
+/* Author: Jack Center, Wyatt Rees, Andy Zelenak
+ * Desc:  An adapter that uses ruckig (https://github.com/pantor/ruckig) to adapt the trajectory to be jerk-constrained and
+ * time-optimal. It is necessary to run another trajectory generation algorithm before this adapter, because the
+ * algorithm requires a fully configured trajectory as initial guess.
+ */
 
 #include <moveit/planning_request_adapter/planning_request_adapter.h>
 #include <moveit/trajectory_processing/ruckig_traj_smoothing.h>
@@ -43,7 +47,8 @@ using namespace trajectory_processing;
 
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_ros.add_traj_smoothing");
 
-/** @brief This adapter uses the time-optimal trajectory generation method */
+/** @brief Use ruckig (https://github.com/pantor/ruckig) to adapt the trajectory to be jerk-constrained and
+ * time-optimal.*/
 class AddRuckigTrajectorySmoothing : public planning_request_adapter::PlanningRequestAdapter
 {
 public:
