@@ -235,6 +235,9 @@ void ServoCalcs::start()
   tf_moveit_to_robot_cmd_frame_ = current_state_->getGlobalLinkTransform(servo_params_.planning_frame).inverse() *
                                   current_state_->getGlobalLinkTransform(servo_params_.robot_link_command_frame);
 
+  // Always reset the low-pass filters when first starting servo
+  resetLowPassFilters(current_joint_state_);
+
   stop_requested_ = false;
   thread_ = std::thread([this] {
     // Check if a realtime kernel is installed. Set a higher thread priority, if so
