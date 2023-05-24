@@ -32,7 +32,16 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-/* Author: Ioan Sucan */
+/* Author: Ioan Sucan
+ * Desc: Plan request adapter to fix start state bounds adapter fixes the start state to be within the joint limits
+ * specified in the URDF. The need for this adapter arises in situations where the joint limits for the physical robot
+ * are not properly configured. The robot may then end up in a configuration where one or more of its joints is slightly
+ * outside its joint limits. In this case, the motion planner is unable to plan since it will think that the starting
+ * state is outside joint limits. The “FixStartStateBounds” planning request adapter will “fix” the start state by
+ * moving it to the joint limit. However, this is obviously not the right solution every time - e.g. where the joint is
+ * really outside its joint limits by a large amount. A parameter for the adapter specifies how much the joint can be
+ * outside its limits for it to be “fixable”.
+ */
 
 #include <moveit/planning_request_adapter/planning_request_adapter.h>
 #include <boost/math/constants/constants.hpp>
@@ -48,6 +57,7 @@ namespace default_planner_request_adapters
 {
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_ros.fix_start_state_bounds");
 
+/** @brief Fix start state bounds adapter fixes the start state to be within the joint limits specified in the URDF. */
 class FixStartStateBounds : public planning_request_adapter::PlanningRequestAdapter
 {
 public:

@@ -424,8 +424,13 @@ bool planning_pipeline::PlanningPipeline::generatePlan(const planning_scene::Pla
     }
   }
 
-  // Set planning pipeline to inactive
+  // Make sure that planner id is set
+  if (res.planner_id.empty())
+  {
+    res.planner_id = req.planner_id;
+  }
 
+  // Set planning pipeline to inactive
   active_ = false;
   return solved && valid;
 }
