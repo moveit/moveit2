@@ -73,14 +73,14 @@ double velocityScalingFactorForSingularity(const moveit::core::JointModelGroup* 
                                            const double leaving_singularity_threshold_multiplier,
                                            const moveit::core::RobotStatePtr& current_state, StatusCode& status);
 
-/** \brief Joint-wise update of a sensor_msgs::msg::JointState with given delta's
+/** \brief Joint-wise update of a sensor_msgs::msg::JointState with given delta values.
  * Also filters and calculates the previous velocity
- * @param publish_period The publishing rate for servo command
- * @param delta_theta Eigen vector of joint delta's
- * @param previous_joint_state The previous joint state
- * @param next_joint_state The joint state object which will hold the next joint state.
+ * @param publish_period The publishing rate for servo command, in seconds.
+ * @param delta_theta Eigen vector of joint delta values.
+ * @param previous_joint_state The previous joint state.
+ * @param current_joint_state The joint state object which will hold the current joint state to send as a command.
  * @param smoother The trajectory smoother to be used.
- * @return Returns false if there is a problem, true otherwise
+ * @return Returns true if successful and false otherwise.
  */
 bool applyJointUpdate(const double publish_period, const Eigen::ArrayXd& delta_theta,
                       const sensor_msgs::msg::JointState& previous_joint_state,

@@ -374,11 +374,6 @@ void ServoCalcs::calculateSingleIteration()
   current_state_->copyJointGroupPositions(joint_model_group_, current_joint_state_.position);
   current_state_->copyJointGroupVelocities(joint_model_group_, current_joint_state_.velocity);
 
-  // copy current state to temp state to use for calculating next state
-  // This is done so that current_joint_state_ is preserved and can be used as backup.
-  // All computations related to computing state q(t + dt) acts only on next_joint_state_ variable.
-  next_joint_state_ = current_joint_state_;
-
   if (latest_twist_stamped_)
     twist_stamped_cmd_ = *latest_twist_stamped_;
   if (latest_joint_cmd_)
@@ -620,7 +615,8 @@ bool ServoCalcs::internalServoUpdate(Eigen::ArrayXd& delta_theta,
   delta_theta *= collision_scale;
 
   // Loop through joints and update them, calculate velocities, and filter
-  if (!applyJointUpdate(servo_params_.publish_period, delta_theta, previous_joint_state_, next_joint_state_, smoother_))
+  if (!applyJointUpdate(servo_params_.publish_period, delta_theta, previous_joint_state_, current_joint_state_,
+                        smoother_))
   {
     RCLCPP_ERROR_STREAM_THROTTLE(LOGGER, *node_->get_clock(), ROS_LOG_THROTTLE_PERIOD,
                                  "Lengths of output and increments do not match.");
@@ -631,12 +627,12 @@ bool ServoCalcs::internalServoUpdate(Eigen::ArrayXd& delta_theta,
   updated_filters_ = true;
 
   // Enforce SRDF velocity limits
-  enforceVelocityLimits(joint_model_group_, servo_params_.publish_period, next_joint_state_,
+  enforceVelocityLimits(joint_model_group_, servo_params_.publish_period, current_joint_state_,
                         servo_params_.override_velocity_scaling_factor);
 
   // Enforce SRDF position limits, might halt if needed, set prev_vel to 0
   const auto joints_to_halt =
-      enforcePositionLimits(next_joint_state_, servo_params_.joint_limit_margin, joint_model_group_);
+      enforcePositionLimits(current_joint_state_, servo_params_.joint_limit_margin, joint_model_group_);
 
   if (!joints_to_halt.empty())
   {
@@ -651,16 +647,16 @@ bool ServoCalcs::internalServoUpdate(Eigen::ArrayXd& delta_theta,
     if ((servo_type == ServoType::JOINT_SPACE && !servo_params_.halt_all_joints_in_joint_mode) ||
         (servo_type == ServoType::CARTESIAN_SPACE && !servo_params_.halt_all_joints_in_cartesian_mode))
     {
-      suddenHalt(next_joint_state_, joints_to_halt);
+      suddenHalt(current_joint_state_, joints_to_halt);
     }
     else
     {
-      suddenHalt(next_joint_state_, joint_model_group_->getActiveJointModels());
+      suddenHalt(current_joint_state_, joint_model_group_->getActiveJointModels());
     }
   }
 
   // compose outgoing message
-  composeJointTrajMessage(next_joint_state_, joint_trajectory);
+  composeJointTrajMessage(current_joint_state_, joint_trajectory);
 
   previous_joint_state_ = current_joint_state_;
   return true;
