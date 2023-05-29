@@ -208,7 +208,7 @@ class Ros2ControlManager : public moveit_controller_manager::MoveItControllerMan
       const std::string& type = controller.type;
       AllocatorsMap::iterator alloc_it = allocators_.find(type);
       if (alloc_it == allocators_.end())
-      {  // create allocator is needed
+      {  // create allocator if needed
         alloc_it = allocators_.insert(std::make_pair(type, loader_.createUniqueInstance(type))).first;
       }
 
@@ -227,7 +227,7 @@ class Ros2ControlManager : public moveit_controller_manager::MoveItControllerMan
   }
 
   /**
-   * \brief get fully qualified name
+   * \brief Get fully qualified name
    * @param name name to be resolved to an absolute name
    * @return resolved name
    */
@@ -243,7 +243,6 @@ public:
   Ros2ControlManager()
     : loader_("moveit_ros_control_interface", "moveit_ros_control_interface::ControllerHandleAllocator")
   {
-    RCLCPP_INFO_STREAM(LOGGER, "Started moveit_ros_control_interface::Ros2ControlManager for namespace " << ns_);
   }
 
   /**
@@ -253,6 +252,7 @@ public:
   Ros2ControlManager(const std::string& ns)
     : ns_(ns), loader_("moveit_ros_control_interface", "moveit_ros_control_interface::ControllerHandleAllocator")
   {
+    RCLCPP_INFO_STREAM(LOGGER, "Started moveit_ros_control_interface::Ros2ControlManager for namespace " << ns_);
   }
 
   void initialize(const rclcpp::Node::SharedPtr& node) override
@@ -293,7 +293,7 @@ public:
     std::scoped_lock<std::mutex> lock(controllers_mutex_);
     HandleMap::iterator it = handles_.find(name);
     if (it != handles_.end())
-    {  // controller is is manager by this interface
+    {  // controller is manager by this interface
       return it->second;
     }
     return moveit_controller_manager::MoveItControllerHandlePtr();
@@ -372,8 +372,8 @@ public:
   /**
    * \brief Filter lists for managed controller and computes switching set.
    * Stopped list might be extended by unsupported controllers that claim needed resources
-   * @param activate
-   * @param deactivate
+   * @param activate vector of controllers to be activated
+   * @param deactivate vector of controllers to be deactivated
    * @return true if switching succeeded
    */
   bool switchControllers(const std::vector<std::string>& activate_base,
@@ -673,10 +673,10 @@ public:
   }
 
   /**
-   * \brief delegates switch  to all known interfaces. Stops on first failing switch.
-   * @param activate
-   * @param deactivate
-   * @return
+   * \brief delegates switch to all known interfaces. Stops on first failing switch.
+   * @param activate vector of controllers to be activated
+   * @param deactivate vector of controllers to be deactivated
+   * @return true if switching succeeded
    */
   bool switchControllers(const std::vector<std::string>& activate, const std::vector<std::string>& deactivate) override
   {
