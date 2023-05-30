@@ -34,6 +34,8 @@
 
 /* Author: Dave Coleman */
 
+#include <algorithm>
+#include <QAction>
 #include <QApplication>
 #include <QHBoxLayout>
 #include <QKeyEvent>
@@ -52,6 +54,7 @@ namespace moveit_setup
 {
 namespace srdf_setup
 {
+
 // ******************************************************************************************
 // User interface for editing the default collision matrix list in an SRDF
 // ******************************************************************************************
@@ -165,6 +168,12 @@ void DefaultCollisionsWidget::onInit()
   action = new QAction(tr("Hide others"), this);
   header_actions_ << action;
   connect(action, SIGNAL(triggered()), this, SLOT(hideOtherSections()));
+  action = new QAction(tr("Disable by default"), this);
+  header_actions_ << action;
+  connect(action, &QAction::triggered, this, [this] { setDefaults(true); });
+  action = new QAction(tr("Enable by default"), this);
+  header_actions_ << action;
+  connect(action, &QAction::triggered, this, [this] { setDefaults(false); });
 
   // Bottom Area ----------------------------------------
 
@@ -189,11 +198,11 @@ void DefaultCollisionsWidget::onInit()
   radio_btn = new QRadioButton("linear view");
   bottom_layout->addWidget(radio_btn);
   view_mode_buttons_->addButton(radio_btn, LINEAR_MODE);
-  radio_btn->setChecked(true);
 
   radio_btn = new QRadioButton("matrix view");
   bottom_layout->addWidget(radio_btn);
   view_mode_buttons_->addButton(radio_btn, MATRIX_MODE);
+  radio_btn->setChecked(true);
   connect(view_mode_buttons_, SIGNAL(buttonClicked(int)), this, SLOT(loadCollisionTable()));
 
   // Revert Button
@@ -258,7 +267,7 @@ void DefaultCollisionsWidget::finishGeneratingCollisionTable()
 void DefaultCollisionsWidget::loadCollisionTable()
 {
   CollisionMatrixModel* matrix_model =
-      new CollisionMatrixModel(setup_step_.getLinkPairs(), setup_step_.getCollidingLinks());
+      new CollisionMatrixModel(setup_step_, setup_step_.getCollidingLinks());
   QAbstractItemModel* model;
 
   if (view_mode_buttons_->checkedId() == MATRIX_MODE)
@@ -269,6 +278,7 @@ void DefaultCollisionsWidget::loadCollisionTable()
   {
     CollisionLinearModel* linear_model = new CollisionLinearModel(matrix_model);
     SortFilterProxyModel* sorted_model = new SortFilterProxyModel();
+    sorted_model->setShowAll(collision_checkbox_->checkState() == Qt::Checked);
     model = sorted_model;
     sorted_model->setSourceModel(linear_model);
     // ensure deletion of underlying models with model
@@ -327,6 +337,7 @@ void DefaultCollisionsWidget::loadCollisionTable()
     collision_checkbox_->show();
     horizontal_header->setVisible(true);
     vertical_header->setVisible(true);
+    horizontal_header->setSectionResizeMode(QHeaderView::Stretch);
 
     vertical_header->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(vertical_header, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(showHeaderContextMenu(QPoint)));
@@ -406,38 +417,9 @@ void DefaultCollisionsWidget::showHeaderContextMenu(const QPoint& p)
   clicked_section_ = -1;
 }
 
-void DefaultCollisionsWidget::hideSections()
+QList<int> DefaultCollisionsWidget::selectedSections(QHeaderView*& header) const
 {
   QList<int> list;
-  QHeaderView* header = nullptr;
-  if (clicked_headers_ == Qt::Horizontal)
-  {
-    for (const QModelIndex& index : selection_model_->selectedColumns())
-      list << index.column();
-    header = collision_table_->horizontalHeader();
-  }
-  else if (clicked_headers_ == Qt::Vertical)
-  {
-    for (const QModelIndex& index : selection_model_->selectedRows())
-      list << index.row();
-    header = collision_table_->verticalHeader();
-  }
-
-  // if somewhere else than the selection was clicked, hide only this row/column
-  if (!list.contains(clicked_section_))
-  {
-    list.clear();
-    list << clicked_section_;
-  }
-
-  for (auto index : list)
-    header->setSectionHidden(index, true);
-}
-
-void DefaultCollisionsWidget::hideOtherSections()
-{
-  QList<int> list;
-  QHeaderView* header = nullptr;
   if (clicked_headers_ == Qt::Horizontal)
   {
     header = collision_table_->horizontalHeader();
@@ -456,67 +438,50 @@ void DefaultCollisionsWidget::hideOtherSections()
         list << index.row();
     }
   }
-
-  // if somewhere else than the selection was clicked, hide only this row/column
+  // if somewhere else than the selection was clicked, only consider this row/column
   if (!list.contains(clicked_section_))
-  {
-    list.clear();
-    list << clicked_section_;
-  }
+    return { clicked_section_ };
 
-  // first hide all sections
-  for (std::size_t index = 0, end = header->count(); index != end; ++index)
-    header->setSectionHidden(index, true);
+  return list;
+}
 
-  // and subsequently show selected ones
+void DefaultCollisionsWidget::hideSections()
+{
+  QHeaderView* header;
+  auto list = selectedSections(header);
+
   for (auto index : list)
-    header->setSectionHidden(index, false);
+    header->setSectionHidden(index, true);
+}
+
+void DefaultCollisionsWidget::hideOtherSections()
+{
+  QHeaderView* header;
+  auto selected = selectedSections(header);
+
+  for (std::size_t index = 0, end = header->count(); index != end; ++index)
+    if (!selected.contains(index))
+      header->setSectionHidden(index, true);
 }
 
 void DefaultCollisionsWidget::showSections()
 {
-  QList<int> list;
   if (clicked_section_ < 0)  // show all
   {
-    if (clicked_headers_.testFlag(Qt::Horizontal))
-    {
-      // show all columns
-      list.clear();
-      list << 0 << model_->columnCount() - 1;
-      showSections(collision_table_->horizontalHeader(), list);
-    }
+    if (clicked_headers_.testFlag(Qt::Horizontal))  // show all columns
+      showSections(collision_table_->horizontalHeader(), { 0, model_->columnCount() - 1 });
 
     if (clicked_headers_.testFlag(Qt::Vertical))  // show all rows
-    {
-      list.clear();
-      list << 0 << model_->rowCount() - 1;
-      showSections(collision_table_->verticalHeader(), list);
-    }
+      showSections(collision_table_->verticalHeader(), { 0, model_->rowCount() - 1 });
+
     return;
   }
 
-  QHeaderView* header = nullptr;
-  if (clicked_headers_ == Qt::Horizontal)
-  {
-    for (const QModelIndex& index : selection_model_->selectedColumns())
-      list << index.column();
-    header = collision_table_->horizontalHeader();
-  }
-  else if (clicked_headers_ == Qt::Vertical)
-  {
-    for (const QModelIndex& index : selection_model_->selectedRows())
-      list << index.row();
-    header = collision_table_->verticalHeader();
-  }
-
-  // if somewhere else than the selection was clicked, hide only this row/column
-  if (!list.contains(clicked_section_))
-  {
-    list.clear();
-    list << clicked_section_;
-  }
+  QHeaderView* header;
+  QList<int> list = selectedSections(header);
   showSections(header, list);
 }
+
 void DefaultCollisionsWidget::showSections(QHeaderView* header, const QList<int>& logicalIndexes)
 {
   if (logicalIndexes.size() < 2)
@@ -526,6 +491,21 @@ void DefaultCollisionsWidget::showSections(QHeaderView* header, const QList<int>
   {
     for (int index = logicalIndexes[prev], index_end = logicalIndexes[next]; index <= index_end; ++index)
       header->setSectionHidden(index, false);
+  }
+}
+
+void DefaultCollisionsWidget::setDefaults(bool disabled)
+{
+  QHeaderView* header;
+  QList<int> list = selectedSections(header);
+  auto m = collision_table_->model();
+
+  for (auto index : list)
+  {
+    const auto& name = m->headerData(index, Qt::Horizontal, Qt::DisplayRole).toString().toStdString();
+    bool changed = setup_step_.setDefault(name, disabled);
+    if (changed)
+      btn_revert_->setEnabled(true);
   }
 }
 

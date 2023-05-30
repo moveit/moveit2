@@ -84,6 +84,17 @@ public:
     return link_pairs_;
   }
 
+  /**
+   * \brief Enable/Disable link collisions by default
+   */
+  bool setDefault(const std::string &name, bool disabled);
+
+  bool setDefault(const std::string &link1, const std::string &link2, bool disable);
+
+  inline static const std::string COLLISION_DISABLING_REASON_ENABLED = "Explicitly enabled";
+  inline static const std::string COLLISION_DISABLING_REASON_DISABLED = "Disabled by default";
+  std::string getCollisionDisablingReason(const std::string &link1, const std::string &link2) const;
+
   // For Threaded Operations
   void startGenerationThread(unsigned int num_trials, double min_frac, bool verbose = true);
   void cancelGenerationThread();
@@ -99,6 +110,8 @@ protected:
   // For threaded operations
   boost::thread worker_;
   unsigned int progress_;
+
+  bool disabledByDefault(const std::string &link1, const std::string &link2) const;
 };
 }  // namespace srdf_setup
 }  // namespace moveit_setup

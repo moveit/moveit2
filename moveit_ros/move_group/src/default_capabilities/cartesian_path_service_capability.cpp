@@ -46,6 +46,7 @@
 #include <moveit/robot_state/cartesian_interpolator.h>
 #include <moveit_msgs/msg/display_trajectory.hpp>
 #include <moveit/trajectory_processing/time_optimal_trajectory_generation.h>
+#include <moveit/trajectory_processing/limit_cartesian_speed.h>
 
 namespace
 {
@@ -179,9 +180,15 @@ bool MoveGroupCartesianPathService::computeService(
             rt.addSuffixWayPoint(traj_state, 0.0);
 
           // time trajectory
-          // \todo optionally compute timing to move the eef with constant speed
           trajectory_processing::TimeOptimalTrajectoryGeneration time_param;
           time_param.computeTimeStamps(rt, req->max_velocity_scaling_factor, req->max_acceleration_scaling_factor);
+
+          // optionally compute timing to move the eef with constant speed
+          if (req->max_cartesian_speed > 0.0)
+          {
+            trajectory_processing::limitMaxCartesianLinkSpeed(rt, req->max_cartesian_speed,
+                                                              req->cartesian_speed_limited_link);
+          }
 
           rt.getRobotTrajectoryMsg(res->solution);
           RCLCPP_INFO(LOGGER, "Computed Cartesian path with %u points (followed %lf%% of requested trajectory)",

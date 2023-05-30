@@ -7,6 +7,7 @@ set(SOURCE_FILES
   src/add_ruckig_traj_smoothing.cpp
   src/add_time_optimal_parameterization.cpp
   src/resolve_constraint_frames.cpp
+  src/limit_max_cartesian_link_speed.cpp
 )
 
 add_library(moveit_default_planning_request_adapter_plugins SHARED ${SOURCE_FILES})
