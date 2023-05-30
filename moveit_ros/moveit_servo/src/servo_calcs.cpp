@@ -46,8 +46,6 @@
 #include <std_msgs/msg/bool.hpp>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
 
-// #include <moveit_servo/make_shared_from_pool.h> // TODO(adamp): create an issue about this
-#include <moveit_servo/enforce_limits.hpp>
 #include <moveit_servo/servo_calcs.h>
 #include <moveit_servo/utilities.h>
 
@@ -74,9 +72,9 @@ int const THREAD_PRIORITY = 40;
 // Constructor for the class that handles servoing calculations
 ServoCalcs::ServoCalcs(const rclcpp::Node::SharedPtr& node,
                        const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor,
-                       std::unique_ptr<const servo::ParamListener> servo_param_listener)
+                       const std::shared_ptr<const servo::ParamListener>& servo_param_listener)
   : node_(node)
-  , servo_param_listener_(std::move(servo_param_listener))
+  , servo_param_listener_(servo_param_listener)
   , servo_params_(servo_param_listener_->get_params())
   , planning_scene_monitor_(planning_scene_monitor)
   , stop_requested_(true)
@@ -100,22 +98,6 @@ ServoCalcs::ServoCalcs(const rclcpp::Node::SharedPtr& node,
   joint_cmd_sub_ = node_->create_subscription<control_msgs::msg::JointJog>(
       servo_params_.joint_command_in_topic, rclcpp::SystemDefaultsQoS(),
       [this](const control_msgs::msg::JointJog::ConstSharedPtr& msg) { return jointCmdCB(msg); });
-
-  // ROS Server for allowing drift in some dimensions
-  drift_dimensions_server_ = node_->create_service<moveit_msgs::srv::ChangeDriftDimensions>(
-      "~/change_drift_dimensions",
-      [this](const std::shared_ptr<moveit_msgs::srv::ChangeDriftDimensions::Request>& req,
-             const std::shared_ptr<moveit_msgs::srv::ChangeDriftDimensions::Response>& res) {
-        return changeDriftDimensions(req, res);
-      });
-
-  // ROS Server for changing the control dimensions
-  control_dimensions_server_ = node_->create_service<moveit_msgs::srv::ChangeControlDimensions>(
-      "~/change_control_dimensions",
-      [this](const std::shared_ptr<moveit_msgs::srv::ChangeControlDimensions::Request>& req,
-             const std::shared_ptr<moveit_msgs::srv::ChangeControlDimensions::Response>& res) {
-        return changeControlDimensions(req, res);
-      });
 
   // Subscribe to the collision_check topic
   collision_velocity_scale_sub_ = node_->create_subscription<std_msgs::msg::Float64>(
@@ -252,6 +234,9 @@ void ServoCalcs::start()
                            current_state_->getGlobalLinkTransform(servo_params_.ee_frame_name);
   tf_moveit_to_robot_cmd_frame_ = current_state_->getGlobalLinkTransform(servo_params_.planning_frame).inverse() *
                                   current_state_->getGlobalLinkTransform(servo_params_.robot_link_command_frame);
+
+  // Always reset the low-pass filters when first starting servo
+  resetLowPassFilters(current_joint_state_);
 
   stop_requested_ = false;
   thread_ = std::thread([this] {
@@ -520,20 +505,22 @@ bool ServoCalcs::cartesianServoCalcs(geometry_msgs::msg::TwistStamped& cmd,
   if (!checkValidCommand(cmd))
     return false;
 
-  // Set uncontrolled dimensions to 0 in command frame
-  enforceControlDimensions(cmd);
-
   // Transform the command to the MoveGroup planning frame
+  if (cmd.header.frame_id.empty())
+  {
+    RCLCPP_WARN_STREAM_THROTTLE(LOGGER, *node_->get_clock(), ROS_LOG_THROTTLE_PERIOD,
+                                "No frame specified for command, will use planning_frame: "
+                                    << servo_params_.planning_frame);
+    cmd.header.frame_id = servo_params_.planning_frame;
+  }
   if (cmd.header.frame_id != servo_params_.planning_frame)
   {
-    transformTwistToPlanningFrame(cmd, servo_params_.planning_frame, current_state_, *node_->get_clock());
+    transformTwistToPlanningFrame(cmd, servo_params_.planning_frame, current_state_);
   }
 
   Eigen::VectorXd delta_x = scaleCartesianCommand(cmd);
 
   Eigen::MatrixXd jacobian = current_state_->getJacobian(joint_model_group_);
-
-  removeDriftDimensions(jacobian, delta_x);
 
   Eigen::JacobiSVD<Eigen::MatrixXd> svd =
       Eigen::JacobiSVD<Eigen::MatrixXd>(jacobian, Eigen::ComputeThinU | Eigen::ComputeThinV);
@@ -576,11 +563,17 @@ bool ServoCalcs::cartesianServoCalcs(geometry_msgs::msg::TwistStamped& cmd,
     delta_theta_ = pseudo_inverse * delta_x;
   }
 
+  const StatusCode last_status = status_;
   delta_theta_ *= velocityScalingFactorForSingularity(joint_model_group_, delta_x, svd, pseudo_inverse,
                                                       servo_params_.hard_stop_singularity_threshold,
                                                       servo_params_.lower_singularity_threshold,
                                                       servo_params_.leaving_singularity_threshold_multiplier,
-                                                      *node_->get_clock(), current_state_, status_);
+                                                      current_state_, status_);
+  // Status will have changed if approaching singularity
+  if (last_status != status_)
+  {
+    RCLCPP_WARN_STREAM_THROTTLE(LOGGER, *node_->get_clock(), ROS_LOG_THROTTLE_PERIOD, SERVO_STATUS_CODE_MAP.at(status_));
+  }
 
   return internalServoUpdate(delta_theta_, joint_trajectory, ServoType::CARTESIAN_SPACE);
 }
@@ -627,9 +620,12 @@ bool ServoCalcs::internalServoUpdate(Eigen::ArrayXd& delta_theta,
   delta_theta *= collision_scale;
 
   // Loop through joints and update them, calculate velocities, and filter
-  if (!applyJointUpdate(*node_->get_clock(), servo_params_.publish_period, delta_theta, previous_joint_state_,
-                        next_joint_state_, smoother_))
+  if (!applyJointUpdate(servo_params_.publish_period, delta_theta, previous_joint_state_, next_joint_state_, smoother_))
+  {
+    RCLCPP_ERROR_STREAM_THROTTLE(LOGGER, *node_->get_clock(), ROS_LOG_THROTTLE_PERIOD,
+                                 "Lengths of output and increments do not match.");
     return false;
+  }
 
   // Mark the lowpass filters as updated for this cycle
   updated_filters_ = true;
@@ -639,9 +635,18 @@ bool ServoCalcs::internalServoUpdate(Eigen::ArrayXd& delta_theta,
                         servo_params_.override_velocity_scaling_factor);
 
   // Enforce SRDF position limits, might halt if needed, set prev_vel to 0
-  const auto joints_to_halt = enforcePositionLimits(next_joint_state_);
+  const auto joints_to_halt =
+      enforcePositionLimits(next_joint_state_, servo_params_.joint_limit_margin, joint_model_group_);
+
   if (!joints_to_halt.empty())
   {
+    std::ostringstream joint_names;
+    std::transform(joints_to_halt.cbegin(), joints_to_halt.cend(), std::ostream_iterator<std::string>(joint_names, ""),
+                   [](const auto& joint) { return " '" + joint->getName() + "'"; });
+
+    RCLCPP_WARN_STREAM_THROTTLE(LOGGER, *node_->get_clock(), ROS_LOG_THROTTLE_PERIOD,
+                                "Joints" << joint_names.str() << " close to a position limit. Halting.");
+
     status_ = StatusCode::JOINT_BOUND;
     if ((servo_type == ServoType::JOINT_SPACE && !servo_params_.halt_all_joints_in_joint_mode) ||
         (servo_type == ServoType::CARTESIAN_SPACE && !servo_params_.halt_all_joints_in_cartesian_mode))
@@ -657,32 +662,8 @@ bool ServoCalcs::internalServoUpdate(Eigen::ArrayXd& delta_theta,
   // compose outgoing message
   composeJointTrajMessage(next_joint_state_, joint_trajectory);
 
-  // Modify the output message if we are using gazebo
-  if (servo_params_.use_gazebo)
-  {
-    insertRedundantPointsIntoTrajectory(joint_trajectory, gazebo_redundant_message_count_);
-  }
-
   previous_joint_state_ = current_joint_state_;
   return true;
-}
-
-// Spam several redundant points into the trajectory. The first few may be skipped if the
-// time stamp is in the past when it reaches the client. Needed for gazebo simulation.
-// Start from 1 because the first point's timestamp is already 1*servo_parameters_.publish_period
-void ServoCalcs::insertRedundantPointsIntoTrajectory(trajectory_msgs::msg::JointTrajectory& joint_trajectory,
-                                                     int count) const
-{
-  if (count < 2)
-    return;
-  joint_trajectory.points.resize(count);
-  auto point = joint_trajectory.points[0];
-  // Start from 1 because we already have the first point. End at count+1 so (total #) == count
-  for (int i = 1; i < count; ++i)
-  {
-    point.time_from_start = rclcpp::Duration::from_seconds((i + 1) * servo_params_.publish_period);
-    joint_trajectory.points[i] = point;
-  }
 }
 
 void ServoCalcs::resetLowPassFilters(const sensor_msgs::msg::JointState& joint_state)
@@ -715,59 +696,6 @@ void ServoCalcs::composeJointTrajMessage(const sensor_msgs::msg::JointState& joi
     point.accelerations = acceleration;
   }
   joint_trajectory.points.push_back(point);
-}
-
-std::vector<const moveit::core::JointModel*>
-ServoCalcs::enforcePositionLimits(sensor_msgs::msg::JointState& joint_state) const
-{
-  // Halt if we're past a joint margin and joint velocity is moving even farther past
-  double joint_angle = 0;
-  std::vector<const moveit::core::JointModel*> joints_to_halt;
-  for (auto joint : joint_model_group_->getActiveJointModels())
-  {
-    for (std::size_t c = 0; c < joint_state.name.size(); ++c)
-    {
-      // Use the most recent robot joint state
-      if (joint_state.name[c] == joint->getName())
-      {
-        joint_angle = joint_state.position.at(c);
-        break;
-      }
-    }
-
-    if (!joint->satisfiesPositionBounds(&joint_angle, -servo_params_.joint_limit_margin))
-    {
-      const std::vector<moveit_msgs::msg::JointLimits>& limits = joint->getVariableBoundsMsg();
-
-      // Joint limits are not defined for some joints. Skip them.
-      if (!limits.empty())
-      {
-        // Check if pending velocity command is moving in the right direction
-        auto joint_itr = std::find(joint_state.name.begin(), joint_state.name.end(), joint->getName());
-        auto joint_idx = std::distance(joint_state.name.begin(), joint_itr);
-
-        if ((joint_state.velocity.at(joint_idx) < 0 &&
-             (joint_angle < (limits[0].min_position + servo_params_.joint_limit_margin))) ||
-            (joint_state.velocity.at(joint_idx) > 0 &&
-             (joint_angle > (limits[0].max_position - servo_params_.joint_limit_margin))))
-        {
-          joints_to_halt.push_back(joint);
-        }
-      }
-    }
-  }
-  if (!joints_to_halt.empty())
-  {
-    std::ostringstream joints_names;
-    std::transform(joints_to_halt.cbegin(), std::prev(joints_to_halt.cend()),
-                   std::ostream_iterator<std::string>(joints_names, ", "),
-                   [](const auto& joint) { return joint->getName(); });
-    joints_names << joints_to_halt.back()->getName();
-    RCLCPP_WARN_STREAM_THROTTLE(LOGGER, *node_->get_clock(), ROS_LOG_THROTTLE_PERIOD,
-                                node_->get_name()
-                                    << ' ' << joints_names.str() << " close to a position limit. Halting.");
-  }
-  return joints_to_halt;
 }
 
 void ServoCalcs::filteredHalt(trajectory_msgs::msg::JointTrajectory& joint_trajectory)
@@ -962,54 +890,6 @@ Eigen::VectorXd ServoCalcs::scaleJointCommand(const control_msgs::msg::JointJog&
   return result;
 }
 
-void ServoCalcs::removeDimension(Eigen::MatrixXd& jacobian, Eigen::VectorXd& delta_x, unsigned int row_to_remove) const
-{
-  unsigned int num_rows = jacobian.rows() - 1;
-  unsigned int num_cols = jacobian.cols();
-
-  if (row_to_remove < num_rows)
-  {
-    jacobian.block(row_to_remove, 0, num_rows - row_to_remove, num_cols) =
-        jacobian.block(row_to_remove + 1, 0, num_rows - row_to_remove, num_cols);
-    delta_x.segment(row_to_remove, num_rows - row_to_remove) =
-        delta_x.segment(row_to_remove + 1, num_rows - row_to_remove);
-  }
-  jacobian.conservativeResize(num_rows, num_cols);
-  delta_x.conservativeResize(num_rows);
-}
-
-void ServoCalcs::removeDriftDimensions(Eigen::MatrixXd& matrix, Eigen::VectorXd& delta_x)
-{
-  // May allow some dimensions to drift, based on drift_dimensions
-  // i.e. take advantage of task redundancy.
-  // Remove the Jacobian rows corresponding to True in the vector drift_dimensions
-  // Work backwards through the 6-vector so indices don't get out of order
-  for (auto dimension = matrix.rows() - 1; dimension >= 0; --dimension)
-  {
-    if (drift_dimensions_[dimension] && matrix.rows() > 1)
-    {
-      removeDimension(matrix, delta_x, dimension);
-    }
-  }
-}
-
-void ServoCalcs::enforceControlDimensions(geometry_msgs::msg::TwistStamped& command)
-{
-  // Can't loop through the message, so check them all
-  if (!control_dimensions_[0])
-    command.twist.linear.x = 0;
-  if (!control_dimensions_[1])
-    command.twist.linear.y = 0;
-  if (!control_dimensions_[2])
-    command.twist.linear.z = 0;
-  if (!control_dimensions_[3])
-    command.twist.angular.x = 0;
-  if (!control_dimensions_[4])
-    command.twist.angular.y = 0;
-  if (!control_dimensions_[5])
-    command.twist.angular.z = 0;
-}
-
 bool ServoCalcs::getCommandFrameTransform(Eigen::Isometry3d& transform)
 {
   const std::lock_guard<std::mutex> lock(main_loop_mutex_);
@@ -1087,29 +967,4 @@ void ServoCalcs::collisionVelocityScaleCB(const std_msgs::msg::Float64::ConstSha
   collision_velocity_scale_ = msg->data;
 }
 
-void ServoCalcs::changeDriftDimensions(const std::shared_ptr<moveit_msgs::srv::ChangeDriftDimensions::Request>& req,
-                                       const std::shared_ptr<moveit_msgs::srv::ChangeDriftDimensions::Response>& res)
-{
-  drift_dimensions_[0] = req->drift_x_translation;
-  drift_dimensions_[1] = req->drift_y_translation;
-  drift_dimensions_[2] = req->drift_z_translation;
-  drift_dimensions_[3] = req->drift_x_rotation;
-  drift_dimensions_[4] = req->drift_y_rotation;
-  drift_dimensions_[5] = req->drift_z_rotation;
-
-  res->success = true;
-}
-
-void ServoCalcs::changeControlDimensions(const std::shared_ptr<moveit_msgs::srv::ChangeControlDimensions::Request>& req,
-                                         const std::shared_ptr<moveit_msgs::srv::ChangeControlDimensions::Response>& res)
-{
-  control_dimensions_[0] = req->control_x_translation;
-  control_dimensions_[1] = req->control_y_translation;
-  control_dimensions_[2] = req->control_z_translation;
-  control_dimensions_[3] = req->control_x_rotation;
-  control_dimensions_[4] = req->control_y_rotation;
-  control_dimensions_[5] = req->control_z_rotation;
-
-  res->success = true;
-}
 }  // namespace moveit_servo

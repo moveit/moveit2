@@ -261,6 +261,11 @@ void init_planning_component(py::module& m)
                 moveit_py_instance (:py:class:`moveit_py.core.MoveItPy`): The MoveItPy instance to use.
         )")
 
+      .def("get_named_target_state_values", &moveit_cpp::PlanningComponent::getNamedTargetStateValues, py::arg("name"),
+           R"(
+           dict: The joint values for targets specified by name.
+           )")
+
       .def_property("planning_group_name", &moveit_cpp::PlanningComponent::getPlanningGroupName, nullptr,
                     R"(
                     str: The name of the planning group to plan for.
@@ -269,13 +274,6 @@ void init_planning_component(py::module& m)
       .def_property("named_target_states", &moveit_cpp::PlanningComponent::getNamedTargetStates, nullptr,
                     R"(
                     list of str: The names of the named robot states available as targets.
-                    )")
-
-      // TODO (peterdavidfagan): write test case for this method.
-      .def_property("named_target_state_values", &moveit_cpp::PlanningComponent::getNamedTargetStateValues, nullptr,
-                    py::return_value_policy::move,
-                    R"(
-                    dict: The joint values for targets specified by name.
                     )")
 
       // start state methods

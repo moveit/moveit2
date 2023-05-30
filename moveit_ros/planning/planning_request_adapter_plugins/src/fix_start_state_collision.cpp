@@ -32,7 +32,13 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-/* Author: Ioan Sucan */
+/* Author: Ioan Sucan
+ * Desc: Fix start state collision adapter which will attempt to sample a new collision-free configuration near a
+ * specified configuration (in collision) by perturbing the joint values by a small amount. The amount that it will
+ * perturb the values by is specified by the jiggle_fraction parameter that controls the perturbation as a percentage of
+ * the total range of motion for the joint. The other parameter for this adapter specifies how many random perturbations
+ * the adapter will sample before giving up.
+ */
 
 #include <moveit/planning_request_adapter/planning_request_adapter.h>
 #include <moveit/robot_state/conversions.h>
@@ -47,6 +53,8 @@ namespace default_planner_request_adapters
 {
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_ros.fix_start_state_collision");
 
+/** @brief This fix start state collision adapter will attempt to sample a new collision-free configuration near a
+ * specified configuration (in collision) by perturbing the joint values by a small amount.*/
 class FixStartStateCollision : public planning_request_adapter::PlanningRequestAdapter
 {
 public:

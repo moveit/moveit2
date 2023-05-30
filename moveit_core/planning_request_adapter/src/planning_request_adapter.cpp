@@ -103,8 +103,13 @@ bool PlanningRequestAdapter::adaptAndPlan(const planning_interface::PlannerManag
                                           const planning_interface::MotionPlanRequest& req,
                                           planning_interface::MotionPlanResponse& res) const
 {
-  std::vector<std::size_t> dummy;
-  return adaptAndPlan(planner, planning_scene, req, res, dummy);
+  std::vector<std::size_t> empty_added_path_index;
+  return adaptAndPlan(planner, planning_scene, req, res, empty_added_path_index);
+}
+
+void PlanningRequestAdapterChain::addAdapter(const PlanningRequestAdapterConstPtr& adapter)
+{
+  adapters_.push_back(adapter);
 }
 
 bool PlanningRequestAdapterChain::adaptAndPlan(const planning_interface::PlannerManagerPtr& planner,
@@ -112,8 +117,8 @@ bool PlanningRequestAdapterChain::adaptAndPlan(const planning_interface::Planner
                                                const planning_interface::MotionPlanRequest& req,
                                                planning_interface::MotionPlanResponse& res) const
 {
-  std::vector<std::size_t> dummy;
-  return adaptAndPlan(planner, planning_scene, req, res, dummy);
+  std::vector<std::size_t> empty_added_path_index;
+  return adaptAndPlan(planner, planning_scene, req, res, empty_added_path_index);
 }
 
 bool PlanningRequestAdapterChain::adaptAndPlan(const planning_interface::PlannerManagerPtr& planner,
@@ -128,48 +133,45 @@ bool PlanningRequestAdapterChain::adaptAndPlan(const planning_interface::Planner
     added_path_index.clear();
     return callPlannerInterfaceSolve(*planner, planning_scene, req, res);
   }
-  else
+  // the index values added by each adapter
+  std::vector<std::vector<std::size_t>> added_path_index_each(adapters_.size());
+
+  // if there are adapters, construct a function for each, in order,
+  // so that in the end we have a nested sequence of functions that calls all adapters
+  // and eventually the planner in the correct order.
+  PlanningRequestAdapter::PlannerFn fn = [&planner = *planner](const planning_scene::PlanningSceneConstPtr& scene,
+                                                               const planning_interface::MotionPlanRequest& req,
+                                                               planning_interface::MotionPlanResponse& res) {
+    return callPlannerInterfaceSolve(planner, scene, req, res);
+  };
+
+  for (int i = adapters_.size() - 1; i >= 0; --i)
   {
-    // the index values added by each adapter
-    std::vector<std::vector<std::size_t> > added_path_index_each(adapters_.size());
-
-    // if there are adapters, construct a function for each, in order,
-    // so that in the end we have a nested sequence of functions that calls all adapters
-    // and eventually the planner in the correct order.
-    PlanningRequestAdapter::PlannerFn fn = [&planner = *planner](const planning_scene::PlanningSceneConstPtr& scene,
-                                                                 const planning_interface::MotionPlanRequest& req,
-                                                                 planning_interface::MotionPlanResponse& res) {
-      return callPlannerInterfaceSolve(planner, scene, req, res);
+    fn = [&adapter = *adapters_[i], fn, &added_path_index = added_path_index_each[i]](
+             const planning_scene::PlanningSceneConstPtr& scene, const planning_interface::MotionPlanRequest& req,
+             planning_interface::MotionPlanResponse& res) {
+      return callAdapter(adapter, fn, scene, req, res, added_path_index);
     };
-
-    for (int i = adapters_.size() - 1; i >= 0; --i)
-    {
-      fn = [&adapter = *adapters_[i], fn, &added_path_index = added_path_index_each[i]](
-               const planning_scene::PlanningSceneConstPtr& scene, const planning_interface::MotionPlanRequest& req,
-               planning_interface::MotionPlanResponse& res) {
-        return callAdapter(adapter, fn, scene, req, res, added_path_index);
-      };
-    }
-
-    bool result = fn(planning_scene, req, res);
-    added_path_index.clear();
-
-    // merge the index values from each adapter
-    for (std::vector<std::size_t>& added_states_by_each_adapter : added_path_index_each)
-    {
-      for (std::size_t& added_index : added_states_by_each_adapter)
-      {
-        for (std::size_t& index_in_path : added_path_index)
-        {
-          if (added_index <= index_in_path)
-            index_in_path++;
-        }
-        added_path_index.push_back(added_index);
-      }
-    }
-    std::sort(added_path_index.begin(), added_path_index.end());
-    return result;
   }
+
+  bool result = fn(planning_scene, req, res);
+  added_path_index.clear();
+
+  // merge the index values from each adapter
+  for (std::vector<std::size_t>& added_states_by_each_adapter : added_path_index_each)
+  {
+    for (std::size_t& added_index : added_states_by_each_adapter)
+    {
+      for (std::size_t& index_in_path : added_path_index)
+      {
+        if (added_index <= index_in_path)
+          index_in_path++;
+      }
+      added_path_index.push_back(added_index);
+    }
+  }
+  std::sort(added_path_index.begin(), added_path_index.end());
+  return result;
 }
 
 }  // end of namespace planning_request_adapter

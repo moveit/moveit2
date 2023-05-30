@@ -48,7 +48,6 @@ generate_parameter_library(
 # This library provides a C++ interface for sending realtime twist or joint commands to a robot
 add_library(moveit_servo_lib SHARED
   src/collision_check.cpp
-  src/enforce_limits.cpp
   src/servo.cpp
   src/servo_calcs.cpp
   src/utilities.cpp

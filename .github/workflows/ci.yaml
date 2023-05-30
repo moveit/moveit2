@@ -74,7 +74,7 @@ jobs:
       - name: "Free up disk space"
         if: matrix.env.CCOV
         run: |
-          sudo apt-get -qq purge build-essential "ghc*"
+          sudo apt-get -qq purge "ghc*"
           sudo apt-get clean
           # cleanup docker images not used by us
           docker system prune -af

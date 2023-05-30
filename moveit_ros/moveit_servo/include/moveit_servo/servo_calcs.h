@@ -49,8 +49,6 @@
 #include <geometry_msgs/msg/twist_stamped.hpp>
 #include <moveit/planning_scene_monitor/planning_scene_monitor.h>
 #include <moveit/robot_model_loader/robot_model_loader.h>
-#include <moveit_msgs/srv/change_drift_dimensions.hpp>
-#include <moveit_msgs/srv/change_control_dimensions.hpp>
 #include <pluginlib/class_loader.hpp>
 #include <rclcpp/rclcpp.hpp>
 #include <sensor_msgs/msg/joint_state.hpp>
@@ -81,7 +79,7 @@ class ServoCalcs
 public:
   ServoCalcs(const rclcpp::Node::SharedPtr& node,
              const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor,
-             std::unique_ptr<const servo::ParamListener> servo_param_listener);
+             const std::shared_ptr<const servo::ParamListener>& servo_param_listener);
 
   ~ServoCalcs();
 
@@ -171,11 +169,6 @@ protected:
   void suddenHalt(sensor_msgs::msg::JointState& joint_state,
                   const std::vector<const moveit::core::JointModel*>& joints_to_halt) const;
 
-  /** \brief Avoid overshooting joint limits
-      \return Vector of the joints that would move farther past position margin limits
-   */
-  std::vector<const moveit::core::JointModel*> enforcePositionLimits(sensor_msgs::msg::JointState& joint_state) const;
-
   /** \brief Compose the outgoing JointTrajectory message */
   void composeJointTrajMessage(const sensor_msgs::msg::JointState& joint_state,
                                trajectory_msgs::msg::JointTrajectory& joint_trajectory);
@@ -193,61 +186,16 @@ protected:
   bool internalServoUpdate(Eigen::ArrayXd& delta_theta, trajectory_msgs::msg::JointTrajectory& joint_trajectory,
                            const ServoType servo_type);
 
-  /** \brief Gazebo simulations have very strict message timestamp requirements.
-   * Satisfy Gazebo by stuffing multiple messages into one.
-   */
-  void insertRedundantPointsIntoTrajectory(trajectory_msgs::msg::JointTrajectory& joint_trajectory, int count) const;
-
-  /**
-   * Remove the Jacobian row and the delta-x element of one Cartesian dimension, to take advantage of task redundancy
-   *
-   * @param matrix The Jacobian matrix.
-   * @param delta_x Vector of Cartesian delta commands, should be the same size as matrix.rows()
-   * @param row_to_remove Dimension that will be allowed to drift, e.g. row_to_remove = 2 allows z-translation drift.
-   */
-  void removeDimension(Eigen::MatrixXd& matrix, Eigen::VectorXd& delta_x, unsigned int row_to_remove) const;
-
-  /**
-   * Removes all of the drift dimensions from the jacobian and delta-x element
-   *
-   * @param matrix The Jacobian matrix.
-   * @param delta_x Vector of Cartesian delta commands, should be the same size as matrix.rows()
-   */
-  void removeDriftDimensions(Eigen::MatrixXd& matrix, Eigen::VectorXd& delta_x);
-
-  /**
-   * Uses control_dimensions_ to set the incoming twist command values to 0 in uncontrolled directions
-   *
-   * @param command TwistStamped msg being used in the Cartesian calcs process
-   */
-  void enforceControlDimensions(geometry_msgs::msg::TwistStamped& command);
-
   /* \brief Command callbacks */
   void twistStampedCB(const geometry_msgs::msg::TwistStamped::ConstSharedPtr& msg);
   void jointCmdCB(const control_msgs::msg::JointJog::ConstSharedPtr& msg);
   void collisionVelocityScaleCB(const std_msgs::msg::Float64::ConstSharedPtr& msg);
 
-  /**
-   * Allow drift in certain dimensions. For example, may allow the wrist to rotate freely.
-   * This can help avoid singularities.
-   *
-   * @param request the service request
-   * @param response the service response
-   * @return true if the adjustment was made
-   */
-  void changeDriftDimensions(const std::shared_ptr<moveit_msgs::srv::ChangeDriftDimensions::Request>& req,
-                             const std::shared_ptr<moveit_msgs::srv::ChangeDriftDimensions::Response>& res);
-
-  /** \brief Start the main calculation timer */
-  // Service callback for changing servoing dimensions
-  void changeControlDimensions(const std::shared_ptr<moveit_msgs::srv::ChangeControlDimensions::Request>& req,
-                               const std::shared_ptr<moveit_msgs::srv::ChangeControlDimensions::Response>& res);
-
   // Pointer to the ROS node
   std::shared_ptr<rclcpp::Node> node_;
 
   // Servo parameters
-  std::unique_ptr<const servo::ParamListener> servo_param_listener_;
+  const std::shared_ptr<const servo::ParamListener> servo_param_listener_;
   servo::Params servo_params_;
 
   // Pointer to the collision environment
@@ -288,8 +236,6 @@ protected:
   rclcpp::Publisher<std_msgs::msg::Int8>::SharedPtr status_pub_;
   rclcpp::Publisher<trajectory_msgs::msg::JointTrajectory>::SharedPtr trajectory_outgoing_cmd_pub_;
   rclcpp::Publisher<std_msgs::msg::Float64MultiArray>::SharedPtr multiarray_outgoing_cmd_pub_;
-  rclcpp::Service<moveit_msgs::srv::ChangeControlDimensions>::SharedPtr control_dimensions_server_;
-  rclcpp::Service<moveit_msgs::srv::ChangeDriftDimensions>::SharedPtr drift_dimensions_server_;
 
   // Main tracking / result publisher loop
   std::thread thread_;
@@ -304,15 +250,7 @@ protected:
   // Use ArrayXd type to enable more coefficient-wise operations
   Eigen::ArrayXd delta_theta_;
 
-  const int gazebo_redundant_message_count_ = 30;
-
   unsigned int num_joints_;
-
-  // True -> allow drift in this dimension. In the command frame. [x, y, z, roll, pitch, yaw]
-  std::array<bool, 6> drift_dimensions_ = { { false, false, false, false, false, false } };
-
-  // The dimensions to control. In the command frame. [x, y, z, roll, pitch, yaw]
-  std::array<bool, 6> control_dimensions_ = { { true, true, true, true, true, true } };
 
   // main_loop_mutex_ is used to protect the input state and dynamic parameters
   mutable std::mutex main_loop_mutex_;

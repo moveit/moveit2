@@ -40,11 +40,6 @@
 
 namespace moveit_servo
 {
-namespace
-{
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_servo.utilities");
-constexpr auto ROS_LOG_THROTTLE_PERIOD = std::chrono::milliseconds(3000).count();
-}  // namespace
 
 /** \brief Helper function for converting Eigen::Isometry3d to geometry_msgs/TransformStamped **/
 geometry_msgs::msg::TransformStamped convertIsometryToTransform(const Eigen::Isometry3d& eigen_tf,
@@ -58,26 +53,13 @@ geometry_msgs::msg::TransformStamped convertIsometryToTransform(const Eigen::Iso
   return output;
 }
 
-/** \brief Possibly calculate a velocity scaling factor, due to proximity of
- * singularity and direction of motion
- * @param[in] joint_model_group   The MoveIt group
- * @param[in] commanded_twist     The commanded Cartesian twist
- * @param[in] svd                 A singular value decomposition of the Jacobian
- * @param[in] pseudo_inverse      The pseudo-inverse of the Jacobian
- * @param[in] hard_stop_singularity_threshold  Halt if condition(Jacobian) > hard_stop_singularity_threshold
- * @param[in] lower_singularity_threshold      Decelerate if condition(Jacobian) > lower_singularity_threshold
- * @param[in] leaving_singularity_threshold_multiplier      Allow faster motion away from singularity
- * @param[in, out] clock          A ROS clock, for logging
- * @param[in, out] current_state  The state of the robot. Used in internal calculations.
- * @param[out] status             Singularity status
- */
 double velocityScalingFactorForSingularity(const moveit::core::JointModelGroup* joint_model_group,
                                            const Eigen::VectorXd& commanded_twist,
                                            const Eigen::JacobiSVD<Eigen::MatrixXd>& svd,
                                            const Eigen::MatrixXd& pseudo_inverse,
                                            const double hard_stop_singularity_threshold,
                                            const double lower_singularity_threshold,
-                                           const double leaving_singularity_threshold_multiplier, rclcpp::Clock& clock,
+                                           const double leaving_singularity_threshold_multiplier,
                                            const moveit::core::RobotStatePtr& current_state, StatusCode& status)
 {
   double velocity_scale = 1;
@@ -128,7 +110,6 @@ double velocityScalingFactorForSingularity(const moveit::core::JointModelGroup* 
         1. - (ini_condition - lower_singularity_threshold) / (upper_threshold - lower_singularity_threshold);
     status =
         dot > 0 ? StatusCode::DECELERATE_FOR_APPROACHING_SINGULARITY : StatusCode::DECELERATE_FOR_LEAVING_SINGULARITY;
-    RCLCPP_WARN_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD, SERVO_STATUS_CODE_MAP.at(status));
   }
 
   // Very close to singularity, so halt.
@@ -136,13 +117,12 @@ double velocityScalingFactorForSingularity(const moveit::core::JointModelGroup* 
   {
     velocity_scale = 0;
     status = StatusCode::HALT_FOR_SINGULARITY;
-    RCLCPP_WARN_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD, SERVO_STATUS_CODE_MAP.at(status));
   }
 
   return velocity_scale;
 }
 
-bool applyJointUpdate(rclcpp::Clock& clock, const double publish_period, const Eigen::ArrayXd& delta_theta,
+bool applyJointUpdate(const double publish_period, const Eigen::ArrayXd& delta_theta,
                       const sensor_msgs::msg::JointState& previous_joint_state,
                       sensor_msgs::msg::JointState& next_joint_state,
                       pluginlib::UniquePtr<online_signal_smoothing::SmoothingBaseClass>& smoother)
@@ -151,8 +131,6 @@ bool applyJointUpdate(rclcpp::Clock& clock, const double publish_period, const E
   if (next_joint_state.position.size() != static_cast<std::size_t>(delta_theta.size()) ||
       next_joint_state.velocity.size() != next_joint_state.position.size())
   {
-    RCLCPP_ERROR_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD,
-                                 "Lengths of output and increments do not match.");
     return false;
   }
 
@@ -180,15 +158,8 @@ bool applyJointUpdate(rclcpp::Clock& clock, const double publish_period, const E
 }
 
 void transformTwistToPlanningFrame(geometry_msgs::msg::TwistStamped& cmd, const std::string& planning_frame,
-                                   const moveit::core::RobotStatePtr& current_state, rclcpp::Clock& clock)
+                                   const moveit::core::RobotStatePtr& current_state)
 {
-  if (cmd.header.frame_id.empty())
-  {
-    RCLCPP_WARN_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD,
-                                "No frame specified for command ,will use planning_frame");
-    cmd.header.frame_id = planning_frame;
-  }
-
   // We solve (planning_frame -> base -> cmd.header.frame_id)
   // by computing (base->planning_frame)^-1 * (base->cmd.header.frame_id)
   const Eigen::Isometry3d tf_moveit_to_incoming_cmd_frame =
@@ -247,6 +218,93 @@ geometry_msgs::msg::Pose poseFromCartesianDelta(const Eigen::VectorXd& delta_x,
 
   // T * R * T' * tf_no_new_rot
   return tf2::toMsg(tf_pos_translation * tf_rot_delta * tf_neg_translation * tf_no_new_rot);
+}
+
+double getVelocityScalingFactor(const moveit::core::JointModelGroup* joint_model_group, const Eigen::VectorXd& velocity)
+{
+  std::size_t joint_delta_index{ 0 };
+  double velocity_scaling_factor{ 1.0 };
+  for (const moveit::core::JointModel* joint : joint_model_group->getActiveJointModels())
+  {
+    const auto& bounds = joint->getVariableBounds(joint->getName());
+    if (bounds.velocity_bounded_ && velocity(joint_delta_index) != 0.0)
+    {
+      const double unbounded_velocity = velocity(joint_delta_index);
+      // Clamp each joint velocity to a joint specific [min_velocity, max_velocity] range.
+      const auto bounded_velocity = std::min(std::max(unbounded_velocity, bounds.min_velocity_), bounds.max_velocity_);
+      velocity_scaling_factor = std::min(velocity_scaling_factor, bounded_velocity / unbounded_velocity);
+    }
+    ++joint_delta_index;
+  }
+
+  return velocity_scaling_factor;
+}
+
+void enforceVelocityLimits(const moveit::core::JointModelGroup* joint_model_group, const double publish_period,
+                           sensor_msgs::msg::JointState& joint_state, const double override_velocity_scaling_factor)
+{
+  // Get the velocity scaling factor
+  Eigen::VectorXd velocity =
+      Eigen::Map<Eigen::VectorXd, Eigen::Unaligned>(joint_state.velocity.data(), joint_state.velocity.size());
+  double velocity_scaling_factor = override_velocity_scaling_factor;
+  // if the override velocity scaling factor is approximately zero then the user is not overriding the value.
+  if (override_velocity_scaling_factor < 0.01)
+    velocity_scaling_factor = getVelocityScalingFactor(joint_model_group, velocity);
+
+  // Take a smaller step if the velocity scaling factor is less than 1
+  if (velocity_scaling_factor < 1)
+  {
+    Eigen::VectorXd velocity_residuals = (1 - velocity_scaling_factor) * velocity;
+    Eigen::VectorXd positions =
+        Eigen::Map<Eigen::VectorXd, Eigen::Unaligned>(joint_state.position.data(), joint_state.position.size());
+    positions -= velocity_residuals * publish_period;
+
+    velocity *= velocity_scaling_factor;
+    // Back to sensor_msgs type
+    joint_state.velocity = std::vector<double>(velocity.data(), velocity.data() + velocity.size());
+    joint_state.position = std::vector<double>(positions.data(), positions.data() + positions.size());
+  }
+}
+
+std::vector<const moveit::core::JointModel*>
+enforcePositionLimits(sensor_msgs::msg::JointState& joint_state, const double joint_limit_margin,
+                      const moveit::core::JointModelGroup* joint_model_group)
+{
+  // Halt if we're past a joint margin and joint velocity is moving even farther past
+  double joint_angle = 0;
+  std::vector<const moveit::core::JointModel*> joints_to_halt;
+  for (auto joint : joint_model_group->getActiveJointModels())
+  {
+    for (std::size_t c = 0; c < joint_state.name.size(); ++c)
+    {
+      // Use the most recent robot joint state
+      if (joint_state.name[c] == joint->getName())
+      {
+        joint_angle = joint_state.position.at(c);
+        break;
+      }
+    }
+
+    if (!joint->satisfiesPositionBounds(&joint_angle, -joint_limit_margin))
+    {
+      const std::vector<moveit_msgs::msg::JointLimits>& limits = joint->getVariableBoundsMsg();
+
+      // Joint limits are not defined for some joints. Skip them.
+      if (!limits.empty())
+      {
+        // Check if pending velocity command is moving in the right direction
+        auto joint_itr = std::find(joint_state.name.begin(), joint_state.name.end(), joint->getName());
+        auto joint_idx = std::distance(joint_state.name.begin(), joint_itr);
+
+        if ((joint_state.velocity.at(joint_idx) < 0 && (joint_angle < (limits[0].min_position + joint_limit_margin))) ||
+            (joint_state.velocity.at(joint_idx) > 0 && (joint_angle > (limits[0].max_position - joint_limit_margin))))
+        {
+          joints_to_halt.push_back(joint);
+        }
+      }
+    }
+  }
+  return joints_to_halt;
 }
 
 }  // namespace moveit_servo

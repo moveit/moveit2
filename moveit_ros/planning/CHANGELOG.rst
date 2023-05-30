@@ -2,6 +2,12 @@
 Changelog for package moveit_ros_planning
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.7.4 (2023-05-18)
+------------------
+* Update default planning configs to use AddTimeOptimalParameterization (`#2167 <https://github.com/ros-planning/moveit2/issues/2167>`_)
+* Deprecate MoveItCpp::execute() use of blocking flag (`#1984 <https://github.com/ros-planning/moveit2/issues/1984>`_)
+* Contributors: Anthony Baker, Lucas Wendland
+
 2.7.3 (2023-04-24)
 ------------------
 * Replace check for the ROS_DISTRO env variable with a check for the rclcpp version (`#2135 <https://github.com/ros-planning/moveit2/issues/2135>`_)

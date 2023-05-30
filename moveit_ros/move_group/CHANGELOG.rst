@@ -2,6 +2,13 @@
 Changelog for package moveit_ros_move_group
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.7.4 (2023-05-18)
+------------------
+* Fix MoveGroup action cancel callback (`#2118 <https://github.com/ros-planning/moveit2/issues/2118>`_)
+  Moves the execution callback into its own thread to avoid blocking and actually calls the preempt function in with the cancel callback.
+* Scale acceleration and velocity of cartesian interpolations (`#1968 <https://github.com/ros-planning/moveit2/issues/1968>`_)
+* Contributors: Jonathan Grebe, Yadu
+
 2.7.3 (2023-04-24)
 ------------------
 * Replace Variable PROJECT_NAME in CMakeLists.txt with the actual name (`#2020 <https://github.com/ros-planning/moveit2/issues/2020>`_)
