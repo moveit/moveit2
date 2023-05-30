@@ -825,12 +825,12 @@ Eigen::VectorXd ServoCalcs::scaleCartesianCommand(const geometry_msgs::msg::Twis
   // Apply user-defined scaling if inputs are unitless [-1:1]
   if (servo_params_.command_in_type == "unitless")
   {
-    result[0] = servo_params_.linear_scale * servo_params_.publish_period * command.twist.linear.x;
-    result[1] = servo_params_.linear_scale * servo_params_.publish_period * command.twist.linear.y;
-    result[2] = servo_params_.linear_scale * servo_params_.publish_period * command.twist.linear.z;
-    result[3] = servo_params_.rotational_scale * servo_params_.publish_period * command.twist.angular.x;
-    result[4] = servo_params_.rotational_scale * servo_params_.publish_period * command.twist.angular.y;
-    result[5] = servo_params_.rotational_scale * servo_params_.publish_period * command.twist.angular.z;
+    result[0] = servo_params_.scale.linear * servo_params_.publish_period * command.twist.linear.x;
+    result[1] = servo_params_.scale.linear * servo_params_.publish_period * command.twist.linear.y;
+    result[2] = servo_params_.scale.linear * servo_params_.publish_period * command.twist.linear.z;
+    result[3] = servo_params_.scale.rotational * servo_params_.publish_period * command.twist.angular.x;
+    result[4] = servo_params_.scale.rotational * servo_params_.publish_period * command.twist.angular.y;
+    result[5] = servo_params_.scale.rotational * servo_params_.publish_period * command.twist.angular.z;
   }
   // Otherwise, commands are in m/s and rad/s
   else if (servo_params_.command_in_type == "speed_units")
@@ -872,7 +872,7 @@ Eigen::VectorXd ServoCalcs::scaleJointCommand(const control_msgs::msg::JointJog&
     // Apply user-defined scaling if inputs are unitless [-1:1]
     if (servo_params_.command_in_type == "unitless")
     {
-      result[c] = command.velocities[m] * servo_params_.joint_scale * servo_params_.publish_period;
+      result[c] = command.velocities[m] * servo_params_.scale.joint * servo_params_.publish_period;
       // Otherwise, commands are in m/s and rad/s
     }
     else if (servo_params_.command_in_type == "speed_units")
