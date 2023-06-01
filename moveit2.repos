@@ -6,5 +6,5 @@ repositories:
     version: ros2
   moveit_resources:
     type: git
-    url: https://github.com/ros-planning/moveit_resources.git
-    version: ros2
+    url: https://github.com/henningkayser/moveit_resources.git
+    version: pr/panda_xacro
