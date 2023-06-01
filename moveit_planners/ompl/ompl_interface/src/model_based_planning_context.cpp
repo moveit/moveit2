@@ -354,14 +354,9 @@ void ompl_interface::ModelBasedPlanningContext::useConfig()
       objective =
           std::make_shared<ompl::base::MaximizeMinClearanceObjective>(ompl_simple_setup_->getSpaceInformation());
     }
-    else if (optimizer.empty())
-    {
-      objective =
-          std::make_shared<ompl::base::PathLengthOptimizationObjective>(ompl_simple_setup_->getSpaceInformation());
-    }
     else
     {
-      RCLCPP_WARN(LOGGER, "Optimization objective %s is invalid, using PathLengthOptimizationObjective instead",
+      RCLCPP_WARN(LOGGER, "Optimization objective %s is invalid or not defined, using PathLengthOptimizationObjective instead",
                   optimizer.c_str());
       objective =
           std::make_shared<ompl::base::PathLengthOptimizationObjective>(ompl_simple_setup_->getSpaceInformation());
