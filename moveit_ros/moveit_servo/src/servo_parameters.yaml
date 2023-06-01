@@ -96,23 +96,22 @@ servo:
                   2. robot_link_command_frame"
   }
 
-  linear_scale: {
-    type: double,
-    default_value: 0.4,
-    description: "Max linear velocity. Unit is [m/s]. Only used for Cartesian commands."
-  }
-
-  rotational_scale: {
-    type: double,
-    default_value: 0.8,
-    description: "Max angular velocity. Unit is [rad/s]. Only used for Cartesian commands"
-  }
-
-  joint_scale: {
-    type: double,
-    default_value: 0.5,
-    description: "Max joint angular/linear velocity. Only used for joint commands on joint_command_in_topic"
-  }
+  scale:
+    linear: {
+      type: double,
+      default_value: 0.4,
+      description: "Max linear velocity. Unit is [m/s]. Only used for Cartesian commands."
+    }
+    rotational: {
+      type: double,
+      default_value: 0.8,
+      description: "Max angular velocity. Unit is [rad/s]. Only used for Cartesian commands."
+    }
+    joint: {
+      type: double,
+      default_value: 0.5,
+      description: "Max joint angular/linear velocity. Only used for joint commands on joint_command_in_topic."
+    }
 
   override_velocity_scaling_factor: {
     type: double,
