@@ -98,6 +98,8 @@ ompl_interface::ModelBasedPlanningContext::ModelBasedPlanningContext(const std::
   complete_initial_robot_state_.update();
 
   constraints_library_ = std::make_shared<ConstraintsLibrary>(this);
+
+  constructOptimizationObjectives();
 }
 
 void ompl_interface::ModelBasedPlanningContext::configure(const rclcpp::Node::SharedPtr& node,
@@ -354,8 +356,16 @@ void ompl_interface::ModelBasedPlanningContext::useConfig()
       objective =
           std::make_shared<ompl::base::MaximizeMinClearanceObjective>(ompl_simple_setup_->getSpaceInformation());
     }
+    else if (optimization_objectives_.find(optimizer) != optimization_objectives_.end())
+    {
+      objective =
+          optimization_objectives_[optimizer]->getOptimizationObjective(ompl_simple_setup_->getSpaceInformation());
+    }
     else
     {
+      RCLCPP_ERROR(LOGGER, "Unknown optimization objective for OMPL planner");
+      RCLCPP_ERROR(LOGGER, "Fall back to the default optimizer : PathLengthOptimizationObjective");
+
       objective =
           std::make_shared<ompl::base::PathLengthOptimizationObjective>(ompl_simple_setup_->getSpaceInformation());
     }
@@ -1053,4 +1063,26 @@ bool ompl_interface::ModelBasedPlanningContext::loadConstraintApproximations(con
     return true;
   }
   return false;
+}
+
+void ompl_interface::ModelBasedPlanningContext::constructOptimizationObjectives()
+{
+  auto optimization_objective_loader = pluginlib::ClassLoader<ompl_optimization_loader::OptimizationObjectiveLoader>(
+      "moveit_core", "ompl_optimization_loader::OptimizationObjectiveLoader");
+
+  for (const auto& plugin_name : optimization_objective_loader.getDeclaredClasses())
+  {
+    try
+    {
+      RCLCPP_DEBUG(LOGGER, "Loading optimization objective : %s", plugin_name.c_str());
+      std::shared_ptr<ompl_optimization_loader::OptimizationObjectiveLoader> obj_loader =
+          optimization_objective_loader.createSharedInstance(plugin_name);
+
+      optimization_objectives_[plugin_name] = obj_loader;
+    }
+    catch (pluginlib::PluginlibException& ex)
+    {
+      RCLCPP_ERROR(LOGGER, "The plugin %s failed to load for some reason. Error: %s", plugin_name.c_str(), ex.what());
+    }
+  }
 }
