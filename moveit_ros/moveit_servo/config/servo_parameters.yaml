@@ -89,29 +89,30 @@ servo:
 ################################ GENERAL CONFIG #############################
   enable_parameter_update: {
     type: bool,
-    default_value: false,
+    default_value: true,
     description: "If true, continuous check for parameter update is enabled \
                   Currently only the following parameters are updated:
                   1. override_velocity_scaling_factor
                   2. robot_link_command_frame"
   }
 
-  scale:
-    linear: {
-      type: double,
-      default_value: 0.4,
-      description: "Max linear velocity. Unit is [m/s]. Only used for Cartesian commands."
-    }
-    rotational: {
-      type: double,
-      default_value: 0.8,
-      description: "Max angular velocity. Unit is [rad/s]. Only used for Cartesian commands."
-    }
-    joint: {
-      type: double,
-      default_value: 0.5,
-      description: "Max joint angular/linear velocity. Only used for joint commands on joint_command_in_topic."
-    }
+  linear_scale: {
+    type: double,
+    default_value: 0.4,
+    description: "Max linear velocity. Unit is [m/s]. Only used for Cartesian commands."
+  }
+
+  rotational_scale: {
+    type: double,
+    default_value: 0.8,
+    description: "Max angular velocity. Unit is [rad/s]. Only used for Cartesian commands"
+  }
+
+  joint_scale: {
+    type: double,
+    default_value: 0.5,
+    description: "Max joint angular/linear velocity. Only used for joint commands on joint_command_in_topic"
+  }
 
   override_velocity_scaling_factor: {
     type: double,
@@ -263,80 +264,91 @@ servo:
 
 ############### POSE TRACKING PARAMETERS #########################
 
-  windup_limit: {
-    type: double,
-    default_value: 0.05,
-    description: "Maximum value of error integral for all PID controllers"
-  }
+  pose_tracking:
+      x_pid:
+        kp: {
+          type: double,
+          default_value: 1.5,
+          description: "Proportional gain value for the controller in x direction"
+        }
 
-  x_proportional_gain: {
-    type: double,
-    default_value: 1.5,
-    description: "Proportional gain value for the controller in x direction"
-  }
+        ki: {
+          type: double,
+          default_value: 0.0,
+          description: "Integral gain value for the controller in x direction"
+        }
 
-  y_proportional_gain: {
-    type: double,
-    default_value: 1.5,
-    description: "Proportional gain value for the controller in y direction"
-  }
+        kd: {
+          type: double,
+          default_value: 0.0,
+          description: "Derivative gain value for the controller in x direction"
+        }
 
-  z_proportional_gain: {
-    type: double,
-    default_value: 1.5,
-    description: "Proportional gain value for the controller in z direction"
-  }
+      y_pid:
+        kp: {
+          type: double,
+          default_value: 1.5,
+          description: "Proportional gain value for the controller in y direction"
+        }
 
-  x_integral_gain: {
-    type: double,
-    default_value: 0.0,
-    description: "Integral gain value for the controller in x direction"
-  }
+        ki: {
+          type: double,
+          default_value: 0.0,
+          description: "Integral gain value for the controller in y direction"
+        }
 
-  y_integral_gain: {
-    type: double,
-    default_value: 0.0,
-    description: "Integral gain value for the controller in y direction"
-  }
+        kd: {
+          type: double,
+          default_value: 0.0,
+          description: "Derivative gain value for the controller in y direction"
+        }
 
-  z_integral_gain: {
-    type: double,
-    default_value: 0.0,
-    description: "Integral gain value for the controller in z direction"
-  }
+      z_pid:
+        kp: {
+          type: double,
+          default_value: 1.5,
+          description: "Proportional gain value for the controller in z direction"
+        }
 
-  x_derivative_gain: {
-    type: double,
-    default_value: 0.0,
-    description: "Derivative gain value for the controller in x direction"
-  }
+        ki: {
+          type: double,
+          default_value: 0.0,
+          description: "Integral gain value for the controller in z direction"
+        }
 
-  y_derivative_gain: {
-    type: double,
-    default_value: 0.0,
-    description: "Derivative gain value for the controller in y direction"
-  }
+        kd: {
+          type: double,
+          default_value: 0.0,
+          description: "Derivative gain value for the controller in z direction"
+        }
 
-  z_derivative_gain: {
-    type: double,
-    default_value: 0.0,
-    description: "Derivative gain value for the controller in z direction"
-  }
+      q_pid:
+        kp: {
+          type: double,
+          default_value: 1.5,
+          description: "Proportional gain value for angular control"
+        }
 
-  angular_proportional_gain: {
-    type: double,
-    default_value: 0.5,
-    description: "Proportional gain value for angular control"
-  }
+        ki: {
+          type: double,
+          default_value: 0.0,
+          description: "Integral gain value for angular control"
+        }
 
-  angular_integral_gain: {
-    type: double,
-    default_value: 0.0,
-    description: "Integral gain value for angular control"
-  }
+        kd: {
+          type: double,
+          default_value: 0.0,
+          description: "Derivative gain value for angular control"
+        }
 
-  angular_derivative_gain: {
-    type: double,
-    default_value: 0.0,
-    description: "Derivative gain value for angular control"
-  }
+      windup_limit: {
+        type: double,
+        default_value: 0.05,
+        description: "Maximum value of error integral for all PID controllers"
+      }
+
+      use_anti_windup: {
+        type: bool,
+        default_value: true,
+        description: "If the controller should use anit windup"
+      }

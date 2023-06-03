@@ -39,12 +39,14 @@
 
 #include <std_msgs/msg/float64.hpp>
 
-#include <moveit_servo/collision_check.h>
-// #include <moveit_servo/make_shared_from_pool.h>
+#include <moveit_servo/collision_monitor.hpp>
 
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_servo.collision_check");
-static const double MIN_RECOMMENDED_COLLISION_RATE = 10;
+namespace
+{
+const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_servo.collision_check");
+const double MIN_RECOMMENDED_COLLISION_RATE = 10;
 constexpr size_t ROS_LOG_THROTTLE_PERIOD = 30 * 1000;  // Milliseconds to throttle logs inside loops
+}  // namespace
 
 namespace moveit_servo
 {
@@ -79,7 +81,7 @@ CollisionCheck::CollisionCheck(const rclcpp::Node::SharedPtr& node,
   collision_velocity_scale_pub_ =
       node_->create_publisher<std_msgs::msg::Float64>("~/collision_velocity_scale", rclcpp::SystemDefaultsQoS());
 
-  current_state_ = planning_scene_monitor_->getStateMonitor()->getCurrentState();
+  robot_state_ = planning_scene_monitor_->getStateMonitor()->getCurrentState();
 }
 
 planning_scene_monitor::LockedPlanningSceneRO CollisionCheck::getLockedPlanningSceneRO() const
@@ -113,14 +115,14 @@ void CollisionCheck::run()
   if (servo_params_.check_collisions)
   {
     // Update to the latest current state
-    current_state_ = planning_scene_monitor_->getStateMonitor()->getCurrentState();
-    current_state_->updateCollisionBodyTransforms();
+    robot_state_ = planning_scene_monitor_->getStateMonitor()->getCurrentState();
+    robot_state_->updateCollisionBodyTransforms();
     collision_detected_ = false;
 
     // Do a timer-safe distance-based collision detection
     collision_result_.clear();
     getLockedPlanningSceneRO()->getCollisionEnv()->checkRobotCollision(collision_request_, collision_result_,
-                                                                       *current_state_);
+                                                                       *robot_state_);
     scene_collision_distance_ = collision_result_.distance;
     collision_detected_ |= collision_result_.collision;
     collision_result_.print();
@@ -128,7 +130,7 @@ void CollisionCheck::run()
     collision_result_.clear();
     // Self-collisions and scene collisions are checked separately so different thresholds can be used
     getLockedPlanningSceneRO()->getCollisionEnvUnpadded()->checkSelfCollision(
-        collision_request_, collision_result_, *current_state_, getLockedPlanningSceneRO()->getAllowedCollisionMatrix());
+        collision_request_, collision_result_, *robot_state_, getLockedPlanningSceneRO()->getAllowedCollisionMatrix());
     self_collision_distance_ = collision_result_.distance;
     collision_detected_ |= collision_result_.collision;
     collision_result_.print();

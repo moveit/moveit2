@@ -1,30 +1,43 @@
 import os
-import pytest
 import launch
 import launch_ros
-import launch_testing
-import unittest
 from ament_index_python.packages import get_package_share_directory
 from launch_param_builder import ParameterBuilder
 from moveit_configs_utils import MoveItConfigsBuilder
 
 
-def generate_servo_test_description(
-    *args, gtest_name: launch.some_substitutions_type.SomeSubstitutionsType
-):
+def generate_launch_description():
     moveit_config = (
         MoveItConfigsBuilder("moveit_resources_panda")
         .robot_description(file_path="config/panda.urdf.xacro")
         .to_moveit_configs()
     )
 
-    # Get parameters for the Pose Tracking and Servo nodes
+    # Get parameters for the Servo node
     servo_params = {
         "moveit_servo": ParameterBuilder("moveit_servo")
-        .yaml("config/pose_tracking_settings.yaml")
-        .yaml("config/panda_simulated_config_pose_tracking.yaml")
+        .yaml("config/panda_simulated_config.yaml")
         .to_dict()
     }
+
+    # This filter parameter should be >1. Increase it for greater smoothing but slower motion.
+    low_pass_filter_coeff = {"butterworth_filter_coeff": 1.5}
+
+    # RViz
+    rviz_config_file = (
+        get_package_share_directory("moveit_servo") + "/config/demo_rviz_config.rviz"
+    )
+    rviz_node = launch_ros.actions.Node(
+        package="rviz2",
+        executable="rviz2",
+        name="rviz2",
+        output="log",
+        arguments=["-d", rviz_config_file],
+        parameters=[
+            moveit_config.robot_description,
+            moveit_config.robot_description_semantic,
+        ],
+    )
 
     # ros2_control using FakeSystem as hardware
     ros2_controllers_path = os.path.join(
@@ -57,9 +70,9 @@ def generate_servo_test_description(
         arguments=["panda_arm_controller", "-c", "/controller_manager"],
     )
 
-    # Component nodes for tf and Servo
-    test_container = launch_ros.actions.ComposableNodeContainer(
-        name="test_pose_tracking_container",
+    # Launch as much as possible in components
+    container = launch_ros.actions.ComposableNodeContainer(
+        name="moveit_servo_demo_container",
         namespace="/",
         package="rclcpp_components",
         executable="component_container_mt",
@@ -74,56 +87,33 @@ def generate_servo_test_description(
                 package="tf2_ros",
                 plugin="tf2_ros::StaticTransformBroadcasterNode",
                 name="static_tf2_broadcaster",
-                parameters=[{"/child_frame_id": "panda_link0", "/frame_id": "world"}],
+                parameters=[{"child_frame_id": "/panda_link0", "frame_id": "/world"}],
             ),
         ],
         output="screen",
     )
-
-    pose_tracking_gtest = launch_ros.actions.Node(
-        executable=launch.substitutions.PathJoinSubstitution(
-            [launch.substitutions.LaunchConfiguration("test_binary_dir"), gtest_name]
-        ),
+    # Launch a standalone Servo node.
+    # As opposed to a node component, this may be necessary (for example) if Servo is running on a different PC
+    servo_node = launch_ros.actions.Node(
+        package="moveit_servo",
+        executable="demo_twist",
         parameters=[
-            moveit_config.to_dict(),
             servo_params,
+            low_pass_filter_coeff,
+            moveit_config.robot_description,
+            moveit_config.robot_description_semantic,
+            moveit_config.robot_description_kinematics,
         ],
         output="screen",
     )
 
     return launch.LaunchDescription(
         [
-            launch.actions.DeclareLaunchArgument(
-                name="test_binary_dir",
-                description="Binary directory of package "
-                "containing test executables",
-            ),
+            rviz_node,
             ros2_control_node,
             joint_state_broadcaster_spawner,
             panda_arm_controller_spawner,
-            test_container,
-            launch.actions.TimerAction(period=2.0, actions=[pose_tracking_gtest]),
-            launch_testing.actions.ReadyToTest(),
+            servo_node,
+            container,
         ]
-    ), {
-        "test_container": test_container,
-        "servo_gtest": pose_tracking_gtest,
-        "ros2_control_node": ros2_control_node,
-    }
-
-
-def generate_test_description():
-    return generate_servo_test_description(gtest_name="test_servo_pose_tracking")
-
-
-class TestGTestProcessActive(unittest.TestCase):
-    def test_gtest_run_complete(self, servo_gtest):
-        self.proc_info.assertWaitForShutdown(servo_gtest, timeout=4000.0)
-
-
-@launch_testing.post_shutdown_test()
-class TestGTestProcessPostShutdown(unittest.TestCase):
-    def test_gtest_pass(
-        self, proc_info, test_container, servo_gtest, ros2_control_node
-    ):
-        launch_testing.asserts.assertExitCodes(proc_info, process=servo_gtest)
+    )

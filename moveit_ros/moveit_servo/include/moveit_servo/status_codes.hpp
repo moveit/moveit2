@@ -1,7 +1,7 @@
 /*******************************************************************************
  * BSD 3-Clause License
  *
- * Copyright (c) 2021, PickNik Inc.
+ * Copyright (c) 2019, Los Alamos National Security, LLC
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,24 +30,40 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *******************************************************************************/
-
-/*      Title     : servo_node_main.cpp
- *      Project   : moveit_servo
- *      Created   : 08/18/2021
- *      Author    : Joe Schornak
+/*
+ *      Title       : status_codes.h
+ *      Project     : moveit_servo
+ *      Created     : 2/25/2019
+ *      Author      : Andy Zelenak
+ *
+ *      Description : The status codes used by MoveIt Servo to indicate the various conditions.
  */
+#pragma once
 
-#include <moveit_servo/servo_node.h>
+#include <string>
+#include <unordered_map>
 
-int main(int argc, char* argv[])
+namespace moveit_servo
 {
-  rclcpp::init(argc, argv);
+enum class StatusCode : int8_t
+{
+  INVALID = -1,
+  NO_WARNING = 0,
+  DECELERATE_FOR_APPROACHING_SINGULARITY = 1,
+  HALT_FOR_SINGULARITY = 2,
+  DECELERATE_FOR_COLLISION = 3,
+  HALT_FOR_COLLISION = 4,
+  JOINT_BOUND = 5,
+  DECELERATE_FOR_LEAVING_SINGULARITY = 6,
+};
 
-  rclcpp::NodeOptions options;
-
-  auto servo_node = std::make_shared<moveit_servo::ServoNode>(options);
-
-  rclcpp::spin(servo_node->get_node_base_interface());
-
-  rclcpp::shutdown();
-}
+const std::unordered_map<StatusCode, std::string> SERVO_STATUS_CODE_MAP(
+    { { StatusCode::INVALID, "Invalid" },
+      { StatusCode::NO_WARNING, "No warnings" },
+      { StatusCode::DECELERATE_FOR_APPROACHING_SINGULARITY, "Moving closer to a singularity, decelerating" },
+      { StatusCode::HALT_FOR_SINGULARITY, "Very close to a singularity, emergency stop" },
+      { StatusCode::DECELERATE_FOR_COLLISION, "Close to a collision, decelerating" },
+      { StatusCode::HALT_FOR_COLLISION, "Collision detected, emergency stop" },
+      { StatusCode::JOINT_BOUND, "Close to a joint bound (position or velocity), halting" },
+      { StatusCode::DECELERATE_FOR_LEAVING_SINGULARITY, "Moving away from a singularity, decelerating" } });
+}  // namespace moveit_servo

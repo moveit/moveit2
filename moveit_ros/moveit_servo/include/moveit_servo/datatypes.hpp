@@ -1,9 +1,4 @@
 /*******************************************************************************
- *      Title     : status_codes.h
- *      Project   : moveit_servo
- *      Created   : 2/25/2019
- *      Author    : Andy Zelenak
- *
  * BSD 3-Clause License
  *
  * Copyright (c) 2019, Los Alamos National Security, LLC
@@ -36,34 +31,54 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *******************************************************************************/
 
-#pragma once
+/*      Title       : datatypes.hpp
+ *      Project     : moveit_servo
+ *      Created     : 05/06/2023
+ *      Author      : V Mohammed Ibrahim
+ *
+ *      Description : The custom datatypes used by Moveit Servo.
+ */
 
-#include <string>
-#include <unordered_map>
+#pragma once
 
 namespace moveit_servo
 {
-enum class StatusCode : int8_t
+// Datatypes used by servo
+
+typedef Eigen::VectorXd JointJog;
+
+struct Pose
 {
-  INVALID = -1,
-  NO_WARNING = 0,
-  DECELERATE_FOR_APPROACHING_SINGULARITY = 1,
-  HALT_FOR_SINGULARITY = 2,
-  DECELERATE_FOR_COLLISION = 3,
-  HALT_FOR_COLLISION = 4,
-  JOINT_BOUND = 5,
-  DECELERATE_FOR_LEAVING_SINGULARITY = 6,
-  PAUSED = 7
+  std::string frame_id;
+  Eigen::Isometry3d pose;
 };
 
-const std::unordered_map<StatusCode, std::string> SERVO_STATUS_CODE_MAP(
-    { { StatusCode::INVALID, "Invalid" },
-      { StatusCode::NO_WARNING, "No warnings" },
-      { StatusCode::DECELERATE_FOR_APPROACHING_SINGULARITY, "Moving closer to a singularity, decelerating" },
-      { StatusCode::HALT_FOR_SINGULARITY, "Very close to a singularity, emergency stop" },
-      { StatusCode::DECELERATE_FOR_COLLISION, "Close to a collision, decelerating" },
-      { StatusCode::HALT_FOR_COLLISION, "Collision detected, emergency stop" },
-      { StatusCode::JOINT_BOUND, "Close to a joint bound (position or velocity), halting" },
-      { StatusCode::DECELERATE_FOR_LEAVING_SINGULARITY, "Moving away from a singularity, decelerating" },
-      { StatusCode::PAUSED, "Paused" } });
+struct Twist
+{
+  std::string frame_id;
+  Eigen::Vector<double, 6> velocities;
+};
+
+typedef std::variant<JointJog, Twist, Pose> ServoInput;
+
+struct KinematicState
+{
+  std::vector<std::string> joint_names;
+  std::vector<double> positions, velocities, accelerations;
+
+  KinematicState(const int num_joints)
+  {
+    joint_names.resize(num_joints);
+    positions.resize(num_joints);
+    velocities.resize(num_joints);
+    accelerations.resize(num_joints);
+  }
+};
+
+enum class CommandType
+{
+  JOINT_JOG = 0,
+  TWIST = 1,
+  POSE = 2
+};
 }  // namespace moveit_servo
