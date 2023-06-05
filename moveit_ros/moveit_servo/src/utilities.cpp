@@ -124,35 +124,30 @@ double velocityScalingFactorForSingularity(const moveit::core::JointModelGroup* 
 
 bool applyJointUpdate(const double publish_period, const Eigen::ArrayXd& delta_theta,
                       const sensor_msgs::msg::JointState& previous_joint_state,
-                      sensor_msgs::msg::JointState& next_joint_state,
+                      sensor_msgs::msg::JointState& current_joint_state,
                       pluginlib::UniquePtr<online_signal_smoothing::SmoothingBaseClass>& smoother)
 {
   // All the sizes must match
-  if (next_joint_state.position.size() != static_cast<std::size_t>(delta_theta.size()) ||
-      next_joint_state.velocity.size() != next_joint_state.position.size())
+  if (current_joint_state.position.size() != static_cast<std::size_t>(delta_theta.size()) ||
+      current_joint_state.velocity.size() != current_joint_state.position.size())
   {
     return false;
   }
 
-  for (std::size_t i = 0; i < next_joint_state.position.size(); ++i)
+  for (std::size_t i = 0; i < current_joint_state.position.size(); ++i)
   {
     // Increment joint
-    next_joint_state.position[i] += delta_theta[i];
+    current_joint_state.position[i] += delta_theta[i];
   }
 
-  smoother->doSmoothing(next_joint_state.position);
+  smoother->doSmoothing(current_joint_state.position);
 
-  // Lambda that calculates velocity using central difference.
-  // (q(t + dt) - q(t - dt)) / ( 2 * dt )
-  auto compute_velocity = [&](const double next_pos, const double previous_pos) {
-    return (next_pos - previous_pos) / (2 * publish_period);
-  };
-
-  // Transform that applies the lambda to all joints.
-  // next_joint_state contains the future position q(t + dt)
-  // previous_joint_state_ contains past position q(t - dt)
-  std::transform(next_joint_state.position.begin(), next_joint_state.position.end(),
-                 previous_joint_state.position.begin(), next_joint_state.velocity.begin(), compute_velocity);
+  // Calculate joint velocities
+  for (std::size_t i = 0; i < current_joint_state.position.size(); ++i)
+  {
+    current_joint_state.velocity[i] =
+        (current_joint_state.position.at(i) - previous_joint_state.position.at(i)) / publish_period;
+  }
 
   return true;
 }
