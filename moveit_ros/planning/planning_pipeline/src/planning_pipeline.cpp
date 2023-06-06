@@ -110,42 +110,48 @@ void planning_pipeline::PlanningPipeline::configure()
   catch (pluginlib::PluginlibException& ex)
   {
     RCLCPP_FATAL(LOGGER, "Exception while creating planning plugin loader %s", ex.what());
+    throw;
   }
 
   std::vector<std::string> classes;
   if (planner_plugin_loader_)
     classes = planner_plugin_loader_->getDeclaredClasses();
-  if (planner_plugin_name_.empty() && classes.size() == 1)
+
+  if (planner_plugin_name_.empty())
   {
-    planner_plugin_name_ = classes[0];
-    RCLCPP_INFO(
-        LOGGER,
-        "No '~planning_plugin' parameter specified, but only '%s' planning plugin is available. Using that one.",
-        planner_plugin_name_.c_str());
+    if (classes.size() == 1)
+    {
+      planner_plugin_name_ = classes[0];
+      RCLCPP_WARN(
+          LOGGER,
+          "No '~planning_plugin' parameter specified, but only '%s' planning plugin is available. Using that one.",
+          planner_plugin_name_.c_str());
+    }
+    else
+    {
+      std::string classes_str = boost::algorithm::join(classes, ", ");
+      throw std::runtime_error("Planning plugin name is empty. Please choose one of the available plugins: " +
+                               classes_str);
+    }
   }
-  if (planner_plugin_name_.empty() && classes.size() > 1)
-  {
-    planner_plugin_name_ = classes[0];
-    RCLCPP_INFO(
-        LOGGER,
-        "Multiple planning plugins available. You should specify the '~planning_plugin' parameter. Using '%s' for "
-        "now.",
-        planner_plugin_name_.c_str());
-  }
+
   try
   {
     planner_instance_ = planner_plugin_loader_->createUniqueInstance(planner_plugin_name_);
     if (!planner_instance_->initialize(robot_model_, node_, parameter_namespace_))
+    {
       throw std::runtime_error("Unable to initialize planning plugin");
+    }
     RCLCPP_INFO(LOGGER, "Using planning interface '%s'", planner_instance_->getDescription().c_str());
   }
   catch (pluginlib::PluginlibException& ex)
   {
     std::string classes_str = boost::algorithm::join(classes, ", ");
-    RCLCPP_ERROR(LOGGER,
+    RCLCPP_FATAL(LOGGER,
                  "Exception while loading planner '%s': %s"
                  "Available plugins: %s",
                  planner_plugin_name_.c_str(), ex.what(), classes_str.c_str());
+    throw;
   }
 
   // load the planner request adapters
@@ -160,7 +166,8 @@ void planning_pipeline::PlanningPipeline::configure()
     }
     catch (pluginlib::PluginlibException& ex)
     {
-      RCLCPP_ERROR(LOGGER, "Exception while creating planning plugin loader %s", ex.what());
+      RCLCPP_FATAL(LOGGER, "Exception while creating planning plugin loader %s", ex.what());
+      throw;
     }
 
     if (adapter_plugin_loader_)
@@ -174,8 +181,9 @@ void planning_pipeline::PlanningPipeline::configure()
         }
         catch (pluginlib::PluginlibException& ex)
         {
-          RCLCPP_ERROR(LOGGER, "Exception while loading planning adapter plugin '%s': %s", adapter_plugin_name.c_str(),
+          RCLCPP_FATAL(LOGGER, "Exception while loading planning adapter plugin '%s': %s", adapter_plugin_name.c_str(),
                        ex.what());
+          throw;
         }
         if (ad)
         {
