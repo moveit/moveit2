@@ -755,7 +755,7 @@ void ServoCalcs::suddenHalt(sensor_msgs::msg::JointState& joint_state,
     if (joint_it != joint_state.name.cend())
     {
       const auto joint_index = std::distance(joint_state.name.cbegin(), joint_it);
-      joint_state.position.at(joint_index) = internal_joint_state_.position.at(joint_index);
+      joint_state.position.at(joint_index) = previous_joint_state_.position.at(joint_index);
       joint_state.velocity.at(joint_index) = 0.0;
     }
   }
