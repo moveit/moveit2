@@ -18,3 +18,14 @@ target_link_libraries(moveit_planning_request_adapter
 )
 
 install(DIRECTORY include/ DESTINATION include/moveit_core)
+
+if(BUILD_TESTING)
+  find_package(ament_cmake_gmock REQUIRED)
+
+  ament_add_gmock(test_planning_request_adapter
+    test/test_planning_request_adapter.cpp
+   )
+   target_link_libraries(test_planning_request_adapter
+	   moveit_planning_request_adapter
+   )
+endif()
