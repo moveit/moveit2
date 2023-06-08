@@ -240,7 +240,7 @@ servo:
     description: "[Hz] Collision-checking can easily bog down a CPU if done too often. \
                   Collision checking begins slowing down when nearer than a specified distance.",
     validation: {
-      gt_eq<>: 0.0
+      gt_eq<>: 10.0
     }
   }
 

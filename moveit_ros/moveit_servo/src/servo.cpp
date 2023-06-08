@@ -61,15 +61,11 @@ Servo::Servo(const rclcpp::Node::SharedPtr& node, std::shared_ptr<const servo::P
 
   createPlanningSceneMonitor();
 
-  // Create the collision checker
-  collision_checker_ = std::make_unique<CollisionCheck>(node_, planning_scene_monitor_, servo_param_listener_);
-  if (servo_params_.check_collisions)
-    collision_checker_->start();
-
-  // Create collision velocity subscriber
-  collision_velocity_scale_sub_ = node_->create_subscription<std_msgs::msg::Float64>(
-      "~/collision_velocity_scale", rclcpp::SystemDefaultsQoS(),
-      [this](const std_msgs::msg::Float64::ConstSharedPtr& msg) { return collisionVelocityScaleCB(msg); });
+  // Create the collision checker and start collision checking.
+  // Collision checking thread can be stopped using c++ API
+  collision_monitor_ =
+      std::make_unique<CollisionMonitor>(planning_scene_monitor_, servo_params_, collision_velocity_scale_);
+  collision_monitor_->start();
 
   // Get the robot state and joint model group info.
   robot_state_ = planning_scene_monitor_->getStateMonitor()->getCurrentState();
@@ -111,6 +107,11 @@ Servo::Servo(const rclcpp::Node::SharedPtr& node, std::shared_ptr<const servo::P
     servo_status_ = StatusCode::NO_WARNING;
     RCLCPP_INFO_STREAM(LOGGER, "Servo initialized successfully");
   }
+}
+
+Servo::~Servo()
+{
+  setCollisionChecking(false);
 }
 
 KinematicState Servo::getNextJointState(const ServoInput& command)
@@ -251,11 +252,6 @@ KinematicState Servo::haltJoints(const std::vector<int>& joints_to_halt, const K
   }
 
   return bounded_state;
-}
-
-void Servo::collisionVelocityScaleCB(const std_msgs::msg::Float64::ConstSharedPtr& msg)
-{
-  collision_velocity_scale_ = msg->data;
 }
 
 void Servo::createPlanningSceneMonitor()
@@ -447,6 +443,11 @@ Twist Servo::toPlanningFrame(const Twist& command)
   {
     return command;
   }
+}
+
+void Servo::setCollisionChecking(const bool check_collision)
+{
+  check_collision ? collision_monitor_->start() : collision_monitor_->stop();
 }
 
 }  // namespace moveit_servo

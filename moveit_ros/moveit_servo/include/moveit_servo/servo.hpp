@@ -68,6 +68,8 @@ class Servo
 public:
   Servo(const rclcpp::Node::SharedPtr& node, std::shared_ptr<const servo::ParamListener>& servo_param_listener);
 
+  ~Servo();
+
   /**
    * \brief Computes the required joint state to follow the given command.
    * @param command The command to follow, std::variant type, can handle JointJog, Twist and Pose.
@@ -128,6 +130,12 @@ public:
    */
   Twist toPlanningFrame(const Twist& command);
 
+  /**
+   * \brief Start/Stop collision checking thread.
+   * @param check_collision Stops collision checking thread if false, starts it if true.
+   */
+  void setCollisionChecking(const bool check_collision);
+
 private:
   /**
    * \brief Validate the servo parameters
@@ -144,11 +152,6 @@ private:
    * \brief create and initialize the smoothing plugin to be used by servo.
    */
   void setSmoothingPlugin();
-
-  /**
-   * \brief The callback for velocity scaling values from collision checker.
-   */
-  void collisionVelocityScaleCB(const std_msgs::msg::Float64::ConstSharedPtr& msg);
 
   /**
    * \brief Updates the servo parameters and performs some validations.
@@ -181,9 +184,7 @@ private:
   planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor_;
 
   std::atomic<double> collision_velocity_scale_ = 1.0;
-  std::unique_ptr<CollisionCheck> collision_checker_;
-  rclcpp::Subscription<std_msgs::msg::Float64>::SharedPtr collision_velocity_scale_sub_;
-
+  std::unique_ptr<CollisionMonitor> collision_monitor_;
   pluginlib::UniquePtr<online_signal_smoothing::SmoothingBaseClass> smoother_;
 
   size_t num_joints_;

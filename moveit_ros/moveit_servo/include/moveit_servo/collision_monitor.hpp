@@ -33,91 +33,49 @@
 /*
  * Title      : collision_monitor.hpp
  * Project    : moveit_servo
- * Created    : 1/11/2019
- * Author     : Brian O'Neil, Andy Zelenak, Blake Anderson
+ * Created    : 08/06/2023
+ * Author     : Brian O'Neil, Andy Zelenak, Blake Anderson, V Mohammed Ibrahim
  *
  * Description: Monitors the planning scene for collision and publishes the velocity scaling.
  */
 
 #pragma once
 
-#include <mutex>
-
-#include <rclcpp/rclcpp.hpp>
-
-#include <moveit/robot_model_loader/robot_model_loader.h>
-#include <moveit/planning_scene_monitor/planning_scene_monitor.h>
-#include <sensor_msgs/msg/joint_state.hpp>
-#include <std_msgs/msg/float64.hpp>
-// Auto-generated
 #include <moveit_servo_lib_parameters.hpp>
+#include <moveit/planning_scene/planning_scene.h>
+#include <moveit/planning_scene_monitor/planning_scene_monitor.h>
 
 namespace moveit_servo
 {
-class CollisionCheck
+
+class CollisionMonitor
 {
 public:
-  /** \brief Constructor
-   *  \param parameters: common settings of moveit_servo
-   *  \param planning_scene_monitor: PSM should have scene monitor and state monitor
-   *                                 already started when passed into this class
-   */
-  CollisionCheck(const rclcpp::Node::SharedPtr& node,
-                 const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor,
-                 const std::shared_ptr<const servo::ParamListener>& servo_param_listener);
+  CollisionMonitor(const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor,
+                   const servo::Params& servo_params, std::atomic<double>& collision_velocity_scale);
 
-  ~CollisionCheck()
-  {
-    stop();
-  }
-
-  /** \brief Start the Timer that regulates collision check rate */
   void start();
 
-  /** \brief Stop the Timer that regulates collision check rate */
   void stop();
 
 private:
-  /** \brief Run one iteration of collision checking */
-  void run();
+  void checkCollisions();
 
-  /** \brief Get a read-only copy of the planning scene */
-  planning_scene_monitor::LockedPlanningSceneRO getLockedPlanningSceneRO() const;
+  // Variables
+  std::atomic<bool> stop_requested_;
+  std::thread monitor_thread_;
 
-  // Pointer to the ROS node
-  const std::shared_ptr<rclcpp::Node> node_;
+  std::atomic<double>& collision_velocity_scale_;
+  const servo::Params& servo_params_;
 
-  // Servo parameters
-  const std::shared_ptr<const servo::ParamListener> servo_param_listener_;
-  servo::Params servo_params_;
+  collision_detection::CollisionRequest self_collision_request_;
+  collision_detection::CollisionResult self_collision_result_;
 
-  // Pointer to the collision environment
-  planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor_;
+  collision_detection::CollisionRequest scene_collision_request_;
+  collision_detection::CollisionResult scene_collision_result_;
 
-  // Robot state and collision matrix from planning scene
-  std::shared_ptr<moveit::core::RobotState> robot_state_;
-
-  // Scale robot velocity according to collision proximity and user-defined thresholds.
-  // I scaled exponentially (cubic power) so velocity drops off quickly after the threshold.
-  // Proximity decreasing --> decelerate
-  double velocity_scale_ = 1.0;
-  double self_collision_distance_ = 0.0;
-  double scene_collision_distance_ = 0.0;
-  bool collision_detected_ = false;
-
-  const double self_velocity_scale_coefficient_;
-  const double scene_velocity_scale_coefficient_;
-
-  // collision request
-  collision_detection::CollisionRequest collision_request_;
-  collision_detection::CollisionResult collision_result_;
-
-  // ROS
-  rclcpp::TimerBase::SharedPtr timer_;
-  double period_;  // The loop period, in seconds
-  rclcpp::Publisher<std_msgs::msg::Float64>::SharedPtr collision_velocity_scale_pub_;
-
-  mutable std::mutex joint_state_mutex_;
-  sensor_msgs::msg::JointState latest_joint_state_;
+  moveit::core::RobotStatePtr robot_state_;
+  const planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor_;
 };
+
 }  // namespace moveit_servo
