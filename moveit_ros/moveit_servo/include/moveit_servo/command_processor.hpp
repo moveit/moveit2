@@ -33,15 +33,13 @@
 
 /*      Title       : command_processor.hpp
  *      Project     : moveit_servo
- *      Created     : 04/06/2023
+ *      Created     : 06/04/2023
  *      Author      : Brian O'Neil, Andy Zelenak, Blake Anderson, V Mohammed Ibrahim
  *
  *      Description : The methods that compute the required change in joint angles for various input types.
  */
 
 #pragma once
-
-#include <control_toolbox/pid.hpp>
 
 #include <rclcpp/rclcpp.hpp>
 #include <tf2_eigen/tf2_eigen.hpp>
@@ -89,14 +87,9 @@ public:
    */
   const Eigen::Isometry3d getEndEffectorPose();
 
-  /**
-   * \brief Resets the PID controllers used for pose tracking.
-   */
-  void resetControllers();
-
 private:
   /**
-   * \brief Set the IK solver that servo will use. If the robot does not have one, inverse jacobian will be used instead.
+   * \brief Set the IK solver that servo will use. If the robot does not have one, inverse Jacobian will be used instead.
    */
   void setIKSolver();
 
@@ -115,9 +108,9 @@ private:
   /**
    * \brief Computes the required change in joint angles for given cartesian change, using the robots IK solver.
    * @param carteisan_position_delta The change in cartesian position.
-   * @return The required joing angle deltas.
+   * @return The required joint angle deltas.
    */
-  Eigen::VectorXd deltaFromIkSolver(const Eigen::VectorXd& cartesian_position_delta);
+  Eigen::VectorXd jointDeltaFromIK(const Eigen::VectorXd& cartesian_position_delta);
 
   // Variables
   size_t num_joints_;
@@ -128,9 +121,6 @@ private:
   StatusCode& servo_status_;
 
   kinematics::KinematicsBaseConstPtr ik_solver_ = nullptr;
-
-  uint64_t controller_period_;
-  std::map<std::string, control_toolbox::Pid> controllers_;
 };
 
 }  // namespace moveit_servo

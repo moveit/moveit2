@@ -33,7 +33,7 @@
 
 /*      Title       : servo.hpp
  *      Project     : moveit_servo
- *      Created     : 17/05/2023
+ *      Created     : 05/17/2023
  *      Author      : Brian O'Neil, Andy Zelenak, Blake Anderson, V Mohammed Ibrahim
  *
  *      Description : The core servoing logic.
@@ -88,13 +88,13 @@ public:
    * \brief Set the type of incoming servo command.
    * @param command_type The type of command servo should expect.
    */
-  void incomingCommandType(const CommandType& command_type);
+  void expectedCommandType(const CommandType& command_type);
 
   /**
    * \brief Get the type of command that servo is currently expecting.
    * @return The type of command.
    */
-  CommandType incomingCommandType();
+  CommandType expectedCommandType();
 
   /**
    * \brief Get the current status of servo.
@@ -112,11 +112,6 @@ public:
    * \brief Returns the end effector pose in planning frame
    */
   const Eigen::Isometry3d getEndEffectorPose();
-
-  /**
-   * \brief Resets the PID controllers used for pose tracking.
-   */
-  void resetPoseControllers();
 
   /**
    * \brief Converts the given pose to planning frame.
@@ -173,7 +168,7 @@ private:
   const rclcpp::Node::SharedPtr node_;
   std::unique_ptr<CommandProcessor> command_processor_;
   // This needs to be threadsafe so it can be updated in realtime with Dynamic Reconfigure
-  std::atomic<CommandType> incoming_command_type_;
+  std::atomic<CommandType> expected_command_type_;
 
   servo::Params servo_params_;
   std::shared_ptr<const servo::ParamListener> servo_param_listener_;

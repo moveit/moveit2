@@ -33,7 +33,7 @@
 /*
  * Title      : collision_monitor.cpp
  * Project    : moveit_servo
- * Created    : 08/06/2023
+ * Created    : 06/08/2023
  * Author     : Brian O'Neil, Andy Zelenak, Blake Anderson, V Mohammed Ibrahim
  */
 
@@ -50,9 +50,9 @@ namespace moveit_servo
 
 CollisionMonitor::CollisionMonitor(const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor,
                                    const servo::Params& servo_params, std::atomic<double>& collision_velocity_scale)
-  : collision_velocity_scale_(collision_velocity_scale)
-  , servo_params_(servo_params)
+  : servo_params_(servo_params)
   , planning_scene_monitor_(planning_scene_monitor)
+  , collision_velocity_scale_(collision_velocity_scale)
 {
 }
 
@@ -88,10 +88,9 @@ void CollisionMonitor::checkCollisions()
 
   while (rclcpp::ok() && !stop_requested_)
   {
+    self_collision_scale = scene_collision_scale = 1.0;
     if (servo_params_.check_collisions)
     {
-      self_collision_scale = scene_collision_scale = 1.0;
-
       // Fetch latest robot state.
       robot_state_ = planning_scene_monitor_->getStateMonitor()->getCurrentState();
       // This must be called before doing collision checking.
@@ -139,12 +138,10 @@ void CollisionMonitor::checkCollisions()
               self_collision_result_.distance - servo_params_.self_collision_proximity_threshold;
           self_collision_scale = std::exp(self_velocity_scale_coefficient * self_collision_threshold_delta);
         }
-
-        // Use the lowest scaling factor.
-        collision_velocity_scale_ = std::min(scene_collision_scale, self_collision_scale);
       }
     }
-
+    // Use the lowest scaling factor.
+    collision_velocity_scale_ = std::min(scene_collision_scale, self_collision_scale);
     rate.sleep();
   }
 }

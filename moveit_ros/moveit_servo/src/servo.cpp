@@ -33,7 +33,7 @@
 
 /*      Title     : servo.cpp
  *      Project   : moveit_servo
- *      Created   : 17/05/2023
+ *      Created   : 05/17/2023
  *      Author    : Brian O'Neil, Andy Zelenak, Blake Anderson, V Mohammed Ibrahim
  */
 
@@ -195,24 +195,26 @@ Eigen::VectorXd Servo::jointDeltaFromCommand(const ServoInput& command)
   Eigen::VectorXd target_joint_positions(num_joints_);
   robot_state_->copyJointGroupPositions(joint_model_group_, target_joint_positions);
 
-  const CommandType incoming_type = incomingCommandType();
-
-  if (incoming_type == CommandType::JOINT_JOG && command.index() == static_cast<size_t>(incoming_type))
+  const CommandType expected_type = expectedCommandType();
+  if (command.index() == static_cast<size_t>(expected_type))
   {
-    target_joint_positions = command_processor_->jointDeltaFromCommand(std::get<JointJog>(command));
-  }
-  else if (incoming_type == CommandType::TWIST && command.index() == static_cast<size_t>(incoming_type))
-  {
-    target_joint_positions = command_processor_->jointDeltaFromCommand(std::get<Twist>(command));
-  }
-  else if (incoming_type == CommandType::POSE && command.index() == static_cast<size_t>(incoming_type))
-  {
-    target_joint_positions = command_processor_->jointDeltaFromCommand(std::get<Pose>(command));
+    if (expected_type == CommandType::JOINT_JOG)
+    {
+      target_joint_positions = command_processor_->jointDeltaFromCommand(std::get<JointJog>(command));
+    }
+    else if (expected_type == CommandType::TWIST)
+    {
+      target_joint_positions = command_processor_->jointDeltaFromCommand(std::get<Twist>(command));
+    }
+    else if (expected_type == CommandType::POSE)
+    {
+      target_joint_positions = command_processor_->jointDeltaFromCommand(std::get<Pose>(command));
+    }
   }
   else
   {
     servo_status_ = StatusCode::INVALID;
-    RCLCPP_WARN_STREAM(LOGGER, "SERVO : Invalid command type, check if proper command type has been set.");
+    RCLCPP_WARN_STREAM(LOGGER, "SERVO : Incoming command type does not match expected command type.");
   }
   return target_joint_positions;
 }
@@ -231,8 +233,8 @@ KinematicState Servo::haltJoints(const std::vector<int>& joints_to_halt, const K
   RCLCPP_WARN_STREAM(LOGGER, "Joint position limit reached on joints: " << halting_joint_names.str());
 
   const bool all_joint_halt =
-      (incomingCommandType() == CommandType::JOINT_JOG && servo_params_.halt_all_joints_in_joint_mode) ||
-      (incomingCommandType() == CommandType::TWIST && servo_params_.halt_all_joints_in_cartesian_mode);
+      (expectedCommandType() == CommandType::JOINT_JOG && servo_params_.halt_all_joints_in_joint_mode) ||
+      (expectedCommandType() == CommandType::TWIST && servo_params_.halt_all_joints_in_cartesian_mode);
 
   if (all_joint_halt)
   {
@@ -343,14 +345,14 @@ const std::string Servo::getStatusMessage()
   return SERVO_STATUS_CODE_MAP.at(servo_status_);
 }
 
-CommandType Servo::incomingCommandType()
+CommandType Servo::expectedCommandType()
 {
-  return incoming_command_type_;
+  return expected_command_type_;
 }
 
-void Servo::incomingCommandType(const CommandType& command_type)
+void Servo::expectedCommandType(const CommandType& command_type)
 {
-  incoming_command_type_ = command_type;
+  expected_command_type_ = command_type;
 }
 
 void Servo::validateParams(const servo::Params& servo_params)
@@ -400,11 +402,6 @@ void Servo::validateParams(const servo::Params& servo_params)
 const Eigen::Isometry3d Servo::getEndEffectorPose()
 {
   return command_processor_->getEndEffectorPose();
-}
-
-void Servo::resetPoseControllers()
-{
-  command_processor_->resetControllers();
 }
 
 Pose Servo::toPlanningFrame(const Pose& command)

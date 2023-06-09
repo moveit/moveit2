@@ -34,7 +34,7 @@
  *      Title       : status_codes.h
  *      Project     : moveit_servo
  *      Created     : 2/25/2019
- *      Author      : Andy Zelenak
+ *      Author      : Andy Zelenak, V Mohammed Ibrahim
  *
  *      Description : The status codes used by MoveIt Servo to indicate the various conditions.
  */
@@ -55,6 +55,7 @@ enum class StatusCode : int8_t
   HALT_FOR_COLLISION = 4,
   JOINT_BOUND = 5,
   DECELERATE_FOR_LEAVING_SINGULARITY = 6,
+  POSE_ACHIEVED = 7
 };
 
 const std::unordered_map<StatusCode, std::string> SERVO_STATUS_CODE_MAP(
@@ -65,5 +66,6 @@ const std::unordered_map<StatusCode, std::string> SERVO_STATUS_CODE_MAP(
       { StatusCode::DECELERATE_FOR_COLLISION, "Close to a collision, decelerating" },
       { StatusCode::HALT_FOR_COLLISION, "Collision detected, emergency stop" },
       { StatusCode::JOINT_BOUND, "Close to a joint bound (position or velocity), halting" },
-      { StatusCode::DECELERATE_FOR_LEAVING_SINGULARITY, "Moving away from a singularity, decelerating" } });
+      { StatusCode::DECELERATE_FOR_LEAVING_SINGULARITY, "Moving away from a singularity, decelerating" },
+      { StatusCode::POSE_ACHIEVED, "Target pose achieved" } });
 }  // namespace moveit_servo

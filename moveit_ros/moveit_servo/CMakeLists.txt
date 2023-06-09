@@ -7,7 +7,6 @@ moveit_package()
 
 set(THIS_PACKAGE_INCLUDE_DEPENDS
   control_msgs
-  control_toolbox
   geometry_msgs
   moveit_core
   moveit_msgs

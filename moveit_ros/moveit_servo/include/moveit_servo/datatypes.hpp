@@ -33,7 +33,7 @@
 
 /*      Title       : datatypes.hpp
  *      Project     : moveit_servo
- *      Created     : 05/06/2023
+ *      Created     : 06/05/2023
  *      Author      : V Mohammed Ibrahim
  *
  *      Description : The custom datatypes used by Moveit Servo.
@@ -45,22 +45,37 @@ namespace moveit_servo
 {
 // Datatypes used by servo
 
-typedef Eigen::VectorXd JointJog;
-
-struct Pose
+// The datatype that specifies the type of command that servo should expect.
+enum class CommandType
 {
-  std::string frame_id;
-  Eigen::Isometry3d pose;
+  JOINT_JOG = 0,
+  TWIST = 1,
+  POSE = 2
 };
 
+// The joint jog command, this will be vector of length equal to the number of joints of the robot.
+typedef Eigen::VectorXd JointJog;
+
+// The twist command,  frame_id is the name of the frame in which the command is specified in.
+// frame_id must always be specified.
 struct Twist
 {
   std::string frame_id;
   Eigen::Vector<double, 6> velocities;
 };
 
+// The Pose command,  frame_id is the name of the frame in which the command is specified in.
+// frame_id must always be specified.
+struct Pose
+{
+  std::string frame_id;
+  Eigen::Isometry3d pose;
+};
+
+// The generic input type for servo that can be JointJog, Twist or Pose.
 typedef std::variant<JointJog, Twist, Pose> ServoInput;
 
+// The output datatype of servo, this structure contains the names of the joints along with their positions, velocities and accelerations.
 struct KinematicState
 {
   std::vector<std::string> joint_names;
@@ -75,10 +90,4 @@ struct KinematicState
   }
 };
 
-enum class CommandType
-{
-  JOINT_JOG = 0,
-  TWIST = 1,
-  POSE = 2
-};
 }  // namespace moveit_servo

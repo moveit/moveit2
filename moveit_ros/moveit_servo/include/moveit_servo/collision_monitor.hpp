@@ -33,7 +33,7 @@
 /*
  * Title      : collision_monitor.hpp
  * Project    : moveit_servo
- * Created    : 08/06/2023
+ * Created    : 06/08/2023
  * Author     : Brian O'Neil, Andy Zelenak, Blake Anderson, V Mohammed Ibrahim
  *
  * Description: Monitors the planning scene for collision and publishes the velocity scaling.
@@ -59,23 +59,31 @@ public:
   void stop();
 
 private:
+  /**
+   * \brief The collision checking function, this will run in a separate thread.
+   */
   void checkCollisions();
 
   // Variables
-  std::atomic<bool> stop_requested_;
-  std::thread monitor_thread_;
 
-  std::atomic<double>& collision_velocity_scale_;
   const servo::Params& servo_params_;
-
-  collision_detection::CollisionRequest self_collision_request_;
-  collision_detection::CollisionResult self_collision_result_;
-
-  collision_detection::CollisionRequest scene_collision_request_;
-  collision_detection::CollisionResult scene_collision_result_;
-
   moveit::core::RobotStatePtr robot_state_;
   const planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor_;
+
+  // The collision monitor thread.
+  std::thread monitor_thread_;
+  // The flag used for stopping the collision monitor thread.
+  std::atomic<bool> stop_requested_;
+
+  // The scaling factor when approaching a collision.
+  std::atomic<double>& collision_velocity_scale_;
+
+  // The data structures used to get information about robot self collisions.
+  collision_detection::CollisionRequest self_collision_request_;
+  collision_detection::CollisionResult self_collision_result_;
+  // The data structures used to get information about robot collision with other objects in the collision scene.
+  collision_detection::CollisionRequest scene_collision_request_;
+  collision_detection::CollisionResult scene_collision_result_;
 };
 
 }  // namespace moveit_servo

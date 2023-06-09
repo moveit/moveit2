@@ -33,11 +33,17 @@
 
 /*      Title     : utils.cpp
  *      Project   : moveit_servo
- *      Created   : 17/05/2023
+ *      Created   : 05/17/2023
  *      Author    : Andy Zelenak, V Mohammed Ibrahim
  */
 
 #include <moveit_servo/utils.hpp>
+
+namespace
+{
+// The threshold above which `override_velocity_scaling_factor` will be used instead of computing the scaling from joint bounds.
+const double SCALING_OVERRIDE_THRESHOLD = 0.01;
+}  // namespace
 
 namespace moveit_servo
 {
@@ -153,7 +159,7 @@ velocityScalingFactorForSingularity(const moveit::core::JointModelGroup* joint_m
   // Get size of total controllable dimensions.
   size_t dims = target_delta_x.size();
 
-  // Get the current jacobian and compute SVD
+  // Get the current Jacobian and compute SVD
   Eigen::JacobiSVD<Eigen::MatrixXd> current_svd = Eigen::JacobiSVD<Eigen::MatrixXd>(
       current_state->getJacobian(joint_model_group), Eigen::ComputeThinU | Eigen::ComputeThinV);
   Eigen::MatrixXd matrix_s = current_svd.singularValues().asDiagonal();
@@ -238,7 +244,7 @@ double velocityScalingFactor(const Eigen::VectorXd& velocities, const moveit::co
                              double scaling_override)
 {
   // If override value is close to zero, user is not overriding the scaling
-  if (scaling_override < 0.01)
+  if (scaling_override < SCALING_OVERRIDE_THRESHOLD)
   {
     double bounded_vel;
     std::vector<double> velocity_scaling_factors;  // The allowable fraction of computed veclocity
@@ -253,7 +259,7 @@ double velocityScalingFactor(const Eigen::VectorXd& velocities, const moveit::co
         velocity_scaling_factors.push_back(bounded_vel / velocities[i]);
       }
     }
-    // Find the lowest scaling factor, this helps preserve cartesian motion.
+    // Find the lowest scaling factor, this helps preserve Cartesian motion.
     scaling_override = velocity_scaling_factors.empty() ?
                            scaling_override :
                            *std::min_element(velocity_scaling_factors.begin(), velocity_scaling_factors.end());
@@ -280,29 +286,6 @@ std::vector<int> jointsToHalt(const Eigen::VectorXd& positions, const Eigen::Vec
     }
   }
   return joint_idxs_to_halt;
-}
-
-std::map<std::string, control_toolbox::Pid> createControllers(const servo::Params& servo_params)
-{
-  std::map<std::string, control_toolbox::Pid> controllers;
-
-  // Get the parameters
-  auto x_pid = servo_params.pose_tracking.x_pid;
-  auto y_pid = servo_params.pose_tracking.y_pid;
-  auto z_pid = servo_params.pose_tracking.z_pid;
-  auto q_pid = servo_params.pose_tracking.q_pid;
-  double windup_limit = servo_params.pose_tracking.windup_limit;
-  bool use_anti_windup = servo_params.pose_tracking.use_anti_windup;
-
-  // Create the controllers
-  controllers["x"] = control_toolbox::Pid(x_pid.kp, x_pid.ki, x_pid.kd, windup_limit, -windup_limit, use_anti_windup);
-  controllers["y"] = control_toolbox::Pid(y_pid.kp, y_pid.ki, y_pid.kd, windup_limit, -windup_limit, use_anti_windup);
-  controllers["z"] = control_toolbox::Pid(z_pid.kp, z_pid.ki, z_pid.kd, windup_limit, -windup_limit, use_anti_windup);
-  controllers["qx"] = control_toolbox::Pid(q_pid.kp, q_pid.ki, q_pid.kd, windup_limit, -windup_limit, use_anti_windup);
-  controllers["qy"] = control_toolbox::Pid(q_pid.kp, q_pid.ki, q_pid.kd, windup_limit, -windup_limit, use_anti_windup);
-  controllers["qz"] = control_toolbox::Pid(q_pid.kp, q_pid.ki, q_pid.kd, windup_limit, -windup_limit, use_anti_windup);
-
-  return controllers;
 }
 
 /** \brief Helper function for converting Eigen::Isometry3d to geometry_msgs/TransformStamped **/

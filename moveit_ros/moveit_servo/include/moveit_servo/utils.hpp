@@ -33,15 +33,13 @@
 
 /*      Title       : utils.hpp
  *      Project     : moveit_servo
- *      Created     : 17/05/2023
+ *      Created     : 05/17/2023
  *      Author      : Andy Zelenak, V Mohammed Ibrahim
  *
  *      Description : The utility functions used by MoveIt Servo.
  */
 
 #pragma once
-
-#include <control_toolbox/pid.hpp>
 
 #include <tf2_eigen/tf2_eigen.hpp>
 #include <sensor_msgs/msg/joint_state.hpp>
@@ -80,8 +78,8 @@ bool isValidCommand(const Eigen::VectorXd& command);
 bool isValidCommand(const Eigen::Isometry3d& command);
 
 /**
- * \brief Create a pose message for the provided change in cartesian position.
- * @param delta_x The change in cartesian position.
+ * \brief Create a pose message for the provided change in Cartesian position.
+ * @param delta_x The change in Cartesian position.
  * @param base_to_tip_frame_transform The transformation from robot base to ee frame.
  * @return The pose message.
  */
@@ -101,7 +99,7 @@ trajectory_msgs::msg::JointTrajectory composeTrajectoryMessage(const servo::Para
  * \brief Computes scaling factor for velocity when the robot is near a singularity.
  * @param joint_model_group The joint model group of the robot, used for fetching the Jacobian.
  * @param current_state The current state of the robot, used for singularity look ahead.
- * @param target_delta_x The vector containing the required change in cartesian position.
+ * @param target_delta_x The vector containing the required change in Cartesian position.
  * @param servo_params The servo parameters, contains the singularity thresholds.
  * @return The velocity scaling factor and the reason for scaling.
  */
@@ -130,13 +128,6 @@ double velocityScalingFactor(const Eigen::VectorXd& velocities, const moveit::co
  */
 std::vector<int> jointsToHalt(const Eigen::VectorXd& positions, const Eigen::VectorXd& velocities,
                               const moveit::core::JointBoundsVector& joint_bounds, double margin);
-
-/**
- * \brief Creates the PID controllers used for pose tracking based on config provided in servo parameters.
- * The parameters can be updated dynamically.
- * @param servo_params The servo parameters, used to get pid information.
- */
-std::map<std::string, control_toolbox::Pid> createControllers(const servo::Params& servo_params);
 
 /**
  * \brief Helper function for converting Eigen::Isometry3d to geometry_msgs/TransformStamped.

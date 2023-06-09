@@ -33,7 +33,7 @@
 
 /*      Title     : joint_jog_demo.cpp
  *      Project   : moveit_servo
- *      Created   : 27/05/2023
+ *      Created   : 05/27/2023
  *      Author    : V Mohammed Ibrahim
  *
  *      Description : Example of controlling a robot through joint jog commands via the C++ API.
@@ -41,7 +41,6 @@
 
 #include <chrono>
 #include <rclcpp/rclcpp.hpp>
-#include <tf2_eigen/tf2_eigen.hpp>
 #include <moveit_servo/servo.hpp>
 #include <moveit_servo/utils.hpp>
 
@@ -72,34 +71,43 @@ int main(int argc, char* argv[])
   // Create the servo object
   auto servo = Servo(demo_node, servo_param_listener);
 
-  // Wait for some time, so that we can actually see when the robot moves.
+  // Wait for some time, so that the planning scene is loaded in rviz.
   // This is just for convenience, should not be used for sync in real application.
   std::this_thread::sleep_for(std::chrono::seconds(3));
+
+  // Set the command type for servo.
+  servo.expectedCommandType(CommandType::JOINT_JOG);
+  // JointJog command that moves only the 7th joint at + 1.0 rad/s
+  JointJog joint_jog(7);
+  joint_jog << 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0;
 
   // Frquency at which the commands will be send to robot controller.
   rclcpp::WallRate rate(1.0 / servo_params.publish_period);
 
-  // Set the command type for servo.
-  servo.incomingCommandType(CommandType::JOINT_JOG);
+  std::chrono::seconds timeout_duration(3);  // Apply the joint jog for 3 seconds.
+  std::chrono::seconds time_elapsed(0);
+  auto start_time = std::chrono::steady_clock::now();
 
   RCLCPP_INFO_STREAM(LOGGER, servo.getStatusMessage());
-  while (rclcpp::ok() && servo.getStatus() == StatusCode::NO_WARNING)
+  while (rclcpp::ok())
   {
-    // Move only the 7th joint
-    moveit_servo::JointJog vec(7);
-    vec << 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0;  // rad/s
+    KinematicState joint_state = servo.getNextJointState(joint_jog);
+    StatusCode status = servo.getStatus();
 
-    auto joint_state = servo.getNextJointState(vec);
-
-    // Send the command to robot controller only if the command was valid.
-    if (servo.getStatus() != StatusCode::INVALID)
+    auto current_time = std::chrono::steady_clock::now();
+    time_elapsed = std::chrono::duration_cast<std::chrono::seconds>(current_time - start_time);
+    if (time_elapsed > timeout_duration)
     {
-      auto joint_trajectory = composeTrajectoryMessage(servo_params, joint_state);
-      trajectory_outgoing_cmd_pub->publish(joint_trajectory);
+      RCLCPP_INFO_STREAM(LOGGER, "Timed out");
+      break;
     }
-
+    else if (status != StatusCode::INVALID)
+    {
+      trajectory_outgoing_cmd_pub->publish(composeTrajectoryMessage(servo_params, joint_state));
+    }
     rate.sleep();
   }
-  RCLCPP_INFO_STREAM(LOGGER, servo.getStatusMessage());
+
+  RCLCPP_INFO(LOGGER, "Exiting demo.");
   rclcpp::shutdown();
 }

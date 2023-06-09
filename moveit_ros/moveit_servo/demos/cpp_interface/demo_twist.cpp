@@ -33,7 +33,7 @@
 
 /*      Title     : twist_demo.cpp
  *      Project   : moveit_servo
- *      Created   : 01/06/2023
+ *      Created   : 06/01/2023
  *      Author    : V Mohammed Ibrahim
  *
  *      Description : Example of controlling a robot through twist commands via the C++ API.
@@ -41,7 +41,6 @@
 
 #include <chrono>
 #include <rclcpp/rclcpp.hpp>
-#include <tf2_eigen/tf2_eigen.hpp>
 #include <moveit_servo/servo.hpp>
 #include <moveit_servo/utils.hpp>
 
@@ -72,36 +71,46 @@ int main(int argc, char* argv[])
   // Create the servo object
   auto servo = Servo(demo_node, servo_param_listener);
 
-  // Wait for some time, so that we can actually see when the robot moves.
+  // Wait for some time, so that the planning scene is loaded in rviz.
   // This is just for convenience, should not be used for sync in real application.
   std::this_thread::sleep_for(std::chrono::seconds(3));
+
+  // Set the command type for servo.
+  servo.expectedCommandType(CommandType::TWIST);
+  // Move end-effector in the +z direction at 10 cm/s
+  // while turning around z axis in the +ve direction at 0.5 rad/s
+  Twist target_twist{ servo_params.ee_frame_name, { 0.0, 0.0, 0.1, 0.0, 0.0, 0.5 } };
+  // Servo expects the command to be in planning frame, use the helper method to convert it.
+  // If the command is already in planning frame, this step is not required.
+  target_twist = servo.toPlanningFrame(target_twist);
 
   // Frquency at which the commands will be send to robot controller.
   rclcpp::WallRate rate(1.0 / servo_params.publish_period);
 
-  // Set the command type for servo.
-  servo.incomingCommandType(CommandType::TWIST);
+  std::chrono::seconds timeout_duration(5);  // Apply the twist for 5 seconds.
+  std::chrono::seconds time_elapsed(0);
+  auto start_time = std::chrono::steady_clock::now();
 
-  // Move end-effector in the +z direction at 10 cm/s
-  // while turning around z axis in the +ve direction at 0.5 rad/s
-  Twist twist{ servo_params.ee_frame_name, { 0.0, 0.0, 0.1, 0.0, 0.0, 0.5 } };
-  // Servo expects the command to be in planning frame, use the helper method to convert it.
-  twist = servo.toPlanningFrame(twist);
-
-  RCLCPP_INFO_STREAM(LOGGER, "SERVO STATUS: " << servo.getStatusMessage());
-  while (rclcpp::ok() && servo.getStatus() == StatusCode::NO_WARNING)
+  RCLCPP_INFO_STREAM(LOGGER, servo.getStatusMessage());
+  while (rclcpp::ok())
   {
-    auto joint_state = servo.getNextJointState(twist);
+    KinematicState joint_state = servo.getNextJointState(target_twist);
+    StatusCode status = servo.getStatus();
 
-    // Send the command to robot controller only if the command was valid.
-    if (servo.getStatus() != StatusCode::INVALID)
+    auto current_time = std::chrono::steady_clock::now();
+    time_elapsed = std::chrono::duration_cast<std::chrono::seconds>(current_time - start_time);
+    if (time_elapsed > timeout_duration)
     {
-      auto joint_trajectory = composeTrajectoryMessage(servo_params, joint_state);
-      trajectory_outgoing_cmd_pub->publish(joint_trajectory);
+      RCLCPP_INFO_STREAM(LOGGER, "Timed out");
+      break;
     }
-
+    else if (status != StatusCode::INVALID)
+    {
+      trajectory_outgoing_cmd_pub->publish(composeTrajectoryMessage(servo_params, joint_state));
+    }
     rate.sleep();
   }
-  RCLCPP_INFO_STREAM(LOGGER, "SERVO STATUS: " << servo.getStatusMessage());
+
+  RCLCPP_INFO(LOGGER, "Exiting demo.");
   rclcpp::shutdown();
 }
