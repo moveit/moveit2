@@ -1,7 +1,6 @@
-from typing import Any, ClassVar
+from typing import Any
 
 class RobotState:
-    state_info: ClassVar[Any] = ...  # read-only
     joint_accelerations: Any
     joint_efforts: Any
     joint_positions: Any
@@ -29,6 +28,8 @@ class RobotState:
     def dirty(self) -> Any: ...
     @property
     def robot_model(self) -> Any: ...
+    @property
+    def state_info(self) -> Any: ...
     @property
     def state_tree(self) -> Any: ...
 
