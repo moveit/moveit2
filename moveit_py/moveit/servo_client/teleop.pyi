@@ -6,11 +6,11 @@ from typing import Any
 class TeleopDevice(ABC, Node, metaclass=abc.ABCMeta):
     device_name: Any
     device_config: Any
+    ee_frame_name: Any
     joy_subscriber: Any
     twist_publisher: Any
     servo_node_start_client: Any
     servo_node_stop_client: Any
-    ee_frame_name: Any
     teleop_thread: Any
     def __init__(
         self, node_name, device_name, device_config, ee_frame_name
