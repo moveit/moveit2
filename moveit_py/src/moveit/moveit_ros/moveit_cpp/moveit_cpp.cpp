@@ -128,12 +128,27 @@ void init_moveit_py(py::module& m)
            Initialize moveit_cpp node and the planning scene service.
            )")
       .def("execute",
-           py::overload_cast<const robot_trajectory::RobotTrajectoryPtr&, const std::vector<std::string>&>(
+           py::overload_cast<const robot_trajectory::RobotTrajectoryPtr&, bool, const std::vector<std::string>&>(
                &moveit_cpp::MoveItCpp::execute),
-           py::arg("robot_trajectory"), py::arg("controllers"),
+           py::arg("robot_trajectory"), py::arg("blocking") = true, py::arg("controllers") = std::vector<std::string>(),
            R"(
 	   Execute a trajectory (planning group is inferred from robot trajectory object).
 	   )")
+      .def(
+          "wait_for_execution",
+          [](moveit_cpp::MoveItCpp* self) { return self->getTrajectoryExecutionManagerNonConst()->waitForExecution(); },
+          R"(
+          Wait for the current trajectory execution to complete.
+          )")
+      .def(
+          "stop_execution",
+          [](moveit_cpp::MoveItCpp* self, bool auto_clear) {
+            self->getTrajectoryExecutionManagerNonConst()->stopExecution(auto_clear);
+          },
+          py::arg("auto_clear") = true,
+          R"(
+          Stop the current trajectory execution.
+          )")
       .def("get_planning_component", &moveit_py::bind_moveit_cpp::get_planning_component,
            py::arg("planning_component_name"), py::return_value_policy::take_ownership,
            R"(

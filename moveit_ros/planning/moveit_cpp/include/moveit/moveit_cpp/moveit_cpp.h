@@ -170,12 +170,8 @@ public:
    * a controller. The exact behavior of finding a controller depends on which MoveItControllerManager plugin is active.
    *  \return moveit_controller_manager::ExecutionStatus::SUCCEEDED if successful
    */
-  [[deprecated("MoveItCpp::execute() no longer requires a blocking parameter")]] moveit_controller_manager::ExecutionStatus
-  execute(const robot_trajectory::RobotTrajectoryPtr& robot_trajectory, bool blocking,
-          const std::vector<std::string>& controllers = std::vector<std::string>());
-
   moveit_controller_manager::ExecutionStatus
-  execute(const robot_trajectory::RobotTrajectoryPtr& robot_trajectory,
+  execute(const robot_trajectory::RobotTrajectoryPtr& robot_trajectory, bool blocking = true,
           const std::vector<std::string>& controllers = std::vector<std::string>());
 
   /** \brief Utility to terminate the given planning pipeline */

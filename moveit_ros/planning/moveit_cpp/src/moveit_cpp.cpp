@@ -195,14 +195,7 @@ trajectory_execution_manager::TrajectoryExecutionManagerPtr MoveItCpp::getTrajec
 }
 
 moveit_controller_manager::ExecutionStatus
-MoveItCpp::execute(const robot_trajectory::RobotTrajectoryPtr& robot_trajectory, bool /* blocking */,
-                   const std::vector<std::string>& /* controllers */)
-{
-  return execute(robot_trajectory);
-}
-
-moveit_controller_manager::ExecutionStatus
-MoveItCpp::execute(const robot_trajectory::RobotTrajectoryPtr& robot_trajectory,
+MoveItCpp::execute(const robot_trajectory::RobotTrajectoryPtr& robot_trajectory, bool blocking,
                    const std::vector<std::string>& controllers)
 {
   if (!robot_trajectory)
@@ -225,6 +218,10 @@ MoveItCpp::execute(const robot_trajectory::RobotTrajectoryPtr& robot_trajectory,
   robot_trajectory->getRobotTrajectoryMsg(robot_trajectory_msg);
   trajectory_execution_manager_->push(robot_trajectory_msg, controllers);
   trajectory_execution_manager_->execute();
+  if (!blocking)
+  {
+    return moveit_controller_manager::ExecutionStatus::RUNNING;
+  }
   return trajectory_execution_manager_->waitForExecution();
 }
 
