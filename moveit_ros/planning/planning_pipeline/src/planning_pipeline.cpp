@@ -53,7 +53,13 @@ planning_pipeline::PlanningPipeline::PlanningPipeline(const moveit::core::RobotM
                                                       const std::string& parameter_namespace,
                                                       const std::string& planner_plugin_param_name,
                                                       const std::string& adapter_plugins_param_name)
-  : active_{ false }, node_(node), parameter_namespace_(parameter_namespace), robot_model_(model)
+  : active_{ false }
+  , node_(node)
+  , parameter_namespace_(parameter_namespace)
+  , display_computed_motion_plans_{ false }
+  , publish_received_requests_{ false }
+  , robot_model_(model)
+  , check_solution_paths_{ false }
 {
   std::string planner_plugin_fullname = parameter_namespace_ + "." + planner_plugin_param_name;
   if (parameter_namespace_.empty())
@@ -88,19 +94,18 @@ planning_pipeline::PlanningPipeline::PlanningPipeline(const moveit::core::RobotM
   : active_{ false }
   , node_(node)
   , parameter_namespace_(parameter_namespace)
+  , display_computed_motion_plans_{ false }
+  , publish_received_requests_{ false }
   , planner_plugin_name_(planner_plugin_name)
   , adapter_plugin_names_(adapter_plugin_names)
   , robot_model_(model)
+  , check_solution_paths_{ false }
 {
   configure();
 }
 
 void planning_pipeline::PlanningPipeline::configure()
 {
-  check_solution_paths_ = false;  // this is set to true below
-  publish_received_requests_ = false;
-  display_computed_motion_plans_ = false;  // this is set to true below
-
   // load the planning plugin
   try
   {
@@ -119,20 +124,9 @@ void planning_pipeline::PlanningPipeline::configure()
 
   if (planner_plugin_name_.empty())
   {
-    if (classes.size() == 1)
-    {
-      planner_plugin_name_ = classes[0];
-      RCLCPP_WARN(
-          LOGGER,
-          "No '~planning_plugin' parameter specified, but only '%s' planning plugin is available. Using that one.",
-          planner_plugin_name_.c_str());
-    }
-    else
-    {
-      std::string classes_str = boost::algorithm::join(classes, ", ");
-      throw std::runtime_error("Planning plugin name is empty. Please choose one of the available plugins: " +
-                               classes_str);
-    }
+    std::string classes_str = boost::algorithm::join(classes, ", ");
+    throw std::runtime_error("Planning plugin name is empty. Please choose one of the available plugins: " +
+                             classes_str);
   }
 
   try
@@ -201,6 +195,10 @@ void planning_pipeline::PlanningPipeline::configure()
         adapter_chain_->addAdapter(ad);
       }
     }
+  }
+  else
+  {
+    RCLCPP_INFO(LOGGER, "No planning request adapter names specified.");
   }
   displayComputedMotionPlans(true);
   checkSolutionPaths(true);
