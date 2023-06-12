@@ -14,16 +14,9 @@ servo:
                   must be passed to the node during launch time."
   }
 
-  ee_frame_name: {
+  ee_frame: {
     type: string,
-    description: "The name of end-effector frame of your robot \
-                  This parameter does not have a default value and \
-                  must be passed to the node during launch time."
-  }
-
-  robot_link_command_frame: {
-    type: string,
-    description: "The frame of incoming command, change this to your own value when using a different robot \
+    description: "The name of end effector frame of your robot \
                   This parameter does not have a default value and \
                   must be passed to the node during launch time."
   }
@@ -92,8 +85,7 @@ servo:
     default_value: true,
     description: "If true, continuous check for parameter update is enabled \
                   Currently only the following parameters are updated:
-                  1. override_velocity_scaling_factor
-                  2. robot_link_command_frame"
+                  1. override_velocity_scaling_factor"
   }
 
   override_velocity_scaling_factor: {

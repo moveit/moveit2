@@ -45,16 +45,16 @@ generate_parameter_library(
 )
 
 # This library provides a C++ interface for sending realtime twist or joint commands to a robot
-add_library(moveit_servo_lib SHARED
+add_library(moveit_servo_lib_cpp SHARED
   src/collision_monitor.cpp
   src/command_processor.cpp
   src/servo.cpp
   src/utils.cpp
 
 )
-set_target_properties(moveit_servo_lib PROPERTIES VERSION "${moveit_servo_VERSION}")
-ament_target_dependencies(moveit_servo_lib ${THIS_PACKAGE_INCLUDE_DEPENDS})
-target_link_libraries(moveit_servo_lib moveit_servo_lib_parameters)
+set_target_properties(moveit_servo_lib_cpp PROPERTIES VERSION "${moveit_servo_VERSION}")
+ament_target_dependencies(moveit_servo_lib_cpp ${THIS_PACKAGE_INCLUDE_DEPENDS})
+target_link_libraries(moveit_servo_lib_cpp moveit_servo_lib_parameters)
 
 ######################
 ## Executable Nodes ##
@@ -62,17 +62,17 @@ target_link_libraries(moveit_servo_lib moveit_servo_lib_parameters)
 
 # An executable node for the joint jog demo
 add_executable(demo_joint_jog demos/cpp_interface/demo_joint_jog.cpp )
-target_link_libraries(demo_joint_jog moveit_servo_lib)
+target_link_libraries(demo_joint_jog moveit_servo_lib_cpp)
 ament_target_dependencies(demo_joint_jog ${THIS_PACKAGE_INCLUDE_DEPENDS})
 
 # An executable node for the twist demo
 add_executable(demo_twist demos/cpp_interface/demo_twist.cpp )
-target_link_libraries(demo_twist moveit_servo_lib)
+target_link_libraries(demo_twist moveit_servo_lib_cpp)
 ament_target_dependencies(demo_twist ${THIS_PACKAGE_INCLUDE_DEPENDS})
 
 # An executable node for the pose demo
 add_executable(demo_pose demos/cpp_interface/demo_pose.cpp )
-target_link_libraries(demo_pose moveit_servo_lib)
+target_link_libraries(demo_pose moveit_servo_lib_cpp)
 ament_target_dependencies(demo_pose ${THIS_PACKAGE_INCLUDE_DEPENDS})
 
 #############
@@ -82,7 +82,7 @@ ament_target_dependencies(demo_pose ${THIS_PACKAGE_INCLUDE_DEPENDS})
 # Install Libraries
 install(
   TARGETS
-    moveit_servo_lib
+    moveit_servo_lib_cpp
     moveit_servo_lib_parameters
   EXPORT moveit_servoTargets
   LIBRARY DESTINATION lib
@@ -109,5 +109,18 @@ install(DIRECTORY config DESTINATION share/moveit_servo)
 
 ament_export_targets(moveit_servoTargets HAS_LIBRARY_TARGET)
 ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS})
+
+
+if(BUILD_TESTING)
+
+    find_package(ament_cmake_gtest REQUIRED)
+    find_package(ros_testing REQUIRED)
+
+    ament_add_gtest_executable(moveit_servo_utils_test tests/test_utils.cpp tests/servo_cpp_fixture.hpp)
+    target_link_libraries(moveit_servo_utils_test moveit_servo_lib_cpp)
+    ament_target_dependencies(moveit_servo_utils_test ${THIS_PACKAGE_INCLUDE_DEPENDS})
+    add_ros_test(tests/launch/servo_test.test.py TIMEOUT 30 ARGS "test_binary_dir:=${CMAKE_CURRENT_BINARY_DIR}")
+
+endif()
 
 ament_package()

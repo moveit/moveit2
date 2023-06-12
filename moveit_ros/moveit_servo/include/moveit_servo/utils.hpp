@@ -45,6 +45,7 @@
 #include <sensor_msgs/msg/joint_state.hpp>
 #include <trajectory_msgs/msg/joint_trajectory.hpp>
 
+#include <moveit/planning_scene_monitor/planning_scene_monitor.h>
 #include <moveit/robot_model/joint_model_group.h>
 #include <moveit/robot_state/robot_state.h>
 
@@ -54,14 +55,6 @@
 
 namespace moveit_servo
 {
-
-/**
- * \brief Checks if a transform exists to the given frame.
- * @param current_state The current robot state.
- * @param frame_name The name of the frame for which we want to know if transform exists.
- * @return True if transform exists, else false
- */
-bool transformExists(const moveit::core::RobotStatePtr& current_state, const std::string& frame_name);
 
 /**
  * \brief Checks if a given command is valid.
@@ -76,6 +69,20 @@ bool isValidCommand(const Eigen::VectorXd& command);
  * @return True if the command is valid, else False.
  */
 bool isValidCommand(const Eigen::Isometry3d& command);
+
+/**
+ * \brief Checks if a given Twist command is valid.
+ * @param command The command to be checked.
+ * @return True if the command is valid, else False.
+ */
+bool isValidCommand(const Twist& command);
+
+/**
+ * \brief Checks if a given Pose command is valid.
+ * @param command The command to be checked.
+ * @return True if the command is valid, else False.
+ */
+bool isValidCommand(const Pose& command);
 
 /**
  * \brief Create a pose message for the provided change in Cartesian position.
@@ -140,4 +147,9 @@ geometry_msgs::msg::TransformStamped convertIsometryToTransform(const Eigen::Iso
                                                                 const std::string& parent_frame,
                                                                 const std::string& child_frame);
 
+/**
+ * \brief Creates the planning scene monitor used by servo
+ */
+planning_scene_monitor::PlanningSceneMonitorPtr createPlanningSceneMonitor(const rclcpp::Node::SharedPtr& node,
+                                                                           const servo::Params& servo_params);
 }  // namespace moveit_servo

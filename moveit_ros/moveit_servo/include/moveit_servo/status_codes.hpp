@@ -51,10 +51,10 @@ enum class StatusCode : int8_t
   NO_WARNING = 0,
   DECELERATE_FOR_APPROACHING_SINGULARITY = 1,
   HALT_FOR_SINGULARITY = 2,
-  DECELERATE_FOR_COLLISION = 3,
-  HALT_FOR_COLLISION = 4,
-  JOINT_BOUND = 5,
-  DECELERATE_FOR_LEAVING_SINGULARITY = 6,
+  DECELERATE_FOR_LEAVING_SINGULARITY = 3,
+  DECELERATE_FOR_COLLISION = 4,
+  HALT_FOR_COLLISION = 5,
+  JOINT_BOUND = 6,
   POSE_ACHIEVED = 7
 };
 
@@ -63,9 +63,9 @@ const std::unordered_map<StatusCode, std::string> SERVO_STATUS_CODE_MAP(
       { StatusCode::NO_WARNING, "No warnings" },
       { StatusCode::DECELERATE_FOR_APPROACHING_SINGULARITY, "Moving closer to a singularity, decelerating" },
       { StatusCode::HALT_FOR_SINGULARITY, "Very close to a singularity, emergency stop" },
+      { StatusCode::DECELERATE_FOR_LEAVING_SINGULARITY, "Moving away from a singularity, decelerating" },
       { StatusCode::DECELERATE_FOR_COLLISION, "Close to a collision, decelerating" },
       { StatusCode::HALT_FOR_COLLISION, "Collision detected, emergency stop" },
       { StatusCode::JOINT_BOUND, "Close to a joint bound (position or velocity), halting" },
-      { StatusCode::DECELERATE_FOR_LEAVING_SINGULARITY, "Moving away from a singularity, decelerating" },
       { StatusCode::POSE_ACHIEVED, "Target pose achieved" } });
 }  // namespace moveit_servo

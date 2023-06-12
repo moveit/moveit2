@@ -68,7 +68,8 @@ int main(int argc, char* argv[])
                                                                          rclcpp::SystemDefaultsQoS());
 
   // Create the servo object
-  auto servo = Servo(demo_node, servo_param_listener);
+  auto planning_scene_monitor = createPlanningSceneMonitor(demo_node, servo_params);
+  auto servo = Servo(demo_node, servo_param_listener, planning_scene_monitor);
 
   // Wait for some time, so that the planning scene is loaded in rviz.
   // This is just for convenience, should not be used for sync in real application.
@@ -101,12 +102,12 @@ int main(int argc, char* argv[])
         RCLCPP_INFO_STREAM(LOGGER, "Timed out while tracking.");
         break;
       }
-      else if (status == StatusCode::POSE_ACHIEVED)
+      else if (status == StatusCode::POSE_ACHIEVED or status == StatusCode::INVALID)
       {
-        RCLCPP_INFO_STREAM(LOGGER, "Target pose in end-effector frame achieved.");
+        RCLCPP_INFO_STREAM(LOGGER, servo.getStatusMessage());
         break;
       }
-      else if (status != StatusCode::INVALID)
+      else
       {
         trajectory_outgoing_cmd_pub->publish(composeTrajectoryMessage(servo_params, joint_state));
       }
@@ -120,7 +121,7 @@ int main(int argc, char* argv[])
   // 1. The workflow for when command is not in planning frame.
   {
     Pose target_pose_ee_frame;
-    target_pose_ee_frame.frame_id = servo_params.ee_frame_name;
+    target_pose_ee_frame.frame_id = servo_params.ee_frame;
     target_pose_ee_frame.pose.setIdentity();
     // Set the target pose to +10 cm in the z direction in ee frame.
     target_pose_ee_frame.pose.translate(Eigen::Vector3d(0.0, 0.0, 0.1));

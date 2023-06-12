@@ -66,7 +66,8 @@ namespace moveit_servo
 class Servo
 {
 public:
-  Servo(const rclcpp::Node::SharedPtr& node, std::shared_ptr<const servo::ParamListener>& servo_param_listener);
+  Servo(const rclcpp::Node::SharedPtr& node, std::shared_ptr<const servo::ParamListener> servo_param_listener,
+        const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor);
 
   ~Servo();
 
@@ -137,11 +138,6 @@ private:
    * @param servo_params The servo parameters
    */
   void validateParams(const servo::Params& servo_params);
-
-  /**
-   * \brief Creates the planning scene monitor used by servo
-   */
-  void createPlanningSceneMonitor();
 
   /**
    * \brief create and initialize the smoothing plugin to be used by servo.

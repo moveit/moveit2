@@ -49,9 +49,11 @@ const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_servo.servo");
 namespace moveit_servo
 {
 
-Servo::Servo(const rclcpp::Node::SharedPtr& node, std::shared_ptr<const servo::ParamListener>& servo_param_listener)
+Servo::Servo(const rclcpp::Node::SharedPtr& node, std::shared_ptr<const servo::ParamListener> servo_param_listener,
+             const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor)
   : node_(node)
   , servo_param_listener_{ servo_param_listener }
+  , planning_scene_monitor_{ planning_scene_monitor }
   , transform_buffer_(node_->get_clock())
   , transform_listener_(transform_buffer_)
 {
@@ -59,10 +61,17 @@ Servo::Servo(const rclcpp::Node::SharedPtr& node, std::shared_ptr<const servo::P
 
   validateParams(servo_params_);
 
-  createPlanningSceneMonitor();
+  // Planning scene monitor is passed in.
+  if (servo_params_.is_primary_planning_scene_monitor)
+  {
+    planning_scene_monitor_->providePlanningSceneService();
+  }
+  else
+  {
+    planning_scene_monitor_->requestPlanningSceneState();
+  }
 
   // Create the collision checker and start collision checking.
-  // Collision checking thread can be stopped using c++ API
   collision_monitor_ =
       std::make_unique<CollisionMonitor>(planning_scene_monitor_, servo_params_, collision_velocity_scale_);
   collision_monitor_->start();
@@ -91,16 +100,16 @@ Servo::Servo(const rclcpp::Node::SharedPtr& node, std::shared_ptr<const servo::P
   // Load the smoothing plugin
   setSmoothingPlugin();
 
-  // Check if the tansforms to planning frame and end-effector frame exists.
-  if (!transformExists(robot_state_, servo_params_.planning_frame))
+  // Check if the transforms to planning frame and end effector frame exist.
+  if (!robot_state_->knowsFrameTransform(servo_params_.planning_frame))
   {
     servo_status_ = StatusCode::INVALID;
     RCLCPP_ERROR_STREAM(LOGGER, "No transform available for planning frame " << servo_params_.planning_frame);
   }
-  else if (!transformExists(robot_state_, servo_params_.ee_frame_name))
+  else if (!robot_state_->knowsFrameTransform(servo_params_.ee_frame))
   {
     servo_status_ = StatusCode::INVALID;
-    RCLCPP_ERROR_STREAM(LOGGER, "No transform available for end-effector frame " << servo_params_.ee_frame_name);
+    RCLCPP_ERROR_STREAM(LOGGER, "No transform available for end effector frame " << servo_params_.ee_frame);
   }
   else
   {
@@ -168,6 +177,7 @@ KinematicState Servo::getNextJointState(const ServoInput& command)
     // Compute velocities based on smoothed joint positions
     target_joint_velocities = (target_joint_positions - current_joint_positions) / servo_params_.publish_period;
 
+    // TODO : print warning if scaling applied for joint limit.
     // Scale down the velocity based on joint velocity limit or user defined scaling if applicable.
     target_joint_velocities *=
         velocityScalingFactor(target_joint_velocities, joint_bounds_, servo_params_.override_velocity_scaling_factor);
@@ -204,7 +214,7 @@ Eigen::VectorXd Servo::jointDeltaFromCommand(const ServoInput& command)
     }
     else if (expected_type == CommandType::TWIST)
     {
-      target_joint_positions = command_processor_->jointDeltaFromCommand(std::get<Twist>(command));
+      target_joint_positions = command_processor_->jointDeltaFromCommand(toPlanningFrame(std::get<Twist>(command)));
     }
     else if (expected_type == CommandType::POSE)
     {
@@ -256,31 +266,6 @@ KinematicState Servo::haltJoints(const std::vector<int>& joints_to_halt, const K
   return bounded_state;
 }
 
-void Servo::createPlanningSceneMonitor()
-{
-  // Can set robot_description name from parameters
-  std::string robot_description_name = "robot_description";
-  node_->get_parameter_or("robot_description_name", robot_description_name, robot_description_name);
-  // Set up planning_scene_monitor
-  planning_scene_monitor_ = std::make_shared<planning_scene_monitor::PlanningSceneMonitor>(
-      node_, robot_description_name, "planning_scene_monitor");
-  planning_scene_monitor_->startStateMonitor(servo_params_.joint_topic);
-  planning_scene_monitor_->startSceneMonitor(servo_params_.monitored_planning_scene_topic);
-  planning_scene_monitor_->setPlanningScenePublishingFrequency(25);
-  planning_scene_monitor_->getStateMonitor()->enableCopyDynamics(true);
-  planning_scene_monitor_->startPublishingPlanningScene(planning_scene_monitor::PlanningSceneMonitor::UPDATE_SCENE,
-                                                        std::string(node_->get_fully_qualified_name()) +
-                                                            "/publish_planning_scene");
-  if (servo_params_.is_primary_planning_scene_monitor)
-  {
-    planning_scene_monitor_->providePlanningSceneService();
-  }
-  else
-  {
-    planning_scene_monitor_->requestPlanningSceneState();
-  }
-}
-
 void Servo::setSmoothingPlugin()
 {
   // Load the smoothing plugin
@@ -316,21 +301,6 @@ void Servo::updateParams()
                                      << std::to_string(params.override_velocity_scaling_factor));
     }
 
-    if (params.robot_link_command_frame != servo_params_.robot_link_command_frame)
-    {
-      if (robot_state_->knowsFrameTransform(params.robot_link_command_frame))
-      {
-        RCLCPP_INFO_STREAM(LOGGER, "robot_link_command_frame changed to : " << params.robot_link_command_frame);
-      }
-      else
-      {
-        RCLCPP_ERROR_STREAM(LOGGER, "Failed to change robot_link_command_frame. Passed frame '"
-                                        << params.robot_link_command_frame
-                                        << "' is unknown, will keep using old command frame.");
-        // Replace frame in new param set with old frame value
-        params.robot_link_command_frame = servo_params_.robot_link_command_frame;
-      }
-    }
     servo_params_ = params;
   }
 }
@@ -422,24 +392,33 @@ Pose Servo::toPlanningFrame(const Pose& command)
 
 Twist Servo::toPlanningFrame(const Twist& command)
 {
+  Twist transformed_twist = command;
+
   if (command.frame_id != servo_params_.planning_frame)
   {
-    Twist transformed_twist = command;
-    auto command_to_planning_frame =
-        transform_buffer_.lookupTransform(servo_params_.planning_frame, command.frame_id, rclcpp::Time(0));
-
-    const Eigen::Isometry3d planning_frame_transfrom = tf2::transformToEigen(command_to_planning_frame);
-    // Apply the transformation to the command vector
-    transformed_twist.frame_id = servo_params_.planning_frame;
-    transformed_twist.velocities.head<3>() = planning_frame_transfrom.linear() * command.velocities.head<3>();
-    transformed_twist.velocities.tail<3>() = planning_frame_transfrom.linear() * command.velocities.tail<3>();
-
-    return transformed_twist;
+    const bool can_transform = robot_state_->knowsFrameTransform(servo_params_.planning_frame);
+    if (can_transform)
+    {
+      // TODO : Find out why transform obtained from tf2 does not work properly.
+      // RobotState::GetGlobalLinkTransform does not work for all frames in the environment.
+      // The behaviour is same if robot_state_ = planning_scene_monitor_->getStateMonitor()->getCurrentState()
+      // is called before computing the transform.
+      const Eigen::Isometry3d planning_frame_transform =
+          robot_state_->getGlobalLinkTransform(servo_params_.planning_frame).inverse() *
+          robot_state_->getGlobalLinkTransform(command.frame_id);
+      // Apply the transformation to the command vector
+      transformed_twist.frame_id = servo_params_.planning_frame;
+      transformed_twist.velocities.head<3>() = planning_frame_transform.linear() * command.velocities.head<3>();
+      transformed_twist.velocities.tail<3>() = planning_frame_transform.linear() * command.velocities.tail<3>();
+    }
+    else
+    {
+      servo_status_ = StatusCode::INVALID;
+      RCLCPP_ERROR_STREAM(LOGGER,
+                          "Cannot transform from " << command.frame_id << " to " << servo_params_.planning_frame);
+    }
   }
-  else
-  {
-    return command;
-  }
+  return transformed_twist;
 }
 
 void Servo::setCollisionChecking(const bool check_collision)

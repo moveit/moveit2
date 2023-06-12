@@ -69,7 +69,8 @@ int main(int argc, char* argv[])
                                                                          rclcpp::SystemDefaultsQoS());
 
   // Create the servo object
-  auto servo = Servo(demo_node, servo_param_listener);
+  auto planning_scene_monitor = createPlanningSceneMonitor(demo_node, servo_params);
+  auto servo = Servo(demo_node, servo_param_listener, planning_scene_monitor);
 
   // Wait for some time, so that the planning scene is loaded in rviz.
   // This is just for convenience, should not be used for sync in real application.
@@ -77,12 +78,10 @@ int main(int argc, char* argv[])
 
   // Set the command type for servo.
   servo.expectedCommandType(CommandType::TWIST);
-  // Move end-effector in the +z direction at 10 cm/s
+  // Move end effector in the +z direction at 10 cm/s
   // while turning around z axis in the +ve direction at 0.5 rad/s
-  Twist target_twist{ servo_params.ee_frame_name, { 0.0, 0.0, 0.1, 0.0, 0.0, 0.5 } };
-  // Servo expects the command to be in planning frame, use the helper method to convert it.
-  // If the command is already in planning frame, this step is not required.
-  target_twist = servo.toPlanningFrame(target_twist);
+  Twist target_twist{ servo_params.ee_frame, { 0.0, 0.0, 0.1, 0.0, 0.0, 0.5 } };
+  // Servo automatically converts all commands to planning frame.
 
   // Frquency at which the commands will be send to robot controller.
   rclcpp::WallRate rate(1.0 / servo_params.publish_period);
@@ -95,6 +94,27 @@ int main(int argc, char* argv[])
   while (rclcpp::ok())
   {
     KinematicState joint_state = servo.getNextJointState(target_twist);
+    StatusCode status = servo.getStatus();
+
+    auto current_time = std::chrono::steady_clock::now();
+    time_elapsed = std::chrono::duration_cast<std::chrono::seconds>(current_time - start_time);
+    if (time_elapsed > timeout_duration)
+    {
+      RCLCPP_INFO_STREAM(LOGGER, "Timed out");
+      break;
+    }
+    else if (status != StatusCode::INVALID)
+    {
+      trajectory_outgoing_cmd_pub->publish(composeTrajectoryMessage(servo_params, joint_state));
+    }
+    rate.sleep();
+  }
+
+  Twist target_twist_reverse{ servo_params.planning_frame, { 0.0, 0.0, 0.1, 0.0, 0.0, 0.5 } };
+  start_time = std::chrono::steady_clock::now();
+  while (rclcpp::ok())
+  {
+    KinematicState joint_state = servo.getNextJointState(target_twist_reverse);
     StatusCode status = servo.getStatus();
 
     auto current_time = std::chrono::steady_clock::now();

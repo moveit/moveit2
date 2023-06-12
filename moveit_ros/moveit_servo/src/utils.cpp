@@ -38,6 +38,7 @@
  */
 
 #include <moveit_servo/utils.hpp>
+#include <moveit_servo/datatypes.hpp>
 
 namespace
 {
@@ -48,42 +49,33 @@ const double SCALING_OVERRIDE_THRESHOLD = 0.01;
 namespace moveit_servo
 {
 
-bool transformExists(const moveit::core::RobotStatePtr& current_state, const std::string& frame_name)
-{
-  bool has_transform = false;
-  if (current_state->knowsFrameTransform(frame_name))
-  {
-    has_transform = true;
-  }
-  return has_transform;
-}
-
 bool isValidCommand(const Eigen::VectorXd& command)
 {
-  bool is_valid = true;
-  for (const double& val : command)
-  {
-    if (std::isnan(val))
-    {
-      is_valid = false;
-      break;
-    }
-  }
-  return is_valid;
+  // returns true only if there are no nan values.
+  return (command.array() == command.array()).all();
 }
 
 bool isValidCommand(const Eigen::Isometry3d& command)
 {
-  bool is_valid = true;
+  bool is_valid_rotation = true;
   Eigen::Matrix3d identity, rotation;
   identity.setIdentity();
   rotation = command.linear();
-
-  is_valid = identity.isApprox(rotation.inverse() * rotation);
+  // checks rotation, will fail if there is nan
+  is_valid_rotation = identity.isApprox(rotation.inverse() * rotation);
   // Command is not vald if there is Nan
-  const Eigen::Vector3d translation = command.translation();
-  const bool not_nan = (!std::isnan(translation.x()) && !std::isnan(translation.y()) && !std::isnan(translation.z()));
-  return is_valid && not_nan;
+  const bool not_nan = isValidCommand(command.translation());
+  return is_valid_rotation && not_nan;
+}
+
+bool isValidCommand(const Twist& command)
+{
+  return !command.frame_id.empty() && isValidCommand(command.velocities);
+}
+
+bool isValidCommand(const Pose& command)
+{
+  return !command.frame_id.empty() && isValidCommand(command.pose);
 }
 
 geometry_msgs::msg::Pose poseFromCartesianDelta(const Eigen::VectorXd& delta_x,
@@ -246,17 +238,18 @@ double velocityScalingFactor(const Eigen::VectorXd& velocities, const moveit::co
   // If override value is close to zero, user is not overriding the scaling
   if (scaling_override < SCALING_OVERRIDE_THRESHOLD)
   {
+    scaling_override = 1.0;  // Set to no scaling.
     double bounded_vel;
     std::vector<double> velocity_scaling_factors;  // The allowable fraction of computed veclocity
 
     for (size_t i = 0; i < joint_bounds.size(); i++)
     {
       const auto joint_bound = (*joint_bounds[i])[0];
-      if (joint_bound.velocity_bounded_ && velocities[i] != 0.0)
+      if (joint_bound.velocity_bounded_ && velocities(i) != 0.0)
       {
         // Find the ratio of clamped velocity to original velocity
-        bounded_vel = std::clamp(velocities[i], joint_bound.min_velocity_, joint_bound.max_velocity_);
-        velocity_scaling_factors.push_back(bounded_vel / velocities[i]);
+        bounded_vel = std::clamp(velocities(i), joint_bound.min_velocity_, joint_bound.max_velocity_);
+        velocity_scaling_factors.push_back(bounded_vel / velocities(i));
       }
     }
     // Find the lowest scaling factor, this helps preserve Cartesian motion.
@@ -297,6 +290,27 @@ geometry_msgs::msg::TransformStamped convertIsometryToTransform(const Eigen::Iso
   output.header.frame_id = parent_frame;
   output.child_frame_id = child_frame;
   return output;
+}
+
+planning_scene_monitor::PlanningSceneMonitorPtr createPlanningSceneMonitor(const rclcpp::Node::SharedPtr& node,
+                                                                           const servo::Params& servo_params)
+{
+  planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor;
+  // Can set robot_description name from parameters
+  std::string robot_description_name = "robot_description";
+  node->get_parameter_or("robot_description_name", robot_description_name, robot_description_name);
+  // Set up planning_scene_monitor
+  planning_scene_monitor = std::make_shared<planning_scene_monitor::PlanningSceneMonitor>(node, robot_description_name,
+                                                                                          "planning_scene_monitor");
+  planning_scene_monitor->startStateMonitor(servo_params.joint_topic);
+  planning_scene_monitor->startSceneMonitor(servo_params.monitored_planning_scene_topic);
+  planning_scene_monitor->setPlanningScenePublishingFrequency(25);
+  planning_scene_monitor->getStateMonitor()->enableCopyDynamics(true);
+  planning_scene_monitor->startPublishingPlanningScene(planning_scene_monitor::PlanningSceneMonitor::UPDATE_SCENE,
+                                                       std::string(node->get_fully_qualified_name()) +
+                                                           "/publish_planning_scene");
+
+  return planning_scene_monitor;
 }
 
 }  // namespace moveit_servo
