@@ -11,4 +11,4 @@ ament_target_dependencies(moveit_lazy_free_space_updater
   sensor_msgs
 )
 
-install(DIRECTORY include/ DESTINATION include)
+install(DIRECTORY include/ DESTINATION include/moveit_ros_perception)

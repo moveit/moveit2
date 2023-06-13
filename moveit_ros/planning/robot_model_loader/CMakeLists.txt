@@ -16,4 +16,4 @@ target_link_libraries(moveit_robot_model_loader
   moveit_kinematics_plugin_loader
 )
 
-install(DIRECTORY include/ DESTINATION include)
+install(DIRECTORY include/ DESTINATION include/moveit_ros_planning)

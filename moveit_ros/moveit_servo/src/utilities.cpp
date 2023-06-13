@@ -34,31 +34,12 @@
 
 #include <moveit_servo/utilities.h>
 
+// Disable -Wold-style-cast because all _THROTTLE macros trigger this
+// It would be too noisy to disable on a per-callsite basis
+#pragma GCC diagnostic ignored "-Wold-style-cast"
+
 namespace moveit_servo
 {
-namespace
-{
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_servo.utilities");
-constexpr auto ROS_LOG_THROTTLE_PERIOD = std::chrono::milliseconds(3000).count();
-}  // namespace
-
-/** \brief Helper function for detecting zeroed message **/
-bool isNonZero(const geometry_msgs::msg::TwistStamped& msg)
-{
-  return msg.twist.linear.x != 0.0 || msg.twist.linear.y != 0.0 || msg.twist.linear.z != 0.0 ||
-         msg.twist.angular.x != 0.0 || msg.twist.angular.y != 0.0 || msg.twist.angular.z != 0.0;
-}
-
-/** \brief Helper function for detecting zeroed message **/
-bool isNonZero(const control_msgs::msg::JointJog& msg)
-{
-  bool all_zeros = true;
-  for (double delta : msg.velocities)
-  {
-    all_zeros &= (delta == 0.0);
-  }
-  return !all_zeros;
-}
 
 /** \brief Helper function for converting Eigen::Isometry3d to geometry_msgs/TransformStamped **/
 geometry_msgs::msg::TransformStamped convertIsometryToTransform(const Eigen::Isometry3d& eigen_tf,
@@ -72,26 +53,13 @@ geometry_msgs::msg::TransformStamped convertIsometryToTransform(const Eigen::Iso
   return output;
 }
 
-/** \brief Possibly calculate a velocity scaling factor, due to proximity of
- * singularity and direction of motion
- * @param[in] joint_model_group   The MoveIt group
- * @param[in] commanded_twist     The commanded Cartesian twist
- * @param[in] svd                 A singular value decomposition of the Jacobian
- * @param[in] pseudo_inverse      The pseudo-inverse of the Jacobian
- * @param[in] hard_stop_singularity_threshold  Halt if condition(Jacobian) > hard_stop_singularity_threshold
- * @param[in] lower_singularity_threshold      Decelerate if condition(Jacobian) > lower_singularity_threshold
- * @param[in] leaving_singularity_threshold_multiplier      Allow faster motion away from singularity
- * @param[in, out] clock          A ROS clock, for logging
- * @param[in, out] current_state  The state of the robot. Used in internal calculations.
- * @param[out] status             Singularity status
- */
 double velocityScalingFactorForSingularity(const moveit::core::JointModelGroup* joint_model_group,
                                            const Eigen::VectorXd& commanded_twist,
                                            const Eigen::JacobiSVD<Eigen::MatrixXd>& svd,
                                            const Eigen::MatrixXd& pseudo_inverse,
                                            const double hard_stop_singularity_threshold,
                                            const double lower_singularity_threshold,
-                                           const double leaving_singularity_threshold_multiplier, rclcpp::Clock& clock,
+                                           const double leaving_singularity_threshold_multiplier,
                                            const moveit::core::RobotStatePtr& current_state, StatusCode& status)
 {
   double velocity_scale = 1;
@@ -142,10 +110,6 @@ double velocityScalingFactorForSingularity(const moveit::core::JointModelGroup* 
         1. - (ini_condition - lower_singularity_threshold) / (upper_threshold - lower_singularity_threshold);
     status =
         dot > 0 ? StatusCode::DECELERATE_FOR_APPROACHING_SINGULARITY : StatusCode::DECELERATE_FOR_LEAVING_SINGULARITY;
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wold-style-cast"
-    RCLCPP_WARN_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD, SERVO_STATUS_CODE_MAP.at(status));
-#pragma GCC diagnostic pop
   }
 
   // Very close to singularity, so halt.
@@ -153,13 +117,189 @@ double velocityScalingFactorForSingularity(const moveit::core::JointModelGroup* 
   {
     velocity_scale = 0;
     status = StatusCode::HALT_FOR_SINGULARITY;
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wold-style-cast"
-    RCLCPP_WARN_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD, SERVO_STATUS_CODE_MAP.at(status));
-#pragma GCC diagnostic pop
   }
 
   return velocity_scale;
+}
+
+bool applyJointUpdate(const double publish_period, const Eigen::ArrayXd& delta_theta,
+                      const sensor_msgs::msg::JointState& previous_joint_state,
+                      sensor_msgs::msg::JointState& current_joint_state,
+                      pluginlib::UniquePtr<online_signal_smoothing::SmoothingBaseClass>& smoother)
+{
+  // All the sizes must match
+  if (current_joint_state.position.size() != static_cast<std::size_t>(delta_theta.size()) ||
+      current_joint_state.velocity.size() != current_joint_state.position.size())
+  {
+    return false;
+  }
+
+  for (std::size_t i = 0; i < current_joint_state.position.size(); ++i)
+  {
+    // Increment joint
+    current_joint_state.position[i] += delta_theta[i];
+  }
+
+  smoother->doSmoothing(current_joint_state.position);
+
+  // Calculate joint velocities
+  for (std::size_t i = 0; i < current_joint_state.position.size(); ++i)
+  {
+    current_joint_state.velocity[i] =
+        (current_joint_state.position.at(i) - previous_joint_state.position.at(i)) / publish_period;
+  }
+
+  return true;
+}
+
+void transformTwistToPlanningFrame(geometry_msgs::msg::TwistStamped& cmd, const std::string& planning_frame,
+                                   const moveit::core::RobotStatePtr& current_state)
+{
+  // We solve (planning_frame -> base -> cmd.header.frame_id)
+  // by computing (base->planning_frame)^-1 * (base->cmd.header.frame_id)
+  const Eigen::Isometry3d tf_moveit_to_incoming_cmd_frame =
+      current_state->getGlobalLinkTransform(planning_frame).inverse() *
+      current_state->getGlobalLinkTransform(cmd.header.frame_id);
+
+  // Apply the transform to linear and angular velocities
+  // v' = R * v  and w' = R * w
+  Eigen::Vector3d translation_vector(cmd.twist.linear.x, cmd.twist.linear.y, cmd.twist.linear.z);
+  Eigen::Vector3d angular_vector(cmd.twist.angular.x, cmd.twist.angular.y, cmd.twist.angular.z);
+  translation_vector = tf_moveit_to_incoming_cmd_frame.linear() * translation_vector;
+  angular_vector = tf_moveit_to_incoming_cmd_frame.linear() * angular_vector;
+
+  // Update the values of the original command message to reflect the change in frame
+  cmd.header.frame_id = planning_frame;
+  cmd.twist.linear.x = translation_vector(0);
+  cmd.twist.linear.y = translation_vector(1);
+  cmd.twist.linear.z = translation_vector(2);
+  cmd.twist.angular.x = angular_vector(0);
+  cmd.twist.angular.y = angular_vector(1);
+  cmd.twist.angular.z = angular_vector(2);
+}
+
+geometry_msgs::msg::Pose poseFromCartesianDelta(const Eigen::VectorXd& delta_x,
+                                                const Eigen::Isometry3d& base_to_tip_frame_transform)
+{
+  // get a transformation matrix with the desired position change &
+  // get a transformation matrix with desired orientation change
+  Eigen::Isometry3d tf_pos_delta(Eigen::Isometry3d::Identity());
+  tf_pos_delta.translate(Eigen::Vector3d(delta_x[0], delta_x[1], delta_x[2]));
+
+  Eigen::Isometry3d tf_rot_delta(Eigen::Isometry3d::Identity());
+  Eigen::Quaterniond q = Eigen::AngleAxisd(delta_x[3], Eigen::Vector3d::UnitX()) *
+                         Eigen::AngleAxisd(delta_x[4], Eigen::Vector3d::UnitY()) *
+                         Eigen::AngleAxisd(delta_x[5], Eigen::Vector3d::UnitZ());
+  tf_rot_delta.rotate(q);
+
+  // Find the new tip link position without newly applied rotation
+  const Eigen::Isometry3d tf_no_new_rot = tf_pos_delta * base_to_tip_frame_transform;
+
+  // we want the rotation to be applied in the requested reference frame,
+  // but we want the rotation to be about the EE point in space, not the origin.
+  // So, we need to translate to origin, rotate, then translate back
+  // Given T = transformation matrix from origin -> EE point in space (translation component of tf_no_new_rot)
+  // and T' as the opposite transformation, EE point in space -> origin (translation only)
+  // apply final transformation as T * R * T' * tf_no_new_rot
+  const Eigen::Matrix<double, 3, 1> tf_translation = tf_no_new_rot.translation();
+  Eigen::Isometry3d tf_neg_translation = Eigen::Isometry3d::Identity();  // T'
+  tf_neg_translation(0, 3) = -tf_translation(0, 0);
+  tf_neg_translation(1, 3) = -tf_translation(1, 0);
+  tf_neg_translation(2, 3) = -tf_translation(2, 0);
+  Eigen::Isometry3d tf_pos_translation = Eigen::Isometry3d::Identity();  // T
+  tf_pos_translation(0, 3) = tf_translation(0, 0);
+  tf_pos_translation(1, 3) = tf_translation(1, 0);
+  tf_pos_translation(2, 3) = tf_translation(2, 0);
+
+  // T * R * T' * tf_no_new_rot
+  return tf2::toMsg(tf_pos_translation * tf_rot_delta * tf_neg_translation * tf_no_new_rot);
+}
+
+double getVelocityScalingFactor(const moveit::core::JointModelGroup* joint_model_group, const Eigen::VectorXd& velocity)
+{
+  std::size_t joint_delta_index{ 0 };
+  double velocity_scaling_factor{ 1.0 };
+  for (const moveit::core::JointModel* joint : joint_model_group->getActiveJointModels())
+  {
+    const auto& bounds = joint->getVariableBounds(joint->getName());
+    if (bounds.velocity_bounded_ && velocity(joint_delta_index) != 0.0)
+    {
+      const double unbounded_velocity = velocity(joint_delta_index);
+      // Clamp each joint velocity to a joint specific [min_velocity, max_velocity] range.
+      const auto bounded_velocity = std::min(std::max(unbounded_velocity, bounds.min_velocity_), bounds.max_velocity_);
+      velocity_scaling_factor = std::min(velocity_scaling_factor, bounded_velocity / unbounded_velocity);
+    }
+    ++joint_delta_index;
+  }
+
+  return velocity_scaling_factor;
+}
+
+void enforceVelocityLimits(const moveit::core::JointModelGroup* joint_model_group, const double publish_period,
+                           sensor_msgs::msg::JointState& joint_state, const double override_velocity_scaling_factor)
+{
+  // Get the velocity scaling factor
+  Eigen::VectorXd velocity =
+      Eigen::Map<Eigen::VectorXd, Eigen::Unaligned>(joint_state.velocity.data(), joint_state.velocity.size());
+  double velocity_scaling_factor = override_velocity_scaling_factor;
+  // if the override velocity scaling factor is approximately zero then the user is not overriding the value.
+  if (override_velocity_scaling_factor < 0.01)
+    velocity_scaling_factor = getVelocityScalingFactor(joint_model_group, velocity);
+
+  // Take a smaller step if the velocity scaling factor is less than 1
+  if (velocity_scaling_factor < 1)
+  {
+    Eigen::VectorXd velocity_residuals = (1 - velocity_scaling_factor) * velocity;
+    Eigen::VectorXd positions =
+        Eigen::Map<Eigen::VectorXd, Eigen::Unaligned>(joint_state.position.data(), joint_state.position.size());
+    positions -= velocity_residuals * publish_period;
+
+    velocity *= velocity_scaling_factor;
+    // Back to sensor_msgs type
+    joint_state.velocity = std::vector<double>(velocity.data(), velocity.data() + velocity.size());
+    joint_state.position = std::vector<double>(positions.data(), positions.data() + positions.size());
+  }
+}
+
+std::vector<const moveit::core::JointModel*>
+enforcePositionLimits(sensor_msgs::msg::JointState& joint_state, const double joint_limit_margin,
+                      const moveit::core::JointModelGroup* joint_model_group)
+{
+  // Halt if we're past a joint margin and joint velocity is moving even farther past
+  double joint_angle = 0;
+  std::vector<const moveit::core::JointModel*> joints_to_halt;
+  for (auto joint : joint_model_group->getActiveJointModels())
+  {
+    for (std::size_t c = 0; c < joint_state.name.size(); ++c)
+    {
+      // Use the most recent robot joint state
+      if (joint_state.name[c] == joint->getName())
+      {
+        joint_angle = joint_state.position.at(c);
+        break;
+      }
+    }
+
+    if (!joint->satisfiesPositionBounds(&joint_angle, -joint_limit_margin))
+    {
+      const std::vector<moveit_msgs::msg::JointLimits>& limits = joint->getVariableBoundsMsg();
+
+      // Joint limits are not defined for some joints. Skip them.
+      if (!limits.empty())
+      {
+        // Check if pending velocity command is moving in the right direction
+        auto joint_itr = std::find(joint_state.name.begin(), joint_state.name.end(), joint->getName());
+        auto joint_idx = std::distance(joint_state.name.begin(), joint_itr);
+
+        if ((joint_state.velocity.at(joint_idx) < 0 && (joint_angle < (limits[0].min_position + joint_limit_margin))) ||
+            (joint_state.velocity.at(joint_idx) > 0 && (joint_angle > (limits[0].max_position - joint_limit_margin))))
+        {
+          joints_to_halt.push_back(joint);
+        }
+      }
+    }
+  }
+  return joints_to_halt;
 }
 
 }  // namespace moveit_servo

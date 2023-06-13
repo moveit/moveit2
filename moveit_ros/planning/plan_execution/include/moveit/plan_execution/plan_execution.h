@@ -55,22 +55,22 @@ class PlanExecution
 public:
   struct Options
   {
-    Options() : replan_(false), replan_attempts_(0), replan_delay_(0.0)
+    Options() : replan(false), replan_attemps(0), replan_delay(0.0)
     {
     }
 
     /// Flag indicating whether replanning is allowed
-    bool replan_;
+    bool replan;
 
     /// If replanning is allowed, this variable specifies how many replanning attempts there can be, at most, before
     /// failure
-    unsigned int replan_attempts_;
+    unsigned int replan_attemps;
 
     /// The amount of time to wait in between replanning attempts (in seconds)
-    double replan_delay_;
+    double replan_delay;
 
     /// Callback for computing motion plans. This callback must always be specified.
-    ExecutableMotionPlanComputationFn plan_callback_;
+    ExecutableMotionPlanComputationFn plan_callback;
 
     /// Callback for repairing motion plans. This is optional. A new plan is re-computed if repairing routines are not
     /// specified.
@@ -161,7 +161,7 @@ private:
   class
   {
   private:
-    std::atomic<bool> preemption_requested{ false };
+    std::atomic<bool> preemption_requested_{ false };
 
   public:
     /** \brief check *and clear* the preemption flag
@@ -169,11 +169,11 @@ private:
         A true return value has to trigger full execution stop, as it consumes the request */
     inline bool checkAndClear()
     {
-      return preemption_requested.exchange(false);
+      return preemption_requested_.exchange(false);
     }
     inline void request()
     {
-      preemption_requested.store(true);
+      preemption_requested_.store(true);
     }
   } preempt_;
 

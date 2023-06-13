@@ -2,6 +2,191 @@
 Changelog for package moveit_servo
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.7.4 (2023-05-18)
+------------------
+* [Servo] Remove soon-to-be obsolete functions (`#2175 <https://github.com/ros-planning/moveit2/issues/2175>`_)
+  * Remove unused functions
+  * Remove drift and control dimension client in tests
+  * Remove gazebo specific message redundancy
+* [Servo] Restore namespace to parameters (`#2171 <https://github.com/ros-planning/moveit2/issues/2171>`_)
+  * Add  namespace to parameters
+  * Minor cleanups
+* [Servo] Fix stop callback, delete pause/unpause mode (`#2139 <https://github.com/ros-planning/moveit2/issues/2139>`_)
+  Co-authored-by: AndyZe <andyz@utexas.edu>
+* [Servo] Make conversion operations into free functions (`#2149 <https://github.com/ros-planning/moveit2/issues/2149>`_)
+  * Move conversion operations to free functions
+  * Optimizations
+  * Fix const references
+  * Readability updates
+  * Remove unused header
+  * Comment update
+  ---------
+  Co-authored-by: AndyZe <andyz@utexas.edu>
+* [Servo] Avoid unnecessary checks for initializing `ik_base_to_tip_frame` (`#2146 <https://github.com/ros-planning/moveit2/issues/2146>`_)
+  * Avoid unnecessary check
+  * Make ik_base_to_tip_frame\_ local
+  * Remove use_inv_jacobian flag
+  * Use nullptr instead of NULL
+  * Alphabetize + clang-tidy
+  * Remove unused header
+* [Servo] Update MoveIt Servo to use generate_parameter_library (`#2096 <https://github.com/ros-planning/moveit2/issues/2096>`_)
+  * Add generate_parameter_library as dependency
+  * Add parameters file
+  * Update parameters file
+  * Fix one_of syntax
+  * Add parameter generation
+  * Include servo param header
+  * Test if parameters are loaded
+  * Make servo_node partially use ParamListener
+  * Make Servo partially use ParamListener
+  * Make ServoCalcs partially use ParamListener
+  * Fix frame name
+  * Handle parameter updates
+  * Remove old param lib dependency in CollisionCheck
+  * Remove old param lib dependency in ServoCalcs
+  * Remove old param lib dependency in Servo
+  * Remove old param lib dependency in ServoNode
+  * Remove old parameter librarysources
+  * Remove parameter_descriptor_builder sources
+  * Update parameter library header name
+  * Formatting
+  * Remove old param lib headers
+  * Add parameter to enable/disable continous parameter update check
+  * Update pose tracking demo
+  * Fix launch time parameter loading for pose tracking
+  * Move PID parameters to generate_parameter_library
+  * Fix launch time parameter loading for servo example
+  * Fix unit tests
+  * Fix interface test
+  * Fix pose tracking test
+  * Redorder member variable initialization
+  * Cleanup
+  * Group parameters
+  * Make parameter listener const
+  * Revert disabled lint tests
+  * Fix issues from rebase
+  * Apply performance suggestion from CI
+  * Apply variable naming suggestion from CI
+  * Apply pass params by reference suggestion by CI
+  * Apply review suggestions
+  * Apply review suggestions
+  * Remove unused parameter
+  * Change parameter listener to unique_ptr
+  * Add validations for some parameters
+  * Changes from review
+  * Make docstring more informative
+  Co-authored-by: Sebastian Castro <4603398+sea-bass@users.noreply.github.com>
+  * Change validation failure from warning to error
+  * Fix parameter loading in test launch files
+  * Remove defaults for robot specific params
+  * Update description for params with no default value
+  * Pass by reference
+  * Clang-tidy
+  Co-authored-by: Sebastian Castro <4603398+sea-bass@users.noreply.github.com>
+  ---------
+  Co-authored-by: Sebastian Castro <4603398+sea-bass@users.noreply.github.com>
+  Co-authored-by: AndyZe <andyz@utexas.edu>
+* Contributors: Sebastian Castro, V Mohammed Ibrahim
+
+2.7.3 (2023-04-24)
+------------------
+* Replace check for the ROS_DISTRO env variable with a check for the rclcpp version (`#2135 <https://github.com/ros-planning/moveit2/issues/2135>`_)
+* Document pausing better (`#2128 <https://github.com/ros-planning/moveit2/issues/2128>`_)
+* [Servo] Make `applyJointUpdate()` a free function (`#2121 <https://github.com/ros-planning/moveit2/issues/2121>`_)
+  * Change variable names for improved readability
+  * Fix issues from rebase
+  * Move applyJointUpdate() to utilities
+  * Fix comment
+  * Fix old-style-cast
+  * Use pluginlib::UniquePtr for smoothing class
+* Contributors: AndyZe, Jafar, V Mohammed Ibrahim
+
+2.7.2 (2023-04-18)
+------------------
+* Switch from qos_event.hpp to event_handler.hpp (`#2111 <https://github.com/ros-planning/moveit2/issues/2111>`_)
+  * Switch from qos_event.hpp to event_handler.hpp
+  * moveit_common: Add a cmake interface library to keep humble support on main
+  * Include qos_event.hpp or event_handler.hpp depending on the ROS 2 version
+  * Fix ament_lint_cmake
+  * Fix clang-tidy
+  * PRIVATE linking in some cases
+  * Update moveit_common/cmake/moveit_package.cmake
+  Co-authored-by: Chris Thrasher <chrisjthrasher@gmail.com>
+  * Fix servo and cleanup excessive CMake variable usage
+  * Cleanup & make compiling
+  * Small variable naming and const cleanup
+  * Restore OpenCV linking
+  * Public/private linking fixup
+  * Revert "Restore OpenCV linking"
+  This reverts commit 57a9efa806e59223e35a1f7e998d7b52f930c263.
+  ---------
+  Co-authored-by: JafarAbdi <jafar.uruc@gmail.com>
+  Co-authored-by: Jafar <cafer.abdi@gmail.com>
+  Co-authored-by: AndyZe <andyz@utexas.edu>
+  Co-authored-by: Chris Thrasher <chrisjthrasher@gmail.com>
+* [Servo] Document the new low-pass filter param (`#2114 <https://github.com/ros-planning/moveit2/issues/2114>`_)
+  * [Servo] Document the new low-pass filter param
+  * More intuitive parameter ordering
+* Update pre-commit (`#2094 <https://github.com/ros-planning/moveit2/issues/2094>`_)
+* Compute velocity using central difference (`#2080 <https://github.com/ros-planning/moveit2/issues/2080>`_)
+  * Compute velocity using central difference
+  * Update calculation
+  * Save and use x(t - dt)
+  * Fix saving x(t - dt)
+  * Fix confusing comment.
+  * Explainer comment for last_joint_state\_
+  Co-authored-by: AndyZe <andyz@utexas.edu>
+  * Change x to q in comments to signify joint domain
+  * Avoid pass-by-reference for basic types
+  ---------
+  Co-authored-by: AndyZe <andyz@utexas.edu>
+* Contributors: AndyZe, Sebastian Jahr, Shobuj Paul, V Mohammed Ibrahim
+
+2.7.1 (2023-03-23)
+------------------
+* Add callback for velocity scaling override + fix params namespace not being set (`#2021 <https://github.com/ros-planning/moveit2/issues/2021>`_)
+* Contributors: Sebastian Castro
+
+2.7.0 (2023-01-29)
+------------------
+* Merge PR `#1712 <https://github.com/ros-planning/moveit2/issues/1712>`_: fix clang compiler warnings + stricter CI
+* converted characters from string format to character format (`#1881 <https://github.com/ros-planning/moveit2/issues/1881>`_)
+* Update the Servo dependency on realtime_tools (`#1791 <https://github.com/ros-planning/moveit2/issues/1791>`_)
+  * Update the Servo dependency on realtime_tools
+  * Update .repos
+  * Add comment
+* Fix more clang warnings
+* Fix warning: passing by value
+* Cleanup msg includes: Use C++ instead of C header (`#1844 <https://github.com/ros-planning/moveit2/issues/1844>`_)
+* Fix BSD license in package.xml (`#1796 <https://github.com/ros-planning/moveit2/issues/1796>`_)
+  * fix BSD license in package.xml
+  * this must also be spdx compliant
+* Minimize use of `this->` (`#1784 <https://github.com/ros-planning/moveit2/issues/1784>`_)
+  It's often unnecessary. MoveIt already avoids this in most cases
+  so this PR better cements that existing pattern.
+* Enable `-Wold-style-cast` (`#1770 <https://github.com/ros-planning/moveit2/issues/1770>`_)
+* Add braces around blocks. (`#999 <https://github.com/ros-planning/moveit2/issues/999>`_)
+* Use <> for non-local headers (`#1734 <https://github.com/ros-planning/moveit2/issues/1734>`_)
+  Unless a header lives in the same or a child directory of the file
+  including it, it's recommended to use <> for the #include statement.
+  For more information, see the C++ Core Guidelines item SF.12
+  https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#sf12-prefer-the-quoted-form-of-include-for-files-relative-to-the-including-file-and-the-angle-bracket-form-everywhere-else
+* Servo: Check frames are known before getting their TFs (`#612 <https://github.com/ros-planning/moveit2/issues/612>`_)
+  * Check frames are known before getting their TFs
+  * Allow empty command frame - fixes tests
+  * Address Jere's feedback
+  Co-authored-by: AndyZe <andyz@utexas.edu>
+* Fix clang-tidy issues (`#1706 <https://github.com/ros-planning/moveit2/issues/1706>`_)
+  * Blindly apply automatic clang-tidy fixes
+  * Exemplarily cleanup a few automatic clang-tidy fixes
+  * Clang-tidy fixups
+  * Missed const-ref fixups
+  * Fix unsupported non-const -> const
+  * More fixes
+  Co-authored-by: Henning Kayser <henningkayser@picknik.ai>
+* Remove unused function in Servo (`#1709 <https://github.com/ros-planning/moveit2/issues/1709>`_)
+* Contributors: AdamPettinger, AndyZe, Chris Thrasher, Christian Henkel, Cory Crean, Henning Kayser, Robert Haschke, Sameer Gupta
+
 2.6.0 (2022-11-10)
 ------------------
 * Fix dead tutorial link (`#1701 <https://github.com/ros-planning/moveit2/issues/1701>`_)

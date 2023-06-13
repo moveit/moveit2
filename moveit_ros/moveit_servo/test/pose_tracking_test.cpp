@@ -49,7 +49,6 @@
 // Servo
 #include <moveit_servo/pose_tracking.h>
 #include <moveit_servo/make_shared_from_pool.h>
-#include <moveit_servo/servo_parameters.h>
 
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_servo.pose_tracking_test");
 
@@ -66,18 +65,13 @@ public:
     executor_->add_node(node_);
     executor_thread_ = std::thread([this]() { this->executor_->spin(); });
 
-    servo_parameters_ = moveit_servo::ServoParameters::makeServoParameters(node_);
-    ;
-    if (servo_parameters_ == nullptr)
-    {
-      RCLCPP_FATAL(LOGGER, "Could not get servo parameters!");
-      exit(EXIT_FAILURE);
-    }
+    auto servo_param_listener = std::make_unique<const servo::ParamListener>(node_, "moveit_servo");
+    servo_parameters_ = servo_param_listener->get_params();
 
     // store test constants as shared pointer to constant struct
     {
       auto test_parameters = std::make_shared<struct TestParameters>();
-      test_parameters->publish_hz = 2.0 / servo_parameters_->incoming_command_timeout;
+      test_parameters->publish_hz = 2.0 / servo_parameters_.incoming_command_timeout;
       test_parameters->publish_period = 1.0 / test_parameters->publish_hz;
       test_parameters->timeout_iterations = 10 * test_parameters->publish_hz;
       test_parameters_ = test_parameters;
@@ -96,7 +90,7 @@ public:
         planning_scene_monitor::PlanningSceneMonitor::DEFAULT_COLLISION_OBJECT_TOPIC,
         planning_scene_monitor::PlanningSceneMonitor::DEFAULT_PLANNING_SCENE_WORLD_TOPIC,
         false /* skip octomap monitor */);
-    planning_scene_monitor_->startStateMonitor(servo_parameters_->joint_topic);
+    planning_scene_monitor_->startStateMonitor(servo_parameters_.joint_topic);
     planning_scene_monitor_->startPublishingPlanningScene(planning_scene_monitor::PlanningSceneMonitor::UPDATE_SCENE);
 
     // Wait for Planning Scene Monitor to setup
@@ -106,7 +100,8 @@ public:
       exit(EXIT_FAILURE);
     }
 
-    tracker_ = std::make_shared<moveit_servo::PoseTracking>(node_, servo_parameters_, planning_scene_monitor_);
+    tracker_ =
+        std::make_shared<moveit_servo::PoseTracking>(node_, std::move(servo_param_listener), planning_scene_monitor_);
 
     // Tolerance for pose seeking
     translation_tolerance_ << TRANSLATION_TOLERANCE, TRANSLATION_TOLERANCE, TRANSLATION_TOLERANCE;
@@ -135,7 +130,7 @@ protected:
   rclcpp::Executor::SharedPtr executor_;
   std::thread executor_thread_;
 
-  moveit_servo::ServoParameters::SharedConstPtr servo_parameters_;
+  servo::Params servo_parameters_;
   planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor_;
 
   struct TestParameters

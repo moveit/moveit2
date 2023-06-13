@@ -60,14 +60,14 @@ void move_group::MoveGroupCapability::convertToMsg(const std::vector<plan_execut
     trajectory_msg.resize(trajectory.size());
     for (std::size_t i = 0; i < trajectory.size(); ++i)
     {
-      if (trajectory[i].trajectory_)
+      if (trajectory[i].trajectory)
       {
-        if (first && !trajectory[i].trajectory_->empty())
+        if (first && !trajectory[i].trajectory->empty())
         {
-          moveit::core::robotStateToRobotStateMsg(trajectory[i].trajectory_->getFirstWayPoint(), first_state_msg);
+          moveit::core::robotStateToRobotStateMsg(trajectory[i].trajectory->getFirstWayPoint(), first_state_msg);
           first = false;
         }
-        trajectory[i].trajectory_->getRobotTrajectoryMsg(trajectory_msg[i]);
+        trajectory[i].trajectory->getRobotTrajectoryMsg(trajectory_msg[i]);
       }
     }
   }
@@ -91,7 +91,7 @@ void move_group::MoveGroupCapability::convertToMsg(const std::vector<plan_execut
   if (trajectory.size() > 1)
     RCLCPP_ERROR_STREAM(LOGGER, "Internal logic error: trajectory component ignored. !!! THIS IS A SERIOUS ERROR !!!");
   if (!trajectory.empty())
-    convertToMsg(trajectory[0].trajectory_, first_state_msg, trajectory_msg);
+    convertToMsg(trajectory[0].trajectory, first_state_msg, trajectory_msg);
 }
 
 planning_interface::MotionPlanRequest

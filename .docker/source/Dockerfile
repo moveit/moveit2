@@ -4,7 +4,7 @@
 # Downloads the moveit source code and install remaining debian dependencies
 
 ARG ROS_DISTRO=rolling
-FROM ghcr.io/ros-planning/moveit2:${ROS_DISTRO}-ci-testing
+FROM moveit/moveit2:${ROS_DISTRO}-ci-testing
 LABEL maintainer Robert Haschke rhaschke@techfak.uni-bielefeld.de
 
 # Export ROS_UNDERLAY for downstream docker containers

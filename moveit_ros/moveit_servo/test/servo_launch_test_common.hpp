@@ -51,15 +51,14 @@
 #include <geometry_msgs/msg/twist_stamped.hpp>
 #include <trajectory_msgs/msg/joint_trajectory.hpp>
 #include <sensor_msgs/msg/joint_state.hpp>
-#include <moveit_msgs/srv/change_drift_dimensions.hpp>
-#include <moveit_msgs/srv/change_control_dimensions.hpp>
 
 // Testing
 #include <gtest/gtest.h>
 
 // Servo
-#include <moveit_servo/servo_parameters.h>
 #include <moveit_servo/status_codes.h>
+// Auto-generated
+#include <moveit_servo_lib_parameters.hpp>
 
 #pragma once
 
@@ -72,7 +71,6 @@ class ServoFixture : public ::testing::Test
 public:
   void SetUp() override
   {
-    ASSERT_TRUE(servo_parameters_.get() != nullptr);
     executor_->add_node(node_);
     executor_thread_ = std::thread([this]() { executor_->spin(); });
   }
@@ -81,18 +79,12 @@ public:
     : node_(std::make_shared<rclcpp::Node>("servo_testing"))
     , executor_(std::make_shared<rclcpp::executors::SingleThreadedExecutor>())
   {
-    // read parameters and store them in shared pointer to constant
-    servo_parameters_ = moveit_servo::ServoParameters::makeServoParameters(node_, "moveit_servo", false);
-    if (servo_parameters_ == nullptr)
-    {
-      RCLCPP_FATAL(LOGGER, "Failed to load the servo parameters");
-      return;
-    }
-
+    auto servo_param_listener = std::make_unique<const servo::ParamListener>(node_, "moveit_servo");
+    servo_parameters_ = servo_param_listener->get_params();
     // store test constants as shared pointer to constant struct
     {
       auto test_parameters = std::make_shared<struct TestParameters>();
-      test_parameters->publish_hz = 2.0 / servo_parameters_->incoming_command_timeout;
+      test_parameters->publish_hz = 2.0 / servo_parameters_.incoming_command_timeout;
       test_parameters->publish_period = 1.0 / test_parameters->publish_hz;
       test_parameters->timeout_iterations = 50 * test_parameters->publish_hz;
       test_parameters->servo_node_name = "/servo_node";
@@ -102,9 +94,9 @@ public:
     // Init ROS interfaces
     // Publishers
     pub_twist_cmd_ = node_->create_publisher<geometry_msgs::msg::TwistStamped>(
-        resolveServoTopicName(servo_parameters_->cartesian_command_in_topic), rclcpp::SystemDefaultsQoS());
+        resolveServoTopicName(servo_parameters_.cartesian_command_in_topic), rclcpp::SystemDefaultsQoS());
     pub_joint_cmd_ = node_->create_publisher<control_msgs::msg::JointJog>(
-        resolveServoTopicName(servo_parameters_->joint_command_in_topic), rclcpp::SystemDefaultsQoS());
+        resolveServoTopicName(servo_parameters_.joint_command_in_topic), rclcpp::SystemDefaultsQoS());
   }
 
   void TearDown() override
@@ -163,74 +155,8 @@ public:
 
     // Status sub (we need this to check that we've started / stopped)
     sub_servo_status_ = node_->create_subscription<std_msgs::msg::Int8>(
-        resolveServoTopicName(servo_parameters_->status_topic), rclcpp::SystemDefaultsQoS(),
+        resolveServoTopicName(servo_parameters_.status_topic), rclcpp::SystemDefaultsQoS(),
         [this](const std_msgs::msg::Int8::ConstSharedPtr& msg) { return statusCB(msg); });
-    return true;
-  }
-
-  bool setupPauseClient()
-  {
-    client_servo_pause_ = node_->create_client<std_srvs::srv::Trigger>(resolveServoTopicName("~/pause_servo"));
-    while (!client_servo_pause_->service_is_ready())
-    {
-      if (!rclcpp::ok())
-      {
-        RCLCPP_ERROR(LOGGER, "Interrupted while waiting for the service. Exiting.");
-        return false;
-      }
-      RCLCPP_INFO(LOGGER, "client_servo_pause_ service not available, waiting again...");
-      rclcpp::sleep_for(std::chrono::milliseconds(500));
-    }
-    return true;
-  }
-
-  bool setupUnpauseClient()
-  {
-    client_servo_unpause_ = node_->create_client<std_srvs::srv::Trigger>(resolveServoTopicName("~/unpause_servo"));
-    while (!client_servo_unpause_->service_is_ready())
-    {
-      if (!rclcpp::ok())
-      {
-        RCLCPP_ERROR(LOGGER, "Interrupted while waiting for the service. Exiting.");
-        return false;
-      }
-      RCLCPP_INFO(LOGGER, "client_servo_unpause_ service not available, waiting again...");
-      rclcpp::sleep_for(std::chrono::milliseconds(500));
-    }
-    return true;
-  }
-
-  bool setupControlDimsClient()
-  {
-    client_change_control_dims_ = node_->create_client<moveit_msgs::srv::ChangeControlDimensions>(
-        resolveServoTopicName("~/change_control_dimensions"));
-    while (!client_change_control_dims_->service_is_ready())
-    {
-      if (!rclcpp::ok())
-      {
-        RCLCPP_ERROR(LOGGER, "Interrupted while waiting for the service. Exiting.");
-        return false;
-      }
-      RCLCPP_INFO(LOGGER, "client_change_control_dims_ service not available, waiting again...");
-      rclcpp::sleep_for(std::chrono::milliseconds(500));
-    }
-    return true;
-  }
-
-  bool setupDriftDimsClient()
-  {
-    client_change_drift_dims_ = node_->create_client<moveit_msgs::srv::ChangeDriftDimensions>(
-        resolveServoTopicName("~/change_drift_dimensions"));
-    while (!client_change_drift_dims_->service_is_ready())
-    {
-      if (!rclcpp::ok())
-      {
-        RCLCPP_ERROR(LOGGER, "Interrupted while waiting for the service. Exiting.");
-        return false;
-      }
-      RCLCPP_INFO(LOGGER, "client_change_drift_dims_ service not available, waiting again...");
-      rclcpp::sleep_for(std::chrono::milliseconds(500));
-    }
     return true;
   }
 
@@ -247,14 +173,14 @@ public:
     if (command_type == "trajectory_msgs/JointTrajectory")
     {
       sub_trajectory_cmd_output_ = node_->create_subscription<trajectory_msgs::msg::JointTrajectory>(
-          resolveServoTopicName(servo_parameters_->command_out_topic), rclcpp::SystemDefaultsQoS(),
+          resolveServoTopicName(servo_parameters_.command_out_topic), rclcpp::SystemDefaultsQoS(),
           [this](const trajectory_msgs::msg::JointTrajectory::ConstSharedPtr& msg) { return trajectoryCommandCB(msg); });
       return true;
     }
     else if (command_type == "std_msgs/Float64MultiArray")
     {
       sub_array_cmd_output_ = node_->create_subscription<std_msgs::msg::Float64MultiArray>(
-          resolveServoTopicName(servo_parameters_->command_out_topic), rclcpp::SystemDefaultsQoS(),
+          resolveServoTopicName(servo_parameters_.command_out_topic), rclcpp::SystemDefaultsQoS(),
           [this](const std_msgs::msg::Float64MultiArray::ConstSharedPtr& msg) { return arrayCommandCB(msg); });
       return true;
     }
@@ -268,7 +194,7 @@ public:
   bool setupJointStateSub()
   {
     sub_joint_state_ = node_->create_subscription<sensor_msgs::msg::JointState>(
-        resolveServoTopicName(servo_parameters_->joint_topic), rclcpp::SystemDefaultsQoS(),
+        resolveServoTopicName(servo_parameters_.joint_topic), rclcpp::SystemDefaultsQoS(),
         [this](const sensor_msgs::msg::JointState::ConstSharedPtr& msg) { return jointStateCB(msg); });
     return true;
   }
@@ -449,7 +375,7 @@ protected:
   rclcpp::Node::SharedPtr node_;
   rclcpp::Executor::SharedPtr executor_;
   std::thread executor_thread_;
-  std::shared_ptr<const moveit_servo::ServoParameters> servo_parameters_;
+  servo::Params servo_parameters_;
 
   struct TestParameters
   {
@@ -465,10 +391,6 @@ protected:
   // Service Clients
   rclcpp::Client<std_srvs::srv::Trigger>::SharedPtr client_servo_start_;
   rclcpp::Client<std_srvs::srv::Trigger>::SharedPtr client_servo_stop_;
-  rclcpp::Client<std_srvs::srv::Trigger>::SharedPtr client_servo_pause_;
-  rclcpp::Client<std_srvs::srv::Trigger>::SharedPtr client_servo_unpause_;
-  rclcpp::Client<moveit_msgs::srv::ChangeControlDimensions>::SharedPtr client_change_control_dims_;
-  rclcpp::Client<moveit_msgs::srv::ChangeDriftDimensions>::SharedPtr client_change_drift_dims_;
 
   // Publishers
   rclcpp::Publisher<geometry_msgs::msg::TwistStamped>::SharedPtr pub_twist_cmd_;

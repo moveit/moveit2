@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.22)
-project(moveit_setup_app_plugins)
+project(moveit_setup_app_plugins LANGUAGES CXX)
 
 # Common cmake code applied to all moveit packages
 find_package(moveit_common REQUIRED)
@@ -22,7 +22,7 @@ qt5_wrap_cpp(MOC_FILES
     include/moveit_setup_app_plugins/perception_widget.hpp
 )
 
-add_library(${PROJECT_NAME}
+add_library(moveit_setup_app_plugins
     src/launches.cpp
     src/launches_widget.cpp
     src/launches_config.cpp
@@ -31,11 +31,11 @@ add_library(${PROJECT_NAME}
     src/perception_widget.cpp
     ${MOC_FILES}
 )
-target_include_directories(${PROJECT_NAME} PUBLIC
+target_include_directories(moveit_setup_app_plugins PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-  $<INSTALL_INTERFACE:include>
+  $<INSTALL_INTERFACE:include/moveit_setup_app_plugins>
 )
-ament_target_dependencies(${PROJECT_NAME}
+ament_target_dependencies(moveit_setup_app_plugins
   ament_index_cpp
   moveit_ros_visualization
   moveit_setup_framework
@@ -49,26 +49,26 @@ if(BUILD_TESTING)
 
   find_package(ament_cmake_gtest REQUIRED)
   ament_add_gtest(test_perception test/test_perception.cpp)
-  target_link_libraries(test_perception ${PROJECT_NAME})
+  target_link_libraries(test_perception moveit_setup_app_plugins)
 endif()
 
-install(DIRECTORY templates DESTINATION share/${PROJECT_NAME})
+install(DIRECTORY templates DESTINATION share/moveit_setup_app_plugins)
 
-install(TARGETS ${PROJECT_NAME}
-        EXPORT ${PROJECT_NAME}Targets
+install(TARGETS moveit_setup_app_plugins
+        EXPORT moveit_setup_app_pluginsTargets
         ARCHIVE DESTINATION lib
         LIBRARY DESTINATION lib
         RUNTIME DESTINATION bin
-        INCLUDES DESTINATION include
+        INCLUDES DESTINATION include/moveit_setup_app_plugins
 )
 install(FILES moveit_setup_framework_plugins.xml
-        DESTINATION share/${PROJECT_NAME}
+        DESTINATION share/moveit_setup_app_plugins
 )
 install(DIRECTORY include/
-        DESTINATION include
+        DESTINATION include/moveit_setup_app_plugins
 )
 
-ament_export_targets(${PROJECT_NAME}Targets HAS_LIBRARY_TARGET)
+ament_export_targets(moveit_setup_app_pluginsTargets HAS_LIBRARY_TARGET)
 pluginlib_export_plugin_description_file(moveit_setup_framework moveit_setup_framework_plugins.xml)
 
 ament_package()

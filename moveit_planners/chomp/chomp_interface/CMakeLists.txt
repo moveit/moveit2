@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.22)
-project(moveit_planners_chomp)
+project(moveit_planners_chomp LANGUAGES CXX)
 
 # Common cmake code applied to all moveit packages
 find_package(moveit_common REQUIRED)
@@ -29,7 +29,7 @@ include_directories(
 add_library(moveit_chomp_interface SHARED
   src/chomp_interface.cpp
   src/chomp_planning_context.cpp)
-set_target_properties(moveit_chomp_interface PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
+set_target_properties(moveit_chomp_interface PROPERTIES VERSION "${moveit_planners_chomp_VERSION}")
 ament_target_dependencies(moveit_chomp_interface ${THIS_PACKAGE_INCLUDE_DEPENDS})
 
 add_library(moveit_chomp_planner_plugin SHARED src/chomp_plugin.cpp)
@@ -40,13 +40,13 @@ target_link_libraries(moveit_chomp_planner_plugin
 
 install(
   TARGETS moveit_chomp_interface moveit_chomp_planner_plugin
-  EXPORT ${PROJECT_NAME}Targets
+  EXPORT moveit_planners_chompTargets
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
   RUNTIME DESTINATION bin
 )
 
-ament_export_targets(${PROJECT_NAME}Targets HAS_LIBRARY_TARGET)
+ament_export_targets(moveit_planners_chompTargets HAS_LIBRARY_TARGET)
 ament_export_dependencies(
   ${THIS_PACKAGE_INCLUDE_DEPENDS}
 )

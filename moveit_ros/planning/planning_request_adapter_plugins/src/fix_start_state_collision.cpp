@@ -32,7 +32,13 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-/* Author: Ioan Sucan */
+/* Author: Ioan Sucan
+ * Desc: Fix start state collision adapter which will attempt to sample a new collision-free configuration near a
+ * specified configuration (in collision) by perturbing the joint values by a small amount. The amount that it will
+ * perturb the values by is specified by the jiggle_fraction parameter that controls the perturbation as a percentage of
+ * the total range of motion for the joint. The other parameter for this adapter specifies how many random perturbations
+ * the adapter will sample before giving up.
+ */
 
 #include <moveit/planning_request_adapter/planning_request_adapter.h>
 #include <moveit/robot_state/conversions.h>
@@ -47,6 +53,8 @@ namespace default_planner_request_adapters
 {
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_ros.fix_start_state_collision");
 
+/** @brief This fix start state collision adapter will attempt to sample a new collision-free configuration near a
+ * specified configuration (in collision) by perturbing the joint values by a small amount.*/
 class FixStartStateCollision : public planning_request_adapter::PlanningRequestAdapter
 {
 public:
@@ -137,13 +145,13 @@ public:
         planning_interface::MotionPlanRequest req2 = req;
         moveit::core::robotStateToRobotStateMsg(start_state, req2.start_state);
         bool solved = planner(planning_scene, req2, res);
-        if (solved && !res.trajectory_->empty())
+        if (solved && !res.trajectory->empty())
         {
           // heuristically decide a duration offset for the trajectory (induced by the additional point added as a
           // prefix to the computed trajectory)
-          res.trajectory_->setWayPointDurationFromPrevious(0, std::min(max_dt_offset_,
-                                                                       res.trajectory_->getAverageSegmentDuration()));
-          res.trajectory_->addPrefixWayPoint(prefix_state, 0.0);
+          res.trajectory->setWayPointDurationFromPrevious(0, std::min(max_dt_offset_,
+                                                                      res.trajectory->getAverageSegmentDuration()));
+          res.trajectory->addPrefixWayPoint(prefix_state, 0.0);
           // we add a prefix point, so we need to bump any previously added index positions
           for (std::size_t& added_index : added_path_index)
             added_index++;
@@ -157,7 +165,7 @@ public:
                     "Unable to find a valid state nearby the start state (using jiggle fraction of %lf and %u sampling "
                     "attempts). Passing the original planning request to the planner.",
                     jiggle_fraction_, sampling_attempts_);
-        res.error_code_.val = moveit_msgs::msg::MoveItErrorCodes::START_STATE_IN_COLLISION;
+        res.error_code.val = moveit_msgs::msg::MoveItErrorCodes::START_STATE_IN_COLLISION;
         return false;  // skip remaining adapters and/or planner
       }
     }

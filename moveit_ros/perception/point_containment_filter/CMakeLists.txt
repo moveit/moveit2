@@ -8,4 +8,4 @@ ament_target_dependencies(moveit_point_containment_filter
   geometric_shapes
 )
 
-install(DIRECTORY include/ DESTINATION include)
+install(DIRECTORY include/ DESTINATION include/moveit_ros_perception)

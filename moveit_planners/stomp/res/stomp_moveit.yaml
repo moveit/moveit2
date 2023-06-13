@@ -1,0 +1,64 @@
+stomp_moveit:
+  num_iterations: {
+    type: int,
+    description: "Total number of iterations that STOMP is allowed to run",
+    default_value: 1000,
+    validation: {
+      gt_eq<>: [1]
+    }
+  }
+  num_iterations_after_valid: {
+    type: int,
+    description: "Total number of iterations that STOMP should continue optimizing an already valid solution",
+    default_value: 0,
+    validation: {
+      gt_eq<>: [0]
+    }
+  }
+  num_rollouts: {
+    type: int,
+    description: "Number of noisy trajectories that are being generated for each iteration",
+    default_value: 15,
+    validation: {
+      gt_eq<>: [1]
+    }
+  }
+  max_rollouts: {
+    type: int,
+    description: "Combined number of old and new rollouts that are being processed for each iteration",
+    default_value: 25,
+    validation: {
+      gt_eq<>: [1]
+    }
+  }
+  num_timesteps: {
+    type: int,
+    description: "Number of timesteps used in trajectories - corresponds to waypoint count",
+    default_value: 40,
+    validation: {
+      gt_eq<>: [3]
+    }
+  }
+  exponentiated_cost_sensitivity: {
+    type: double,
+    description: "Exponentiated cost sensitivity coefficient used for probability calculation",
+    default_value: 0.5,
+    validation: {
+      gt_eq<>: [0.0]
+    }
+  }
+  control_cost_weight: {
+    type: double,
+    description: "Weight of the acceleration costs to be applied for the general cost calculation. A value of 0 disables this cost.",
+    default_value: 0.1,
+  }
+  delta_t: {
+    type: double,
+    description: "Assumed time change between consecutive points - used for computing control costs",
+    default_value: 0.1,
+  }
+  path_marker_topic: {
+    type: string,
+    description: "Name of the topic RVIZ subscribes to to visualize the EE path. An empty string disables the publisher.",
+    default_value: "",
+  }

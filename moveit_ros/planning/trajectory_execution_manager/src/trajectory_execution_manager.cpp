@@ -74,10 +74,10 @@ TrajectoryExecutionManager::TrajectoryExecutionManager(const rclcpp::Node::Share
 TrajectoryExecutionManager::~TrajectoryExecutionManager()
 {
   stopExecution(true);
-  private_executor_->cancel();
+  if (private_executor_)
+    private_executor_->cancel();
   if (private_executor_thread_.joinable())
     private_executor_thread_.join();
-  private_executor_.reset();
 }
 
 void TrajectoryExecutionManager::initialize()
@@ -130,6 +130,7 @@ void TrajectoryExecutionManager::initialize()
         RCLCPP_FATAL(LOGGER, "Parameter '~moveit_controller_manager' not specified. This is needed to "
                              "identify the plugin to use for interacting with controllers. No paths can "
                              "be executed.");
+        return;
       }
     }
 
@@ -1667,8 +1668,8 @@ bool TrajectoryExecutionManager::ensureActiveControllers(const std::vector<std::
           ci.last_update_ = rclcpp::Time(0, 0, RCL_ROS_TIME);
         }
         // reset the state update cache
-        for (const std::string& controller_to_activate : controllers_to_deactivate)
-          known_controllers_[controller_to_activate].last_update_ = rclcpp::Time(0, 0, RCL_ROS_TIME);
+        for (const std::string& controller_to_deactivate : controllers_to_deactivate)
+          known_controllers_[controller_to_deactivate].last_update_ = rclcpp::Time(0, 0, RCL_ROS_TIME);
         return controller_manager_->switchControllers(controllers_to_activate, controllers_to_deactivate);
       }
       else

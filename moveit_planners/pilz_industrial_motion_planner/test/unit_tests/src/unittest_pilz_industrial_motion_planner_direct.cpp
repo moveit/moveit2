@@ -44,8 +44,8 @@ using namespace pilz_industrial_motion_planner;
 
 TEST(CommandPlannerTestDirect, ExceptionCoverage)
 {
-  std::shared_ptr<PlanningException> p_ex{ new PlanningException("") };
-  std::shared_ptr<ContextLoaderRegistrationException> clr_ex{ new ContextLoaderRegistrationException("") };
+  auto p_ex = std::make_shared<PlanningException>("");
+  auto clr_ex = std::make_shared<ContextLoaderRegistrationException>("");
 }
 
 /**
@@ -75,44 +75,6 @@ TEST(CommandPlannerTestDirect, CheckDoubleLoadingException)
 
   EXPECT_THROW(planner.registerContextLoader(planning_context_loader),
                pilz_industrial_motion_planner::ContextLoaderRegistrationException);
-}
-
-/**
- * @brief Check that getPlanningContext() fails if the underlying ContextLoader
- * fails to load the context.
- */
-TEST(CommandPlannerTestDirect, FailOnLoadContext)
-{
-  pilz_industrial_motion_planner::CommandPlanner planner;
-
-  // Mock of failing PlanningContextLoader
-  class TestPlanningContextLoader : public pilz_industrial_motion_planner::PlanningContextLoader
-  {
-  public:
-    std::string getAlgorithm() const override
-    {
-      return "Test_Algorithm";
-    }
-
-    bool loadContext(planning_interface::PlanningContextPtr& /* planning_context */, const std::string& /* name */,
-                     const std::string& /* group */) const override
-    {
-      // Mock behaviour: Cannot load planning context.
-      return false;
-    }
-  };
-
-  /// Registered a found loader
-  pilz_industrial_motion_planner::PlanningContextLoaderPtr planning_context_loader =
-      std::make_shared<TestPlanningContextLoader>();
-  planner.registerContextLoader(planning_context_loader);
-
-  moveit_msgs::msg::MotionPlanRequest req;
-  req.planner_id = "Test_Algorithm";
-
-  moveit_msgs::msg::MoveItErrorCodes error_code;
-  EXPECT_FALSE(planner.getPlanningContext(nullptr, req, error_code));
-  EXPECT_EQ(moveit_msgs::msg::MoveItErrorCodes::PLANNING_FAILED, error_code.val);
 }
 
 int main(int argc, char** argv)

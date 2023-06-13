@@ -1,6 +1,5 @@
 import os
 from launch import LaunchDescription
-from launch.actions import ExecuteProcess
 from launch_ros.actions import Node
 from ament_index_python.packages import get_package_share_directory
 from moveit_configs_utils import MoveItConfigsBuilder
@@ -15,9 +14,14 @@ def generate_launch_description():
     )
 
     # Get parameters for the Pose Tracking node
-    servo_params = {
+    pose_tracker_params = {
         "moveit_servo": ParameterBuilder("moveit_servo")
         .yaml("config/pose_tracking_settings.yaml")
+        .to_dict()
+    }
+
+    servo_params = {
+        "moveit_servo": ParameterBuilder("moveit_servo")
         .yaml("config/panda_simulated_config_pose_tracking.yaml")
         .to_dict()
     }
@@ -59,10 +63,7 @@ def generate_launch_description():
         executable="servo_pose_tracking_demo",
         # prefix=['xterm -e gdb -ex run --args'],
         output="screen",
-        parameters=[
-            moveit_config.to_dict(),
-            servo_params,
-        ],
+        parameters=[moveit_config.to_dict(), servo_params, pose_tracker_params],
     )
 
     # ros2_control using FakeSystem as hardware

@@ -39,10 +39,7 @@
 #include <gtest/gtest.h>
 
 #include <moveit/utils/robot_model_test_utils.h>
-
-#include <moveit_servo/enforce_limits.hpp>
 #include <moveit_servo/servo_calcs.h>
-#include <moveit_servo/servo_parameters.h>
 #include <moveit_servo/status_codes.h>
 #include <moveit_servo/utilities.h>
 
@@ -161,9 +158,10 @@ TEST_F(ServoCalcsUnitTests, SingularityScaling)
   rclcpp::Clock clock;
   moveit_servo::StatusCode status;
 
-  double scaling_factor = moveit_servo::velocityScalingFactorForSingularity(
-      joint_model_group_, commanded_twist, svd, pseudo_inverse, hard_stop_singularity_threshold,
-      lower_singularity_threshold, leaving_singularity_threshold_multiplier, clock, robot_state, status);
+  double scaling_factor =
+      moveit_servo::velocityScalingFactorForSingularity(joint_model_group_, commanded_twist, svd, pseudo_inverse,
+                                                        hard_stop_singularity_threshold, lower_singularity_threshold,
+                                                        leaving_singularity_threshold_multiplier, robot_state, status);
 
   EXPECT_EQ(scaling_factor, 0);
 }

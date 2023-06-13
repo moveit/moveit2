@@ -54,7 +54,7 @@ namespace move_group
 {
 // These capabilities are loaded unless listed in disable_capabilities
 // clang-format off
-static const char* DEFAULT_CAPABILITIES[] = {
+static const char* const DEFAULT_CAPABILITIES[] = {
    "move_group/MoveGroupCartesianPathService",
    "move_group/MoveGroupKinematicsService",
    "move_group/MoveGroupExecuteTrajectoryAction",
@@ -278,7 +278,7 @@ int main(int argc, char** argv)
   // Initialize MoveItCpp
   const auto tf_buffer = std::make_shared<tf2_ros::Buffer>(nh->get_clock(), tf2::durationFromSec(10.0));
   const auto moveit_cpp = std::make_shared<moveit_cpp::MoveItCpp>(nh, moveit_cpp_options, tf_buffer);
-  const auto planning_scene_monitor = moveit_cpp->getPlanningSceneMonitor();
+  const auto planning_scene_monitor = moveit_cpp->getPlanningSceneMonitorNonConst();
 
   if (planning_scene_monitor->getPlanningScene())
   {

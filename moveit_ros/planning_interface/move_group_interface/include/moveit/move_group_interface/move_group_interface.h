@@ -87,23 +87,23 @@ public:
   struct Options
   {
     Options(std::string group_name, std::string desc = ROBOT_DESCRIPTION, std::string move_group_namespace = "")
-      : group_name_(std::move(group_name))
-      , robot_description_(std::move(desc))
-      , move_group_namespace_(std::move(move_group_namespace))
+      : group_name(std::move(group_name))
+      , robot_description(std::move(desc))
+      , move_group_namespace(std::move(move_group_namespace))
     {
     }
 
     /// The group to construct the class instance for
-    std::string group_name_;
+    std::string group_name;
 
     /// The robot description parameter name (if different from default)
-    std::string robot_description_;
+    std::string robot_description;
 
     /// Optionally, an instance of the RobotModel to use can be also specified
-    moveit::core::RobotModelConstPtr robot_model_;
+    moveit::core::RobotModelConstPtr robot_model;
 
     /// The namespace for the move group node
-    std::string move_group_namespace_;
+    std::string move_group_namespace;
   };
 
   MOVEIT_STRUCT_FORWARD(Plan);
@@ -112,13 +112,13 @@ public:
   struct Plan
   {
     /// The full starting state used for planning
-    moveit_msgs::msg::RobotState start_state_;
+    moveit_msgs::msg::RobotState start_state;
 
     /// The trajectory of the robot (may not contain joints that are the same as for the start_state_)
-    moveit_msgs::msg::RobotTrajectory trajectory_;
+    moveit_msgs::msg::RobotTrajectory trajectory;
 
     /// The amount of time it took to generate the plan
-    double planning_time_;
+    double planning_time;
   };
 
   /**

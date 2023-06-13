@@ -158,12 +158,12 @@ void MoveGroupSequenceAction::executeSequenceCallbackPlanAndExecute(
           goal->planning_options.planning_scene_diff :
           clearSceneRobotState(goal->planning_options.planning_scene_diff);
 
-  opt.replan_ = goal->planning_options.replan;
-  opt.replan_attempts_ = goal->planning_options.replan_attempts;
-  opt.replan_delay_ = goal->planning_options.replan_delay;
+  opt.replan = goal->planning_options.replan;
+  opt.replan_attemps = goal->planning_options.replan_attempts;
+  opt.replan_delay = goal->planning_options.replan_delay;
   opt.before_execution_callback_ = [this] { startMoveExecutionCallback(); };
 
-  opt.plan_callback_ = [this, &request = goal->request](plan_execution::ExecutableMotionPlan& plan) {
+  opt.plan_callback = [this, &request = goal->request](plan_execution::ExecutableMotionPlan& plan) {
     return planUsingSequenceManager(request, plan);
   };
 
@@ -171,7 +171,7 @@ void MoveGroupSequenceAction::executeSequenceCallbackPlanAndExecute(
   context_->plan_execution_->planAndExecute(plan, planning_scene_diff, opt);
 
   StartStatesMsg start_states_msg;
-  convertToMsg(plan.plan_components_, start_states_msg, action_res->response.planned_trajectories);
+  convertToMsg(plan.plan_components, start_states_msg, action_res->response.planned_trajectories);
   try
   {
     action_res->response.sequence_start = start_states_msg.at(0);
@@ -180,7 +180,7 @@ void MoveGroupSequenceAction::executeSequenceCallbackPlanAndExecute(
   {
     RCLCPP_WARN(LOGGER, "Can not determine start state from empty sequence.");
   }
-  action_res->response.error_code = plan.error_code_;
+  action_res->response.error_code = plan.error_code;
 }
 
 void MoveGroupSequenceAction::convertToMsg(const ExecutableTrajs& trajs, StartStatesMsg& start_states_msg,
@@ -190,8 +190,8 @@ void MoveGroupSequenceAction::convertToMsg(const ExecutableTrajs& trajs, StartSt
   planned_trajs_msgs.resize(trajs.size());
   for (size_t i = 0; i < trajs.size(); ++i)
   {
-    moveit::core::robotStateToRobotStateMsg(trajs.at(i).trajectory_->getFirstWayPoint(), start_states_msg.at(i));
-    trajs.at(i).trajectory_->getRobotTrajectoryMsg(planned_trajs_msgs.at(i));
+    moveit::core::robotStateToRobotStateMsg(trajs.at(i).trajectory->getFirstWayPoint(), start_states_msg.at(i));
+    trajs.at(i).trajectory->getRobotTrajectoryMsg(planned_trajs_msgs.at(i));
   }
 }
 
@@ -269,7 +269,7 @@ bool MoveGroupSequenceAction::planUsingSequenceManager(const moveit_msgs::msg::M
 {
   setMoveState(move_group::PLANNING);
 
-  planning_scene_monitor::LockedPlanningSceneRO lscene(plan.planning_scene_monitor_);
+  planning_scene_monitor::LockedPlanningSceneRO lscene(plan.planning_scene_monitor);
   RobotTrajCont traj_vec;
   try
   {
@@ -283,34 +283,34 @@ bool MoveGroupSequenceAction::planUsingSequenceManager(const moveit_msgs::msg::M
       return false;
     }
 
-    traj_vec = command_list_manager_->solve(plan.planning_scene_, planning_pipeline, req);
+    traj_vec = command_list_manager_->solve(plan.planning_scene, planning_pipeline, req);
   }
   catch (const MoveItErrorCodeException& ex)
   {
     RCLCPP_ERROR_STREAM(LOGGER, "Planning pipeline threw an exception (error code: " << ex.getErrorCode()
                                                                                      << "): " << ex.what());
-    plan.error_code_.val = ex.getErrorCode();
+    plan.error_code.val = ex.getErrorCode();
     return false;
   }
   // LCOV_EXCL_START // Keep MoveIt up even if lower parts throw
   catch (const std::exception& ex)
   {
     RCLCPP_ERROR_STREAM(LOGGER, "Planning pipeline threw an exception: " << ex.what());
-    plan.error_code_.val = moveit_msgs::msg::MoveItErrorCodes::FAILURE;
+    plan.error_code.val = moveit_msgs::msg::MoveItErrorCodes::FAILURE;
     return false;
   }
   // LCOV_EXCL_STOP
 
   if (!traj_vec.empty())
   {
-    plan.plan_components_.resize(traj_vec.size());
+    plan.plan_components.resize(traj_vec.size());
     for (size_t i = 0; i < traj_vec.size(); ++i)
     {
-      plan.plan_components_.at(i).trajectory_ = traj_vec.at(i);
-      plan.plan_components_.at(i).description_ = "plan";
+      plan.plan_components.at(i).trajectory = traj_vec.at(i);
+      plan.plan_components.at(i).description = "plan";
     }
   }
-  plan.error_code_.val = moveit_msgs::msg::MoveItErrorCodes::SUCCESS;
+  plan.error_code.val = moveit_msgs::msg::MoveItErrorCodes::SUCCESS;
   return true;
 }
 

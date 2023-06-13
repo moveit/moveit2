@@ -25,6 +25,7 @@ target_link_libraries(moveit_planning_scene_monitor
 
 add_executable(demo_scene demos/demo_scene.cpp)
 ament_target_dependencies(demo_scene
+  PUBLIC
   rclcpp
   Boost
   moveit_msgs
@@ -32,14 +33,14 @@ ament_target_dependencies(demo_scene
   message_filters
   pluginlib
 )
-target_link_libraries(demo_scene moveit_planning_scene_monitor)
+target_link_libraries(demo_scene PRIVATE moveit_planning_scene_monitor)
 
 install(TARGETS demo_scene
   DESTINATION lib/${PROJECT_NAME}
 )
 
-install(DIRECTORY include/ DESTINATION include)
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/moveit_planning_scene_monitor_export.h DESTINATION include)
+install(DIRECTORY include/ DESTINATION include/moveit_ros_planning)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/moveit_planning_scene_monitor_export.h DESTINATION include/moveit_ros_planning)
 
 if(BUILD_TESTING)
   find_package(ament_cmake_gtest REQUIRED)

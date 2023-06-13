@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>moveit_planners_stomp</name>
+  <version>2.7.4</version>
+  <description>STOMP Motion Planner for MoveIt</description>
+  <maintainer email="henningkayser@picknik.ai">Henning Kayser</maintainer>
+  <license>BSD-3-Clause</license>
+
+  <url type="bugtracker">https://github.com/ros-planning/moveit2/issues</url>
+  <url type="repository">https://github.com/ros-planning/moveit2</url>
+
+  <author email="henningkayser@picknik.ai">Henning Kayser</author>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <depend>generate_parameter_library</depend>
+  <depend>stomp</depend>
+  <depend>moveit_common</depend>
+  <depend>moveit_core</depend>
+  <depend>std_msgs</depend>
+  <depend>tf2_eigen</depend>
+  <depend>visualization_msgs</depend>
+
+  <test_depend>ament_lint_auto</test_depend>
+  <test_depend>ament_lint_common</test_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>

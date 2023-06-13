@@ -6,4 +6,4 @@ ament_target_dependencies(moveit_collision_plugin_loader
   pluginlib
 )
 
-install(DIRECTORY include/ DESTINATION include)
+install(DIRECTORY include/ DESTINATION include/moveit_ros_planning)

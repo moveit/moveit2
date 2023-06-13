@@ -46,8 +46,8 @@
 #include <moveit/planning_scene_monitor/planning_scene_monitor.h>
 #include <sensor_msgs/msg/joint_state.hpp>
 #include <std_msgs/msg/float64.hpp>
-
-#include <moveit_servo/servo_parameters.h>
+// Auto-generated
+#include <moveit_servo_lib_parameters.hpp>
 
 namespace moveit_servo
 {
@@ -59,22 +59,20 @@ public:
    *  \param planning_scene_monitor: PSM should have scene monitor and state monitor
    *                                 already started when passed into this class
    */
-  CollisionCheck(const rclcpp::Node::SharedPtr& node, const ServoParameters::SharedConstPtr& parameters,
-                 const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor);
+  CollisionCheck(const rclcpp::Node::SharedPtr& node,
+                 const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor,
+                 const std::shared_ptr<const servo::ParamListener>& servo_param_listener);
 
   ~CollisionCheck()
   {
-    if (timer_)
-    {
-      timer_->cancel();
-    }
+    stop();
   }
 
-  /** \brief start the Timer that regulates collision check rate */
+  /** \brief Start the Timer that regulates collision check rate */
   void start();
 
-  /** \brief Pause or unpause processing servo commands while keeping the timers alive */
-  void setPaused(bool paused);
+  /** \brief Stop the Timer that regulates collision check rate */
+  void stop();
 
 private:
   /** \brief Run one iteration of collision checking */
@@ -86,8 +84,9 @@ private:
   // Pointer to the ROS node
   const std::shared_ptr<rclcpp::Node> node_;
 
-  // Parameters from yaml
-  const ServoParameters::SharedConstPtr parameters_;
+  // Servo parameters
+  const std::shared_ptr<const servo::ParamListener> servo_param_listener_;
+  servo::Params servo_params_;
 
   // Pointer to the collision environment
   planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor_;
@@ -98,11 +97,10 @@ private:
   // Scale robot velocity according to collision proximity and user-defined thresholds.
   // I scaled exponentially (cubic power) so velocity drops off quickly after the threshold.
   // Proximity decreasing --> decelerate
-  double velocity_scale_ = 1;
-  double self_collision_distance_ = 0;
-  double scene_collision_distance_ = 0;
+  double velocity_scale_ = 1.0;
+  double self_collision_distance_ = 0.0;
+  double scene_collision_distance_ = 0.0;
   bool collision_detected_ = false;
-  bool paused_ = false;
 
   const double self_velocity_scale_coefficient_;
   const double scene_velocity_scale_coefficient_;
