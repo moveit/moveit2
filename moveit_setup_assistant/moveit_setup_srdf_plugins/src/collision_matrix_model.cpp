@@ -58,7 +58,8 @@ static const std::unordered_map<DisabledReason, QVariant> LONG_REASONS_TO_BRUSH 
     ( USER, QBrush(QColor("yellow")) )
     ( NOT_DISABLED, QBrush());  // clang-format on
 
-CollisionMatrixModel::CollisionMatrixModel(DefaultCollisions& default_collisions, const std::vector<std::string>& names, QObject* parent)
+CollisionMatrixModel::CollisionMatrixModel(DefaultCollisions& default_collisions, const std::vector<std::string>& names,
+                                           QObject* parent)
   : QAbstractTableModel(parent), default_collisions_(default_collisions), std_names_(names)
 {
   int idx = 0;
@@ -100,7 +101,8 @@ QVariant CollisionMatrixModel::data(const QModelIndex& index, int role) const
   switch (role)
   {
     case Qt::CheckStateRole:
-      return (reason.empty() || reason == DefaultCollisions::COLLISION_DISABLING_REASON_ENABLED) ? Qt::Unchecked : Qt::Checked;
+      return (reason.empty() || reason == DefaultCollisions::COLLISION_DISABLING_REASON_ENABLED) ? Qt::Unchecked :
+                                                                                                   Qt::Checked;
     case Qt::ToolTipRole:
       return !reason.empty() ? QString::fromStdString(reason) : QString();
     case Qt::BackgroundRole:
@@ -121,7 +123,8 @@ bool CollisionMatrixModel::setData(const QModelIndex& index, const QVariant& val
 
   bool new_value = (value.toInt() == Qt::Checked);
 
-  bool changed = default_collisions_.setDefault(std_names_[visual_to_index_[index.row()]], std_names_[visual_to_index_[index.column()]], new_value);
+  bool changed = default_collisions_.setDefault(std_names_[visual_to_index_[index.row()]],
+                                                std_names_[visual_to_index_[index.column()]], new_value);
   if (changed)
   {
     QModelIndex mirror = this->index(index.column(), index.row());

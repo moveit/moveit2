@@ -70,7 +70,7 @@ public:
       if (req.max_cartesian_speed <= 0.0)
         return result;
       RCLCPP_DEBUG(LOGGER, "'%s' below '%f' [m/s] for link '%s'", getDescription().c_str(), req.max_cartesian_speed,
-                req.cartesian_speed_limited_link.c_str());
+                   req.cartesian_speed_limited_link.c_str());
       if (!trajectory_processing::limitMaxCartesianLinkSpeed(*res.trajectory, req.max_cartesian_speed,
                                                              req.cartesian_speed_limited_link))
       {

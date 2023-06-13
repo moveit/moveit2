@@ -187,7 +187,7 @@ int DefaultCollisions::getThreadProgress() const
   return progress_;
 }
 
-bool DefaultCollisions::setDefault(const std::string &name, bool disabled)
+bool DefaultCollisions::setDefault(const std::string& name, bool disabled)
 {
   bool changed = false;
   if (disabled)
@@ -231,8 +231,8 @@ bool DefaultCollisions::setDefault(const std::string &name, bool disabled)
 struct PairMatcher
 {
   PairMatcher(const std::string& link1, const std::string& link2)
-      : search(link1 < link2 ? std::make_pair(std::cref(link1), std::cref(link2)) :
-               std::make_pair(std::cref(link2), std::cref(link1)))
+    : search(link1 < link2 ? std::make_pair(std::cref(link1), std::cref(link2)) :
+                             std::make_pair(std::cref(link2), std::cref(link1)))
   {
   }
 
@@ -259,7 +259,7 @@ bool DefaultCollisions::disabledByDefault(const std::string& link1, const std::s
   return false;
 }
 
-std::string DefaultCollisions::getCollisionDisablingReason(const std::string &link1, const std::string &link2) const
+std::string DefaultCollisions::getCollisionDisablingReason(const std::string& link1, const std::string& link2) const
 {
   auto it = find(srdf_config_->getDisabledCollisions(), link1, link2);
   if (it != srdf_config_->getDisabledCollisions().end())
@@ -271,9 +271,9 @@ std::string DefaultCollisions::getCollisionDisablingReason(const std::string &li
   return "";
 }
 
-bool DefaultCollisions::setDefault(const std::string &link1, const std::string &link2, bool disable)
+bool DefaultCollisions::setDefault(const std::string& link1, const std::string& link2, bool disable)
 {
-  srdf::Model::CollisionPair p{link1, link2, std::string()};
+  srdf::Model::CollisionPair p{ link1, link2, std::string() };
   if (p.link1_ > p.link2_)
     std::swap(p.link1_, p.link2_);
 

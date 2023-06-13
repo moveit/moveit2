@@ -266,8 +266,7 @@ void DefaultCollisionsWidget::finishGeneratingCollisionTable()
 // ******************************************************************************************
 void DefaultCollisionsWidget::loadCollisionTable()
 {
-  CollisionMatrixModel* matrix_model =
-      new CollisionMatrixModel(setup_step_, setup_step_.getCollidingLinks());
+  CollisionMatrixModel* matrix_model = new CollisionMatrixModel(setup_step_, setup_step_.getCollidingLinks());
   QAbstractItemModel* model;
 
   if (view_mode_buttons_->checkedId() == MATRIX_MODE)

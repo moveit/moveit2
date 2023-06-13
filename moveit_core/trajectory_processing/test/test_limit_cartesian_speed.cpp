@@ -132,14 +132,14 @@ void printTrajectory(robot_trajectory::RobotTrajectory& trajectory)
   unsigned int count = trajectory.getWayPointCount();
 
   RCLCPP_INFO_STREAM(LOGGER,
-                        "trajectory length is " << trajectory.getWayPointDurationFromStart(count - 1) << " seconds.");
+                     "trajectory length is " << trajectory.getWayPointDurationFromStart(count - 1) << " seconds.");
   for (unsigned i = 0; i < count; i++)
   {
     moveit::core::RobotStatePtr point = trajectory.getWayPointPtr(i);
-    RCLCPP_INFO_STREAM(LOGGER, "Waypoint " << i << " time " << trajectory.getWayPointDurationFromStart(i)
-                                                   << " pos " << point->getVariablePosition(idx[0]) << " vel "
-                                                   << point->getVariableVelocity(idx[0]) << " acc "
-                                                   << point->getVariableAcceleration(idx[0]));
+    RCLCPP_INFO_STREAM(LOGGER, "Waypoint " << i << " time " << trajectory.getWayPointDurationFromStart(i) << " pos "
+                                           << point->getVariablePosition(idx[0]) << " vel "
+                                           << point->getVariableVelocity(idx[0]) << " acc "
+                                           << point->getVariableAcceleration(idx[0]));
 
     if (i > 0)
     {

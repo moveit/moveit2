@@ -52,7 +52,8 @@ class CollisionMatrixModel : public QAbstractTableModel
 {
   Q_OBJECT
 public:
-  CollisionMatrixModel(DefaultCollisions& default_collisions, const std::vector<std::string>& names, QObject* parent = nullptr);
+  CollisionMatrixModel(DefaultCollisions& default_collisions, const std::vector<std::string>& names,
+                       QObject* parent = nullptr);
   int rowCount(const QModelIndex& parent = QModelIndex()) const override;
   int columnCount(const QModelIndex& parent = QModelIndex()) const override;
   QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
