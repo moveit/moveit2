@@ -53,6 +53,7 @@ struct MockMiddlewareHandle : public planning_scene_monitor::CurrentStateMonitor
   MOCK_METHOD(void, resetJointStateSubscription, (), (override));
   MOCK_METHOD(std::string, getJointStateTopicName, (), (const, override));
   MOCK_METHOD(bool, sleepFor, (const std::chrono::nanoseconds& nanoseconds), (const, override));
+  MOCK_METHOD(bool, ok, (), (const, override));
   MOCK_METHOD(void, createStaticTfSubscription, (TfCallback callback), (override));
   MOCK_METHOD(void, createDynamicTfSubscription, (TfCallback callback), (override));
   MOCK_METHOD(std::string, getStaticTfTopicName, (), (const, override));

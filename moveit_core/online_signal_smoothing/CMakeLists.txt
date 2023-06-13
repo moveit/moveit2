@@ -27,9 +27,14 @@ target_include_directories(${BUTTERWORTH_FILTER_LIB} PUBLIC
 set_target_properties(${BUTTERWORTH_FILTER_LIB} PROPERTIES VERSION
   "${${PROJECT_NAME}_VERSION}"
 )
+
+generate_parameter_library(moveit_butterworth_parameters src/butterworth_parameters.yaml)
+
 target_link_libraries(${BUTTERWORTH_FILTER_LIB}
   ${SMOOTHING_BASE_LIB}
+  moveit_butterworth_parameters
   moveit_robot_model
+  moveit_smoothing_base
 )
 ament_target_dependencies(${BUTTERWORTH_FILTER_LIB}
   srdfdom  # include dependency from moveit_robot_model

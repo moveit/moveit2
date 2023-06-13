@@ -366,9 +366,7 @@ inline void getAverageSupport(const btConvexShape* shape, const btVector3& local
         pt_sum = pt;
         max_support = sup;
       }
-      else if (sup < max_support - BULLET_EPSILON)
-      {
-      }
+      else if (sup < max_support - BULLET_EPSILON) {}
       else
       {
         pt_count += 1;

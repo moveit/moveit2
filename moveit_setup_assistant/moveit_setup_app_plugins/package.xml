@@ -11,6 +11,7 @@
   <buildtool_depend>ament_cmake</buildtool_depend>
 
   <depend>ament_index_cpp</depend>
+  <depend>moveit_configs_utils</depend>
   <depend>moveit_ros_visualization</depend>
   <depend>moveit_setup_framework</depend>
   <depend>pluginlib</depend>
