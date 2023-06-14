@@ -56,18 +56,15 @@ namespace stomp_moveit
 class StompSmoothingAdapter : public planning_request_adapter::PlanningRequestAdapter
 {
 public:
-  StompSmoothingAdapter() : planning_request_adapter::PlanningRequestAdapter()
-  {
-  }
-
   void initialize(const rclcpp::Node::SharedPtr& node, const std::string& parameter_namespace) override
   {
+    node_ = node;
     param_listener_ = std::make_shared<stomp_moveit::ParamListener>(node, parameter_namespace);
   }
 
-  std::string getDescription() const override
+  [[nodiscard]] std::string getDescription() const override
   {
-    return "Stomp Smoothing Adapter";
+    return std::string("Stomp Smoothing Adapter");
   }
 
   bool adaptAndPlan(const PlannerFn& planner, const planning_scene::PlanningSceneConstPtr& ps,
@@ -101,11 +98,19 @@ public:
     }
 
     // Initialize STOMP Planner
-    PlanningContextPtr planning_context =
-        std::make_shared<StompPlanningContext>("STOMP", req.group_name, param_listener_->get_params());
+    auto const params = param_listener_->get_params();
+    std::shared_ptr<StompPlanningContext> planning_context =
+        std::make_shared<StompPlanningContext>("STOMP", req.group_name, params);
     planning_context->clear();
     planning_context->setPlanningScene(ps);
     planning_context->setMotionPlanRequest(seed_req);
+
+    if (!params.path_marker_topic.empty())
+    {
+      auto path_publisher = node_->create_publisher<visualization_msgs::msg::MarkerArray>(params.path_marker_topic,
+                                                                                          rclcpp::SystemDefaultsQoS());
+      planning_context->setPathPublisher(path_publisher);
+    }
 
     // Solve
     RCLCPP_INFO(rclcpp::get_logger("stomp_moveit"), "Smoothing result trajectory with STOMP");
@@ -122,6 +127,7 @@ public:
 
 private:
   std::shared_ptr<stomp_moveit::ParamListener> param_listener_;
+  rclcpp::Node::SharedPtr node_;
 };
 }  // namespace stomp_moveit
 
