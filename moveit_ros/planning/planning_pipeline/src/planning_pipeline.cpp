@@ -433,6 +433,9 @@ bool planning_pipeline::PlanningPipeline::generatePlan(const planning_scene::Pla
   // Make sure that planner id is set
   if (res.planner_id.empty())
   {
+    RCLCPP_WARN(LOGGER, "The planner plugin did not fill out the 'planner_id' field of the MotionPlanResponse. Setting "
+                        "it to the planner ID name of the MotionPlanRequest assuming that the planner plugin does warn "
+                        "you if it does not use the requested planner.");
     res.planner_id = req.planner_id;
   }
 
