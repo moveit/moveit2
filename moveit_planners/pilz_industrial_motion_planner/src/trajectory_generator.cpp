@@ -307,6 +307,7 @@ bool TrajectoryGenerator::generate(const planning_scene::PlanningSceneConstPtr& 
   RCLCPP_INFO_STREAM(LOGGER, "Generating " << req.planner_id << " trajectory...");
   rclcpp::Time planning_begin = clock_->now();
 
+  res.planner_id = req.planner_id;
   try
   {
     validateRequest(req);

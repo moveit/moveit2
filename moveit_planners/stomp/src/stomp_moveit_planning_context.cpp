@@ -209,6 +209,7 @@ bool StompPlanningContext::solve(planning_interface::MotionPlanResponse& res)
   // Start time
   auto time_start = std::chrono::steady_clock::now();
 
+  res.planner_id = std::string("stomp");
   // Default to happy path
   res.error_code.val = moveit_msgs::msg::MoveItErrorCodes::SUCCESS;
 
