@@ -198,7 +198,7 @@ void planning_pipeline::PlanningPipeline::configure()
   }
   else
   {
-    RCLCPP_INFO(LOGGER, "No planning request adapter names specified.");
+    RCLCPP_WARN(LOGGER, "No planning request adapter names specified.");
   }
   displayComputedMotionPlans(true);
   checkSolutionPaths(true);
