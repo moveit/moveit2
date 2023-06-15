@@ -53,7 +53,13 @@ planning_pipeline::PlanningPipeline::PlanningPipeline(const moveit::core::RobotM
                                                       const std::string& parameter_namespace,
                                                       const std::string& planner_plugin_param_name,
                                                       const std::string& adapter_plugins_param_name)
-  : active_{ false }, node_(node), parameter_namespace_(parameter_namespace), robot_model_(model)
+  : active_{ false }
+  , node_(node)
+  , parameter_namespace_(parameter_namespace)
+  , display_computed_motion_plans_{ false }
+  , publish_received_requests_{ false }
+  , robot_model_(model)
+  , check_solution_paths_{ false }
 {
   std::string planner_plugin_fullname = parameter_namespace_ + "." + planner_plugin_param_name;
   if (parameter_namespace_.empty())
@@ -88,19 +94,18 @@ planning_pipeline::PlanningPipeline::PlanningPipeline(const moveit::core::RobotM
   : active_{ false }
   , node_(node)
   , parameter_namespace_(parameter_namespace)
+  , display_computed_motion_plans_{ false }
+  , publish_received_requests_{ false }
   , planner_plugin_name_(planner_plugin_name)
   , adapter_plugin_names_(adapter_plugin_names)
   , robot_model_(model)
+  , check_solution_paths_{ false }
 {
   configure();
 }
 
 void planning_pipeline::PlanningPipeline::configure()
 {
-  check_solution_paths_ = false;  // this is set to true below
-  publish_received_requests_ = false;
-  display_computed_motion_plans_ = false;  // this is set to true below
-
   // load the planning plugin
   try
   {
@@ -110,42 +115,37 @@ void planning_pipeline::PlanningPipeline::configure()
   catch (pluginlib::PluginlibException& ex)
   {
     RCLCPP_FATAL(LOGGER, "Exception while creating planning plugin loader %s", ex.what());
+    throw;
   }
 
   std::vector<std::string> classes;
   if (planner_plugin_loader_)
     classes = planner_plugin_loader_->getDeclaredClasses();
-  if (planner_plugin_name_.empty() && classes.size() == 1)
+
+  if (planner_plugin_name_.empty())
   {
-    planner_plugin_name_ = classes[0];
-    RCLCPP_INFO(
-        LOGGER,
-        "No '~planning_plugin' parameter specified, but only '%s' planning plugin is available. Using that one.",
-        planner_plugin_name_.c_str());
+    std::string classes_str = boost::algorithm::join(classes, ", ");
+    throw std::runtime_error("Planning plugin name is empty. Please choose one of the available plugins: " +
+                             classes_str);
   }
-  if (planner_plugin_name_.empty() && classes.size() > 1)
-  {
-    planner_plugin_name_ = classes[0];
-    RCLCPP_INFO(
-        LOGGER,
-        "Multiple planning plugins available. You should specify the '~planning_plugin' parameter. Using '%s' for "
-        "now.",
-        planner_plugin_name_.c_str());
-  }
+
   try
   {
     planner_instance_ = planner_plugin_loader_->createUniqueInstance(planner_plugin_name_);
     if (!planner_instance_->initialize(robot_model_, node_, parameter_namespace_))
+    {
       throw std::runtime_error("Unable to initialize planning plugin");
+    }
     RCLCPP_INFO(LOGGER, "Using planning interface '%s'", planner_instance_->getDescription().c_str());
   }
   catch (pluginlib::PluginlibException& ex)
   {
     std::string classes_str = boost::algorithm::join(classes, ", ");
-    RCLCPP_ERROR(LOGGER,
+    RCLCPP_FATAL(LOGGER,
                  "Exception while loading planner '%s': %s"
                  "Available plugins: %s",
                  planner_plugin_name_.c_str(), ex.what(), classes_str.c_str());
+    throw;
   }
 
   // load the planner request adapters
@@ -160,7 +160,8 @@ void planning_pipeline::PlanningPipeline::configure()
     }
     catch (pluginlib::PluginlibException& ex)
     {
-      RCLCPP_ERROR(LOGGER, "Exception while creating planning plugin loader %s", ex.what());
+      RCLCPP_FATAL(LOGGER, "Exception while creating planning plugin loader %s", ex.what());
+      throw;
     }
 
     if (adapter_plugin_loader_)
@@ -174,8 +175,9 @@ void planning_pipeline::PlanningPipeline::configure()
         }
         catch (pluginlib::PluginlibException& ex)
         {
-          RCLCPP_ERROR(LOGGER, "Exception while loading planning adapter plugin '%s': %s", adapter_plugin_name.c_str(),
+          RCLCPP_FATAL(LOGGER, "Exception while loading planning adapter plugin '%s': %s", adapter_plugin_name.c_str(),
                        ex.what());
+          throw;
         }
         if (ad)
         {
@@ -193,6 +195,10 @@ void planning_pipeline::PlanningPipeline::configure()
         adapter_chain_->addAdapter(ad);
       }
     }
+  }
+  else
+  {
+    RCLCPP_WARN(LOGGER, "No planning request adapter names specified.");
   }
   displayComputedMotionPlans(true);
   checkSolutionPaths(true);
@@ -427,6 +433,9 @@ bool planning_pipeline::PlanningPipeline::generatePlan(const planning_scene::Pla
   // Make sure that planner id is set
   if (res.planner_id.empty())
   {
+    RCLCPP_WARN(LOGGER, "The planner plugin did not fill out the 'planner_id' field of the MotionPlanResponse. Setting "
+                        "it to the planner ID name of the MotionPlanRequest assuming that the planner plugin does warn "
+                        "you if it does not use the requested planner.");
     res.planner_id = req.planner_id;
   }
 
