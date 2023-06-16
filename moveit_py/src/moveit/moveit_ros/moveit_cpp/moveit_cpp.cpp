@@ -67,7 +67,7 @@ void init_moveit_py(py::module& m)
                auto utils = py::module::import("moveit.utils");
                // TODO (peterdavidfagan): replace python method with C++ method
                std::string params_filepath =
-                   utils.attr("create_params_file_from_dict")(config_dict, "moveit_py").cast<std::string>();
+                   utils.attr("create_params_file_from_dict")(config_dict, node_name).cast<std::string>();
                launch_arguments = { "--ros-args", "--params-file", params_filepath };
              }
              else if (!launch_params_filepath.empty())
