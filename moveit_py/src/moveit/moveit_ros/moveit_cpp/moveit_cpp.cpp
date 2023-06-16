@@ -79,7 +79,7 @@ void init_moveit_py(py::module& m)
              if (!rclcpp::ok())
              {
                RCLCPP_INFO(LOGGER, "Initialize rclcpp");
-               std::vector<char*> chars;
+               std::vector<const char*> chars;
                chars.reserve(launch_arguments.size());
                for (const auto& arg : launch_arguments)
                {
