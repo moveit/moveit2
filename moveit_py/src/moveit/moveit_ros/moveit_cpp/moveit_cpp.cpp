@@ -83,7 +83,7 @@ void init_moveit_py(py::module& m)
                chars.reserve(launch_arguments.size());
                for (const auto& arg : launch_arguments)
                {
-                 chars.push_back(const_cast<char*>(arg.c_str()));
+                 chars.push_back(arg.c_str());
                }
 
                rclcpp::init(launch_arguments.size(), chars.data());
