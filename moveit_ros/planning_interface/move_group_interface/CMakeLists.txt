@@ -26,6 +26,3 @@ endif()
 
 install(DIRECTORY include/ DESTINATION include/moveit_ros_planning_interface)
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/moveit_move_group_interface_export.h DESTINATION include/moveit_ros_planning_interface)
-
-#add_executable(demo src/demo.cpp)
-#target_link_libraries(demo moveit_move_group_interface ${LIBS} ${Boost_LIBRARIES})
