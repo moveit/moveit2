@@ -1741,26 +1741,38 @@ bool PlanningScene::shapesAndPosesFromCollisionObjectMessage(const moveit_msgs::
   auto treat_shape_vectors = [&append](const auto& shape_vector,        // the shape_msgs of each type
                                        const auto& shape_poses_vector,  // std::vector<const geometry_msgs::Pose>
                                        const std::string& shape_type) {
-    if (shape_vector.size() > shape_poses_vector.size())
+    try
     {
-      RCLCPP_DEBUG_STREAM(LOGGER, "Number of " << shape_type
-                                               << " does not match number of poses "
-                                                  "in collision object message. Assuming identity.");
-      for (std::size_t i = 0; i < shape_vector.size(); ++i)
+      if (shape_vector.size() > shape_poses_vector.size())
       {
-        if (i >= shape_poses_vector.size())
+        RCLCPP_DEBUG_STREAM(LOGGER, "Number of " << shape_type
+                                                 << " does not match number of poses "
+                                                    "in collision object message. Assuming identity.");
+        for (std::size_t i = 0; i < shape_vector.size(); ++i)
         {
-          append(shapes::constructShapeFromMsg(shape_vector[i]),
-                 geometry_msgs::msg::Pose());  // Empty shape pose => Identity
+          if (i >= shape_poses_vector.size())
+          {
+            append(shapes::constructShapeFromMsg(shape_vector[i]),
+                   geometry_msgs::msg::Pose());  // Empty shape pose => Identity
+          }
+          else
+          {
+            append(shapes::constructShapeFromMsg(shape_vector[i]), shape_poses_vector[i]);
+          }
         }
-        else
+      }
+      else
+      {
+        for (std::size_t i = 0; i < shape_vector.size(); ++i)
+        {
           append(shapes::constructShapeFromMsg(shape_vector[i]), shape_poses_vector[i]);
+        }
       }
     }
-    else
+    catch (const std::runtime_error& e)
     {
-      for (std::size_t i = 0; i < shape_vector.size(); ++i)
-        append(shapes::constructShapeFromMsg(shape_vector[i]), shape_poses_vector[i]);
+      RCLCPP_ERROR_STREAM(LOGGER, e.what());
+      return false;
     }
   };
 

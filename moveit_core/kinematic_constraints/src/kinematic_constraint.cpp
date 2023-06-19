@@ -387,7 +387,16 @@ bool PositionConstraint::configure(const moveit_msgs::msg::PositionConstraint& p
   // load primitive shapes, first clearing any we already have
   for (std::size_t i = 0; i < pc.constraint_region.primitives.size(); ++i)
   {
-    std::unique_ptr<shapes::Shape> shape(shapes::constructShapeFromMsg(pc.constraint_region.primitives[i]));
+    try
+    {
+      std::unique_ptr<shapes::Shape> shape(shapes::constructShapeFromMsg(pc.constraint_region.primitives[i]));
+    }
+    catch (const std::runtime_error& e)
+    {
+      RCLCPP_ERROR_STREAM(LOGGER, e.what());
+      return false;
+    }
+
     if (shape)
     {
       if (pc.constraint_region.primitive_poses.size() <= i)
@@ -415,7 +424,15 @@ bool PositionConstraint::configure(const moveit_msgs::msg::PositionConstraint& p
   // load meshes
   for (std::size_t i = 0; i < pc.constraint_region.meshes.size(); ++i)
   {
-    std::unique_ptr<shapes::Shape> shape(shapes::constructShapeFromMsg(pc.constraint_region.meshes[i]));
+    try
+    {
+      std::unique_ptr<shapes::Shape> shape(shapes::constructShapeFromMsg(pc.constraint_region.meshes[i]));
+    }
+    catch (const std::runtime_error& e)
+    {
+      RCLCPP_ERROR_STREAM(LOGGER, e.what());
+      return false;
+    }
     if (shape)
     {
       if (pc.constraint_region.mesh_poses.size() <= i)
