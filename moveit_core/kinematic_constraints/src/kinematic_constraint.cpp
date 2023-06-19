@@ -390,35 +390,37 @@ bool PositionConstraint::configure(const moveit_msgs::msg::PositionConstraint& p
     try
     {
       std::unique_ptr<shapes::Shape> shape(shapes::constructShapeFromMsg(pc.constraint_region.primitives[i]));
+
+      if (shape)
+      {
+        if (pc.constraint_region.primitive_poses.size() <= i)
+        {
+          RCLCPP_WARN(LOGGER, "Constraint region message does not contain enough primitive poses");
+          continue;
+        }
+        Eigen::Isometry3d t;
+        tf2::fromMsg(pc.constraint_region.primitive_poses[i], t);
+        ASSERT_ISOMETRY(t)  // unsanitized input, could contain a non-isometry
+        constraint_region_pose_.push_back(t);
+        if (!mobile_frame_)
+          tf.transformPose(pc.header.frame_id, constraint_region_pose_.back(), constraint_region_pose_.back());
+
+        const bodies::BodyPtr body(bodies::createEmptyBodyFromShapeType(shape->type));
+        body->setDimensionsDirty(shape.get());
+        body->setPoseDirty(constraint_region_pose_.back());
+        body->updateInternalData();
+        constraint_region_.push_back(body);
+      }
+      else
+      {
+        RCLCPP_WARN(LOGGER, "Could not construct primitive shape %zu", i);
+      }
     }
     catch (const std::runtime_error& e)
     {
       RCLCPP_ERROR_STREAM(LOGGER, e.what());
       return false;
     }
-
-    if (shape)
-    {
-      if (pc.constraint_region.primitive_poses.size() <= i)
-      {
-        RCLCPP_WARN(LOGGER, "Constraint region message does not contain enough primitive poses");
-        continue;
-      }
-      Eigen::Isometry3d t;
-      tf2::fromMsg(pc.constraint_region.primitive_poses[i], t);
-      ASSERT_ISOMETRY(t)  // unsanitized input, could contain a non-isometry
-      constraint_region_pose_.push_back(t);
-      if (!mobile_frame_)
-        tf.transformPose(pc.header.frame_id, constraint_region_pose_.back(), constraint_region_pose_.back());
-
-      const bodies::BodyPtr body(bodies::createEmptyBodyFromShapeType(shape->type));
-      body->setDimensionsDirty(shape.get());
-      body->setPoseDirty(constraint_region_pose_.back());
-      body->updateInternalData();
-      constraint_region_.push_back(body);
-    }
-    else
-      RCLCPP_WARN(LOGGER, "Could not construct primitive shape %zu", i);
   }
 
   // load meshes
@@ -427,34 +429,34 @@ bool PositionConstraint::configure(const moveit_msgs::msg::PositionConstraint& p
     try
     {
       std::unique_ptr<shapes::Shape> shape(shapes::constructShapeFromMsg(pc.constraint_region.meshes[i]));
+      if (shape)
+      {
+        if (pc.constraint_region.mesh_poses.size() <= i)
+        {
+          RCLCPP_WARN(LOGGER, "Constraint region message does not contain enough primitive poses");
+          continue;
+        }
+        Eigen::Isometry3d t;
+        tf2::fromMsg(pc.constraint_region.mesh_poses[i], t);
+        ASSERT_ISOMETRY(t)  // unsanitized input, could contain a non-isometry
+        constraint_region_pose_.push_back(t);
+        if (!mobile_frame_)
+          tf.transformPose(pc.header.frame_id, constraint_region_pose_.back(), constraint_region_pose_.back());
+        const bodies::BodyPtr body(bodies::createEmptyBodyFromShapeType(shape->type));
+        body->setDimensionsDirty(shape.get());
+        body->setPoseDirty(constraint_region_pose_.back());
+        body->updateInternalData();
+        constraint_region_.push_back(body);
+      }
+      else
+      {
+        RCLCPP_WARN(LOGGER, "Could not construct mesh shape %zu", i);
+      }
     }
     catch (const std::runtime_error& e)
     {
       RCLCPP_ERROR_STREAM(LOGGER, e.what());
       return false;
-    }
-    if (shape)
-    {
-      if (pc.constraint_region.mesh_poses.size() <= i)
-      {
-        RCLCPP_WARN(LOGGER, "Constraint region message does not contain enough primitive poses");
-        continue;
-      }
-      Eigen::Isometry3d t;
-      tf2::fromMsg(pc.constraint_region.mesh_poses[i], t);
-      ASSERT_ISOMETRY(t)  // unsanitized input, could contain a non-isometry
-      constraint_region_pose_.push_back(t);
-      if (!mobile_frame_)
-        tf.transformPose(pc.header.frame_id, constraint_region_pose_.back(), constraint_region_pose_.back());
-      const bodies::BodyPtr body(bodies::createEmptyBodyFromShapeType(shape->type));
-      body->setDimensionsDirty(shape.get());
-      body->setPoseDirty(constraint_region_pose_.back());
-      body->updateInternalData();
-      constraint_region_.push_back(body);
-    }
-    else
-    {
-      RCLCPP_WARN(LOGGER, "Could not construct mesh shape %zu", i);
     }
   }
 
