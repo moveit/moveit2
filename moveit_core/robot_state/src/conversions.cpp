@@ -195,7 +195,8 @@ private:
   const geometry_msgs::msg::Pose* pose_;
 };
 
-static void _attachedBodyToMsg(const AttachedBody& attached_body, moveit_msgs::msg::AttachedCollisionObject& attached_collision_object)
+static void _attachedBodyToMsg(const AttachedBody& attached_body,
+                               moveit_msgs::msg::AttachedCollisionObject& attached_collision_object)
 {
   attached_collision_object.link_name = attached_body.getAttachedLinkName();
   attached_collision_object.detach_posture = attached_body.getDetachPosture();
@@ -238,12 +239,14 @@ static void _attachedBodyToMsg(const AttachedBody& attached_body, moveit_msgs::m
   }
 }
 
-static void _msgToAttachedBody(const Transforms* tf, const moveit_msgs::msg::AttachedCollisionObject& attached_collision_object,
+static void _msgToAttachedBody(const Transforms* tf,
+                               const moveit_msgs::msg::AttachedCollisionObject& attached_collision_object,
                                RobotState& state)
 {
   if (attached_collision_object.object.operation == moveit_msgs::msg::CollisionObject::ADD)
   {
-    if (!attached_collision_object.object.primitives.empty() || !attached_collision_object.object.meshes.empty() || !attached_collision_object.object.planes.empty())
+    if (!attached_collision_object.object.primitives.empty() || !attached_collision_object.object.meshes.empty() ||
+        !attached_collision_object.object.planes.empty())
     {
       if (attached_collision_object.object.primitives.size() != attached_collision_object.object.primitive_poses.size())
       {
@@ -264,7 +267,8 @@ static void _msgToAttachedBody(const Transforms* tf, const moveit_msgs::msg::Att
         return;
       }
 
-      if (attached_collision_object.object.subframe_poses.size() != attached_collision_object.object.subframe_names.size())
+      if (attached_collision_object.object.subframe_poses.size() !=
+          attached_collision_object.object.subframe_names.size())
       {
         RCLCPP_ERROR(LOGGER, "Number of subframe poses does not match number of subframe names in message");
         return;
@@ -278,7 +282,9 @@ static void _msgToAttachedBody(const Transforms* tf, const moveit_msgs::msg::Att
 
         std::vector<shapes::ShapeConstPtr> shapes;
         EigenSTL::vector_Isometry3d shape_poses;
-        const auto num_shapes = attached_collision_object.object.primitives.size() + attached_collision_object.object.meshes.size() + attached_collision_object.object.planes.size();
+        const auto num_shapes = attached_collision_object.object.primitives.size() +
+                                attached_collision_object.object.meshes.size() +
+                                attached_collision_object.object.planes.size();
         shapes.reserve(num_shapes);
         shape_poses.reserve(num_shapes);
 
@@ -294,15 +300,18 @@ static void _msgToAttachedBody(const Transforms* tf, const moveit_msgs::msg::Att
         {
           for (std::size_t i = 0; i < attached_collision_object.object.primitives.size(); ++i)
           {
-            append(shapes::constructShapeFromMsg(attached_collision_object.object.primitives[i]), attached_collision_object.object.primitive_poses[i]);
+            append(shapes::constructShapeFromMsg(attached_collision_object.object.primitives[i]),
+                   attached_collision_object.object.primitive_poses[i]);
           }
           for (std::size_t i = 0; i < attached_collision_object.object.meshes.size(); ++i)
           {
-            append(shapes::constructShapeFromMsg(attached_collision_object.object.meshes[i]), attached_collision_object.object.mesh_poses[i]);
+            append(shapes::constructShapeFromMsg(attached_collision_object.object.meshes[i]),
+                   attached_collision_object.object.mesh_poses[i]);
           }
           for (std::size_t i = 0; i < attached_collision_object.object.planes.size(); ++i)
           {
-            append(shapes::constructShapeFromMsg(attached_collision_object.object.planes[i]), attached_collision_object.object.plane_poses[i]);
+            append(shapes::constructShapeFromMsg(attached_collision_object.object.planes[i]),
+                   attached_collision_object.object.plane_poses[i]);
           }
         }
         catch (const std::runtime_error& e)
@@ -321,11 +330,13 @@ static void _msgToAttachedBody(const Transforms* tf, const moveit_msgs::msg::Att
         }
 
         // Transform shape pose to link frame
-        if (!Transforms::sameFrame(attached_collision_object.object.header.frame_id, attached_collision_object.link_name))
+        if (!Transforms::sameFrame(attached_collision_object.object.header.frame_id,
+                                   attached_collision_object.link_name))
         {
           bool frame_found = false;
           Eigen::Isometry3d world_to_header_frame;
-          world_to_header_frame = state.getFrameTransform(attached_collision_object.object.header.frame_id, &frame_found);
+          world_to_header_frame =
+              state.getFrameTransform(attached_collision_object.object.header.frame_id, &frame_found);
           if (!frame_found)
           {
             if (tf && tf->canTransform(attached_collision_object.object.header.frame_id))
@@ -358,19 +369,23 @@ static void _msgToAttachedBody(const Transforms* tf, const moveit_msgs::msg::Att
                          "The object was replaced.",
                          attached_collision_object.object.id.c_str(), attached_collision_object.link_name.c_str());
           }
-          state.attachBody(attached_collision_object.object.id, object_pose, shapes, shape_poses, attached_collision_object.touch_links, attached_collision_object.link_name,
+          state.attachBody(attached_collision_object.object.id, object_pose, shapes, shape_poses,
+                           attached_collision_object.touch_links, attached_collision_object.link_name,
                            attached_collision_object.detach_posture, subframe_poses);
-          RCLCPP_DEBUG(LOGGER, "Attached object '%s' to link '%s'", attached_collision_object.object.id.c_str(), attached_collision_object.link_name.c_str());
+          RCLCPP_DEBUG(LOGGER, "Attached object '%s' to link '%s'", attached_collision_object.object.id.c_str(),
+                       attached_collision_object.link_name.c_str());
         }
       }
     }
     else
-      RCLCPP_ERROR(LOGGER, "The attached body for link '%s' has no geometry", attached_collision_object.link_name.c_str());
+      RCLCPP_ERROR(LOGGER, "The attached body for link '%s' has no geometry",
+                   attached_collision_object.link_name.c_str());
   }
   else if (attached_collision_object.object.operation == moveit_msgs::msg::CollisionObject::REMOVE)
   {
     if (!state.clearAttachedBody(attached_collision_object.object.id))
-      RCLCPP_ERROR(LOGGER, "The attached body '%s' can not be removed because it does not exist", attached_collision_object.link_name.c_str());
+      RCLCPP_ERROR(LOGGER, "The attached body '%s' can not be removed because it does not exist",
+                   attached_collision_object.link_name.c_str());
   }
   else
     RCLCPP_ERROR(LOGGER, "Unknown collision object operation: %d", attached_collision_object.object.operation);
