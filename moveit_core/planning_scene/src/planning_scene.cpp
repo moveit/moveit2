@@ -1774,12 +1774,12 @@ bool PlanningScene::shapesAndPosesFromCollisionObjectMessage(const moveit_msgs::
       RCLCPP_ERROR_STREAM(LOGGER, e.what());
       return false;
     }
+    return true;
   };
 
-  treat_shape_vectors(object.primitives, object.primitive_poses, std::string("primitive_poses"));
-  treat_shape_vectors(object.meshes, object.mesh_poses, std::string("meshes"));
-  treat_shape_vectors(object.planes, object.plane_poses, std::string("planes"));
-  return true;
+  return treat_shape_vectors(object.primitives, object.primitive_poses, std::string("primitive_poses")) &&
+         treat_shape_vectors(object.meshes, object.mesh_poses, std::string("meshes")) &&
+         treat_shape_vectors(object.planes, object.plane_poses, std::string("planes"));
 }
 
 bool PlanningScene::processCollisionObjectAdd(const moveit_msgs::msg::CollisionObject& object)
