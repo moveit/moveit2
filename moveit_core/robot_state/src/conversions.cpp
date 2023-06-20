@@ -386,11 +386,15 @@ static void _msgToAttachedBody(const Transforms* tf,
   else if (attached_collision_object.object.operation == moveit_msgs::msg::CollisionObject::REMOVE)
   {
     if (!state.clearAttachedBody(attached_collision_object.object.id))
+    {
       RCLCPP_ERROR(LOGGER, "The attached body '%s' can not be removed because it does not exist",
                    attached_collision_object.link_name.c_str());
+    }
   }
   else
+  {
     RCLCPP_ERROR(LOGGER, "Unknown collision object operation: %d", attached_collision_object.object.operation);
+  }
 }
 
 static bool _robotStateMsgToRobotStateHelper(const Transforms* tf, const moveit_msgs::msg::RobotState& robot_state,
@@ -470,7 +474,9 @@ void attachedBodiesToAttachedCollisionObjectMsgs(
 {
   attached_collision_objs.resize(attached_bodies.size());
   for (std::size_t i = 0; i < attached_bodies.size(); ++i)
+  {
     _attachedBodyToMsg(*attached_bodies[i], attached_collision_objs[i]);
+  }
 }
 
 void robotStateToJointStateMsg(const RobotState& state, sensor_msgs::msg::JointState& joint_state)
@@ -488,7 +494,9 @@ void robotStateToJointStateMsg(const RobotState& state, sensor_msgs::msg::JointS
 
   // if inconsistent number of velocities are specified, discard them
   if (joint_state.velocity.size() != joint_state.position.size())
+  {
     joint_state.velocity.clear();
+  }
 
   joint_state.header.frame_id = state.getRobotModel()->getModelFrame();
 }
@@ -509,11 +517,17 @@ bool jointTrajPointToRobotState(const trajectory_msgs::msg::JointTrajectory& tra
 
   state.setVariablePositions(trajectory.joint_names, trajectory.points[point_id].positions);
   if (!trajectory.points[point_id].velocities.empty())
+  {
     state.setVariableVelocities(trajectory.joint_names, trajectory.points[point_id].velocities);
+  }
   if (!trajectory.points[point_id].accelerations.empty())
+  {
     state.setVariableAccelerations(trajectory.joint_names, trajectory.points[point_id].accelerations);
+  }
   if (!trajectory.points[point_id].effort.empty())
+  {
     state.setVariableEffort(trajectory.joint_names, trajectory.points[point_id].effort);
+  }
 
   return true;
 }
@@ -579,7 +593,9 @@ void robotStateToStream(const RobotState& state, std::ostream& out,
 
   // Push all headers and joints to our output stream
   if (include_header)
+  {
     out << headers.str() << '\n';
+  }
   out << joints.str() << '\n';
 }
 
