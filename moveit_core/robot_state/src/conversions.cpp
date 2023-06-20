@@ -274,8 +274,8 @@ static void _msgToAttachedBody(const Transforms* tf,
         return;
       }
 
-      const LinkModel* lm = state.getLinkModel(attached_collision_object.link_name);
-      if (lm)
+      const LinkModel* link_model = state.getLinkModel(attached_collision_object.link_name);
+      if (link_model)
       {
         Eigen::Isometry3d object_pose;
         tf2::fromMsg(attached_collision_object.object.pose, object_pose);
@@ -288,12 +288,12 @@ static void _msgToAttachedBody(const Transforms* tf,
         shapes.reserve(num_shapes);
         shape_poses.reserve(num_shapes);
 
-        auto append = [&shapes, &shape_poses](shapes::Shape* s, const geometry_msgs::msg::Pose& pose_msg) {
-          if (!s)
+        auto append = [&shapes, &shape_poses](shapes::Shape* shape, const geometry_msgs::msg::Pose& pose_msg) {
+          if (!shape)
             return;
           Eigen::Isometry3d pose;
           tf2::fromMsg(pose_msg, pose);
-          shapes.emplace_back(shapes::ShapeConstPtr(s));
+          shapes.emplace_back(shapes::ShapeConstPtr(shape));
           shape_poses.emplace_back(std::move(pose));
         };
         try
@@ -323,10 +323,10 @@ static void _msgToAttachedBody(const Transforms* tf,
         moveit::core::FixedTransformsMap subframe_poses;
         for (std::size_t i = 0; i < attached_collision_object.object.subframe_poses.size(); ++i)
         {
-          Eigen::Isometry3d p;
-          tf2::fromMsg(attached_collision_object.object.subframe_poses[i], p);
+          Eigen::Isometry3d pose;
+          tf2::fromMsg(attached_collision_object.object.subframe_poses[i], pose);
           std::string name = attached_collision_object.object.subframe_names[i];
-          subframe_poses[name] = p;
+          subframe_poses[name] = pose;
         }
 
         // Transform shape pose to link frame
@@ -352,7 +352,7 @@ static void _msgToAttachedBody(const Transforms* tf,
                            attached_collision_object.object.header.frame_id.c_str());
             }
           }
-          object_pose = state.getGlobalLinkTransform(lm).inverse() * world_to_header_frame * object_pose;
+          object_pose = state.getGlobalLinkTransform(link_model).inverse() * world_to_header_frame * object_pose;
         }
 
         if (shapes.empty())
@@ -378,8 +378,10 @@ static void _msgToAttachedBody(const Transforms* tf,
       }
     }
     else
+    {
       RCLCPP_ERROR(LOGGER, "The attached body for link '%s' has no geometry",
                    attached_collision_object.link_name.c_str());
+    }
   }
   else if (attached_collision_object.object.operation == moveit_msgs::msg::CollisionObject::REMOVE)
   {
@@ -394,10 +396,7 @@ static void _msgToAttachedBody(const Transforms* tf,
 static bool _robotStateMsgToRobotStateHelper(const Transforms* tf, const moveit_msgs::msg::RobotState& robot_state,
                                              RobotState& state, bool copy_attached_bodies)
 {
-  bool valid;
-  const moveit_msgs::msg::RobotState& rs = robot_state;
-
-  if (!rs.is_diff && rs.joint_state.name.empty() && rs.multi_dof_joint_state.joint_names.empty())
+  if (!robot_state.is_diff && robot_state.joint_state.name.empty() && robot_state.multi_dof_joint_state.joint_names.empty())
   {
     RCLCPP_ERROR(LOGGER, "Found empty JointState message");
     return false;
@@ -405,7 +404,7 @@ static bool _robotStateMsgToRobotStateHelper(const Transforms* tf, const moveit_
 
   bool result1 = _jointStateToRobotState(robot_state.joint_state, state);
   bool result2 = _multiDOFJointsToRobotState(robot_state.multi_dof_joint_state, state, tf);
-  valid = result1 || result2;
+  bool valid = result1 || result2;
 
   if (valid && copy_attached_bodies)
   {
