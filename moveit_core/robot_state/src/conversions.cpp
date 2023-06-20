@@ -396,7 +396,8 @@ static void _msgToAttachedBody(const Transforms* tf,
 static bool _robotStateMsgToRobotStateHelper(const Transforms* tf, const moveit_msgs::msg::RobotState& robot_state,
                                              RobotState& state, bool copy_attached_bodies)
 {
-  if (!robot_state.is_diff && robot_state.joint_state.name.empty() && robot_state.multi_dof_joint_state.joint_names.empty())
+  if (!robot_state.is_diff && robot_state.joint_state.name.empty() &&
+      robot_state.multi_dof_joint_state.joint_names.empty())
   {
     RCLCPP_ERROR(LOGGER, "Found empty JointState message");
     return false;
