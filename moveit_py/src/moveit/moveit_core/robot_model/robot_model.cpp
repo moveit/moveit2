@@ -154,7 +154,12 @@ void init_robot_model(py::module& m)
                joint_model_group_name (str): The name of the joint model group to return.
            Returns:
                :py:class:`moveit_py.core.JointModelGroup`: joint model group instance that corresponds with joint_model_group_name parameter.
-           )");
+           )")
+      .def("get_link_models", [](moveit::core::RobotModel* self) { return self->getLinkModels(); })
+      .def(
+          "get_link_model",
+          [](moveit::core::RobotModel* self, const std::string& name) { return self->getLinkModel(name); },
+          py::return_value_policy::reference_internal);
 }
 }  // namespace bind_robot_model
 }  // namespace moveit_py
