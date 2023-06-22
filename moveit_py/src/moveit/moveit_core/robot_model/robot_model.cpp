@@ -54,35 +54,43 @@ void init_robot_model(py::module& m)
           Representation of a kinematic model.
           )")
       // TODO (peterdavidfagan): rewrite with RobotModelLoader.
-      .def(py::init([](std::string& urdf_xml_path, std::string& srdf_xml_path) {
-             // Read in URDF
-             std::string xml_string;
-             std::fstream xml_file(urdf_xml_path.c_str(), std::fstream::in);
-             while (xml_file.good())
+      .def(py::init([](std::string& urdf_xml_path, std::string& srdf_xml_path, std::string urdf_xml_string,
+                       std::string srdf_xml_string) {
+             if (urdf_xml_string.empty())
              {
-               std::string line;
-               std::getline(xml_file, line);
-               xml_string += (line + "\n");
+               std::fstream xml_file(urdf_xml_path.c_str(), std::fstream::in);
+               while (xml_file.good())
+               {
+                 std::string line;
+                 std::getline(xml_file, line);
+                 urdf_xml_string += (line + "\n");
+               }
+               xml_file.close();
              }
-             xml_file.close();
 
-             urdf::ModelInterfaceSharedPtr urdf_model = urdf::parseURDF(xml_string);
+             urdf::ModelInterfaceSharedPtr urdf_model = urdf::parseURDF(urdf_xml_string);
 
              // Read in SRDF
              srdf::Model srdf_model;
-             srdf_model.initFile(*urdf_model, srdf_xml_path);
+             if (!srdf_xml_string.empty())
+               srdf_model.initString(*urdf_model, srdf_xml_string);
+             else
+               srdf_model.initFile(*urdf_model, srdf_xml_path);
 
              // Instantiate robot model
              return std::make_shared<moveit::core::RobotModel>(
                  urdf_model, std::make_shared<const srdf::Model>(std::move(srdf_model)));
            }),
-           py::arg("urdf_xml_path"), py::arg("srdf_xml_path"),
+           py::arg("urdf_xml_path") = std::string(), py::arg("srdf_xml_path") = std::string(),
+           py::arg("urdf_xml_string") = std::string(), py::arg("srdf_xml_string") = std::string(),
            R"(
            Initializes a kinematic model for a robot.
 
            Args:
                urdf_xml_path (str): The filepath to the urdf file describing the robot.
                srdf_xml_path (str): The filepath to the srdf file describing the robot semantics.
+               urdf_xml_string (str): The string containing the urdf file describing the robot.
+               srdf_xml_string (str): The string containing the srdf file describing the robot semantics.
            Returns:
                moveit_py.core.RobotModel: The kinematic model for the robot.
        )")
