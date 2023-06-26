@@ -539,9 +539,9 @@ struct OrderPotentialControllerCombination
       return false;
 
     // and then to active ones
-    if (nractive[a] < nractive[b])
-      return true;
     if (nractive[a] > nractive[b])
+      return true;
+    if (nractive[a] < nractive[b])
       return false;
 
     return false;
