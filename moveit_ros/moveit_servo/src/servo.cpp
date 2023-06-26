@@ -218,7 +218,7 @@ Eigen::VectorXd Servo::jointDeltaFromCommand(const ServoInput& command)
     }
     else if (expected_type == CommandType::POSE)
     {
-      target_joint_positions = command_processor_->jointDeltaFromCommand(std::get<Pose>(command));
+      target_joint_positions = command_processor_->jointDeltaFromCommand(toPlanningFrame(std::get<Pose>(command)));
     }
   }
   else

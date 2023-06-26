@@ -118,22 +118,7 @@ int main(int argc, char* argv[])
   // Set the command type for servo.
   servo.expectedCommandType(CommandType::POSE);
   RCLCPP_INFO_STREAM(LOGGER, servo.getStatusMessage());
-  // 1. The workflow for when command is not in planning frame.
-  {
-    Pose target_pose_ee_frame;
-    target_pose_ee_frame.frame_id = servo_params.ee_frame;
-    target_pose_ee_frame.pose.setIdentity();
-    // Set the target pose to +10 cm in the z direction in ee frame.
-    target_pose_ee_frame.pose.translate(Eigen::Vector3d(0.0, 0.0, 0.1));
-    // Set rotation to +45 degrees from current angle about z
-    target_pose_ee_frame.pose.rotate(Eigen::AngleAxisd(M_PI / 4, Eigen::Vector3d::UnitZ()));
-    // Servo only accepts commands in planning_frame, so use convert it before sending.
-    target_pose_ee_frame = servo.toPlanningFrame(target_pose_ee_frame);
 
-    move_to_pose(target_pose_ee_frame);
-  }
-
-  // 2. The workflow for when command is in planning frame.
   {
     Pose target_pose_planning_frame;
     target_pose_planning_frame.frame_id = servo_params.planning_frame;

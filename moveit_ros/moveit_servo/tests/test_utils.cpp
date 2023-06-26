@@ -229,10 +229,10 @@ TEST_F(ServoCppFixture, testPoseFromCartesianDelta)
   ASSERT_NEAR(received_pose.orientation.z, ee_pose_z, tol);
 }
 
-TEST_F(ServoCppFixture, testWrongCommandFrameTwist)
+TEST_F(ServoCppFixture, testNonPlanningFrameTwist)
 {
   servo_test_instance_->expectedCommandType(moveit_servo::CommandType::TWIST);
-  // Servo expects the incoming commands to be in the planning frame (here it is `panda_link0`)
+  // Servo automatically converts the frame to planning frame
   // We test it by setting the command frame to another frame
   moveit_servo::Twist twist_wrong_frame{ "panda_link3", { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 } };
 
@@ -241,13 +241,13 @@ TEST_F(ServoCppFixture, testWrongCommandFrameTwist)
 
   auto result = servo_test_instance_->getNextJointState(twist_wrong_frame);
   status = servo_test_instance_->getStatus();
-  ASSERT_EQ(status, moveit_servo::StatusCode::INVALID);
+  ASSERT_EQ(status, moveit_servo::StatusCode::NO_WARNING);
 }
 
-TEST_F(ServoCppFixture, testWrongCommandFramePose)
+TEST_F(ServoCppFixture, testNonPlanningFramePose)
 {
   servo_test_instance_->expectedCommandType(moveit_servo::CommandType::POSE);
-  // Servo expects the incoming commands to be in the planning frame (here it is `panda_link0`)
+  // Servo automatically converts the frame to planning frame
   // We test it by setting the command frame to another frame
   moveit_servo::Pose pose_wrong_frame;
   pose_wrong_frame.frame_id = "panda_link3";
@@ -258,7 +258,7 @@ TEST_F(ServoCppFixture, testWrongCommandFramePose)
 
   auto result = servo_test_instance_->getNextJointState(pose_wrong_frame);
   status = servo_test_instance_->getStatus();
-  ASSERT_EQ(status, moveit_servo::StatusCode::INVALID);
+  ASSERT_EQ(status, moveit_servo::StatusCode::NO_WARNING);
 }
 
 }  // namespace
