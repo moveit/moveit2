@@ -633,7 +633,7 @@ void RobotTrajectory::print(std::ostream& out, std::vector<int> variable_indexes
 bool RobotTrajectory::isContinuous(const double threshold)
 {
   bool is_continuous = true;
-  // Iterate over joint states & check if distance is higher than max_vel
+  // Iterate over joint states & check if distance is higher than the given threshold
   for (std::size_t index = 1; index < waypoints_.size(); ++index)
   {
     for (auto const& joint_name : group_->getJointModelNames())
