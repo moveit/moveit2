@@ -382,6 +382,11 @@ public:
    */
   void print(std::ostream& out, std::vector<int> variable_indexes = std::vector<int>()) const;
 
+  /** @brief Check if trajectory contains any joint jumps
+   *  @return True if trajectory is continuous
+   */
+  [[nodiscard]] bool isContinuous(const double threshold);
+
 private:
   moveit::core::RobotModelConstPtr robot_model_;
   const moveit::core::JointModelGroup* group_;

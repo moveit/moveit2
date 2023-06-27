@@ -630,6 +630,32 @@ void RobotTrajectory::print(std::ostream& out, std::vector<int> variable_indexes
   out.flush();
 }
 
+bool RobotTrajectory::isContinuous(const double threshold)
+{
+  bool is_continuous = true;
+  // Iterate over joint states & check if distance is higher than max_vel
+  for (std::size_t index = 1; index < waypoints_.size(); ++index)
+  {
+    for (auto const& joint_name : group_->getJointModelNames())
+    {
+      auto const joint_model_ptr = group_->getJointModel(joint_name);
+      auto const distance = joint_model_ptr->getDistanceFactor() *
+                            joint_model_ptr->distance(waypoints_.at(index)->getJointPositions(joint_name),
+                                                      waypoints_.at(index - 1)->getJointPositions(joint_name));
+      if (distance > threshold)
+      {
+        RCLCPP_WARN(rclcpp::get_logger("RobotTrajectory"),
+                    "Joint discontinuity detected for joint %s between waypoint %li and %li. The distance is %f and "
+                    "accedes the threshold %f",
+                    joint_name.c_str(), index - 1, index, distance, threshold);
+        is_continuous = false;
+      }
+    }
+  }
+
+  return is_continuous;
+}
+
 std::ostream& operator<<(std::ostream& out, const RobotTrajectory& trajectory)
 {
   trajectory.print(out);
