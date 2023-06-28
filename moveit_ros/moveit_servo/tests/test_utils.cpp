@@ -133,7 +133,7 @@ TEST_F(ServoCppFixture, testVeclocityScaling)
   // The resulting scaling factor selected should be approximately 0.90909
   double user_velocity_override = 0.0;
   double scaling_factor =
-      moveit_servo::velocityScalingFactor(incoming_velocities, joint_bounds, user_velocity_override);
+      moveit_servo::jointLimitVelocityScalingFactor(incoming_velocities, joint_bounds, user_velocity_override);
   constexpr double tol = 0.001;
   ASSERT_NEAR(scaling_factor, 0.90909, tol);
 }

@@ -109,7 +109,7 @@ trajectory_msgs::msg::JointTrajectory composeTrajectoryMessage(const servo::Para
  * @param servo_params The servo parameters, contains the singularity thresholds.
  * @return The velocity scaling factor and the reason for scaling.
  */
-std::pair<double, StatusCode> velocityScalingFactorForSingularity(const moveit::core::RobotStatePtr& current_state,
+std::pair<double, StatusCode> velocityScalingFactorForSingularity(const moveit::core::RobotStatePtr& robot_state,
                                                                   const Eigen::VectorXd& target_delta_x,
                                                                   const servo::Params& servo_params);
 
@@ -120,8 +120,8 @@ std::pair<double, StatusCode> velocityScalingFactorForSingularity(const moveit::
  * @param scaling_override The user defined velocity scaling override.
  * @return The velocity scaling factor.
  */
-double velocityScalingFactor(const Eigen::VectorXd& velocities, const moveit::core::JointBoundsVector& joint_bounds,
-                             double scaling_override);
+double jointLimitVelocityScalingFactor(const Eigen::VectorXd& velocities,
+                                       const moveit::core::JointBoundsVector& joint_bounds, double scaling_override);
 
 /**
  * \brief Finds the joints that are going past allowable joint limits.

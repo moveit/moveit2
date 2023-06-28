@@ -233,8 +233,8 @@ std::pair<double, StatusCode> velocityScalingFactorForSingularity(const moveit::
   return std::make_pair(velocity_scale, servo_status);
 }
 
-double velocityScalingFactor(const Eigen::VectorXd& velocities, const moveit::core::JointBoundsVector& joint_bounds,
-                             double scaling_override)
+double jointLimitVelocityScalingFactor(const Eigen::VectorXd& velocities,
+                                       const moveit::core::JointBoundsVector& joint_bounds, double scaling_override)
 {
   // If override value is close to zero, user is not overriding the scaling
   if (scaling_override < SCALING_OVERRIDE_THRESHOLD)

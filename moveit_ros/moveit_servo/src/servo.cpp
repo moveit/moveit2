@@ -177,8 +177,8 @@ KinematicState Servo::getNextJointState(const ServoInput& command)
 
     // TODO : print warning if scaling applied for joint limit.
     // Scale down the velocity based on joint velocity limit or user defined scaling if applicable.
-    target_joint_velocities *=
-        velocityScalingFactor(target_joint_velocities, joint_bounds_, servo_params_.override_velocity_scaling_factor);
+    target_joint_velocities *= jointLimitVelocityScalingFactor(target_joint_velocities, joint_bounds_,
+                                                               servo_params_.override_velocity_scaling_factor);
 
     // Adjust joint position based on scaled down velocity
     target_joint_positions = current_joint_positions + (target_joint_velocities * servo_params_.publish_period);
