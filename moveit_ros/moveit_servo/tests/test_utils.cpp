@@ -145,23 +145,20 @@ TEST_F(ServoCppFixture, testLeavingSingularity)
   // Home state
   Eigen::Vector<double, 7> home_state{ 0.0, -0.785, 0.0, -2.356, 0.0, 1.571, 0.785 };
   robot_state_->setJointGroupActivePositions(joint_model_group_, home_state);
-  auto scaling_result = moveit_servo::velocityScalingFactorForSingularity(joint_model_group_, robot_state_,
-                                                                          cartesian_delta, servo_params_);
+  auto scaling_result = moveit_servo::velocityScalingFactorForSingularity(robot_state_, cartesian_delta, servo_params_);
   ASSERT_EQ(scaling_result.second, moveit_servo::StatusCode::NO_WARNING);
 
   // Approach singularity
   Eigen::Vector<double, 7> state_approaching_singularity{ 0.0, 0.334, 0.0, -1.177, 0.0, 1.510, 0.785 };
   robot_state_->setJointGroupActivePositions(joint_model_group_, state_approaching_singularity);
-  scaling_result = moveit_servo::velocityScalingFactorForSingularity(joint_model_group_, robot_state_, cartesian_delta,
-                                                                     servo_params_);
+  scaling_result = moveit_servo::velocityScalingFactorForSingularity(robot_state_, cartesian_delta, servo_params_);
   ASSERT_EQ(scaling_result.second, moveit_servo::StatusCode::DECELERATE_FOR_APPROACHING_SINGULARITY);
 
   // Move away from singularity
   cartesian_delta(0) *= -1;
   Eigen::Vector<double, 7> state_leaving_singularity{ 0.0, 0.3458, 0.0, -1.1424, 0.0, 1.4865, 0.785 };
   robot_state_->setJointGroupActivePositions(joint_model_group_, state_leaving_singularity);
-  scaling_result = moveit_servo::velocityScalingFactorForSingularity(joint_model_group_, robot_state_, cartesian_delta,
-                                                                     servo_params_);
+  scaling_result = moveit_servo::velocityScalingFactorForSingularity(robot_state_, cartesian_delta, servo_params_);
   ASSERT_EQ(scaling_result.second, moveit_servo::StatusCode::DECELERATE_FOR_LEAVING_SINGULARITY);
 }
 
@@ -171,15 +168,13 @@ TEST_F(ServoCppFixture, testApproachingSingularity)
 
   // Home state
   robot_state_->setToDefaultValues(joint_model_group_, "ready");
-  auto scaling_result = moveit_servo::velocityScalingFactorForSingularity(joint_model_group_, robot_state_,
-                                                                          cartesian_delta, servo_params_);
+  auto scaling_result = moveit_servo::velocityScalingFactorForSingularity(robot_state_, cartesian_delta, servo_params_);
   ASSERT_EQ(scaling_result.second, moveit_servo::StatusCode::NO_WARNING);
 
   // Approach singularity
   Eigen::Vector<double, 7> state_approaching_singularity{ 0.0, 0.334, 0.0, -1.177, 0.0, 1.510, 0.785 };
   robot_state_->setJointGroupActivePositions(joint_model_group_, state_approaching_singularity);
-  scaling_result = moveit_servo::velocityScalingFactorForSingularity(joint_model_group_, robot_state_, cartesian_delta,
-                                                                     servo_params_);
+  scaling_result = moveit_servo::velocityScalingFactorForSingularity(robot_state_, cartesian_delta, servo_params_);
   ASSERT_EQ(scaling_result.second, moveit_servo::StatusCode::DECELERATE_FOR_APPROACHING_SINGULARITY);
 }
 
@@ -189,15 +184,13 @@ TEST_F(ServoCppFixture, testHaltForSingularity)
 
   // Home state
   robot_state_->setToDefaultValues(joint_model_group_, "ready");
-  auto scaling_result = moveit_servo::velocityScalingFactorForSingularity(joint_model_group_, robot_state_,
-                                                                          cartesian_delta, servo_params_);
+  auto scaling_result = moveit_servo::velocityScalingFactorForSingularity(robot_state_, cartesian_delta, servo_params_);
   ASSERT_EQ(scaling_result.second, moveit_servo::StatusCode::NO_WARNING);
 
   // Move to singular state.
   Eigen::Vector<double, 7> singular_state{ -0.0001, 0.5690, 0.0005, -0.7782, 0.0, 1.3453, 0.7845 };
   robot_state_->setJointGroupActivePositions(joint_model_group_, singular_state);
-  scaling_result = moveit_servo::velocityScalingFactorForSingularity(joint_model_group_, robot_state_, cartesian_delta,
-                                                                     servo_params_);
+  scaling_result = moveit_servo::velocityScalingFactorForSingularity(robot_state_, cartesian_delta, servo_params_);
   ASSERT_EQ(scaling_result.second, moveit_servo::StatusCode::HALT_FOR_SINGULARITY);
 }
 

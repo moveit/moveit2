@@ -89,9 +89,8 @@ JointDeltaResult jointDeltaFromTwist(const Twist& command, moveit::core::RobotSt
     {
       joint_position_delta = delta_result.second;
       // Get velocity scaling information for singularity.
-      auto joint_model_group = robot_state->getJointModelGroup(servo_params.move_group_name);
       std::pair<double, StatusCode> singularity_scaling_info =
-          velocityScalingFactorForSingularity(joint_model_group, robot_state, cartesian_position_delta, servo_params);
+          velocityScalingFactorForSingularity(robot_state, cartesian_position_delta, servo_params);
       // Apply velocity scaling for singularity, if there was any scaling.
       if (singularity_scaling_info.second != StatusCode::NO_WARNING)
       {
@@ -174,7 +173,8 @@ JointDeltaResult jointDeltaFromPose(const Pose& command, moveit::core::RobotStat
 JointDeltaResult jointDeltaFromIK(const Eigen::VectorXd& cartesian_position_delta,
                                   moveit::core::RobotStatePtr& robot_state, servo::Params& servo_params)
 {
-  auto joint_model_group = robot_state->getJointModelGroup(servo_params.move_group_name);
+  const moveit::core::JointModelGroup* joint_model_group =
+      robot_state->getJointModelGroup(servo_params.move_group_name);
 
   std::vector<double> current_joint_positions;
   robot_state->copyJointGroupPositions(joint_model_group, current_joint_positions);

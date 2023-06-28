@@ -134,13 +134,15 @@ trajectory_msgs::msg::JointTrajectory composeTrajectoryMessage(const servo::Para
   return joint_trajectory;
 }
 
-std::pair<double, StatusCode>
-velocityScalingFactorForSingularity(const moveit::core::JointModelGroup* joint_model_group,
-                                    const moveit::core::RobotStatePtr& current_state,
-                                    const Eigen::VectorXd& target_delta_x, const servo::Params& servo_params)
+std::pair<double, StatusCode> velocityScalingFactorForSingularity(const moveit::core::RobotStatePtr& robot_state,
+                                                                  const Eigen::VectorXd& target_delta_x,
+                                                                  const servo::Params& servo_params)
 {
   // We need to send information back about if we are halting, moving away or towards the singularity.
   StatusCode servo_status = StatusCode::NO_WARNING;
+
+  const moveit::core::JointModelGroup* joint_model_group =
+      robot_state->getJointModelGroup(servo_params.move_group_name);
 
   // Get the thresholds.
   const double lower_singularity_threshold = servo_params.lower_singularity_threshold;
@@ -152,7 +154,7 @@ velocityScalingFactorForSingularity(const moveit::core::JointModelGroup* joint_m
 
   // Get the current Jacobian and compute SVD
   Eigen::JacobiSVD<Eigen::MatrixXd> current_svd = Eigen::JacobiSVD<Eigen::MatrixXd>(
-      current_state->getJacobian(joint_model_group), Eigen::ComputeThinU | Eigen::ComputeThinV);
+      robot_state->getJacobian(joint_model_group), Eigen::ComputeThinU | Eigen::ComputeThinV);
   Eigen::MatrixXd matrix_s = current_svd.singularValues().asDiagonal();
 
   // Compute pseudo inverse
@@ -174,13 +176,13 @@ velocityScalingFactorForSingularity(const moveit::core::JointModelGroup* joint_m
 
   // Compute the new joint angles if we take the small step delta_x
   Eigen::VectorXd next_joint_angles;
-  current_state->copyJointGroupPositions(joint_model_group, next_joint_angles);
+  robot_state->copyJointGroupPositions(joint_model_group, next_joint_angles);
   next_joint_angles += pseudo_inverse * delta_x;
 
   // Compute the Jacobian SVD for the new robot state.
-  current_state->setJointGroupPositions(joint_model_group, next_joint_angles);
+  robot_state->setJointGroupPositions(joint_model_group, next_joint_angles);
   Eigen::JacobiSVD<Eigen::MatrixXd> next_svd = Eigen::JacobiSVD<Eigen::MatrixXd>(
-      current_state->getJacobian(joint_model_group), Eigen::ComputeThinU | Eigen::ComputeThinV);
+      robot_state->getJacobian(joint_model_group), Eigen::ComputeThinU | Eigen::ComputeThinV);
 
   // Compute condition number for the new Jacobian.
   const double next_condition_number = next_svd.singularValues()(0) / next_svd.singularValues()(dims - 1);
