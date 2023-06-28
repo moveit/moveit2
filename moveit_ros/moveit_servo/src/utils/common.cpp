@@ -37,8 +37,7 @@
  *      Author    : Andy Zelenak, V Mohammed Ibrahim
  */
 
-#include <moveit_servo/utils.hpp>
-#include <moveit_servo/datatypes.hpp>
+#include <moveit_servo/utils/common.hpp>
 
 namespace
 {

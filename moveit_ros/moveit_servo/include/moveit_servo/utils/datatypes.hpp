@@ -30,14 +30,15 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *******************************************************************************/
-/*
- *      Title       : status_codes.h
+
+/*      Title       : datatypes.hpp
  *      Project     : moveit_servo
- *      Created     : 2/25/2019
- *      Author      : Andy Zelenak, V Mohammed Ibrahim
+ *      Created     : 06/05/2023
+ *      Author      : V Mohammed Ibrahim
  *
- *      Description : The status codes used by MoveIt Servo to indicate the various conditions.
+ *      Description : The custom datatypes used by Moveit Servo.
  */
+
 #pragma once
 
 #include <string>
@@ -45,6 +46,8 @@
 
 namespace moveit_servo
 {
+// Datatypes used by servo
+
 enum class StatusCode : int8_t
 {
   INVALID = -1,
@@ -68,4 +71,52 @@ const std::unordered_map<StatusCode, std::string> SERVO_STATUS_CODE_MAP(
       { StatusCode::HALT_FOR_COLLISION, "Collision detected, emergency stop" },
       { StatusCode::JOINT_BOUND, "Close to a joint bound (position or velocity), halting" },
       { StatusCode::POSE_ACHIEVED, "Target pose achieved" } });
+
+// The datatype that specifies the type of command that servo should expect.
+enum class CommandType
+{
+  JOINT_JOG = 0,
+  TWIST = 1,
+  POSE = 2
+};
+
+typedef std::pair<StatusCode, Eigen::VectorXd> JointDeltaResult;
+
+// The joint jog command, this will be vector of length equal to the number of joints of the robot.
+typedef Eigen::VectorXd JointJog;
+
+// The twist command,  frame_id is the name of the frame in which the command is specified in.
+// frame_id must always be specified.
+struct Twist
+{
+  std::string frame_id;
+  Eigen::Vector<double, 6> velocities;
+};
+
+// The Pose command,  frame_id is the name of the frame in which the command is specified in.
+// frame_id must always be specified.
+struct Pose
+{
+  std::string frame_id;
+  Eigen::Isometry3d pose;
+};
+
+// The generic input type for servo that can be JointJog, Twist or Pose.
+typedef std::variant<JointJog, Twist, Pose> ServoInput;
+
+// The output datatype of servo, this structure contains the names of the joints along with their positions, velocities and accelerations.
+struct KinematicState
+{
+  std::vector<std::string> joint_names;
+  std::vector<double> positions, velocities, accelerations;
+
+  KinematicState(const int num_joints)
+  {
+    joint_names.resize(num_joints);
+    positions.resize(num_joints);
+    velocities.resize(num_joints);
+    accelerations.resize(num_joints);
+  }
+};
+
 }  // namespace moveit_servo

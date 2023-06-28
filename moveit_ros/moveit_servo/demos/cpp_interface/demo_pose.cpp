@@ -41,7 +41,7 @@
 #include <chrono>
 #include <rclcpp/rclcpp.hpp>
 #include <moveit_servo/servo.hpp>
-#include <moveit_servo/utils.hpp>
+#include <moveit_servo/utils/common.hpp>
 
 using namespace moveit_servo;
 

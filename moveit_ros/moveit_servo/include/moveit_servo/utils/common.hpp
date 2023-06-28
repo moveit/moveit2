@@ -49,8 +49,7 @@
 #include <moveit/robot_model/joint_model_group.h>
 #include <moveit/robot_state/robot_state.h>
 
-#include <moveit_servo/datatypes.hpp>
-#include <moveit_servo/status_codes.hpp>
+#include <moveit_servo/utils/datatypes.hpp>
 #include <moveit_servo_lib_parameters.hpp>
 
 namespace moveit_servo

@@ -39,7 +39,8 @@
 
 #include <rclcpp/rclcpp.hpp>
 #include <moveit_servo/servo.hpp>
-#include <moveit_servo/utils.hpp>
+#include <moveit_servo/utils/common.hpp>
+#include <moveit_servo/utils/command.hpp>
 
 namespace
 {
@@ -87,16 +88,13 @@ Servo::Servo(const rclcpp::Node::SharedPtr& node, std::shared_ptr<const servo::P
   }
   else
   {
-    // Create the command processor to handle the different types of servo inputs.
-    command_processor_ = std::make_unique<CommandProcessor>(planning_scene_monitor_, joint_model_group_, robot_state_,
-                                                            servo_params_, servo_status_);
-
     // Get necessary information about joints
     joint_names_ = joint_model_group_->getActiveJointModelNames();
     joint_bounds_ = joint_model_group_->getActiveJointModelsBounds();
     num_joints_ = joint_names_.size();
   }
 
+  checkIKSolver();
   // Load the smoothing plugin
   setSmoothingPlugin();
 
@@ -202,23 +200,32 @@ KinematicState Servo::getNextJointState(const ServoInput& command)
 
 Eigen::VectorXd Servo::jointDeltaFromCommand(const ServoInput& command)
 {
-  Eigen::VectorXd target_joint_positions(num_joints_);
-  robot_state_->copyJointGroupPositions(joint_model_group_, target_joint_positions);
+  Eigen::VectorXd joint_position_deltas(num_joints_);
+  joint_position_deltas.setZero();
+
+  JointDeltaResult delta_result;
 
   const CommandType expected_type = expectedCommandType();
   if (command.index() == static_cast<size_t>(expected_type))
   {
     if (expected_type == CommandType::JOINT_JOG)
     {
-      target_joint_positions = command_processor_->jointDeltaFromCommand(std::get<JointJog>(command));
+      delta_result = jointDeltaFromJointJog(std::get<JointJog>(command), robot_state_, servo_params_);
+      servo_status_ = delta_result.first;
     }
     else if (expected_type == CommandType::TWIST)
     {
-      target_joint_positions = command_processor_->jointDeltaFromCommand(toPlanningFrame(std::get<Twist>(command)));
+      delta_result = jointDeltaFromTwist(toPlanningFrame(std::get<Twist>(command)), robot_state_, servo_params_);
+      servo_status_ = delta_result.first;
     }
     else if (expected_type == CommandType::POSE)
     {
-      target_joint_positions = command_processor_->jointDeltaFromCommand(toPlanningFrame(std::get<Pose>(command)));
+      delta_result = jointDeltaFromPose(toPlanningFrame(std::get<Pose>(command)), robot_state_, servo_params_);
+      servo_status_ = delta_result.first;
+    }
+    if (servo_status_ != StatusCode::INVALID)
+    {
+      joint_position_deltas = delta_result.second;
     }
   }
   else
@@ -226,7 +233,8 @@ Eigen::VectorXd Servo::jointDeltaFromCommand(const ServoInput& command)
     servo_status_ = StatusCode::INVALID;
     RCLCPP_WARN_STREAM(LOGGER, "SERVO : Incoming command type does not match expected command type.");
   }
-  return target_joint_positions;
+
+  return joint_position_deltas;
 }
 
 KinematicState Servo::haltJoints(const std::vector<int>& joints_to_halt, const KinematicState& current_state,
@@ -287,6 +295,30 @@ void Servo::setSmoothingPlugin()
   {
     RCLCPP_ERROR(LOGGER, "Smoothing plugin could not be initialized");
     std::exit(EXIT_FAILURE);
+  }
+}
+
+void Servo::checkIKSolver()
+{
+  // Get the IK solver for the group
+  kinematics::KinematicsBaseConstPtr ik_solver = joint_model_group_->getSolverInstance();
+  if (!ik_solver)
+  {
+    RCLCPP_WARN(
+        LOGGER,
+        "No kinematics solver instantiated for group '%s'. Will use inverse Jacobian for servo calculations instead.",
+        joint_model_group_->getName().c_str());
+  }
+  else if (!ik_solver->supportsGroup(joint_model_group_))
+  {
+    RCLCPP_WARN(LOGGER,
+                "The loaded kinematics plugin does not support group '%s'. Will use inverse Jacobian for servo "
+                "calculations instead.",
+                joint_model_group_->getName().c_str());
+  }
+  else
+  {
+    RCLCPP_INFO(LOGGER, "IK solver available for robot, will use it.");
   }
 }
 
@@ -371,7 +403,9 @@ void Servo::validateParams(const servo::Params& servo_params)
 
 const Eigen::Isometry3d Servo::getEndEffectorPose()
 {
-  return command_processor_->getEndEffectorPose();
+  // Robot base (panda_link0) to end effector frame (panda_link8)
+  robot_state_ = planning_scene_monitor_->getStateMonitor()->getCurrentState();
+  return robot_state_->getGlobalLinkTransform(servo_params_.ee_frame);
 }
 
 Pose Servo::toPlanningFrame(const Pose& command)

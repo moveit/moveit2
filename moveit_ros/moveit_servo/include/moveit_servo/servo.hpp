@@ -45,20 +45,21 @@
 #include <variant>
 
 // ROS
+#include <pluginlib/class_loader.hpp>
+#include <sensor_msgs/msg/joint_state.hpp>
 #include <tf2_eigen/tf2_eigen.hpp>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
 #include <tf2_ros/transform_listener.h>
-#include <sensor_msgs/msg/joint_state.hpp>
 
 // MoveIt
+#include <moveit/kinematics_base/kinematics_base.h>
 #include <moveit/online_signal_smoothing/smoothing_base_class.h>
 #include <moveit/planning_scene_monitor/planning_scene_monitor.h>
+
 #include <moveit_servo/collision_monitor.hpp>
-#include <moveit_servo/command_processor.hpp>
-#include <moveit_servo/datatypes.hpp>
-#include <moveit_servo/status_codes.hpp>
+#include <moveit_servo/utils/datatypes.hpp>
+#include <moveit_servo/utils/command.hpp>
 #include <moveit_servo_lib_parameters.hpp>
-#include <pluginlib/class_loader.hpp>
 
 namespace moveit_servo
 {
@@ -77,13 +78,6 @@ public:
    * @return The required joint state.
    */
   KinematicState getNextJointState(const ServoInput& command);
-
-  /**
-   * \brief Compute the change in joint position for the received command.
-   * @param command The incoming servo command.
-   * @return The joint position change required (delta).
-   */
-  Eigen::VectorXd jointDeltaFromCommand(const ServoInput& command);
 
   /**
    * \brief Set the type of incoming servo command.
@@ -115,6 +109,20 @@ public:
   const Eigen::Isometry3d getEndEffectorPose();
 
   /**
+   * \brief Start/Stop collision checking thread.
+   * @param check_collision Stops collision checking thread if false, starts it if true.
+   */
+  void setCollisionChecking(const bool check_collision);
+
+private:
+  /**
+   * \brief Compute the change in joint position for the received command.
+   * @param command The incoming servo command.
+   * @return The joint position change required (delta).
+   */
+  Eigen::VectorXd jointDeltaFromCommand(const ServoInput& command);
+
+  /**
    * \brief Converts the given pose to planning frame.
    * @param command The pose to be converted to planning frame.
    */
@@ -127,12 +135,10 @@ public:
   Twist toPlanningFrame(const Twist& command);
 
   /**
-   * \brief Start/Stop collision checking thread.
-   * @param check_collision Stops collision checking thread if false, starts it if true.
+   * \brief Make sure that IK solver exists.
    */
-  void setCollisionChecking(const bool check_collision);
+  void checkIKSolver();
 
-private:
   /**
    * \brief Validate the servo parameters
    * @param servo_params The servo parameters
@@ -162,7 +168,6 @@ private:
   // Variables
 
   const rclcpp::Node::SharedPtr node_;
-  std::unique_ptr<CommandProcessor> command_processor_;
   // This needs to be threadsafe so it can be updated in realtime with Dynamic Reconfigure
   std::atomic<CommandType> expected_command_type_;
 
