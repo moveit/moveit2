@@ -43,23 +43,25 @@
 #include <tf2_eigen/tf2_eigen.hpp>
 
 #include <moveit_servo/servo.hpp>
-#include <moveit_servo/datatypes.hpp>
-#include <moveit_servo/utils.hpp>
+#include <moveit_servo/utils/datatypes.hpp>
+#include <moveit_servo/utils/common.hpp>
 
 class ServoCppFixture : public testing::Test
 {
 protected:
   ServoCppFixture()
   {
-    // Create a node to be given to Servo.
     servo_test_node_ = std::make_shared<rclcpp::Node>("moveit_servo_test");
-    // Create a Servo object for testing.
+
     const std::string servo_param_namespace = "moveit_servo_test";
     servo_param_listener_ = std::make_shared<servo::ParamListener>(servo_test_node_, servo_param_namespace);
     servo_params_ = servo_param_listener_->get_params();
+
     planning_scene_monitor_ = moveit_servo::createPlanningSceneMonitor(servo_test_node_, servo_params_);
+
     servo_test_instance_ =
         std::make_shared<moveit_servo::Servo>(servo_test_node_, servo_param_listener_, planning_scene_monitor_);
+
     robot_state_ = planning_scene_monitor_->getStateMonitor()->getCurrentState();
     joint_model_group_ = robot_state_->getJointModelGroup(servo_params_.move_group_name);
   }

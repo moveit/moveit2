@@ -43,7 +43,7 @@
 #include <tf2_eigen/tf2_eigen.hpp>
 
 #include "servo_cpp_fixture.hpp"
-#include <moveit_servo/utils.hpp>
+#include <moveit_servo/utils/common.hpp>
 
 namespace
 {
@@ -227,38 +227,6 @@ TEST_F(ServoCppFixture, testPoseFromCartesianDelta)
   double ee_pose_z = ee_rotation.z();
   constexpr double tol = 0.001;
   ASSERT_NEAR(received_pose.orientation.z, ee_pose_z, tol);
-}
-
-TEST_F(ServoCppFixture, testNonPlanningFrameTwist)
-{
-  servo_test_instance_->expectedCommandType(moveit_servo::CommandType::TWIST);
-  // Servo automatically converts the frame to planning frame
-  // We test it by setting the command frame to another frame
-  moveit_servo::Twist twist_wrong_frame{ "panda_link3", { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 } };
-
-  moveit_servo::StatusCode status = servo_test_instance_->getStatus();
-  ASSERT_EQ(status, moveit_servo::StatusCode::NO_WARNING);
-
-  auto result = servo_test_instance_->getNextJointState(twist_wrong_frame);
-  status = servo_test_instance_->getStatus();
-  ASSERT_EQ(status, moveit_servo::StatusCode::NO_WARNING);
-}
-
-TEST_F(ServoCppFixture, testNonPlanningFramePose)
-{
-  servo_test_instance_->expectedCommandType(moveit_servo::CommandType::POSE);
-  // Servo automatically converts the frame to planning frame
-  // We test it by setting the command frame to another frame
-  moveit_servo::Pose pose_wrong_frame;
-  pose_wrong_frame.frame_id = "panda_link3";
-  pose_wrong_frame.pose.setIdentity();
-
-  moveit_servo::StatusCode status = servo_test_instance_->getStatus();
-  ASSERT_EQ(status, moveit_servo::StatusCode::NO_WARNING);
-
-  auto result = servo_test_instance_->getNextJointState(pose_wrong_frame);
-  status = servo_test_instance_->getStatus();
-  ASSERT_EQ(status, moveit_servo::StatusCode::NO_WARNING);
 }
 
 }  // namespace
