@@ -60,6 +60,11 @@ target_link_libraries(moveit_servo_lib_cpp moveit_servo_lib_parameters)
 ## Executable Nodes ##
 ######################
 
+# Standalone servo node
+add_executable(servo_node src/servo_node.cpp)
+target_link_libraries(servo_node moveit_servo_lib_cpp)
+ament_target_dependencies(servo_node ${THIS_PACKAGE_INCLUDE_DEPENDS})
+
 # An executable node for the joint jog demo
 add_executable(demo_joint_jog demos/cpp_interface/demo_joint_jog.cpp )
 target_link_libraries(demo_joint_jog moveit_servo_lib_cpp)
@@ -97,6 +102,7 @@ install(
   demo_joint_jog
   demo_twist
   demo_pose
+  servo_node
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION lib/moveit_servo

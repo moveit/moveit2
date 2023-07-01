@@ -220,7 +220,7 @@ Eigen::VectorXd Servo::jointDeltaFromCommand(const ServoInput& command)
     }
     else if (expected_type == CommandType::POSE)
     {
-      delta_result = jointDeltaFromPose(toPlanningFrame(std::get<Pose>(command)), robot_state_, servo_params_);
+      delta_result = jointDeltaFromPose(std::get<Pose>(command), robot_state_, servo_params_);
       servo_status_ = delta_result.first;
     }
     if (servo_status_ != StatusCode::INVALID)

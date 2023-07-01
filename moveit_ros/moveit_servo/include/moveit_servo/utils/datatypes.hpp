@@ -73,7 +73,7 @@ const std::unordered_map<StatusCode, std::string> SERVO_STATUS_CODE_MAP(
       { StatusCode::POSE_ACHIEVED, "Target pose achieved" } });
 
 // The datatype that specifies the type of command that servo should expect.
-enum class CommandType
+enum class CommandType : int8_t
 {
   JOINT_JOG = 0,
   TWIST = 1,

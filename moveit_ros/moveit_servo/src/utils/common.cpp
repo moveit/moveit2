@@ -293,6 +293,22 @@ geometry_msgs::msg::TransformStamped convertIsometryToTransform(const Eigen::Iso
   return output;
 }
 
+Pose poseFromPoseStamped(const geometry_msgs::msg::PoseStamped& msg)
+{
+  Pose command;
+  command.frame_id = msg.header.frame_id;
+
+  Eigen::Vector3d translation(msg.pose.position.x, msg.pose.position.y, msg.pose.position.z);
+  Eigen::Quaterniond rotation(msg.pose.orientation.w, msg.pose.orientation.x, msg.pose.orientation.y,
+                              msg.pose.orientation.z);
+
+  command.pose = Eigen::Isometry3d::Identity();
+  command.pose.translate(translation);
+  command.pose.linear() = rotation.normalized().toRotationMatrix();
+
+  return command;
+}
+
 planning_scene_monitor::PlanningSceneMonitorPtr createPlanningSceneMonitor(const rclcpp::Node::SharedPtr& node,
                                                                            const servo::Params& servo_params)
 {

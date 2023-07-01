@@ -52,6 +52,13 @@ servo:
   }
 
 ################################ INPUTS  #############################
+
+  pose_command_in_topic: {
+    type: string,
+    default_value: "~/pose_cmd",
+    description: "The topic on which servo will receive the pose commands"
+  }
+
   cartesian_command_in_topic: {
     type: string,
     default_value: "~/delta_twist_cmds",

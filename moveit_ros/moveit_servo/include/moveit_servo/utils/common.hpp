@@ -146,6 +146,13 @@ geometry_msgs::msg::TransformStamped convertIsometryToTransform(const Eigen::Iso
                                                                 const std::string& child_frame);
 
 /**
+ * \brief Convert a PoseStamped message to a Servo Pose
+ * @param msg The PoseStamped message.
+ * @return The equivalent Servo Pose type.
+ */
+Pose poseFromPoseStamped(const geometry_msgs::msg::PoseStamped& msg);
+
+/**
  * \brief Creates the planning scene monitor used by servo
  */
 planning_scene_monitor::PlanningSceneMonitorPtr createPlanningSceneMonitor(const rclcpp::Node::SharedPtr& node,

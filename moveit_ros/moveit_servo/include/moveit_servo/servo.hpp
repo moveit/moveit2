@@ -114,6 +114,12 @@ public:
    */
   void setCollisionChecking(const bool check_collision);
 
+  /**
+   * \brief Converts the given pose to planning frame.
+   * @param command The pose to be converted to planning frame.
+   */
+  Pose toPlanningFrame(const Pose& command);
+
 private:
   /**
    * \brief Compute the change in joint position for the received command.
@@ -121,12 +127,6 @@ private:
    * @return The joint position change required (delta).
    */
   Eigen::VectorXd jointDeltaFromCommand(const ServoInput& command);
-
-  /**
-   * \brief Converts the given pose to planning frame.
-   * @param command The pose to be converted to planning frame.
-   */
-  Pose toPlanningFrame(const Pose& command);
 
   /**
    * \brief Converts the given twist to planning frame.
