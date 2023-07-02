@@ -264,3 +264,21 @@ servo:
           gt<>: 0.0
         }
     }
+
+    frequency: {
+      type: double,
+      default_value: 50,
+      description: "The frequency for the pose tracking loop",
+      validation: {
+        gt<>: 0
+      }
+    }
+
+    timeout: {
+      type: int,
+      default_value: 3,
+      description: "The timeout in seconds for pose tracking, the tracking loop will exit after this time.",
+      validation: {
+        gt<>: 0
+      }
+    }

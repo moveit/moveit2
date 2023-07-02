@@ -117,6 +117,10 @@ struct KinematicState
     velocities.resize(num_joints);
     accelerations.resize(num_joints);
   }
+
+  KinematicState()
+  {
+  }
 };
 
 }  // namespace moveit_servo

@@ -120,6 +120,12 @@ public:
    */
   Pose toPlanningFrame(const Pose& command);
 
+  /**
+   * \brief Converts the given twist to planning frame.
+   * @param command The twist to be converted to planning frame.
+   */
+  Twist toPlanningFrame(const Twist& command);
+
 private:
   /**
    * \brief Compute the change in joint position for the received command.
@@ -127,12 +133,6 @@ private:
    * @return The joint position change required (delta).
    */
   Eigen::VectorXd jointDeltaFromCommand(const ServoInput& command);
-
-  /**
-   * \brief Converts the given twist to planning frame.
-   * @param command The twist to be converted to planning frame.
-   */
-  Twist toPlanningFrame(const Twist& command);
 
   /**
    * \brief Make sure that IK solver exists.

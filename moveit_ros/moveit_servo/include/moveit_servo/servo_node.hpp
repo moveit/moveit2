@@ -64,18 +64,14 @@ public:
 
 private:
   /**
-   * \brief Run the loop that handles incoming commands.
+   * \brief Loop that handles different types of incoming commands.
    */
-  void ServoLoop();
+  void servoLoop();
 
   /**
    * \brief The pose tracking loop which is run by pose_tracking_thread_
    */
   void moveToPose();
-
-  void jointJogCallback(const control_msgs::msg::JointJog::SharedPtr msg);
-  void twistCallback(const geometry_msgs::msg::TwistStamped::SharedPtr msg);
-  void poseCallback(const geometry_msgs::msg::PoseStamped::SharedPtr msg);
 
   /**
    * \brief The service to pause servoing, this does not exit the loop or stop the servo loop thread.
@@ -94,6 +90,10 @@ private:
    */
   void switchCommandType(const std::shared_ptr<moveit_msgs::srv::ServoCommandType::Request> request,
                          const std::shared_ptr<moveit_msgs::srv::ServoCommandType::Response> response);
+
+  void jointJogCallback(const control_msgs::msg::JointJog::SharedPtr msg);
+  void twistCallback(const geometry_msgs::msg::TwistStamped::SharedPtr msg);
+  void poseCallback(const geometry_msgs::msg::PoseStamped::SharedPtr msg);
 
   // Variables
 
@@ -116,13 +116,13 @@ private:
   rclcpp::Service<std_srvs::srv::SetBool>::SharedPtr pause_servo_;
 
   // Used for communication with thread
-  bool stop_servo_;
+  std::atomic<bool> stop_servo_;
   std::atomic<bool> servo_paused_;
-  std::atomic<bool> tacking_pose_;
-  std::atomic<bool> new_joint_jog_, new_twist_, new_pose_;
+  std::atomic<bool> tracking_pose_;
+  std::atomic<bool> new_joint_jog_msg_, new_twist_msg_, new_pose_msg_;
 
   // Threads used by ServoNode
-  std::thread loop_thread_;
+  std::thread servo_loop_thread_;
   std::thread pose_tracking_thread_;
 };
 
