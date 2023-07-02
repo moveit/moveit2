@@ -123,6 +123,9 @@ void ServoNode::switchCommandType(const std::shared_ptr<moveit_msgs::srv::ServoC
   {
     RCLCPP_WARN_STREAM(LOGGER, "Unknown command type " << request->command_type << " requested");
   }
+
+  // In case pose tracking thread is running, stop it.
+  tracking_pose_ = false;
 }
 
 void ServoNode::moveToPose()
