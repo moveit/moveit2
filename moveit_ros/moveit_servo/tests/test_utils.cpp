@@ -42,89 +42,105 @@
 #include <gtest/gtest.h>
 #include <tf2_eigen/tf2_eigen.hpp>
 
-#include "servo_cpp_fixture.hpp"
 #include <moveit_servo/servo.hpp>
 #include <moveit_servo/utils/datatypes.hpp>
 #include <moveit_servo/utils/common.hpp>
 
+#include <moveit/utils/robot_model_test_utils.h>
+
 namespace
 {
 
-TEST_F(ServoCppFixture, ApproachingSingularityScaling)
+TEST(ServoUtilsUnitTests, ApproachingSingularityScaling)
 {
+  using moveit::core::loadTestingRobotModel;
+  moveit::core::RobotModelPtr robot_model = loadTestingRobotModel("panda");
+  moveit::core::RobotStatePtr robot_state = std::make_shared<moveit::core::RobotState>(robot_model);
+  
   servo::Params servo_params;
   servo_params.move_group_name = "panda_arm";
   const moveit::core::JointModelGroup* joint_model_group =
-      robot_state_->getJointModelGroup(servo_params.move_group_name);
+      robot_state->getJointModelGroup(servo_params.move_group_name);
 
   Eigen::Vector<double, 6> cartesian_delta{ 0.005, 0.0, 0.0, 0.0, 0.0, 0.0 };
   // Home state
   Eigen::Vector<double, 7> state_ready{ 0.0, -0.785, 0.0, -2.356, 0.0, 1.571, 0.785 };
-  robot_state_->setJointGroupActivePositions(joint_model_group, state_ready);
-  auto scaling_result = moveit_servo::velocityScalingFactorForSingularity(robot_state_, cartesian_delta, servo_params);
+  robot_state->setJointGroupActivePositions(joint_model_group, state_ready);
+  auto scaling_result = moveit_servo::velocityScalingFactorForSingularity(robot_state, cartesian_delta, servo_params);
   ASSERT_EQ(scaling_result.second, moveit_servo::StatusCode::NO_WARNING);
 
   // Approach singularity
   Eigen::Vector<double, 7> state_approaching_singularity{ 0.0, 0.334, 0.0, -1.177, 0.0, 1.510, 0.785 };
-  robot_state_->setJointGroupActivePositions(joint_model_group, state_approaching_singularity);
-  scaling_result = moveit_servo::velocityScalingFactorForSingularity(robot_state_, cartesian_delta, servo_params);
+  robot_state->setJointGroupActivePositions(joint_model_group, state_approaching_singularity);
+  scaling_result = moveit_servo::velocityScalingFactorForSingularity(robot_state, cartesian_delta, servo_params);
   ASSERT_EQ(scaling_result.second, moveit_servo::StatusCode::DECELERATE_FOR_APPROACHING_SINGULARITY);
 }
 
-TEST_F(ServoCppFixture, HaltForSingularityScaling)
+TEST(ServoUtilsUnitTests, HaltForSingularityScaling)
 {
+  using moveit::core::loadTestingRobotModel;
+  moveit::core::RobotModelPtr robot_model = loadTestingRobotModel("panda");
+  moveit::core::RobotStatePtr robot_state = std::make_shared<moveit::core::RobotState>(robot_model);
+
   servo::Params servo_params;
   servo_params.move_group_name = "panda_arm";
   const moveit::core::JointModelGroup* joint_model_group =
-      robot_state_->getJointModelGroup(servo_params.move_group_name);
+      robot_state->getJointModelGroup(servo_params.move_group_name);
 
   Eigen::Vector<double, 6> cartesian_delta{ 0.005, 0.0, 0.0, 0.0, 0.0, 0.0 };
 
   // Home state
   Eigen::Vector<double, 7> state_ready{ 0.0, -0.785, 0.0, -2.356, 0.0, 1.571, 0.785 };
-  robot_state_->setJointGroupActivePositions(joint_model_group, state_ready);
-  auto scaling_result = moveit_servo::velocityScalingFactorForSingularity(robot_state_, cartesian_delta, servo_params);
+  robot_state->setJointGroupActivePositions(joint_model_group, state_ready);
+  auto scaling_result = moveit_servo::velocityScalingFactorForSingularity(robot_state, cartesian_delta, servo_params);
   ASSERT_EQ(scaling_result.second, moveit_servo::StatusCode::NO_WARNING);
 
   // Move to singular state.
   Eigen::Vector<double, 7> singular_state{ -0.0001, 0.5690, 0.0005, -0.7782, 0.0, 1.3453, 0.7845 };
-  robot_state_->setJointGroupActivePositions(joint_model_group, singular_state);
-  scaling_result = moveit_servo::velocityScalingFactorForSingularity(robot_state_, cartesian_delta, servo_params);
+  robot_state->setJointGroupActivePositions(joint_model_group, singular_state);
+  scaling_result = moveit_servo::velocityScalingFactorForSingularity(robot_state, cartesian_delta, servo_params);
   ASSERT_EQ(scaling_result.second, moveit_servo::StatusCode::HALT_FOR_SINGULARITY);
 }
 
-TEST_F(ServoCppFixture, LeavingSingularityScaling)
+TEST(ServoUtilsUnitTests, LeavingSingularityScaling)
 {
+  using moveit::core::loadTestingRobotModel;
+  moveit::core::RobotModelPtr robot_model = loadTestingRobotModel("panda");
+  moveit::core::RobotStatePtr robot_state = std::make_shared<moveit::core::RobotState>(robot_model);
+
   servo::Params servo_params;
   servo_params.move_group_name = "panda_arm";
   const moveit::core::JointModelGroup* joint_model_group =
-      robot_state_->getJointModelGroup(servo_params.move_group_name);
+      robot_state->getJointModelGroup(servo_params.move_group_name);
 
   Eigen::Vector<double, 6> cartesian_delta{ 0.005, 0.0, 0.0, 0.0, 0.0, 0.0 };
 
   // Home state
   Eigen::Vector<double, 7> state_ready{ 0.0, -0.785, 0.0, -2.356, 0.0, 1.571, 0.785 };
-  robot_state_->setJointGroupActivePositions(joint_model_group, state_ready);
-  auto scaling_result = moveit_servo::velocityScalingFactorForSingularity(robot_state_, cartesian_delta, servo_params);
+  robot_state->setJointGroupActivePositions(joint_model_group, state_ready);
+  auto scaling_result = moveit_servo::velocityScalingFactorForSingularity(robot_state, cartesian_delta, servo_params);
   ASSERT_EQ(scaling_result.second, moveit_servo::StatusCode::NO_WARNING);
 
   // Approach singularity
   Eigen::Vector<double, 7> state_approaching_singularity{ 0.0, 0.334, 0.0, -1.177, 0.0, 1.510, 0.785 };
-  robot_state_->setJointGroupActivePositions(joint_model_group, state_approaching_singularity);
-  scaling_result = moveit_servo::velocityScalingFactorForSingularity(robot_state_, cartesian_delta, servo_params);
+  robot_state->setJointGroupActivePositions(joint_model_group, state_approaching_singularity);
+  scaling_result = moveit_servo::velocityScalingFactorForSingularity(robot_state, cartesian_delta, servo_params);
   ASSERT_EQ(scaling_result.second, moveit_servo::StatusCode::DECELERATE_FOR_APPROACHING_SINGULARITY);
 
   // Move away from singularity
   cartesian_delta(0) *= -1;
   Eigen::Vector<double, 7> state_leaving_singularity{ 0.0, 0.3458, 0.0, -1.1424, 0.0, 1.4865, 0.785 };
-  robot_state_->setJointGroupActivePositions(joint_model_group, state_leaving_singularity);
-  scaling_result = moveit_servo::velocityScalingFactorForSingularity(robot_state_, cartesian_delta, servo_params);
+  robot_state->setJointGroupActivePositions(joint_model_group, state_leaving_singularity);
+  scaling_result = moveit_servo::velocityScalingFactorForSingularity(robot_state, cartesian_delta, servo_params);
   ASSERT_EQ(scaling_result.second, moveit_servo::StatusCode::DECELERATE_FOR_LEAVING_SINGULARITY);
 }
 
-TEST_F(ServoCppFixture, JointLimitVeclocityScaling)
+TEST(ServoUtilsUnitTests, JointLimitVeclocityScaling)
 {
-  moveit::core::JointBoundsVector joint_bounds = robot_model_->getActiveJointModelsBounds();
+  using moveit::core::loadTestingRobotModel;
+  moveit::core::RobotModelPtr robot_model = loadTestingRobotModel("panda");
+  moveit::core::JointBoundsVector joint_bounds = robot_model->getActiveJointModelsBounds();
+  
   // Get the upper bound for the velocities of each joint.
   Eigen::VectorXd incoming_velocities(joint_bounds.size());
   for (size_t i = 0; i < joint_bounds.size(); i++)

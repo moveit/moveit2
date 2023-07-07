@@ -122,7 +122,7 @@ if(BUILD_TESTING)
     find_package(ament_cmake_gtest REQUIRED)
     find_package(ros_testing REQUIRED)
 
-    ament_add_gtest_executable(moveit_servo_utils_test tests/test_utils.cpp tests/servo_cpp_fixture.hpp)
+    ament_add_gtest_executable(moveit_servo_utils_test tests/test_utils.cpp)
     target_link_libraries(moveit_servo_utils_test moveit_servo_lib_cpp)
     ament_target_dependencies(moveit_servo_utils_test ${THIS_PACKAGE_INCLUDE_DEPENDS})
     add_ros_test(tests/launch/servo_test.test.py TIMEOUT 30 ARGS "test_binary_dir:=${CMAKE_CURRENT_BINARY_DIR}")
