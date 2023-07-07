@@ -65,20 +65,25 @@ add_executable(servo_node src/servo_node.cpp)
 target_link_libraries(servo_node moveit_servo_lib_cpp)
 ament_target_dependencies(servo_node ${THIS_PACKAGE_INCLUDE_DEPENDS})
 
-# An executable node for the joint jog demo
+# Executable node for the joint jog demo
 add_executable(demo_joint_jog demos/cpp_interface/demo_joint_jog.cpp )
 target_link_libraries(demo_joint_jog moveit_servo_lib_cpp)
 ament_target_dependencies(demo_joint_jog ${THIS_PACKAGE_INCLUDE_DEPENDS})
 
-# An executable node for the twist demo
+# Executable node for the twist demo
 add_executable(demo_twist demos/cpp_interface/demo_twist.cpp )
 target_link_libraries(demo_twist moveit_servo_lib_cpp)
 ament_target_dependencies(demo_twist ${THIS_PACKAGE_INCLUDE_DEPENDS})
 
-# An executable node for the pose demo
+# Executable node for the pose demo
 add_executable(demo_pose demos/cpp_interface/demo_pose.cpp )
 target_link_libraries(demo_pose moveit_servo_lib_cpp)
 ament_target_dependencies(demo_pose ${THIS_PACKAGE_INCLUDE_DEPENDS})
+
+# Keyboard control example for servo
+add_executable(servo_keyboard_input demos/servo_keyboard_input.cpp)
+target_include_directories(servo_keyboard_input PUBLIC include)
+ament_target_dependencies(servo_keyboard_input  ${THIS_PACKAGE_INCLUDE_DEPENDS})
 
 #############
 ## Install ##
@@ -103,6 +108,7 @@ install(
   demo_twist
   demo_pose
   servo_node
+  servo_keyboard_input
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION lib/moveit_servo
@@ -125,7 +131,13 @@ if(BUILD_TESTING)
     ament_add_gtest_executable(moveit_servo_utils_test tests/test_utils.cpp)
     target_link_libraries(moveit_servo_utils_test moveit_servo_lib_cpp)
     ament_target_dependencies(moveit_servo_utils_test ${THIS_PACKAGE_INCLUDE_DEPENDS})
-    add_ros_test(tests/launch/servo_test.test.py TIMEOUT 30 ARGS "test_binary_dir:=${CMAKE_CURRENT_BINARY_DIR}")
+    add_ros_test(tests/launch/servo_utils.test.py TIMEOUT 30 ARGS "test_binary_dir:=${CMAKE_CURRENT_BINARY_DIR}")
+
+
+    ament_add_gtest_executable(moveit_servo_cpp_integration_test tests/test_integration.cpp tests/servo_cpp_fixture.hpp)
+    target_link_libraries(moveit_servo_cpp_integration_test moveit_servo_lib_cpp)
+    ament_target_dependencies(moveit_servo_cpp_integration_test ${THIS_PACKAGE_INCLUDE_DEPENDS})
+    add_ros_test(tests/launch/servo_cpp_integration.test.py TIMEOUT 30 ARGS "test_binary_dir:=${CMAKE_CURRENT_BINARY_DIR}")
 
 endif()
 

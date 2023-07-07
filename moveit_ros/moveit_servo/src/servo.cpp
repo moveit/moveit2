@@ -45,7 +45,8 @@
 namespace
 {
 const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_servo.servo");
-}
+constexpr double ROBOT_STATE_WAIT_TIME = 5.0;  // seconds
+}  // namespace
 
 namespace moveit_servo
 {
@@ -62,6 +63,13 @@ Servo::Servo(const rclcpp::Node::SharedPtr& node, std::shared_ptr<const servo::P
 
   validateParams(servo_params_);
 
+  if (!planning_scene_monitor_->getStateMonitor()->waitForCompleteState(servo_params_.move_group_name,
+                                                                        ROBOT_STATE_WAIT_TIME))
+  {
+    RCLCPP_ERROR(LOGGER, "Timeout waiting for current state");
+    std::exit(EXIT_FAILURE);
+  }
+
   // Planning scene monitor is passed in.
   if (servo_params_.is_primary_planning_scene_monitor)
   {
@@ -71,11 +79,6 @@ Servo::Servo(const rclcpp::Node::SharedPtr& node, std::shared_ptr<const servo::P
   {
     planning_scene_monitor_->requestPlanningSceneState();
   }
-
-  // Create the collision checker and start collision checking.
-  collision_monitor_ =
-      std::make_unique<CollisionMonitor>(planning_scene_monitor_, servo_params_, collision_velocity_scale_);
-  collision_monitor_->start();
 
   // Get the robot state and joint model group info.
   robot_state_ = planning_scene_monitor_->getStateMonitor()->getCurrentState();
@@ -95,8 +98,6 @@ Servo::Servo(const rclcpp::Node::SharedPtr& node, std::shared_ptr<const servo::P
   }
 
   checkIKSolver();
-  // Load the smoothing plugin
-  setSmoothingPlugin();
 
   // Check if the transforms to planning frame and end effector frame exist.
   if (!robot_state_->knowsFrameTransform(servo_params_.planning_frame))
@@ -111,6 +112,21 @@ Servo::Servo(const rclcpp::Node::SharedPtr& node, std::shared_ptr<const servo::P
   }
   else
   {
+    // Load the smoothing plugin
+    if (servo_params_.use_smoothing)
+    {
+      setSmoothingPlugin();
+    }
+    else
+    {
+      RCLCPP_WARN(LOGGER, "No smoothing plugin loaded");
+    }
+
+    // Create the collision checker and start collision checking.
+    collision_monitor_ =
+        std::make_unique<CollisionMonitor>(planning_scene_monitor_, servo_params_, collision_velocity_scale_);
+    collision_monitor_->start();
+
     servo_status_ = StatusCode::NO_WARNING;
     RCLCPP_INFO_STREAM(LOGGER, "Servo initialized successfully");
   }
@@ -145,9 +161,6 @@ KinematicState Servo::getNextJointState(const ServoInput& command)
   Eigen::Map<Eigen::VectorXd> current_joint_velocities(current_state.velocities.data(), num_joints_);
   Eigen::Map<Eigen::VectorXd> target_joint_velocities(target_state.velocities.data(), num_joints_);
 
-  // Update filter state
-  smoother_->reset(current_state.positions);
-
   // Compute the change in joint position due to the incoming command
   Eigen::VectorXd joint_position_delta = jointDeltaFromCommand(command);
 
@@ -170,7 +183,12 @@ KinematicState Servo::getNextJointState(const ServoInput& command)
 
     // TODO : apply filtering to the velocity instead of position
     // Apply smoothing to the positions
-    smoother_->doSmoothing(target_state.positions);
+    // Update filter state
+    if (smoother_)
+    {
+      smoother_->reset(current_state.positions);
+      smoother_->doSmoothing(target_state.positions);
+    }
 
     // Compute velocities based on smoothed joint positions
     target_joint_velocities = (target_joint_positions - current_joint_positions) / servo_params_.publish_period;
@@ -215,7 +233,7 @@ Eigen::VectorXd Servo::jointDeltaFromCommand(const ServoInput& command)
     }
     else if (expected_type == CommandType::TWIST)
     {
-      delta_result = jointDeltaFromTwist(toPlanningFrame(std::get<Twist>(command)), robot_state_, servo_params_);
+      delta_result = jointDeltaFromTwist(std::get<Twist>(command), robot_state_, servo_params_);
       servo_status_ = delta_result.first;
     }
     else if (expected_type == CommandType::POSE)

@@ -72,18 +72,19 @@ JointDeltaResult jointDeltaFromTwist(const Twist& command, moveit::core::RobotSt
                                      servo::Params& servo_params)
 {
   StatusCode status = StatusCode::NO_WARNING;
-  int num_joints = robot_state->getJointModelGroup(servo_params.move_group_name)->getJointModelNames().size();
+  const int num_joints = robot_state->getJointModelGroup(servo_params.move_group_name)->getJointModelNames().size();
   Eigen::VectorXd joint_position_delta(num_joints);
   Eigen::VectorXd cartesian_position_delta;
 
   const bool valid_command = isValidCommand(command);
   const bool is_planning_frame = (command.frame_id == servo_params.planning_frame);
-  if (is_planning_frame && valid_command)
+  const bool is_zero = command.velocities.isZero();
+  if (!is_zero && is_planning_frame && valid_command)
   {
     // Compute the Cartesian position delta based on incoming command, assumed to be in m/s
     cartesian_position_delta = command.velocities * servo_params.publish_period;
     // Compute the required change in joint angles.
-    auto delta_result = jointDeltaFromIK(cartesian_position_delta, robot_state, servo_params);
+    const auto delta_result = jointDeltaFromIK(cartesian_position_delta, robot_state, servo_params);
     status = delta_result.first;
     if (status != StatusCode::INVALID)
     {
@@ -99,6 +100,10 @@ JointDeltaResult jointDeltaFromTwist(const Twist& command, moveit::core::RobotSt
         joint_position_delta *= singularity_scaling_info.first;
       }
     }
+  }
+  else if (is_zero)
+  {
+    joint_position_delta.setZero();
   }
   else
   {

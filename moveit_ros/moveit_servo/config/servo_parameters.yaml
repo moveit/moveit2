@@ -128,6 +128,13 @@ servo:
     description: "If true servo will publish joint accelerations in the output command"
   }
 
+
+  use_smoothing: {
+    type: bool,
+    default_value: true,
+    description: "Enables the use of smoothing plugins for joint tracjectory smoothing"
+  }
+
   smoothing_filter_plugin_name: {
     type: string,
     default_value: "online_signal_smoothing::ButterworthFilterPlugin",
@@ -142,15 +149,6 @@ servo:
                   which other nodes can use to get information about the planning environment. \
                   If a different node in your system will be publishing the planning scene, \
                   this should be set to false"
-  }
-
-  incoming_command_timeout: {
-    type: double,
-    default_value: 0.1,
-    description: "Stop servoing if X seconds elapse without a new command. \
-                  If 0, republish commands forever even if the robot is stationary. \
-                  Otherwise, specify num. to publish. Important because ROS may drop \
-                  some messages and we need the robot to halt reliably."
   }
 
   halt_all_joints_in_joint_mode: {
@@ -201,12 +199,6 @@ servo:
     validation: {
       gt<>: 0.0
     }
-  }
-
-  low_latency_mode: {
-    type: bool,
-    default_value: false,
-    description: "If true , low latency mode is enabled."
   }
 
   check_collisions: {

@@ -18,7 +18,7 @@ def generate_test_description():
     # Get parameters for the Servo node
     servo_params = {
         "moveit_servo_test": ParameterBuilder("moveit_servo")
-        .yaml("config/panda_simulated_config.yaml")
+        .yaml("config/test_config_panda.yaml")
         .to_dict()
     }
 
@@ -58,7 +58,7 @@ def generate_test_description():
 
     # Component nodes for tf and Servo
     test_container = launch_ros.actions.ComposableNodeContainer(
-        name="test_servo_utils_container",
+        name="servo_integration_tests_container",
         namespace="/",
         package="rclcpp_components",
         executable="component_container_mt",
@@ -83,7 +83,7 @@ def generate_test_description():
         executable=launch.substitutions.PathJoinSubstitution(
             [
                 launch.substitutions.LaunchConfiguration("test_binary_dir"),
-                "moveit_servo_utils_test",
+                "moveit_servo_cpp_integration_test",
             ]
         ),
         parameters=[

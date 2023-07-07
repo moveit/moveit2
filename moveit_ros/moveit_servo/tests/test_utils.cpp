@@ -56,7 +56,7 @@ TEST(ServoUtilsUnitTests, ApproachingSingularityScaling)
   using moveit::core::loadTestingRobotModel;
   moveit::core::RobotModelPtr robot_model = loadTestingRobotModel("panda");
   moveit::core::RobotStatePtr robot_state = std::make_shared<moveit::core::RobotState>(robot_model);
-  
+
   servo::Params servo_params;
   servo_params.move_group_name = "panda_arm";
   const moveit::core::JointModelGroup* joint_model_group =
@@ -140,7 +140,7 @@ TEST(ServoUtilsUnitTests, JointLimitVeclocityScaling)
   using moveit::core::loadTestingRobotModel;
   moveit::core::RobotModelPtr robot_model = loadTestingRobotModel("panda");
   moveit::core::JointBoundsVector joint_bounds = robot_model->getActiveJointModelsBounds();
-  
+
   // Get the upper bound for the velocities of each joint.
   Eigen::VectorXd incoming_velocities(joint_bounds.size());
   for (size_t i = 0; i < joint_bounds.size(); i++)

@@ -181,7 +181,7 @@ private:
 
   std::atomic<double> collision_velocity_scale_ = 1.0;
   std::unique_ptr<CollisionMonitor> collision_monitor_;
-  pluginlib::UniquePtr<online_signal_smoothing::SmoothingBaseClass> smoother_;
+  pluginlib::UniquePtr<online_signal_smoothing::SmoothingBaseClass> smoother_ = nullptr;
 
   size_t num_joints_;
   std::vector<std::string> joint_names_;
