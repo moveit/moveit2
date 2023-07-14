@@ -45,10 +45,6 @@ static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_ros.resolve_cons
 class ResolveConstraintFrames : public planning_request_adapter::PlanningRequestAdapter
 {
 public:
-  ResolveConstraintFrames() : planning_request_adapter::PlanningRequestAdapter()
-  {
-  }
-
   void initialize(const rclcpp::Node::SharedPtr& /* node */, const std::string& /* parameter_namespace */) override
   {
   }
@@ -66,7 +62,9 @@ public:
     planning_interface::MotionPlanRequest modified = req;
     kinematic_constraints::resolveConstraintFrames(planning_scene->getCurrentState(), modified.path_constraints);
     for (moveit_msgs::msg::Constraints& constraint : modified.goal_constraints)
+    {
       kinematic_constraints::resolveConstraintFrames(planning_scene->getCurrentState(), constraint);
+    }
     return planner(planning_scene, modified, res);
   }
 };
