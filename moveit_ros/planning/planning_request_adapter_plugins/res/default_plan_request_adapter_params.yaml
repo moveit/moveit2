@@ -16,7 +16,7 @@ default_plan_request_adapter_parameters:
   }
   start_state_max_dt: {
     type: double,
-    description: "FixStartStateCollision: Maximum temporal distance of the fixed start state from the original state.",
+    description: "FixStartStateCollision/ FixStartStateBounds: Maximum temporal distance of the fixed start state from the original state.",
     default_value: 0.5,
   }
   jiggle_fraction: {
@@ -36,11 +36,6 @@ default_plan_request_adapter_parameters:
     type: double,
     description: "FixStartStateBounds: ?",
     default_value: 0.05,
-  }
-  start_state_max_dt: {
-    type: double,
-    description: "FixStartStateBounds: ?",
-    default_value: 0.5,
   }
   default_workspace_bounds: {
     type: double,
