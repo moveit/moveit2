@@ -1,0 +1,49 @@
+default_plan_request_adapter_parameters:
+  path_tolerance: {
+    type: double,
+    description: "AddTimeOptimalParameterization: Tolerance per joint in which the time parameterization is allowed to deviate from the original path.",
+    default_value: 0.1,
+  }
+  resample_dt: {
+    type: double,
+    description: "AddTimeOptimalParameterization:Time steps between two waypoints of the parameterized trajectory. The trajectory is re-sampled from the original path.",
+    default_value: 0.1,
+  }
+  min_angle_change: {
+    type: double,
+    description: "AddTimeOptimalParameterization: ?",
+    default_value: 0.001,
+  }
+  start_state_max_dt: {
+    type: double,
+    description: "FixStartStateCollision: Maximum temporal distance of the fixed start state from the original state.",
+    default_value: 0.5,
+  }
+  jiggle_fraction: {
+    type: double,
+    description: "FixStartStateCollision: ?",
+    default_value: 0.02,
+  }
+  max_sampling_attempts: {
+    type: int,
+    description: "FixStartStateCollision: Maximum number of attempts to re-sample a valid start state.",
+    default_value: 100,
+    validation: {
+        bounds<>: [0, 255]
+    }
+  }
+  start_state_max_bounds_error: {
+    type: double,
+    description: "FixStartStateBounds: ?",
+    default_value: 0.05,
+  }
+  start_state_max_dt: {
+    type: double,
+    description: "FixStartStateBounds: ?",
+    default_value: 0.5,
+  }
+  default_workspace_bounds: {
+    type: double,
+    description: "FixWorkspaceBounds: Default workspace bounds representing a 10m x 10m x 10m box around the robot's origin.",
+    default_value: 10.0,
+  }

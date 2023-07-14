@@ -52,6 +52,7 @@ set(THIS_PACKAGE_LIBRARIES
   moveit_plan_execution
   moveit_planning_scene_monitor
   moveit_collision_plugin_loader
+  default_plan_request_adapter_parameters
   moveit_default_planning_request_adapter_plugins
   moveit_cpp
 )
