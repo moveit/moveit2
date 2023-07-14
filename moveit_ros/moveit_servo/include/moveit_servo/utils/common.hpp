@@ -41,29 +41,27 @@
 
 #pragma once
 
-#include <tf2_eigen/tf2_eigen.hpp>
-#include <sensor_msgs/msg/joint_state.hpp>
-#include <trajectory_msgs/msg/joint_trajectory.hpp>
-
+#include <moveit_servo_lib_parameters.hpp>
+#include <moveit_servo/utils/datatypes.hpp>
 #include <moveit/planning_scene_monitor/planning_scene_monitor.h>
 #include <moveit/robot_model/joint_model_group.h>
 #include <moveit/robot_state/robot_state.h>
-
-#include <moveit_servo/utils/datatypes.hpp>
-#include <moveit_servo_lib_parameters.hpp>
+#include <sensor_msgs/msg/joint_state.hpp>
+#include <tf2_eigen/tf2_eigen.hpp>
+#include <trajectory_msgs/msg/joint_trajectory.hpp>
 
 namespace moveit_servo
 {
 
 /**
- * \brief Checks if a given command is valid.
+ * \brief Checks if a given VectorXd is a valid command.
  * @param command The command to be checked.
  * @return True if the command is valid, else False.
  */
 bool isValidCommand(const Eigen::VectorXd& command);
 
 /**
- * \brief Checks if a given command is valid.
+ * \brief Checks if a given Isometry3d (pose) is a valid command.
  * @param command The command to be checked.
  * @return True if the command is valid, else False.
  */
@@ -74,14 +72,14 @@ bool isValidCommand(const Eigen::Isometry3d& command);
  * @param command The command to be checked.
  * @return True if the command is valid, else False.
  */
-bool isValidCommand(const Twist& command);
+bool isValidCommand(const TwistCommand& command);
 
 /**
  * \brief Checks if a given Pose command is valid.
  * @param command The command to be checked.
  * @return True if the command is valid, else False.
  */
-bool isValidCommand(const Pose& command);
+bool isValidCommand(const PoseCommand& command);
 
 /**
  * \brief Create a pose message for the provided change in Cartesian position.
@@ -150,7 +148,7 @@ geometry_msgs::msg::TransformStamped convertIsometryToTransform(const Eigen::Iso
  * @param msg The PoseStamped message.
  * @return The equivalent Servo Pose type.
  */
-Pose poseFromPoseStamped(const geometry_msgs::msg::PoseStamped& msg);
+PoseCommand poseFromPoseStamped(const geometry_msgs::msg::PoseStamped& msg);
 
 /**
  * \brief Creates the planning scene monitor used by servo

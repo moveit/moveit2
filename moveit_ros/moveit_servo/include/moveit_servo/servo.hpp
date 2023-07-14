@@ -41,25 +41,19 @@
 
 #pragma once
 
-// Standard Library
-#include <variant>
-
-// ROS
+#include <moveit_servo_lib_parameters.hpp>
+#include <moveit_servo/collision_monitor.hpp>
+#include <moveit_servo/utils/command.hpp>
+#include <moveit_servo/utils/datatypes.hpp>
+#include <moveit/kinematics_base/kinematics_base.h>
+#include <moveit/online_signal_smoothing/smoothing_base_class.h>
+#include <moveit/planning_scene_monitor/planning_scene_monitor.h>
 #include <pluginlib/class_loader.hpp>
 #include <sensor_msgs/msg/joint_state.hpp>
 #include <tf2_eigen/tf2_eigen.hpp>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
 #include <tf2_ros/transform_listener.h>
-
-// MoveIt
-#include <moveit/kinematics_base/kinematics_base.h>
-#include <moveit/online_signal_smoothing/smoothing_base_class.h>
-#include <moveit/planning_scene_monitor/planning_scene_monitor.h>
-
-#include <moveit_servo/collision_monitor.hpp>
-#include <moveit_servo/utils/datatypes.hpp>
-#include <moveit_servo/utils/command.hpp>
-#include <moveit_servo_lib_parameters.hpp>
+#include <variant>
 
 namespace moveit_servo
 {
@@ -73,7 +67,7 @@ public:
   ~Servo();
 
   /**
-   * \brief Computes the required joint state to follow the given command.
+   * \brief Computes the joint state required to follow the given command.
    * @param command The command to follow, std::variant type, can handle JointJog, Twist and Pose.
    * @return The required joint state.
    */
@@ -118,32 +112,33 @@ public:
    * \brief Converts the given pose to planning frame.
    * @param command The pose to be converted to planning frame.
    */
-  Pose toPlanningFrame(const Pose& command);
+  PoseCommand toPlanningFrame(const PoseCommand& command);
 
   /**
    * \brief Converts the given twist to planning frame.
    * @param command The twist to be converted to planning frame.
    */
-  Twist toPlanningFrame(const Twist& command);
+  TwistCommand toPlanningFrame(const TwistCommand& command);
 
 private:
   /**
-   * \brief Compute the change in joint position for the received command.
+   * \brief Compute the change in joint position required to follow the received command.
    * @param command The incoming servo command.
    * @return The joint position change required (delta).
    */
   Eigen::VectorXd jointDeltaFromCommand(const ServoInput& command);
 
   /**
-   * \brief Make sure that IK solver exists.
+   * \brief Checks if an IK solver is available.
    */
   void checkIKSolver();
 
   /**
    * \brief Validate the servo parameters
    * @param servo_params The servo parameters
+   * @return True is parameters are valid, else False
    */
-  void validateParams(const servo::Params& servo_params);
+  bool validateParams(const servo::Params& servo_params);
 
   /**
    * \brief create and initialize the smoothing plugin to be used by servo.
@@ -151,7 +146,7 @@ private:
   void setSmoothingPlugin();
 
   /**
-   * \brief Updates the servo parameters and performs some validations.
+   * \brief Updates the servo parameters and performs validations.
    */
   void updateParams();
 
@@ -168,7 +163,8 @@ private:
   // Variables
 
   const rclcpp::Node::SharedPtr node_;
-  // This needs to be threadsafe so it can be updated in realtime with Dynamic Reconfigure
+
+  // This needs to be threadsafe so it can be updated in realtime.
   std::atomic<CommandType> expected_command_type_;
 
   servo::Params servo_params_;
@@ -179,7 +175,9 @@ private:
 
   planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor_;
 
+  // This value will be updated by CollisionMonitor in a separate thread.
   std::atomic<double> collision_velocity_scale_ = 1.0;
+
   std::unique_ptr<CollisionMonitor> collision_monitor_;
   pluginlib::UniquePtr<online_signal_smoothing::SmoothingBaseClass> smoother_ = nullptr;
 

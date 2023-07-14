@@ -1,7 +1,7 @@
 /*******************************************************************************
  * BSD 3-Clause License
  *
- * Copyright (c) 2021, PickNik Inc.
+ * Copyright (c) 2023, PickNik Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,9 +40,9 @@
  */
 
 #include <chrono>
-#include <rclcpp/rclcpp.hpp>
 #include <moveit_servo/servo.hpp>
 #include <moveit_servo/utils/common.hpp>
+#include <rclcpp/rclcpp.hpp>
 
 using namespace moveit_servo;
 
@@ -78,15 +78,16 @@ int main(int argc, char* argv[])
 
   // Set the command type for servo.
   servo.expectedCommandType(CommandType::TWIST);
-  // Move end effector in the +z direction at 10 cm/s
-  // while turning around z axis in the +ve direction at 0.5 rad/s
-  Twist target_twist{ servo_params.ee_frame, { 0.0, 0.0, 0.1, 0.0, 0.0, 0.5 } };
-  // Servo automatically converts all commands to planning frame.
+  // Move end effector in the +z direction at 10 cm/s (in ee_frame)
+  // while turning around z axis in the +ve direction at 0.5 rad/s (in ee_frame)
+  TwistCommand target_twist{ servo_params.ee_frame, { 0.0, 0.0, 0.1, 0.0, 0.0, 0.5 } };
+  // Convert the command to planning frame.
+  target_twist = servo.toPlanningFrame(target_twist);
 
-  // Frquency at which the commands will be send to robot controller.
+  // Frequency at which the commands will be send to robot controller.
   rclcpp::WallRate rate(1.0 / servo_params.publish_period);
 
-  std::chrono::seconds timeout_duration(5);  // Apply the twist for 5 seconds.
+  std::chrono::seconds timeout_duration(5);
   std::chrono::seconds time_elapsed(0);
   auto start_time = std::chrono::steady_clock::now();
 
@@ -110,7 +111,8 @@ int main(int argc, char* argv[])
     rate.sleep();
   }
 
-  Twist target_twist_reverse{ servo_params.planning_frame, { 0.0, 0.0, 0.1, 0.0, 0.0, 0.5 } };
+  // Reverse the previous operation by applying the same twist, but in planning frame.
+  TwistCommand target_twist_reverse{ servo_params.planning_frame, { 0.0, 0.0, 0.1, 0.0, 0.0, 0.5 } };
   start_time = std::chrono::steady_clock::now();
   while (rclcpp::ok())
   {

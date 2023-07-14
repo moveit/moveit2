@@ -67,12 +67,12 @@ bool isValidCommand(const Eigen::Isometry3d& command)
   return is_valid_rotation && not_nan;
 }
 
-bool isValidCommand(const Twist& command)
+bool isValidCommand(const TwistCommand& command)
 {
   return !command.frame_id.empty() && isValidCommand(command.velocities);
 }
 
-bool isValidCommand(const Pose& command)
+bool isValidCommand(const PoseCommand& command)
 {
   return !command.frame_id.empty() && isValidCommand(command.pose);
 }
@@ -293,9 +293,9 @@ geometry_msgs::msg::TransformStamped convertIsometryToTransform(const Eigen::Iso
   return output;
 }
 
-Pose poseFromPoseStamped(const geometry_msgs::msg::PoseStamped& msg)
+PoseCommand poseFromPoseStamped(const geometry_msgs::msg::PoseStamped& msg)
 {
-  Pose command;
+  PoseCommand command;
   command.frame_id = msg.header.frame_id;
 
   Eigen::Vector3d translation(msg.pose.position.x, msg.pose.position.y, msg.pose.position.z);

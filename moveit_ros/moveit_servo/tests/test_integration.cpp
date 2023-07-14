@@ -47,7 +47,7 @@ namespace
 TEST_F(ServoCppFixture, JointJogTest)
 {
   moveit_servo::StatusCode status_curr, status_next, status_initial;
-  moveit_servo::JointJog joint_jog_z(7), zero_joint_jog(7);
+  moveit_servo::JointJogCommand joint_jog_z(7), zero_joint_jog(7);
   joint_jog_z << 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0;
   zero_joint_jog << 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0;
   // Compute next state.
@@ -72,8 +72,8 @@ TEST_F(ServoCppFixture, JointJogTest)
 TEST_F(ServoCppFixture, TwistTest)
 {
   moveit_servo::StatusCode status_curr, status_next, status_initial;
-  moveit_servo::Twist twist_non_zero{ servo_params_.planning_frame, { 0.0, 0.0, 0.0, 0.0, 0.0, 0.1 } };
-  moveit_servo::Twist twist_zero{ servo_params_.planning_frame, { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 } };
+  moveit_servo::TwistCommand twist_non_zero{ servo_params_.planning_frame, { 0.0, 0.0, 0.0, 0.0, 0.0, 0.1 } };
+  moveit_servo::TwistCommand twist_zero{ servo_params_.planning_frame, { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 } };
 
   servo_test_instance_->expectedCommandType(moveit_servo::CommandType::TWIST);
   status_initial = servo_test_instance_->getStatus();
@@ -96,7 +96,7 @@ TEST_F(ServoCppFixture, TwistTest)
 TEST_F(ServoCppFixture, PoseTest)
 {
   moveit_servo::StatusCode status_curr, status_next, status_initial;
-  moveit_servo::Pose zero_pose, non_zero_pose;
+  moveit_servo::PoseCommand zero_pose, non_zero_pose;
   zero_pose.frame_id = servo_params_.planning_frame;
   zero_pose.pose = servo_test_instance_->getEndEffectorPose();
 
@@ -110,7 +110,7 @@ TEST_F(ServoCppFixture, PoseTest)
 
   moveit_servo::KinematicState curr_state = servo_test_instance_->getNextJointState(zero_pose);
   status_curr = servo_test_instance_->getStatus();
-  ASSERT_EQ(status_curr, moveit_servo::StatusCode::POSE_ACHIEVED);
+  ASSERT_EQ(status_curr, moveit_servo::StatusCode::NO_WARNING);
 
   moveit_servo::KinematicState next_state = servo_test_instance_->getNextJointState(non_zero_pose);
   status_next = servo_test_instance_->getStatus();

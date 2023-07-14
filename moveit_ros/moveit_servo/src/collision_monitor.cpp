@@ -1,7 +1,7 @@
 /*******************************************************************************
  * BSD 3-Clause License
  *
- * Copyright (c) 2021, PickNik Inc.
+ * Copyright (c) 2019, Los Alamos National Security, LLC
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,8 +37,8 @@
  * Author     : Brian O'Neil, Andy Zelenak, Blake Anderson, V Mohammed Ibrahim
  */
 
-#include <rclcpp/rclcpp.hpp>
 #include <moveit_servo/collision_monitor.hpp>
+#include <rclcpp/rclcpp.hpp>
 
 namespace
 {

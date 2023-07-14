@@ -55,7 +55,7 @@ servo:
 
   pose_command_in_topic: {
     type: string,
-    default_value: "~/pose_cmd",
+    default_value: "~/pose_target_cmds",
     description: "The topic on which servo will receive the pose commands"
   }
 
@@ -87,13 +87,6 @@ servo:
   }
 
 ################################ GENERAL CONFIG #############################
-  enable_parameter_update: {
-    type: bool,
-    default_value: true,
-    description: "If true, continuous check for parameter update is enabled \
-                  Currently only the following parameters are updated:
-                  1. override_velocity_scaling_factor"
-  }
 
   override_velocity_scaling_factor: {
     type: double,
@@ -255,22 +248,4 @@ servo:
         validation: {
           gt<>: 0.0
         }
-    }
-
-    frequency: {
-      type: double,
-      default_value: 50,
-      description: "The frequency for the pose tracking loop",
-      validation: {
-        gt<>: 0
-      }
-    }
-
-    timeout: {
-      type: int,
-      default_value: 3,
-      description: "The timeout in seconds for pose tracking, the tracking loop will exit after this time.",
-      validation: {
-        gt<>: 0
-      }
     }

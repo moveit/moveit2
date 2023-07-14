@@ -41,16 +41,16 @@
 
 #pragma once
 
-#include <rclcpp/rclcpp.hpp>
 #include <control_msgs/msg/joint_jog.hpp>
-#include <geometry_msgs/msg/twist_stamped.hpp>
 #include <geometry_msgs/msg/pose_stamped.hpp>
+#include <geometry_msgs/msg/twist_stamped.hpp>
+#include <moveit_msgs/srv/servo_command_type.hpp>
+#include <moveit_servo/servo.hpp>
+#include <rclcpp/rclcpp.hpp>
 #include <std_msgs/msg/float64_multi_array.hpp>
+#include <std_msgs/msg/int8.hpp>
 #include <std_srvs/srv/set_bool.hpp>
 #include <trajectory_msgs/msg/joint_trajectory.hpp>
-
-#include <moveit_servo/servo.hpp>
-#include <moveit_msgs/srv/servo_command_type.hpp>
 
 namespace moveit_servo
 {
@@ -67,11 +67,6 @@ private:
    * \brief Loop that handles different types of incoming commands.
    */
   void servoLoop();
-
-  /**
-   * \brief The pose tracking loop which is run by pose_tracking_thread_
-   */
-  void moveToPose();
 
   /**
    * \brief The service to pause servoing, this does not exit the loop or stop the servo loop thread.
@@ -111,6 +106,7 @@ private:
   rclcpp::Subscription<geometry_msgs::msg::PoseStamped>::SharedPtr pose_subscriber_;
 
   rclcpp::Publisher<trajectory_msgs::msg::JointTrajectory>::SharedPtr trajectory_publisher_;
+  rclcpp::Publisher<std_msgs::msg::Int8>::SharedPtr status_publisher_;
 
   rclcpp::Service<moveit_msgs::srv::ServoCommandType>::SharedPtr switch_command_type_;
   rclcpp::Service<std_srvs::srv::SetBool>::SharedPtr pause_servo_;
@@ -118,12 +114,10 @@ private:
   // Used for communication with thread
   std::atomic<bool> stop_servo_;
   std::atomic<bool> servo_paused_;
-  std::atomic<bool> tracking_pose_;
   std::atomic<bool> new_joint_jog_msg_, new_twist_msg_, new_pose_msg_;
 
   // Threads used by ServoNode
   std::thread servo_loop_thread_;
-  std::thread pose_tracking_thread_;
 };
 
 }  // namespace moveit_servo

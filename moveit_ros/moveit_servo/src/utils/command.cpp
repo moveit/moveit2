@@ -47,7 +47,7 @@ const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_servo.command_processor
 namespace moveit_servo
 {
 
-JointDeltaResult jointDeltaFromJointJog(const JointJog& command, moveit::core::RobotStatePtr& robot_state,
+JointDeltaResult jointDeltaFromJointJog(const JointJogCommand& command, moveit::core::RobotStatePtr& robot_state,
                                         servo::Params& servo_params)
 {
   // Find the target joint position based on the commanded joint velocity
@@ -68,7 +68,7 @@ JointDeltaResult jointDeltaFromJointJog(const JointJog& command, moveit::core::R
   return std::make_pair(status, joint_position_delta);
 }
 
-JointDeltaResult jointDeltaFromTwist(const Twist& command, moveit::core::RobotStatePtr& robot_state,
+JointDeltaResult jointDeltaFromTwist(const TwistCommand& command, moveit::core::RobotStatePtr& robot_state,
                                      servo::Params& servo_params)
 {
   StatusCode status = StatusCode::NO_WARNING;
@@ -117,50 +117,34 @@ JointDeltaResult jointDeltaFromTwist(const Twist& command, moveit::core::RobotSt
   return std::make_pair(status, joint_position_delta);
 }
 
-JointDeltaResult jointDeltaFromPose(const Pose& command, moveit::core::RobotStatePtr& robot_state,
+JointDeltaResult jointDeltaFromPose(const PoseCommand& command, moveit::core::RobotStatePtr& robot_state,
                                     servo::Params& servo_params)
 {
   StatusCode status = StatusCode::NO_WARNING;
   int num_joints = robot_state->getJointModelGroup(servo_params.move_group_name)->getJointModelNames().size();
   Eigen::VectorXd joint_position_delta(num_joints);
 
-  // Robot base (panda_link0) to end effector frame (panda_link8)
-  const Eigen::Isometry3d ee_pose{ robot_state->getGlobalLinkTransform(servo_params.ee_frame) };
-
-  const bool satisfies_angular_tolerance =
-      ee_pose.rotation().isApprox(command.pose.rotation(), servo_params.pose_tracking.linear_tolerance);
-  const bool satisfies_linear_tolerance =
-      ee_pose.translation().isApprox(command.pose.translation(), servo_params.pose_tracking.angular_tolerance);
-
-  const bool reached = satisfies_angular_tolerance && satisfies_linear_tolerance;
   const bool valid_command = isValidCommand(command);
   const bool is_planning_frame = command.frame_id == servo_params.planning_frame;
 
-  if (is_planning_frame)
+  if (valid_command && is_planning_frame)
   {
-    if (reached)
+    Eigen::Vector<double, 6> cartesian_position_delta;
+
+    // Compute linear and angular change needed.
+    const Eigen::Isometry3d ee_pose{ robot_state->getGlobalLinkTransform(servo_params.ee_frame) };
+    cartesian_position_delta.head<3>() = command.pose.translation() - ee_pose.translation();
+    Eigen::Quaterniond q_current(ee_pose.rotation()), q_target(command.pose.rotation());
+    Eigen::Quaterniond q_error = q_target * q_current.inverse();
+    Eigen::AngleAxisd angle_axis_error(q_error);
+    cartesian_position_delta.tail<3>() = angle_axis_error.axis() * angle_axis_error.angle();
+
+    // Compute the required change in joint angles.
+    auto delta_result = jointDeltaFromIK(cartesian_position_delta, robot_state, servo_params);
+    status = delta_result.first;
+    if (status != StatusCode::INVALID)
     {
-      status = StatusCode::POSE_ACHIEVED;
-    }
-    else if (valid_command && !reached)
-    {
-      Eigen::Vector<double, 6> cartesian_position_delta;
-
-      // Compute linear and angular change needed.
-      cartesian_position_delta.head<3>() = command.pose.translation() - ee_pose.translation();
-
-      Eigen::Quaterniond q_current(ee_pose.rotation()), q_target(command.pose.rotation());
-      Eigen::Quaterniond q_error = q_target * q_current.inverse();
-      Eigen::AngleAxisd angle_axis_error(q_error);
-      cartesian_position_delta.tail<3>() = angle_axis_error.axis() * angle_axis_error.angle();
-
-      // Compute the required change in joint angles.
-      auto delta_result = jointDeltaFromIK(cartesian_position_delta, robot_state, servo_params);
-      status = delta_result.first;
-      if (status != StatusCode::INVALID)
-      {
-        joint_position_delta = delta_result.second;
-      }
+      joint_position_delta = delta_result.second;
     }
   }
   else

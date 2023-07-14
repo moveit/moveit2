@@ -40,13 +40,11 @@
 */
 
 #include <gtest/gtest.h>
-#include <tf2_eigen/tf2_eigen.hpp>
-
 #include <moveit_servo/servo.hpp>
-#include <moveit_servo/utils/datatypes.hpp>
 #include <moveit_servo/utils/common.hpp>
-
+#include <moveit_servo/utils/datatypes.hpp>
 #include <moveit/utils/robot_model_test_utils.h>
+#include <tf2_eigen/tf2_eigen.hpp>
 
 namespace
 {
@@ -184,7 +182,7 @@ TEST(ServoUtilsUnitTests, validTwist)
 {
   Eigen::VectorXd valid_vector(6);
   valid_vector << 0.0, 0.0, 0.0, 0.0, 0.0, 0.0;
-  moveit_servo::Twist valid_twist{ "panda_link0", valid_vector };
+  moveit_servo::TwistCommand valid_twist{ "panda_link0", valid_vector };
   EXPECT_TRUE(moveit_servo::isValidCommand(valid_twist));
 }
 
@@ -192,7 +190,7 @@ TEST(ServoUtilsUnitTests, emptyTwistFrame)
 {
   Eigen::VectorXd invalid_vector(6);
   invalid_vector << 0.0, 0.0, 0.0, 0.0, std::nan("");
-  moveit_servo::Twist invalid_twist;
+  moveit_servo::TwistCommand invalid_twist;
   invalid_twist.velocities = invalid_vector;
   EXPECT_FALSE(moveit_servo::isValidCommand(invalid_twist));
 }
@@ -201,7 +199,7 @@ TEST(ServoUtilsUnitTests, invalidTwistVelocities)
 {
   Eigen::VectorXd invalid_vector(6);
   invalid_vector << 0.0, 0.0, 0.0, 0.0, 0.0, std::nan("");
-  moveit_servo::Twist invalid_twist{ "panda_link0", invalid_vector };
+  moveit_servo::TwistCommand invalid_twist{ "panda_link0", invalid_vector };
   EXPECT_FALSE(moveit_servo::isValidCommand(invalid_twist));
 }
 
@@ -224,7 +222,7 @@ TEST(ServoUtilsUnitTests, validPose)
 {
   Eigen::Isometry3d valid_isometry;
   valid_isometry.setIdentity();
-  moveit_servo::Pose valid_pose{ "panda_link0", valid_isometry };
+  moveit_servo::PoseCommand valid_pose{ "panda_link0", valid_isometry };
   EXPECT_TRUE(moveit_servo::isValidCommand(valid_pose));
 }
 

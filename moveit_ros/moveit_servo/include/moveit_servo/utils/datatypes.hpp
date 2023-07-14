@@ -57,8 +57,7 @@ enum class StatusCode : int8_t
   DECELERATE_FOR_LEAVING_SINGULARITY = 3,
   DECELERATE_FOR_COLLISION = 4,
   HALT_FOR_COLLISION = 5,
-  JOINT_BOUND = 6,
-  POSE_ACHIEVED = 7
+  JOINT_BOUND = 6
 };
 
 const std::unordered_map<StatusCode, std::string> SERVO_STATUS_CODE_MAP(
@@ -69,8 +68,7 @@ const std::unordered_map<StatusCode, std::string> SERVO_STATUS_CODE_MAP(
       { StatusCode::DECELERATE_FOR_LEAVING_SINGULARITY, "Moving away from a singularity, decelerating" },
       { StatusCode::DECELERATE_FOR_COLLISION, "Close to a collision, decelerating" },
       { StatusCode::HALT_FOR_COLLISION, "Collision detected, emergency stop" },
-      { StatusCode::JOINT_BOUND, "Close to a joint bound (position or velocity), halting" },
-      { StatusCode::POSE_ACHIEVED, "Target pose achieved" } });
+      { StatusCode::JOINT_BOUND, "Close to a joint bound (position or velocity), halting" } });
 
 // The datatype that specifies the type of command that servo should expect.
 enum class CommandType : int8_t
@@ -83,11 +81,11 @@ enum class CommandType : int8_t
 typedef std::pair<StatusCode, Eigen::VectorXd> JointDeltaResult;
 
 // The joint jog command, this will be vector of length equal to the number of joints of the robot.
-typedef Eigen::VectorXd JointJog;
+typedef Eigen::VectorXd JointJogCommand;
 
 // The twist command,  frame_id is the name of the frame in which the command is specified in.
 // frame_id must always be specified.
-struct Twist
+struct TwistCommand
 {
   std::string frame_id;
   Eigen::Vector<double, 6> velocities;
@@ -95,14 +93,14 @@ struct Twist
 
 // The Pose command,  frame_id is the name of the frame in which the command is specified in.
 // frame_id must always be specified.
-struct Pose
+struct PoseCommand
 {
   std::string frame_id;
   Eigen::Isometry3d pose;
 };
 
 // The generic input type for servo that can be JointJog, Twist or Pose.
-typedef std::variant<JointJog, Twist, Pose> ServoInput;
+typedef std::variant<JointJogCommand, TwistCommand, PoseCommand> ServoInput;
 
 // The output datatype of servo, this structure contains the names of the joints along with their positions, velocities and accelerations.
 struct KinematicState

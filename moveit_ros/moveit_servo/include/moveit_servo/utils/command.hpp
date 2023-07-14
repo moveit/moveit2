@@ -41,13 +41,11 @@
 
 #pragma once
 
-#include <rclcpp/rclcpp.hpp>
-#include <tf2_eigen/tf2_eigen.hpp>
-
+#include <moveit_servo/utils/common.hpp>
 #include <moveit/kinematics_base/kinematics_base.h>
 #include <moveit/planning_scene_monitor/planning_scene_monitor.h>
-
-#include <moveit_servo/utils/common.hpp>
+#include <rclcpp/rclcpp.hpp>
+#include <tf2_eigen/tf2_eigen.hpp>
 
 namespace moveit_servo
 {
@@ -59,7 +57,7 @@ namespace moveit_servo
  * @param servo_params The servo parameters
  * @return The status and joint position change required (delta).
  */
-JointDeltaResult jointDeltaFromJointJog(const JointJog& command, moveit::core::RobotStatePtr& robot_state,
+JointDeltaResult jointDeltaFromJointJog(const JointJogCommand& command, moveit::core::RobotStatePtr& robot_state,
                                         servo::Params& servo_params);
 
 /**
@@ -69,7 +67,7 @@ JointDeltaResult jointDeltaFromJointJog(const JointJog& command, moveit::core::R
  * @param servo_params The servo parameters
  * @return The status and joint position change required (delta).
  */
-JointDeltaResult jointDeltaFromTwist(const Twist& command, moveit::core::RobotStatePtr& robot_state,
+JointDeltaResult jointDeltaFromTwist(const TwistCommand& command, moveit::core::RobotStatePtr& robot_state,
                                      servo::Params& servo_params);
 
 /**
@@ -79,7 +77,7 @@ JointDeltaResult jointDeltaFromTwist(const Twist& command, moveit::core::RobotSt
  * @param servo_params The servo parameters
  * @return The status and joint position change required (delta).
  */
-JointDeltaResult jointDeltaFromPose(const Pose& command, moveit::core::RobotStatePtr& robot_state,
+JointDeltaResult jointDeltaFromPose(const PoseCommand& command, moveit::core::RobotStatePtr& robot_state,
                                     servo::Params& servo_params);
 
 /**

@@ -51,8 +51,6 @@ namespace moveit_servo
 ServoNode::~ServoNode()
 {
   stop_servo_ = true;
-  if (pose_tracking_thread_.joinable())
-    pose_tracking_thread_.join();
   if (servo_loop_thread_.joinable())
     servo_loop_thread_.join();
 }
@@ -61,7 +59,6 @@ ServoNode::ServoNode(const rclcpp::Node::SharedPtr& node)
   : node_(node)
   , stop_servo_{ false }
   , servo_paused_{ false }
-  , tracking_pose_{ false }
   , new_joint_jog_msg_{ false }
   , new_twist_msg_{ false }
   , new_pose_msg_{ false }
@@ -88,6 +85,10 @@ ServoNode::ServoNode(const rclcpp::Node::SharedPtr& node)
   // Create publisher for joint trajectory message
   trajectory_publisher_ = node_->create_publisher<trajectory_msgs::msg::JointTrajectory>(
       servo_params_.command_out_topic, rclcpp::SystemDefaultsQoS());
+
+  // Create status publisher
+  status_publisher_ =
+      node_->create_publisher<std_msgs::msg::Int8>(servo_params_.status_topic, rclcpp::SystemDefaultsQoS());
 
   // Create service to enable switching command type
   switch_command_type_ = node_->create_service<moveit_msgs::srv::ServoCommandType>(
@@ -132,47 +133,6 @@ void ServoNode::switchCommandType(const std::shared_ptr<moveit_msgs::srv::ServoC
   {
     RCLCPP_WARN_STREAM(LOGGER, "Unknown command type " << request->command_type << " requested");
   }
-
-  // In case pose tracking thread is running, stop it.
-  tracking_pose_ = false;
-}
-
-void ServoNode::moveToPose()
-{
-  KinematicState next_joint_states;
-  Pose command = servo_->toPlanningFrame(poseFromPoseStamped(latest_pose_));
-
-  rclcpp::WallRate tracking_frequency(servo_params_.pose_tracking.frequency);
-  std::chrono::seconds timeout_duration(servo_params_.pose_tracking.timeout);
-
-  tracking_pose_ = true;
-  std::chrono::seconds time_elapsed(0);
-  auto start_time = std::chrono::steady_clock::now();
-  while (rclcpp::ok() && !stop_servo_)
-  {
-    next_joint_states = servo_->getNextJointState(command);
-    StatusCode status = servo_->getStatus();
-
-    auto current_time = std::chrono::steady_clock::now();
-    time_elapsed = std::chrono::duration_cast<std::chrono::seconds>(current_time - start_time);
-
-    if (time_elapsed > timeout_duration)
-    {
-      RCLCPP_INFO_STREAM(LOGGER, "Timed out while tracking.");
-      break;
-    }
-    else if (status == StatusCode::POSE_ACHIEVED || status == StatusCode::INVALID)
-    {
-      RCLCPP_INFO_STREAM(LOGGER, servo_->getStatusMessage());
-      tracking_pose_ = false;
-      break;
-    }
-    else
-    {
-      trajectory_publisher_->publish(composeTrajectoryMessage(servo_params_, next_joint_states));
-    }
-    tracking_frequency.sleep();
-  }
 }
 
 void ServoNode::servoLoop()
@@ -194,7 +154,7 @@ void ServoNode::servoLoop()
     {
       new_joint_jog_msg_ = false;
       // JointJog is an alias for VectorXd, so we can directly make a map and pass it.
-      Eigen::Map<Eigen::VectorXd> command(latest_joint_jog_.velocities.data(), latest_joint_jog_.velocities.size());
+      Eigen::Map<JointJogCommand> command(latest_joint_jog_.velocities.data(), latest_joint_jog_.velocities.size());
       next_joint_states = servo_->getNextJointState(command);
       publish_command = (servo_->getStatus() != StatusCode::INVALID);
     }
@@ -204,18 +164,17 @@ void ServoNode::servoLoop()
       Eigen::Vector<double, 6> velocities{ latest_twist_.twist.linear.x,  latest_twist_.twist.linear.y,
                                            latest_twist_.twist.linear.z,  latest_twist_.twist.angular.x,
                                            latest_twist_.twist.angular.y, latest_twist_.twist.angular.z };
-      Twist command{ latest_twist_.header.frame_id, velocities };
-      command = servo_->toPlanningFrame(command);
+      TwistCommand command{ latest_twist_.header.frame_id, velocities };
       next_joint_states = servo_->getNextJointState(command);
       publish_command = (servo_->getStatus() != StatusCode::INVALID);
     }
 
-    else if (!tracking_pose_ && expectedType == CommandType::POSE && new_pose_msg_)
+    else if (expectedType == CommandType::POSE && new_pose_msg_)
     {
       new_pose_msg_ = false;
-      if (pose_tracking_thread_.joinable())
-        pose_tracking_thread_.join();
-      pose_tracking_thread_ = std::thread(&ServoNode::moveToPose, this);
+      PoseCommand command = poseFromPoseStamped(latest_pose_);
+      next_joint_states = servo_->getNextJointState(command);
+      publish_command = (servo_->getStatus() != StatusCode::INVALID);
     }
 
     if (publish_command)
@@ -223,6 +182,9 @@ void ServoNode::servoLoop()
       trajectory_publisher_->publish(composeTrajectoryMessage(servo_params_, next_joint_states));
       publish_command = false;
     }
+    auto status_msg = std::make_unique<std_msgs::msg::Int8>();
+    status_msg->data = static_cast<int8_t>(servo_->getStatus());
+    status_publisher_->publish(std::move(status_msg));
   }
 
   servo_frequency.sleep();

@@ -37,10 +37,10 @@
  *      Author    : Brian O'Neil, Andy Zelenak, Blake Anderson, V Mohammed Ibrahim
  */
 
-#include <rclcpp/rclcpp.hpp>
 #include <moveit_servo/servo.hpp>
-#include <moveit_servo/utils/common.hpp>
 #include <moveit_servo/utils/command.hpp>
+#include <moveit_servo/utils/common.hpp>
+#include <rclcpp/rclcpp.hpp>
 
 namespace
 {
@@ -61,7 +61,12 @@ Servo::Servo(const rclcpp::Node::SharedPtr& node, std::shared_ptr<const servo::P
 {
   servo_params_ = servo_param_listener_->get_params();
 
-  validateParams(servo_params_);
+  const bool params_valid = validateParams(servo_params_);
+  if (!params_valid)
+  {
+    RCLCPP_ERROR_STREAM(LOGGER, "Got invalid parameters, exiting.");
+    std::exit(EXIT_FAILURE);
+  }
 
   if (!planning_scene_monitor_->getStateMonitor()->waitForCompleteState(servo_params_.move_group_name,
                                                                         ROBOT_STATE_WAIT_TIME))
@@ -87,7 +92,7 @@ Servo::Servo(const rclcpp::Node::SharedPtr& node, std::shared_ptr<const servo::P
   if (joint_model_group_ == nullptr)
   {
     RCLCPP_ERROR_STREAM(LOGGER, "Invalid move group name: `" << servo_params_.move_group_name << '`');
-    throw std::runtime_error("Invalid move group name");
+    std::exit(EXIT_FAILURE);
   }
   else
   {
@@ -140,10 +145,7 @@ Servo::~Servo()
 KinematicState Servo::getNextJointState(const ServoInput& command)
 {
   // Update the parameters
-  if (servo_params_.enable_parameter_update)
-  {
-    updateParams();
-  }
+  updateParams();
 
   // Set status to clear
   servo_status_ = StatusCode::NO_WARNING;
@@ -164,25 +166,27 @@ KinematicState Servo::getNextJointState(const ServoInput& command)
   // Compute the change in joint position due to the incoming command
   Eigen::VectorXd joint_position_delta = jointDeltaFromCommand(command);
 
-  // Continue rest of the computations only if the command was valid
-  if (servo_status_ != StatusCode::INVALID)
+  if (collision_velocity_scale_ > 0 && collision_velocity_scale_ < 1)
+  {
+    servo_status_ = StatusCode::DECELERATE_FOR_COLLISION;
+  }
+  else if (collision_velocity_scale_ == 0)
+  {
+    servo_status_ = StatusCode::HALT_FOR_COLLISION;
+  }
+
+  // Continue rest of the computations only if the command is valid
+  // The computations can be skipped also in case we are halting.
+  if (servo_status_ != StatusCode::INVALID || servo_status_ != StatusCode::HALT_FOR_COLLISION)
   {
     // Apply collision scaling to the joint position delta
-    if (collision_velocity_scale_ > 0 && collision_velocity_scale_ < 1)
-    {
-      servo_status_ = StatusCode::DECELERATE_FOR_COLLISION;
-    }
-    else if (collision_velocity_scale_ == 0)
-    {
-      servo_status_ = StatusCode::HALT_FOR_COLLISION;
-    }
     joint_position_delta *= collision_velocity_scale_;
 
     // Compute the next joint positions based on the joint position deltas
     target_joint_positions = current_joint_positions + joint_position_delta;
 
     // TODO : apply filtering to the velocity instead of position
-    // Apply smoothing to the positions
+    // Apply smoothing to the positions if a smoother was provided.
     // Update filter state
     if (smoother_)
     {
@@ -228,17 +232,17 @@ Eigen::VectorXd Servo::jointDeltaFromCommand(const ServoInput& command)
   {
     if (expected_type == CommandType::JOINT_JOG)
     {
-      delta_result = jointDeltaFromJointJog(std::get<JointJog>(command), robot_state_, servo_params_);
+      delta_result = jointDeltaFromJointJog(std::get<JointJogCommand>(command), robot_state_, servo_params_);
       servo_status_ = delta_result.first;
     }
     else if (expected_type == CommandType::TWIST)
     {
-      delta_result = jointDeltaFromTwist(std::get<Twist>(command), robot_state_, servo_params_);
+      delta_result = jointDeltaFromTwist(std::get<TwistCommand>(command), robot_state_, servo_params_);
       servo_status_ = delta_result.first;
     }
     else if (expected_type == CommandType::POSE)
     {
-      delta_result = jointDeltaFromPose(std::get<Pose>(command), robot_state_, servo_params_);
+      delta_result = jointDeltaFromPose(std::get<PoseCommand>(command), robot_state_, servo_params_);
       servo_status_ = delta_result.first;
     }
     if (servo_status_ != StatusCode::INVALID)
@@ -350,8 +354,15 @@ void Servo::updateParams()
       RCLCPP_INFO_STREAM(LOGGER, "override_velocity_scaling_factor changed to : "
                                      << std::to_string(params.override_velocity_scaling_factor));
     }
-
-    servo_params_ = params;
+    const bool params_valid = validateParams(params);
+    if (params_valid)
+    {
+      servo_params_ = params;
+    }
+    else
+    {
+      RCLCPP_WARN_STREAM(LOGGER, "Parameters will not be updated.");
+    }
   }
 }
 
@@ -375,15 +386,15 @@ void Servo::expectedCommandType(const CommandType& command_type)
   expected_command_type_ = command_type;
 }
 
-void Servo::validateParams(const servo::Params& servo_params)
+bool Servo::validateParams(const servo::Params& servo_params)
 {
-  bool has_error = false;
+  bool params_valid = true;
   if (servo_params.hard_stop_singularity_threshold <= servo_params.lower_singularity_threshold)
   {
     RCLCPP_ERROR(LOGGER, "Parameter 'hard_stop_singularity_threshold' "
                          "should be greater than 'lower_singularity_threshold.' "
                          "Check the parameters YAML file used to launch this node.");
-    has_error = true;
+    params_valid = false;
   }
 
   if (!servo_params.publish_joint_positions && !servo_params.publish_joint_velocities &&
@@ -393,7 +404,7 @@ void Servo::validateParams(const servo::Params& servo_params)
                          "publish_joint_velocities / "
                          "publish_joint_accelerations must be true. "
                          "Check the parameters YAML file used to launch this node.");
-    has_error = true;
+    params_valid = false;
   }
 
   if ((servo_params.command_out_type == "std_msgs/Float64MultiArray") && servo_params.publish_joint_positions &&
@@ -402,7 +413,7 @@ void Servo::validateParams(const servo::Params& servo_params)
     RCLCPP_ERROR(LOGGER, "When publishing a std_msgs/Float64MultiArray, "
                          "you must select positions OR velocities."
                          "Check the parameters YAML file used to launch this node.");
-    has_error = true;
+    params_valid = false;
   }
 
   if (servo_params.scene_collision_proximity_threshold < servo_params.self_collision_proximity_threshold)
@@ -410,13 +421,10 @@ void Servo::validateParams(const servo::Params& servo_params)
     RCLCPP_ERROR(LOGGER, "Parameter 'self_collision_proximity_threshold' should probably be less "
                          "than or equal to 'scene_collision_proximity_threshold'."
                          "Check the parameters YAML file used to launch this node.");
-    has_error = true;
+    params_valid = false;
   }
 
-  if (has_error)
-  {
-    throw std::runtime_error("Servo failed to initialize : Invalid parameter values");
-  }
+  return params_valid;
 }
 
 const Eigen::Isometry3d Servo::getEndEffectorPose()
@@ -426,7 +434,7 @@ const Eigen::Isometry3d Servo::getEndEffectorPose()
   return robot_state_->getGlobalLinkTransform(servo_params_.ee_frame);
 }
 
-Pose Servo::toPlanningFrame(const Pose& command)
+PoseCommand Servo::toPlanningFrame(const PoseCommand& command)
 {
   if (command.frame_id != servo_params_.planning_frame)
   {
@@ -434,7 +442,7 @@ Pose Servo::toPlanningFrame(const Pose& command)
     auto command_to_planning_frame =
         transform_buffer_.lookupTransform(servo_params_.planning_frame, command.frame_id, rclcpp::Time(0));
     tf2::doTransform(target_pose, target_pose, command_to_planning_frame);
-    return Pose{ servo_params_.planning_frame, tf2::transformToEigen(target_pose) };
+    return PoseCommand{ servo_params_.planning_frame, tf2::transformToEigen(target_pose) };
   }
   else
   {
@@ -442,9 +450,9 @@ Pose Servo::toPlanningFrame(const Pose& command)
   }
 }
 
-Twist Servo::toPlanningFrame(const Twist& command)
+TwistCommand Servo::toPlanningFrame(const TwistCommand& command)
 {
-  Twist transformed_twist = command;
+  TwistCommand transformed_twist = command;
 
   if (command.frame_id != servo_params_.planning_frame)
   {

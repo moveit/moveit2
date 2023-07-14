@@ -1,7 +1,7 @@
 /*******************************************************************************
  * BSD 3-Clause License
  *
- * Copyright (c) 2021, PickNik Inc.
+ * Copyright (c) 2019, Los Alamos National Security, LLC
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,8 +42,8 @@
 #pragma once
 
 #include <moveit_servo_lib_parameters.hpp>
-#include <moveit/planning_scene/planning_scene.h>
 #include <moveit/planning_scene_monitor/planning_scene_monitor.h>
+#include <moveit/planning_scene/planning_scene.h>
 
 namespace moveit_servo
 {

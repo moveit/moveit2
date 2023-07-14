@@ -1,7 +1,7 @@
 /*******************************************************************************
  * BSD 3-Clause License
  *
- * Copyright (c) 2021, PickNik Inc.
+ * Copyright (c) 2023, PickNik Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,9 +40,9 @@
  */
 
 #include <chrono>
-#include <rclcpp/rclcpp.hpp>
 #include <moveit_servo/servo.hpp>
 #include <moveit_servo/utils/common.hpp>
+#include <rclcpp/rclcpp.hpp>
 
 using namespace moveit_servo;
 
@@ -79,13 +79,13 @@ int main(int argc, char* argv[])
   // Set the command type for servo.
   servo.expectedCommandType(CommandType::JOINT_JOG);
   // JointJog command that moves only the 7th joint at + 1.0 rad/s
-  JointJog joint_jog(7);
+  JointJogCommand joint_jog(7);
   joint_jog << 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0;
 
-  // Frquency at which the commands will be send to robot controller.
+  // Frequency at which the commands will be send to robot controller.
   rclcpp::WallRate rate(1.0 / servo_params.publish_period);
 
-  std::chrono::seconds timeout_duration(3);  // Apply the joint jog for 3 seconds.
+  std::chrono::seconds timeout_duration(3);
   std::chrono::seconds time_elapsed(0);
   auto start_time = std::chrono::steady_clock::now();
 
