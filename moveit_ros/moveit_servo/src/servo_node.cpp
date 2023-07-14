@@ -107,7 +107,16 @@ void ServoNode::pauseServo(const std::shared_ptr<std_srvs::srv::SetBool::Request
 {
   servo_paused_ = request->data;
   response->success = (servo_paused_ == request->data);
-  servo_paused_ ? response->message = "Servoing disabled" : response->message = "Servoing enabled";
+  if (servo_paused_)
+  {
+    servo_->setCollisionChecking(false);
+    response->message = "Servoing disabled";
+  }
+  else
+  {
+    servo_->setCollisionChecking(true);
+    response->message = "Servoing enabled";
+  }
 }
 
 void ServoNode::switchCommandType(const std::shared_ptr<moveit_msgs::srv::ServoCommandType::Request> request,

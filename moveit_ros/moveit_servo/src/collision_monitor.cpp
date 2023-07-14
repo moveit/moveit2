@@ -62,8 +62,12 @@ void CollisionMonitor::start()
   if (!monitor_thread_.joinable())
   {
     monitor_thread_ = std::thread(&CollisionMonitor::checkCollisions, this);
+    RCLCPP_INFO_STREAM(LOGGER, "Collision monitor started");
   }
-  RCLCPP_INFO_STREAM(LOGGER, "Collision monitor started");
+  else
+  {
+    RCLCPP_INFO_STREAM(LOGGER, "Collision monitor could not be started");
+  }
 }
 
 void CollisionMonitor::stop()
