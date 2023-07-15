@@ -125,8 +125,8 @@ int main(int argc, char* argv[])
     {
       std::lock_guard<std::mutex> pguard(pose_guard);
       target_pose.pose = servo.getEndEffectorPose();
-      stop_tracking = target_pose.pose.isApprox(
-          terminal_pose, servo_params.pose_tracking.linear_tolerance);  // Dynamically update the target pose
+      stop_tracking = target_pose.pose.isApprox(terminal_pose, servo_params.pose_tracking.linear_tolerance);
+      // Dynamically update the target pose.
       target_pose.pose.translate(Eigen::Vector3d(0.0, 0.0, -delta));
     }
 
