@@ -42,6 +42,7 @@
 #pragma once
 
 #include <string>
+#include <tf2_eigen/tf2_eigen.hpp>
 #include <unordered_map>
 
 namespace moveit_servo
