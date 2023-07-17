@@ -8,7 +8,12 @@
 ## Properties of outgoing commands
 publish_period: 0.02  # 1/Nominal publish rate [seconds]
 
-command_in_type: "speed_units"
+command_in_type: "unitless"
+scale:
+  linear: 1.0
+  rotational: 1.0
+  joint: 1.0
+
 # What type of topic does your robot driver expect?
 # Currently supported are std_msgs/Float64MultiArray or trajectory_msgs/JointTrajectory
 command_out_type: trajectory_msgs/JointTrajectory
