@@ -166,11 +166,13 @@ void ServoNode::servoLoop()
     if (servo_paused_)
       continue;
 
+    publish_command = false;
     CommandType expectedType = servo_->expectedCommandType();
 
     if (expectedType == CommandType::JOINT_JOG && new_joint_jog_msg_)
     {
-      new_joint_jog_msg_ = false;
+      // Mark latest jointjog command as processed and also reject any twist and pose messages that had arrived simultaneously.
+      new_joint_jog_msg_ = new_twist_msg_ = new_pose_msg_ = false;
       // JointJogCommand is an alias for VectorXd, so we can directly make a map and pass it.
       Eigen::Map<JointJogCommand> command(latest_joint_jog_.velocities.data(), latest_joint_jog_.velocities.size());
       next_joint_states = servo_->getNextJointState(command);
@@ -178,7 +180,8 @@ void ServoNode::servoLoop()
     }
     else if (expectedType == CommandType::TWIST && new_twist_msg_)
     {
-      new_twist_msg_ = false;
+      // Mark latest twist command as processed and also reject any jointjog and pose messages that had arrived simultaneously.
+      new_joint_jog_msg_ = new_twist_msg_ = new_pose_msg_ = false;
       Eigen::Vector<double, 6> velocities{ latest_twist_.twist.linear.x,  latest_twist_.twist.linear.y,
                                            latest_twist_.twist.linear.z,  latest_twist_.twist.angular.x,
                                            latest_twist_.twist.angular.y, latest_twist_.twist.angular.z };
@@ -186,13 +189,17 @@ void ServoNode::servoLoop()
       next_joint_states = servo_->getNextJointState(command);
       publish_command = (servo_->getStatus() != StatusCode::INVALID);
     }
-
     else if (expectedType == CommandType::POSE && new_pose_msg_)
     {
-      new_pose_msg_ = false;
+      // Mark latest pose command as processed and also reject any jointjog and twist messages that had arrived simultaneously.
+      new_joint_jog_msg_ = new_twist_msg_ = new_pose_msg_ = false;
       PoseCommand command = poseFromPoseStamped(latest_pose_);
       next_joint_states = servo_->getNextJointState(command);
       publish_command = (servo_->getStatus() != StatusCode::INVALID);
+    }
+    else if (new_joint_jog_msg_ || new_twist_msg_ || new_pose_msg_)
+    {
+      RCLCPP_WARN_STREAM(LOGGER, "Command type has not been set, cannot accept input");
     }
 
     if (publish_command)
