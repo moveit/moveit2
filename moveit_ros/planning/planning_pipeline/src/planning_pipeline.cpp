@@ -319,11 +319,7 @@ bool planning_pipeline::PlanningPipeline::generatePlan(const planning_scene::Pla
       arr.markers.push_back(m);
 
       std::vector<std::size_t> index;
-      if(!res.trajectory->isContinuous(0.1)){
-        res.error_code.val = moveit_msgs::msg::MoveItErrorCodes::INVALID_MOTION_PLAN;
-        valid = false;
-      }
-      else if (!planning_scene->isPathValid(*res.trajectory, req.path_constraints, req.group_name, false, &index))
+      if (!planning_scene->isPathValid(*res.trajectory, req.path_constraints, req.group_name, false, &index))
       {
         // check to see if there is any problem with the states that are found to be invalid
         // they are considered ok if they were added by a planning request adapter

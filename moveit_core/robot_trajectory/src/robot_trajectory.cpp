@@ -632,8 +632,6 @@ void RobotTrajectory::print(std::ostream& out, std::vector<int> variable_indexes
 
 bool RobotTrajectory::isContinuous(const double threshold)
 {
-  RCLCPP_WARN(rclcpp::get_logger("RobotTrajectory"),
-                    "Checking for continuity!");
   bool is_continuous = true;
   // Iterate over joint states & check if distance is higher than the given threshold
   for (std::size_t index = 1; index < waypoints_.size(); ++index)
