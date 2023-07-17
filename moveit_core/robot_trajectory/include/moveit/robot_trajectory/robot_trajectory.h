@@ -385,7 +385,7 @@ public:
   /** @brief Check if trajectory contains any joint jumps
    *  @return True if trajectory is continuous
    */
-  [[nodiscard]] bool isContinuous(const double threshold);
+  [[nodiscard]] bool isContinuous(const double threshold) const;
 
 private:
   moveit::core::RobotModelConstPtr robot_model_;
