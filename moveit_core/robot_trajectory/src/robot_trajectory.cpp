@@ -646,7 +646,7 @@ bool RobotTrajectory::isContinuous(const double threshold)
       {
         RCLCPP_WARN(rclcpp::get_logger("RobotTrajectory"),
                     "Joint discontinuity detected for joint %s between waypoint %li and %li. The distance is %f and "
-                    "accedes the threshold %f",
+                    "exceeds the threshold %f",
                     joint_name.c_str(), index - 1, index, distance, threshold);
         is_continuous = false;
       }
