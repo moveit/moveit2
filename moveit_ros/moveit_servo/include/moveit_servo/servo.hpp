@@ -66,6 +66,12 @@ public:
 
   ~Servo();
 
+  // Disable copy construction.
+  Servo(const Servo&) = delete;
+
+  // Disable copy assignment.
+  Servo& operator=(Servo&) = delete;
+
   /**
    * \brief Computes the joint state required to follow the given command.
    * @param command The command to follow, std::variant type, can handle JointJog, Twist and Pose.

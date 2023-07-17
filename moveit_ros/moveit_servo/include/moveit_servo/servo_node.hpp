@@ -62,6 +62,12 @@ public:
 
   ~ServoNode();
 
+  // Disable copy construction.
+  ServoNode(const ServoNode&) = delete;
+
+  // Disable copy assignment.
+  ServoNode& operator=(ServoNode&) = delete;
+
 private:
   /**
    * \brief Loop that handles different types of incoming commands.
