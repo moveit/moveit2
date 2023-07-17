@@ -39,11 +39,16 @@
  */
 
 #include <moveit_servo/servo_node.hpp>
+#include <realtime_tools/thread_priority.hpp>
 
 namespace
 {
 const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_servo.servo_node");
-}
+// This value is used when configuring the main loop to use SCHED_FIFO scheduling
+// We use a slightly lower priority than the ros2_control default in order to reduce jitter
+// Reference: https://man7.org/linux/man-pages/man2/sched_setparam.2.html
+int const THREAD_PRIORITY = 40;
+}  // namespace
 
 namespace moveit_servo
 {
@@ -99,6 +104,19 @@ ServoNode::ServoNode(const rclcpp::Node::SharedPtr& node)
   pause_servo_ = node_->create_service<std_srvs::srv::SetBool>("moveit_servo/pause_servo",
                                                                std::bind(&ServoNode::pauseServo, this,
                                                                          std::placeholders::_1, std::placeholders::_2));
+
+  // Check if a realtime kernel is available
+  if (realtime_tools::has_realtime_kernel())
+  {
+    if (realtime_tools::configure_sched_fifo(THREAD_PRIORITY))
+      RCLCPP_INFO_STREAM(LOGGER, "Realtime kernel available, higher thread priority has been set.");
+    else
+      RCLCPP_WARN_STREAM(LOGGER, "Could not enable FIFO RT scheduling policy.");
+  }
+  else
+  {
+    RCLCPP_WARN_STREAM(LOGGER, "Realtime kernel is recommended for better performance.");
+  }
   // Start the servoing loop
   servo_loop_thread_ = std::thread(&ServoNode::servoLoop, this);
 }
