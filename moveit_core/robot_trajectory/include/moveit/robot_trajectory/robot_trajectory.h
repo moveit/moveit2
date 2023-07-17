@@ -383,6 +383,8 @@ public:
   void print(std::ostream& out, std::vector<int> variable_indexes = std::vector<int>()) const;
 
   /** @brief Check if trajectory contains any joint jumps
+   *  @param threshold If the distance between two consecutive joint values in the trajectory exceeds this threshold,
+   * the trajectory is classified as discontinuous.
    *  @return True if trajectory is continuous
    */
   [[nodiscard]] bool isContinuous(const double threshold) const;

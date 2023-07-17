@@ -630,7 +630,7 @@ void RobotTrajectory::print(std::ostream& out, std::vector<int> variable_indexes
   out.flush();
 }
 
-bool RobotTrajectory::isContinuous(const double threshold)
+bool RobotTrajectory::isContinuous(const double threshold) const
 {
   bool is_continuous = true;
   // Iterate over joint states & check if distance is higher than the given threshold
