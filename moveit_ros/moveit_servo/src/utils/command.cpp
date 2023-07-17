@@ -59,6 +59,11 @@ JointDeltaResult jointDeltaFromJointJog(const JointJogCommand& command, moveit::
   {
     // The incoming command should be in rad/s
     joint_position_delta = command * servo_params.publish_period;
+
+    if (servo_params.command_in_type == "unitless")
+    {
+      joint_position_delta *= servo_params.scale.joint;
+    }
   }
   else
   {
@@ -83,6 +88,15 @@ JointDeltaResult jointDeltaFromTwist(const TwistCommand& command, moveit::core::
   {
     // Compute the Cartesian position delta based on incoming command, assumed to be in m/s
     cartesian_position_delta = command.velocities * servo_params.publish_period;
+    // This scaling is supposed to be applied to the command.
+    // But since it is only used here, we avoid creating a copy of the command,
+    // by applying the scaling to the computed Cartesian delta instead.
+    if (servo_params.command_in_type == "unitless")
+    {
+      cartesian_position_delta.head<3>() *= servo_params.scale.linear;
+      cartesian_position_delta.tail<3>() *= servo_params.scale.rotational;
+    }
+
     // Compute the required change in joint angles.
     const auto delta_result = jointDeltaFromIK(cartesian_position_delta, robot_state, servo_params);
     status = delta_result.first;
