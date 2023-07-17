@@ -31,7 +31,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *******************************************************************************/
 
-/*      Title     : twist_demo.cpp
+/*      Title     : demo_twist.cpp
  *      Project   : moveit_servo
  *      Created   : 06/01/2023
  *      Author    : V Mohammed Ibrahim

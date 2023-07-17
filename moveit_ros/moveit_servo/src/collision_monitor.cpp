@@ -149,5 +149,4 @@ void CollisionMonitor::checkCollisions()
     rate.sleep();
   }
 }
-
 }  // namespace moveit_servo

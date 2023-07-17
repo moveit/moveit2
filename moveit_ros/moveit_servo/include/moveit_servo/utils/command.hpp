@@ -81,8 +81,8 @@ JointDeltaResult jointDeltaFromPose(const PoseCommand& command, moveit::core::Ro
                                     servo::Params& servo_params);
 
 /**
- * \brief Computes the required change in joint angles for given cartesian change, using the robots IK solver.
- * @param carteisan_position_delta The change in cartesian position.
+ * \brief Computes the required change in joint angles for given Cartesian change, using the robot's IK solver.
+ * @param cartesian_position_delta The change in Cartesian position.
  * @param robot_state_ The current robot state as obtained from PlanningSceneMonitor
  * @param servo_params The servo parameters
  * @return The status and joint position change required (delta).

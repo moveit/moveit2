@@ -153,7 +153,7 @@ void ServoNode::servoLoop()
     if (expectedType == CommandType::JOINT_JOG && new_joint_jog_msg_)
     {
       new_joint_jog_msg_ = false;
-      // JointJog is an alias for VectorXd, so we can directly make a map and pass it.
+      // JointJogCommand is an alias for VectorXd, so we can directly make a map and pass it.
       Eigen::Map<JointJogCommand> command(latest_joint_jog_.velocities.data(), latest_joint_jog_.velocities.size());
       next_joint_states = servo_->getNextJointState(command);
       publish_command = (servo_->getStatus() != StatusCode::INVALID);

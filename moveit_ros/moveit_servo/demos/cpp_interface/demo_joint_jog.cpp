@@ -31,7 +31,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *******************************************************************************/
 
-/*      Title     : joint_jog_demo.cpp
+/*      Title     : demo_joint_jog.cpp
  *      Project   : moveit_servo
  *      Created   : 05/27/2023
  *      Author    : V Mohammed Ibrahim

@@ -125,7 +125,7 @@ servo:
   use_smoothing: {
     type: bool,
     default_value: true,
-    description: "Enables the use of smoothing plugins for joint tracjectory smoothing"
+    description: "Enables the use of smoothing plugins for joint trajectory smoothing"
   }
 
   smoothing_filter_plugin_name: {

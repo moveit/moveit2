@@ -80,11 +80,11 @@ bool isValidCommand(const PoseCommand& command)
 geometry_msgs::msg::Pose poseFromCartesianDelta(const Eigen::VectorXd& delta_x,
                                                 const Eigen::Isometry3d& base_to_tip_frame_transform)
 {
-  // get a transformation matrix with the desired position change &
-  // get a transformation matrix with desired orientation change
+  // Get a transformation matrix with the desired position change
   Eigen::Isometry3d tf_pos_delta(Eigen::Isometry3d::Identity());
   tf_pos_delta.translate(Eigen::Vector3d(delta_x[0], delta_x[1], delta_x[2]));
 
+  // Get a transformation matrix with desired orientation change
   Eigen::Isometry3d tf_rot_delta(Eigen::Isometry3d::Identity());
   Eigen::Quaterniond q = Eigen::AngleAxisd(delta_x[3], Eigen::Vector3d::UnitX()) *
                          Eigen::AngleAxisd(delta_x[4], Eigen::Vector3d::UnitY()) *

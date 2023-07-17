@@ -122,11 +122,11 @@ double jointLimitVelocityScalingFactor(const Eigen::VectorXd& velocities,
                                        const moveit::core::JointBoundsVector& joint_bounds, double scaling_override);
 
 /**
- * \brief Finds the joints that are going past allowable joint limits.
+ * \brief Finds the joints that are exceeding allowable joint limits.
  * @param positions The joints positions.
  * @param velocities The current commanded velocities.
  * @param joint_bounds The bounding information for the robot joints.
- * @param margin The buffer before the actual limit.
+ * @param margin Additional buffer on the actual joint limits.
  * @return The joints that are violating the specified position limits.
  */
 std::vector<int> jointsToHalt(const Eigen::VectorXd& positions, const Eigen::VectorXd& velocities,

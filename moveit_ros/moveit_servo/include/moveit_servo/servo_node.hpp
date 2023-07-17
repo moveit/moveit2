@@ -77,10 +77,7 @@ private:
 
   /**
    * \brief The service to set the command type for Servo.
-   * Supported commands are
-   * 0 - JointJog
-   * 1 - Twist
-   * 2 - Pose
+   * Supported command types can be found in utils/datatypes.hpp
    * This service must be used to set the command type before sending any servoing commands.
    */
   void switchCommandType(const std::shared_ptr<moveit_msgs::srv::ServoCommandType::Request> request,

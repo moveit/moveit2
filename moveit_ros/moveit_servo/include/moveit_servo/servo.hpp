@@ -116,7 +116,8 @@ public:
 
   /**
    * \brief Converts the given twist to planning frame.
-   * @param command The twist to be converted to planning frame.
+   * @param command The twist to be converted to planning frame. Assumes the command is in a stationary reference frame
+   * (issue #2150)
    */
   TwistCommand toPlanningFrame(const TwistCommand& command);
 
@@ -136,12 +137,12 @@ private:
   /**
    * \brief Validate the servo parameters
    * @param servo_params The servo parameters
-   * @return True is parameters are valid, else False
+   * @return True if parameters are valid, else False
    */
   bool validateParams(const servo::Params& servo_params);
 
   /**
-   * \brief create and initialize the smoothing plugin to be used by servo.
+   * \brief Create and initialize the smoothing plugin to be used by servo.
    */
   void setSmoothingPlugin();
 
