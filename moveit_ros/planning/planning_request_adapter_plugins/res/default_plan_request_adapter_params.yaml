@@ -11,7 +11,7 @@ default_plan_request_adapter_parameters:
   }
   min_angle_change: {
     type: double,
-    description: "AddTimeOptimalParameterization: ?",
+    description: "min_angle_change: ?",
     default_value: 0.001,
   }
   start_state_max_dt: {
