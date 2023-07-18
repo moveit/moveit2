@@ -6,7 +6,7 @@ default_plan_request_adapter_parameters:
   }
   resample_dt: {
     type: double,
-    description: "AddTimeOptimalParameterization:Time steps between two waypoints of the parameterized trajectory. The trajectory is re-sampled from the original path.",
+    description: "AddTimeOptimalParameterization: Time steps between two waypoints of the parameterized trajectory. The trajectory is re-sampled from the original path.",
     default_value: 0.1,
   }
   min_angle_change: {
@@ -16,7 +16,7 @@ default_plan_request_adapter_parameters:
   }
   start_state_max_dt: {
     type: double,
-    description: "FixStartStateCollision/ FixStartStateBounds: Maximum temporal distance of the fixed start state from the original state.",
+    description: "FixStartStateCollision/FixStartStateBounds: Maximum temporal distance of the fixed start state from the original state.",
     default_value: 0.5,
   }
   jiggle_fraction: {
@@ -39,6 +39,6 @@ default_plan_request_adapter_parameters:
   }
   default_workspace_bounds: {
     type: double,
-    description: "FixWorkspaceBounds: Default workspace bounds representing a 10m x 10m x 10m box around the robot's origin.",
+    description: "FixWorkspaceBounds: Default workspace bounds representing a cube around the robot's origin whose edge length this parameter defines.",
     default_value: 10.0,
   }
