@@ -97,7 +97,6 @@ private:
 
   const rclcpp::Node::SharedPtr node_;
   std::unique_ptr<Servo> servo_;
-  std::shared_ptr<servo::ParamListener> servo_param_listener_;
   servo::Params servo_params_;
   planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor_;
 

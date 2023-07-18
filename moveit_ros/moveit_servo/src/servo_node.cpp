@@ -68,12 +68,13 @@ ServoNode::ServoNode(const rclcpp::Node::SharedPtr& node)
   , new_twist_msg_{ false }
   , new_pose_msg_{ false }
 {
-  servo_param_listener_ = std::make_shared<servo::ParamListener>(node_, "moveit_servo");
-  servo_params_ = servo_param_listener_->get_params();
-
+  std::shared_ptr<servo::ParamListener> servo_param_listener =
+      std::make_shared<servo::ParamListener>(node_, "moveit_servo");
   // Create Servo instance
-  planning_scene_monitor_ = createPlanningSceneMonitor(node_, servo_params_);
-  servo_ = std::make_unique<Servo>(node_, servo_param_listener_, planning_scene_monitor_);
+  planning_scene_monitor_ = createPlanningSceneMonitor(node_, servo_param_listener->get_params());
+  servo_ = std::make_unique<Servo>(node_, servo_param_listener, planning_scene_monitor_);
+
+  servo_params_ = servo_->getParams();
 
   // Create subscriber for jointjog
   joint_jog_subscriber_ = node_->create_subscription<control_msgs::msg::JointJog>(
@@ -166,6 +167,7 @@ void ServoNode::servoLoop()
     if (servo_paused_)
       continue;
 
+    servo_params_ = servo_->getParams();
     publish_command = false;
     CommandType expectedType = servo_->expectedCommandType();
 

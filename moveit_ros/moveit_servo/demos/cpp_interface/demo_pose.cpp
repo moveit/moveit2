@@ -44,6 +44,8 @@
 #include <moveit_servo/utils/common.hpp>
 #include <mutex>
 #include <rclcpp/rclcpp.hpp>
+#include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
+#include <tf2_ros/transform_listener.h>
 
 using namespace moveit_servo;
 
@@ -89,7 +91,14 @@ int main(int argc, char* argv[])
   target_pose.frame_id = servo_params.ee_frame;
   target_pose.pose = Eigen::Isometry3d::Identity();  // Target pose in ee frame (same as the ee frame pose)
   // Convert the pose to planning frame.
-  target_pose = servo.toPlanningFrame(target_pose);
+  tf2_ros::Buffer transform_buffer(demo_node->get_clock());
+  tf2_ros::TransformListener transform_listener(transform_buffer);
+  auto target_pose_msg =
+      convertIsometryToTransform(target_pose.pose, servo_params.planning_frame, target_pose.frame_id);
+  auto command_to_planning_frame = transform_buffer.lookupTransform(servo_params.planning_frame, target_pose.frame_id,
+                                                                    rclcpp::Time(0), rclcpp::Duration::from_seconds(2));
+  tf2::doTransform(target_pose_msg, target_pose_msg, command_to_planning_frame);
+  target_pose = PoseCommand{ servo_params.planning_frame, tf2::transformToEigen(target_pose_msg) };
 
   // The pose tracking lambda that will be run in a separate thread.
   auto pose_tracker = [&]() {

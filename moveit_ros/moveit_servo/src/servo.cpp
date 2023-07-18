@@ -53,11 +53,7 @@ namespace moveit_servo
 
 Servo::Servo(const rclcpp::Node::SharedPtr& node, std::shared_ptr<const servo::ParamListener> servo_param_listener,
              const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor)
-  : node_(node)
-  , servo_param_listener_{ servo_param_listener }
-  , planning_scene_monitor_{ planning_scene_monitor }
-  , transform_buffer_(node_->get_clock())
-  , transform_listener_(transform_buffer_)
+  : node_(node), servo_param_listener_{ servo_param_listener }, planning_scene_monitor_{ planning_scene_monitor }
 {
   servo_params_ = servo_param_listener_->get_params();
 
@@ -85,32 +81,14 @@ Servo::Servo(const rclcpp::Node::SharedPtr& node, std::shared_ptr<const servo::P
     planning_scene_monitor_->requestPlanningSceneState();
   }
 
-  // Get the robot state and joint model group info.
-  robot_state_ = planning_scene_monitor_->getStateMonitor()->getCurrentState();
-  joint_model_group_ = robot_state_->getJointModelGroup(servo_params_.move_group_name);
-
-  if (joint_model_group_ == nullptr)
-  {
-    RCLCPP_ERROR_STREAM(LOGGER, "Invalid move group name: `" << servo_params_.move_group_name << '`');
-    std::exit(EXIT_FAILURE);
-  }
-  else
-  {
-    // Get necessary information about joints
-    joint_names_ = joint_model_group_->getActiveJointModelNames();
-    joint_bounds_ = joint_model_group_->getActiveJointModelsBounds();
-    num_joints_ = joint_names_.size();
-  }
-
-  checkIKSolver();
-
+  moveit::core::RobotStatePtr robot_state = planning_scene_monitor_->getStateMonitor()->getCurrentState();
   // Check if the transforms to planning frame and end effector frame exist.
-  if (!robot_state_->knowsFrameTransform(servo_params_.planning_frame))
+  if (!robot_state->knowsFrameTransform(servo_params_.planning_frame))
   {
     servo_status_ = StatusCode::INVALID;
     RCLCPP_ERROR_STREAM(LOGGER, "No transform available for planning frame " << servo_params_.planning_frame);
   }
-  else if (!robot_state_->knowsFrameTransform(servo_params_.ee_frame))
+  else if (!robot_state->knowsFrameTransform(servo_params_.ee_frame))
   {
     servo_status_ = StatusCode::INVALID;
     RCLCPP_ERROR_STREAM(LOGGER, "No transform available for end effector frame " << servo_params_.ee_frame);
@@ -142,160 +120,6 @@ Servo::~Servo()
   setCollisionChecking(false);
 }
 
-KinematicState Servo::getNextJointState(const ServoInput& command)
-{
-  // Update the parameters
-  updateParams();
-
-  // Set status to clear
-  servo_status_ = StatusCode::NO_WARNING;
-
-  // State variables
-  KinematicState current_state(num_joints_), target_state(num_joints_);
-  target_state.joint_names = joint_names_;
-  // Copy current kinematic data from RobotState.
-  robot_state_ = planning_scene_monitor_->getStateMonitor()->getCurrentState();
-  robot_state_->copyJointGroupPositions(joint_model_group_, current_state.positions);
-  robot_state_->copyJointGroupVelocities(joint_model_group_, current_state.velocities);
-  // Create Eigen maps for cleaner operations.
-  Eigen::Map<Eigen::VectorXd> current_joint_positions(current_state.positions.data(), num_joints_);
-  Eigen::Map<Eigen::VectorXd> target_joint_positions(target_state.positions.data(), num_joints_);
-  Eigen::Map<Eigen::VectorXd> current_joint_velocities(current_state.velocities.data(), num_joints_);
-  Eigen::Map<Eigen::VectorXd> target_joint_velocities(target_state.velocities.data(), num_joints_);
-
-  // Compute the change in joint position due to the incoming command
-  Eigen::VectorXd joint_position_delta = jointDeltaFromCommand(command);
-
-  if (collision_velocity_scale_ > 0 && collision_velocity_scale_ < 1)
-  {
-    servo_status_ = StatusCode::DECELERATE_FOR_COLLISION;
-  }
-  else if (collision_velocity_scale_ == 0)
-  {
-    servo_status_ = StatusCode::HALT_FOR_COLLISION;
-  }
-
-  // Continue rest of the computations only if the command is valid
-  // The computations can be skipped also in case we are halting.
-  if (servo_status_ != StatusCode::INVALID || servo_status_ != StatusCode::HALT_FOR_COLLISION)
-  {
-    // Apply collision scaling to the joint position delta
-    joint_position_delta *= collision_velocity_scale_;
-
-    // Compute the next joint positions based on the joint position deltas
-    target_joint_positions = current_joint_positions + joint_position_delta;
-
-    // TODO : apply filtering to the velocity instead of position
-    // Apply smoothing to the positions if a smoother was provided.
-    // Update filter state
-    if (smoother_)
-    {
-      smoother_->reset(current_state.positions);
-      smoother_->doSmoothing(target_state.positions);
-    }
-
-    // Compute velocities based on smoothed joint positions
-    target_joint_velocities = (target_joint_positions - current_joint_positions) / servo_params_.publish_period;
-
-    // TODO : print warning if scaling applied for joint limit.
-    // Scale down the velocity based on joint velocity limit or user defined scaling if applicable.
-    target_joint_velocities *= jointLimitVelocityScalingFactor(target_joint_velocities, joint_bounds_,
-                                                               servo_params_.override_velocity_scaling_factor);
-
-    // Adjust joint position based on scaled down velocity
-    target_joint_positions = current_joint_positions + (target_joint_velocities * servo_params_.publish_period);
-
-    // Check if any joints are going past joint position limits
-    std::vector<int> joints_to_halt =
-        jointsToHalt(target_joint_positions, target_joint_velocities, joint_bounds_, servo_params_.joint_limit_margin);
-
-    // Apply halting if any joints need to be halted.
-    if (!joints_to_halt.empty())
-    {
-      servo_status_ = StatusCode::JOINT_BOUND;
-      target_state = haltJoints(joints_to_halt, current_state, target_state);
-    }
-  }
-
-  return target_state;
-}
-
-Eigen::VectorXd Servo::jointDeltaFromCommand(const ServoInput& command)
-{
-  Eigen::VectorXd joint_position_deltas(num_joints_);
-  joint_position_deltas.setZero();
-
-  JointDeltaResult delta_result;
-
-  const CommandType expected_type = expectedCommandType();
-  if (command.index() == static_cast<size_t>(expected_type))
-  {
-    if (expected_type == CommandType::JOINT_JOG)
-    {
-      delta_result = jointDeltaFromJointJog(std::get<JointJogCommand>(command), robot_state_, servo_params_);
-      servo_status_ = delta_result.first;
-    }
-    else if (expected_type == CommandType::TWIST)
-    {
-      delta_result = jointDeltaFromTwist(std::get<TwistCommand>(command), robot_state_, servo_params_);
-      servo_status_ = delta_result.first;
-    }
-    else if (expected_type == CommandType::POSE)
-    {
-      delta_result = jointDeltaFromPose(std::get<PoseCommand>(command), robot_state_, servo_params_);
-      servo_status_ = delta_result.first;
-    }
-    if (servo_status_ != StatusCode::INVALID)
-    {
-      joint_position_deltas = delta_result.second;
-    }
-  }
-  else
-  {
-    servo_status_ = StatusCode::INVALID;
-    RCLCPP_WARN_STREAM(LOGGER, "SERVO : Incoming command type does not match expected command type.");
-  }
-
-  return joint_position_deltas;
-}
-
-KinematicState Servo::haltJoints(const std::vector<int>& joints_to_halt, const KinematicState& current_state,
-                                 const KinematicState& target_state)
-{
-  KinematicState bounded_state(num_joints_);
-  bounded_state.joint_names = target_state.joint_names;
-
-  std::stringstream halting_joint_names;
-  for (const int idx : joints_to_halt)
-  {
-    halting_joint_names << joint_names_[idx] + " ";
-  }
-  RCLCPP_WARN_STREAM(LOGGER, "Joint position limit reached on joints: " << halting_joint_names.str());
-
-  const bool all_joint_halt =
-      (expectedCommandType() == CommandType::JOINT_JOG && servo_params_.halt_all_joints_in_joint_mode) ||
-      (expectedCommandType() == CommandType::TWIST && servo_params_.halt_all_joints_in_cartesian_mode);
-
-  if (all_joint_halt)
-  {
-    // The velocities are initialized to zero by default, so we dont need to set it here.
-    bounded_state.positions = current_state.positions;
-  }
-  else
-  {
-    // Halt only the joints that are out of bounds
-    bounded_state.positions = target_state.positions;
-    bounded_state.velocities = target_state.velocities;
-    for (const int idx : joints_to_halt)
-    {
-      bounded_state.positions[idx] = current_state.positions[idx];
-      bounded_state.velocities[idx] = 0.0;
-    }
-  }
-
-  return bounded_state;
-}
-
 void Servo::setSmoothingPlugin()
 {
   // Load the smoothing plugin
@@ -313,82 +137,33 @@ void Servo::setSmoothingPlugin()
   }
 
   // Initialize the smoothing plugin
-  if (!smoother_->initialize(node_, planning_scene_monitor_->getRobotModel(), num_joints_))
+  moveit::core::RobotStatePtr robot_state = planning_scene_monitor_->getStateMonitor()->getCurrentState();
+  const int num_joints =
+      robot_state->getJointModelGroup(servo_params_.move_group_name)->getActiveJointModelNames().size();
+  if (!smoother_->initialize(node_, planning_scene_monitor_->getRobotModel(), num_joints))
   {
     RCLCPP_ERROR(LOGGER, "Smoothing plugin could not be initialized");
     std::exit(EXIT_FAILURE);
   }
 }
 
-void Servo::checkIKSolver()
+void Servo::setCollisionChecking(const bool check_collision)
 {
-  // Get the IK solver for the group
-  kinematics::KinematicsBaseConstPtr ik_solver = joint_model_group_->getSolverInstance();
-  if (!ik_solver)
-  {
-    RCLCPP_WARN(
-        LOGGER,
-        "No kinematics solver instantiated for group '%s'. Will use inverse Jacobian for servo calculations instead.",
-        joint_model_group_->getName().c_str());
-  }
-  else if (!ik_solver->supportsGroup(joint_model_group_))
-  {
-    RCLCPP_WARN(LOGGER,
-                "The loaded kinematics plugin does not support group '%s'. Will use inverse Jacobian for servo "
-                "calculations instead.",
-                joint_model_group_->getName().c_str());
-  }
-  else
-  {
-    RCLCPP_INFO(LOGGER, "IK solver available for robot, will use it.");
-  }
-}
-
-void Servo::updateParams()
-{
-  if (servo_param_listener_->is_old(servo_params_))
-  {
-    auto params = servo_param_listener_->get_params();
-    if (params.override_velocity_scaling_factor != servo_params_.override_velocity_scaling_factor)
-    {
-      RCLCPP_INFO_STREAM(LOGGER, "override_velocity_scaling_factor changed to : "
-                                     << std::to_string(params.override_velocity_scaling_factor));
-    }
-    const bool params_valid = validateParams(params);
-    if (params_valid)
-    {
-      servo_params_ = params;
-    }
-    else
-    {
-      RCLCPP_WARN_STREAM(LOGGER, "Parameters will not be updated.");
-    }
-  }
-}
-
-StatusCode Servo::getStatus()
-{
-  return servo_status_;
-}
-
-const std::string Servo::getStatusMessage()
-{
-  return SERVO_STATUS_CODE_MAP.at(servo_status_);
-}
-
-CommandType Servo::expectedCommandType()
-{
-  return expected_command_type_;
-}
-
-void Servo::expectedCommandType(const CommandType& command_type)
-{
-  expected_command_type_ = command_type;
+  check_collision ? collision_monitor_->start() : collision_monitor_->stop();
 }
 
 bool Servo::validateParams(const servo::Params& servo_params)
 {
   bool params_valid = true;
+
+  auto robot_state = planning_scene_monitor_->getStateMonitor()->getCurrentState();
+  auto joint_model_group = robot_state->getJointModelGroup(servo_params.move_group_name);
+  if (joint_model_group == nullptr)
+  {
+    RCLCPP_ERROR_STREAM(LOGGER, "Invalid move group name: `" << servo_params.move_group_name << '`');
+    params_valid = false;
+  }
+
   if (servo_params.hard_stop_singularity_threshold <= servo_params.lower_singularity_threshold)
   {
     RCLCPP_ERROR(LOGGER, "Parameter 'hard_stop_singularity_threshold' "
@@ -427,63 +202,235 @@ bool Servo::validateParams(const servo::Params& servo_params)
   return params_valid;
 }
 
-const Eigen::Isometry3d Servo::getEndEffectorPose()
+bool Servo::updateParams()
 {
-  // Robot base (panda_link0) to end effector frame (panda_link8)
-  robot_state_ = planning_scene_monitor_->getStateMonitor()->getCurrentState();
-  return robot_state_->getGlobalLinkTransform(servo_params_.ee_frame);
-}
+  bool params_updated = false;
 
-PoseCommand Servo::toPlanningFrame(const PoseCommand& command)
-{
-  if (command.frame_id != servo_params_.planning_frame)
+  if (servo_param_listener_->is_old(servo_params_))
   {
-    auto target_pose = convertIsometryToTransform(command.pose, servo_params_.planning_frame, command.frame_id);
-    auto command_to_planning_frame =
-        transform_buffer_.lookupTransform(servo_params_.planning_frame, command.frame_id, rclcpp::Time(0));
-    tf2::doTransform(target_pose, target_pose, command_to_planning_frame);
-    return PoseCommand{ servo_params_.planning_frame, tf2::transformToEigen(target_pose) };
-  }
-  else
-  {
-    return command;
-  }
-}
+    auto params = servo_param_listener_->get_params();
 
-TwistCommand Servo::toPlanningFrame(const TwistCommand& command)
-{
-  TwistCommand transformed_twist = command;
-
-  if (command.frame_id != servo_params_.planning_frame)
-  {
-    const bool can_transform = robot_state_->knowsFrameTransform(servo_params_.planning_frame);
-    if (can_transform)
+    const bool params_valid = validateParams(params);
+    if (params_valid)
     {
-      // TODO : Find out why transform obtained from tf2 does not work properly.
-      // RobotState::GetGlobalLinkTransform does not work for all frames in the environment.
-      // The behaviour is same if robot_state_ = planning_scene_monitor_->getStateMonitor()->getCurrentState()
-      // is called before computing the transform.
-      const Eigen::Isometry3d planning_frame_transform =
-          robot_state_->getGlobalLinkTransform(servo_params_.planning_frame).inverse() *
-          robot_state_->getGlobalLinkTransform(command.frame_id);
-      // Apply the transformation to the command vector
-      transformed_twist.frame_id = servo_params_.planning_frame;
-      transformed_twist.velocities.head<3>() = planning_frame_transform.linear() * command.velocities.head<3>();
-      transformed_twist.velocities.tail<3>() = planning_frame_transform.linear() * command.velocities.tail<3>();
+      if (params.override_velocity_scaling_factor != servo_params_.override_velocity_scaling_factor)
+      {
+        RCLCPP_INFO_STREAM(LOGGER, "override_velocity_scaling_factor changed to : "
+                                       << std::to_string(params.override_velocity_scaling_factor));
+      }
+      if (params.move_group_name != servo_params_.move_group_name)
+      {
+        RCLCPP_INFO_STREAM(LOGGER, "Move group changed from " << servo_params_.move_group_name << " to "
+                                                              << params.move_group_name);
+      }
+
+      servo_params_ = params;
+      params_updated = true;
     }
     else
     {
-      servo_status_ = StatusCode::INVALID;
-      RCLCPP_ERROR_STREAM(LOGGER,
-                          "Cannot transform from " << command.frame_id << " to " << servo_params_.planning_frame);
+      RCLCPP_WARN_STREAM(LOGGER, "Parameters will not be updated.");
     }
   }
-  return transformed_twist;
+  return params_updated;
 }
 
-void Servo::setCollisionChecking(const bool check_collision)
+servo::Params& Servo::getParams()
 {
-  check_collision ? collision_monitor_->start() : collision_monitor_->stop();
+  return servo_params_;
+}
+
+StatusCode Servo::getStatus()
+{
+  return servo_status_;
+}
+
+const std::string Servo::getStatusMessage()
+{
+  return SERVO_STATUS_CODE_MAP.at(servo_status_);
+}
+
+CommandType Servo::expectedCommandType()
+{
+  return expected_command_type_;
+}
+
+void Servo::expectedCommandType(const CommandType& command_type)
+{
+  expected_command_type_ = command_type;
+}
+
+const Eigen::Isometry3d Servo::getEndEffectorPose()
+{
+  // Robot base (panda_link0) to end effector frame (panda_link8)
+  return planning_scene_monitor_->getStateMonitor()->getCurrentState()->getGlobalLinkTransform(servo_params_.ee_frame);
+}
+
+KinematicState Servo::haltJoints(const std::vector<int>& joints_to_halt, const KinematicState& current_state,
+                                 const KinematicState& target_state)
+{
+  KinematicState bounded_state(target_state.joint_names.size());
+  bounded_state.joint_names = target_state.joint_names;
+
+  std::stringstream halting_joint_names;
+  for (const int idx : joints_to_halt)
+  {
+    halting_joint_names << bounded_state.joint_names[idx] + " ";
+  }
+  RCLCPP_WARN_STREAM(LOGGER, "Joint position limit reached on joints: " << halting_joint_names.str());
+
+  const bool all_joint_halt =
+      (expectedCommandType() == CommandType::JOINT_JOG && servo_params_.halt_all_joints_in_joint_mode) ||
+      (expectedCommandType() == CommandType::TWIST && servo_params_.halt_all_joints_in_cartesian_mode);
+
+  if (all_joint_halt)
+  {
+    // The velocities are initialized to zero by default, so we dont need to set it here.
+    bounded_state.positions = current_state.positions;
+  }
+  else
+  {
+    // Halt only the joints that are out of bounds
+    bounded_state.positions = target_state.positions;
+    bounded_state.velocities = target_state.velocities;
+    for (const int idx : joints_to_halt)
+    {
+      bounded_state.positions[idx] = current_state.positions[idx];
+      bounded_state.velocities[idx] = 0.0;
+    }
+  }
+
+  return bounded_state;
+}
+
+Eigen::VectorXd Servo::jointDeltaFromCommand(const ServoInput& command, moveit::core::RobotStatePtr& robot_state)
+{
+  const int num_joints =
+      robot_state->getJointModelGroup(servo_params_.move_group_name)->getActiveJointModelNames().size();
+  Eigen::VectorXd joint_position_deltas(num_joints);
+  joint_position_deltas.setZero();
+
+  JointDeltaResult delta_result;
+
+  const CommandType expected_type = expectedCommandType();
+  if (command.index() == static_cast<size_t>(expected_type))
+  {
+    if (expected_type == CommandType::JOINT_JOG)
+    {
+      delta_result = jointDeltaFromJointJog(std::get<JointJogCommand>(command), robot_state, servo_params_);
+      servo_status_ = delta_result.first;
+    }
+    else if (expected_type == CommandType::TWIST)
+    {
+      delta_result = jointDeltaFromTwist(std::get<TwistCommand>(command), robot_state, servo_params_);
+      servo_status_ = delta_result.first;
+    }
+    else if (expected_type == CommandType::POSE)
+    {
+      delta_result = jointDeltaFromPose(std::get<PoseCommand>(command), robot_state, servo_params_);
+      servo_status_ = delta_result.first;
+    }
+    if (servo_status_ != StatusCode::INVALID)
+    {
+      joint_position_deltas = delta_result.second;
+    }
+  }
+  else
+  {
+    servo_status_ = StatusCode::INVALID;
+    RCLCPP_WARN_STREAM(LOGGER, "SERVO : Incoming command type does not match expected command type.");
+  }
+
+  return joint_position_deltas;
+}
+
+KinematicState Servo::getNextJointState(const ServoInput& command)
+{
+  // Set status to clear
+  servo_status_ = StatusCode::NO_WARNING;
+
+  // Update the parameters
+  updateParams();
+
+  // Get the robot state and joint model group info.
+  moveit::core::RobotStatePtr robot_state = planning_scene_monitor_->getStateMonitor()->getCurrentState();
+  const moveit::core::JointModelGroup* joint_model_group =
+      robot_state->getJointModelGroup(servo_params_.move_group_name);
+
+  // Get necessary information about joints
+  const std::vector<std::string> joint_names = joint_model_group->getActiveJointModelNames();
+  moveit::core::JointBoundsVector joint_bounds = joint_model_group->getActiveJointModelsBounds();
+  const int num_joints = joint_names.size();
+
+  // State variables
+  KinematicState current_state(num_joints), target_state(num_joints);
+  target_state.joint_names = joint_names;
+
+  // Copy current kinematic data from RobotState.
+  robot_state->copyJointGroupPositions(joint_model_group, current_state.positions);
+  robot_state->copyJointGroupVelocities(joint_model_group, current_state.velocities);
+
+  // Create Eigen maps for cleaner operations.
+  Eigen::Map<Eigen::VectorXd> current_joint_positions(current_state.positions.data(), num_joints);
+  Eigen::Map<Eigen::VectorXd> target_joint_positions(target_state.positions.data(), num_joints);
+  Eigen::Map<Eigen::VectorXd> current_joint_velocities(current_state.velocities.data(), num_joints);
+  Eigen::Map<Eigen::VectorXd> target_joint_velocities(target_state.velocities.data(), num_joints);
+
+  // Compute the change in joint position due to the incoming command
+  Eigen::VectorXd joint_position_delta = jointDeltaFromCommand(command, robot_state);
+
+  if (collision_velocity_scale_ > 0 && collision_velocity_scale_ < 1)
+  {
+    servo_status_ = StatusCode::DECELERATE_FOR_COLLISION;
+  }
+  else if (collision_velocity_scale_ == 0)
+  {
+    servo_status_ = StatusCode::HALT_FOR_COLLISION;
+  }
+
+  // Continue rest of the computations only if the command is valid
+  // The computations can be skipped also in case we are halting.
+  if (servo_status_ != StatusCode::INVALID || servo_status_ != StatusCode::HALT_FOR_COLLISION)
+  {
+    // Apply collision scaling to the joint position delta
+    joint_position_delta *= collision_velocity_scale_;
+
+    // Compute the next joint positions based on the joint position deltas
+    target_joint_positions = current_joint_positions + joint_position_delta;
+
+    // TODO : apply filtering to the velocity instead of position
+    // Apply smoothing to the positions if a smoother was provided.
+    // Update filter state and apply filtering in position domain
+    if (smoother_)
+    {
+      smoother_->reset(current_state.positions);
+      smoother_->doSmoothing(target_state.positions);
+    }
+
+    // Compute velocities based on smoothed joint positions
+    target_joint_velocities = (target_joint_positions - current_joint_positions) / servo_params_.publish_period;
+
+    // TODO : print warning if scaling applied for joint limit.
+    // Scale down the velocity based on joint velocity limit or user defined scaling if applicable.
+    target_joint_velocities *= jointLimitVelocityScalingFactor(target_joint_velocities, joint_bounds,
+                                                               servo_params_.override_velocity_scaling_factor);
+
+    // Adjust joint position based on scaled down velocity
+    target_joint_positions = current_joint_positions + (target_joint_velocities * servo_params_.publish_period);
+
+    // Check if any joints are going past joint position limits
+    std::vector<int> joints_to_halt =
+        jointsToHalt(target_joint_positions, target_joint_velocities, joint_bounds, servo_params_.joint_limit_margin);
+
+    // Apply halting if any joints need to be halted.
+    if (!joints_to_halt.empty())
+    {
+      servo_status_ = StatusCode::JOINT_BOUND;
+      target_state = haltJoints(joints_to_halt, current_state, target_state);
+    }
+  }
+
+  return target_state;
 }
 
 }  // namespace moveit_servo

@@ -43,6 +43,8 @@
 #include <moveit_servo/servo.hpp>
 #include <moveit_servo/utils/common.hpp>
 #include <rclcpp/rclcpp.hpp>
+#include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
+#include <tf2_ros/transform_listener.h>
 
 using namespace moveit_servo;
 
@@ -82,7 +84,13 @@ int main(int argc, char* argv[])
   // while turning around z axis in the +ve direction at 0.5 rad/s (in ee_frame)
   TwistCommand target_twist{ servo_params.ee_frame, { 0.0, 0.0, 0.1, 0.0, 0.0, 0.5 } };
   // Convert the command to planning frame.
-  target_twist = servo.toPlanningFrame(target_twist);
+  tf2_ros::Buffer transform_buffer(demo_node->get_clock());
+  tf2_ros::TransformListener transform_listener(transform_buffer);
+  auto command_to_planning_frame = transform_buffer.lookupTransform(servo_params.planning_frame, target_twist.frame_id,
+                                                                    rclcpp::Time(0), rclcpp::Duration::from_seconds(2));
+  Eigen::VectorXd transformed_twist = target_twist.velocities;
+  tf2::doTransform(transformed_twist, transformed_twist, command_to_planning_frame);
+  target_twist = TwistCommand{ servo_params.planning_frame, transformed_twist };
 
   // Frequency at which the commands will be send to robot controller.
   rclcpp::WallRate rate(1.0 / servo_params.publish_period);

@@ -186,8 +186,14 @@ JointDeltaResult jointDeltaFromIK(const Eigen::VectorXd& cartesian_position_delt
   StatusCode status = StatusCode::NO_WARNING;
 
   kinematics::KinematicsBaseConstPtr ik_solver = joint_model_group->getSolverInstance();
+  const bool ik_solver_supports_jmg = ik_solver->supportsGroup(joint_model_group);
+  if (!ik_solver_supports_jmg)
+  {
+    status = StatusCode::INVALID;
+    RCLCPP_ERROR_STREAM(LOGGER, "Loaded IK plugin does not support group " << joint_model_group->getName());
+  }
 
-  if (ik_solver)
+  if (ik_solver && ik_solver_supports_jmg)
   {
     const Eigen::Isometry3d base_to_tip_frame_transform =
         robot_state->getGlobalLinkTransform(ik_solver->getBaseFrame()).inverse() *

@@ -245,7 +245,7 @@ double jointLimitVelocityScalingFactor(const Eigen::VectorXd& velocities,
 
     for (size_t i = 0; i < joint_bounds.size(); i++)
     {
-      const auto joint_bound = (*joint_bounds[i])[0];
+      const auto joint_bound = (joint_bounds[i])->front();
       if (joint_bound.velocity_bounded_ && velocities(i) != 0.0)
       {
         // Find the ratio of clamped velocity to original velocity
@@ -268,7 +268,7 @@ std::vector<int> jointsToHalt(const Eigen::VectorXd& positions, const Eigen::Vec
   std::vector<int> joint_idxs_to_halt;
   for (size_t i = 0; i < joint_bounds.size(); i++)
   {
-    const auto joint_bound = (*joint_bounds[i])[0];
+    const auto joint_bound = (joint_bounds[i])->front();
     if (joint_bound.position_bounded_)
     {
       const bool negative_bound = velocities[i] < 0 && positions[i] < (joint_bound.min_position_ + margin);
