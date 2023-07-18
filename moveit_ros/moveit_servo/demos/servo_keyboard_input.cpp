@@ -68,7 +68,6 @@ constexpr int8_t KEYCODE_Q = 0x71;
 constexpr int8_t KEYCODE_R = 0x72;
 constexpr int8_t KEYCODE_J = 0x6A;
 constexpr int8_t KEYCODE_T = 0x74;
-constexpr int8_t KEYCODE_P = 0x70;
 }  // namespace
 
 // Some constants used in the Servo Teleop demo
