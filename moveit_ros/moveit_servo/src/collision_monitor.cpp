@@ -92,7 +92,6 @@ void CollisionMonitor::checkCollisions()
 
   while (rclcpp::ok() && !stop_requested_)
   {
-    self_collision_scale = scene_collision_scale = 1.0;
     if (servo_params_.check_collisions)
     {
       // Fetch latest robot state.
@@ -125,6 +124,8 @@ void CollisionMonitor::checkCollisions()
       }
       else
       {
+        self_collision_scale = scene_collision_scale = 1.0;
+
         approaching_scene_collision =
             scene_collision_result_.distance < servo_params_.scene_collision_proximity_threshold;
         approaching_self_collision = self_collision_result_.distance < servo_params_.self_collision_proximity_threshold;
@@ -142,10 +143,11 @@ void CollisionMonitor::checkCollisions()
               self_collision_result_.distance - servo_params_.self_collision_proximity_threshold;
           self_collision_scale = std::exp(self_velocity_scale_coefficient * self_collision_threshold_delta);
         }
+
+        // Use the scaling factor with lower value, i.e maximum scale down.
+        collision_velocity_scale_ = std::min(scene_collision_scale, self_collision_scale);
       }
     }
-    // Use the lowest scaling factor.
-    collision_velocity_scale_ = std::min(scene_collision_scale, self_collision_scale);
     rate.sleep();
   }
 }

@@ -107,7 +107,7 @@ Servo::Servo(const rclcpp::Node::SharedPtr& node, std::shared_ptr<const servo::P
 
     // Create the collision checker and start collision checking.
     collision_monitor_ =
-        std::make_unique<CollisionMonitor>(planning_scene_monitor_, servo_params_, collision_velocity_scale_);
+        std::make_unique<CollisionMonitor>(planning_scene_monitor_, servo_params_, std::ref(collision_velocity_scale_));
     collision_monitor_->start();
 
     servo_status_ = StatusCode::NO_WARNING;

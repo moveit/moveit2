@@ -95,7 +95,7 @@ int main(int argc, char* argv[])
   // Frequency at which the commands will be send to robot controller.
   rclcpp::WallRate rate(1.0 / servo_params.publish_period);
 
-  std::chrono::seconds timeout_duration(5);
+  std::chrono::seconds timeout_duration(7);
   std::chrono::seconds time_elapsed(0);
   auto start_time = std::chrono::steady_clock::now();
 
