@@ -11,7 +11,7 @@ default_plan_request_adapter_parameters:
   }
   min_angle_change: {
     type: double,
-    description: "min_angle_change: ?",
+    description: "AddTimeOptimalParameterization: Minimum joint value change to consider two waypoints unique.",
     default_value: 0.001,
   }
   start_state_max_dt: {
@@ -21,7 +21,7 @@ default_plan_request_adapter_parameters:
   }
   jiggle_fraction: {
     type: double,
-    description: "FixStartStateCollision: ?",
+    description: "FixStartStateCollision: Joint value perturbation as a percentage of the total range of motion for the joint.",
     default_value: 0.02,
   }
   max_sampling_attempts: {
@@ -34,7 +34,7 @@ default_plan_request_adapter_parameters:
   }
   start_state_max_bounds_error: {
     type: double,
-    description: "FixStartStateBounds: ?",
+    description: "FixStartStateBounds: Maximum allowable error outside joint bounds for the starting configuration.",
     default_value: 0.05,
   }
   default_workspace_bounds: {
