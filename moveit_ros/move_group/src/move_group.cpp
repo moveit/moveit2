@@ -152,7 +152,7 @@ private:
     {
       const auto& pipeline_name = pipeline_entry.first;
       std::string pipeline_capabilities;
-      if (context_->moveit_cpp_->getNode()->get_parameter("planning_pipelines/" + pipeline_name + "/capabilities",
+      if (context_->moveit_cpp_->getNode()->get_parameter(pipeline_name + ".capabilities",
                                                           pipeline_capabilities))
       {
         boost::char_separator<char> sep(" ");
