@@ -56,10 +56,6 @@
 
 namespace planning_scene_monitor
 {
-namespace
-{
-static const auto SUBSCRIPTION_QOS = rclcpp::QoS(25);
-}
 
 CurrentStateMonitorMiddlewareHandle::CurrentStateMonitorMiddlewareHandle(const rclcpp::Node::SharedPtr& node)
   : node_(node)
@@ -75,7 +71,7 @@ void CurrentStateMonitorMiddlewareHandle::createJointStateSubscription(const std
                                                                        JointStateUpdateCallback callback)
 {
   joint_state_subscription_ =
-      node_->create_subscription<sensor_msgs::msg::JointState>(topic, SUBSCRIPTION_QOS, callback);
+      node_->create_subscription<sensor_msgs::msg::JointState>(topic, rclcpp::SystemDefaultsQoS(), callback);
 }
 
 void CurrentStateMonitorMiddlewareHandle::resetJointStateSubscription()
