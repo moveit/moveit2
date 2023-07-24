@@ -71,7 +71,7 @@ SemanticWorld::SemanticWorld(const rclcpp::Node::SharedPtr& node,
 
 {
   table_subscriber_ = node_handle_->create_subscription<object_recognition_msgs::msg::TableArray>(
-      "table_array", 1,
+      "table_array", rclcpp::SystemDefaultsQoS(),
       [this](const object_recognition_msgs::msg::TableArray::ConstSharedPtr& msg) { return tableCallback(msg); });
   visualization_publisher_ =
       node_handle_->create_publisher<visualization_msgs::msg::MarkerArray>("visualize_place", 20);
