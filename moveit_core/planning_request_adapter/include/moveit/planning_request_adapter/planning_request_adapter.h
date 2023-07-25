@@ -48,7 +48,7 @@ namespace planning_request_adapter
 {
 namespace
 {
-std::vector<std::size_t> EMPTY_PATH_INDEX_VECTOR = {};
+std::vector<std::size_t> empty_path_index_vector = {};
 }
 MOVEIT_CLASS_FORWARD(PlanningRequestAdapter);  // Defines PlanningRequestAdapterPtr, ConstPtr, WeakPtr... etc
 
@@ -93,7 +93,7 @@ public:
                                   const planning_scene::PlanningSceneConstPtr& planning_scene,
                                   const planning_interface::MotionPlanRequest& req,
                                   planning_interface::MotionPlanResponse& res,
-                                  std::vector<std::size_t>& added_path_index = EMPTY_PATH_INDEX_VECTOR) const;
+                                  std::vector<std::size_t>& added_path_index = empty_path_index_vector) const;
 
   /** \brief Adapt the planning request if needed, call the planner
       function \e planner and update the planning response if
@@ -112,7 +112,7 @@ public:
   [[nodiscard]] virtual bool
   adaptAndPlan(const PlannerFn& planner, const planning_scene::PlanningSceneConstPtr& planning_scene,
                const planning_interface::MotionPlanRequest& req, planning_interface::MotionPlanResponse& res,
-               std::vector<std::size_t>& added_path_index = EMPTY_PATH_INDEX_VECTOR) const = 0;
+               std::vector<std::size_t>& added_path_index = empty_path_index_vector) const = 0;
 };
 
 /** \brief Apply a sequence of adapters to a motion plan */
@@ -137,7 +137,7 @@ public:
                                   const planning_scene::PlanningSceneConstPtr& planning_scene,
                                   const planning_interface::MotionPlanRequest& req,
                                   planning_interface::MotionPlanResponse& res,
-                                  std::vector<std::size_t>& added_path_index = EMPTY_PATH_INDEX_VECTOR) const;
+                                  std::vector<std::size_t>& added_path_index = empty_path_index_vector) const;
 
 private:
   std::vector<PlanningRequestAdapterConstPtr> adapters_;
