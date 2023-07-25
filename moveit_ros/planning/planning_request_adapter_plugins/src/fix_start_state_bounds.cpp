@@ -66,7 +66,7 @@ public:
   void initialize(const rclcpp::Node::SharedPtr& node, const std::string& parameter_namespace) override
   {
     param_listener_ =
-        std::make_shared<default_plan_request_adapter_parameters::ParamListener>(node, parameter_namespace);
+        std::make_unique<default_plan_request_adapter_parameters::ParamListener>(node, parameter_namespace);
   }
 
   std::string getDescription() const override
@@ -206,7 +206,7 @@ public:
   }
 
 private:
-  std::shared_ptr<default_plan_request_adapter_parameters::ParamListener> param_listener_;
+  std::unique_ptr<default_plan_request_adapter_parameters::ParamListener> param_listener_;
 };
 }  // namespace default_planner_request_adapters
 
