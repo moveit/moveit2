@@ -201,6 +201,7 @@ void ServoNode::servoLoop()
     }
     else if (new_joint_jog_msg_ || new_twist_msg_ || new_pose_msg_)
     {
+      new_joint_jog_msg_ = new_twist_msg_ = new_pose_msg_ = false;
       RCLCPP_WARN_STREAM(LOGGER, "Command type has not been set, cannot accept input");
     }
 
