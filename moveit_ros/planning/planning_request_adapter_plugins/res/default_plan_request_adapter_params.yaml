@@ -6,7 +6,7 @@ default_plan_request_adapter_parameters:
   }
   resample_dt: {
     type: double,
-    description: "AddTimeOptimalParameterization: Time steps between two waypoints of the parameterized trajectory. The trajectory is re-sampled from the original path.",
+    description: "AddTimeOptimalParameterization: Time steps between two adjacent waypoints of the parameterized trajectory. The trajectory is re-sampled from the original path.",
     default_value: 0.1,
   }
   min_angle_change: {
