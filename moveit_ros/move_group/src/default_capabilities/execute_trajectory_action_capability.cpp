@@ -108,7 +108,7 @@ void MoveGroupExecuteTrajectoryAction::executePath(const std::shared_ptr<ExecTra
   RCLCPP_INFO(LOGGER, "Execution request received");
 
   context_->trajectory_execution_manager_->clear();
-  if (context_->trajectory_execution_manager_->push(goal->get_goal()->trajectory))
+  if (context_->trajectory_execution_manager_->push(goal->get_goal()->trajectory, goal->get_goal()->controller_names))
   {
     setExecuteTrajectoryState(MONITOR, goal);
     context_->trajectory_execution_manager_->execute();
