@@ -1,3 +1,4 @@
+# This files contains the parameters for all of MoveIt's default PlanRequestAdapters
 default_plan_request_adapter_parameters:
   path_tolerance: {
     type: double,
@@ -29,7 +30,7 @@ default_plan_request_adapter_parameters:
     description: "FixStartStateCollision: Maximum number of attempts to re-sample a valid start state.",
     default_value: 100,
     validation: {
-        bounds<>: [0, 255]
+        lower_bounds<>: [ 0 ],
     }
   }
   start_state_max_bounds_error: {
