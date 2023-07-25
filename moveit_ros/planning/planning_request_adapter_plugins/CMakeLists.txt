@@ -11,7 +11,7 @@ add_library(moveit_default_planning_request_adapter_plugins SHARED
   src/resolve_constraint_frames.cpp
 )
 
-target_link_libraries(moveit_default_planning_request_adapter_plugins PRIVATE default_plan_request_adapter_parameters)
+target_link_libraries(moveit_default_planning_request_adapter_plugins default_plan_request_adapter_parameters)
 
 set_target_properties(moveit_default_planning_request_adapter_plugins PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
 ament_target_dependencies(moveit_default_planning_request_adapter_plugins
