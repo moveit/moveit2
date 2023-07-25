@@ -716,7 +716,7 @@ public:
   moveit::core::MoveItErrorCode plan(Plan& plan);
 
   /** \brief Given a \e plan, execute it without waiting for completion.
-   *  \param [in] plan The motion plan for which
+   *  \param [in] plan The motion plan for which to execute
    *  \param [in] controllers An optional list of ros2_controllers to execute with. If none, MoveIt will attempt to find
    * a controller. The exact behavior of finding a controller depends on which MoveItControllerManager plugin is active.
    *  \return moveit::core::MoveItErrorCode::SUCCESS if successful
