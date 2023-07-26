@@ -45,7 +45,7 @@
 #include <tf2_eigen/tf2_eigen.hpp>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
 
-#include <boost/algorithm/string/join.hpp>
+#include <fmt/format.h>
 #include <memory>
 
 #include <std_msgs/msg/string.hpp>
@@ -1454,7 +1454,7 @@ void PlanningSceneMonitor::updateSceneWithCurrentState()
     if (!current_state_monitor_->haveCompleteState(missing) &&
         (time - current_state_monitor_->getMonitorStartTime()).seconds() > 1.0)
     {
-      std::string missing_str = boost::algorithm::join(missing, ", ");
+      std::string missing_str = fmt::format("{}", fmt::join(missing, ", "));
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wold-style-cast"
       RCLCPP_WARN_THROTTLE(LOGGER, steady_clock, 1000, "The complete state of the robot is not yet known.  Missing %s",
