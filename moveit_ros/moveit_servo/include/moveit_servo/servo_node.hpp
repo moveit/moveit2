@@ -58,7 +58,7 @@ namespace moveit_servo
 class ServoNode
 {
 public:
-  ServoNode(const rclcpp::Node::SharedPtr& node);
+  explicit ServoNode(const rclcpp::NodeOptions& options);
 
   ~ServoNode();
 
@@ -67,6 +67,8 @@ public:
 
   // Disable copy assignment.
   ServoNode& operator=(ServoNode&) = delete;
+
+  rclcpp::node_interfaces::NodeBaseInterface::SharedPtr get_node_base_interface();
 
 private:
   /**

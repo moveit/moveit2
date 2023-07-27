@@ -49,6 +49,11 @@ const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_servo.servo_node");
 namespace moveit_servo
 {
 
+rclcpp::node_interfaces::NodeBaseInterface::SharedPtr ServoNode::get_node_base_interface()
+{
+  return node_->get_node_base_interface();
+}
+
 ServoNode::~ServoNode()
 {
   stop_servo_ = true;
@@ -56,16 +61,37 @@ ServoNode::~ServoNode()
     servo_loop_thread_.join();
 }
 
-ServoNode::ServoNode(const rclcpp::Node::SharedPtr& node)
-  : node_(node)
+ServoNode::ServoNode(const rclcpp::NodeOptions& options)
+  : node_{ std::make_shared<rclcpp::Node>("moveit_servo", options) }
   , stop_servo_{ false }
   , servo_paused_{ false }
   , new_joint_jog_msg_{ false }
   , new_twist_msg_{ false }
   , new_pose_msg_{ false }
 {
+  if (!options.use_intra_process_comms())
+  {
+    RCLCPP_WARN_STREAM(LOGGER, "Intra-process communication is disabled, consider enabling it by adding: "
+                               "\nextra_arguments=[{'use_intra_process_comms' : True}]\nto the Servo composable node "
+                               "in the launch file");
+  }
+
+  // Check if a realtime kernel is available
+  if (realtime_tools::has_realtime_kernel())
+  {
+    if (realtime_tools::configure_sched_fifo(servo_params_.thread_priority))
+      RCLCPP_INFO_STREAM(LOGGER, "Realtime kernel available, higher thread priority has been set.");
+    else
+      RCLCPP_WARN_STREAM(LOGGER, "Could not enable FIFO RT scheduling policy.");
+  }
+  else
+  {
+    RCLCPP_WARN_STREAM(LOGGER, "Realtime kernel is recommended for better performance.");
+  }
+
   std::shared_ptr<servo::ParamListener> servo_param_listener =
       std::make_shared<servo::ParamListener>(node_, "moveit_servo");
+
   // Create Servo instance
   planning_scene_monitor_ = createPlanningSceneMonitor(node_, servo_param_listener->get_params());
   servo_ = std::make_unique<Servo>(node_, servo_param_listener, planning_scene_monitor_);
@@ -102,18 +128,6 @@ ServoNode::ServoNode(const rclcpp::Node::SharedPtr& node)
                                                                std::bind(&ServoNode::pauseServo, this,
                                                                          std::placeholders::_1, std::placeholders::_2));
 
-  // Check if a realtime kernel is available
-  if (realtime_tools::has_realtime_kernel())
-  {
-    if (realtime_tools::configure_sched_fifo(servo_params_.thread_priority))
-      RCLCPP_INFO_STREAM(LOGGER, "Realtime kernel available, higher thread priority has been set.");
-    else
-      RCLCPP_WARN_STREAM(LOGGER, "Could not enable FIFO RT scheduling policy.");
-  }
-  else
-  {
-    RCLCPP_WARN_STREAM(LOGGER, "Realtime kernel is recommended for better performance.");
-  }
   // Start the servoing loop
   servo_loop_thread_ = std::thread(&ServoNode::servoLoop, this);
 }
@@ -288,13 +302,5 @@ void ServoNode::servoLoop()
 
 }  // namespace moveit_servo
 
-int main(int argc, char* argv[])
-{
-  rclcpp::init(argc, argv);
-  auto node = std::make_shared<rclcpp::Node>("moveit_servo");
-  auto servo_node = std::make_unique<moveit_servo::ServoNode>(node);
-  rclcpp::spin(node);
-  rclcpp::shutdown();
-
-  return 0;
-}
+#include "rclcpp_components/register_node_macro.hpp"
+RCLCPP_COMPONENTS_REGISTER_NODE(moveit_servo::ServoNode)

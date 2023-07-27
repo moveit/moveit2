@@ -53,17 +53,27 @@ add_library(moveit_servo_lib_cpp SHARED
 
 )
 set_target_properties(moveit_servo_lib_cpp PROPERTIES VERSION "${moveit_servo_VERSION}")
-ament_target_dependencies(moveit_servo_lib_cpp ${THIS_PACKAGE_INCLUDE_DEPENDS})
 target_link_libraries(moveit_servo_lib_cpp moveit_servo_lib_parameters)
+ament_target_dependencies(moveit_servo_lib_cpp ${THIS_PACKAGE_INCLUDE_DEPENDS})
+
+add_library(moveit_servo_lib_ros SHARED src/servo_node.cpp)
+set_target_properties(moveit_servo_lib_ros PROPERTIES VERSION "${moveit_servo_VERSION}")
+target_link_libraries(moveit_servo_lib_ros moveit_servo_lib_cpp)
+ament_target_dependencies(moveit_servo_lib_ros ${THIS_PACKAGE_INCLUDE_DEPENDS})
+
+######################
+## Components ##
+######################
+
+rclcpp_components_register_node(
+  moveit_servo_lib_ros
+  PLUGIN "moveit_servo::ServoNode"
+  EXECUTABLE servo_node
+)
 
 ######################
 ## Executable Nodes ##
 ######################
-
-# Standalone servo node
-add_executable(servo_node src/servo_node.cpp)
-target_link_libraries(servo_node moveit_servo_lib_cpp)
-ament_target_dependencies(servo_node ${THIS_PACKAGE_INCLUDE_DEPENDS})
 
 # Executable node for the joint jog demo
 add_executable(demo_joint_jog demos/cpp_interface/demo_joint_jog.cpp )
@@ -93,6 +103,7 @@ ament_target_dependencies(servo_keyboard_input  ${THIS_PACKAGE_INCLUDE_DEPENDS})
 install(
   TARGETS
     moveit_servo_lib_cpp
+    moveit_servo_lib_ros
     moveit_servo_lib_parameters
   EXPORT moveit_servoTargets
   LIBRARY DESTINATION lib

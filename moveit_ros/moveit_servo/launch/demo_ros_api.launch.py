@@ -2,6 +2,8 @@ import os
 import launch
 import launch_ros
 from ament_index_python.packages import get_package_share_directory
+from launch.conditions import IfCondition, UnlessCondition
+from launch.substitutions import LaunchConfiguration
 from launch_param_builder import ParameterBuilder
 from moveit_configs_utils import MoveItConfigsBuilder
 
@@ -11,6 +13,11 @@ def generate_launch_description():
         MoveItConfigsBuilder("moveit_resources_panda")
         .robot_description(file_path="config/panda.urdf.xacro")
         .to_moveit_configs()
+    )
+
+    # Launch Servo as a standalone node or as a "node component" for better latency/efficiency
+    launch_as_standalone_node = LaunchConfiguration(
+        "launch_as_standalone_node", default="false"
     )
 
     # Get parameters for the Servo node
@@ -78,6 +85,19 @@ def generate_launch_description():
         package="rclcpp_components",
         executable="component_container_mt",
         composable_node_descriptions=[
+            # Example of launching Servo as a node component
+            # Launching as a node component makes ROS 2 intraprocess communication more efficient.
+            launch_ros.descriptions.ComposableNode(
+                package="moveit_servo",
+                plugin="moveit_servo::ServoNode",
+                name="servo_node",
+                parameters=[
+                    servo_params,
+                    moveit_config.robot_description,
+                    moveit_config.robot_description_semantic,
+                ],
+                condition=UnlessCondition(launch_as_standalone_node),
+            ),
             launch_ros.descriptions.ComposableNode(
                 package="robot_state_publisher",
                 plugin="robot_state_publisher::RobotStatePublisher",
@@ -106,6 +126,7 @@ def generate_launch_description():
             moveit_config.robot_description_kinematics,
         ],
         output="screen",
+        condition=IfCondition(launch_as_standalone_node),
     )
 
     return launch.LaunchDescription(
