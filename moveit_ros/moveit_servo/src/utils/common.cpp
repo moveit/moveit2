@@ -51,20 +51,19 @@ namespace moveit_servo
 bool isValidCommand(const Eigen::VectorXd& command)
 {
   // returns true only if there are no nan values.
-  return (command.array() == command.array()).all();
+  return command.allFinite();
 }
 
 bool isValidCommand(const Eigen::Isometry3d& command)
 {
-  bool is_valid_rotation = true;
   Eigen::Matrix3d identity, rotation;
   identity.setIdentity();
   rotation = command.linear();
   // checks rotation, will fail if there is nan
-  is_valid_rotation = identity.isApprox(rotation.inverse() * rotation);
+  const bool is_valid_rotation = rotation.allFinite() && identity.isApprox(rotation.inverse() * rotation);
   // Command is not vald if there is Nan
-  const bool not_nan = isValidCommand(command.translation());
-  return is_valid_rotation && not_nan;
+  const bool is_valid_translation = isValidCommand(command.translation());
+  return is_valid_rotation && is_valid_translation;
 }
 
 bool isValidCommand(const TwistCommand& command)
@@ -86,9 +85,9 @@ geometry_msgs::msg::Pose poseFromCartesianDelta(const Eigen::VectorXd& delta_x,
 
   // Get a transformation matrix with desired orientation change
   Eigen::Isometry3d tf_rot_delta(Eigen::Isometry3d::Identity());
-  Eigen::Quaterniond q = Eigen::AngleAxisd(delta_x[3], Eigen::Vector3d::UnitX()) *
-                         Eigen::AngleAxisd(delta_x[4], Eigen::Vector3d::UnitY()) *
-                         Eigen::AngleAxisd(delta_x[5], Eigen::Vector3d::UnitZ());
+  const Eigen::Quaterniond q = Eigen::AngleAxisd(delta_x[3], Eigen::Vector3d::UnitX()) *
+                               Eigen::AngleAxisd(delta_x[4], Eigen::Vector3d::UnitY()) *
+                               Eigen::AngleAxisd(delta_x[5], Eigen::Vector3d::UnitZ());
   tf_rot_delta.rotate(q);
 
   // Find the new tip link position without newly applied rotation
@@ -150,15 +149,15 @@ std::pair<double, StatusCode> velocityScalingFactorForSingularity(const moveit::
   const double leaving_singularity_threshold_multiplier = servo_params.leaving_singularity_threshold_multiplier;
 
   // Get size of total controllable dimensions.
-  size_t dims = target_delta_x.size();
+  const size_t dims = target_delta_x.size();
 
   // Get the current Jacobian and compute SVD
-  Eigen::JacobiSVD<Eigen::MatrixXd> current_svd = Eigen::JacobiSVD<Eigen::MatrixXd>(
+  const Eigen::JacobiSVD<Eigen::MatrixXd> current_svd = Eigen::JacobiSVD<Eigen::MatrixXd>(
       robot_state->getJacobian(joint_model_group), Eigen::ComputeThinU | Eigen::ComputeThinV);
-  Eigen::MatrixXd matrix_s = current_svd.singularValues().asDiagonal();
+  const Eigen::MatrixXd matrix_s = current_svd.singularValues().asDiagonal();
 
   // Compute pseudo inverse
-  Eigen::MatrixXd pseudo_inverse = current_svd.matrixV() * matrix_s.inverse() * current_svd.matrixU().transpose();
+  const Eigen::MatrixXd pseudo_inverse = current_svd.matrixV() * matrix_s.inverse() * current_svd.matrixU().transpose();
 
   // Get the singular vector corresponding to least singular value.
   // This vector represents the least responsive dimension. By convention this is the last column of the matrix U.
@@ -171,8 +170,7 @@ std::pair<double, StatusCode> velocityScalingFactorForSingularity(const moveit::
   const double current_condition_number = current_svd.singularValues()(0) / current_svd.singularValues()(dims - 1);
 
   // Take a small step in the direction of vector_towards_singularity
-  double scale = 100;
-  Eigen::VectorXd delta_x = vector_towards_singularity / scale;
+  const Eigen::VectorXd delta_x = vector_towards_singularity * servo_params.singularity_step_scale;
 
   // Compute the new joint angles if we take the small step delta_x
   Eigen::VectorXd next_joint_angles;
@@ -181,7 +179,7 @@ std::pair<double, StatusCode> velocityScalingFactorForSingularity(const moveit::
 
   // Compute the Jacobian SVD for the new robot state.
   robot_state->setJointGroupPositions(joint_model_group, next_joint_angles);
-  Eigen::JacobiSVD<Eigen::MatrixXd> next_svd = Eigen::JacobiSVD<Eigen::MatrixXd>(
+  const Eigen::JacobiSVD<Eigen::MatrixXd> next_svd = Eigen::JacobiSVD<Eigen::MatrixXd>(
       robot_state->getJacobian(joint_model_group), Eigen::ComputeThinU | Eigen::ComputeThinV);
 
   // Compute condition number for the new Jacobian.
@@ -298,9 +296,9 @@ PoseCommand poseFromPoseStamped(const geometry_msgs::msg::PoseStamped& msg)
   PoseCommand command;
   command.frame_id = msg.header.frame_id;
 
-  Eigen::Vector3d translation(msg.pose.position.x, msg.pose.position.y, msg.pose.position.z);
-  Eigen::Quaterniond rotation(msg.pose.orientation.w, msg.pose.orientation.x, msg.pose.orientation.y,
-                              msg.pose.orientation.z);
+  const Eigen::Vector3d translation(msg.pose.position.x, msg.pose.position.y, msg.pose.position.z);
+  const Eigen::Quaterniond rotation(msg.pose.orientation.w, msg.pose.orientation.x, msg.pose.orientation.y,
+                                    msg.pose.orientation.z);
 
   command.pose = Eigen::Isometry3d::Identity();
   command.pose.translate(translation);

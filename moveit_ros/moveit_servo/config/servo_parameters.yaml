@@ -74,7 +74,9 @@ servo:
   command_in_type: {
     type: string,
     default_value: "unitless",
-    description: "The unit of the incoming command.",
+    description: "The unit of the incoming command. \
+                  unitless commands are in the range [-1:1] as if from joystick \
+                  speed_units are in m/s and rad/s",
     validation: {
       one_of<>: [["unitless", "speed_units"]]
     }
@@ -87,6 +89,24 @@ servo:
   }
 
 ################################ GENERAL CONFIG #############################
+
+  thread_priority: {
+    type: int,
+    default_value: 40,
+    description: "This value is used when configuring the servo loop thread to use SCHED_FIFO scheduling \
+                  We use a slightly lower priority than the ros2_control default in order to reduce jitter \
+                  Reference: https://man7.org/linux/man-pages/man2/sched_setparam.2.html",
+    validation: {
+      gt_eq<>: 0
+    }
+  }
+
+  incoming_command_timeout: {
+    type: double,
+    default_value: 0.1,
+    description: "Commands will be discarded if it is older than the timeout.\
+                   Important because ROS may drop some messages."
+  }
 
   scale:
     linear: {
@@ -197,6 +217,15 @@ servo:
     description: "When 'lower_singularity_threshold' is triggered, \
                   but we are moving away from singularity, move this many times faster \
                   than if we were moving further into singularity",
+    validation: {
+      gt<>: 0.0
+    }
+  }
+
+  singularity_step_scale: {
+    type: double,
+    default_value: 0.01,
+    description: "The vector towards singularity is scaled by this factor during singularity check",
     validation: {
       gt<>: 0.0
     }

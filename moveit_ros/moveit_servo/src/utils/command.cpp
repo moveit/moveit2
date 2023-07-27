@@ -52,7 +52,7 @@ JointDeltaResult jointDeltaFromJointJog(const JointJogCommand& command, moveit::
 {
   // Find the target joint position based on the commanded joint velocity
   StatusCode status = StatusCode::NO_WARNING;
-  int num_joints = robot_state->getJointModelGroup(servo_params.move_group_name)->getJointModelNames().size();
+  const int num_joints = robot_state->getJointModelGroup(servo_params.move_group_name)->getJointModelNames().size();
   Eigen::VectorXd joint_position_delta(num_joints);
 
   if (isValidCommand(command))
@@ -104,7 +104,7 @@ JointDeltaResult jointDeltaFromTwist(const TwistCommand& command, moveit::core::
     {
       joint_position_delta = delta_result.second;
       // Get velocity scaling information for singularity.
-      std::pair<double, StatusCode> singularity_scaling_info =
+      const std::pair<double, StatusCode> singularity_scaling_info =
           velocityScalingFactorForSingularity(robot_state, cartesian_position_delta, servo_params);
       // Apply velocity scaling for singularity, if there was any scaling.
       if (singularity_scaling_info.second != StatusCode::NO_WARNING)
@@ -135,7 +135,7 @@ JointDeltaResult jointDeltaFromPose(const PoseCommand& command, moveit::core::Ro
                                     servo::Params& servo_params)
 {
   StatusCode status = StatusCode::NO_WARNING;
-  int num_joints = robot_state->getJointModelGroup(servo_params.move_group_name)->getJointModelNames().size();
+  const int num_joints = robot_state->getJointModelGroup(servo_params.move_group_name)->getJointModelNames().size();
   Eigen::VectorXd joint_position_delta(num_joints);
 
   const bool valid_command = isValidCommand(command);
@@ -147,14 +147,15 @@ JointDeltaResult jointDeltaFromPose(const PoseCommand& command, moveit::core::Ro
 
     // Compute linear and angular change needed.
     const Eigen::Isometry3d ee_pose{ robot_state->getGlobalLinkTransform(servo_params.ee_frame) };
+    const Eigen::Quaterniond q_current(ee_pose.rotation()), q_target(command.pose.rotation());
+    const Eigen::Quaterniond q_error = q_target * q_current.inverse();
+    const Eigen::AngleAxisd angle_axis_error(q_error);
+
     cartesian_position_delta.head<3>() = command.pose.translation() - ee_pose.translation();
-    Eigen::Quaterniond q_current(ee_pose.rotation()), q_target(command.pose.rotation());
-    Eigen::Quaterniond q_error = q_target * q_current.inverse();
-    Eigen::AngleAxisd angle_axis_error(q_error);
     cartesian_position_delta.tail<3>() = angle_axis_error.axis() * angle_axis_error.angle();
 
     // Compute the required change in joint angles.
-    auto delta_result = jointDeltaFromIK(cartesian_position_delta, robot_state, servo_params);
+    const auto delta_result = jointDeltaFromIK(cartesian_position_delta, robot_state, servo_params);
     status = delta_result.first;
     if (status != StatusCode::INVALID)
     {
@@ -185,7 +186,7 @@ JointDeltaResult jointDeltaFromIK(const Eigen::VectorXd& cartesian_position_delt
   Eigen::VectorXd delta_theta(current_joint_positions.size());
   StatusCode status = StatusCode::NO_WARNING;
 
-  kinematics::KinematicsBaseConstPtr ik_solver = joint_model_group->getSolverInstance();
+  const kinematics::KinematicsBaseConstPtr ik_solver = joint_model_group->getSolverInstance();
   const bool ik_solver_supports_jmg = ik_solver->supportsGroup(joint_model_group);
   if (!ik_solver_supports_jmg)
   {
@@ -199,7 +200,8 @@ JointDeltaResult jointDeltaFromIK(const Eigen::VectorXd& cartesian_position_delt
         robot_state->getGlobalLinkTransform(ik_solver->getBaseFrame()).inverse() *
         robot_state->getGlobalLinkTransform(ik_solver->getTipFrame());
 
-    geometry_msgs::msg::Pose next_pose = poseFromCartesianDelta(cartesian_position_delta, base_to_tip_frame_transform);
+    const geometry_msgs::msg::Pose next_pose =
+        poseFromCartesianDelta(cartesian_position_delta, base_to_tip_frame_transform);
 
     // setup for IK call
     std::vector<double> solution;
@@ -224,11 +226,11 @@ JointDeltaResult jointDeltaFromIK(const Eigen::VectorXd& cartesian_position_delt
   else
   {
     // Robot does not have an IK solver, use inverse Jacobian to compute IK.
-    Eigen::MatrixXd jacobian = robot_state->getJacobian(joint_model_group);
-    Eigen::JacobiSVD<Eigen::MatrixXd> svd =
+    const Eigen::MatrixXd jacobian = robot_state->getJacobian(joint_model_group);
+    const Eigen::JacobiSVD<Eigen::MatrixXd> svd =
         Eigen::JacobiSVD<Eigen::MatrixXd>(jacobian, Eigen::ComputeThinU | Eigen::ComputeThinV);
-    Eigen::MatrixXd matrix_s = svd.singularValues().asDiagonal();
-    Eigen::MatrixXd pseudo_inverse = svd.matrixV() * matrix_s.inverse() * svd.matrixU().transpose();
+    const Eigen::MatrixXd matrix_s = svd.singularValues().asDiagonal();
+    const Eigen::MatrixXd pseudo_inverse = svd.matrixV() * matrix_s.inverse() * svd.matrixU().transpose();
 
     delta_theta = pseudo_inverse * cartesian_position_delta;
   }

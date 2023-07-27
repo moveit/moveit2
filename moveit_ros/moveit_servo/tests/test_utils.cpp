@@ -133,7 +133,7 @@ TEST(ServoUtilsUnitTests, LeavingSingularityScaling)
   ASSERT_EQ(scaling_result.second, moveit_servo::StatusCode::DECELERATE_FOR_LEAVING_SINGULARITY);
 }
 
-TEST(ServoUtilsUnitTests, JointLimitVeclocityScaling)
+TEST(ServoUtilsUnitTests, JointLimitVelocityScaling)
 {
   using moveit::core::loadTestingRobotModel;
   moveit::core::RobotModelPtr robot_model = loadTestingRobotModel("panda");

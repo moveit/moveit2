@@ -93,6 +93,10 @@ private:
   void twistCallback(const geometry_msgs::msg::TwistStamped::SharedPtr msg);
   void poseCallback(const geometry_msgs::msg::PoseStamped::SharedPtr msg);
 
+  std::optional<KinematicState> processJointJogCommand();
+  std::optional<KinematicState> processTwistCommand();
+  std::optional<KinematicState> processPoseCommand();
+
   // Variables
 
   const rclcpp::Node::SharedPtr node_;

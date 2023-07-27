@@ -359,7 +359,7 @@ KinematicState Servo::getNextJointState(const ServoInput& command)
 
   // Get necessary information about joints
   const std::vector<std::string> joint_names = joint_model_group->getActiveJointModelNames();
-  moveit::core::JointBoundsVector joint_bounds = joint_model_group->getActiveJointModelsBounds();
+  const moveit::core::JointBoundsVector joint_bounds = joint_model_group->getActiveJointModelsBounds();
   const int num_joints = joint_names.size();
 
   // State variables
@@ -410,16 +410,19 @@ KinematicState Servo::getNextJointState(const ServoInput& command)
     // Compute velocities based on smoothed joint positions
     target_joint_velocities = (target_joint_positions - current_joint_positions) / servo_params_.publish_period;
 
-    // TODO : print warning if scaling applied for joint limit.
     // Scale down the velocity based on joint velocity limit or user defined scaling if applicable.
-    target_joint_velocities *= jointLimitVelocityScalingFactor(target_joint_velocities, joint_bounds,
-                                                               servo_params_.override_velocity_scaling_factor);
+    const double joint_limit_scale = jointLimitVelocityScalingFactor(target_joint_velocities, joint_bounds,
+                                                                     servo_params_.override_velocity_scaling_factor);
+    if (joint_limit_scale < 1.0)  // 1.0 means no scaling.
+      RCLCPP_WARN_STREAM(LOGGER, "Joint velocity limit scaling applied by a factor of " << joint_limit_scale);
+
+    target_joint_velocities *= joint_limit_scale;
 
     // Adjust joint position based on scaled down velocity
     target_joint_positions = current_joint_positions + (target_joint_velocities * servo_params_.publish_period);
 
     // Check if any joints are going past joint position limits
-    std::vector<int> joints_to_halt =
+    const std::vector<int> joints_to_halt =
         jointsToHalt(target_joint_positions, target_joint_velocities, joint_bounds, servo_params_.joint_limit_margin);
 
     // Apply halting if any joints need to be halted.

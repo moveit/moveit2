@@ -122,10 +122,10 @@ double jointLimitVelocityScalingFactor(const Eigen::VectorXd& velocities,
                                        const moveit::core::JointBoundsVector& joint_bounds, double scaling_override);
 
 /**
- * \brief Finds the joints that are exceeding allowable joint limits.
- * @param positions The joints positions.
+ * \brief Finds the joints that are exceeding allowable position limits.
+ * @param positions The joint positions.
  * @param velocities The current commanded velocities.
- * @param joint_bounds The bounding information for the robot joints.
+ * @param joint_bounds The allowable limits for the robot joints.
  * @param margin Additional buffer on the actual joint limits.
  * @return The joints that are violating the specified position limits.
  */
@@ -137,7 +137,7 @@ std::vector<int> jointsToHalt(const Eigen::VectorXd& positions, const Eigen::Vec
  * @param eigen_tf The isometry to be converted to TransformStamped.
  * @param parent_frame The target frame.
  * @param child_frame The current frame.
- * @return The isometery as TransformStamped message.
+ * @return The isometry as a TransformStamped message.
  */
 geometry_msgs::msg::TransformStamped convertIsometryToTransform(const Eigen::Isometry3d& eigen_tf,
                                                                 const std::string& parent_frame,

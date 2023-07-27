@@ -87,11 +87,14 @@ void CollisionMonitor::checkCollisions()
   bool approaching_self_collision, approaching_scene_collision;
   double self_collision_threshold_delta, scene_collision_threshold_delta;
   double self_collision_scale, scene_collision_scale;
-  double self_velocity_scale_coefficient{ -log(0.001) / servo_params_.self_collision_proximity_threshold };
-  double scene_velocity_scale_coefficient{ -log(0.001) / servo_params_.scene_collision_proximity_threshold };
+  const double self_velocity_scale_coefficient{ -log(0.001) / servo_params_.self_collision_proximity_threshold };
+  const double scene_velocity_scale_coefficient{ -log(0.001) / servo_params_.scene_collision_proximity_threshold };
 
   while (rclcpp::ok() && !stop_requested_)
   {
+    // Reset the scale on every iteration.
+    collision_velocity_scale_ = 1.0;
+
     if (servo_params_.check_collisions)
     {
       // Fetch latest robot state.

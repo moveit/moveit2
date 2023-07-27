@@ -44,10 +44,6 @@
 namespace
 {
 const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_servo.servo_node");
-// This value is used when configuring the main loop to use SCHED_FIFO scheduling
-// We use a slightly lower priority than the ros2_control default in order to reduce jitter
-// Reference: https://man7.org/linux/man-pages/man2/sched_setparam.2.html
-int const THREAD_PRIORITY = 40;
 }  // namespace
 
 namespace moveit_servo
@@ -109,7 +105,7 @@ ServoNode::ServoNode(const rclcpp::Node::SharedPtr& node)
   // Check if a realtime kernel is available
   if (realtime_tools::has_realtime_kernel())
   {
-    if (realtime_tools::configure_sched_fifo(THREAD_PRIORITY))
+    if (realtime_tools::configure_sched_fifo(servo_params_.thread_priority))
       RCLCPP_INFO_STREAM(LOGGER, "Realtime kernel available, higher thread priority has been set.");
     else
       RCLCPP_WARN_STREAM(LOGGER, "Could not enable FIFO RT scheduling policy.");
@@ -154,70 +150,6 @@ void ServoNode::switchCommandType(const std::shared_ptr<moveit_msgs::srv::ServoC
   }
 }
 
-void ServoNode::servoLoop()
-{
-  rclcpp::WallRate servo_frequency(1 / servo_params_.publish_period);
-  KinematicState next_joint_states;
-
-  bool publish_command = false;
-
-  while (rclcpp::ok() && !stop_servo_)
-  {
-    // Skip processing if servoing is disabled.
-    if (servo_paused_)
-      continue;
-
-    servo_params_ = servo_->getParams();
-    publish_command = false;
-    CommandType expectedType = servo_->expectedCommandType();
-
-    if (expectedType == CommandType::JOINT_JOG && new_joint_jog_msg_)
-    {
-      // Mark latest jointjog command as processed and also reject any twist and pose messages that had arrived simultaneously.
-      new_joint_jog_msg_ = new_twist_msg_ = new_pose_msg_ = false;
-      // JointJogCommand is an alias for VectorXd, so we can directly make a map and pass it.
-      Eigen::Map<JointJogCommand> command(latest_joint_jog_.velocities.data(), latest_joint_jog_.velocities.size());
-      next_joint_states = servo_->getNextJointState(command);
-      publish_command = (servo_->getStatus() != StatusCode::INVALID);
-    }
-    else if (expectedType == CommandType::TWIST && new_twist_msg_)
-    {
-      // Mark latest twist command as processed and also reject any jointjog and pose messages that had arrived simultaneously.
-      new_joint_jog_msg_ = new_twist_msg_ = new_pose_msg_ = false;
-      Eigen::Vector<double, 6> velocities{ latest_twist_.twist.linear.x,  latest_twist_.twist.linear.y,
-                                           latest_twist_.twist.linear.z,  latest_twist_.twist.angular.x,
-                                           latest_twist_.twist.angular.y, latest_twist_.twist.angular.z };
-      TwistCommand command{ latest_twist_.header.frame_id, velocities };
-      next_joint_states = servo_->getNextJointState(command);
-      publish_command = (servo_->getStatus() != StatusCode::INVALID);
-    }
-    else if (expectedType == CommandType::POSE && new_pose_msg_)
-    {
-      // Mark latest pose command as processed and also reject any jointjog and twist messages that had arrived simultaneously.
-      new_joint_jog_msg_ = new_twist_msg_ = new_pose_msg_ = false;
-      PoseCommand command = poseFromPoseStamped(latest_pose_);
-      next_joint_states = servo_->getNextJointState(command);
-      publish_command = (servo_->getStatus() != StatusCode::INVALID);
-    }
-    else if (new_joint_jog_msg_ || new_twist_msg_ || new_pose_msg_)
-    {
-      new_joint_jog_msg_ = new_twist_msg_ = new_pose_msg_ = false;
-      RCLCPP_WARN_STREAM(LOGGER, "Command type has not been set, cannot accept input");
-    }
-
-    if (publish_command)
-    {
-      trajectory_publisher_->publish(composeTrajectoryMessage(servo_params_, next_joint_states));
-      publish_command = false;
-    }
-    auto status_msg = std::make_unique<std_msgs::msg::Int8>();
-    status_msg->data = static_cast<int8_t>(servo_->getStatus());
-    status_publisher_->publish(std::move(status_msg));
-  }
-
-  servo_frequency.sleep();
-}
-
 void ServoNode::jointJogCallback(const control_msgs::msg::JointJog::SharedPtr msg)
 {
   latest_joint_jog_ = *msg;
@@ -234,6 +166,124 @@ void ServoNode::poseCallback(const geometry_msgs::msg::PoseStamped::SharedPtr ms
 {
   latest_pose_ = *msg;
   new_pose_msg_ = true;
+}
+
+std::optional<KinematicState> ServoNode::processJointJogCommand()
+{
+  std::optional<KinematicState> next_joint_state = std::nullopt;
+
+  // Mark latest jointjog command as processed.
+  // Reject any other command types that had arrived simultaneously.
+  new_joint_jog_msg_ = new_twist_msg_ = new_pose_msg_ = false;
+
+  const bool command_stale = (node_->now() - latest_joint_jog_.header.stamp) >=
+                             rclcpp::Duration::from_seconds(servo_params_.incoming_command_timeout);
+  if (!command_stale)
+  {
+    // JointJogCommand is an alias for VectorXd, so we can directly make a map and pass it.
+    const Eigen::Map<JointJogCommand> command(latest_joint_jog_.velocities.data(), latest_joint_jog_.velocities.size());
+    next_joint_state = servo_->getNextJointState(command);
+  }
+  else
+  {
+    RCLCPP_WARN(LOGGER, "JointJog command is stale, will not process.");
+  }
+
+  return next_joint_state;
+}
+
+std::optional<KinematicState> ServoNode::processTwistCommand()
+{
+  std::optional<KinematicState> next_joint_state = std::nullopt;
+
+  // Mark latest twist command as processed.
+  // Reject any other command types that had arrived simultaneously.
+  new_joint_jog_msg_ = new_twist_msg_ = new_pose_msg_ = false;
+
+  const bool command_stale = (node_->now() - latest_twist_.header.stamp) >=
+                             rclcpp::Duration::from_seconds(servo_params_.incoming_command_timeout);
+  if (!command_stale)
+  {
+    const Eigen::Vector<double, 6> velocities{ latest_twist_.twist.linear.x,  latest_twist_.twist.linear.y,
+                                               latest_twist_.twist.linear.z,  latest_twist_.twist.angular.x,
+                                               latest_twist_.twist.angular.y, latest_twist_.twist.angular.z };
+    const TwistCommand command{ latest_twist_.header.frame_id, velocities };
+    next_joint_state = servo_->getNextJointState(command);
+  }
+  else
+  {
+    RCLCPP_WARN(LOGGER, "Twist command is stale, will not process.");
+  }
+
+  return next_joint_state;
+}
+
+std::optional<KinematicState> ServoNode::processPoseCommand()
+{
+  std::optional<KinematicState> next_joint_state = std::nullopt;
+
+  // Mark latest pose command as processed.
+  // Reject any other command types that had arrived simultaneously.
+  new_joint_jog_msg_ = new_twist_msg_ = new_pose_msg_ = false;
+
+  const bool command_stale = (node_->now() - latest_pose_.header.stamp) >=
+                             rclcpp::Duration::from_seconds(servo_params_.incoming_command_timeout);
+  if (!command_stale)
+  {
+    const PoseCommand command = poseFromPoseStamped(latest_pose_);
+    next_joint_state = servo_->getNextJointState(command);
+  }
+  else
+  {
+    RCLCPP_WARN(LOGGER, "Pose command is stale, will not process.");
+  }
+
+  return next_joint_state;
+}
+
+void ServoNode::servoLoop()
+{
+  std_msgs::msg::Int8 status_msg;
+  std::optional<KinematicState> next_joint_state;
+  rclcpp::WallRate servo_frequency(1 / servo_params_.publish_period);
+
+  while (rclcpp::ok() && !stop_servo_)
+  {
+    // Skip processing if servoing is disabled.
+    if (servo_paused_)
+      continue;
+
+    next_joint_state = std::nullopt;
+    const CommandType expectedType = servo_->expectedCommandType();
+
+    if (expectedType == CommandType::JOINT_JOG && new_joint_jog_msg_)
+    {
+      next_joint_state = processJointJogCommand();
+    }
+    else if (expectedType == CommandType::TWIST && new_twist_msg_)
+    {
+      next_joint_state = processTwistCommand();
+    }
+    else if (expectedType == CommandType::POSE && new_pose_msg_)
+    {
+      next_joint_state = processPoseCommand();
+    }
+    else if (new_joint_jog_msg_ || new_twist_msg_ || new_pose_msg_)
+    {
+      new_joint_jog_msg_ = new_twist_msg_ = new_pose_msg_ = false;
+      RCLCPP_WARN_STREAM(LOGGER, "Command type has not been set, cannot accept input");
+    }
+
+    if (next_joint_state && (servo_->getStatus() != StatusCode::INVALID))
+    {
+      trajectory_publisher_->publish(composeTrajectoryMessage(servo_->getParams(), next_joint_state.value()));
+    }
+
+    status_msg.data = static_cast<int8_t>(servo_->getStatus());
+    status_publisher_->publish(status_msg);
+  }
+
+  servo_frequency.sleep();
 }
 
 }  // namespace moveit_servo

@@ -56,12 +56,13 @@ int main(int argc, char* argv[])
   rclcpp::init(argc, argv);
 
   // The servo object expects to get a ROS node.
-  auto demo_node = std::make_shared<rclcpp::Node>("moveit_servo_demo");
+  const rclcpp::Node::SharedPtr demo_node = std::make_shared<rclcpp::Node>("moveit_servo_demo");
 
   // Get the servo parameters.
-  std::string param_namespace = "moveit_servo";
-  auto servo_param_listener = std::make_shared<const servo::ParamListener>(demo_node, param_namespace);
-  auto servo_params = servo_param_listener->get_params();
+  const std::string param_namespace = "moveit_servo";
+  const std::shared_ptr<const servo::ParamListener> servo_param_listener =
+      std::make_shared<const servo::ParamListener>(demo_node, param_namespace);
+  const servo::Params servo_params = servo_param_listener->get_params();
 
   // The publisher to send trajectory message to the robot controller.
   rclcpp::Publisher<trajectory_msgs::msg::JointTrajectory>::SharedPtr trajectory_outgoing_cmd_pub =
@@ -69,8 +70,9 @@ int main(int argc, char* argv[])
                                                                          rclcpp::SystemDefaultsQoS());
 
   // Create the servo object
-  auto planning_scene_monitor = createPlanningSceneMonitor(demo_node, servo_params);
-  auto servo = Servo(demo_node, servo_param_listener, planning_scene_monitor);
+  const planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor =
+      createPlanningSceneMonitor(demo_node, servo_params);
+  Servo servo = Servo(demo_node, servo_param_listener, planning_scene_monitor);
 
   // Wait for some time, so that the planning scene is loaded in rviz.
   // This is just for convenience, should not be used for sync in real application.
@@ -78,11 +80,11 @@ int main(int argc, char* argv[])
 
   // Set the command type for servo.
   servo.expectedCommandType(CommandType::JOINT_JOG);
-  // JointJog command that moves only the 7th joint at + 1.0 rad/s
+  // JointJog command that moves only the 7th joint at +1.0 rad/s
   JointJogCommand joint_jog(7);
   joint_jog << 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0;
 
-  // Frequency at which the commands will be send to robot controller.
+  // Frequency at which commands will be sent to the robot controller.
   rclcpp::WallRate rate(1.0 / servo_params.publish_period);
 
   std::chrono::seconds timeout_duration(3);
@@ -92,8 +94,8 @@ int main(int argc, char* argv[])
   RCLCPP_INFO_STREAM(LOGGER, servo.getStatusMessage());
   while (rclcpp::ok())
   {
-    KinematicState joint_state = servo.getNextJointState(joint_jog);
-    StatusCode status = servo.getStatus();
+    const KinematicState joint_state = servo.getNextJointState(joint_jog);
+    const StatusCode status = servo.getStatus();
 
     auto current_time = std::chrono::steady_clock::now();
     time_elapsed = std::chrono::duration_cast<std::chrono::seconds>(current_time - start_time);

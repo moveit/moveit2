@@ -59,12 +59,13 @@ int main(int argc, char* argv[])
   rclcpp::init(argc, argv);
 
   // The servo object expects to get a ROS node.
-  auto demo_node = std::make_shared<rclcpp::Node>("moveit_servo_demo");
+  const rclcpp::Node::SharedPtr demo_node = std::make_shared<rclcpp::Node>("moveit_servo_demo");
 
   // Get the servo parameters.
-  std::string param_namespace = "moveit_servo";
-  auto servo_param_listener = std::make_shared<const servo::ParamListener>(demo_node, param_namespace);
-  auto servo_params = servo_param_listener->get_params();
+  const std::string param_namespace = "moveit_servo";
+  const std::shared_ptr<const servo::ParamListener> servo_param_listener =
+      std::make_shared<const servo::ParamListener>(demo_node, param_namespace);
+  const servo::Params servo_params = servo_param_listener->get_params();
 
   // The publisher to send trajectory message to the robot controller.
   rclcpp::Publisher<trajectory_msgs::msg::JointTrajectory>::SharedPtr trajectory_outgoing_cmd_pub =
@@ -72,8 +73,9 @@ int main(int argc, char* argv[])
                                                                          rclcpp::SystemDefaultsQoS());
 
   // Create the servo object
-  auto planning_scene_monitor = createPlanningSceneMonitor(demo_node, servo_params);
-  auto servo = Servo(demo_node, servo_param_listener, planning_scene_monitor);
+  const planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor =
+      createPlanningSceneMonitor(demo_node, servo_params);
+  Servo servo = Servo(demo_node, servo_param_listener, planning_scene_monitor);
 
   // Wait for some time, so that the planning scene is loaded in rviz.
   // This is just for convenience, should not be used for sync in real application.
@@ -88,17 +90,9 @@ int main(int argc, char* argv[])
 
   // The dynamically updated target pose.
   PoseCommand target_pose;
-  target_pose.frame_id = servo_params.ee_frame;
-  target_pose.pose = Eigen::Isometry3d::Identity();  // Target pose in ee frame (same as the ee frame pose)
-  // Convert the pose to planning frame.
-  tf2_ros::Buffer transform_buffer(demo_node->get_clock());
-  tf2_ros::TransformListener transform_listener(transform_buffer);
-  auto target_pose_msg =
-      convertIsometryToTransform(target_pose.pose, servo_params.planning_frame, target_pose.frame_id);
-  auto command_to_planning_frame = transform_buffer.lookupTransform(servo_params.planning_frame, target_pose.frame_id,
-                                                                    rclcpp::Time(0), rclcpp::Duration::from_seconds(2));
-  tf2::doTransform(target_pose_msg, target_pose_msg, command_to_planning_frame);
-  target_pose = PoseCommand{ servo_params.planning_frame, tf2::transformToEigen(target_pose_msg) };
+  target_pose.frame_id = servo_params.planning_frame;
+  // Initializing the target pose as end effector pose, this can be any pose.
+  target_pose.pose = servo.getEndEffectorPose();
 
   // The pose tracking lambda that will be run in a separate thread.
   auto pose_tracker = [&]() {
@@ -120,12 +114,16 @@ int main(int argc, char* argv[])
 
   // Pose tracking thread will exit upon reaching this pose.
   Eigen::Isometry3d terminal_pose = target_pose.pose;
+  terminal_pose.rotate(Eigen::AngleAxisd(M_PI / 4, Eigen::Vector3d::UnitZ()));
   terminal_pose.translate(Eigen::Vector3d(0.0, 0.0, -0.1));
 
   std::thread tracker_thread(pose_tracker);
   tracker_thread.detach();
 
-  const double delta = 0.002;
+  // The target pose (frame being tracked) moves by this step size each iteration.
+  Eigen::Vector3d step_size{ 0.0, 0.0, -0.002 };
+
+  // Frequency at which commands will be sent to the robot controller.
   rclcpp::WallRate command_rate(50);
   RCLCPP_INFO_STREAM(LOGGER, servo.getStatusMessage());
 
@@ -134,9 +132,16 @@ int main(int argc, char* argv[])
     {
       std::lock_guard<std::mutex> pguard(pose_guard);
       target_pose.pose = servo.getEndEffectorPose();
-      stop_tracking = target_pose.pose.isApprox(terminal_pose, servo_params.pose_tracking.linear_tolerance);
+      const bool satisfies_linear_tolerance = target_pose.pose.translation().isApprox(
+          terminal_pose.translation(), servo_params.pose_tracking.linear_tolerance);
+      const bool satisfies_angular_tolerance =
+          target_pose.pose.rotation().isApprox(terminal_pose.rotation(), servo_params.pose_tracking.angular_tolerance);
+      stop_tracking = satisfies_linear_tolerance && satisfies_angular_tolerance;
       // Dynamically update the target pose.
-      target_pose.pose.translate(Eigen::Vector3d(0.0, 0.0, -delta));
+      if (!satisfies_linear_tolerance)
+        target_pose.pose.translate(step_size);
+      if (!satisfies_angular_tolerance)
+        target_pose.pose.rotate(Eigen::AngleAxisd(0.01, Eigen::Vector3d::UnitZ()));
     }
 
     command_rate.sleep();

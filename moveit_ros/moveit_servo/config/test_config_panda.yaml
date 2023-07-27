@@ -8,10 +8,12 @@
 ## Properties of outgoing commands
 publish_period: 0.02  # 1/Nominal publish rate [seconds]
 
-command_in_type: "unitless"
+command_in_type: "unitless" # "unitless" in the range [-1:1], as if from joystick. "speed_units" cmds are in m/s and rad/s
 scale:
-  linear: 1.0
-  rotational: 1.0
+  # Scale parameters are only used if command_in_type=="unitless"
+  linear:  1.0  # Max linear velocity. Unit is [m/s]. Only used for Cartesian commands.
+  rotational:  1.0 # Max angular velocity. Unit is [rad/s]. Only used for Cartesian commands.
+  # Max joint angular/linear velocity. Only used for joint commands on joint_command_in_topic.
   joint: 1.0
 
 # What type of topic does your robot driver expect?
