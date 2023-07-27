@@ -1,0 +1,45 @@
+# This files contains the parameters for all of MoveIt's default PlanRequestAdapters
+default_plan_request_adapter_parameters:
+  path_tolerance: {
+    type: double,
+    description: "AddTimeOptimalParameterization: Tolerance per joint in which the time parameterization is allowed to deviate from the original path.",
+    default_value: 0.1,
+  }
+  resample_dt: {
+    type: double,
+    description: "AddTimeOptimalParameterization: Time steps between two adjacent waypoints of the parameterized trajectory. The trajectory is re-sampled from the original path.",
+    default_value: 0.1,
+  }
+  min_angle_change: {
+    type: double,
+    description: "AddTimeOptimalParameterization: Minimum joint value change to consider two waypoints unique.",
+    default_value: 0.001,
+  }
+  start_state_max_dt: {
+    type: double,
+    description: "FixStartStateCollision/FixStartStateBounds: Maximum temporal distance of the fixed start state from the original state.",
+    default_value: 0.5,
+  }
+  jiggle_fraction: {
+    type: double,
+    description: "FixStartStateCollision: Joint value perturbation as a percentage of the total range of motion for the joint.",
+    default_value: 0.02,
+  }
+  max_sampling_attempts: {
+    type: int,
+    description: "FixStartStateCollision: Maximum number of attempts to re-sample a valid start state.",
+    default_value: 100,
+    validation: {
+        gt_eq<>: [ 0 ],
+    }
+  }
+  start_state_max_bounds_error: {
+    type: double,
+    description: "FixStartStateBounds: Maximum allowable error outside joint bounds for the starting configuration.",
+    default_value: 0.05,
+  }
+  default_workspace_bounds: {
+    type: double,
+    description: "FixWorkspaceBounds: Default workspace bounds representing a cube around the robot's origin whose edge length this parameter defines.",
+    default_value: 10.0,
+  }

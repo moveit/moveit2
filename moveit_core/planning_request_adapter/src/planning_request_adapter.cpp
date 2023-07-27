@@ -98,27 +98,9 @@ bool PlanningRequestAdapter::adaptAndPlan(const planning_interface::PlannerManag
       planning_scene, req, res, added_path_index);
 }
 
-bool PlanningRequestAdapter::adaptAndPlan(const planning_interface::PlannerManagerPtr& planner,
-                                          const planning_scene::PlanningSceneConstPtr& planning_scene,
-                                          const planning_interface::MotionPlanRequest& req,
-                                          planning_interface::MotionPlanResponse& res) const
-{
-  std::vector<std::size_t> empty_added_path_index;
-  return adaptAndPlan(planner, planning_scene, req, res, empty_added_path_index);
-}
-
 void PlanningRequestAdapterChain::addAdapter(const PlanningRequestAdapterConstPtr& adapter)
 {
   adapters_.push_back(adapter);
-}
-
-bool PlanningRequestAdapterChain::adaptAndPlan(const planning_interface::PlannerManagerPtr& planner,
-                                               const planning_scene::PlanningSceneConstPtr& planning_scene,
-                                               const planning_interface::MotionPlanRequest& req,
-                                               planning_interface::MotionPlanResponse& res) const
-{
-  std::vector<std::size_t> empty_added_path_index;
-  return adaptAndPlan(planner, planning_scene, req, res, empty_added_path_index);
 }
 
 bool PlanningRequestAdapterChain::adaptAndPlan(const planning_interface::PlannerManagerPtr& planner,

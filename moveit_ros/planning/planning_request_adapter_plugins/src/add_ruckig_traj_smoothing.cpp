@@ -52,10 +52,6 @@ static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_ros.add_traj_smo
 class AddRuckigTrajectorySmoothing : public planning_request_adapter::PlanningRequestAdapter
 {
 public:
-  AddRuckigTrajectorySmoothing() : planning_request_adapter::PlanningRequestAdapter()
-  {
-  }
-
   void initialize(const rclcpp::Node::SharedPtr& /* unused */, const std::string& /* unused */) override
   {
   }

@@ -52,6 +52,7 @@ set(THIS_PACKAGE_LIBRARIES
   moveit_plan_execution
   moveit_planning_scene_monitor
   moveit_collision_plugin_loader
+  default_plan_request_adapter_parameters
   moveit_default_planning_request_adapter_plugins
   moveit_cpp
 )
@@ -79,19 +80,20 @@ include_directories(${THIS_PACKAGE_INCLUDE_DIRS})
 include_directories(SYSTEM
                     ${EIGEN3_INCLUDE_DIRS})
 
-add_subdirectory(rdf_loader)
 add_subdirectory(collision_plugin_loader)
-add_subdirectory(kinematics_plugin_loader)
-add_subdirectory(robot_model_loader)
 add_subdirectory(constraint_sampler_manager_loader)
+add_subdirectory(introspection)
+add_subdirectory(kinematics_plugin_loader)
+add_subdirectory(moveit_cpp)
+add_subdirectory(plan_execution)
+add_subdirectory(planning_components_tools)
 add_subdirectory(planning_pipeline)
 add_subdirectory(planning_pipeline_interfaces)
 add_subdirectory(planning_request_adapter_plugins)
 add_subdirectory(planning_scene_monitor)
-add_subdirectory(planning_components_tools)
+add_subdirectory(rdf_loader)
+add_subdirectory(robot_model_loader)
 add_subdirectory(trajectory_execution_manager)
-add_subdirectory(plan_execution)
-add_subdirectory(moveit_cpp)
 
 install(
   TARGETS ${THIS_PACKAGE_LIBRARIES}
