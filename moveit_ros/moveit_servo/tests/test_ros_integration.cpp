@@ -83,7 +83,7 @@ TEST_F(ServoRosFixture, testJointJog)
 
   sensor_msgs::msg::JointState prev_state, curr_state;
   {
-    std::lock_guard<std::mutex> state_guard(joint_state_mutex);
+    std::lock_guard<std::mutex> state_guard(joint_state_mutex_);
     prev_state = joint_states_;
   }
 
@@ -109,7 +109,7 @@ TEST_F(ServoRosFixture, testJointJog)
   }
 
   {
-    std::lock_guard<std::mutex> state_guard(joint_state_mutex);
+    std::lock_guard<std::mutex> state_guard(joint_state_mutex_);
     curr_state = joint_states_;
   }
 
@@ -137,7 +137,7 @@ TEST_F(ServoRosFixture, testTwist)
 
   sensor_msgs::msg::JointState prev_state, curr_state;
   {
-    std::lock_guard<std::mutex> state_guard(joint_state_mutex);
+    std::lock_guard<std::mutex> state_guard(joint_state_mutex_);
     prev_state = joint_states_;
   }
 
@@ -160,7 +160,7 @@ TEST_F(ServoRosFixture, testTwist)
   }
 
   {
-    std::lock_guard<std::mutex> state_guard(joint_state_mutex);
+    std::lock_guard<std::mutex> state_guard(joint_state_mutex_);
     curr_state = joint_states_;
   }
 
@@ -200,7 +200,7 @@ TEST_F(ServoRosFixture, testPose)
 
   sensor_msgs::msg::JointState prev_state, curr_state;
   {
-    std::lock_guard<std::mutex> state_guard(joint_state_mutex);
+    std::lock_guard<std::mutex> state_guard(joint_state_mutex_);
     prev_state = joint_states_;
   }
 
@@ -213,7 +213,7 @@ TEST_F(ServoRosFixture, testPose)
   }
 
   {
-    std::lock_guard<std::mutex> state_guard(joint_state_mutex);
+    std::lock_guard<std::mutex> state_guard(joint_state_mutex_);
     curr_state = joint_states_;
   }
 

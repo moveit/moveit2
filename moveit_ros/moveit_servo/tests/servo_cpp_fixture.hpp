@@ -32,12 +32,13 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-/* Author    : V Mohammed Ibrahim
-   Desc      : Resources used by servo c++ integration tests
-   Title     : servo_cpp_fixture.hpp
-   Project   : moveit_servo
-   Created   : 07/07/2023
-*/
+/*      Title       : servo_cpp_fixture.hpp
+ *      Project     : moveit_servo
+ *      Created     : 07/13/2020
+ *      Author      : Adam Pettinger, V Mohammed Ibrahim
+ *
+ *      Description : Resources used by servo c++ integration tests
+ */
 
 #include <gtest/gtest.h>
 #include <moveit_servo/servo.hpp>

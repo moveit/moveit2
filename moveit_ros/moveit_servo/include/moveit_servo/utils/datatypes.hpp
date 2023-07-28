@@ -34,7 +34,7 @@
 /*      Title       : datatypes.hpp
  *      Project     : moveit_servo
  *      Created     : 06/05/2023
- *      Author      : V Mohammed Ibrahim
+ *      Author      : Andy Zelenak, V Mohammed Ibrahim
  *
  *      Description : The custom datatypes used by Moveit Servo.
  */
@@ -47,7 +47,6 @@
 
 namespace moveit_servo
 {
-// Datatypes used by servo
 
 enum class StatusCode : int8_t
 {

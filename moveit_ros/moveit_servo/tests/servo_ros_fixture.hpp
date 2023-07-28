@@ -60,7 +60,7 @@ protected:
 
   void jointStateCallback(const sensor_msgs::msg::JointState::ConstSharedPtr msg)
   {
-    std::lock_guard<std::mutex> state_guard(joint_state_mutex);
+    std::lock_guard<std::mutex> state_guard(joint_state_mutex_);
     joint_states_ = *msg;
     state_count_++;
   }
@@ -88,6 +88,7 @@ protected:
       if (!rclcpp::ok())
       {
         RCLCPP_ERROR(logger, "Interrupted while waiting for the service. Exiting.");
+        std::exit(EXIT_FAILURE);
       }
 
       rclcpp::sleep_for(std::chrono::milliseconds(500));
@@ -128,7 +129,7 @@ protected:
   std::atomic<int> status_count_;
   std::atomic<moveit_servo::StatusCode> status_;
 
-  std::mutex joint_state_mutex;
+  std::mutex joint_state_mutex_;
   std::atomic<int> state_count_;
   sensor_msgs::msg::JointState joint_states_;
 };

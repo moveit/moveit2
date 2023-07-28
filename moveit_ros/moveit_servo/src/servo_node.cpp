@@ -33,8 +33,8 @@
 
 /*      Title       : servo_node.cpp
  *      Project     : moveit_servo
- *      Created     : 01/07/2023
- *      Author      : V Mohammed Ibrahim
+ *      Created     : 12/31/2018
+ *      Author      : Andy Zelenak, V Mohammed Ibrahim
  *
  */
 
