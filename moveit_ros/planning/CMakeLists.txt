@@ -6,6 +6,7 @@ find_package(moveit_common REQUIRED)
 moveit_package()
 
 find_package(ament_cmake REQUIRED)
+find_package(fmt REQUIRED)
 find_package(generate_parameter_library REQUIRED)
 find_package(moveit_msgs REQUIRED)
 # find_package(moveit_ros_perception REQUIRED)

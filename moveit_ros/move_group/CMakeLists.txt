@@ -9,6 +9,7 @@ moveit_package()
 include(ConfigExtras.cmake)
 
 set(THIS_PACKAGE_INCLUDE_DEPENDS
+  fmt
   ament_cmake
   moveit_core
   moveit_ros_occupancy_map_monitor
@@ -65,7 +66,7 @@ target_link_libraries(move_group moveit_move_group_capabilities_base)
 
 add_executable(list_move_group_capabilities src/list_capabilities.cpp)
 ament_target_dependencies(list_move_group_capabilities ${THIS_PACKAGE_INCLUDE_DEPENDS} Boost)
-target_link_libraries(list_move_group_capabilities moveit_move_group_capabilities_base)
+target_link_libraries(list_move_group_capabilities moveit_move_group_capabilities_base fmt)
 
 install(
   TARGETS

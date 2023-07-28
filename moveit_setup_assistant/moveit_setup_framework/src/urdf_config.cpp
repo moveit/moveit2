@@ -35,7 +35,6 @@
 #include <moveit_setup_framework/data/urdf_config.hpp>
 #include <moveit_setup_framework/utilities.hpp>
 #include <moveit/rdf_loader/rdf_loader.h>
-#include <boost/algorithm/string/join.hpp>
 #include <fmt/format.h>
 
 namespace moveit_setup
