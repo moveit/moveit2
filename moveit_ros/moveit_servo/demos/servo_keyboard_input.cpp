@@ -73,8 +73,8 @@ constexpr int8_t KEYCODE_T = 0x74;
 // Some constants used in the Servo Teleop demo
 namespace
 {
-const std::string TWIST_TOPIC = "/moveit_servo/delta_twist_cmds";
-const std::string JOINT_TOPIC = "/moveit_servo/delta_joint_cmds";
+const std::string TWIST_TOPIC = "/servo_node/delta_twist_cmds";
+const std::string JOINT_TOPIC = "/servo_node/delta_joint_cmds";
 const size_t ROS_QUEUE_SIZE = 10;
 const std::string PLANNING_FRAME_ID = "panda_link0";
 }  // namespace
@@ -141,7 +141,7 @@ KeyboardServo::KeyboardServo() : joint_vel_cmd_(1.0)
   joint_pub_ = nh_->create_publisher<control_msgs::msg::JointJog>(JOINT_TOPIC, ROS_QUEUE_SIZE);
 
   // Client for switching input types
-  switch_input_ = nh_->create_client<moveit_msgs::srv::ServoCommandType>("moveit_servo/switch_command_type");
+  switch_input_ = nh_->create_client<moveit_msgs::srv::ServoCommandType>("servo_node/switch_command_type");
 }
 
 KeyboardReader input;
@@ -293,11 +293,11 @@ int KeyboardServo::keyLoop()
       case KEYCODE_J:
         RCLCPP_DEBUG(nh_->get_logger(), "j");
         request_ = std::make_shared<moveit_msgs::srv::ServoCommandType::Request>();
-        request_->command_type = 0;
+        request_->command_type = moveit_msgs::srv::ServoCommandType::Request::JOINT_JOG;
         if (switch_input_->wait_for_service(std::chrono::seconds(1)))
         {
           auto result = switch_input_->async_send_request(request_);
-          if (result.get()->expected_type == request_->command_type)
+          if (result.get()->success)
             RCLCPP_INFO_STREAM(nh_->get_logger(), "Switched to input type: JointJog");
           else
             RCLCPP_WARN_STREAM(nh_->get_logger(), "Could not switch input to: JointJog");
@@ -306,11 +306,11 @@ int KeyboardServo::keyLoop()
       case KEYCODE_T:
         RCLCPP_DEBUG(nh_->get_logger(), "t");
         request_ = std::make_shared<moveit_msgs::srv::ServoCommandType::Request>();
-        request_->command_type = 1;
+        request_->command_type = moveit_msgs::srv::ServoCommandType::Request::TWIST;
         if (switch_input_->wait_for_service(std::chrono::seconds(1)))
         {
           auto result = switch_input_->async_send_request(request_);
-          if (result.get()->expected_type == request_->command_type)
+          if (result.get()->success)
             RCLCPP_INFO_STREAM(nh_->get_logger(), "Switched to input type: Twist");
           else
             RCLCPP_WARN_STREAM(nh_->get_logger(), "Could not switch input to: Twist");

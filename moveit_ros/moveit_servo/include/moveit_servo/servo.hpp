@@ -81,13 +81,13 @@ public:
    * \brief Set the type of incoming servo command.
    * @param command_type The type of command servo should expect.
    */
-  void expectedCommandType(const CommandType& command_type);
+  void setCommandType(const CommandType& command_type);
 
   /**
    * \brief Get the type of command that servo is currently expecting.
    * @return The type of command.
    */
-  CommandType expectedCommandType();
+  CommandType getCommandType();
 
   /**
    * \brief Get the current status of servo.

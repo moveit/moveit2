@@ -60,16 +60,21 @@
 
 namespace
 {
+const size_t NUM_COMMANDS = 10;
+}
+
+namespace
+{
 TEST_F(ServoRosFixture, testJointJog)
 {
   auto joint_jog_publisher = servo_test_node_->create_publisher<control_msgs::msg::JointJog>(
-      "/moveit_servo/delta_joint_cmds", rclcpp::SystemDefaultsQoS());
+      "/servo_node/delta_joint_cmds", rclcpp::SystemDefaultsQoS());
 
   // Call input type service
   auto request = std::make_shared<moveit_msgs::srv::ServoCommandType::Request>();
   request->command_type = 0;
   auto response = switch_input_client_->async_send_request(request);
-  ASSERT_EQ(response.get()->expected_type, 0);
+  ASSERT_EQ(response.get()->success, true);
 
   if (state_count_ > 0)
     RCLCPP_INFO_STREAM(servo_test_node_->get_logger(), "State available");
@@ -96,7 +101,7 @@ TEST_F(ServoRosFixture, testJointJog)
   jog_cmd.velocities[6] = 1.0;
 
   size_t count = 0;
-  while (rclcpp::ok() && count < 5)
+  while (rclcpp::ok() && count < NUM_COMMANDS)
   {
     joint_jog_publisher->publish(jog_cmd);
     count++;
@@ -118,12 +123,12 @@ TEST_F(ServoRosFixture, testJointJog)
 TEST_F(ServoRosFixture, testTwist)
 {
   auto twist_publisher = servo_test_node_->create_publisher<geometry_msgs::msg::TwistStamped>(
-      "/moveit_servo/delta_twist_cmds", rclcpp::SystemDefaultsQoS());
+      "/servo_node/delta_twist_cmds", rclcpp::SystemDefaultsQoS());
 
   auto request = std::make_shared<moveit_msgs::srv::ServoCommandType::Request>();
   request->command_type = 1;
   auto response = switch_input_client_->async_send_request(request);
-  ASSERT_EQ(response.get()->expected_type, 1);
+  ASSERT_EQ(response.get()->success, true);
 
   if (state_count_ > 0)
     RCLCPP_INFO_STREAM(servo_test_node_->get_logger(), "State available");
@@ -147,7 +152,7 @@ TEST_F(ServoRosFixture, testTwist)
   twist_cmd.twist.angular.z = 0.5;
 
   size_t count = 0;
-  while (rclcpp::ok() && count < 5)
+  while (rclcpp::ok() && count < NUM_COMMANDS)
   {
     twist_publisher->publish(twist_cmd);
     count++;
@@ -169,12 +174,12 @@ TEST_F(ServoRosFixture, testTwist)
 TEST_F(ServoRosFixture, testPose)
 {
   auto pose_publisher = servo_test_node_->create_publisher<geometry_msgs::msg::PoseStamped>(
-      "/moveit_servo/pose_target_cmds", rclcpp::SystemDefaultsQoS());
+      "/servo_node/pose_target_cmds", rclcpp::SystemDefaultsQoS());
 
   auto request = std::make_shared<moveit_msgs::srv::ServoCommandType::Request>();
   request->command_type = 2;
   auto response = switch_input_client_->async_send_request(request);
-  ASSERT_EQ(response.get()->expected_type, 2);
+  ASSERT_EQ(response.get()->success, true);
 
   geometry_msgs::msg::PoseStamped pose_cmd;
   pose_cmd.header.stamp = servo_test_node_->now();
@@ -200,7 +205,7 @@ TEST_F(ServoRosFixture, testPose)
   }
 
   size_t count = 0;
-  while (rclcpp::ok() && count < 5)
+  while (rclcpp::ok() && count < NUM_COMMANDS)
   {
     pose_publisher->publish(pose_cmd);
     count++;

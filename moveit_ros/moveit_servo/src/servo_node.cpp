@@ -62,7 +62,7 @@ ServoNode::~ServoNode()
 }
 
 ServoNode::ServoNode(const rclcpp::NodeOptions& options)
-  : node_{ std::make_shared<rclcpp::Node>("moveit_servo", options) }
+  : node_{ std::make_shared<rclcpp::Node>("servo_node", options) }
   , stop_servo_{ false }
   , servo_paused_{ false }
   , new_joint_jog_msg_{ false }
@@ -110,23 +110,25 @@ ServoNode::ServoNode(const rclcpp::NodeOptions& options)
   pose_subscriber_ = node_->create_subscription<geometry_msgs::msg::PoseStamped>(
       servo_params_.pose_command_in_topic, 10, std::bind(&ServoNode::poseCallback, this, std::placeholders::_1));
 
-  // Create publisher for joint trajectory message
-  trajectory_publisher_ = node_->create_publisher<trajectory_msgs::msg::JointTrajectory>(
-      servo_params_.command_out_topic, rclcpp::SystemDefaultsQoS());
+  if (servo_params_.command_out_type == "trajectory_msgs/JointTrajectory")
+    trajectory_publisher_ = node_->create_publisher<trajectory_msgs::msg::JointTrajectory>(
+        servo_params_.command_out_topic, rclcpp::SystemDefaultsQoS());
+  else if (servo_params_.command_out_type == "std_msgs/Float64MultiArray")
+    multi_array_publisher_ = node_->create_publisher<std_msgs::msg::Float64MultiArray>(servo_params_.command_out_topic,
+                                                                                       rclcpp::SystemDefaultsQoS());
 
   // Create status publisher
   status_publisher_ =
-      node_->create_publisher<std_msgs::msg::Int8>(servo_params_.status_topic, rclcpp::SystemDefaultsQoS());
+      node_->create_publisher<moveit_msgs::msg::ServoStatus>(servo_params_.status_topic, rclcpp::SystemDefaultsQoS());
 
   // Create service to enable switching command type
   switch_command_type_ = node_->create_service<moveit_msgs::srv::ServoCommandType>(
-      "moveit_servo/switch_command_type",
+      "~/switch_command_type",
       std::bind(&ServoNode::switchCommandType, this, std::placeholders::_1, std::placeholders::_2));
 
   // Create service to pause/unpause servoing
-  pause_servo_ = node_->create_service<std_srvs::srv::SetBool>("moveit_servo/pause_servo",
-                                                               std::bind(&ServoNode::pauseServo, this,
-                                                                         std::placeholders::_1, std::placeholders::_2));
+  pause_servo_ = node_->create_service<std_srvs::srv::SetBool>(
+      "~/pause_servo", std::bind(&ServoNode::pauseServo, this, std::placeholders::_1, std::placeholders::_2));
 
   // Start the servoing loop
   servo_loop_thread_ = std::thread(&ServoNode::servoLoop, this);
@@ -152,16 +154,17 @@ void ServoNode::pauseServo(const std::shared_ptr<std_srvs::srv::SetBool::Request
 void ServoNode::switchCommandType(const std::shared_ptr<moveit_msgs::srv::ServoCommandType::Request> request,
                                   const std::shared_ptr<moveit_msgs::srv::ServoCommandType::Response> response)
 {
-  const bool is_valid = (request->command_type >= 0) && (request->command_type <= 2);
+  const bool is_valid = (request->command_type >= static_cast<int8_t>(CommandType::MIN)) &&
+                        (request->command_type <= static_cast<int8_t>(CommandType::MAX));
   if (is_valid)
   {
-    servo_->expectedCommandType(static_cast<CommandType>(request->command_type));
-    response->expected_type = static_cast<int8_t>(servo_->expectedCommandType());
+    servo_->setCommandType(static_cast<CommandType>(request->command_type));
   }
   else
   {
     RCLCPP_WARN_STREAM(LOGGER, "Unknown command type " << request->command_type << " requested");
   }
+  response->success = (request->command_type == static_cast<int8_t>(servo_->getCommandType()));
 }
 
 void ServoNode::jointJogCallback(const control_msgs::msg::JointJog::SharedPtr msg)
@@ -257,7 +260,7 @@ std::optional<KinematicState> ServoNode::processPoseCommand()
 
 void ServoNode::servoLoop()
 {
-  std_msgs::msg::Int8 status_msg;
+  moveit_msgs::msg::ServoStatus status_msg;
   std::optional<KinematicState> next_joint_state;
   rclcpp::WallRate servo_frequency(1 / servo_params_.publish_period);
 
@@ -268,7 +271,7 @@ void ServoNode::servoLoop()
       continue;
 
     next_joint_state = std::nullopt;
-    const CommandType expectedType = servo_->expectedCommandType();
+    const CommandType expectedType = servo_->getCommandType();
 
     if (expectedType == CommandType::JOINT_JOG && new_joint_jog_msg_)
     {
@@ -290,10 +293,14 @@ void ServoNode::servoLoop()
 
     if (next_joint_state && (servo_->getStatus() != StatusCode::INVALID))
     {
-      trajectory_publisher_->publish(composeTrajectoryMessage(servo_->getParams(), next_joint_state.value()));
+      if (servo_params_.command_out_type == "trajectory_msgs/JointTrajectory")
+        trajectory_publisher_->publish(composeTrajectoryMessage(servo_->getParams(), next_joint_state.value()));
+      else if (servo_params_.command_out_type == "std_msgs/Float64MultiArray")
+        multi_array_publisher_->publish(composeMultiArrayMessage(servo_->getParams(), next_joint_state.value()));
     }
 
-    status_msg.data = static_cast<int8_t>(servo_->getStatus());
+    status_msg.code = static_cast<int8_t>(servo_->getStatus());
+    status_msg.message = servo_->getStatusMessage();
     status_publisher_->publish(status_msg);
   }
 

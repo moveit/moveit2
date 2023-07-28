@@ -85,16 +85,18 @@ def generate_launch_description():
         package="rclcpp_components",
         executable="component_container_mt",
         composable_node_descriptions=[
-            # Example of launching Servo as a node component
-            # Launching as a node component makes ROS 2 intraprocess communication more efficient.
+            # # Example of launching Servo as a node component
+            # # Launching as a node component makes ROS 2 intraprocess communication more efficient.
             launch_ros.descriptions.ComposableNode(
                 package="moveit_servo",
                 plugin="moveit_servo::ServoNode",
                 name="servo_node",
                 parameters=[
                     servo_params,
+                    low_pass_filter_coeff,
                     moveit_config.robot_description,
                     moveit_config.robot_description_semantic,
+                    moveit_config.robot_description_kinematics,
                 ],
                 condition=UnlessCondition(launch_as_standalone_node),
             ),
@@ -118,6 +120,7 @@ def generate_launch_description():
     servo_node = launch_ros.actions.Node(
         package="moveit_servo",
         executable="servo_node",
+        name="servo_node",
         parameters=[
             servo_params,
             low_pass_filter_coeff,
@@ -126,7 +129,7 @@ def generate_launch_description():
             moveit_config.robot_description_kinematics,
         ],
         output="screen",
-        condition=IfCondition(launch_as_standalone_node),
+        # condition=IfCondition(launch_as_standalone_node),
     )
 
     return launch.LaunchDescription(

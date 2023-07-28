@@ -133,6 +133,22 @@ trajectory_msgs::msg::JointTrajectory composeTrajectoryMessage(const servo::Para
   return joint_trajectory;
 }
 
+std_msgs::msg::Float64MultiArray composeMultiArrayMessage(const servo::Params& servo_params,
+                                                          const KinematicState& joint_state)
+{
+  std_msgs::msg::Float64MultiArray multi_array;
+  if (servo_params.publish_joint_positions)
+  {
+    multi_array.data = joint_state.positions;
+  }
+  else if (servo_params.publish_joint_velocities)
+  {
+    multi_array.data = joint_state.velocities;
+  }
+
+  return multi_array;
+}
+
 std::pair<double, StatusCode> velocityScalingFactorForSingularity(const moveit::core::RobotStatePtr& robot_state,
                                                                   const Eigen::VectorXd& target_delta_x,
                                                                   const servo::Params& servo_params)

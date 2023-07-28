@@ -40,6 +40,7 @@
 */
 
 #include <gtest/gtest.h>
+#include <moveit_msgs/msg/servo_status.hpp>
 #include <moveit_msgs/srv/servo_command_type.hpp>
 #include <moveit_servo/utils/datatypes.hpp>
 #include <rclcpp/client.hpp>
@@ -47,14 +48,13 @@
 #include <rclcpp/publisher.hpp>
 #include <rclcpp/qos.hpp>
 #include <sensor_msgs/msg/joint_state.hpp>
-#include <std_msgs/msg/int8.hpp>
 
 class ServoRosFixture : public testing::Test
 {
 protected:
-  void statusCallback(const std_msgs::msg::Int8::ConstSharedPtr msg)
+  void statusCallback(const moveit_msgs::msg::ServoStatus::ConstSharedPtr msg)
   {
-    status_ = static_cast<moveit_servo::StatusCode>(msg->data);
+    status_ = static_cast<moveit_servo::StatusCode>(msg->code);
     status_count_++;
   }
 
@@ -103,14 +103,14 @@ protected:
 
     status_ = moveit_servo::StatusCode::INVALID;
 
-    status_subscriber_ = servo_test_node_->create_subscription<std_msgs::msg::Int8>(
-        "/moveit_servo/status", 1, std::bind(&ServoRosFixture::statusCallback, this, std::placeholders::_1));
+    status_subscriber_ = servo_test_node_->create_subscription<moveit_msgs::msg::ServoStatus>(
+        "/servo_node/status", 1, std::bind(&ServoRosFixture::statusCallback, this, std::placeholders::_1));
 
     joint_state_subscriber_ = servo_test_node_->create_subscription<sensor_msgs::msg::JointState>(
         "/joint_states", 1, std::bind(&ServoRosFixture::jointStateCallback, this, std::placeholders::_1));
 
     switch_input_client_ =
-        servo_test_node_->create_client<moveit_msgs::srv::ServoCommandType>("moveit_servo/switch_command_type");
+        servo_test_node_->create_client<moveit_msgs::srv::ServoCommandType>("/servo_node/switch_command_type");
 
     waitForService();
   }
@@ -121,7 +121,7 @@ protected:
   rclcpp::Executor::SharedPtr executor_;
   std::thread executor_thread_;
 
-  rclcpp::Subscription<std_msgs::msg::Int8>::SharedPtr status_subscriber_;
+  rclcpp::Subscription<moveit_msgs::msg::ServoStatus>::SharedPtr status_subscriber_;
   rclcpp::Subscription<sensor_msgs::msg::JointState>::SharedPtr joint_state_subscriber_;
   rclcpp::Client<moveit_msgs::srv::ServoCommandType>::SharedPtr switch_input_client_;
 

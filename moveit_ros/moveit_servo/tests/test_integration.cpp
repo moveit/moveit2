@@ -51,7 +51,7 @@ TEST_F(ServoCppFixture, JointJogTest)
   joint_jog_z << 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0;
   zero_joint_jog << 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0;
   // Compute next state.
-  servo_test_instance_->expectedCommandType(moveit_servo::CommandType::JOINT_JOG);
+  servo_test_instance_->setCommandType(moveit_servo::CommandType::JOINT_JOG);
   status_initial = servo_test_instance_->getStatus();
   ASSERT_EQ(status_initial, moveit_servo::StatusCode::NO_WARNING);
 
@@ -75,7 +75,7 @@ TEST_F(ServoCppFixture, TwistTest)
   moveit_servo::TwistCommand twist_non_zero{ servo_params_.planning_frame, { 0.0, 0.0, 0.0, 0.0, 0.0, 0.1 } };
   moveit_servo::TwistCommand twist_zero{ servo_params_.planning_frame, { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 } };
 
-  servo_test_instance_->expectedCommandType(moveit_servo::CommandType::TWIST);
+  servo_test_instance_->setCommandType(moveit_servo::CommandType::TWIST);
   status_initial = servo_test_instance_->getStatus();
   ASSERT_EQ(status_initial, moveit_servo::StatusCode::NO_WARNING);
   moveit_servo::KinematicState curr_state = servo_test_instance_->getNextJointState(twist_zero);
@@ -104,7 +104,7 @@ TEST_F(ServoCppFixture, PoseTest)
   non_zero_pose.pose = servo_test_instance_->getEndEffectorPose();
   non_zero_pose.pose.rotate(Eigen::AngleAxisd(M_PI / 2, Eigen::Vector3d::UnitZ()));
 
-  servo_test_instance_->expectedCommandType(moveit_servo::CommandType::POSE);
+  servo_test_instance_->setCommandType(moveit_servo::CommandType::POSE);
   status_initial = servo_test_instance_->getStatus();
   ASSERT_EQ(status_initial, moveit_servo::StatusCode::NO_WARNING);
 

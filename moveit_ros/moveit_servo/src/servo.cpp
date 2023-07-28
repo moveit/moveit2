@@ -250,12 +250,12 @@ const std::string Servo::getStatusMessage()
   return SERVO_STATUS_CODE_MAP.at(servo_status_);
 }
 
-CommandType Servo::expectedCommandType()
+CommandType Servo::getCommandType()
 {
   return expected_command_type_;
 }
 
-void Servo::expectedCommandType(const CommandType& command_type)
+void Servo::setCommandType(const CommandType& command_type)
 {
   expected_command_type_ = command_type;
 }
@@ -280,8 +280,8 @@ KinematicState Servo::haltJoints(const std::vector<int>& joints_to_halt, const K
   RCLCPP_WARN_STREAM(LOGGER, "Joint position limit reached on joints: " << halting_joint_names.str());
 
   const bool all_joint_halt =
-      (expectedCommandType() == CommandType::JOINT_JOG && servo_params_.halt_all_joints_in_joint_mode) ||
-      (expectedCommandType() == CommandType::TWIST && servo_params_.halt_all_joints_in_cartesian_mode);
+      (getCommandType() == CommandType::JOINT_JOG && servo_params_.halt_all_joints_in_joint_mode) ||
+      (getCommandType() == CommandType::TWIST && servo_params_.halt_all_joints_in_cartesian_mode);
 
   if (all_joint_halt)
   {
@@ -312,7 +312,7 @@ Eigen::VectorXd Servo::jointDeltaFromCommand(const ServoInput& command, moveit::
 
   JointDeltaResult delta_result;
 
-  const CommandType expected_type = expectedCommandType();
+  const CommandType expected_type = getCommandType();
   if (command.index() == static_cast<size_t>(expected_type))
   {
     if (expected_type == CommandType::JOINT_JOG)

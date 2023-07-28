@@ -76,7 +76,11 @@ enum class CommandType : int8_t
 {
   JOINT_JOG = 0,
   TWIST = 1,
-  POSE = 2
+  POSE = 2,
+
+  // Range of allowed values used for validation.
+  MIN = JOINT_JOG,
+  MAX = POSE
 };
 
 typedef std::pair<StatusCode, Eigen::VectorXd> JointDeltaResult;

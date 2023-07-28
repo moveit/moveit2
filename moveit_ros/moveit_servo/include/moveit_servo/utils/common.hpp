@@ -47,6 +47,7 @@
 #include <moveit/robot_model/joint_model_group.h>
 #include <moveit/robot_state/robot_state.h>
 #include <sensor_msgs/msg/joint_state.hpp>
+#include <std_msgs/msg/float64_multi_array.hpp>
 #include <tf2_eigen/tf2_eigen.hpp>
 #include <trajectory_msgs/msg/joint_trajectory.hpp>
 
@@ -98,6 +99,15 @@ geometry_msgs::msg::Pose poseFromCartesianDelta(const Eigen::VectorXd& delta_x,
  */
 trajectory_msgs::msg::JointTrajectory composeTrajectoryMessage(const servo::Params& servo_params,
                                                                const KinematicState& joint_state);
+
+/**
+ * \brief Create a Float64MultiArray message from given joint state
+ * @param servo_params The configuration used by servo, required for selecting position vs velocity.
+ * @param joint_state The joint state to be added into the Float64MultiArray.
+ * @return The Float64MultiArray message.
+ */
+std_msgs::msg::Float64MultiArray composeMultiArrayMessage(const servo::Params& servo_params,
+                                                          const KinematicState& joint_state);
 
 /**
  * \brief Computes scaling factor for velocity when the robot is near a singularity.

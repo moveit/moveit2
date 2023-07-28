@@ -85,6 +85,7 @@ def generate_test_description():
     servo_node = launch_ros.actions.Node(
         package="moveit_servo",
         executable="servo_node",
+        name="servo_node",
         parameters=[
             servo_params,
             low_pass_filter_coeff,

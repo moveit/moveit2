@@ -79,7 +79,7 @@ int main(int argc, char* argv[])
   std::this_thread::sleep_for(std::chrono::seconds(3));
 
   // Set the command type for servo.
-  servo.expectedCommandType(CommandType::JOINT_JOG);
+  servo.setCommandType(CommandType::JOINT_JOG);
   // JointJog command that moves only the 7th joint at +1.0 rad/s
   JointJogCommand joint_jog(7);
   joint_jog << 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0;

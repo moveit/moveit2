@@ -86,7 +86,7 @@ int main(int argc, char* argv[])
   std::atomic<bool> stop_tracking = false;
 
   // Set the command type for servo.
-  servo.expectedCommandType(CommandType::POSE);
+  servo.setCommandType(CommandType::POSE);
 
   // The dynamically updated target pose.
   PoseCommand target_pose;

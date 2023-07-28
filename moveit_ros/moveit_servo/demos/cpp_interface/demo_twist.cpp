@@ -81,7 +81,7 @@ int main(int argc, char* argv[])
   std::this_thread::sleep_for(std::chrono::seconds(3));
 
   // Set the command type for servo.
-  servo.expectedCommandType(CommandType::TWIST);
+  servo.setCommandType(CommandType::TWIST);
 
   // Move end effector in the +z direction at 10 cm/s
   // while turning around z axis in the +ve direction at 0.5 rad/s
