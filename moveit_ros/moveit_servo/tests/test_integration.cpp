@@ -47,9 +47,8 @@ namespace
 TEST_F(ServoCppFixture, JointJogTest)
 {
   moveit_servo::StatusCode status_curr, status_next, status_initial;
-  moveit_servo::JointJogCommand joint_jog_z(7), zero_joint_jog(7);
-  joint_jog_z << 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0;
-  zero_joint_jog << 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0;
+  moveit_servo::JointJogCommand joint_jog_z{ { "panda_joint7" }, { 1.0 } };
+  moveit_servo::JointJogCommand zero_joint_jog;
   // Compute next state.
   servo_test_instance_->setCommandType(moveit_servo::CommandType::JOINT_JOG);
   status_initial = servo_test_instance_->getStatus();

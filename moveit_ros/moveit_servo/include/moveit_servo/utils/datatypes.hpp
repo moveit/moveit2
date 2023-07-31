@@ -85,7 +85,11 @@ enum class CommandType : int8_t
 typedef std::pair<StatusCode, Eigen::VectorXd> JointDeltaResult;
 
 // The joint jog command, this will be vector of length equal to the number of joints of the robot.
-typedef Eigen::VectorXd JointJogCommand;
+struct JointJogCommand
+{
+  std::vector<std::string> names;
+  std::vector<double> velocities;
+};
 
 // The twist command,  frame_id is the name of the frame in which the command is specified in.
 // frame_id must always be specified.

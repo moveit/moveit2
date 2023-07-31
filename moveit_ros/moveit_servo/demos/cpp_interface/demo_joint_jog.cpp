@@ -81,8 +81,7 @@ int main(int argc, char* argv[])
   // Set the command type for servo.
   servo.setCommandType(CommandType::JOINT_JOG);
   // JointJog command that moves only the 7th joint at +1.0 rad/s
-  JointJogCommand joint_jog(7);
-  joint_jog << 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0;
+  JointJogCommand joint_jog{ { "panda_joint7" }, { 1.0 } };
 
   // Frequency at which commands will be sent to the robot controller.
   rclcpp::WallRate rate(1.0 / servo_params.publish_period);

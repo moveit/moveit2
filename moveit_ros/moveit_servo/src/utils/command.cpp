@@ -52,14 +52,30 @@ JointDeltaResult jointDeltaFromJointJog(const JointJogCommand& command, moveit::
 {
   // Find the target joint position based on the commanded joint velocity
   StatusCode status = StatusCode::NO_WARNING;
-  const int num_joints = robot_state->getJointModelGroup(servo_params.move_group_name)->getJointModelNames().size();
-  Eigen::VectorXd joint_position_delta(num_joints);
+  const auto joint_names = robot_state->getJointModelGroup(servo_params.move_group_name)->getJointModelNames();
+  Eigen::VectorXd joint_position_delta(joint_names.size());
+  Eigen::VectorXd velocities(joint_names.size());
 
-  if (isValidCommand(command))
+  velocities.setZero();
+  bool names_valid = true;
+
+  for (size_t i = 0; i < command.names.size(); i++)
   {
-    // The incoming command should be in rad/s
-    joint_position_delta = command * servo_params.publish_period;
-
+    auto it = std::find(joint_names.begin(), joint_names.end(), command.names[i]);
+    if (it != std::end(joint_names))
+    {
+      velocities[std::distance(joint_names.begin(), it)] = command.velocities[i];
+    }
+    else
+    {
+      names_valid = false;
+      break;
+    }
+  }
+  const bool velocity_valid = isValidCommand(velocities);
+  if (names_valid && velocity_valid)
+  {
+    joint_position_delta = velocities * servo_params.publish_period;
     if (servo_params.command_in_type == "unitless")
     {
       joint_position_delta *= servo_params.scale.joint;
@@ -68,7 +84,10 @@ JointDeltaResult jointDeltaFromJointJog(const JointJogCommand& command, moveit::
   else
   {
     status = StatusCode::INVALID;
-    RCLCPP_WARN_STREAM(LOGGER, "Invalid joint velocity command");
+    if (!names_valid)
+      RCLCPP_WARN_STREAM(LOGGER, "Invalid joint names in jointjog command");
+    if (!velocity_valid)
+      RCLCPP_WARN_STREAM(LOGGER, "Invalid velocity values in jointjog command");
   }
   return std::make_pair(status, joint_position_delta);
 }

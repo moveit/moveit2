@@ -198,7 +198,7 @@ std::optional<KinematicState> ServoNode::processJointJogCommand()
   if (!command_stale)
   {
     // JointJogCommand is an alias for VectorXd, so we can directly make a map and pass it.
-    const Eigen::Map<JointJogCommand> command(latest_joint_jog_.velocities.data(), latest_joint_jog_.velocities.size());
+    JointJogCommand command{ latest_joint_jog_.joint_names, latest_joint_jog_.velocities };
     next_joint_state = servo_->getNextJointState(command);
   }
   else
