@@ -127,6 +127,13 @@ private:
   const TwistCommand toPlanningFrame(const TwistCommand& command);
 
   /**
+   * \brief Convert a given pose command to planning frame
+   * @param command The pose command to be converted
+   * @return The transformed pose command
+   */
+  const PoseCommand toPlanningFrame(const PoseCommand& command);
+
+  /**
    * \brief Compute the change in joint position required to follow the received command.
    * @param command The incoming servo command.
    * @return The joint position change required (delta).

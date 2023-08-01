@@ -332,7 +332,8 @@ Eigen::VectorXd Servo::jointDeltaFromCommand(const ServoInput& command, moveit::
     }
     else if (expected_type == CommandType::POSE)
     {
-      delta_result = jointDeltaFromPose(std::get<PoseCommand>(command), robot_state, servo_params_);
+      const PoseCommand command_in_planning_frame = toPlanningFrame(std::get<PoseCommand>(command));
+      delta_result = jointDeltaFromPose(command_in_planning_frame, robot_state, servo_params_);
       servo_status_ = delta_result.first;
     }
     if (servo_status_ != StatusCode::INVALID)
@@ -448,6 +449,15 @@ const TwistCommand Servo::toPlanningFrame(const TwistCommand& command)
   Eigen::VectorXd transformed_twist = command.velocities;
   tf2::doTransform(transformed_twist, transformed_twist, command_to_planning_frame);
   return TwistCommand{ servo_params_.planning_frame, transformed_twist };
+}
+
+const PoseCommand Servo::toPlanningFrame(const PoseCommand& command)
+{
+  auto target_pose_msg = convertIsometryToTransform(command.pose, servo_params_.planning_frame, command.frame_id);
+  auto command_to_planning_frame = transform_buffer_.lookupTransform(
+      servo_params_.planning_frame, command.frame_id, rclcpp::Time(0), rclcpp::Duration::from_seconds(2));
+  tf2::doTransform(target_pose_msg, target_pose_msg, command_to_planning_frame);
+  return PoseCommand{ servo_params_.planning_frame, tf2::transformToEigen(target_pose_msg) };
 }
 
 }  // namespace moveit_servo
