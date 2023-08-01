@@ -479,7 +479,7 @@ static bool collectConstraints(const rclcpp::Node::SharedPtr& node, const std::v
     const auto constraint_param = "constraints." + constraint_id;
     if (!node->has_parameter(constraint_param + ".type"))
     {
-      RCLCPP_ERROR(LOGGER, "constraint parameter does not specify its type");
+      RCLCPP_ERROR(LOGGER, "constraint parameter \"%s\" does not specify its type", constraint_param.c_str());
       return false;
     }
     std::string constraint_type;
@@ -529,7 +529,7 @@ bool constructConstraints(const rclcpp::Node::SharedPtr& node, const std::string
     return false;
 
   for (auto& constraint_id : constraint_ids)
-    constraint_id.insert(0, constraints_param);
+    constraint_id.insert(0, constraints_param + std::string("."));
 
   return collectConstraints(node, constraint_ids, constraints);
 }
