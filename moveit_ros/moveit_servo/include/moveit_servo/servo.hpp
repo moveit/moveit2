@@ -51,6 +51,7 @@
 #include <pluginlib/class_loader.hpp>
 #include <sensor_msgs/msg/joint_state.hpp>
 #include <tf2_eigen/tf2_eigen.hpp>
+#include <tf2_ros/transform_listener.h>
 #include <variant>
 
 namespace moveit_servo
@@ -119,6 +120,13 @@ public:
 
 private:
   /**
+   * \brief Convert a give twist command to planning frame
+   * @param command The twist command to be converted
+   * @return The transformed twist command
+   */
+  const TwistCommand toPlanningFrame(const TwistCommand& command);
+
+  /**
    * \brief Compute the change in joint position required to follow the received command.
    * @param command The incoming servo command.
    * @return The joint position change required (delta).
@@ -173,6 +181,9 @@ private:
   std::unique_ptr<CollisionMonitor> collision_monitor_;
 
   pluginlib::UniquePtr<online_signal_smoothing::SmoothingBaseClass> smoother_ = nullptr;
+
+  tf2_ros::Buffer transform_buffer_;
+  tf2_ros::TransformListener transform_listener_;
 };
 
 }  // namespace moveit_servo

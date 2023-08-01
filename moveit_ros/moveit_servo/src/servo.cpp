@@ -53,7 +53,11 @@ namespace moveit_servo
 
 Servo::Servo(const rclcpp::Node::SharedPtr& node, std::shared_ptr<const servo::ParamListener> servo_param_listener,
              const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor)
-  : node_(node), servo_param_listener_{ servo_param_listener }, planning_scene_monitor_{ planning_scene_monitor }
+  : node_(node)
+  , servo_param_listener_{ servo_param_listener }
+  , planning_scene_monitor_{ planning_scene_monitor }
+  , transform_buffer_(node_->get_clock())
+  , transform_listener_(transform_buffer_)
 {
   servo_params_ = servo_param_listener_->get_params();
 
@@ -322,7 +326,8 @@ Eigen::VectorXd Servo::jointDeltaFromCommand(const ServoInput& command, moveit::
     }
     else if (expected_type == CommandType::TWIST)
     {
-      delta_result = jointDeltaFromTwist(std::get<TwistCommand>(command), robot_state, servo_params_);
+      const TwistCommand command_in_planning_frame = toPlanningFrame(std::get<TwistCommand>(command));
+      delta_result = jointDeltaFromTwist(command_in_planning_frame, robot_state, servo_params_);
       servo_status_ = delta_result.first;
     }
     else if (expected_type == CommandType::POSE)
@@ -434,6 +439,15 @@ KinematicState Servo::getNextJointState(const ServoInput& command)
   }
 
   return target_state;
+}
+
+const TwistCommand Servo::toPlanningFrame(const TwistCommand& command)
+{
+  const auto command_to_planning_frame =
+      transform_buffer_.lookupTransform(servo_params_.planning_frame, command.frame_id, rclcpp::Time(0));
+  Eigen::VectorXd transformed_twist = command.velocities;
+  tf2::doTransform(transformed_twist, transformed_twist, command_to_planning_frame);
+  return TwistCommand{ servo_params_.planning_frame, transformed_twist };
 }
 
 }  // namespace moveit_servo
