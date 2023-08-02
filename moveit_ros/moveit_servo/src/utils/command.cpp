@@ -52,7 +52,7 @@ JointDeltaResult jointDeltaFromJointJog(const JointJogCommand& command, moveit::
 {
   // Find the target joint position based on the commanded joint velocity
   StatusCode status = StatusCode::NO_WARNING;
-  const auto joint_names = robot_state->getJointModelGroup(servo_params.move_group_name)->getJointModelNames();
+  const auto joint_names = robot_state->getJointModelGroup(servo_params.move_group_name)->getActiveJointModelNames();
   Eigen::VectorXd joint_position_delta(joint_names.size());
   Eigen::VectorXd velocities(joint_names.size());
 
@@ -96,7 +96,8 @@ JointDeltaResult jointDeltaFromTwist(const TwistCommand& command, moveit::core::
                                      servo::Params& servo_params)
 {
   StatusCode status = StatusCode::NO_WARNING;
-  const int num_joints = robot_state->getJointModelGroup(servo_params.move_group_name)->getJointModelNames().size();
+  const int num_joints =
+      robot_state->getJointModelGroup(servo_params.move_group_name)->getActiveJointModelNames().size();
   Eigen::VectorXd joint_position_delta(num_joints);
   Eigen::VectorXd cartesian_position_delta;
 
@@ -154,7 +155,8 @@ JointDeltaResult jointDeltaFromPose(const PoseCommand& command, moveit::core::Ro
                                     servo::Params& servo_params)
 {
   StatusCode status = StatusCode::NO_WARNING;
-  const int num_joints = robot_state->getJointModelGroup(servo_params.move_group_name)->getJointModelNames().size();
+  const int num_joints =
+      robot_state->getJointModelGroup(servo_params.move_group_name)->getActiveJointModelNames().size();
   Eigen::VectorXd joint_position_delta(num_joints);
 
   const bool valid_command = isValidCommand(command);
