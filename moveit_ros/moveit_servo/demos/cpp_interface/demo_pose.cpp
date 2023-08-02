@@ -121,7 +121,8 @@ int main(int argc, char* argv[])
   tracker_thread.detach();
 
   // The target pose (frame being tracked) moves by this step size each iteration.
-  Eigen::Vector3d step_size{ 0.0, 0.0, -0.002 };
+  Eigen::Vector3d linear_step_size{ 0.0, 0.0, -0.002 };
+  Eigen::AngleAxisd angular_step_size(0.01, Eigen::Vector3d::UnitZ());
 
   // Frequency at which commands will be sent to the robot controller.
   rclcpp::WallRate command_rate(50);
@@ -139,9 +140,9 @@ int main(int argc, char* argv[])
       stop_tracking = satisfies_linear_tolerance && satisfies_angular_tolerance;
       // Dynamically update the target pose.
       if (!satisfies_linear_tolerance)
-        target_pose.pose.translate(step_size);
+        target_pose.pose.translate(linear_step_size);
       if (!satisfies_angular_tolerance)
-        target_pose.pose.rotate(Eigen::AngleAxisd(0.01, Eigen::Vector3d::UnitZ()));
+        target_pose.pose.rotate(angular_step_size);
     }
 
     command_rate.sleep();
