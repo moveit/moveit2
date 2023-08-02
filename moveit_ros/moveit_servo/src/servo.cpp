@@ -396,7 +396,7 @@ KinematicState Servo::getNextJointState(const ServoInput& command)
 
   // Continue rest of the computations only if the command is valid
   // The computations can be skipped also in case we are halting.
-  if (servo_status_ != StatusCode::INVALID || servo_status_ != StatusCode::HALT_FOR_COLLISION)
+  if (servo_status_ != StatusCode::INVALID && servo_status_ != StatusCode::HALT_FOR_COLLISION)
   {
     // Apply collision scaling to the joint position delta
     joint_position_delta *= collision_velocity_scale_;
