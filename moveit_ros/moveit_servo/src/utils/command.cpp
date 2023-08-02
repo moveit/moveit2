@@ -85,9 +85,13 @@ JointDeltaResult jointDeltaFromJointJog(const JointJogCommand& command, moveit::
   {
     status = StatusCode::INVALID;
     if (!names_valid)
-      RCLCPP_WARN_STREAM(LOGGER, "Invalid joint names in jointjog command");
+    {
+      RCLCPP_WARN_STREAM(LOGGER, "Invalid joint names in joint jog command");
+    }
     if (!velocity_valid)
-      RCLCPP_WARN_STREAM(LOGGER, "Invalid velocity values in jointjog command");
+    {
+      RCLCPP_WARN_STREAM(LOGGER, "Invalid velocity values in joint jog command");
+    }
   }
   return std::make_pair(status, joint_position_delta);
 }
