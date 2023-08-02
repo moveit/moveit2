@@ -75,8 +75,8 @@ public:
   }
 
   bool adaptAndPlan(const PlannerFn& planner, const planning_scene::PlanningSceneConstPtr& planning_scene,
-                    const planning_interface::MotionPlanRequest& req, planning_interface::MotionPlanResponse& res,
-                    std::vector<std::size_t>& added_path_index) const override
+                    const planning_interface::MotionPlanRequest& req,
+                    planning_interface::MotionPlanResponse& res) const override
   {
     RCLCPP_DEBUG(LOGGER, "Running '%s'", getDescription().c_str());
 
@@ -197,9 +197,11 @@ public:
                                                                   res.trajectory->getAverageSegmentDuration()));
       res.trajectory->addPrefixWayPoint(prefix_state, 0.0);
       // we add a prefix point, so we need to bump any previously added index positions
-      for (std::size_t& added_index : added_path_index)
+      for (std::size_t& added_index : res.added_path_index)
+      {
         added_index++;
-      added_path_index.push_back(0);
+      }
+      res.added_path_index.push_back(0);
     }
 
     return solved;
