@@ -185,37 +185,34 @@ void ServoNode::poseCallback(const geometry_msgs::msg::PoseStamped::SharedPtr ms
   new_pose_msg_ = true;
 }
 
-std::optional<KinematicState> ServoNode::processJointJogCommand()
+KinematicState ServoNode::processJointJogCommand()
 {
-  std::optional<KinematicState> next_joint_state = std::nullopt;
-
-  // Mark latest jointjog command as processed.
+  KinematicState next_joint_state;
   // Reject any other command types that had arrived simultaneously.
-  new_joint_jog_msg_ = new_twist_msg_ = new_pose_msg_ = false;
+  new_twist_msg_ = new_pose_msg_ = false;
 
   const bool command_stale = (node_->now() - latest_joint_jog_.header.stamp) >=
                              rclcpp::Duration::from_seconds(servo_params_.incoming_command_timeout);
   if (!command_stale)
   {
-    // JointJogCommand is an alias for VectorXd, so we can directly make a map and pass it.
     JointJogCommand command{ latest_joint_jog_.joint_names, latest_joint_jog_.velocities };
     next_joint_state = servo_->getNextJointState(command);
   }
   else
   {
-    RCLCPP_WARN(LOGGER, "JointJog command is stale, will not process.");
+    next_joint_state = servo_->smoothHalt(last_commanded_state_);
   }
 
   return next_joint_state;
 }
 
-std::optional<KinematicState> ServoNode::processTwistCommand()
+KinematicState ServoNode::processTwistCommand()
 {
-  std::optional<KinematicState> next_joint_state = std::nullopt;
+  KinematicState next_joint_state;
 
   // Mark latest twist command as processed.
   // Reject any other command types that had arrived simultaneously.
-  new_joint_jog_msg_ = new_twist_msg_ = new_pose_msg_ = false;
+  new_joint_jog_msg_ = new_pose_msg_ = false;
 
   const bool command_stale = (node_->now() - latest_twist_.header.stamp) >=
                              rclcpp::Duration::from_seconds(servo_params_.incoming_command_timeout);
@@ -229,19 +226,19 @@ std::optional<KinematicState> ServoNode::processTwistCommand()
   }
   else
   {
-    RCLCPP_WARN(LOGGER, "Twist command is stale, will not process.");
+    next_joint_state = servo_->smoothHalt(last_commanded_state_);
   }
 
   return next_joint_state;
 }
 
-std::optional<KinematicState> ServoNode::processPoseCommand()
+KinematicState ServoNode::processPoseCommand()
 {
-  std::optional<KinematicState> next_joint_state = std::nullopt;
+  KinematicState next_joint_state;
 
   // Mark latest pose command as processed.
   // Reject any other command types that had arrived simultaneously.
-  new_joint_jog_msg_ = new_twist_msg_ = new_pose_msg_ = false;
+  new_joint_jog_msg_ = new_twist_msg_ = false;
 
   const bool command_stale = (node_->now() - latest_pose_.header.stamp) >=
                              rclcpp::Duration::from_seconds(servo_params_.incoming_command_timeout);
@@ -252,7 +249,7 @@ std::optional<KinematicState> ServoNode::processPoseCommand()
   }
   else
   {
-    RCLCPP_WARN(LOGGER, "Pose command is stale, will not process.");
+    next_joint_state = servo_->smoothHalt(last_commanded_state_);
   }
 
   return next_joint_state;
@@ -261,8 +258,16 @@ std::optional<KinematicState> ServoNode::processPoseCommand()
 void ServoNode::servoLoop()
 {
   moveit_msgs::msg::ServoStatus status_msg;
-  std::optional<KinematicState> next_joint_state;
+  KinematicState next_joint_state;
   rclcpp::WallRate servo_frequency(1 / servo_params_.publish_period);
+
+  // Initialize the kinematicState
+  {
+    auto state = servo_->getCurrentRobotState();
+    std::fill(state.velocities.begin(), state.velocities.end(), 0.0);
+    std::fill(state.accelerations.begin(), state.accelerations.end(), 0.0);
+    next_joint_state = state;
+  }
 
   while (rclcpp::ok() && !stop_servo_)
   {
@@ -270,7 +275,6 @@ void ServoNode::servoLoop()
     if (servo_paused_)
       continue;
 
-    next_joint_state = std::nullopt;
     const CommandType expectedType = servo_->getCommandType();
 
     if (expectedType == CommandType::JOINT_JOG && new_joint_jog_msg_)
@@ -291,20 +295,21 @@ void ServoNode::servoLoop()
       RCLCPP_WARN_STREAM(LOGGER, "Command type has not been set, cannot accept input");
     }
 
-    if (next_joint_state && (servo_->getStatus() != StatusCode::INVALID))
+    if ((servo_->getStatus() != StatusCode::INVALID))
     {
       if (servo_params_.command_out_type == "trajectory_msgs/JointTrajectory")
-        trajectory_publisher_->publish(composeTrajectoryMessage(servo_->getParams(), next_joint_state.value()));
+        trajectory_publisher_->publish(composeTrajectoryMessage(servo_->getParams(), next_joint_state));
       else if (servo_params_.command_out_type == "std_msgs/Float64MultiArray")
-        multi_array_publisher_->publish(composeMultiArrayMessage(servo_->getParams(), next_joint_state.value()));
+        multi_array_publisher_->publish(composeMultiArrayMessage(servo_->getParams(), next_joint_state));
+      last_commanded_state_ = next_joint_state;
     }
 
     status_msg.code = static_cast<int8_t>(servo_->getStatus());
     status_msg.message = servo_->getStatusMessage();
     status_publisher_->publish(status_msg);
-  }
 
-  servo_frequency.sleep();
+    servo_frequency.sleep();
+  }
 }
 
 }  // namespace moveit_servo
