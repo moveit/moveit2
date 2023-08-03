@@ -15,7 +15,7 @@ ament_target_dependencies(moveit_planning_scene_monitor
   urdf
   pluginlib
   rclcpp
-  Boost
+  fmt
   moveit_msgs
 )
 target_link_libraries(moveit_planning_scene_monitor
@@ -27,7 +27,7 @@ add_executable(demo_scene demos/demo_scene.cpp)
 ament_target_dependencies(demo_scene
   PUBLIC
   rclcpp
-  Boost
+  fmt
   moveit_msgs
   urdf
   message_filters
