@@ -76,10 +76,7 @@ TEST_F(ServoRosFixture, testJointJog)
   auto response = switch_input_client_->async_send_request(request);
   ASSERT_EQ(response.get()->success, true);
 
-  if (state_count_ > 0)
-    RCLCPP_INFO_STREAM(servo_test_node_->get_logger(), "State available");
-  else
-    RCLCPP_INFO_STREAM(servo_test_node_->get_logger(), "state not available");
+  ASSERT_NE(state_count_, 0);
 
   sensor_msgs::msg::JointState prev_state, curr_state;
   {
@@ -130,10 +127,7 @@ TEST_F(ServoRosFixture, testTwist)
   auto response = switch_input_client_->async_send_request(request);
   ASSERT_EQ(response.get()->success, true);
 
-  if (state_count_ > 0)
-    RCLCPP_INFO_STREAM(servo_test_node_->get_logger(), "State available");
-  else
-    RCLCPP_INFO_STREAM(servo_test_node_->get_logger(), "state not available");
+  ASSERT_NE(state_count_, 0);
 
   sensor_msgs::msg::JointState prev_state, curr_state;
   {
@@ -193,10 +187,7 @@ TEST_F(ServoRosFixture, testPose)
   pose_cmd.pose.orientation.y = 0.0;
   pose_cmd.pose.orientation.z = 0.0;
 
-  if (state_count_ > 0)
-    RCLCPP_INFO_STREAM(servo_test_node_->get_logger(), "State available");
-  else
-    RCLCPP_INFO_STREAM(servo_test_node_->get_logger(), "state not available");
+  ASSERT_NE(state_count_, 0);
 
   sensor_msgs::msg::JointState prev_state, curr_state;
   {

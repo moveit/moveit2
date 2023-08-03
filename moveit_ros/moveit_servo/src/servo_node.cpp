@@ -298,9 +298,13 @@ void ServoNode::servoLoop()
     if ((servo_->getStatus() != StatusCode::INVALID))
     {
       if (servo_params_.command_out_type == "trajectory_msgs/JointTrajectory")
+      {
         trajectory_publisher_->publish(composeTrajectoryMessage(servo_->getParams(), next_joint_state));
+      }
       else if (servo_params_.command_out_type == "std_msgs/Float64MultiArray")
+      {
         multi_array_publisher_->publish(composeMultiArrayMessage(servo_->getParams(), next_joint_state));
+      }
       last_commanded_state_ = next_joint_state;
     }
 
