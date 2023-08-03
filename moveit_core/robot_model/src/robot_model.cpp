@@ -412,7 +412,7 @@ void RobotModel::buildMimic(const urdf::ModelInterface& urdf_model)
           }
           else
           {
-            RCLCPP_ERROR(LOGGER, "Join '%s' cannot mimic joint '%s' because they have different number of DOF",
+            RCLCPP_ERROR(LOGGER, "Joint '%s' cannot mimic joint '%s' because they have different number of DOF",
                          joint_model->getName().c_str(), jm->mimic->joint_name.c_str());
           }
         }
