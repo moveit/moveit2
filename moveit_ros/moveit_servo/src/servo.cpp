@@ -327,16 +327,33 @@ Eigen::VectorXd Servo::jointDeltaFromCommand(const ServoInput& command, moveit::
     }
     else if (expected_type == CommandType::TWIST)
     {
-      const TwistCommand command_in_planning_frame = toPlanningFrame(std::get<TwistCommand>(command));
-      delta_result = jointDeltaFromTwist(command_in_planning_frame, robot_state, servo_params_);
-      servo_status_ = delta_result.first;
+      try
+      {
+        const TwistCommand command_in_planning_frame = toPlanningFrame(std::get<TwistCommand>(command));
+        delta_result = jointDeltaFromTwist(command_in_planning_frame, robot_state, servo_params_);
+        servo_status_ = delta_result.first;
+      }
+      catch (tf2::TransformException& ex)
+      {
+        servo_status_ = StatusCode::INVALID;
+        RCLCPP_ERROR_STREAM(LOGGER, "Could not transform twist to planning frame.");
+      }
     }
     else if (expected_type == CommandType::POSE)
     {
-      const PoseCommand command_in_planning_frame = toPlanningFrame(std::get<PoseCommand>(command));
-      delta_result = jointDeltaFromPose(command_in_planning_frame, robot_state, servo_params_);
-      servo_status_ = delta_result.first;
+      try
+      {
+        const PoseCommand command_in_planning_frame = toPlanningFrame(std::get<PoseCommand>(command));
+        delta_result = jointDeltaFromPose(command_in_planning_frame, robot_state, servo_params_);
+        servo_status_ = delta_result.first;
+      }
+      catch (tf2::TransformException& ex)
+      {
+        servo_status_ = StatusCode::INVALID;
+        RCLCPP_ERROR_STREAM(LOGGER, "Could not transform pose to planning frame.");
+      }
     }
+
     if (servo_status_ != StatusCode::INVALID)
     {
       joint_position_deltas = delta_result.second;

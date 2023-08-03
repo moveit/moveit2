@@ -134,8 +134,10 @@ public:
 private:
   /**
    * \brief Convert a give twist command to planning frame
+   * (This implementation assumes that source and target frames are stationary)
+   * See issue: https://github.com/ros-planning/moveit2/issues/2150
    * @param command The twist command to be converted
-   * @return The transformed twist command
+   * @return The transformed twist command.
    */
   const TwistCommand toPlanningFrame(const TwistCommand& command);
 
