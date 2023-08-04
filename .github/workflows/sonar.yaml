@@ -107,7 +107,7 @@ jobs:
         run: cat ${{ github.workspace }}/.work/target_ws/coverage.info
       - name: Install sonar-scanner
         if: steps.ici.outputs.target_test_results == '0'
-        uses: SonarSource/sonarcloud-github-c-cpp@v1
+        uses: SonarSource/sonarcloud-github-c-cpp@v2
       - name: Run sonar-scanner
         if: steps.ici.outputs.target_test_results == '0'
         env:
