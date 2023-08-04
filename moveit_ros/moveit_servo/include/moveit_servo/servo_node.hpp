@@ -96,9 +96,9 @@ private:
   void twistCallback(const geometry_msgs::msg::TwistStamped::SharedPtr msg);
   void poseCallback(const geometry_msgs::msg::PoseStamped::SharedPtr msg);
 
-  KinematicState processJointJogCommand();
-  KinematicState processTwistCommand();
-  KinematicState processPoseCommand();
+  std::optional<KinematicState> processJointJogCommand();
+  std::optional<KinematicState> processTwistCommand();
+  std::optional<KinematicState> processPoseCommand();
 
   // Variables
 
@@ -107,7 +107,6 @@ private:
   servo::Params servo_params_;
   planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor_;
 
-  KinematicState last_commanded_state_;  // Used when commands go stale;
   control_msgs::msg::JointJog latest_joint_jog_;
   geometry_msgs::msg::TwistStamped latest_twist_;
   geometry_msgs::msg::PoseStamped latest_pose_;

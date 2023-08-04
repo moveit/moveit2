@@ -478,42 +478,4 @@ const PoseCommand Servo::toPlanningFrame(const PoseCommand& command)
   return PoseCommand{ servo_params_.planning_frame, tf2::transformToEigen(target_pose_msg) };
 }
 
-KinematicState Servo::getCurrentRobotState()
-{
-  moveit::core::RobotStatePtr robot_state = planning_scene_monitor_->getStateMonitor()->getCurrentState();
-  const moveit::core::JointModelGroup* joint_model_group =
-      robot_state->getJointModelGroup(servo_params_.move_group_name);
-  const auto joint_names = joint_model_group->getActiveJointModelNames();
-
-  KinematicState current_state(joint_names.size());
-  current_state.joint_names = joint_names;
-  robot_state->copyJointGroupPositions(joint_model_group, current_state.positions);
-  robot_state->copyJointGroupVelocities(joint_model_group, current_state.velocities);
-  robot_state->copyJointGroupAccelerations(joint_model_group, current_state.accelerations);
-
-  return current_state;
-}
-
-KinematicState Servo::smoothHalt(KinematicState halt_state)
-{
-  const auto current_state = getCurrentRobotState();
-
-  const size_t num_joints = current_state.joint_names.size();
-  for (size_t i = 0; i < num_joints; i++)
-  {
-    const double vel = (halt_state.positions[i] - current_state.positions[i]) / servo_params_.publish_period;
-    halt_state.velocities[i] = (vel > STOPPED_VELOCITY_EPS) ? vel : 0.0;
-    halt_state.accelerations[i] =
-        (halt_state.velocities[i] - current_state.velocities[i]) / servo_params_.publish_period;
-  }
-
-  if (smoother_)
-  {
-    smoother_->reset(current_state.positions);
-    smoother_->doSmoothing(halt_state.positions);
-  }
-
-  return halt_state;
-}
-
 }  // namespace moveit_servo
