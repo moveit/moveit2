@@ -249,15 +249,6 @@ bool planning_pipeline::PlanningPipeline::generatePlan(const planning_scene::Pla
                                                        const planning_interface::MotionPlanRequest& req,
                                                        planning_interface::MotionPlanResponse& res) const
 {
-  std::vector<std::size_t> dummy;
-  return generatePlan(planning_scene, req, res, dummy);
-}
-
-bool planning_pipeline::PlanningPipeline::generatePlan(const planning_scene::PlanningSceneConstPtr& planning_scene,
-                                                       const planning_interface::MotionPlanRequest& req,
-                                                       planning_interface::MotionPlanResponse& res,
-                                                       std::vector<std::size_t>& adapter_added_state_index) const
-{
   // Set planning pipeline active
   active_ = true;
 
@@ -266,7 +257,6 @@ bool planning_pipeline::PlanningPipeline::generatePlan(const planning_scene::Pla
   {
     received_request_publisher_->publish(req);
   }
-  adapter_added_state_index.clear();
 
   if (!planner_instance_)
   {
@@ -282,11 +272,11 @@ bool planning_pipeline::PlanningPipeline::generatePlan(const planning_scene::Pla
   {
     if (adapter_chain_)
     {
-      solved = adapter_chain_->adaptAndPlan(planner_instance_, planning_scene, req, res, adapter_added_state_index);
-      if (!adapter_added_state_index.empty())
+      solved = adapter_chain_->adaptAndPlan(planner_instance_, planning_scene, req, res);
+      if (!res.added_path_index.empty())
       {
         std::stringstream ss;
-        for (std::size_t added_index : adapter_added_state_index)
+        for (std::size_t added_index : res.added_path_index)
           ss << added_index << ' ';
         RCLCPP_INFO(LOGGER, "Planning adapters have added states at index positions: [ %s]", ss.str().c_str());
       }
@@ -328,7 +318,7 @@ bool planning_pipeline::PlanningPipeline::generatePlan(const planning_scene::Pla
         for (std::size_t i = 0; i < index.size() && !problem; ++i)
         {
           bool found = false;
-          for (std::size_t added_index : adapter_added_state_index)
+          for (std::size_t added_index : res.added_path_index)
           {
             if (index[i] == added_index)
             {
