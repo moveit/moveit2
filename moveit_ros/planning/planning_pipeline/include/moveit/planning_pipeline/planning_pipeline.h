@@ -111,19 +111,19 @@ public:
   void checkSolutionPaths(bool flag);
 
   /** \brief Get the flag set by displayComputedMotionPlans() */
-  bool getDisplayComputedMotionPlans() const
+  [[nodiscard]] bool getDisplayComputedMotionPlans() const
   {
     return display_computed_motion_plans_;
   }
 
   /** \brief Get the flag set by publishReceivedRequests() */
-  bool getPublishReceivedRequests() const
+  [[nodiscard]] bool getPublishReceivedRequests() const
   {
     return publish_received_requests_;
   }
 
   /** \brief Get the flag set by checkSolutionPaths() */
-  bool getCheckSolutionPaths() const
+  [[nodiscard]] bool getCheckSolutionPaths() const
   {
     return check_solution_paths_;
   }
@@ -132,33 +132,33 @@ public:
       \param planning_scene The planning scene where motion planning is to be done
       \param req The request for motion planning
       \param res The motion planning response */
-  bool generatePlan(const planning_scene::PlanningSceneConstPtr& planning_scene,
-                    const planning_interface::MotionPlanRequest& req,
-                    planning_interface::MotionPlanResponse& res) const;
+  [[nodiscard]] bool generatePlan(const planning_scene::PlanningSceneConstPtr& planning_scene,
+                                  const planning_interface::MotionPlanRequest& req,
+                                  planning_interface::MotionPlanResponse& res) const;
 
   /** \brief Request termination, if a generatePlan() function is currently computing plans */
   void terminate() const;
 
   /** \brief Get the name of the planning plugin used */
-  const std::string& getPlannerPluginName() const
+  [[nodiscard]] const std::string& getPlannerPluginName() const
   {
     return planner_plugin_name_;
   }
 
   /** \brief Get the names of the planning request adapter plugins used */
-  const std::vector<std::string>& getAdapterPluginNames() const
+  [[nodiscard]] const std::vector<std::string>& getAdapterPluginNames() const
   {
     return adapter_plugin_names_;
   }
 
   /** \brief Get the planner manager for the loaded planning plugin */
-  const planning_interface::PlannerManagerPtr& getPlannerManager()
+  [[nodiscard]] const planning_interface::PlannerManagerPtr& getPlannerManager()
   {
     return planner_instance_;
   }
 
   /** \brief Get the robot model that this pipeline is using */
-  const moveit::core::RobotModelConstPtr& getRobotModel() const
+  [[nodiscard]] const moveit::core::RobotModelConstPtr& getRobotModel() const
   {
     return robot_model_;
   }
@@ -197,7 +197,7 @@ private:
   moveit::core::RobotModelConstPtr robot_model_;
 
   /// Flag indicating whether the reported plans should be checked once again, by the planning pipeline itself
-  bool check_solution_paths_;
+  bool check_solution_paths_;  // TODO(sjahr) Remove
   rclcpp::Publisher<visualization_msgs::msg::MarkerArray>::SharedPtr contacts_publisher_;
 };
 
