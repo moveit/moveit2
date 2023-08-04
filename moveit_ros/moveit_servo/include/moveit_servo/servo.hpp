@@ -118,6 +118,19 @@ public:
    */
   servo::Params& getParams();
 
+  /**
+   * \brief Get the current state of the robot as given by planning scene monitor.
+   * @return The current state of the robot.
+   */
+  KinematicState getCurrentRobotState();
+
+  /**
+   * \brief Smoothly halt at a commanded state when command goes stale.
+   * @param The last commanded joint states.
+   * @return The next state stepping towards the required halting state.
+   */
+  std::pair<bool, KinematicState> smoothHalt(KinematicState halt_state);
+
 private:
   /**
    * \brief Convert a give twist command to planning frame

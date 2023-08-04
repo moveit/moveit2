@@ -200,8 +200,16 @@ std::optional<KinematicState> ServoNode::processJointJogCommand()
   }
   else
   {
-    new_joint_jog_msg_ = false;
-    RCLCPP_INFO_STREAM(LOGGER, "Joint jog command timed out.");
+    auto result = servo_->smoothHalt(last_commanded_state_);
+    new_joint_jog_msg_ = result.first;
+    if (new_joint_jog_msg_)
+    {
+      next_joint_state = result.second;
+    }
+    else
+    {
+      RCLCPP_INFO_STREAM(LOGGER, "Joint jog command timed out, will not publish outgoing commands.");
+    }
   }
 
   return next_joint_state;
@@ -227,8 +235,16 @@ std::optional<KinematicState> ServoNode::processTwistCommand()
   }
   else
   {
-    new_twist_msg_ = false;
-    RCLCPP_INFO_STREAM(LOGGER, "Twist command timed out.");
+    auto result = servo_->smoothHalt(last_commanded_state_);
+    new_twist_msg_ = result.first;
+    if (new_twist_msg_)
+    {
+      next_joint_state = result.second;
+    }
+    else
+    {
+      RCLCPP_INFO_STREAM(LOGGER, "Twist command timed out, will not publish outgoing commands.");
+    }
   }
 
   return next_joint_state;
@@ -251,8 +267,16 @@ std::optional<KinematicState> ServoNode::processPoseCommand()
   }
   else
   {
-    new_pose_msg_ = false;
-    RCLCPP_INFO_STREAM(LOGGER, "Pose command timed out.");
+    auto result = servo_->smoothHalt(last_commanded_state_);
+    new_pose_msg_ = result.first;
+    if (new_pose_msg_)
+    {
+      next_joint_state = result.second;
+    }
+    else
+    {
+      RCLCPP_INFO_STREAM(LOGGER, "Pose command timed out, will not publish outgoing commands.");
+    }
   }
 
   return next_joint_state;
@@ -301,6 +325,7 @@ void ServoNode::servoLoop()
       {
         multi_array_publisher_->publish(composeMultiArrayMessage(servo_->getParams(), next_joint_state.value()));
       }
+      last_commanded_state_ = next_joint_state.value();
     }
 
     status_msg.code = static_cast<int8_t>(servo_->getStatus());
