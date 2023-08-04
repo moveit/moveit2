@@ -96,7 +96,25 @@ protected:
     RCLCPP_INFO(logger, "SERVICE READY");
   }
 
-  ServoRosFixture()
+  void waitForStatus()
+  {
+    auto logger = servo_test_node_->get_logger();
+    auto wait_timeout = rclcpp::Duration::from_seconds(5);
+    auto start_time = servo_test_node_->now();
+
+    while (rclcpp::ok() && state_count_ == 0)
+    {
+      rclcpp::sleep_for(std::chrono::milliseconds(500));
+      auto elapsed_time = servo_test_node_->now() - start_time;
+      if (elapsed_time >= wait_timeout)
+      {
+        RCLCPP_ERROR(logger, "Timed out waiting for joint states");
+        FAIL();
+      }
+    }
+  }
+
+  ServoRosFixture() : state_count_{ 0 }
   {
     // Create a node to be given to Servo.
     servo_test_node_ = std::make_shared<rclcpp::Node>("moveit_servo_test");
@@ -114,6 +132,7 @@ protected:
         servo_test_node_->create_client<moveit_msgs::srv::ServoCommandType>("/servo_node/switch_command_type");
 
     waitForService();
+    waitForStatus();
   }
 
   std::shared_ptr<rclcpp::Node> servo_test_node_;
