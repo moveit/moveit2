@@ -120,16 +120,16 @@ ServoCalcs::ServoCalcs(const rclcpp::Node::SharedPtr& node,
   // Publish status
   status_pub_ = node_->create_publisher<std_msgs::msg::Int8>(servo_params_.status_topic, rclcpp::SystemDefaultsQoS());
 
-  current_joint_state_.name = joint_model_group_->getActiveJointModelNames();
-  num_joints_ = current_joint_state_.name.size();
-  current_joint_state_.position.resize(num_joints_);
-  current_joint_state_.velocity.resize(num_joints_);
+  internal_joint_state_.name = joint_model_group_->getActiveJointModelNames();
+  num_joints_ = internal_joint_state_.name.size();
+  internal_joint_state_.position.resize(num_joints_);
+  internal_joint_state_.velocity.resize(num_joints_);
   delta_theta_.setZero(num_joints_);
 
   for (std::size_t i = 0; i < num_joints_; ++i)
   {
     // A map for the indices of incoming joint commands
-    joint_state_name_map_[current_joint_state_.name[i]] = i;
+    joint_state_name_map_[internal_joint_state_.name[i]] = i;
   }
 
   // Load the smoothing plugin
@@ -190,7 +190,7 @@ void ServoCalcs::start()
   auto initial_joint_trajectory = std::make_unique<trajectory_msgs::msg::JointTrajectory>();
   initial_joint_trajectory->header.stamp = node_->now();
   initial_joint_trajectory->header.frame_id = servo_params_.planning_frame;
-  initial_joint_trajectory->joint_names = current_joint_state_.name;
+  initial_joint_trajectory->joint_names = internal_joint_state_.name;
   trajectory_msgs::msg::JointTrajectoryPoint point;
   point.time_from_start = rclcpp::Duration::from_seconds(servo_params_.publish_period);
   if (servo_params_.publish_joint_positions)
@@ -214,10 +214,10 @@ void ServoCalcs::start()
   last_sent_command_ = std::move(initial_joint_trajectory);
 
   current_state_ = planning_scene_monitor_->getStateMonitor()->getCurrentState();
-  current_state_->copyJointGroupPositions(joint_model_group_, current_joint_state_.position);
-  current_state_->copyJointGroupVelocities(joint_model_group_, current_joint_state_.velocity);
-  // set previous state to same as current state for t = 0
-  previous_joint_state_ = current_joint_state_;
+  current_state_->copyJointGroupPositions(joint_model_group_, internal_joint_state_.position);
+  current_state_->copyJointGroupVelocities(joint_model_group_, internal_joint_state_.velocity);
+  // set previous state to same as internal state for t = 0
+  previous_joint_state_ = internal_joint_state_;
 
   // Check that all links are known to the robot
   auto check_link_is_known = [this](const std::string& frame_name) {
@@ -236,7 +236,7 @@ void ServoCalcs::start()
                                   current_state_->getGlobalLinkTransform(servo_params_.robot_link_command_frame);
 
   // Always reset the low-pass filters when first starting servo
-  resetLowPassFilters(current_joint_state_);
+  resetLowPassFilters(internal_joint_state_);
 
   stop_requested_ = false;
   thread_ = std::thread([this] {
@@ -371,13 +371,8 @@ void ServoCalcs::calculateSingleIteration()
   // 2) so the low-pass filters are up to date and don't cause a jump
   // Get the latest joint group positions
   current_state_ = planning_scene_monitor_->getStateMonitor()->getCurrentState();
-  current_state_->copyJointGroupPositions(joint_model_group_, current_joint_state_.position);
-  current_state_->copyJointGroupVelocities(joint_model_group_, current_joint_state_.velocity);
-
-  // copy current state to temp state to use for calculating next state
-  // This is done so that current_joint_state_ is preserved and can be used as backup.
-  // All computations related to computing state q(t + dt) acts only on next_joint_state_ variable.
-  next_joint_state_ = current_joint_state_;
+  current_state_->copyJointGroupPositions(joint_model_group_, internal_joint_state_.position);
+  current_state_->copyJointGroupVelocities(joint_model_group_, internal_joint_state_.velocity);
 
   if (latest_twist_stamped_)
     twist_stamped_cmd_ = *latest_twist_stamped_;
@@ -409,7 +404,7 @@ void ServoCalcs::calculateSingleIteration()
   // joints so a jump doesn't occur when restarting
   if (wait_for_servo_commands_)
   {
-    resetLowPassFilters(current_joint_state_);
+    resetLowPassFilters(internal_joint_state_);
 
     // Check if there are any new commands with valid timestamp
     wait_for_servo_commands_ =
@@ -430,7 +425,7 @@ void ServoCalcs::calculateSingleIteration()
   {
     if (!cartesianServoCalcs(twist_stamped_cmd_, *joint_trajectory))
     {
-      resetLowPassFilters(current_joint_state_);
+      resetLowPassFilters(internal_joint_state_);
       return;
     }
   }
@@ -438,7 +433,7 @@ void ServoCalcs::calculateSingleIteration()
   {
     if (!jointServoCalcs(joint_servo_cmd_, *joint_trajectory))
     {
-      resetLowPassFilters(current_joint_state_);
+      resetLowPassFilters(internal_joint_state_);
       return;
     }
   }
@@ -494,7 +489,7 @@ void ServoCalcs::calculateSingleIteration()
 
   // Update the filters if we haven't yet
   if (!updated_filters_)
-    resetLowPassFilters(current_joint_state_);
+    resetLowPassFilters(internal_joint_state_);
 }
 
 // Perform the servoing calculations
@@ -542,13 +537,13 @@ bool ServoCalcs::cartesianServoCalcs(geometry_msgs::msg::TwistStamped& cmd,
     moveit_msgs::msg::MoveItErrorCodes err;
     kinematics::KinematicsQueryOptions opts;
     opts.return_approximate_solution = true;
-    if (ik_solver_->searchPositionIK(next_pose, current_joint_state_.position, servo_params_.publish_period / 2.0,
+    if (ik_solver_->searchPositionIK(next_pose, internal_joint_state_.position, servo_params_.publish_period / 2.0,
                                      solution, err, opts))
     {
       // find the difference in joint positions that will get us to the desired pose
       for (size_t i = 0; i < num_joints_; ++i)
       {
-        delta_theta_.coeffRef(i) = solution.at(i) - current_joint_state_.position.at(i);
+        delta_theta_.coeffRef(i) = solution.at(i) - internal_joint_state_.position.at(i);
       }
     }
     else
@@ -620,7 +615,8 @@ bool ServoCalcs::internalServoUpdate(Eigen::ArrayXd& delta_theta,
   delta_theta *= collision_scale;
 
   // Loop through joints and update them, calculate velocities, and filter
-  if (!applyJointUpdate(servo_params_.publish_period, delta_theta, previous_joint_state_, next_joint_state_, smoother_))
+  if (!applyJointUpdate(servo_params_.publish_period, delta_theta, previous_joint_state_, internal_joint_state_,
+                        smoother_))
   {
     RCLCPP_ERROR_STREAM_THROTTLE(LOGGER, *node_->get_clock(), ROS_LOG_THROTTLE_PERIOD,
                                  "Lengths of output and increments do not match.");
@@ -631,12 +627,12 @@ bool ServoCalcs::internalServoUpdate(Eigen::ArrayXd& delta_theta,
   updated_filters_ = true;
 
   // Enforce SRDF velocity limits
-  enforceVelocityLimits(joint_model_group_, servo_params_.publish_period, next_joint_state_,
+  enforceVelocityLimits(joint_model_group_, servo_params_.publish_period, internal_joint_state_,
                         servo_params_.override_velocity_scaling_factor);
 
   // Enforce SRDF position limits, might halt if needed, set prev_vel to 0
   const auto joints_to_halt =
-      enforcePositionLimits(next_joint_state_, servo_params_.joint_limit_margin, joint_model_group_);
+      enforcePositionLimits(internal_joint_state_, servo_params_.joint_limit_margin, joint_model_group_);
 
   if (!joints_to_halt.empty())
   {
@@ -651,18 +647,18 @@ bool ServoCalcs::internalServoUpdate(Eigen::ArrayXd& delta_theta,
     if ((servo_type == ServoType::JOINT_SPACE && !servo_params_.halt_all_joints_in_joint_mode) ||
         (servo_type == ServoType::CARTESIAN_SPACE && !servo_params_.halt_all_joints_in_cartesian_mode))
     {
-      suddenHalt(next_joint_state_, joints_to_halt);
+      suddenHalt(internal_joint_state_, joints_to_halt);
     }
     else
     {
-      suddenHalt(next_joint_state_, joint_model_group_->getActiveJointModels());
+      suddenHalt(internal_joint_state_, joint_model_group_->getActiveJointModels());
     }
   }
 
   // compose outgoing message
-  composeJointTrajMessage(next_joint_state_, joint_trajectory);
+  composeJointTrajMessage(internal_joint_state_, joint_trajectory);
 
-  previous_joint_state_ = current_joint_state_;
+  previous_joint_state_ = internal_joint_state_;
   return true;
 }
 
@@ -706,12 +702,12 @@ void ServoCalcs::filteredHalt(trajectory_msgs::msg::JointTrajectory& joint_traje
   joint_trajectory.joint_names = joint_model_group_->getActiveJointModelNames();
 
   // Deceleration algorithm:
-  // Set positions to current_joint_state_
+  // Set positions to internal_joint_state_
   // Filter
   // Calculate velocities
   // Check if velocities are close to zero. Round to zero, if so.
-  assert(current_joint_state_.position.size() >= num_joints_);
-  joint_trajectory.points[0].positions = current_joint_state_.position;
+  assert(internal_joint_state_.position.size() >= num_joints_);
+  joint_trajectory.points[0].positions = internal_joint_state_.position;
   smoother_->doSmoothing(joint_trajectory.points[0].positions);
   bool done_stopping = true;
   if (servo_params_.publish_joint_velocities)
@@ -720,7 +716,7 @@ void ServoCalcs::filteredHalt(trajectory_msgs::msg::JointTrajectory& joint_traje
     for (std::size_t i = 0; i < num_joints_; ++i)
     {
       joint_trajectory.points[0].velocities.at(i) =
-          (joint_trajectory.points[0].positions.at(i) - current_joint_state_.position.at(i)) /
+          (joint_trajectory.points[0].positions.at(i) - internal_joint_state_.position.at(i)) /
           servo_params_.publish_period;
       // If velocity is very close to zero, round to zero
       if (joint_trajectory.points[0].velocities.at(i) > STOPPED_VELOCITY_EPS)
@@ -741,7 +737,7 @@ void ServoCalcs::filteredHalt(trajectory_msgs::msg::JointTrajectory& joint_traje
     for (std::size_t i = 0; i < num_joints_; ++i)
     {
       joint_trajectory.points[0].accelerations.at(i) =
-          (joint_trajectory.points[0].velocities.at(i) - current_joint_state_.velocity.at(i)) /
+          (joint_trajectory.points[0].velocities.at(i) - internal_joint_state_.velocity.at(i)) /
           servo_params_.publish_period;
     }
   }
@@ -759,7 +755,7 @@ void ServoCalcs::suddenHalt(sensor_msgs::msg::JointState& joint_state,
     if (joint_it != joint_state.name.cend())
     {
       const auto joint_index = std::distance(joint_state.name.cbegin(), joint_it);
-      joint_state.position.at(joint_index) = current_joint_state_.position.at(joint_index);
+      joint_state.position.at(joint_index) = previous_joint_state_.position.at(joint_index);
       joint_state.velocity.at(joint_index) = 0.0;
     }
   }
@@ -825,12 +821,12 @@ Eigen::VectorXd ServoCalcs::scaleCartesianCommand(const geometry_msgs::msg::Twis
   // Apply user-defined scaling if inputs are unitless [-1:1]
   if (servo_params_.command_in_type == "unitless")
   {
-    result[0] = servo_params_.linear_scale * servo_params_.publish_period * command.twist.linear.x;
-    result[1] = servo_params_.linear_scale * servo_params_.publish_period * command.twist.linear.y;
-    result[2] = servo_params_.linear_scale * servo_params_.publish_period * command.twist.linear.z;
-    result[3] = servo_params_.rotational_scale * servo_params_.publish_period * command.twist.angular.x;
-    result[4] = servo_params_.rotational_scale * servo_params_.publish_period * command.twist.angular.y;
-    result[5] = servo_params_.rotational_scale * servo_params_.publish_period * command.twist.angular.z;
+    result[0] = servo_params_.scale.linear * servo_params_.publish_period * command.twist.linear.x;
+    result[1] = servo_params_.scale.linear * servo_params_.publish_period * command.twist.linear.y;
+    result[2] = servo_params_.scale.linear * servo_params_.publish_period * command.twist.linear.z;
+    result[3] = servo_params_.scale.rotational * servo_params_.publish_period * command.twist.angular.x;
+    result[4] = servo_params_.scale.rotational * servo_params_.publish_period * command.twist.angular.y;
+    result[5] = servo_params_.scale.rotational * servo_params_.publish_period * command.twist.angular.z;
   }
   // Otherwise, commands are in m/s and rad/s
   else if (servo_params_.command_in_type == "speed_units")
@@ -872,7 +868,7 @@ Eigen::VectorXd ServoCalcs::scaleJointCommand(const control_msgs::msg::JointJog&
     // Apply user-defined scaling if inputs are unitless [-1:1]
     if (servo_params_.command_in_type == "unitless")
     {
-      result[c] = command.velocities[m] * servo_params_.joint_scale * servo_params_.publish_period;
+      result[c] = command.velocities[m] * servo_params_.scale.joint * servo_params_.publish_period;
       // Otherwise, commands are in m/s and rad/s
     }
     else if (servo_params_.command_in_type == "speed_units")

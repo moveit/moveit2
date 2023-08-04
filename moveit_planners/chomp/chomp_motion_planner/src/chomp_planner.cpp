@@ -53,6 +53,7 @@ bool ChompPlanner::solve(const planning_scene::PlanningSceneConstPtr& planning_s
                          planning_interface::MotionPlanDetailedResponse& res) const
 {
   auto start_time = std::chrono::system_clock::now();
+  res.planner_id = std::string("chomp");
   if (!planning_scene)
   {
     RCLCPP_ERROR(LOGGER, "No planning scene initialized.");

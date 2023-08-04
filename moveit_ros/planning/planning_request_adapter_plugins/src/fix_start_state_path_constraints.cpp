@@ -59,10 +59,6 @@ static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_ros.fix_start_st
 class FixStartStatePathConstraints : public planning_request_adapter::PlanningRequestAdapter
 {
 public:
-  FixStartStatePathConstraints() : planning_request_adapter::PlanningRequestAdapter()
-  {
-  }
-
   void initialize(const rclcpp::Node::SharedPtr& /* node */, const std::string& /* parameter_namespace */) override
   {
   }

@@ -58,40 +58,44 @@ void init_moveit_py(py::module& m)
                        const py::object& config_dict, bool provide_planning_service) {
              static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_cpp_initializer");
 
-             if (!rclcpp::ok())
-             {
-               RCLCPP_INFO(LOGGER, "Initialize rclcpp");
-               rclcpp::init(0, nullptr);
-             }
-
-             RCLCPP_INFO(LOGGER, "Initialize node parameters");
-             rclcpp::NodeOptions node_options;
-
              // This section is used to load the appropriate node parameters before spinning a moveit_cpp instance
              // Priority is given to parameters supplied directly via a config_dict, followed by launch parameters
              // and finally no supplied parameters.
+             std::vector<std::string> launch_arguments;
              if (!config_dict.is(py::none()))
              {
                auto utils = py::module::import("moveit.utils");
                // TODO (peterdavidfagan): replace python method with C++ method
                std::string params_filepath =
-                   utils.attr("create_params_file_from_dict")(config_dict, "moveit_py").cast<std::string>();
-               RCLCPP_INFO(LOGGER, "params_filepath: %s", params_filepath.c_str());
-               node_options.allow_undeclared_parameters(true)
-                   .automatically_declare_parameters_from_overrides(true)
-                   .arguments({ "--ros-args", "--params-file", params_filepath });
+                   utils.attr("create_params_file_from_dict")(config_dict, node_name).cast<std::string>();
+               launch_arguments = { "--ros-args", "--params-file", params_filepath };
              }
              else if (!launch_params_filepath.empty())
              {
-               node_options.allow_undeclared_parameters(true)
-                   .automatically_declare_parameters_from_overrides(true)
-                   .arguments({ "--ros-args", "--params-file", launch_params_filepath });
+               launch_arguments = { "--ros-args", "--params-file", launch_params_filepath };
              }
-             else
+
+             // Initialize ROS, pass launch arguments with rclcpp::init()
+             if (!rclcpp::ok())
              {
-               // TODO (peterdavidfagan): consider failing initialization if no params file is provided
-               node_options.allow_undeclared_parameters(true).automatically_declare_parameters_from_overrides(true);
+               RCLCPP_INFO(LOGGER, "Initialize rclcpp");
+               std::vector<const char*> chars;
+               chars.reserve(launch_arguments.size());
+               for (const auto& arg : launch_arguments)
+               {
+                 chars.push_back(arg.c_str());
+               }
+
+               rclcpp::init(launch_arguments.size(), chars.data());
              }
+
+             // Build NodeOptions
+             RCLCPP_INFO(LOGGER, "Initialize node parameters");
+             rclcpp::NodeOptions node_options;
+             node_options.allow_undeclared_parameters(true)
+                 .automatically_declare_parameters_from_overrides(true)
+                 .arguments(launch_arguments);
+
              RCLCPP_INFO(LOGGER, "Initialize node and executor");
              rclcpp::Node::SharedPtr node = rclcpp::Node::make_shared(node_name, "", node_options);
              std::shared_ptr<rclcpp::executors::SingleThreadedExecutor> executor =

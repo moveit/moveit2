@@ -602,8 +602,8 @@ void RobotInteraction::toggleMoveInteractiveMarkerTopic(bool enable)
             [this, marker_name](const geometry_msgs::msg::PoseStamped::SharedPtr& msg) {
               moveInteractiveMarker(marker_name, *msg);
             };
-        auto subscription =
-            node_->create_subscription<geometry_msgs::msg::PoseStamped>(topic_name, 1, subscription_callback);
+        auto subscription = node_->create_subscription<geometry_msgs::msg::PoseStamped>(
+            topic_name, rclcpp::SystemDefaultsQoS(), subscription_callback);
         int_marker_move_subscribers_.push_back(subscription);
       }
     }

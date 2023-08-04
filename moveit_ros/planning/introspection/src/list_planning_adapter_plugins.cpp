@@ -32,7 +32,10 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-/* Author: Ioan Sucan */
+/* Author: Ioan Sucan
+ * Desc:  Simple executable to list the loadable PlanningRequestAdapter. To use it simply run:
+ * `ros2 run moveit_ros_planning moveit_list_planning_adapter_plugins`
+ */
 
 #include <pluginlib/class_loader.hpp>
 #include <moveit/planning_request_adapter/planning_request_adapter.h>

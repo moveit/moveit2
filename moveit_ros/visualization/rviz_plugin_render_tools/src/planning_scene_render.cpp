@@ -109,6 +109,7 @@ void PlanningSceneRender::renderPlanningScene(const planning_scene::PlanningScen
       color.r = c.r;
       color.g = c.g;
       color.b = c.b;
+      color.a = c.a;
       alpha = c.a;
     }
     for (std::size_t j = 0; j < object->shapes_.size(); ++j)

@@ -186,7 +186,7 @@ void TrajectoryExecutionManager::initialize()
   auto options = rclcpp::SubscriptionOptions();
   options.callback_group = callback_group;
   event_topic_subscriber_ = node_->create_subscription<std_msgs::msg::String>(
-      EXECUTION_EVENT_TOPIC, 100,
+      EXECUTION_EVENT_TOPIC, rclcpp::SystemDefaultsQoS(),
       [this](const std_msgs::msg::String::ConstSharedPtr& event) { return receiveEvent(event); }, options);
 
   controller_mgr_node_->get_parameter("trajectory_execution.execution_duration_monitoring",
@@ -539,9 +539,9 @@ struct OrderPotentialControllerCombination
       return false;
 
     // and then to active ones
-    if (nractive[a] < nractive[b])
-      return true;
     if (nractive[a] > nractive[b])
+      return true;
+    if (nractive[a] < nractive[b])
       return false;
 
     return false;
@@ -1668,8 +1668,8 @@ bool TrajectoryExecutionManager::ensureActiveControllers(const std::vector<std::
           ci.last_update_ = rclcpp::Time(0, 0, RCL_ROS_TIME);
         }
         // reset the state update cache
-        for (const std::string& controller_to_activate : controllers_to_deactivate)
-          known_controllers_[controller_to_activate].last_update_ = rclcpp::Time(0, 0, RCL_ROS_TIME);
+        for (const std::string& controller_to_deactivate : controllers_to_deactivate)
+          known_controllers_[controller_to_deactivate].last_update_ = rclcpp::Time(0, 0, RCL_ROS_TIME);
         return controller_manager_->switchControllers(controllers_to_activate, controllers_to_deactivate);
       }
       else
