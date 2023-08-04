@@ -85,11 +85,10 @@ TEST_F(ServoRosFixture, testJointJog)
   }
 
   control_msgs::msg::JointJog jog_cmd;
-  jog_cmd.header.stamp = servo_test_node_->now();
+
   jog_cmd.header.frame_id = "panda_link0";
   jog_cmd.joint_names.resize(7);
   jog_cmd.velocities.resize(7);
-
   jog_cmd.joint_names = { "panda_joint1", "panda_joint2", "panda_joint3", "panda_joint4",
                           "panda_joint5", "panda_joint6", "panda_joint7" };
 
@@ -100,6 +99,7 @@ TEST_F(ServoRosFixture, testJointJog)
   size_t count = 0;
   while (rclcpp::ok() && count < NUM_COMMANDS)
   {
+    jog_cmd.header.stamp = servo_test_node_->now();
     joint_jog_publisher->publish(jog_cmd);
     count++;
     rclcpp::sleep_for(std::chrono::milliseconds(200));
@@ -136,7 +136,6 @@ TEST_F(ServoRosFixture, testTwist)
   }
 
   geometry_msgs::msg::TwistStamped twist_cmd;
-  twist_cmd.header.stamp = servo_test_node_->now();
   twist_cmd.header.frame_id = "panda_link0";  // Planning frame
   twist_cmd.twist.linear.x = 0.0;
   twist_cmd.twist.linear.y = 0.0;
@@ -148,6 +147,7 @@ TEST_F(ServoRosFixture, testTwist)
   size_t count = 0;
   while (rclcpp::ok() && count < NUM_COMMANDS)
   {
+    twist_cmd.header.stamp = servo_test_node_->now();
     twist_publisher->publish(twist_cmd);
     count++;
     rclcpp::sleep_for(std::chrono::milliseconds(200));
@@ -176,7 +176,6 @@ TEST_F(ServoRosFixture, testPose)
   ASSERT_EQ(response.get()->success, true);
 
   geometry_msgs::msg::PoseStamped pose_cmd;
-  pose_cmd.header.stamp = servo_test_node_->now();
   pose_cmd.header.frame_id = "panda_link0";  // Planning frame
 
   pose_cmd.pose.position.x = 0.5;
@@ -198,6 +197,7 @@ TEST_F(ServoRosFixture, testPose)
   size_t count = 0;
   while (rclcpp::ok() && count < NUM_COMMANDS)
   {
+    pose_cmd.header.stamp = servo_test_node_->now();
     pose_publisher->publish(pose_cmd);
     count++;
     rclcpp::sleep_for(std::chrono::milliseconds(200));
