@@ -151,7 +151,7 @@ void planning_pipeline::PlanningPipeline::configure()
   // load the planner request adapters
   if (!adapter_plugin_names_.empty())
   {
-    std::vector<planning_request_adapter::PlanningRequestAdapterConstPtr> ads;
+    std::vector<planning_request_adapter::PlanningRequestAdapterConstPtr> planning_request_adapter_vector;
     try
     {
       adapter_plugin_loader_ =
@@ -168,10 +168,10 @@ void planning_pipeline::PlanningPipeline::configure()
     {
       for (const std::string& adapter_plugin_name : adapter_plugin_names_)
       {
-        planning_request_adapter::PlanningRequestAdapterPtr ad;
+        planning_request_adapter::PlanningRequestAdapterPtr planning_request_adapter;
         try
         {
-          ad = adapter_plugin_loader_->createUniqueInstance(adapter_plugin_name);
+          planning_request_adapter = adapter_plugin_loader_->createUniqueInstance(adapter_plugin_name);
         }
         catch (pluginlib::PluginlibException& ex)
         {
@@ -179,20 +179,21 @@ void planning_pipeline::PlanningPipeline::configure()
                        ex.what());
           throw;
         }
-        if (ad)
+        if (planning_request_adapter)
         {
-          ad->initialize(node_, parameter_namespace_);
-          ads.push_back(std::move(ad));
+          planning_request_adapter->initialize(node_, parameter_namespace_);
+          planning_request_adapter_vector.push_back(std::move(planning_request_adapter));
         }
       }
     }
-    if (!ads.empty())
+    if (!planning_request_adapter_vector.empty())
     {
       adapter_chain_ = std::make_unique<planning_request_adapter::PlanningRequestAdapterChain>();
-      for (planning_request_adapter::PlanningRequestAdapterConstPtr& ad : ads)
+      for (planning_request_adapter::PlanningRequestAdapterConstPtr& planning_request_adapter :
+           planning_request_adapter_vector)
       {
-        RCLCPP_INFO(LOGGER, "Using planning request adapter '%s'", ad->getDescription().c_str());
-        adapter_chain_->addAdapter(ad);
+        RCLCPP_INFO(LOGGER, "Using planning request adapter '%s'", planning_request_adapter->getDescription().c_str());
+        adapter_chain_->addAdapter(planning_request_adapter);
       }
     }
   }
