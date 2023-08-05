@@ -42,11 +42,20 @@
 #include <fmt/format.h>
 #include <sstream>
 
+namespace
+{
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.ros_planning.planning_pipeline");
 
-const std::string planning_pipeline::PlanningPipeline::DISPLAY_PATH_TOPIC = "display_planned_path";
-const std::string planning_pipeline::PlanningPipeline::MOTION_PLAN_REQUEST_TOPIC = "motion_plan_request";
-const std::string planning_pipeline::PlanningPipeline::MOTION_CONTACTS_TOPIC = "display_contacts";
+/** \brief When motion plans are computed and they are supposed to be automatically displayed, they are sent to this
+ * topic (moveit_msgs::msg::DisplauTrajectory) */
+const std::string DISPLAY_PATH_TOPIC = std::string("display_planned_path");
+/** \brief When motion planning requests are received and they are supposed to be automatically published, they are
+ * sent to this topic (moveit_msgs::msg::MotionPlanRequest) */
+const std::string MOTION_PLAN_REQUEST_TOPIC = std::string("motion_plan_request");
+/** \brief When contacts are found in the solution path reported by a planner, they can be published as markers on
+ * this topic (visualization_msgs::MarkerArray) */
+const std::string MOTION_CONTACTS_TOPIC = std::string("display_contacts");
+}  // namespace
 
 planning_pipeline::PlanningPipeline::PlanningPipeline(const moveit::core::RobotModelConstPtr& model,
                                                       const std::shared_ptr<rclcpp::Node>& node,
@@ -63,7 +72,9 @@ planning_pipeline::PlanningPipeline::PlanningPipeline(const moveit::core::RobotM
 {
   std::string planner_plugin_fullname = parameter_namespace_ + "." + planner_plugin_param_name;
   if (parameter_namespace_.empty())
+  {
     planner_plugin_fullname = planner_plugin_param_name;
+  }
   if (node_->has_parameter(planner_plugin_fullname))
   {
     node_->get_parameter(planner_plugin_fullname, planner_plugin_name_);
@@ -71,7 +82,9 @@ planning_pipeline::PlanningPipeline::PlanningPipeline(const moveit::core::RobotM
 
   std::string adapter_plugins_fullname = parameter_namespace_ + "." + adapter_plugins_param_name;
   if (parameter_namespace_.empty())
+  {
     adapter_plugins_fullname = adapter_plugins_param_name;
+  }
 
   std::string adapters;
   if (node_->has_parameter(adapter_plugins_fullname))
@@ -80,7 +93,9 @@ planning_pipeline::PlanningPipeline::PlanningPipeline(const moveit::core::RobotM
     boost::char_separator<char> sep(" ");
     boost::tokenizer<boost::char_separator<char>> tok(adapters, sep);
     for (boost::tokenizer<boost::char_separator<char>>::iterator beg = tok.begin(); beg != tok.end(); ++beg)
+    {
       adapter_plugin_names_.push_back(*beg);
+    }
   }
 
   configure();
