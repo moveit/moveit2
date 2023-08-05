@@ -61,6 +61,16 @@ namespace planning_pipeline
 class MOVEIT_PLANNING_PIPELINE_EXPORT PlanningPipeline
 {
 public:
+  /** \brief When motion plans are computed and they are supposed to be automatically displayed, they are sent to this
+   * topic (moveit_msgs::msg::DisplauTrajectory) */
+  inline static const std::string DISPLAY_PATH_TOPIC = std::string("display_planned_path");
+  /** \brief When motion planning requests are received and they are supposed to be automatically published, they are
+   * sent to this topic (moveit_msgs::msg::MotionPlanRequest) */
+  inline static const std::string MOTION_PLAN_REQUEST_TOPIC = std::string("motion_plan_request");
+  /** \brief When contacts are found in the solution path reported by a planner, they can be published as markers on
+   * this topic (visualization_msgs::MarkerArray) */
+  inline static const std::string MOTION_CONTACTS_TOPIC = std::string("display_contacts");
+
   /** \brief Given a robot model (\e model), a node handle (\e pipeline_nh), initialize the planning pipeline.
       \param model The robot model for which this pipeline is initialized.
       \param node The ROS node that should be used for reading parameters needed for configuration
