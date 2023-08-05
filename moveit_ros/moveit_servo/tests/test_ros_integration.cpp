@@ -60,13 +60,15 @@
 
 namespace
 {
-const size_t NUM_COMMANDS = 10;
+const int NUM_COMMANDS = 10;
 }
 
 namespace
 {
 TEST_F(ServoRosFixture, testJointJog)
 {
+  waitForJointStates();
+
   auto joint_jog_publisher = servo_test_node_->create_publisher<control_msgs::msg::JointJog>(
       "/servo_node/delta_joint_cmds", rclcpp::SystemDefaultsQoS());
 
@@ -77,12 +79,6 @@ TEST_F(ServoRosFixture, testJointJog)
   ASSERT_EQ(response.get()->success, true);
 
   ASSERT_NE(state_count_, 0);
-
-  sensor_msgs::msg::JointState prev_state, curr_state;
-  {
-    std::lock_guard<std::mutex> state_guard(joint_state_mutex_);
-    prev_state = joint_states_;
-  }
 
   control_msgs::msg::JointJog jog_cmd;
 
@@ -105,12 +101,7 @@ TEST_F(ServoRosFixture, testJointJog)
     rclcpp::sleep_for(std::chrono::milliseconds(200));
   }
 
-  {
-    std::lock_guard<std::mutex> state_guard(joint_state_mutex_);
-    curr_state = joint_states_;
-  }
-
-  ASSERT_NE(curr_state.position[8], prev_state.position[8]);
+  ASSERT_GE(traj_count_, NUM_COMMANDS);
 
   moveit_servo::StatusCode status = status_;
   RCLCPP_INFO_STREAM(servo_test_node_->get_logger(), "Status after jointjog: " << static_cast<size_t>(status));
@@ -119,6 +110,8 @@ TEST_F(ServoRosFixture, testJointJog)
 
 TEST_F(ServoRosFixture, testTwist)
 {
+  waitForJointStates();
+
   auto twist_publisher = servo_test_node_->create_publisher<geometry_msgs::msg::TwistStamped>(
       "/servo_node/delta_twist_cmds", rclcpp::SystemDefaultsQoS());
 
@@ -128,12 +121,6 @@ TEST_F(ServoRosFixture, testTwist)
   ASSERT_EQ(response.get()->success, true);
 
   ASSERT_NE(state_count_, 0);
-
-  sensor_msgs::msg::JointState prev_state, curr_state;
-  {
-    std::lock_guard<std::mutex> state_guard(joint_state_mutex_);
-    prev_state = joint_states_;
-  }
 
   geometry_msgs::msg::TwistStamped twist_cmd;
   twist_cmd.header.frame_id = "panda_link0";  // Planning frame
@@ -153,12 +140,7 @@ TEST_F(ServoRosFixture, testTwist)
     rclcpp::sleep_for(std::chrono::milliseconds(200));
   }
 
-  {
-    std::lock_guard<std::mutex> state_guard(joint_state_mutex_);
-    curr_state = joint_states_;
-  }
-
-  ASSERT_NE(curr_state.position[8], prev_state.position[8]);
+  ASSERT_GE(traj_count_, NUM_COMMANDS);
 
   moveit_servo::StatusCode status = status_;
   RCLCPP_INFO_STREAM(servo_test_node_->get_logger(), "Status after twist: " << static_cast<size_t>(status));
@@ -167,6 +149,8 @@ TEST_F(ServoRosFixture, testTwist)
 
 TEST_F(ServoRosFixture, testPose)
 {
+  waitForJointStates();
+
   auto pose_publisher = servo_test_node_->create_publisher<geometry_msgs::msg::PoseStamped>(
       "/servo_node/pose_target_cmds", rclcpp::SystemDefaultsQoS());
 
@@ -178,21 +162,15 @@ TEST_F(ServoRosFixture, testPose)
   geometry_msgs::msg::PoseStamped pose_cmd;
   pose_cmd.header.frame_id = "panda_link0";  // Planning frame
 
-  pose_cmd.pose.position.x = 0.5;
+  pose_cmd.pose.position.x = 0.3;
   pose_cmd.pose.position.y = 0.0;
-  pose_cmd.pose.position.z = 0.5;
-  pose_cmd.pose.orientation.w = 1.0;
-  pose_cmd.pose.orientation.x = 0.0;
-  pose_cmd.pose.orientation.y = 0.0;
-  pose_cmd.pose.orientation.z = 0.0;
+  pose_cmd.pose.position.z = 0.6;
+  pose_cmd.pose.orientation.x = 0.7;
+  pose_cmd.pose.orientation.y = -0.7;
+  pose_cmd.pose.orientation.z = -0.000014;
+  pose_cmd.pose.orientation.w = -0.0000015;
 
   ASSERT_NE(state_count_, 0);
-
-  sensor_msgs::msg::JointState prev_state, curr_state;
-  {
-    std::lock_guard<std::mutex> state_guard(joint_state_mutex_);
-    prev_state = joint_states_;
-  }
 
   size_t count = 0;
   while (rclcpp::ok() && count < NUM_COMMANDS)
@@ -203,12 +181,7 @@ TEST_F(ServoRosFixture, testPose)
     rclcpp::sleep_for(std::chrono::milliseconds(200));
   }
 
-  {
-    std::lock_guard<std::mutex> state_guard(joint_state_mutex_);
-    curr_state = joint_states_;
-  }
-
-  ASSERT_NE(curr_state.position[8], prev_state.position[8]);
+  ASSERT_GE(traj_count_, NUM_COMMANDS);
 
   moveit_servo::StatusCode status = status_;
   RCLCPP_INFO_STREAM(servo_test_node_->get_logger(), "Status after pose: " << static_cast<size_t>(status));

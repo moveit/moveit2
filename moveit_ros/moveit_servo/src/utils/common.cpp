@@ -333,6 +333,7 @@ planning_scene_monitor::PlanningSceneMonitorPtr createPlanningSceneMonitor(const
   // Set up planning_scene_monitor
   planning_scene_monitor = std::make_shared<planning_scene_monitor::PlanningSceneMonitor>(node, robot_description_name,
                                                                                           "planning_scene_monitor");
+
   planning_scene_monitor->startStateMonitor(servo_params.joint_topic);
   planning_scene_monitor->startSceneMonitor(servo_params.monitored_planning_scene_topic);
   planning_scene_monitor->setPlanningScenePublishingFrequency(25);

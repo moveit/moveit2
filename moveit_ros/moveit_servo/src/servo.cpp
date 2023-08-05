@@ -55,7 +55,7 @@ namespace moveit_servo
 Servo::Servo(const rclcpp::Node::SharedPtr& node, std::shared_ptr<const servo::ParamListener> servo_param_listener,
              const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor)
   : node_(node)
-  , servo_param_listener_{ servo_param_listener }
+  , servo_param_listener_{ std::move(servo_param_listener) }
   , planning_scene_monitor_{ planning_scene_monitor }
   , transform_buffer_(node_->get_clock())
   , transform_listener_(transform_buffer_)

@@ -81,20 +81,20 @@ private:
    * \brief The service to pause servoing, this does not exit the loop or stop the servo loop thread.
    * The loop will be alive even after pausing, but no commands will be processed.
    */
-  void pauseServo(const std::shared_ptr<std_srvs::srv::SetBool::Request> request,
-                  const std::shared_ptr<std_srvs::srv::SetBool::Response> response);
+  void pauseServo(const std::shared_ptr<std_srvs::srv::SetBool::Request>& request,
+                  const std::shared_ptr<std_srvs::srv::SetBool::Response>& response);
 
   /**
    * \brief The service to set the command type for Servo.
    * Supported command types can be found in utils/datatypes.hpp
    * This service must be used to set the command type before sending any servoing commands.
    */
-  void switchCommandType(const std::shared_ptr<moveit_msgs::srv::ServoCommandType::Request> request,
-                         const std::shared_ptr<moveit_msgs::srv::ServoCommandType::Response> response);
+  void switchCommandType(const std::shared_ptr<moveit_msgs::srv::ServoCommandType::Request>& request,
+                         const std::shared_ptr<moveit_msgs::srv::ServoCommandType::Response>& response);
 
-  void jointJogCallback(const control_msgs::msg::JointJog::SharedPtr msg);
-  void twistCallback(const geometry_msgs::msg::TwistStamped::SharedPtr msg);
-  void poseCallback(const geometry_msgs::msg::PoseStamped::SharedPtr msg);
+  void jointJogCallback(const control_msgs::msg::JointJog::ConstSharedPtr& msg);
+  void twistCallback(const geometry_msgs::msg::TwistStamped::ConstSharedPtr& msg);
+  void poseCallback(const geometry_msgs::msg::PoseStamped::ConstSharedPtr& msg);
 
   std::optional<KinematicState> processJointJogCommand();
   std::optional<KinematicState> processTwistCommand();

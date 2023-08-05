@@ -83,21 +83,21 @@ const std::string PLANNING_FRAME_ID = "panda_link0";
 class KeyboardReader
 {
 public:
-  KeyboardReader() : kfd(0)
+  KeyboardReader() : file_descriptor_(0)
   {
     // get the console in raw mode
-    tcgetattr(kfd, &cooked);
+    tcgetattr(file_descriptor_, &cooked_);
     struct termios raw;
-    memcpy(&raw, &cooked, sizeof(struct termios));
+    memcpy(&raw, &cooked_, sizeof(struct termios));
     raw.c_lflag &= ~(ICANON | ECHO);
     // Setting a new line, then end of file
     raw.c_cc[VEOL] = 1;
     raw.c_cc[VEOF] = 2;
-    tcsetattr(kfd, TCSANOW, &raw);
+    tcsetattr(file_descriptor_, TCSANOW, &raw);
   }
   void readOne(char* c)
   {
-    int rc = read(kfd, c, 1);
+    int rc = read(file_descriptor_, c, 1);
     if (rc < 0)
     {
       throw std::runtime_error("read failed");
@@ -105,12 +105,12 @@ public:
   }
   void shutdown()
   {
-    tcsetattr(kfd, TCSANOW, &cooked);
+    tcsetattr(file_descriptor_, TCSANOW, &cooked_);
   }
 
 private:
-  int kfd;
-  struct termios cooked;
+  int file_descriptor_;
+  struct termios cooked_;
 };
 
 // Converts key-presses to Twist or Jog commands for Servo, in lieu of a controller
@@ -182,7 +182,7 @@ int KeyboardServo::keyLoop()
   bool publish_twist = false;
   bool publish_joint = false;
 
-  std::thread{ std::bind(&KeyboardServo::spin, this) }.detach();
+  std::thread{ [this]() { return spin(); } }.detach();
 
   puts("Reading from keyboard");
   puts("---------------------------");
@@ -298,9 +298,13 @@ int KeyboardServo::keyLoop()
         {
           auto result = switch_input_->async_send_request(request_);
           if (result.get()->success)
+          {
             RCLCPP_INFO_STREAM(nh_->get_logger(), "Switched to input type: JointJog");
+          }
           else
+          {
             RCLCPP_WARN_STREAM(nh_->get_logger(), "Could not switch input to: JointJog");
+          }
         }
         break;
       case KEYCODE_T:
@@ -311,9 +315,13 @@ int KeyboardServo::keyLoop()
         {
           auto result = switch_input_->async_send_request(request_);
           if (result.get()->success)
+          {
             RCLCPP_INFO_STREAM(nh_->get_logger(), "Switched to input type: Twist");
+          }
           else
+          {
             RCLCPP_WARN_STREAM(nh_->get_logger(), "Could not switch input to: Twist");
+          }
         }
         break;
       case KEYCODE_Q:

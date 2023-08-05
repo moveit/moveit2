@@ -48,6 +48,7 @@
 #include <rclcpp/publisher.hpp>
 #include <rclcpp/qos.hpp>
 #include <sensor_msgs/msg/joint_state.hpp>
+#include <trajectory_msgs/msg/joint_trajectory.hpp>
 
 class ServoRosFixture : public testing::Test
 {
@@ -60,9 +61,14 @@ protected:
 
   void jointStateCallback(const sensor_msgs::msg::JointState::ConstSharedPtr msg)
   {
-    std::lock_guard<std::mutex> state_guard(joint_state_mutex_);
     joint_states_ = *msg;
     state_count_++;
+  }
+
+  void trajectoryCallback(const trajectory_msgs::msg::JointTrajectory::ConstSharedPtr msg)
+  {
+    published_trajectory_ = *msg;
+    traj_count_++;
   }
 
   void SetUp()
@@ -96,7 +102,7 @@ protected:
     RCLCPP_INFO(logger, "SERVICE READY");
   }
 
-  void waitForStatus()
+  void waitForJointStates()
   {
     auto logger = servo_test_node_->get_logger();
     auto wait_timeout = rclcpp::Duration::from_seconds(5);
@@ -114,7 +120,7 @@ protected:
     }
   }
 
-  ServoRosFixture() : state_count_{ 0 }
+  ServoRosFixture() : state_count_{ 0 }, traj_count_{ 0 }
   {
     // Create a node to be given to Servo.
     servo_test_node_ = std::make_shared<rclcpp::Node>("moveit_servo_test");
@@ -128,11 +134,14 @@ protected:
     joint_state_subscriber_ = servo_test_node_->create_subscription<sensor_msgs::msg::JointState>(
         "/joint_states", 1, std::bind(&ServoRosFixture::jointStateCallback, this, std::placeholders::_1));
 
+    trajectory_subscriber_ = servo_test_node_->create_subscription<trajectory_msgs::msg::JointTrajectory>(
+        "/panda_arm_controller/joint_trajectory", 1,
+        std::bind(&ServoRosFixture::trajectoryCallback, this, std::placeholders::_1));
+
     switch_input_client_ =
         servo_test_node_->create_client<moveit_msgs::srv::ServoCommandType>("/servo_node/switch_command_type");
 
     waitForService();
-    waitForStatus();
   }
 
   std::shared_ptr<rclcpp::Node> servo_test_node_;
@@ -143,12 +152,15 @@ protected:
 
   rclcpp::Subscription<moveit_msgs::msg::ServoStatus>::SharedPtr status_subscriber_;
   rclcpp::Subscription<sensor_msgs::msg::JointState>::SharedPtr joint_state_subscriber_;
+  rclcpp::Subscription<trajectory_msgs::msg::JointTrajectory>::SharedPtr trajectory_subscriber_;
   rclcpp::Client<moveit_msgs::srv::ServoCommandType>::SharedPtr switch_input_client_;
+
+  sensor_msgs::msg::JointState joint_states_;
+  trajectory_msgs::msg::JointTrajectory published_trajectory_;
 
   std::atomic<int> status_count_;
   std::atomic<moveit_servo::StatusCode> status_;
 
-  std::mutex joint_state_mutex_;
   std::atomic<int> state_count_;
-  sensor_msgs::msg::JointState joint_states_;
+  std::atomic<int> traj_count_;
 };

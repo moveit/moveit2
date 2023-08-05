@@ -80,9 +80,13 @@ ServoNode::ServoNode(const rclcpp::NodeOptions& options)
   if (realtime_tools::has_realtime_kernel())
   {
     if (realtime_tools::configure_sched_fifo(servo_params_.thread_priority))
+    {
       RCLCPP_INFO_STREAM(LOGGER, "Realtime kernel available, higher thread priority has been set.");
+    }
     else
+    {
       RCLCPP_WARN_STREAM(LOGGER, "Could not enable FIFO RT scheduling policy.");
+    }
   }
   else
   {
@@ -100,42 +104,53 @@ ServoNode::ServoNode(const rclcpp::NodeOptions& options)
 
   // Create subscriber for jointjog
   joint_jog_subscriber_ = node_->create_subscription<control_msgs::msg::JointJog>(
-      servo_params_.joint_command_in_topic, 10, std::bind(&ServoNode::jointJogCallback, this, std::placeholders::_1));
+      servo_params_.joint_command_in_topic, rclcpp::SystemDefaultsQoS(),
+      [this](const control_msgs::msg::JointJog::ConstSharedPtr& msg) { return jointJogCallback(msg); });
 
   // Create subscriber for twist
   twist_subscriber_ = node_->create_subscription<geometry_msgs::msg::TwistStamped>(
-      servo_params_.cartesian_command_in_topic, 10, std::bind(&ServoNode::twistCallback, this, std::placeholders::_1));
+      servo_params_.cartesian_command_in_topic, rclcpp::SystemDefaultsQoS(),
+      [this](const geometry_msgs::msg::TwistStamped::ConstSharedPtr& msg) { return twistCallback(msg); });
 
   // Create subscriber for pose
   pose_subscriber_ = node_->create_subscription<geometry_msgs::msg::PoseStamped>(
-      servo_params_.pose_command_in_topic, 10, std::bind(&ServoNode::poseCallback, this, std::placeholders::_1));
+      servo_params_.pose_command_in_topic, rclcpp::SystemDefaultsQoS(),
+      [this](const geometry_msgs::msg::PoseStamped::ConstSharedPtr& msg) { return poseCallback(msg); });
 
   if (servo_params_.command_out_type == "trajectory_msgs/JointTrajectory")
+  {
     trajectory_publisher_ = node_->create_publisher<trajectory_msgs::msg::JointTrajectory>(
         servo_params_.command_out_topic, rclcpp::SystemDefaultsQoS());
+  }
   else if (servo_params_.command_out_type == "std_msgs/Float64MultiArray")
+  {
     multi_array_publisher_ = node_->create_publisher<std_msgs::msg::Float64MultiArray>(servo_params_.command_out_topic,
                                                                                        rclcpp::SystemDefaultsQoS());
-
+  }
   // Create status publisher
   status_publisher_ =
       node_->create_publisher<moveit_msgs::msg::ServoStatus>(servo_params_.status_topic, rclcpp::SystemDefaultsQoS());
 
   // Create service to enable switching command type
   switch_command_type_ = node_->create_service<moveit_msgs::srv::ServoCommandType>(
-      "~/switch_command_type",
-      std::bind(&ServoNode::switchCommandType, this, std::placeholders::_1, std::placeholders::_2));
+      "~/switch_command_type", [this](const std::shared_ptr<moveit_msgs::srv::ServoCommandType::Request>& request,
+                                      const std::shared_ptr<moveit_msgs::srv::ServoCommandType::Response>& response) {
+        return switchCommandType(request, response);
+      });
 
   // Create service to pause/unpause servoing
   pause_servo_ = node_->create_service<std_srvs::srv::SetBool>(
-      "~/pause_servo", std::bind(&ServoNode::pauseServo, this, std::placeholders::_1, std::placeholders::_2));
+      "~/pause_servo", [this](const std::shared_ptr<std_srvs::srv::SetBool::Request>& request,
+                              const std::shared_ptr<std_srvs::srv::SetBool::Response>& response) {
+        return pauseServo(request, response);
+      });
 
   // Start the servoing loop
   servo_loop_thread_ = std::thread(&ServoNode::servoLoop, this);
 }
 
-void ServoNode::pauseServo(const std::shared_ptr<std_srvs::srv::SetBool::Request> request,
-                           const std::shared_ptr<std_srvs::srv::SetBool::Response> response)
+void ServoNode::pauseServo(const std::shared_ptr<std_srvs::srv::SetBool::Request>& request,
+                           const std::shared_ptr<std_srvs::srv::SetBool::Response>& response)
 {
   servo_paused_ = request->data;
   response->success = (servo_paused_ == request->data);
@@ -151,8 +166,8 @@ void ServoNode::pauseServo(const std::shared_ptr<std_srvs::srv::SetBool::Request
   }
 }
 
-void ServoNode::switchCommandType(const std::shared_ptr<moveit_msgs::srv::ServoCommandType::Request> request,
-                                  const std::shared_ptr<moveit_msgs::srv::ServoCommandType::Response> response)
+void ServoNode::switchCommandType(const std::shared_ptr<moveit_msgs::srv::ServoCommandType::Request>& request,
+                                  const std::shared_ptr<moveit_msgs::srv::ServoCommandType::Response>& response)
 {
   const bool is_valid = (request->command_type >= static_cast<int8_t>(CommandType::MIN)) &&
                         (request->command_type <= static_cast<int8_t>(CommandType::MAX));
@@ -167,19 +182,19 @@ void ServoNode::switchCommandType(const std::shared_ptr<moveit_msgs::srv::ServoC
   response->success = (request->command_type == static_cast<int8_t>(servo_->getCommandType()));
 }
 
-void ServoNode::jointJogCallback(const control_msgs::msg::JointJog::SharedPtr msg)
+void ServoNode::jointJogCallback(const control_msgs::msg::JointJog::ConstSharedPtr& msg)
 {
   latest_joint_jog_ = *msg;
   new_joint_jog_msg_ = true;
 }
 
-void ServoNode::twistCallback(const geometry_msgs::msg::TwistStamped::SharedPtr msg)
+void ServoNode::twistCallback(const geometry_msgs::msg::TwistStamped::ConstSharedPtr& msg)
 {
   latest_twist_ = *msg;
   new_twist_msg_ = true;
 }
 
-void ServoNode::poseCallback(const geometry_msgs::msg::PoseStamped::SharedPtr msg)
+void ServoNode::poseCallback(const geometry_msgs::msg::PoseStamped::ConstSharedPtr& msg)
 {
   latest_pose_ = *msg;
   new_pose_msg_ = true;
@@ -295,17 +310,17 @@ void ServoNode::servoLoop()
       continue;
 
     next_joint_state = std::nullopt;
-    const CommandType expectedType = servo_->getCommandType();
+    const CommandType expected_type = servo_->getCommandType();
 
-    if (expectedType == CommandType::JOINT_JOG && new_joint_jog_msg_)
+    if (expected_type == CommandType::JOINT_JOG && new_joint_jog_msg_)
     {
       next_joint_state = processJointJogCommand();
     }
-    else if (expectedType == CommandType::TWIST && new_twist_msg_)
+    else if (expected_type == CommandType::TWIST && new_twist_msg_)
     {
       next_joint_state = processTwistCommand();
     }
-    else if (expectedType == CommandType::POSE && new_pose_msg_)
+    else if (expected_type == CommandType::POSE && new_pose_msg_)
     {
       next_joint_state = processPoseCommand();
     }

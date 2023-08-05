@@ -147,10 +147,14 @@ JointDeltaResult jointDeltaFromTwist(const TwistCommand& command, moveit::core::
   {
     status = StatusCode::INVALID;
     if (!valid_command)
+    {
       RCLCPP_WARN_STREAM(LOGGER, "Invalid twist command.");
+    }
     if (!is_planning_frame)
+    {
       RCLCPP_WARN_STREAM(LOGGER,
                          "Command frame is: " << command.frame_id << " expected: " << servo_params.planning_frame);
+    }
   }
   return std::make_pair(status, joint_position_delta);
 }
@@ -191,10 +195,14 @@ JointDeltaResult jointDeltaFromPose(const PoseCommand& command, moveit::core::Ro
   {
     status = StatusCode::INVALID;
     if (!valid_command)
+    {
       RCLCPP_WARN_STREAM(LOGGER, "Invalid pose command.");
+    }
     if (!is_planning_frame)
+    {
       RCLCPP_WARN_STREAM(LOGGER,
                          "Command frame is: " << command.frame_id << " expected: " << servo_params.planning_frame);
+    }
   }
   return std::make_pair(status, joint_position_delta);
 }

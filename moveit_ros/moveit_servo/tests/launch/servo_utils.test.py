@@ -111,9 +111,7 @@ def generate_test_description():
             launch_testing.actions.ReadyToTest(),
         ]
     ), {
-        "test_container": test_container,
         "servo_gtest": servo_gtest,
-        "ros2_control_node": ros2_control_node,
     }
 
 
