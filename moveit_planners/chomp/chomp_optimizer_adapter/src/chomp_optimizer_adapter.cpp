@@ -53,7 +53,7 @@
 
 namespace chomp
 {
-static rclcpp::Logger LOGGER = rclcpp::get_logger("chomp_planner");
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("chomp_planner");
 
 class OptimizerAdapter : public planning_request_adapter::PlanningRequestAdapter
 {
