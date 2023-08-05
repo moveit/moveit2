@@ -42,6 +42,8 @@
 #include <fmt/format.h>
 #include <sstream>
 
+#include <planning_pipeline_parameters.hpp>
+
 namespace
 {
 const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.ros_planning.planning_pipeline");
@@ -49,9 +51,7 @@ const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.ros_planning.planning_p
 
 planning_pipeline::PlanningPipeline::PlanningPipeline(const moveit::core::RobotModelConstPtr& model,
                                                       const std::shared_ptr<rclcpp::Node>& node,
-                                                      const std::string& parameter_namespace,
-                                                      const std::string& planner_plugin_param_name,
-                                                      const std::string& adapter_plugins_param_name)
+                                                      const std::string& parameter_namespace)
   : active_{ false }
   , node_(node)
   , parameter_namespace_(parameter_namespace)
@@ -60,28 +60,13 @@ planning_pipeline::PlanningPipeline::PlanningPipeline(const moveit::core::RobotM
   , robot_model_(model)
   , check_solution_paths_{ false }
 {
-  std::string planner_plugin_fullname = parameter_namespace_ + "." + planner_plugin_param_name;
-  if (parameter_namespace_.empty())
+  auto param_listener = planning_pipeline_parameters::ParamListener(node, parameter_namespace);
+  const auto params = param_listener.get_params();
+  planner_plugin_name_ = params.planning_plugin;
+  if (!params.request_adapters.empty())
   {
-    planner_plugin_fullname = planner_plugin_param_name;
-  }
-  if (node_->has_parameter(planner_plugin_fullname))
-  {
-    node_->get_parameter(planner_plugin_fullname, planner_plugin_name_);
-  }
-
-  std::string adapter_plugins_fullname = parameter_namespace_ + "." + adapter_plugins_param_name;
-  if (parameter_namespace_.empty())
-  {
-    adapter_plugins_fullname = adapter_plugins_param_name;
-  }
-
-  std::string adapters;
-  if (node_->has_parameter(adapter_plugins_fullname))
-  {
-    node_->get_parameter(adapter_plugins_fullname, adapters);
     boost::char_separator<char> sep(" ");
-    boost::tokenizer<boost::char_separator<char>> tok(adapters, sep);
+    boost::tokenizer<boost::char_separator<char>> tok(params.request_adapters, sep);
     for (boost::tokenizer<boost::char_separator<char>>::iterator beg = tok.begin(); beg != tok.end(); ++beg)
     {
       adapter_plugin_names_.push_back(*beg);
