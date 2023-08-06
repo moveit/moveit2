@@ -53,31 +53,31 @@
 class ServoRosFixture : public testing::Test
 {
 protected:
-  void statusCallback(const moveit_msgs::msg::ServoStatus::ConstSharedPtr msg)
+  void statusCallback(const moveit_msgs::msg::ServoStatus::ConstSharedPtr& msg)
   {
     status_ = static_cast<moveit_servo::StatusCode>(msg->code);
     status_count_++;
   }
 
-  void jointStateCallback(const sensor_msgs::msg::JointState::ConstSharedPtr msg)
+  void jointStateCallback(const sensor_msgs::msg::JointState::ConstSharedPtr& msg)
   {
     joint_states_ = *msg;
     state_count_++;
   }
 
-  void trajectoryCallback(const trajectory_msgs::msg::JointTrajectory::ConstSharedPtr msg)
+  void trajectoryCallback(const trajectory_msgs::msg::JointTrajectory::ConstSharedPtr& msg)
   {
     published_trajectory_ = *msg;
     traj_count_++;
   }
 
-  void SetUp()
+  void SetUp() override
   {
     executor_->add_node(servo_test_node_);
     executor_thread_ = std::thread([this]() { executor_->spin(); });
   }
 
-  void TearDown()
+  void TearDown() override
   {
     executor_->cancel();
     if (executor_thread_.joinable())
@@ -129,14 +129,16 @@ protected:
     status_ = moveit_servo::StatusCode::INVALID;
 
     status_subscriber_ = servo_test_node_->create_subscription<moveit_msgs::msg::ServoStatus>(
-        "/servo_node/status", 1, std::bind(&ServoRosFixture::statusCallback, this, std::placeholders::_1));
+        "/servo_node/status", rclcpp::SystemDefaultsQoS(),
+        [this](const moveit_msgs::msg::ServoStatus::ConstSharedPtr& msg) { return statusCallback(msg); });
 
     joint_state_subscriber_ = servo_test_node_->create_subscription<sensor_msgs::msg::JointState>(
-        "/joint_states", 1, std::bind(&ServoRosFixture::jointStateCallback, this, std::placeholders::_1));
+        "/joint_states", rclcpp::SystemDefaultsQoS(),
+        [this](const sensor_msgs::msg::JointState::ConstSharedPtr& msg) { return jointStateCallback(msg); });
 
     trajectory_subscriber_ = servo_test_node_->create_subscription<trajectory_msgs::msg::JointTrajectory>(
-        "/panda_arm_controller/joint_trajectory", 1,
-        std::bind(&ServoRosFixture::trajectoryCallback, this, std::placeholders::_1));
+        "/panda_arm_controller/joint_trajectory", rclcpp::SystemDefaultsQoS(),
+        [this](const trajectory_msgs::msg::JointTrajectory::ConstSharedPtr& msg) { return trajectoryCallback(msg); });
 
     switch_input_client_ =
         servo_test_node_->create_client<moveit_msgs::srv::ServoCommandType>("/servo_node/switch_command_type");

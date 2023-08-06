@@ -69,6 +69,7 @@ public:
   // Disable copy assignment.
   ServoNode& operator=(ServoNode&) = delete;
 
+  // NOLINTNEXTLINE(readability-identifier-naming)
   rclcpp::node_interfaces::NodeBaseInterface::SharedPtr get_node_base_interface();
 
 private:
