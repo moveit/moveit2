@@ -70,7 +70,8 @@ public:
   ServoNode& operator=(ServoNode&) = delete;
 
   // NOLINTNEXTLINE(readability-identifier-naming)
-  rclcpp::node_interfaces::NodeBaseInterface::SharedPtr get_node_base_interface();
+  rclcpp::node_interfaces::NodeBaseInterface::SharedPtr
+  get_node_base_interface();  // Interface required for ServoNode to be a component.
 
 private:
   /**
