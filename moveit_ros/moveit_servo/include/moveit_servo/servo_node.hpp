@@ -69,9 +69,10 @@ public:
   // Disable copy assignment.
   ServoNode& operator=(ServoNode&) = delete;
 
-  // NOLINTNEXTLINE(readability-identifier-naming)
-  rclcpp::node_interfaces::NodeBaseInterface::SharedPtr
-  get_node_base_interface();  // Interface required for ServoNode to be a component.
+  // This function is required to make this class a valid NodeClass
+  // see https://docs.ros2.org/latest/api/rclcpp_components/register__node__macro_8hpp.html
+  // Skip linting due to unconventional function naming
+  rclcpp::node_interfaces::NodeBaseInterface::SharedPtr get_node_base_interface();  // NOLINT
 
 private:
   /**
