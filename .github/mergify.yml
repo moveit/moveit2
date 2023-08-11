@@ -26,6 +26,15 @@ pull_request_rules:
         branches:
           - humble
 
+  - name: backport to iron at reviewers discretion
+    conditions:
+      - base=main
+      - "label=backport-iron"
+    actions:
+      backport:
+        branches:
+          - iron
+
   - name: ask to resolve conflict
     conditions:
       - conflict
