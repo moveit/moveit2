@@ -42,6 +42,9 @@
 #include <moveit_servo/utils/common.hpp>
 #include <rclcpp/rclcpp.hpp>
 
+// Disable -Wold-style-cast because all _THROTTLE macros trigger this
+#pragma GCC diagnostic ignored "-Wold-style-cast"
+
 namespace
 {
 const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_servo.servo");
