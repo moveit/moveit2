@@ -466,7 +466,7 @@ const TwistCommand Servo::toPlanningFrame(const TwistCommand& command)
   if (command.frame_id != servo_params_.planning_frame)
   {
     RCLCPP_WARN_STREAM_THROTTLE(LOGGER, *node_->get_clock(), ROS_LOG_THROTTLE_PERIOD,
-                                "Twist command is not in planning frame, conversion may not be accurate.");
+                                "Twist command is not in planning frame, transformation may not be accurate.");
   }
   const auto command_to_planning_frame =
       transform_buffer_.lookupTransform(servo_params_.planning_frame, command.frame_id, rclcpp::Time(0));
