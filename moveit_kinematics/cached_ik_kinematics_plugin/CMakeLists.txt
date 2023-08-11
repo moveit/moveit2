@@ -4,7 +4,7 @@ find_package(ur_kinematics QUIET)
 
 add_library(moveit_cached_ik_kinematics_base SHARED src/ik_cache.cpp)
 set_target_properties(moveit_cached_ik_kinematics_base PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
-ament_target_dependencies(moveit_cached_ik_kinematics_base
+ament_target_dependencies(moveit_cached_ik_kinematics_base PUBLIC
   rclcpp
   moveit_core
   moveit_msgs
@@ -19,19 +19,19 @@ generate_parameter_library(
   include/moveit/cached_ik_kinematics_plugin/cached_ik_kinematics_parameters.yaml # path to input yaml file
 )
 
-target_link_libraries(moveit_cached_ik_kinematics_base
+target_link_libraries(moveit_cached_ik_kinematics_base PUBLIC
   cached_ik_kinematics_parameters
   moveit_kdl_kinematics_plugin)
 
 add_library(moveit_cached_ik_kinematics_plugin SHARED src/cached_ik_kinematics_plugin.cpp)
 set_target_properties(moveit_cached_ik_kinematics_plugin PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
-ament_target_dependencies(moveit_cached_ik_kinematics_plugin
+ament_target_dependencies(moveit_cached_ik_kinematics_plugin PUBLIC
   rclcpp
   moveit_core
   moveit_msgs
   rsl
 )
-target_link_libraries(moveit_cached_ik_kinematics_plugin
+target_link_libraries(moveit_cached_ik_kinematics_plugin PRIVATE
     cached_ik_kinematics_parameters
     moveit_kdl_kinematics_plugin
     moveit_srv_kinematics_plugin
