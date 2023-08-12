@@ -69,7 +69,7 @@ public:
 
   bool write() override;
 
-  static std::vector<TemplateVariable> variables_;
+  static std::vector<TemplateVariable> variables;
 };
 
 }  // namespace moveit_setup
