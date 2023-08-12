@@ -70,8 +70,8 @@ protected:
     node_ = rclcpp::Node::make_shared("unittest_trajectory_generator_circ", node_options);
 
     // load robot model
-    robot_model_loader::RobotModelLoader rm_loader(node_);
-    robot_model_ = rm_loader.getModel();
+    rm_loader_ = std::make_unique<robot_model_loader::RobotModelLoader>(node_);
+    robot_model_ = rm_loader_->getModel();
     ASSERT_TRUE(bool(robot_model_)) << "Failed to load robot model";
     planning_scene_ = std::make_shared<planning_scene::PlanningScene>(robot_model_);
 
@@ -161,6 +161,11 @@ protected:
     }
   }
 
+  void TearDown() override
+  {
+    robot_model_.reset();
+  }
+
   void getCircCenter(const planning_interface::MotionPlanRequest& req,
                      const planning_interface::MotionPlanResponse& res, Eigen::Vector3d& circ_center)
   {
@@ -193,6 +198,7 @@ protected:
   // ros stuff
   rclcpp::Node::SharedPtr node_;
   moveit::core::RobotModelConstPtr robot_model_;
+  std::unique_ptr<robot_model_loader::RobotModelLoader> rm_loader_;
   planning_scene::PlanningSceneConstPtr planning_scene_;
 
   std::unique_ptr<TrajectoryGeneratorCIRC> circ_;

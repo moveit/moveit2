@@ -69,8 +69,8 @@ protected:
   void createPlannerInstance()
   {
     // load robot model
-    robot_model_loader::RobotModelLoader rm_loader(node_);
-    robot_model_ = rm_loader.getModel();
+    rm_loader_ = std::make_unique<robot_model_loader::RobotModelLoader>(node_);
+    robot_model_ = rm_loader_->getModel();
     ASSERT_TRUE(bool(robot_model_)) << "Failed to load robot model";
 
     // Load planner name from node parameters
@@ -105,12 +105,14 @@ protected:
   void TearDown() override
   {
     planner_plugin_loader_->unloadLibraryForClass(planner_plugin_name_);
+    robot_model_.reset();
   }
 
 protected:
   // ros stuff
   rclcpp::Node::SharedPtr node_;
   moveit::core::RobotModelConstPtr robot_model_;
+  std::unique_ptr<robot_model_loader::RobotModelLoader> rm_loader_;
 
   std::string planner_plugin_name_;
   std::unique_ptr<pluginlib::ClassLoader<planning_interface::PlannerManager>> planner_plugin_loader_;

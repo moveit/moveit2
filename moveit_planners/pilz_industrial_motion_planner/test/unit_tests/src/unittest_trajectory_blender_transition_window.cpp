@@ -74,8 +74,8 @@ protected:
     node_ = rclcpp::Node::make_shared("unittest_trajectory_blender_transition_window", node_options);
 
     // load robot model
-    robot_model_loader::RobotModelLoader rm_loader(node_);
-    robot_model_ = rm_loader.getModel();
+    rm_loader_ = std::make_unique<robot_model_loader::RobotModelLoader>(node_);
+    robot_model_ = rm_loader_->getModel();
     ASSERT_TRUE(bool(robot_model_)) << "Failed to load robot model";
     planning_scene_ = std::make_shared<planning_scene::PlanningScene>(robot_model_);
 
@@ -125,6 +125,11 @@ protected:
     ASSERT_NE(nullptr, blender_) << "failed to create trajectory blender";
   }
 
+  void TearDown() override
+  {
+    robot_model_.reset();
+  }
+
   /**
    * @brief Generate lin trajectories for blend sequences
    */
@@ -155,6 +160,7 @@ protected:
   // ros stuff
   rclcpp::Node::SharedPtr node_;
   moveit::core::RobotModelConstPtr robot_model_;
+  std::unique_ptr<robot_model_loader::RobotModelLoader> rm_loader_;
   planning_scene::PlanningSceneConstPtr planning_scene_;
 
   std::unique_ptr<TrajectoryGenerator> lin_generator_;
