@@ -8,6 +8,7 @@ moveit_package()
 find_package(ament_cmake REQUIRED)
 find_package(ament_cmake_ros REQUIRED)
 find_package(ament_index_cpp REQUIRED)
+find_package(fmt REQUIRED)
 find_package(moveit_core REQUIRED)
 find_package(moveit_ros_planning REQUIRED)
 find_package(moveit_ros_visualization REQUIRED)
@@ -83,6 +84,7 @@ install(TARGETS moveit_setup_framework
         INCLUDES DESTINATION include/moveit_setup_framework
 )
 
+ament_export_dependencies(fmt)
 ament_export_dependencies(rclcpp)
 ament_export_dependencies(Qt5Core)
 ament_export_dependencies(Qt5Widgets)

@@ -6,6 +6,7 @@ find_package(moveit_common REQUIRED)
 moveit_package()
 
 find_package(ament_cmake REQUIRED)
+find_package(fmt REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(moveit_core REQUIRED)
 find_package(warehouse_ros REQUIRED)
@@ -19,6 +20,7 @@ include(ConfigExtras.cmake)
 include_directories(include)
 
 set(THIS_PACKAGE_INCLUDE_DEPENDS
+  fmt
   Boost
   moveit_core
   rclcpp
@@ -52,7 +54,7 @@ target_link_libraries(moveit_warehouse_broadcast moveit_warehouse)
 
 add_executable(moveit_save_to_warehouse src/save_to_warehouse.cpp)
 ament_target_dependencies(moveit_save_to_warehouse ${THIS_PACKAGE_INCLUDE_DEPENDS})
-target_link_libraries(moveit_save_to_warehouse moveit_warehouse)
+target_link_libraries(moveit_save_to_warehouse moveit_warehouse fmt)
 
 add_executable(moveit_warehouse_import_from_text src/import_from_text.cpp)
 ament_target_dependencies(moveit_warehouse_import_from_text ${THIS_PACKAGE_INCLUDE_DEPENDS})

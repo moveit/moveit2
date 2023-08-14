@@ -139,9 +139,9 @@ public:
     bool write() override
     {
       // Add function name as a TemplateVariable, then remove it
-      variables_.push_back(TemplateVariable("FUNCTION_NAME", function_name_));
+      variables.push_back(TemplateVariable("FUNCTION_NAME", function_name_));
       bool ret = TemplatedGeneratedFile::write();
-      variables_.pop_back();
+      variables.pop_back();
       return ret;
     }
 

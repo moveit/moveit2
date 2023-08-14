@@ -42,11 +42,15 @@
 #include <moveit_servo/utils/common.hpp>
 #include <rclcpp/rclcpp.hpp>
 
+// Disable -Wold-style-cast because all _THROTTLE macros trigger this
+#pragma GCC diagnostic ignored "-Wold-style-cast"
+
 namespace
 {
 const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_servo.servo");
 constexpr double ROBOT_STATE_WAIT_TIME = 5.0;  // seconds
 constexpr double STOPPED_VELOCITY_EPS = 1e-4;
+constexpr auto ROS_LOG_THROTTLE_PERIOD = std::chrono::milliseconds(3000).count();
 }  // namespace
 
 namespace moveit_servo
@@ -462,6 +466,11 @@ KinematicState Servo::getNextJointState(const ServoInput& command)
 
 const TwistCommand Servo::toPlanningFrame(const TwistCommand& command)
 {
+  if (command.frame_id != servo_params_.planning_frame)
+  {
+    RCLCPP_WARN_STREAM_THROTTLE(LOGGER, *node_->get_clock(), ROS_LOG_THROTTLE_PERIOD,
+                                "Twist command is not in planning frame, transformation may not be accurate.");
+  }
   const auto command_to_planning_frame =
       transform_buffer_.lookupTransform(servo_params_.planning_frame, command.frame_id, rclcpp::Time(0));
   Eigen::VectorXd transformed_twist = command.velocities;

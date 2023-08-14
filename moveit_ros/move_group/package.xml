@@ -31,6 +31,7 @@
   <depend>tf2</depend>
   <depend>tf2_geometry_msgs</depend>
   <depend>tf2_ros</depend>
+  <depend>fmt</depend>
 
   <exec_depend>moveit_kinematics</exec_depend>
 

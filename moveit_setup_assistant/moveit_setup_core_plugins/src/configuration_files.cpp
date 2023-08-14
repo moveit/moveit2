@@ -47,7 +47,7 @@ void ConfigurationFiles::onInit()
 
 void ConfigurationFiles::loadTemplateVariables()
 {
-  auto& variables = TemplatedGeneratedFile::variables_;
+  auto& variables = TemplatedGeneratedFile::variables;
   variables.clear();
   for (const auto& config : config_data_->getConfigured())
   {
