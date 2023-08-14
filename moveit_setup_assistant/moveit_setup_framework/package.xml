@@ -20,6 +20,7 @@
   <depend>rviz_rendering</depend>
   <depend>srdfdom</depend>
   <depend>urdf</depend>
+  <depend>fmt</depend>
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_clang_format</test_depend>

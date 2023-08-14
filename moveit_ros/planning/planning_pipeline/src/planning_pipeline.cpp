@@ -39,7 +39,7 @@
 #include <moveit/collision_detection/collision_tools.h>
 #include <moveit/trajectory_processing/trajectory_tools.h>
 #include <boost/tokenizer.hpp>
-#include <boost/algorithm/string/join.hpp>
+#include <fmt/format.h>
 #include <sstream>
 
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.ros_planning.planning_pipeline");
@@ -124,7 +124,7 @@ void planning_pipeline::PlanningPipeline::configure()
 
   if (planner_plugin_name_.empty())
   {
-    std::string classes_str = boost::algorithm::join(classes, ", ");
+    std::string classes_str = fmt::format("{}", fmt::join(classes, ", "));
     throw std::runtime_error("Planning plugin name is empty. Please choose one of the available plugins: " +
                              classes_str);
   }
@@ -140,7 +140,7 @@ void planning_pipeline::PlanningPipeline::configure()
   }
   catch (pluginlib::PluginlibException& ex)
   {
-    std::string classes_str = boost::algorithm::join(classes, ", ");
+    std::string classes_str = fmt::format("{}", fmt::join(classes, ", "));
     RCLCPP_FATAL(LOGGER,
                  "Exception while loading planner '%s': %s"
                  "Available plugins: %s",
