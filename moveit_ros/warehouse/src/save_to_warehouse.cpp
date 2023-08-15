@@ -197,12 +197,14 @@ int main(int argc, char** argv)
   psm.addUpdateCallback([&](auto&&) { return onSceneUpdate(psm, pss); });
 
   auto mplan_req_sub = node->create_subscription<moveit_msgs::msg::MotionPlanRequest>(
-      "motion_plan_request", 100,
+      "motion_plan_request", rclcpp::SystemDefaultsQoS(),
       [&](const moveit_msgs::msg::MotionPlanRequest& msg) { onMotionPlanRequest(msg, psm, pss); });
   auto constr_sub = node->create_subscription<moveit_msgs::msg::Constraints>(
-      "constraints", 100, [&](const moveit_msgs::msg::Constraints& msg) { onConstraints(msg, cs); });
+      "constraints", rclcpp::SystemDefaultsQoS(),
+      [&](const moveit_msgs::msg::Constraints& msg) { onConstraints(msg, cs); });
   auto state_sub = node->create_subscription<moveit_msgs::msg::RobotState>(
-      "robot_state", 100, [&](const moveit_msgs::msg::RobotState& msg) { onRobotState(msg, rs); });
+      "robot_state", rclcpp::SystemDefaultsQoS(),
+      [&](const moveit_msgs::msg::RobotState& msg) { onRobotState(msg, rs); });
 
   std::vector<std::string> topics;
   psm.getMonitoredTopics(topics);

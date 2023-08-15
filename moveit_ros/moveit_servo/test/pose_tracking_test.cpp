@@ -183,7 +183,7 @@ TEST_F(PoseTrackingFixture, OutgoingMsgTest)
         return;
       };
   auto traj_sub = node_->create_subscription<trajectory_msgs::msg::JointTrajectory>(
-      "/panda_arm_controller/joint_trajectory", 1, traj_callback);
+      "/panda_arm_controller/joint_trajectory", rclcpp::SystemDefaultsQoS(), traj_callback);
 
   geometry_msgs::msg::PoseStamped target_pose;
   target_pose.header.frame_id = "panda_link4";

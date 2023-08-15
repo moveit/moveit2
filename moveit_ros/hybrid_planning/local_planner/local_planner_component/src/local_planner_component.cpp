@@ -201,7 +201,8 @@ bool LocalPlannerComponent::initialize()
 
   // Initialize global trajectory listener
   global_solution_subscriber_ = node_->create_subscription<moveit_msgs::msg::MotionPlanResponse>(
-      config_.global_solution_topic, 1, [this](const moveit_msgs::msg::MotionPlanResponse::ConstSharedPtr& msg) {
+      config_.global_solution_topic, rclcpp::SystemDefaultsQoS(),
+      [this](const moveit_msgs::msg::MotionPlanResponse::ConstSharedPtr& msg) {
         // Add received trajectory to internal reference trajectory
         robot_trajectory::RobotTrajectory new_trajectory(planning_scene_monitor_->getRobotModel(), msg->group_name);
         moveit::core::RobotState start_state(planning_scene_monitor_->getRobotModel());
