@@ -64,12 +64,11 @@ bool callPlannerInterfaceSolve(const planning_interface::PlannerManager& planner
 
 bool callAdapter(const PlanningRequestAdapter& adapter, const PlanningRequestAdapter::PlannerFn& planner,
                  const planning_scene::PlanningSceneConstPtr& planning_scene,
-                 const planning_interface::MotionPlanRequest& req, planning_interface::MotionPlanResponse& res,
-                 std::vector<std::size_t>& added_path_index)
+                 const planning_interface::MotionPlanRequest& req, planning_interface::MotionPlanResponse& res)
 {
   try
   {
-    bool result = adapter.adaptAndPlan(planner, planning_scene, req, res, added_path_index);
+    bool result = adapter.adaptAndPlan(planner, planning_scene, req, res);
     RCLCPP_DEBUG_STREAM(LOGGER, adapter.getDescription() << ": " << moveit::core::error_code_to_string(res.error_code));
     return result;
   }
@@ -77,7 +76,6 @@ bool callAdapter(const PlanningRequestAdapter& adapter, const PlanningRequestAda
   {
     RCLCPP_ERROR(LOGGER, "Exception caught executing adapter '%s': %s\nSkipping adapter instead.",
                  adapter.getDescription().c_str(), ex.what());
-    added_path_index.clear();
     return planner(planning_scene, req, res);
   }
 }
@@ -87,15 +85,14 @@ bool callAdapter(const PlanningRequestAdapter& adapter, const PlanningRequestAda
 bool PlanningRequestAdapter::adaptAndPlan(const planning_interface::PlannerManagerPtr& planner,
                                           const planning_scene::PlanningSceneConstPtr& planning_scene,
                                           const planning_interface::MotionPlanRequest& req,
-                                          planning_interface::MotionPlanResponse& res,
-                                          std::vector<std::size_t>& added_path_index) const
+                                          planning_interface::MotionPlanResponse& res) const
 {
   return adaptAndPlan(
       [&planner](const planning_scene::PlanningSceneConstPtr& scene, const planning_interface::MotionPlanRequest& req,
                  planning_interface::MotionPlanResponse& res) {
         return callPlannerInterfaceSolve(*planner, scene, req, res);
       },
-      planning_scene, req, res, added_path_index);
+      planning_scene, req, res);
 }
 
 void PlanningRequestAdapterChain::addAdapter(const PlanningRequestAdapterConstPtr& adapter)
@@ -106,17 +103,13 @@ void PlanningRequestAdapterChain::addAdapter(const PlanningRequestAdapterConstPt
 bool PlanningRequestAdapterChain::adaptAndPlan(const planning_interface::PlannerManagerPtr& planner,
                                                const planning_scene::PlanningSceneConstPtr& planning_scene,
                                                const planning_interface::MotionPlanRequest& req,
-                                               planning_interface::MotionPlanResponse& res,
-                                               std::vector<std::size_t>& added_path_index) const
+                                               planning_interface::MotionPlanResponse& res) const
 {
   // if there are no adapters, run the planner directly
   if (adapters_.empty())
   {
-    added_path_index.clear();
     return callPlannerInterfaceSolve(*planner, planning_scene, req, res);
   }
-  // the index values added by each adapter
-  std::vector<std::vector<std::size_t>> added_path_index_each(adapters_.size());
 
   // if there are adapters, construct a function for each, in order,
   // so that in the end we have a nested sequence of functions that calls all adapters
@@ -129,30 +122,14 @@ bool PlanningRequestAdapterChain::adaptAndPlan(const planning_interface::Planner
 
   for (int i = adapters_.size() - 1; i >= 0; --i)
   {
-    fn = [&adapter = *adapters_[i], fn, &added_path_index = added_path_index_each[i]](
-             const planning_scene::PlanningSceneConstPtr& scene, const planning_interface::MotionPlanRequest& req,
-             planning_interface::MotionPlanResponse& res) {
-      return callAdapter(adapter, fn, scene, req, res, added_path_index);
-    };
+    fn = [&adapter = *adapters_[i],
+          fn](const planning_scene::PlanningSceneConstPtr& scene, const planning_interface::MotionPlanRequest& req,
+              planning_interface::MotionPlanResponse& res) { return callAdapter(adapter, fn, scene, req, res); };
   }
 
   bool result = fn(planning_scene, req, res);
-  added_path_index.clear();
 
-  // merge the index values from each adapter
-  for (std::vector<std::size_t>& added_states_by_each_adapter : added_path_index_each)
-  {
-    for (std::size_t& added_index : added_states_by_each_adapter)
-    {
-      for (std::size_t& index_in_path : added_path_index)
-      {
-        if (added_index <= index_in_path)
-          index_in_path++;
-      }
-      added_path_index.push_back(added_index);
-    }
-  }
-  std::sort(added_path_index.begin(), added_path_index.end());
+  std::sort(res.added_path_index.begin(), res.added_path_index.end());
   return result;
 }
 
