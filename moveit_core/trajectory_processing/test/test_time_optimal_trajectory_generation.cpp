@@ -496,6 +496,115 @@ TEST(time_optimal_trajectory_generation, testPluginAPI)
   ASSERT_EQ(first_trajectory_msg_end, third_trajectory_msg_end);
 }
 
+<<<<<<< HEAD
+=======
+TEST(time_optimal_trajectory_generation, testFixedNumWaypoints)
+{
+  // Test the version of computeTimeStamps() that gives a fixed num waypoints
+  constexpr size_t desired_num_waypoints = 42;
+
+  constexpr auto robot_name{ "panda" };
+  constexpr auto group_name{ "panda_arm" };
+
+  auto robot_model = moveit::core::loadTestingRobotModel(robot_name);
+  ASSERT_TRUE(robot_model) << "Failed to load robot model" << robot_name;
+  set_acceleration_limits(robot_model);
+  auto group = robot_model->getJointModelGroup(group_name);
+  ASSERT_TRUE(group) << "Failed to load joint model group " << group_name;
+  moveit::core::RobotState waypoint_state(robot_model);
+  waypoint_state.setToDefaultValues();
+
+  const double delta_t = 0.1;
+  robot_trajectory::RobotTrajectory trajectory(robot_model, group);
+  waypoint_state.setJointGroupPositions(group, std::vector<double>{ -0.5, -3.52, 1.35, -2.51, -0.88, 0.63, 0.0 });
+  trajectory.addSuffixWayPoint(waypoint_state, delta_t);
+  waypoint_state.setJointGroupPositions(group, std::vector<double>{ -0.45, -3.2, 1.2, -2.4, -0.8, 0.6, 0.0 });
+  trajectory.addSuffixWayPoint(waypoint_state, delta_t);
+
+  ASSERT_TRUE(trajectory_processing::totgComputeTimeStamps(desired_num_waypoints, trajectory))
+      << "Failed to compute time stamps";
+  // Allow +/-1 waypoint due to floating point error
+  EXPECT_NEAR(trajectory.getWayPointCount(), desired_num_waypoints, 1);
+}
+
+TEST(time_optimal_trajectory_generation, testSingleDofDiscontinuity)
+{
+  // Test a (prior) specific failure case
+  Eigen::VectorXd waypoint(1);
+  std::list<Eigen::VectorXd> waypoints;
+
+  const double start_position = 1.881943;
+  waypoint << start_position;
+  waypoints.push_back(waypoint);
+  waypoint << 2.600542;
+  waypoints.push_back(waypoint);
+
+  Eigen::VectorXd max_velocities(1);
+  max_velocities << 4.54;
+  Eigen::VectorXd max_accelerations(1);
+  max_accelerations << 28.0;
+
+  Trajectory trajectory(Path(waypoints, 0.1 /* path tolerance */), max_velocities, max_accelerations,
+                        0.001 /* timestep */);
+  EXPECT_TRUE(trajectory.isValid());
+
+  EXPECT_GT(trajectory.getDuration(), 0.0);
+  const double traj_duration = trajectory.getDuration();
+  EXPECT_NEAR(0.320681, traj_duration, 1e-3);
+
+  // Start matches
+  EXPECT_DOUBLE_EQ(start_position, trajectory.getPosition(0.0)[0]);
+  // Start at rest and end at rest
+  EXPECT_NEAR(0.0, trajectory.getVelocity(0.0)[0], 0.1);
+  EXPECT_NEAR(0.0, trajectory.getVelocity(traj_duration)[0], 0.1);
+
+  // Check vels and accels at all points
+  for (double time = 0; time < traj_duration; time += 0.01)
+  {
+    // This trajectory has a single switching point
+    double t_switch = 0.1603407;
+    if (time < t_switch)
+    {
+      EXPECT_NEAR(trajectory.getAcceleration(time)[0], max_accelerations[0], 1e-3) << "Time: " << time;
+    }
+    else if (time > t_switch)
+    {
+      EXPECT_NEAR(trajectory.getAcceleration(time)[0], -max_accelerations[0], 1e-3) << "Time: " << time;
+    }
+  }
+}
+
+TEST(time_optimal_trajectory_generation, testRelevantZeroMaxAccelerationsInvalidateTrajectory)
+{
+  const Eigen::Vector2d max_velocity(1, 1);
+  const Path path(std::list<Eigen::VectorXd>{ Eigen::Vector2d(0, 0), Eigen::Vector2d(1, 1) });
+
+  EXPECT_FALSE(Trajectory(path, max_velocity, /*max_acceleration=*/Eigen::Vector2d(0, 1)).isValid());
+  EXPECT_FALSE(Trajectory(path, max_velocity, /*max_acceleration=*/Eigen::Vector2d(1, 0)).isValid());
+  EXPECT_FALSE(Trajectory(path, max_velocity, /*max_acceleration=*/Eigen::Vector2d(0, 0)).isValid());
+}
+
+TEST(time_optimal_trajectory_generation, testIrrelevantZeroMaxAccelerationsDontInvalidateTrajectory)
+{
+  const Eigen::Vector2d max_velocity(1, 1);
+
+  EXPECT_TRUE(Trajectory(Path(std::list<Eigen::VectorXd>{ Eigen::Vector2d(0, 0), Eigen::Vector2d(0, 1) }), max_velocity,
+                         /*max_acceleration=*/Eigen::Vector2d(0, 1))
+                  .isValid());
+  EXPECT_TRUE(Trajectory(Path(std::list<Eigen::VectorXd>{ Eigen::Vector2d(0, 0), Eigen::Vector2d(1, 0) }), max_velocity,
+                         /*max_acceleration=*/Eigen::Vector2d(1, 0))
+                  .isValid());
+}
+
+TEST(time_optimal_trajectory_generation, testTimeStepZeroMakesTrajectoryInvalid)
+{
+  EXPECT_FALSE(Trajectory(Path(std::list<Eigen::VectorXd>{ Eigen::Vector2d(0, 0), Eigen::Vector2d(1, 1) }),
+                          /*max_velocity=*/Eigen::Vector2d(1, 1), /*max_acceleration=*/Eigen::Vector2d(1, 1),
+                          /*time_step=*/0)
+                   .isValid());
+}
+
+>>>>>>> 7c95367a2 ([TOTG] Exit loop when position can't change (#2307))
 int main(int argc, char** argv)
 {
   testing::InitGoogleTest(&argc, argv);
