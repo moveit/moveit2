@@ -428,7 +428,7 @@ void MotionPlanningDisplay::changedMetricsTextHeight()
 void MotionPlanningDisplay::displayTable(const std::map<std::string, double>& values, const Ogre::ColourValue& color,
                                          const Ogre::Vector3& pos, const Ogre::Quaternion& orient)
 {
-  if (values.size() == 0)
+  if (values.empty())
   {
     text_to_display_->setVisible(false);
     return;
