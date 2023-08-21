@@ -16,7 +16,8 @@ servo:
 
   ee_frame: {
     type: string,
-    description: "The name of end effector frame of your robot \
+    description: "The name of end effector frame of your robot, \
+                  this should also be the IK tip frame of your IK solver. \
                   This parameter does not have a default value and \
                   must be passed to the node during launch time."
   }
@@ -124,6 +125,15 @@ servo:
       default_value: 0.5,
       description: "Max joint angular/linear velocity. Only used for joint commands on joint_command_in_topic."
     }
+
+
+  angular_velocity_about_ee_frame: {
+    type: bool,
+    default_value: true,
+    description: "If true, the angular velocity specified in the twist command is applied about the ee frame axes \
+                  if false, the twist computed will include the linear component from rotation of ee frame about the planning frame, \
+                  due to the existence of a lever between the two frames."
+  }
 
   override_velocity_scaling_factor: {
     type: double,

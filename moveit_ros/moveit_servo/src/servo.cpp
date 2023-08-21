@@ -466,15 +466,47 @@ KinematicState Servo::getNextJointState(const ServoInput& command)
 
 const TwistCommand Servo::toPlanningFrame(const TwistCommand& command)
 {
+  Eigen::Vector<double, 6> transformed_twist = command.velocities;
+
   if (command.frame_id != servo_params_.planning_frame)
   {
-    RCLCPP_WARN_STREAM_THROTTLE(LOGGER, *node_->get_clock(), ROS_LOG_THROTTLE_PERIOD,
-                                "Twist command is not in planning frame, transformation may not be accurate.");
+    Eigen::Vector<double, 6> reordered_twist;
+    // (linear, angular) -> (angular, linear)
+    reordered_twist.head<3>() = command.velocities.tail<3>();
+    reordered_twist.tail<3>() = command.velocities.head<3>();
+
+    const auto command_to_planning_frame = tf2::transformToEigen(
+        transform_buffer_.lookupTransform(servo_params_.planning_frame, command.frame_id, rclcpp::Time(0)));
+
+    if (servo_params_.angular_velocity_about_ee_frame)
+    {
+      reordered_twist.head<3>() = command_to_planning_frame.rotation() * reordered_twist.head<3>();
+      reordered_twist.tail<3>() = command_to_planning_frame.rotation() * reordered_twist.tail<3>();
+    }
+    else
+    {
+      Eigen::MatrixXd adjoint(6, 6);
+      const Eigen::Matrix3d& rotation = command_to_planning_frame.rotation();
+      const Eigen::Vector3d& translation = command_to_planning_frame.translation();
+
+      Eigen::Matrix3d skew_translation;
+      skew_translation.row(0) << 0, -translation(2), translation(1);
+      skew_translation.row(1) << translation(2), 0, -translation(0);
+      skew_translation.row(2) << -translation(1), translation(0), 0;
+
+      adjoint.topLeftCorner(3, 3) = rotation;
+      adjoint.topRightCorner(3, 3).setZero();
+      adjoint.bottomLeftCorner(3, 3) = skew_translation * rotation;
+      adjoint.bottomRightCorner(3, 3) = rotation;
+
+      reordered_twist = adjoint * reordered_twist;
+    }
+
+    // (angular, linear) -> (linear, angular)
+    transformed_twist.head<3>() = reordered_twist.tail<3>();
+    transformed_twist.tail<3>() = reordered_twist.head<3>();
   }
-  const auto command_to_planning_frame =
-      transform_buffer_.lookupTransform(servo_params_.planning_frame, command.frame_id, rclcpp::Time(0));
-  Eigen::VectorXd transformed_twist = command.velocities;
-  tf2::doTransform(transformed_twist, transformed_twist, command_to_planning_frame);
+
   return TwistCommand{ servo_params_.planning_frame, transformed_twist };
 }
 
