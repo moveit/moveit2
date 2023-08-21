@@ -96,7 +96,7 @@ TEST_F(ServoCppFixture, NonPlanningFrameTwistTest)
 {
   moveit_servo::StatusCode status_curr, status_next, status_initial;
   moveit_servo::TwistCommand twist_non_zero{ servo_params_.ee_frame, { 0.0, 0.0, 0.0, 0.0, 0.0, 0.1 } };
-  moveit_servo::TwistCommand twist_zero{ servo_params_.planning_frame, { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 } };
+  moveit_servo::TwistCommand twist_zero{ servo_params_.ee_frame, { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 } };
 
   servo_test_instance_->setCommandType(moveit_servo::CommandType::TWIST);
   status_initial = servo_test_instance_->getStatus();
