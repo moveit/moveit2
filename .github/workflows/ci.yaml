@@ -23,17 +23,6 @@ jobs:
             ROS_DISTRO: iron
             IKFAST_TEST: true
             CLANG_TIDY: pedantic
-<<<<<<< HEAD
-            # Silent gmock/gtest warnings: https://github.com/ament/googletest/pull/21
-            AFTER_BUILD_UPSTREAM_WORKSPACE: |
-              git clone --quiet --branch clalancette/update-to-gtest-1.11 https://github.com/ament/googletest "${BASEDIR}/upstream_ws/src/googletest"
-              builder_run_build "/opt/ros/${ROS_DISTRO}" "${BASEDIR}/upstream_ws" --packages-select gtest_vendor gmock_vendor
-=======
-          - IMAGE: humble-ci
-            ROS_DISTRO: humble
-          - IMAGE: humble-ci-testing
-            ROS_DISTRO: humble
->>>>>>> f9f180471 (Remove source install of gtest branch in CI (#2284))
     env:
       CXXFLAGS: >-
         -Wall -Wextra -Wwrite-strings -Wunreachable-code -Wpointer-arith -Wredundant-decls
