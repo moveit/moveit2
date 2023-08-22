@@ -11,7 +11,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        distro: [humble, rolling]
+        distro: [rolling]
 
     env:
       ROS_DISTRO: ${{ matrix.distro }}
