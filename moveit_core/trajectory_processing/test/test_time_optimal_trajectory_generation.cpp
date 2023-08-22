@@ -496,8 +496,6 @@ TEST(time_optimal_trajectory_generation, testPluginAPI)
   ASSERT_EQ(first_trajectory_msg_end, third_trajectory_msg_end);
 }
 
-<<<<<<< HEAD
-=======
 TEST(time_optimal_trajectory_generation, testFixedNumWaypoints)
 {
   // Test the version of computeTimeStamps() that gives a fixed num waypoints
@@ -604,7 +602,6 @@ TEST(time_optimal_trajectory_generation, testTimeStepZeroMakesTrajectoryInvalid)
                    .isValid());
 }
 
->>>>>>> 7c95367a2 ([TOTG] Exit loop when position can't change (#2307))
 int main(int argc, char** argv)
 {
   testing::InitGoogleTest(&argc, argv);
