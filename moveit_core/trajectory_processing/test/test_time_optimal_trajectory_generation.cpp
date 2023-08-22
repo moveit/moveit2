@@ -496,35 +496,6 @@ TEST(time_optimal_trajectory_generation, testPluginAPI)
   ASSERT_EQ(first_trajectory_msg_end, third_trajectory_msg_end);
 }
 
-TEST(time_optimal_trajectory_generation, testFixedNumWaypoints)
-{
-  // Test the version of computeTimeStamps() that gives a fixed num waypoints
-  constexpr size_t desired_num_waypoints = 42;
-
-  constexpr auto robot_name{ "panda" };
-  constexpr auto group_name{ "panda_arm" };
-
-  auto robot_model = moveit::core::loadTestingRobotModel(robot_name);
-  ASSERT_TRUE(robot_model) << "Failed to load robot model" << robot_name;
-  set_acceleration_limits(robot_model);
-  auto group = robot_model->getJointModelGroup(group_name);
-  ASSERT_TRUE(group) << "Failed to load joint model group " << group_name;
-  moveit::core::RobotState waypoint_state(robot_model);
-  waypoint_state.setToDefaultValues();
-
-  const double delta_t = 0.1;
-  robot_trajectory::RobotTrajectory trajectory(robot_model, group);
-  waypoint_state.setJointGroupPositions(group, std::vector<double>{ -0.5, -3.52, 1.35, -2.51, -0.88, 0.63, 0.0 });
-  trajectory.addSuffixWayPoint(waypoint_state, delta_t);
-  waypoint_state.setJointGroupPositions(group, std::vector<double>{ -0.45, -3.2, 1.2, -2.4, -0.8, 0.6, 0.0 });
-  trajectory.addSuffixWayPoint(waypoint_state, delta_t);
-
-  ASSERT_TRUE(trajectory_processing::totgComputeTimeStamps(desired_num_waypoints, trajectory))
-      << "Failed to compute time stamps";
-  // Allow +/-1 waypoint due to floating point error
-  EXPECT_NEAR(trajectory.getWayPointCount(), desired_num_waypoints, 1);
-}
-
 TEST(time_optimal_trajectory_generation, testSingleDofDiscontinuity)
 {
   // Test a (prior) specific failure case
