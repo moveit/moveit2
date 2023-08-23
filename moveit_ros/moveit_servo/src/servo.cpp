@@ -474,19 +474,19 @@ const TwistCommand Servo::toPlanningFrame(const TwistCommand& command)
     reordered_twist.head<3>() = command.velocities.tail<3>();
     reordered_twist.tail<3>() = command.velocities.head<3>();
 
-    const auto command_to_planning_frame = tf2::transformToEigen(
+    const auto planning_to_command_tf = tf2::transformToEigen(
         transform_buffer_.lookupTransform(command.frame_id, servo_params_.planning_frame, rclcpp::Time(0)));
 
     if (servo_params_.apply_twist_commands_about_ee_frame)
     {
-      reordered_twist.head<3>() = command_to_planning_frame.rotation() * reordered_twist.head<3>();
-      reordered_twist.tail<3>() = command_to_planning_frame.rotation() * reordered_twist.tail<3>();
+      reordered_twist.head<3>() = planning_to_command_tf.rotation() * reordered_twist.head<3>();
+      reordered_twist.tail<3>() = planning_to_command_tf.rotation() * reordered_twist.tail<3>();
     }
     else
     {
       Eigen::MatrixXd adjoint(6, 6);
-      const Eigen::Matrix3d& rotation = command_to_planning_frame.rotation();
-      const Eigen::Vector3d& translation = command_to_planning_frame.translation();
+      const Eigen::Matrix3d& rotation = planning_to_command_tf.rotation();
+      const Eigen::Vector3d& translation = planning_to_command_tf.translation();
 
       Eigen::Matrix3d skew_translation;
       skew_translation.row(0) << 0, -translation(2), translation(1);

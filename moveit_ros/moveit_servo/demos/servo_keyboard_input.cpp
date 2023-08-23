@@ -195,7 +195,7 @@ int KeyboardServo::keyLoop()
   puts("Use 1|2|3|4|5|6|7 keys to joint jog. 'r' to reverse the direction of jogging.");
   puts("Use 'j' to select joint jog. ");
   puts("Use 't' to select twist ");
-  puts("Use 'w' and 'e' to switch between sending command in world frame or end effector frame");
+  puts("Use 'w' and 'e' to switch between sending command in planning frame or end effector frame");
   puts("'Q' to quit.");
 
   for (;;)
