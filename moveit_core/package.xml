@@ -2,7 +2,7 @@
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
   <name>moveit_core</name>
-  <version>2.7.3</version>
+  <version>2.7.4</version>
   <description>Core libraries used by MoveIt</description>
 
   <maintainer email="henningkayser@picknik.ai">Henning Kayser</maintainer>
@@ -26,40 +26,40 @@
   <buildtool_depend>eigen3_cmake_module</buildtool_depend>
   <buildtool_export_depend>eigen3_cmake_module</buildtool_export_depend>
 
-  <depend>generate_parameter_library</depend>
-  <depend>moveit_common</depend>
   <depend>angles</depend>
-  <depend>rclcpp</depend>
-  <depend>common_interfaces</depend>
   <depend>assimp</depend>
   <depend>boost</depend>
-  <depend>eigen</depend>
   <depend>bullet</depend>
+  <depend>common_interfaces</depend>
   <depend>eigen_stl_containers</depend>
-  <depend>libfcl-dev</depend>
+  <depend>eigen</depend>
+  <depend>generate_parameter_library</depend>
   <depend>geometric_shapes</depend>
   <depend>geometry_msgs</depend>
   <depend>kdl_parser</depend>
-  <depend>urdf</depend>
-  <depend>urdfdom</depend>
-  <depend>urdfdom_headers</depend>
+  <depend>libfcl-dev</depend>
+  <depend>moveit_common</depend>
   <depend>moveit_msgs</depend>
-  <depend>octomap</depend>
   <depend>octomap_msgs</depend>
+  <depend>octomap</depend>
   <depend>pluginlib</depend>
   <depend>pybind11_vendor</depend>
   <depend>random_numbers</depend>
+  <depend>rclcpp</depend>
+  <depend>ruckig</depend>
   <depend>sensor_msgs</depend>
   <depend>shape_msgs</depend>
   <depend>srdfdom</depend>
   <depend>std_msgs</depend>
-  <depend>tf2</depend>
   <depend>tf2_eigen</depend>
   <depend>tf2_geometry_msgs</depend>
   <depend>tf2_kdl</depend>
+  <depend>tf2</depend>
   <depend>trajectory_msgs</depend>
+  <depend>urdf</depend>
+  <depend>urdfdom_headers</depend>
+  <depend>urdfdom</depend>
   <depend>visualization_msgs</depend>
-  <depend>ruckig</depend>
 
   <doc_depend>python3-sphinx-rtd-theme</doc_depend>
 

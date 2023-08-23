@@ -184,7 +184,7 @@ void TrajectoryVisualization::onInitialize(const rclcpp::Node::SharedPtr& node, 
   }
 
   trajectory_topic_sub_ = node_->create_subscription<moveit_msgs::msg::DisplayTrajectory>(
-      trajectory_topic_property_->getStdString(), 2,
+      trajectory_topic_property_->getStdString(), rclcpp::SystemDefaultsQoS(),
       [this](const moveit_msgs::msg::DisplayTrajectory::ConstSharedPtr& msg) { return incomingDisplayTrajectory(msg); });
 }
 
@@ -294,7 +294,7 @@ void TrajectoryVisualization::changedTrajectoryTopic()
   if (!trajectory_topic_property_->getStdString().empty() && robot_state_)
   {
     trajectory_topic_sub_ = node_->create_subscription<moveit_msgs::msg::DisplayTrajectory>(
-        trajectory_topic_property_->getStdString(), 2,
+        trajectory_topic_property_->getStdString(), rclcpp::SystemDefaultsQoS(),
         [this](const moveit_msgs::msg::DisplayTrajectory::ConstSharedPtr& msg) {
           return incomingDisplayTrajectory(msg);
         });

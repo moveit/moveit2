@@ -65,10 +65,6 @@
 #include <moveit/robot_state/conversions.h>
 #include <moveit/trajectory_processing/trajectory_tools.h>
 
-#include <boost/format.hpp>
-#include <boost/algorithm/string/replace.hpp>
-#include <boost/algorithm/string/trim.hpp>
-
 #include <QShortcut>
 
 #include "ui_motion_planning_rviz_plugin_frame.h"
@@ -284,7 +280,7 @@ void MotionPlanningDisplay::toggleSelectPlanningGroupSubscription(bool enable)
   if (enable)
   {
     planning_group_sub_ = node_->create_subscription<std_msgs::msg::String>(
-        "/rviz/moveit/select_planning_group", 1,
+        "/rviz/moveit/select_planning_group", rclcpp::SystemDefaultsQoS(),
         [this](const std_msgs::msg::String::ConstSharedPtr& msg) { return selectPlanningGroupCallback(msg); });
   }
   else
@@ -432,16 +428,19 @@ void MotionPlanningDisplay::changedMetricsTextHeight()
 void MotionPlanningDisplay::displayTable(const std::map<std::string, double>& values, const Ogre::ColourValue& color,
                                          const Ogre::Vector3& pos, const Ogre::Quaternion& orient)
 {
-  // the line we want to render
-  std::stringstream ss;
-  for (const std::pair<const std::string, double>& value : values)
-    ss << boost::format("%-10s %-4.2f") % value.first % value.second << '\n';
-
-  if (ss.str().empty())
+  if (values.empty())
   {
     text_to_display_->setVisible(false);
     return;
   }
+
+  // the line we want to render
+  std::stringstream ss;
+  ss.setf(std::ios_base::fixed);
+  ss.precision(2);
+
+  for (const auto& [label, value] : values)
+    ss << label << ':' << value << '\n';
 
   text_to_display_->setCaption(ss.str());
   text_to_display_->setColor(color);

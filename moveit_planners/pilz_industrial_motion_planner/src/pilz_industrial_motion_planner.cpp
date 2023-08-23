@@ -156,7 +156,40 @@ CommandPlanner::getPlanningContext(const planning_scene::PlanningSceneConstPtr& 
 
 bool CommandPlanner::canServiceRequest(const moveit_msgs::msg::MotionPlanRequest& req) const
 {
-  return context_loader_map_.find(req.planner_id) != context_loader_map_.end();
+  if (context_loader_map_.find(req.planner_id) == context_loader_map_.end())
+  {
+    RCLCPP_ERROR(LOGGER, "Cannot service planning request because planner ID '%s' does not exist.",
+                 req.planner_id.c_str());
+    return false;
+  }
+
+  if (req.group_name.empty())
+  {
+    RCLCPP_ERROR(LOGGER, "Cannot service planning request because group name is not specified.");
+    return false;
+  }
+
+  auto joint_mode_group_ptr = model_->getJointModelGroup(req.group_name);
+  if (joint_mode_group_ptr == nullptr)
+  {
+    RCLCPP_ERROR(LOGGER, "Cannot service planning request because group '%s' does not exist.", req.group_name.c_str());
+    return false;
+  }
+
+  if (joint_mode_group_ptr->getSolverInstance() == nullptr)
+  {
+    RCLCPP_ERROR(LOGGER, "Cannot service planning request because group '%s' does have an IK solver instance.",
+                 req.group_name.c_str());
+    return false;
+  }
+
+  if (!req.trajectory_constraints.constraints.empty())
+  {
+    RCLCPP_ERROR(LOGGER, "Cannot service planning request because PILZ does not support 'trajectory constraints'.");
+    return false;
+  }
+
+  return true;
 }
 
 void CommandPlanner::registerContextLoader(
