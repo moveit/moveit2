@@ -255,7 +255,7 @@ public:
     return world_const_;
   }
 
-  // brief Get the representation of the world
+  /** \brief Get the representation of the world */
   const collision_detection::WorldPtr& getWorldNonConst()
   {
     // we always have a world representation

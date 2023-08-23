@@ -2,6 +2,33 @@
 Changelog for package moveit_core
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.7.4 (2023-05-18)
+------------------
+* Add documentation and cleanups for PlanningRequestAdapter and PlanningRequestAdapterChain classes (`#2142 <https://github.com/ros-planning/moveit2/issues/2142>`_)
+  * Cleanups
+  * Add documentation and more cleanups
+  * Revert size_t change
+* Fix collision checking in VisibilityConstraint (`#1986 <https://github.com/ros-planning/moveit2/issues/1986>`_)
+* Alphabetize, smart pointer not needed (`#2148 <https://github.com/ros-planning/moveit2/issues/2148>`_)
+  * Alphabetize, smart pointer not needed
+  * Readability
+* Fix getting variable bounds in mimic joints for TOTG (`#2030 <https://github.com/ros-planning/moveit2/issues/2030>`_)
+  * Fix getting variable bounds in mimic joints for TOTG
+  * Formatting
+  * Remove unnecessary code
+  * Do not include mimic joints in timing calculations
+  * Change joint variable bounds at mimic creation time
+  * Braces take you places
+  * Fix other single-line if-else without braces in file for clang_tidy
+  * Remove mimic bounds modification
+  * Variable renaming and a comment
+  * Fix index naming
+  ---------
+  Co-authored-by: Sebastian Jahr <sebastian.jahr@picknik.ai>
+  Co-authored-by: Jafar <cafer.abdi@gmail.com>
+  Co-authored-by: AndyZe <andyz@utexas.edu>
+* Contributors: AndyZe, Joseph Schornak, Sebastian Castro, Sebastian Jahr
+
 2.7.3 (2023-04-24)
 ------------------
 

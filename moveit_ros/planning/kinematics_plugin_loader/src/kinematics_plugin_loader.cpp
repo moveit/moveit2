@@ -49,7 +49,7 @@
 
 namespace kinematics_plugin_loader
 {
-rclcpp::Logger LOGGER = rclcpp::get_logger("kinematics_plugin_loader");
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("kinematics_plugin_loader");
 class KinematicsPluginLoader::KinematicsLoaderImpl
 {
 public:

@@ -2,6 +2,15 @@
 Changelog for package moveit_planners
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.7.4 (2023-05-18)
+------------------
+* Migrate STOMP from ros-planning/stomp_moveit (`#2158 <https://github.com/ros-planning/moveit2/issues/2158>`_)
+* Migrate stomp_moveit into moveit_planners
+  * Move package into moveit_planners subdirectory
+  * Rename stomp_moveit package to moveit_planners_stomp
+  * List moveit_planners_stomp as package dependency
+* Contributors: Henning Kayser
+
 2.7.3 (2023-04-24)
 ------------------
 

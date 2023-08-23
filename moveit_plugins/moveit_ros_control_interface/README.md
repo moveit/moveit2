@@ -2,7 +2,7 @@
 
 This package provides plugins of base class `moveit_controller_manager::MoveItControllerManager` and a new plugin base class for `moveit_controller_manager::MoveItControllerHandle` allocators.
 The allocator class is necessary because `moveit_controller_manager::MoveItControllerHandle` needs a name passed to the constructor.
-Two variantes are provided, `moveit_ros_control_interface::Ros2ControlManager` for interfacing a single ros_control node and `moveit_ros_control_interface::Ros2ControlMultiManager` for seamless integration with any number of ros_control nodes.
+Two variants are provided, `moveit_ros_control_interface::Ros2ControlManager` for interfacing a single ros_control node and `moveit_ros_control_interface::Ros2ControlMultiManager` for seamless integration with any number of ros_control nodes.
 
 
 ## moveit_ros_control_interface::Ros2ControlManager
@@ -17,13 +17,13 @@ These plugins should be registered with lookup names that match the correspondin
 Currently plugins for `position_controllers/JointTrajectoryController`, `velocity_controllers/JointTrajectoryController` and `effort_controllers/JointTrajectoryController` are available, which simply wrap `moveit_simple_controller_manager::FollowJointTrajectoryControllerHandle` instances.
 
 ### Setup
-In your MoveIt launch file (e.g. `ROBOT_moveit_config/launch/ROBOT_moveit_controller_manager.launch.xml`) set the `moveit_controller_manager` parameter:
+In your MoveIt launch file (e.g. `ROBOT_moveit_config/launch/ROBOT_moveit_controller_manager.launch.xml`), set the `moveit_controller_manager` parameter:
 ```
 <param name="moveit_controller_manager" value="moveit_ros_control_interface::Ros2ControlManager" />
 ```
 
-And make sure to set the `ros_control_namespace` parameter to the namespace (without the /controller_manager/ part) of the ros_control-based node you like to interface.
-If you are using the `moveit_setup_assistent` you can add it to `ROBOT_moveit_config/config/moveit_controllers.yaml`, e.g.:
+Make sure to set the `ros_control_namespace` parameter to the namespace (without the /controller_manager/ part) of the ros_control-based node you like to interface.
+If you are using `moveit_setup_assistant`, you can add it to `ROBOT_moveit_config/config/moveit_controllers.yaml`, e.g.:
 ```
 ros_control_namespace: /ROS_CONTROL_NODE
 controller_list:

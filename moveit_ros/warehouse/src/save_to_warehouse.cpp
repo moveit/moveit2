@@ -38,11 +38,11 @@
 #include <moveit/warehouse/constraints_storage.h>
 #include <moveit/warehouse/state_storage.h>
 #include <moveit/planning_scene_monitor/planning_scene_monitor.h>
-#include <boost/algorithm/string/join.hpp>
 #include <boost/program_options/cmdline.hpp>
 #include <boost/program_options/options_description.hpp>
 #include <boost/program_options/parsers.hpp>
 #include <boost/program_options/variables_map.hpp>
+#include <fmt/format.h>
 #include <tf2_ros/transform_listener.h>
 #include <rclcpp/executors.hpp>
 #include <rclcpp/experimental/buffers/intra_process_buffer.hpp>
@@ -210,16 +210,18 @@ int main(int argc, char** argv)
   psm.addUpdateCallback([&](auto&&) { return onSceneUpdate(psm, pss); });
 
   auto mplan_req_sub = node->create_subscription<moveit_msgs::msg::MotionPlanRequest>(
-      "motion_plan_request", 100,
+      "motion_plan_request", rclcpp::SystemDefaultsQoS(),
       [&](const moveit_msgs::msg::MotionPlanRequest& msg) { onMotionPlanRequest(msg, psm, pss); });
   auto constr_sub = node->create_subscription<moveit_msgs::msg::Constraints>(
-      "constraints", 100, [&](const moveit_msgs::msg::Constraints& msg) { onConstraints(msg, cs); });
+      "constraints", rclcpp::SystemDefaultsQoS(),
+      [&](const moveit_msgs::msg::Constraints& msg) { onConstraints(msg, cs); });
   auto state_sub = node->create_subscription<moveit_msgs::msg::RobotState>(
-      "robot_state", 100, [&](const moveit_msgs::msg::RobotState& msg) { onRobotState(msg, rs); });
+      "robot_state", rclcpp::SystemDefaultsQoS(),
+      [&](const moveit_msgs::msg::RobotState& msg) { onRobotState(msg, rs); });
 
   std::vector<std::string> topics;
   psm.getMonitoredTopics(topics);
-  RCLCPP_INFO_STREAM(LOGGER, "Listening for scene updates on topics " << boost::algorithm::join(topics, ", "));
+  RCLCPP_INFO_STREAM(LOGGER, "Listening for scene updates on topics " << fmt::format("{}", fmt::join(topics, ", ")));
   RCLCPP_INFO_STREAM(LOGGER, "Listening for planning requests on topic " << mplan_req_sub->get_topic_name());
   RCLCPP_INFO_STREAM(LOGGER, "Listening for named constraints on topic " << constr_sub->get_topic_name());
   RCLCPP_INFO_STREAM(LOGGER, "Listening for states on topic " << state_sub->get_topic_name());
