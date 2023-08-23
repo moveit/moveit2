@@ -934,7 +934,7 @@ void BenchmarkExecutor::runBenchmark(moveit_msgs::msg::MotionPlanRequest request
           .max_velocity_scaling_factor = request.max_velocity_scaling_factor,
           .max_acceleration_scaling_factor = request.max_acceleration_scaling_factor
         };
-        multi_pipeline_plan_request.multi_plan_request_parameters.push_back(plan_req_params);
+        multi_pipeline_plan_request.plan_request_parameter_vector.push_back(plan_req_params);
       }
 
       // Iterate runs
@@ -960,7 +960,8 @@ void BenchmarkExecutor::runBenchmark(moveit_msgs::msg::MotionPlanRequest request
         std::chrono::system_clock::time_point start = std::chrono::system_clock::now();
 
         auto const t1 = std::chrono::system_clock::now();
-        auto const response = planning_component->plan(multi_pipeline_plan_request, &moveit_cpp::getShortestSolution,
+        auto const response = planning_component->plan(multi_pipeline_plan_request,
+                                                       &moveit::planning_pipeline_interfaces::getShortestSolution,
                                                        nullptr, planning_scene_);
         auto const t2 = std::chrono::system_clock::now();
 

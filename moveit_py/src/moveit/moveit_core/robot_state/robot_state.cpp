@@ -79,8 +79,7 @@ Eigen::MatrixXd get_global_link_transform(const moveit::core::RobotState* self, 
 
 geometry_msgs::msg::Pose get_pose(const moveit::core::RobotState* self, const std::string& link_name)
 {
-  Eigen::Isometry3d pose = self->getGlobalLinkTransform(link_name);
-  return tf2::toMsg(pose);
+  return tf2::toMsg(self->getGlobalLinkTransform(link_name));
 }
 
 std::map<std::string, double> get_joint_positions(const moveit::core::RobotState* self)
@@ -224,9 +223,7 @@ void init_robot_state(py::module& m)
 
   py::class_<moveit::core::RobotState, std::shared_ptr<moveit::core::RobotState>>(robot_state, "RobotState",
                                                                                   R"(
-          Representation of a robot's state.
-          At the lowest level, a state is a collection of variables. Each variable has a name and can have position, velocity, acceleration and effort associated to it. Effort and acceleration share the memory area for efficiency reasons (one should not set both acceleration and effort in the same state and expect things to work). Often variables correspond to joint names as well (joints with one degree of freedom have one variable), but joints with multiple degrees of freedom have more variables. Operations are allowed at variable level, joint level (see JointModel) and joint group level (see JointModelGroup).
-                  For efficiency reasons a state computes forward kinematics in a lazy fashion. This can sometimes lead to problems if the update() function was not called on the state.
+          Representation of a robot's state. At the lowest level, a state is a collection of variables. Each variable has a name and can have position, velocity, acceleration and effort associated to it. Effort and acceleration share the memory area for efficiency reasons (one should not set both acceleration and effort in the same state and expect things to work). Often variables correspond to joint names as well (joints with one degree of freedom have one variable), but joints with multiple degrees of freedom have more variables. Operations are allowed at variable level, joint level (see JointModel) and joint group level (see JointModelGroup). For efficiency reasons a state computes forward kinematics in a lazy fashion. This can sometimes lead to problems if the update() function was not called on the state.
           )")
 
       .def(py::init<const std::shared_ptr<const moveit::core::RobotModel>&>(),
@@ -238,8 +235,8 @@ void init_robot_state(py::module& m)
 
            )")
       .def("__copy__", [](const moveit::core::RobotState* self) { return moveit::core::RobotState{ *self }; })
-      .def("__deepcopy__",
-           [](const moveit::core::RobotState* self, py::dict /* memo */) { return moveit::core::RobotState{ *self }; })
+      .def("__deepcopy__", [](const moveit::core::RobotState* self,
+                              py::dict /* memo */) { return moveit::core::RobotState{ *self }; })  // NOLINT
 
       // Get underlying robot model, frame transformations and jacobian
       .def_property("robot_model", &moveit::core::RobotState::getRobotModel, nullptr,
@@ -256,22 +253,24 @@ void init_robot_state(py::module& m)
       .def("get_frame_transform", &moveit_py::bind_robot_state::get_frame_transform, py::arg("frame_id"),
            py::return_value_policy::move,
            R"(
-           Get the transformation matrix from the model frame (root of model) to the frame identified by frame_id.
-           If frame_id was not found, frame_found is set to false and an identity transform is returned.
-       This method is restricted to frames defined within the robot state and doesn't include collision object present in the collision world. Please use the PlanningScene.get_frame_transform method for collision world objects.
-           Args:
+           Get the transformation matrix from the model frame (root of model) to the frame identified by frame_id. If frame_id was not found, frame_found is set to false and an identity transform is returned. This method is restricted to frames defined within the robot state and doesn't include collision object present in the collision world. Please use the PlanningScene.get_frame_transform method for collision world objects.
+
+	   Args:
                frame_id (str): The id of the frame to get the transform for.
-           Returns:
+
+	   Returns:
                :py:class:`numpy.ndarray`: The transformation matrix from the model frame to the frame identified by frame_id.
            )")
 
       .def("get_pose", &moveit_py::bind_robot_state::get_pose, py::arg("link_name"),
            R"(
            Get the pose of a link that is defined in the robot model.
-           Args:
+
+	   Args:
                link_name (str): The name of the link to get the pose for.
-           Returns:
-               :py:class: `geometry_msgs.msg.Pose`: A ROS geometry message containing the pose of the link.
+
+	   Returns:
+               geometry_msgs.msg.Pose: A ROS geometry message containing the pose of the link.
            )")
 
       .def("get_jacobian",
@@ -280,12 +279,15 @@ void init_robot_state(py::module& m)
            py::arg("joint_model_group_name"), py::arg("reference_point_position"), py::return_value_policy::move,
            R"(
            Compute the Jacobian with reference to the last link of a specified group.
-           Args:
+
+	   Args:
                joint_model_group_name (str): The name of the joint model group to compute the Jacobian for.
                reference_point_position (:py:class:`numpy.ndarray`): The position of the reference point in the link frame.
-           Returns:
+
+	   Returns:
                :py:class:`numpy.ndarray`: The Jacobian of the specified group with respect to the reference point.
-           Raises:
+
+	   Raises:
                Exception: If the group is not a chain.
            )")
 
@@ -296,12 +298,14 @@ void init_robot_state(py::module& m)
            py::arg("use_quaternion_representation") = false, py::return_value_policy::move,
            R"(
            Compute the Jacobian with reference to a particular point on a given link, for a specified group.
-           Args:
+
+	   Args:
                joint_model_group_name (str): The name of the joint model group to compute the Jacobian for.
                link_name (str): The name of the link model to compute the Jacobian for.
                reference_point_position (:py:class:`numpy.ndarray`): The position of the reference point in the link frame.
 	       use_quaternion_representation (bool): If true, the Jacobian will be represented using a quaternion representation, if false it defaults to euler angle representation.
-           Returns:
+
+	   Returns:
                :py:class:`numpy.ndarray`: The Jacobian of the specified group with respect to the reference point.
            )")
 
@@ -321,8 +325,8 @@ void init_robot_state(py::module& m)
           },
           py::return_value_policy::move,
           R"(
-	  str: the state information of the robot state.
-	  )")
+    str: the state information of the robot state.
+    )")
 
       // Getting and setting joint model group positions, velocities, accelerations
       .def_property("joint_positions", &moveit_py::bind_robot_state::get_joint_positions,
@@ -343,7 +347,8 @@ void init_robot_state(py::module& m)
            py::arg("joint_model_group_name"), py::arg("position_values"),
            R"(
            Sets the positions of the joints in the specified joint model group.
-           Args:
+
+	   Args:
                joint_model_group_name (str):
                position_values (:py:class:`numpy.ndarray`): The positions of the joints in the joint model group.
        )")
@@ -365,10 +370,12 @@ void init_robot_state(py::module& m)
            py::arg("joint_model_group_name"),
            R"(
            For a given group, get the position values of the variables that make up the group.
-           Args:
-               joint_model_group_name (str): The name of the joint model group to copy the positions for.
-           Returns:
-               :py:class:`numpy.ndarray`: The positions of the joints in the joint model group.
+
+	   Args:
+	       joint_model_group_name (str): The name of the joint model group to copy the positions for.
+
+	   Returns:
+	       :py:class:`numpy.ndarray`: The positions of the joints in the joint model group.
            )")
 
       .def("set_joint_group_velocities",
@@ -377,7 +384,8 @@ void init_robot_state(py::module& m)
            py::arg("joint_model_group_name"), py::arg("velocity_values"),
            R"(
            Sets the velocities of the joints in the specified joint model group.
-           Args:
+
+	   Args:
                joint_model_group_name (str): The name of the joint model group to set the velocities for.
                velocity_values (:py:class:`numpy.ndarray`): The velocities of the joints in the joint model group.
            )")
@@ -409,9 +417,11 @@ void init_robot_state(py::module& m)
            py::arg("joint_model_group_name"),
            R"(
            For a given group, get the acceleration values of the variables that make up the group.
-           Args:
+
+	   Args:
                joint_model_group_name (str): The name of the joint model group to copy the accelerations for.
-           Returns:
+
+	   Returns:
                :py:class:`numpy.ndarray`: The accelerations of the joints in the joint model group.
            )")
 
@@ -419,8 +429,10 @@ void init_robot_state(py::module& m)
       .def("get_global_link_transform", &moveit_py::bind_robot_state::get_global_link_transform, py::arg("link_name"),
            R"(
        Returns the transform of the specified link in the global frame.
+
        Args:
            link_name (str): The name of the link to get the transform for.
+
        Returns:
            :py:class:`numpy.ndarray`: The transform of the specified link in the global frame.
        )")
@@ -434,9 +446,10 @@ void init_robot_state(py::module& m)
           py::arg("joint_model_group_name"), py::arg("geometry_pose"), py::arg("tip_name"), py::arg("timeout") = 0.0,
           R"(
            Sets the state of the robot to the one that results from solving the inverse kinematics for the specified group.
-           Args:
+
+	   Args:
                joint_model_group_name (str): The name of the joint model group to set the state for.
-               geometry_pose (:py:class: `geometry_msgs.msg.Pose`): The pose of the end-effector to solve the inverse kinematics for.
+               geometry_pose (geometry_msgs.msg.Pose): The pose of the end-effector to solve the inverse kinematics for.
                tip_name (str): The name of the link that is the tip of the end-effector.
                timeout (float): The amount of time to wait for the IK solution to be found.
            )")
@@ -454,7 +467,8 @@ void init_robot_state(py::module& m)
            py::arg("joint_model_group"), py::arg("name"),
            R"(
            Set the joints in group to the position name defined in the SRDF.
-           Args:
+
+	   Args:
                joint_model_group (:py:class:`moveit_py.core.JointModelGroup`): The joint model group to set the default values for.
                name (str): The name of a predefined state which is defined in the robot model SRDF.
            )")
@@ -465,7 +479,8 @@ void init_robot_state(py::module& m)
            py::arg("joint_model_group_name"), py::arg("name"),
            R"(
            Set the joints in group to the position name defined in the SRDF.
-           Args:
+
+	   Args:
                joint_model_group_name (str): The name of the joint model group to set the default values for.
                name (str): The name of a predefined state which is defined in the robot model SRDF.
        )")
@@ -480,24 +495,23 @@ void init_robot_state(py::module& m)
            py::arg("joint_model_group"),
            R"(
            Set all joints in the joint model group to random positions within the default bounds.
-           Args:
+
+	   Args:
                joint_model_group (:py:class:`moveit_py.core.JointModelGroup`): The joint model group to set the random values for.
            )")
 
       .def("clear_attached_bodies", py::overload_cast<>(&moveit::core::RobotState::clearAttachedBodies),
            R"(
-      	   Clear all attached bodies.
-
-      	   We only allow for attaching of objects via the PlanningScene instance. This method allows any attached objects that are associated to this RobotState instance to be removed.
-	   )")
+           Clear all attached bodies. We only allow for attaching of objects via the PlanningScene instance. This method allows any attached objects that are associated to this RobotState instance to be removed.
+     )")
 
       .def("update", &moveit_py::bind_robot_state::update, py::arg("force") = false, py::arg("type") = "all",
            R"(
              Update state transforms.
 
              Args:
-	     	force (bool): when true forces the update of the transforms from scratch.
-		category (str): specifies the category to update. All indicates updating all transforms while "links_only" and "collisions_only" ensure that only links or collision transforms are updated. )");
+	         force (bool): when true forces the update of the transforms from scratch.
+		 category (str): specifies the category to update. All indicates updating all transforms while "links_only" and "collisions_only" ensure that only links or collision transforms are updated. )");
 }
 }  // namespace bind_robot_state
 }  // namespace moveit_py

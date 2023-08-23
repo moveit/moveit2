@@ -34,6 +34,8 @@
 
 #include <pilz_industrial_motion_planner/trajectory_generator_lin.h>
 
+#include <pilz_industrial_motion_planner/tip_frame_getter.h>
+
 #include <cassert>
 #include <sstream>
 #include <time.h>
@@ -71,7 +73,7 @@ void TrajectoryGeneratorLIN::extractMotionPlanInfo(const planning_scene::Plannin
   // goal given in joint space
   if (!req.goal_constraints.front().joint_constraints.empty())
   {
-    info.link_name = robot_model_->getJointModelGroup(req.group_name)->getSolverInstance()->getTipFrame();
+    info.link_name = getSolverTipFrame(robot_model_->getJointModelGroup(req.group_name));
 
     if (req.goal_constraints.front().joint_constraints.size() !=
         robot_model_->getJointModelGroup(req.group_name)->getActiveJointModelNames().size())
@@ -83,11 +85,6 @@ void TrajectoryGeneratorLIN::extractMotionPlanInfo(const planning_scene::Plannin
          << robot_model_->getJointModelGroup(req.group_name)->getActiveJointModelNames().size() << ')';
       throw JointNumberMismatch(os.str());
     }
-    // initializing all joints of the model
-    for (const auto& joint_name : robot_model_->getVariableNames())
-    {
-      info.goal_joint_position[joint_name] = 0;
-    }
 
     for (const auto& joint_item : req.goal_constraints.front().joint_constraints)
     {
@@ -96,7 +93,7 @@ void TrajectoryGeneratorLIN::extractMotionPlanInfo(const planning_scene::Plannin
 
     // Ignored return value because at this point the function should always
     // return 'true'.
-    computeLinkFK(robot_model_, info.link_name, info.goal_joint_position, info.goal_pose);
+    computeLinkFK(scene, info.link_name, info.goal_joint_position, info.goal_pose);
   }
   // goal given in Cartesian space
   else
@@ -133,7 +130,7 @@ void TrajectoryGeneratorLIN::extractMotionPlanInfo(const planning_scene::Plannin
 
   // Ignored return value because at this point the function should always
   // return 'true'.
-  computeLinkFK(robot_model_, info.link_name, info.start_joint_position, info.start_pose);
+  computeLinkFK(scene, info.link_name, info.start_joint_position, info.start_pose);
 
   // check goal pose ik before Cartesian motion plan starts
   std::map<std::string, double> ik_solution;

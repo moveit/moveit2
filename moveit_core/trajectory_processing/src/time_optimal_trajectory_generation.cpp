@@ -325,6 +325,12 @@ Trajectory::Trajectory(const Path& path, const Eigen::VectorXd& max_velocity, co
   , time_step_(time_step)
   , cached_time_(std::numeric_limits<double>::max())
 {
+  if (time_step_ == 0)
+  {
+    valid_ = false;
+    RCLCPP_ERROR(LOGGER, "The trajectory is invalid because the time step is 0.");
+    return;
+  }
   trajectory_.push_back(TrajectoryStep(0.0, 0.0));
   double after_acceleration = getMinMaxPathAcceleration(0.0, 0.0, true);
   while (valid_ && !integrateForward(trajectory_, after_acceleration) && valid_)
@@ -565,6 +571,16 @@ bool Trajectory::integrateForward(std::list<TrajectoryStep>& trajectory, double 
 
     trajectory.push_back(TrajectoryStep(path_pos, path_vel));
     acceleration = getMinMaxPathAcceleration(path_pos, path_vel, true);
+
+    if (path_vel == 0 && acceleration == 0)
+    {
+      // The position will never change if velocity and acceleration are zero.
+      // The loop will spin indefinitely as no exit condition is met.
+      valid_ = false;
+      RCLCPP_ERROR(LOGGER, "Error while integrating forward: zero acceleration and velocity. Are any relevant "
+                           "acceleration components limited to zero?");
+      return true;
+    }
 
     if (path_vel > getAccelerationMaxPathVelocity(path_pos) || path_vel > getVelocityMaxPathVelocity(path_pos))
     {
@@ -831,7 +847,6 @@ Eigen::VectorXd Trajectory::getVelocity(double time) const
   const double acceleration =
       2.0 * (it->path_pos_ - previous->path_pos_ - time_step * previous->path_vel_) / (time_step * time_step);
 
-  time_step = time - previous->time_;
   const double path_pos =
       previous->path_pos_ + time_step * previous->path_vel_ + 0.5 * time_step * time_step * acceleration;
   const double path_vel = previous->path_vel_ + time_step * acceleration;
@@ -849,7 +864,6 @@ Eigen::VectorXd Trajectory::getAcceleration(double time) const
   const double acceleration =
       2.0 * (it->path_pos_ - previous->path_pos_ - time_step * previous->path_vel_) / (time_step * time_step);
 
-  time_step = time - previous->time_;
   const double path_pos =
       previous->path_pos_ + time_step * previous->path_vel_ + 0.5 * time_step * time_step * acceleration;
   const double path_vel = previous->path_vel_ + time_step * acceleration;
@@ -887,18 +901,19 @@ bool TimeOptimalTrajectoryGeneration::computeTimeStamps(robot_trajectory::RobotT
   // Get the velocity and acceleration limits for all active joints
   const moveit::core::RobotModel& rmodel = group->getParentModel();
   const std::vector<std::string>& vars = group->getVariableNames();
-  std::vector<size_t> indices;
-  if (!group->computeJointVariableIndices(group->getActiveJointModelNames(), indices))
+  std::vector<size_t> active_joint_indices;
+  if (!group->computeJointVariableIndices(group->getActiveJointModelNames(), active_joint_indices))
   {
     RCLCPP_ERROR(LOGGER, "Failed to get active variable indices.");
   }
 
-  const size_t num_joints = indices.size();
-  Eigen::VectorXd max_velocity(num_joints);
-  Eigen::VectorXd max_acceleration(num_joints);
-  for (const auto idx : indices)
+  const size_t num_active_joints = active_joint_indices.size();
+  Eigen::VectorXd max_velocity(num_active_joints);
+  Eigen::VectorXd max_acceleration(num_active_joints);
+  for (size_t idx = 0; idx < num_active_joints; ++idx)
   {
-    const moveit::core::VariableBounds& bounds = rmodel.getVariableBounds(vars[idx]);
+    // For active joints only (skip mimic joints and other types)
+    const moveit::core::VariableBounds& bounds = rmodel.getVariableBounds(vars[active_joint_indices[idx]]);
 
     // Limits need to be non-zero, otherwise we never exit
     if (bounds.velocity_bounded_)

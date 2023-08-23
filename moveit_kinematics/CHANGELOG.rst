@@ -2,6 +2,20 @@
 Changelog for package moveit_kinematics
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.7.4 (2023-05-18)
+------------------
+
+2.7.3 (2023-04-24)
+------------------
+
+2.7.2 (2023-04-18)
+------------------
+* Fix moveit_kinematics dependency on moveit_ros_planning (`#2109 <https://github.com/ros-planning/moveit2/issues/2109>`_)
+  This dependency is unconditionally used even if tests are disabled.
+* Update pre-commit (`#2094 <https://github.com/ros-planning/moveit2/issues/2094>`_)
+* Readability: kinematic_state -> robot_state (`#2078 <https://github.com/ros-planning/moveit2/issues/2078>`_)
+* Contributors: Scott K Logan, Sebastian Jahr, Shobuj Paul
+
 2.7.1 (2023-03-23)
 ------------------
 * Fix member naming (`#1949 <https://github.com/ros-planning/moveit2/issues/1949>`_)

@@ -94,9 +94,10 @@ MultiQueryPlannerAllocator::~MultiQueryPlannerAllocator()
   // Store all planner data
   for (const auto& entry : planner_data_storage_paths_)
   {
-    RCLCPP_INFO(LOGGER, "Storing planner data");
     ob::PlannerData data(planners_[entry.first]->getSpaceInformation());
     planners_[entry.first]->getPlannerData(data);
+    RCLCPP_INFO_STREAM(LOGGER, "Storing planner data. NumEdges: " << data.numEdges()
+                                                                  << ", NumVertices: " << data.numVertices());
     storage_.store(data, entry.second.c_str());
   }
 }
@@ -117,11 +118,17 @@ ompl::base::PlannerPtr MultiQueryPlannerAllocator::allocatePlanner(const ob::Spa
   }
   if (multi_query_planning_enabled)
   {
-    // If we already have an instance, use that one
+    // If we already have an instance, reuse it's planning data
+    // FIXME: make reusing PlannerPtr not crash, so that we don't have to reconstruct a PlannerPtr instance
     auto planner_map_it = planners_.find(new_name);
     if (planner_map_it != planners_.end())
     {
-      return planner_map_it->second;
+      ob::PlannerData data(si);
+      planner_map_it->second->getPlannerData(data);
+      RCLCPP_INFO_STREAM(LOGGER, "Reusing planner data. NumEdges: " << data.numEdges()
+                                                                    << ", NumVertices: " << data.numVertices());
+      planners_[planner_map_it->first] = std::shared_ptr<ob::Planner>{ allocatePersistentPlanner<T>(data) };
+      return planners_[planner_map_it->first];
     }
 
     // Certain multi-query planners allow loading and storing the generated planner data. This feature can be
@@ -173,9 +180,10 @@ MultiQueryPlannerAllocator::allocatePlannerImpl(const ob::SpaceInformationPtr& s
   // Try to initialize planner with loaded planner data
   if (load_planner_data)
   {
-    RCLCPP_INFO(LOGGER, "Loading planner data");
     ob::PlannerData data(si);
     storage_.load(file_path.c_str(), data);
+    RCLCPP_INFO_STREAM(LOGGER, "Loading planner data. NumEdges: " << data.numEdges()
+                                                                  << ", NumVertices: " << data.numVertices());
     planner = std::shared_ptr<ob::Planner>{ allocatePersistentPlanner<T>(data) };
     if (!planner)
     {

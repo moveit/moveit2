@@ -42,6 +42,8 @@
 #include <moveit/robot_model/robot_model.h>
 #include <geometry_msgs/msg/pose.hpp>
 
+#include <rclcpp/node.hpp>
+
 namespace moveit
 {
 namespace core
@@ -69,6 +71,16 @@ urdf::ModelInterfaceSharedPtr loadModelInterface(const std::string& robot_name);
  * \returns an SRDF Model constructed from robot_name's URDF and SRDF.
  */
 srdf::ModelSharedPtr loadSRDFModel(const std::string& robot_name);
+
+/** \brief Load an IK solver plugin for the given joint model group
+ * \param[in] jmg joint model group to load the plugin for
+ * \param[in] base_link base link of chain
+ * \param[in] tip_link tip link of chain
+ * \param[in] plugin name of the plugin ("KDL", or full name)
+ * \param[in] timeout default solver timeout
+ */
+void loadIKPluginForGroup(rclcpp::Node::SharedPtr node, JointModelGroup* jmg, const std::string& base_link,
+                          const std::string& tip_link, std::string plugin = "KDL", double timeout = 0.1);
 
 /** \brief Easily build different robot models for testing.
  *  Essentially a programmer-friendly light wrapper around URDF and SRDF.

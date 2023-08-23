@@ -36,6 +36,7 @@
 
 #include <moveit/depth_image_octomap_updater/depth_image_octomap_updater.h>
 #include <moveit/occupancy_map_monitor/occupancy_map_monitor.h>
+#include <cmath>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
 #include <tf2/LinearMath/Vector3.h>
 #include <tf2/LinearMath/Transform.h>
@@ -400,7 +401,7 @@ void DepthImageOctomapUpdater::depthImageCallback(const sensor_msgs::msg::Image:
     inv_fy_ = 1.0 / K4_;
 
     // if there are any NaNs, discard data
-    if (!(px == px && py == py && inv_fx_ == inv_fx_ && inv_fy_ == inv_fy_))
+    if (isnan(px) || isnan(py) || isnan(inv_fx_) || isnan(inv_fy_))
       return;
 
     // Pre-compute some constants

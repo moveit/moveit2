@@ -2,6 +2,85 @@
 Changelog for package moveit_ros_planning
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.7.4 (2023-05-18)
+------------------
+* Update default planning configs to use AddTimeOptimalParameterization (`#2167 <https://github.com/ros-planning/moveit2/issues/2167>`_)
+* Deprecate MoveItCpp::execute() use of blocking flag (`#1984 <https://github.com/ros-planning/moveit2/issues/1984>`_)
+* Contributors: Anthony Baker, Lucas Wendland
+
+2.7.3 (2023-04-24)
+------------------
+* Replace check for the ROS_DISTRO env variable with a check for the rclcpp version (`#2135 <https://github.com/ros-planning/moveit2/issues/2135>`_)
+* Replace Variable PROJECT_NAME in CMakeLists.txt with the actual name (`#2020 <https://github.com/ros-planning/moveit2/issues/2020>`_)
+* Contributors: Jafar, Shobuj Paul
+
+2.7.2 (2023-04-18)
+------------------
+* Switch from qos_event.hpp to event_handler.hpp (`#2111 <https://github.com/ros-planning/moveit2/issues/2111>`_)
+  * Switch from qos_event.hpp to event_handler.hpp
+  * moveit_common: Add a cmake interface library to keep humble support on main
+  * Include qos_event.hpp or event_handler.hpp depending on the ROS 2 version
+  * Fix ament_lint_cmake
+  * Fix clang-tidy
+  * PRIVATE linking in some cases
+  * Update moveit_common/cmake/moveit_package.cmake
+  Co-authored-by: Chris Thrasher <chrisjthrasher@gmail.com>
+  * Fix servo and cleanup excessive CMake variable usage
+  * Cleanup & make compiling
+  * Small variable naming and const cleanup
+  * Restore OpenCV linking
+  * Public/private linking fixup
+  * Revert "Restore OpenCV linking"
+  This reverts commit 57a9efa806e59223e35a1f7e998d7b52f930c263.
+  ---------
+  Co-authored-by: JafarAbdi <jafar.uruc@gmail.com>
+  Co-authored-by: Jafar <cafer.abdi@gmail.com>
+  Co-authored-by: AndyZe <andyz@utexas.edu>
+  Co-authored-by: Chris Thrasher <chrisjthrasher@gmail.com>
+* Fix MoveItCpp issues (port from MoveIt1) (`#2001 <https://github.com/ros-planning/moveit2/issues/2001>`_)
+  * Fix MoveitCpp's const member accessors
+  They should return a ConstPtr instead of a const Ptr&!
+  * Fix SEVERE ClassLoader warning when releasing MoveItCpp
+  - PSM was released before copy of its RobotModel -> removed extra RobotModel copy
+  - clearContents() was broken:
+  - resets in wrong order: psm\_ should be last
+  - trajectory_execution_manager\_ was missing
+  I suggest to omit clearContents() and rely on the (correct) ordering of member variables.
+  While this is not explicit, we ensure that we don't miss any newly added member variable.
+  Fix: https://github.com/ros-planning/moveit2/issues/1597
+  ---------
+  Co-authored-by: Sebastian Jahr <sebastian.jahr@picknik.ai>
+  Co-authored-by: Jafar <cafer.abdi@gmail.com>
+  Co-authored-by: Sebastian Jahr <sebastian.jahr@tuta.io>
+  Co-authored-by: JafarAbdi <jafar.uruc@gmail.com>
+* Extract parallel planning from moveit cpp (`#2043 <https://github.com/ros-planning/moveit2/issues/2043>`_)
+  * Add parallel_planning_interface
+  * Add parallel planning interface
+  * Rename package to pipeline_planning_interface
+  * Move plan_responses_container into own header + source file
+  * Add plan_responses_contrainer source file
+  * Add solution selection and stopping criterion function files
+  * Remove parallel planning from moveit_cpp
+  * Move parallel planning into planning package
+  * Update moveit_cpp
+  * Drop planning_interface changes
+  * Add documentation
+  * Update other moveit packages
+  * Remove removed header
+  * Address CI complains
+  * Address clang-tidy complains
+  * Address clang-tidy complains 2
+  * Address clang-tidy complains 3
+  * Extract planning pipeline map creation function from moveit_cpp
+  * Cleanup comment
+  * Use const moveit::core::RobotModelConstPtr&
+  * Formatting
+  * Add header descriptions
+  * Remove superfluous TODOs
+  * Cleanup
+* Move displaced launch file into planning_component_tools (`#2044 <https://github.com/ros-planning/moveit2/issues/2044>`_)
+* Contributors: Robert Haschke, Sebastian Jahr
+
 2.7.1 (2023-03-23)
 ------------------
 * Fix member naming (`#1949 <https://github.com/ros-planning/moveit2/issues/1949>`_)

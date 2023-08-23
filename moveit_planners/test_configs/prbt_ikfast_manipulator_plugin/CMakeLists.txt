@@ -57,14 +57,14 @@ pluginlib_export_plugin_description_file(moveit_core prbt_manipulator_moveit_ikf
 
 install(
   TARGETS prbt_manipulator_moveit_ikfast_plugin prbt_ikfast_kinematics_parameters
-  EXPORT ${PROJECT_NAME}Targets
+  EXPORT moveit_resources_prbt_ikfast_manipulator_pluginTargets
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
   RUNTIME DESTINATION bin
   INCLUDES DESTINATION include/moveit_resources_prbt_ikfast_manipulator_plugin
 )
 
-ament_export_targets(${PROJECT_NAME}Targets HAS_LIBRARY_TARGET)
+ament_export_targets(moveit_resources_prbt_ikfast_manipulator_pluginTargets HAS_LIBRARY_TARGET)
 ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS} generate_parameter_library)
 
 ament_package()

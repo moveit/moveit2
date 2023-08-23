@@ -2,6 +2,17 @@
 Changelog for package moveit
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.7.4 (2023-05-18)
+------------------
+
+2.7.3 (2023-04-24)
+------------------
+
+2.7.2 (2023-04-18)
+------------------
+* moveit_py: Python interface for MoveIt 2
+* Contributors: Jens Vanhooydonck, Peter David Fagan, Robert Haschke, Sebastian Jahr
+
 2.7.1 (2023-03-23)
 ------------------
 

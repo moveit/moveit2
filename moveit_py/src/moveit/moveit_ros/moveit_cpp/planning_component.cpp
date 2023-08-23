@@ -45,8 +45,8 @@ planning_interface::MotionPlanResponse
 plan(std::shared_ptr<moveit_cpp::PlanningComponent>& planning_component,
      std::shared_ptr<moveit_cpp::PlanningComponent::PlanRequestParameters>& single_plan_parameters,
      std::shared_ptr<moveit_cpp::PlanningComponent::MultiPipelinePlanRequestParameters>& multi_plan_parameters,
-     std::optional<const moveit_cpp::PlanningComponent::SolutionCallbackFunction> solution_selection_callback,
-     std::optional<moveit_cpp::PlanningComponent::StoppingCriterionFunction> stopping_criterion_callback)
+     std::optional<const moveit::planning_pipeline_interfaces::SolutionSelectionFunction> solution_selection_function,
+     std::optional<moveit::planning_pipeline_interfaces::StoppingCriterionFunction> stopping_criterion_callback)
 {
   // parameter argument checking
   if (single_plan_parameters && multi_plan_parameters)
@@ -70,18 +70,19 @@ plan(std::shared_ptr<moveit_cpp::PlanningComponent>& planning_component,
         std::const_pointer_cast<const moveit_cpp::PlanningComponent::MultiPipelinePlanRequestParameters>(
             multi_plan_parameters);
 
-    if (solution_selection_callback && stopping_criterion_callback)
+    if (solution_selection_function && stopping_criterion_callback)
     {
-      return planning_component->plan(*const_multi_plan_parameters, std::ref(*solution_selection_callback),
+      return planning_component->plan(*const_multi_plan_parameters, std::ref(*solution_selection_function),
                                       *stopping_criterion_callback);
     }
-    else if (solution_selection_callback)
+    else if (solution_selection_function)
     {
-      return planning_component->plan(*const_multi_plan_parameters, std::ref(*solution_selection_callback));
+      return planning_component->plan(*const_multi_plan_parameters, std::ref(*solution_selection_function));
     }
     else if (stopping_criterion_callback)
     {
-      return planning_component->plan(*const_multi_plan_parameters, moveit_cpp::getShortestSolution,
+      return planning_component->plan(*const_multi_plan_parameters,
+                                      moveit::planning_pipeline_interfaces::getShortestSolution,
                                       *stopping_criterion_callback);
     }
     else
@@ -190,8 +191,8 @@ void init_plan_request_parameters(py::module& m)
   py::class_<moveit_cpp::PlanningComponent::PlanRequestParameters,
              std::shared_ptr<moveit_cpp::PlanningComponent::PlanRequestParameters>>(m, "PlanRequestParameters",
                                                                                     R"(
-			     Planner parameters provided with a MotionPlanRequest.
-			     )")
+                             Planner parameters provided with a MotionPlanRequest.
+                             )")
       .def(py::init([](std::shared_ptr<moveit_cpp::MoveItCpp>& moveit_cpp, const std::string& ns) {
         const rclcpp::Node::SharedPtr& node = moveit_cpp->getNode();
         moveit_cpp::PlanningComponent::PlanRequestParameters params;
@@ -232,8 +233,8 @@ void init_multi_plan_request_parameters(py::module& m)
              std::shared_ptr<moveit_cpp::PlanningComponent::MultiPipelinePlanRequestParameters>>(
       m, "MultiPipelinePlanRequestParameters",
       R"(
-			     Planner parameters provided with a MotionPlanRequest.
-			     )")
+                             Planner parameters provided with a MotionPlanRequest.
+                             )")
       .def(py::init([](std::shared_ptr<moveit_cpp::MoveItCpp>& moveit_cpp,
                        const std::vector<std::string>& planning_pipeline_names) {
         const rclcpp::Node::SharedPtr& node = moveit_cpp->getNode();
@@ -241,7 +242,7 @@ void init_multi_plan_request_parameters(py::module& m)
         return params;
       }))
       .def_readonly("multi_plan_request_parameters",
-                    &moveit_cpp::PlanningComponent::MultiPipelinePlanRequestParameters::multi_plan_request_parameters);
+                    &moveit_cpp::PlanningComponent::MultiPipelinePlanRequestParameters::plan_request_parameter_vector);
 }
 void init_planning_component(py::module& m)
 {
@@ -254,10 +255,16 @@ void init_planning_component(py::module& m)
            py::arg("joint_model_group_name"), py::arg("moveit_py_instance"),
            R"(
             Constructs a PlanningComponent instance.
-            Args:
+
+	    Args:
                 joint_model_group_name (str): The name of the joint model group to plan for.
                 moveit_py_instance (:py:class:`moveit_py.core.MoveItPy`): The MoveItPy instance to use.
         )")
+
+      .def("get_named_target_state_values", &moveit_cpp::PlanningComponent::getNamedTargetStateValues, py::arg("name"),
+           R"(
+           dict: The joint values for targets specified by name.
+           )")
 
       .def_property("planning_group_name", &moveit_cpp::PlanningComponent::getPlanningGroupName, nullptr,
                     R"(
@@ -269,13 +276,6 @@ void init_planning_component(py::module& m)
                     list of str: The names of the named robot states available as targets.
                     )")
 
-      // TODO (peterdavidfagan): write test case for this method.
-      .def_property("named_target_state_values", &moveit_cpp::PlanningComponent::getNamedTargetStateValues, nullptr,
-                    py::return_value_policy::move,
-                    R"(
-                    dict: The joint values for targets specified by name.
-                    )")
-
       // start state methods
       .def("set_start_state_to_current_state", &moveit_cpp::PlanningComponent::setStartStateToCurrentState,
            R"(
@@ -285,11 +285,12 @@ void init_planning_component(py::module& m)
       .def("set_start_state", &moveit_py::bind_planning_component::set_start_state,
            py::arg("configuration_name") = nullptr, py::arg("robot_state") = nullptr,
            R"(
-	   Set the start state of the plan to the given robot state.
+           Set the start state of the plan to the given robot state.
+
 	   Args:
-	       configuration_name (str): The name of the configuration to use as the start state.
-	       robot_state (:py:class:`moveit_msgs.msg.RobotState`): The robot state to use as the start state.
-	   )")
+               configuration_name (str): The name of the configuration to use as the start state.
+               robot_state (:py:class:`moveit_msgs.msg.RobotState`): The robot state to use as the start state.
+           )")
 
       .def("get_start_state", &moveit_cpp::PlanningComponent::getStartState,
            py::return_value_policy::reference_internal,
@@ -307,32 +308,35 @@ void init_planning_component(py::module& m)
            py::arg("pose_stamped_msg") = nullptr, py::arg("pose_link") = nullptr,
            py::arg("motion_plan_constraints") = nullptr,
            R"(
-	   Set the goal state for the planning component.
+           Set the goal state for the planning component.
+
 	   Args:
-	       configuration_name (str): The name of the configuration to set the goal to.
-	       robot_state (moveit_py.core.RobotState): The state to set the goal to.
-	       pose_stamped_msg (geometry_msgs.msg.PoseStamped): A PoseStamped ros message.
-	       pose_link (str): The name of the link for which the pose constraint is specified.
-	       motion_plan_constraints (list): The motion plan constraints to set the goal to.
-	   )")
+               configuration_name (str): The name of the configuration to set the goal to.
+               robot_state (moveit_py.core.RobotState): The state to set the goal to.
+               pose_stamped_msg (geometry_msgs.msg.PoseStamped): A PoseStamped ros message.
+               pose_link (str): The name of the link for which the pose constraint is specified.
+               motion_plan_constraints (list): The motion plan constraints to set the goal to.
+           )")
 
       // plan/execution methods
 
       // TODO (peterdavidfagan): improve the plan API
       .def("plan", &moveit_py::bind_planning_component::plan, py::arg("single_plan_parameters") = nullptr,
-           py::arg("multi_plan_parameters") = nullptr, py::arg("solution_selection_callback") = nullptr,
+           py::arg("multi_plan_parameters") = nullptr, py::arg("solution_selection_function") = nullptr,
            py::arg("stopping_criterion_callback") = nullptr, py::return_value_policy::move,
            R"(
-      	   Plan a motion plan using the current start and goal states.
-      	   Args:
-      	       plan_parameters (moveit_py.core.PlanParameters): The parameters to use for planning.
-      	   )")
+           Plan a motion plan using the current start and goal states.
+
+	   Args:
+               plan_parameters (moveit_py.core.PlanParameters): The parameters to use for planning.
+           )")
 
       .def("set_path_constraints", &moveit_cpp::PlanningComponent::setPathConstraints, py::arg("path_constraints"),
            py::return_value_policy::move,
            R"(
            Set the path constraints generated from a moveit msg Constraints.
-           Args:
+
+	   Args:
                path_constraints (moveit_msgs.msg.Constraints): The path constraints.
         )")
 
@@ -340,9 +344,9 @@ void init_planning_component(py::module& m)
       .def("set_workspace", &moveit_cpp::PlanningComponent::setWorkspace, py::arg("min_x"), py::arg("min_y"),
            py::arg("min_z"), py::arg("max_x"), py::arg("max_y"), py::arg("max_z"),
            R"(
-           Specify the workspace bounding box.
-           The box is specified in the planning frame (i.e. relative to the robot root link start position). The workspace applies only to the root joint of a mobile robot (driving base, quadrotor) and does not limit the workspace of a robot arm.
-           Args:
+           Specify the workspace bounding box. The box is specified in the planning frame (i.e. relative to the robot root link start position). The workspace applies only to the root joint of a mobile robot (driving base, quadrotor) and does not limit the workspace of a robot arm.
+
+	   Args:
                min_x (float): The minimum x value of the workspace.
                min_y (float): The minimum y value of the workspace.
                min_z (float): The minimum z value of the workspace.

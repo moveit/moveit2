@@ -5,40 +5,38 @@ project(moveit_ros_move_group LANGUAGES CXX)
 find_package(moveit_common REQUIRED)
 moveit_package()
 
-find_package(ament_cmake REQUIRED)
-find_package(moveit_core REQUIRED)
-find_package(moveit_ros_planning REQUIRED)
-find_package(rclcpp REQUIRED)
-find_package(rclcpp_action REQUIRED)
-find_package(pluginlib REQUIRED)
-find_package(std_srvs REQUIRED)
-find_package(tf2 REQUIRED)
-find_package(tf2_ros REQUIRED)
-find_package(tf2_geometry_msgs REQUIRED)
-
 # Finds Boost Components
 include(ConfigExtras.cmake)
 
 set(THIS_PACKAGE_INCLUDE_DEPENDS
+  fmt
   ament_cmake
+  moveit_core
+  moveit_ros_occupancy_map_monitor
+  moveit_ros_planning
+  pluginlib
   rclcpp
   rclcpp_action
   std_srvs
   tf2
   tf2_geometry_msgs
   tf2_ros
-  moveit_core
-  moveit_ros_occupancy_map_monitor
-  moveit_ros_planning
-  pluginlib
 )
 
-include_directories(include)
+foreach(Dependency IN ITEMS ${THIS_PACKAGE_INCLUDE_DEPENDS})
+  find_package(${Dependency} REQUIRED)
+endforeach()
 
 add_library(moveit_move_group_capabilities_base SHARED
   src/move_group_context.cpp
   src/move_group_capability.cpp
 )
+target_include_directories(moveit_move_group_capabilities_base PUBLIC
+  $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include/moveit_ros_move_group>
+)
+set_target_properties(moveit_move_group_capabilities_base PROPERTIES VERSION "${moveit_ros_move_group_VERSION}")
+ament_target_dependencies(moveit_move_group_capabilities_base ${THIS_PACKAGE_INCLUDE_DEPENDS})
 
 add_library(moveit_move_group_default_capabilities SHARED
   src/default_capabilities/apply_planning_scene_service_capability.cpp
@@ -53,14 +51,13 @@ add_library(moveit_move_group_default_capabilities SHARED
   src/default_capabilities/state_validation_service_capability.cpp
   src/default_capabilities/tf_publisher_capability.cpp
 )
-
-set_target_properties(moveit_move_group_capabilities_base
-  PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
-
-set_target_properties(moveit_move_group_default_capabilities
-  PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
-
-ament_target_dependencies(moveit_move_group_capabilities_base ${THIS_PACKAGE_INCLUDE_DEPENDS})
+target_include_directories(moveit_move_group_default_capabilities PUBLIC
+  $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include/moveit_ros_move_group>
+)
+set_target_properties(moveit_move_group_default_capabilities PROPERTIES VERSION "${moveit_ros_move_group_VERSION}")
+ament_target_dependencies(moveit_move_group_default_capabilities ${THIS_PACKAGE_INCLUDE_DEPENDS})
+target_link_libraries(moveit_move_group_default_capabilities moveit_move_group_capabilities_base)
 
 add_executable(move_group src/move_group.cpp)
 target_include_directories(move_group PUBLIC include)
@@ -68,50 +65,40 @@ ament_target_dependencies(move_group  ${THIS_PACKAGE_INCLUDE_DEPENDS} Boost)
 target_link_libraries(move_group moveit_move_group_capabilities_base)
 
 add_executable(list_move_group_capabilities src/list_capabilities.cpp)
-ament_target_dependencies(list_move_group_capabilities  ${THIS_PACKAGE_INCLUDE_DEPENDS} Boost)
-
-ament_target_dependencies(moveit_move_group_default_capabilities ${THIS_PACKAGE_INCLUDE_DEPENDS})
-target_link_libraries(moveit_move_group_default_capabilities moveit_move_group_capabilities_base)
+ament_target_dependencies(list_move_group_capabilities ${THIS_PACKAGE_INCLUDE_DEPENDS})
+target_link_libraries(list_move_group_capabilities moveit_move_group_capabilities_base fmt)
 
 install(
   TARGETS
     move_group
     list_move_group_capabilities
   RUNTIME
-  DESTINATION lib/${PROJECT_NAME})
+  DESTINATION lib/moveit_ros_move_group
+)
 
 install(
   TARGETS
     moveit_move_group_default_capabilities
     moveit_move_group_capabilities_base
-  EXPORT ${PROJECT_NAME}Targets
+  EXPORT moveit_ros_move_groupTargets
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
   RUNTIME DESTINATION bin
-  INCLUDES DESTINATION include/moveit_ros_move_group
 )
 
-install(DIRECTORY include/ DESTINATION include/moveit_ros_move_group)
-
-ament_export_targets(${PROJECT_NAME}Targets HAS_LIBRARY_TARGET)
-ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS})
+install(
+  DIRECTORY include/
+  DESTINATION include/moveit_ros_move_group
+)
 
 install(
   PROGRAMS
     scripts/load_map
     scripts/save_map
-  DESTINATION lib/${PROJECT_NAME}
+  DESTINATION lib/moveit_ros_move_group
 )
 
-pluginlib_export_plugin_description_file(${PROJECT_NAME} default_capabilities_plugin_description.xml)
-
-if(BUILD_TESTING)
-# TODO(henningkayser): enable rostests
-#  find_package(rostest REQUIRED) # rostest under development in ROS2 https://github.com/ros-planning/moveit2/issues/23
-  # this test is flaky
-  # add_rostest(test/test_cancel_before_plan_execution.test)
-  # add_rostest(test/test_check_state_validity_in_empty_scene.test)
-endif()
+pluginlib_export_plugin_description_file(moveit_ros_move_group default_capabilities_plugin_description.xml)
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
@@ -124,6 +111,14 @@ if(BUILD_TESTING)
 
   # Run all lint tests in package.xml except those listed above
   ament_lint_auto_find_test_dependencies()
+
+# TODO(henningkayser): enable rostests
+#  find_package(rostest REQUIRED) # rostest under development in ROS2 https://github.com/ros-planning/moveit2/issues/23
+  # this test is flaky
+  # add_rostest(test/test_cancel_before_plan_execution.test)
+  # add_rostest(test/test_check_state_validity_in_empty_scene.test)
 endif()
 
+ament_export_targets(moveit_ros_move_groupTargets HAS_LIBRARY_TARGET)
+ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS})
 ament_package(CONFIG_EXTRAS ConfigExtras.cmake)

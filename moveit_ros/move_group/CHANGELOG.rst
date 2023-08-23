@@ -2,6 +2,38 @@
 Changelog for package moveit_ros_move_group
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.7.4 (2023-05-18)
+------------------
+* Fix MoveGroup action cancel callback (`#2118 <https://github.com/ros-planning/moveit2/issues/2118>`_)
+  Moves the execution callback into its own thread to avoid blocking and actually calls the preempt function in with the cancel callback.
+* Scale acceleration and velocity of cartesian interpolations (`#1968 <https://github.com/ros-planning/moveit2/issues/1968>`_)
+* Contributors: Jonathan Grebe, Yadu
+
+2.7.3 (2023-04-24)
+------------------
+* Replace Variable PROJECT_NAME in CMakeLists.txt with the actual name (`#2020 <https://github.com/ros-planning/moveit2/issues/2020>`_)
+* Contributors: Shobuj Paul
+
+2.7.2 (2023-04-18)
+------------------
+* Fix MoveItCpp issues (port from MoveIt1) (`#2001 <https://github.com/ros-planning/moveit2/issues/2001>`_)
+  * Fix MoveitCpp's const member accessors
+  They should return a ConstPtr instead of a const Ptr&!
+  * Fix SEVERE ClassLoader warning when releasing MoveItCpp
+  - PSM was released before copy of its RobotModel -> removed extra RobotModel copy
+  - clearContents() was broken:
+  - resets in wrong order: psm\_ should be last
+  - trajectory_execution_manager\_ was missing
+  I suggest to omit clearContents() and rely on the (correct) ordering of member variables.
+  While this is not explicit, we ensure that we don't miss any newly added member variable.
+  Fix: https://github.com/ros-planning/moveit2/issues/1597
+  ---------
+  Co-authored-by: Sebastian Jahr <sebastian.jahr@picknik.ai>
+  Co-authored-by: Jafar <cafer.abdi@gmail.com>
+  Co-authored-by: Sebastian Jahr <sebastian.jahr@tuta.io>
+  Co-authored-by: JafarAbdi <jafar.uruc@gmail.com>
+* Contributors: Robert Haschke
+
 2.7.1 (2023-03-23)
 ------------------
 * Fix member naming (`#1949 <https://github.com/ros-planning/moveit2/issues/1949>`_)

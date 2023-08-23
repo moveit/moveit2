@@ -148,7 +148,7 @@ TEST_F(ControllersTest, AddDefaultControllers)
   // Number of the planning groups defined in the model srdf
   size_t group_count = srdf_config->getGroups().size();
 
-  // Test that addDefaultControllers() did accually add a controller for the new_group
+  // Test that addDefaultControllers() did actually add a controller for the new_group
   EXPECT_EQ(ros2_controllers_config->getControllers().size(), group_count);
 }
 

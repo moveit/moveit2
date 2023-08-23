@@ -2,6 +2,22 @@
 Changelog for package pilz_industrial_motion_planner
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.7.4 (2023-05-18)
+------------------
+
+2.7.3 (2023-04-24)
+------------------
+* Replace Variable PROJECT_NAME in CMakeLists.txt with the actual name (`#2020 <https://github.com/ros-planning/moveit2/issues/2020>`_)
+* Contributors: Shobuj Paul
+
+2.7.2 (2023-04-18)
+------------------
+* Update pre-commit (`#2094 <https://github.com/ros-planning/moveit2/issues/2094>`_)
+* PILZ: Throw if IK solver doesn't exist (`#2082 <https://github.com/ros-planning/moveit2/issues/2082>`_)
+  * Throw if IK solver doesn't exist
+  * Format
+* Contributors: Sebastian Jahr, Shobuj Paul
+
 2.7.1 (2023-03-23)
 ------------------
 * Remove "new" from smart pointer instantiation (`#2019 <https://github.com/ros-planning/moveit2/issues/2019>`_)

@@ -24,15 +24,15 @@ include_directories(
   include
 )
 
-add_library(${PROJECT_NAME} SHARED
+add_library(chomp_motion_planner SHARED
   src/chomp_cost.cpp
   src/chomp_parameters.cpp
   src/chomp_trajectory.cpp
   src/chomp_optimizer.cpp
   src/chomp_planner.cpp
 )
-set_target_properties(${PROJECT_NAME} PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
-ament_target_dependencies(${PROJECT_NAME} ${THIS_PACKAGE_INCLUDE_DEPENDS})
+set_target_properties(chomp_motion_planner PROPERTIES VERSION "${chomp_motion_planner_VERSION}")
+ament_target_dependencies(chomp_motion_planner ${THIS_PACKAGE_INCLUDE_DEPENDS})
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
@@ -49,8 +49,8 @@ if(BUILD_TESTING)
 endif()
 
 install(
-  TARGETS ${PROJECT_NAME}
-  EXPORT ${PROJECT_NAME}Targets
+  TARGETS chomp_motion_planner
+  EXPORT chomp_motion_plannerTargets
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
   RUNTIME DESTINATION bin
@@ -58,7 +58,7 @@ install(
 )
 install(DIRECTORY include/ DESTINATION include/chomp_motion_planner)
 
-ament_export_targets(${PROJECT_NAME}Targets HAS_LIBRARY_TARGET)
+ament_export_targets(chomp_motion_plannerTargets HAS_LIBRARY_TARGET)
 ament_export_dependencies(${THIS_PACKAGE_EXPORT_DEPENDS})
 
 ament_package()

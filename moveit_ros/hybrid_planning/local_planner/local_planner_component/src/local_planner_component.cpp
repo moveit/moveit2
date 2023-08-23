@@ -95,7 +95,9 @@ bool LocalPlannerComponent::initialize()
   // Start state and scene monitors
   planning_scene_monitor_->startSceneMonitor(config_.monitored_planning_scene_topic);
   planning_scene_monitor_->startWorldGeometryMonitor(config_.collision_object_topic);
-  planning_scene_monitor_->startStateMonitor(config_.joint_states_topic);
+  planning_scene_monitor_->startStateMonitor(config_.joint_states_topic, "/attached_collision_object");
+  planning_scene_monitor_->monitorDiffs(true);
+  planning_scene_monitor_->stopPublishingPlanningScene();
 
   // Load trajectory operator plugin
   try
@@ -201,7 +203,8 @@ bool LocalPlannerComponent::initialize()
 
   // Initialize global trajectory listener
   global_solution_subscriber_ = node_->create_subscription<moveit_msgs::msg::MotionPlanResponse>(
-      config_.global_solution_topic, 1, [this](const moveit_msgs::msg::MotionPlanResponse::ConstSharedPtr& msg) {
+      config_.global_solution_topic, rclcpp::SystemDefaultsQoS(),
+      [this](const moveit_msgs::msg::MotionPlanResponse::ConstSharedPtr& msg) {
         // Add received trajectory to internal reference trajectory
         robot_trajectory::RobotTrajectory new_trajectory(planning_scene_monitor_->getRobotModel(), msg->group_name);
         moveit::core::RobotState start_state(planning_scene_monitor_->getRobotModel());
@@ -264,8 +267,6 @@ void LocalPlannerComponent::executeIteration()
     // If the planner received an action request and a global solution it starts to plan locally
     case LocalPlannerState::LOCAL_PLANNING_ACTIVE:
     {
-      planning_scene_monitor_->updateSceneWithCurrentState();
-
       // Read current robot state
       const moveit::core::RobotState current_robot_state = [this] {
         planning_scene_monitor::LockedPlanningSceneRO ls(planning_scene_monitor_);

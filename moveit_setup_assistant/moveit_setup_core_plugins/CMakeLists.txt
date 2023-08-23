@@ -53,8 +53,8 @@ if(BUILD_TESTING)
   ament_lint_auto_find_test_dependencies()
 endif()
 
-install(TARGETS ${PROJECT_NAME}
-        EXPORT ${PROJECT_NAME}Targets
+install(TARGETS moveit_setup_core_plugins
+        EXPORT moveit_setup_core_pluginsTargets
         ARCHIVE DESTINATION lib
         LIBRARY DESTINATION lib
         RUNTIME DESTINATION bin
@@ -67,7 +67,7 @@ install(DIRECTORY include/
         DESTINATION include/moveit_setup_core_plugins
 )
 
-ament_export_targets(${PROJECT_NAME}Targets HAS_LIBRARY_TARGET)
+ament_export_targets(moveit_setup_core_pluginsTargets HAS_LIBRARY_TARGET)
 pluginlib_export_plugin_description_file(moveit_setup_framework moveit_setup_framework_plugins.xml)
 
 ament_package()

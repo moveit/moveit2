@@ -45,7 +45,6 @@
 #include <moveit_py/moveit_py_utils/ros_msg_typecasters.h>
 #include <moveit/moveit_cpp/moveit_cpp.h>
 #include <moveit/moveit_cpp/planning_component.h>
-#include <moveit/moveit_cpp/plan_solutions.hpp>
 #include <geometry_msgs/msg/pose_stamped.hpp>
 #include <moveit_msgs/msg/constraints.hpp>
 
@@ -63,8 +62,8 @@ planning_interface::MotionPlanResponse
 plan(std::shared_ptr<moveit_cpp::PlanningComponent>& planning_component,
      std::shared_ptr<moveit_cpp::PlanningComponent::PlanRequestParameters>& single_plan_parameters,
      std::shared_ptr<moveit_cpp::PlanningComponent::MultiPipelinePlanRequestParameters>& multi_plan_parameters,
-     std::optional<const moveit_cpp::PlanningComponent::SolutionCallbackFunction> solution_selection_callback,
-     std::optional<moveit_cpp::PlanningComponent::StoppingCriterionFunction> stopping_criterion_callback);
+     std::optional<const moveit::planning_pipeline_interfaces::SolutionSelectionFunction> solution_selection_function,
+     std::optional<moveit::planning_pipeline_interfaces::StoppingCriterionFunction> stopping_criterion_callback);
 
 bool set_goal(std::shared_ptr<moveit_cpp::PlanningComponent>& planning_component,
               std::optional<std::string> configuration_name, std::optional<moveit::core::RobotState> robot_state,

@@ -20,19 +20,19 @@ set(THIS_PACKAGE_INCLUDE_DEPENDS
   rsl
 )
 
-add_library(${PROJECT_NAME} SHARED src/chomp_optimizer_adapter.cpp)
-set_target_properties(${PROJECT_NAME} PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
-ament_target_dependencies(${PROJECT_NAME} ${THIS_PACKAGE_INCLUDE_DEPENDS})
+add_library(moveit_chomp_optimizer_adapter SHARED src/chomp_optimizer_adapter.cpp)
+set_target_properties(moveit_chomp_optimizer_adapter PROPERTIES VERSION "${moveit_chomp_optimizer_adapter_VERSION}")
+ament_target_dependencies(moveit_chomp_optimizer_adapter ${THIS_PACKAGE_INCLUDE_DEPENDS})
 
 install(
-  TARGETS ${PROJECT_NAME}
-  EXPORT ${PROJECT_NAME}Targets
+  TARGETS moveit_chomp_optimizer_adapter
+  EXPORT moveit_chomp_optimizer_adapterTargets
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
   RUNTIME DESTINATION bin
 )
 
-ament_export_targets(${PROJECT_NAME}Targets HAS_LIBRARY_TARGET)
+ament_export_targets(moveit_chomp_optimizer_adapterTargets HAS_LIBRARY_TARGET)
 
 pluginlib_export_plugin_description_file(moveit_core chomp_optimizer_adapter_plugin_description.xml)
 

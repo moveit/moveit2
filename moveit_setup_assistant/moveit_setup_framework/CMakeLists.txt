@@ -8,6 +8,7 @@ moveit_package()
 find_package(ament_cmake REQUIRED)
 find_package(ament_cmake_ros REQUIRED)
 find_package(ament_index_cpp REQUIRED)
+find_package(fmt REQUIRED)
 find_package(moveit_core REQUIRED)
 find_package(moveit_ros_planning REQUIRED)
 find_package(moveit_ros_visualization REQUIRED)
@@ -29,7 +30,7 @@ qt5_wrap_cpp(MOC_FILES
     include/moveit_setup_framework/qt/double_list_widget.hpp
 )
 
-add_library(${PROJECT_NAME}
+add_library(moveit_setup_framework
     src/helper_widgets.cpp
     src/double_list_widget.cpp
     src/urdf_config.cpp
@@ -42,11 +43,11 @@ add_library(${PROJECT_NAME}
     src/xml_syntax_highlighter.cpp
     ${MOC_FILES}
 )
-target_include_directories(${PROJECT_NAME} PUBLIC
+target_include_directories(moveit_setup_framework PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include/moveit_setup_framework>
 )
-ament_target_dependencies(${PROJECT_NAME}
+ament_target_dependencies(moveit_setup_framework
   ament_index_cpp
   moveit_core
   moveit_ros_planning
@@ -69,20 +70,21 @@ install(DIRECTORY include/
         DESTINATION include/moveit_setup_framework
 )
 install(FILES moveit_setup_framework_plugins.xml
-        DESTINATION share/${PROJECT_NAME}
+        DESTINATION share/moveit_setup_framework
 )
 
-install(DIRECTORY templates DESTINATION share/${PROJECT_NAME})
+install(DIRECTORY templates DESTINATION share/moveit_setup_framework)
 
-ament_export_targets(${PROJECT_NAME}Targets HAS_LIBRARY_TARGET)
-install(TARGETS ${PROJECT_NAME}
-        EXPORT ${PROJECT_NAME}Targets
+ament_export_targets(moveit_setup_frameworkTargets HAS_LIBRARY_TARGET)
+install(TARGETS moveit_setup_framework
+        EXPORT moveit_setup_frameworkTargets
         LIBRARY DESTINATION lib
         ARCHIVE DESTINATION lib
         RUNTIME DESTINATION bin
         INCLUDES DESTINATION include/moveit_setup_framework
 )
 
+ament_export_dependencies(fmt)
 ament_export_dependencies(rclcpp)
 ament_export_dependencies(Qt5Core)
 ament_export_dependencies(Qt5Widgets)

@@ -1,4 +1,6 @@
-set(SOURCE_FILES
+generate_parameter_library(default_plan_request_adapter_parameters res/default_plan_request_adapter_params.yaml)
+
+add_library(moveit_default_planning_request_adapter_plugins SHARED
   src/empty.cpp
   src/fix_start_state_bounds.cpp
   src/fix_start_state_collision.cpp
@@ -9,7 +11,7 @@ set(SOURCE_FILES
   src/resolve_constraint_frames.cpp
 )
 
-add_library(moveit_default_planning_request_adapter_plugins SHARED ${SOURCE_FILES})
+target_link_libraries(moveit_default_planning_request_adapter_plugins default_plan_request_adapter_parameters)
 
 set_target_properties(moveit_default_planning_request_adapter_plugins PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
 ament_target_dependencies(moveit_default_planning_request_adapter_plugins
@@ -17,16 +19,4 @@ ament_target_dependencies(moveit_default_planning_request_adapter_plugins
   moveit_core
   rclcpp
   pluginlib
-)
-
-add_executable(moveit_list_request_adapter_plugins src/list.cpp)
-ament_target_dependencies(moveit_list_request_adapter_plugins
-  Boost
-  moveit_core
-  rclcpp
-  pluginlib
-)
-
-install(TARGETS moveit_list_request_adapter_plugins
-  DESTINATION lib/${PROJECT_NAME}
 )

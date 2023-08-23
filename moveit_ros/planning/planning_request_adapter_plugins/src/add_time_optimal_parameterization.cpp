@@ -38,6 +38,8 @@
 #include <moveit/trajectory_processing/time_optimal_trajectory_generation.h>
 #include <class_loader/class_loader.hpp>
 
+#include <default_plan_request_adapter_parameters.hpp>
+
 namespace default_planner_request_adapters
 {
 using namespace trajectory_processing;
@@ -48,15 +50,10 @@ static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_ros.add_time_opt
 class AddTimeOptimalParameterization : public planning_request_adapter::PlanningRequestAdapter
 {
 public:
-  AddTimeOptimalParameterization() : planning_request_adapter::PlanningRequestAdapter()
-  {
-  }
-
   void initialize(const rclcpp::Node::SharedPtr& node, const std::string& parameter_namespace) override
   {
-    path_tolerance_ = getParam(node, LOGGER, parameter_namespace, "path_tolerance", 0.1);
-    resample_dt_ = getParam(node, LOGGER, parameter_namespace, "resample_dt", 0.1);
-    min_angle_change_ = getParam(node, LOGGER, parameter_namespace, "min_angle_change", 0.001);
+    param_listener_ =
+        std::make_unique<default_plan_request_adapter_parameters::ParamListener>(node, parameter_namespace);
   }
 
   std::string getDescription() const override
@@ -65,14 +62,15 @@ public:
   }
 
   bool adaptAndPlan(const PlannerFn& planner, const planning_scene::PlanningSceneConstPtr& planning_scene,
-                    const planning_interface::MotionPlanRequest& req, planning_interface::MotionPlanResponse& res,
-                    std::vector<std::size_t>& /*added_path_index*/) const override
+                    const planning_interface::MotionPlanRequest& req,
+                    planning_interface::MotionPlanResponse& res) const override
   {
     bool result = planner(planning_scene, req, res);
     if (result && res.trajectory)
     {
       RCLCPP_DEBUG(LOGGER, " Running '%s'", getDescription().c_str());
-      TimeOptimalTrajectoryGeneration totg(path_tolerance_, resample_dt_, min_angle_change_);
+      const auto params = param_listener_->get_params();
+      TimeOptimalTrajectoryGeneration totg(params.path_tolerance, params.resample_dt, params.min_angle_change);
       if (!totg.computeTimeStamps(*res.trajectory, req.max_velocity_scaling_factor, req.max_acceleration_scaling_factor))
       {
         RCLCPP_WARN(LOGGER, " Time parametrization for the solution path failed.");
@@ -84,9 +82,7 @@ public:
   }
 
 protected:
-  double path_tolerance_;
-  double resample_dt_;
-  double min_angle_change_;
+  std::unique_ptr<default_plan_request_adapter_parameters::ParamListener> param_listener_;
 };
 
 }  // namespace default_planner_request_adapters

@@ -1,11 +1,19 @@
-# ghcr.io/ros-planning/moveit2:${ROS_DISTRO}-ci-testing
+# ghcr.io/ros-planning/moveit2:${OUR_ROS_DISTRO}-ci-testing
 # CI image using the ROS testing repository
 
-ARG ROS_DISTRO=rolling
 FROM osrf/ros2:testing
 LABEL maintainer Robert Haschke rhaschke@techfak.uni-bielefeld.de
 
 ENV TERM xterm
+
+# Overwrite the ROS_DISTRO set in osrf/ros2:testing to the distro tied to this Dockerfile (OUR_ROS_DISTRO).
+# In case ROS_DISTRO is now different from what was set in osrf/ros2:testing, run `rosdep update` again
+# to get any missing dependencies.
+# https://docs.docker.com/engine/reference/builder/#using-arg-variables explains why ARG and ENV can't have
+# the same name (ROS_DISTRO is an ENV in the osrf/ros2:testing image).
+ARG OUR_ROS_DISTRO=rolling
+ENV ROS_DISTRO=${OUR_ROS_DISTRO}
+RUN rosdep update --rosdistro $ROS_DISTRO
 
 # Install ROS 2 base packages and build tools
 # We are installing ros-<distro>-ros-base here to mimic the behavior of the ros:<distro>-ros-base images.

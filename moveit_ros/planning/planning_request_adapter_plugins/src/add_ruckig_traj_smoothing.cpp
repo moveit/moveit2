@@ -31,7 +31,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *******************************************************************************/
 
-/* Author: Jack Center, Wyatt Rees, Andy Zelenak */
+/* Author: Jack Center, Wyatt Rees, Andy Zelenak
+ * Desc:  An adapter that uses ruckig (https://github.com/pantor/ruckig) to adapt the trajectory to be jerk-constrained and
+ * time-optimal. It is necessary to run another trajectory generation algorithm before this adapter, because the
+ * algorithm requires a fully configured trajectory as initial guess.
+ */
 
 #include <moveit/planning_request_adapter/planning_request_adapter.h>
 #include <moveit/trajectory_processing/ruckig_traj_smoothing.h>
@@ -43,14 +47,11 @@ using namespace trajectory_processing;
 
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_ros.add_traj_smoothing");
 
-/** @brief This adapter uses the time-optimal trajectory generation method */
+/** @brief Use ruckig (https://github.com/pantor/ruckig) to adapt the trajectory to be jerk-constrained and
+ * time-optimal.*/
 class AddRuckigTrajectorySmoothing : public planning_request_adapter::PlanningRequestAdapter
 {
 public:
-  AddRuckigTrajectorySmoothing() : planning_request_adapter::PlanningRequestAdapter()
-  {
-  }
-
   void initialize(const rclcpp::Node::SharedPtr& /* unused */, const std::string& /* unused */) override
   {
   }
@@ -61,8 +62,8 @@ public:
   }
 
   bool adaptAndPlan(const PlannerFn& planner, const planning_scene::PlanningSceneConstPtr& planning_scene,
-                    const planning_interface::MotionPlanRequest& req, planning_interface::MotionPlanResponse& res,
-                    std::vector<std::size_t>& /*added_path_index*/) const override
+                    const planning_interface::MotionPlanRequest& req,
+                    planning_interface::MotionPlanResponse& res) const override
   {
     bool result = planner(planning_scene, req, res);
     if (result && res.trajectory)

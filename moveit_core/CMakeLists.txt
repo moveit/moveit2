@@ -22,6 +22,7 @@ find_package(common_interfaces REQUIRED)
 find_package(eigen_stl_containers REQUIRED)
 find_package(Eigen3 REQUIRED)
 find_package(eigen3_cmake_module REQUIRED)
+find_package(generate_parameter_library REQUIRED)
 find_package(geometric_shapes REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(kdl_parser REQUIRED)
@@ -44,6 +45,7 @@ find_package(urdf REQUIRED)
 find_package(urdfdom REQUIRED)
 find_package(urdfdom_headers REQUIRED)
 find_package(visualization_msgs REQUIRED)
+
 
 # TODO: Port python bindings
 # find_package(pybind11 REQUIRED)
@@ -108,6 +110,7 @@ install(
   TARGETS
     collision_detector_bullet_plugin
     moveit_butterworth_filter
+    moveit_butterworth_parameters
     moveit_collision_detection
     moveit_collision_detection_bullet
     moveit_collision_detection_fcl
@@ -145,6 +148,7 @@ ament_export_dependencies(
   eigen_stl_containers
   Eigen3
   eigen3_cmake_module
+  generate_parameter_library
   geometric_shapes
   geometry_msgs
   kdl_parser
