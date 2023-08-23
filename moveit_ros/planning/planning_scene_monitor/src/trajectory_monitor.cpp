@@ -71,9 +71,13 @@ void planning_scene_monitor::TrajectoryMonitor::setSamplingFrequency(double samp
     return;  // silently return if nothing changes
 
   if (sampling_frequency <= std::numeric_limits<double>::epsilon())
+  {
     RCLCPP_ERROR(LOGGER, "The sampling frequency for trajectory states should be positive");
+  }
   else
+  {
     RCLCPP_DEBUG(LOGGER, "Setting trajectory sampling frequency to %.1f", sampling_frequency);
+  }
   sampling_frequency_ = sampling_frequency;
 }
 

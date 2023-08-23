@@ -53,9 +53,9 @@ public:
   void initialize() override;
 
 private:
-  bool applyScene(const std::shared_ptr<rmw_request_id_t> request_header,
-                  const std::shared_ptr<moveit_msgs::srv::ApplyPlanningScene::Request> req,
-                  std::shared_ptr<moveit_msgs::srv::ApplyPlanningScene::Response> res);
+  bool applyScene(const std::shared_ptr<rmw_request_id_t>& request_header,
+                  const std::shared_ptr<moveit_msgs::srv::ApplyPlanningScene::Request>& req,
+                  const std::shared_ptr<moveit_msgs::srv::ApplyPlanningScene::Response>& res);
 
   rclcpp::Service<moveit_msgs::srv::ApplyPlanningScene>::SharedPtr service_;
 };

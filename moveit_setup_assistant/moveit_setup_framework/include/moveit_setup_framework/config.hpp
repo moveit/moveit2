@@ -57,13 +57,20 @@ MOVEIT_CLASS_FORWARD(SetupConfig);  // Defines SetupConfigPtr, ConstPtr, WeakPtr
 class SetupConfig
 {
 public:
+  SetupConfig() = default;
+  SetupConfig(const SetupConfig&) = default;
+  SetupConfig(SetupConfig&&) = default;
+  SetupConfig& operator=(const SetupConfig&) = default;
+  SetupConfig& operator=(SetupConfig&&) = default;
+  virtual ~SetupConfig() = default;
+
   /**
    * @brief Called after construction to initialize the step
    * @param config_data Pointer to all the other configs
    * @param parent_node Shared pointer to the parent node
    * @param name
    */
-  void initialize(std::shared_ptr<DataWarehouse> config_data, const rclcpp::Node::SharedPtr& parent_node,
+  void initialize(const std::shared_ptr<DataWarehouse>& config_data, const rclcpp::Node::SharedPtr& parent_node,
                   const std::string& name)
   {
     config_data_ = config_data;

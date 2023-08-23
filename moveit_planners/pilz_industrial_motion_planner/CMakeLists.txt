@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.22)
-project(pilz_industrial_motion_planner)
+project(pilz_industrial_motion_planner LANGUAGES CXX)
 
 # Common cmake code applied to all moveit packages
 find_package(moveit_common REQUIRED)
@@ -126,11 +126,11 @@ ament_target_dependencies(command_list_manager ${THIS_PACKAGE_INCLUDE_DEPENDS})
 ## Plugins ##
 #############
 
-add_library(${PROJECT_NAME} SHARED
-  src/${PROJECT_NAME}.cpp
+add_library(pilz_industrial_motion_planner SHARED
+  src/pilz_industrial_motion_planner.cpp
 )
-ament_target_dependencies(${PROJECT_NAME} ${THIS_PACKAGE_INCLUDE_DEPENDS})
-target_link_libraries(${PROJECT_NAME}
+ament_target_dependencies(pilz_industrial_motion_planner ${THIS_PACKAGE_INCLUDE_DEPENDS})
+target_link_libraries(pilz_industrial_motion_planner
   planning_context_loader_base
   joint_limits_common)
 
@@ -176,7 +176,7 @@ pluginlib_export_plugin_description_file(pilz_industrial_motion_planner plugins/
 ## Mark libraries for installation
 install(
   TARGETS
-    ${PROJECT_NAME}
+    pilz_industrial_motion_planner
     cartesian_limits_parameters
     joint_limits_common
     planning_context_loader_base
@@ -186,22 +186,22 @@ install(
     command_list_manager
     sequence_capability
     trajectory_generation_common
-  EXPORT ${PROJECT_NAME}Targets
+  EXPORT pilz_industrial_motion_plannerTargets
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
   RUNTIME DESTINATION bin
-  INCLUDES DESTINATION include
+  INCLUDES DESTINATION include/pilz_industrial_motion_planner
 )
 
 install(
   DIRECTORY include/
-  DESTINATION include
+  DESTINATION include/pilz_industrial_motion_planner
 )
 
 ament_export_include_directories(
-  include
+  include/pilz_industrial_motion_planner
 )
-ament_export_targets(${PROJECT_NAME}Targets HAS_LIBRARY_TARGET)
+ament_export_targets(pilz_industrial_motion_plannerTargets HAS_LIBRARY_TARGET)
 ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS} orocos_kdl_vendor)
 
 if(BUILD_TESTING)

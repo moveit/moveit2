@@ -65,7 +65,7 @@ private:
   using PlannedTrajMsgs = moveit_msgs::msg::MotionSequenceResponse::_planned_trajectories_type;
 
 private:
-  void executeSequenceCallback(const std::shared_ptr<MoveGroupSequenceGoalHandle> goal_handle);
+  void executeSequenceCallback(const std::shared_ptr<MoveGroupSequenceGoalHandle>& goal_handle);
   void
   executeSequenceCallbackPlanAndExecute(const moveit_msgs::action::MoveGroupSequence::Goal::ConstSharedPtr& goal,
                                         const moveit_msgs::action::MoveGroupSequence::Result::SharedPtr& action_res);

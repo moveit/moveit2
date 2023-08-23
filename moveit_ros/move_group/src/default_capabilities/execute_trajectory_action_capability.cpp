@@ -61,7 +61,7 @@ void MoveGroupExecuteTrajectoryAction::initialize()
   execute_action_server_ = rclcpp_action::create_server<ExecTrajectory>(
       node->get_node_base_interface(), node->get_node_clock_interface(), node->get_node_logging_interface(),
       node->get_node_waitables_interface(), EXECUTE_ACTION_NAME,
-      [](const rclcpp_action::GoalUUID& /*unused*/, std::shared_ptr<const ExecTrajectory::Goal> /*unused*/) {
+      [](const rclcpp_action::GoalUUID& /*unused*/, const std::shared_ptr<const ExecTrajectory::Goal>& /*unused*/) {
         RCLCPP_INFO(LOGGER, "Received goal request");
         return rclcpp_action::GoalResponse::ACCEPT_AND_EXECUTE;
       },
@@ -72,7 +72,7 @@ void MoveGroupExecuteTrajectoryAction::initialize()
       [this](const auto& goal) { executePathCallback(goal); });
 }
 
-void MoveGroupExecuteTrajectoryAction::executePathCallback(std::shared_ptr<ExecTrajectoryGoal> goal)
+void MoveGroupExecuteTrajectoryAction::executePathCallback(const std::shared_ptr<ExecTrajectoryGoal>& goal)
 {
   auto action_res = std::make_shared<ExecTrajectory::Result>();
   if (!context_->trajectory_execution_manager_)
@@ -108,7 +108,7 @@ void MoveGroupExecuteTrajectoryAction::executePath(const std::shared_ptr<ExecTra
   RCLCPP_INFO(LOGGER, "Execution request received");
 
   context_->trajectory_execution_manager_->clear();
-  if (context_->trajectory_execution_manager_->push(goal->get_goal()->trajectory))
+  if (context_->trajectory_execution_manager_->push(goal->get_goal()->trajectory, goal->get_goal()->controller_names))
   {
     setExecuteTrajectoryState(MONITOR, goal);
     context_->trajectory_execution_manager_->execute();

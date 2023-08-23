@@ -42,7 +42,7 @@
 
 #include <moveit/robot_model/joint_model_group.h>
 
-#include "pilz_industrial_motion_planner/tip_frame_getter.h"
+#include <pilz_industrial_motion_planner/tip_frame_getter.h>
 
 namespace pilz_industrial_motion_planner
 {
@@ -89,12 +89,12 @@ void GetSolverTipFrameTest::SetUp()
 TEST_F(GetSolverTipFrameTest, TestExceptionErrorCodeMapping)
 {
   {
-    std::shared_ptr<NoSolverException> nse_ex{ new NoSolverException("") };
+    auto nse_ex = std::make_shared<NoSolverException>("");
     EXPECT_EQ(nse_ex->getErrorCode(), moveit_msgs::msg::MoveItErrorCodes::FAILURE);
   }
 
   {
-    std::shared_ptr<MoreThanOneTipFrameException> ex{ new MoreThanOneTipFrameException("") };
+    auto ex = std::make_shared<MoreThanOneTipFrameException>("");
     EXPECT_EQ(ex->getErrorCode(), moveit_msgs::msg::MoveItErrorCodes::FAILURE);
   }
 }

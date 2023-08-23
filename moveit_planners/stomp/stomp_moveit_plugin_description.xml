@@ -1,0 +1,13 @@
+<library path="stomp_moveit_plugin">
+  <class name="stomp_moveit/StompPlanner" type="stomp_moveit::StompPlannerManager" base_class_type="planning_interface::PlannerManager">
+    <description>
+      STOMP Motion Planning Plugin for MoveIt
+    </description>
+  </class>
+  <class name="stomp_moveit/StompSmoothingAdapter" type="stomp_moveit::StompSmoothingAdapter"
+         base_class_type="planning_request_adapter::PlanningRequestAdapter">
+    <description>
+      STOMP Smoothing Adapter for MoveIt
+    </description>
+  </class>
+</library>

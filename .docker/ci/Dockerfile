@@ -18,14 +18,14 @@ COPY . src/moveit2
 RUN \
     # Update apt package list as previous containers clear the cache
     apt-get -q update && \
-    apt-get -q -y upgrade && \
+    apt-get -q -y upgrade --with-new-pkgs && \
     #
     # Install some base dependencies
     apt-get -q install --no-install-recommends -y \
         # Some basic requirements
         wget git sudo curl \
         # Preferred build tools
-        clang clang-format-12 clang-tidy clang-tools \
+        clang clang-format-14 clang-tidy clang-tools \
         ccache && \
     #
     # Globally disable git security

@@ -40,7 +40,7 @@
 #include <mutex>
 #include <functional>
 
-#include "moveit_robot_interaction_export.h"
+#include <moveit_robot_interaction_export.h>
 
 namespace robot_interaction
 {

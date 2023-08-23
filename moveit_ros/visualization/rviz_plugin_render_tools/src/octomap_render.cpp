@@ -58,7 +58,7 @@ OcTreeRender::OcTreeRender(const std::shared_ptr<const octomap::OcTree>& octree,
   }
   else
   {
-    octree_depth_ = std::min(max_octree_depth, (std::size_t)octree->getTreeDepth());
+    octree_depth_ = std::min(max_octree_depth, static_cast<std::size_t>(octree->getTreeDepth()));
   }
 
   scene_node_ = parent_node->createChildSceneNode();

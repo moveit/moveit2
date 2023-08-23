@@ -87,9 +87,13 @@ bool JointConstraintSampler::configure(const std::vector<kinematic_constraints::
     JointInfo ji;
     std::map<std::string, JointInfo>::iterator it = bound_data.find(joint_constraint.getJointVariableName());
     if (it != bound_data.end())
+    {
       ji = it->second;
+    }
     else
+    {
       ji.index_ = jmg_->getVariableGroupIndex(joint_constraint.getJointVariableName());
+    }
     ji.potentiallyAdjustMinMaxBounds(
         std::max(joint_bounds.min_position_,
                  joint_constraint.getDesiredJointPosition() - joint_constraint.getJointToleranceBelow()),
@@ -125,6 +129,7 @@ bool JointConstraintSampler::configure(const std::vector<kinematic_constraints::
   // get a separate list of joints that are not bounded; we will sample these randomly
   const std::vector<const moveit::core::JointModel*>& joints = jmg_->getJointModels();
   for (const moveit::core::JointModel* joint : joints)
+  {
     if (bound_data.find(joint->getName()) == bound_data.end() && joint->getVariableCount() > 0 &&
         joint->getMimic() == nullptr)
     {
@@ -134,11 +139,13 @@ bool JointConstraintSampler::configure(const std::vector<kinematic_constraints::
       {
         bool all_found = true;
         for (const std::string& var : vars)
+        {
           if (bound_data.find(var) == bound_data.end())
           {
             all_found = false;
             break;
           }
+        }
         if (all_found)
           continue;
       }
@@ -146,6 +153,7 @@ bool JointConstraintSampler::configure(const std::vector<kinematic_constraints::
       // Get the first variable name of this joint and find its index position in the planning group
       uindex_.push_back(jmg_->getVariableGroupIndex(vars[0]));
     }
+  }
   values_.resize(jmg_->getVariableCount());
   is_valid_ = true;
   return true;
@@ -252,6 +260,7 @@ bool IKConstraintSampler::configure(const IKSamplingPose& sp)
   sampling_pose_ = sp;
   ik_timeout_ = jmg_->getDefaultIKTimeout();
   if (sampling_pose_.position_constraint_ && sampling_pose_.orientation_constraint_)
+  {
     if (sampling_pose_.position_constraint_->getLinkModel()->getName() !=
         sampling_pose_.orientation_constraint_->getLinkModel()->getName())
     {
@@ -259,6 +268,7 @@ bool IKConstraintSampler::configure(const IKSamplingPose& sp)
                            "in order to use IK-based sampling");
       return false;
     }
+  }
 
   if (sampling_pose_.position_constraint_ && sampling_pose_.position_constraint_->mobileReferenceFrame())
     frame_depends_.push_back(sampling_pose_.position_constraint_->getReferenceFrame());
@@ -278,7 +288,9 @@ bool IKConstraintSampler::configure(const IKSamplingPose& sp)
 bool IKConstraintSampler::configure(const moveit_msgs::msg::Constraints& constr)
 {
   for (std::size_t p = 0; p < constr.position_constraints.size(); ++p)
+  {
     for (std::size_t o = 0; o < constr.orientation_constraints.size(); ++o)
+    {
       if (constr.position_constraints[p].link_name == constr.orientation_constraints[o].link_name)
       {
         kinematic_constraints::PositionConstraintPtr pc(
@@ -289,6 +301,8 @@ bool IKConstraintSampler::configure(const moveit_msgs::msg::Constraints& constr)
             oc->configure(constr.orientation_constraints[o], scene_->getTransforms()))
           return configure(IKSamplingPose(pc, oc));
       }
+    }
+  }
 
   for (const moveit_msgs::msg::PositionConstraint& position_constraint : constr.position_constraints)
   {
@@ -323,9 +337,11 @@ double IKConstraintSampler::getSamplingVolume() const
   }
 
   if (sampling_pose_.orientation_constraint_)
+  {
     v *= sampling_pose_.orientation_constraint_->getXAxisTolerance() *
          sampling_pose_.orientation_constraint_->getYAxisTolerance() *
          sampling_pose_.orientation_constraint_->getZAxisTolerance();
+  }
   return v;
 }
 
@@ -350,6 +366,7 @@ bool IKConstraintSampler::loadIKSolver()
   if (!ik_frame_.empty() && ik_frame_[0] == '/')
     ik_frame_.erase(ik_frame_.begin());
   if (transform_ik_)
+  {
     if (!jmg_->getParentModel().hasLinkModel(ik_frame_))
     {
       RCLCPP_ERROR(LOGGER,
@@ -358,6 +375,7 @@ bool IKConstraintSampler::loadIKSolver()
                    ik_frame_.c_str());
       transform_ik_ = false;
     }
+  }
 
   // check if IK is performed for the desired link
   bool wrong_link = false;
@@ -369,6 +387,7 @@ bool IKConstraintSampler::loadIKSolver()
       wrong_link = true;
       const moveit::core::LinkTransformMap& fixed_links = lm->getAssociatedFixedTransforms();
       for (const std::pair<const moveit::core::LinkModel* const, Eigen::Isometry3d>& fixed_link : fixed_links)
+      {
         if (moveit::core::Transforms::sameFrame(fixed_link.first->getName(), kb_->getTipFrame()))
         {
           eef_to_ik_tip_transform_ = fixed_link.second;  // valid isometry by contract
@@ -376,6 +395,7 @@ bool IKConstraintSampler::loadIKSolver()
           wrong_link = false;
           break;
         }
+      }
     }
   }
 
@@ -387,6 +407,7 @@ bool IKConstraintSampler::loadIKSolver()
       wrong_link = true;
       const moveit::core::LinkTransformMap& fixed_links = lm->getAssociatedFixedTransforms();
       for (const std::pair<const moveit::core::LinkModel* const, Eigen::Isometry3d>& fixed_link : fixed_links)
+      {
         if (moveit::core::Transforms::sameFrame(fixed_link.first->getName(), kb_->getTipFrame()))
         {
           eef_to_ik_tip_transform_ = fixed_link.second;  // valid isometry by contract
@@ -394,6 +415,7 @@ bool IKConstraintSampler::loadIKSolver()
           wrong_link = false;
           break;
         }
+      }
     }
   }
 
@@ -428,11 +450,13 @@ bool IKConstraintSampler::samplePose(Eigen::Vector3d& pos, Eigen::Quaterniond& q
       bool found = false;
       std::size_t k = random_number_generator_.uniformInteger(0, b.size() - 1);
       for (std::size_t i = 0; i < b.size(); ++i)
+      {
         if (b[(i + k) % b.size()]->samplePointInside(random_number_generator_, max_attempts, pos))
         {
           found = true;
           break;
         }
+      }
       if (!found)
       {
         RCLCPP_ERROR(LOGGER, "Unable to sample a point inside the constraint region");
@@ -518,8 +542,10 @@ bool IKConstraintSampler::samplePose(Eigen::Vector3d& pos, Eigen::Quaterniond& q
 
   // if there is an offset, we need to undo the induced rotation in the sampled transform origin (point)
   if (sampling_pose_.position_constraint_ && sampling_pose_.position_constraint_->hasLinkOffset())
+  {
     // the rotation matrix that corresponds to the desired orientation
     pos = pos - quat * sampling_pose_.position_constraint_->getLinkOffset();
+  }
 
   return true;
 }
@@ -535,9 +561,13 @@ void samplingIkCallbackFnAdapter(moveit::core::RobotState* state, const moveit::
   for (std::size_t i = 0; i < bij.size(); ++i)
     solution[i] = ik_sol[bij[i]];
   if (constraint(state, jmg, &solution[0]))
+  {
     error_code.val = moveit_msgs::msg::MoveItErrorCodes::SUCCESS;
+  }
   else
+  {
     error_code.val = moveit_msgs::msg::MoveItErrorCodes::NO_IK_SOLUTION;
+  }
 }
 }  // namespace
 
@@ -558,11 +588,13 @@ bool IKConstraintSampler::sampleHelper(moveit::core::RobotState& state, const mo
 
   kinematics::KinematicsBase::IKCallbackFn adapted_ik_validity_callback;
   if (group_state_validity_callback_)
+  {
     adapted_ik_validity_callback = [this, state_ptr = &state](const geometry_msgs::msg::Pose&,
                                                               const std::vector<double>& joints,
                                                               moveit_msgs::msg::MoveItErrorCodes& error_code) {
       return samplingIkCallbackFnAdapter(state_ptr, jmg_, group_state_validity_callback_, joints, error_code);
     };
+  }
 
   for (unsigned int a = 0; a < max_attempts; ++a)
   {
@@ -630,10 +662,14 @@ bool IKConstraintSampler::callIK(const geometry_msgs::msg::Pose& ik_query,
   std::vector<double> vals;
 
   if (use_as_seed)
+  {
     state.copyJointGroupPositions(jmg_, vals);
+  }
   else
+  {
     // sample a seed value
     jmg_->getVariableRandomPositions(random_number_generator_, vals);
+  }
 
   assert(vals.size() == ik_joint_bijection.size());
   for (std::size_t i = 0; i < ik_joint_bijection.size(); ++i)

@@ -125,6 +125,13 @@ public:
     virtual bool sleepFor(const std::chrono::nanoseconds& nanoseconds) const = 0;
 
     /**
+     * @brief      Uses rclcpp::ok to check the context status
+     *
+     * @return     Return of rclcpp::ok
+     */
+    virtual bool ok() const = 0;
+
+    /**
      * @brief      Get the static transform topic name
      *
      * @return     The static transform topic name.
@@ -315,9 +322,9 @@ private:
   bool haveCompleteStateHelper(const rclcpp::Time& oldest_allowed_update_time,
                                std::vector<std::string>* missing_joints) const;
 
-  void jointStateCallback(sensor_msgs::msg::JointState::ConstSharedPtr joint_state);
+  void jointStateCallback(const sensor_msgs::msg::JointState::ConstSharedPtr& joint_state);
   void updateMultiDofJoints();
-  void transformCallback(const tf2_msgs::msg::TFMessage::ConstSharedPtr msg, const bool is_static);
+  void transformCallback(const tf2_msgs::msg::TFMessage::ConstSharedPtr& msg, const bool is_static);
 
   std::unique_ptr<MiddlewareHandle> middleware_handle_;
   std::shared_ptr<tf2_ros::Buffer> tf_buffer_;

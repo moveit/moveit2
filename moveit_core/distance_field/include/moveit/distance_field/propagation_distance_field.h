@@ -42,7 +42,7 @@
 #include <Eigen/Core>
 #include <set>
 #include <octomap/octomap.h>
-#include "rclcpp/rclcpp.hpp"
+#include <rclcpp/rclcpp.hpp>
 
 namespace EigenSTL
 {
@@ -60,11 +60,17 @@ struct CompareEigenVector3i
   bool operator()(const Eigen::Vector3i& loc_1, const Eigen::Vector3i& loc_2) const
   {
     if (loc_1.z() != loc_2.z())
+    {
       return (loc_1.z() < loc_2.z());
+    }
     else if (loc_1.y() != loc_2.y())
+    {
       return (loc_1.y() < loc_2.y());
+    }
     else if (loc_1.x() != loc_2.x())
+    {
       return (loc_1.x() < loc_2.x());
+    }
     return false;
   }
 };

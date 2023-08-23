@@ -178,9 +178,9 @@ public:
   {
     for (std::size_t i = 0; i < _vbasesol.size(); ++i)
     {
-      if (_vbasesol[i].freeind < 0)
+      if (_vbasesol[i].freeind < 0) {
         solution[i] = _vbasesol[i].foffset;
-      else
+      } else
       {
         solution[i] = freevalues[_vbasesol[i].freeind] * _vbasesol[i].fmul + _vbasesol[i].foffset;
         if (solution[i] > T(3.14159265358979))
@@ -214,7 +214,7 @@ public:
   {
     for (size_t i = 0; i < _vbasesol.size(); ++i)
     {
-      if (_vbasesol[i].maxsolutions == (unsigned char)-1)
+      if (_vbasesol[i].maxsolutions ==static_cast<unsigned char>(-1))
       {
         throw std::runtime_error("max solutions for joint not initialized");
       }
@@ -224,7 +224,7 @@ public:
         {
           throw std::runtime_error("index >= max solutions for joint");
         }
-        if (_vbasesol[i].indices[1] != (unsigned char)-1 && _vbasesol[i].indices[1] >= _vbasesol[i].maxsolutions)
+        if (_vbasesol[i].indices[1] != static_cast<unsigned char>(-1) && _vbasesol[i].indices[1] >= _vbasesol[i].maxsolutions)
         {
           throw std::runtime_error("2nd index >= max solutions for joint");
         }
@@ -236,23 +236,23 @@ public:
   {
     v.resize(0);
     v.push_back(0);
-    for (int i = (int)_vbasesol.size() - 1; i >= 0; --i)
+    for (int i = static_cast<int>(_vbasesol.size()) - 1; i >= 0; --i)
     {
-      if (_vbasesol[i].maxsolutions != (unsigned char)-1 && _vbasesol[i].maxsolutions > 1)
+      if (_vbasesol[i].maxsolutions != static_cast<unsigned char>(-1) && _vbasesol[i].maxsolutions > 1)
       {
         for (size_t j = 0; j < v.size(); ++j)
         {
           v[j] *= _vbasesol[i].maxsolutions;
         }
         size_t orgsize = v.size();
-        if (_vbasesol[i].indices[1] != (unsigned char)-1)
+        if (_vbasesol[i].indices[1] != static_cast<unsigned char>(-1))
         {
           for (size_t j = 0; j < orgsize; ++j)
           {
             v.push_back(v[j] + _vbasesol[i].indices[1]);
           }
         }
-        if (_vbasesol[i].indices[0] != (unsigned char)-1)
+        if (_vbasesol[i].indices[0] !=static_cast<unsigned char>(-1))
         {
           for (size_t j = 0; j < orgsize; ++j)
           {

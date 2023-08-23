@@ -47,9 +47,8 @@
 
 namespace kdl_kinematics_plugin
 {
-static rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_kdl_kinematics_plugin.kdl_kinematics_plugin");
-
-rclcpp::Clock KDLKinematicsPlugin::steady_clock_{ RCL_STEADY_TIME };
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_kdl_kinematics_plugin.kdl_kinematics_plugin");
+static rclcpp::Clock steady_clock = rclcpp::Clock(RCL_ROS_TIME);
 
 KDLKinematicsPlugin::KDLKinematicsPlugin() : initialized_(false)
 {
@@ -74,8 +73,10 @@ bool KDLKinematicsPlugin::checkConsistency(const Eigen::VectorXd& seed_state,
                                            const Eigen::VectorXd& solution) const
 {
   for (std::size_t i = 0; i < dimension_; ++i)
+  {
     if (fabs(seed_state(i) - solution(i)) > consistency_limits[i])
       return false;
+  }
   return true;
 }
 
@@ -105,7 +106,7 @@ void KDLKinematicsPlugin::getJointWeights()
 
   RCLCPP_INFO_STREAM(
       LOGGER, "Joint weights for group '"
-                  << getGroupName() << "': \n"
+                  << getGroupName() << "': "
                   << Eigen::Map<const Eigen::VectorXd>(joint_weights_.data(), joint_weights_.size()).transpose());
 }
 
@@ -238,7 +239,7 @@ bool KDLKinematicsPlugin::initialize(const rclcpp::Node::SharedPtr& node, const 
 
 bool KDLKinematicsPlugin::timedOut(const rclcpp::Time& start_time, double duration) const
 {
-  return ((steady_clock_.now() - start_time).seconds() >= duration);
+  return ((steady_clock.now() - start_time).seconds() >= duration);
 }
 
 bool KDLKinematicsPlugin::getPositionIK(const geometry_msgs::msg::Pose& ik_pose,
@@ -293,7 +294,7 @@ bool KDLKinematicsPlugin::searchPositionIK(const geometry_msgs::msg::Pose& ik_po
                                            moveit_msgs::msg::MoveItErrorCodes& error_code,
                                            const kinematics::KinematicsQueryOptions& options) const
 {
-  const rclcpp::Time start_time = steady_clock_.now();
+  const rclcpp::Time start_time = steady_clock.now();
   if (!initialized_)
   {
     RCLCPP_ERROR(LOGGER, "kinematics solver not initialized");
@@ -348,9 +349,9 @@ bool KDLKinematicsPlugin::searchPositionIK(const geometry_msgs::msg::Pose& ik_po
   tf2::fromMsg(ik_pose, pose_desired);
 
   RCLCPP_DEBUG_STREAM(LOGGER, "searchPositionIK: Position request pose is "
-                                  << ik_pose.position.x << " " << ik_pose.position.y << " " << ik_pose.position.z << " "
-                                  << ik_pose.orientation.x << " " << ik_pose.orientation.y << " "
-                                  << ik_pose.orientation.z << " " << ik_pose.orientation.w);
+                                  << ik_pose.position.x << ' ' << ik_pose.position.y << ' ' << ik_pose.position.z << ' '
+                                  << ik_pose.orientation.x << ' ' << ik_pose.orientation.y << ' '
+                                  << ik_pose.orientation.z << ' ' << ik_pose.orientation.w);
 
   unsigned int attempt = 0;
   do
@@ -359,9 +360,13 @@ bool KDLKinematicsPlugin::searchPositionIK(const geometry_msgs::msg::Pose& ik_po
     if (attempt > 1)  // randomly re-seed after first attempt
     {
       if (!consistency_limits_mimic.empty())
+      {
         getRandomConfiguration(jnt_seed_state.data, consistency_limits_mimic, jnt_pos_in.data);
+      }
       else
+      {
         getRandomConfiguration(jnt_pos_in.data);
+      }
       RCLCPP_DEBUG_STREAM(LOGGER, "New random configuration (" << attempt << "): " << jnt_pos_in);
     }
 
@@ -384,13 +389,13 @@ bool KDLKinematicsPlugin::searchPositionIK(const geometry_msgs::msg::Pose& ik_po
 
       // solution passed consistency check and solution callback
       error_code.val = error_code.SUCCESS;
-      RCLCPP_DEBUG_STREAM(LOGGER, "Solved after " << (steady_clock_.now() - start_time).seconds() << " < " << timeout
+      RCLCPP_DEBUG_STREAM(LOGGER, "Solved after " << (steady_clock.now() - start_time).seconds() << " < " << timeout
                                                   << "s and " << attempt << " attempts");
       return true;
     }
   } while (!timedOut(start_time, timeout));
 
-  RCLCPP_DEBUG_STREAM(LOGGER, "IK timed out after " << (steady_clock_.now() - start_time).seconds() << " > " << timeout
+  RCLCPP_DEBUG_STREAM(LOGGER, "IK timed out after " << (steady_clock.now() - start_time).seconds() << " > " << timeout
                                                     << "s and " << attempt << " attempts");
   error_code.val = error_code.TIMED_OUT;
   return false;
@@ -487,11 +492,17 @@ void KDLKinematicsPlugin::clipToJointLimits(const KDL::JntArray& q, KDL::JntArra
     const double delta_max = joint_max_(i) - q(i);
     const double delta_min = joint_min_(i) - q(i);
     if (q_delta(i) > delta_max)
+    {
       q_delta(i) = delta_max;
+    }
     else if (q_delta(i) < delta_min)
+    {
       q_delta(i) = delta_min;
+    }
     else
+    {
       continue;
+    }
 
     weighting[mimic_joints_[i].map_index] = 0.01;
   }

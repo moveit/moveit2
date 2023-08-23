@@ -120,12 +120,16 @@ bool SrvKinematicsPlugin::initialize(const rclcpp::Node::SharedPtr& node, const 
   RCLCPP_DEBUG(LOGGER, "IK Service client topic : %s", params_.kinematics_solver_service_name.c_str());
   ik_service_client_ = node_->create_client<moveit_msgs::srv::GetPositionIK>(params_.kinematics_solver_service_name);
 
-  if (!ik_service_client_->wait_for_service(std::chrono::seconds(1)))  // wait 0.1 seconds, blocking
+  if (!ik_service_client_->wait_for_service(std::chrono::seconds(1)))
+  {  // wait 0.1 seconds, blocking
     RCLCPP_WARN_STREAM(LOGGER,
                        "Unable to connect to ROS service client with name: " << ik_service_client_->get_service_name());
+  }
   else
+  {
     RCLCPP_INFO_STREAM(LOGGER,
                        "Service client started with ROS service name: " << ik_service_client_->get_service_name());
+  }
 
   active_ = true;
   RCLCPP_DEBUG(LOGGER, "ROS service-based kinematics solver initialized");
@@ -151,8 +155,10 @@ bool SrvKinematicsPlugin::setRedundantJoints(const std::vector<unsigned int>& re
 bool SrvKinematicsPlugin::isRedundantJoint(unsigned int index) const
 {
   for (const unsigned int& redundant_joint_indice : redundant_joint_indices_)
+  {
     if (redundant_joint_indice == index)
       return true;
+  }
   return false;
 }
 

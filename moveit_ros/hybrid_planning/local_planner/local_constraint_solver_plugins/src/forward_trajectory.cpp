@@ -53,13 +53,19 @@ bool ForwardTrajectory::initialize(const rclcpp::Node::SharedPtr& node,
 {
   // Load parameter & initialize member variables
   if (node->has_parameter("stop_before_collision"))
+  {
     node->get_parameter<bool>("stop_before_collision", stop_before_collision_);
+  }
   else
+  {
     stop_before_collision_ = node->declare_parameter<bool>("stop_before_collision", false);
-  planning_scene_monitor_ = planning_scene_monitor;
+  }
   node_ = node;
   path_invalidation_event_send_ = false;
   num_iterations_stuck_ = 0;
+
+  planning_scene_monitor_ = planning_scene_monitor;
+
   return true;
 }
 
@@ -77,7 +83,10 @@ ForwardTrajectory::solve(const robot_trajectory::RobotTrajectory& local_trajecto
                          trajectory_msgs::msg::JointTrajectory& local_solution)
 {
   // A message every once in awhile is useful in case the local planner gets stuck
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wold-style-cast"
   RCLCPP_INFO_THROTTLE(LOGGER, *node_->get_clock(), 2000 /* ms */, "The local planner is solving...");
+#pragma GCC diagnostic pop
 
   // Create controller command trajectory
   robot_trajectory::RobotTrajectory robot_command(local_trajectory.getRobotModel(), local_trajectory.getGroupName());
@@ -99,6 +108,7 @@ ForwardTrajectory::solve(const robot_trajectory::RobotTrajectory& local_trajecto
     bool is_path_valid = false;
     // Lock the planning scene as briefly as possible
     {
+      planning_scene_monitor_->updateSceneWithCurrentState();
       planning_scene_monitor::LockedPlanningSceneRO locked_planning_scene(planning_scene_monitor_);
       current_state = std::make_shared<moveit::core::RobotState>(locked_planning_scene->getCurrentState());
       is_path_valid = locked_planning_scene->isPathValid(local_trajectory, local_trajectory.getGroupName(), false);

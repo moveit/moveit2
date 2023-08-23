@@ -35,7 +35,7 @@
 #include <moveit/global_planner/global_planner_component.h>
 #include <moveit/robot_state/robot_state.h>
 #include <moveit/robot_state/conversions.h>
-#include <moveit_msgs/msg/move_it_error_codes.h>
+#include <moveit_msgs/msg/move_it_error_codes.hpp>
 
 #include <chrono>
 #include <thread>
@@ -76,7 +76,7 @@ bool GlobalPlannerComponent::initializeGlobalPlanner()
       node_, global_planning_action_name,
       // Goal callback
       [this](const rclcpp_action::GoalUUID& /*unused*/,
-             std::shared_ptr<const moveit_msgs::action::GlobalPlanner::Goal> /*unused*/) {
+             const std::shared_ptr<const moveit_msgs::action::GlobalPlanner::Goal>& /*unused*/) {
         RCLCPP_INFO(LOGGER, "Received global planning goal request");
         // If another goal is active, cancel it and reject this goal
         if (long_callback_thread_.joinable())
@@ -156,7 +156,7 @@ bool GlobalPlannerComponent::initializeGlobalPlanner()
 }
 
 void GlobalPlannerComponent::globalPlanningRequestCallback(
-    std::shared_ptr<rclcpp_action::ServerGoalHandle<moveit_msgs::action::GlobalPlanner>> goal_handle)
+    const std::shared_ptr<rclcpp_action::ServerGoalHandle<moveit_msgs::action::GlobalPlanner>>& goal_handle)
 {
   // Plan global trajectory
   moveit_msgs::msg::MotionPlanResponse planning_solution = global_planner_instance_->plan(goal_handle);

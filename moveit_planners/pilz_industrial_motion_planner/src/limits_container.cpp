@@ -32,7 +32,7 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#include "pilz_industrial_motion_planner/limits_container.h"
+#include <pilz_industrial_motion_planner/limits_container.h>
 #include <rclcpp/logger.hpp>
 
 namespace pilz_industrial_motion_planner

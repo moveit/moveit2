@@ -277,7 +277,7 @@ GLuint mesh_filter::GLRenderer::createShader(GLuint shaderType, const string& Sh
       vector<char> shader_error_message(info_log_length + 1);
       glGetShaderInfoLog(shader_id, info_log_length, nullptr, &shader_error_message[0]);
       stringstream error_stream;
-      error_stream << "Could not compile shader: " << (const char*)&shader_error_message[0];
+      error_stream << "Could not compile shader: " << const_cast<const char*>(&shader_error_message[0]);
 
       glDeleteShader(shader_id);
       throw runtime_error(error_stream.str());
@@ -289,7 +289,9 @@ GLuint mesh_filter::GLRenderer::createShader(GLuint shaderType, const string& Sh
 void mesh_filter::GLRenderer::readShaderCodeFromFile(const string& filename, string& shader) const
 {
   if (filename.empty())
+  {
     shader = "";
+  }
   else
   {
     string shader_code;
@@ -303,7 +305,7 @@ void mesh_filter::GLRenderer::readShaderCodeFromFile(const string& filename, str
     else
     {
       stringstream error_stream;
-      error_stream << "Could not open shader code in file \"" << filename << "\"";
+      error_stream << "Could not open shader code in file \"" << filename << '\"';
       throw runtime_error(error_stream.str());
     }
   }

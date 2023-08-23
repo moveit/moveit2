@@ -60,6 +60,10 @@ public:
   {
   }
 
+  TestdataLoader(const TestdataLoader&) = default;
+  TestdataLoader(TestdataLoader&&) = default;
+  TestdataLoader& operator=(const TestdataLoader&) = default;
+  TestdataLoader& operator=(TestdataLoader&&) = default;
   virtual ~TestdataLoader() = default;
 
 public:

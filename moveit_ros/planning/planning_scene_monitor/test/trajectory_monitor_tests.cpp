@@ -38,13 +38,13 @@
 #include <chrono>
 #include <thread>
 #include <atomic>
-#include "gmock/gmock.h"
-#include "gtest/gtest.h"
-#include "moveit/planning_scene_monitor/trajectory_monitor.h"
-#include "moveit/planning_scene_monitor/current_state_monitor.h"
-#include "moveit/utils/robot_model_test_utils.h"
-#include "rclcpp/rclcpp.hpp"
-#include "tf2_ros/buffer.h"
+#include <gmock/gmock.h>
+#include <gtest/gtest.h>
+#include <moveit/planning_scene_monitor/trajectory_monitor.h>
+#include <moveit/planning_scene_monitor/current_state_monitor.h>
+#include <moveit/utils/robot_model_test_utils.h>
+#include <rclcpp/rclcpp.hpp>
+#include <tf2_ros/buffer.h>
 
 using namespace std::chrono_literals;
 
@@ -62,6 +62,7 @@ struct MockCurrentStateMonitorMiddlewareHandle : public planning_scene_monitor::
   MOCK_METHOD(void, resetJointStateSubscription, (), (override));
   MOCK_METHOD(std::string, getJointStateTopicName, (), (const, override));
   MOCK_METHOD(bool, sleepFor, (const std::chrono::nanoseconds& nanoseconds), (const, override));
+  MOCK_METHOD(bool, ok, (), (const, override));
   MOCK_METHOD(void, createStaticTfSubscription, (TfCallback callback), (override));
   MOCK_METHOD(void, createDynamicTfSubscription, (TfCallback callback), (override));
   MOCK_METHOD(std::string, getStaticTfTopicName, (), (const, override));
@@ -69,7 +70,7 @@ struct MockCurrentStateMonitorMiddlewareHandle : public planning_scene_monitor::
   MOCK_METHOD(void, resetTfSubscriptions, (), (override));
 };
 
-void waitFor(std::chrono::seconds timeout, std::function<bool()> done)
+void waitFor(std::chrono::seconds timeout, const std::function<bool()>& done)
 {
   const auto start = std::chrono::steady_clock::now();
   while ((std::chrono::steady_clock::now() - start) < timeout)

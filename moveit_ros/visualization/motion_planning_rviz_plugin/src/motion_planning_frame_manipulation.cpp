@@ -160,7 +160,7 @@ void MotionPlanningFrame::triggerObjectDetection()
 }
 
 void MotionPlanningFrame::listenDetectedObjects(
-    const object_recognition_msgs::msg::RecognizedObjectArray::ConstSharedPtr /*msg*/)
+    const object_recognition_msgs::msg::RecognizedObjectArray::ConstSharedPtr& /*msg*/)
 {
   rclcpp::sleep_for(std::chrono::seconds(1));
   planning_display_->addMainLoopJob([this] { processDetectedObjects(); });
@@ -308,7 +308,9 @@ void MotionPlanningFrame::placeObjectButtonClicked()
   std::string group_name = planning_display_->getCurrentPlanningGroup();
 
   if (!sel_table.empty())
+  {
     support_surface_name_ = sel_table[0]->text().toStdString();
+  }
   else
   {
     support_surface_name_.clear();

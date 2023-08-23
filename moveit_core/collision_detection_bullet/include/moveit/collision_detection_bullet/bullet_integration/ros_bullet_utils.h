@@ -37,8 +37,8 @@ namespace collision_detection_bullet
  *   \param active_links Stores the active links
  *   \param urdf_link The current urdf link representation
  *   \param active Indicates if link is considered active */
-static void getActiveLinkNamesRecursive(std::vector<std::string>& active_links,
-                                        const urdf::LinkConstSharedPtr& urdf_link, bool active);
+void getActiveLinkNamesRecursive(std::vector<std::string>& active_links, const urdf::LinkConstSharedPtr& urdf_link,
+                                 bool active);
 
 shapes::ShapePtr constructShape(const urdf::Geometry* geom);
 

@@ -138,8 +138,10 @@ void MotionPlanningFrame::saveRobotStateButtonClicked(const moveit::core::RobotS
     {
       name = text.toStdString();
       if (robot_states_.find(name) != robot_states_.end())
+      {
         QMessageBox::warning(this, "Name already exists",
                              QString("The name '").append(name.c_str()).append("' already exists. Not creating state."));
+      }
       else
       {
         // Store the current start state

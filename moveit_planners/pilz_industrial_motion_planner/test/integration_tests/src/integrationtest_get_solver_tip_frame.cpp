@@ -44,7 +44,7 @@
 #include <moveit/robot_model_loader/robot_model_loader.h>
 #include <ros/ros.h>
 
-#include "pilz_industrial_motion_planner/tip_frame_getter.h"
+#include <pilz_industrial_motion_planner/tip_frame_getter.h>
 
 static const std::string ROBOT_DESCRIPTION_PARAM{ "robot_description" };
 

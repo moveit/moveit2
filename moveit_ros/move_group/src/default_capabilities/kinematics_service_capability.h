@@ -50,12 +50,12 @@ public:
   void initialize() override;
 
 private:
-  bool computeIKService(const std::shared_ptr<rmw_request_id_t> request_header,
-                        const std::shared_ptr<moveit_msgs::srv::GetPositionIK::Request> req,
-                        std::shared_ptr<moveit_msgs::srv::GetPositionIK::Response> res);
-  bool computeFKService(const std::shared_ptr<rmw_request_id_t> request_header,
-                        const std::shared_ptr<moveit_msgs::srv::GetPositionFK::Request> req,
-                        std::shared_ptr<moveit_msgs::srv::GetPositionFK::Response> res);
+  bool computeIKService(const std::shared_ptr<rmw_request_id_t>& request_header,
+                        const std::shared_ptr<moveit_msgs::srv::GetPositionIK::Request>& req,
+                        const std::shared_ptr<moveit_msgs::srv::GetPositionIK::Response>& res);
+  bool computeFKService(const std::shared_ptr<rmw_request_id_t>& request_header,
+                        const std::shared_ptr<moveit_msgs::srv::GetPositionFK::Request>& req,
+                        const std::shared_ptr<moveit_msgs::srv::GetPositionFK::Response>& res);
 
   void computeIK(moveit_msgs::msg::PositionIKRequest& req, moveit_msgs::msg::RobotState& solution,
                  moveit_msgs::msg::MoveItErrorCodes& error_code, moveit::core::RobotState& rs,

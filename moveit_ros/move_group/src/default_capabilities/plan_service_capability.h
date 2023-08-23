@@ -49,9 +49,9 @@ public:
   void initialize() override;
 
 private:
-  bool computePlanService(const std::shared_ptr<rmw_request_id_t> request_header,
-                          const std::shared_ptr<moveit_msgs::srv::GetMotionPlan::Request> req,
-                          std::shared_ptr<moveit_msgs::srv::GetMotionPlan::Response> res);
+  bool computePlanService(const std::shared_ptr<rmw_request_id_t>& request_header,
+                          const std::shared_ptr<moveit_msgs::srv::GetMotionPlan::Request>& req,
+                          const std::shared_ptr<moveit_msgs::srv::GetMotionPlan::Response>& res);
 
   rclcpp::Service<moveit_msgs::srv::GetMotionPlan>::SharedPtr plan_service_;
 };

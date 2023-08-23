@@ -108,9 +108,13 @@ void getCollisionMarkersFromContacts(visualization_msgs::msg::MarkerArray& arr, 
     {
       std::string ns_name = contact.body_name_1 + "=" + contact.body_name_2;
       if (ns_counts.find(ns_name) == ns_counts.end())
+      {
         ns_counts[ns_name] = 0;
+      }
       else
+      {
         ns_counts[ns_name]++;
+      }
       visualization_msgs::msg::Marker mk;
       mk.header.stamp = rclcpp::Clock(RCL_ROS_TIME).now();
       mk.header.frame_id = frame_id;
@@ -162,6 +166,7 @@ void intersectCostSources(std::set<CostSource>& cost_sources, const std::set<Cos
   cost_sources.clear();
   CostSource tmp;
   for (const auto& source_a : a)
+  {
     for (const auto& source_b : b)
     {
       tmp.aabb_min[0] = std::max(source_a.aabb_min[0], source_b.aabb_min[0]);
@@ -177,6 +182,7 @@ void intersectCostSources(std::set<CostSource>& cost_sources, const std::set<Cos
       tmp.cost = std::max(source_a.cost, source_b.cost);
       cost_sources.insert(tmp);
     }
+  }
 }
 
 void removeOverlapping(std::set<CostSource>& cost_sources, const double overlap_fraction)
@@ -233,7 +239,9 @@ void removeCostSources(std::set<CostSource>& cost_sources, const std::set<CostSo
 
       const double intersect_volume = (q[0] - p[0]) * (q[1] - p[1]) * (q[2] - p[2]);
       if (intersect_volume >= it->getVolume() * overlap_fraction)
+      {
         remove.push_back(it);
+      }
       else
       {
         // there is some overlap, but not too large, so we split the cost source into multiple ones
@@ -281,17 +289,29 @@ void contactToMsg(const Contact& contact, moveit_msgs::msg::ContactInformation& 
   msg.contact_body_1 = contact.body_name_1;
   msg.contact_body_2 = contact.body_name_2;
   if (contact.body_type_1 == BodyTypes::ROBOT_LINK)
+  {
     msg.body_type_1 = moveit_msgs::msg::ContactInformation::ROBOT_LINK;
+  }
   else if (contact.body_type_1 == BodyTypes::ROBOT_ATTACHED)
+  {
     msg.body_type_1 = moveit_msgs::msg::ContactInformation::ROBOT_ATTACHED;
+  }
   else
+  {
     msg.body_type_1 = moveit_msgs::msg::ContactInformation::WORLD_OBJECT;
+  }
   if (contact.body_type_2 == BodyTypes::ROBOT_LINK)
+  {
     msg.body_type_2 = moveit_msgs::msg::ContactInformation::ROBOT_LINK;
+  }
   else if (contact.body_type_2 == BodyTypes::ROBOT_ATTACHED)
+  {
     msg.body_type_2 = moveit_msgs::msg::ContactInformation::ROBOT_ATTACHED;
+  }
   else
+  {
     msg.body_type_2 = moveit_msgs::msg::ContactInformation::WORLD_OBJECT;
+  }
 }
 
 }  // end of namespace collision_detection

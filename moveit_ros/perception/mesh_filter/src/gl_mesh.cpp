@@ -46,14 +46,16 @@ using shapes::Mesh;
 mesh_filter::GLMesh::GLMesh(const Mesh& mesh, unsigned int mesh_label)
 {
   if (!mesh.vertex_normals)
+  {
     throw std::runtime_error("Vertex normals are not computed for input mesh. Call computeVertexNormals() before "
                              "passing as input to mesh_filter.");
+  }
 
   mesh_label_ = mesh_label;
   list_ = glGenLists(1);
   glNewList(list_, GL_COMPILE);
   glBegin(GL_TRIANGLES);
-  glColor4ubv((GLubyte*)&mesh_label_);
+  glColor4ubv(reinterpret_cast<GLubyte*>(&mesh_label_));
   for (unsigned t_idx = 0; t_idx < mesh.triangle_count; ++t_idx)
   {
     unsigned v1 = 3 * mesh.triangles[3 * t_idx];
@@ -83,9 +85,13 @@ void mesh_filter::GLMesh::render(const Isometry3d& transform) const
   glMatrixMode(GL_MODELVIEW);
   glPushMatrix();
   if (!(transform.matrix().Flags & RowMajorBit))
+  {
     glMultMatrixd(transform.matrix().data());
+  }
   else
+  {
     glMultTransposeMatrixd(transform.matrix().data());
+  }
   glCallList(list_);
   glPopMatrix();
 }

@@ -41,10 +41,10 @@
 #include <moveit/robot_trajectory/robot_trajectory.h>
 #include <moveit/planning_interface/planning_interface.h>
 
-#include "pilz_industrial_motion_planner/trajectory_blend_request.h"
-#include "pilz_industrial_motion_planner/trajectory_blender.h"
-#include "pilz_industrial_motion_planner/trajectory_functions.h"
-#include "pilz_industrial_motion_planner/trajectory_generation_exceptions.h"
+#include <pilz_industrial_motion_planner/trajectory_blend_request.h>
+#include <pilz_industrial_motion_planner/trajectory_blender.h>
+#include <pilz_industrial_motion_planner/trajectory_functions.h>
+#include <pilz_industrial_motion_planner/trajectory_generation_exceptions.h>
 
 namespace pilz_industrial_motion_planner
 {

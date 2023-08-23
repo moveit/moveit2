@@ -143,9 +143,13 @@ void RenderShapes::renderShape(Ogre::SceneNode* node, const shapes::Shape* s, co
               m->addVertex(v, n);
             }
             else if (mesh->triangle_normals)
+            {
               m->addVertex(v, normal);
+            }
             else
+            {
               m->addVertex(v);
+            }
           }
         }
         m->endTriangles();

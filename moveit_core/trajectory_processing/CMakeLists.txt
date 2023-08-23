@@ -1,15 +1,14 @@
-set(MOVEIT_LIB_NAME moveit_trajectory_processing)
-
-add_library(${MOVEIT_LIB_NAME} SHARED
-  src/iterative_time_parameterization.cpp
-  src/iterative_spline_parameterization.cpp
+add_library(moveit_trajectory_processing SHARED
   src/ruckig_traj_smoothing.cpp
   src/trajectory_tools.cpp
   src/time_optimal_trajectory_generation.cpp
 )
-
-set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
-ament_target_dependencies(${MOVEIT_LIB_NAME}
+target_include_directories(moveit_trajectory_processing PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include/moveit_core>
+)
+set_target_properties(moveit_trajectory_processing PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
+ament_target_dependencies(moveit_trajectory_processing
   rclcpp
   rmw_implementation
   urdf
@@ -18,13 +17,13 @@ ament_target_dependencies(${MOVEIT_LIB_NAME}
   visualization_msgs
   Boost
 )
-target_link_libraries(${MOVEIT_LIB_NAME}
+target_link_libraries(moveit_trajectory_processing
   moveit_robot_state
   moveit_robot_trajectory
   ruckig::ruckig
 )
 
-install(DIRECTORY include/ DESTINATION include)
+install(DIRECTORY include/ DESTINATION include/moveit_core)
 
 if(BUILD_TESTING)
   if(WIN32)
@@ -34,16 +33,12 @@ if(BUILD_TESTING)
     set(append_library_dirs "${CMAKE_CURRENT_BINARY_DIR};${CMAKE_CURRENT_BINARY_DIR}/../robot_trajectory;${CMAKE_CURRENT_BINARY_DIR}/../utils")
   endif()
 
-  ament_add_gtest(test_time_parameterization test/test_time_parameterization.cpp
-    APPEND_LIBRARY_DIRS "${append_library_dirs}")
-  target_link_libraries(test_time_parameterization moveit_test_utils ${MOVEIT_LIB_NAME})
-
   ament_add_gtest(test_time_optimal_trajectory_generation test/test_time_optimal_trajectory_generation.cpp)
-  target_link_libraries(test_time_optimal_trajectory_generation moveit_test_utils ${MOVEIT_LIB_NAME})
+  target_link_libraries(test_time_optimal_trajectory_generation moveit_test_utils moveit_trajectory_processing)
 
   ament_add_gtest(test_ruckig_traj_smoothing test/test_ruckig_traj_smoothing.cpp)
   target_link_libraries(test_ruckig_traj_smoothing
-    ${MOVEIT_LIB_NAME}
+    moveit_trajectory_processing
     moveit_test_utils
   )
 endif()

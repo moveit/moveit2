@@ -39,11 +39,11 @@
 #include <moveit/robot_model/robot_model.h>
 #include <moveit/robot_model_loader/robot_model_loader.h>
 
-#include "pilz_industrial_motion_planner/planning_context_loader.h"
+#include <pilz_industrial_motion_planner/planning_context_loader.h>
 
 #include "test_utils.h"
 
-#include "rclcpp/rclcpp.hpp"
+#include <rclcpp/rclcpp.hpp>
 
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("unittest_planning_context_loader");
 
@@ -63,8 +63,8 @@ protected:
     node_ = rclcpp::Node::make_shared("unittest_planning_context_loader", node_options);
 
     // load robot model
-    robot_model_loader::RobotModelLoader rm_loader(node_);
-    robot_model_ = rm_loader.getModel();
+    rm_loader_ = std::make_unique<robot_model_loader::RobotModelLoader>(node_);
+    robot_model_ = rm_loader_->getModel();
     ASSERT_FALSE(robot_model_ == nullptr) << "There is no robot model!";
 
     // Load the plugin
@@ -98,11 +98,13 @@ protected:
     {
       planning_context_loader_class_loader_->unloadLibraryForClass(GetParam().front());
     }
+    robot_model_.reset();
   }
 
 protected:
   rclcpp::Node::SharedPtr node_;
   moveit::core::RobotModelConstPtr robot_model_;
+  std::unique_ptr<robot_model_loader::RobotModelLoader> rm_loader_;
 
   // Load the plugin
   std::unique_ptr<pluginlib::ClassLoader<pilz_industrial_motion_planner::PlanningContextLoader>>
@@ -165,7 +167,7 @@ TEST_P(PlanningContextLoadersTest, LoadContext)
   }
   catch (std::exception& ex)
   {
-    FAIL() << "Exception!" << ex.what() << " " << typeid(ex).name();
+    FAIL() << "Exception!" << ex.what() << ' ' << typeid(ex).name();
   }
 
   EXPECT_EQ(true, res) << "Context could not be loaded!";

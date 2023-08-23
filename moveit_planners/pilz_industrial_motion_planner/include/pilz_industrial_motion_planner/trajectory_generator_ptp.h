@@ -36,10 +36,10 @@
 
 #include <moveit/planning_scene/planning_scene.h>
 
-#include "eigen3/Eigen/Eigen"
-#include "pilz_industrial_motion_planner/trajectory_generation_exceptions.h"
-#include "pilz_industrial_motion_planner/trajectory_generator.h"
-#include "pilz_industrial_motion_planner/velocity_profile_atrap.h"
+#include <eigen3/Eigen/Eigen>
+#include <pilz_industrial_motion_planner/trajectory_generation_exceptions.h>
+#include <pilz_industrial_motion_planner/trajectory_generator.h>
+#include <pilz_industrial_motion_planner/velocity_profile_atrap.h>
 
 namespace pilz_industrial_motion_planner
 {
@@ -87,7 +87,7 @@ private:
             trajectory_msgs::msg::JointTrajectory& joint_trajectory) override;
 
 private:
-  const double MIN_MOVEMENT = 0.001;
+  static constexpr double MIN_MOVEMENT = 0.001;
   pilz_industrial_motion_planner::JointLimitsContainer joint_limits_;
   // most strict joint limits
   JointLimit most_strict_limit_;

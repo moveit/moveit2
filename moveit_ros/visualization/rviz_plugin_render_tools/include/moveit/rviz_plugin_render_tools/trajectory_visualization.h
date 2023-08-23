@@ -125,7 +125,7 @@ protected:
   /**
    * \brief ROS callback for an incoming path message
    */
-  void incomingDisplayTrajectory(const moveit_msgs::msg::DisplayTrajectory::ConstSharedPtr msg);
+  void incomingDisplayTrajectory(const moveit_msgs::msg::DisplayTrajectory::ConstSharedPtr& msg);
 
   /**
    * \brief get time to show each single robot state

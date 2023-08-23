@@ -37,12 +37,13 @@
 #include <moveit_setup_framework/data/urdf_config.hpp>
 #include <moveit_setup_framework/data/srdf_config.hpp>
 #include <QApplication>
-#include "rviz_rendering/render_window.hpp"
+#include <rviz_rendering/render_window.hpp>
 
 namespace moveit_setup
 {
-RVizPanel::RVizPanel(QWidget* parent, rviz_common::ros_integration::RosNodeAbstractionIface::WeakPtr node_abstraction,
-                     DataWarehousePtr config_data)
+RVizPanel::RVizPanel(QWidget* parent,
+                     const rviz_common::ros_integration::RosNodeAbstractionIface::WeakPtr& node_abstraction,
+                     const DataWarehousePtr& config_data)
   : QWidget(parent)
   , parent_(parent)
   , node_abstraction_(node_abstraction)

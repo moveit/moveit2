@@ -92,9 +92,13 @@ void Transforms::setAllTransforms(const FixedTransformsMap& transforms)
 bool Transforms::isFixedFrame(const std::string& frame) const
 {
   if (frame.empty())
+  {
     return false;
+  }
   else
+  {
     return transforms_map_.find(frame) != transforms_map_.end();
+  }
 }
 
 const Eigen::Isometry3d& Transforms::getTransform(const std::string& from_frame) const
@@ -118,9 +122,13 @@ const Eigen::Isometry3d& Transforms::getTransform(const std::string& from_frame)
 bool Transforms::canTransform(const std::string& from_frame) const
 {
   if (from_frame.empty())
+  {
     return false;
+  }
   else
+  {
     return transforms_map_.find(from_frame) != transforms_map_.end();
+  }
 }
 
 void Transforms::setTransform(const Eigen::Isometry3d& t, const std::string& from_frame)

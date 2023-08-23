@@ -236,11 +236,17 @@ void addViewPlaneControl(visualization_msgs::msg::InteractiveMarker& int_marker,
   visualization_msgs::msg::InteractiveMarkerControl control;
   control.orientation_mode = visualization_msgs::msg::InteractiveMarkerControl::VIEW_FACING;
   if (position && orientation)
+  {
     control.interaction_mode = visualization_msgs::msg::InteractiveMarkerControl::MOVE_ROTATE_3D;
+  }
   else if (orientation)
+  {
     control.interaction_mode = visualization_msgs::msg::InteractiveMarkerControl::ROTATE_3D;
+  }
   else
+  {
     control.interaction_mode = visualization_msgs::msg::InteractiveMarkerControl::MOVE_3D;
+  }
   control.independent_marker_orientation = true;
   control.name = "move";
 

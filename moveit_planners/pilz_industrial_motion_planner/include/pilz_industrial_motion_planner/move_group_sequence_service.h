@@ -58,8 +58,8 @@ public:
   void initialize() override;
 
 private:
-  bool plan(const moveit_msgs::srv::GetMotionSequence::Request::SharedPtr req,
-            moveit_msgs::srv::GetMotionSequence::Response::SharedPtr res);
+  bool plan(const moveit_msgs::srv::GetMotionSequence::Request::SharedPtr& req,
+            const moveit_msgs::srv::GetMotionSequence::Response::SharedPtr& res);
 
 private:
   rclcpp::Service<moveit_msgs::srv::GetMotionSequence>::SharedPtr sequence_service_;

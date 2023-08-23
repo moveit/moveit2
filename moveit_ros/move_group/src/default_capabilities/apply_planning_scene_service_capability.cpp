@@ -54,16 +54,17 @@ void ApplyPlanningSceneService::initialize()
   using std::placeholders::_3;
 
   service_ = context_->moveit_cpp_->getNode()->create_service<moveit_msgs::srv::ApplyPlanningScene>(
-      APPLY_PLANNING_SCENE_SERVICE_NAME, [this](const std::shared_ptr<rmw_request_id_t> request_header,
-                                                const std::shared_ptr<moveit_msgs::srv::ApplyPlanningScene::Request> req,
-                                                std::shared_ptr<moveit_msgs::srv::ApplyPlanningScene::Response> res) {
+      APPLY_PLANNING_SCENE_SERVICE_NAME,
+      [this](const std::shared_ptr<rmw_request_id_t>& request_header,
+             const std::shared_ptr<moveit_msgs::srv::ApplyPlanningScene::Request>& req,
+             const std::shared_ptr<moveit_msgs::srv::ApplyPlanningScene::Response>& res) {
         return applyScene(request_header, req, res);
       });
 }
 
-bool ApplyPlanningSceneService::applyScene(const std::shared_ptr<rmw_request_id_t> /* unused */,
-                                           const std::shared_ptr<moveit_msgs::srv::ApplyPlanningScene::Request> req,
-                                           std::shared_ptr<moveit_msgs::srv::ApplyPlanningScene::Response> res)
+bool ApplyPlanningSceneService::applyScene(const std::shared_ptr<rmw_request_id_t>& /* unused */,
+                                           const std::shared_ptr<moveit_msgs::srv::ApplyPlanningScene::Request>& req,
+                                           const std::shared_ptr<moveit_msgs::srv::ApplyPlanningScene::Response>& res)
 {
   if (!context_->planning_scene_monitor_)
   {

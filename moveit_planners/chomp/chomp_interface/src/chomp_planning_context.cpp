@@ -40,7 +40,8 @@
 namespace chomp_interface
 {
 CHOMPPlanningContext::CHOMPPlanningContext(const std::string& name, const std::string& group,
-                                           const moveit::core::RobotModelConstPtr& model, rclcpp::Node::SharedPtr node)
+                                           const moveit::core::RobotModelConstPtr& model,
+                                           const rclcpp::Node::SharedPtr& node)
   : planning_interface::PlanningContext(name, group), robot_model_(model)
 {
   chomp_interface_ = std::make_shared<CHOMPInterface>(node);
@@ -56,12 +57,12 @@ bool CHOMPPlanningContext::solve(planning_interface::MotionPlanResponse& res)
   planning_interface::MotionPlanDetailedResponse res_detailed;
   bool planning_success = solve(res_detailed);
 
-  res.error_code_ = res_detailed.error_code_;
+  res.error_code = res_detailed.error_code;
 
   if (planning_success)
   {
-    res.trajectory_ = res_detailed.trajectory_[0];
-    res.planning_time_ = res_detailed.processing_time_[0];
+    res.trajectory = res_detailed.trajectory[0];
+    res.planning_time = res_detailed.processing_time[0];
   }
 
   return planning_success;

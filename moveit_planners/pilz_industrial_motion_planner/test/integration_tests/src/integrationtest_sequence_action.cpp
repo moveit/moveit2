@@ -58,7 +58,7 @@
 #include <pilz_industrial_motion_planner_testutils/sequence.h>
 #include <pilz_industrial_motion_planner_testutils/xml_testdata_loader.h>
 
-#include "moveit_msgs/MoveGroupSequenceAction.h"
+#include <moveit_msgs/MoveGroupSequenceAction.h>
 
 static constexpr int WAIT_FOR_ACTION_SERVER_TIME_OUT{ 10 };  // seconds
 

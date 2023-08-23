@@ -36,8 +36,8 @@
 
 #pragma once
 
-#include "moveit_setup_framework/qt/setup_step_widget.hpp"
-#include "moveit_setup_framework/qt/helper_widgets.hpp"
+#include <moveit_setup_framework/qt/setup_step_widget.hpp>
+#include <moveit_setup_framework/qt/helper_widgets.hpp>
 #include <rclcpp/node.hpp>
 #include <QWidget>
 #include <QFrame>

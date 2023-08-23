@@ -93,7 +93,7 @@ public:
     return srdf_;
   }
 
-  void setNewModelCallback(NewModelCallback cb)
+  void setNewModelCallback(const NewModelCallback& cb)
   {
     new_model_cb_ = cb;
   }

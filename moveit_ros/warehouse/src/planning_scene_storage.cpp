@@ -126,8 +126,10 @@ std::string moveit_warehouse::PlanningSceneStorage::getMotionPlanRequestName(
     if (serial_size != serial_size_arg)
       continue;
     if (memcmp(data_arg, data, serial_size) == 0)
+    {
       // we found the same message twice
       return existing_request->lookupString(MOTION_PLAN_REQUEST_ID_NAME);
+    }
   }
   return "";
 }
@@ -195,8 +197,10 @@ void moveit_warehouse::PlanningSceneStorage::getPlanningSceneNames(std::vector<s
   std::vector<PlanningSceneWithMetadata> planning_scenes =
       planning_scene_collection_->queryList(q, true, PLANNING_SCENE_ID_NAME, true);
   for (PlanningSceneWithMetadata& planning_scene : planning_scenes)
+  {
     if (planning_scene->lookupField(PLANNING_SCENE_ID_NAME))
       names.push_back(planning_scene->lookupString(PLANNING_SCENE_ID_NAME));
+  }
 }
 
 void moveit_warehouse::PlanningSceneStorage::getPlanningSceneNames(const std::string& regex,
@@ -273,8 +277,10 @@ void moveit_warehouse::PlanningSceneStorage::getPlanningQueriesNames(std::vector
   std::vector<MotionPlanRequestWithMetadata> planning_queries = motion_plan_request_collection_->queryList(q, true);
   query_names.clear();
   for (MotionPlanRequestWithMetadata& planning_query : planning_queries)
+  {
     if (planning_query->lookupField(MOTION_PLAN_REQUEST_ID_NAME))
       query_names.push_back(planning_query->lookupString(MOTION_PLAN_REQUEST_ID_NAME));
+  }
 }
 
 void moveit_warehouse::PlanningSceneStorage::getPlanningQueriesNames(const std::string& regex,
@@ -308,10 +314,16 @@ void moveit_warehouse::PlanningSceneStorage::getPlanningQueries(
   planning_queries = motion_plan_request_collection_->queryList(q, false);
   query_names.resize(planning_queries.size());
   for (std::size_t i = 0; i < planning_queries.size(); ++i)
+  {
     if (planning_queries[i]->lookupField(MOTION_PLAN_REQUEST_ID_NAME))
+    {
       query_names[i] = planning_queries[i]->lookupString(MOTION_PLAN_REQUEST_ID_NAME);
+    }
     else
+    {
       query_names[i].clear();
+    }
+  }
 }
 
 void moveit_warehouse::PlanningSceneStorage::getPlanningResults(
@@ -320,9 +332,13 @@ void moveit_warehouse::PlanningSceneStorage::getPlanningResults(
 {
   std::string id = getMotionPlanRequestName(planning_query, scene_name);
   if (id.empty())
+  {
     planning_results.clear();
+  }
   else
+  {
     getPlanningResults(planning_results, id, scene_name);
+  }
 }
 
 void moveit_warehouse::PlanningSceneStorage::getPlanningResults(

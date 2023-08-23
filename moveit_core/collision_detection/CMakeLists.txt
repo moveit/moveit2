@@ -1,6 +1,4 @@
-set(MOVEIT_LIB_NAME moveit_collision_detection)
-
-add_library(${MOVEIT_LIB_NAME} SHARED
+add_library(moveit_collision_detection SHARED
   src/allvalid/collision_env_allvalid.cpp
   src/collision_common.cpp
   src/collision_matrix.cpp
@@ -11,10 +9,14 @@ add_library(${MOVEIT_LIB_NAME} SHARED
   src/collision_env.cpp
   src/collision_plugin_cache.cpp
 )
+target_include_directories(moveit_collision_detection PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include/moveit_core>
+)
 include(GenerateExportHeader)
-generate_export_header(${MOVEIT_LIB_NAME})
+generate_export_header(moveit_collision_detection)
 
-ament_target_dependencies(${MOVEIT_LIB_NAME}
+ament_target_dependencies(moveit_collision_detection
   rclcpp
   rmw_implementation
   urdf
@@ -26,12 +28,12 @@ ament_target_dependencies(${MOVEIT_LIB_NAME}
   geometric_shapes
   OCTOMAP
 )
-target_include_directories(${MOVEIT_LIB_NAME} BEFORE PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>)
-target_include_directories(${MOVEIT_LIB_NAME} PUBLIC $<TARGET_PROPERTY:moveit_planning_scene,INCLUDE_DIRECTORIES>)
+target_include_directories(moveit_collision_detection BEFORE PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>)
+target_include_directories(moveit_collision_detection PUBLIC $<TARGET_PROPERTY:moveit_planning_scene,INCLUDE_DIRECTORIES>)
 
-set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES VERSION ${${PROJECT_NAME}_VERSION})
+set_target_properties(moveit_collision_detection PROPERTIES VERSION ${${PROJECT_NAME}_VERSION})
 
-target_link_libraries(${MOVEIT_LIB_NAME}
+target_link_libraries(moveit_collision_detection
   moveit_robot_state
 )
 
@@ -45,16 +47,16 @@ if(BUILD_TESTING)
 
   ament_add_gtest(test_world test/test_world.cpp
     APPEND_LIBRARY_DIRS "${append_library_dirs}")
-  target_link_libraries(test_world ${MOVEIT_LIB_NAME})
+  target_link_libraries(test_world moveit_collision_detection)
 
   ament_add_gtest(test_world_diff test/test_world_diff.cpp
     APPEND_LIBRARY_DIRS "${append_library_dirs}")
-  target_link_libraries(test_world_diff ${MOVEIT_LIB_NAME})
+  target_link_libraries(test_world_diff moveit_collision_detection)
 
   ament_add_gtest(test_all_valid test/test_all_valid.cpp
     APPEND_LIBRARY_DIRS "${append_library_dirs}")
-  target_link_libraries(test_all_valid ${MOVEIT_LIB_NAME} moveit_robot_model)
+  target_link_libraries(test_all_valid moveit_collision_detection moveit_robot_model)
 endif()
 
-install(DIRECTORY include/ DESTINATION include)
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${MOVEIT_LIB_NAME}_export.h DESTINATION include)
+install(DIRECTORY include/ DESTINATION include/moveit_core)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/moveit_collision_detection_export.h DESTINATION include/moveit_core)

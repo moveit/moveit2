@@ -95,7 +95,7 @@ private:
 
   // Goal callback for global planning request action server
   void globalPlanningRequestCallback(
-      std::shared_ptr<rclcpp_action::ServerGoalHandle<moveit_msgs::action::GlobalPlanner>> goal_handle);
+      const std::shared_ptr<rclcpp_action::ServerGoalHandle<moveit_msgs::action::GlobalPlanner>>& goal_handle);
 
   // Initialize planning scene monitor and load pipelines
   bool initializeGlobalPlanner();

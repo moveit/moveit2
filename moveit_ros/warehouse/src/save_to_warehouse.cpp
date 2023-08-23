@@ -38,11 +38,11 @@
 #include <moveit/warehouse/constraints_storage.h>
 #include <moveit/warehouse/state_storage.h>
 #include <moveit/planning_scene_monitor/planning_scene_monitor.h>
-#include <boost/algorithm/string/join.hpp>
 #include <boost/program_options/cmdline.hpp>
 #include <boost/program_options/options_description.hpp>
 #include <boost/program_options/parsers.hpp>
 #include <boost/program_options/variables_map.hpp>
+#include <fmt/format.h>
 #include <tf2_ros/transform_listener.h>
 #include <rclcpp/executors.hpp>
 #include <rclcpp/experimental/buffers/intra_process_buffer.hpp>
@@ -50,7 +50,12 @@
 #include <rclcpp/logging.hpp>
 #include <rclcpp/node.hpp>
 #include <rclcpp/node_options.hpp>
+#include <rclcpp/version.h>
+#if RCLCPP_VERSION_GTE(20, 0, 0)
+#include <rclcpp/event_handler.hpp>
+#else
 #include <rclcpp/qos_event.hpp>
+#endif
 #include <rclcpp/subscription.hpp>
 #include <rclcpp/utilities.hpp>
 
@@ -71,8 +76,10 @@ void onSceneUpdate(planning_scene_monitor::PlanningSceneMonitor& psm, moveit_war
       pss.addPlanningScene(psmsg);
     }
     else
+    {
       RCLCPP_INFO(LOGGER, "Scene '%s' was previously added. Not adding again.",
                   psm.getPlanningScene()->getName().c_str());
+    }
   }
   else
     RCLCPP_INFO(LOGGER, "Scene name is empty. Not saving.");
@@ -168,7 +175,9 @@ int main(int argc, char** argv)
   std::vector<std::string> names;
   pss.getPlanningSceneNames(names);
   if (names.empty())
+  {
     RCLCPP_INFO(LOGGER, "There are no previously stored scenes");
+  }
   else
   {
     RCLCPP_INFO(LOGGER, "Previously stored scenes:");
@@ -177,7 +186,9 @@ int main(int argc, char** argv)
   }
   cs.getKnownConstraints(names);
   if (names.empty())
+  {
     RCLCPP_INFO(LOGGER, "There are no previously stored constraints");
+  }
   else
   {
     RCLCPP_INFO(LOGGER, "Previously stored constraints:");
@@ -186,7 +197,9 @@ int main(int argc, char** argv)
   }
   rs.getKnownRobotStates(names);
   if (names.empty())
+  {
     RCLCPP_INFO(LOGGER, "There are no previously stored robot states");
+  }
   else
   {
     RCLCPP_INFO(LOGGER, "Previously stored robot states:");
@@ -196,17 +209,19 @@ int main(int argc, char** argv)
 
   psm.addUpdateCallback([&](auto&&) { return onSceneUpdate(psm, pss); });
 
-  auto callback1 = [&](moveit_msgs::msg::MotionPlanRequest msg) -> void { return onMotionPlanRequest(msg, psm, pss); };
-  auto mplan_req_sub =
-      node->create_subscription<moveit_msgs::msg::MotionPlanRequest>("motion_plan_request", 100, callback1);
-  auto callback2 = [&](moveit_msgs::msg::Constraints msg) -> void { return onConstraints(msg, cs); };
-  auto constr_sub = node->create_subscription<moveit_msgs::msg::Constraints>("constraints", 100, callback2);
-  auto callback3 = [&](moveit_msgs::msg::RobotState msg) -> void { return onRobotState(msg, rs); };
-  auto state_sub = node->create_subscription<moveit_msgs::msg::RobotState>("robot_state", 100, callback3);
+  auto mplan_req_sub = node->create_subscription<moveit_msgs::msg::MotionPlanRequest>(
+      "motion_plan_request", rclcpp::SystemDefaultsQoS(),
+      [&](const moveit_msgs::msg::MotionPlanRequest& msg) { onMotionPlanRequest(msg, psm, pss); });
+  auto constr_sub = node->create_subscription<moveit_msgs::msg::Constraints>(
+      "constraints", rclcpp::SystemDefaultsQoS(),
+      [&](const moveit_msgs::msg::Constraints& msg) { onConstraints(msg, cs); });
+  auto state_sub = node->create_subscription<moveit_msgs::msg::RobotState>(
+      "robot_state", rclcpp::SystemDefaultsQoS(),
+      [&](const moveit_msgs::msg::RobotState& msg) { onRobotState(msg, rs); });
 
   std::vector<std::string> topics;
   psm.getMonitoredTopics(topics);
-  RCLCPP_INFO_STREAM(LOGGER, "Listening for scene updates on topics " << boost::algorithm::join(topics, ", "));
+  RCLCPP_INFO_STREAM(LOGGER, "Listening for scene updates on topics " << fmt::format("{}", fmt::join(topics, ", ")));
   RCLCPP_INFO_STREAM(LOGGER, "Listening for planning requests on topic " << mplan_req_sub->get_topic_name());
   RCLCPP_INFO_STREAM(LOGGER, "Listening for named constraints on topic " << constr_sub->get_topic_name());
   RCLCPP_INFO_STREAM(LOGGER, "Listening for states on topic " << state_sub->get_topic_name());

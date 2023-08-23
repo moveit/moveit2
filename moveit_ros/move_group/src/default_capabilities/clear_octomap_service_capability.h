@@ -49,8 +49,8 @@ public:
   void initialize() override;
 
 private:
-  void clearOctomap(const std::shared_ptr<std_srvs::srv::Empty::Request> req,
-                    std::shared_ptr<std_srvs::srv::Empty::Response> res);
+  void clearOctomap(const std::shared_ptr<std_srvs::srv::Empty::Request>& req,
+                    const std::shared_ptr<std_srvs::srv::Empty::Response>& res);
 
   rclcpp::Service<std_srvs::srv::Empty>::SharedPtr service_;
 };

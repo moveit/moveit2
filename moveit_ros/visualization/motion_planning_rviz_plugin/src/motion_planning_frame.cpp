@@ -267,26 +267,28 @@ void MotionPlanningFrame::allowExternalProgramCommunication(bool enable)
   {
     using std::placeholders::_1;
     plan_subscriber_ = node_->create_subscription<std_msgs::msg::Empty>(
-        "/rviz/moveit/plan", 1,
-        [this](const std_msgs::msg::Empty::ConstSharedPtr msg) { return remotePlanCallback(msg); });
+        "/rviz/moveit/plan", rclcpp::SystemDefaultsQoS(),
+        [this](const std_msgs::msg::Empty::ConstSharedPtr& msg) { return remotePlanCallback(msg); });
     execute_subscriber_ = node_->create_subscription<std_msgs::msg::Empty>(
-        "/rviz/moveit/execute", 1,
-        [this](const std_msgs::msg::Empty::ConstSharedPtr msg) { return remoteExecuteCallback(msg); });
+        "/rviz/moveit/execute", rclcpp::SystemDefaultsQoS(),
+        [this](const std_msgs::msg::Empty::ConstSharedPtr& msg) { return remoteExecuteCallback(msg); });
     stop_subscriber_ = node_->create_subscription<std_msgs::msg::Empty>(
-        "/rviz/moveit/stop", 1,
-        [this](const std_msgs::msg::Empty::ConstSharedPtr msg) { return remoteStopCallback(msg); });
+        "/rviz/moveit/stop", rclcpp::SystemDefaultsQoS(),
+        [this](const std_msgs::msg::Empty::ConstSharedPtr& msg) { return remoteStopCallback(msg); });
     update_start_state_subscriber_ = node_->create_subscription<std_msgs::msg::Empty>(
-        "/rviz/moveit/update_start_state", 1,
-        [this](const std_msgs::msg::Empty::ConstSharedPtr msg) { return remoteUpdateStartStateCallback(msg); });
+        "/rviz/moveit/update_start_state", rclcpp::SystemDefaultsQoS(),
+        [this](const std_msgs::msg::Empty::ConstSharedPtr& msg) { return remoteUpdateStartStateCallback(msg); });
     update_goal_state_subscriber_ = node_->create_subscription<std_msgs::msg::Empty>(
-        "/rviz/moveit/update_goal_state", 1,
-        [this](const std_msgs::msg::Empty::ConstSharedPtr msg) { return remoteUpdateGoalStateCallback(msg); });
+        "/rviz/moveit/update_goal_state", rclcpp::SystemDefaultsQoS(),
+        [this](const std_msgs::msg::Empty::ConstSharedPtr& msg) { return remoteUpdateGoalStateCallback(msg); });
     update_custom_start_state_subscriber_ = node_->create_subscription<moveit_msgs::msg::RobotState>(
-        "/rviz/moveit/update_custom_start_state", 1, [this](const moveit_msgs::msg::RobotState::ConstSharedPtr msg) {
+        "/rviz/moveit/update_custom_start_state", rclcpp::SystemDefaultsQoS(),
+        [this](const moveit_msgs::msg::RobotState::ConstSharedPtr& msg) {
           return remoteUpdateCustomStartStateCallback(msg);
         });
     update_custom_goal_state_subscriber_ = node_->create_subscription<moveit_msgs::msg::RobotState>(
-        "/rviz/moveit/update_custom_goal_state", 1, [this](const moveit_msgs::msg::RobotState::ConstSharedPtr msg) {
+        "/rviz/moveit/update_custom_goal_state", rclcpp::SystemDefaultsQoS(),
+        [this](const moveit_msgs::msg::RobotState::ConstSharedPtr& msg) {
           return remoteUpdateCustomGoalStateCallback(msg);
         });
   }
@@ -381,8 +383,8 @@ void MotionPlanningFrame::changePlanningGroupHelper()
                 planning_display_->getMoveGroupNS().c_str());
     moveit::planning_interface::MoveGroupInterface::Options opt(
         group, moveit::planning_interface::MoveGroupInterface::ROBOT_DESCRIPTION, planning_display_->getMoveGroupNS());
-    opt.robot_model_ = robot_model;
-    opt.robot_description_.clear();
+    opt.robot_model = robot_model;
+    opt.robot_description.clear();
     try
     {
 #ifdef RVIZ_TF1
@@ -491,12 +493,16 @@ void MotionPlanningFrame::addSceneObject()
     case shapes::MESH:
     {
       QUrl url;
-      if (ui_->shapes_combo_box->currentText().contains("file"))  // open from file
+      if (ui_->shapes_combo_box->currentText().contains("file"))
+      {  // open from file
         url = QFileDialog::getOpenFileUrl(this, tr("Import Object Mesh"), QString(),
                                           "CAD files (*.stl *.obj *.dae);;All files (*.*)");
-      else  // open from URL
+      }
+      else
+      {  // open from URL
         url = QInputDialog::getText(this, tr("Import Object Mesh"), tr("URL for file to import from:"),
                                     QLineEdit::Normal, QString("http://"));
+      }
       if (!url.isEmpty())
         shape = loadMeshResource(url.toString().toStdString());
       if (!shape)
@@ -610,8 +616,8 @@ void MotionPlanningFrame::initFromMoveGroupNS()
   clear_octomap_service_client_ = node_->create_client<std_srvs::srv::Empty>(move_group::CLEAR_OCTOMAP_SERVICE_NAME);
 
   object_recognition_subscriber_ = node_->create_subscription<object_recognition_msgs::msg::RecognizedObjectArray>(
-      "recognized_object_array", 1,
-      [this](const object_recognition_msgs::msg::RecognizedObjectArray::ConstSharedPtr msg) {
+      "recognized_object_array", rclcpp::SystemDefaultsQoS(),
+      [this](const object_recognition_msgs::msg::RecognizedObjectArray::ConstSharedPtr& msg) {
         return listenDetectedObjects(msg);
       });
 
@@ -658,9 +664,13 @@ void MotionPlanningFrame::disable()
 void MotionPlanningFrame::tabChanged(int index)
 {
   if (scene_marker_ && ui_->tabWidget->tabText(index).toStdString() != TAB_OBJECTS)
+  {
     scene_marker_.reset();
+  }
   else if (ui_->tabWidget->tabText(index).toStdString() == TAB_OBJECTS)
+  {
     selectedCollisionObjectChanged();
+  }
 }
 
 void MotionPlanningFrame::updateSceneMarkers(float /*wall_dt*/, float /*ros_dt*/)

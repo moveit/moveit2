@@ -75,7 +75,7 @@ struct ModelBasedPlanningContextSpecification
    * When the parameter "use_ompl_constrained_planning" is set to true in ompl_planning.yaml,
    * the path constraints are handled by this state space.
    *
-   * **Important**: because code often depents on the attribute `state_space_` to copy states from MoveIt to OMPL, we
+   * **Important**: because code often depends on the attribute `state_space_` to copy states from MoveIt to OMPL, we
    * must set `state_space_` to have type `ompl_interface::ConstrainedPlanningStateSpace`. The actual planning does
    * not happen with this `state_space_`, but it is used to create the `constrained_state_space_` of type
    * `ompl::base::ConstrainedStateSpace`. The latter is the one passed to OMPL simple setup (after creating a
@@ -388,7 +388,7 @@ protected:
   void unregisterTerminationCondition();
 
   /** \brief Convert OMPL PlannerStatus to moveit_msgs::msg::MoveItErrorCode */
-  int32_t logPlannerStatus(og::SimpleSetupPtr ompl_simple_setup);
+  int32_t logPlannerStatus(const og::SimpleSetupPtr& ompl_simple_setup);
 
   ModelBasedPlanningContextSpecification spec_;
 

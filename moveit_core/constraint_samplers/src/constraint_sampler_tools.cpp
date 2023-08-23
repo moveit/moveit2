@@ -83,7 +83,7 @@ double countSamplesPerSecond(const ConstraintSamplerPtr& sampler, const moveit::
         valid++;
     }
   } while (rclcpp::Clock().now() < end);
-  return (double)valid / (double)total;
+  return static_cast<double>(valid) / static_cast<double>(total);
 }
 
 void visualizeDistribution(const ConstraintSamplerPtr& sampler, const moveit::core::RobotState& reference_state,

@@ -47,6 +47,8 @@ void CollisionResult::print() const
   rclcpp::Clock clock;
   if (!contacts.empty())
   {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wold-style-cast"
     RCLCPP_WARN_STREAM_THROTTLE(LOGGER, clock, LOG_THROTTLE_PERIOD,
                                 "Objects in collision (printing 1st of "
                                     << contacts.size() << " pairs): " << contacts.begin()->first.first << ", "
@@ -59,6 +61,7 @@ void CollisionResult::print() const
       RCLCPP_DEBUG_STREAM_THROTTLE(LOGGER, clock, LOG_THROTTLE_PERIOD,
                                    "\t" << contact.first.first << ", " << contact.first.second);
     }
+#pragma GCC diagnostic pop
   }
 }
 

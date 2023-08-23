@@ -53,7 +53,7 @@
 
 namespace chomp
 {
-static rclcpp::Logger LOGGER = rclcpp::get_logger("chomp_planner");
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("chomp_planner");
 
 class OptimizerAdapter : public planning_request_adapter::PlanningRequestAdapter
 {
@@ -173,8 +173,8 @@ public:
   }
 
   bool adaptAndPlan(const PlannerFn& planner, const planning_scene::PlanningSceneConstPtr& ps,
-                    const planning_interface::MotionPlanRequest& req, planning_interface::MotionPlanResponse& res,
-                    std::vector<std::size_t>& /*added_path_index*/) const override
+                    const planning_interface::MotionPlanRequest& req,
+                    planning_interface::MotionPlanResponse& res) const override
   {
     RCLCPP_DEBUG(LOGGER, "CHOMP: adaptAndPlan ...");
 
@@ -194,16 +194,16 @@ public:
 
     chomp::ChompPlanner chomp_planner;
     planning_interface::MotionPlanDetailedResponse res_detailed;
-    res_detailed.trajectory_.push_back(res.trajectory_);
+    res_detailed.trajectory.push_back(res.trajectory);
 
     bool planning_success = chomp_planner.solve(planning_scene, req, params_, res_detailed);
 
     if (planning_success)
     {
-      res.trajectory_ = res_detailed.trajectory_[0];
-      res.planning_time_ += res_detailed.processing_time_[0];
+      res.trajectory = res_detailed.trajectory[0];
+      res.planning_time += res_detailed.processing_time[0];
     }
-    res.error_code_ = res_detailed.error_code_;
+    res.error_code = res_detailed.error_code;
 
     return planning_success;
   }

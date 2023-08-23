@@ -39,10 +39,10 @@
 #include <moveit/robot_model/robot_model.h>
 #include <moveit/robot_model_loader/robot_model_loader.h>
 
-#include "pilz_industrial_motion_planner/pilz_industrial_motion_planner.h"
+#include <pilz_industrial_motion_planner/pilz_industrial_motion_planner.h>
 #include "test_utils.h"
 
-#include "rclcpp/rclcpp.hpp"
+#include <rclcpp/rclcpp.hpp>
 
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("unittest_pilz_industrial_motion_planner");
 
@@ -69,8 +69,8 @@ protected:
   void createPlannerInstance()
   {
     // load robot model
-    robot_model_loader::RobotModelLoader rm_loader(node_);
-    robot_model_ = rm_loader.getModel();
+    rm_loader_ = std::make_unique<robot_model_loader::RobotModelLoader>(node_);
+    robot_model_ = rm_loader_->getModel();
     ASSERT_TRUE(bool(robot_model_)) << "Failed to load robot model";
 
     // Load planner name from node parameters
@@ -98,19 +98,21 @@ protected:
     }
     catch (pluginlib::PluginlibException& ex)
     {
-      FAIL() << "Could not create planner " << ex.what() << "\n";
+      FAIL() << "Could not create planner " << ex.what() << '\n';
     }
   }
 
   void TearDown() override
   {
     planner_plugin_loader_->unloadLibraryForClass(planner_plugin_name_);
+    robot_model_.reset();
   }
 
 protected:
   // ros stuff
   rclcpp::Node::SharedPtr node_;
   moveit::core::RobotModelConstPtr robot_model_;
+  std::unique_ptr<robot_model_loader::RobotModelLoader> rm_loader_;
 
   std::string planner_plugin_name_;
   std::unique_ptr<pluginlib::ClassLoader<planning_interface::PlannerManager>> planner_plugin_loader_;
@@ -155,8 +157,40 @@ TEST_F(CommandPlannerTest, CheckValidAlgorithmsForServiceRequest)
   {
     planning_interface::MotionPlanRequest req;
     req.planner_id = alg;
+    req.group_name = "manipulator";
 
     EXPECT_TRUE(planner_instance_->canServiceRequest(req));
+  }
+}
+
+TEST_F(CommandPlannerTest, CheckEmptyGroupNameForServiceRequest)
+{
+  // Check for the algorithms
+  std::vector<std::string> algs;
+  planner_instance_->getPlanningAlgorithms(algs);
+
+  for (const auto& alg : algs)
+  {
+    planning_interface::MotionPlanRequest req;
+    req.planner_id = alg;
+
+    EXPECT_FALSE(planner_instance_->canServiceRequest(req));
+  }
+}
+
+TEST_F(CommandPlannerTest, CheckInvalidGroupNameForServiceRequest)
+{
+  // Check for the algorithms
+  std::vector<std::string> algs;
+  planner_instance_->getPlanningAlgorithms(algs);
+
+  for (const auto& alg : algs)
+  {
+    planning_interface::MotionPlanRequest req;
+    req.planner_id = alg;
+    req.group_name = "1234manipulator";
+
+    EXPECT_FALSE(planner_instance_->canServiceRequest(req));
   }
 }
 
@@ -168,6 +202,7 @@ TEST_F(CommandPlannerTest, CheckInvalidAlgorithmsForServiceRequest)
 {
   planning_interface::MotionPlanRequest req;
   req.planner_id = "NON_EXISTEND_ALGORITHM_HASH_da39a3ee5e6b4b0d3255bfef95601890afd80709";
+  req.group_name = "manipulator";
 
   EXPECT_FALSE(planner_instance_->canServiceRequest(req));
 }
@@ -179,6 +214,7 @@ TEST_F(CommandPlannerTest, CheckEmptyPlannerIdForServiceRequest)
 {
   planning_interface::MotionPlanRequest req;
   req.planner_id = "";
+  req.group_name = "manipulator";
 
   EXPECT_FALSE(planner_instance_->canServiceRequest(req));
 }
@@ -222,6 +258,46 @@ TEST_F(CommandPlannerTest, CheckPlanningContextDescriptionNotEmptyAndStable)
 {
   std::string desc = planner_instance_->getDescription();
   EXPECT_GT(desc.length(), 0u);
+}
+
+/**
+ * @brief Check that getPlanningContext() fails if the underlying ContextLoader
+ * fails to load the context.
+ */
+TEST_F(CommandPlannerTest, FailOnLoadContext)
+{
+  pilz_industrial_motion_planner::CommandPlanner planner;
+  planner.initialize(robot_model_, node_, "");
+
+  // Mock of failing PlanningContextLoader
+  class TestPlanningContextLoader : public pilz_industrial_motion_planner::PlanningContextLoader
+  {
+  public:
+    std::string getAlgorithm() const override
+    {
+      return "Test_Algorithm";
+    }
+
+    bool loadContext(planning_interface::PlanningContextPtr& /* planning_context */, const std::string& /* name */,
+                     const std::string& /* group */) const override
+    {
+      // Mock behaviour: Cannot load planning context.
+      return false;
+    }
+  };
+
+  /// Registered a found loader
+  pilz_industrial_motion_planner::PlanningContextLoaderPtr planning_context_loader =
+      std::make_shared<TestPlanningContextLoader>();
+  planner.registerContextLoader(planning_context_loader);
+
+  moveit_msgs::msg::MotionPlanRequest req;
+  req.planner_id = "Test_Algorithm";
+  req.group_name = "manipulator";
+
+  moveit_msgs::msg::MoveItErrorCodes error_code;
+  EXPECT_FALSE(planner.getPlanningContext(nullptr, req, error_code));
+  EXPECT_EQ(moveit_msgs::msg::MoveItErrorCodes::PLANNING_FAILED, error_code.val);
 }
 
 int main(int argc, char** argv)

@@ -262,7 +262,7 @@ void PR2ArmIK::computeIKShoulderPan(const Eigen::Isometry3f& g_in, const double&
   theta4[1] = -acos_angle;
 
 #ifdef DEBUG
-  std::cout << "ComputeIK::theta3:" << numerator << "," << denominator << ",\n" << theta4[0] << '\n';
+  std::cout << "ComputeIK::theta3:" << numerator << ',' << denominator << ",\n" << theta4[0] << '\n';
 #endif
 
   for (double theta : theta4)
@@ -451,8 +451,8 @@ void PR2ArmIK::computeIKShoulderPan(const Eigen::Isometry3f& g_in, const double&
             solution.push_back(solution_ik);
 
 #ifdef DEBUG
-            std::cout << "SOLN " << solution_ik[0] << " " << solution_ik[1] << " " << solution_ik[2] << " "
-                      << solution_ik[3] << " " << solution_ik[4] << " " << solution_ik[5] << " " << solution_ik[6]
+            std::cout << "SOLN " << solution_ik[0] << ' ' << solution_ik[1] << ' ' << solution_ik[2] << ' '
+                      << solution_ik[3] << ' ' << solution_ik[4] << ' ' << solution_ik[5] << ' ' << solution_ik[6]
                       << '\n'
                       << '\n';
 #endif
@@ -755,8 +755,8 @@ void PR2ArmIK::computeIKShoulderRoll(const Eigen::Isometry3f& g_in, const double
             solution_ik[6] = normalize_angle(t7 * angle_multipliers_[6]);
             solution.push_back(solution_ik);
 #ifdef DEBUG
-            std::cout << "SOLN " << solution_ik[0] << " " << solution_ik[1] << " " << solution_ik[2] << " "
-                      << solution_ik[3] << " " << solution_ik[4] << " " << solution_ik[5] << " " << solution_ik[6]
+            std::cout << "SOLN " << solution_ik[0] << ' ' << solution_ik[1] << ' ' << solution_ik[2] << ' '
+                      << solution_ik[3] << ' ' << solution_ik[4] << ' ' << solution_ik[5] << ' ' << solution_ik[6]
                       << '\n'
                       << '\n';
 #endif
@@ -783,11 +783,17 @@ bool PR2ArmIK::checkJointLimits(const double& joint_value, const int& joint_num)
 {
   double jv;
   if (continuous_joint_[joint_num])
+  {
     jv = angles::normalize_angle(joint_value * angle_multipliers_[joint_num]);
+  }
   else if (joint_num == 2)
+  {
     jv = joint_value * angle_multipliers_[joint_num];
+  }
   else
+  {
     jv = angles::normalize_angle(joint_value * angle_multipliers_[joint_num]);
+  }
 
   return !(jv < min_angles_[joint_num] || jv > max_angles_[joint_num]);
 }

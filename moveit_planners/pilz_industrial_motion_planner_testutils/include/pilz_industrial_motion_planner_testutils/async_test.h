@@ -28,7 +28,7 @@
 
 namespace testing
 {
-const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.pilz_industrial_motion_planner.async_test");
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.pilz_industrial_motion_planner.async_test");
 /**
  * @brief Test class that allows the handling of asynchronous test objects
  *

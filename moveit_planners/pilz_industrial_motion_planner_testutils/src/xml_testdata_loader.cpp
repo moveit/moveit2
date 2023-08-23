@@ -32,16 +32,16 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#include "pilz_industrial_motion_planner_testutils/xml_testdata_loader.h"
+#include <pilz_industrial_motion_planner_testutils/xml_testdata_loader.h>
 
 #include <iostream>
 
 #include <boost/property_tree/xml_parser.hpp>
 #include <boost/algorithm/string.hpp>
 
-#include "pilz_industrial_motion_planner_testutils/default_values.h"
-#include "pilz_industrial_motion_planner_testutils/exception_types.h"
-#include "pilz_industrial_motion_planner_testutils/xml_constants.h"
+#include <pilz_industrial_motion_planner_testutils/default_values.h>
+#include <pilz_industrial_motion_planner_testutils/exception_types.h>
+#include <pilz_industrial_motion_planner_testutils/xml_constants.h>
 
 namespace pt = boost::property_tree;
 namespace pilz_industrial_motion_planner_testutils

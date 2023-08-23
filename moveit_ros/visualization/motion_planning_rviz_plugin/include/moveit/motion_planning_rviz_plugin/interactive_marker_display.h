@@ -40,17 +40,17 @@
 #include <string>
 #include <vector>
 
-#include "visualization_msgs/msg/interactive_marker.hpp"
-#include "visualization_msgs/msg/interactive_marker_update.hpp"
-#include "visualization_msgs/msg/interactive_marker_init.hpp"
+#include <visualization_msgs/msg/interactive_marker.hpp>
+#include <visualization_msgs/msg/interactive_marker_update.hpp>
+#include <visualization_msgs/msg/interactive_marker_init.hpp>
 
 #ifndef Q_MOC_RUN
-#include "interactive_markers/interactive_marker_client.hpp"
+#include <interactive_markers/interactive_marker_client.hpp>
 #endif
 
-#include "rviz_common/display.hpp"
+#include <rviz_common/display.hpp>
 
-#include "rviz_default_plugins/displays/interactive_markers/interactive_marker.hpp"
+#include <rviz_default_plugins/displays/interactive_markers/interactive_marker.hpp>
 
 namespace rviz_common
 {
@@ -114,10 +114,10 @@ private:
   void unsubscribe();
 
   /// Called by InteractiveMarkerClient when successfully initialized.
-  void initializeCallback(visualization_msgs::srv::GetInteractiveMarkers::Response::SharedPtr /*msg*/);
+  void initializeCallback(const visualization_msgs::srv::GetInteractiveMarkers::Response::SharedPtr& /*msg*/);
 
   /// Called by InteractiveMarkerClient when an update from a server is received.
-  void updateCallback(visualization_msgs::msg::InteractiveMarkerUpdate::ConstSharedPtr msg);
+  void updateCallback(const visualization_msgs::msg::InteractiveMarkerUpdate::ConstSharedPtr& msg);
 
   /// Called by InteractiveMarkerClient when it resets.
   void resetCallback();

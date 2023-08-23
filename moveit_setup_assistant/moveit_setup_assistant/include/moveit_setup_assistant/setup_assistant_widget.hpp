@@ -47,10 +47,10 @@
 class QSplitter;
 
 // Setup Assistant
-#include "moveit_setup_framework/qt/setup_step_widget.hpp"
-#include "moveit_setup_framework/qt/rviz_panel.hpp"
-#include "moveit_setup_framework/data_warehouse.hpp"
-#include "moveit_setup_assistant/navigation_widget.hpp"
+#include <moveit_setup_framework/qt/setup_step_widget.hpp>
+#include <moveit_setup_framework/qt/rviz_panel.hpp>
+#include <moveit_setup_framework/data_warehouse.hpp>
+#include <moveit_setup_assistant/navigation_widget.hpp>
 
 #ifndef Q_MOC_RUN
 // Other
@@ -75,7 +75,7 @@ public:
    * @param parent - used by Qt for destructing all elements
    * @return
    */
-  SetupAssistantWidget(rviz_common::ros_integration::RosNodeAbstractionIface::WeakPtr node, QWidget* parent,
+  SetupAssistantWidget(const rviz_common::ros_integration::RosNodeAbstractionIface::WeakPtr& node, QWidget* parent,
                        const boost::program_options::variables_map& args);
 
   /**
@@ -87,7 +87,7 @@ public:
 
   /**
    * Qt close event function for reminding user to save
-   * @param event A Qt paramenter
+   * @param event A Qt parameter
    */
   void closeEvent(QCloseEvent* event) override;
 

@@ -55,7 +55,7 @@ public:
   bool terminate() override;
 
   CHOMPPlanningContext(const std::string& name, const std::string& group, const moveit::core::RobotModelConstPtr& model,
-                       rclcpp::Node::SharedPtr node);
+                       const rclcpp::Node::SharedPtr& node);
 
   ~CHOMPPlanningContext() override = default;
 

@@ -50,7 +50,7 @@
 #include <QVBoxLayout>
 
 // SA
-#include "moveit_setup_core_plugins/start_screen_widget.hpp"
+#include <moveit_setup_core_plugins/start_screen_widget.hpp>
 // C
 #include <fstream>  // for reading in urdf
 #include <streambuf>
@@ -178,7 +178,7 @@ void StartScreenWidget::onInit()
   layout->addLayout(load_files_layout);
 
   setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
-  this->setLayout(layout);
+  setLayout(layout);
 
   // Debug mode: auto load the configuration file by clicking button after a timeout
   if (debug_)
@@ -280,7 +280,7 @@ void StartScreenWidget::loadFilesClick()
   // Check if there was a failure loading files
   if (!result)
   {
-    // Renable components
+    // Re-enable components
     urdf_file_->setDisabled(false);
     // srdf_file_->setDisabled(false);
     stack_path_->setDisabled(false);
@@ -305,8 +305,16 @@ void StartScreenWidget::onPackagePathChanged(const QString& /*path*/)
 
 void StartScreenWidget::onUrdfPathChanged(const QString& path)
 {
-  setup_step_.loadURDFFile(path.toStdString(), urdf_file_->getArgs().toStdString());
-  urdf_file_->setArgsEnabled(setup_step_.isXacroFile());
+  try
+  {
+    setup_step_.loadURDFFile(path.toStdString(), urdf_file_->getArgs().toStdString());
+    urdf_file_->setArgsEnabled(setup_step_.isXacroFile());
+  }
+  catch (const std::runtime_error& e)
+  {
+    RCLCPP_ERROR(setup_step_.getLogger(), "Error Loading URDF Path. %s", e.what());
+    QMessageBox::warning(this, "Error Loading URDF Path", QString(e.what()));
+  }
 }
 
 bool StartScreenWidget::loadPackageSettings(bool show_warnings)
@@ -343,8 +351,8 @@ bool StartScreenWidget::loadExistingFiles()
   }
   catch (const std::runtime_error& e)
   {
+    RCLCPP_ERROR(setup_step_.getLogger(), "Error Loading SRDF. %s", e.what());
     QMessageBox::warning(this, "Error Loading SRDF", QString(e.what()));
-    RCLCPP_ERROR(setup_step_.getLogger(), "%s", e.what());
     return false;
   }
 

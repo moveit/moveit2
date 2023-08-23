@@ -52,9 +52,9 @@
 #include <pilz_industrial_motion_planner_testutils/sequence.h>
 #include <pilz_industrial_motion_planner_testutils/xml_testdata_loader.h>
 
-#include "moveit_msgs/GetMotionSequence.h"
-#include "moveit_msgs/MotionSequenceRequest.h"
-#include "pilz_industrial_motion_planner/capability_names.h"
+#include <moveit_msgs/GetMotionSequence.h>
+#include <moveit_msgs/MotionSequenceRequest.h>
+#include <pilz_industrial_motion_planner/capability_names.h>
 
 // Parameters from the node
 const std::string TEST_DATA_FILE_NAME("testdata_file_name");

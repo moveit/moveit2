@@ -1,19 +1,10 @@
 repositories:
-  # TODO(andyz): remove this once a sync containing 35b93c8 happens
+  # Keep moveit_* repos here because they are released with moveit
   moveit_msgs:
     type: git
     url: https://github.com/ros-planning/moveit_msgs.git
     version: ros2
-  # https://github.com/ros-planning/moveit_resources/pull/147
   moveit_resources:
     type: git
     url: https://github.com/ros-planning/moveit_resources.git
     version: ros2
-  ros2_control:
-    type: git
-    url: https://github.com/ros-controls/ros2_control.git
-    version: 2.13.0
-  generate_parameter_library:
-    type: git
-    url: https://github.com/PickNikRobotics/generate_parameter_library.git
-    version: main

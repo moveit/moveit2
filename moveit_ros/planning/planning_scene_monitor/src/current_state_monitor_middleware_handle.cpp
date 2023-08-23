@@ -39,7 +39,12 @@
 #include <rclcpp/experimental/buffers/intra_process_buffer.hpp>
 #include <rclcpp/node.hpp>
 #include <rclcpp/qos.hpp>
+#include <rclcpp/version.h>
+#if RCLCPP_VERSION_GTE(20, 0, 0)
+#include <rclcpp/event_handler.hpp>
+#else
 #include <rclcpp/qos_event.hpp>
+#endif
 #include <rclcpp/subscription.hpp>
 #include <rclcpp/time.hpp>
 #include <rclcpp/utilities.hpp>
@@ -51,10 +56,6 @@
 
 namespace planning_scene_monitor
 {
-namespace
-{
-static const auto SUBSCRIPTION_QOS = rclcpp::QoS(25);
-}
 
 CurrentStateMonitorMiddlewareHandle::CurrentStateMonitorMiddlewareHandle(const rclcpp::Node::SharedPtr& node)
   : node_(node)
@@ -70,7 +71,7 @@ void CurrentStateMonitorMiddlewareHandle::createJointStateSubscription(const std
                                                                        JointStateUpdateCallback callback)
 {
   joint_state_subscription_ =
-      node_->create_subscription<sensor_msgs::msg::JointState>(topic, SUBSCRIPTION_QOS, callback);
+      node_->create_subscription<sensor_msgs::msg::JointState>(topic, rclcpp::SystemDefaultsQoS(), callback);
 }
 
 void CurrentStateMonitorMiddlewareHandle::resetJointStateSubscription()
@@ -93,6 +94,11 @@ std::string CurrentStateMonitorMiddlewareHandle::getJointStateTopicName() const
 bool CurrentStateMonitorMiddlewareHandle::sleepFor(const std::chrono::nanoseconds& nanoseconds) const
 {
   return rclcpp::sleep_for(nanoseconds);
+}
+
+bool CurrentStateMonitorMiddlewareHandle::ok() const
+{
+  return rclcpp::ok();
 }
 
 void CurrentStateMonitorMiddlewareHandle::createDynamicTfSubscription(TfCallback callback)
