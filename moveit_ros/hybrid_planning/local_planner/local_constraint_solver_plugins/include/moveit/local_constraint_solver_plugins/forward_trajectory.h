@@ -49,7 +49,7 @@ class ForwardTrajectory : public LocalConstraintSolverInterface
 {
 public:
   ForwardTrajectory() = default;
-  ~ForwardTrajectory() = default;
+  ~ForwardTrajectory() override = default;
   bool initialize(const rclcpp::Node::SharedPtr& node,
                   const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor,
                   const std::string& /* unused */) override;

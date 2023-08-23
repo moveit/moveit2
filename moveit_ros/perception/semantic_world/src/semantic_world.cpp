@@ -47,7 +47,12 @@
 #include <rclcpp/logging.hpp>
 #include <rclcpp/node.hpp>
 #include <rclcpp/publisher.hpp>
+#include <rclcpp/version.h>
+#if RCLCPP_VERSION_GTE(20, 0, 0)
+#include <rclcpp/event_handler.hpp>
+#else
 #include <rclcpp/qos_event.hpp>
+#endif
 #include <rclcpp/subscription.hpp>
 
 // Eigen
@@ -66,7 +71,7 @@ SemanticWorld::SemanticWorld(const rclcpp::Node::SharedPtr& node,
 
 {
   table_subscriber_ = node_handle_->create_subscription<object_recognition_msgs::msg::TableArray>(
-      "table_array", 1,
+      "table_array", rclcpp::SystemDefaultsQoS(),
       [this](const object_recognition_msgs::msg::TableArray::ConstSharedPtr& msg) { return tableCallback(msg); });
   visualization_publisher_ =
       node_handle_->create_publisher<visualization_msgs::msg::MarkerArray>("visualize_place", 20);
@@ -510,7 +515,7 @@ void SemanticWorld::transformTableArray(object_recognition_msgs::msg::TableArray
     std::string original_frame = table.header.frame_id;
     if (table.convex_hull.empty())
       continue;
-    RCLCPP_INFO_STREAM(LOGGER, "Original pose: " << table.pose.position.x << "," << table.pose.position.y << ","
+    RCLCPP_INFO_STREAM(LOGGER, "Original pose: " << table.pose.position.x << ',' << table.pose.position.y << ','
                                                  << table.pose.position.z);
     std::string error_text;
     const Eigen::Isometry3d& original_transform = planning_scene_->getFrameTransform(original_frame);
@@ -521,7 +526,7 @@ void SemanticWorld::transformTableArray(object_recognition_msgs::msg::TableArray
     table.header.frame_id = planning_scene_->getTransforms().getTargetFrame();
     RCLCPP_INFO_STREAM(LOGGER, "Successfully transformed table array from " << original_frame << "to "
                                                                             << table.header.frame_id);
-    RCLCPP_INFO_STREAM(LOGGER, "Transformed pose: " << table.pose.position.x << "," << table.pose.position.y << ","
+    RCLCPP_INFO_STREAM(LOGGER, "Transformed pose: " << table.pose.position.x << ',' << table.pose.position.y << ','
                                                     << table.pose.position.z);
   }
 }

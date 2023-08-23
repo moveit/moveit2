@@ -34,6 +34,8 @@
 
 /* Author: Ioan Sucan */
 
+#include <algorithm>
+
 #include <geometric_shapes/solid_primitive_dims.h>
 #include <moveit/kinematic_constraints/utils.h>
 #include <moveit/utils/message_checks.h>
@@ -128,11 +130,6 @@ moveit_msgs::msg::Constraints mergeConstraints(const moveit_msgs::msg::Constrain
   return r;
 }
 
-bool isEmpty(const moveit_msgs::msg::Constraints& constr)
-{
-  return moveit::core::isEmpty(constr);
-}
-
 std::size_t countIndividualConstraints(const moveit_msgs::msg::Constraints& constr)
 {
   return constr.position_constraints.size() + constr.orientation_constraints.size() +
@@ -163,6 +160,28 @@ moveit_msgs::msg::Constraints constructGoalConstraints(const moveit::core::Robot
   }
 
   return goal;
+}
+
+bool updateJointConstraints(moveit_msgs::msg::Constraints& constraints, const moveit::core::RobotState& state,
+                            const moveit::core::JointModelGroup* jmg)
+{
+  const std::vector<std::string>& jmg_active_joints = jmg->getActiveJointModelNames();
+
+  // For each constraint, update it if the joint is found within jmg
+  for (auto& constraint : constraints.joint_constraints)
+  {
+    const auto itr = find(jmg_active_joints.begin(), jmg_active_joints.end(), constraint.joint_name);
+    if (itr != jmg_active_joints.end())
+    {
+      constraint.position = state.getVariablePosition(constraint.joint_name);
+    }
+    // The joint was not found within jmg
+    else
+    {
+      return false;
+    }
+  }
+  return true;
 }
 
 moveit_msgs::msg::Constraints constructGoalConstraints(const std::string& link_name,
@@ -227,6 +246,24 @@ moveit_msgs::msg::Constraints constructGoalConstraints(const std::string& link_n
   return goal;
 }
 
+bool updatePoseConstraint(moveit_msgs::msg::Constraints& constraints, const std::string& link_name,
+                          const geometry_msgs::msg::PoseStamped& pose)
+{
+  // Convert message types so the existing functions can be used
+  geometry_msgs::msg::PointStamped point;
+  point.header = pose.header;
+  point.point.x = pose.pose.position.x;
+  point.point.y = pose.pose.position.y;
+  point.point.z = pose.pose.position.z;
+
+  geometry_msgs::msg::QuaternionStamped quat_stamped;
+  quat_stamped.header = pose.header;
+  quat_stamped.quaternion = pose.pose.orientation;
+
+  return updatePositionConstraint(constraints, link_name, point) &&
+         updateOrientationConstraint(constraints, link_name, quat_stamped);
+}
+
 moveit_msgs::msg::Constraints constructGoalConstraints(const std::string& link_name,
                                                        const geometry_msgs::msg::QuaternionStamped& quat,
                                                        double tolerance)
@@ -244,6 +281,26 @@ moveit_msgs::msg::Constraints constructGoalConstraints(const std::string& link_n
   return goal;
 }
 
+bool updateOrientationConstraint(moveit_msgs::msg::Constraints& constraints, const std::string& link_name,
+                                 const geometry_msgs::msg::QuaternionStamped& quat)
+{
+  for (auto& constraint : constraints.orientation_constraints)
+  {
+    if (constraint.link_name == link_name)
+    {
+      if (quat.header.frame_id.empty())
+      {
+        RCLCPP_ERROR(LOGGER, "Cannot update orientation constraint, frame_id in the header is empty");
+        return false;
+      }
+      constraint.header = quat.header;
+      constraint.orientation = quat.quaternion;
+      return true;
+    }
+  }
+  return false;
+}
+
 moveit_msgs::msg::Constraints constructGoalConstraints(const std::string& link_name,
                                                        const geometry_msgs::msg::PointStamped& goal_point,
                                                        double tolerance)
@@ -253,6 +310,28 @@ moveit_msgs::msg::Constraints constructGoalConstraints(const std::string& link_n
   p.y = 0;
   p.z = 0;
   return constructGoalConstraints(link_name, p, goal_point, tolerance);
+}
+
+bool updatePositionConstraint(moveit_msgs::msg::Constraints& constraints, const std::string& link_name,
+                              const geometry_msgs::msg::PointStamped& goal_point)
+{
+  for (auto& constraint : constraints.position_constraints)
+  {
+    if (constraint.link_name == link_name)
+    {
+      if (goal_point.header.frame_id.empty())
+      {
+        RCLCPP_ERROR(LOGGER, "Cannot update position constraint, frame_id in the header is empty");
+        return false;
+      }
+      constraint.header = goal_point.header;
+      constraint.constraint_region.primitive_poses.at(0).position.x = goal_point.point.x;
+      constraint.constraint_region.primitive_poses.at(0).position.y = goal_point.point.y;
+      constraint.constraint_region.primitive_poses.at(0).position.z = goal_point.point.z;
+      return true;
+    }
+  }
+  return false;
 }
 
 moveit_msgs::msg::Constraints constructGoalConstraints(const std::string& link_name,
@@ -478,7 +557,7 @@ static bool collectConstraints(const rclcpp::Node::SharedPtr& node, const std::v
     const auto constraint_param = "constraints." + constraint_id;
     if (!node->has_parameter(constraint_param + ".type"))
     {
-      RCLCPP_ERROR(LOGGER, "constraint parameter does not specify its type");
+      RCLCPP_ERROR(LOGGER, "constraint parameter \"%s\" does not specify its type", constraint_param.c_str());
       return false;
     }
     std::string constraint_type;
@@ -528,14 +607,12 @@ bool constructConstraints(const rclcpp::Node::SharedPtr& node, const std::string
     return false;
 
   for (auto& constraint_id : constraint_ids)
-    constraint_id.insert(0, constraints_param);
+    constraint_id.insert(0, constraints_param + std::string("."));
 
   return collectConstraints(node, constraint_ids, constraints);
 }
-}  // namespace kinematic_constraints
 
-bool kinematic_constraints::resolveConstraintFrames(const moveit::core::RobotState& state,
-                                                    moveit_msgs::msg::Constraints& constraints)
+bool resolveConstraintFrames(const moveit::core::RobotState& state, moveit_msgs::msg::Constraints& constraints)
 {
   for (auto& c : constraints.position_constraints)
   {
@@ -581,3 +658,4 @@ bool kinematic_constraints::resolveConstraintFrames(const moveit::core::RobotSta
   }
   return true;
 }
+}  // namespace kinematic_constraints

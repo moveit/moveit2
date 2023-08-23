@@ -51,7 +51,6 @@
 #include <moveit/common_planning_interface_objects/common_objects.h>
 #include <moveit/robot_state/conversions.h>
 #include <moveit_msgs/action/execute_trajectory.hpp>
-#include <moveit_msgs/srv/execute_known_trajectory.hpp>
 #include <moveit_msgs/srv/query_planner_interfaces.hpp>
 #include <moveit_msgs/srv/get_cartesian_path.hpp>
 #include <moveit_msgs/srv/grasp_planning.hpp>
@@ -60,7 +59,7 @@
 #include <moveit/utils/rclcpp_utils.h>
 
 #include <std_msgs/msg/string.hpp>
-#include <geometry_msgs/msg/transform_stamped.h>
+#include <geometry_msgs/msg/transform_stamped.hpp>
 #include <tf2/utils.h>
 #include <tf2_eigen/tf2_eigen.hpp>
 #include <tf2_ros/transform_listener.h>
@@ -120,7 +119,7 @@ public:
     callback_executor_.add_callback_group(callback_group_, node->get_node_base_interface());
     callback_thread_ = std::thread([this]() { callback_executor_.spin(); });
 
-    robot_model_ = opt.robot_model_ ? opt.robot_model_ : getSharedRobotModel(node_, opt.robot_description_);
+    robot_model_ = opt.robot_model ? opt.robot_model : getSharedRobotModel(node_, opt.robot_description);
     if (!getRobotModel())
     {
       std::string error = "Unable to construct robot model. Please make sure all needed information is on the "
@@ -129,14 +128,14 @@ public:
       throw std::runtime_error(error);
     }
 
-    if (!getRobotModel()->hasJointModelGroup(opt.group_name_))
+    if (!getRobotModel()->hasJointModelGroup(opt.group_name))
     {
-      std::string error = "Group '" + opt.group_name_ + "' was not found.";
+      std::string error = "Group '" + opt.group_name + "' was not found.";
       RCLCPP_FATAL_STREAM(LOGGER, error);
       throw std::runtime_error(error);
     }
 
-    joint_model_group_ = getRobotModel()->getJointModelGroup(opt.group_name_);
+    joint_model_group_ = getRobotModel()->getJointModelGroup(opt.group_name);
 
     joint_state_target_ = std::make_shared<moveit::core::RobotState>(getRobotModel());
     joint_state_target_->setToDefaultValues();
@@ -162,37 +161,37 @@ public:
     pose_reference_frame_ = getRobotModel()->getModelFrame();
     // Append the slash between two topic components
     trajectory_event_publisher_ = node_->create_publisher<std_msgs::msg::String>(
-        rclcpp::names::append(opt_.move_group_namespace_,
+        rclcpp::names::append(opt_.move_group_namespace,
                               trajectory_execution_manager::TrajectoryExecutionManager::EXECUTION_EVENT_TOPIC),
         1);
     attached_object_publisher_ = node_->create_publisher<moveit_msgs::msg::AttachedCollisionObject>(
-        rclcpp::names::append(opt_.move_group_namespace_,
+        rclcpp::names::append(opt_.move_group_namespace,
                               planning_scene_monitor::PlanningSceneMonitor::DEFAULT_ATTACHED_COLLISION_OBJECT_TOPIC),
         1);
 
     current_state_monitor_ = getSharedStateMonitor(node_, robot_model_, tf_buffer_);
 
     move_action_client_ = rclcpp_action::create_client<moveit_msgs::action::MoveGroup>(
-        node_, rclcpp::names::append(opt_.move_group_namespace_, move_group::MOVE_ACTION), callback_group_);
+        node_, rclcpp::names::append(opt_.move_group_namespace, move_group::MOVE_ACTION), callback_group_);
     move_action_client_->wait_for_action_server(wait_for_servers.to_chrono<std::chrono::duration<double>>());
     execute_action_client_ = rclcpp_action::create_client<moveit_msgs::action::ExecuteTrajectory>(
-        node_, rclcpp::names::append(opt_.move_group_namespace_, move_group::EXECUTE_ACTION_NAME), callback_group_);
+        node_, rclcpp::names::append(opt_.move_group_namespace, move_group::EXECUTE_ACTION_NAME), callback_group_);
     execute_action_client_->wait_for_action_server(wait_for_servers.to_chrono<std::chrono::duration<double>>());
 
     query_service_ = node_->create_client<moveit_msgs::srv::QueryPlannerInterfaces>(
-        rclcpp::names::append(opt_.move_group_namespace_, move_group::QUERY_PLANNERS_SERVICE_NAME), qos_default(),
+        rclcpp::names::append(opt_.move_group_namespace, move_group::QUERY_PLANNERS_SERVICE_NAME), qos_default(),
         callback_group_);
     get_params_service_ = node_->create_client<moveit_msgs::srv::GetPlannerParams>(
-        rclcpp::names::append(opt_.move_group_namespace_, move_group::GET_PLANNER_PARAMS_SERVICE_NAME), qos_default(),
+        rclcpp::names::append(opt_.move_group_namespace, move_group::GET_PLANNER_PARAMS_SERVICE_NAME), qos_default(),
         callback_group_);
     set_params_service_ = node_->create_client<moveit_msgs::srv::SetPlannerParams>(
-        rclcpp::names::append(opt_.move_group_namespace_, move_group::SET_PLANNER_PARAMS_SERVICE_NAME), qos_default(),
+        rclcpp::names::append(opt_.move_group_namespace, move_group::SET_PLANNER_PARAMS_SERVICE_NAME), qos_default(),
         callback_group_);
     cartesian_path_service_ = node_->create_client<moveit_msgs::srv::GetCartesianPath>(
-        rclcpp::names::append(opt_.move_group_namespace_, move_group::CARTESIAN_PATH_SERVICE_NAME), qos_default(),
+        rclcpp::names::append(opt_.move_group_namespace, move_group::CARTESIAN_PATH_SERVICE_NAME), qos_default(),
         callback_group_);
 
-    RCLCPP_INFO_STREAM(LOGGER, "Ready to take commands for planning group " << opt.group_name_ << ".");
+    RCLCPP_INFO_STREAM(LOGGER, "Ready to take commands for planning group " << opt.group_name << '.');
   }
 
   ~MoveGroupInterfaceImpl()
@@ -332,7 +331,7 @@ public:
     if (!pipeline_id.empty())
       param_name << "/planning_pipelines/" << pipeline_id;
     if (!group.empty())
-      param_name << "." << group;
+      param_name << '.' << group;
     param_name << ".default_planner_config";
 
     std::string default_planner_config;
@@ -502,7 +501,7 @@ public:
     if (!end_effector_link_.empty())
     {
       const std::vector<std::string>& possible_eefs =
-          getRobotModel()->getJointModelGroup(opt_.group_name_)->getAttachedEndEffectorNames();
+          getRobotModel()->getJointModelGroup(opt_.group_name)->getAttachedEndEffectorNames();
       for (const std::string& possible_eef : possible_eefs)
       {
         if (getRobotModel()->getEndEffector(possible_eef)->hasLinkModel(end_effector_link_))
@@ -610,7 +609,7 @@ public:
     if (!current_state_monitor_->isActive())
       current_state_monitor_->startStateMonitor();
 
-    current_state_monitor_->waitForCompleteState(opt_.group_name_, wait);
+    current_state_monitor_->waitForCompleteState(opt_.group_name, wait);
     return true;
   }
 
@@ -635,128 +634,6 @@ public:
     current_state = current_state_monitor_->getCurrentState();
     return true;
   }
-
-  /** \brief Convert a vector of PoseStamped to a vector of PlaceLocation */
-  //  std::vector<moveit_msgs::msg::PlaceLocation>
-  //  posesToPlaceLocations(const std::vector<geometry_msgs::msg::PoseStamped>& poses) const
-  //  {
-  //    std::vector<moveit_msgs::msg::PlaceLocation> locations;
-  //    for (const geometry_msgs::msg::PoseStamped& pose : poses)
-  //    {
-  //      moveit_msgs::msg::PlaceLocation location;
-  //      location.pre_place_approach.direction.vector.z = -1.0;
-  //      location.post_place_retreat.direction.vector.x = -1.0;
-  //      location.pre_place_approach.direction.header.frame_id = getRobotModel()->getModelFrame();
-  //      location.post_place_retreat.direction.header.frame_id = end_effector_link_;
-  //
-  //      location.pre_place_approach.min_distance = 0.1;
-  //      location.pre_place_approach.desired_distance = 0.2;
-  //      location.post_place_retreat.min_distance = 0.0;
-  //      location.post_place_retreat.desired_distance = 0.2;
-  //      // location.post_place_posture is filled by the pick&place lib with the getDetachPosture from the AttachedBody
-  //
-  //      location.place_pose = pose;
-  //      locations.push_back(location);
-  //    }
-  //    RCLCPP_DEBUG(LOGGER, "Move group interface has %u place locations",
-  //                    static_cast<unsigned int>(locations.size()));
-  //    return locations;
-  //  }
-
-  //  moveit::core::MoveItErrorCode place(const moveit_msgs::action::Place::Goal& goal)
-  //  {
-  //    if (!place_action_client_ || !place_action_client_->action_server_is_ready())
-  //    {
-  //      RCLCPP_ERROR_STREAM(LOGGER, "Place action client not found/not ready");
-  //      return moveit::core::MoveItErrorCode::FAILURE;
-  //    }
-  //
-  //    int64_t timeout = 3.0;
-  //    auto future = place_action_client_->async_send_goal(goal);
-  //    if (rclcpp::spin_until_future_complete(node_, future, std::chrono::seconds(timeout)) !=
-  //      rclcpp::FutureReturnCode::SUCCESS)
-  //    {
-  //      RCLCPP_ERROR_STREAM(LOGGER, "Place action timeout reached");
-  //      return moveit::core::MoveItErrorCode::FAILURE;
-  //    }
-  //    return moveit::core::MoveItErrorCode::SUCCESS;
-  //  }
-
-  //  moveit::core::MoveItErrorCode pick(const moveit_msgs::action::Pickup::Goal& goal)
-  //  {
-  //    if (!pick_action_client_ || !pick_action_client_->action_server_is_ready())
-  //    {
-  //      RCLCPP_ERROR_STREAM(LOGGER, "Pick action client not found/not ready");
-  //      return moveit::core::MoveItErrorCode::FAILURE;
-  //    }
-  //
-  //    int64_t timeout = 3.0;
-  //    auto future = pick_action_client_->async_send_goal(goal);
-  //    if (rclcpp::spin_until_future_complete(node_, future, std::chrono::seconds(timeout)) !=
-  //      rclcpp::FutureReturnCode::SUCCESS)
-  //    {
-  //      RCLCPP_ERROR_STREAM(LOGGER, "Pick action timeout reached");
-  //      return moveit::core::MoveItErrorCode::FAILURE;
-  //    }
-  //    return moveit::core::MoveItErrorCode::SUCCESS;
-  //  }
-
-  //  moveit::core::MoveItErrorCode planGraspsAndPick(const std::string& object, bool plan_only = false)
-  //  {
-  //    if (object.empty())
-  //    {
-  //      return planGraspsAndPick(moveit_msgs::msg::CollisionObject());
-  //    }
-  //
-  //    PlanningSceneInterface psi;
-  //    std::map<std::string, moveit_msgs::msg::CollisionObject> objects =
-  //        psi.getObjects(std::vector<std::string>(1, object));
-  //
-  //    if (objects.empty())
-  //    {
-  //      RCLCPP_ERROR_STREAM(LOGGER, "Asked for grasps for the object '"
-  //                                                         << object << "', but the object could not be found");
-  //      return moveit::core::MoveItErrorCode::INVALID_OBJECT_NAME;
-  //    }
-  //
-  //    return planGraspsAndPick(objects[object], plan_only);
-  //  }
-
-  //  moveit::core::MoveItErrorCode planGraspsAndPick(const moveit_msgs::msg::CollisionObject& object, bool plan_only = false)
-  //  {
-  //    if (!plan_grasps_service_)
-  //    {
-  //      RCLCPP_ERROR_STREAM(LOGGER, "Grasp planning service '"
-  //                                                         << GRASP_PLANNING_SERVICE_NAME
-  //                                                         << "' is not available."
-  //                                                            " This has to be implemented and started separately.");
-  //      return moveit::core::MoveItErrorCode::FAILURE;
-  //    }
-  //
-  //    auto request = std::make_shared<moveit_msgs::srv::GraspPlanning::Request>();
-  //    moveit_msgs::srv::GraspPlanning::Response::SharedPtr response;
-  //
-  //    request->group_name = opt_.group_name_;
-  //    request->target = object;
-  //    request->support_surfaces.push_back(support_surface_);
-  //
-  //    RCLCPP_DEBUG(LOGGER, "Calling grasp planner...");
-  //
-  //    auto res = plan_grasps_service_->async_send_request(request);
-  //    if (rclcpp::spin_until_future_complete(node_, res) !=
-  //          rclcpp::FutureReturnCode::SUCCESS)
-  //    {
-  //      RCLCPP_ERROR(LOGGER, "Grasp planning failed. Unable to pick.");
-  //      return moveit::core::MoveItErrorCode::FAILURE;
-  //    }
-  //    response = res.get();
-  //    if (response->error_code.val != moveit_msgs::msg::MoveItErrorCodes::SUCCESS)
-  //    {
-  //      RCLCPP_ERROR(LOGGER, "Grasp planning failed. Unable to pick.");
-  //      return moveit::core::MoveItErrorCode::FAILURE;
-  //    }
-  //    return pick(constructPickupGoal(object.id, std::move(response->grasps), plan_only));
-  //  }
 
   moveit::core::MoveItErrorCode plan(Plan& plan)
   {
@@ -818,7 +695,7 @@ public:
     // wait until send_goal_opts.result_callback is called
     while (!done)
     {
-      std::this_thread::sleep_for(std::chrono::milliseconds(100));
+      std::this_thread::sleep_for(std::chrono::milliseconds(1));
     }
 
     if (code != rclcpp_action::ResultCode::SUCCEEDED)
@@ -827,10 +704,10 @@ public:
       return res->error_code;
     }
 
-    plan.trajectory_ = res->planned_trajectory;
-    plan.start_state_ = res->trajectory_start;
-    plan.planning_time_ = res->planning_time;
-    RCLCPP_INFO(LOGGER, "time taken to generate plan: %g seconds", plan.planning_time_);
+    plan.trajectory = res->planned_trajectory;
+    plan.start_state = res->trajectory_start;
+    plan.planning_time = res->planning_time;
+    RCLCPP_INFO(LOGGER, "time taken to generate plan: %g seconds", plan.planning_time);
 
     return res->error_code;
   }
@@ -896,7 +773,7 @@ public:
     // wait until send_goal_opts.result_callback is called
     while (!done)
     {
-      std::this_thread::sleep_for(std::chrono::milliseconds(100));
+      std::this_thread::sleep_for(std::chrono::milliseconds(1));
     }
 
     if (code != rclcpp_action::ResultCode::SUCCEEDED)
@@ -906,7 +783,8 @@ public:
     return res->error_code;
   }
 
-  moveit::core::MoveItErrorCode execute(const moveit_msgs::msg::RobotTrajectory& trajectory, bool wait)
+  moveit::core::MoveItErrorCode execute(const moveit_msgs::msg::RobotTrajectory& trajectory, bool wait,
+                                        const std::vector<std::string>& controllers = std::vector<std::string>())
   {
     if (!execute_action_client_ || !execute_action_client_->action_server_is_ready())
     {
@@ -954,6 +832,7 @@ public:
 
     moveit_msgs::action::ExecuteTrajectory::Goal goal;
     goal.trajectory = trajectory;
+    goal.controller_names = controllers;
 
     auto goal_handle_future = execute_action_client_->async_send_goal(goal, send_goal_opts);
     if (!wait)
@@ -962,7 +841,7 @@ public:
     // wait until send_goal_opts.result_callback is called
     while (!done)
     {
-      std::this_thread::sleep_for(std::chrono::milliseconds(100));
+      std::this_thread::sleep_for(std::chrono::milliseconds(1));
     }
 
     if (code != rclcpp_action::ResultCode::SUCCEEDED)
@@ -989,7 +868,7 @@ public:
       req->start_state.is_diff = true;
     }
 
-    req->group_name = opt_.group_name_;
+    req->group_name = opt_.group_name;
     req->header.frame_id = getPoseReferenceFrame();
     req->header.stamp = getClock()->now();
     req->waypoints = waypoints;
@@ -998,6 +877,8 @@ public:
     req->path_constraints = path_constraints;
     req->avoid_collisions = avoid_collisions;
     req->link_name = getEndEffectorLink();
+    req->max_velocity_scaling_factor = max_velocity_scaling_factor_;
+    req->max_acceleration_scaling_factor = max_acceleration_scaling_factor_;
 
     auto future_response = cartesian_path_service_->async_send_request(req);
     if (future_response.valid())
@@ -1132,7 +1013,7 @@ public:
 
   void constructMotionPlanRequest(moveit_msgs::msg::MotionPlanRequest& request) const
   {
-    request.group_name = opt_.group_name_;
+    request.group_name = opt_.group_name;
     request.num_planning_attempts = num_planning_attempts_;
     request.max_velocity_scaling_factor = max_velocity_scaling_factor_;
     request.max_acceleration_scaling_factor = max_acceleration_scaling_factor_;
@@ -1203,7 +1084,7 @@ public:
   //  {
   //    moveit_msgs::action::Pickup::Goal goal;
   //    goal.target_name = object;
-  //    goal.group_name = opt_.group_name_;
+  //    goal.group_name = opt_.group_name;
   //    goal.end_effector = getEndEffector();
   //    goal.support_surface_name = support_surface_;
   //    goal.possible_grasps = std::move(grasps);
@@ -1230,7 +1111,7 @@ public:
   //                                                    bool plan_only = false) const
   //  {
   //    moveit_msgs::action::Place::Goal goal;
-  //    goal.group_name = opt_.group_name_;
+  //    goal.group_name = opt_.group_name;
   //    goal.attached_object_name = object;
   //    goal.support_surface_name = support_surface_;
   //    goal.place_locations = std::move(locations);
@@ -1262,7 +1143,7 @@ public:
     if (constraints_storage_)
     {
       moveit_warehouse::ConstraintsWithMetadata msg_m;
-      if (constraints_storage_->getConstraints(msg_m, constraint, robot_model_->getName(), opt_.group_name_))
+      if (constraints_storage_->getConstraints(msg_m, constraint, robot_model_->getName(), opt_.group_name))
       {
         path_constraints_ =
             std::make_unique<moveit_msgs::msg::Constraints>(static_cast<moveit_msgs::msg::Constraints>(*msg_m));
@@ -1300,7 +1181,7 @@ public:
 
     std::vector<std::string> c;
     if (constraints_storage_)
-      constraints_storage_->getKnownConstraints(c, robot_model_->getName(), opt_.group_name_);
+      constraints_storage_->getKnownConstraints(c, robot_model_->getName(), opt_.group_name);
 
     return c;
   }
@@ -1479,7 +1360,7 @@ MoveGroupInterface& MoveGroupInterface::operator=(MoveGroupInterface&& other) no
 
 const std::string& MoveGroupInterface::getName() const
 {
-  return impl_->getOptions().group_name_;
+  return impl_->getOptions().group_name;
 }
 
 const std::vector<std::string>& MoveGroupInterface::getNamedTargets() const
@@ -1576,24 +1457,27 @@ moveit::core::MoveItErrorCode MoveGroupInterface::move()
   return impl_->move(true);
 }
 
-moveit::core::MoveItErrorCode MoveGroupInterface::asyncExecute(const Plan& plan)
+moveit::core::MoveItErrorCode MoveGroupInterface::asyncExecute(const Plan& plan,
+                                                               const std::vector<std::string>& controllers)
 {
-  return impl_->execute(plan.trajectory_, false);
+  return impl_->execute(plan.trajectory, false, controllers);
 }
 
-moveit::core::MoveItErrorCode MoveGroupInterface::asyncExecute(const moveit_msgs::msg::RobotTrajectory& trajectory)
+moveit::core::MoveItErrorCode MoveGroupInterface::asyncExecute(const moveit_msgs::msg::RobotTrajectory& trajectory,
+                                                               const std::vector<std::string>& controllers)
 {
-  return impl_->execute(trajectory, false);
+  return impl_->execute(trajectory, false, controllers);
 }
 
-moveit::core::MoveItErrorCode MoveGroupInterface::execute(const Plan& plan)
+moveit::core::MoveItErrorCode MoveGroupInterface::execute(const Plan& plan, const std::vector<std::string>& controllers)
 {
-  return impl_->execute(plan.trajectory_, true);
+  return impl_->execute(plan.trajectory, true, controllers);
 }
 
-moveit::core::MoveItErrorCode MoveGroupInterface::execute(const moveit_msgs::msg::RobotTrajectory& trajectory)
+moveit::core::MoveItErrorCode MoveGroupInterface::execute(const moveit_msgs::msg::RobotTrajectory& trajectory,
+                                                          const std::vector<std::string>& controllers)
 {
-  return impl_->execute(trajectory, true);
+  return impl_->execute(trajectory, true, controllers);
 }
 
 moveit::core::MoveItErrorCode MoveGroupInterface::plan(Plan& plan)
@@ -1646,8 +1530,8 @@ double MoveGroupInterface::computeCartesianPath(const std::vector<geometry_msgs:
                                                 bool avoid_collisions, moveit_msgs::msg::MoveItErrorCodes* error_code)
 {
   moveit_msgs::msg::Constraints path_constraints_tmp;
-  return computeCartesianPath(waypoints, eef_step, jump_threshold, trajectory, path_constraints_tmp, avoid_collisions,
-                              error_code);
+  return computeCartesianPath(waypoints, eef_step, jump_threshold, trajectory, moveit_msgs::msg::Constraints(),
+                              avoid_collisions, error_code);
 }
 
 double MoveGroupInterface::computeCartesianPath(const std::vector<geometry_msgs::msg::Pose>& waypoints, double eef_step,
@@ -1662,9 +1546,11 @@ double MoveGroupInterface::computeCartesianPath(const std::vector<geometry_msgs:
   }
   else
   {
-    moveit_msgs::msg::MoveItErrorCodes error_code_tmp;
+    moveit_msgs::msg::MoveItErrorCodes err_tmp;
+    err_tmp.val = moveit_msgs::msg::MoveItErrorCodes::SUCCESS;
+    moveit_msgs::msg::MoveItErrorCodes& err = error_code ? *error_code : err_tmp;
     return impl_->computeCartesianPath(waypoints, eef_step, jump_threshold, trajectory, path_constraints,
-                                       avoid_collisions, error_code_tmp);
+                                       avoid_collisions, err);
   }
 }
 
@@ -1798,6 +1684,11 @@ bool MoveGroupInterface::setJointValueTarget(const std::map<std::string, double>
 bool MoveGroupInterface::setJointValueTarget(const std::vector<std::string>& variable_names,
                                              const std::vector<double>& variable_values)
 {
+  if (variable_names.size() != variable_values.size())
+  {
+    RCLCPP_ERROR_STREAM(LOGGER, "sizes of name and position arrays do not match");
+    return false;
+  }
   const auto& allowed = impl_->getJointModelGroup()->getVariableNames();
   for (const auto& variable_name : variable_names)
   {

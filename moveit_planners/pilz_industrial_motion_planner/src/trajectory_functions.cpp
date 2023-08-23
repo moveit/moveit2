@@ -68,14 +68,11 @@ bool pilz_industrial_motion_planner::computePoseIK(const planning_scene::Plannin
   if (frame_id != robot_model->getModelFrame())
   {
     RCLCPP_ERROR_STREAM(LOGGER, "Given frame (" << frame_id << ") is unequal to model frame("
-                                                << robot_model->getModelFrame() << ")");
+                                                << robot_model->getModelFrame() << ')');
     return false;
   }
 
-  moveit::core::RobotState rstate(robot_model);
-  // By setting the robot state to default values, we basically allow
-  // the user of this function to supply an incomplete or even empty seed.
-  rstate.setToDefaultValues();
+  moveit::core::RobotState rstate{ scene->getCurrentState() };
   rstate.setVariablePositions(seed);
 
   moveit::core::GroupStateValidityCallbackFn ik_constraint_function;
@@ -118,12 +115,12 @@ bool pilz_industrial_motion_planner::computePoseIK(const planning_scene::Plannin
                        timeout);
 }
 
-bool pilz_industrial_motion_planner::computeLinkFK(const moveit::core::RobotModelConstPtr& robot_model,
+bool pilz_industrial_motion_planner::computeLinkFK(const planning_scene::PlanningSceneConstPtr& scene,
                                                    const std::string& link_name,
                                                    const std::map<std::string, double>& joint_state,
                                                    Eigen::Isometry3d& pose)
-{  // create robot state
-  moveit::core::RobotState rstate(robot_model);
+{  // take robot state from the current scene
+  moveit::core::RobotState rstate{ scene->getCurrentState() };
 
   // check the reference frame of the target pose
   if (!rstate.knowsFrameTransform(link_name))
@@ -132,8 +129,6 @@ bool pilz_industrial_motion_planner::computeLinkFK(const moveit::core::RobotMode
     return false;
   }
 
-  // set the joint positions
-  rstate.setToDefaultValues();
   rstate.setVariablePositions(joint_state);
 
   // update the frame

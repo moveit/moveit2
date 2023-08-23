@@ -54,7 +54,7 @@ class ActionBasedControllerHandleBase : public moveit_controller_manager::MoveIt
 {
 public:
   ActionBasedControllerHandleBase(const std::string& name, const std::string& logger_name)
-    : moveit_controller_manager::MoveItControllerHandle(name), LOGGER(rclcpp::get_logger(logger_name))
+    : moveit_controller_manager::MoveItControllerHandle(name), logger_(rclcpp::get_logger(logger_name))
   {
   }
 
@@ -66,7 +66,7 @@ public:
   //  }
 
 protected:
-  const rclcpp::Logger LOGGER;
+  const rclcpp::Logger logger_;
 };
 
 MOVEIT_CLASS_FORWARD(
@@ -99,12 +99,12 @@ public:
       return false;
     if (!done_)
     {
-      RCLCPP_INFO_STREAM(LOGGER, "Cancelling execution for " << name_);
+      RCLCPP_INFO_STREAM(logger_, "Cancelling execution for " << name_);
       auto cancel_result_future = controller_action_client_->async_cancel_goal(current_goal_);
 
       const auto& result = cancel_result_future.get();
       if (!result)
-        RCLCPP_ERROR(LOGGER, "Failed to cancel goal");
+        RCLCPP_ERROR(logger_, "Failed to cancel goal");
 
       last_exec_ = moveit_controller_manager::ExecutionStatus::PREEMPTED;
       done_ = true;
@@ -147,7 +147,7 @@ public:
           status = result_future.wait_for(50ms);
           if ((status == std::future_status::timeout) and ((node_->now() - start) > timeout))
           {
-            RCLCPP_WARN(LOGGER, "waitForExecution timed out");
+            RCLCPP_WARN(logger_, "waitForExecution timed out");
             return false;
           }
         } while (status == std::future_status::timeout);
@@ -157,7 +157,7 @@ public:
         status = result_future.wait_for(timeout.to_chrono<std::chrono::duration<double>>());
         if (status == std::future_status::timeout)
         {
-          RCLCPP_WARN(LOGGER, "waitForExecution timed out");
+          RCLCPP_WARN(logger_, "waitForExecution timed out");
           return false;
         }
       }
@@ -220,7 +220,7 @@ protected:
    */
   void finishControllerExecution(const rclcpp_action::ResultCode& state)
   {
-    RCLCPP_DEBUG_STREAM(LOGGER, "Controller " << name_ << " is done with state " << static_cast<int>(state));
+    RCLCPP_DEBUG_STREAM(logger_, "Controller " << name_ << " is done with state " << static_cast<int>(state));
     if (state == rclcpp_action::ResultCode::SUCCEEDED)
     {
       last_exec_ = moveit_controller_manager::ExecutionStatus::SUCCEEDED;

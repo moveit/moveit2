@@ -7,7 +7,7 @@ ament_target_dependencies(moveit_rdf_loader
       srdfdom
       moveit_core)
 
-install(DIRECTORY include/ DESTINATION include)
+install(DIRECTORY include/ DESTINATION include/moveit_ros_planning)
 install(DIRECTORY
             test/data
             test/launch

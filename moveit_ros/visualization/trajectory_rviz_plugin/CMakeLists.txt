@@ -39,4 +39,4 @@ ament_target_dependencies(moveit_trajectory_rviz_plugin
 )
 target_include_directories(moveit_trajectory_rviz_plugin PRIVATE "${OGRE_PREFIX_DIR}/include")
 
-install(DIRECTORY include/ DESTINATION include)
+install(DIRECTORY include/ DESTINATION include/moveit_ros_visualization)

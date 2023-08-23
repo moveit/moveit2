@@ -12,5 +12,5 @@ ament_target_dependencies(moveit_planning_pipeline
   pluginlib
 )
 
-install(DIRECTORY include/ DESTINATION include)
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/moveit_planning_pipeline_export.h DESTINATION include)
+install(DIRECTORY include/ DESTINATION include/moveit_ros_planning)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/moveit_planning_pipeline_export.h DESTINATION include/moveit_ros_planning)

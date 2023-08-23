@@ -159,8 +159,8 @@ bool MotionPlanningFrame::computeCartesianPlan()
 
     // Store trajectory in current_plan_
     current_plan_ = std::make_shared<moveit::planning_interface::MoveGroupInterface::Plan>();
-    rt.getRobotTrajectoryMsg(current_plan_->trajectory_);
-    current_plan_->planning_time_ = (rclcpp::Clock().now() - start).seconds();
+    rt.getRobotTrajectoryMsg(current_plan_->trajectory);
+    current_plan_->planning_time = (rclcpp::Clock().now() - start).seconds();
     return success;
   }
   return false;
@@ -189,7 +189,7 @@ void MotionPlanningFrame::computePlanButtonClicked()
   if (success)
   {
     ui_->execute_button->setEnabled(true);
-    ui_->result_label->setText(QString("Time: ").append(QString::number(current_plan_->planning_time_, 'f', 3)));
+    ui_->result_label->setText(QString("Time: ").append(QString::number(current_plan_->planning_time, 'f', 3)));
   }
   else
   {

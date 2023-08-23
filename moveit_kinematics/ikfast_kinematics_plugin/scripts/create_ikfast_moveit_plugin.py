@@ -1,8 +1,6 @@
 #! /usr/bin/env python
 from __future__ import print_function
 
-from symbol import parameters
-
 """
 IKFast Plugin Generator for MoveIt
 
@@ -65,6 +63,7 @@ except ImportError:
     print(
         "Failed to import ament_index_python. No ROS2 environment available? Trying without."
     )
+
     # define stubs
     class PackageNotFoundError(Exception):
         pass
@@ -234,6 +233,9 @@ def create_ikfast_package(args):
             xmlElement("maintainer", email="%s@todo.todo" % user_name, text=user_name)
         )
         root.append(xmlElement("buildtool_depend", text="ament_cmake"))
+        export = xmlElement("export")
+        export.append(xmlElement("build_type", text="ament_cmake"))
+        root.append(export)
         etree.ElementTree(root).write(
             pkg_xml_path, xml_declaration=True, pretty_print=True, encoding="UTF-8"
         )

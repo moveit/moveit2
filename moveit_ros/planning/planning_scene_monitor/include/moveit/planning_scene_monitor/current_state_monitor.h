@@ -125,6 +125,13 @@ public:
     virtual bool sleepFor(const std::chrono::nanoseconds& nanoseconds) const = 0;
 
     /**
+     * @brief      Uses rclcpp::ok to check the context status
+     *
+     * @return     Return of rclcpp::ok
+     */
+    virtual bool ok() const = 0;
+
+    /**
      * @brief      Get the static transform topic name
      *
      * @return     The static transform topic name.

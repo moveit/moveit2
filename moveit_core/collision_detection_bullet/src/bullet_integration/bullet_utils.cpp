@@ -85,7 +85,7 @@ bool acmCheck(const std::string& body_1, const std::string& body_2,
 
 btCollisionShape* createShapePrimitive(const shapes::Box* geom, const CollisionObjectType& collision_object_type)
 {
-  (void)(collision_object_type);
+  static_cast<void>(collision_object_type);
   assert(collision_object_type == CollisionObjectType::USE_SHAPE_TYPE);
   const double* size = geom->size;
   btScalar a = static_cast<btScalar>(size[0] / 2);
@@ -97,14 +97,14 @@ btCollisionShape* createShapePrimitive(const shapes::Box* geom, const CollisionO
 
 btCollisionShape* createShapePrimitive(const shapes::Sphere* geom, const CollisionObjectType& collision_object_type)
 {
-  (void)(collision_object_type);
+  static_cast<void>(collision_object_type);
   assert(collision_object_type == CollisionObjectType::USE_SHAPE_TYPE);
   return (new btSphereShape(static_cast<btScalar>(geom->radius)));
 }
 
 btCollisionShape* createShapePrimitive(const shapes::Cylinder* geom, const CollisionObjectType& collision_object_type)
 {
-  (void)(collision_object_type);
+  static_cast<void>(collision_object_type);
   assert(collision_object_type == CollisionObjectType::USE_SHAPE_TYPE);
   btScalar r = static_cast<btScalar>(geom->radius);
   btScalar l = static_cast<btScalar>(geom->length / 2);
@@ -113,7 +113,7 @@ btCollisionShape* createShapePrimitive(const shapes::Cylinder* geom, const Colli
 
 btCollisionShape* createShapePrimitive(const shapes::Cone* geom, const CollisionObjectType& collision_object_type)
 {
-  (void)(collision_object_type);
+  static_cast<void>(collision_object_type);
   assert(collision_object_type == CollisionObjectType::USE_SHAPE_TYPE);
   btScalar r = static_cast<btScalar>(geom->radius);
   btScalar l = static_cast<btScalar>(geom->length);
@@ -457,21 +457,21 @@ bool BroadphaseFilterCallback::needBroadphaseCollision(btBroadphaseProxy* proxy0
   if (cow0->getTypeID() == collision_detection::BodyType::ROBOT_ATTACHED &&
       cow1->getTypeID() == collision_detection::BodyType::ROBOT_LINK)
   {
-    if (cow0->m_touch_links.find(cow1->getName()) != cow0->m_touch_links.end())
+    if (cow0->touch_links.find(cow1->getName()) != cow0->touch_links.end())
       return false;
   }
 
   if (cow1->getTypeID() == collision_detection::BodyType::ROBOT_ATTACHED &&
       cow0->getTypeID() == collision_detection::BodyType::ROBOT_LINK)
   {
-    if (cow1->m_touch_links.find(cow0->getName()) != cow1->m_touch_links.end())
+    if (cow1->touch_links.find(cow0->getName()) != cow1->touch_links.end())
       return false;
   }
 
   if (cow0->getTypeID() == collision_detection::BodyType::ROBOT_ATTACHED &&
       cow1->getTypeID() == collision_detection::BodyType::ROBOT_ATTACHED)
   {
-    if (cow0->m_touch_links == cow1->m_touch_links)
+    if (cow0->touch_links == cow1->touch_links)
       return false;
   }
 
@@ -546,11 +546,11 @@ CollisionObjectWrapper::CollisionObjectWrapper(const std::string& name, const co
                                                const AlignedVector<Eigen::Isometry3d>& shape_poses,
                                                const std::vector<CollisionObjectType>& collision_object_types,
                                                bool active)
-  : m_name(name)
-  , m_type_id(type_id)
-  , m_shapes(shapes)
-  , m_shape_poses(shape_poses)
-  , m_collision_object_types(collision_object_types)
+  : name_(name)
+  , type_id_(type_id)
+  , shapes_(shapes)
+  , shape_poses_(shape_poses)
+  , collision_object_types_(collision_object_types)
 {
   if (shapes.empty() || shape_poses.empty() ||
       (shapes.size() != shape_poses.size() || collision_object_types.empty() ||
@@ -575,32 +575,31 @@ CollisionObjectWrapper::CollisionObjectWrapper(const std::string& name, const co
 
   if (shapes.size() == 1)
   {
-    btCollisionShape* shape = createShapePrimitive(m_shapes[0], collision_object_types[0], this);
+    btCollisionShape* shape = createShapePrimitive(shapes_[0], collision_object_types[0], this);
     shape->setMargin(BULLET_MARGIN);
     manage(shape);
     setCollisionShape(shape);
-    setWorldTransform(convertEigenToBt(m_shape_poses[0]));
+    setWorldTransform(convertEigenToBt(shape_poses_[0]));
   }
   else
   {
-    btCompoundShape* compound =
-        new btCompoundShape(BULLET_COMPOUND_USE_DYNAMIC_AABB, static_cast<int>(m_shapes.size()));
+    btCompoundShape* compound = new btCompoundShape(BULLET_COMPOUND_USE_DYNAMIC_AABB, static_cast<int>(shapes_.size()));
     manage(compound);
     // margin on compound seems to have no effect when positive but has an effect when negative
     compound->setMargin(BULLET_MARGIN);
     setCollisionShape(compound);
 
-    setWorldTransform(convertEigenToBt(m_shape_poses[0]));
-    Eigen::Isometry3d inv_world = m_shape_poses[0].inverse();
+    setWorldTransform(convertEigenToBt(shape_poses_[0]));
+    Eigen::Isometry3d inv_world = shape_poses_[0].inverse();
 
-    for (std::size_t j = 0; j < m_shapes.size(); ++j)
+    for (std::size_t j = 0; j < shapes_.size(); ++j)
     {
-      btCollisionShape* subshape = createShapePrimitive(m_shapes[j], collision_object_types[j], this);
+      btCollisionShape* subshape = createShapePrimitive(shapes_[j], collision_object_types[j], this);
       if (subshape != nullptr)
       {
         manage(subshape);
         subshape->setMargin(BULLET_MARGIN);
-        btTransform geom_trans = convertEigenToBt(inv_world * m_shape_poses[j]);
+        btTransform geom_trans = convertEigenToBt(inv_world * shape_poses_[j]);
         compound->addChildShape(geom_trans, subshape);
       }
     }
@@ -614,7 +613,7 @@ CollisionObjectWrapper::CollisionObjectWrapper(const std::string& name, const co
                                                const std::set<std::string>& touch_links)
   : CollisionObjectWrapper(name, type_id, shapes, shape_poses, collision_object_types, true)
 {
-  m_touch_links = touch_links;
+  this->touch_links = touch_links;
 }
 
 CollisionObjectWrapper::CollisionObjectWrapper(const std::string& name, const collision_detection::BodyType& type_id,
@@ -622,12 +621,12 @@ CollisionObjectWrapper::CollisionObjectWrapper(const std::string& name, const co
                                                const AlignedVector<Eigen::Isometry3d>& shape_poses,
                                                const std::vector<CollisionObjectType>& collision_object_types,
                                                const std::vector<std::shared_ptr<void>>& data)
-  : m_name(name)
-  , m_type_id(type_id)
-  , m_shapes(shapes)
-  , m_shape_poses(shape_poses)
-  , m_collision_object_types(collision_object_types)
-  , m_data(data)
+  : name_(name)
+  , type_id_(type_id)
+  , shapes_(shapes)
+  , shape_poses_(shape_poses)
+  , collision_object_types_(collision_object_types)
+  , data_(data)
 {
 }
 }  // namespace collision_detection_bullet

@@ -46,6 +46,13 @@ namespace moveit_setup
 class SetupStep
 {
 public:
+  SetupStep() = default;
+  SetupStep(const SetupStep&) = default;
+  SetupStep(SetupStep&&) = default;
+  SetupStep& operator=(const SetupStep&) = default;
+  SetupStep& operator=(SetupStep&&) = default;
+  virtual ~SetupStep() = default;
+
   /**
    * @brief Called after construction to initialize the step
    * @param parent_node Shared pointer to the parent node

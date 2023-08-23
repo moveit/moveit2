@@ -34,7 +34,7 @@
 
 #pragma once
 
-#include <moveit_msgs/msg/move_it_error_codes.h>
+#include <moveit_msgs/msg/move_it_error_codes.hpp>
 #include <string>
 
 namespace moveit

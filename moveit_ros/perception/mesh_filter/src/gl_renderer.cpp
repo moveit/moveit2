@@ -305,7 +305,7 @@ void mesh_filter::GLRenderer::readShaderCodeFromFile(const string& filename, str
     else
     {
       stringstream error_stream;
-      error_stream << "Could not open shader code in file \"" << filename << "\"";
+      error_stream << "Could not open shader code in file \"" << filename << '\"';
       throw runtime_error(error_stream.str());
     }
   }

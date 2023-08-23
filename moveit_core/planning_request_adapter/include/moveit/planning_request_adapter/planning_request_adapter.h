@@ -48,95 +48,78 @@ namespace planning_request_adapter
 {
 MOVEIT_CLASS_FORWARD(PlanningRequestAdapter);  // Defines PlanningRequestAdapterPtr, ConstPtr, WeakPtr... etc
 
+/** @brief Concept in MoveIt which can be used to modify the planning problem and resulting trajectory (pre-processing
+ * and/or post-processing) for a motion planner. PlanningRequestAdapter enable using multiple motion planning and
+ * trajectory generation algorithms in sequence to produce robust motion plans.
+ */
 class PlanningRequestAdapter
 {
 public:
+  /// \brief Functional interface to call a planning function
   using PlannerFn =
       std::function<bool(const planning_scene::PlanningSceneConstPtr&, const planning_interface::MotionPlanRequest&,
                          planning_interface::MotionPlanResponse&)>;
 
-  PlanningRequestAdapter()
-  {
-  }
-
-  virtual ~PlanningRequestAdapter()
-  {
-  }
-
   /** \brief Initialize parameters using the passed Node and parameter namespace.
+   *  @param node Node instance used by the adapter
+   *  @param parameter_namespace Parameter namespace for adapter
       If no initialization is needed, simply implement as empty */
   virtual void initialize(const rclcpp::Node::SharedPtr& node, const std::string& parameter_namespace) = 0;
 
-  /// Get a short string that identifies the planning request adapter
-  virtual std::string getDescription() const
-  {
-    return "";
-  }
-
-  bool adaptAndPlan(const planning_interface::PlannerManagerPtr& planner,
-                    const planning_scene::PlanningSceneConstPtr& planning_scene,
-                    const planning_interface::MotionPlanRequest& req,
-                    planning_interface::MotionPlanResponse& res) const;
-
-  bool adaptAndPlan(const planning_interface::PlannerManagerPtr& planner,
-                    const planning_scene::PlanningSceneConstPtr& planning_scene,
-                    const planning_interface::MotionPlanRequest& req, planning_interface::MotionPlanResponse& res,
-                    std::vector<std::size_t>& added_path_index) const;
+  /** \brief Get a description of this adapter
+   *  @return Returns a short string that identifies the planning request adapter
+   */
+  [[nodiscard]] virtual std::string getDescription() const = 0;
 
   /** \brief Adapt the planning request if needed, call the planner
       function \e planner and update the planning response if
       needed. If the response is changed, the index values of the
       states added without planning are added to \e
-      added_path_index */
-  virtual bool adaptAndPlan(const PlannerFn& planner, const planning_scene::PlanningSceneConstPtr& planning_scene,
-                            const planning_interface::MotionPlanRequest& req,
-                            planning_interface::MotionPlanResponse& res,
-                            std::vector<std::size_t>& added_path_index) const = 0;
+      added_path_index
+   *  @param planner Pointer to the planner used to solve the passed problem
+   *  @param planning_scene Representation of the environment for the planning
+   *  @param req Motion planning request with a set of constraints
+   *  @param res Reference to which the generated motion plan response is written to
+   *  @return True if response got generated correctly */
+  [[nodiscard]] bool adaptAndPlan(const planning_interface::PlannerManagerPtr& planner,
+                                  const planning_scene::PlanningSceneConstPtr& planning_scene,
+                                  const planning_interface::MotionPlanRequest& req,
+                                  planning_interface::MotionPlanResponse& res) const;
 
-protected:
-  /** \brief Helper param for getting a parameter using a namespace **/
-  template <typename T>
-  T getParam(const rclcpp::Node::SharedPtr& node, const rclcpp::Logger& logger, const std::string& parameter_namespace,
-             const std::string& parameter_name, T default_value = {}) const
-  {
-    std::string full_name = parameter_namespace.empty() ? parameter_name : parameter_namespace + "." + parameter_name;
-    T value;
-    if (!node->get_parameter(full_name, value))
-    {
-      RCLCPP_INFO(logger, "Param '%s' was not set. Using default value: %s", full_name.c_str(),
-                  std::to_string(default_value).c_str());
-      return default_value;
-    }
-    else
-    {
-      RCLCPP_INFO(logger, "Param '%s' was set to %s", full_name.c_str(), std::to_string(value).c_str());
-      return value;
-    }
-  }
+  /** \brief Adapt the planning request if needed, call the planner
+      function \e planner and update the planning response if
+      needed. If the response is changed, the index values of the
+      states added without planning are added to \e
+      added_path_index
+   *  @param planner Pointer to the planner used to solve the passed problem
+   *  @param planning_scene Representation of the environment for the planning
+   *  @param req Motion planning request with a set of constraints
+   *  @param res Reference to which the generated motion plan response is written to
+   *  @return True if response got generated correctly */
+  [[nodiscard]] virtual bool adaptAndPlan(const PlannerFn& planner,
+                                          const planning_scene::PlanningSceneConstPtr& planning_scene,
+                                          const planning_interface::MotionPlanRequest& req,
+                                          planning_interface::MotionPlanResponse& res) const = 0;
 };
 
-/// Apply a sequence of adapters to a motion plan
+/** \brief Apply a sequence of adapters to a motion plan */
 class PlanningRequestAdapterChain
 {
 public:
-  PlanningRequestAdapterChain()
-  {
-  }
+  /** \brief Add new adapter to the back of the chain
+   *  @param adapter Adapter to be added */
+  void addAdapter(const PlanningRequestAdapterConstPtr& adapter);
 
-  void addAdapter(const PlanningRequestAdapterConstPtr& adapter)
-  {
-    adapters_.push_back(adapter);
-  }
-
-  bool adaptAndPlan(const planning_interface::PlannerManagerPtr& planner,
-                    const planning_scene::PlanningSceneConstPtr& planning_scene,
-                    const planning_interface::MotionPlanRequest& req,
-                    planning_interface::MotionPlanResponse& res) const;
-
-  bool adaptAndPlan(const planning_interface::PlannerManagerPtr& planner,
-                    const planning_scene::PlanningSceneConstPtr& planning_scene,
-                    const planning_interface::MotionPlanRequest& req, planning_interface::MotionPlanResponse& res,
-                    std::vector<std::size_t>& added_path_index) const;
+  /** \brief Iterate through the chain and call all adapters and planners in the correct order
+   *  @param planner Pointer to the planner used to solve the passed problem
+   *  @param planning_scene Representation of the environment for the planning
+   *  @param req Motion planning request with a set of constraints
+   *  @param res Reference to which the generated motion plan response is written to
+   *  @return True if response got generated correctly */
+  [[nodiscard]] bool adaptAndPlan(const planning_interface::PlannerManagerPtr& planner,
+                                  const planning_scene::PlanningSceneConstPtr& planning_scene,
+                                  const planning_interface::MotionPlanRequest& req,
+                                  planning_interface::MotionPlanResponse& res) const;
 
 private:
   std::vector<PlanningRequestAdapterConstPtr> adapters_;

@@ -32,7 +32,6 @@ add_library(moveit_motion_planning_rviz_plugin_core SHARED ${SOURCE_FILES} ${HEA
 set_target_properties(moveit_motion_planning_rviz_plugin_core PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
 target_link_libraries(moveit_motion_planning_rviz_plugin_core moveit_rviz_plugin_render_tools moveit_planning_scene_rviz_plugin)
 ament_target_dependencies(moveit_motion_planning_rviz_plugin_core
-  Boost
   moveit_ros_robot_interaction
   moveit_ros_planning_interface
   moveit_ros_warehouse
@@ -40,7 +39,6 @@ ament_target_dependencies(moveit_motion_planning_rviz_plugin_core
   rviz_ogre_vendor
   Qt5
   pluginlib
-  rviz_ogre_vendor
 )
 target_include_directories(moveit_motion_planning_rviz_plugin_core PRIVATE "${OGRE_PREFIX_DIR}/include")
 
@@ -48,7 +46,6 @@ add_library(moveit_motion_planning_rviz_plugin SHARED src/plugin_init.cpp)
 set_target_properties(moveit_motion_planning_rviz_plugin PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
 target_link_libraries(moveit_motion_planning_rviz_plugin moveit_motion_planning_rviz_plugin_core)
 ament_target_dependencies(moveit_motion_planning_rviz_plugin
-  Boost
   moveit_ros_robot_interaction
   moveit_ros_warehouse
   pluginlib
@@ -56,4 +53,4 @@ ament_target_dependencies(moveit_motion_planning_rviz_plugin
 )
 target_include_directories(moveit_motion_planning_rviz_plugin PRIVATE "${OGRE_PREFIX_DIR}/include")
 
-install(DIRECTORY include/ DESTINATION include)
+install(DIRECTORY include/ DESTINATION include/moveit_ros_visualization)

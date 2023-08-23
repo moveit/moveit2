@@ -52,7 +52,7 @@ RobotModelLoader::RobotModelLoader(const rclcpp::Node::SharedPtr& node, const st
   : node_(node)
 {
   Options opt(robot_description);
-  opt.load_kinematics_solvers_ = load_kinematics_solvers;
+  opt.load_kinematics_solvers = load_kinematics_solvers;
   configure(opt);
 }
 
@@ -105,13 +105,13 @@ void RobotModelLoader::configure(const Options& opt)
 {
   rclcpp::Clock clock;
   rclcpp::Time start = clock.now();
-  if (!opt.urdf_string_.empty() && !opt.srdf_string_.empty())
+  if (!opt.urdf_string_.empty() && !opt.srdf_string.empty())
   {
-    rdf_loader_ = std::make_shared<rdf_loader::RDFLoader>(opt.urdf_string_, opt.srdf_string_);
+    rdf_loader_ = std::make_shared<rdf_loader::RDFLoader>(opt.urdf_string_, opt.srdf_string);
   }
   else
   {
-    rdf_loader_ = std::make_shared<rdf_loader::RDFLoader>(node_, opt.robot_description_);
+    rdf_loader_ = std::make_shared<rdf_loader::RDFLoader>(node_, opt.robot_description);
   }
   if (rdf_loader_->getURDF())
   {
@@ -246,7 +246,7 @@ void RobotModelLoader::configure(const Options& opt)
     }
   }
 
-  if (model_ && opt.load_kinematics_solvers_)
+  if (model_ && opt.load_kinematics_solvers)
     loadKinematicsSolvers();
 
   RCLCPP_DEBUG(node_->get_logger(), "Loaded kinematic model in %f seconds", (clock.now() - start).seconds());

@@ -19,7 +19,7 @@ target_include_directories(moveit_test_utils PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include/moveit_core>
 )
-target_link_libraries(moveit_test_utils moveit_robot_model)
+target_link_libraries(moveit_test_utils moveit_robot_model moveit_kinematics_base)
 ament_target_dependencies(moveit_test_utils
   ament_index_cpp
   Boost

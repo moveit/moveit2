@@ -27,4 +27,4 @@ ament_target_dependencies(moveit_depth_image_octomap_updater
 )
 target_link_libraries(moveit_depth_image_octomap_updater moveit_depth_image_octomap_updater_core)
 
-install(DIRECTORY include/ DESTINATION include)
+install(DIRECTORY include/ DESTINATION include/moveit_ros_perception)

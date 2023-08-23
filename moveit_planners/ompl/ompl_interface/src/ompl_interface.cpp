@@ -181,7 +181,7 @@ void OMPLInterface::loadPlannerConfigurations()
         {
           RCLCPP_ERROR_STREAM(LOGGER, "Invalid type for parameter '" << name << "' expected ["
                                                                      << rclcpp::to_string(type) << "] got ["
-                                                                     << rclcpp::to_string(parameter.get_type()) << "]");
+                                                                     << rclcpp::to_string(parameter.get_type()) << ']');
           continue;
         }
         if (parameter.get_type() == rclcpp::ParameterType::PARAMETER_STRING)

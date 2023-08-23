@@ -112,7 +112,7 @@ private Q_SLOTS:
   /// Called from Double List widget to highlight a group
   void previewSelectedGroup(const std::vector<std::string>& groups);
 
-  /// Called when an item is seleceted from the controllers tree
+  /// Called when an item is selected from the controllers tree
   void previewSelected(QTreeWidgetItem* selected_item, int column);
 
   /// Called sleceted item changed

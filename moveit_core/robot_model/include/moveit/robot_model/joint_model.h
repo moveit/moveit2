@@ -287,7 +287,7 @@ public:
   virtual bool satisfiesPositionBounds(const double* values, const Bounds& other_bounds, double margin) const = 0;
 
   /** \brief Force the specified values to be inside bounds and normalized. Quaternions are normalized, continuous
-     joints are made between -Pi and Pi.
+     revolute joints are made between -Pi and Pi.
       Returns true if changes were made. */
   bool enforcePositionBounds(double* values) const
   {
@@ -295,7 +295,7 @@ public:
   }
 
   /** \brief Force the specified values to be inside bounds and normalized. Quaternions are normalized, continuous
-     joints are made between -Pi and Pi.
+     revolute joints are made between -Pi and Pi.
       Return true if changes were made. */
   virtual bool enforcePositionBounds(double* values, const Bounds& other_bounds) const = 0;
 
@@ -324,6 +324,24 @@ public:
 
   /** \brief Force the specified velocities to be inside bounds. Return true if changes were made. */
   virtual bool enforceVelocityBounds(double* values, const Bounds& other_bounds) const;
+
+  /** \brief Check if the set of accelerations for the variables of this joint are within bounds. */
+  bool satisfiesAccelerationBounds(const double* values, double margin = 0.0) const
+  {
+    return satisfiesAccelerationBounds(values, variable_bounds_, margin);
+  }
+
+  /** \brief Check if the set of accelerations for the variables of this joint are within bounds, up to some margin. */
+  virtual bool satisfiesAccelerationBounds(const double* values, const Bounds& other_bounds, double margin) const;
+
+  /** \brief Check if the set of jerks for the variables of this joint are within bounds. */
+  bool satisfiesJerkBounds(const double* values, double margin = 0.0) const
+  {
+    return satisfiesJerkBounds(values, variable_bounds_, margin);
+  }
+
+  /** \brief Check if the set of jerks for the variables of this joint are within bounds, up to some margin. */
+  virtual bool satisfiesJerkBounds(const double* values, const Bounds& other_bounds, double margin) const;
 
   /** \brief Get the bounds for a variable. Throw an exception if the variable was not found */
   const VariableBounds& getVariableBounds(const std::string& variable) const;

@@ -1,0 +1,19 @@
+<?xml version="1.0" ?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+  <xacro:macro name="robot" params="test_robot number postfix">
+    <robot name="$(arg test_robot)">
+      <link name="base" />
+      <link name="link_${postfix}" />
+
+      <joint name="base_to_link_${postfix}" type="fixed">
+        <parent link="base" />
+        <child link="link_${postfix}" />
+        <origin xyz="0 ${number} 0" />
+      </joint>
+    </robot>
+  </xacro:macro>
+  <xacro:arg name="test_robot" default="testing_robot"/>
+  <xacro:arg name="number" default="testing_number"/>
+  <xacro:arg name="postfix" default="testing_postfix"/>
+  <xacro:robot test_robot="$(arg test_robot)" number="$(arg number)" postfix="$(arg postfix)" />
+</robot>

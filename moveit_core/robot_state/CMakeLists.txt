@@ -75,5 +75,6 @@ if(BUILD_TESTING)
   target_link_libraries(test_cartesian_interpolator
     moveit_test_utils
     moveit_robot_state
+    moveit_kinematics_base
   )
 endif()

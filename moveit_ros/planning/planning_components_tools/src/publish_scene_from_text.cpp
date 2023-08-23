@@ -41,7 +41,12 @@
 #include <rclcpp/logging.hpp>
 #include <rclcpp/node.hpp>
 #include <rclcpp/publisher.hpp>
+#include <rclcpp/version.h>
+#if RCLCPP_VERSION_GTE(20, 0, 0)
+#include <rclcpp/event_handler.hpp>
+#else
 #include <rclcpp/qos_event.hpp>
+#endif
 #include <rclcpp/utilities.hpp>
 
 using namespace std::chrono_literals;
@@ -86,8 +91,8 @@ int main(int argc, char** argv)
     }
 
     robot_model_loader::RobotModelLoader::Options opt;
-    opt.robot_description_ = "robot_description";
-    opt.load_kinematics_solvers_ = false;
+    opt.robot_description = "robot_description";
+    opt.load_kinematics_solvers = false;
 
     auto rml = std::make_shared<robot_model_loader::RobotModelLoader>(node, opt);
     planning_scene::PlanningScene ps(rml->getModel());

@@ -107,7 +107,7 @@ OccupancyMapMonitor::OccupancyMapMonitor(std::unique_ptr<MiddlewareHandle> middl
     // Verify the updater was loaded
     if (occupancy_map_updater == nullptr)
     {
-      RCLCPP_ERROR_STREAM(LOGGER, "Failed to load sensor: `" << sensor_name << "` of type: `" << sensor_type << "`");
+      RCLCPP_ERROR_STREAM(LOGGER, "Failed to load sensor: `" << sensor_name << "` of type: `" << sensor_type << '`');
       continue;
     }
 

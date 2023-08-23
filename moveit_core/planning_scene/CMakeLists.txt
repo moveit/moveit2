@@ -1,4 +1,6 @@
-add_library(moveit_planning_scene SHARED src/planning_scene.cpp)
+add_library(moveit_planning_scene SHARED
+  src/planning_scene.cpp
+)
 target_include_directories(moveit_planning_scene PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include/moveit_core>

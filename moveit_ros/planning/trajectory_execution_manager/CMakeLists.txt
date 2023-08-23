@@ -17,8 +17,8 @@ target_link_libraries(moveit_trajectory_execution_manager
   moveit_planning_scene_monitor
 )
 
-install(DIRECTORY include/ DESTINATION include)
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/moveit_trajectory_execution_manager_export.h DESTINATION include)
+install(DIRECTORY include/ DESTINATION include/moveit_ros_planning)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/moveit_trajectory_execution_manager_export.h DESTINATION include/moveit_ros_planning)
 
 if(CATKIN_ENABLE_TESTING)
 ## This needs further cleanup before it can run

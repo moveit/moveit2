@@ -794,40 +794,40 @@ FCLGeometryConstPtr createCollisionGeometry(const shapes::ShapeConstPtr& shape, 
     }
   }
   else
-      // world objects could have previously been attached objects; we try to move them
-      // from their old cache to the new one, if possible. the code is not pretty, but should help
-      // when we attach/detach objects that are in the world
-      if (std::is_same<T, World::Object>::value)
-  {
-    // get the cache that corresponds to objects; maybe this attached object used to be a world object
-    FCLShapeCache& othercache = GetShapeCache<BV, moveit::core::AttachedBody>();
-
-    // attached bodies could be just moved from the environment.
-    auto cache_it = othercache.map_.find(wptr);
-    if (cache_it != othercache.map_.end())
+    // world objects could have previously been attached objects; we try to move them
+    // from their old cache to the new one, if possible. the code is not pretty, but should help
+    // when we attach/detach objects that are in the world
+    if (std::is_same<T, World::Object>::value)
     {
-      if (cache_it->second.unique())
+      // get the cache that corresponds to objects; maybe this attached object used to be a world object
+      FCLShapeCache& othercache = GetShapeCache<BV, moveit::core::AttachedBody>();
+
+      // attached bodies could be just moved from the environment.
+      auto cache_it = othercache.map_.find(wptr);
+      if (cache_it != othercache.map_.end())
       {
-        // remove from old cache
-        FCLGeometryConstPtr obj_cache = cache_it->second;
-        othercache.map_.erase(cache_it);
+        if (cache_it->second.unique())
+        {
+          // remove from old cache
+          FCLGeometryConstPtr obj_cache = cache_it->second;
+          othercache.map_.erase(cache_it);
 
-        // update the CollisionGeometryData; nobody has a pointer to this, so we can safely modify it
-        const_cast<FCLGeometry*>(obj_cache.get())->updateCollisionGeometryData(data, shape_index, true);
+          // update the CollisionGeometryData; nobody has a pointer to this, so we can safely modify it
+          const_cast<FCLGeometry*>(obj_cache.get())->updateCollisionGeometryData(data, shape_index, true);
 
-        //          RCLCPP_DEBUG(LOGGER, "Collision data structures for world object %s retrieved
-        //          from the cache for
-        //          attached
-        //          bodies.",
-        //                   obj_cache->collision_geometry_data_->getID().c_str());
+          //          RCLCPP_DEBUG(LOGGER, "Collision data structures for world object %s retrieved
+          //          from the cache for
+          //          attached
+          //          bodies.",
+          //                   obj_cache->collision_geometry_data_->getID().c_str());
 
-        // add to the new cache
-        cache.map_[wptr] = obj_cache;
-        cache.bumpUseCount();
-        return obj_cache;
+          // add to the new cache
+          cache.map_[wptr] = obj_cache;
+          cache.bumpUseCount();
+          return obj_cache;
+        }
       }
     }
-  }
 
   fcl::CollisionGeometryd* cg_g = nullptr;
   // handle cases individually

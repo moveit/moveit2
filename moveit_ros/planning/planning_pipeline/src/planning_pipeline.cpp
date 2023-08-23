@@ -39,7 +39,7 @@
 #include <moveit/collision_detection/collision_tools.h>
 #include <moveit/trajectory_processing/trajectory_tools.h>
 #include <boost/tokenizer.hpp>
-#include <boost/algorithm/string/join.hpp>
+#include <fmt/format.h>
 #include <sstream>
 
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.ros_planning.planning_pipeline");
@@ -53,7 +53,13 @@ planning_pipeline::PlanningPipeline::PlanningPipeline(const moveit::core::RobotM
                                                       const std::string& parameter_namespace,
                                                       const std::string& planner_plugin_param_name,
                                                       const std::string& adapter_plugins_param_name)
-  : active_{ false }, node_(node), parameter_namespace_(parameter_namespace), robot_model_(model)
+  : active_{ false }
+  , node_(node)
+  , parameter_namespace_(parameter_namespace)
+  , display_computed_motion_plans_{ false }
+  , publish_received_requests_{ false }
+  , robot_model_(model)
+  , check_solution_paths_{ false }
 {
   std::string planner_plugin_fullname = parameter_namespace_ + "." + planner_plugin_param_name;
   if (parameter_namespace_.empty())
@@ -88,19 +94,18 @@ planning_pipeline::PlanningPipeline::PlanningPipeline(const moveit::core::RobotM
   : active_{ false }
   , node_(node)
   , parameter_namespace_(parameter_namespace)
+  , display_computed_motion_plans_{ false }
+  , publish_received_requests_{ false }
   , planner_plugin_name_(planner_plugin_name)
   , adapter_plugin_names_(adapter_plugin_names)
   , robot_model_(model)
+  , check_solution_paths_{ false }
 {
   configure();
 }
 
 void planning_pipeline::PlanningPipeline::configure()
 {
-  check_solution_paths_ = false;  // this is set to true below
-  publish_received_requests_ = false;
-  display_computed_motion_plans_ = false;  // this is set to true below
-
   // load the planning plugin
   try
   {
@@ -110,48 +115,43 @@ void planning_pipeline::PlanningPipeline::configure()
   catch (pluginlib::PluginlibException& ex)
   {
     RCLCPP_FATAL(LOGGER, "Exception while creating planning plugin loader %s", ex.what());
+    throw;
   }
 
   std::vector<std::string> classes;
   if (planner_plugin_loader_)
     classes = planner_plugin_loader_->getDeclaredClasses();
-  if (planner_plugin_name_.empty() && classes.size() == 1)
+
+  if (planner_plugin_name_.empty())
   {
-    planner_plugin_name_ = classes[0];
-    RCLCPP_INFO(
-        LOGGER,
-        "No '~planning_plugin' parameter specified, but only '%s' planning plugin is available. Using that one.",
-        planner_plugin_name_.c_str());
+    std::string classes_str = fmt::format("{}", fmt::join(classes, ", "));
+    throw std::runtime_error("Planning plugin name is empty. Please choose one of the available plugins: " +
+                             classes_str);
   }
-  if (planner_plugin_name_.empty() && classes.size() > 1)
-  {
-    planner_plugin_name_ = classes[0];
-    RCLCPP_INFO(
-        LOGGER,
-        "Multiple planning plugins available. You should specify the '~planning_plugin' parameter. Using '%s' for "
-        "now.",
-        planner_plugin_name_.c_str());
-  }
+
   try
   {
     planner_instance_ = planner_plugin_loader_->createUniqueInstance(planner_plugin_name_);
     if (!planner_instance_->initialize(robot_model_, node_, parameter_namespace_))
+    {
       throw std::runtime_error("Unable to initialize planning plugin");
+    }
     RCLCPP_INFO(LOGGER, "Using planning interface '%s'", planner_instance_->getDescription().c_str());
   }
   catch (pluginlib::PluginlibException& ex)
   {
-    std::string classes_str = boost::algorithm::join(classes, ", ");
-    RCLCPP_ERROR(LOGGER,
+    std::string classes_str = fmt::format("{}", fmt::join(classes, ", "));
+    RCLCPP_FATAL(LOGGER,
                  "Exception while loading planner '%s': %s"
                  "Available plugins: %s",
                  planner_plugin_name_.c_str(), ex.what(), classes_str.c_str());
+    throw;
   }
 
   // load the planner request adapters
   if (!adapter_plugin_names_.empty())
   {
-    std::vector<planning_request_adapter::PlanningRequestAdapterConstPtr> ads;
+    std::vector<planning_request_adapter::PlanningRequestAdapterConstPtr> planning_request_adapter_vector;
     try
     {
       adapter_plugin_loader_ =
@@ -160,39 +160,46 @@ void planning_pipeline::PlanningPipeline::configure()
     }
     catch (pluginlib::PluginlibException& ex)
     {
-      RCLCPP_ERROR(LOGGER, "Exception while creating planning plugin loader %s", ex.what());
+      RCLCPP_FATAL(LOGGER, "Exception while creating planning plugin loader %s", ex.what());
+      throw;
     }
 
     if (adapter_plugin_loader_)
     {
       for (const std::string& adapter_plugin_name : adapter_plugin_names_)
       {
-        planning_request_adapter::PlanningRequestAdapterPtr ad;
+        planning_request_adapter::PlanningRequestAdapterPtr planning_request_adapter;
         try
         {
-          ad = adapter_plugin_loader_->createUniqueInstance(adapter_plugin_name);
+          planning_request_adapter = adapter_plugin_loader_->createUniqueInstance(adapter_plugin_name);
         }
         catch (pluginlib::PluginlibException& ex)
         {
-          RCLCPP_ERROR(LOGGER, "Exception while loading planning adapter plugin '%s': %s", adapter_plugin_name.c_str(),
+          RCLCPP_FATAL(LOGGER, "Exception while loading planning adapter plugin '%s': %s", adapter_plugin_name.c_str(),
                        ex.what());
+          throw;
         }
-        if (ad)
+        if (planning_request_adapter)
         {
-          ad->initialize(node_, parameter_namespace_);
-          ads.push_back(std::move(ad));
+          planning_request_adapter->initialize(node_, parameter_namespace_);
+          planning_request_adapter_vector.push_back(std::move(planning_request_adapter));
         }
       }
     }
-    if (!ads.empty())
+    if (!planning_request_adapter_vector.empty())
     {
       adapter_chain_ = std::make_unique<planning_request_adapter::PlanningRequestAdapterChain>();
-      for (planning_request_adapter::PlanningRequestAdapterConstPtr& ad : ads)
+      for (planning_request_adapter::PlanningRequestAdapterConstPtr& planning_request_adapter :
+           planning_request_adapter_vector)
       {
-        RCLCPP_INFO(LOGGER, "Using planning request adapter '%s'", ad->getDescription().c_str());
-        adapter_chain_->addAdapter(ad);
+        RCLCPP_INFO(LOGGER, "Using planning request adapter '%s'", planning_request_adapter->getDescription().c_str());
+        adapter_chain_->addAdapter(planning_request_adapter);
       }
     }
+  }
+  else
+  {
+    RCLCPP_WARN(LOGGER, "No planning request adapter names specified.");
   }
   displayComputedMotionPlans(true);
   checkSolutionPaths(true);
@@ -242,15 +249,6 @@ bool planning_pipeline::PlanningPipeline::generatePlan(const planning_scene::Pla
                                                        const planning_interface::MotionPlanRequest& req,
                                                        planning_interface::MotionPlanResponse& res) const
 {
-  std::vector<std::size_t> dummy;
-  return generatePlan(planning_scene, req, res, dummy);
-}
-
-bool planning_pipeline::PlanningPipeline::generatePlan(const planning_scene::PlanningSceneConstPtr& planning_scene,
-                                                       const planning_interface::MotionPlanRequest& req,
-                                                       planning_interface::MotionPlanResponse& res,
-                                                       std::vector<std::size_t>& adapter_added_state_index) const
-{
   // Set planning pipeline active
   active_ = true;
 
@@ -259,7 +257,6 @@ bool planning_pipeline::PlanningPipeline::generatePlan(const planning_scene::Pla
   {
     received_request_publisher_->publish(req);
   }
-  adapter_added_state_index.clear();
 
   if (!planner_instance_)
   {
@@ -275,19 +272,19 @@ bool planning_pipeline::PlanningPipeline::generatePlan(const planning_scene::Pla
   {
     if (adapter_chain_)
     {
-      solved = adapter_chain_->adaptAndPlan(planner_instance_, planning_scene, req, res, adapter_added_state_index);
-      if (!adapter_added_state_index.empty())
+      solved = adapter_chain_->adaptAndPlan(planner_instance_, planning_scene, req, res);
+      if (!res.added_path_index.empty())
       {
         std::stringstream ss;
-        for (std::size_t added_index : adapter_added_state_index)
-          ss << added_index << " ";
+        for (std::size_t added_index : res.added_path_index)
+          ss << added_index << ' ';
         RCLCPP_INFO(LOGGER, "Planning adapters have added states at index positions: [ %s]", ss.str().c_str());
       }
     }
     else
     {
       planning_interface::PlanningContextPtr context =
-          planner_instance_->getPlanningContext(planning_scene, req, res.error_code_);
+          planner_instance_->getPlanningContext(planning_scene, req, res.error_code);
       solved = context ? context->solve(res) : false;
     }
   }
@@ -301,9 +298,9 @@ bool planning_pipeline::PlanningPipeline::generatePlan(const planning_scene::Pla
   }
   bool valid = true;
 
-  if (solved && res.trajectory_)
+  if (solved && res.trajectory)
   {
-    std::size_t state_count = res.trajectory_->getWayPointCount();
+    std::size_t state_count = res.trajectory->getWayPointCount();
     RCLCPP_DEBUG(LOGGER, "Motion planner reported a solution path with %ld states", state_count);
     if (check_solution_paths_)
     {
@@ -313,7 +310,7 @@ bool planning_pipeline::PlanningPipeline::generatePlan(const planning_scene::Pla
       arr.markers.push_back(m);
 
       std::vector<std::size_t> index;
-      if (!planning_scene->isPathValid(*res.trajectory_, req.path_constraints, req.group_name, false, &index))
+      if (!planning_scene->isPathValid(*res.trajectory, req.path_constraints, req.group_name, false, &index))
       {
         // check to see if there is any problem with the states that are found to be invalid
         // they are considered ok if they were added by a planning request adapter
@@ -321,7 +318,7 @@ bool planning_pipeline::PlanningPipeline::generatePlan(const planning_scene::Pla
         for (std::size_t i = 0; i < index.size() && !problem; ++i)
         {
           bool found = false;
-          for (std::size_t added_index : adapter_added_state_index)
+          for (std::size_t added_index : res.added_path_index)
           {
             if (index[i] == added_index)
             {
@@ -341,12 +338,12 @@ bool planning_pipeline::PlanningPipeline::generatePlan(const planning_scene::Pla
           else
           {
             valid = false;
-            res.error_code_.val = moveit_msgs::msg::MoveItErrorCodes::INVALID_MOTION_PLAN;
+            res.error_code.val = moveit_msgs::msg::MoveItErrorCodes::INVALID_MOTION_PLAN;
 
             // display error messages
             std::stringstream ss;
             for (std::size_t it : index)
-              ss << it << " ";
+              ss << it << ' ';
 
             RCLCPP_ERROR_STREAM(LOGGER, "Computed path is not valid. Invalid states at index locations: [ "
                                             << ss.str() << "] out of " << state_count
@@ -357,7 +354,7 @@ bool planning_pipeline::PlanningPipeline::generatePlan(const planning_scene::Pla
             for (std::size_t it : index)
             {
               // check validity with verbose on
-              const moveit::core::RobotState& robot_state = res.trajectory_->getWayPoint(it);
+              const moveit::core::RobotState& robot_state = res.trajectory->getWayPoint(it);
               planning_scene->isStateValid(robot_state, req.path_constraints, req.group_name, true);
 
               // compute the contacts if any
@@ -398,8 +395,8 @@ bool planning_pipeline::PlanningPipeline::generatePlan(const planning_scene::Pla
     moveit_msgs::msg::DisplayTrajectory disp;
     disp.model_id = robot_model_->getName();
     disp.trajectory.resize(1);
-    res.trajectory_->getRobotTrajectoryMsg(disp.trajectory[0]);
-    moveit::core::robotStateToRobotStateMsg(res.trajectory_->getFirstWayPoint(), disp.trajectory_start);
+    res.trajectory->getRobotTrajectoryMsg(disp.trajectory[0]);
+    moveit::core::robotStateToRobotStateMsg(res.trajectory->getFirstWayPoint(), disp.trajectory_start);
     display_path_publisher_->publish(disp);
   }
 
@@ -424,8 +421,16 @@ bool planning_pipeline::PlanningPipeline::generatePlan(const planning_scene::Pla
     }
   }
 
-  // Set planning pipeline to inactive
+  // Make sure that planner id is set
+  if (res.planner_id.empty())
+  {
+    RCLCPP_WARN(LOGGER, "The planner plugin did not fill out the 'planner_id' field of the MotionPlanResponse. Setting "
+                        "it to the planner ID name of the MotionPlanRequest assuming that the planner plugin does warn "
+                        "you if it does not use the requested planner.");
+    res.planner_id = req.planner_id;
+  }
 
+  // Set planning pipeline to inactive
   active_ = false;
   return solved && valid;
 }

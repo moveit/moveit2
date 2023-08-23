@@ -66,7 +66,7 @@ int main(int argc, char** argv)
   executor.add_node(node);
 
   robot_model_loader::RobotModelLoader::Options opt;
-  opt.robot_description_ = "robot_description";
+  opt.robot_description = "robot_description";
   auto rml = std::make_shared<robot_model_loader::RobotModelLoader>(node, opt);
   planning_scene_monitor::PlanningSceneMonitor psm(node, rml);
   psm.startWorldGeometryMonitor();

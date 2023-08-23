@@ -316,7 +316,7 @@ void ompl_interface::ModelBasedStateSpace::printState(const ompl::base::State* s
     const int idx = spec_.joint_model_group_->getVariableGroupIndex(j->getName());
     const int vc = j->getVariableCount();
     for (int i = 0; i < vc; ++i)
-      out << state->as<StateType>()->values[idx + i] << " ";
+      out << state->as<StateType>()->values[idx + i] << ' ';
     out << '\n';
   }
 

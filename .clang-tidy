@@ -43,15 +43,15 @@ CheckOptions:
   # variable names
   - key:             readability-identifier-naming.VariableCase
     value:           lower_case
-  - key:             readability-identifier-naming.ClassMemberSuffix
+  - key:             readability-identifier-naming.ProtectedMemberSuffix
+    value:           '_'
+  - key:             readability-identifier-naming.PrivateMemberSuffix
     value:           '_'
   # const static or global variables are UPPER_CASE
   - key:             readability-identifier-naming.EnumConstantCase
     value:           UPPER_CASE
   - key:             readability-identifier-naming.StaticConstantCase
     value:           UPPER_CASE
-  - key:             readability-identifier-naming.ClassConstantCase
-    value:           UPPER_CASE
-  - key:             readability-identifier-naming.GlobalVariableCase
+  - key:             readability-identifier-naming.GlobalConstantCase
     value:           UPPER_CASE
 ...

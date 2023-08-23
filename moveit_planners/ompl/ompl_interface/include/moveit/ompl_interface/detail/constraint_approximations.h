@@ -40,7 +40,7 @@
 #include <planning_scene/planning_scene.h>
 #include <kinematic_constraints/kinematic_constraint.h>
 #include <ompl/base/StateStorage.h>
-#include <visualization_msgs/msg/marker_array.h>
+#include <visualization_msgs/msg/marker_array.hpp>
 
 namespace ompl_interface
 {

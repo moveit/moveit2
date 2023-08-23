@@ -24,8 +24,5 @@ if(WIN32)
 #  set_target_properties(moveit_move_group_interface_python PROPERTIES SUFFIX .pyd)
 endif()
 
-install(DIRECTORY include/ DESTINATION include)
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/moveit_move_group_interface_export.h DESTINATION include)
-
-#add_executable(demo src/demo.cpp)
-#target_link_libraries(demo moveit_move_group_interface ${LIBS} ${Boost_LIBRARIES})
+install(DIRECTORY include/ DESTINATION include/moveit_ros_planning_interface)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/moveit_move_group_interface_export.h DESTINATION include/moveit_ros_planning_interface)

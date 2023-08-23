@@ -38,6 +38,7 @@
 #include <moveit/robot_state/robot_state.h>
 #include <moveit/robot_trajectory/robot_trajectory.h>
 #include <moveit/utils/robot_model_test_utils.h>
+#include <urdf_parser/urdf_parser.h>
 #include <gtest/gtest.h>
 
 class RobotTrajectoryTestFixture : public testing::Test
@@ -150,6 +151,210 @@ protected:
   }
 };
 
+class OneRobot : public testing::Test
+{
+protected:
+  void SetUp() override
+  {
+    static const std::string MODEL2 =
+        "<?xml version=\"1.0\" ?>"
+        "<robot name=\"one_robot\">"
+        "<link name=\"base_link\">"
+        "  <inertial>"
+        "    <mass value=\"2.81\"/>"
+        "    <origin rpy=\"0 0 0\" xyz=\"0.0 0.0 .0\"/>"
+        "    <inertia ixx=\"0.1\" ixy=\"-0.2\" ixz=\"0.5\" iyy=\"-.09\" iyz=\"1\" izz=\"0.101\"/>"
+        "  </inertial>"
+        "  <collision name=\"my_collision\">"
+        "    <origin rpy=\"0 0 0\" xyz=\"0 0 0\"/>"
+        "    <geometry>"
+        "      <box size=\"1 2 1\" />"
+        "    </geometry>"
+        "  </collision>"
+        "  <visual>"
+        "    <origin rpy=\"0 0 0\" xyz=\"0.0 0 0\"/>"
+        "    <geometry>"
+        "      <box size=\"1 2 1\" />"
+        "    </geometry>"
+        "  </visual>"
+        "</link>"
+        "<joint name=\"panda_joint0\" type=\"continuous\">"
+        "   <axis xyz=\"0 0 1\"/>"
+        "   <parent link=\"base_link\"/>"
+        "   <child link=\"link_a\"/>"
+        "   <origin rpy=\" 0.0 0 0 \" xyz=\"0.0 0 0 \"/>"
+        "</joint>"
+        "<link name=\"link_a\">"
+        "  <inertial>"
+        "    <mass value=\"1.0\"/>"
+        "    <origin rpy=\"0 0 0\" xyz=\"0.0 0.0 .0\"/>"
+        "    <inertia ixx=\"0.1\" ixy=\"-0.2\" ixz=\"0.5\" iyy=\"-.09\" iyz=\"1\" izz=\"0.101\"/>"
+        "  </inertial>"
+        "  <collision>"
+        "    <origin rpy=\"0 0 0\" xyz=\"0 0 0\"/>"
+        "    <geometry>"
+        "      <box size=\"1 2 1\" />"
+        "    </geometry>"
+        "  </collision>"
+        "  <visual>"
+        "    <origin rpy=\"0 0 0\" xyz=\"0.0 0 0\"/>"
+        "    <geometry>"
+        "      <box size=\"1 2 1\" />"
+        "    </geometry>"
+        "  </visual>"
+        "</link>"
+        "<joint name=\"joint_b\" type=\"fixed\">"
+        "  <parent link=\"link_a\"/>"
+        "  <child link=\"link_b\"/>"
+        "  <origin rpy=\" 0.0 -0.42 0 \" xyz=\"0.0 0.5 0 \"/>"
+        "</joint>"
+        "<link name=\"link_b\">"
+        "  <inertial>"
+        "    <mass value=\"1.0\"/>"
+        "    <origin rpy=\"0 0 0\" xyz=\"0.0 0.0 .0\"/>"
+        "    <inertia ixx=\"0.1\" ixy=\"-0.2\" ixz=\"0.5\" iyy=\"-.09\" iyz=\"1\" izz=\"0.101\"/>"
+        "  </inertial>"
+        "  <collision>"
+        "    <origin rpy=\"0 0 0\" xyz=\"0 0 0\"/>"
+        "    <geometry>"
+        "      <box size=\"1 2 1\" />"
+        "    </geometry>"
+        "  </collision>"
+        "  <visual>"
+        "    <origin rpy=\"0 0 0\" xyz=\"0.0 0 0\"/>"
+        "    <geometry>"
+        "      <box size=\"1 2 1\" />"
+        "    </geometry>"
+        "  </visual>"
+        "</link>"
+        "  <joint name=\"panda_joint1\" type=\"prismatic\">"
+        "    <axis xyz=\"1 0 0\"/>"
+        "    <limit effort=\"100.0\" lower=\"0.0\" upper=\"0.09\" velocity=\"0.2\"/>"
+        "    <safety_controller k_position=\"20.0\" k_velocity=\"500.0\" soft_lower_limit=\"0.0\" "
+        "soft_upper_limit=\"0.089\"/>"
+        "    <parent link=\"link_b\"/>"
+        "    <child link=\"link_c\"/>"
+        "    <origin rpy=\" 0.0 0.42 0.0 \" xyz=\"0.0 -0.1 0 \"/>"
+        "  </joint>"
+        "<link name=\"link_c\">"
+        "  <inertial>"
+        "    <mass value=\"1.0\"/>"
+        "    <origin rpy=\"0 0 0\" xyz=\"0.0 0 .0\"/>"
+        "    <inertia ixx=\"0.1\" ixy=\"-0.2\" ixz=\"0.5\" iyy=\"-.09\" iyz=\"1\" izz=\"0.101\"/>"
+        "  </inertial>"
+        "  <collision>"
+        "    <origin rpy=\"0 0 0\" xyz=\"0 0 0\"/>"
+        "    <geometry>"
+        "      <box size=\"1 2 1\" />"
+        "    </geometry>"
+        "  </collision>"
+        "  <visual>"
+        "    <origin rpy=\"0 0 0\" xyz=\"0.0 0 0\"/>"
+        "    <geometry>"
+        "      <box size=\"1 2 1\" />"
+        "    </geometry>"
+        "  </visual>"
+        "</link>"
+        "  <joint name=\"mim_f\" type=\"prismatic\">"
+        "    <axis xyz=\"1 0 0\"/>"
+        "    <limit effort=\"100.0\" lower=\"0.0\" upper=\"0.19\" velocity=\"0.2\"/>"
+        "    <parent link=\"link_c\"/>"
+        "    <child link=\"link_d\"/>"
+        "    <origin rpy=\" 0.0 0.0 0.0 \" xyz=\"0.1 0.1 0 \"/>"
+        "    <mimic joint=\"joint_f\" multiplier=\"1.5\" offset=\"0.1\"/>"
+        "  </joint>"
+        "  <joint name=\"joint_f\" type=\"prismatic\">"
+        "    <axis xyz=\"1 0 0\"/>"
+        "    <limit effort=\"100.0\" lower=\"0.0\" upper=\"0.19\" velocity=\"0.2\"/>"
+        "    <parent link=\"link_d\"/>"
+        "    <child link=\"link_e\"/>"
+        "    <origin rpy=\" 0.0 0.0 0.0 \" xyz=\"0.1 0.1 0 \"/>"
+        "  </joint>"
+        "<link name=\"link_d\">"
+        "  <collision>"
+        "    <origin rpy=\"0 0 0\" xyz=\"0 0 0\"/>"
+        "    <geometry>"
+        "      <box size=\"1 2 1\" />"
+        "    </geometry>"
+        "  </collision>"
+        "  <visual>"
+        "    <origin rpy=\"0 1 0\" xyz=\"0 0.1 0\"/>"
+        "    <geometry>"
+        "      <box size=\"1 2 1\" />"
+        "    </geometry>"
+        "  </visual>"
+        "</link>"
+        "<link name=\"link_e\">"
+        "  <collision>"
+        "    <origin rpy=\"0 0 0\" xyz=\"0 0 0\"/>"
+        "    <geometry>"
+        "      <box size=\"1 2 1\" />"
+        "    </geometry>"
+        "  </collision>"
+        "  <visual>"
+        "    <origin rpy=\"0 1 0\" xyz=\"0 0.1 0\"/>"
+        "    <geometry>"
+        "      <box size=\"1 2 1\" />"
+        "    </geometry>"
+        "  </visual>"
+        "</link>"
+        "</robot>";
+
+    static const std::string SMODEL2 =
+        "<?xml version=\"1.0\" ?>"
+        "<robot name=\"one_robot\">"
+        "<virtual_joint name=\"base_joint\" child_link=\"base_link\" parent_frame=\"odom_combined\" type=\"planar\"/>"
+        "<group name=\"panda_arm\">"
+        "<chain base_link=\"base_link\" tip_link=\"link_e\"/>"
+        "<joint name=\"base_joint\"/>"
+        "</group>"
+        "</robot>";
+
+    urdf::ModelInterfaceSharedPtr urdf_model = urdf::parseURDF(MODEL2);
+    srdf::ModelSharedPtr srdf_model = std::make_shared<srdf::Model>();
+    srdf_model->initString(*urdf_model, SMODEL2);
+    robot_model_ = std::make_shared<moveit::core::RobotModel>(urdf_model, srdf_model);
+    robot_state_ = std::make_shared<moveit::core::RobotState>(robot_model_);
+    robot_state_->setToDefaultValues();
+    robot_state_->setVariablePositions({ "panda_joint0" }, { -3.1416 });
+    robot_state_->setVariableVelocity(/*index*/ 0, /*value*/ 1.0);
+    robot_state_->setVariableAcceleration(/*index*/ 0, /*value*/ -0.1);
+    robot_state_->update();
+  }
+
+  void TearDown() override
+  {
+  }
+
+  void initTestTrajectory(robot_trajectory::RobotTrajectoryPtr& trajectory)
+  {
+    // Init a traj
+    ASSERT_TRUE(robot_model_->hasJointModelGroup(arm_jmg_name_))
+        << "Robot model does not have group: " << arm_jmg_name_;
+
+    trajectory = std::make_shared<robot_trajectory::RobotTrajectory>(robot_model_, arm_jmg_name_);
+
+    EXPECT_EQ(trajectory->getGroupName(), arm_jmg_name_) << "Generated trajectory group name does not match";
+    EXPECT_TRUE(trajectory->empty()) << "Generated trajectory not empty";
+
+    double duration_from_previous = 0.1;
+    std::size_t waypoint_count = 5;
+    for (std::size_t ix = 0; ix < waypoint_count; ++ix)
+      trajectory->addSuffixWayPoint(*robot_state_, duration_from_previous);
+    // Quick check that getDuration is working correctly
+    EXPECT_EQ(trajectory->getDuration(), duration_from_previous * waypoint_count)
+        << "Generated trajectory duration incorrect";
+    EXPECT_EQ(waypoint_count, trajectory->getWayPointDurations().size())
+        << "Generated trajectory has the wrong number of waypoints";
+    EXPECT_EQ(waypoint_count, trajectory->size());
+  }
+
+protected:
+  moveit::core::RobotModelConstPtr robot_model_;
+  moveit::core::RobotStatePtr robot_state_;
+  const std::string arm_jmg_name_ = "panda_arm";
+};
+
 TEST_F(RobotTrajectoryTestFixture, ModifyFirstWaypointByPtr)
 {
   robot_trajectory::RobotTrajectoryPtr trajectory;
@@ -198,6 +403,27 @@ TEST_F(RobotTrajectoryTestFixture, ChainEdits)
 
   EXPECT_EQ(trajectory.getGroupName(), arm_jmg_name_);
   EXPECT_EQ(trajectory.getWayPointCount(), initial_trajectory->getWayPointCount() * 2 + 3);
+}
+
+TEST_F(RobotTrajectoryTestFixture, Append)
+{
+  robot_trajectory::RobotTrajectoryPtr initial_trajectory;
+  initTestTrajectory(initial_trajectory);
+  EXPECT_EQ(initial_trajectory->getWayPointCount(), size_t(5));
+
+  // Append to the first
+  robot_trajectory::RobotTrajectoryPtr traj2;
+  initTestTrajectory(traj2);
+  EXPECT_EQ(traj2->getWayPointCount(), size_t(5));
+
+  // After append() we should have 10 waypoints, all with 0.1s duration
+  const double expected_duration = 0.1;
+  initial_trajectory->append(*traj2, expected_duration, 0, 5);
+  EXPECT_EQ(initial_trajectory->getWayPointCount(), size_t(10));
+
+  EXPECT_EQ(initial_trajectory->getWayPointDurationFromPrevious(4), expected_duration);
+  EXPECT_EQ(initial_trajectory->getWayPointDurationFromPrevious(5), expected_duration);
+  EXPECT_EQ(initial_trajectory->getWayPointDurationFromPrevious(6), expected_duration);
 }
 
 TEST_F(RobotTrajectoryTestFixture, RobotTrajectoryShallowCopy)
@@ -331,6 +557,42 @@ TEST_F(RobotTrajectoryTestFixture, RobotTrajectoryDensity)
   // Check for empty trajectory
   trajectory->clear();
   EXPECT_FALSE(robot_trajectory::waypoint_density(*trajectory).has_value());
+}
+
+TEST_F(OneRobot, Unwind)
+{
+  const double epsilon = 1e-4;
+
+  // An initial joint position needs unwinding
+  {
+    robot_trajectory::RobotTrajectoryPtr trajectory;
+    initTestTrajectory(trajectory);
+    moveit::core::RobotStatePtr& first_waypoint = trajectory->getFirstWayPointPtr();
+    const double random_large_angle = 20.2;  // rad, should unwind to 1.350444 rad
+    first_waypoint->setVariablePosition("panda_joint0", random_large_angle);
+    first_waypoint->update();
+    trajectory->unwind();
+    EXPECT_NEAR(trajectory->getFirstWayPoint().getVariablePosition("panda_joint0"), 1.350444, epsilon);
+  }
+}
+
+TEST_F(OneRobot, UnwindFromState)
+{
+  const double epsilon = 1e-4;
+
+  // Unwind a trajectory from a robot state
+  {
+    robot_trajectory::RobotTrajectoryPtr trajectory;
+    initTestTrajectory(trajectory);
+    moveit::core::RobotState first_waypoint = trajectory->getFirstWayPoint();
+    // Wrap the continuous joint by 4PI as if this happened to be the current state of the robot
+    const double wrapped_angle = first_waypoint.getVariablePosition("panda_joint0") + 12.566371;
+    first_waypoint.setVariablePosition("panda_joint0", wrapped_angle);
+    first_waypoint.update();
+    // Unwind the trajectory from the wound up robot state
+    trajectory->unwind(first_waypoint);
+    EXPECT_NEAR(trajectory->getFirstWayPoint().getVariablePosition("panda_joint0"), wrapped_angle, epsilon);
+  }
 }
 
 int main(int argc, char** argv)

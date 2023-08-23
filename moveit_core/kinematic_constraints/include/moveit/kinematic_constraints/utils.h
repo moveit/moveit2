@@ -66,9 +66,6 @@ namespace kinematic_constraints
 moveit_msgs::msg::Constraints mergeConstraints(const moveit_msgs::msg::Constraints& first,
                                                const moveit_msgs::msg::Constraints& second);
 
-/** \brief Check if any constraints were specified */
-[[deprecated("Use moveit/utils/message_checks.h instead")]] bool isEmpty(const moveit_msgs::msg::Constraints& constr);
-
 std::size_t countIndividualConstraints(const moveit_msgs::msg::Constraints& constr);
 
 /**
@@ -78,8 +75,8 @@ std::size_t countIndividualConstraints(const moveit_msgs::msg::Constraints& cons
  *
  * @param [in] state The state from which to generate goal joint constraints
  * @param [in] jmg The group for which to generate goal joint constraints
- * @param [in] tolerance_below The below tolerance to apply to all constraints
- * @param [in] tolerance_above The above tolerance to apply to all constraints
+ * @param [in] tolerance_below The below tolerance to apply to all constraints [rad or meters for prismatic joints]
+ * @param [in] tolerance_above The above tolerance to apply to all constraints [rad or meters for prismatic joints]
  *
  * @return A full constraint message containing all the joint constraints
  */
@@ -94,13 +91,26 @@ moveit_msgs::msg::Constraints constructGoalConstraints(const moveit::core::Robot
  *
  * @param [in] state The state from which to generate goal joint constraints
  * @param [in] jmg The group for which to generate joint constraints
- * @param [in] tolerance A tolerance to apply both above and below for all constraints
+ * @param [in] tolerance An angular tolerance to apply both above and below for all constraints [rad or meters for
+ * prismatic joints]
  *
  * @return A full constraint message containing all the joint constraints
  */
 moveit_msgs::msg::Constraints constructGoalConstraints(const moveit::core::RobotState& state,
                                                        const moveit::core::JointModelGroup* jmg,
                                                        double tolerance = std::numeric_limits<double>::epsilon());
+
+/**
+ * \brief Update joint constraints with a new JointModelGroup state
+ *
+ * @param [in, out] constraints Previously-constructed constraints to update
+ * @param [in] state The new target state
+ * @param [in] jmg Specify which JointModelGroup to update
+ *
+ * @return true if all joint constraints were updated
+ */
+bool updateJointConstraints(moveit_msgs::msg::Constraints& constraints, const moveit::core::RobotState& state,
+                            const moveit::core::JointModelGroup* jmg);
 
 /**
  * \brief Generates a constraint message intended to be used as a goal
@@ -111,8 +121,7 @@ moveit_msgs::msg::Constraints constructGoalConstraints(const moveit::core::Robot
  *
  * @param [in] link_name The link name for both constraints
  * @param [in] pose The pose stamped to be used for the target region.
- * @param [in] tolerance_pos The dimension of the sphere associated with the target region of the \ref
- *PositionConstraint
+ * @param [in] tolerance_pos The radius of a sphere defining a \ref PositionConstraint
  * @param [in] tolerance_angle The value to assign to the absolute tolerances of the \ref OrientationConstraint
  *
  * @return A full constraint message containing both constraints
@@ -142,6 +151,18 @@ moveit_msgs::msg::Constraints constructGoalConstraints(const std::string& link_n
                                                        const std::vector<double>& tolerance_angle);
 
 /**
+ * \brief Update a pose constraint for one link with a new pose
+ *
+ * @param [in, out] constraints Previously-constructed constraints to update
+ * @param [in] link The link to update for
+ * @param [in] pose The new target pose
+ *
+ * @return true if the constraint was updated
+ */
+bool updatePoseConstraint(moveit_msgs::msg::Constraints& constraints, const std::string& link_name,
+                          const geometry_msgs::msg::PoseStamped& pose);
+
+/**
  * \brief Generates a constraint message intended to be used as a goal
  * constraint for a given link. The full constraint message will
  * contain only an \ref OrientationConstraint.
@@ -157,6 +178,18 @@ moveit_msgs::msg::Constraints constructGoalConstraints(const std::string& link_n
                                                        double tolerance = 1e-2);
 
 /**
+ * \brief Update an orientation constraint for one link with a new quaternion
+ *
+ * @param [in, out] constraints Previously-constructed constraints to update
+ * @param [in] link The link to update for
+ * @param [in] quat The new target quaternion
+ *
+ * @return true if the constraint was updated
+ */
+bool updateOrientationConstraint(moveit_msgs::msg::Constraints& constraints, const std::string& link_name,
+                                 const geometry_msgs::msg::QuaternionStamped& quat);
+
+/**
  * \brief Generates a constraint message intended to be used as a goal
  * constraint for a given link.  The full constraint message will
  * contain only a \ref PositionConstraint.  A sphere will be used to
@@ -165,7 +198,7 @@ moveit_msgs::msg::Constraints constructGoalConstraints(const std::string& link_n
  * @param [in] link_name The link name for the \ref PositionConstraint
  * @param [in] reference_point A point corresponding to the target_point_offset of the \ref PositionConstraint
  * @param [in] goal_point The position associated with the constraint region
- * @param [in] tolerance The radius associated with the sphere volume associated with the constraint region
+ * @param [in] tolerance The radius of a sphere defining a \ref PositionConstraint
  *
  * @return A full constraint message containing the position constraint
  */
@@ -182,13 +215,25 @@ moveit_msgs::msg::Constraints constructGoalConstraints(const std::string& link_n
  *
  * @param [in] link_name The link name for the \ref PositionConstraint
  * @param [in] goal_point The position associated with the constraint region
- * @param [in] tolerance The radius associated with the sphere volume associated with the constraint region
+ * @param [in] tolerance The radius of a sphere defining a \ref PositionConstraint
  *
  * @return A full constraint message containing the position constraint
  */
 moveit_msgs::msg::Constraints constructGoalConstraints(const std::string& link_name,
                                                        const geometry_msgs::msg::PointStamped& goal_point,
                                                        double tolerance = 1e-3);
+
+/**
+ * \brief Update a position constraint for one link with a new position
+ *
+ * @param [in, out] constraints Previously-constructed constraints to update
+ * @param [in] link The link to update for
+ * @param [in] goal_point The new target point
+ *
+ * @return true if the constraint was updated
+ */
+bool updatePositionConstraint(moveit_msgs::msg::Constraints& constraints, const std::string& link_name,
+                              const geometry_msgs::msg::PointStamped& goal_point);
 
 /**
  * \brief extract constraint message from node parameters.

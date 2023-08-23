@@ -17,4 +17,4 @@ target_link_libraries(moveit_lma_kinematics_plugin
   lma_kinematics_parameters
 )
 
-install(DIRECTORY include/ DESTINATION include)
+install(DIRECTORY include/ DESTINATION include/moveit_kinematics)

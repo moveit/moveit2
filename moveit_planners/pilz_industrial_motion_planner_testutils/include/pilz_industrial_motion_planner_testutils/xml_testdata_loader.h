@@ -184,8 +184,14 @@ public:
   class AbstractCmdGetterAdapter
   {
   public:
-    virtual CmdVariant getCmd(const std::string& /*cmd_name*/) const = 0;
+    AbstractCmdGetterAdapter() = default;
+    AbstractCmdGetterAdapter(const AbstractCmdGetterAdapter&) = default;
+    AbstractCmdGetterAdapter(AbstractCmdGetterAdapter&&) = default;
+    AbstractCmdGetterAdapter& operator=(const AbstractCmdGetterAdapter&) = default;
+    AbstractCmdGetterAdapter& operator=(AbstractCmdGetterAdapter&&) = default;
     virtual ~AbstractCmdGetterAdapter() = default;
+
+    virtual CmdVariant getCmd(const std::string& /*cmd_name*/) const = 0;
   };
 
 private:

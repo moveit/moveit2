@@ -360,9 +360,9 @@ TYPED_TEST_P(DistanceFullPandaTest, DistancePoints)
   }
 }
 
-REGISTER_TYPED_TEST_CASE_P(CollisionDetectorPandaTest, InitOK, DefaultNotInCollision, LinksInCollision,
-                           RobotWorldCollision_1, RobotWorldCollision_2, PaddingTest, DistanceSelf, DistanceWorld);
+REGISTER_TYPED_TEST_SUITE_P(CollisionDetectorPandaTest, InitOK, DefaultNotInCollision, LinksInCollision,
+                            RobotWorldCollision_1, RobotWorldCollision_2, PaddingTest, DistanceSelf, DistanceWorld);
 
-REGISTER_TYPED_TEST_CASE_P(DistanceCheckPandaTest, DistanceSingle);
+REGISTER_TYPED_TEST_SUITE_P(DistanceCheckPandaTest, DistanceSingle);
 
-REGISTER_TYPED_TEST_CASE_P(DistanceFullPandaTest, DistancePoints);
+REGISTER_TYPED_TEST_SUITE_P(DistanceFullPandaTest, DistancePoints);

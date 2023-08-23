@@ -29,4 +29,4 @@ target_compile_definitions(moveit_kdl_kinematics_plugin PUBLIC "PLUGINLIB__DISAB
 # which is appropriate when building the dll but not consuming it.
 target_compile_definitions(moveit_kdl_kinematics_plugin PRIVATE "MOVEIT_KDL_KINEMATICS_PLUGIN_BUILDING_DLL")
 
-install(DIRECTORY include/ DESTINATION include)
+install(DIRECTORY include/ DESTINATION include/moveit_kinematics)

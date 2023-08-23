@@ -60,10 +60,12 @@ bool ForwardTrajectory::initialize(const rclcpp::Node::SharedPtr& node,
   {
     stop_before_collision_ = node->declare_parameter<bool>("stop_before_collision", false);
   }
-  planning_scene_monitor_ = planning_scene_monitor;
   node_ = node;
   path_invalidation_event_send_ = false;
   num_iterations_stuck_ = 0;
+
+  planning_scene_monitor_ = planning_scene_monitor;
+
   return true;
 }
 
@@ -106,6 +108,7 @@ ForwardTrajectory::solve(const robot_trajectory::RobotTrajectory& local_trajecto
     bool is_path_valid = false;
     // Lock the planning scene as briefly as possible
     {
+      planning_scene_monitor_->updateSceneWithCurrentState();
       planning_scene_monitor::LockedPlanningSceneRO locked_planning_scene(planning_scene_monitor_);
       current_state = std::make_shared<moveit::core::RobotState>(locked_planning_scene->getCurrentState());
       is_path_valid = locked_planning_scene->isPathValid(local_trajectory, local_trajectory.getGroupName(), false);

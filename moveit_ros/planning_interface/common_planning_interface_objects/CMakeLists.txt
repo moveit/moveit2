@@ -6,4 +6,4 @@ ament_target_dependencies(moveit_common_planning_interface_objects
     tf2_ros
 )
 
-install(DIRECTORY include/ DESTINATION include)
+install(DIRECTORY include/ DESTINATION include/moveit_ros_planning_interface)
