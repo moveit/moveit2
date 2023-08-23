@@ -68,6 +68,8 @@ constexpr int8_t KEYCODE_Q = 0x71;
 constexpr int8_t KEYCODE_R = 0x72;
 constexpr int8_t KEYCODE_J = 0x6A;
 constexpr int8_t KEYCODE_T = 0x74;
+constexpr int8_t KEYCODE_W = 0x77;
+constexpr int8_t KEYCODE_E = 0x65;
 }  // namespace
 
 // Some constants used in the Servo Teleop demo
@@ -77,6 +79,7 @@ const std::string TWIST_TOPIC = "/servo_node/delta_twist_cmds";
 const std::string JOINT_TOPIC = "/servo_node/delta_joint_cmds";
 const size_t ROS_QUEUE_SIZE = 10;
 const std::string PLANNING_FRAME_ID = "panda_link0";
+const std::string EE_FRAME_ID = "panda_link8";
 }  // namespace
 
 // A class for reading the key inputs from the terminal
@@ -131,9 +134,10 @@ private:
 
   std::shared_ptr<moveit_msgs::srv::ServoCommandType::Request> request_;
   double joint_vel_cmd_;
+  std::string command_frame_id_;
 };
 
-KeyboardServo::KeyboardServo() : joint_vel_cmd_(1.0)
+KeyboardServo::KeyboardServo() : joint_vel_cmd_(1.0), command_frame_id_{ "panda_link0" }
 {
   nh_ = rclcpp::Node::make_shared("servo_keyboard_input");
 
@@ -191,6 +195,7 @@ int KeyboardServo::keyLoop()
   puts("Use 1|2|3|4|5|6|7 keys to joint jog. 'r' to reverse the direction of jogging.");
   puts("Use 'j' to select joint jog. ");
   puts("Use 't' to select twist ");
+  puts("Use 'w' and 'e' to switch between sending command in world frame or end effector frame");
   puts("'Q' to quit.");
 
   for (;;)
@@ -324,6 +329,16 @@ int KeyboardServo::keyLoop()
           }
         }
         break;
+      case KEYCODE_W:
+        RCLCPP_DEBUG(nh_->get_logger(), "w");
+        RCLCPP_INFO_STREAM(nh_->get_logger(), "Command frame set to: " << PLANNING_FRAME_ID);
+        command_frame_id_ = PLANNING_FRAME_ID;
+        break;
+      case KEYCODE_E:
+        RCLCPP_DEBUG(nh_->get_logger(), "e");
+        RCLCPP_INFO_STREAM(nh_->get_logger(), "Command frame set to: " << EE_FRAME_ID);
+        command_frame_id_ = EE_FRAME_ID;
+        break;
       case KEYCODE_Q:
         RCLCPP_DEBUG(nh_->get_logger(), "quit");
         return 0;
@@ -333,7 +348,7 @@ int KeyboardServo::keyLoop()
     if (publish_twist)
     {
       twist_msg->header.stamp = nh_->now();
-      twist_msg->header.frame_id = PLANNING_FRAME_ID;
+      twist_msg->header.frame_id = command_frame_id_;
       twist_pub_->publish(std::move(twist_msg));
       publish_twist = false;
     }

@@ -127,7 +127,7 @@ servo:
     }
 
 
-  angular_velocity_about_ee_frame: {
+  apply_twist_commands_about_ee_frame: {
     type: bool,
     default_value: true,
     description: "If true, the angular velocity specified in the twist command is applied about the ee frame axes \

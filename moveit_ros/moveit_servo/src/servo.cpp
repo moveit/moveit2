@@ -50,7 +50,6 @@ namespace
 const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_servo.servo");
 constexpr double ROBOT_STATE_WAIT_TIME = 5.0;  // seconds
 constexpr double STOPPED_VELOCITY_EPS = 1e-4;
-constexpr auto ROS_LOG_THROTTLE_PERIOD = std::chrono::milliseconds(3000).count();
 }  // namespace
 
 namespace moveit_servo
@@ -476,9 +475,9 @@ const TwistCommand Servo::toPlanningFrame(const TwistCommand& command)
     reordered_twist.tail<3>() = command.velocities.head<3>();
 
     const auto command_to_planning_frame = tf2::transformToEigen(
-        transform_buffer_.lookupTransform(servo_params_.planning_frame, command.frame_id, rclcpp::Time(0)));
+        transform_buffer_.lookupTransform(command.frame_id, servo_params_.planning_frame, rclcpp::Time(0)));
 
-    if (servo_params_.angular_velocity_about_ee_frame)
+    if (servo_params_.apply_twist_commands_about_ee_frame)
     {
       reordered_twist.head<3>() = command_to_planning_frame.rotation() * reordered_twist.head<3>();
       reordered_twist.tail<3>() = command_to_planning_frame.rotation() * reordered_twist.tail<3>();
