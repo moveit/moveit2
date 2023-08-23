@@ -103,11 +103,9 @@ public:
   void createLoadMapService(OccupancyMapMonitor::MiddlewareHandle::LoadMapServiceCallback callback) override;
 
 private:
-  rclcpp::Node::SharedPtr node_; /*!< ROS node */
-  rclcpp::Service<moveit_msgs::srv::SaveMap>::SharedPtr
-      save_map_srv_; /*!< ROS service created by createSaveMapService */
-  rclcpp::Service<moveit_msgs::srv::LoadMap>::SharedPtr
-      load_map_srv_; /*!< ROS service created by createLoadMapService */
+  rclcpp::Node::SharedPtr node_;                                       /*!< ROS node */
+  rclcpp::Service<moveit_msgs::srv::SaveMap>::SharedPtr save_map_srv_; /*!< ROS service created by createSaveMapService */
+  rclcpp::Service<moveit_msgs::srv::LoadMap>::SharedPtr load_map_srv_; /*!< ROS service created by createLoadMapService */
   std::unique_ptr<pluginlib::ClassLoader<OccupancyMapUpdater>>
       updater_plugin_loader_; /*!< Pluginlib loader for OccupancyMapUpdater */
 

@@ -44,9 +44,9 @@
 #include <moveit_msgs/msg/motion_plan_response.hpp>
 #include <moveit_msgs/msg/motion_sequence_request.hpp>
 
-#include "pilz_industrial_motion_planner/plan_components_builder.h"
-#include "pilz_industrial_motion_planner/trajectory_blender.h"
-#include "pilz_industrial_motion_planner/trajectory_generation_exceptions.h"
+#include <pilz_industrial_motion_planner/plan_components_builder.h>
+#include <pilz_industrial_motion_planner/trajectory_blender.h>
+#include <pilz_industrial_motion_planner/trajectory_generation_exceptions.h>
 
 #include <cartesian_limits_parameters.hpp>
 

@@ -53,10 +53,10 @@
 #include <tf2_eigen/tf2_eigen.hpp>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
 
-#include "pilz_industrial_motion_planner/cartesian_trajectory.h"
-#include "pilz_industrial_motion_planner/cartesian_trajectory_point.h"
-#include "pilz_industrial_motion_planner/limits_container.h"
-#include "pilz_industrial_motion_planner/trajectory_functions.h"
+#include <pilz_industrial_motion_planner/cartesian_trajectory.h>
+#include <pilz_industrial_motion_planner/cartesian_trajectory_point.h>
+#include <pilz_industrial_motion_planner/limits_container.h>
+#include <pilz_industrial_motion_planner/trajectory_functions.h>
 #include "test_utils.h"
 
 #define _USE_MATH_DEFINES
@@ -92,8 +92,8 @@ protected:
     node_ = rclcpp::Node::make_shared("unittest_trajectory_functions", node_options);
 
     // load robot model
-    robot_model_loader::RobotModelLoader rm_loader(node_);
-    robot_model_ = rm_loader.getModel();
+    rm_loader_ = std::make_unique<robot_model_loader::RobotModelLoader>(node_);
+    robot_model_ = rm_loader_->getModel();
     ASSERT_TRUE(bool(robot_model_)) << "Failed to load robot model";
     planning_scene_ = std::make_shared<planning_scene::PlanningScene>(robot_model_);
 
@@ -120,6 +120,11 @@ protected:
     }
   }
 
+  void TearDown() override
+  {
+    robot_model_.reset();
+  }
+
   /**
    * @brief check if two transformations are close
    * @param pose1
@@ -133,6 +138,7 @@ protected:
   // ros stuff
   rclcpp::Node::SharedPtr node_;
   moveit::core::RobotModelConstPtr robot_model_;
+  std::unique_ptr<robot_model_loader::RobotModelLoader> rm_loader_;
   planning_scene::PlanningSceneConstPtr planning_scene_;
 
   // test parameters from parameter server
@@ -150,11 +156,13 @@ bool TrajectoryFunctionsTestBase::tfNear(const Eigen::Isometry3d& pose1, const E
                                          const double& epsilon)
 {
   for (std::size_t i = 0; i < 3; ++i)
+  {
     for (std::size_t j = 0; j < 4; ++j)
     {
       if (fabs(pose1(i, j) - pose2(i, j)) > fabs(epsilon))
         return false;
     }
+  }
   return true;
 }
 
@@ -182,27 +190,27 @@ TEST_F(TrajectoryFunctionsTestFlangeAndGripper, TipLinkFK)
 {
   Eigen::Isometry3d tip_pose;
   std::map<std::string, double> test_state = zero_state_;
-  EXPECT_TRUE(pilz_industrial_motion_planner::computeLinkFK(robot_model_, group_tip_link_, test_state, tip_pose));
+  EXPECT_TRUE(pilz_industrial_motion_planner::computeLinkFK(planning_scene_, group_tip_link_, test_state, tip_pose));
   EXPECT_NEAR(tip_pose(0, 3), 0, EPSILON);
   EXPECT_NEAR(tip_pose(1, 3), 0, EPSILON);
   EXPECT_NEAR(tip_pose(2, 3), L0 + L1 + L2 + L3, EPSILON);
 
   test_state[joint_names_.at(1)] = M_PI_2;
-  EXPECT_TRUE(pilz_industrial_motion_planner::computeLinkFK(robot_model_, group_tip_link_, test_state, tip_pose));
+  EXPECT_TRUE(pilz_industrial_motion_planner::computeLinkFK(planning_scene_, group_tip_link_, test_state, tip_pose));
   EXPECT_NEAR(tip_pose(0, 3), L1 + L2 + L3, EPSILON);
   EXPECT_NEAR(tip_pose(1, 3), 0, EPSILON);
   EXPECT_NEAR(tip_pose(2, 3), L0, EPSILON);
 
   test_state[joint_names_.at(1)] = -M_PI_2;
   test_state[joint_names_.at(2)] = M_PI_2;
-  EXPECT_TRUE(pilz_industrial_motion_planner::computeLinkFK(robot_model_, group_tip_link_, test_state, tip_pose));
+  EXPECT_TRUE(pilz_industrial_motion_planner::computeLinkFK(planning_scene_, group_tip_link_, test_state, tip_pose));
   EXPECT_NEAR(tip_pose(0, 3), -L1, EPSILON);
   EXPECT_NEAR(tip_pose(1, 3), 0, EPSILON);
   EXPECT_NEAR(tip_pose(2, 3), L0 - L2 - L3, EPSILON);
 
   // wrong link name
   std::string link_name = "wrong_link_name";
-  EXPECT_FALSE(pilz_industrial_motion_planner::computeLinkFK(robot_model_, link_name, test_state, tip_pose));
+  EXPECT_FALSE(pilz_industrial_motion_planner::computeLinkFK(planning_scene_, link_name, test_state, tip_pose));
 }
 
 /**
@@ -214,6 +222,10 @@ TEST_F(TrajectoryFunctionsTestFlangeAndGripper, testIKSolver)
   const moveit::core::JointModelGroup* jmg = robot_model_->getJointModelGroup(planning_group_);
   const kinematics::KinematicsBaseConstPtr& solver = jmg->getSolverInstance();
 
+  if (!solver)
+  {
+    throw("No IK solver configured for group '" + planning_group_ + "'");
+  }
   // robot state
   moveit::core::RobotState rstate(robot_model_);
 
@@ -232,9 +244,13 @@ TEST_F(TrajectoryFunctionsTestFlangeAndGripper, testIKSolver)
     {
       ik_expect.push_back(rstate.getVariablePosition(joint_name));
       if (rstate.getVariablePosition(joint_name) > 0)
+      {
         ik_seed.push_back(rstate.getVariablePosition(joint_name) - IK_SEED_OFFSET);
+      }
       else
+      {
         ik_seed.push_back(rstate.getVariablePosition(joint_name) + IK_SEED_OFFSET);
+      }
     }
 
     std::vector<std::vector<double>> ik_solutions;
@@ -282,9 +298,13 @@ TEST_F(TrajectoryFunctionsTestFlangeAndGripper, testIKRobotState)
     {
       ik_expect[joint_name] = rstate.getVariablePosition(joint_name);
       if (rstate.getVariablePosition(joint_name) > 0)
+      {
         ik_seed[joint_name] = rstate.getVariablePosition(joint_name) - IK_SEED_OFFSET;
+      }
       else
+      {
         ik_seed[joint_name] = rstate.getVariablePosition(joint_name) + IK_SEED_OFFSET;
+      }
     }
 
     rstate.setVariablePositions(ik_seed);

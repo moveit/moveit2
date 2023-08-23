@@ -208,10 +208,16 @@ void MotionPlanningFrame::computeDatabaseConnectButtonClickedHelper(int mode)
 void MotionPlanningFrame::computeResetDbButtonClicked(const std::string& db)
 {
   if (db == "Constraints" && constraints_storage_)
+  {
     constraints_storage_->reset();
+  }
   else if (db == "Robot States" && robot_state_storage_)
+  {
     robot_state_storage_->reset();
+  }
   else if (db == "Planning Scenes")
+  {
     planning_scene_storage_->reset();
+  }
 }
 }  // namespace moveit_rviz_plugin

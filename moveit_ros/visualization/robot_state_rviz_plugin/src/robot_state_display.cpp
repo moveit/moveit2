@@ -304,7 +304,7 @@ void RobotStateDisplay::changedRobotStateTopic()
   setStatus(rviz_common::properties::StatusProperty::Warn, "RobotState", "No msg received");
 
   robot_state_subscriber_ = node_->create_subscription<moveit_msgs::msg::DisplayRobotState>(
-      robot_state_topic_property_->getStdString(), 10,
+      robot_state_topic_property_->getStdString(), rclcpp::SystemDefaultsQoS(),
       [this](const moveit_msgs::msg::DisplayRobotState::ConstSharedPtr& state) { return newRobotStateCallback(state); });
 }
 
@@ -334,9 +334,13 @@ void RobotStateDisplay::newRobotStateCallback(const moveit_msgs::msg::DisplayRob
   {
     robot_->setVisible(!state_msg->hide);
     if (robot_->isVisible())
+    {
       setStatus(rviz_common::properties::StatusProperty::Ok, "RobotState", "");
+    }
     else
+    {
       setStatus(rviz_common::properties::StatusProperty::Warn, "RobotState", "Hidden");
+    }
   }
 
   update_state_ = true;

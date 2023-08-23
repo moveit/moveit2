@@ -89,11 +89,11 @@ void IKCache::initializeCache(const std::string& robot_id, const std::string& gr
   {
     // read cache
     std::ifstream cache_file(cache_file_name_, std::ios_base::binary | std::ios_base::in);
-    cache_file.read((char*)&last_saved_cache_size_, sizeof(unsigned int));
+    cache_file.read(reinterpret_cast<char*>(&last_saved_cache_size_), sizeof(unsigned int));
     unsigned int num_dofs;
-    cache_file.read((char*)&num_dofs, sizeof(unsigned int));
+    cache_file.read(reinterpret_cast<char*>(&num_dofs), sizeof(unsigned int));
     unsigned int num_tips;
-    cache_file.read((char*)&num_tips, sizeof(unsigned int));
+    cache_file.read(reinterpret_cast<char*>(&num_tips), sizeof(unsigned int));
 
     RCLCPP_INFO(LOGGER, "Found %d IK solutions for a %d-dof system with %d end effectors in %s", last_saved_cache_size_,
                 num_dofs, num_tips, cache_file_name_.string().c_str());
@@ -232,10 +232,10 @@ void IKCache::saveCache() const
 
   // write number of IK entries and size of each configuration first
   last_saved_cache_size_ = ik_cache_.size();
-  cache_file.write((char*)&last_saved_cache_size_, sizeof(unsigned int));
+  cache_file.write(reinterpret_cast<char*>(&last_saved_cache_size_), sizeof(unsigned int));
   unsigned int sz = ik_cache_[0].second.size();
-  cache_file.write((char*)&sz, sizeof(unsigned int));
-  cache_file.write((char*)&num_tips, sizeof(unsigned int));
+  cache_file.write(reinterpret_cast<char*>(&sz), sizeof(unsigned int));
+  cache_file.write(reinterpret_cast<char*>(&num_tips), sizeof(unsigned int));
   for (const auto& entry : ik_cache_)
   {
     for (unsigned int i = 0; i < num_tips; ++i)
@@ -262,7 +262,7 @@ void IKCache::verifyCache(kdl_kinematics_plugin::KDLKinematicsPlugin& fk) const
     for (unsigned int i = 0; i < poses.size(); ++i)
       error += entry.first[i].distance(poses[i]);
     if (!poses.empty())
-      error /= (double)poses.size();
+      error /= static_cast<double>(poses.size());
     if (error > max_error)
       max_error = error;
     if (error > 1e-4)
@@ -302,7 +302,9 @@ const IKCache::IKEntry& IKCacheMap::getBestApproximateIKSolution(const std::vect
   auto key(getKey(fixed, active));
   auto it = find(key);
   if (it != end())
+  {
     return it->second->getBestApproximateIKSolution(poses);
+  }
   else
   {
     static IKEntry dummy = std::make_pair(poses, std::vector<double>(num_joints_, 0.));
@@ -317,7 +319,9 @@ void IKCacheMap::updateCache(const IKEntry& nearest, const std::vector<std::stri
   auto key(getKey(fixed, active));
   auto it = find(key);
   if (it != end())
+  {
     it->second->updateCache(nearest, poses, config);
+  }
   else
   {
     value_type val = std::make_pair(key, nullptr);

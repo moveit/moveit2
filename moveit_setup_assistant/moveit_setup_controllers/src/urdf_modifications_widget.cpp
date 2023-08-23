@@ -60,7 +60,7 @@ void UrdfModificationsWidget::onInit()
   content_widget_ = new QWidget(this);
   layout->addWidget(content_widget_);
 
-  this->setLayout(layout);
+  setLayout(layout);
 }
 
 QWidget* UrdfModificationsWidget::makeInterfacesBox(const std::string& interface_type,

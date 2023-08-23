@@ -75,13 +75,17 @@ PlanningSceneDisplay::PlanningSceneDisplay(bool listen_to_planning_scene, bool s
       this, SLOT(changedRobotDescription()), this);
 
   if (listen_to_planning_scene)
+  {
     planning_scene_topic_property_ = new rviz_common::properties::RosTopicProperty(
         "Planning Scene Topic", "/monitored_planning_scene",
         rosidl_generator_traits::data_type<moveit_msgs::msg::PlanningScene>(),
         "The topic on which the moveit_msgs::msg::PlanningScene messages are received", this,
         SLOT(changedPlanningSceneTopic()), this);
+  }
   else
+  {
     planning_scene_topic_property_ = nullptr;
+  }
 
   // Planning scene category -------------------------------------------------------------------------------------------
   scene_category_ = new rviz_common::properties::Property("Scene Geometry", QVariant(), "", this);
@@ -290,7 +294,9 @@ const std::string PlanningSceneDisplay::getMoveGroupNS() const
 const moveit::core::RobotModelConstPtr& PlanningSceneDisplay::getRobotModel() const
 {
   if (planning_scene_monitor_)
+  {
     return planning_scene_monitor_->getRobotModel();
+  }
   else
   {
     static moveit::core::RobotModelConstPtr empty;
@@ -398,9 +404,13 @@ void PlanningSceneDisplay::changedPlanningSceneTopic()
       service_name = rclcpp::names::append(getMoveGroupNS(), service_name);
     auto bg_func = [=]() {
       if (planning_scene_monitor_->requestPlanningSceneState(service_name))
+      {
         addMainLoopJob([this] { onNewPlanningSceneState(); });
+      }
       else
+      {
         setStatus(rviz_common::properties::StatusProperty::Warn, "PlanningScene", "Requesting initial scene failed");
+      }
     };
     addBackgroundJob(bg_func, "requestPlanningSceneState");
   }

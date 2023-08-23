@@ -34,7 +34,7 @@
 
 #pragma once
 
-#include "pilz_industrial_motion_planner/planning_context_loader.h"
+#include <pilz_industrial_motion_planner/planning_context_loader.h>
 
 #include <moveit/planning_interface/planning_interface.h>
 

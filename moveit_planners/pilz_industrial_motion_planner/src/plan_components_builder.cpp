@@ -32,11 +32,11 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#include "pilz_industrial_motion_planner/plan_components_builder.h"
+#include <pilz_industrial_motion_planner/plan_components_builder.h>
 
 #include <cassert>
 
-#include "pilz_industrial_motion_planner/tip_frame_getter.h"
+#include <pilz_industrial_motion_planner/tip_frame_getter.h>
 
 namespace pilz_industrial_motion_planner
 {

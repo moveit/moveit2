@@ -175,9 +175,11 @@ int PR2ArmIKSolver::cartToJntSearch(const KDL::JntArray& q_in, const KDL::Frame&
   int num_negative_increments = static_cast<int>(
       (initial_guess - pr2_arm_ik_.solver_info_.limits[free_angle_].min_position) / search_discretization_angle_);
   if (verbose)
+  {
     RCLCPP_WARN(LOGGER, "%f %f %f %d %d \n\n", initial_guess, pr2_arm_ik_.solver_info_.limits[free_angle_].max_position,
                 pr2_arm_ik_.solver_info_.limits[free_angle_].min_position, num_positive_increments,
                 num_negative_increments);
+  }
   while (loop_time < timeout)
   {
     if (CartToJnt(q_init, p_in, q_out) > 0)

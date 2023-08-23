@@ -20,8 +20,9 @@ ament_target_dependencies(moveit_display_random_state
 )
 
 add_executable(moveit_visualize_robot_collision_volume src/visualize_robot_collision_volume.cpp)
-target_link_libraries(moveit_visualize_robot_collision_volume moveit_planning_scene_monitor)
+target_link_libraries(moveit_visualize_robot_collision_volume PRIVATE moveit_planning_scene_monitor)
 ament_target_dependencies(moveit_visualize_robot_collision_volume
+    PUBLIC
     rclcpp
     tf2_ros
 )
@@ -43,8 +44,9 @@ if("${catkin_LIBRARIES}" MATCHES "moveit_collision_detection_bullet")
 endif()
 
 add_executable(moveit_publish_scene_from_text src/publish_scene_from_text.cpp)
-target_link_libraries(moveit_publish_scene_from_text moveit_planning_scene_monitor moveit_robot_model_loader)
+target_link_libraries(moveit_publish_scene_from_text PRIVATE moveit_planning_scene_monitor moveit_robot_model_loader)
 ament_target_dependencies(moveit_publish_scene_from_text
+    PUBLIC
     rclcpp
 )
 

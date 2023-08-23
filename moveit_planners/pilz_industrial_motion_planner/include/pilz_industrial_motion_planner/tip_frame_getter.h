@@ -39,7 +39,7 @@
 #include <string>
 #include <vector>
 
-#include "pilz_industrial_motion_planner/trajectory_generation_exceptions.h"
+#include <pilz_industrial_motion_planner/trajectory_generation_exceptions.h>
 
 namespace pilz_industrial_motion_planner
 {

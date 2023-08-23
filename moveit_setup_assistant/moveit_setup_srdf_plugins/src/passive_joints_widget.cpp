@@ -78,7 +78,7 @@ void PassiveJointsWidget::onInit()
   layout->addWidget(joints_widget_);
 
   // Finish Layout --------------------------------------------------
-  this->setLayout(layout);
+  setLayout(layout);
 }
 
 // ******************************************************************************************

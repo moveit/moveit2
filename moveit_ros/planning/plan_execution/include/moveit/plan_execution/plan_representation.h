@@ -48,40 +48,40 @@ struct ExecutableMotionPlan;
 /** \brief Representation of a trajectory that can be executed */
 struct ExecutableTrajectory
 {
-  ExecutableTrajectory() : trajectory_monitoring_(true)
+  ExecutableTrajectory() : trajectory_monitoring(true)
   {
   }
 
   ExecutableTrajectory(const robot_trajectory::RobotTrajectoryPtr& trajectory, const std::string& description,
                        std::vector<std::string> controller_names = {})
-    : trajectory_(trajectory)
-    , description_(description)
-    , trajectory_monitoring_(true)
-    , controller_names_(std::move(controller_names))
+    : trajectory(trajectory)
+    , description(description)
+    , trajectory_monitoring(true)
+    , controller_name(std::move(controller_names))
   {
   }
 
-  robot_trajectory::RobotTrajectoryPtr trajectory_;
-  std::string description_;
-  bool trajectory_monitoring_;
-  collision_detection::AllowedCollisionMatrixConstPtr allowed_collision_matrix_;
-  std::function<bool(const ExecutableMotionPlan*)> effect_on_success_;
-  std::vector<std::string> controller_names_;
+  robot_trajectory::RobotTrajectoryPtr trajectory;
+  std::string description;
+  bool trajectory_monitoring;
+  collision_detection::AllowedCollisionMatrixConstPtr allowed_collision_matrix;
+  std::function<bool(const ExecutableMotionPlan*)> effect_on_success;
+  std::vector<std::string> controller_name;
 };
 
 /// A generic representation on what a computed motion plan looks like
 struct ExecutableMotionPlan
 {
-  planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor_;
-  planning_scene::PlanningSceneConstPtr planning_scene_;
+  planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor;
+  planning_scene::PlanningSceneConstPtr planning_scene;
 
-  std::vector<ExecutableTrajectory> plan_components_;
+  std::vector<ExecutableTrajectory> plan_components;
 
   /// The trace of the trajectory recorded during execution
-  robot_trajectory::RobotTrajectoryPtr executed_trajectory_;
+  robot_trajectory::RobotTrajectoryPtr executed_trajectory;
 
   /// An error code reflecting what went wrong (if anything)
-  moveit_msgs::msg::MoveItErrorCodes error_code_;
+  moveit_msgs::msg::MoveItErrorCodes error_code;
 };
 
 /// The signature of a function that can compute a motion plan

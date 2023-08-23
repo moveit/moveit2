@@ -43,8 +43,8 @@
 #include <trajectory_msgs/msg/multi_dof_joint_trajectory.hpp>
 #include <moveit/planning_scene/planning_scene.h>
 
-#include "pilz_industrial_motion_planner/cartesian_trajectory.h"
-#include "pilz_industrial_motion_planner/limits_container.h"
+#include <pilz_industrial_motion_planner/cartesian_trajectory.h>
+#include <pilz_industrial_motion_planner/limits_container.h>
 
 namespace pilz_industrial_motion_planner
 {
@@ -81,10 +81,10 @@ bool computePoseIK(const planning_scene::PlanningSceneConstPtr& scene, const std
  * @param pose: pose of the link in base frame of robot model
  * @return true if succeed
  */
-bool computeLinkFK(const moveit::core::RobotModelConstPtr& robot_model, const std::string& link_name,
+bool computeLinkFK(const planning_scene::PlanningSceneConstPtr& scene, const std::string& link_name,
                    const std::map<std::string, double>& joint_state, Eigen::Isometry3d& pose);
 
-bool computeLinkFK(const moveit::core::RobotModelConstPtr& robot_model, const std::string& link_name,
+bool computeLinkFK(const planning_scene::PlanningSceneConstPtr& scene, const std::string& link_name,
                    const std::vector<std::string>& joint_names, const std::vector<double>& joint_positions,
                    Eigen::Isometry3d& pose);
 

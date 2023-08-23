@@ -38,12 +38,12 @@
 #include <memory>
 #include <string>
 
-#include "gmock/gmock.h"
-#include "gtest/gtest.h"
-#include "moveit/planning_scene_monitor/current_state_monitor.h"
-#include "moveit/utils/robot_model_test_utils.h"
-#include "rclcpp/rclcpp.hpp"
-#include "tf2_ros/buffer.h"
+#include <gmock/gmock.h>
+#include <gtest/gtest.h>
+#include <moveit/planning_scene_monitor/current_state_monitor.h>
+#include <moveit/utils/robot_model_test_utils.h>
+#include <rclcpp/rclcpp.hpp>
+#include <tf2_ros/buffer.h>
 
 struct MockMiddlewareHandle : public planning_scene_monitor::CurrentStateMonitor::MiddlewareHandle
 {
@@ -53,6 +53,7 @@ struct MockMiddlewareHandle : public planning_scene_monitor::CurrentStateMonitor
   MOCK_METHOD(void, resetJointStateSubscription, (), (override));
   MOCK_METHOD(std::string, getJointStateTopicName, (), (const, override));
   MOCK_METHOD(bool, sleepFor, (const std::chrono::nanoseconds& nanoseconds), (const, override));
+  MOCK_METHOD(bool, ok, (), (const, override));
   MOCK_METHOD(void, createStaticTfSubscription, (TfCallback callback), (override));
   MOCK_METHOD(void, createDynamicTfSubscription, (TfCallback callback), (override));
   MOCK_METHOD(std::string, getStaticTfTopicName, (), (const, override));

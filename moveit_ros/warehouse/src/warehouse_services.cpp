@@ -183,7 +183,9 @@ int main(int argc, char** argv)
   std::vector<std::string> names;
   rs.getKnownRobotStates(names);
   if (names.empty())
+  {
     RCLCPP_INFO(LOGGER, "There are no previously stored robot states");
+  }
   else
   {
     RCLCPP_INFO(LOGGER, "Previously stored robot states:");

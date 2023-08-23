@@ -113,12 +113,16 @@ bool KinematicsBase::setRedundantJoints(const std::vector<std::string>& redundan
   const std::vector<std::string>& jnames = getJointNames();
   std::vector<unsigned int> redundant_joint_indices;
   for (const std::string& redundant_joint_name : redundant_joint_names)
+  {
     for (std::size_t j = 0; j < jnames.size(); ++j)
+    {
       if (jnames[j] == redundant_joint_name)
       {
         redundant_joint_indices.push_back(j);
         break;
       }
+    }
+  }
   return redundant_joint_indices.size() == redundant_joint_names.size() ? setRedundantJoints(redundant_joint_indices) :
                                                                           false;
 }

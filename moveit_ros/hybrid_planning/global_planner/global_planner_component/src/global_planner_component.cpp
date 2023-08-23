@@ -35,7 +35,7 @@
 #include <moveit/global_planner/global_planner_component.h>
 #include <moveit/robot_state/robot_state.h>
 #include <moveit/robot_state/conversions.h>
-#include <moveit_msgs/msg/move_it_error_codes.h>
+#include <moveit_msgs/msg/move_it_error_codes.hpp>
 
 #include <chrono>
 #include <thread>

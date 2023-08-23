@@ -47,7 +47,7 @@
 #include <rclcpp/rclcpp.hpp>
 #endif
 
-#include "moveit_planning_scene_rviz_plugin_core_export.h"
+#include <moveit_planning_scene_rviz_plugin_core_export.h>
 
 namespace Ogre
 {

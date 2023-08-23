@@ -51,7 +51,7 @@
 #include <std_msgs/msg/float64.hpp>
 #include <std_msgs/msg/float64_multi_array.hpp>
 
-#include "trajectory_msgs/msg/joint_trajectory.hpp"
+#include <trajectory_msgs/msg/joint_trajectory.hpp>
 
 #include <moveit/planning_scene_monitor/planning_scene_monitor.h>
 #include <moveit/robot_model_loader/robot_model_loader.h>
@@ -71,9 +71,13 @@ void declareOrGetParam(const std::string& param_name, T& output_value, const T& 
   try
   {
     if (node->has_parameter(param_name))
+    {
       node->get_parameter<T>(param_name, output_value);
+    }
     else
+    {
       output_value = node->declare_parameter<T>(param_name, default_value);
+    }
   }
   catch (const rclcpp::exceptions::InvalidParameterTypeException& e)
   {

@@ -42,10 +42,10 @@
 #include <moveit/robot_model/robot_model.h>
 #include <moveit/robot_model_loader/robot_model_loader.h>
 
-#include "pilz_industrial_motion_planner/joint_limits_container.h"
-#include "pilz_industrial_motion_planner/planning_context_circ.h"
-#include "pilz_industrial_motion_planner/planning_context_lin.h"
-#include "pilz_industrial_motion_planner/planning_context_ptp.h"
+#include <pilz_industrial_motion_planner/joint_limits_container.h>
+#include <pilz_industrial_motion_planner/planning_context_circ.h>
+#include <pilz_industrial_motion_planner/planning_context_lin.h>
+#include <pilz_industrial_motion_planner/planning_context_ptp.h>
 
 #include "test_utils.h"
 
@@ -94,8 +94,8 @@ protected:
     node_ = rclcpp::Node::make_shared("unittest_planning_context", node_options);
 
     // load robot model
-    robot_model_loader::RobotModelLoader rm_loader(node_);
-    robot_model_ = rm_loader.getModel();
+    rm_loader_ = std::make_unique<robot_model_loader::RobotModelLoader>(node_);
+    robot_model_ = rm_loader_->getModel();
     ASSERT_FALSE(robot_model_ == nullptr) << "There is no robot model!";
 
     // get parameters
@@ -128,6 +128,11 @@ protected:
     current_state.setJointGroupPositions(planning_group_, std::vector<double>{ 0, 1.57, 1.57, 0, 0.2, 0 });
     scene->setCurrentState(current_state);
     planning_context_->setPlanningScene(scene);  // TODO Check what happens if this is missing
+  }
+
+  void TearDown() override
+  {
+    robot_model_.reset();
   }
 
   /**
@@ -185,6 +190,7 @@ protected:
   // ros stuff
   rclcpp::Node::SharedPtr node_;
   moveit::core::RobotModelConstPtr robot_model_;
+  std::unique_ptr<robot_model_loader::RobotModelLoader> rm_loader_;
 
   std::unique_ptr<planning_interface::PlanningContext> planning_context_;
 
@@ -204,7 +210,7 @@ TYPED_TEST(PlanningContextTest, NoRequest)
   bool result = this->planning_context_->solve(res);
 
   EXPECT_FALSE(result) << testutils::demangle(typeid(TypeParam).name());
-  EXPECT_EQ(moveit_msgs::msg::MoveItErrorCodes::INVALID_MOTION_PLAN, res.error_code_.val)
+  EXPECT_EQ(moveit_msgs::msg::MoveItErrorCodes::INVALID_MOTION_PLAN, res.error_code.val)
       << testutils::demangle(typeid(TypeParam).name());
 }
 
@@ -222,14 +228,14 @@ TYPED_TEST(PlanningContextTest, SolveValidRequest)
   bool result = this->planning_context_->solve(res);
 
   EXPECT_TRUE(result) << testutils::demangle(typeid(TypeParam).name());
-  EXPECT_EQ(moveit_msgs::msg::MoveItErrorCodes::SUCCESS, res.error_code_.val)
+  EXPECT_EQ(moveit_msgs::msg::MoveItErrorCodes::SUCCESS, res.error_code.val)
       << testutils::demangle(typeid(TypeParam).name());
 
   planning_interface::MotionPlanDetailedResponse res_detailed;
   bool result_detailed = this->planning_context_->solve(res_detailed);
 
   EXPECT_TRUE(result_detailed) << testutils::demangle(typeid(TypeParam).name());
-  EXPECT_EQ(moveit_msgs::msg::MoveItErrorCodes::SUCCESS, res.error_code_.val)
+  EXPECT_EQ(moveit_msgs::msg::MoveItErrorCodes::SUCCESS, res.error_code.val)
       << testutils::demangle(typeid(TypeParam).name());
 }
 
@@ -245,7 +251,7 @@ TYPED_TEST(PlanningContextTest, SolveValidRequestDetailedResponse)
   bool result = this->planning_context_->solve(res);
 
   EXPECT_TRUE(result) << testutils::demangle(typeid(TypeParam).name());
-  EXPECT_EQ(moveit_msgs::msg::MoveItErrorCodes::SUCCESS, res.error_code_.val)
+  EXPECT_EQ(moveit_msgs::msg::MoveItErrorCodes::SUCCESS, res.error_code.val)
       << testutils::demangle(typeid(TypeParam).name());
 }
 
@@ -265,7 +271,7 @@ TYPED_TEST(PlanningContextTest, SolveOnTerminated)
   bool result = this->planning_context_->solve(res);
   EXPECT_FALSE(result) << testutils::demangle(typeid(TypeParam).name());
 
-  EXPECT_EQ(moveit_msgs::msg::MoveItErrorCodes::PLANNING_FAILED, res.error_code_.val)
+  EXPECT_EQ(moveit_msgs::msg::MoveItErrorCodes::PLANNING_FAILED, res.error_code.val)
       << testutils::demangle(typeid(TypeParam).name());
 }
 

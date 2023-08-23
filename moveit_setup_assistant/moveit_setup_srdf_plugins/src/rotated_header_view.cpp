@@ -91,9 +91,13 @@ QSize RotatedHeaderView::sectionSizeFromContents(int logicalIndex) const
   QVariant var = model()->headerData(logicalIndex, orientation(), Qt::FontRole);
   QFont fnt;
   if (var.isValid() && var.canConvert<QFont>())
+  {
     fnt = qvariant_cast<QFont>(var);
+  }
   else
+  {
     fnt = font();
+  }
   fnt.setBold(true);
   opt.fontMetrics = QFontMetrics(fnt);
   opt.text = model()->headerData(logicalIndex, orientation(), Qt::DisplayRole).toString();
@@ -106,9 +110,13 @@ QSize RotatedHeaderView::sectionSizeFromContents(int logicalIndex) const
   {
     int margin = style()->pixelMetric(QStyle::PM_HeaderMargin, &opt, this);
     if (orientation() == Qt::Horizontal)
+    {
       size.rwidth() += size.height() + margin;
+    }
     else
+    {
       size.rheight() += size.width() + margin;
+    }
   }
   return QSize(size.height(), size.width());
 }
@@ -122,9 +130,13 @@ int RotatedHeaderView::sectionSizeHint(int logicalIndex) const
   QSize size;
   QVariant value = model()->headerData(logicalIndex, orientation(), Qt::SizeHintRole);
   if (value.isValid())
+  {
     size = qvariant_cast<QSize>(value);
+  }
   else
+  {
     size = sectionSizeFromContents(logicalIndex);
+  }
   int hint = size.height();
   return qMax(minimumSectionSize(), hint);
 }

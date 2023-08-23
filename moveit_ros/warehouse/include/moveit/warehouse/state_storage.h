@@ -40,7 +40,7 @@
 #include <moveit/macros/class_forward.h>
 #include <moveit_msgs/msg/robot_state.hpp>
 
-#include "moveit_warehouse_export.h"
+#include <moveit_warehouse_export.h>
 
 namespace moveit_warehouse
 {

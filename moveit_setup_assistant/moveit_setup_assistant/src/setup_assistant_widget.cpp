@@ -35,7 +35,7 @@
 /* Author: Dave Coleman */
 
 // SA
-#include "moveit_setup_assistant/setup_assistant_widget.hpp"
+#include <moveit_setup_assistant/setup_assistant_widget.hpp>
 
 // Qt
 #include <QApplication>
@@ -71,7 +71,7 @@ SetupAssistantWidget::SetupAssistantWidget(const rviz_common::ros_integration::R
 
   // Setting the window icon
   auto icon_path = getSharePath("moveit_ros_visualization") / "icons/classes/MotionPlanning.png";
-  this->setWindowIcon(QIcon(icon_path.c_str()));
+  setWindowIcon(QIcon(icon_path.c_str()));
 
   // Basic widget container -----------------------------------------
   QHBoxLayout* layout = new QHBoxLayout();
@@ -157,10 +157,10 @@ SetupAssistantWidget::SetupAssistantWidget(const rviz_common::ros_integration::R
   connect(navs_view_, SIGNAL(clicked(const QModelIndex&)), this, SLOT(navigationClicked(const QModelIndex&)));
 
   // Final Layout Setup ---------------------------------------------
-  this->setLayout(layout);
+  setLayout(layout);
 
   // Title
-  this->setWindowTitle("MoveIt Setup Assistant");  // title of window
+  setWindowTitle("MoveIt Setup Assistant");  // title of window
 
   // Show screen before message
   QApplication::processEvents();

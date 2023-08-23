@@ -1,11 +1,8 @@
 kinematics:
   kinematics_solver: {
     type: string,
-    default_value: kdl_kinematics_plugin/KDLKinematicsPlugin,
+    default_value: "",
     description: "Kinematics solver",
-    validation: {
-      not_empty<>: []
-    }
   }
   kinematics_solver_search_resolution: {
     type: double,

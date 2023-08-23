@@ -345,18 +345,24 @@ TYPED_TEST_P(DistanceFullPandaTest, DistancePoints)
     for (auto& pair : distance.second)
     {
       if (pair.link_names[0] == "box")
+      {
         check_in_box(pair.nearest_points[0]);
+      }
       else if (pair.link_names[1] == "box")
+      {
         check_in_box(pair.nearest_points[1]);
+      }
       else
+      {
         ADD_FAILURE() << "Unrecognized link names";
+      }
     }
   }
 }
 
-REGISTER_TYPED_TEST_CASE_P(CollisionDetectorPandaTest, InitOK, DefaultNotInCollision, LinksInCollision,
-                           RobotWorldCollision_1, RobotWorldCollision_2, PaddingTest, DistanceSelf, DistanceWorld);
+REGISTER_TYPED_TEST_SUITE_P(CollisionDetectorPandaTest, InitOK, DefaultNotInCollision, LinksInCollision,
+                            RobotWorldCollision_1, RobotWorldCollision_2, PaddingTest, DistanceSelf, DistanceWorld);
 
-REGISTER_TYPED_TEST_CASE_P(DistanceCheckPandaTest, DistanceSingle);
+REGISTER_TYPED_TEST_SUITE_P(DistanceCheckPandaTest, DistanceSingle);
 
-REGISTER_TYPED_TEST_CASE_P(DistanceFullPandaTest, DistancePoints);
+REGISTER_TYPED_TEST_SUITE_P(DistanceFullPandaTest, DistancePoints);

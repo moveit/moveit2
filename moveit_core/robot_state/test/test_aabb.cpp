@@ -51,8 +51,8 @@
 #endif
 
 #if VISUALIZE_PR2_RVIZ
-#include "rclcpp/rclcpp.hpp"
-#include <visualization_msgs/msg/marker.h>
+#include <rclcpp/rclcpp.hpp>
+#include <visualization_msgs/msg/marker.hpp>
 #include <geometric_shapes/shape_operations.h>
 #endif
 

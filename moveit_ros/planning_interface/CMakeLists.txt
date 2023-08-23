@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.22)
-project(moveit_ros_planning_interface)
+project(moveit_ros_planning_interface LANGUAGES CXX)
 
 # Common cmake code applied to all moveit packages
 find_package(moveit_common REQUIRED)
@@ -93,14 +93,14 @@ endif()
 
 install(
   TARGETS ${THIS_PACKAGE_LIBRARIES}
-  EXPORT ${PROJECT_NAME}Targets
+  EXPORT moveit_ros_planning_interfaceTargets
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
   RUNTIME DESTINATION bin
-  INCLUDES DESTINATION include
+  INCLUDES DESTINATION include/moveit_ros_planning_interface
 )
 
-ament_export_targets(${PROJECT_NAME}Targets HAS_LIBRARY_TARGET)
+ament_export_targets(moveit_ros_planning_interfaceTargets HAS_LIBRARY_TARGET)
 ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS})
 
 if(BUILD_TESTING)

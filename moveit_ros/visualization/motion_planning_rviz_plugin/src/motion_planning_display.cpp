@@ -65,10 +65,6 @@
 #include <moveit/robot_state/conversions.h>
 #include <moveit/trajectory_processing/trajectory_tools.h>
 
-#include <boost/format.hpp>
-#include <boost/algorithm/string/replace.hpp>
-#include <boost/algorithm/string/trim.hpp>
-
 #include <QShortcut>
 
 #include "ui_motion_planning_rviz_plugin_frame.h"
@@ -239,7 +235,7 @@ void MotionPlanningDisplay::onInitialize()
   rviz_common::WindowManagerInterface* window_context = context_->getWindowManager();
   frame_ = new MotionPlanningFrame(this, context_, window_context ? window_context->getParentWindow() : nullptr);
 
-  connect(frame_, SIGNAL(configChanged()), this->getModel(), SIGNAL(configChanged()));
+  connect(frame_, SIGNAL(configChanged()), getModel(), SIGNAL(configChanged()));
   resetStatusTextColor();
   addStatusText("Initialized.");
 
@@ -284,7 +280,7 @@ void MotionPlanningDisplay::toggleSelectPlanningGroupSubscription(bool enable)
   if (enable)
   {
     planning_group_sub_ = node_->create_subscription<std_msgs::msg::String>(
-        "/rviz/moveit/select_planning_group", 1,
+        "/rviz/moveit/select_planning_group", rclcpp::SystemDefaultsQoS(),
         [this](const std_msgs::msg::String::ConstSharedPtr& msg) { return selectPlanningGroupCallback(msg); });
   }
   else
@@ -311,7 +307,7 @@ void MotionPlanningDisplay::reset()
   // Planned Path Display
   trajectory_visual_->reset();
 
-  bool enabled = this->isEnabled();
+  bool enabled = isEnabled();
   frame_->disable();
   if (enabled)
   {
@@ -432,16 +428,19 @@ void MotionPlanningDisplay::changedMetricsTextHeight()
 void MotionPlanningDisplay::displayTable(const std::map<std::string, double>& values, const Ogre::ColourValue& color,
                                          const Ogre::Vector3& pos, const Ogre::Quaternion& orient)
 {
-  // the line we want to render
-  std::stringstream ss;
-  for (const std::pair<const std::string, double>& value : values)
-    ss << boost::format("%-10s %-4.2f") % value.first % value.second << '\n';
-
-  if (ss.str().empty())
+  if (values.empty())
   {
     text_to_display_->setVisible(false);
     return;
   }
+
+  // the line we want to render
+  std::stringstream ss;
+  ss.setf(std::ios_base::fixed);
+  ss.precision(2);
+
+  for (const auto& [label, value] : values)
+    ss << label << ':' << value << '\n';
 
   text_to_display_->setCaption(ss.str());
   text_to_display_->setColor(color);
@@ -486,8 +485,10 @@ void MotionPlanningDisplay::computeMetrics(bool start, const std::string& group,
 
   moveit::core::RobotStateConstPtr state = start ? getQueryStartState() : getQueryGoalState();
   for (const robot_interaction::EndEffectorInteraction& ee : eef)
+  {
     if (ee.parent_group == group)
       computeMetricsInternal(computed_metrics_[std::make_pair(start, group)], ee, *state, payload);
+  }
 }
 
 void MotionPlanningDisplay::computeMetricsInternal(std::map<std::string, double>& metrics,
@@ -519,7 +520,7 @@ void MotionPlanningDisplay::computeMetricsInternal(std::map<std::string, double>
       for (std::size_t i = 0; i < joint_torques.size(); ++i)
       {
         std::stringstream stream;
-        stream << "torque[" << i << "]";
+        stream << "torque[" << i << ']';
         metrics[stream.str()] = joint_torques[i];
       }
     }
@@ -582,7 +583,7 @@ void MotionPlanningDisplay::displayMetrics(bool start)
       for (size_t j = 0; j < nj; ++j)
       {
         std::stringstream stream;
-        stream << "torque[" << j << "]";
+        stream << "torque[" << j << ']';
         copyItemIfExists(metrics_table, text_table, stream.str());
       }
     }
@@ -590,8 +591,10 @@ void MotionPlanningDisplay::displayMetrics(bool start)
     const moveit::core::LinkModel* lm = nullptr;
     const moveit::core::JointModelGroup* jmg = getRobotModel()->getJointModelGroup(ee.parent_group);
     if (jmg)
+    {
       if (!jmg->getLinkModelNames().empty())
         lm = state->getLinkModel(jmg->getLinkModelNames().back());
+    }
     if (lm)
     {
       const Eigen::Vector3d& t = state->getGlobalLinkTransform(lm).translation();
@@ -600,9 +603,13 @@ void MotionPlanningDisplay::displayMetrics(bool start)
       position[2] = t.z() + 0.2;  // \todo this should be a param
     }
     if (start)
+    {
       displayTable(text_table, query_start_color_property_->getOgreColor(), position, ORIENTATION);
+    }
     else
+    {
       displayTable(text_table, query_goal_color_property_->getOgreColor(), position, ORIENTATION);
+    }
     text_display_for_start_ = start;
   }
 }
@@ -647,11 +654,13 @@ void MotionPlanningDisplay::drawQueryStartState()
           std::vector<std::string> outside_bounds;
           const std::vector<const moveit::core::JointModel*>& jmodels = jmg->getActiveJointModels();
           for (const moveit::core::JointModel* jmodel : jmodels)
+          {
             if (!state->satisfiesBounds(jmodel, jmodel->getMaximumExtent() * 1e-2))
             {
               outside_bounds.push_back(jmodel->getChildLinkModel()->getName());
               status_links_start_[outside_bounds.back()] = OUTSIDE_BOUNDS_LINK;
             }
+          }
           if (!outside_bounds.empty())
           {
             setStatusTextColor(query_start_color_property_->getColor());
@@ -767,11 +776,13 @@ void MotionPlanningDisplay::drawQueryGoalState()
           const std::vector<const moveit::core::JointModel*>& jmodels = jmg->getActiveJointModels();
           std::vector<std::string> outside_bounds;
           for (const moveit::core::JointModel* jmodel : jmodels)
+          {
             if (!state->satisfiesBounds(jmodel, jmodel->getMaximumExtent() * 1e-2))
             {
               outside_bounds.push_back(jmodel->getChildLinkModel()->getName());
               status_links_goal_[outside_bounds.back()] = OUTSIDE_BOUNDS_LINK;
             }
+          }
 
           if (!outside_bounds.empty())
           {
@@ -988,19 +999,31 @@ void MotionPlanningDisplay::updateLinkColors()
 
     for (std::map<std::string, LinkDisplayStatus>::const_iterator it = status_links_start_.begin();
          it != status_links_start_.end(); ++it)
+    {
       if (it->second == COLLISION_LINK)
+      {
         setLinkColor(&query_robot_start_->getRobot(), it->first, query_colliding_link_color_property_->getColor());
+      }
       else
+      {
         setLinkColor(&query_robot_start_->getRobot(), it->first,
                      query_outside_joint_limits_link_color_property_->getColor());
+      }
+    }
 
     for (std::map<std::string, LinkDisplayStatus>::const_iterator it = status_links_goal_.begin();
          it != status_links_goal_.end(); ++it)
+    {
       if (it->second == COLLISION_LINK)
+      {
         setLinkColor(&query_robot_goal_->getRobot(), it->first, query_colliding_link_color_property_->getColor());
+      }
       else
+      {
         setLinkColor(&query_robot_goal_->getRobot(), it->first,
                      query_outside_joint_limits_link_color_property_->getColor());
+      }
+    }
   }
 }
 
@@ -1177,8 +1200,10 @@ void MotionPlanningDisplay::onRobotModelLoaded()
   query_goal_state_->setMenuHandler(menu_handler_goal_);
 
   if (!planning_group_property_->getStdString().empty())
+  {
     if (!getRobotModel()->hasJointModelGroup(planning_group_property_->getStdString()))
       planning_group_property_->setStdString("");
+  }
 
   const std::vector<std::string>& groups = getRobotModel()->getJointModelGroupNames();
   planning_group_property_->clearOptions();
@@ -1198,9 +1223,13 @@ void MotionPlanningDisplay::onRobotModelLoaded()
 
   dynamics_solver_.clear();
   for (const std::string& group : groups)
+  {
     if (getRobotModel()->getJointModelGroup(group)->isChain())
+    {
       dynamics_solver_[group] =
           std::make_shared<dynamics_solver::DynamicsSolver>(getRobotModel(), group, gravity_vector);
+    }
+  }
 
   if (frame_)
     frame_->fillPlanningGroupOptions();
@@ -1423,8 +1452,10 @@ void MotionPlanningDisplay::fixedFrameChanged()
     int_marker_display_->setFixedFrame(fixed_frame_);
   // When the fixed frame changes we need to tell RViz to update the rendered interactive marker display
   if (frame_ && frame_->scene_marker_)
+  {
     frame_->scene_marker_->requestPoseUpdate(frame_->scene_marker_->getPosition(),
                                              frame_->scene_marker_->getOrientation());
+  }
   changedPlanningGroup();
 }
 

@@ -159,8 +159,8 @@ bool MotionPlanningFrame::computeCartesianPlan()
 
     // Store trajectory in current_plan_
     current_plan_ = std::make_shared<moveit::planning_interface::MoveGroupInterface::Plan>();
-    rt.getRobotTrajectoryMsg(current_plan_->trajectory_);
-    current_plan_->planning_time_ = (rclcpp::Clock().now() - start).seconds();
+    rt.getRobotTrajectoryMsg(current_plan_->trajectory);
+    current_plan_->planning_time = (rclcpp::Clock().now() - start).seconds();
     return success;
   }
   return false;
@@ -189,7 +189,7 @@ void MotionPlanningFrame::computePlanButtonClicked()
   if (success)
   {
     ui_->execute_button->setEnabled(true);
-    ui_->result_label->setText(QString("Time: ").append(QString::number(current_plan_->planning_time_, 'f', 3)));
+    ui_->result_label->setText(QString("Time: ").append(QString::number(current_plan_->planning_time, 'f', 3)));
   }
   else
   {
@@ -246,9 +246,13 @@ void MotionPlanningFrame::onFinishedExecution(bool success)
 {
   // visualize result of execution
   if (success)
+  {
     ui_->result_label->setText("Executed");
+  }
   else
+  {
     ui_->result_label->setText(!ui_->stop_button->isEnabled() ? "Stopped" : "Failed");
+  }
   // disable stop button
   ui_->stop_button->setEnabled(false);
 
@@ -431,7 +435,9 @@ void MotionPlanningFrame::populatePlannerDescription(const moveit_msgs::msg::Pla
     {
       RCLCPP_DEBUG(LOGGER, "planner id: %s", planner_id.c_str());
       if (planner_id == group)
+      {
         found_group = true;
+      }
       else if (planner_id.substr(0, group.length()) == group)
       {
         if (planner_id.size() > group.length() && planner_id[group.length()] == '[')
@@ -447,8 +453,10 @@ void MotionPlanningFrame::populatePlannerDescription(const moveit_msgs::msg::Pla
     }
   }
   if (ui_->planning_algorithm_combo_box->count() == 0 && !found_group)
+  {
     for (const std::string& planner_id : desc.planner_ids)
       ui_->planning_algorithm_combo_box->addItem(QString::fromStdString(planner_id));
+  }
 
   ui_->planning_algorithm_combo_box->insertItem(0, "<unspecified>");
 
@@ -515,8 +523,10 @@ void MotionPlanningFrame::configureWorkspace()
   bz.max_position_ = ui_->wcenter_z->value() + ui_->wsize_z->value() / 2.0;
 
   if (move_group_)
+  {
     move_group_->setWorkspace(bx.min_position_, by.min_position_, bz.min_position_, bx.max_position_, by.max_position_,
                               bz.max_position_);
+  }
   planning_scene_monitor::PlanningSceneMonitorPtr psm = planning_display_->getPlanningSceneMonitor();
   // get non-const access to the robot_model and update planar & floating joints as indicated by the workspace settings
   if (psm && psm->getRobotModelLoader() && psm->getRobotModelLoader()->getModel())
@@ -524,6 +534,7 @@ void MotionPlanningFrame::configureWorkspace()
     const moveit::core::RobotModelPtr& robot_model = psm->getRobotModelLoader()->getModel();
     const std::vector<moveit::core::JointModel*>& jm = robot_model->getJointModels();
     for (moveit::core::JointModel* joint : jm)
+    {
       if (joint->getType() == moveit::core::JointModel::PLANAR)
       {
         joint->setVariableBounds(joint->getName() + "/" + joint->getLocalVariableNames()[0], bx);
@@ -535,6 +546,7 @@ void MotionPlanningFrame::configureWorkspace()
         joint->setVariableBounds(joint->getName() + "/" + joint->getLocalVariableNames()[1], by);
         joint->setVariableBounds(joint->getName() + "/" + joint->getLocalVariableNames()[2], bz);
       }
+    }
   }
 }
 

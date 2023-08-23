@@ -230,7 +230,7 @@ protected:
 
     for (std::size_t i = 0; i < num_dofs_; ++i)
     {
-      EXPECT_EQ(joint_limits[i]->size(), (unsigned int)1);
+      EXPECT_EQ(joint_limits[i]->size(), 1u);
       bounds.setLow(i, joint_limits[i]->at(0).min_position_);
       bounds.setHigh(i, joint_limits[i]->at(0).max_position_);
     }

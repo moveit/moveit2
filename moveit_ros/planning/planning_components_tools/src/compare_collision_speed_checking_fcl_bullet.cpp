@@ -221,7 +221,7 @@ void runCollisionDetection(unsigned int trials, const planning_scene::PlanningSc
     }
   }
   double duration = (ros::WallTime::now() - start).toSec();
-  ROS_INFO("Performed %lf collision checks per second", (double)trials * states.size() / duration);
+  ROS_INFO("Performed %lf collision checks per second", static_cast<double>(trials) * states.size() / duration);
   ROS_INFO_STREAM("Total number was " << trials * states.size() << " checks.");
   ROS_INFO_STREAM("We had " << states.size() << " different robot states which were "
                             << (res.collision ? "in collision " : "not in collision ") << "with " << res.contact_count);

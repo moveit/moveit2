@@ -483,16 +483,22 @@ void DistanceField::getProjectionPlanes(const std::string& frame_id, const rclcp
 
   // Initialize
   for (int y = 0; y < max_y_cell; ++y)
+  {
     for (int x = 0; x < max_x_cell; ++x)
       z_projection[x + y * max_x_cell] = initial_val;
+  }
 
   for (int z = 0; z < max_z_cell; ++z)
+  {
     for (int y = 0; y < max_y_cell; ++y)
       x_projection[y + z * max_y_cell] = initial_val;
+  }
 
   for (int z = 0; z < max_z_cell; ++z)
+  {
     for (int x = 0; x < max_x_cell; ++x)
       y_projection[x + z * max_x_cell] = initial_val;
+  }
 
   // Calculate projections
   for (int z = 0; z < max_z_cell; ++z)

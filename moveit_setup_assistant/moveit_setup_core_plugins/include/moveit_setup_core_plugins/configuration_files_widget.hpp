@@ -37,8 +37,8 @@
 #pragma once
 
 #include <moveit_setup_core_plugins/configuration_files.hpp>
-#include "moveit_setup_framework/qt/setup_step_widget.hpp"
-#include "moveit_setup_framework/qt/helper_widgets.hpp"
+#include <moveit_setup_framework/qt/setup_step_widget.hpp>
+#include <moveit_setup_framework/qt/helper_widgets.hpp>
 
 #include <QList>
 #include <QLabel>

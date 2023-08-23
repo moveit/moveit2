@@ -32,7 +32,7 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#include "pilz_industrial_motion_planner/command_list_manager.h"
+#include <pilz_industrial_motion_planner/command_list_manager.h>
 
 #include <rclcpp/logger.hpp>
 #include <rclcpp/logging.hpp>
@@ -44,10 +44,10 @@
 #include <moveit/robot_state/conversions.h>
 
 #include "cartesian_limits_parameters.hpp"
-#include "pilz_industrial_motion_planner/joint_limits_aggregator.h"
-#include "pilz_industrial_motion_planner/tip_frame_getter.h"
-#include "pilz_industrial_motion_planner/trajectory_blend_request.h"
-#include "pilz_industrial_motion_planner/trajectory_blender_transition_window.h"
+#include <pilz_industrial_motion_planner/joint_limits_aggregator.h>
+#include <pilz_industrial_motion_planner/tip_frame_getter.h>
+#include <pilz_industrial_motion_planner/trajectory_blend_request.h>
+#include <pilz_industrial_motion_planner/trajectory_blender_transition_window.h>
 
 namespace pilz_industrial_motion_planner
 {
@@ -99,7 +99,7 @@ RobotTrajCont CommandListManager::solve(const planning_scene::PlanningSceneConst
   plan_comp_builder_.reset();
   for (MotionResponseCont::size_type i = 0; i < resp_cont.size(); ++i)
   {
-    plan_comp_builder_.append(planning_scene, resp_cont.at(i).trajectory_,
+    plan_comp_builder_.append(planning_scene, resp_cont.at(i).trajectory,
                               // The blend radii has to be "attached" to
                               // the second part of a blend trajectory,
                               // therefore: "i-1".
@@ -144,7 +144,7 @@ void CommandListManager::checkForOverlappingRadii(const MotionResponseCont& resp
 
   for (MotionResponseCont::size_type i = 0; i < resp_cont.size() - 2; ++i)
   {
-    if (checkRadiiForOverlap(*(resp_cont.at(i).trajectory_), radii.at(i), *(resp_cont.at(i + 1).trajectory_),
+    if (checkRadiiForOverlap(*(resp_cont.at(i).trajectory), radii.at(i), *(resp_cont.at(i + 1).trajectory),
                              radii.at(i + 1)))
     {
       std::ostringstream os;
@@ -160,9 +160,9 @@ CommandListManager::getPreviousEndState(const MotionResponseCont& motion_plan_re
   for (MotionResponseCont::const_reverse_iterator it = motion_plan_responses.crbegin();
        it != motion_plan_responses.crend(); ++it)
   {
-    if (it->trajectory_->getGroupName() == group_name)
+    if (it->trajectory->getGroupName() == group_name)
     {
-      return std::reference_wrapper(it->trajectory_->getLastWayPoint());
+      return std::reference_wrapper(it->trajectory->getLastWayPoint());
     }
   }
   return {};
@@ -240,14 +240,14 @@ CommandListManager::solveSequenceItems(const planning_scene::PlanningSceneConstP
 
     planning_interface::MotionPlanResponse res;
     planning_pipeline->generatePlan(planning_scene, req, res);
-    if (res.error_code_.val != res.error_code_.SUCCESS)
+    if (res.error_code.val != res.error_code.SUCCESS)
     {
       std::ostringstream os;
       os << "Could not solve request\n";  // TODO(henning): re-enable "---\n" << req << "\n---\n";
-      throw PlanningPipelineException(os.str(), res.error_code_.val);
+      throw PlanningPipelineException(os.str(), res.error_code.val);
     }
     motion_plan_responses.emplace_back(res);
-    RCLCPP_DEBUG_STREAM(LOGGER, "Solved [" << ++curr_req_index << "/" << num_req << "]");
+    RCLCPP_DEBUG_STREAM(LOGGER, "Solved [" << ++curr_req_index << '/' << num_req << ']');
   }
   return motion_plan_responses;
 }

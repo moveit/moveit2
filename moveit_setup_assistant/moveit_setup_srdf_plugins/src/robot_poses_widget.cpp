@@ -87,7 +87,7 @@ void RobotPosesWidget::onInit()
   layout->addWidget(stacked_widget_);
 
   // Finish Layout --------------------------------------------------
-  this->setLayout(layout);
+  setLayout(layout);
 }
 
 // ******************************************************************************************
@@ -761,10 +761,10 @@ SliderWidget::SliderWidget(QWidget* parent, const moveit::core::JointModel* join
   // Finish GUI ----------------------------------------
   layout->addLayout(row2);
 
-  this->setContentsMargins(0, 0, 0, 0);
-  // this->setSizePolicy( QSizePolicy::Expanding, QSizePolicy::Preferred );
-  this->setGeometry(QRect(110, 80, 120, 80));
-  this->setLayout(layout);
+  setContentsMargins(0, 0, 0, 0);
+  // setSizePolicy( QSizePolicy::Expanding, QSizePolicy::Preferred );
+  setGeometry(QRect(110, 80, 120, 80));
+  setLayout(layout);
 
   // Declare std::string as metatype so we can use it in a signal
   qRegisterMetaType<std::string>("std::string");

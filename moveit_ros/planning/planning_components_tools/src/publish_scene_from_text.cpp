@@ -41,7 +41,12 @@
 #include <rclcpp/logging.hpp>
 #include <rclcpp/node.hpp>
 #include <rclcpp/publisher.hpp>
+#include <rclcpp/version.h>
+#if RCLCPP_VERSION_GTE(20, 0, 0)
+#include <rclcpp/event_handler.hpp>
+#else
 #include <rclcpp/qos_event.hpp>
+#endif
 #include <rclcpp/utilities.hpp>
 
 using namespace std::chrono_literals;
@@ -58,11 +63,13 @@ int main(int argc, char** argv)
   // the index of the argument with the filename
   int filename_index = 1;
   if (argc > 2)
+  {
     if (strncmp(argv[1], "--scene", 7) == 0)
     {
       full_scene = true;
       filename_index = 2;
     }
+  }
 
   if (argc > 1)
   {
@@ -73,15 +80,19 @@ int main(int argc, char** argv)
     rclcpp::Publisher<moveit_msgs::msg::PlanningSceneWorld>::SharedPtr pub_world_scene;
 
     if (full_scene)
+    {
       pub_scene = node->create_publisher<moveit_msgs::msg::PlanningScene>(
           planning_scene_monitor::PlanningSceneMonitor::DEFAULT_PLANNING_SCENE_TOPIC, 1);
+    }
     else
+    {
       pub_world_scene = node->create_publisher<moveit_msgs::msg::PlanningSceneWorld>(
           planning_scene_monitor::PlanningSceneMonitor::DEFAULT_PLANNING_SCENE_WORLD_TOPIC, 1);
+    }
 
     robot_model_loader::RobotModelLoader::Options opt;
-    opt.robot_description_ = "robot_description";
-    opt.load_kinematics_solvers_ = false;
+    opt.robot_description = "robot_description";
+    opt.load_kinematics_solvers = false;
 
     auto rml = std::make_shared<robot_model_loader::RobotModelLoader>(node, opt);
     planning_scene::PlanningScene ps(rml->getModel());
@@ -99,17 +110,23 @@ int main(int argc, char** argv)
         rclcpp::sleep_for(500ms);
 
       if (full_scene)
+      {
         pub_scene->publish(ps_msg);
+      }
       else
+      {
         pub_world_scene->publish(ps_msg.world);
+      }
 
       rclcpp::sleep_for(1s);
     }
   }
   else
+  {
     RCLCPP_WARN(LOGGER,
                 "A filename was expected as argument. That file should be a text representation of the geometry in a "
                 "planning scene.");
+  }
 
   rclcpp::shutdown();
   return 0;

@@ -90,11 +90,13 @@ point_containment_filter::ShapeHandle point_containment_filter::ShapeMask::addSh
   ShapeHandle ret = next_handle_;
   const std::size_t sz = min_handle_ + bodies_.size() + 1;
   for (std::size_t i = min_handle_; i < sz; ++i)
+  {
     if (used_handles_.find(i) == used_handles_.end())
     {
       next_handle_ = i;
       break;
     }
+  }
   min_handle_ = next_handle_;
 
   return ret;
@@ -125,7 +127,9 @@ void point_containment_filter::ShapeMask::maskContainment(const sensor_msgs::msg
   mask.resize(np);
 
   if (bodies_.empty())
+  {
     std::fill(mask.begin(), mask.end(), static_cast<int>(OUTSIDE));
+  }
   else
   {
     Eigen::Isometry3d tmp;
@@ -136,10 +140,14 @@ void point_containment_filter::ShapeMask::maskContainment(const sensor_msgs::msg
       if (!transform_callback_(it->handle, tmp))
       {
         if (!it->body)
+        {
           RCLCPP_ERROR_STREAM(LOGGER, "Missing transform for shape with handle " << it->handle << " without a body");
+        }
         else
+        {
           RCLCPP_ERROR_STREAM(LOGGER,
                               "Missing transform for shape " << it->body->getType() << " with handle " << it->handle);
+        }
       }
       else
       {
@@ -167,11 +175,17 @@ void point_containment_filter::ShapeMask::maskContainment(const sensor_msgs::msg
       double d = pt.norm();
       int out = OUTSIDE;
       if (d < min_sensor_dist || d > max_sensor_dist)
+      {
         out = CLIP;
+      }
       else if ((bound.center - pt).squaredNorm() < radius_squared)
+      {
         for (std::set<SeeShape>::const_iterator it = bodies_.begin(); it != bodies_.end() && out == OUTSIDE; ++it)
+        {
           if (it->body->containsPoint(pt))
             out = INSIDE;
+        }
+      }
       mask[i] = out;
     }
   }
@@ -183,8 +197,10 @@ int point_containment_filter::ShapeMask::getMaskContainment(const Eigen::Vector3
 
   int out = OUTSIDE;
   for (std::set<SeeShape>::const_iterator it = bodies_.begin(); it != bodies_.end() && out == OUTSIDE; ++it)
+  {
     if (it->body->containsPoint(pt))
       out = INSIDE;
+  }
   return out;
 }
 

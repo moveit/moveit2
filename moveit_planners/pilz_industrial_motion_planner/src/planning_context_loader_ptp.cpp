@@ -32,9 +32,9 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#include "pilz_industrial_motion_planner/planning_context_loader_ptp.h"
-#include "moveit/planning_scene/planning_scene.h"
-#include "pilz_industrial_motion_planner/planning_context_ptp.h"
+#include <pilz_industrial_motion_planner/planning_context_loader_ptp.h>
+#include <moveit/planning_scene/planning_scene.h>
+#include <pilz_industrial_motion_planner/planning_context_ptp.h>
 
 #include <pluginlib/class_list_macros.hpp>
 

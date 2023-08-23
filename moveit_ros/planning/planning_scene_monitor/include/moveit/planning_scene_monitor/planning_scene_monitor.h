@@ -52,7 +52,7 @@
 #include <mutex>
 #include <thread>
 
-#include "moveit_planning_scene_monitor_export.h"
+#include <moveit_planning_scene_monitor_export.h>
 
 namespace planning_scene_monitor
 {
@@ -340,9 +340,13 @@ public:
   double getStateUpdateFrequency() const
   {
     if (dt_state_update_.count() > 0.0)
+    {
       return 1.0 / dt_state_update_.count();
+    }
     else
+    {
       return 0.0;
+    }
   }
 
   /** @brief Start the scene monitor (ROS topic-based)
@@ -693,16 +697,24 @@ protected:
       : planning_scene_monitor_(planning_scene_monitor), read_only_(read_only)
     {
       if (read_only)
+      {
         planning_scene_monitor_->lockSceneRead();
+      }
       else
+      {
         planning_scene_monitor_->lockSceneWrite();
+      }
     }
     ~SingleUnlock()
     {
       if (read_only_)
+      {
         planning_scene_monitor_->unlockSceneRead();
+      }
       else
+      {
         planning_scene_monitor_->unlockSceneWrite();
+      }
     }
     PlanningSceneMonitor* planning_scene_monitor_;
     bool read_only_;

@@ -58,7 +58,7 @@ TEST_F(CHOMPMoveitTest, jointSpaceGoodGoal)
   move_group_.setJointValueTarget(std::vector<double>({ 1.0, 1.0 }));
 
   moveit::core::MoveItErrorCode error_code = move_group_.plan(my_plan_);
-  EXPECT_GT(my_plan_.trajectory_.joint_trajectory.points.size(), 0u);
+  EXPECT_GT(my_plan_.trajectory.joint_trajectory.points.size(), 0u);
   EXPECT_EQ(error_code.val, moveit::core::MoveItErrorCode::SUCCESS);
 }
 

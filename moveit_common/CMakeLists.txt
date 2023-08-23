@@ -14,5 +14,5 @@ ament_package(
 
 install(
   DIRECTORY cmake
-  DESTINATION share/${PROJECT_NAME}
+  DESTINATION share/moveit_common
 )

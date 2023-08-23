@@ -34,7 +34,7 @@
 
 #pragma once
 
-#include "pilz_industrial_motion_planner/joint_limits_extension.h"
+#include <pilz_industrial_motion_planner/joint_limits_extension.h>
 
 #include <map>
 #include <vector>

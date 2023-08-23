@@ -50,8 +50,10 @@ ConstraintSamplerPtr ConstraintSamplerManager::selectSampler(const planning_scen
                                                              const moveit_msgs::msg::Constraints& constr) const
 {
   for (const ConstraintSamplerAllocatorPtr& sampler : sampler_alloc_)
+  {
     if (sampler->canService(scene, group_name, constr))
       return sampler->alloc(scene, group_name, constr);
+  }
 
   // if no default sampler was used, try a default one
   return selectDefaultSampler(scene, group_name, constr);
@@ -100,11 +102,13 @@ ConstraintSamplerPtr ConstraintSamplerManager::selectDefaultSampler(const planni
     // check if every joint is covered (constrained) by just joint samplers
     bool full_coverage = true;
     for (const std::pair<const std::string, bool>& it : joint_coverage)
+    {
       if (!it.second)
       {
         full_coverage = false;
         break;
       }
+    }
 
     // if we have constrained every joint, then we just use a sampler using these constraints
     if (full_coverage)
@@ -117,20 +121,20 @@ ConstraintSamplerPtr ConstraintSamplerManager::selectDefaultSampler(const planni
       }
     }
     else
-        // if a smaller set of joints has been specified, keep the constraint sampler around, but use it only if no IK
-        // sampler has been specified.
-        if (!jc.empty())
-    {
-      JointConstraintSamplerPtr sampler = std::make_shared<JointConstraintSampler>(scene, jmg->getName());
-      if (sampler->configure(jc))
+      // if a smaller set of joints has been specified, keep the constraint sampler around, but use it only if no IK
+      // sampler has been specified.
+      if (!jc.empty())
       {
-        RCLCPP_DEBUG(LOGGER,
-                     "Temporary sampler satisfying joint constraints for group '%s' allocated. "
-                     "Looking for different types of constraints before returning though.",
-                     jmg->getName().c_str());
-        joint_sampler = sampler;
+        JointConstraintSamplerPtr sampler = std::make_shared<JointConstraintSampler>(scene, jmg->getName());
+        if (sampler->configure(jc))
+        {
+          RCLCPP_DEBUG(LOGGER,
+                       "Temporary sampler satisfying joint constraints for group '%s' allocated. "
+                       "Looking for different types of constraints before returning though.",
+                       jmg->getName().c_str());
+          joint_sampler = sampler;
+        }
       }
-    }
   }
 
   std::vector<ConstraintSamplerPtr> samplers;
@@ -158,7 +162,9 @@ ConstraintSamplerPtr ConstraintSamplerManager::selectDefaultSampler(const planni
     // if there are multiple constraints for the same link, we keep the one with the smallest
     // volume for sampling
     for (std::size_t p = 0; p < constr.position_constraints.size(); ++p)
+    {
       for (std::size_t o = 0; o < constr.orientation_constraints.size(); ++o)
+      {
         if (constr.position_constraints[p].link_name == constr.orientation_constraints[o].link_name)
         {
           kinematic_constraints::PositionConstraintPtr pc(
@@ -174,9 +180,11 @@ ConstraintSamplerPtr ConstraintSamplerManager::selectDefaultSampler(const planni
               bool use = true;
               // Check if there already is a constraint on this link
               if (used_l.find(constr.position_constraints[p].link_name) != used_l.end())
+              {
                 // If there is, check if the previous one has a smaller volume for sampling
                 if (used_l[constr.position_constraints[p].link_name]->getSamplingVolume() < iks->getSamplingVolume())
                   use = false;  // only use new constraint if it has a smaller sampling volume
+              }
               if (use)
               {
                 // assign the link to a new constraint sampler
@@ -189,6 +197,8 @@ ConstraintSamplerPtr ConstraintSamplerManager::selectDefaultSampler(const planni
             }
           }
         }
+      }
+    }
 
     // keep track of links constrained with a full pose
     std::map<std::string, IKConstraintSamplerPtr> used_l_full_pose = used_l;
@@ -209,8 +219,10 @@ ConstraintSamplerPtr ConstraintSamplerManager::selectDefaultSampler(const planni
         {
           bool use = true;
           if (used_l.find(position_constraint.link_name) != used_l.end())
+          {
             if (used_l[position_constraint.link_name]->getSamplingVolume() < iks->getSamplingVolume())
               use = false;
+          }
           if (use)
           {
             used_l[position_constraint.link_name] = iks;
@@ -239,8 +251,10 @@ ConstraintSamplerPtr ConstraintSamplerManager::selectDefaultSampler(const planni
         {
           bool use = true;
           if (used_l.find(orientation_constraint.link_name) != used_l.end())
+          {
             if (used_l[orientation_constraint.link_name]->getSamplingVolume() < iks->getSamplingVolume())
               use = false;
+          }
           if (use)
           {
             used_l[orientation_constraint.link_name] = iks;
@@ -256,7 +270,9 @@ ConstraintSamplerPtr ConstraintSamplerManager::selectDefaultSampler(const planni
     if (used_l.size() == 1)
     {
       if (samplers.empty())
+      {
         return used_l.begin()->second;
+      }
       else
       {
         samplers.push_back(used_l.begin()->second);
@@ -309,20 +325,28 @@ ConstraintSamplerPtr ConstraintSamplerManager::selectDefaultSampler(const planni
       // construct a sub-set of constraints that operate on the sub-group for which we have an IK allocator
       moveit_msgs::msg::Constraints sub_constr;
       for (std::size_t p = 0; p < constr.position_constraints.size(); ++p)
+      {
         if (it->first->hasLinkModel(constr.position_constraints[p].link_name))
+        {
           if (used_p.find(p) == used_p.end())
           {
             sub_constr.position_constraints.push_back(constr.position_constraints[p]);
             used_p.insert(p);
           }
+        }
+      }
 
       for (std::size_t o = 0; o < constr.orientation_constraints.size(); ++o)
+      {
         if (it->first->hasLinkModel(constr.orientation_constraints[o].link_name))
+        {
           if (used_o.find(o) == used_o.end())
           {
             sub_constr.orientation_constraints.push_back(constr.orientation_constraints[o]);
             used_o.insert(o);
           }
+        }
+      }
 
       // if some matching constraints were found, construct the allocator
       if (!sub_constr.orientation_constraints.empty() || !sub_constr.position_constraints.empty())

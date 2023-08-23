@@ -101,9 +101,13 @@ public:
   void set(const std::string& id, World::Action val)
   {
     if (val)
+    {
       changes_[id] = val;
+    }
     else
+    {
       changes_.erase(id);
+    }
   }
 
   /** \brief Clear the internally maintained vector of changes */

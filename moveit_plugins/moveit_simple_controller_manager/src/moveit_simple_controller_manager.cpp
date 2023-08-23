@@ -117,7 +117,7 @@ public:
         if (!node_->get_parameter(action_ns_param, action_ns))
         {
           RCLCPP_ERROR_STREAM(LOGGER, "No action namespace specified for controller `"
-                                          << controller_name << "` through parameter `" << action_ns_param << "`");
+                                          << controller_name << "` through parameter `" << action_ns_param << '`');
           continue;
         }
 
@@ -216,9 +216,13 @@ public:
   {
     std::map<std::string, ActionBasedControllerHandleBasePtr>::const_iterator it = controllers_.find(name);
     if (it != controllers_.end())
+    {
       return static_cast<moveit_controller_manager::MoveItControllerHandlePtr>(it->second);
+    }
     else
+    {
       RCLCPP_FATAL_STREAM(LOGGER, "No such controller: " << name);
+    }
     return moveit_controller_manager::MoveItControllerHandlePtr();
   }
 

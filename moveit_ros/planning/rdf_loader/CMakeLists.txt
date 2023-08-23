@@ -1,15 +1,13 @@
-set(MOVEIT_LIB_NAME moveit_rdf_loader)
-
-add_library(${MOVEIT_LIB_NAME} SHARED src/rdf_loader.cpp src/synchronized_string_parameter.cpp)
-set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
-ament_target_dependencies(${MOVEIT_LIB_NAME}
+add_library(moveit_rdf_loader SHARED src/rdf_loader.cpp src/synchronized_string_parameter.cpp)
+set_target_properties(moveit_rdf_loader PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
+ament_target_dependencies(moveit_rdf_loader
       rclcpp
       ament_index_cpp
       urdf
       srdfdom
       moveit_core)
 
-install(DIRECTORY include/ DESTINATION include)
+install(DIRECTORY include/ DESTINATION include/moveit_ros_planning)
 install(DIRECTORY
             test/data
             test/launch
@@ -24,11 +22,11 @@ install(DIRECTORY
 #  ament_add_gtest_executable(test_rdf_integration
 #      test/test_rdf_integration.cpp
 #  )
-#  target_link_libraries(test_rdf_integration ${MOVEIT_LIB_NAME})
+#  target_link_libraries(test_rdf_integration moveit_rdf_loader)
 #  add_ros_test(test/launch/test_rdf_integration.test.py TIMEOUT 120)
 #
 #  add_executable(boring_string_publisher test/boring_string_publisher.cpp)
-#  target_link_libraries(boring_string_publisher ${MOVEIT_LIB_NAME})
+#  target_link_libraries(boring_string_publisher moveit_rdf_loader)
 #
 #  install(
 #    TARGETS

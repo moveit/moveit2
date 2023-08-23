@@ -4,7 +4,7 @@
 #include <trajopt_sco/expr_ops.hpp>
 #include <trajopt_sco/modeling_utils.hpp>
 
-#include "trajopt_interface/kinematic_terms.h"
+#include <trajopt_interface/kinematic_terms.h>
 
 using namespace std;
 using namespace sco;

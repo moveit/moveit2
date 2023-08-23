@@ -49,7 +49,7 @@
 
 #include <moveit_msgs/action/local_planner.hpp>
 
-#include <trajectory_msgs/msg/joint_trajectory.h>
+#include <trajectory_msgs/msg/joint_trajectory.hpp>
 
 namespace moveit::hybrid_planning
 {
@@ -59,6 +59,12 @@ namespace moveit::hybrid_planning
 class LocalConstraintSolverInterface
 {
 public:
+  LocalConstraintSolverInterface() = default;
+  LocalConstraintSolverInterface(const LocalConstraintSolverInterface&) = default;
+  LocalConstraintSolverInterface(LocalConstraintSolverInterface&&) = default;
+  LocalConstraintSolverInterface& operator=(const LocalConstraintSolverInterface&) = default;
+  LocalConstraintSolverInterface& operator=(LocalConstraintSolverInterface&&) = default;
+  virtual ~LocalConstraintSolverInterface() = default;
   /**
    * Initialize local constraint solver
    * @return True if initialization was successful

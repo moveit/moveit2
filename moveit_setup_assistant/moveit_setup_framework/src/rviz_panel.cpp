@@ -37,7 +37,7 @@
 #include <moveit_setup_framework/data/urdf_config.hpp>
 #include <moveit_setup_framework/data/srdf_config.hpp>
 #include <QApplication>
-#include "rviz_rendering/render_window.hpp"
+#include <rviz_rendering/render_window.hpp>
 
 namespace moveit_setup
 {
