@@ -90,4 +90,6 @@ if(BUILD_TESTING)
   endforeach()
 endif()
 
+ament_export_targets(moveit_py_utilsTargets HAS_LIBRARY_TARGET)
+ament_export_dependencies(moveit_ros_planning_interface)
 ament_package()

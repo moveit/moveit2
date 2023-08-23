@@ -163,21 +163,19 @@ public:
   trajectory_execution_manager::TrajectoryExecutionManagerConstPtr getTrajectoryExecutionManager() const;
   trajectory_execution_manager::TrajectoryExecutionManagerPtr getTrajectoryExecutionManagerNonConst();
 
-  /** \brief Execute a trajectory on the planning group specified by group_name using the trajectory execution manager.
-   *  \param [in] group_name MoveIt group to execute for.
+  /** \brief Execute a trajectory on the planning group specified by the robot's trajectory using the trajectory
+   * execution manager.
    *  \param [in] robot_trajectory Contains trajectory info as well as metadata such as a RobotModel.
-   *  \param [in] blocking If blocking, wait for the trajectory to execute before continuing. Defaults to `true`.
    *  \param [in] controllers An optional list of ros2_controllers to execute with. If none, MoveIt will attempt to find
    * a controller. The exact behavior of finding a controller depends on which MoveItControllerManager plugin is active.
-   * \return moveit_controller_manager::ExecutionStatus::SUCCEEDED if successful
+   *  \return moveit_controller_manager::ExecutionStatus::SUCCEEDED if successful
    */
-  [[deprecated(
-      "MoveItCpp::execute() no longer requires a group_name parameter")]] moveit_controller_manager::ExecutionStatus
-  execute(const std::string& group_name, const robot_trajectory::RobotTrajectoryPtr& robot_trajectory,
-          bool blocking = true, const std::vector<std::string>& controllers = std::vector<std::string>());
+  [[deprecated("MoveItCpp::execute() no longer requires a blocking parameter")]] moveit_controller_manager::ExecutionStatus
+  execute(const robot_trajectory::RobotTrajectoryPtr& robot_trajectory, bool blocking,
+          const std::vector<std::string>& controllers = std::vector<std::string>());
 
   moveit_controller_manager::ExecutionStatus
-  execute(const robot_trajectory::RobotTrajectoryPtr& robot_trajectory, bool blocking = true,
+  execute(const robot_trajectory::RobotTrajectoryPtr& robot_trajectory,
           const std::vector<std::string>& controllers = std::vector<std::string>());
 
   /** \brief Utility to terminate the given planning pipeline */

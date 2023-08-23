@@ -23,10 +23,6 @@ jobs:
             ROS_DISTRO: rolling
             IKFAST_TEST: true
             CLANG_TIDY: pedantic
-            # Silent gmock/gtest warnings: https://github.com/ament/googletest/pull/21
-            AFTER_BUILD_UPSTREAM_WORKSPACE: |
-              git clone --quiet --branch clalancette/update-to-gtest-1.11 https://github.com/ament/googletest "${BASEDIR}/upstream_ws/src/googletest"
-              builder_run_build "/opt/ros/${ROS_DISTRO}" "${BASEDIR}/upstream_ws" --packages-select gtest_vendor gmock_vendor
           - IMAGE: humble-ci
             ROS_DISTRO: humble
           - IMAGE: humble-ci-testing
@@ -74,7 +70,7 @@ jobs:
       - name: "Free up disk space"
         if: matrix.env.CCOV
         run: |
-          sudo apt-get -qq purge build-essential "ghc*"
+          sudo apt-get -qq purge "ghc*"
           sudo apt-get clean
           # cleanup docker images not used by us
           docker system prune -af

@@ -1,7 +1,12 @@
 *~
 ~$
 .swp$
+
+# colcon
 build/
+install/
+log/
+
 bin/
 lib/
 msg_gen/
@@ -64,3 +69,10 @@ _autosummary
 
 # VSCode Devcontainer
 .devcontainer
+
+# clangd
+.cache
+
+# source dependencies (see moveit2.repos)
+moveit_msgs
+moveit_resources

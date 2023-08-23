@@ -45,7 +45,7 @@
 #include <tf2_eigen/tf2_eigen.hpp>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
 
-#include <boost/algorithm/string/join.hpp>
+#include <fmt/format.h>
 #include <memory>
 
 #include <std_msgs/msg/string.hpp>
@@ -1128,7 +1128,7 @@ void PlanningSceneMonitor::startSceneMonitor(const std::string& scene_topic)
   if (!scene_topic.empty())
   {
     planning_scene_subscriber_ = pnode_->create_subscription<moveit_msgs::msg::PlanningScene>(
-        scene_topic, 100, [this](const moveit_msgs::msg::PlanningScene::ConstSharedPtr& scene) {
+        scene_topic, rclcpp::SystemDefaultsQoS(), [this](const moveit_msgs::msg::PlanningScene::ConstSharedPtr& scene) {
           return newPlanningSceneCallback(scene);
         });
     RCLCPP_INFO(LOGGER, "Listening to '%s'", planning_scene_subscriber_->get_topic_name());
@@ -1225,7 +1225,7 @@ void PlanningSceneMonitor::startWorldGeometryMonitor(const std::string& collisio
   if (!collision_objects_topic.empty())
   {
     collision_object_subscriber_ = pnode_->create_subscription<moveit_msgs::msg::CollisionObject>(
-        collision_objects_topic, 1024,
+        collision_objects_topic, rclcpp::SystemDefaultsQoS(),
         [this](const moveit_msgs::msg::CollisionObject::ConstSharedPtr& obj) { return collisionObjectCallback(obj); });
     RCLCPP_INFO(LOGGER, "Listening to '%s'", collision_objects_topic.c_str());
   }
@@ -1233,7 +1233,8 @@ void PlanningSceneMonitor::startWorldGeometryMonitor(const std::string& collisio
   if (!planning_scene_world_topic.empty())
   {
     planning_scene_world_subscriber_ = pnode_->create_subscription<moveit_msgs::msg::PlanningSceneWorld>(
-        planning_scene_world_topic, 1, [this](const moveit_msgs::msg::PlanningSceneWorld::ConstSharedPtr& world) {
+        planning_scene_world_topic, rclcpp::SystemDefaultsQoS(),
+        [this](const moveit_msgs::msg::PlanningSceneWorld::ConstSharedPtr& world) {
           return newPlanningSceneWorldCallback(world);
         });
     RCLCPP_INFO(LOGGER, "Listening to '%s' for planning scene world geometry", planning_scene_world_topic.c_str());
@@ -1306,7 +1307,8 @@ void PlanningSceneMonitor::startStateMonitor(const std::string& joint_states_top
     {
       // using regular message filter as there's no header
       attached_collision_object_subscriber_ = pnode_->create_subscription<moveit_msgs::msg::AttachedCollisionObject>(
-          attached_objects_topic, 1024, [this](const moveit_msgs::msg::AttachedCollisionObject::ConstSharedPtr& obj) {
+          attached_objects_topic, rclcpp::SystemDefaultsQoS(),
+          [this](const moveit_msgs::msg::AttachedCollisionObject::ConstSharedPtr& obj) {
             return attachObjectCallback(obj);
           });
       RCLCPP_INFO(LOGGER, "Listening to '%s' for attached collision objects",
@@ -1452,7 +1454,7 @@ void PlanningSceneMonitor::updateSceneWithCurrentState()
     if (!current_state_monitor_->haveCompleteState(missing) &&
         (time - current_state_monitor_->getMonitorStartTime()).seconds() > 1.0)
     {
-      std::string missing_str = boost::algorithm::join(missing, ", ");
+      std::string missing_str = fmt::format("{}", fmt::join(missing, ", "));
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wold-style-cast"
       RCLCPP_WARN_THROTTLE(LOGGER, steady_clock, 1000, "The complete state of the robot is not yet known.  Missing %s",
