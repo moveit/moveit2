@@ -92,6 +92,30 @@ TEST_F(ServoCppFixture, TwistTest)
   ASSERT_NEAR(delta, expected_delta, tol);
 }
 
+TEST_F(ServoCppFixture, NonPlanningFrameTwistTest)
+{
+  moveit_servo::StatusCode status_curr, status_next, status_initial;
+  moveit_servo::TwistCommand twist_non_zero{ servo_params_.ee_frame, { 0.0, 0.0, 0.0, 0.0, 0.0, 0.1 } };
+  moveit_servo::TwistCommand twist_zero{ servo_params_.ee_frame, { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 } };
+
+  servo_test_instance_->setCommandType(moveit_servo::CommandType::TWIST);
+  status_initial = servo_test_instance_->getStatus();
+  ASSERT_EQ(status_initial, moveit_servo::StatusCode::NO_WARNING);
+  moveit_servo::KinematicState curr_state = servo_test_instance_->getNextJointState(twist_zero);
+  status_curr = servo_test_instance_->getStatus();
+  ASSERT_EQ(status_curr, moveit_servo::StatusCode::NO_WARNING);
+
+  moveit_servo::KinematicState next_state = servo_test_instance_->getNextJointState(twist_non_zero);
+  status_next = servo_test_instance_->getStatus();
+  ASSERT_EQ(status_next, moveit_servo::StatusCode::NO_WARNING);
+
+  // Check against manually verified value
+  constexpr double expected_delta = 0.001693;
+  double delta = next_state.positions[6] - curr_state.positions[6];
+  constexpr double tol = 0.00001;
+  ASSERT_NEAR(delta, expected_delta, tol);
+}
+
 TEST_F(ServoCppFixture, PoseTest)
 {
   moveit_servo::StatusCode status_curr, status_next, status_initial;

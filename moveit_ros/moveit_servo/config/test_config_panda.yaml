@@ -41,7 +41,7 @@ move_group_name:  panda_arm  # Often 'manipulator' or 'arm'
 planning_frame: panda_link0  # The MoveIt planning frame. Often 'base_link' or 'world'
 
 ## Other frames
-ee_frame: panda_link8  # The name of the end effector link, used to return the EE pose
+ee_frame: panda_link8  # The name of the IK tip link
 
 ## Configure handling of singularities and joint limits
 lower_singularity_threshold:  17.0  # Start decelerating when the condition number hits this (close to singularity)

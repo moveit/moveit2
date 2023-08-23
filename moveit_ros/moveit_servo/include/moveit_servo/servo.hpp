@@ -133,11 +133,11 @@ public:
 
 private:
   /**
-   * \brief Convert a give twist command to planning frame
-   * This implementation does not differentiate between body twist and spatial twist,
-   * i.e if the command is as seen from a stationary or non-stationary frame.
-   * The result of this transformation will only be accurate if the command frame is a stationary frame.
-   * See issue: https://github.com/ros-planning/moveit2/issues/2150
+   * \brief Convert a give twist command to planning frame,
+   * The command frame specified by `command.frame_id` is expected to be a stationary frame or end-effector frame.
+   * References:
+   * https://core.ac.uk/download/pdf/154240607.pdf
+   * https://www.seas.upenn.edu/~meam520/notes02/Forces8.pdf
    * @param command The twist command to be converted
    * @return The transformed twist command.
    */
