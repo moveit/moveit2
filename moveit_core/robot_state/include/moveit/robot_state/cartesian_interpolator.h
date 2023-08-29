@@ -225,26 +225,6 @@ public:
       const kinematics::KinematicsBase::IKCostFn& cost_function = kinematics::KinematicsBase::IKCostFn(),
       const Eigen::Isometry3d& link_offset = Eigen::Isometry3d::Identity());
 
-  /** \brief Tests joint space jumps of a trajectory.
-
-     If \e jump_threshold_factor is non-zero, we test for relative jumps.
-     If \e revolute_jump_threshold  or \e prismatic_jump_threshold are non-zero, we test for absolute jumps.
-     Both tests can be combined. If all params are zero, jump detection is disabled.
-     For relative jump detection, the average joint-space distance between consecutive points in the trajectory is
-     computed. If any individual joint-space motion delta is larger then this average distance by a factor of
-     \e jump_threshold_factor, this step is considered a failure and the returned path is truncated up to just
-     before the jump.
-
-     @param group The joint model group of the robot state.
-     @param traj The trajectory that should be tested.
-     @param jump_threshold The struct holding jump thresholds to determine if a joint space jump has occurred.
-     @return The fraction of the trajectory that passed.
-
-     TODO: move to more appropriate location
-  */
-  static Percentage checkJointSpaceJump(const JointModelGroup* group, std::vector<std::shared_ptr<RobotState>>& traj,
-                                        const JumpThreshold& jump_threshold);
-
   /** \brief Tests for relative joint space jumps of the trajectory \e traj.
 
      First, the average distance between adjacent trajectory points is computed. If two adjacent trajectory points
@@ -280,5 +260,23 @@ public:
                                                 double revolute_jump_threshold, double prismatic_jump_threshold);
 };
 
+  /** \brief Tests joint space jumps of a trajectory.
+
+     If \e jump_threshold_factor is non-zero, we test for relative jumps.
+     If \e revolute_jump_threshold  or \e prismatic_jump_threshold are non-zero, we test for absolute jumps.
+     Both tests can be combined. If all params are zero, jump detection is disabled.
+     For relative jump detection, the average joint-space distance between consecutive points in the trajectory is
+     computed. If any individual joint-space motion delta is larger then this average distance by a factor of
+     \e jump_threshold_factor, this step is considered a failure and the returned path is truncated up to just
+     before the jump.
+
+     @param group The joint model group of the robot state.
+     @param traj The trajectory that should be tested.
+     @param jump_threshold The struct holding jump thresholds to determine if a joint space jump has occurred.
+     @return The fraction of the trajectory that passed.
+
+  */
+static Percentage checkJointSpaceJump(const JointModelGroup* group, std::vector<std::shared_ptr<RobotState>>& traj,
+                                      const JumpThreshold& jump_threshold);
 }  // end of namespace core
 }  // end of namespace moveit
