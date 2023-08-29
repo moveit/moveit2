@@ -425,15 +425,6 @@ KinematicState Servo::getNextJointState(const ServoInput& command)
     // Compute the next joint positions based on the joint position deltas
     target_joint_positions = current_joint_positions + joint_position_delta;
 
-    // TODO : apply filtering to the velocity instead of position
-    // Apply smoothing to the positions if a smoother was provided.
-    // Update filter state and apply filtering in position domain
-    if (smoother_)
-    {
-      smoother_->reset(current_state.positions);
-      smoother_->doSmoothing(target_state.positions);
-    }
-
     // Compute velocities based on smoothed joint positions
     target_joint_velocities = (target_joint_positions - current_joint_positions) / servo_params_.publish_period;
 
@@ -444,6 +435,13 @@ KinematicState Servo::getNextJointState(const ServoInput& command)
       RCLCPP_WARN_STREAM(LOGGER, "Joint velocity limit scaling applied by a factor of " << joint_limit_scale);
 
     target_joint_velocities *= joint_limit_scale;
+
+    // Apply smoothing to the velocity if a smoother was provided.
+    if (smoother_)
+    {
+      smoother_->reset(current_state.velocities);
+      smoother_->doSmoothing(target_state.velocities);
+    }
 
     // Adjust joint position based on scaled down velocity
     target_joint_positions = current_joint_positions + (target_joint_velocities * servo_params_.publish_period);
@@ -553,8 +551,8 @@ std::pair<bool, KinematicState> Servo::smoothHalt(KinematicState halt_state)
 
   if (smoother_)
   {
-    smoother_->reset(current_state.positions);
-    smoother_->doSmoothing(halt_state.positions);
+    smoother_->reset(current_state.velocities);
+    smoother_->doSmoothing(halt_state.velocities);
   }
 
   return std::make_pair(stopped, halt_state);
