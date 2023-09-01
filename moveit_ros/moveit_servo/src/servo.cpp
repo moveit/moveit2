@@ -425,7 +425,6 @@ KinematicState Servo::getNextJointState(const ServoInput& command)
     // Compute the next joint positions based on the joint position deltas
     target_joint_positions = current_joint_positions + joint_position_delta;
 
-    // Compute velocities based on smoothed joint positions
     target_joint_velocities = (target_joint_positions - current_joint_positions) / servo_params_.publish_period;
 
     // Scale down the velocity based on joint velocity limit or user defined scaling if applicable.
