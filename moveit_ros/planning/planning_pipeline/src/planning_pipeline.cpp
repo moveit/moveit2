@@ -325,20 +325,19 @@ bool planning_pipeline::PlanningPipeline::generatePlan(const planning_scene::Pla
         RCLCPP_DEBUG(LOGGER, "Planned path was found to be valid when rechecked");
       contacts_publisher_->publish(arr);
     }
-  }
 
-  // display solution path if needed
-  if (display_computed_motion_plans && solved)
-  {
-    moveit_msgs::msg::DisplayTrajectory disp;
-    disp.model_id = robot_model_->getName();
-    disp.trajectory.resize(1);
-    res.trajectory->getRobotTrajectoryMsg(disp.trajectory.at(0));
-    moveit::core::robotStateToRobotStateMsg(res.trajectory->getFirstWayPoint(), disp.trajectory_start);
-    display_path_publisher_->publish(disp);
+    // Optionally publish DisplayTrajectory msg
+    if (display_computed_motion_plans)
+    {
+      moveit_msgs::msg::DisplayTrajectory disp;
+      disp.model_id = robot_model_->getName();
+      disp.trajectory.resize(1);
+      res.trajectory->getRobotTrajectoryMsg(disp.trajectory.at(0));
+      moveit::core::robotStateToRobotStateMsg(res.trajectory->getFirstWayPoint(), disp.trajectory_start);
+      display_path_publisher_->publish(disp);
+    }
   }
-
-  if (!solved)
+  else  // If no trajectory exists, let's see if it might be related to stacked constraints
   {
     // This should alert the user if planning failed because of contradicting constraints.
     // Could be checked more thoroughly, but it is probably not worth going to that length.
