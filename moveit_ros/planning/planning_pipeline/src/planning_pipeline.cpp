@@ -195,6 +195,8 @@ bool planning_pipeline::PlanningPipeline::generatePlan(const planning_scene::Pla
                                                        const bool check_solution_paths,
                                                        const bool display_computed_motion_plans) const
 {
+  assert(planner_instance_ != nullptr);
+
   // Set planning pipeline active
   active_ = true;
 
@@ -202,15 +204,6 @@ bool planning_pipeline::PlanningPipeline::generatePlan(const planning_scene::Pla
   if (publish_received_requests)
   {
     received_request_publisher_->publish(req);
-  }
-
-  if (!planner_instance_)
-  {
-    RCLCPP_ERROR(LOGGER, "No planning plugin loaded. Cannot plan.");
-    // Set planning pipeline to inactive
-
-    active_ = false;
-    return false;
   }
 
   bool solved = false;
