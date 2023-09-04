@@ -206,6 +206,9 @@ bool planning_pipeline::PlanningPipeline::generatePlan(const planning_scene::Pla
     received_request_publisher_->publish(req);
   }
 
+  // ---------------------------------
+  // Solve the motion planning problem
+  // ---------------------------------
   bool solved = false;
   try
   {
@@ -235,6 +238,9 @@ bool planning_pipeline::PlanningPipeline::generatePlan(const planning_scene::Pla
     return false;
   }
 
+  // -----------------
+  // Validate solution
+  // -----------------
   if (solved && res.trajectory)
   {
     std::size_t state_count = res.trajectory->getWayPointCount();
@@ -362,7 +368,7 @@ bool planning_pipeline::PlanningPipeline::generatePlan(const planning_scene::Pla
     }
   }
 
-  // Make sure that planner id is set
+  // Make sure that planner id is set in the response
   if (res.planner_id.empty())
   {
     RCLCPP_WARN(LOGGER, "The planner plugin did not fill out the 'planner_id' field of the MotionPlanResponse. Setting "
