@@ -234,7 +234,6 @@ bool planning_pipeline::PlanningPipeline::generatePlan(const planning_scene::Pla
     active_ = false;
     return false;
   }
-  bool valid = true;
 
   if (solved && res.trajectory)
   {
@@ -275,7 +274,6 @@ bool planning_pipeline::PlanningPipeline::generatePlan(const planning_scene::Pla
           }
           else
           {
-            valid = false;
             res.error_code.val = moveit_msgs::msg::MoveItErrorCodes::INVALID_MOTION_PLAN;
 
             // display error messages
@@ -376,7 +374,7 @@ bool planning_pipeline::PlanningPipeline::generatePlan(const planning_scene::Pla
 
   // Set planning pipeline to inactive
   active_ = false;
-  return solved && valid;
+  return solved && bool(res);
 }
 
 void planning_pipeline::PlanningPipeline::terminate() const
