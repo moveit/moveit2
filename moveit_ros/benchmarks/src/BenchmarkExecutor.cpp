@@ -119,10 +119,6 @@ BenchmarkExecutor::~BenchmarkExecutor()
       RCLCPP_ERROR(LOGGER, "Failed to initialize planning pipeline '%s'", planning_pipeline_name.c_str());
       continue;
     }
-
-    // Disable visualizations
-    pipeline->displayComputedMotionPlans(false);
-    pipeline->checkSolutionPaths(false);
   }
 
   // Error check

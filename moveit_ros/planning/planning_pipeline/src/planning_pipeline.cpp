@@ -52,13 +52,7 @@ const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.ros_planning.planning_p
 planning_pipeline::PlanningPipeline::PlanningPipeline(const moveit::core::RobotModelConstPtr& model,
                                                       const std::shared_ptr<rclcpp::Node>& node,
                                                       const std::string& parameter_namespace)
-  : active_{ false }
-  , node_(node)
-  , parameter_namespace_(parameter_namespace)
-  , display_computed_motion_plans_{ false }
-  , publish_received_requests_{ false }
-  , robot_model_(model)
-  , check_solution_paths_{ false }
+  : active_{ false }, node_(node), parameter_namespace_(parameter_namespace), robot_model_(model)
 {
   auto param_listener = planning_pipeline_parameters::ParamListener(node, parameter_namespace);
   const auto params = param_listener.get_params();
@@ -84,18 +78,23 @@ planning_pipeline::PlanningPipeline::PlanningPipeline(const moveit::core::RobotM
   : active_{ false }
   , node_(node)
   , parameter_namespace_(parameter_namespace)
-  , display_computed_motion_plans_{ false }
-  , publish_received_requests_{ false }
   , planner_plugin_name_(planner_plugin_name)
   , adapter_plugin_names_(adapter_plugin_names)
   , robot_model_(model)
-  , check_solution_paths_{ false }
 {
   configure();
 }
 
 void planning_pipeline::PlanningPipeline::configure()
 {
+  // Optional publishers for debugging
+  received_request_publisher_ = node_->create_publisher<moveit_msgs::msg::MotionPlanRequest>(
+      MOTION_PLAN_REQUEST_TOPIC, rclcpp::SystemDefaultsQoS());
+  contacts_publisher_ =
+      node_->create_publisher<visualization_msgs::msg::MarkerArray>(MOTION_CONTACTS_TOPIC, rclcpp::SystemDefaultsQoS());
+  display_path_publisher_ =
+      node_->create_publisher<moveit_msgs::msg::DisplayTrajectory>(DISPLAY_PATH_TOPIC, rclcpp::SystemDefaultsQoS());
+
   // load the planning plugin
   try
   {
@@ -191,59 +190,20 @@ void planning_pipeline::PlanningPipeline::configure()
   {
     RCLCPP_WARN(LOGGER, "No planning request adapter names specified.");
   }
-  displayComputedMotionPlans(true);
-  checkSolutionPaths(true);
-}
-
-void planning_pipeline::PlanningPipeline::displayComputedMotionPlans(bool flag)
-{
-  if (display_computed_motion_plans_ && !flag)
-  {
-    display_path_publisher_.reset();
-  }
-  else if (!display_computed_motion_plans_ && flag)
-  {
-    display_path_publisher_ = node_->create_publisher<moveit_msgs::msg::DisplayTrajectory>(DISPLAY_PATH_TOPIC, 10);
-  }
-  display_computed_motion_plans_ = flag;
-}
-
-void planning_pipeline::PlanningPipeline::publishReceivedRequests(bool flag)
-{
-  if (publish_received_requests_ && !flag)
-  {
-    received_request_publisher_.reset();
-  }
-  else if (!publish_received_requests_ && flag)
-  {
-    received_request_publisher_ =
-        node_->create_publisher<moveit_msgs::msg::MotionPlanRequest>(MOTION_PLAN_REQUEST_TOPIC, 10);
-  }
-  publish_received_requests_ = flag;
-}
-
-void planning_pipeline::PlanningPipeline::checkSolutionPaths(bool flag)
-{
-  if (check_solution_paths_ && !flag)
-  {
-    contacts_publisher_.reset();
-  }
-  else if (!check_solution_paths_ && flag)
-  {
-    contacts_publisher_ = node_->create_publisher<visualization_msgs::msg::MarkerArray>(MOTION_CONTACTS_TOPIC, 10);
-  }
-  check_solution_paths_ = flag;
 }
 
 bool planning_pipeline::PlanningPipeline::generatePlan(const planning_scene::PlanningSceneConstPtr& planning_scene,
                                                        const planning_interface::MotionPlanRequest& req,
-                                                       planning_interface::MotionPlanResponse& res) const
+                                                       planning_interface::MotionPlanResponse& res,
+                                                       const bool publish_received_requests,
+                                                       const bool check_solution_paths,
+                                                       const bool display_computed_motion_plans) const
 {
   // Set planning pipeline active
   active_ = true;
 
   // broadcast the request we are about to work on, if needed
-  if (publish_received_requests_)
+  if (publish_received_requests)
   {
     received_request_publisher_->publish(req);
   }
@@ -292,7 +252,7 @@ bool planning_pipeline::PlanningPipeline::generatePlan(const planning_scene::Pla
   {
     std::size_t state_count = res.trajectory->getWayPointCount();
     RCLCPP_DEBUG(LOGGER, "Motion planner reported a solution path with %ld states", state_count);
-    if (check_solution_paths_)
+    if (check_solution_paths)
     {
       visualization_msgs::msg::MarkerArray arr;
       visualization_msgs::msg::Marker m;
@@ -380,7 +340,7 @@ bool planning_pipeline::PlanningPipeline::generatePlan(const planning_scene::Pla
   }
 
   // display solution path if needed
-  if (display_computed_motion_plans_ && solved)
+  if (display_computed_motion_plans && solved)
   {
     moveit_msgs::msg::DisplayTrajectory disp;
     disp.model_id = robot_model_->getName();

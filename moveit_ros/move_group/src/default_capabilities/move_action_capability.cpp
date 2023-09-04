@@ -46,8 +46,13 @@
 
 namespace move_group
 {
-static const rclcpp::Logger LOGGER =
-    rclcpp::get_logger("moveit_move_group_default_capabilities.move_action_capability");
+
+namespace
+{
+const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_move_group_default_capabilities.move_action_capability");
+constexpr bool DISPLAY_COMPUTED_MOTION_PLANS = true;
+constexpr bool CHECK_SOLUTION_PATHS = true;
+}  // namespace
 
 MoveGroupMoveAction::MoveGroupMoveAction()
   : MoveGroupCapability("MoveAction"), move_state_(IDLE), preempt_requested_{ false }
@@ -211,7 +216,8 @@ void MoveGroupMoveAction::executeMoveCallbackPlanOnly(const std::shared_ptr<MGAc
 
   try
   {
-    if (!planning_pipeline->generatePlan(the_scene, goal->get_goal()->request, res))
+    if (!planning_pipeline->generatePlan(the_scene, goal->get_goal()->request, res, context_->debug_,
+                                         CHECK_SOLUTION_PATHS, DISPLAY_COMPUTED_MOTION_PLANS))
     {
       RCLCPP_ERROR(LOGGER, "Generating a plan with planning pipeline failed.");
       res.error_code.val = moveit_msgs::msg::MoveItErrorCodes::FAILURE;
@@ -247,7 +253,8 @@ bool MoveGroupMoveAction::planUsingPlanningPipeline(const planning_interface::Mo
   planning_scene_monitor::LockedPlanningSceneRO lscene(plan.planning_scene_monitor);
   try
   {
-    solved = planning_pipeline->generatePlan(plan.planning_scene, req, res);
+    solved = planning_pipeline->generatePlan(plan.planning_scene, req, res, context_->debug_, CHECK_SOLUTION_PATHS,
+                                             DISPLAY_COMPUTED_MOTION_PLANS);
   }
   catch (std::exception& ex)
   {

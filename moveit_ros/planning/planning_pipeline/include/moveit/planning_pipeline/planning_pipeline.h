@@ -88,43 +88,22 @@ public:
                    const std::string& parameter_namespace, const std::string& planning_plugin_name,
                    const std::vector<std::string>& adapter_plugin_names);
 
-  /** \brief Pass a flag telling the pipeline whether or not to publish the computed motion plans on DISPLAY_PATH_TOPIC.
-   * Default is true. */
-  void displayComputedMotionPlans(bool flag);
-
-  /** \brief Pass a flag telling the pipeline whether or not to publish the received motion planning requests on
-   * MOTION_PLAN_REQUEST_TOPIC. Default is false. */
-  void publishReceivedRequests(bool flag);
-
-  /** \brief Pass a flag telling the pipeline whether or not to re-check the solution paths reported by the planner.
-   * This is true by default.  */
-  void checkSolutionPaths(bool flag);
-
-  /** \brief Get the flag set by displayComputedMotionPlans() */
-  [[nodiscard]] bool getDisplayComputedMotionPlans() const
-  {
-    return display_computed_motion_plans_;
-  }
-
-  /** \brief Get the flag set by publishReceivedRequests() */
-  [[nodiscard]] bool getPublishReceivedRequests() const
-  {
-    return publish_received_requests_;
-  }
-
-  /** \brief Get the flag set by checkSolutionPaths() */
-  [[nodiscard]] bool getCheckSolutionPaths() const
-  {
-    return check_solution_paths_;
-  }
-
   /** \brief Call the motion planner plugin and the sequence of planning request adapters (if any).
       \param planning_scene The planning scene where motion planning is to be done
       \param req The request for motion planning
-      \param res The motion planning response */
+      \param res The motion planning response
+      \param publish_received_requests Flag indicating whether received requests should be published just before
+      beginning processing (useful for debugging)
+      \param check_solution_paths Flag indicating whether the reported plans
+      should be checked once again, by the planning pipeline itself
+      \param display_computed_motion_plans Flag indicating
+      whether motion plans should be published as a moveit_msgs::msg::DisplayTrajectory
+      */
   [[nodiscard]] bool generatePlan(const planning_scene::PlanningSceneConstPtr& planning_scene,
                                   const planning_interface::MotionPlanRequest& req,
-                                  planning_interface::MotionPlanResponse& res) const;
+                                  planning_interface::MotionPlanResponse& res,
+                                  const bool publish_received_requests = false, const bool check_solution_paths = true,
+                                  const bool display_computed_motion_plans = true) const;
 
   /** \brief Request termination, if a generatePlan() function is currently computing plans */
   void terminate() const;
@@ -167,13 +146,10 @@ private:
 
   std::shared_ptr<rclcpp::Node> node_;
   std::string parameter_namespace_;
-  /// Flag indicating whether motion plans should be published as a moveit_msgs::msg::DisplayTrajectory
-  bool display_computed_motion_plans_;
+  /// Optionally publish motion plans as a moveit_msgs::msg::DisplayTrajectory
   rclcpp::Publisher<moveit_msgs::msg::DisplayTrajectory>::SharedPtr display_path_publisher_;
 
-  /// Flag indicating whether received requests should be published just before beginning processing (useful for
-  /// debugging)
-  bool publish_received_requests_;
+  /// Optionally publish the request before beginning processing (useful for debugging)
   rclcpp::Publisher<moveit_msgs::msg::MotionPlanRequest>::SharedPtr received_request_publisher_;
 
   std::unique_ptr<pluginlib::ClassLoader<planning_interface::PlannerManager> > planner_plugin_loader_;
@@ -186,8 +162,7 @@ private:
 
   moveit::core::RobotModelConstPtr robot_model_;
 
-  /// Flag indicating whether the reported plans should be checked once again, by the planning pipeline itself
-  bool check_solution_paths_;  // TODO(sjahr) Remove
+  /// Publish contacts if the generated plans are checked again by the planning pipeline
   rclcpp::Publisher<visualization_msgs::msg::MarkerArray>::SharedPtr contacts_publisher_;
 };
 
