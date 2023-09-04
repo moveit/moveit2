@@ -211,7 +211,11 @@ void MoveGroupMoveAction::executeMoveCallbackPlanOnly(const std::shared_ptr<MGAc
 
   try
   {
-    planning_pipeline->generatePlan(the_scene, goal->get_goal()->request, res);
+    if (!planning_pipeline->generatePlan(the_scene, goal->get_goal()->request, res))
+    {
+      RCLCPP_ERROR(LOGGER, "Generating a plan with planning pipeline failed.");
+      res.error_code.val = moveit_msgs::msg::MoveItErrorCodes::FAILURE;
+    }
   }
   catch (std::exception& ex)
   {
