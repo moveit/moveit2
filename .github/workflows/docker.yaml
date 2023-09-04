@@ -19,7 +19,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        ROS_DISTRO: [humble, rolling]
+        ROS_DISTRO: [rolling]
     runs-on: ubuntu-latest
     permissions:
       packages: write
@@ -60,7 +60,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        ROS_DISTRO: [humble, rolling]
+        ROS_DISTRO: [rolling]
     runs-on: ubuntu-latest
     permissions:
       packages: write
@@ -101,7 +101,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        ROS_DISTRO: [humble, rolling]
+        ROS_DISTRO: [rolling]
     runs-on: ubuntu-latest
     permissions:
       packages: write
@@ -143,7 +143,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        ROS_DISTRO: [humble, rolling]
+        ROS_DISTRO: [rolling]
     runs-on: ubuntu-latest
     permissions:
       packages: write
