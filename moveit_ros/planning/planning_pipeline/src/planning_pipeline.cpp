@@ -107,13 +107,9 @@ void planning_pipeline::PlanningPipeline::configure()
     throw;
   }
 
-  std::vector<std::string> classes;
-  if (planner_plugin_loader_)
-    classes = planner_plugin_loader_->getDeclaredClasses();
-
   if (planner_plugin_name_.empty())
   {
-    std::string classes_str = fmt::format("{}", fmt::join(classes, ", "));
+    std::string classes_str = fmt::format("{}", fmt::join(planner_plugin_loader_->getDeclaredClasses(), ", "));
     throw std::runtime_error("Planning plugin name is empty. Please choose one of the available plugins: " +
                              classes_str);
   }
@@ -129,7 +125,7 @@ void planning_pipeline::PlanningPipeline::configure()
   }
   catch (pluginlib::PluginlibException& ex)
   {
-    std::string classes_str = fmt::format("{}", fmt::join(classes, ", "));
+    std::string classes_str = fmt::format("{}", fmt::join(planner_plugin_loader_->getDeclaredClasses(), ", "));
     RCLCPP_FATAL(LOGGER,
                  "Exception while loading planner '%s': %s"
                  "Available plugins: %s",
@@ -242,7 +238,6 @@ bool planning_pipeline::PlanningPipeline::generatePlan(const planning_scene::Pla
   {
     RCLCPP_ERROR(LOGGER, "Exception caught: '%s'", ex.what());
     // Set planning pipeline to inactive
-
     active_ = false;
     return false;
   }
@@ -270,7 +265,7 @@ bool planning_pipeline::PlanningPipeline::generatePlan(const planning_scene::Pla
           bool found = false;
           for (std::size_t added_index : res.added_path_index)
           {
-            if (index[i] == added_index)
+            if (index.at(i) == added_index)
             {
               found = true;
               break;
@@ -281,7 +276,7 @@ bool planning_pipeline::PlanningPipeline::generatePlan(const planning_scene::Pla
         }
         if (problem)
         {
-          if (index.size() == 1 && index[0] == 0)
+          if (index.size() == 1 && index.at(0) == 0)
           {  // ignore cases when the robot starts at invalid location
             RCLCPP_DEBUG(LOGGER, "It appears the robot is starting at an invalid state, but that is ok.");
           }
@@ -293,7 +288,9 @@ bool planning_pipeline::PlanningPipeline::generatePlan(const planning_scene::Pla
             // display error messages
             std::stringstream ss;
             for (std::size_t it : index)
+            {
               ss << it << ' ';
+            }
 
             RCLCPP_ERROR_STREAM(LOGGER, "Computed path is not valid. Invalid states at index locations: [ "
                                             << ss.str() << "] out of " << state_count
@@ -345,7 +342,7 @@ bool planning_pipeline::PlanningPipeline::generatePlan(const planning_scene::Pla
     moveit_msgs::msg::DisplayTrajectory disp;
     disp.model_id = robot_model_->getName();
     disp.trajectory.resize(1);
-    res.trajectory->getRobotTrajectoryMsg(disp.trajectory[0]);
+    res.trajectory->getRobotTrajectoryMsg(disp.trajectory.at(0));
     moveit::core::robotStateToRobotStateMsg(res.trajectory->getFirstWayPoint(), disp.trajectory_start);
     display_path_publisher_->publish(disp);
   }
@@ -356,11 +353,15 @@ bool planning_pipeline::PlanningPipeline::generatePlan(const planning_scene::Pla
     // Could be checked more thoroughly, but it is probably not worth going to that length.
     bool stacked_constraints = false;
     if (req.path_constraints.position_constraints.size() > 1 || req.path_constraints.orientation_constraints.size() > 1)
+    {
       stacked_constraints = true;
+    }
     for (const auto& constraint : req.goal_constraints)
     {
       if (constraint.position_constraints.size() > 1 || constraint.orientation_constraints.size() > 1)
+      {
         stacked_constraints = true;
+      }
     }
     if (stacked_constraints)
     {
