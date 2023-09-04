@@ -82,7 +82,11 @@ bool MoveGroupPlanService::computePlanService(const std::shared_ptr<rmw_request_
   try
   {
     planning_interface::MotionPlanResponse mp_res;
-    planning_pipeline->generatePlan(ps, req->motion_plan_request, mp_res);
+    if (!planning_pipeline->generatePlan(ps, req->motion_plan_request, mp_res))
+    {
+      RCLCPP_ERROR(LOGGER, "Generating a plan with planning pipeline failed.");
+      mp_res.error_code.val = moveit_msgs::msg::MoveItErrorCodes::FAILURE;
+    }
     mp_res.getMessage(res->motion_plan_response);
   }
   catch (std::exception& ex)
