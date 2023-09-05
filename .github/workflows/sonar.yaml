@@ -55,7 +55,7 @@ jobs:
           # free up a lot of stuff from /usr/local
           sudo rm -rf /usr/local
           df -h
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: testspace-com/setup-testspace@v1
         if: github.repository == 'ros-planning/moveit2'
         with:
