@@ -803,11 +803,11 @@ public:
   bool isShapeValid(const shape_msgs::msg::SolidPrimitive& shape);
 
   /** \brief Check if a given shape is valid to prevent segmentation fault at
-   * shapesAndPosesFromCollisionObjectMessage(). Return false if any dimension is negative */
+   * shapesAndPosesFromCollisionObjectMessage(). */
   bool isShapeValid(const shape_msgs::msg::Mesh& shape);
 
   /** \brief Check if a given shape is valid to prevent segmentation fault at
-   * shapesAndPosesFromCollisionObjectMessage(). Return false if any dimension is negative */
+   * shapesAndPosesFromCollisionObjectMessage(). */
   bool isShapeValid(const shape_msgs::msg::Plane& shape);
 
   /** \brief Check if a given state is feasible, in accordance to the feasibility predicate specified by
