@@ -252,18 +252,18 @@ bool planning_pipeline::PlanningPipeline::generatePlan(const planning_scene::Pla
       m.action = visualization_msgs::msg::Marker::DELETEALL;
       arr.markers.push_back(m);
 
-      std::vector<std::size_t> index;
-      if (!planning_scene->isPathValid(*res.trajectory, req.path_constraints, req.group_name, false, &index))
+      std::vector<std::size_t> indices;
+      if (!planning_scene->isPathValid(*res.trajectory, req.path_constraints, req.group_name, false, &indices))
       {
         // check to see if there is any problem with the states that are found to be invalid
         // they are considered ok if they were added by a planning request adapter
         bool problem = false;
-        for (std::size_t i = 0; i < index.size(); ++i)
+        for (auto const& index : indices)
         {
           bool found = false;
           for (std::size_t const& added_index : res.added_path_index)
           {
-            if (index.at(i) == added_index)
+            if (index == added_index)
             {
               found = true;
               break;
@@ -277,7 +277,7 @@ bool planning_pipeline::PlanningPipeline::generatePlan(const planning_scene::Pla
         }
         if (problem)
         {
-          if (index.size() == 1 && index.at(0) == 0)
+          if (indices.size() == 1 && indices.at(0) == 0)
           {  // ignore cases when the robot starts at invalid location
             RCLCPP_DEBUG(LOGGER, "It appears the robot is starting at an invalid state, but that is ok.");
           }
@@ -287,7 +287,7 @@ bool planning_pipeline::PlanningPipeline::generatePlan(const planning_scene::Pla
 
             // display error messages
             std::stringstream ss;
-            for (std::size_t it : index)
+            for (std::size_t it : indices)
             {
               ss << it << ' ';
             }
@@ -298,7 +298,7 @@ bool planning_pipeline::PlanningPipeline::generatePlan(const planning_scene::Pla
                                             << contacts_publisher_->get_topic_name());
 
             // call validity checks in verbose mode for the problematic states
-            for (std::size_t it : index)
+            for (std::size_t it : indices)
             {
               // check validity with verbose on
               const moveit::core::RobotState& robot_state = res.trajectory->getWayPoint(it);
