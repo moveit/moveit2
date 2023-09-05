@@ -106,8 +106,8 @@ void LazyFreeSpaceUpdater::pushBatchToProcess(OcTreeKeyCountMap* occupied_cells,
 
 void LazyFreeSpaceUpdater::processThread()
 {
-  const double lg_0 = tree_->getClampingThresMinLog() - tree_->getClampingThresMaxLog();
-  const double lg_miss = tree_->getProbMissLog();
+  const float lg_0 = tree_->getClampingThresMinLog() - tree_->getClampingThresMaxLog();
+  const float lg_miss = tree_->getProbMissLog();
 
   octomap::KeyRay key_ray1, key_ray2;
   OcTreeKeyCountMap free_cells1, free_cells2;
