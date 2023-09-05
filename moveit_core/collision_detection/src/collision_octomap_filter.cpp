@@ -211,16 +211,18 @@ bool findSurface(const octomap::point3d_list& cloud, const double& spacing, cons
                  const double& r_multiple, const octomath::Vector3& seed, octomath::Vector3& surface_point,
                  octomath::Vector3& normal)
 {
+  const int iterations = 10;
   octomath::Vector3 p = seed, dp, gs;
-  for (int i = 0; i < 10; ++i)
+  for (int i = 0; i < iterations; ++i)
   {
+    const double epsilon = 1e-10;
     double intensity = 0;
     if (!sampleCloud(cloud, spacing, r_multiple, p, intensity, gs))
       return false;
     const double s = iso_value - intensity;
     dp = (gs * -s) * (1.0 / std::max(gs.dot(gs), epsilon));
     p = p + dp;
-    if (dp.dot(dp) < 1e-10 /* epsilon */)
+    if (dp.dot(dp) < epsilon)
     {
       surface_point = p;
       normal = gs.normalized();
