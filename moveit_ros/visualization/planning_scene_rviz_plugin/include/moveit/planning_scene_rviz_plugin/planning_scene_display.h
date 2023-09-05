@@ -79,7 +79,7 @@ public:
   void load(const rviz_common::Config& config) override;
   void save(rviz_common::Config config) const override;
 
-  void update(double wall_dt, double ros_dt) override;
+  void update(float wall_dt, float ros_dt) override;
   void reset() override;
 
   void setLinkColor(const std::string& link_name, const QColor& color);
