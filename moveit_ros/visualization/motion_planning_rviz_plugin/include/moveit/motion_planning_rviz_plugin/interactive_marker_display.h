@@ -82,7 +82,7 @@ public:
   }
 
   // Overrides from Display
-  void update(double wall_dt, double ros_dt) override;
+  void update(float wall_dt, float ros_dt) override;
 
   void reset() override;
 

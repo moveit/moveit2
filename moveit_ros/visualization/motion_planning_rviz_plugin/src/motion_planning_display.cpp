@@ -1332,7 +1332,7 @@ void MotionPlanningDisplay::onDisable()
 // ******************************************************************************************
 // Update
 // ******************************************************************************************
-void MotionPlanningDisplay::update(double wall_dt, double ros_dt)
+void MotionPlanningDisplay::update(float wall_dt, float ros_dt)
 {
   if (int_marker_display_)
     int_marker_display_->update(wall_dt, ros_dt);
@@ -1357,7 +1357,7 @@ void MotionPlanningDisplay::load(const rviz_common::Config& config)
   PlanningSceneDisplay::load(config);
   if (frame_)
   {
-    double d;
+    float d;
     if (config.mapGetFloat("MoveIt_Planning_Time", &d))
       frame_->ui_->planning_time->setValue(d);
     int attempts;
@@ -1384,7 +1384,7 @@ void MotionPlanningDisplay::load(const rviz_common::Config& config)
 
     rviz_common::Config workspace = config.mapGetChild("MoveIt_Workspace");
     rviz_common::Config ws_center = workspace.mapGetChild("Center");
-    double val;
+    float val;
     if (ws_center.mapGetFloat("X", &val))
       frame_->ui_->wcenter_x->setValue(val);
     if (ws_center.mapGetFloat("Y", &val))
