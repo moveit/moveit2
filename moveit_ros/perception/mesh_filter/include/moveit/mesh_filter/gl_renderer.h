@@ -281,10 +281,10 @@ private:
   GLuint program_;
 
   /** \brief distance of near clipping plane in meters*/
-  float near_;
+  double near_;
 
   /** \brief distance of far clipping plane in meters*/
-  float far_;
+  double far_;
 
   /** \brief focal length in x-direction of camera in pixels*/
   float fx_;
