@@ -202,10 +202,6 @@ void ServoNode::poseCallback(const geometry_msgs::msg::PoseStamped::ConstSharedP
 
 std::optional<KinematicState> ServoNode::processJointJogCommand()
 {
-  std::optional<KinematicState> next_joint_state = std::nullopt;
-  // Reject any other command types that had arrived simultaneously.
-  new_twist_msg_ = new_pose_msg_ = false;
-
   const bool command_stale = (node_->now() - latest_joint_jog_.header.stamp) >=
                              rclcpp::Duration::from_seconds(servo_params_.incoming_command_timeout);
   if (!command_stale)
@@ -230,10 +226,6 @@ std::optional<KinematicState> ServoNode::processJointJogCommand()
 std::optional<KinematicState> ServoNode::processTwistCommand()
 {
   std::optional<KinematicState> next_joint_state = std::nullopt;
-
-  // Mark latest twist command as processed.
-  // Reject any other command types that had arrived simultaneously.
-  new_joint_jog_msg_ = new_pose_msg_ = false;
 
   const bool command_stale = (node_->now() - latest_twist_.header.stamp) >=
                              rclcpp::Duration::from_seconds(servo_params_.incoming_command_timeout);
@@ -262,10 +254,6 @@ std::optional<KinematicState> ServoNode::processTwistCommand()
 std::optional<KinematicState> ServoNode::processPoseCommand()
 {
   std::optional<KinematicState> next_joint_state = std::nullopt;
-
-  // Mark latest pose command as processed.
-  // Reject any other command types that had arrived simultaneously.
-  new_joint_jog_msg_ = new_twist_msg_ = false;
 
   const bool command_stale = (node_->now() - latest_pose_.header.stamp) >=
                              rclcpp::Duration::from_seconds(servo_params_.incoming_command_timeout);
@@ -317,9 +305,11 @@ void ServoNode::servoLoop()
     }
     else if (new_joint_jog_msg_ || new_twist_msg_ || new_pose_msg_)
     {
-      new_joint_jog_msg_ = new_twist_msg_ = new_pose_msg_ = false;
       RCLCPP_WARN_STREAM(LOGGER, "Command type has not been set, cannot accept input");
     }
+
+    // Mark latest commands as processed.
+    new_joint_jog_msg_ = new_pose_msg_ = new_twist_msg_ = false;
 
     if (next_joint_state && (servo_->getStatus() != StatusCode::INVALID))
     {

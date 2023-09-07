@@ -286,8 +286,8 @@ servo:
   low_latency_mode: {
     type: bool,
     default_value: false,
-    description: "If true, publish commands as fast as possible. \
-                  Useful for controlling robots that have significant drift."
+    description: "If true, publish commands as quickly as possible. \
+                  Useful workaround for controlling robots with significant joint drift."
   }
 
 ########################### POSE TRACKING #######################################
