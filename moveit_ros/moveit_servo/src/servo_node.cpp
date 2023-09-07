@@ -202,6 +202,8 @@ void ServoNode::poseCallback(const geometry_msgs::msg::PoseStamped::ConstSharedP
 
 std::optional<KinematicState> ServoNode::processJointJogCommand()
 {
+  std::optional<KinematicState> next_joint_state = std::nullopt;
+
   const bool command_stale = (node_->now() - latest_joint_jog_.header.stamp) >=
                              rclcpp::Duration::from_seconds(servo_params_.incoming_command_timeout);
   if (!command_stale)
