@@ -8,7 +8,7 @@ on:
   pull_request:
   push:
     branches:
-      - main
+      - iron
 
 jobs:
   default:
@@ -16,11 +16,11 @@ jobs:
       fail-fast: false
       matrix:
         env:
-          - IMAGE: rolling-ci
+          - IMAGE: iron-ci
             CCOV: true
-            ROS_DISTRO: rolling
-          - IMAGE: rolling-ci-testing
-            ROS_DISTRO: rolling
+            ROS_DISTRO: iron
+          - IMAGE: iron-ci-testing
+            ROS_DISTRO: iron
             IKFAST_TEST: true
             CLANG_TIDY: pedantic
           - IMAGE: humble-ci
