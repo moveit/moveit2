@@ -338,7 +338,10 @@ void ServoNode::servoLoop()
     status_msg.message = servo_->getStatusMessage();
     status_publisher_->publish(status_msg);
 
-    servo_frequency.sleep();
+    if (!servo_params_.low_latency_mode)
+    {
+      servo_frequency.sleep();
+    }
   }
 }
 

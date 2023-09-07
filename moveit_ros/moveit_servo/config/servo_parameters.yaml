@@ -168,7 +168,6 @@ servo:
     description: "If true servo will publish joint accelerations in the output command"
   }
 
-
   use_smoothing: {
     type: bool,
     default_value: true,
@@ -284,6 +283,12 @@ servo:
     }
   }
 
+  low_latency_mode: {
+    type: bool,
+    default_value: false,
+    description: "If true, publish commands as fast as possible. \
+                  Useful for controlling robots that have significant drift."
+  }
 
 ########################### POSE TRACKING #######################################
 
