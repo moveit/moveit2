@@ -338,6 +338,10 @@ void ServoNode::servoLoop()
       }
       last_commanded_state_ = next_joint_state;
     }
+    else
+    {
+      last_commanded_state_ = std::nullopt;
+    }
 
     status_msg.code = static_cast<int8_t>(servo_->getStatus());
     status_msg.message = servo_->getStatusMessage();
