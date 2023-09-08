@@ -33,7 +33,7 @@ servo:
   status_topic: {
     type: string,
     default_value: "~/status",
-    description: "The topic to which the status will be published"
+    description: "The topic to which the status will be published."
   }
 
   command_out_topic: {
@@ -46,7 +46,7 @@ servo:
   command_out_type: {
     type: string,
     default_value: "trajectory_msgs/JointTrajectory",
-    description: "The type of command that servo will publish",
+    description: "The type of command to publish.",
     validation: {
       one_of<>: [["trajectory_msgs/JointTrajectory", "std_msgs/Float64MultiArray"]]
     }
@@ -57,19 +57,19 @@ servo:
   pose_command_in_topic: {
     type: string,
     default_value: "~/pose_target_cmds",
-    description: "The topic on which servo will receive the pose commands"
+    description: "The topic on which to receive pose commands."
   }
 
   cartesian_command_in_topic: {
     type: string,
     default_value: "~/delta_twist_cmds",
-    description: "The topic on which servo will receive the twist commands"
+    description: "The topic on which to receive twist commands."
   }
 
   joint_command_in_topic: {
     type: string,
     default_value: "~/delta_joint_cmds",
-    description: "The topic on which servo will receive the joint jog commands"
+    description: "The topic on which to receive joint jog commands."
   }
 
   command_in_type: {
@@ -86,7 +86,7 @@ servo:
   joint_topic: {
     type: string,
     default_value: "/joint_states",
-    description: "The topic on which joint states can be monitored"
+    description: "The topic on which joint states can be monitored."
   }
 
 ################################ GENERAL CONFIG #############################
@@ -105,8 +105,8 @@ servo:
   incoming_command_timeout: {
     type: double,
     default_value: 0.1,
-    description: "Commands will be discarded if it is older than the timeout.\
-                   Important because ROS may drop some messages."
+    description: "Commands will be discarded if it is older than the timeout. \
+                  Important because ROS may drop some messages."
   }
 
   scale:
@@ -138,13 +138,13 @@ servo:
   override_velocity_scaling_factor: {
     type: double,
     default_value: 0.0,
-    description: "Scaling factor when servo overrides the velocity (eg: near singularities)"
+    description: "Scaling factor when overriding the velocity scaling, e.g., near singularities)"
   }
 
   publish_period: {
     type: double,
     default_value: 0.034,
-    description: " 1 / (Nominal publish rate) [seconds]",
+    description: "1 / (Nominal publish rate) [seconds]",
     validation: {
       gt<>: 0.0
     }
@@ -153,32 +153,37 @@ servo:
   publish_joint_positions: {
     type: bool,
     default_value: true,
-    description: "If true servo will publish joint positions in the output command"
+    description: "If true, publish joint positions in the output command."
   }
 
   publish_joint_velocities: {
     type: bool,
     default_value: true,
-    description: "If true servo will publish joint velocities in the output command"
+    description: "If true, publish joint velocities in the output command."
   }
 
   publish_joint_accelerations: {
     type: bool,
     default_value: false,
-    description: "If true servo will publish joint accelerations in the output command"
+    description: "If true, publish joint accelerations in the output command."
   }
 
+  apply_anti_drift: {
+    type: bool,
+    default_value: false,
+    description: "If true, uses the previous commanded state instead of current state to correct for joint drift."
+  }
 
   use_smoothing: {
     type: bool,
     default_value: true,
-    description: "Enables the use of smoothing plugins for joint trajectory smoothing"
+    description: "Enables the use of smoothing plugins for joint trajectory smoothing."
   }
 
   smoothing_filter_plugin_name: {
     type: string,
     default_value: "online_signal_smoothing::ButterworthFilterPlugin",
-    description: "The name of the smoothing plugin to be used"
+    description: "The name of the smoothing plugin to be used."
   }
 
   is_primary_planning_scene_monitor: {
@@ -188,25 +193,25 @@ servo:
                   the Servo server's PlanningScene advertises the /get_planning_scene service, \
                   which other nodes can use to get information about the planning environment. \
                   If a different node in your system will be publishing the planning scene, \
-                  this should be set to false"
+                  this should be set to false."
   }
 
   halt_all_joints_in_joint_mode: {
     type: bool,
     default_value: true,
-    description: "Halt all joints in joint mode"
+    description: "Halt all joints in joint mode."
   }
 
   halt_all_joints_in_cartesian_mode: {
     type: bool,
     default_value: true,
-    description: "Halt all joints in cartesian mode"
+    description: "Halt all joints in cartesian mode."
   }
 
   lower_singularity_threshold: {
     type: double,
     default_value: 17.0,
-    description: "Start decelerating when the condition number hits this (close to singularity)",
+    description: "Start decelerating when the condition number hits this (close to singularity).",
     validation: {
       gt<>: 0.0
     }
@@ -215,7 +220,7 @@ servo:
   hard_stop_singularity_threshold: {
     type: double,
     default_value: 30.0,
-    description: "Stop when the condition number hits this",
+    description: "Stop when the condition number reaches this value.",
     validation: {
       gt<>: 0.0,
     }
@@ -226,7 +231,7 @@ servo:
     default_value: 2.0,
     description: "When 'lower_singularity_threshold' is triggered, \
                   but we are moving away from singularity, move this many times faster \
-                  than if we were moving further into singularity",
+                  than if we were moving further into singularity.",
     validation: {
       gt<>: 0.0
     }
@@ -235,7 +240,7 @@ servo:
   singularity_step_scale: {
     type: double,
     default_value: 0.01,
-    description: "The vector towards singularity is scaled by this factor during singularity check",
+    description: "The vector towards singularity is scaled by this factor during singularity check.",
     validation: {
       gt<>: 0.0
     }
@@ -253,7 +258,7 @@ servo:
   check_collisions: {
     type: bool,
     default_value: true,
-    description: "If true, servo will check for collision using the planning scene monitor."
+    description: "If true, check for collisions using the planning scene monitor."
   }
 
   collision_check_rate: {
@@ -269,7 +274,7 @@ servo:
   self_collision_proximity_threshold: {
     type: double,
     default_value: 0.01,
-    description: "Start decelerating when a self-collision is this far [m]",
+    description: "Start decelerating when a self-collision is this far [m].",
     validation: {
       gt<>: 0.0
     }
@@ -278,7 +283,7 @@ servo:
   scene_collision_proximity_threshold: {
     type: double,
     default_value: 0.02,
-    description: "Start decelerating when a collision is this far [m]",
+    description: "Start decelerating when a collision is this far [m].",
     validation: {
       gt<>: 0.0
     }

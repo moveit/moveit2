@@ -211,7 +211,8 @@ std::optional<KinematicState> ServoNode::processJointJogCommand()
   if (!command_stale)
   {
     JointJogCommand command{ latest_joint_jog_.joint_names, latest_joint_jog_.velocities };
-    next_joint_state = servo_->getNextJointState(command);
+    next_joint_state =
+        servo_->getNextJointState(command, servo_params_.apply_anti_drift ? last_commanded_state_ : std::nullopt);
   }
   else
   {
@@ -221,6 +222,10 @@ std::optional<KinematicState> ServoNode::processJointJogCommand()
     {
       next_joint_state = result.second;
       RCLCPP_DEBUG_STREAM(LOGGER, "Joint jog command timed out. Halting to a stop.");
+    }
+    else
+    {
+      new_joint_jog_msg_ = false;
     }
   }
 
@@ -243,7 +248,8 @@ std::optional<KinematicState> ServoNode::processTwistCommand()
                                                latest_twist_.twist.linear.z,  latest_twist_.twist.angular.x,
                                                latest_twist_.twist.angular.y, latest_twist_.twist.angular.z };
     const TwistCommand command{ latest_twist_.header.frame_id, velocities };
-    next_joint_state = servo_->getNextJointState(command);
+    next_joint_state =
+        servo_->getNextJointState(command, servo_params_.apply_anti_drift ? last_commanded_state_ : std::nullopt);
   }
   else
   {
@@ -253,6 +259,10 @@ std::optional<KinematicState> ServoNode::processTwistCommand()
     {
       next_joint_state = result.second;
       RCLCPP_INFO_STREAM(LOGGER, "Twist command timed out. Halting to a stop.");
+    }
+    else
+    {
+      new_twist_msg_ = false;
     }
   }
 
@@ -272,7 +282,8 @@ std::optional<KinematicState> ServoNode::processPoseCommand()
   if (!command_stale)
   {
     const PoseCommand command = poseFromPoseStamped(latest_pose_);
-    next_joint_state = servo_->getNextJointState(command);
+    next_joint_state =
+        servo_->getNextJointState(command, servo_params_.apply_anti_drift ? last_commanded_state_ : std::nullopt);
   }
   else
   {
@@ -282,6 +293,10 @@ std::optional<KinematicState> ServoNode::processPoseCommand()
     {
       next_joint_state = result.second;
       RCLCPP_DEBUG_STREAM(LOGGER, "Pose command timed out. Halting to a stop.");
+    }
+    else
+    {
+      new_pose_msg_ = false;
     }
   }
 
@@ -298,7 +313,9 @@ void ServoNode::servoLoop()
   {
     // Skip processing if servoing is disabled.
     if (servo_paused_)
+    {
       continue;
+    }
 
     next_joint_state = std::nullopt;
     const CommandType expected_type = servo_->getCommandType();
@@ -331,7 +348,7 @@ void ServoNode::servoLoop()
       {
         multi_array_publisher_->publish(composeMultiArrayMessage(servo_->getParams(), next_joint_state.value()));
       }
-      last_commanded_state_ = next_joint_state.value();
+      last_commanded_state_ = next_joint_state;
     }
 
     status_msg.code = static_cast<int8_t>(servo_->getStatus());

@@ -371,7 +371,8 @@ Eigen::VectorXd Servo::jointDeltaFromCommand(const ServoInput& command, moveit::
   return joint_position_deltas;
 }
 
-KinematicState Servo::getNextJointState(const ServoInput& command)
+KinematicState Servo::getNextJointState(const ServoInput& command,
+                                        const std::optional<KinematicState>& previous_state_maybe)
 {
   // Set status to clear
   servo_status_ = StatusCode::NO_WARNING;
@@ -392,6 +393,14 @@ KinematicState Servo::getNextJointState(const ServoInput& command)
   // State variables
   KinematicState current_state(num_joints), target_state(num_joints);
   target_state.joint_names = joint_names;
+
+  // If we provide a previous state for drift correction, set that as the robot state.
+  if (previous_state_maybe)
+  {
+    const auto& previous_state = previous_state_maybe.value();
+    robot_state->setJointGroupPositions(joint_model_group, previous_state.positions);
+    robot_state->setJointGroupVelocities(joint_model_group, previous_state.velocities);
+  }
 
   // Copy current kinematic data from RobotState.
   robot_state->copyJointGroupPositions(joint_model_group, current_state.positions);
@@ -534,30 +543,37 @@ KinematicState Servo::getCurrentRobotState()
   return current_state;
 }
 
-std::pair<bool, KinematicState> Servo::smoothHalt(KinematicState halt_state)
+std::pair<bool, KinematicState> Servo::smoothHalt(std::optional<KinematicState>& halt_state_maybe)
 {
   bool stopped = false;
   const auto current_state = getCurrentRobotState();
 
-  const size_t num_joints = current_state.joint_names.size();
-  for (size_t i = 0; i < num_joints; i++)
+  if (halt_state_maybe)
   {
-    const double vel = (halt_state.positions[i] - current_state.positions[i]) / servo_params_.publish_period;
-    halt_state.velocities[i] = (vel > STOPPED_VELOCITY_EPS) ? vel : 0.0;
-    halt_state.accelerations[i] =
-        (halt_state.velocities[i] - current_state.velocities[i]) / servo_params_.publish_period;
+    auto& halt_state = halt_state_maybe.value();
+    const size_t num_joints = current_state.joint_names.size();
+    for (size_t i = 0; i < num_joints; i++)
+    {
+      const double vel = (halt_state.positions[i] - current_state.positions[i]) / servo_params_.publish_period;
+      halt_state.velocities[i] = (vel > STOPPED_VELOCITY_EPS) ? vel : 0.0;
+      halt_state.accelerations[i] =
+          (halt_state.velocities[i] - current_state.velocities[i]) / servo_params_.publish_period;
+    }
+
+    // If all velocities are zero, robot has decelerated to a stop.
+    stopped = (std::accumulate(halt_state.velocities.begin(), halt_state.velocities.end(), 0.0) == 0.0);
+
+    if (smoother_)
+    {
+      smoother_->reset(current_state.positions);
+      smoother_->doSmoothing(halt_state.positions);
+    }
+    return std::make_pair(stopped, halt_state);
   }
-
-  // If all velocities are zero, robot has decelerated to a stop.
-  stopped = (std::accumulate(halt_state.velocities.begin(), halt_state.velocities.end(), 0.0) == 0.0);
-
-  if (smoother_)
+  else
   {
-    smoother_->reset(current_state.positions);
-    smoother_->doSmoothing(halt_state.positions);
+    return std::make_pair(stopped, current_state);
   }
-
-  return std::make_pair(stopped, halt_state);
 }
 
 }  // namespace moveit_servo
