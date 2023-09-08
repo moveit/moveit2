@@ -133,10 +133,14 @@ public:
   std::pair<bool, KinematicState> smoothHalt();
 
   /**
-   * TODO
+   * \brief Returns the last commanded state.
+   * @return The last commanded state.
    */
   std::optional<KinematicState> getLastCommandedState();
 
+  /**
+   * \brief Resets the last commanded state to std::nullopt.
+   */
   void resetLastCommandedState();
 
 private:
