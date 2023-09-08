@@ -126,7 +126,6 @@ servo:
       description: "Max joint angular/linear velocity. Only used for joint commands on joint_command_in_topic."
     }
 
-
   apply_twist_commands_about_ee_frame: {
     type: bool,
     default_value: true,

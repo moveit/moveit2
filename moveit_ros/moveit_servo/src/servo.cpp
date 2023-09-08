@@ -371,8 +371,7 @@ Eigen::VectorXd Servo::jointDeltaFromCommand(const ServoInput& command, moveit::
   return joint_position_deltas;
 }
 
-KinematicState Servo::getNextJointState(const ServoInput& command,
-                                        const std::optional<KinematicState>& previous_state_maybe)
+KinematicState Servo::getNextJointState(const ServoInput& command)
 {
   // Set status to clear
   servo_status_ = StatusCode::NO_WARNING;
@@ -395,9 +394,9 @@ KinematicState Servo::getNextJointState(const ServoInput& command,
   target_state.joint_names = joint_names;
 
   // If we provide a previous state for drift correction, set the robot position to that.
-  if (previous_state_maybe)
+  if (servo_params_.apply_anti_drift && last_commanded_state_.has_value())
   {
-    robot_state->setJointGroupPositions(joint_model_group, previous_state_maybe.value().positions);
+    robot_state->setJointGroupPositions(joint_model_group, last_commanded_state_.value().positions);
   }
 
   // Copy current kinematic data from RobotState.
@@ -467,6 +466,7 @@ KinematicState Servo::getNextJointState(const ServoInput& command,
     }
   }
 
+  last_commanded_state_ = target_state;
   return target_state;
 }
 
@@ -541,14 +541,14 @@ KinematicState Servo::getCurrentRobotState()
   return current_state;
 }
 
-std::pair<bool, KinematicState> Servo::smoothHalt(std::optional<KinematicState>& halt_state_maybe)
+std::pair<bool, KinematicState> Servo::smoothHalt()
 {
   bool stopped = false;
   const auto current_state = getCurrentRobotState();
 
-  if (halt_state_maybe)
+  if (last_commanded_state_)
   {
-    auto& halt_state = halt_state_maybe.value();
+    auto& halt_state = last_commanded_state_.value();
     const size_t num_joints = current_state.joint_names.size();
     for (size_t i = 0; i < num_joints; i++)
     {
@@ -572,6 +572,16 @@ std::pair<bool, KinematicState> Servo::smoothHalt(std::optional<KinematicState>&
   {
     return std::make_pair(stopped, current_state);
   }
+}
+
+std::optional<KinematicState> Servo::getLastCommandedState()
+{
+  return last_commanded_state_;
+}
+
+void Servo::resetLastCommandedState()
+{
+  last_commanded_state_ = std::nullopt;
 }
 
 }  // namespace moveit_servo

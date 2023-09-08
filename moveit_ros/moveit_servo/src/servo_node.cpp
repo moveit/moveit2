@@ -211,12 +211,11 @@ std::optional<KinematicState> ServoNode::processJointJogCommand()
   if (!command_stale)
   {
     JointJogCommand command{ latest_joint_jog_.joint_names, latest_joint_jog_.velocities };
-    next_joint_state =
-        servo_->getNextJointState(command, servo_params_.apply_anti_drift ? last_commanded_state_ : std::nullopt);
+    next_joint_state = servo_->getNextJointState(command);
   }
   else
   {
-    auto result = servo_->smoothHalt(last_commanded_state_);
+    auto result = servo_->smoothHalt();
     new_joint_jog_msg_ = result.first;
     if (new_joint_jog_msg_)
     {
@@ -244,12 +243,11 @@ std::optional<KinematicState> ServoNode::processTwistCommand()
                                                latest_twist_.twist.linear.z,  latest_twist_.twist.angular.x,
                                                latest_twist_.twist.angular.y, latest_twist_.twist.angular.z };
     const TwistCommand command{ latest_twist_.header.frame_id, velocities };
-    next_joint_state =
-        servo_->getNextJointState(command, servo_params_.apply_anti_drift ? last_commanded_state_ : std::nullopt);
+    next_joint_state = servo_->getNextJointState(command);
   }
   else
   {
-    auto result = servo_->smoothHalt(last_commanded_state_);
+    auto result = servo_->smoothHalt();
     new_twist_msg_ = result.first;
     if (new_twist_msg_)
     {
@@ -274,12 +272,11 @@ std::optional<KinematicState> ServoNode::processPoseCommand()
   if (!command_stale)
   {
     const PoseCommand command = poseFromPoseStamped(latest_pose_);
-    next_joint_state =
-        servo_->getNextJointState(command, servo_params_.apply_anti_drift ? last_commanded_state_ : std::nullopt);
+    next_joint_state = servo_->getNextJointState(command);
   }
   else
   {
-    auto result = servo_->smoothHalt(last_commanded_state_);
+    auto result = servo_->smoothHalt();
     new_pose_msg_ = result.first;
     if (new_pose_msg_)
     {
@@ -336,11 +333,10 @@ void ServoNode::servoLoop()
       {
         multi_array_publisher_->publish(composeMultiArrayMessage(servo_->getParams(), next_joint_state.value()));
       }
-      last_commanded_state_ = next_joint_state;
     }
     else
     {
-      last_commanded_state_ = std::nullopt;
+      servo_->resetLastCommandedState();
     }
 
     status_msg.code = static_cast<int8_t>(servo_->getStatus());

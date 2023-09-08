@@ -74,12 +74,10 @@ public:
   /**
    * \brief Computes the joint state required to follow the given command.
    * @param command The command to follow, std::variant type, can handle JointJog, Twist and Pose.
-   * @param previous_state_maybe A std::optional containing the previous commanded state. If this value is set, it
    * is used to calculate an error between the current state and the previous commanded state for anti-drift correction.
    * @return The required joint state.
    */
-  KinematicState getNextJointState(const ServoInput& command,
-                                   const std::optional<KinematicState>& previous_state_maybe = std::nullopt);
+  KinematicState getNextJointState(const ServoInput& command);
 
   /**
    * \brief Set the type of incoming servo command.
@@ -132,7 +130,14 @@ public:
    * @param halt_state_maybe A std::optional containing the last commanded joint states, if available.
    * @return The next state stepping towards the required halting state.
    */
-  std::pair<bool, KinematicState> smoothHalt(std::optional<KinematicState>& halt_state_maybe);
+  std::pair<bool, KinematicState> smoothHalt();
+
+  /**
+   * TODO
+   */
+  std::optional<KinematicState> getLastCommandedState();
+
+  void resetLastCommandedState();
 
 private:
   /**
@@ -202,6 +207,8 @@ private:
   const rclcpp::Node::SharedPtr node_;
   std::shared_ptr<const servo::ParamListener> servo_param_listener_;
   planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor_;
+
+  std::optional<KinematicState> last_commanded_state_;
 
   // This value will be updated by CollisionMonitor in a separate thread.
   std::atomic<double> collision_velocity_scale_ = 1.0;
