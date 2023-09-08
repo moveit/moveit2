@@ -223,10 +223,6 @@ std::optional<KinematicState> ServoNode::processJointJogCommand()
       next_joint_state = result.second;
       RCLCPP_DEBUG_STREAM(LOGGER, "Joint jog command timed out. Halting to a stop.");
     }
-    else
-    {
-      new_joint_jog_msg_ = false;
-    }
   }
 
   return next_joint_state;
@@ -260,10 +256,6 @@ std::optional<KinematicState> ServoNode::processTwistCommand()
       next_joint_state = result.second;
       RCLCPP_INFO_STREAM(LOGGER, "Twist command timed out. Halting to a stop.");
     }
-    else
-    {
-      new_twist_msg_ = false;
-    }
   }
 
   return next_joint_state;
@@ -293,10 +285,6 @@ std::optional<KinematicState> ServoNode::processPoseCommand()
     {
       next_joint_state = result.second;
       RCLCPP_DEBUG_STREAM(LOGGER, "Pose command timed out. Halting to a stop.");
-    }
-    else
-    {
-      new_pose_msg_ = false;
     }
   }
 
