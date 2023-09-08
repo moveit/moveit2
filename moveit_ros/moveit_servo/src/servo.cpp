@@ -465,45 +465,37 @@ KinematicState Servo::getNextJointState(const ServoInput& command)
 
 const TwistCommand Servo::toPlanningFrame(const TwistCommand& command)
 {
-  Eigen::Vector<double, 6> transformed_twist = command.velocities;
+  Eigen::VectorXd transformed_twist = command.velocities;
 
   if (command.frame_id != servo_params_.planning_frame)
   {
-    Eigen::Vector<double, 6> reordered_twist;
-    // (linear, angular) -> (angular, linear)
-    reordered_twist.head<3>() = command.velocities.tail<3>();
-    reordered_twist.tail<3>() = command.velocities.head<3>();
-
-    const auto planning_to_command_tf = tf2::transformToEigen(
-        transform_buffer_.lookupTransform(command.frame_id, servo_params_.planning_frame, rclcpp::Time(0)));
+    const auto planning_to_command_tf =
+        transform_buffer_.lookupTransform(command.frame_id, servo_params_.planning_frame, rclcpp::Time(0));
 
     if (servo_params_.apply_twist_commands_about_ee_frame)
     {
-      reordered_twist.head<3>() = planning_to_command_tf.rotation() * reordered_twist.head<3>();
-      reordered_twist.tail<3>() = planning_to_command_tf.rotation() * reordered_twist.tail<3>();
+      tf2::doTransform(transformed_twist, transformed_twist, planning_to_command_tf);
     }
     else
     {
       Eigen::MatrixXd adjoint(6, 6);
-      const Eigen::Matrix3d& rotation = planning_to_command_tf.rotation();
-      const Eigen::Vector3d& translation = planning_to_command_tf.translation();
+
+      const auto planning_to_command_tf_eigen = tf2::transformToEigen(planning_to_command_tf);
+      const Eigen::Matrix3d& rotation = planning_to_command_tf_eigen.rotation();
+      const Eigen::Vector3d& translation = planning_to_command_tf_eigen.translation();
 
       Eigen::Matrix3d skew_translation;
       skew_translation.row(0) << 0, -translation(2), translation(1);
       skew_translation.row(1) << translation(2), 0, -translation(0);
       skew_translation.row(2) << -translation(1), translation(0), 0;
 
-      adjoint.topLeftCorner(3, 3) = rotation;
-      adjoint.topRightCorner(3, 3).setZero();
-      adjoint.bottomLeftCorner(3, 3) = skew_translation * rotation;
-      adjoint.bottomRightCorner(3, 3) = rotation;
+      adjoint.topLeftCorner(3, 3) = skew_translation * rotation;
+      adjoint.topRightCorner(3, 3) = rotation;
+      adjoint.bottomLeftCorner(3, 3) = rotation;
+      adjoint.bottomRightCorner(3, 3).setZero();
 
-      reordered_twist = adjoint * reordered_twist;
+      transformed_twist = adjoint * transformed_twist;
     }
-
-    // (angular, linear) -> (linear, angular)
-    transformed_twist.head<3>() = reordered_twist.tail<3>();
-    transformed_twist.tail<3>() = reordered_twist.head<3>();
   }
 
   return TwistCommand{ servo_params_.planning_frame, transformed_twist };
