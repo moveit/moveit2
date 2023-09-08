@@ -393,17 +393,20 @@ KinematicState Servo::getNextJointState(const ServoInput& command)
   KinematicState current_state(num_joints), target_state(num_joints);
   target_state.joint_names = joint_names;
 
-  // If we provide a previous state for drift correction, set the robot position to that.
-  if (servo_params_.apply_anti_drift && last_commanded_state_.has_value())
-  {
-    robot_state->setJointGroupPositions(joint_model_group, last_commanded_state_.value().positions);
-  }
-
   // Copy current kinematic data from RobotState.
   robot_state->copyJointGroupPositions(joint_model_group, current_state.positions);
   robot_state->copyJointGroupVelocities(joint_model_group, current_state.velocities);
 
+  // If we provide a previous state for drift correction, set the robot position to that.
+  auto initial_state = current_state;
+  if (servo_params_.apply_anti_drift && last_commanded_state_.has_value())
+  {
+    robot_state->setJointGroupPositions(joint_model_group, last_commanded_state_.value().positions);
+    robot_state->copyJointGroupPositions(joint_model_group, initial_state.positions);
+  }
+
   // Create Eigen maps for cleaner operations.
+  Eigen::Map<Eigen::VectorXd> initial_joint_positions(initial_state.positions.data(), num_joints);
   Eigen::Map<Eigen::VectorXd> current_joint_positions(current_state.positions.data(), num_joints);
   Eigen::Map<Eigen::VectorXd> target_joint_positions(target_state.positions.data(), num_joints);
   Eigen::Map<Eigen::VectorXd> current_joint_velocities(current_state.velocities.data(), num_joints);
@@ -429,7 +432,7 @@ KinematicState Servo::getNextJointState(const ServoInput& command)
     joint_position_delta *= collision_velocity_scale_;
 
     // Compute the next joint positions based on the joint position deltas
-    target_joint_positions = current_joint_positions + joint_position_delta;
+    target_joint_positions = initial_joint_positions + joint_position_delta;
 
     // TODO : apply filtering to the velocity instead of position
     // Apply smoothing to the positions if a smoother was provided.
