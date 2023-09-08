@@ -394,12 +394,10 @@ KinematicState Servo::getNextJointState(const ServoInput& command,
   KinematicState current_state(num_joints), target_state(num_joints);
   target_state.joint_names = joint_names;
 
-  // If we provide a previous state for drift correction, set that as the robot state.
+  // If we provide a previous state for drift correction, set the robot position to that.
   if (previous_state_maybe)
   {
-    const auto& previous_state = previous_state_maybe.value();
-    robot_state->setJointGroupPositions(joint_model_group, previous_state.positions);
-    robot_state->setJointGroupVelocities(joint_model_group, previous_state.velocities);
+    robot_state->setJointGroupPositions(joint_model_group, previous_state_maybe.value().positions);
   }
 
   // Copy current kinematic data from RobotState.
