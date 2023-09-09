@@ -459,6 +459,10 @@ KinematicState Servo::getNextJointState(const ServoInput& command)
       target_state = haltJoints(joints_to_halt, current_state, target_state);
     }
   }
+  else
+  {
+    robot_state->copyJointGroupPositions(joint_model_group, target_state.positions);
+  }
 
   return target_state;
 }
@@ -469,15 +473,23 @@ const TwistCommand Servo::toPlanningFrame(const TwistCommand& command)
 
   if (command.frame_id != servo_params_.planning_frame)
   {
-    const auto planning_to_command_tf =
+    auto planning_to_command_tf =
         transform_buffer_.lookupTransform(command.frame_id, servo_params_.planning_frame, rclcpp::Time(0));
 
     if (servo_params_.apply_twist_commands_about_ee_frame)
     {
+      // If the twist command is applied about the ee frame, simply apply the rotation of the transform.
+      planning_to_command_tf.transform.translation.x = 0.0;
+      planning_to_command_tf.transform.translation.y = 0.0;
+      planning_to_command_tf.transform.translation.z = 0.0;
       tf2::doTransform(transformed_twist, transformed_twist, planning_to_command_tf);
     }
     else
     {
+      // If the twist command is applied about the planning frame, the spatial twist is calculated
+      // as shown in Equation 3.83 in http://hades.mech.northwestern.edu/images/7/7f/MR.pdf.
+      // The above equation defines twist as [angular; linear], but in our convention it is
+      // [linear; angular] so the adjoint matrix is also reordered accordingly.
       Eigen::MatrixXd adjoint(6, 6);
 
       const auto planning_to_command_tf_eigen = tf2::transformToEigen(planning_to_command_tf);
