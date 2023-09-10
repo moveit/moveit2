@@ -357,9 +357,9 @@ GLuint mesh_filter::GLRenderer::loadShaders(const string& vertex_source, const s
   return program_id;
 }
 
-map<std::thread::id, pair<unsigned, GLuint> > mesh_filter::GLRenderer::context_;
-std::mutex mesh_filter::GLRenderer::context_lock_;
-bool mesh_filter::GLRenderer::glutInitialized_ = false;
+map<std::thread::id, pair<unsigned, GLuint> > mesh_filter::GLRenderer::context;
+std::mutex mesh_filter::GLRenderer::context_lock;
+bool mesh_filter::GLRenderer::glut_initialized = false;
 
 namespace
 {
@@ -370,8 +370,8 @@ void nullDisplayFunction()
 
 void mesh_filter::GLRenderer::createGLContext()
 {
-  std::unique_lock<std::mutex> _(context_lock_);
-  if (!glutInitialized_)
+  std::unique_lock<std::mutex> _(context_lock);
+  if (!glut_initialized)
   {
     char buffer[1];
     char* args = buffer;
@@ -379,16 +379,16 @@ void mesh_filter::GLRenderer::createGLContext()
 
     glutInit(&n, &args);
     glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB | GLUT_DEPTH);
-    glutInitialized_ = true;
+    glut_initialized = true;
   }
 
   // check if our thread is initialized
   std::thread::id thread_id = std::this_thread::get_id();
-  map<std::thread::id, pair<unsigned, GLuint> >::iterator context_it = context_.find(thread_id);
+  map<std::thread::id, pair<unsigned, GLuint> >::iterator context_it = context.find(thread_id);
 
-  if (context_it == context_.end())
+  if (context_it == context.end())
   {
-    context_[thread_id] = std::pair<unsigned, GLuint>(1, 0);
+    context[thread_id] = std::pair<unsigned, GLuint>(1, 0);
 
     glutInitWindowPosition(glutGet(GLUT_SCREEN_WIDTH) + 30000, 0);
     glutInitWindowSize(1, 1);
@@ -409,7 +409,7 @@ void mesh_filter::GLRenderer::createGLContext()
     for (int i = 0; i < 10; ++i)
       glutMainLoopEvent();
 
-    context_[thread_id] = std::pair<unsigned, GLuint>(1, window_id);
+    context[thread_id] = std::pair<unsigned, GLuint>(1, window_id);
   }
   else
     ++(context_it->second.first);
@@ -417,10 +417,10 @@ void mesh_filter::GLRenderer::createGLContext()
 
 void mesh_filter::GLRenderer::deleteGLContext()
 {
-  std::unique_lock<std::mutex> _(context_lock_);
+  std::unique_lock<std::mutex> _(context_lock);
   std::thread::id thread_id = std::this_thread::get_id();
-  map<std::thread::id, pair<unsigned, GLuint> >::iterator context_it = context_.find(thread_id);
-  if (context_it == context_.end())
+  map<std::thread::id, pair<unsigned, GLuint> >::iterator context_it = context.find(thread_id);
+  if (context_it == context.end())
   {
     stringstream error_msg;
     error_msg << "No OpenGL context exists for Thread " << thread_id;
@@ -430,7 +430,7 @@ void mesh_filter::GLRenderer::deleteGLContext()
   if (--(context_it->second.first) == 0)
   {
     glutDestroyWindow(context_it->second.second);
-    context_.erase(context_it);
+    context.erase(context_it);
   }
 }
 
