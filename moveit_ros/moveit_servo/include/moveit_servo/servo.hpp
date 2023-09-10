@@ -129,7 +129,7 @@ public:
    * @param The last commanded joint states.
    * @return The next state stepping towards the required halting state.
    */
-  std::pair<bool, KinematicState> smoothHalt(KinematicState& halt_state);
+  std::pair<bool, KinematicState> smoothHalt(const KinematicState& halt_state);
 
 private:
   /**

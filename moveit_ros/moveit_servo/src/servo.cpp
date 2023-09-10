@@ -547,30 +547,32 @@ KinematicState Servo::getCurrentRobotState()
   return current_state;
 }
 
-std::pair<bool, KinematicState> Servo::smoothHalt(KinematicState& halt_state)
+std::pair<bool, KinematicState> Servo::smoothHalt(const KinematicState& halt_state)
 {
   bool stopped = false;
+  auto target_state = halt_state;
   const auto current_state = getCurrentRobotState();
 
   const size_t num_joints = current_state.joint_names.size();
   for (size_t i = 0; i < num_joints; i++)
   {
-    const double vel = (halt_state.positions[i] - current_state.positions[i]) / servo_params_.publish_period;
-    halt_state.velocities[i] = (vel > STOPPED_VELOCITY_EPS) ? vel : 0.0;
-    halt_state.accelerations[i] =
-        (halt_state.velocities[i] - current_state.velocities[i]) / servo_params_.publish_period;
+    const double vel = (target_state.positions[i] - current_state.positions[i]) / servo_params_.publish_period;
+    target_state.velocities[i] = (vel > STOPPED_VELOCITY_EPS) ? vel : 0.0;
+    target_state.accelerations[i] =
+        (target_state.velocities[i] - current_state.velocities[i]) / servo_params_.publish_period;
   }
 
   // If all velocities are near zero, robot has decelerated to a stop.
-  stopped = (std::accumulate(halt_state.velocities.begin(), halt_state.velocities.end(), 0.0) <= STOPPED_VELOCITY_EPS);
+  stopped =
+      (std::accumulate(target_state.velocities.begin(), target_state.velocities.end(), 0.0) <= STOPPED_VELOCITY_EPS);
 
   if (smoother_)
   {
     smoother_->reset(current_state.positions);
-    smoother_->doSmoothing(halt_state.positions);
+    smoother_->doSmoothing(target_state.positions);
   }
 
-  return std::make_pair(stopped, halt_state);
+  return std::make_pair(stopped, target_state);
 }
 
 }  // namespace moveit_servo
