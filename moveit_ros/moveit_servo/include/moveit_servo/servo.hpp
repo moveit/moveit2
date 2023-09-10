@@ -137,7 +137,7 @@ private:
    * If the command frame is part of the robot model, directly look up the transform using the robot model.
    * Else, fall back to using TF to look up the transform.
    * @param command_frame The command frame name.
-   * @return A transformation
+   * @return The transformation between planning frame and command frame.
    */
   Eigen::Isometry3d getPlanningToCommandFrameTransform(const std::string& command_frame) const;
 

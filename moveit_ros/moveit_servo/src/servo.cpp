@@ -473,7 +473,7 @@ Eigen::Isometry3d Servo::getPlanningToCommandFrameTransform(const std::string& c
   else
   {
     return tf2::transformToEigen(
-        transform_buffer_.lookupTransform(command_frame, servo_params_.planning_frame, rclcpp::Time(0)));
+        transform_buffer_.lookupTransform(servo_params_.planning_frame, command_frame, rclcpp::Time(0)));
   }
 }
 
