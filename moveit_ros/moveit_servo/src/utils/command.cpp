@@ -47,8 +47,8 @@ const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_servo.command_processor
 namespace moveit_servo
 {
 
-JointDeltaResult jointDeltaFromJointJog(const JointJogCommand& command, moveit::core::RobotStatePtr& robot_state,
-                                        servo::Params& servo_params)
+JointDeltaResult jointDeltaFromJointJog(const JointJogCommand& command, const moveit::core::RobotStatePtr& robot_state,
+                                        const servo::Params& servo_params)
 {
   // Find the target joint position based on the commanded joint velocity
   StatusCode status = StatusCode::NO_WARNING;
@@ -96,8 +96,8 @@ JointDeltaResult jointDeltaFromJointJog(const JointJogCommand& command, moveit::
   return std::make_pair(status, joint_position_delta);
 }
 
-JointDeltaResult jointDeltaFromTwist(const TwistCommand& command, moveit::core::RobotStatePtr& robot_state,
-                                     servo::Params& servo_params)
+JointDeltaResult jointDeltaFromTwist(const TwistCommand& command, const moveit::core::RobotStatePtr& robot_state,
+                                     const servo::Params& servo_params)
 {
   StatusCode status = StatusCode::NO_WARNING;
   const int num_joints =
@@ -159,8 +159,8 @@ JointDeltaResult jointDeltaFromTwist(const TwistCommand& command, moveit::core::
   return std::make_pair(status, joint_position_delta);
 }
 
-JointDeltaResult jointDeltaFromPose(const PoseCommand& command, moveit::core::RobotStatePtr& robot_state,
-                                    servo::Params& servo_params)
+JointDeltaResult jointDeltaFromPose(const PoseCommand& command, const moveit::core::RobotStatePtr& robot_state,
+                                    const servo::Params& servo_params)
 {
   StatusCode status = StatusCode::NO_WARNING;
   const int num_joints =
@@ -208,7 +208,7 @@ JointDeltaResult jointDeltaFromPose(const PoseCommand& command, moveit::core::Ro
 }
 
 JointDeltaResult jointDeltaFromIK(const Eigen::VectorXd& cartesian_position_delta,
-                                  moveit::core::RobotStatePtr& robot_state, servo::Params& servo_params)
+                                  const moveit::core::RobotStatePtr& robot_state, const servo::Params& servo_params)
 {
   const moveit::core::JointModelGroup* joint_model_group =
       robot_state->getJointModelGroup(servo_params.move_group_name);

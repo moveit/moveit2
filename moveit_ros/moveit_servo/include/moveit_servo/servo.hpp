@@ -129,7 +129,7 @@ public:
    * @param The last commanded joint states.
    * @return The next state stepping towards the required halting state.
    */
-  std::pair<bool, KinematicState> smoothHalt(KinematicState halt_state);
+  std::pair<bool, KinematicState> smoothHalt(KinematicState& halt_state);
 
 private:
   /**
@@ -155,7 +155,7 @@ private:
    * @param command The incoming servo command.
    * @return The joint position change required (delta).
    */
-  Eigen::VectorXd jointDeltaFromCommand(const ServoInput& command, moveit::core::RobotStatePtr& robot_state);
+  Eigen::VectorXd jointDeltaFromCommand(const ServoInput& command, const moveit::core::RobotStatePtr& robot_state);
 
   /**
    * \brief Updates data depending on joint model group
