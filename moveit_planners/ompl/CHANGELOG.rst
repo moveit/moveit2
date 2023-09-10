@@ -2,6 +2,17 @@
 Changelog for package moveit_planners_ompl
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.8.0 (2023-09-10)
+------------------
+* Fix typo in model_based_planning_context.h (`#2243 <https://github.com/ros-planning/moveit2/issues/2243>`_)
+* Warn if optimization objective does not match expected values (`#2213 <https://github.com/ros-planning/moveit2/issues/2213>`_)
+  * Warn if optimization objective does not match expected values
+  * Update moveit_planners/ompl/ompl_interface/src/model_based_planning_context.cpp
+  Co-authored-by: Sebastian Jahr <sebastian.jahr@tuta.io>
+  * Format
+  ---------
+* Contributors: Stephanie Eng
+
 2.7.4 (2023-05-18)
 ------------------
 * Fix Constraint Planning Segfault (`#2130 <https://github.com/ros-planning/moveit2/issues/2130>`_)

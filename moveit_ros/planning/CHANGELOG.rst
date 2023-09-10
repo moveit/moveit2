@@ -2,6 +2,61 @@
 Changelog for package moveit_ros_planning
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.8.0 (2023-09-10)
+------------------
+* Remove added path index from planner adapter function signature (`#2285 <https://github.com/ros-planning/moveit2/issues/2285>`_)
+* Replaced boost::algorithm::join with fmt::join (`#2273 <https://github.com/ros-planning/moveit2/issues/2273>`_)
+  * Replaced boost::algorithm::join with fmt::join
+  * Made changes in CMakeLists.txt to accomodate fmt
+  * Updated package.xml files
+  * removed redundant boost dependencies
+  * Rename variables -> variable
+  ---------
+  Co-authored-by: Sebastian Castro <4603398+sea-bass@users.noreply.github.com>
+  Co-authored-by: Sebastian Jahr <sebastian.jahr@picknik.ai>
+* Replaced numbers with SystemDefaultsQos() (`#2271 <https://github.com/ros-planning/moveit2/issues/2271>`_)
+* Cleanup planning request adapter interface (`#2266 <https://github.com/ros-planning/moveit2/issues/2266>`_)
+  * Use default arguments instead of additional functions
+  * Use generate param lib for default plan request adapters
+  * Small cleanup of ResolveConstraintFrames
+  * Remove dublicate yaml file entry
+  * Move list_planning_adapter_plugins into own directory
+  * Apply suggestions from code review
+  Co-authored-by: Sebastian Castro <4603398+sea-bass@users.noreply.github.com>
+  * Fix copy& paste error
+  * Update parameter descriptions
+  Co-authored-by: Sebastian Castro <4603398+sea-bass@users.noreply.github.com>
+  * Apply suggestions from code review
+  Co-authored-by: Kyle Cesare <kcesare@gmail.com>
+  * EMPTY_PATH_INDEX_VECTOR -> empty_path_index_vector
+  * Update parameter yaml
+  * Make param listener unique
+  * Fix build error
+  * Use gt_eq instead of deprecated lower_bounds
+  ---------
+  Co-authored-by: Sebastian Castro <4603398+sea-bass@users.noreply.github.com>
+  Co-authored-by: Kyle Cesare <kcesare@gmail.com>
+* Prefer to use the active controller if multiple controllers apply (`#2251 <https://github.com/ros-planning/moveit2/issues/2251>`_)
+* Don't default to random algorithm if no plugin is defined (`#2228 <https://github.com/ros-planning/moveit2/issues/2228>`_)
+  * Don't default to random algorithm if no plugin is defined
+  * Simplify selection logic & initialize default values in constructor
+  * Increase message severity
+* Always set response planner id and warn if it is not set (`#2236 <https://github.com/ros-planning/moveit2/issues/2236>`_)
+* Suppress redundant error message in CSM (`#2222 <https://github.com/ros-planning/moveit2/issues/2222>`_)
+  The CSM would spam the log if /joint_states messages
+  includes unkonwn joints. RobotModel::hasJointModel()
+  allows for verifying joint names in a safe way without
+  the error message.
+* Minor cleanup to ros_control_interface and trajectory execution (`#2208 <https://github.com/ros-planning/moveit2/issues/2208>`_)
+* Ensure that planning pipeline id is set (`#2202 <https://github.com/ros-planning/moveit2/issues/2202>`_)
+* Add @brief descriptions for plan_request_adapters (`#2185 <https://github.com/ros-planning/moveit2/issues/2185>`_)
+* Make loggers static or move into anonymous namespace (`#2184 <https://github.com/ros-planning/moveit2/issues/2184>`_)
+  * Make loggers static or move into anonymous namespace
+  * Update moveit_ros/planning_interface/move_group_interface/src/move_group_interface.cpp
+  * Update moveit_ros/planning_interface/move_group_interface/src/move_group_interface.cpp
+  * Move LOGGER out of class template
+* Contributors: Henning Kayser, Sebastian Jahr, Shobuj Paul, Stephanie Eng
+
 2.7.4 (2023-05-18)
 ------------------
 * Update default planning configs to use AddTimeOptimalParameterization (`#2167 <https://github.com/ros-planning/moveit2/issues/2167>`_)
