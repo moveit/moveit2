@@ -2,6 +2,9 @@
 Changelog for package moveit_ros_benchmarks
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.5.5 (2023-09-10)
+------------------
+
 2.5.4 (2022-11-04)
 ------------------
 * Free functions for calculating properties of trajectories (`#1503 <https://github.com/ros-planning/moveit2/issues/1503>`_) (`#1657 <https://github.com/ros-planning/moveit2/issues/1657>`_)

@@ -2,6 +2,30 @@
 Changelog for package moveit_ros_visualization
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.5.5 (2023-09-10)
+------------------
+* Replaced numbers with SystemDefaultsQos() (`#2271 <https://github.com/ros-planning/moveit2/issues/2271>`_) (`#2277 <https://github.com/ros-planning/moveit2/issues/2277>`_)
+  (cherry picked from commit 5506dd516a91bc145e462b493668ef8623d43521)
+  Co-authored-by: Shobuj Paul <72087882+Shobuj-Paul@users.noreply.github.com>
+* Doxygen tag (backport `#1955 <https://github.com/ros-planning/moveit2/issues/1955>`_) (`#1958 <https://github.com/ros-planning/moveit2/issues/1958>`_)
+  * Generate Doxygen Tag
+  * Install tagfile in output directory
+  * Fix problematic override for Doxygen linking
+  (cherry picked from commit 752571e9ff027b3137b9720227681ed6b57e42d6)
+  Co-authored-by: Henning Kayser <henningkayser@picknik.ai>
+* Use <> for non-local headers (`#1765 <https://github.com/ros-planning/moveit2/issues/1765>`_)
+  Unless a header lives in the same or a child directory of the file
+  including it, it's recommended to use <> for the #include statement.
+  For more information, see the C++ Core Guidelines item SF.12
+  https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#sf12-prefer-the-quoted-form-of-include-for-files-relative-to-the-including-file-and-the-angle-bracket-form-everywhere-else
+  (cherry picked from commit 7a1f2a101f9aeb8557e8a31656bbe1a6d53b430e)
+* Re-enable clang-tidy check `performance-unnecessary-value-param` (backport `#1703 <https://github.com/ros-planning/moveit2/issues/1703>`_)
+  * Re-enable clang-tidy check performance-unnecessary-value-param (`#1703 <https://github.com/ros-planning/moveit2/issues/1703>`_)
+  * Fix clang-tidy issues (`#1706 <https://github.com/ros-planning/moveit2/issues/1706>`_)
+  Co-authored-by: Henning Kayser <henningkayser@picknik.ai>
+  Co-authored-by: Robert Haschke <rhaschke@users.noreply.github.com>
+* Contributors: Chris Thrasher, mergify[bot]
+
 2.5.4 (2022-11-04)
 ------------------
 * Use pragma once as header include guard (`#1525 <https://github.com/ros-planning/moveit2/issues/1525>`_) (`#1652 <https://github.com/ros-planning/moveit2/issues/1652>`_)

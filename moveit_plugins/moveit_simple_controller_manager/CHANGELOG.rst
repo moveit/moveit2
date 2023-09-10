@@ -2,6 +2,18 @@
 Changelog for package moveit_simple_controller_manager
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.5.5 (2023-09-10)
+------------------
+* Use emulated time in action-based controller (`#899 <https://github.com/ros-planning/moveit2/issues/899>`_) (`#1743 <https://github.com/ros-planning/moveit2/issues/1743>`_)
+  (cherry picked from commit b6fcac8055f54012dd9e698be6e06f70613a5abf)
+  Co-authored-by: Gaël Écorchard <gael.ecorchard@cvut.cz>
+* Re-enable clang-tidy check `performance-unnecessary-value-param` (backport `#1703 <https://github.com/ros-planning/moveit2/issues/1703>`_)
+  * Re-enable clang-tidy check performance-unnecessary-value-param (`#1703 <https://github.com/ros-planning/moveit2/issues/1703>`_)
+  * Fix clang-tidy issues (`#1706 <https://github.com/ros-planning/moveit2/issues/1706>`_)
+  Co-authored-by: Henning Kayser <henningkayser@picknik.ai>
+  Co-authored-by: Robert Haschke <rhaschke@users.noreply.github.com>
+* Contributors: mergify[bot]
+
 2.5.4 (2022-11-04)
 ------------------
 * Support chained controllers (backport `#1482 <https://github.com/ros-planning/moveit2/issues/1482>`_) (`#1623 <https://github.com/ros-planning/moveit2/issues/1623>`_)
