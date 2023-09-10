@@ -473,16 +473,22 @@ const TwistCommand Servo::toPlanningFrame(const TwistCommand& command)
 
   if (command.frame_id != servo_params_.planning_frame)
   {
-    // Lookup the transform between the planning and command frames.
-    // TODO (2352) Use the robot state instead of TF when possible.
+    // Look up the transform between the planning and command frames.
+    // If the command frame is known by the robot model, use the robot model transforms directly.
+    // Otherwise, fall back to using TF to lookup the transform (useful for externally tracked frames).
+    moveit::core::RobotStatePtr robot_state = planning_scene_monitor_->getStateMonitor()->getCurrentState();
+    const bool command_frame_in_robot_model = robot_state->knowsFrameTransform(command.frame_id);
     const auto planning_to_command_tf =
-        transform_buffer_.lookupTransform(command.frame_id, servo_params_.planning_frame, rclcpp::Time(0));
-    const auto planning_to_command_tf_eigen = tf2::transformToEigen(planning_to_command_tf);
+        command_frame_in_robot_model ?
+            robot_state->getGlobalLinkTransform(servo_params_.planning_frame).inverse() *
+                robot_state->getGlobalLinkTransform(command.frame_id) :
+            tf2::transformToEigen(
+                transform_buffer_.lookupTransform(command.frame_id, servo_params_.planning_frame, rclcpp::Time(0)));
 
     if (servo_params_.apply_twist_commands_about_ee_frame)
     {
       // If the twist command is applied about the end effector frame, simply apply the rotation of the transform.
-      const auto planning_to_command_rotation = planning_to_command_tf_eigen.linear();
+      const auto planning_to_command_rotation = planning_to_command_tf.linear();
       const Eigen::Vector3d translation_vector =
           planning_to_command_rotation *
           Eigen::Vector3d(command.velocities[0], command.velocities[1], command.velocities[2]);
@@ -502,8 +508,8 @@ const TwistCommand Servo::toPlanningFrame(const TwistCommand& command)
       // [linear; angular] so the adjoint matrix is also reordered accordingly.
       Eigen::MatrixXd adjoint(6, 6);
 
-      const Eigen::Matrix3d& rotation = planning_to_command_tf_eigen.rotation();
-      const Eigen::Vector3d& translation = planning_to_command_tf_eigen.translation();
+      const Eigen::Matrix3d& rotation = planning_to_command_tf.rotation();
+      const Eigen::Vector3d& translation = planning_to_command_tf.translation();
 
       Eigen::Matrix3d skew_translation;
       skew_translation.row(0) << 0, -translation(2), translation(1);
