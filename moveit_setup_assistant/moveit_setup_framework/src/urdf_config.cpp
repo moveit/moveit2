@@ -110,8 +110,8 @@ void URDFConfig::setPackageName()
     else
     {
       RCLCPP_WARN(*logger_,
-                  "Package Not Found In ROS Workspace. ROS was unable to find the package name '%s'"
-                  " within the ROS workspace. This may cause issues later.",
+                  "Found package name '%s' but failed to resolve ROS package path."
+                  "Attempting to load the URDF from absolute path, instead.",
                   pkg_name.c_str());
     }
   }
