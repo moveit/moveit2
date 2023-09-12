@@ -2,6 +2,12 @@
 Changelog for package moveit_ros_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.8.0 (2023-09-10)
+------------------
+* Replaced numbers with SystemDefaultsQos() (`#2271 <https://github.com/ros-planning/moveit2/issues/2271>`_)
+* Use `isnan` in `DepthImageOctomapUpdater` (`#2201 <https://github.com/ros-planning/moveit2/issues/2201>`_)
+* Contributors: Ezra Brooks, Shobuj Paul
+
 2.7.4 (2023-05-18)
 ------------------
 

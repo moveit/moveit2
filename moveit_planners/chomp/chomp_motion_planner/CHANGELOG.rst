@@ -2,6 +2,11 @@
 Changelog for package chomp_motion_planner
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.8.0 (2023-09-10)
+------------------
+* Always set response planner id and warn if it is not set (`#2236 <https://github.com/ros-planning/moveit2/issues/2236>`_)
+* Contributors: Sebastian Jahr
+
 2.7.4 (2023-05-18)
 ------------------
 
