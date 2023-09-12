@@ -2,6 +2,37 @@
 Changelog for package moveit_core
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.8.0 (2023-09-10)
+------------------
+* Add a benchmark for 'getJacobian' (`#2326 <https://github.com/ros-planning/moveit2/issues/2326>`_)
+* [TOTG] Exit loop when position can't change (`#2307 <https://github.com/ros-planning/moveit2/issues/2307>`_)
+* Remove added path index from planner adapter function signature (`#2285 <https://github.com/ros-planning/moveit2/issues/2285>`_)
+* Fix typo in error message (`#2286 <https://github.com/ros-planning/moveit2/issues/2286>`_)
+* Fix comment formatting (`#2276 <https://github.com/ros-planning/moveit2/issues/2276>`_)
+* Cleanup planning request adapter interface (`#2266 <https://github.com/ros-planning/moveit2/issues/2266>`_)
+  * Use default arguments instead of additional functions
+  * Use generate param lib for default plan request adapters
+  * Small cleanup of ResolveConstraintFrames
+  * Remove dublicate yaml file entry
+  * Move list_planning_adapter_plugins into own directory
+  * Apply suggestions from code review
+  Co-authored-by: Sebastian Castro <4603398+sea-bass@users.noreply.github.com>
+  * Fix copy& paste error
+  * Update parameter descriptions
+  Co-authored-by: Sebastian Castro <4603398+sea-bass@users.noreply.github.com>
+  * Apply suggestions from code review
+  Co-authored-by: Kyle Cesare <kcesare@gmail.com>
+  * EMPTY_PATH_INDEX_VECTOR -> empty_path_index_vector
+  * Update parameter yaml
+  * Make param listener unique
+  * Fix build error
+  * Use gt_eq instead of deprecated lower_bounds
+  ---------
+  Co-authored-by: Sebastian Castro <4603398+sea-bass@users.noreply.github.com>
+  Co-authored-by: Kyle Cesare <kcesare@gmail.com>
+* fix for kinematic constraints parsing (`#2267 <https://github.com/ros-planning/moveit2/issues/2267>`_)
+* Contributors: Jorge Nicho, Mario Prats, Nacho Mellado, Sebastian Jahr, Stephanie Eng
+
 2.7.4 (2023-05-18)
 ------------------
 * Add documentation and cleanups for PlanningRequestAdapter and PlanningRequestAdapterChain classes (`#2142 <https://github.com/ros-planning/moveit2/issues/2142>`_)

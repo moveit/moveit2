@@ -2,6 +2,17 @@
 Changelog for package moveit_kinematics
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.8.0 (2023-09-10)
+------------------
+* Fix linking error with cached_ik_kinematics_plugin (`#2292 <https://github.com/ros-planning/moveit2/issues/2292>`_)
+* Fix ikfast package template (`#2195 <https://github.com/ros-planning/moveit2/issues/2195>`_)
+* Make loggers static or move into anonymous namespace (`#2184 <https://github.com/ros-planning/moveit2/issues/2184>`_)
+  * Make loggers static or move into anonymous namespace
+  * Update moveit_ros/planning_interface/move_group_interface/src/move_group_interface.cpp
+  * Update moveit_ros/planning_interface/move_group_interface/src/move_group_interface.cpp
+  * Move LOGGER out of class template
+* Contributors: Jafar, Sebastian Jahr, Shane Loretz
+
 2.7.4 (2023-05-18)
 ------------------
 

@@ -2,6 +2,28 @@
 Changelog for package moveit_ros_move_group
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.8.0 (2023-09-10)
+------------------
+* Replaced boost::algorithm::join with fmt::join (`#2273 <https://github.com/ros-planning/moveit2/issues/2273>`_)
+  * Replaced boost::algorithm::join with fmt::join
+  * Made changes in CMakeLists.txt to accomodate fmt
+  * Updated package.xml files
+  * removed redundant boost dependencies
+  * Rename variables -> variable
+  ---------
+  Co-authored-by: Sebastian Castro <4603398+sea-bass@users.noreply.github.com>
+  Co-authored-by: Sebastian Jahr <sebastian.jahr@picknik.ai>
+* Specify controller name in MGI execution (`#2257 <https://github.com/ros-planning/moveit2/issues/2257>`_)
+  * Specify controller name in MGI execute
+  * Finish comment
+  ---------
+  Co-authored-by: Sebastian Jahr <sebastian.jahr@picknik.ai>
+* fix move_group capabilities loading (`#2270 <https://github.com/ros-planning/moveit2/issues/2270>`_)
+  * fix move_group capabilities loading
+  * clang-format
+* Cleanup move_group CMake (`#2226 <https://github.com/ros-planning/moveit2/issues/2226>`_)
+* Contributors: Shobuj Paul, Stephanie Eng, Tyler Weaver, Yang Lin
+
 2.7.4 (2023-05-18)
 ------------------
 * Fix MoveGroup action cancel callback (`#2118 <https://github.com/ros-planning/moveit2/issues/2118>`_)
