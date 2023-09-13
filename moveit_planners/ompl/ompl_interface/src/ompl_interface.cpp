@@ -39,6 +39,7 @@
 #include <moveit/kinematic_constraints/utils.h>
 #include <moveit/utils/lexical_casts.h>
 #include <fstream>
+#include <any>
 
 namespace ompl_interface
 {
@@ -119,7 +120,7 @@ void OMPLInterface::loadConstraintSamplers()
 }
 
 bool OMPLInterface::loadPlannerConfiguration(const std::string& group_name, const std::string& planner_id,
-                                             const std::map<std::string, std::string>& group_params,
+                                             const std::map<std::string, std::any>& group_params,
                                              planning_interface::PlannerConfigurationSettings& planner_config)
 {
   rcl_interfaces::msg::ListParametersResult planner_params_result =
@@ -168,7 +169,7 @@ void OMPLInterface::loadPlannerConfigurations()
     const std::string group_name_param = parameter_namespace_ + "." + group_name;
 
     // get parameters specific for the robot planning group
-    std::map<std::string, std::string> specific_group_params;
+    std::map<std::string, std::any> specific_group_params;
     for (const auto& [name, type] : KNOWN_GROUP_PARAMS)
     {
       std::string param_name{ group_name_param };
@@ -190,15 +191,15 @@ void OMPLInterface::loadPlannerConfigurations()
         }
         else if (parameter.get_type() == rclcpp::ParameterType::PARAMETER_DOUBLE)
         {
-          specific_group_params[name] = moveit::core::toString(parameter.as_double());
+          specific_group_params[name] = parameter.as_double();
         }
         else if (parameter.get_type() == rclcpp::ParameterType::PARAMETER_INTEGER)
         {
-          specific_group_params[name] = std::to_string(parameter.as_int());
+          specific_group_params[name] = parameter.as_int();
         }
         else if (parameter.get_type() == rclcpp::ParameterType::PARAMETER_BOOL)
         {
-          specific_group_params[name] = std::to_string(parameter.as_bool());
+          specific_group_params[name] = parameter.as_bool();
         }
       }
     }
@@ -245,7 +246,7 @@ void OMPLInterface::loadPlannerConfigurations()
 
     for (const auto& [param_name, param_value] : config_settings.config)
     {
-      RCLCPP_DEBUG_STREAM(LOGGER, " - " << param_name << " = " << param_value);
+      RCLCPP_DEBUG_STREAM(LOGGER, " - " << param_name << " = " << moveit::core::toString(param_value));
     }
   }
 

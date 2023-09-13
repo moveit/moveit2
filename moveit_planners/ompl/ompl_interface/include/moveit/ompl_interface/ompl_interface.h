@@ -45,6 +45,7 @@
 #include <rclcpp/node.hpp>
 #include <string>
 #include <map>
+#include <any>
 
 /** \brief The MoveIt interface to OMPL */
 namespace ompl_interface
@@ -122,7 +123,7 @@ public:
 protected:
   /** @brief Load planner configurations for specified group into planner_config */
   bool loadPlannerConfiguration(const std::string& group_name, const std::string& planner_id,
-                                const std::map<std::string, std::string>& group_params,
+                                const std::map<std::string, std::any>& group_params,
                                 planning_interface::PlannerConfigurationSettings& planner_config);
 
   /** @brief Configure the planners*/
