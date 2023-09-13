@@ -321,7 +321,8 @@ void ServoNode::servoLoop()
       RCLCPP_WARN_STREAM(LOGGER, "Command type has not been set, cannot accept input");
     }
 
-    if (next_joint_state && (servo_->getStatus() != StatusCode::INVALID))
+    if (next_joint_state && (servo_->getStatus() != StatusCode::INVALID) &&
+        (servo_->getStatus() != StatusCode::HALT_FOR_COLLISION))
     {
       if (servo_params_.command_out_type == "trajectory_msgs/JointTrajectory")
       {
