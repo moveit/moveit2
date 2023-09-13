@@ -214,9 +214,6 @@ private:
   std::unique_ptr<CollisionMonitor> collision_monitor_;
 
   pluginlib::UniquePtr<online_signal_smoothing::SmoothingBaseClass> smoother_ = nullptr;
-
-  tf2_ros::Buffer transform_buffer_;
-  tf2_ros::TransformListener transform_listener_;
 };
 
 }  // namespace moveit_servo

@@ -60,8 +60,6 @@ Servo::Servo(const rclcpp::Node::SharedPtr& node, std::shared_ptr<const servo::P
   : node_(node)
   , servo_param_listener_{ std::move(servo_param_listener) }
   , planning_scene_monitor_{ planning_scene_monitor }
-  , transform_buffer_(node_->get_clock())
-  , transform_listener_(transform_buffer_)
 {
   servo_params_ = servo_param_listener_->get_params();
 
@@ -472,8 +470,8 @@ Eigen::Isometry3d Servo::getPlanningToCommandFrameTransform(const std::string& c
   }
   else
   {
-    return tf2::transformToEigen(
-        transform_buffer_.lookupTransform(servo_params_.planning_frame, command_frame, rclcpp::Time(0)));
+    return tf2::transformToEigen(planning_scene_monitor_->getTFClient()->lookupTransform(
+        servo_params_.planning_frame, command_frame, rclcpp::Time(0)));
   }
 }
 
