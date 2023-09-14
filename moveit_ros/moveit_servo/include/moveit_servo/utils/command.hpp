@@ -53,41 +53,41 @@ namespace moveit_servo
 /**
  * \brief Compute the change in joint position for the given joint jog command.
  * @param command The joint jog command.
- * @param robot_state_ The current robot state as obtained from PlanningSceneMonitor
- * @param servo_params The servo parameters
+ * @param robot_state_ The current robot state as obtained from PlanningSceneMonitor.
+ * @param servo_params The servo parameters.
  * @return The status and joint position change required (delta).
  */
-JointDeltaResult jointDeltaFromJointJog(const JointJogCommand& command, moveit::core::RobotStatePtr& robot_state,
-                                        servo::Params& servo_params);
+JointDeltaResult jointDeltaFromJointJog(const JointJogCommand& command, const moveit::core::RobotStatePtr& robot_state,
+                                        const servo::Params& servo_params);
 
 /**
  * \brief Compute the change in joint position for the given twist command.
  * @param command The twist command.
- * @param robot_state_ The current robot state as obtained from PlanningSceneMonitor
- * @param servo_params The servo parameters
+ * @param robot_state_ The current robot state as obtained from PlanningSceneMonitor.
+ * @param servo_params The servo parameters.
  * @return The status and joint position change required (delta).
  */
-JointDeltaResult jointDeltaFromTwist(const TwistCommand& command, moveit::core::RobotStatePtr& robot_state,
-                                     servo::Params& servo_params);
+JointDeltaResult jointDeltaFromTwist(const TwistCommand& command, const moveit::core::RobotStatePtr& robot_state,
+                                     const servo::Params& servo_params);
 
 /**
  * \brief Compute the change in joint position for the given pose command.
  * @param command The pose command.
- * @param robot_state_ The current robot state as obtained from PlanningSceneMonitor
- * @param servo_params The servo parameters
+ * @param robot_state_ The current robot state as obtained from PlanningSceneMonitor.
+ * @param servo_params The servo parameters.
  * @return The status and joint position change required (delta).
  */
-JointDeltaResult jointDeltaFromPose(const PoseCommand& command, moveit::core::RobotStatePtr& robot_state,
-                                    servo::Params& servo_params);
+JointDeltaResult jointDeltaFromPose(const PoseCommand& command, const moveit::core::RobotStatePtr& robot_state,
+                                    const servo::Params& servo_params);
 
 /**
  * \brief Computes the required change in joint angles for given Cartesian change, using the robot's IK solver.
  * @param cartesian_position_delta The change in Cartesian position.
- * @param robot_state_ The current robot state as obtained from PlanningSceneMonitor
- * @param servo_params The servo parameters
+ * @param robot_state_ The current robot state as obtained from PlanningSceneMonitor.
+ * @param servo_params The servo parameters.
  * @return The status and joint position change required (delta).
  */
 JointDeltaResult jointDeltaFromIK(const Eigen::VectorXd& cartesian_position_delta,
-                                  moveit::core::RobotStatePtr& robot_state, servo::Params& servo_params);
+                                  const moveit::core::RobotStatePtr& robot_state, const servo::Params& servo_params);
 
 }  // namespace moveit_servo
