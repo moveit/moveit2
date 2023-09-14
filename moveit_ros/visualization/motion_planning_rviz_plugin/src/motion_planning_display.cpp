@@ -1342,7 +1342,7 @@ void MotionPlanningDisplay::update(float wall_dt, float ros_dt)
   PlanningSceneDisplay::update(wall_dt, ros_dt);
 }
 
-void MotionPlanningDisplay::updateInternal(float wall_dt, float ros_dt)
+void MotionPlanningDisplay::updateInternal(double wall_dt, double ros_dt)
 {
   PlanningSceneDisplay::updateInternal(wall_dt, ros_dt);
 

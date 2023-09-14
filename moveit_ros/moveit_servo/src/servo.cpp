@@ -60,8 +60,6 @@ Servo::Servo(const rclcpp::Node::SharedPtr& node, std::shared_ptr<const servo::P
   : node_(node)
   , servo_param_listener_{ std::move(servo_param_listener) }
   , planning_scene_monitor_{ planning_scene_monitor }
-  , transform_buffer_(node_->get_clock())
-  , transform_listener_(transform_buffer_)
 {
   servo_params_ = servo_param_listener_->get_params();
 
@@ -160,7 +158,7 @@ void Servo::setCollisionChecking(const bool check_collision)
   check_collision ? collision_monitor_->start() : collision_monitor_->stop();
 }
 
-bool Servo::validateParams(const servo::Params& servo_params)
+bool Servo::validateParams(const servo::Params& servo_params) const
 {
   bool params_valid = true;
 
@@ -248,17 +246,17 @@ servo::Params& Servo::getParams()
   return servo_params_;
 }
 
-StatusCode Servo::getStatus()
+StatusCode Servo::getStatus() const
 {
   return servo_status_;
 }
 
-const std::string Servo::getStatusMessage()
+std::string Servo::getStatusMessage() const
 {
   return SERVO_STATUS_CODE_MAP.at(servo_status_);
 }
 
-CommandType Servo::getCommandType()
+CommandType Servo::getCommandType() const
 {
   return expected_command_type_;
 }
@@ -268,14 +266,13 @@ void Servo::setCommandType(const CommandType& command_type)
   expected_command_type_ = command_type;
 }
 
-const Eigen::Isometry3d Servo::getEndEffectorPose()
+Eigen::Isometry3d Servo::getEndEffectorPose() const
 {
-  // Robot base (panda_link0) to end effector frame (panda_link8)
   return planning_scene_monitor_->getStateMonitor()->getCurrentState()->getGlobalLinkTransform(servo_params_.ee_frame);
 }
 
 KinematicState Servo::haltJoints(const std::vector<int>& joints_to_halt, const KinematicState& current_state,
-                                 const KinematicState& target_state)
+                                 const KinematicState& target_state) const
 {
   KinematicState bounded_state(target_state.joint_names.size());
   bounded_state.joint_names = target_state.joint_names;
@@ -311,7 +308,7 @@ KinematicState Servo::haltJoints(const std::vector<int>& joints_to_halt, const K
   return bounded_state;
 }
 
-Eigen::VectorXd Servo::jointDeltaFromCommand(const ServoInput& command, moveit::core::RobotStatePtr& robot_state)
+Eigen::VectorXd Servo::jointDeltaFromCommand(const ServoInput& command, const moveit::core::RobotStatePtr& robot_state)
 {
   const int num_joints =
       robot_state->getJointModelGroup(servo_params_.move_group_name)->getActiveJointModelNames().size();
@@ -463,28 +460,53 @@ KinematicState Servo::getNextJointState(const ServoInput& command)
   return target_state;
 }
 
-const TwistCommand Servo::toPlanningFrame(const TwistCommand& command)
+Eigen::Isometry3d Servo::getPlanningToCommandFrameTransform(const std::string& command_frame) const
 {
-  Eigen::Vector<double, 6> transformed_twist = command.velocities;
+  const moveit::core::RobotStatePtr robot_state = planning_scene_monitor_->getStateMonitor()->getCurrentState();
+  if (robot_state->knowsFrameTransform(command_frame))
+  {
+    return robot_state->getGlobalLinkTransform(servo_params_.planning_frame).inverse() *
+           robot_state->getGlobalLinkTransform(command_frame);
+  }
+  else
+  {
+    return tf2::transformToEigen(planning_scene_monitor_->getTFClient()->lookupTransform(
+        servo_params_.planning_frame, command_frame, rclcpp::Time(0)));
+  }
+}
+
+TwistCommand Servo::toPlanningFrame(const TwistCommand& command) const
+{
+  Eigen::VectorXd transformed_twist = command.velocities;
 
   if (command.frame_id != servo_params_.planning_frame)
   {
-    Eigen::Vector<double, 6> reordered_twist;
-    // (linear, angular) -> (angular, linear)
-    reordered_twist.head<3>() = command.velocities.tail<3>();
-    reordered_twist.tail<3>() = command.velocities.head<3>();
-
-    const auto planning_to_command_tf = tf2::transformToEigen(
-        transform_buffer_.lookupTransform(command.frame_id, servo_params_.planning_frame, rclcpp::Time(0)));
+    // Look up the transform between the planning and command frames.
+    const auto planning_to_command_tf = getPlanningToCommandFrameTransform(command.frame_id);
 
     if (servo_params_.apply_twist_commands_about_ee_frame)
     {
-      reordered_twist.head<3>() = planning_to_command_tf.rotation() * reordered_twist.head<3>();
-      reordered_twist.tail<3>() = planning_to_command_tf.rotation() * reordered_twist.tail<3>();
+      // If the twist command is applied about the end effector frame, simply apply the rotation of the transform.
+      const auto planning_to_command_rotation = planning_to_command_tf.linear();
+      const Eigen::Vector3d translation_vector =
+          planning_to_command_rotation *
+          Eigen::Vector3d(command.velocities[0], command.velocities[1], command.velocities[2]);
+      const Eigen::Vector3d angular_vector =
+          planning_to_command_rotation *
+          Eigen::Vector3d(command.velocities[3], command.velocities[4], command.velocities[5]);
+
+      // Update the values of the original command message to reflect the change in frame
+      transformed_twist.head<3>() = translation_vector;
+      transformed_twist.tail<3>() = angular_vector;
     }
     else
     {
+      // If the twist command is applied about the planning frame, the spatial twist is calculated
+      // as shown in Equation 3.83 in http://hades.mech.northwestern.edu/images/7/7f/MR.pdf.
+      // The above equation defines twist as [angular; linear], but in our convention it is
+      // [linear; angular] so the adjoint matrix is also reordered accordingly.
       Eigen::MatrixXd adjoint(6, 6);
+
       const Eigen::Matrix3d& rotation = planning_to_command_tf.rotation();
       const Eigen::Vector3d& translation = planning_to_command_tf.translation();
 
@@ -493,32 +515,25 @@ const TwistCommand Servo::toPlanningFrame(const TwistCommand& command)
       skew_translation.row(1) << translation(2), 0, -translation(0);
       skew_translation.row(2) << -translation(1), translation(0), 0;
 
-      adjoint.topLeftCorner(3, 3) = rotation;
-      adjoint.topRightCorner(3, 3).setZero();
-      adjoint.bottomLeftCorner(3, 3) = skew_translation * rotation;
-      adjoint.bottomRightCorner(3, 3) = rotation;
+      adjoint.topLeftCorner(3, 3) = skew_translation * rotation;
+      adjoint.topRightCorner(3, 3) = rotation;
+      adjoint.bottomLeftCorner(3, 3) = rotation;
+      adjoint.bottomRightCorner(3, 3).setZero();
 
-      reordered_twist = adjoint * reordered_twist;
+      transformed_twist = adjoint * transformed_twist;
     }
-
-    // (angular, linear) -> (linear, angular)
-    transformed_twist.head<3>() = reordered_twist.tail<3>();
-    transformed_twist.tail<3>() = reordered_twist.head<3>();
   }
 
   return TwistCommand{ servo_params_.planning_frame, transformed_twist };
 }
 
-const PoseCommand Servo::toPlanningFrame(const PoseCommand& command)
+PoseCommand Servo::toPlanningFrame(const PoseCommand& command) const
 {
-  auto target_pose_msg = convertIsometryToTransform(command.pose, servo_params_.planning_frame, command.frame_id);
-  auto command_to_planning_frame = transform_buffer_.lookupTransform(
-      servo_params_.planning_frame, command.frame_id, rclcpp::Time(0), rclcpp::Duration::from_seconds(2));
-  tf2::doTransform(target_pose_msg, target_pose_msg, command_to_planning_frame);
-  return PoseCommand{ servo_params_.planning_frame, tf2::transformToEigen(target_pose_msg) };
+  return PoseCommand{ servo_params_.planning_frame,
+                      getPlanningToCommandFrameTransform(command.frame_id) * command.pose };
 }
 
-KinematicState Servo::getCurrentRobotState()
+KinematicState Servo::getCurrentRobotState() const
 {
   moveit::core::RobotStatePtr robot_state = planning_scene_monitor_->getStateMonitor()->getCurrentState();
   const moveit::core::JointModelGroup* joint_model_group =
@@ -534,30 +549,32 @@ KinematicState Servo::getCurrentRobotState()
   return current_state;
 }
 
-std::pair<bool, KinematicState> Servo::smoothHalt(KinematicState halt_state)
+std::pair<bool, KinematicState> Servo::smoothHalt(const KinematicState& halt_state) const
 {
   bool stopped = false;
+  auto target_state = halt_state;
   const auto current_state = getCurrentRobotState();
 
   const size_t num_joints = current_state.joint_names.size();
   for (size_t i = 0; i < num_joints; i++)
   {
-    const double vel = (halt_state.positions[i] - current_state.positions[i]) / servo_params_.publish_period;
-    halt_state.velocities[i] = (vel > STOPPED_VELOCITY_EPS) ? vel : 0.0;
-    halt_state.accelerations[i] =
-        (halt_state.velocities[i] - current_state.velocities[i]) / servo_params_.publish_period;
+    const double vel = (target_state.positions[i] - current_state.positions[i]) / servo_params_.publish_period;
+    target_state.velocities[i] = (vel > STOPPED_VELOCITY_EPS) ? vel : 0.0;
+    target_state.accelerations[i] =
+        (target_state.velocities[i] - current_state.velocities[i]) / servo_params_.publish_period;
   }
 
-  // If all velocities are zero, robot has decelerated to a stop.
-  stopped = (std::accumulate(halt_state.velocities.begin(), halt_state.velocities.end(), 0.0) == 0.0);
+  // If all velocities are near zero, robot has decelerated to a stop.
+  stopped =
+      (std::accumulate(target_state.velocities.begin(), target_state.velocities.end(), 0.0) <= STOPPED_VELOCITY_EPS);
 
   if (smoother_)
   {
     smoother_->reset(current_state.positions);
-    smoother_->doSmoothing(halt_state.positions);
+    smoother_->doSmoothing(target_state.positions);
   }
 
-  return std::make_pair(stopped, halt_state);
+  return std::make_pair(stopped, target_state);
 }
 
 }  // namespace moveit_servo

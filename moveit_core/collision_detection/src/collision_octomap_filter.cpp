@@ -98,13 +98,13 @@ int collision_detection::refineContactNormals(const World::ObjectConstPtr& objec
       continue;
     }
 
-    double cell_size = 0;
     if (!object->shapes_.empty())
     {
       const shapes::ShapeConstPtr& shape = object->shapes_[0];
       const std::shared_ptr<const shapes::OcTree> shape_octree = std::dynamic_pointer_cast<const shapes::OcTree>(shape);
       if (shape_octree)
       {
+        double cell_size = 0;
         std::shared_ptr<const octomap::OcTree> octree = shape_octree->octree;
         cell_size = octree->getResolution();
         for (auto& contact_info : contact_vector)
@@ -174,7 +174,6 @@ bool getMetaballSurfaceProperties(const octomap::point3d_list& cloud, const doub
                                   const double& r_multiple, const octomath::Vector3& contact_point,
                                   octomath::Vector3& normal, double& depth, const bool estimate_depth)
 {
-  double intensity;
   if (estimate_depth)
   {
     octomath::Vector3 surface_point;
@@ -191,6 +190,7 @@ bool getMetaballSurfaceProperties(const octomap::point3d_list& cloud, const doub
   else  // just get normals, no depth
   {
     octomath::Vector3 gradient;
+    double intensity = 0;
     if (sampleCloud(cloud, spacing, r_multiple, contact_point, intensity, gradient))
     {
       normal = gradient.normalized();
@@ -211,11 +211,10 @@ bool findSurface(const octomap::point3d_list& cloud, const double& spacing, cons
                  const double& r_multiple, const octomath::Vector3& seed, octomath::Vector3& surface_point,
                  octomath::Vector3& normal)
 {
-  const double epsilon = 1e-10;
-  const int iterations = 10;
-  double intensity = 0;
-
   octomath::Vector3 p = seed, dp, gs;
+  const int iterations = 10;
+  const double epsilon = 1e-10;
+  double intensity = 0;
   for (int i = 0; i < iterations; ++i)
   {
     if (!sampleCloud(cloud, spacing, r_multiple, p, intensity, gs))
