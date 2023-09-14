@@ -103,13 +103,13 @@ public:
      * \brief transforms depth values from rendered model to metric depth values
      * \param[in,out] depth pointer to floating point depth buffer
      */
-    virtual void transformModelDepthToMetricDepth(float* depth) const;
+    virtual void transformModelDepthToMetricDepth(double* depth) const;
 
     /**
      * \brief transforms depth values from filtered depth to metric depth values
      * \param[in,out] depth pointer to floating point depth buffer
      */
-    virtual void transformFilteredDepthToMetricDepth(float* depth) const;
+    virtual void transformFilteredDepthToMetricDepth(double* depth) const;
 
     /**
      * \brief sets  the image size

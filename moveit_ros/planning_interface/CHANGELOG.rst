@@ -2,6 +2,17 @@
 Changelog for package moveit_ros_planning_interface
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.8.0 (2023-09-10)
+------------------
+* Specify controller name in MGI execution (`#2257 <https://github.com/ros-planning/moveit2/issues/2257>`_)
+  * Specify controller name in MGI execute
+  * Finish comment
+  ---------
+  Co-authored-by: Sebastian Jahr <sebastian.jahr@picknik.ai>
+* Remove deprecated move_group pick& place functionality + demo (`#2239 <https://github.com/ros-planning/moveit2/issues/2239>`_)
+  Co-authored-by: Jafar Uruç <cafer.abdi@gmail.com>
+* Contributors: Sebastian Jahr, Stephanie Eng
+
 2.7.4 (2023-05-18)
 ------------------
 * Scale acceleration and velocity of cartesian interpolations (`#1968 <https://github.com/ros-planning/moveit2/issues/1968>`_)

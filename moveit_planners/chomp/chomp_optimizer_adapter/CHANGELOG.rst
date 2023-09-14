@@ -2,6 +2,11 @@
 Changelog for package moveit_chomp_optimizer_adapter
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.8.0 (2023-09-10)
+------------------
+* Remove added path index from planner adapter function signature (`#2285 <https://github.com/ros-planning/moveit2/issues/2285>`_)
+* Contributors: Sebastian Jahr
+
 2.7.4 (2023-05-18)
 ------------------
 
