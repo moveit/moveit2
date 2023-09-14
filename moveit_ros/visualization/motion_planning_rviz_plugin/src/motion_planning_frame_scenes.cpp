@@ -53,8 +53,6 @@
 
 #include "ui_motion_planning_rviz_plugin_frame.h"
 
-#include <boost/math/constants/constants.hpp>
-
 #include <memory>
 
 namespace moveit_rviz_plugin

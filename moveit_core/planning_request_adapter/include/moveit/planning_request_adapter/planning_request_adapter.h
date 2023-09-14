@@ -46,10 +46,6 @@
 /** \brief Generic interface to adapting motion planning requests */
 namespace planning_request_adapter
 {
-namespace
-{
-std::vector<std::size_t> empty_path_index_vector = {};
-}
 MOVEIT_CLASS_FORWARD(PlanningRequestAdapter);  // Defines PlanningRequestAdapterPtr, ConstPtr, WeakPtr... etc
 
 /** @brief Concept in MoveIt which can be used to modify the planning problem and resulting trajectory (pre-processing
@@ -84,16 +80,11 @@ public:
    *  @param planning_scene Representation of the environment for the planning
    *  @param req Motion planning request with a set of constraints
    *  @param res Reference to which the generated motion plan response is written to
-   *  @param added_path_index Sometimes planning request adapters may add states on the solution path (e.g.,
-     add the current state of the robot as prefix, when the robot started to plan only from near that state, as the
-     current state itself appears to touch obstacles). This is helpful because the added states should not be considered
-     invalid in all situations.
    *  @return True if response got generated correctly */
   [[nodiscard]] bool adaptAndPlan(const planning_interface::PlannerManagerPtr& planner,
                                   const planning_scene::PlanningSceneConstPtr& planning_scene,
                                   const planning_interface::MotionPlanRequest& req,
-                                  planning_interface::MotionPlanResponse& res,
-                                  std::vector<std::size_t>& added_path_index = empty_path_index_vector) const;
+                                  planning_interface::MotionPlanResponse& res) const;
 
   /** \brief Adapt the planning request if needed, call the planner
       function \e planner and update the planning response if
@@ -104,15 +95,11 @@ public:
    *  @param planning_scene Representation of the environment for the planning
    *  @param req Motion planning request with a set of constraints
    *  @param res Reference to which the generated motion plan response is written to
-   *  @param added_path_index Sometimes planning request adapters may add states on the solution path (e.g.,
-        add the current state of the robot as prefix, when the robot started to plan only from near that state, as the
-        current state itself appears to touch obstacles). This is helpful because the added states should not be
-   considered invalid in all situations.
    *  @return True if response got generated correctly */
-  [[nodiscard]] virtual bool
-  adaptAndPlan(const PlannerFn& planner, const planning_scene::PlanningSceneConstPtr& planning_scene,
-               const planning_interface::MotionPlanRequest& req, planning_interface::MotionPlanResponse& res,
-               std::vector<std::size_t>& added_path_index = empty_path_index_vector) const = 0;
+  [[nodiscard]] virtual bool adaptAndPlan(const PlannerFn& planner,
+                                          const planning_scene::PlanningSceneConstPtr& planning_scene,
+                                          const planning_interface::MotionPlanRequest& req,
+                                          planning_interface::MotionPlanResponse& res) const = 0;
 };
 
 /** \brief Apply a sequence of adapters to a motion plan */
@@ -128,16 +115,11 @@ public:
    *  @param planning_scene Representation of the environment for the planning
    *  @param req Motion planning request with a set of constraints
    *  @param res Reference to which the generated motion plan response is written to
-   *  @param added_path_index Sometimes planning request adapters may add states on the solution path (e.g.,
-          add the current state of the robot as prefix, when the robot started to plan only from near that state, as the
-          current state itself appears to touch obstacles). This is helpful because the added states should not be
-          considered invalid in all situations.
    *  @return True if response got generated correctly */
   [[nodiscard]] bool adaptAndPlan(const planning_interface::PlannerManagerPtr& planner,
                                   const planning_scene::PlanningSceneConstPtr& planning_scene,
                                   const planning_interface::MotionPlanRequest& req,
-                                  planning_interface::MotionPlanResponse& res,
-                                  std::vector<std::size_t>& added_path_index = empty_path_index_vector) const;
+                                  planning_interface::MotionPlanResponse& res) const;
 
 private:
   std::vector<PlanningRequestAdapterConstPtr> adapters_;

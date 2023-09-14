@@ -26,7 +26,9 @@ install(DIRECTORY include/ DESTINATION include/moveit_core)
 
 # Unit tests
 if(BUILD_TESTING)
+  find_package(ament_cmake_google_benchmark REQUIRED)
   find_package(ament_cmake_gtest REQUIRED)
+  find_package(benchmark REQUIRED)
   find_package(tf2_geometry_msgs REQUIRED)
   find_package(resource_retriever REQUIRED)
 
@@ -76,5 +78,14 @@ if(BUILD_TESTING)
     moveit_test_utils
     moveit_robot_state
     moveit_kinematics_base
+  )
+
+  ament_add_google_benchmark(
+    robot_state_jacobian_benchmark
+    test/robot_state_jacobian_benchmark.cpp)
+  target_link_libraries(robot_state_jacobian_benchmark
+    moveit_robot_model
+    moveit_test_utils
+    moveit_robot_state
   )
 endif()

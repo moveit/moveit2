@@ -2,6 +2,45 @@
 Changelog for package moveit_servo
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.8.0 (2023-09-10)
+------------------
+* [Servo] Fix Twist transformation  (`#2311 <https://github.com/ros-planning/moveit2/issues/2311>`_)
+* [Servo] Add additional info about twist frame conversion  (`#2295 <https://github.com/ros-planning/moveit2/issues/2295>`_)
+  * Update docstring + warning for twist frame conversion
+  * Apply suggestions from code review
+  Co-authored-by: AndyZe <andyz@utexas.edu>
+  * Suppress old-style-cast warnings
+  ---------
+  Co-authored-by: AndyZe <andyz@utexas.edu>
+* [Servo] Refactoring servo (`#2224 <https://github.com/ros-planning/moveit2/issues/2224>`_)
+* Replaced numbers with SystemDefaultsQos() (`#2271 <https://github.com/ros-planning/moveit2/issues/2271>`_)
+* Fix Servo suddenHalt() to halt at previous state, not current (`#2229 <https://github.com/ros-planning/moveit2/issues/2229>`_)
+* Fix the launching of Servo as a node component (`#2194 <https://github.com/ros-planning/moveit2/issues/2194>`_)
+  * Fix the launching of Servo as a node component
+  * Comment improvement
+  Co-authored-by: Sebastian Castro <4603398+sea-bass@users.noreply.github.com>
+  * Add launch argument
+  ---------
+  Co-authored-by: Sebastian Castro <4603398+sea-bass@users.noreply.github.com>
+* Revert central differencing calculation in servo (`#2203 <https://github.com/ros-planning/moveit2/issues/2203>`_)
+  * Revert central differencing calculation in servo
+  * current_joint_state\_ to internal_joint_state\_
+* Fix servo speed scaling YAML parameters (`#2211 <https://github.com/ros-planning/moveit2/issues/2211>`_)
+* Reset Servo filters when starting (`#2186 <https://github.com/ros-planning/moveit2/issues/2186>`_)
+* [Servo] Move `enforcePositionLimits` and `enforceVelocityLimits` to utilities (`#2180 <https://github.com/ros-planning/moveit2/issues/2180>`_)
+  * Move limit enforcing functions to utilities
+  * Fix comments
+  * Make clock const
+  * Remove clock from enforcePositionLimit
+  * Remove clock usage from transformTwistToPlanningFrame and applyJointUpdates
+  * Remove clock from vvelocityScalingFactorForSingularity
+  * Fix tests
+  * Cleanups + clang-tidy
+  * Minor cleanups
+  * Log output formatting
+* Change servo collision checking parameters to dynamically update (`#2183 <https://github.com/ros-planning/moveit2/issues/2183>`_)
+* Contributors: AndyZe, Sebastian Castro, Shobuj Paul, V Mohammed Ibrahim
+
 2.7.4 (2023-05-18)
 ------------------
 * [Servo] Remove soon-to-be obsolete functions (`#2175 <https://github.com/ros-planning/moveit2/issues/2175>`_)
