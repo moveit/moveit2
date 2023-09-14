@@ -1650,7 +1650,7 @@ void MoveGroupInterface::getJointValueTarget(std::vector<double>& group_variable
 
 bool MoveGroupInterface::setJointValueTarget(const std::vector<double>& joint_values)
 {
-  auto const n_group_joints = impl_->getJointModelGroup()->getVariableCount();
+  const auto n_group_joints = impl_->getJointModelGroup()->getVariableCount();
   if (joint_values.size() != n_group_joints)
   {
     RCLCPP_DEBUG_STREAM(LOGGER, "Provided joint value list has length " << joint_values.size() << " but group "

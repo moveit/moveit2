@@ -57,7 +57,7 @@ public:
 
 private:
   bool sampleUsingConstraintSampler(const ompl::base::GoalLazySamples* gls, ompl::base::State* new_goal);
-  bool stateValidityCallback(ompl::base::State* new_goal, moveit::core::RobotState const* state,
+  bool stateValidityCallback(ompl::base::State* new_goal, const moveit::core::RobotState* state,
                              const moveit::core::JointModelGroup* /*jmg*/, const double* /*jpos*/,
                              bool verbose = false) const;
   bool checkStateValidity(ompl::base::State* new_goal, const moveit::core::RobotState& state,

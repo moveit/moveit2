@@ -261,7 +261,7 @@ GLuint mesh_filter::GLRenderer::createShader(GLuint shaderType, const string& Sh
   GLuint shader_id = glCreateShader(shaderType);
 
   // Compile Shader
-  char const* source_pointer = ShaderCode.c_str();
+  const char* source_pointer = ShaderCode.c_str();
   glShaderSource(shader_id, 1, &source_pointer, nullptr);
   glCompileShader(shader_id);
 
