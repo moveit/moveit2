@@ -2,6 +2,9 @@
 Changelog for package moveit_runtime
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.5.5 (2023-09-10)
+------------------
+
 2.5.4 (2022-11-04)
 ------------------
 * Uncomment moveit_ros_perception dependency (`#1463 <https://github.com/ros-planning/moveit2/issues/1463>`_) (`#1644 <https://github.com/ros-planning/moveit2/issues/1644>`_)

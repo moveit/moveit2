@@ -2,6 +2,32 @@
 Changelog for package moveit_configs_utils
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.5.5 (2023-09-10)
+------------------
+* Do not add Pilz parameters to MoveIt Configs Utils if Pilz is not used (`#1583 <https://github.com/ros-planning/moveit2/issues/1583>`_) (`#2174 <https://github.com/ros-planning/moveit2/issues/2174>`_)
+  (cherry picked from commit 1c7fa52edeef08bf8eb1e9cc73c1b0835aaf17e7)
+  Co-authored-by: Stephanie Eng <stephanie-eng@users.noreply.github.com>
+* Update default planning configs to use AddTimeOptimalParameterization (`#2167 <https://github.com/ros-planning/moveit2/issues/2167>`_) (`#2170 <https://github.com/ros-planning/moveit2/issues/2170>`_)
+  (cherry picked from commit 895e9268bd5d9337bebdede07a7f68a99055a1df)
+  Co-authored-by: Anthony Baker <abake48@users.noreply.github.com>
+* Add xacro subsititution class and use it for loading urdf & srdf (backport `#1805 <https://github.com/ros-planning/moveit2/issues/1805>`_) (`#1937 <https://github.com/ros-planning/moveit2/issues/1937>`_)
+  * Add xacro subsititution class and use it for loading urdf & srdf (`#1805 <https://github.com/ros-planning/moveit2/issues/1805>`_)
+  * Add Xacro substitution type
+  * Use Xacro substitution for robot description and robot description semantic
+  * Install subsititution folder
+  * Default to load_xacro if there's no launch substitution specified in the mappings
+  (cherry picked from commit 4bc83c3c9e6bfa9efea8c431794a630fbf27dddc)
+  # Conflicts:
+  #	moveit_configs_utils/moveit_configs_utils/moveit_configs_builder.py
+  * Fix merge conflicts
+  ---------
+  Co-authored-by: Jafar <cafer.abdi@gmail.com>
+  Co-authored-by: Tyler Weaver <tyler@picknik.ai>
+* Add support for multiple MoveItConfigBuilder instaces (`#1807 <https://github.com/ros-planning/moveit2/issues/1807>`_) (`#1808 <https://github.com/ros-planning/moveit2/issues/1808>`_)
+  (cherry picked from commit 25d086cee9a7cf1c95a15ea12a27e5b7cbe50a1f)
+  Co-authored-by: Marco Magri <94347649+MarcoMagriDev@users.noreply.github.com>
+* Contributors: mergify[bot]
+
 2.5.4 (2022-11-04)
 ------------------
 * Use MoveItConfigsBuilder in Pilz test launch file (`#1571 <https://github.com/ros-planning/moveit2/issues/1571>`_) (`#1662 <https://github.com/ros-planning/moveit2/issues/1662>`_)
