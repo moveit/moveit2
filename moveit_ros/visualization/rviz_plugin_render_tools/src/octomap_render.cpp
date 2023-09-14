@@ -224,7 +224,7 @@ void OcTreeRender::octreeDecoding(const std::shared_ptr<const octomap::OcTree>& 
         new_point.position.y = it.getY();
         new_point.position.z = it.getZ();
 
-        float cell_probability;
+        double cell_probability;
 
         switch (octree_color_mode)
         {

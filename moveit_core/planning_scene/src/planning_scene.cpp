@@ -1058,7 +1058,7 @@ bool PlanningScene::loadGeometryFromStream(std::istream& in, const Eigen::Isomet
           RCLCPP_ERROR(LOGGER, "Failed to read pose from scene file");
           return false;
         }
-        float r, g, b, a;
+        double r, g, b, a;
         if (!(in >> r >> g >> b >> a))
         {
           RCLCPP_ERROR(LOGGER, "Improperly formatted color in scene geometry file");
