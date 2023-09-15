@@ -230,6 +230,7 @@ bool Servo::updateParams()
         {
           joint_model_group_ = robot_state_->getJointModelGroup(servo_params_.move_group_name);
           joint_names_ = joint_model_group_->getActiveJointModelNames();
+          setSmoothingPlugin();
         }
       }
 
