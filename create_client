@@ -1,0 +1,252 @@
+moveit_setup_assistant/moveit_setup_controllers/CHANGELOG.rst:* Minimize use of `this->` (`#1784 <https://github.com/ros-planning/moveit2/issues/1784>`_)
+moveit_setup_assistant/moveit_setup_assistant/CHANGELOG.rst:* Minimize use of `this->` (`#1784 <https://github.com/ros-planning/moveit2/issues/1784>`_)
+moveit_setup_assistant/moveit_setup_app_plugins/CHANGELOG.rst:* Minimize use of `this->` (`#1784 <https://github.com/ros-planning/moveit2/issues/1784>`_)
+moveit_setup_assistant/moveit_setup_srdf_plugins/src/collision_linear_model.cpp:    Q_EMIT dataChanged(this->index(r, 2), this->index(r, 3));  // reason changed too
+moveit_setup_assistant/moveit_setup_srdf_plugins/src/collision_matrix_model.cpp:  LinkPairMap::const_iterator item = this->item(index);
+moveit_setup_assistant/moveit_setup_srdf_plugins/src/collision_matrix_model.cpp:  LinkPairMap::const_iterator item = this->item(index);
+moveit_setup_assistant/moveit_setup_srdf_plugins/src/collision_matrix_model.cpp:    LinkPairMap::iterator item = this->item(index);
+moveit_setup_assistant/moveit_setup_srdf_plugins/src/collision_matrix_model.cpp:    QModelIndex mirror = this->index(index.column(), index.row());
+moveit_setup_assistant/moveit_setup_srdf_plugins/CHANGELOG.rst:* Minimize use of `this->` (`#1784 <https://github.com/ros-planning/moveit2/issues/1784>`_)
+moveit_setup_assistant/moveit_setup_framework/CHANGELOG.rst:* Minimize use of `this->` (`#1784 <https://github.com/ros-planning/moveit2/issues/1784>`_)
+moveit_setup_assistant/moveit_setup_core_plugins/CHANGELOG.rst:* Minimize use of `this->` (`#1784 <https://github.com/ros-planning/moveit2/issues/1784>`_)
+moveit_ros/visualization/CHANGELOG.rst:* Minimize use of `this->` (`#1784 <https://github.com/ros-planning/moveit2/issues/1784>`_)
+moveit_ros/perception/mesh_filter/test/mesh_filter_test.cpp:  this->setMeshDistance(this->GetParam());
+moveit_ros/perception/mesh_filter/test/mesh_filter_test.cpp:  this->test();
+moveit_ros/perception/mesh_filter/test/mesh_filter_test.cpp:  this->setMeshDistance(this->GetParam());
+moveit_ros/perception/mesh_filter/test/mesh_filter_test.cpp:  this->test();
+moveit_ros/robot_interaction/CHANGELOG.rst:* Minimize use of `this->` (`#1784 <https://github.com/ros-planning/moveit2/issues/1784>`_)
+moveit_ros/moveit_servo/CHANGELOG.rst:* Minimize use of `this->` (`#1784 <https://github.com/ros-planning/moveit2/issues/1784>`_)
+moveit_ros/hybrid_planning/CHANGELOG.rst:* Minimize use of `this->` (`#1784 <https://github.com/ros-planning/moveit2/issues/1784>`_)
+moveit_ros/planning_interface/CHANGELOG.rst:* Minimize use of `this->` (`#1784 <https://github.com/ros-planning/moveit2/issues/1784>`_)
+moveit_kinematics/CHANGELOG.rst:* Minimize use of `this->` (`#1784 <https://github.com/ros-planning/moveit2/issues/1784>`_)
+moveit_kinematics/test/test_kinematics_plugin.cpp:    robot_state.setToRandomPositions(jmg_, this->rng_);
+moveit_kinematics/test/test_kinematics_plugin.cpp:    robot_state.setToRandomPositions(jmg_, this->rng_);
+moveit_kinematics/test/test_kinematics_plugin.cpp:    robot_state.setToRandomPositions(jmg_, this->rng_);
+moveit_kinematics/test/test_kinematics_plugin.cpp:    robot_state.setToRandomPositions(jmg_, this->rng_);
+moveit_kinematics/test/test_kinematics_plugin.cpp:    robot_state.setToRandomPositions(jmg_, this->rng_);
+moveit_kinematics/test/test_kinematics_plugin.cpp:    robot_state.setToRandomPositions(jmg_, this->rng_);
+moveit_kinematics/test/test_kinematics_plugin.cpp:    robot_state.setToRandomPositions(jmg_, this->rng_);
+moveit_core/CHANGELOG.rst:* Minimize use of `this->` (`#1784 <https://github.com/ros-planning/moveit2/issues/1784>`_)
+moveit_core/collision_detection_bullet/src/bullet_integration/bullet_utils.cpp:  this->touch_links = touch_links;
+moveit_core/robot_state/test/test_aabb.cpp:  moveit::core::RobotState pr2_state = this->loadModel("pr2");
+moveit_core/robot_state/test/test_aabb.cpp:  moveit::core::RobotState complex_state = this->loadModel(builder.build());
+moveit_core/collision_detection/include/moveit/collision_detection/test_collision_common_panda.h:  ASSERT_TRUE(this->robot_model_ok_);
+moveit_core/collision_detection/include/moveit/collision_detection/test_collision_common_panda.h:  this->cenv_->checkSelfCollision(req, res, *this->robot_state_, *this->acm_);
+moveit_core/collision_detection/include/moveit/collision_detection/test_collision_common_panda.h:  this->robot_state_->setJointPositions("panda_joint2", &joint2);
+moveit_core/collision_detection/include/moveit/collision_detection/test_collision_common_panda.h:  this->robot_state_->setJointPositions("panda_joint4", &joint4);
+moveit_core/collision_detection/include/moveit/collision_detection/test_collision_common_panda.h:  this->robot_state_->update();
+moveit_core/collision_detection/include/moveit/collision_detection/test_collision_common_panda.h:  this->cenv_->checkSelfCollision(req, res, *this->robot_state_, *this->acm_);
+moveit_core/collision_detection/include/moveit/collision_detection/test_collision_common_panda.h:  this->cenv_->getWorld()->addToObject("box", pos1, shape_ptr, Eigen::Isometry3d::Identity());
+moveit_core/collision_detection/include/moveit/collision_detection/test_collision_common_panda.h:  this->cenv_->checkSelfCollision(req, res, *this->robot_state_, *this->acm_);
+moveit_core/collision_detection/include/moveit/collision_detection/test_collision_common_panda.h:  this->cenv_->checkRobotCollision(req, res, *this->robot_state_, *this->acm_);
+moveit_core/collision_detection/include/moveit/collision_detection/test_collision_common_panda.h:  this->cenv_->getWorld()->moveObject("box", pos1);
+moveit_core/collision_detection/include/moveit/collision_detection/test_collision_common_panda.h:  this->cenv_->checkRobotCollision(req, res, *this->robot_state_, *this->acm_);
+moveit_core/collision_detection/include/moveit/collision_detection/test_collision_common_panda.h:  this->cenv_->getWorld()->moveObject("box", pos1);
+moveit_core/collision_detection/include/moveit/collision_detection/test_collision_common_panda.h:  this->cenv_->getWorld()->addToObject("box", pos1, shape_ptr, Eigen::Isometry3d::Identity());
+moveit_core/collision_detection/include/moveit/collision_detection/test_collision_common_panda.h:  this->cenv_->checkRobotCollision(req, res, *this->robot_state_, *this->acm_);
+moveit_core/collision_detection/include/moveit/collision_detection/test_collision_common_panda.h:  this->cenv_->checkRobotCollision(req, res, *this->robot_state_, *this->acm_);
+moveit_core/collision_detection/include/moveit/collision_detection/test_collision_common_panda.h:  this->cenv_->getWorld()->addToObject("box", pos, shape_ptr, Eigen::Isometry3d::Identity());
+moveit_core/collision_detection/include/moveit/collision_detection/test_collision_common_panda.h:  this->cenv_->setLinkPadding("panda_hand", 0.08);
+moveit_core/collision_detection/include/moveit/collision_detection/test_collision_common_panda.h:  this->cenv_->checkRobotCollision(req, res, *this->robot_state_, *this->acm_);
+moveit_core/collision_detection/include/moveit/collision_detection/test_collision_common_panda.h:  this->cenv_->setLinkPadding("panda_hand", 0.0);
+moveit_core/collision_detection/include/moveit/collision_detection/test_collision_common_panda.h:  this->cenv_->checkRobotCollision(req, res, *this->robot_state_, *this->acm_);
+moveit_core/collision_detection/include/moveit/collision_detection/test_collision_common_panda.h:  this->cenv_->checkSelfCollision(req, res, *this->robot_state_, *this->acm_);
+moveit_core/collision_detection/include/moveit/collision_detection/test_collision_common_panda.h:  this->cenv_->getWorld()->addToObject("box", pos, shape_ptr, Eigen::Isometry3d::Identity());
+moveit_core/collision_detection/include/moveit/collision_detection/test_collision_common_panda.h:  this->cenv_->setLinkPadding("panda_hand", 0.0);
+moveit_core/collision_detection/include/moveit/collision_detection/test_collision_common_panda.h:  this->cenv_->checkRobotCollision(req, res, *this->robot_state_, *this->acm_);
+moveit_core/collision_detection/include/moveit/collision_detection/test_collision_common_panda.h:  std::set<const moveit::core::LinkModel*> active_components{ this->robot_model_->getLinkModel("panda_hand") };
+moveit_core/collision_detection/include/moveit/collision_detection/test_collision_common_panda.h:    this->cenv_->getWorld()->addToObject("collection", Eigen::Isometry3d::Identity(), shape, pose);
+moveit_core/collision_detection/include/moveit/collision_detection/test_collision_common_panda.h:    this->cenv_->getWorld()->removeObject("object");
+moveit_core/collision_detection/include/moveit/collision_detection/test_collision_common_panda.h:    this->cenv_->getWorld()->addToObject("object", pose, shape, Eigen::Isometry3d::Identity());
+moveit_core/collision_detection/include/moveit/collision_detection/test_collision_common_panda.h:    this->cenv_->distanceRobot(req, res, *this->robot_state_);
+moveit_core/collision_detection/include/moveit/collision_detection/test_collision_common_panda.h:  this->cenv_->getWorld()->addToObject("box", shape_ptr, pos);
+moveit_core/collision_detection/include/moveit/collision_detection/test_collision_common_panda.h:  req.acm = &*this->acm_;
+moveit_core/collision_detection/include/moveit/collision_detection/test_collision_common_panda.h:  this->cenv_->distanceRobot(req, res, *this->robot_state_);
+moveit_core/collision_detection/include/moveit/collision_detection/test_collision_common_pr2.h:  ASSERT_TRUE(this->robot_model_ok_);
+moveit_core/collision_detection/include/moveit/collision_detection/test_collision_common_pr2.h:  moveit::core::RobotState robot_state(this->robot_model_);
+moveit_core/collision_detection/include/moveit/collision_detection/test_collision_common_pr2.h:  this->cenv_->checkSelfCollision(req, res, robot_state, *this->acm_);
+moveit_core/collision_detection/include/moveit/collision_detection/test_collision_common_pr2.h:  moveit::core::RobotState robot_state(this->robot_model_);
+moveit_core/collision_detection/include/moveit/collision_detection/test_collision_common_pr2.h:  this->acm_->setEntry("base_link", "base_bellow_link", false);
+moveit_core/collision_detection/include/moveit/collision_detection/test_collision_common_pr2.h:  this->cenv_->checkSelfCollision(req, res1, robot_state, *this->acm_);
+moveit_core/collision_detection/include/moveit/collision_detection/test_collision_common_pr2.h:  this->acm_->setEntry("base_link", "base_bellow_link", true);
+moveit_core/collision_detection/include/moveit/collision_detection/test_collision_common_pr2.h:  this->cenv_->checkSelfCollision(req, res2, robot_state, *this->acm_);
+moveit_core/collision_detection/include/moveit/collision_detection/test_collision_common_pr2.h:  this->acm_->setEntry("r_gripper_palm_link", "l_gripper_palm_link", false);
+moveit_core/collision_detection/include/moveit/collision_detection/test_collision_common_pr2.h:  this->cenv_->checkSelfCollision(req, res3, robot_state, *this->acm_);
+moveit_core/collision_detection/include/moveit/collision_detection/test_collision_common_pr2.h:  moveit::core::RobotState robot_state(this->robot_model_);
+moveit_core/collision_detection/include/moveit/collision_detection/test_collision_common_pr2.h:  this->acm_->setEntry("base_link", "base_bellow_link", false);
+moveit_core/collision_detection/include/moveit/collision_detection/test_collision_common_pr2.h:  this->acm_->setEntry("r_gripper_palm_link", "l_gripper_palm_link", false);
+moveit_core/collision_detection/include/moveit/collision_detection/test_collision_common_pr2.h:  this->cenv_->checkSelfCollision(req, res, robot_state, *this->acm_);
+moveit_core/collision_detection/include/moveit/collision_detection/test_collision_common_pr2.h:  this->cenv_->checkSelfCollision(req, res, robot_state, *this->acm_);
+moveit_core/collision_detection/include/moveit/collision_detection/test_collision_common_pr2.h:  this->acm_ =
+moveit_core/collision_detection/include/moveit/collision_detection/test_collision_common_pr2.h:      std::make_shared<collision_detection::AllowedCollisionMatrix>(this->robot_model_->getLinkModelNames(), false);
+moveit_core/collision_detection/include/moveit/collision_detection/test_collision_common_pr2.h:  this->cenv_->checkSelfCollision(req, res, robot_state, *this->acm_);
+moveit_core/collision_detection/include/moveit/collision_detection/test_collision_common_pr2.h:  moveit::core::RobotState robot_state(this->robot_model_);
+moveit_core/collision_detection/include/moveit/collision_detection/test_collision_common_pr2.h:  this->acm_->setEntry("r_gripper_palm_link", "l_gripper_palm_link", false);
+moveit_core/collision_detection/include/moveit/collision_detection/test_collision_common_pr2.h:  this->cenv_->checkSelfCollision(req, res, robot_state, *this->acm_);
+moveit_core/collision_detection/include/moveit/collision_detection/test_collision_common_pr2.h:  this->cenv_->checkSelfCollision(req, res2, robot_state, *this->acm_);
+moveit_core/collision_detection/include/moveit/collision_detection/test_collision_common_pr2.h:  this->cenv_->checkSelfCollision(req, res2, robot_state, *this->acm_);
+moveit_core/collision_detection/include/moveit/collision_detection/test_collision_common_pr2.h:  this->acm_ =
+moveit_core/collision_detection/include/moveit/collision_detection/test_collision_common_pr2.h:      std::make_shared<collision_detection::AllowedCollisionMatrix>(this->robot_model_->getLinkModelNames(), true);
+moveit_core/collision_detection/include/moveit/collision_detection/test_collision_common_pr2.h:  moveit::core::RobotState robot_state(this->robot_model_);
+moveit_core/collision_detection/include/moveit/collision_detection/test_collision_common_pr2.h:  this->cenv_->checkSelfCollision(req, res, robot_state, *this->acm_);
+moveit_core/collision_detection/include/moveit/collision_detection/test_collision_common_pr2.h:  this->cenv_->getWorld()->addToObject("box", pos1, shapes::ShapeConstPtr(shape), Eigen::Isometry3d::Identity());
+moveit_core/collision_detection/include/moveit/collision_detection/test_collision_common_pr2.h:  this->cenv_->checkRobotCollision(req, res, robot_state, *this->acm_);
+moveit_core/collision_detection/include/moveit/collision_detection/test_collision_common_pr2.h:  this->cenv_->getWorld()->removeObject("box");
+moveit_core/collision_detection/include/moveit/collision_detection/test_collision_common_pr2.h:  this->cenv_->checkSelfCollision(req, res, robot_state, *this->acm_);
+moveit_core/collision_detection/include/moveit/collision_detection/test_collision_common_pr2.h:  this->cenv_->checkSelfCollision(req, res, robot_state, *this->acm_);
+moveit_core/collision_detection/include/moveit/collision_detection/test_collision_common_pr2.h:  this->cenv_->getWorld()->addToObject("coll", pos1, shapes::ShapeConstPtr(coll), Eigen::Isometry3d::Identity());
+moveit_core/collision_detection/include/moveit/collision_detection/test_collision_common_pr2.h:  this->cenv_->checkRobotCollision(req, res, robot_state, *this->acm_);
+moveit_core/collision_detection/include/moveit/collision_detection/test_collision_common_pr2.h:  this->acm_->setEntry("coll", "r_gripper_palm_link", true);
+moveit_core/collision_detection/include/moveit/collision_detection/test_collision_common_pr2.h:  this->cenv_->checkRobotCollision(req, res, robot_state, *this->acm_);
+moveit_core/collision_detection/include/moveit/collision_detection/test_collision_common_pr2.h:  moveit::core::RobotState robot_state(this->robot_model_);
+moveit_core/collision_detection/include/moveit/collision_detection/test_collision_common_pr2.h:  collision_detection::CollisionEnvPtr new_cenv = this->value_->allocateEnv(this->cenv_, this->cenv_->getWorld());
+moveit_core/collision_detection/include/moveit/collision_detection/test_collision_common_pr2.h:  shapes[0].reset(shapes::createMeshFromResource(this->kinect_dae_resource_));
+moveit_core/collision_detection/include/moveit/collision_detection/test_collision_common_pr2.h:  collision_detection::CollisionEnvPtr other_new_cenv = this->value_->allocateEnv(this->cenv_, this->cenv_->getWorld());
+moveit_core/collision_detection/include/moveit/collision_detection/test_collision_common_pr2.h:  shapes::ShapeConstPtr shape(shapes::createMeshFromResource(this->kinect_dae_resource_));
+moveit_core/collision_detection/include/moveit/collision_detection/test_collision_common_pr2.h:  this->cenv_->getWorld()->addToObject("kinect", pos1, shape, Eigen::Isometry3d::Identity());
+moveit_core/collision_detection/include/moveit/collision_detection/test_collision_common_pr2.h:  moveit::core::RobotState robot_state(this->robot_model_);
+moveit_core/collision_detection/include/moveit/collision_detection/test_collision_common_pr2.h:  this->cenv_->checkRobotCollision(req, res, robot_state);
+moveit_core/collision_detection/include/moveit/collision_detection/test_collision_common_pr2.h:  this->cenv_->checkRobotCollision(req, res, robot_state);
+moveit_core/collision_detection/include/moveit/collision_detection/test_collision_common_pr2.h:  collision_detection::CollisionEnv::ObjectConstPtr object = this->cenv_->getWorld()->getObject("kinect");
+moveit_core/collision_detection/include/moveit/collision_detection/test_collision_common_pr2.h:  this->cenv_->getWorld()->removeObject("kinect");
+moveit_core/collision_detection/include/moveit/collision_detection/test_collision_common_pr2.h:  moveit::core::RobotState robot_state1(this->robot_model_);
+moveit_core/collision_detection/include/moveit/collision_detection/test_collision_common_pr2.h:  moveit::core::RobotState robot_state2(this->robot_model_);
+moveit_core/collision_detection/include/moveit/collision_detection/test_collision_common_pr2.h:  this->cenv_->checkSelfCollision(req, res, robot_state1);
+moveit_core/collision_detection/include/moveit/collision_detection/test_collision_common_pr2.h:  this->cenv_->checkSelfCollision(req, res, robot_state1, *this->acm_);
+moveit_core/collision_detection/include/moveit/collision_detection/test_collision_common_pr2.h:  this->cenv_->checkSelfCollision(req, res, robot_state2, *this->acm_);
+moveit_core/collision_detection/include/moveit/collision_detection/test_collision_common_pr2.h:  this->cenv_->getWorld()->addToObject("map", shapes, poses);
+moveit_core/collision_detection/include/moveit/collision_detection/test_collision_common_pr2.h:  moveit::core::RobotState robot_state1(this->robot_model_);
+moveit_core/collision_detection/include/moveit/collision_detection/test_collision_common_pr2.h:  kinect_shape.reset(shapes::createMeshFromResource(this->kinect_dae_resource_));
+moveit_core/collision_detection/include/moveit/collision_detection/test_collision_common_pr2.h:  this->cenv_->getWorld()->addToObject("kinect", kinect_shape, kinect_pose);
+moveit_core/collision_detection/include/moveit/collision_detection/test_collision_common_pr2.h:    this->cenv_->getWorld()->moveShapeInObject("kinect", kinect_shape, np);
+moveit_core/collision_detection/include/moveit/collision_detection/test_collision_common_pr2.h:    this->cenv_->checkCollision(req, res, robot_state1, *this->acm_);
+moveit_core/collision_detection/include/moveit/collision_detection/test_collision_common_pr2.h:  moveit::core::RobotState robot_state1(this->robot_model_);
+moveit_core/collision_detection/include/moveit/collision_detection/test_collision_common_pr2.h:    this->cenv_->getWorld()->removeObject("shape");
+moveit_core/collision_detection/include/moveit/collision_detection/test_collision_common_pr2.h:    this->cenv_->getWorld()->addToObject("shape", shapes, poses);
+moveit_core/collision_detection/include/moveit/collision_detection/test_collision_common_pr2.h:    this->cenv_->checkCollision(req, res, robot_state1, *this->acm_);
+moveit_core/collision_detection/include/moveit/collision_detection/test_collision_common_pr2.h:  kinect_shape.reset(shapes::createMeshFromResource(this->kinect_dae_resource_));
+moveit_core/collision_detection/include/moveit/collision_detection/test_collision_common_pr2.h:  this->cenv_->getWorld()->addToObject("kinect", kinect_shape, kinect_pose);
+moveit_core/collision_detection/include/moveit/collision_detection/test_collision_common_pr2.h:  this->cenv_->checkCollision(req2, res2, robot_state1, *this->acm_);
+moveit_core/collision_detection/include/moveit/collision_detection/test_collision_common_pr2.h:    this->cenv_->getWorld()->removeObject("shape");
+moveit_core/collision_detection/include/moveit/collision_detection/test_collision_common_pr2.h:    this->cenv_->getWorld()->addToObject("shape", shapes, poses);
+moveit_core/collision_detection/include/moveit/collision_detection/test_collision_common_pr2.h:    this->cenv_->checkCollision(req, res, robot_state1, *this->acm_);
+moveit_planners/chomp/chomp_motion_planner/CHANGELOG.rst:* Minimize use of `this->` (`#1784 <https://github.com/ros-planning/moveit2/issues/1784>`_)
+moveit_planners/pilz_industrial_motion_planner_testutils/include/pilz_industrial_motion_planner_testutils/async_test.h:    this->triggerClearEvent(str);                                                                                      \
+moveit_planners/pilz_industrial_motion_planner_testutils/include/pilz_industrial_motion_planner_testutils/async_test.h:#define ACTION_OPEN_BARRIER_VOID(str) ::testing::InvokeWithoutArgs([this]() { this->triggerClearEvent(str); })
+moveit_planners/pilz_industrial_motion_planner_testutils/include/pilz_industrial_motion_planner_testutils/async_test.h:               [this](const std::string& event) { return this->waitlist_.count(event) == 0; });
+moveit_planners/pilz_industrial_motion_planner_testutils/CHANGELOG.rst:* Minimize use of `this->` (`#1784 <https://github.com/ros-planning/moveit2/issues/1784>`_)
+moveit_planners/pilz_industrial_motion_planner/CHANGELOG.rst:* Minimize use of `this->` (`#1784 <https://github.com/ros-planning/moveit2/issues/1784>`_)
+moveit_planners/pilz_industrial_motion_planner/test/unit_tests/src/unittest_planning_context.cpp:    req.group_name = this->planning_group_;
+moveit_planners/pilz_industrial_motion_planner/test/unit_tests/src/unittest_planning_context.cpp:    moveit::core::RobotState rstate(this->robot_model_);
+moveit_planners/pilz_industrial_motion_planner/test/unit_tests/src/unittest_planning_context.cpp:    rstate.setJointGroupPositions(this->planning_group_,
+moveit_planners/pilz_industrial_motion_planner/test/unit_tests/src/unittest_planning_context.cpp:    rstate.setFromIK(this->robot_model_->getJointModelGroup(this->planning_group_), start_pose);
+moveit_planners/pilz_industrial_motion_planner/test/unit_tests/src/unittest_planning_context.cpp:    rstate.setFromIK(this->robot_model_->getJointModelGroup(this->planning_group_), goal_pose);
+moveit_planners/pilz_industrial_motion_planner/test/unit_tests/src/unittest_planning_context.cpp:        rstate, this->robot_model_->getJointModelGroup(this->planning_group_)));
+moveit_planners/pilz_industrial_motion_planner/test/unit_tests/src/unittest_planning_context.cpp:    center_point.link_name = this->target_link_;
+moveit_planners/pilz_industrial_motion_planner/test/unit_tests/src/unittest_planning_context.cpp:  bool result = this->planning_context_->solve(res);
+moveit_planners/pilz_industrial_motion_planner/test/unit_tests/src/unittest_planning_context.cpp:  planning_interface::MotionPlanRequest req = this->getValidRequest(testutils::demangle(typeid(TypeParam).name()));
+moveit_planners/pilz_industrial_motion_planner/test/unit_tests/src/unittest_planning_context.cpp:  this->planning_context_->setMotionPlanRequest(req);
+moveit_planners/pilz_industrial_motion_planner/test/unit_tests/src/unittest_planning_context.cpp:  bool result = this->planning_context_->solve(res);
+moveit_planners/pilz_industrial_motion_planner/test/unit_tests/src/unittest_planning_context.cpp:  bool result_detailed = this->planning_context_->solve(res_detailed);
+moveit_planners/pilz_industrial_motion_planner/test/unit_tests/src/unittest_planning_context.cpp:  planning_interface::MotionPlanRequest req = this->getValidRequest(testutils::demangle(typeid(TypeParam).name()));
+moveit_planners/pilz_industrial_motion_planner/test/unit_tests/src/unittest_planning_context.cpp:  this->planning_context_->setMotionPlanRequest(req);
+moveit_planners/pilz_industrial_motion_planner/test/unit_tests/src/unittest_planning_context.cpp:  bool result = this->planning_context_->solve(res);
+moveit_planners/pilz_industrial_motion_planner/test/unit_tests/src/unittest_planning_context.cpp:  planning_interface::MotionPlanRequest req = this->getValidRequest(testutils::demangle(typeid(TypeParam).name()));
+moveit_planners/pilz_industrial_motion_planner/test/unit_tests/src/unittest_planning_context.cpp:  this->planning_context_->setMotionPlanRequest(req);
+moveit_planners/pilz_industrial_motion_planner/test/unit_tests/src/unittest_planning_context.cpp:  bool result_termination = this->planning_context_->terminate();
+moveit_planners/pilz_industrial_motion_planner/test/unit_tests/src/unittest_planning_context.cpp:  bool result = this->planning_context_->solve(res);
+moveit_planners/pilz_industrial_motion_planner/test/unit_tests/src/unittest_planning_context.cpp:  EXPECT_NO_THROW(this->planning_context_->clear()) << testutils::demangle(typeid(TypeParam).name());
+moveit_planners/pilz_industrial_motion_planner/test/unit_tests/src/unittest_trajectory_generator_common.cpp:    joint_constraint.joint_name = this->robot_model_->getActiveJointModels().front()->getName();
+moveit_planners/pilz_industrial_motion_planner/test/unit_tests/src/unittest_trajectory_generator_common.cpp:  this->req_.max_velocity_scaling_factor = 2.0;
+moveit_planners/pilz_industrial_motion_planner/test/unit_tests/src/unittest_trajectory_generator_common.cpp:  EXPECT_FALSE(this->trajectory_generator_->generate(this->planning_scene_, this->req_, this->res_));
+moveit_planners/pilz_industrial_motion_planner/test/unit_tests/src/unittest_trajectory_generator_common.cpp:  EXPECT_EQ(this->res_.error_code.val, moveit_msgs::msg::MoveItErrorCodes::INVALID_MOTION_PLAN);
+moveit_planners/pilz_industrial_motion_planner/test/unit_tests/src/unittest_trajectory_generator_common.cpp:  this->req_.max_velocity_scaling_factor = 1.0;
+moveit_planners/pilz_industrial_motion_planner/test/unit_tests/src/unittest_trajectory_generator_common.cpp:  this->req_.max_acceleration_scaling_factor = 0;
+moveit_planners/pilz_industrial_motion_planner/test/unit_tests/src/unittest_trajectory_generator_common.cpp:  EXPECT_FALSE(this->trajectory_generator_->generate(this->planning_scene_, this->req_, this->res_));
+moveit_planners/pilz_industrial_motion_planner/test/unit_tests/src/unittest_trajectory_generator_common.cpp:  EXPECT_EQ(this->res_.error_code.val, moveit_msgs::msg::MoveItErrorCodes::INVALID_MOTION_PLAN);
+moveit_planners/pilz_industrial_motion_planner/test/unit_tests/src/unittest_trajectory_generator_common.cpp:  this->req_.max_velocity_scaling_factor = 0.00001;
+moveit_planners/pilz_industrial_motion_planner/test/unit_tests/src/unittest_trajectory_generator_common.cpp:  this->req_.max_acceleration_scaling_factor = 1;
+moveit_planners/pilz_industrial_motion_planner/test/unit_tests/src/unittest_trajectory_generator_common.cpp:  EXPECT_FALSE(this->trajectory_generator_->generate(this->planning_scene_, this->req_, this->res_));
+moveit_planners/pilz_industrial_motion_planner/test/unit_tests/src/unittest_trajectory_generator_common.cpp:  EXPECT_EQ(this->res_.error_code.val, moveit_msgs::msg::MoveItErrorCodes::INVALID_MOTION_PLAN);
+moveit_planners/pilz_industrial_motion_planner/test/unit_tests/src/unittest_trajectory_generator_common.cpp:  this->req_.max_velocity_scaling_factor = 1;
+moveit_planners/pilz_industrial_motion_planner/test/unit_tests/src/unittest_trajectory_generator_common.cpp:  this->req_.max_acceleration_scaling_factor = -1;
+moveit_planners/pilz_industrial_motion_planner/test/unit_tests/src/unittest_trajectory_generator_common.cpp:  EXPECT_FALSE(this->trajectory_generator_->generate(this->planning_scene_, this->req_, this->res_));
+moveit_planners/pilz_industrial_motion_planner/test/unit_tests/src/unittest_trajectory_generator_common.cpp:  EXPECT_EQ(this->res_.error_code.val, moveit_msgs::msg::MoveItErrorCodes::INVALID_MOTION_PLAN);
+moveit_planners/pilz_industrial_motion_planner/test/unit_tests/src/unittest_trajectory_generator_common.cpp:  this->req_.group_name = "foot";
+moveit_planners/pilz_industrial_motion_planner/test/unit_tests/src/unittest_trajectory_generator_common.cpp:  EXPECT_FALSE(this->trajectory_generator_->generate(this->planning_scene_, this->req_, this->res_));
+moveit_planners/pilz_industrial_motion_planner/test/unit_tests/src/unittest_trajectory_generator_common.cpp:  EXPECT_EQ(moveit_msgs::msg::MoveItErrorCodes::INVALID_GROUP_NAME, this->res_.error_code.val);
+moveit_planners/pilz_industrial_motion_planner/test/unit_tests/src/unittest_trajectory_generator_common.cpp:  this->req_.group_name = "gripper";
+moveit_planners/pilz_industrial_motion_planner/test/unit_tests/src/unittest_trajectory_generator_common.cpp:  EXPECT_FALSE(this->trajectory_generator_->generate(this->planning_scene_, this->req_, this->res_));
+moveit_planners/pilz_industrial_motion_planner/test/unit_tests/src/unittest_trajectory_generator_common.cpp:  EXPECT_EQ(moveit_msgs::msg::MoveItErrorCodes::INVALID_GROUP_NAME, this->res_.error_code.val);
+moveit_planners/pilz_industrial_motion_planner/test/unit_tests/src/unittest_trajectory_generator_common.cpp://   this->req_.group_name = "gripper";
+moveit_planners/pilz_industrial_motion_planner/test/unit_tests/src/unittest_trajectory_generator_common.cpp://   EXPECT_FALSE(this->trajectory_generator_->generate(this->planning_scene_, this->req_, this->res_));
+moveit_planners/pilz_industrial_motion_planner/test/unit_tests/src/unittest_trajectory_generator_common.cpp://   EXPECT_EQ(moveit_msgs::msg::MoveItErrorCodes::INVALID_GOAL_CONSTRAINTS, this->res_.error_code.val);
+moveit_planners/pilz_industrial_motion_planner/test/unit_tests/src/unittest_trajectory_generator_common.cpp://  EXPECT_FALSE(this->trajectory_generator_->generate(this->req_, this->res_));
+moveit_planners/pilz_industrial_motion_planner/test/unit_tests/src/unittest_trajectory_generator_common.cpp://  EXPECT_EQ(this->res_.error_code.val,
+moveit_planners/pilz_industrial_motion_planner/test/unit_tests/src/unittest_trajectory_generator_common.cpp:  this->req_.start_state.joint_state.name.clear();
+moveit_planners/pilz_industrial_motion_planner/test/unit_tests/src/unittest_trajectory_generator_common.cpp:  EXPECT_FALSE(this->trajectory_generator_->generate(this->planning_scene_, this->req_, this->res_));
+moveit_planners/pilz_industrial_motion_planner/test/unit_tests/src/unittest_trajectory_generator_common.cpp:  EXPECT_EQ(this->res_.error_code.val, moveit_msgs::msg::MoveItErrorCodes::INVALID_ROBOT_STATE);
+moveit_planners/pilz_industrial_motion_planner/test/unit_tests/src/unittest_trajectory_generator_common.cpp:  this->req_.start_state.joint_state.name.push_back("joint_7");
+moveit_planners/pilz_industrial_motion_planner/test/unit_tests/src/unittest_trajectory_generator_common.cpp:  EXPECT_FALSE(this->trajectory_generator_->generate(this->planning_scene_, this->req_, this->res_));
+moveit_planners/pilz_industrial_motion_planner/test/unit_tests/src/unittest_trajectory_generator_common.cpp:  EXPECT_EQ(this->res_.error_code.val, moveit_msgs::msg::MoveItErrorCodes::INVALID_ROBOT_STATE);
+moveit_planners/pilz_industrial_motion_planner/test/unit_tests/src/unittest_trajectory_generator_common.cpp:  this->req_.start_state.joint_state.position[0] = 100;
+moveit_planners/pilz_industrial_motion_planner/test/unit_tests/src/unittest_trajectory_generator_common.cpp:  EXPECT_FALSE(this->trajectory_generator_->generate(this->planning_scene_, this->req_, this->res_));
+moveit_planners/pilz_industrial_motion_planner/test/unit_tests/src/unittest_trajectory_generator_common.cpp:  EXPECT_EQ(this->res_.error_code.val, moveit_msgs::msg::MoveItErrorCodes::INVALID_ROBOT_STATE);
+moveit_planners/pilz_industrial_motion_planner/test/unit_tests/src/unittest_trajectory_generator_common.cpp:  this->req_.start_state.joint_state.velocity[0] = 100;
+moveit_planners/pilz_industrial_motion_planner/test/unit_tests/src/unittest_trajectory_generator_common.cpp:  EXPECT_FALSE(this->trajectory_generator_->generate(this->planning_scene_, this->req_, this->res_));
+moveit_planners/pilz_industrial_motion_planner/test/unit_tests/src/unittest_trajectory_generator_common.cpp:  EXPECT_EQ(this->res_.error_code.val, moveit_msgs::msg::MoveItErrorCodes::INVALID_ROBOT_STATE);
+moveit_planners/pilz_industrial_motion_planner/test/unit_tests/src/unittest_trajectory_generator_common.cpp:  this->req_.goal_constraints.clear();
+moveit_planners/pilz_industrial_motion_planner/test/unit_tests/src/unittest_trajectory_generator_common.cpp:  EXPECT_FALSE(this->trajectory_generator_->generate(this->planning_scene_, this->req_, this->res_));
+moveit_planners/pilz_industrial_motion_planner/test/unit_tests/src/unittest_trajectory_generator_common.cpp:  EXPECT_EQ(this->res_.error_code.val, moveit_msgs::msg::MoveItErrorCodes::INVALID_GOAL_CONSTRAINTS);
+moveit_planners/pilz_industrial_motion_planner/test/unit_tests/src/unittest_trajectory_generator_common.cpp:  this->req_.goal_constraints.push_back(goal_constraint);
+moveit_planners/pilz_industrial_motion_planner/test/unit_tests/src/unittest_trajectory_generator_common.cpp:  this->req_.goal_constraints.push_back(goal_constraint);
+moveit_planners/pilz_industrial_motion_planner/test/unit_tests/src/unittest_trajectory_generator_common.cpp:  EXPECT_FALSE(this->trajectory_generator_->generate(this->planning_scene_, this->req_, this->res_));
+moveit_planners/pilz_industrial_motion_planner/test/unit_tests/src/unittest_trajectory_generator_common.cpp:  EXPECT_EQ(this->res_.error_code.val, moveit_msgs::msg::MoveItErrorCodes::INVALID_GOAL_CONSTRAINTS);
+moveit_planners/pilz_industrial_motion_planner/test/unit_tests/src/unittest_trajectory_generator_common.cpp:  this->req_.goal_constraints.clear();
+moveit_planners/pilz_industrial_motion_planner/test/unit_tests/src/unittest_trajectory_generator_common.cpp:  this->req_.goal_constraints.push_back(goal_constraint);
+moveit_planners/pilz_industrial_motion_planner/test/unit_tests/src/unittest_trajectory_generator_common.cpp:  EXPECT_FALSE(this->trajectory_generator_->generate(this->planning_scene_, this->req_, this->res_));
+moveit_planners/pilz_industrial_motion_planner/test/unit_tests/src/unittest_trajectory_generator_common.cpp:  EXPECT_EQ(this->res_.error_code.val, moveit_msgs::msg::MoveItErrorCodes::INVALID_GOAL_CONSTRAINTS);
+moveit_planners/pilz_industrial_motion_planner/test/unit_tests/src/unittest_trajectory_generator_common.cpp:  this->req_.goal_constraints.clear();
+moveit_planners/pilz_industrial_motion_planner/test/unit_tests/src/unittest_trajectory_generator_common.cpp:  this->req_.goal_constraints.push_back(goal_constraint);
+moveit_planners/pilz_industrial_motion_planner/test/unit_tests/src/unittest_trajectory_generator_common.cpp:  EXPECT_FALSE(this->trajectory_generator_->generate(this->planning_scene_, this->req_, this->res_));
+moveit_planners/pilz_industrial_motion_planner/test/unit_tests/src/unittest_trajectory_generator_common.cpp:  EXPECT_EQ(this->res_.error_code.val, moveit_msgs::msg::MoveItErrorCodes::INVALID_GOAL_CONSTRAINTS);
+moveit_planners/pilz_industrial_motion_planner/test/unit_tests/src/unittest_trajectory_generator_common.cpp:  this->req_.goal_constraints.clear();
+moveit_planners/pilz_industrial_motion_planner/test/unit_tests/src/unittest_trajectory_generator_common.cpp:  this->req_.goal_constraints.push_back(goal_constraint);
+moveit_planners/pilz_industrial_motion_planner/test/unit_tests/src/unittest_trajectory_generator_common.cpp:  EXPECT_FALSE(this->trajectory_generator_->generate(this->planning_scene_, this->req_, this->res_));
+moveit_planners/pilz_industrial_motion_planner/test/unit_tests/src/unittest_trajectory_generator_common.cpp:  EXPECT_EQ(this->res_.error_code.val, moveit_msgs::msg::MoveItErrorCodes::INVALID_GOAL_CONSTRAINTS);
+moveit_planners/pilz_industrial_motion_planner/test/unit_tests/src/unittest_trajectory_generator_common.cpp:  this->req_.goal_constraints.front().joint_constraints[0] = joint_constraint;
+moveit_planners/pilz_industrial_motion_planner/test/unit_tests/src/unittest_trajectory_generator_common.cpp:  EXPECT_FALSE(this->trajectory_generator_->generate(this->planning_scene_, this->req_, this->res_));
+moveit_planners/pilz_industrial_motion_planner/test/unit_tests/src/unittest_trajectory_generator_common.cpp:  EXPECT_EQ(this->res_.error_code.val, moveit_msgs::msg::MoveItErrorCodes::INVALID_GOAL_CONSTRAINTS);
+moveit_planners/pilz_industrial_motion_planner/test/unit_tests/src/unittest_trajectory_generator_common.cpp:  this->req_.goal_constraints.front().joint_constraints.pop_back();  //<-- Missing joint constraint
+moveit_planners/pilz_industrial_motion_planner/test/unit_tests/src/unittest_trajectory_generator_common.cpp:  EXPECT_FALSE(this->trajectory_generator_->generate(this->planning_scene_, this->req_, this->res_));
+moveit_planners/pilz_industrial_motion_planner/test/unit_tests/src/unittest_trajectory_generator_common.cpp:  EXPECT_EQ(this->res_.error_code.val, moveit_msgs::msg::MoveItErrorCodes::INVALID_GOAL_CONSTRAINTS);
+moveit_planners/pilz_industrial_motion_planner/test/unit_tests/src/unittest_trajectory_generator_common.cpp:  this->req_.goal_constraints.front().joint_constraints[0].position = 100;
+moveit_planners/pilz_industrial_motion_planner/test/unit_tests/src/unittest_trajectory_generator_common.cpp:  EXPECT_FALSE(this->trajectory_generator_->generate(this->planning_scene_, this->req_, this->res_));
+moveit_planners/pilz_industrial_motion_planner/test/unit_tests/src/unittest_trajectory_generator_common.cpp:  EXPECT_EQ(this->res_.error_code.val, moveit_msgs::msg::MoveItErrorCodes::INVALID_GOAL_CONSTRAINTS);
+moveit_planners/pilz_industrial_motion_planner/test/unit_tests/src/unittest_trajectory_generator_common.cpp:  this->req_.goal_constraints.clear();
+moveit_planners/pilz_industrial_motion_planner/test/unit_tests/src/unittest_trajectory_generator_common.cpp:  this->req_.goal_constraints.push_back(goal_constraint);
+moveit_planners/pilz_industrial_motion_planner/test/unit_tests/src/unittest_trajectory_generator_common.cpp:  EXPECT_FALSE(this->trajectory_generator_->generate(this->planning_scene_, this->req_, this->res_));
+moveit_planners/pilz_industrial_motion_planner/test/unit_tests/src/unittest_trajectory_generator_common.cpp:  EXPECT_EQ(this->res_.error_code.val, moveit_msgs::msg::MoveItErrorCodes::INVALID_GOAL_CONSTRAINTS);
+moveit_planners/pilz_industrial_motion_planner/test/unit_tests/src/unittest_trajectory_generator_common.cpp:  this->req_.goal_constraints.clear();
+moveit_planners/pilz_industrial_motion_planner/test/unit_tests/src/unittest_trajectory_generator_common.cpp:  this->req_.goal_constraints.push_back(goal_constraint);
+moveit_planners/pilz_industrial_motion_planner/test/unit_tests/src/unittest_trajectory_generator_common.cpp:  EXPECT_FALSE(this->trajectory_generator_->generate(this->planning_scene_, this->req_, this->res_));
+moveit_planners/pilz_industrial_motion_planner/test/unit_tests/src/unittest_trajectory_generator_common.cpp:  EXPECT_EQ(this->res_.error_code.val, moveit_msgs::msg::MoveItErrorCodes::INVALID_GOAL_CONSTRAINTS);
+moveit_planners/pilz_industrial_motion_planner/test/unit_tests/src/unittest_trajectory_generator_common.cpp:  this->req_.goal_constraints.clear();
+moveit_planners/pilz_industrial_motion_planner/test/unit_tests/src/unittest_trajectory_generator_common.cpp:  this->req_.goal_constraints.push_back(goal_constraint);
+moveit_planners/pilz_industrial_motion_planner/test/unit_tests/src/unittest_trajectory_generator_common.cpp:  EXPECT_FALSE(this->trajectory_generator_->generate(this->planning_scene_, this->req_, this->res_));
+moveit_planners/pilz_industrial_motion_planner/test/unit_tests/src/unittest_trajectory_generator_common.cpp:  EXPECT_EQ(this->res_.error_code.val, moveit_msgs::msg::MoveItErrorCodes::NO_IK_SOLUTION);
+moveit_planners/pilz_industrial_motion_planner/test/unit_tests/src/unittest_trajectory_generator_common.cpp:      this->robot_model_->getJointModelGroup(this->planning_group_)->getLinkModelNames().back();
+moveit_planners/pilz_industrial_motion_planner/test/unit_tests/src/unittest_trajectory_generator_common.cpp:  this->req_.goal_constraints.clear();
+moveit_planners/pilz_industrial_motion_planner/test/unit_tests/src/unittest_trajectory_generator_common.cpp:  this->req_.goal_constraints.push_back(goal_constraint);
+moveit_planners/pilz_industrial_motion_planner/test/unit_tests/src/unittest_trajectory_generator_common.cpp:  EXPECT_FALSE(this->trajectory_generator_->generate(this->planning_scene_, this->req_, this->res_));
+moveit_planners/pilz_industrial_motion_planner/test/unit_tests/src/unittest_trajectory_generator_common.cpp:  EXPECT_EQ(this->res_.error_code.val, moveit_msgs::msg::MoveItErrorCodes::INVALID_GOAL_CONSTRAINTS);
+moveit_planners/pilz_industrial_motion_planner/test/unit_tests/src/unittest_trajectory_generator_ptp.cpp:  EXPECT_THROW(TrajectoryGeneratorPTP(this->robot_model_, planner_limits, planning_group_),
+moveit_planners/pilz_industrial_motion_planner/test/unit_tests/src/unittest_trajectory_generator_ptp.cpp:      new robot_trajectory::RobotTrajectory(this->robot_model_, planning_group_));
+moveit_planners/pilz_industrial_motion_planner/test/unit_tests/src/unittest_trajectory_generator_ptp.cpp:  moveit::core::RobotState state(this->robot_model_);
+moveit_planners/pilz_industrial_motion_planner/test/unit_tests/src/unittest_trajectory_generator_ptp.cpp:  EXPECT_THROW(TrajectoryGeneratorPTP(this->robot_model_, planner_limits, planning_group_),
+moveit_planners/pilz_industrial_motion_planner/test/unit_tests/src/unittest_trajectory_generator_ptp.cpp:  EXPECT_THROW(TrajectoryGeneratorPTP(this->robot_model_, planner_limits, planning_group_),
+moveit_planners/pilz_industrial_motion_planner/test/unit_tests/src/unittest_trajectory_generator_ptp.cpp:                          [this](double v) { return std::fabs(v) < this->joint_velocity_tolerance_; }));
+moveit_planners/pilz_industrial_motion_planner/test/unit_tests/src/unittest_trajectory_generator_ptp.cpp:                          [this](double v) { return std::fabs(v) < this->joint_acceleration_tolerance_; }));
+moveit_planners/pilz_industrial_motion_planner/test/unit_tests/src/unittest_trajectory_generator_ptp.cpp:                          [this](double v) { return std::fabs(v) < this->joint_velocity_tolerance_; }));
+moveit_planners/pilz_industrial_motion_planner/test/unit_tests/src/unittest_trajectory_generator_ptp.cpp:                          [this](double v) { return std::fabs(v) < this->joint_acceleration_tolerance_; }));
+moveit_planners/ompl/CHANGELOG.rst:* Minimize use of `this->` (`#1784 <https://github.com/ros-planning/moveit2/issues/1784>`_)
