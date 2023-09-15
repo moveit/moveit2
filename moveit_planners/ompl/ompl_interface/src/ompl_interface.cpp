@@ -66,7 +66,19 @@ OMPLInterface::OMPLInterface(const moveit::core::RobotModelConstPtr& robot_model
 
   store_planner_data_service_ = node_->create_service<std_srvs::srv::Trigger>(
       "store_planner_data",
-      std::bind(&OMPLInterface::storePlannerData, this, std::placeholders::_1, std::placeholders::_2));
+      [this](const std::shared_ptr<std_srvs::srv::Trigger::Request>,
+             std::shared_ptr<std_srvs::srv::Trigger::Response> response) -> void {
+        bool success = context_manager_.storePlannerData();
+        response->success = success;
+        if (success)
+        {
+          RCLCPP_INFO(LOGGER, "Stored motion planner data");
+        }
+        else
+        {
+          RCLCPP_ERROR(LOGGER, "Motion planning graph is empty");
+        }
+      });
 }
 
 OMPLInterface::OMPLInterface(const moveit::core::RobotModelConstPtr& robot_model,
@@ -85,7 +97,19 @@ OMPLInterface::OMPLInterface(const moveit::core::RobotModelConstPtr& robot_model
 
   store_planner_data_service_ = node_->create_service<std_srvs::srv::Trigger>(
       "store_planner_data",
-      std::bind(&OMPLInterface::storePlannerData, this, std::placeholders::_1, std::placeholders::_2));
+      [this](const std::shared_ptr<std_srvs::srv::Trigger::Request>,
+             std::shared_ptr<std_srvs::srv::Trigger::Response> response) -> void {
+        bool success = context_manager_.storePlannerData();
+        response->success = success;
+        if (success)
+        {
+          RCLCPP_INFO(LOGGER, "Stored motion planner data");
+        }
+        else
+        {
+          RCLCPP_ERROR(LOGGER, "Motion planning graph is empty");
+        }
+      });
 }
 
 OMPLInterface::~OMPLInterface() = default;
