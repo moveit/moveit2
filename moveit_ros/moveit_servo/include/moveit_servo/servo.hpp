@@ -97,6 +97,12 @@ public:
   StatusCode getStatus() const;
 
   /**
+   * \brief Set the current status of servo to the provided status.
+   * @param status The new status of servo.
+   */
+  void setStatus(const StatusCode status);
+
+  /**
    * \brief Get the message associated with the current servo status.
    * @return The status message.
    */

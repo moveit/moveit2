@@ -91,12 +91,12 @@ Servo::Servo(const rclcpp::Node::SharedPtr& node, std::shared_ptr<const servo::P
   // Check if the transforms to planning frame and end effector frame exist.
   if (!robot_state->knowsFrameTransform(servo_params_.planning_frame))
   {
-    servo_status_ = StatusCode::INVALID;
+    setStatus(StatusCode::INVALID);
     RCLCPP_ERROR_STREAM(LOGGER, "No transform available for planning frame " << servo_params_.planning_frame);
   }
   else if (!robot_state->knowsFrameTransform(servo_params_.ee_frame))
   {
-    servo_status_ = StatusCode::INVALID;
+    setStatus(StatusCode::INVALID);
     RCLCPP_ERROR_STREAM(LOGGER, "No transform available for end effector frame " << servo_params_.ee_frame);
   }
   else
@@ -116,7 +116,7 @@ Servo::Servo(const rclcpp::Node::SharedPtr& node, std::shared_ptr<const servo::P
         std::make_unique<CollisionMonitor>(planning_scene_monitor_, servo_params_, std::ref(collision_velocity_scale_));
     collision_monitor_->start();
 
-    servo_status_ = StatusCode::NO_WARNING;
+    setStatus(StatusCode::NO_WARNING);
     RCLCPP_INFO_STREAM(LOGGER, "Servo initialized successfully");
   }
 }
@@ -251,6 +251,11 @@ StatusCode Servo::getStatus() const
   return servo_status_;
 }
 
+void Servo::setStatus(const StatusCode status)
+{
+  servo_status_ = status;
+}
+
 std::string Servo::getStatusMessage() const
 {
   return SERVO_STATUS_CODE_MAP.at(servo_status_);
@@ -323,7 +328,7 @@ Eigen::VectorXd Servo::jointDeltaFromCommand(const ServoInput& command, const mo
     if (expected_type == CommandType::JOINT_JOG)
     {
       delta_result = jointDeltaFromJointJog(std::get<JointJogCommand>(command), robot_state, servo_params_);
-      servo_status_ = delta_result.first;
+      setStatus(delta_result.first);
     }
     else if (expected_type == CommandType::TWIST)
     {
@@ -331,11 +336,11 @@ Eigen::VectorXd Servo::jointDeltaFromCommand(const ServoInput& command, const mo
       {
         const TwistCommand command_in_planning_frame = toPlanningFrame(std::get<TwistCommand>(command));
         delta_result = jointDeltaFromTwist(command_in_planning_frame, robot_state, servo_params_);
-        servo_status_ = delta_result.first;
+        setStatus(delta_result.first);
       }
       catch (tf2::TransformException& ex)
       {
-        servo_status_ = StatusCode::INVALID;
+        setStatus(StatusCode::INVALID);
         RCLCPP_ERROR_STREAM(LOGGER, "Could not transform twist to planning frame.");
       }
     }
@@ -345,11 +350,11 @@ Eigen::VectorXd Servo::jointDeltaFromCommand(const ServoInput& command, const mo
       {
         const PoseCommand command_in_planning_frame = toPlanningFrame(std::get<PoseCommand>(command));
         delta_result = jointDeltaFromPose(command_in_planning_frame, robot_state, servo_params_);
-        servo_status_ = delta_result.first;
+        setStatus(delta_result.first);
       }
       catch (tf2::TransformException& ex)
       {
-        servo_status_ = StatusCode::INVALID;
+        setStatus(StatusCode::INVALID);
         RCLCPP_ERROR_STREAM(LOGGER, "Could not transform pose to planning frame.");
       }
     }
@@ -361,7 +366,7 @@ Eigen::VectorXd Servo::jointDeltaFromCommand(const ServoInput& command, const mo
   }
   else
   {
-    servo_status_ = StatusCode::INVALID;
+    setStatus(StatusCode::INVALID);
     RCLCPP_WARN_STREAM(LOGGER, "SERVO : Incoming command type does not match expected command type.");
   }
 
@@ -371,7 +376,7 @@ Eigen::VectorXd Servo::jointDeltaFromCommand(const ServoInput& command, const mo
 KinematicState Servo::getNextJointState(const ServoInput& command)
 {
   // Set status to clear
-  servo_status_ = StatusCode::NO_WARNING;
+  setStatus(StatusCode::NO_WARNING);
 
   // Update the parameters
   updateParams();
@@ -405,11 +410,11 @@ KinematicState Servo::getNextJointState(const ServoInput& command)
 
   if (collision_velocity_scale_ > 0 && collision_velocity_scale_ < 1)
   {
-    servo_status_ = StatusCode::DECELERATE_FOR_COLLISION;
+    setStatus(StatusCode::DECELERATE_FOR_COLLISION);
   }
   else if (collision_velocity_scale_ == 0)
   {
-    servo_status_ = StatusCode::HALT_FOR_COLLISION;
+    setStatus(StatusCode::HALT_FOR_COLLISION);
   }
 
   // Continue rest of the computations only if the command is valid
@@ -452,7 +457,7 @@ KinematicState Servo::getNextJointState(const ServoInput& command)
     // Apply halting if any joints need to be halted.
     if (!joints_to_halt.empty())
     {
-      servo_status_ = StatusCode::JOINT_BOUND;
+      setStatus(StatusCode::JOINT_BOUND);
       target_state = haltJoints(joints_to_halt, current_state, target_state);
     }
   }
