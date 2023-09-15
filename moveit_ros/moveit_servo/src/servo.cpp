@@ -90,6 +90,7 @@ Servo::Servo(const rclcpp::Node::SharedPtr& node, std::shared_ptr<const servo::P
   robot_state_ = planning_scene_monitor_->getStateMonitor()->getCurrentState();
   joint_model_group_ = robot_state_->getJointModelGroup(servo_params_.move_group_name);
   joint_names_ = joint_model_group_->getActiveJointModelNames();
+
   // Check if the transforms to planning frame and end effector frame exist.
   if (!robot_state_->knowsFrameTransform(servo_params_.planning_frame))
   {
@@ -130,7 +131,6 @@ Servo::~Servo()
 
 void Servo::setSmoothingPlugin()
 {
-  // Load the smoothing plugin
   try
   {
     pluginlib::ClassLoader<online_signal_smoothing::SmoothingBaseClass> smoothing_loader(
@@ -219,6 +219,18 @@ bool Servo::updateParams()
       {
         RCLCPP_INFO_STREAM(LOGGER, "Move group changed from " << servo_params_.move_group_name << " to "
                                                               << params.move_group_name);
+
+        robot_state_ = planning_scene_monitor_->getStateMonitor()->getCurrentState();
+        auto joint_model_group = robot_state_->getJointModelGroup(servo_params_.move_group_name);
+        if (joint_model_group == nullptr)
+        {
+          RCLCPP_ERROR_STREAM(LOGGER, "Group with name: " << params.move_group_name << " not found.");
+        }
+        else
+        {
+          joint_model_group_ = robot_state_->getJointModelGroup(servo_params_.move_group_name);
+          joint_names_ = joint_model_group_->getActiveJointModelNames();
+        }
       }
 
       servo_params_ = params;
