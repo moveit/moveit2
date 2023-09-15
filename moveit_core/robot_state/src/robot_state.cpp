@@ -1287,7 +1287,7 @@ void RobotState::getRobotMarkers(visualization_msgs::msg::MarkerArray& arr, cons
             if (shapes::constructMarkerFromShape(it.second->getShapes()[j].get(), att_mark))
             {
               // if the object is invisible (0 volume) we skip it
-              if (fabs(att_mark.scale.x * att_mark.scale.y * att_mark.scale.z) < std::numeric_limits<float>::epsilon())
+              if (fabs(att_mark.scale.x * att_mark.scale.y * att_mark.scale.z) < std::numeric_limits<double>::epsilon())
                 continue;
               att_mark.pose = tf2::toMsg(it.second->getGlobalCollisionBodyTransforms()[j]);
               arr.markers.push_back(att_mark);
@@ -1313,7 +1313,7 @@ void RobotState::getRobotMarkers(visualization_msgs::msg::MarkerArray& arr, cons
         if (!shapes::constructMarkerFromShape(link_model->getShapes()[j].get(), mark))
           continue;
         // if the object is invisible (0 volume) we skip it
-        if (fabs(mark.scale.x * mark.scale.y * mark.scale.z) < std::numeric_limits<float>::epsilon())
+        if (fabs(mark.scale.x * mark.scale.y * mark.scale.z) < std::numeric_limits<double>::epsilon())
           continue;
         mark.pose =
             tf2::toMsg(global_collision_body_transforms_[link_model->getFirstCollisionBodyTransformIndex() + j]);
@@ -1488,7 +1488,7 @@ void RobotState::computeVariableVelocity(const JointModelGroup* jmg, Eigen::Vect
   const Eigen::VectorXd& s = svd_of_j.singularValues();
 
   Eigen::VectorXd sinv = s;
-  static const double PINVTOLER = std::numeric_limits<float>::epsilon();
+  static const double PINVTOLER = std::numeric_limits<double>::epsilon();
   double maxsv = 0.0;
   for (std::size_t i = 0; i < static_cast<std::size_t>(s.rows()); ++i)
   {
