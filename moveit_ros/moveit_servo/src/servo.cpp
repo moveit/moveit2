@@ -145,9 +145,7 @@ void Servo::setSmoothingPlugin()
   }
 
   // Initialize the smoothing plugin
-  const int num_joints =
-      robot_state_->getJointModelGroup(servo_params_.move_group_name)->getActiveJointModelNames().size();
-  if (!smoother_->initialize(node_, planning_scene_monitor_->getRobotModel(), num_joints))
+  if (!smoother_->initialize(node_, planning_scene_monitor_->getRobotModel(), joint_names_.size()))
   {
     RCLCPP_ERROR(LOGGER, "Smoothing plugin could not be initialized");
     std::exit(EXIT_FAILURE);
@@ -308,9 +306,7 @@ KinematicState Servo::haltJoints(const std::vector<int>& joints_to_halt, const K
 
 Eigen::VectorXd Servo::jointDeltaFromCommand(const ServoInput& command)
 {
-  const int num_joints =
-      robot_state_->getJointModelGroup(servo_params_.move_group_name)->getActiveJointModelNames().size();
-  Eigen::VectorXd joint_position_deltas(num_joints);
+  Eigen::VectorXd joint_position_deltas(joint_names_.size());
   joint_position_deltas.setZero();
 
   JointDeltaResult delta_result;
@@ -544,8 +540,7 @@ std::pair<bool, KinematicState> Servo::smoothHalt(const KinematicState& halt_sta
   auto target_state = halt_state;
   const auto current_state = getCurrentRobotState();
 
-  const size_t num_joints = joint_names_.size();
-  for (size_t i = 0; i < num_joints; i++)
+  for (size_t i = 0; i < joint_names_.size(); i++)
   {
     const double vel = (target_state.positions[i] - current_state.positions[i]) / servo_params_.publish_period;
     target_state.velocities[i] = (vel > STOPPED_VELOCITY_EPS) ? vel : 0.0;
