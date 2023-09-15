@@ -296,9 +296,12 @@ void ServoNode::servoLoop()
 
   while (rclcpp::ok() && !stop_servo_)
   {
-    // Skip processing if servoing is disabled.
+    // Skip processing commands if servoing is disabled, but allow parameter updates.
     if (servo_paused_)
+    {
+      servo_->updateParams();
       continue;
+    }
 
     next_joint_state = std::nullopt;
     const CommandType expected_type = servo_->getCommandType();

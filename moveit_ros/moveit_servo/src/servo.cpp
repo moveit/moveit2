@@ -212,7 +212,7 @@ bool Servo::updateParams()
 {
   bool params_updated = false;
 
-  if (servo_param_listener_->is_old(servo_params_))
+  if (servo_param_listener_->is_old(servo_params_) && servo_status_ == StatusCode::PAUSED)
   {
     auto params = servo_param_listener_->get_params();
 
@@ -377,9 +377,6 @@ KinematicState Servo::getNextJointState(const ServoInput& command)
 {
   // Set status to clear
   setStatus(StatusCode::NO_WARNING);
-
-  // Update the parameters
-  updateParams();
 
   // Get the robot state and joint model group info.
   moveit::core::RobotStatePtr robot_state = planning_scene_monitor_->getStateMonitor()->getCurrentState();

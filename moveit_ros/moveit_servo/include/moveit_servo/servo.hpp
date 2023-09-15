@@ -137,6 +137,11 @@ public:
    */
   std::pair<bool, KinematicState> smoothHalt(const KinematicState& halt_state) const;
 
+  /**
+   * \brief Updates the servo parameters and performs validations.
+   */
+  bool updateParams();
+
 private:
   /**
    * \brief Finds the transform from the planning frame to a specified command frame.
@@ -183,11 +188,6 @@ private:
    * @return True if parameters are valid, else False
    */
   bool validateParams(const servo::Params& servo_params) const;
-
-  /**
-   * \brief Updates the servo parameters and performs validations.
-   */
-  bool updateParams();
 
   /**
    * \brief Create and initialize the smoothing plugin to be used by servo.
