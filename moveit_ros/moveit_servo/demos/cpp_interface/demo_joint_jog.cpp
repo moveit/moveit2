@@ -93,6 +93,7 @@ int main(int argc, char* argv[])
   RCLCPP_INFO_STREAM(LOGGER, servo.getStatusMessage());
   while (rclcpp::ok())
   {
+    servo.updateParams();  // This can be skipped if your application will not be updating parameters.
     const KinematicState joint_state = servo.getNextJointState(joint_jog);
     const StatusCode status = servo.getStatus();
 

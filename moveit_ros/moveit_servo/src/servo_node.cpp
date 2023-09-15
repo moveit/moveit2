@@ -298,6 +298,8 @@ void ServoNode::servoLoop()
 
   while (rclcpp::ok() && !stop_servo_)
   {
+    servo_->updateParams();
+
     // Skip processing commands if servoing is disabled.
     if (servo_->getStatus() == StatusCode::PAUSED)
     {

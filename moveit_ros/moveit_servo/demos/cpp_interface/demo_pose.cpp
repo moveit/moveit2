@@ -100,6 +100,7 @@ int main(int argc, char* argv[])
     rclcpp::WallRate tracking_rate(1 / servo_params.publish_period);
     while (!stop_tracking && rclcpp::ok())
     {
+      servo.updateParams();  // This can be skipped if your application will not be updating parameters.
       {
         std::lock_guard<std::mutex> pguard(pose_guard);
         joint_state = servo.getNextJointState(target_pose);

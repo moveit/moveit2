@@ -60,6 +60,7 @@ Servo::Servo(const rclcpp::Node::SharedPtr& node, std::shared_ptr<const servo::P
   : node_(node)
   , servo_param_listener_{ std::move(servo_param_listener) }
   , planning_scene_monitor_{ planning_scene_monitor }
+  , invalid_parameter_update_{ false }
 {
   servo_params_ = servo_param_listener_->get_params();
 
@@ -212,6 +213,7 @@ bool Servo::updateParams()
       {
         if (servo_status_ == StatusCode::PAUSED)
         {
+          invalid_parameter_update_ = false;
           RCLCPP_INFO_STREAM(LOGGER, "Move group changed from " << servo_params_.move_group_name << " to "
                                                                 << params.move_group_name);
 
@@ -230,8 +232,9 @@ bool Servo::updateParams()
         }
         else
         {
-          setStatus(StatusCode::INVALID);
-          RCLCPP_WARN_STREAM(LOGGER, "Move group cannot be updated without pausing servo.");
+          invalid_parameter_update_ = true;
+          RCLCPP_WARN_STREAM(
+              LOGGER, "Move group cannot be updated without pausing servo. Please pause servo and reapply the update.");
         }
       }
 
@@ -381,6 +384,11 @@ KinematicState Servo::getNextJointState(const ServoInput& command)
   // Set status to clear
   setStatus(StatusCode::NO_WARNING);
 
+  if (invalid_parameter_update_)
+  {
+    setStatus(StatusCode::INVALID);
+  }
+
   // Get the robot state and joint model group info.
   robot_state_ = planning_scene_monitor_->getStateMonitor()->getCurrentState();
 
@@ -397,8 +405,7 @@ KinematicState Servo::getNextJointState(const ServoInput& command)
   robot_state_->copyJointGroupVelocities(joint_model_group_, current_state.velocities);
   robot_state_->copyJointGroupPositions(joint_model_group_, target_state.velocities);
 
-  updateParams();
-
+  // Only start the computations if servo is in a valid state.
   if (servo_status_ != StatusCode::INVALID)
   {
     // Create Eigen maps for cleaner operations.
