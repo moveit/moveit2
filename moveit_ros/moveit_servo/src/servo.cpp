@@ -87,14 +87,14 @@ Servo::Servo(const rclcpp::Node::SharedPtr& node, std::shared_ptr<const servo::P
     planning_scene_monitor_->requestPlanningSceneState();
   }
 
-  moveit::core::RobotStatePtr robot_state = planning_scene_monitor_->getStateMonitor()->getCurrentState();
+  robot_state_ = planning_scene_monitor_->getStateMonitor()->getCurrentState();
   // Check if the transforms to planning frame and end effector frame exist.
-  if (!robot_state->knowsFrameTransform(servo_params_.planning_frame))
+  if (!robot_state_->knowsFrameTransform(servo_params_.planning_frame))
   {
     setStatus(StatusCode::INVALID);
     RCLCPP_ERROR_STREAM(LOGGER, "No transform available for planning frame " << servo_params_.planning_frame);
   }
-  else if (!robot_state->knowsFrameTransform(servo_params_.ee_frame))
+  else if (!robot_state_->knowsFrameTransform(servo_params_.ee_frame))
   {
     setStatus(StatusCode::INVALID);
     RCLCPP_ERROR_STREAM(LOGGER, "No transform available for end effector frame " << servo_params_.ee_frame);
@@ -143,9 +143,8 @@ void Servo::setSmoothingPlugin()
   }
 
   // Initialize the smoothing plugin
-  moveit::core::RobotStatePtr robot_state = planning_scene_monitor_->getStateMonitor()->getCurrentState();
   const int num_joints =
-      robot_state->getJointModelGroup(servo_params_.move_group_name)->getActiveJointModelNames().size();
+      robot_state_->getJointModelGroup(servo_params_.move_group_name)->getActiveJointModelNames().size();
   if (!smoother_->initialize(node_, planning_scene_monitor_->getRobotModel(), num_joints))
   {
     RCLCPP_ERROR(LOGGER, "Smoothing plugin could not be initialized");
@@ -161,14 +160,6 @@ void Servo::setCollisionChecking(const bool check_collision)
 bool Servo::validateParams(const servo::Params& servo_params) const
 {
   bool params_valid = true;
-
-  auto robot_state = planning_scene_monitor_->getStateMonitor()->getCurrentState();
-  auto joint_model_group = robot_state->getJointModelGroup(servo_params.move_group_name);
-  if (joint_model_group == nullptr)
-  {
-    RCLCPP_ERROR_STREAM(LOGGER, "Invalid move group name: `" << servo_params.move_group_name << '`');
-    params_valid = false;
-  }
 
   if (servo_params.hard_stop_singularity_threshold <= servo_params.lower_singularity_threshold)
   {
@@ -313,10 +304,10 @@ KinematicState Servo::haltJoints(const std::vector<int>& joints_to_halt, const K
   return bounded_state;
 }
 
-Eigen::VectorXd Servo::jointDeltaFromCommand(const ServoInput& command, const moveit::core::RobotStatePtr& robot_state)
+Eigen::VectorXd Servo::jointDeltaFromCommand(const ServoInput& command)
 {
   const int num_joints =
-      robot_state->getJointModelGroup(servo_params_.move_group_name)->getActiveJointModelNames().size();
+      robot_state_->getJointModelGroup(servo_params_.move_group_name)->getActiveJointModelNames().size();
   Eigen::VectorXd joint_position_deltas(num_joints);
   joint_position_deltas.setZero();
 
@@ -327,7 +318,7 @@ Eigen::VectorXd Servo::jointDeltaFromCommand(const ServoInput& command, const mo
   {
     if (expected_type == CommandType::JOINT_JOG)
     {
-      delta_result = jointDeltaFromJointJog(std::get<JointJogCommand>(command), robot_state, servo_params_);
+      delta_result = jointDeltaFromJointJog(std::get<JointJogCommand>(command), robot_state_, servo_params_);
       setStatus(delta_result.first);
     }
     else if (expected_type == CommandType::TWIST)
@@ -335,7 +326,7 @@ Eigen::VectorXd Servo::jointDeltaFromCommand(const ServoInput& command, const mo
       try
       {
         const TwistCommand command_in_planning_frame = toPlanningFrame(std::get<TwistCommand>(command));
-        delta_result = jointDeltaFromTwist(command_in_planning_frame, robot_state, servo_params_);
+        delta_result = jointDeltaFromTwist(command_in_planning_frame, robot_state_, servo_params_);
         setStatus(delta_result.first);
       }
       catch (tf2::TransformException& ex)
@@ -349,7 +340,7 @@ Eigen::VectorXd Servo::jointDeltaFromCommand(const ServoInput& command, const mo
       try
       {
         const PoseCommand command_in_planning_frame = toPlanningFrame(std::get<PoseCommand>(command));
-        delta_result = jointDeltaFromPose(command_in_planning_frame, robot_state, servo_params_);
+        delta_result = jointDeltaFromPose(command_in_planning_frame, robot_state_, servo_params_);
         setStatus(delta_result.first);
       }
       catch (tf2::TransformException& ex)
@@ -379,9 +370,9 @@ KinematicState Servo::getNextJointState(const ServoInput& command)
   setStatus(StatusCode::NO_WARNING);
 
   // Get the robot state and joint model group info.
-  moveit::core::RobotStatePtr robot_state = planning_scene_monitor_->getStateMonitor()->getCurrentState();
+  robot_state_ = planning_scene_monitor_->getStateMonitor()->getCurrentState();
   const moveit::core::JointModelGroup* joint_model_group =
-      robot_state->getJointModelGroup(servo_params_.move_group_name);
+      robot_state_->getJointModelGroup(servo_params_.move_group_name);
 
   // Get necessary information about joints
   const std::vector<std::string> joint_names = joint_model_group->getActiveJointModelNames();
@@ -393,8 +384,8 @@ KinematicState Servo::getNextJointState(const ServoInput& command)
   target_state.joint_names = joint_names;
 
   // Copy current kinematic data from RobotState.
-  robot_state->copyJointGroupPositions(joint_model_group, current_state.positions);
-  robot_state->copyJointGroupVelocities(joint_model_group, current_state.velocities);
+  robot_state_->copyJointGroupPositions(joint_model_group, current_state.positions);
+  robot_state_->copyJointGroupVelocities(joint_model_group, current_state.velocities);
 
   // Create Eigen maps for cleaner operations.
   Eigen::Map<Eigen::VectorXd> current_joint_positions(current_state.positions.data(), num_joints);
@@ -403,7 +394,7 @@ KinematicState Servo::getNextJointState(const ServoInput& command)
   Eigen::Map<Eigen::VectorXd> target_joint_velocities(target_state.velocities.data(), num_joints);
 
   // Compute the change in joint position due to the incoming command
-  Eigen::VectorXd joint_position_delta = jointDeltaFromCommand(command, robot_state);
+  Eigen::VectorXd joint_position_delta = jointDeltaFromCommand(command);
 
   if (collision_velocity_scale_ > 0 && collision_velocity_scale_ < 1)
   {
@@ -462,13 +453,13 @@ KinematicState Servo::getNextJointState(const ServoInput& command)
   return target_state;
 }
 
-Eigen::Isometry3d Servo::getPlanningToCommandFrameTransform(const std::string& command_frame) const
+Eigen::Isometry3d Servo::getPlanningToCommandFrameTransform(const std::string& command_frame)
 {
-  const moveit::core::RobotStatePtr robot_state = planning_scene_monitor_->getStateMonitor()->getCurrentState();
-  if (robot_state->knowsFrameTransform(command_frame))
+  robot_state_ = planning_scene_monitor_->getStateMonitor()->getCurrentState();
+  if (robot_state_->knowsFrameTransform(command_frame))
   {
-    return robot_state->getGlobalLinkTransform(servo_params_.planning_frame).inverse() *
-           robot_state->getGlobalLinkTransform(command_frame);
+    return robot_state_->getGlobalLinkTransform(servo_params_.planning_frame).inverse() *
+           robot_state_->getGlobalLinkTransform(command_frame);
   }
   else
   {
@@ -477,7 +468,7 @@ Eigen::Isometry3d Servo::getPlanningToCommandFrameTransform(const std::string& c
   }
 }
 
-TwistCommand Servo::toPlanningFrame(const TwistCommand& command) const
+TwistCommand Servo::toPlanningFrame(const TwistCommand& command)
 {
   Eigen::VectorXd transformed_twist = command.velocities;
 
@@ -529,29 +520,29 @@ TwistCommand Servo::toPlanningFrame(const TwistCommand& command) const
   return TwistCommand{ servo_params_.planning_frame, transformed_twist };
 }
 
-PoseCommand Servo::toPlanningFrame(const PoseCommand& command) const
+PoseCommand Servo::toPlanningFrame(const PoseCommand& command)
 {
   return PoseCommand{ servo_params_.planning_frame,
                       getPlanningToCommandFrameTransform(command.frame_id) * command.pose };
 }
 
-KinematicState Servo::getCurrentRobotState() const
+KinematicState Servo::getCurrentRobotState()
 {
-  moveit::core::RobotStatePtr robot_state = planning_scene_monitor_->getStateMonitor()->getCurrentState();
+  robot_state_ = planning_scene_monitor_->getStateMonitor()->getCurrentState();
   const moveit::core::JointModelGroup* joint_model_group =
-      robot_state->getJointModelGroup(servo_params_.move_group_name);
+      robot_state_->getJointModelGroup(servo_params_.move_group_name);
   const auto joint_names = joint_model_group->getActiveJointModelNames();
 
   KinematicState current_state(joint_names.size());
   current_state.joint_names = joint_names;
-  robot_state->copyJointGroupPositions(joint_model_group, current_state.positions);
-  robot_state->copyJointGroupVelocities(joint_model_group, current_state.velocities);
-  robot_state->copyJointGroupAccelerations(joint_model_group, current_state.accelerations);
+  robot_state_->copyJointGroupPositions(joint_model_group, current_state.positions);
+  robot_state_->copyJointGroupVelocities(joint_model_group, current_state.velocities);
+  robot_state_->copyJointGroupAccelerations(joint_model_group, current_state.accelerations);
 
   return current_state;
 }
 
-std::pair<bool, KinematicState> Servo::smoothHalt(const KinematicState& halt_state) const
+std::pair<bool, KinematicState> Servo::smoothHalt(const KinematicState& halt_state)
 {
   bool stopped = false;
   auto target_state = halt_state;

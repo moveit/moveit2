@@ -128,14 +128,14 @@ public:
    * \brief Get the current state of the robot as given by planning scene monitor.
    * @return The current state of the robot.
    */
-  KinematicState getCurrentRobotState() const;
+  KinematicState getCurrentRobotState();
 
   /**
    * \brief Smoothly halt at a commanded state when command goes stale.
    * @param The last commanded joint states.
    * @return The next state stepping towards the required halting state.
    */
-  std::pair<bool, KinematicState> smoothHalt(const KinematicState& halt_state) const;
+  std::pair<bool, KinematicState> smoothHalt(const KinematicState& halt_state);
 
   /**
    * \brief Updates the servo parameters and performs validations.
@@ -150,7 +150,7 @@ private:
    * @param command_frame The command frame name.
    * @return The transformation between planning frame and command frame.
    */
-  Eigen::Isometry3d getPlanningToCommandFrameTransform(const std::string& command_frame) const;
+  Eigen::Isometry3d getPlanningToCommandFrameTransform(const std::string& command_frame);
 
   /**
    * \brief Convert a given twist command to planning frame,
@@ -161,21 +161,21 @@ private:
    * @param command The twist command to be converted.
    * @return The transformed twist command.
    */
-  TwistCommand toPlanningFrame(const TwistCommand& command) const;
+  TwistCommand toPlanningFrame(const TwistCommand& command);
 
   /**
    * \brief Convert a given pose command to planning frame
    * @param command The pose command to be converted
    * @return The transformed pose command
    */
-  PoseCommand toPlanningFrame(const PoseCommand& command) const;
+  PoseCommand toPlanningFrame(const PoseCommand& command);
 
   /**
    * \brief Compute the change in joint position required to follow the received command.
    * @param command The incoming servo command.
    * @return The joint position change required (delta).
    */
-  Eigen::VectorXd jointDeltaFromCommand(const ServoInput& command, const moveit::core::RobotStatePtr& robot_state);
+  Eigen::VectorXd jointDeltaFromCommand(const ServoInput& command);
 
   /**
    * \brief Updates data depending on joint model group
@@ -220,6 +220,8 @@ private:
   std::unique_ptr<CollisionMonitor> collision_monitor_;
 
   pluginlib::UniquePtr<online_signal_smoothing::SmoothingBaseClass> smoother_ = nullptr;
+
+  moveit::core::RobotStatePtr robot_state_;
 };
 
 }  // namespace moveit_servo
