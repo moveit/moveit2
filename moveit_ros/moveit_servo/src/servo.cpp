@@ -129,18 +129,18 @@ void Servo::setSmoothingPlugin()
     pluginlib::ClassLoader<online_signal_smoothing::SmoothingBaseClass> smoothing_loader(
         "moveit_core", "online_signal_smoothing::SmoothingBaseClass");
     smoother_ = smoothing_loader.createUniqueInstance(servo_params_.smoothing_filter_plugin_name);
+
+    // Initialize the smoothing plugin
+    if (!smoother_->initialize(node_, planning_scene_monitor_->getRobotModel(), joint_names_.size()))
+    {
+      RCLCPP_ERROR(LOGGER, "Smoothing plugin could not be initialized");
+      std::exit(EXIT_FAILURE);
+    }
   }
   catch (pluginlib::PluginlibException& ex)
   {
     RCLCPP_ERROR(LOGGER, "Exception while loading the smoothing plugin '%s': '%s'",
                  servo_params_.smoothing_filter_plugin_name.c_str(), ex.what());
-    std::exit(EXIT_FAILURE);
-  }
-
-  // Initialize the smoothing plugin
-  if (!smoother_->initialize(node_, planning_scene_monitor_->getRobotModel(), joint_names_.size()))
-  {
-    RCLCPP_ERROR(LOGGER, "Smoothing plugin could not be initialized");
     std::exit(EXIT_FAILURE);
   }
 }
