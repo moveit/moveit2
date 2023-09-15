@@ -157,11 +157,13 @@ void ServoNode::pauseServo(const std::shared_ptr<std_srvs::srv::SetBool::Request
   if (servo_paused_)
   {
     servo_->setCollisionChecking(false);
+    servo_->setStatus(StatusCode::PAUSED);
     response->message = "Servoing disabled";
   }
   else
   {
     servo_->setCollisionChecking(true);
+    servo_->setStatus(StatusCode::NO_WARNING);
     response->message = "Servoing enabled";
   }
 }
@@ -297,7 +299,7 @@ void ServoNode::servoLoop()
   while (rclcpp::ok() && !stop_servo_)
   {
     // Skip processing commands if servoing is disabled, but allow parameter updates.
-    if (servo_paused_)
+    if (servo_->getStatus() == StatusCode::PAUSED)
     {
       servo_->updateParams();
       continue;
@@ -320,6 +322,7 @@ void ServoNode::servoLoop()
     }
     else if (new_joint_jog_msg_ || new_twist_msg_ || new_pose_msg_)
     {
+      servo_->setStatus(StatusCode::INVALID);
       new_joint_jog_msg_ = new_twist_msg_ = new_pose_msg_ = false;
       RCLCPP_WARN_STREAM(LOGGER, "Command type has not been set, cannot accept input");
     }
