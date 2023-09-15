@@ -105,14 +105,7 @@ Servo::Servo(const rclcpp::Node::SharedPtr& node, std::shared_ptr<const servo::P
   else
   {
     // Load the smoothing plugin
-    if (servo_params_.use_smoothing)
-    {
-      setSmoothingPlugin();
-    }
-    else
-    {
-      RCLCPP_WARN(LOGGER, "No smoothing plugin loaded");
-    }
+    setSmoothingPlugin();
 
     // Create the collision checker and start collision checking.
     collision_monitor_ =
@@ -426,7 +419,7 @@ KinematicState Servo::getNextJointState(const ServoInput& command)
     // TODO : apply filtering to the velocity instead of position
     // Apply smoothing to the positions if a smoother was provided.
     // Update filter state and apply filtering in position domain
-    if (smoother_)
+    if (servo_params_.use_smoothing)
     {
       smoother_->reset(current_state.positions);
       smoother_->doSmoothing(target_state.positions);
