@@ -89,6 +89,7 @@ Servo::Servo(const rclcpp::Node::SharedPtr& node, std::shared_ptr<const servo::P
 
   robot_state_ = planning_scene_monitor_->getStateMonitor()->getCurrentState();
   joint_model_group_ = robot_state_->getJointModelGroup(servo_params_.move_group_name);
+  joint_names_ = joint_model_group_->getActiveJointModelNames();
   // Check if the transforms to planning frame and end effector frame exist.
   if (!robot_state_->knowsFrameTransform(servo_params_.planning_frame))
   {
@@ -271,8 +272,8 @@ Eigen::Isometry3d Servo::getEndEffectorPose() const
 KinematicState Servo::haltJoints(const std::vector<int>& joints_to_halt, const KinematicState& current_state,
                                  const KinematicState& target_state) const
 {
-  KinematicState bounded_state(target_state.joint_names.size());
-  bounded_state.joint_names = target_state.joint_names;
+  KinematicState bounded_state(joint_names_.size());
+  bounded_state.joint_names = joint_names_;
 
   std::stringstream halting_joint_names;
   for (const int idx : joints_to_halt)
@@ -374,13 +375,12 @@ KinematicState Servo::getNextJointState(const ServoInput& command)
   robot_state_ = planning_scene_monitor_->getStateMonitor()->getCurrentState();
 
   // Get necessary information about joints
-  const std::vector<std::string> joint_names = joint_model_group_->getActiveJointModelNames();
   const moveit::core::JointBoundsVector joint_bounds = joint_model_group_->getActiveJointModelsBounds();
-  const int num_joints = joint_names.size();
+  const int num_joints = joint_names_.size();
 
   // State variables
   KinematicState current_state(num_joints), target_state(num_joints);
-  target_state.joint_names = joint_names;
+  target_state.joint_names = joint_names_;
 
   // Copy current kinematic data from RobotState.
   robot_state_->copyJointGroupPositions(joint_model_group_, current_state.positions);
@@ -528,10 +528,9 @@ PoseCommand Servo::toPlanningFrame(const PoseCommand& command)
 KinematicState Servo::getCurrentRobotState()
 {
   robot_state_ = planning_scene_monitor_->getStateMonitor()->getCurrentState();
-  const auto joint_names = joint_model_group_->getActiveJointModelNames();
 
-  KinematicState current_state(joint_names.size());
-  current_state.joint_names = joint_names;
+  KinematicState current_state(joint_names_.size());
+  current_state.joint_names = joint_names_;
   robot_state_->copyJointGroupPositions(joint_model_group_, current_state.positions);
   robot_state_->copyJointGroupVelocities(joint_model_group_, current_state.velocities);
   robot_state_->copyJointGroupAccelerations(joint_model_group_, current_state.accelerations);
@@ -545,7 +544,7 @@ std::pair<bool, KinematicState> Servo::smoothHalt(const KinematicState& halt_sta
   auto target_state = halt_state;
   const auto current_state = getCurrentRobotState();
 
-  const size_t num_joints = current_state.joint_names.size();
+  const size_t num_joints = joint_names_.size();
   for (size_t i = 0; i < num_joints; i++)
   {
     const double vel = (target_state.positions[i] - current_state.positions[i]) / servo_params_.publish_period;
