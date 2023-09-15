@@ -196,7 +196,7 @@ bool Servo::updateParams()
 {
   bool params_updated = false;
 
-  if (servo_param_listener_->is_old(servo_params_) && servo_status_ == StatusCode::PAUSED)
+  if (servo_param_listener_->is_old(servo_params_))
   {
     auto params = servo_param_listener_->get_params();
 
@@ -210,20 +210,28 @@ bool Servo::updateParams()
       }
       if (params.move_group_name != servo_params_.move_group_name)
       {
-        RCLCPP_INFO_STREAM(LOGGER, "Move group changed from " << servo_params_.move_group_name << " to "
-                                                              << params.move_group_name);
-
-        robot_state_ = planning_scene_monitor_->getStateMonitor()->getCurrentState();
-        auto joint_model_group = robot_state_->getJointModelGroup(servo_params_.move_group_name);
-        if (joint_model_group == nullptr)
+        if (servo_status_ == StatusCode::PAUSED)
         {
-          RCLCPP_ERROR_STREAM(LOGGER, "Group with name: " << params.move_group_name << " not found.");
+          RCLCPP_INFO_STREAM(LOGGER, "Move group changed from " << servo_params_.move_group_name << " to "
+                                                                << params.move_group_name);
+
+          robot_state_ = planning_scene_monitor_->getStateMonitor()->getCurrentState();
+          auto joint_model_group = robot_state_->getJointModelGroup(servo_params_.move_group_name);
+          if (joint_model_group == nullptr)
+          {
+            RCLCPP_ERROR_STREAM(LOGGER, "Group with name: " << params.move_group_name << " not found.");
+          }
+          else
+          {
+            joint_model_group_ = robot_state_->getJointModelGroup(servo_params_.move_group_name);
+            joint_names_ = joint_model_group_->getActiveJointModelNames();
+            setSmoothingPlugin();
+          }
         }
         else
         {
-          joint_model_group_ = robot_state_->getJointModelGroup(servo_params_.move_group_name);
-          joint_names_ = joint_model_group_->getActiveJointModelNames();
-          setSmoothingPlugin();
+          setStatus(StatusCode::INVALID);
+          RCLCPP_WARN_STREAM(LOGGER, "Move group cannot be updated without pausing servo.");
         }
       }
 
@@ -387,67 +395,73 @@ KinematicState Servo::getNextJointState(const ServoInput& command)
   // Copy current kinematic data from RobotState.
   robot_state_->copyJointGroupPositions(joint_model_group_, current_state.positions);
   robot_state_->copyJointGroupVelocities(joint_model_group_, current_state.velocities);
+  robot_state_->copyJointGroupPositions(joint_model_group_, target_state.velocities);
 
-  // Create Eigen maps for cleaner operations.
-  Eigen::Map<Eigen::VectorXd> current_joint_positions(current_state.positions.data(), num_joints);
-  Eigen::Map<Eigen::VectorXd> target_joint_positions(target_state.positions.data(), num_joints);
-  Eigen::Map<Eigen::VectorXd> current_joint_velocities(current_state.velocities.data(), num_joints);
-  Eigen::Map<Eigen::VectorXd> target_joint_velocities(target_state.velocities.data(), num_joints);
+  updateParams();
 
-  // Compute the change in joint position due to the incoming command
-  Eigen::VectorXd joint_position_delta = jointDeltaFromCommand(command);
-
-  if (collision_velocity_scale_ > 0 && collision_velocity_scale_ < 1)
+  if (servo_status_ != StatusCode::INVALID)
   {
-    setStatus(StatusCode::DECELERATE_FOR_COLLISION);
-  }
-  else if (collision_velocity_scale_ == 0)
-  {
-    setStatus(StatusCode::HALT_FOR_COLLISION);
-  }
+    // Create Eigen maps for cleaner operations.
+    Eigen::Map<Eigen::VectorXd> current_joint_positions(current_state.positions.data(), num_joints);
+    Eigen::Map<Eigen::VectorXd> target_joint_positions(target_state.positions.data(), num_joints);
+    Eigen::Map<Eigen::VectorXd> current_joint_velocities(current_state.velocities.data(), num_joints);
+    Eigen::Map<Eigen::VectorXd> target_joint_velocities(target_state.velocities.data(), num_joints);
 
-  // Continue rest of the computations only if the command is valid
-  // The computations can be skipped also in case we are halting.
-  if (servo_status_ != StatusCode::INVALID && servo_status_ != StatusCode::HALT_FOR_COLLISION)
-  {
-    // Apply collision scaling to the joint position delta
-    joint_position_delta *= collision_velocity_scale_;
+    // Compute the change in joint position due to the incoming command
+    Eigen::VectorXd joint_position_delta = jointDeltaFromCommand(command);
 
-    // Compute the next joint positions based on the joint position deltas
-    target_joint_positions = current_joint_positions + joint_position_delta;
-
-    // TODO : apply filtering to the velocity instead of position
-    // Apply smoothing to the positions if a smoother was provided.
-    // Update filter state and apply filtering in position domain
-    if (servo_params_.use_smoothing)
+    if (collision_velocity_scale_ > 0 && collision_velocity_scale_ < 1)
     {
-      smoother_->reset(current_state.positions);
-      smoother_->doSmoothing(target_state.positions);
+      setStatus(StatusCode::DECELERATE_FOR_COLLISION);
+    }
+    else if (collision_velocity_scale_ == 0)
+    {
+      setStatus(StatusCode::HALT_FOR_COLLISION);
     }
 
-    // Compute velocities based on smoothed joint positions
-    target_joint_velocities = (target_joint_positions - current_joint_positions) / servo_params_.publish_period;
-
-    // Scale down the velocity based on joint velocity limit or user defined scaling if applicable.
-    const double joint_limit_scale = jointLimitVelocityScalingFactor(target_joint_velocities, joint_bounds,
-                                                                     servo_params_.override_velocity_scaling_factor);
-    if (joint_limit_scale < 1.0)  // 1.0 means no scaling.
-      RCLCPP_WARN_STREAM(LOGGER, "Joint velocity limit scaling applied by a factor of " << joint_limit_scale);
-
-    target_joint_velocities *= joint_limit_scale;
-
-    // Adjust joint position based on scaled down velocity
-    target_joint_positions = current_joint_positions + (target_joint_velocities * servo_params_.publish_period);
-
-    // Check if any joints are going past joint position limits
-    const std::vector<int> joints_to_halt =
-        jointsToHalt(target_joint_positions, target_joint_velocities, joint_bounds, servo_params_.joint_limit_margin);
-
-    // Apply halting if any joints need to be halted.
-    if (!joints_to_halt.empty())
+    // Continue rest of the computations only if the command is valid
+    // The computations can be skipped also in case we are halting.
+    if (servo_status_ != StatusCode::INVALID && servo_status_ != StatusCode::HALT_FOR_COLLISION)
     {
-      setStatus(StatusCode::JOINT_BOUND);
-      target_state = haltJoints(joints_to_halt, current_state, target_state);
+      // Apply collision scaling to the joint position delta
+      joint_position_delta *= collision_velocity_scale_;
+
+      // Compute the next joint positions based on the joint position deltas
+      target_joint_positions = current_joint_positions + joint_position_delta;
+
+      // TODO : apply filtering to the velocity instead of position
+      // Apply smoothing to the positions if a smoother was provided.
+      // Update filter state and apply filtering in position domain
+      if (servo_params_.use_smoothing)
+      {
+        smoother_->reset(current_state.positions);
+        smoother_->doSmoothing(target_state.positions);
+      }
+
+      // Compute velocities based on smoothed joint positions
+      target_joint_velocities = (target_joint_positions - current_joint_positions) / servo_params_.publish_period;
+
+      // Scale down the velocity based on joint velocity limit or user defined scaling if applicable.
+      const double joint_limit_scale = jointLimitVelocityScalingFactor(target_joint_velocities, joint_bounds,
+                                                                       servo_params_.override_velocity_scaling_factor);
+      if (joint_limit_scale < 1.0)  // 1.0 means no scaling.
+        RCLCPP_WARN_STREAM(LOGGER, "Joint velocity limit scaling applied by a factor of " << joint_limit_scale);
+
+      target_joint_velocities *= joint_limit_scale;
+
+      // Adjust joint position based on scaled down velocity
+      target_joint_positions = current_joint_positions + (target_joint_velocities * servo_params_.publish_period);
+
+      // Check if any joints are going past joint position limits
+      const std::vector<int> joints_to_halt =
+          jointsToHalt(target_joint_positions, target_joint_velocities, joint_bounds, servo_params_.joint_limit_margin);
+
+      // Apply halting if any joints need to be halted.
+      if (!joints_to_halt.empty())
+      {
+        setStatus(StatusCode::JOINT_BOUND);
+        target_state = haltJoints(joints_to_halt, current_state, target_state);
+      }
     }
   }
 

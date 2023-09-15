@@ -224,6 +224,8 @@ private:
   moveit::core::RobotStatePtr robot_state_;
   const moveit::core::JointModelGroup* joint_model_group_;
   std::vector<std::string> joint_names_;
+
+  bool invalid_parameter_update_;
 };
 
 }  // namespace moveit_servo
