@@ -222,6 +222,7 @@ private:
   pluginlib::UniquePtr<online_signal_smoothing::SmoothingBaseClass> smoother_ = nullptr;
 
   moveit::core::RobotStatePtr robot_state_;
+  const moveit::core::JointModelGroup* joint_model_group_;
 };
 
 }  // namespace moveit_servo

@@ -88,6 +88,7 @@ Servo::Servo(const rclcpp::Node::SharedPtr& node, std::shared_ptr<const servo::P
   }
 
   robot_state_ = planning_scene_monitor_->getStateMonitor()->getCurrentState();
+  joint_model_group_ = robot_state_->getJointModelGroup(servo_params_.move_group_name);
   // Check if the transforms to planning frame and end effector frame exist.
   if (!robot_state_->knowsFrameTransform(servo_params_.planning_frame))
   {
@@ -371,12 +372,10 @@ KinematicState Servo::getNextJointState(const ServoInput& command)
 
   // Get the robot state and joint model group info.
   robot_state_ = planning_scene_monitor_->getStateMonitor()->getCurrentState();
-  const moveit::core::JointModelGroup* joint_model_group =
-      robot_state_->getJointModelGroup(servo_params_.move_group_name);
 
   // Get necessary information about joints
-  const std::vector<std::string> joint_names = joint_model_group->getActiveJointModelNames();
-  const moveit::core::JointBoundsVector joint_bounds = joint_model_group->getActiveJointModelsBounds();
+  const std::vector<std::string> joint_names = joint_model_group_->getActiveJointModelNames();
+  const moveit::core::JointBoundsVector joint_bounds = joint_model_group_->getActiveJointModelsBounds();
   const int num_joints = joint_names.size();
 
   // State variables
@@ -384,8 +383,8 @@ KinematicState Servo::getNextJointState(const ServoInput& command)
   target_state.joint_names = joint_names;
 
   // Copy current kinematic data from RobotState.
-  robot_state_->copyJointGroupPositions(joint_model_group, current_state.positions);
-  robot_state_->copyJointGroupVelocities(joint_model_group, current_state.velocities);
+  robot_state_->copyJointGroupPositions(joint_model_group_, current_state.positions);
+  robot_state_->copyJointGroupVelocities(joint_model_group_, current_state.velocities);
 
   // Create Eigen maps for cleaner operations.
   Eigen::Map<Eigen::VectorXd> current_joint_positions(current_state.positions.data(), num_joints);
@@ -529,15 +528,13 @@ PoseCommand Servo::toPlanningFrame(const PoseCommand& command)
 KinematicState Servo::getCurrentRobotState()
 {
   robot_state_ = planning_scene_monitor_->getStateMonitor()->getCurrentState();
-  const moveit::core::JointModelGroup* joint_model_group =
-      robot_state_->getJointModelGroup(servo_params_.move_group_name);
-  const auto joint_names = joint_model_group->getActiveJointModelNames();
+  const auto joint_names = joint_model_group_->getActiveJointModelNames();
 
   KinematicState current_state(joint_names.size());
   current_state.joint_names = joint_names;
-  robot_state_->copyJointGroupPositions(joint_model_group, current_state.positions);
-  robot_state_->copyJointGroupVelocities(joint_model_group, current_state.velocities);
-  robot_state_->copyJointGroupAccelerations(joint_model_group, current_state.accelerations);
+  robot_state_->copyJointGroupPositions(joint_model_group_, current_state.positions);
+  robot_state_->copyJointGroupVelocities(joint_model_group_, current_state.velocities);
+  robot_state_->copyJointGroupAccelerations(joint_model_group_, current_state.accelerations);
 
   return current_state;
 }
