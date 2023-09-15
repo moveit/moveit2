@@ -119,7 +119,7 @@ void RobotStateVisualization::updateHelper(const moveit::core::RobotStateConstPt
   for (const moveit::core::AttachedBody* attached_body : attached_bodies)
   {
     std_msgs::msg::ColorRGBA color = default_attached_object_color;
-    float alpha = robot_.getAlpha();
+    double alpha = robot_.getAlpha();
     if (color_map)
     {
       std::map<std::string, std_msgs::msg::ColorRGBA>::const_iterator it = color_map->find(attached_body->getName());
@@ -176,7 +176,7 @@ void RobotStateVisualization::setCollisionVisible(bool visible)
   robot_.setCollisionVisible(visible);
 }
 
-void RobotStateVisualization::setAlpha(float alpha)
+void RobotStateVisualization::setAlpha(double alpha)
 {
   robot_.setAlpha(alpha);
 }

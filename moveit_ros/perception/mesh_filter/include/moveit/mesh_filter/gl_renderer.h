@@ -70,7 +70,7 @@ public:
    * \param[in] near distance of the near clipping plane in meters
    * \param[in] far distance of the far clipping plane in meters
    */
-  GLRenderer(unsigned width, unsigned height, float near = 0.1, float far = 10.0);
+  GLRenderer(unsigned width, unsigned height, double near = 0.1, double far = 10.0);
 
   /** \brief destructor, destroys frame buffer objects and OpenGL context*/
   ~GLRenderer();
@@ -106,7 +106,7 @@ public:
    * \author Suat Gedikli (gedikli@willowgarage.com)
    * \param[out] buffer pointer to memory where the depth values need to be stored
    */
-  void getDepthBuffer(float* buffer) const;
+  void getDepthBuffer(double* buffer) const;
 
   /**
    * \brief loads, compiles, links and adds GLSL shaders from files to the current OpenGL context.
@@ -135,7 +135,7 @@ public:
    * \param[in] cx x component of principal point
    * \param[in] cy y component of principal point
    */
-  void setCameraParameters(float fx, float fy, float cx, float cy);
+  void setCameraParameters(double fx, double fy, double cx, double cy);
 
   /**
    * \brief sets the near and far clipping plane distances in meters
@@ -143,21 +143,21 @@ public:
    * \param[in] near distance of the near clipping plane in meters
    * \param[in] far distance of the far clipping plane in meters
    */
-  void setClippingRange(float near, float far);
+  void setClippingRange(double near, double far);
 
   /**
    * \brief returns the distance of the near clipping plane in meters
    * \author Suat Gedikli (gedikli@willowgarage.com)
    * \return distance of near clipping plane in meters
    */
-  const float& getNearClippingDistance() const;
+  const double& getNearClippingDistance() const;
 
   /**
    * \brief returns the distance of the far clipping plane in meters
    * \author Suat Gedikli (gedikli@willowgarage.com)
    * \return distance of the far clipping plane in meters
    */
-  const float& getFarClippingDistance() const;
+  const double& getFarClippingDistance() const;
 
   /**
    * \brief returns the width of the frame buffer objectsin pixels
@@ -281,10 +281,10 @@ private:
   GLuint program_;
 
   /** \brief distance of near clipping plane in meters*/
-  float near_;
+  double near_;
 
   /** \brief distance of far clipping plane in meters*/
-  float far_;
+  double far_;
 
   /** \brief focal length in x-direction of camera in pixels*/
   float fx_;
@@ -299,11 +299,11 @@ private:
   float cy_;
 
   /** \brief map from thread id to OpenGL context */
-  static std::map<std::thread::id, std::pair<unsigned, GLuint> > context_;
+  static std::map<std::thread::id, std::pair<unsigned, GLuint> > context;
 
   /* \brief lock for context map */
-  static std::mutex context_lock_;
+  static std::mutex context_lock;
 
-  static bool glutInitialized_;
+  static bool glut_initialized;
 };
 }  // namespace mesh_filter

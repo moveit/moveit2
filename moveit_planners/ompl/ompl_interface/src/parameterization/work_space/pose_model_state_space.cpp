@@ -126,7 +126,7 @@ void ompl_interface::PoseModelStateSpace::copyState(ompl::base::State* destinati
 
 void ompl_interface::PoseModelStateSpace::sanityChecks() const
 {
-  ModelBasedStateSpace::sanityChecks(std::numeric_limits<double>::epsilon(), std::numeric_limits<float>::epsilon(),
+  ModelBasedStateSpace::sanityChecks(std::numeric_limits<double>::epsilon(), std::numeric_limits<double>::epsilon(),
                                      ~ompl::base::StateSpace::STATESPACE_TRIANGLE_INEQUALITY);
 }
 
