@@ -114,8 +114,8 @@ OMPLInterface::OMPLInterface(const moveit::core::RobotModelConstPtr& robot_model
 
 OMPLInterface::~OMPLInterface() = default;
 
-void OMPLInterface::storePlannerData(const std::shared_ptr<std_srvs::srv::Trigger::Request> /* unused */,
-                                     std::shared_ptr<std_srvs::srv::Trigger::Response> response)
+void OMPLInterface::storePlannerData(const std::shared_ptr<std_srvs::srv::Trigger::Request>& /* unused */,
+                                     const std::shared_ptr<std_srvs::srv::Trigger::Response>& response)
 {
   bool success = context_manager_.storePlannerData();
   response->success = success;

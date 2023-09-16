@@ -76,7 +76,7 @@ public:
    *  @param response the service response
    */
   void storePlannerData(const std::shared_ptr<std_srvs::srv::Trigger::Request>& request,
-                        std::shared_ptr<std_srvs::srv::Trigger::Response> response);
+                        const std::shared_ptr<std_srvs::srv::Trigger::Response>& response);
 
   /** @brief Specify configurations for the planners.
       @param pconfig Configurations for the different planners */
