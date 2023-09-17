@@ -80,9 +80,9 @@ private:
   int size_;
   std::mt19937 rng_;
   std::normal_distribution<double> normal_dist_;
-  std::shared_ptr<boost::variate_generator<
-      std::mt19937, STD_MSGS__MSG__DETAIL__COLOR_RGBA__TYPE_SUPPORT_HPP_::std::normal_distribution<>>>
-      gaussian_;
+  // std::shared_ptr<boost::variate_generator<
+  //     std::mt19937, STD_MSGS__MSG__DETAIL__COLOR_RGBA__TYPE_SUPPORT_HPP_::std::normal_distribution<>>>
+  //     gaussian_;
 };
 
 //////////////////////// template function definitions follow //////////////////////////////
@@ -94,14 +94,14 @@ MultivariateGaussian::MultivariateGaussian(const Eigen::MatrixBase<Derived1>& me
 {
   rng_.seed(rand());
   size_ = mean.rows();
-  gaussian_.reset(new boost::variate_generator<std::mt19937, std::normal_distribution<double>>(rng_, normal_dist_));
+  // gaussian_.reset(new boost::variate_generator<std::mt19937, std::normal_distribution<double>>(rng_, normal_dist_));
 }
 
 template <typename Derived>
 void MultivariateGaussian::sample(Eigen::MatrixBase<Derived>& output, bool use_covariance)
 {
   for (int i = 0; i < size_; ++i)
-    output(i) = (*gaussian_)();
+    output(i) = normal_dist_(rng_);
 
   if (use_covariance)
   {
