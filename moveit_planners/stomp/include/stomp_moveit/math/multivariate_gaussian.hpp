@@ -42,9 +42,6 @@
 #include <Eigen/Core>
 #include <Eigen/Cholesky>
 
-// TODO(#2166): Replace with std types
-#include <boost/random/variate_generator.hpp>
-
 #include <random>
 #include <cstdlib>
 
@@ -80,9 +77,6 @@ private:
   int size_;
   std::mt19937 rng_;
   std::normal_distribution<double> normal_dist_;
-  // std::shared_ptr<boost::variate_generator<
-  //     std::mt19937, STD_MSGS__MSG__DETAIL__COLOR_RGBA__TYPE_SUPPORT_HPP_::std::normal_distribution<>>>
-  //     gaussian_;
 };
 
 //////////////////////// template function definitions follow //////////////////////////////
@@ -94,7 +88,6 @@ MultivariateGaussian::MultivariateGaussian(const Eigen::MatrixBase<Derived1>& me
 {
   rng_.seed(rand());
   size_ = mean.rows();
-  // gaussian_.reset(new boost::variate_generator<std::mt19937, std::normal_distribution<double>>(rng_, normal_dist_));
 }
 
 template <typename Derived>
