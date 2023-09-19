@@ -88,24 +88,24 @@ public:
    * \brief Get the type of command that servo is currently expecting.
    * @return The type of command.
    */
-  CommandType getCommandType();
+  CommandType getCommandType() const;
 
   /**
    * \brief Get the current status of servo.
    * @return The current status.
    */
-  StatusCode getStatus();
+  StatusCode getStatus() const;
 
   /**
    * \brief Get the message associated with the current servo status.
    * @return The status message.
    */
-  const std::string getStatusMessage();
+  std::string getStatusMessage() const;
 
   /**
    * \brief Returns the end effector pose in planning frame
    */
-  const Eigen::Isometry3d getEndEffectorPose();
+  Eigen::Isometry3d getEndEffectorPose() const;
 
   /**
    * \brief Start/Stop collision checking thread.
@@ -122,40 +122,49 @@ public:
    * \brief Get the current state of the robot as given by planning scene monitor.
    * @return The current state of the robot.
    */
-  KinematicState getCurrentRobotState();
+  KinematicState getCurrentRobotState() const;
 
   /**
    * \brief Smoothly halt at a commanded state when command goes stale.
    * @param The last commanded joint states.
    * @return The next state stepping towards the required halting state.
    */
-  std::pair<bool, KinematicState> smoothHalt(KinematicState halt_state);
+  std::pair<bool, KinematicState> smoothHalt(const KinematicState& halt_state) const;
 
 private:
   /**
-   * \brief Convert a give twist command to planning frame,
+   * \brief Finds the transform from the planning frame to a specified command frame.
+   * If the command frame is part of the robot model, directly look up the transform using the robot model.
+   * Else, fall back to using TF to look up the transform.
+   * @param command_frame The command frame name.
+   * @return The transformation between planning frame and command frame.
+   */
+  Eigen::Isometry3d getPlanningToCommandFrameTransform(const std::string& command_frame) const;
+
+  /**
+   * \brief Convert a given twist command to planning frame,
    * The command frame specified by `command.frame_id` is expected to be a stationary frame or end-effector frame.
    * References:
    * https://core.ac.uk/download/pdf/154240607.pdf
    * https://www.seas.upenn.edu/~meam520/notes02/Forces8.pdf
-   * @param command The twist command to be converted
+   * @param command The twist command to be converted.
    * @return The transformed twist command.
    */
-  const TwistCommand toPlanningFrame(const TwistCommand& command);
+  TwistCommand toPlanningFrame(const TwistCommand& command) const;
 
   /**
    * \brief Convert a given pose command to planning frame
    * @param command The pose command to be converted
    * @return The transformed pose command
    */
-  const PoseCommand toPlanningFrame(const PoseCommand& command);
+  PoseCommand toPlanningFrame(const PoseCommand& command) const;
 
   /**
    * \brief Compute the change in joint position required to follow the received command.
    * @param command The incoming servo command.
    * @return The joint position change required (delta).
    */
-  Eigen::VectorXd jointDeltaFromCommand(const ServoInput& command, moveit::core::RobotStatePtr& robot_state);
+  Eigen::VectorXd jointDeltaFromCommand(const ServoInput& command, const moveit::core::RobotStatePtr& robot_state);
 
   /**
    * \brief Updates data depending on joint model group
@@ -167,7 +176,7 @@ private:
    * @param servo_params The servo parameters
    * @return True if parameters are valid, else False
    */
-  bool validateParams(const servo::Params& servo_params);
+  bool validateParams(const servo::Params& servo_params) const;
 
   /**
    * \brief Updates the servo parameters and performs validations.
@@ -187,7 +196,7 @@ private:
    * @return The bounded kinematic state.
    */
   KinematicState haltJoints(const std::vector<int>& joints_to_halt, const KinematicState& current_state,
-                            const KinematicState& target_state);
+                            const KinematicState& target_state) const;
 
   // Variables
 
@@ -205,9 +214,6 @@ private:
   std::unique_ptr<CollisionMonitor> collision_monitor_;
 
   pluginlib::UniquePtr<online_signal_smoothing::SmoothingBaseClass> smoother_ = nullptr;
-
-  tf2_ros::Buffer transform_buffer_;
-  tf2_ros::TransformListener transform_listener_;
 };
 
 }  // namespace moveit_servo

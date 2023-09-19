@@ -364,15 +364,15 @@ void TrajectoryVisualization::interruptCurrentDisplay()
     animating_path_ = false;
 }
 
-float TrajectoryVisualization::getStateDisplayTime()
+double TrajectoryVisualization::getStateDisplayTime()
 {
   constexpr char default_time_string[] = "3x";
-  constexpr float default_time_value = -3.0f;
+  constexpr double default_time_value = -3.0;
 
   std::string tm = state_display_time_property_->getStdString();
   boost::trim(tm);
 
-  float type;
+  double type;
 
   if (tm.back() == 'x')
   {
@@ -391,7 +391,7 @@ float TrajectoryVisualization::getStateDisplayTime()
   tm.resize(tm.size() - 1);
   boost::trim_right(tm);
 
-  float value;
+  double value;
   try
   {
     value = std::stof(tm);
@@ -416,7 +416,7 @@ void TrajectoryVisualization::dropTrajectory()
   drop_displaying_trajectory_ = true;
 }
 
-void TrajectoryVisualization::update(float wall_dt, float sim_dt)
+void TrajectoryVisualization::update(double wall_dt, double sim_dt)
 {
   if (drop_displaying_trajectory_)
   {
@@ -478,7 +478,7 @@ void TrajectoryVisualization::update(float wall_dt, float sim_dt)
     {
       current_state_time_ += wall_dt;
     }
-    float tm = getStateDisplayTime();
+    double tm = getStateDisplayTime();
 
     if (trajectory_slider_panel_ && trajectory_slider_panel_->isVisible() && trajectory_slider_panel_->isPaused())
     {
@@ -493,7 +493,7 @@ void TrajectoryVisualization::update(float wall_dt, float sim_dt)
     else if (tm < 0.0)
     {
       // using realtime factors: skip to next waypoint based on elapsed display time
-      const float rt_factor = -tm;  // negative tm is the intended realtime factor
+      const double rt_factor = -tm;  // negative tm is the intended realtime factor
       while (current_state_ < waypoint_count &&
              (tm = displaying_trajectory_message_->getWayPointDurationFromPrevious(current_state_ + 1) / rt_factor) <
                  current_state_time_)
