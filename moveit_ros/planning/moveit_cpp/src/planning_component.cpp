@@ -189,7 +189,7 @@ planning_interface::MotionPlanResponse PlanningComponent::plan(
     planning_scene->setCurrentState(request.start_state);
   }
 
-  auto const motion_plan_response_vector = moveit::planning_pipeline_interfaces::planWithParallelPipelines(
+  const auto motion_plan_response_vector = moveit::planning_pipeline_interfaces::planWithParallelPipelines(
       requests, planning_scene, moveit_cpp_->getPlanningPipelines(), stopping_criterion_callback,
       solution_selection_function);
 
@@ -354,7 +354,7 @@ std::vector<::planning_interface::MotionPlanRequest> PlanningComponent::getMotio
 {
   std::vector<::planning_interface::MotionPlanRequest> motion_plan_requests;
   motion_plan_requests.reserve(multi_pipeline_plan_request_parameters.plan_request_parameter_vector.size());
-  for (auto const& plan_request_parameters : multi_pipeline_plan_request_parameters.plan_request_parameter_vector)
+  for (const auto& plan_request_parameters : multi_pipeline_plan_request_parameters.plan_request_parameter_vector)
   {
     motion_plan_requests.push_back(getMotionPlanRequest(plan_request_parameters));
   }
