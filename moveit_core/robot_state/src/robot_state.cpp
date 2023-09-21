@@ -804,7 +804,10 @@ const LinkModel* RobotState::getRigidlyConnectedParentLinkModel(const std::strin
   const moveit::core::LinkModel* link{ nullptr };
 
   size_t idx = 0;
-  if ((idx = frame.find('/')) != std::string::npos)
+  if (getRobotModel()->hasLinkModel(frame)) {
+    link = getLinkModel(frame);
+  } 
+  else if ((idx = frame.find('/')) != std::string::npos)
   {  // resolve sub frame
     std::string object{ frame.substr(0, idx) };
     if (!hasAttachedBody(object))
@@ -818,8 +821,6 @@ const LinkModel* RobotState::getRigidlyConnectedParentLinkModel(const std::strin
   {
     link = getAttachedBody(frame)->getAttachedLink();
   }
-  else if (getRobotModel()->hasLinkModel(frame))
-    link = getLinkModel(frame);
 
   return getRobotModel()->getRigidlyConnectedParentLinkModel(link);
 }
