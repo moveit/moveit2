@@ -255,10 +255,10 @@ bool BenchmarkOptions::readPlannerConfigs(const rclcpp::Node::SharedPtr& node)
 
       parallel_planning_pipelines[parallel_pipeline] = pipeline_planner_id_pairs;
 
-      for (auto const& entry : parallel_planning_pipelines)
+      for (const auto& entry : parallel_planning_pipelines)
       {
         RCLCPP_INFO(LOGGER, "Parallel planning pipeline '%s'", entry.first.c_str());
-        for (auto const& pair : entry.second)
+        for (const auto& pair : entry.second)
         {
           RCLCPP_INFO(LOGGER, "  '%s': '%s'", pair.first.c_str(), pair.second.c_str());
         }

@@ -140,7 +140,7 @@ public:
 
     // just to be sure, do not call the same pluginlib instance allocation function in parallel
     std::scoped_lock slock(lock_);
-    for (auto const& [group, solver] : possible_kinematics_solvers_)
+    for (const auto& [group, solver] : possible_kinematics_solvers_)
     {
       // Don't bother trying to load a solver for the wrong group
       if (group != jmg->getName())
@@ -206,7 +206,7 @@ public:
 
   void status() const
   {
-    for (auto const& [group, solver] : possible_kinematics_solvers_)
+    for (const auto& [group, solver] : possible_kinematics_solvers_)
     {
       RCLCPP_INFO(LOGGER, "Solver for group '%s': '%s' (search resolution = %lf)", group.c_str(), solver.c_str(),
                   search_res_.at(group));

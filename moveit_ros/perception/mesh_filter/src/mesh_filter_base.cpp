@@ -227,7 +227,7 @@ void mesh_filter::MeshFilterBase::getModelLabels(LabelType* labels) const
   job->wait();
 }
 
-void mesh_filter::MeshFilterBase::getModelDepth(float* depth) const
+void mesh_filter::MeshFilterBase::getModelDepth(double* depth) const
 {
   JobPtr job1 =
       std::make_shared<FilterJob<void>>([&renderer = *mesh_renderer_, depth] { renderer.getDepthBuffer(depth); });
@@ -243,7 +243,7 @@ void mesh_filter::MeshFilterBase::getModelDepth(float* depth) const
   job2->wait();
 }
 
-void mesh_filter::MeshFilterBase::getFilteredDepth(float* depth) const
+void mesh_filter::MeshFilterBase::getFilteredDepth(double* depth) const
 {
   JobPtr job1 = std::make_shared<FilterJob<void>>([&filter = *depth_filter_, depth] { filter.getDepthBuffer(depth); });
   JobPtr job2 = std::make_shared<FilterJob<void>>(

@@ -87,7 +87,7 @@ public:
       return nullptr;
     }
 
-    auto const params = param_listener_->get_params();
+    const auto params = param_listener_->get_params();
 
     std::shared_ptr<StompPlanningContext> planning_context =
         std::make_shared<StompPlanningContext>("STOMP", req.group_name, params);

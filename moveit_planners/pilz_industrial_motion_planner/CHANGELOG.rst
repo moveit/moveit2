@@ -2,6 +2,14 @@
 Changelog for package pilz_industrial_motion_planner
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.8.0 (2023-09-10)
+------------------
+* Fx class_loader warnings in PILZ unittests (`#2296 <https://github.com/ros-planning/moveit2/issues/2296>`_)
+* Always set response planner id and warn if it is not set (`#2236 <https://github.com/ros-planning/moveit2/issues/2236>`_)
+* Pilz multi-group incompatibility (`#1856 <https://github.com/ros-planning/moveit2/issues/1856>`_)
+* Enhance PILZ service request checks (`#2087 <https://github.com/ros-planning/moveit2/issues/2087>`_)
+* Contributors: Marco Magri, Sebastian Jahr, Yang Lin
+
 2.7.4 (2023-05-18)
 ------------------
 

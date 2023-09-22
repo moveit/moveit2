@@ -423,8 +423,8 @@ void ProgressBarDelegate::paint(QPainter* painter, const QStyleOptionViewItem& o
     if (vbounds.isValid())
     {
       QPointF bounds = vbounds.toPointF();
-      const float min = bounds.x();
-      const float max = bounds.y();
+      const double min = bounds.x();
+      const double max = bounds.y();
 
       QStyleOptionProgressBar opt;
       opt.rect = option.rect;
@@ -452,8 +452,8 @@ QWidget* ProgressBarDelegate::createEditor(QWidget* parent, const QStyleOptionVi
     if (vbounds.isValid())
     {
       QPointF bounds = vbounds.toPointF();
-      float min = bounds.x();
-      float max = bounds.y();
+      double min = bounds.x();
+      double max = bounds.y();
       bool is_revolute = (index.data(JointTypeRole).toInt() == moveit::core::JointModel::REVOLUTE);
       if (is_revolute)
       {
@@ -462,7 +462,7 @@ QWidget* ProgressBarDelegate::createEditor(QWidget* parent, const QStyleOptionVi
       }
       auto* editor = new ProgressBarEditor(parent, min, max, is_revolute ? 0 : 3);
       connect(editor, &ProgressBarEditor::editingFinished, this, &ProgressBarDelegate::commitAndCloseEditor);
-      connect(editor, &ProgressBarEditor::valueChanged, this, [=](float value) {
+      connect(editor, &ProgressBarEditor::valueChanged, this, [=](double value) {
         const_cast<QAbstractItemModel*>(index.model())->setData(index, value, Qt::EditRole);
       });
       return editor;
@@ -498,7 +498,7 @@ bool JointsWidgetEventFilter::eventFilter(QObject* /*target*/, QEvent* event)
   return false;
 }
 
-ProgressBarEditor::ProgressBarEditor(QWidget* parent, float min, float max, int digits)
+ProgressBarEditor::ProgressBarEditor(QWidget* parent, double min, double max, int digits)
   : QWidget(parent), min_(min), max_(max), digits_(digits)
 {
   // if left mouse button is pressed, grab all future mouse events until button(s) released
@@ -530,7 +530,7 @@ void ProgressBarEditor::mousePressEvent(QMouseEvent* event)
 
 void ProgressBarEditor::mouseMoveEvent(QMouseEvent* event)
 {
-  float v = std::min(max_, std::max(min_, min_ + event->x() * (max_ - min_) / width()));
+  double v = std::min(max_, std::max(min_, min_ + event->x() * (max_ - min_) / width()));
   if (value_ != v)
   {
     value_ = v;

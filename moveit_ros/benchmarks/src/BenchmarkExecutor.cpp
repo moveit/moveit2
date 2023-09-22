@@ -112,7 +112,7 @@ BenchmarkExecutor::~BenchmarkExecutor()
       return false;
     }
 
-    auto const& pipeline = moveit_cpp_->getPlanningPipelines().at(planning_pipeline_name);
+    const auto& pipeline = moveit_cpp_->getPlanningPipelines().at(planning_pipeline_name);
     // Verify the pipeline has successfully initialized a planner
     if (!pipeline->getPlannerManager())
     {
@@ -861,7 +861,7 @@ void BenchmarkExecutor::runBenchmark(moveit_msgs::msg::MotionPlanRequest request
         std::chrono::system_clock::time_point start = std::chrono::system_clock::now();
 
         // Planning pipeline benchmark
-        auto const response = planning_component->plan(plan_req_params, planning_scene_);
+        const auto response = planning_component->plan(plan_req_params, planning_scene_);
 
         solved[j] = bool(response.error_code);
 
@@ -924,7 +924,7 @@ void BenchmarkExecutor::runBenchmark(moveit_msgs::msg::MotionPlanRequest request
 
       // Create multi-pipeline request
       moveit_cpp::PlanningComponent::MultiPipelinePlanRequestParameters multi_pipeline_plan_request;
-      for (auto const& pipeline_planner_id_pair : parallel_pipeline_entry.second)
+      for (const auto& pipeline_planner_id_pair : parallel_pipeline_entry.second)
       {
         moveit_cpp::PlanningComponent::PlanRequestParameters plan_req_params = {
           .planner_id = pipeline_planner_id_pair.second,
@@ -959,11 +959,11 @@ void BenchmarkExecutor::runBenchmark(moveit_msgs::msg::MotionPlanRequest request
         // Solve problem
         std::chrono::system_clock::time_point start = std::chrono::system_clock::now();
 
-        auto const t1 = std::chrono::system_clock::now();
-        auto const response = planning_component->plan(multi_pipeline_plan_request,
+        const auto t1 = std::chrono::system_clock::now();
+        const auto response = planning_component->plan(multi_pipeline_plan_request,
                                                        &moveit::planning_pipeline_interfaces::getShortestSolution,
                                                        nullptr, planning_scene_);
-        auto const t2 = std::chrono::system_clock::now();
+        const auto t2 = std::chrono::system_clock::now();
 
         solved[j] = bool(response.error_code);
 

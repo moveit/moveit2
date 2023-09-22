@@ -43,7 +43,7 @@
 #include <rclcpp/time.hpp>
 #include <memory>
 
-const static double EPSILON{ 0.0001 };
+static const double EPSILON{ 0.0001 };
 
 namespace collision_detection
 {

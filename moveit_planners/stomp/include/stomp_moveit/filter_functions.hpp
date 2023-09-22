@@ -50,7 +50,7 @@ namespace stomp_moveit
 namespace filters
 {
 // \brief An empty placeholder filter that doesn't apply any updates to the trajectory.
-const static FilterFn NO_FILTER = [](const Eigen::MatrixXd& /*values*/, Eigen::MatrixXd& /*filtered_values*/) {
+static const FilterFn NO_FILTER = [](const Eigen::MatrixXd& /*values*/, Eigen::MatrixXd& /*filtered_values*/) {
   return true;
 };
 

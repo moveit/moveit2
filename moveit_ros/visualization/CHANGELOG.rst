@@ -2,6 +2,15 @@
 Changelog for package moveit_ros_visualization
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.8.0 (2023-09-10)
+------------------
+* Remove boost from motion_planning_rviz_plugin (`#2308 <https://github.com/ros-planning/moveit2/issues/2308>`_)
+  Co-authored-by: Sebastian Jahr <sebastian.jahr@tuta.io>
+* Replaced numbers with SystemDefaultsQos() (`#2271 <https://github.com/ros-planning/moveit2/issues/2271>`_)
+* fix for not having transparency in collision scenes on rviz. (`#2242 <https://github.com/ros-planning/moveit2/issues/2242>`_)
+  Co-authored-by: Alp Akgun <samialp.akgun@ocado.com>
+* Contributors: Sami Alperen Akgün, Shobuj Paul, Yang Lin
+
 2.7.4 (2023-05-18)
 ------------------
 
