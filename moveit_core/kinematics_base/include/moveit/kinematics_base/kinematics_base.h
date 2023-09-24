@@ -592,51 +592,6 @@ protected:
   std::map<int, double> redundant_joint_discretization_;
   std::vector<DiscretizationMethod> supported_methods_;
 
-  /**
-   * @brief Enables kinematics plugins access to parameters that are defined
-   * for the private namespace and inside 'robot_description_kinematics'.
-   * Parameters are searched in the following locations and order
-   *
-   * ~/<group_name>/<param>
-   * ~/<param>
-   * robot_description_kinematics/<group_name>/<param>
-   * robot_description_kinematics/<param>
-   *
-   * This order maintains default behavior by keeping the private namespace
-   * as the predominant configuration but also allows groupwise specifications.
-   */
-  template <typename T>
-  [[deprecated("Use generate_parameter_library instead")]] inline bool
-  lookupParam(const rclcpp::Node::SharedPtr& node, const std::string& param, T& val, const T& default_val) const
-  {
-    if (node->has_parameter({ group_name_ + "." + param }))
-    {
-      node->get_parameter(group_name_ + "." + param, val);
-      return true;
-    }
-
-    if (node->has_parameter({ param }))
-    {
-      node->get_parameter(param, val);
-      return true;
-    }
-
-    if (node->has_parameter({ "robot_description_kinematics." + group_name_ + "." + param }))
-    {
-      node->get_parameter("robot_description_kinematics." + group_name_ + "." + param, val);
-      return true;
-    }
-
-    if (node->has_parameter("robot_description_kinematics." + param))
-    {
-      node->get_parameter("robot_description_kinematics." + param, val);
-      return true;
-    }
-
-    val = default_val;
-    return false;
-  }
-
   /** Store some core variables passed via initialize().
    *
    * @param robot_model RobotModel, this kinematics solver should act on.
