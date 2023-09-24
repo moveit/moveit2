@@ -1067,78 +1067,6 @@ public:
   bool setFromDiffIK(const JointModelGroup* group, const geometry_msgs::msg::Twist& twist, const std::string& tip,
                      double dt, const GroupStateValidityCallbackFn& constraint = GroupStateValidityCallbackFn());
 
-  /** \brief Compute the sequence of joint values that correspond to a straight Cartesian path for a particular group.
-
-     The Cartesian path to be followed is specified as a direction of motion (\e direction, unit vector) for the origin
-     The Cartesian path to be followed is specified as a direction of motion (\e direction, unit vector) for the origin
-     of a robot link (\e link). The direction is assumed to be either in a global reference frame or in the local
-     reference frame of the link. In the latter case (\e global_reference_frame is false) the \e direction is rotated
-     accordingly. The link needs to move in a straight line, following the specified direction, for the desired \e
-     distance. The resulting joint values are stored in the vector \e traj, one by one. The maximum distance in
-     Cartesian space between consecutive points on the resulting path is specified in the \e MaxEEFStep struct which
-     provides two fields: translation and rotation. If a \e validCallback is specified, this is passed to the internal
-     call to setFromIK(). In case of IK failure, the computation of the path stops and the value returned corresponds to
-     the distance that was computed and for which corresponding states were added to the path.  At the end of the
-     function call, the state of the group corresponds to the last attempted Cartesian pose.
-
-     During the computation of the trajectory, it is usually preferred if consecutive joint values do not 'jump' by a
-     large amount in joint space, even if the Cartesian distance between the corresponding points is small as expected.
-     To account for this, the \e jump_threshold struct is provided, which comprises three fields:
-     \e jump_threshold_factor, \e revolute_jump_threshold and \e prismatic_jump_threshold.
-     If either \e revolute_jump_threshold or \e prismatic_jump_threshold  are non-zero, we test for absolute jumps.
-     If \e jump_threshold_factor is non-zero, we test for relative jumps. Otherwise (all params are zero), jump
-     detection is disabled.
-
-     For relative jump detection, the average joint-space distance between consecutive points in the trajectory is
-     computed. If any individual joint-space motion delta is larger then this average distance by a factor of
-     \e jump_threshold_factor, this step is considered a failure and the returned path is truncated up to just
-     before the jump.
-
-     For absolute jump thresholds, if any individual joint-space motion delta is larger then \e revolute_jump_threshold
-     for revolute joints or \e prismatic_jump_threshold for prismatic joints then this step is considered a failure and
-     the returned path is truncated up to just before the jump.
-
-     NOTE: As of ROS-Melodic these are deprecated and should not be used
-     */
-  [[deprecated]] double
-  computeCartesianPath(const JointModelGroup* group, std::vector<RobotStatePtr>& traj, const LinkModel* link,
-                       const Eigen::Vector3d& direction, bool global_reference_frame, double distance, double max_step,
-                       double jump_threshold_factor,
-                       const GroupStateValidityCallbackFn& validCallback = GroupStateValidityCallbackFn(),
-                       const kinematics::KinematicsQueryOptions& options = kinematics::KinematicsQueryOptions());
-
-  /** \brief Compute the sequence of joint values that correspond to a straight Cartesian path, for a particular group.
-
-     In contrast to the previous function, the Cartesian path is specified as a target frame to be reached (\e target)
-     for the origin of a robot link (\e link). The target frame is assumed to be either in a global reference frame or
-     in the local reference frame of the link. In the latter case (\e global_reference_frame is false) the \e target is
-     rotated accordingly. All other comments from the previous function apply.
-
-     NOTE: As of ROS-Melodic these are deprecated and should not be used
-     */
-  [[deprecated]] double
-  computeCartesianPath(const JointModelGroup* group, std::vector<RobotStatePtr>& traj, const LinkModel* link,
-                       const Eigen::Isometry3d& target, bool global_reference_frame, double max_step,
-                       double jump_threshold_factor,
-                       const GroupStateValidityCallbackFn& validCallback = GroupStateValidityCallbackFn(),
-                       const kinematics::KinematicsQueryOptions& options = kinematics::KinematicsQueryOptions());
-
-  /** \brief Compute the sequence of joint values that perform a general Cartesian path.
-
-     In contrast to the previous functions, the Cartesian path is specified as a set of \e waypoints to be sequentially
-     reached for the origin of a robot link (\e link). The waypoints are transforms given either in a global reference
-     frame or in the local reference frame of the link at the immediately preceding waypoint. The link needs to move
-     in a straight line between two consecutive waypoints. All other comments apply.
-
-     NOTE: As of ROS-Melodic these are deprecated and should not be used
-     */
-  [[deprecated]] double
-  computeCartesianPath(const JointModelGroup* group, std::vector<RobotStatePtr>& traj, const LinkModel* link,
-                       const EigenSTL::vector_Isometry3d& waypoints, bool global_reference_frame, double max_step,
-                       double jump_threshold_factor,
-                       const GroupStateValidityCallbackFn& validCallback = GroupStateValidityCallbackFn(),
-                       const kinematics::KinematicsQueryOptions& options = kinematics::KinematicsQueryOptions());
-
   /** \brief Compute the Jacobian with reference to a particular point on a given link, for a specified group.
    * \param group The group to compute the Jacobian for
    * \param link The link model to compute the Jacobian for
@@ -1599,27 +1527,6 @@ public:
    **/
   void attachBody(std::unique_ptr<AttachedBody> attached_body);
 
-  /** \brief Add an attached body to this state. Ownership of the
-   * memory for the attached body is assumed by the state.
-   *
-   * This only adds the given body to this RobotState
-   * instance.  It does not change anything about other
-   * representations of the object elsewhere in the system.  So if the
-   * body represents an object in a collision_detection::World (like
-   * from a planning_scene::PlanningScene), you will likely need to remove the
-   * corresponding object from that world to avoid having collisions
-   * detected against it.
-   *
-   * \note This version of the function (taking an AttachedBody
-   * pointer) does not copy the AttachedBody object, it just uses it
-   * directly.  The AttachedBody object stores its position data
-   * internally.  This means you should <b>never attach a single
-   * AttachedBody instance to multiple RobotState instances</b>, or
-   * the body positions will get corrupted.  You need to make a fresh
-   * copy of the AttachedBody object for each RobotState you attach it
-   * to.*/
-  [[deprecated("Deprecated. Pass a unique_ptr instead")]] void attachBody(AttachedBody* attached_body);
-
   /** @brief Add an attached body to a link
    * @param id The string id associated with the attached body
    * @param pose The pose associated with the attached body
@@ -1854,21 +1761,6 @@ private:
     {
       position_[jm->getFirstVariableIndex()] = jm->getMimicFactor() * v + jm->getMimicOffset();
       markDirtyJointTransforms(jm);
-    }
-  }
-
-  /** \brief Update a set of joints that are certain to be mimicking other joints */
-  /* use updateMimicJoints() instead, which also marks joints dirty */
-  [[deprecated]] void updateMimicJoint(const std::vector<const JointModel*>& mim)
-  {
-    for (const JointModel* jm : mim)
-    {
-      const int fvi = jm->getFirstVariableIndex();
-      position_[fvi] = jm->getMimicFactor() * position_[jm->getMimic()->getFirstVariableIndex()] + jm->getMimicOffset();
-      // Only mark joint transform dirty, but not the associated link transform
-      // as this function is always used in combination of
-      // updateMimicJoint(group->getMimicJointModels()) + markDirtyJointTransforms(group);
-      dirty_joint_transforms_[jm->getJointIndex()] = 1;
     }
   }
 
