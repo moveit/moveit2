@@ -25,6 +25,7 @@ servo:
 
   move_group_name: {
     type: string,
+    read_only: true,
     description: "The name of the moveit move_group of your robot \
                   This parameter does not have a default value and \
                   must be passed to the node during launch time."
@@ -70,7 +71,6 @@ servo:
 
   command_in_type: {
     type: string,
-    read_only: true,
     default_value: "unitless",
     description: "The unit of the incoming command. \
                   unitless commands are in the range [-1:1] as if from joystick \
@@ -100,7 +100,6 @@ servo:
 
   incoming_command_timeout: {
     type: double,
-    read_only: true,
     default_value: 0.1,
     description: "Commands will be discarded if it is older than the timeout.\
                    Important because ROS may drop some messages."
@@ -307,13 +306,13 @@ servo:
   halt_all_joints_in_joint_mode: {
     type: bool,
     default_value: true,
-    description: "Halt all joints in joint mode"
+    description: "Halt all joints in joint mode, else halt only the joints at their limit"
   }
 
   halt_all_joints_in_cartesian_mode: {
     type: bool,
     default_value: true,
-    description: "Halt all joints in cartesian mode"
+    description: "Halt all joints in cartesian mode, else halt only the joints at their limit"
   }
 
   joint_limit_margin: {
