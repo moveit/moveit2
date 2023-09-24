@@ -144,21 +144,6 @@ private:
   const PlanningScene* scene_;
 };
 
-bool PlanningScene::isEmpty(const moveit_msgs::msg::PlanningScene& msg)
-{
-  return moveit::core::isEmpty(msg);
-}
-
-bool PlanningScene::isEmpty(const moveit_msgs::msg::RobotState& msg)
-{
-  return moveit::core::isEmpty(msg);
-}
-
-bool PlanningScene::isEmpty(const moveit_msgs::msg::PlanningSceneWorld& msg)
-{
-  return moveit::core::isEmpty(msg);
-}
-
 PlanningScene::PlanningScene(const moveit::core::RobotModelConstPtr& robot_model,
                              const collision_detection::WorldPtr& world)
 
