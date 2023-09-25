@@ -97,7 +97,7 @@ int main(int argc, char** argv)
       return 1;
     }
     // Running benchmarks
-    for (auto const& name : scene_names)
+    for (const auto& name : scene_names)
     {
       options.scene_name = name;
       if (!server.runBenchmarks(options))

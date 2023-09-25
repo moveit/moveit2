@@ -77,7 +77,7 @@ bool ompl_interface::ConstrainedGoalSampler::checkStateValidity(ob::State* new_g
 }
 
 bool ompl_interface::ConstrainedGoalSampler::stateValidityCallback(ob::State* new_goal,
-                                                                   moveit::core::RobotState const* state,
+                                                                   const moveit::core::RobotState* state,
                                                                    const moveit::core::JointModelGroup* jmg,
                                                                    const double* jpos, bool verbose) const
 {

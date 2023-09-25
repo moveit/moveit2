@@ -102,7 +102,7 @@ void TrajectoryGeneratorPTP::planPTP(const std::map<std::string, double>& start_
 
   // check if goal already reached
   bool goal_reached = true;
-  for (auto const& goal : goal_pos)
+  for (const auto& goal : goal_pos)
   {
     if (fabs(start_pos.at(goal.first) - goal.second) >= MIN_MOVEMENT)
     {
