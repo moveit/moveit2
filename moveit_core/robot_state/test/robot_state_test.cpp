@@ -68,18 +68,18 @@ void CheckJacobian(moveit::core::RobotState& state, const moveit::core::JointMod
   state.setToDefaultValues();
   state.setJointGroupPositions(&joint_model_group, joint_values);
   state.updateLinkTransforms();
-  Eigen::Isometry3d tip_pose_initial = state.getGlobalLinkTransform(joint_model_group.getLinkModels().back());
-  Eigen::MatrixXd jacobian = state.getJacobian(&joint_model_group);
-  Eigen::VectorXd cartesian_velocity = jacobian * joint_velocities;
+  const Eigen::Isometry3d tip_pose_initial = state.getGlobalLinkTransform(joint_model_group.getLinkModels().back());
+  const Eigen::MatrixXd jacobian = state.getJacobian(&joint_model_group);
+  const Eigen::VectorXd cartesian_velocity = jacobian * joint_velocities;
 
   // Compute the instantaneous displacement that the end-effector would achieve if the given joint
   // velocities were applied for a small amount of time.
   constexpr double time_step = 1e-5;
-  Eigen::VectorXd delta_joint_angles = time_step * joint_velocities;
+  const Eigen::VectorXd delta_joint_angles = time_step * joint_velocities;
   state.setJointGroupPositions(&joint_model_group, joint_values + delta_joint_angles);
   state.updateLinkTransforms();
-  Eigen::Isometry3d tip_pose_after_delta = state.getGlobalLinkTransform(joint_model_group.getLinkModels().back());
-  Eigen::Vector3d displacement = tip_pose_after_delta.translation() - tip_pose_initial.translation();
+  const Eigen::Isometry3d tip_pose_after_delta = state.getGlobalLinkTransform(joint_model_group.getLinkModels().back());
+  const Eigen::Vector3d displacement = tip_pose_after_delta.translation() - tip_pose_initial.translation();
 
   // The Cartesian velocity vector obtained via the Jacobian should be aligned with the instantaneous robot motion, i.e.
   // the angle between the vectors should be close to zero.
@@ -742,6 +742,7 @@ TEST_F(OneRobot, rigidlyConnectedParent)
 
 TEST(getJacobian, RevoluteJoints)
 {
+  // Robot URDF with four revolute joints.
   constexpr char robot_urdf[] = R"(
       <?xml version="1.0" ?>
       <robot name="one_robot">
@@ -793,11 +794,11 @@ TEST(getJacobian, RevoluteJoints)
       </robot>
       )xml";
 
-  urdf::ModelInterfaceSharedPtr urdf_model = urdf::parseURDF(robot_urdf);
+  const urdf::ModelInterfaceSharedPtr urdf_model = urdf::parseURDF(robot_urdf);
   ASSERT_TRUE(urdf_model);
-  auto srdf_model = std::make_shared<srdf::Model>();
+  const auto srdf_model = std::make_shared<srdf::Model>();
   ASSERT_TRUE(srdf_model->initString(*urdf_model, robot_srdf));
-  auto robot_model = std::make_shared<moveit::core::RobotModel>(urdf_model, srdf_model);
+  const auto robot_model = std::make_shared<moveit::core::RobotModel>(urdf_model, srdf_model);
 
   moveit::core::RobotState state(robot_model);
   const moveit::core::JointModelGroup* jmg = state.getJointModelGroup("base_to_tip");
@@ -809,6 +810,7 @@ TEST(getJacobian, RevoluteJoints)
 
 TEST(getJacobian, RevoluteAndPrismaticJoints)
 {
+  // Robot URDF with three revolute joints and one prismatic joint.
   constexpr char robot_urdf[] = R"(
       <?xml version="1.0" ?>
       <robot name="one_robot">
@@ -860,11 +862,11 @@ TEST(getJacobian, RevoluteAndPrismaticJoints)
       </robot>
       )xml";
 
-  urdf::ModelInterfaceSharedPtr urdf_model = urdf::parseURDF(robot_urdf);
+  const urdf::ModelInterfaceSharedPtr urdf_model = urdf::parseURDF(robot_urdf);
   ASSERT_TRUE(urdf_model);
-  auto srdf_model = std::make_shared<srdf::Model>();
+  const auto srdf_model = std::make_shared<srdf::Model>();
   ASSERT_TRUE(srdf_model->initString(*urdf_model, robot_srdf));
-  auto robot_model = std::make_shared<moveit::core::RobotModel>(urdf_model, srdf_model);
+  const auto robot_model = std::make_shared<moveit::core::RobotModel>(urdf_model, srdf_model);
 
   moveit::core::RobotState state(robot_model);
   const moveit::core::JointModelGroup* jmg = state.getJointModelGroup("base_to_tip");
@@ -876,6 +878,7 @@ TEST(getJacobian, RevoluteAndPrismaticJoints)
 
 TEST(getJacobian, RevoluteAndFixedJoints)
 {
+  // Robot URDF with two revolute joints and two fixed joints.
   constexpr char robot_urdf[] = R"(
       <?xml version="1.0" ?>
       <robot name="one_robot">
@@ -921,11 +924,11 @@ TEST(getJacobian, RevoluteAndFixedJoints)
       </robot>
       )xml";
 
-  urdf::ModelInterfaceSharedPtr urdf_model = urdf::parseURDF(robot_urdf);
+  const urdf::ModelInterfaceSharedPtr urdf_model = urdf::parseURDF(robot_urdf);
   ASSERT_TRUE(urdf_model);
-  auto srdf_model = std::make_shared<srdf::Model>();
+  const auto srdf_model = std::make_shared<srdf::Model>();
   ASSERT_TRUE(srdf_model->initString(*urdf_model, robot_srdf));
-  auto robot_model = std::make_shared<moveit::core::RobotModel>(urdf_model, srdf_model);
+  const auto robot_model = std::make_shared<moveit::core::RobotModel>(urdf_model, srdf_model);
 
   moveit::core::RobotState state(robot_model);
   const moveit::core::JointModelGroup* jmg = state.getJointModelGroup("base_to_tip");
@@ -937,6 +940,7 @@ TEST(getJacobian, RevoluteAndFixedJoints)
 
 TEST(getJacobian, RevolutePlanarAndPrismaticJoints)
 {
+  // Robot URDF with two revolute joints, one planar joint and one prismatic.
   constexpr char robot_urdf[] = R"(
       <?xml version="1.0" ?>
       <robot name="one_robot">
@@ -988,11 +992,11 @@ TEST(getJacobian, RevolutePlanarAndPrismaticJoints)
       </robot>
       )xml";
 
-  urdf::ModelInterfaceSharedPtr urdf_model = urdf::parseURDF(robot_urdf);
+  const urdf::ModelInterfaceSharedPtr urdf_model = urdf::parseURDF(robot_urdf);
   ASSERT_TRUE(urdf_model);
-  auto srdf_model = std::make_shared<srdf::Model>();
+  const auto srdf_model = std::make_shared<srdf::Model>();
   ASSERT_TRUE(srdf_model->initString(*urdf_model, robot_srdf));
-  auto robot_model = std::make_shared<moveit::core::RobotModel>(urdf_model, srdf_model);
+  const auto robot_model = std::make_shared<moveit::core::RobotModel>(urdf_model, srdf_model);
 
   moveit::core::RobotState state(robot_model);
   const moveit::core::JointModelGroup* jmg = state.getJointModelGroup("base_to_tip");
