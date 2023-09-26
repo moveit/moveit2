@@ -67,7 +67,7 @@ inline bool getJointLimits(const std::string& joint_name, const std::string& par
   {
     // Deceleration limits
     const std::string param_base_name = (param_ns.empty() ? "" : param_ns + ".") + "joint_limits." + joint_name;
-    if(node->has_parameter(param_base_name + ".has_deceleration_limits"))
+    if (node->has_parameter(param_base_name + ".has_deceleration_limits"))
     {
       limits.has_deceleration_limits = node->get_parameter(param_base_name + ".has_deceleration_limits").as_bool();
     }
@@ -83,7 +83,7 @@ inline bool getJointLimits(const std::string& joint_name, const std::string& par
       }
       else
       {
-        limits.max_deceleration = 
+        limits.max_deceleration =
             node->declare_parameter(param_base_name + ".max_deceleration", std::numeric_limits<double>::quiet_NaN());
       }
     }
