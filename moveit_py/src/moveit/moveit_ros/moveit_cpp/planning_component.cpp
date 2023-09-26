@@ -88,12 +88,15 @@ plan(std::shared_ptr<moveit_cpp::PlanningComponent>& planning_component,
     }
     else
     {
-      return planning_component->plan(*const_multi_plan_parameters, moveit::planning_pipeline_interfaces::getShortestSolution, nullptr, planning_scene);
+      return planning_component->plan(*const_multi_plan_parameters, 
+                                      moveit::planning_pipeline_interfaces::getShortestSolution, nullptr,
+                                      planning_scene);
     }
   }
   else
   {
-    if (planning_scene) {
+    if (planning_scene) 
+    {
       throw std::invalid_argument("Cannot specify planning scene without specifying plan parameters");
     }
     return planning_component->plan();
@@ -326,8 +329,9 @@ void init_planning_component(py::module& m)
 
       // TODO (peterdavidfagan): improve the plan API
       .def("plan", &moveit_py::bind_planning_component::plan, py::arg("single_plan_parameters") = nullptr,
-           py::arg("multi_plan_parameters") = nullptr, py::arg("planning_scene") = nullptr, py::arg("solution_selection_function") = nullptr,
-           py::arg("stopping_criterion_callback") = nullptr, py::return_value_policy::move,
+           py::arg("multi_plan_parameters") = nullptr, py::arg("planning_scene") = nullptr,
+           py::arg("solution_selection_function") = nullptr, py::arg("stopping_criterion_callback") = nullptr, 
+           py::return_value_policy::move,
            R"(
            Plan a motion plan using the current start and goal states.
 
