@@ -661,15 +661,11 @@ void PlanningSceneMonitor::updatePublishSettings(bool publish_geom_updates, bool
   }
   if (publish_planning_scene)
   {
-    RCLCPP_INFO(LOGGER, "Publishing maintained planning scene on '%s'", planning_scene_publisher_->get_topic_name());
     setPlanningScenePublishingFrequency(publish_planning_scene_hz);
     startPublishingPlanningScene(event);
   }
   else
-  {
-    RCLCPP_INFO(LOGGER, "STOPPED Publishing maintained planning scene on");
     stopPublishingPlanningScene();
-  }
 }
 
 void PlanningSceneMonitor::newPlanningSceneCallback(const moveit_msgs::msg::PlanningScene::ConstSharedPtr& scene)
