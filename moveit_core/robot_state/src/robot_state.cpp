@@ -1374,7 +1374,7 @@ bool RobotState::getJacobian(const JointModelGroup* group, const LinkModel* link
     return false;
   }
 
-  // Get the link model of the group root link, and it's inverted pose with respect to the RobotModel (URDF) root,
+  // Get the link model of the group root link, and its inverted pose with respect to the RobotModel (URDF) root,
   // 'root_pose_world'.
   const JointModel* root_joint_model = group->getJointModels().front();
   const LinkModel* root_link_model = root_joint_model->getParentLinkModel();
