@@ -851,7 +851,7 @@ void RobotState::updateStateWithLinkAt(const LinkModel* link, const Eigen::Isome
 
 const LinkModel* RobotState::getRigidlyConnectedParentLinkModel(const std::string& frame) const
 {
-  const moveit::core::LinkModel* link{ nullptr };
+  const LinkModel* link{ nullptr };
 
   size_t idx = 0;
   if ((idx = frame.find('/')) != std::string::npos)
@@ -1005,7 +1005,7 @@ double RobotState::distance(const RobotState& other, const JointModelGroup* join
 
 void RobotState::interpolate(const RobotState& to, double t, RobotState& state) const
 {
-  moveit::core::checkInterpolationParamBounds(LOGGER, t);
+  checkInterpolationParamBounds(LOGGER, t);
   robot_model_->interpolate(getVariablePositions(), to.getVariablePositions(), t, state.getVariablePositions());
 
   memset(state.dirty_joint_transforms_, 1, state.robot_model_->getJointModelCount() * sizeof(unsigned char));
@@ -1014,7 +1014,7 @@ void RobotState::interpolate(const RobotState& to, double t, RobotState& state) 
 
 void RobotState::interpolate(const RobotState& to, double t, RobotState& state, const JointModelGroup* joint_group) const
 {
-  moveit::core::checkInterpolationParamBounds(LOGGER, t);
+  checkInterpolationParamBounds(LOGGER, t);
   const std::vector<const JointModel*>& jm = joint_group->getActiveJointModels();
   for (const JointModel* joint : jm)
   {
@@ -1066,7 +1066,7 @@ void RobotState::attachBody(const std::string& id, const Eigen::Isometry3d& pose
                             const std::vector<shapes::ShapeConstPtr>& shapes,
                             const EigenSTL::vector_Isometry3d& shape_poses, const std::set<std::string>& touch_links,
                             const std::string& link, const trajectory_msgs::msg::JointTrajectory& detach_posture,
-                            const moveit::core::FixedTransformsMap& subframe_poses)
+                            const FixedTransformsMap& subframe_poses)
 {
   attachBody(std::make_unique<AttachedBody>(robot_model_->getLinkModel(link), id, pose, shapes, shape_poses,
                                             touch_links, detach_posture, subframe_poses));
@@ -1351,89 +1351,85 @@ bool RobotState::getJacobian(const JointModelGroup* group, const LinkModel* link
 {
   assert(checkLinkTransforms());
 
+  // Check that the group is a chain, contains 'link' and has joint models.
   if (!group->isChain())
   {
     RCLCPP_ERROR(LOGGER, "The group '%s' is not a chain. Cannot compute Jacobian.", group->getName().c_str());
     return false;
   }
 
-  if (!group->isLinkUpdated(link->getName()))
+  const std::set<const LinkModel*>& descendant_links = group->getUpdatedLinkModelsSet();
+  if (descendant_links.find(link) == descendant_links.end())
   {
     RCLCPP_ERROR(LOGGER, "Link name '%s' does not exist in the chain '%s' or is not a child for this chain",
                  link->getName().c_str(), group->getName().c_str());
     return false;
   }
 
-  const moveit::core::JointModel* root_joint_model = group->getJointModels()[0];  // group->getJointRoots()[0];
-  const moveit::core::LinkModel* root_link_model = root_joint_model->getParentLinkModel();
-  // getGlobalLinkTransform() returns a valid isometry by contract
-  Eigen::Isometry3d reference_transform =
-      root_link_model ? getGlobalLinkTransform(root_link_model).inverse() : Eigen::Isometry3d::Identity();
-  int rows = use_quaternion_representation ? 7 : 6;
-  int columns = group->getVariableCount();
-  jacobian = Eigen::MatrixXd::Zero(rows, columns);
-
-  // getGlobalLinkTransform() returns a valid isometry by contract
-  Eigen::Isometry3d link_transform = reference_transform * getGlobalLinkTransform(link);  // valid isometry
-  Eigen::Vector3d point_transform = link_transform * reference_point_position;
-
-  // RCLCPP_DEBUG(LOGGER, "Point from reference origin expressed in world coordinates: %f %f %f",
-  //         point_transform.x(),
-  //         point_transform.y(),
-  //         point_transform.z());
-
-  Eigen::Vector3d joint_axis;
-  Eigen::Isometry3d joint_transform;
-
-  while (link)
+  const std::vector<const JointModel*>& joint_models = group->getActiveJointModels();
+  if (joint_models.empty())
   {
-    // RCLCPP_DEBUG(LOGGER, "Link: %s, %f %f %f",link_state->getName().c_str(),
-    //         link_state->getGlobalLinkTransform().translation().x(),
-    //         link_state->getGlobalLinkTransform().translation().y(),
-    //         link_state->getGlobalLinkTransform().translation().z());
-    // RCLCPP_DEBUG(LOGGER, "Joint: %s",link_state->getParentJointState()->getName().c_str());
-
-    const JointModel* pjm = link->getParentJointModel();
-    if (pjm->getVariableCount() > 0)
-    {
-      if (!group->hasJointModel(pjm->getName()))
-      {
-        link = pjm->getParentLinkModel();
-        continue;
-      }
-      unsigned int joint_index = group->getVariableGroupIndex(pjm->getName());
-      // getGlobalLinkTransform() returns a valid isometry by contract
-      joint_transform = reference_transform * getGlobalLinkTransform(link);  // valid isometry
-      if (pjm->getType() == moveit::core::JointModel::REVOLUTE)
-      {
-        joint_axis = joint_transform.linear() * static_cast<const moveit::core::RevoluteJointModel*>(pjm)->getAxis();
-        jacobian.block<3, 1>(0, joint_index) =
-            jacobian.block<3, 1>(0, joint_index) + joint_axis.cross(point_transform - joint_transform.translation());
-        jacobian.block<3, 1>(3, joint_index) = jacobian.block<3, 1>(3, joint_index) + joint_axis;
-      }
-      else if (pjm->getType() == moveit::core::JointModel::PRISMATIC)
-      {
-        joint_axis = joint_transform.linear() * static_cast<const moveit::core::PrismaticJointModel*>(pjm)->getAxis();
-        jacobian.block<3, 1>(0, joint_index) = jacobian.block<3, 1>(0, joint_index) + joint_axis;
-      }
-      else if (pjm->getType() == moveit::core::JointModel::PLANAR)
-      {
-        joint_axis = joint_transform * Eigen::Vector3d(1.0, 0.0, 0.0);
-        jacobian.block<3, 1>(0, joint_index) = jacobian.block<3, 1>(0, joint_index) + joint_axis;
-        joint_axis = joint_transform * Eigen::Vector3d(0.0, 1.0, 0.0);
-        jacobian.block<3, 1>(0, joint_index + 1) = jacobian.block<3, 1>(0, joint_index + 1) + joint_axis;
-        joint_axis = joint_transform * Eigen::Vector3d(0.0, 0.0, 1.0);
-        jacobian.block<3, 1>(0, joint_index + 2) = jacobian.block<3, 1>(0, joint_index + 2) +
-                                                   joint_axis.cross(point_transform - joint_transform.translation());
-        jacobian.block<3, 1>(3, joint_index + 2) = jacobian.block<3, 1>(3, joint_index + 2) + joint_axis;
-      }
-      else
-        RCLCPP_ERROR(LOGGER, "Unknown type of joint in Jacobian computation");
-    }
-    if (pjm == root_joint_model)
-      break;
-    link = pjm->getParentLinkModel();
+    RCLCPP_ERROR(LOGGER, "The group '%s' doesn't contain any joint models. Cannot compute Jacobian.",
+                 group->getName().c_str());
+    return false;
   }
+
+  // Get the link model of the group root link, and its inverted pose with respect to the RobotModel (URDF) root,
+  // 'root_pose_world'.
+  const JointModel* root_joint_model = group->getJointModels().front();
+  const LinkModel* root_link_model = root_joint_model->getParentLinkModel();
+  const Eigen::Isometry3d root_pose_world =
+      root_link_model ? getGlobalLinkTransform(root_link_model).inverse() : Eigen::Isometry3d::Identity();
+  const int rows = use_quaternion_representation ? 7 : 6;
+  const int columns = group->getVariableCount();
+  jacobian.resize(rows, columns);
+
+  // Get the tip pose with respect to the group root link. Append the user-requested offset 'reference_point_position'.
+  const Eigen::Isometry3d root_pose_tip = root_pose_world * getGlobalLinkTransform(link);
+  const Eigen::Vector3d tip_point = root_pose_tip * reference_point_position;
+
+  // Here we iterate over all the group active joints, and compute how much each of them contribute to the Cartesian
+  // displacement at the tip. So we build the Jacobian incrementally joint by joint.
+  std::size_t active_joints = group->getActiveJointModels().size();
+  int i = 0;
+  for (std::size_t joint = 0; joint < active_joints; ++joint)
+  {
+    // Get the child link for the current joint, and its pose with respect to the group root link.
+    const JointModel* joint_model = joint_models[joint];
+    const LinkModel* child_link_model = joint_model->getChildLinkModel();
+    const Eigen::Isometry3d& root_pose_link = root_pose_world * getGlobalLinkTransform(child_link_model);
+
+    // Compute the Jacobian for the specific joint model, given with respect to the group root link.
+    if (joint_model->getType() == JointModel::REVOLUTE)
+    {
+      const Eigen::Vector3d axis_wrt_origin =
+          root_pose_link.linear() * static_cast<const RevoluteJointModel*>(joint_model)->getAxis();
+      jacobian.block<3, 1>(0, i) = axis_wrt_origin.cross(tip_point - root_pose_link.translation());
+      jacobian.block<3, 1>(3, i) = axis_wrt_origin;
+    }
+    else if (joint_model->getType() == JointModel::PRISMATIC)
+    {
+      const Eigen::Vector3d axis_wrt_origin =
+          root_pose_link.linear() * static_cast<const PrismaticJointModel*>(joint_model)->getAxis();
+      jacobian.block<3, 1>(0, i) = axis_wrt_origin;
+      jacobian.block<3, 1>(3, i) = Eigen::Vector3d::Zero();
+    }
+    else if (joint_model->getType() == JointModel::PLANAR)
+    {
+      jacobian.block<3, 1>(0, i) = root_pose_link.linear() * Eigen::Vector3d(1.0, 0.0, 0.0);
+      jacobian.block<3, 1>(0, i + 1) = root_pose_link.linear() * Eigen::Vector3d(0.0, 1.0, 0.0);
+      jacobian.block<3, 1>(0, i + 2) =
+          (root_pose_link.linear() * Eigen::Vector3d(0.0, 0.0, 1.0)).cross(tip_point - root_pose_link.translation());
+      jacobian.block<3, 1>(3, i + 2) = root_pose_link.linear() * Eigen::Vector3d(0.0, 0.0, 1.0);
+    }
+    else
+    {
+      RCLCPP_ERROR(LOGGER, "Unknown type of joint in Jacobian computation");
+      return false;
+    }
+    i += joint_model->getVariableCount();
+  }
+
   if (use_quaternion_representation)
   {  // Quaternion representation
     // From "Advanced Dynamics and Motion Simulation" by Paul Mitiguy
@@ -1441,7 +1437,7 @@ bool RobotState::getJacobian(const JointModelGroup* group, const LinkModel* link
     //        [x]           [  w -z  y ]    [ omega_2 ]
     //        [y]           [  z  w -x ]    [ omega_3 ]
     //        [z]           [ -y  x  w ]
-    Eigen::Quaterniond q(link_transform.linear());
+    Eigen::Quaterniond q(root_pose_tip.linear());
     double w = q.w(), x = q.x(), y = q.y(), z = q.z();
     Eigen::MatrixXd quaternion_update_matrix(4, 3);
     quaternion_update_matrix << -x, -y, -z, w, -z, y, z, w, -x, -y, x, w;
@@ -1769,13 +1765,13 @@ bool RobotState::setFromIK(const JointModelGroup* jmg, const EigenSTL::vector_Is
         }
         if (pose_frame != solver_tip_frame)
         {
-          const moveit::core::LinkModel* link_model = getLinkModel(pose_frame);
+          const LinkModel* link_model = getLinkModel(pose_frame);
           if (!link_model)
           {
             RCLCPP_ERROR(LOGGER, "The following Pose Frame does not exist: %s", pose_frame.c_str());
             return false;
           }
-          const moveit::core::LinkTransformMap& fixed_links = link_model->getAssociatedFixedTransforms();
+          const LinkTransformMap& fixed_links = link_model->getAssociatedFixedTransforms();
           for (const std::pair<const LinkModel* const, Eigen::Isometry3d>& fixed_link : fixed_links)
           {
             if (Transforms::sameFrame(fixed_link.first->getName(), solver_tip_frame))
@@ -1983,11 +1979,11 @@ bool RobotState::setFromIKSubgroups(const JointModelGroup* jmg, const EigenSTL::
       }
       if (pose_frame != solver_tip_frame)
       {
-        const moveit::core::LinkModel* link_model = getLinkModel(pose_frame);
+        const LinkModel* link_model = getLinkModel(pose_frame);
         if (!link_model)
           return false;
         // getAssociatedFixedTransforms() returns valid isometries by contract
-        const moveit::core::LinkTransformMap& fixed_links = link_model->getAssociatedFixedTransforms();
+        const LinkTransformMap& fixed_links = link_model->getAssociatedFixedTransforms();
         for (const std::pair<const LinkModel* const, Eigen::Isometry3d>& fixed_link : fixed_links)
         {
           if (fixed_link.first->getName() == solver_tip_frame)
@@ -2177,12 +2173,12 @@ void RobotState::printStatePositions(std::ostream& out) const
     out << nm[i] << '=' << position_[i] << '\n';
 }
 
-void RobotState::printStatePositionsWithJointLimits(const moveit::core::JointModelGroup* jmg, std::ostream& out) const
+void RobotState::printStatePositionsWithJointLimits(const JointModelGroup* jmg, std::ostream& out) const
 {
   // TODO(davetcoleman): support joints with multiple variables / multiple DOFs such as floating joints
   // TODO(davetcoleman): support unbounded joints
 
-  const std::vector<const moveit::core::JointModel*>& joints = jmg->getActiveJointModels();
+  const std::vector<const JointModel*>& joints = jmg->getActiveJointModels();
 
   // Loop through joints
   for (const JointModel* joint : joints)
@@ -2196,7 +2192,7 @@ void RobotState::printStatePositionsWithJointLimits(const moveit::core::JointMod
     // check if joint is beyond limits
     bool out_of_bounds = !satisfiesBounds(joint);
 
-    const moveit::core::VariableBounds& bound = joint->getVariableBounds()[0];
+    const VariableBounds& bound = joint->getVariableBounds()[0];
 
     if (out_of_bounds)
       out << MOVEIT_CONSOLE_COLOR_RED;

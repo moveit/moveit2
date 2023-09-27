@@ -1143,7 +1143,7 @@ public:
    * \param group The group to compute the Jacobian for
    * \param link The link model to compute the Jacobian for
    * \param reference_point_position The reference point position (with respect to the link specified in link)
-   * \param jacobian The resultant jacobian
+   * \param jacobian The resultant jacobian, with the origin at the group root link.
    * \param use_quaternion_representation Flag indicating if the Jacobian should use a quaternion representation
    * (default is false)
    * \return True if jacobian was successfully computed, false otherwise
@@ -1155,7 +1155,7 @@ public:
    * \param group The group to compute the Jacobian for
    * \param link The link model to compute the Jacobian for
    * \param reference_point_position The reference point position (with respect to the link specified in link)
-   * \param jacobian The resultant jacobian
+   * \param jacobian The resultant jacobian, with the origin at the group root link.
    * \param use_quaternion_representation Flag indicating if the Jacobian should use a quaternion representation
    * (default is false)
    * \return True if jacobian was successfully computed, false otherwise
@@ -1168,8 +1168,8 @@ public:
                                                              use_quaternion_representation);
   }
 
-  /** \brief Compute the Jacobian with reference to the last link of a specified group. If the group is not a chain, an
-   * exception is thrown.
+  /** \brief Compute the Jacobian with reference to the last link of a specified group, and origin at the group root
+   * link. If the group is not a chain, an exception is thrown.
    * \param group The group to compute the Jacobian for
    * \param reference_point_position The reference point position (with respect to the link specified in link_name)
    * \return The computed Jacobian.
@@ -1177,8 +1177,8 @@ public:
   Eigen::MatrixXd getJacobian(const JointModelGroup* group,
                               const Eigen::Vector3d& reference_point_position = Eigen::Vector3d(0.0, 0.0, 0.0)) const;
 
-  /** \brief Compute the Jacobian with reference to the last link of a specified group. If the group is not a chain, an
-   * exception is thrown.
+  /** \brief Compute the Jacobian with reference to the last link of a specified group, and origin at the group root
+   * link. If the group is not a chain, an exception is thrown.
    * \param group The group to compute the Jacobian for
    * \param reference_point_position The reference point position (with respect to the link specified in link_name)
    * \return The computed Jacobian.
