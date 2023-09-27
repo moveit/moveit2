@@ -224,8 +224,7 @@ void PlanningSceneMonitor::initialize(const planning_scene::PlanningScenePtr& sc
   private_executor_thread_ = std::thread([this]() { private_executor_->spin(); });
 
   auto declare_parameter = [this](const std::string& param_name, auto default_val,
-                                  const std::string& description) -> auto
-  {
+                                  const std::string& description) -> auto {
     rcl_interfaces::msg::ParameterDescriptor desc;
     desc.set__description(description);
     return pnode_->declare_parameter(param_name, default_val, desc);
@@ -238,23 +237,23 @@ void PlanningSceneMonitor::initialize(const planning_scene::PlanningScenePtr& sc
     bool publish_state_updates = false;
     bool publish_transform_updates = false;
     double publish_planning_scene_hz = 4.0;
-    if(node_->has_parameter("publish_planning_scene"))
+    if (node_->has_parameter("publish_planning_scene"))
     {
       publish_planning_scene = node_->get_parameter("publish_planning_scene").as_bool();
     }
-    if(node_->has_parameter("publish_geometry_updates"))
+    if (node_->has_parameter("publish_geometry_updates"))
     {
       publish_geometry_updates = node_->get_parameter("publish_geometry_updates").as_bool();
     }
-    if(node_->has_parameter("publish_state_updates"))
+    if (node_->has_parameter("publish_state_updates"))
     {
       publish_state_updates = node_->get_parameter("publish_state_updates").as_bool();
     }
-    if(node_->has_parameter("publish_transforms_updates"))
+    if (node_->has_parameter("publish_transforms_updates"))
     {
       publish_transform_updates = node_->get_parameter("publish_transforms_updates").as_bool();
     }
-    if(node_->has_parameter("publish_planning_scene_hz"))
+    if (node_->has_parameter("publish_planning_scene_hz"))
     {
       publish_planning_scene_hz = node_->get_parameter("publish_planning_scene_hz").as_double();
     }
@@ -263,13 +262,14 @@ void PlanningSceneMonitor::initialize(const planning_scene::PlanningScenePtr& sc
     publish_planning_scene =
         declare_parameter("publish_planning_scene", publish_planning_scene, "Set to True to publish Planning Scenes");
     publish_geometry_updates = declare_parameter("publish_geometry_updates", publish_geometry_updates,
-                                                      "Set to True to publish geometry updates of the planning scene");
-    publish_state_updates =
-        declare_parameter("publish_state_updates", publish_state_updates, "Set to True to publish state updates of the planning scene");
-    publish_transform_updates = declare_parameter(
-        "publish_transforms_updates", publish_transform_updates, "Set to True to publish transform updates of the planning scene");
-    publish_planning_scene_hz = declare_parameter(
-        "publish_planning_scene_hz", publish_planning_scene_hz, "Set the maximum frequency at which planning scene updates are published");
+                                                 "Set to True to publish geometry updates of the planning scene");
+    publish_state_updates = declare_parameter("publish_state_updates", publish_state_updates,
+                                              "Set to True to publish state updates of the planning scene");
+    publish_transform_updates = declare_parameter("publish_transforms_updates", publish_transform_updates,
+                                                  "Set to True to publish transform updates of the planning scene");
+    publish_planning_scene_hz =
+        declare_parameter("publish_planning_scene_hz", publish_planning_scene_hz,
+                          "Set the maximum frequency at which planning scene updates are published");
     updatePublishSettings(publish_geometry_updates, publish_state_updates, publish_transform_updates,
                           publish_planning_scene, publish_planning_scene_hz);
   }
@@ -280,8 +280,7 @@ void PlanningSceneMonitor::initialize(const planning_scene::PlanningScenePtr& sc
     return;
   }
 
-  auto psm_parameter_set_callback = [this](const std::vector<rclcpp::Parameter>& parameters) -> auto
-  {
+  auto psm_parameter_set_callback = [this](const std::vector<rclcpp::Parameter>& parameters) -> auto {
     auto result = rcl_interfaces::msg::SetParametersResult();
     result.successful = true;
 
@@ -666,8 +665,9 @@ void PlanningSceneMonitor::updatePublishSettings(bool publish_geom_updates, bool
     setPlanningScenePublishingFrequency(publish_planning_scene_hz);
     startPublishingPlanningScene(event);
   }
-  else {
-      RCLCPP_INFO(LOGGER, "STOPPED Publishing maintained planning scene on");
+  else
+  {
+    RCLCPP_INFO(LOGGER, "STOPPED Publishing maintained planning scene on");
     stopPublishingPlanningScene();
   }
 }
