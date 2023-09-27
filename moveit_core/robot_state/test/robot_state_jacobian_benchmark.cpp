@@ -37,6 +37,8 @@
 // To run this benchmark, 'cd' to the build/moveit_core/robot_state directory and directly run the binary.
 
 #include <benchmark/benchmark.h>
+#include <kdl_parser/kdl_parser.hpp>
+#include <kdl/chainjnttojacsolver.hpp>
 #include <moveit/robot_model/robot_model.h>
 #include <moveit/robot_state/robot_state.h>
 #include <moveit/utils/robot_model_test_utils.h>
@@ -77,4 +79,55 @@ static void BM_MoveItJacobian(benchmark::State& st)
   }
 }
 
+static void BM_KDLJacobian(benchmark::State& st)
+{
+  const moveit::core::RobotModelPtr& robot_model = moveit::core::loadTestingRobotModel(TEST_ROBOT);
+
+  // Make sure the group exists, otherwise exit early with an error.
+  if (!robot_model->hasJointModelGroup(TEST_GROUP))
+  {
+    st.SkipWithError("The planning group doesn't exist.");
+    return;
+  }
+
+  // Robot state.
+  moveit::core::RobotState kinematic_state(robot_model);
+  const moveit::core::JointModelGroup* jmg = kinematic_state.getJointModelGroup(TEST_GROUP);
+
+  // Provide our own random number generator to setToRandomPositions to get a deterministic sequence of joint
+  // configurations.
+  random_numbers::RandomNumberGenerator rng(0);
+
+  KDL::Tree kdl_tree;
+  if (!kdl_parser::treeFromUrdfModel(*robot_model->getURDF(), kdl_tree))
+  {
+    st.SkipWithError("Can't create KDL tree.");
+    return;
+  }
+
+  KDL::Chain kdl_chain;
+  if (!kdl_tree.getChain(jmg->getJointModels().front()->getParentLinkModel()->getName(),
+                         jmg->getLinkModelNames().back(), kdl_chain))
+  {
+    st.SkipWithError("Can't create KDL Chain.");
+    return;
+  }
+
+  KDL::ChainJntToJacSolver jacobian_solver(kdl_chain);
+
+  for (auto _ : st)
+  {
+    st.PauseTiming();
+    kinematic_state.setToRandomPositions(jmg, rng);
+    kinematic_state.updateLinkTransforms();
+    KDL::Jacobian jacobian(kdl_chain.getNrOfJoints());
+    KDL::JntArray kdl_q;
+    kdl_q.resize(kdl_chain.getNrOfJoints());
+    kinematic_state.copyJointGroupPositions(jmg, &kdl_q.data[0]);
+    st.ResumeTiming();
+    jacobian_solver.JntToJac(kdl_q, jacobian);
+  }
+}
+
 BENCHMARK(BM_MoveItJacobian);
+BENCHMARK(BM_KDLJacobian);
