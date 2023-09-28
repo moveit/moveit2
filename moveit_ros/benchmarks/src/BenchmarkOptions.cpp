@@ -170,7 +170,7 @@ bool BenchmarkOptions::readPlannerConfigs(const rclcpp::Node::SharedPtr& node)
   std::vector<std::string> pipelines;
   if (!node->get_parameter(ns + ".pipelines", pipelines))
   {
-    RCLCPP_ERROR(LOGGER, "No single planning pipeline namespace `%s` configured.", (ns + ".pipelines").c_str());
+    RCLCPP_WARN(LOGGER, "No single planning pipeline namespace `%s` configured.", (ns + ".pipelines").c_str());
   }
 
   for (const std::string& pipeline : pipelines)
