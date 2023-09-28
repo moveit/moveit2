@@ -51,5 +51,5 @@ namespace distance_field
  * @param [out] points The points internal to the body are appended to thiss
  *                   vector.
  */
-void findInternalPointsConvex(const bodies::Body& body, double resolution, EigenSTL::vector_Vector3d& points);
+void findInternalPointsConvex(const bodies::Body& body, const double resolution, EigenSTL::vector_Vector3d& points);
 }  // namespace distance_field

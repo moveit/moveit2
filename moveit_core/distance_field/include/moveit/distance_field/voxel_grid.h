@@ -88,8 +88,8 @@ public:
    * @param [in] default_object An object that will be returned for any
    * future queries that are not valid
    */
-  VoxelGrid(double size_x, double size_y, double size_z, double resolution, double origin_x, double origin_y,
-            double origin_z, T default_object);
+  VoxelGrid(const double size_x, const double size_y, const double size_z, const double resolution, const double origin_x, const double origin_y,
+            const double origin_z, const T default_object);
   virtual ~VoxelGrid();
 
   /**
@@ -117,8 +117,8 @@ public:
    * @param [in] origin_y Minimum point along the Y axis of the volume
    * @param [in] origin_z Minimum point along the Z axis of the volume
    */
-  void resize(double size_x, double size_y, double size_z, double resolution, double origin_x, double origin_y,
-              double origin_z, T default_object);
+  void resize(const double size_x, const double size_y, const double size_z, const double resolution, const double origin_x, const double origin_y,
+              const double origin_z, const T default_object);
 
   /**
    * \brief Operator that gets the value of the given location (x, y,
@@ -133,7 +133,7 @@ public:
    * @return The data stored at that location, or a default value
    * supplied in the constructor if the location is not valid.
    */
-  const T& operator()(double x, double y, double z) const;
+  const T& operator()(const double x, const double y, const double z) const;
   const T& operator()(const Eigen::Vector3d& pos) const;
 
   /**
@@ -153,9 +153,9 @@ public:
    * @return The data in the indicated cell.  If x,y,z is invalid then
    * corruption and/or SEGFAULTS will occur.
    */
-  T& getCell(int x, int y, int z);
+  T& getCell(const int x, const int y, const int z);
   T& getCell(const Eigen::Vector3i& pos);
-  const T& getCell(int x, int y, int z) const;
+  const T& getCell(const int x, const int y, const int z) const;
   const T& getCell(const Eigen::Vector3i& pos) const;
 
   /**
@@ -176,7 +176,7 @@ public:
    * @param [in] z The Z index of the desired cell
    * @param [out] obj The data to place into the given cell
    */
-  void setCell(int x, int y, int z, const T& obj);
+  void setCell(const int x, const int y, const int z, const T& obj);
   void setCell(const Eigen::Vector3i& pos, const T& obj);
 
   /**
@@ -193,7 +193,7 @@ public:
    *
    * @return The size in meters
    */
-  double getSize(Dimension dim) const;
+  double getSize(const Dimension dim) const;
 
   /**
    * \brief Gets the resolution in arbitrary consistent units
@@ -203,7 +203,7 @@ public:
   double getResolution() const;
 
   /** \brief deprecated.  Use the version with no arguments. */
-  double getResolution(Dimension dim) const;
+  double getResolution(const Dimension dim) const;
 
   /**
    * \brief Gets the origin (minimum point) of the indicated dimension
@@ -212,7 +212,7 @@ public:
    *
    * @return The indicated axis origin
    */
-  double getOrigin(Dimension dim) const;
+  double getOrigin(const Dimension dim) const;
 
   /**
    * \brief Gets the number of cells in the indicated dimension
@@ -221,7 +221,7 @@ public:
    *
    * @return The number of cells for the indicated dimension
    */
-  int getNumCells(Dimension dim) const;
+  int getNumCells(const Dimension dim) const;
 
   /**
    * \brief Converts grid coordinates to world coordinates.
@@ -241,7 +241,7 @@ public:
    *
    * @return True, as there is no check that the integer locations are valid
    */
-  void gridToWorld(int x, int y, int z, double& world_x, double& world_y, double& world_z) const;
+  void gridToWorld(const int x, const int y, const int z, double& world_x, double& world_y, double& world_z) const;
   void gridToWorld(const Eigen::Vector3i& grid, Eigen::Vector3d& world) const;
 
   /**
@@ -260,7 +260,7 @@ public:
    * @return True if all the world values result in integer indices
    * that pass a validity check; otherwise False.
    */
-  bool worldToGrid(double world_x, double world_y, double world_z, int& x, int& y, int& z) const;
+  bool worldToGrid(const double world_x, const double world_y, const double world_z, int& x, int& y, int& z) const;
   bool worldToGrid(const Eigen::Vector3d& world, Eigen::Vector3i& grid) const;
 
   /**
@@ -272,7 +272,7 @@ public:
    *
    * @return True if the cell lies within the voxel grid; otherwise False.
    */
-  bool isCellValid(int x, int y, int z) const;
+  bool isCellValid(const int x, const int y, const int z) const;
   bool isCellValid(const Eigen::Vector3i& pos) const;
 
   /**
@@ -283,7 +283,7 @@ public:
    *
    * @return True if the cell is valid along that dimension; otherwise False.
    */
-  bool isCellValid(Dimension dim, int cell) const;
+  bool isCellValid(const Dimension dim, const int cell) const;
 
 protected:
   T* data_;                /**< \brief Storage for the full set of data elements */
@@ -308,7 +308,7 @@ protected:
    *
    * @return The computed 1D index
    */
-  int ref(int x, int y, int z) const;
+  int ref(const int x, const int y, const int z) const;
 
   /**
    * \brief Gets the cell number from the location
@@ -322,7 +322,7 @@ protected:
    *
    * @return The computed cell index along the given dimension
    */
-  int getCellFromLocation(Dimension dim, double loc) const;
+  int getCellFromLocation(const Dimension dim, const double loc) const;
 
   /**
    * \brief Gets the center of the cell in world coordinates along the
@@ -333,14 +333,14 @@ protected:
    *
    * @return The world coordinate of the center of the cell
    */
-  double getLocationFromCell(Dimension dim, int cell) const;
+  double getLocationFromCell(const Dimension dim, const int cell) const;
 };
 
 //////////////////////////// template function definitions follow //////////////////
 
 template <typename T>
-VoxelGrid<T>::VoxelGrid(double size_x, double size_y, double size_z, double resolution, double origin_x,
-                        double origin_y, double origin_z, T default_object)
+VoxelGrid<T>::VoxelGrid(const double size_x, const double size_y, const double size_z, const double resolution, const double origin_x,
+                        const double origin_y, const double origin_z, const T default_object)
   : data_(nullptr)
 {
   resize(size_x, size_y, size_z, resolution, origin_x, origin_y, origin_z, default_object);
@@ -364,8 +364,8 @@ VoxelGrid<T>::VoxelGrid() : data_(nullptr)
 }
 
 template <typename T>
-void VoxelGrid<T>::resize(double size_x, double size_y, double size_z, double resolution, double origin_x,
-                          double origin_y, double origin_z, T default_object)
+void VoxelGrid<T>::resize(const double size_x, const double size_y, const double size_z, const double resolution, const double origin_x,
+                          const double origin_y, const double origin_z, const T default_object)
 {
   delete[] data_;
   data_ = nullptr;
@@ -405,7 +405,7 @@ VoxelGrid<T>::~VoxelGrid()
 }
 
 template <typename T>
-inline bool VoxelGrid<T>::isCellValid(int x, int y, int z) const
+inline bool VoxelGrid<T>::isCellValid(const int x, const int y, const int z) const
 {
   return (x >= 0 && x < num_cells_[DIM_X] && y >= 0 && y < num_cells_[DIM_Y] && z >= 0 && z < num_cells_[DIM_Z]);
 }
@@ -417,19 +417,19 @@ inline bool VoxelGrid<T>::isCellValid(const Eigen::Vector3i& pos) const
 }
 
 template <typename T>
-inline bool VoxelGrid<T>::isCellValid(Dimension dim, int cell) const
+inline bool VoxelGrid<T>::isCellValid(const Dimension dim, const int cell) const
 {
   return cell >= 0 && cell < num_cells_[dim];
 }
 
 template <typename T>
-inline int VoxelGrid<T>::ref(int x, int y, int z) const
+inline int VoxelGrid<T>::ref(const int x, const int y, const int z) const
 {
   return x * stride1_ + y * stride2_ + z;
 }
 
 template <typename T>
-inline double VoxelGrid<T>::getSize(Dimension dim) const
+inline double VoxelGrid<T>::getSize(const Dimension dim) const
 {
   return size_[dim];
 }
@@ -441,25 +441,25 @@ inline double VoxelGrid<T>::getResolution() const
 }
 
 template <typename T>
-inline double VoxelGrid<T>::getResolution(Dimension /*dim*/) const
+inline double VoxelGrid<T>::getResolution(const Dimension /*dim*/) const
 {
   return resolution_;
 }
 
 template <typename T>
-inline double VoxelGrid<T>::getOrigin(Dimension dim) const
+inline double VoxelGrid<T>::getOrigin(const Dimension dim) const
 {
   return origin_[dim];
 }
 
 template <typename T>
-inline int VoxelGrid<T>::getNumCells(Dimension dim) const
+inline int VoxelGrid<T>::getNumCells(const Dimension dim) const
 {
   return num_cells_[dim];
 }
 
 template <typename T>
-inline const T& VoxelGrid<T>::operator()(double x, double y, double z) const
+inline const T& VoxelGrid<T>::operator()(const double x, const double y, const double z) const
 {
   int cell_x = getCellFromLocation(DIM_X, x);
   int cell_y = getCellFromLocation(DIM_Y, y);
@@ -476,13 +476,13 @@ inline const T& VoxelGrid<T>::operator()(const Eigen::Vector3d& pos) const
 }
 
 template <typename T>
-inline T& VoxelGrid<T>::getCell(int x, int y, int z)
+inline T& VoxelGrid<T>::getCell(const int x, const int y, const int z)
 {
   return data_[ref(x, y, z)];
 }
 
 template <typename T>
-inline const T& VoxelGrid<T>::getCell(int x, int y, int z) const
+inline const T& VoxelGrid<T>::getCell(const int x, const int y, const int z) const
 {
   return data_[ref(x, y, z)];
 }
@@ -500,7 +500,7 @@ inline const T& VoxelGrid<T>::getCell(const Eigen::Vector3i& pos) const
 }
 
 template <typename T>
-inline void VoxelGrid<T>::setCell(int x, int y, int z, const T& obj)
+inline void VoxelGrid<T>::setCell(const int x, const int y, const int z, const T& obj)
 {
   data_[ref(x, y, z)] = obj;
 }
@@ -512,7 +512,7 @@ inline void VoxelGrid<T>::setCell(const Eigen::Vector3i& pos, const T& obj)
 }
 
 template <typename T>
-inline int VoxelGrid<T>::getCellFromLocation(Dimension dim, double loc) const
+inline int VoxelGrid<T>::getCellFromLocation(const Dimension dim, const double loc) const
 {
   // This implements
   //
@@ -532,7 +532,7 @@ inline int VoxelGrid<T>::getCellFromLocation(Dimension dim, double loc) const
 }
 
 template <typename T>
-inline double VoxelGrid<T>::getLocationFromCell(Dimension dim, int cell) const
+inline double VoxelGrid<T>::getLocationFromCell(const Dimension dim, const int cell) const
 {
   return origin_[dim] + resolution_ * (double(cell));
 }
@@ -544,7 +544,7 @@ inline void VoxelGrid<T>::reset(const T& initial)
 }
 
 template <typename T>
-inline void VoxelGrid<T>::gridToWorld(int x, int y, int z, double& world_x, double& world_y, double& world_z) const
+inline void VoxelGrid<T>::gridToWorld(const int x, const int y, const int z, double& world_x, double& world_y, double& world_z) const
 {
   world_x = getLocationFromCell(DIM_X, x);
   world_y = getLocationFromCell(DIM_Y, y);
@@ -560,7 +560,7 @@ inline void VoxelGrid<T>::gridToWorld(const Eigen::Vector3i& grid, Eigen::Vector
 }
 
 template <typename T>
-inline bool VoxelGrid<T>::worldToGrid(double world_x, double world_y, double world_z, int& x, int& y, int& z) const
+inline bool VoxelGrid<T>::worldToGrid(const double world_x, const double world_y, const double world_z, int& x, int& y, int& z) const
 {
   x = getCellFromLocation(DIM_X, world_x);
   y = getCellFromLocation(DIM_Y, world_y);

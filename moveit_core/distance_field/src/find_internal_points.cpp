@@ -36,7 +36,7 @@
 
 #include <moveit/distance_field/find_internal_points.h>
 
-void distance_field::findInternalPointsConvex(const bodies::Body& body, double resolution,
+void distance_field::findInternalPointsConvex(const bodies::Body& body, const double resolution,
                                               EigenSTL::vector_Vector3d& points)
 {
   bodies::BoundingSphere sphere;

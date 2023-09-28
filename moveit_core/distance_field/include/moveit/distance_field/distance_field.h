@@ -104,8 +104,8 @@ public:
    * @param [in] origin_y The minimum Y point of the volume
    * @param [in] origin_z The minimum Z point of the volume
    */
-  DistanceField(double size_x, double size_y, double size_z, double resolution, double origin_x, double origin_y,
-                double origin_z);
+  DistanceField(const double size_x, const double size_y, const double size_z, const double resolution, const double origin_x, const double origin_y,
+                const double origin_z);
 
   virtual ~DistanceField();
 
@@ -270,7 +270,7 @@ public:
    *
    * @return The distance to the closest obstacle cell
    */
-  virtual double getDistance(double x, double y, double z) const = 0;
+  virtual double getDistance(const double x, const double y, const double z) const = 0;
 
   /**
    * \brief Gets not only the distance to the nearest cell but the
@@ -319,7 +319,7 @@ public:
    *
    * @return The distance to the closest occupied cell
    */
-  double getDistanceGradient(double x, double y, double z, double& gradient_x, double& gradient_y, double& gradient_z,
+  double getDistanceGradient(const double x, const double y, const double z, double& gradient_x, double& gradient_y, double& gradient_z,
                              bool& in_bounds) const;
   /**
    * \brief Gets the distance to the closest obstacle at the given
@@ -332,7 +332,7 @@ public:
    *
    * @return The distance to the closest occupied cell
    */
-  virtual double getDistance(int x, int y, int z) const = 0;
+  virtual double getDistance(const int x, const int y, const int z) const = 0;
 
   /**
    * \brief Determines whether or not the cell associated with the
@@ -344,7 +344,7 @@ public:
    *
    * @return True if the cell is valid, otherwise false.
    */
-  virtual bool isCellValid(int x, int y, int z) const = 0;
+  virtual bool isCellValid(const int x, const int y, const int z) const = 0;
 
   /**
    * \brief Gets the number of cells along the X axis
@@ -383,7 +383,7 @@ public:
    * @return Whether or not the transformation is successful.  An implementation may or may not choose to return false
    *if the indicated cell is not valid for this distance field.
    */
-  virtual bool gridToWorld(int x, int y, int z, double& world_x, double& world_y, double& world_z) const = 0;
+  virtual bool gridToWorld(const int x, const int y, const int z, double& world_x, double& world_y, double& world_z) const = 0;
 
   /**
    * \brief Converts from a world location to a set of integer
@@ -401,7 +401,7 @@ public:
    * @return True if all the world values result in integer indices
    * that pass a validity check; otherwise False.
    */
-  virtual bool worldToGrid(double world_x, double world_y, double world_z, int& x, int& y, int& z) const = 0;
+  virtual bool worldToGrid(const double world_x, const double world_y, const double world_z, int& x, int& y, int& z) const = 0;
 
   /**
    * \brief Writes the contents of the distance field to the supplied stream.
@@ -436,7 +436,7 @@ public:
    * @param [in] stamp The stamp to use in the header of the marker
    * @param [out] marker The marker that will contain the indicated cells.
    */
-  void getIsoSurfaceMarkers(double min_distance, double max_distance, const std::string& frame_id,
+  void getIsoSurfaceMarkers(const double min_distance, const double max_distance, const std::string& frame_id,
                             const rclcpp::Time& stamp, visualization_msgs::msg::Marker& marker) const;
 
   /**
@@ -452,7 +452,7 @@ public:
    * @param [in] stamp The stamp to use in the header of the marker
    * @param [out] marker_array The marker array to populate
    */
-  void getGradientMarkers(double min_radius, double max_radius, const std::string& frame_id, const rclcpp::Time& stamp,
+  void getGradientMarkers(const double min_radius, const double max_radius, const std::string& frame_id, const rclcpp::Time& stamp,
                           visualization_msgs::msg::MarkerArray& marker_array) const;
 
   /**
@@ -480,7 +480,7 @@ public:
    * @param [in] stamp The stamp to use in the header of the marker
    * @param [out] marker The marker that will contain the indicated cells.
    */
-  void getPlaneMarkers(PlaneVisualizationType type, double length, double width, double height,
+  void getPlaneMarkers(const PlaneVisualizationType type, const double length, const double width, const double height,
                        const Eigen::Vector3d& origin, const std::string& frame_id, const rclcpp::Time& stamp,
                        visualization_msgs::msg::Marker& marker) const;
   /**
@@ -499,7 +499,7 @@ public:
    * @param [out] marker The marker, which will be populated with a
    * visualization_msgs::msg::Marker::CUBE_LIST .
    */
-  void getProjectionPlanes(const std::string& frame_id, const rclcpp::Time& stamp, double max_distance,
+  void getProjectionPlanes(const std::string& frame_id, const rclcpp::Time& stamp, const double max_distance,
                            visualization_msgs::msg::Marker& marker) const;
 
   /**
@@ -610,8 +610,8 @@ protected:
    *
    * @param [in] max_distance The distance past which all cells will be fully white
    */
-  void setPoint(int xCell, int yCell, int zCell, double dist, geometry_msgs::msg::Point& point,
-                std_msgs::msg::ColorRGBA& color, double max_distance) const;
+  void setPoint(const int xCell, const int yCell, const int zCell, const double dist, geometry_msgs::msg::Point& point,
+                std_msgs::msg::ColorRGBA& color, const double max_distance) const;
 
   double size_x_;            /**< \brief X size of the distance field */
   double size_y_;            /**< \brief Y size of the distance field */

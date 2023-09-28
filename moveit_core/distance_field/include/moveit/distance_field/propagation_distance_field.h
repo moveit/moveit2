@@ -169,9 +169,9 @@ public:
    * the implications of this.
    *
    */
-  PropagationDistanceField(double size_x, double size_y, double size_z, double resolution, double origin_x,
-                           double origin_y, double origin_z, double max_distance,
-                           bool propagate_negative_distances = false);
+  PropagationDistanceField(const double size_x, const double size_y, const double size_z, const double resolution, const double origin_x,
+                           const double origin_y, const double origin_z, const double max_distance,
+                           const bool propagate_negative_distances = false);
 
   /**
    * \brief Constructor based on an OcTree and bounding box
@@ -196,8 +196,8 @@ public:
    * the implications of this.
    */
   PropagationDistanceField(const octomap::OcTree& octree, const octomap::point3d& bbx_min,
-                           const octomap::point3d& bbx_max, double max_distance,
-                           bool propagate_negative_distances = false);
+                           const octomap::point3d& bbx_max, const double max_distance,
+                           const bool propagate_negative_distances = false);
 
   /**
    * \brief Constructor that takes an istream and reads the contents
@@ -220,7 +220,7 @@ public:
    *
    * @return
    */
-  PropagationDistanceField(std::istream& stream, double max_distance, bool propagate_negative_distances = false);
+  PropagationDistanceField(std::istream& stream, const double max_distance, const bool propagate_negative_distances = false);
   /**
    * \brief Empty destructor
    *
@@ -313,7 +313,7 @@ public:
    *
    * @return The distance value
    */
-  double getDistance(double x, double y, double z) const override;
+  double getDistance(const double x, const double y, const double z) const override;
 
   /**
    * \brief Get the distance value associated with the cell indicated
@@ -330,14 +330,14 @@ public:
    *
    * @return The distance value for the cell
    */
-  double getDistance(int x, int y, int z) const override;
+  double getDistance(const int x, const int y, const int z) const override;
 
-  bool isCellValid(int x, int y, int z) const override;
+  bool isCellValid(const int x, const int y, const int z) const override;
   int getXNumCells() const override;
   int getYNumCells() const override;
   int getZNumCells() const override;
-  bool gridToWorld(int x, int y, int z, double& world_x, double& world_y, double& world_z) const override;
-  bool worldToGrid(double world_x, double world_y, double world_z, int& x, int& y, int& z) const override;
+  bool gridToWorld(const int x, const int y, const int z, double& world_x, double& world_y, double& world_z) const override;
+  bool worldToGrid(const double world_x, const double world_y, const double world_z, int& x, int& y, int& z) const override;
 
   /**
    * \brief Writes the contents of the distance field to the supplied stream.
@@ -392,7 +392,7 @@ public:
    *
    * @return The data in the indicated cell.
    */
-  const PropDistanceFieldVoxel& getCell(int x, int y, int z) const
+  const PropDistanceFieldVoxel& getCell(const int x, const int y, const int z) const
   {
     return voxel_grid_->getCell(x, y, z);
   }
@@ -415,7 +415,7 @@ public:
    *         If starting cell is outside, the nearst inside cell
    *         If nearest cell is unknown, return nullptr
    */
-  const PropDistanceFieldVoxel* getNearestCell(int x, int y, int z, double& dist, Eigen::Vector3i& pos) const
+  const PropDistanceFieldVoxel* getNearestCell(const int x, const int y, const int z, double& dist, Eigen::Vector3i& pos) const
   {
     const PropDistanceFieldVoxel* cell = &voxel_grid_->getCell(x, y, z);
     if (cell->distance_square_ > 0)
@@ -512,7 +512,7 @@ private:
    *
    * @return Single number 0-26 representing direction
    */
-  int getDirectionNumber(int dx, int dy, int dz) const;
+  int getDirectionNumber(const int dx, const int dy, const int dz) const;
 
   /**
    * \brief Helper function that gets change values given single
@@ -522,7 +522,7 @@ private:
    *
    * @return Integer changes
    */
-  Eigen::Vector3i getLocationDifference(int directionNumber) const;
+  Eigen::Vector3i getLocationDifference(const int directionNumber) const;
 
   /**
    * \brief Helper function for computing location and neighborhood
