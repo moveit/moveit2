@@ -210,8 +210,9 @@ JointDeltaResult jointDeltaFromPose(const PoseCommand& command, const moveit::co
 JointDeltaResult jointDeltaFromIK(const Eigen::VectorXd& cartesian_position_delta,
                                   const moveit::core::RobotStatePtr& robot_state, const servo::Params& servo_params)
 {
-  const moveit::core::JointModelGroup* joint_model_group =
-      robot_state->getJointModelGroup(servo_params.move_group_name);
+  auto const& group_name =
+      servo_params.active_subgroup.empty() ? servo_params.move_group_name : servo_params.active_subgroup;
+  const moveit::core::JointModelGroup* joint_model_group = robot_state->getJointModelGroup(group_name);
 
   std::vector<double> current_joint_positions;
   robot_state->copyJointGroupPositions(joint_model_group, current_joint_positions);
@@ -270,6 +271,24 @@ JointDeltaResult jointDeltaFromIK(const Eigen::VectorXd& cartesian_position_delt
     const Eigen::MatrixXd pseudo_inverse = svd.matrixV() * matrix_s.inverse() * svd.matrixU().transpose();
 
     delta_theta = pseudo_inverse * cartesian_position_delta;
+  }
+
+  if (!servo_params.active_subgroup.empty())
+  {
+    // Create full delta vector and add delta theta's at actuated joints
+    auto const& move_group_joint_names =
+        robot_state->getJointModelGroup(servo_params.move_group_name)->getActiveJointModelNames();
+    auto const& subgroup_joint_names =
+        robot_state->getJointModelGroup(servo_params.active_subgroup)->getActiveJointModelNames();
+
+    Eigen::VectorXd move_group_delta_theta = Eigen::VectorXd::Zero(move_group_joint_names.size());
+    for (size_t index = 0; index < subgroup_joint_names.size(); index++)
+    {
+      auto const move_group_iterator =
+          find(move_group_joint_names.cbegin(), move_group_joint_names.cend(), subgroup_joint_names.at(index));
+      move_group_delta_theta[std::distance(move_group_joint_names.cbegin(), move_group_iterator)] = delta_theta[index];
+    }
+    return std::make_pair(status, move_group_delta_theta);
   }
 
   return std::make_pair(status, delta_theta);

@@ -63,8 +63,7 @@ Servo::Servo(const rclcpp::Node::SharedPtr& node, std::shared_ptr<const servo::P
 {
   servo_params_ = servo_param_listener_->get_params();
 
-  const bool params_valid = validateParams(servo_params_);
-  if (!params_valid)
+  if (!validateParams(servo_params_))
   {
     RCLCPP_ERROR_STREAM(LOGGER, "Got invalid parameters, exiting.");
     std::exit(EXIT_FAILURE);
@@ -160,14 +159,19 @@ void Servo::setCollisionChecking(const bool check_collision)
 
 bool Servo::validateParams(const servo::Params& servo_params) const
 {
-  bool params_valid = true;
+  if (params.move_group_name != servo_params_.move_group_name)
+  {
+    RCLCPP_ERROR_STREAM(LOGGER, "It is not possible to change the move group online from "
+                                    << servo_params_.move_group_name << " to " << params.move_group_name);
+    return false;
+  }
 
   auto robot_state = planning_scene_monitor_->getStateMonitor()->getCurrentState();
   auto joint_model_group = robot_state->getJointModelGroup(servo_params.move_group_name);
   if (joint_model_group == nullptr)
   {
     RCLCPP_ERROR_STREAM(LOGGER, "Invalid move group name: `" << servo_params.move_group_name << '`');
-    params_valid = false;
+    return false;
   }
 
   if (servo_params.hard_stop_singularity_threshold <= servo_params.lower_singularity_threshold)
@@ -175,7 +179,7 @@ bool Servo::validateParams(const servo::Params& servo_params) const
     RCLCPP_ERROR(LOGGER, "Parameter 'hard_stop_singularity_threshold' "
                          "should be greater than 'lower_singularity_threshold.' "
                          "Check the parameters YAML file used to launch this node.");
-    params_valid = false;
+    return false;
   }
 
   if (!servo_params.publish_joint_positions && !servo_params.publish_joint_velocities &&
@@ -185,7 +189,7 @@ bool Servo::validateParams(const servo::Params& servo_params) const
                          "publish_joint_velocities / "
                          "publish_joint_accelerations must be true. "
                          "Check the parameters YAML file used to launch this node.");
-    params_valid = false;
+    return false;
   }
 
   if ((servo_params.command_out_type == "std_msgs/Float64MultiArray") && servo_params.publish_joint_positions &&
@@ -194,7 +198,7 @@ bool Servo::validateParams(const servo::Params& servo_params) const
     RCLCPP_ERROR(LOGGER, "When publishing a std_msgs/Float64MultiArray, "
                          "you must select positions OR velocities."
                          "Check the parameters YAML file used to launch this node.");
-    params_valid = false;
+    return false;
   }
 
   if (servo_params.scene_collision_proximity_threshold < servo_params.self_collision_proximity_threshold)
@@ -202,43 +206,44 @@ bool Servo::validateParams(const servo::Params& servo_params) const
     RCLCPP_ERROR(LOGGER, "Parameter 'self_collision_proximity_threshold' should probably be less "
                          "than or equal to 'scene_collision_proximity_threshold'."
                          "Check the parameters YAML file used to launch this node.");
-    params_valid = false;
+    return false;
   }
 
-  return params_valid;
+  if (!servo_params.active_subgroup.empty() && servo_params.active_subgroup != servo_params.move_group_name &&
+      !joint_model_group->isSubgroup(servo_params.active_subgroup))
+  {
+    RCLCPP_ERROR(LOGGER,
+                 "The value '%s' Parameter 'active_subgroup' does not name a valid subgroup of joint group '%s'.",
+                 servo_params.active_subgroup.c_str(), servo_params.move_group_name.c_str());
+    return false;
+  }
+
+  return true;
 }
 
 bool Servo::updateParams()
 {
-  bool params_updated = false;
-
   if (servo_param_listener_->is_old(servo_params_))
   {
-    auto params = servo_param_listener_->get_params();
+    const auto params = servo_param_listener_->get_params();
 
-    const bool params_valid = validateParams(params);
-    if (params_valid)
+    if (validateParams(params))
     {
       if (params.override_velocity_scaling_factor != servo_params_.override_velocity_scaling_factor)
       {
         RCLCPP_INFO_STREAM(LOGGER, "override_velocity_scaling_factor changed to : "
                                        << std::to_string(params.override_velocity_scaling_factor));
       }
-      if (params.move_group_name != servo_params_.move_group_name)
-      {
-        RCLCPP_INFO_STREAM(LOGGER, "Move group changed from " << servo_params_.move_group_name << " to "
-                                                              << params.move_group_name);
-      }
 
       servo_params_ = params;
-      params_updated = true;
+      return true;
     }
     else
     {
       RCLCPP_WARN_STREAM(LOGGER, "Parameters will not be updated.");
     }
   }
-  return params_updated;
+  return false;
 }
 
 servo::Params& Servo::getParams()
