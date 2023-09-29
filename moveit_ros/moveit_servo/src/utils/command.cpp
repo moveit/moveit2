@@ -275,7 +275,7 @@ JointDeltaResult jointDeltaFromIK(const Eigen::VectorXd& cartesian_position_delt
 
   if (!servo_params.active_subgroup.empty())
   {
-    // Create full delta vector and add delta theta's at actuated joints
+    // Create full delta vector and add delta theta values only at actuated joints
     const auto& move_group_joint_names =
         robot_state->getJointModelGroup(servo_params.move_group_name)->getActiveJointModelNames();
     const auto& subgroup_joint_names =

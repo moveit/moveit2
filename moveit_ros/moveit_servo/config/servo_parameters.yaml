@@ -49,7 +49,7 @@ servo:
   active_subgroup: {
     type: string,
     default_value: "",
-    description: "This parameter can be used to switch online to actuating a sub-joint group of the move group with servo. \
+    description: "This parameter can be used to switch online to actuating a subgroup of the move group. \
     If it is empty, the full move group is actuated."
   }
 
