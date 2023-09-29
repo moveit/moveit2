@@ -64,8 +64,6 @@ namespace moveit
 /** \brief Simple interface to MoveIt components */
 namespace planning_interface
 {
-using MoveItErrorCode [[deprecated("Use moveit::core::MoveItErrorCode")]] = moveit::core::MoveItErrorCode;
-
 MOVEIT_CLASS_FORWARD(MoveGroupInterface);  // Defines MoveGroupInterfacePtr, ConstPtr, WeakPtr... etc
 
 /** \class MoveGroupInterface move_group_interface.h moveit/planning_interface/move_group_interface.h
@@ -501,9 +499,6 @@ public:
 
   /** \brief Get the current joint state goal in a form compatible to setJointValueTarget() */
   void getJointValueTarget(std::vector<double>& group_variable_values) const;
-
-  /// Get the currently set joint state goal, replaced by private getTargetRobotState()
-  [[deprecated]] const moveit::core::RobotState& getJointValueTarget() const;
 
   /**@}*/
 

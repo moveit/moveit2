@@ -925,20 +925,6 @@ public:
   /** \brief Outputs debug information about the planning scene contents */
   void printKnownObjects(std::ostream& out = std::cout) const;
 
-  /** \brief Check if a message includes any information about a planning scene, or it is just a default, empty message.
-   */
-  [[deprecated("Use moveit/utils/message_checks.h instead")]] static bool
-  isEmpty(const moveit_msgs::msg::PlanningScene& msg);
-
-  /** \brief Check if a message includes any information about a planning scene world, or it is just a default, empty
-   * message. */
-  [[deprecated("Use moveit/utils/message_checks.h instead")]] static bool
-  isEmpty(const moveit_msgs::msg::PlanningSceneWorld& msg);
-
-  /** \brief Check if a message includes any information about a robot state, or it is just a default, empty message. */
-  [[deprecated("Use moveit/utils/message_checks.h instead")]] static bool
-  isEmpty(const moveit_msgs::msg::RobotState& msg);
-
   /** \brief Clone a planning scene. Even if the scene \e scene depends on a parent, the cloned scene will not. */
   static PlanningScenePtr clone(const PlanningSceneConstPtr& scene);
 
