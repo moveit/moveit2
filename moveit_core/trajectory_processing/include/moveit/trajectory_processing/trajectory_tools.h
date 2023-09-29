@@ -37,9 +37,11 @@
 #pragma once
 
 #include <moveit_msgs/msg/robot_trajectory.hpp>
+#include <moveit/robot_trajectory/robot_trajectory.h>
 
 namespace trajectory_processing
 {
 bool isTrajectoryEmpty(const moveit_msgs::msg::RobotTrajectory& trajectory);
 std::size_t trajectoryWaypointCount(const moveit_msgs::msg::RobotTrajectory& trajectory);
+void updateTrajectory(robot_trajectory::RobotTrajectory& rob_trajectory, const std::vector<double>& time_diff);
 }  // namespace trajectory_processing

@@ -9,6 +9,7 @@ add_library(moveit_default_planning_request_adapter_plugins SHARED
   src/add_ruckig_traj_smoothing.cpp
   src/add_time_optimal_parameterization.cpp
   src/resolve_constraint_frames.cpp
+  src/limit_max_cartesian_link_speed.cpp
 )
 
 target_link_libraries(moveit_default_planning_request_adapter_plugins default_plan_request_adapter_parameters)

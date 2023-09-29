@@ -200,9 +200,20 @@ private:
   bool eventFilter(QObject* object, QEvent* event) override;
 
   /**
+   * \brief Return list of selected sections
+   */
+  QList<int> selectedSections(QHeaderView*& header) const;
+
+  /**
    * \brief Show header's sections in logicalIndexes and everything in between
    */
   void showSections(QHeaderView* header, const QList<int>& logicalIndexes);
+
+  /**
+   * \brief Enable/Disable selected sections by default
+   */
+  void setDefaults(bool enabled);
+
   /**
    * \brief Toggle enabled status of selection
    */

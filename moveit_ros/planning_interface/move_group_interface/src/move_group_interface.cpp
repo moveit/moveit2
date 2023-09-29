@@ -150,6 +150,7 @@ public:
     goal_orientation_tolerance_ = 1e-3;  // ~0.1 deg
     allowed_planning_time_ = 5.0;
     num_planning_attempts_ = 1;
+    max_cartesian_speed_ = 0.0;
     node_->get_parameter_or<double>("robot_description_planning.default_velocity_scaling_factor",
                                     max_velocity_scaling_factor_, 0.1);
     node_->get_parameter_or<double>("robot_description_planning.default_acceleration_scaling_factor",
@@ -386,6 +387,18 @@ public:
     {
       variable = target_value;
     }
+  }
+
+  void limitMaxCartesianLinkSpeed(const double max_speed, const std::string& link_name)
+  {
+    cartesian_speed_limited_link_ = link_name;
+    max_cartesian_speed_ = max_speed;
+  }
+
+  void clearMaxCartesianLinkSpeed()
+  {
+    cartesian_speed_limited_link_ = "";
+    max_cartesian_speed_ = 0.0;
   }
 
   moveit::core::RobotState& getTargetRobotState()
@@ -879,6 +892,8 @@ public:
     req->link_name = getEndEffectorLink();
     req->max_velocity_scaling_factor = max_velocity_scaling_factor_;
     req->max_acceleration_scaling_factor = max_acceleration_scaling_factor_;
+    req->cartesian_speed_limited_link = cartesian_speed_limited_link_;
+    req->max_cartesian_speed = max_cartesian_speed_;
 
     auto future_response = cartesian_path_service_->async_send_request(req);
     if (future_response.valid())
@@ -1017,6 +1032,8 @@ public:
     request.num_planning_attempts = num_planning_attempts_;
     request.max_velocity_scaling_factor = max_velocity_scaling_factor_;
     request.max_acceleration_scaling_factor = max_acceleration_scaling_factor_;
+    request.cartesian_speed_limited_link = cartesian_speed_limited_link_;
+    request.max_cartesian_speed = max_cartesian_speed_;
     request.allowed_planning_time = allowed_planning_time_;
     request.pipeline_id = planning_pipeline_id_;
     request.planner_id = planner_id_;
@@ -1279,6 +1296,8 @@ private:
   unsigned int num_planning_attempts_;
   double max_velocity_scaling_factor_;
   double max_acceleration_scaling_factor_;
+  std::string cartesian_speed_limited_link_;
+  double max_cartesian_speed_;
   double goal_joint_tolerance_;
   double goal_position_tolerance_;
   double goal_orientation_tolerance_;
@@ -1440,6 +1459,16 @@ void MoveGroupInterface::setMaxVelocityScalingFactor(double max_velocity_scaling
 void MoveGroupInterface::setMaxAccelerationScalingFactor(double max_acceleration_scaling_factor)
 {
   impl_->setMaxAccelerationScalingFactor(max_acceleration_scaling_factor);
+}
+
+void MoveGroupInterface::limitMaxCartesianLinkSpeed(const double max_speed, const std::string& link_name)
+{
+  impl_->limitMaxCartesianLinkSpeed(max_speed, link_name);
+}
+
+void MoveGroupInterface::clearMaxCartesianLinkSpeed()
+{
+  impl_->clearMaxCartesianLinkSpeed();
 }
 
 moveit::core::MoveItErrorCode MoveGroupInterface::asyncMove()
