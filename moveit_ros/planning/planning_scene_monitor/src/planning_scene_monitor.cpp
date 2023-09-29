@@ -233,17 +233,44 @@ void PlanningSceneMonitor::initialize(const planning_scene::PlanningScenePtr& sc
 
   try
   {
+    bool publish_planning_scene = false;
+    bool publish_geometry_updates = false;
+    bool publish_state_updates = false;
+    bool publish_transform_updates = false;
+    double publish_planning_scene_hz = 4.0;
+    if (node_->has_parameter("publish_planning_scene"))
+    {
+      publish_planning_scene = node_->get_parameter("publish_planning_scene").as_bool();
+    }
+    if (node_->has_parameter("publish_geometry_updates"))
+    {
+      publish_geometry_updates = node_->get_parameter("publish_geometry_updates").as_bool();
+    }
+    if (node_->has_parameter("publish_state_updates"))
+    {
+      publish_state_updates = node_->get_parameter("publish_state_updates").as_bool();
+    }
+    if (node_->has_parameter("publish_transforms_updates"))
+    {
+      publish_transform_updates = node_->get_parameter("publish_transforms_updates").as_bool();
+    }
+    if (node_->has_parameter("publish_planning_scene_hz"))
+    {
+      publish_planning_scene_hz = node_->get_parameter("publish_planning_scene_hz").as_double();
+    }
+
     // Set up publishing parameters
-    bool publish_planning_scene =
-        declare_parameter("publish_planning_scene", false, "Set to True to publish Planning Scenes");
-    bool publish_geometry_updates = declare_parameter("publish_geometry_updates", false,
-                                                      "Set to True to publish geometry updates of the planning scene");
-    bool publish_state_updates =
-        declare_parameter("publish_state_updates", false, "Set to True to publish state updates of the planning scene");
-    bool publish_transform_updates = declare_parameter(
-        "publish_transforms_updates", false, "Set to True to publish transform updates of the planning scene");
-    double publish_planning_scene_hz = declare_parameter(
-        "publish_planning_scene_hz", 4.0, "Set the maximum frequency at which planning scene updates are published");
+    publish_planning_scene =
+        declare_parameter("publish_planning_scene", publish_planning_scene, "Set to True to publish Planning Scenes");
+    publish_geometry_updates = declare_parameter("publish_geometry_updates", publish_geometry_updates,
+                                                 "Set to True to publish geometry updates of the planning scene");
+    publish_state_updates = declare_parameter("publish_state_updates", publish_state_updates,
+                                              "Set to True to publish state updates of the planning scene");
+    publish_transform_updates = declare_parameter("publish_transforms_updates", publish_transform_updates,
+                                                  "Set to True to publish transform updates of the planning scene");
+    publish_planning_scene_hz =
+        declare_parameter("publish_planning_scene_hz", publish_planning_scene_hz,
+                          "Set the maximum frequency at which planning scene updates are published");
     updatePublishSettings(publish_geometry_updates, publish_state_updates, publish_transform_updates,
                           publish_planning_scene, publish_planning_scene_hz);
   }
