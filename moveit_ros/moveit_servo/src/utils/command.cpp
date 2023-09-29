@@ -243,6 +243,7 @@ JointDeltaResult jointDeltaFromIK(const Eigen::VectorXd& cartesian_position_delt
 
     // setup for IK call
     std::vector<double> solution;
+    solution.reserve(current_joint_positions.size());
     moveit_msgs::msg::MoveItErrorCodes err;
     kinematics::KinematicsQueryOptions opts;
     opts.return_approximate_solution = true;
@@ -252,7 +253,7 @@ JointDeltaResult jointDeltaFromIK(const Eigen::VectorXd& cartesian_position_delt
       // find the difference in joint positions that will get us to the desired pose
       for (size_t i = 0; i < current_joint_positions.size(); ++i)
       {
-        delta_theta[i] = solution[i] - current_joint_positions[i];
+        delta_theta[i] = solution.at(i) - current_joint_positions.at(i);
       }
     }
     else
@@ -273,7 +274,7 @@ JointDeltaResult jointDeltaFromIK(const Eigen::VectorXd& cartesian_position_delt
     delta_theta = pseudo_inverse * cartesian_position_delta;
   }
 
-  if (!servo_params.active_subgroup.empty())
+  if (!servo_params.active_subgroup.empty() && servo_params.active_subgroup != servo_params.move_group_name)
   {
     // Create full delta vector and add delta theta values only at actuated joints
     const auto& move_group_joint_names =
