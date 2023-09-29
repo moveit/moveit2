@@ -6,6 +6,7 @@ find_package(moveit_common REQUIRED)
 moveit_package()
 
 find_package(ament_cmake REQUIRED)
+<<<<<<< HEAD
 find_package(rclcpp REQUIRED)
 find_package(eigen3_cmake_module REQUIRED)
 find_package(Eigen3 REQUIRED)
@@ -20,6 +21,9 @@ foreach(LIBFCL_LIBRARY ${LIBFCL_LIBRARIES})
 endforeach()
 set(LIBFCL_LIBRARIES "${LIBFCL_LIBRARIES_FULL}")
 
+=======
+find_package(angles REQUIRED)
+>>>>>>> 498a9f3d6 (Use find_package for fcl (#2399))
 find_package(Bullet 2.87 REQUIRED)
 find_package(angles REQUIRED)
 find_package(OCTOMAP REQUIRED)
@@ -31,6 +35,12 @@ find_package(tf2_eigen REQUIRED)
 find_package(tf2_kdl REQUIRED)
 find_package(tf2_geometry_msgs REQUIRED)
 find_package(eigen_stl_containers REQUIRED)
+<<<<<<< HEAD
+=======
+find_package(Eigen3 REQUIRED)
+find_package(eigen3_cmake_module REQUIRED)
+find_package(fcl REQUIRED)
+>>>>>>> 498a9f3d6 (Use find_package for fcl (#2399))
 find_package(generate_parameter_library REQUIRED)
 find_package(geometric_shapes REQUIRED)
 find_package(geometry_msgs REQUIRED)
@@ -218,8 +228,44 @@ install(
   INCLUDES DESTINATION include
 )
 
+<<<<<<< HEAD
 ament_export_targets(export_${PROJECT_NAME} HAS_LIBRARY_TARGET)
 ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS} orocos_kdl_vendor)
+=======
+ament_export_targets(moveit_coreTargets HAS_LIBRARY_TARGET)
+ament_export_dependencies(
+  angles
+  Bullet
+  common_interfaces
+  eigen_stl_containers
+  Eigen3
+  eigen3_cmake_module
+  fcl
+  generate_parameter_library
+  geometric_shapes
+  geometry_msgs
+  kdl_parser
+  moveit_msgs
+  OCTOMAP
+  octomap_msgs
+  pluginlib
+  random_numbers
+  rclcpp
+  ruckig
+  sensor_msgs
+  shape_msgs
+  srdfdom
+  std_msgs
+  tf2_eigen
+  tf2_geometry_msgs
+  tf2_kdl
+  trajectory_msgs
+  urdf
+  urdfdom
+  urdfdom_headers
+  visualization_msgs
+)
+>>>>>>> 498a9f3d6 (Use find_package for fcl (#2399))
 
 # Plugin exports
 pluginlib_export_plugin_description_file(moveit_core collision_detector_fcl_description.xml)
