@@ -159,13 +159,6 @@ void Servo::setCollisionChecking(const bool check_collision)
 
 bool Servo::validateParams(const servo::Params& servo_params) const
 {
-  if (params.move_group_name != servo_params_.move_group_name)
-  {
-    RCLCPP_ERROR_STREAM(LOGGER, "It is not possible to change the move group online from "
-                                    << servo_params_.move_group_name << " to " << params.move_group_name);
-    return false;
-  }
-
   auto robot_state = planning_scene_monitor_->getStateMonitor()->getCurrentState();
   auto joint_model_group = robot_state->getJointModelGroup(servo_params.move_group_name);
   if (joint_model_group == nullptr)

@@ -210,7 +210,7 @@ JointDeltaResult jointDeltaFromPose(const PoseCommand& command, const moveit::co
 JointDeltaResult jointDeltaFromIK(const Eigen::VectorXd& cartesian_position_delta,
                                   const moveit::core::RobotStatePtr& robot_state, const servo::Params& servo_params)
 {
-  auto const& group_name =
+  const auto& group_name =
       servo_params.active_subgroup.empty() ? servo_params.move_group_name : servo_params.active_subgroup;
   const moveit::core::JointModelGroup* joint_model_group = robot_state->getJointModelGroup(group_name);
 
@@ -276,15 +276,15 @@ JointDeltaResult jointDeltaFromIK(const Eigen::VectorXd& cartesian_position_delt
   if (!servo_params.active_subgroup.empty())
   {
     // Create full delta vector and add delta theta's at actuated joints
-    auto const& move_group_joint_names =
+    const auto& move_group_joint_names =
         robot_state->getJointModelGroup(servo_params.move_group_name)->getActiveJointModelNames();
-    auto const& subgroup_joint_names =
+    const auto& subgroup_joint_names =
         robot_state->getJointModelGroup(servo_params.active_subgroup)->getActiveJointModelNames();
 
     Eigen::VectorXd move_group_delta_theta = Eigen::VectorXd::Zero(move_group_joint_names.size());
     for (size_t index = 0; index < subgroup_joint_names.size(); index++)
     {
-      auto const move_group_iterator =
+      const auto move_group_iterator =
           find(move_group_joint_names.cbegin(), move_group_joint_names.cend(), subgroup_joint_names.at(index));
       move_group_delta_theta[std::distance(move_group_joint_names.cbegin(), move_group_iterator)] = delta_theta[index];
     }
