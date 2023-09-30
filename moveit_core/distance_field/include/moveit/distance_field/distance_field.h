@@ -480,7 +480,7 @@ public:
    * @param [in] stamp The stamp to use in the header of the marker
    * @param [out] marker The marker that will contain the indicated cells.
    */
-  void getPlaneMarkers(const PlaneVisualizationType type, const double length, const double width, const double height,
+  void getPlaneMarkers(PlaneVisualizationType type, double length, double width, double height,
                        const Eigen::Vector3d& origin, const std::string& frame_id, const rclcpp::Time& stamp,
                        visualization_msgs::msg::Marker& marker) const;
   /**

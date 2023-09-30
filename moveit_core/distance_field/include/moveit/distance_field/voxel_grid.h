@@ -203,7 +203,7 @@ public:
   double getResolution() const;
 
   /** \brief deprecated.  Use the version with no arguments. */
-  double getResolution(const Dimension dim) const;
+  double getResolution(Dimension dim) const;
 
   /**
    * \brief Gets the origin (minimum point) of the indicated dimension
@@ -212,7 +212,7 @@ public:
    *
    * @return The indicated axis origin
    */
-  double getOrigin(const Dimension dim) const;
+  double getOrigin(Dimension dim) const;
 
   /**
    * \brief Gets the number of cells in the indicated dimension
@@ -441,13 +441,13 @@ inline double VoxelGrid<T>::getResolution() const
 }
 
 template <typename T>
-inline double VoxelGrid<T>::getResolution(const Dimension /*dim*/) const
+inline double VoxelGrid<T>::getResolution(Dimension /*dim*/) const
 {
   return resolution_;
 }
 
 template <typename T>
-inline double VoxelGrid<T>::getOrigin(const Dimension dim) const
+inline double VoxelGrid<T>::getOrigin(Dimension dim) const
 {
   return origin_[dim];
 }

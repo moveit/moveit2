@@ -343,7 +343,7 @@ void DistanceField::removeShapeFromField(const shapes::Shape* shape, const geome
   removeShapeFromField(shape, pose_e);
 }
 
-void DistanceField::getPlaneMarkers(const PlaneVisualizationType type, const double length, const double width, const double height,
+void DistanceField::getPlaneMarkers(PlaneVisualizationType type, double length, double width, double height,
                                     const Eigen::Vector3d& origin, const std::string& frame_id,
                                     const rclcpp::Time& stamp, visualization_msgs::msg::Marker& plane_marker) const
 {
