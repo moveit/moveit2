@@ -805,12 +805,12 @@ bool IKFastKinematicsPlugin::getPositionFK(const std::vector<std::string>& link_
     return false;
   }
 
-  IkReal angles[num_joints_];
+  std::vector<IkReal> angles(num_joints_, 0);
   for (unsigned char i = 0; i < num_joints_; i++)
     angles[i] = joint_angles[i];
 
   // IKFast56/61
-  ComputeFk(angles, eetrans, eerot);
+  ComputeFk(angles.data(), eetrans, eerot);
 
   for (int i = 0; i < 3; ++i)
     p_out.p.data[i] = eetrans[i];

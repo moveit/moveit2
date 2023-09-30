@@ -5,16 +5,6 @@ project(moveit_core LANGUAGES CXX)
 find_package(moveit_common REQUIRED)
 moveit_package()
 
-find_package(PkgConfig REQUIRED)
-pkg_check_modules(LIBFCL REQUIRED "fcl>=0.5.0")
-# replace LIBFCL_LIBRARIES with full paths to the libraries
-set(LIBFCL_LIBRARIES_FULL "")
-foreach(LIBFCL_LIBRARY ${LIBFCL_LIBRARIES})
-  find_library(${LIBFCL_LIBRARY}_LIB ${LIBFCL_LIBRARY} ${LIBFCL_LIBRARY_DIRS})
-  list(APPEND LIBFCL_LIBRARIES_FULL ${${LIBFCL_LIBRARY}_LIB})
-endforeach()
-set(LIBFCL_LIBRARIES "${LIBFCL_LIBRARIES_FULL}")
-
 find_package(ament_cmake REQUIRED)
 find_package(angles REQUIRED)
 find_package(Bullet 2.87 REQUIRED)
@@ -22,6 +12,7 @@ find_package(common_interfaces REQUIRED)
 find_package(eigen_stl_containers REQUIRED)
 find_package(Eigen3 REQUIRED)
 find_package(eigen3_cmake_module REQUIRED)
+find_package(fcl REQUIRED)
 find_package(generate_parameter_library REQUIRED)
 find_package(geometric_shapes REQUIRED)
 find_package(geometry_msgs REQUIRED)
@@ -148,6 +139,7 @@ ament_export_dependencies(
   eigen_stl_containers
   Eigen3
   eigen3_cmake_module
+  fcl
   generate_parameter_library
   geometric_shapes
   geometry_msgs

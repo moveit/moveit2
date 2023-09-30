@@ -85,7 +85,7 @@ bool LocalPlannerComponent::initialize()
 
   // Configure planning scene monitor
   planning_scene_monitor_ = std::make_shared<planning_scene_monitor::PlanningSceneMonitor>(
-      node_, "robot_description", tf_buffer_, "local_planner/planning_scene_monitor");
+      node_, "robot_description", "local_planner/planning_scene_monitor");
   if (!planning_scene_monitor_->getPlanningScene())
   {
     RCLCPP_ERROR(LOGGER, "Unable to configure planning scene monitor");

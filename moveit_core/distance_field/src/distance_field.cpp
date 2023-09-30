@@ -231,14 +231,6 @@ void DistanceField::addShapeToField(const shapes::Shape* shape, const Eigen::Iso
   addPointsToField(point_vec);
 }
 
-// DEPRECATED
-void DistanceField::addShapeToField(const shapes::Shape* shape, const geometry_msgs::msg::Pose& pose)
-{
-  Eigen::Isometry3d pose_e;
-  tf2::fromMsg(pose, pose_e);
-  addShapeToField(shape, pose_e);
-}
-
 void DistanceField::getOcTreePoints(const octomap::OcTree* octree, EigenSTL::vector_Vector3d* points)
 {
   // lower extent
@@ -313,16 +305,6 @@ void DistanceField::moveShapeInField(const shapes::Shape* shape, const Eigen::Is
   updatePointsInField(old_point_vec, new_point_vec);
 }
 
-// DEPRECATED
-void DistanceField::moveShapeInField(const shapes::Shape* shape, const geometry_msgs::msg::Pose& old_pose,
-                                     const geometry_msgs::msg::Pose& new_pose)
-{
-  Eigen::Isometry3d old_pose_e, new_pose_e;
-  tf2::fromMsg(old_pose, old_pose_e);
-  tf2::fromMsg(new_pose, new_pose_e);
-  moveShapeInField(shape, old_pose_e, new_pose_e);
-}
-
 void DistanceField::removeShapeFromField(const shapes::Shape* shape, const Eigen::Isometry3d& pose)
 {
   bodies::Body* body = bodies::createEmptyBodyFromShapeType(shape->type);
@@ -333,14 +315,6 @@ void DistanceField::removeShapeFromField(const shapes::Shape* shape, const Eigen
   findInternalPointsConvex(*body, resolution_, point_vec);
   delete body;
   removePointsFromField(point_vec);
-}
-
-// DEPRECATED
-void DistanceField::removeShapeFromField(const shapes::Shape* shape, const geometry_msgs::msg::Pose& pose)
-{
-  Eigen::Isometry3d pose_e;
-  tf2::fromMsg(pose, pose_e);
-  removeShapeFromField(shape, pose_e);
 }
 
 void DistanceField::getPlaneMarkers(PlaneVisualizationType type, double length, double width, double height,
