@@ -798,18 +798,6 @@ public:
     return motion_feasibility_;
   }
 
-  /** \brief Check if a given shape is valid to prevent segmentation fault at
-   * shapesAndPosesFromCollisionObjectMessage(). Return false if any dimension is negative */
-  bool isShapeValid(const shape_msgs::msg::SolidPrimitive& shape);
-
-  /** \brief Check if a given shape is valid to prevent segmentation fault at
-   * shapesAndPosesFromCollisionObjectMessage(). */
-  bool isShapeValid(const shape_msgs::msg::Mesh& shape);
-
-  /** \brief Check if a given shape is valid to prevent segmentation fault at
-   * shapesAndPosesFromCollisionObjectMessage(). */
-  bool isShapeValid(const shape_msgs::msg::Plane& shape);
-
   /** \brief Check if a given state is feasible, in accordance to the feasibility predicate specified by
    * setStateFeasibilityPredicate(). Returns true if no feasibility predicate was specified. */
   bool isStateFeasible(const moveit_msgs::msg::RobotState& state, bool verbose = false) const;
