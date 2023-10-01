@@ -1741,9 +1741,9 @@ bool PlanningScene::shapesAndPosesFromCollisionObjectMessage(const moveit_msgs::
   auto is_shape_valid = [](const auto& shape_msg,
                            const std::string& shape_type) {
     if(shape_type == "primitive_poses") {
-      for(const auto& dim : shape_msg.dimensions)
+      for(const auto& dimension : shape_msg.dimensions)
       {
-        if(dim <= 0) { return false; }
+        if(dimension <= 0) { return false; }
       }
     }
 

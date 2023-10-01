@@ -390,9 +390,9 @@ bool PositionConstraint::configure(const moveit_msgs::msg::PositionConstraint& p
     std::unique_ptr<shapes::Shape> shape(shapes::constructShapeFromMsg(pc.constraint_region.primitives[i]));
     if (shape)
     {
-      for(std::size_t j = 0; i < pc.constraint_region.primitives[i].dimensions.size(); ++j) 
+      for(const auto& dimension : pc.constraint_region.primitives.at(i).dimensions) 
       { 
-        if(pc.constraint_region.primitives[i].dimensions[j] <= 0)
+        if(dimension <= 0)
         {
           RCLCPP_WARN(LOGGER, "Constraint reigon primitive shape is invalid");
           continue;
