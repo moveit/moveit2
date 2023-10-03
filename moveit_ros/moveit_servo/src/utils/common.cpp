@@ -121,13 +121,36 @@ trajectory_msgs::msg::JointTrajectory composeTrajectoryMessage(const servo::Para
 
   trajectory_msgs::msg::JointTrajectoryPoint point;
   point.time_from_start = rclcpp::Duration::from_seconds(servo_params.publish_period);
+  const size_t num_joints = joint_state.joint_names.size();
+  point.positions.resize(num_joints);
+  point.velocities.resize(num_joints);
+  point.accelerations.resize(num_joints);
 
   // Set the fields of trajectory point based on which fields are requested.
   // Some controllers check that acceleration data is non-empty, even if accelerations are not used
   // Send all zeros (joint_state.accelerations is a vector of all zeros).
-  point.positions = servo_params.publish_joint_positions ? joint_state.positions : point.positions;
-  point.velocities = servo_params.publish_joint_velocities ? joint_state.velocities : point.velocities;
-  point.accelerations = servo_params.publish_joint_accelerations ? joint_state.accelerations : point.accelerations;
+
+  if (servo_params.publish_joint_positions)
+  {
+    for (size_t i = 0; i < num_joints; i++)
+    {
+      point.positions[i] = joint_state.positions[i];
+    }
+  }
+  if (servo_params.publish_joint_velocities)
+  {
+    for (size_t i = 0; i < num_joints; i++)
+    {
+      point.velocities[i] = joint_state.velocities[i];
+    }
+  }
+  if (servo_params.publish_joint_accelerations)
+  {
+    for (size_t i = 0; i < num_joints; i++)
+    {
+      point.accelerations[i] = joint_state.accelerations[i];
+    }
+  }
 
   joint_trajectory.points.push_back(point);
   return joint_trajectory;
@@ -137,13 +160,21 @@ std_msgs::msg::Float64MultiArray composeMultiArrayMessage(const servo::Params& s
                                                           const KinematicState& joint_state)
 {
   std_msgs::msg::Float64MultiArray multi_array;
+  const size_t num_joints = joint_state.joint_names.size();
+  multi_array.data.resize(num_joints);
   if (servo_params.publish_joint_positions)
   {
-    multi_array.data = joint_state.positions;
+    for (size_t i = 0; i < num_joints; i++)
+    {
+      multi_array.data[i] = joint_state.positions[i];
+    }
   }
   else if (servo_params.publish_joint_velocities)
   {
-    multi_array.data = joint_state.velocities;
+    for (size_t i = 0; i < num_joints; i++)
+    {
+      multi_array.data[i] = joint_state.velocities[i];
+    }
   }
 
   return multi_array;
