@@ -83,7 +83,8 @@ public:
    * @param joint_positions reset the filters to these joint positions
    * @return True if reset was successful
    */
-  virtual bool reset(Eigen::VectorXd& positions, Eigen::VectorXd& velocities, Eigen::VectorXd& accelerations) = 0;
+  virtual bool reset(const Eigen::VectorXd& positions, const Eigen::VectorXd& velocities,
+                     const Eigen::VectorXd& accelerations) = 0;
   ;
 };
 }  // namespace online_signal_smoothing
