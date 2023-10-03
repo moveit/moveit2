@@ -107,14 +107,14 @@ public:
    * @param position_vector array of joint position commands
    * @return True if initialization was successful
    */
-  bool doSmoothing(std::vector<double>& position_vector) override;
+  bool doSmoothing(Eigen::VectorXd& positions, Eigen::VectorXd& velocities, Eigen::VectorXd& accelerations) override;
 
   /**
    * Reset to a given joint state
    * @param joint_positions reset the filters to these joint positions
    * @return True if reset was successful
    */
-  bool reset(const std::vector<double>& joint_positions) override;
+  bool reset(Eigen::VectorXd& positions, Eigen::VectorXd& velocities, Eigen::VectorXd& accelerations) override;
 
 private:
   rclcpp::Node::SharedPtr node_;

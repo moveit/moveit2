@@ -40,6 +40,9 @@
 #include <rclcpp/clock.hpp>
 #include <rclcpp/logging.hpp>
 
+// Disable -Wold-style-cast because all _THROTTLE macros trigger this
+#pragma GCC diagnostic ignored "-Wold-style-cast"
+
 namespace online_signal_smoothing
 {
 namespace
@@ -111,39 +114,35 @@ bool ButterworthFilterPlugin::initialize(rclcpp::Node::SharedPtr node, moveit::c
   return true;
 };
 
-bool ButterworthFilterPlugin::doSmoothing(std::vector<double>& position_vector)
+bool ButterworthFilterPlugin::doSmoothing(Eigen::VectorXd& positions, Eigen::VectorXd& velocities,
+                                          Eigen::VectorXd& accelerations)
 {
-  if (position_vector.size() != position_filters_.size())
+  if (positions.size() != position_filters_.size())
   {
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wold-style-cast"
     RCLCPP_ERROR_THROTTLE(node_->get_logger(), *node_->get_clock(), 1000,
                           "Position vector to be smoothed does not have the right length.");
-#pragma GCC diagnostic pop
     return false;
   }
-  for (size_t i = 0; i < position_vector.size(); ++i)
+  for (size_t i = 0; i < positions.size(); ++i)
   {
     // Lowpass filter the position command
-    position_vector[i] = position_filters_.at(i).filter(position_vector[i]);
+    positions[i] = position_filters_.at(i).filter(positions[i]);
   }
   return true;
 };
 
-bool ButterworthFilterPlugin::reset(const std::vector<double>& joint_positions)
+bool ButterworthFilterPlugin::reset(Eigen::VectorXd& positions, Eigen::VectorXd& velocities,
+                                    Eigen::VectorXd& accelerations)
 {
-  if (joint_positions.size() != position_filters_.size())
+  if (positions.size() != position_filters_.size())
   {
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wold-style-cast"
     RCLCPP_ERROR_THROTTLE(node_->get_logger(), *node_->get_clock(), 1000,
                           "Position vector to be reset does not have the right length.");
-#pragma GCC diagnostic pop
     return false;
   }
-  for (size_t joint_idx = 0; joint_idx < joint_positions.size(); ++joint_idx)
+  for (size_t joint_idx = 0; joint_idx < positions.size(); ++joint_idx)
   {
-    position_filters_.at(joint_idx).reset(joint_positions.at(joint_idx));
+    position_filters_.at(joint_idx).reset(positions[joint_idx]);
   }
   return true;
 };
