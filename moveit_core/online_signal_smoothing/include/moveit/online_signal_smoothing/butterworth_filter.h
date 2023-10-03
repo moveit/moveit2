@@ -114,7 +114,8 @@ public:
    * @param joint_positions reset the filters to these joint positions
    * @return True if reset was successful
    */
-  bool reset(Eigen::VectorXd& positions, Eigen::VectorXd& velocities, Eigen::VectorXd& accelerations) override;
+  bool reset(const Eigen::VectorXd& positions, const Eigen::VectorXd& velocities,
+             const Eigen::VectorXd& accelerations) override;
 
 private:
   rclcpp::Node::SharedPtr node_;

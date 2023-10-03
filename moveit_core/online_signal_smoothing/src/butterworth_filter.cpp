@@ -131,8 +131,8 @@ bool ButterworthFilterPlugin::doSmoothing(Eigen::VectorXd& positions, Eigen::Vec
   return true;
 };
 
-bool ButterworthFilterPlugin::reset(Eigen::VectorXd& positions, Eigen::VectorXd& velocities,
-                                    Eigen::VectorXd& accelerations)
+bool ButterworthFilterPlugin::reset(const Eigen::VectorXd& positions, const Eigen::VectorXd& velocities,
+                                    const Eigen::VectorXd& accelerations)
 {
   if (positions.size() != position_filters_.size())
   {
