@@ -14,11 +14,11 @@ ament_target_dependencies(${MOVEIT_LIB_NAME}
   urdf
   urdfdom
   urdfdom_headers
-  LIBFCL
   visualization_msgs
 )
 target_link_libraries(${MOVEIT_LIB_NAME}
   moveit_collision_detection
+  fcl
 )
 
 add_library(collision_detector_fcl_plugin SHARED src/collision_detector_fcl_plugin_loader.cpp)
