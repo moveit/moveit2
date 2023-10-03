@@ -114,8 +114,8 @@ bool ButterworthFilterPlugin::initialize(rclcpp::Node::SharedPtr node, moveit::c
   return true;
 };
 
-bool ButterworthFilterPlugin::doSmoothing(Eigen::VectorXd& positions, Eigen::VectorXd& velocities,
-                                          Eigen::VectorXd& accelerations)
+bool ButterworthFilterPlugin::doSmoothing(Eigen::VectorXd& positions, Eigen::VectorXd& /* unused */,
+                                          Eigen::VectorXd& /* unused */)
 {
   if (positions.size() != position_filters_.size())
   {
@@ -131,8 +131,8 @@ bool ButterworthFilterPlugin::doSmoothing(Eigen::VectorXd& positions, Eigen::Vec
   return true;
 };
 
-bool ButterworthFilterPlugin::reset(const Eigen::VectorXd& positions, const Eigen::VectorXd& velocities,
-                                    const Eigen::VectorXd& accelerations)
+bool ButterworthFilterPlugin::reset(const Eigen::VectorXd& positions, const Eigen::VectorXd& /* unused */,
+                                    const Eigen::VectorXd& /* unused */)
 {
   if (positions.size() != position_filters_.size())
   {
