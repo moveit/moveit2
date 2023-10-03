@@ -15,6 +15,7 @@ set_target_properties(moveit_smoothing_base PROPERTIES VERSION
 )
 ament_target_dependencies(moveit_smoothing_base
   rclcpp
+  tf2_eigen
 )
 
 # Plugin implementations
