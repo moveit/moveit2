@@ -38,9 +38,11 @@
 
 #pragma once
 
-#include <rclcpp/rclcpp.hpp>
-#include <moveit/macros/class_forward.h>
+#include <optional>
 
+#include <rclcpp/rclcpp.hpp>
+#include <tf2_eigen/tf2_eigen.hpp>
+#include <moveit/macros/class_forward.h>
 #include <moveit_smoothing_base_export.h>
 
 namespace moveit
@@ -74,13 +76,14 @@ public:
    * @param position_vector array of joint position commands
    * @return True if initialization was successful
    */
-  virtual bool doSmoothing(std::vector<double>& position_vector) = 0;
+  virtual bool doSmoothing(Eigen::VectorXd& positions, Eigen::VectorXd& velocities, Eigen::VectorXd& accelerations) = 0;
 
   /**
    * Reset to a given joint state
    * @param joint_positions reset the filters to these joint positions
    * @return True if reset was successful
    */
-  virtual bool reset(const std::vector<double>& joint_positions) = 0;
+  virtual bool reset(Eigen::VectorXd& positions, Eigen::VectorXd& velocities, Eigen::VectorXd& accelerations) = 0;
+  ;
 };
 }  // namespace online_signal_smoothing

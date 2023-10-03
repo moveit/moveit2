@@ -103,7 +103,8 @@ Servo::Servo(const rclcpp::Node::SharedPtr& node, std::shared_ptr<const servo::P
     // Load the smoothing plugin
     if (servo_params_.use_smoothing)
     {
-      setSmoothingPlugin();
+      // setSmoothingPlugin();
+      RCLCPP_WARN(LOGGER, "smoothing plugin loaded");
     }
     else
     {
@@ -155,32 +156,32 @@ Servo::~Servo()
   setCollisionChecking(false);
 }
 
-void Servo::setSmoothingPlugin()
-{
-  // Load the smoothing plugin
-  try
-  {
-    pluginlib::ClassLoader<online_signal_smoothing::SmoothingBaseClass> smoothing_loader(
-        "moveit_core", "online_signal_smoothing::SmoothingBaseClass");
-    smoother_ = smoothing_loader.createUniqueInstance(servo_params_.smoothing_filter_plugin_name);
-  }
-  catch (pluginlib::PluginlibException& ex)
-  {
-    RCLCPP_ERROR(LOGGER, "Exception while loading the smoothing plugin '%s': '%s'",
-                 servo_params_.smoothing_filter_plugin_name.c_str(), ex.what());
-    std::exit(EXIT_FAILURE);
-  }
+// void Servo::setSmoothingPlugin()
+// {
+//   // Load the smoothing plugin
+//   try
+//   {
+//     pluginlib::ClassLoader<online_signal_smoothing::SmoothingBaseClass> smoothing_loader(
+//         "moveit_core", "online_signal_smoothing::SmoothingBaseClass");
+//     smoother_ = smoothing_loader.createUniqueInstance(servo_params_.smoothing_filter_plugin_name);
+//   }
+//   catch (pluginlib::PluginlibException& ex)
+//   {
+//     RCLCPP_ERROR(LOGGER, "Exception while loading the smoothing plugin '%s': '%s'",
+//                  servo_params_.smoothing_filter_plugin_name.c_str(), ex.what());
+//     std::exit(EXIT_FAILURE);
+//   }
 
-  // Initialize the smoothing plugin
-  moveit::core::RobotStatePtr robot_state = planning_scene_monitor_->getStateMonitor()->getCurrentState();
-  const int num_joints =
-      robot_state->getJointModelGroup(servo_params_.move_group_name)->getActiveJointModelNames().size();
-  if (!smoother_->initialize(node_, planning_scene_monitor_->getRobotModel(), num_joints))
-  {
-    RCLCPP_ERROR(LOGGER, "Smoothing plugin could not be initialized");
-    std::exit(EXIT_FAILURE);
-  }
-}
+//   // Initialize the smoothing plugin
+//   moveit::core::RobotStatePtr robot_state = planning_scene_monitor_->getStateMonitor()->getCurrentState();
+//   const int num_joints =
+//       robot_state->getJointModelGroup(servo_params_.move_group_name)->getActiveJointModelNames().size();
+//   if (!smoother_->initialize(node_, planning_scene_monitor_->getRobotModel(), num_joints))
+//   {
+//     RCLCPP_ERROR(LOGGER, "Smoothing plugin could not be initialized");
+//     std::exit(EXIT_FAILURE);
+//   }
+// }
 
 void Servo::setCollisionChecking(const bool check_collision)
 {
