@@ -103,7 +103,7 @@ private:
   std::unique_ptr<mesh_filter::MeshFilter<mesh_filter::StereoCameraModel> > mesh_filter_;
   std::unique_ptr<LazyFreeSpaceUpdater> free_space_updater_;
 
-  std::vector<float> x_cache_, y_cache_;
+  std::vector<double> x_cache_, y_cache_;
   double inv_fx_, inv_fy_, K0_, K2_, K4_, K5_;
   std::vector<unsigned int> filtered_labels_;
   rclcpp::Time last_depth_callback_start_;

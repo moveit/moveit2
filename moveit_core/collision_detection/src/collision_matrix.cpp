@@ -64,10 +64,10 @@ AllowedCollisionMatrix::AllowedCollisionMatrix(const srdf::Model& srdf)
   for (const std::string& name : srdf.getNoDefaultCollisionLinks())
     setDefaultEntry(name, collision_detection::AllowedCollision::ALWAYS);
   // re-enable specific collision pairs
-  for (auto const& collision : srdf.getEnabledCollisionPairs())
+  for (const auto& collision : srdf.getEnabledCollisionPairs())
     setEntry(collision.link1_, collision.link2_, false);
   // *finally* disable selected collision pairs
-  for (auto const& collision : srdf.getDisabledCollisionPairs())
+  for (const auto& collision : srdf.getDisabledCollisionPairs())
     setEntry(collision.link1_, collision.link2_, true);
 }
 

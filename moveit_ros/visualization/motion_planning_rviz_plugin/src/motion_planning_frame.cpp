@@ -673,7 +673,7 @@ void MotionPlanningFrame::tabChanged(int index)
   }
 }
 
-void MotionPlanningFrame::updateSceneMarkers(float /*wall_dt*/, float /*ros_dt*/)
+void MotionPlanningFrame::updateSceneMarkers(double /*wall_dt*/, double /*ros_dt*/)
 {
   if (scene_marker_)
     scene_marker_->update();

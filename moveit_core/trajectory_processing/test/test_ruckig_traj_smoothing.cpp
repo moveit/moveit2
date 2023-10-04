@@ -158,9 +158,9 @@ TEST_F(RuckigTests, single_waypoint)
   EXPECT_TRUE(
       smoother_.applySmoothing(*trajectory_, 1.0 /* max vel scaling factor */, 1.0 /* max accel scaling factor */));
   // And the waypoint did not change
-  auto const new_first_waypoint = trajectory_->getFirstWayPointPtr();
-  auto const& variable_names = new_first_waypoint->getVariableNames();
-  for (std::string const& variable_name : variable_names)
+  const auto new_first_waypoint = trajectory_->getFirstWayPointPtr();
+  const auto& variable_names = new_first_waypoint->getVariableNames();
+  for (const std::string& variable_name : variable_names)
   {
     EXPECT_EQ(first_waypoint_input.getVariablePosition(variable_name),
               new_first_waypoint->getVariablePosition(variable_name));

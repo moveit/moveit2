@@ -144,21 +144,6 @@ private:
   const PlanningScene* scene_;
 };
 
-bool PlanningScene::isEmpty(const moveit_msgs::msg::PlanningScene& msg)
-{
-  return moveit::core::isEmpty(msg);
-}
-
-bool PlanningScene::isEmpty(const moveit_msgs::msg::RobotState& msg)
-{
-  return moveit::core::isEmpty(msg);
-}
-
-bool PlanningScene::isEmpty(const moveit_msgs::msg::PlanningSceneWorld& msg)
-{
-  return moveit::core::isEmpty(msg);
-}
-
 PlanningScene::PlanningScene(const moveit::core::RobotModelConstPtr& robot_model,
                              const collision_detection::WorldPtr& world)
 
@@ -1058,7 +1043,7 @@ bool PlanningScene::loadGeometryFromStream(std::istream& in, const Eigen::Isomet
           RCLCPP_ERROR(LOGGER, "Failed to read pose from scene file");
           return false;
         }
-        float r, g, b, a;
+        double r, g, b, a;
         if (!(in >> r >> g >> b >> a))
         {
           RCLCPP_ERROR(LOGGER, "Improperly formatted color in scene geometry file");

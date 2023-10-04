@@ -85,7 +85,7 @@ class SharedData
   int num_nearest_ik_tests_;
   bool publish_trajectory_;
 
-  SharedData(SharedData const&) = delete;  // this is a singleton
+  SharedData(const SharedData&) = delete;  // this is a singleton
   SharedData()
   {
     initialize();

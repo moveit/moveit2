@@ -51,7 +51,7 @@ const rclcpp::Logger LOGGER = rclcpp::get_logger("local_planner_component");
 const auto JOIN_THREAD_TIMEOUT = std::chrono::seconds(1);
 
 // If the trajectory progress reaches more than 0.X the global goal state is considered as reached
-constexpr float PROGRESS_THRESHOLD = 0.995;
+constexpr double PROGRESS_THRESHOLD = 0.995;
 }  // namespace
 
 LocalPlannerComponent::LocalPlannerComponent(const rclcpp::NodeOptions& options)
@@ -85,7 +85,7 @@ bool LocalPlannerComponent::initialize()
 
   // Configure planning scene monitor
   planning_scene_monitor_ = std::make_shared<planning_scene_monitor::PlanningSceneMonitor>(
-      node_, "robot_description", tf_buffer_, "local_planner/planning_scene_monitor");
+      node_, "robot_description", "local_planner/planning_scene_monitor");
   if (!planning_scene_monitor_->getPlanningScene())
   {
     RCLCPP_ERROR(LOGGER, "Unable to configure planning scene monitor");

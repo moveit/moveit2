@@ -76,7 +76,7 @@ const std::vector<::planning_interface::MotionPlanResponse> planWithParallelPipe
 
   // Print a warning if more parallel planning problems than available concurrent threads are defined. If
   // std::thread::hardware_concurrency() is not defined, the command returns 0 so the check does not work
-  auto const hardware_concurrency = std::thread::hardware_concurrency();
+  const auto hardware_concurrency = std::thread::hardware_concurrency();
   if (motion_plan_requests.size() > hardware_concurrency && hardware_concurrency != 0)
   {
     RCLCPP_WARN(LOGGER,
