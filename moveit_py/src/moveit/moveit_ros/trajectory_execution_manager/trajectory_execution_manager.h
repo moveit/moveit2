@@ -1,7 +1,7 @@
 /*********************************************************************
  * Software License Agreement (BSD License)
  *
- *  Copyright (c) 2022, Peter David Fagan
+ *  Copyright (c) 2023, Matthijs van der Burgh
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -32,27 +32,24 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-/* Author: Peter David Fagan */
+/* Author: Matthijs van der Burgh */
 
-#include "moveit_ros/moveit_cpp/moveit_cpp.h"
-#include "moveit_ros/moveit_cpp/planning_component.h"
-#include "moveit_ros/planning_scene_monitor/planning_scene_monitor.h"
-#include "moveit_ros/trajectory_execution_manager/trajectory_execution_manager.h"
+#pragma once
 
-PYBIND11_MODULE(planning, m)
+#include <pybind11/pybind11.h>
+#include <moveit_py/moveit_py_utils/copy_ros_msg.h>
+#include <moveit_py/moveit_py_utils/ros_msg_typecasters.h>
+#include <rclcpp/rclcpp.hpp>
+#include <moveit/trajectory_execution_manager/trajectory_execution_manager.h>
+
+namespace py = pybind11;
+
+namespace moveit_py
 {
-  m.doc() = "Python bindings for moveit_cpp functionalities.";
+namespace bind_trajectory_execution_manager
+{
 
-  // Provide custom function signatures
-  py::options options;
-  options.disable_function_signatures();
+void init_trajectory_execution_manager(py::module& m);
 
-  // Construct module classes
-  moveit_py::bind_planning_component::init_plan_request_parameters(m);
-  moveit_py::bind_planning_component::init_multi_plan_request_parameters(m);
-  moveit_py::bind_planning_component::init_planning_component(m);
-  moveit_py::bind_planning_scene_monitor::init_planning_scene_monitor(m);
-  moveit_py::bind_planning_scene_monitor::init_context_managers(m);
-  moveit_py::bind_trajectory_execution_manager::init_trajectory_execution_manager(m);
-  moveit_py::bind_moveit_cpp::init_moveit_py(m);
-}
+}  // namespace bind_trajectory_execution_manager
+}  // namespace moveit_py

@@ -160,6 +160,12 @@ void init_moveit_py(py::module& m)
            Returns the planning scene monitor.
            )")
 
+      .def("get_trajactory_execution_manager", &moveit_cpp::MoveItCpp::getTrajectoryExecutionManagerNonConst,
+           py::return_value_policy::reference,
+           R"(
+           Returns the trajectory execution manager.
+           )")
+
       .def("get_robot_model", &moveit_cpp::MoveItCpp::getRobotModel, py::return_value_policy::reference,
            R"(
            Returns robot model.
