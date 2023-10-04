@@ -42,7 +42,36 @@
 namespace
 {
 const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_servo.command_processor");
-}
+
+/// @brief Helper function to create a move group deltas vector from a sub group deltas vector. A delta vector for the
+/// whole move group is created and all entries zeroed. The elements of the subgroup deltas vector are copied into the
+/// correct element of the bigger move group delta vector.
+/// @param sub_group_deltas Set of command deltas for a subgroup of the move group actuated by servo
+/// @param robot_state Current robot state
+/// @param servo_params Servo params
+/// @return Delta vector for the whole move group. The elements that don't belong to the actuated subgroup are zero.
+const Eigen::VectorXd createMoveGroupDelta(const Eigen::VectorXd& sub_group_deltas,
+                                           const moveit::core::RobotStatePtr& robot_state,
+                                           const servo::Params& servo_params)
+{
+  // Create full delta vector and add delta theta values only at actuated joints
+  const auto& move_group_joint_names =
+      robot_state->getJointModelGroup(servo_params.move_group_name)->getActiveJointModelNames();
+  const auto& subgroup_joint_names =
+      robot_state->getJointModelGroup(servo_params.active_subgroup)->getActiveJointModelNames();
+
+  Eigen::VectorXd move_group_delta_theta = Eigen::VectorXd::Zero(move_group_joint_names.size());
+
+  for (size_t index = 0; index < subgroup_joint_names.size(); index++)
+  {
+    const auto move_group_iterator =
+        find(move_group_joint_names.cbegin(), move_group_joint_names.cend(), subgroup_joint_names.at(index));
+    move_group_delta_theta[std::distance(move_group_joint_names.cbegin(), move_group_iterator)] =
+        sub_group_deltas[index];
+  }
+  return move_group_delta_theta;
+};
+}  // namespace
 
 namespace moveit_servo
 {
@@ -52,7 +81,10 @@ JointDeltaResult jointDeltaFromJointJog(const JointJogCommand& command, const mo
 {
   // Find the target joint position based on the commanded joint velocity
   StatusCode status = StatusCode::NO_WARNING;
-  const auto joint_names = robot_state->getJointModelGroup(servo_params.move_group_name)->getActiveJointModelNames();
+  const auto& group_name =
+      servo_params.active_subgroup.empty() ? servo_params.move_group_name : servo_params.active_subgroup;
+  const moveit::core::JointModelGroup* joint_model_group = robot_state->getJointModelGroup(group_name);
+  const auto joint_names = joint_model_group->getActiveJointModelNames();
   Eigen::VectorXd joint_position_delta(joint_names.size());
   Eigen::VectorXd velocities(joint_names.size());
 
@@ -68,6 +100,8 @@ JointDeltaResult jointDeltaFromJointJog(const JointJogCommand& command, const mo
     }
     else
     {
+      RCLCPP_WARN_STREAM(LOGGER, "Invalid joint name: " << command.names[i]);
+
       names_valid = false;
       break;
     }
@@ -86,13 +120,21 @@ JointDeltaResult jointDeltaFromJointJog(const JointJogCommand& command, const mo
     status = StatusCode::INVALID;
     if (!names_valid)
     {
-      RCLCPP_WARN_STREAM(LOGGER, "Invalid joint names in joint jog command");
+      RCLCPP_WARN_STREAM(LOGGER, "Invalid joint names in joint jog command. Either you're sending commands for a joint "
+                                 "that is not part of the move group or certain joints cannot be moved because a "
+                                 "subgroup is active and they are not part of it.");
     }
     if (!velocity_valid)
     {
       RCLCPP_WARN_STREAM(LOGGER, "Invalid velocity values in joint jog command");
     }
   }
+
+  if (!servo_params.active_subgroup.empty() && servo_params.active_subgroup != servo_params.move_group_name)
+  {
+    return std::make_pair(status, createMoveGroupDelta(joint_position_delta, robot_state, servo_params));
+  }
+
   return std::make_pair(status, joint_position_delta);
 }
 
@@ -276,20 +318,7 @@ JointDeltaResult jointDeltaFromIK(const Eigen::VectorXd& cartesian_position_delt
 
   if (!servo_params.active_subgroup.empty() && servo_params.active_subgroup != servo_params.move_group_name)
   {
-    // Create full delta vector and add delta theta values only at actuated joints
-    const auto& move_group_joint_names =
-        robot_state->getJointModelGroup(servo_params.move_group_name)->getActiveJointModelNames();
-    const auto& subgroup_joint_names =
-        robot_state->getJointModelGroup(servo_params.active_subgroup)->getActiveJointModelNames();
-
-    Eigen::VectorXd move_group_delta_theta = Eigen::VectorXd::Zero(move_group_joint_names.size());
-    for (size_t index = 0; index < subgroup_joint_names.size(); index++)
-    {
-      const auto move_group_iterator =
-          find(move_group_joint_names.cbegin(), move_group_joint_names.cend(), subgroup_joint_names.at(index));
-      move_group_delta_theta[std::distance(move_group_joint_names.cbegin(), move_group_iterator)] = delta_theta[index];
-    }
-    return std::make_pair(status, move_group_delta_theta);
+    return std::make_pair(status, createMoveGroupDelta(delta_theta, robot_state, servo_params));
   }
 
   return std::make_pair(status, delta_theta);
