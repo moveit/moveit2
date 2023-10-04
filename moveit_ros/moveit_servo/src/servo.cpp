@@ -159,12 +159,13 @@ void Servo::setCollisionChecking(const bool check_collision)
 
 bool Servo::validateParams(const servo::Params& servo_params) const
 {
+  bool params_valid = true;
   auto robot_state = planning_scene_monitor_->getStateMonitor()->getCurrentState();
   auto joint_model_group = robot_state->getJointModelGroup(servo_params.move_group_name);
   if (joint_model_group == nullptr)
   {
     RCLCPP_ERROR_STREAM(LOGGER, "Invalid move group name: `" << servo_params.move_group_name << '`');
-    return false;
+    params_valid = false;
   }
 
   if (servo_params.hard_stop_singularity_threshold <= servo_params.lower_singularity_threshold)
@@ -172,7 +173,7 @@ bool Servo::validateParams(const servo::Params& servo_params) const
     RCLCPP_ERROR(LOGGER, "Parameter 'hard_stop_singularity_threshold' "
                          "should be greater than 'lower_singularity_threshold.' "
                          "Check the parameters YAML file used to launch this node.");
-    return false;
+    params_valid = false;
   }
 
   if (!servo_params.publish_joint_positions && !servo_params.publish_joint_velocities &&
@@ -182,7 +183,7 @@ bool Servo::validateParams(const servo::Params& servo_params) const
                          "publish_joint_velocities / "
                          "publish_joint_accelerations must be true. "
                          "Check the parameters YAML file used to launch this node.");
-    return false;
+    params_valid = false;
   }
 
   if ((servo_params.command_out_type == "std_msgs/Float64MultiArray") && servo_params.publish_joint_positions &&
@@ -191,7 +192,7 @@ bool Servo::validateParams(const servo::Params& servo_params) const
     RCLCPP_ERROR(LOGGER, "When publishing a std_msgs/Float64MultiArray, "
                          "you must select positions OR velocities."
                          "Check the parameters YAML file used to launch this node.");
-    return false;
+    params_valid = false;
   }
 
   if (servo_params.scene_collision_proximity_threshold < servo_params.self_collision_proximity_threshold)
@@ -199,7 +200,7 @@ bool Servo::validateParams(const servo::Params& servo_params) const
     RCLCPP_ERROR(LOGGER, "Parameter 'self_collision_proximity_threshold' should probably be less "
                          "than or equal to 'scene_collision_proximity_threshold'."
                          "Check the parameters YAML file used to launch this node.");
-    return false;
+    params_valid = false;
   }
 
   if (!servo_params.active_subgroup.empty() && servo_params.active_subgroup != servo_params.move_group_name &&
@@ -208,10 +209,10 @@ bool Servo::validateParams(const servo::Params& servo_params) const
     RCLCPP_ERROR(LOGGER,
                  "The value '%s' Parameter 'active_subgroup' does not name a valid subgroup of joint group '%s'.",
                  servo_params.active_subgroup.c_str(), servo_params.move_group_name.c_str());
-    return false;
+    params_valid = false;
   }
 
-  return true;
+  return params_valid;
 }
 
 bool Servo::updateParams()
