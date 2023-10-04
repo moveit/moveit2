@@ -108,17 +108,7 @@ public:
   };
 
   /** \brief Constructor */
-  [[deprecated("Passing tf2_ros::Buffer to MoveItCpp's constructor is deprecated")]] MoveItCpp(
-      const rclcpp::Node::SharedPtr& node, const std::shared_ptr<tf2_ros::Buffer>& /* unused */)
-    : MoveItCpp(node)
-  {
-  }
   MoveItCpp(const rclcpp::Node::SharedPtr& node);
-  [[deprecated("Passing tf2_ros::Buffer to MoveItCpp's constructor is deprecated")]] MoveItCpp(
-      const rclcpp::Node::SharedPtr& node, const Options& options, const std::shared_ptr<tf2_ros::Buffer>& /* unused */)
-    : MoveItCpp(node, options)
-  {
-  }
   MoveItCpp(const rclcpp::Node::SharedPtr& node, const Options& options);
 
   /**
@@ -200,12 +190,3 @@ private:
   bool loadPlanningPipelines(const PlanningPipelineOptions& options);
 };
 }  // namespace moveit_cpp
-
-namespace moveit
-{
-namespace planning_interface
-{
-using MoveItCpp [[deprecated("use moveit_cpp")]] = moveit_cpp::MoveItCpp;
-[[deprecated("use moveit_cpp")]] MOVEIT_DECLARE_PTR(MoveItCpp, moveit_cpp::MoveItCpp);
-}  // namespace planning_interface
-}  // namespace moveit
