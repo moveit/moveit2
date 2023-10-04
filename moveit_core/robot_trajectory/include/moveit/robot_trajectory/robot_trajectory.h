@@ -155,8 +155,6 @@ public:
    */
   double getWayPointDurationFromStart(std::size_t index) const;
 
-  [[deprecated]] double getWaypointDurationFromStart(std::size_t index) const;
-
   double getWayPointDurationFromPrevious(std::size_t index) const
   {
     if (duration_from_previous_.size() > index)
