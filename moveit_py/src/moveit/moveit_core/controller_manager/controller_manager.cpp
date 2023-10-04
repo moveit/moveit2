@@ -46,7 +46,11 @@ void init_execution_status(py::module& m)
 
   py::class_<moveit_controller_manager::ExecutionStatus, std::shared_ptr<moveit_controller_manager::ExecutionStatus>>(
       controller_manager, "ExecutionStatus", R"( Execution status of planned robot trajectory. )")
-      .def_property_readonly("status", &moveit_controller_manager::ExecutionStatus::asString);
+      .def_property_readonly("status", &moveit_controller_manager::ExecutionStatus::asString)
+
+      .def("__bool__", [](std::shared_ptr<moveit_controller_manager::ExecutionStatus>& status) {
+        return static_cast<bool>(*status);
+      });
 }
 }  // namespace bind_controller_manager
 }  // namespace moveit_py
