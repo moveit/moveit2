@@ -170,8 +170,7 @@ bool BenchmarkOptions::readPlannerConfigs(const rclcpp::Node::SharedPtr& node)
   std::vector<std::string> pipelines;
   if (!node->get_parameter(ns + ".pipelines", pipelines))
   {
-    RCLCPP_ERROR(LOGGER, "Fail to get the parameter in `%s` namespace.", (ns + ".pipelines").c_str());
-    return false;
+    RCLCPP_WARN(LOGGER, "No single planning pipeline namespace `%s` configured.", (ns + ".pipelines").c_str());
   }
 
   for (const std::string& pipeline : pipelines)
@@ -210,8 +209,8 @@ bool BenchmarkOptions::readPlannerConfigs(const rclcpp::Node::SharedPtr& node)
   std::vector<std::string> parallel_pipelines;
   if (!node->get_parameter(ns + ".parallel_pipelines", parallel_pipelines))
   {
-    RCLCPP_ERROR(LOGGER, "Fail to get the parameter in `%s` namespace.", (ns + ".parallel_pipelines").c_str());
-    return false;
+    RCLCPP_WARN(LOGGER, "No parallel planning pipeline namespace `%s` configured.",
+                (ns + ".parallel_pipelines").c_str());
   }
 
   for (const std::string& parallel_pipeline : parallel_pipelines)
@@ -250,20 +249,25 @@ bool BenchmarkOptions::readPlannerConfigs(const rclcpp::Node::SharedPtr& node)
       std::vector<std::pair<std::string, std::string>> pipeline_planner_id_pairs;
       for (size_t i = 0; i < pipelines.size(); ++i)
       {
-        pipeline_planner_id_pairs.push_back(std::pair<std::string, std::string>(pipelines[i], planner_ids[i]));
+        pipeline_planner_id_pairs.push_back(std::pair<std::string, std::string>(pipelines.at(i), planner_ids.at(i)));
       }
 
       parallel_planning_pipelines[parallel_pipeline] = pipeline_planner_id_pairs;
 
-      for (auto const& entry : parallel_planning_pipelines)
+      for (const auto& entry : parallel_planning_pipelines)
       {
         RCLCPP_INFO(LOGGER, "Parallel planning pipeline '%s'", entry.first.c_str());
-        for (auto const& pair : entry.second)
+        for (const auto& pair : entry.second)
         {
           RCLCPP_INFO(LOGGER, "  '%s': '%s'", pair.first.c_str(), pair.second.c_str());
         }
       }
     }
+  }
+  if (pipelines.empty() && parallel_pipelines.empty())
+  {
+    RCLCPP_ERROR(LOGGER, "No single or parallel planning pipelines configured for benchmarking.");
+    return false;
   }
   return true;
 }

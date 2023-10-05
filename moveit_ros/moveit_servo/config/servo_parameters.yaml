@@ -1,7 +1,31 @@
 servo:
-################################ ROBOT SPECIFIC CONFIG #############################
+################################ GENERAL CONFIG ################################
+
+  thread_priority: {
+    type: int,
+    read_only: true,
+    default_value: 40,
+    description: "This value is used when configuring the servo loop thread to use SCHED_FIFO scheduling \
+                  We use a slightly lower priority than the ros2_control default in order to reduce jitter \
+                  Reference: https://man7.org/linux/man-pages/man2/sched_setparam.2.html",
+    validation: {
+      gt_eq<>: 0
+    }
+  }
+
+  publish_period: {
+    type: double,
+    read_only: true,
+    default_value: 0.034,
+    description: " 1 / (Nominal publish rate) [seconds]",
+    validation: {
+      gt<>: 0.0
+    }
+  }
+
   move_group_name: {
     type: string,
+    read_only: true,
     description: "The name of the moveit move_group of your robot \
                   This parameter does not have a default value and \
                   must be passed to the node during launch time."
@@ -22,52 +46,25 @@ servo:
                   must be passed to the node during launch time."
   }
 
-  monitored_planning_scene_topic: {
-    type: string,
-    default_value: "/planning_scene",
-    description: "The name of the planning scene topic. \
-                  planning_scene_monitor::PlanningSceneMonitor::DEFAULT_PLANNING_SCENE_TOPIC"
-  }
-
-################################ OUTPUTS #########################################
-  status_topic: {
-    type: string,
-    default_value: "~/status",
-    description: "The topic to which the status will be published"
-  }
-
-  command_out_topic: {
-    type: string,
-    default_value: "/panda_arm_controller/joint_trajectory",
-    description: "The topic on which servo will publish the joint trajectory \
-                  Change this to the topic your controller requires."
-  }
-
-  command_out_type: {
-    type: string,
-    default_value: "trajectory_msgs/JointTrajectory",
-    description: "The type of command that servo will publish",
-    validation: {
-      one_of<>: [["trajectory_msgs/JointTrajectory", "std_msgs/Float64MultiArray"]]
-    }
-  }
-
-################################ INPUTS  #############################
+############################# INCOMING COMMAND SETTINGS ########################
 
   pose_command_in_topic: {
     type: string,
+    read_only: true,
     default_value: "~/pose_target_cmds",
     description: "The topic on which servo will receive the pose commands"
   }
 
   cartesian_command_in_topic: {
     type: string,
+    read_only: true,
     default_value: "~/delta_twist_cmds",
     description: "The topic on which servo will receive the twist commands"
   }
 
   joint_command_in_topic: {
     type: string,
+    read_only: true,
     default_value: "~/delta_joint_cmds",
     description: "The topic on which servo will receive the joint jog commands"
   }
@@ -81,32 +78,6 @@ servo:
     validation: {
       one_of<>: [["unitless", "speed_units"]]
     }
-  }
-
-  joint_topic: {
-    type: string,
-    default_value: "/joint_states",
-    description: "The topic on which joint states can be monitored"
-  }
-
-################################ GENERAL CONFIG #############################
-
-  thread_priority: {
-    type: int,
-    default_value: 40,
-    description: "This value is used when configuring the servo loop thread to use SCHED_FIFO scheduling \
-                  We use a slightly lower priority than the ros2_control default in order to reduce jitter \
-                  Reference: https://man7.org/linux/man-pages/man2/sched_setparam.2.html",
-    validation: {
-      gt_eq<>: 0
-    }
-  }
-
-  incoming_command_timeout: {
-    type: double,
-    default_value: 0.1,
-    description: "Commands will be discarded if it is older than the timeout.\
-                   Important because ROS may drop some messages."
   }
 
   scale:
@@ -127,6 +98,15 @@ servo:
     }
 
 
+  incoming_command_timeout: {
+    type: double,
+    default_value: 0.1,
+    description: "Commands will be discarded if it is older than the timeout.\
+                   Important because ROS may drop some messages."
+  }
+
+################################ TWIST SETTINGS #################################
+
   apply_twist_commands_about_ee_frame: {
     type: bool,
     default_value: true,
@@ -135,18 +115,51 @@ servo:
                   due to the existence of a lever between the two frames."
   }
 
-  override_velocity_scaling_factor: {
-    type: double,
-    default_value: 0.0,
-    description: "Scaling factor when servo overrides the velocity (eg: near singularities)"
+############################ POSE TRACKING SETTINGS #############################
+
+  pose_tracking:
+    linear_tolerance: {
+        type: double,
+        default_value: 0.001,
+        description: "The allowable linear error when tracking a pose.",
+        validation: {
+          gt<>: 0.0
+        }
+    }
+
+    angular_tolerance: {
+        type: double,
+        default_value: 0.01,
+        description: "The allowable angular error when tracking a pose.",
+        validation: {
+          gt<>: 0.0
+        }
+    }
+
+############################## OUTGOING COMMAND SETTINGS #######################
+
+  status_topic: {
+    type: string,
+    read_only: true,
+    default_value: "~/status",
+    description: "The topic to which the status will be published"
   }
 
-  publish_period: {
-    type: double,
-    default_value: 0.034,
-    description: " 1 / (Nominal publish rate) [seconds]",
+  command_out_topic: {
+    type: string,
+    read_only: true,
+    default_value: "/panda_arm_controller/joint_trajectory",
+    description: "The topic on which servo will publish the joint trajectory \
+                  Change this to the topic your controller requires."
+  }
+
+  command_out_type: {
+    type: string,
+    read_only: true,
+    default_value: "trajectory_msgs/JointTrajectory",
+    description: "The type of command that servo will publish",
     validation: {
-      gt<>: 0.0
+      one_of<>: [["trajectory_msgs/JointTrajectory", "std_msgs/Float64MultiArray"]]
     }
   }
 
@@ -168,21 +181,26 @@ servo:
     description: "If true servo will publish joint accelerations in the output command"
   }
 
+############################## PLANNING SCENE MONITOR ##########################
 
-  use_smoothing: {
-    type: bool,
-    default_value: true,
-    description: "Enables the use of smoothing plugins for joint trajectory smoothing"
+  monitored_planning_scene_topic: {
+    type: string,
+    read_only: true,
+    default_value: "/planning_scene",
+    description: "The name of the planning scene topic. \
+                  planning_scene_monitor::PlanningSceneMonitor::DEFAULT_PLANNING_SCENE_TOPIC"
   }
 
-  smoothing_filter_plugin_name: {
+  joint_topic: {
     type: string,
-    default_value: "online_signal_smoothing::ButterworthFilterPlugin",
-    description: "The name of the smoothing plugin to be used"
+    read_only: true,
+    default_value: "/joint_states",
+    description: "The topic on which joint states can be monitored"
   }
 
   is_primary_planning_scene_monitor: {
     type: bool,
+    read_only: true,
     default_value: true,
     description: "If is_primary_planning_scene_monitor is set to true, \
                   the Servo server's PlanningScene advertises the /get_planning_scene service, \
@@ -191,17 +209,59 @@ servo:
                   this should be set to false"
   }
 
-  halt_all_joints_in_joint_mode: {
+############################### SMOOTHING PLUGIN ###############################
+
+  use_smoothing: {
     type: bool,
+    read_only: true,
     default_value: true,
-    description: "Halt all joints in joint mode"
+    description: "Enables the use of smoothing plugins for joint trajectory smoothing"
   }
 
-  halt_all_joints_in_cartesian_mode: {
+  smoothing_filter_plugin_name: {
+    type: string,
+    read_only: true,
+    default_value: "online_signal_smoothing::ButterworthFilterPlugin",
+    description: "The name of the smoothing plugin to be used"
+  }
+
+############################# COLLISION MONITOR ################################
+
+  check_collisions: {
     type: bool,
     default_value: true,
-    description: "Halt all joints in cartesian mode"
+    description: "If true, servo will check for collision using the planning scene monitor."
   }
+
+  self_collision_proximity_threshold: {
+    type: double,
+    default_value: 0.01,
+    description: "Start decelerating when a self-collision is this far [m]",
+    validation: {
+      gt<>: 0.0
+    }
+  }
+
+  scene_collision_proximity_threshold: {
+    type: double,
+    default_value: 0.02,
+    description: "Start decelerating when a collision is this far [m]",
+    validation: {
+      gt<>: 0.0
+    }
+  }
+
+  collision_check_rate: {
+    type: double,
+    default_value: 10.0,
+    description: "[Hz] Collision-checking can easily bog down a CPU if done too often. \
+                  Collision checking begins slowing down when nearer than a specified distance.",
+    validation: {
+      gt_eq<>: 0.0
+    }
+  }
+
+############################# SINGULARITY CHECKING #############################
 
   lower_singularity_threshold: {
     type: double,
@@ -235,10 +295,24 @@ servo:
   singularity_step_scale: {
     type: double,
     default_value: 0.01,
-    description: "The vector towards singularity is scaled by this factor during singularity check",
+    description: "The test vector towards singularity is scaled by this factor during singularity check",
     validation: {
       gt<>: 0.0
     }
+  }
+
+############################### JOINT LIMITING #################################
+
+  halt_all_joints_in_joint_mode: {
+    type: bool,
+    default_value: true,
+    description: "Halt all joints in joint mode, else halt only the joints at their limit"
+  }
+
+  halt_all_joints_in_cartesian_mode: {
+    type: bool,
+    default_value: true,
+    description: "Halt all joints in cartesian mode, else halt only the joints at their limit"
   }
 
   joint_limit_margin: {
@@ -250,58 +324,8 @@ servo:
     }
   }
 
-  check_collisions: {
-    type: bool,
-    default_value: true,
-    description: "If true, servo will check for collision using the planning scene monitor."
-  }
-
-  collision_check_rate: {
+  override_velocity_scaling_factor: {
     type: double,
-    default_value: 10.0,
-    description: "[Hz] Collision-checking can easily bog down a CPU if done too often. \
-                  Collision checking begins slowing down when nearer than a specified distance.",
-    validation: {
-      gt_eq<>: 0.0
-    }
+    default_value: 0.0,
+    description: "Scaling factor when servo overrides the velocity (eg: near singularities)"
   }
-
-  self_collision_proximity_threshold: {
-    type: double,
-    default_value: 0.01,
-    description: "Start decelerating when a self-collision is this far [m]",
-    validation: {
-      gt<>: 0.0
-    }
-  }
-
-  scene_collision_proximity_threshold: {
-    type: double,
-    default_value: 0.02,
-    description: "Start decelerating when a collision is this far [m]",
-    validation: {
-      gt<>: 0.0
-    }
-  }
-
-
-########################### POSE TRACKING #######################################
-
-  pose_tracking:
-    linear_tolerance: {
-        type: double,
-        default_value: 0.001,
-        description: "The allowable linear error when tracking a pose.",
-        validation: {
-          gt<>: 0.0
-        }
-    }
-
-    angular_tolerance: {
-        type: double,
-        default_value: 0.01,
-        description: "The allowable angular error when tracking a pose.",
-        validation: {
-          gt<>: 0.0
-        }
-    }

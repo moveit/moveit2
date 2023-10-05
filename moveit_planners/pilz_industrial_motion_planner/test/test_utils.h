@@ -72,7 +72,7 @@ static constexpr double DEFAULT_ROTATION_AXIS_EQUALITY_TOLERANCE{ 1e-8 };
 /**
  * @brief Convert degree to rad.
  */
-inline static constexpr double deg2Rad(double angle)
+static inline constexpr double deg2Rad(double angle)
 {
   return (angle / 180.0) * M_PI;
 }
@@ -88,7 +88,7 @@ inline std::string getJointName(size_t joint_number, const std::string& joint_pr
  */
 pilz_industrial_motion_planner::JointLimitsContainer createFakeLimits(const std::vector<std::string>& joint_names);
 
-inline std::string demangle(char const* name)
+inline std::string demangle(const char* name)
 {
   return boost::core::demangle(name);
 }

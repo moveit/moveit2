@@ -154,7 +154,7 @@ void TrajectoryGenerator::checkJointGoalConstraint(const moveit_msgs::msg::Const
                                                    const std::vector<std::string>& expected_joint_names,
                                                    const std::string& group_name) const
 {
-  for (auto const& joint_constraint : constraint.joint_constraints)
+  for (const auto& joint_constraint : constraint.joint_constraints)
   {
     const std::string& curr_joint_name{ joint_constraint.joint_name };
     if (std::find(expected_joint_names.cbegin(), expected_joint_names.cend(), curr_joint_name) ==
