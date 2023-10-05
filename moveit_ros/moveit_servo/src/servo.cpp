@@ -229,6 +229,33 @@ bool Servo::updateParams()
                                        << std::to_string(params.override_velocity_scaling_factor));
       }
 
+      // If necessary, create new subgroup map
+      if (!params.active_subgroup.empty() && params.active_subgroup != params.move_group_name &&
+          joint_name_to_index_maps_.count(params.active_subgroup) == 0)
+      {
+        const auto& move_group_joint_names = planning_scene_monitor_->getRobotModel()
+                                                 ->getJointModelGroup(params.move_group_name)
+                                                 ->getActiveJointModelNames();
+        const auto& subgroup_joint_names = planning_scene_monitor_->getRobotModel()
+                                               ->getJointModelGroup(params.active_subgroup)
+                                               ->getActiveJointModelNames();
+
+        JointNameToMoveGroupIndexMap new_map;
+        // For each joint name of the subgroup calculate the index in the move group joint vector
+        for (const auto& joint_name : subgroup_joint_names)
+        {
+          // Find sub group joint name in move group joint names
+          const auto move_group_iterator =
+              std::find(move_group_joint_names.cbegin(), move_group_joint_names.cend(), joint_name);
+          // Calculate position and add a new mapping of joint name to move group joint vector position
+          new_map.insert(std::make_pair<std::string, std::size_t>(
+              std::string(joint_name), std::distance(move_group_joint_names.cbegin(), move_group_iterator)));
+        }
+        // Add new joint name to index map to existing maps
+        joint_name_to_index_maps_.insert(std::make_pair<std::string, JointNameToMoveGroupIndexMap>(
+            std::string(params.active_subgroup), std::move(new_map)));
+      }
+
       servo_params_ = params;
       return true;
     }
@@ -309,6 +336,12 @@ KinematicState Servo::haltJoints(const std::vector<int>& joints_to_halt, const K
 
 Eigen::VectorXd Servo::jointDeltaFromCommand(const ServoInput& command, const moveit::core::RobotStatePtr& robot_state)
 {
+  // Determine joint_name_group_index_map, if no subgroup is active, the map is empty
+  const auto& joint_name_group_index_map =
+      (!servo_params_.active_subgroup.empty() && servo_params_.active_subgroup != servo_params_.move_group_name) ?
+          joint_name_to_index_maps_.at(servo_params_.active_subgroup) :
+          JointNameToMoveGroupIndexMap();
+
   const int num_joints =
       robot_state->getJointModelGroup(servo_params_.move_group_name)->getActiveJointModelNames().size();
   Eigen::VectorXd joint_position_deltas(num_joints);
@@ -321,7 +354,8 @@ Eigen::VectorXd Servo::jointDeltaFromCommand(const ServoInput& command, const mo
   {
     if (expected_type == CommandType::JOINT_JOG)
     {
-      delta_result = jointDeltaFromJointJog(std::get<JointJogCommand>(command), robot_state, servo_params_);
+      delta_result = jointDeltaFromJointJog(std::get<JointJogCommand>(command), robot_state, servo_params_,
+                                            joint_name_group_index_map);
       servo_status_ = delta_result.first;
     }
     else if (expected_type == CommandType::TWIST)
@@ -329,7 +363,8 @@ Eigen::VectorXd Servo::jointDeltaFromCommand(const ServoInput& command, const mo
       try
       {
         const TwistCommand command_in_planning_frame = toPlanningFrame(std::get<TwistCommand>(command));
-        delta_result = jointDeltaFromTwist(command_in_planning_frame, robot_state, servo_params_);
+        delta_result =
+            jointDeltaFromTwist(command_in_planning_frame, robot_state, servo_params_, joint_name_group_index_map);
         servo_status_ = delta_result.first;
       }
       catch (tf2::TransformException& ex)
@@ -343,7 +378,8 @@ Eigen::VectorXd Servo::jointDeltaFromCommand(const ServoInput& command, const mo
       try
       {
         const PoseCommand command_in_planning_frame = toPlanningFrame(std::get<PoseCommand>(command));
-        delta_result = jointDeltaFromPose(command_in_planning_frame, robot_state, servo_params_);
+        delta_result =
+            jointDeltaFromPose(command_in_planning_frame, robot_state, servo_params_, joint_name_group_index_map);
         servo_status_ = delta_result.first;
       }
       catch (tf2::TransformException& ex)

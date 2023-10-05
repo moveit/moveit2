@@ -214,6 +214,9 @@ private:
   std::unique_ptr<CollisionMonitor> collision_monitor_;
 
   pluginlib::UniquePtr<online_signal_smoothing::SmoothingBaseClass> smoother_ = nullptr;
+
+  // Map between joint subgroup names and corresponding joint name - move group indices map
+  std::unordered_map<std::string, JointNameToMoveGroupIndexMap> joint_name_to_index_maps_;
 };
 
 }  // namespace moveit_servo
