@@ -116,8 +116,38 @@ Servo::Servo(const rclcpp::Node::SharedPtr& node, std::shared_ptr<const servo::P
     collision_monitor_->start();
 
     servo_status_ = StatusCode::NO_WARNING;
-    RCLCPP_INFO_STREAM(LOGGER, "Servo initialized successfully");
   }
+
+  const auto& move_group_joint_names = planning_scene_monitor_->getRobotModel()
+                                           ->getJointModelGroup(servo_params_.move_group_name)
+                                           ->getActiveJointModelNames();
+  // Create subgroup map
+  for (const auto& sub_group_name : planning_scene_monitor_->getRobotModel()->getJointModelGroupNames())
+  {
+    // Skip move group
+    if (sub_group_name == servo_params_.move_group_name)
+    {
+      continue;
+    }
+    const auto& subgroup_joint_names =
+        planning_scene_monitor_->getRobotModel()->getJointModelGroup(sub_group_name)->getActiveJointModelNames();
+
+    JointNameToMoveGroupIndexMap new_map;
+    // For each joint name of the subgroup calculate the index in the move group joint vector
+    for (const auto& joint_name : subgroup_joint_names)
+    {
+      // Find sub group joint name in move group joint names
+      const auto move_group_iterator =
+          std::find(move_group_joint_names.cbegin(), move_group_joint_names.cend(), joint_name);
+      // Calculate position and add a new mapping of joint name to move group joint vector position
+      new_map.insert(std::make_pair<std::string, std::size_t>(
+          std::string(joint_name), std::distance(move_group_joint_names.cbegin(), move_group_iterator)));
+    }
+    // Add new joint name to index map to existing maps
+    joint_name_to_index_maps_.insert(
+        std::make_pair<std::string, JointNameToMoveGroupIndexMap>(std::string(sub_group_name), std::move(new_map)));
+  }
+  RCLCPP_INFO_STREAM(LOGGER, "Servo initialized successfully");
 }
 
 Servo::~Servo()
@@ -227,33 +257,6 @@ bool Servo::updateParams()
       {
         RCLCPP_INFO_STREAM(LOGGER, "override_velocity_scaling_factor changed to : "
                                        << std::to_string(params.override_velocity_scaling_factor));
-      }
-
-      // If necessary, create new subgroup map
-      if (!params.active_subgroup.empty() && params.active_subgroup != params.move_group_name &&
-          joint_name_to_index_maps_.count(params.active_subgroup) == 0)
-      {
-        const auto& move_group_joint_names = planning_scene_monitor_->getRobotModel()
-                                                 ->getJointModelGroup(params.move_group_name)
-                                                 ->getActiveJointModelNames();
-        const auto& subgroup_joint_names = planning_scene_monitor_->getRobotModel()
-                                               ->getJointModelGroup(params.active_subgroup)
-                                               ->getActiveJointModelNames();
-
-        JointNameToMoveGroupIndexMap new_map;
-        // For each joint name of the subgroup calculate the index in the move group joint vector
-        for (const auto& joint_name : subgroup_joint_names)
-        {
-          // Find sub group joint name in move group joint names
-          const auto move_group_iterator =
-              std::find(move_group_joint_names.cbegin(), move_group_joint_names.cend(), joint_name);
-          // Calculate position and add a new mapping of joint name to move group joint vector position
-          new_map.insert(std::make_pair<std::string, std::size_t>(
-              std::string(joint_name), std::distance(move_group_joint_names.cbegin(), move_group_iterator)));
-        }
-        // Add new joint name to index map to existing maps
-        joint_name_to_index_maps_.insert(std::make_pair<std::string, JointNameToMoveGroupIndexMap>(
-            std::string(params.active_subgroup), std::move(new_map)));
       }
 
       servo_params_ = params;
