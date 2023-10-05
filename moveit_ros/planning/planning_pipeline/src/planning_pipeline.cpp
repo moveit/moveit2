@@ -258,10 +258,10 @@ bool planning_pipeline::PlanningPipeline::generatePlan(const planning_scene::Pla
         // check to see if there is any problem with the states that are found to be invalid
         // they are considered ok if they were added by a planning request adapter
         bool problem = false;
-        for (auto const& index : indices)
+        for (const auto& index : indices)
         {
           bool found = false;
-          for (std::size_t const& added_index : res.added_path_index)
+          for (const std::size_t& added_index : res.added_path_index)
           {
             if (index == added_index)
             {

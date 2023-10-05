@@ -63,13 +63,13 @@ class MOVEIT_PLANNING_PIPELINE_EXPORT PlanningPipeline
 public:
   /** \brief When motion plans are computed and they are supposed to be automatically displayed, they are sent to this
    * topic (moveit_msgs::msg::DisplauTrajectory) */
-  inline static const std::string DISPLAY_PATH_TOPIC = std::string("display_planned_path");
+  static inline const std::string DISPLAY_PATH_TOPIC = std::string("display_planned_path");
   /** \brief When motion planning requests are received and they are supposed to be automatically published, they are
    * sent to this topic (moveit_msgs::msg::MotionPlanRequest) */
-  inline static const std::string MOTION_PLAN_REQUEST_TOPIC = std::string("motion_plan_request");
+  static inline const std::string MOTION_PLAN_REQUEST_TOPIC = std::string("motion_plan_request");
   /** \brief When contacts are found in the solution path reported by a planner, they can be published as markers on
    * this topic (visualization_msgs::MarkerArray) */
-  inline static const std::string MOTION_CONTACTS_TOPIC = std::string("display_contacts");
+  static inline const std::string MOTION_CONTACTS_TOPIC = std::string("display_contacts");
 
   /** \brief Given a robot model (\e model), a node handle (\e pipeline_nh), initialize the planning pipeline.
       \param model The robot model for which this pipeline is initialized.
@@ -87,6 +87,28 @@ public:
   PlanningPipeline(const moveit::core::RobotModelConstPtr& model, const std::shared_ptr<rclcpp::Node>& node,
                    const std::string& parameter_namespace, const std::string& planning_plugin_name,
                    const std::vector<std::string>& adapter_plugin_names);
+
+  /*
+  BEGIN BLOCK OF DEPRECATED FUNCTIONS: TODO(sjahr): Remove after 04/2024 (6 months from merge)
+  */
+  [[deprecated("Use generatePlan or ROS parameter API instead.")]] void displayComputedMotionPlans(bool flag){};
+  [[deprecated("Use generatePlan or ROS parameter API instead.")]] void publishReceivedRequests(bool flag){};
+  [[deprecated("Use generatePlan or ROS parameter API instead.")]] void checkSolutionPaths(bool flag){};
+  [[deprecated("Use generatePlan or ROS parameter API instead.")]] bool getDisplayComputedMotionPlans() const
+  {
+    return false;
+  }
+  [[deprecated("Use generatePlan or ROS parameter API instead.")]] bool getPublishReceivedRequests() const
+  {
+    return false;
+  }
+  [[deprecated("Use generatePlan or ROS parameter API instead.")]] bool getCheckSolutionPaths() const
+  {
+    return false;
+  }
+  /*
+  END BLOCK OF DEPRECATED FUNCTIONS
+  */
 
   /** \brief Call the motion planner plugin and the sequence of planning request adapters (if any).
       \param planning_scene The planning scene where motion planning is to be done
