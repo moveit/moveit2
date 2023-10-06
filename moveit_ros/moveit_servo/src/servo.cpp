@@ -248,7 +248,6 @@ bool Servo::validateParams(const servo::Params& servo_params) const
 bool Servo::updateParams()
 {
   bool params_updated = false;
-  
   if (servo_param_listener_->is_old(servo_params_))
   {
     const auto params = servo_param_listener_->get_params();
