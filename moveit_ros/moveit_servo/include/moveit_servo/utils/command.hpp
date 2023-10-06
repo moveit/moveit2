@@ -55,7 +55,7 @@ namespace moveit_servo
  * @param command The joint jog command.
  * @param robot_state_ The current robot state as obtained from PlanningSceneMonitor.
  * @param servo_params The servo parameters.
- * @param joint_name_group_index_map Mapping between sub group joint name and move group joint vector position
+ * @param joint_name_group_index_map Mapping between joint subgroup name and move group joint vector position.
  * @return The status and joint position change required (delta).
  */
 JointDeltaResult jointDeltaFromJointJog(const JointJogCommand& command, const moveit::core::RobotStatePtr& robot_state,
@@ -67,7 +67,7 @@ JointDeltaResult jointDeltaFromJointJog(const JointJogCommand& command, const mo
  * @param command The twist command.
  * @param robot_state_ The current robot state as obtained from PlanningSceneMonitor.
  * @param servo_params The servo parameters.
- * @param joint_name_group_index_map Mapping between sub group joint name and move group joint vector position
+ * @param joint_name_group_index_map Mapping between joint subgroup name and move group joint vector position.
  * @return The status and joint position change required (delta).
  */
 JointDeltaResult jointDeltaFromTwist(const TwistCommand& command, const moveit::core::RobotStatePtr& robot_state,
@@ -91,7 +91,7 @@ JointDeltaResult jointDeltaFromPose(const PoseCommand& command, const moveit::co
  * @param cartesian_position_delta The change in Cartesian position.
  * @param robot_state_ The current robot state as obtained from PlanningSceneMonitor.
  * @param servo_params The servo parameters.
- * @param joint_name_group_index_map Mapping between sub group joint name and move group joint vector position
+ * @param joint_name_group_index_map Mapping between joint subgroup name and move group joint vector position.
  * @return The status and joint position change required (delta).
  */
 JointDeltaResult jointDeltaFromIK(const Eigen::VectorXd& cartesian_position_delta,

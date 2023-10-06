@@ -136,7 +136,7 @@ Servo::Servo(const rclcpp::Node::SharedPtr& node, std::shared_ptr<const servo::P
     // For each joint name of the subgroup calculate the index in the move group joint vector
     for (const auto& joint_name : subgroup_joint_names)
     {
-      // Find sub group joint name in move group joint names
+      // Find subgroup joint name in move group joint names
       const auto move_group_iterator =
           std::find(move_group_joint_names.cbegin(), move_group_joint_names.cend(), joint_name);
       // Calculate position and add a new mapping of joint name to move group joint vector position
@@ -247,6 +247,8 @@ bool Servo::validateParams(const servo::Params& servo_params) const
 
 bool Servo::updateParams()
 {
+  bool params_updated = false;
+  
   if (servo_param_listener_->is_old(servo_params_))
   {
     const auto params = servo_param_listener_->get_params();
@@ -260,14 +262,14 @@ bool Servo::updateParams()
       }
 
       servo_params_ = params;
-      return true;
+      params_updated = true;
     }
     else
     {
       RCLCPP_WARN_STREAM(LOGGER, "Parameters will not be updated.");
     }
   }
-  return false;
+  return params_updated;
 }
 
 servo::Params& Servo::getParams()

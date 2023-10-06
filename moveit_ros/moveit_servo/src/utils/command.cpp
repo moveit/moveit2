@@ -50,7 +50,7 @@ const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_servo.command_processor
  * @param sub_group_deltas Set of command deltas for a subgroup of the move group actuated by servo
  * @param robot_state Current robot state
  * @param servo_params Servo params
- * @param joint_name_group_index_map Mapping between sub group joint name and move group joint vector position
+ * @param joint_name_group_index_map Mapping between joint subgroup name and move group joint vector position.
  * @return Delta vector for the whole move group. The elements that don't belong to the actuated subgroup are zero.
  */
 const Eigen::VectorXd createMoveGroupDelta(const Eigen::VectorXd& sub_group_deltas,
