@@ -36,6 +36,8 @@
 
 #include "robot_trajectory.h"
 #include <moveit_py/moveit_py_utils/ros_msg_typecasters.h>
+#include <moveit/trajectory_processing/ruckig_traj_smoothing.h>
+#include <moveit/trajectory_processing/time_optimal_trajectory_generation.h>
 
 namespace moveit_py
 {
@@ -55,6 +57,34 @@ set_robot_trajectory_msg(const std::shared_ptr<robot_trajectory::RobotTrajectory
                          const moveit::core::RobotState& robot_state, const moveit_msgs::msg::RobotTrajectory& msg)
 {
   return robot_trajectory->setRobotTrajectoryMsg(robot_state, msg);
+}
+
+bool retimeTrajectory(std::shared_ptr<robot_trajectory::RobotTrajectory>& self, const std::string& algorithm,
+                      const double& velocity_scaling_factor, const double& acceleration_scaling_factor)
+{
+  bool success = false;
+  // Do the actual retiming
+  if (algorithm == "ruckig_smoothing")
+  {
+    trajectory_processing::RuckigSmoothing time_param;
+    success = time_param.applySmoothing(*self, velocity_scaling_factor, acceleration_scaling_factor, false, 0.01);
+  }
+  else if (algorithm == "time_optimal_trajectory_generation")
+  {
+    trajectory_processing::TimeOptimalTrajectoryGeneration totg;
+    success = totg.computeTimeStamps(*self, velocity_scaling_factor, acceleration_scaling_factor);
+  }
+  else
+  {
+    RCLCPP_ERROR_STREAM(rclcpp::get_logger("RobotTrajectory"),
+                        "Unknown time parameterization algorithm: " << algorithm.c_str());
+    return success;
+  }
+  if (!success)
+  {
+    RCLCPP_WARN(rclcpp::get_logger("moveit_robot_trajectory"), " Time parametrization for the solution path failed.");
+  }
+  return success;
 }
 
 void init_robot_trajectory(py::module& m)
@@ -133,6 +163,19 @@ void init_robot_trajectory(py::module& m)
 
            Returns:
                list of float: The duration from previous of each waypoint in the trajectory.
+           )")
+      .def("retime_trajectory", &moveit_py::bind_robot_trajectory::retimeTrajectory, py::arg("algorithm"),
+           py::arg("velocity_scaling_factor"), py::arg("acceleration_scaling_factor"),
+           R"(
+           Retime the trajectory.
+
+           Args:
+               algorithm (str): The algorithm to use for retiming the trajectory.
+               velocity_scaling_factor (float): The velocity scaling factor.
+               acceleration_scaling_factor (float): The acceleration scaling factor.
+           )
+           Returns:
+               bool: Retiming successful.
            )")
       .def("get_robot_trajectory_msg", &moveit_py::bind_robot_trajectory::get_robot_trajectory_msg,
            py::arg("joint_filter") = std::vector<std::string>(),
