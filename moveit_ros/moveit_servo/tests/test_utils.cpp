@@ -153,7 +153,6 @@ TEST(ServoUtilsUnitTests, ApproachingSingularityScaling)
   const moveit::core::JointModelGroup* joint_model_group =
       robot_state->getJointModelGroup(servo_params.move_group_name);
 
-  rclcpp::sleep_for(std::chrono::milliseconds(500));
   Eigen::Vector<double, 6> cartesian_delta{ 0.005, 0.0, 0.0, 0.0, 0.0, 0.0 };
   // Home state
   Eigen::Vector<double, 7> state_ready{ 0.0, -0.785, 0.0, -2.356, 0.0, 1.571, 0.785 };
@@ -179,7 +178,6 @@ TEST(ServoUtilsUnitTests, HaltForSingularityScaling)
   const moveit::core::JointModelGroup* joint_model_group =
       robot_state->getJointModelGroup(servo_params.move_group_name);
 
-  rclcpp::sleep_for(std::chrono::milliseconds(500));
   Eigen::Vector<double, 6> cartesian_delta{ 0.005, 0.0, 0.0, 0.0, 0.0, 0.0 };
 
   // Home state
@@ -206,7 +204,6 @@ TEST(ServoUtilsUnitTests, LeavingSingularityScaling)
   const moveit::core::JointModelGroup* joint_model_group =
       robot_state->getJointModelGroup(servo_params.move_group_name);
 
-  rclcpp::sleep_for(std::chrono::milliseconds(500));
   Eigen::Vector<double, 6> cartesian_delta{ 0.005, 0.0, 0.0, 0.0, 0.0, 0.0 };
 
   // Home state
