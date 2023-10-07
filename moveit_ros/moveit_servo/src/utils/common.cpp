@@ -184,6 +184,7 @@ std::pair<double, StatusCode> velocityScalingFactorForSingularity(const moveit::
   // Compute the current condition number. The ratio of max and min singular values.
   // By convention these are the first and last element of the diagonal.
   const double current_condition_number = current_svd.singularValues()(0) / current_svd.singularValues()(dims - 1);
+  std::cout << "CURENT_CONDITION_NUMBER: " << current_condition_number << std::endl;
 
   // Take a small step in the direction of vector_towards_singularity
   const Eigen::VectorXd delta_x = vector_towards_singularity * servo_params.singularity_step_scale;
@@ -200,6 +201,7 @@ std::pair<double, StatusCode> velocityScalingFactorForSingularity(const moveit::
 
   // Compute condition number for the new Jacobian.
   const double next_condition_number = next_svd.singularValues()(0) / next_svd.singularValues()(dims - 1);
+  std::cout << "NEXT_CONDITION_NUMBER: " << next_condition_number << std::endl;
 
   // If the condition number has increased, we are moving towards singularity and the direction of the
   // vector_towards_singularity is correct. If the condition number has decreased, it means the sign of
