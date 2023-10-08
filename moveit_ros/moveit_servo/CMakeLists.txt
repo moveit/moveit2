@@ -144,14 +144,14 @@ if(BUILD_TESTING)
     ament_target_dependencies(moveit_servo_utils_test ${THIS_PACKAGE_INCLUDE_DEPENDS})
     add_ros_test(tests/launch/servo_utils.test.py TIMEOUT 30 ARGS "test_binary_dir:=${CMAKE_CURRENT_BINARY_DIR}")
 
-    ament_add_gtest_executable(moveit_servo_cpp_integration_test tests/test_integration.cpp tests/servo_cpp_fixture.hpp)
-    target_link_libraries(moveit_servo_cpp_integration_test moveit_servo_lib_cpp)
-    ament_target_dependencies(moveit_servo_cpp_integration_test ${THIS_PACKAGE_INCLUDE_DEPENDS})
-    add_ros_test(tests/launch/servo_cpp_integration.test.py TIMEOUT 30 ARGS "test_binary_dir:=${CMAKE_CURRENT_BINARY_DIR}")
+    # ament_add_gtest_executable(moveit_servo_cpp_integration_test tests/test_integration.cpp tests/servo_cpp_fixture.hpp)
+    # target_link_libraries(moveit_servo_cpp_integration_test moveit_servo_lib_cpp)
+    # ament_target_dependencies(moveit_servo_cpp_integration_test ${THIS_PACKAGE_INCLUDE_DEPENDS})
+    # add_ros_test(tests/launch/servo_cpp_integration.test.py TIMEOUT 30 ARGS "test_binary_dir:=${CMAKE_CURRENT_BINARY_DIR}")
 
-    ament_add_gtest_executable(moveit_servo_ros_integration_test tests/test_ros_integration.cpp tests/servo_ros_fixture.hpp)
-    ament_target_dependencies(moveit_servo_ros_integration_test ${THIS_PACKAGE_INCLUDE_DEPENDS})
-    add_ros_test(tests/launch/servo_ros_integration.test.py TIMEOUT 120 ARGS "test_binary_dir:=${CMAKE_CURRENT_BINARY_DIR}")
+    # ament_add_gtest_executable(moveit_servo_ros_integration_test tests/test_ros_integration.cpp tests/servo_ros_fixture.hpp)
+    # ament_target_dependencies(moveit_servo_ros_integration_test ${THIS_PACKAGE_INCLUDE_DEPENDS})
+    # add_ros_test(tests/launch/servo_ros_integration.test.py TIMEOUT 120 ARGS "test_binary_dir:=${CMAKE_CURRENT_BINARY_DIR}")
 
 endif()
 

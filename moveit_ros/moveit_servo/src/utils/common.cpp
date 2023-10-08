@@ -210,6 +210,8 @@ std::pair<double, StatusCode> velocityScalingFactorForSingularity(const moveit::
   }
 
   // Double check the direction using dot product.
+  std::cout << "Moving towards singularity vector dot product: " << vector_towards_singularity.dot(target_delta_x)
+            << std::endl;
   const bool moving_towards_singularity = vector_towards_singularity.dot(target_delta_x) > 0;
 
   // Compute upper condition variable threshold based on if we are moving towards or away from singularity.
@@ -229,6 +231,9 @@ std::pair<double, StatusCode> velocityScalingFactorForSingularity(const moveit::
   double velocity_scale = 1.0;
   const bool is_above_lower_limit = current_condition_number > lower_singularity_threshold;
   const bool is_below_hard_stop_limit = current_condition_number < hard_stop_singularity_threshold;
+  std::cout << "Condition number: " << current_condition_number << std::endl;
+  std::cout << "Lower threshold: " << lower_singularity_threshold << std::endl;
+  std::cout << "Hard stop threshold: " << hard_stop_singularity_threshold << std::endl;
   if (is_above_lower_limit && is_below_hard_stop_limit)
   {
     velocity_scale -=
