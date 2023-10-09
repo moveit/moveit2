@@ -154,7 +154,6 @@ TEST(ServoUtilsUnitTests, ApproachingSingularityScaling)
       robot_state->getJointModelGroup(servo_params.move_group_name);
   robot_state->setToDefaultValues();
 
-  rclcpp::sleep_for(std::chrono::milliseconds(500));
   Eigen::Vector<double, 6> cartesian_delta{ 0.005, 0.0, 0.0, 0.0, 0.0, 0.0 };
   // Home state
   Eigen::Vector<double, 7> state_ready{ 0.0, -0.785, 0.0, -2.356, 0.0, 1.571, 0.785 };
@@ -183,7 +182,6 @@ TEST(ServoUtilsUnitTests, HaltForSingularityScaling)
       robot_state->getJointModelGroup(servo_params.move_group_name);
   robot_state->setToDefaultValues();
 
-  rclcpp::sleep_for(std::chrono::milliseconds(500));
   Eigen::Vector<double, 6> cartesian_delta{ 0.005, 0.0, 0.0, 0.0, 0.0, 0.0 };
 
   // Home state
@@ -213,8 +211,7 @@ TEST(ServoUtilsUnitTests, LeavingSingularityScaling)
       robot_state->getJointModelGroup(servo_params.move_group_name);
   robot_state->setToDefaultValues();
 
-  rclcpp::sleep_for(std::chrono::milliseconds(500));
-  Eigen::Vector<double, 6> cartesian_delta{ 0.005, 0.0, 0.0, 0.0, 0.0, 0.0 };
+  Eigen::Vector<double, 6> cartesian_delta{ -0.005, 0.0, 0.0, 0.0, 0.0, 0.0 };
 
   // Home state
   Eigen::Vector<double, 7> state_ready{ 0.0, -0.785, 0.0, -2.356, 0.0, 1.571, 0.785 };
@@ -223,15 +220,7 @@ TEST(ServoUtilsUnitTests, LeavingSingularityScaling)
   auto scaling_result = moveit_servo::velocityScalingFactorForSingularity(robot_state, cartesian_delta, servo_params);
   ASSERT_EQ(scaling_result.second, moveit_servo::StatusCode::NO_WARNING);
 
-  // Approach singularity
-  Eigen::Vector<double, 7> state_approaching_singularity{ 0.0, 0.334, 0.0, -1.177, 0.0, 1.510, 0.785 };
-  robot_state->setJointGroupActivePositions(joint_model_group, state_approaching_singularity);
-  robot_state->updateLinkTransforms();
-  scaling_result = moveit_servo::velocityScalingFactorForSingularity(robot_state, cartesian_delta, servo_params);
-  ASSERT_EQ(scaling_result.second, moveit_servo::StatusCode::DECELERATE_FOR_APPROACHING_SINGULARITY);
-
   // Move away from singularity
-  cartesian_delta(0) *= -1;
   Eigen::Vector<double, 7> state_leaving_singularity{ 0.0, 0.3458, 0.0, -1.1424, 0.0, 1.4865, 0.785 };
   robot_state->setJointGroupActivePositions(joint_model_group, state_leaving_singularity);
   robot_state->updateLinkTransforms();
