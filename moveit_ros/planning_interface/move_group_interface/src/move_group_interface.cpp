@@ -1775,11 +1775,6 @@ bool MoveGroupInterface::setApproximateJointValueTarget(const Eigen::Isometry3d&
   return setApproximateJointValueTarget(msg, end_effector_link);
 }
 
-const moveit::core::RobotState& MoveGroupInterface::getJointValueTarget() const
-{
-  return impl_->getTargetRobotState();
-}
-
 const moveit::core::RobotState& MoveGroupInterface::getTargetRobotState() const
 {
   return impl_->getTargetRobotState();

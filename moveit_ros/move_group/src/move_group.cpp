@@ -275,8 +275,7 @@ int main(int argc, char** argv)
   }
 
   // Initialize MoveItCpp
-  const auto tf_buffer = std::make_shared<tf2_ros::Buffer>(nh->get_clock(), tf2::durationFromSec(10.0));
-  const auto moveit_cpp = std::make_shared<moveit_cpp::MoveItCpp>(nh, moveit_cpp_options, tf_buffer);
+  const auto moveit_cpp = std::make_shared<moveit_cpp::MoveItCpp>(nh, moveit_cpp_options);
   const auto planning_scene_monitor = moveit_cpp->getPlanningSceneMonitorNonConst();
 
   if (planning_scene_monitor->getPlanningScene())
