@@ -239,7 +239,11 @@ CommandListManager::solveSequenceItems(const planning_scene::PlanningSceneConstP
     setStartState(motion_plan_responses, req.group_name, req.start_state);
 
     planning_interface::MotionPlanResponse res;
-    planning_pipeline->generatePlan(planning_scene, req, res);
+    if (!planning_pipeline->generatePlan(planning_scene, req, res))
+    {
+      RCLCPP_ERROR(LOGGER, "Generating a plan with planning pipeline failed.");
+      res.error_code.val = moveit_msgs::msg::MoveItErrorCodes::FAILURE;
+    }
     if (res.error_code.val != res.error_code.SUCCESS)
     {
       std::ostringstream os;

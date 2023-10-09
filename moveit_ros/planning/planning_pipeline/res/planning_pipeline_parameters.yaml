@@ -1,0 +1,11 @@
+planning_pipeline_parameters:
+  planning_plugin: {
+    type: string,
+    description: "Name of the planner plugin used by the pipeline",
+    default_value: "UNKNOWN",
+  }
+  request_adapters: {
+    type: string,
+    description: "Names of the planning request adapter plugins (plugin names separated by space).",
+    default_value: "UNKNOWN",
+  }

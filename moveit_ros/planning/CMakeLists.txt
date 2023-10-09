@@ -47,6 +47,7 @@ set(THIS_PACKAGE_LIBRARIES
   moveit_kinematics_plugin_loader
   moveit_robot_model_loader
   moveit_constraint_sampler_manager_loader
+  planning_pipeline_parameters
   moveit_planning_pipeline
   moveit_planning_pipeline_interfaces
   moveit_trajectory_execution_manager
