@@ -35,6 +35,7 @@
 /* Author: Abishalini Sivaraman */
 
 #include <moveit/planning_scene_monitor/trajectory_monitor_middleware_handle.hpp>
+#include <limits>
 
 namespace planning_scene_monitor
 {
@@ -45,7 +46,7 @@ planning_scene_monitor::TrajectoryMonitorMiddlewareHandle::TrajectoryMonitorMidd
 
 void planning_scene_monitor::TrajectoryMonitorMiddlewareHandle::setRate(double sampling_frequency)
 {
-  if (sampling_frequency > 0.0)
+  if (sampling_frequency > std::numeric_limits<double>::epsilon())
   {
     rate_ = std::make_unique<rclcpp::Rate>(sampling_frequency);
   }
