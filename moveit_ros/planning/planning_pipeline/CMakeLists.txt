@@ -1,4 +1,7 @@
+generate_parameter_library(planning_pipeline_parameters res/planning_pipeline_parameters.yaml)
+
 add_library(moveit_planning_pipeline SHARED src/planning_pipeline.cpp)
+target_link_libraries(moveit_planning_pipeline planning_pipeline_parameters)
 include(GenerateExportHeader)
 generate_export_header(moveit_planning_pipeline)
 target_include_directories(moveit_planning_pipeline PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>)

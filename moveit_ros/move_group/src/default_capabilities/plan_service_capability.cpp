@@ -42,8 +42,12 @@
 
 namespace move_group
 {
-static const rclcpp::Logger LOGGER =
-    rclcpp::get_logger("moveit_move_group_default_capabilities.plan_service_capability");
+namespace
+{
+const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_move_group_default_capabilities.plan_service_capability");
+constexpr bool DISPLAY_COMPUTED_MOTION_PLANS = true;
+constexpr bool CHECK_SOLUTION_PATHS = true;
+}  // namespace
 
 MoveGroupPlanService::MoveGroupPlanService() : MoveGroupCapability("MotionPlanService")
 {
@@ -82,7 +86,12 @@ bool MoveGroupPlanService::computePlanService(const std::shared_ptr<rmw_request_
   try
   {
     planning_interface::MotionPlanResponse mp_res;
-    planning_pipeline->generatePlan(ps, req->motion_plan_request, mp_res);
+    if (!planning_pipeline->generatePlan(ps, req->motion_plan_request, mp_res, context_->debug_, CHECK_SOLUTION_PATHS,
+                                         DISPLAY_COMPUTED_MOTION_PLANS))
+    {
+      RCLCPP_ERROR(LOGGER, "Generating a plan with planning pipeline failed.");
+      mp_res.error_code.val = moveit_msgs::msg::MoveItErrorCodes::FAILURE;
+    }
     mp_res.getMessage(res->motion_plan_response);
   }
   catch (std::exception& ex)

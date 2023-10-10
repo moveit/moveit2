@@ -42,17 +42,49 @@
 namespace
 {
 const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_servo.command_processor");
-}
+
+/**
+ * @brief Helper function to create a move group deltas vector from a sub group deltas vector. A delta vector for the
+ * whole move group is created and all entries zeroed. The elements of the subgroup deltas vector are copied into the
+ * correct element of the bigger move group delta vector.
+ * @param sub_group_deltas Set of command deltas for a subgroup of the move group actuated by servo
+ * @param robot_state Current robot state
+ * @param servo_params Servo params
+ * @param joint_name_group_index_map Mapping between joint subgroup name and move group joint vector position.
+ * @return Delta vector for the whole move group. The elements that don't belong to the actuated subgroup are zero.
+ */
+const Eigen::VectorXd createMoveGroupDelta(const Eigen::VectorXd& sub_group_deltas,
+                                           const moveit::core::RobotStatePtr& robot_state,
+                                           const servo::Params& servo_params,
+                                           const moveit_servo::JointNameToMoveGroupIndexMap& joint_name_group_index_map)
+{
+  const auto& subgroup_joint_names =
+      robot_state->getJointModelGroup(servo_params.active_subgroup)->getActiveJointModelNames();
+
+  // Create
+  Eigen::VectorXd move_group_delta_theta = Eigen::VectorXd::Zero(
+      robot_state->getJointModelGroup(servo_params.move_group_name)->getActiveJointModelNames().size());
+  for (size_t index = 0; index < subgroup_joint_names.size(); index++)
+  {
+    move_group_delta_theta[joint_name_group_index_map.at(subgroup_joint_names.at(index))] = sub_group_deltas[index];
+  }
+  return move_group_delta_theta;
+};
+}  // namespace
 
 namespace moveit_servo
 {
 
 JointDeltaResult jointDeltaFromJointJog(const JointJogCommand& command, const moveit::core::RobotStatePtr& robot_state,
-                                        const servo::Params& servo_params)
+                                        const servo::Params& servo_params,
+                                        const JointNameToMoveGroupIndexMap& joint_name_group_index_map)
 {
   // Find the target joint position based on the commanded joint velocity
   StatusCode status = StatusCode::NO_WARNING;
-  const auto joint_names = robot_state->getJointModelGroup(servo_params.move_group_name)->getActiveJointModelNames();
+  const auto& group_name =
+      servo_params.active_subgroup.empty() ? servo_params.move_group_name : servo_params.active_subgroup;
+  const moveit::core::JointModelGroup* joint_model_group = robot_state->getJointModelGroup(group_name);
+  const auto joint_names = joint_model_group->getActiveJointModelNames();
   Eigen::VectorXd joint_position_delta(joint_names.size());
   Eigen::VectorXd velocities(joint_names.size());
 
@@ -68,6 +100,8 @@ JointDeltaResult jointDeltaFromJointJog(const JointJogCommand& command, const mo
     }
     else
     {
+      RCLCPP_WARN_STREAM(LOGGER, "Invalid joint name: " << command.names[i]);
+
       names_valid = false;
       break;
     }
@@ -86,18 +120,28 @@ JointDeltaResult jointDeltaFromJointJog(const JointJogCommand& command, const mo
     status = StatusCode::INVALID;
     if (!names_valid)
     {
-      RCLCPP_WARN_STREAM(LOGGER, "Invalid joint names in joint jog command");
+      RCLCPP_WARN_STREAM(LOGGER, "Invalid joint names in joint jog command. Either you're sending commands for a joint "
+                                 "that is not part of the move group or certain joints cannot be moved because a "
+                                 "subgroup is active and they are not part of it.");
     }
     if (!velocity_valid)
     {
       RCLCPP_WARN_STREAM(LOGGER, "Invalid velocity values in joint jog command");
     }
   }
+
+  if (!servo_params.active_subgroup.empty() && servo_params.active_subgroup != servo_params.move_group_name)
+  {
+    return std::make_pair(status, createMoveGroupDelta(joint_position_delta, robot_state, servo_params,
+                                                       joint_name_group_index_map));
+  }
+
   return std::make_pair(status, joint_position_delta);
 }
 
 JointDeltaResult jointDeltaFromTwist(const TwistCommand& command, const moveit::core::RobotStatePtr& robot_state,
-                                     const servo::Params& servo_params)
+                                     const servo::Params& servo_params,
+                                     const JointNameToMoveGroupIndexMap& joint_name_group_index_map)
 {
   StatusCode status = StatusCode::NO_WARNING;
   const int num_joints =
@@ -122,7 +166,8 @@ JointDeltaResult jointDeltaFromTwist(const TwistCommand& command, const moveit::
     }
 
     // Compute the required change in joint angles.
-    const auto delta_result = jointDeltaFromIK(cartesian_position_delta, robot_state, servo_params);
+    const auto delta_result =
+        jointDeltaFromIK(cartesian_position_delta, robot_state, servo_params, joint_name_group_index_map);
     status = delta_result.first;
     if (status != StatusCode::INVALID)
     {
@@ -160,7 +205,8 @@ JointDeltaResult jointDeltaFromTwist(const TwistCommand& command, const moveit::
 }
 
 JointDeltaResult jointDeltaFromPose(const PoseCommand& command, const moveit::core::RobotStatePtr& robot_state,
-                                    const servo::Params& servo_params)
+                                    const servo::Params& servo_params,
+                                    const JointNameToMoveGroupIndexMap& joint_name_group_index_map)
 {
   StatusCode status = StatusCode::NO_WARNING;
   const int num_joints =
@@ -184,7 +230,8 @@ JointDeltaResult jointDeltaFromPose(const PoseCommand& command, const moveit::co
     cartesian_position_delta.tail<3>() = angle_axis_error.axis() * angle_axis_error.angle();
 
     // Compute the required change in joint angles.
-    const auto delta_result = jointDeltaFromIK(cartesian_position_delta, robot_state, servo_params);
+    const auto delta_result =
+        jointDeltaFromIK(cartesian_position_delta, robot_state, servo_params, joint_name_group_index_map);
     status = delta_result.first;
     if (status != StatusCode::INVALID)
     {
@@ -208,10 +255,12 @@ JointDeltaResult jointDeltaFromPose(const PoseCommand& command, const moveit::co
 }
 
 JointDeltaResult jointDeltaFromIK(const Eigen::VectorXd& cartesian_position_delta,
-                                  const moveit::core::RobotStatePtr& robot_state, const servo::Params& servo_params)
+                                  const moveit::core::RobotStatePtr& robot_state, const servo::Params& servo_params,
+                                  const JointNameToMoveGroupIndexMap& joint_name_group_index_map)
 {
-  const moveit::core::JointModelGroup* joint_model_group =
-      robot_state->getJointModelGroup(servo_params.move_group_name);
+  const auto& group_name =
+      servo_params.active_subgroup.empty() ? servo_params.move_group_name : servo_params.active_subgroup;
+  const moveit::core::JointModelGroup* joint_model_group = robot_state->getJointModelGroup(group_name);
 
   std::vector<double> current_joint_positions;
   robot_state->copyJointGroupPositions(joint_model_group, current_joint_positions);
@@ -242,6 +291,7 @@ JointDeltaResult jointDeltaFromIK(const Eigen::VectorXd& cartesian_position_delt
 
     // setup for IK call
     std::vector<double> solution;
+    solution.reserve(current_joint_positions.size());
     moveit_msgs::msg::MoveItErrorCodes err;
     kinematics::KinematicsQueryOptions opts;
     opts.return_approximate_solution = true;
@@ -251,7 +301,7 @@ JointDeltaResult jointDeltaFromIK(const Eigen::VectorXd& cartesian_position_delt
       // find the difference in joint positions that will get us to the desired pose
       for (size_t i = 0; i < current_joint_positions.size(); ++i)
       {
-        delta_theta[i] = solution[i] - current_joint_positions[i];
+        delta_theta[i] = solution.at(i) - current_joint_positions.at(i);
       }
     }
     else
@@ -270,6 +320,12 @@ JointDeltaResult jointDeltaFromIK(const Eigen::VectorXd& cartesian_position_delt
     const Eigen::MatrixXd pseudo_inverse = svd.matrixV() * matrix_s.inverse() * svd.matrixU().transpose();
 
     delta_theta = pseudo_inverse * cartesian_position_delta;
+  }
+
+  if (!servo_params.active_subgroup.empty() && servo_params.active_subgroup != servo_params.move_group_name)
+  {
+    return std::make_pair(status,
+                          createMoveGroupDelta(delta_theta, robot_state, servo_params, joint_name_group_index_map));
   }
 
   return std::make_pair(status, delta_theta);

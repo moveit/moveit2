@@ -56,13 +56,6 @@ move_group::MoveGroupContext::MoveGroupContext(const moveit_cpp::MoveItCppPtr& m
   if (default_pipeline_it != pipelines.end())
   {
     planning_pipeline_ = default_pipeline_it->second;
-
-    // configure the planning pipeline
-    planning_pipeline_->displayComputedMotionPlans(true);
-    planning_pipeline_->checkSolutionPaths(true);
-
-    if (debug_)
-      planning_pipeline_->publishReceivedRequests(true);
   }
   else
   {

@@ -46,8 +46,14 @@ servo:
                   must be passed to the node during launch time."
   }
 
-############################# INCOMING COMMAND SETTINGS ########################
+  active_subgroup: {
+    type: string,
+    default_value: "",
+    description: "This parameter can be used to switch online to actuating a subgroup of the move group. \
+    If it is empty, the full move group is actuated."
+  }
 
+############################# INCOMING COMMAND SETTINGS ########################
   pose_command_in_topic: {
     type: string,
     read_only: true,
