@@ -49,8 +49,8 @@ namespace distance_field
 // Logger
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_distance_field.distance_field");
 
-DistanceField::DistanceField(const double size_x, const double size_y, const double size_z, const double resolution, const double origin_x,
-                             const double origin_y, const double origin_z)
+DistanceField::DistanceField(const double size_x, const double size_y, const double size_z, const double resolution,
+                             const double origin_x, const double origin_y, const double origin_z)
   : size_x_(size_x)
   , size_y_(size_y)
   , size_z_(size_z)
@@ -64,8 +64,8 @@ DistanceField::DistanceField(const double size_x, const double size_y, const dou
 
 DistanceField::~DistanceField() = default;
 
-double DistanceField::getDistanceGradient(const double x, const double y, const double z, double& gradient_x, double& gradient_y,
-                                          double& gradient_z, bool& in_bounds) const
+double DistanceField::getDistanceGradient(const double x, const double y, const double z, double& gradient_x,
+                                          double& gradient_y, double& gradient_z, bool& in_bounds) const
 {
   int gx, gy, gz;
 
@@ -90,8 +90,9 @@ double DistanceField::getDistanceGradient(const double x, const double y, const 
   return getDistance(gx, gy, gz);
 }
 
-void DistanceField::getIsoSurfaceMarkers(const double min_distance, const double max_distance, const std::string& frame_id,
-                                         const rclcpp::Time& stamp, visualization_msgs::msg::Marker& inf_marker) const
+void DistanceField::getIsoSurfaceMarkers(const double min_distance, const double max_distance,
+                                         const std::string& frame_id, const rclcpp::Time& stamp,
+                                         visualization_msgs::msg::Marker& inf_marker) const
 {
   inf_marker.points.clear();
   inf_marker.header.frame_id = frame_id;
@@ -134,8 +135,8 @@ void DistanceField::getIsoSurfaceMarkers(const double min_distance, const double
   }
 }
 
-void DistanceField::getGradientMarkers(const double min_distance, const double max_distance, const std::string& frame_id,
-                                       const rclcpp::Time& stamp,
+void DistanceField::getGradientMarkers(const double min_distance, const double max_distance,
+                                       const std::string& frame_id, const rclcpp::Time& stamp,
                                        visualization_msgs::msg::MarkerArray& marker_array) const
 {
   Eigen::Vector3d unit_x(1, 0, 0);
@@ -428,8 +429,9 @@ void DistanceField::getPlaneMarkers(PlaneVisualizationType type, double length, 
   }
 }
 
-void DistanceField::setPoint(const int xCell, const int yCell, const int zCell, const double dist, geometry_msgs::msg::Point& point,
-                             std_msgs::msg::ColorRGBA& color, const double max_distance) const
+void DistanceField::setPoint(const int xCell, const int yCell, const int zCell, const double dist,
+                             geometry_msgs::msg::Point& point, std_msgs::msg::ColorRGBA& color,
+                             const double max_distance) const
 {
   double wx, wy, wz;
   gridToWorld(xCell, yCell, zCell, wx, wy, wz);

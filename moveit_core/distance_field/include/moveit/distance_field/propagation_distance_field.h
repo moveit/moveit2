@@ -169,9 +169,9 @@ public:
    * the implications of this.
    *
    */
-  PropagationDistanceField(const double size_x, const double size_y, const double size_z, const double resolution, const double origin_x,
-                           const double origin_y, const double origin_z, const double max_distance,
-                           const bool propagate_negative_distances = false);
+  PropagationDistanceField(const double size_x, const double size_y, const double size_z, const double resolution,
+                           const double origin_x, const double origin_y, const double origin_z,
+                           const double max_distance, const bool propagate_negative_distances = false);
 
   /**
    * \brief Constructor based on an OcTree and bounding box
@@ -220,7 +220,8 @@ public:
    *
    * @return
    */
-  PropagationDistanceField(std::istream& stream, const double max_distance, const bool propagate_negative_distances = false);
+  PropagationDistanceField(std::istream& stream, const double max_distance,
+                           const bool propagate_negative_distances = false);
   /**
    * \brief Empty destructor
    *
@@ -336,8 +337,10 @@ public:
   int getXNumCells() const override;
   int getYNumCells() const override;
   int getZNumCells() const override;
-  bool gridToWorld(const int x, const int y, const int z, double& world_x, double& world_y, double& world_z) const override;
-  bool worldToGrid(const double world_x, const double world_y, const double world_z, int& x, int& y, int& z) const override;
+  bool gridToWorld(const int x, const int y, const int z, double& world_x, double& world_y,
+                   double& world_z) const override;
+  bool worldToGrid(const double world_x, const double world_y, const double world_z, int& x, int& y,
+                   int& z) const override;
 
   /**
    * \brief Writes the contents of the distance field to the supplied stream.
@@ -415,7 +418,8 @@ public:
    *         If starting cell is outside, the nearst inside cell
    *         If nearest cell is unknown, return nullptr
    */
-  const PropDistanceFieldVoxel* getNearestCell(const int x, const int y, const int z, double& dist, Eigen::Vector3i& pos) const
+  const PropDistanceFieldVoxel* getNearestCell(const int x, const int y, const int z, double& dist,
+                                               Eigen::Vector3i& pos) const
   {
     const PropDistanceFieldVoxel* cell = &voxel_grid_->getCell(x, y, z);
     if (cell->distance_square_ > 0)

@@ -88,8 +88,8 @@ public:
    * @param [in] default_object An object that will be returned for any
    * future queries that are not valid
    */
-  VoxelGrid(const double size_x, const double size_y, const double size_z, const double resolution, const double origin_x, const double origin_y,
-            const double origin_z, const T default_object);
+  VoxelGrid(const double size_x, const double size_y, const double size_z, const double resolution,
+            const double origin_x, const double origin_y, const double origin_z, const T default_object);
   virtual ~VoxelGrid();
 
   /**
@@ -117,8 +117,8 @@ public:
    * @param [in] origin_y Minimum point along the Y axis of the volume
    * @param [in] origin_z Minimum point along the Z axis of the volume
    */
-  void resize(const double size_x, const double size_y, const double size_z, const double resolution, const double origin_x, const double origin_y,
-              const double origin_z, const T default_object);
+  void resize(const double size_x, const double size_y, const double size_z, const double resolution,
+              const double origin_x, const double origin_y, const double origin_z, const T default_object);
 
   /**
    * \brief Operator that gets the value of the given location (x, y,
@@ -336,8 +336,8 @@ protected:
 //////////////////////////// template function definitions follow //////////////////
 
 template <typename T>
-VoxelGrid<T>::VoxelGrid(const double size_x, const double size_y, const double size_z, const double resolution, const double origin_x,
-                        const double origin_y, const double origin_z, const T default_object)
+VoxelGrid<T>::VoxelGrid(const double size_x, const double size_y, const double size_z, const double resolution,
+                        const double origin_x, const double origin_y, const double origin_z, const T default_object)
   : data_(nullptr)
 {
   resize(size_x, size_y, size_z, resolution, origin_x, origin_y, origin_z, default_object);
@@ -361,8 +361,8 @@ VoxelGrid<T>::VoxelGrid() : data_(nullptr)
 }
 
 template <typename T>
-void VoxelGrid<T>::resize(const double size_x, const double size_y, const double size_z, const double resolution, const double origin_x,
-                          const double origin_y, const double origin_z, const T default_object)
+void VoxelGrid<T>::resize(const double size_x, const double size_y, const double size_z, const double resolution,
+                          const double origin_x, const double origin_y, const double origin_z, const T default_object)
 {
   delete[] data_;
   data_ = nullptr;
@@ -535,7 +535,8 @@ inline void VoxelGrid<T>::reset(const T& initial)
 }
 
 template <typename T>
-inline void VoxelGrid<T>::gridToWorld(const int x, const int y, const int z, double& world_x, double& world_y, double& world_z) const
+inline void VoxelGrid<T>::gridToWorld(const int x, const int y, const int z, double& world_x, double& world_y,
+                                      double& world_z) const
 {
   world_x = getLocationFromCell(DIM_X, x);
   world_y = getLocationFromCell(DIM_Y, y);
@@ -551,7 +552,8 @@ inline void VoxelGrid<T>::gridToWorld(const Eigen::Vector3i& grid, Eigen::Vector
 }
 
 template <typename T>
-inline bool VoxelGrid<T>::worldToGrid(const double world_x, const double world_y, const double world_z, int& x, int& y, int& z) const
+inline bool VoxelGrid<T>::worldToGrid(const double world_x, const double world_y, const double world_z, int& x, int& y,
+                                      int& z) const
 {
   x = getCellFromLocation(DIM_X, world_x);
   y = getCellFromLocation(DIM_Y, world_y);

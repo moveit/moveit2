@@ -47,8 +47,9 @@ namespace distance_field
 // Logger
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_distance_field.propagation_distance_field");
 
-PropagationDistanceField::PropagationDistanceField(const double size_x, const double size_y, const double size_z, const double resolution,
-                                                   const double origin_x, const double origin_y, const double origin_z,
+PropagationDistanceField::PropagationDistanceField(const double size_x, const double size_y, const double size_z,
+                                                   const double resolution, const double origin_x,
+                                                   const double origin_y, const double origin_z,
                                                    const double max_distance, const bool propagate_negative)
   : DistanceField(size_x, size_y, size_z, resolution, origin_x, origin_y, origin_z)
   , propagate_negative_(propagate_negative)
@@ -615,13 +616,15 @@ int PropagationDistanceField::getZNumCells() const
   return voxel_grid_->getNumCells(DIM_Z);
 }
 
-bool PropagationDistanceField::gridToWorld(const int x, const int y, const int z, double& world_x, double& world_y, double& world_z) const
+bool PropagationDistanceField::gridToWorld(const int x, const int y, const int z, double& world_x, double& world_y,
+                                           double& world_z) const
 {
   voxel_grid_->gridToWorld(x, y, z, world_x, world_y, world_z);
   return true;
 }
 
-bool PropagationDistanceField::worldToGrid(const double world_x, const double world_y, const double world_z, int& x, int& y, int& z) const
+bool PropagationDistanceField::worldToGrid(const double world_x, const double world_y, const double world_z, int& x,
+                                           int& y, int& z) const
 {
   return voxel_grid_->worldToGrid(world_x, world_y, world_z, x, y, z);
 }

@@ -104,8 +104,8 @@ public:
    * @param [in] origin_y The minimum Y point of the volume
    * @param [in] origin_z The minimum Z point of the volume
    */
-  DistanceField(const double size_x, const double size_y, const double size_z, const double resolution, const double origin_x, const double origin_y,
-                const double origin_z);
+  DistanceField(const double size_x, const double size_y, const double size_z, const double resolution,
+                const double origin_x, const double origin_y, const double origin_z);
 
   virtual ~DistanceField();
 
@@ -309,8 +309,8 @@ public:
    *
    * @return The distance to the closest occupied cell
    */
-  double getDistanceGradient(const double x, const double y, const double z, double& gradient_x, double& gradient_y, double& gradient_z,
-                             bool& in_bounds) const;
+  double getDistanceGradient(const double x, const double y, const double z, double& gradient_x, double& gradient_y,
+                             double& gradient_z, bool& in_bounds) const;
   /**
    * \brief Gets the distance to the closest obstacle at the given
    * integer cell location. The particulars of this function are
@@ -373,7 +373,8 @@ public:
    * @return Whether or not the transformation is successful.  An implementation may or may not choose to return false
    *if the indicated cell is not valid for this distance field.
    */
-  virtual bool gridToWorld(const int x, const int y, const int z, double& world_x, double& world_y, double& world_z) const = 0;
+  virtual bool gridToWorld(const int x, const int y, const int z, double& world_x, double& world_y,
+                           double& world_z) const = 0;
 
   /**
    * \brief Converts from a world location to a set of integer
@@ -391,7 +392,8 @@ public:
    * @return True if all the world values result in integer indices
    * that pass a validity check; otherwise False.
    */
-  virtual bool worldToGrid(const double world_x, const double world_y, const double world_z, int& x, int& y, int& z) const = 0;
+  virtual bool worldToGrid(const double world_x, const double world_y, const double world_z, int& x, int& y,
+                           int& z) const = 0;
 
   /**
    * \brief Writes the contents of the distance field to the supplied stream.
@@ -442,8 +444,8 @@ public:
    * @param [in] stamp The stamp to use in the header of the marker
    * @param [out] marker_array The marker array to populate
    */
-  void getGradientMarkers(const double min_radius, const double max_radius, const std::string& frame_id, const rclcpp::Time& stamp,
-                          visualization_msgs::msg::MarkerArray& marker_array) const;
+  void getGradientMarkers(const double min_radius, const double max_radius, const std::string& frame_id,
+                          const rclcpp::Time& stamp, visualization_msgs::msg::MarkerArray& marker_array) const;
 
   /**
    * \brief Populates a marker with a slice of the distance field in a
