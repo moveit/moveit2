@@ -374,6 +374,12 @@ PlanningContextManager::getPlanningContext(const planning_interface::PlannerConf
       ompl::base::ConstraintPtr ompl_constraint =
           createOMPLConstraints(robot_model_, config.group, req.path_constraints);
 
+      // Fail if ompl constraints could not be parsed successfully
+      if (!ompl_constraint)
+      {
+        return ModelBasedPlanningContextPtr();
+      }
+
       // Create a constrained state space of type "projected state space".
       // Other types are available, so we probably should add another setting to ompl_planning.yaml
       // to choose between them.
