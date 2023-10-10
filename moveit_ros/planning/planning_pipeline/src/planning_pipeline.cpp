@@ -107,11 +107,11 @@ void planning_pipeline::PlanningPipeline::configure()
     throw;
   }
 
-  if (planner_plugin_name_.empty())
+  if (planner_plugin_name_.empty() || planner_plugin_name_ == "UNKNOWN")
   {
     std::string classes_str = fmt::format("{}", fmt::join(planner_plugin_loader_->getDeclaredClasses(), ", "));
-    throw std::runtime_error("Planning plugin name is empty. Please choose one of the available plugins: " +
-                             classes_str);
+    throw std::runtime_error("Planning plugin name is empty or not defined in namespace '" + parameter_namespace_ +
+                             "'. Please choose one of the available plugins: " + classes_str);
   }
 
   try
