@@ -23,6 +23,10 @@ jobs:
             ROS_DISTRO: rolling
             IKFAST_TEST: true
             CLANG_TIDY: pedantic
+          - IMAGE: iron-ci
+            ROS_DISTRO: iron
+          - IMAGE: iron-ci-testing
+            ROS_DISTRO: iron
           - IMAGE: humble-ci
             ROS_DISTRO: humble
           - IMAGE: humble-ci-testing
