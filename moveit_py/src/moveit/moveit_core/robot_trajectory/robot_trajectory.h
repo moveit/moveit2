@@ -56,9 +56,6 @@ robot_trajectory::RobotTrajectory
 set_robot_trajectory_msg(const std::shared_ptr<robot_trajectory::RobotTrajectory>& robot_trajectory,
                          const moveit::core::RobotState& robot_state, const moveit_msgs::msg::RobotTrajectory& msg);
 
-bool retimeTrajectory(std::shared_ptr<robot_trajectory::RobotTrajectory>& self, const std::string& algorithm,
-                      const double& velocity_scaling_factor, const double& acceleration_scaling_factor);
-
 void init_robot_trajectory(py::module& m);
 }  // namespace bind_robot_trajectory
 }  // namespace moveit_py
