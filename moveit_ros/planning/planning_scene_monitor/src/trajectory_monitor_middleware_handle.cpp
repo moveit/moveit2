@@ -39,17 +39,23 @@
 namespace planning_scene_monitor
 {
 planning_scene_monitor::TrajectoryMonitorMiddlewareHandle::TrajectoryMonitorMiddlewareHandle(double sampling_frequency)
-  : rate_{ std::make_unique<rclcpp::Rate>(sampling_frequency) }
 {
+  setRate(sampling_frequency);
 }
 
 void planning_scene_monitor::TrajectoryMonitorMiddlewareHandle::setRate(double sampling_frequency)
 {
-  rate_ = std::make_unique<rclcpp::Rate>(sampling_frequency);
+  if (sampling_frequency > 0.0)
+  {
+    rate_ = std::make_unique<rclcpp::Rate>(sampling_frequency);
+  }
 }
 
 void planning_scene_monitor::TrajectoryMonitorMiddlewareHandle::sleep()
 {
-  rate_->sleep();
+  if (rate_)
+  {
+    rate_->sleep();
+  }
 }
 }  // namespace planning_scene_monitor
