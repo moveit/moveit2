@@ -63,8 +63,7 @@ Servo::Servo(const rclcpp::Node::SharedPtr& node, std::shared_ptr<const servo::P
 {
   servo_params_ = servo_param_listener_->get_params();
 
-  const bool params_valid = validateParams(servo_params_);
-  if (!params_valid)
+  if (!validateParams(servo_params_))
   {
     RCLCPP_ERROR_STREAM(LOGGER, "Got invalid parameters, exiting.");
     std::exit(EXIT_FAILURE);
@@ -117,8 +116,38 @@ Servo::Servo(const rclcpp::Node::SharedPtr& node, std::shared_ptr<const servo::P
     collision_monitor_->start();
 
     servo_status_ = StatusCode::NO_WARNING;
-    RCLCPP_INFO_STREAM(LOGGER, "Servo initialized successfully");
   }
+
+  const auto& move_group_joint_names = planning_scene_monitor_->getRobotModel()
+                                           ->getJointModelGroup(servo_params_.move_group_name)
+                                           ->getActiveJointModelNames();
+  // Create subgroup map
+  for (const auto& sub_group_name : planning_scene_monitor_->getRobotModel()->getJointModelGroupNames())
+  {
+    // Skip move group
+    if (sub_group_name == servo_params_.move_group_name)
+    {
+      continue;
+    }
+    const auto& subgroup_joint_names =
+        planning_scene_monitor_->getRobotModel()->getJointModelGroup(sub_group_name)->getActiveJointModelNames();
+
+    JointNameToMoveGroupIndexMap new_map;
+    // For each joint name of the subgroup calculate the index in the move group joint vector
+    for (const auto& joint_name : subgroup_joint_names)
+    {
+      // Find subgroup joint name in move group joint names
+      const auto move_group_iterator =
+          std::find(move_group_joint_names.cbegin(), move_group_joint_names.cend(), joint_name);
+      // Calculate position and add a new mapping of joint name to move group joint vector position
+      new_map.insert(std::make_pair<std::string, std::size_t>(
+          std::string(joint_name), std::distance(move_group_joint_names.cbegin(), move_group_iterator)));
+    }
+    // Add new joint name to index map to existing maps
+    joint_name_to_index_maps_.insert(
+        std::make_pair<std::string, JointNameToMoveGroupIndexMap>(std::string(sub_group_name), std::move(new_map)));
+  }
+  RCLCPP_INFO_STREAM(LOGGER, "Servo initialized successfully");
 }
 
 Servo::~Servo()
@@ -161,7 +190,6 @@ void Servo::setCollisionChecking(const bool check_collision)
 bool Servo::validateParams(const servo::Params& servo_params) const
 {
   bool params_valid = true;
-
   auto robot_state = planning_scene_monitor_->getStateMonitor()->getCurrentState();
   auto joint_model_group = robot_state->getJointModelGroup(servo_params.move_group_name);
   if (joint_model_group == nullptr)
@@ -205,29 +233,31 @@ bool Servo::validateParams(const servo::Params& servo_params) const
     params_valid = false;
   }
 
+  if (!servo_params.active_subgroup.empty() && servo_params.active_subgroup != servo_params.move_group_name &&
+      !joint_model_group->isSubgroup(servo_params.active_subgroup))
+  {
+    RCLCPP_ERROR(LOGGER,
+                 "The value '%s' Parameter 'active_subgroup' does not name a valid subgroup of joint group '%s'.",
+                 servo_params.active_subgroup.c_str(), servo_params.move_group_name.c_str());
+    params_valid = false;
+  }
+
   return params_valid;
 }
 
 bool Servo::updateParams()
 {
   bool params_updated = false;
-
   if (servo_param_listener_->is_old(servo_params_))
   {
-    auto params = servo_param_listener_->get_params();
+    const auto params = servo_param_listener_->get_params();
 
-    const bool params_valid = validateParams(params);
-    if (params_valid)
+    if (validateParams(params))
     {
       if (params.override_velocity_scaling_factor != servo_params_.override_velocity_scaling_factor)
       {
         RCLCPP_INFO_STREAM(LOGGER, "override_velocity_scaling_factor changed to : "
                                        << std::to_string(params.override_velocity_scaling_factor));
-      }
-      if (params.move_group_name != servo_params_.move_group_name)
-      {
-        RCLCPP_INFO_STREAM(LOGGER, "Move group changed from " << servo_params_.move_group_name << " to "
-                                                              << params.move_group_name);
       }
 
       servo_params_ = params;
@@ -310,6 +340,12 @@ KinematicState Servo::haltJoints(const std::vector<int>& joints_to_halt, const K
 
 Eigen::VectorXd Servo::jointDeltaFromCommand(const ServoInput& command, const moveit::core::RobotStatePtr& robot_state)
 {
+  // Determine joint_name_group_index_map, if no subgroup is active, the map is empty
+  const auto& joint_name_group_index_map =
+      (!servo_params_.active_subgroup.empty() && servo_params_.active_subgroup != servo_params_.move_group_name) ?
+          joint_name_to_index_maps_.at(servo_params_.active_subgroup) :
+          JointNameToMoveGroupIndexMap();
+
   const int num_joints =
       robot_state->getJointModelGroup(servo_params_.move_group_name)->getActiveJointModelNames().size();
   Eigen::VectorXd joint_position_deltas(num_joints);
@@ -322,7 +358,8 @@ Eigen::VectorXd Servo::jointDeltaFromCommand(const ServoInput& command, const mo
   {
     if (expected_type == CommandType::JOINT_JOG)
     {
-      delta_result = jointDeltaFromJointJog(std::get<JointJogCommand>(command), robot_state, servo_params_);
+      delta_result = jointDeltaFromJointJog(std::get<JointJogCommand>(command), robot_state, servo_params_,
+                                            joint_name_group_index_map);
       servo_status_ = delta_result.first;
     }
     else if (expected_type == CommandType::TWIST)
@@ -330,7 +367,8 @@ Eigen::VectorXd Servo::jointDeltaFromCommand(const ServoInput& command, const mo
       try
       {
         const TwistCommand command_in_planning_frame = toPlanningFrame(std::get<TwistCommand>(command));
-        delta_result = jointDeltaFromTwist(command_in_planning_frame, robot_state, servo_params_);
+        delta_result =
+            jointDeltaFromTwist(command_in_planning_frame, robot_state, servo_params_, joint_name_group_index_map);
         servo_status_ = delta_result.first;
       }
       catch (tf2::TransformException& ex)
@@ -344,7 +382,8 @@ Eigen::VectorXd Servo::jointDeltaFromCommand(const ServoInput& command, const mo
       try
       {
         const PoseCommand command_in_planning_frame = toPlanningFrame(std::get<PoseCommand>(command));
-        delta_result = jointDeltaFromPose(command_in_planning_frame, robot_state, servo_params_);
+        delta_result =
+            jointDeltaFromPose(command_in_planning_frame, robot_state, servo_params_, joint_name_group_index_map);
         servo_status_ = delta_result.first;
       }
       catch (tf2::TransformException& ex)
