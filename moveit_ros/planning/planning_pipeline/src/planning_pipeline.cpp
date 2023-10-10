@@ -42,45 +42,29 @@
 #include <fmt/format.h>
 #include <sstream>
 
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.ros_planning.planning_pipeline");
+#include <planning_pipeline_parameters.hpp>
 
-const std::string planning_pipeline::PlanningPipeline::DISPLAY_PATH_TOPIC = "display_planned_path";
-const std::string planning_pipeline::PlanningPipeline::MOTION_PLAN_REQUEST_TOPIC = "motion_plan_request";
-const std::string planning_pipeline::PlanningPipeline::MOTION_CONTACTS_TOPIC = "display_contacts";
+namespace
+{
+const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.ros_planning.planning_pipeline");
+}  // namespace
 
 planning_pipeline::PlanningPipeline::PlanningPipeline(const moveit::core::RobotModelConstPtr& model,
                                                       const std::shared_ptr<rclcpp::Node>& node,
-                                                      const std::string& parameter_namespace,
-                                                      const std::string& planner_plugin_param_name,
-                                                      const std::string& adapter_plugins_param_name)
-  : active_{ false }
-  , node_(node)
-  , parameter_namespace_(parameter_namespace)
-  , display_computed_motion_plans_{ false }
-  , publish_received_requests_{ false }
-  , robot_model_(model)
-  , check_solution_paths_{ false }
+                                                      const std::string& parameter_namespace)
+  : active_{ false }, node_(node), parameter_namespace_(parameter_namespace), robot_model_(model)
 {
-  std::string planner_plugin_fullname = parameter_namespace_ + "." + planner_plugin_param_name;
-  if (parameter_namespace_.empty())
-    planner_plugin_fullname = planner_plugin_param_name;
-  if (node_->has_parameter(planner_plugin_fullname))
+  auto param_listener = planning_pipeline_parameters::ParamListener(node, parameter_namespace);
+  const auto params = param_listener.get_params();
+  planner_plugin_name_ = params.planning_plugin;
+  if (!params.request_adapters.empty())
   {
-    node_->get_parameter(planner_plugin_fullname, planner_plugin_name_);
-  }
-
-  std::string adapter_plugins_fullname = parameter_namespace_ + "." + adapter_plugins_param_name;
-  if (parameter_namespace_.empty())
-    adapter_plugins_fullname = adapter_plugins_param_name;
-
-  std::string adapters;
-  if (node_->has_parameter(adapter_plugins_fullname))
-  {
-    node_->get_parameter(adapter_plugins_fullname, adapters);
     boost::char_separator<char> sep(" ");
-    boost::tokenizer<boost::char_separator<char>> tok(adapters, sep);
+    boost::tokenizer<boost::char_separator<char>> tok(params.request_adapters, sep);
     for (boost::tokenizer<boost::char_separator<char>>::iterator beg = tok.begin(); beg != tok.end(); ++beg)
+    {
       adapter_plugin_names_.push_back(*beg);
+    }
   }
 
   configure();
@@ -94,18 +78,23 @@ planning_pipeline::PlanningPipeline::PlanningPipeline(const moveit::core::RobotM
   : active_{ false }
   , node_(node)
   , parameter_namespace_(parameter_namespace)
-  , display_computed_motion_plans_{ false }
-  , publish_received_requests_{ false }
   , planner_plugin_name_(planner_plugin_name)
   , adapter_plugin_names_(adapter_plugin_names)
   , robot_model_(model)
-  , check_solution_paths_{ false }
 {
   configure();
 }
 
 void planning_pipeline::PlanningPipeline::configure()
 {
+  // Optional publishers for debugging
+  received_request_publisher_ = node_->create_publisher<moveit_msgs::msg::MotionPlanRequest>(
+      MOTION_PLAN_REQUEST_TOPIC, rclcpp::SystemDefaultsQoS());
+  contacts_publisher_ =
+      node_->create_publisher<visualization_msgs::msg::MarkerArray>(MOTION_CONTACTS_TOPIC, rclcpp::SystemDefaultsQoS());
+  display_path_publisher_ =
+      node_->create_publisher<moveit_msgs::msg::DisplayTrajectory>(DISPLAY_PATH_TOPIC, rclcpp::SystemDefaultsQoS());
+
   // load the planning plugin
   try
   {
@@ -118,13 +107,9 @@ void planning_pipeline::PlanningPipeline::configure()
     throw;
   }
 
-  std::vector<std::string> classes;
-  if (planner_plugin_loader_)
-    classes = planner_plugin_loader_->getDeclaredClasses();
-
   if (planner_plugin_name_.empty())
   {
-    std::string classes_str = fmt::format("{}", fmt::join(classes, ", "));
+    std::string classes_str = fmt::format("{}", fmt::join(planner_plugin_loader_->getDeclaredClasses(), ", "));
     throw std::runtime_error("Planning plugin name is empty. Please choose one of the available plugins: " +
                              classes_str);
   }
@@ -140,7 +125,7 @@ void planning_pipeline::PlanningPipeline::configure()
   }
   catch (pluginlib::PluginlibException& ex)
   {
-    std::string classes_str = fmt::format("{}", fmt::join(classes, ", "));
+    std::string classes_str = fmt::format("{}", fmt::join(planner_plugin_loader_->getDeclaredClasses(), ", "));
     RCLCPP_FATAL(LOGGER,
                  "Exception while loading planner '%s': %s"
                  "Available plugins: %s",
@@ -201,72 +186,29 @@ void planning_pipeline::PlanningPipeline::configure()
   {
     RCLCPP_WARN(LOGGER, "No planning request adapter names specified.");
   }
-  displayComputedMotionPlans(true);
-  checkSolutionPaths(true);
-}
-
-void planning_pipeline::PlanningPipeline::displayComputedMotionPlans(bool flag)
-{
-  if (display_computed_motion_plans_ && !flag)
-  {
-    display_path_publisher_.reset();
-  }
-  else if (!display_computed_motion_plans_ && flag)
-  {
-    display_path_publisher_ = node_->create_publisher<moveit_msgs::msg::DisplayTrajectory>(DISPLAY_PATH_TOPIC, 10);
-  }
-  display_computed_motion_plans_ = flag;
-}
-
-void planning_pipeline::PlanningPipeline::publishReceivedRequests(bool flag)
-{
-  if (publish_received_requests_ && !flag)
-  {
-    received_request_publisher_.reset();
-  }
-  else if (!publish_received_requests_ && flag)
-  {
-    received_request_publisher_ =
-        node_->create_publisher<moveit_msgs::msg::MotionPlanRequest>(MOTION_PLAN_REQUEST_TOPIC, 10);
-  }
-  publish_received_requests_ = flag;
-}
-
-void planning_pipeline::PlanningPipeline::checkSolutionPaths(bool flag)
-{
-  if (check_solution_paths_ && !flag)
-  {
-    contacts_publisher_.reset();
-  }
-  else if (!check_solution_paths_ && flag)
-  {
-    contacts_publisher_ = node_->create_publisher<visualization_msgs::msg::MarkerArray>(MOTION_CONTACTS_TOPIC, 10);
-  }
-  check_solution_paths_ = flag;
 }
 
 bool planning_pipeline::PlanningPipeline::generatePlan(const planning_scene::PlanningSceneConstPtr& planning_scene,
                                                        const planning_interface::MotionPlanRequest& req,
-                                                       planning_interface::MotionPlanResponse& res) const
+                                                       planning_interface::MotionPlanResponse& res,
+                                                       const bool publish_received_requests,
+                                                       const bool check_solution_paths,
+                                                       const bool display_computed_motion_plans) const
 {
+  assert(planner_instance_ != nullptr);
+
   // Set planning pipeline active
   active_ = true;
 
   // broadcast the request we are about to work on, if needed
-  if (publish_received_requests_)
+  if (publish_received_requests)
   {
     received_request_publisher_->publish(req);
   }
 
-  if (!planner_instance_)
-  {
-    RCLCPP_ERROR(LOGGER, "No planning plugin loaded. Cannot plan.");
-    // Set planning pipeline to inactive
-
-    active_ = false;
-    return false;
-  }
-
+  // ---------------------------------
+  // Solve the motion planning problem
+  // ---------------------------------
   bool solved = false;
   try
   {
@@ -292,58 +234,63 @@ bool planning_pipeline::PlanningPipeline::generatePlan(const planning_scene::Pla
   {
     RCLCPP_ERROR(LOGGER, "Exception caught: '%s'", ex.what());
     // Set planning pipeline to inactive
-
     active_ = false;
     return false;
   }
-  bool valid = true;
 
+  // -----------------
+  // Validate solution
+  // -----------------
   if (solved && res.trajectory)
   {
     std::size_t state_count = res.trajectory->getWayPointCount();
     RCLCPP_DEBUG(LOGGER, "Motion planner reported a solution path with %ld states", state_count);
-    if (check_solution_paths_)
+    if (check_solution_paths)
     {
       visualization_msgs::msg::MarkerArray arr;
       visualization_msgs::msg::Marker m;
       m.action = visualization_msgs::msg::Marker::DELETEALL;
       arr.markers.push_back(m);
 
-      std::vector<std::size_t> index;
-      if (!planning_scene->isPathValid(*res.trajectory, req.path_constraints, req.group_name, false, &index))
+      std::vector<std::size_t> indices;
+      if (!planning_scene->isPathValid(*res.trajectory, req.path_constraints, req.group_name, false, &indices))
       {
         // check to see if there is any problem with the states that are found to be invalid
         // they are considered ok if they were added by a planning request adapter
         bool problem = false;
-        for (std::size_t i = 0; i < index.size() && !problem; ++i)
+        for (const auto& index : indices)
         {
           bool found = false;
-          for (std::size_t added_index : res.added_path_index)
+          for (const std::size_t& added_index : res.added_path_index)
           {
-            if (index[i] == added_index)
+            if (index == added_index)
             {
               found = true;
               break;
             }
           }
           if (!found)
+          {
             problem = true;
+            break;
+          }
         }
         if (problem)
         {
-          if (index.size() == 1 && index[0] == 0)
+          if (indices.size() == 1 && indices.at(0) == 0)
           {  // ignore cases when the robot starts at invalid location
             RCLCPP_DEBUG(LOGGER, "It appears the robot is starting at an invalid state, but that is ok.");
           }
           else
           {
-            valid = false;
             res.error_code.val = moveit_msgs::msg::MoveItErrorCodes::INVALID_MOTION_PLAN;
 
             // display error messages
             std::stringstream ss;
-            for (std::size_t it : index)
+            for (std::size_t it : indices)
+            {
               ss << it << ' ';
+            }
 
             RCLCPP_ERROR_STREAM(LOGGER, "Computed path is not valid. Invalid states at index locations: [ "
                                             << ss.str() << "] out of " << state_count
@@ -351,7 +298,7 @@ bool planning_pipeline::PlanningPipeline::generatePlan(const planning_scene::Pla
                                             << contacts_publisher_->get_topic_name());
 
             // call validity checks in verbose mode for the problematic states
-            for (std::size_t it : index)
+            for (std::size_t it : indices)
             {
               // check validity with verbose on
               const moveit::core::RobotState& robot_state = res.trajectory->getWayPoint(it);
@@ -387,30 +334,33 @@ bool planning_pipeline::PlanningPipeline::generatePlan(const planning_scene::Pla
         RCLCPP_DEBUG(LOGGER, "Planned path was found to be valid when rechecked");
       contacts_publisher_->publish(arr);
     }
-  }
 
-  // display solution path if needed
-  if (display_computed_motion_plans_ && solved)
-  {
-    moveit_msgs::msg::DisplayTrajectory disp;
-    disp.model_id = robot_model_->getName();
-    disp.trajectory.resize(1);
-    res.trajectory->getRobotTrajectoryMsg(disp.trajectory[0]);
-    moveit::core::robotStateToRobotStateMsg(res.trajectory->getFirstWayPoint(), disp.trajectory_start);
-    display_path_publisher_->publish(disp);
+    // Optionally publish DisplayTrajectory msg
+    if (display_computed_motion_plans)
+    {
+      moveit_msgs::msg::DisplayTrajectory disp;
+      disp.model_id = robot_model_->getName();
+      disp.trajectory.resize(1);
+      res.trajectory->getRobotTrajectoryMsg(disp.trajectory.at(0));
+      moveit::core::robotStateToRobotStateMsg(res.trajectory->getFirstWayPoint(), disp.trajectory_start);
+      display_path_publisher_->publish(disp);
+    }
   }
-
-  if (!solved)
+  else  // If no trajectory exists, let's see if it might be related to stacked constraints
   {
     // This should alert the user if planning failed because of contradicting constraints.
     // Could be checked more thoroughly, but it is probably not worth going to that length.
     bool stacked_constraints = false;
     if (req.path_constraints.position_constraints.size() > 1 || req.path_constraints.orientation_constraints.size() > 1)
+    {
       stacked_constraints = true;
+    }
     for (const auto& constraint : req.goal_constraints)
     {
       if (constraint.position_constraints.size() > 1 || constraint.orientation_constraints.size() > 1)
+      {
         stacked_constraints = true;
+      }
     }
     if (stacked_constraints)
     {
@@ -421,7 +371,7 @@ bool planning_pipeline::PlanningPipeline::generatePlan(const planning_scene::Pla
     }
   }
 
-  // Make sure that planner id is set
+  // Make sure that planner id is set in the response
   if (res.planner_id.empty())
   {
     RCLCPP_WARN(LOGGER, "The planner plugin did not fill out the 'planner_id' field of the MotionPlanResponse. Setting "
@@ -432,7 +382,7 @@ bool planning_pipeline::PlanningPipeline::generatePlan(const planning_scene::Pla
 
   // Set planning pipeline to inactive
   active_ = false;
-  return solved && valid;
+  return solved && bool(res);
 }
 
 void planning_pipeline::PlanningPipeline::terminate() const
