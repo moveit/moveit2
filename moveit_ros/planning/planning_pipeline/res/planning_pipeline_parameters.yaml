@@ -7,5 +7,5 @@ planning_pipeline_parameters:
   request_adapters: {
     type: string,
     description: "Names of the planning request adapter plugins (plugin names separated by space).",
-    default_value: "UNKNOWN",
+    default_value: "",
   }
