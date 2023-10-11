@@ -38,6 +38,7 @@
 #include <moveit_setup_framework/data/srdf_config.hpp>
 #include <QApplication>
 #include <rviz_rendering/render_window.hpp>
+#include <rviz_common/tool_manager.hpp>
 
 namespace moveit_setup
 {
@@ -73,6 +74,9 @@ void RVizPanel::initialize()
   rviz_render_panel_->initialize(rviz_manager_);
   rviz_manager_->initialize();
   rviz_manager_->startUpdate();
+
+  auto tm = rviz_manager_->getToolManager();
+  tm->addTool("rviz_default_plugins/MoveCamera");
 
   // Create the MoveIt Rviz Plugin and attach to display
   robot_state_display_ = new moveit_rviz_plugin::RobotStateDisplay();
