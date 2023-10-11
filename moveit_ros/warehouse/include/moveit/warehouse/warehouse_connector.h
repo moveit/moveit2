@@ -37,6 +37,7 @@
 #pragma once
 
 #include <string>
+#include <rclcpp/logger.hpp>
 
 namespace moveit_warehouse
 {
@@ -47,7 +48,7 @@ public:
 
   ~WarehouseConnector();
 
-  bool connectToDatabase(const std::string& db_dirname);
+  bool connectToDatabase(const std::string& db_dirname, const rclcpp::Logger& logger);
 
 private:
   std::string dbexec_;

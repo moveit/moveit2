@@ -41,8 +41,6 @@
 #include <rclcpp/logging.hpp>
 #include <rclcpp/utilities.hpp>
 
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.ros.warehouse.warehouse_connector");
-
 #ifdef _WIN32
 void kill(int, int)
 {
@@ -69,7 +67,7 @@ WarehouseConnector::~WarehouseConnector()
     kill(child_pid_, SIGTERM);
 }
 
-bool WarehouseConnector::connectToDatabase(const std::string& dirname)
+bool WarehouseConnector::connectToDatabase(const std::string& dirname, const rclcpp::Logger& logger)
 {
   if (child_pid_ != 0)
     kill(child_pid_, SIGTERM);
@@ -77,7 +75,7 @@ bool WarehouseConnector::connectToDatabase(const std::string& dirname)
   child_pid_ = fork();
   if (child_pid_ == -1)
   {
-    RCLCPP_ERROR(LOGGER, "Error forking process.");
+    RCLCPP_ERROR(logger, "Error forking process.");
     child_pid_ = 0;
     return false;
   }
@@ -105,7 +103,7 @@ bool WarehouseConnector::connectToDatabase(const std::string& dirname)
       delete[] argv[1];
       delete[] argv[2];
       delete[] argv;
-      RCLCPP_ERROR_STREAM(LOGGER,
+      RCLCPP_ERROR_STREAM(logger,
                           "execv() returned " << code << ", errno=" << errno << " string errno = " << strerror(errno));
     }
     return false;
