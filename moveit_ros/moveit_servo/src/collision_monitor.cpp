@@ -66,7 +66,7 @@ void CollisionMonitor::start()
   }
   else
   {
-    RCLCPP_INFO_STREAM(LOGGER, "Collision monitor could not be started");
+    RCLCPP_ERROR_STREAM(LOGGER, "Collision monitor could not be started");
   }
 }
 
