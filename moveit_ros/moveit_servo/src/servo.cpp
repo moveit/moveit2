@@ -401,7 +401,7 @@ Eigen::VectorXd Servo::jointDeltaFromCommand(const ServoInput& command, const mo
   else
   {
     servo_status_ = StatusCode::INVALID;
-    RCLCPP_WARN_STREAM(LOGGER, "SERVO : Incoming command type does not match expected command type.");
+    RCLCPP_WARN_STREAM(LOGGER, "Incoming servo command type does not match known command types.");
   }
 
   return joint_position_deltas;
@@ -477,7 +477,9 @@ KinematicState Servo::getNextJointState(const ServoInput& command)
     const double joint_limit_scale = jointLimitVelocityScalingFactor(target_joint_velocities, joint_bounds,
                                                                      servo_params_.override_velocity_scaling_factor);
     if (joint_limit_scale < 1.0)  // 1.0 means no scaling.
-      RCLCPP_WARN_STREAM(LOGGER, "Joint velocity limit scaling applied by a factor of " << joint_limit_scale);
+    {
+      RCLCPP_DEBUG_STREAM(LOGGER, "Joint velocity limit scaling applied by a factor of " << joint_limit_scale);
+    }
 
     target_joint_velocities *= joint_limit_scale;
 
