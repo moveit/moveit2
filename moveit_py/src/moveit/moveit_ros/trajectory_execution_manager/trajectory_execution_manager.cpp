@@ -155,6 +155,7 @@ void init_trajectory_execution_manager(py::module& m)
            )")
 
       // ToDo(MatthijsBurgh)
+      // See https://github.com/ros-planning/moveit2/issues/2442
       // getTrajectories
       // execute
       // executeAndWait
@@ -216,6 +217,7 @@ void init_trajectory_execution_manager(py::module& m)
            )");
 
   // ToDo(MatthijsBurgh)
+  // https://github.com/ros-planning/moveit2/issues/2442
   // getControllerManagerNode
 }
 }  // namespace bind_trajectory_execution_manager
