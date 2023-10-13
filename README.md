@@ -1,6 +1,8 @@
-<img src="https://moveit.ros.org/assets/logo/moveit_logo-black.png" alt="MoveIt Logo" width="200"/>
+<div align="center">  
+  <img src="https://moveit.ros.org/assets/logo/moveit_logo-black.png" alt="MoveIt Logo" width="200"/>
+<div/>
 
-The [MoveIt Motion Planning Framework for ROS 2](http://moveit.ros.org). For the ROS 1 repository see [MoveIt 1](https://github.com/ros-planning/moveit).
+## The [MoveIt Motion Planning Framework for ROS 2](http://moveit.ros.org). For the ROS 1 repository see [MoveIt 1](https://github.com/ros-planning/moveit).
 
 *Easy-to-use open source robotics manipulation platform for developing commercial applications, prototyping designs, and benchmarking algorithms.*
 
@@ -10,50 +12,51 @@ The [MoveIt Motion Planning Framework for ROS 2](http://moveit.ros.org). For the
 [![CI (Rolling and Humble)](https://github.com/ros-planning/moveit2/actions/workflows/ci.yaml/badge.svg?branch=main)](https://github.com/ros-planning/moveit2/actions/workflows/ci.yaml?query=branch%3Amain)
 [![Code Coverage](https://codecov.io/gh/ros-planning/moveit2/branch/main/graph/badge.svg?token=W7uHKcY0ly)](https://codecov.io/gh/ros-planning/moveit2)
 
-## Getting Started
-
-See our extensive [Tutorials and Documentation](https://moveit.picknik.ai/)
-
+<div align="left">
+<h2>Getting Started</h2>
+<span>See our extensive <span/> <a href="https://moveit.picknik.ai/">Tutorials and Documentation</a>
+<br>
+<br>
+  
 ## Install
-
-- [Binary Install](https://moveit.ros.org/install-moveit2/binary/)
-- [Source Build](https://moveit.ros.org/install-moveit2/source/)
+- <a href="https://moveit.ros.org/install-moveit2/binary/">Binary Install</a>
+- <a href="https://moveit.ros.org/install-moveit2/source/">Source Build<a/>
+<br>
 
 ## More Info
-
 - [How to Get Involved](http://moveit.ros.org/about/get_involved/)
 - [Development Roadmap](https://moveit.ros.org/documentation/contributing/roadmap/)
 - [Future Release Dates](https://moveit.ros.org/#release-versions)
 - [MoveIt 2 Migration Guidelines](doc/MIGRATION_GUIDE.md)
 - [MoveIt 2 Migration Progress](https://docs.google.com/spreadsheets/d/1aPb3hNP213iPHQIYgcnCYh9cGFUlZmi_06E_9iTSsOI/edit?usp=sharing)
+<br>
 
 ## Supporters
-
 This open source project is maintained by supporters from around the world — see our [MoveIt Maintainers and Core Contributors](https://moveit.ros.org/about/).
-
 <a href="https://picknik.ai/">
   <img src="https://picknik.ai/assets/images/logo.jpg" width="168">
-</a>
-
+</a><br>
 [PickNik Inc](https://picknik.ai/) is leading the development of MoveIt.
 If you would like to support this project, please contact hello@picknik.ai
+<br>
 
 <a href="http://rosin-project.eu">
-  <img src="http://rosin-project.eu/wp-content/uploads/rosin_ack_logo_wide.png"
-       alt="rosin_logo" height="60" >
-</a>
-
+  <img src="http://rosin-project.eu/wp-content/uploads/rosin_ack_logo_wide.png" alt="rosin_logo" height="60" >
+</a><br>
 The port to ROS 2 was supported by ROSIN - ROS-Industrial Quality-Assured Robot Software Components.
 More information: <a href="http://rosin-project.eu">rosin-project.eu</a>
+<br><br>
 
 <img src="http://rosin-project.eu/wp-content/uploads/rosin_eu_flag.jpg"
      alt="eu_flag" height="45" align="left" >
-
 This project has received funding from the European Union’s Horizon 2020
 research and innovation programme under grant agreement no. 732287.
+<br><br>
 
 ## Generate API Doxygen Documentation
 See [How To Generate API Doxygen Reference Locally](https://moveit.picknik.ai/main/doc/how_to_guides/how_to_generate_api_doxygen_locally.html)
+</div>
+<br>
 
 # Buildfarm
 | Package | Humble Binary | Iron Binary | Rolling Binary |
