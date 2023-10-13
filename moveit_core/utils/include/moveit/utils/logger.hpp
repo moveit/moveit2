@@ -36,7 +36,7 @@
 
 #pragma once
 
-#include <rclcpp/rclcpp.hpp>
+#include <rclcpp/logger.hpp>
 
 namespace moveit
 {
