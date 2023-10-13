@@ -1,6 +1,6 @@
 # syntax = docker/dockerfile:1.3
 
-# ghcr.io/ros-planning/moveit2:main-tutorial-${ROS_DISTRO}
+# ghcr.io/ros-planning/moveit2:main-${ROS_DISTRO}-tutorial-source
 # Source build of the repos file from the tutorail site
 
 ARG ROS_DISTRO=rolling
