@@ -21,8 +21,8 @@ jobs:
       packages: write
       contents: read
     env:
-      GH_IMAGE: ghcr.io/ros-planning/moveit2:main-tutorial-${{ matrix.ROS_DISTRO }}-${{ github.job }}
-      DH_IMAGE: moveit/moveit2:main-tutorial-${{ matrix.ROS_DISTRO }}-${{ github.job }}
+      GH_IMAGE: ghcr.io/ros-planning/moveit2:main-${{ matrix.ROS_DISTRO }}-${{ github.job }}
+      DH_IMAGE: moveit/moveit2:main-${{ matrix.ROS_DISTRO }}-${{ github.job }}
       PUSH: ${{ (github.event_name != 'pull_request') && (github.repository == 'ros-planning/moveit2') }}
 
     steps:
