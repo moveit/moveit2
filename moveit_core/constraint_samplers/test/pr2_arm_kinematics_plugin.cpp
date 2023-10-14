@@ -87,8 +87,7 @@ bool PR2ArmIKSolver::getCount(int& count, int max_count, int min_count)
 }
 
 PR2ArmIKSolver::PR2ArmIKSolver(const urdf::ModelInterface& robot_model, const std::string& root_frame_name,
-                               const std::string& tip_frame_name, double search_discretization_angle,
-                               int free_angle)
+                               const std::string& tip_frame_name, double search_discretization_angle, int free_angle)
   : ChainIkSolverPos()
 {
   search_discretization_angle_ = search_discretization_angle;

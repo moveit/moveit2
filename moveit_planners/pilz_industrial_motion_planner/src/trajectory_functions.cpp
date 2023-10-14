@@ -525,8 +525,7 @@ bool pilz_industrial_motion_planner::isRobotStateStationary(const moveit::core::
 }
 
 bool pilz_industrial_motion_planner::linearSearchIntersectionPoint(const std::string& link_name,
-                                                                   const Eigen::Vector3d& center_position,
-                                                                   double r,
+                                                                   const Eigen::Vector3d& center_position, double r,
                                                                    const robot_trajectory::RobotTrajectoryPtr& traj,
                                                                    bool inverseOrder, std::size_t& index)
 {

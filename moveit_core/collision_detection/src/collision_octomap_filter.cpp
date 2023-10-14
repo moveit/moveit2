@@ -49,20 +49,18 @@ static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_collision_detect
 
 // forward declarations
 bool getMetaballSurfaceProperties(const octomap::point3d_list& cloud, double spacing, double iso_value,
-                                  double r_multiple, const octomath::Vector3& contact_point,
-                                  octomath::Vector3& normal, double& depth, bool estimate_depth);
+                                  double r_multiple, const octomath::Vector3& contact_point, octomath::Vector3& normal,
+                                  double& depth, bool estimate_depth);
 
-bool findSurface(const octomap::point3d_list& cloud, double spacing, double iso_value,
-                 double r_multiple, const octomath::Vector3& seed, octomath::Vector3& surface_point,
-                 octomath::Vector3& normal);
+bool findSurface(const octomap::point3d_list& cloud, double spacing, double iso_value, double r_multiple,
+                 const octomath::Vector3& seed, octomath::Vector3& surface_point, octomath::Vector3& normal);
 
 bool sampleCloud(const octomap::point3d_list& cloud, double spacing, double r_multiple,
                  const octomath::Vector3& position, double& intensity, octomath::Vector3& gradient);
 
 int collision_detection::refineContactNormals(const World::ObjectConstPtr& object, CollisionResult& res,
-                                              double cell_bbx_search_distance,
-                                              double allowed_angle_divergence, bool estimate_depth,
-                                              double iso_value, double metaball_radius_multiple)
+                                              double cell_bbx_search_distance, double allowed_angle_divergence,
+                                              bool estimate_depth, double iso_value, double metaball_radius_multiple)
 {
   if (!object)
   {
@@ -171,8 +169,8 @@ int collision_detection::refineContactNormals(const World::ObjectConstPtr& objec
 }
 
 bool getMetaballSurfaceProperties(const octomap::point3d_list& cloud, double spacing, double iso_value,
-                                  double r_multiple, const octomath::Vector3& contact_point,
-                                  octomath::Vector3& normal, double& depth, bool estimate_depth)
+                                  double r_multiple, const octomath::Vector3& contact_point, octomath::Vector3& normal,
+                                  double& depth, bool estimate_depth)
 {
   if (estimate_depth)
   {
@@ -207,9 +205,8 @@ bool getMetaballSurfaceProperties(const octomap::point3d_list& cloud, double spa
 // This algorithm is from Salisbury & Tarr's 1997 paper.  It will find the
 // closest point on the surface starting from a seed point that is close by
 // following the direction of the field gradient.
-bool findSurface(const octomap::point3d_list& cloud, double spacing, double iso_value,
-                 double r_multiple, const octomath::Vector3& seed, octomath::Vector3& surface_point,
-                 octomath::Vector3& normal)
+bool findSurface(const octomap::point3d_list& cloud, double spacing, double iso_value, double r_multiple,
+                 const octomath::Vector3& seed, octomath::Vector3& surface_point, octomath::Vector3& normal)
 {
   octomath::Vector3 p = seed, dp, gs;
   const int iterations = 10;
