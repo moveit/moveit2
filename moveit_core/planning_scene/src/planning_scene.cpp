@@ -1187,11 +1187,11 @@ void PlanningScene::decoupleParent()
     }
   }
 
-  if (!object_types_)
+  if (!object_types_.has_value())
   {
     ObjectTypeMap kc;
     parent_->getKnownObjectTypes(kc);
-    object_types_ = std::make_unique<ObjectTypeMap>(kc);
+    object_types_.value() = std::make_unique<ObjectTypeMap>(kc);
   }
   else
   {
@@ -1199,8 +1199,8 @@ void PlanningScene::decoupleParent()
     parent_->getKnownObjectTypes(kc);
     for (ObjectTypeMap::const_iterator it = kc.begin(); it != kc.end(); ++it)
     {
-      if (object_types_->find(it->first) == object_types_->end())
-        (*object_types_)[it->first] = it->second;
+      if (object_types_.value()->find(it->first) == object_types_.value()->end())
+        (*object_types_.value())[it->first] = it->second;
     }
   }
 
@@ -1274,7 +1274,7 @@ bool PlanningScene::setPlanningSceneMsg(const moveit_msgs::msg::PlanningScene& s
   if (parent_)
     decoupleParent();
 
-  object_types_.reset();
+  object_types_.value().reset();
   scene_transforms_->setTransforms(scene_msg.fixed_frame_transforms);
   setCurrentState(scene_msg.robot_state);
   acm_ = std::make_shared<collision_detection::AllowedCollisionMatrix>(scene_msg.allowed_collision_matrix);
@@ -1923,9 +1923,9 @@ bool PlanningScene::knowsFrameTransform(const moveit::core::RobotState& state, c
 
 bool PlanningScene::hasObjectType(const std::string& object_id) const
 {
-  if (object_types_)
+  if (object_types_.has_value())
   {
-    if (object_types_->find(object_id) != object_types_->end())
+    if (object_types_.value()->find(object_id) != object_types_.value()->end())
       return true;
   }
   if (parent_)
@@ -1935,10 +1935,10 @@ bool PlanningScene::hasObjectType(const std::string& object_id) const
 
 const object_recognition_msgs::msg::ObjectType& PlanningScene::getObjectType(const std::string& object_id) const
 {
-  if (object_types_)
+  if (object_types_.has_value())
   {
-    ObjectTypeMap::const_iterator it = object_types_->find(object_id);
-    if (it != object_types_->end())
+    ObjectTypeMap::const_iterator it = object_types_.value()->find(object_id);
+    if (it != object_types_.value()->end())
       return it->second;
   }
   if (parent_)
@@ -1949,15 +1949,15 @@ const object_recognition_msgs::msg::ObjectType& PlanningScene::getObjectType(con
 
 void PlanningScene::setObjectType(const std::string& object_id, const object_recognition_msgs::msg::ObjectType& type)
 {
-  if (!object_types_)
-    object_types_ = std::make_unique<ObjectTypeMap>();
-  (*object_types_)[object_id] = type;
+  if (!object_types_.value())
+    object_types_.value() = std::make_unique<ObjectTypeMap>();
+  (*object_types_.value())[object_id] = type;
 }
 
 void PlanningScene::removeObjectType(const std::string& object_id)
 {
-  if (object_types_)
-    object_types_->erase(object_id);
+  if (object_types_.has_value())
+    object_types_.value()->erase(object_id);
 }
 
 void PlanningScene::getKnownObjectTypes(ObjectTypeMap& kc) const
@@ -1965,9 +1965,9 @@ void PlanningScene::getKnownObjectTypes(ObjectTypeMap& kc) const
   kc.clear();
   if (parent_)
     parent_->getKnownObjectTypes(kc);
-  if (object_types_)
+  if (object_types_.has_value())
   {
-    for (ObjectTypeMap::const_iterator it = object_types_->begin(); it != object_types_->end(); ++it)
+    for (ObjectTypeMap::const_iterator it = object_types_.value()->begin(); it != object_types_.value()->end(); ++it)
       kc[it->first] = it->second;
   }
 }

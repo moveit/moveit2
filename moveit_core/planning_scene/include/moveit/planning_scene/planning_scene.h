@@ -56,6 +56,7 @@
 #include <optional>
 #include <thread>
 #include <variant>
+#include <optional>
 #include <rclcpp/rclcpp.hpp>
 
 #include <moveit_planning_scene_export.h>
@@ -1038,6 +1039,6 @@ private:
   std::unique_ptr<ObjectColorMap> original_object_colors_;
 
   // a map of object types
-  std::unique_ptr<ObjectTypeMap> object_types_;
+  std::optional<std::unique_ptr<ObjectTypeMap>> object_types_;
 };
 }  // namespace planning_scene
