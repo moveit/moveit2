@@ -78,7 +78,8 @@ plan(std::shared_ptr<moveit_cpp::PlanningComponent>& planning_component,
     }
     else if (solution_selection_function)
     {
-      return planning_component->plan(*const_multi_plan_parameters, std::ref(*solution_selection_function), nullptr, planning_scene);
+      return planning_component->plan(*const_multi_plan_parameters, std::ref(*solution_selection_function), nullptr,
+                                      planning_scene);
     }
     else if (stopping_criterion_callback)
     {
