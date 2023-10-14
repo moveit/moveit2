@@ -358,7 +358,7 @@ private:
   double enforceLimits(double val, double min, double max) const;
 
   void fillFreeParams(int count, int* array);
-  bool getCount(int& count, const int max_count, const int min_count) const;
+  bool getCount(int& count, int max_count, int min_count) const;
 
   /**
    * @brief samples the designated redundant joint using the chosen discretization method
@@ -732,7 +732,7 @@ void IKFastKinematicsPlugin::fillFreeParams(int count, int* array)
     free_params_.push_back(array[i]);
 }
 
-bool IKFastKinematicsPlugin::getCount(int& count, const int max_count, const int min_count) const
+bool IKFastKinematicsPlugin::getCount(int& count, int max_count, int min_count) const
 {
   if (count > 0)
   {

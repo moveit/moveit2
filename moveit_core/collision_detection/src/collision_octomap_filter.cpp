@@ -48,21 +48,21 @@
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_collision_detection.collision_octomap_filter");
 
 // forward declarations
-bool getMetaballSurfaceProperties(const octomap::point3d_list& cloud, const double spacing, const double iso_value,
-                                  const double r_multiple, const octomath::Vector3& contact_point,
+bool getMetaballSurfaceProperties(const octomap::point3d_list& cloud, double spacing, double iso_value,
+                                  double r_multiple, const octomath::Vector3& contact_point,
                                   octomath::Vector3& normal, double& depth, bool estimate_depth);
 
-bool findSurface(const octomap::point3d_list& cloud, const double spacing, const double iso_value,
-                 const double r_multiple, const octomath::Vector3& seed, octomath::Vector3& surface_point,
+bool findSurface(const octomap::point3d_list& cloud, double spacing, double iso_value,
+                 double r_multiple, const octomath::Vector3& seed, octomath::Vector3& surface_point,
                  octomath::Vector3& normal);
 
-bool sampleCloud(const octomap::point3d_list& cloud, const double spacing, const double r_multiple,
+bool sampleCloud(const octomap::point3d_list& cloud, double spacing, double r_multiple,
                  const octomath::Vector3& position, double& intensity, octomath::Vector3& gradient);
 
 int collision_detection::refineContactNormals(const World::ObjectConstPtr& object, CollisionResult& res,
-                                              const double cell_bbx_search_distance,
-                                              const double allowed_angle_divergence, const bool estimate_depth,
-                                              const double iso_value, const double metaball_radius_multiple)
+                                              double cell_bbx_search_distance,
+                                              double allowed_angle_divergence, bool estimate_depth,
+                                              double iso_value, double metaball_radius_multiple)
 {
   if (!object)
   {
@@ -170,9 +170,9 @@ int collision_detection::refineContactNormals(const World::ObjectConstPtr& objec
   return modified;
 }
 
-bool getMetaballSurfaceProperties(const octomap::point3d_list& cloud, const double spacing, const double iso_value,
-                                  const double r_multiple, const octomath::Vector3& contact_point,
-                                  octomath::Vector3& normal, double& depth, const bool estimate_depth)
+bool getMetaballSurfaceProperties(const octomap::point3d_list& cloud, double spacing, double iso_value,
+                                  double r_multiple, const octomath::Vector3& contact_point,
+                                  octomath::Vector3& normal, double& depth, bool estimate_depth)
 {
   if (estimate_depth)
   {
@@ -207,8 +207,8 @@ bool getMetaballSurfaceProperties(const octomap::point3d_list& cloud, const doub
 // This algorithm is from Salisbury & Tarr's 1997 paper.  It will find the
 // closest point on the surface starting from a seed point that is close by
 // following the direction of the field gradient.
-bool findSurface(const octomap::point3d_list& cloud, const double spacing, const double iso_value,
-                 const double r_multiple, const octomath::Vector3& seed, octomath::Vector3& surface_point,
+bool findSurface(const octomap::point3d_list& cloud, double spacing, double iso_value,
+                 double r_multiple, const octomath::Vector3& seed, octomath::Vector3& surface_point,
                  octomath::Vector3& normal)
 {
   octomath::Vector3 p = seed, dp, gs;
@@ -233,7 +233,7 @@ bool findSurface(const octomap::point3d_list& cloud, const double spacing, const
   //    return p;
 }
 
-bool sampleCloud(const octomap::point3d_list& cloud, const double spacing, const double r_multiple,
+bool sampleCloud(const octomap::point3d_list& cloud, double spacing, double r_multiple,
                  const octomath::Vector3& position, double& intensity, octomath::Vector3& gradient)
 {
   intensity = 0.f;

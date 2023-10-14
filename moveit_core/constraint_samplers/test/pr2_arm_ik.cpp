@@ -198,7 +198,7 @@ void PR2ArmIK::getSolverInfo(moveit_msgs::msg::KinematicSolverInfo& info)
   info = solver_info_;
 }
 
-void PR2ArmIK::computeIKShoulderPan(const Eigen::Isometry3f& g_in, const double t1_in,
+void PR2ArmIK::computeIKShoulderPan(const Eigen::Isometry3f& g_in, double t1_in,
                                     std::vector<std::vector<double> >& solution) const
 {
   // t1 = shoulder/turret pan is specified
