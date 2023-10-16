@@ -43,7 +43,7 @@
 #include <moveit/macros/class_forward.h>
 #include <moveit_smoothing_base_export.h>
 
-#include <tf2_eigen/tf2_eigen.hpp>
+#include <Eigen/Dense>
 
 namespace moveit
 {

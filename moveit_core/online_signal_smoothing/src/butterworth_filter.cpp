@@ -117,13 +117,14 @@ bool ButterworthFilterPlugin::initialize(rclcpp::Node::SharedPtr node, moveit::c
 bool ButterworthFilterPlugin::doSmoothing(Eigen::VectorXd& positions, Eigen::VectorXd& /* unused */,
                                           Eigen::VectorXd& /* unused */)
 {
-  if (positions.size() != position_filters_.size())
+  const size_t num_positions = positions.size();
+  if (num_positions != position_filters_.size())
   {
     RCLCPP_ERROR_THROTTLE(node_->get_logger(), *node_->get_clock(), 1000,
                           "Position vector to be smoothed does not have the right length.");
     return false;
   }
-  for (size_t i = 0; i < positions.size(); ++i)
+  for (size_t i = 0; i < num_positions; ++i)
   {
     // Lowpass filter the position command
     positions[i] = position_filters_.at(i).filter(positions[i]);
@@ -134,13 +135,14 @@ bool ButterworthFilterPlugin::doSmoothing(Eigen::VectorXd& positions, Eigen::Vec
 bool ButterworthFilterPlugin::reset(const Eigen::VectorXd& positions, const Eigen::VectorXd& /* unused */,
                                     const Eigen::VectorXd& /* unused */)
 {
-  if (positions.size() != position_filters_.size())
+  const size_t num_positions = positions.size();
+  if (num_positions != position_filters_.size())
   {
     RCLCPP_ERROR_THROTTLE(node_->get_logger(), *node_->get_clock(), 1000,
                           "Position vector to be reset does not have the right length.");
     return false;
   }
-  for (size_t joint_idx = 0; joint_idx < positions.size(); ++joint_idx)
+  for (size_t joint_idx = 0; joint_idx < num_positions; ++joint_idx)
   {
     position_filters_.at(joint_idx).reset(positions[joint_idx]);
   }
