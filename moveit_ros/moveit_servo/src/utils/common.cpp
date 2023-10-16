@@ -119,7 +119,7 @@ trajectory_msgs::msg::JointTrajectory composeTrajectoryMessage(const servo::Para
   joint_trajectory.header.frame_id = servo_params.planning_frame;
   joint_trajectory.joint_names = joint_state.joint_names;
 
-  trajectory_msgs::msg::JointTrajectoryPoint point;
+  static trajectory_msgs::msg::JointTrajectoryPoint point;
   point.time_from_start = rclcpp::Duration::from_seconds(servo_params.publish_period);
   const size_t num_joints = joint_state.joint_names.size();
   point.positions.resize(num_joints);
