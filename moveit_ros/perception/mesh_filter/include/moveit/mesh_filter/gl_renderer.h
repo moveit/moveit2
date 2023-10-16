@@ -150,14 +150,14 @@ public:
    * \author Suat Gedikli (gedikli@willowgarage.com)
    * \return distance of near clipping plane in meters
    */
-  const double& getNearClippingDistance() const;
+  double getNearClippingDistance() const;
 
   /**
    * \brief returns the distance of the far clipping plane in meters
    * \author Suat Gedikli (gedikli@willowgarage.com)
    * \return distance of the far clipping plane in meters
    */
-  const double& getFarClippingDistance() const;
+  double getFarClippingDistance() const;
 
   /**
    * \brief returns the width of the frame buffer objectsin pixels
