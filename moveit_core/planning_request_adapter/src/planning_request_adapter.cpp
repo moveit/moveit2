@@ -68,8 +68,14 @@ bool callAdapter(const PlanningRequestAdapter& adapter, const PlanningRequestAda
 {
   try
   {
+    auto previous = res.added_path_index.size();
     bool result = adapter.adaptAndPlan(planner, planning_scene, req, res);
     RCLCPP_DEBUG_STREAM(LOGGER, adapter.getDescription() << ": " << moveit::core::error_code_to_string(res.error_code));
+    for (auto n = previous, end = res.added_path_index.size(); n < end; ++n)  // iterate over the new indices
+      // iterate over the old indices and increase them if the new one is smaller
+      for (size_t p = 0; p < previous; ++p)
+        if (res.added_path_index[p] <= res.added_path_index[n])
+          ++res.added_path_index[p];
     return result;
   }
   catch (std::exception& ex)
