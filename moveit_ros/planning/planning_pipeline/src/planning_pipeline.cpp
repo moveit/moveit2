@@ -129,7 +129,7 @@ void PlanningPipeline::configure()
     // Check if planner is not NULL
     if (!planner_instance)
     {
-      throw std::runtime_error("Unable to initialize planning plugin " + planner_name);
+      throw std::runtime_error("Unable to initialize planning plugin " + planner_name + ". Planner instance is nullptr.");
     }
 
     // Initialize planner
