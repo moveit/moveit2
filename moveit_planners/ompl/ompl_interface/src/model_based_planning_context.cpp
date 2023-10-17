@@ -857,7 +857,7 @@ const moveit_msgs::msg::MoveItErrorCodes ompl_interface::ModelBasedPlanningConte
     RCLCPP_DEBUG(LOGGER, "%s: Solving the planning problem once...", name_.c_str());
     ob::PlannerTerminationCondition ptc = constructPlannerTerminationCondition(timeout, start);
     registerTerminationCondition(ptc);
-    result.val = ompl_simple_setup_->solve(ptc) == ompl::base::PlannerStatus::EXACT_SOLUTION;
+    std::ignore = ompl_simple_setup_->solve(ptc);
     last_plan_time_ = ompl_simple_setup_->getLastPlanComputationTime();
     unregisterTerminationCondition();
     // fill the result status code
@@ -971,7 +971,7 @@ void ompl_interface::ModelBasedPlanningContext::unregisterTerminationCondition()
 int32_t ompl_interface::ModelBasedPlanningContext::logPlannerStatus(const og::SimpleSetupPtr& ompl_simple_setup)
 {
   auto result = moveit_msgs::msg::MoveItErrorCodes::PLANNING_FAILED;
-  ompl::base::PlannerStatus ompl_status = ompl_simple_setup->getLastPlannerStatus();
+  const ompl::base::PlannerStatus ompl_status = ompl_simple_setup->getLastPlannerStatus();
   switch (ompl::base::PlannerStatus::StatusType(ompl_status))
   {
     case ompl::base::PlannerStatus::UNKNOWN:
@@ -991,12 +991,23 @@ int32_t ompl_interface::ModelBasedPlanningContext::logPlannerStatus(const og::Si
       result = moveit_msgs::msg::MoveItErrorCodes::UNRECOGNIZED_GOAL_TYPE;
       break;
     case ompl::base::PlannerStatus::TIMEOUT:
-      RCLCPP_WARN(LOGGER, "Timed out");
+      RCLCPP_WARN(LOGGER, "Timed out: %.1fs ≥ %.1fs", ompl_simple_setup->getLastPlanComputationTime(),
+                  request_.allowed_planning_time);
       result = moveit_msgs::msg::MoveItErrorCodes::TIMED_OUT;
       break;
     case ompl::base::PlannerStatus::APPROXIMATE_SOLUTION:
-      RCLCPP_WARN(LOGGER, "Solution is approximate");
-      result = moveit_msgs::msg::MoveItErrorCodes::SUCCESS;
+      // timeout is a common reason for APPROXIMATE_SOLUTION
+      if (ompl_simple_setup->getLastPlanComputationTime() > request_.allowed_planning_time)
+      {
+        RCLCPP_WARN(LOGGER, "Planning timed out: %.1fs ≥ %.1fs", ompl_simple_setup->getLastPlanComputationTime(),
+                    request_.allowed_planning_time);
+        result = moveit_msgs::msg::MoveItErrorCodes::TIMED_OUT;
+      }
+      else
+      {
+        RCLCPP_WARN(LOGGER, "Solution is approximate");
+        result = moveit_msgs::msg::MoveItErrorCodes::PLANNING_FAILED;
+      }
       break;
     case ompl::base::PlannerStatus::EXACT_SOLUTION:
       result = moveit_msgs::msg::MoveItErrorCodes::SUCCESS;
