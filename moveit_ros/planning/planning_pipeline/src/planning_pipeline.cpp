@@ -40,6 +40,40 @@
 
 namespace planning_pipeline
 {
+const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.ros_planning.planning_pipeline");
+
+/**
+ * @brief Transform a joint trajectory into a vector of joint constraints
+ *
+ * @param trajectory Reference trajectory from which the joint constraints are created
+ * @return A vector of joint constraints each corresponding to a waypoint of the reference trajectory.
+ */
+[[nodiscard]] std::vector<moveit_msgs::msg::Constraints>
+getTrajectoryConstraints(const robot_trajectory::RobotTrajectoryPtr& trajectory)
+{
+  const std::vector<std::string> joint_names =
+      trajectory->getFirstWayPoint().getJointModelGroup(trajectory->getGroupName())->getActiveJointModelNames();
+
+  std::vector<moveit_msgs::msg::Constraints> trajectory_constraints;
+  // Iterate through waypoints and create a joint constraint for each
+  for (size_t waypoint_index = 0; waypoint_index < trajectory->getWayPointCount(); ++waypoint_index)
+  {
+    moveit_msgs::msg::Constraints new_waypoint_constraint;
+    // Iterate through joints and copy waypoint data to joint constraint
+    for (size_t joint_index = 0; joint_index < joint_names.size(); ++joint_index)
+    {
+      moveit_msgs::msg::JointConstraint new_joint_constraint;
+      new_joint_constraint.joint_name = joint_names.at(joint_index);
+      new_joint_constraint.position =
+          trajectory->getWayPoint(waypoint_index).getVariablePosition(joint_names.at(joint_index));
+      new_waypoint_constraint.joint_constraints.push_back(new_joint_constraint);
+    }
+    trajectory_constraints.push_back(new_waypoint_constraint);
+  }
+  return trajectory_constraints;
+}
+}  // namespace
+
 PlanningPipeline::PlanningPipeline(const moveit::core::RobotModelConstPtr& model,
                                    const std::shared_ptr<rclcpp::Node>& node, const std::string& parameter_namespace)
   : active_{ false }
@@ -129,7 +163,8 @@ void PlanningPipeline::configure()
     // Check if planner is not NULL
     if (!planner_instance)
     {
-      throw std::runtime_error("Unable to initialize planning plugin " + planner_name + ". Planner instance is nullptr.");
+      throw std::runtime_error("Unable to initialize planning plugin " + planner_name +
+                               ". Planner instance is nullptr.");
     }
 
     // Initialize planner
@@ -261,6 +296,11 @@ bool PlanningPipeline::generatePlan(const planning_scene::PlanningSceneConstPtr&
     {
       if (res.error_code)
       {
+        // Update reference trajectory with latest solution (if available)
+        if (res.trajectory)
+        {
+          mutable_request.trajectory_constraints.constraints = getTrajectoryConstraints(res.trajectory);
+        }
         planning_interface::PlanningContextPtr context =
             planner->getPlanningContext(planning_scene, mutable_request, res.error_code);
         if (context)
