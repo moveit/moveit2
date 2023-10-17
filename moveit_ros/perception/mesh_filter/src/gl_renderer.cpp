@@ -246,12 +246,12 @@ const GLuint& mesh_filter::GLRenderer::getProgramID() const
   return program_;
 }
 
-double mesh_filter::GLRenderer::getNearClippingDistance() const
+const double& mesh_filter::GLRenderer::getNearClippingDistance() const
 {
   return near_;
 }
 
-double mesh_filter::GLRenderer::getFarClippingDistance() const
+const double& mesh_filter::GLRenderer::getFarClippingDistance() const
 {
   return far_;
 }

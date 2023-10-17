@@ -154,7 +154,7 @@ bool SrvKinematicsPlugin::setRedundantJoints(const std::vector<unsigned int>& re
 
 bool SrvKinematicsPlugin::isRedundantJoint(unsigned int index) const
 {
-  for (const unsigned int& redundant_joint_indice : redundant_joint_indices_)
+  for (unsigned int redundant_joint_indice : redundant_joint_indices_)
   {
     if (redundant_joint_indice == index)
       return true;
