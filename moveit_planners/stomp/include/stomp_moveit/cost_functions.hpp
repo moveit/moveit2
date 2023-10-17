@@ -49,7 +49,7 @@
 
 namespace stomp_moveit
 {
-// Decides if the given state position vector is valid or not - example use cases are collision or constraint checking
+// Validates a given state and produces a scalar cost penalty - example use cases are collision or constraint checking
 using StateValidatorFn = std::function<double(const Eigen::VectorXd& state_positions)>;
 
 namespace costs
