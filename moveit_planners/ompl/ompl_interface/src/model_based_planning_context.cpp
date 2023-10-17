@@ -996,14 +996,16 @@ int32_t ompl_interface::ModelBasedPlanningContext::logPlannerStatus(const og::Si
       result = moveit_msgs::msg::MoveItErrorCodes::UNRECOGNIZED_GOAL_TYPE;
       break;
     case ompl::base::PlannerStatus::TIMEOUT:
-      RCLCPP_WARN(LOGGER, "Timed out");
+      RCLCPP_WARN(LOGGER, "Timed out: %.1fs ≥ %.1fs", ompl_simple_setup->getLastPlanComputationTime(),
+                  request_.allowed_planning_time);
       result = moveit_msgs::msg::MoveItErrorCodes::TIMED_OUT;
       break;
     case ompl::base::PlannerStatus::APPROXIMATE_SOLUTION:
       // timeout is a common reason for APPROXIMATE_SOLUTION
       if (ompl_simple_setup->getLastPlanComputationTime() > request_.allowed_planning_time)
       {
-        RCLCPP_WARN(LOGGER, "Planning timed out");
+        RCLCPP_WARN(LOGGER, "Planning timed out: %.1fs ≥ %.1fs", ompl_simple_setup->getLastPlanComputationTime(),
+                    request_.allowed_planning_time);
         result = moveit_msgs::msg::MoveItErrorCodes::TIMED_OUT;
       }
       else
