@@ -358,6 +358,11 @@ void init_planning_component(py::module& m)
       .def("unset_workspace", &moveit_cpp::PlanningComponent::unsetWorkspace,
            R"(
            Remove the workspace bounding box from planning.
+           )")
+      .def("get_motion_plan_request", &moveit_cpp::PlanningComponent::getMotionPlanRequest,
+           py::arg("plan_request_parameters"),
+           R"(
+           Get a MotionPlanRequest message for current planning request.
            )");
 }
 }  // namespace bind_planning_component
