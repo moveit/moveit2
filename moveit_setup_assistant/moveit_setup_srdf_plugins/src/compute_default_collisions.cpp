@@ -349,7 +349,7 @@ void computeConnectionGraph(const moveit::core::LinkModel* start_link, LinkGraph
   // Recursively build adj list of link connections
   computeConnectionGraphRec(start_link, link_graph);
 
-  // Repeatdly check for links with no geometry and remove them, then re-check until no more removals are detected
+  // Repeatedly check for links with no geometry and remove them, then re-check until no more removals are detected
   bool update = true;  // track if a no geometry link was found
   while (update)
   {
