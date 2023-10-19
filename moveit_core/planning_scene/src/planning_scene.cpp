@@ -328,7 +328,8 @@ void PlanningScene::clearDiffs()
   robot_state_.reset();
   acm_.reset();
   object_colors_.reset();
-  object_types_.reset();
+  if(object_types_.has_value())
+    object_types_.value().reset();
 }
 
 void PlanningScene::pushDiffs(const PlanningScenePtr& scene)
@@ -1273,8 +1274,8 @@ bool PlanningScene::setPlanningSceneMsg(const moveit_msgs::msg::PlanningScene& s
 
   if (parent_)
     decoupleParent();
-
-  object_types_.value().reset();
+  if(object_types_.has_value())
+    object_types_.value().reset();
   scene_transforms_->setTransforms(scene_msg.fixed_frame_transforms);
   setCurrentState(scene_msg.robot_state);
   acm_ = std::make_shared<collision_detection::AllowedCollisionMatrix>(scene_msg.allowed_collision_matrix);
@@ -1949,7 +1950,7 @@ const object_recognition_msgs::msg::ObjectType& PlanningScene::getObjectType(con
 
 void PlanningScene::setObjectType(const std::string& object_id, const object_recognition_msgs::msg::ObjectType& type)
 {
-  if (!object_types_.value())
+  if (!object_types_.has_value())
     object_types_.value() = std::make_unique<ObjectTypeMap>();
   (*object_types_.value())[object_id] = type;
 }
