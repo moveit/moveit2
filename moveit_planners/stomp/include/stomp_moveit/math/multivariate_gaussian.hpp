@@ -42,7 +42,7 @@
 #include <Eigen/Core>
 #include <Eigen/Cholesky>
 
-#include <random>
+#include <rsl/random.hpp>
 #include <cstdlib>
 
 namespace stomp_moveit
@@ -75,8 +75,6 @@ private:
   Eigen::MatrixXd covariance_cholesky_; /**< Cholesky decomposition (LL^T) of the covariance */
 
   int size_;
-  std::mt19937 rng_;
-  std::random_device rd_{};
   std::normal_distribution<double> normal_dist_;
 };
 
@@ -87,7 +85,6 @@ MultivariateGaussian::MultivariateGaussian(const Eigen::MatrixBase<Derived1>& me
                                            const Eigen::MatrixBase<Derived2>& covariance)
   : mean_(mean), covariance_(covariance), covariance_cholesky_(covariance_.llt().matrixL()), normal_dist_(0.0, 1.0)
 {
-  rng_.seed(rd_());
   size_ = mean.rows();
 }
 
@@ -95,7 +92,7 @@ template <typename Derived>
 void MultivariateGaussian::sample(Eigen::MatrixBase<Derived>& output, bool use_covariance)
 {
   for (int i = 0; i < size_; ++i)
-    output(i) = normal_dist_(rng_);
+    output(i) = normal_dist_(rsl::rng());
 
   if (use_covariance)
   {
