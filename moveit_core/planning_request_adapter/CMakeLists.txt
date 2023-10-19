@@ -18,3 +18,11 @@ target_link_libraries(moveit_planning_request_adapter
 )
 
 install(DIRECTORY include/ DESTINATION include/moveit_core)
+
+if(BUILD_TESTING)
+  ament_add_gmock(test_planning_request_adapter_chain test/test_planning_request_adapter_chain.cpp)
+  target_link_libraries(test_planning_request_adapter_chain
+    moveit_test_utils
+    moveit_planning_interface
+    moveit_planning_request_adapter)
+endif()
