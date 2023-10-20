@@ -1186,14 +1186,14 @@ public:
   /** \brief Set all joints in \e group to random values near the value in \e seed.
    *  \e distance is the maximum amount each joint value will vary from the
    *  corresponding value in \e seed.  \distance represents meters for
-   *  prismatic/postitional joints and radians for revolute/orientation joints.
+   *  prismatic/positional joints and radians for revolute/orientation joints.
    *  Resulting values are clamped within default bounds. */
   void setToRandomPositionsNearBy(const JointModelGroup* group, const RobotState& seed, double distance);
 
   /** \brief Set all joints in \e group to random values near the value in \e seed, using a specified random number generator.
    *  \e distance is the maximum amount each joint value will vary from the
    *  corresponding value in \e seed.  \distance represents meters for
-   *  prismatic/postitional joints and radians for revolute/orientation joints.
+   *  prismatic/positional joints and radians for revolute/orientation joints.
    *  Resulting values are clamped within default bounds. */
   void setToRandomPositionsNearBy(const JointModelGroup* group, const RobotState& seed, double distance,
                                   random_numbers::RandomNumberGenerator& rng);
@@ -1203,7 +1203,7 @@ public:
    *  group.getActiveJointModels().  Each value in \e distances is the maximum
    *  amount the corresponding active joint in \e group will vary from the
    *  corresponding value in \e seed.  \distance represents meters for
-   *  prismatic/postitional joints and radians for revolute/orientation joints.
+   *  prismatic/positional joints and radians for revolute/orientation joints.
    *  Resulting values are clamped within default bounds. */
   void setToRandomPositionsNearBy(const JointModelGroup* group, const RobotState& seed,
                                   const std::vector<double>& distances);
@@ -1213,7 +1213,7 @@ public:
    *  group.getActiveJointModels().  Each value in \e distances is the maximum
    *  amount the corresponding active joint in \e group will vary from the
    *  corresponding value in \e seed.  \distance represents meters for
-   *  prismatic/postitional joints and radians for revolute/orientation joints.
+   *  prismatic/positional joints and radians for revolute/orientation joints.
    *  Resulting values are clamped within default bounds. */
   void setToRandomPositionsNearBy(const JointModelGroup* group, const RobotState& seed,
                                   const std::vector<double>& distances, random_numbers::RandomNumberGenerator& rng);
