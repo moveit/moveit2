@@ -328,7 +328,7 @@ void PlanningScene::clearDiffs()
   robot_state_.reset();
   acm_.reset();
   object_colors_.reset();
-  if(object_types_.has_value())
+  if (object_types_.has_value())
     object_types_.value().reset();
 }
 
@@ -1274,7 +1274,7 @@ bool PlanningScene::setPlanningSceneMsg(const moveit_msgs::msg::PlanningScene& s
 
   if (parent_)
     decoupleParent();
-  if(object_types_.has_value())
+  if (object_types_.has_value())
     object_types_.value().reset();
   scene_transforms_->setTransforms(scene_msg.fixed_frame_transforms);
   setCurrentState(scene_msg.robot_state);
