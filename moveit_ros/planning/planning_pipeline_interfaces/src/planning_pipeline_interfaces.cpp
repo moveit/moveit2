@@ -58,7 +58,10 @@ planWithSinglePipeline(const ::planning_interface::MotionPlanRequest& motion_pla
     return motion_plan_response;
   }
   const planning_pipeline::PlanningPipelinePtr pipeline = it->second;
-  pipeline->generatePlan(planning_scene, motion_plan_request, motion_plan_response);
+  if (!pipeline->generatePlan(planning_scene, motion_plan_request, motion_plan_response))
+  {
+    motion_plan_response.error_code = moveit::core::MoveItErrorCode::FAILURE;
+  }
   return motion_plan_response;
 }
 
@@ -157,8 +160,7 @@ const std::vector<::planning_interface::MotionPlanResponse> planWithParallelPipe
 std::unordered_map<std::string, planning_pipeline::PlanningPipelinePtr>
 createPlanningPipelineMap(const std::vector<std::string>& pipeline_names,
                           const moveit::core::RobotModelConstPtr& robot_model, const rclcpp::Node::SharedPtr& node,
-                          const std::string& parameter_namespace, const std::string& planning_plugin_param_name,
-                          const std::string& adapter_plugins_param_name)
+                          const std::string& parameter_namespace)
 {
   std::unordered_map<std::string, planning_pipeline::PlanningPipelinePtr> planning_pipelines;
   for (const auto& planning_pipeline_name : pipeline_names)
@@ -171,10 +173,8 @@ createPlanningPipelineMap(const std::vector<std::string>& pipeline_names,
     }
 
     // Create planning pipeline
-    planning_pipeline::PlanningPipelinePtr pipeline =
-        std::make_shared<planning_pipeline::PlanningPipeline>(robot_model, node,
-                                                              parameter_namespace + planning_pipeline_name,
-                                                              planning_plugin_param_name, adapter_plugins_param_name);
+    planning_pipeline::PlanningPipelinePtr pipeline = std::make_shared<planning_pipeline::PlanningPipeline>(
+        robot_model, node, parameter_namespace + planning_pipeline_name);
 
     if (!pipeline->getPlannerManager())
     {
