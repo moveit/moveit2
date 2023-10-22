@@ -460,7 +460,6 @@ KinematicState Servo::getNextJointState(const ServoInput& command)
     // Update filter state and apply filtering in position domain
     if (smoother_)
     {
-      smoother_->reset(current_state.positions, current_state.velocities, current_state.accelerations);
       smoother_->doSmoothing(target_state.positions, target_state.velocities, target_state.accelerations);
     }
 
