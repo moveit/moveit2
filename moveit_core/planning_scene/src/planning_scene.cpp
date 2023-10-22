@@ -328,8 +328,7 @@ void PlanningScene::clearDiffs()
   robot_state_.reset();
   acm_.reset();
   object_colors_.reset();
-  if (object_types_.has_value())
-    object_types_.value().reset();
+  object_types_.reset();
 }
 
 void PlanningScene::pushDiffs(const PlanningScenePtr& scene)
@@ -1274,8 +1273,7 @@ bool PlanningScene::setPlanningSceneMsg(const moveit_msgs::msg::PlanningScene& s
 
   if (parent_)
     decoupleParent();
-  if (object_types_.has_value())
-    object_types_.value().reset();
+  object_types_.reset();
   scene_transforms_->setTransforms(scene_msg.fixed_frame_transforms);
   setCurrentState(scene_msg.robot_state);
   acm_ = std::make_shared<collision_detection::AllowedCollisionMatrix>(scene_msg.allowed_collision_matrix);
