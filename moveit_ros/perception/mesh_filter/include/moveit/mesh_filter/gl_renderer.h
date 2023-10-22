@@ -174,7 +174,7 @@ public:
   unsigned getHeight() const;
 
   /**
-   * \brief set the size of fram buffers
+   * \brief set the size of frame buffers
    * \author Suat Gedikli (gedikli@willowgarage.com)
    * \param[in] width width of frame buffer in pixels
    * \param[in] height height of frame buffer in pixels

@@ -312,7 +312,7 @@ bool SrvKinematicsPlugin::searchPositionIK(const std::vector<geometry_msgs::msg:
     if (error_code.val != error_code.SUCCESS)
     {
       // TODO (JafarAbdi) Print the entire message for ROS2?
-      // RCLCPP_DEBUG("srv", "An IK that satisifes the constraints and is collision free could not be found."
+      // RCLCPP_DEBUG("srv", "An IK that satisfies the constraints and is collision free could not be found."
       //                                   << "\nRequest was: \n"
       //                                   << ik_srv.request.ik_request << "\nResponse was: \n"
       //                                   << ik_srv.response.solution);

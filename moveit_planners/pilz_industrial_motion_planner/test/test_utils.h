@@ -169,7 +169,7 @@ void createPTPRequest(const std::string& planning_group, const moveit::core::Rob
 
 /**
  * @brief check if the goal given in joint space is reached
- * Only the last point in the trajectory is veryfied.
+ * Only the last point in the trajectory is verified.
  * @param trajectory: generated trajectory
  * @param goal: goal in joint space
  * @param joint_position_tolerance
@@ -182,7 +182,7 @@ bool isGoalReached(const trajectory_msgs::msg::JointTrajectory& trajectory,
 
 /**
  * @brief check if the goal given in cartesian space is reached
- * Only the last point in the trajectory is veryfied.
+ * Only the last point in the trajectory is verified.
  * @param robot_model
  * @param trajectory
  * @param req

@@ -217,7 +217,7 @@ bool VelocityProfileATrap::setProfileStartVelocity(double pos1, double pos2, dou
 
   if (s * vel1 <= 0)
   {
-    // TODO initial velocity is in opposite derection of start-end vector
+    // TODO initial velocity is in opposite direction of start-end vector
     return false;
   }
 
