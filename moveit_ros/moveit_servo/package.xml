@@ -34,7 +34,6 @@
   <depend>sensor_msgs</depend>
   <depend>std_msgs</depend>
   <depend>std_srvs</depend>
-  <depend>tf2_eigen</depend>
   <depend>trajectory_msgs</depend>
 
   <exec_depend>controller_manager</exec_depend>
@@ -43,7 +42,6 @@
   <exec_depend>joint_trajectory_controller</exec_depend>
   <exec_depend>joy</exec_depend>
   <exec_depend>robot_state_publisher</exec_depend>
-  <exec_depend>tf2_ros</exec_depend>
   <exec_depend>moveit_configs_utils</exec_depend>
   <exec_depend>launch_param_builder</exec_depend>
 

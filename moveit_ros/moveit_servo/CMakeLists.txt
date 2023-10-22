@@ -18,7 +18,6 @@ set(THIS_PACKAGE_INCLUDE_DEPENDS
   sensor_msgs
   std_msgs
   std_srvs
-  tf2_eigen
   trajectory_msgs
 )
 
@@ -32,6 +31,8 @@ endforeach()
 
 include_directories(
   include
+SYSTEM
+  ${EIGEN3_INCLUDE_DIRS}
 )
 
 ###################
@@ -53,7 +54,7 @@ add_library(moveit_servo_lib_cpp SHARED
 
 )
 set_target_properties(moveit_servo_lib_cpp PROPERTIES VERSION "${moveit_servo_VERSION}")
-target_link_libraries(moveit_servo_lib_cpp moveit_servo_lib_parameters)
+target_link_libraries(moveit_servo_lib_cpp moveit_servo_lib_parameters ${Eigen_LIBRARIES})
 ament_target_dependencies(moveit_servo_lib_cpp ${THIS_PACKAGE_INCLUDE_DEPENDS})
 
 add_library(moveit_servo_lib_ros SHARED src/servo_node.cpp)
