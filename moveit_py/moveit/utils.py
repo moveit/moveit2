@@ -32,6 +32,8 @@
 #
 # Author: Peter David Fagan
 
+from typing import List, Optional
+
 import sys
 import traceback
 import yaml
@@ -47,12 +49,17 @@ def create_params_file_from_dict(params, node_name):
         return param_file_path
 
 
-def get_launch_params_filepath():
+def get_launch_params_filepaths(cli_args: Optional[List[str]] = None) -> List[str]:
     """
-    A utility that returns the path value after argument --params-file.
+    A utility that returns the path value after the --params-file arguments.
     """
-    try:
+    if cli_args is None:
         cli_args = sys.argv
-        return sys.argv[sys.argv.index("--params-file") + 1]
-    except ValueError:
-        return "Failed to parse params file path from command line arguments. Check that --params-file command line argument is specified."
+
+    try:
+        indexes = [i for i, v in enumerate(cli_args) if v == "--params-file"]
+        return [cli_args[i + 1] for i in indexes]
+    except IndexError:
+        return [
+            "Failed to parse params file paths from command line arguments. Check that --params-file command line argument is specified."
+        ]
