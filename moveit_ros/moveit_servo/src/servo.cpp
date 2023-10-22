@@ -180,6 +180,8 @@ void Servo::setSmoothingPlugin()
     RCLCPP_ERROR(LOGGER, "Smoothing plugin could not be initialized");
     std::exit(EXIT_FAILURE);
   }
+  KinematicState current_state = getCurrentRobotState();
+  smoother_->reset(current_state.positions, current_state.velocities, current_state.accelerations);
 }
 
 void Servo::setCollisionChecking(const bool check_collision)
