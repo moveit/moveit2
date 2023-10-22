@@ -122,9 +122,12 @@ trajectory_msgs::msg::JointTrajectory composeTrajectoryMessage(const servo::Para
   static trajectory_msgs::msg::JointTrajectoryPoint point;
   point.time_from_start = rclcpp::Duration::from_seconds(servo_params.publish_period);
   const size_t num_joints = joint_state.joint_names.size();
-  point.positions.resize(num_joints);
-  point.velocities.resize(num_joints);
-  point.accelerations.resize(num_joints);
+  if (point.positions.size() != num_joints)
+  {
+    point.positions.resize(num_joints);
+    point.velocities.resize(num_joints);
+    point.accelerations.resize(num_joints);
+  }
 
   // Set the fields of trajectory point based on which fields are requested.
   // Some controllers check that acceleration data is non-empty, even if accelerations are not used
