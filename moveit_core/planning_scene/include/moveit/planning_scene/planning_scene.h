@@ -160,7 +160,7 @@ public:
   const moveit::core::RobotState& getCurrentState() const
   {
     // if we have an updated state, return it; otherwise, return the parent one
-    return robot_state_ ? *robot_state_ : parent_->getCurrentState();
+    return robot_state_.has_value() ? *robot_state_.value() : parent_->getCurrentState();
   }
   /** \brief Get the state at which the robot is assumed to be. */
   moveit::core::RobotState& getCurrentStateNonConst();
@@ -1012,7 +1012,7 @@ private:
 
   moveit::core::RobotModelConstPtr robot_model_;  // Never null (may point to same model as parent)
 
-  moveit::core::RobotStatePtr robot_state_;  // if nullptr use parent's
+  std::optional<moveit::core::RobotStatePtr> robot_state_;  // if nullptr use parent's
 
   // Called when changes are made to attached bodies
   moveit::core::AttachedBodyCallback current_state_attached_body_callback_;
