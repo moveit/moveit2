@@ -1273,7 +1273,7 @@ bool PlanningScene::setPlanningSceneMsg(const moveit_msgs::msg::PlanningScene& s
 
   if (parent_)
     decoupleParent();
-  
+
   object_types_.reset();
   scene_transforms_->setTransforms(scene_msg.fixed_frame_transforms);
   setCurrentState(scene_msg.robot_state);
