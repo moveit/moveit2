@@ -1191,7 +1191,7 @@ void PlanningScene::decoupleParent()
   {
     ObjectTypeMap kc;
     parent_->getKnownObjectTypes(kc);
-    object_types_.value() = std::make_unique<ObjectTypeMap>(kc);
+    object_types_.value_or(std::make_unique<ObjectTypeMap>(kc));
   }
   else
   {
@@ -1273,6 +1273,7 @@ bool PlanningScene::setPlanningSceneMsg(const moveit_msgs::msg::PlanningScene& s
 
   if (parent_)
     decoupleParent();
+  
   object_types_.reset();
   scene_transforms_->setTransforms(scene_msg.fixed_frame_transforms);
   setCurrentState(scene_msg.robot_state);
@@ -1949,7 +1950,7 @@ const object_recognition_msgs::msg::ObjectType& PlanningScene::getObjectType(con
 void PlanningScene::setObjectType(const std::string& object_id, const object_recognition_msgs::msg::ObjectType& type)
 {
   if (!object_types_.has_value())
-    object_types_.value() = std::make_unique<ObjectTypeMap>();
+    object_types_.value_or(std::make_unique<ObjectTypeMap>());
   (*(object_types_.value()))[object_id] = type;
 }
 
