@@ -36,37 +36,21 @@
 
 #include <chrono>
 #include <rclcpp/rclcpp.hpp>
-#include <rclcpp/executors.hpp>
 #include <moveit/utils/logger.hpp>
-#include <thread>
-#include <rclcpp/version.h>
 
 int main(int argc, char** argv)
 {
   rclcpp::init(argc, argv);
-  rclcpp::Node::SharedPtr node = rclcpp::Node::make_shared("logger_test_node");
+  rclcpp::Node::SharedPtr node = rclcpp::Node::make_shared("dut_node");
 
-  // Not a node logger, should print but should not be in file or rosout output
-  RCLCPP_INFO(moveit::get_logger(), "Before");
-
-  // Set the node logger
+  // Set the moveit logger to be from node
   moveit::get_logger_mut() = node->get_logger();
 
-  // A node logger, should be in the file output and rosout
-  RCLCPP_INFO(moveit::get_logger(), "After");
+  // Make a child logger
+  const auto child_logger = moveit::make_child_logger("child");
 
-  // A child logger, should also be in the file output and rosout
-  const auto child_logger = moveit::get_child_logger("child");
-  RCLCPP_INFO(child_logger, "Child");
-
-  // Spin the node to publish to /rosout
-#if RCLCPP_VERSION_GTE(22, 1, 0)  // https://github.com/ros2/rclcpp/commit/a17d26b20ac41cc9d5bf3583de8475bb7c18bb1e
-  rclcpp::spin_all(node, std::chrono::seconds(1));
-#else  // Humble or Iron
-  rclcpp::executors::SingleThreadedExecutor exec;
-  exec.add_node(node);
-  exec.spin_all(std::chrono::seconds(1));
-#endif
-
-  std::this_thread::sleep_for(std::chrono::seconds(5));
+  // publish via a timer
+  auto wall_timer = node->create_wall_timer(std::chrono::milliseconds(100),
+                                            [&] { RCLCPP_INFO(child_logger, "hello from child node!"); });
+  rclcpp::spin(node);
 }

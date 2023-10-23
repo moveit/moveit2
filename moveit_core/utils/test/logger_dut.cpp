@@ -34,24 +34,21 @@
 
 /* Author: Tyler Weaver */
 
-#pragma once
+#include <chrono>
+#include <rclcpp/rclcpp.hpp>
+#include <moveit/utils/logger.hpp>
 
-#include <rclcpp/logger.hpp>
-#include <string>
-
-namespace moveit
+int main(int argc, char** argv)
 {
+  rclcpp::init(argc, argv);
+  rclcpp::Node::SharedPtr node = rclcpp::Node::make_shared("dut_node");
 
-// Function for getting a reference to a logger object kept on the stack
-// Use get_logger_mut to set the logger to a node logger
-const rclcpp::Logger& get_logger();
+  // Set the moveit logger to be from node
+  moveit::get_logger_mut() = node->get_logger();
 
-// Function for getting a child logger. In Humble this also creates a node
-// Do no use this in place as it will create a new logger each time
-// instead store it in the state of your class or method.
-rclcpp::Logger make_child_logger(const std::string& name);
+  // A node logger, should be in the file output and rosout
+  auto wall_timer = node->create_wall_timer(std::chrono::milliseconds(100),
+                                            [&] { RCLCPP_INFO(moveit::get_logger(), "hello from node!"); });
 
-// Mutable access to global logger for setting to node logger
-rclcpp::Logger& get_logger_mut();
-
-}  // namespace moveit
+  rclcpp::spin(node);
+}

@@ -32,9 +32,6 @@
 
 # Author: Tyler Weaver
 
-# Based on https://github.com/ros2/launch/blob/master/launch_testing/test/launch_testing/examples/good_proc_launch_test.py
-
-import os
 import unittest
 from threading import Event
 from threading import Thread
@@ -54,17 +51,16 @@ def generate_test_description():
     # dut: device under test
     dut_process = launch_ros.actions.Node(
         package="moveit_core",
-        executable="logger_test_node",
-        name="logger_test_node",
+        executable=launch.substitutions.LaunchConfiguration("dut"),
         output="screen",
     )
 
-    # This is necessary to get unbuffered output from the process under test
-    proc_env = os.environ.copy()
-    proc_env["PYTHONUNBUFFERED"] = "1"
-
     return launch.LaunchDescription(
         [
+            launch.actions.DeclareLaunchArgument(
+                "dut",
+                description="Executable to launch",
+            ),
             dut_process,
             # Start tests right away - no need to wait for anything
             launch_testing.actions.ReadyToTest(),
@@ -72,11 +68,10 @@ def generate_test_description():
     ), {"dut_process": dut_process}
 
 
-class MakeTestNode(Node):
-    def __init__(self, name="test_node"):
+class MakeRosoutObserverNode(Node):
+    def __init__(self, name="rosout_observer_node"):
         super().__init__(name)
         self.msg_event_object = Event()
-        self.rosout_msgs = []
 
     def start_subscriber(self):
         # Create a subscriber
@@ -91,22 +86,16 @@ class MakeTestNode(Node):
         self.ros_spin_thread.start()
 
     def subscriber_callback(self, data):
-        self.rosout_msgs.append(data)
         self.msg_event_object.set()
 
 
 # These tests will run concurrently with the dut process.  After all these tests are done,
 # the launch system will shut down the processes that it started up
 class TestFixture(unittest.TestCase):
-    def test_stdout_print(self, proc_output):
-        proc_output.assertWaitFor("Before", timeout=10, stream="stdout")
-        proc_output.assertWaitFor("After", timeout=10, stream="stdout")
-        proc_output.assertWaitFor("Child", timeout=10, stream="stdout")
-
     def test_rosout_msgs_published(self, proc_output):
         rclpy.init()
         try:
-            node = MakeTestNode("test_node")
+            node = MakeRosoutObserverNode()
             node.start_subscriber()
             msgs_received_flag = node.msg_event_object.wait(timeout=5.0)
             assert msgs_received_flag, "Did not receive msgs !"

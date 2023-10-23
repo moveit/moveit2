@@ -37,6 +37,7 @@
 #include <rclcpp/rclcpp.hpp>
 #include <moveit/utils/logger.hpp>
 #include <rclcpp/version.h>
+#include <vector>
 
 namespace moveit
 {
@@ -48,8 +49,20 @@ const rclcpp::Logger& get_logger()
   return get_logger_mut();
 }
 
-rclcpp::Logger get_child_logger(const std::string& name)
+rclcpp::Logger make_child_logger(const std::string& name)
 {
+  // On versions of ROS older than Iron we need to create a node for each child logger
+  // Remove once Humble is EOL
+  // References:
+  // Use parent logger (rcl PR) - https://github.com/ros2/rcl/pull/921
+  // Request for backport (rclpy issue) - https://github.com/ros2/rclpy/issues/1131
+  // MoveIt PR that added this - https://github.com/ros-planning/moveit2/pull/2445
+#if !RCLCPP_VERSION_GTE(21, 0, 3)
+  static std::vector<std::shared_ptr<rclcpp::Node>> child_nodes;
+  std::string ns = get_logger().get_name();
+  child_nodes.push_back(std::make_shared<rclcpp::Node>(name, ns));
+#endif
+
   auto logger = get_logger_mut().get_child(name);
   return logger;
 }
