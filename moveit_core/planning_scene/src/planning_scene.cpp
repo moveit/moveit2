@@ -189,7 +189,7 @@ void PlanningScene::initialize()
 {
   name_ = DEFAULT_SCENE_NAME;
 
-  scene_transforms_ = std::make_shared<SceneTransforms>(this);
+  scene_transforms_.emplace(std::make_shared<SceneTransforms>(this));
 
   robot_state_.emplace(std::make_shared<moveit::core::RobotState>(robot_model_));
   robot_state_.value()->setToDefaultValues();
@@ -336,8 +336,8 @@ void PlanningScene::pushDiffs(const PlanningScenePtr& scene)
   if (!parent_)
     return;
 
-  if (scene_transforms_)
-    scene->getTransformsNonConst().setAllTransforms(scene_transforms_->getAllTransforms());
+  if (scene_transforms_.has_value())
+    scene->getTransformsNonConst().setAllTransforms(scene_transforms_.value()->getAllTransforms());
 
   if (robot_state_.has_value())
   {
@@ -581,14 +581,14 @@ moveit::core::Transforms& PlanningScene::getTransformsNonConst()
 {
   // Trigger an update of the robot transforms
   getCurrentStateNonConst().update();
-  if (!scene_transforms_)
+  if (!scene_transforms_.has_value())
   {
     // The only case when there are no transforms is if this planning scene has a parent. When a non-const version of
     // the planning scene is requested, a copy of the parent's transforms is forced
-    scene_transforms_ = std::make_shared<SceneTransforms>(this);
-    scene_transforms_->setAllTransforms(parent_->getTransforms().getAllTransforms());
+    scene_transforms_.emplace(std::make_shared<SceneTransforms>(this));
+    scene_transforms_.value()->setAllTransforms(parent_->getTransforms().getAllTransforms());
   }
-  return *scene_transforms_;
+  return *scene_transforms_.value();
 }
 
 void PlanningScene::getPlanningSceneDiffMsg(moveit_msgs::msg::PlanningScene& scene_msg) const
@@ -597,9 +597,9 @@ void PlanningScene::getPlanningSceneDiffMsg(moveit_msgs::msg::PlanningScene& sce
   scene_msg.robot_model_name = getRobotModel()->getName();
   scene_msg.is_diff = true;
 
-  if (scene_transforms_)
+  if (scene_transforms_.has_value())
   {
-    scene_transforms_->copyTransforms(scene_msg.fixed_frame_transforms);
+    scene_transforms_.value()->copyTransforms(scene_msg.fixed_frame_transforms);
   }
   else
   {
@@ -1126,7 +1126,7 @@ void PlanningScene::setCurrentState(const moveit_msgs::msg::RobotState& state)
     moveit::core::robotStateMsgToRobotState(getTransforms(), state_no_attached, *robot_state_.value());
   }
   else
-    moveit::core::robotStateMsgToRobotState(*scene_transforms_, state_no_attached, *robot_state_.value());
+    moveit::core::robotStateMsgToRobotState(*scene_transforms_.value(), state_no_attached, *robot_state_.value());
 
   for (std::size_t i = 0; i < state.attached_collision_objects.size(); ++i)
   {
@@ -1153,10 +1153,10 @@ void PlanningScene::decoupleParent()
     return;
 
   // This child planning scene did not have its own copy of frame transforms
-  if (!scene_transforms_)
+  if (!scene_transforms_.has_value())
   {
-    scene_transforms_ = std::make_shared<SceneTransforms>(this);
-    scene_transforms_->setAllTransforms(parent_->getTransforms().getAllTransforms());
+    scene_transforms_.emplace(std::make_shared<SceneTransforms>(this));
+    scene_transforms_.value()->setAllTransforms(parent_->getTransforms().getAllTransforms());
   }
 
   if (!robot_state_.has_value())
@@ -1225,9 +1225,9 @@ bool PlanningScene::setPlanningSceneDiffMsg(const moveit_msgs::msg::PlanningScen
   // if the list is empty, then nothing has been set
   if (!scene_msg.fixed_frame_transforms.empty())
   {
-    if (!scene_transforms_)
-      scene_transforms_ = std::make_shared<SceneTransforms>(this);
-    scene_transforms_->setTransforms(scene_msg.fixed_frame_transforms);
+    if (!scene_transforms_.has_value())
+      scene_transforms_.emplace(std::make_shared<SceneTransforms>(this));
+    scene_transforms_.value()->setTransforms(scene_msg.fixed_frame_transforms);
   }
 
   // if at least some joints have been specified, we set them
@@ -1275,7 +1275,7 @@ bool PlanningScene::setPlanningSceneMsg(const moveit_msgs::msg::PlanningScene& s
     decoupleParent();
 
   object_types_.reset();
-  scene_transforms_->setTransforms(scene_msg.fixed_frame_transforms);
+  scene_transforms_.value()->setTransforms(scene_msg.fixed_frame_transforms);
   setCurrentState(scene_msg.robot_state);
   acm_.emplace(std::make_shared<collision_detection::AllowedCollisionMatrix>(scene_msg.allowed_collision_matrix));
   collision_detector_->cenv_->setPadding(scene_msg.link_padding);
