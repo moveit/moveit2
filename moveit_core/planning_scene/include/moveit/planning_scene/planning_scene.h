@@ -291,7 +291,7 @@ public:
   /** \brief Get the allowed collision matrix */
   const collision_detection::AllowedCollisionMatrix& getAllowedCollisionMatrix() const
   {
-    return acm_ ? *acm_ : parent_->getAllowedCollisionMatrix();
+    return acm_.has_value() ? *acm_.value() : parent_->getAllowedCollisionMatrix();
   }
 
   /** \brief Get the allowed collision matrix */
@@ -1029,7 +1029,7 @@ private:
 
   CollisionDetectorPtr collision_detector_;  // Never nullptr.
 
-  collision_detection::AllowedCollisionMatrixPtr acm_;  // if nullptr use parent's
+  std::optional<collision_detection::AllowedCollisionMatrixPtr> acm_;  // if nullptr use parent's
 
   StateFeasibilityFn state_feasibility_;
   MotionFeasibilityFn motion_feasibility_;

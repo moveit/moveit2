@@ -195,7 +195,7 @@ void PlanningScene::initialize()
   robot_state_->setToDefaultValues();
   robot_state_->update();
 
-  acm_ = std::make_shared<collision_detection::AllowedCollisionMatrix>(*getRobotModel()->getSRDF());
+  acm_.emplace(std::make_shared<collision_detection::AllowedCollisionMatrix>(*getRobotModel()->getSRDF()));
 
   allocateCollisionDetector(collision_detection::CollisionDetectorAllocatorFCL::create());
 }
@@ -354,8 +354,8 @@ void PlanningScene::pushDiffs(const PlanningScenePtr& scene)
     }
   }
 
-  if (acm_)
-    scene->getAllowedCollisionMatrixNonConst() = *acm_;
+  if (acm_.has_value())
+    scene->getAllowedCollisionMatrixNonConst() = *acm_.value();
 
   collision_detection::CollisionEnvPtr active_cenv = scene->getCollisionEnvNonConst();
   active_cenv->setLinkPadding(collision_detector_->cenv_->getLinkPadding());
@@ -560,9 +560,9 @@ void PlanningScene::setCollisionObjectUpdateCallback(const collision_detection::
 
 collision_detection::AllowedCollisionMatrix& PlanningScene::getAllowedCollisionMatrixNonConst()
 {
-  if (!acm_)
-    acm_ = std::make_shared<collision_detection::AllowedCollisionMatrix>(parent_->getAllowedCollisionMatrix());
-  return *acm_;
+  if (!acm_.has_value())
+    acm_.emplace(std::make_shared<collision_detection::AllowedCollisionMatrix>(parent_->getAllowedCollisionMatrix()));
+  return *acm_.value();
 }
 
 void PlanningScene::setAllowedCollisionMatrix(const collision_detection::AllowedCollisionMatrix& acm)
@@ -616,9 +616,9 @@ void PlanningScene::getPlanningSceneDiffMsg(moveit_msgs::msg::PlanningScene& sce
   }
   scene_msg.robot_state.is_diff = true;
 
-  if (acm_)
+  if (acm_.has_value())
   {
-    acm_->getMessage(scene_msg.allowed_collision_matrix);
+    acm_.value()->getMessage(scene_msg.allowed_collision_matrix);
   }
   else
   {
@@ -1165,8 +1165,8 @@ void PlanningScene::decoupleParent()
     robot_state_->setAttachedBodyUpdateCallback(current_state_attached_body_callback_);
   }
 
-  if (!acm_)
-    acm_ = std::make_shared<collision_detection::AllowedCollisionMatrix>(parent_->getAllowedCollisionMatrix());
+  if (!acm_.has_value())
+    acm_.emplace(std::make_shared<collision_detection::AllowedCollisionMatrix>(parent_->getAllowedCollisionMatrix()));
 
   world_diff_.reset();
 
@@ -1237,7 +1237,7 @@ bool PlanningScene::setPlanningSceneDiffMsg(const moveit_msgs::msg::PlanningScen
 
   // if at least some links are mentioned in the allowed collision matrix, then we have an update
   if (!scene_msg.allowed_collision_matrix.entry_names.empty())
-    acm_ = std::make_shared<collision_detection::AllowedCollisionMatrix>(scene_msg.allowed_collision_matrix);
+    acm_.emplace(std::make_shared<collision_detection::AllowedCollisionMatrix>(scene_msg.allowed_collision_matrix));
 
   if (!scene_msg.link_padding.empty() || !scene_msg.link_scale.empty())
   {
@@ -1277,7 +1277,7 @@ bool PlanningScene::setPlanningSceneMsg(const moveit_msgs::msg::PlanningScene& s
   object_types_.reset();
   scene_transforms_->setTransforms(scene_msg.fixed_frame_transforms);
   setCurrentState(scene_msg.robot_state);
-  acm_ = std::make_shared<collision_detection::AllowedCollisionMatrix>(scene_msg.allowed_collision_matrix);
+  acm_.emplace(std::make_shared<collision_detection::AllowedCollisionMatrix>(scene_msg.allowed_collision_matrix));
   collision_detector_->cenv_->setPadding(scene_msg.link_padding);
   collision_detector_->cenv_->setScale(scene_msg.link_scale);
   object_colors_ = std::make_unique<ObjectColorMap>();
@@ -1951,7 +1951,7 @@ void PlanningScene::setObjectType(const std::string& object_id, const object_rec
 {
   if (!object_types_.has_value())
     object_types_.emplace(std::make_unique<ObjectTypeMap>());
-  (*(object_types_.value()))[object_id] = type;
+  (*object_types_.value())[object_id] = type;
 }
 
 void PlanningScene::removeObjectType(const std::string& object_id)
