@@ -42,6 +42,7 @@
 #include <rclcpp/node.hpp>
 #include <string>
 #include <map>
+#include <any>
 #include <rclcpp/rclcpp.hpp>
 
 namespace planning_scene
@@ -69,7 +70,7 @@ struct PlannerConfigurationSettings
   std::string name;
 
   /** \brief Key-value pairs of settings that get passed to the planning algorithm */
-  std::map<std::string, std::string> config;
+  std::map<std::string, std::any> config;
 };
 
 /** \brief Map from PlannerConfigurationSettings.name to PlannerConfigurationSettings */

@@ -246,7 +246,22 @@ void OMPLInterface::loadPlannerConfigurations()
 
     for (const auto& [param_name, param_value] : config_settings.config)
     {
-      RCLCPP_DEBUG_STREAM(LOGGER, " - " << param_name << " = " << moveit::core::toString(param_value));
+      if (param_value.type() == typeid(std::string()))
+      {
+        RCLCPP_DEBUG_STREAM(LOGGER, " - " << param_name << " = " << std::any_cast<std::string>(param_value));
+      }
+      else if (param_value.type() == typeid(double))
+      {
+        RCLCPP_DEBUG_STREAM(LOGGER, " - " << param_name << " = " << std::any_cast<double>(param_value));
+      }
+      else if (param_value.type() == typeid(int))
+      {
+        RCLCPP_DEBUG_STREAM(LOGGER, " - " << param_name << " = " << std::any_cast<int>(param_value));
+      }
+      else if (param_value.type() == typeid(bool))
+      {
+        RCLCPP_DEBUG_STREAM(LOGGER, " - " << param_name << " = " << std::any_cast<bool>(param_value));
+      }
     }
   }
 

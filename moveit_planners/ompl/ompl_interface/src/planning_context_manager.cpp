@@ -113,7 +113,7 @@ ompl::base::PlannerPtr MultiQueryPlannerAllocator::allocatePlanner(const ob::Spa
   bool multi_query_planning_enabled = false;
   if (it != cfg.end())
   {
-    multi_query_planning_enabled = boost::lexical_cast<bool>(it->second);
+    multi_query_planning_enabled = std::any_cast<bool>(it->second);
     cfg.erase(it);
   }
   if (multi_query_planning_enabled)
@@ -140,14 +140,14 @@ ompl::base::PlannerPtr MultiQueryPlannerAllocator::allocatePlanner(const ob::Spa
     bool load_planner_data = false;
     if (it != cfg.end())
     {
-      load_planner_data = boost::lexical_cast<bool>(it->second);
+      load_planner_data = std::any_cast<bool>(it->second);
       cfg.erase(it);
     }
     it = cfg.find("store_planner_data");
     bool store_planner_data = false;
     if (it != cfg.end())
     {
-      store_planner_data = boost::lexical_cast<bool>(it->second);
+      store_planner_data = std::any_cast<bool>(it->second);
       cfg.erase(it);
     }
     it = cfg.find("planner_data_path");
@@ -548,14 +548,14 @@ ModelBasedPlanningContextPtr PlanningContextManager::getPlanningContext(
 
   // Use ConstrainedPlanningStateSpace if there is exactly one position constraint and/or one orientation constraint
   if (constrained_planning_iterator != pc->second.config.end() &&
-      boost::lexical_cast<bool>(constrained_planning_iterator->second) &&
+      std::any_cast<bool>(constrained_planning_iterator->second) &&
       ((req.path_constraints.position_constraints.size() == 1) ||
        (req.path_constraints.orientation_constraints.size() == 1)))
   {
     factory = getStateSpaceFactory(ConstrainedPlanningStateSpace::PARAMETERIZATION_TYPE);
   }
   else if (joint_space_planning_iterator != pc->second.config.end() &&
-           boost::lexical_cast<bool>(joint_space_planning_iterator->second))
+           std::any_cast<bool>(joint_space_planning_iterator->second))
   {
     factory = getStateSpaceFactory(JointModelStateSpace::PARAMETERIZATION_TYPE);
   }

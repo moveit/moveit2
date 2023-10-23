@@ -46,6 +46,8 @@
 #include <ompl/base/StateStorage.h>
 #include <ompl/base/spaces/constraint/ConstrainedStateSpace.h>
 
+#include <any>
+
 namespace ompl_interface
 {
 namespace ob = ompl::base;
@@ -63,7 +65,7 @@ typedef std::function<ConfiguredPlannerAllocator(const std::string& planner_type
 
 struct ModelBasedPlanningContextSpecification
 {
-  std::map<std::string, std::string> config_;
+  std::map<std::string, std::any> config_;
   ConfiguredPlannerSelector planner_selector_;
   constraint_samplers::ConstraintSamplerManagerPtr constraint_sampler_manager_;
 
@@ -109,7 +111,7 @@ public:
     return spec_.config_;
   }
 
-  void setSpecificationConfig(const std::map<std::string, std::string>& config)
+  void setSpecificationConfig(const std::map<std::string, std::any>& config)
   {
     spec_.config_ = config;
   }

@@ -37,7 +37,6 @@
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/replace.hpp>
-#include <boost/lexical_cast.hpp>
 
 #include <moveit/ompl_interface/model_based_planning_context.h>
 #include <moveit/ompl_interface/detail/state_validity_checker.h>
@@ -280,10 +279,10 @@ ompl_interface::ModelBasedPlanningContext::allocPathConstrainedSampler(const omp
 
 void ompl_interface::ModelBasedPlanningContext::useConfig()
 {
-  const std::map<std::string, std::string>& config = spec_.config_;
+  const std::map<std::string, std::any>& config = spec_.config_;
   if (config.empty())
     return;
-  std::map<std::string, std::string> cfg = config;
+  std::map<std::string, std::any> cfg = config;
 
   // set the distance between waypoints when interpolating and collision checking.
   auto it = cfg.find("longest_valid_segment_fraction");
@@ -292,7 +291,7 @@ void ompl_interface::ModelBasedPlanningContext::useConfig()
   {
     // clang-format off
     double longest_valid_segment_fraction_config = (it != cfg.end())
-      ? moveit::core::toDouble(it->second)  // value from config file if there
+      ? moveit::core::toDouble(std::any_cast<double>(it->second))  // value from config file if there
       : 0.01;  // default value in OMPL.
     double longest_valid_segment_fraction_final = longest_valid_segment_fraction_config;
     if (max_solution_segment_length_ > 0.0)
@@ -370,14 +369,14 @@ void ompl_interface::ModelBasedPlanningContext::useConfig()
   it = cfg.find("multi_query_planning_enabled");
   if (it != cfg.end())
   {
-    multi_query_planning_enabled_ = boost::lexical_cast<bool>(it->second);
+    multi_query_planning_enabled_ = std::any_cast<bool>(it->second);
   }
 
   // check whether the path returned by the planner should be interpolated
   it = cfg.find("interpolate");
   if (it != cfg.end())
   {
-    interpolate_ = boost::lexical_cast<bool>(it->second);
+    interpolate_ = std::any_cast<bool>(it->second);
     cfg.erase(it);
   }
 
@@ -385,7 +384,7 @@ void ompl_interface::ModelBasedPlanningContext::useConfig()
   it = cfg.find("simplify_solutions");
   if (it != cfg.end())
   {
-    simplify_solutions_ = boost::lexical_cast<bool>(it->second);
+    simplify_solutions_ = std::any_cast<bool>(it->second);
     cfg.erase(it);
   }
 
@@ -393,7 +392,7 @@ void ompl_interface::ModelBasedPlanningContext::useConfig()
   it = cfg.find("hybridize");
   if (it != cfg.end())
   {
-    hybridize_ = boost::lexical_cast<bool>(it->second);
+    hybridize_ = std::any_cast<bool>(it->second);
     cfg.erase(it);
   }
 
