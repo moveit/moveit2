@@ -32,3 +32,7 @@ ament_target_dependencies(moveit_test_utils
   rclcpp
 )
 set_target_properties(moveit_test_utils PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
+
+if(BUILD_TESTING)
+    add_subdirectory(test)
+endif()
