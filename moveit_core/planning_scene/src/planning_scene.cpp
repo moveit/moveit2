@@ -1200,7 +1200,7 @@ void PlanningScene::decoupleParent()
     for (ObjectTypeMap::const_iterator it = kc.begin(); it != kc.end(); ++it)
     {
       if (object_types_.value()->find(it->first) == object_types_.value()->end())
-        (*object_types_.value())[it->first] = it->second;
+        (*(object_types_.value()))[it->first] = it->second;
     }
   }
 
@@ -1950,7 +1950,7 @@ void PlanningScene::setObjectType(const std::string& object_id, const object_rec
 {
   if (!object_types_.has_value())
     object_types_.value() = std::make_unique<ObjectTypeMap>();
-  (*object_types_.value())[object_id] = type;
+  (*(object_types_.value()))[object_id] = type;
 }
 
 void PlanningScene::removeObjectType(const std::string& object_id)
