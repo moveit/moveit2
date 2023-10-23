@@ -1191,7 +1191,7 @@ void PlanningScene::decoupleParent()
   {
     ObjectTypeMap kc;
     parent_->getKnownObjectTypes(kc);
-    object_types_.value_or(std::make_unique<ObjectTypeMap>(kc));
+    object_types_.emplace(std::make_unique<ObjectTypeMap>(kc));
   }
   else
   {
@@ -1950,7 +1950,7 @@ const object_recognition_msgs::msg::ObjectType& PlanningScene::getObjectType(con
 void PlanningScene::setObjectType(const std::string& object_id, const object_recognition_msgs::msg::ObjectType& type)
 {
   if (!object_types_.has_value())
-    object_types_.value_or(std::make_unique<ObjectTypeMap>());
+    object_types_.emplace(std::make_unique<ObjectTypeMap>());
   (*(object_types_.value()))[object_id] = type;
 }
 
