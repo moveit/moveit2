@@ -146,7 +146,6 @@ void init_robot_trajectory(py::module& m)
                path_tolerance (float): The path tolerance to use for time parameterization (default: 0.1).
                resample_dt (float): The time step to use for time parameterization (default: 0.1).
                min_angle_change (float): The minimum angle change to use for time parameterization (default: 0.001).
-           )
            Returns:
                bool: True if the trajectory was successfully retimed, false otherwise.
            )")
@@ -160,7 +159,6 @@ void init_robot_trajectory(py::module& m)
                acceleration_scaling_factor (float): The acceleration scaling factor.
                mitigate_overshoot (bool): Whether to mitigate overshoot during smoothing (default: false).
                overshoot_threshold (float): The maximum allowed overshoot during smoothing (default: 0.01
-           )
            Returns:
                bool: True if the trajectory was successfully retimed, false otherwise.
            )")
@@ -168,6 +166,8 @@ void init_robot_trajectory(py::module& m)
            py::arg("joint_filter") = std::vector<std::string>(),
            R"(
            Get the trajectory as a moveit_msgs.msg.RobotTrajectory message.
+           Args:
+               joint_filter (list[string]): List of joints to consider in creating the message. If empty, uses all joints.
            Returns:
                moveit_msgs.msg.RobotTrajectory: A ROS robot trajectory message.
            )")
@@ -175,6 +175,9 @@ void init_robot_trajectory(py::module& m)
            py::arg("robot_state"), py::arg("msg"),
            R"(
            Set the trajectory from a moveit_msgs.msg.RobotTrajectory message.
+           Args:
+               robot_state (py:class:`moveit_py.core.RobotState`): The reference robot starting state.
+               msg (moveit_msgs.msg.RobotTrajectory): A ROS robot trajectory message.
            )");
   // TODO (peterdavidfagan): support other methods such as appending trajectories
 }
