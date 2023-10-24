@@ -1,7 +1,7 @@
 /*********************************************************************
  * Software License Agreement (BSD License)
  *
- *  Copyright (c) 2012, Willow Garage, Inc.
+ *  Copyright (c) 2023, PickNik Robotics Inc.
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -32,45 +32,25 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-/* Author: Ioan Sucan */
+/* Author: Tyler Weaver */
 
-#pragma once
+#include <chrono>
+#include <rclcpp/rclcpp.hpp>
+#include <moveit/utils/logger.hpp>
 
-#include <moveit/warehouse/moveit_message_storage.h>
-#include <moveit_msgs/msg/planning_scene_world.hpp>
-#include <rclcpp/logger.hpp>
-
-namespace moveit_warehouse
+int main(int argc, char** argv)
 {
-typedef warehouse_ros::MessageWithMetadata<moveit_msgs::msg::PlanningSceneWorld>::ConstPtr PlanningSceneWorldWithMetadata;
-typedef warehouse_ros::MessageCollection<moveit_msgs::msg::PlanningSceneWorld>::Ptr PlanningSceneWorldCollection;
+  rclcpp::init(argc, argv);
+  rclcpp::Node::SharedPtr node = rclcpp::Node::make_shared("dut_node");
 
-class PlanningSceneWorldStorage : public MoveItMessageStorage
-{
-public:
-  static const std::string DATABASE_NAME;
-  static const std::string PLANNING_SCENE_WORLD_ID_NAME;
+  // Set the moveit logger to be from node
+  moveit::get_logger_mut() = node->get_logger();
 
-  PlanningSceneWorldStorage(warehouse_ros::DatabaseConnection::Ptr conn);
+  // Make a child logger
+  const auto child_logger = moveit::make_child_logger("child");
 
-  void addPlanningSceneWorld(const moveit_msgs::msg::PlanningSceneWorld& msg, const std::string& name);
-  bool hasPlanningSceneWorld(const std::string& name) const;
-  void getKnownPlanningSceneWorlds(std::vector<std::string>& names) const;
-  void getKnownPlanningSceneWorlds(const std::string& regex, std::vector<std::string>& names) const;
-
-  /** \brief Get the constraints named \e name. Return false on failure. */
-  bool getPlanningSceneWorld(PlanningSceneWorldWithMetadata& msg_m, const std::string& name) const;
-
-  void renamePlanningSceneWorld(const std::string& old_name, const std::string& new_name);
-
-  void removePlanningSceneWorld(const std::string& name);
-
-  void reset();
-
-private:
-  void createCollections();
-
-  PlanningSceneWorldCollection planning_scene_world_collection_;
-  rclcpp::Logger logger_;
-};
-}  // namespace moveit_warehouse
+  // publish via a timer
+  auto wall_timer = node->create_wall_timer(std::chrono::milliseconds(100),
+                                            [&] { RCLCPP_INFO(child_logger, "hello from child node!"); });
+  rclcpp::spin(node);
+}

@@ -1,7 +1,7 @@
 /*********************************************************************
  * Software License Agreement (BSD License)
  *
- *  Copyright (c) 2012, Willow Garage, Inc.
+ *  Copyright (c) 2023, PickNik Robotics Inc.
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -32,45 +32,46 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-/* Author: Ioan Sucan */
+/* Author: Tyler Weaver */
 
-#pragma once
+#include <rclcpp/rclcpp.hpp>
+#include <moveit/utils/logger.hpp>
+#include <rclcpp/version.h>
+#include <unordered_map>
+#include <string>
 
-#include <moveit/warehouse/moveit_message_storage.h>
-#include <moveit_msgs/msg/planning_scene_world.hpp>
-#include <rclcpp/logger.hpp>
-
-namespace moveit_warehouse
+namespace moveit
 {
-typedef warehouse_ros::MessageWithMetadata<moveit_msgs::msg::PlanningSceneWorld>::ConstPtr PlanningSceneWorldWithMetadata;
-typedef warehouse_ros::MessageCollection<moveit_msgs::msg::PlanningSceneWorld>::Ptr PlanningSceneWorldCollection;
 
-class PlanningSceneWorldStorage : public MoveItMessageStorage
+const rclcpp::Logger& get_logger()
 {
-public:
-  static const std::string DATABASE_NAME;
-  static const std::string PLANNING_SCENE_WORLD_ID_NAME;
+  return get_logger_mut();
+}
 
-  PlanningSceneWorldStorage(warehouse_ros::DatabaseConnection::Ptr conn);
+rclcpp::Logger make_child_logger(const std::string& name)
+{
+  // On versions of ROS older than Iron we need to create a node for each child logger
+  // Remove once Humble is EOL
+  // References:
+  // Use parent logger (rcl PR) - https://github.com/ros2/rcl/pull/921
+  // Request for backport (rclpy issue) - https://github.com/ros2/rclpy/issues/1131
+  // MoveIt PR that added this - https://github.com/ros-planning/moveit2/pull/2445
+#if !RCLCPP_VERSION_GTE(21, 0, 3)
+  static std::unordered_map<std::string, std::shared_ptr<rclcpp::Node>> child_nodes;
+  if (child_nodes.find(name) == child_nodes.end())
+  {
+    std::string ns = get_logger().get_name();
+    child_nodes[name] = std::make_shared<rclcpp::Node>(name, ns);
+  }
+#endif
 
-  void addPlanningSceneWorld(const moveit_msgs::msg::PlanningSceneWorld& msg, const std::string& name);
-  bool hasPlanningSceneWorld(const std::string& name) const;
-  void getKnownPlanningSceneWorlds(std::vector<std::string>& names) const;
-  void getKnownPlanningSceneWorlds(const std::string& regex, std::vector<std::string>& names) const;
+  return get_logger_mut().get_child(name);
+}
 
-  /** \brief Get the constraints named \e name. Return false on failure. */
-  bool getPlanningSceneWorld(PlanningSceneWorldWithMetadata& msg_m, const std::string& name) const;
+rclcpp::Logger& get_logger_mut()
+{
+  static rclcpp::Logger logger = rclcpp::get_logger("moveit");
+  return logger;
+}
 
-  void renamePlanningSceneWorld(const std::string& old_name, const std::string& new_name);
-
-  void removePlanningSceneWorld(const std::string& name);
-
-  void reset();
-
-private:
-  void createCollections();
-
-  PlanningSceneWorldCollection planning_scene_world_collection_;
-  rclcpp::Logger logger_;
-};
-}  // namespace moveit_warehouse
+}  // namespace moveit
