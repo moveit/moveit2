@@ -42,12 +42,12 @@
 const std::string moveit_warehouse::PlanningSceneWorldStorage::DATABASE_NAME = "moveit_planning_scene_worlds";
 const std::string moveit_warehouse::PlanningSceneWorldStorage::PLANNING_SCENE_WORLD_ID_NAME = "world_id";
 
-using moveit::get_logger;
 using warehouse_ros::Metadata;
 using warehouse_ros::Query;
 
 moveit_warehouse::PlanningSceneWorldStorage::PlanningSceneWorldStorage(warehouse_ros::DatabaseConnection::Ptr conn)
   : MoveItMessageStorage(std::move(conn))
+  , logger_(moveit::make_child_logger("moveit_warehouse_planning_scene_world_storage"))
 {
   createCollections();
 }
@@ -77,7 +77,7 @@ void moveit_warehouse::PlanningSceneWorldStorage::addPlanningSceneWorld(const mo
   Metadata::Ptr metadata = planning_scene_world_collection_->createMetadata();
   metadata->append(PLANNING_SCENE_WORLD_ID_NAME, name);
   planning_scene_world_collection_->insert(msg, metadata);
-  RCLCPP_DEBUG(get_logger(), "%s planning scene world '%s'", replace ? "Replaced" : "Added", name.c_str());
+  RCLCPP_DEBUG(logger_, "%s planning scene world '%s'", replace ? "Replaced" : "Added", name.c_str());
 }
 
 bool moveit_warehouse::PlanningSceneWorldStorage::hasPlanningSceneWorld(const std::string& name) const
@@ -133,7 +133,7 @@ void moveit_warehouse::PlanningSceneWorldStorage::renamePlanningSceneWorld(const
   Metadata::Ptr m = planning_scene_world_collection_->createMetadata();
   m->append(PLANNING_SCENE_WORLD_ID_NAME, new_name);
   planning_scene_world_collection_->modifyMetadata(q, m);
-  RCLCPP_DEBUG(get_logger(), "Renamed planning scene world from '%s' to '%s'", old_name.c_str(), new_name.c_str());
+  RCLCPP_DEBUG(logger_, "Renamed planning scene world from '%s' to '%s'", old_name.c_str(), new_name.c_str());
 }
 
 void moveit_warehouse::PlanningSceneWorldStorage::removePlanningSceneWorld(const std::string& name)
@@ -141,5 +141,5 @@ void moveit_warehouse::PlanningSceneWorldStorage::removePlanningSceneWorld(const
   Query::Ptr q = planning_scene_world_collection_->createQuery();
   q->append(PLANNING_SCENE_WORLD_ID_NAME, name);
   unsigned int rem = planning_scene_world_collection_->removeMessages(q);
-  RCLCPP_DEBUG(get_logger(), "Removed %u PlanningSceneWorld messages (named '%s')", rem, name.c_str());
+  RCLCPP_DEBUG(logger_, "Removed %u PlanningSceneWorld messages (named '%s')", rem, name.c_str());
 }

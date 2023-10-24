@@ -44,12 +44,11 @@ const std::string moveit_warehouse::RobotStateStorage::DATABASE_NAME = "moveit_r
 const std::string moveit_warehouse::RobotStateStorage::STATE_NAME = "state_id";
 const std::string moveit_warehouse::RobotStateStorage::ROBOT_NAME = "robot_id";
 
-using moveit::get_logger;
 using warehouse_ros::Metadata;
 using warehouse_ros::Query;
 
 moveit_warehouse::RobotStateStorage::RobotStateStorage(warehouse_ros::DatabaseConnection::Ptr conn)
-  : MoveItMessageStorage(std::move(conn))
+  : MoveItMessageStorage(std::move(conn)), logger_(moveit::make_child_logger("moveit_warehouse_robot_state_storage"))
 {
   createCollections();
 }
@@ -79,7 +78,7 @@ void moveit_warehouse::RobotStateStorage::addRobotState(const moveit_msgs::msg::
   metadata->append(STATE_NAME, name);
   metadata->append(ROBOT_NAME, robot);
   state_collection_->insert(msg, metadata);
-  RCLCPP_DEBUG(get_logger(), "%s robot state '%s'", replace ? "Replaced" : "Added", name.c_str());
+  RCLCPP_DEBUG(logger_, "%s robot state '%s'", replace ? "Replaced" : "Added", name.c_str());
 }
 
 bool moveit_warehouse::RobotStateStorage::hasRobotState(const std::string& name, const std::string& robot) const
@@ -143,7 +142,7 @@ void moveit_warehouse::RobotStateStorage::renameRobotState(const std::string& ol
   Metadata::Ptr m = state_collection_->createMetadata();
   m->append(STATE_NAME, new_name);
   state_collection_->modifyMetadata(q, m);
-  RCLCPP_DEBUG(get_logger(), "Renamed robot state from '%s' to '%s'", old_name.c_str(), new_name.c_str());
+  RCLCPP_DEBUG(logger_, "Renamed robot state from '%s' to '%s'", old_name.c_str(), new_name.c_str());
 }
 
 void moveit_warehouse::RobotStateStorage::removeRobotState(const std::string& name, const std::string& robot)
@@ -153,5 +152,5 @@ void moveit_warehouse::RobotStateStorage::removeRobotState(const std::string& na
   if (!robot.empty())
     q->append(ROBOT_NAME, robot);
   unsigned int rem = state_collection_->removeMessages(q);
-  RCLCPP_DEBUG(get_logger(), "Removed %u RobotState messages (named '%s')", rem, name.c_str());
+  RCLCPP_DEBUG(logger_, "Removed %u RobotState messages (named '%s')", rem, name.c_str());
 }

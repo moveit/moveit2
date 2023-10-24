@@ -47,9 +47,9 @@
 #include <boost/program_options/variables_map.hpp>
 #include <moveit/utils/logger.hpp>
 
-using moveit::get_logger;
-
 static const std::string ROBOT_DESCRIPTION = "robot_description";
+
+using moveit::get_logger;
 
 void parseStart(std::istream& in, planning_scene_monitor::PlanningSceneMonitor* psm,
                 moveit_warehouse::RobotStateStorage* rs)
