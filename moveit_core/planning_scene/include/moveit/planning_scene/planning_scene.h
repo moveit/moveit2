@@ -160,7 +160,7 @@ public:
   const moveit::core::RobotState& getCurrentState() const
   {
     // if we have an updated state, return it; otherwise, return the parent one
-    return robot_state_.has_value() ? *robot_state_.value() : parent_->getCurrentState();
+    return robot_state_.has_value() ? robot_state_.value() : parent_->getCurrentState();
   }
   /** \brief Get the state at which the robot is assumed to be. */
   moveit::core::RobotState& getCurrentStateNonConst();
@@ -291,7 +291,7 @@ public:
   /** \brief Get the allowed collision matrix */
   const collision_detection::AllowedCollisionMatrix& getAllowedCollisionMatrix() const
   {
-    return acm_.has_value() ? *acm_.value() : parent_->getAllowedCollisionMatrix();
+    return acm_.has_value() ? acm_.value() : parent_->getAllowedCollisionMatrix();
   }
 
   /** \brief Get the allowed collision matrix */
@@ -1012,7 +1012,7 @@ private:
 
   moveit::core::RobotModelConstPtr robot_model_;  // Never null (may point to same model as parent)
 
-  std::optional<moveit::core::RobotStatePtr> robot_state_;  // if there is no value use parent's
+  std::optional<moveit::core::RobotState> robot_state_;  // if there is no value use parent's
 
   // Called when changes are made to attached bodies
   moveit::core::AttachedBodyCallback current_state_attached_body_callback_;
@@ -1029,7 +1029,7 @@ private:
 
   CollisionDetectorPtr collision_detector_;  // Never nullptr.
 
-  std::optional<collision_detection::AllowedCollisionMatrixPtr> acm_;  // if there is no value use parent's
+  std::optional<collision_detection::AllowedCollisionMatrix> acm_;  // if there is no value use parent's
 
   StateFeasibilityFn state_feasibility_;
   MotionFeasibilityFn motion_feasibility_;
@@ -1039,6 +1039,6 @@ private:
   std::unique_ptr<ObjectColorMap> original_object_colors_;
 
   // a map of object types
-  std::optional<std::unique_ptr<ObjectTypeMap>> object_types_;
+  std::optional<ObjectTypeMap> object_types_;
 };
 }  // namespace planning_scene
