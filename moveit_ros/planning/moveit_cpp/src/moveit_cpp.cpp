@@ -116,12 +116,11 @@ bool MoveItCpp::loadPlanningSceneMonitor(const PlanningSceneMonitorOptions& opti
   }
 
   // Wait for complete state to be received
-  // TODO(henningkayser): Fix segfault in waitForCurrentState()
-  // if (options.wait_for_initial_state_timeout > 0.0)
-  // {
-  //   return planning_scene_monitor_->getStateMonitor()->waitForCurrentState(node_->now(),
-  //                                                                          options.wait_for_initial_state_timeout);
-  // }
+  if (options.wait_for_initial_state_timeout > 0.0)
+  {
+    return planning_scene_monitor_->getStateMonitor()->waitForCurrentState(node_->now(),
+                                                                           options.wait_for_initial_state_timeout);
+  }
 
   return true;
 }

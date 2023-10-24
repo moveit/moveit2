@@ -51,7 +51,7 @@ qtcreator-*
 # Vim
 *.swp
 
-# Continous Integration
+# Continuous Integration
 .moveit_ci
 
 *.pyc

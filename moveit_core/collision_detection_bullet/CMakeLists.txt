@@ -47,8 +47,8 @@ target_link_libraries(collision_detector_bullet_plugin
   moveit_planning_scene
 )
 
-install(DIRECTORY include/ DESTINATION include/moveit_core)
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/moveit_collision_detection_bullet_export.h DESTINATION include/moveit_core)
+install(DIRECTORY include/ DESTINATION include)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/moveit_collision_detection_bullet_export.h DESTINATION include)
 
 if(BUILD_TESTING)
   if(WIN32)
