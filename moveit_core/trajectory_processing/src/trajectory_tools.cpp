@@ -48,16 +48,15 @@ std::size_t trajectoryWaypointCount(const moveit_msgs::msg::RobotTrajectory& tra
 {
   return std::max(trajectory.joint_trajectory.points.size(), trajectory.multi_dof_joint_trajectory.points.size());
 }
-bool applyTOTGTimeParameterization(robot_trajectory::RobotTrajectory& trajectory, const double& velocity_scaling_factor,
-                                   const double& acceleration_scaling_factor, const double path_tolerance,
-                                   const double resample_dt, const double min_angle_change)
+bool applyTOTGTimeParameterization(robot_trajectory::RobotTrajectory& trajectory, double velocity_scaling_factor,
+                                   double acceleration_scaling_factor, double path_tolerance, double resample_dt,
+                                   double min_angle_change)
 {
   TimeOptimalTrajectoryGeneration totg(path_tolerance, resample_dt, min_angle_change);
   return totg.computeTimeStamps(trajectory, velocity_scaling_factor, acceleration_scaling_factor);
 }
-bool applyRuckigSmoothing(robot_trajectory::RobotTrajectory& trajectory, const double& velocity_scaling_factor,
-                          const double& acceleration_scaling_factor, const bool mitigate_overshoot,
-                          const double overshoot_threshold)
+bool applyRuckigSmoothing(robot_trajectory::RobotTrajectory& trajectory, double velocity_scaling_factor,
+                          double acceleration_scaling_factor, bool mitigate_overshoot, double overshoot_threshold)
 {
   RuckigSmoothing time_param;
   return time_param.applySmoothing(trajectory, velocity_scaling_factor, acceleration_scaling_factor, mitigate_overshoot,
