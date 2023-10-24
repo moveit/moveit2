@@ -37,13 +37,12 @@
 #include <rclcpp/rclcpp.hpp>
 #include <moveit/utils/logger.hpp>
 #include <rclcpp/version.h>
-#include <vector>
+#include <unordered_map>
+#include <string>
 
 namespace moveit
 {
 
-// Function for getting a reference to a logger object kept on the stack
-// Use get_logger_mut to set the logger to a node logger
 const rclcpp::Logger& get_logger()
 {
   return get_logger_mut();
@@ -58,15 +57,17 @@ rclcpp::Logger make_child_logger(const std::string& name)
   // Request for backport (rclpy issue) - https://github.com/ros2/rclpy/issues/1131
   // MoveIt PR that added this - https://github.com/ros-planning/moveit2/pull/2445
 #if !RCLCPP_VERSION_GTE(21, 0, 3)
-  static std::vector<std::shared_ptr<rclcpp::Node>> child_nodes;
-  std::string ns = get_logger().get_name();
-  child_nodes.push_back(std::make_shared<rclcpp::Node>(name, ns));
+  static std::unordered_map<std::string, std::shared_ptr<rclcpp::Node>> child_nodes;
+  if (child_nodes.find(name) == child_nodes.end())
+  {
+    std::string ns = get_logger().get_name();
+    child_nodes[name] = std::make_shared<rclcpp::Node>(name, ns);
+  }
 #endif
 
   return get_logger_mut().get_child(name);
 }
 
-// Mutable access to global logger for setting to node logger
 rclcpp::Logger& get_logger_mut()
 {
   static rclcpp::Logger logger = rclcpp::get_logger("moveit");
