@@ -37,9 +37,46 @@
 #pragma once
 
 #include <moveit_msgs/msg/robot_trajectory.hpp>
+#include <moveit/robot_trajectory/robot_trajectory.h>
 
 namespace trajectory_processing
 {
+/**
+ * \brief Checks if a robot trajectory is empty.
+ * \param [in] trajectory The robot trajectory to check.
+ * \return True if the trajectory is empty, false otherwise.
+ */
 bool isTrajectoryEmpty(const moveit_msgs::msg::RobotTrajectory& trajectory);
+/**
+ * \brief Returns the number of waypoints in a robot trajectory.
+ * \param [in] trajectory The robot trajectory to count waypoints in.
+ * \return The number of waypoints in the trajectory.
+ */
 std::size_t trajectoryWaypointCount(const moveit_msgs::msg::RobotTrajectory& trajectory);
+/**
+ * \brief Applies time parameterization to a robot trajectory using the Time-Optimal Trajectory Generation (TOTG)
+ * algorithm.
+ * \param [in,out] trajectory The robot trajectory to be time parameterized.
+ * \param [in] velocity_scaling_factor The factor by which to scale the maximum velocity of the trajectory.
+ * \param [in] acceleration_scaling_factor The factor by which to scale the maximum acceleration of the trajectory.
+ * \param [in] path_tolerance The path tolerance to use for time parameterization (default: 0.1).
+ * \param [in] resample_dt The time step to use for time parameterization (default: 0.1).
+ * \param [in] min_angle_change The minimum angle change to use for time parameterization (default: 0.001).
+ * \return True if time parameterization was successful, false otherwise.
+ */
+bool applyTOTGTimeParameterization(robot_trajectory::RobotTrajectory& trajectory, const double& velocity_scaling_factor,
+                                   const double& acceleration_scaling_factor, const double path_tolerance = 0.1,
+                                   const double resample_dt = 0.1, const double min_angle_change = 0.001);
+/**
+ * \brief Applies Ruckig smoothing to a robot trajectory.
+ * \param [in,out] trajectory The robot trajectory to be smoothed.
+ * \param [in] velocity_scaling_factor The factor by which to scale the maximum velocity of the trajectory.
+ * \param [in] acceleration_scaling_factor The factor by which to scale the maximum acceleration of the trajectory.
+ * \param [in] mitigate_overshoot Whether to mitigate overshoot during smoothing (default: false).
+ * \param [in] overshoot_threshold The maximum allowed overshoot during smoothing (default: 0.01).
+ * \return True if smoothing was successful, false otherwise.
+ */
+bool applyRuckigSmoothing(robot_trajectory::RobotTrajectory& trajectory, const double& velocity_scaling_factor,
+                          const double& acceleration_scaling_factor, const bool mitigate_overshoot = false,
+                          const double overshoot_threshold = 0.01);
 }  // namespace trajectory_processing

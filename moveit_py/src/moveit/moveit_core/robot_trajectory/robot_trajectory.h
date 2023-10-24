@@ -41,6 +41,7 @@
 #include <pybind11/eigen.h>
 #include <moveit/robot_trajectory/robot_trajectory.h>
 #include <moveit_msgs/msg/robot_trajectory.hpp>
+#include <rclcpp/rclcpp.hpp>
 
 namespace py = pybind11;
 
