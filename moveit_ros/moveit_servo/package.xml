@@ -26,8 +26,8 @@
   <depend>control_msgs</depend>
   <depend>generate_parameter_library</depend>
   <depend>geometry_msgs</depend>
-  <depend>moveit_msgs</depend>
   <depend>moveit_core</depend>
+  <depend>moveit_msgs</depend>
   <depend>moveit_ros_planning_interface</depend>
   <depend>pluginlib</depend>
   <depend>realtime_tools</depend>
@@ -42,10 +42,10 @@
   <exec_depend>joint_state_broadcaster</exec_depend>
   <exec_depend>joint_trajectory_controller</exec_depend>
   <exec_depend>joy</exec_depend>
+  <exec_depend>launch_param_builder</exec_depend>
+  <exec_depend>moveit_configs_utils</exec_depend>
   <exec_depend>robot_state_publisher</exec_depend>
   <exec_depend>tf2_ros</exec_depend>
-  <exec_depend>moveit_configs_utils</exec_depend>
-  <exec_depend>launch_param_builder</exec_depend>
 
   <test_depend>ament_cmake_gtest</test_depend>
   <test_depend>ament_lint_auto</test_depend>

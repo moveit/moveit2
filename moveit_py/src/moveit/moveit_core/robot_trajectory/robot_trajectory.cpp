@@ -139,7 +139,7 @@ void init_robot_trajectory(py::module& m)
            py::arg("velocity_scaling_factor"), py::arg("acceleration_scaling_factor"), py::kw_only(),
            py::arg("path_tolerance") = 0.1, py::arg("resample_dt") = 0.1, py::arg("min_angle_change") = 0.001,
            R"(
-               Adds time parameterization to the trajectory using the Time-Optimal Trajectory Generation (TOTG) algorithm.
+           Adds time parameterization to the trajectory using the Time-Optimal Trajectory Generation (TOTG) algorithm.
            Args:
                velocity_scaling_factor (float): The velocity scaling factor.
                acceleration_scaling_factor (float): The acceleration scaling factor.
@@ -154,7 +154,7 @@ void init_robot_trajectory(py::module& m)
            py::arg("acceleration_scaling_factor"), py::kw_only(), py::arg("mitigate_overshoot") = false,
            py::arg("overshoot_threshold") = 0.01,
            R"(
-               Applies Ruckig smoothing to the trajectory.
+           Applies Ruckig smoothing to the trajectory.
            Args:
                velocity_scaling_factor (float): The velocity scaling factor.
                acceleration_scaling_factor (float): The acceleration scaling factor.
@@ -168,8 +168,7 @@ void init_robot_trajectory(py::module& m)
            py::arg("joint_filter") = std::vector<std::string>(),
            R"(
            Get the trajectory as a moveit_msgs.msg.RobotTrajectory message.
-
-	   Returns:
+           Returns:
                moveit_msgs.msg.RobotTrajectory: A ROS robot trajectory message.
            )")
       .def("set_robot_trajectory_msg", &moveit_py::bind_robot_trajectory::set_robot_trajectory_msg,

@@ -225,7 +225,7 @@ protected:
   void addJob(const JobPtr& job) const;
 
   /**
-   * \brief sets the size of the fram buffers
+   * \brief sets the size of the frame buffers
    * \author Suat Gedikli (gedikli@willowgarage.com)
    * \param[in] width width of frame buffers in pixels
    * \param[in] height height of frame buffers in pixels
