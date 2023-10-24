@@ -96,8 +96,8 @@ protected:
   void updatedPaddingOrScaling(const std::vector<std::string>& links) override;
 
   /** \brief All of the attached objects in the robot state are wrapped into bullet collision objects */
-  void addAttachedOjects(const moveit::core::RobotState& state,
-                         std::vector<collision_detection_bullet::CollisionObjectWrapperPtr>& cows) const;
+  void addAttachedObjects(const moveit::core::RobotState& state,
+                          std::vector<collision_detection_bullet::CollisionObjectWrapperPtr>& cows) const;
 
   /** \brief Bundles the different checkSelfCollision functions into a single function */
   void checkSelfCollisionHelper(const CollisionRequest& req, CollisionResult& res,
