@@ -47,7 +47,7 @@ namespace moveit
 const rclcpp::Logger& get_logger();
 
 // Function for getting a child logger. In Humble this also creates a node.
-// Do no use this in place as it will create a new logger each time,
+// Do not use this in place as it will create a new logger each time,
 // instead store it in the state of your class or method.
 rclcpp::Logger make_child_logger(const std::string& name);
 
