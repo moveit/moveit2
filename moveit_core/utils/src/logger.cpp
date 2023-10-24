@@ -63,8 +63,7 @@ rclcpp::Logger make_child_logger(const std::string& name)
   child_nodes.push_back(std::make_shared<rclcpp::Node>(name, ns));
 #endif
 
-  auto logger = get_logger_mut().get_child(name);
-  return logger;
+  return get_logger_mut().get_child(name);
 }
 
 // Mutable access to global logger for setting to node logger
