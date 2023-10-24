@@ -186,7 +186,7 @@ void TrajectoryExecutionManager::initialize()
   auto options = rclcpp::SubscriptionOptions();
   options.callback_group = callback_group;
   event_topic_subscriber_ = node_->create_subscription<std_msgs::msg::String>(
-      EXECUTION_EVENT_TOPIC, 100,
+      EXECUTION_EVENT_TOPIC, rclcpp::SystemDefaultsQoS(),
       [this](const std_msgs::msg::String::ConstSharedPtr& event) { return receiveEvent(event); }, options);
 
   controller_mgr_node_->get_parameter("trajectory_execution.execution_duration_monitoring",
@@ -539,9 +539,9 @@ struct OrderPotentialControllerCombination
       return false;
 
     // and then to active ones
-    if (nractive[a] < nractive[b])
-      return true;
     if (nractive[a] > nractive[b])
+      return true;
+    if (nractive[a] < nractive[b])
       return false;
 
     return false;

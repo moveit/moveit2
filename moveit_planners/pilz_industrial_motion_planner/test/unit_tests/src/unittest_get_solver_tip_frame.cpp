@@ -59,7 +59,7 @@ public:
 class JointModelGroupMock
 {
 public:
-  MOCK_CONST_METHOD0(getSolverInstance, SolverMock const*());
+  MOCK_CONST_METHOD0(getSolverInstance, const SolverMock*());
   MOCK_CONST_METHOD0(getName, const std::string&());
 };
 

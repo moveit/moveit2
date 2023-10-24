@@ -2,21 +2,19 @@
 # Modify all parameters related to servoing here
 ###############################################
 
-## Properties of incoming commands
-command_in_type: "unitless" # "unitless"> in the range [-1:1], as if from joystick. "speed_units"> cmds are in m/s and rad/s
+# Optionally override Servo's internal velocity scaling when near singularity or collision (0.0 = use internal velocity scaling)
+# override_velocity_scaling_factor = 0.0 # valid range [0.0:1.0]
+
+## Properties of outgoing commands
+publish_period: 0.034  # 1/Nominal publish rate [seconds]
+
+command_in_type: "speed_units" # "unitless"> in the range [-1:1], as if from joystick. "speed_units"> cmds are in m/s and rad/s
 scale:
   # Scale parameters are only used if command_in_type=="unitless"
   linear:  0.4  # Max linear velocity. Unit is [m/s]. Only used for Cartesian commands.
   rotational:  0.8 # Max angular velocity. Unit is [rad/s]. Only used for Cartesian commands.
   # Max joint angular/linear velocity. Only used for joint commands on joint_command_in_topic.
   joint: 0.5
-
-# Optionally override Servo's internal velocity scaling when near singularity or collision (0.0 = use internal velocity scaling)
-# override_velocity_scaling_factor = 0.0 # valid range [0.0:1.0]
-
-## Properties of outgoing commands
-publish_period: 0.034  # 1/Nominal publish rate [seconds]
-low_latency_mode: false  # Set this to true to publish as soon as an incoming Twist command is received (publish_period is ignored)
 
 # What type of topic does your robot driver expect?
 # Currently supported are std_msgs/Float64MultiArray or trajectory_msgs/JointTrajectory
@@ -28,6 +26,7 @@ publish_joint_velocities: true
 publish_joint_accelerations: false
 
 ## Plugins for smoothing outgoing commands
+use_smoothing: true
 smoothing_filter_plugin_name: "online_signal_smoothing::ButterworthFilterPlugin"
 
 # If is_primary_planning_scene_monitor is set to true, the Servo server's PlanningScene advertises the /get_planning_scene service,
@@ -41,11 +40,7 @@ move_group_name:  panda_arm  # Often 'manipulator' or 'arm'
 planning_frame: panda_link0  # The MoveIt planning frame. Often 'base_link' or 'world'
 
 ## Other frames
-ee_frame_name: panda_link8  # The name of the end effector link, used to return the EE pose
-robot_link_command_frame:  panda_link0  # commands must be given in the frame of a robot link. Usually either the base or end effector
-
-## Stopping behaviour
-incoming_command_timeout:  0.1  # Stop servoing if X seconds elapse without a new command
+ee_frame: panda_link8  # The name of the IK tip link
 
 ## Configure handling of singularities and joint limits
 lower_singularity_threshold:  17.0  # Start decelerating when the condition number hits this (close to singularity)

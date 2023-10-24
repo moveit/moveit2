@@ -152,8 +152,7 @@ private:
     {
       const auto& pipeline_name = pipeline_entry.first;
       std::string pipeline_capabilities;
-      if (context_->moveit_cpp_->getNode()->get_parameter("planning_pipelines/" + pipeline_name + "/capabilities",
-                                                          pipeline_capabilities))
+      if (context_->moveit_cpp_->getNode()->get_parameter(pipeline_name + ".capabilities", pipeline_capabilities))
       {
         boost::char_separator<char> sep(" ");
         boost::tokenizer<boost::char_separator<char>> tok(pipeline_capabilities, sep);
@@ -276,8 +275,7 @@ int main(int argc, char** argv)
   }
 
   // Initialize MoveItCpp
-  const auto tf_buffer = std::make_shared<tf2_ros::Buffer>(nh->get_clock(), tf2::durationFromSec(10.0));
-  const auto moveit_cpp = std::make_shared<moveit_cpp::MoveItCpp>(nh, moveit_cpp_options, tf_buffer);
+  const auto moveit_cpp = std::make_shared<moveit_cpp::MoveItCpp>(nh, moveit_cpp_options);
   const auto planning_scene_monitor = moveit_cpp->getPlanningSceneMonitorNonConst();
 
   if (planning_scene_monitor->getPlanningScene())

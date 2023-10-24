@@ -53,6 +53,8 @@
 #include <rclcpp/node.hpp>
 #include <rclcpp/parameter_value.hpp>
 
+#include <default_plan_request_adapter_parameters.hpp>
+
 namespace default_planner_request_adapters
 {
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_ros.fix_start_state_bounds");
@@ -61,14 +63,10 @@ static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_ros.fix_start_st
 class FixStartStateBounds : public planning_request_adapter::PlanningRequestAdapter
 {
 public:
-  static const std::string BOUNDS_PARAM_NAME;
-  static const std::string DT_PARAM_NAME;
-
   void initialize(const rclcpp::Node::SharedPtr& node, const std::string& parameter_namespace) override
   {
-    node_ = node;
-    bounds_dist_ = getParam(node_, LOGGER, parameter_namespace, BOUNDS_PARAM_NAME, 0.05);
-    max_dt_offset_ = getParam(node_, LOGGER, parameter_namespace, DT_PARAM_NAME, 0.5);
+    param_listener_ =
+        std::make_unique<default_plan_request_adapter_parameters::ParamListener>(node, parameter_namespace);
   }
 
   std::string getDescription() const override
@@ -77,8 +75,8 @@ public:
   }
 
   bool adaptAndPlan(const PlannerFn& planner, const planning_scene::PlanningSceneConstPtr& planning_scene,
-                    const planning_interface::MotionPlanRequest& req, planning_interface::MotionPlanResponse& res,
-                    std::vector<std::size_t>& added_path_index) const override
+                    const planning_interface::MotionPlanRequest& req,
+                    planning_interface::MotionPlanResponse& res) const override
   {
     RCLCPP_DEBUG(LOGGER, "Running '%s'", getDescription().c_str());
 
@@ -137,13 +135,16 @@ public:
           }
     }
 
+    // Read parameters
+    const auto params = param_listener_->get_params();
+
     // pointer to a prefix state we could possibly add, if we detect we have to make changes
     moveit::core::RobotStatePtr prefix_state;
     for (const moveit::core::JointModel* jmodel : jmodels)
     {
       if (!start_state.satisfiesBounds(jmodel))
       {
-        if (start_state.satisfiesBounds(jmodel, bounds_dist_))
+        if (start_state.satisfiesBounds(jmodel, params.start_state_max_bounds_error))
         {
           if (!prefix_state)
             prefix_state = std::make_shared<moveit::core::RobotState>(start_state);
@@ -168,9 +169,10 @@ public:
           }
           RCLCPP_WARN(LOGGER,
                       "Joint '%s' from the starting state is outside bounds by a significant margin: [%s] should be in "
-                      "the range [%s], [%s] but the error above the ~%s parameter (currently set to %f)",
+                      "the range [%s], [%s] but the error above the 'start_state_max_bounds_error' parameter "
+                      "(currently set to %f)",
                       jmodel->getName().c_str(), joint_values.str().c_str(), joint_bounds_low.str().c_str(),
-                      joint_bounds_hi.str().c_str(), BOUNDS_PARAM_NAME.c_str(), bounds_dist_);
+                      joint_bounds_hi.str().c_str(), params.start_state_max_bounds_error);
         }
       }
     }
@@ -191,26 +193,23 @@ public:
     {
       // heuristically decide a duration offset for the trajectory (induced by the additional point added as a prefix to
       // the computed trajectory)
-      res.trajectory->setWayPointDurationFromPrevious(0, std::min(max_dt_offset_,
+      res.trajectory->setWayPointDurationFromPrevious(0, std::min(params.start_state_max_dt,
                                                                   res.trajectory->getAverageSegmentDuration()));
       res.trajectory->addPrefixWayPoint(prefix_state, 0.0);
       // we add a prefix point, so we need to bump any previously added index positions
-      for (std::size_t& added_index : added_path_index)
+      for (std::size_t& added_index : res.added_path_index)
+      {
         added_index++;
-      added_path_index.push_back(0);
+      }
+      res.added_path_index.push_back(0);
     }
 
     return solved;
   }
 
 private:
-  rclcpp::Node::SharedPtr node_;
-  double bounds_dist_;
-  double max_dt_offset_;
+  std::unique_ptr<default_plan_request_adapter_parameters::ParamListener> param_listener_;
 };
-
-const std::string FixStartStateBounds::BOUNDS_PARAM_NAME = "start_state_max_bounds_error";
-const std::string FixStartStateBounds::DT_PARAM_NAME = "start_state_max_dt";
 }  // namespace default_planner_request_adapters
 
 CLASS_LOADER_REGISTER_CLASS(default_planner_request_adapters::FixStartStateBounds,

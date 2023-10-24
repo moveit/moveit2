@@ -2,6 +2,19 @@
 Changelog for package moveit_py
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.8.0 (2023-09-10)
+------------------
+* Fix moveit_py rclcpp::init() (`#2223 <https://github.com/ros-planning/moveit2/issues/2223>`_)
+  * Fix moveit_py rclcpp::init()
+  Rclcpp has been initialized without args which was problematic
+  for some use cases like clock simulation. Parameters like
+  use_sim_time:=true need to be passed to rclcpp, also
+  NodeOptions access the global rcl state on construction.
+  Co-authored-by: Jafar Uruç <jafar.uruc@gmail.com>
+* Export moveit_py_utils' cmake target (`#2207 <https://github.com/ros-planning/moveit2/issues/2207>`_)
+* fix typo in name
+* Contributors: Henning Kayser, Michael Görner, Robert Haschke
+
 2.7.4 (2023-05-18)
 ------------------
 * Rename named_target_state_values to get_named_target_state_values (`#2181 <https://github.com/ros-planning/moveit2/issues/2181>`_)

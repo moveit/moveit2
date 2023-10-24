@@ -59,10 +59,6 @@ static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_ros.fix_start_st
 class FixStartStatePathConstraints : public planning_request_adapter::PlanningRequestAdapter
 {
 public:
-  FixStartStatePathConstraints() : planning_request_adapter::PlanningRequestAdapter()
-  {
-  }
-
   void initialize(const rclcpp::Node::SharedPtr& /* node */, const std::string& /* parameter_namespace */) override
   {
   }
@@ -73,8 +69,8 @@ public:
   }
 
   bool adaptAndPlan(const PlannerFn& planner, const planning_scene::PlanningSceneConstPtr& planning_scene,
-                    const planning_interface::MotionPlanRequest& req, planning_interface::MotionPlanResponse& res,
-                    std::vector<std::size_t>& added_path_index) const override
+                    const planning_interface::MotionPlanRequest& req,
+                    planning_interface::MotionPlanResponse& res) const override
   {
     RCLCPP_DEBUG(LOGGER, "Running '%s'", getDescription().c_str());
 
@@ -98,9 +94,9 @@ public:
       // we call the planner for this additional request, but we do not want to include potential
       // index information from that call
       std::vector<std::size_t> added_path_index_temp;
-      added_path_index_temp.swap(added_path_index);
+      added_path_index_temp.swap(res.added_path_index);
       bool solved1 = planner(planning_scene, req2, res2);
-      added_path_index_temp.swap(added_path_index);
+      added_path_index_temp.swap(res.added_path_index);
 
       if (solved1)
       {
@@ -115,12 +111,16 @@ public:
         if (solved2)
         {
           // since we add a prefix, we need to correct any existing index positions
-          for (std::size_t& added_index : added_path_index)
+          for (std::size_t& added_index : res.added_path_index)
+          {
             added_index += res2.trajectory->getWayPointCount();
+          }
 
           // we mark the fact we insert a prefix path (we specify the index position we just added)
           for (std::size_t i = 0; i < res2.trajectory->getWayPointCount(); ++i)
-            added_path_index.push_back(i);
+          {
+            res.added_path_index.push_back(i);
+          }
 
           // we need to append the solution paths.
           res2.trajectory->append(*res.trajectory, 0.0);

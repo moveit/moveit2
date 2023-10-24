@@ -113,7 +113,7 @@ void mesh_filter::DepthSelfFiltering::filter(const sensor_msgs::ImageConstPtr& d
   params.setCameraParameters(info_msg->K[0], info_msg->K[4], info_msg->K[2], info_msg->K[5]);
   params.setImageSize(depth_msg->width, depth_msg->height);
 
-  const float* src = (const float*)&depth_msg->data[0];
+  const double* src = (const double*)&depth_msg->data[0];
   //*
   static unsigned data_size = 0;
   static unsigned short* data = nullptr;
@@ -135,7 +135,7 @@ void mesh_filter::DepthSelfFiltering::filter(const sensor_msgs::ImageConstPtr& d
     if (static_cast<uint32_t>(filtered_depth_ptr_->image.cols) != depth_msg->width ||
         static_cast<uint32_t>(filtered_depth_ptr_->image.rows) != depth_msg->height)
       filtered_depth_ptr_->image = cv::Mat(depth_msg->height, depth_msg->width, CV_32FC1);
-    mesh_filter_->getFilteredDepth((float*)filtered_depth_ptr_->image.data);
+    mesh_filter_->getFilteredDepth((double*)filtered_depth_ptr_->image.data);
     pub_filtered_depth_image_.publish(filtered_depth_ptr_->toImageMsg(), info_msg);
   }
 
@@ -148,7 +148,7 @@ void mesh_filter::DepthSelfFiltering::filter(const sensor_msgs::ImageConstPtr& d
     if (static_cast<uint32_t>(model_depth_ptr_->image.cols) != depth_msg->width ||
         static_cast<uint32_t>(model_depth_ptr_->image.rows) != depth_msg->height)
       model_depth_ptr_->image = cv::Mat(depth_msg->height, depth_msg->width, CV_32FC1);
-    mesh_filter_->getModelDepth((float*)model_depth_ptr_->image.data);
+    mesh_filter_->getModelDepth((double*)model_depth_ptr_->image.data);
     pub_model_depth_image_.publish(model_depth_ptr_->toImageMsg(), info_msg);
   }
 

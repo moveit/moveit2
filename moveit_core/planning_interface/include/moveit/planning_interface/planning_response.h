@@ -65,6 +65,11 @@ struct MotionPlanResponse
   moveit_msgs::msg::RobotState start_state;
   std::string planner_id;
 
+  /// Sometimes planning request adapters may add states on the solution path (e.g., add the current state of the robot
+  /// as prefix, when the robot started to plan only from near that state, as the current state itself appears to touch
+  /// obstacles). This is helpful because the added states should not be considered invalid in all situations.
+  std::vector<std::size_t> added_path_index;  // This won't be included into the MotionPlanResponse ROS 2 message!
+
   // \brief Enable checking of query success or failure, for example if(response) ...
   explicit operator bool() const
   {

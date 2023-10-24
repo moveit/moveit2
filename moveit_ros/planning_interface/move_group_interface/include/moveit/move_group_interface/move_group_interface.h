@@ -64,8 +64,6 @@ namespace moveit
 /** \brief Simple interface to MoveIt components */
 namespace planning_interface
 {
-using MoveItErrorCode [[deprecated("Use moveit::core::MoveItErrorCode")]] = moveit::core::MoveItErrorCode;
-
 MOVEIT_CLASS_FORWARD(MoveGroupInterface);  // Defines MoveGroupInterfacePtr, ConstPtr, WeakPtr... etc
 
 /** \class MoveGroupInterface move_group_interface.h moveit/planning_interface/move_group_interface.h
@@ -502,9 +500,6 @@ public:
   /** \brief Get the current joint state goal in a form compatible to setJointValueTarget() */
   void getJointValueTarget(std::vector<double>& group_variable_values) const;
 
-  /// Get the currently set joint state goal, replaced by private getTargetRobotState()
-  [[deprecated]] const moveit::core::RobotState& getJointValueTarget() const;
-
   /**@}*/
 
   /**
@@ -715,17 +710,41 @@ public:
       target. No execution is performed. The resulting plan is stored in \e plan*/
   moveit::core::MoveItErrorCode plan(Plan& plan);
 
-  /** \brief Given a \e plan, execute it without waiting for completion. */
-  moveit::core::MoveItErrorCode asyncExecute(const Plan& plan);
+  /** \brief Given a \e plan, execute it without waiting for completion.
+   *  \param [in] plan The motion plan for which to execute
+   *  \param [in] controllers An optional list of ros2_controllers to execute with. If none, MoveIt will attempt to find
+   * a controller. The exact behavior of finding a controller depends on which MoveItControllerManager plugin is active.
+   *  \return moveit::core::MoveItErrorCode::SUCCESS if successful
+   */
+  moveit::core::MoveItErrorCode asyncExecute(const Plan& plan,
+                                             const std::vector<std::string>& controllers = std::vector<std::string>());
 
-  /** \brief Given a \e robot trajectory, execute it without waiting for completion. */
-  moveit::core::MoveItErrorCode asyncExecute(const moveit_msgs::msg::RobotTrajectory& trajectory);
+  /** \brief Given a \e robot trajectory, execute it without waiting for completion.
+   *  \param [in] trajectory The trajectory to execute
+   *  \param [in] controllers An optional list of ros2_controllers to execute with. If none, MoveIt will attempt to find
+   * a controller. The exact behavior of finding a controller depends on which MoveItControllerManager plugin is active.
+   *  \return moveit::core::MoveItErrorCode::SUCCESS if successful
+   */
+  moveit::core::MoveItErrorCode asyncExecute(const moveit_msgs::msg::RobotTrajectory& trajectory,
+                                             const std::vector<std::string>& controllers = std::vector<std::string>());
 
-  /** \brief Given a \e plan, execute it while waiting for completion. */
-  moveit::core::MoveItErrorCode execute(const Plan& plan);
+  /** \brief Given a \e plan, execute it while waiting for completion.
+   *  \param [in] plan Contains trajectory info as well as metadata such as a RobotModel.
+   *  \param [in] controllers An optional list of ros2_controllers to execute with. If none, MoveIt will attempt to find
+   * a controller. The exact behavior of finding a controller depends on which MoveItControllerManager plugin is active.
+   *  \return moveit::core::MoveItErrorCode::SUCCESS if successful
+   */
+  moveit::core::MoveItErrorCode execute(const Plan& plan,
+                                        const std::vector<std::string>& controllers = std::vector<std::string>());
 
-  /** \brief Given a \e robot trajectory, execute it while waiting for completion. */
-  moveit::core::MoveItErrorCode execute(const moveit_msgs::msg::RobotTrajectory& trajectory);
+  /** \brief Given a \e robot trajectory, execute it while waiting for completion.
+   *  \param [in] trajectory The trajectory to execute
+   *  \param [in] controllers An optional list of ros2_controllers to execute with. If none, MoveIt will attempt to find
+   * a controller. The exact behavior of finding a controller depends on which MoveItControllerManager plugin is active.
+   *  \return moveit::core::MoveItErrorCode::SUCCESS if successful
+   */
+  moveit::core::MoveItErrorCode execute(const moveit_msgs::msg::RobotTrajectory& trajectory,
+                                        const std::vector<std::string>& controllers = std::vector<std::string>());
 
   /** \brief Compute a Cartesian path that follows specified waypoints with a step size of at most \e eef_step meters
       between end effector configurations of consecutive points in the result \e trajectory. The reference frame for the

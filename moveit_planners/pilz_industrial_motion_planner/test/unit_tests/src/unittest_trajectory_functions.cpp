@@ -92,8 +92,8 @@ protected:
     node_ = rclcpp::Node::make_shared("unittest_trajectory_functions", node_options);
 
     // load robot model
-    robot_model_loader::RobotModelLoader rm_loader(node_);
-    robot_model_ = rm_loader.getModel();
+    rm_loader_ = std::make_unique<robot_model_loader::RobotModelLoader>(node_);
+    robot_model_ = rm_loader_->getModel();
     ASSERT_TRUE(bool(robot_model_)) << "Failed to load robot model";
     planning_scene_ = std::make_shared<planning_scene::PlanningScene>(robot_model_);
 
@@ -120,6 +120,11 @@ protected:
     }
   }
 
+  void TearDown() override
+  {
+    robot_model_.reset();
+  }
+
   /**
    * @brief check if two transformations are close
    * @param pose1
@@ -127,12 +132,13 @@ protected:
    * @param epsilon
    * @return
    */
-  bool tfNear(const Eigen::Isometry3d& pose1, const Eigen::Isometry3d& pose2, const double& epsilon);
+  bool tfNear(const Eigen::Isometry3d& pose1, const Eigen::Isometry3d& pose2, double epsilon);
 
 protected:
   // ros stuff
   rclcpp::Node::SharedPtr node_;
   moveit::core::RobotModelConstPtr robot_model_;
+  std::unique_ptr<robot_model_loader::RobotModelLoader> rm_loader_;
   planning_scene::PlanningSceneConstPtr planning_scene_;
 
   // test parameters from parameter server
@@ -146,8 +152,7 @@ protected:
   random_numbers::RandomNumberGenerator rng_{ random_seed_ };
 };
 
-bool TrajectoryFunctionsTestBase::tfNear(const Eigen::Isometry3d& pose1, const Eigen::Isometry3d& pose2,
-                                         const double& epsilon)
+bool TrajectoryFunctionsTestBase::tfNear(const Eigen::Isometry3d& pose1, const Eigen::Isometry3d& pose2, double epsilon)
 {
   for (std::size_t i = 0; i < 3; ++i)
   {

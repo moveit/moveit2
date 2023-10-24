@@ -131,7 +131,7 @@ public:
    * \author Suat Gedikli (gedikli@willowgarage.com)
    * \param[out] depth pointer to buffer to be filled with depth values.
    */
-  void getFilteredDepth(float* depth) const;
+  void getFilteredDepth(double* depth) const;
 
   /**
    * \brief retrieves the labels of the rendered model
@@ -149,7 +149,7 @@ public:
    * \author Suat Gedikli (gedikli@willowgarage.com)
    * \param[out] depth pointer to buffer to be filled with depth values.
    */
-  void getModelDepth(float* depth) const;
+  void getModelDepth(double* depth) const;
 
   /**
    * \brief set the shadow threshold. points that are further away than the rendered model are filtered out.
@@ -225,7 +225,7 @@ protected:
   void addJob(const JobPtr& job) const;
 
   /**
-   * \brief sets the size of the fram buffers
+   * \brief sets the size of the frame buffers
    * \author Suat Gedikli (gedikli@willowgarage.com)
    * \param[in] width width of frame buffers in pixels
    * \param[in] height height of frame buffers in pixels

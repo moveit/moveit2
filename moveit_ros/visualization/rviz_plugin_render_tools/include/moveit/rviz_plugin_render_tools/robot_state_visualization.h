@@ -95,7 +95,7 @@ public:
    */
   void setCollisionVisible(bool visible);
 
-  void setAlpha(float alpha);
+  void setAlpha(double alpha);
 
 private:
   void updateHelper(const moveit::core::RobotStateConstPtr& robot_state,

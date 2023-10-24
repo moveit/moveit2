@@ -76,7 +76,7 @@ public:
    * @return true if successfully disabled, otherwise false. */
   bool disableCollisionObject(const std::string& name);
 
-  /**@brief Set a single static collision object's tansform
+  /**@brief Set a single static collision object's transform
    * @param name The name of the object
    * @param pose The transformation in world */
   void setCollisionObjectsTransform(const std::string& name, const Eigen::Isometry3d& pose);

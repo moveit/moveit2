@@ -19,7 +19,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        ROS_DISTRO: [humble, rolling]
+        ROS_DISTRO: [rolling]
     runs-on: ubuntu-latest
     permissions:
       packages: write
@@ -31,22 +31,22 @@ jobs:
 
     steps:
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v3
       - name: Login to Github Container Registry
         if: env.PUSH == 'true'
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Login to DockerHub
         if: env.PUSH == 'true'
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
       - name: Build and Push
-        uses: docker/build-push-action@v4
+        uses: docker/build-push-action@v5
         with:
           file: .docker/${{ github.job }}/Dockerfile
           build-args: ROS_DISTRO=${{ matrix.ROS_DISTRO }}
@@ -60,7 +60,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        ROS_DISTRO: [humble, rolling]
+        ROS_DISTRO: [rolling]
     runs-on: ubuntu-latest
     permissions:
       packages: write
@@ -72,22 +72,22 @@ jobs:
 
     steps:
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v3
       - name: Login to Github Container Registry
         if: env.PUSH == 'true'
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Login to DockerHub
         if: env.PUSH == 'true'
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
       - name: Build and Push
-        uses: docker/build-push-action@v4
+        uses: docker/build-push-action@v5
         with:
           file: .docker/${{ github.job }}/Dockerfile
           build-args: ROS_DISTRO=${{ matrix.ROS_DISTRO }}
@@ -101,7 +101,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        ROS_DISTRO: [humble, rolling]
+        ROS_DISTRO: [rolling]
     runs-on: ubuntu-latest
     permissions:
       packages: write
@@ -113,22 +113,22 @@ jobs:
 
     steps:
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v3
       - name: Login to Github Container Registry
         if: env.PUSH == 'true'
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Login to DockerHub
         if: env.PUSH == 'true'
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
       - name: Build and Push
-        uses: docker/build-push-action@v4
+        uses: docker/build-push-action@v5
         with:
           file: .docker/${{ github.job }}/Dockerfile
           build-args: OUR_ROS_DISTRO=${{ matrix.ROS_DISTRO }}
@@ -143,7 +143,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        ROS_DISTRO: [humble, rolling]
+        ROS_DISTRO: [rolling]
     runs-on: ubuntu-latest
     permissions:
       packages: write
@@ -154,26 +154,26 @@ jobs:
       PUSH: ${{ (github.event_name != 'pull_request') && (github.repository == 'ros-planning/moveit2') }}
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v3
       - name: Login to Github Container Registry
         if: env.PUSH == 'true'
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Login to DockerHub
         if: env.PUSH == 'true'
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
       - name: "Remove .dockerignore"
         run: rm .dockerignore  # enforce full source context
       - name: Build and Push
-        uses: docker/build-push-action@v4
+        uses: docker/build-push-action@v5
         with:
           context: .
           file: .docker/${{ github.job }}/Dockerfile

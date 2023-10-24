@@ -783,7 +783,8 @@ public:
     return res->error_code;
   }
 
-  moveit::core::MoveItErrorCode execute(const moveit_msgs::msg::RobotTrajectory& trajectory, bool wait)
+  moveit::core::MoveItErrorCode execute(const moveit_msgs::msg::RobotTrajectory& trajectory, bool wait,
+                                        const std::vector<std::string>& controllers = std::vector<std::string>())
   {
     if (!execute_action_client_ || !execute_action_client_->action_server_is_ready())
     {
@@ -831,6 +832,7 @@ public:
 
     moveit_msgs::action::ExecuteTrajectory::Goal goal;
     goal.trajectory = trajectory;
+    goal.controller_names = controllers;
 
     auto goal_handle_future = execute_action_client_->async_send_goal(goal, send_goal_opts);
     if (!wait)
@@ -1455,24 +1457,27 @@ moveit::core::MoveItErrorCode MoveGroupInterface::move()
   return impl_->move(true);
 }
 
-moveit::core::MoveItErrorCode MoveGroupInterface::asyncExecute(const Plan& plan)
+moveit::core::MoveItErrorCode MoveGroupInterface::asyncExecute(const Plan& plan,
+                                                               const std::vector<std::string>& controllers)
 {
-  return impl_->execute(plan.trajectory, false);
+  return impl_->execute(plan.trajectory, false, controllers);
 }
 
-moveit::core::MoveItErrorCode MoveGroupInterface::asyncExecute(const moveit_msgs::msg::RobotTrajectory& trajectory)
+moveit::core::MoveItErrorCode MoveGroupInterface::asyncExecute(const moveit_msgs::msg::RobotTrajectory& trajectory,
+                                                               const std::vector<std::string>& controllers)
 {
-  return impl_->execute(trajectory, false);
+  return impl_->execute(trajectory, false, controllers);
 }
 
-moveit::core::MoveItErrorCode MoveGroupInterface::execute(const Plan& plan)
+moveit::core::MoveItErrorCode MoveGroupInterface::execute(const Plan& plan, const std::vector<std::string>& controllers)
 {
-  return impl_->execute(plan.trajectory, true);
+  return impl_->execute(plan.trajectory, true, controllers);
 }
 
-moveit::core::MoveItErrorCode MoveGroupInterface::execute(const moveit_msgs::msg::RobotTrajectory& trajectory)
+moveit::core::MoveItErrorCode MoveGroupInterface::execute(const moveit_msgs::msg::RobotTrajectory& trajectory,
+                                                          const std::vector<std::string>& controllers)
 {
-  return impl_->execute(trajectory, true);
+  return impl_->execute(trajectory, true, controllers);
 }
 
 moveit::core::MoveItErrorCode MoveGroupInterface::plan(Plan& plan)
@@ -1645,7 +1650,7 @@ void MoveGroupInterface::getJointValueTarget(std::vector<double>& group_variable
 
 bool MoveGroupInterface::setJointValueTarget(const std::vector<double>& joint_values)
 {
-  auto const n_group_joints = impl_->getJointModelGroup()->getVariableCount();
+  const auto n_group_joints = impl_->getJointModelGroup()->getVariableCount();
   if (joint_values.size() != n_group_joints)
   {
     RCLCPP_DEBUG_STREAM(LOGGER, "Provided joint value list has length " << joint_values.size() << " but group "
@@ -1768,11 +1773,6 @@ bool MoveGroupInterface::setApproximateJointValueTarget(const Eigen::Isometry3d&
 {
   geometry_msgs::msg::Pose msg = tf2::toMsg(eef_pose);
   return setApproximateJointValueTarget(msg, end_effector_link);
-}
-
-const moveit::core::RobotState& MoveGroupInterface::getJointValueTarget() const
-{
-  return impl_->getTargetRobotState();
 }
 
 const moveit::core::RobotState& MoveGroupInterface::getTargetRobotState() const

@@ -108,7 +108,7 @@ private:
    */
   [[nodiscard]] static bool getRobotModelBounds(const double max_velocity_scaling_factor,
                                                 const double max_acceleration_scaling_factor,
-                                                moveit::core::JointModelGroup const* const group,
+                                                const moveit::core::JointModelGroup* const group,
                                                 ruckig::InputParameter<ruckig::DynamicDOFs>& ruckig_input);
 
   /**

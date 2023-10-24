@@ -325,6 +325,12 @@ Trajectory::Trajectory(const Path& path, const Eigen::VectorXd& max_velocity, co
   , time_step_(time_step)
   , cached_time_(std::numeric_limits<double>::max())
 {
+  if (time_step_ == 0)
+  {
+    valid_ = false;
+    RCLCPP_ERROR(LOGGER, "The trajectory is invalid because the time step is 0.");
+    return;
+  }
   trajectory_.push_back(TrajectoryStep(0.0, 0.0));
   double after_acceleration = getMinMaxPathAcceleration(0.0, 0.0, true);
   while (valid_ && !integrateForward(trajectory_, after_acceleration) && valid_)
@@ -565,6 +571,16 @@ bool Trajectory::integrateForward(std::list<TrajectoryStep>& trajectory, double 
 
     trajectory.push_back(TrajectoryStep(path_pos, path_vel));
     acceleration = getMinMaxPathAcceleration(path_pos, path_vel, true);
+
+    if (path_vel == 0 && acceleration == 0)
+    {
+      // The position will never change if velocity and acceleration are zero.
+      // The loop will spin indefinitely as no exit condition is met.
+      valid_ = false;
+      RCLCPP_ERROR(LOGGER, "Error while integrating forward: zero acceleration and velocity. Are any relevant "
+                           "acceleration components limited to zero?");
+      return true;
+    }
 
     if (path_vel > getAccelerationMaxPathVelocity(path_pos) || path_vel > getVelocityMaxPathVelocity(path_pos))
     {

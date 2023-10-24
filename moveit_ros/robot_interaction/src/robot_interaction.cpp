@@ -56,8 +56,8 @@
 namespace robot_interaction
 {
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_ros_robot_interaction.robot_interaction");
-static const float END_EFFECTOR_UNREACHABLE_COLOR[4] = { 1.0, 0.3, 0.3, 1.0 };
-static const float END_EFFECTOR_REACHABLE_COLOR[4] = { 0.2, 1.0, 0.2, 1.0 };
+static const double END_EFFECTOR_UNREACHABLE_COLOR[4] = { 1.0, 0.3, 0.3, 1.0 };
+static const double END_EFFECTOR_REACHABLE_COLOR[4] = { 0.2, 1.0, 0.2, 1.0 };
 
 const std::string RobotInteraction::INTERACTIVE_MARKER_TOPIC = "robot_interaction_interactive_marker_topic";
 
@@ -419,7 +419,7 @@ void RobotInteraction::addEndEffectorMarkers(const InteractionHandlerPtr& handle
   }
 
   std_msgs::msg::ColorRGBA marker_color;
-  const float* color = handler->inError(eef) ? END_EFFECTOR_UNREACHABLE_COLOR : END_EFFECTOR_REACHABLE_COLOR;
+  const double* color = handler->inError(eef) ? END_EFFECTOR_UNREACHABLE_COLOR : END_EFFECTOR_REACHABLE_COLOR;
   marker_color.r = color[0];
   marker_color.g = color[1];
   marker_color.b = color[2];
@@ -602,8 +602,8 @@ void RobotInteraction::toggleMoveInteractiveMarkerTopic(bool enable)
             [this, marker_name](const geometry_msgs::msg::PoseStamped::SharedPtr& msg) {
               moveInteractiveMarker(marker_name, *msg);
             };
-        auto subscription =
-            node_->create_subscription<geometry_msgs::msg::PoseStamped>(topic_name, 1, subscription_callback);
+        auto subscription = node_->create_subscription<geometry_msgs::msg::PoseStamped>(
+            topic_name, rclcpp::SystemDefaultsQoS(), subscription_callback);
         int_marker_move_subscribers_.push_back(subscription);
       }
     }

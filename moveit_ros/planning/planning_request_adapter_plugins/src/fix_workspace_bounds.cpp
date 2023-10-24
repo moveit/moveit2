@@ -42,7 +42,8 @@
 #include <rclcpp/logger.hpp>
 #include <rclcpp/logging.hpp>
 #include <rclcpp/node.hpp>
-#include <rclcpp/parameter_value.hpp>
+
+#include <default_plan_request_adapter_parameters.hpp>
 
 namespace default_planner_request_adapters
 {
@@ -53,13 +54,10 @@ static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_ros.fix_workspac
 class FixWorkspaceBounds : public planning_request_adapter::PlanningRequestAdapter
 {
 public:
-  static const std::string WBOUNDS_PARAM_NAME;
-
   void initialize(const rclcpp::Node::SharedPtr& node, const std::string& parameter_namespace) override
   {
-    node_ = node;
-    workspace_extent_ = getParam(node_, LOGGER, parameter_namespace, WBOUNDS_PARAM_NAME, 10.0);
-    workspace_extent_ /= 2.0;
+    param_listener_ =
+        std::make_unique<default_plan_request_adapter_parameters::ParamListener>(node, parameter_namespace);
   }
 
   std::string getDescription() const override
@@ -68,8 +66,8 @@ public:
   }
 
   bool adaptAndPlan(const PlannerFn& planner, const planning_scene::PlanningSceneConstPtr& planning_scene,
-                    const planning_interface::MotionPlanRequest& req, planning_interface::MotionPlanResponse& res,
-                    std::vector<std::size_t>& /*added_path_index*/) const override
+                    const planning_interface::MotionPlanRequest& req,
+                    planning_interface::MotionPlanResponse& res) const override
   {
     RCLCPP_DEBUG(LOGGER, "Running '%s'", getDescription().c_str());
     const moveit_msgs::msg::WorkspaceParameters& wparams = req.workspace_parameters;
@@ -80,8 +78,12 @@ public:
       RCLCPP_DEBUG(LOGGER, "It looks like the planning volume was not specified. Using default values.");
       planning_interface::MotionPlanRequest req2 = req;
       moveit_msgs::msg::WorkspaceParameters& default_wp = req2.workspace_parameters;
-      default_wp.min_corner.x = default_wp.min_corner.y = default_wp.min_corner.z = -workspace_extent_;
-      default_wp.max_corner.x = default_wp.max_corner.y = default_wp.max_corner.z = workspace_extent_;
+      const auto params = param_listener_->get_params();
+
+      default_wp.min_corner.x = default_wp.min_corner.y = default_wp.min_corner.z =
+          -params.default_workspace_bounds / 2.0;
+      default_wp.max_corner.x = default_wp.max_corner.y = default_wp.max_corner.z =
+          params.default_workspace_bounds / 2.0;
       return planner(planning_scene, req2, res);
     }
     else
@@ -91,11 +93,8 @@ public:
   }
 
 private:
-  rclcpp::Node::SharedPtr node_;
-  double workspace_extent_;
+  std::unique_ptr<default_plan_request_adapter_parameters::ParamListener> param_listener_;
 };
-
-const std::string FixWorkspaceBounds::WBOUNDS_PARAM_NAME = "default_workspace_bounds";
 }  // namespace default_planner_request_adapters
 
 CLASS_LOADER_REGISTER_CLASS(default_planner_request_adapters::FixWorkspaceBounds,
