@@ -95,7 +95,7 @@ bool KinematicsBase::initialize(const rclcpp::Node::SharedPtr& /*node*/,
 
 bool KinematicsBase::setRedundantJoints(const std::vector<unsigned int>& redundant_joint_indices)
 {
-  for (const unsigned int& redundant_joint_index : redundant_joint_indices)
+  for (unsigned int redundant_joint_index : redundant_joint_indices)
   {
     if (redundant_joint_index >= getJointNames().size())
     {
