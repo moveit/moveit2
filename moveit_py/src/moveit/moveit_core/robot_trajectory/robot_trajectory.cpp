@@ -158,7 +158,7 @@ void init_robot_trajectory(py::module& m)
                velocity_scaling_factor (float): The velocity scaling factor.
                acceleration_scaling_factor (float): The acceleration scaling factor.
                mitigate_overshoot (bool): Whether to mitigate overshoot during smoothing (default: false).
-               overshoot_threshold (float): The maximum allowed overshoot during smoothing (default: 0.01
+               overshoot_threshold (float): The maximum allowed overshoot during smoothing (default: 0.01).
            Returns:
                bool: True if the trajectory was successfully retimed, false otherwise.
            )")
