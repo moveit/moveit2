@@ -135,21 +135,21 @@ trajectory_msgs::msg::JointTrajectory composeTrajectoryMessage(const servo::Para
 
   if (servo_params.publish_joint_positions)
   {
-    for (size_t i = 0; i < num_joints; i++)
+    for (size_t i = 0; i < num_joints; ++i)
     {
       point.positions[i] = joint_state.positions[i];
     }
   }
   if (servo_params.publish_joint_velocities)
   {
-    for (size_t i = 0; i < num_joints; i++)
+    for (size_t i = 0; i < num_joints; ++i)
     {
       point.velocities[i] = joint_state.velocities[i];
     }
   }
   if (servo_params.publish_joint_accelerations)
   {
-    for (size_t i = 0; i < num_joints; i++)
+    for (size_t i = 0; i < num_joints; ++i)
     {
       point.accelerations[i] = joint_state.accelerations[i];
     }
@@ -167,14 +167,14 @@ std_msgs::msg::Float64MultiArray composeMultiArrayMessage(const servo::Params& s
   multi_array.data.resize(num_joints);
   if (servo_params.publish_joint_positions)
   {
-    for (size_t i = 0; i < num_joints; i++)
+    for (size_t i = 0; i < num_joints; ++i)
     {
       multi_array.data[i] = joint_state.positions[i];
     }
   }
   else if (servo_params.publish_joint_velocities)
   {
-    for (size_t i = 0; i < num_joints; i++)
+    for (size_t i = 0; i < num_joints; ++i)
     {
       multi_array.data[i] = joint_state.velocities[i];
     }

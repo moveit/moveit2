@@ -104,14 +104,18 @@ public:
 
   /**
    * Smooth the command signals for all DOF
-   * @param position_vector array of joint position commands
+   * @param positions array of joint position commands
+   * @param velocities array of joint velocity commands
+   * @param accelerations array of joint acceleration commands
    * @return True if initialization was successful
    */
   bool doSmoothing(Eigen::VectorXd& positions, Eigen::VectorXd& velocities, Eigen::VectorXd& accelerations) override;
 
   /**
    * Reset to a given joint state
-   * @param joint_positions reset the filters to these joint positions
+   * @param positions reset the filters to these joint positions
+   * @param velocities (unused)
+   * @param accelerations (unused)
    * @return True if reset was successful
    */
   bool reset(const Eigen::VectorXd& positions, const Eigen::VectorXd& velocities,
