@@ -180,6 +180,8 @@ void Servo::setSmoothingPlugin()
     RCLCPP_ERROR(LOGGER, "Smoothing plugin could not be initialized");
     std::exit(EXIT_FAILURE);
   }
+  const KinematicState current_state = getCurrentRobotState();
+  smoother_->reset(current_state.positions, current_state.velocities, current_state.accelerations);
 }
 
 void Servo::setCollisionChecking(const bool check_collision)
@@ -401,7 +403,7 @@ Eigen::VectorXd Servo::jointDeltaFromCommand(const ServoInput& command, const mo
   else
   {
     servo_status_ = StatusCode::INVALID;
-    RCLCPP_WARN_STREAM(LOGGER, "SERVO : Incoming command type does not match expected command type.");
+    RCLCPP_WARN_STREAM(LOGGER, "Incoming servo command type does not match known command types.");
   }
 
   return joint_position_deltas;
@@ -433,12 +435,6 @@ KinematicState Servo::getNextJointState(const ServoInput& command)
   robot_state->copyJointGroupPositions(joint_model_group, current_state.positions);
   robot_state->copyJointGroupVelocities(joint_model_group, current_state.velocities);
 
-  // Create Eigen maps for cleaner operations.
-  Eigen::Map<Eigen::VectorXd> current_joint_positions(current_state.positions.data(), num_joints);
-  Eigen::Map<Eigen::VectorXd> target_joint_positions(target_state.positions.data(), num_joints);
-  Eigen::Map<Eigen::VectorXd> current_joint_velocities(current_state.velocities.data(), num_joints);
-  Eigen::Map<Eigen::VectorXd> target_joint_velocities(target_state.velocities.data(), num_joints);
-
   // Compute the change in joint position due to the incoming command
   Eigen::VectorXd joint_position_delta = jointDeltaFromCommand(command, robot_state);
 
@@ -459,34 +455,35 @@ KinematicState Servo::getNextJointState(const ServoInput& command)
     joint_position_delta *= collision_velocity_scale_;
 
     // Compute the next joint positions based on the joint position deltas
-    target_joint_positions = current_joint_positions + joint_position_delta;
+    target_state.positions = current_state.positions + joint_position_delta;
 
     // TODO : apply filtering to the velocity instead of position
     // Apply smoothing to the positions if a smoother was provided.
     // Update filter state and apply filtering in position domain
     if (smoother_)
     {
-      smoother_->reset(current_state.positions);
-      smoother_->doSmoothing(target_state.positions);
+      smoother_->doSmoothing(target_state.positions, target_state.velocities, target_state.accelerations);
     }
 
     // Compute velocities based on smoothed joint positions
-    target_joint_velocities = (target_joint_positions - current_joint_positions) / servo_params_.publish_period;
+    target_state.velocities = (target_state.positions - current_state.positions) / servo_params_.publish_period;
 
     // Scale down the velocity based on joint velocity limit or user defined scaling if applicable.
-    const double joint_limit_scale = jointLimitVelocityScalingFactor(target_joint_velocities, joint_bounds,
+    const double joint_limit_scale = jointLimitVelocityScalingFactor(target_state.velocities, joint_bounds,
                                                                      servo_params_.override_velocity_scaling_factor);
     if (joint_limit_scale < 1.0)  // 1.0 means no scaling.
-      RCLCPP_WARN_STREAM(LOGGER, "Joint velocity limit scaling applied by a factor of " << joint_limit_scale);
+    {
+      RCLCPP_DEBUG_STREAM(LOGGER, "Joint velocity limit scaling applied by a factor of " << joint_limit_scale);
+    }
 
-    target_joint_velocities *= joint_limit_scale;
+    target_state.velocities *= joint_limit_scale;
 
     // Adjust joint position based on scaled down velocity
-    target_joint_positions = current_joint_positions + (target_joint_velocities * servo_params_.publish_period);
+    target_state.positions = current_state.positions + (target_state.velocities * servo_params_.publish_period);
 
     // Check if any joints are going past joint position limits
     const std::vector<int> joints_to_halt =
-        jointsToHalt(target_joint_positions, target_joint_velocities, joint_bounds, servo_params_.joint_limit_margin);
+        jointsToHalt(target_state.positions, target_state.velocities, joint_bounds, servo_params_.joint_limit_margin);
 
     // Apply halting if any joints need to be halted.
     if (!joints_to_halt.empty())
@@ -592,7 +589,7 @@ std::pair<bool, KinematicState> Servo::smoothHalt(const KinematicState& halt_sta
 {
   bool stopped = false;
   auto target_state = halt_state;
-  const auto current_state = getCurrentRobotState();
+  const KinematicState current_state = getCurrentRobotState();
 
   const size_t num_joints = current_state.joint_names.size();
   for (size_t i = 0; i < num_joints; i++)
@@ -609,8 +606,8 @@ std::pair<bool, KinematicState> Servo::smoothHalt(const KinematicState& halt_sta
 
   if (smoother_)
   {
-    smoother_->reset(current_state.positions);
-    smoother_->doSmoothing(target_state.positions);
+    smoother_->reset(current_state.positions, current_state.velocities, current_state.accelerations);
+    smoother_->doSmoothing(target_state.positions, target_state.velocities, target_state.accelerations);
   }
 
   return std::make_pair(stopped, target_state);

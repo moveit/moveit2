@@ -119,7 +119,7 @@ void CollisionEnvBullet::checkSelfCollisionHelper(const CollisionRequest& req, C
   std::lock_guard<std::mutex> guard(collision_env_mutex_);
 
   std::vector<collision_detection_bullet::CollisionObjectWrapperPtr> cows;
-  addAttachedOjects(state, cows);
+  addAttachedObjects(state, cows);
 
   if (req.distance)
   {
@@ -187,7 +187,7 @@ void CollisionEnvBullet::checkRobotCollisionHelper(const CollisionRequest& req, 
   }
 
   std::vector<collision_detection_bullet::CollisionObjectWrapperPtr> attached_cows;
-  addAttachedOjects(state, attached_cows);
+  addAttachedObjects(state, attached_cows);
   updateTransformsFromState(state, manager_);
 
   for (const collision_detection_bullet::CollisionObjectWrapperPtr& cow : attached_cows)
@@ -213,7 +213,7 @@ void CollisionEnvBullet::checkRobotCollisionHelperCCD(const CollisionRequest& re
   std::lock_guard<std::mutex> guard(collision_env_mutex_);
 
   std::vector<collision_detection_bullet::CollisionObjectWrapperPtr> attached_cows;
-  addAttachedOjects(state1, attached_cows);
+  addAttachedObjects(state1, attached_cows);
 
   for (const collision_detection_bullet::CollisionObjectWrapperPtr& cow : attached_cows)
   {
@@ -331,8 +331,8 @@ void CollisionEnvBullet::notifyObjectChange(const ObjectConstPtr& obj, World::Ac
   }
 }
 
-void CollisionEnvBullet::addAttachedOjects(const moveit::core::RobotState& state,
-                                           std::vector<collision_detection_bullet::CollisionObjectWrapperPtr>& cows) const
+void CollisionEnvBullet::addAttachedObjects(const moveit::core::RobotState& state,
+                                            std::vector<collision_detection_bullet::CollisionObjectWrapperPtr>& cows) const
 {
   std::vector<const moveit::core::AttachedBody*> attached_bodies;
   state.getAttachedBodies(attached_bodies);

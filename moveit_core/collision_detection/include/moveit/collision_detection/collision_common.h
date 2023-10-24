@@ -81,7 +81,7 @@ struct Contact
   Eigen::Vector3d normal;
 
   /** \brief depth (penetration between bodies) */
-  double depth;
+  double depth = 0.0;
 
   /** \brief The id of the first body involved in the contact */
   std::string body_name_1;
@@ -99,7 +99,7 @@ struct Contact
    *
    *  If the value is 0, then the collision occurred in the start pose. If the value is 1, then the collision occurred
    * in the end pose. */
-  double percent_interpolation;
+  double percent_interpolation = 0.0;
 
   /** \brief The two nearest points connecting the two bodies */
   Eigen::Vector3d nearest_points[2];
@@ -116,7 +116,7 @@ struct CostSource
   std::array<double, 3> aabb_max;
 
   /// The partial cost (the probability of existence for the object there is a collision with)
-  double cost;
+  double cost = 0.0;
 
   /// Get the volume of the AABB around the cost source
   double getVolume() const
@@ -144,9 +144,6 @@ struct CostSource
 /** \brief Representation of a collision checking result */
 struct CollisionResult
 {
-  CollisionResult() : collision(false), distance(std::numeric_limits<double>::max()), contact_count(0)
-  {
-  }
   using ContactMap = std::map<std::pair<std::string, std::string>, std::vector<Contact> >;
 
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
@@ -165,13 +162,13 @@ struct CollisionResult
   void print() const;
 
   /** \brief True if collision was found, false otherwise */
-  bool collision;
+  bool collision = false;
 
   /** \brief Closest distance between two bodies */
-  double distance;
+  double distance = std::numeric_limits<double>::max();
 
   /** \brief Number of contacts returned */
-  std::size_t contact_count;
+  std::size_t contact_count = 0;
 
   /** \brief A map returning the pairs of body ids in contact, plus their contact details */
   ContactMap contacts;
@@ -183,47 +180,34 @@ struct CollisionResult
 /** \brief Representation of a collision checking request */
 struct CollisionRequest
 {
-  CollisionRequest()
-    : distance(false)
-    , cost(false)
-    , contacts(false)
-    , max_contacts(1)
-    , max_contacts_per_pair(1)
-    , max_cost_sources(1)
-    , verbose(false)
-  {
-  }
-  virtual ~CollisionRequest()
-  {
-  }
-
-  /** \brief The group name to check collisions for (optional; if empty, assume the complete robot). Descendent links are included. */
-  std::string group_name;
+  /** \brief The group name to check collisions for (optional; if empty, assume the complete robot). Descendent links
+   * are included. */
+  std::string group_name = "";
 
   /** \brief If true, compute proximity distance */
-  bool distance;
+  bool distance = false;
 
   /** \brief If true, a collision cost is computed */
-  bool cost;
+  bool cost = false;
 
   /** \brief If true, compute contacts. Otherwise only a binary collision yes/no is reported. */
-  bool contacts;
+  bool contacts = false;
 
   /** \brief Overall maximum number of contacts to compute */
-  std::size_t max_contacts;
+  std::size_t max_contacts = 1;
 
   /** \brief Maximum number of contacts to compute per pair of bodies (multiple bodies may be in contact at different
    * configurations) */
-  std::size_t max_contacts_per_pair;
+  std::size_t max_contacts_per_pair = 1;
 
   /** \brief When costs are computed, this value defines how many of the top cost sources should be returned */
-  std::size_t max_cost_sources;
+  std::size_t max_cost_sources = 1;
 
   /** \brief Function call that decides whether collision detection should stop. */
-  std::function<bool(const CollisionResult&)> is_done;
+  std::function<bool(const CollisionResult&)> is_done = nullptr;
 
   /** \brief Flag indicating whether information about detected collisions should be reported */
-  bool verbose;
+  bool verbose = false;
 };
 
 namespace DistanceRequestTypes
@@ -241,19 +225,6 @@ using DistanceRequestType = DistanceRequestTypes::DistanceRequestType;
 /** \brief Representation of a distance-reporting request */
 struct DistanceRequest
 {
-  DistanceRequest()
-    : enable_nearest_points(false)
-    , enable_signed_distance(false)
-    , type(DistanceRequestType::GLOBAL)
-    , max_contacts_per_body(1)
-    , active_components_only(nullptr)
-    , acm(nullptr)
-    , distance_threshold(std::numeric_limits<double>::max())
-    , verbose(false)
-    , compute_gradient(false)
-  {
-  }
-
   /*** \brief Compute \e active_components_only_ based on \e req_. This
       includes links that are in the kinematic model but outside this group, if those links are descendants of
       joints in this group that have their values updated. */
@@ -270,38 +241,38 @@ struct DistanceRequest
   }
 
   /// Indicate if nearest point information should be calculated
-  bool enable_nearest_points;
+  bool enable_nearest_points = false;
 
   /// Indicate if a signed distance should be calculated in a collision.
-  bool enable_signed_distance;
+  bool enable_signed_distance = false;
 
   /// Indicate the type of distance request. If using type=ALL, it is
   /// recommended to set max_contacts_per_body to the expected number
   /// of contacts per pair because it is used to reserve space.
-  DistanceRequestType type;
+  DistanceRequestType type = DistanceRequestType::GLOBAL;
 
   /// Maximum number of contacts to store for bodies (multiple bodies may be within distance threshold)
-  std::size_t max_contacts_per_body;
+  std::size_t max_contacts_per_body = 1;
 
   /// The group name
-  std::string group_name;
+  std::string group_name = "";
 
   /// The set of active components to check
-  const std::set<const moveit::core::LinkModel*>* active_components_only;
+  const std::set<const moveit::core::LinkModel*>* active_components_only = nullptr;
 
   /// The allowed collision matrix used to filter checks
-  const AllowedCollisionMatrix* acm;
+  const AllowedCollisionMatrix* acm = nullptr;
 
   /// Only calculate distances for objects within this threshold to each other.
   /// If set, this can significantly reduce the number of queries.
-  double distance_threshold;
+  double distance_threshold = std::numeric_limits<double>::max();
 
   /// Log debug information
-  bool verbose;
+  bool verbose = false;
 
   /// Indicate if gradient should be calculated between each object.
   /// This is the normalized vector connecting the closest points on the two objects.
-  bool compute_gradient;
+  bool compute_gradient = false;
 };
 
 /** \brief Generic representation of the distance information for a pair of objects */
@@ -366,12 +337,8 @@ using DistanceMap = std::map<const std::pair<std::string, std::string>, std::vec
 /** \brief Result of a distance request. */
 struct DistanceResult
 {
-  DistanceResult() : collision(false)
-  {
-  }
-
   /// Indicates if two objects were in collision
-  bool collision;
+  bool collision = false;
 
   /// ResultsData for the two objects with the minimum distance
   DistanceResultsData minimum_distance;

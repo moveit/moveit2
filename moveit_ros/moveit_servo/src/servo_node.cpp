@@ -252,7 +252,7 @@ std::optional<KinematicState> ServoNode::processTwistCommand()
     if (new_twist_msg_)
     {
       next_joint_state = result.second;
-      RCLCPP_INFO_STREAM(LOGGER, "Twist command timed out. Halting to a stop.");
+      RCLCPP_DEBUG_STREAM(LOGGER, "Twist command timed out. Halting to a stop.");
     }
   }
 

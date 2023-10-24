@@ -105,7 +105,7 @@ inline double IKlog(double f) { return log(f); }
 #define IKFAST_SOLUTION_THRESH ((IkReal)1e-6)
 #endif
 
-// there are checkpoints in ikfast that are evaluated to make sure they are 0. This threshold speicfies by how much they can deviate
+// there are checkpoints in ikfast that are evaluated to make sure they are 0. This threshold specifies by how much they can deviate
 #ifndef IKFAST_EVALCOND_THRESH
 #define IKFAST_EVALCOND_THRESH ((IkReal)0.00001)
 #endif

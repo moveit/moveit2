@@ -7,7 +7,10 @@ target_include_directories(moveit_smoothing_base PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
   $<INSTALL_INTERFACE:include/moveit_core>
 )
-target_link_libraries(moveit_smoothing_base moveit_macros)
+target_link_libraries(moveit_smoothing_base
+  ${Eigen_LIBRARIES}
+  moveit_macros
+)
 include(GenerateExportHeader)
 generate_export_header(moveit_smoothing_base)
 set_target_properties(moveit_smoothing_base PROPERTIES VERSION
@@ -15,6 +18,7 @@ set_target_properties(moveit_smoothing_base PROPERTIES VERSION
 )
 ament_target_dependencies(moveit_smoothing_base
   rclcpp
+  tf2_eigen
 )
 
 # Plugin implementations

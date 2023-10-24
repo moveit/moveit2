@@ -38,6 +38,7 @@
 
 #include <moveit/warehouse/moveit_message_storage.h>
 #include <moveit_msgs/msg/planning_scene_world.hpp>
+#include <rclcpp/logger.hpp>
 
 namespace moveit_warehouse
 {
@@ -70,5 +71,6 @@ private:
   void createCollections();
 
   PlanningSceneWorldCollection planning_scene_world_collection_;
+  rclcpp::Logger logger_;
 };
 }  // namespace moveit_warehouse

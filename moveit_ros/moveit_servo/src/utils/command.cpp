@@ -198,7 +198,7 @@ JointDeltaResult jointDeltaFromTwist(const TwistCommand& command, const moveit::
     if (!is_planning_frame)
     {
       RCLCPP_WARN_STREAM(LOGGER,
-                         "Command frame is: " << command.frame_id << " expected: " << servo_params.planning_frame);
+                         "Command frame is: " << command.frame_id << ", expected: " << servo_params.planning_frame);
     }
   }
   return std::make_pair(status, joint_position_delta);
