@@ -58,7 +58,7 @@ inline double distance(const urdf::Pose& transform)
               transform.position.z * transform.position.z);
 }
 
-inline bool solveQuadratic(const double& a, const double& b, const double& c, double* x1, double* x2)
+inline bool solveQuadratic(double a, double b, double c, double* x1, double* x2)
 {
   double discriminant = b * b - 4 * a * c;
   if (fabs(a) < IK_EPS)
@@ -88,7 +88,7 @@ inline bool solveQuadratic(const double& a, const double& b, const double& c, do
   }
 }
 
-inline bool solveCosineEqn(const double& a, const double& b, const double& c, double& soln1, double& soln2)
+inline bool solveCosineEqn(double a, double b, double c, double& soln1, double& soln2)
 {
   double theta1 = atan2(b, a);
   double denom = sqrt(a * a + b * b);
@@ -140,7 +140,7 @@ public:
      @param Input pose for end-effector
      @param Initial guess for shoulder pan angle
   */
-  void computeIKShoulderPan(const Eigen::Isometry3f& g_in, const double& shoulder_pan_initial_guess,
+  void computeIKShoulderPan(const Eigen::Isometry3f& g_in, double shoulder_pan_initial_guess,
                             std::vector<std::vector<double> >& solution) const;
 
   /**
@@ -148,7 +148,7 @@ public:
      h       @param Input pose for end-effector
      @param Initial guess for shoulder roll angle
   */
-  void computeIKShoulderRoll(const Eigen::Isometry3f& g_in, const double& shoulder_roll_initial_guess,
+  void computeIKShoulderRoll(const Eigen::Isometry3f& g_in, double shoulder_roll_initial_guess,
                              std::vector<std::vector<double> >& solution) const;
 
   //  std::vector<std::vector<double> > solution_ik_;/// a vector of ik solutions
@@ -172,7 +172,7 @@ private:
 
   bool checkJointLimits(const std::vector<double>& joint_values) const;
 
-  bool checkJointLimits(const double& joint_value, const int& joint_num) const;
+  bool checkJointLimits(double joint_value, int joint_num) const;
 
   Eigen::Isometry3f grhs_, gf_, home_inv_;
 

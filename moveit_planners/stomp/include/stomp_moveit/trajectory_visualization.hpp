@@ -56,7 +56,7 @@ namespace visualization
 
 namespace
 {
-const auto GREEN = [](const double& a) {
+const auto GREEN = [](double a) {
   std_msgs::msg::ColorRGBA color;
   color.r = 0.1;
   color.g = 0.8;
