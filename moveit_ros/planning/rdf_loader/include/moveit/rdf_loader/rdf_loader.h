@@ -133,5 +133,7 @@ private:
 
   srdf::ModelSharedPtr srdf_;
   urdf::ModelInterfaceSharedPtr urdf_;
+
+  rclcpp::Logger logger_;
 };
 }  // namespace rdf_loader

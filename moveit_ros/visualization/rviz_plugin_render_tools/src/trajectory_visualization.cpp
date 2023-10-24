@@ -42,7 +42,7 @@
 #include <moveit/rviz_plugin_render_tools/planning_link_updater.h>
 #include <moveit/rviz_plugin_render_tools/robot_state_visualization.h>
 #include <rviz_default_plugins/robot/robot.hpp>
-
+#include <moveit/utils/logger.hpp>
 #include <moveit/trajectory_processing/trajectory_tools.h>
 #include <rviz_common/display_context.hpp>
 #include <rviz_common/properties/bool_property.hpp>
@@ -62,7 +62,6 @@ using namespace std::placeholders;
 
 namespace moveit_rviz_plugin
 {
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_rviz_plugin_render_tools.trajectory_visualization");
 
 TrajectoryVisualization::TrajectoryVisualization(rviz_common::properties::Property* widget,
                                                  rviz_common::Display* display)
@@ -73,6 +72,7 @@ TrajectoryVisualization::TrajectoryVisualization(rviz_common::properties::Proper
   , widget_(widget)
   , trajectory_slider_panel_(nullptr)
   , trajectory_slider_dock_panel_(nullptr)
+  , logger_(moveit::makeChildLogger("trajectory_visualization"))
 {
   trajectory_topic_property_ = new rviz_common::properties::RosTopicProperty(
       "Trajectory Topic", "/display_planned_path",
@@ -201,7 +201,7 @@ void TrajectoryVisualization::onRobotModelLoaded(const moveit::core::RobotModelC
   // Error check
   if (!robot_model_)
   {
-    RCLCPP_ERROR_STREAM(LOGGER, "No robot model found");
+    RCLCPP_ERROR_STREAM(logger_, "No robot model found");
     return;
   }
 
@@ -550,13 +550,13 @@ void TrajectoryVisualization::incomingDisplayTrajectory(const moveit_msgs::msg::
   // Error check
   if (!robot_state_ || !robot_model_)
   {
-    RCLCPP_ERROR_STREAM(LOGGER, "No robot state or robot model loaded");
+    RCLCPP_ERROR_STREAM(logger_, "No robot state or robot model loaded");
     return;
   }
 
   if (!msg->model_id.empty() && msg->model_id != robot_model_->getName())
   {
-    RCLCPP_WARN(LOGGER, "Received a trajectory to display for model '%s' but model '%s' was expected",
+    RCLCPP_WARN(logger_, "Received a trajectory to display for model '%s' but model '%s' was expected",
                 msg->model_id.c_str(), robot_model_->getName().c_str());
   }
 

@@ -1,7 +1,7 @@
 /*********************************************************************
  * Software License Agreement (BSD License)
  *
- *  Copyright (c) 2016, Michael 'v4hn' Goerner
+ *  Copyright (c) 2023, PickNik Robotics Inc.
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -32,50 +32,22 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-/* Author: Michael Goerner */
+/* Author: Tyler Weaver */
 
-#include "apply_planning_scene_service_capability.h"
-#include <moveit/moveit_cpp/moveit_cpp.h>
-#include <moveit/move_group/capability_names.h>
+#include <chrono>
+#include <rclcpp/rclcpp.hpp>
 #include <moveit/utils/logger.hpp>
 
-namespace move_group
+int main(int argc, char** argv)
 {
+  rclcpp::init(argc, argv);
+  rclcpp::Node::SharedPtr node = rclcpp::Node::make_shared("dut_node");
 
-ApplyPlanningSceneService::ApplyPlanningSceneService() : MoveGroupCapability("ApplyPlanningSceneService")
-{
+  // Make a child logger
+  const auto child_logger = moveit::makeChildLogger("child");
+
+  // publish via a timer
+  auto wall_timer = node->create_wall_timer(std::chrono::milliseconds(100),
+                                            [&] { RCLCPP_INFO(child_logger, "hello from only the child node!"); });
+  rclcpp::spin(node);
 }
-
-void ApplyPlanningSceneService::initialize()
-{
-  using std::placeholders::_1;
-  using std::placeholders::_2;
-  using std::placeholders::_3;
-
-  service_ = context_->moveit_cpp_->getNode()->create_service<moveit_msgs::srv::ApplyPlanningScene>(
-      APPLY_PLANNING_SCENE_SERVICE_NAME,
-      [this](const std::shared_ptr<rmw_request_id_t>& request_header,
-             const std::shared_ptr<moveit_msgs::srv::ApplyPlanningScene::Request>& req,
-             const std::shared_ptr<moveit_msgs::srv::ApplyPlanningScene::Response>& res) {
-        return applyScene(request_header, req, res);
-      });
-}
-
-bool ApplyPlanningSceneService::applyScene(const std::shared_ptr<rmw_request_id_t>& /* unused */,
-                                           const std::shared_ptr<moveit_msgs::srv::ApplyPlanningScene::Request>& req,
-                                           const std::shared_ptr<moveit_msgs::srv::ApplyPlanningScene::Response>& res)
-{
-  if (!context_->planning_scene_monitor_)
-  {
-    RCLCPP_ERROR(moveit::getLogger(), "Cannot apply PlanningScene as no scene is monitored.");
-    return true;
-  }
-  context_->planning_scene_monitor_->updateFrameTransforms();
-  res->success = context_->planning_scene_monitor_->newPlanningSceneMessage(req->scene);
-  return true;
-}
-}  // namespace move_group
-
-#include <pluginlib/class_list_macros.hpp>
-
-PLUGINLIB_EXPORT_CLASS(move_group::ApplyPlanningSceneService, move_group::MoveGroupCapability)

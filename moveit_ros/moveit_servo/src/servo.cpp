@@ -41,13 +41,13 @@
 #include <moveit_servo/utils/command.hpp>
 #include <moveit_servo/utils/common.hpp>
 #include <rclcpp/rclcpp.hpp>
+#include <moveit/utils/logger.hpp>
 
 // Disable -Wold-style-cast because all _THROTTLE macros trigger this
 #pragma GCC diagnostic ignored "-Wold-style-cast"
 
 namespace
 {
-const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_servo.servo");
 constexpr double ROBOT_STATE_WAIT_TIME = 5.0;  // seconds
 constexpr double STOPPED_VELOCITY_EPS = 1e-4;
 }  // namespace
@@ -58,6 +58,7 @@ namespace moveit_servo
 Servo::Servo(const rclcpp::Node::SharedPtr& node, std::shared_ptr<const servo::ParamListener> servo_param_listener,
              const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor)
   : node_(node)
+  , logger_(moveit::makeChildLogger("servo"))
   , servo_param_listener_{ std::move(servo_param_listener) }
   , planning_scene_monitor_{ planning_scene_monitor }
 {
@@ -65,14 +66,14 @@ Servo::Servo(const rclcpp::Node::SharedPtr& node, std::shared_ptr<const servo::P
 
   if (!validateParams(servo_params_))
   {
-    RCLCPP_ERROR_STREAM(LOGGER, "Got invalid parameters, exiting.");
+    RCLCPP_ERROR_STREAM(logger_, "Got invalid parameters, exiting.");
     std::exit(EXIT_FAILURE);
   }
 
   if (!planning_scene_monitor_->getStateMonitor()->waitForCompleteState(servo_params_.move_group_name,
                                                                         ROBOT_STATE_WAIT_TIME))
   {
-    RCLCPP_ERROR(LOGGER, "Timeout waiting for current state");
+    RCLCPP_ERROR(logger_, "Timeout waiting for current state");
     std::exit(EXIT_FAILURE);
   }
 
@@ -91,12 +92,12 @@ Servo::Servo(const rclcpp::Node::SharedPtr& node, std::shared_ptr<const servo::P
   if (!robot_state->knowsFrameTransform(servo_params_.planning_frame))
   {
     servo_status_ = StatusCode::INVALID;
-    RCLCPP_ERROR_STREAM(LOGGER, "No transform available for planning frame " << servo_params_.planning_frame);
+    RCLCPP_ERROR_STREAM(logger_, "No transform available for planning frame " << servo_params_.planning_frame);
   }
   else if (!robot_state->knowsFrameTransform(servo_params_.ee_frame))
   {
     servo_status_ = StatusCode::INVALID;
-    RCLCPP_ERROR_STREAM(LOGGER, "No transform available for end effector frame " << servo_params_.ee_frame);
+    RCLCPP_ERROR_STREAM(logger_, "No transform available for end effector frame " << servo_params_.ee_frame);
   }
   else
   {
@@ -107,7 +108,7 @@ Servo::Servo(const rclcpp::Node::SharedPtr& node, std::shared_ptr<const servo::P
     }
     else
     {
-      RCLCPP_WARN(LOGGER, "No smoothing plugin loaded");
+      RCLCPP_WARN(logger_, "No smoothing plugin loaded");
     }
 
     // Create the collision checker and start collision checking.
@@ -147,7 +148,7 @@ Servo::Servo(const rclcpp::Node::SharedPtr& node, std::shared_ptr<const servo::P
     joint_name_to_index_maps_.insert(
         std::make_pair<std::string, JointNameToMoveGroupIndexMap>(std::string(sub_group_name), std::move(new_map)));
   }
-  RCLCPP_INFO_STREAM(LOGGER, "Servo initialized successfully");
+  RCLCPP_INFO_STREAM(logger_, "Servo initialized successfully");
 }
 
 Servo::~Servo()
@@ -166,7 +167,7 @@ void Servo::setSmoothingPlugin()
   }
   catch (pluginlib::PluginlibException& ex)
   {
-    RCLCPP_ERROR(LOGGER, "Exception while loading the smoothing plugin '%s': '%s'",
+    RCLCPP_ERROR(logger_, "Exception while loading the smoothing plugin '%s': '%s'",
                  servo_params_.smoothing_filter_plugin_name.c_str(), ex.what());
     std::exit(EXIT_FAILURE);
   }
@@ -177,7 +178,7 @@ void Servo::setSmoothingPlugin()
       robot_state->getJointModelGroup(servo_params_.move_group_name)->getActiveJointModelNames().size();
   if (!smoother_->initialize(node_, planning_scene_monitor_->getRobotModel(), num_joints))
   {
-    RCLCPP_ERROR(LOGGER, "Smoothing plugin could not be initialized");
+    RCLCPP_ERROR(logger_, "Smoothing plugin could not be initialized");
     std::exit(EXIT_FAILURE);
   }
   const KinematicState current_state = getCurrentRobotState();
@@ -196,49 +197,49 @@ bool Servo::validateParams(const servo::Params& servo_params) const
   auto joint_model_group = robot_state->getJointModelGroup(servo_params.move_group_name);
   if (joint_model_group == nullptr)
   {
-    RCLCPP_ERROR_STREAM(LOGGER, "Invalid move group name: `" << servo_params.move_group_name << '`');
+    RCLCPP_ERROR_STREAM(logger_, "Invalid move group name: `" << servo_params.move_group_name << '`');
     params_valid = false;
   }
 
   if (servo_params.hard_stop_singularity_threshold <= servo_params.lower_singularity_threshold)
   {
-    RCLCPP_ERROR(LOGGER, "Parameter 'hard_stop_singularity_threshold' "
-                         "should be greater than 'lower_singularity_threshold.' "
-                         "Check the parameters YAML file used to launch this node.");
+    RCLCPP_ERROR(logger_, "Parameter 'hard_stop_singularity_threshold' "
+                          "should be greater than 'lower_singularity_threshold.' "
+                          "Check the parameters YAML file used to launch this node.");
     params_valid = false;
   }
 
   if (!servo_params.publish_joint_positions && !servo_params.publish_joint_velocities &&
       !servo_params.publish_joint_accelerations)
   {
-    RCLCPP_ERROR(LOGGER, "At least one of publish_joint_positions / "
-                         "publish_joint_velocities / "
-                         "publish_joint_accelerations must be true. "
-                         "Check the parameters YAML file used to launch this node.");
+    RCLCPP_ERROR(logger_, "At least one of publish_joint_positions / "
+                          "publish_joint_velocities / "
+                          "publish_joint_accelerations must be true. "
+                          "Check the parameters YAML file used to launch this node.");
     params_valid = false;
   }
 
   if ((servo_params.command_out_type == "std_msgs/Float64MultiArray") && servo_params.publish_joint_positions &&
       servo_params.publish_joint_velocities)
   {
-    RCLCPP_ERROR(LOGGER, "When publishing a std_msgs/Float64MultiArray, "
-                         "you must select positions OR velocities."
-                         "Check the parameters YAML file used to launch this node.");
+    RCLCPP_ERROR(logger_, "When publishing a std_msgs/Float64MultiArray, "
+                          "you must select positions OR velocities."
+                          "Check the parameters YAML file used to launch this node.");
     params_valid = false;
   }
 
   if (servo_params.scene_collision_proximity_threshold < servo_params.self_collision_proximity_threshold)
   {
-    RCLCPP_ERROR(LOGGER, "Parameter 'self_collision_proximity_threshold' should probably be less "
-                         "than or equal to 'scene_collision_proximity_threshold'."
-                         "Check the parameters YAML file used to launch this node.");
+    RCLCPP_ERROR(logger_, "Parameter 'self_collision_proximity_threshold' should probably be less "
+                          "than or equal to 'scene_collision_proximity_threshold'."
+                          "Check the parameters YAML file used to launch this node.");
     params_valid = false;
   }
 
   if (!servo_params.active_subgroup.empty() && servo_params.active_subgroup != servo_params.move_group_name &&
       !joint_model_group->isSubgroup(servo_params.active_subgroup))
   {
-    RCLCPP_ERROR(LOGGER,
+    RCLCPP_ERROR(logger_,
                  "The value '%s' Parameter 'active_subgroup' does not name a valid subgroup of joint group '%s'.",
                  servo_params.active_subgroup.c_str(), servo_params.move_group_name.c_str());
     params_valid = false;
@@ -258,8 +259,8 @@ bool Servo::updateParams()
     {
       if (params.override_velocity_scaling_factor != servo_params_.override_velocity_scaling_factor)
       {
-        RCLCPP_INFO_STREAM(LOGGER, "override_velocity_scaling_factor changed to : "
-                                       << std::to_string(params.override_velocity_scaling_factor));
+        RCLCPP_INFO_STREAM(logger_, "override_velocity_scaling_factor changed to : "
+                                        << std::to_string(params.override_velocity_scaling_factor));
       }
 
       servo_params_ = params;
@@ -267,7 +268,7 @@ bool Servo::updateParams()
     }
     else
     {
-      RCLCPP_WARN_STREAM(LOGGER, "Parameters will not be updated.");
+      RCLCPP_WARN_STREAM(logger_, "Parameters will not be updated.");
     }
   }
   return params_updated;
@@ -314,7 +315,7 @@ KinematicState Servo::haltJoints(const std::vector<int>& joints_to_halt, const K
   {
     halting_joint_names << bounded_state.joint_names[idx] + " ";
   }
-  RCLCPP_WARN_STREAM(LOGGER, "Joint position limit reached on joints: " << halting_joint_names.str());
+  RCLCPP_WARN_STREAM(logger_, "Joint position limit reached on joints: " << halting_joint_names.str());
 
   const bool all_joint_halt =
       (getCommandType() == CommandType::JOINT_JOG && servo_params_.halt_all_joints_in_joint_mode) ||
@@ -376,7 +377,7 @@ Eigen::VectorXd Servo::jointDeltaFromCommand(const ServoInput& command, const mo
       catch (tf2::TransformException& ex)
       {
         servo_status_ = StatusCode::INVALID;
-        RCLCPP_ERROR_STREAM(LOGGER, "Could not transform twist to planning frame.");
+        RCLCPP_ERROR_STREAM(logger_, "Could not transform twist to planning frame.");
       }
     }
     else if (expected_type == CommandType::POSE)
@@ -391,7 +392,7 @@ Eigen::VectorXd Servo::jointDeltaFromCommand(const ServoInput& command, const mo
       catch (tf2::TransformException& ex)
       {
         servo_status_ = StatusCode::INVALID;
-        RCLCPP_ERROR_STREAM(LOGGER, "Could not transform pose to planning frame.");
+        RCLCPP_ERROR_STREAM(logger_, "Could not transform pose to planning frame.");
       }
     }
 
@@ -403,7 +404,7 @@ Eigen::VectorXd Servo::jointDeltaFromCommand(const ServoInput& command, const mo
   else
   {
     servo_status_ = StatusCode::INVALID;
-    RCLCPP_WARN_STREAM(LOGGER, "Incoming servo command type does not match known command types.");
+    RCLCPP_WARN_STREAM(logger_, "Incoming servo command type does not match known command types.");
   }
 
   return joint_position_deltas;
@@ -473,7 +474,7 @@ KinematicState Servo::getNextJointState(const ServoInput& command)
                                                                      servo_params_.override_velocity_scaling_factor);
     if (joint_limit_scale < 1.0)  // 1.0 means no scaling.
     {
-      RCLCPP_DEBUG_STREAM(LOGGER, "Joint velocity limit scaling applied by a factor of " << joint_limit_scale);
+      RCLCPP_DEBUG_STREAM(logger_, "Joint velocity limit scaling applied by a factor of " << joint_limit_scale);
     }
 
     target_state.velocities *= joint_limit_scale;

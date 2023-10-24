@@ -48,18 +48,22 @@
 #include <rclcpp/logging.hpp>
 #include <rclcpp/node.hpp>
 #include <rclcpp/parameter_value.hpp>
+#include <moveit/utils/logger.hpp>
 
 #include <default_plan_request_adapter_parameters.hpp>
 
 namespace default_planner_request_adapters
 {
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_ros.fix_start_state_collision");
 
 /** @brief This fix start state collision adapter will attempt to sample a new collision-free configuration near a
  * specified configuration (in collision) by perturbing the joint values by a small amount.*/
 class FixStartStateCollision : public planning_request_adapter::PlanningRequestAdapter
 {
 public:
+  FixStartStateCollision() : logger_(moveit::makeChildLogger("fix_start_state_collision"))
+  {
+  }
+
   void initialize(const rclcpp::Node::SharedPtr& node, const std::string& parameter_namespace) override
   {
     param_listener_ =
@@ -75,7 +79,7 @@ public:
                     const planning_interface::MotionPlanRequest& req,
                     planning_interface::MotionPlanResponse& res) const override
   {
-    RCLCPP_DEBUG(LOGGER, "Running '%s'", getDescription().c_str());
+    RCLCPP_DEBUG(logger_, "Running '%s'", getDescription().c_str());
 
     // get the specified start state
     moveit::core::RobotState start_state = planning_scene->getCurrentState();
@@ -95,11 +99,11 @@ public:
 
       if (creq.group_name.empty())
       {
-        RCLCPP_INFO(LOGGER, "Start state appears to be in collision");
+        RCLCPP_INFO(logger_, "Start state appears to be in collision");
       }
       else
       {
-        RCLCPP_INFO(LOGGER, "Start state appears to be in collision with respect to group %s", creq.group_name.c_str());
+        RCLCPP_INFO(logger_, "Start state appears to be in collision with respect to group %s", creq.group_name.c_str());
       }
 
       auto prefix_state = std::make_shared<moveit::core::RobotState>(start_state);
@@ -127,7 +131,7 @@ public:
           if (!cres.collision)
           {
             found = true;
-            RCLCPP_INFO(LOGGER, "Found a valid state near the start state at distance %lf after %d attempts",
+            RCLCPP_INFO(logger_, "Found a valid state near the start state at distance %lf after %d attempts",
                         prefix_state->distance(start_state), c);
           }
         }
@@ -157,7 +161,7 @@ public:
       else
       {
         RCLCPP_WARN(
-            LOGGER,
+            logger_,
             "Unable to find a valid state nearby the start state (using jiggle fraction of %lf and %lu sampling "
             "attempts). Passing the original planning request to the planner.",
             params.jiggle_fraction, params.max_sampling_attempts);
@@ -169,11 +173,11 @@ public:
     {
       if (creq.group_name.empty())
       {
-        RCLCPP_DEBUG(LOGGER, "Start state is valid");
+        RCLCPP_DEBUG(logger_, "Start state is valid");
       }
       else
       {
-        RCLCPP_DEBUG(LOGGER, "Start state is valid with respect to group %s", creq.group_name.c_str());
+        RCLCPP_DEBUG(logger_, "Start state is valid with respect to group %s", creq.group_name.c_str());
       }
       return planner(planning_scene, req, res);
     }
@@ -181,6 +185,7 @@ public:
 
 private:
   std::unique_ptr<default_plan_request_adapter_parameters::ParamListener> param_listener_;
+  rclcpp::Logger logger_;
 };
 }  // namespace default_planner_request_adapters
 

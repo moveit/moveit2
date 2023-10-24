@@ -75,7 +75,7 @@ int main(int argc, char** argv)
   node_options.allow_undeclared_parameters(true);
   node_options.automatically_declare_parameters_from_overrides(true);
   rclcpp::Node::SharedPtr node = rclcpp::Node::make_shared("publish_warehouse_data", node_options);
-  moveit::getLoggerMut() = node->get_logger();
+  moveit::setLogger(node->get_logger());
 
   // time to wait in between publishing messages
   double delay = 0.001;

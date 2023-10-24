@@ -42,18 +42,22 @@
 #include <rclcpp/logger.hpp>
 #include <rclcpp/logging.hpp>
 #include <rclcpp/node.hpp>
+#include <moveit/utils/logger.hpp>
 
 #include <default_plan_request_adapter_parameters.hpp>
 
 namespace default_planner_request_adapters
 {
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_ros.fix_workspace_bounds");
 
 /** @brief This fix workspace bounds adapter will specify a default workspace for planning: a cube of size 10 m x 10 m x
  * 10 m. This workspace will only be specified if the planning request to the planner does not have these fields filled in. */
 class FixWorkspaceBounds : public planning_request_adapter::PlanningRequestAdapter
 {
 public:
+  FixWorkspaceBounds() : logger_(moveit::makeChildLogger("fix_workspace_bounds"))
+  {
+  }
+
   void initialize(const rclcpp::Node::SharedPtr& node, const std::string& parameter_namespace) override
   {
     param_listener_ =
@@ -69,13 +73,13 @@ public:
                     const planning_interface::MotionPlanRequest& req,
                     planning_interface::MotionPlanResponse& res) const override
   {
-    RCLCPP_DEBUG(LOGGER, "Running '%s'", getDescription().c_str());
+    RCLCPP_DEBUG(logger_, "Running '%s'", getDescription().c_str());
     const moveit_msgs::msg::WorkspaceParameters& wparams = req.workspace_parameters;
     if (wparams.min_corner.x == wparams.max_corner.x && wparams.min_corner.x == 0.0 &&
         wparams.min_corner.y == wparams.max_corner.y && wparams.min_corner.y == 0.0 &&
         wparams.min_corner.z == wparams.max_corner.z && wparams.min_corner.z == 0.0)
     {
-      RCLCPP_DEBUG(LOGGER, "It looks like the planning volume was not specified. Using default values.");
+      RCLCPP_DEBUG(logger_, "It looks like the planning volume was not specified. Using default values.");
       planning_interface::MotionPlanRequest req2 = req;
       moveit_msgs::msg::WorkspaceParameters& default_wp = req2.workspace_parameters;
       const auto params = param_listener_->get_params();
@@ -94,6 +98,7 @@ public:
 
 private:
   std::unique_ptr<default_plan_request_adapter_parameters::ParamListener> param_listener_;
+  rclcpp::Logger logger_;
 };
 }  // namespace default_planner_request_adapters
 

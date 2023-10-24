@@ -36,6 +36,7 @@
 
 #include <moveit/occupancy_map_monitor/occupancy_map_monitor_middleware_handle.hpp>
 #include <moveit/occupancy_map_monitor/occupancy_map_updater.h>
+#include <moveit/utils/logger.hpp>
 
 #include <pluginlib/class_loader.hpp>
 #include <rclcpp/logger.hpp>
@@ -48,15 +49,13 @@
 
 namespace occupancy_map_monitor
 {
-namespace
-{
-const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.ros.occupancy_map_monitor.middleware_handle");
-}
 
 OccupancyMapMonitorMiddlewareHandle::OccupancyMapMonitorMiddlewareHandle(const rclcpp::Node::SharedPtr& node,
                                                                          double map_resolution,
                                                                          const std::string& map_frame)
-  : node_{ node }, parameters_{ map_resolution, map_frame, {} }
+  : node_{ node }
+  , parameters_{ map_resolution, map_frame, {} }
+  , logger_(moveit::makeChildLogger("occupancy_map_monitor"))
 {
   try
   {
@@ -65,7 +64,7 @@ OccupancyMapMonitorMiddlewareHandle::OccupancyMapMonitorMiddlewareHandle(const r
   }
   catch (pluginlib::PluginlibException& ex)
   {
-    RCLCPP_FATAL_STREAM(LOGGER, "Exception while creating octomap updater plugin loader " << ex.what());
+    RCLCPP_FATAL_STREAM(logger_, "Exception while creating octomap updater plugin loader " << ex.what());
     throw ex;
   }
 
@@ -74,7 +73,7 @@ OccupancyMapMonitorMiddlewareHandle::OccupancyMapMonitorMiddlewareHandle(const r
     if (!node_->get_parameter("octomap_resolution", parameters_.map_resolution))
     {
       parameters_.map_resolution = 0.1;
-      RCLCPP_WARN(LOGGER, "Resolution not specified for Octomap. Assuming resolution = %g instead",
+      RCLCPP_WARN(logger_, "Resolution not specified for Octomap. Assuming resolution = %g instead",
                   parameters_.map_resolution);
     }
   }
@@ -84,18 +83,18 @@ OccupancyMapMonitorMiddlewareHandle::OccupancyMapMonitorMiddlewareHandle(const r
     node_->get_parameter("octomap_frame", parameters_.map_frame);
     if (parameters_.map_frame.empty())
     {
-      RCLCPP_ERROR(LOGGER, "No 'octomap_frame' parameter defined for octomap updates");
+      RCLCPP_ERROR(logger_, "No 'octomap_frame' parameter defined for octomap updates");
     }
   }
 
   std::vector<std::string> sensor_names;
   if (!node_->get_parameter("sensors", sensor_names))
   {
-    RCLCPP_ERROR(LOGGER, "No 3D sensor plugin(s) defined for octomap updates");
+    RCLCPP_ERROR(logger_, "No 3D sensor plugin(s) defined for octomap updates");
   }
   else if (sensor_names.empty())
   {
-    RCLCPP_ERROR(LOGGER, "List of sensors is empty!");
+    RCLCPP_ERROR(logger_, "List of sensors is empty!");
   }
 
   for (const auto& sensor_name : sensor_names)
@@ -103,12 +102,12 @@ OccupancyMapMonitorMiddlewareHandle::OccupancyMapMonitorMiddlewareHandle(const r
     std::string sensor_plugin = "";
     if (!node_->get_parameter(sensor_name + ".sensor_plugin", sensor_plugin))
     {
-      RCLCPP_ERROR(LOGGER, "No sensor plugin specified for octomap updater %s; ignoring.", sensor_name.c_str());
+      RCLCPP_ERROR(logger_, "No sensor plugin specified for octomap updater %s; ignoring.", sensor_name.c_str());
     }
 
     if (sensor_plugin.empty() || sensor_plugin[0] == '~')
     {
-      RCLCPP_INFO_STREAM(LOGGER, "Skipping octomap updater plugin '" << sensor_plugin << '\'');
+      RCLCPP_INFO_STREAM(logger_, "Skipping octomap updater plugin '" << sensor_plugin << '\'');
       continue;
     }
     else
@@ -131,8 +130,8 @@ OccupancyMapUpdaterPtr OccupancyMapMonitorMiddlewareHandle::loadOccupancyMapUpda
   }
   catch (pluginlib::PluginlibException& exception)
   {
-    RCLCPP_ERROR_STREAM(LOGGER, "Exception while loading octomap updater '" << sensor_plugin
-                                                                            << "': " << exception.what() << '\n');
+    RCLCPP_ERROR_STREAM(logger_, "Exception while loading octomap updater '" << sensor_plugin
+                                                                             << "': " << exception.what() << '\n');
   }
   return nullptr;
 }
@@ -141,7 +140,7 @@ void OccupancyMapMonitorMiddlewareHandle::initializeOccupancyMapUpdater(Occupanc
 {
   if (!occupancy_map_updater->initialize(node_))
   {
-    RCLCPP_ERROR(LOGGER, "Unable to initialize map updater of type %s", occupancy_map_updater->getType().c_str());
+    RCLCPP_ERROR(logger_, "Unable to initialize map updater of type %s", occupancy_map_updater->getType().c_str());
   }
 }
 

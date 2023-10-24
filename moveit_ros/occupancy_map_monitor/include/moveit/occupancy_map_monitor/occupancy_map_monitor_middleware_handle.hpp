@@ -110,6 +110,7 @@ private:
       updater_plugin_loader_; /*!< Pluginlib loader for OccupancyMapUpdater */
 
   OccupancyMapMonitor::Parameters parameters_; /*!< ROS parameters for OccupancyMapMonitor */
+  rclcpp::Logger logger_;
 };
 
 }  // namespace occupancy_map_monitor

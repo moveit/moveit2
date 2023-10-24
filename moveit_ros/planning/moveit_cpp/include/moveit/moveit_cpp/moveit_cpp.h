@@ -183,6 +183,8 @@ private:
   // Execution
   trajectory_execution_manager::TrajectoryExecutionManagerPtr trajectory_execution_manager_;
 
+  rclcpp::Logger logger_;
+
   /** \brief Initialize and setup the planning scene monitor */
   bool loadPlanningSceneMonitor(const PlanningSceneMonitorOptions& options);
 

@@ -36,42 +36,68 @@
 
 #include <rclcpp/rclcpp.hpp>
 #include <moveit/utils/logger.hpp>
-#include <rclcpp/version.h>
-#include <unordered_map>
 #include <string>
+#include <rsl/random.hpp>
+#include <fmt/format.h>
 
 namespace moveit
 {
 
+// This is the function that stores the global logger used by moveit.
+// As it returns a reference to the static logger it can be changed through the
+// `setLogger` function.
+//
+// You can get a const reference to the logger through the public function
+// `getLogger`.
+//
+// As there is no way to know if `getLogger` is called before `setLogger`
+// we try to initialize a node that will setup /rosout logging with this logger.
+// If that fails (likely due to rclcpp::init not haven't been called) we set the
+// global logger to one that is not associated with a node. When a logger not
+// associated with a node is used the logs only go to the console and files,
+// they do not go to /rosout. This is because publishing is done by a node.
+//
+// The node and logger created here is not intended to be used. But if it is,
+// we append a random number to the name of the node name and logger to make it
+// unique. This helps to prevent problems that arise from when multiple
+// nodes use the same name.
+rclcpp::Logger& getGlobalLoggerRef()
+{
+  static rclcpp::Logger logger = [&] {
+    // A random number is appended to the name used for the node to make it unique.
+    // This unique node and logger name is only used if a user does not set a logger
+    // through the `setLogger` method to their node's logger.
+    auto name = fmt::format("moveit_{}", rsl::rng()());
+    try
+    {
+      static auto moveit_node = std::make_shared<rclcpp::Node>(name);
+      return moveit_node->get_logger();
+    }
+    catch (const std::exception& ex)
+    {
+      // rclcpp::init was not called so rcl context is null, return non-node logger
+      auto logger = rclcpp::get_logger(name);
+      RCLCPP_WARN_STREAM(logger, "exception thrown while creating node for logging: " << ex.what());
+      RCLCPP_WARN(logger, "if rclcpp::init was not called, messages from this logger may be missing from /rosout");
+      return logger;
+    }
+  }();
+  return logger;
+}
+
 const rclcpp::Logger& getLogger()
 {
-  return getLoggerMut();
+  return getGlobalLoggerRef();
 }
 
 rclcpp::Logger makeChildLogger(const std::string& name)
 {
-  // On versions of ROS older than Iron we need to create a node for each child logger
-  // Remove once Humble is EOL
-  // References:
-  // Use parent logger (rcl PR) - https://github.com/ros2/rcl/pull/921
-  // Request for backport (rclpy issue) - https://github.com/ros2/rclpy/issues/1131
-  // MoveIt PR that added this - https://github.com/ros-planning/moveit2/pull/2445
-#if !RCLCPP_VERSION_GTE(21, 0, 3)
-  static std::unordered_map<std::string, std::shared_ptr<rclcpp::Node>> child_nodes;
-  if (child_nodes.find(name) == child_nodes.end())
-  {
-    std::string ns = getLogger().get_name();
-    child_nodes[name] = std::make_shared<rclcpp::Node>(name, ns);
-  }
-#endif
-
-  return getLoggerMut().get_child(name);
+  return getGlobalLoggerRef().get_child(name);
 }
 
-rclcpp::Logger& getLoggerMut()
+void setLogger(const rclcpp::Logger& logger)
 {
-  static rclcpp::Logger logger = rclcpp::get_logger("moveit");
-  return logger;
+  getGlobalLoggerRef() = logger;
 }
 
 }  // namespace moveit

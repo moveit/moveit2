@@ -141,7 +141,7 @@ int main(int argc, char** argv)
   node_options.allow_undeclared_parameters(true);
   node_options.automatically_declare_parameters_from_overrides(true);
   rclcpp::Node::SharedPtr node = rclcpp::Node::make_shared("moveit_warehouse_services", node_options);
-  moveit::getLoggerMut() = node->get_logger();
+  moveit::setLogger(node->get_logger());
 
   std::string host;
 

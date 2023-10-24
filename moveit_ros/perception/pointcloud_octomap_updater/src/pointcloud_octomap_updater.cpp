@@ -43,12 +43,12 @@
 #include <sensor_msgs/point_cloud2_iterator.hpp>
 #include <tf2_ros/create_timer_interface.h>
 #include <tf2_ros/create_timer_ros.h>
+#include <moveit/utils/logger.hpp>
 
 #include <memory>
 
 namespace occupancy_map_monitor
 {
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.ros.perception.pointcloud_octomap_updater");
 PointCloudOctomapUpdater::PointCloudOctomapUpdater()
   : OccupancyMapUpdater("PointCloudUpdater")
   , scale_(1.0)
@@ -58,6 +58,7 @@ PointCloudOctomapUpdater::PointCloudOctomapUpdater()
   , max_update_rate_(0)
   , point_cloud_subscriber_(nullptr)
   , point_cloud_filter_(nullptr)
+  , logger_(moveit::makeChildLogger("pointcloud_octomap_updater"))
 {
 }
 
@@ -113,14 +114,14 @@ void PointCloudOctomapUpdater::start()
         *point_cloud_subscriber_, *tf_buffer_, monitor_->getMapFrame(), 5, node_);
     point_cloud_filter_->registerCallback(
         [this](const sensor_msgs::msg::PointCloud2::ConstSharedPtr& cloud) { cloudMsgCallback(cloud); });
-    RCLCPP_INFO(LOGGER, "Listening to '%s' using message filter with target frame '%s'", point_cloud_topic_.c_str(),
+    RCLCPP_INFO(logger_, "Listening to '%s' using message filter with target frame '%s'", point_cloud_topic_.c_str(),
                 point_cloud_filter_->getTargetFramesString().c_str());
   }
   else
   {
     point_cloud_subscriber_->registerCallback(
         [this](const sensor_msgs::msg::PointCloud2::ConstSharedPtr& cloud) { cloudMsgCallback(cloud); });
-    RCLCPP_INFO(LOGGER, "Listening to '%s'", point_cloud_topic_.c_str());
+    RCLCPP_INFO(logger_, "Listening to '%s'", point_cloud_topic_.c_str());
   }
 }
 
@@ -141,7 +142,7 @@ ShapeHandle PointCloudOctomapUpdater::excludeShape(const shapes::ShapeConstPtr& 
   }
   else
   {
-    RCLCPP_ERROR(LOGGER, "Shape filter not yet initialized!");
+    RCLCPP_ERROR(logger_, "Shape filter not yet initialized!");
   }
   return h;
 }
@@ -169,7 +170,7 @@ void PointCloudOctomapUpdater::updateMask(const sensor_msgs::msg::PointCloud2& /
 
 void PointCloudOctomapUpdater::cloudMsgCallback(const sensor_msgs::msg::PointCloud2::ConstSharedPtr& cloud_msg)
 {
-  RCLCPP_DEBUG(LOGGER, "Received a new point cloud message");
+  RCLCPP_DEBUG(logger_, "Received a new point cloud message");
   rclcpp::Time start = rclcpp::Clock(RCL_ROS_TIME).now();
 
   if (max_update_rate_ > 0)
@@ -201,7 +202,7 @@ void PointCloudOctomapUpdater::cloudMsgCallback(const sensor_msgs::msg::PointClo
       }
       catch (tf2::TransformException& ex)
       {
-        RCLCPP_ERROR_STREAM(LOGGER, "Transform error of sensor data: " << ex.what() << "; quitting callback");
+        RCLCPP_ERROR_STREAM(logger_, "Transform error of sensor data: " << ex.what() << "; quitting callback");
         return;
       }
     }
@@ -358,10 +359,10 @@ void PointCloudOctomapUpdater::cloudMsgCallback(const sensor_msgs::msg::PointClo
   }
   catch (...)
   {
-    RCLCPP_ERROR(LOGGER, "Internal error while updating octree");
+    RCLCPP_ERROR(logger_, "Internal error while updating octree");
   }
   tree_->unlockWrite();
-  RCLCPP_DEBUG(LOGGER, "Processed point cloud in %lf ms", (node_->now() - start).seconds() * 1000.0);
+  RCLCPP_DEBUG(logger_, "Processed point cloud in %lf ms", (node_->now() - start).seconds() * 1000.0);
   tree_->triggerUpdateCallback();
 
   if (filtered_cloud)
