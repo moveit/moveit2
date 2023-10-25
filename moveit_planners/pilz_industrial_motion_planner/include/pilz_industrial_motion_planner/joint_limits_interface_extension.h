@@ -44,12 +44,12 @@ namespace pilz_industrial_motion_planner
 namespace joint_limits_interface
 {
 /**
- * @see joint_limits::declare_parameters(...)
+ * @see joint_limits::declareParameters(...)
  */
 inline bool declareParameters(const std::string& joint_name, const std::string& param_ns,
                               const rclcpp::Node::SharedPtr& node)
 {
-  return joint_limits::declare_parameters(joint_name, node, param_ns);
+  return joint_limits::declareParameters(joint_name, node, param_ns);
 }
 /**
  * @see joint_limits::getJointLimits(...)

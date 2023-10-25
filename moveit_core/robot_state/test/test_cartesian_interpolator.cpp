@@ -53,7 +53,7 @@ protected:
     builder.addChain("a->b", "continuous");
     builder.addChain("b->c", "prismatic");
     builder.addGroupChain("a", "c", "group");
-    robot_model = builder.build();
+    robot_model_ = builder.build();
   }
 
   void TearDown() override
@@ -61,18 +61,18 @@ protected:
   }
 
 protected:
-  RobotModelConstPtr robot_model;
+  RobotModelConstPtr robot_model_;
 
   static std::size_t generateTestTraj(std::vector<std::shared_ptr<RobotState>>& traj,
-                                      const RobotModelConstPtr& robot_model);
+                                      const RobotModelConstPtr& robot_model_);
 };
 
 std::size_t SimpleRobot::generateTestTraj(std::vector<std::shared_ptr<RobotState>>& traj,
-                                          const RobotModelConstPtr& robot_model)
+                                          const RobotModelConstPtr& robot_model_)
 {
   traj.clear();
 
-  auto robot_state = std::make_shared<RobotState>(robot_model);
+  auto robot_state = std::make_shared<RobotState>(robot_model_);
   robot_state->setToDefaultValues();
   double ja, jc;
 
@@ -116,7 +116,7 @@ TEST_F(SimpleRobot, testGenerateTrajectory)
   const std::size_t expected_full_traj_len = 7;
 
   // Generate a test trajectory
-  std::size_t full_traj_len = generateTestTraj(traj, robot_model);
+  std::size_t full_traj_len = generateTestTraj(traj, robot_model_);
 
   // Test the generateTestTraj still generates a trajectory of length 7
   EXPECT_EQ(full_traj_len, expected_full_traj_len);  // full traj should be 7 waypoints long
@@ -124,7 +124,7 @@ TEST_F(SimpleRobot, testGenerateTrajectory)
 
 TEST_F(SimpleRobot, checkAbsoluteJointSpaceJump)
 {
-  const JointModelGroup* joint_model_group = robot_model->getJointModelGroup("group");
+  const JointModelGroup* joint_model_group = robot_model_->getJointModelGroup("group");
   std::vector<std::shared_ptr<RobotState>> traj;
 
   // A revolute joint jumps 1.01 at the 5th waypoint and a prismatic joint jumps 1.01 at the 6th waypoint
@@ -132,7 +132,7 @@ TEST_F(SimpleRobot, checkAbsoluteJointSpaceJump)
   const std::size_t expected_prismatic_jump_traj_len = 5;
 
   // Pre-compute expected results for tests
-  std::size_t full_traj_len = generateTestTraj(traj, robot_model);
+  std::size_t full_traj_len = generateTestTraj(traj, robot_model_);
   const double expected_revolute_jump_fraction =
       static_cast<double>(expected_revolute_jump_traj_len) / static_cast<double>(full_traj_len);
   const double expected_prismatic_jump_fraction =
@@ -147,25 +147,25 @@ TEST_F(SimpleRobot, checkAbsoluteJointSpaceJump)
   EXPECT_NEAR(expected_revolute_jump_fraction, fraction, 0.01);
 
   // Indirect call using checkJointSpaceJumps
-  generateTestTraj(traj, robot_model);
+  generateTestTraj(traj, robot_model_);
   fraction = CartesianInterpolator::checkJointSpaceJump(joint_model_group, traj, JumpThreshold(1.0, 1.0));
   EXPECT_EQ(expected_revolute_jump_traj_len, traj.size());  // traj should be cut before the revolute jump
   EXPECT_NEAR(expected_revolute_jump_fraction, fraction, 0.01);
 
   // Test revolute joints
-  generateTestTraj(traj, robot_model);
+  generateTestTraj(traj, robot_model_);
   fraction = CartesianInterpolator::checkJointSpaceJump(joint_model_group, traj, JumpThreshold(1.0, 0.0));
   EXPECT_EQ(expected_revolute_jump_traj_len, traj.size());  // traj should be cut before the revolute jump
   EXPECT_NEAR(expected_revolute_jump_fraction, fraction, 0.01);
 
   // Test prismatic joints
-  generateTestTraj(traj, robot_model);
+  generateTestTraj(traj, robot_model_);
   fraction = CartesianInterpolator::checkJointSpaceJump(joint_model_group, traj, JumpThreshold(0.0, 1.0));
   EXPECT_EQ(expected_prismatic_jump_traj_len, traj.size());  // traj should be cut before the prismatic jump
   EXPECT_NEAR(expected_prismatic_jump_fraction, fraction, 0.01);
 
   // Ignore all absolute jumps
-  generateTestTraj(traj, robot_model);
+  generateTestTraj(traj, robot_model_);
   fraction = CartesianInterpolator::checkJointSpaceJump(joint_model_group, traj, JumpThreshold(0.0, 0.0));
   EXPECT_EQ(full_traj_len, traj.size());  // traj should not be cut
   EXPECT_NEAR(1.0, fraction, 0.01);
@@ -173,14 +173,14 @@ TEST_F(SimpleRobot, checkAbsoluteJointSpaceJump)
 
 TEST_F(SimpleRobot, checkRelativeJointSpaceJump)
 {
-  const JointModelGroup* joint_model_group = robot_model->getJointModelGroup("group");
+  const JointModelGroup* joint_model_group = robot_model_->getJointModelGroup("group");
   std::vector<std::shared_ptr<RobotState>> traj;
 
   // The first large jump of 1.01 occurs at the 5th waypoint so the test should trim the trajectory to length 4
   const std::size_t expected_relative_jump_traj_len = 4;
 
   // Pre-compute expected results for tests
-  std::size_t full_traj_len = generateTestTraj(traj, robot_model);
+  std::size_t full_traj_len = generateTestTraj(traj, robot_model_);
   const double expected_relative_jump_fraction =
       static_cast<double>(expected_relative_jump_traj_len) / static_cast<double>(full_traj_len);
 
@@ -193,74 +193,73 @@ TEST_F(SimpleRobot, checkRelativeJointSpaceJump)
   EXPECT_NEAR(expected_relative_jump_fraction, fraction, 0.01);
 
   // Indirect call of relative version using checkJointSpaceJumps
-  generateTestTraj(traj, robot_model);
+  generateTestTraj(traj, robot_model_);
   fraction = CartesianInterpolator::checkJointSpaceJump(joint_model_group, traj, JumpThreshold(2.97));
   EXPECT_EQ(expected_relative_jump_traj_len, traj.size());  // traj should be cut before the first jump of 1.01
   EXPECT_NEAR(expected_relative_jump_fraction, fraction, 0.01);
 
   // Trajectory should not be cut: 1.01 < 2.98 * (0.01 * 2 + 1.01 * 2)/6.
-  generateTestTraj(traj, robot_model);
+  generateTestTraj(traj, robot_model_);
   fraction = CartesianInterpolator::checkJointSpaceJump(joint_model_group, traj, JumpThreshold(2.98));
   EXPECT_EQ(full_traj_len, traj.size());  // traj should not be cut
   EXPECT_NEAR(1.0, fraction, 0.01);
 }
 
-class PandaRobot : public testing::Test
-{
-protected:
-  static void SetUpTestSuite()  // setup resources shared between tests
-  {
-    robot_model = loadTestingRobotModel("panda");
-    jmg = robot_model->getJointModelGroup("panda_arm");
-    link = robot_model->getLinkModel("panda_link8");
-    ASSERT_TRUE(link);
-    node = rclcpp::Node::make_shared("test_cartesian_interpolator");
-    loadIKPluginForGroup(node, jmg, "panda_link0", link->getName());
-  }
-
-  static void TearDownTestSuite()
-  {
-    robot_model.reset();
-  }
-
-  void SetUp() override
-  {
-    start_state = std::make_shared<RobotState>(robot_model);
-    ASSERT_TRUE(start_state->setToDefaultValues(jmg, "ready"));
-    start_pose = start_state->getGlobalLinkTransform(link);
-  }
-
-  double computeCartesianPath(std::vector<std::shared_ptr<RobotState>>& result, const Eigen::Vector3d& translation,
-                              bool global)
-  {
-    return CartesianInterpolator::computeCartesianPath(start_state.get(), jmg, result, link, translation, global,
-                                                       MaxEEFStep(0.1), JumpThreshold(), GroupStateValidityCallbackFn(),
-                                                       kinematics::KinematicsQueryOptions());
-  }
-
-  double computeCartesianPath(std::vector<std::shared_ptr<RobotState>>& result, const Eigen::Isometry3d& target,
-                              bool global, const Eigen::Isometry3d& offset = Eigen::Isometry3d::Identity())
-  {
-    return CartesianInterpolator::computeCartesianPath(start_state.get(), jmg, result, link, target, global,
-                                                       MaxEEFStep(0.1), JumpThreshold(), GroupStateValidityCallbackFn(),
-                                                       kinematics::KinematicsQueryOptions(),
-                                                       kinematics::KinematicsBase::IKCostFn(), offset);
-  }
-
-protected:
-  static RobotModelPtr robot_model;
-  static JointModelGroup* jmg;
-  static const LinkModel* link;
-  static rclcpp::Node::SharedPtr node;
-
-  double prec = 1e-8;
-  RobotStatePtr start_state;
-  Eigen::Isometry3d start_pose;
-  std::vector<std::shared_ptr<RobotState>> result;
-};
-
 // TODO - The tests below fail since no kinematic plugins are found. Move the tests to IK plugin package.
-
+// class PandaRobot : public testing::Test
+// {
+// protected:
+//   static void SetUpTestSuite()  // setup resources shared between tests
+//   {
+//     robot_model_ = loadTestingRobotModel("panda");
+//     jmg = robot_model_->getJointModelGroup("panda_arm");
+//     link = robot_model_->getLinkModel("panda_link8");
+//     ASSERT_TRUE(link);
+//     node = rclcpp::Node::make_shared("test_cartesian_interpolator");
+//     loadIKPluginForGroup(node, jmg, "panda_link0", link->getName());
+//   }
+//
+//   static void TearDownTestSuite()
+//   {
+//     robot_model_.reset();
+//   }
+//
+//   void SetUp() override
+//   {
+//     start_state = std::make_shared<RobotState>(robot_model_);
+//     ASSERT_TRUE(start_state->setToDefaultValues(jmg, "ready"));
+//     start_pose = start_state->getGlobalLinkTransform(link);
+//   }
+//
+//   double computeCartesianPath(std::vector<std::shared_ptr<RobotState>>& result, const Eigen::Vector3d& translation,
+//                               bool global)
+//   {
+//     return CartesianInterpolator::computeCartesianPath(start_state.get(), jmg, result, link, translation, global,
+//                                                        MaxEEFStep(0.1), JumpThreshold(), GroupStateValidityCallbackFn(),
+//                                                        kinematics::KinematicsQueryOptions());
+//   }
+//
+//   double computeCartesianPath(std::vector<std::shared_ptr<RobotState>>& result, const Eigen::Isometry3d& target,
+//                               bool global, const Eigen::Isometry3d& offset = Eigen::Isometry3d::Identity())
+//   {
+//     return CartesianInterpolator::computeCartesianPath(start_state.get(), jmg, result, link, target, global,
+//                                                        MaxEEFStep(0.1), JumpThreshold(), GroupStateValidityCallbackFn(),
+//                                                        kinematics::KinematicsQueryOptions(),
+//                                                        kinematics::KinematicsBase::IKCostFn(), offset);
+//   }
+//
+// protected:
+//   static RobotModelPtr robot_model_;
+//   static JointModelGroup* jmg_;
+//   static const LinkModel* link_;
+//   static rclcpp::Node::SharedPtr node;
+//
+//   const double prec_ = 1e-8;
+//   RobotStatePtr start_state_;
+//   Eigen::Isometry3d start_pose_;
+//   std::vector<std::shared_ptr<RobotState>> result_;
+// };
+//
 // TEST_F(PandaRobot, testVectorGlobal)
 // {
 //   Eigen::Vector3d translation(0.2, 0, 0);                                   // move by 0.2 along world's x axis
