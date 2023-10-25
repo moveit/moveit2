@@ -12,7 +12,7 @@ The [MoveIt Motion Planning Framework for ROS 2](http://moveit.ros.org). For the
 
 ## Getting Started
 
-See our extensive [Tutorials and Documentation](https://moveit.picknik.ai/)
+See our extensive [Tutorials and Documentation](https://moveit.picknik.ai/).
 
 ## Install
 
@@ -36,7 +36,7 @@ This open source project is maintained by supporters from around the world — s
 </a>
 
 [PickNik Inc](https://picknik.ai/) is leading the development of MoveIt.
-If you would like to support this project, please contact hello@picknik.ai
+If you would like to support this project, please contact hello@picknik.ai.
 
 <a href="http://rosin-project.eu">
   <img src="http://rosin-project.eu/wp-content/uploads/rosin_ack_logo_wide.png"
@@ -44,7 +44,7 @@ If you would like to support this project, please contact hello@picknik.ai
 </a>
 
 The port to ROS 2 was supported by ROSIN - ROS-Industrial Quality-Assured Robot Software Components.
-More information: <a href="http://rosin-project.eu">rosin-project.eu</a>
+More information: <a href="http://rosin-project.eu">rosin-project.eu</a>.
 
 <img src="http://rosin-project.eu/wp-content/uploads/rosin_eu_flag.jpg"
      alt="eu_flag" height="45" align="left" >
@@ -53,7 +53,7 @@ This project has received funding from the European Union’s Horizon 2020
 research and innovation programme under grant agreement no. 732287.
 
 ## Generate API Doxygen Documentation
-See [How To Generate API Doxygen Reference Locally](https://moveit.picknik.ai/main/doc/how_to_guides/how_to_generate_api_doxygen_locally.html)
+See [How To Generate API Doxygen Reference Locally](https://moveit.picknik.ai/main/doc/how_to_guides/how_to_generate_api_doxygen_locally.html).
 
 # Buildfarm
 | Package | Humble Binary | Iron Binary | Rolling Binary |
