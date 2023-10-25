@@ -1967,8 +1967,8 @@ void PlanningScene::getKnownObjectTypes(ObjectTypeMap& kc) const
     parent_->getKnownObjectTypes(kc);
   if (object_types_.has_value())
   {
-    for (ObjectTypeMap::const_iterator it = object_types_.value().begin(); it != object_types_.value().end(); ++it)
-      kc[it->first] = it->second;
+    for (const auto& it : object_types_.value())
+      kc[it.first] = it.second;
   }
 }
 
