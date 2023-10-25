@@ -29,8 +29,12 @@ See [MoveIt 2 Source Build - Linux](https://moveit.ros.org/install-moveit2/sourc
 
 ## Getting Started
 
+<<<<<<< HEAD
 We've prepared a simple demo setup that you can use for quickly spinning up a simulated robot environment with MoveItCpp.
 See the [run_moveit_cpp](moveit_demo_nodes/run_moveit_cpp) demo package for further instructions and information.
+=======
+See our extensive [Tutorials and Documentation](https://moveit.picknik.ai/).
+>>>>>>> 7fba8c60a (added full stops (#2487))
 
 The package [run_move_group](moveit_demo_nodes/run_move_group) provides a simple launch file for running a MoveGroup setup.
 You can test it using the MotionPlanning display in RViz or by implementing your own MoveGroupInterface application.
@@ -46,16 +50,26 @@ This open source project is maintained by supporters from around the world — s
   <img src="https://picknik.ai/assets/images/logo.jpg" width="168">
 </a>
 
+<<<<<<< HEAD
 [PickNik Inc.](https://picknik.ai/) is leading and organizing the development of MoveIt 2.
 If you would like to support this project, please contact hello@picknik.ai
+=======
+[PickNik Inc](https://picknik.ai/) is leading the development of MoveIt.
+If you would like to support this project, please contact hello@picknik.ai.
+>>>>>>> 7fba8c60a (added full stops (#2487))
 
 <a href="http://rosin-project.eu">
   <img src="http://rosin-project.eu/wp-content/uploads/rosin_ack_logo_wide.png"
        alt="rosin_logo" height="60" >
 </a>
 
+<<<<<<< HEAD
 The port to ROS 2 is supported by ROSIN - ROS-Industrial Quality-Assured Robot Software Components.
 More information: <a href="http://rosin-project.eu">rosin-project.eu</a>
+=======
+The port to ROS 2 was supported by ROSIN - ROS-Industrial Quality-Assured Robot Software Components.
+More information: <a href="http://rosin-project.eu">rosin-project.eu</a>.
+>>>>>>> 7fba8c60a (added full stops (#2487))
 
 <img src="http://rosin-project.eu/wp-content/uploads/rosin_eu_flag.jpg"
      alt="eu_flag" height="45" align="left" >
@@ -63,6 +77,11 @@ More information: <a href="http://rosin-project.eu">rosin-project.eu</a>
 This project has received funding from the European Union’s Horizon 2020
 research and innovation programme under grant agreement no. 732287.
 
+<<<<<<< HEAD
+=======
+## Generate API Doxygen Documentation
+See [How To Generate API Doxygen Reference Locally](https://moveit.picknik.ai/main/doc/how_to_guides/how_to_generate_api_doxygen_locally.html).
+>>>>>>> 7fba8c60a (added full stops (#2487))
 
 # ROS2 Buildfarm
 | MoveIt 2 Package | Foxy Source | Foxy Debian | Galactic Source | Galactic Debian | Rolling Source | Rolling Debian |
