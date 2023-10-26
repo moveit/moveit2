@@ -60,7 +60,7 @@ rclcpp::Logger makeChildLogger(const std::string& name)
   static std::unordered_map<std::string, std::shared_ptr<rclcpp::Node>> child_nodes;
   if (child_nodes.find(name) == child_nodes.end())
   {
-    std::string ns = get_logger().get_name();
+    std::string ns = getLogger().get_name();
     child_nodes[name] = std::make_shared<rclcpp::Node>(name, ns);
   }
 #endif
