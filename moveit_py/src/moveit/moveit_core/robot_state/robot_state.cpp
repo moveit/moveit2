@@ -64,20 +64,20 @@ void update(moveit::core::RobotState* self, bool force, std::string& category)
   }
 }
 
-Eigen::MatrixXd get_frame_transform(const moveit::core::RobotState* self, std::string& frame_id)
+Eigen::MatrixXd getFrameTransform(const moveit::core::RobotState* self, std::string& frame_id)
 {
   bool frame_found;
   auto transformation = self->getFrameTransform(frame_id, &frame_found);
   return transformation.matrix();
 }
 
-Eigen::MatrixXd get_global_link_transform(const moveit::core::RobotState* self, std::string& link_name)
+Eigen::MatrixXd getGlobalLinkTransform(const moveit::core::RobotState* self, std::string& link_name)
 {
   auto transformation = self->getGlobalLinkTransform(link_name);
   return transformation.matrix();
 }
 
-geometry_msgs::msg::Pose get_pose(const moveit::core::RobotState* self, const std::string& link_name)
+geometry_msgs::msg::Pose getPose(const moveit::core::RobotState* self, const std::string& link_name)
 {
   return tf2::toMsg(self->getGlobalLinkTransform(link_name));
 }
@@ -158,40 +158,38 @@ void set_joint_efforts(moveit::core::RobotState* self, std::map<std::string, dou
   }
 }
 
-Eigen::VectorXd copy_joint_group_positions(const moveit::core::RobotState* self,
-                                           const std::string& joint_model_group_name)
+Eigen::VectorXd copyJointGroupPositions(const moveit::core::RobotState* self, const std::string& joint_model_group_name)
 {
   Eigen::VectorXd values;
   self->copyJointGroupPositions(joint_model_group_name, values);
   return values;
 }
 
-Eigen::VectorXd copy_joint_group_velocities(const moveit::core::RobotState* self,
-                                            const std::string& joint_model_group_name)
+Eigen::VectorXd copyJointGroupVelocities(const moveit::core::RobotState* self, const std::string& joint_model_group_name)
 {
   Eigen::VectorXd values;
   self->copyJointGroupVelocities(joint_model_group_name, values);
   return values;
 }
 
-Eigen::VectorXd copy_joint_group_accelerations(const moveit::core::RobotState* self,
-                                               const std::string& joint_model_group_name)
+Eigen::VectorXd copyJointGroupAccelerations(const moveit::core::RobotState* self,
+                                            const std::string& joint_model_group_name)
 {
   Eigen::VectorXd values;
   self->copyJointGroupAccelerations(joint_model_group_name, values);
   return values;
 }
 
-Eigen::MatrixXd get_jacobian(const moveit::core::RobotState* self, const std::string& joint_model_group_name,
-                             const Eigen::Vector3d& reference_point_position)
+Eigen::MatrixXd getJacobian(const moveit::core::RobotState* self, const std::string& joint_model_group_name,
+                            const Eigen::Vector3d& reference_point_position)
 {
   const moveit::core::JointModelGroup* joint_model_group = self->getJointModelGroup(joint_model_group_name);
   return self->getJacobian(joint_model_group, reference_point_position);
 }
 
-Eigen::MatrixXd get_jacobian(const moveit::core::RobotState* self, const std::string& joint_model_group_name,
-                             const std::string& link_model_name, const Eigen::Vector3d& reference_point_position,
-                             bool use_quaternion_representation)
+Eigen::MatrixXd getJacobian(const moveit::core::RobotState* self, const std::string& joint_model_group_name,
+                            const std::string& link_model_name, const Eigen::Vector3d& reference_point_position,
+                            bool use_quaternion_representation)
 {
   Eigen::MatrixXd jacobian;
   const moveit::core::JointModelGroup* joint_model_group = self->getJointModelGroup(joint_model_group_name);
@@ -200,15 +198,15 @@ Eigen::MatrixXd get_jacobian(const moveit::core::RobotState* self, const std::st
   return jacobian;
 }
 
-bool set_to_default_values(moveit::core::RobotState* self, const std::string& joint_model_group_name,
-                           const std::string& state_name)
+bool setToDefaultValues(moveit::core::RobotState* self, const std::string& joint_model_group_name,
+                        const std::string& state_name)
 
 {
   const moveit::core::JointModelGroup* joint_model_group = self->getJointModelGroup(joint_model_group_name);
   return self->setToDefaultValues(joint_model_group, state_name);
 }
 
-void init_robot_state(py::module& m)
+void initRobotState(py::module& m)
 {
   py::module robot_state = m.def_submodule("robot_state");
 
@@ -250,10 +248,10 @@ void init_robot_state(py::module& m)
             bool: True if the robot state is dirty.
             )")
 
-      .def("get_frame_transform", &moveit_py::bind_robot_state::get_frame_transform, py::arg("frame_id"),
+      .def("get_frame_transform", &moveit_py::bind_robot_state::getFrameTransform, py::arg("frame_id"),
            py::return_value_policy::move,
            R"(
-           Get the transformation matrix from the model frame (root of model) to the frame identified by frame_id. If frame_id was not found, frame_found is set to false and an identity transform is returned. This method is restricted to frames defined within the robot state and doesn't include collision object present in the collision world. Please use the PlanningScene.get_frame_transform method for collision world objects.
+           Get the transformation matrix from the model frame (root of model) to the frame identified by frame_id. If frame_id was not found, frame_found is set to false and an identity transform is returned. This method is restricted to frames defined within the robot state and doesn't include collision object present in the collision world. Please use the PlanningScene.getFrameTransform method for collision world objects.
 
 	   Args:
                frame_id (str): The id of the frame to get the transform for.
@@ -262,7 +260,7 @@ void init_robot_state(py::module& m)
                :py:class:`numpy.ndarray`: The transformation matrix from the model frame to the frame identified by frame_id.
            )")
 
-      .def("get_pose", &moveit_py::bind_robot_state::get_pose, py::arg("link_name"),
+      .def("get_pose", &moveit_py::bind_robot_state::getPose, py::arg("link_name"),
            R"(
            Get the pose of a link that is defined in the robot model.
 
@@ -275,7 +273,7 @@ void init_robot_state(py::module& m)
 
       .def("get_jacobian",
            py::overload_cast<const moveit::core::RobotState*, const std::string&, const Eigen::Vector3d&>(
-               &moveit_py::bind_robot_state::get_jacobian),
+               &moveit_py::bind_robot_state::getJacobian),
            py::arg("joint_model_group_name"), py::arg("reference_point_position"), py::return_value_policy::move,
            R"(
            Compute the Jacobian with reference to the last link of a specified group.
@@ -293,7 +291,7 @@ void init_robot_state(py::module& m)
 
       .def("get_jacobian",
            py::overload_cast<const moveit::core::RobotState*, const std::string&, const std::string&,
-                             const Eigen::Vector3d&, bool>(&moveit_py::bind_robot_state::get_jacobian),
+                             const Eigen::Vector3d&, bool>(&moveit_py::bind_robot_state::getJacobian),
            py::arg("joint_model_group_name"), py::arg("link_name"), py::arg("reference_point_position"),
            py::arg("use_quaternion_representation") = false, py::return_value_policy::move,
            R"(
@@ -366,7 +364,7 @@ void init_robot_state(py::module& m)
                position_values (:py:class:`numpy.ndarray`): The positions of the joints in the joint model group.
        )")
 
-      .def("get_joint_group_positions", &moveit_py::bind_robot_state::copy_joint_group_positions,
+      .def("get_joint_group_positions", &moveit_py::bind_robot_state::copyJointGroupPositions,
            py::arg("joint_model_group_name"),
            R"(
            For a given group, get the position values of the variables that make up the group.
@@ -390,7 +388,7 @@ void init_robot_state(py::module& m)
                velocity_values (:py:class:`numpy.ndarray`): The velocities of the joints in the joint model group.
            )")
 
-      .def("get_joint_group_velocities", &moveit_py::bind_robot_state::copy_joint_group_velocities,
+      .def("get_joint_group_velocities", &moveit_py::bind_robot_state::copyJointGroupVelocities,
            py::arg("joint_model_group_name"),
            R"(
            For a given group, get the velocity values of the variables that make up the group.
@@ -413,7 +411,7 @@ void init_robot_state(py::module& m)
                acceleration_values (:py:class:`numpy.ndarray`): The accelerations of the joints in the joint model group.
            )")
 
-      .def("get_joint_group_accelerations", &moveit_py::bind_robot_state::copy_joint_group_accelerations,
+      .def("get_joint_group_accelerations", &moveit_py::bind_robot_state::copyJointGroupAccelerations,
            py::arg("joint_model_group_name"),
            R"(
            For a given group, get the acceleration values of the variables that make up the group.
@@ -426,7 +424,7 @@ void init_robot_state(py::module& m)
            )")
 
       // Forward kinematics
-      .def("get_global_link_transform", &moveit_py::bind_robot_state::get_global_link_transform, py::arg("link_name"),
+      .def("get_global_link_transform", &moveit_py::bind_robot_state::getGlobalLinkTransform, py::arg("link_name"),
            R"(
        Returns the transform of the specified link in the global frame.
 
@@ -475,7 +473,7 @@ void init_robot_state(py::module& m)
 
       .def("set_to_default_values",
            py::overload_cast<moveit::core::RobotState*, const std::string&, const std::string&>(
-               &moveit_py::bind_robot_state::set_to_default_values),
+               &moveit_py::bind_robot_state::setToDefaultValues),
            py::arg("joint_model_group_name"), py::arg("name"),
            R"(
            Set the joints in group to the position name defined in the SRDF.

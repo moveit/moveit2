@@ -46,7 +46,7 @@ get_planning_component(std::shared_ptr<moveit_cpp::MoveItCpp>& moveit_cpp_ptr, c
   return std::make_shared<moveit_cpp::PlanningComponent>(planning_component, moveit_cpp_ptr);
 }
 
-void init_moveit_py(py::module& m)
+void initMoveitPy(py::module& m)
 {
   auto utils = py::module::import("moveit.utils");
 
