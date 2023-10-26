@@ -43,15 +43,15 @@ namespace moveit
 {
 
 // Function for getting a reference to a logger object kept in a global variable.
-// Use get_logger_mut to set the logger to a node logger.
-const rclcpp::Logger& get_logger();
+// Use getLoggerMut to set the logger to a node logger.
+const rclcpp::Logger& getLogger();
 
 // Function for getting a child logger. In Humble this also creates a node.
 // Do not use this in place as it will create a new logger each time,
 // instead store it in the state of your class or method.
-rclcpp::Logger make_child_logger(const std::string& name);
+rclcpp::Logger makeChildLogger(const std::string& name);
 
 // Mutable access to global logger for setting to node logger.
-rclcpp::Logger& get_logger_mut();
+rclcpp::Logger& getLoggerMut();
 
 }  // namespace moveit

@@ -43,12 +43,12 @@
 namespace moveit
 {
 
-const rclcpp::Logger& get_logger()
+const rclcpp::Logger& getLogger()
 {
-  return get_logger_mut();
+  return getLoggerMut();
 }
 
-rclcpp::Logger make_child_logger(const std::string& name)
+rclcpp::Logger makeChildLogger(const std::string& name)
 {
   // On versions of ROS older than Iron we need to create a node for each child logger
   // Remove once Humble is EOL
@@ -65,10 +65,10 @@ rclcpp::Logger make_child_logger(const std::string& name)
   }
 #endif
 
-  return get_logger_mut().get_child(name);
+  return getLoggerMut().get_child(name);
 }
 
-rclcpp::Logger& get_logger_mut()
+rclcpp::Logger& getLoggerMut()
 {
   static rclcpp::Logger logger = rclcpp::get_logger("moveit");
   return logger;

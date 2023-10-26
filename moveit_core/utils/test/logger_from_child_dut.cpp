@@ -44,10 +44,10 @@ int main(int argc, char** argv)
   rclcpp::Node::SharedPtr node = rclcpp::Node::make_shared("dut_node");
 
   // Set the moveit logger to be from node
-  moveit::get_logger_mut() = node->get_logger();
+  moveit::getLoggerMut() = node->get_logger();
 
   // Make a child logger
-  const auto child_logger = moveit::make_child_logger("child");
+  const auto child_logger = moveit::makeChildLogger("child");
 
   // publish via a timer
   auto wall_timer = node->create_wall_timer(std::chrono::milliseconds(100),
