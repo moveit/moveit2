@@ -35,6 +35,7 @@
 /* Author: Sebastian Jahr */
 
 #include <moveit/planning_pipeline_interfaces/planning_pipeline_interfaces.hpp>
+#include <moveit/utils/logger.hpp>
 
 #include <thread>
 
@@ -42,7 +43,12 @@ namespace moveit
 {
 namespace planning_pipeline_interfaces
 {
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.::planning_interface.planning_pipeline_interfaces");
+
+rclcpp::Logger get_logger()
+{
+  static rclcpp::Logger logger = moveit::makeChildLogger("planning_pipeline_interfaces");
+  return logger;
+}
 
 ::planning_interface::MotionPlanResponse
 planWithSinglePipeline(const ::planning_interface::MotionPlanRequest& motion_plan_request,
@@ -53,7 +59,7 @@ planWithSinglePipeline(const ::planning_interface::MotionPlanRequest& motion_pla
   auto it = planning_pipelines.find(motion_plan_request.pipeline_id);
   if (it == planning_pipelines.end())
   {
-    RCLCPP_ERROR(LOGGER, "No planning pipeline available for name '%s'", motion_plan_request.pipeline_id.c_str());
+    RCLCPP_ERROR(get_logger(), "No planning pipeline available for name '%s'", motion_plan_request.pipeline_id.c_str());
     motion_plan_response.error_code = moveit::core::MoveItErrorCode::FAILURE;
     return motion_plan_response;
   }
@@ -82,7 +88,7 @@ const std::vector<::planning_interface::MotionPlanResponse> planWithParallelPipe
   const auto hardware_concurrency = std::thread::hardware_concurrency();
   if (motion_plan_requests.size() > hardware_concurrency && hardware_concurrency != 0)
   {
-    RCLCPP_WARN(LOGGER,
+    RCLCPP_WARN(get_logger(),
                 "More parallel planning problems defined ('%ld') than possible to solve concurrently with the "
                 "hardware ('%d')",
                 motion_plan_requests.size(), hardware_concurrency);
@@ -100,7 +106,7 @@ const std::vector<::planning_interface::MotionPlanResponse> planWithParallelPipe
       }
       catch (const std::exception& e)
       {
-        RCLCPP_ERROR(LOGGER, "Planning pipeline '%s' threw exception '%s'", request.pipeline_id.c_str(), e.what());
+        RCLCPP_ERROR(get_logger(), "Planning pipeline '%s' threw exception '%s'", request.pipeline_id.c_str(), e.what());
         plan_solution = ::planning_interface::MotionPlanResponse();
         plan_solution.error_code = moveit::core::MoveItErrorCode::FAILURE;
       }
@@ -112,7 +118,7 @@ const std::vector<::planning_interface::MotionPlanResponse> planWithParallelPipe
         if (stopping_criterion_callback(plan_responses_container, motion_plan_requests))
         {
           // Terminate planning pipelines
-          RCLCPP_INFO(LOGGER, "Stopping criterion met: Terminating planning pipelines that are still active");
+          RCLCPP_INFO(get_logger(), "Stopping criterion met: Terminating planning pipelines that are still active");
           for (const auto& request : motion_plan_requests)
           {
             try
@@ -125,7 +131,7 @@ const std::vector<::planning_interface::MotionPlanResponse> planWithParallelPipe
             }
             catch (const std::out_of_range&)
             {
-              RCLCPP_WARN(LOGGER, "Cannot terminate pipeline '%s' because no pipeline with that name exists",
+              RCLCPP_WARN(get_logger(), "Cannot terminate pipeline '%s' because no pipeline with that name exists",
                           request.pipeline_id.c_str());
             }
           }
@@ -168,7 +174,7 @@ createPlanningPipelineMap(const std::vector<std::string>& pipeline_names,
     // Check if pipeline already exists
     if (planning_pipelines.count(planning_pipeline_name) > 0)
     {
-      RCLCPP_WARN(LOGGER, "Skipping duplicate entry for planning pipeline '%s'.", planning_pipeline_name.c_str());
+      RCLCPP_WARN(get_logger(), "Skipping duplicate entry for planning pipeline '%s'.", planning_pipeline_name.c_str());
       continue;
     }
 
@@ -178,7 +184,7 @@ createPlanningPipelineMap(const std::vector<std::string>& pipeline_names,
 
     if (!pipeline->getPlannerManager())
     {
-      RCLCPP_ERROR(LOGGER, "Failed to initialize planning pipeline '%s'.", planning_pipeline_name.c_str());
+      RCLCPP_ERROR(get_logger(), "Failed to initialize planning pipeline '%s'.", planning_pipeline_name.c_str());
       continue;
     }
 

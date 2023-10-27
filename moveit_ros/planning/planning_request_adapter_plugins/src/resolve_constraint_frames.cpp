@@ -37,6 +37,7 @@
 #include <moveit/planning_request_adapter/planning_request_adapter.h>
 #include <moveit/kinematic_constraints/utils.h>
 #include <class_loader/class_loader.hpp>
+#include <moveit/utils/logger.hpp>
 
 namespace default_planner_request_adapters
 {
@@ -45,6 +46,10 @@ static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_ros.resolve_cons
 class ResolveConstraintFrames : public planning_request_adapter::PlanningRequestAdapter
 {
 public:
+  ResolveConstraintFrames() : logger_(moveit::makeChildLogger("resolve_constraint_frames"))
+  {
+  }
+
   void initialize(const rclcpp::Node::SharedPtr& /* node */, const std::string& /* parameter_namespace */) override
   {
   }
@@ -58,7 +63,7 @@ public:
                     const planning_interface::MotionPlanRequest& req,
                     planning_interface::MotionPlanResponse& res) const override
   {
-    RCLCPP_DEBUG(LOGGER, "Running '%s'", getDescription().c_str());
+    RCLCPP_DEBUG(logger_, "Running '%s'", getDescription().c_str());
     planning_interface::MotionPlanRequest modified = req;
     kinematic_constraints::resolveConstraintFrames(planning_scene->getCurrentState(), modified.path_constraints);
     for (moveit_msgs::msg::Constraints& constraint : modified.goal_constraints)
@@ -67,6 +72,9 @@ public:
     }
     return planner(planning_scene, modified, res);
   }
+
+private:
+  rclcpp::Logger logger_;
 };
 
 }  // namespace default_planner_request_adapters

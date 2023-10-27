@@ -53,6 +53,7 @@
 #include <tf2_eigen/tf2_eigen.hpp>
 #include <tf2_ros/transform_listener.h>
 #include <variant>
+#include <rclcpp/logger.hpp>
 
 namespace moveit_servo
 {
@@ -206,6 +207,7 @@ private:
 
   servo::Params servo_params_;
   const rclcpp::Node::SharedPtr node_;
+  rclcpp::Logger logger_;
   std::shared_ptr<const servo::ParamListener> servo_param_listener_;
   planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor_;
 

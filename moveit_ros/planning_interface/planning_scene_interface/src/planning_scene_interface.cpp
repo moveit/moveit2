@@ -41,12 +41,14 @@
 #include <algorithm>
 #include <rclcpp/executors.hpp>
 #include <rclcpp/future_return_code.hpp>
+#include <moveit/utils/logger.hpp>
+
+using moveit::getLogger;
 
 namespace moveit
 {
 namespace planning_interface
 {
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_ros.planning_scene_interface.planning_scene_interface");
 
 class PlanningSceneInterface::PlanningSceneInterfaceImpl
 {
@@ -58,6 +60,7 @@ public:
                         "__node:=" + std::string("planning_scene_interface_") +
                             std::to_string(reinterpret_cast<std::size_t>(this)) });
     node_ = rclcpp::Node::make_shared("_", ns, options);
+    moveit::setLogger(node_->get_logger());
     planning_scene_diff_publisher_ = node_->create_publisher<moveit_msgs::msg::PlanningScene>("planning_scene", 1);
     planning_scene_service_ =
         node_->create_client<moveit_msgs::srv::GetPlanningScene>(move_group::GET_PLANNING_SCENE_SERVICE_NAME);
@@ -112,7 +115,7 @@ public:
     auto res = planning_scene_service_->async_send_request(request);
     if (rclcpp::spin_until_future_complete(node_, res) != rclcpp::FutureReturnCode::SUCCESS)
     {
-      RCLCPP_WARN(LOGGER, "Could not call planning scene service to get object names");
+      RCLCPP_WARN(getLogger(), "Could not call planning scene service to get object names");
       return result;
     }
     response = res.get();
@@ -185,7 +188,7 @@ public:
     auto res = planning_scene_service_->async_send_request(request);
     if (rclcpp::spin_until_future_complete(node_, res) != rclcpp::FutureReturnCode::SUCCESS)
     {
-      RCLCPP_WARN(LOGGER, "Could not call planning scene service to get object geometries");
+      RCLCPP_WARN(getLogger(), "Could not call planning scene service to get object geometries");
       return result;
     }
     response = res.get();
@@ -211,7 +214,7 @@ public:
     auto res = planning_scene_service_->async_send_request(request);
     if (rclcpp::spin_until_future_complete(node_, res) != rclcpp::FutureReturnCode::SUCCESS)
     {
-      RCLCPP_WARN(LOGGER, "Could not call planning scene service to get attached object geometries");
+      RCLCPP_WARN(getLogger(), "Could not call planning scene service to get attached object geometries");
       return result;
     }
     response = res.get();
@@ -237,7 +240,7 @@ public:
     auto res = apply_planning_scene_service_->async_send_request(request);
     if (rclcpp::spin_until_future_complete(node_, res) != rclcpp::FutureReturnCode::SUCCESS)
     {
-      RCLCPP_WARN(LOGGER, "Failed to call ApplyPlanningScene service");
+      RCLCPP_WARN(getLogger(), "Failed to call ApplyPlanningScene service");
     }
     response = res.get();
     return response->success;
@@ -289,7 +292,8 @@ private:
     srv->wait_for_service(std::chrono::duration_cast<std::chrono::nanoseconds>(d));
     if (!srv->service_is_ready())
     {
-      RCLCPP_WARN_STREAM(LOGGER, "service '" << srv->get_service_name() << "' not advertised yet. Continue waiting...");
+      RCLCPP_WARN_STREAM(getLogger(),
+                         "service '" << srv->get_service_name() << "' not advertised yet. Continue waiting...");
       srv->wait_for_service();
     }
   }

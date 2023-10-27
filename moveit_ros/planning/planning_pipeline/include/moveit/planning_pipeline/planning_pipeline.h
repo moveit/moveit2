@@ -186,6 +186,8 @@ private:
 
   /// Publish contacts if the generated plans are checked again by the planning pipeline
   rclcpp::Publisher<visualization_msgs::msg::MarkerArray>::SharedPtr contacts_publisher_;
+
+  rclcpp::Logger logger_;
 };
 
 MOVEIT_CLASS_FORWARD(PlanningPipeline);  // Defines PlanningPipelinePtr, ConstPtr, WeakPtr... etc

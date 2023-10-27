@@ -45,8 +45,6 @@ namespace default_planner_request_adapters
 {
 using namespace trajectory_processing;
 
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_ros.add_traj_smoothing");
-
 /** @brief Use ruckig (https://github.com/pantor/ruckig) to adapt the trajectory to be jerk-constrained and
  * time-optimal.*/
 class AddRuckigTrajectorySmoothing : public planning_request_adapter::PlanningRequestAdapter

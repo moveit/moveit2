@@ -41,15 +41,16 @@
 #include <rclcpp/logging.hpp>
 #include <rclcpp/parameter_value.hpp>
 #include <memory>
+#include <moveit/utils/logger.hpp>
 
 namespace constraint_sampler_manager_loader
 {
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_ros.constraint_sampler_manager_loader");
 
 class ConstraintSamplerManagerLoader::Helper
 {
 public:
-  Helper(const rclcpp::Node::SharedPtr& node, const constraint_samplers::ConstraintSamplerManagerPtr& csm) : node_(node)
+  Helper(const rclcpp::Node::SharedPtr& node, const constraint_samplers::ConstraintSamplerManagerPtr& csm)
+    : node_(node), logger_(moveit::makeChildLogger("constraint_sampler_manager_loader"))
   {
     if (node_->has_parameter("constraint_samplers"))
     {
@@ -63,7 +64,7 @@ public:
       }
       catch (pluginlib::PluginlibException& ex)
       {
-        RCLCPP_ERROR(LOGGER, "Exception while creating constraint sampling plugin loader %s", ex.what());
+        RCLCPP_ERROR(logger_, "Exception while creating constraint sampling plugin loader %s", ex.what());
         return;
       }
       boost::char_separator<char> sep(" ");
@@ -75,11 +76,12 @@ public:
           constraint_samplers::ConstraintSamplerAllocatorPtr csa =
               constraint_sampler_plugin_loader_->createUniqueInstance(*beg);
           csm->registerSamplerAllocator(csa);
-          RCLCPP_INFO(LOGGER, "Loaded constraint sampling plugin %s", std::string(*beg).c_str());
+          RCLCPP_INFO(logger_, "Loaded constraint sampling plugin %s", std::string(*beg).c_str());
         }
         catch (pluginlib::PluginlibException& ex)
         {
-          RCLCPP_ERROR(LOGGER, "Exception while planning adapter plugin '%s': %s", std::string(*beg).c_str(), ex.what());
+          RCLCPP_ERROR(logger_, "Exception while planning adapter plugin '%s': %s", std::string(*beg).c_str(),
+                       ex.what());
         }
       }
     }
@@ -89,6 +91,7 @@ private:
   const rclcpp::Node::SharedPtr node_;
   std::unique_ptr<pluginlib::ClassLoader<constraint_samplers::ConstraintSamplerAllocator>>
       constraint_sampler_plugin_loader_;
+  rclcpp::Logger logger_;
 };
 ConstraintSamplerManagerLoader::ConstraintSamplerManagerLoader(
     const rclcpp::Node::SharedPtr& node, const constraint_samplers::ConstraintSamplerManagerPtr& csm)

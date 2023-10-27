@@ -46,6 +46,7 @@
 #include <tf2/LinearMath/Transform.h>
 #include <tf2_eigen/tf2_eigen.hpp>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
+#include <moveit/utils/logger.hpp>
 #include <algorithm>
 #include <string>
 
@@ -54,7 +55,6 @@
 
 namespace robot_interaction
 {
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_ros_robot_interaction.interaction_handler");
 
 InteractionHandler::InteractionHandler(const RobotInteractionPtr& robot_interaction, const std::string& name,
                                        const moveit::core::RobotState& initial_robot_state,
@@ -406,14 +406,14 @@ bool InteractionHandler::transformFeedbackPose(
       }
       catch (tf2::TransformException& e)
       {
-        RCLCPP_ERROR(LOGGER, "Error transforming from frame '%s' to frame '%s'", tpose.header.frame_id.c_str(),
-                     planning_frame_.c_str());
+        RCLCPP_ERROR(moveit::getLogger(), "Error transforming from frame '%s' to frame '%s'",
+                     tpose.header.frame_id.c_str(), planning_frame_.c_str());
         return false;
       }
     }
     else
     {
-      RCLCPP_ERROR(LOGGER, "Cannot transform from frame '%s' to frame '%s' (no TF instance provided)",
+      RCLCPP_ERROR(moveit::getLogger(), "Cannot transform from frame '%s' to frame '%s' (no TF instance provided)",
                    tpose.header.frame_id.c_str(), planning_frame_.c_str());
       return false;
     }

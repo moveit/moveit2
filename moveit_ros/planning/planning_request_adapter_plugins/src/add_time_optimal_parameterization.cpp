@@ -37,6 +37,7 @@
 #include <moveit/planning_request_adapter/planning_request_adapter.h>
 #include <moveit/trajectory_processing/time_optimal_trajectory_generation.h>
 #include <class_loader/class_loader.hpp>
+#include <moveit/utils/logger.hpp>
 
 #include <default_plan_request_adapter_parameters.hpp>
 
@@ -44,12 +45,14 @@ namespace default_planner_request_adapters
 {
 using namespace trajectory_processing;
 
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_ros.add_time_optimal_parameterization");
-
 /** @brief This adapter uses the time-optimal trajectory generation method */
 class AddTimeOptimalParameterization : public planning_request_adapter::PlanningRequestAdapter
 {
 public:
+  AddTimeOptimalParameterization() : logger_(moveit::makeChildLogger("add_time_optimal_parameterization"))
+  {
+  }
+
   void initialize(const rclcpp::Node::SharedPtr& node, const std::string& parameter_namespace) override
   {
     param_listener_ =
@@ -68,12 +71,12 @@ public:
     bool result = planner(planning_scene, req, res);
     if (result && res.trajectory)
     {
-      RCLCPP_DEBUG(LOGGER, " Running '%s'", getDescription().c_str());
+      RCLCPP_DEBUG(logger_, " Running '%s'", getDescription().c_str());
       const auto params = param_listener_->get_params();
       TimeOptimalTrajectoryGeneration totg(params.path_tolerance, params.resample_dt, params.min_angle_change);
       if (!totg.computeTimeStamps(*res.trajectory, req.max_velocity_scaling_factor, req.max_acceleration_scaling_factor))
       {
-        RCLCPP_WARN(LOGGER, " Time parametrization for the solution path failed.");
+        RCLCPP_WARN(logger_, " Time parametrization for the solution path failed.");
         result = false;
       }
     }
@@ -83,6 +86,7 @@ public:
 
 protected:
   std::unique_ptr<default_plan_request_adapter_parameters::ParamListener> param_listener_;
+  rclcpp::Logger logger_;
 };
 
 }  // namespace default_planner_request_adapters

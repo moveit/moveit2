@@ -43,26 +43,27 @@
 #include <rclcpp/logging.hpp>
 #include <rclcpp/node.hpp>
 #include <rclcpp/utilities.hpp>
+#include <moveit/utils/logger.hpp>
 
 static const std::string ROBOT_DESCRIPTION = "robot_description";
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("print_planning_scene_info");
 
 int main(int argc, char** argv)
 {
   rclcpp::init(argc, argv);
 
   auto node = rclcpp::Node::make_shared("print_scene_info_to_console");
+  moveit::setLogger(node->get_logger());
 
   rclcpp::executors::MultiThreadedExecutor executor;
   executor.add_node(node);
 
-  RCLCPP_INFO_STREAM(LOGGER, "Getting planning scene info to print");
+  RCLCPP_INFO_STREAM(moveit::getLogger(), "Getting planning scene info to print");
 
   // Create planning scene monitor
   planning_scene_monitor::PlanningSceneMonitor psm(node, ROBOT_DESCRIPTION);
   if (!psm.getPlanningScene())
   {
-    RCLCPP_ERROR_STREAM(LOGGER, "Planning scene not configured");
+    RCLCPP_ERROR_STREAM(moveit::getLogger(), "Planning scene not configured");
     return 1;
   }
 

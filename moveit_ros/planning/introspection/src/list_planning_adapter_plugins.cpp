@@ -42,12 +42,14 @@
 #include <rclcpp/node.hpp>
 #include <rclcpp/utilities.hpp>
 #include <memory>
+#include <moveit/utils/logger.hpp>
 
 int main(int argc, char** argv)
 {
   rclcpp::init(argc, argv);
 
   auto node = std::make_shared<rclcpp::Node>("list_planning_adapter_plugins");
+  moveit::setLogger(node->get_logger());
 
   std::unique_ptr<pluginlib::ClassLoader<planning_request_adapter::PlanningRequestAdapter>> loader;
   try

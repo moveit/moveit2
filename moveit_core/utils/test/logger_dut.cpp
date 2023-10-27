@@ -44,7 +44,7 @@ int main(int argc, char** argv)
   rclcpp::Node::SharedPtr node = rclcpp::Node::make_shared("dut_node");
 
   // Set the moveit logger to be from node
-  moveit::getLoggerMut() = node->get_logger();
+  moveit::setLogger(node->get_logger());
 
   // A node logger, should be in the file output and rosout
   auto wall_timer = node->create_wall_timer(std::chrono::milliseconds(100),

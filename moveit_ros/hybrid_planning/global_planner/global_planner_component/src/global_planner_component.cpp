@@ -42,7 +42,6 @@
 
 namespace
 {
-const rclcpp::Logger LOGGER = rclcpp::get_logger("global_planner_component");
 const auto JOIN_THREAD_TIMEOUT = std::chrono::seconds(1);
 }  // namespace
 
@@ -68,7 +67,7 @@ bool GlobalPlannerComponent::initializeGlobalPlanner()
   node_->get_parameter<std::string>("global_planning_action_name", global_planning_action_name);
   if (global_planning_action_name.empty())
   {
-    RCLCPP_ERROR(LOGGER, "global_planning_action_name was not defined");
+    RCLCPP_ERROR(node_->get_logger(), "global_planning_action_name was not defined");
     return false;
   }
   cb_group_ = node_->create_callback_group(rclcpp::CallbackGroupType::MutuallyExclusive);
@@ -77,7 +76,7 @@ bool GlobalPlannerComponent::initializeGlobalPlanner()
       // Goal callback
       [this](const rclcpp_action::GoalUUID& /*unused*/,
              const std::shared_ptr<const moveit_msgs::action::GlobalPlanner::Goal>& /*unused*/) {
-        RCLCPP_INFO(LOGGER, "Received global planning goal request");
+        RCLCPP_INFO(node_->get_logger(), "Received global planning goal request");
         // If another goal is active, cancel it and reject this goal
         if (long_callback_thread_.joinable())
         {
@@ -85,7 +84,7 @@ bool GlobalPlannerComponent::initializeGlobalPlanner()
           auto future = std::async(std::launch::async, &std::thread::join, &long_callback_thread_);
           if (future.wait_for(JOIN_THREAD_TIMEOUT) == std::future_status::timeout)
           {
-            RCLCPP_WARN(LOGGER, "Another goal was running. Rejecting the new hybrid planning goal.");
+            RCLCPP_WARN(node_->get_logger(), "Another goal was running. Rejecting the new hybrid planning goal.");
             return rclcpp_action::GoalResponse::REJECT;
           }
           if (!global_planner_instance_->reset())
@@ -97,7 +96,7 @@ bool GlobalPlannerComponent::initializeGlobalPlanner()
       },
       // Cancel callback
       [this](const std::shared_ptr<rclcpp_action::ServerGoalHandle<moveit_msgs::action::GlobalPlanner>>& /*unused*/) {
-        RCLCPP_INFO(LOGGER, "Received request to cancel global planning goal");
+        RCLCPP_INFO(node_->get_logger(), "Received request to cancel global planning goal");
         if (long_callback_thread_.joinable())
         {
           long_callback_thread_.join();
@@ -132,7 +131,7 @@ bool GlobalPlannerComponent::initializeGlobalPlanner()
   }
   catch (pluginlib::PluginlibException& ex)
   {
-    RCLCPP_ERROR(LOGGER, "Exception while creating global planner plugin loader: '%s'", ex.what());
+    RCLCPP_ERROR(node_->get_logger(), "Exception while creating global planner plugin loader: '%s'", ex.what());
     return false;
   }
   try
@@ -141,17 +140,18 @@ bool GlobalPlannerComponent::initializeGlobalPlanner()
   }
   catch (pluginlib::PluginlibException& ex)
   {
-    RCLCPP_ERROR(LOGGER, "Exception while loading global planner '%s': '%s'", planner_plugin_name_.c_str(), ex.what());
+    RCLCPP_ERROR(node_->get_logger(), "Exception while loading global planner '%s': '%s'", planner_plugin_name_.c_str(),
+                 ex.what());
     return false;
   }
 
   // Initialize global planner plugin
   if (!global_planner_instance_->initialize(node_))
   {
-    RCLCPP_ERROR(LOGGER, "Unable to initialize global planner plugin '%s'", planner_plugin_name_.c_str());
+    RCLCPP_ERROR(node_->get_logger(), "Unable to initialize global planner plugin '%s'", planner_plugin_name_.c_str());
     return false;
   }
-  RCLCPP_INFO(LOGGER, "Using global planner plugin '%s'", planner_plugin_name_.c_str());
+  RCLCPP_INFO(node_->get_logger(), "Using global planner plugin '%s'", planner_plugin_name_.c_str());
   return true;
 }
 
