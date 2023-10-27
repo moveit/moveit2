@@ -41,7 +41,7 @@ namespace moveit_py
 namespace bind_moveit_cpp
 {
 std::shared_ptr<moveit_cpp::PlanningComponent>
-get_planning_component(std::shared_ptr<moveit_cpp::MoveItCpp>& moveit_cpp_ptr, const std::string& planning_component)
+getPlanningComponent(std::shared_ptr<moveit_cpp::MoveItCpp>& moveit_cpp_ptr, const std::string& planning_component)
 {
   return std::make_shared<moveit_cpp::PlanningComponent>(planning_component, moveit_cpp_ptr);
 }
@@ -144,7 +144,7 @@ void initMoveitPy(py::module& m)
            R"(
 	   Execute a trajectory (planning group is inferred from robot trajectory object).
 	   )")
-      .def("get_planning_component", &moveit_py::bind_moveit_cpp::get_planning_component,
+      .def("get_planning_component", &moveit_py::bind_moveit_cpp::getPlanningComponent,
            py::arg("planning_component_name"), py::return_value_policy::take_ownership,
            R"(
            Creates a planning component instance.

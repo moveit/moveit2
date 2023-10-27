@@ -82,7 +82,7 @@ geometry_msgs::msg::Pose getPose(const moveit::core::RobotState* self, const std
   return tf2::toMsg(self->getGlobalLinkTransform(link_name));
 }
 
-std::map<std::string, double> get_joint_positions(const moveit::core::RobotState* self)
+std::map<std::string, double> getJointPositions(const moveit::core::RobotState* self)
 {
   std::map<std::string, double> joint_positions;
   const std::vector<std::string>& variable_name = self->getVariableNames();
@@ -93,7 +93,7 @@ std::map<std::string, double> get_joint_positions(const moveit::core::RobotState
   return joint_positions;
 }
 
-void set_joint_positions(moveit::core::RobotState* self, std::map<std::string, double>& joint_positions)
+void setJointPositions(moveit::core::RobotState* self, std::map<std::string, double>& joint_positions)
 {
   for (const auto& item : joint_positions)
   {
@@ -101,7 +101,7 @@ void set_joint_positions(moveit::core::RobotState* self, std::map<std::string, d
   }
 }
 
-std::map<std::string, double> get_joint_velocities(const moveit::core::RobotState* self)
+std::map<std::string, double> getJointVelocities(const moveit::core::RobotState* self)
 {
   std::map<std::string, double> joint_velocity;
   const std::vector<std::string>& variable_name = self->getVariableNames();
@@ -112,7 +112,7 @@ std::map<std::string, double> get_joint_velocities(const moveit::core::RobotStat
   return joint_velocity;
 }
 
-void set_joint_velocities(moveit::core::RobotState* self, std::map<std::string, double>& joint_velocities)
+void setJointVelocities(moveit::core::RobotState* self, std::map<std::string, double>& joint_velocities)
 {
   for (const auto& item : joint_velocities)
   {
@@ -120,7 +120,7 @@ void set_joint_velocities(moveit::core::RobotState* self, std::map<std::string, 
   }
 }
 
-std::map<std::string, double> get_joint_accelerations(const moveit::core::RobotState* self)
+std::map<std::string, double> getJointAccelerations(const moveit::core::RobotState* self)
 {
   std::map<std::string, double> joint_acceleration;
   const std::vector<std::string>& variable_name = self->getVariableNames();
@@ -131,7 +131,7 @@ std::map<std::string, double> get_joint_accelerations(const moveit::core::RobotS
   return joint_acceleration;
 }
 
-void set_joint_accelerations(moveit::core::RobotState* self, std::map<std::string, double>& joint_accelerations)
+void setJointAccelerations(moveit::core::RobotState* self, std::map<std::string, double>& joint_accelerations)
 {
   for (const auto& item : joint_accelerations)
   {
@@ -139,7 +139,7 @@ void set_joint_accelerations(moveit::core::RobotState* self, std::map<std::strin
   }
 }
 
-std::map<std::string, double> get_joint_efforts(const moveit::core::RobotState* self)
+std::map<std::string, double> getJointEfforts(const moveit::core::RobotState* self)
 {
   std::map<std::string, double> joint_effort;
   const std::vector<std::string>& variable_name = self->getVariableNames();
@@ -150,7 +150,7 @@ std::map<std::string, double> get_joint_efforts(const moveit::core::RobotState* 
   return joint_effort;
 }
 
-void set_joint_efforts(moveit::core::RobotState* self, std::map<std::string, double>& joint_efforts)
+void setJointEfforts(moveit::core::RobotState* self, std::map<std::string, double>& joint_efforts)
 {
   for (const auto& item : joint_efforts)
   {
@@ -327,17 +327,17 @@ void initRobotState(py::module& m)
     )")
 
       // Getting and setting joint model group positions, velocities, accelerations
-      .def_property("joint_positions", &moveit_py::bind_robot_state::get_joint_positions,
-                    &moveit_py::bind_robot_state::set_joint_positions, py::return_value_policy::copy)
+      .def_property("joint_positions", &moveit_py::bind_robot_state::getJointPositions,
+                    &moveit_py::bind_robot_state::setJointPositions, py::return_value_policy::copy)
 
-      .def_property("joint_velocities", &moveit_py::bind_robot_state::get_joint_velocities,
-                    &moveit_py::bind_robot_state::set_joint_velocities, py::return_value_policy::copy)
+      .def_property("joint_velocities", &moveit_py::bind_robot_state::getJointVelocities,
+                    &moveit_py::bind_robot_state::setJointVelocities, py::return_value_policy::copy)
 
-      .def_property("joint_accelerations", &moveit_py::bind_robot_state::get_joint_accelerations,
-                    &moveit_py::bind_robot_state::set_joint_accelerations, py::return_value_policy::copy)
+      .def_property("joint_accelerations", &moveit_py::bind_robot_state::getJointAccelerations,
+                    &moveit_py::bind_robot_state::setJointAccelerations, py::return_value_policy::copy)
 
-      .def_property("joint_efforts", &moveit_py::bind_robot_state::get_joint_efforts,
-                    &moveit_py::bind_robot_state::set_joint_efforts, py::return_value_policy::copy)
+      .def_property("joint_efforts", &moveit_py::bind_robot_state::getJointEfforts,
+                    &moveit_py::bind_robot_state::setJointEfforts, py::return_value_policy::copy)
 
       .def("set_joint_group_positions",
            py::overload_cast<const std::string&, const Eigen::VectorXd&>(

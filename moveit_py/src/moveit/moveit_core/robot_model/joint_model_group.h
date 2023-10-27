@@ -49,6 +49,6 @@ namespace bind_robot_model
 {
 bool satisfiesPositionBounds(const moveit::core::JointModelGroup* jmg, const Eigen::VectorXd& joint_positions,
                              const double margin);
-void initJointModel_group(py::module& m);
+void initJointModelGroup(py::module& m);
 }  // namespace bind_robot_model
 }  // namespace moveit_py

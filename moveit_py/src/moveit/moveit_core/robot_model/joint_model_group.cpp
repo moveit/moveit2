@@ -48,7 +48,7 @@ bool satisfiesPositionBounds(const moveit::core::JointModelGroup* jmg, const Eig
   return jmg->satisfiesPositionBounds(joint_positions.data(), margin);
 }
 
-void initJointModel_group(py::module& m)
+void initJointModelGroup(py::module& m)
 {
   py::module robot_model = m.def_submodule("robot_model");
 

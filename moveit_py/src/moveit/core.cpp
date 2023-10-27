@@ -67,7 +67,7 @@ PYBIND11_MODULE(core, m)
   moveit_py::bind_planning_scene::initPlanningScene(m);
   moveit_py::bind_planning_interface::initMotionPlanResponse(m);
   moveit_py::bind_robot_model::initJointModel(m);
-  moveit_py::bind_robot_model::initJointModel_group(m);
+  moveit_py::bind_robot_model::initJointModelGroup(m);
   moveit_py::bind_robot_model::initRobotModel(m);
   moveit_py::bind_robot_state::initRobotState(m);
   moveit_py::bind_robot_trajectory::initRobotTrajectory(m);
