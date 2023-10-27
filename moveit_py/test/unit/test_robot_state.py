@@ -41,14 +41,14 @@ class TestRobotState(unittest.TestCase):
 
         self.assertEqual(robot_state.robot_model, robot_model)
 
-    def test_getFrameTransform(self):
+    def test_get_frame_transform(self):
         """
         Test that the frame transform is correct
         """
         robot_model = get_robot_model()
         robot_state = RobotState(robot_model)
         robot_state.update()
-        frame_transform = robot_state.getFrameTransform("panda_link0")
+        frame_transform = robot_state.get_frame_transform("panda_link0")
 
         self.assertIsInstance(frame_transform, np.ndarray)
         # TODO(peterdavidfagan): add assertion for particular values
@@ -60,7 +60,7 @@ class TestRobotState(unittest.TestCase):
         robot_model = get_robot_model()
         robot_state = RobotState(robot_model)
         robot_state.update()
-        pose = robot_state.getPose(link_name="panda_link8")
+        pose = robot_state.get_pose(link_name="panda_link8")
 
         self.assertIsInstance(pose, Pose)
         # TODO(peterdavidfagan): add assertion for particular values
@@ -72,7 +72,7 @@ class TestRobotState(unittest.TestCase):
         robot_model = get_robot_model()
         robot_state = RobotState(robot_model)
         robot_state.update()
-        jacobian = robot_state.getJacobian(
+        jacobian = robot_state.get_jacobian(
             joint_model_group_name="panda_arm",
             reference_point_position=np.array([0.0, 0.0, 0.0]),
         )
@@ -80,14 +80,14 @@ class TestRobotState(unittest.TestCase):
         self.assertIsInstance(jacobian, np.ndarray)
         # TODO(peterdavidfagan): add assertion for particular values
 
-    def test_getJacobian_2(self):
+    def test_get_jacobian_2(self):
         """
         Test that the jacobian is correct
         """
         robot_model = get_robot_model()
         robot_state = RobotState(robot_model)
         robot_state.update()
-        jacobian = robot_state.getJacobian(
+        jacobian = robot_state.get_jacobian(
             joint_model_group_name="panda_arm",
             link_name="panda_link6",
             reference_point_position=np.array([0.0, 0.0, 0.0]),
@@ -170,7 +170,7 @@ class TestRobotState(unittest.TestCase):
     #        tip_name="panda_link8",
     #    )
 
-    #    self.assertEqual(robot_state.getPose("panda_link8"), pose)
+    #    self.assertEqual(robot_state.get_pose("panda_link8"), pose)
 
 
 if __name__ == "__main__":
