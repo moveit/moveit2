@@ -43,13 +43,13 @@ namespace bind_planning_scene_monitor
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_py.bind_planning_scene_monitor");
 
 LockedPlanningSceneContextManagerRO
-read_only(const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor)
+readOnly(const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor)
 {
   return LockedPlanningSceneContextManagerRO(planning_scene_monitor);
 };
 
 LockedPlanningSceneContextManagerRW
-read_write(const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor)
+readWrite(const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor)
 {
   return LockedPlanningSceneContextManagerRW(planning_scene_monitor);
 };
@@ -80,8 +80,8 @@ void LockedPlanningSceneContextManagerRW::lockedPlanningSceneRwExit(const py::ob
 }
 
 // TODO: simplify with typecaster
-void apply_planning_scene(std::shared_ptr<planning_scene_monitor::PlanningSceneMonitor>& planning_scene_monitor,
-                          const moveit_msgs::msg::PlanningScene& planning_scene)
+void applyPlanningScene(std::shared_ptr<planning_scene_monitor::PlanningSceneMonitor>& planning_scene_monitor,
+                        const moveit_msgs::msg::PlanningScene& planning_scene)
 {
   // lock planning scene
   {
@@ -90,7 +90,7 @@ void apply_planning_scene(std::shared_ptr<planning_scene_monitor::PlanningSceneM
   }
 }
 
-void init_planning_scene_monitor(py::module& m)
+void initPlanningSceneMonitor(py::module& m)
 {
   py::class_<planning_scene_monitor::PlanningSceneMonitor, planning_scene_monitor::PlanningSceneMonitorPtr>(
       m, "PlanningSceneMonitor", R"(
@@ -132,18 +132,18 @@ void init_planning_scene_monitor(py::module& m)
            Clears the octomap.
            )")
 
-      .def("read_only", &moveit_py::bind_planning_scene_monitor::read_only,
+      .def("read_only", &moveit_py::bind_planning_scene_monitor::readOnly,
            R"(
            Returns a read-only context manager for the planning scene.
            )")
 
-      .def("read_write", &moveit_py::bind_planning_scene_monitor::read_write,
+      .def("read_write", &moveit_py::bind_planning_scene_monitor::readWrite,
            R"(
            Returns a read-write context manager for the planning scene.
            )");
 }
 
-void init_context_managers(py::module& m)
+void initContextManagers(py::module& m)
 {
   // In Python we lock the planning scene using a with statement as this allows us to have control over resources.
   // To this end each of the below manager classes binds special methods __enter__ and __exit__.

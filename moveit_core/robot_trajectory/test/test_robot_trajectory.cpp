@@ -531,6 +531,7 @@ TEST_F(RobotTrajectoryTestFixture, RobotTrajectoryLength)
 {
   robot_trajectory::RobotTrajectoryPtr trajectory;
   initTestTrajectory(trajectory);
+<<<<<<< HEAD
   EXPECT_FLOAT_EQ(robot_trajectory::path_length(*trajectory), 0.0);
 
   // modify joint values so the smoothness is nonzero
@@ -543,6 +544,9 @@ TEST_F(RobotTrajectoryTestFixture, RobotTrajectoryLength)
     waypoint->setJointGroupPositions(arm_jmg_name_, positions);
   }
   EXPECT_GT(robot_trajectory::path_length(*trajectory), 0.0);
+=======
+  EXPECT_GT(robot_trajectory::pathLength(*trajectory), 0.0);
+>>>>>>> 63e0c3a39 (Add new clang-tidy style rules (#2177))
 }
 
 TEST_F(RobotTrajectoryTestFixture, RobotTrajectorySmoothness)
@@ -574,6 +578,7 @@ TEST_F(RobotTrajectoryTestFixture, RobotTrajectoryDensity)
   robot_trajectory::RobotTrajectoryPtr trajectory;
   initTestTrajectory(trajectory);
 
+<<<<<<< HEAD
   // If trajectory has all equal state, and length zero, density should be null.
   auto density = robot_trajectory::waypoint_density(*trajectory);
   ASSERT_FALSE(density.has_value());
@@ -589,13 +594,20 @@ TEST_F(RobotTrajectoryTestFixture, RobotTrajectoryDensity)
   }
 
   density = robot_trajectory::waypoint_density(*trajectory);
+=======
+  const auto density = robot_trajectory::waypointDensity(*trajectory);
+>>>>>>> 63e0c3a39 (Add new clang-tidy style rules (#2177))
   ASSERT_TRUE(density.has_value());
   EXPECT_GT(density.value(), 0.0);
 
   // Check for empty trajectory
   trajectory->clear();
+<<<<<<< HEAD
   density = robot_trajectory::waypoint_density(*trajectory);
   EXPECT_FALSE(density.has_value());
+=======
+  EXPECT_FALSE(robot_trajectory::waypointDensity(*trajectory).has_value());
+>>>>>>> 63e0c3a39 (Add new clang-tidy style rules (#2177))
 }
 
 TEST_F(OneRobot, Unwind)

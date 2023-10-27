@@ -57,6 +57,11 @@ static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.ros.warehouse.sa
 typedef std::pair<geometry_msgs::msg::Point, geometry_msgs::msg::Quaternion> LinkConstraintPair;
 typedef std::map<std::string, LinkConstraintPair> LinkConstraintMap;
 
+<<<<<<< HEAD
+=======
+using moveit::getLogger;
+
+>>>>>>> 63e0c3a39 (Add new clang-tidy style rules (#2177))
 void collectLinkConstraints(const moveit_msgs::msg::Constraints& constraints, LinkConstraintMap& lcmap)
 {
   for (const moveit_msgs::msg::PositionConstraint& position_constraint : constraints.position_constraints)
@@ -75,7 +80,11 @@ void collectLinkConstraints(const moveit_msgs::msg::Constraints& constraints, Li
     }
     else
     {
+<<<<<<< HEAD
       RCLCPP_WARN(LOGGER, "Orientation constraint for %s has no matching position constraint",
+=======
+      RCLCPP_WARN(getLogger(), "Orientation constraint for %s has no matching position constraint",
+>>>>>>> 63e0c3a39 (Add new clang-tidy style rules (#2177))
                   orientation_constraint.link_name.c_str());
     }
   }
@@ -88,6 +97,10 @@ int main(int argc, char** argv)
   node_options.allow_undeclared_parameters(true);
   node_options.automatically_declare_parameters_from_overrides(true);
   rclcpp::Node::SharedPtr node = rclcpp::Node::make_shared("save_warehouse_as_text", node_options);
+<<<<<<< HEAD
+=======
+  moveit::getLoggerMut() = node->get_logger();
+>>>>>>> 63e0c3a39 (Add new clang-tidy style rules (#2177))
 
   boost::program_options::options_description desc;
   desc.add_options()("help", "Show help message")("host", boost::program_options::value<std::string>(),
@@ -125,7 +138,11 @@ int main(int argc, char** argv)
     moveit_warehouse::PlanningSceneWithMetadata pswm;
     if (pss.getPlanningScene(pswm, scene_name))
     {
+<<<<<<< HEAD
       RCLCPP_INFO(LOGGER, "Saving scene '%s'", scene_name.c_str());
+=======
+      RCLCPP_INFO(getLogger(), "Saving scene '%s'", scene_name.c_str());
+>>>>>>> 63e0c3a39 (Add new clang-tidy style rules (#2177))
       psm.getPlanningScene()->setPlanningSceneMsg(static_cast<const moveit_msgs::msg::PlanningScene&>(*pswm));
       std::ofstream fout((scene_name + ".scene").c_str());
       psm.getPlanningScene()->saveGeometryToStream(fout);
@@ -155,7 +172,11 @@ int main(int argc, char** argv)
           qfout << robot_state_names.size() << '\n';
           for (const std::string& robot_state_name : robot_state_names)
           {
+<<<<<<< HEAD
             RCLCPP_INFO(LOGGER, "Saving start state %s for scene %s", robot_state_name.c_str(), scene_name.c_str());
+=======
+            RCLCPP_INFO(getLogger(), "Saving start state %s for scene %s", robot_state_name.c_str(), scene_name.c_str());
+>>>>>>> 63e0c3a39 (Add new clang-tidy style rules (#2177))
             qfout << robot_state_name << '\n';
             moveit_warehouse::RobotStateWithMetadata robot_state;
             rss.getRobotState(robot_state, robot_state_name);
@@ -172,7 +193,11 @@ int main(int argc, char** argv)
           qfout << constraint_names.size() << '\n';
           for (const std::string& constraint_name : constraint_names)
           {
+<<<<<<< HEAD
             RCLCPP_INFO(LOGGER, "Saving goal %s for scene %s", constraint_name.c_str(), scene_name.c_str());
+=======
+            RCLCPP_INFO(getLogger(), "Saving goal %s for scene %s", constraint_name.c_str(), scene_name.c_str());
+>>>>>>> 63e0c3a39 (Add new clang-tidy style rules (#2177))
             qfout << "link_constraint" << '\n';
             qfout << constraint_name << '\n';
             moveit_warehouse::ConstraintsWithMetadata constraints;
@@ -198,7 +223,11 @@ int main(int argc, char** argv)
     }
   }
 
+<<<<<<< HEAD
   RCLCPP_INFO(LOGGER, "Done.");
+=======
+  RCLCPP_INFO(getLogger(), "Done.");
+>>>>>>> 63e0c3a39 (Add new clang-tidy style rules (#2177))
   rclcpp::spin(node);
   return 0;
 }

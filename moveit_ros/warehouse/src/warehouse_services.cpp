@@ -48,6 +48,12 @@
 #include <rclcpp/node_options.hpp>
 #include <rclcpp/parameter_value.hpp>
 #include <rclcpp/utilities.hpp>
+<<<<<<< HEAD
+=======
+#include <moveit/utils/logger.hpp>
+
+using moveit::getLogger;
+>>>>>>> 63e0c3a39 (Add new clang-tidy style rules (#2177))
 
 static const std::string ROBOT_DESCRIPTION = "robot_description";
 
@@ -59,7 +65,11 @@ bool storeState(const std::shared_ptr<moveit_msgs::srv::SaveRobotStateToWarehous
 {
   if (request->name.empty())
   {
+<<<<<<< HEAD
     RCLCPP_ERROR(LOGGER, "You must specify a name to store a state");
+=======
+    RCLCPP_ERROR(getLogger(), "You must specify a name to store a state");
+>>>>>>> 63e0c3a39 (Add new clang-tidy style rules (#2177))
     return (response->success = false);
   }
   rs.addRobotState(request->state, request->name, request->robot);
@@ -95,7 +105,11 @@ bool getState(const std::shared_ptr<moveit_msgs::srv::GetRobotStateFromWarehouse
 {
   if (!rs.hasRobotState(request->name, request->robot))
   {
+<<<<<<< HEAD
     RCLCPP_ERROR_STREAM(LOGGER, "No state called '" << request->name << "' for robot '" << request->robot << "'.");
+=======
+    RCLCPP_ERROR_STREAM(getLogger(), "No state called '" << request->name << "' for robot '" << request->robot << "'.");
+>>>>>>> 63e0c3a39 (Add new clang-tidy style rules (#2177))
     moveit_msgs::msg::RobotState dummy;
     response->state = dummy;
     return false;
@@ -112,7 +126,12 @@ bool renameState(const std::shared_ptr<moveit_msgs::srv::RenameRobotStateInWareh
 {
   if (!rs.hasRobotState(request->old_name, request->robot))
   {
+<<<<<<< HEAD
     RCLCPP_ERROR_STREAM(LOGGER, "No state called '" << request->old_name << "' for robot '" << request->robot << "'.");
+=======
+    RCLCPP_ERROR_STREAM(getLogger(),
+                        "No state called '" << request->old_name << "' for robot '" << request->robot << "'.");
+>>>>>>> 63e0c3a39 (Add new clang-tidy style rules (#2177))
     return false;
   }
   rs.renameRobotState(request->old_name, request->new_name, request->robot);
@@ -125,7 +144,11 @@ bool deleteState(const std::shared_ptr<moveit_msgs::srv::DeleteRobotStateFromWar
 {
   if (!rs.hasRobotState(request->name, request->robot))
   {
+<<<<<<< HEAD
     RCLCPP_ERROR_STREAM(LOGGER, "No state called '" << request->name << "' for robot '" << request->robot << "'.");
+=======
+    RCLCPP_ERROR_STREAM(getLogger(), "No state called '" << request->name << "' for robot '" << request->robot << "'.");
+>>>>>>> 63e0c3a39 (Add new clang-tidy style rules (#2177))
     return false;
   }
   rs.removeRobotState(request->name, request->robot);
@@ -139,6 +162,10 @@ int main(int argc, char** argv)
   node_options.allow_undeclared_parameters(true);
   node_options.automatically_declare_parameters_from_overrides(true);
   rclcpp::Node::SharedPtr node = rclcpp::Node::make_shared("moveit_warehouse_services", node_options);
+<<<<<<< HEAD
+=======
+  moveit::getLoggerMut() = node->get_logger();
+>>>>>>> 63e0c3a39 (Add new clang-tidy style rules (#2177))
 
   std::string host;
 
@@ -158,23 +185,39 @@ int main(int argc, char** argv)
     conn = moveit_warehouse::loadDatabase(node);
     conn->setParams(host, port, connection_timeout);
 
+<<<<<<< HEAD
     RCLCPP_INFO(LOGGER, "Connecting to warehouse on %s:%d", host.c_str(), port);
+=======
+    RCLCPP_INFO(getLogger(), "Connecting to warehouse on %s:%d", host.c_str(), port);
+>>>>>>> 63e0c3a39 (Add new clang-tidy style rules (#2177))
     int tries = 0;
     while (!conn->connect())
     {
       ++tries;
+<<<<<<< HEAD
       RCLCPP_WARN(LOGGER, "Failed to connect to DB on %s:%d (try %d/%d).", host.c_str(), port, tries,
                   connection_retries);
       if (tries == connection_retries)
       {
         RCLCPP_FATAL(LOGGER, "Failed to connect too many times, giving up");
+=======
+      RCLCPP_WARN(getLogger(), "Failed to connect to DB on %s:%d (try %d/%d).", host.c_str(), port, tries,
+                  connection_retries);
+      if (tries == connection_retries)
+      {
+        RCLCPP_FATAL(getLogger(), "Failed to connect too many times, giving up");
+>>>>>>> 63e0c3a39 (Add new clang-tidy style rules (#2177))
         return 1;
       }
     }
   }
   catch (std::exception& ex)
   {
+<<<<<<< HEAD
     RCLCPP_ERROR(LOGGER, "%s", ex.what());
+=======
+    RCLCPP_ERROR(getLogger(), "%s", ex.what());
+>>>>>>> 63e0c3a39 (Add new clang-tidy style rules (#2177))
     return 1;
   }
 
@@ -184,6 +227,7 @@ int main(int argc, char** argv)
   rs.getKnownRobotStates(names);
   if (names.empty())
   {
+<<<<<<< HEAD
     RCLCPP_INFO(LOGGER, "There are no previously stored robot states");
   }
   else
@@ -191,6 +235,15 @@ int main(int argc, char** argv)
     RCLCPP_INFO(LOGGER, "Previously stored robot states:");
     for (const std::string& name : names)
       RCLCPP_INFO(LOGGER, " * %s", name.c_str());
+=======
+    RCLCPP_INFO(getLogger(), "There are no previously stored robot states");
+  }
+  else
+  {
+    RCLCPP_INFO(getLogger(), "Previously stored robot states:");
+    for (const std::string& name : names)
+      RCLCPP_INFO(getLogger(), " * %s", name.c_str());
+>>>>>>> 63e0c3a39 (Add new clang-tidy style rules (#2177))
   }
 
   auto save_cb = [&](const std::shared_ptr<moveit_msgs::srv::SaveRobotStateToWarehouse::Request>& request,

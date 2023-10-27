@@ -106,7 +106,7 @@ void PR2ArmIKSolver::updateInternalDataStructures()
 int PR2ArmIKSolver::CartToJnt(const KDL::JntArray& q_init, const KDL::Frame& p_in, KDL::JntArray& q_out)
 {
   const bool verbose = false;
-  Eigen::Isometry3f b = KDLToEigenMatrix(p_in);
+  Eigen::Isometry3f b = kdlToEigenMatrix(p_in);
   std::vector<std::vector<double> > solution_ik;
   if (free_angle_ == 0)
   {
@@ -222,7 +222,7 @@ bool getKDLChain(const urdf::ModelInterface& model, const std::string& root_name
   return true;
 }
 
-Eigen::Isometry3f KDLToEigenMatrix(const KDL::Frame& p)
+Eigen::Isometry3f kdlToEigenMatrix(const KDL::Frame& p)
 {
   Eigen::Isometry3f b = Eigen::Isometry3f::Identity();
   for (int i = 0; i < 3; ++i)

@@ -59,13 +59,22 @@
 #include <rclcpp/subscription.hpp>
 #include <rclcpp/utilities.hpp>
 
+<<<<<<< HEAD
+=======
+using moveit::getLogger;
+
+>>>>>>> 63e0c3a39 (Add new clang-tidy style rules (#2177))
 static const std::string ROBOT_DESCRIPTION = "robot_description";
 
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.ros.warehouse.save_to_warehouse");
 
 void onSceneUpdate(planning_scene_monitor::PlanningSceneMonitor& psm, moveit_warehouse::PlanningSceneStorage& pss)
 {
+<<<<<<< HEAD
   RCLCPP_INFO(LOGGER, "Received an update to the planning scene...");
+=======
+  RCLCPP_INFO(getLogger(), "Received an update to the planning scene...");
+>>>>>>> 63e0c3a39 (Add new clang-tidy style rules (#2177))
 
   if (!psm.getPlanningScene()->getName().empty())
   {
@@ -77,12 +86,20 @@ void onSceneUpdate(planning_scene_monitor::PlanningSceneMonitor& psm, moveit_war
     }
     else
     {
+<<<<<<< HEAD
       RCLCPP_INFO(LOGGER, "Scene '%s' was previously added. Not adding again.",
+=======
+      RCLCPP_INFO(getLogger(), "Scene '%s' was previously added. Not adding again.",
+>>>>>>> 63e0c3a39 (Add new clang-tidy style rules (#2177))
                   psm.getPlanningScene()->getName().c_str());
     }
   }
   else
+<<<<<<< HEAD
     RCLCPP_INFO(LOGGER, "Scene name is empty. Not saving.");
+=======
+    RCLCPP_INFO(getLogger(), "Scene name is empty. Not saving.");
+>>>>>>> 63e0c3a39 (Add new clang-tidy style rules (#2177))
 }
 
 void onMotionPlanRequest(const moveit_msgs::msg::MotionPlanRequest& req,
@@ -90,7 +107,11 @@ void onMotionPlanRequest(const moveit_msgs::msg::MotionPlanRequest& req,
 {
   if (psm.getPlanningScene()->getName().empty())
   {
+<<<<<<< HEAD
     RCLCPP_INFO(LOGGER, "Scene name is empty. Not saving planning request.");
+=======
+    RCLCPP_INFO(getLogger(), "Scene name is empty. Not saving planning request.");
+>>>>>>> 63e0c3a39 (Add new clang-tidy style rules (#2177))
     return;
   }
   pss.addPlanningQuery(req, psm.getPlanningScene()->getName());
@@ -100,19 +121,31 @@ void onConstraints(const moveit_msgs::msg::Constraints& msg, moveit_warehouse::C
 {
   if (msg.name.empty())
   {
+<<<<<<< HEAD
     RCLCPP_INFO(LOGGER, "No name specified for constraints. Not saving.");
+=======
+    RCLCPP_INFO(getLogger(), "No name specified for constraints. Not saving.");
+>>>>>>> 63e0c3a39 (Add new clang-tidy style rules (#2177))
     return;
   }
 
   if (cs.hasConstraints(msg.name))
   {
+<<<<<<< HEAD
     RCLCPP_INFO(LOGGER, "Replacing constraints '%s'", msg.name.c_str());
+=======
+    RCLCPP_INFO(getLogger(), "Replacing constraints '%s'", msg.name.c_str());
+>>>>>>> 63e0c3a39 (Add new clang-tidy style rules (#2177))
     cs.removeConstraints(msg.name);
     cs.addConstraints(msg);
   }
   else
   {
+<<<<<<< HEAD
     RCLCPP_INFO(LOGGER, "Adding constraints '%s'", msg.name.c_str());
+=======
+    RCLCPP_INFO(getLogger(), "Adding constraints '%s'", msg.name.c_str());
+>>>>>>> 63e0c3a39 (Add new clang-tidy style rules (#2177))
     cs.addConstraints(msg);
   }
 }
@@ -126,7 +159,11 @@ void onRobotState(const moveit_msgs::msg::RobotState& msg, moveit_warehouse::Rob
   while (names_set.find("S" + std::to_string(n)) != names_set.end())
     n++;
   std::string name = "S" + std::to_string(n);
+<<<<<<< HEAD
   RCLCPP_INFO(LOGGER, "Adding robot state '%s'", name.c_str());
+=======
+  RCLCPP_INFO(getLogger(), "Adding robot state '%s'", name.c_str());
+>>>>>>> 63e0c3a39 (Add new clang-tidy style rules (#2177))
   rs.addRobotState(msg, name);
 }
 
@@ -137,6 +174,10 @@ int main(int argc, char** argv)
   node_options.allow_undeclared_parameters(true);
   node_options.automatically_declare_parameters_from_overrides(true);
   rclcpp::Node::SharedPtr node = rclcpp::Node::make_shared("save_to_warehouse", node_options);
+<<<<<<< HEAD
+=======
+  moveit::getLoggerMut() = node->get_logger();
+>>>>>>> 63e0c3a39 (Add new clang-tidy style rules (#2177))
 
   boost::program_options::options_description desc;
   desc.add_options()("help", "Show help message")("host", boost::program_options::value<std::string>(),
@@ -163,7 +204,11 @@ int main(int argc, char** argv)
   planning_scene_monitor::PlanningSceneMonitor psm(node, ROBOT_DESCRIPTION);
   if (!psm.getPlanningScene())
   {
+<<<<<<< HEAD
     RCLCPP_ERROR(LOGGER, "Unable to initialize PlanningSceneMonitor");
+=======
+    RCLCPP_ERROR(getLogger(), "Unable to initialize PlanningSceneMonitor");
+>>>>>>> 63e0c3a39 (Add new clang-tidy style rules (#2177))
     return 1;
   }
 
@@ -176,6 +221,7 @@ int main(int argc, char** argv)
   pss.getPlanningSceneNames(names);
   if (names.empty())
   {
+<<<<<<< HEAD
     RCLCPP_INFO(LOGGER, "There are no previously stored scenes");
   }
   else
@@ -183,10 +229,20 @@ int main(int argc, char** argv)
     RCLCPP_INFO(LOGGER, "Previously stored scenes:");
     for (const std::string& name : names)
       RCLCPP_INFO(LOGGER, " * %s", name.c_str());
+=======
+    RCLCPP_INFO(getLogger(), "There are no previously stored scenes");
+  }
+  else
+  {
+    RCLCPP_INFO(getLogger(), "Previously stored scenes:");
+    for (const std::string& name : names)
+      RCLCPP_INFO(getLogger(), " * %s", name.c_str());
+>>>>>>> 63e0c3a39 (Add new clang-tidy style rules (#2177))
   }
   cs.getKnownConstraints(names);
   if (names.empty())
   {
+<<<<<<< HEAD
     RCLCPP_INFO(LOGGER, "There are no previously stored constraints");
   }
   else
@@ -194,10 +250,20 @@ int main(int argc, char** argv)
     RCLCPP_INFO(LOGGER, "Previously stored constraints:");
     for (const std::string& name : names)
       RCLCPP_INFO(LOGGER, " * %s", name.c_str());
+=======
+    RCLCPP_INFO(getLogger(), "There are no previously stored constraints");
+  }
+  else
+  {
+    RCLCPP_INFO(getLogger(), "Previously stored constraints:");
+    for (const std::string& name : names)
+      RCLCPP_INFO(getLogger(), " * %s", name.c_str());
+>>>>>>> 63e0c3a39 (Add new clang-tidy style rules (#2177))
   }
   rs.getKnownRobotStates(names);
   if (names.empty())
   {
+<<<<<<< HEAD
     RCLCPP_INFO(LOGGER, "There are no previously stored robot states");
   }
   else
@@ -205,6 +271,15 @@ int main(int argc, char** argv)
     RCLCPP_INFO(LOGGER, "Previously stored robot states:");
     for (const std::string& name : names)
       RCLCPP_INFO(LOGGER, " * %s", name.c_str());
+=======
+    RCLCPP_INFO(getLogger(), "There are no previously stored robot states");
+  }
+  else
+  {
+    RCLCPP_INFO(getLogger(), "Previously stored robot states:");
+    for (const std::string& name : names)
+      RCLCPP_INFO(getLogger(), " * %s", name.c_str());
+>>>>>>> 63e0c3a39 (Add new clang-tidy style rules (#2177))
   }
 
   psm.addUpdateCallback([&](auto&&) { return onSceneUpdate(psm, pss); });
@@ -221,10 +296,18 @@ int main(int argc, char** argv)
 
   std::vector<std::string> topics;
   psm.getMonitoredTopics(topics);
+<<<<<<< HEAD
   RCLCPP_INFO_STREAM(LOGGER, "Listening for scene updates on topics " << fmt::format("{}", fmt::join(topics, ", ")));
   RCLCPP_INFO_STREAM(LOGGER, "Listening for planning requests on topic " << mplan_req_sub->get_topic_name());
   RCLCPP_INFO_STREAM(LOGGER, "Listening for named constraints on topic " << constr_sub->get_topic_name());
   RCLCPP_INFO_STREAM(LOGGER, "Listening for states on topic " << state_sub->get_topic_name());
+=======
+  RCLCPP_INFO_STREAM(getLogger(),
+                     "Listening for scene updates on topics " << fmt::format("{}", fmt::join(topics, ", ")));
+  RCLCPP_INFO_STREAM(getLogger(), "Listening for planning requests on topic " << mplan_req_sub->get_topic_name());
+  RCLCPP_INFO_STREAM(getLogger(), "Listening for named constraints on topic " << constr_sub->get_topic_name());
+  RCLCPP_INFO_STREAM(getLogger(), "Listening for states on topic " << state_sub->get_topic_name());
+>>>>>>> 63e0c3a39 (Add new clang-tidy style rules (#2177))
 
   rclcpp::spin(node);
   return 0;

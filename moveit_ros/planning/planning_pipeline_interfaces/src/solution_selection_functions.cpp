@@ -50,8 +50,8 @@ getShortestSolution(const std::vector<::planning_interface::MotionPlanResponse>&
                                                       // If both solutions were successful, check which path is shorter
                                                       if (solution_a && solution_b)
                                                       {
-                                                        return robot_trajectory::path_length(*solution_a.trajectory) <
-                                                               robot_trajectory::path_length(*solution_b.trajectory);
+                                                        return robot_trajectory::pathLength(*solution_a.trajectory) <
+                                                               robot_trajectory::pathLength(*solution_b.trajectory);
                                                       }
                                                       // If only solution a is successful, return a
                                                       else if (solution_a)

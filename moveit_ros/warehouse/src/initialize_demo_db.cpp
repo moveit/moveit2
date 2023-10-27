@@ -55,7 +55,11 @@
 
 static const std::string ROBOT_DESCRIPTION = "robot_description";
 
+<<<<<<< HEAD
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.ros.warehouse.initialize_demo_db");
+=======
+using moveit::getLogger;
+>>>>>>> 63e0c3a39 (Add new clang-tidy style rules (#2177))
 
 int main(int argc, char** argv)
 {
@@ -64,6 +68,10 @@ int main(int argc, char** argv)
   node_options.allow_undeclared_parameters(true);
   node_options.automatically_declare_parameters_from_overrides(true);
   rclcpp::Node::SharedPtr node = rclcpp::Node::make_shared("initialize_demo_db", node_options);
+<<<<<<< HEAD
+=======
+  moveit::getLoggerMut() = node->get_logger();
+>>>>>>> 63e0c3a39 (Add new clang-tidy style rules (#2177))
 
   boost::program_options::options_description desc;
   desc.add_options()("help", "Show help message")("host", boost::program_options::value<std::string>(),
@@ -90,7 +98,11 @@ int main(int argc, char** argv)
   planning_scene_monitor::PlanningSceneMonitor psm(node, ROBOT_DESCRIPTION);
   if (!psm.getPlanningScene())
   {
+<<<<<<< HEAD
     RCLCPP_ERROR(LOGGER, "Unable to initialize PlanningSceneMonitor");
+=======
+    RCLCPP_ERROR(getLogger(), "Unable to initialize PlanningSceneMonitor");
+>>>>>>> 63e0c3a39 (Add new clang-tidy style rules (#2177))
     return 1;
   }
 
@@ -106,12 +118,20 @@ int main(int argc, char** argv)
   psm.getPlanningScene()->getPlanningSceneMsg(psmsg);
   psmsg.name = "default";
   pss.addPlanningScene(psmsg);
+<<<<<<< HEAD
   RCLCPP_INFO(LOGGER, "Added default scene: '%s'", psmsg.name.c_str());
+=======
+  RCLCPP_INFO(getLogger(), "Added default scene: '%s'", psmsg.name.c_str());
+>>>>>>> 63e0c3a39 (Add new clang-tidy style rules (#2177))
 
   moveit_msgs::msg::RobotState rsmsg;
   moveit::core::robotStateToRobotStateMsg(psm.getPlanningScene()->getCurrentState(), rsmsg);
   rs.addRobotState(rsmsg, "default");
+<<<<<<< HEAD
   RCLCPP_INFO(LOGGER, "Added default state");
+=======
+  RCLCPP_INFO(getLogger(), "Added default state");
+>>>>>>> 63e0c3a39 (Add new clang-tidy style rules (#2177))
 
   const std::vector<std::string>& gnames = psm.getRobotModel()->getJointModelGroupNames();
   for (const std::string& gname : gnames)
@@ -138,9 +158,15 @@ int main(int argc, char** argv)
     cmsg.orientation_constraints.resize(1, ocm);
     cmsg.name = ocm.link_name + ":upright";
     cs.addConstraints(cmsg, psm.getRobotModel()->getName(), jmg->getName());
+<<<<<<< HEAD
     RCLCPP_INFO(LOGGER, "Added default constraint: '%s'", cmsg.name.c_str());
   }
   RCLCPP_INFO(LOGGER, "Default MoveIt Warehouse was reset.");
+=======
+    RCLCPP_INFO(getLogger(), "Added default constraint: '%s'", cmsg.name.c_str());
+  }
+  RCLCPP_INFO(getLogger(), "Default MoveIt Warehouse was reset.");
+>>>>>>> 63e0c3a39 (Add new clang-tidy style rules (#2177))
 
   rclcpp::spin(node);
 

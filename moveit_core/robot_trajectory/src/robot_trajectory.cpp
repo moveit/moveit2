@@ -636,7 +636,11 @@ std::ostream& operator<<(std::ostream& out, const RobotTrajectory& trajectory)
   return out;
 }
 
+<<<<<<< HEAD
 double path_length(RobotTrajectory const& trajectory)
+=======
+double pathLength(const RobotTrajectory& trajectory)
+>>>>>>> 63e0c3a39 (Add new clang-tidy style rules (#2177))
 {
   auto trajectory_length = 0.0;
   for (std::size_t index = 1; index < trajectory.getWayPointCount(); ++index)
@@ -686,13 +690,21 @@ std::optional<double> smoothness(RobotTrajectory const& trajectory)
   return std::nullopt;
 }
 
+<<<<<<< HEAD
 std::optional<double> waypoint_density(RobotTrajectory const& trajectory)
+=======
+std::optional<double> waypointDensity(const RobotTrajectory& trajectory)
+>>>>>>> 63e0c3a39 (Add new clang-tidy style rules (#2177))
 {
   // Only calculate density if more than one waypoint exists
   if (trajectory.getWayPointCount() > 1)
   {
     // Calculate path length
+<<<<<<< HEAD
     auto const length = path_length(trajectory);
+=======
+    const auto length = pathLength(trajectory);
+>>>>>>> 63e0c3a39 (Add new clang-tidy style rules (#2177))
     if (length > 0.0)
     {
       auto density = static_cast<double>(trajectory.getWayPointCount()) / length;

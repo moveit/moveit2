@@ -1,7 +1,7 @@
 /*********************************************************************
  * Software License Agreement (BSD License)
  *
- *  Copyright (c) 2018 Pilz GmbH & Co. KG
+ *  Copyright (c) 2023, PickNik Robotics Inc.
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *     copyright notice, this list of conditions and the following
  *     disclaimer in the documentation and/or other materials provided
  *     with the distribution.
- *   * Neither the name of Pilz GmbH & Co. KG nor the names of its
+ *   * Neither the name of PickNik Robotics Inc. nor the names of its
  *     contributors may be used to endorse or promote products derived
  *     from this software without specific prior written permission.
  *
@@ -32,48 +32,26 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#include <pilz_industrial_motion_planner/planning_context_loader_lin.h>
-#include <moveit/planning_scene/planning_scene.h>
-#include <pilz_industrial_motion_planner/planning_context_base.h>
-#include <pilz_industrial_motion_planner/planning_context_lin.h>
+/* Author: Tyler Weaver */
 
-#include <pluginlib/class_list_macros.hpp>
+#pragma once
 
-namespace
+#include <rclcpp/logger.hpp>
+#include <string>
+
+namespace moveit
 {
-const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.pilz_industrial_motion_planner.planning_context_loader_lin");
-}
 
-pilz_industrial_motion_planner::PlanningContextLoaderLIN::PlanningContextLoaderLIN()
-{
-  alg_ = "LIN";
-}
+// Function for getting a reference to a logger object kept in a global variable.
+// Use getLoggerMut to set the logger to a node logger.
+const rclcpp::Logger& getLogger();
 
-pilz_industrial_motion_planner::PlanningContextLoaderLIN::~PlanningContextLoaderLIN()
-{
-}
+// Function for getting a child logger. In Humble this also creates a node.
+// Do not use this in place as it will create a new logger each time,
+// instead store it in the state of your class or method.
+rclcpp::Logger makeChildLogger(const std::string& name);
 
-bool pilz_industrial_motion_planner::PlanningContextLoaderLIN::loadContext(
-    planning_interface::PlanningContextPtr& planning_context, const std::string& name, const std::string& group) const
-{
-  if (limits_set_ && model_set_)
-  {
-    planning_context = std::make_shared<PlanningContextLIN>(name, group, model_, limits_);
-    return true;
-  }
-  else
-  {
-    if (!limits_set_)
-    {
-      RCLCPP_ERROR_STREAM(LOGGER, "Limits are not defined. Cannot load planning context. Call setLimits loadContext");
-    }
-    if (!model_set_)
-    {
-      RCLCPP_ERROR_STREAM(LOGGER, "Robot model was not set");
-    }
-    return false;
-  }
-}
+// Mutable access to global logger for setting to node logger.
+rclcpp::Logger& getLoggerMut();
 
-PLUGINLIB_EXPORT_CLASS(pilz_industrial_motion_planner::PlanningContextLoaderLIN,
-                       pilz_industrial_motion_planner::PlanningContextLoader)
+}  // namespace moveit

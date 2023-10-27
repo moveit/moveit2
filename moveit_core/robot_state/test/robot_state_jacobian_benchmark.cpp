@@ -46,7 +46,7 @@
 constexpr char TEST_ROBOT[] = "panda";
 constexpr char TEST_GROUP[] = "panda_arm";
 
-static void BM_MoveItJacobian(benchmark::State& st)
+static void bmMoveItJacobian(benchmark::State& st)
 {
   // Load a test robot model.
   const moveit::core::RobotModelPtr& robot_model = moveit::core::loadTestingRobotModel(TEST_ROBOT);
@@ -77,4 +77,59 @@ static void BM_MoveItJacobian(benchmark::State& st)
   }
 }
 
+<<<<<<< HEAD
 BENCHMARK(BM_MoveItJacobian);
+=======
+static void bmKdlJacobian(benchmark::State& st)
+{
+  const moveit::core::RobotModelPtr& robot_model = moveit::core::loadTestingRobotModel(TEST_ROBOT);
+
+  // Make sure the group exists, otherwise exit early with an error.
+  if (!robot_model->hasJointModelGroup(TEST_GROUP))
+  {
+    st.SkipWithError("The planning group doesn't exist.");
+    return;
+  }
+
+  // Robot state.
+  moveit::core::RobotState kinematic_state(robot_model);
+  const moveit::core::JointModelGroup* jmg = kinematic_state.getJointModelGroup(TEST_GROUP);
+
+  // Provide our own random number generator to setToRandomPositions to get a deterministic sequence of joint
+  // configurations.
+  random_numbers::RandomNumberGenerator rng(0);
+
+  KDL::Tree kdl_tree;
+  if (!kdl_parser::treeFromUrdfModel(*robot_model->getURDF(), kdl_tree))
+  {
+    st.SkipWithError("Can't create KDL tree.");
+    return;
+  }
+
+  KDL::Chain kdl_chain;
+  if (!kdl_tree.getChain(jmg->getJointModels().front()->getParentLinkModel()->getName(),
+                         jmg->getLinkModelNames().back(), kdl_chain))
+  {
+    st.SkipWithError("Can't create KDL Chain.");
+    return;
+  }
+
+  KDL::ChainJntToJacSolver jacobian_solver(kdl_chain);
+
+  for (auto _ : st)
+  {
+    st.PauseTiming();
+    kinematic_state.setToRandomPositions(jmg, rng);
+    kinematic_state.updateLinkTransforms();
+    KDL::Jacobian jacobian(kdl_chain.getNrOfJoints());
+    KDL::JntArray kdl_q;
+    kdl_q.resize(kdl_chain.getNrOfJoints());
+    kinematic_state.copyJointGroupPositions(jmg, &kdl_q.data[0]);
+    st.ResumeTiming();
+    jacobian_solver.JntToJac(kdl_q, jacobian);
+  }
+}
+
+BENCHMARK(bmMoveItJacobian);
+BENCHMARK(bmKdlJacobian);
+>>>>>>> 63e0c3a39 (Add new clang-tidy style rules (#2177))

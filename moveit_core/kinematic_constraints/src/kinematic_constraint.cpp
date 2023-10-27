@@ -89,7 +89,7 @@ static double normalizeAbsoluteAngle(const double angle)
  */
 template <typename Derived>
 std::tuple<Eigen::Matrix<typename Eigen::MatrixBase<Derived>::Scalar, 3, 1>, bool>
-CalcEulerAngles(const Eigen::MatrixBase<Derived>& R)
+calcEulerAngles(const Eigen::MatrixBase<Derived>& R)
 {
   using std::atan2;
   using std::sqrt;
@@ -721,11 +721,11 @@ ConstraintEvaluationResult OrientationConstraint::decide(const moveit::core::Rob
   Eigen::Vector3d xyz_rotation;
   if (parameterization_type_ == moveit_msgs::msg::OrientationConstraint::XYZ_EULER_ANGLES)
   {
-    euler_angles_error = CalcEulerAngles(diff.linear());
+    euler_angles_error = calcEulerAngles(diff.linear());
     // Converting from a rotation matrix to intrinsic XYZ Euler angles has 2 singularities:
     // pitch ~= pi/2 ==> roll + yaw = theta
     // pitch ~= -pi/2 ==> roll - yaw = theta
-    // in those cases CalcEulerAngles will set roll (xyz_rotation(0)) to theta and yaw (xyz_rotation(2)) to zero, so for
+    // in those cases calcEulerAngles will set roll (xyz_rotation(0)) to theta and yaw (xyz_rotation(2)) to zero, so for
     // us to be able to capture yaw tolerance violations we do the following: If theta violates the absolute yaw
     // tolerance we think of it as a pure yaw rotation and set roll to zero.
     xyz_rotation = std::get<Eigen::Vector3d>(euler_angles_error);

@@ -709,7 +709,7 @@ bool distanceCallback(fcl::CollisionObjectd* o1, fcl::CollisionObjectd* o2, void
  *
  * The returned cache is a quasi-singleton for each thread as it is created \e thread_local. */
 template <typename BV, typename T>
-FCLShapeCache& GetShapeCache()
+FCLShapeCache& getShapeCache()
 {
   /* The cache is created thread_local, that is each thread calling
    * this quasi-singleton function will get its own instance. Once
@@ -735,7 +735,7 @@ FCLGeometryConstPtr createCollisionGeometry(const shapes::ShapeConstPtr& shape, 
   using ShapeKey = shapes::ShapeConstWeakPtr;
   using ShapeMap = std::map<ShapeKey, FCLGeometryConstPtr, std::owner_less<ShapeKey>>;
 
-  FCLShapeCache& cache = GetShapeCache<BV, T>();
+  FCLShapeCache& cache = getShapeCache<BV, T>();
 
   shapes::ShapeConstWeakPtr wptr(shape);
   {
@@ -767,7 +767,7 @@ FCLGeometryConstPtr createCollisionGeometry(const shapes::ShapeConstPtr& shape, 
   if (std::is_same<T, moveit::core::AttachedBody>::value)
   {
     // get the cache that corresponds to objects; maybe this attached object used to be a world object
-    FCLShapeCache& othercache = GetShapeCache<BV, World::Object>();
+    FCLShapeCache& othercache = getShapeCache<BV, World::Object>();
 
     // attached bodies could be just moved from the environment.
     auto cache_it = othercache.map_.find(wptr);
@@ -800,7 +800,7 @@ FCLGeometryConstPtr createCollisionGeometry(const shapes::ShapeConstPtr& shape, 
     if (std::is_same<T, World::Object>::value)
     {
       // get the cache that corresponds to objects; maybe this attached object used to be a world object
-      FCLShapeCache& othercache = GetShapeCache<BV, moveit::core::AttachedBody>();
+      FCLShapeCache& othercache = getShapeCache<BV, moveit::core::AttachedBody>();
 
       // attached bodies could be just moved from the environment.
       auto cache_it = othercache.map_.find(wptr);
@@ -966,11 +966,11 @@ FCLGeometryConstPtr createCollisionGeometry(const shapes::ShapeConstPtr& shape, 
 
 void cleanCollisionGeometryCache()
 {
-  FCLShapeCache& cache1 = GetShapeCache<fcl::OBBRSSd, World::Object>();
+  FCLShapeCache& cache1 = getShapeCache<fcl::OBBRSSd, World::Object>();
   {
     cache1.bumpUseCount(true);
   }
-  FCLShapeCache& cache2 = GetShapeCache<fcl::OBBRSSd, moveit::core::AttachedBody>();
+  FCLShapeCache& cache2 = getShapeCache<fcl::OBBRSSd, moveit::core::AttachedBody>();
   {
     cache2.bumpUseCount(true);
   }

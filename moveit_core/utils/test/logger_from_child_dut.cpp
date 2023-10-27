@@ -1,7 +1,7 @@
 /*********************************************************************
  * Software License Agreement (BSD License)
  *
- *  Copyright (c) 2018 Pilz GmbH & Co. KG
+ *  Copyright (c) 2023, PickNik Robotics Inc.
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *     copyright notice, this list of conditions and the following
  *     disclaimer in the documentation and/or other materials provided
  *     with the distribution.
- *   * Neither the name of Pilz GmbH & Co. KG nor the names of its
+ *   * Neither the name of Willow Garage nor the names of its
  *     contributors may be used to endorse or promote products derived
  *     from this software without specific prior written permission.
  *
@@ -32,48 +32,25 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#include <pilz_industrial_motion_planner/planning_context_loader_lin.h>
-#include <moveit/planning_scene/planning_scene.h>
-#include <pilz_industrial_motion_planner/planning_context_base.h>
-#include <pilz_industrial_motion_planner/planning_context_lin.h>
+/* Author: Tyler Weaver */
 
-#include <pluginlib/class_list_macros.hpp>
+#include <chrono>
+#include <rclcpp/rclcpp.hpp>
+#include <moveit/utils/logger.hpp>
 
-namespace
+int main(int argc, char** argv)
 {
-const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.pilz_industrial_motion_planner.planning_context_loader_lin");
-}
+  rclcpp::init(argc, argv);
+  rclcpp::Node::SharedPtr node = rclcpp::Node::make_shared("dut_node");
 
-pilz_industrial_motion_planner::PlanningContextLoaderLIN::PlanningContextLoaderLIN()
-{
-  alg_ = "LIN";
-}
+  // Set the moveit logger to be from node
+  moveit::getLoggerMut() = node->get_logger();
 
-pilz_industrial_motion_planner::PlanningContextLoaderLIN::~PlanningContextLoaderLIN()
-{
-}
+  // Make a child logger
+  const auto child_logger = moveit::makeChildLogger("child");
 
-bool pilz_industrial_motion_planner::PlanningContextLoaderLIN::loadContext(
-    planning_interface::PlanningContextPtr& planning_context, const std::string& name, const std::string& group) const
-{
-  if (limits_set_ && model_set_)
-  {
-    planning_context = std::make_shared<PlanningContextLIN>(name, group, model_, limits_);
-    return true;
-  }
-  else
-  {
-    if (!limits_set_)
-    {
-      RCLCPP_ERROR_STREAM(LOGGER, "Limits are not defined. Cannot load planning context. Call setLimits loadContext");
-    }
-    if (!model_set_)
-    {
-      RCLCPP_ERROR_STREAM(LOGGER, "Robot model was not set");
-    }
-    return false;
-  }
+  // publish via a timer
+  auto wall_timer = node->create_wall_timer(std::chrono::milliseconds(100),
+                                            [&] { RCLCPP_INFO(child_logger, "hello from child node!"); });
+  rclcpp::spin(node);
 }
-
-PLUGINLIB_EXPORT_CLASS(pilz_industrial_motion_planner::PlanningContextLoaderLIN,
-                       pilz_industrial_motion_planner::PlanningContextLoader)

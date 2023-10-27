@@ -69,7 +69,12 @@ bool callAdapter(const PlanningRequestAdapter& adapter, const PlanningRequestAda
   try
   {
     bool result = adapter.adaptAndPlan(planner, planning_scene, req, res);
+<<<<<<< HEAD
     RCLCPP_DEBUG_STREAM(LOGGER, adapter.getDescription() << ": " << moveit::core::error_code_to_string(res.error_code));
+=======
+    std::swap(res.added_path_index, added_path_index);
+    RCLCPP_DEBUG_STREAM(LOGGER, adapter.getDescription() << ": " << moveit::core::errorCodeToString(res.error_code));
+>>>>>>> 63e0c3a39 (Add new clang-tidy style rules (#2177))
     return result;
   }
   catch (std::exception& ex)

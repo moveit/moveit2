@@ -73,7 +73,50 @@ static bool sameStringIgnoringWS(const std::string& s1, const std::string& s2)
   }
   return i1 == s1.size() && i2 == s2.size();
 }
+<<<<<<< HEAD
 #endif
+=======
+
+// Checks the validity of state.getJacobian() at the given 'joint_values' and 'joint_velocities'.
+void checkJacobian(moveit::core::RobotState& state, const moveit::core::JointModelGroup& joint_model_group,
+                   const Eigen::VectorXd& joint_values, const Eigen::VectorXd& joint_velocities)
+{
+  // Using the Jacobian, compute the Cartesian velocity vector at which the end-effector would move, with the given
+  // joint velocities.
+  state.setToDefaultValues();
+  state.setJointGroupPositions(&joint_model_group, joint_values);
+  state.updateLinkTransforms();
+
+  const moveit::core::JointModel* root_joint_model = joint_model_group.getJointModels().front();
+  const moveit::core::LinkModel* root_link_model = root_joint_model->getParentLinkModel();
+  const Eigen::Isometry3d root_pose_world = state.getGlobalLinkTransform(root_link_model).inverse();
+
+  const Eigen::Isometry3d tip_pose_initial =
+      root_pose_world * state.getGlobalLinkTransform(joint_model_group.getLinkModels().back());
+  const Eigen::MatrixXd jacobian = state.getJacobian(&joint_model_group);
+  const Eigen::VectorXd cartesian_velocity = jacobian * joint_velocities;
+
+  // Compute the instantaneous displacement that the end-effector would achieve if the given joint
+  // velocities were applied for a small amount of time.
+  constexpr double time_step = 1e-5;
+  const Eigen::VectorXd delta_joint_angles = time_step * joint_velocities;
+  state.setJointGroupPositions(&joint_model_group, joint_values + delta_joint_angles);
+  state.updateLinkTransforms();
+  const Eigen::Isometry3d tip_pose_after_delta =
+      root_pose_world * state.getGlobalLinkTransform(joint_model_group.getLinkModels().back());
+  const Eigen::Vector3d displacement = tip_pose_after_delta.translation() - tip_pose_initial.translation();
+
+  // The Cartesian velocity vector obtained via the Jacobian should be aligned with the instantaneous robot motion, i.e.
+  // the angle between the vectors should be close to zero.
+  double angle = std::acos(displacement.dot(cartesian_velocity.head<3>()) /
+                           (displacement.norm() * cartesian_velocity.head<3>().norm()));
+  EXPECT_NEAR(angle, 0.0, 1e-05) << "Angle between Cartesian velocity and Cartesian displacement larger than expected. "
+                                    "Angle: "
+                                 << angle << ". displacement: " << displacement.transpose()
+                                 << ". Cartesian velocity: " << cartesian_velocity.head<3>().transpose() << std::endl;
+}
+}  // namespace
+>>>>>>> 63e0c3a39 (Add new clang-tidy style rules (#2177))
 
 static void expect_near(const Eigen::MatrixXd& x, const Eigen::MatrixXd& y,
                         double eps = std::numeric_limits<double>::epsilon())
@@ -714,6 +757,339 @@ TEST_F(OneRobot, rigidlyConnectedParent)
   EXPECT_EQ(nullptr, state.getRigidlyConnectedParentLinkModel("/"));
 }
 
+<<<<<<< HEAD
+=======
+TEST(getJacobian, RevoluteJoints)
+{
+  // Robot URDF with four revolute joints.
+  constexpr char robot_urdf[] = R"(
+      <?xml version="1.0" ?>
+      <robot name="one_robot">
+        <link name="base_link"/>
+        <joint name="joint_a_revolute" type="revolute">
+            <axis xyz="0 0 1"/>
+            <parent link="base_link"/>
+            <child link="link_a"/>
+            <origin rpy="0 0 0" xyz="0 0 0"/>
+            <limit effort="100.0" lower="-3.14" upper="3.14" velocity="0.2"/>
+        </joint>
+        <link name="link_a"/>
+        <joint name="joint_b_revolute" type="revolute">
+          <axis xyz="0 0 1"/>
+          <parent link="link_a"/>
+          <child link="link_b"/>
+          <origin rpy="0 0 0" xyz="0.0 0.5 0"/>
+          <limit effort="100.0" lower="-3.14" upper="3.14" velocity="0.2"/>
+        </joint>
+        <link name="link_b"/>
+        <joint name="joint_c_revolute" type="revolute">
+          <axis xyz="0 1 0"/>
+          <parent link="link_b"/>
+          <child link="link_c"/>
+          <origin rpy="0 0 0" xyz="0.2 0.2 0"/>
+          <limit effort="100.0" lower="-3.14" upper="3.14" velocity="0.2"/>
+        </joint>
+        <link name="link_c"/>
+        <joint name="joint_d_revolute" type="revolute">
+          <axis xyz="1 0 0"/>
+          <parent link="link_c"/>
+          <child link="link_d"/>
+          <origin rpy="0 0 0" xyz="0.0 0.2 0.4"/>
+          <limit effort="100.0" lower="-3.14" upper="3.14" velocity="0.2"/>
+        </joint>
+        <link name="link_d"/>
+      </robot>
+    )";
+
+  constexpr char robot_srdf[] = R"xml(
+      <?xml version="1.0" ?>
+      <robot name="one_robot">
+        <group name="base_to_tip">
+          <joint name="joint_a_revolute"/>
+          <joint name="joint_b_revolute"/>
+          <joint name="joint_c_revolute"/>
+          <joint name="joint_d_revolute"/>
+        </group>
+      </robot>
+      )xml";
+
+  const urdf::ModelInterfaceSharedPtr urdf_model = urdf::parseURDF(robot_urdf);
+  ASSERT_TRUE(urdf_model);
+  const auto srdf_model = std::make_shared<srdf::Model>();
+  ASSERT_TRUE(srdf_model->initString(*urdf_model, robot_srdf));
+  const auto robot_model = std::make_shared<moveit::core::RobotModel>(urdf_model, srdf_model);
+
+  moveit::core::RobotState state(robot_model);
+  const moveit::core::JointModelGroup* jmg = state.getJointModelGroup("base_to_tip");
+
+  // Some made-up numbers, at zero and non-zero robot configurations.
+  checkJacobian(state, *jmg, makeVector({ 0.0, 0.0, 0.0, 0.0 }), makeVector({ 0.1, 0.2, 0.3, 0.4 }));
+  checkJacobian(state, *jmg, makeVector({ 0.1, 0.2, 0.3, 0.4 }), makeVector({ 0.5, 0.3, 0.2, 0.1 }));
+}
+
+TEST(getJacobian, RevoluteAndPrismaticJoints)
+{
+  // Robot URDF with three revolute joints and one prismatic joint.
+  constexpr char robot_urdf[] = R"(
+      <?xml version="1.0" ?>
+      <robot name="one_robot">
+        <link name="base_link"/>
+        <joint name="joint_a_revolute" type="revolute">
+            <axis xyz="0 0 1"/>
+            <parent link="base_link"/>
+            <child link="link_a"/>
+            <origin rpy="0 0 0" xyz="0 0 0"/>
+            <limit effort="100.0" lower="-3.14" upper="3.14" velocity="0.2"/>
+        </joint>
+        <link name="link_a"/>
+        <joint name="joint_b_revolute" type="revolute">
+          <axis xyz="0 0 1"/>
+          <parent link="link_a"/>
+          <child link="link_b"/>
+          <origin rpy="0 0 0" xyz="0.0 0.5 0"/>
+          <limit effort="100.0" lower="-3.14" upper="3.14" velocity="0.2"/>
+        </joint>
+        <link name="link_b"/>
+        <joint name="joint_c_prismatic" type="prismatic">
+          <axis xyz="0 1 0"/>
+          <parent link="link_b"/>
+          <child link="link_c"/>
+          <origin rpy="0 0 0" xyz="0.2 0.2 0"/>
+          <limit effort="100.0" lower="-1.0" upper="1.0" velocity="0.2"/>
+        </joint>
+        <link name="link_c"/>
+        <joint name="joint_d_revolute" type="revolute">
+          <axis xyz="1 0 0"/>
+          <parent link="link_c"/>
+          <child link="link_d"/>
+          <origin rpy="0 0 0" xyz="0.0 0.2 0.4"/>
+          <limit effort="100.0" lower="-3.14" upper="3.14" velocity="0.2"/>
+        </joint>
+        <link name="link_d"/>
+      </robot>
+    )";
+
+  constexpr char robot_srdf[] = R"xml(
+      <?xml version="1.0" ?>
+      <robot name="one_robot">
+        <group name="base_to_tip">
+          <joint name="joint_a_revolute"/>
+          <joint name="joint_b_revolute"/>
+          <joint name="joint_c_prismatic"/>
+          <joint name="joint_d_revolute"/>
+        </group>
+      </robot>
+      )xml";
+
+  const urdf::ModelInterfaceSharedPtr urdf_model = urdf::parseURDF(robot_urdf);
+  ASSERT_TRUE(urdf_model);
+  const auto srdf_model = std::make_shared<srdf::Model>();
+  ASSERT_TRUE(srdf_model->initString(*urdf_model, robot_srdf));
+  const auto robot_model = std::make_shared<moveit::core::RobotModel>(urdf_model, srdf_model);
+
+  moveit::core::RobotState state(robot_model);
+  const moveit::core::JointModelGroup* jmg = state.getJointModelGroup("base_to_tip");
+
+  // Some made-up numbers, at zero and non-zero robot configurations.
+  checkJacobian(state, *jmg, makeVector({ 0.0, 0.0, 0.0, 0.0 }), makeVector({ 0.1, 0.2, 0.3, 0.4 }));
+  checkJacobian(state, *jmg, makeVector({ 0.1, 0.2, 0.3, 0.4 }), makeVector({ 0.5, 0.3, 0.2, 0.1 }));
+}
+
+TEST(getJacobian, RevoluteAndFixedJoints)
+{
+  // Robot URDF with two revolute joints and two fixed joints.
+  constexpr char robot_urdf[] = R"(
+      <?xml version="1.0" ?>
+      <robot name="one_robot">
+        <link name="base_link"/>
+        <joint name="joint_a_revolute" type="revolute">
+            <axis xyz="0 0 1"/>
+            <parent link="base_link"/>
+            <child link="link_a"/>
+            <origin rpy="0 0 0" xyz="0 0 0"/>
+            <limit effort="100.0" lower="-3.14" upper="3.14" velocity="0.2"/>
+        </joint>
+        <link name="link_a"/>
+        <joint name="joint_b_fixed" type="fixed">
+          <parent link="link_a"/>
+          <child link="link_b"/>
+        </joint>
+        <link name="link_b"/>
+        <joint name="joint_c_fixed" type="fixed">
+          <parent link="link_b"/>
+          <child link="link_c"/>
+        </joint>
+        <link name="link_c"/>
+        <joint name="joint_d_revolute" type="revolute">
+          <axis xyz="1 0 0"/>
+          <parent link="link_c"/>
+          <child link="link_d"/>
+          <origin rpy="0 0 0" xyz="0.0 0.2 0.4"/>
+          <limit effort="100.0" lower="-3.14" upper="3.14" velocity="0.2"/>
+        </joint>
+        <link name="link_d"/>
+      </robot>
+    )";
+
+  constexpr char robot_srdf[] = R"xml(
+      <?xml version="1.0" ?>
+      <robot name="one_robot">
+        <group name="base_to_tip">
+          <joint name="joint_a_revolute"/>
+          <joint name="joint_b_fixed"/>
+          <joint name="joint_c_fixed"/>
+          <joint name="joint_d_revolute"/>
+        </group>
+      </robot>
+      )xml";
+
+  const urdf::ModelInterfaceSharedPtr urdf_model = urdf::parseURDF(robot_urdf);
+  ASSERT_TRUE(urdf_model);
+  const auto srdf_model = std::make_shared<srdf::Model>();
+  ASSERT_TRUE(srdf_model->initString(*urdf_model, robot_srdf));
+  const auto robot_model = std::make_shared<moveit::core::RobotModel>(urdf_model, srdf_model);
+
+  moveit::core::RobotState state(robot_model);
+  const moveit::core::JointModelGroup* jmg = state.getJointModelGroup("base_to_tip");
+
+  // Some made-up numbers, at zero and non-zero robot configurations.
+  checkJacobian(state, *jmg, makeVector({ 0.0, 0.0 }), makeVector({ 0.1, 0.4 }));
+  checkJacobian(state, *jmg, makeVector({ 0.1, 0.4 }), makeVector({ 0.5, 0.1 }));
+}
+
+TEST(getJacobian, RevolutePlanarAndPrismaticJoints)
+{
+  // Robot URDF with two revolute joints, one planar joint and one prismatic.
+  constexpr char robot_urdf[] = R"(
+      <?xml version="1.0" ?>
+      <robot name="one_robot">
+        <link name="base_link"/>
+        <joint name="joint_a_planar" type="planar">
+            <axis xyz="0 0 1"/>
+            <parent link="base_link"/>
+            <child link="link_a"/>
+            <origin rpy="0 0 0" xyz="0 0 0"/>
+            <limit effort="100.0" lower="-1.0" upper="1.0" velocity="0.2"/>
+        </joint>
+        <link name="link_a"/>
+        <joint name="joint_b_revolute" type="revolute">
+          <axis xyz="0 0 1"/>
+          <parent link="link_a"/>
+          <child link="link_b"/>
+          <origin rpy="0 0 0" xyz="0.0 0.5 0"/>
+          <limit effort="100.0" lower="-3.14" upper="3.14" velocity="0.2"/>
+        </joint>
+        <link name="link_b"/>
+        <joint name="joint_c_prismatic" type="prismatic">
+          <axis xyz="0 1 0"/>
+          <parent link="link_b"/>
+          <child link="link_c"/>
+          <origin rpy="0 0 0" xyz="0.2 0.2 0"/>
+          <limit effort="100.0" lower="-1.0" upper="1.0" velocity="0.2"/>
+        </joint>
+        <link name="link_c"/>
+        <joint name="joint_d_revolute" type="revolute">
+          <axis xyz="1 0 0"/>
+          <parent link="link_c"/>
+          <child link="link_d"/>
+          <origin rpy="0 0 0" xyz="0.0 0.2 0.4"/>
+          <limit effort="100.0" lower="-3.14" upper="3.14" velocity="0.2"/>
+        </joint>
+        <link name="link_d"/>
+      </robot>
+    )";
+
+  constexpr char robot_srdf[] = R"xml(
+      <?xml version="1.0" ?>
+      <robot name="one_robot">
+        <group name="base_to_tip">
+          <joint name="joint_a_planar"/>
+          <joint name="joint_b_revolute"/>
+          <joint name="joint_c_prismatic"/>
+          <joint name="joint_d_revolute"/>
+        </group>
+      </robot>
+      )xml";
+
+  const urdf::ModelInterfaceSharedPtr urdf_model = urdf::parseURDF(robot_urdf);
+  ASSERT_TRUE(urdf_model);
+  const auto srdf_model = std::make_shared<srdf::Model>();
+  ASSERT_TRUE(srdf_model->initString(*urdf_model, robot_srdf));
+  const auto robot_model = std::make_shared<moveit::core::RobotModel>(urdf_model, srdf_model);
+
+  moveit::core::RobotState state(robot_model);
+  const moveit::core::JointModelGroup* jmg = state.getJointModelGroup("base_to_tip");
+
+  checkJacobian(state, *jmg, makeVector({ 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 }),
+                makeVector({ 0.2, 0.05, 0.1, 0.2, 0.3, 0.4 }));
+}
+
+TEST(getJacobian, GroupNotAtOrigin)
+{
+  // URDF with a 3 DOF robot not at the URDF origin.
+  constexpr char robot_urdf[] = R"(
+      <?xml version="1.0" ?>
+      <robot name="one_robot">
+        <link name="origin"/>
+        <joint name="fixed_offset" type="fixed">
+            <parent link="origin"/>
+            <child link="link_a"/>
+            <origin rpy="0 0 1.5707" xyz="0.0 0.0 0.0"/>
+        </joint>
+        <link name="link_a"/>
+        <joint name="joint_a_revolute" type="revolute">
+          <axis xyz="1 0 0"/>
+          <parent link="link_a"/>
+          <child link="link_b"/>
+          <origin rpy="0 0 0" xyz="0.0 0.2 0.4"/>
+          <limit effort="100.0" lower="-3.14" upper="3.14" velocity="0.2"/>
+        </joint>
+        <link name="link_b"/>
+        <joint name="joint_b_revolute" type="revolute">
+          <axis xyz="1 0 0"/>
+          <parent link="link_b"/>
+          <child link="link_c"/>
+          <origin rpy="0 0 0" xyz="0.0 0.2 0.4"/>
+          <limit effort="100.0" lower="-3.14" upper="3.14" velocity="0.2"/>
+        </joint>
+        <link name="link_c"/>
+        <joint name="joint_c_revolute" type="revolute">
+          <axis xyz="1 0 0"/>
+          <parent link="link_c"/>
+          <child link="link_d"/>
+          <origin rpy="0 0 0" xyz="0.0 0.2 0.4"/>
+          <limit effort="100.0" lower="-3.14" upper="3.14" velocity="0.2"/>
+        </joint>
+        <link name="link_d"/>
+      </robot>
+    )";
+
+  constexpr char robot_srdf[] = R"xml(
+      <?xml version="1.0" ?>
+      <robot name="one_robot">
+        <group name="base_to_tip">
+          <joint name="joint_a_revolute"/>
+          <joint name="joint_b_revolute"/>
+          <joint name="joint_c_revolute"/>
+        </group>
+      </robot>
+      )xml";
+
+  const urdf::ModelInterfaceSharedPtr urdf_model = urdf::parseURDF(robot_urdf);
+  ASSERT_TRUE(urdf_model);
+  const auto srdf_model = std::make_shared<srdf::Model>();
+  ASSERT_TRUE(srdf_model->initString(*urdf_model, robot_srdf));
+  const auto robot_model = std::make_shared<moveit::core::RobotModel>(urdf_model, srdf_model);
+
+  moveit::core::RobotState state(robot_model);
+  const moveit::core::JointModelGroup* jmg = state.getJointModelGroup("base_to_tip");
+
+  // Some made-up numbers, at zero and non-zero robot configurations.
+  checkJacobian(state, *jmg, makeVector({ 0.0, 0.0, 0.0 }), makeVector({ 0.1, 0.4, 0.2 }));
+  checkJacobian(state, *jmg, makeVector({ 0.1, 0.4, 0.3 }), makeVector({ 0.5, 0.1, 0.2 }));
+}
+
+>>>>>>> 63e0c3a39 (Add new clang-tidy style rules (#2177))
 int main(int argc, char** argv)
 {
   testing::InitGoogleTest(&argc, argv);

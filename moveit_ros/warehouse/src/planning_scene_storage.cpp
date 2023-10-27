@@ -50,7 +50,11 @@ using warehouse_ros::Query;
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.ros.warehouse.planning_scene_storage");
 
 moveit_warehouse::PlanningSceneStorage::PlanningSceneStorage(warehouse_ros::DatabaseConnection::Ptr conn)
+<<<<<<< HEAD
   : MoveItMessageStorage(std::move(conn))
+=======
+  : MoveItMessageStorage(std::move(conn)), logger_(moveit::makeChildLogger("moveit_warehouse_planning_scene_storage"))
+>>>>>>> 63e0c3a39 (Add new clang-tidy style rules (#2177))
 {
   createCollections();
 }

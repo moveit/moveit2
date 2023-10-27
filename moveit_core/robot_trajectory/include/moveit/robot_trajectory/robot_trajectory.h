@@ -398,7 +398,11 @@ std::ostream& operator<<(std::ostream& out, const RobotTrajectory& trajectory);
 /// active joint distances between the two states (L1 norm).
 /// \param[in] trajectory Given robot trajectory
 /// \return Length of the robot trajectory [rad]
+<<<<<<< HEAD
 [[nodiscard]] double path_length(RobotTrajectory const& trajectory);
+=======
+[[nodiscard]] double pathLength(const RobotTrajectory& trajectory);
+>>>>>>> 63e0c3a39 (Add new clang-tidy style rules (#2177))
 
 /// \brief Calculate the smoothness of a given trajectory
 /// \param[in] trajectory Given robot trajectory
@@ -410,6 +414,10 @@ std::ostream& operator<<(std::ostream& out, const RobotTrajectory& trajectory);
 /// \param[in] trajectory Given robot trajectory
 /// \return Waypoint density of the given trajectory
 /// or nullopt if it is not possible to calculate the density
+<<<<<<< HEAD
 [[nodiscard]] std::optional<double> waypoint_density(RobotTrajectory const& trajectory);
+=======
+[[nodiscard]] std::optional<double> waypointDensity(const RobotTrajectory& trajectory);
+>>>>>>> 63e0c3a39 (Add new clang-tidy style rules (#2177))
 
 }  // namespace robot_trajectory

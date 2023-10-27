@@ -48,6 +48,10 @@ using warehouse_ros::Query;
 
 moveit_warehouse::PlanningSceneWorldStorage::PlanningSceneWorldStorage(warehouse_ros::DatabaseConnection::Ptr conn)
   : MoveItMessageStorage(std::move(conn))
+<<<<<<< HEAD
+=======
+  , logger_(moveit::makeChildLogger("moveit_warehouse_planning_scene_world_storage"))
+>>>>>>> 63e0c3a39 (Add new clang-tidy style rules (#2177))
 {
   createCollections();
 }

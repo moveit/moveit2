@@ -51,8 +51,11 @@
 
 namespace pilz_industrial_motion_planner
 {
-static const std::string PARAM_NAMESPACE_LIMITS = "robot_description_planning";
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.pilz_industrial_motion_planner");
+namespace
+{
+const std::string PARAM_NAMESPACE_LIMITS = "robot_description_planning";
+const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.pilz_industrial_motion_planner");
+}  // namespace
 
 bool CommandPlanner::initialize(const moveit::core::RobotModelConstPtr& model, const rclcpp::Node::SharedPtr& node,
                                 const std::string& ns)

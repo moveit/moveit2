@@ -156,7 +156,7 @@ std::string move_group::MoveGroupCapability::getActionResultString(const moveit_
     case moveit_msgs::msg::MoveItErrorCodes::MOTION_PLAN_INVALIDATED_BY_ENVIRONMENT_CHANGE:
       return "Solution found but the environment changed during execution and the path was aborted";
     default:
-      return moveit::core::error_code_to_string(error_code);
+      return moveit::core::errorCodeToString(error_code);
   }
 }
 

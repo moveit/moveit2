@@ -46,11 +46,19 @@ static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.ros.warehouse.wa
 #ifdef _WIN32
 void kill(int, int)
 {
+<<<<<<< HEAD
   RCLCPP_ERROR(LOGGER, "Warehouse connector not supported on Windows");
 }  // Should never be called
 int fork()
 {
   RCLCPP_ERROR(LOGGER, "Warehouse connector not supported on Windows");
+=======
+  RCLCPP_ERROR(moveit::getLogger(), "Warehouse connector not supported on Windows");
+}  // Should never be called
+int fork()
+{
+  RCLCPP_ERROR(moveit::getLogger(), "Warehouse connector not supported on Windows");
+>>>>>>> 63e0c3a39 (Add new clang-tidy style rules (#2177))
   return -1;
 }
 #else
@@ -59,7 +67,12 @@ int fork()
 
 namespace moveit_warehouse
 {
+<<<<<<< HEAD
 WarehouseConnector::WarehouseConnector(const std::string& dbexec) : dbexec_(dbexec), child_pid_(0)
+=======
+WarehouseConnector::WarehouseConnector(const std::string& dbexec)
+  : dbexec_(dbexec), child_pid_(0), logger_(moveit::makeChildLogger("moveit_warehouse_warehouse_connector"))
+>>>>>>> 63e0c3a39 (Add new clang-tidy style rules (#2177))
 {
 }
 

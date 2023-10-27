@@ -117,9 +117,9 @@ createTrajectoryMarkerArray(const robot_trajectory::RobotTrajectory& robot_traje
  * returned. Otherwise, a function that does nothing.
  */
 PostIterationFn
-get_iteration_path_publisher(const rclcpp::Publisher<visualization_msgs::msg::MarkerArray>::SharedPtr& marker_publisher,
-                             const std::shared_ptr<const planning_scene::PlanningScene>& planning_scene,
-                             const moveit::core::JointModelGroup* group)
+getIterationPathPublisher(const rclcpp::Publisher<visualization_msgs::msg::MarkerArray>::SharedPtr& marker_publisher,
+                          const std::shared_ptr<const planning_scene::PlanningScene>& planning_scene,
+                          const moveit::core::JointModelGroup* group)
 {
   assert(group != nullptr);
 
@@ -134,7 +134,7 @@ get_iteration_path_publisher(const rclcpp::Publisher<visualization_msgs::msg::Ma
                          reference_state = moveit::core::RobotState(planning_scene->getCurrentState())](
                             int /*iteration_number*/, double /*cost*/, const Eigen::MatrixXd& values) {
     static thread_local robot_trajectory::RobotTrajectory trajectory(reference_state.getRobotModel(), group);
-    fill_robot_trajectory(values, reference_state, trajectory);
+    fillRobotTrajectory(values, reference_state, trajectory);
 
     const moveit::core::LinkModel* ee_parent_link = group->getOnlyOneEndEffectorTip();
 
@@ -156,10 +156,10 @@ get_iteration_path_publisher(const rclcpp::Publisher<visualization_msgs::msg::Ma
  * @return If the marker_publisher is not a nullptr a Done function that publishes the generated EE path is returned.
  * Otherwise, a function that does nothing.
  */
-DoneFn get_success_trajectory_publisher(
-    const rclcpp::Publisher<visualization_msgs::msg::MarkerArray>::SharedPtr& marker_publisher,
-    const std::shared_ptr<const planning_scene::PlanningScene>& planning_scene,
-    const moveit::core::JointModelGroup* group)
+DoneFn
+getSuccessTrajectoryPublisher(const rclcpp::Publisher<visualization_msgs::msg::MarkerArray>::SharedPtr& marker_publisher,
+                              const std::shared_ptr<const planning_scene::PlanningScene>& planning_scene,
+                              const moveit::core::JointModelGroup* group)
 {
   assert(group != nullptr);
 
@@ -176,7 +176,7 @@ DoneFn get_success_trajectory_publisher(
         static thread_local robot_trajectory::RobotTrajectory trajectory(reference_state.getRobotModel(), group);
         if (success)
         {
-          fill_robot_trajectory(values, reference_state, trajectory);
+          fillRobotTrajectory(values, reference_state, trajectory);
 
           const moveit::core::LinkModel* ee_parent_link = group->getOnlyOneEndEffectorTip();
 

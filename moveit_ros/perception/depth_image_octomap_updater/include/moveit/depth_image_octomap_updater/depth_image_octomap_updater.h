@@ -64,7 +64,6 @@ private:
   void depthImageCallback(const sensor_msgs::msg::Image::ConstSharedPtr& depth_msg,
                           const sensor_msgs::msg::CameraInfo::ConstSharedPtr& info_msg);
   bool getShapeTransform(mesh_filter::MeshHandle h, Eigen::Isometry3d& transform) const;
-  void stopHelper();
 
   rclcpp::Node::SharedPtr node_;
   std::shared_ptr<tf2_ros::Buffer> tf_buffer_;

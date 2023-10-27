@@ -1,7 +1,7 @@
 /*********************************************************************
  * Software License Agreement (BSD License)
  *
- *  Copyright (c) 2018 Pilz GmbH & Co. KG
+ *  Copyright (c) 2023, PickNik Robotics Inc.
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *     copyright notice, this list of conditions and the following
  *     disclaimer in the documentation and/or other materials provided
  *     with the distribution.
- *   * Neither the name of Pilz GmbH & Co. KG nor the names of its
+ *   * Neither the name of Willow Garage nor the names of its
  *     contributors may be used to endorse or promote products derived
  *     from this software without specific prior written permission.
  *
@@ -32,48 +32,46 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#include <pilz_industrial_motion_planner/planning_context_loader_lin.h>
-#include <moveit/planning_scene/planning_scene.h>
-#include <pilz_industrial_motion_planner/planning_context_base.h>
-#include <pilz_industrial_motion_planner/planning_context_lin.h>
+/* Author: Tyler Weaver */
 
-#include <pluginlib/class_list_macros.hpp>
+#include <rclcpp/rclcpp.hpp>
+#include <moveit/utils/logger.hpp>
+#include <rclcpp/version.h>
+#include <unordered_map>
+#include <string>
 
-namespace
+namespace moveit
 {
-const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.pilz_industrial_motion_planner.planning_context_loader_lin");
+
+const rclcpp::Logger& getLogger()
+{
+  return getLoggerMut();
 }
 
-pilz_industrial_motion_planner::PlanningContextLoaderLIN::PlanningContextLoaderLIN()
+rclcpp::Logger makeChildLogger(const std::string& name)
 {
-  alg_ = "LIN";
-}
-
-pilz_industrial_motion_planner::PlanningContextLoaderLIN::~PlanningContextLoaderLIN()
-{
-}
-
-bool pilz_industrial_motion_planner::PlanningContextLoaderLIN::loadContext(
-    planning_interface::PlanningContextPtr& planning_context, const std::string& name, const std::string& group) const
-{
-  if (limits_set_ && model_set_)
+  // On versions of ROS older than Iron we need to create a node for each child logger
+  // Remove once Humble is EOL
+  // References:
+  // Use parent logger (rcl PR) - https://github.com/ros2/rcl/pull/921
+  // Request for backport (rclpy issue) - https://github.com/ros2/rclpy/issues/1131
+  // MoveIt PR that added this - https://github.com/ros-planning/moveit2/pull/2445
+#if !RCLCPP_VERSION_GTE(21, 0, 3)
+  static std::unordered_map<std::string, std::shared_ptr<rclcpp::Node>> child_nodes;
+  if (child_nodes.find(name) == child_nodes.end())
   {
-    planning_context = std::make_shared<PlanningContextLIN>(name, group, model_, limits_);
-    return true;
+    std::string ns = getLogger().get_name();
+    child_nodes[name] = std::make_shared<rclcpp::Node>(name, ns);
   }
-  else
-  {
-    if (!limits_set_)
-    {
-      RCLCPP_ERROR_STREAM(LOGGER, "Limits are not defined. Cannot load planning context. Call setLimits loadContext");
-    }
-    if (!model_set_)
-    {
-      RCLCPP_ERROR_STREAM(LOGGER, "Robot model was not set");
-    }
-    return false;
-  }
+#endif
+
+  return getLoggerMut().get_child(name);
 }
 
-PLUGINLIB_EXPORT_CLASS(pilz_industrial_motion_planner::PlanningContextLoaderLIN,
-                       pilz_industrial_motion_planner::PlanningContextLoader)
+rclcpp::Logger& getLoggerMut()
+{
+  static rclcpp::Logger logger = rclcpp::get_logger("moveit");
+  return logger;
+}
+
+}  // namespace moveit
