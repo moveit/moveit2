@@ -50,7 +50,7 @@ using warehouse_ros::Query;
 
 moveit_warehouse::TrajectoryConstraintsStorage::TrajectoryConstraintsStorage(warehouse_ros::DatabaseConnection::Ptr conn)
   : MoveItMessageStorage(std::move(conn))
-  , logger_(moveit::make_child_logger("moveit_warehouse_trajectory_constraints_storage"))
+  , logger_(moveit::makeChildLogger("moveit_warehouse_trajectory_constraints_storage"))
 {
   createCollections();
 }

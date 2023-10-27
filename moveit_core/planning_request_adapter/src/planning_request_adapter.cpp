@@ -72,7 +72,7 @@ bool callAdapter(const PlanningRequestAdapter& adapter, const PlanningRequestAda
     std::swap(res.added_path_index, added_path_index);
     bool result = adapter.adaptAndPlan(planner, planning_scene, req, res);
     std::swap(res.added_path_index, added_path_index);
-    RCLCPP_DEBUG_STREAM(LOGGER, adapter.getDescription() << ": " << moveit::core::error_code_to_string(res.error_code));
+    RCLCPP_DEBUG_STREAM(LOGGER, adapter.getDescription() << ": " << moveit::core::errorCodeToString(res.error_code));
     return result;
   }
   catch (std::exception& ex)

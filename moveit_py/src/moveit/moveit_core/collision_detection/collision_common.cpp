@@ -40,7 +40,7 @@ namespace moveit_py
 {
 namespace bind_collision_detection
 {
-void init_collision_request(py::module& m)
+void initCollisionRequest(py::module& m)
 {
   py::module collision_detection = m.def_submodule("collision_detection");
 
@@ -96,7 +96,7 @@ void init_collision_request(py::module& m)
                      )");
 }
 
-void init_collision_result(py::module& m)
+void initCollisionResult(py::module& m)
 {
   py::module collision_detection = m.def_submodule("collision_detection");
 

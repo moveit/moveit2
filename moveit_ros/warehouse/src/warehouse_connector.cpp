@@ -45,11 +45,11 @@
 #ifdef _WIN32
 void kill(int, int)
 {
-  RCLCPP_ERROR(moveit::get_logger(), "Warehouse connector not supported on Windows");
+  RCLCPP_ERROR(moveit::getLogger(), "Warehouse connector not supported on Windows");
 }  // Should never be called
 int fork()
 {
-  RCLCPP_ERROR(moveit::get_logger(), "Warehouse connector not supported on Windows");
+  RCLCPP_ERROR(moveit::getLogger(), "Warehouse connector not supported on Windows");
   return -1;
 }
 #else
@@ -59,7 +59,7 @@ int fork()
 namespace moveit_warehouse
 {
 WarehouseConnector::WarehouseConnector(const std::string& dbexec)
-  : dbexec_(dbexec), child_pid_(0), logger_(moveit::make_child_logger("moveit_warehouse_warehouse_connector"))
+  : dbexec_(dbexec), child_pid_(0), logger_(moveit::makeChildLogger("moveit_warehouse_warehouse_connector"))
 {
 }
 

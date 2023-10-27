@@ -161,7 +161,7 @@ bool HybridPlanningManager::initialize()
         return rclcpp_action::CancelResponse::ACCEPT;
       },
       // Execution callback
-      [this](std::shared_ptr<rclcpp_action::ServerGoalHandle<moveit_msgs::action::HybridPlanner>> goal_handle) {
+      [this](const std::shared_ptr<rclcpp_action::ServerGoalHandle<moveit_msgs::action::HybridPlanner>>& goal_handle) {
         // this needs to return quickly to avoid blocking the executor, so spin up a new thread
         if (long_callback_thread_.joinable())
         {

@@ -55,7 +55,7 @@ namespace noise
  * @param num_timesteps the waypoint count of the trajectory
  * @param stddev the standard deviation for each variable dimension (number of joints)
  */
-NoiseGeneratorFn get_normal_distribution_generator(size_t num_timesteps, const std::vector<double>& stddev)
+NoiseGeneratorFn getNormalDistributionGenerator(size_t num_timesteps, const std::vector<double>& stddev)
 {
   // Five-point stencil constants
   static const std::vector<double> ACC_MATRIX_DIAGONAL_VALUES = { -1.0 / 12.0, 16.0 / 12.0, -30.0 / 12.0, 16.0 / 12.0,

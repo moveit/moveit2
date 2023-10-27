@@ -56,7 +56,7 @@
 
 static const std::string ROBOT_DESCRIPTION = "robot_description";
 
-using moveit::get_logger;
+using moveit::getLogger;
 
 int main(int argc, char** argv)
 {
@@ -65,7 +65,7 @@ int main(int argc, char** argv)
   node_options.allow_undeclared_parameters(true);
   node_options.automatically_declare_parameters_from_overrides(true);
   rclcpp::Node::SharedPtr node = rclcpp::Node::make_shared("initialize_demo_db", node_options);
-  moveit::get_logger_mut() = node->get_logger();
+  moveit::getLoggerMut() = node->get_logger();
 
   boost::program_options::options_description desc;
   desc.add_options()("help", "Show help message")("host", boost::program_options::value<std::string>(),
@@ -92,7 +92,7 @@ int main(int argc, char** argv)
   planning_scene_monitor::PlanningSceneMonitor psm(node, ROBOT_DESCRIPTION);
   if (!psm.getPlanningScene())
   {
-    RCLCPP_ERROR(get_logger(), "Unable to initialize PlanningSceneMonitor");
+    RCLCPP_ERROR(getLogger(), "Unable to initialize PlanningSceneMonitor");
     return 1;
   }
 
@@ -108,12 +108,12 @@ int main(int argc, char** argv)
   psm.getPlanningScene()->getPlanningSceneMsg(psmsg);
   psmsg.name = "default";
   pss.addPlanningScene(psmsg);
-  RCLCPP_INFO(get_logger(), "Added default scene: '%s'", psmsg.name.c_str());
+  RCLCPP_INFO(getLogger(), "Added default scene: '%s'", psmsg.name.c_str());
 
   moveit_msgs::msg::RobotState rsmsg;
   moveit::core::robotStateToRobotStateMsg(psm.getPlanningScene()->getCurrentState(), rsmsg);
   rs.addRobotState(rsmsg, "default");
-  RCLCPP_INFO(get_logger(), "Added default state");
+  RCLCPP_INFO(getLogger(), "Added default state");
 
   const std::vector<std::string>& gnames = psm.getRobotModel()->getJointModelGroupNames();
   for (const std::string& gname : gnames)
@@ -140,9 +140,9 @@ int main(int argc, char** argv)
     cmsg.orientation_constraints.resize(1, ocm);
     cmsg.name = ocm.link_name + ":upright";
     cs.addConstraints(cmsg, psm.getRobotModel()->getName(), jmg->getName());
-    RCLCPP_INFO(get_logger(), "Added default constraint: '%s'", cmsg.name.c_str());
+    RCLCPP_INFO(getLogger(), "Added default constraint: '%s'", cmsg.name.c_str());
   }
-  RCLCPP_INFO(get_logger(), "Default MoveIt Warehouse was reset.");
+  RCLCPP_INFO(getLogger(), "Default MoveIt Warehouse was reset.");
 
   rclcpp::spin(node);
 

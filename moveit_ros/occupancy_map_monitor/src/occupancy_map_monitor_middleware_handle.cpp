@@ -50,7 +50,7 @@ namespace occupancy_map_monitor
 {
 namespace
 {
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.ros.occupancy_map_monitor.middleware_handle");
+const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.ros.occupancy_map_monitor.middleware_handle");
 }
 
 OccupancyMapMonitorMiddlewareHandle::OccupancyMapMonitorMiddlewareHandle(const rclcpp::Node::SharedPtr& node,

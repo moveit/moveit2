@@ -41,8 +41,8 @@ namespace moveit_py
 namespace bind_collision_detection
 {
 std::pair<bool, collision_detection::AllowedCollision::Type>
-get_entry(const std::shared_ptr<collision_detection::AllowedCollisionMatrix>& acm, const std::string& name1,
-          const std::string& name2)
+getEntry(const std::shared_ptr<collision_detection::AllowedCollisionMatrix>& acm, const std::string& name1,
+         const std::string& name2)
 {
   // check acm for collision
   collision_detection::AllowedCollision::Type type;
@@ -53,7 +53,7 @@ get_entry(const std::shared_ptr<collision_detection::AllowedCollisionMatrix>& ac
   return result;
 }
 
-void init_acm(py::module& m)
+void initAcm(py::module& m)
 {
   py::module collision_detection = m.def_submodule("collision_detection");
 
@@ -72,7 +72,7 @@ void init_acm(py::module& m)
        )",
            py::arg("names"), py::arg("default_entry") = false)
 
-      .def("get_entry", &moveit_py::bind_collision_detection::get_entry,
+      .def("get_entry", &moveit_py::bind_collision_detection::getEntry,
            R"(
            Get the allowed collision entry for a pair of objects.
 

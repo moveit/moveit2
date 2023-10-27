@@ -67,17 +67,17 @@ bool solveWithStomp(const std::shared_ptr<stomp::Stomp>& stomp, const moveit::co
   bool success = false;
   if (!input_trajectory || input_trajectory->empty())
   {
-    success = stomp->solve(get_positions(start_state, joints), get_positions(goal_state, joints), waypoints);
+    success = stomp->solve(getPositions(start_state, joints), getPositions(goal_state, joints), waypoints);
   }
   else
   {
-    auto input = robot_trajectory_to_matrix(*input_trajectory);
+    auto input = robotTrajectoryToMatrix(*input_trajectory);
     success = stomp->solve(input, waypoints);
   }
   if (success)
   {
     output_trajectory = std::make_shared<robot_trajectory::RobotTrajectory>(start_state.getRobotModel(), group);
-    fill_robot_trajectory(waypoints, start_state, *output_trajectory);
+    fillRobotTrajectory(waypoints, start_state, *output_trajectory);
   }
 
   return success;
@@ -154,24 +154,24 @@ stomp::TaskPtr createStompTask(const stomp::StompConfiguration& config, StompPla
   CostFn cost_fn;
   if (!constraints.empty())
   {
-    cost_fn = costs::sum({ costs::get_collision_cost_function(planning_scene, group, 1.0 /* collision penalty */),
-                           costs::get_constraints_cost_function(planning_scene, group, constraints.getAllConstraints(),
-                                                                1.0 /* constraint penalty */) });
+    cost_fn = costs::sum({ costs::getCollisionCostFunction(planning_scene, group, 1.0 /* collision penalty */),
+                           costs::getConstraintsCostFunction(planning_scene, group, constraints.getAllConstraints(),
+                                                             1.0 /* constraint penalty */) });
   }
   else
   {
-    cost_fn = costs::get_collision_cost_function(planning_scene, group, 1.0 /* collision penalty */);
+    cost_fn = costs::getCollisionCostFunction(planning_scene, group, 1.0 /* collision penalty */);
   }
 
   // TODO(henningkayser): parameterize stddev
   const std::vector<double> stddev(group->getActiveJointModels().size(), 0.1);
-  auto noise_generator_fn = noise::get_normal_distribution_generator(num_timesteps, stddev);
+  auto noise_generator_fn = noise::getNormalDistributionGenerator(num_timesteps, stddev);
   auto filter_fn =
-      filters::chain({ filters::simple_smoothing_matrix(num_timesteps), filters::enforce_position_bounds(group) });
+      filters::chain({ filters::simpleSmoothingMatrix(num_timesteps), filters::enforcePositionBounds(group) });
   auto iteration_callback_fn =
-      visualization::get_iteration_path_publisher(context.getPathPublisher(), planning_scene, group);
+      visualization::getIterationPathPublisher(context.getPathPublisher(), planning_scene, group);
   auto done_callback_fn =
-      visualization::get_success_trajectory_publisher(context.getPathPublisher(), planning_scene, group);
+      visualization::getSuccessTrajectoryPublisher(context.getPathPublisher(), planning_scene, group);
 
   // Initialize and return STOMP task
   stomp::TaskPtr task =

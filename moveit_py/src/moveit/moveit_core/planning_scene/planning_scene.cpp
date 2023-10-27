@@ -42,9 +42,9 @@ namespace moveit_py
 {
 namespace bind_planning_scene
 {
-void apply_collision_object(std::shared_ptr<planning_scene::PlanningScene>& planning_scene,
-                            moveit_msgs::msg::CollisionObject& collision_object_msg,
-                            std::optional<moveit_msgs::msg::ObjectColor> color_msg)
+void applyCollisionObject(std::shared_ptr<planning_scene::PlanningScene>& planning_scene,
+                          moveit_msgs::msg::CollisionObject& collision_object_msg,
+                          std::optional<moveit_msgs::msg::ObjectColor> color_msg)
 {
   // apply collision object
   planning_scene->processCollisionObjectMsg(collision_object_msg);
@@ -57,21 +57,20 @@ void apply_collision_object(std::shared_ptr<planning_scene::PlanningScene>& plan
   }
 }
 
-Eigen::MatrixXd get_frame_transform(std::shared_ptr<planning_scene::PlanningScene>& planning_scene,
-                                    const std::string& id)
+Eigen::MatrixXd getFrameTransform(std::shared_ptr<planning_scene::PlanningScene>& planning_scene, const std::string& id)
 {
   auto transformation = planning_scene->getFrameTransform(id);
   return transformation.matrix();
 }
 
-moveit_msgs::msg::PlanningScene get_planning_scene_msg(std::shared_ptr<planning_scene::PlanningScene>& planning_scene)
+moveit_msgs::msg::PlanningScene getPlanningSceneMsg(std::shared_ptr<planning_scene::PlanningScene>& planning_scene)
 {
   moveit_msgs::msg::PlanningScene planning_scene_msg;
   planning_scene->getPlanningSceneMsg(planning_scene_msg);
   return planning_scene_msg;
 }
 
-void init_planning_scene(py::module& m)
+void initPlanningScene(py::module& m)
 {
   py::module planning_scene = m.def_submodule("planning_scene");
 
@@ -108,7 +107,7 @@ void init_planning_scene(py::module& m)
                     :py:class:`moveit_py.core.RobotState`: The current state of the robot.
                     )")
 
-      .def_property("planning_scene_message", &moveit_py::bind_planning_scene::get_planning_scene_msg, nullptr,
+      .def_property("planning_scene_message", &moveit_py::bind_planning_scene::getPlanningSceneMsg, nullptr,
                     py::return_value_policy::move)
 
       .def_property("transforms", py::overload_cast<>(&planning_scene::PlanningScene::getTransforms), nullptr)
@@ -151,7 +150,7 @@ void init_planning_scene(py::module& m)
                bool: True if the transform is known, false otherwise.
            )")
 
-      .def("get_frame_transform", &moveit_py::bind_planning_scene::get_frame_transform, py::arg("frame_id"),
+      .def("get_frame_transform", &moveit_py::bind_planning_scene::getFrameTransform, py::arg("frame_id"),
            R"(
            Get the transform corresponding to the frame id.
            This will be known if id is a link name, an attached body id or a collision object. Return identity when no transform is available.
@@ -172,7 +171,7 @@ void init_planning_scene(py::module& m)
                msg (:py:class:`moveit_msgs.msg.PlanningSceneWorld`): The planning scene world message.
            )")
 
-      .def("apply_collision_object", &moveit_py::bind_planning_scene::apply_collision_object,
+      .def("apply_collision_object", &moveit_py::bind_planning_scene::applyCollisionObject,
            py::arg("collision_object_msg"), py::arg("color_msg") = nullptr,
            R"(
            Apply a collision object to the planning scene.

@@ -48,7 +48,7 @@
 constexpr char TEST_ROBOT[] = "panda";
 constexpr char TEST_GROUP[] = "panda_arm";
 
-static void BM_MoveItJacobian(benchmark::State& st)
+static void bmMoveItJacobian(benchmark::State& st)
 {
   // Load a test robot model.
   const moveit::core::RobotModelPtr& robot_model = moveit::core::loadTestingRobotModel(TEST_ROBOT);
@@ -79,7 +79,7 @@ static void BM_MoveItJacobian(benchmark::State& st)
   }
 }
 
-static void BM_KDLJacobian(benchmark::State& st)
+static void bmKdlJacobian(benchmark::State& st)
 {
   const moveit::core::RobotModelPtr& robot_model = moveit::core::loadTestingRobotModel(TEST_ROBOT);
 
@@ -129,5 +129,5 @@ static void BM_KDLJacobian(benchmark::State& st)
   }
 }
 
-BENCHMARK(BM_MoveItJacobian);
-BENCHMARK(BM_KDLJacobian);
+BENCHMARK(bmMoveItJacobian);
+BENCHMARK(bmKdlJacobian);

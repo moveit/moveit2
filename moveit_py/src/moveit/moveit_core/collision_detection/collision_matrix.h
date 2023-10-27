@@ -45,6 +45,6 @@ namespace moveit_py
 {
 namespace bind_collision_detection
 {
-void init_acm(py::module& m);
+void initAcm(py::module& m);
 }  // namespace bind_collision_detection
 }  // namespace moveit_py
