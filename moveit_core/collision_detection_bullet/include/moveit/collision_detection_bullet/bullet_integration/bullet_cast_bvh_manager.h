@@ -57,7 +57,7 @@ public:
    * This is to be used for multi threaded applications. A user should make a clone for each thread. */
   BulletCastBVHManagerPtr clone() const;
 
-  /**@brief Set a single cast (moving) collision object's tansforms
+  /**@brief Set a single cast (moving) collision object's transforms
    *
    * This should only be used for moving objects.
    *

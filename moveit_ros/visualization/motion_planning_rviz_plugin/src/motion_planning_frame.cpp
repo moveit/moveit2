@@ -41,6 +41,7 @@
 #include <moveit/motion_planning_rviz_plugin/motion_planning_frame_joints_widget.h>
 #include <moveit/motion_planning_rviz_plugin/motion_planning_display.h>
 #include <moveit/move_group/capability_names.h>
+#include <moveit/utils/logger.hpp>
 
 #include <geometric_shapes/shape_operations.h>
 
@@ -60,16 +61,20 @@
 
 namespace moveit_rviz_plugin
 {
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_ros_visualization.motion_planning_frame");
 
 MotionPlanningFrame::MotionPlanningFrame(MotionPlanningDisplay* pdisplay, rviz_common::DisplayContext* context,
                                          QWidget* parent)
-  : QWidget(parent), planning_display_(pdisplay), context_(context), ui_(new Ui::MotionPlanningUI()), first_time_(true)
+  : QWidget(parent)
+  , planning_display_(pdisplay)
+  , context_(context)
+  , ui_(new Ui::MotionPlanningUI())
+  , logger_(moveit::makeChildLogger("motion_planning_frame"))
+  , first_time_(true)
 {
   auto ros_node_abstraction = context_->getRosNodeAbstraction().lock();
   if (!ros_node_abstraction)
   {
-    RCLCPP_INFO(LOGGER, "Unable to lock weak_ptr from DisplayContext in MotionPlanningFrame constructor");
+    RCLCPP_INFO(logger_, "Unable to lock weak_ptr from DisplayContext in MotionPlanningFrame constructor");
     return;
   }
   node_ = ros_node_abstraction->get_raw_node();
@@ -211,7 +216,7 @@ MotionPlanningFrame::MotionPlanningFrame(MotionPlanningDisplay* pdisplay, rviz_c
   {
     if (!object_recognition_client_->wait_for_action_server(std::chrono::seconds(3)))
     {
-      RCLCPP_ERROR(LOGGER, "Action server: %s not available", OBJECT_RECOGNITION_ACTION.c_str());
+      RCLCPP_ERROR(logger_, "Action server: %s not available", OBJECT_RECOGNITION_ACTION.c_str());
       object_recognition_client_.reset();
     }
   }
@@ -233,7 +238,7 @@ MotionPlanningFrame::MotionPlanningFrame(MotionPlanningDisplay* pdisplay, rviz_c
   //  }
   //  catch (std::exception& ex)
   //  {
-  //    RCLCPP_ERROR(LOGGER, "Failed to get semantic world: %s", ex.what());
+  //    RCLCPP_ERROR(logger_, "Failed to get semantic world: %s", ex.what());
   //  }
 }
 
@@ -267,26 +272,28 @@ void MotionPlanningFrame::allowExternalProgramCommunication(bool enable)
   {
     using std::placeholders::_1;
     plan_subscriber_ = node_->create_subscription<std_msgs::msg::Empty>(
-        "/rviz/moveit/plan", 1,
+        "/rviz/moveit/plan", rclcpp::SystemDefaultsQoS(),
         [this](const std_msgs::msg::Empty::ConstSharedPtr& msg) { return remotePlanCallback(msg); });
     execute_subscriber_ = node_->create_subscription<std_msgs::msg::Empty>(
-        "/rviz/moveit/execute", 1,
+        "/rviz/moveit/execute", rclcpp::SystemDefaultsQoS(),
         [this](const std_msgs::msg::Empty::ConstSharedPtr& msg) { return remoteExecuteCallback(msg); });
     stop_subscriber_ = node_->create_subscription<std_msgs::msg::Empty>(
-        "/rviz/moveit/stop", 1,
+        "/rviz/moveit/stop", rclcpp::SystemDefaultsQoS(),
         [this](const std_msgs::msg::Empty::ConstSharedPtr& msg) { return remoteStopCallback(msg); });
     update_start_state_subscriber_ = node_->create_subscription<std_msgs::msg::Empty>(
-        "/rviz/moveit/update_start_state", 1,
+        "/rviz/moveit/update_start_state", rclcpp::SystemDefaultsQoS(),
         [this](const std_msgs::msg::Empty::ConstSharedPtr& msg) { return remoteUpdateStartStateCallback(msg); });
     update_goal_state_subscriber_ = node_->create_subscription<std_msgs::msg::Empty>(
-        "/rviz/moveit/update_goal_state", 1,
+        "/rviz/moveit/update_goal_state", rclcpp::SystemDefaultsQoS(),
         [this](const std_msgs::msg::Empty::ConstSharedPtr& msg) { return remoteUpdateGoalStateCallback(msg); });
     update_custom_start_state_subscriber_ = node_->create_subscription<moveit_msgs::msg::RobotState>(
-        "/rviz/moveit/update_custom_start_state", 1, [this](const moveit_msgs::msg::RobotState::ConstSharedPtr& msg) {
+        "/rviz/moveit/update_custom_start_state", rclcpp::SystemDefaultsQoS(),
+        [this](const moveit_msgs::msg::RobotState::ConstSharedPtr& msg) {
           return remoteUpdateCustomStartStateCallback(msg);
         });
     update_custom_goal_state_subscriber_ = node_->create_subscription<moveit_msgs::msg::RobotState>(
-        "/rviz/moveit/update_custom_goal_state", 1, [this](const moveit_msgs::msg::RobotState::ConstSharedPtr& msg) {
+        "/rviz/moveit/update_custom_goal_state", rclcpp::SystemDefaultsQoS(),
+        [this](const moveit_msgs::msg::RobotState::ConstSharedPtr& msg) {
           return remoteUpdateCustomGoalStateCallback(msg);
         });
   }
@@ -374,10 +381,10 @@ void MotionPlanningFrame::changePlanningGroupHelper()
 
   if (!group.empty() && robot_model)
   {
-    RCLCPP_INFO(LOGGER, "group %s", group.c_str());
+    RCLCPP_INFO(logger_, "group %s", group.c_str());
     if (move_group_ && move_group_->getName() == group)
       return;
-    RCLCPP_INFO(LOGGER, "Constructing new MoveGroup connection for group '%s' in namespace '%s'", group.c_str(),
+    RCLCPP_INFO(logger_, "Constructing new MoveGroup connection for group '%s' in namespace '%s'", group.c_str(),
                 planning_display_->getMoveGroupNS().c_str());
     moveit::planning_interface::MoveGroupInterface::Options opt(
         group, moveit::planning_interface::MoveGroupInterface::ROBOT_DESCRIPTION, planning_display_->getMoveGroupNS());
@@ -399,7 +406,7 @@ void MotionPlanningFrame::changePlanningGroupHelper()
     }
     catch (std::exception& ex)
     {
-      RCLCPP_ERROR(LOGGER, "%s", ex.what());
+      RCLCPP_ERROR(logger_, "%s", ex.what());
     }
     planning_display_->addMainLoopJob([&view = *ui_->planner_param_treeview, this] { view.setMoveGroup(move_group_); });
     if (move_group_)
@@ -596,7 +603,7 @@ void MotionPlanningFrame::enable()
   const std::string new_ns = planning_display_->getMoveGroupNS();
   if (node_->get_namespace() != new_ns)
   {
-    RCLCPP_INFO(LOGGER, "MoveGroup namespace changed: %s -> %s. Reloading params.", node_->get_namespace(),
+    RCLCPP_INFO(logger_, "MoveGroup namespace changed: %s -> %s. Reloading params.", node_->get_namespace(),
                 new_ns.c_str());
     initFromMoveGroupNS();
   }
@@ -614,7 +621,7 @@ void MotionPlanningFrame::initFromMoveGroupNS()
   clear_octomap_service_client_ = node_->create_client<std_srvs::srv::Empty>(move_group::CLEAR_OCTOMAP_SERVICE_NAME);
 
   object_recognition_subscriber_ = node_->create_subscription<object_recognition_msgs::msg::RecognizedObjectArray>(
-      "recognized_object_array", 1,
+      "recognized_object_array", rclcpp::SystemDefaultsQoS(),
       [this](const object_recognition_msgs::msg::RecognizedObjectArray::ConstSharedPtr& msg) {
         return listenDetectedObjects(msg);
       });
@@ -671,7 +678,7 @@ void MotionPlanningFrame::tabChanged(int index)
   }
 }
 
-void MotionPlanningFrame::updateSceneMarkers(float /*wall_dt*/, float /*ros_dt*/)
+void MotionPlanningFrame::updateSceneMarkers(double /*wall_dt*/, double /*ros_dt*/)
 {
   if (scene_marker_)
     scene_marker_->update();

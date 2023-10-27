@@ -489,7 +489,7 @@ void ControllersWidget::previewSelectedGroup(const std::vector<std::string>& gro
 }
 
 // ******************************************************************************************
-// Called when an item is seleceted from the controllers tree
+// Called when an item is selected from the controllers tree
 // ******************************************************************************************
 void ControllersWidget::previewSelected(QTreeWidgetItem* selected_item, int /*column*/)
 {

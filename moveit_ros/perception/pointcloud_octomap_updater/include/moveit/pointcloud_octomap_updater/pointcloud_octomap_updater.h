@@ -52,7 +52,7 @@ class PointCloudOctomapUpdater : public OccupancyMapUpdater
 {
 public:
   PointCloudOctomapUpdater();
-  ~PointCloudOctomapUpdater() override;
+  ~PointCloudOctomapUpdater() override{};
 
   bool setParams(const std::string& name_space) override;
 
@@ -69,7 +69,6 @@ protected:
 private:
   bool getShapeTransform(ShapeHandle h, Eigen::Isometry3d& transform) const;
   void cloudMsgCallback(const sensor_msgs::msg::PointCloud2::ConstSharedPtr& cloud_msg);
-  void stopHelper();
 
   // TODO: Enable private node for publishing filtered point cloud
   // ros::NodeHandle root_nh_;
@@ -97,10 +96,12 @@ private:
   tf2_ros::MessageFilter<sensor_msgs::msg::PointCloud2>* point_cloud_filter_;
 
   /* used to store all cells in the map which a given ray passes through during raycasting.
-     we cache this here because it dynamically pre-allocates a lot of memory in its contsructor */
+     we cache this here because it dynamically pre-allocates a lot of memory in its constructor */
   octomap::KeyRay key_ray_;
 
   std::unique_ptr<point_containment_filter::ShapeMask> shape_mask_;
   std::vector<int> mask_;
+
+  rclcpp::Logger logger_;
 };
 }  // namespace occupancy_map_monitor

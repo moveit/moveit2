@@ -35,7 +35,8 @@
 /* Author: Ioan Sucan */
 
 #include <moveit/trajectory_processing/trajectory_tools.h>
-
+#include <moveit/trajectory_processing/ruckig_traj_smoothing.h>
+#include <moveit/trajectory_processing/time_optimal_trajectory_generation.h>
 namespace trajectory_processing
 {
 bool isTrajectoryEmpty(const moveit_msgs::msg::RobotTrajectory& trajectory)
@@ -46,5 +47,19 @@ bool isTrajectoryEmpty(const moveit_msgs::msg::RobotTrajectory& trajectory)
 std::size_t trajectoryWaypointCount(const moveit_msgs::msg::RobotTrajectory& trajectory)
 {
   return std::max(trajectory.joint_trajectory.points.size(), trajectory.multi_dof_joint_trajectory.points.size());
+}
+bool applyTOTGTimeParameterization(robot_trajectory::RobotTrajectory& trajectory, double velocity_scaling_factor,
+                                   double acceleration_scaling_factor, double path_tolerance, double resample_dt,
+                                   double min_angle_change)
+{
+  TimeOptimalTrajectoryGeneration totg(path_tolerance, resample_dt, min_angle_change);
+  return totg.computeTimeStamps(trajectory, velocity_scaling_factor, acceleration_scaling_factor);
+}
+bool applyRuckigSmoothing(robot_trajectory::RobotTrajectory& trajectory, double velocity_scaling_factor,
+                          double acceleration_scaling_factor, bool mitigate_overshoot, double overshoot_threshold)
+{
+  RuckigSmoothing time_param;
+  return time_param.applySmoothing(trajectory, velocity_scaling_factor, acceleration_scaling_factor, mitigate_overshoot,
+                                   overshoot_threshold);
 }
 }  // namespace trajectory_processing

@@ -41,6 +41,8 @@
 
 #include <cstddef>
 
+// Auto-generated
+#include <moveit_butterworth_parameters.hpp>
 #include <moveit/robot_model/robot_model.h>
 #include <moveit/online_signal_smoothing/smoothing_base_class.h>
 
@@ -102,17 +104,22 @@ public:
 
   /**
    * Smooth the command signals for all DOF
-   * @param position_vector array of joint position commands
+   * @param positions array of joint position commands
+   * @param velocities array of joint velocity commands
+   * @param accelerations array of joint acceleration commands
    * @return True if initialization was successful
    */
-  bool doSmoothing(std::vector<double>& position_vector) override;
+  bool doSmoothing(Eigen::VectorXd& positions, Eigen::VectorXd& velocities, Eigen::VectorXd& accelerations) override;
 
   /**
    * Reset to a given joint state
-   * @param joint_positions reset the filters to these joint positions
+   * @param positions reset the filters to these joint positions
+   * @param velocities (unused)
+   * @param accelerations (unused)
    * @return True if reset was successful
    */
-  bool reset(const std::vector<double>& joint_positions) override;
+  bool reset(const Eigen::VectorXd& positions, const Eigen::VectorXd& velocities,
+             const Eigen::VectorXd& accelerations) override;
 
 private:
   rclcpp::Node::SharedPtr node_;

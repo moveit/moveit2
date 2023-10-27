@@ -9,6 +9,6 @@ ament_package()
 #############
 
 ## Install URDF and meshes
-install(DIRECTORY urdf DESTINATION share/${PROJECT_NAME})
-install(DIRECTORY meshes DESTINATION share/${PROJECT_NAME})
-install(DIRECTORY config DESTINATION share/${PROJECT_NAME})
+install(DIRECTORY urdf DESTINATION share/moveit_resources_prbt_support)
+install(DIRECTORY meshes DESTINATION share/moveit_resources_prbt_support)
+install(DIRECTORY config DESTINATION share/moveit_resources_prbt_support)

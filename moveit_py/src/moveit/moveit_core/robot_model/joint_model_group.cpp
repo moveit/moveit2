@@ -35,19 +35,20 @@
 /* Author: Peter David Fagan */
 
 #include "joint_model_group.h"
+#include <exception>
 
 namespace moveit_py
 {
 namespace bind_robot_model
 {
-bool satisfies_position_bounds(const moveit::core::JointModelGroup* jmg, const Eigen::VectorXd& joint_positions,
-                               const double margin)
+bool satisfiesPositionBounds(const moveit::core::JointModelGroup* jmg, const Eigen::VectorXd& joint_positions,
+                             const double margin)
 {
   assert(joint_positions.size() == jmg->getActiveVariableCount());
   return jmg->satisfiesPositionBounds(joint_positions.data(), margin);
 }
 
-void init_joint_model_group(py::module& m)
+void initJointModelGroup(py::module& m)
 {
   py::module robot_model = m.def_submodule("robot_model");
 
@@ -61,6 +62,7 @@ void init_joint_model_group(py::module& m)
                     str: The name of the joint model group.
                     )")
 
+      .def_property_readonly("link_model_names", &moveit::core::JointModelGroup::getLinkModelNames)
       .def_property("joint_model_names", &moveit::core::JointModelGroup::getJointModelNames, nullptr,
                     R"(
                     list[str]: The names of the joint models in the group.
@@ -68,7 +70,16 @@ void init_joint_model_group(py::module& m)
       .def_property("active_joint_model_names", &moveit::core::JointModelGroup::getActiveJointModelNames, nullptr)
       .def_property("active_joint_model_bounds", &moveit::core::JointModelGroup::getActiveJointModelsBounds, nullptr,
                     py::return_value_policy::reference_internal)
-      .def("satisfies_position_bounds", &moveit_py::bind_robot_model::satisfies_position_bounds, py::arg("values"),
+      .def_property_readonly("eef_name",
+                             [](const moveit::core::JointModelGroup* self) {
+                               const auto eef = self->getOnlyOneEndEffectorTip();
+                               if (!eef)
+                               {
+                                 throw std::runtime_error("Error getting the end effector name - see log for details");
+                               }
+                               return eef->getName();
+                             })
+      .def("satisfies_position_bounds", &moveit_py::bind_robot_model::satisfiesPositionBounds, py::arg("values"),
            py::arg("margin") = 0.0);
 }
 }  // namespace bind_robot_model

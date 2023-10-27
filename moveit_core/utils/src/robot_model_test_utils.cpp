@@ -43,6 +43,10 @@
 #include <rclcpp/logging.hpp>
 #include <urdf_parser/urdf_parser.h>
 
+#include <pluginlib/class_loader.hpp>
+
+#include <moveit/kinematics_base/kinematics_base.h>
+
 namespace moveit
 {
 namespace core
@@ -98,6 +102,32 @@ srdf::ModelSharedPtr loadSRDFModel(const std::string& robot_name)
   }
   srdf_model->initFile(*urdf_model, srdf_path);
   return srdf_model;
+}
+
+void loadIKPluginForGroup(const rclcpp::Node::SharedPtr& node, JointModelGroup* jmg, const std::string& base_link,
+                          const std::string& tip_link, std::string plugin, double timeout)
+{
+  using LoaderType = pluginlib::ClassLoader<kinematics::KinematicsBase>;
+  static std::weak_ptr<LoaderType> cached_loader;
+  std::shared_ptr<LoaderType> loader = cached_loader.lock();
+  if (!loader)
+  {
+    loader = std::make_shared<LoaderType>("moveit_core", "kinematics::KinematicsBase");
+    cached_loader = loader;
+  }
+
+  // translate short to long names
+  if (plugin == "KDL")
+    plugin = "kdl_kinematics_plugin/KDLKinematicsPlugin";
+
+  jmg->setSolverAllocators(
+      [=](const JointModelGroup* jmg) -> kinematics::KinematicsBasePtr {
+        kinematics::KinematicsBasePtr result = loader->createUniqueInstance(plugin);
+        result->initialize(node, jmg->getParentModel(), jmg->getName(), base_link, { tip_link }, 0.0);
+        result->setDefaultTimeout(timeout);
+        return result;
+      },
+      SolverAllocatorMapFn());
 }
 
 RobotModelBuilder::RobotModelBuilder(const std::string& name, const std::string& base_link_name)

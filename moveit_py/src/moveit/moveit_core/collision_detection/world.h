@@ -45,6 +45,6 @@ namespace moveit_py
 {
 namespace bind_collision_detection
 {
-void init_world(py::module& m);
+void initWorld(py::module& m);
 }  // namespace bind_collision_detection
 }  // namespace moveit_py

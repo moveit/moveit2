@@ -1,0 +1,63 @@
+###############################################
+# Modify all parameters related to servoing here
+###############################################
+
+# Optionally override Servo's internal velocity scaling when near singularity or collision (0.0 = use internal velocity scaling)
+# override_velocity_scaling_factor = 0.0 # valid range [0.0:1.0]
+
+## Properties of outgoing commands
+publish_period: 0.02  # 1/Nominal publish rate [seconds]
+
+incoming_command_timeout: 0.5 # seconds
+command_in_type: "unitless" # "unitless" in the range [-1:1], as if from joystick. "speed_units" cmds are in m/s and rad/s
+scale:
+  # Scale parameters are only used if command_in_type=="unitless"
+  linear:  1.0  # Max linear velocity. Unit is [m/s]. Only used for Cartesian commands.
+  rotational:  1.0 # Max angular velocity. Unit is [rad/s]. Only used for Cartesian commands.
+  # Max joint angular/linear velocity. Only used for joint commands on joint_command_in_topic.
+  joint: 1.0
+
+# What type of topic does your robot driver expect?
+# Currently supported are std_msgs/Float64MultiArray or trajectory_msgs/JointTrajectory
+command_out_type: trajectory_msgs/JointTrajectory
+
+# What to publish? Can save some bandwidth as most robots only require positions or velocities
+publish_joint_positions: true
+publish_joint_velocities: true
+publish_joint_accelerations: false
+
+## Plugins for smoothing outgoing commands
+use_smoothing: false
+smoothing_filter_plugin_name: "online_signal_smoothing::ButterworthFilterPlugin"
+
+# If is_primary_planning_scene_monitor is set to true, the Servo server's PlanningScene advertises the /get_planning_scene service,
+# which other nodes can use as a source for information about the planning environment.
+# NOTE: If a different node in your system is responsible for the "primary" planning scene instance (e.g. the MoveGroup node),
+# then is_primary_planning_scene_monitor needs to be set to false.
+is_primary_planning_scene_monitor: true
+
+## MoveIt properties
+move_group_name:  panda_arm  # Often 'manipulator' or 'arm'
+planning_frame: panda_link0  # The MoveIt planning frame. Often 'base_link' or 'world'
+
+## Other frames
+ee_frame: panda_link8  # The name of the IK tip link
+
+## Configure handling of singularities and joint limits
+lower_singularity_threshold:  17.0  # Start decelerating when the condition number hits this (close to singularity)
+hard_stop_singularity_threshold: 30.0 # Stop when the condition number hits this
+joint_limit_margin: 0.1 # added as a buffer to joint limits [radians]. If moving quickly, make this larger.
+leaving_singularity_threshold_multiplier: 2.0 # Multiply the hard stop limit by this when leaving singularity (see https://github.com/ros-planning/moveit2/pull/620)
+
+## Topic names
+cartesian_command_in_topic: ~/delta_twist_cmds  # Topic for incoming Cartesian twist commands
+joint_command_in_topic: ~/delta_joint_cmds # Topic for incoming joint angle commands
+joint_topic: /joint_states
+status_topic: ~/status # Publish status to this topic
+command_out_topic: /panda_arm_controller/joint_trajectory # Publish outgoing commands here
+
+## Collision checking for the entire robot body
+check_collisions: true # Check collisions?
+collision_check_rate: 10.0 # [Hz] Collision-checking can easily bog down a CPU if done too often.
+self_collision_proximity_threshold: 0.01 # Start decelerating when a self-collision is this far [m]
+scene_collision_proximity_threshold: 0.02 # Start decelerating when a scene collision is this far [m]

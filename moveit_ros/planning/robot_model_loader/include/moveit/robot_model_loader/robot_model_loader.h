@@ -133,5 +133,6 @@ private:
   rdf_loader::RDFLoaderPtr rdf_loader_;
   kinematics_plugin_loader::KinematicsPluginLoaderPtr kinematics_loader_;
   const rclcpp::Node::SharedPtr node_;
+  rclcpp::Logger logger_;
 };
 }  // namespace robot_model_loader

@@ -2,6 +2,60 @@
 Changelog for package moveit_ros_move_group
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.8.0 (2023-09-10)
+------------------
+* Replaced boost::algorithm::join with fmt::join (`#2273 <https://github.com/ros-planning/moveit2/issues/2273>`_)
+  * Replaced boost::algorithm::join with fmt::join
+  * Made changes in CMakeLists.txt to accomodate fmt
+  * Updated package.xml files
+  * removed redundant boost dependencies
+  * Rename variables -> variable
+  ---------
+  Co-authored-by: Sebastian Castro <4603398+sea-bass@users.noreply.github.com>
+  Co-authored-by: Sebastian Jahr <sebastian.jahr@picknik.ai>
+* Specify controller name in MGI execution (`#2257 <https://github.com/ros-planning/moveit2/issues/2257>`_)
+  * Specify controller name in MGI execute
+  * Finish comment
+  ---------
+  Co-authored-by: Sebastian Jahr <sebastian.jahr@picknik.ai>
+* fix move_group capabilities loading (`#2270 <https://github.com/ros-planning/moveit2/issues/2270>`_)
+  * fix move_group capabilities loading
+  * clang-format
+* Cleanup move_group CMake (`#2226 <https://github.com/ros-planning/moveit2/issues/2226>`_)
+* Contributors: Shobuj Paul, Stephanie Eng, Tyler Weaver, Yang Lin
+
+2.7.4 (2023-05-18)
+------------------
+* Fix MoveGroup action cancel callback (`#2118 <https://github.com/ros-planning/moveit2/issues/2118>`_)
+  Moves the execution callback into its own thread to avoid blocking and actually calls the preempt function in with the cancel callback.
+* Scale acceleration and velocity of cartesian interpolations (`#1968 <https://github.com/ros-planning/moveit2/issues/1968>`_)
+* Contributors: Jonathan Grebe, Yadu
+
+2.7.3 (2023-04-24)
+------------------
+* Replace Variable PROJECT_NAME in CMakeLists.txt with the actual name (`#2020 <https://github.com/ros-planning/moveit2/issues/2020>`_)
+* Contributors: Shobuj Paul
+
+2.7.2 (2023-04-18)
+------------------
+* Fix MoveItCpp issues (port from MoveIt1) (`#2001 <https://github.com/ros-planning/moveit2/issues/2001>`_)
+  * Fix MoveitCpp's const member accessors
+  They should return a ConstPtr instead of a const Ptr&!
+  * Fix SEVERE ClassLoader warning when releasing MoveItCpp
+  - PSM was released before copy of its RobotModel -> removed extra RobotModel copy
+  - clearContents() was broken:
+  - resets in wrong order: psm\_ should be last
+  - trajectory_execution_manager\_ was missing
+  I suggest to omit clearContents() and rely on the (correct) ordering of member variables.
+  While this is not explicit, we ensure that we don't miss any newly added member variable.
+  Fix: https://github.com/ros-planning/moveit2/issues/1597
+  ---------
+  Co-authored-by: Sebastian Jahr <sebastian.jahr@picknik.ai>
+  Co-authored-by: Jafar <cafer.abdi@gmail.com>
+  Co-authored-by: Sebastian Jahr <sebastian.jahr@tuta.io>
+  Co-authored-by: JafarAbdi <jafar.uruc@gmail.com>
+* Contributors: Robert Haschke
+
 2.7.1 (2023-03-23)
 ------------------
 * Fix member naming (`#1949 <https://github.com/ros-planning/moveit2/issues/1949>`_)

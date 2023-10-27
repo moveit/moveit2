@@ -490,7 +490,7 @@ RobotTrajectory& RobotTrajectory::setRobotTrajectoryMsg(const moveit::core::Robo
   return setRobotTrajectoryMsg(st, trajectory);
 }
 
-void RobotTrajectory::findWayPointIndicesForDurationAfterStart(const double& duration, int& before, int& after,
+void RobotTrajectory::findWayPointIndicesForDurationAfterStart(double duration, int& before, int& after,
                                                                double& blend) const
 {
   if (duration < 0.0)
@@ -536,11 +536,6 @@ double RobotTrajectory::getWayPointDurationFromStart(std::size_t index) const
   for (std::size_t i = 0; i <= index; ++i)
     time += duration_from_previous_[i];
   return time;
-}
-
-double RobotTrajectory::getWaypointDurationFromStart(std::size_t index) const
-{
-  return getWayPointDurationFromStart(index);
 }
 
 bool RobotTrajectory::getStateAtDurationFromStart(const double request_duration,
@@ -636,19 +631,19 @@ std::ostream& operator<<(std::ostream& out, const RobotTrajectory& trajectory)
   return out;
 }
 
-double path_length(RobotTrajectory const& trajectory)
+double pathLength(const RobotTrajectory& trajectory)
 {
   auto trajectory_length = 0.0;
   for (std::size_t index = 1; index < trajectory.getWayPointCount(); ++index)
   {
-    auto const& first = trajectory.getWayPoint(index - 1);
-    auto const& second = trajectory.getWayPoint(index);
+    const auto& first = trajectory.getWayPoint(index - 1);
+    const auto& second = trajectory.getWayPoint(index);
     trajectory_length += first.distance(second);
   }
   return trajectory_length;
 }
 
-std::optional<double> smoothness(RobotTrajectory const& trajectory)
+std::optional<double> smoothness(const RobotTrajectory& trajectory)
 {
   if (trajectory.getWayPointCount() > 2)
   {
@@ -686,13 +681,13 @@ std::optional<double> smoothness(RobotTrajectory const& trajectory)
   return std::nullopt;
 }
 
-std::optional<double> waypoint_density(RobotTrajectory const& trajectory)
+std::optional<double> waypointDensity(const RobotTrajectory& trajectory)
 {
   // Only calculate density if more than one waypoint exists
   if (trajectory.getWayPointCount() > 1)
   {
     // Calculate path length
-    auto const length = path_length(trajectory);
+    const auto length = pathLength(trajectory);
     if (length > 0.0)
     {
       auto density = static_cast<double>(trajectory.getWayPointCount()) / length;

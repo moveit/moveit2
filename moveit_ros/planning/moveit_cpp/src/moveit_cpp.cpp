@@ -41,22 +41,23 @@
 #include <moveit/moveit_cpp/moveit_cpp.h>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
 #include <geometry_msgs/msg/quaternion_stamped.hpp>
+#include <moveit/utils/logger.hpp>
 
 namespace moveit_cpp
 {
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.ros_planning_interface.moveit_cpp");
 
 MoveItCpp::MoveItCpp(const rclcpp::Node::SharedPtr& node) : MoveItCpp(node, Options(node))
 {
 }
 
-MoveItCpp::MoveItCpp(const rclcpp::Node::SharedPtr& node, const Options& options) : node_(node)
+MoveItCpp::MoveItCpp(const rclcpp::Node::SharedPtr& node, const Options& options)
+  : node_(node), logger_(moveit::makeChildLogger("moveit_cpp"))
 {
   // Configure planning scene monitor
   if (!loadPlanningSceneMonitor(options.planning_scene_monitor_options))
   {
     const std::string error = "Unable to configure planning scene monitor";
-    RCLCPP_FATAL_STREAM(LOGGER, error);
+    RCLCPP_FATAL_STREAM(logger_, error);
     throw std::runtime_error(error);
   }
 
@@ -64,7 +65,7 @@ MoveItCpp::MoveItCpp(const rclcpp::Node::SharedPtr& node, const Options& options
   {
     const std::string error = "Unable to construct robot model. Please make sure all needed information is on the "
                               "parameter server.";
-    RCLCPP_FATAL_STREAM(LOGGER, error);
+    RCLCPP_FATAL_STREAM(logger_, error);
     throw std::runtime_error(error);
   }
 
@@ -72,19 +73,19 @@ MoveItCpp::MoveItCpp(const rclcpp::Node::SharedPtr& node, const Options& options
   if (load_planning_pipelines && !loadPlanningPipelines(options.planning_pipeline_options))
   {
     const std::string error = "Failed to load planning pipelines from parameter server";
-    RCLCPP_FATAL_STREAM(LOGGER, error);
+    RCLCPP_FATAL_STREAM(logger_, error);
     throw std::runtime_error(error);
   }
 
   trajectory_execution_manager_ = std::make_shared<trajectory_execution_manager::TrajectoryExecutionManager>(
       node_, getRobotModel(), planning_scene_monitor_->getStateMonitor());
 
-  RCLCPP_DEBUG(LOGGER, "MoveItCpp running");
+  RCLCPP_DEBUG(logger_, "MoveItCpp running");
 }
 
 MoveItCpp::~MoveItCpp()
 {
-  RCLCPP_INFO(LOGGER, "Deleting MoveItCpp");
+  RCLCPP_INFO(logger_, "Deleting MoveItCpp");
 }
 
 bool MoveItCpp::loadPlanningSceneMonitor(const PlanningSceneMonitorOptions& options)
@@ -92,11 +93,11 @@ bool MoveItCpp::loadPlanningSceneMonitor(const PlanningSceneMonitorOptions& opti
   planning_scene_monitor_ =
       std::make_shared<planning_scene_monitor::PlanningSceneMonitor>(node_, options.robot_description, options.name);
   // Allows us to synchronize to Rviz and also publish collision objects to ourselves
-  RCLCPP_DEBUG(LOGGER, "Configuring Planning Scene Monitor");
+  RCLCPP_DEBUG(logger_, "Configuring Planning Scene Monitor");
   if (planning_scene_monitor_->getPlanningScene())
   {
     // Start state and scene monitors
-    RCLCPP_INFO(LOGGER, "Listening to '%s' for joint states", options.joint_state_topic.c_str());
+    RCLCPP_INFO(logger_, "Listening to '%s' for joint states", options.joint_state_topic.c_str());
     // Subscribe to JointState sensor messages
     planning_scene_monitor_->startStateMonitor(options.joint_state_topic, options.attached_collision_object_topic);
     // Publish planning scene updates to remote monitors like RViz
@@ -109,17 +110,16 @@ bool MoveItCpp::loadPlanningSceneMonitor(const PlanningSceneMonitorOptions& opti
   }
   else
   {
-    RCLCPP_ERROR(LOGGER, "Planning scene not configured");
+    RCLCPP_ERROR(logger_, "Planning scene not configured");
     return false;
   }
 
   // Wait for complete state to be received
-  // TODO(henningkayser): Fix segfault in waitForCurrentState()
-  // if (options.wait_for_initial_state_timeout > 0.0)
-  // {
-  //   return planning_scene_monitor_->getStateMonitor()->waitForCurrentState(node_->now(),
-  //                                                                          options.wait_for_initial_state_timeout);
-  // }
+  if (options.wait_for_initial_state_timeout > 0.0)
+  {
+    return planning_scene_monitor_->getStateMonitor()->waitForCurrentState(node_->now(),
+                                                                           options.wait_for_initial_state_timeout);
+  }
 
   return true;
 }
@@ -132,7 +132,7 @@ bool MoveItCpp::loadPlanningPipelines(const PlanningPipelineOptions& options)
 
   if (planning_pipelines_.empty())
   {
-    RCLCPP_ERROR(LOGGER, "Failed to load any planning pipelines.");
+    RCLCPP_ERROR(logger_, "Failed to load any planning pipelines.");
     return false;
   }
   return true;
@@ -152,7 +152,7 @@ bool MoveItCpp::getCurrentState(moveit::core::RobotStatePtr& current_state, doub
 {
   if (wait_seconds > 0.0 && !planning_scene_monitor_->getStateMonitor()->waitForCurrentState(node_->now(), wait_seconds))
   {
-    RCLCPP_ERROR(LOGGER, "Did not receive robot state");
+    RCLCPP_ERROR(logger_, "Did not receive robot state");
     return false;
   }
   {  // Lock planning scene
@@ -207,7 +207,7 @@ MoveItCpp::execute(const robot_trajectory::RobotTrajectoryPtr& robot_trajectory,
 {
   if (!robot_trajectory)
   {
-    RCLCPP_ERROR(LOGGER, "Robot trajectory is undefined");
+    RCLCPP_ERROR(logger_, "Robot trajectory is undefined");
     return moveit_controller_manager::ExecutionStatus::ABORTED;
   }
 
@@ -216,7 +216,7 @@ MoveItCpp::execute(const robot_trajectory::RobotTrajectoryPtr& robot_trajectory,
   // Check if there are controllers that can handle the execution
   if (!trajectory_execution_manager_->ensureActiveControllersForGroup(group_name))
   {
-    RCLCPP_ERROR(LOGGER, "Execution failed! No active controllers configured for group '%s'", group_name.c_str());
+    RCLCPP_ERROR(logger_, "Execution failed! No active controllers configured for group '%s'", group_name.c_str());
     return moveit_controller_manager::ExecutionStatus::ABORTED;
   }
 
@@ -241,7 +241,7 @@ bool MoveItCpp::terminatePlanningPipeline(const std::string& pipeline_name)
   }
   catch (const std::out_of_range& oor)
   {
-    RCLCPP_ERROR(LOGGER, "Cannot terminate pipeline '%s' because no pipeline with that name exists",
+    RCLCPP_ERROR(logger_, "Cannot terminate pipeline '%s' because no pipeline with that name exists",
                  pipeline_name.c_str());
     return false;
   }

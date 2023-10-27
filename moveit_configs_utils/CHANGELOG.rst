@@ -2,6 +2,31 @@
 Changelog for package moveit_configs_utils
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.8.0 (2023-09-10)
+------------------
+* Add stomp default config to moveit_config_utils (`#2238 <https://github.com/ros-planning/moveit2/issues/2238>`_)
+* Contributors: Sebastian Jahr
+
+2.7.4 (2023-05-18)
+------------------
+* Parse xacro args from .setup_assistant config in MoveIt Configs Builder (`#2172 <https://github.com/ros-planning/moveit2/issues/2172>`_)
+  Co-authored-by: Jafar <jafar.uruc@gmail.com>
+* Update default planning configs to use AddTimeOptimalParameterization (`#2167 <https://github.com/ros-planning/moveit2/issues/2167>`_)
+* Contributors: Anthony Baker
+
+2.7.3 (2023-04-24)
+------------------
+
+2.7.2 (2023-04-18)
+------------------
+* Update pre-commit (`#2094 <https://github.com/ros-planning/moveit2/issues/2094>`_)
+* Use $DISPLAY rather than assuming :0 (`#2049 <https://github.com/ros-planning/moveit2/issues/2049>`_)
+  * Use $DISPLAY rather than assuming :
+  * Double quotes
+  ---------
+  Co-authored-by: Sebastian Jahr <sebastian.jahr@picknik.ai>
+* Contributors: Shobuj Paul, Stephanie Eng
+
 2.7.1 (2023-03-23)
 ------------------
 

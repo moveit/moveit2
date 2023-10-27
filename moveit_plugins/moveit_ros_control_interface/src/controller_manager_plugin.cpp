@@ -43,6 +43,7 @@
 #include <pluginlib/class_list_macros.hpp>
 #include <pluginlib/class_loader.hpp>
 #include <boost/bimap.hpp>
+#include <boost/bimap/unordered_multiset_of.hpp>
 #include <rclcpp/client.hpp>
 #include <rclcpp/duration.hpp>
 #include <rclcpp/logger.hpp>
@@ -207,7 +208,7 @@ class Ros2ControlManager : public moveit_controller_manager::MoveItControllerMan
       const std::string& type = controller.type;
       AllocatorsMap::iterator alloc_it = allocators_.find(type);
       if (alloc_it == allocators_.end())
-      {  // create allocator is needed
+      {  // create allocator if needed
         alloc_it = allocators_.insert(std::make_pair(type, loader_.createUniqueInstance(type))).first;
       }
 
@@ -226,7 +227,7 @@ class Ros2ControlManager : public moveit_controller_manager::MoveItControllerMan
   }
 
   /**
-   * \brief get fully qualified name
+   * \brief Get fully qualified name
    * @param name name to be resolved to an absolute name
    * @return resolved name
    */
@@ -242,33 +243,28 @@ public:
   Ros2ControlManager()
     : loader_("moveit_ros_control_interface", "moveit_ros_control_interface::ControllerHandleAllocator")
   {
-    RCLCPP_INFO_STREAM(LOGGER, "Started moveit_ros_control_interface::Ros2ControlManager for namespace " << ns_);
   }
 
   /**
    * \brief Configure interface with namespace
    * @param ns namespace of ros_control node (without /controller_manager/)
    */
-  Ros2ControlManager(const std::string& ns)
+  [[deprecated("Ros2ControlManager constructor with namespace is deprecated. Set namespace via the "
+               "ros_control_namespace parameter.")]] Ros2ControlManager(const std::string& ns)
     : ns_(ns), loader_("moveit_ros_control_interface", "moveit_ros_control_interface::ControllerHandleAllocator")
   {
+    RCLCPP_INFO_STREAM(LOGGER, "Started moveit_ros_control_interface::Ros2ControlManager for namespace " << ns_);
   }
 
   void initialize(const rclcpp::Node::SharedPtr& node) override
   {
     node_ = node;
-    if (!ns_.empty())
+    // Set the namespace from the ros_control_namespace parameter, or default to "/"
+    if (!node_->has_parameter("ros_control_namespace"))
     {
-      if (!node_->has_parameter("ros_control_namespace"))
-      {
-        ns_ = node_->declare_parameter<std::string>("ros_control_namespace", "/");
-      }
-      else
-      {
-        node_->get_parameter<std::string>("ros_control_namespace", ns_);
-      }
+      ns_ = node_->declare_parameter<std::string>("ros_control_namespace", "/");
     }
-    else if (node->has_parameter("ros_control_namespace"))
+    else
     {
       node_->get_parameter<std::string>("ros_control_namespace", ns_);
       RCLCPP_INFO_STREAM(LOGGER, "Namespace for controller manager was specified, namespace: " << ns_);
@@ -292,7 +288,7 @@ public:
     std::scoped_lock<std::mutex> lock(controllers_mutex_);
     HandleMap::iterator it = handles_.find(name);
     if (it != handles_.end())
-    {  // controller is is manager by this interface
+    {  // controller is manager by this interface
       return it->second;
     }
     return moveit_controller_manager::MoveItControllerHandlePtr();
@@ -371,8 +367,8 @@ public:
   /**
    * \brief Filter lists for managed controller and computes switching set.
    * Stopped list might be extended by unsupported controllers that claim needed resources
-   * @param activate
-   * @param deactivate
+   * @param activate vector of controllers to be activated
+   * @param deactivate vector of controllers to be deactivated
    * @return true if switching succeeded
    */
   bool switchControllers(const std::vector<std::string>& activate_base,
@@ -402,7 +398,25 @@ public:
     std::scoped_lock<std::mutex> lock(controllers_mutex_);
     discover(true);
 
-    typedef boost::bimap<std::string, std::string> resources_bimap;
+    // Holds the list of controllers that are currently active and their resources
+    // Example:
+    // controller1:
+    //  - controller1_joint1
+    //  - controller1_joint2
+    //  ...
+    // controller2:
+    //  - controller2_joint1
+    //  - controller2_joint2
+    //  ...
+    // ...
+    // The left type have to be an unordered_multiset_of, because each controller can claim multiple resources
+    // {{ "controller1", "controller1_joint1" },
+    //  { "controller1", "controller1_joint2" },
+    //  ...,
+    //  { "controller2", "controller2_joint1" },
+    //  { "controller2", "controller2_joint2" },
+    //  ...}
+    typedef boost::bimap<boost::bimaps::unordered_multiset_of<std::string>, std::string> resources_bimap;
 
     resources_bimap claimed_resources;
 
@@ -423,7 +437,7 @@ public:
       if (c != managed_controllers_.end())
       {  // controller belongs to this manager
         request->deactivate_controllers.push_back(c->second.name);
-        claimed_resources.right.erase(c->second.name);  // remove resources
+        claimed_resources.left.erase(c->second.name);  // remove resources
       }
     }
 
@@ -654,10 +668,10 @@ public:
   }
 
   /**
-   * \brief delegates switch  to all known interfaces. Stops on first failing switch.
-   * @param activate
-   * @param deactivate
-   * @return
+   * \brief delegates switch to all known interfaces. Stops on first failing switch.
+   * @param activate vector of controllers to be activated
+   * @param deactivate vector of controllers to be deactivated
+   * @return true if switching succeeded
    */
   bool switchControllers(const std::vector<std::string>& activate, const std::vector<std::string>& deactivate) override
   {

@@ -59,6 +59,48 @@ static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_planning_scene.p
 const std::string PlanningScene::OCTOMAP_NS = "<octomap>";
 const std::string PlanningScene::DEFAULT_SCENE_NAME = "(noname)";
 
+namespace utilities
+{
+/**
+ * convert Pose msg to Eigen::Isometry, normalizing the quaternion part if necessary.
+ * @param msg Input message
+ * @param out Output Eigen transform
+ */
+void poseMsgToEigen(const geometry_msgs::msg::Pose& msg, Eigen::Isometry3d& out)
+{
+  Eigen::Translation3d translation(msg.position.x, msg.position.y, msg.position.z);
+  Eigen::Quaterniond quaternion(msg.orientation.w, msg.orientation.x, msg.orientation.y, msg.orientation.z);
+  quaternion.normalize();
+  out = translation * quaternion;
+}
+
+/** \brief Read a pose from text */
+bool readPoseFromText(std::istream& in, Eigen::Isometry3d& pose)
+{
+  double x, y, z, rx, ry, rz, rw;
+  if (!(in >> x >> y >> z))
+  {
+    RCLCPP_ERROR(LOGGER, "Improperly formatted translation in scene geometry file");
+    return false;
+  }
+  if (!(in >> rx >> ry >> rz >> rw))
+  {
+    RCLCPP_ERROR(LOGGER, "Improperly formatted rotation in scene geometry file");
+    return false;
+  }
+  pose = Eigen::Translation3d(x, y, z) * Eigen::Quaterniond(rw, rx, ry, rz);
+  return true;
+}
+
+/** \brief Write a pose to text */
+void writePoseToText(std::ostream& out, const Eigen::Isometry3d& pose)
+{
+  out << pose.translation().x() << ' ' << pose.translation().y() << ' ' << pose.translation().z() << '\n';
+  Eigen::Quaterniond r(pose.linear());
+  out << r.x() << ' ' << r.y() << ' ' << r.z() << ' ' << r.w() << '\n';
+}
+}  // namespace utilities
+
 class SceneTransforms : public moveit::core::Transforms
 {
 public:
@@ -102,21 +144,6 @@ private:
   const PlanningScene* scene_;
 };
 
-bool PlanningScene::isEmpty(const moveit_msgs::msg::PlanningScene& msg)
-{
-  return moveit::core::isEmpty(msg);
-}
-
-bool PlanningScene::isEmpty(const moveit_msgs::msg::RobotState& msg)
-{
-  return moveit::core::isEmpty(msg);
-}
-
-bool PlanningScene::isEmpty(const moveit_msgs::msg::PlanningSceneWorld& msg)
-{
-  return moveit::core::isEmpty(msg);
-}
-
 PlanningScene::PlanningScene(const moveit::core::RobotModelConstPtr& robot_model,
                              const collision_detection::WorldPtr& world)
 
@@ -135,9 +162,12 @@ PlanningScene::PlanningScene(const urdf::ModelInterfaceSharedPtr& urdf_model,
   if (!srdf_model)
     throw moveit::ConstructException("The SRDF model cannot be nullptr");
 
-  robot_model_ = createRobotModel(urdf_model, srdf_model);
-  if (!robot_model_)
+  robot_model_ = std::make_shared<moveit::core::RobotModel>(urdf_model, srdf_model);
+  if (!robot_model_ || !robot_model_->getRootJoint())
+  {
+    robot_model_ = nullptr;
     throw moveit::ConstructException("Could not create RobotModel");
+  }
 
   initialize();
 }
@@ -161,17 +191,6 @@ void PlanningScene::initialize()
   acm_ = std::make_shared<collision_detection::AllowedCollisionMatrix>(*getRobotModel()->getSRDF());
 
   allocateCollisionDetector(collision_detection::CollisionDetectorAllocatorFCL::create());
-}
-
-// return nullptr on failure
-moveit::core::RobotModelPtr PlanningScene::createRobotModel(const urdf::ModelInterfaceSharedPtr& urdf_model,
-                                                            const srdf::ModelConstSharedPtr& srdf_model)
-{
-  auto robot_model = std::make_shared<moveit::core::RobotModel>(urdf_model, srdf_model);
-  if (!robot_model || !robot_model->getRootJoint())
-    return moveit::core::RobotModelPtr();
-
-  return robot_model;
 }
 
 PlanningScene::PlanningScene(const PlanningSceneConstPtr& parent) : parent_(parent)
@@ -917,7 +936,7 @@ void PlanningScene::saveGeometryToStream(std::ostream& out) const
       {
         out << "* " << id << '\n';  // New object start
         // Write object pose
-        writePoseToText(out, obj->pose_);
+        utilities::writePoseToText(out, obj->pose_);
 
         // Write shapes and shape poses
         out << obj->shapes_.size() << '\n';  // Number of shapes
@@ -925,7 +944,7 @@ void PlanningScene::saveGeometryToStream(std::ostream& out) const
         {
           shapes::saveAsText(obj->shapes_[j].get(), out);
           // shape_poses_ is valid isometry by contract
-          writePoseToText(out, obj->shape_poses_[j]);
+          utilities::writePoseToText(out, obj->shape_poses_[j]);
           if (hasObjectColor(id))
           {
             const std_msgs::msg::ColorRGBA& c = getObjectColor(id);
@@ -939,8 +958,8 @@ void PlanningScene::saveGeometryToStream(std::ostream& out) const
         out << obj->subframe_poses_.size() << '\n';  // Number of subframes
         for (auto& pose_pair : obj->subframe_poses_)
         {
-          out << pose_pair.first << '\n';          // Subframe name
-          writePoseToText(out, pose_pair.second);  // Subframe pose
+          out << pose_pair.first << '\n';                     // Subframe name
+          utilities::writePoseToText(out, pose_pair.second);  // Subframe pose
         }
       }
     }
@@ -1000,7 +1019,7 @@ bool PlanningScene::loadGeometryFromStream(std::istream& in, const Eigen::Isomet
 
       // Read in object pose (added in the new scene format)
       pose.setIdentity();
-      if (uses_new_scene_format && !readPoseFromText(in, pose))
+      if (uses_new_scene_format && !utilities::readPoseFromText(in, pose))
       {
         RCLCPP_ERROR(LOGGER, "Failed to read object pose from scene file");
         return false;
@@ -1019,12 +1038,12 @@ bool PlanningScene::loadGeometryFromStream(std::istream& in, const Eigen::Isomet
           RCLCPP_ERROR(LOGGER, "Failed to load shape from scene file");
           return false;
         }
-        if (!readPoseFromText(in, pose))
+        if (!utilities::readPoseFromText(in, pose))
         {
           RCLCPP_ERROR(LOGGER, "Failed to read pose from scene file");
           return false;
         }
-        float r, g, b, a;
+        double r, g, b, a;
         if (!(in >> r >> g >> b >> a))
         {
           RCLCPP_ERROR(LOGGER, "Improperly formatted color in scene geometry file");
@@ -1055,7 +1074,7 @@ bool PlanningScene::loadGeometryFromStream(std::istream& in, const Eigen::Isomet
         {
           std::string subframe_name;
           in >> subframe_name;
-          if (!readPoseFromText(in, pose))
+          if (!utilities::readPoseFromText(in, pose))
           {
             RCLCPP_ERROR(LOGGER, "Failed to read subframe pose from scene file");
             return false;
@@ -1076,30 +1095,6 @@ bool PlanningScene::loadGeometryFromStream(std::istream& in, const Eigen::Isomet
       return false;
     }
   } while (true);
-}
-
-bool PlanningScene::readPoseFromText(std::istream& in, Eigen::Isometry3d& pose) const
-{
-  double x, y, z, rx, ry, rz, rw;
-  if (!(in >> x >> y >> z))
-  {
-    RCLCPP_ERROR(LOGGER, "Improperly formatted translation in scene geometry file");
-    return false;
-  }
-  if (!(in >> rx >> ry >> rz >> rw))
-  {
-    RCLCPP_ERROR(LOGGER, "Improperly formatted rotation in scene geometry file");
-    return false;
-  }
-  pose = Eigen::Translation3d(x, y, z) * Eigen::Quaterniond(rw, rx, ry, rz);
-  return true;
-}
-
-void PlanningScene::writePoseToText(std::ostream& out, const Eigen::Isometry3d& pose) const
-{
-  out << pose.translation().x() << ' ' << pose.translation().y() << ' ' << pose.translation().z() << '\n';
-  Eigen::Quaterniond r(pose.linear());
-  out << r.x() << ' ' << r.y() << ' ' << r.z() << ' ' << r.w() << '\n';
 }
 
 void PlanningScene::setCurrentState(const moveit_msgs::msg::RobotState& state)
@@ -1379,7 +1374,7 @@ void PlanningScene::processOctomapMsg(const octomap_msgs::msg::OctomapWithPose& 
 
   const Eigen::Isometry3d& t = getFrameTransform(map.header.frame_id);
   Eigen::Isometry3d p;
-  PlanningScene::poseMsgToEigen(map.origin, p);
+  utilities::poseMsgToEigen(map.origin, p);
   p = t * p;
   world_->addToObject(OCTOMAP_NS, std::make_shared<const shapes::OcTree>(om), p);
 }
@@ -1497,7 +1492,7 @@ bool PlanningScene::processAttachedCollisionObjectMsg(const moveit_msgs::msg::At
         Eigen::Isometry3d subframe_pose;
         for (std::size_t i = 0; i < object.object.subframe_poses.size(); ++i)
         {
-          PlanningScene::poseMsgToEigen(object.object.subframe_poses[i], subframe_pose);
+          utilities::poseMsgToEigen(object.object.subframe_poses[i], subframe_pose);
           std::string name = object.object.subframe_names[i];
           subframe_poses[name] = subframe_pose;
         }
@@ -1673,22 +1668,6 @@ bool PlanningScene::processCollisionObjectMsg(const moveit_msgs::msg::CollisionO
   return false;
 }
 
-void PlanningScene::poseMsgToEigen(const geometry_msgs::msg::Pose& msg, Eigen::Isometry3d& out)
-{
-  Eigen::Translation3d translation(msg.position.x, msg.position.y, msg.position.z);
-  Eigen::Quaterniond quaternion(msg.orientation.w, msg.orientation.x, msg.orientation.y, msg.orientation.z);
-  if ((quaternion.x() == 0) && (quaternion.y() == 0) && (quaternion.z() == 0) && (quaternion.w() == 0))
-  {
-    RCLCPP_WARN(LOGGER, "Empty quaternion found in pose message. Setting to neutral orientation.");
-    quaternion.setIdentity();
-  }
-  else
-  {
-    quaternion.normalize();
-  }
-  out = translation * quaternion;
-}
-
 bool PlanningScene::shapesAndPosesFromCollisionObjectMessage(const moveit_msgs::msg::CollisionObject& object,
                                                              Eigen::Isometry3d& object_pose,
                                                              std::vector<shapes::ShapeConstPtr>& shapes,
@@ -1714,7 +1693,7 @@ bool PlanningScene::shapesAndPosesFromCollisionObjectMessage(const moveit_msgs::
   shapes.reserve(num_shapes);
   shape_poses.reserve(num_shapes);
 
-  PlanningScene::poseMsgToEigen(object.pose, object_pose);
+  utilities::poseMsgToEigen(object.pose, object_pose);
 
   bool switch_object_pose_and_shape_pose = false;
   if (num_shapes == 1)
@@ -1731,7 +1710,7 @@ bool PlanningScene::shapesAndPosesFromCollisionObjectMessage(const moveit_msgs::
     if (!s)
       return;
     Eigen::Isometry3d pose;
-    PlanningScene::poseMsgToEigen(pose_msg, pose);
+    utilities::poseMsgToEigen(pose_msg, pose);
     if (!switch_object_pose_and_shape_pose)
     {
       shape_poses.emplace_back(std::move(pose));
@@ -1812,7 +1791,7 @@ bool PlanningScene::processCollisionObjectAdd(const moveit_msgs::msg::CollisionO
   Eigen::Isometry3d subframe_pose;
   for (std::size_t i = 0; i < object.subframe_poses.size(); ++i)
   {
-    PlanningScene::poseMsgToEigen(object.subframe_poses[i], subframe_pose);
+    utilities::poseMsgToEigen(object.subframe_poses[i], subframe_pose);
     std::string name = object.subframe_names[i];
     subframes[name] = subframe_pose;
   }
@@ -1854,7 +1833,7 @@ bool PlanningScene::processCollisionObjectMove(const moveit_msgs::msg::Collision
     const Eigen::Isometry3d& world_to_object_header_transform = getFrameTransform(object.header.frame_id);
     Eigen::Isometry3d header_to_pose_transform;
 
-    PlanningScene::poseMsgToEigen(object.pose, header_to_pose_transform);
+    utilities::poseMsgToEigen(object.pose, header_to_pose_transform);
 
     const Eigen::Isometry3d object_frame_transform = world_to_object_header_transform * header_to_pose_transform;
     world_->setObjectPose(object.id, object_frame_transform);

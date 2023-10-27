@@ -118,61 +118,31 @@ public:
 
   /** @brief Constructor
    *  @param robot_description The name of the ROS parameter that contains the URDF (in string format)
-   *  @param tf_buffer A pointer to a tf2_ros::Buffer
    *  @param name A name identifying this planning scene monitor
    */
-  [[deprecated("Passing tf2_ros::Buffer to PlanningSceneMonitor's constructor is deprecated")]] PlanningSceneMonitor(
-      const rclcpp::Node::SharedPtr& node, const std::string& robot_description,
-      const std::shared_ptr<tf2_ros::Buffer>& /* unused */, const std::string& name = "")
-    : PlanningSceneMonitor(node, robot_description, name)
-  {
-  }
   PlanningSceneMonitor(const rclcpp::Node::SharedPtr& node, const std::string& robot_description,
                        const std::string& name = "");
 
   /** @brief Constructor
    *  @param rml A pointer to a kinematic model loader
-   *  @param tf_buffer A pointer to a tf2_ros::Buffer
    *  @param name A name identifying this planning scene monitor
    */
-  [[deprecated("Passing tf2_ros::Buffer to PlanningSceneMonitor's constructor is deprecated")]] PlanningSceneMonitor(
-      const rclcpp::Node::SharedPtr& node, const robot_model_loader::RobotModelLoaderPtr& rml,
-      const std::shared_ptr<tf2_ros::Buffer>& /* unused */, const std::string& name = "")
-    : PlanningSceneMonitor(node, rml, name)
-  {
-  }
   PlanningSceneMonitor(const rclcpp::Node::SharedPtr& node, const robot_model_loader::RobotModelLoaderPtr& rml,
                        const std::string& name = "");
 
   /** @brief Constructor
    *  @param scene The scene instance to maintain up to date with monitored information
    *  @param robot_description The name of the ROS parameter that contains the URDF (in string format)
-   *  @param tf_buffer A pointer to a tf2_ros::Buffer
    *  @param name A name identifying this planning scene monitor
    */
-  [[deprecated("Passing tf2_ros::Buffer to PlanningSceneMonitor's constructor is deprecated")]] PlanningSceneMonitor(
-      const rclcpp::Node::SharedPtr& node, const planning_scene::PlanningScenePtr& scene,
-      const std::string& robot_description, const std::shared_ptr<tf2_ros::Buffer>& /* unused */,
-      const std::string& name = "")
-    : PlanningSceneMonitor(node, scene, robot_description, name)
-  {
-  }
   PlanningSceneMonitor(const rclcpp::Node::SharedPtr& node, const planning_scene::PlanningScenePtr& scene,
                        const std::string& robot_description, const std::string& name = "");
 
   /** @brief Constructor
    *  @param scene The scene instance to maintain up to date with monitored information
    *  @param rml A pointer to a kinematic model loader
-   *  @param tf_buffer A pointer to a tf2_ros::Buffer
    *  @param name A name identifying this planning scene monitor
    */
-  [[deprecated("Passing tf2_ros::Buffer to PlanningSceneMonitor's constructor is deprecated")]] PlanningSceneMonitor(
-      const rclcpp::Node::SharedPtr& node, const planning_scene::PlanningScenePtr& scene,
-      const robot_model_loader::RobotModelLoaderPtr& rml, const std::shared_ptr<tf2_ros::Buffer>& /* unused */,
-      const std::string& name = "")
-    : PlanningSceneMonitor(node, scene, rml, name)
-  {
-  }
   PlanningSceneMonitor(const rclcpp::Node::SharedPtr& node, const planning_scene::PlanningScenePtr& scene,
                        const robot_model_loader::RobotModelLoaderPtr& rml, const std::string& name = "");
 
@@ -622,6 +592,8 @@ private:
 
   friend class LockedPlanningSceneRO;
   friend class LockedPlanningSceneRW;
+
+  rclcpp::Logger logger_;
 };
 
 /** \brief This is a convenience class for obtaining access to an
@@ -639,7 +611,7 @@ private:
  * a member of this class.  However because of the "operator->" here
  * which returns a PlanningSceneConstPtr, this works.
  *
- * Any number of these "ReadOnly" locks can exist at a given time.
+ * Any number of these "read_only" locks can exist at a given time.
  * The intention is that users which only need to read from the
  * PlanningScene will use these and will thus not interfere with each
  * other.

@@ -33,7 +33,13 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-/* Author: Ioan Sucan */
+/* Author: Ioan Sucan
+ * Desc: Fix start state collision adapter which will attempt to sample a new collision-free configuration near a
+ * specified configuration (in collision) by perturbing the joint values by a small amount. The amount that it will
+ * perturb the values by is specified by the jiggle_fraction parameter that controls the perturbation as a percentage of
+ * the total range of motion for the joint. The other parameter for this adapter specifies how many random perturbations
+ * the adapter will sample before giving up
+ */
 
 #include <moveit/planning_request_adapter/planning_request_adapter.h>
 #include <moveit/robot_state/conversions.h>
@@ -42,15 +48,18 @@
 #include <rclcpp/logger.hpp>
 #include <rclcpp/logging.hpp>
 #include <rclcpp/node.hpp>
+#include <moveit/utils/logger.hpp>
 
 namespace default_planner_request_adapters
 {
-rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_ros.fix_start_state_path_constraints");
+
+/** @brief This fix start state collision adapter will attempt to sample a new collision-free configuration near a
+ * specified configuration (in collision) by perturbing the joint values by a small amount.*/
 
 class FixStartStatePathConstraints : public planning_request_adapter::PlanningRequestAdapter
 {
 public:
-  FixStartStatePathConstraints() : planning_request_adapter::PlanningRequestAdapter()
+  FixStartStatePathConstraints() : logger_(moveit::makeChildLogger("fix_start_state_path_constraints"))
   {
   }
 
@@ -64,10 +73,10 @@ public:
   }
 
   bool adaptAndPlan(const PlannerFn& planner, const planning_scene::PlanningSceneConstPtr& planning_scene,
-                    const planning_interface::MotionPlanRequest& req, planning_interface::MotionPlanResponse& res,
-                    std::vector<std::size_t>& added_path_index) const override
+                    const planning_interface::MotionPlanRequest& req,
+                    planning_interface::MotionPlanResponse& res) const override
   {
-    RCLCPP_DEBUG(LOGGER, "Running '%s'", getDescription().c_str());
+    RCLCPP_DEBUG(logger_, "Running '%s'", getDescription().c_str());
 
     // get the specified start state
     moveit::core::RobotState start_state = planning_scene->getCurrentState();
@@ -77,9 +86,9 @@ public:
     if (planning_scene->isStateValid(start_state, req.group_name) &&
         !planning_scene->isStateValid(start_state, req.path_constraints, req.group_name))
     {
-      RCLCPP_INFO(LOGGER, "Path constraints not satisfied for start state...");
+      RCLCPP_INFO(logger_, "Path constraints not satisfied for start state...");
       planning_scene->isStateValid(start_state, req.path_constraints, req.group_name, true);
-      RCLCPP_INFO(LOGGER, "Planning to path constraints...");
+      RCLCPP_INFO(logger_, "Planning to path constraints...");
 
       planning_interface::MotionPlanRequest req2 = req;
       req2.goal_constraints.resize(1);
@@ -89,14 +98,14 @@ public:
       // we call the planner for this additional request, but we do not want to include potential
       // index information from that call
       std::vector<std::size_t> added_path_index_temp;
-      added_path_index_temp.swap(added_path_index);
+      added_path_index_temp.swap(res.added_path_index);
       bool solved1 = planner(planning_scene, req2, res2);
-      added_path_index_temp.swap(added_path_index);
+      added_path_index_temp.swap(res.added_path_index);
 
       if (solved1)
       {
         planning_interface::MotionPlanRequest req3 = req;
-        RCLCPP_INFO(LOGGER, "Planned to path constraints. Resuming original planning request.");
+        RCLCPP_INFO(logger_, "Planned to path constraints. Resuming original planning request.");
 
         // extract the last state of the computed motion plan and set it as the new start state
         moveit::core::robotStateToRobotStateMsg(res2.trajectory->getLastWayPoint(), req3.start_state);
@@ -106,12 +115,16 @@ public:
         if (solved2)
         {
           // since we add a prefix, we need to correct any existing index positions
-          for (std::size_t& added_index : added_path_index)
+          for (std::size_t& added_index : res.added_path_index)
+          {
             added_index += res2.trajectory->getWayPointCount();
+          }
 
           // we mark the fact we insert a prefix path (we specify the index position we just added)
           for (std::size_t i = 0; i < res2.trajectory->getWayPointCount(); ++i)
-            added_path_index.push_back(i);
+          {
+            res.added_path_index.push_back(i);
+          }
 
           // we need to append the solution paths.
           res2.trajectory->append(*res.trajectory, 0.0);
@@ -125,7 +138,7 @@ public:
       }
       else
       {
-        RCLCPP_WARN(LOGGER, "Unable to plan to path constraints. Running usual motion plan.");
+        RCLCPP_WARN(logger_, "Unable to plan to path constraints. Running usual motion plan.");
         res.error_code.val = moveit_msgs::msg::MoveItErrorCodes::START_STATE_VIOLATES_PATH_CONSTRAINTS;
         res.planning_time = res2.planning_time;
         return false;  // skip remaining adapters and/or planner
@@ -133,10 +146,13 @@ public:
     }
     else
     {
-      RCLCPP_DEBUG(LOGGER, "Path constraints are OK. Running usual motion plan.");
+      RCLCPP_DEBUG(logger_, "Path constraints are OK. Running usual motion plan.");
       return planner(planning_scene, req, res);
     }
   }
+
+private:
+  rclcpp::Logger logger_;
 };
 }  // namespace default_planner_request_adapters
 

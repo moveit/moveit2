@@ -46,10 +46,10 @@
 #include <map>
 #include <memory>
 #include <mutex>
+#include <moveit/utils/logger.hpp>
 
 namespace kinematics_plugin_loader
 {
-rclcpp::Logger LOGGER = rclcpp::get_logger("kinematics_plugin_loader");
 class KinematicsPluginLoader::KinematicsLoaderImpl
 {
 public:
@@ -61,11 +61,12 @@ public:
    */
   KinematicsLoaderImpl(const rclcpp::Node::SharedPtr& node, const std::string& robot_description,
                        const std::map<std::string, std::string>& possible_kinematics_solvers,
-                       const std::map<std::string, double>& search_res)
+                       const std::map<std::string, double>& search_res, const rclcpp::Logger& logger)
     : node_(node)
     , robot_description_(robot_description)
     , possible_kinematics_solvers_(possible_kinematics_solvers)
     , search_res_(search_res)
+    , logger_(logger)
   {
     try
     {
@@ -75,7 +76,7 @@ public:
     }
     catch (pluginlib::PluginlibException& e)
     {
-      RCLCPP_ERROR(LOGGER, "Unable to construct kinematics loader. Error: %s", e.what());
+      RCLCPP_ERROR(logger_, "Unable to construct kinematics loader. Error: %s", e.what());
     }
   }
 
@@ -88,7 +89,7 @@ public:
   {
     std::vector<std::string> tips;
     // get the last link in the chain
-    RCLCPP_DEBUG(LOGGER,
+    RCLCPP_DEBUG(logger_,
                  "Choosing tip frame of kinematic solver for group %s"
                  "based on last link in chain",
                  jmg->getName().c_str());
@@ -98,7 +99,7 @@ public:
     // Error check
     if (tips.empty())
     {
-      RCLCPP_ERROR(LOGGER, "Error choosing kinematic solver tip frame(s).");
+      RCLCPP_ERROR(logger_, "Error choosing kinematic solver tip frame(s).");
     }
 
     // Debug tip choices
@@ -106,7 +107,7 @@ public:
     tip_debug << "Planning group '" << jmg->getName() << "' has tip(s): ";
     for (const auto& tip : tips)
       tip_debug << tip << ", ";
-    RCLCPP_DEBUG_STREAM(LOGGER, tip_debug.str());
+    RCLCPP_DEBUG_STREAM(logger_, tip_debug.str());
 
     return tips;
   }
@@ -116,23 +117,23 @@ public:
     kinematics::KinematicsBasePtr result;
     if (!kinematics_loader_)
     {
-      RCLCPP_ERROR(LOGGER, "Invalid kinematics loader.");
+      RCLCPP_ERROR(logger_, "Invalid kinematics loader.");
       return result;
     }
     if (!jmg)
     {
-      RCLCPP_ERROR(LOGGER, "Specified group is nullptr. Cannot allocate kinematics solver.");
+      RCLCPP_ERROR(logger_, "Specified group is nullptr. Cannot allocate kinematics solver.");
       return result;
     }
     const std::vector<const moveit::core::LinkModel*>& links = jmg->getLinkModels();
     if (links.empty())
     {
-      RCLCPP_ERROR(LOGGER, "No links specified for group '%s'. Cannot allocate kinematics solver.",
+      RCLCPP_ERROR(logger_, "No links specified for group '%s'. Cannot allocate kinematics solver.",
                    jmg->getName().c_str());
       return result;
     }
 
-    RCLCPP_DEBUG(LOGGER, "Trying to allocate kinematics solver for group '%s'", jmg->getName().c_str());
+    RCLCPP_DEBUG(logger_, "Trying to allocate kinematics solver for group '%s'", jmg->getName().c_str());
 
     const std::string& base = links.front()->getParentJointModel()->getParentLinkModel() ?
                                   links.front()->getParentJointModel()->getParentLinkModel()->getName() :
@@ -140,7 +141,7 @@ public:
 
     // just to be sure, do not call the same pluginlib instance allocation function in parallel
     std::scoped_lock slock(lock_);
-    for (auto const& [group, solver] : possible_kinematics_solvers_)
+    for (const auto& [group, solver] : possible_kinematics_solvers_)
     {
       // Don't bother trying to load a solver for the wrong group
       if (group != jmg->getName())
@@ -161,14 +162,14 @@ public:
           if (!result->initialize(node_, jmg->getParentModel(), jmg->getName(),
                                   (base.empty() || base[0] != '/') ? base : base.substr(1), tips, search_res))
           {
-            RCLCPP_ERROR(LOGGER, "Kinematics solver of type '%s' could not be initialized for group '%s'",
+            RCLCPP_ERROR(logger_, "Kinematics solver of type '%s' could not be initialized for group '%s'",
                          solver.c_str(), jmg->getName().c_str());
             result.reset();
             continue;
           }
 
           result->setDefaultTimeout(jmg->getDefaultIKTimeout());
-          RCLCPP_DEBUG(LOGGER,
+          RCLCPP_DEBUG(logger_,
                        "Successfully allocated and initialized a kinematics solver of type '%s' with search "
                        "resolution %lf for group '%s' at address %p",
                        solver.c_str(), search_res, jmg->getName().c_str(), result.get());
@@ -177,14 +178,14 @@ public:
       }
       catch (pluginlib::PluginlibException& e)
       {
-        RCLCPP_ERROR(LOGGER, "The kinematics plugin (%s) failed to load. Error: %s", solver.c_str(), e.what());
+        RCLCPP_ERROR(logger_, "The kinematics plugin (%s) failed to load. Error: %s", solver.c_str(), e.what());
       }
     }
 
     if (!result)
     {
-      RCLCPP_DEBUG(LOGGER, "No usable kinematics solver was found for this group.\n"
-                           "Did you load kinematics.yaml into your node's namespace?");
+      RCLCPP_DEBUG(logger_, "No usable kinematics solver was found for this group.\n"
+                            "Did you load kinematics.yaml into your node's namespace?");
     }
     return result;
   }
@@ -206,9 +207,9 @@ public:
 
   void status() const
   {
-    for (auto const& [group, solver] : possible_kinematics_solvers_)
+    for (const auto& [group, solver] : possible_kinematics_solvers_)
     {
-      RCLCPP_INFO(LOGGER, "Solver for group '%s': '%s' (search resolution = %lf)", group.c_str(), solver.c_str(),
+      RCLCPP_INFO(logger_, "Solver for group '%s': '%s' (search resolution = %lf)", group.c_str(), solver.c_str(),
                   search_res_.at(group));
     }
   }
@@ -222,6 +223,7 @@ private:
   std::map<const moveit::core::JointModelGroup*, kinematics::KinematicsBasePtr> instances_;
   std::mutex lock_;
   std::mutex cache_lock_;
+  rclcpp::Logger logger_;
 };
 
 void KinematicsPluginLoader::status() const
@@ -232,7 +234,7 @@ void KinematicsPluginLoader::status() const
   }
   else
   {
-    RCLCPP_INFO(LOGGER, "Loader function was never required");
+    RCLCPP_INFO(logger_, "Loader function was never required");
   }
 }
 
@@ -240,7 +242,7 @@ moveit::core::SolverAllocatorFn KinematicsPluginLoader::getLoaderFunction(const 
 {
   if (!loader_)
   {
-    RCLCPP_DEBUG(LOGGER, "Configuring kinematics solvers");
+    RCLCPP_DEBUG(logger_, "Configuring kinematics solvers");
     groups_.clear();
 
     std::map<std::string, std::string> possible_kinematics_solvers;
@@ -251,7 +253,7 @@ moveit::core::SolverAllocatorFn KinematicsPluginLoader::getLoaderFunction(const 
     {
       const std::vector<srdf::Model::Group>& known_groups = srdf_model->getGroups();
 
-      RCLCPP_DEBUG(LOGGER, "Loading kinematics parameters...");
+      RCLCPP_DEBUG(logger_, "Loading kinematics parameters...");
       // read the list of plugin names for possible kinematics solvers
       for (const srdf::Model::Group& known_group : known_groups)
       {
@@ -265,7 +267,7 @@ moveit::core::SolverAllocatorFn KinematicsPluginLoader::getLoaderFunction(const 
 
         if (kinematics_solver.empty())
         {
-          RCLCPP_DEBUG(LOGGER, "No kinematics solver specified for group '%s'.", known_group.name_.c_str());
+          RCLCPP_DEBUG(logger_, "No kinematics solver specified for group '%s'.", known_group.name_.c_str());
           continue;
         }
 
@@ -273,26 +275,26 @@ moveit::core::SolverAllocatorFn KinematicsPluginLoader::getLoaderFunction(const 
         groups_.push_back(known_group.name_);
 
         possible_kinematics_solvers[known_group.name_] = kinematics_solver;
-        RCLCPP_DEBUG(LOGGER, "Found kinematics solver '%s' for group '%s'.", kinematics_solver.c_str(),
+        RCLCPP_DEBUG(logger_, "Found kinematics solver '%s' for group '%s'.", kinematics_solver.c_str(),
                      known_group.name_.c_str());
 
         std::string kinematics_solver_res_param_name = kinematics_param_prefix + ".kinematics_solver_search_resolution";
         const auto kinematics_solver_search_resolution =
             group_params_.at(known_group.name_).kinematics_solver_search_resolution;
         search_res[known_group.name_] = kinematics_solver_search_resolution;
-        RCLCPP_DEBUG(LOGGER, "Found param %s : %f", kinematics_solver_res_param_name.c_str(),
+        RCLCPP_DEBUG(logger_, "Found param %s : %f", kinematics_solver_res_param_name.c_str(),
                      kinematics_solver_search_resolution);
 
         std::string kinematics_solver_timeout_param_name = kinematics_param_prefix + ".kinematics_solver_timeout";
         const auto kinematics_solver_timeout = group_params_.at(known_group.name_).kinematics_solver_timeout;
         ik_timeout_[known_group.name_] = kinematics_solver_timeout;
-        RCLCPP_DEBUG(LOGGER, "Found param %s : %f", kinematics_solver_timeout_param_name.c_str(),
+        RCLCPP_DEBUG(logger_, "Found param %s : %f", kinematics_solver_timeout_param_name.c_str(),
                      kinematics_solver_timeout);
       }
     }
 
-    loader_ =
-        std::make_shared<KinematicsLoaderImpl>(node_, robot_description_, possible_kinematics_solvers, search_res);
+    loader_ = std::make_shared<KinematicsLoaderImpl>(node_, robot_description_, possible_kinematics_solvers, search_res,
+                                                     logger_);
   }
 
   return [&loader = *loader_](const moveit::core::JointModelGroup* jmg) {

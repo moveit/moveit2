@@ -42,7 +42,7 @@
 
 namespace
 {
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.pilz_industrial_motion_planner.trajectory_functions");
+const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.pilz_industrial_motion_planner.trajectory_functions");
 }
 
 bool pilz_industrial_motion_planner::computePoseIK(const planning_scene::PlanningSceneConstPtr& scene,
@@ -72,10 +72,7 @@ bool pilz_industrial_motion_planner::computePoseIK(const planning_scene::Plannin
     return false;
   }
 
-  moveit::core::RobotState rstate(robot_model);
-  // By setting the robot state to default values, we basically allow
-  // the user of this function to supply an incomplete or even empty seed.
-  rstate.setToDefaultValues();
+  moveit::core::RobotState rstate{ scene->getCurrentState() };
   rstate.setVariablePositions(seed);
 
   moveit::core::GroupStateValidityCallbackFn ik_constraint_function;
@@ -118,12 +115,12 @@ bool pilz_industrial_motion_planner::computePoseIK(const planning_scene::Plannin
                        timeout);
 }
 
-bool pilz_industrial_motion_planner::computeLinkFK(const moveit::core::RobotModelConstPtr& robot_model,
+bool pilz_industrial_motion_planner::computeLinkFK(const planning_scene::PlanningSceneConstPtr& scene,
                                                    const std::string& link_name,
                                                    const std::map<std::string, double>& joint_state,
                                                    Eigen::Isometry3d& pose)
-{  // create robot state
-  moveit::core::RobotState rstate(robot_model);
+{  // take robot state from the current scene
+  moveit::core::RobotState rstate{ scene->getCurrentState() };
 
   // check the reference frame of the target pose
   if (!rstate.knowsFrameTransform(link_name))
@@ -132,8 +129,6 @@ bool pilz_industrial_motion_planner::computeLinkFK(const moveit::core::RobotMode
     return false;
   }
 
-  // set the joint positions
-  rstate.setToDefaultValues();
   rstate.setVariablePositions(joint_state);
 
   // update the frame
@@ -206,7 +201,7 @@ bool pilz_industrial_motion_planner::generateJointTrajectory(
     const planning_scene::PlanningSceneConstPtr& scene,
     const pilz_industrial_motion_planner::JointLimitsContainer& joint_limits, const KDL::Trajectory& trajectory,
     const std::string& group_name, const std::string& link_name,
-    const std::map<std::string, double>& initial_joint_position, const double& sampling_time,
+    const std::map<std::string, double>& initial_joint_position, double sampling_time,
     trajectory_msgs::msg::JointTrajectory& joint_trajectory, moveit_msgs::msg::MoveItErrorCodes& error_code,
     bool check_self_collision)
 {
@@ -530,8 +525,7 @@ bool pilz_industrial_motion_planner::isRobotStateStationary(const moveit::core::
 }
 
 bool pilz_industrial_motion_planner::linearSearchIntersectionPoint(const std::string& link_name,
-                                                                   const Eigen::Vector3d& center_position,
-                                                                   const double& r,
+                                                                   const Eigen::Vector3d& center_position, double r,
                                                                    const robot_trajectory::RobotTrajectoryPtr& traj,
                                                                    bool inverseOrder, std::size_t& index)
 {
@@ -569,7 +563,7 @@ bool pilz_industrial_motion_planner::linearSearchIntersectionPoint(const std::st
 
 bool pilz_industrial_motion_planner::intersectionFound(const Eigen::Vector3d& p_center,
                                                        const Eigen::Vector3d& p_current, const Eigen::Vector3d& p_next,
-                                                       const double& r)
+                                                       double r)
 {
   return ((p_current - p_center).norm() <= r) && ((p_next - p_center).norm() >= r);
 }

@@ -1,38 +1,12 @@
 cmake_minimum_required(VERSION 3.22)
 project(moveit_servo LANGUAGES CXX)
 
-# C++ Libraries #################################################
-
-# Core C++ library for calculations and collision checking.
-# Provides interface used by the component node.
-set(SERVO_LIB_NAME moveit_servo_lib)
-# C++ library containing the parameters initialization
-# - This is intended to use with the component node when you
-# -   need to read the parameters loaded into servo in a separate
-# -   node.
-set(SERVO_PARAM_LIB_NAME ${SERVO_LIB_NAME}_parameters)
-
-# Pose Tracking
-set(POSE_TRACKING pose_tracking)
-
-# Component Nodes (Shared libraries) ############################
-set(SERVO_COMPONENT_NODE servo_node)
-set(SERVO_CONTROLLER_INPUT servo_controller_input)
-
-# Executable Nodes ##############################################
-set(SERVO_NODE_MAIN_NAME servo_node_main)
-set(POSE_TRACKING_DEMO_NAME servo_pose_tracking_demo)
-set(FAKE_SERVO_CMDS_NAME fake_command_publisher)
-
-#################################################################
-
 # Common cmake code applied to all moveit packages
 find_package(moveit_common REQUIRED)
 moveit_package()
 
 set(THIS_PACKAGE_INCLUDE_DEPENDS
   control_msgs
-  control_toolbox
   geometry_msgs
   moveit_core
   moveit_msgs
@@ -49,8 +23,7 @@ set(THIS_PACKAGE_INCLUDE_DEPENDS
 )
 
 find_package(ament_cmake REQUIRED)
-find_package(eigen3_cmake_module REQUIRED)
-find_package(Eigen3 REQUIRED)
+find_package(generate_parameter_library REQUIRED)
 foreach(Dependency IN ITEMS ${THIS_PACKAGE_INCLUDE_DEPENDS})
   find_package(${Dependency} REQUIRED)
 endforeach()
@@ -64,65 +37,61 @@ include_directories(
 ###################
 
 # This library provides a way of loading parameters for servo
-add_library(${SERVO_PARAM_LIB_NAME} SHARED
-  src/servo_parameters.cpp
-  src/parameter_descriptor_builder.cpp
+generate_parameter_library(
+  moveit_servo_lib_parameters
+  config/servo_parameters.yaml
 )
-set_target_properties(${SERVO_PARAM_LIB_NAME} PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
-ament_target_dependencies(${SERVO_PARAM_LIB_NAME} ${THIS_PACKAGE_INCLUDE_DEPENDS})
 
 # This library provides a C++ interface for sending realtime twist or joint commands to a robot
-add_library(${SERVO_LIB_NAME} SHARED
-  src/collision_check.cpp
-  src/enforce_limits.cpp
+add_library(moveit_servo_lib_cpp SHARED
+  src/collision_monitor.cpp
   src/servo.cpp
-  src/servo_calcs.cpp
-  src/utilities.cpp
+  src/utils/common.cpp
+  src/utils/command.cpp
+
 )
-set_target_properties(${SERVO_LIB_NAME} PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
-ament_target_dependencies(${SERVO_LIB_NAME} ${THIS_PACKAGE_INCLUDE_DEPENDS})
-target_link_libraries(${SERVO_LIB_NAME} ${SERVO_PARAM_LIB_NAME})
+set_target_properties(moveit_servo_lib_cpp PROPERTIES VERSION "${moveit_servo_VERSION}")
+target_link_libraries(moveit_servo_lib_cpp moveit_servo_lib_parameters)
+ament_target_dependencies(moveit_servo_lib_cpp ${THIS_PACKAGE_INCLUDE_DEPENDS})
 
-add_library(${POSE_TRACKING} SHARED src/pose_tracking.cpp)
-ament_target_dependencies(${POSE_TRACKING} ${THIS_PACKAGE_INCLUDE_DEPENDS})
-target_link_libraries(${POSE_TRACKING} ${SERVO_LIB_NAME})
+add_library(moveit_servo_lib_ros SHARED src/servo_node.cpp)
+set_target_properties(moveit_servo_lib_ros PROPERTIES VERSION "${moveit_servo_VERSION}")
+target_link_libraries(moveit_servo_lib_ros moveit_servo_lib_cpp)
+ament_target_dependencies(moveit_servo_lib_ros ${THIS_PACKAGE_INCLUDE_DEPENDS})
 
-#####################
-## Component Nodes ##
-#####################
+######################
+## Components ##
+######################
 
-# Add and export library to run as a ROS node component, and receive commands via topics
-add_library(${SERVO_COMPONENT_NODE} SHARED src/servo_node.cpp)
-ament_target_dependencies(${SERVO_COMPONENT_NODE} ${THIS_PACKAGE_INCLUDE_DEPENDS})
-target_link_libraries(${SERVO_COMPONENT_NODE} ${SERVO_LIB_NAME})
-rclcpp_components_register_nodes(${SERVO_COMPONENT_NODE} "moveit_servo::ServoNode")
-
-# Add executable for using a controller
-add_library(${SERVO_CONTROLLER_INPUT} SHARED src/teleop_demo/joystick_servo_example.cpp)
-ament_target_dependencies(${SERVO_CONTROLLER_INPUT} ${THIS_PACKAGE_INCLUDE_DEPENDS})
-rclcpp_components_register_nodes(${SERVO_CONTROLLER_INPUT} "moveit_servo::JoyToServoPub")
+rclcpp_components_register_node(
+  moveit_servo_lib_ros
+  PLUGIN "moveit_servo::ServoNode"
+  EXECUTABLE servo_node
+)
 
 ######################
 ## Executable Nodes ##
 ######################
 
-# An executable node for the servo server
-add_executable(${SERVO_NODE_MAIN_NAME} src/servo_node_main.cpp)
-target_link_libraries(${SERVO_NODE_MAIN_NAME} ${SERVO_COMPONENT_NODE})
-ament_target_dependencies(${SERVO_NODE_MAIN_NAME} ${THIS_PACKAGE_INCLUDE_DEPENDS})
+# Executable node for the joint jog demo
+add_executable(demo_joint_jog demos/cpp_interface/demo_joint_jog.cpp )
+target_link_libraries(demo_joint_jog moveit_servo_lib_cpp)
+ament_target_dependencies(demo_joint_jog ${THIS_PACKAGE_INCLUDE_DEPENDS})
 
-# An example of pose tracking
-add_executable(${POSE_TRACKING_DEMO_NAME} src/cpp_interface_demo/pose_tracking_demo.cpp)
-target_link_libraries(${POSE_TRACKING_DEMO_NAME} ${POSE_TRACKING})
-ament_target_dependencies(${POSE_TRACKING_DEMO_NAME} ${THIS_PACKAGE_INCLUDE_DEPENDS})
+# Executable node for the twist demo
+add_executable(demo_twist demos/cpp_interface/demo_twist.cpp )
+target_link_libraries(demo_twist moveit_servo_lib_cpp)
+ament_target_dependencies(demo_twist ${THIS_PACKAGE_INCLUDE_DEPENDS})
 
-# Add executable to publish fake servo commands for testing/demo purposes
-add_executable(${FAKE_SERVO_CMDS_NAME} test/publish_fake_jog_commands.cpp)
-ament_target_dependencies(${FAKE_SERVO_CMDS_NAME}
-  rclcpp
-  geometry_msgs
-  std_srvs
-)
+# Executable node for the pose demo
+add_executable(demo_pose demos/cpp_interface/demo_pose.cpp )
+target_link_libraries(demo_pose moveit_servo_lib_cpp)
+ament_target_dependencies(demo_pose ${THIS_PACKAGE_INCLUDE_DEPENDS})
+
+# Keyboard control example for servo
+add_executable(servo_keyboard_input demos/servo_keyboard_input.cpp)
+target_include_directories(servo_keyboard_input PUBLIC include)
+ament_target_dependencies(servo_keyboard_input  ${THIS_PACKAGE_INCLUDE_DEPENDS})
 
 #############
 ## Install ##
@@ -131,12 +100,10 @@ ament_target_dependencies(${FAKE_SERVO_CMDS_NAME}
 # Install Libraries
 install(
   TARGETS
-    ${SERVO_LIB_NAME}
-    ${SERVO_LIB_NAME}_parameters
-    ${POSE_TRACKING}
-    ${SERVO_COMPONENT_NODE}
-    ${SERVO_CONTROLLER_INPUT}
-  EXPORT ${PROJECT_NAME}Targets
+    moveit_servo_lib_cpp
+    moveit_servo_lib_ros
+    moveit_servo_lib_parameters
+  EXPORT moveit_servoTargets
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
   RUNTIME DESTINATION bin
@@ -146,73 +113,43 @@ install(
 # Install Binaries
 install(
   TARGETS
-    ${SERVO_NODE_MAIN_NAME}
-    ${CPP_DEMO_NAME}
-    ${POSE_TRACKING_DEMO_NAME}
-    ${FAKE_SERVO_CMDS_NAME}
+  demo_joint_jog
+  demo_twist
+  demo_pose
+  servo_node
+  servo_keyboard_input
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
-  RUNTIME DESTINATION lib/${PROJECT_NAME}
+  RUNTIME DESTINATION lib/moveit_servo
 )
 
 # Install include, launch, config directories
 install(DIRECTORY include/ DESTINATION include/moveit_servo)
-install(DIRECTORY launch DESTINATION share/${PROJECT_NAME})
-install(DIRECTORY config DESTINATION share/${PROJECT_NAME})
+install(DIRECTORY launch DESTINATION share/moveit_servo)
+install(DIRECTORY config DESTINATION share/moveit_servo)
 
-ament_export_targets(${PROJECT_NAME}Targets HAS_LIBRARY_TARGET)
+ament_export_targets(moveit_servoTargets HAS_LIBRARY_TARGET)
 ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS})
 
-#############
-## TESTING ##
-#############
 
 if(BUILD_TESTING)
-  find_package(ament_lint_auto REQUIRED)
-  find_package(ament_cmake_gtest REQUIRED)
-  find_package(ros_testing REQUIRED)
-  find_package(Boost REQUIRED COMPONENTS filesystem)
 
-  # These don't pass yet, disable them for now
-  set(ament_cmake_copyright_FOUND TRUE)
-  set(ament_cmake_cpplint_FOUND TRUE)
-  set(ament_cmake_flake8_FOUND TRUE)
-  set(ament_cmake_uncrustify_FOUND TRUE)
+    find_package(ament_cmake_gtest REQUIRED)
+    find_package(ros_testing REQUIRED)
 
-  # Run all lint tests in package.xml except those listed above
-  ament_lint_auto_find_test_dependencies()
+    ament_add_gtest_executable(moveit_servo_utils_test tests/test_utils.cpp)
+    target_link_libraries(moveit_servo_utils_test moveit_servo_lib_cpp)
+    ament_target_dependencies(moveit_servo_utils_test ${THIS_PACKAGE_INCLUDE_DEPENDS})
+    add_ros_test(tests/launch/servo_utils.test.py TIMEOUT 30 ARGS "test_binary_dir:=${CMAKE_CURRENT_BINARY_DIR}")
 
-  # Servo integration launch test
-  ament_add_gtest_executable(test_servo_integration
-      test/test_servo_interface.cpp
-      test/servo_launch_test_common.hpp
-  )
-  target_link_libraries(test_servo_integration ${SERVO_PARAM_LIB_NAME})
-  ament_target_dependencies(test_servo_integration ${THIS_PACKAGE_INCLUDE_DEPENDS})
-  add_ros_test(test/launch/test_servo_integration.test.py TIMEOUT 120 ARGS "test_binary_dir:=${CMAKE_CURRENT_BINARY_DIR}")
+    ament_add_gtest_executable(moveit_servo_cpp_integration_test tests/test_integration.cpp tests/servo_cpp_fixture.hpp)
+    target_link_libraries(moveit_servo_cpp_integration_test moveit_servo_lib_cpp)
+    ament_target_dependencies(moveit_servo_cpp_integration_test ${THIS_PACKAGE_INCLUDE_DEPENDS})
+    add_ros_test(tests/launch/servo_cpp_integration.test.py TIMEOUT 30 ARGS "test_binary_dir:=${CMAKE_CURRENT_BINARY_DIR}")
 
-  # Servo collision checking integration test
-  ament_add_gtest_executable(test_servo_collision
-        test/test_servo_collision.cpp
-        test/servo_launch_test_common.hpp
-  )
-  target_link_libraries(test_servo_collision ${SERVO_PARAM_LIB_NAME})
-  ament_target_dependencies(test_servo_collision ${THIS_PACKAGE_INCLUDE_DEPENDS})
-  add_ros_test(test/launch/test_servo_collision.test.py TIMEOUT 120 ARGS "test_binary_dir:=${CMAKE_CURRENT_BINARY_DIR}")
-
-  # pose_tracking
-  ament_add_gtest_executable(test_servo_pose_tracking
-        test/pose_tracking_test.cpp
-  )
-  ament_target_dependencies(test_servo_pose_tracking ${THIS_PACKAGE_INCLUDE_DEPENDS})
-  target_link_libraries(test_servo_pose_tracking ${POSE_TRACKING})
-  add_ros_test(test/launch/test_servo_pose_tracking.test.py TIMEOUT 120 ARGS "test_binary_dir:=${CMAKE_CURRENT_BINARY_DIR}")
-
-  # Unit tests
-  ament_add_gtest(servo_calcs_unit_tests
-    test/servo_calcs_unit_tests.cpp
-  )
-  target_link_libraries(servo_calcs_unit_tests ${SERVO_LIB_NAME})
+    ament_add_gtest_executable(moveit_servo_ros_integration_test tests/test_ros_integration.cpp tests/servo_ros_fixture.hpp)
+    ament_target_dependencies(moveit_servo_ros_integration_test ${THIS_PACKAGE_INCLUDE_DEPENDS})
+    add_ros_test(tests/launch/servo_ros_integration.test.py TIMEOUT 120 ARGS "test_binary_dir:=${CMAKE_CURRENT_BINARY_DIR}")
 
 endif()
 

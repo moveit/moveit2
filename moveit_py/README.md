@@ -20,5 +20,16 @@ Community contributions are welcome.
 
 For detailed contribution guidelines please consult the official [MoveIt contribution guidelines](https://moveit.ros.org/documentation/contributing/).
 
+## Citing the Library
+If you use this library in your work please use the following citation:
+```bibtex
+@software{fagan2023moveitpy,
+  author = {Fagan, Peter David},
+  title = {{MoveIt 2 Python Library: A Software Library for Robotics Education and Research}},
+  url = {https://github.com/ros-planning/moveit2/tree/main/moveit_py},
+  year = {2023}
+}
+```
+
 ## Acknowledgements
-Thank you to the [Google Summer of Code program](https://summerofcode.withgoogle.com/) for sponsoring the development of this Python library. Thank you to the MoveIt maintainers Henning Kayser (@henningkayser) and Michael Gorner (@v4hn) for their guidance as supervisors of my GSoC project. Finally thank you to the [ML Collective](https://mlcollective.org/) for providing compute support for this project.
+Thank you to the [Google Summer of Code program](https://summerofcode.withgoogle.com/) for sponsoring the development of this Python library. Thank you to the MoveIt maintainers Henning Kayser (@henningkayser) and Michael Goerner (@v4hn) for their guidance as supervisors of my GSoC project. Finally thank you to the [ML Collective](https://mlcollective.org/) for providing compute support for this project.

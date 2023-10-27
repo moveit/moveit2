@@ -2,6 +2,44 @@
 Changelog for package moveit_ros_planning_interface
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.8.0 (2023-09-10)
+------------------
+* Specify controller name in MGI execution (`#2257 <https://github.com/ros-planning/moveit2/issues/2257>`_)
+  * Specify controller name in MGI execute
+  * Finish comment
+  ---------
+  Co-authored-by: Sebastian Jahr <sebastian.jahr@picknik.ai>
+* Remove deprecated move_group pick& place functionality + demo (`#2239 <https://github.com/ros-planning/moveit2/issues/2239>`_)
+  Co-authored-by: Jafar Uruç <cafer.abdi@gmail.com>
+* Contributors: Sebastian Jahr, Stephanie Eng
+
+2.7.4 (2023-05-18)
+------------------
+* Scale acceleration and velocity of cartesian interpolations (`#1968 <https://github.com/ros-planning/moveit2/issues/1968>`_)
+* Contributors: Yadu
+
+2.7.3 (2023-04-24)
+------------------
+* Replace Variable PROJECT_NAME in CMakeLists.txt with the actual name (`#2020 <https://github.com/ros-planning/moveit2/issues/2020>`_)
+* Contributors: Shobuj Paul
+
+2.7.2 (2023-04-18)
+------------------
+* Update pre-commit (`#2094 <https://github.com/ros-planning/moveit2/issues/2094>`_)
+* Merge pull request `#1900 <https://github.com/ros-planning/moveit2/issues/1900>`_ from Abishalini/pr-sync-1245f15
+  Sync with MoveIt1
+* Readd comment and assign error code
+* Merge https://github.com/ros-planning/moveit/commit/1245f151393fe09023efec3e1faead2d26737227
+* Update description of moveit_ros_planning_interface (`#2045 <https://github.com/ros-planning/moveit2/issues/2045>`_)
+  * Update description of moveit_ros_planning_interface
+  * Update moveit_ros/planning_interface/package.xml
+  Co-authored-by: Henning Kayser <henningkayser@picknik.ai>
+  ---------
+  Co-authored-by: Henning Kayser <henningkayser@picknik.ai>
+* Merge PR `#3197 <https://github.com/ros-planning/moveit2/issues/3197>`_: Improve computeCartesianPath()
+* Simplify MGI::computeCartesianPath()
+* Contributors: Abishalini, Abishalini Sivaraman, Robert Haschke, Sebastian Jahr, Shobuj Paul
+
 2.7.1 (2023-03-23)
 ------------------
 * Fix member naming (`#1949 <https://github.com/ros-planning/moveit2/issues/1949>`_)

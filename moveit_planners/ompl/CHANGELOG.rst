@@ -2,6 +2,39 @@
 Changelog for package moveit_planners_ompl
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.8.0 (2023-09-10)
+------------------
+* Fix typo in model_based_planning_context.h (`#2243 <https://github.com/ros-planning/moveit2/issues/2243>`_)
+* Warn if optimization objective does not match expected values (`#2213 <https://github.com/ros-planning/moveit2/issues/2213>`_)
+  * Warn if optimization objective does not match expected values
+  * Update moveit_planners/ompl/ompl_interface/src/model_based_planning_context.cpp
+  Co-authored-by: Sebastian Jahr <sebastian.jahr@tuta.io>
+  * Format
+  ---------
+* Contributors: Stephanie Eng
+
+2.7.4 (2023-05-18)
+------------------
+* Fix Constraint Planning Segfault (`#2130 <https://github.com/ros-planning/moveit2/issues/2130>`_)
+  * Fix Constraint Planning Segfault
+  * Reuse planner data
+  * apply clang formatting
+  * apply clang formatting round 2
+  * add FIXME note and verbose output of planning graph size
+  ---------
+  Co-authored-by: Sebastian Jahr <sebastian.jahr@picknik.ai>
+* Contributors: Marq Rasmussen
+
+2.7.3 (2023-04-24)
+------------------
+* Replace Variable PROJECT_NAME in CMakeLists.txt with the actual name (`#2020 <https://github.com/ros-planning/moveit2/issues/2020>`_)
+* Contributors: Shobuj Paul
+
+2.7.2 (2023-04-18)
+------------------
+* Update pre-commit (`#2094 <https://github.com/ros-planning/moveit2/issues/2094>`_)
+* Contributors: Shobuj Paul
+
 2.7.1 (2023-03-23)
 ------------------
 * Fix include install destination (`#2008 <https://github.com/ros-planning/moveit2/issues/2008>`_)

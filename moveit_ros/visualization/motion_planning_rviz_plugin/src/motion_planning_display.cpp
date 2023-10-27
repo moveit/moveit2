@@ -65,18 +65,14 @@
 #include <moveit/robot_state/conversions.h>
 #include <moveit/trajectory_processing/trajectory_tools.h>
 
-#include <boost/format.hpp>
-#include <boost/algorithm/string/replace.hpp>
-#include <boost/algorithm/string/trim.hpp>
-
 #include <QShortcut>
 
 #include "ui_motion_planning_rviz_plugin_frame.h"
 #include <moveit/utils/rclcpp_utils.h>
+#include <moveit/utils/logger.hpp>
 
 namespace moveit_rviz_plugin
 {
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_ros_visualization.motion_planning_display");
 
 // ******************************************************************************************
 // Base class constructor
@@ -284,7 +280,7 @@ void MotionPlanningDisplay::toggleSelectPlanningGroupSubscription(bool enable)
   if (enable)
   {
     planning_group_sub_ = node_->create_subscription<std_msgs::msg::String>(
-        "/rviz/moveit/select_planning_group", 1,
+        "/rviz/moveit/select_planning_group", rclcpp::SystemDefaultsQoS(),
         [this](const std_msgs::msg::String::ConstSharedPtr& msg) { return selectPlanningGroupCallback(msg); });
   }
   else
@@ -432,16 +428,19 @@ void MotionPlanningDisplay::changedMetricsTextHeight()
 void MotionPlanningDisplay::displayTable(const std::map<std::string, double>& values, const Ogre::ColourValue& color,
                                          const Ogre::Vector3& pos, const Ogre::Quaternion& orient)
 {
-  // the line we want to render
-  std::stringstream ss;
-  for (const std::pair<const std::string, double>& value : values)
-    ss << boost::format("%-10s %-4.2f") % value.first % value.second << '\n';
-
-  if (ss.str().empty())
+  if (values.empty())
   {
     text_to_display_->setVisible(false);
     return;
   }
+
+  // the line we want to render
+  std::stringstream ss;
+  ss.setf(std::ios_base::fixed);
+  ss.precision(2);
+
+  for (const auto& [label, value] : values)
+    ss << label << ':' << value << '\n';
 
   text_to_display_->setCaption(ss.str());
   text_to_display_->setColor(color);
@@ -1038,7 +1037,7 @@ void MotionPlanningDisplay::changePlanningGroup(const std::string& group)
     planning_group_property_->setStdString(group);
   }
   else
-    RCLCPP_ERROR(LOGGER, "Group [%s] not found in the robot model.", group.c_str());
+    RCLCPP_ERROR(moveit::getLogger(), "Group [%s] not found in the robot model.", group.c_str());
 }
 
 void MotionPlanningDisplay::changedPlanningGroup()
@@ -1343,7 +1342,7 @@ void MotionPlanningDisplay::update(float wall_dt, float ros_dt)
   PlanningSceneDisplay::update(wall_dt, ros_dt);
 }
 
-void MotionPlanningDisplay::updateInternal(float wall_dt, float ros_dt)
+void MotionPlanningDisplay::updateInternal(double wall_dt, double ros_dt)
 {
   PlanningSceneDisplay::updateInternal(wall_dt, ros_dt);
 

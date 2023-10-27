@@ -46,7 +46,6 @@
 
 namespace moveit_rviz_plugin
 {
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_ros_visualization.motion_planning_frame_states");
 
 void MotionPlanningFrame::populateRobotStatesList()
 {
@@ -103,7 +102,7 @@ void MotionPlanningFrame::loadStoredStates(const std::string& pattern)
     }
     catch (std::exception& ex)
     {
-      RCLCPP_ERROR(LOGGER, "%s", ex.what());
+      RCLCPP_ERROR(logger_, "%s", ex.what());
     }
     if (!got_state)
       continue;
@@ -158,7 +157,7 @@ void MotionPlanningFrame::saveRobotStateButtonClicked(const moveit::core::RobotS
           }
           catch (std::exception& ex)
           {
-            RCLCPP_ERROR(LOGGER, "Cannot save robot state on the database: %s", ex.what());
+            RCLCPP_ERROR(logger_, "Cannot save robot state on the database: %s", ex.what());
           }
         }
         else
@@ -234,7 +233,7 @@ void MotionPlanningFrame::removeStateButtonClicked()
           }
           catch (std::exception& ex)
           {
-            RCLCPP_ERROR(LOGGER, "%s", ex.what());
+            RCLCPP_ERROR(logger_, "%s", ex.what());
           }
         }
         break;

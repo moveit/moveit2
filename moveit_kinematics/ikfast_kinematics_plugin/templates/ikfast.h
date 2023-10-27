@@ -267,7 +267,7 @@ public:
     }
   }
 
-  std::vector<IkSingleDOFSolutionBase<T> > _vbasesol;  ///< solution and their offsets if joints are mimiced
+  std::vector<IkSingleDOFSolutionBase<T> > _vbasesol;  ///< solution and their offsets if joints are mimicked
   std::vector<int> _vfree;
 };
 

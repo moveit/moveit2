@@ -2,6 +2,47 @@
 Changelog for package moveit_ros_benchmarks
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.8.0 (2023-09-10)
+------------------
+
+2.7.4 (2023-05-18)
+------------------
+
+2.7.3 (2023-04-24)
+------------------
+* Replace Variable PROJECT_NAME in CMakeLists.txt with the actual name (`#2020 <https://github.com/ros-planning/moveit2/issues/2020>`_)
+* Contributors: Shobuj Paul
+
+2.7.2 (2023-04-18)
+------------------
+* Update pre-commit (`#2094 <https://github.com/ros-planning/moveit2/issues/2094>`_)
+* Extract parallel planning from moveit cpp (`#2043 <https://github.com/ros-planning/moveit2/issues/2043>`_)
+  * Add parallel_planning_interface
+  * Add parallel planning interface
+  * Rename package to pipeline_planning_interface
+  * Move plan_responses_container into own header + source file
+  * Add plan_responses_contrainer source file
+  * Add solution selection and stopping criterion function files
+  * Remove parallel planning from moveit_cpp
+  * Move parallel planning into planning package
+  * Update moveit_cpp
+  * Drop planning_interface changes
+  * Add documentation
+  * Update other moveit packages
+  * Remove removed header
+  * Address CI complains
+  * Address clang-tidy complains
+  * Address clang-tidy complains 2
+  * Address clang-tidy complains 3
+  * Extract planning pipeline map creation function from moveit_cpp
+  * Cleanup comment
+  * Use const moveit::core::RobotModelConstPtr&
+  * Formatting
+  * Add header descriptions
+  * Remove superfluous TODOs
+  * Cleanup
+* Contributors: Sebastian Jahr, Shobuj Paul
+
 2.7.1 (2023-03-23)
 ------------------
 * Fix member naming (`#1949 <https://github.com/ros-planning/moveit2/issues/1949>`_)

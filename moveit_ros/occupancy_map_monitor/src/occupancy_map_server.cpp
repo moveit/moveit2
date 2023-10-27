@@ -45,13 +45,17 @@
 #include <rclcpp/logging.hpp>
 #include <rclcpp/node.hpp>
 #include <rclcpp/publisher.hpp>
+#include <rclcpp/version.h>
+#include <moveit/utils/logger.hpp>
+#if RCLCPP_VERSION_GTE(20, 0, 0)
+#include <rclcpp/event_handler.hpp>
+#else
 #include <rclcpp/qos_event.hpp>
+#endif
 #include <rclcpp/time.hpp>
 #include <rclcpp/utilities.hpp>
 #include <memory>
 #include <sstream>
-
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.ros.occupancy_map_server");
 
 static void publishOctomap(const rclcpp::Publisher<octomap_msgs::msg::Octomap>::SharedPtr& octree_binary_pub,
                            occupancy_map_monitor::OccupancyMapMonitor& server)
@@ -69,7 +73,7 @@ static void publishOctomap(const rclcpp::Publisher<octomap_msgs::msg::Octomap>::
     {
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wold-style-cast"
-      RCLCPP_ERROR_THROTTLE(LOGGER, steady_clock, 1000, "Could not generate OctoMap message");
+      RCLCPP_ERROR_THROTTLE(moveit::getLogger(), steady_clock, 1000, "Could not generate OctoMap message");
 #pragma GCC diagnostic pop
     }
   }
@@ -77,7 +81,7 @@ static void publishOctomap(const rclcpp::Publisher<octomap_msgs::msg::Octomap>::
   {
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wold-style-cast"
-    RCLCPP_ERROR_THROTTLE(LOGGER, steady_clock, 1000, "Exception thrown while generating OctoMap message");
+    RCLCPP_ERROR_THROTTLE(moveit::getLogger(), steady_clock, 1000, "Exception thrown while generating OctoMap message");
 #pragma GCC diagnostic pop
   }
   server.getOcTreePtr()->unlockRead();

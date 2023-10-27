@@ -6,6 +6,7 @@ find_package(moveit_common REQUIRED)
 moveit_package()
 
 find_package(ament_cmake REQUIRED)
+find_package(fmt REQUIRED)
 find_package(generate_parameter_library REQUIRED)
 find_package(moveit_msgs REQUIRED)
 # find_package(moveit_ros_perception REQUIRED)
@@ -33,6 +34,7 @@ set(THIS_PACKAGE_INCLUDE_DIRS
     robot_model_loader/include
     constraint_sampler_manager_loader/include
     planning_pipeline/include
+    planning_pipeline_interfaces/include
     planning_scene_monitor/include
     trajectory_execution_manager/include
     plan_execution/include
@@ -45,11 +47,14 @@ set(THIS_PACKAGE_LIBRARIES
   moveit_kinematics_plugin_loader
   moveit_robot_model_loader
   moveit_constraint_sampler_manager_loader
+  planning_pipeline_parameters
   moveit_planning_pipeline
+  moveit_planning_pipeline_interfaces
   moveit_trajectory_execution_manager
   moveit_plan_execution
   moveit_planning_scene_monitor
   moveit_collision_plugin_loader
+  default_plan_request_adapter_parameters
   moveit_default_planning_request_adapter_plugins
   moveit_cpp
 )
@@ -77,29 +82,31 @@ include_directories(${THIS_PACKAGE_INCLUDE_DIRS})
 include_directories(SYSTEM
                     ${EIGEN3_INCLUDE_DIRS})
 
-add_subdirectory(rdf_loader)
 add_subdirectory(collision_plugin_loader)
-add_subdirectory(kinematics_plugin_loader)
-add_subdirectory(robot_model_loader)
 add_subdirectory(constraint_sampler_manager_loader)
+add_subdirectory(introspection)
+add_subdirectory(kinematics_plugin_loader)
+add_subdirectory(moveit_cpp)
+add_subdirectory(plan_execution)
+add_subdirectory(planning_components_tools)
 add_subdirectory(planning_pipeline)
+add_subdirectory(planning_pipeline_interfaces)
 add_subdirectory(planning_request_adapter_plugins)
 add_subdirectory(planning_scene_monitor)
-add_subdirectory(planning_components_tools)
+add_subdirectory(rdf_loader)
+add_subdirectory(robot_model_loader)
 add_subdirectory(trajectory_execution_manager)
-add_subdirectory(plan_execution)
-add_subdirectory(moveit_cpp)
 
 install(
   TARGETS ${THIS_PACKAGE_LIBRARIES}
-  EXPORT ${PROJECT_NAME}Targets
+  EXPORT moveit_ros_planningTargets
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
   RUNTIME DESTINATION bin
   INCLUDES DESTINATION include/moveit_ros_planning
 )
 
-ament_export_targets(${PROJECT_NAME}Targets HAS_LIBRARY_TARGET)
+ament_export_targets(moveit_ros_planningTargets HAS_LIBRARY_TARGET)
 ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS})
 
 pluginlib_export_plugin_description_file(moveit_core "planning_request_adapters_plugin_description.xml")

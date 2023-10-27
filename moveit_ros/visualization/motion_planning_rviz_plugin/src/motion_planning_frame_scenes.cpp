@@ -53,13 +53,10 @@
 
 #include "ui_motion_planning_rviz_plugin_frame.h"
 
-#include <boost/math/constants/constants.hpp>
-
 #include <memory>
 
 namespace moveit_rviz_plugin
 {
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_ros_visualization.motion_planning_frame_scenes");
 
 void MotionPlanningFrame::saveSceneButtonClicked()
 {

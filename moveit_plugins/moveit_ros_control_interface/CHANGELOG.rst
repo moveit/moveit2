@@ -2,6 +2,24 @@
 Changelog for package moveit_ros_control_interface
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.8.0 (2023-09-10)
+------------------
+* Simplify controller manager namespacing (`#2210 <https://github.com/ros-planning/moveit2/issues/2210>`_)
+* Minor cleanup to ros_control_interface and trajectory execution (`#2208 <https://github.com/ros-planning/moveit2/issues/2208>`_)
+* Contributors: Stephanie Eng
+
+2.7.4 (2023-05-18)
+------------------
+
+2.7.3 (2023-04-24)
+------------------
+* Replace Variable PROJECT_NAME in CMakeLists.txt with the actual name (`#2020 <https://github.com/ros-planning/moveit2/issues/2020>`_)
+* Fix controller_manager_plugin's switch controllers functionality (`#2116 <https://github.com/ros-planning/moveit2/issues/2116>`_)
+* Contributors: Jafar, Shobuj Paul
+
+2.7.2 (2023-04-18)
+------------------
+
 2.7.1 (2023-03-23)
 ------------------
 * Add Warning Message for Out of Date Controller Information (`#1983 <https://github.com/ros-planning/moveit2/issues/1983>`_)

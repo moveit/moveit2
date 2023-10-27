@@ -10,8 +10,11 @@ class TeleopDevice(ABC, Node, metaclass=abc.ABCMeta):
     twist_publisher: Any
     servo_node_start_client: Any
     servo_node_stop_client: Any
-    teleop_process: Any
-    def __init__(self, node_name, device_name, device_config) -> None: ...
+    ee_frame_name: Any
+    teleop_thread: Any
+    def __init__(
+        self, node_name, device_name, device_config, ee_frame_name
+    ) -> None: ...
     def start_teleop(self) -> None: ...
     def stop_teleop(self) -> None: ...
     @abstractmethod
