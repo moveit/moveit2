@@ -6,9 +6,16 @@ The [MoveIt Motion Planning Framework for ROS 2](http://moveit.ros.org). For the
 
 ## Continuous Integration Status
 
+[![License](https://img.shields.io/badge/license-Apache%202-4EB1BA.svg?style=socialflat-square&)](https://www.apache.org/licenses/LICENSE-2.0.html)
 [![Formatting (pre-commit)](https://github.com/ros-planning/moveit2/actions/workflows/format.yaml/badge.svg?branch=main)](https://github.com/ros-planning/moveit2/actions/workflows/format.yaml?query=branch%3Amain)
 [![CI (Rolling and Humble)](https://github.com/ros-planning/moveit2/actions/workflows/ci.yaml/badge.svg?branch=main)](https://github.com/ros-planning/moveit2/actions/workflows/ci.yaml?query=branch%3Amain)
 [![Code Coverage](https://codecov.io/gh/ros-planning/moveit2/branch/main/graph/badge.svg?token=W7uHKcY0ly)](https://codecov.io/gh/ros-planning/moveit2)
+[![Stars](https://img.shields.io/github/stars/ros-planning/moveit2.svg?style=flat)](https://github.com/ros-planning/moveit2/stars)
+[![Issues](https://img.shields.io/github/issues/ros-planning/moveit2.svg?style=flat)](https://github.com/ros-planning/moveit2/issues)
+[![Forks](https://img.shields.io/github/forks/ros-planning/moveit2.svg?style=flat)](https://github.com/ros-planning/moveit2/forks)
+[![PR:s Welcome](https://img.shields.io/badge/PR:s-welcome-brightgreen.svg)](https://github.com/ros-planning/moveit2/pulls)
+[![First Contributors](https://img.shields.io/badge/first-contributors-brightgreen.svg)](https://github.com/ros-planning/moveit2/pulls)
+![GitHub repo size](https://img.shields.io/github/repo-size/ros-planning/moveit2)
 
 ## Getting Started
 
