@@ -32,44 +32,43 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-/** @file
- * @author Henning Kayser
- * @brief Planning Context implementation for STOMP
- **/
+/* Author: Sebastian Jahr */
 
 #pragma once
 
+#include <moveit/macros/class_forward.h>
 #include <moveit/planning_interface/planning_interface.h>
+#include <rclcpp/logging.hpp>
+#include <rclcpp/node.hpp>
 
-#include <stomp_moveit_parameters.hpp>
-
-// Forward declaration
-namespace stomp
+namespace planning_interface
 {
-class Stomp;
-}
+MOVEIT_CLASS_FORWARD(PlanningResponseAdapter);  // Defines PlanningResponseAdapterPtr, ConstPtr, WeakPtr... etc
 
-namespace stomp_moveit
-{
-class StompPlanningContext : public planning_interface::PlanningContext
+/** @brief Concept in MoveIt which can be used to modify the planning solution (post-processing) in a planning pipeline.
+ * PlanningResponseAdapters enable using for example smoothing and trajectory generation algorithms in sequence to
+ * produce a trajectory.
+ */
+class PlanningResponseAdapter
 {
 public:
-  StompPlanningContext(const std::string& name, const std::string& group_name, const stomp_moveit::Params& params);
+  /** @brief Initialize parameters using the passed Node and parameter namespace.
+   *  @param node Node instance used by the adapter
+   *  @param parameter_namespace Parameter namespace for adapter
+      @details If no initialization is needed, simply implement as empty */
+  virtual void initialize(const rclcpp::Node::SharedPtr& node, const std::string& parameter_namespace){};
 
-  void solve(planning_interface::MotionPlanResponse& res) override;
+  /** \brief Get a description of this adapter
+   *  @return Returns a short string that identifies the planning response adapter
+   */
+  [[nodiscard]] virtual std::string getDescription() const = 0;
 
-  void solve(planning_interface::MotionPlanDetailedResponse& res) override;
-
-  bool terminate() override;
-
-  void clear() override;
-
-  void setPathPublisher(const std::shared_ptr<rclcpp::Publisher<visualization_msgs::msg::MarkerArray>>& path_publisher);
-  std::shared_ptr<rclcpp::Publisher<visualization_msgs::msg::MarkerArray>> getPathPublisher();
-
-private:
-  const stomp_moveit::Params params_;
-  std::shared_ptr<stomp::Stomp> stomp_;
-  std::shared_ptr<rclcpp::Publisher<visualization_msgs::msg::MarkerArray>> path_publisher_;
+  /** @brief Adapt the planning response
+   *  @param planning_scene Representation of the environment for the planning
+   *  @param req Motion planning request with a set of constraints
+   *  @param res Motion planning response containing the solution that is adapted. */
+  virtual void adapt(const planning_scene::PlanningSceneConstPtr& planning_scene,
+                     const planning_interface::MotionPlanRequest& req,
+                     planning_interface::MotionPlanResponse& res) const = 0;
 };
-}  // namespace stomp_moveit
+}  // namespace planning_interface

@@ -1,7 +1,7 @@
 /*********************************************************************
  * Software License Agreement (BSD License)
  *
- *  Copyright (c) 2019, Bielefeld University
+ *  Copyright (c) 2012, Willow Garage, Inc.
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *     copyright notice, this list of conditions and the following
  *     disclaimer in the documentation and/or other materials provided
  *     with the distribution.
- *   * Neither the name of Bielefeld University nor the names of its
+ *   * Neither the name of Willow Garage nor the names of its
  *     contributors may be used to endorse or promote products derived
  *     from this software without specific prior written permission.
  *
@@ -32,51 +32,70 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-/* Author: Robert Haschke
-   Desc: This adapter changes the link_name field of a constraint from an object's (sub-)frame name to the name of the
-   robot link, that object is attached to. Transforming the frame names is necessary because the frames of an attached
-   object are not know to a planner.
-*/
+/* Author: Ioan Sucan, Sebastian Jahr
+ * Desc: This adapter checks if the start state is in collision.
+ */
 
 #include <moveit/planning_interface/planning_request_adapter.h>
-#include <moveit/kinematic_constraints/utils.h>
+#include <moveit/robot_state/conversions.h>
+#include <moveit/trajectory_processing/trajectory_tools.h>
 #include <class_loader/class_loader.hpp>
+#include <rclcpp/logging.hpp>
+#include <rclcpp/node.hpp>
+#include <rclcpp/parameter_value.hpp>
 #include <moveit/utils/logger.hpp>
+
+#include <default_request_adapter_parameters.hpp>
 
 namespace default_planning_request_adapters
 {
-/// @brief Transforms frames used in constraints to link frames in the robot model.
-class ResolveConstraintFrames : public planning_interface::PlanningRequestAdapter
+
+/** @brief This adapter checks if the start state is in collision.*/
+class CheckStartStateCollision : public planning_interface::PlanningRequestAdapter
 {
 public:
-  ResolveConstraintFrames() : logger_(moveit::makeChildLogger("resolve_constraint_frames"))
+  CheckStartStateCollision() : logger_(moveit::makeChildLogger("validate_start_state"))
   {
   }
 
   [[nodiscard]] std::string getDescription() const override
   {
-    return std::string("ResolveConstraintFrames");
+    return std::string("CheckStartStateCollision");
   }
 
   [[nodiscard]] moveit::core::MoveItStatus adapt(const planning_scene::PlanningSceneConstPtr& planning_scene,
                                                  planning_interface::MotionPlanRequest& req) const override
   {
     RCLCPP_DEBUG(logger_, "Running '%s'", getDescription().c_str());
-    // Resolve path constraint frames
-    kinematic_constraints::resolveConstraintFrames(planning_scene->getCurrentState(), req.path_constraints);
-    // Resolve goal constraint frames
-    for (moveit_msgs::msg::Constraints& constraint : req.goal_constraints)
+
+    // Get the start state TODO(sjahr): Should we check if req.start state == planning scene start state?
+    moveit::core::RobotState start_state = planning_scene->getCurrentState();
+    moveit::core::robotStateMsgToRobotState(planning_scene->getTransforms(), req.start_state, start_state);
+
+    collision_detection::CollisionRequest creq;
+    creq.group_name = req.group_name;
+    collision_detection::CollisionResult cres;
+    // TODO(sjahr): Would verbose make sense?
+    planning_scene->checkCollision(creq, cres, start_state);
+
+    auto status = moveit::core::MoveItStatus();
+    if (!cres.collision)
     {
-      kinematic_constraints::resolveConstraintFrames(planning_scene->getCurrentState(), constraint);
+      status.error_code = moveit_msgs::msg::MoveItErrorCodes::SUCCESS;
     }
-    return moveit::core::MoveItStatus(moveit_msgs::msg::MoveItErrorCodes::SUCCESS, std::string(""), getDescription());
+    else
+    {
+      status.error_code = moveit_msgs::msg::MoveItErrorCodes::START_STATE_IN_COLLISION;
+      status.message = std::string("Start state in collision.");
+    }
+    status.source = getDescription();
+    return status;
   }
 
 private:
   rclcpp::Logger logger_;
 };
-
 }  // namespace default_planning_request_adapters
 
-CLASS_LOADER_REGISTER_CLASS(default_planning_request_adapters::ResolveConstraintFrames,
-                            planning_interface::PlanningRequestAdapter);
+CLASS_LOADER_REGISTER_CLASS(default_planning_request_adapters::CheckStartStateCollision,
+                            planning_interface::PlanningRequestAdapter)

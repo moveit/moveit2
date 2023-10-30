@@ -83,12 +83,10 @@ def generate_launch_description():
         "pilz": {
             "planning_plugin": "pilz_industrial_motion_planner/CommandPlanner",
             "request_adapters": "",
-            "start_state_max_bounds_error": 0.1,
         },
         "ompl": {
             "planning_plugin": "ompl_interface/OMPLPlanner",
-            "request_adapters": """default_planner_request_adapters/AddTimeOptimalParameterization default_planner_request_adapters/FixWorkspaceBounds default_planner_request_adapters/FixStartStateBounds default_planner_request_adapters/FixStartStateCollision default_planner_request_adapters/FixStartStatePathConstraints""",
-            "start_state_max_bounds_error": 0.1,
+            "request_adapters": """default_planning_request_adapters/AddTimeOptimalParameterization default_planning_request_adapters/ValidateWorkspaceBounds default_planning_request_adapters/CheckStartStateBounds default_planning_request_adapters/CheckStartStateCollision default_planning_request_adapters/FixStartStatePathConstraints""",
         },
     }
     ompl_planning_yaml = load_yaml(

@@ -59,7 +59,6 @@ add_subdirectory(kinematics_metrics)
 add_subdirectory(macros)
 add_subdirectory(online_signal_smoothing)
 add_subdirectory(planning_interface)
-add_subdirectory(planning_request_adapter)
 add_subdirectory(planning_scene)
 add_subdirectory(robot_model)
 add_subdirectory(robot_state)
@@ -115,7 +114,6 @@ install(
     moveit_kinematics_metrics
     moveit_macros
     moveit_planning_interface
-    moveit_planning_request_adapter
     moveit_planning_scene
     moveit_robot_model
     moveit_robot_state

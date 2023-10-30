@@ -1,7 +1,7 @@
 /*********************************************************************
  * Software License Agreement (BSD License)
  *
- *  Copyright (c) 2012, Willow Garage, Inc.
+ *  Copyright (c) 2023, PickNik Inc.
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *     copyright notice, this list of conditions and the following
  *     disclaimer in the documentation and/or other materials provided
  *     with the distribution.
- *   * Neither the name of Willow Garage nor the names of its
+ *   * Neither the name of the copyright holder nor the names of its
  *     contributors may be used to endorse or promote products derived
  *     from this software without specific prior written permission.
  *
@@ -32,35 +32,28 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-/* Author: Ioan Sucan
- * Desc: Empty adapter that just calls the planner
+#pragma once
+
+#include <string>
+
+namespace moveit::core
+{
+/**
+ * @brief Information about potential errors
  */
-
-#include <moveit/planning_request_adapter/planning_request_adapter.h>
-#include <class_loader/class_loader.hpp>
-
-namespace default_planner_request_adapters
+struct MoveItStatus
 {
-/** @brief Empty adapter that just calls the planner. */
-class Empty : public planning_request_adapter::PlanningRequestAdapter
-{
-public:
-  std::string getDescription() const override
-  {
-    return "No Op";
-  }
+  // Error code - encodes the overall reason for failure
+  MoveItErrorCode error_code;
+  // A message to provide additional information
+  std::string message;
+  // Name of the component that created the status
+  std::string source;
 
-  bool adaptAndPlan(const PlannerFn& planner, const planning_scene::PlanningSceneConstPtr& planning_scene,
-                    const planning_interface::MotionPlanRequest& req,
-                    planning_interface::MotionPlanResponse& res) const override
-  {
-    return planner(planning_scene, req, res);
-  }
-
-  void initialize(const rclcpp::Node::SharedPtr& /* node */, const std::string& /* parameter_namespace */) override
+  MoveItStatus(const int code = 0 /*UNDEFINED*/, const std::string& message = std::string(),
+               const std::string& source = std::string())
+    : error_code{ code }, message{ message }, source{ source }
   {
   }
 };
-}  // namespace default_planner_request_adapters
-
-CLASS_LOADER_REGISTER_CLASS(default_planner_request_adapters::Empty, planning_request_adapter::PlanningRequestAdapter)
+}  // namespace moveit::core

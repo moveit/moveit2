@@ -763,88 +763,81 @@ void ompl_interface::ModelBasedPlanningContext::postSolve()
   RCLCPP_DEBUG(LOGGER, "%s", rclcpp::get_c_string(debug_out.str()));
 }
 
-bool ompl_interface::ModelBasedPlanningContext::solve(planning_interface::MotionPlanResponse& res)
+void ompl_interface::ModelBasedPlanningContext::solve(planning_interface::MotionPlanResponse& res)
 {
   res.error_code = solve(request_.allowed_planning_time, request_.num_planning_attempts);
-  if (res.error_code.val == moveit_msgs::msg::MoveItErrorCodes::SUCCESS)
+  if (res.error_code.val != moveit_msgs::msg::MoveItErrorCodes::SUCCESS)
   {
-    double ptime = getLastPlanTime();
-    if (simplify_solutions_)
-    {
-      simplifySolution(request_.allowed_planning_time - ptime);
-      ptime += getLastSimplifyTime();
-    }
-
-    if (interpolate_)
-    {
-      interpolateSolution();
-    }
-
-    // fill the response
-    RCLCPP_DEBUG(LOGGER, "%s: Returning successful solution with %lu states", getName().c_str(),
-                 getOMPLSimpleSetup()->getSolutionPath().getStateCount());
-
-    res.trajectory = std::make_shared<robot_trajectory::RobotTrajectory>(getRobotModel(), getGroupName());
-    getSolutionPath(*res.trajectory);
-    res.planning_time = ptime;
-    return true;
+    RCLCPP_ERROR(LOGGER, "Unable to solve the planning problem");
+    return;
   }
-  else
+  double ptime = getLastPlanTime();
+  if (simplify_solutions_)
   {
-    RCLCPP_INFO(LOGGER, "Unable to solve the planning problem");
-    return false;
+    simplifySolution(request_.allowed_planning_time - ptime);
+    ptime += getLastSimplifyTime();
   }
+
+  if (interpolate_)
+  {
+    interpolateSolution();
+  }
+
+  // fill the response
+  RCLCPP_DEBUG(LOGGER, "%s: Returning successful solution with %lu states", getName().c_str(),
+               getOMPLSimpleSetup()->getSolutionPath().getStateCount());
+
+  res.trajectory = std::make_shared<robot_trajectory::RobotTrajectory>(getRobotModel(), getGroupName());
+  getSolutionPath(*res.trajectory);
+  res.planning_time = ptime;
 }
 
-bool ompl_interface::ModelBasedPlanningContext::solve(planning_interface::MotionPlanDetailedResponse& res)
+void ompl_interface::ModelBasedPlanningContext::solve(planning_interface::MotionPlanDetailedResponse& res)
 {
   moveit_msgs::msg::MoveItErrorCodes moveit_result =
       solve(request_.allowed_planning_time, request_.num_planning_attempts);
-  if (moveit_result.val == moveit_msgs::msg::MoveItErrorCodes::SUCCESS)
-  {
-    res.trajectory.reserve(3);
-
-    // add info about planned solution
-    double ptime = getLastPlanTime();
-    res.processing_time.push_back(ptime);
-    res.description.emplace_back("plan");
-    res.trajectory.resize(res.trajectory.size() + 1);
-    res.trajectory.back() = std::make_shared<robot_trajectory::RobotTrajectory>(getRobotModel(), getGroupName());
-    getSolutionPath(*res.trajectory.back());
-
-    // simplify solution if time remains
-    if (simplify_solutions_)
-    {
-      simplifySolution(request_.allowed_planning_time - ptime);
-      res.processing_time.push_back(getLastSimplifyTime());
-      res.description.emplace_back("simplify");
-      res.trajectory.resize(res.trajectory.size() + 1);
-      res.trajectory.back() = std::make_shared<robot_trajectory::RobotTrajectory>(getRobotModel(), getGroupName());
-      getSolutionPath(*res.trajectory.back());
-    }
-
-    if (interpolate_)
-    {
-      ompl::time::point start_interpolate = ompl::time::now();
-      interpolateSolution();
-      res.processing_time.push_back(ompl::time::seconds(ompl::time::now() - start_interpolate));
-      res.description.emplace_back("interpolate");
-      res.trajectory.resize(res.trajectory.size() + 1);
-      res.trajectory.back() = std::make_shared<robot_trajectory::RobotTrajectory>(getRobotModel(), getGroupName());
-      getSolutionPath(*res.trajectory.back());
-    }
-
-    RCLCPP_DEBUG(LOGGER, "%s: Returning successful solution with %lu states", getName().c_str(),
-                 getOMPLSimpleSetup()->getSolutionPath().getStateCount());
-    res.error_code.val = moveit_result.val;
-    return true;
-  }
-  else
+  if (moveit_result.val != moveit_msgs::msg::MoveItErrorCodes::SUCCESS)
   {
     RCLCPP_INFO(LOGGER, "Unable to solve the planning problem");
     res.error_code.val = moveit_msgs::msg::MoveItErrorCodes::PLANNING_FAILED;
-    return false;
+    return;
   }
+
+  res.trajectory.reserve(3);
+
+  // add info about planned solution
+  double ptime = getLastPlanTime();
+  res.processing_time.push_back(ptime);
+  res.description.emplace_back("plan");
+  res.trajectory.resize(res.trajectory.size() + 1);
+  res.trajectory.back() = std::make_shared<robot_trajectory::RobotTrajectory>(getRobotModel(), getGroupName());
+  getSolutionPath(*res.trajectory.back());
+
+  // simplify solution if time remains
+  if (simplify_solutions_)
+  {
+    simplifySolution(request_.allowed_planning_time - ptime);
+    res.processing_time.push_back(getLastSimplifyTime());
+    res.description.emplace_back("simplify");
+    res.trajectory.resize(res.trajectory.size() + 1);
+    res.trajectory.back() = std::make_shared<robot_trajectory::RobotTrajectory>(getRobotModel(), getGroupName());
+    getSolutionPath(*res.trajectory.back());
+  }
+
+  if (interpolate_)
+  {
+    ompl::time::point start_interpolate = ompl::time::now();
+    interpolateSolution();
+    res.processing_time.push_back(ompl::time::seconds(ompl::time::now() - start_interpolate));
+    res.description.emplace_back("interpolate");
+    res.trajectory.resize(res.trajectory.size() + 1);
+    res.trajectory.back() = std::make_shared<robot_trajectory::RobotTrajectory>(getRobotModel(), getGroupName());
+    getSolutionPath(*res.trajectory.back());
+  }
+
+  RCLCPP_DEBUG(LOGGER, "%s: Returning successful solution with %lu states", getName().c_str(),
+               getOMPLSimpleSetup()->getSolutionPath().getStateCount());
+  res.error_code.val = moveit_result.val;
 }
 
 const moveit_msgs::msg::MoveItErrorCodes ompl_interface::ModelBasedPlanningContext::solve(double timeout,

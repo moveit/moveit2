@@ -1076,7 +1076,8 @@ bool testutils::generateTrajFromBlendTestData(
       goal_state_1, goal_state_1.getRobotModel()->getJointModelGroup(group_name)));
 
   // trajectory generation
-  if (!tg->generate(scene, req_1, res_1, sampling_time_1))
+  tg->generate(scene, req_1, res_1, sampling_time_1);
+  if (res_1.error_code.val != moveit_msgs::msg::MoveItErrorCodes::SUCCESS)
   {
     std::cout << "Failed to generate first trajectory." << '\n';
     return false;
@@ -1096,7 +1097,8 @@ bool testutils::generateTrajFromBlendTestData(
   req_2.goal_constraints.push_back(kinematic_constraints::constructGoalConstraints(
       goal_state_2, goal_state_2.getRobotModel()->getJointModelGroup(group_name)));
   // trajectory generation
-  if (!tg->generate(scene, req_2, res_2, sampling_time_2))
+  tg->generate(scene, req_2, res_2, sampling_time_2);
+  if (res_2.error_code.val != moveit_msgs::msg::MoveItErrorCodes::SUCCESS)
   {
     std::cout << "Failed to generate second trajectory." << '\n';
     return false;
