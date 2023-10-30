@@ -290,7 +290,7 @@ void initPlanningComponent(py::module& m)
            Set the start state of the plan to the current state of the robot.
            )")
 
-      .def("set_goal_state", &moveit_py::bind_planning_component::setStartState,
+      .def("set_start_state", &moveit_py::bind_planning_component::setStartState,
            py::arg("configuration_name") = nullptr, py::arg("robot_state") = nullptr,
            R"(
            Set the start state of the plan to the given robot state.
