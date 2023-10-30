@@ -49,15 +49,14 @@ namespace moveit_py
 {
 namespace bind_planning_scene
 {
-void apply_collision_object(std::shared_ptr<planning_scene::PlanningScene>& planning_scene,
-                            moveit_msgs::msg::CollisionObject& collision_object_msg,
-                            std::optional<moveit_msgs::msg::ObjectColor> color_msg);
+void applyCollisionObject(std::shared_ptr<planning_scene::PlanningScene>& planning_scene,
+                          moveit_msgs::msg::CollisionObject& collision_object_msg,
+                          std::optional<moveit_msgs::msg::ObjectColor> color_msg);
 
-Eigen::MatrixXd get_frame_transform(std::shared_ptr<planning_scene::PlanningScene>& planning_scene,
-                                    const std::string& id);
+Eigen::MatrixXd getFrameTransform(std::shared_ptr<planning_scene::PlanningScene>& planning_scene, const std::string& id);
 
-moveit_msgs::msg::PlanningScene get_planning_scene_msg(std::shared_ptr<planning_scene::PlanningScene>& planning_scene);
+moveit_msgs::msg::PlanningScene getPlanningSceneMsg(std::shared_ptr<planning_scene::PlanningScene>& planning_scene);
 
-void init_planning_scene(py::module& m);
+void initPlanningScene(py::module& m);
 }  // namespace bind_planning_scene
 }  // namespace moveit_py

@@ -132,7 +132,7 @@ protected:
    * @param epsilon
    * @return
    */
-  bool tfNear(const Eigen::Isometry3d& pose1, const Eigen::Isometry3d& pose2, const double& epsilon);
+  bool tfNear(const Eigen::Isometry3d& pose1, const Eigen::Isometry3d& pose2, double epsilon);
 
 protected:
   // ros stuff
@@ -152,8 +152,7 @@ protected:
   random_numbers::RandomNumberGenerator rng_{ random_seed_ };
 };
 
-bool TrajectoryFunctionsTestBase::tfNear(const Eigen::Isometry3d& pose1, const Eigen::Isometry3d& pose2,
-                                         const double& epsilon)
+bool TrajectoryFunctionsTestBase::tfNear(const Eigen::Isometry3d& pose1, const Eigen::Isometry3d& pose2, double epsilon)
 {
   for (std::size_t i = 0; i < 3; ++i)
   {

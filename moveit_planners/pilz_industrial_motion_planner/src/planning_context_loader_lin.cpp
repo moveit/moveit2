@@ -41,8 +41,7 @@
 
 namespace
 {
-static const rclcpp::Logger LOGGER =
-    rclcpp::get_logger("moveit.pilz_industrial_motion_planner.planning_context_loader_lin");
+const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.pilz_industrial_motion_planner.planning_context_loader_lin");
 }
 
 pilz_industrial_motion_planner::PlanningContextLoaderLIN::PlanningContextLoaderLIN()

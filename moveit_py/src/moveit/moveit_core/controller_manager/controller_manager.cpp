@@ -40,7 +40,7 @@ namespace moveit_py
 {
 namespace bind_controller_manager
 {
-void init_execution_status(py::module& m)
+void initExecutionStatus(py::module& m)
 {
   py::module controller_manager = m.def_submodule("controller_manager");
 

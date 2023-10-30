@@ -69,10 +69,10 @@
 
 #include "ui_motion_planning_rviz_plugin_frame.h"
 #include <moveit/utils/rclcpp_utils.h>
+#include <moveit/utils/logger.hpp>
 
 namespace moveit_rviz_plugin
 {
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_ros_visualization.motion_planning_display");
 
 // ******************************************************************************************
 // Base class constructor
@@ -1037,7 +1037,7 @@ void MotionPlanningDisplay::changePlanningGroup(const std::string& group)
     planning_group_property_->setStdString(group);
   }
   else
-    RCLCPP_ERROR(LOGGER, "Group [%s] not found in the robot model.", group.c_str());
+    RCLCPP_ERROR(moveit::getLogger(), "Group [%s] not found in the robot model.", group.c_str());
 }
 
 void MotionPlanningDisplay::changedPlanningGroup()

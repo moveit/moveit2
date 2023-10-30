@@ -58,10 +58,10 @@ public:
   explicit NavigationWidget(QWidget* parent = nullptr);
 
   void setNavs(const QList<QString>& navs);
-  void setEnabled(const int& index, bool enabled);
-  void setSelected(const int& index);
+  void setEnabled(int index, bool enabled);
+  void setSelected(int index);
 
-  bool isEnabled(const int& index) const;
+  bool isEnabled(int index) const;
 
 private:
   QStandardItemModel* model_;

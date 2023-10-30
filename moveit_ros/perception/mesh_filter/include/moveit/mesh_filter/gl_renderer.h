@@ -174,7 +174,7 @@ public:
   unsigned getHeight() const;
 
   /**
-   * \brief set the size of fram buffers
+   * \brief set the size of frame buffers
    * \author Suat Gedikli (gedikli@willowgarage.com)
    * \param[in] width width of frame buffer in pixels
    * \param[in] height height of frame buffer in pixels
@@ -299,11 +299,11 @@ private:
   float cy_;
 
   /** \brief map from thread id to OpenGL context */
-  static std::map<std::thread::id, std::pair<unsigned, GLuint> > context;
+  static std::map<std::thread::id, std::pair<unsigned, GLuint> > s_context;
 
   /* \brief lock for context map */
-  static std::mutex context_lock;
+  static std::mutex s_context_lock;
 
-  static bool glut_initialized;
+  static bool s_glut_initialized;
 };
 }  // namespace mesh_filter

@@ -45,7 +45,7 @@ namespace moveit_py
 {
 namespace bind_robot_model
 {
-void init_robot_model(py::module& m)
+void initRobotModel(py::module& m)
 {
   py::module robot_model = m.def_submodule("robot_model");
 

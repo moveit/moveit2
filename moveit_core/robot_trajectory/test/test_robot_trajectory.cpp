@@ -528,7 +528,7 @@ TEST_F(RobotTrajectoryTestFixture, RobotTrajectoryLength)
 {
   robot_trajectory::RobotTrajectoryPtr trajectory;
   initTestTrajectory(trajectory);
-  EXPECT_GT(robot_trajectory::path_length(*trajectory), 0.0);
+  EXPECT_GT(robot_trajectory::pathLength(*trajectory), 0.0);
 }
 
 TEST_F(RobotTrajectoryTestFixture, RobotTrajectorySmoothness)
@@ -550,13 +550,13 @@ TEST_F(RobotTrajectoryTestFixture, RobotTrajectoryDensity)
   robot_trajectory::RobotTrajectoryPtr trajectory;
   initTestTrajectory(trajectory);
 
-  const auto density = robot_trajectory::waypoint_density(*trajectory);
+  const auto density = robot_trajectory::waypointDensity(*trajectory);
   ASSERT_TRUE(density.has_value());
   EXPECT_GT(density.value(), 0.0);
 
   // Check for empty trajectory
   trajectory->clear();
-  EXPECT_FALSE(robot_trajectory::waypoint_density(*trajectory).has_value());
+  EXPECT_FALSE(robot_trajectory::waypointDensity(*trajectory).has_value());
 }
 
 TEST_F(OneRobot, Unwind)

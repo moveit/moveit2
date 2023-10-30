@@ -52,8 +52,10 @@
 
 namespace pilz_industrial_motion_planner
 {
-static const rclcpp::Logger LOGGER =
-    rclcpp::get_logger("moveit.pilz_industrial_motion_planner.trajectory_generator_lin");
+namespace
+{
+const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.pilz_industrial_motion_planner.trajectory_generator_lin");
+}
 TrajectoryGeneratorLIN::TrajectoryGeneratorLIN(const moveit::core::RobotModelConstPtr& robot_model,
                                                const LimitsContainer& planner_limits, const std::string& /*group_name*/)
   : TrajectoryGenerator::TrajectoryGenerator(robot_model, planner_limits)
@@ -145,7 +147,7 @@ void TrajectoryGeneratorLIN::extractMotionPlanInfo(const planning_scene::Plannin
 
 void TrajectoryGeneratorLIN::plan(const planning_scene::PlanningSceneConstPtr& scene,
                                   const planning_interface::MotionPlanRequest& req, const MotionPlanInfo& plan_info,
-                                  const double& sampling_time, trajectory_msgs::msg::JointTrajectory& joint_trajectory)
+                                  double sampling_time, trajectory_msgs::msg::JointTrajectory& joint_trajectory)
 {
   // create Cartesian path for lin
   std::unique_ptr<KDL::Path> path(setPathLIN(plan_info.start_pose, plan_info.goal_pose));

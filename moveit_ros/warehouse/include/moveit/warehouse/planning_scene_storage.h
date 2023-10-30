@@ -41,6 +41,7 @@
 #include <moveit_msgs/msg/planning_scene.hpp>
 #include <moveit_msgs/msg/motion_plan_request.hpp>
 #include <moveit_msgs/msg/robot_trajectory.hpp>
+#include <rclcpp/logger.hpp>
 
 #include <moveit_warehouse_export.h>
 
@@ -119,5 +120,6 @@ private:
   PlanningSceneCollection planning_scene_collection_;
   MotionPlanRequestCollection motion_plan_request_collection_;
   RobotTrajectoryCollection robot_trajectory_collection_;
+  rclcpp::Logger logger_;
 };
 }  // namespace moveit_warehouse

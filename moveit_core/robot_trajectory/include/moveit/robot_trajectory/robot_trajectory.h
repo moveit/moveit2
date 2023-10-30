@@ -300,7 +300,7 @@ public:
    *  @param The waypoint index after (or equal to) the supplied duration.
    *  @param The progress (0 to 1) between the two waypoints, based on time (not based on joint distances).
    */
-  void findWayPointIndicesForDurationAfterStart(const double& duration, int& before, int& after, double& blend) const;
+  void findWayPointIndicesForDurationAfterStart(double duration, int& before, int& after, double& blend) const;
 
   // TODO support visitor function for interpolation, or at least different types.
   /** @brief Gets a robot state corresponding to a supplied duration from start for the trajectory, using linear time
@@ -396,7 +396,7 @@ std::ostream& operator<<(std::ostream& out, const RobotTrajectory& trajectory);
 /// active joint distances between the two states (L1 norm).
 /// \param[in] trajectory Given robot trajectory
 /// \return Length of the robot trajectory [rad]
-[[nodiscard]] double path_length(const RobotTrajectory& trajectory);
+[[nodiscard]] double pathLength(const RobotTrajectory& trajectory);
 
 /// \brief Calculate the smoothness of a given trajectory
 /// \param[in] trajectory Given robot trajectory
@@ -408,6 +408,6 @@ std::ostream& operator<<(std::ostream& out, const RobotTrajectory& trajectory);
 /// \param[in] trajectory Given robot trajectory
 /// \return Waypoint density of the given trajectory
 /// or nullopt if it is not possible to calculate the density
-[[nodiscard]] std::optional<double> waypoint_density(const RobotTrajectory& trajectory);
+[[nodiscard]] std::optional<double> waypointDensity(const RobotTrajectory& trajectory);
 
 }  // namespace robot_trajectory

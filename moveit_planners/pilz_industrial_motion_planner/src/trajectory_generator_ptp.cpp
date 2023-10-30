@@ -46,8 +46,10 @@
 
 namespace pilz_industrial_motion_planner
 {
-static const rclcpp::Logger LOGGER =
-    rclcpp::get_logger("moveit.pilz_industrial_motion_planner.trajectory_generator_ptp");
+namespace
+{
+const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.pilz_industrial_motion_planner.trajectory_generator_ptp");
+}
 TrajectoryGeneratorPTP::TrajectoryGeneratorPTP(const moveit::core::RobotModelConstPtr& robot_model,
                                                const LimitsContainer& planner_limits, const std::string& group_name)
   : TrajectoryGenerator::TrajectoryGenerator(robot_model, planner_limits)
@@ -91,8 +93,8 @@ TrajectoryGeneratorPTP::TrajectoryGeneratorPTP(const moveit::core::RobotModelCon
 void TrajectoryGeneratorPTP::planPTP(const std::map<std::string, double>& start_pos,
                                      const std::map<std::string, double>& goal_pos,
                                      trajectory_msgs::msg::JointTrajectory& joint_trajectory,
-                                     const double& velocity_scaling_factor, const double& acceleration_scaling_factor,
-                                     const double& sampling_time)
+                                     double velocity_scaling_factor, double acceleration_scaling_factor,
+                                     double sampling_time)
 {
   // initialize joint names
   for (const auto& item : goal_pos)
@@ -245,7 +247,7 @@ void TrajectoryGeneratorPTP::extractMotionPlanInfo(const planning_scene::Plannin
 
 void TrajectoryGeneratorPTP::plan(const planning_scene::PlanningSceneConstPtr& /*scene*/,
                                   const planning_interface::MotionPlanRequest& req, const MotionPlanInfo& plan_info,
-                                  const double& sampling_time, trajectory_msgs::msg::JointTrajectory& joint_trajectory)
+                                  double sampling_time, trajectory_msgs::msg::JointTrajectory& joint_trajectory)
 {
   // plan the ptp trajectory
   planPTP(plan_info.start_joint_position, plan_info.goal_joint_position, joint_trajectory,

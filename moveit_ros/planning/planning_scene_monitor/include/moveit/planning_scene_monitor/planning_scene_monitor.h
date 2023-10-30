@@ -592,6 +592,8 @@ private:
 
   friend class LockedPlanningSceneRO;
   friend class LockedPlanningSceneRW;
+
+  rclcpp::Logger logger_;
 };
 
 /** \brief This is a convenience class for obtaining access to an
@@ -609,7 +611,7 @@ private:
  * a member of this class.  However because of the "operator->" here
  * which returns a PlanningSceneConstPtr, this works.
  *
- * Any number of these "ReadOnly" locks can exist at a given time.
+ * Any number of these "read_only" locks can exist at a given time.
  * The intention is that users which only need to read from the
  * PlanningScene will use these and will thus not interfere with each
  * other.

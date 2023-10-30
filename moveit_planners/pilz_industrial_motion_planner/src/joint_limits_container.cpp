@@ -41,7 +41,10 @@
 
 namespace pilz_industrial_motion_planner
 {
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.pilz_industrial_motion_planner.joint_limits_container");
+namespace
+{
+const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.pilz_industrial_motion_planner.joint_limits_container");
+}
 bool JointLimitsContainer::addLimit(const std::string& joint_name,
                                     pilz_industrial_motion_planner::JointLimit joint_limit)
 {

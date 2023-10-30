@@ -62,22 +62,22 @@ planning_interface::MotionPlanResponse
 plan(std::shared_ptr<moveit_cpp::PlanningComponent>& planning_component,
      std::shared_ptr<moveit_cpp::PlanningComponent::PlanRequestParameters>& single_plan_parameters,
      std::shared_ptr<moveit_cpp::PlanningComponent::MultiPipelinePlanRequestParameters>& multi_plan_parameters,
+     std::shared_ptr<planning_scene::PlanningScene>& planning_scene,
      std::optional<const moveit::planning_pipeline_interfaces::SolutionSelectionFunction> solution_selection_function,
      std::optional<moveit::planning_pipeline_interfaces::StoppingCriterionFunction> stopping_criterion_callback);
 
-bool set_goal(std::shared_ptr<moveit_cpp::PlanningComponent>& planning_component,
-              std::optional<std::string> configuration_name, std::optional<moveit::core::RobotState> robot_state,
-              std::optional<geometry_msgs::msg::PoseStamped> pose_stamped_msg, std::optional<std::string> pose_link,
-              std::optional<std::vector<moveit_msgs::msg::Constraints>> motion_plan_constraints);
+bool setGoal(std::shared_ptr<moveit_cpp::PlanningComponent>& planning_component,
+             std::optional<std::string> configuration_name, std::optional<moveit::core::RobotState> robot_state,
+             std::optional<geometry_msgs::msg::PoseStamped> pose_stamped_msg, std::optional<std::string> pose_link,
+             std::optional<std::vector<moveit_msgs::msg::Constraints>> motion_plan_constraints);
 
-bool set_start_state(std::shared_ptr<moveit_cpp::PlanningComponent>& planning_component,
-                     std::optional<std::string> configuration_name,
-                     std::optional<moveit::core::RobotState> robot_state);
+bool setStartState(std::shared_ptr<moveit_cpp::PlanningComponent>& planning_component,
+                   std::optional<std::string> configuration_name, std::optional<moveit::core::RobotState> robot_state);
 
-void init_plan_request_parameters(py::module& m);
+void initPlanRequestParameters(py::module& m);
 
-void init_multi_plan_request_parameters(py::module& m);
+void initMultiPlanRequestParameters(py::module& m);
 
-void init_planning_component(py::module& m);
+void initPlanningComponent(py::module& m);
 }  // namespace bind_planning_component
 }  // namespace moveit_py
