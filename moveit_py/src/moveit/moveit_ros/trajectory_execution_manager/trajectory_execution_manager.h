@@ -49,7 +49,7 @@ namespace moveit_py
 namespace bind_trajectory_execution_manager
 {
 
-void init_trajectory_execution_manager(py::module& m);
+void initTrajectoryExecutionManager(py::module& m);
 
 }  // namespace bind_trajectory_execution_manager
 }  // namespace moveit_py

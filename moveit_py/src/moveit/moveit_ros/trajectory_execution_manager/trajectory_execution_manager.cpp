@@ -42,7 +42,7 @@ namespace bind_trajectory_execution_manager
 {
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_py.bind_trajectory_execution_manager");
 
-void init_trajectory_execution_manager(py::module& m)
+void initTrajectoryExecutionManager(py::module& m)
 {
   py::class_<trajectory_execution_manager::TrajectoryExecutionManager,
              trajectory_execution_manager::TrajectoryExecutionManagerPtr>(m, "TrajectoryExecutionManager", R"(
