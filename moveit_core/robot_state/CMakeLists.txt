@@ -50,15 +50,6 @@ if(BUILD_TESTING)
     moveit_robot_state
   )
 
-  # As an executable, this benchmark is not run as a test by default
-  ament_add_gtest(test_robot_state_benchmark test/robot_state_benchmark.cpp)
-  target_link_libraries(test_robot_state_benchmark
-    moveit_test_utils
-    moveit_utils
-    moveit_exceptions
-    moveit_robot_state
-  )
-
   ament_add_gtest(test_robot_state_complex test/test_kinematic_complex.cpp)
   target_link_libraries(test_robot_state_complex
     moveit_test_utils
@@ -83,12 +74,12 @@ if(BUILD_TESTING)
   )
 
   ament_add_google_benchmark(
-    robot_state_jacobian_benchmark
-    test/robot_state_jacobian_benchmark.cpp)
-  ament_target_dependencies(robot_state_jacobian_benchmark
+    robot_state_benchmark
+    test/robot_state_benchmark.cpp)
+  ament_target_dependencies(robot_state_benchmark
     kdl_parser
   )
-  target_link_libraries(robot_state_jacobian_benchmark
+  target_link_libraries(robot_state_benchmark
     moveit_robot_model
     moveit_test_utils
     moveit_robot_state
