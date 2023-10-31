@@ -130,6 +130,31 @@ std::optional<int> hasAbsoluteJointSpaceJump(const std::vector<moveit::core::Rob
 }
 }  // namespace
 
+JumpThreshold JumpThreshold::disabled()
+{
+  return JumpThreshold();
+}
+
+JumpThreshold JumpThreshold::relative(double relative_factor)
+{
+  return JumpThreshold(relative_factor);
+}
+
+JumpThreshold JumpThreshold::absolute(double revolute, double prismatic)
+{
+  return JumpThreshold(revolute, prismatic);
+}
+
+JumpThreshold::JumpThreshold(double relative_factor)
+{
+  this->relative_factor = relative_factor;
+}
+JumpThreshold::JumpThreshold(double revolute, double prismatic)
+{
+  this->revolute = revolute;
+  this->prismatic = prismatic;
+}
+
 CartesianInterpolator::Distance CartesianInterpolator::computeCartesianPath(
     RobotState* start_state, const JointModelGroup* group, std::vector<RobotStatePtr>& path, const LinkModel* link,
     const Eigen::Vector3d& translation, bool global_reference_frame, const MaxEEFStep& max_step,
@@ -197,7 +222,7 @@ CartesianInterpolator::Percentage CartesianInterpolator::computeCartesianPath(
 
   // If we are testing for relative jumps, we always want at least MIN_STEPS_FOR_JUMP_THRESH steps
   std::size_t steps = std::max(translation_steps, rotation_steps) + 1;
-  if (jump_threshold.factor > 0 && steps < MIN_STEPS_FOR_JUMP_THRESH)
+  if (jump_threshold.relative_factor > 0 && steps < MIN_STEPS_FOR_JUMP_THRESH)
     steps = MIN_STEPS_FOR_JUMP_THRESH;
 
   // To limit absolute joint-space jumps, we pass consistency limits to the IK solver
@@ -266,7 +291,7 @@ CartesianInterpolator::Percentage CartesianInterpolator::computeCartesianPath(
   for (std::size_t i = 0; i < waypoints.size(); ++i)
   {
     // Don't test joint space jumps for every waypoint, test them later on the whole path.
-    static const JumpThreshold NO_JOINT_SPACE_JUMP_TEST;
+    static const JumpThreshold NO_JOINT_SPACE_JUMP_TEST = JumpThreshold::disabled();
     std::vector<RobotStatePtr> waypoint_path;
     double wp_percentage_solved =
         computeCartesianPath(start_state, group, waypoint_path, link, waypoints[i], global_reference_frame, max_step,
@@ -321,9 +346,9 @@ std::optional<int> hasJointSpaceJumps(const std::vector<moveit::core::RobotState
     return std::nullopt;
   }
 
-  if (jump_threshold.factor > 0.0)
+  if (jump_threshold.relative_factor > 0.0)
   {
-    return hasRelativeJointSpaceJump(waypoints, group, jump_threshold.factor);
+    return hasRelativeJointSpaceJump(waypoints, group, jump_threshold.relative_factor);
   }
 
   if (jump_threshold.revolute > 0.0 || jump_threshold.prismatic > 0.0)

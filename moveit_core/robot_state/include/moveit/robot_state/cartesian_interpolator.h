@@ -44,32 +44,36 @@ namespace moveit
 {
 namespace core
 {
-/** \brief Struct for containing jump_threshold.
-
-    For the purposes of maintaining API, we support both \e jump_threshold_factor which provides a scaling factor for
-    detecting joint space jumps and \e revolute_jump_threshold and \e prismatic_jump_threshold which provide absolute
-    thresholds for detecting joint space jumps. */
-struct JumpThreshold
+/** \brief Class with options for defining joint-space jump thresholds. */
+class JumpThreshold
 {
-  double factor = 0.0;
+public:
+  /** \brief Do not define any jump threshold, i.e., disable joint-space jump detection. */
+  static JumpThreshold disabled();
+
+  /** \brief Detect joint-space jumps relative to the average joint-space displacement along the path.
+
+     The average joint-space distance between consecutive points in the path is computed. If any individual joint-space
+     motion delta is larger than the average distance by a factor of `relative_factor`, it is considered the path has a
+     jump. For instance, a `relative_factor` of 10.0 will detect joint increments larger than 10x the average increment
+   */
+  static JumpThreshold relative(double relative_factor);
+
+  /** \brief Detect joint-space jumps greater than the given absolute thresholds.
+
+     `revolute` and `prismatic` are absolute joint displacement thresholds, in radians and meters respectively.
+     If any two consecutive waypoints have a joint-space distance larger than these values, the path has a jump. */
+  static JumpThreshold absolute(double revolute, double prismatic);
+
+  double relative_factor = 0.0;
   double revolute = 0.0;   // Radians
   double prismatic = 0.0;  // Meters
 
-  explicit JumpThreshold() = default;
-
-  // For relative jump detection, the average joint-space distance between consecutive points in the path is
-  // computed. If any individual joint-space motion delta is larger than this average distance by a factor of
-  // \e jt_factor, it is considered the path has a jump.
-  explicit JumpThreshold(double jt_factor) : JumpThreshold()
-  {
-    factor = jt_factor;
-  }
-
-  explicit JumpThreshold(double jt_revolute, double jt_prismatic) : JumpThreshold()
-  {
-    revolute = jt_revolute;    // Radians
-    prismatic = jt_prismatic;  // Meters
-  }
+private:
+  // Private constructors. Construct using builder methods in the public interface.
+  JumpThreshold() = default;
+  JumpThreshold(double relative_factor);
+  JumpThreshold(double revolute, double prismatic);
 };
 
 /** \brief Struct for containing max_step for computeCartesianPath
@@ -155,20 +159,8 @@ public:
 
      During the computation of the path, it is usually preferred if consecutive joint values do not 'jump' by a
      large amount in joint space, even if the Cartesian distance between the corresponding points is small as expected.
-     To account for this, the \e jump_threshold struct is provided, which comprises three fields:
-     \e jump_threshold_factor, \e revolute_jump_threshold and \e prismatic_jump_threshold.
-     If either \e revolute_jump_threshold or \e prismatic_jump_threshold  are non-zero, we test for absolute jumps.
-     If \e jump_threshold_factor is non-zero, we test for relative jumps. Otherwise (all params are zero), jump
-     detection is disabled.
-
-     For relative jump detection, the average joint-space distance between consecutive points in the path is
-     computed. If any individual joint-space motion delta is larger then this average distance by a factor of
-     \e jump_threshold_factor, this step is considered a failure and the returned path is truncated up to just
-     before the jump.
-
-     For absolute jump thresholds, if any individual joint-space motion delta is larger then \e revolute_jump_threshold
-     for revolute joints or \e prismatic_jump_threshold for prismatic joints then this step is considered a failure and
-     the returned path is truncated up to just before the jump.
+     To account for this, the \e jump_threshold argument is provided. If a jump detection is enabled and a jump is
+     found, the path is truncated up to just before the jump.
 
      Kinematics solvers may use cost functions to prioritize certain solutions, which may be specified with \e
      cost_function. */
@@ -242,12 +234,11 @@ public:
 };
 
 /** \brief Checks if a joint-space path has jumps larger than the given threshold.
- *
- * This function computes the distance between every pair of adjacent waypoints (for the given group) and checks if that
- * distance is larger than the threshold defined by `jump_threshold`. If so, it is considered that the path has a
- * jump, and the path index where the jump happens is returned as output.
- * Otherwise the function returns a nullopt.
- */
+
+   This function computes the distance between every pair of adjacent waypoints (for the given group) and checks if that
+   distance is larger than the threshold defined by `jump_threshold`. If so, it is considered that the path has a
+   jump, and the path index where the jump happens is returned as output.
+   Otherwise the function returns a nullopt. */
 std::optional<int> hasJointSpaceJumps(const std::vector<moveit::core::RobotStatePtr>& waypoints,
                                       const moveit::core::JointModelGroup* group,
                                       const moveit::core::JumpThreshold& jump_threshold);
