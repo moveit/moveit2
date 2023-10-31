@@ -14,6 +14,7 @@ ament_target_dependencies(moveit_dynamics_solver
 )
 target_link_libraries(moveit_dynamics_solver
   moveit_robot_state
+  moveit_utils
 )
 
 install(DIRECTORY include/ DESTINATION include/moveit_core)

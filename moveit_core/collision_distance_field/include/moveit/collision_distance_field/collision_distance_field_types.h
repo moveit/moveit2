@@ -56,6 +56,7 @@
 #include <rclcpp/rclcpp.hpp>
 #include <rclcpp/time.hpp>
 #include <rclcpp/utilities.hpp>
+#include <moveit/utils/logger.hpp>
 
 namespace collision_detection
 {
@@ -372,7 +373,7 @@ class PosedBodySphereDecompositionVector
 public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-  PosedBodySphereDecompositionVector()
+  PosedBodySphereDecompositionVector() : logger_(moveit::makeChildLogger("posed_body_sphere_decomposition_vector"))
   {
   }
 
@@ -411,7 +412,7 @@ public:
   {
     if (i >= decomp_vector_.size())
     {
-      RCLCPP_INFO(LOGGER, "No body decomposition");
+      RCLCPP_INFO(logger_, "No body decomposition");
       return empty_ptr_;
     }
     return decomp_vector_[i];
@@ -421,7 +422,7 @@ public:
   {
     if (ind >= decomp_vector_.size())
     {
-      RCLCPP_WARN(LOGGER, "Can't update pose");
+      RCLCPP_WARN(logger_, "Can't update pose");
       return;
     }
     decomp_vector_[ind]->updatePose(pose);
@@ -432,7 +433,7 @@ public:
   }
 
 private:
-  static const rclcpp::Logger LOGGER;
+  rclcpp::Logger logger_;
   PosedBodySphereDecompositionConstPtr empty_ptr_;
   std::vector<PosedBodySphereDecompositionPtr> decomp_vector_;
   std::vector<CollisionSphere> collision_spheres_;
@@ -446,7 +447,7 @@ class PosedBodyPointDecompositionVector
 public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-  PosedBodyPointDecompositionVector()
+  PosedBodyPointDecompositionVector() : logger_(moveit::makeChildLogger("posed_body_point_decomposition_vector"))
   {
   }
 
@@ -474,7 +475,7 @@ public:
   {
     if (i >= decomp_vector_.size())
     {
-      RCLCPP_INFO(LOGGER, "No body decomposition");
+      RCLCPP_INFO(logger_, "No body decomposition");
       return empty_ptr_;
     }
     return decomp_vector_[i];
@@ -488,13 +489,13 @@ public:
     }
     else
     {
-      RCLCPP_WARN(LOGGER, "Can't update pose");
+      RCLCPP_WARN(logger_, "Can't update pose");
       return;
     }
   }
 
 protected:
-  static const rclcpp::Logger LOGGER;
+  rclcpp::Logger logger_;
 
 private:
   PosedBodyPointDecompositionPtr empty_ptr_;

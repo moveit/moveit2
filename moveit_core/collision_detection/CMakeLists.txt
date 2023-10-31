@@ -35,6 +35,7 @@ set_target_properties(moveit_collision_detection PROPERTIES VERSION ${${PROJECT_
 
 target_link_libraries(moveit_collision_detection
   moveit_robot_state
+  moveit_utils
 )
 
 # unit tests

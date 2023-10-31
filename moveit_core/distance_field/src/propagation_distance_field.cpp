@@ -41,11 +41,18 @@
 #include <boost/iostreams/filter/zlib.hpp>
 #include <rclcpp/logger.hpp>
 #include <rclcpp/logging.hpp>
+#include <moveit/utils/logger.hpp>
 
 namespace distance_field
 {
-// Logger
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_distance_field.propagation_distance_field");
+namespace
+{
+rclcpp::Logger getLogger()
+{
+  static auto logger = moveit::makeChildLogger("propagation_distance_field");
+  return logger;
+}
+}  // namespace
 
 PropagationDistanceField::PropagationDistanceField(double size_x, double size_y, double size_z, double resolution,
                                                    double origin_x, double origin_y, double origin_z,
@@ -99,26 +106,26 @@ void PropagationDistanceField::initialize()
 
 void PropagationDistanceField::print(const VoxelSet& set)
 {
-  RCLCPP_DEBUG(LOGGER, "[");
+  RCLCPP_DEBUG(getLogger(), "[");
   VoxelSet::const_iterator it;
   for (it = set.begin(); it != set.end(); ++it)
   {
     Eigen::Vector3i loc1 = *it;
-    RCLCPP_DEBUG(LOGGER, "%d, %d, %d ", loc1.x(), loc1.y(), loc1.z());
+    RCLCPP_DEBUG(getLogger(), "%d, %d, %d ", loc1.x(), loc1.y(), loc1.z());
   }
-  RCLCPP_DEBUG(LOGGER, "] size=%u\n", static_cast<unsigned int>(set.size()));
+  RCLCPP_DEBUG(getLogger(), "] size=%u\n", static_cast<unsigned int>(set.size()));
 }
 
 void PropagationDistanceField::print(const EigenSTL::vector_Vector3d& points)
 {
-  RCLCPP_DEBUG(LOGGER, "[");
+  RCLCPP_DEBUG(getLogger(), "[");
   EigenSTL::vector_Vector3d::const_iterator it;
   for (it = points.begin(); it != points.end(); ++it)
   {
     Eigen::Vector3d loc1 = *it;
-    RCLCPP_DEBUG(LOGGER, "%g, %g, %g ", loc1.x(), loc1.y(), loc1.z());
+    RCLCPP_DEBUG(getLogger(), "%g, %g, %g ", loc1.x(), loc1.y(), loc1.z());
   }
-  RCLCPP_DEBUG(LOGGER, "] size=%u\n", static_cast<unsigned int>(points.size()));
+  RCLCPP_DEBUG(getLogger(), "] size=%u\n", static_cast<unsigned int>(points.size()));
 }
 
 void PropagationDistanceField::updatePointsInField(const EigenSTL::vector_Vector3d& old_points,
@@ -402,7 +409,7 @@ void PropagationDistanceField::propagatePositive()
       // This will never happen.  update_direction_ is always set before voxel is added to bucket queue.
       if (vptr->update_direction_ < 0 || vptr->update_direction_ > 26)
       {
-        RCLCPP_ERROR(LOGGER, "PROGRAMMING ERROR: Invalid update direction detected: %d", vptr->update_direction_);
+        RCLCPP_ERROR(getLogger(), "PROGRAMMING ERROR: Invalid update direction detected: %d", vptr->update_direction_);
         continue;
       }
 
@@ -459,7 +466,7 @@ void PropagationDistanceField::propagateNegative()
       // negative_bucket_queue_.
       if (vptr->negative_update_direction_ < 0 || vptr->negative_update_direction_ > 26)
       {
-        RCLCPP_ERROR(LOGGER, "PROGRAMMING ERROR: Invalid update direction detected: %d", vptr->update_direction_);
+        RCLCPP_ERROR(getLogger(), "PROGRAMMING ERROR: Invalid update direction detected: %d", vptr->update_direction_);
         continue;
       }
 

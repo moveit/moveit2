@@ -37,11 +37,19 @@
 #include <rclcpp/logger.hpp>
 #include <rclcpp/logging.hpp>
 #include <memory>
-
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("collision_detection");
+#include <moveit/utils/logger.hpp>
 
 namespace collision_detection
 {
+namespace
+{
+rclcpp::Logger getLogger()
+{
+  static auto logger = moveit::makeChildLogger("collision_detection_plugin_cache");
+  return logger;
+}
+}  // namespace
+
 class CollisionPluginCache::CollisionPluginCacheImpl
 {
 public:
@@ -54,7 +62,7 @@ public:
     }
     catch (pluginlib::PluginlibException& e)
     {
-      RCLCPP_ERROR(LOGGER, "Unable to construct collision plugin loader. Error: %s", e.what());
+      RCLCPP_ERROR(getLogger(), "Unable to construct collision plugin loader. Error: %s", e.what());
     }
   }
 
@@ -68,7 +76,7 @@ public:
     }
     catch (pluginlib::PluginlibException& ex)
     {
-      RCLCPP_ERROR_STREAM(LOGGER, "Exception while loading " << name << ": " << ex.what());
+      RCLCPP_ERROR_STREAM(getLogger(), "Exception while loading " << name << ": " << ex.what());
     }
     return plugin;
   }

@@ -39,10 +39,18 @@
 #include <rclcpp/logger.hpp>
 #include <rclcpp/logging.hpp>
 #include <algorithm>
+#include <moveit/utils/logger.hpp>
 
 namespace constraint_samplers
 {
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_constraint_samplers.union_constraint_sampler");
+namespace
+{
+rclcpp::Logger getLogger()
+{
+  static auto logger = moveit::makeChildLogger("union_constraint_sampler");
+  return logger;
+}
+}  // namespace
 
 struct OrderSamplers
 {
@@ -92,7 +100,7 @@ struct OrderSamplers
     }
     if (b_depends_on_a && a_depends_on_b)
     {
-      RCLCPP_WARN(LOGGER,
+      RCLCPP_WARN(getLogger(),
                   "Circular frame dependency! "
                   "Sampling will likely produce invalid results (sampling for groups '%s' and '%s')",
                   a->getJointModelGroup()->getName().c_str(), b->getJointModelGroup()->getName().c_str());
@@ -130,7 +138,7 @@ UnionConstraintSampler::UnionConstraintSampler(const planning_scene::PlanningSce
     for (const std::string& fd : fds)
       frame_depends_.push_back(fd);
 
-    RCLCPP_DEBUG(LOGGER, "Union sampler for group '%s' includes sampler for group '%s'", jmg_->getName().c_str(),
+    RCLCPP_DEBUG(getLogger(), "Union sampler for group '%s' includes sampler for group '%s'", jmg_->getName().c_str(),
                  sampler->getJointModelGroup()->getName().c_str());
   }
 }

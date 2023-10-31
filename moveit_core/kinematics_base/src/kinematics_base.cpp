@@ -37,11 +37,19 @@
 #include <moveit/kinematics_base/kinematics_base.h>
 #include <moveit/robot_model/joint_model_group.h>
 #include <rclcpp/logger.hpp>
+#include <moveit/utils/logger.hpp>
 
 namespace kinematics
 {
-// Logger
-const rclcpp::Logger KinematicsBase::LOGGER = rclcpp::get_logger("moveit_kinematics_base.kinematics_base");
+namespace
+{
+rclcpp::Logger getLogger()
+{
+  static auto logger = moveit::makeChildLogger("kinematics_base");
+  return logger;
+}
+}  // namespace
+
 const double KinematicsBase::DEFAULT_SEARCH_DISCRETIZATION = 0.1;
 const double KinematicsBase::DEFAULT_TIMEOUT = 1.0;
 
@@ -86,7 +94,7 @@ bool KinematicsBase::initialize(const rclcpp::Node::SharedPtr& /*node*/,
                                 const std::string& /*base_frame*/, const std::vector<std::string>& /*tip_frames*/,
                                 double /*search_discretization*/)
 {
-  RCLCPP_ERROR(LOGGER,
+  RCLCPP_ERROR(getLogger(),
                "IK plugin for group '%s' relies on deprecated API. "
                "Please implement initialize(rclcpp::Node::SharedPtr, RobotModel, ...).",
                group_name.c_str());
@@ -171,14 +179,14 @@ bool KinematicsBase::getPositionIK(const std::vector<geometry_msgs::msg::Pose>& 
 
   if (ik_poses.size() != 1)
   {
-    RCLCPP_ERROR(LOGGER, "This kinematic solver does not support getPositionIK for multiple tips");
+    RCLCPP_ERROR(getLogger(), "This kinematic solver does not support getPositionIK for multiple tips");
     result.kinematic_error = KinematicErrors::MULTIPLE_TIPS_NOT_SUPPORTED;
     return false;
   }
 
   if (ik_poses.empty())
   {
-    RCLCPP_ERROR(LOGGER, "Input ik_poses array is empty");
+    RCLCPP_ERROR(getLogger(), "Input ik_poses array is empty");
     result.kinematic_error = KinematicErrors::EMPTY_TIP_POSES;
     return false;
   }

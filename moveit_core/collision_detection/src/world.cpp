@@ -38,11 +38,18 @@
 #include <geometric_shapes/check_isometry.h>
 #include <rclcpp/logger.hpp>
 #include <rclcpp/logging.hpp>
+#include <moveit/utils/logger.hpp>
 
 namespace collision_detection
 {
-// Logger
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_collision_detection.world");
+namespace
+{
+rclcpp::Logger getLogger()
+{
+  static auto logger = moveit::makeChildLogger("collision_detection_world");
+  return logger;
+}
+}  // namespace
 
 World::World()
 {
@@ -74,7 +81,7 @@ void World::addToObject(const std::string& object_id, const Eigen::Isometry3d& p
 {
   if (shapes.size() != shape_poses.size())
   {
-    RCLCPP_ERROR(LOGGER,
+    RCLCPP_ERROR(getLogger(),
                  "Number of shapes and number of poses do not match. Not adding this object to collision world.");
     return;
   }
@@ -207,7 +214,7 @@ const Eigen::Isometry3d& World::getGlobalShapeTransform(const std::string& objec
   }
   else
   {
-    RCLCPP_ERROR_STREAM(LOGGER, "Could not find global shape transform for object " << object_id);
+    RCLCPP_ERROR_STREAM(getLogger(), "Could not find global shape transform for object " << object_id);
     static const Eigen::Isometry3d IDENTITY_TRANSFORM = Eigen::Isometry3d::Identity();
     return IDENTITY_TRANSFORM;
   }
@@ -222,7 +229,7 @@ const EigenSTL::vector_Isometry3d& World::getGlobalShapeTransforms(const std::st
   }
   else
   {
-    RCLCPP_ERROR_STREAM(LOGGER, "Could not find global shape transforms for object " << object_id);
+    RCLCPP_ERROR_STREAM(getLogger(), "Could not find global shape transforms for object " << object_id);
     static const EigenSTL::vector_Isometry3d IDENTITY_TRANSFORM_VECTOR;
     return IDENTITY_TRANSFORM_VECTOR;
   }

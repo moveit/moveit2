@@ -40,10 +40,18 @@
 #include <rclcpp/logger.hpp>
 #include <rclcpp/logging.hpp>
 #include <sstream>
+#include <moveit/utils/logger.hpp>
 
 namespace constraint_samplers
 {
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_constraint_samplers.constraint_sampler_manager");
+namespace
+{
+rclcpp::Logger getLogger()
+{
+  static auto logger = moveit::makeChildLogger("constraint_sampler_manager");
+  return logger;
+}
+}  // namespace
 
 ConstraintSamplerPtr ConstraintSamplerManager::selectSampler(const planning_scene::PlanningSceneConstPtr& scene,
                                                              const std::string& group_name,
@@ -68,14 +76,15 @@ ConstraintSamplerPtr ConstraintSamplerManager::selectDefaultSampler(const planni
     return ConstraintSamplerPtr();
   std::stringstream ss;
   ss << constr.name;
-  RCLCPP_DEBUG(LOGGER, "Attempting to construct constrained state sampler for group '%s', using constraints:\n%s.\n",
+  RCLCPP_DEBUG(getLogger(),
+               "Attempting to construct constrained state sampler for group '%s', using constraints:\n%s.\n",
                jmg->getName().c_str(), ss.str().c_str());
 
   ConstraintSamplerPtr joint_sampler;  // location to put chosen joint sampler if needed
   // if there are joint constraints, we could possibly get a sampler from those
   if (!constr.joint_constraints.empty())
   {
-    RCLCPP_DEBUG(LOGGER,
+    RCLCPP_DEBUG(getLogger(),
                  "There are joint constraints specified. "
                  "Attempting to construct a JointConstraintSampler for group '%s'",
                  jmg->getName().c_str());
@@ -116,7 +125,8 @@ ConstraintSamplerPtr ConstraintSamplerManager::selectDefaultSampler(const planni
       JointConstraintSamplerPtr sampler = std::make_shared<JointConstraintSampler>(scene, jmg->getName());
       if (sampler->configure(jc))
       {
-        RCLCPP_DEBUG(LOGGER, "Allocated a sampler satisfying joint constraints for group '%s'", jmg->getName().c_str());
+        RCLCPP_DEBUG(getLogger(), "Allocated a sampler satisfying joint constraints for group '%s'",
+                     jmg->getName().c_str());
         return sampler;
       }
     }
@@ -128,7 +138,7 @@ ConstraintSamplerPtr ConstraintSamplerManager::selectDefaultSampler(const planni
         JointConstraintSamplerPtr sampler = std::make_shared<JointConstraintSampler>(scene, jmg->getName());
         if (sampler->configure(jc))
         {
-          RCLCPP_DEBUG(LOGGER,
+          RCLCPP_DEBUG(getLogger(),
                        "Temporary sampler satisfying joint constraints for group '%s' allocated. "
                        "Looking for different types of constraints before returning though.",
                        jmg->getName().c_str());
@@ -149,7 +159,7 @@ ConstraintSamplerPtr ConstraintSamplerManager::selectDefaultSampler(const planni
   // should be used
   if (ik_alloc)
   {
-    RCLCPP_DEBUG(LOGGER,
+    RCLCPP_DEBUG(getLogger(),
                  "There is an IK allocator for '%s'. "
                  "Checking for corresponding position and/or orientation constraints",
                  jmg->getName().c_str());
@@ -189,7 +199,7 @@ ConstraintSamplerPtr ConstraintSamplerManager::selectDefaultSampler(const planni
               {
                 // assign the link to a new constraint sampler
                 used_l[constr.position_constraints[p].link_name] = iks;
-                RCLCPP_DEBUG(LOGGER,
+                RCLCPP_DEBUG(getLogger(),
                              "Allocated an IK-based sampler for group '%s' "
                              "satisfying position and orientation constraints on link '%s'",
                              jmg->getName().c_str(), constr.position_constraints[p].link_name.c_str());
@@ -226,7 +236,7 @@ ConstraintSamplerPtr ConstraintSamplerManager::selectDefaultSampler(const planni
           if (use)
           {
             used_l[position_constraint.link_name] = iks;
-            RCLCPP_DEBUG(LOGGER,
+            RCLCPP_DEBUG(getLogger(),
                          "Allocated an IK-based sampler for group '%s' "
                          "satisfying position constraints on link '%s'",
                          jmg->getName().c_str(), position_constraint.link_name.c_str());
@@ -258,7 +268,7 @@ ConstraintSamplerPtr ConstraintSamplerManager::selectDefaultSampler(const planni
           if (use)
           {
             used_l[orientation_constraint.link_name] = iks;
-            RCLCPP_DEBUG(LOGGER,
+            RCLCPP_DEBUG(getLogger(),
                          "Allocated an IK-based sampler for group '%s' "
                          "satisfying orientation constraints on link '%s'",
                          jmg->getName().c_str(), orientation_constraint.link_name.c_str());
@@ -281,7 +291,8 @@ ConstraintSamplerPtr ConstraintSamplerManager::selectDefaultSampler(const planni
     }
     else if (used_l.size() > 1)
     {
-      RCLCPP_DEBUG(LOGGER, "Too many IK-based samplers for group '%s'. Keeping the one with minimal sampling volume",
+      RCLCPP_DEBUG(getLogger(),
+                   "Too many IK-based samplers for group '%s'. Keeping the one with minimal sampling volume",
                    jmg->getName().c_str());
       // find the sampler with the smallest sampling volume; delete the rest
       IKConstraintSamplerPtr iks = used_l.begin()->second;
@@ -311,7 +322,7 @@ ConstraintSamplerPtr ConstraintSamplerManager::selectDefaultSampler(const planni
   // we now check to see if we can use samplers from subgroups
   if (!ik_subgroup_alloc.empty())
   {
-    RCLCPP_DEBUG(LOGGER,
+    RCLCPP_DEBUG(getLogger(),
                  "There are IK allocators for subgroups of group '%s'. "
                  "Checking for corresponding position and/or orientation constraints",
                  jmg->getName().c_str());
@@ -351,12 +362,12 @@ ConstraintSamplerPtr ConstraintSamplerManager::selectDefaultSampler(const planni
       // if some matching constraints were found, construct the allocator
       if (!sub_constr.orientation_constraints.empty() || !sub_constr.position_constraints.empty())
       {
-        RCLCPP_DEBUG(LOGGER, "Attempting to construct a sampler for the '%s' subgroup of '%s'",
+        RCLCPP_DEBUG(getLogger(), "Attempting to construct a sampler for the '%s' subgroup of '%s'",
                      it->first->getName().c_str(), jmg->getName().c_str());
         ConstraintSamplerPtr cs = selectDefaultSampler(scene, it->first->getName(), sub_constr);
         if (cs)
         {
-          RCLCPP_DEBUG(LOGGER,
+          RCLCPP_DEBUG(getLogger(),
                        "Constructed a sampler for the joints corresponding to group '%s', "
                        "but part of group '%s'",
                        it->first->getName().c_str(), jmg->getName().c_str());
@@ -367,8 +378,8 @@ ConstraintSamplerPtr ConstraintSamplerManager::selectDefaultSampler(const planni
     }
     if (some_sampler_valid)
     {
-      RCLCPP_DEBUG(LOGGER, "Constructing sampler for group '%s' as a union of %zu samplers", jmg->getName().c_str(),
-                   samplers.size());
+      RCLCPP_DEBUG(getLogger(), "Constructing sampler for group '%s' as a union of %zu samplers",
+                   jmg->getName().c_str(), samplers.size());
       return std::make_shared<UnionConstraintSampler>(scene, jmg->getName(), samplers);
     }
   }
@@ -376,11 +387,11 @@ ConstraintSamplerPtr ConstraintSamplerManager::selectDefaultSampler(const planni
   // if we've gotten here, just return joint sampler
   if (joint_sampler)
   {
-    RCLCPP_DEBUG(LOGGER, "Allocated a sampler satisfying joint constraints for group '%s'", jmg->getName().c_str());
+    RCLCPP_DEBUG(getLogger(), "Allocated a sampler satisfying joint constraints for group '%s'", jmg->getName().c_str());
     return joint_sampler;
   }
 
-  RCLCPP_DEBUG(LOGGER, "No constraints sampler allocated for group '%s'", jmg->getName().c_str());
+  RCLCPP_DEBUG(getLogger(), "No constraints sampler allocated for group '%s'", jmg->getName().c_str());
 
   return ConstraintSamplerPtr();
 }

@@ -38,6 +38,20 @@ Once you have a child logger you can use it in logging macros:
 RCLCPP_INFO(logger_, "Very important info message");
 ```
 
+In some files you'll find the creation of a static logger for the file like this.
+Note that this is different from the previous file level static variables because the logger is not initialized until the function is called the first time.
+This enables us to set the global node logger before this is called.
+```C++
+namespace
+{
+rclcpp::Logger getLogger()
+{
+  static auto logger = moveit::makeChildLogger("moveit_collision_detection");
+  return logger;
+}
+}  // namespace
+```
+
 ### Logger naming convention
 
 Migrating the loggers is a good opportunity to make logger names more consistent.

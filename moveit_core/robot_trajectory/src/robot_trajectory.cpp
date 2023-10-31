@@ -44,9 +44,19 @@
 #include <tf2_eigen/tf2_eigen.hpp>
 #include <numeric>
 #include <optional>
+#include <moveit/utils/logger.hpp>
 
 namespace robot_trajectory
 {
+namespace
+{
+rclcpp::Logger getLogger()
+{
+  static auto logger = moveit::makeChildLogger("robot_trajectory");
+  return logger;
+}
+}  // namespace
+
 RobotTrajectory::RobotTrajectory(const moveit::core::RobotModelConstPtr& robot_model)
   : robot_model_(robot_model), group_(nullptr)
 {
@@ -93,7 +103,7 @@ double RobotTrajectory::getAverageSegmentDuration() const
 {
   if (duration_from_previous_.empty())
   {
-    RCLCPP_WARN(rclcpp::get_logger("RobotTrajectory"), "Too few waypoints to calculate a duration. Returning 0.");
+    RCLCPP_WARN(getLogger(), "Too few waypoints to calculate a duration. Returning 0.");
     return 0.0;
   }
 
@@ -102,7 +112,7 @@ double RobotTrajectory::getAverageSegmentDuration() const
   {
     if (duration_from_previous_.size() <= 1)
     {
-      RCLCPP_WARN(rclcpp::get_logger("RobotTrajectory"), "First and only waypoint has a duration of 0.");
+      RCLCPP_WARN(getLogger(), "First and only waypoint has a duration of 0.");
       return 0.0;
     }
     else

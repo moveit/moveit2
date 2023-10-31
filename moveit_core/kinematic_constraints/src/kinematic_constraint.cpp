@@ -49,14 +49,21 @@
 #include <math.h>
 #include <memory>
 #include <typeinfo>
+#include <moveit/utils/logger.hpp>
 
 #include <rclcpp/clock.hpp>
 #include <rclcpp/duration.hpp>
 
 namespace kinematic_constraints
 {
-// Logger
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_kinematic_constraints.kinematic_constraints");
+namespace
+{
+rclcpp::Logger getLogger()
+{
+  static auto logger = moveit::makeChildLogger("kinematic_constraints");
+  return logger;
+}
+}  // namespace
 
 static double normalizeAngle(double angle)
 {
@@ -139,7 +146,7 @@ bool JointConstraint::configure(const moveit_msgs::msg::JointConstraint& jc)
   // testing tolerances first
   if (jc.tolerance_above < 0.0 || jc.tolerance_below < 0.0)
   {
-    RCLCPP_WARN(LOGGER, "JointConstraint tolerance values must be positive.");
+    RCLCPP_WARN(getLogger(), "JointConstraint tolerance values must be positive.");
     joint_model_ = nullptr;
     return false;
   }
@@ -170,12 +177,12 @@ bool JointConstraint::configure(const moveit_msgs::msg::JointConstraint& jc)
       // check if the joint has 1 DOF (the only kind we can handle)
       if (joint_model_->getVariableCount() == 0)
       {
-        RCLCPP_ERROR(LOGGER, "Joint '%s' has no parameters to constrain", jc.joint_name.c_str());
+        RCLCPP_ERROR(getLogger(), "Joint '%s' has no parameters to constrain", jc.joint_name.c_str());
         joint_model_ = nullptr;
       }
       else if (joint_model_->getVariableCount() > 1)
       {
-        RCLCPP_ERROR(LOGGER,
+        RCLCPP_ERROR(getLogger(),
                      "Joint '%s' has more than one parameter to constrain. "
                      "This type of constraint is not supported.",
                      jc.joint_name.c_str());
@@ -196,7 +203,7 @@ bool JointConstraint::configure(const moveit_msgs::msg::JointConstraint& jc)
       }
       if (found < 0)
       {
-        RCLCPP_ERROR(LOGGER, "Local variable name '%s' is not known to joint '%s'", local_variable_name_.c_str(),
+        RCLCPP_ERROR(getLogger(), "Local variable name '%s' is not known to joint '%s'", local_variable_name_.c_str(),
                      joint_model_->getName().c_str());
         joint_model_ = nullptr;
       }
@@ -238,7 +245,7 @@ bool JointConstraint::configure(const moveit_msgs::msg::JointConstraint& jc)
       {
         joint_position_ = bounds.min_position_;
         joint_tolerance_above_ = std::numeric_limits<double>::epsilon();
-        RCLCPP_WARN(LOGGER,
+        RCLCPP_WARN(getLogger(),
                     "Joint %s is constrained to be below the minimum bounds. "
                     "Assuming minimum bounds instead.",
                     jc.joint_name.c_str());
@@ -247,7 +254,7 @@ bool JointConstraint::configure(const moveit_msgs::msg::JointConstraint& jc)
       {
         joint_position_ = bounds.max_position_;
         joint_tolerance_below_ = std::numeric_limits<double>::epsilon();
-        RCLCPP_WARN(LOGGER,
+        RCLCPP_WARN(getLogger(),
                     "Joint %s is constrained to be above the maximum bounds. "
                     "Assuming maximum bounds instead.",
                     jc.joint_name.c_str());
@@ -256,7 +263,7 @@ bool JointConstraint::configure(const moveit_msgs::msg::JointConstraint& jc)
 
     if (jc.weight <= std::numeric_limits<double>::epsilon())
     {
-      RCLCPP_WARN(LOGGER, "The weight on constraint for joint '%s' is very near zero.  Setting to 1.0.",
+      RCLCPP_WARN(getLogger(), "The weight on constraint for joint '%s' is very near zero.  Setting to 1.0.",
                   jc.joint_name.c_str());
       constraint_weight_ = 1.0;
     }
@@ -310,7 +317,7 @@ ConstraintEvaluationResult JointConstraint::decide(const moveit::core::RobotStat
                 dif >= (-joint_tolerance_below_ - 2.0 * std::numeric_limits<double>::epsilon());
   if (verbose)
   {
-    RCLCPP_INFO(LOGGER,
+    RCLCPP_INFO(getLogger(),
                 "Constraint %s:: Joint name: '%s', actual value: %f, desired value: %f, "
                 "tolerance_above: %f, tolerance_below: %f",
                 result ? "satisfied" : "violated", joint_variable_name_.c_str(), current_joint_position,
@@ -359,14 +366,14 @@ bool PositionConstraint::configure(const moveit_msgs::msg::PositionConstraint& p
   link_model_ = robot_model_->getLinkModel(pc.link_name);
   if (link_model_ == nullptr)
   {
-    RCLCPP_WARN(LOGGER, "Position constraint link model %s not found in kinematic model. Constraint invalid.",
+    RCLCPP_WARN(getLogger(), "Position constraint link model %s not found in kinematic model. Constraint invalid.",
                 pc.link_name.c_str());
     return false;
   }
 
   if (pc.header.frame_id.empty())
   {
-    RCLCPP_WARN(LOGGER, "No frame specified for position constraint on link '%s'!", pc.link_name.c_str());
+    RCLCPP_WARN(getLogger(), "No frame specified for position constraint on link '%s'!", pc.link_name.c_str());
     return false;
   }
 
@@ -392,7 +399,7 @@ bool PositionConstraint::configure(const moveit_msgs::msg::PositionConstraint& p
     {
       if (pc.constraint_region.primitive_poses.size() <= i)
       {
-        RCLCPP_WARN(LOGGER, "Constraint region message does not contain enough primitive poses");
+        RCLCPP_WARN(getLogger(), "Constraint region message does not contain enough primitive poses");
         continue;
       }
       Eigen::Isometry3d t;
@@ -409,7 +416,7 @@ bool PositionConstraint::configure(const moveit_msgs::msg::PositionConstraint& p
       constraint_region_.push_back(body);
     }
     else
-      RCLCPP_WARN(LOGGER, "Could not construct primitive shape %zu", i);
+      RCLCPP_WARN(getLogger(), "Could not construct primitive shape %zu", i);
   }
 
   // load meshes
@@ -420,7 +427,7 @@ bool PositionConstraint::configure(const moveit_msgs::msg::PositionConstraint& p
     {
       if (pc.constraint_region.mesh_poses.size() <= i)
       {
-        RCLCPP_WARN(LOGGER, "Constraint region message does not contain enough primitive poses");
+        RCLCPP_WARN(getLogger(), "Constraint region message does not contain enough primitive poses");
         continue;
       }
       Eigen::Isometry3d t;
@@ -437,13 +444,13 @@ bool PositionConstraint::configure(const moveit_msgs::msg::PositionConstraint& p
     }
     else
     {
-      RCLCPP_WARN(LOGGER, "Could not construct mesh shape %zu", i);
+      RCLCPP_WARN(getLogger(), "Could not construct mesh shape %zu", i);
     }
   }
 
   if (pc.weight <= std::numeric_limits<double>::epsilon())
   {
-    RCLCPP_WARN(LOGGER, "The weight on position constraint for link '%s' is near zero.  Setting to 1.0.",
+    RCLCPP_WARN(getLogger(), "The weight on position constraint for link '%s' is near zero.  Setting to 1.0.",
                 pc.link_name.c_str());
     constraint_weight_ = 1.0;
   }
@@ -505,10 +512,10 @@ static inline ConstraintEvaluationResult finishPositionConstraintDecision(const 
   double dz = desired.z() - pt.z();
   if (verbose)
   {
-    RCLCPP_INFO(LOGGER, "Position constraint %s on link '%s'. Desired: %f, %f, %f, current: %f, %f, %f",
+    RCLCPP_INFO(getLogger(), "Position constraint %s on link '%s'. Desired: %f, %f, %f, current: %f, %f, %f",
                 result ? "satisfied" : "violated", name.c_str(), desired.x(), desired.y(), desired.z(), pt.x(), pt.y(),
                 pt.z());
-    RCLCPP_INFO(LOGGER, "Differences %g %g %g", dx, dy, dz);
+    RCLCPP_INFO(getLogger(), "Differences %g %g %g", dx, dy, dz);
   }
   return ConstraintEvaluationResult(result, weight * sqrt(dx * dx + dy * dy + dz * dz));
 }
@@ -594,14 +601,14 @@ bool OrientationConstraint::configure(const moveit_msgs::msg::OrientationConstra
   link_model_ = robot_model_->getLinkModel(oc.link_name);
   if (!link_model_)
   {
-    RCLCPP_WARN(LOGGER, "Could not find link model for link name %s", oc.link_name.c_str());
+    RCLCPP_WARN(getLogger(), "Could not find link model for link name %s", oc.link_name.c_str());
     return false;
   }
   Eigen::Quaterniond q;
   tf2::fromMsg(oc.orientation, q);
   if (fabs(q.norm() - 1.0) > 1e-3)
   {
-    RCLCPP_WARN(LOGGER,
+    RCLCPP_WARN(getLogger(),
                 "Orientation constraint for link '%s' is probably incorrect: %f, %f, %f, "
                 "%f. Assuming identity instead.",
                 oc.link_name.c_str(), oc.orientation.x, oc.orientation.y, oc.orientation.z, oc.orientation.w);
@@ -609,7 +616,7 @@ bool OrientationConstraint::configure(const moveit_msgs::msg::OrientationConstra
   }
 
   if (oc.header.frame_id.empty())
-    RCLCPP_WARN(LOGGER, "No frame specified for position constraint on link '%s'!", oc.link_name.c_str());
+    RCLCPP_WARN(getLogger(), "No frame specified for position constraint on link '%s'!", oc.link_name.c_str());
 
   if (tf.isFixedFrame(oc.header.frame_id))
   {
@@ -627,12 +634,12 @@ bool OrientationConstraint::configure(const moveit_msgs::msg::OrientationConstra
   }
   std::stringstream matrix_str;
   matrix_str << desired_rotation_matrix_;
-  RCLCPP_DEBUG(LOGGER, "The desired rotation matrix for link '%s' in frame %s is:\n%s", oc.link_name.c_str(),
+  RCLCPP_DEBUG(getLogger(), "The desired rotation matrix for link '%s' in frame %s is:\n%s", oc.link_name.c_str(),
                desired_rotation_frame_id_.c_str(), matrix_str.str().c_str());
 
   if (oc.weight <= std::numeric_limits<double>::epsilon())
   {
-    RCLCPP_WARN(LOGGER, "The weight on orientation constraint for link '%s' is near zero.  Setting to 1.0.",
+    RCLCPP_WARN(getLogger(), "The weight on orientation constraint for link '%s' is near zero.  Setting to 1.0.",
                 oc.link_name.c_str());
     constraint_weight_ = 1.0;
   }
@@ -646,20 +653,20 @@ bool OrientationConstraint::configure(const moveit_msgs::msg::OrientationConstra
   if (parameterization_type_ != moveit_msgs::msg::OrientationConstraint::XYZ_EULER_ANGLES &&
       parameterization_type_ != moveit_msgs::msg::OrientationConstraint::ROTATION_VECTOR)
   {
-    RCLCPP_WARN(LOGGER,
+    RCLCPP_WARN(getLogger(),
                 "Unknown parameterization for orientation constraint tolerance, using default (XYZ_EULER_ANGLES).");
     parameterization_type_ = moveit_msgs::msg::OrientationConstraint::XYZ_EULER_ANGLES;
   }
 
   absolute_x_axis_tolerance_ = fabs(oc.absolute_x_axis_tolerance);
   if (absolute_x_axis_tolerance_ < std::numeric_limits<double>::epsilon())
-    RCLCPP_WARN(LOGGER, "Near-zero value for absolute_x_axis_tolerance");
+    RCLCPP_WARN(getLogger(), "Near-zero value for absolute_x_axis_tolerance");
   absolute_y_axis_tolerance_ = fabs(oc.absolute_y_axis_tolerance);
   if (absolute_y_axis_tolerance_ < std::numeric_limits<double>::epsilon())
-    RCLCPP_WARN(LOGGER, "Near-zero value for absolute_y_axis_tolerance");
+    RCLCPP_WARN(getLogger(), "Near-zero value for absolute_y_axis_tolerance");
   absolute_z_axis_tolerance_ = fabs(oc.absolute_z_axis_tolerance);
   if (absolute_z_axis_tolerance_ < std::numeric_limits<double>::epsilon())
-    RCLCPP_WARN(LOGGER, "Near-zero value for absolute_z_axis_tolerance");
+    RCLCPP_WARN(getLogger(), "Near-zero value for absolute_z_axis_tolerance");
 
   return link_model_ != nullptr;
 }
@@ -751,7 +758,7 @@ ConstraintEvaluationResult OrientationConstraint::decide(const moveit::core::Rob
   else
   {
     /* The parameterization type should be validated in configure, so this should never happen. */
-    RCLCPP_ERROR(LOGGER, "The parameterization type for the orientation constraints is invalid.");
+    RCLCPP_ERROR(getLogger(), "The parameterization type for the orientation constraints is invalid.");
   }
 
   bool result = xyz_rotation(2) < absolute_z_axis_tolerance_ + std::numeric_limits<double>::epsilon() &&
@@ -762,7 +769,7 @@ ConstraintEvaluationResult OrientationConstraint::decide(const moveit::core::Rob
   {
     Eigen::Quaterniond q_act(state.getGlobalLinkTransform(link_model_).linear());
     Eigen::Quaterniond q_des(desired_rotation_matrix_);
-    RCLCPP_INFO(LOGGER,
+    RCLCPP_INFO(getLogger(),
                 "Orientation constraint %s for link '%s'. Quaternion desired: %f %f %f %f, quaternion "
                 "actual: %f %f %f %f, error: x=%f, y=%f, z=%f, tolerance: x=%f, y=%f, z=%f",
                 result ? "satisfied" : "violated", link_model_->getName().c_str(), q_des.x(), q_des.y(), q_des.z(),
@@ -812,11 +819,11 @@ bool VisibilityConstraint::configure(const moveit_msgs::msg::VisibilityConstrain
   target_radius_ = fabs(vc.target_radius);
 
   if (vc.target_radius <= std::numeric_limits<double>::epsilon())
-    RCLCPP_WARN(LOGGER, "The radius of the target disc that must be visible should be strictly positive");
+    RCLCPP_WARN(getLogger(), "The radius of the target disc that must be visible should be strictly positive");
 
   if (vc.cone_sides < 3)
   {
-    RCLCPP_WARN(LOGGER,
+    RCLCPP_WARN(getLogger(),
                 "The number of sides for the visibility region must be 3 or more. "
                 "Assuming 3 sides instead of the specified %d",
                 vc.cone_sides);
@@ -864,7 +871,7 @@ bool VisibilityConstraint::configure(const moveit_msgs::msg::VisibilityConstrain
 
   if (vc.weight <= std::numeric_limits<double>::epsilon())
   {
-    RCLCPP_WARN(LOGGER, "The weight of visibility constraint is near zero.  Setting to 1.0.");
+    RCLCPP_WARN(getLogger(), "The weight of visibility constraint is near zero.  Setting to 1.0.");
     constraint_weight_ = 1.0;
   }
   else
@@ -1081,8 +1088,8 @@ ConstraintEvaluationResult VisibilityConstraint::decide(const moveit::core::Robo
     {
       if (verbose)
       {
-        RCLCPP_INFO(LOGGER, "Visibility constraint is violated because the sensor is looking at "
-                            "the wrong side");
+        RCLCPP_INFO(getLogger(), "Visibility constraint is violated because the sensor is looking at "
+                                 "the wrong side");
       }
       return ConstraintEvaluationResult(false, 0.0);
     }
@@ -1090,7 +1097,7 @@ ConstraintEvaluationResult VisibilityConstraint::decide(const moveit::core::Robo
     {
       if (verbose)
       {
-        RCLCPP_INFO(LOGGER,
+        RCLCPP_INFO(getLogger(),
                     "Visibility constraint is violated because the view angle is %lf "
                     "(above the maximum allowed of %lf)",
                     ang, max_view_angle_);
@@ -1109,8 +1116,8 @@ ConstraintEvaluationResult VisibilityConstraint::decide(const moveit::core::Robo
     {
       if (verbose)
       {
-        RCLCPP_INFO(LOGGER, "Visibility constraint is violated because the sensor is looking at "
-                            "the wrong side");
+        RCLCPP_INFO(getLogger(), "Visibility constraint is violated because the sensor is looking at "
+                                 "the wrong side");
       }
       return ConstraintEvaluationResult(false, 0.0);
     }
@@ -1120,7 +1127,7 @@ ConstraintEvaluationResult VisibilityConstraint::decide(const moveit::core::Robo
     {
       if (verbose)
       {
-        RCLCPP_INFO(LOGGER,
+        RCLCPP_INFO(getLogger(),
                     "Visibility constraint is violated because the range angle is %lf "
                     "(above the maximum allowed of %lf)",
                     ang, max_range_angle_);
@@ -1135,7 +1142,8 @@ ConstraintEvaluationResult VisibilityConstraint::decide(const moveit::core::Robo
     shapes::Mesh* m = getVisibilityCone(tform_world_to_sensor, tform_world_to_target);
     if (!m)
     {
-      RCLCPP_ERROR(LOGGER, "Visibility constraint is violated because we could not create the visibility cone mesh.");
+      RCLCPP_ERROR(getLogger(),
+                   "Visibility constraint is violated because we could not create the visibility cone mesh.");
       return ConstraintEvaluationResult(false, 0.0);
     }
 
@@ -1162,7 +1170,7 @@ ConstraintEvaluationResult VisibilityConstraint::decide(const moveit::core::Robo
     {
       std::stringstream ss;
       m->print(ss);
-      RCLCPP_INFO(LOGGER, "Visibility constraint %ssatisfied. Visibility cone approximation:\n %s",
+      RCLCPP_INFO(getLogger(), "Visibility constraint %ssatisfied. Visibility cone approximation:\n %s",
                   res.collision ? "not " : "", ss.str().c_str());
     }
 
@@ -1185,7 +1193,7 @@ bool VisibilityConstraint::decideContact(const collision_detection::Contact& con
       (moveit::core::Transforms::sameFrame(contact.body_name_1, sensor_frame_id_) ||
        moveit::core::Transforms::sameFrame(contact.body_name_1, target_frame_id_)))
   {
-    RCLCPP_DEBUG(LOGGER, "Accepted collision with either sensor or target");
+    RCLCPP_DEBUG(getLogger(), "Accepted collision with either sensor or target");
     return true;
   }
   if (contact.body_type_2 == collision_detection::BodyTypes::ROBOT_LINK &&
@@ -1193,7 +1201,7 @@ bool VisibilityConstraint::decideContact(const collision_detection::Contact& con
       (moveit::core::Transforms::sameFrame(contact.body_name_2, sensor_frame_id_) ||
        moveit::core::Transforms::sameFrame(contact.body_name_2, target_frame_id_)))
   {
-    RCLCPP_DEBUG(LOGGER, "Accepted collision with either sensor or target");
+    RCLCPP_DEBUG(getLogger(), "Accepted collision with either sensor or target");
     return true;
   }
   return false;

@@ -42,6 +42,8 @@
 #include <rclcpp/logger.hpp>
 #include <rclcpp/logging.hpp>
 #include <rcpputils/asserts.hpp>
+#include <moveit/utils/logger.hpp>
+
 namespace moveit::core
 {
 
@@ -50,16 +52,21 @@ namespace moveit::core
 // will be printed out.
 static const std::size_t MIN_STEPS_FOR_JUMP_THRESH = 10;
 
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_robot_state.cartesian_interpolator");
-
 namespace
 {
+
+rclcpp::Logger getLogger()
+{
+  static auto logger = moveit::makeChildLogger("cartesian_interpolator");
+  return logger;
+}
+
 std::optional<int> hasRelativeJointSpaceJump(const std::vector<moveit::core::RobotStatePtr>& waypoints,
                                              const moveit::core::JointModelGroup& group, double jump_threshold_factor)
 {
   if (waypoints.size() < MIN_STEPS_FOR_JUMP_THRESH)
   {
-    RCLCPP_WARN(LOGGER,
+    RCLCPP_WARN(getLogger(),
                 "The computed path is too short to detect jumps in joint-space. "
                 "Need at least %zu steps, only got %zu. Try a lower max_step.",
                 MIN_STEPS_FOR_JUMP_THRESH, waypoints.size());
@@ -116,7 +123,7 @@ std::optional<int> hasAbsoluteJointSpaceJump(const std::vector<moveit::core::Rob
           }
           break;
         default:
-          RCLCPP_WARN(LOGGER,
+          RCLCPP_WARN(getLogger(),
                       "Joint %s has not supported type %s. \n"
                       "hasAbsoluteJointSpaceJump only supports prismatic and revolute joints. Skipping joint jump "
                       "check for this joint.",
@@ -212,9 +219,10 @@ CartesianInterpolator::Percentage CartesianInterpolator::computeCartesianPath(
 
   if (max_step.translation <= 0.0 && max_step.rotation <= 0.0)
   {
-    RCLCPP_ERROR(LOGGER, "Invalid MaxEEFStep passed into computeCartesianPath. Both the MaxEEFStep.rotation and "
-                         "MaxEEFStep.translation components must be non-negative and at least one component must be "
-                         "greater than zero");
+    RCLCPP_ERROR(getLogger(),
+                 "Invalid MaxEEFStep passed into computeCartesianPath. Both the MaxEEFStep.rotation and "
+                 "MaxEEFStep.translation components must be non-negative and at least one component must be "
+                 "greater than zero");
     return 0.0;
   }
 

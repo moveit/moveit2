@@ -35,8 +35,7 @@
 
 #include <rclcpp/logger.hpp>
 #include <rclcpp/logging.hpp>
-
-const rclcpp::Logger BULLET_LOGGER = rclcpp::get_logger("collision_detection.bullet");
+#include <moveit/utils/logger.hpp>
 
 namespace collision_detection_bullet
 {
@@ -98,7 +97,7 @@ shapes::ShapePtr constructShape(const urdf::Geometry* geom)
     }
     break;
     default:
-      RCLCPP_ERROR(BULLET_LOGGER, "Unknown geometry type: %d", static_cast<int>(geom->type));
+      RCLCPP_ERROR(getLogger(), "Unknown geometry type: %d", static_cast<int>(geom->type));
       break;
   }
 
@@ -112,6 +111,12 @@ Eigen::Isometry3d urdfPose2Eigen(const urdf::Pose& pose)
   result.translation() = Eigen::Vector3d(pose.position.x, pose.position.y, pose.position.z);
   result.linear() = q.toRotationMatrix();
   return result;
+}
+
+rclcpp::Logger getLogger()
+{
+  static auto logger = moveit::makeChildLogger("collision_detection_bullet");
+  return logger;
 }
 
 }  // namespace collision_detection_bullet

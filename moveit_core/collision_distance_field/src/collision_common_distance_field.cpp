@@ -42,11 +42,19 @@
 #include <tf2_eigen/tf2_eigen.hpp>
 #include <memory>
 #include <mutex>
+#include <moveit/utils/logger.hpp>
 
 namespace collision_detection
 {
-static const rclcpp::Logger LOGGER =
-    rclcpp::get_logger("moveit_collision_distance_field.collision_common_distance_field");
+namespace
+{
+rclcpp::Logger getLogger()
+{
+  static auto logger = moveit::makeChildLogger("collision_common_distance_field");
+  return logger;
+}
+}  // namespace
+
 struct BodyDecompositionCache
 {
   using Comperator = std::owner_less<shapes::ShapeConstWeakPtr>;
@@ -199,7 +207,7 @@ void getBodySphereVisualizationMarkers(const GroupStateRepresentationConstPtr& g
     const moveit::core::AttachedBody* att = state.getAttachedBody(gsr->dfce_->attached_body_names_[i]);
     if (!att)
     {
-      RCLCPP_WARN(LOGGER,
+      RCLCPP_WARN(getLogger(),
                   "Attached body '%s' was not found, skipping sphere "
                   "decomposition visualization",
                   gsr->dfce_->attached_body_names_[i].c_str());
@@ -208,7 +216,7 @@ void getBodySphereVisualizationMarkers(const GroupStateRepresentationConstPtr& g
 
     if (gsr->attached_body_decompositions_[i]->getSize() != att->getShapes().size())
     {
-      RCLCPP_WARN(LOGGER, "Attached body size discrepancy");
+      RCLCPP_WARN(getLogger(), "Attached body size discrepancy");
       continue;
     }
 

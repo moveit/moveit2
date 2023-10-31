@@ -43,6 +43,7 @@
 #include <rclcpp/logging.hpp>
 #include <rclcpp/node.hpp>
 #include <rclcpp/parameter_value.hpp>
+#include <moveit/utils/logger.hpp>
 
 #include <rclcpp/node.hpp>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
@@ -52,8 +53,14 @@ using namespace moveit::core;
 
 namespace kinematic_constraints
 {
-// Logger
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_kinematic_constraints.utils");
+namespace
+{
+rclcpp::Logger getLogger()
+{
+  static auto logger = moveit::makeChildLogger("moveit_kinematic_constraints");
+  return logger;
+}
+}  // namespace
 
 moveit_msgs::msg::Constraints mergeConstraints(const moveit_msgs::msg::Constraints& first,
                                                const moveit_msgs::msg::Constraints& second)
@@ -78,7 +85,8 @@ moveit_msgs::msg::Constraints mergeConstraints(const moveit_msgs::msg::Constrain
         double high = std::min(a.position + a.tolerance_above, b.position + b.tolerance_above);
         if (low > high)
         {
-          RCLCPP_ERROR(LOGGER, "Attempted to merge incompatible constraints for joint '%s'. Discarding constraint.",
+          RCLCPP_ERROR(getLogger(),
+                       "Attempted to merge incompatible constraints for joint '%s'. Discarding constraint.",
                        a.joint_name.c_str());
         }
         else
@@ -290,7 +298,7 @@ bool updateOrientationConstraint(moveit_msgs::msg::Constraints& constraints, con
     {
       if (quat.header.frame_id.empty())
       {
-        RCLCPP_ERROR(LOGGER, "Cannot update orientation constraint, frame_id in the header is empty");
+        RCLCPP_ERROR(getLogger(), "Cannot update orientation constraint, frame_id in the header is empty");
         return false;
       }
       constraint.header = quat.header;
@@ -321,7 +329,7 @@ bool updatePositionConstraint(moveit_msgs::msg::Constraints& constraints, const 
     {
       if (goal_point.header.frame_id.empty())
       {
-        RCLCPP_ERROR(LOGGER, "Cannot update position constraint, frame_id in the header is empty");
+        RCLCPP_ERROR(getLogger(), "Cannot update position constraint, frame_id in the header is empty");
         return false;
       }
       constraint.header = goal_point.header;
@@ -557,7 +565,7 @@ static bool collectConstraints(const rclcpp::Node::SharedPtr& node, const std::v
     const auto constraint_param = "constraints." + constraint_id;
     if (!node->has_parameter(constraint_param + ".type"))
     {
-      RCLCPP_ERROR(LOGGER, "constraint parameter \"%s\" does not specify its type", constraint_param.c_str());
+      RCLCPP_ERROR(getLogger(), "constraint parameter \"%s\" does not specify its type", constraint_param.c_str());
       return false;
     }
     std::string constraint_type;
@@ -588,7 +596,7 @@ static bool collectConstraints(const rclcpp::Node::SharedPtr& node, const std::v
     }
     else
     {
-      RCLCPP_ERROR_STREAM(LOGGER, "Unable to process unknown constraint type: " << constraint_type);
+      RCLCPP_ERROR_STREAM(getLogger(), "Unable to process unknown constraint type: " << constraint_type);
       return false;
     }
   }

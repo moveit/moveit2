@@ -40,20 +40,27 @@
 #include <rclcpp/logging.hpp>
 #include <tf2_eigen/tf2_eigen.hpp>
 #include <boost/algorithm/string/trim.hpp>
+#include <moveit/utils/logger.hpp>
 
 namespace moveit
 {
 namespace core
 {
-// Logger
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_transforms.transforms");
+namespace
+{
+rclcpp::Logger getLogger()
+{
+  static auto logger = moveit::makeChildLogger("transforms");
+  return logger;
+}
+}  // namespace
 
 Transforms::Transforms(const std::string& target_frame) : target_frame_(target_frame)
 {
   boost::trim(target_frame_);
   if (target_frame_.empty())
   {
-    RCLCPP_ERROR(LOGGER, "The target frame for MoveIt Transforms cannot be empty.");
+    RCLCPP_ERROR(getLogger(), "The target frame for MoveIt Transforms cannot be empty.");
   }
   else
   {
@@ -111,8 +118,8 @@ const Eigen::Isometry3d& Transforms::getTransform(const std::string& from_frame)
     // If no transform found in map, return identity
   }
 
-  RCLCPP_ERROR(LOGGER, "Unable to transform from frame '%s' to frame '%s'. Returning identity.", from_frame.c_str(),
-               target_frame_.c_str());
+  RCLCPP_ERROR(getLogger(), "Unable to transform from frame '%s' to frame '%s'. Returning identity.",
+               from_frame.c_str(), target_frame_.c_str());
 
   // return identity
   static const Eigen::Isometry3d IDENTITY = Eigen::Isometry3d::Identity();
@@ -136,7 +143,7 @@ void Transforms::setTransform(const Eigen::Isometry3d& t, const std::string& fro
   ASSERT_ISOMETRY(t)  // unsanitized input, could contain a non-isometry
   if (from_frame.empty())
   {
-    RCLCPP_ERROR(LOGGER, "Cannot record transform with empty name");
+    RCLCPP_ERROR(getLogger(), "Cannot record transform with empty name");
   }
   else
     transforms_map_[from_frame] = t;
@@ -158,7 +165,7 @@ void Transforms::setTransform(const geometry_msgs::msg::TransformStamped& transf
   }
   else
   {
-    RCLCPP_ERROR(LOGGER, "Given transform is to frame '%s', but frame '%s' was expected.",
+    RCLCPP_ERROR(getLogger(), "Given transform is to frame '%s', but frame '%s' was expected.",
                  transform.child_frame_id.c_str(), target_frame_.c_str());
   }
 }

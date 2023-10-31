@@ -42,15 +42,21 @@
 #include <moveit/robot_model/floating_joint_model.h>
 #include <rclcpp/logger.hpp>
 #include <rclcpp/logging.hpp>
+#include <moveit/utils/logger.hpp>
 
 namespace moveit
 {
 namespace core
 {
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_robot_model.floating_joint_model");
 namespace
 {
 constexpr size_t STATE_SPACE_DIMENSION = 7;
+
+rclcpp::Logger getLogger()
+{
+  static auto logger = moveit::makeChildLogger("floating_joint_model");
+  return logger;
+}
 
 }  // namespace
 
@@ -180,7 +186,7 @@ bool FloatingJointModel::normalizeRotation(double* values) const
     double norm = sqrt(norm_sqr);
     if (norm < std::numeric_limits<double>::epsilon() * 100.0)
     {
-      RCLCPP_WARN(LOGGER, "Quaternion is zero in RobotState representation. Setting to identity");
+      RCLCPP_WARN(getLogger(), "Quaternion is zero in RobotState representation. Setting to identity");
       values[3] = 0.0;
       values[4] = 0.0;
       values[5] = 0.0;

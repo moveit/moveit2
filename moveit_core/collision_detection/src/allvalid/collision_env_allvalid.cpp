@@ -38,103 +38,112 @@
 #include <moveit/collision_detection/allvalid/collision_detector_allocator_allvalid.h>
 #include <rclcpp/logger.hpp>
 #include <rclcpp/logging.hpp>
+#include <moveit/utils/logger.hpp>
 
-// Logger
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_collision_detection.collision_world_allvalid");
+namespace collision_detection
+{
+namespace
+{
+rclcpp::Logger getLogger()
+{
+  static auto logger = moveit::makeChildLogger("collision_detection_world_allvalid");
+  return logger;
+}
+}  // namespace
 
-const std::string collision_detection::CollisionDetectorAllocatorAllValid::NAME("ALL_VALID");
+const std::string CollisionDetectorAllocatorAllValid::NAME("ALL_VALID");
 
-collision_detection::CollisionEnvAllValid::CollisionEnvAllValid(const moveit::core::RobotModelConstPtr& robot_model,
-                                                                double padding, double scale)
+CollisionEnvAllValid::CollisionEnvAllValid(const moveit::core::RobotModelConstPtr& robot_model, double padding,
+                                           double scale)
   : CollisionEnv(robot_model, padding, scale)
 {
 }
 
-collision_detection::CollisionEnvAllValid::CollisionEnvAllValid(const moveit::core::RobotModelConstPtr& robot_model,
-                                                                const WorldPtr& world, double padding, double scale)
+CollisionEnvAllValid::CollisionEnvAllValid(const moveit::core::RobotModelConstPtr& robot_model, const WorldPtr& world,
+                                           double padding, double scale)
   : CollisionEnv(robot_model, world, padding, scale)
 {
 }
 
-collision_detection::CollisionEnvAllValid::CollisionEnvAllValid(const CollisionEnv& other, const WorldPtr& world)
+CollisionEnvAllValid::CollisionEnvAllValid(const CollisionEnv& other, const WorldPtr& world)
   : CollisionEnv(other, world)
 {
 }
 
-void collision_detection::CollisionEnvAllValid::checkRobotCollision(const CollisionRequest& req, CollisionResult& res,
-                                                                    const moveit::core::RobotState& /*state*/) const
+void CollisionEnvAllValid::checkRobotCollision(const CollisionRequest& req, CollisionResult& res,
+                                               const moveit::core::RobotState& /*state*/) const
 {
   res.collision = false;
   if (req.verbose)
-    RCLCPP_INFO(LOGGER, "Using AllValid collision detection. No collision checking is performed.");
+    RCLCPP_INFO(getLogger(), "Using AllValid collision detection. No collision checking is performed.");
 }
 
-void collision_detection::CollisionEnvAllValid::checkRobotCollision(const CollisionRequest& req, CollisionResult& res,
-                                                                    const moveit::core::RobotState& /*state*/,
-                                                                    const AllowedCollisionMatrix& /*acm*/) const
+void CollisionEnvAllValid::checkRobotCollision(const CollisionRequest& req, CollisionResult& res,
+                                               const moveit::core::RobotState& /*state*/,
+                                               const AllowedCollisionMatrix& /*acm*/) const
 {
   res.collision = false;
   if (req.verbose)
-    RCLCPP_INFO(LOGGER, "Using AllValid collision detection. No collision checking is performed.");
+    RCLCPP_INFO(getLogger(), "Using AllValid collision detection. No collision checking is performed.");
 }
 
-void collision_detection::CollisionEnvAllValid::checkRobotCollision(const CollisionRequest& req, CollisionResult& res,
-                                                                    const moveit::core::RobotState& /*state1*/,
-                                                                    const moveit::core::RobotState& /*state2*/) const
+void CollisionEnvAllValid::checkRobotCollision(const CollisionRequest& req, CollisionResult& res,
+                                               const moveit::core::RobotState& /*state1*/,
+                                               const moveit::core::RobotState& /*state2*/) const
 {
   res.collision = false;
   if (req.verbose)
-    RCLCPP_INFO(LOGGER, "Using AllValid collision detection. No collision checking is performed.");
+    RCLCPP_INFO(getLogger(), "Using AllValid collision detection. No collision checking is performed.");
 }
 
-void collision_detection::CollisionEnvAllValid::checkRobotCollision(const CollisionRequest& req, CollisionResult& res,
-                                                                    const moveit::core::RobotState& /*state1*/,
-                                                                    const moveit::core::RobotState& /*state2*/,
-                                                                    const AllowedCollisionMatrix& /*acm*/) const
+void CollisionEnvAllValid::checkRobotCollision(const CollisionRequest& req, CollisionResult& res,
+                                               const moveit::core::RobotState& /*state1*/,
+                                               const moveit::core::RobotState& /*state2*/,
+                                               const AllowedCollisionMatrix& /*acm*/) const
 {
   res.collision = false;
   if (req.verbose)
-    RCLCPP_INFO(LOGGER, "Using AllValid collision detection. No collision checking is performed.");
+    RCLCPP_INFO(getLogger(), "Using AllValid collision detection. No collision checking is performed.");
 }
 
-void collision_detection::CollisionEnvAllValid::distanceRobot(const collision_detection::DistanceRequest& /*req*/,
-                                                              collision_detection::DistanceResult& res,
-                                                              const moveit::core::RobotState& /*state*/) const
+void CollisionEnvAllValid::distanceRobot(const DistanceRequest& /*req*/, DistanceResult& res,
+                                         const moveit::core::RobotState& /*state*/) const
 {
   res.collision = false;
 }
 
-double collision_detection::CollisionEnvAllValid::distanceRobot(const moveit::core::RobotState& /*state*/) const
+double CollisionEnvAllValid::distanceRobot(const moveit::core::RobotState& /*state*/) const
 {
   return 0.0;
 }
 
-double collision_detection::CollisionEnvAllValid::distanceRobot(const moveit::core::RobotState& /*state*/,
-                                                                const AllowedCollisionMatrix& /*acm*/) const
+double CollisionEnvAllValid::distanceRobot(const moveit::core::RobotState& /*state*/,
+                                           const AllowedCollisionMatrix& /*acm*/) const
 {
   return 0.0;
 }
 
-void collision_detection::CollisionEnvAllValid::checkSelfCollision(const CollisionRequest& req, CollisionResult& res,
-                                                                   const moveit::core::RobotState& /*state*/) const
+void CollisionEnvAllValid::checkSelfCollision(const CollisionRequest& req, CollisionResult& res,
+                                              const moveit::core::RobotState& /*state*/) const
 {
   res.collision = false;
   if (req.verbose)
-    RCLCPP_INFO(LOGGER, "Using AllValid collision detection. No collision checking is performed.");
+    RCLCPP_INFO(getLogger(), "Using AllValid collision detection. No collision checking is performed.");
 }
 
-void collision_detection::CollisionEnvAllValid::checkSelfCollision(const CollisionRequest& req, CollisionResult& res,
-                                                                   const moveit::core::RobotState& /*state*/,
-                                                                   const AllowedCollisionMatrix& /*acm*/) const
+void CollisionEnvAllValid::checkSelfCollision(const CollisionRequest& req, CollisionResult& res,
+                                              const moveit::core::RobotState& /*state*/,
+                                              const AllowedCollisionMatrix& /*acm*/) const
 {
   res.collision = false;
   if (req.verbose)
-    RCLCPP_INFO(LOGGER, "Using AllValid collision detection. No collision checking is performed.");
+    RCLCPP_INFO(getLogger(), "Using AllValid collision detection. No collision checking is performed.");
 }
 
-void collision_detection::CollisionEnvAllValid::distanceSelf(const collision_detection::DistanceRequest& /*req*/,
-                                                             collision_detection::DistanceResult& res,
-                                                             const moveit::core::RobotState& /*state*/) const
+void CollisionEnvAllValid::distanceSelf(const DistanceRequest& /*req*/, DistanceResult& res,
+                                        const moveit::core::RobotState& /*state*/) const
 {
   res.collision = false;
 }
+
+}  // namespace collision_detection

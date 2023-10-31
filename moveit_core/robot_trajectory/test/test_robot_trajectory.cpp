@@ -63,6 +63,8 @@ protected:
 
   void TearDown() override
   {
+    robot_model_.reset();
+    robot_state_.reset();
   }
 
   void initTestTrajectory(robot_trajectory::RobotTrajectoryPtr& trajectory)

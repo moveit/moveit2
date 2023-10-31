@@ -38,6 +38,17 @@
 #include <rclcpp/rclcpp.hpp>
 #include <moveit/utils/logger.hpp>
 
+// make the child logger the first time we use it
+rclcpp::Logger getLogger()
+{
+  static auto logger = [] {
+    auto logger = moveit::makeChildLogger("child");
+    RCLCPP_INFO(logger, "making the child logger");
+    return logger;
+  }();
+  return logger;
+}
+
 int main(int argc, char** argv)
 {
   rclcpp::init(argc, argv);
@@ -45,12 +56,10 @@ int main(int argc, char** argv)
 
   // Set the moveit logger to be from node
   moveit::setLogger(node->get_logger());
-
-  // Make a child logger
-  const auto child_logger = moveit::makeChildLogger("child");
+  RCLCPP_INFO(moveit::getLogger(), "node logger");
 
   // publish via a timer
-  auto wall_timer = node->create_wall_timer(std::chrono::milliseconds(100),
-                                            [&] { RCLCPP_INFO(child_logger, "hello from child node!"); });
+  auto wall_timer =
+      node->create_wall_timer(std::chrono::milliseconds(100), [&] { RCLCPP_INFO(getLogger(), "child node logger"); });
   rclcpp::spin(node);
 }

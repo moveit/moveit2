@@ -41,10 +41,18 @@
 #include <moveit/kinematics_metrics/kinematics_metrics.h>
 #include <rclcpp/logger.hpp>
 #include <rclcpp/logging.hpp>
+#include <moveit/utils/logger.hpp>
 
 namespace kinematics_metrics
 {
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_kinematics_metrics.kinematics_metrics");
+namespace
+{
+rclcpp::Logger getLogger()
+{
+  static auto logger = moveit::makeChildLogger("kinematics_metrics");
+  return logger;
+}
+}  // namespace
 
 double KinematicsMetrics::getJointLimitsPenalty(const moveit::core::RobotState& state,
                                                 const moveit::core::JointModelGroup* joint_model_group) const
@@ -131,7 +139,7 @@ bool KinematicsMetrics::getManipulabilityIndex(const moveit::core::RobotState& s
       manipulability_index = 1.0;
       for (unsigned int i = 0; i < singular_values.rows(); ++i)
       {
-        RCLCPP_DEBUG(LOGGER, "Singular value: %d %f", i, singular_values(i, 0));
+        RCLCPP_DEBUG(getLogger(), "Singular value: %d %f", i, singular_values(i, 0));
         manipulability_index *= singular_values(i, 0);
       }
       // Get manipulability index
@@ -154,7 +162,7 @@ bool KinematicsMetrics::getManipulabilityIndex(const moveit::core::RobotState& s
       manipulability_index = 1.0;
       for (unsigned int i = 0; i < singular_values.rows(); ++i)
       {
-        RCLCPP_DEBUG(LOGGER, "Singular value: %d %f", i, singular_values(i, 0));
+        RCLCPP_DEBUG(getLogger(), "Singular value: %d %f", i, singular_values(i, 0));
         manipulability_index *= singular_values(i, 0);
       }
       // Get manipulability index
@@ -236,7 +244,7 @@ bool KinematicsMetrics::getManipulability(const moveit::core::RobotState& state,
     Eigen::MatrixXd singular_values = svdsolver.singularValues();
     for (int i = 0; i < singular_values.rows(); ++i)
     {
-      RCLCPP_DEBUG(LOGGER, "Singular value: %d %f", i, singular_values(i, 0));
+      RCLCPP_DEBUG(getLogger(), "Singular value: %d %f", i, singular_values(i, 0));
     }
 
     manipulability = penalty * singular_values.minCoeff() / singular_values.maxCoeff();
@@ -248,7 +256,7 @@ bool KinematicsMetrics::getManipulability(const moveit::core::RobotState& state,
     Eigen::MatrixXd singular_values = svdsolver.singularValues();
     for (int i = 0; i < singular_values.rows(); ++i)
     {
-      RCLCPP_DEBUG(LOGGER, "Singular value: %d %f", i, singular_values(i, 0));
+      RCLCPP_DEBUG(getLogger(), "Singular value: %d %f", i, singular_values(i, 0));
     }
     manipulability = penalty * singular_values.minCoeff() / singular_values.maxCoeff();
   }

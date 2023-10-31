@@ -27,7 +27,9 @@ add_launch_test(rosout_publish_test.py
 
 # These tests do not work on Humble as /rosout logging from child loggers
 # does not work.
-if(NOT $ENV{ROS_DISTRO} STREQUAL "humble")
+# ROS_DISTRO is not defined on rolling
+if((NOT DEFINED ENV{ROS_DISTRO}) OR
+   (NOT $ENV{ROS_DISTRO} STREQUAL "humble"))
   # Test init node logging then log from child logger to rosout
   add_launch_test(rosout_publish_test.py
       TARGET test-node_logging_from_child
