@@ -49,17 +49,17 @@ void initTrajectoryExecutionManager(py::module& m)
       Manages the trajectory execution.
       )")
 
-      .def("isManagingControllers", &trajectory_execution_manager::TrajectoryExecutionManager::isManagingControllers,
+      .def("is_managing_controllers", &trajectory_execution_manager::TrajectoryExecutionManager::isManagingControllers,
            R"(
            If this function returns true, then this instance of the manager is allowed to load/unload/switch controllers.
            )")
 
-      .def("processEvent", &trajectory_execution_manager::TrajectoryExecutionManager::processEvent, py::arg("event"),
+      .def("process_event", &trajectory_execution_manager::TrajectoryExecutionManager::processEvent, py::arg("event"),
            R"(
            Execute a named event (e.g., 'stop').
            )")
 
-      .def("ensureActiveControllersForGroup",
+      .def("ensure_active_controllers_for_group",
            &trajectory_execution_manager::TrajectoryExecutionManager::ensureActiveControllersForGroup, py::arg("group"),
            R"(
            Make sure the active controllers are such that trajectories that actuate joints in the specified group can be executed.
@@ -67,7 +67,7 @@ void initTrajectoryExecutionManager(py::module& m)
            If manage_controllers_ is false and the controllers that happen to be active do not cover the joints in the group to be actuated, this function fails.
            )")
 
-      .def("ensureActiveControllersForJoints",
+      .def("ensure_active_controllers_for_joints",
            &trajectory_execution_manager::TrajectoryExecutionManager::ensureActiveControllersForJoints,
            py::arg("joints"),
            R"(
@@ -76,7 +76,7 @@ void initTrajectoryExecutionManager(py::module& m)
            If manage_controllers_ is false and the controllers that happen to be active do not cover the joints to be actuated, this function fails.
            )")
 
-      .def("ensureActiveController", &trajectory_execution_manager::TrajectoryExecutionManager::ensureActiveController,
+      .def("ensure_active_controller", &trajectory_execution_manager::TrajectoryExecutionManager::ensureActiveController,
            py::arg("controller"),
            R"(
            Make sure a particular controller is active.
@@ -84,7 +84,7 @@ void initTrajectoryExecutionManager(py::module& m)
            If manage_controllers_ is false and the controllers that happen to be active to not include the one specified as argument, this function fails.
            )")
 
-      .def("ensureActiveControllers",
+      .def("ensure_active_controllers",
            &trajectory_execution_manager::TrajectoryExecutionManager::ensureActiveControllers, py::arg("controllers"),
            R"(
            Make sure a particular set of controllers are active.
@@ -92,13 +92,13 @@ void initTrajectoryExecutionManager(py::module& m)
            If manage_controllers_ is false and the controllers that happen to be active to not include the ones specified as argument, this function fails.
           )")
 
-      .def("isControllerActive", &trajectory_execution_manager::TrajectoryExecutionManager::isControllerActive,
+      .def("is_controller_active", &trajectory_execution_manager::TrajectoryExecutionManager::isControllerActive,
            py::arg("controller"),
            R"(
            Check if a controller is active.
            )")
 
-      .def("areControllersActive", &trajectory_execution_manager::TrajectoryExecutionManager::areControllersActive,
+      .def("are_controllers_active", &trajectory_execution_manager::TrajectoryExecutionManager::areControllersActive,
            py::arg("controllers"),
            R"(
            Check if a set of controllers are active
@@ -156,14 +156,14 @@ void initTrajectoryExecutionManager(py::module& m)
 
       // ToDo(MatthijsBurgh)
       // See https://github.com/ros-planning/moveit2/issues/2442
-      // getTrajectories
+      // get_trajectories
       // execute
-      // executeAndWait
-      // waitForExecution
-      // getCurrentExpectedTrajectoryIndex
-      // getLastExecutionStatus
+      // execute_and_wait
+      // wait_for_execution
+      // get_current_expected_trajectory_index
+      // get_last_execution_status
 
-      .def("stopExecution", &trajectory_execution_manager::TrajectoryExecutionManager::stopExecution,
+      .def("stop_execution", &trajectory_execution_manager::TrajectoryExecutionManager::stopExecution,
            py::arg("auto_clear") = true,
            R"(
            Stop whatever executions are active, if any.
@@ -174,7 +174,7 @@ void initTrajectoryExecutionManager(py::module& m)
            Clear the trajectories to execute.
            )")
 
-      .def("enableExecutionDurationMonitoring",
+      .def("enable_execution_duration_monitoring",
            &trajectory_execution_manager::TrajectoryExecutionManager::enableExecutionDurationMonitoring,
            py::arg("flag"),
            R"(
@@ -183,20 +183,20 @@ void initTrajectoryExecutionManager(py::module& m)
            If a controller takes longer than expected, the trajectory is canceled.
            )")
 
-      .def("setAllowedExecutionDurationScaling",
+      .def("set_allowed_execution_duration_scaling",
            &trajectory_execution_manager::TrajectoryExecutionManager::setAllowedExecutionDurationScaling,
            py::arg("scaling"),
            R"(
            When determining the expected duration of a trajectory, this multiplicative factor is applied to get the allowed duration of execution.
            )")
 
-      .def("setAllowedGoalDurationMargin",
+      .def("set_allowed_goal_duration_margin",
            &trajectory_execution_manager::TrajectoryExecutionManager::setAllowedGoalDurationMargin, py::arg("margin"),
            R"(
            When determining the expected duration of a trajectory, this additional margin s applied after scalign to allow more than the expected execution time before triggering trajectory cancel.
            )")
 
-      .def("setExecutionVelocityScaling",
+      .def("set_execution_velocity_scaling",
            &trajectory_execution_manager::TrajectoryExecutionManager::setExecutionVelocityScaling, py::arg("scaling"),
            R"(
            Before sending a trajectory to a controller, scale the velocities by the factor specified.
@@ -204,13 +204,13 @@ void initTrajectoryExecutionManager(py::module& m)
            By default, this is 1.0
            )")
 
-      .def("setAllowedStartTolerance",
+      .def("set_allowed_start_tolerance",
            &trajectory_execution_manager::TrajectoryExecutionManager::setAllowedStartTolerance, py::arg("tolerance"),
            R"(
            Set joint-value tolerance for validating trajectory's start point against current robot state.
            )")
 
-      .def("setWaitForTrajectoryCompletion",
+      .def("set_wait_for_trajectory_completion",
            &trajectory_execution_manager::TrajectoryExecutionManager::setWaitForTrajectoryCompletion, py::arg("flag"),
            R"(
            Enable or disable waiting for trajectory completion.
@@ -218,7 +218,7 @@ void initTrajectoryExecutionManager(py::module& m)
 
   // ToDo(MatthijsBurgh)
   // https://github.com/ros-planning/moveit2/issues/2442
-  // getControllerManagerNode
+  // get_controller_manager_node
 }
 }  // namespace bind_trajectory_execution_manager
 }  // namespace moveit_py
