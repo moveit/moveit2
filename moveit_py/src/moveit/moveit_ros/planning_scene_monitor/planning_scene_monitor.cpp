@@ -79,17 +79,6 @@ void LockedPlanningSceneContextManagerRW::lockedPlanningSceneRwExit(const py::ob
   ls_rw_.reset();
 }
 
-// TODO: simplify with typecaster
-void applyPlanningScene(std::shared_ptr<planning_scene_monitor::PlanningSceneMonitor>& planning_scene_monitor,
-                        const moveit_msgs::msg::PlanningScene& planning_scene)
-{
-  // lock planning scene
-  {
-    planning_scene_monitor::LockedPlanningSceneRW scene(planning_scene_monitor);
-    scene->usePlanningSceneMsg(planning_scene);
-  }
-}
-
 void initPlanningSceneMonitor(py::module& m)
 {
   py::class_<planning_scene_monitor::PlanningSceneMonitor, planning_scene_monitor::PlanningSceneMonitorPtr>(
