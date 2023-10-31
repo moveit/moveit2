@@ -186,18 +186,26 @@ bool DefaultCollisions::setDefault(const std::string& link1, const std::string& 
     if (disable)
     {
       if (enabled != pairs.end())  // delete all matching pairs, starting with enabled
+      {
         pairs.erase(std::remove_if(enabled, pairs.end(), DefaultCollisions::PairMatcher(p.link1_, p.link2_)),
                     pairs.end());
+      }
       else
+      {
         changed = false;
+      }
     }
     else
     {
       p.reason_ = disabledReasonToString(NOT_DISABLED);
       if (enabled == pairs.end())
+      {
         srdf_config_->getEnabledCollisions().push_back(p);
+      }
       else
+      {
         changed = false;
+      }
     }
   }
   else
@@ -208,17 +216,25 @@ bool DefaultCollisions::setDefault(const std::string& link1, const std::string& 
     {
       p.reason_ = disabledReasonToString(USER);
       if (disabled == pairs.end())
+      {
         pairs.push_back(p);
+      }
       else
+      {
         changed = false;
+      }
     }
     else
     {
       if (disabled != pairs.end())  // delete all matching pairs, starting with disabled
+      {
         pairs.erase(std::remove_if(disabled, pairs.end(), DefaultCollisions::PairMatcher(p.link1_, p.link2_)),
                     pairs.end());
+      }
       else
+      {
         changed = false;
+      }
     }
   }
 
