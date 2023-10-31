@@ -141,12 +141,7 @@ TEST_F(SimpleRobot, checkAbsoluteJointSpaceJump)
   // Container for results
   double fraction;
 
-  // Direct call of absolute version
-  fraction = CartesianInterpolator::checkAbsoluteJointSpaceJump(joint_model_group, traj, 1.0, 1.0);
-  EXPECT_EQ(expected_revolute_jump_traj_len, traj.size());  // traj should be cut
-  EXPECT_NEAR(expected_revolute_jump_fraction, fraction, 0.01);
-
-  // Indirect call using checkJointSpaceJumps
+  // Revolute and prismatic joints.
   generateTestTraj(traj, robot_model_);
   fraction = CartesianInterpolator::checkJointSpaceJump(joint_model_group, traj, JumpThreshold(1.0, 1.0));
   EXPECT_EQ(expected_revolute_jump_traj_len, traj.size());  // traj should be cut before the revolute jump
@@ -185,14 +180,9 @@ TEST_F(SimpleRobot, checkRelativeJointSpaceJump)
       static_cast<double>(expected_relative_jump_traj_len) / static_cast<double>(full_traj_len);
 
   // Container for results
-  double fraction;
+  double fraction = 0.0;
 
-  // Direct call of relative version: 1.01 > 2.97 * (0.01 * 2 + 1.01 * 2)/6.
-  fraction = CartesianInterpolator::checkRelativeJointSpaceJump(joint_model_group, traj, 2.97);
-  EXPECT_EQ(expected_relative_jump_traj_len, traj.size());  // traj should be cut before the first jump of 1.01
-  EXPECT_NEAR(expected_relative_jump_fraction, fraction, 0.01);
-
-  // Indirect call of relative version using checkJointSpaceJumps
+  // Call of relative version: 1.01 > 2.97 * (0.01 * 2 + 1.01 * 2)/6.
   generateTestTraj(traj, robot_model_);
   fraction = CartesianInterpolator::checkJointSpaceJump(joint_model_group, traj, JumpThreshold(2.97));
   EXPECT_EQ(expected_relative_jump_traj_len, traj.size());  // traj should be cut before the first jump of 1.01
