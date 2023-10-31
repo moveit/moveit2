@@ -106,8 +106,12 @@ auto find(Container& pairs, const std::string& link1, const std::string& link2)
 bool CollisionMatrixModel::disabledByDefault(const std::string& link1, const std::string& link2) const
 {
   for (const auto& name : srdf_.no_default_collision_links_)
+  {
     if (name == link1 || name == link2)
+    {
       return true;
+    }
+  }
   return false;
 }
 
@@ -132,11 +136,17 @@ QVariant CollisionMatrixModel::data(const QModelIndex& index, int role) const
   int r = visual_to_index_[index.row()], c = visual_to_index_[index.column()];
   auto it = find(srdf_.disabled_collision_pairs_, std_names_[r], std_names_[c]);
   if (it != srdf_.disabled_collision_pairs_.end())
+  {
     reason = &it->reason_;
+  }
   else if (find(srdf_.enabled_collision_pairs_, std_names_[r], std_names_[c]) != srdf_.enabled_collision_pairs_.end())
+  {
     reason = &enabled;
+  }
   else if (disabledByDefault(std_names_[r], std_names_[c]))
+  {
     reason = &disabled;
+  }
 
   switch (role)
   {
@@ -146,11 +156,17 @@ QVariant CollisionMatrixModel::data(const QModelIndex& index, int role) const
       return reason ? QString::fromStdString(*reason) : QString();
     case Qt::BackgroundRole:
       if (!reason || reason == &enabled)
+      {
         return QVariant();
+      }
       else if (reason == &disabled)
+      {
         return default_collision_brush;
+      }
       else
+      {
         return LONG_REASONS_TO_BRUSH.at(moveit_setup::srdf_setup::disabledReasonFromString(*reason));
+      }
   }
   return QVariant();
 }
@@ -176,17 +192,25 @@ bool CollisionMatrixModel::setData(const QModelIndex& index, const QVariant& val
     if (new_value)
     {
       if (enabled != pairs.end())  // delete all matching pairs, starting with enabled
+      {
         pairs.erase(std::remove_if(enabled, pairs.end(), PairMatcher(p.link1_, p.link2_)), pairs.end());
+      }
       else
+      {
         changed = false;
+      }
     }
     else
     {
       p.reason_ = moveit_setup::srdf_setup::disabledReasonToString(moveit_setup::srdf_setup::NOT_DISABLED);
       if (enabled == pairs.end())
+      {
         srdf_.enabled_collision_pairs_.push_back(p);
+      }
       else
+      {
         changed = false;
+      }
     }
   }
   else
@@ -197,16 +221,24 @@ bool CollisionMatrixModel::setData(const QModelIndex& index, const QVariant& val
     {
       p.reason_ = moveit_setup::srdf_setup::disabledReasonToString(moveit_setup::srdf_setup::USER);
       if (disabled == pairs.end())
+      {
         pairs.push_back(p);
+      }
       else
+      {
         changed = false;
+      }
     }
     else
     {
       if (disabled != pairs.end())  // delete all matching pairs, starting with disabled
+      {
         pairs.erase(std::remove_if(disabled, pairs.end(), PairMatcher(p.link1_, p.link2_)), pairs.end());
+      }
       else
+      {
         changed = false;
+      }
     }
   }
 

@@ -482,8 +482,12 @@ void DefaultCollisionsWidget::hideOtherSections()
   auto selected = selectedSections(header);
 
   for (std::size_t index = 0, end = header->count(); index != end; ++index)
+  {
     if (!selected.contains(index))
+    {
       header->setSectionHidden(index, true);
+    }
+  }
 }
 
 void DefaultCollisionsWidget::showSections()
