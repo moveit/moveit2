@@ -84,6 +84,11 @@ public:
     return link_pairs_;
   }
 
+  srdf::SRDFWriter& getSRDFWriter()
+  {
+    return srdf_config_->getSRDFWriter();
+  }
+
   // For Threaded Operations
   void startGenerationThread(unsigned int num_trials, double min_frac, bool verbose = true);
   void cancelGenerationThread();

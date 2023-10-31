@@ -275,6 +275,11 @@ public:
     return changes_;
   }
 
+  srdf::SRDFWriter& getSRDFWriter()
+  {
+    return srdf_;
+  }
+
 protected:
   void getRelativePath();
   void loadURDFModel();

@@ -165,6 +165,9 @@ void DefaultCollisions::generateCollisionTable(unsigned int num_trials, double m
   // Find the default collision matrix - all links that are allowed to collide
   link_pairs_ = computeDefaultCollisions(srdf_config_->getPlanningScene(), &progress_, include_never_colliding,
                                          num_trials, min_frac, verbose);
+  // linkPairsToSRDF(link_pairs, *wip_srdf_);
+  // Update collision_matrix for robot pose's use
+  // config_data_->loadAllowedCollisionMatrix(*wip_srdf_);
 
   // End the progress bar loop
   progress_ = 100;

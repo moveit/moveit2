@@ -40,10 +40,6 @@
 #include <QSortFilterProxyModel>
 #include <QVector>
 
-#ifndef Q_MOC_RUN
-#include <moveit_setup_srdf_plugins/compute_default_collisions.hpp>
-#endif
-
 #include <moveit_setup_srdf_plugins/collision_matrix_model.hpp>
 
 namespace moveit_setup
@@ -70,7 +66,6 @@ public:
   QModelIndex index(int row, int column, const QModelIndex& parent = QModelIndex()) const override;
   QModelIndex parent(const QModelIndex& child) const override;
   QVariant data(const QModelIndex& index, int role) const override;
-  DisabledReason reason(int row) const;
 
   bool setData(const QModelIndex& index, const QVariant& value, int role) override;
   void setEnabled(const QItemSelection& selection, bool value);

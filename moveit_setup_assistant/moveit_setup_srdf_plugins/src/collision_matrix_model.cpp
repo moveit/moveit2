@@ -48,16 +48,6 @@ namespace moveit_setup
 {
 namespace srdf_setup
 {
-/// Mapping of reasons for disabling a link pair to strings
-static const std::unordered_map<DisabledReason, const char*> LONG_REASONS_TO_STRING =
-    boost::assign::map_list_of  // clang-format off
-    ( NEVER, "Never in Collision" )
-    ( DEFAULT, "Collision by Default" )
-    ( ADJACENT, "Adjacent Links" )
-    ( ALWAYS, "Always in Collision" )
-    ( USER, "User Disabled" )
-    ( NOT_DISABLED, "");  // clang-format on
-
 /// Mapping of reasons to a background color
 static const std::unordered_map<DisabledReason, QVariant> LONG_REASONS_TO_BRUSH =
     boost::assign::map_list_of  // clang-format off
@@ -68,8 +58,9 @@ static const std::unordered_map<DisabledReason, QVariant> LONG_REASONS_TO_BRUSH 
     ( USER, QBrush(QColor("yellow")) )
     ( NOT_DISABLED, QBrush());  // clang-format on
 
-CollisionMatrixModel::CollisionMatrixModel(LinkPairMap& pairs, const std::vector<std::string>& names, QObject* parent)
-  : QAbstractTableModel(parent), pairs_(pairs), std_names_(names)
+CollisionMatrixModel::CollisionMatrixModel(const srdf::SRDFWriter& srdf, const std::vector<std::string>& names,
+                                           QObject* parent)
+  : QAbstractTableModel(parent), srdf_(srdf), std_names_(names)
 {
   int idx = 0;
   for (std::vector<std::string>::const_iterator it = names.begin(), end = names.end(); it != end; ++it, ++idx)
@@ -77,20 +68,6 @@ CollisionMatrixModel::CollisionMatrixModel(LinkPairMap& pairs, const std::vector
     visual_to_index_ << idx;
     q_names_ << QString::fromStdString(*it);
   }
-}
-
-// return item in pairs map given a normalized index, use item(normalized(index))
-LinkPairMap::iterator CollisionMatrixModel::item(const QModelIndex& index)
-{
-  int r = visual_to_index_[index.row()], c = visual_to_index_[index.column()];
-  if (r == c)
-    return pairs_.end();
-
-  // setLinkPair() actually inserts the pair (A,B) where A < B
-  if (std_names_[r] >= std_names_[c])
-    std::swap(r, c);
-
-  return pairs_.find(std::make_pair(std_names_[r], std_names_[c]));
 }
 
 int CollisionMatrixModel::rowCount(const QModelIndex& /*parent*/) const
@@ -103,67 +80,143 @@ int CollisionMatrixModel::columnCount(const QModelIndex& /*parent*/) const
   return visual_to_index_.size();
 }
 
+struct PairMatcher
+{
+  PairMatcher(const std::string& link1, const std::string& link2)
+    : search(link1 < link2 ? std::make_pair(std::cref(link1), std::cref(link2)) :
+                             std::make_pair(std::cref(link2), std::cref(link1)))
+  {
+  }
+
+  bool operator()(const srdf::Model::CollisionPair& pair) const
+  {
+    return (pair.link1_ == search.first && pair.link2_ == search.second) ||
+           (pair.link2_ == search.first && pair.link1_ == search.second);
+  }
+
+  std::pair<const std::string&, const std::string&> search;
+};
+
+template <typename Container>
+auto find(Container& pairs, const std::string& link1, const std::string& link2)
+{
+  return std::find_if(pairs.begin(), pairs.end(), PairMatcher(link1, link2));
+}
+
+bool CollisionMatrixModel::disabledByDefault(const std::string& link1, const std::string& link2) const
+{
+  for (const auto& name : srdf_.no_default_collision_links_)
+    if (name == link1 || name == link2)
+      return true;
+  return false;
+}
+
 QVariant CollisionMatrixModel::data(const QModelIndex& index, int role) const
 {
-  if (index.isValid() && index.row() == index.column() && role == Qt::BackgroundRole)
-    return QApplication::palette().window();
+  static std::string enabled = "Explicitly enabled";
+  static std::string disabled = "Disabled by default";
+  static QBrush default_collision_brush(QColor("lightpink").darker(110));
 
-  LinkPairMap::const_iterator item = this->item(index);
-  if (item == pairs_.end())
-    return QVariant();
+  if (index.isValid() && index.row() == index.column())
+  {
+    switch (role)
+    {
+      case Qt::BackgroundRole:
+        return QApplication::palette().window();
+      default:
+        return QVariant();
+    }
+  }
+
+  const std::string* reason = nullptr;
+  int r = visual_to_index_[index.row()], c = visual_to_index_[index.column()];
+  auto it = find(srdf_.disabled_collision_pairs_, std_names_[r], std_names_[c]);
+  if (it != srdf_.disabled_collision_pairs_.end())
+    reason = &it->reason_;
+  else if (find(srdf_.enabled_collision_pairs_, std_names_[r], std_names_[c]) != srdf_.enabled_collision_pairs_.end())
+    reason = &enabled;
+  else if (disabledByDefault(std_names_[r], std_names_[c]))
+    reason = &disabled;
 
   switch (role)
   {
     case Qt::CheckStateRole:
-      return item->second.disable_check ? Qt::Checked : Qt::Unchecked;
+      return (!reason || reason == &enabled) ? Qt::Unchecked : Qt::Checked;
     case Qt::ToolTipRole:
-      return LONG_REASONS_TO_STRING.at(item->second.reason);
+      return reason ? QString::fromStdString(*reason) : QString();
     case Qt::BackgroundRole:
-      return LONG_REASONS_TO_BRUSH.at(item->second.reason);
+      if (!reason || reason == &enabled)
+        return QVariant();
+      else if (reason == &disabled)
+        return default_collision_brush;
+      else
+        return LONG_REASONS_TO_BRUSH.at(moveit_setup::srdf_setup::disabledReasonFromString(*reason));
   }
   return QVariant();
 }
 
-DisabledReason CollisionMatrixModel::reason(const QModelIndex& index) const
-{
-  LinkPairMap::const_iterator item = this->item(index);
-  if (item == pairs_.end())
-    return NOT_DISABLED;
-  return item->second.reason;
-}
-
 bool CollisionMatrixModel::setData(const QModelIndex& index, const QVariant& value, int role)
 {
-  if (role == Qt::CheckStateRole)
+  if (role != Qt::CheckStateRole)
+    return false;
+
+  bool new_value = (value.toInt() == Qt::Checked);
+  srdf::Model::CollisionPair p{ std_names_[visual_to_index_[index.row()]], std_names_[visual_to_index_[index.column()]],
+                                std::string() };
+  if (p.link1_ > p.link2_)
+    std::swap(p.link1_, p.link2_);
+
+  auto enabled = find(srdf_.enabled_collision_pairs_, p.link1_, p.link2_);
+  auto disabled = find(srdf_.disabled_collision_pairs_, p.link1_, p.link2_);
+  bool changed = true;
+  if (disabledByDefault(p.link1_, p.link2_))
   {
-    LinkPairMap::iterator item = this->item(index);
-    if (item == pairs_.end())
-      return false;
-
-    bool new_value = (value.toInt() == Qt::Checked);
-    if (item->second.disable_check == new_value)
-      return true;
-
-    item->second.disable_check = new_value;
-
-    // Handle USER Reasons: 1) pair is disabled by user
-    if (item->second.disable_check && item->second.reason == NOT_DISABLED)
+    assert(disabled == srdf_.disabled_collision_pairs_.end());
+    auto& pairs = srdf_.enabled_collision_pairs_;
+    if (new_value)
     {
-      item->second.reason = USER;
-
-      // Handle USER Reasons: 2) pair was disabled by user and now is enabled (not checked)
+      if (enabled != pairs.end())  // delete all matching pairs, starting with enabled
+        pairs.erase(std::remove_if(enabled, pairs.end(), PairMatcher(p.link1_, p.link2_)), pairs.end());
+      else
+        changed = false;
     }
-    else if (!item->second.disable_check && item->second.reason == USER)
+    else
     {
-      item->second.reason = NOT_DISABLED;
+      p.reason_ = moveit_setup::srdf_setup::disabledReasonToString(moveit_setup::srdf_setup::NOT_DISABLED);
+      if (enabled == pairs.end())
+        srdf_.enabled_collision_pairs_.push_back(p);
+      else
+        changed = false;
     }
+  }
+  else
+  {
+    assert(enabled == srdf_.enabled_collision_pairs_.end());
+    auto& pairs = srdf_.disabled_collision_pairs_;
+    if (new_value)
+    {
+      p.reason_ = moveit_setup::srdf_setup::disabledReasonToString(moveit_setup::srdf_setup::USER);
+      if (disabled == pairs.end())
+        pairs.push_back(p);
+      else
+        changed = false;
+    }
+    else
+    {
+      if (disabled != pairs.end())  // delete all matching pairs, starting with disabled
+        pairs.erase(std::remove_if(disabled, pairs.end(), PairMatcher(p.link1_, p.link2_)), pairs.end());
+      else
+        changed = false;
+    }
+  }
 
+  if (changed)
+  {
     QModelIndex mirror = this->index(index.column(), index.row());
     Q_EMIT dataChanged(index, index);
     Q_EMIT dataChanged(mirror, mirror);
-    return true;
   }
-  return false;  // reject all other changes
+  return changed;
 }
 
 void CollisionMatrixModel::setEnabled(const QItemSelection& selection, bool value)

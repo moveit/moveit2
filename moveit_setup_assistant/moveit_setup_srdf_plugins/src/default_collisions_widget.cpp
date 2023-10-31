@@ -53,6 +53,31 @@ namespace moveit_setup
 namespace srdf_setup
 {
 // ******************************************************************************************
+// Convert LinkPairMap to SRDF
+// ******************************************************************************************
+void linkPairsToSRDF(const LinkPairMap& pairs, srdf::SRDFWriter& srdf)
+{
+  // reset the data in the SRDF Writer class
+  srdf.disabled_collision_pairs_.clear();
+
+  // Create temp disabled collision
+  srdf::Model::CollisionPair dc;
+
+  // copy the data in this class's LinkPairMap datastructure to srdf::Model::CollisionPair format
+  for (const auto& item : pairs)
+  {
+    // Only copy those that are actually disabled
+    if (item.second.disable_check)
+    {
+      dc.link1_ = item.first.first;
+      dc.link2_ = item.first.second;
+      dc.reason_ = disabledReasonToString(item.second.reason);
+      srdf.disabled_collision_pairs_.push_back(dc);
+    }
+  }
+}
+
+// ******************************************************************************************
 // User interface for editing the default collision matrix list in an SRDF
 // ******************************************************************************************
 void DefaultCollisionsWidget::onInit()
@@ -165,6 +190,12 @@ void DefaultCollisionsWidget::onInit()
   action = new QAction(tr("Hide others"), this);
   header_actions_ << action;
   connect(action, SIGNAL(triggered()), this, SLOT(hideOtherSections()));
+  action = new QAction(tr("Disable by default"), this);
+  header_actions_ << action;
+  connect(action, &QAction::triggered, this, [this] { setDefaults(true); });
+  action = new QAction(tr("Enable by default"), this);
+  header_actions_ << action;
+  connect(action, &QAction::triggered, this, [this] { setDefaults(false); });
 
   // Bottom Area ----------------------------------------
 
@@ -189,11 +220,11 @@ void DefaultCollisionsWidget::onInit()
   radio_btn = new QRadioButton("linear view");
   bottom_layout->addWidget(radio_btn);
   view_mode_buttons_->addButton(radio_btn, LINEAR_MODE);
-  radio_btn->setChecked(true);
 
   radio_btn = new QRadioButton("matrix view");
   bottom_layout->addWidget(radio_btn);
   view_mode_buttons_->addButton(radio_btn, MATRIX_MODE);
+  radio_btn->setChecked(true);
   connect(view_mode_buttons_, SIGNAL(buttonClicked(int)), this, SLOT(loadCollisionTable()));
 
   // Revert Button
@@ -258,7 +289,7 @@ void DefaultCollisionsWidget::finishGeneratingCollisionTable()
 void DefaultCollisionsWidget::loadCollisionTable()
 {
   CollisionMatrixModel* matrix_model =
-      new CollisionMatrixModel(setup_step_.getLinkPairs(), setup_step_.getCollidingLinks());
+      new CollisionMatrixModel(setup_step_.getSRDFWriter(), setup_step_.getCollidingLinks());
   QAbstractItemModel* model;
 
   if (view_mode_buttons_->checkedId() == MATRIX_MODE)
@@ -269,6 +300,7 @@ void DefaultCollisionsWidget::loadCollisionTable()
   {
     CollisionLinearModel* linear_model = new CollisionLinearModel(matrix_model);
     SortFilterProxyModel* sorted_model = new SortFilterProxyModel();
+    sorted_model->setShowAll(collision_checkbox_->checkState() == Qt::Checked);
     model = sorted_model;
     sorted_model->setSourceModel(linear_model);
     // ensure deletion of underlying models with model
@@ -327,6 +359,7 @@ void DefaultCollisionsWidget::loadCollisionTable()
     collision_checkbox_->show();
     horizontal_header->setVisible(true);
     vertical_header->setVisible(true);
+    horizontal_header->setSectionResizeMode(QHeaderView::Stretch);
 
     vertical_header->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(vertical_header, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(showHeaderContextMenu(QPoint)));
@@ -406,38 +439,9 @@ void DefaultCollisionsWidget::showHeaderContextMenu(const QPoint& p)
   clicked_section_ = -1;
 }
 
-void DefaultCollisionsWidget::hideSections()
+QList<int> DefaultCollisionsWidget::selectedSections(QHeaderView*& header) const
 {
   QList<int> list;
-  QHeaderView* header = nullptr;
-  if (clicked_headers_ == Qt::Horizontal)
-  {
-    for (const QModelIndex& index : selection_model_->selectedColumns())
-      list << index.column();
-    header = collision_table_->horizontalHeader();
-  }
-  else if (clicked_headers_ == Qt::Vertical)
-  {
-    for (const QModelIndex& index : selection_model_->selectedRows())
-      list << index.row();
-    header = collision_table_->verticalHeader();
-  }
-
-  // if somewhere else than the selection was clicked, hide only this row/column
-  if (!list.contains(clicked_section_))
-  {
-    list.clear();
-    list << clicked_section_;
-  }
-
-  for (auto index : list)
-    header->setSectionHidden(index, true);
-}
-
-void DefaultCollisionsWidget::hideOtherSections()
-{
-  QList<int> list;
-  QHeaderView* header = nullptr;
   if (clicked_headers_ == Qt::Horizontal)
   {
     header = collision_table_->horizontalHeader();
@@ -456,67 +460,50 @@ void DefaultCollisionsWidget::hideOtherSections()
         list << index.row();
     }
   }
-
-  // if somewhere else than the selection was clicked, hide only this row/column
+  // if somewhere else than the selection was clicked, only consider this row/column
   if (!list.contains(clicked_section_))
-  {
-    list.clear();
-    list << clicked_section_;
-  }
+    return { clicked_section_ };
 
-  // first hide all sections
-  for (std::size_t index = 0, end = header->count(); index != end; ++index)
-    header->setSectionHidden(index, true);
+  return list;
+}
 
-  // and subsequently show selected ones
+void DefaultCollisionsWidget::hideSections()
+{
+  QHeaderView* header;
+  auto list = selectedSections(header);
+
   for (auto index : list)
-    header->setSectionHidden(index, false);
+    header->setSectionHidden(index, true);
+}
+
+void DefaultCollisionsWidget::hideOtherSections()
+{
+  QHeaderView* header;
+  auto selected = selectedSections(header);
+
+  for (std::size_t index = 0, end = header->count(); index != end; ++index)
+    if (!selected.contains(index))
+      header->setSectionHidden(index, true);
 }
 
 void DefaultCollisionsWidget::showSections()
 {
-  QList<int> list;
   if (clicked_section_ < 0)  // show all
   {
-    if (clicked_headers_.testFlag(Qt::Horizontal))
-    {
-      // show all columns
-      list.clear();
-      list << 0 << model_->columnCount() - 1;
-      showSections(collision_table_->horizontalHeader(), list);
-    }
+    if (clicked_headers_.testFlag(Qt::Horizontal))  // show all columns
+      showSections(collision_table_->horizontalHeader(), { 0, model_->columnCount() - 1 });
 
     if (clicked_headers_.testFlag(Qt::Vertical))  // show all rows
-    {
-      list.clear();
-      list << 0 << model_->rowCount() - 1;
-      showSections(collision_table_->verticalHeader(), list);
-    }
+      showSections(collision_table_->verticalHeader(), { 0, model_->rowCount() - 1 });
+
     return;
   }
 
-  QHeaderView* header = nullptr;
-  if (clicked_headers_ == Qt::Horizontal)
-  {
-    for (const QModelIndex& index : selection_model_->selectedColumns())
-      list << index.column();
-    header = collision_table_->horizontalHeader();
-  }
-  else if (clicked_headers_ == Qt::Vertical)
-  {
-    for (const QModelIndex& index : selection_model_->selectedRows())
-      list << index.row();
-    header = collision_table_->verticalHeader();
-  }
-
-  // if somewhere else than the selection was clicked, hide only this row/column
-  if (!list.contains(clicked_section_))
-  {
-    list.clear();
-    list << clicked_section_;
-  }
+  QHeaderView* header;
+  QList<int> list = selectedSections(header);
   showSections(header, list);
 }
+
 void DefaultCollisionsWidget::showSections(QHeaderView* header, const QList<int>& logicalIndexes)
 {
   if (logicalIndexes.size() < 2)
@@ -529,9 +516,60 @@ void DefaultCollisionsWidget::showSections(QHeaderView* header, const QList<int>
   }
 }
 
+void DefaultCollisionsWidget::setDefaults(bool disabled)
+{
+  QHeaderView* header;
+  QList<int> list = selectedSections(header);
+  auto m = collision_table_->model();
+
+  for (auto index : list)
+  {
+    bool changed = false;
+    if (disabled)
+    {
+      const auto& name = m->headerData(index, Qt::Horizontal, Qt::DisplayRole).toString().toStdString();
+      // add name to no_default_collision_links_ (if not yet in there)
+      auto& links = wip_srdf_->no_default_collision_links_;
+      if (std::find(links.begin(), links.end(), name) == links.end())
+      {
+        links.push_back(name);
+        changed = true;
+      }
+      // remove-erase disabled pairs that are redundant now
+      auto& pairs = wip_srdf_->disabled_collision_pairs_;
+      auto last = std::remove_if(pairs.begin(), pairs.end(),
+                                 [&name](const auto& p) { return p.link1_ == name || p.link2_ == name; });
+      changed |= last != pairs.end();
+      pairs.erase(last, pairs.end());
+    }
+    else
+    {
+      const auto& name = m->headerData(index, Qt::Horizontal, Qt::DisplayRole).toString().toStdString();
+      // remove-erase name from no_default_collision_links_
+      auto& links = wip_srdf_->no_default_collision_links_;
+      {
+        auto last = std::remove(links.begin(), links.end(), name);
+        changed |= last != links.end();
+        links.erase(last, links.end());
+      }
+
+      // remove explicitly enabled pairs
+      auto& pairs = wip_srdf_->enabled_collision_pairs_;
+      auto last = std::remove_if(pairs.begin(), pairs.end(), [&name, &links](const auto& p) {
+        return (p.link1_ == name && std::find(links.begin(), links.end(), p.link2_) == links.end()) ||
+               (p.link2_ == name && std::find(links.begin(), links.end(), p.link1_) == links.end());
+      });
+      pairs.erase(last, pairs.end());
+    }
+    if (changed)
+      btn_revert_->setEnabled(true);
+  }
+}
+
 void DefaultCollisionsWidget::revertChanges()
 {
   setup_step_.linkPairsFromSRDF();
+  *wip_srdf_ = setup_step_.getSRDFWriter();
   loadCollisionTable();
   btn_revert_->setEnabled(false);  // no changes to revert
 }
@@ -704,6 +742,8 @@ void DefaultCollisionsWidget::focusGiven()
 {
   // Convert the SRDF data to LinkPairData format
   setup_step_.linkPairsFromSRDF();
+  // srdf backup
+  wip_srdf_ = std::make_shared<srdf::SRDFWriter>(setup_step_.getSRDFWriter());
 
   // Load the data to the table
   loadCollisionTable();
@@ -724,6 +764,7 @@ bool DefaultCollisionsWidget::focusLost()
     worker_->cancel();
     worker_->wait();
   }
+  // *config_data_->srdf_ = *wip_srdf_;
 
   // Copy changes to srdf_writer object
   setup_step_.linkPairsToSRDF();

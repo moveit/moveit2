@@ -183,6 +183,8 @@ private:
   MonitorThread* worker_;
 
   DefaultCollisions setup_step_;
+  /// Working copy of SRDF config
+  srdf::SRDFWriterPtr wip_srdf_;
 
   // ******************************************************************************************
   // Private Functions
@@ -194,18 +196,19 @@ private:
    */
   void disableControls(bool disable);
 
-  /**
-   * \brief Allow toggling of all checkboxes in selection by filtering <space> keypresses
-   */
+  /** Allow toggling of all checkboxes in selection by filtering <space> keypresses */
   bool eventFilter(QObject* object, QEvent* event) override;
 
-  /**
-   * \brief Show header's sections in logicalIndexes and everything in between
-   */
+  /** Return list of selected sections */
+  QList<int> selectedSections(QHeaderView*& header) const;
+
+  /** Show header's sections in logicalIndexes and everything in between */
   void showSections(QHeaderView* header, const QList<int>& logicalIndexes);
-  /**
-   * \brief Toggle enabled status of selection
-   */
+
+  /** Enable/Disable selected sections by default */
+  void setDefaults(bool enabled);
+
+  /** Toggle enabled status of selection */
   void toggleSelection(QItemSelection selection);
 };
 
