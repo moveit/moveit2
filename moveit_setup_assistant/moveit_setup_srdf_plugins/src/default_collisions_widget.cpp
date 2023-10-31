@@ -53,31 +53,6 @@ namespace moveit_setup
 namespace srdf_setup
 {
 // ******************************************************************************************
-// Convert LinkPairMap to SRDF
-// ******************************************************************************************
-void linkPairsToSRDF(const LinkPairMap& pairs, srdf::SRDFWriter& srdf)
-{
-  // reset the data in the SRDF Writer class
-  srdf.disabled_collision_pairs_.clear();
-
-  // Create temp disabled collision
-  srdf::Model::CollisionPair dc;
-
-  // copy the data in this class's LinkPairMap datastructure to srdf::Model::CollisionPair format
-  for (const auto& item : pairs)
-  {
-    // Only copy those that are actually disabled
-    if (item.second.disable_check)
-    {
-      dc.link1_ = item.first.first;
-      dc.link2_ = item.first.second;
-      dc.reason_ = disabledReasonToString(item.second.reason);
-      srdf.disabled_collision_pairs_.push_back(dc);
-    }
-  }
-}
-
-// ******************************************************************************************
 // User interface for editing the default collision matrix list in an SRDF
 // ******************************************************************************************
 void DefaultCollisionsWidget::onInit()
@@ -288,8 +263,7 @@ void DefaultCollisionsWidget::finishGeneratingCollisionTable()
 // ******************************************************************************************
 void DefaultCollisionsWidget::loadCollisionTable()
 {
-  CollisionMatrixModel* matrix_model =
-      new CollisionMatrixModel(setup_step_.getSRDFWriter(), setup_step_.getCollidingLinks());
+  CollisionMatrixModel* matrix_model = new CollisionMatrixModel(setup_step_, setup_step_.getCollidingLinks());
   QAbstractItemModel* model;
 
   if (view_mode_buttons_->checkedId() == MATRIX_MODE)
@@ -495,10 +469,14 @@ void DefaultCollisionsWidget::showSections()
   if (clicked_section_ < 0)  // show all
   {
     if (clicked_headers_.testFlag(Qt::Horizontal))  // show all columns
+    {
       showSections(collision_table_->horizontalHeader(), { 0, model_->columnCount() - 1 });
+    }
 
     if (clicked_headers_.testFlag(Qt::Vertical))  // show all rows
+    {
       showSections(collision_table_->verticalHeader(), { 0, model_->rowCount() - 1 });
+    }
 
     return;
   }
@@ -528,52 +506,18 @@ void DefaultCollisionsWidget::setDefaults(bool disabled)
 
   for (auto index : list)
   {
-    bool changed = false;
-    if (disabled)
-    {
-      const auto& name = m->headerData(index, Qt::Horizontal, Qt::DisplayRole).toString().toStdString();
-      // add name to no_default_collision_links_ (if not yet in there)
-      auto& links = wip_srdf_->no_default_collision_links_;
-      if (std::find(links.begin(), links.end(), name) == links.end())
-      {
-        links.push_back(name);
-        changed = true;
-      }
-      // remove-erase disabled pairs that are redundant now
-      auto& pairs = wip_srdf_->disabled_collision_pairs_;
-      auto last = std::remove_if(pairs.begin(), pairs.end(),
-                                 [&name](const auto& p) { return p.link1_ == name || p.link2_ == name; });
-      changed |= last != pairs.end();
-      pairs.erase(last, pairs.end());
-    }
-    else
-    {
-      const auto& name = m->headerData(index, Qt::Horizontal, Qt::DisplayRole).toString().toStdString();
-      // remove-erase name from no_default_collision_links_
-      auto& links = wip_srdf_->no_default_collision_links_;
-      {
-        auto last = std::remove(links.begin(), links.end(), name);
-        changed |= last != links.end();
-        links.erase(last, links.end());
-      }
-
-      // remove explicitly enabled pairs
-      auto& pairs = wip_srdf_->enabled_collision_pairs_;
-      auto last = std::remove_if(pairs.begin(), pairs.end(), [&name, &links](const auto& p) {
-        return (p.link1_ == name && std::find(links.begin(), links.end(), p.link2_) == links.end()) ||
-               (p.link2_ == name && std::find(links.begin(), links.end(), p.link1_) == links.end());
-      });
-      pairs.erase(last, pairs.end());
-    }
+    const auto& name = m->headerData(index, Qt::Horizontal, Qt::DisplayRole).toString().toStdString();
+    bool changed = setup_step_.setDefault(name, disabled);
     if (changed)
+    {
       btn_revert_->setEnabled(true);
+    }
   }
 }
 
 void DefaultCollisionsWidget::revertChanges()
 {
   setup_step_.linkPairsFromSRDF();
-  *wip_srdf_ = setup_step_.getSRDFWriter();
   loadCollisionTable();
   btn_revert_->setEnabled(false);  // no changes to revert
 }
@@ -746,8 +690,6 @@ void DefaultCollisionsWidget::focusGiven()
 {
   // Convert the SRDF data to LinkPairData format
   setup_step_.linkPairsFromSRDF();
-  // srdf backup
-  wip_srdf_ = std::make_shared<srdf::SRDFWriter>(setup_step_.getSRDFWriter());
 
   // Load the data to the table
   loadCollisionTable();
@@ -768,7 +710,6 @@ bool DefaultCollisionsWidget::focusLost()
     worker_->cancel();
     worker_->wait();
   }
-  // *config_data_->srdf_ = *wip_srdf_;
 
   // Copy changes to srdf_writer object
   setup_step_.linkPairsToSRDF();

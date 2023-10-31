@@ -105,6 +105,16 @@ public:
     return srdf_.disabled_collision_pairs_;
   }
 
+  std::vector<srdf::Model::CollisionPair>& getEnabledCollisions()
+  {
+    return srdf_.enabled_collision_pairs_;
+  }
+
+  std::vector<std::string>& getNoDefaultCollisionLinks()
+  {
+    return srdf_.no_default_collision_links_;
+  }
+
   std::vector<srdf::Model::EndEffector>& getEndEffectors()
   {
     return srdf_.end_effectors_;
@@ -273,11 +283,6 @@ public:
   unsigned long getChangeMask() const
   {
     return changes_;
-  }
-
-  srdf::SRDFWriter& getSRDFWriter()
-  {
-    return srdf_;
   }
 
 protected:

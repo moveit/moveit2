@@ -41,6 +41,7 @@
 
 #ifndef Q_MOC_RUN
 #include <moveit_setup_srdf_plugins/compute_default_collisions.hpp>
+#include <moveit_setup_srdf_plugins/default_collisions.hpp>
 #endif
 
 #include <QItemSelection>
@@ -52,7 +53,8 @@ class CollisionMatrixModel : public QAbstractTableModel
 {
   Q_OBJECT
 public:
-  CollisionMatrixModel(const srdf::SRDFWriter& srdf, const std::vector<std::string>& names, QObject* parent = nullptr);
+  CollisionMatrixModel(DefaultCollisions& default_collisions, const std::vector<std::string>& names,
+                       QObject* parent = nullptr);
   int rowCount(const QModelIndex& parent = QModelIndex()) const override;
   int columnCount(const QModelIndex& parent = QModelIndex()) const override;
   QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
@@ -68,10 +70,7 @@ public Q_SLOTS:
   void setFilterRegExp(const QString& filter);
 
 private:
-  bool disabledByDefault(const std::string& link1, const std::string& link2) const;
-
-private:
-  srdf::SRDFWriter srdf_;
+  DefaultCollisions& default_collisions_;
   const std::vector<std::string> std_names_;  // names of links
   QList<QString> q_names_;                    // names of links
   QList<int> visual_to_index_;                // map from visual index to actual index

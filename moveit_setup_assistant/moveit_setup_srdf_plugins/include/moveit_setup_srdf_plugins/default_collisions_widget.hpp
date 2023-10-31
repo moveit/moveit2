@@ -183,8 +183,6 @@ private:
   MonitorThread* worker_;
 
   DefaultCollisions setup_step_;
-  /// Working copy of SRDF config
-  srdf::SRDFWriterPtr wip_srdf_;
 
   // ******************************************************************************************
   // Private Functions
