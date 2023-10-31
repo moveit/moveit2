@@ -48,6 +48,8 @@ namespace core
 class JumpThreshold
 {
 public:
+  JumpThreshold() = default;  // default is equivalent to disabled().
+
   /** \brief Do not define any jump threshold, i.e., disable joint-space jump detection. */
   static JumpThreshold disabled();
 
@@ -69,11 +71,9 @@ public:
   double revolute = 0.0;   // Radians
   double prismatic = 0.0;  // Meters
 
-private:
-  // Private constructors. Construct using builder methods in the public interface.
-  JumpThreshold() = default;
-  JumpThreshold(double relative_factor);
-  JumpThreshold(double revolute, double prismatic);
+  // Deprecated constructors. Construct using the builder methods above.
+  [[deprecated("Use JumpThreshold::relative() instead.")]] JumpThreshold(double relative_factor);
+  [[deprecated("Use JumpThreshold::absolute() instead.")]] JumpThreshold(double revolute, double prismatic);
 };
 
 /** \brief Struct for containing max_step for computeCartesianPath

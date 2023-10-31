@@ -137,12 +137,17 @@ JumpThreshold JumpThreshold::disabled()
 
 JumpThreshold JumpThreshold::relative(double relative_factor)
 {
-  return JumpThreshold(relative_factor);
+  JumpThreshold threshold;
+  threshold.relative_factor = relative_factor;
+  return threshold;
 }
 
 JumpThreshold JumpThreshold::absolute(double revolute, double prismatic)
 {
-  return JumpThreshold(revolute, prismatic);
+  JumpThreshold threshold;
+  threshold.revolute = revolute;
+  threshold.prismatic = prismatic;
+  return threshold;
 }
 
 JumpThreshold::JumpThreshold(double relative_factor)
