@@ -34,32 +34,47 @@
 
 /* Author: Tyler Weaver */
 
-#include <chrono>
+#include <string>
+#include <memory>
+#include <thread>
+#include <unordered_map>
 #include <rclcpp/rclcpp.hpp>
-#include <moveit/utils/logger.hpp>
+#include <fmt/format.h>
+#include <rsl/random.hpp>
 
-// make the child logger the first time we use it
-rclcpp::Logger getLogger()
+rclcpp::Logger& get_root_logger()
 {
-  static auto logger = [] {
-    auto logger = moveit::makeChildLogger("child");
-    RCLCPP_INFO(logger, "making the child logger");
-    return logger;
-  }();
+  static auto moveit_node = std::make_shared<rclcpp::Node>(fmt::format("____moveit_{}", rsl::rng()()));
+  static auto logger = moveit_node->get_logger();
   return logger;
+}
+
+void set_node_logger_name(const std::string& name)
+{
+  static auto node = std::make_shared<rclcpp::Node>("moveit", name);
+  get_root_logger() = node->get_logger();
+}
+
+rclcpp::Logger get_logger(const std::string& name)
+{
+  return get_root_logger().get_child(name);
 }
 
 int main(int argc, char** argv)
 {
   rclcpp::init(argc, argv);
   rclcpp::Node::SharedPtr node = rclcpp::Node::make_shared("dut_node");
+  set_node_logger_name(node->get_name());
 
-  // Set the moveit logger to be from node
-  moveit::setLogger(node->get_logger());
-  RCLCPP_INFO(moveit::getLogger(), "node logger");
+  RCLCPP_ERROR(get_logger("child1"), "A");
+  RCLCPP_ERROR(get_logger("child2"), "A");
+  RCLCPP_ERROR(get_logger("child3"), "A");
+  RCLCPP_ERROR(get_logger("child4"), "A");
 
-  // publish via a timer
-  auto wall_timer =
-      node->create_wall_timer(std::chrono::milliseconds(100), [&] { RCLCPP_INFO(getLogger(), "child node logger"); });
-  rclcpp::spin(node);
+  RCLCPP_ERROR(get_logger("child1"), "B");
+  RCLCPP_ERROR(get_logger("child2"), "B");
+  RCLCPP_ERROR(get_logger("child3"), "B");
+  RCLCPP_ERROR(get_logger("child4"), "B");
+
+  std::this_thread::sleep_for(std::chrono::seconds(1));
 }

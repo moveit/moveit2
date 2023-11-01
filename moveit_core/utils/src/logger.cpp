@@ -92,6 +92,7 @@ const rclcpp::Logger& getLogger()
 
 rclcpp::Logger makeChildLogger(const std::string& name)
 {
+  RCLCPP_INFO_STREAM(getLogger(), "Creating child logger: " << name);
   return getGlobalLoggerRef().get_child(name);
 }
 
