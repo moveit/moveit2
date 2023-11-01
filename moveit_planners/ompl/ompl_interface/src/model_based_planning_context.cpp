@@ -291,7 +291,7 @@ void ompl_interface::ModelBasedPlanningContext::useConfig()
   {
     // clang-format off
     double longest_valid_segment_fraction_config = (it != cfg.end())
-      ? moveit::core::toDouble(std::any_cast<double>(it->second))  // value from config file if there
+      ? std::any_cast<double>(it->second)  // value from config file if there
       : 0.01;  // default value in OMPL.
     double longest_valid_segment_fraction_final = longest_valid_segment_fraction_config;
     if (max_solution_segment_length_ > 0.0)
@@ -313,7 +313,7 @@ void ompl_interface::ModelBasedPlanningContext::useConfig()
   it = cfg.find("projection_evaluator");
   if (it != cfg.end())
   {
-    setProjectionEvaluator(boost::trim_copy(it->second));
+    setProjectionEvaluator(boost::trim_copy(std::any_cast<std::string>(it->second)));
     cfg.erase(it);
   }
 
@@ -327,7 +327,7 @@ void ompl_interface::ModelBasedPlanningContext::useConfig()
   it = cfg.find("optimization_objective");
   if (it != cfg.end())
   {
-    optimizer = it->second;
+    optimizer = std::any_cast<std::string>(it->second);
     cfg.erase(it);
 
     if (optimizer == "PathLengthOptimizationObjective")
@@ -405,7 +405,7 @@ void ompl_interface::ModelBasedPlanningContext::useConfig()
   }
   else
   {
-    std::string type = it->second;
+    std::string type = std::any_cast<std::string>(it->second);
     cfg.erase(it);
     const std::string planner_name = getGroupName() + "/" + name_;
     ompl_simple_setup_->setPlannerAllocator(
@@ -553,7 +553,7 @@ ompl_interface::ModelBasedPlanningContext::constructPlannerTerminationCondition(
     return ob::timedPlannerTerminationCondition(timeout - ompl::time::seconds(ompl::time::now() - start));
   }
 
-  std::string termination_string = it->second;
+  std::string termination_string = std::any_cast<std::string>(it->second);
   std::vector<std::string> termination_and_params;
   boost::split(termination_and_params, termination_string, boost::is_any_of("[ ,]"));
 

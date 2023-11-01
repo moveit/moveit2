@@ -106,7 +106,7 @@ public:
     return spec_;
   }
 
-  const std::map<std::string, std::string>& getSpecificationConfig() const
+  const std::map<std::string, std::any>& getSpecificationConfig() const
   {
     return spec_.config_;
   }

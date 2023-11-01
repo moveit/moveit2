@@ -154,7 +154,7 @@ ompl::base::PlannerPtr MultiQueryPlannerAllocator::allocatePlanner(const ob::Spa
     std::string planner_data_path;
     if (it != cfg.end())
     {
-      planner_data_path = it->second;
+      planner_data_path = std::any_cast<std::string>(it->second);
       cfg.erase(it);
     }
     // Store planner instance for multi-query use
