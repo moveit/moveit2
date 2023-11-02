@@ -149,21 +149,21 @@ TEST_F(SimpleRobot, checkAbsoluteJointSpaceJump)
 
   // Test revolute joints
   generateTestTraj(traj, robot_model_);
-  fraction = CartesianInterpolator::checkJointSpaceJump(joint_model_group, traj, JumpThreshold::absolute(1.0, 0.0));
+  fraction = CartesianInterpolator::checkJointSpaceJump(joint_model_group, traj, JumpThreshold::absolute(0.01, 10.0));
   EXPECT_EQ(expected_revolute_jump_traj_len, traj.size());  // traj should be cut before the revolute jump
   EXPECT_NEAR(expected_revolute_jump_fraction, fraction, 0.01);
 
   // Test prismatic joints
   generateTestTraj(traj, robot_model_);
-  fraction = CartesianInterpolator::checkJointSpaceJump(joint_model_group, traj, JumpThreshold::absolute(0.0, 1.0));
+  fraction = CartesianInterpolator::checkJointSpaceJump(joint_model_group, traj, JumpThreshold::absolute(10.0, 0.01));
   EXPECT_EQ(expected_prismatic_jump_traj_len, traj.size());  // traj should be cut before the prismatic jump
   EXPECT_NEAR(expected_prismatic_jump_fraction, fraction, 0.01);
 
-  // Ignore all absolute jumps
-  generateTestTraj(traj, robot_model_);
-  fraction = CartesianInterpolator::checkJointSpaceJump(joint_model_group, traj, JumpThreshold::absolute(0.0, 0.0));
-  EXPECT_EQ(full_traj_len, traj.size());  // traj should not be cut
-  EXPECT_NEAR(1.0, fraction, 0.01);
+  // Pre-condition checks.
+  EXPECT_ANY_THROW(
+      CartesianInterpolator::checkJointSpaceJump(joint_model_group, traj, JumpThreshold::absolute(0.0, 0.01)));
+  EXPECT_ANY_THROW(
+      CartesianInterpolator::checkJointSpaceJump(joint_model_group, traj, JumpThreshold::absolute(0.01, 0.0)));
 }
 
 TEST_F(SimpleRobot, checkRelativeJointSpaceJump)
@@ -193,6 +193,9 @@ TEST_F(SimpleRobot, checkRelativeJointSpaceJump)
   fraction = CartesianInterpolator::checkJointSpaceJump(joint_model_group, traj, JumpThreshold::relative(2.98));
   EXPECT_EQ(full_traj_len, traj.size());  // traj should not be cut
   EXPECT_NEAR(1.0, fraction, 0.01);
+
+  // Pre-condition checks.
+  EXPECT_ANY_THROW(CartesianInterpolator::checkJointSpaceJump(joint_model_group, traj, JumpThreshold::relative(0.0)));
 }
 
 // TODO - The tests below fail since no kinematic plugins are found. Move the tests to IK plugin package.

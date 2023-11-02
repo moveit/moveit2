@@ -44,10 +44,9 @@ namespace moveit
 {
 namespace core
 {
-/** \brief Class with options for defining joint-space jump thresholds. */
-class JumpThreshold
+/** \brief Struct with options for defining joint-space jump thresholds. */
+struct JumpThreshold
 {
-public:
   JumpThreshold() = default;  // default is equivalent to disabled().
 
   /** \brief Do not define any jump threshold, i.e., disable joint-space jump detection. */
@@ -154,7 +153,7 @@ public:
      Cartesian space between consecutive points on the resulting path is specified in the \e MaxEEFStep struct which
      provides two fields: translation and rotation. If a \e validCallback is specified, this is passed to the internal
      call to setFromIK(). In case of IK failure, the computation of the path stops and the value returned corresponds to
-     the distance that was achieved and for which corresponding states were added to the path.  At the end of the
+     the distance that was achieved and for which corresponding states were added to the path. At the end of the
      function call, the state of the group corresponds to the last attempted Cartesian pose.
 
      During the computation of the path, it is usually preferred if consecutive joint values do not 'jump' by a
@@ -240,7 +239,7 @@ public:
    jump, and the path index where the jump happens is returned as output.
    Otherwise the function returns a nullopt. */
 std::optional<int> hasJointSpaceJumps(const std::vector<moveit::core::RobotStatePtr>& waypoints,
-                                      const moveit::core::JointModelGroup* group,
+                                      const moveit::core::JointModelGroup& group,
                                       const moveit::core::JumpThreshold& jump_threshold);
 
 }  // end of namespace core

@@ -41,7 +41,7 @@
 #include <geometric_shapes/check_isometry.h>
 #include <rclcpp/logger.hpp>
 #include <rclcpp/logging.hpp>
-
+#include <rcpputils/asserts.hpp>
 namespace moveit::core
 {
 
@@ -56,7 +56,7 @@ static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_robot_state.cart
 namespace
 {
 std::optional<int> hasRelativeJointSpaceJump(const std::vector<moveit::core::RobotStatePtr>& waypoints,
-                                             const moveit::core::JointModelGroup* group, double jump_threshold_factor)
+                                             const moveit::core::JointModelGroup& group, double jump_threshold_factor)
 {
   if (waypoints.size() < MIN_STEPS_FOR_JUMP_THRESH)
   {
@@ -71,7 +71,7 @@ std::optional<int> hasRelativeJointSpaceJump(const std::vector<moveit::core::Rob
   double total_dist = 0.0;
   for (std::size_t i = 1; i < waypoints.size(); ++i)
   {
-    double dist_prev_point = waypoints[i]->distance(*waypoints[i - 1], group);
+    const double dist_prev_point = waypoints[i]->distance(*waypoints[i - 1], &group);
     dist_vector.push_back(dist_prev_point);
     total_dist += dist_prev_point;
   }
@@ -90,13 +90,13 @@ std::optional<int> hasRelativeJointSpaceJump(const std::vector<moveit::core::Rob
 }
 
 std::optional<int> hasAbsoluteJointSpaceJump(const std::vector<moveit::core::RobotStatePtr>& waypoints,
-                                             const moveit::core::JointModelGroup* group, double revolute_threshold,
+                                             const moveit::core::JointModelGroup& group, double revolute_threshold,
                                              double prismatic_threshold)
 {
   const bool check_revolute = revolute_threshold > 0.0;
   const bool check_prismatic = prismatic_threshold > 0.0;
 
-  const std::vector<const moveit::core::JointModel*>& joints = group->getActiveJointModels();
+  const std::vector<const moveit::core::JointModel*>& joints = group.getActiveJointModels();
   for (std::size_t i = 1; i < waypoints.size(); ++i)
   {
     for (const auto& joint : joints)
@@ -119,7 +119,8 @@ std::optional<int> hasAbsoluteJointSpaceJump(const std::vector<moveit::core::Rob
         default:
           RCLCPP_WARN(LOGGER,
                       "Joint %s has not supported type %s. \n"
-                      "hasAbsoluteJointSpaceJump only supports prismatic and revolute joints.",
+                      "hasAbsoluteJointSpaceJump only supports prismatic and revolute joints. Skipping joint jump "
+                      "check for this joint.",
                       joint->getName().c_str(), joint->getTypeName().c_str());
           continue;
       }
@@ -137,6 +138,8 @@ JumpThreshold JumpThreshold::disabled()
 
 JumpThreshold JumpThreshold::relative(double relative_factor)
 {
+  rcpputils::require_true(relative_factor > 1.0);
+
   JumpThreshold threshold;
   threshold.relative_factor = relative_factor;
   return threshold;
@@ -144,6 +147,9 @@ JumpThreshold JumpThreshold::relative(double relative_factor)
 
 JumpThreshold JumpThreshold::absolute(double revolute, double prismatic)
 {
+  rcpputils::require_true(revolute > 0.0);
+  rcpputils::require_true(prismatic > 0.0);
+
   JumpThreshold threshold;
   threshold.revolute = revolute;
   threshold.prismatic = prismatic;
@@ -329,7 +335,7 @@ CartesianInterpolator::Percentage CartesianInterpolator::checkJointSpaceJump(con
                                                                              std::vector<RobotStatePtr>& path,
                                                                              const JumpThreshold& jump_threshold)
 {
-  std::optional<int> jump_index = hasJointSpaceJumps(path, group, jump_threshold);
+  std::optional<int> jump_index = hasJointSpaceJumps(path, *group, jump_threshold);
 
   double percentage_solved = 1.0;
   if (jump_index)
@@ -343,7 +349,7 @@ CartesianInterpolator::Percentage CartesianInterpolator::checkJointSpaceJump(con
 }
 
 std::optional<int> hasJointSpaceJumps(const std::vector<moveit::core::RobotStatePtr>& waypoints,
-                                      const moveit::core::JointModelGroup* group,
+                                      const moveit::core::JointModelGroup& group,
                                       const moveit::core::JumpThreshold& jump_threshold)
 {
   if (waypoints.size() <= 1)
