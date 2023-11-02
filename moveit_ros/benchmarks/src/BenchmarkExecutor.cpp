@@ -62,8 +62,15 @@
 
 #undef max
 
-using moveit::getLogger;
 using namespace moveit_ros_benchmarks;
+
+namespace
+{
+rclcpp::Logger getLogger()
+{
+  return moveit::getLogger("BenchmarkExecutor");
+}
+}  // namespace
 
 template <class Clock, class Duration>
 boost::posix_time::ptime toBoost(const std::chrono::time_point<Clock, Duration>& from)

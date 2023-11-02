@@ -59,8 +59,7 @@ namespace
 {
 rclcpp::Logger getLogger()
 {
-  static auto logger = moveit::makeChildLogger("robot_state");
-  return logger;
+  return moveit::getLogger("robot_state");
 }
 }  // namespace
 

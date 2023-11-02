@@ -56,8 +56,7 @@ constexpr double DEFAULT_SCALING_FACTOR = 1.0;
 
 rclcpp::Logger getLogger()
 {
-  static auto logger = moveit::makeChildLogger("time_optimal_trajectory_generation");
-  return logger;
+  return moveit::getLogger("time_optimal_trajectory_generation");
 }
 }  // namespace
 

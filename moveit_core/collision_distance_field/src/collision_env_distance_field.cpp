@@ -61,7 +61,7 @@ CollisionEnvDistanceField::CollisionEnvDistanceField(
     const std::map<std::string, std::vector<CollisionSphere>>& link_body_decompositions, double size_x, double size_y,
     double size_z, const Eigen::Vector3d& origin, bool use_signed_distance_field, double resolution,
     double collision_tolerance, double max_propogation_distance, double /*padding*/, double /*scale*/)
-  : CollisionEnv(robot_model), logger_(moveit::makeChildLogger("collision_robot_distance_field"))
+  : CollisionEnv(robot_model), logger_(moveit::getLogger("collision_robot_distance_field"))
 {
   initialize(link_body_decompositions, Eigen::Vector3d(size_x, size_y, size_z), origin, use_signed_distance_field,
              resolution, collision_tolerance, max_propogation_distance);
@@ -80,7 +80,7 @@ CollisionEnvDistanceField::CollisionEnvDistanceField(
     const std::map<std::string, std::vector<CollisionSphere>>& link_body_decompositions, double size_x, double size_y,
     double size_z, const Eigen::Vector3d& origin, bool use_signed_distance_field, double resolution,
     double collision_tolerance, double max_propogation_distance, double padding, double scale)
-  : CollisionEnv(robot_model, world, padding, scale), logger_(moveit::makeChildLogger("collision_robot_distance_field"))
+  : CollisionEnv(robot_model, world, padding, scale), logger_(moveit::getLogger("collision_robot_distance_field"))
 {
   initialize(link_body_decompositions, Eigen::Vector3d(size_x, size_y, size_z), origin, use_signed_distance_field,
              resolution, collision_tolerance, max_propogation_distance);

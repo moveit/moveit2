@@ -57,8 +57,7 @@ constexpr double OVERSHOOT_CHECK_PERIOD = 0.01;  // sec
 
 rclcpp::Logger getLogger()
 {
-  static auto logger = moveit::makeChildLogger("ruckig_traj_smoothing");
-  return logger;
+  return moveit::getLogger("ruckig_traj_smoothing");
 }
 }  // namespace
 

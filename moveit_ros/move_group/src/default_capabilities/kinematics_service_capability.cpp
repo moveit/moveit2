@@ -205,7 +205,7 @@ bool MoveGroupKinematicsService::computeFKService(const std::shared_ptr<rmw_requ
 {
   if (req->fk_link_names.empty())
   {
-    RCLCPP_ERROR(moveit::getLogger(), "No links specified for FK request");
+    RCLCPP_ERROR(moveit::getLogger("MoveGroupKinematicsService"), "No links specified for FK request");
     res->error_code.val = moveit_msgs::msg::MoveItErrorCodes::INVALID_LINK_NAME;
     return true;
   }

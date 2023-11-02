@@ -49,8 +49,7 @@ namespace
 {
 rclcpp::Logger getLogger()
 {
-  static auto logger = moveit::makeChildLogger("collision_detection_octomap_filter");
-  return logger;
+  return moveit::getLogger("collision_detection_octomap_filter");
 }
 }  // namespace
 

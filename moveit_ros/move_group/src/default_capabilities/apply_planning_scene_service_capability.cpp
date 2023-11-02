@@ -67,7 +67,8 @@ bool ApplyPlanningSceneService::applyScene(const std::shared_ptr<rmw_request_id_
 {
   if (!context_->planning_scene_monitor_)
   {
-    RCLCPP_ERROR(moveit::getLogger(), "Cannot apply PlanningScene as no scene is monitored.");
+    RCLCPP_ERROR(moveit::getLogger("ApplyPlanningSceneService"),
+                 "Cannot apply PlanningScene as no scene is monitored.");
     return true;
   }
   context_->planning_scene_monitor_->updateFrameTransforms();

@@ -50,8 +50,7 @@ namespace
 {
 rclcpp::Logger getLogger()
 {
-  static auto logger = moveit::makeChildLogger("collision_common_distance_field");
-  return logger;
+  return moveit::getLogger("collision_common_distance_field");
 }
 }  // namespace
 

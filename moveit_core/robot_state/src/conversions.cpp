@@ -56,8 +56,7 @@ namespace
 {
 rclcpp::Logger getLogger()
 {
-  static auto logger = moveit::makeChildLogger("conversions");
-  return logger;
+  return moveit::getLogger("conversions");
 }
 
 bool jointStateToRobotStateImpl(const sensor_msgs::msg::JointState& joint_state, RobotState& state)

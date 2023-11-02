@@ -49,8 +49,7 @@ namespace
 {
 rclcpp::Logger getLogger()
 {
-  static auto logger = moveit::makeChildLogger("propagation_distance_field");
-  return logger;
+  return moveit::getLogger("propagation_distance_field");
 }
 }  // namespace
 

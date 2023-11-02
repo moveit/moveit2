@@ -39,6 +39,14 @@
 #include <moveit/move_group/capability_names.h>
 #include <moveit/utils/logger.hpp>
 
+namespace
+{
+rclcpp::Logger getLogger()
+{
+  return moveit::getLogger("ClearOctomapService");
+}
+}  // namespace
+
 move_group::ClearOctomapService::ClearOctomapService() : MoveGroupCapability("ClearOctomapService")
 {
 }
@@ -55,11 +63,11 @@ void move_group::ClearOctomapService::clearOctomap(const std::shared_ptr<std_srv
                                                    const std::shared_ptr<std_srvs::srv::Empty::Response>& /*res*/)
 {
   if (!context_->planning_scene_monitor_)
-    RCLCPP_ERROR(moveit::getLogger(), "Cannot clear octomap since planning_scene_monitor_ does not exist.");
+    RCLCPP_ERROR(getLogger(), "Cannot clear octomap since planning_scene_monitor_ does not exist.");
 
-  RCLCPP_INFO(moveit::getLogger(), "Clearing octomap...");
+  RCLCPP_INFO(getLogger(), "Clearing octomap...");
   context_->planning_scene_monitor_->clearOctomap();
-  RCLCPP_INFO(moveit::getLogger(), "Octomap cleared.");
+  RCLCPP_INFO(getLogger(), "Octomap cleared.");
 }
 
 #include <pluginlib/class_list_macros.hpp>

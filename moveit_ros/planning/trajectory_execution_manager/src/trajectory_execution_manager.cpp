@@ -55,7 +55,7 @@ static const double DEFAULT_CONTROLLER_GOAL_DURATION_SCALING =
 TrajectoryExecutionManager::TrajectoryExecutionManager(const rclcpp::Node::SharedPtr& node,
                                                        const moveit::core::RobotModelConstPtr& robot_model,
                                                        const planning_scene_monitor::CurrentStateMonitorPtr& csm)
-  : node_(node), logger_(moveit::makeChildLogger("trajectory_execution_manager")), robot_model_(robot_model), csm_(csm)
+  : node_(node), logger_(moveit::getLogger("trajectory_execution_manager")), robot_model_(robot_model), csm_(csm)
 {
   if (!node_->get_parameter("moveit_manage_controllers", manage_controllers_))
     manage_controllers_ = false;
@@ -67,7 +67,7 @@ TrajectoryExecutionManager::TrajectoryExecutionManager(const rclcpp::Node::Share
                                                        const planning_scene_monitor::CurrentStateMonitorPtr& csm,
                                                        bool manage_controllers)
   : node_(node)
-  , logger_(moveit::makeChildLogger("trajectory_execution_manager"))
+  , logger_(moveit::getLogger("trajectory_execution_manager"))
   , robot_model_(robot_model)
   , csm_(csm)
   , manage_controllers_(manage_controllers)

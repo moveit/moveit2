@@ -45,6 +45,13 @@
 
 namespace move_group
 {
+namespace
+{
+rclcpp::Logger getLogger()
+{
+  return moveit::getLogger("ClearOctomapService");
+}
+}  // namespace
 
 MoveGroupExecuteTrajectoryAction::MoveGroupExecuteTrajectoryAction() : MoveGroupCapability("ExecuteTrajectoryAction")
 {
@@ -100,7 +107,7 @@ void MoveGroupExecuteTrajectoryAction::executePathCallback(const std::shared_ptr
 void MoveGroupExecuteTrajectoryAction::executePath(const std::shared_ptr<ExecTrajectoryGoal>& goal,
                                                    std::shared_ptr<ExecTrajectory::Result>& action_res)
 {
-  RCLCPP_INFO(moveit::getLogger(), "Execution request received");
+  RCLCPP_INFO(getLogger(), "Execution request received");
 
   context_->trajectory_execution_manager_->clear();
   if (context_->trajectory_execution_manager_->push(goal->get_goal()->trajectory, goal->get_goal()->controller_names))
@@ -124,7 +131,7 @@ void MoveGroupExecuteTrajectoryAction::executePath(const std::shared_ptr<ExecTra
     {
       action_res->error_code.val = moveit_msgs::msg::MoveItErrorCodes::CONTROL_FAILED;
     }
-    RCLCPP_INFO_STREAM(moveit::getLogger(), "Execution completed: " << status.asString());
+    RCLCPP_INFO_STREAM(getLogger(), "Execution completed: " << status.asString());
   }
   else
   {

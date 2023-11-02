@@ -48,8 +48,7 @@ namespace
 {
 rclcpp::Logger getLogger()
 {
-  static auto logger = moveit::makeChildLogger("constraint_sampler_manager");
-  return logger;
+  return moveit::getLogger("constraint_sampler_manager");
 }
 }  // namespace
 

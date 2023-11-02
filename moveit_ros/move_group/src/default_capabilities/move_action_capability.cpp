@@ -45,10 +45,16 @@
 #include <moveit/move_group/capability_names.h>
 #include <moveit/utils/logger.hpp>
 
-using moveit::getLogger;
-
 namespace move_group
 {
+
+namespace
+{
+rclcpp::Logger getLogger()
+{
+  return moveit::getLogger("MoveGroupMoveAction");
+}
+}  // namespace
 
 MoveGroupMoveAction::MoveGroupMoveAction()
   : MoveGroupCapability("MoveAction"), move_state_(IDLE), preempt_requested_{ false }

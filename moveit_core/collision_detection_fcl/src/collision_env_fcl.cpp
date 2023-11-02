@@ -55,8 +55,7 @@ namespace
 {
 rclcpp::Logger getLogger()
 {
-  static auto logger = moveit::makeChildLogger("moveit_collision_detection_fcl");
-  return logger;
+  return moveit::getLogger("moveit_collision_detection_fcl");
 }
 
 // Check whether this FCL version supports the requested computations

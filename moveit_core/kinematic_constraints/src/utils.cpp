@@ -57,8 +57,7 @@ namespace
 {
 rclcpp::Logger getLogger()
 {
-  static auto logger = moveit::makeChildLogger("moveit_kinematic_constraints");
-  return logger;
+  return moveit::getLogger("moveit_kinematic_constraints");
 }
 }  // namespace
 

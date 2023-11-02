@@ -72,7 +72,7 @@ TrajectoryVisualization::TrajectoryVisualization(rviz_common::properties::Proper
   , widget_(widget)
   , trajectory_slider_panel_(nullptr)
   , trajectory_slider_dock_panel_(nullptr)
-  , logger_(moveit::makeChildLogger("trajectory_visualization"))
+  , logger_(moveit::getLogger("trajectory_visualization"))
 {
   trajectory_topic_property_ = new rviz_common::properties::RosTopicProperty(
       "Trajectory Topic", "/display_planned_path",

@@ -50,8 +50,7 @@ namespace
 {
 rclcpp::Logger getLogger()
 {
-  static auto logger = moveit::makeChildLogger("transforms");
-  return logger;
+  return moveit::getLogger("transforms");
 }
 }  // namespace
 

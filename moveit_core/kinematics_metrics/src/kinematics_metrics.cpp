@@ -49,8 +49,7 @@ namespace
 {
 rclcpp::Logger getLogger()
 {
-  static auto logger = moveit::makeChildLogger("kinematics_metrics");
-  return logger;
+  return moveit::getLogger("kinematics_metrics");
 }
 }  // namespace
 

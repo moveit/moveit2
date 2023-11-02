@@ -40,6 +40,14 @@
 using moveit::getLogger;
 using namespace moveit_ros_benchmarks;
 
+namespace
+{
+rclcpp::Logger getLogger()
+{
+  return moveit::getLogger("BenchmarkOptions");
+}
+}  // namespace
+
 BenchmarkOptions::BenchmarkOptions(const rclcpp::Node::SharedPtr& node)
 {
   if (!readBenchmarkOptions(node))

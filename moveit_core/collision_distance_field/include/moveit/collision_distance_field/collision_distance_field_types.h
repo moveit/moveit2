@@ -373,7 +373,7 @@ class PosedBodySphereDecompositionVector
 public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-  PosedBodySphereDecompositionVector() : logger_(moveit::makeChildLogger("posed_body_sphere_decomposition_vector"))
+  PosedBodySphereDecompositionVector() : logger_(moveit::getLogger("posed_body_sphere_decomposition_vector"))
   {
   }
 
@@ -447,7 +447,7 @@ class PosedBodyPointDecompositionVector
 public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-  PosedBodyPointDecompositionVector() : logger_(moveit::makeChildLogger("posed_body_point_decomposition_vector"))
+  PosedBodyPointDecompositionVector() : logger_(moveit::getLogger("posed_body_point_decomposition_vector"))
   {
   }
 

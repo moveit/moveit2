@@ -56,9 +56,8 @@ static const std::string ROBOT_DESCRIPTION = "robot_description";
 typedef std::pair<geometry_msgs::msg::Point, geometry_msgs::msg::Quaternion> LinkConstraintPair;
 typedef std::map<std::string, LinkConstraintPair> LinkConstraintMap;
 
-using moveit::getLogger;
-
-void collectLinkConstraints(const moveit_msgs::msg::Constraints& constraints, LinkConstraintMap& lcmap)
+void collectLinkConstraints(const moveit_msgs::msg::Constraints& constraints, LinkConstraintMap& lcmap,
+                            rclcpp::Logger logger)
 {
   for (const moveit_msgs::msg::PositionConstraint& position_constraint : constraints.position_constraints)
   {
@@ -76,7 +75,7 @@ void collectLinkConstraints(const moveit_msgs::msg::Constraints& constraints, Li
     }
     else
     {
-      RCLCPP_WARN(getLogger(), "Orientation constraint for %s has no matching position constraint",
+      RCLCPP_WARN(logger, "Orientation constraint for %s has no matching position constraint",
                   orientation_constraint.link_name.c_str());
     }
   }
@@ -89,7 +88,7 @@ int main(int argc, char** argv)
   node_options.allow_undeclared_parameters(true);
   node_options.automatically_declare_parameters_from_overrides(true);
   rclcpp::Node::SharedPtr node = rclcpp::Node::make_shared("save_warehouse_as_text", node_options);
-  moveit::setLogger(node->get_logger());
+  moveit::setNodeLoggerName(node->get_name());
 
   boost::program_options::options_description desc;
   desc.add_options()("help", "Show help message")("host", boost::program_options::value<std::string>(),
@@ -127,7 +126,7 @@ int main(int argc, char** argv)
     moveit_warehouse::PlanningSceneWithMetadata pswm;
     if (pss.getPlanningScene(pswm, scene_name))
     {
-      RCLCPP_INFO(getLogger(), "Saving scene '%s'", scene_name.c_str());
+      RCLCPP_INFO(node->get_logger(), "Saving scene '%s'", scene_name.c_str());
       psm.getPlanningScene()->setPlanningSceneMsg(static_cast<const moveit_msgs::msg::PlanningScene&>(*pswm));
       std::ofstream fout((scene_name + ".scene").c_str());
       psm.getPlanningScene()->saveGeometryToStream(fout);
@@ -157,7 +156,8 @@ int main(int argc, char** argv)
           qfout << robot_state_names.size() << '\n';
           for (const std::string& robot_state_name : robot_state_names)
           {
-            RCLCPP_INFO(getLogger(), "Saving start state %s for scene %s", robot_state_name.c_str(), scene_name.c_str());
+            RCLCPP_INFO(node->get_logger(), "Saving start state %s for scene %s", robot_state_name.c_str(),
+                        scene_name.c_str());
             qfout << robot_state_name << '\n';
             moveit_warehouse::RobotStateWithMetadata robot_state;
             rss.getRobotState(robot_state, robot_state_name);
@@ -174,14 +174,14 @@ int main(int argc, char** argv)
           qfout << constraint_names.size() << '\n';
           for (const std::string& constraint_name : constraint_names)
           {
-            RCLCPP_INFO(getLogger(), "Saving goal %s for scene %s", constraint_name.c_str(), scene_name.c_str());
+            RCLCPP_INFO(node->get_logger(), "Saving goal %s for scene %s", constraint_name.c_str(), scene_name.c_str());
             qfout << "link_constraint" << '\n';
             qfout << constraint_name << '\n';
             moveit_warehouse::ConstraintsWithMetadata constraints;
             cs.getConstraints(constraints, constraint_name);
 
             LinkConstraintMap lcmap;
-            collectLinkConstraints(*constraints, lcmap);
+            collectLinkConstraints(*constraints, lcmap, node->get_logger());
             for (std::pair<const std::string, LinkConstraintPair>& iter : lcmap)
             {
               std::string link_name = iter.first;
@@ -200,7 +200,7 @@ int main(int argc, char** argv)
     }
   }
 
-  RCLCPP_INFO(getLogger(), "Done.");
+  RCLCPP_INFO(node->get_logger(), "Done.");
   rclcpp::spin(node);
   return 0;
 }

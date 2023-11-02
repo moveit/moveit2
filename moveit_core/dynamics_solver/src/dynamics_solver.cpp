@@ -49,8 +49,7 @@ namespace
 {
 rclcpp::Logger getLogger()
 {
-  static auto logger = moveit::makeChildLogger("dynamics_solver");
-  return logger;
+  return moveit::getLogger("dynamics_solver");
 }
 }  // namespace
 

@@ -132,7 +132,8 @@ void TfPublisher::initialize()
 
   keep_running_ = true;
 
-  RCLCPP_INFO(moveit::getLogger(), "Initializing MoveGroupTfPublisher with a frame publishing rate of %d", rate_);
+  RCLCPP_INFO(moveit::getLogger("TfPublisher"), "Initializing MoveGroupTfPublisher with a frame publishing rate of %d",
+              rate_);
   thread_ = std::thread(&TfPublisher::publishPlanningSceneFrames, this);
 }
 }  // namespace move_group

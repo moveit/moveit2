@@ -44,14 +44,24 @@
 #include <sstream>
 #include <string>
 
-void move_group::MoveGroupCapability::setContext(const MoveGroupContextPtr& context)
+namespace move_group
+{
+namespace
+{
+rclcpp::Logger getLogger()
+{
+  return moveit::getLogger("MoveGroupCapability");
+}
+}  // namespace
+
+void MoveGroupCapability::setContext(const MoveGroupContextPtr& context)
 {
   context_ = context;
 }
 
-void move_group::MoveGroupCapability::convertToMsg(const std::vector<plan_execution::ExecutableTrajectory>& trajectory,
-                                                   moveit_msgs::msg::RobotState& first_state_msg,
-                                                   std::vector<moveit_msgs::msg::RobotTrajectory>& trajectory_msg) const
+void MoveGroupCapability::convertToMsg(const std::vector<plan_execution::ExecutableTrajectory>& trajectory,
+                                       moveit_msgs::msg::RobotState& first_state_msg,
+                                       std::vector<moveit_msgs::msg::RobotTrajectory>& trajectory_msg) const
 {
   if (!trajectory.empty())
   {
@@ -72,9 +82,9 @@ void move_group::MoveGroupCapability::convertToMsg(const std::vector<plan_execut
   }
 }
 
-void move_group::MoveGroupCapability::convertToMsg(const robot_trajectory::RobotTrajectoryPtr& trajectory,
-                                                   moveit_msgs::msg::RobotState& first_state_msg,
-                                                   moveit_msgs::msg::RobotTrajectory& trajectory_msg) const
+void MoveGroupCapability::convertToMsg(const robot_trajectory::RobotTrajectoryPtr& trajectory,
+                                       moveit_msgs::msg::RobotState& first_state_msg,
+                                       moveit_msgs::msg::RobotTrajectory& trajectory_msg) const
 {
   if (trajectory && !trajectory->empty())
   {
@@ -83,13 +93,13 @@ void move_group::MoveGroupCapability::convertToMsg(const robot_trajectory::Robot
   }
 }
 
-void move_group::MoveGroupCapability::convertToMsg(const std::vector<plan_execution::ExecutableTrajectory>& trajectory,
-                                                   moveit_msgs::msg::RobotState& first_state_msg,
-                                                   moveit_msgs::msg::RobotTrajectory& trajectory_msg) const
+void MoveGroupCapability::convertToMsg(const std::vector<plan_execution::ExecutableTrajectory>& trajectory,
+                                       moveit_msgs::msg::RobotState& first_state_msg,
+                                       moveit_msgs::msg::RobotTrajectory& trajectory_msg) const
 {
   if (trajectory.size() > 1)
   {
-    RCLCPP_ERROR_STREAM(moveit::getLogger(),
+    RCLCPP_ERROR_STREAM(getLogger(),
                         "Internal logic error: trajectory component ignored. !!! THIS IS A SERIOUS ERROR !!!");
   }
   if (!trajectory.empty())
@@ -99,31 +109,31 @@ void move_group::MoveGroupCapability::convertToMsg(const std::vector<plan_execut
 }
 
 planning_interface::MotionPlanRequest
-move_group::MoveGroupCapability::clearRequestStartState(const planning_interface::MotionPlanRequest& request) const
+MoveGroupCapability::clearRequestStartState(const planning_interface::MotionPlanRequest& request) const
 {
   planning_interface::MotionPlanRequest r = request;
   r.start_state = moveit_msgs::msg::RobotState();
   r.start_state.is_diff = true;
-  RCLCPP_WARN(moveit::getLogger(),
+  RCLCPP_WARN(getLogger(),
               "Execution of motions should always start at the robot's current state. Ignoring the state supplied as "
               "start state in the motion planning request");
   return r;
 }
 
 moveit_msgs::msg::PlanningScene
-move_group::MoveGroupCapability::clearSceneRobotState(const moveit_msgs::msg::PlanningScene& scene) const
+MoveGroupCapability::clearSceneRobotState(const moveit_msgs::msg::PlanningScene& scene) const
 {
   moveit_msgs::msg::PlanningScene r = scene;
   r.robot_state = moveit_msgs::msg::RobotState();
   r.robot_state.is_diff = true;
-  RCLCPP_WARN(moveit::getLogger(),
+  RCLCPP_WARN(getLogger(),
               "Execution of motions should always start at the robot's current state. Ignoring the state supplied as "
               "difference in the planning scene diff");
   return r;
 }
 
-std::string move_group::MoveGroupCapability::getActionResultString(const moveit_msgs::msg::MoveItErrorCodes& error_code,
-                                                                   bool planned_trajectory_empty, bool plan_only)
+std::string MoveGroupCapability::getActionResultString(const moveit_msgs::msg::MoveItErrorCodes& error_code,
+                                                       bool planned_trajectory_empty, bool plan_only)
 {
   switch (error_code.val)
   {
@@ -164,7 +174,7 @@ std::string move_group::MoveGroupCapability::getActionResultString(const moveit_
   }
 }
 
-std::string move_group::MoveGroupCapability::stateToStr(MoveGroupState state) const
+std::string MoveGroupCapability::stateToStr(MoveGroupState state) const
 {
   switch (state)
   {
@@ -181,8 +191,8 @@ std::string move_group::MoveGroupCapability::stateToStr(MoveGroupState state) co
   }
 }
 
-bool move_group::MoveGroupCapability::performTransform(geometry_msgs::msg::PoseStamped& pose_msg,
-                                                       const std::string& target_frame) const
+bool MoveGroupCapability::performTransform(geometry_msgs::msg::PoseStamped& pose_msg,
+                                           const std::string& target_frame) const
 {
   if (!context_ || !context_->planning_scene_monitor_->getTFClient())
     return false;
@@ -204,14 +214,13 @@ bool move_group::MoveGroupCapability::performTransform(geometry_msgs::msg::PoseS
   }
   catch (tf2::TransformException& ex)
   {
-    RCLCPP_ERROR(moveit::getLogger(), "TF Problem: %s", ex.what());
+    RCLCPP_ERROR(getLogger(), "TF Problem: %s", ex.what());
     return false;
   }
   return true;
 }
 
-planning_pipeline::PlanningPipelinePtr
-move_group::MoveGroupCapability::resolvePlanningPipeline(const std::string& pipeline_id) const
+planning_pipeline::PlanningPipelinePtr MoveGroupCapability::resolvePlanningPipeline(const std::string& pipeline_id) const
 {
   if (pipeline_id.empty())
   {
@@ -224,14 +233,16 @@ move_group::MoveGroupCapability::resolvePlanningPipeline(const std::string& pipe
     try
     {
       auto pipeline = context_->moveit_cpp_->getPlanningPipelines().at(pipeline_id);
-      RCLCPP_INFO(moveit::getLogger(), "Using planning pipeline '%s'", pipeline_id.c_str());
+      RCLCPP_INFO(getLogger(), "Using planning pipeline '%s'", pipeline_id.c_str());
       return pipeline;
     }
     catch (const std::out_of_range&)
     {
-      RCLCPP_WARN(moveit::getLogger(), "Couldn't find requested planning pipeline '%s'", pipeline_id.c_str());
+      RCLCPP_WARN(getLogger(), "Couldn't find requested planning pipeline '%s'", pipeline_id.c_str());
     }
   }
 
   return planning_pipeline::PlanningPipelinePtr();
 }
+
+}  // namespace move_group

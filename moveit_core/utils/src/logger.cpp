@@ -45,29 +45,14 @@ namespace moveit
 
 // This is the function that stores the global logger used by moveit.
 // As it returns a reference to the static logger it can be changed through the
-// `setLogger` function.
-//
-// You can get a const reference to the logger through the public function
-// `getLogger`.
-//
-// As there is no way to know if `getLogger` is called before `setLogger`
-// we try to initialize a node that will setup /rosout logging with this logger.
-// If that fails (likely due to rclcpp::init not haven't been called) we set the
-// global logger to one that is not associated with a node. When a logger not
-// associated with a node is used the logs only go to the console and files,
-// they do not go to /rosout. This is because publishing is done by a node.
-//
-// The node and logger created here is not intended to be used. But if it is,
-// we append a random number to the name of the node name and logger to make it
-// unique. This helps to prevent problems that arise from when multiple
-// nodes use the same name.
-rclcpp::Logger& getGlobalLoggerRef()
+// `setNodeLoggerName` function.
+rclcpp::Logger& getGlobalRootLogger()
 {
   static rclcpp::Logger logger = [&] {
     // A random number is appended to the name used for the node to make it unique.
     // This unique node and logger name is only used if a user does not set a logger
-    // through the `setLogger` method to their node's logger.
-    auto name = fmt::format("moveit_{}", rsl::rng()());
+    // through the `setNodeLoggerName` method to their node's logger.
+    auto name = fmt::format("____moveit_{}", rsl::rng()());
     try
     {
       static auto* moveit_node = new rclcpp::Node(name);
@@ -85,20 +70,15 @@ rclcpp::Logger& getGlobalLoggerRef()
   return logger;
 }
 
-const rclcpp::Logger& getLogger()
+void setNodeLoggerName(const std::string& name)
 {
-  return getGlobalLoggerRef();
+  static auto node = std::make_shared<rclcpp::Node>("moveit", name);
+  getGlobalRootLogger() = node->get_logger();
 }
 
-rclcpp::Logger makeChildLogger(const std::string& name)
+rclcpp::Logger getLogger(const std::string& name)
 {
-  RCLCPP_INFO_STREAM(getLogger(), "Creating child logger: " << name);
-  return getGlobalLoggerRef().get_child(name);
-}
-
-void setLogger(const rclcpp::Logger& logger)
-{
-  getGlobalLoggerRef() = logger;
+  return getGlobalRootLogger().get_child(name);
 }
 
 }  // namespace moveit

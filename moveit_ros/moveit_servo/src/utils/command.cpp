@@ -40,10 +40,12 @@
 #include <moveit_servo/utils/command.hpp>
 #include <moveit/utils/logger.hpp>
 
-using moveit::getLogger;
-
 namespace
 {
+rclcpp::Logger getLogger()
+{
+  return moveit::getLogger("servo_command");
+}
 
 /**
  * @brief Helper function to create a move group deltas vector from a sub group deltas vector. A delta vector for the

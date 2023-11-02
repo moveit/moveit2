@@ -53,7 +53,7 @@ namespace default_planning_request_adapters
 class ValidateWorkspaceBounds : public planning_interface::PlanningRequestAdapter
 {
 public:
-  ValidateWorkspaceBounds() : logger_(moveit::makeChildLogger("validate_workspace_bounds"))
+  ValidateWorkspaceBounds() : logger_(moveit::getLogger("validate_workspace_bounds"))
   {
   }
 

@@ -46,8 +46,7 @@ namespace
 {
 rclcpp::Logger getLogger()
 {
-  static auto logger = moveit::makeChildLogger("collision_detection_world");
-  return logger;
+  return moveit::getLogger("collision_detection_world");
 }
 }  // namespace
 

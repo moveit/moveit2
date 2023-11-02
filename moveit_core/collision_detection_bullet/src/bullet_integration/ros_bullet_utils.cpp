@@ -115,8 +115,6 @@ Eigen::Isometry3d urdfPose2Eigen(const urdf::Pose& pose)
 
 rclcpp::Logger getLogger()
 {
-  static auto logger = moveit::makeChildLogger("collision_detection_bullet");
-  return logger;
+  return moveit::getLogger("collision_detection_bullet");
 }
-
 }  // namespace collision_detection_bullet

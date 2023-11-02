@@ -51,8 +51,7 @@ namespace
 {
 rclcpp::Logger getLogger()
 {
-  static auto logger = moveit::makeChildLogger("distance_field");
-  return logger;
+  return moveit::getLogger("distance_field");
 }
 }  // namespace
 

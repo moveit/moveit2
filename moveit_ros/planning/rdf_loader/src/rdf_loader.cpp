@@ -56,10 +56,17 @@
 
 namespace rdf_loader
 {
+namespace
+{
+rclcpp::Logger getLogger()
+{
+  return moveit::getLogger("RDFLoader");
+}
+}  // namespace
 
 RDFLoader::RDFLoader(const std::shared_ptr<rclcpp::Node>& node, const std::string& ros_name,
                      bool default_continuous_value, double default_timeout)
-  : ros_name_(ros_name), logger_(moveit::makeChildLogger("rdf_loader"))
+  : ros_name_(ros_name)
 {
   auto start = node->now();
 
@@ -77,11 +84,11 @@ RDFLoader::RDFLoader(const std::shared_ptr<rclcpp::Node>& node, const std::strin
     return;
   }
 
-  RCLCPP_INFO_STREAM(logger_, "Loaded robot model in " << (node->now() - start).seconds() << " seconds");
+  RCLCPP_INFO_STREAM(getLogger(), "Loaded robot model in " << (node->now() - start).seconds() << " seconds");
 }
 
 RDFLoader::RDFLoader(const std::string& urdf_string, const std::string& srdf_string)
-  : urdf_string_(urdf_string), srdf_string_(srdf_string), logger_(moveit::makeChildLogger("rdf_loader"))
+  : urdf_string_(urdf_string), srdf_string_(srdf_string)
 {
   if (!loadFromStrings())
   {
@@ -94,14 +101,14 @@ bool RDFLoader::loadFromStrings()
   std::unique_ptr<urdf::Model> urdf = std::make_unique<urdf::Model>();
   if (!urdf->initString(urdf_string_))
   {
-    RCLCPP_INFO(logger_, "Unable to parse URDF");
+    RCLCPP_INFO(getLogger(), "Unable to parse URDF");
     return false;
   }
 
   srdf::ModelSharedPtr srdf = std::make_shared<srdf::Model>();
   if (!srdf->initString(*urdf, srdf_string_))
   {
-    RCLCPP_ERROR(logger_, "Unable to parse SRDF");
+    RCLCPP_ERROR(getLogger(), "Unable to parse SRDF");
     return false;
   }
 
@@ -122,20 +129,20 @@ bool RDFLoader::loadFileToString(std::string& buffer, const std::string& path)
 {
   if (path.empty())
   {
-    RCLCPP_ERROR(moveit::getLogger(), "Path is empty");
+    RCLCPP_ERROR(getLogger(), "Path is empty");
     return false;
   }
 
   if (!std::filesystem::exists(path))
   {
-    RCLCPP_ERROR(moveit::getLogger(), "File does not exist");
+    RCLCPP_ERROR(getLogger(), "File does not exist");
     return false;
   }
 
   std::ifstream stream(path.c_str());
   if (!stream.good())
   {
-    RCLCPP_ERROR(moveit::getLogger(), "Unable to load path");
+    RCLCPP_ERROR(getLogger(), "Unable to load path");
     return false;
   }
 
@@ -155,13 +162,13 @@ bool RDFLoader::loadXacroFileToString(std::string& buffer, const std::string& pa
   buffer.clear();
   if (path.empty())
   {
-    RCLCPP_ERROR(moveit::getLogger(), "Path is empty");
+    RCLCPP_ERROR(getLogger(), "Path is empty");
     return false;
   }
 
   if (!std::filesystem::exists(path))
   {
-    RCLCPP_ERROR(moveit::getLogger(), "File does not exist");
+    RCLCPP_ERROR(getLogger(), "File does not exist");
     return false;
   }
 
@@ -177,7 +184,7 @@ bool RDFLoader::loadXacroFileToString(std::string& buffer, const std::string& pa
 #endif
   if (!pipe)
   {
-    RCLCPP_ERROR(moveit::getLogger(), "Unable to load path");
+    RCLCPP_ERROR(getLogger(), "Unable to load path");
     return false;
   }
 
@@ -217,7 +224,7 @@ bool RDFLoader::loadPkgFileToString(std::string& buffer, const std::string& pack
   }
   catch (const ament_index_cpp::PackageNotFoundError& e)
   {
-    RCLCPP_ERROR(moveit::getLogger(), "ament_index_cpp: %s", e.what());
+    RCLCPP_ERROR(getLogger(), "ament_index_cpp: %s", e.what());
     return false;
   }
 
