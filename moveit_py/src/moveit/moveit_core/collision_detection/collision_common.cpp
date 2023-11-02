@@ -103,6 +103,9 @@ void initCollisionResult(py::module& m)
   py::class_<collision_detection::CollisionResult>(collision_detection, "CollisionResult", R"(
       Representation of a collision checking result.
       )")
+
+      .def(py::init<>())
+
       .def_readwrite("collision", &collision_detection::CollisionResult::collision,
                      R"(
                      bool: True if collision was found, false otherwise.
