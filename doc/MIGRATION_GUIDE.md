@@ -13,43 +13,15 @@ However because of initaliziation order (child logger has to be created after rc
 #include <moveit/utils/logger.hpp>
 ```
 
-Wherever the node is created there is the option to set the global logger for moveit using this syntax:
+Wherever the node is created there is the option to set the root logging namespace to be from the node for moveit using this syntax:
 
 ```C++
-moveit::setLogger(node->get_logger());
+moveit::setNodeLoggerName(node->get_name());
 ```
 
 Then wherever you call a logging macro you can use the `moveit::getLogger()` function:
 ```C++
-RCLCPP_INFO(moveit::getLogger(), "Very important info message");
-```
-
-To have namespaces you need to create a child logger.
-There is a function for that too.
-This creates a child of the global logger.
-You'll find this in the constructor of many of our classes.
-
-```C++
-, logger_(moveit::makeChildLogger("servo"))
-```
-
-Once you have a child logger you can use it in logging macros:
-```C++
-RCLCPP_INFO(logger_, "Very important info message");
-```
-
-In some files you'll find the creation of a static logger for the file like this.
-Note that this is different from the previous file level static variables because the logger is not initialized until the function is called the first time.
-This enables us to set the global node logger before this is called.
-```C++
-namespace
-{
-rclcpp::Logger getLogger()
-{
-  static auto logger = moveit::makeChildLogger("moveit_collision_detection");
-  return logger;
-}
-}  // namespace
+RCLCPP_INFO(moveit::getLogger("my_namespace"), "Very important info message");
 ```
 
 ### Logger naming convention
