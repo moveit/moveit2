@@ -270,8 +270,8 @@ CartesianInterpolator::Percentage CartesianInterpolator::computeCartesianPath(
     Eigen::Isometry3d pose(start_quaternion.slerp(percentage, target_quaternion));
     pose.translation() = percentage * rotated_target.translation() + (1 - percentage) * start_pose.translation();
 
-    // Explicitly use a single IK attempt only: We want a smooth path.
-    // Random seeding (of additional attempts) would probably create IK jumps.
+    // Explicitly use a single IK attempt only (by setting a timeout of 0.0), using the current state as the seed.
+    // Random seeding (of additional attempts) would create large joint-space jumps.
     if (start_state->setFromIK(group, pose * offset, link->getName(), consistency_limits, 0.0, validCallback, options,
                                cost_function))
     {
@@ -337,11 +337,11 @@ CartesianInterpolator::Percentage CartesianInterpolator::checkJointSpaceJump(con
   std::optional<int> jump_index = hasJointSpaceJump(path, *group, jump_threshold);
 
   double percentage_solved = 1.0;
-  if (jump_index)
+  if (jump_index.has_value())
   {
     percentage_solved = static_cast<double>(*jump_index) / static_cast<double>(path.size());
     // Truncate the path at the index right before the jump.
-    path.resize(*jump_index);
+    path.resize(jump_index.value());
   }
 
   return CartesianInterpolator::Percentage(percentage_solved);
