@@ -232,15 +232,15 @@ public:
                                         const JumpThreshold& jump_threshold);
 };
 
-/** \brief Checks if a joint-space path has jumps larger than the given threshold.
+/** \brief Checks if a joint-space path has a jump larger than the given threshold.
 
    This function computes the distance between every pair of adjacent waypoints (for the given group) and checks if that
    distance is larger than the threshold defined by `jump_threshold`. If so, it is considered that the path has a
    jump, and the path index where the jump happens is returned as output.
    Otherwise the function returns a nullopt. */
-std::optional<int> hasJointSpaceJumps(const std::vector<moveit::core::RobotStatePtr>& waypoints,
-                                      const moveit::core::JointModelGroup& group,
-                                      const moveit::core::JumpThreshold& jump_threshold);
+std::optional<int> hasJointSpaceJump(const std::vector<moveit::core::RobotStatePtr>& waypoints,
+                                     const moveit::core::JointModelGroup& group,
+                                     const moveit::core::JumpThreshold& jump_threshold);
 
 }  // end of namespace core
 }  // end of namespace moveit

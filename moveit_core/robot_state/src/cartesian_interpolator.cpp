@@ -45,10 +45,9 @@
 namespace moveit::core
 {
 
-/** \brief It is recommended that there are at least 10 steps per path
- * for testing jump thresholds with computeCartesianPath. With less than 10 steps
- * it is difficult to choose a jump_threshold parameter that effectively separates
- * valid paths from paths with large joint space jumps. */
+// Minimum amount of path waypoints recommended to reliably compute a joint-space increment average.
+// If relative jump detection is selected and the path is shorter than `MIN_STEPS_FOR_JUMP_THRESH`, a warning message
+// will be printed out.
 static const std::size_t MIN_STEPS_FOR_JUMP_THRESH = 10;
 
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_robot_state.cartesian_interpolator");
@@ -335,7 +334,7 @@ CartesianInterpolator::Percentage CartesianInterpolator::checkJointSpaceJump(con
                                                                              std::vector<RobotStatePtr>& path,
                                                                              const JumpThreshold& jump_threshold)
 {
-  std::optional<int> jump_index = hasJointSpaceJumps(path, *group, jump_threshold);
+  std::optional<int> jump_index = hasJointSpaceJump(path, *group, jump_threshold);
 
   double percentage_solved = 1.0;
   if (jump_index)
@@ -348,9 +347,9 @@ CartesianInterpolator::Percentage CartesianInterpolator::checkJointSpaceJump(con
   return CartesianInterpolator::Percentage(percentage_solved);
 }
 
-std::optional<int> hasJointSpaceJumps(const std::vector<moveit::core::RobotStatePtr>& waypoints,
-                                      const moveit::core::JointModelGroup& group,
-                                      const moveit::core::JumpThreshold& jump_threshold)
+std::optional<int> hasJointSpaceJump(const std::vector<moveit::core::RobotStatePtr>& waypoints,
+                                     const moveit::core::JointModelGroup& group,
+                                     const moveit::core::JumpThreshold& jump_threshold)
 {
   if (waypoints.size() <= 1)
   {
