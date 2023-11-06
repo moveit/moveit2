@@ -192,7 +192,7 @@ bool ROS2ControllersConfig::GeneratedControllersConfig::writeYaml(YAML::Emitter&
       emitter << YAML::Value;
       emitter << YAML::BeginMap;
       {
-        if (ci.joints_.size() != 1 && ci.type_ != "position_controllers/GripperActionController")
+        if (ci.joints_.size() != 1 || ci.type_ != "position_controllers/GripperActionController")
         {
           emitter << YAML::Key << "joints" << YAML::Value << ci.joints_;
         }
