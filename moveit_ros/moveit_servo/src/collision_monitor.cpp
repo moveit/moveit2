@@ -51,11 +51,9 @@ CollisionMonitor::CollisionMonitor(const planning_scene_monitor::PlanningSceneMo
   , collision_velocity_scale_(collision_velocity_scale)
 {
   scene_collision_request_.distance = true;
-  scene_collision_request_.contacts = true;
   scene_collision_request_.group_name = servo_params.move_group_name;
 
   self_collision_request_.distance = true;
-  self_collision_request_.contacts = true;
   self_collision_request_.group_name = servo_params.move_group_name;
 }
 
