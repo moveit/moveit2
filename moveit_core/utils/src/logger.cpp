@@ -70,7 +70,7 @@ rclcpp::Logger& getGlobalLoggerRef()
     auto name = fmt::format("moveit_{}", rsl::rng()());
     try
     {
-      static auto moveit_node = std::make_shared<rclcpp::Node>(name);
+      static auto* moveit_node = new rclcpp::Node(name);
       return moveit_node->get_logger();
     }
     catch (const std::exception& ex)
