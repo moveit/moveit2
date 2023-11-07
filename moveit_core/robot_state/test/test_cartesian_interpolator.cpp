@@ -141,34 +141,29 @@ TEST_F(SimpleRobot, checkAbsoluteJointSpaceJump)
   // Container for results
   double fraction;
 
-  // Direct call of absolute version
-  fraction = CartesianInterpolator::checkAbsoluteJointSpaceJump(joint_model_group, traj, 1.0, 1.0);
-  EXPECT_EQ(expected_revolute_jump_traj_len, traj.size());  // traj should be cut
-  EXPECT_NEAR(expected_revolute_jump_fraction, fraction, 0.01);
-
-  // Indirect call using checkJointSpaceJumps
+  // Revolute and prismatic joints.
   generateTestTraj(traj, robot_model_);
-  fraction = CartesianInterpolator::checkJointSpaceJump(joint_model_group, traj, JumpThreshold(1.0, 1.0));
+  fraction = CartesianInterpolator::checkJointSpaceJump(joint_model_group, traj, JumpThreshold::absolute(1.0, 1.0));
   EXPECT_EQ(expected_revolute_jump_traj_len, traj.size());  // traj should be cut before the revolute jump
   EXPECT_NEAR(expected_revolute_jump_fraction, fraction, 0.01);
 
   // Test revolute joints
   generateTestTraj(traj, robot_model_);
-  fraction = CartesianInterpolator::checkJointSpaceJump(joint_model_group, traj, JumpThreshold(1.0, 0.0));
+  fraction = CartesianInterpolator::checkJointSpaceJump(joint_model_group, traj, JumpThreshold::absolute(0.01, 10.0));
   EXPECT_EQ(expected_revolute_jump_traj_len, traj.size());  // traj should be cut before the revolute jump
   EXPECT_NEAR(expected_revolute_jump_fraction, fraction, 0.01);
 
   // Test prismatic joints
   generateTestTraj(traj, robot_model_);
-  fraction = CartesianInterpolator::checkJointSpaceJump(joint_model_group, traj, JumpThreshold(0.0, 1.0));
+  fraction = CartesianInterpolator::checkJointSpaceJump(joint_model_group, traj, JumpThreshold::absolute(10.0, 0.01));
   EXPECT_EQ(expected_prismatic_jump_traj_len, traj.size());  // traj should be cut before the prismatic jump
   EXPECT_NEAR(expected_prismatic_jump_fraction, fraction, 0.01);
 
-  // Ignore all absolute jumps
-  generateTestTraj(traj, robot_model_);
-  fraction = CartesianInterpolator::checkJointSpaceJump(joint_model_group, traj, JumpThreshold(0.0, 0.0));
-  EXPECT_EQ(full_traj_len, traj.size());  // traj should not be cut
-  EXPECT_NEAR(1.0, fraction, 0.01);
+  // Pre-condition checks.
+  EXPECT_ANY_THROW(
+      CartesianInterpolator::checkJointSpaceJump(joint_model_group, traj, JumpThreshold::absolute(0.0, 0.01)));
+  EXPECT_ANY_THROW(
+      CartesianInterpolator::checkJointSpaceJump(joint_model_group, traj, JumpThreshold::absolute(0.01, 0.0)));
 }
 
 TEST_F(SimpleRobot, checkRelativeJointSpaceJump)
@@ -185,24 +180,22 @@ TEST_F(SimpleRobot, checkRelativeJointSpaceJump)
       static_cast<double>(expected_relative_jump_traj_len) / static_cast<double>(full_traj_len);
 
   // Container for results
-  double fraction;
+  double fraction = 0.0;
 
-  // Direct call of relative version: 1.01 > 2.97 * (0.01 * 2 + 1.01 * 2)/6.
-  fraction = CartesianInterpolator::checkRelativeJointSpaceJump(joint_model_group, traj, 2.97);
-  EXPECT_EQ(expected_relative_jump_traj_len, traj.size());  // traj should be cut before the first jump of 1.01
-  EXPECT_NEAR(expected_relative_jump_fraction, fraction, 0.01);
-
-  // Indirect call of relative version using checkJointSpaceJumps
+  // Call of relative version: 1.01 > 2.97 * (0.01 * 2 + 1.01 * 2)/6.
   generateTestTraj(traj, robot_model_);
-  fraction = CartesianInterpolator::checkJointSpaceJump(joint_model_group, traj, JumpThreshold(2.97));
+  fraction = CartesianInterpolator::checkJointSpaceJump(joint_model_group, traj, JumpThreshold::relative(2.97));
   EXPECT_EQ(expected_relative_jump_traj_len, traj.size());  // traj should be cut before the first jump of 1.01
   EXPECT_NEAR(expected_relative_jump_fraction, fraction, 0.01);
 
   // Trajectory should not be cut: 1.01 < 2.98 * (0.01 * 2 + 1.01 * 2)/6.
   generateTestTraj(traj, robot_model_);
-  fraction = CartesianInterpolator::checkJointSpaceJump(joint_model_group, traj, JumpThreshold(2.98));
+  fraction = CartesianInterpolator::checkJointSpaceJump(joint_model_group, traj, JumpThreshold::relative(2.98));
   EXPECT_EQ(full_traj_len, traj.size());  // traj should not be cut
   EXPECT_NEAR(1.0, fraction, 0.01);
+
+  // Pre-condition checks.
+  EXPECT_ANY_THROW(CartesianInterpolator::checkJointSpaceJump(joint_model_group, traj, JumpThreshold::relative(0.0)));
 }
 
 // TODO - The tests below fail since no kinematic plugins are found. Move the tests to IK plugin package.
@@ -235,7 +228,8 @@ TEST_F(SimpleRobot, checkRelativeJointSpaceJump)
 //                               bool global)
 //   {
 //     return CartesianInterpolator::computeCartesianPath(start_state.get(), jmg, result, link, translation, global,
-//                                                        MaxEEFStep(0.1), JumpThreshold(), GroupStateValidityCallbackFn(),
+//                                                        MaxEEFStep(0.1), JumpThreshold::Disabled(),
+//                                                        GroupStateValidityCallbackFn(),
 //                                                        kinematics::KinematicsQueryOptions());
 //   }
 //
@@ -243,7 +237,8 @@ TEST_F(SimpleRobot, checkRelativeJointSpaceJump)
 //                               bool global, const Eigen::Isometry3d& offset = Eigen::Isometry3d::Identity())
 //   {
 //     return CartesianInterpolator::computeCartesianPath(start_state.get(), jmg, result, link, target, global,
-//                                                        MaxEEFStep(0.1), JumpThreshold(), GroupStateValidityCallbackFn(),
+//                                                        MaxEEFStep(0.1), JumpThreshold::Disabled(),
+//                                                        GroupStateValidityCallbackFn(),
 //                                                        kinematics::KinematicsQueryOptions(),
 //                                                        kinematics::KinematicsBase::IKCostFn(), offset);
 //   }
@@ -335,7 +330,8 @@ TEST_F(SimpleRobot, checkRelativeJointSpaceJump)
 // TEST_F(PandaRobot, testRotationOffset)
 // {
 //   // define offset to virtual center frame
-//   Eigen::Isometry3d offset = Eigen::Translation3d(0, 0, 0.2) * Eigen::AngleAxisd(-M_PI / 4, Eigen::Vector3d::UnitZ());
+//   Eigen::Isometry3d offset = Eigen::Translation3d(0, 0, 0.2) * Eigen::AngleAxisd(-M_PI / 4,
+//   Eigen::Vector3d::UnitZ());
 //   // 45° rotation about center's x-axis
 //   Eigen::Isometry3d rot(Eigen::AngleAxisd(M_PI / 4, Eigen::Vector3d::UnitX()));
 //   Eigen::Isometry3d goal = start_pose * offset * rot;
