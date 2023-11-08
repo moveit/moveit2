@@ -95,8 +95,8 @@ void CollisionMonitor::checkCollisions()
     const double self_velocity_scale_coefficient{ log_val / servo_params_.self_collision_proximity_threshold };
     const double scene_velocity_scale_coefficient{ log_val / servo_params_.scene_collision_proximity_threshold };
 
-    // Reset the scale on every iteration.
-    collision_velocity_scale_ = 1.0;
+    // Use a local variable to prevent access issues between the collision monitor and the servo loop
+    auto new_collision_velocity_scale = 1.0;
 
     if (servo_params_.check_collisions)
     {
@@ -126,7 +126,7 @@ void CollisionMonitor::checkCollisions()
 
       if (self_collision_result_.collision || scene_collision_result_.collision)
       {
-        collision_velocity_scale_ = 0.0;
+        new_collision_velocity_scale = 0.0;
       }
       else
       {
@@ -151,9 +151,13 @@ void CollisionMonitor::checkCollisions()
         }
 
         // Use the scaling factor with lower value, i.e maximum scale down.
-        collision_velocity_scale_ = std::min(scene_collision_scale, self_collision_scale);
+        new_collision_velocity_scale = std::min(scene_collision_scale, self_collision_scale);
       }
     }
+
+    // Set the shared velocity scale once
+    collision_velocity_scale_ = new_collision_velocity_scale;
+
     rate.sleep();
   }
 }
