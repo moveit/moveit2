@@ -71,8 +71,8 @@ TEST_F(ServoCppFixture, JointJogTest)
 TEST_F(ServoCppFixture, TwistTest)
 {
   moveit_servo::StatusCode status_curr, status_next, status_initial;
-  moveit_servo::TwistCommand twist_non_zero{ servo_params_.planning_frame, { 0.0, 0.0, 0.0, 0.0, 0.0, 0.1 } };
-  moveit_servo::TwistCommand twist_zero{ servo_params_.planning_frame, { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 } };
+  moveit_servo::TwistCommand twist_non_zero{ "panda_link0", { 0.0, 0.0, 0.0, 0.0, 0.0, 0.1 } };
+  moveit_servo::TwistCommand twist_zero{ "panda_link0", { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 } };
 
   servo_test_instance_->setCommandType(moveit_servo::CommandType::TWIST);
   status_initial = servo_test_instance_->getStatus();
@@ -95,8 +95,8 @@ TEST_F(ServoCppFixture, TwistTest)
 TEST_F(ServoCppFixture, NonPlanningFrameTwistTest)
 {
   moveit_servo::StatusCode status_curr, status_next, status_initial;
-  moveit_servo::TwistCommand twist_non_zero{ servo_params_.ee_frame, { 0.0, 0.0, 0.0, 0.0, 0.0, 0.1 } };
-  moveit_servo::TwistCommand twist_zero{ servo_params_.ee_frame, { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 } };
+  moveit_servo::TwistCommand twist_non_zero{ "panda_link8", { 0.0, 0.0, 0.0, 0.0, 0.0, 0.1 } };
+  moveit_servo::TwistCommand twist_zero{ "panda_link8", { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 } };
 
   servo_test_instance_->setCommandType(moveit_servo::CommandType::TWIST);
   status_initial = servo_test_instance_->getStatus();
@@ -120,11 +120,11 @@ TEST_F(ServoCppFixture, PoseTest)
 {
   moveit_servo::StatusCode status_curr, status_next, status_initial;
   moveit_servo::PoseCommand zero_pose, non_zero_pose;
-  zero_pose.frame_id = servo_params_.planning_frame;
-  zero_pose.pose = servo_test_instance_->getEndEffectorPose();
+  zero_pose.frame_id = "panda_link0";
+  zero_pose.pose = servo_test_instance_->getCurrentPose("panda_link8");
 
-  non_zero_pose.frame_id = servo_params_.planning_frame;
-  non_zero_pose.pose = servo_test_instance_->getEndEffectorPose();
+  non_zero_pose.frame_id = "panda_link0";
+  non_zero_pose.pose = servo_test_instance_->getCurrentPose("panda_link8");
   non_zero_pose.pose.rotate(Eigen::AngleAxisd(M_PI / 2, Eigen::Vector3d::UnitZ()));
 
   servo_test_instance_->setCommandType(moveit_servo::CommandType::POSE);

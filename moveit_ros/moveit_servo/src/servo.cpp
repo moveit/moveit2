@@ -88,36 +88,23 @@ Servo::Servo(const rclcpp::Node::SharedPtr& node, std::shared_ptr<const servo::P
   }
 
   moveit::core::RobotStatePtr robot_state = planning_scene_monitor_->getStateMonitor()->getCurrentState();
-  // Check if the transforms to planning frame and end effector frame exist.
-  if (!robot_state->knowsFrameTransform(servo_params_.planning_frame))
+
+  // Load the smoothing plugin
+  if (servo_params_.use_smoothing)
   {
-    servo_status_ = StatusCode::INVALID;
-    RCLCPP_ERROR_STREAM(logger_, "No transform available for planning frame " << servo_params_.planning_frame);
-  }
-  else if (!robot_state->knowsFrameTransform(servo_params_.ee_frame))
-  {
-    servo_status_ = StatusCode::INVALID;
-    RCLCPP_ERROR_STREAM(logger_, "No transform available for end effector frame " << servo_params_.ee_frame);
+    setSmoothingPlugin();
   }
   else
   {
-    // Load the smoothing plugin
-    if (servo_params_.use_smoothing)
-    {
-      setSmoothingPlugin();
-    }
-    else
-    {
-      RCLCPP_WARN(logger_, "No smoothing plugin loaded");
-    }
-
-    // Create the collision checker and start collision checking.
-    collision_monitor_ =
-        std::make_unique<CollisionMonitor>(planning_scene_monitor_, servo_params_, std::ref(collision_velocity_scale_));
-    collision_monitor_->start();
-
-    servo_status_ = StatusCode::NO_WARNING;
+    RCLCPP_WARN(logger_, "No smoothing plugin loaded");
   }
+
+  // Create the collision checker and start collision checking.
+  collision_monitor_ =
+      std::make_unique<CollisionMonitor>(planning_scene_monitor_, servo_params_, std::ref(collision_velocity_scale_));
+  collision_monitor_->start();
+
+  servo_status_ = StatusCode::NO_WARNING;
 
   const auto& move_group_joint_names = planning_scene_monitor_->getRobotModel()
                                            ->getJointModelGroup(servo_params_.move_group_name)
@@ -299,9 +286,9 @@ void Servo::setCommandType(const CommandType& command_type)
   expected_command_type_ = command_type;
 }
 
-Eigen::Isometry3d Servo::getEndEffectorPose() const
+Eigen::Isometry3d Servo::getCurrentPose(const std::string& target_frame) const
 {
-  return planning_scene_monitor_->getStateMonitor()->getCurrentState()->getGlobalLinkTransform(servo_params_.ee_frame);
+  return planning_scene_monitor_->getStateMonitor()->getCurrentState()->getGlobalLinkTransform(target_frame);
 }
 
 KinematicState Servo::haltJoints(const std::vector<int>& joints_to_halt, const KinematicState& current_state,
@@ -394,14 +381,15 @@ Eigen::VectorXd Servo::jointDeltaFromCommand(const ServoInput& command, const mo
     else if (expected_type == CommandType::POSE)
     {
       const auto planning_frame_maybe = getIKSolverBaseFrame(robot_state, active_subgroup_name);
-      if (planning_frame_maybe.has_value())
+      const auto ee_frame_maybe = getIKSolverTipFrame(robot_state, active_subgroup_name);
+      if (planning_frame_maybe.has_value() && ee_frame_maybe.has_value())
       {
         const auto& planning_frame = *planning_frame_maybe;
         const auto command_in_planning_frame_maybe = toPlanningFrame(std::get<PoseCommand>(command), planning_frame);
         if (command_in_planning_frame_maybe.has_value())
         {
           delta_result = jointDeltaFromPose(*command_in_planning_frame_maybe, robot_state, servo_params_,
-                                            planning_frame, joint_name_group_index_map);
+                                            planning_frame, *ee_frame_maybe, joint_name_group_index_map);
           servo_status_ = delta_result.first;
         }
         else
@@ -549,7 +537,7 @@ std::optional<TwistCommand> Servo::toPlanningFrame(const TwistCommand& command, 
   {
     // Look up the transform between the planning and command frames.
     const auto planning_to_command_tf_maybe = getPlanningToCommandFrameTransform(command.frame_id, planning_frame);
-    if (!planning_to_command_tf_maybe)
+    if (!planning_to_command_tf_maybe.has_value())
     {
       return std::nullopt;
     }
@@ -633,7 +621,7 @@ std::pair<bool, KinematicState> Servo::smoothHalt(const KinematicState& halt_sta
   const KinematicState current_state = getCurrentRobotState();
 
   const size_t num_joints = current_state.joint_names.size();
-  for (size_t i = 0; i < num_joints; i++)
+  for (size_t i = 0; i < num_joints; ++i)
   {
     const double vel = (target_state.positions[i] - current_state.positions[i]) / servo_params_.publish_period;
     target_state.velocities[i] = (vel > STOPPED_VELOCITY_EPS) ? vel : 0.0;

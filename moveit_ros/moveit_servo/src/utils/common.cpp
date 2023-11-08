@@ -63,6 +63,21 @@ std::optional<std::string> getIKSolverBaseFrame(const moveit::core::RobotStatePt
   }
 }
 
+std::optional<std::string> getIKSolverTipFrame(const moveit::core::RobotStatePtr& robot_state,
+                                               const std::string& group_name)
+{
+  const auto ik_solver = robot_state->getJointModelGroup(group_name)->getSolverInstance();
+
+  if (ik_solver)
+  {
+    return ik_solver->getTipFrame();
+  }
+  else
+  {
+    return std::nullopt;
+  }
+}
+
 bool isValidCommand(const Eigen::VectorXd& command)
 {
   // returns true only if there are no nan values.
@@ -130,8 +145,6 @@ trajectory_msgs::msg::JointTrajectory composeTrajectoryMessage(const servo::Para
   // See http://wiki.ros.org/joint_trajectory_controller#Trajectory_replacement
 
   trajectory_msgs::msg::JointTrajectory joint_trajectory;
-  joint_trajectory.header.stamp = rclcpp::Time(0);
-  joint_trajectory.header.frame_id = servo_params.planning_frame;
   joint_trajectory.joint_names = joint_state.joint_names;
 
   static trajectory_msgs::msg::JointTrajectoryPoint point;

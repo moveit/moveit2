@@ -64,6 +64,15 @@ std::optional<std::string> getIKSolverBaseFrame(const moveit::core::RobotStatePt
                                                 const std::string& group_name);
 
 /**
+ * \brief Get the tip (end-effector) frame of the current active joint group or subgroup's IK solver.
+ * @param robot_state A pointer to the current robot state.
+ * @param group_name The currently active joint group name.
+ * @return The IK solver tip frame, if one exists, otherwise std::nullopt.
+ */
+std::optional<std::string> getIKSolverTipFrame(const moveit::core::RobotStatePtr& robot_state,
+                                               const std::string& group_name);
+
+/**
  * \brief Checks if a given VectorXd is a valid command.
  * @param command The command to be checked.
  * @return True if the command is valid, else False.

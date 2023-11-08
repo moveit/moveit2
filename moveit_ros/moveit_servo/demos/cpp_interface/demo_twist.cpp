@@ -83,7 +83,7 @@ int main(int argc, char* argv[])
 
   // Move end effector in the +z direction at 10 cm/s
   // while turning around z axis in the +ve direction at 0.5 rad/s
-  TwistCommand target_twist{ servo_params.planning_frame, { 0.0, 0.0, 0.1, 0.0, 0.0, 0.5 } };
+  TwistCommand target_twist{ "panda_link0", { 0.0, 0.0, 0.1, 0.0, 0.0, 0.5 } };
 
   // Frequency at which commands will be sent to the robot controller.
   rclcpp::WallRate rate(1.0 / servo_params.publish_period);

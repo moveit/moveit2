@@ -88,9 +88,9 @@ int main(int argc, char* argv[])
 
   // The dynamically updated target pose.
   PoseCommand target_pose;
-  target_pose.frame_id = servo_params.planning_frame;
+  target_pose.frame_id = "panda_link0";
   // Initializing the target pose as end effector pose, this can be any pose.
-  target_pose.pose = servo.getEndEffectorPose();
+  target_pose.pose = servo.getCurrentPose("panda_link8");
 
   // The pose tracking lambda that will be run in a separate thread.
   auto pose_tracker = [&]() {
@@ -130,7 +130,7 @@ int main(int argc, char* argv[])
   {
     {
       std::lock_guard<std::mutex> pguard(pose_guard);
-      target_pose.pose = servo.getEndEffectorPose();
+      target_pose.pose = servo.getCurrentPose("panda_link8");
       const bool satisfies_linear_tolerance = target_pose.pose.translation().isApprox(
           terminal_pose.translation(), servo_params.pose_tracking.linear_tolerance);
       const bool satisfies_angular_tolerance =

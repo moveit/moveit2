@@ -208,6 +208,7 @@ JointDeltaResult jointDeltaFromTwist(const TwistCommand& command, const moveit::
 
 JointDeltaResult jointDeltaFromPose(const PoseCommand& command, const moveit::core::RobotStatePtr& robot_state,
                                     const servo::Params& servo_params, const std::string& planning_frame,
+                                    const std::string& ee_frame,
                                     const JointNameToMoveGroupIndexMap& joint_name_group_index_map)
 {
   StatusCode status = StatusCode::NO_WARNING;
@@ -223,7 +224,7 @@ JointDeltaResult jointDeltaFromPose(const PoseCommand& command, const moveit::co
     Eigen::Vector<double, 6> cartesian_position_delta;
 
     // Compute linear and angular change needed.
-    const Eigen::Isometry3d ee_pose{ robot_state->getGlobalLinkTransform(servo_params.ee_frame) };
+    const Eigen::Isometry3d ee_pose{ robot_state->getGlobalLinkTransform(ee_frame) };
     const Eigen::Quaterniond q_current(ee_pose.rotation()), q_target(command.pose.rotation());
     const Eigen::Quaterniond q_error = q_target * q_current.inverse();
     const Eigen::AngleAxisd angle_axis_error(q_error);
