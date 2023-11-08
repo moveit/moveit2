@@ -48,6 +48,21 @@ const double SCALING_OVERRIDE_THRESHOLD = 0.01;
 namespace moveit_servo
 {
 
+std::optional<std::string> getIKSolverBaseFrame(const moveit::core::RobotStatePtr& robot_state,
+                                                const std::string& group_name)
+{
+  const auto ik_solver = robot_state->getJointModelGroup(group_name)->getSolverInstance();
+
+  if (ik_solver)
+  {
+    return ik_solver->getBaseFrame();
+  }
+  else
+  {
+    return std::nullopt;
+  }
+}
+
 bool isValidCommand(const Eigen::VectorXd& command)
 {
   // returns true only if there are no nan values.

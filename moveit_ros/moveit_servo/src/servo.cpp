@@ -344,19 +344,16 @@ KinematicState Servo::haltJoints(const std::vector<int>& joints_to_halt, const K
 Eigen::VectorXd Servo::jointDeltaFromCommand(const ServoInput& command, const moveit::core::RobotStatePtr& robot_state)
 {
   // Determine joint_name_group_index_map, if no subgroup is active, the map is empty
-  const auto& joint_name_group_index_map =
-      (!servo_params_.active_subgroup.empty() && servo_params_.active_subgroup != servo_params_.move_group_name) ?
-          joint_name_to_index_maps_.at(servo_params_.active_subgroup) :
-          JointNameToMoveGroupIndexMap();
+  const auto& active_subgroup_name =
+      servo_params_.active_subgroup.empty() ? servo_params_.move_group_name : servo_params_.active_subgroup;
+  const auto& joint_name_group_index_map = (active_subgroup_name != servo_params_.move_group_name) ?
+                                               joint_name_to_index_maps_.at(servo_params_.active_subgroup) :
+                                               JointNameToMoveGroupIndexMap();
 
   const int num_joints =
       robot_state->getJointModelGroup(servo_params_.move_group_name)->getActiveJointModelNames().size();
   Eigen::VectorXd joint_position_deltas(num_joints);
   joint_position_deltas.setZero();
-
-  const auto& active_group_name =
-      servo_params_.active_subgroup.empty() ? servo_params_.move_group_name : servo_params_.active_subgroup;
-  const auto active_joint_model_group = robot_state->getJointModelGroup(active_group_name);
 
   JointDeltaResult delta_result;
 
@@ -373,10 +370,10 @@ Eigen::VectorXd Servo::jointDeltaFromCommand(const ServoInput& command, const mo
     {
       try
       {
-        const auto ik_solver = active_joint_model_group->getSolverInstance();
-        if (ik_solver)
+        const auto planning_frame_maybe = getIKSolverBaseFrame(robot_state, active_subgroup_name);
+        if (planning_frame_maybe.has_value())
         {
-          const auto planning_frame = ik_solver->getBaseFrame();
+          const auto& planning_frame = *planning_frame_maybe;
           const TwistCommand command_in_planning_frame =
               toPlanningFrame(std::get<TwistCommand>(command), planning_frame);
           delta_result = jointDeltaFromTwist(command_in_planning_frame, robot_state, servo_params_, planning_frame,
@@ -386,7 +383,7 @@ Eigen::VectorXd Servo::jointDeltaFromCommand(const ServoInput& command, const mo
         else
         {
           servo_status_ = StatusCode::INVALID;
-          RCLCPP_ERROR(logger_, "No IK solver for planning group %s.", active_group_name.c_str());
+          RCLCPP_ERROR(logger_, "No IK solver for planning group %s.", active_subgroup_name.c_str());
         }
       }
       catch (tf2::TransformException& ex)
@@ -399,10 +396,10 @@ Eigen::VectorXd Servo::jointDeltaFromCommand(const ServoInput& command, const mo
     {
       try
       {
-        const auto ik_solver = active_joint_model_group->getSolverInstance();
-        if (ik_solver)
+        const auto planning_frame_maybe = getIKSolverBaseFrame(robot_state, active_subgroup_name);
+        if (planning_frame_maybe.has_value())
         {
-          const auto planning_frame = ik_solver->getBaseFrame();
+          const auto& planning_frame = *planning_frame_maybe;
           const PoseCommand command_in_planning_frame = toPlanningFrame(std::get<PoseCommand>(command), planning_frame);
           delta_result = jointDeltaFromPose(command_in_planning_frame, robot_state, servo_params_, planning_frame,
                                             joint_name_group_index_map);
@@ -411,7 +408,7 @@ Eigen::VectorXd Servo::jointDeltaFromCommand(const ServoInput& command, const mo
         else
         {
           servo_status_ = StatusCode::INVALID;
-          RCLCPP_ERROR(logger_, "No IK solver for planning group %s.", active_group_name.c_str());
+          RCLCPP_ERROR(logger_, "No IK solver for planning group %s.", active_subgroup_name.c_str());
         }
       }
       catch (tf2::TransformException& ex)
