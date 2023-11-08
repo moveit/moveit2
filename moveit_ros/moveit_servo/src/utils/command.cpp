@@ -93,7 +93,7 @@ JointDeltaResult jointDeltaFromJointJog(const JointJogCommand& command, const mo
   velocities.setZero();
   bool names_valid = true;
 
-  for (size_t i = 0; i < command.names.size(); i++)
+  for (size_t i = 0; i < command.names.size(); ++i)
   {
     auto it = std::find(joint_names.begin(), joint_names.end(), command.names[i]);
     if (it != std::end(joint_names))
@@ -143,17 +143,17 @@ JointDeltaResult jointDeltaFromJointJog(const JointJogCommand& command, const mo
 }
 
 JointDeltaResult jointDeltaFromTwist(const TwistCommand& command, const moveit::core::RobotStatePtr& robot_state,
-                                     const servo::Params& servo_params,
+                                     const servo::Params& servo_params, const std::string& planning_frame,
                                      const JointNameToMoveGroupIndexMap& joint_name_group_index_map)
 {
   StatusCode status = StatusCode::NO_WARNING;
   const int num_joints =
       robot_state->getJointModelGroup(servo_params.move_group_name)->getActiveJointModelNames().size();
   Eigen::VectorXd joint_position_delta(num_joints);
-  Eigen::VectorXd cartesian_position_delta;
+  Eigen::Vector<double, 6> cartesian_position_delta;
 
   const bool valid_command = isValidCommand(command);
-  const bool is_planning_frame = (command.frame_id == servo_params.planning_frame);
+  const bool is_planning_frame = (command.frame_id == planning_frame);
   const bool is_zero = command.velocities.isZero();
   if (!is_zero && is_planning_frame && valid_command)
   {
@@ -200,15 +200,14 @@ JointDeltaResult jointDeltaFromTwist(const TwistCommand& command, const moveit::
     }
     if (!is_planning_frame)
     {
-      RCLCPP_WARN_STREAM(getLogger(),
-                         "Command frame is: " << command.frame_id << ", expected: " << servo_params.planning_frame);
+      RCLCPP_WARN_STREAM(getLogger(), "Command frame is: " << command.frame_id << ", expected: " << planning_frame);
     }
   }
   return std::make_pair(status, joint_position_delta);
 }
 
 JointDeltaResult jointDeltaFromPose(const PoseCommand& command, const moveit::core::RobotStatePtr& robot_state,
-                                    const servo::Params& servo_params,
+                                    const servo::Params& servo_params, const std::string& planning_frame,
                                     const JointNameToMoveGroupIndexMap& joint_name_group_index_map)
 {
   StatusCode status = StatusCode::NO_WARNING;
@@ -217,7 +216,7 @@ JointDeltaResult jointDeltaFromPose(const PoseCommand& command, const moveit::co
   Eigen::VectorXd joint_position_delta(num_joints);
 
   const bool valid_command = isValidCommand(command);
-  const bool is_planning_frame = command.frame_id == servo_params.planning_frame;
+  const bool is_planning_frame = (command.frame_id == planning_frame);
 
   if (valid_command && is_planning_frame)
   {
@@ -250,8 +249,7 @@ JointDeltaResult jointDeltaFromPose(const PoseCommand& command, const moveit::co
     }
     if (!is_planning_frame)
     {
-      RCLCPP_WARN_STREAM(getLogger(),
-                         "Command frame is: " << command.frame_id << " expected: " << servo_params.planning_frame);
+      RCLCPP_WARN_STREAM(getLogger(), "Command frame is: " << command.frame_id << " expected: " << planning_frame);
     }
   }
   return std::make_pair(status, joint_position_delta);

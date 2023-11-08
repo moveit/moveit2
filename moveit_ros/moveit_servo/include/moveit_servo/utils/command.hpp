@@ -67,11 +67,12 @@ JointDeltaResult jointDeltaFromJointJog(const JointJogCommand& command, const mo
  * @param command The twist command.
  * @param robot_state_ The current robot state as obtained from PlanningSceneMonitor.
  * @param servo_params The servo parameters.
+ * @param planning_frame The planning frame name.
  * @param joint_name_group_index_map Mapping between joint subgroup name and move group joint vector position.
  * @return The status and joint position change required (delta).
  */
 JointDeltaResult jointDeltaFromTwist(const TwistCommand& command, const moveit::core::RobotStatePtr& robot_state,
-                                     const servo::Params& servo_params,
+                                     const servo::Params& servo_params, const std::string& planning_frame,
                                      const JointNameToMoveGroupIndexMap& joint_name_group_index_map);
 
 /**
@@ -79,11 +80,12 @@ JointDeltaResult jointDeltaFromTwist(const TwistCommand& command, const moveit::
  * @param command The pose command.
  * @param robot_state_ The current robot state as obtained from PlanningSceneMonitor.
  * @param servo_params The servo parameters.
+ * @param planning_frame The planning frame name.
  * @param joint_name_group_index_map Mapping between sub group joint name and move group joint vector position
  * @return The status and joint position change required (delta).
  */
 JointDeltaResult jointDeltaFromPose(const PoseCommand& command, const moveit::core::RobotStatePtr& robot_state,
-                                    const servo::Params& servo_params,
+                                    const servo::Params& servo_params, const std::string& planning_frame,
                                     const JointNameToMoveGroupIndexMap& joint_name_group_index_map);
 
 /**

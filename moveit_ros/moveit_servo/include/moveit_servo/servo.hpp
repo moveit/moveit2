@@ -138,9 +138,11 @@ private:
    * If the command frame is part of the robot model, directly look up the transform using the robot model.
    * Else, fall back to using TF to look up the transform.
    * @param command_frame The command frame name.
+   * @param planning_frame The planning frame name.
    * @return The transformation between planning frame and command frame.
    */
-  Eigen::Isometry3d getPlanningToCommandFrameTransform(const std::string& command_frame) const;
+  Eigen::Isometry3d getPlanningToCommandFrameTransform(const std::string& command_frame,
+                                                       const std::string& planning_frame) const;
 
   /**
    * \brief Convert a given twist command to planning frame,
@@ -149,16 +151,18 @@ private:
    * https://core.ac.uk/download/pdf/154240607.pdf
    * https://www.seas.upenn.edu/~meam520/notes02/Forces8.pdf
    * @param command The twist command to be converted.
+   * @param planning_frame The name of the planning frame.
    * @return The transformed twist command.
    */
-  TwistCommand toPlanningFrame(const TwistCommand& command) const;
+  TwistCommand toPlanningFrame(const TwistCommand& command, const std::string& planning_frame) const;
 
   /**
    * \brief Convert a given pose command to planning frame
-   * @param command The pose command to be converted
-   * @return The transformed pose command
+   * @param command The pose command to be converted.
+   * @param planning_frame The name of the planning frame.
+   * @return The transformed pose command.
    */
-  PoseCommand toPlanningFrame(const PoseCommand& command) const;
+  PoseCommand toPlanningFrame(const PoseCommand& command, const std::string& planning_frame) const;
 
   /**
    * \brief Compute the change in joint position required to follow the received command.
