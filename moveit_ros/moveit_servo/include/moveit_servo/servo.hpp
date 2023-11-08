@@ -139,10 +139,11 @@ private:
    * Else, fall back to using TF to look up the transform.
    * @param command_frame The command frame name.
    * @param planning_frame The planning frame name.
-   * @return The transformation between planning frame and command frame.
+   * @return The transformation between planning frame and command frame, or std::nullopt if there was a failure looking
+   * up a transform.
    */
-  Eigen::Isometry3d getPlanningToCommandFrameTransform(const std::string& command_frame,
-                                                       const std::string& planning_frame) const;
+  std::optional<Eigen::Isometry3d> getPlanningToCommandFrameTransform(const std::string& command_frame,
+                                                                      const std::string& planning_frame) const;
 
   /**
    * \brief Convert a given twist command to planning frame,
@@ -154,7 +155,7 @@ private:
    * @param planning_frame The name of the planning frame.
    * @return The transformed twist command.
    */
-  TwistCommand toPlanningFrame(const TwistCommand& command, const std::string& planning_frame) const;
+  std::optional<TwistCommand> toPlanningFrame(const TwistCommand& command, const std::string& planning_frame) const;
 
   /**
    * \brief Convert a given pose command to planning frame
@@ -162,7 +163,7 @@ private:
    * @param planning_frame The name of the planning frame.
    * @return The transformed pose command.
    */
-  PoseCommand toPlanningFrame(const PoseCommand& command, const std::string& planning_frame) const;
+  std::optional<PoseCommand> toPlanningFrame(const PoseCommand& command, const std::string& planning_frame) const;
 
   /**
    * \brief Compute the change in joint position required to follow the received command.

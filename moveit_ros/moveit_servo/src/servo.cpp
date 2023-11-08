@@ -368,53 +368,52 @@ Eigen::VectorXd Servo::jointDeltaFromCommand(const ServoInput& command, const mo
     }
     else if (expected_type == CommandType::TWIST)
     {
-      try
+      const auto planning_frame_maybe = getIKSolverBaseFrame(robot_state, active_subgroup_name);
+      if (planning_frame_maybe.has_value())
       {
-        const auto planning_frame_maybe = getIKSolverBaseFrame(robot_state, active_subgroup_name);
-        if (planning_frame_maybe.has_value())
+        const auto& planning_frame = *planning_frame_maybe;
+        const auto command_in_planning_frame_maybe = toPlanningFrame(std::get<TwistCommand>(command), planning_frame);
+        if (command_in_planning_frame_maybe.has_value())
         {
-          const auto& planning_frame = *planning_frame_maybe;
-          const TwistCommand command_in_planning_frame =
-              toPlanningFrame(std::get<TwistCommand>(command), planning_frame);
-          delta_result = jointDeltaFromTwist(command_in_planning_frame, robot_state, servo_params_, planning_frame,
-                                             joint_name_group_index_map);
+          delta_result = jointDeltaFromTwist(*command_in_planning_frame_maybe, robot_state, servo_params_,
+                                             planning_frame, joint_name_group_index_map);
           servo_status_ = delta_result.first;
         }
         else
         {
           servo_status_ = StatusCode::INVALID;
-          RCLCPP_ERROR(logger_, "No IK solver for planning group %s.", active_subgroup_name.c_str());
+          RCLCPP_ERROR_STREAM(logger_, "Could not transform twist command to planning frame.");
         }
       }
-      catch (tf2::TransformException& ex)
+      else
       {
         servo_status_ = StatusCode::INVALID;
-        RCLCPP_ERROR_STREAM(logger_, "Could not transform twist to planning frame.");
+        RCLCPP_ERROR(logger_, "No IK solver for planning group %s.", active_subgroup_name.c_str());
       }
     }
     else if (expected_type == CommandType::POSE)
     {
-      try
+      const auto planning_frame_maybe = getIKSolverBaseFrame(robot_state, active_subgroup_name);
+      if (planning_frame_maybe.has_value())
       {
-        const auto planning_frame_maybe = getIKSolverBaseFrame(robot_state, active_subgroup_name);
-        if (planning_frame_maybe.has_value())
+        const auto& planning_frame = *planning_frame_maybe;
+        const auto command_in_planning_frame_maybe = toPlanningFrame(std::get<PoseCommand>(command), planning_frame);
+        if (command_in_planning_frame_maybe.has_value())
         {
-          const auto& planning_frame = *planning_frame_maybe;
-          const PoseCommand command_in_planning_frame = toPlanningFrame(std::get<PoseCommand>(command), planning_frame);
-          delta_result = jointDeltaFromPose(command_in_planning_frame, robot_state, servo_params_, planning_frame,
-                                            joint_name_group_index_map);
+          delta_result = jointDeltaFromPose(*command_in_planning_frame_maybe, robot_state, servo_params_,
+                                            planning_frame, joint_name_group_index_map);
           servo_status_ = delta_result.first;
         }
         else
         {
           servo_status_ = StatusCode::INVALID;
-          RCLCPP_ERROR(logger_, "No IK solver for planning group %s.", active_subgroup_name.c_str());
+          RCLCPP_ERROR_STREAM(logger_, "Could not transform pose command to planning frame.");
         }
       }
-      catch (tf2::TransformException& ex)
+      else
       {
         servo_status_ = StatusCode::INVALID;
-        RCLCPP_ERROR_STREAM(logger_, "Could not transform pose to planning frame.");
+        RCLCPP_ERROR(logger_, "No IK solver for planning group %s.", active_subgroup_name.c_str());
       }
     }
 
@@ -519,8 +518,8 @@ KinematicState Servo::getNextJointState(const ServoInput& command)
   return target_state;
 }
 
-Eigen::Isometry3d Servo::getPlanningToCommandFrameTransform(const std::string& command_frame,
-                                                            const std::string& planning_frame) const
+std::optional<Eigen::Isometry3d> Servo::getPlanningToCommandFrameTransform(const std::string& command_frame,
+                                                                           const std::string& planning_frame) const
 {
   const moveit::core::RobotStatePtr robot_state = planning_scene_monitor_->getStateMonitor()->getCurrentState();
   if (robot_state->knowsFrameTransform(command_frame) && (robot_state->knowsFrameTransform(planning_frame)))
@@ -530,19 +529,31 @@ Eigen::Isometry3d Servo::getPlanningToCommandFrameTransform(const std::string& c
   }
   else
   {
-    return tf2::transformToEigen(
-        planning_scene_monitor_->getTFClient()->lookupTransform(planning_frame, command_frame, rclcpp::Time(0)));
+    try
+    {
+      return tf2::transformToEigen(
+          planning_scene_monitor_->getTFClient()->lookupTransform(planning_frame, command_frame, rclcpp::Time(0)));
+    }
+    catch (tf2::TransformException& ex)
+    {
+      return std::nullopt;
+    }
   }
 }
 
-TwistCommand Servo::toPlanningFrame(const TwistCommand& command, const std::string& planning_frame) const
+std::optional<TwistCommand> Servo::toPlanningFrame(const TwistCommand& command, const std::string& planning_frame) const
 {
   Eigen::VectorXd transformed_twist = command.velocities;
 
   if (command.frame_id != planning_frame)
   {
     // Look up the transform between the planning and command frames.
-    const auto planning_to_command_tf = getPlanningToCommandFrameTransform(command.frame_id, planning_frame);
+    const auto planning_to_command_tf_maybe = getPlanningToCommandFrameTransform(command.frame_id, planning_frame);
+    if (!planning_to_command_tf_maybe)
+    {
+      return std::nullopt;
+    }
+    const auto& planning_to_command_tf = *planning_to_command_tf_maybe;
 
     if (servo_params_.apply_twist_commands_about_ee_frame)
     {
@@ -587,10 +598,16 @@ TwistCommand Servo::toPlanningFrame(const TwistCommand& command, const std::stri
   return TwistCommand{ planning_frame, transformed_twist };
 }
 
-PoseCommand Servo::toPlanningFrame(const PoseCommand& command, const std::string& planning_frame) const
+std::optional<PoseCommand> Servo::toPlanningFrame(const PoseCommand& command, const std::string& planning_frame) const
 {
-  return PoseCommand{ planning_frame,
-                      getPlanningToCommandFrameTransform(command.frame_id, planning_frame) * command.pose };
+  const auto planning_to_command_tf_maybe = getPlanningToCommandFrameTransform(command.frame_id, planning_frame);
+  if (!planning_to_command_tf_maybe)
+  {
+    return std::nullopt;
+  }
+
+  const auto& planning_to_command_tf = *planning_to_command_tf_maybe;
+  return PoseCommand{ planning_frame, planning_to_command_tf * command.pose };
 }
 
 KinematicState Servo::getCurrentRobotState() const
