@@ -72,6 +72,7 @@ QString subframePosesToQstring(const moveit::core::FixedTransformsMap& subframes
 
 namespace moveit_rviz_plugin
 {
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_ros_visualization.motion_planning_frame_objects");
 
 void MotionPlanningFrame::shapesComboBoxChanged(const QString& /*text*/)
 {
@@ -454,7 +455,7 @@ void MotionPlanningFrame::imProcessFeedback(visualization_msgs::msg::Interactive
 {
   if (!planning_display_->getPlanningSceneRO()->knowsFrameTransform(feedback.header.frame_id))
   {
-    RCLCPP_ERROR_STREAM(logger_,
+    RCLCPP_ERROR_STREAM(LOGGER,
                         "Frame `" << feedback.header.frame_id << "` unknown doesn't exists in the planning scene");
   }
   Eigen::Isometry3d fixed_frame_t_scene_marker;
@@ -519,7 +520,7 @@ void MotionPlanningFrame::copySelectedCollisionObject()
       name += std::to_string(n);
     }
     ps->getWorldNonConst()->addToObject(name, obj->shapes_, obj->shape_poses_);
-    RCLCPP_DEBUG(logger_, "Copied collision object to '%s'", name.c_str());
+    RCLCPP_DEBUG(LOGGER, "Copied collision object to '%s'", name.c_str());
   }
   setLocalSceneEdited();
   planning_display_->addMainLoopJob([this] { populateCollisionObjectsList(); });
@@ -538,7 +539,7 @@ void MotionPlanningFrame::computeSaveSceneButtonClicked()
     }
     catch (std::exception& ex)
     {
-      RCLCPP_ERROR(logger_, "%s", ex.what());
+      RCLCPP_ERROR(LOGGER, "%s", ex.what());
     }
 
     planning_display_->addMainLoopJob([this] { populatePlanningSceneTreeView(); });
@@ -559,7 +560,7 @@ void MotionPlanningFrame::computeSaveQueryButtonClicked(const std::string& scene
     }
     catch (std::exception& ex)
     {
-      RCLCPP_ERROR(logger_, "%s", ex.what());
+      RCLCPP_ERROR(LOGGER, "%s", ex.what());
     }
 
     planning_display_->addMainLoopJob([this] { populatePlanningSceneTreeView(); });
@@ -583,7 +584,7 @@ void MotionPlanningFrame::computeDeleteSceneButtonClicked()
         }
         catch (std::exception& ex)
         {
-          RCLCPP_ERROR(logger_, "%s", ex.what());
+          RCLCPP_ERROR(LOGGER, "%s", ex.what());
         }
       }
       else
@@ -596,7 +597,7 @@ void MotionPlanningFrame::computeDeleteSceneButtonClicked()
         }
         catch (std::exception& ex)
         {
-          RCLCPP_ERROR(logger_, "%s", ex.what());
+          RCLCPP_ERROR(LOGGER, "%s", ex.what());
         }
       }
       planning_display_->addMainLoopJob([this] { populatePlanningSceneTreeView(); });
@@ -622,7 +623,7 @@ void MotionPlanningFrame::computeDeleteQueryButtonClicked()
         }
         catch (std::exception& ex)
         {
-          RCLCPP_ERROR(logger_, "%s", ex.what());
+          RCLCPP_ERROR(LOGGER, "%s", ex.what());
         }
         planning_display_->addMainLoopJob([this, s] { computeDeleteQueryButtonClickedHelper(s); });
       }
@@ -684,7 +685,7 @@ void MotionPlanningFrame::computeLoadSceneButtonClicked()
       if (s->type() == ITEM_TYPE_SCENE)
       {
         std::string scene = s->text(0).toStdString();
-        RCLCPP_DEBUG(logger_, "Attempting to load scene '%s'", scene.c_str());
+        RCLCPP_DEBUG(LOGGER, "Attempting to load scene '%s'", scene.c_str());
 
         moveit_warehouse::PlanningSceneWithMetadata scene_m;
         bool got_ps = false;
@@ -694,17 +695,17 @@ void MotionPlanningFrame::computeLoadSceneButtonClicked()
         }
         catch (std::exception& ex)
         {
-          RCLCPP_ERROR(logger_, "%s", ex.what());
+          RCLCPP_ERROR(LOGGER, "%s", ex.what());
         }
 
         if (got_ps)
         {
-          RCLCPP_INFO(logger_, "Loaded scene '%s'", scene.c_str());
+          RCLCPP_INFO(LOGGER, "Loaded scene '%s'", scene.c_str());
           if (planning_display_->getPlanningSceneMonitor())
           {
             if (scene_m->robot_model_name != planning_display_->getRobotModel()->getName())
             {
-              RCLCPP_INFO(logger_,
+              RCLCPP_INFO(LOGGER,
                           "Scene '%s' was saved for robot '%s' but we are using robot '%s'. Using scene geometry only",
                           scene.c_str(), scene_m->robot_model_name.c_str(),
                           planning_display_->getRobotModel()->getName().c_str());
@@ -723,7 +724,7 @@ void MotionPlanningFrame::computeLoadSceneButtonClicked()
         }
         else
         {
-          RCLCPP_WARN(logger_, "Failed to load scene '%s'. Has the message format changed since the scene was saved?",
+          RCLCPP_WARN(LOGGER, "Failed to load scene '%s'. Has the message format changed since the scene was saved?",
                       scene.c_str());
         }
       }
@@ -752,7 +753,7 @@ void MotionPlanningFrame::computeLoadQueryButtonClicked()
         }
         catch (std::exception& ex)
         {
-          RCLCPP_ERROR(logger_, "%s", ex.what());
+          RCLCPP_ERROR(LOGGER, "%s", ex.what());
         }
 
         if (got_q)
@@ -779,7 +780,7 @@ void MotionPlanningFrame::computeLoadQueryButtonClicked()
         }
         else
         {
-          RCLCPP_ERROR(logger_,
+          RCLCPP_ERROR(LOGGER,
                        "Failed to load planning query '%s'. Has the message format changed since the query was saved?",
                        query_name.c_str());
         }
@@ -1049,10 +1050,10 @@ void MotionPlanningFrame::computeExportGeometryAsText(const std::string& path)
     {
       ps->saveGeometryToStream(fout);
       fout.close();
-      RCLCPP_INFO(logger_, "Saved current scene geometry to '%s'", p.c_str());
+      RCLCPP_INFO(LOGGER, "Saved current scene geometry to '%s'", p.c_str());
     }
     else
-      RCLCPP_WARN(logger_, "Unable to save current scene geometry to '%s'", p.c_str());
+      RCLCPP_WARN(LOGGER, "Unable to save current scene geometry to '%s'", p.c_str());
   }
 }
 
@@ -1064,7 +1065,7 @@ void MotionPlanningFrame::computeImportGeometryFromText(const std::string& path)
     std::ifstream fin(path.c_str());
     if (ps->loadGeometryFromStream(fin))
     {
-      RCLCPP_INFO(logger_, "Loaded scene geometry from '%s'", path.c_str());
+      RCLCPP_INFO(LOGGER, "Loaded scene geometry from '%s'", path.c_str());
       planning_display_->addMainLoopJob([this] { populateCollisionObjectsList(); });
       planning_display_->queueRenderSceneGeometry();
       setLocalSceneEdited();

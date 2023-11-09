@@ -43,7 +43,6 @@
 #endif
 #include <GL/freeglut.h>
 #include <moveit/mesh_filter/gl_renderer.h>
-#include <moveit/utils/logger.hpp>
 #include <sstream>
 #include <fstream>
 #include <stdexcept>
@@ -53,6 +52,8 @@
 #include <rclcpp/logging.hpp>
 
 using namespace std;
+
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.ros.perception.gl_renderer");
 
 mesh_filter::GLRenderer::GLRenderer(unsigned width, unsigned height, double near, double far)
   : width_(width)
@@ -344,7 +345,7 @@ GLuint mesh_filter::GLRenderer::loadShaders(const string& vertex_source, const s
     glGetProgramInfoLog(program_id, info_log_length, nullptr, &program_error_message[0]);
     std::size_t l = strnlen(&program_error_message[0], program_error_message.size());
     if (l > 0)
-      RCLCPP_ERROR(moveit::getLogger(), "%s\n", &program_error_message[0]);
+      RCLCPP_ERROR(LOGGER, "%s\n", &program_error_message[0]);
   }
 
   if (vertex_shader_id)

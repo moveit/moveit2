@@ -95,7 +95,6 @@ protected:
   rviz_common::properties::StringProperty* robot_description_property_;
 
   rclcpp::Node::SharedPtr node_;
-  rclcpp::Logger logger_;
 };
 
 }  // namespace moveit_rviz_plugin

@@ -36,7 +36,8 @@
 
 #include <moveit/robot_interaction/kinematic_options.h>
 #include <rclcpp/logging.hpp>
-#include <moveit/utils/logger.hpp>
+
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_ros_robot_interaction.kinematic_options");
 
 robot_interaction::KinematicOptions::KinematicOptions() : timeout_seconds_(0.0)  // 0.0 = use default timeout
 {
@@ -51,7 +52,7 @@ bool robot_interaction::KinematicOptions::setStateFromIK(moveit::core::RobotStat
   const moveit::core::JointModelGroup* jmg = state.getJointModelGroup(group);
   if (!jmg)
   {
-    RCLCPP_ERROR(moveit::getLogger(), "No getJointModelGroup('%s') found", group.c_str());
+    RCLCPP_ERROR(LOGGER, "No getJointModelGroup('%s') found", group.c_str());
     return false;
   }
   bool result = state.setFromIK(jmg, pose, tip,

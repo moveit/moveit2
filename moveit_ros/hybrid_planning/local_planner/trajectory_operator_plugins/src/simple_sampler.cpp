@@ -40,6 +40,7 @@ namespace moveit::hybrid_planning
 {
 namespace
 {
+const rclcpp::Logger LOGGER = rclcpp::get_logger("local_planner_component");
 constexpr double WAYPOINT_RADIAN_TOLERANCE = 0.2;  // rad: L1-norm sum for all joints
 }  // namespace
 

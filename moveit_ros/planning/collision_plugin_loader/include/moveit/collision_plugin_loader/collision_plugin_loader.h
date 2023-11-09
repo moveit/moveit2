@@ -43,13 +43,8 @@ namespace collision_detection
 class CollisionPluginLoader : public CollisionPluginCache
 {
 public:
-  CollisionPluginLoader();
-
   /** @brief Fetch plugin name from parameter server and activate the plugin for the given scene */
   void setupScene(const rclcpp::Node::SharedPtr& node, const planning_scene::PlanningScenePtr& scene);
-
-private:
-  rclcpp::Logger logger_;
 };
 
 }  // namespace collision_detection

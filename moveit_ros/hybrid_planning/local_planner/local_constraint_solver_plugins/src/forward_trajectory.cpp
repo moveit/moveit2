@@ -39,6 +39,7 @@
 
 namespace
 {
+const rclcpp::Logger LOGGER = rclcpp::get_logger("local_planner_component");
 // If stuck for this many iterations or more, abort the local planning action
 constexpr size_t STUCK_ITERATIONS_THRESHOLD = 5;
 constexpr double STUCK_THRESHOLD_RAD = 1e-4;  // L1-norm sum across all joints
@@ -84,7 +85,7 @@ ForwardTrajectory::solve(const robot_trajectory::RobotTrajectory& local_trajecto
   // A message every once in awhile is useful in case the local planner gets stuck
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wold-style-cast"
-  RCLCPP_INFO_THROTTLE(node_->get_logger(), *node_->get_clock(), 2000 /* ms */, "The local planner is solving...");
+  RCLCPP_INFO_THROTTLE(LOGGER, *node_->get_clock(), 2000 /* ms */, "The local planner is solving...");
 #pragma GCC diagnostic pop
 
   // Create controller command trajectory
@@ -130,7 +131,7 @@ ForwardTrajectory::solve(const robot_trajectory::RobotTrajectory& local_trajecto
         feedback_result.feedback = toString(LocalFeedbackEnum::COLLISION_AHEAD);
         path_invalidation_event_send_ = true;  // Set feedback flag
       }
-      RCLCPP_INFO(node_->get_logger(), "Collision ahead, holding current position");
+      RCLCPP_INFO(LOGGER, "Collision ahead, holding current position");
       // Keep current position
       moveit::core::RobotState current_state_command(*current_state);
       if (current_state_command.hasVelocities())
@@ -162,7 +163,7 @@ ForwardTrajectory::solve(const robot_trajectory::RobotTrajectory& local_trajecto
           prev_waypoint_target_ = nullptr;
           feedback_result.feedback = toString(LocalFeedbackEnum::LOCAL_PLANNER_STUCK);
           path_invalidation_event_send_ = true;  // Set feedback flag
-          RCLCPP_INFO(node_->get_logger(), "The local planner has been stuck for several iterations. Aborting.");
+          RCLCPP_INFO(LOGGER, "The local planner has been stuck for several iterations. Aborting.");
         }
       }
       prev_waypoint_target_ = robot_command.getFirstWayPointPtr();

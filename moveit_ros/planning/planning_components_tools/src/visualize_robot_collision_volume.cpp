@@ -40,7 +40,6 @@
 #include <rclcpp/node.hpp>
 #include <rclcpp/publisher.hpp>
 #include <rclcpp/version.h>
-#include <moveit/utils/logger.hpp>
 #if RCLCPP_VERSION_GTE(20, 0, 0)
 #include <rclcpp/event_handler.hpp>
 #else
@@ -56,7 +55,6 @@ int main(int argc, char** argv)
 {
   rclcpp::init(argc, argv);
   auto node = rclcpp::Node::make_shared("visualize_robot_collision_volume");
-  moveit::setLogger(node->get_logger());
 
   rclcpp::executors::MultiThreadedExecutor executor;
   executor.add_node(node);

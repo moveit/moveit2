@@ -36,6 +36,11 @@
 #include <moveit/planning_scene/planning_scene.h>
 #include <moveit/robot_state/conversions.h>
 
+namespace
+{
+const rclcpp::Logger LOGGER = rclcpp::get_logger("global_planner_component");
+}
+
 namespace moveit::hybrid_planning
 {
 const std::string PLANNING_SCENE_MONITOR_NS = "planning_scene_monitor_options.";
@@ -96,8 +101,7 @@ moveit_msgs::msg::MotionPlanResponse MoveItPlanningPipeline::plan(
 
   if ((global_goal_handle->get_goal())->motion_sequence.items.empty())
   {
-    RCLCPP_WARN(node_ptr_->get_logger(),
-                "Global planner received motion sequence request with no items. At least one is needed.");
+    RCLCPP_WARN(LOGGER, "Global planner received motion sequence request with no items. At least one is needed.");
     response.error_code.val = moveit_msgs::msg::MoveItErrorCodes::PLANNING_FAILED;
     return response;
   }
@@ -105,10 +109,9 @@ moveit_msgs::msg::MotionPlanResponse MoveItPlanningPipeline::plan(
   // Process goal
   if ((global_goal_handle->get_goal())->motion_sequence.items.size() > 1)
   {
-    RCLCPP_WARN(node_ptr_->get_logger(),
-                "Global planner received motion sequence request with more than one item but the "
-                "'moveit_planning_pipeline' plugin only accepts one item. Just using the first item as global "
-                "planning goal!");
+    RCLCPP_WARN(LOGGER, "Global planner received motion sequence request with more than one item but the "
+                        "'moveit_planning_pipeline' plugin only accepts one item. Just using the first item as global "
+                        "planning goal!");
   }
   auto motion_plan_req = (global_goal_handle->get_goal())->motion_sequence.items[0].req;
 

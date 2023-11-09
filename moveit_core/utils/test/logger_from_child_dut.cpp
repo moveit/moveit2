@@ -44,7 +44,7 @@ int main(int argc, char** argv)
   rclcpp::Node::SharedPtr node = rclcpp::Node::make_shared("dut_node");
 
   // Set the moveit logger to be from node
-  moveit::setLogger(node->get_logger());
+  moveit::getLoggerMut() = node->get_logger();
 
   // Make a child logger
   const auto child_logger = moveit::makeChildLogger("child");

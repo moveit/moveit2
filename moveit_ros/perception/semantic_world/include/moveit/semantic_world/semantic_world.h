@@ -158,8 +158,6 @@ private:
   TableCallbackFn table_callback_;
 
   rclcpp::Publisher<moveit_msgs::msg::PlanningScene>::SharedPtr planning_scene_diff_publisher_;
-
-  rclcpp::Logger logger_;
 };
 }  // namespace semantic_world
 }  // namespace moveit

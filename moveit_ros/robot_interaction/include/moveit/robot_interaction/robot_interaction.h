@@ -42,7 +42,6 @@
 #include <moveit/macros/class_forward.h>
 #include <moveit/robot_state/robot_state.h>
 #include <moveit/robot_interaction/interaction.h>
-#include <rclcpp/logger.hpp>
 #include <memory>
 #include <functional>
 #include <thread>
@@ -233,7 +232,6 @@ private:
 
   std::string topic_;
   rclcpp::Node::SharedPtr node_;
-  rclcpp::Logger logger_;
 
   // options for doing IK
   KinematicOptionsMapPtr kinematic_options_map_;

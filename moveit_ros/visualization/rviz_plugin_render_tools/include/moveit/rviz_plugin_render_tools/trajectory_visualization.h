@@ -42,7 +42,6 @@
 #include <rviz_common/properties/int_property.hpp>
 #include <rviz_common/properties/ros_topic_property.hpp>
 #include <mutex>
-#include <rclcpp/logger.hpp>
 
 #ifndef Q_MOC_RUN
 #include <moveit/rviz_plugin_render_tools/robot_state_visualization.h>
@@ -165,7 +164,6 @@ protected:
   rclcpp::Node::SharedPtr node_;
   TrajectoryPanel* trajectory_slider_panel_;
   rviz_common::PanelDockWidget* trajectory_slider_dock_panel_;
-  rclcpp::Logger logger_;
 
   // Properties
   rviz_common::properties::BoolProperty* display_path_visual_enabled_property_;

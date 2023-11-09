@@ -239,7 +239,6 @@ private:
   moveit_msgs::msg::TrajectoryConstraints current_trajectory_constraints_;
   moveit_msgs::msg::WorkspaceParameters workspace_parameters_;
   bool workspace_parameters_set_ = false;
-  rclcpp::Logger logger_;
 
   // common properties for goals
   // TODO(henningkayser): support goal tolerances

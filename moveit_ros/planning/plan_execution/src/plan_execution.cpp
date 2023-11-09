@@ -47,13 +47,13 @@
 #include <rclcpp/parameter_value.hpp>
 #include <rclcpp/rate.hpp>
 #include <rclcpp/utilities.hpp>
-#include <moveit/utils/logger.hpp>
 
 // #include <dynamic_reconfigure/server.h>
 // #include <moveit_ros_planning/PlanExecutionDynamicReconfigureConfig.h>
 
 namespace plan_execution
 {
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_ros.plan_execution");
 
 // class PlanExecution::DynamicReconfigureImpl
 // {
@@ -80,10 +80,7 @@ namespace plan_execution
 plan_execution::PlanExecution::PlanExecution(
     const rclcpp::Node::SharedPtr& node, const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor,
     const trajectory_execution_manager::TrajectoryExecutionManagerPtr& trajectory_execution)
-  : node_(node)
-  , planning_scene_monitor_(planning_scene_monitor)
-  , trajectory_execution_manager_(trajectory_execution)
-  , logger_(moveit::makeChildLogger("add_time_optimal_parameterization"))
+  : node_(node), planning_scene_monitor_(planning_scene_monitor), trajectory_execution_manager_(trajectory_execution)
 {
   if (!trajectory_execution_manager_)
   {
@@ -162,7 +159,7 @@ void plan_execution::PlanExecution::planAndExecuteHelper(ExecutableMotionPlan& p
   do
   {
     replan_attempts++;
-    RCLCPP_INFO(logger_, "Planning attempt %u of at most %u", replan_attempts, max_replan_attempts);
+    RCLCPP_INFO(LOGGER, "Planning attempt %u of at most %u", replan_attempts, max_replan_attempts);
 
     if (opt.before_plan_callback_)
       opt.before_plan_callback_();
@@ -232,10 +229,10 @@ void plan_execution::PlanExecution::planAndExecuteHelper(ExecutableMotionPlan& p
       // otherwise, we wait (if needed)
       if (opt.replan_delay > 0.0)
       {
-        RCLCPP_INFO(logger_, "Waiting for a %lf seconds before attempting a new plan ...", opt.replan_delay);
+        RCLCPP_INFO(LOGGER, "Waiting for a %lf seconds before attempting a new plan ...", opt.replan_delay);
         auto replan_delay_seconds = std::chrono::duration<double>(opt.replan_delay);
         rclcpp::sleep_for(std::chrono::duration_cast<std::chrono::nanoseconds>(replan_delay_seconds));
-        RCLCPP_INFO(logger_, "Done waiting");
+        RCLCPP_INFO(node_->get_logger(), "Done waiting");
       }
     }
 
@@ -247,7 +244,7 @@ void plan_execution::PlanExecution::planAndExecuteHelper(ExecutableMotionPlan& p
 
   if (preempt_requested)
   {
-    RCLCPP_DEBUG(logger_, "PlanExecution was preempted");
+    RCLCPP_DEBUG(LOGGER, "PlanExecution was preempted");
     plan.error_code.val = moveit_msgs::msg::MoveItErrorCodes::PREEMPTED;
   }
 
@@ -256,11 +253,11 @@ void plan_execution::PlanExecution::planAndExecuteHelper(ExecutableMotionPlan& p
 
   if (plan.error_code.val == moveit_msgs::msg::MoveItErrorCodes::SUCCESS)
   {
-    RCLCPP_DEBUG(logger_, "PlanExecution finished successfully.");
+    RCLCPP_DEBUG(LOGGER, "PlanExecution finished successfully.");
   }
   else
   {
-    RCLCPP_DEBUG(logger_, "PlanExecution terminating with error code %d - '%s'", plan.error_code.val,
+    RCLCPP_DEBUG(LOGGER, "PlanExecution terminating with error code %d - '%s'", plan.error_code.val,
                  moveit::core::errorCodeToString(plan.error_code).c_str());
   }
 }
@@ -297,7 +294,7 @@ bool plan_execution::PlanExecution::isRemainingPathValid(const ExecutableMotionP
       if (res.collision || !plan.planning_scene->isStateFeasible(t.getWayPoint(i), false))
       {
         // Dave's debacle
-        RCLCPP_INFO(logger_, "Trajectory component '%s' is invalid",
+        RCLCPP_INFO(LOGGER, "Trajectory component '%s' is invalid",
                     plan.plan_components[path_segment.first].description.c_str());
 
         // call the same functions again, in verbose mode, to show what issues have been detected
@@ -337,7 +334,7 @@ moveit_msgs::msg::MoveItErrorCodes plan_execution::PlanExecution::executeAndMoni
 
   if (!trajectory_execution_manager_)
   {
-    RCLCPP_ERROR(logger_, "No trajectory execution manager");
+    RCLCPP_ERROR(LOGGER, "No trajectory execution manager");
     result.val = moveit_msgs::msg::MoveItErrorCodes::CONTROL_FAILED;
     return result;
   }
@@ -402,7 +399,7 @@ moveit_msgs::msg::MoveItErrorCodes plan_execution::PlanExecution::executeAndMoni
     if (!trajectory_execution_manager_->push(msg, plan.plan_components[component_idx].controller_name))
     {
       trajectory_execution_manager_->clear();
-      RCLCPP_ERROR(logger_, "Apparently trajectory initialization failed");
+      RCLCPP_ERROR(LOGGER, "Apparently trajectory initialization failed");
       execution_complete_ = true;
       result.val = moveit_msgs::msg::MoveItErrorCodes::CONTROL_FAILED;
       return result;
@@ -441,7 +438,7 @@ moveit_msgs::msg::MoveItErrorCodes plan_execution::PlanExecution::executeAndMoni
       std::pair<int, int> current_index = trajectory_execution_manager_->getCurrentExpectedTrajectoryIndex();
       if (!isRemainingPathValid(plan, current_index))
       {
-        RCLCPP_INFO(logger_, "Trajectory component '%s' is invalid after scene update",
+        RCLCPP_INFO(LOGGER, "Trajectory component '%s' is invalid after scene update",
                     plan.plan_components[current_index.first].description.c_str());
         path_became_invalid_ = true;
         break;
@@ -456,19 +453,19 @@ moveit_msgs::msg::MoveItErrorCodes plan_execution::PlanExecution::executeAndMoni
   // stop execution if needed
   if (preempt_requested)
   {
-    RCLCPP_INFO(logger_, "Stopping execution due to preempt request");
+    RCLCPP_INFO(LOGGER, "Stopping execution due to preempt request");
     trajectory_execution_manager_->stopExecution();
   }
   else if (path_became_invalid_)
   {
-    RCLCPP_INFO(logger_, "Stopping execution because the path to execute became invalid"
-                         "(probably the environment changed)");
+    RCLCPP_INFO(LOGGER, "Stopping execution because the path to execute became invalid"
+                        "(probably the environment changed)");
     trajectory_execution_manager_->stopExecution();
   }
   else if (!execution_complete_)
   {
-    RCLCPP_WARN(logger_, "Stopping execution due to unknown reason."
-                         "Possibly the node is about to shut down.");
+    RCLCPP_WARN(LOGGER, "Stopping execution due to unknown reason."
+                        "Possibly the node is about to shut down.");
     trajectory_execution_manager_->stopExecution();
   }
 
@@ -532,18 +529,18 @@ void plan_execution::PlanExecution::successfulTrajectorySegmentExecution(const E
 {
   if (plan.plan_components.empty())
   {
-    RCLCPP_WARN(logger_, "Length of provided motion plan is zero.");
+    RCLCPP_WARN(LOGGER, "Length of provided motion plan is zero.");
     return;
   }
 
   // if any side-effects are associated to the trajectory part that just completed, execute them
-  RCLCPP_DEBUG(logger_, "Completed '%s'", plan.plan_components[index].description.c_str());
+  RCLCPP_DEBUG(LOGGER, "Completed '%s'", plan.plan_components[index].description.c_str());
   if (plan.plan_components[index].effect_on_success)
   {
     if (!plan.plan_components[index].effect_on_success(&plan))
     {
       // execution of side-effect failed
-      RCLCPP_ERROR(logger_, "Execution of path-completion side-effect failed. Preempting.");
+      RCLCPP_ERROR(LOGGER, "Execution of path-completion side-effect failed. Preempting.");
       preempt_.request();
       return;
     }
@@ -557,7 +554,7 @@ void plan_execution::PlanExecution::successfulTrajectorySegmentExecution(const E
     std::pair<int, int> next_index(static_cast<int>(index), 0);
     if (!isRemainingPathValid(plan, next_index))
     {
-      RCLCPP_INFO(logger_, "Upcoming trajectory component '%s' is invalid",
+      RCLCPP_INFO(LOGGER, "Upcoming trajectory component '%s' is invalid",
                   plan.plan_components[next_index.first].description.c_str());
       path_became_invalid_ = true;
     }

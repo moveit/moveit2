@@ -41,7 +41,6 @@
 #include <moveit/motion_planning_rviz_plugin/motion_planning_frame_joints_widget.h>
 #include <moveit/motion_planning_rviz_plugin/motion_planning_display.h>
 #include <moveit/move_group/capability_names.h>
-#include <moveit/utils/logger.hpp>
 
 #include <geometric_shapes/shape_operations.h>
 
@@ -61,20 +60,16 @@
 
 namespace moveit_rviz_plugin
 {
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_ros_visualization.motion_planning_frame");
 
 MotionPlanningFrame::MotionPlanningFrame(MotionPlanningDisplay* pdisplay, rviz_common::DisplayContext* context,
                                          QWidget* parent)
-  : QWidget(parent)
-  , planning_display_(pdisplay)
-  , context_(context)
-  , ui_(new Ui::MotionPlanningUI())
-  , logger_(moveit::makeChildLogger("motion_planning_frame"))
-  , first_time_(true)
+  : QWidget(parent), planning_display_(pdisplay), context_(context), ui_(new Ui::MotionPlanningUI()), first_time_(true)
 {
   auto ros_node_abstraction = context_->getRosNodeAbstraction().lock();
   if (!ros_node_abstraction)
   {
-    RCLCPP_INFO(logger_, "Unable to lock weak_ptr from DisplayContext in MotionPlanningFrame constructor");
+    RCLCPP_INFO(LOGGER, "Unable to lock weak_ptr from DisplayContext in MotionPlanningFrame constructor");
     return;
   }
   node_ = ros_node_abstraction->get_raw_node();
@@ -216,7 +211,7 @@ MotionPlanningFrame::MotionPlanningFrame(MotionPlanningDisplay* pdisplay, rviz_c
   {
     if (!object_recognition_client_->wait_for_action_server(std::chrono::seconds(3)))
     {
-      RCLCPP_ERROR(logger_, "Action server: %s not available", OBJECT_RECOGNITION_ACTION.c_str());
+      RCLCPP_ERROR(LOGGER, "Action server: %s not available", OBJECT_RECOGNITION_ACTION.c_str());
       object_recognition_client_.reset();
     }
   }
@@ -238,7 +233,7 @@ MotionPlanningFrame::MotionPlanningFrame(MotionPlanningDisplay* pdisplay, rviz_c
   //  }
   //  catch (std::exception& ex)
   //  {
-  //    RCLCPP_ERROR(logger_, "Failed to get semantic world: %s", ex.what());
+  //    RCLCPP_ERROR(LOGGER, "Failed to get semantic world: %s", ex.what());
   //  }
 }
 
@@ -381,10 +376,10 @@ void MotionPlanningFrame::changePlanningGroupHelper()
 
   if (!group.empty() && robot_model)
   {
-    RCLCPP_INFO(logger_, "group %s", group.c_str());
+    RCLCPP_INFO(LOGGER, "group %s", group.c_str());
     if (move_group_ && move_group_->getName() == group)
       return;
-    RCLCPP_INFO(logger_, "Constructing new MoveGroup connection for group '%s' in namespace '%s'", group.c_str(),
+    RCLCPP_INFO(LOGGER, "Constructing new MoveGroup connection for group '%s' in namespace '%s'", group.c_str(),
                 planning_display_->getMoveGroupNS().c_str());
     moveit::planning_interface::MoveGroupInterface::Options opt(
         group, moveit::planning_interface::MoveGroupInterface::ROBOT_DESCRIPTION, planning_display_->getMoveGroupNS());
@@ -406,7 +401,7 @@ void MotionPlanningFrame::changePlanningGroupHelper()
     }
     catch (std::exception& ex)
     {
-      RCLCPP_ERROR(logger_, "%s", ex.what());
+      RCLCPP_ERROR(LOGGER, "%s", ex.what());
     }
     planning_display_->addMainLoopJob([&view = *ui_->planner_param_treeview, this] { view.setMoveGroup(move_group_); });
     if (move_group_)
@@ -603,7 +598,7 @@ void MotionPlanningFrame::enable()
   const std::string new_ns = planning_display_->getMoveGroupNS();
   if (node_->get_namespace() != new_ns)
   {
-    RCLCPP_INFO(logger_, "MoveGroup namespace changed: %s -> %s. Reloading params.", node_->get_namespace(),
+    RCLCPP_INFO(LOGGER, "MoveGroup namespace changed: %s -> %s. Reloading params.", node_->get_namespace(),
                 new_ns.c_str());
     initFromMoveGroupNS();
   }

@@ -37,10 +37,10 @@
 #include <moveit/lazy_free_space_updater/lazy_free_space_updater.h>
 #include <rclcpp/logging.hpp>
 #include <rclcpp/clock.hpp>
-#include <moveit/utils/logger.hpp>
 
 namespace occupancy_map_monitor
 {
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.ros.perception.lazy_free_space_updater");
 
 LazyFreeSpaceUpdater::LazyFreeSpaceUpdater(const collision_detection::OccMapTreePtr& tree, unsigned int max_batch_size)
   : tree_(tree)
@@ -51,7 +51,6 @@ LazyFreeSpaceUpdater::LazyFreeSpaceUpdater(const collision_detection::OccMapTree
   , process_model_cells_set_(nullptr)
   , update_thread_([this] { lazyUpdateThread(); })
   , process_thread_([this] { processThread(); })
-  , logger_(moveit::makeChildLogger("lazy_free_space_updater"))
 {
 }
 
@@ -73,7 +72,7 @@ LazyFreeSpaceUpdater::~LazyFreeSpaceUpdater()
 void LazyFreeSpaceUpdater::pushLazyUpdate(octomap::KeySet* occupied_cells, octomap::KeySet* model_cells,
                                           const octomap::point3d& sensor_origin)
 {
-  RCLCPP_DEBUG(logger_, "Pushing %lu occupied cells and %lu model cells for lazy updating...",
+  RCLCPP_DEBUG(LOGGER, "Pushing %lu occupied cells and %lu model cells for lazy updating...",
                static_cast<long unsigned int>(occupied_cells->size()),
                static_cast<long unsigned int>(model_cells->size()));
   std::scoped_lock _(update_cell_sets_lock_);
@@ -99,7 +98,7 @@ void LazyFreeSpaceUpdater::pushBatchToProcess(OcTreeKeyCountMap* occupied_cells,
   }
   else
   {
-    RCLCPP_WARN(logger_, "Previous batch update did not complete. Ignoring set of cells to be freed.");
+    RCLCPP_WARN(LOGGER, "Previous batch update did not complete. Ignoring set of cells to be freed.");
     delete occupied_cells;
     delete model_cells;
   }
@@ -125,7 +124,7 @@ void LazyFreeSpaceUpdater::processThread()
     if (!running_)
       break;
 
-    RCLCPP_DEBUG(logger_,
+    RCLCPP_DEBUG(LOGGER,
                  "Begin processing batched update: marking free cells due to %lu occupied cells and %lu model cells",
                  static_cast<long unsigned int>(process_occupied_cells_set_->size()),
                  static_cast<long unsigned int>(process_model_cells_set_->size()));
@@ -176,7 +175,7 @@ void LazyFreeSpaceUpdater::processThread()
       free_cells1.erase(it);
       free_cells2.erase(it);
     }
-    RCLCPP_DEBUG(logger_, "Marking %lu cells as free...",
+    RCLCPP_DEBUG(LOGGER, "Marking %lu cells as free...",
                  static_cast<long unsigned int>(free_cells1.size() + free_cells2.size()));
 
     tree_->lockWrite();
@@ -195,12 +194,12 @@ void LazyFreeSpaceUpdater::processThread()
     }
     catch (...)
     {
-      RCLCPP_ERROR(logger_, "Internal error while updating octree");
+      RCLCPP_ERROR(LOGGER, "Internal error while updating octree");
     }
     tree_->unlockWrite();
     tree_->triggerUpdateCallback();
 
-    RCLCPP_DEBUG(logger_, "Marked free cells in %lf ms", (clock.now() - start).seconds() * 1000.0);
+    RCLCPP_DEBUG(LOGGER, "Marked free cells in %lf ms", (clock.now() - start).seconds() * 1000.0);
 
     delete process_occupied_cells_set_;
     process_occupied_cells_set_ = nullptr;
@@ -244,7 +243,7 @@ void LazyFreeSpaceUpdater::lazyUpdateThread()
     {
       if ((sensor_origins_.front() - sensor_origin).norm() > max_sensor_delta_)
       {
-        RCLCPP_DEBUG(logger_, "Pushing %u sets of occupied/model cells to free cells update thread (origin changed)",
+        RCLCPP_DEBUG(LOGGER, "Pushing %u sets of occupied/model cells to free cells update thread (origin changed)",
                      batch_size);
         pushBatchToProcess(occupied_cells_set, model_cells_set, sensor_origin);
         batch_size = 0;
@@ -266,7 +265,7 @@ void LazyFreeSpaceUpdater::lazyUpdateThread()
 
     if (batch_size >= max_batch_size_)
     {
-      RCLCPP_DEBUG(logger_, "Pushing %u sets of occupied/model cells to free cells update thread", batch_size);
+      RCLCPP_DEBUG(LOGGER, "Pushing %u sets of occupied/model cells to free cells update thread", batch_size);
       pushBatchToProcess(occupied_cells_set, model_cells_set, sensor_origin);
       occupied_cells_set = nullptr;
       batch_size = 0;

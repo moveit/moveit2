@@ -48,10 +48,10 @@
 #include <rclcpp/logger.hpp>
 #include <rclcpp/logging.hpp>
 #include <rclcpp/node.hpp>
-#include <moveit/utils/logger.hpp>
 
 namespace default_planner_request_adapters
 {
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_ros.fix_start_state_path_constraints");
 
 /** @brief This fix start state collision adapter will attempt to sample a new collision-free configuration near a
  * specified configuration (in collision) by perturbing the joint values by a small amount.*/
@@ -59,10 +59,6 @@ namespace default_planner_request_adapters
 class FixStartStatePathConstraints : public planning_request_adapter::PlanningRequestAdapter
 {
 public:
-  FixStartStatePathConstraints() : logger_(moveit::makeChildLogger("fix_start_state_path_constraints"))
-  {
-  }
-
   void initialize(const rclcpp::Node::SharedPtr& /* node */, const std::string& /* parameter_namespace */) override
   {
   }
@@ -76,7 +72,7 @@ public:
                     const planning_interface::MotionPlanRequest& req,
                     planning_interface::MotionPlanResponse& res) const override
   {
-    RCLCPP_DEBUG(logger_, "Running '%s'", getDescription().c_str());
+    RCLCPP_DEBUG(LOGGER, "Running '%s'", getDescription().c_str());
 
     // get the specified start state
     moveit::core::RobotState start_state = planning_scene->getCurrentState();
@@ -86,9 +82,9 @@ public:
     if (planning_scene->isStateValid(start_state, req.group_name) &&
         !planning_scene->isStateValid(start_state, req.path_constraints, req.group_name))
     {
-      RCLCPP_INFO(logger_, "Path constraints not satisfied for start state...");
+      RCLCPP_INFO(LOGGER, "Path constraints not satisfied for start state...");
       planning_scene->isStateValid(start_state, req.path_constraints, req.group_name, true);
-      RCLCPP_INFO(logger_, "Planning to path constraints...");
+      RCLCPP_INFO(LOGGER, "Planning to path constraints...");
 
       planning_interface::MotionPlanRequest req2 = req;
       req2.goal_constraints.resize(1);
@@ -105,7 +101,7 @@ public:
       if (solved1)
       {
         planning_interface::MotionPlanRequest req3 = req;
-        RCLCPP_INFO(logger_, "Planned to path constraints. Resuming original planning request.");
+        RCLCPP_INFO(LOGGER, "Planned to path constraints. Resuming original planning request.");
 
         // extract the last state of the computed motion plan and set it as the new start state
         moveit::core::robotStateToRobotStateMsg(res2.trajectory->getLastWayPoint(), req3.start_state);
@@ -138,7 +134,7 @@ public:
       }
       else
       {
-        RCLCPP_WARN(logger_, "Unable to plan to path constraints. Running usual motion plan.");
+        RCLCPP_WARN(LOGGER, "Unable to plan to path constraints. Running usual motion plan.");
         res.error_code.val = moveit_msgs::msg::MoveItErrorCodes::START_STATE_VIOLATES_PATH_CONSTRAINTS;
         res.planning_time = res2.planning_time;
         return false;  // skip remaining adapters and/or planner
@@ -146,13 +142,10 @@ public:
     }
     else
     {
-      RCLCPP_DEBUG(logger_, "Path constraints are OK. Running usual motion plan.");
+      RCLCPP_DEBUG(LOGGER, "Path constraints are OK. Running usual motion plan.");
       return planner(planning_scene, req, res);
     }
   }
-
-private:
-  rclcpp::Logger logger_;
 };
 }  // namespace default_planner_request_adapters
 

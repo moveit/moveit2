@@ -39,7 +39,8 @@
 #include <moveit/moveit_cpp/moveit_cpp.h>
 #include <moveit/planning_pipeline/planning_pipeline.h>
 #include <moveit/plan_execution/plan_execution.h>
-#include <moveit/utils/logger.hpp>
+
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_move_group_capabilities_base.move_group_context");
 
 move_group::MoveGroupContext::MoveGroupContext(const moveit_cpp::MoveItCppPtr& moveit_cpp,
                                                const std::string& default_planning_pipeline,
@@ -59,7 +60,7 @@ move_group::MoveGroupContext::MoveGroupContext(const moveit_cpp::MoveItCppPtr& m
   else
   {
     RCLCPP_ERROR(
-        moveit::getLogger(),
+        LOGGER,
         "Failed to find default PlanningPipeline '%s' - please check MoveGroup's planning pipeline configuration.",
         default_planning_pipeline.c_str());
   }
@@ -85,15 +86,13 @@ bool move_group::MoveGroupContext::status() const
   const planning_interface::PlannerManagerPtr& planner_interface = planning_pipeline_->getPlannerManager();
   if (planner_interface)
   {
-    RCLCPP_INFO_STREAM(moveit::getLogger(),
-                       "MoveGroup context using planning plugin " << planning_pipeline_->getPlannerPluginName());
-    RCLCPP_INFO_STREAM(moveit::getLogger(), "MoveGroup context initialization complete");
+    RCLCPP_INFO_STREAM(LOGGER, "MoveGroup context using planning plugin " << planning_pipeline_->getPlannerPluginName());
+    RCLCPP_INFO_STREAM(LOGGER, "MoveGroup context initialization complete");
     return true;
   }
   else
   {
-    RCLCPP_WARN_STREAM(moveit::getLogger(),
-                       "MoveGroup running was unable to load " << planning_pipeline_->getPlannerPluginName());
+    RCLCPP_WARN_STREAM(LOGGER, "MoveGroup running was unable to load " << planning_pipeline_->getPlannerPluginName());
     return false;
   }
 }

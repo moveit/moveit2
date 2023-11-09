@@ -39,7 +39,11 @@
 
 #include <moveit_servo/collision_monitor.hpp>
 #include <rclcpp/rclcpp.hpp>
-#include <moveit/utils/logger.hpp>
+
+namespace
+{
+const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_servo.servo");
+}
 
 namespace moveit_servo
 {
@@ -63,11 +67,11 @@ void CollisionMonitor::start()
   if (!monitor_thread_.joinable())
   {
     monitor_thread_ = std::thread(&CollisionMonitor::checkCollisions, this);
-    RCLCPP_INFO_STREAM(moveit::getLogger(), "Collision monitor started");
+    RCLCPP_INFO_STREAM(LOGGER, "Collision monitor started");
   }
   else
   {
-    RCLCPP_ERROR_STREAM(moveit::getLogger(), "Collision monitor could not be started");
+    RCLCPP_ERROR_STREAM(LOGGER, "Collision monitor could not be started");
   }
 }
 
@@ -78,7 +82,7 @@ void CollisionMonitor::stop()
   {
     monitor_thread_.join();
   }
-  RCLCPP_INFO_STREAM(moveit::getLogger(), "Collision monitor stopped");
+  RCLCPP_INFO_STREAM(LOGGER, "Collision monitor stopped");
 }
 
 void CollisionMonitor::checkCollisions()

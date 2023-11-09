@@ -40,7 +40,6 @@
 #include <moveit/robot_model/robot_model.h>
 #include <moveit/kinematics_base/kinematics_base.h>
 #include <kinematics_parameters.hpp>
-#include <moveit/utils/logger.hpp>
 
 namespace kinematics_plugin_loader
 {
@@ -57,7 +56,7 @@ public:
       well as used to read the SRDF document when needed. */
   KinematicsPluginLoader(const rclcpp::Node::SharedPtr& node,
                          const std::string& robot_description = "robot_description")
-    : node_(node), robot_description_(robot_description), logger_(moveit::makeChildLogger("kinematics_plugin_loader"))
+    : node_(node), robot_description_(robot_description)
   {
   }
 
@@ -90,6 +89,5 @@ private:
 
   std::vector<std::string> groups_;
   std::map<std::string, double> ik_timeout_;
-  rclcpp::Logger logger_;
 };
 }  // namespace kinematics_plugin_loader

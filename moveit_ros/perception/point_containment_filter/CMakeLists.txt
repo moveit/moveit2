@@ -6,7 +6,6 @@ ament_target_dependencies(moveit_point_containment_filter
   rclcpp
   sensor_msgs
   geometric_shapes
-  moveit_core
 )
 
 install(DIRECTORY include/ DESTINATION include/moveit_ros_perception)

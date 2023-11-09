@@ -278,7 +278,6 @@ private:
   const std::string name_ = "trajectory_execution_manager";
 
   rclcpp::Node::SharedPtr node_;
-  rclcpp::Logger logger_;
   rclcpp::Node::SharedPtr controller_mgr_node_;
   std::shared_ptr<rclcpp::executors::SingleThreadedExecutor> private_executor_;
   std::thread private_executor_thread_;

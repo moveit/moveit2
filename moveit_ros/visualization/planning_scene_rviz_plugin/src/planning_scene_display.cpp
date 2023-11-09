@@ -56,18 +56,15 @@
 #include <OgreSceneNode.h>
 
 #include <moveit/utils/rclcpp_utils.h>
-#include <moveit/utils/logger.hpp>
 
 namespace moveit_rviz_plugin
 {
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_ros_visualization.planning_scene_display");
 // ******************************************************************************************
 // Base class constructor
 // ******************************************************************************************
 PlanningSceneDisplay::PlanningSceneDisplay(bool listen_to_planning_scene, bool show_scene_robot)
-  : Display()
-  , planning_scene_needs_render_(true)
-  , current_scene_time_(0.0f)
-  , logger_(moveit::makeChildLogger("planning_scene_display"))
+  : Display(), planning_scene_needs_render_(true), current_scene_time_(0.0f)
 {
   move_group_ns_property_ = new rviz_common::properties::StringProperty("Move Group Namespace", "",
                                                                         "The name of the ROS namespace in "
@@ -276,7 +273,7 @@ void PlanningSceneDisplay::executeMainLoopJobs()
     }
     catch (std::exception& ex)
     {
-      RCLCPP_ERROR(logger_, "Exception caught executing main loop job: %s", ex.what());
+      RCLCPP_ERROR(LOGGER, "Exception caught executing main loop job: %s", ex.what());
     }
     main_loop_jobs_lock_.lock();
   }
@@ -378,7 +375,7 @@ void PlanningSceneDisplay::renderPlanningScene()
   }
   catch (std::exception& ex)
   {
-    RCLCPP_ERROR(logger_, "Caught %s while rendering planning scene", ex.what());
+    RCLCPP_ERROR(LOGGER, "Caught %s while rendering planning scene", ex.what());
   }
   planning_scene_render_->getGeometryNode()->setVisible(scene_enabled_property_->getBool());
 }

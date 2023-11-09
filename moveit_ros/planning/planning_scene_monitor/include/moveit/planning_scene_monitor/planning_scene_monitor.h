@@ -592,8 +592,6 @@ private:
 
   friend class LockedPlanningSceneRO;
   friend class LockedPlanningSceneRW;
-
-  rclcpp::Logger logger_;
 };
 
 /** \brief This is a convenience class for obtaining access to an

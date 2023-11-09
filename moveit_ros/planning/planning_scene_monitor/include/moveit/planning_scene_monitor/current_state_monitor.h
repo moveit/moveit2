@@ -342,8 +342,6 @@ private:
   std::vector<JointStateUpdateCallback> update_callbacks_;
 
   bool use_sim_time_;
-
-  rclcpp::Logger logger_;
 };
 
 MOVEIT_CLASS_FORWARD(CurrentStateMonitor);  // Defines CurrentStateMonitorPtr, ConstPtr, WeakPtr... etc

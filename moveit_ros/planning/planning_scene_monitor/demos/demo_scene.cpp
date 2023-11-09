@@ -51,6 +51,8 @@
 #include <rclcpp/time.hpp>
 #include <rclcpp/utilities.hpp>
 
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_ros.planning_scene_monitor.demo_scene");
+
 static const std::string ROBOT_DESCRIPTION = "robot_description";
 
 void sendKnife(const rclcpp::Node::SharedPtr& node)
@@ -91,7 +93,7 @@ void sendKnife(const rclcpp::Node::SharedPtr& node)
   pub_aco->publish(aco);
   rclcpp::sleep_for(1s);
   pub_aco->publish(aco);
-  RCLCPP_INFO(node->get_logger(), "Object published.");
+  RCLCPP_INFO(LOGGER, "Object published.");
   rclcpp::sleep_for(1500ms);
 }
 

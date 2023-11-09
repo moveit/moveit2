@@ -43,15 +43,13 @@
 #include <moveit/kinematic_constraints/utils.h>
 #include <moveit/utils/message_checks.h>
 #include <moveit/move_group/capability_names.h>
-#include <moveit/utils/logger.hpp>
-
-using moveit::getLogger;
 
 namespace move_group
 {
 
 namespace
 {
+const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_move_group_default_capabilities.move_action_capability");
 constexpr bool DISPLAY_COMPUTED_MOTION_PLANS = true;
 constexpr bool CHECK_SOLUTION_PATHS = true;
 }  // namespace
@@ -68,11 +66,11 @@ void MoveGroupMoveAction::initialize()
   execute_action_server_ = rclcpp_action::create_server<MGAction>(
       node, MOVE_ACTION,
       [](const rclcpp_action::GoalUUID& /*unused*/, const std::shared_ptr<const MGAction::Goal>& /*unused*/) {
-        RCLCPP_INFO(getLogger(), "MoveGroupMoveAction: Received request");
+        RCLCPP_INFO(LOGGER, "Received request");
         return rclcpp_action::GoalResponse::ACCEPT_AND_EXECUTE;
       },
       [this](const std::shared_ptr<MGActionGoal>& /*unused*/) {
-        RCLCPP_INFO(getLogger(), "MoveGroupMoveAction: Received request to cancel goal");
+        RCLCPP_INFO(LOGGER, "Received request to cancel goal");
         preemptMoveCallback();
         return rclcpp_action::CancelResponse::ACCEPT;
       },
@@ -85,7 +83,7 @@ void MoveGroupMoveAction::initialize()
 void MoveGroupMoveAction::executeMoveCallback(const std::shared_ptr<MGActionGoal>& goal)
 {
   goal_ = goal;
-  RCLCPP_INFO(getLogger(), "executing..");
+  RCLCPP_INFO(LOGGER, "executing..");
   setMoveState(PLANNING, goal_);
   // before we start planning, ensure that we have the latest robot state received...
   auto node = context_->moveit_cpp_->getNode();
@@ -97,9 +95,9 @@ void MoveGroupMoveAction::executeMoveCallback(const std::shared_ptr<MGActionGoal
   {
     if (!goal->get_goal()->planning_options.plan_only)
     {
-      RCLCPP_WARN(getLogger(), "This instance of MoveGroup is not allowed to execute trajectories "
-                               "but the goal request has plan_only set to false. "
-                               "Only a motion plan will be computed anyway.");
+      RCLCPP_WARN(LOGGER, "This instance of MoveGroup is not allowed to execute trajectories "
+                          "but the goal request has plan_only set to false. "
+                          "Only a motion plan will be computed anyway.");
     }
     executeMoveCallbackPlanOnly(goal, action_res);
   }
@@ -108,8 +106,8 @@ void MoveGroupMoveAction::executeMoveCallback(const std::shared_ptr<MGActionGoal
 
   bool planned_trajectory_empty = trajectory_processing::isTrajectoryEmpty(action_res->planned_trajectory);
   // @todo: Response messages
-  RCLCPP_INFO_STREAM(getLogger(), getActionResultString(action_res->error_code, planned_trajectory_empty,
-                                                        goal->get_goal()->planning_options.plan_only));
+  RCLCPP_INFO_STREAM(LOGGER, getActionResultString(action_res->error_code, planned_trajectory_empty,
+                                                   goal->get_goal()->planning_options.plan_only));
   if (action_res->error_code.val == moveit_msgs::msg::MoveItErrorCodes::SUCCESS)
   {
     goal->succeed(action_res);
@@ -131,8 +129,8 @@ void MoveGroupMoveAction::executeMoveCallback(const std::shared_ptr<MGActionGoal
 void MoveGroupMoveAction::executeMoveCallbackPlanAndExecute(const std::shared_ptr<MGActionGoal>& goal,
                                                             std::shared_ptr<MGAction::Result>& action_res)
 {
-  RCLCPP_INFO(getLogger(), "Combined planning and execution request received for MoveGroup action. "
-                           "Forwarding to planning and execution pipeline.");
+  RCLCPP_INFO(LOGGER, "Combined planning and execution request received for MoveGroup action. "
+                      "Forwarding to planning and execution pipeline.");
 
   if (moveit::core::isEmpty(goal->get_goal()->planning_options.planning_scene_diff))
   {
@@ -146,7 +144,7 @@ void MoveGroupMoveAction::executeMoveCallbackPlanAndExecute(const std::shared_pt
               current_state, kinematic_constraints::mergeConstraints(goal->get_goal()->request.goal_constraints[i],
                                                                      goal->get_goal()->request.path_constraints)))
       {
-        RCLCPP_INFO(getLogger(), "Goal constraints are already satisfied. No need to plan or execute any motions");
+        RCLCPP_INFO(LOGGER, "Goal constraints are already satisfied. No need to plan or execute any motions");
         action_res->error_code.val = moveit_msgs::msg::MoveItErrorCodes::SUCCESS;
         return;
       }
@@ -175,7 +173,7 @@ void MoveGroupMoveAction::executeMoveCallbackPlanAndExecute(const std::shared_pt
   plan_execution::ExecutableMotionPlan plan;
   if (preempt_requested_)
   {
-    RCLCPP_INFO(getLogger(), "Preempt requested before the goal is planned and executed.");
+    RCLCPP_INFO(LOGGER, "Preempt requested before the goal is planned and executed.");
     action_res->error_code.val = moveit_msgs::msg::MoveItErrorCodes::PREEMPTED;
     return;
   }
@@ -191,7 +189,7 @@ void MoveGroupMoveAction::executeMoveCallbackPlanAndExecute(const std::shared_pt
 void MoveGroupMoveAction::executeMoveCallbackPlanOnly(const std::shared_ptr<MGActionGoal>& goal,
                                                       std::shared_ptr<MGAction::Result>& action_res)
 {
-  RCLCPP_INFO(getLogger(), "Planning request received for MoveGroup action. Forwarding to planning pipeline.");
+  RCLCPP_INFO(LOGGER, "Planning request received for MoveGroup action. Forwarding to planning pipeline.");
 
   // lock the scene so that it does not modify the world representation while diff() is called
   planning_scene_monitor::LockedPlanningSceneRO lscene(context_->planning_scene_monitor_);
@@ -203,7 +201,7 @@ void MoveGroupMoveAction::executeMoveCallbackPlanOnly(const std::shared_ptr<MGAc
 
   if (preempt_requested_)
   {
-    RCLCPP_INFO(getLogger(), "Preempt requested before the goal is planned.");
+    RCLCPP_INFO(LOGGER, "Preempt requested before the goal is planned.");
     action_res->error_code.val = moveit_msgs::msg::MoveItErrorCodes::PREEMPTED;
     return;
   }
@@ -222,13 +220,13 @@ void MoveGroupMoveAction::executeMoveCallbackPlanOnly(const std::shared_ptr<MGAc
     if (!planning_pipeline->generatePlan(the_scene, goal->get_goal()->request, res, context_->debug_,
                                          CHECK_SOLUTION_PATHS, DISPLAY_COMPUTED_MOTION_PLANS))
     {
-      RCLCPP_ERROR(getLogger(), "Generating a plan with planning pipeline failed.");
+      RCLCPP_ERROR(LOGGER, "Generating a plan with planning pipeline failed.");
       res.error_code.val = moveit_msgs::msg::MoveItErrorCodes::FAILURE;
     }
   }
   catch (std::exception& ex)
   {
-    RCLCPP_ERROR(getLogger(), "Planning pipeline threw an exception: %s", ex.what());
+    RCLCPP_ERROR(LOGGER, "Planning pipeline threw an exception: %s", ex.what());
     res.error_code.val = moveit_msgs::msg::MoveItErrorCodes::FAILURE;
   }
 
@@ -261,7 +259,7 @@ bool MoveGroupMoveAction::planUsingPlanningPipeline(const planning_interface::Mo
   }
   catch (std::exception& ex)
   {
-    RCLCPP_ERROR(getLogger(), "Planning pipeline threw an exception: %s", ex.what());
+    RCLCPP_ERROR(LOGGER, "Planning pipeline threw an exception: %s", ex.what());
     res.error_code.val = moveit_msgs::msg::MoveItErrorCodes::FAILURE;
   }
   if (res.trajectory)

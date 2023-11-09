@@ -106,6 +106,5 @@ private:
   double inv_fx_, inv_fy_, K0_, K2_, K4_, K5_;
   std::vector<unsigned int> filtered_labels_;
   rclcpp::Time last_depth_callback_start_;
-  rclcpp::Logger logger_;
 };
 }  // namespace occupancy_map_monitor

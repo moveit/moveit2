@@ -46,9 +46,6 @@
 #include <moveit/robot_state/cartesian_interpolator.h>
 #include <moveit_msgs/msg/display_trajectory.hpp>
 #include <moveit/trajectory_processing/time_optimal_trajectory_generation.h>
-#include <moveit/utils/logger.hpp>
-
-using moveit::getLogger;
 
 namespace
 {
@@ -65,6 +62,9 @@ bool isStateValid(const planning_scene::PlanningScene* planning_scene,
 
 namespace move_group
 {
+static const rclcpp::Logger LOGGER =
+    rclcpp::get_logger("moveit_move_group_default_capabilities.cartersian_path_service_capability");
+
 MoveGroupCartesianPathService::MoveGroupCartesianPathService()
   : MoveGroupCapability("CartesianPathService"), display_computed_paths_(true)
 {
@@ -90,7 +90,7 @@ bool MoveGroupCartesianPathService::computeService(
     const std::shared_ptr<moveit_msgs::srv::GetCartesianPath::Request>& req,
     const std::shared_ptr<moveit_msgs::srv::GetCartesianPath::Response>& res)
 {
-  RCLCPP_INFO(getLogger(), "Received request to compute Cartesian path");
+  RCLCPP_INFO(LOGGER, "Received request to compute Cartesian path");
   context_->planning_scene_monitor_->updateFrameTransforms();
 
   moveit::core::RobotState start_state =
@@ -126,7 +126,7 @@ bool MoveGroupCartesianPathService::computeService(
         }
         else
         {
-          RCLCPP_ERROR(getLogger(), "Error encountered transforming waypoints to frame '%s'", default_frame.c_str());
+          RCLCPP_ERROR(LOGGER, "Error encountered transforming waypoints to frame '%s'", default_frame.c_str());
           ok = false;
           break;
         }
@@ -137,8 +137,8 @@ bool MoveGroupCartesianPathService::computeService(
     {
       if (req->max_step < std::numeric_limits<double>::epsilon())
       {
-        RCLCPP_ERROR(getLogger(), "Maximum step to take between consecutive configurations along Cartesian path"
-                                  "was not specified (this value needs to be > 0)");
+        RCLCPP_ERROR(LOGGER, "Maximum step to take between consecutive configurations along Cartesian path"
+                             "was not specified (this value needs to be > 0)");
         res->error_code.val = moveit_msgs::msg::MoveItErrorCodes::FAILURE;
       }
       else
@@ -163,7 +163,7 @@ bool MoveGroupCartesianPathService::computeService(
                 };
           }
           bool global_frame = !moveit::core::Transforms::sameFrame(link_name, req->header.frame_id);
-          RCLCPP_INFO(getLogger(),
+          RCLCPP_INFO(LOGGER,
                       "Attempting to follow %u waypoints for link '%s' using a step of %lf m "
                       "and jump threshold %lf (in %s reference frame)",
                       static_cast<unsigned int>(waypoints.size()), link_name.c_str(), req->max_step,
@@ -185,7 +185,7 @@ bool MoveGroupCartesianPathService::computeService(
           time_param.computeTimeStamps(rt, req->max_velocity_scaling_factor, req->max_acceleration_scaling_factor);
 
           rt.getRobotTrajectoryMsg(res->solution);
-          RCLCPP_INFO(getLogger(), "Computed Cartesian path with %u points (followed %lf%% of requested trajectory)",
+          RCLCPP_INFO(LOGGER, "Computed Cartesian path with %u points (followed %lf%% of requested trajectory)",
                       static_cast<unsigned int>(traj.size()), res->fraction * 100.0);
           if (display_computed_paths_ && rt.getWayPointCount() > 0)
           {

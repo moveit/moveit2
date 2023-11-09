@@ -42,22 +42,19 @@
 #include <moveit/planning_scene_monitor/planning_scene_monitor.h>
 #include <moveit/robot_state/conversions.h>
 #include <thread>
-#include <moveit/utils/logger.hpp>
 
 namespace moveit_cpp
 {
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.ros_planning_interface.planning_component");
 
 PlanningComponent::PlanningComponent(const std::string& group_name, const MoveItCppPtr& moveit_cpp)
-  : node_(moveit_cpp->getNode())
-  , moveit_cpp_(moveit_cpp)
-  , group_name_(group_name)
-  , logger_(moveit::makeChildLogger("planning_component"))
+  : node_(moveit_cpp->getNode()), moveit_cpp_(moveit_cpp), group_name_(group_name)
 {
   joint_model_group_ = moveit_cpp_->getRobotModel()->getJointModelGroup(group_name);
   if (!joint_model_group_)
   {
     std::string error = "Could not find joint model group '" + group_name + "'.";
-    RCLCPP_FATAL_STREAM(logger_, error);
+    RCLCPP_FATAL_STREAM(LOGGER, error);
     throw std::runtime_error(error);
   }
 }
@@ -69,7 +66,7 @@ PlanningComponent::PlanningComponent(const std::string& group_name, const rclcpp
   if (!joint_model_group_)
   {
     std::string error = "Could not find joint model group '" + group_name + "'.";
-    RCLCPP_FATAL_STREAM(logger_, error);
+    RCLCPP_FATAL_STREAM(LOGGER, error);
     throw std::runtime_error(error);
   }
 }
@@ -82,7 +79,7 @@ const std::vector<std::string> PlanningComponent::getNamedTargetStates()
   }
   else
   {
-    RCLCPP_WARN(logger_, "Unable to find joint group with name '%s'.", group_name_.c_str());
+    RCLCPP_WARN(LOGGER, "Unable to find joint group with name '%s'.", group_name_.c_str());
   }
 
   std::vector<std::string> empty;
@@ -114,7 +111,7 @@ planning_interface::MotionPlanResponse PlanningComponent::plan(const PlanRequest
   // check if joint_model_group exists
   if (!joint_model_group_)
   {
-    RCLCPP_ERROR(logger_, "Failed to retrieve joint model group for name '%s'.", group_name_.c_str());
+    RCLCPP_ERROR(LOGGER, "Failed to retrieve joint model group for name '%s'.", group_name_.c_str());
     plan_solution.error_code = moveit::core::MoveItErrorCode::INVALID_GROUP_NAME;
     return plan_solution;
   }
@@ -122,7 +119,7 @@ planning_interface::MotionPlanResponse PlanningComponent::plan(const PlanRequest
   // Check if goal constraints exist
   if (current_goal_constraints_.empty())
   {
-    RCLCPP_ERROR(logger_, "No goal constraints set for planning request");
+    RCLCPP_ERROR(LOGGER, "No goal constraints set for planning request");
     plan_solution.error_code = moveit::core::MoveItErrorCode::INVALID_GOAL_CONSTRAINTS;
     return plan_solution;
   }
@@ -159,7 +156,7 @@ planning_interface::MotionPlanResponse PlanningComponent::plan(
   // check if joint_model_group exists
   if (!joint_model_group_)
   {
-    RCLCPP_ERROR(logger_, "Failed to retrieve joint model group for name '%s'.", group_name_.c_str());
+    RCLCPP_ERROR(LOGGER, "Failed to retrieve joint model group for name '%s'.", group_name_.c_str());
     plan_solution.error_code = moveit::core::MoveItErrorCode::INVALID_GROUP_NAME;
     return plan_solution;
   }
@@ -167,7 +164,7 @@ planning_interface::MotionPlanResponse PlanningComponent::plan(
   // Check if goal constraints exist
   if (current_goal_constraints_.empty())
   {
-    RCLCPP_ERROR(logger_, "No goal constraints set for planning request");
+    RCLCPP_ERROR(LOGGER, "No goal constraints set for planning request");
     plan_solution.error_code = moveit::core::MoveItErrorCode::INVALID_GOAL_CONSTRAINTS;
     return plan_solution;
   }
@@ -204,7 +201,7 @@ planning_interface::MotionPlanResponse PlanningComponent::plan(
   }
   catch (std::out_of_range&)
   {
-    RCLCPP_ERROR(logger_, "MotionPlanResponse vector was empty after parallel planning");
+    RCLCPP_ERROR(LOGGER, "MotionPlanResponse vector was empty after parallel planning");
     plan_solution.error_code = moveit::core::MoveItErrorCode::INVALID_GOAL_CONSTRAINTS;
   }
   // Run planning attempt
@@ -216,13 +213,13 @@ planning_interface::MotionPlanResponse PlanningComponent::plan()
   PlanRequestParameters plan_request_parameters;
   plan_request_parameters.load(node_);
   RCLCPP_DEBUG_STREAM(
-      logger_, "Default plan request parameters loaded with --"
-                   << " planning_pipeline: " << plan_request_parameters.planning_pipeline << ','
-                   << " planner_id: " << plan_request_parameters.planner_id << ','
-                   << " planning_time: " << plan_request_parameters.planning_time << ','
-                   << " planning_attempts: " << plan_request_parameters.planning_attempts << ','
-                   << " max_velocity_scaling_factor: " << plan_request_parameters.max_velocity_scaling_factor << ','
-                   << " max_acceleration_scaling_factor: " << plan_request_parameters.max_acceleration_scaling_factor);
+      LOGGER, "Default plan request parameters loaded with --"
+                  << " planning_pipeline: " << plan_request_parameters.planning_pipeline << ','
+                  << " planner_id: " << plan_request_parameters.planner_id << ','
+                  << " planning_time: " << plan_request_parameters.planning_time << ','
+                  << " planning_attempts: " << plan_request_parameters.planning_attempts << ','
+                  << " max_velocity_scaling_factor: " << plan_request_parameters.max_velocity_scaling_factor << ','
+                  << " max_acceleration_scaling_factor: " << plan_request_parameters.max_acceleration_scaling_factor);
   return plan(plan_request_parameters);
 }
 
@@ -251,7 +248,7 @@ bool PlanningComponent::setStartState(const std::string& start_state_name)
   const auto& named_targets = getNamedTargetStates();
   if (std::find(named_targets.begin(), named_targets.end(), start_state_name) == named_targets.end())
   {
-    RCLCPP_ERROR(logger_, "No predefined joint state found for target name '%s'", start_state_name.c_str());
+    RCLCPP_ERROR(LOGGER, "No predefined joint state found for target name '%s'", start_state_name.c_str());
     return false;
   }
   moveit::core::RobotState start_state(moveit_cpp_->getRobotModel());
@@ -314,7 +311,7 @@ bool PlanningComponent::setGoal(const std::string& goal_state_name)
   const auto& named_targets = getNamedTargetStates();
   if (std::find(named_targets.begin(), named_targets.end(), goal_state_name) == named_targets.end())
   {
-    RCLCPP_ERROR(logger_, "No predefined joint state found for target name '%s'", goal_state_name.c_str());
+    RCLCPP_ERROR(LOGGER, "No predefined joint state found for target name '%s'", goal_state_name.c_str());
     return false;
   }
   moveit::core::RobotState goal_state(moveit_cpp_->getRobotModel());

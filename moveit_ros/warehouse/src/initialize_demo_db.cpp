@@ -65,7 +65,7 @@ int main(int argc, char** argv)
   node_options.allow_undeclared_parameters(true);
   node_options.automatically_declare_parameters_from_overrides(true);
   rclcpp::Node::SharedPtr node = rclcpp::Node::make_shared("initialize_demo_db", node_options);
-  moveit::setLogger(node->get_logger());
+  moveit::getLoggerMut() = node->get_logger();
 
   boost::program_options::options_description desc;
   desc.add_options()("help", "Show help message")("host", boost::program_options::value<std::string>(),

@@ -57,6 +57,7 @@
 
 namespace moveit_rviz_plugin
 {
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_ros_visualization.motion_planning_frame_scenes");
 
 void MotionPlanningFrame::saveSceneButtonClicked()
 {

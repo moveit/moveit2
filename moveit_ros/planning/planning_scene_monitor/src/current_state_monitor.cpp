@@ -36,7 +36,6 @@
 
 #include <moveit/planning_scene_monitor/current_state_monitor.h>
 #include <moveit/planning_scene_monitor/current_state_monitor_middleware_handle.hpp>
-#include <moveit/utils/logger.hpp>
 
 #include <tf2_eigen/tf2_eigen.hpp>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
@@ -49,6 +48,11 @@ namespace planning_scene_monitor
 {
 using namespace std::chrono_literals;
 
+namespace
+{
+const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_ros.current_state_monitor");
+}
+
 CurrentStateMonitor::CurrentStateMonitor(std::unique_ptr<CurrentStateMonitor::MiddlewareHandle> middleware_handle,
                                          const moveit::core::RobotModelConstPtr& robot_model,
                                          const std::shared_ptr<tf2_ros::Buffer>& tf_buffer, bool use_sim_time)
@@ -60,7 +64,6 @@ CurrentStateMonitor::CurrentStateMonitor(std::unique_ptr<CurrentStateMonitor::Mi
   , copy_dynamics_(false)
   , error_(std::numeric_limits<double>::epsilon())
   , use_sim_time_(use_sim_time)
-  , logger_(moveit::makeChildLogger("current_state_monitor"))
 {
   robot_state_.setToDefaultValues();
 }
@@ -152,7 +155,7 @@ void CurrentStateMonitor::startStateMonitor(const std::string& joint_states_topi
     joint_time_.clear();
     if (joint_states_topic.empty())
     {
-      RCLCPP_ERROR(logger_, "The joint states topic cannot be an empty string");
+      RCLCPP_ERROR(LOGGER, "The joint states topic cannot be an empty string");
     }
     else
     {
@@ -169,7 +172,7 @@ void CurrentStateMonitor::startStateMonitor(const std::string& joint_states_topi
     }
     state_monitor_started_ = true;
     monitor_start_time_ = middleware_handle_->now();
-    RCLCPP_INFO(logger_, "Listening to joint states on topic '%s'", joint_states_topic.c_str());
+    RCLCPP_INFO(LOGGER, "Listening to joint states on topic '%s'", joint_states_topic.c_str());
   }
 }
 
@@ -187,7 +190,7 @@ void CurrentStateMonitor::stopStateMonitor()
     {
       middleware_handle_->resetTfSubscriptions();
     }
-    RCLCPP_DEBUG(logger_, "No longer listening for joint states");
+    RCLCPP_DEBUG(LOGGER, "No longer listening for joint states");
     state_monitor_started_ = false;
   }
 }
@@ -207,12 +210,12 @@ bool CurrentStateMonitor::haveCompleteStateHelper(const rclcpp::Time& oldest_all
     std::map<const moveit::core::JointModel*, rclcpp::Time>::const_iterator it = joint_time_.find(joint);
     if (it == joint_time_.end())
     {
-      RCLCPP_DEBUG(logger_, "Joint '%s' has never been updated", joint->getName().c_str());
+      RCLCPP_DEBUG(LOGGER, "Joint '%s' has never been updated", joint->getName().c_str());
     }
     else if (it->second < oldest_allowed_update_time)
     {
-      RCLCPP_DEBUG(logger_, "Joint '%s' was last updated %0.3lf seconds before requested time",
-                   joint->getName().c_str(), (oldest_allowed_update_time - it->second).seconds());
+      RCLCPP_DEBUG(LOGGER, "Joint '%s' was last updated %0.3lf seconds before requested time", joint->getName().c_str(),
+                   (oldest_allowed_update_time - it->second).seconds());
     }
     else
       continue;
@@ -247,7 +250,7 @@ bool CurrentStateMonitor::waitForCurrentState(const rclcpp::Time& t, double wait
          * state messages, warn the user. */
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wold-style-cast"
-        RCLCPP_WARN_SKIPFIRST_THROTTLE(logger_, steady_clock, 1000,
+        RCLCPP_WARN_SKIPFIRST_THROTTLE(LOGGER, steady_clock, 1000,
                                        "No state update received within 100ms of system clock. "
                                        "Have been waiting for %fs, timeout is %fs",
                                        elapsed.seconds(), wait_time_s);
@@ -261,7 +264,7 @@ bool CurrentStateMonitor::waitForCurrentState(const rclcpp::Time& t, double wait
     elapsed = middleware_handle_->now() - start;
     if (elapsed > timeout)
     {
-      RCLCPP_INFO(logger_,
+      RCLCPP_INFO(LOGGER,
                   "Didn't receive robot state (joint angles) with recent timestamp within "
                   "%f seconds. Requested time %f, but latest received state has time %f.\n"
                   "Check clock synchronization if your are running ROS across multiple machines!",
@@ -270,7 +273,7 @@ bool CurrentStateMonitor::waitForCurrentState(const rclcpp::Time& t, double wait
     }
     if (!middleware_handle_->ok())
     {
-      RCLCPP_DEBUG(logger_, "ROS context shut down while waiting for current robot state.");
+      RCLCPP_DEBUG(LOGGER, "ROS context shut down while waiting for current robot state.");
       return false;
     }
   }
@@ -326,7 +329,7 @@ void CurrentStateMonitor::jointStateCallback(const sensor_msgs::msg::JointState:
     rclcpp::Clock steady_clock(RCL_STEADY_TIME);
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wold-style-cast"
-    RCLCPP_ERROR_THROTTLE(logger_, steady_clock, 1000,
+    RCLCPP_ERROR_THROTTLE(LOGGER, steady_clock, 1000,
                           "State monitor received invalid joint state (number of joint names does not match number of "
                           "positions)");
 #pragma GCC diagnostic pop
@@ -438,7 +441,7 @@ void CurrentStateMonitor::updateMultiDofJoints()
       }
       catch (tf2::TransformException& ex)
       {
-        RCLCPP_WARN_ONCE(logger_,
+        RCLCPP_WARN_ONCE(LOGGER,
                          "Unable to update multi-DOF joint '%s':"
                          "Failure to lookup transform between '%s'"
                          "and '%s' with TF exception: %s",
@@ -508,7 +511,7 @@ void CurrentStateMonitor::transformCallback(const tf2_msgs::msg::TFMessage::Cons
     catch (tf2::TransformException& ex)
     {
       std::string temp = ex.what();
-      RCLCPP_ERROR(logger_, "Failure to set received transform from %s to %s with error: %s\n",
+      RCLCPP_ERROR(LOGGER, "Failure to set received transform from %s to %s with error: %s\n",
                    transform.child_frame_id.c_str(), transform.header.frame_id.c_str(), temp.c_str());
     }
   }
