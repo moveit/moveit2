@@ -42,8 +42,6 @@
 
 #include <moveit_warehouse_export.h>
 
-#include <rclcpp/logger.hpp>
-
 namespace moveit_warehouse
 {
 typedef warehouse_ros::MessageWithMetadata<moveit_msgs::msg::Constraints>::ConstPtr ConstraintsWithMetadata;
@@ -85,6 +83,5 @@ private:
   void createCollections();
 
   ConstraintsCollection constraints_collection_;
-  rclcpp::Logger logger_;
 };
 }  // namespace moveit_warehouse

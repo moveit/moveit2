@@ -39,7 +39,6 @@
 #include <moveit/warehouse/moveit_message_storage.h>
 #include <moveit/macros/class_forward.h>
 #include <moveit_msgs/msg/robot_state.hpp>
-#include <rclcpp/logger.hpp>
 
 #include <moveit_warehouse_export.h>
 
@@ -79,6 +78,5 @@ private:
   void createCollections();
 
   RobotStateCollection state_collection_;
-  rclcpp::Logger logger_;
 };
 }  // namespace moveit_warehouse
