@@ -155,7 +155,7 @@ void CollisionMonitor::checkCollisions()
       }
     }
 
-    // Set the shared velocity scale once
+    // Only set the shared variable ONCE to ensure intermediate values are not read by the servo thread.
     collision_velocity_scale_ = new_collision_velocity_scale;
 
     rate.sleep();
