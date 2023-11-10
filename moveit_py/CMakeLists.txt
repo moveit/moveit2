@@ -61,16 +61,19 @@ target_link_libraries(core PRIVATE moveit_ros_planning::moveit_cpp
 configure_build_install_location(core)
 
 pybind11_add_module(planning
-	src/moveit/planning.cpp
-        src/moveit/moveit_ros/moveit_cpp/moveit_cpp.cpp
-	src/moveit/moveit_ros/moveit_cpp/planning_component.cpp
-	src/moveit/moveit_ros/planning_scene_monitor/planning_scene_monitor.cpp
-	)
+    src/moveit/planning.cpp
+    src/moveit/moveit_ros/moveit_cpp/moveit_cpp.cpp
+    src/moveit/moveit_ros/moveit_cpp/planning_component.cpp
+    src/moveit/moveit_ros/planning_scene_monitor/planning_scene_monitor.cpp
+    src/moveit/moveit_ros/trajectory_execution_manager/trajectory_execution_manager.cpp
+)
 target_link_libraries(planning PRIVATE moveit_ros_planning::moveit_cpp
-				       moveit_ros_planning::moveit_planning_scene_monitor
-				       moveit_core::moveit_utils
-				       rclcpp::rclcpp
-				       moveit_py_utils)
+    moveit_ros_planning::moveit_planning_scene_monitor
+    moveit_ros_planning::moveit_trajectory_execution_manager
+    moveit_core::moveit_utils
+    rclcpp::rclcpp
+    moveit_py_utils
+)
 configure_build_install_location(planning)
 
 
