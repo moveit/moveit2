@@ -49,13 +49,6 @@
 
 class ServoCppFixture : public testing::Test
 {
-public:
-  /// Helper function to get the current pose of a specified frame.
-  Eigen::Isometry3d getCurrentPose(const std::string& target_frame) const
-  {
-    return planning_scene_monitor_->getStateMonitor()->getCurrentState()->getGlobalLinkTransform(target_frame);
-  }
-
 protected:
   ServoCppFixture()
   {
@@ -71,6 +64,12 @@ protected:
 
     servo_test_instance_ =
         std::make_shared<moveit_servo::Servo>(servo_test_node_, servo_param_listener_, planning_scene_monitor_);
+  }
+
+  /// Helper function to get the current pose of a specified frame.
+  Eigen::Isometry3d getCurrentPose(const std::string& target_frame) const
+  {
+    return planning_scene_monitor_->getStateMonitor()->getCurrentState()->getGlobalLinkTransform(target_frame);
   }
 
   std::shared_ptr<rclcpp::Node> servo_test_node_;
