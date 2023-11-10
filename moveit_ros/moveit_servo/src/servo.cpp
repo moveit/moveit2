@@ -286,11 +286,6 @@ void Servo::setCommandType(const CommandType& command_type)
   expected_command_type_ = command_type;
 }
 
-Eigen::Isometry3d Servo::getCurrentPose(const std::string& target_frame) const
-{
-  return planning_scene_monitor_->getStateMonitor()->getCurrentState()->getGlobalLinkTransform(target_frame);
-}
-
 KinematicState Servo::haltJoints(const std::vector<int>& joints_to_halt, const KinematicState& current_state,
                                  const KinematicState& target_state) const
 {

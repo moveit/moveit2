@@ -121,10 +121,10 @@ TEST_F(ServoCppFixture, PoseTest)
   moveit_servo::StatusCode status_curr, status_next, status_initial;
   moveit_servo::PoseCommand zero_pose, non_zero_pose;
   zero_pose.frame_id = "panda_link0";
-  zero_pose.pose = servo_test_instance_->getCurrentPose("panda_link8");
+  zero_pose.pose = getCurrentPose("panda_link8");
 
   non_zero_pose.frame_id = "panda_link0";
-  non_zero_pose.pose = servo_test_instance_->getCurrentPose("panda_link8");
+  non_zero_pose.pose = getCurrentPose("panda_link8");
   non_zero_pose.pose.rotate(Eigen::AngleAxisd(M_PI / 2, Eigen::Vector3d::UnitZ()));
 
   servo_test_instance_->setCommandType(moveit_servo::CommandType::POSE);

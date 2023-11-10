@@ -49,6 +49,13 @@
 
 class ServoCppFixture : public testing::Test
 {
+public:
+  /// Helper function to get the current pose of a specified frame.
+  Eigen::Isometry3d getCurrentPose(const std::string& target_frame) const
+  {
+    return planning_scene_monitor_->getStateMonitor()->getCurrentState()->getGlobalLinkTransform(target_frame);
+  }
+
 protected:
   ServoCppFixture()
   {

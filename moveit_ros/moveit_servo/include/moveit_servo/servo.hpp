@@ -104,13 +104,6 @@ public:
   std::string getStatusMessage() const;
 
   /**
-   * \brief Returns the current pose of a specified target frame.
-   * @param target_frame The name of the target frame.
-   * @return The global transform of the specified frame.
-   */
-  Eigen::Isometry3d getCurrentPose(const std::string& target_frame) const;
-
-  /**
    * \brief Start/Stop collision checking thread.
    * @param check_collision Stops collision checking thread if false, starts it if true.
    */
