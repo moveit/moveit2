@@ -76,8 +76,8 @@ void initTrajectoryExecutionManager(py::module& m)
            If manage_controllers_ is false and the controllers that happen to be active do not cover the joints to be actuated, this function fails.
            )")
 
-      .def("ensure_active_controller", &trajectory_execution_manager::TrajectoryExecutionManager::ensureActiveController,
-           py::arg("controller"),
+      .def("ensure_active_controller",
+           &trajectory_execution_manager::TrajectoryExecutionManager::ensureActiveController, py::arg("controller"),
            R"(
            Make sure a particular controller is active.
 
