@@ -50,6 +50,11 @@ CollisionMonitor::CollisionMonitor(const planning_scene_monitor::PlanningSceneMo
   , planning_scene_monitor_(planning_scene_monitor)
   , collision_velocity_scale_(collision_velocity_scale)
 {
+  scene_collision_request_.distance = true;
+  scene_collision_request_.group_name = servo_params.move_group_name;
+
+  self_collision_request_.distance = true;
+  self_collision_request_.group_name = servo_params.move_group_name;
 }
 
 void CollisionMonitor::start()
@@ -90,9 +95,6 @@ void CollisionMonitor::checkCollisions()
     const double self_velocity_scale_coefficient{ log_val / servo_params_.self_collision_proximity_threshold };
     const double scene_velocity_scale_coefficient{ log_val / servo_params_.scene_collision_proximity_threshold };
 
-    // Reset the scale on every iteration.
-    collision_velocity_scale_ = 1.0;
-
     if (servo_params_.check_collisions)
     {
       // Fetch latest robot state.
@@ -118,6 +120,11 @@ void CollisionMonitor::checkCollisions()
       // k = - ln(0.001) / collision_proximity_threshold
       // velocity_scale should equal one when collision_distance is at collision_proximity_threshold.
       // velocity_scale should equal 0.001 when collision_distance is at zero.
+      //
+      // NOTE:
+      // collision_velocity_scale_ is shared by the primary servo thread. Be sure to not set any
+      // intermediate values in this loop or they can be picked up and throw off scaling while processing
+      // joint updates.
 
       if (self_collision_result_.collision || scene_collision_result_.collision)
       {
@@ -149,6 +156,12 @@ void CollisionMonitor::checkCollisions()
         collision_velocity_scale_ = std::min(scene_collision_scale, self_collision_scale);
       }
     }
+    else
+    {
+      // If collision checking is disabled we do not scale
+      collision_velocity_scale_ = 1.0;
+    }
+
     rate.sleep();
   }
 }
