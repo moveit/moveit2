@@ -50,7 +50,7 @@
 class ServoCppFixture : public testing::Test
 {
 protected:
-  ServoCppFixture()
+  void SetUp() override
   {
     // Create a node to be given to Servo.
     servo_test_node_ = std::make_shared<rclcpp::Node>("moveit_servo_test");
