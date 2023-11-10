@@ -91,6 +91,15 @@ void initPlanningSceneMonitor(py::module& m)
                     str: The name of this planning scene monitor.
                     )")
 
+      .def("update_frame_transforms", &planning_scene_monitor::PlanningSceneMonitor::updateFrameTransforms,
+           R"(
+           Update the transforms for the frames that are not part of the kinematic model using tf.
+
+           Examples of these frames are the "map" and "odom_combined" transforms. This function is automatically called
+           when data that uses transforms is received.
+           However, this function should also be called before starting a planning request, for example.
+           )")
+
       .def("start_scene_monitor", &planning_scene_monitor::PlanningSceneMonitor::startSceneMonitor,
            R"(
            Starts the scene monitor.
