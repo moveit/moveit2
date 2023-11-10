@@ -53,8 +53,8 @@ using namespace moveit_servo;
 
 namespace
 {
-constexpr auto kBaseFrame = "panda_link0";
-constexpr auto kTipFrame = "panda_link8";
+constexpr auto K_BASE_FRAME = "panda_link0";
+constexpr auto K_TIP_FRAME = "panda_link8";
 }  // namespace
 
 int main(int argc, char* argv[])
@@ -82,7 +82,7 @@ int main(int argc, char* argv[])
   Servo servo = Servo(demo_node, servo_param_listener, planning_scene_monitor);
 
   // Helper function to get the current pose of a specified frame.
-  const auto getCurrentPose = [planning_scene_monitor](const std::string& target_frame) {
+  const auto get_current_pose = [planning_scene_monitor](const std::string& target_frame) {
     return planning_scene_monitor->getStateMonitor()->getCurrentState()->getGlobalLinkTransform(target_frame);
   };
 
@@ -99,9 +99,9 @@ int main(int argc, char* argv[])
 
   // The dynamically updated target pose.
   PoseCommand target_pose;
-  target_pose.frame_id = kBaseFrame;
+  target_pose.frame_id = K_BASE_FRAME;
   // Initializing the target pose as end effector pose, this can be any pose.
-  target_pose.pose = getCurrentPose(kTipFrame);
+  target_pose.pose = get_current_pose(K_TIP_FRAME);
 
   // The pose tracking lambda that will be run in a separate thread.
   auto pose_tracker = [&]() {
@@ -141,7 +141,7 @@ int main(int argc, char* argv[])
   {
     {
       std::lock_guard<std::mutex> pguard(pose_guard);
-      target_pose.pose = getCurrentPose(kTipFrame);
+      target_pose.pose = get_current_pose(K_TIP_FRAME);
       const bool satisfies_linear_tolerance = target_pose.pose.translation().isApprox(
           terminal_pose.translation(), servo_params.pose_tracking.linear_tolerance);
       const bool satisfies_angular_tolerance =
