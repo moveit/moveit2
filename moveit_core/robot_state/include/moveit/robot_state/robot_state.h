@@ -146,14 +146,14 @@ public:
       the state by calling update(true). */
   double* getVariablePositions()
   {
-    return position_;
+    return position_.data();
   }
 
   /** \brief Get a raw pointer to the positions of the variables
       stored in this state. */
   const double* getVariablePositions() const
   {
-    return position_;
+    return position_.data();
   }
 
   /** \brief It is assumed \e positions is an array containing the new
@@ -236,14 +236,14 @@ public:
   double* getVariableVelocities()
   {
     markVelocity();
-    return velocity_;
+    return velocity_.data();
   }
 
   /** \brief Get const access to the velocities of the variables that make up this state. The values are in the same
    * order as reported by getVariableNames() */
   const double* getVariableVelocities() const
   {
-    return velocity_;
+    return velocity_.data();
   }
 
   /** \brief Set all velocities to 0.0 */
@@ -254,7 +254,7 @@ public:
   {
     has_velocity_ = true;
     // assume everything is in order in terms of array lengths (for efficiency reasons)
-    memcpy(velocity_, velocity, robot_model_->getVariableCount() * sizeof(double));
+    memcpy(velocity_.data(), velocity, robot_model_->getVariableCount() * sizeof(double));
   }
 
   /** \brief Given an array with velocity values for all variables, set those values as the velocities in this state */
@@ -428,14 +428,14 @@ public:
   double* getVariableEffort()
   {
     markEffort();
-    return effort_;
+    return effort_.data();
   }
 
   /** \brief Get const raw access to the effort of the variables that make up this state. The values are in the same
    * order as reported by getVariableNames(). */
   const double* getVariableEffort() const
   {
-    return effort_;
+    return effort_.data();
   }
 
   /** \brief Set all effort values to 0.0 */
@@ -447,7 +447,7 @@ public:
     has_effort_ = true;
     has_acceleration_ = false;
     // assume everything is in order in terms of array lengths (for efficiency reasons)
-    memcpy(effort_, effort, robot_model_->getVariableCount() * sizeof(double));
+    memcpy(effort_.data(), effort, robot_model_->getVariableCount() * sizeof(double));
   }
 
   /** \brief Given an array with effort values for all variables, set those values as the effort in this state */
@@ -529,7 +529,7 @@ public:
 
   void setJointPositions(const JointModel* joint, const double* position)
   {
-    memcpy(position_ + joint->getFirstVariableIndex(), position, joint->getVariableCount() * sizeof(double));
+    memcpy(position_.data() + joint->getFirstVariableIndex(), position, joint->getVariableCount() * sizeof(double));
     markDirtyJointTransforms(joint);
     updateMimicJoint(joint);
   }
@@ -541,7 +541,7 @@ public:
 
   void setJointPositions(const JointModel* joint, const Eigen::Isometry3d& transform)
   {
-    joint->computeVariablePositions(transform, position_ + joint->getFirstVariableIndex());
+    joint->computeVariablePositions(transform, position_.data() + joint->getFirstVariableIndex());
     markDirtyJointTransforms(joint);
     updateMimicJoint(joint);
   }
@@ -549,7 +549,7 @@ public:
   void setJointVelocities(const JointModel* joint, const double* velocity)
   {
     has_velocity_ = true;
-    memcpy(velocity_ + joint->getFirstVariableIndex(), velocity, joint->getVariableCount() * sizeof(double));
+    memcpy(velocity_.data() + joint->getFirstVariableIndex(), velocity, joint->getVariableCount() * sizeof(double));
   }
 
   void setJointEfforts(const JointModel* joint, const double* effort);
@@ -561,7 +561,7 @@ public:
 
   const double* getJointPositions(const JointModel* joint) const
   {
-    return position_ + joint->getFirstVariableIndex();
+    return position_.data() + joint->getFirstVariableIndex();
   }
 
   const double* getJointVelocities(const std::string& joint_name) const
@@ -571,7 +571,7 @@ public:
 
   const double* getJointVelocities(const JointModel* joint) const
   {
-    return velocity_ + joint->getFirstVariableIndex();
+    return velocity_.data() + joint->getFirstVariableIndex();
   }
 
   const double* getJointAccelerations(const std::string& joint_name) const
@@ -591,7 +591,7 @@ public:
 
   const double* getJointEffort(const JointModel* joint) const
   {
-    return effort_ + joint->getFirstVariableIndex();
+    return effort_.data() + joint->getFirstVariableIndex();
   }
 
   /** @} */
@@ -1341,7 +1341,7 @@ public:
     unsigned char& dirty = dirty_joint_transforms_[idx];
     if (dirty)
     {
-      joint->computeTransform(position_ + joint->getFirstVariableIndex(), variable_joint_transforms_[idx]);
+      joint->computeTransform(position_.data() + joint->getFirstVariableIndex(), variable_joint_transforms_[idx]);
       dirty = 0;
     }
     return variable_joint_transforms_[idx];
@@ -1388,7 +1388,7 @@ public:
   /** \brief Return the sum of joint distances to "other" state. An L1 norm. Only considers active joints. */
   double distance(const RobotState& other) const
   {
-    return robot_model_->distance(position_, other.getVariablePositions());
+    return robot_model_->distance(position_.data(), other.getVariablePositions());
   }
 
   /** \brief Return the sum of joint distances to "other" state. An L1 norm. Only considers active joints. */
@@ -1398,7 +1398,7 @@ public:
   double distance(const RobotState& other, const JointModel* joint) const
   {
     const int idx = joint->getFirstVariableIndex();
-    return joint->distance(position_ + idx, other.position_ + idx);
+    return joint->distance(position_.data() + idx, other.position_.data() + idx);
   }
 
   /**
@@ -1434,7 +1434,7 @@ public:
   void interpolate(const RobotState& to, double t, RobotState& state, const JointModel* joint) const
   {
     const int idx = joint->getFirstVariableIndex();
-    joint->interpolate(position_ + idx, to.position_ + idx, t, state.position_ + idx);
+    joint->interpolate(position_.data() + idx, to.position_.data() + idx, t, state.position_.data() + idx);
     state.markDirtyJointTransforms(joint);
     state.updateMimicJoint(joint);
   }
@@ -1449,7 +1449,7 @@ public:
   }
   void enforcePositionBounds(const JointModel* joint)
   {
-    if (joint->enforcePositionBounds(position_ + joint->getFirstVariableIndex()))
+    if (joint->enforcePositionBounds(position_.data() + joint->getFirstVariableIndex()))
     {
       markDirtyJointTransforms(joint);
       updateMimicJoint(joint);
@@ -1461,7 +1461,7 @@ public:
   void harmonizePositions(const JointModelGroup* joint_group);
   void harmonizePosition(const JointModel* joint)
   {
-    if (joint->harmonizePosition(position_ + joint->getFirstVariableIndex()))
+    if (joint->harmonizePosition(position_.data() + joint->getFirstVariableIndex()))
     {
       // no need to mark transforms dirty, as the transform hasn't changed
       updateMimicJoint(joint);
@@ -1470,7 +1470,7 @@ public:
 
   void enforceVelocityBounds(const JointModel* joint)
   {
-    joint->enforceVelocityBounds(velocity_ + joint->getFirstVariableIndex());
+    joint->enforceVelocityBounds(velocity_.data() + joint->getFirstVariableIndex());
   }
 
   bool satisfiesBounds(double margin = 0.0) const;
@@ -1792,26 +1792,25 @@ private:
   bool checkCollisionTransforms() const;
 
   RobotModelConstPtr robot_model_;
-  void* memory_;
 
-  double* position_;
-  double* velocity_;
-  double* acceleration_;
-  double* effort_;
+  std::vector<double> position_;
+  std::vector<double> velocity_;
+  double* acceleration_ = nullptr;
+  std::vector<double> effort_;
   bool has_velocity_;
   bool has_acceleration_;
   bool has_effort_;
 
-  const JointModel* dirty_link_transforms_;
-  const JointModel* dirty_collision_body_transforms_;
+  const JointModel* dirty_link_transforms_ = nullptr;
+  const JointModel* dirty_collision_body_transforms_ = nullptr;
 
-  // All the following transform variables point into aligned memory in memory_
+  // All the following transform variables point into aligned memory.
   // They are updated lazily, based on the flags in dirty_joint_transforms_
   // resp. the pointers dirty_link_transforms_ and dirty_collision_body_transforms_
-  Eigen::Isometry3d* variable_joint_transforms_;         ///< Local transforms of all joints
-  Eigen::Isometry3d* global_link_transforms_;            ///< Transforms from model frame to link frame for each link
-  Eigen::Isometry3d* global_collision_body_transforms_;  ///< Transforms from model frame to collision bodies
-  unsigned char* dirty_joint_transforms_;
+  std::vector<Eigen::Isometry3d> variable_joint_transforms_;  ///< Local transforms of all joints
+  std::vector<Eigen::Isometry3d> global_link_transforms_;  ///< Transforms from model frame to link frame for each link
+  std::vector<Eigen::Isometry3d> global_collision_body_transforms_;  ///< Transforms from model frame to collision bodies
+  std::vector<unsigned char> dirty_joint_transforms_;
 
   /** \brief All attached bodies that are part of this state, indexed by their name */
   std::map<std::string, std::unique_ptr<AttachedBody>> attached_body_map_;
