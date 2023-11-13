@@ -192,7 +192,7 @@ void PlanningPipeline::publishPipelineState(moveit_msgs::msg::MotionPlanRequest 
   if (progress_publisher_)
   {
     moveit_msgs::msg::PipelineState progress;
-    progress.request = req;
+    progress.request = std::move(req);
     res.getMessage(progress.response);
     progress.pipeline_stage = pipeline_stage;
     progress_publisher_->publish(progress);
