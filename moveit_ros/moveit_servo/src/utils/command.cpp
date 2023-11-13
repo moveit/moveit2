@@ -196,11 +196,11 @@ JointDeltaResult jointDeltaFromTwist(const TwistCommand& command, const moveit::
     status = StatusCode::INVALID;
     if (!valid_command)
     {
-      RCLCPP_WARN_STREAM(getLogger(), "Invalid twist command.");
+      RCLCPP_ERROR_STREAM(getLogger(), "Invalid twist command.");
     }
     if (!is_planning_frame)
     {
-      RCLCPP_WARN_STREAM(getLogger(), "Command frame is: " << command.frame_id << ", expected: " << planning_frame);
+      RCLCPP_ERROR_STREAM(getLogger(), "Command frame is: " << command.frame_id << ", expected: " << planning_frame);
     }
   }
   return std::make_pair(status, joint_position_delta);
