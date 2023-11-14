@@ -32,7 +32,7 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-/* Author: Mario Prats, Robert Haschke */
+/* Author: Robert Haschke, Mario Prats */
 
 // To run this benchmark, 'cd' to the build/moveit_core/robot_state directory and directly run the binary.
 
@@ -44,10 +44,14 @@
 #include <moveit/utils/robot_model_test_utils.h>
 #include <random_numbers/random_numbers.h>
 
-// Robot and planning group for benchmarks, except for RobotStateUpdate and RobotStateForwardKinematics, which will use
-// the pr2.
-constexpr char TEST_ROBOT[] = "panda";
-constexpr char TEST_GROUP[] = "panda_arm";
+// Robot and planning group for benchmarks.
+constexpr char PANDA_TEST_ROBOT[] = "panda";
+constexpr char PANDA_TEST_GROUP[] = "panda_arm";
+constexpr char PR2_TEST_ROBOT[] = "pr2";
+constexpr char PR2_TIP_LINK[] = "r_wrist_roll_link";
+
+// Number of iterations to use in matrix multiplication / inversion benchmarks.
+constexpr int MATRIX_OPS_N_ITERATIONS = 1e7;
 
 static void MultiplyAffineTimesMatrix(benchmark::State& st)
 {
@@ -187,10 +191,10 @@ static void InverseMatrix4d(benchmark::State& st)
 static void RobotStateConstruct(benchmark::State& st)
 {
   int n_states = st.range(0);
-  const moveit::core::RobotModelPtr& robot_model = moveit::core::loadTestingRobotModel(TEST_ROBOT);
+  const moveit::core::RobotModelPtr& robot_model = moveit::core::loadTestingRobotModel(PANDA_TEST_ROBOT);
 
   // Make sure the group exists, otherwise exit early with an error.
-  if (!robot_model->hasJointModelGroup(TEST_GROUP))
+  if (!robot_model->hasJointModelGroup(PANDA_TEST_GROUP))
   {
     st.SkipWithError("The planning group doesn't exist.");
     return;
@@ -210,10 +214,10 @@ static void RobotStateConstruct(benchmark::State& st)
 static void RobotStateCopy(benchmark::State& st)
 {
   int n_states = st.range(0);
-  const moveit::core::RobotModelPtr& robot_model = moveit::core::loadTestingRobotModel(TEST_ROBOT);
+  const moveit::core::RobotModelPtr& robot_model = moveit::core::loadTestingRobotModel(PANDA_TEST_ROBOT);
 
   // Make sure the group exists, otherwise exit early with an error.
-  if (!robot_model->hasJointModelGroup(TEST_GROUP))
+  if (!robot_model->hasJointModelGroup(PANDA_TEST_GROUP))
   {
     st.SkipWithError("The planning group doesn't exist.");
     return;
@@ -237,7 +241,7 @@ static void RobotStateCopy(benchmark::State& st)
 static void RobotStateUpdate(benchmark::State& st)
 {
   int n_states = st.range(0);
-  const moveit::core::RobotModelPtr& robot_model = moveit::core::loadTestingRobotModel("pr2");
+  const moveit::core::RobotModelPtr& robot_model = moveit::core::loadTestingRobotModel(PR2_TEST_ROBOT);
   moveit::core::RobotState state(robot_model);
 
   for (auto _ : st)
@@ -254,7 +258,7 @@ static void RobotStateUpdate(benchmark::State& st)
 static void RobotStateForwardKinematics(benchmark::State& st)
 {
   int n_states = st.range(0);
-  const moveit::core::RobotModelPtr& robot_model = moveit::core::loadTestingRobotModel("pr2");
+  const moveit::core::RobotModelPtr& robot_model = moveit::core::loadTestingRobotModel(PR2_TEST_ROBOT);
   moveit::core::RobotState state(robot_model);
 
   for (auto _ : st)
@@ -263,8 +267,7 @@ static void RobotStateForwardKinematics(benchmark::State& st)
     {
       state.setToRandomPositions();
       Eigen::Isometry3d transform;
-      benchmark::DoNotOptimize(transform = state.getGlobalLinkTransform(robot_model->getLinkModel("r_wrist_roll_"
-                                                                                                  "link")));
+      benchmark::DoNotOptimize(transform = state.getGlobalLinkTransform(robot_model->getLinkModel(PR2_TIP_LINK)));
       benchmark::ClobberMemory();
     }
   }
@@ -273,10 +276,10 @@ static void RobotStateForwardKinematics(benchmark::State& st)
 static void MoveItJacobian(benchmark::State& st)
 {
   // Load a test robot model.
-  const moveit::core::RobotModelPtr& robot_model = moveit::core::loadTestingRobotModel(TEST_ROBOT);
+  const moveit::core::RobotModelPtr& robot_model = moveit::core::loadTestingRobotModel(PANDA_TEST_ROBOT);
 
   // Make sure the group exists, otherwise exit early with an error.
-  if (!robot_model->hasJointModelGroup(TEST_GROUP))
+  if (!robot_model->hasJointModelGroup(PANDA_TEST_GROUP))
   {
     st.SkipWithError("The planning group doesn't exist.");
     return;
@@ -284,7 +287,7 @@ static void MoveItJacobian(benchmark::State& st)
 
   // Robot state.
   moveit::core::RobotState kinematic_state(robot_model);
-  const moveit::core::JointModelGroup* jmg = kinematic_state.getJointModelGroup(TEST_GROUP);
+  const moveit::core::JointModelGroup* jmg = kinematic_state.getJointModelGroup(PANDA_TEST_GROUP);
 
   // Provide our own random number generator to setToRandomPositions to get a deterministic sequence of joint
   // configurations.
@@ -303,10 +306,10 @@ static void MoveItJacobian(benchmark::State& st)
 
 static void KdlJacobian(benchmark::State& st)
 {
-  const moveit::core::RobotModelPtr& robot_model = moveit::core::loadTestingRobotModel(TEST_ROBOT);
+  const moveit::core::RobotModelPtr& robot_model = moveit::core::loadTestingRobotModel(PANDA_TEST_ROBOT);
 
   // Make sure the group exists, otherwise exit early with an error.
-  if (!robot_model->hasJointModelGroup(TEST_GROUP))
+  if (!robot_model->hasJointModelGroup(PANDA_TEST_GROUP))
   {
     st.SkipWithError("The planning group doesn't exist.");
     return;
@@ -314,7 +317,7 @@ static void KdlJacobian(benchmark::State& st)
 
   // Robot state.
   moveit::core::RobotState kinematic_state(robot_model);
-  const moveit::core::JointModelGroup* jmg = kinematic_state.getJointModelGroup(TEST_GROUP);
+  const moveit::core::JointModelGroup* jmg = kinematic_state.getJointModelGroup(PANDA_TEST_GROUP);
 
   // Provide our own random number generator to setToRandomPositions to get a deterministic sequence of joint
   // configurations.
@@ -339,6 +342,7 @@ static void KdlJacobian(benchmark::State& st)
 
   for (auto _ : st)
   {
+    // Time only the jacobian computation, not the forward kinematics.
     st.PauseTiming();
     kinematic_state.setToRandomPositions(jmg, rng);
     kinematic_state.updateLinkTransforms();
@@ -351,14 +355,14 @@ static void KdlJacobian(benchmark::State& st)
   }
 }
 
-BENCHMARK(MultiplyAffineTimesMatrix)->Arg(1e7)->Unit(benchmark::kMillisecond);
-BENCHMARK(MultiplyMatrixTimesMatrix)->Arg(1e7)->Unit(benchmark::kMillisecond);
-BENCHMARK(MultiplyIsometryTimesIsometry)->Arg(1e7)->Unit(benchmark::kMillisecond);
+BENCHMARK(MultiplyAffineTimesMatrix)->Arg(MATRIX_OPS_N_ITERATIONS)->Unit(benchmark::kMillisecond);
+BENCHMARK(MultiplyMatrixTimesMatrix)->Arg(MATRIX_OPS_N_ITERATIONS)->Unit(benchmark::kMillisecond);
+BENCHMARK(MultiplyIsometryTimesIsometry)->Arg(MATRIX_OPS_N_ITERATIONS)->Unit(benchmark::kMillisecond);
 
-BENCHMARK(InverseIsometry3d)->Arg(1e7)->Unit(benchmark::kMillisecond);
-BENCHMARK(InverseAffineIsometry)->Arg(1e7)->Unit(benchmark::kMillisecond);
-BENCHMARK(InverseAffine)->Arg(1e7)->Unit(benchmark::kMillisecond);
-BENCHMARK(InverseMatrix4d)->Arg(1e7)->Unit(benchmark::kMillisecond);
+BENCHMARK(InverseIsometry3d)->Arg(MATRIX_OPS_N_ITERATIONS)->Unit(benchmark::kMillisecond);
+BENCHMARK(InverseAffineIsometry)->Arg(MATRIX_OPS_N_ITERATIONS)->Unit(benchmark::kMillisecond);
+BENCHMARK(InverseAffine)->Arg(MATRIX_OPS_N_ITERATIONS)->Unit(benchmark::kMillisecond);
+BENCHMARK(InverseMatrix4d)->Arg(MATRIX_OPS_N_ITERATIONS)->Unit(benchmark::kMillisecond);
 
 BENCHMARK(RobotStateConstruct)->RangeMultiplier(10)->Range(100, 10000)->Unit(benchmark::kMillisecond);
 BENCHMARK(RobotStateCopy)->RangeMultiplier(10)->Range(100, 10000)->Unit(benchmark::kMillisecond);
