@@ -248,13 +248,16 @@ bool PlanningPipeline::generatePlan(const planning_scene::PlanningSceneConstPtr&
           planner_instance_->getPlanningContext(planning_scene, mutable_request, res.error_code);
       if (context)
       {
+        context->solve(res);
+        publishPipelineState(mutable_request, res, planner_instance_->getDescription());
+      }
+      else
+      {
         RCLCPP_ERROR(node_->get_logger(),
                      "Failed to create PlanningContext for planner '%s'. Aborting planning pipeline.",
                      planner_instance_->getDescription().c_str());
         res.error_code = moveit::core::MoveItErrorCode::PLANNING_FAILED;
       }
-      context->solve(res);
-      publishPipelineState(mutable_request, res, planner_instance_->getDescription());
     }
 
     // Call plan response adapter chain
