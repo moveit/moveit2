@@ -53,7 +53,7 @@ constexpr char PR2_TIP_LINK[] = "r_wrist_roll_link";
 // Number of iterations to use in matrix multiplication / inversion benchmarks.
 constexpr int MATRIX_OPS_N_ITERATIONS = 1e7;
 
-static void MultiplyAffineTimesMatrix(benchmark::State& st)
+static void multiplyAffineTimesMatrix(benchmark::State& st)
 {
   int n_iters = st.range(0);
   Eigen::Isometry3d isometry = Eigen::Translation3d(1, 2, 3) *
@@ -71,7 +71,7 @@ static void MultiplyAffineTimesMatrix(benchmark::State& st)
   }
 }
 
-static void MultiplyMatrixTimesMatrix(benchmark::State& st)
+static void multiplyMatrixTimesMatrix(benchmark::State& st)
 {
   int n_iters = st.range(0);
   Eigen::Isometry3d isometry = Eigen::Translation3d(1, 2, 3) *
@@ -89,7 +89,7 @@ static void MultiplyMatrixTimesMatrix(benchmark::State& st)
   }
 }
 
-static void MultiplyIsometryTimesIsometry(benchmark::State& st)
+static void multiplyIsometryTimesIsometry(benchmark::State& st)
 {
   int n_iters = st.range(0);
   Eigen::Isometry3d isometry = Eigen::Translation3d(1, 2, 3) *
@@ -107,7 +107,7 @@ static void MultiplyIsometryTimesIsometry(benchmark::State& st)
   }
 }
 
-static void InverseIsometry3d(benchmark::State& st)
+static void inverseIsometry3d(benchmark::State& st)
 {
   int n_iters = st.range(0);
   Eigen::Isometry3d isometry = Eigen::Translation3d(1, 2, 3) *
@@ -125,7 +125,7 @@ static void InverseIsometry3d(benchmark::State& st)
   }
 }
 
-static void InverseAffineIsometry(benchmark::State& st)
+static void inverseAffineIsometry(benchmark::State& st)
 {
   int n_iters = st.range(0);
   Eigen::Isometry3d isometry = Eigen::Translation3d(1, 2, 3) *
@@ -146,7 +146,7 @@ static void InverseAffineIsometry(benchmark::State& st)
   }
 }
 
-static void InverseAffine(benchmark::State& st)
+static void inverseAffine(benchmark::State& st)
 {
   int n_iters = st.range(0);
   Eigen::Isometry3d isometry = Eigen::Translation3d(1, 2, 3) *
@@ -167,7 +167,7 @@ static void InverseAffine(benchmark::State& st)
   }
 }
 
-static void InverseMatrix4d(benchmark::State& st)
+static void inverseMatrix4d(benchmark::State& st)
 {
   int n_iters = st.range(0);
   Eigen::Isometry3d isometry = Eigen::Translation3d(1, 2, 3) *
@@ -188,7 +188,7 @@ static void InverseMatrix4d(benchmark::State& st)
   }
 }
 
-static void RobotStateConstruct(benchmark::State& st)
+static void robotStateConstruct(benchmark::State& st)
 {
   int n_states = st.range(0);
   const moveit::core::RobotModelPtr& robot_model = moveit::core::loadTestingRobotModel(PANDA_TEST_ROBOT);
@@ -211,7 +211,7 @@ static void RobotStateConstruct(benchmark::State& st)
   }
 }
 
-static void RobotStateCopy(benchmark::State& st)
+static void robotStateCopy(benchmark::State& st)
 {
   int n_states = st.range(0);
   const moveit::core::RobotModelPtr& robot_model = moveit::core::loadTestingRobotModel(PANDA_TEST_ROBOT);
@@ -238,7 +238,7 @@ static void RobotStateCopy(benchmark::State& st)
   }
 }
 
-static void RobotStateUpdate(benchmark::State& st)
+static void robotStateUpdate(benchmark::State& st)
 {
   int n_states = st.range(0);
   const moveit::core::RobotModelPtr& robot_model = moveit::core::loadTestingRobotModel(PR2_TEST_ROBOT);
@@ -255,7 +255,7 @@ static void RobotStateUpdate(benchmark::State& st)
   }
 }
 
-static void RobotStateForwardKinematics(benchmark::State& st)
+static void robotStateForwardKinematics(benchmark::State& st)
 {
   int n_states = st.range(0);
   const moveit::core::RobotModelPtr& robot_model = moveit::core::loadTestingRobotModel(PR2_TEST_ROBOT);
@@ -273,7 +273,7 @@ static void RobotStateForwardKinematics(benchmark::State& st)
   }
 }
 
-static void MoveItJacobian(benchmark::State& st)
+static void moveItJacobian(benchmark::State& st)
 {
   // Load a test robot model.
   const moveit::core::RobotModelPtr& robot_model = moveit::core::loadTestingRobotModel(PANDA_TEST_ROBOT);
@@ -304,7 +304,7 @@ static void MoveItJacobian(benchmark::State& st)
   }
 }
 
-static void KdlJacobian(benchmark::State& st)
+static void kdlJacobian(benchmark::State& st)
 {
   const moveit::core::RobotModelPtr& robot_model = moveit::core::loadTestingRobotModel(PANDA_TEST_ROBOT);
 
@@ -355,19 +355,19 @@ static void KdlJacobian(benchmark::State& st)
   }
 }
 
-BENCHMARK(MultiplyAffineTimesMatrix)->Arg(MATRIX_OPS_N_ITERATIONS)->Unit(benchmark::kMillisecond);
-BENCHMARK(MultiplyMatrixTimesMatrix)->Arg(MATRIX_OPS_N_ITERATIONS)->Unit(benchmark::kMillisecond);
-BENCHMARK(MultiplyIsometryTimesIsometry)->Arg(MATRIX_OPS_N_ITERATIONS)->Unit(benchmark::kMillisecond);
+BENCHMARK(multiplyAffineTimesMatrix)->Arg(MATRIX_OPS_N_ITERATIONS)->Unit(benchmark::kMillisecond);
+BENCHMARK(multiplyMatrixTimesMatrix)->Arg(MATRIX_OPS_N_ITERATIONS)->Unit(benchmark::kMillisecond);
+BENCHMARK(multiplyIsometryTimesIsometry)->Arg(MATRIX_OPS_N_ITERATIONS)->Unit(benchmark::kMillisecond);
 
-BENCHMARK(InverseIsometry3d)->Arg(MATRIX_OPS_N_ITERATIONS)->Unit(benchmark::kMillisecond);
-BENCHMARK(InverseAffineIsometry)->Arg(MATRIX_OPS_N_ITERATIONS)->Unit(benchmark::kMillisecond);
-BENCHMARK(InverseAffine)->Arg(MATRIX_OPS_N_ITERATIONS)->Unit(benchmark::kMillisecond);
-BENCHMARK(InverseMatrix4d)->Arg(MATRIX_OPS_N_ITERATIONS)->Unit(benchmark::kMillisecond);
+BENCHMARK(inverseIsometry3d)->Arg(MATRIX_OPS_N_ITERATIONS)->Unit(benchmark::kMillisecond);
+BENCHMARK(inverseAffineIsometry)->Arg(MATRIX_OPS_N_ITERATIONS)->Unit(benchmark::kMillisecond);
+BENCHMARK(inverseAffine)->Arg(MATRIX_OPS_N_ITERATIONS)->Unit(benchmark::kMillisecond);
+BENCHMARK(inverseMatrix4d)->Arg(MATRIX_OPS_N_ITERATIONS)->Unit(benchmark::kMillisecond);
 
-BENCHMARK(RobotStateConstruct)->RangeMultiplier(10)->Range(100, 10000)->Unit(benchmark::kMillisecond);
-BENCHMARK(RobotStateCopy)->RangeMultiplier(10)->Range(100, 10000)->Unit(benchmark::kMillisecond);
-BENCHMARK(RobotStateUpdate)->RangeMultiplier(10)->Range(10, 1000)->Unit(benchmark::kMillisecond);
-BENCHMARK(RobotStateForwardKinematics)->RangeMultiplier(10)->Range(10, 1000)->Unit(benchmark::kMillisecond);
+BENCHMARK(robotStateConstruct)->RangeMultiplier(10)->Range(100, 10000)->Unit(benchmark::kMillisecond);
+BENCHMARK(robotStateCopy)->RangeMultiplier(10)->Range(100, 10000)->Unit(benchmark::kMillisecond);
+BENCHMARK(robotStateUpdate)->RangeMultiplier(10)->Range(10, 1000)->Unit(benchmark::kMillisecond);
+BENCHMARK(robotStateForwardKinematics)->RangeMultiplier(10)->Range(10, 1000)->Unit(benchmark::kMillisecond);
 
-BENCHMARK(MoveItJacobian);
-BENCHMARK(KdlJacobian);
+BENCHMARK(moveItJacobian);
+BENCHMARK(kdlJacobian);
