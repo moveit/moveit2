@@ -72,7 +72,7 @@ RobotState::RobotState(const RobotModelConstPtr& robot_model)
   }
 
   dirty_link_transforms_ = robot_model_->getRootJoint();
-  initTransforms();
+  init();
 }
 
 RobotState::RobotState(const RobotState& other) : rng_(nullptr)
@@ -84,11 +84,9 @@ RobotState::RobotState(const RobotState& other) : rng_(nullptr)
 RobotState::~RobotState()
 {
   clearAttachedBodies();
-  if (rng_)
-    delete rng_;
 }
 
-void RobotState::initTransforms()
+void RobotState::init()
 {
   variable_joint_transforms_.resize(robot_model_->getJointModelCount(), Eigen::Isometry3d::Identity());
   global_link_transforms_.resize(robot_model_->getLinkModelCount(), Eigen::Isometry3d::Identity());
@@ -96,8 +94,7 @@ void RobotState::initTransforms()
   dirty_joint_transforms_.resize(robot_model_->getJointModelCount(), 1);
   position_.resize(robot_model_->getVariableCount());
   velocity_.resize(robot_model_->getVariableCount());
-  effort_.resize(robot_model_->getVariableCount());
-  acceleration_ = effort_.data();
+  effort_or_acceleration_.resize(robot_model_->getVariableCount());
 }
 
 RobotState& RobotState::operator=(const RobotState& other)
@@ -116,29 +113,13 @@ void RobotState::copyFrom(const RobotState& other)
   dirty_collision_body_transforms_ = other.dirty_collision_body_transforms_;
   dirty_link_transforms_ = other.dirty_link_transforms_;
 
-  if (dirty_link_transforms_ == robot_model_->getRootJoint())
-  {
-    variable_joint_transforms_.resize(robot_model_->getJointModelCount(), Eigen::Isometry3d::Identity());
-    global_link_transforms_.resize(robot_model_->getLinkModelCount(), Eigen::Isometry3d::Identity());
-    global_collision_body_transforms_.resize(robot_model_->getLinkModelCount(), Eigen::Isometry3d::Identity());
-    dirty_joint_transforms_.resize(robot_model_->getJointModelCount(), 1);
-    position_ = other.position_;
-    velocity_.resize(robot_model_->getVariableCount());
-    effort_.resize(robot_model_->getVariableCount());
-    acceleration_ = effort_.data();
-  }
-  else
-  {
-    // copy all the memory; maybe avoid copying velocity and acceleration if possible
-    variable_joint_transforms_ = other.variable_joint_transforms_;
-    global_link_transforms_ = other.global_link_transforms_;
-    global_collision_body_transforms_ = other.global_collision_body_transforms_;
-    dirty_joint_transforms_ = other.dirty_joint_transforms_;
-    position_ = other.position_;
-    velocity_ = other.velocity_;
-    effort_ = other.effort_;
-    acceleration_ = effort_.data();
-  }
+  variable_joint_transforms_ = other.variable_joint_transforms_;
+  global_link_transforms_ = other.global_link_transforms_;
+  global_collision_body_transforms_ = other.global_collision_body_transforms_;
+  dirty_joint_transforms_ = other.dirty_joint_transforms_;
+  position_ = other.position_;
+  velocity_ = other.velocity_;
+  effort_or_acceleration_ = other.effort_or_acceleration_;
 
   // copy attached bodies
   clearAttachedBodies();
@@ -181,7 +162,7 @@ void RobotState::markVelocity()
   if (!has_velocity_)
   {
     has_velocity_ = true;
-    memset(velocity_.data(), 0, sizeof(double) * robot_model_->getVariableCount());
+    std::fill(velocity_.begin(), velocity_.end(), 0.0);
   }
 }
 
@@ -191,7 +172,7 @@ void RobotState::markAcceleration()
   {
     has_acceleration_ = true;
     has_effort_ = false;
-    memset(acceleration_, 0, sizeof(double) * robot_model_->getVariableCount());
+    std::fill(effort_or_acceleration_.begin(), effort_or_acceleration_.end(), 0.0);
   }
 }
 
@@ -201,7 +182,7 @@ void RobotState::markEffort()
   {
     has_acceleration_ = false;
     has_effort_ = true;
-    memset(effort_.data(), 0, sizeof(double) * robot_model_->getVariableCount());
+    std::fill(effort_or_acceleration_.begin(), effort_or_acceleration_.end(), 0.0);
   }
 }
 
@@ -249,7 +230,7 @@ void RobotState::setToRandomPositions()
 {
   random_numbers::RandomNumberGenerator& rng = getRandomNumberGenerator();
   robot_model_->getVariableRandomPositions(rng, position_);
-  memset(dirty_joint_transforms_.data(), 1, robot_model_->getJointModelCount() * sizeof(unsigned char));
+  std::fill(dirty_joint_transforms_.begin(), dirty_joint_transforms_.end(), 1);
   dirty_link_transforms_ = robot_model_->getRootJoint();
   // mimic values are correctly set in RobotModel
 }
@@ -326,8 +307,8 @@ void RobotState::setToDefaultValues()
 {
   robot_model_->getVariableDefaultPositions(position_);  // mimic values are updated
   // set velocity & acceleration to 0
-  memset(velocity_.data(), 0, sizeof(double) * robot_model_->getVariableCount());
-  memset(dirty_joint_transforms_.data(), 1, robot_model_->getJointModelCount() * sizeof(unsigned char));
+  std::fill(velocity_.begin(), velocity_.end(), 0);
+  std::fill(dirty_joint_transforms_.begin(), dirty_joint_transforms_.end(), 1);
   dirty_link_transforms_ = robot_model_->getRootJoint();
 }
 
@@ -339,7 +320,7 @@ void RobotState::setVariablePositions(const double* position)
   // the full state includes mimic joint values, so no need to update mimic here
 
   // Since all joint values have potentially changed, we will need to recompute all transforms
-  memset(dirty_joint_transforms_.data(), 1, robot_model_->getJointModelCount() * sizeof(unsigned char));
+  std::fill(dirty_joint_transforms_.begin(), dirty_joint_transforms_.end(), 1);
   dirty_link_transforms_ = robot_model_->getRootJoint();
 }
 
@@ -417,7 +398,7 @@ void RobotState::setVariableAccelerations(const std::map<std::string, double>& v
 {
   markAcceleration();
   for (const std::pair<const std::string, double>& it : variable_map)
-    acceleration_[robot_model_->getVariableIndex(it.first)] = it.second;
+    effort_or_acceleration_[robot_model_->getVariableIndex(it.first)] = it.second;
 }
 
 void RobotState::setVariableAccelerations(const std::map<std::string, double>& variable_map,
@@ -433,14 +414,14 @@ void RobotState::setVariableAccelerations(const std::vector<std::string>& variab
   markAcceleration();
   assert(variable_names.size() == variable_acceleration.size());
   for (std::size_t i = 0; i < variable_names.size(); ++i)
-    acceleration_[robot_model_->getVariableIndex(variable_names[i])] = variable_acceleration[i];
+    effort_or_acceleration_[robot_model_->getVariableIndex(variable_names[i])] = variable_acceleration[i];
 }
 
 void RobotState::setVariableEffort(const std::map<std::string, double>& variable_map)
 {
   markEffort();
   for (const std::pair<const std::string, double>& it : variable_map)
-    effort_[robot_model_->getVariableIndex(it.first)] = it.second;
+    effort_or_acceleration_[robot_model_->getVariableIndex(it.first)] = it.second;
 }
 
 void RobotState::setVariableEffort(const std::map<std::string, double>& variable_map,
@@ -456,7 +437,7 @@ void RobotState::setVariableEffort(const std::vector<std::string>& variable_name
   markEffort();
   assert(variable_names.size() == variable_effort.size());
   for (std::size_t i = 0; i < variable_names.size(); ++i)
-    effort_[robot_model_->getVariableIndex(variable_names[i])] = variable_effort[i];
+    effort_or_acceleration_[robot_model_->getVariableIndex(variable_names[i])] = variable_effort[i];
 }
 
 void RobotState::invertVelocity()
@@ -477,7 +458,8 @@ void RobotState::setJointEfforts(const JointModel* joint, const double* effort)
   }
   has_effort_ = true;
 
-  memcpy(effort_.data() + joint->getFirstVariableIndex(), effort, joint->getVariableCount() * sizeof(double));
+  memcpy(effort_or_acceleration_.data() + joint->getFirstVariableIndex(), effort,
+         joint->getVariableCount() * sizeof(double));
 }
 
 void RobotState::setJointGroupPositions(const JointModelGroup* group, const double* gstate)
@@ -600,12 +582,12 @@ void RobotState::setJointGroupAccelerations(const JointModelGroup* group, const 
   const std::vector<int>& il = group->getVariableIndexList();
   if (group->isContiguousWithinState())
   {
-    memcpy(acceleration_ + il[0], gstate, group->getVariableCount() * sizeof(double));
+    memcpy(effort_or_acceleration_.data() + il[0], gstate, group->getVariableCount() * sizeof(double));
   }
   else
   {
     for (std::size_t i = 0; i < il.size(); ++i)
-      acceleration_[il[i]] = gstate[i];
+      effort_or_acceleration_[il[i]] = gstate[i];
   }
 }
 
@@ -614,7 +596,7 @@ void RobotState::setJointGroupAccelerations(const JointModelGroup* group, const 
   markAcceleration();
   const std::vector<int>& il = group->getVariableIndexList();
   for (std::size_t i = 0; i < il.size(); ++i)
-    acceleration_[il[i]] = values(i);
+    effort_or_acceleration_[il[i]] = values(i);
 }
 
 void RobotState::copyJointGroupAccelerations(const JointModelGroup* group, double* gstate) const
@@ -622,12 +604,12 @@ void RobotState::copyJointGroupAccelerations(const JointModelGroup* group, doubl
   const std::vector<int>& il = group->getVariableIndexList();
   if (group->isContiguousWithinState())
   {
-    memcpy(gstate, acceleration_ + il[0], group->getVariableCount() * sizeof(double));
+    memcpy(gstate, effort_or_acceleration_.data() + il[0], group->getVariableCount() * sizeof(double));
   }
   else
   {
     for (std::size_t i = 0; i < il.size(); ++i)
-      gstate[i] = acceleration_[il[i]];
+      gstate[i] = effort_or_acceleration_[il[i]];
   }
 }
 
@@ -636,7 +618,7 @@ void RobotState::copyJointGroupAccelerations(const JointModelGroup* group, Eigen
   const std::vector<int>& il = group->getVariableIndexList();
   values.resize(il.size());
   for (std::size_t i = 0; i < il.size(); ++i)
-    values(i) = acceleration_[il[i]];
+    values(i) = effort_or_acceleration_[il[i]];
 }
 
 void RobotState::update(bool force)
@@ -644,7 +626,7 @@ void RobotState::update(bool force)
   // make sure we do everything from scratch if needed
   if (force)
   {
-    memset(dirty_joint_transforms_.data(), 1, robot_model_->getJointModelCount() * sizeof(unsigned char));
+    std::fill(dirty_joint_transforms_.begin(), dirty_joint_transforms_.end(), 1);
     dirty_link_transforms_ = robot_model_->getRootJoint();
   }
 
@@ -973,7 +955,7 @@ void RobotState::interpolate(const RobotState& to, double t, RobotState& state) 
   checkInterpolationParamBounds(LOGGER, t);
   robot_model_->interpolate(getVariablePositions(), to.getVariablePositions(), t, state.getVariablePositions());
 
-  memset(state.dirty_joint_transforms_.data(), 1, state.robot_model_->getJointModelCount() * sizeof(unsigned char));
+  std::fill(state.dirty_joint_transforms_.begin(), state.dirty_joint_transforms_.end(), 1);
   state.dirty_link_transforms_ = state.robot_model_->getRootJoint();
 }
 
@@ -2191,11 +2173,11 @@ void RobotState::printStateInfo(std::ostream& out) const
   else
     out << "  * Velocity: NULL\n";
 
-  if (acceleration_)
+  if (has_acceleration_)
   {
     out << "  * Acceleration: ";
     for (std::size_t i = 0; i < n; ++i)
-      out << acceleration_[i] << ' ';
+      out << effort_or_acceleration_[i] << ' ';
     out << '\n';
   }
   else

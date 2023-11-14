@@ -47,6 +47,7 @@
 #include <cassert>
 
 #include <rclcpp/duration.hpp>
+#include <rcpputils/asserts.hpp>
 
 /* Terminology
    * Model Frame: RobotModel's root frame == PlanningScene's planning frame
@@ -330,14 +331,14 @@ public:
   double* getVariableAccelerations()
   {
     markAcceleration();
-    return acceleration_;
+    return effort_or_acceleration_.data();
   }
 
   /** \brief Get const raw access to the accelerations of the variables that make up this state. The values are in the
    * same order as reported by getVariableNames() */
   const double* getVariableAccelerations() const
   {
-    return acceleration_;
+    return effort_or_acceleration_.data();
   }
 
   /** \brief Set all accelerations to 0.0 */
@@ -351,7 +352,7 @@ public:
     has_effort_ = false;
 
     // assume everything is in order in terms of array lengths (for efficiency reasons)
-    memcpy(acceleration_, acceleration, robot_model_->getVariableCount() * sizeof(double));
+    memcpy(effort_or_acceleration_.data(), acceleration, robot_model_->getVariableCount() * sizeof(double));
   }
 
   /** \brief Given an array with acceleration values for all variables, set those values as the accelerations in this
@@ -388,13 +389,13 @@ public:
   void setVariableAcceleration(int index, double value)
   {
     markAcceleration();
-    acceleration_[index] = value;
+    effort_or_acceleration_[index] = value;
   }
 
   /** \brief Get the acceleration of a particular variable. An exception is thrown if the variable is not known. */
   double getVariableAcceleration(const std::string& variable) const
   {
-    return acceleration_[robot_model_->getVariableIndex(variable)];
+    return effort_or_acceleration_[robot_model_->getVariableIndex(variable)];
   }
 
   /** \brief Get the acceleration of a particular variable. The variable is
@@ -402,7 +403,7 @@ public:
       of the index passed  */
   double getVariableAcceleration(int index) const
   {
-    return acceleration_[index];
+    return effort_or_acceleration_[index];
   }
 
   /** \brief Remove accelerations from this state (this differs from setting them to zero) */
@@ -428,14 +429,14 @@ public:
   double* getVariableEffort()
   {
     markEffort();
-    return effort_.data();
+    return effort_or_acceleration_.data();
   }
 
   /** \brief Get const raw access to the effort of the variables that make up this state. The values are in the same
    * order as reported by getVariableNames(). */
   const double* getVariableEffort() const
   {
-    return effort_.data();
+    return effort_or_acceleration_.data();
   }
 
   /** \brief Set all effort values to 0.0 */
@@ -447,7 +448,7 @@ public:
     has_effort_ = true;
     has_acceleration_ = false;
     // assume everything is in order in terms of array lengths (for efficiency reasons)
-    memcpy(effort_.data(), effort, robot_model_->getVariableCount() * sizeof(double));
+    memcpy(effort_or_acceleration_.data(), effort, robot_model_->getVariableCount() * sizeof(double));
   }
 
   /** \brief Given an array with effort values for all variables, set those values as the effort in this state */
@@ -479,13 +480,13 @@ public:
   void setVariableEffort(int index, double value)
   {
     markEffort();
-    effort_[index] = value;
+    effort_or_acceleration_[index] = value;
   }
 
   /** \brief Get the effort of a particular variable. An exception is thrown if the variable is not known. */
   double getVariableEffort(const std::string& variable) const
   {
-    return effort_[robot_model_->getVariableIndex(variable)];
+    return effort_or_acceleration_[robot_model_->getVariableIndex(variable)];
   }
 
   /** \brief Get the effort of a particular variable. The variable is
@@ -493,7 +494,7 @@ public:
       of the index passed  */
   double getVariableEffort(int index) const
   {
-    return effort_[index];
+    return effort_or_acceleration_[index];
   }
 
   /** \brief Remove effort values from this state (this differs from setting them to zero) */
@@ -581,7 +582,7 @@ public:
 
   const double* getJointAccelerations(const JointModel* joint) const
   {
-    return acceleration_ + joint->getFirstVariableIndex();
+    return effort_or_acceleration_.data() + joint->getFirstVariableIndex();
   }
 
   const double* getJointEffort(const std::string& joint_name) const
@@ -591,7 +592,7 @@ public:
 
   const double* getJointEffort(const JointModel* joint) const
   {
-    return effort_.data() + joint->getFirstVariableIndex();
+    return effort_or_acceleration_.data() + joint->getFirstVariableIndex();
   }
 
   /** @} */
@@ -1190,11 +1191,10 @@ public:
    *  Resulting values are clamped within default bounds. */
   void setToRandomPositionsNearBy(const JointModelGroup* group, const RobotState& seed, double distance);
 
-  /** \brief Set all joints in \e group to random values near the value in \e seed, using a specified random number generator.
-   *  \e distance is the maximum amount each joint value will vary from the
-   *  corresponding value in \e seed.  \distance represents meters for
-   *  prismatic/positional joints and radians for revolute/orientation joints.
-   *  Resulting values are clamped within default bounds. */
+  /** \brief Set all joints in \e group to random values near the value in \e seed, using a specified random number
+   * generator. \e distance is the maximum amount each joint value will vary from the corresponding value in \e seed.
+   * \distance represents meters for prismatic/positional joints and radians for revolute/orientation joints. Resulting
+   * values are clamped within default bounds. */
   void setToRandomPositionsNearBy(const JointModelGroup* group, const RobotState& seed, double distance,
                                   random_numbers::RandomNumberGenerator& rng);
 
@@ -1208,13 +1208,11 @@ public:
   void setToRandomPositionsNearBy(const JointModelGroup* group, const RobotState& seed,
                                   const std::vector<double>& distances);
 
-  /** \brief Set all joints in \e group to random values near the value in \e seed, using a specified random number generator.
-   *  \e distances \b MUST have the same size as \c
-   *  group.getActiveJointModels().  Each value in \e distances is the maximum
-   *  amount the corresponding active joint in \e group will vary from the
-   *  corresponding value in \e seed.  \distance represents meters for
-   *  prismatic/positional joints and radians for revolute/orientation joints.
-   *  Resulting values are clamped within default bounds. */
+  /** \brief Set all joints in \e group to random values near the value in \e seed, using a specified random number
+   * generator. \e distances \b MUST have the same size as \c group.getActiveJointModels().  Each value in \e distances
+   * is the maximum amount the corresponding active joint in \e group will vary from the corresponding value in \e seed.
+   * \distance represents meters for prismatic/positional joints and radians for revolute/orientation joints. Resulting
+   * values are clamped within default bounds. */
   void setToRandomPositionsNearBy(const JointModelGroup* group, const RobotState& seed,
                                   const std::vector<double>& distances, random_numbers::RandomNumberGenerator& rng);
 
@@ -1624,7 +1622,7 @@ public:
   random_numbers::RandomNumberGenerator& getRandomNumberGenerator()
   {
     if (!rng_)
-      rng_ = new random_numbers::RandomNumberGenerator();
+      rng_ = std::make_unique<random_numbers::RandomNumberGenerator>();
     return *rng_;
   }
 
@@ -1731,7 +1729,7 @@ public:
 
 private:
   void allocMemory();
-  void initTransforms();
+  void init();
   void copyFrom(const RobotState& other);
 
   void markDirtyJointTransforms(const JointModel* joint)
@@ -1795,11 +1793,10 @@ private:
 
   std::vector<double> position_;
   std::vector<double> velocity_;
-  double* acceleration_ = nullptr;
-  std::vector<double> effort_;
-  bool has_velocity_;
-  bool has_acceleration_;
-  bool has_effort_;
+  std::vector<double> effort_or_acceleration_;
+  bool has_velocity_ = false;
+  bool has_acceleration_ = false;
+  bool has_effort_ = false;
 
   const JointModel* dirty_link_transforms_ = nullptr;
   const JointModel* dirty_collision_body_transforms_ = nullptr;
@@ -1809,7 +1806,8 @@ private:
   // resp. the pointers dirty_link_transforms_ and dirty_collision_body_transforms_
   std::vector<Eigen::Isometry3d> variable_joint_transforms_;  ///< Local transforms of all joints
   std::vector<Eigen::Isometry3d> global_link_transforms_;  ///< Transforms from model frame to link frame for each link
-  std::vector<Eigen::Isometry3d> global_collision_body_transforms_;  ///< Transforms from model frame to collision bodies
+  std::vector<Eigen::Isometry3d> global_collision_body_transforms_;  ///< Transforms from model frame to collision
+                                                                     ///< bodies
   std::vector<unsigned char> dirty_joint_transforms_;
 
   /** \brief All attached bodies that are part of this state, indexed by their name */
@@ -1824,7 +1822,7 @@ private:
       is allocated on a need basis, by the getRandomNumberGenerator() function. Never use the rng_ member directly, but
      call
       getRandomNumberGenerator() instead. */
-  random_numbers::RandomNumberGenerator* rng_;
+  std::unique_ptr<random_numbers::RandomNumberGenerator> rng_ = nullptr;
 };
 
 /** \brief Operator overload for printing variable bounds to a stream */
