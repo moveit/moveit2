@@ -56,7 +56,7 @@ public:
   /** @brief Initialize parameters using the passed Node and parameter namespace.
    *  @param node Node instance used by the adapter
    *  @param parameter_namespace Parameter namespace for adapter
-      @details If no initialization is needed, simply implement as empty */
+   *  @details The default implementation is empty */
   virtual void initialize(const rclcpp::Node::SharedPtr& node, const std::string& parameter_namespace){};
 
   /** @brief Get a description of this adapter
