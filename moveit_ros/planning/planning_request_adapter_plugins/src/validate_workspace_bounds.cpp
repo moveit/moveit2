@@ -67,8 +67,8 @@ public:
     return std::string("ValidateWorkspaceBounds");
   }
 
-  [[nodiscard]] moveit::core::MoveItStatus adapt(const planning_scene::PlanningSceneConstPtr& /*planning_scene*/,
-                                                 planning_interface::MotionPlanRequest& req) const override
+  [[nodiscard]] moveit::core::MoveItErrorCode adapt(const planning_scene::PlanningSceneConstPtr& /*planning_scene*/,
+                                                    planning_interface::MotionPlanRequest& req) const override
   {
     RCLCPP_DEBUG(logger_, "Running '%s'", getDescription().c_str());
     const moveit_msgs::msg::WorkspaceParameters& wparams = req.workspace_parameters;
@@ -88,7 +88,7 @@ public:
       default_wp.max_corner.x = default_wp.max_corner.y = default_wp.max_corner.z =
           params.default_workspace_bounds / 2.0;
     }
-    return moveit::core::MoveItStatus(moveit_msgs::msg::MoveItErrorCodes::SUCCESS, std::string(""), getDescription());
+    return moveit::core::MoveItErrorCode(moveit_msgs::msg::MoveItErrorCodes::SUCCESS, std::string(""), getDescription());
   }
 
 private:

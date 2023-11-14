@@ -40,7 +40,6 @@
 
 #include <moveit/macros/class_forward.h>
 #include <moveit/planning_interface/planning_interface.h>
-#include <moveit/utils/moveit_status.h>
 #include <rclcpp/logging.hpp>
 #include <rclcpp/node.hpp>
 
@@ -69,7 +68,7 @@ public:
    *  @param planning_scene Representation of the environment for the planning
    *  @param req Motion planning request with a set of constraints
    *  @return True if response was generated correctly */
-  [[nodiscard]] virtual moveit::core::MoveItStatus adapt(const planning_scene::PlanningSceneConstPtr& planning_scene,
-                                                         planning_interface::MotionPlanRequest& req) const = 0;
+  [[nodiscard]] virtual moveit::core::MoveItErrorCode adapt(const planning_scene::PlanningSceneConstPtr& planning_scene,
+                                                            planning_interface::MotionPlanRequest& req) const = 0;
 };
 }  // namespace planning_interface

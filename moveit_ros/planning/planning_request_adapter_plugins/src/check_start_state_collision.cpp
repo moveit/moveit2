@@ -63,8 +63,8 @@ public:
     return std::string("CheckStartStateCollision");
   }
 
-  [[nodiscard]] moveit::core::MoveItStatus adapt(const planning_scene::PlanningSceneConstPtr& planning_scene,
-                                                 planning_interface::MotionPlanRequest& req) const override
+  [[nodiscard]] moveit::core::MoveItErrorCode adapt(const planning_scene::PlanningSceneConstPtr& planning_scene,
+                                                    planning_interface::MotionPlanRequest& req) const override
   {
     RCLCPP_DEBUG(logger_, "Running '%s'", getDescription().c_str());
 
@@ -78,14 +78,14 @@ public:
     // TODO(sjahr): Would verbose make sense?
     planning_scene->checkCollision(creq, cres, start_state);
 
-    auto status = moveit::core::MoveItStatus();
+    auto status = moveit::core::MoveItErrorCode();
     if (!cres.collision)
     {
-      status.error_code = moveit_msgs::msg::MoveItErrorCodes::SUCCESS;
+      status.val = moveit_msgs::msg::MoveItErrorCodes::SUCCESS;
     }
     else
     {
-      status.error_code = moveit_msgs::msg::MoveItErrorCodes::START_STATE_IN_COLLISION;
+      status.val = moveit_msgs::msg::MoveItErrorCodes::START_STATE_IN_COLLISION;
       status.message = std::string("Start state in collision.");
     }
     status.source = getDescription();

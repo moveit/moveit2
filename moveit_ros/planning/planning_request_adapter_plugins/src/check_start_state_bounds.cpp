@@ -76,8 +76,8 @@ public:
     return std::string("CheckStartStateBounds");
   }
 
-  [[nodiscard]] moveit::core::MoveItStatus adapt(const planning_scene::PlanningSceneConstPtr& planning_scene,
-                                                 planning_interface::MotionPlanRequest& req) const override
+  [[nodiscard]] moveit::core::MoveItErrorCode adapt(const planning_scene::PlanningSceneConstPtr& planning_scene,
+                                                    planning_interface::MotionPlanRequest& req) const override
   {
     RCLCPP_DEBUG(logger_, "Running '%s'", getDescription().c_str());
 
@@ -175,17 +175,18 @@ public:
     {
       RCLCPP_WARN(logger_, "Changing start state.");
       moveit::core::robotStateToRobotStateMsg(start_state, req.start_state);
-      return moveit::core::MoveItStatus(moveit_msgs::msg::MoveItErrorCodes::SUCCESS, std::string(""), getDescription());
+      return moveit::core::MoveItErrorCode(moveit_msgs::msg::MoveItErrorCodes::SUCCESS, std::string(""),
+                                           getDescription());
     }
 
-    auto status = moveit::core::MoveItStatus();
+    auto status = moveit::core::MoveItErrorCode();
     if (!changed_req)
     {
-      status.error_code = moveit_msgs::msg::MoveItErrorCodes::SUCCESS;
+      status.val = moveit_msgs::msg::MoveItErrorCodes::SUCCESS;
     }
     else
     {
-      status.error_code = moveit_msgs::msg::MoveItErrorCodes::START_STATE_INVALID;
+      status.val = moveit_msgs::msg::MoveItErrorCodes::START_STATE_INVALID;
       status.message = std::string("Start state out of bounds.");
     }
     status.source = getDescription();

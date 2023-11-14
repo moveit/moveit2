@@ -58,8 +58,8 @@ public:
     return std::string("ResolveConstraintFrames");
   }
 
-  [[nodiscard]] moveit::core::MoveItStatus adapt(const planning_scene::PlanningSceneConstPtr& planning_scene,
-                                                 planning_interface::MotionPlanRequest& req) const override
+  [[nodiscard]] moveit::core::MoveItErrorCode adapt(const planning_scene::PlanningSceneConstPtr& planning_scene,
+                                                    planning_interface::MotionPlanRequest& req) const override
   {
     RCLCPP_DEBUG(logger_, "Running '%s'", getDescription().c_str());
     // Resolve path constraint frames
@@ -69,7 +69,7 @@ public:
     {
       kinematic_constraints::resolveConstraintFrames(planning_scene->getCurrentState(), constraint);
     }
-    return moveit::core::MoveItStatus(moveit_msgs::msg::MoveItErrorCodes::SUCCESS, std::string(""), getDescription());
+    return moveit::core::MoveItErrorCode(moveit_msgs::msg::MoveItErrorCodes::SUCCESS, std::string(""), getDescription());
   }
 
 private:

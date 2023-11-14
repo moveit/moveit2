@@ -61,8 +61,8 @@ public:
     return std::string("CheckForStackedConstraints");
   }
 
-  [[nodiscard]] moveit::core::MoveItStatus adapt(const planning_scene::PlanningSceneConstPtr& /*planning_scene*/,
-                                                 planning_interface::MotionPlanRequest& req) const override
+  [[nodiscard]] moveit::core::MoveItErrorCode adapt(const planning_scene::PlanningSceneConstPtr& /*planning_scene*/,
+                                                    planning_interface::MotionPlanRequest& req) const override
   {
     // This should alert the user if planning failed because of contradicting constraints.
     // Could be checked more thoroughly, but it is probably not worth going to that length.
@@ -85,7 +85,7 @@ public:
         break;
       }
     }
-    return moveit::core::MoveItStatus(moveit_msgs::msg::MoveItErrorCodes::SUCCESS, std::string(""), getDescription());
+    return moveit::core::MoveItErrorCode(moveit_msgs::msg::MoveItErrorCodes::SUCCESS, std::string(""), getDescription());
   }
 
 private:
