@@ -39,6 +39,14 @@
 #include <moveit/planning_pipeline/planning_pipeline.h>
 #include <moveit/utils/robot_model_test_utils.h>
 
+namespace
+{
+const std::vector<std::string> REQUEST_ADAPTERS{ "planning_pipeline_test/AlwaysSuccessRequestAdapter",
+                                                 "planning_pipeline_test/AlwaysSuccessRequestAdapter" };
+const std::vector<std::string> RESPONSE_ADAPTERS{ "planning_pipeline_test/AlwaysSuccessResponseAdapter",
+                                                  "planning_pipeline_test/AlwaysSuccessResponseAdapter" };
+const std::string PLANNER_PLUGIN = std::string("planning_pipeline_test/DummyPlannerManager");
+}  // namespace
 class TestPlanningPipeline : public testing::Test
 {
 protected:
@@ -51,24 +59,42 @@ protected:
   {
   }
 
+  std::shared_ptr<rclcpp::Node> node_;
   std::shared_ptr<const moveit::core::RobotModel> robot_model_;
-}
+  planning_pipeline::PlanningPipelinePtr pipeline_ptr_{ nullptr };
+};
 
 TEST_F(TestPlanningPipeline, HappyPath)
 {
-  // GIVEN a valid configuration and a valid motion plan request
+  // GIVEN a valid configuration
   // WHEN the planning pipeline is configured
   // THEN it is successful
-  // WHEN generatePlan is called
-  // THEN The plugins are called in the correct order
-  // THEN A successful response is created
-}
+  EXPECT_NO_THROW(pipeline_ptr_ = std::make_shared<planning_pipeline::PlanningPipeline>(
+                      robot_model_, node_, "", PLANNER_PLUGIN, REQUEST_ADAPTERS, RESPONSE_ADAPTERS));
+  // THEN a planning pipeline exists
+  EXPECT_NE(pipeline_ptr_, nullptr);
+  // THEN the pipeline is inactive
+  EXPECT_FALSE(pipeline_ptr_->isActive());
+  // THEN the pipeline contains a valid robot model
+  EXPECT_NE(pipeline_ptr_->getRobotModel(), nullptr);
+  // THEN a planner plugin is loaded
+  EXPECT_NE(pipeline_ptr_->getPlannerManager(), nullptr);
+  // THEN the loaded request adapter names equal the adapter names input vector
+  const auto loaded_req_adapters = pipeline_ptr_->getRequestAdapterPluginNames();
+  EXPECT_TRUE(std::equal(loaded_req_adapters.begin(), loaded_req_adapters.end(), REQUEST_ADAPTERS.begin()));
+  // THEN the loaded request adapter names equal the adapter names input vector
+  const auto loaded_res_adapters = pipeline_ptr_->getResponseAdapterPluginNames();
+  EXPECT_TRUE(std::equal(loaded_res_adapters.begin(), loaded_res_adapters.end(), RESPONSE_ADAPTERS.begin()));
+  // THEN the loaded planner plugin name equals the planner name input argument
+  EXPECT_EQ(pipeline_ptr_->getPlannerPluginName(), PLANNER_PLUGIN);
 
-TEST_F(TestPlanningPipeline, HappyPathTerminate)
-{
-  // GIVEN a valid config and request
-  // WHEN the pipeline is started and terminate is called
-  // THEN the pipeline terminates the running planner and returns a result
+  // WHEN generatePlan is called
+  // THEN A successful response is created
+  planning_interface::MotionPlanResponse motion_plan_response;
+  planning_interface::MotionPlanRequest motion_plan_request;
+  const auto planning_scene_ptr = std::make_shared<planning_scene::PlanningScene>(robot_model_);
+  EXPECT_TRUE(pipeline_ptr_->generatePlan(planning_scene_ptr, motion_plan_request, motion_plan_response));
+  EXPECT_TRUE(motion_plan_response.error_code);
 }
 
 TEST_F(TestPlanningPipeline, NoPlannerPluginConfigured)
@@ -76,10 +102,14 @@ TEST_F(TestPlanningPipeline, NoPlannerPluginConfigured)
   // GIVEN a configuration without planner plugin
   // WHEN the pipeline is configured
   // THEN an exception is thrown
+  EXPECT_THROW(pipeline_ptr_ = std::make_shared<planning_pipeline::PlanningPipeline>(
+                   robot_model_, node_, "", "NoExistingPlannerPlugin", REQUEST_ADAPTERS, RESPONSE_ADAPTERS),
+               std::runtime_error);
 }
 
 int main(int argc, char** argv)
 {
+  rclcpp::init(argc, argv);
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }

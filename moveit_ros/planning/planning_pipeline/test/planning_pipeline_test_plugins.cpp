@@ -40,80 +40,93 @@
 #include <moveit/planning_interface/planning_response_adapter.h>
 #include <class_loader/class_loader.hpp>
 
-namespace planning_pipeline_test_plugins
+namespace planning_pipeline_test
 {
-/// @brief A dummy request adapter that does nothing to test the planning pipeline
-class DummyRequestAdapter : public planning_interface::PlanningRequestAdapter
+/// @brief A dummy request adapter that does nothing and is always successful
+class AlwaysSuccessRequestAdapter : public planning_interface::PlanningRequestAdapter
 {
-  void initialize(const rclcpp::Node::SharedPtr& /*node*/, const std::string& /*parameter_namespace*/) override{};
-  std::string getDescription() const override{ return "" };
-  bool adapt(const planning_scene::PlanningSceneConstPtr& /*planning_scene*/,
-             planning_interface::MotionPlanRequest& /*req*/,
-             const planning_interface::MotionPlanResponse& /*res*/) override
+public:
+  std::string getDescription() const override
+  {
+    return "AlwaysSuccessRequestAdapter";
+  }
+  moveit::core::MoveItErrorCode adapt(const planning_scene::PlanningSceneConstPtr& /*planning_scene*/,
+                                      planning_interface::MotionPlanRequest& /*req*/) const override
   {
     // Mock light computations
-    std::this_thread::sleep_for(std::chrono::milliseconds(10));
-    return true;
-  };
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    return moveit::core::MoveItErrorCode(moveit_msgs::msg::MoveItErrorCodes::SUCCESS, std::string(""), getDescription());
+  }
 };
 
-/// @brief A dummy response adapter that does nothing to test the planning pipeline
-class DummyResponseAdapter : public planning_interface::PlanningResponseAdapter
+/// @brief A dummy response adapter that does nothing and is always successful
+class AlwaysSuccessResponseAdapter : public planning_interface::PlanningResponseAdapter
 {
-  void initialize(const rclcpp::Node::SharedPtr& /*node*/, const std::string& /*parameter_namespace*/) override{};
-  std::string getDescription() const override{ return "" };
-  bool adapt(const planning_scene::PlanningSceneConstPtr& /*planning_scene*/,
+public:
+  std::string getDescription() const override
+  {
+    return "AlwaysSuccessResponseAdapter";
+  }
+  void adapt(const planning_scene::PlanningSceneConstPtr& /*planning_scene*/,
              const planning_interface::MotionPlanRequest& /*req*/,
-             planning_interface::MotionPlanResponse& /*res*/) override
+             planning_interface::MotionPlanResponse& res) const override
   {
     // Mock light computations
-    std::this_thread::sleep_for(std::chrono::milliseconds(10));
-    return true;
-  };
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    res.error_code.val = moveit_msgs::msg::MoveItErrorCodes::SUCCESS;
+  }
 };
 
-/// @brief A dummy planning context that does nothing
-class DummyPlanningContext : public class planning_interface::PlanningContext
+/// @brief A dummy planning context that does nothing and is always successful
+class DummyPlanningContext : public planning_interface::PlanningContext
 {
-  DummyPlannerPlugin(){};
-  ~DummyPlannerPlugin() override{};
-  bool solve(MotionPlanResponse& res) override
+public:
+  DummyPlanningContext() : planning_interface::PlanningContext("DummyPlanningContext", "empty_group")
+  {
+  }
+  void solve(planning_interface::MotionPlanResponse& res) override
   {
     // Mock heavy computations
     std::this_thread::sleep_for(std::chrono::seconds(1));
     // Planning succeeded
     res.error_code.val = moveit_msgs::msg::MoveItErrorCodes::SUCCESS;
-    return true;
-  };
-  bool solve(MotionPlanDetailedResponse& res) override
+  }
+  void solve(planning_interface::MotionPlanDetailedResponse& res) override
   {
     // Mock heavy computations
     std::this_thread::sleep_for(std::chrono::seconds(1));
     res.error_code.val = moveit_msgs::msg::MoveItErrorCodes::SUCCESS;
+  }
+  bool terminate() override
+  {
     return true;
-  };
-  bool terminate() override{};
+  }
   void clear() override{};
 };
 
 /// @brief A dummy planning manager that does nothing
 class DummyPlannerManager : public planning_interface::PlannerManager
 {
-  ~PlannerManager() override{};
-  PlanningContextPtr getPlanningContext(const planning_scene::PlanningSceneConstPtr& /*planning_scene*/,
-                                        const MotionPlanRequest& /*req*/,
-                                        moveit_msgs::msg::MoveItErrorCodes& /*error_code*/) const override
+public:
+  ~DummyPlannerManager() override
   {
-    return DummyPlanningContext();
-  };
-  bool canServiceRequest(const MotionPlanRequest& req) const override
+  }
+  planning_interface::PlanningContextPtr
+  getPlanningContext(const planning_scene::PlanningSceneConstPtr& /*planning_scene*/,
+                     const planning_interface::MotionPlanRequest& /*req*/,
+                     moveit_msgs::msg::MoveItErrorCodes& /*error_code*/) const override
+  {
+    return std::make_shared<DummyPlanningContext>();
+  }
+  bool canServiceRequest(const planning_interface::MotionPlanRequest& /*req*/) const override
   {
     return true;
-  };
+  }
 };
-}  // namespace planning_pipeline_test_plugins
+}  // namespace planning_pipeline_test
 
-CLASS_LOADER_REGISTER_CLASS(planning_pipeline_test_plugins::DummyRequestAdapter,
-                            planning_interface::PlanningRequestAdapter);
-CLASS_LOADER_REGISTER_CLASS(planning_pipeline_test_plugins::DummyResponseAdapter,
-                            planning_interface::PlanningResponseAdapter);
+CLASS_LOADER_REGISTER_CLASS(planning_pipeline_test::DummyPlannerManager, planning_interface::PlannerManager)
+CLASS_LOADER_REGISTER_CLASS(planning_pipeline_test::AlwaysSuccessRequestAdapter,
+                            planning_interface::PlanningRequestAdapter)
+CLASS_LOADER_REGISTER_CLASS(planning_pipeline_test::AlwaysSuccessResponseAdapter,
+                            planning_interface::PlanningResponseAdapter)
