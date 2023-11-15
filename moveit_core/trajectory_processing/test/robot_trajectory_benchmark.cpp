@@ -71,10 +71,14 @@ static void RobotTrajectoryCreate(benchmark::State& st)
     auto trajectory = std::make_shared<robot_trajectory::RobotTrajectory>(robot_model, group);
     for (int i = 0; i < n_states; ++i)
     {
+      // Create a sinusoidal test trajectory for all the joints.
+      const double joint_value = std::sin(0.001 * i);
+      const double duration_from_previous = 0.1;
+
       moveit::core::RobotState robot_state_waypoint(robot_state);
-      Eigen::VectorXd joint_values = Eigen::VectorXd::Constant(group->getActiveVariableCount(), std::sin(0.01 * i));
+      Eigen::VectorXd joint_values = Eigen::VectorXd::Constant(group->getActiveVariableCount(), joint_value);
       robot_state_waypoint.setJointGroupActivePositions(group, joint_values);
-      trajectory->addSuffixWayPoint(std::move(robot_state_waypoint), /*duration_from_previous=*/0.1);
+      trajectory->addSuffixWayPoint(std::move(robot_state_waypoint), duration_from_previous);
     }
   }
 }
@@ -102,13 +106,17 @@ static void RobotTrajectoryTiming(benchmark::State& st)
   Eigen::VectorXd joint_values = Eigen::VectorXd::Zero(group->getActiveVariableCount());
   for (int i = 0; i < n_states; ++i)
   {
+    // Create a sinusoidal test trajectory for all the joints.
+    const double joint_value = std::sin(0.001 * i);
+    const double duration_from_previous = 0.0;
+
     moveit::core::RobotState robot_state_waypoint(robot_state);
-    joint_values = Eigen::VectorXd::Constant(group->getActiveVariableCount(), std::sin(0.001 * i));
+    joint_values = Eigen::VectorXd::Constant(group->getActiveVariableCount(), joint_value);
     robot_state_waypoint.setJointGroupActivePositions(group, joint_values);
-    trajectory->addSuffixWayPoint(std::move(robot_state_waypoint), /*duration_from_previous=*/0.0);
+    trajectory->addSuffixWayPoint(std::move(robot_state_waypoint), duration_from_previous);
   }
 
-  // Pretend some velocity / acceleration limits.
+  // Add some velocity / acceleration limits, which are needed for TOTG.
   std::unordered_map<std::string, double> velocity_limits, acceleration_limits;
   for (const auto& joint_name : group->getActiveJointModelNames())
   {
