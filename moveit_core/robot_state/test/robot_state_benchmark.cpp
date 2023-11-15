@@ -1,7 +1,7 @@
 /*********************************************************************
  * Software License Agreement (BSD License)
  *
- *  Copyright (c) 2018, CITEC Bielefeld
+ *  Copyright (c) 2023, PickNik Robotics.
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -32,132 +32,346 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-/* Author: Robert Haschke */
+/* Author: Robert Haschke, Mario Prats */
+
+// This file contains various benchmarks related to RobotState and matrix multiplication and inverse with Eigen types.
+// To run this benchmark, 'cd' to the build/moveit_core/robot_state directory and directly run the binary.
+
+#include <benchmark/benchmark.h>
+#include <kdl_parser/kdl_parser.hpp>
+#include <kdl/chainjnttojacsolver.hpp>
 #include <moveit/robot_model/robot_model.h>
 #include <moveit/robot_state/robot_state.h>
 #include <moveit/utils/robot_model_test_utils.h>
-#include <eigen_stl_containers/eigen_stl_containers.h>
-#include <chrono>
-#include <gtest/gtest.h>
+#include <random_numbers/random_numbers.h>
 
-// Helper class to measure time within a scoped block and output the result
-class ScopedTimer
+// Robot and planning group for benchmarks.
+constexpr char PANDA_TEST_ROBOT[] = "panda";
+constexpr char PANDA_TEST_GROUP[] = "panda_arm";
+constexpr char PR2_TEST_ROBOT[] = "pr2";
+constexpr char PR2_TIP_LINK[] = "r_wrist_roll_link";
+
+// Number of iterations to use in matrix multiplication / inversion benchmarks.
+constexpr int MATRIX_OPS_N_ITERATIONS = 1e7;
+
+namespace
 {
-  const char* const msg_;
-  double* const gold_standard_;
-  const std::chrono::time_point<std::chrono::steady_clock> start_;
+Eigen::Isometry3d createTestIsometry()
+{
+  // An arbitrary Eigen::Isometry3d object.
+  return Eigen::Translation3d(1, 2, 3) * Eigen::AngleAxisd(0.13 * M_PI, Eigen::Vector3d::UnitX()) *
+         Eigen::AngleAxisd(0.29 * M_PI, Eigen::Vector3d::UnitY()) *
+         Eigen::AngleAxisd(0.42 * M_PI, Eigen::Vector3d::UnitZ());
+}
+}  // namespace
 
-public:
-  // if gold_standard is provided, a relative increase/decrease is shown too
-  ScopedTimer(const char* msg = "", double* gold_standard = nullptr)
-    : msg_(msg), gold_standard_(gold_standard), start_(std::chrono::steady_clock::now())
+// Benchmark time to multiply an Eigen::Affine3d with an Eigen::Matrix4d.
+static void multiplyAffineTimesMatrix(benchmark::State& st)
+{
+  int n_iters = st.range(0);
+  Eigen::Isometry3d isometry = createTestIsometry();
+  for (auto _ : st)
   {
-  }
-
-  ~ScopedTimer()
-  {
-    std::chrono::duration<double> elapsed = std::chrono::steady_clock::now() - start_;
-    std::cerr << msg_ << elapsed.count() * 1000. << "ms ";
-
-    if (gold_standard_)
+    for (int i = 0; i < n_iters; ++i)
     {
-      if (*gold_standard_ == 0)
-        *gold_standard_ = elapsed.count();
-      std::cerr << 100 * elapsed.count() / *gold_standard_ << '%';
+      Eigen::Affine3d result;
+      benchmark::DoNotOptimize(result = isometry.affine() * isometry.matrix());
+      benchmark::ClobberMemory();
     }
-    std::cerr << '\n';
-  }
-};
-
-class Timing : public testing::Test
-{
-protected:
-  void SetUp() override
-  {
-    Eigen::Isometry3d iso = Eigen::Translation3d(1, 2, 3) * Eigen::AngleAxisd(0.13 * M_PI, Eigen::Vector3d::UnitX()) *
-                            Eigen::AngleAxisd(0.29 * M_PI, Eigen::Vector3d::UnitY()) *
-                            Eigen::AngleAxisd(0.42 * M_PI, Eigen::Vector3d::UnitZ());
-    transforms_.push_back(Eigen::Isometry3d::Identity());  // result
-    transforms_.push_back(iso);                            // input
-  }
-
-  void TearDown() override
-  {
-  }
-
-public:
-  const Eigen::Isometry3d id = Eigen::Isometry3d::Identity();
-  // put transforms into a vector to avoid compiler optimization on variables
-  EigenSTL::vector_Isometry3d transforms_;
-  volatile size_t result_idx_ = 0;
-  volatile size_t input_idx_ = 1;
-};
-
-TEST_F(Timing, stateUpdate)
-{
-  moveit::core::RobotModelPtr model = moveit::core::loadTestingRobotModel("pr2");
-  ASSERT_TRUE(bool(model));
-  moveit::core::RobotState state(model);
-  ScopedTimer t("RobotState updates: ");
-  for (unsigned i = 0; i < 1e5; ++i)
-  {
-    state.setToRandomPositions();
-    state.update();
   }
 }
 
-TEST_F(Timing, multiply)
+// Benchmark time to multiply an Eigen::Matrix4d with an Eigen::Matrix4d.
+static void multiplyMatrixTimesMatrix(benchmark::State& st)
 {
-  size_t runs = 1e7;
-  double gold_standard = 0;
+  int n_iters = st.range(0);
+  Eigen::Isometry3d isometry = createTestIsometry();
+  for (auto _ : st)
   {
-    ScopedTimer t("Eigen::Affine * Eigen::Matrix: ", &gold_standard);
-    for (size_t i = 0; i < runs; ++i)
-      transforms_[result_idx_].affine().noalias() = transforms_[input_idx_].affine() * transforms_[input_idx_].matrix();
-  }
-  {
-    ScopedTimer t("Eigen::Matrix * Eigen::Matrix: ", &gold_standard);
-    for (size_t i = 0; i < runs; ++i)
-      transforms_[result_idx_].matrix().noalias() = transforms_[input_idx_].matrix() * transforms_[input_idx_].matrix();
-  }
-  {
-    ScopedTimer t("Eigen::Isometry * Eigen::Isometry: ", &gold_standard);
-    for (size_t i = 0; i < runs; ++i)
-      transforms_[result_idx_] = transforms_[input_idx_] * transforms_[input_idx_];
+    for (int i = 0; i < n_iters; ++i)
+    {
+      Eigen::Matrix4d result;
+      benchmark::DoNotOptimize(result = isometry.matrix() * isometry.matrix());
+      benchmark::ClobberMemory();
+    }
   }
 }
 
-TEST_F(Timing, inverse)
+// Benchmark time to multiply an Eigen::Isometry3d with an Eigen::Isometry3d.
+static void multiplyIsometryTimesIsometry(benchmark::State& st)
 {
-  EigenSTL::vector_Affine3d affine(1);
-  affine[0].matrix() = transforms_[input_idx_].matrix();
-  size_t runs = 1e7;
-  double gold_standard = 0;
+  int n_iters = st.range(0);
+  Eigen::Isometry3d isometry = createTestIsometry();
+  for (auto _ : st)
   {
-    ScopedTimer t("Isometry3d::inverse(): ", &gold_standard);
-    for (size_t i = 0; i < runs; ++i)
-      transforms_[result_idx_] = transforms_[input_idx_].inverse();
-  }
-  volatile size_t input_idx = 0;
-  {
-    ScopedTimer t("Affine3d::inverse(Eigen::Isometry): ", &gold_standard);
-    for (size_t i = 0; i < runs; ++i)
-      transforms_[result_idx_].affine().noalias() = affine[input_idx].inverse(Eigen::Isometry).affine();
-  }
-  {
-    ScopedTimer t("Affine3d::inverse(): ", &gold_standard);
-    for (size_t i = 0; i < runs; ++i)
-      transforms_[result_idx_].affine().noalias() = affine[input_idx].inverse().affine();
-  }
-  {
-    ScopedTimer t("Matrix4d::inverse(): ", &gold_standard);
-    for (size_t i = 0; i < runs; ++i)
-      transforms_[result_idx_].matrix().noalias() = affine[input_idx].matrix().inverse();
+    for (int i = 0; i < n_iters; ++i)
+    {
+      Eigen::Isometry3d result;
+      benchmark::DoNotOptimize(result = isometry * isometry);
+      benchmark::ClobberMemory();
+    }
   }
 }
 
-int main(int argc, char** argv)
+// Benchmark time to invert an Eigen::Isometry3d.
+static void inverseIsometry3d(benchmark::State& st)
 {
-  testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
+  int n_iters = st.range(0);
+  Eigen::Isometry3d isometry = createTestIsometry();
+  for (auto _ : st)
+  {
+    for (int i = 0; i < n_iters; ++i)
+    {
+      Eigen::Isometry3d result;
+      benchmark::DoNotOptimize(result = isometry.inverse());
+      benchmark::ClobberMemory();
+    }
+  }
 }
+
+// Benchmark time to invert an Eigen::Affine3d(Eigen::Isometry).
+static void inverseAffineIsometry(benchmark::State& st)
+{
+  int n_iters = st.range(0);
+  Eigen::Isometry3d isometry = createTestIsometry();
+  Eigen::Affine3d affine;
+  affine.matrix() = isometry.matrix();
+
+  for (auto _ : st)
+  {
+    for (int i = 0; i < n_iters; ++i)
+    {
+      Eigen::Affine3d result;
+      benchmark::DoNotOptimize(result = affine.inverse(Eigen::Isometry).affine());
+      benchmark::ClobberMemory();
+    }
+  }
+}
+
+// Benchmark time to invert an Eigen::Affine3d.
+static void inverseAffine(benchmark::State& st)
+{
+  int n_iters = st.range(0);
+  Eigen::Isometry3d isometry = createTestIsometry();
+  Eigen::Affine3d affine;
+  affine.matrix() = isometry.matrix();
+
+  for (auto _ : st)
+  {
+    for (int i = 0; i < n_iters; ++i)
+    {
+      Eigen::Affine3d result;
+      benchmark::DoNotOptimize(result = affine.inverse().affine());
+      benchmark::ClobberMemory();
+    }
+  }
+}
+
+// Benchmark time to invert an Eigen::Matrix4d.
+static void inverseMatrix4d(benchmark::State& st)
+{
+  int n_iters = st.range(0);
+  Eigen::Isometry3d isometry = createTestIsometry();
+  Eigen::Affine3d affine;
+  affine.matrix() = isometry.matrix();
+
+  for (auto _ : st)
+  {
+    for (int i = 0; i < n_iters; ++i)
+    {
+      Eigen::Affine3d result;
+      benchmark::DoNotOptimize(result = affine.matrix().inverse());
+      benchmark::ClobberMemory();
+    }
+  }
+}
+
+// Benchmark time to construct a RobotState given a RobotModel.
+static void robotStateConstruct(benchmark::State& st)
+{
+  int n_states = st.range(0);
+  const moveit::core::RobotModelPtr& robot_model = moveit::core::loadTestingRobotModel(PANDA_TEST_ROBOT);
+
+  // Make sure the group exists, otherwise exit early with an error.
+  if (!robot_model->hasJointModelGroup(PANDA_TEST_GROUP))
+  {
+    st.SkipWithError("The planning group doesn't exist.");
+    return;
+  }
+
+  for (auto _ : st)
+  {
+    for (int i = 0; i < n_states; i++)
+    {
+      std::unique_ptr<moveit::core::RobotState> robot_state;
+      benchmark::DoNotOptimize(robot_state = std::make_unique<moveit::core::RobotState>(robot_model));
+      benchmark::ClobberMemory();
+    }
+  }
+}
+
+// Benchmark time to copy a RobotState.
+static void robotStateCopy(benchmark::State& st)
+{
+  int n_states = st.range(0);
+  const moveit::core::RobotModelPtr& robot_model = moveit::core::loadTestingRobotModel(PANDA_TEST_ROBOT);
+
+  // Make sure the group exists, otherwise exit early with an error.
+  if (!robot_model->hasJointModelGroup(PANDA_TEST_GROUP))
+  {
+    st.SkipWithError("The planning group doesn't exist.");
+    return;
+  }
+
+  // Robot state.
+  moveit::core::RobotState robot_state(robot_model);
+  robot_state.setToDefaultValues();
+
+  for (auto _ : st)
+  {
+    for (int i = 0; i < n_states; i++)
+    {
+      std::unique_ptr<moveit::core::RobotState> robot_state_copy;
+      benchmark::DoNotOptimize(robot_state_copy = std::make_unique<moveit::core::RobotState>(robot_state));
+      benchmark::ClobberMemory();
+    }
+  }
+}
+
+// Benchmark time to call `setToRandomPositions` and `update` on a RobotState.
+static void robotStateUpdate(benchmark::State& st)
+{
+  int n_states = st.range(0);
+  const moveit::core::RobotModelPtr& robot_model = moveit::core::loadTestingRobotModel(PR2_TEST_ROBOT);
+  moveit::core::RobotState state(robot_model);
+
+  for (auto _ : st)
+  {
+    for (int i = 0; i < n_states; ++i)
+    {
+      state.setToRandomPositions();
+      state.update();
+      benchmark::ClobberMemory();
+    }
+  }
+}
+
+// Benchmark time to call `setToRandomPositions` and `getGlobalLinkTransform` on a RobotState.
+static void robotStateForwardKinematics(benchmark::State& st)
+{
+  int n_states = st.range(0);
+  const moveit::core::RobotModelPtr& robot_model = moveit::core::loadTestingRobotModel(PR2_TEST_ROBOT);
+  moveit::core::RobotState state(robot_model);
+
+  for (auto _ : st)
+  {
+    for (int i = 0; i < n_states; ++i)
+    {
+      state.setToRandomPositions();
+      Eigen::Isometry3d transform;
+      benchmark::DoNotOptimize(transform = state.getGlobalLinkTransform(robot_model->getLinkModel(PR2_TIP_LINK)));
+      benchmark::ClobberMemory();
+    }
+  }
+}
+
+// Benchmark time to compute the Jacobian, using MoveIt's `getJacobian` function.
+static void moveItJacobian(benchmark::State& st)
+{
+  // Load a test robot model.
+  const moveit::core::RobotModelPtr& robot_model = moveit::core::loadTestingRobotModel(PANDA_TEST_ROBOT);
+
+  // Make sure the group exists, otherwise exit early with an error.
+  if (!robot_model->hasJointModelGroup(PANDA_TEST_GROUP))
+  {
+    st.SkipWithError("The planning group doesn't exist.");
+    return;
+  }
+
+  // Robot state.
+  moveit::core::RobotState kinematic_state(robot_model);
+  const moveit::core::JointModelGroup* jmg = kinematic_state.getJointModelGroup(PANDA_TEST_GROUP);
+
+  // Provide our own random number generator to setToRandomPositions to get a deterministic sequence of joint
+  // configurations.
+  random_numbers::RandomNumberGenerator rng(0);
+
+  for (auto _ : st)
+  {
+    // Time only the jacobian computation, not the forward kinematics.
+    st.PauseTiming();
+    kinematic_state.setToRandomPositions(jmg, rng);
+    kinematic_state.updateLinkTransforms();
+    st.ResumeTiming();
+    kinematic_state.getJacobian(jmg);
+  }
+}
+
+// Benchmark time to compute the Jacobian using KDL.
+static void kdlJacobian(benchmark::State& st)
+{
+  const moveit::core::RobotModelPtr& robot_model = moveit::core::loadTestingRobotModel(PANDA_TEST_ROBOT);
+
+  // Make sure the group exists, otherwise exit early with an error.
+  if (!robot_model->hasJointModelGroup(PANDA_TEST_GROUP))
+  {
+    st.SkipWithError("The planning group doesn't exist.");
+    return;
+  }
+
+  // Robot state.
+  moveit::core::RobotState kinematic_state(robot_model);
+  const moveit::core::JointModelGroup* jmg = kinematic_state.getJointModelGroup(PANDA_TEST_GROUP);
+
+  // Provide our own random number generator to setToRandomPositions to get a deterministic sequence of joint
+  // configurations.
+  random_numbers::RandomNumberGenerator rng(0);
+
+  KDL::Tree kdl_tree;
+  if (!kdl_parser::treeFromUrdfModel(*robot_model->getURDF(), kdl_tree))
+  {
+    st.SkipWithError("Can't create KDL tree.");
+    return;
+  }
+
+  KDL::Chain kdl_chain;
+  if (!kdl_tree.getChain(jmg->getJointModels().front()->getParentLinkModel()->getName(),
+                         jmg->getLinkModelNames().back(), kdl_chain))
+  {
+    st.SkipWithError("Can't create KDL Chain.");
+    return;
+  }
+
+  KDL::ChainJntToJacSolver jacobian_solver(kdl_chain);
+
+  for (auto _ : st)
+  {
+    // Time only the jacobian computation, not the forward kinematics.
+    st.PauseTiming();
+    kinematic_state.setToRandomPositions(jmg, rng);
+    kinematic_state.updateLinkTransforms();
+    KDL::Jacobian jacobian(kdl_chain.getNrOfJoints());
+    KDL::JntArray kdl_q;
+    kdl_q.resize(kdl_chain.getNrOfJoints());
+    kinematic_state.copyJointGroupPositions(jmg, &kdl_q.data[0]);
+    st.ResumeTiming();
+    jacobian_solver.JntToJac(kdl_q, jacobian);
+  }
+}
+
+BENCHMARK(multiplyAffineTimesMatrix)->Arg(MATRIX_OPS_N_ITERATIONS)->Unit(benchmark::kMillisecond);
+BENCHMARK(multiplyMatrixTimesMatrix)->Arg(MATRIX_OPS_N_ITERATIONS)->Unit(benchmark::kMillisecond);
+BENCHMARK(multiplyIsometryTimesIsometry)->Arg(MATRIX_OPS_N_ITERATIONS)->Unit(benchmark::kMillisecond);
+
+BENCHMARK(inverseIsometry3d)->Arg(MATRIX_OPS_N_ITERATIONS)->Unit(benchmark::kMillisecond);
+BENCHMARK(inverseAffineIsometry)->Arg(MATRIX_OPS_N_ITERATIONS)->Unit(benchmark::kMillisecond);
+BENCHMARK(inverseAffine)->Arg(MATRIX_OPS_N_ITERATIONS)->Unit(benchmark::kMillisecond);
+BENCHMARK(inverseMatrix4d)->Arg(MATRIX_OPS_N_ITERATIONS)->Unit(benchmark::kMillisecond);
+
+BENCHMARK(robotStateConstruct)->RangeMultiplier(10)->Range(100, 10000)->Unit(benchmark::kMillisecond);
+BENCHMARK(robotStateCopy)->RangeMultiplier(10)->Range(100, 10000)->Unit(benchmark::kMillisecond);
+BENCHMARK(robotStateUpdate)->RangeMultiplier(10)->Range(10, 1000)->Unit(benchmark::kMillisecond);
+BENCHMARK(robotStateForwardKinematics)->RangeMultiplier(10)->Range(10, 1000)->Unit(benchmark::kMillisecond);
+
+BENCHMARK(moveItJacobian);
+BENCHMARK(kdlJacobian);
