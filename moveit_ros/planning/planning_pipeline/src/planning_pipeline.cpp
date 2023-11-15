@@ -67,7 +67,7 @@ PlanningPipeline::PlanningPipeline(const moveit::core::RobotModelConstPtr& model
 {
   pipeline_parameters_.planning_plugin = planner_plugin_name;
   pipeline_parameters_.request_adapters = request_adapter_plugin_names;
-  pipeline_parameters_.request_adapters = response_adapter_plugin_names;
+  pipeline_parameters_.response_adapters = response_adapter_plugin_names;
   configure();
 }
 
