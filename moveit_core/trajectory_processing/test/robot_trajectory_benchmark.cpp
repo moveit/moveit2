@@ -49,7 +49,7 @@ constexpr char TEST_GROUP[] = "panda_arm";
 
 // Benchmark manual creation of a trajectory with a given number of waypoints.
 // This includes creating and updating the individual RobotState's.
-static void RobotTrajectoryCreate(benchmark::State& st)
+static void robotTrajectoryCreate(benchmark::State& st)
 {
   int n_states = st.range(0);
   const moveit::core::RobotModelPtr& robot_model = moveit::core::loadTestingRobotModel(TEST_ROBOT);
@@ -84,7 +84,7 @@ static void RobotTrajectoryCreate(benchmark::State& st)
 }
 
 // Benchmark timing of a trajectory with a given number of waypoints, via TOTG.
-static void RobotTrajectoryTiming(benchmark::State& st)
+static void robotTrajectoryTiming(benchmark::State& st)
 {
   int n_states = st.range(0);
   const moveit::core::RobotModelPtr& robot_model = moveit::core::loadTestingRobotModel(TEST_ROBOT);
@@ -131,5 +131,5 @@ static void RobotTrajectoryTiming(benchmark::State& st)
   }
 }
 
-BENCHMARK(RobotTrajectoryCreate)->RangeMultiplier(10)->Range(10, 100000)->Unit(benchmark::kMillisecond);
-BENCHMARK(RobotTrajectoryTiming)->RangeMultiplier(10)->Range(10, 20000)->Unit(benchmark::kMillisecond);
+BENCHMARK(robotTrajectoryCreate)->RangeMultiplier(10)->Range(10, 100000)->Unit(benchmark::kMillisecond);
+BENCHMARK(robotTrajectoryTiming)->RangeMultiplier(10)->Range(10, 20000)->Unit(benchmark::kMillisecond);
