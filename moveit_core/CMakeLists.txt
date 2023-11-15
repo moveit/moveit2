@@ -23,6 +23,7 @@ find_package(octomap_msgs REQUIRED)
 find_package(pluginlib REQUIRED)
 find_package(random_numbers REQUIRED)
 find_package(rclcpp REQUIRED)
+find_package(rsl REQUIRED)
 find_package(ruckig REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(shape_msgs REQUIRED)
@@ -148,6 +149,7 @@ ament_export_dependencies(
   pluginlib
   random_numbers
   rclcpp
+  rsl
   ruckig
   sensor_msgs
   shape_msgs
