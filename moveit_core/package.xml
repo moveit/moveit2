@@ -47,6 +47,7 @@
   <depend>pybind11_vendor</depend>
   <depend>random_numbers</depend>
   <depend>rclcpp</depend>
+  <depend>rsl</depend>
   <depend>ruckig</depend>
   <depend>sensor_msgs</depend>
   <depend>shape_msgs</depend>
