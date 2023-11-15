@@ -34,8 +34,8 @@
 
 /* Author: Robert Haschke
    Desc: This adapter changes the link_name field of a constraint from an object's (sub-)frame name to the name of the
-   robot link, that the object is attached to. Transforming the frame names is necessary because the frames of an attached
-   object are not known to a planner.
+   robot link, that the object is attached to. Transforming the frame names is necessary because the frames of an
+   attached object are not known to a planner.
 */
 
 #include <moveit/planning_interface/planning_request_adapter.h>
