@@ -34,6 +34,7 @@
 
 /* Author: Robert Haschke, Mario Prats */
 
+// This file contains various benchmarks related to RobotState and matrix multiplication and inverse with Eigen types.
 // To run this benchmark, 'cd' to the build/moveit_core/robot_state directory and directly run the binary.
 
 #include <benchmark/benchmark.h>
@@ -53,13 +54,22 @@ constexpr char PR2_TIP_LINK[] = "r_wrist_roll_link";
 // Number of iterations to use in matrix multiplication / inversion benchmarks.
 constexpr int MATRIX_OPS_N_ITERATIONS = 1e7;
 
+namespace
+{
+Eigen::Isometry3d createTestIsometry()
+{
+  // An arbitrary Eigen::Isometry3d object.
+  return Eigen::Translation3d(1, 2, 3) * Eigen::AngleAxisd(0.13 * M_PI, Eigen::Vector3d::UnitX()) *
+         Eigen::AngleAxisd(0.29 * M_PI, Eigen::Vector3d::UnitY()) *
+         Eigen::AngleAxisd(0.42 * M_PI, Eigen::Vector3d::UnitZ());
+}
+}  // namespace
+
+// Benchmark time to multiply an Eigen::Affine3d with an Eigen::Matrix4d.
 static void multiplyAffineTimesMatrix(benchmark::State& st)
 {
   int n_iters = st.range(0);
-  Eigen::Isometry3d isometry = Eigen::Translation3d(1, 2, 3) *
-                               Eigen::AngleAxisd(0.13 * M_PI, Eigen::Vector3d::UnitX()) *
-                               Eigen::AngleAxisd(0.29 * M_PI, Eigen::Vector3d::UnitY()) *
-                               Eigen::AngleAxisd(0.42 * M_PI, Eigen::Vector3d::UnitZ());
+  Eigen::Isometry3d isometry = createTestIsometry();
   for (auto _ : st)
   {
     for (int i = 0; i < n_iters; ++i)
@@ -71,13 +81,11 @@ static void multiplyAffineTimesMatrix(benchmark::State& st)
   }
 }
 
+// Benchmark time to multiply an Eigen::Matrix4d with an Eigen::Matrix4d.
 static void multiplyMatrixTimesMatrix(benchmark::State& st)
 {
   int n_iters = st.range(0);
-  Eigen::Isometry3d isometry = Eigen::Translation3d(1, 2, 3) *
-                               Eigen::AngleAxisd(0.13 * M_PI, Eigen::Vector3d::UnitX()) *
-                               Eigen::AngleAxisd(0.29 * M_PI, Eigen::Vector3d::UnitY()) *
-                               Eigen::AngleAxisd(0.42 * M_PI, Eigen::Vector3d::UnitZ());
+  Eigen::Isometry3d isometry = createTestIsometry();
   for (auto _ : st)
   {
     for (int i = 0; i < n_iters; ++i)
@@ -89,13 +97,11 @@ static void multiplyMatrixTimesMatrix(benchmark::State& st)
   }
 }
 
+// Benchmark time to multiply an Eigen::Isometry3d with an Eigen::Isometry3d.
 static void multiplyIsometryTimesIsometry(benchmark::State& st)
 {
   int n_iters = st.range(0);
-  Eigen::Isometry3d isometry = Eigen::Translation3d(1, 2, 3) *
-                               Eigen::AngleAxisd(0.13 * M_PI, Eigen::Vector3d::UnitX()) *
-                               Eigen::AngleAxisd(0.29 * M_PI, Eigen::Vector3d::UnitY()) *
-                               Eigen::AngleAxisd(0.42 * M_PI, Eigen::Vector3d::UnitZ());
+  Eigen::Isometry3d isometry = createTestIsometry();
   for (auto _ : st)
   {
     for (int i = 0; i < n_iters; ++i)
@@ -107,13 +113,11 @@ static void multiplyIsometryTimesIsometry(benchmark::State& st)
   }
 }
 
+// Benchmark time to invert an Eigen::Isometry3d.
 static void inverseIsometry3d(benchmark::State& st)
 {
   int n_iters = st.range(0);
-  Eigen::Isometry3d isometry = Eigen::Translation3d(1, 2, 3) *
-                               Eigen::AngleAxisd(0.13 * M_PI, Eigen::Vector3d::UnitX()) *
-                               Eigen::AngleAxisd(0.29 * M_PI, Eigen::Vector3d::UnitY()) *
-                               Eigen::AngleAxisd(0.42 * M_PI, Eigen::Vector3d::UnitZ());
+  Eigen::Isometry3d isometry = createTestIsometry();
   for (auto _ : st)
   {
     for (int i = 0; i < n_iters; ++i)
@@ -125,13 +129,11 @@ static void inverseIsometry3d(benchmark::State& st)
   }
 }
 
+// Benchmark time to invert an Eigen::Affine3d(Eigen::Isometry).
 static void inverseAffineIsometry(benchmark::State& st)
 {
   int n_iters = st.range(0);
-  Eigen::Isometry3d isometry = Eigen::Translation3d(1, 2, 3) *
-                               Eigen::AngleAxisd(0.13 * M_PI, Eigen::Vector3d::UnitX()) *
-                               Eigen::AngleAxisd(0.29 * M_PI, Eigen::Vector3d::UnitY()) *
-                               Eigen::AngleAxisd(0.42 * M_PI, Eigen::Vector3d::UnitZ());
+  Eigen::Isometry3d isometry = createTestIsometry();
   Eigen::Affine3d affine;
   affine.matrix() = isometry.matrix();
 
@@ -146,13 +148,11 @@ static void inverseAffineIsometry(benchmark::State& st)
   }
 }
 
+// Benchmark time to invert an Eigen::Affine3d.
 static void inverseAffine(benchmark::State& st)
 {
   int n_iters = st.range(0);
-  Eigen::Isometry3d isometry = Eigen::Translation3d(1, 2, 3) *
-                               Eigen::AngleAxisd(0.13 * M_PI, Eigen::Vector3d::UnitX()) *
-                               Eigen::AngleAxisd(0.29 * M_PI, Eigen::Vector3d::UnitY()) *
-                               Eigen::AngleAxisd(0.42 * M_PI, Eigen::Vector3d::UnitZ());
+  Eigen::Isometry3d isometry = createTestIsometry();
   Eigen::Affine3d affine;
   affine.matrix() = isometry.matrix();
 
@@ -167,13 +167,11 @@ static void inverseAffine(benchmark::State& st)
   }
 }
 
+// Benchmark time to invert an Eigen::Matrix4d.
 static void inverseMatrix4d(benchmark::State& st)
 {
   int n_iters = st.range(0);
-  Eigen::Isometry3d isometry = Eigen::Translation3d(1, 2, 3) *
-                               Eigen::AngleAxisd(0.13 * M_PI, Eigen::Vector3d::UnitX()) *
-                               Eigen::AngleAxisd(0.29 * M_PI, Eigen::Vector3d::UnitY()) *
-                               Eigen::AngleAxisd(0.42 * M_PI, Eigen::Vector3d::UnitZ());
+  Eigen::Isometry3d isometry = createTestIsometry();
   Eigen::Affine3d affine;
   affine.matrix() = isometry.matrix();
 
@@ -188,6 +186,7 @@ static void inverseMatrix4d(benchmark::State& st)
   }
 }
 
+// Benchmark time to construct a RobotState given a RobotModel.
 static void robotStateConstruct(benchmark::State& st)
 {
   int n_states = st.range(0);
@@ -211,6 +210,7 @@ static void robotStateConstruct(benchmark::State& st)
   }
 }
 
+// Benchmark time to copy a RobotState.
 static void robotStateCopy(benchmark::State& st)
 {
   int n_states = st.range(0);
@@ -238,6 +238,7 @@ static void robotStateCopy(benchmark::State& st)
   }
 }
 
+// Benchmark time to call `setToRandomPositions` and `update` on a RobotState.
 static void robotStateUpdate(benchmark::State& st)
 {
   int n_states = st.range(0);
@@ -255,6 +256,7 @@ static void robotStateUpdate(benchmark::State& st)
   }
 }
 
+// Benchmark time to call `setToRandomPositions` and `getGlobalLinkTransform` on a RobotState.
 static void robotStateForwardKinematics(benchmark::State& st)
 {
   int n_states = st.range(0);
@@ -273,6 +275,7 @@ static void robotStateForwardKinematics(benchmark::State& st)
   }
 }
 
+// Benchmark time to compute the Jacobian, using MoveIt's `getJacobian` function.
 static void moveItJacobian(benchmark::State& st)
 {
   // Load a test robot model.
@@ -304,6 +307,7 @@ static void moveItJacobian(benchmark::State& st)
   }
 }
 
+// Benchmark time to compute the Jacobian using KDL.
 static void kdlJacobian(benchmark::State& st)
 {
   const moveit::core::RobotModelPtr& robot_model = moveit::core::loadTestingRobotModel(PANDA_TEST_ROBOT);
