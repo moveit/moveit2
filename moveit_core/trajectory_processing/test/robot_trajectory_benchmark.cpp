@@ -78,7 +78,7 @@ static void robotTrajectoryCreate(benchmark::State& st)
       moveit::core::RobotState robot_state_waypoint(robot_state);
       Eigen::VectorXd joint_values = Eigen::VectorXd::Constant(group->getActiveVariableCount(), joint_value);
       robot_state_waypoint.setJointGroupActivePositions(group, joint_values);
-      trajectory->addSuffixWayPoint(std::move(robot_state_waypoint), duration_from_previous);
+      trajectory->addSuffixWayPoint(robot_state_waypoint, duration_from_previous);
     }
   }
 }
@@ -113,7 +113,7 @@ static void robotTrajectoryTiming(benchmark::State& st)
     moveit::core::RobotState robot_state_waypoint(robot_state);
     joint_values = Eigen::VectorXd::Constant(group->getActiveVariableCount(), joint_value);
     robot_state_waypoint.setJointGroupActivePositions(group, joint_values);
-    trajectory->addSuffixWayPoint(std::move(robot_state_waypoint), duration_from_previous);
+    trajectory->addSuffixWayPoint(robot_state_waypoint, duration_from_previous);
   }
 
   // Add some velocity / acceleration limits, which are needed for TOTG.
