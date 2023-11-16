@@ -38,7 +38,7 @@
 #include <fmt/format.h>
 #include <moveit/utils/logger.hpp>
 
-namespace planning_pipeline
+namespace
 {
 const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.ros_planning.planning_pipeline");
 
@@ -74,6 +74,8 @@ getTrajectoryConstraints(const robot_trajectory::RobotTrajectoryPtr& trajectory)
 }
 }  // namespace
 
+namespace planning_pipeline
+{
 PlanningPipeline::PlanningPipeline(const moveit::core::RobotModelConstPtr& model,
                                    const std::shared_ptr<rclcpp::Node>& node, const std::string& parameter_namespace)
   : active_{ false }
@@ -90,7 +92,7 @@ PlanningPipeline::PlanningPipeline(const moveit::core::RobotModelConstPtr& model
 
 PlanningPipeline::PlanningPipeline(const moveit::core::RobotModelConstPtr& model,
                                    const std::shared_ptr<rclcpp::Node>& node, const std::string& parameter_namespace,
-                                   const std::string& planner_plugin_name,
+                                   const std::vector<std::string>& planner_plugin_names,
                                    const std::vector<std::string>& request_adapter_plugin_names,
                                    const std::vector<std::string>& response_adapter_plugin_names)
   : active_{ false }

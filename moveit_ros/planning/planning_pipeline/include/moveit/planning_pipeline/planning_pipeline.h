@@ -161,104 +161,104 @@ public:
                const bool /*display_computed_motion_plans*/) const
   {
     return false;
-    [[deprecated("Please use getPlannerPluginNames().")]] const std::string& getPlannerPluginName() const
-    {
-      return pipeline_parameters_.planning_plugins.at(0);
-    }
-    [[deprecated("Removed from API.")]] const planning_interface::PlannerManagerPtr& getPlannerManager()
-    {
-      return planner_vector_.at(0);
-    }
-    /*
-    END BLOCK OF DEPRECATED FUNCTIONS
-    */
+  }
+  [[deprecated("Please use getPlannerPluginNames().")]] const std::string& getPlannerPluginName() const
+  {
+    return pipeline_parameters_.planning_plugins.at(0);
+  }
+  [[deprecated("Removed from API.")]] const planning_interface::PlannerManagerPtr& getPlannerManager()
+  {
+    return planner_vector_.at(0);
+  }
+  /*
+  END BLOCK OF DEPRECATED FUNCTIONS
+  */
 
-    /** \brief Call the chain of planning request adapters, motion planner plugin, and planning response adapters in
-       sequence. \param planning_scene The planning scene where motion planning is to be done \param req The request for
-       motion planning \param res The motion planning response \param publish_received_requests Flag indicating whether
-       received requests should be published just before beginning processing (useful for debugging)
-        */
-    [[nodiscard]] bool generatePlan(const planning_scene::PlanningSceneConstPtr& planning_scene,
-                                    const planning_interface::MotionPlanRequest& req,
-                                    planning_interface::MotionPlanResponse& res,
-                                    const bool publish_received_requests = false) const;
+  /** \brief Call the chain of planning request adapters, motion planner plugin, and planning response adapters in
+     sequence. \param planning_scene The planning scene where motion planning is to be done \param req The request for
+     motion planning \param res The motion planning response \param publish_received_requests Flag indicating whether
+     received requests should be published just before beginning processing (useful for debugging)
+      */
+  [[nodiscard]] bool generatePlan(const planning_scene::PlanningSceneConstPtr& planning_scene,
+                                  const planning_interface::MotionPlanRequest& req,
+                                  planning_interface::MotionPlanResponse& res,
+                                  const bool publish_received_requests = false) const;
 
-    /** \brief Request termination, if a generatePlan() function is currently computing plans */
-    void terminate() const;
+  /** \brief Request termination, if a generatePlan() function is currently computing plans */
+  void terminate() const;
 
-    /** \brief Get the names of the planning plugins used */
-    [[nodiscard]] const std::vector<std::string>& getPlannerPluginNames() const
-    {
-      return pipeline_parameters_.planning_plugins;
-    }
+  /** \brief Get the names of the planning plugins used */
+  [[nodiscard]] const std::vector<std::string>& getPlannerPluginNames() const
+  {
+    return pipeline_parameters_.planning_plugins;
+  }
 
-    /** \brief Get the names of the planning request adapter plugins used */
-    [[nodiscard]] const std::vector<std::string>& getRequestAdapterPluginNames() const
-    {
-      return pipeline_parameters_.request_adapters;
-    }
+  /** \brief Get the names of the planning request adapter plugins used */
+  [[nodiscard]] const std::vector<std::string>& getRequestAdapterPluginNames() const
+  {
+    return pipeline_parameters_.request_adapters;
+  }
 
-    /** \brief Get the names of the planning response adapter plugins in the order they are processed. */
-    [[nodiscard]] const std::vector<std::string>& getResponseAdapterPluginNames() const
-    {
-      return pipeline_parameters_.response_adapters;
-    }
+  /** \brief Get the names of the planning response adapter plugins in the order they are processed. */
+  [[nodiscard]] const std::vector<std::string>& getResponseAdapterPluginNames() const
+  {
+    return pipeline_parameters_.response_adapters;
+  }
 
-    /** \brief Get the robot model that this pipeline is using */
-    [[nodiscard]] const moveit::core::RobotModelConstPtr& getRobotModel() const
-    {
-      return robot_model_;
-    }
+  /** \brief Get the robot model that this pipeline is using */
+  [[nodiscard]] const moveit::core::RobotModelConstPtr& getRobotModel() const
+  {
+    return robot_model_;
+  }
 
-    /** \brief Get current status of the planning pipeline */
-    [[nodiscard]] bool isActive() const
-    {
-      return active_;
-    }
+  /** \brief Get current status of the planning pipeline */
+  [[nodiscard]] bool isActive() const
+  {
+    return active_;
+  }
 
-  private:
-    /// \brief Helper function that is called by both constructors to configure and initialize a PlanningPipeline instance
-    void configure();
+private:
+  /// \brief Helper function that is called by both constructors to configure and initialize a PlanningPipeline instance
+  void configure();
 
-    /**
-     * @brief Helper function to publish the planning pipeline state during the planning process
-     *
-     * @param req Current request to publish
-     * @param res Current pipeline result
-     * @param pipeline_stage Last pipeline stage that got invoked
-     */
-    void publishPipelineState(moveit_msgs::msg::MotionPlanRequest req,
-                              const planning_interface::MotionPlanResponse& res, const std::string& pipeline_stage)
-        const;
+  /**
+   * @brief Helper function to publish the planning pipeline state during the planning process
+   *
+   * @param req Current request to publish
+   * @param res Current pipeline result
+   * @param pipeline_stage Last pipeline stage that got invoked
+   */
+  void publishPipelineState(moveit_msgs::msg::MotionPlanRequest req, const planning_interface::MotionPlanResponse& res,
+                            const std::string& pipeline_stage) const;
 
-    // Flag that indicates whether or not the planning pipeline is currently solving a planning problem
-    mutable std::atomic<bool> active_;
+  // Flag that indicates whether or not the planning pipeline is currently solving a planning problem
+  mutable std::atomic<bool> active_;
 
-    // ROS node and parameters
-    std::shared_ptr<rclcpp::Node> node_;
-    const std::string parameter_namespace_;
-    planning_pipeline_parameters::Params pipeline_parameters_;
+  // ROS node and parameters
+  std::shared_ptr<rclcpp::Node> node_;
+  const std::string parameter_namespace_;
+  planning_pipeline_parameters::Params pipeline_parameters_;
 
-    // Planner plugin
-    std::unique_ptr<pluginlib::ClassLoader<planning_interface::PlannerManager>> planner_plugin_loader_;
-    std::vector<planning_interface::PlannerManagerPtr> planner_vector_;
+  // Planner plugin
+  std::unique_ptr<pluginlib::ClassLoader<planning_interface::PlannerManager>> planner_plugin_loader_;
+  std::vector<planning_interface::PlannerManagerPtr> planner_vector_;
 
-    // Plan request adapters
-    std::unique_ptr<pluginlib::ClassLoader<planning_interface::PlanningRequestAdapter>> request_adapter_plugin_loader_;
-    std::vector<planning_interface::PlanningRequestAdapterConstPtr> planning_request_adapter_vector_;
+  // Plan request adapters
+  std::unique_ptr<pluginlib::ClassLoader<planning_interface::PlanningRequestAdapter>> request_adapter_plugin_loader_;
+  std::vector<planning_interface::PlanningRequestAdapterConstPtr> planning_request_adapter_vector_;
 
-    // Plan response adapters
-    std::unique_ptr<pluginlib::ClassLoader<planning_interface::PlanningResponseAdapter>> response_adapter_plugin_loader_;
-    std::vector<planning_interface::PlanningResponseAdapterConstPtr> planning_response_adapter_vector_;
+  // Plan response adapters
+  std::unique_ptr<pluginlib::ClassLoader<planning_interface::PlanningResponseAdapter>> response_adapter_plugin_loader_;
+  std::vector<planning_interface::PlanningResponseAdapterConstPtr> planning_response_adapter_vector_;
 
-    // Robot model
-    moveit::core::RobotModelConstPtr robot_model_;
+  // Robot model
+  moveit::core::RobotModelConstPtr robot_model_;
 
-    /// Publish the planning pipeline progress
-    rclcpp::Publisher<moveit_msgs::msg::PipelineState>::SharedPtr progress_publisher_;
+  /// Publish the planning pipeline progress
+  rclcpp::Publisher<moveit_msgs::msg::PipelineState>::SharedPtr progress_publisher_;
 
-    rclcpp::Logger logger_;
-  };
+  rclcpp::Logger logger_;
+};
 
-  MOVEIT_CLASS_FORWARD(PlanningPipeline);  // Defines PlanningPipelinePtr, ConstPtr, WeakPtr... etc
+MOVEIT_CLASS_FORWARD(PlanningPipeline);  // Defines PlanningPipelinePtr, ConstPtr, WeakPtr... etc
 }  // namespace planning_pipeline

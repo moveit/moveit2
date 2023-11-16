@@ -45,7 +45,8 @@ const std::vector<std::string> REQUEST_ADAPTERS{ "planning_pipeline_test/AlwaysS
                                                  "planning_pipeline_test/AlwaysSuccessRequestAdapter" };
 const std::vector<std::string> RESPONSE_ADAPTERS{ "planning_pipeline_test/AlwaysSuccessResponseAdapter",
                                                   "planning_pipeline_test/AlwaysSuccessResponseAdapter" };
-const std::string PLANNER_PLUGIN = std::string("planning_pipeline_test/DummyPlannerManager");
+const std::vector<std::string> PLANNER_PLUGINS{ "planning_pipeline_test/DummyPlannerManager",
+                                                "planning_pipeline_test/DummyPlannerManager" };
 }  // namespace
 class TestPlanningPipeline : public testing::Test
 {
@@ -70,15 +71,13 @@ TEST_F(TestPlanningPipeline, HappyPath)
   // WHEN the planning pipeline is configured
   // THEN it is successful
   EXPECT_NO_THROW(pipeline_ptr_ = std::make_shared<planning_pipeline::PlanningPipeline>(
-                      robot_model_, node_, "", PLANNER_PLUGIN, REQUEST_ADAPTERS, RESPONSE_ADAPTERS));
+                      robot_model_, node_, "", PLANNER_PLUGINS, REQUEST_ADAPTERS, RESPONSE_ADAPTERS));
   // THEN a planning pipeline exists
   EXPECT_NE(pipeline_ptr_, nullptr);
   // THEN the pipeline is inactive
   EXPECT_FALSE(pipeline_ptr_->isActive());
   // THEN the pipeline contains a valid robot model
   EXPECT_NE(pipeline_ptr_->getRobotModel(), nullptr);
-  // THEN a planner plugin is loaded
-  EXPECT_NE(pipeline_ptr_->getPlannerManager(), nullptr);
   // THEN the loaded request adapter names equal the adapter names input vector
   const auto loaded_req_adapters = pipeline_ptr_->getRequestAdapterPluginNames();
   EXPECT_TRUE(std::equal(loaded_req_adapters.begin(), loaded_req_adapters.end(), REQUEST_ADAPTERS.begin()));
@@ -86,7 +85,8 @@ TEST_F(TestPlanningPipeline, HappyPath)
   const auto loaded_res_adapters = pipeline_ptr_->getResponseAdapterPluginNames();
   EXPECT_TRUE(std::equal(loaded_res_adapters.begin(), loaded_res_adapters.end(), RESPONSE_ADAPTERS.begin()));
   // THEN the loaded planner plugin name equals the planner name input argument
-  EXPECT_EQ(pipeline_ptr_->getPlannerPluginName(), PLANNER_PLUGIN);
+  const auto loaded_planners = pipeline_ptr_->getPlannerPluginNames();
+  EXPECT_TRUE(std::equal(loaded_planners.begin(), loaded_planners.end(), PLANNER_PLUGINS.begin()));
 
   // WHEN generatePlan is called
   // THEN A successful response is created
@@ -103,7 +103,7 @@ TEST_F(TestPlanningPipeline, NoPlannerPluginConfigured)
   // WHEN the pipeline is configured
   // THEN an exception is thrown
   EXPECT_THROW(pipeline_ptr_ = std::make_shared<planning_pipeline::PlanningPipeline>(
-                   robot_model_, node_, "", "NoExistingPlannerPlugin", REQUEST_ADAPTERS, RESPONSE_ADAPTERS),
+                   robot_model_, node_, "", std::vector<std::string>(), REQUEST_ADAPTERS, RESPONSE_ADAPTERS),
                std::runtime_error);
 }
 
