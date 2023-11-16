@@ -105,6 +105,14 @@ TEST_F(TestPlanningPipeline, NoPlannerPluginConfigured)
   EXPECT_THROW(pipeline_ptr_ = std::make_shared<planning_pipeline::PlanningPipeline>(
                    robot_model_, node_, "", std::vector<std::string>(), REQUEST_ADAPTERS, RESPONSE_ADAPTERS),
                std::runtime_error);
+
+  // GIVEN a configuration with planner plugin called UNKNOWN
+  // WHEN the pipeline is configured
+  // THEN an exception is thrown
+  EXPECT_THROW(pipeline_ptr_ = std::make_shared<planning_pipeline::PlanningPipeline>(
+                   robot_model_, node_, "", std::vector<std::string>({ "UNKNOWN" }), REQUEST_ADAPTERS,
+                   RESPONSE_ADAPTERS),
+               std::runtime_error);
 }
 
 int main(int argc, char** argv)

@@ -109,14 +109,6 @@ PlanningPipeline::PlanningPipeline(const moveit::core::RobotModelConstPtr& model
 
 void PlanningPipeline::configure()
 {
-  // Check if planning plugin name is available
-  if (pipeline_parameters_.planning_plugins.empty())
-  {
-    const std::string classes_str = fmt::format("{}", fmt::join(planner_plugin_loader_->getDeclaredClasses(), ", "));
-    throw std::runtime_error("Planning plugin name is empty. Please choose one of the available plugins: " +
-                             classes_str);
-  }
-
   // If progress topic parameter is not empty, initialize publisher
   if (!pipeline_parameters_.progress_topic.empty())
   {
@@ -307,6 +299,7 @@ bool PlanningPipeline::generatePlan(const planning_scene::PlanningSceneConstPtr&
             planner->getPlanningContext(planning_scene, mutable_request, res.error_code);
         if (context)
         {
+          RCLCPP_INFO(node_->get_logger(), "Calling Planner '%s'", planner->getDescription().c_str());
           context->solve(res);
           publishPipelineState(mutable_request, res, planner->getDescription());
         }
