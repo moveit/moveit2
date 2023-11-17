@@ -314,7 +314,7 @@ bool PlanningPipeline::generatePlan(const planning_scene::PlanningSceneConstPtr&
       // If planner does not succeed, break chain and return false
       if (!res.error_code)
       {
-        RCLCPP_ERROR(node_->get_logger(), "Planner '%s' failed", planner->getDescription());
+        RCLCPP_ERROR(node_->get_logger(), "Planner '%s' failed", planner->getDescription().c_str());
         break;
       }
     }
