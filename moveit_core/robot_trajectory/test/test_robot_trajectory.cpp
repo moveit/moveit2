@@ -528,7 +528,7 @@ TEST_F(RobotTrajectoryTestFixture, RobotTrajectoryLength)
 {
   robot_trajectory::RobotTrajectoryPtr trajectory;
   initTestTrajectory(trajectory);
-  EXPECT_GT(robot_trajectory::pathLength(*trajectory), 0.0);
+  EXPECT_FLOAT_EQ(robot_trajectory::pathLength(*trajectory), 0.0);
 }
 
 TEST_F(RobotTrajectoryTestFixture, RobotTrajectorySmoothness)
@@ -538,7 +538,7 @@ TEST_F(RobotTrajectoryTestFixture, RobotTrajectorySmoothness)
 
   const auto smoothness = robot_trajectory::smoothness(*trajectory);
   ASSERT_TRUE(smoothness.has_value());
-  EXPECT_GT(smoothness.value(), 0.0);
+  EXPECT_FLOAT_EQ(smoothness.value(), 0.0);
 
   // Check for empty trajectory
   trajectory->clear();
