@@ -67,7 +67,7 @@ protected:
 
   void initTestTrajectory(robot_trajectory::RobotTrajectoryPtr& trajectory)
   {
-    // Init a traj
+    // Init a trajectory
     ASSERT_TRUE(robot_model_->hasJointModelGroup(arm_jmg_name_))
         << "Robot model does not have group: " << arm_jmg_name_;
 
@@ -79,7 +79,10 @@ protected:
     double duration_from_previous = 0.1;
     std::size_t waypoint_count = 5;
     for (std::size_t ix = 0; ix < waypoint_count; ++ix)
+    {
       trajectory->addSuffixWayPoint(*robot_state_, duration_from_previous);
+    }
+
     // Quick check that getDuration is working correctly
     EXPECT_EQ(trajectory->getDuration(), duration_from_previous * waypoint_count)
         << "Generated trajectory duration incorrect";
@@ -529,6 +532,17 @@ TEST_F(RobotTrajectoryTestFixture, RobotTrajectoryLength)
   robot_trajectory::RobotTrajectoryPtr trajectory;
   initTestTrajectory(trajectory);
   EXPECT_FLOAT_EQ(robot_trajectory::pathLength(*trajectory), 0.0);
+
+  // modify joint values so the smoothness is nonzero
+  std::vector<double> positions;
+  for (size_t i = 0; i < trajectory->size(); ++i)
+  {
+    auto waypoint = trajectory->getWayPointPtr(i);
+    waypoint->copyJointGroupPositions(arm_jmg_name_, positions);
+    positions[0] += 0.01 * i;
+    waypoint->setJointGroupPositions(arm_jmg_name_, positions);
+  }
+  EXPECT_GT(robot_trajectory::pathLength(*trajectory), 0.0);
 }
 
 TEST_F(RobotTrajectoryTestFixture, RobotTrajectorySmoothness)
@@ -536,9 +550,19 @@ TEST_F(RobotTrajectoryTestFixture, RobotTrajectorySmoothness)
   robot_trajectory::RobotTrajectoryPtr trajectory;
   initTestTrajectory(trajectory);
 
+  // modify joint values so the smoothness is nonzero
+  std::vector<double> positions;
+  for (size_t i = 0; i < trajectory->size(); ++i)
+  {
+    auto waypoint = trajectory->getWayPointPtr(i);
+    waypoint->copyJointGroupPositions(arm_jmg_name_, positions);
+    positions[0] += 0.01 * i;
+    waypoint->setJointGroupPositions(arm_jmg_name_, positions);
+  }
+
   const auto smoothness = robot_trajectory::smoothness(*trajectory);
   ASSERT_TRUE(smoothness.has_value());
-  EXPECT_FLOAT_EQ(smoothness.value(), 0.0);
+  EXPECT_GT(smoothness.value(), 0.0);
 
   // Check for empty trajectory
   trajectory->clear();
@@ -550,13 +574,28 @@ TEST_F(RobotTrajectoryTestFixture, RobotTrajectoryDensity)
   robot_trajectory::RobotTrajectoryPtr trajectory;
   initTestTrajectory(trajectory);
 
-  const auto density = robot_trajectory::waypointDensity(*trajectory);
+  // If trajectory has all equal state, and length zero, density should be null.
+  auto density = robot_trajectory::waypointDensity(*trajectory);
+  ASSERT_FALSE(density.has_value());
+
+  // modify joint values so the density is nonzero
+  std::vector<double> positions;
+  for (size_t i = 0; i < trajectory->size(); ++i)
+  {
+    auto waypoint = trajectory->getWayPointPtr(i);
+    waypoint->copyJointGroupPositions(arm_jmg_name_, positions);
+    positions[0] += 0.01 * i;
+    waypoint->setJointGroupPositions(arm_jmg_name_, positions);
+  }
+
+  density = robot_trajectory::waypointDensity(*trajectory);
   ASSERT_TRUE(density.has_value());
   EXPECT_GT(density.value(), 0.0);
 
   // Check for empty trajectory
   trajectory->clear();
-  EXPECT_FALSE(robot_trajectory::waypointDensity(*trajectory).has_value());
+  density = robot_trajectory::waypointDensity(*trajectory);
+  EXPECT_FALSE(density.has_value());
 }
 
 TEST_F(OneRobot, Unwind)
