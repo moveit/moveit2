@@ -168,10 +168,10 @@ void Servo::setSmoothingPlugin()
     RCLCPP_ERROR(logger_, "Smoothing plugin could not be initialized");
     std::exit(EXIT_FAILURE);
   }
-  resetSmoother(getCurrentRobotState());
+  resetSmoothing(getCurrentRobotState());
 }
 
-void Servo::updateSmoother(KinematicState& state)
+void Servo::doSmoothing(KinematicState& state)
 {
   if (smoother_)
   {
@@ -179,7 +179,7 @@ void Servo::updateSmoother(KinematicState& state)
   }
 }
 
-void Servo::resetSmoother(const KinematicState& state)
+void Servo::resetSmoothing(const KinematicState& state)
 {
   if (smoother_)
   {
@@ -483,7 +483,7 @@ KinematicState Servo::getNextJointState(const ServoInput& command)
     target_state.positions = current_state.positions + joint_position_delta;
 
     // Apply smoothing to the positions if a smoother was provided.
-    updateSmoother(target_state);
+    doSmoothing(target_state);
 
     // Compute velocities based on smoothed joint positions
     target_state.velocities = (target_state.positions - current_state.positions) / servo_params_.publish_period;
@@ -640,7 +640,7 @@ std::pair<bool, KinematicState> Servo::smoothHalt(const KinematicState& halt_sta
         (target_state.velocities[i] - current_state.velocities[i]) / servo_params_.publish_period;
   }
 
-  updateSmoother(target_state);
+  doSmoothing(target_state);
 
   // If all velocities are near zero, robot has decelerated to a stop.
   stopped =

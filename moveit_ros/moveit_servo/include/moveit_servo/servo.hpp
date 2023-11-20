@@ -128,16 +128,16 @@ public:
   std::pair<bool, KinematicState> smoothHalt(const KinematicState& halt_state);
 
   /**
-   * \brief Updates the smoother, if one exists, by filtering with a new state.
-   * @param state The state used to update the smoothing plugin.
+   * \brief Applies smoothing to an input state, if a smoothing plugin is set.
+   * @param state The state to be updated by the smoothing plugin.
    */
-  void updateSmoother(KinematicState& state);
+  void doSmoothing(KinematicState& state);
 
   /**
-   * \brief Resets the smoother, if one exists, to a specified state.
-   * @param state The desired state to reset the smoother to.
+   * \brief Resets the smoothing plugin, if set, to a specified state.
+   * @param state The desired state to reset the smoothing plugin to.
    */
-  void resetSmoother(const KinematicState& state);
+  void resetSmoothing(const KinematicState& state);
 
 private:
   /**
