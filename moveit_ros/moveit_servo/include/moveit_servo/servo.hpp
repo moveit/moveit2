@@ -125,7 +125,19 @@ public:
    * @param The last commanded joint states.
    * @return The next state stepping towards the required halting state.
    */
-  std::pair<bool, KinematicState> smoothHalt(const KinematicState& halt_state) const;
+  std::pair<bool, KinematicState> smoothHalt(const KinematicState& halt_state);
+
+  /**
+   * \brief Updates the smoother, if one exists, by filtering with a new state.
+   * @param state The state used to update the smoothing plugin.
+   */
+  void updateSmoother(KinematicState& state);
+
+  /**
+   * \brief Resets the smoother, if one exists, to a specified state.
+   * @param state The desired state to reset the smoother to.
+   */
+  void resetSmoother(const KinematicState& state);
 
 private:
   /**
@@ -215,6 +227,7 @@ private:
   std::atomic<double> collision_velocity_scale_ = 1.0;
   std::unique_ptr<CollisionMonitor> collision_monitor_;
 
+  // Pointer to the (optional) smoothing plugin.
   pluginlib::UniquePtr<online_signal_smoothing::SmoothingBaseClass> smoother_ = nullptr;
 
   // Map between joint subgroup names and corresponding joint name - move group indices map
