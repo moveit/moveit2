@@ -181,10 +181,8 @@ void Servo::updateSmoother(KinematicState& state)
 
 void Servo::resetSmoother(const KinematicState& state)
 {
-  RCLCPP_ERROR(logger_, "TRYING TO RESET SMOOTHER");
   if (smoother_)
   {
-    RCLCPP_ERROR(logger_, "RESET SMOOTHER TO CURRENT STATE");
     smoother_->reset(state.positions, state.velocities, state.accelerations);
   }
 }
