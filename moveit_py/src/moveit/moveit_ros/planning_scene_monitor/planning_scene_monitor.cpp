@@ -42,6 +42,22 @@ namespace bind_planning_scene_monitor
 {
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_py.bind_planning_scene_monitor");
 
+bool processCollisionObject(const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor,
+                            moveit_msgs::msg::CollisionObject& collision_object_msg)
+{
+  moveit_msgs::msg::CollisionObject::ConstSharedPtr const_ptr =
+      std::make_shared<const moveit_msgs::msg::CollisionObject>(collision_object_msg);
+  return planning_scene_monitor->processCollisionObjectMsg(const_ptr);
+}
+
+bool processAttachedCollisionObjectMsg(const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor,
+                                       moveit_msgs::msg::AttachedCollisionObject& attached_collision_object_msg)
+{
+  moveit_msgs::msg::AttachedCollisionObject::ConstSharedPtr const_ptr =
+      std::make_shared<const moveit_msgs::msg::AttachedCollisionObject>(attached_collision_object_msg);
+  return planning_scene_monitor->processAttachedCollisionObjectMsg(const_ptr);
+}
+
 LockedPlanningSceneContextManagerRO
 readOnly(const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor)
 {
@@ -119,6 +135,14 @@ void initPlanningSceneMonitor(py::module& m)
            R"(
 	       Stops the state monitor.
 	   )")
+      .def("request_planning_scene_state", &planning_scene_monitor::PlanningSceneMonitor::requestPlanningSceneState,
+          py::arg("service_name"),
+           R"(
+	       Request the planning scene.
+
+            Args:
+               service_name (str): The name of the service to call.
+	   )")
 
       .def("wait_for_current_robot_state", &planning_scene_monitor::PlanningSceneMonitor::waitForCurrentRobotState,
            R"(
@@ -128,6 +152,22 @@ void initPlanningSceneMonitor(py::module& m)
       .def("clear_octomap", &planning_scene_monitor::PlanningSceneMonitor::clearOctomap,
            R"(
            Clears the octomap.
+           )")
+      .def("process_collision_object", &moveit_py::bind_planning_scene_monitor::processCollisionObject,
+           py::arg("collision_object_msg"),  // py::arg("color_msg") = nullptr,
+           R"(
+           Apply a collision object to the planning scene.
+
+	      Args:
+               collision_object_msg (moveit_msgs.msg.CollisionObject): The collision object to apply to the planning scene.
+           )")
+      .def("process_attached_collision_object",
+           &moveit_py::bind_planning_scene_monitor::processAttachedCollisionObjectMsg, py::arg("attached_collision_object_msg"),
+           R"(
+           Apply an attached collision object msg to the planning scene.
+
+	      Args:
+               attached_collision_object_msg (moveit_msgs.msg.AttachedCollisionObject): The attached collision object to apply to the planning scene.
            )")
 
       .def("read_only", &moveit_py::bind_planning_scene_monitor::readOnly,
