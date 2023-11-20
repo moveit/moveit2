@@ -55,7 +55,7 @@ protected:
   {
     robot_model_ = moveit::core::loadTestingRobotModel(robot_model_name_);
     robot_state_ = std::make_shared<moveit::core::RobotState>(robot_model_);
-    robot_state_->setToDefaultValues(arm_jmg_name_, arm_state_name_);
+    robot_state_->setToDefaultValues();
     robot_state_->setVariableVelocity(/*index*/ 0, /*value*/ 1.0);
     robot_state_->setVariableAcceleration(/*index*/ 0, /*value*/ -0.1);
     robot_state_->update();
