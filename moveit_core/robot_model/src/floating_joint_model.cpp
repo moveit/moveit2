@@ -123,8 +123,8 @@ double FloatingJointModel::distanceTranslation(const double* values1, const doub
 double FloatingJointModel::distanceRotation(const double* values1, const double* values2) const
 {
   // The values are in "xyzw" order but Eigen expects "wxyz".
-  const auto q1 = Eigen::Quaterniond(values1[6], values1[3], values1[4], values1[5]);
-  const auto q2 = Eigen::Quaterniond(values2[6], values2[3], values2[4], values2[5]);
+  const auto q1 = Eigen::Quaterniond(values1[6], values1[3], values1[4], values1[5]).normalized();
+  const auto q2 = Eigen::Quaterniond(values2[6], values2[3], values2[4], values2[5]).normalized();
   return q2.angularDistance(q1);
 }
 
