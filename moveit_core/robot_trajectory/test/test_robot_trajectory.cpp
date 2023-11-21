@@ -372,8 +372,6 @@ TEST_F(RobotTrajectoryTestFixture, RobotTrajectoryDensity)
   EXPECT_FALSE(density.has_value());
 }
 
-}
-
 int main(int argc, char** argv)
 {
   testing::InitGoogleTest(&argc, argv);
