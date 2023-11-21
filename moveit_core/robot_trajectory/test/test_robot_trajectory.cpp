@@ -54,7 +54,7 @@ protected:
   {
     robot_model_ = moveit::core::loadTestingRobotModel(robot_model_name_);
     robot_state_ = std::make_shared<moveit::core::RobotState>(robot_model_);
-    robot_state_->setToDefaultValues(arm_jmg_name_, arm_state_name_);
+    robot_state_->setToDefaultValues();
     robot_state_->setVariableVelocity(/*index*/ 0, /*value*/ 1.0);
     robot_state_->setVariableAcceleration(/*index*/ 0, /*value*/ -0.1);
     robot_state_->update();
@@ -66,7 +66,7 @@ protected:
 
   void initTestTrajectory(robot_trajectory::RobotTrajectoryPtr& trajectory)
   {
-    // Init a traj
+    // Init a trajectory
     ASSERT_TRUE(robot_model_->hasJointModelGroup(arm_jmg_name_))
         << "Robot model does not have group: " << arm_jmg_name_;
 
@@ -78,7 +78,10 @@ protected:
     double duration_from_previous = 0.1;
     std::size_t waypoint_count = 5;
     for (std::size_t ix = 0; ix < waypoint_count; ++ix)
+    {
       trajectory->addSuffixWayPoint(*robot_state_, duration_from_previous);
+    }
+
     // Quick check that getDuration is working correctly
     EXPECT_EQ(trajectory->getDuration(), duration_from_previous * waypoint_count)
         << "Generated trajectory duration incorrect";
@@ -302,13 +305,38 @@ TEST_F(RobotTrajectoryTestFixture, RobotTrajectoryLength)
 {
   robot_trajectory::RobotTrajectoryPtr trajectory;
   initTestTrajectory(trajectory);
+<<<<<<< HEAD
   EXPECT_GT(robot_trajectory::path_length(*trajectory), 0.0);
+=======
+  EXPECT_FLOAT_EQ(robot_trajectory::pathLength(*trajectory), 0.0);
+
+  // modify joint values so the smoothness is nonzero
+  std::vector<double> positions;
+  for (size_t i = 0; i < trajectory->size(); ++i)
+  {
+    auto waypoint = trajectory->getWayPointPtr(i);
+    waypoint->copyJointGroupPositions(arm_jmg_name_, positions);
+    positions[0] += 0.01 * i;
+    waypoint->setJointGroupPositions(arm_jmg_name_, positions);
+  }
+  EXPECT_GT(robot_trajectory::pathLength(*trajectory), 0.0);
+>>>>>>> 83ff55a4a (Fix angular distance calculation in floating joint model (#2538))
 }
 
 TEST_F(RobotTrajectoryTestFixture, RobotTrajectorySmoothness)
 {
   robot_trajectory::RobotTrajectoryPtr trajectory;
   initTestTrajectory(trajectory);
+
+  // modify joint values so the smoothness is nonzero
+  std::vector<double> positions;
+  for (size_t i = 0; i < trajectory->size(); ++i)
+  {
+    auto waypoint = trajectory->getWayPointPtr(i);
+    waypoint->copyJointGroupPositions(arm_jmg_name_, positions);
+    positions[0] += 0.01 * i;
+    waypoint->setJointGroupPositions(arm_jmg_name_, positions);
+  }
 
   const auto smoothness = robot_trajectory::smoothness(*trajectory);
   ASSERT_TRUE(smoothness.has_value());
@@ -324,13 +352,72 @@ TEST_F(RobotTrajectoryTestFixture, RobotTrajectoryDensity)
   robot_trajectory::RobotTrajectoryPtr trajectory;
   initTestTrajectory(trajectory);
 
+<<<<<<< HEAD
   const auto density = robot_trajectory::waypoint_density(*trajectory);
+=======
+  // If trajectory has all equal state, and length zero, density should be null.
+  auto density = robot_trajectory::waypointDensity(*trajectory);
+  ASSERT_FALSE(density.has_value());
+
+  // modify joint values so the density is nonzero
+  std::vector<double> positions;
+  for (size_t i = 0; i < trajectory->size(); ++i)
+  {
+    auto waypoint = trajectory->getWayPointPtr(i);
+    waypoint->copyJointGroupPositions(arm_jmg_name_, positions);
+    positions[0] += 0.01 * i;
+    waypoint->setJointGroupPositions(arm_jmg_name_, positions);
+  }
+
+  density = robot_trajectory::waypointDensity(*trajectory);
+>>>>>>> 83ff55a4a (Fix angular distance calculation in floating joint model (#2538))
   ASSERT_TRUE(density.has_value());
   EXPECT_GT(density.value(), 0.0);
 
   // Check for empty trajectory
   trajectory->clear();
+<<<<<<< HEAD
   EXPECT_FALSE(robot_trajectory::waypoint_density(*trajectory).has_value());
+=======
+  density = robot_trajectory::waypointDensity(*trajectory);
+  EXPECT_FALSE(density.has_value());
+}
+
+TEST_F(OneRobot, Unwind)
+{
+  const double epsilon = 1e-4;
+
+  // An initial joint position needs unwinding
+  {
+    robot_trajectory::RobotTrajectoryPtr trajectory;
+    initTestTrajectory(trajectory);
+    moveit::core::RobotStatePtr& first_waypoint = trajectory->getFirstWayPointPtr();
+    const double random_large_angle = 20.2;  // rad, should unwind to 1.350444 rad
+    first_waypoint->setVariablePosition("panda_joint0", random_large_angle);
+    first_waypoint->update();
+    trajectory->unwind();
+    EXPECT_NEAR(trajectory->getFirstWayPoint().getVariablePosition("panda_joint0"), 1.350444, epsilon);
+  }
+}
+
+TEST_F(OneRobot, UnwindFromState)
+{
+  const double epsilon = 1e-4;
+
+  // Unwind a trajectory from a robot state
+  {
+    robot_trajectory::RobotTrajectoryPtr trajectory;
+    initTestTrajectory(trajectory);
+    moveit::core::RobotState first_waypoint = trajectory->getFirstWayPoint();
+    // Wrap the continuous joint by 4PI as if this happened to be the current state of the robot
+    const double wrapped_angle = first_waypoint.getVariablePosition("panda_joint0") + 12.566371;
+    first_waypoint.setVariablePosition("panda_joint0", wrapped_angle);
+    first_waypoint.update();
+    // Unwind the trajectory from the wound up robot state
+    trajectory->unwind(first_waypoint);
+    EXPECT_NEAR(trajectory->getFirstWayPoint().getVariablePosition("panda_joint0"), wrapped_angle, epsilon);
+  }
+>>>>>>> 83ff55a4a (Fix angular distance calculation in floating joint model (#2538))
 }
 
 int main(int argc, char** argv)
