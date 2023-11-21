@@ -320,15 +320,20 @@ double jointLimitVelocityScalingFactor(const Eigen::VectorXd& velocities,
   }
 
   // Now get the scaling factor from joint velocity limits.
-  for (size_t i = 0; i < joint_bounds.size(); ++i)
+  size_t idx = 0;
+  for (const auto& joint_bound : joint_bounds)
   {
-    const auto joint_bound = (joint_bounds[i])->front();
-    if (joint_bound.velocity_bounded_ && velocities(i) != 0.0)
+    for (const auto& variable_bound : *joint_bound)
     {
-      // Find the ratio of clamped velocity to original velocity
-      const auto bounded_vel = std::clamp(velocities(i), joint_bound.min_velocity_, joint_bound.max_velocity_);
-      const auto joint_scaling_factor = bounded_vel / velocities(i);
-      min_scaling_factor = std::min(min_scaling_factor, joint_scaling_factor);
+      const auto& target_vel = velocities(idx);
+      if (variable_bound.velocity_bounded_ && target_vel != 0.0)
+      {
+        // Find the ratio of clamped velocity to original velocity
+        const auto bounded_vel = std::clamp(target_vel, variable_bound.min_velocity_, variable_bound.max_velocity_);
+        const auto joint_scaling_factor = bounded_vel / target_vel;
+        min_scaling_factor = std::min(min_scaling_factor, joint_scaling_factor);
+      }
+      ++idx;
     }
   }
 
