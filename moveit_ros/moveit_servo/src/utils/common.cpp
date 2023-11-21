@@ -313,29 +313,26 @@ double jointLimitVelocityScalingFactor(const Eigen::VectorXd& velocities,
                                        const moveit::core::JointBoundsVector& joint_bounds, double scaling_override)
 {
   // If override value is close to zero, user is not overriding the scaling
+  double min_scaling_factor = scaling_override;
   if (scaling_override < SCALING_OVERRIDE_THRESHOLD)
   {
-    scaling_override = 1.0;  // Set to no scaling.
-    double bounded_vel;
-    std::vector<double> velocity_scaling_factors;  // The allowable fraction of computed veclocity
-
-    for (size_t i = 0; i < joint_bounds.size(); i++)
-    {
-      const auto joint_bound = (joint_bounds[i])->front();
-      if (joint_bound.velocity_bounded_ && velocities(i) != 0.0)
-      {
-        // Find the ratio of clamped velocity to original velocity
-        bounded_vel = std::clamp(velocities(i), joint_bound.min_velocity_, joint_bound.max_velocity_);
-        velocity_scaling_factors.push_back(bounded_vel / velocities(i));
-      }
-    }
-    // Find the lowest scaling factor, this helps preserve Cartesian motion.
-    scaling_override = velocity_scaling_factors.empty() ?
-                           scaling_override :
-                           *std::min_element(velocity_scaling_factors.begin(), velocity_scaling_factors.end());
+    min_scaling_factor = 1.0;  // Set to no scaling override.
   }
 
-  return scaling_override;
+  // Now get the scaling factor from joint velocity limits.
+  for (size_t i = 0; i < joint_bounds.size(); ++i)
+  {
+    const auto joint_bound = (joint_bounds[i])->front();
+    if (joint_bound.velocity_bounded_ && velocities(i) != 0.0)
+    {
+      // Find the ratio of clamped velocity to original velocity
+      const auto bounded_vel = std::clamp(velocities(i), joint_bound.min_velocity_, joint_bound.max_velocity_);
+      const auto joint_scaling_factor = bounded_vel / velocities(i);
+      min_scaling_factor = std::min(min_scaling_factor, joint_scaling_factor);
+    }
+  }
+
+  return min_scaling_factor;
 }
 
 std::vector<int> jointsToHalt(const Eigen::VectorXd& positions, const Eigen::VectorXd& velocities,
