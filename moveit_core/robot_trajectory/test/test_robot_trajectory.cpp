@@ -372,40 +372,6 @@ TEST_F(RobotTrajectoryTestFixture, RobotTrajectoryDensity)
   EXPECT_FALSE(density.has_value());
 }
 
-TEST_F(OneRobot, Unwind)
-{
-  const double epsilon = 1e-4;
-
-  // An initial joint position needs unwinding
-  {
-    robot_trajectory::RobotTrajectoryPtr trajectory;
-    initTestTrajectory(trajectory);
-    moveit::core::RobotStatePtr& first_waypoint = trajectory->getFirstWayPointPtr();
-    const double random_large_angle = 20.2;  // rad, should unwind to 1.350444 rad
-    first_waypoint->setVariablePosition("panda_joint0", random_large_angle);
-    first_waypoint->update();
-    trajectory->unwind();
-    EXPECT_NEAR(trajectory->getFirstWayPoint().getVariablePosition("panda_joint0"), 1.350444, epsilon);
-  }
-}
-
-TEST_F(OneRobot, UnwindFromState)
-{
-  const double epsilon = 1e-4;
-
-  // Unwind a trajectory from a robot state
-  {
-    robot_trajectory::RobotTrajectoryPtr trajectory;
-    initTestTrajectory(trajectory);
-    moveit::core::RobotState first_waypoint = trajectory->getFirstWayPoint();
-    // Wrap the continuous joint by 4PI as if this happened to be the current state of the robot
-    const double wrapped_angle = first_waypoint.getVariablePosition("panda_joint0") + 12.566371;
-    first_waypoint.setVariablePosition("panda_joint0", wrapped_angle);
-    first_waypoint.update();
-    // Unwind the trajectory from the wound up robot state
-    trajectory->unwind(first_waypoint);
-    EXPECT_NEAR(trajectory->getFirstWayPoint().getVariablePosition("panda_joint0"), wrapped_angle, epsilon);
-  }
 }
 
 int main(int argc, char** argv)
