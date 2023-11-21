@@ -136,7 +136,7 @@ void initPlanningSceneMonitor(py::module& m)
 	       Stops the state monitor.
 	   )")
       .def("request_planning_scene_state", &planning_scene_monitor::PlanningSceneMonitor::requestPlanningSceneState,
-          py::arg("service_name"),
+           py::arg("service_name"),
            R"(
 	       Request the planning scene.
 
@@ -162,7 +162,8 @@ void initPlanningSceneMonitor(py::module& m)
                collision_object_msg (moveit_msgs.msg.CollisionObject): The collision object to apply to the planning scene.
            )")
       .def("process_attached_collision_object",
-           &moveit_py::bind_planning_scene_monitor::processAttachedCollisionObjectMsg, py::arg("attached_collision_object_msg"),
+           &moveit_py::bind_planning_scene_monitor::processAttachedCollisionObjectMsg,
+           py::arg("attached_collision_object_msg"),
            R"(
            Apply an attached collision object msg to the planning scene.
 

@@ -394,9 +394,11 @@ public:
 
   // Called to update a collision object in the planning scene.
   bool processCollisionObjectMsg(const moveit_msgs::msg::CollisionObject::ConstSharedPtr& collision_object_msg);
-  
+
   // Called to update an attached collision object in the planning scene.
-  bool processAttachedCollisionObjectMsg(const moveit_msgs::msg::AttachedCollisionObject::ConstSharedPtr& attached_collision_object_msg);
+  bool processAttachedCollisionObjectMsg(
+      const moveit_msgs::msg::AttachedCollisionObject::ConstSharedPtr& attached_collision_object_msg);
+
 protected:
   /** @brief Initialize the planning scene monitor
    *  @param scene The scene instance to fill with data (an instance is allocated if the one passed in is not allocated)
