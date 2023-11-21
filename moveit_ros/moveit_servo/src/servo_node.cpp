@@ -302,7 +302,10 @@ void ServoNode::servoLoop()
   {
     // Skip processing if servoing is disabled.
     if (servo_paused_)
+    {
+      servo_frequency.sleep();
       continue;
+    }
 
     next_joint_state = std::nullopt;
     const CommandType expected_type = servo_->getCommandType();
