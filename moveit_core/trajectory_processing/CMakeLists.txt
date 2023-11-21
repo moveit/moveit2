@@ -26,6 +26,9 @@ target_link_libraries(moveit_trajectory_processing
 install(DIRECTORY include/ DESTINATION include/moveit_core)
 
 if(BUILD_TESTING)
+  find_package(ament_cmake_google_benchmark REQUIRED)
+  find_package(ament_cmake_gtest REQUIRED)
+  find_package(benchmark REQUIRED)
   if(WIN32)
     # TODO add windows paths
     # set(append_library_dirs "$<TARGET_FILE_DIR:${PROJECT_NAME}>;$<TARGET_FILE_DIR:${PROJECT_NAME}_TestPlugins1>")
@@ -40,5 +43,16 @@ if(BUILD_TESTING)
   target_link_libraries(test_ruckig_traj_smoothing
     moveit_trajectory_processing
     moveit_test_utils
+  )
+
+  ament_add_google_benchmark(
+    robot_trajectory_benchmark
+    test/robot_trajectory_benchmark.cpp)
+  target_link_libraries(robot_trajectory_benchmark
+    moveit_robot_model
+    moveit_test_utils
+    moveit_robot_state
+    moveit_robot_trajectory
+    moveit_trajectory_processing
   )
 endif()
