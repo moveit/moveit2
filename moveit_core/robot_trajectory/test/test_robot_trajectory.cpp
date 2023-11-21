@@ -531,10 +531,7 @@ TEST_F(RobotTrajectoryTestFixture, RobotTrajectoryLength)
 {
   robot_trajectory::RobotTrajectoryPtr trajectory;
   initTestTrajectory(trajectory);
-<<<<<<< HEAD
-  EXPECT_GT(robot_trajectory::path_length(*trajectory), 0.0);
-=======
-  EXPECT_FLOAT_EQ(robot_trajectory::pathLength(*trajectory), 0.0);
+  EXPECT_FLOAT_EQ(robot_trajectory::path_length(*trajectory), 0.0);
 
   // modify joint values so the smoothness is nonzero
   std::vector<double> positions;
@@ -545,8 +542,7 @@ TEST_F(RobotTrajectoryTestFixture, RobotTrajectoryLength)
     positions[0] += 0.01 * i;
     waypoint->setJointGroupPositions(arm_jmg_name_, positions);
   }
-  EXPECT_GT(robot_trajectory::pathLength(*trajectory), 0.0);
->>>>>>> 83ff55a4a (Fix angular distance calculation in floating joint model (#2538))
+  EXPECT_GT(robot_trajectory::path_length(*trajectory), 0.0);
 }
 
 TEST_F(RobotTrajectoryTestFixture, RobotTrajectorySmoothness)
@@ -578,11 +574,8 @@ TEST_F(RobotTrajectoryTestFixture, RobotTrajectoryDensity)
   robot_trajectory::RobotTrajectoryPtr trajectory;
   initTestTrajectory(trajectory);
 
-<<<<<<< HEAD
-  const auto density = robot_trajectory::waypoint_density(*trajectory);
-=======
   // If trajectory has all equal state, and length zero, density should be null.
-  auto density = robot_trajectory::waypointDensity(*trajectory);
+  auto density = robot_trajectory::waypoint_density(*trajectory);
   ASSERT_FALSE(density.has_value());
 
   // modify joint values so the density is nonzero
@@ -595,19 +588,14 @@ TEST_F(RobotTrajectoryTestFixture, RobotTrajectoryDensity)
     waypoint->setJointGroupPositions(arm_jmg_name_, positions);
   }
 
-  density = robot_trajectory::waypointDensity(*trajectory);
->>>>>>> 83ff55a4a (Fix angular distance calculation in floating joint model (#2538))
+  density = robot_trajectory::waypoint_density(*trajectory);
   ASSERT_TRUE(density.has_value());
   EXPECT_GT(density.value(), 0.0);
 
   // Check for empty trajectory
   trajectory->clear();
-<<<<<<< HEAD
-  EXPECT_FALSE(robot_trajectory::waypoint_density(*trajectory).has_value());
-=======
-  density = robot_trajectory::waypointDensity(*trajectory);
+  density = robot_trajectory::waypoint_density(*trajectory);
   EXPECT_FALSE(density.has_value());
->>>>>>> 83ff55a4a (Fix angular distance calculation in floating joint model (#2538))
 }
 
 TEST_F(OneRobot, Unwind)
