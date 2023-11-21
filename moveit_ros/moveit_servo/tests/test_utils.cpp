@@ -68,25 +68,25 @@ TEST(ServoUtilsUnitTests, JointLimitVelocityScaling)
 
   // Create incoming velocities with only joint 1 and joint 2 over limit by a factor of 0.1 and 0.05
   // Scale down all other joint velocities by 0.3 to keep it within limits.
-  incoming_velocities(0) *= 1.1;
-  incoming_velocities(1) *= 1.05;
+  incoming_velocities(0) *= 1.1;   // This joint is not velocity bounded, so it not accounted for in scaling.
+  incoming_velocities(1) *= 1.05;  // This joint is velocity bounded, and should be the limiting joint in scaling.
   incoming_velocities.tail<5>() *= 0.7;
 
   constexpr double tol = 0.001;
 
-  // The resulting scaling factor from joints should be approximately 0.95238
+  // The resulting scaling factor from joints should be 1 / 1.05 = 0.95238
   double user_velocity_override = 0.0;
   double scaling_factor =
       moveit_servo::jointLimitVelocityScalingFactor(incoming_velocities, joint_bounds, user_velocity_override);
   ASSERT_NEAR(scaling_factor, 0.95238, tol);
 
-  // With a scaling override, it should use the override if lower than joint scaling.
+  // With a scaling override lower than the joint limit scaling, it should use the override value.
   user_velocity_override = 0.5;
   scaling_factor =
       moveit_servo::jointLimitVelocityScalingFactor(incoming_velocities, joint_bounds, user_velocity_override);
   ASSERT_NEAR(scaling_factor, 0.5, tol);
 
-  // With a scaling override, it should still use the joint limits if higher than joint scaling.
+  // With a scaling override higher than the joint limit scaling, it should still use the joint limits.
   // Safety always first!
   user_velocity_override = 1.0;
   scaling_factor =
