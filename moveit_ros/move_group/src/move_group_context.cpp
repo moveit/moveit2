@@ -82,18 +82,17 @@ move_group::MoveGroupContext::~MoveGroupContext()
 
 bool move_group::MoveGroupContext::status() const
 {
-  const planning_interface::PlannerManagerPtr& planner_interface = planning_pipeline_->getPlannerManager();
-  if (planner_interface)
+  if (planning_pipeline_)
   {
     RCLCPP_INFO_STREAM(moveit::getLogger(),
-                       "MoveGroup context using planning plugin " << planning_pipeline_->getPlannerPluginName());
+                       "MoveGroup context using pipeline " << planning_pipeline_->getName().c_str());
     RCLCPP_INFO_STREAM(moveit::getLogger(), "MoveGroup context initialization complete");
     return true;
   }
   else
   {
     RCLCPP_WARN_STREAM(moveit::getLogger(),
-                       "MoveGroup running was unable to load " << planning_pipeline_->getPlannerPluginName());
+                       "MoveGroup running was unable to load pipeline " << planning_pipeline_->getName().c_str());
     return false;
   }
 }

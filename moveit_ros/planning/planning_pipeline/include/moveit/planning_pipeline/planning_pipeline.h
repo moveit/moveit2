@@ -217,6 +217,12 @@ public:
     return active_;
   }
 
+  /** \brief Return the parameter namespace as name of the planning pipeline. */
+  [[nodiscard]] std::string getName() const
+  {
+    return parameter_namespace_;
+  }
+
 private:
   /// \brief Helper function that is called by both constructors to configure and initialize a PlanningPipeline instance
   void configure();

@@ -114,7 +114,7 @@ BenchmarkExecutor::~BenchmarkExecutor()
 
     const auto& pipeline = moveit_cpp_->getPlanningPipelines().at(planning_pipeline_name);
     // Verify the pipeline has successfully initialized a planner
-    if (!pipeline->getPlannerManager())
+    if (!pipeline)
     {
       RCLCPP_ERROR(getLogger(), "Failed to initialize planning pipeline '%s'", planning_pipeline_name.c_str());
       continue;
@@ -542,42 +542,6 @@ bool BenchmarkExecutor::plannerConfigurationsExist(
       return false;
     }
   }
-
-  // Make sure planners exist within those pipelines
-  auto planning_pipelines = moveit_cpp_->getPlanningPipelines();
-  for (const std::pair<const std::string, std::vector<std::string>>& entry : pipeline_configurations)
-  {
-    planning_interface::PlannerManagerPtr pm = planning_pipelines[entry.first]->getPlannerManager();
-    const planning_interface::PlannerConfigurationMap& config_map = pm->getPlannerConfigurations();
-
-    // if the planner is chomp or stomp skip this function and return true for checking planner configurations for the
-    // planning group otherwise an error occurs, because for OMPL a specific planning algorithm needs to be defined for
-    // a planning group, whereas with STOMP and CHOMP this is not necessary
-    if (pm->getDescription().compare("stomp") || pm->getDescription().compare("chomp"))
-      continue;
-
-    for (std::size_t i = 0; i < entry.second.size(); ++i)
-    {
-      bool planner_exists = false;
-      for (const std::pair<const std::string, planning_interface::PlannerConfigurationSettings>& config_entry :
-           config_map)
-      {
-        std::string planner_name = group_name + "[" + entry.second[i] + "]";
-        planner_exists = (config_entry.second.group == group_name && config_entry.second.name == planner_name);
-      }
-
-      if (!planner_exists)
-      {
-        RCLCPP_ERROR(getLogger(), "Planner '%s' does NOT exist for group '%s' in pipeline '%s'",
-                     entry.second[i].c_str(), group_name.c_str(), entry.first.c_str());
-        std::cout << "There are " << config_map.size() << " planner entries: " << '\n';
-        for (const auto& config_map_entry : config_map)
-          std::cout << config_map_entry.second.name << '\n';
-        return false;
-      }
-    }
-  }
-
   return true;
 }
 
