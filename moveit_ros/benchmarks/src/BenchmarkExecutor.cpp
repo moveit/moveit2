@@ -132,8 +132,7 @@ BenchmarkExecutor::~BenchmarkExecutor()
     for (const std::pair<const std::string, planning_pipeline::PlanningPipelinePtr>& entry :
          moveit_cpp_->getPlanningPipelines())
     {
-      RCLCPP_INFO_STREAM(getLogger(),
-                         "Pipeline: " << entry.first << ", Planner: " << entry.second->getPlannerPluginName());
+      RCLCPP_INFO_STREAM(getLogger(), entry.first);
     }
   }
   return true;
