@@ -3,6 +3,7 @@
 API changes in MoveIt releases
 
 ## ROS Rolling
+- planning_plugin: ompl_interface/OMPLPlanner
 - [10/2023] Planning request adapters are now separated into PlanRequest (preprocessing) and PlanResponse (postprocessing) adapters. The adapters are configured with ROS parameter vectors (vector order corresponds to execution order). Please update your pipeline configurations for example like this:
 ```diff
 - request_adapters: >-
