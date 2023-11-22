@@ -259,7 +259,7 @@ bool BenchmarkExecutor::initializeBenchmarks(const BenchmarkOptions& options,
                                              moveit_msgs::msg::PlanningScene& scene_msg,
                                              std::vector<BenchmarkRequest>& requests)
 {
-  if (!plannerConfigurationsExist(options.planning_pipelines, options.group_name))
+  if (!plannerConfigurationsExist(options.planning_pipelines))
   {
     return false;
   }
@@ -521,7 +521,7 @@ void BenchmarkExecutor::createRequestCombinations(const BenchmarkRequest& benchm
 }
 
 bool BenchmarkExecutor::plannerConfigurationsExist(
-    const std::map<std::string, std::vector<std::string>>& pipeline_configurations, const std::string& group_name)
+    const std::map<std::string, std::vector<std::string>>& pipeline_configurations)
 {
   // Make sure planner plugins exist
   for (const std::pair<const std::string, std::vector<std::string>>& pipeline_config_entry : pipeline_configurations)
