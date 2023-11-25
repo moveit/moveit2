@@ -40,16 +40,34 @@ namespace moveit_py
 {
 namespace bind_collision_detection
 {
-std::pair<bool, collision_detection::AllowedCollision::Type>
-getEntry(const std::shared_ptr<collision_detection::AllowedCollisionMatrix>& acm, const std::string& name1,
-         const std::string& name2)
+// TODO: Create a custom typecaster/revise the current implementation to return std::pair<bool,
+// collision_detection::AllowedCollision::Type>
+std::pair<bool, std::string> getEntry(const collision_detection::AllowedCollisionMatrix& acm, const std::string& name1,
+                                      const std::string& name2)
 {
   // check acm for collision
   collision_detection::AllowedCollision::Type type;
-  bool collision_allowed = acm->getEntry(name1, name2, type);
+  bool collision_allowed = acm.getEntry(name1, name2, type);
+  std::string type_str;
+  if (type == collision_detection::AllowedCollision::Type::NEVER)
+  {
+    type_str = "NEVER";
+  }
+  else if (type == collision_detection::AllowedCollision::Type::ALWAYS)
+  {
+    type_str = "ALWAYS";
+  }
+  else if (type == collision_detection::AllowedCollision::Type::CONDITIONAL)
+  {
+    type_str = "CONDITIONAL";
+  }
+  else
+  {
+    type_str = "UNKNOWN";
+  }
 
   // should return a tuple true/false and the allowed collision type
-  std::pair<bool, collision_detection::AllowedCollision::Type> result = std::make_pair(collision_allowed, type);
+  std::pair<bool, std::string> result = std::make_pair(collision_allowed, type_str);
   return result;
 }
 
