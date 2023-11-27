@@ -204,7 +204,7 @@ StompPlanningContext::StompPlanningContext(const std::string& name, const std::s
 {
 }
 
-bool StompPlanningContext::solve(planning_interface::MotionPlanResponse& res)
+void StompPlanningContext::solve(planning_interface::MotionPlanResponse& res)
 {
   // Start time
   auto time_start = std::chrono::steady_clock::now();
@@ -222,7 +222,7 @@ bool StompPlanningContext::solve(planning_interface::MotionPlanResponse& res)
   if (!goal_sampler || !goal_sampler->sample(goal_state))
   {
     res.error_code.val = moveit_msgs::msg::MoveItErrorCodes::INVALID_GOAL_CONSTRAINTS;
-    return false;  // Can't plan without valid goal state
+    return;  // Can't plan without valid goal state
   }
 
   // STOMP config, task, planner instance
@@ -267,16 +267,14 @@ bool StompPlanningContext::solve(planning_interface::MotionPlanResponse& res)
   // Stop time
   std::chrono::duration<double> elapsed_seconds = std::chrono::steady_clock::now() - time_start;
   res.planning_time = elapsed_seconds.count();
-
-  return res.error_code.val == moveit_msgs::msg::MoveItErrorCodes::SUCCESS;
 }
 
-bool StompPlanningContext::solve(planning_interface::MotionPlanDetailedResponse& /*res*/)
+void StompPlanningContext::solve(planning_interface::MotionPlanDetailedResponse& /*res*/)
 {
   // TODO(#2168): implement this function
   RCLCPP_ERROR(LOGGER,
                "StompPlanningContext::solve(planning_interface::MotionPlanDetailedResponse&) is not implemented!");
-  return false;
+  return;
 }
 
 bool StompPlanningContext::terminate()

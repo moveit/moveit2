@@ -52,6 +52,10 @@ using moveit::getLogger;
 
 namespace
 {
+
+/** \brief To display a motion path with RVIZ, the solution is sent to this topic (moveit_msgs::msg::DisplayTrajectory) */
+const std::string DISPLAY_PATH_TOPIC = std::string("display_planned_path");
+
 bool isStateValid(const planning_scene::PlanningScene* planning_scene,
                   const kinematic_constraints::KinematicConstraintSet* constraint_set, moveit::core::RobotState* state,
                   const moveit::core::JointModelGroup* group, const double* ik_solution)
@@ -72,8 +76,8 @@ MoveGroupCartesianPathService::MoveGroupCartesianPathService()
 
 void MoveGroupCartesianPathService::initialize()
 {
-  display_path_ = context_->moveit_cpp_->getNode()->create_publisher<moveit_msgs::msg::DisplayTrajectory>(
-      planning_pipeline::PlanningPipeline::DISPLAY_PATH_TOPIC, 10);
+  display_path_ =
+      context_->moveit_cpp_->getNode()->create_publisher<moveit_msgs::msg::DisplayTrajectory>(DISPLAY_PATH_TOPIC, 10);
 
   cartesian_path_service_ = context_->moveit_cpp_->getNode()->create_service<moveit_msgs::srv::GetCartesianPath>(
 

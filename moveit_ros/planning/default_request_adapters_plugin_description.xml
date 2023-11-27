@@ -1,0 +1,33 @@
+<library path="moveit_default_planning_request_adapter_plugins">
+
+  <class name="default_planning_request_adapters/CheckStartStateBounds" type="default_planning_request_adapters::CheckStartStateBounds" base_class_type="planning_interface::PlanningRequestAdapter">
+    <description>
+      Fixes the start state to be within the joint limits specified in the URDF.
+    </description>
+  </class>
+
+  <class name="default_planning_request_adapters/ValidateWorkspaceBounds" type="default_planning_request_adapters::ValidateWorkspaceBounds" base_class_type="planning_interface::PlanningRequestAdapter">
+    <description>
+      Specify a default workspace for planning if none is specified in the planning request.
+    </description>
+  </class>
+
+  <class name="default_planning_request_adapters/CheckStartStateCollision" type="default_planning_request_adapters::CheckStartStateCollision" base_class_type="planning_interface::PlanningRequestAdapter">
+    <description>
+      If start state is in collision this adapter attempts to sample a new collision-free configuration near a specified configuration (in collision) by perturbing the joint values by a small amount.
+    </description>
+  </class>
+
+  <class name="default_planning_request_adapters/ResolveConstraintFrames" type="default_planning_request_adapters::ResolveConstraintFrames" base_class_type="planning_interface::PlanningRequestAdapter">
+    <description>
+      Resolves constraints that are defined in collision objects or subframes to robot links, because the former are not known to the planner.
+    </description>
+  </class>
+
+  <class name="default_planning_request_adapters/CheckForStackedConstraints" type="default_planning_request_adapters::CheckForStackedConstraints" base_class_type="planning_interface::PlanningRequestAdapter">
+    <description>
+      Check if the motion plan request contains stacked path or goal constraints.
+    </description>
+  </class>
+
+</library>

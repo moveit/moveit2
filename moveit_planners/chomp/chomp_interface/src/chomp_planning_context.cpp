@@ -47,25 +47,22 @@ CHOMPPlanningContext::CHOMPPlanningContext(const std::string& name, const std::s
   chomp_interface_ = std::make_shared<CHOMPInterface>(node);
 }
 
-bool CHOMPPlanningContext::solve(planning_interface::MotionPlanDetailedResponse& res)
+void CHOMPPlanningContext::solve(planning_interface::MotionPlanDetailedResponse& res)
 {
-  return chomp_interface_->solve(planning_scene_, request_, chomp_interface_->getParams(), res);
+  chomp_interface_->solve(planning_scene_, request_, chomp_interface_->getParams(), res);
 }
 
-bool CHOMPPlanningContext::solve(planning_interface::MotionPlanResponse& res)
+void CHOMPPlanningContext::solve(planning_interface::MotionPlanResponse& res)
 {
   planning_interface::MotionPlanDetailedResponse res_detailed;
-  bool planning_success = solve(res_detailed);
-
-  res.error_code = res_detailed.error_code;
-
-  if (planning_success)
+  solve(res_detailed);
+  if (res_detailed.error_code.val == moveit_msgs::msg::MoveItErrorCodes::SUCCESS)
   {
     res.trajectory = res_detailed.trajectory[0];
     res.planning_time = res_detailed.processing_time[0];
   }
 
-  return planning_success;
+  res.error_code = res_detailed.error_code;
 }
 
 bool CHOMPPlanningContext::terminate()

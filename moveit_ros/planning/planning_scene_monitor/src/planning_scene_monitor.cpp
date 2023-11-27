@@ -800,20 +800,21 @@ bool PlanningSceneMonitor::processCollisionObjectMsg(const moveit_msgs::msg::Col
 bool PlanningSceneMonitor::processAttachedCollisionObjectMsg(
     const moveit_msgs::msg::AttachedCollisionObject::ConstSharedPtr& object)
 {
-  if (scene_)
+  if (!scene_)
   {
-    updateFrameTransforms();
-    {
-      std::unique_lock<std::shared_mutex> ulock(scene_update_mutex_);
-      last_update_time_ = rclcpp::Clock().now();
-      if (!scene_->processAttachedCollisionObjectMsg(*object))
-        return false;
-    }
-    triggerSceneUpdateEvent(UPDATE_GEOMETRY);
-    RCLCPP_INFO(logger_, "Published update attached");
-    return true;
+    return false;
   }
-  return false;
+
+  updateFrameTransforms();
+  {
+    std::unique_lock<std::shared_mutex> ulock(scene_update_mutex_);
+    last_update_time_ = rclcpp::Clock().now();
+    if (!scene_->processAttachedCollisionObjectMsg(*object))
+      return false;
+  }
+  triggerSceneUpdateEvent(UPDATE_GEOMETRY);
+  RCLCPP_INFO(logger_, "Published update attached");
+  return true;
 }
 
 void PlanningSceneMonitor::newPlanningSceneWorldCallback(

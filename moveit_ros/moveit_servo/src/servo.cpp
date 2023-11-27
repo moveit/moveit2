@@ -168,8 +168,23 @@ void Servo::setSmoothingPlugin()
     RCLCPP_ERROR(logger_, "Smoothing plugin could not be initialized");
     std::exit(EXIT_FAILURE);
   }
-  const KinematicState current_state = getCurrentRobotState();
-  smoother_->reset(current_state.positions, current_state.velocities, current_state.accelerations);
+  resetSmoothing(getCurrentRobotState());
+}
+
+void Servo::doSmoothing(KinematicState& state)
+{
+  if (smoother_)
+  {
+    smoother_->doSmoothing(state.positions, state.velocities, state.accelerations);
+  }
+}
+
+void Servo::resetSmoothing(const KinematicState& state)
+{
+  if (smoother_)
+  {
+    smoother_->reset(state.positions, state.velocities, state.accelerations);
+  }
 }
 
 void Servo::setCollisionChecking(const bool check_collision)
@@ -467,13 +482,8 @@ KinematicState Servo::getNextJointState(const ServoInput& command)
     // Compute the next joint positions based on the joint position deltas
     target_state.positions = current_state.positions + joint_position_delta;
 
-    // TODO : apply filtering to the velocity instead of position
     // Apply smoothing to the positions if a smoother was provided.
-    // Update filter state and apply filtering in position domain
-    if (smoother_)
-    {
-      smoother_->doSmoothing(target_state.positions, target_state.velocities, target_state.accelerations);
-    }
+    doSmoothing(target_state);
 
     // Compute velocities based on smoothed joint positions
     target_state.velocities = (target_state.positions - current_state.positions) / servo_params_.publish_period;
@@ -615,7 +625,7 @@ KinematicState Servo::getCurrentRobotState() const
   return current_state;
 }
 
-std::pair<bool, KinematicState> Servo::smoothHalt(const KinematicState& halt_state) const
+std::pair<bool, KinematicState> Servo::smoothHalt(const KinematicState& halt_state)
 {
   bool stopped = false;
   auto target_state = halt_state;
@@ -630,15 +640,11 @@ std::pair<bool, KinematicState> Servo::smoothHalt(const KinematicState& halt_sta
         (target_state.velocities[i] - current_state.velocities[i]) / servo_params_.publish_period;
   }
 
+  doSmoothing(target_state);
+
   // If all velocities are near zero, robot has decelerated to a stop.
   stopped =
       (std::accumulate(target_state.velocities.begin(), target_state.velocities.end(), 0.0) <= STOPPED_VELOCITY_EPS);
-
-  if (smoother_)
-  {
-    smoother_->reset(current_state.positions, current_state.velocities, current_state.accelerations);
-    smoother_->doSmoothing(target_state.positions, target_state.velocities, target_state.accelerations);
-  }
 
   return std::make_pair(stopped, target_state);
 }

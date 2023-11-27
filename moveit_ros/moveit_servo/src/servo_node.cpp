@@ -162,6 +162,10 @@ void ServoNode::pauseServo(const std::shared_ptr<std_srvs::srv::SetBool::Request
   }
   else
   {
+    // Reset the smoothing plugin with the robot's current state in case the robot moved between pausing and unpausing.
+    last_commanded_state_ = servo_->getCurrentRobotState();
+    servo_->resetSmoothing(last_commanded_state_);
+
     servo_->setCollisionChecking(true);
     response->message = "Servoing enabled";
   }
@@ -299,7 +303,10 @@ void ServoNode::servoLoop()
   {
     // Skip processing if servoing is disabled.
     if (servo_paused_)
+    {
+      servo_frequency.sleep();
       continue;
+    }
 
     next_joint_state = std::nullopt;
     const CommandType expected_type = servo_->getCommandType();
