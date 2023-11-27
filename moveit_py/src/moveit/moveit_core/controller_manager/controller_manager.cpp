@@ -14,7 +14,7 @@
  *     copyright notice, this list of conditions and the following
  *     disclaimer in the documentation and/or other materials provided
  *     with the distribution.
- *   * Neither the name of PickNik Inc. nor the names of its
+ *   * Neither the name of the copyright holder nor the names of its
  *     contributors may be used to endorse or promote products derived
  *     from this software without specific prior written permission.
  *
@@ -40,13 +40,17 @@ namespace moveit_py
 {
 namespace bind_controller_manager
 {
-void init_execution_status(py::module& m)
+void initExecutionStatus(py::module& m)
 {
   py::module controller_manager = m.def_submodule("controller_manager");
 
   py::class_<moveit_controller_manager::ExecutionStatus, std::shared_ptr<moveit_controller_manager::ExecutionStatus>>(
       controller_manager, "ExecutionStatus", R"( Execution status of planned robot trajectory. )")
-      .def_property_readonly("status", &moveit_controller_manager::ExecutionStatus::asString);
+      .def_property_readonly("status", &moveit_controller_manager::ExecutionStatus::asString)
+
+      .def("__bool__", [](std::shared_ptr<moveit_controller_manager::ExecutionStatus>& status) {
+        return static_cast<bool>(*status);
+      });
 }
 }  // namespace bind_controller_manager
 }  // namespace moveit_py

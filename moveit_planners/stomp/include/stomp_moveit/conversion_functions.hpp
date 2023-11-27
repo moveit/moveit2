@@ -54,7 +54,7 @@ using Joints = std::vector<const moveit::core::JointModel*>;
  *
  * @return       The vector containing the joint values
  */
-std::vector<double> get_positions(const moveit::core::RobotState& state, const Joints& joints)
+std::vector<double> getPositions(const moveit::core::RobotState& state, const Joints& joints)
 {
   std::vector<double> positions;
   for (const auto& joint : joints)
@@ -74,7 +74,7 @@ std::vector<double> get_positions(const moveit::core::RobotState& state, const J
  * @param joints The joints that should be considered
  * @param state  The robot state to update with the new joint values
  */
-void set_joint_positions(const Eigen::VectorXd& values, const Joints& joints, moveit::core::RobotState& state)
+void setJointPositions(const Eigen::VectorXd& values, const Joints& joints, moveit::core::RobotState& state)
 {
   for (size_t joint_index = 0; joint_index < joints.size(); ++joint_index)
   {
@@ -89,8 +89,8 @@ void set_joint_positions(const Eigen::VectorXd& values, const Joints& joints, mo
  * @param reference_state   A robot state providing default joint values and robot model
  * @param trajectory        The robot trajectory containing waypoints with updated values
  */
-void fill_robot_trajectory(const Eigen::MatrixXd& trajectory_values, const moveit::core::RobotState& reference_state,
-                           robot_trajectory::RobotTrajectory& trajectory)
+void fillRobotTrajectory(const Eigen::MatrixXd& trajectory_values, const moveit::core::RobotState& reference_state,
+                         robot_trajectory::RobotTrajectory& trajectory)
 {
   trajectory.clear();
   const auto& active_joints = trajectory.getGroup() ? trajectory.getGroup()->getActiveJointModels() :
@@ -100,7 +100,7 @@ void fill_robot_trajectory(const Eigen::MatrixXd& trajectory_values, const movei
   for (int timestep = 0; timestep < trajectory_values.cols(); ++timestep)
   {
     const auto waypoint = std::make_shared<moveit::core::RobotState>(reference_state);
-    set_joint_positions(trajectory_values.col(timestep), active_joints, *waypoint);
+    setJointPositions(trajectory_values.col(timestep), active_joints, *waypoint);
 
     trajectory.addSuffixWayPoint(waypoint, 0.1 /* placeholder dt */);
   }
@@ -115,12 +115,12 @@ void fill_robot_trajectory(const Eigen::MatrixXd& trajectory_values, const movei
  *
  * @return                  The created RobotTrajectory containing updated waypoints
  */
-robot_trajectory::RobotTrajectory matrix_to_robot_trajectory(const Eigen::MatrixXd& trajectory_values,
-                                                             const moveit::core::RobotState& reference_state,
-                                                             const moveit::core::JointModelGroup* group = nullptr)
+robot_trajectory::RobotTrajectory matrixToRobotTrajectory(const Eigen::MatrixXd& trajectory_values,
+                                                          const moveit::core::RobotState& reference_state,
+                                                          const moveit::core::JointModelGroup* group = nullptr)
 {
   robot_trajectory::RobotTrajectory trajectory(reference_state.getRobotModel(), group);
-  fill_robot_trajectory(trajectory_values, reference_state, trajectory);
+  fillRobotTrajectory(trajectory_values, reference_state, trajectory);
   return trajectory;
 }
 
@@ -131,7 +131,7 @@ robot_trajectory::RobotTrajectory matrix_to_robot_trajectory(const Eigen::Matrix
  *
  * @return           The matrix representing a sequence of waypoint positions
  */
-Eigen::MatrixXd robot_trajectory_to_matrix(const robot_trajectory::RobotTrajectory& trajectory)
+Eigen::MatrixXd robotTrajectoryToMatrix(const robot_trajectory::RobotTrajectory& trajectory)
 {
   const auto& active_joints = trajectory.getGroup() ? trajectory.getGroup()->getActiveJointModels() :
                                                       trajectory.getRobotModel()->getActiveJointModels();

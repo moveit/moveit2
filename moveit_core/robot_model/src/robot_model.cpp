@@ -885,7 +885,7 @@ JointModel* RobotModel::buildRecursive(LinkModel* parent, const urdf::Link* urdf
 namespace
 {
 // construct bounds for 1DOF joint
-static inline VariableBounds jointBoundsFromURDF(const urdf::Joint* urdf_joint)
+inline VariableBounds jointBoundsFromURDF(const urdf::Joint* urdf_joint)
 {
   VariableBounds b;
   if (urdf_joint->safety)
@@ -1155,7 +1155,7 @@ JointModel* RobotModel::constructJointModel(const urdf::Link* child_link, const 
 
 namespace
 {
-static inline Eigen::Isometry3d urdfPose2Isometry3d(const urdf::Pose& pose)
+inline Eigen::Isometry3d urdfPose2Isometry3d(const urdf::Pose& pose)
 {
   Eigen::Quaterniond q(pose.rotation.w, pose.rotation.x, pose.rotation.y, pose.rotation.z);
   Eigen::Isometry3d af(Eigen::Translation3d(pose.position.x, pose.position.y, pose.position.z) * q);

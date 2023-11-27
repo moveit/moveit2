@@ -140,5 +140,7 @@ private:
 
   std::unique_ptr<std::thread> record_states_thread_;
   TrajectoryStateAddedCallback state_add_callback_;
+
+  rclcpp::Logger logger_;
 };
 }  // namespace planning_scene_monitor

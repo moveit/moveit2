@@ -47,36 +47,36 @@ namespace moveit_py
 {
 namespace moveit_py_utils
 {
-geometry_msgs::msg::PoseStamped PoseStampedToCpp(const py::object& pose_stamped);
+geometry_msgs::msg::PoseStamped poseStampedToCpp(const py::object& pose_stamped);
 
 // TODO(peterdavidfagan): consider creating typecaster
-geometry_msgs::msg::Pose PoseToCpp(const py::object& pose);
-py::object PoseToPy(geometry_msgs::msg::Pose pose);
+geometry_msgs::msg::Pose poseToCpp(const py::object& pose);
+py::object poseToPy(geometry_msgs::msg::Pose pose);
 
-geometry_msgs::msg::Point PointToCpp(const py::object& point);
+geometry_msgs::msg::Point pointToCpp(const py::object& point);
 
-geometry_msgs::msg::Vector3 Vector3ToCpp(const py::object& vector3);
+geometry_msgs::msg::Vector3 vector3ToCpp(const py::object& vector3);
 
-geometry_msgs::msg::Quaternion QuaternionToCpp(const py::object& quaternion);
+geometry_msgs::msg::Quaternion quaternionToCpp(const py::object& quaternion);
 
-shape_msgs::msg::SolidPrimitive SolidPrimitiveToCpp(const py::object& primitive);
+shape_msgs::msg::SolidPrimitive solidPrimitiveToCpp(const py::object& primitive);
 
-shape_msgs::msg::MeshTriangle MeshTriangleToCpp(const py::object& mesh_triangle);
+shape_msgs::msg::MeshTriangle meshTriangleToCpp(const py::object& mesh_triangle);
 
-shape_msgs::msg::Mesh MeshToCpp(const py::object& mesh);
+shape_msgs::msg::Mesh meshToCpp(const py::object& mesh);
 
-moveit_msgs::msg::BoundingVolume BoundingVolumeToCpp(const py::object& bounding_volume);
+moveit_msgs::msg::BoundingVolume boundingVolumeToCpp(const py::object& bounding_volume);
 
-moveit_msgs::msg::JointConstraint JointConstraintToCpp(const py::object& joint_constraint);
+moveit_msgs::msg::JointConstraint jointConstraintToCpp(const py::object& joint_constraint);
 
-moveit_msgs::msg::PositionConstraint PositionConstraintToCpp(const py::object& position_constraint);
+moveit_msgs::msg::PositionConstraint positionConstraintToCpp(const py::object& position_constraint);
 
-moveit_msgs::msg::OrientationConstraint OrientationConstraintToCpp(const py::object& orientation_constraint);
+moveit_msgs::msg::OrientationConstraint orientationConstraintToCpp(const py::object& orientation_constraint);
 
-moveit_msgs::msg::VisibilityConstraint VisibilityConstraintToCpp(const py::object& visibility_constraint);
+moveit_msgs::msg::VisibilityConstraint visibilityConstraintToCpp(const py::object& visibility_constraint);
 
-moveit_msgs::msg::CollisionObject CollisionObjectToCpp(const py::object& collision_object);
+moveit_msgs::msg::CollisionObject collisionObjectToCpp(const py::object& collision_object);
 
-moveit_msgs::msg::Constraints ConstraintsToCpp(const py::object& constraints);
+moveit_msgs::msg::Constraints constraintsToCpp(const py::object& constraints);
 }  // namespace moveit_py_utils
 }  // namespace moveit_py

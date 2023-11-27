@@ -14,7 +14,7 @@
  *     copyright notice, this list of conditions and the following
  *     disclaimer in the documentation and/or other materials provided
  *     with the distribution.
- *   * Neither the name of PickNik Inc. nor the names of its
+ *   * Neither the name of the copyright holder nor the names of its
  *     contributors may be used to endorse or promote products derived
  *     from this software without specific prior written permission.
  *
@@ -41,12 +41,12 @@ namespace moveit_py
 namespace bind_moveit_cpp
 {
 std::shared_ptr<moveit_cpp::PlanningComponent>
-get_planning_component(std::shared_ptr<moveit_cpp::MoveItCpp>& moveit_cpp_ptr, const std::string& planning_component)
+getPlanningComponent(std::shared_ptr<moveit_cpp::MoveItCpp>& moveit_cpp_ptr, const std::string& planning_component)
 {
   return std::make_shared<moveit_cpp::PlanningComponent>(planning_component, moveit_cpp_ptr);
 }
 
-void init_moveit_py(py::module& m)
+void initMoveitPy(py::module& m)
 {
   auto utils = py::module::import("moveit.utils");
 
@@ -54,7 +54,7 @@ void init_moveit_py(py::module& m)
   The MoveItPy class is the main interface to the MoveIt Python API. It is a wrapper around the MoveIt C++ API.
 									     )")
 
-      .def(py::init([](const std::string& node_name, const std::string& launch_params_filepath,
+      .def(py::init([](const std::string& node_name, const std::vector<std::string>& launch_params_filepaths,
                        const py::object& config_dict, bool provide_planning_service) {
              static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_cpp_initializer");
 
@@ -70,9 +70,14 @@ void init_moveit_py(py::module& m)
                    utils.attr("create_params_file_from_dict")(config_dict, node_name).cast<std::string>();
                launch_arguments = { "--ros-args", "--params-file", params_filepath };
              }
-             else if (!launch_params_filepath.empty())
+             else if (!launch_params_filepaths.empty())
              {
-               launch_arguments = { "--ros-args", "--params-file", launch_params_filepath };
+               launch_arguments = { "--ros-args" };
+               for (const auto& launch_params_filepath : launch_params_filepaths)
+               {
+                 launch_arguments.push_back("--params-file");
+                 launch_arguments.push_back(launch_params_filepath);
+               }
              }
 
              // Initialize ROS, pass launch arguments with rclcpp::init()
@@ -125,7 +130,8 @@ void init_moveit_py(py::module& m)
              return moveit_cpp_ptr;
            }),
            py::arg("node_name") = "moveit_py",
-           py::arg("launch_params_filepath") = utils.attr("get_launch_params_filepath")().cast<std::string>(),
+           py::arg("launch_params_filepaths") =
+               utils.attr("get_launch_params_filepaths")().cast<std::vector<std::string>>(),
            py::arg("config_dict") = py::none(), py::arg("provide_planning_service") = true,
            py::return_value_policy::take_ownership,
            R"(
@@ -138,7 +144,7 @@ void init_moveit_py(py::module& m)
            R"(
 	   Execute a trajectory (planning group is inferred from robot trajectory object).
 	   )")
-      .def("get_planning_component", &moveit_py::bind_moveit_cpp::get_planning_component,
+      .def("get_planning_component", &moveit_py::bind_moveit_cpp::getPlanningComponent,
            py::arg("planning_component_name"), py::return_value_policy::take_ownership,
            R"(
            Creates a planning component instance.
@@ -158,6 +164,12 @@ void init_moveit_py(py::module& m)
            py::return_value_policy::reference,
            R"(
            Returns the planning scene monitor.
+           )")
+
+      .def("get_trajactory_execution_manager", &moveit_cpp::MoveItCpp::getTrajectoryExecutionManagerNonConst,
+           py::return_value_policy::reference,
+           R"(
+           Returns the trajectory execution manager.
            )")
 
       .def("get_robot_model", &moveit_cpp::MoveItCpp::getRobotModel, py::return_value_policy::reference,

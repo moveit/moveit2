@@ -46,13 +46,16 @@
 #include <rclcpp/rclcpp.hpp>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
 #include <tf2_ros/transform_listener.h>
+#include <moveit/utils/logger.hpp>
 
+using moveit::getLogger;
 using namespace moveit_servo;
 
 namespace
 {
-const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_servo.pose_demo");
-}
+constexpr auto K_BASE_FRAME = "panda_link0";
+constexpr auto K_TIP_FRAME = "panda_link8";
+}  // namespace
 
 int main(int argc, char* argv[])
 {
@@ -60,6 +63,7 @@ int main(int argc, char* argv[])
 
   // The servo object expects to get a ROS node.
   const rclcpp::Node::SharedPtr demo_node = std::make_shared<rclcpp::Node>("moveit_servo_demo");
+  moveit::setLogger(demo_node->get_logger());
 
   // Get the servo parameters.
   const std::string param_namespace = "moveit_servo";
@@ -77,6 +81,11 @@ int main(int argc, char* argv[])
       createPlanningSceneMonitor(demo_node, servo_params);
   Servo servo = Servo(demo_node, servo_param_listener, planning_scene_monitor);
 
+  // Helper function to get the current pose of a specified frame.
+  const auto get_current_pose = [planning_scene_monitor](const std::string& target_frame) {
+    return planning_scene_monitor->getStateMonitor()->getCurrentState()->getGlobalLinkTransform(target_frame);
+  };
+
   // Wait for some time, so that the planning scene is loaded in rviz.
   // This is just for convenience, should not be used for sync in real application.
   std::this_thread::sleep_for(std::chrono::seconds(3));
@@ -90,9 +99,9 @@ int main(int argc, char* argv[])
 
   // The dynamically updated target pose.
   PoseCommand target_pose;
-  target_pose.frame_id = servo_params.planning_frame;
+  target_pose.frame_id = K_BASE_FRAME;
   // Initializing the target pose as end effector pose, this can be any pose.
-  target_pose.pose = servo.getEndEffectorPose();
+  target_pose.pose = get_current_pose(K_TIP_FRAME);
 
   // The pose tracking lambda that will be run in a separate thread.
   auto pose_tracker = [&]() {
@@ -126,13 +135,13 @@ int main(int argc, char* argv[])
 
   // Frequency at which commands will be sent to the robot controller.
   rclcpp::WallRate command_rate(50);
-  RCLCPP_INFO_STREAM(LOGGER, servo.getStatusMessage());
+  RCLCPP_INFO_STREAM(getLogger(), servo.getStatusMessage());
 
   while (!stop_tracking && rclcpp::ok())
   {
     {
       std::lock_guard<std::mutex> pguard(pose_guard);
-      target_pose.pose = servo.getEndEffectorPose();
+      target_pose.pose = get_current_pose(K_TIP_FRAME);
       const bool satisfies_linear_tolerance = target_pose.pose.translation().isApprox(
           terminal_pose.translation(), servo_params.pose_tracking.linear_tolerance);
       const bool satisfies_angular_tolerance =
@@ -148,12 +157,12 @@ int main(int argc, char* argv[])
     command_rate.sleep();
   }
 
-  RCLCPP_INFO_STREAM(LOGGER, "REACHED : " << stop_tracking);
+  RCLCPP_INFO_STREAM(getLogger(), "REACHED : " << stop_tracking);
   stop_tracking = true;
 
   if (tracker_thread.joinable())
     tracker_thread.join();
 
-  RCLCPP_INFO(LOGGER, "Exiting demo.");
+  RCLCPP_INFO(getLogger(), "Exiting demo.");
   rclcpp::shutdown();
 }

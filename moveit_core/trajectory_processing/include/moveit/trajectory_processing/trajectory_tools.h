@@ -64,9 +64,9 @@ std::size_t trajectoryWaypointCount(const moveit_msgs::msg::RobotTrajectory& tra
  * \param [in] min_angle_change The minimum angle change to use for time parameterization (default: 0.001).
  * \return True if time parameterization was successful, false otherwise.
  */
-bool applyTOTGTimeParameterization(robot_trajectory::RobotTrajectory& trajectory, const double& velocity_scaling_factor,
-                                   const double& acceleration_scaling_factor, const double path_tolerance = 0.1,
-                                   const double resample_dt = 0.1, const double min_angle_change = 0.001);
+bool applyTOTGTimeParameterization(robot_trajectory::RobotTrajectory& trajectory, double velocity_scaling_factor,
+                                   double acceleration_scaling_factor, double path_tolerance = 0.1,
+                                   double resample_dt = 0.1, double min_angle_change = 0.001);
 /**
  * \brief Applies Ruckig smoothing to a robot trajectory.
  * \param [in,out] trajectory The robot trajectory to be smoothed.
@@ -76,7 +76,7 @@ bool applyTOTGTimeParameterization(robot_trajectory::RobotTrajectory& trajectory
  * \param [in] overshoot_threshold The maximum allowed overshoot during smoothing (default: 0.01).
  * \return True if smoothing was successful, false otherwise.
  */
-bool applyRuckigSmoothing(robot_trajectory::RobotTrajectory& trajectory, const double& velocity_scaling_factor,
-                          const double& acceleration_scaling_factor, const bool mitigate_overshoot = false,
-                          const double overshoot_threshold = 0.01);
+bool applyRuckigSmoothing(robot_trajectory::RobotTrajectory& trajectory, double velocity_scaling_factor,
+                          double acceleration_scaling_factor, bool mitigate_overshoot = false,
+                          double overshoot_threshold = 0.01);
 }  // namespace trajectory_processing

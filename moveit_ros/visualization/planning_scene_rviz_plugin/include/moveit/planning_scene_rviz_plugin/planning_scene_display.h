@@ -221,6 +221,7 @@ protected:
 
   // rclcpp node
   rclcpp::Node::SharedPtr node_;
+  rclcpp::Logger logger_;
 };
 
 }  // namespace moveit_rviz_plugin

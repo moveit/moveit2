@@ -93,8 +93,8 @@ public:
   {
   }
 
-  bool solve(planning_interface::MotionPlanResponse& res) override;
-  bool solve(planning_interface::MotionPlanDetailedResponse& res) override;
+  void solve(planning_interface::MotionPlanResponse& res) override;
+  void solve(planning_interface::MotionPlanDetailedResponse& res) override;
 
   void clear() override;
   bool terminate() override;

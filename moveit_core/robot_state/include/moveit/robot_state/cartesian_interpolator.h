@@ -44,31 +44,35 @@ namespace moveit
 {
 namespace core
 {
-/** \brief Struct for containing jump_threshold.
-
-    For the purposes of maintaining API, we support both \e jump_threshold_factor which provides a scaling factor for
-    detecting joint space jumps and \e revolute_jump_threshold and \e prismatic_jump_threshold which provide absolute
-    thresholds for detecting joint space jumps. */
+/** \brief Struct with options for defining joint-space jump thresholds. */
 struct JumpThreshold
 {
-  double factor;
-  double revolute;   // Radians
-  double prismatic;  // Meters
+  JumpThreshold() = default;  // default is equivalent to disabled().
 
-  explicit JumpThreshold() : factor(0.0), revolute(0.0), prismatic(0.0)
-  {
-  }
+  /** \brief Do not define any jump threshold, i.e., disable joint-space jump detection. */
+  static JumpThreshold disabled();
 
-  explicit JumpThreshold(double jt_factor) : JumpThreshold()
-  {
-    factor = jt_factor;
-  }
+  /** \brief Detect joint-space jumps relative to the average joint-space displacement along the path.
 
-  explicit JumpThreshold(double jt_revolute, double jt_prismatic) : JumpThreshold()
-  {
-    revolute = jt_revolute;    // Radians
-    prismatic = jt_prismatic;  // Meters
-  }
+     The average joint-space distance between consecutive points in the path is computed. If any individual joint-space
+     motion delta is larger than the average distance by a factor of `relative_factor`, it is considered the path has a
+     jump. For instance, a `relative_factor` of 10.0 will detect joint increments larger than 10x the average increment
+   */
+  static JumpThreshold relative(double relative_factor);
+
+  /** \brief Detect joint-space jumps greater than the given absolute thresholds.
+
+     `revolute` and `prismatic` are absolute joint displacement thresholds, in radians and meters respectively.
+     If any two consecutive waypoints have a joint-space distance larger than these values, the path has a jump. */
+  static JumpThreshold absolute(double revolute, double prismatic);
+
+  double relative_factor = 0.0;
+  double revolute = 0.0;   // Radians
+  double prismatic = 0.0;  // Meters
+
+  // Deprecated constructors. Construct using the builder methods above.
+  [[deprecated("Use JumpThreshold::relative() instead.")]] JumpThreshold(double relative_factor);
+  [[deprecated("Use JumpThreshold::absolute() instead.")]] JumpThreshold(double revolute, double prismatic);
 };
 
 /** \brief Struct for containing max_step for computeCartesianPath
@@ -145,33 +149,22 @@ public:
      The Cartesian path to be followed is specified as a \e translation vector to be followed by the robot \e link.
      This vector is assumed to be specified either in the global reference frame or in the local
      reference frame of the link (\e global_reference_frame is false).
-     The resulting joint values are stored in the vector \e traj, one by one. The maximum distance in
+     The resulting joint values are stored in the vector \e path, one by one. The maximum distance in
      Cartesian space between consecutive points on the resulting path is specified in the \e MaxEEFStep struct which
      provides two fields: translation and rotation. If a \e validCallback is specified, this is passed to the internal
      call to setFromIK(). In case of IK failure, the computation of the path stops and the value returned corresponds to
-     the distance that was achieved and for which corresponding states were added to the path.  At the end of the
+     the distance that was achieved and for which corresponding states were added to the path. At the end of the
      function call, the state of the group corresponds to the last attempted Cartesian pose.
 
-     During the computation of the trajectory, it is usually preferred if consecutive joint values do not 'jump' by a
+     During the computation of the path, it is usually preferred if consecutive joint values do not 'jump' by a
      large amount in joint space, even if the Cartesian distance between the corresponding points is small as expected.
-     To account for this, the \e jump_threshold struct is provided, which comprises three fields:
-     \e jump_threshold_factor, \e revolute_jump_threshold and \e prismatic_jump_threshold.
-     If either \e revolute_jump_threshold or \e prismatic_jump_threshold  are non-zero, we test for absolute jumps.
-     If \e jump_threshold_factor is non-zero, we test for relative jumps. Otherwise (all params are zero), jump
-     detection is disabled.
+     To account for this, the \e jump_threshold argument is provided. If a jump detection is enabled and a jump is
+     found, the path is truncated up to just before the jump.
 
-     For relative jump detection, the average joint-space distance between consecutive points in the trajectory is
-     computed. If any individual joint-space motion delta is larger then this average distance by a factor of
-     \e jump_threshold_factor, this step is considered a failure and the returned path is truncated up to just
-     before the jump.
-
-     For absolute jump thresholds, if any individual joint-space motion delta is larger then \e revolute_jump_threshold
-     for revolute joints or \e prismatic_jump_threshold for prismatic joints then this step is considered a failure and
-     the returned path is truncated up to just before the jump.
-
-     Kinematics solvers may use cost functions to prioritize certain solutions, which may be specified with \e cost_function. */
+     Kinematics solvers may use cost functions to prioritize certain solutions, which may be specified with \e
+     cost_function. */
   static Distance computeCartesianPath(
-      RobotState* start_state, const JointModelGroup* group, std::vector<std::shared_ptr<RobotState>>& traj,
+      RobotState* start_state, const JointModelGroup* group, std::vector<std::shared_ptr<RobotState>>& path,
       const LinkModel* link, const Eigen::Vector3d& translation, bool global_reference_frame,
       const MaxEEFStep& max_step, const JumpThreshold& jump_threshold,
       const GroupStateValidityCallbackFn& validCallback = GroupStateValidityCallbackFn(),
@@ -183,14 +176,14 @@ public:
      In contrast to the previous function, the translation vector is specified as a (unit) direction vector and
      a distance. */
   static Distance computeCartesianPath(
-      RobotState* start_state, const JointModelGroup* group, std::vector<std::shared_ptr<RobotState>>& traj,
+      RobotState* start_state, const JointModelGroup* group, std::vector<std::shared_ptr<RobotState>>& path,
       const LinkModel* link, const Eigen::Vector3d& direction, bool global_reference_frame, double distance,
       const MaxEEFStep& max_step, const JumpThreshold& jump_threshold,
       const GroupStateValidityCallbackFn& validCallback = GroupStateValidityCallbackFn(),
       const kinematics::KinematicsQueryOptions& options = kinematics::KinematicsQueryOptions(),
       const kinematics::KinematicsBase::IKCostFn& cost_function = kinematics::KinematicsBase::IKCostFn())
   {
-    return computeCartesianPath(start_state, group, traj, link, distance * direction, global_reference_frame, max_step,
+    return computeCartesianPath(start_state, group, path, link, distance * direction, global_reference_frame, max_step,
                                 jump_threshold, validCallback, options, cost_function);
   }
 
@@ -202,7 +195,7 @@ public:
      (\e global_reference_frame is false). This function returns the percentage (0..1) of the path that was achieved.
      All other comments from the previous function apply. */
   static Percentage computeCartesianPath(
-      RobotState* start_state, const JointModelGroup* group, std::vector<std::shared_ptr<RobotState>>& traj,
+      RobotState* start_state, const JointModelGroup* group, std::vector<std::shared_ptr<RobotState>>& path,
       const LinkModel* link, const Eigen::Isometry3d& target, bool global_reference_frame, const MaxEEFStep& max_step,
       const JumpThreshold& jump_threshold,
       const GroupStateValidityCallbackFn& validCallback = GroupStateValidityCallbackFn(),
@@ -213,11 +206,11 @@ public:
   /** \brief Compute the sequence of joint values that perform a general Cartesian path.
 
      In contrast to the previous functions, the Cartesian path is specified as a set of \e waypoints to be sequentially
-     reached by the virtual frame attached to the robot \e link. The waypoints are transforms given either w.r.t. the global
-     reference frame or the virtual frame at the immediately preceding waypoint. The virtual frame needs
-     to move in a straight line between two consecutive waypoints. All other comments apply. */
+     reached by the virtual frame attached to the robot \e link. The waypoints are transforms given either w.r.t. the
+     global reference frame or the virtual frame at the immediately preceding waypoint. The virtual frame needs to move
+     in a straight line between two consecutive waypoints. All other comments apply. */
   static Percentage computeCartesianPath(
-      RobotState* start_state, const JointModelGroup* group, std::vector<std::shared_ptr<RobotState>>& traj,
+      RobotState* start_state, const JointModelGroup* group, std::vector<std::shared_ptr<RobotState>>& path,
       const LinkModel* link, const EigenSTL::vector_Isometry3d& waypoints, bool global_reference_frame,
       const MaxEEFStep& max_step, const JumpThreshold& jump_threshold,
       const GroupStateValidityCallbackFn& validCallback = GroupStateValidityCallbackFn(),
@@ -225,60 +218,29 @@ public:
       const kinematics::KinematicsBase::IKCostFn& cost_function = kinematics::KinematicsBase::IKCostFn(),
       const Eigen::Isometry3d& link_offset = Eigen::Isometry3d::Identity());
 
-  /** \brief Tests joint space jumps of a trajectory.
+  /** \brief Checks if a path has a joint-space jump, and truncates the path at the jump.
 
-     If \e jump_threshold_factor is non-zero, we test for relative jumps.
-     If \e revolute_jump_threshold  or \e prismatic_jump_threshold are non-zero, we test for absolute jumps.
-     Both tests can be combined. If all params are zero, jump detection is disabled.
-     For relative jump detection, the average joint-space distance between consecutive points in the trajectory is
-     computed. If any individual joint-space motion delta is larger then this average distance by a factor of
-     \e jump_threshold_factor, this step is considered a failure and the returned path is truncated up to just
-     before the jump.
+     Checks if a path has a jump larger than `jump_threshold` and truncates the path to the waypoint right before the
+     jump. Returns the percentage of the path that doesn't have jumps.
 
      @param group The joint model group of the robot state.
-     @param traj The trajectory that should be tested.
+     @param path The path that should be tested.
      @param jump_threshold The struct holding jump thresholds to determine if a joint space jump has occurred.
-     @return The fraction of the trajectory that passed.
-
-     TODO: move to more appropriate location
+     @return The fraction of the path that passed.
   */
-  static Percentage checkJointSpaceJump(const JointModelGroup* group, std::vector<std::shared_ptr<RobotState>>& traj,
+  static Percentage checkJointSpaceJump(const JointModelGroup* group, std::vector<std::shared_ptr<RobotState>>& path,
                                         const JumpThreshold& jump_threshold);
-
-  /** \brief Tests for relative joint space jumps of the trajectory \e traj.
-
-     First, the average distance between adjacent trajectory points is computed. If two adjacent trajectory points
-     have distance > \e jump_threshold_factor * average, the trajectory is truncated at this point.
-
-     @param group The joint model group of the robot state.
-     @param traj The trajectory that should be tested.
-     @param jump_threshold_factor The threshold to determine if a joint space jump has occurred .
-     @return The fraction of the trajectory that passed.
-
-     TODO: move to more appropriate location
-   */
-  static Percentage checkRelativeJointSpaceJump(const JointModelGroup* group,
-                                                std::vector<std::shared_ptr<RobotState>>& traj,
-                                                double jump_threshold_factor);
-
-  /** \brief Tests for absolute joint space jumps of the trajectory \e traj.
-
-     The joint-space difference between consecutive waypoints is computed for each active joint and compared to the
-     absolute thresholds \e revolute_jump_threshold for revolute joints and \e prismatic_jump_threshold for prismatic
-     joints. If these thresholds are exceeded, the trajectory is truncated.
-
-     @param group The joint model group of the robot state.
-     @param traj The trajectory that should be tested.
-     @param revolute_jump_threshold Absolute joint-space threshold for revolute joints.
-     @param prismatic_jump_threshold Absolute joint-space threshold for prismatic joints.
-     @return The fraction of the trajectory that passed.
-
-     TODO: move to more appropriate location
-  */
-  static Percentage checkAbsoluteJointSpaceJump(const JointModelGroup* group,
-                                                std::vector<std::shared_ptr<RobotState>>& traj,
-                                                double revolute_jump_threshold, double prismatic_jump_threshold);
 };
+
+/** \brief Checks if a joint-space path has a jump larger than the given threshold.
+
+   This function computes the distance between every pair of adjacent waypoints (for the given group) and checks if that
+   distance is larger than the threshold defined by `jump_threshold`. If so, it is considered that the path has a
+   jump, and the path index where the jump happens is returned as output.
+   Otherwise the function returns a nullopt. */
+std::optional<int> hasJointSpaceJump(const std::vector<moveit::core::RobotStatePtr>& waypoints,
+                                     const moveit::core::JointModelGroup& group,
+                                     const moveit::core::JumpThreshold& jump_threshold);
 
 }  // end of namespace core
 }  // end of namespace moveit

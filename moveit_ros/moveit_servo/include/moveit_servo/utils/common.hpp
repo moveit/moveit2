@@ -54,6 +54,23 @@
 
 namespace moveit_servo
 {
+/**
+ * \brief Get the base frame of the current active joint group or subgroup's IK solver.
+ * @param robot_state A pointer to the current robot state.
+ * @param group_name The currently active joint group name.
+ * @return The IK solver base frame, if one exists, otherwise std::nullopt.
+ */
+std::optional<std::string> getIKSolverBaseFrame(const moveit::core::RobotStatePtr& robot_state,
+                                                const std::string& group_name);
+
+/**
+ * \brief Get the tip (end-effector) frame of the current active joint group or subgroup's IK solver.
+ * @param robot_state A pointer to the current robot state.
+ * @param group_name The currently active joint group name.
+ * @return The IK solver tip frame, if one exists, otherwise std::nullopt.
+ */
+std::optional<std::string> getIKSolverTipFrame(const moveit::core::RobotStatePtr& robot_state,
+                                               const std::string& group_name);
 
 /**
  * \brief Checks if a given VectorXd is a valid command.
@@ -112,8 +129,7 @@ std_msgs::msg::Float64MultiArray composeMultiArrayMessage(const servo::Params& s
 
 /**
  * \brief Computes scaling factor for velocity when the robot is near a singularity.
- * @param joint_model_group The joint model group of the robot, used for fetching the Jacobian.
- * @param current_state The current state of the robot, used for singularity look ahead.
+ * @param robot_state A pointer to the current robot state.
  * @param target_delta_x The vector containing the required change in Cartesian position.
  * @param servo_params The servo parameters, contains the singularity thresholds.
  * @return The velocity scaling factor and the reason for scaling.

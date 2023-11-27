@@ -47,6 +47,6 @@ namespace moveit_py
 {
 namespace bind_controller_manager
 {
-void init_execution_status(py::module& m);
+void initExecutionStatus(py::module& m);
 }
 }  // namespace moveit_py

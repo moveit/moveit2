@@ -45,7 +45,6 @@
 
 namespace moveit_rviz_plugin
 {
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_ros_visualization.motion_planning_frame_joints_widget");
 
 JMGItemModel::JMGItemModel(const moveit::core::RobotState& robot_state, const std::string& group_name, QObject* parent)
   : QAbstractTableModel(parent), robot_state_(robot_state), jmg_(nullptr)

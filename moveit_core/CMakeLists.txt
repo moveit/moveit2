@@ -23,6 +23,7 @@ find_package(octomap_msgs REQUIRED)
 find_package(pluginlib REQUIRED)
 find_package(random_numbers REQUIRED)
 find_package(rclcpp REQUIRED)
+find_package(rsl REQUIRED)
 find_package(ruckig REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(shape_msgs REQUIRED)
@@ -59,7 +60,6 @@ add_subdirectory(kinematics_metrics)
 add_subdirectory(macros)
 add_subdirectory(online_signal_smoothing)
 add_subdirectory(planning_interface)
-add_subdirectory(planning_request_adapter)
 add_subdirectory(planning_scene)
 add_subdirectory(robot_model)
 add_subdirectory(robot_state)
@@ -115,7 +115,6 @@ install(
     moveit_kinematics_metrics
     moveit_macros
     moveit_planning_interface
-    moveit_planning_request_adapter
     moveit_planning_scene
     moveit_robot_model
     moveit_robot_state
@@ -150,6 +149,7 @@ ament_export_dependencies(
   pluginlib
   random_numbers
   rclcpp
+  rsl
   ruckig
   sensor_msgs
   shape_msgs

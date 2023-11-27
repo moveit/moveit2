@@ -53,6 +53,7 @@
 #include <tf2_eigen/tf2_eigen.hpp>
 #include <tf2_ros/transform_listener.h>
 #include <variant>
+#include <rclcpp/logger.hpp>
 
 namespace moveit_servo
 {
@@ -103,11 +104,6 @@ public:
   std::string getStatusMessage() const;
 
   /**
-   * \brief Returns the end effector pose in planning frame
-   */
-  Eigen::Isometry3d getEndEffectorPose() const;
-
-  /**
    * \brief Start/Stop collision checking thread.
    * @param check_collision Stops collision checking thread if false, starts it if true.
    */
@@ -129,7 +125,19 @@ public:
    * @param The last commanded joint states.
    * @return The next state stepping towards the required halting state.
    */
-  std::pair<bool, KinematicState> smoothHalt(const KinematicState& halt_state) const;
+  std::pair<bool, KinematicState> smoothHalt(const KinematicState& halt_state);
+
+  /**
+   * \brief Applies smoothing to an input state, if a smoothing plugin is set.
+   * @param state The state to be updated by the smoothing plugin.
+   */
+  void doSmoothing(KinematicState& state);
+
+  /**
+   * \brief Resets the smoothing plugin, if set, to a specified state.
+   * @param state The desired state to reset the smoothing plugin to.
+   */
+  void resetSmoothing(const KinematicState& state);
 
 private:
   /**
@@ -137,9 +145,12 @@ private:
    * If the command frame is part of the robot model, directly look up the transform using the robot model.
    * Else, fall back to using TF to look up the transform.
    * @param command_frame The command frame name.
-   * @return The transformation between planning frame and command frame.
+   * @param planning_frame The planning frame name.
+   * @return The transformation between planning frame and command frame, or std::nullopt if there was a failure looking
+   * up a transform.
    */
-  Eigen::Isometry3d getPlanningToCommandFrameTransform(const std::string& command_frame) const;
+  std::optional<Eigen::Isometry3d> getPlanningToCommandFrameTransform(const std::string& command_frame,
+                                                                      const std::string& planning_frame) const;
 
   /**
    * \brief Convert a given twist command to planning frame,
@@ -148,16 +159,18 @@ private:
    * https://core.ac.uk/download/pdf/154240607.pdf
    * https://www.seas.upenn.edu/~meam520/notes02/Forces8.pdf
    * @param command The twist command to be converted.
+   * @param planning_frame The name of the planning frame.
    * @return The transformed twist command.
    */
-  TwistCommand toPlanningFrame(const TwistCommand& command) const;
+  std::optional<TwistCommand> toPlanningFrame(const TwistCommand& command, const std::string& planning_frame) const;
 
   /**
    * \brief Convert a given pose command to planning frame
-   * @param command The pose command to be converted
-   * @return The transformed pose command
+   * @param command The pose command to be converted.
+   * @param planning_frame The name of the planning frame.
+   * @return The transformed pose command.
    */
-  PoseCommand toPlanningFrame(const PoseCommand& command) const;
+  std::optional<PoseCommand> toPlanningFrame(const PoseCommand& command, const std::string& planning_frame) const;
 
   /**
    * \brief Compute the change in joint position required to follow the received command.
@@ -206,6 +219,7 @@ private:
 
   servo::Params servo_params_;
   const rclcpp::Node::SharedPtr node_;
+  rclcpp::Logger logger_;
   std::shared_ptr<const servo::ParamListener> servo_param_listener_;
   planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor_;
 
@@ -213,6 +227,7 @@ private:
   std::atomic<double> collision_velocity_scale_ = 1.0;
   std::unique_ptr<CollisionMonitor> collision_monitor_;
 
+  // Pointer to the (optional) smoothing plugin.
   pluginlib::UniquePtr<online_signal_smoothing::SmoothingBaseClass> smoother_ = nullptr;
 
   // Map between joint subgroup names and corresponding joint name - move group indices map

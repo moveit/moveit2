@@ -42,11 +42,7 @@
 #include <Eigen/Core>
 #include <Eigen/Cholesky>
 
-// TODO(#2166): Replace with std types
-#include <boost/random/variate_generator.hpp>
-#include <boost/random/normal_distribution.hpp>
-#include <boost/random/mersenne_twister.hpp>
-#include <boost/shared_ptr.hpp>
+#include <rsl/random.hpp>
 #include <cstdlib>
 
 namespace stomp_moveit
@@ -79,9 +75,7 @@ private:
   Eigen::MatrixXd covariance_cholesky_; /**< Cholesky decomposition (LL^T) of the covariance */
 
   int size_;
-  boost::mt19937 rng_;
-  boost::normal_distribution<> normal_dist_;
-  std::shared_ptr<boost::variate_generator<boost::mt19937, boost::normal_distribution<> > > gaussian_;
+  std::normal_distribution<double> normal_dist_;
 };
 
 //////////////////////// template function definitions follow //////////////////////////////
@@ -91,16 +85,14 @@ MultivariateGaussian::MultivariateGaussian(const Eigen::MatrixBase<Derived1>& me
                                            const Eigen::MatrixBase<Derived2>& covariance)
   : mean_(mean), covariance_(covariance), covariance_cholesky_(covariance_.llt().matrixL()), normal_dist_(0.0, 1.0)
 {
-  rng_.seed(rand());
   size_ = mean.rows();
-  gaussian_.reset(new boost::variate_generator<boost::mt19937, boost::normal_distribution<> >(rng_, normal_dist_));
 }
 
 template <typename Derived>
 void MultivariateGaussian::sample(Eigen::MatrixBase<Derived>& output, bool use_covariance)
 {
   for (int i = 0; i < size_; ++i)
-    output(i) = (*gaussian_)();
+    output(i) = normal_dist_(rsl::rng());
 
   if (use_covariance)
   {
