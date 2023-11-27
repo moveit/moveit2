@@ -166,7 +166,9 @@ public:
   {
     return pipeline_parameters_.planning_plugins.at(0);
   }
-  [[deprecated("Removed from API.")]] const planning_interface::PlannerManagerPtr& getPlannerManager()
+  [[deprecated(
+      "Please use 'getPlannerManager(const std::string& planner_name)'.")]] const planning_interface::PlannerManagerPtr&
+  getPlannerManager()
   {
     return planner_map_.at(pipeline_parameters_.planning_plugins.at(0));
   }
