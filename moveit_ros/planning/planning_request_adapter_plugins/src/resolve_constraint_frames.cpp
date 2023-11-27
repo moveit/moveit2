@@ -32,52 +32,51 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-/* Author: Robert Haschke */
+/* Author: Robert Haschke
+   Desc: This adapter changes the link_name field of a constraint from an object's (sub-)frame name to the name of the
+   robot link, that the object is attached to. Transforming the frame names is necessary because the frames of an
+   attached object are not known to a planner.
+*/
 
-#include <moveit/planning_request_adapter/planning_request_adapter.h>
+#include <moveit/planning_interface/planning_request_adapter.h>
 #include <moveit/kinematic_constraints/utils.h>
 #include <class_loader/class_loader.hpp>
 #include <moveit/utils/logger.hpp>
 
-namespace default_planner_request_adapters
+namespace default_planning_request_adapters
 {
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_ros.resolve_constraint_frames");
-
-class ResolveConstraintFrames : public planning_request_adapter::PlanningRequestAdapter
+/// @brief Transforms frames used in constraints to link frames in the robot model.
+class ResolveConstraintFrames : public planning_interface::PlanningRequestAdapter
 {
 public:
   ResolveConstraintFrames() : logger_(moveit::makeChildLogger("resolve_constraint_frames"))
   {
   }
 
-  void initialize(const rclcpp::Node::SharedPtr& /* node */, const std::string& /* parameter_namespace */) override
+  [[nodiscard]] std::string getDescription() const override
   {
+    return std::string("ResolveConstraintFrames");
   }
 
-  std::string getDescription() const override
-  {
-    return "Resolve constraint frames to robot links";
-  }
-
-  bool adaptAndPlan(const PlannerFn& planner, const planning_scene::PlanningSceneConstPtr& planning_scene,
-                    const planning_interface::MotionPlanRequest& req,
-                    planning_interface::MotionPlanResponse& res) const override
+  [[nodiscard]] moveit::core::MoveItErrorCode adapt(const planning_scene::PlanningSceneConstPtr& planning_scene,
+                                                    planning_interface::MotionPlanRequest& req) const override
   {
     RCLCPP_DEBUG(logger_, "Running '%s'", getDescription().c_str());
-    planning_interface::MotionPlanRequest modified = req;
-    kinematic_constraints::resolveConstraintFrames(planning_scene->getCurrentState(), modified.path_constraints);
-    for (moveit_msgs::msg::Constraints& constraint : modified.goal_constraints)
+    // Resolve path constraint frames
+    kinematic_constraints::resolveConstraintFrames(planning_scene->getCurrentState(), req.path_constraints);
+    // Resolve goal constraint frames
+    for (moveit_msgs::msg::Constraints& constraint : req.goal_constraints)
     {
       kinematic_constraints::resolveConstraintFrames(planning_scene->getCurrentState(), constraint);
     }
-    return planner(planning_scene, modified, res);
+    return moveit::core::MoveItErrorCode(moveit_msgs::msg::MoveItErrorCodes::SUCCESS, std::string(""), getDescription());
   }
 
 private:
   rclcpp::Logger logger_;
 };
 
-}  // namespace default_planner_request_adapters
+}  // namespace default_planning_request_adapters
 
-CLASS_LOADER_REGISTER_CLASS(default_planner_request_adapters::ResolveConstraintFrames,
-                            planning_request_adapter::PlanningRequestAdapter);
+CLASS_LOADER_REGISTER_CLASS(default_planning_request_adapters::ResolveConstraintFrames,
+                            planning_interface::PlanningRequestAdapter);

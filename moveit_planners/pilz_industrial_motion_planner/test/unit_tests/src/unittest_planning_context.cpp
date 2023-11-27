@@ -207,9 +207,8 @@ TYPED_TEST_SUITE(PlanningContextTest, PlanningContextTestTypes, /* ... */);
 TYPED_TEST(PlanningContextTest, NoRequest)
 {
   planning_interface::MotionPlanResponse res;
-  bool result = this->planning_context_->solve(res);
+  this->planning_context_->solve(res);
 
-  EXPECT_FALSE(result) << testutils::demangle(typeid(TypeParam).name());
   EXPECT_EQ(moveit_msgs::msg::MoveItErrorCodes::INVALID_MOTION_PLAN, res.error_code.val)
       << testutils::demangle(typeid(TypeParam).name());
 }
@@ -225,16 +224,14 @@ TYPED_TEST(PlanningContextTest, SolveValidRequest)
   this->planning_context_->setMotionPlanRequest(req);
 
   // TODO Formulate valid request
-  bool result = this->planning_context_->solve(res);
+  this->planning_context_->solve(res);
 
-  EXPECT_TRUE(result) << testutils::demangle(typeid(TypeParam).name());
   EXPECT_EQ(moveit_msgs::msg::MoveItErrorCodes::SUCCESS, res.error_code.val)
       << testutils::demangle(typeid(TypeParam).name());
 
   planning_interface::MotionPlanDetailedResponse res_detailed;
-  bool result_detailed = this->planning_context_->solve(res_detailed);
+  this->planning_context_->solve(res_detailed);
 
-  EXPECT_TRUE(result_detailed) << testutils::demangle(typeid(TypeParam).name());
   EXPECT_EQ(moveit_msgs::msg::MoveItErrorCodes::SUCCESS, res.error_code.val)
       << testutils::demangle(typeid(TypeParam).name());
 }
@@ -248,9 +245,8 @@ TYPED_TEST(PlanningContextTest, SolveValidRequestDetailedResponse)
   planning_interface::MotionPlanRequest req = this->getValidRequest(testutils::demangle(typeid(TypeParam).name()));
 
   this->planning_context_->setMotionPlanRequest(req);
-  bool result = this->planning_context_->solve(res);
+  this->planning_context_->solve(res);
 
-  EXPECT_TRUE(result) << testutils::demangle(typeid(TypeParam).name());
   EXPECT_EQ(moveit_msgs::msg::MoveItErrorCodes::SUCCESS, res.error_code.val)
       << testutils::demangle(typeid(TypeParam).name());
 }
@@ -268,8 +264,7 @@ TYPED_TEST(PlanningContextTest, SolveOnTerminated)
   bool result_termination = this->planning_context_->terminate();
   EXPECT_TRUE(result_termination) << testutils::demangle(typeid(TypeParam).name());
 
-  bool result = this->planning_context_->solve(res);
-  EXPECT_FALSE(result) << testutils::demangle(typeid(TypeParam).name());
+  this->planning_context_->solve(res);
 
   EXPECT_EQ(moveit_msgs::msg::MoveItErrorCodes::PLANNING_FAILED, res.error_code.val)
       << testutils::demangle(typeid(TypeParam).name());
