@@ -1,4 +1,4 @@
-planning_plugin:
+planning_plugins:
   - chomp_interface/CHOMPPlanner
 enable_failure_recovery: true
 # The order of the elements in the adapter corresponds to the order they are processed by the motion planning pipeline.
