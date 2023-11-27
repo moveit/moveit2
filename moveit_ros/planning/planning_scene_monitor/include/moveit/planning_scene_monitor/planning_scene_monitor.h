@@ -425,17 +425,11 @@ protected:
   /** @brief Configure the default padding*/
   void configureDefaultPadding();
 
-  /** @brief Callback for a new collision object msg*/
-  void collisionObjectCallback(const moveit_msgs::msg::CollisionObject::ConstSharedPtr& obj);
-
   /** @brief Callback for a new planning scene world*/
   void newPlanningSceneWorldCallback(const moveit_msgs::msg::PlanningSceneWorld::ConstSharedPtr& world);
 
   /** @brief Callback for octomap updates */
   void octomapUpdateCallback();
-
-  /** @brief Callback for a new attached object msg*/
-  void attachObjectCallback(const moveit_msgs::msg::AttachedCollisionObject::ConstSharedPtr& obj);
 
   /** @brief Callback for a change for an attached object of the current state of the planning scene */
   void currentStateAttachedBodyUpdateCallback(moveit::core::AttachedBody* attached_body, bool just_attached);

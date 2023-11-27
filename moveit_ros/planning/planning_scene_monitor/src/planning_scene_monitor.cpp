@@ -841,16 +841,6 @@ void PlanningSceneMonitor::newPlanningSceneWorldCallback(
   }
 }
 
-void PlanningSceneMonitor::collisionObjectCallback(const moveit_msgs::msg::CollisionObject::ConstSharedPtr& obj)
-{
-  processCollisionObjectMsg(obj);
-}
-
-void PlanningSceneMonitor::attachObjectCallback(const moveit_msgs::msg::AttachedCollisionObject::ConstSharedPtr& obj)
-{
-  processAttachedCollisionObjectMsg(obj);
-}
-
 void PlanningSceneMonitor::excludeRobotLinksFromOctree()
 {
   if (!octomap_monitor_)
@@ -1273,7 +1263,7 @@ void PlanningSceneMonitor::startWorldGeometryMonitor(const std::string& collisio
   {
     collision_object_subscriber_ = pnode_->create_subscription<moveit_msgs::msg::CollisionObject>(
         collision_objects_topic, rclcpp::SystemDefaultsQoS(),
-        [this](const moveit_msgs::msg::CollisionObject::ConstSharedPtr& obj) { return collisionObjectCallback(obj); });
+        [this](const moveit_msgs::msg::CollisionObject::ConstSharedPtr& obj) { processCollisionObjectMsg(obj); });
     RCLCPP_INFO(logger_, "Listening to '%s'", collision_objects_topic.c_str());
   }
 
@@ -1356,7 +1346,7 @@ void PlanningSceneMonitor::startStateMonitor(const std::string& joint_states_top
       attached_collision_object_subscriber_ = pnode_->create_subscription<moveit_msgs::msg::AttachedCollisionObject>(
           attached_objects_topic, rclcpp::SystemDefaultsQoS(),
           [this](const moveit_msgs::msg::AttachedCollisionObject::ConstSharedPtr& obj) {
-            return attachObjectCallback(obj);
+            processAttachedCollisionObjectMsg(obj);
           });
       RCLCPP_INFO(logger_, "Listening to '%s' for attached collision objects",
                   attached_collision_object_subscriber_->get_topic_name());
