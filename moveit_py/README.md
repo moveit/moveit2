@@ -1,7 +1,7 @@
 # MoveIt 2 Python Library
 <img src="./banner.png" width="50%">
 
-`moveit` is a Python library for interfacing with the core functionalities of MoveIt 2.
+`moveit_py` is a Python library for interfacing with the core functionalities of MoveIt 2.
 The goal of this library is to provide a simplified interface for MoveIt 2 Python users.
 
 This Python library depends on [pybind11](https://pybind11.readthedocs.io/en/stable/index.html) for generating Python bindings.
