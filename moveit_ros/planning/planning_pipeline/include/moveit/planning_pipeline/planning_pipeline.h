@@ -168,7 +168,7 @@ public:
   }
   [[deprecated("Removed from API.")]] const planning_interface::PlannerManagerPtr& getPlannerManager()
   {
-    return planner_vector_.at(0);
+    return planner_map_.at(pipeline_parameters_.planning_plugins.at(0));
   }
   /*
   END BLOCK OF DEPRECATED FUNCTIONS
@@ -223,6 +223,17 @@ public:
     return parameter_namespace_;
   }
 
+  /** \brief Get access to planner plugin */
+  const planning_interface::PlannerManagerConstPtr getPlannerManager(const std::string& planner_name)
+  {
+    if (planner_map_.find(planner_name) == planner_map_.end())
+    {
+      RCLCPP_ERROR(node_->get_logger(), "Cannot retrieve planner because '%s' does not exist.", planner_name.c_str());
+      return nullptr;
+    }
+    return planner_map_.at(planner_name);
+  }
+
 private:
   /// \brief Helper function that is called by both constructors to configure and initialize a PlanningPipeline instance
   void configure();
@@ -247,7 +258,7 @@ private:
 
   // Planner plugin
   std::unique_ptr<pluginlib::ClassLoader<planning_interface::PlannerManager>> planner_plugin_loader_;
-  std::vector<planning_interface::PlannerManagerPtr> planner_vector_;
+  std::unordered_map<std::string, planning_interface::PlannerManagerPtr> planner_map_;
 
   // Plan request adapters
   std::unique_ptr<pluginlib::ClassLoader<planning_interface::PlanningRequestAdapter>> request_adapter_plugin_loader_;

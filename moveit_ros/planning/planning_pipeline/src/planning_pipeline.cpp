@@ -167,7 +167,7 @@ void PlanningPipeline::configure()
       throw std::runtime_error("Unable to initialize planning plugin " + planner_name);
     }
     RCLCPP_INFO(LOGGER, "Successfully loaded planner '%s'", planner_instance->getDescription().c_str());
-    planner_vector_.push_back(std::move(planner_instance));
+    planner_map_.insert(std::make_pair(planner_name, planner_instance));
   }
 
   // Load the planner request adapters
@@ -248,7 +248,7 @@ bool PlanningPipeline::generatePlan(const planning_scene::PlanningSceneConstPtr&
                                     planning_interface::MotionPlanResponse& res,
                                     const bool publish_received_requests) const
 {
-  assert(!planner_vector_.empty());
+  assert(!planner_map_.empty());
 
   // Set planning pipeline active
   active_ = true;
@@ -286,8 +286,9 @@ bool PlanningPipeline::generatePlan(const planning_scene::PlanningSceneConstPtr&
     }
 
     // Call planners
-    for (const auto& planner : planner_vector_)
+    for (const auto& planner_name : pipeline_parameters_.planning_plugins)
     {
+      const auto& planner = planner_map_.at(planner_name);
       // Update reference trajectory with latest solution (if available)
       if (res.trajectory)
       {
@@ -364,10 +365,10 @@ bool PlanningPipeline::generatePlan(const planning_scene::PlanningSceneConstPtr&
 
 void PlanningPipeline::terminate() const
 {
-  for (const auto& planner : planner_vector_)
-    if (planner)
+  for (const auto& planner_pair : planner_map_)
+    if (planner_pair.second)
     {
-      planner->terminate();
+      planner_pair.second->terminate();
     }
 }
 }  // namespace planning_pipeline
