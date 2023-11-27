@@ -224,7 +224,7 @@ public:
   }
 
   /** \brief Get access to planner plugin */
-  const planning_interface::PlannerManagerConstPtr getPlannerManager(const std::string& planner_name)
+  const planning_interface::PlannerManagerPtr getPlannerManager(const std::string& planner_name)
   {
     if (planner_map_.find(planner_name) == planner_map_.end())
     {
