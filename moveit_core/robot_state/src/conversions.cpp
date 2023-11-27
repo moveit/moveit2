@@ -359,8 +359,10 @@ void msgToAttachedBody(const Transforms* tf, const moveit_msgs::msg::AttachedCol
   else if (aco.object.operation == moveit_msgs::msg::CollisionObject::REMOVE)
   {
     if (!state.clearAttachedBody(aco.object.id))
+    {
       RCLCPP_ERROR(getLogger(), "The attached body '%s' can not be removed because it does not exist",
                    aco.link_name.c_str());
+    }
   }
   else
     RCLCPP_ERROR(getLogger(), "Unknown collision object operation: %d", aco.object.operation);

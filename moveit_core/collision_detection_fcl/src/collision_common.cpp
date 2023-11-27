@@ -167,8 +167,10 @@ bool collisionCallback(fcl::CollisionObjectd* o1, fcl::CollisionObjectd* o2, voi
     return false;
 
   if (cdata->req_->verbose)
+  {
     RCLCPP_DEBUG(getLogger(), "Actually checking collisions between %s and %s", cd1->getID().c_str(),
                  cd2->getID().c_str());
+  }
 
   // see if we need to compute a contact
   std::size_t want_contact_count{ 0 };
@@ -534,8 +536,10 @@ bool distanceCallback(fcl::CollisionObjectd* o1, fcl::CollisionObjectd* o2, void
     return false;
   }
   if (cdata->req->verbose)
+  {
     RCLCPP_DEBUG(getLogger(), "Actually checking collisions between %s and %s", cd1->getID().c_str(),
                  cd2->getID().c_str());
+  }
 
   double dist_threshold = cdata->req->distance_threshold;
 

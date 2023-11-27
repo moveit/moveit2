@@ -58,9 +58,10 @@
 #include <sstream>
 
 static void publishOctomap(const rclcpp::Publisher<octomap_msgs::msg::Octomap>::SharedPtr& octree_binary_pub,
-                           occupancy_map_monitor::OccupancyMapMonitor& server, rclcpp::Logger logger)
+                           occupancy_map_monitor::OccupancyMapMonitor& server)
 {
   octomap_msgs::msg::Octomap map;
+  const auto logger = moveit::getLogger("occupancy_map_monitor");
 
   map.header.frame_id = server.getMapFrame();
   map.header.stamp = rclcpp::Clock().now();
@@ -100,9 +101,8 @@ int main(int argc, char** argv)
   std::shared_ptr<tf2_ros::Buffer> buffer = std::make_shared<tf2_ros::Buffer>(clock_ptr, tf2::durationFromSec(5.0));
   tf2_ros::TransformListener listener(*buffer, node, false /* spin_thread - disables executor */);
   occupancy_map_monitor::OccupancyMapMonitor server(node, buffer);
-  server.setUpdateCallback([&octree_binary_pub, &server, logger = node->get_logger()] {
-    return publishOctomap(octree_binary_pub, server, logger);
-  });
+  server.setUpdateCallback(
+      [&octree_binary_pub, &server, logger = node->get_logger()] { return publishOctomap(octree_binary_pub, server); });
   server.startMonitor();
 
   rclcpp::spin(node);

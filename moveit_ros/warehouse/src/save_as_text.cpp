@@ -57,7 +57,7 @@ typedef std::pair<geometry_msgs::msg::Point, geometry_msgs::msg::Quaternion> Lin
 typedef std::map<std::string, LinkConstraintPair> LinkConstraintMap;
 
 void collectLinkConstraints(const moveit_msgs::msg::Constraints& constraints, LinkConstraintMap& lcmap,
-                            rclcpp::Logger logger)
+                            const rclcpp::Logger& logger)
 {
   for (const moveit_msgs::msg::PositionConstraint& position_constraint : constraints.position_constraints)
   {

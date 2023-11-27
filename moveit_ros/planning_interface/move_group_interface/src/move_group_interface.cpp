@@ -1341,7 +1341,9 @@ MoveGroupInterface::~MoveGroupInterface()
 }
 
 MoveGroupInterface::MoveGroupInterface(MoveGroupInterface&& other) noexcept
-  : remembered_joint_values_(std::move(other.remembered_joint_values_)), impl_(other.impl_), logger_(other.logger_)
+  : remembered_joint_values_(std::move(other.remembered_joint_values_))
+  , impl_(other.impl_)
+  , logger_(std::move(other.logger_))
 {
   other.impl_ = nullptr;
 }
