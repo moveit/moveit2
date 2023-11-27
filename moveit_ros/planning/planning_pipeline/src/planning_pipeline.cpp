@@ -60,12 +60,11 @@ getTrajectoryConstraints(const robot_trajectory::RobotTrajectoryPtr& trajectory)
   {
     moveit_msgs::msg::Constraints new_waypoint_constraint;
     // Iterate through joints and copy waypoint data to joint constraint
-    for (size_t joint_index = 0; joint_index < joint_names.size(); ++joint_index)
+    for (const auto& joint_name : joint_names)
     {
       moveit_msgs::msg::JointConstraint new_joint_constraint;
-      new_joint_constraint.joint_name = joint_names.at(joint_index);
-      new_joint_constraint.position =
-          trajectory->getWayPoint(waypoint_index).getVariablePosition(joint_names.at(joint_index));
+      new_joint_constraint.joint_name = joint_name;
+      new_joint_constraint.position = trajectory->getWayPoint(waypoint_index).getVariablePosition(joint_name);
       new_waypoint_constraint.joint_constraints.push_back(new_joint_constraint);
     }
     trajectory_constraints.push_back(new_waypoint_constraint);
@@ -366,9 +365,11 @@ bool PlanningPipeline::generatePlan(const planning_scene::PlanningSceneConstPtr&
 void PlanningPipeline::terminate() const
 {
   for (const auto& planner_pair : planner_map_)
+  {
     if (planner_pair.second)
     {
       planner_pair.second->terminate();
     }
+  }
 }
 }  // namespace planning_pipeline
