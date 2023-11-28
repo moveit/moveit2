@@ -715,14 +715,20 @@ void RobotState::updateLinkTransformsInternal(const JointModel* start)
     }
     else  // is the origin / root / 'model frame'
     {
-      if (link->jointOriginTransformIsIdentity())
+      const JointModel* root_joint = link->getParentJointModel();
+      if (root_joint->getVariableCount() == 0)
       {
-        global_link_transforms_[idx_link] = getJointTransform(link->getParentJointModel());
+        // The root joint doesn't have any variables: avoid calling getJointTransform() on it.
+        global_link_transforms_[idx_link] = Eigen::Isometry3d::Identity();
+      }
+      else if (link->jointOriginTransformIsIdentity())
+      {
+        global_link_transforms_[idx_link] = getJointTransform(root_joint);
       }
       else
       {
         global_link_transforms_[idx_link].affine().noalias() =
-            link->getJointOriginTransform().affine() * getJointTransform(link->getParentJointModel()).matrix();
+            link->getJointOriginTransform().affine() * getJointTransform(root_joint).matrix();
       }
     }
   }
