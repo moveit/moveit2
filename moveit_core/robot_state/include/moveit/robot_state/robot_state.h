@@ -530,7 +530,7 @@ public:
 
   void setJointPositions(const JointModel* joint, const double* position)
   {
-    memcpy(position_.data() + joint->getFirstVariableIndex(), position, joint->getVariableCount() * sizeof(double));
+    memcpy(&position_.at(joint->getFirstVariableIndex()), position, joint->getVariableCount() * sizeof(double));
     markDirtyJointTransforms(joint);
     updateMimicJoint(joint);
   }
@@ -542,7 +542,7 @@ public:
 
   void setJointPositions(const JointModel* joint, const Eigen::Isometry3d& transform)
   {
-    joint->computeVariablePositions(transform, position_.data() + joint->getFirstVariableIndex());
+    joint->computeVariablePositions(transform, &position_.at(joint->getFirstVariableIndex()));
     markDirtyJointTransforms(joint);
     updateMimicJoint(joint);
   }
@@ -550,7 +550,7 @@ public:
   void setJointVelocities(const JointModel* joint, const double* velocity)
   {
     has_velocity_ = true;
-    memcpy(velocity_.data() + joint->getFirstVariableIndex(), velocity, joint->getVariableCount() * sizeof(double));
+    memcpy(&velocity_.at(joint->getFirstVariableIndex()), velocity, joint->getVariableCount() * sizeof(double));
   }
 
   void setJointEfforts(const JointModel* joint, const double* effort);
@@ -562,7 +562,7 @@ public:
 
   const double* getJointPositions(const JointModel* joint) const
   {
-    return position_.data() + joint->getFirstVariableIndex();
+    return &position_.at(joint->getFirstVariableIndex());
   }
 
   const double* getJointVelocities(const std::string& joint_name) const
@@ -572,7 +572,7 @@ public:
 
   const double* getJointVelocities(const JointModel* joint) const
   {
-    return velocity_.data() + joint->getFirstVariableIndex();
+    return &velocity_.at(joint->getFirstVariableIndex());
   }
 
   const double* getJointAccelerations(const std::string& joint_name) const
@@ -582,7 +582,7 @@ public:
 
   const double* getJointAccelerations(const JointModel* joint) const
   {
-    return effort_or_acceleration_.data() + joint->getFirstVariableIndex();
+    return &effort_or_acceleration_.at(joint->getFirstVariableIndex());
   }
 
   const double* getJointEffort(const std::string& joint_name) const
@@ -592,7 +592,7 @@ public:
 
   const double* getJointEffort(const JointModel* joint) const
   {
-    return effort_or_acceleration_.data() + joint->getFirstVariableIndex();
+    return &effort_or_acceleration_.at(joint->getFirstVariableIndex());
   }
 
   /** @} */
@@ -1339,7 +1339,7 @@ public:
     unsigned char& dirty = dirty_joint_transforms_[idx];
     if (dirty)
     {
-      joint->computeTransform(position_.data() + joint->getFirstVariableIndex(), variable_joint_transforms_[idx]);
+      joint->computeTransform(&position_.at(joint->getFirstVariableIndex()), variable_joint_transforms_[idx]);
       dirty = 0;
     }
     return variable_joint_transforms_[idx];
@@ -1396,7 +1396,7 @@ public:
   double distance(const RobotState& other, const JointModel* joint) const
   {
     const int idx = joint->getFirstVariableIndex();
-    return joint->distance(position_.data() + idx, other.position_.data() + idx);
+    return joint->distance(&position_.at(idx), &other.position_.at(idx));
   }
 
   /**
@@ -1432,7 +1432,7 @@ public:
   void interpolate(const RobotState& to, double t, RobotState& state, const JointModel* joint) const
   {
     const int idx = joint->getFirstVariableIndex();
-    joint->interpolate(position_.data() + idx, to.position_.data() + idx, t, state.position_.data() + idx);
+    joint->interpolate(&position_.at(idx), &to.position_.at(idx), t, &state.position_.at(idx));
     state.markDirtyJointTransforms(joint);
     state.updateMimicJoint(joint);
   }
@@ -1447,7 +1447,7 @@ public:
   }
   void enforcePositionBounds(const JointModel* joint)
   {
-    if (joint->enforcePositionBounds(position_.data() + joint->getFirstVariableIndex()))
+    if (joint->enforcePositionBounds(&position_.at(joint->getFirstVariableIndex())))
     {
       markDirtyJointTransforms(joint);
       updateMimicJoint(joint);
@@ -1459,7 +1459,7 @@ public:
   void harmonizePositions(const JointModelGroup* joint_group);
   void harmonizePosition(const JointModel* joint)
   {
-    if (joint->harmonizePosition(position_.data() + joint->getFirstVariableIndex()))
+    if (joint->harmonizePosition(&position_.at(joint->getFirstVariableIndex())))
     {
       // no need to mark transforms dirty, as the transform hasn't changed
       updateMimicJoint(joint);
@@ -1468,7 +1468,7 @@ public:
 
   void enforceVelocityBounds(const JointModel* joint)
   {
-    joint->enforceVelocityBounds(velocity_.data() + joint->getFirstVariableIndex());
+    joint->enforceVelocityBounds(&velocity_.at(joint->getFirstVariableIndex()));
   }
 
   bool satisfiesBounds(double margin = 0.0) const;
@@ -1820,9 +1820,8 @@ private:
   /** \brief For certain operations a state needs a random number generator. However, it may be slightly expensive
       to allocate the random number generator if many state instances are generated. For this reason, the generator
       is allocated on a need basis, by the getRandomNumberGenerator() function. Never use the rng_ member directly, but
-     call
-      getRandomNumberGenerator() instead. */
-  std::unique_ptr<random_numbers::RandomNumberGenerator> rng_ = nullptr;
+      call getRandomNumberGenerator() instead. */
+  std::unique_ptr<random_numbers::RandomNumberGenerator> rng_;
 };
 
 /** \brief Operator overload for printing variable bounds to a stream */

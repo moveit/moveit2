@@ -246,7 +246,7 @@ void RobotState::setToRandomPositions(const JointModelGroup* group, random_numbe
 {
   const std::vector<const JointModel*>& joints = group->getActiveJointModels();
   for (const JointModel* joint : joints)
-    joint->getVariableRandomPositions(rng, position_.data() + joint->getFirstVariableIndex());
+    joint->getVariableRandomPositions(rng, &position_[joint->getFirstVariableIndex()]);
   updateMimicJoints(group);
 }
 
@@ -268,8 +268,8 @@ void RobotState::setToRandomPositionsNearBy(const JointModelGroup* group, const 
   for (std::size_t i = 0; i < joints.size(); ++i)
   {
     const int idx = joints[i]->getFirstVariableIndex();
-    joints[i]->getVariableRandomPositionsNearBy(rng, position_.data() + joints[i]->getFirstVariableIndex(),
-                                                seed.position_.data() + idx, distances[i]);
+    joints[i]->getVariableRandomPositionsNearBy(rng, &position_.at(joints[i]->getFirstVariableIndex()),
+                                                &seed.position_.at(idx), distances[i]);
   }
   updateMimicJoints(group);
 }
@@ -289,8 +289,8 @@ void RobotState::setToRandomPositionsNearBy(const JointModelGroup* group, const 
   for (const JointModel* joint : joints)
   {
     const int idx = joint->getFirstVariableIndex();
-    joint->getVariableRandomPositionsNearBy(rng, position_.data() + joint->getFirstVariableIndex(),
-                                            seed.position_.data() + idx, distance);
+    joint->getVariableRandomPositionsNearBy(rng, &position_.at(joint->getFirstVariableIndex()), &seed.position_.at(idx),
+                                            distance);
   }
   updateMimicJoints(group);
 }
@@ -458,7 +458,7 @@ void RobotState::setJointEfforts(const JointModel* joint, const double* effort)
   }
   has_effort_ = true;
 
-  memcpy(effort_or_acceleration_.data() + joint->getFirstVariableIndex(), effort,
+  memcpy(&effort_or_acceleration_.at(joint->getFirstVariableIndex()), effort,
          joint->getVariableCount() * sizeof(double));
 }
 
@@ -467,7 +467,7 @@ void RobotState::setJointGroupPositions(const JointModelGroup* group, const doub
   const std::vector<int>& il = group->getVariableIndexList();
   if (group->isContiguousWithinState())
   {
-    memcpy(position_.data() + il[0], gstate, group->getVariableCount() * sizeof(double));
+    memcpy(&position_.at(il[0]), gstate, group->getVariableCount() * sizeof(double));
   }
   else
   {
@@ -514,7 +514,7 @@ void RobotState::copyJointGroupPositions(const JointModelGroup* group, double* g
   const std::vector<int>& il = group->getVariableIndexList();
   if (group->isContiguousWithinState())
   {
-    memcpy(gstate, position_.data() + il[0], group->getVariableCount() * sizeof(double));
+    memcpy(gstate, &position_.at(il[0]), group->getVariableCount() * sizeof(double));
   }
   else
   {
@@ -537,7 +537,7 @@ void RobotState::setJointGroupVelocities(const JointModelGroup* group, const dou
   const std::vector<int>& il = group->getVariableIndexList();
   if (group->isContiguousWithinState())
   {
-    memcpy(velocity_.data() + il[0], gstate, group->getVariableCount() * sizeof(double));
+    memcpy(&velocity_.at(il[0]), gstate, group->getVariableCount() * sizeof(double));
   }
   else
   {
@@ -559,7 +559,7 @@ void RobotState::copyJointGroupVelocities(const JointModelGroup* group, double* 
   const std::vector<int>& il = group->getVariableIndexList();
   if (group->isContiguousWithinState())
   {
-    memcpy(gstate, velocity_.data() + il[0], group->getVariableCount() * sizeof(double));
+    memcpy(gstate, &velocity_.at(il[0]), group->getVariableCount() * sizeof(double));
   }
   else
   {
@@ -582,7 +582,7 @@ void RobotState::setJointGroupAccelerations(const JointModelGroup* group, const 
   const std::vector<int>& il = group->getVariableIndexList();
   if (group->isContiguousWithinState())
   {
-    memcpy(effort_or_acceleration_.data() + il[0], gstate, group->getVariableCount() * sizeof(double));
+    memcpy(&effort_or_acceleration_.at(il[0]), gstate, group->getVariableCount() * sizeof(double));
   }
   else
   {
@@ -604,7 +604,7 @@ void RobotState::copyJointGroupAccelerations(const JointModelGroup* group, doubl
   const std::vector<int>& il = group->getVariableIndexList();
   if (group->isContiguousWithinState())
   {
-    memcpy(gstate, effort_or_acceleration_.data() + il[0], group->getVariableCount() * sizeof(double));
+    memcpy(gstate, &effort_or_acceleration_.at(il[0]), group->getVariableCount() * sizeof(double));
   }
   else
   {
@@ -928,8 +928,7 @@ bool RobotState::isValidVelocityMove(const RobotState& other, const JointModelGr
     // Check velocity for each joint variable
     for (std::size_t var_id = 0; var_id < joint_id->getVariableCount(); ++var_id)
     {
-      const double dtheta =
-          std::abs(*(position_.data() + idx + var_id) - *(other.getVariablePositions() + idx + var_id));
+      const double dtheta = std::abs(position_.at(idx + var_id) - *(other.getVariablePositions() + idx + var_id));
 
       if (dtheta > dt * bounds[var_id].max_velocity_)
         return false;
@@ -945,7 +944,7 @@ double RobotState::distance(const RobotState& other, const JointModelGroup* join
   for (const JointModel* joint : jm)
   {
     const int idx = joint->getFirstVariableIndex();
-    d += joint->getDistanceFactor() * joint->distance(position_.data() + idx, other.position_.data() + idx);
+    d += joint->getDistanceFactor() * joint->distance(&position_.at(idx), &other.position_.at(idx));
   }
   return d;
 }
@@ -966,7 +965,7 @@ void RobotState::interpolate(const RobotState& to, double t, RobotState& state, 
   for (const JointModel* joint : jm)
   {
     const int idx = joint->getFirstVariableIndex();
-    joint->interpolate(position_.data() + idx, to.position_.data() + idx, t, state.position_.data() + idx);
+    joint->interpolate(&position_.at(idx), &to.position_.at(idx), t, &state.position_.at(idx));
   }
   state.updateMimicJoints(joint_group);
 }
