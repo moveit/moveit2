@@ -558,6 +558,11 @@ collision_detection::AllowedCollisionMatrix& PlanningScene::getAllowedCollisionM
   return *acm_;
 }
 
+void PlanningScene::setAllowedCollisionMatrix(const collision_detection::AllowedCollisionMatrix& acm)
+{
+  getAllowedCollisionMatrixNonConst() = acm;
+}
+
 const moveit::core::Transforms& PlanningScene::getTransforms()
 {
   // Trigger an update of the robot transforms
@@ -1269,6 +1274,7 @@ bool PlanningScene::setPlanningSceneMsg(const moveit_msgs::msg::PlanningScene& s
   collision_detector_->cenv_->setPadding(scene_msg.link_padding);
   collision_detector_->cenv_->setScale(scene_msg.link_scale);
   object_colors_ = std::make_unique<ObjectColorMap>();
+  original_object_colors_ = std::make_unique<ObjectColorMap>();
   for (const moveit_msgs::msg::ObjectColor& object_color : scene_msg.object_colors)
     setObjectColor(object_color.id, object_color.color);
   world_->clearObjects();
@@ -1621,6 +1627,15 @@ bool PlanningScene::processAttachedCollisionObjectMsg(const moveit_msgs::msg::At
         const Eigen::Isometry3d& pose = attached_body->getGlobalPose();
         world_->addToObject(name, pose, attached_body->getShapes(), attached_body->getShapePoses());
         world_->setSubframesOfObject(name, attached_body->getSubframes());
+
+        // Try to set the object's color to its original color when first created.
+        // This ensures that the original color is reverted, e.g., when an object is attached and then unattached.
+        const auto original_object_color = getOriginalObjectColor(name);
+        if (original_object_color.has_value())
+        {
+          setObjectColor(attached_body->getName(), original_object_color.value());
+        }
+
         RCLCPP_DEBUG(LOGGER, "Detached object '%s' from link '%s' and added it back in the collision world",
                      name.c_str(), object.link_name.c_str());
       }
@@ -1975,6 +1990,17 @@ const std_msgs::msg::ColorRGBA& PlanningScene::getObjectColor(const std::string&
   return EMPTY;
 }
 
+std::optional<std_msgs::msg::ColorRGBA> PlanningScene::getOriginalObjectColor(const std::string& object_id) const
+{
+  if (original_object_colors_)
+  {
+    ObjectColorMap::const_iterator it = original_object_colors_->find(object_id);
+    if (it != original_object_colors_->end())
+      return it->second;
+  }
+  return std::nullopt;
+}
+
 void PlanningScene::getKnownObjectColors(ObjectColorMap& kc) const
 {
   kc.clear();
@@ -1997,6 +2023,12 @@ void PlanningScene::setObjectColor(const std::string& object_id, const std_msgs:
   if (!object_colors_)
     object_colors_ = std::make_unique<ObjectColorMap>();
   (*object_colors_)[object_id] = color;
+
+  // Set the original object color only once, if it's the first time adding this object ID.
+  if (!original_object_colors_)
+    original_object_colors_ = std::make_unique<ObjectColorMap>();
+  if (!getOriginalObjectColor(object_id))
+    (*original_object_colors_)[object_id] = color;
 }
 
 void PlanningScene::removeObjectColor(const std::string& object_id)
