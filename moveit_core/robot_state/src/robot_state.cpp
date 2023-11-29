@@ -90,7 +90,7 @@ void RobotState::init()
 {
   variable_joint_transforms_.resize(robot_model_->getJointModelCount(), Eigen::Isometry3d::Identity());
   global_link_transforms_.resize(robot_model_->getLinkModelCount(), Eigen::Isometry3d::Identity());
-  global_collision_body_transforms_.resize(robot_model_->getLinkModelCount(), Eigen::Isometry3d::Identity());
+  global_collision_body_transforms_.resize(robot_model_->getLinkGeometryCount(), Eigen::Isometry3d::Identity());
   dirty_joint_transforms_.resize(robot_model_->getJointModelCount(), 1);
   position_.resize(robot_model_->getVariableCount());
   velocity_.resize(robot_model_->getVariableCount());
