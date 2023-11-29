@@ -47,7 +47,6 @@
 #include <cassert>
 
 #include <rclcpp/duration.hpp>
-#include <rcpputils/asserts.hpp>
 
 /* Terminology
    * Model Frame: RobotModel's root frame == PlanningScene's planning frame
