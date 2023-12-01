@@ -116,19 +116,19 @@ public:
   bool ensureActiveControllersForJoints(const std::vector<std::string>& joints);
 
   /** \brief Make sure a particular controller is active.
-      \note If the 'moveit_manage_controllers' parameter is false and the controllers that happen to be active to not
+      \note If the 'moveit_manage_controllers' parameter is false and the controllers that happen to be active do not
      include the one specified as argument, this function fails. */
   bool ensureActiveController(const std::string& controller);
 
   /** \brief Make sure a particular set of controllers are active.
-      \note If the 'moveit_manage_controllers' parameter is false and the controllers that happen to be active to not
+      \note If the 'moveit_manage_controllers' parameter is false and the controllers that happen to be active do not
      include the ones specified as argument, this function fails. */
   bool ensureActiveControllers(const std::vector<std::string>& controllers);
 
   /** \brief Check if a controller is active. */
   bool isControllerActive(const std::string& controller);
 
-  /** \brief Check if a set of controllers are active. */
+  /** \brief Check if a set of controllers is active. */
   bool areControllersActive(const std::vector<std::string>& controllers);
 
   /// Add a trajectory for future execution. Optionally specify a controller to use for the trajectory. If no controller
