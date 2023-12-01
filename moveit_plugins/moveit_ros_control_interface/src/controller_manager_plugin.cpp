@@ -133,10 +133,12 @@ class Ros2ControlManager : public moveit_controller_manager::MoveItControllerMan
   void discover(bool force = false)
   {
     // Skip if controller stamp is too new for new discovery, enforce update if force==true
-    if (!force && ((node_->now() - controllers_stamp_) < CONTROLLER_INFORMATION_VALIDITY_AGE))
+    const auto CONTROLLER_INFORMATION_AGE = node_->now() - controllers_stamp_;
+    if (!force && (CONTROLLER_INFORMATION_AGE > CONTROLLER_INFORMATION_VALIDITY_AGE))
     {
-      RCLCPP_WARN_STREAM(LOGGER, "Controller information from " << list_controllers_service_->get_service_name()
-                                                                << " is out of date, skipping discovery");
+      RCLCPP_WARN_STREAM(LOGGER, "Controller information from "
+                                     << list_controllers_service_->get_service_name() << " is out of date ("
+                                     << CONTROLLER_INFORMATION_AGE.seconds() << "s old), skipping discovery");
       return;
     }
 

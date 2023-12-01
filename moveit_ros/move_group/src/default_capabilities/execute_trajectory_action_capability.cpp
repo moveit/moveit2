@@ -52,9 +52,6 @@ MoveGroupExecuteTrajectoryAction::MoveGroupExecuteTrajectoryAction() : MoveGroup
 
 void MoveGroupExecuteTrajectoryAction::initialize()
 {
-  using std::placeholders::_1;
-  using std::placeholders::_2;
-
   auto node = context_->moveit_cpp_->getNode();
   // start the move action server
   execute_action_server_ = rclcpp_action::create_server<ExecTrajectory>(
