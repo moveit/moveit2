@@ -64,7 +64,7 @@ void initTrajectoryExecutionManager(py::module& m)
            R"(
            Make sure the active controllers are such that trajectories that actuate joints in the specified group can be executed.
 
-           If manage_controllers_ is false and the controllers that happen to be active do not cover the joints in the group to be actuated, this function fails.
+           If the 'moveit_manage_controllers' parameter is false and the controllers that happen to be active do not cover the joints in the group to be actuated, this function fails.
            )")
 
       .def("ensure_active_controllers_for_joints",
@@ -73,7 +73,7 @@ void initTrajectoryExecutionManager(py::module& m)
            R"(
            Make sure the active controllers are such that trajectories that actuate joints in the specified set can be executed.
 
-           If manage_controllers_ is false and the controllers that happen to be active do not cover the joints to be actuated, this function fails.
+           If the 'moveit_manage_controllers' parameter is false and the controllers that happen to be active do not cover the joints to be actuated, this function fails.
            )")
 
       .def("ensure_active_controller",
@@ -81,7 +81,7 @@ void initTrajectoryExecutionManager(py::module& m)
            R"(
            Make sure a particular controller is active.
 
-           If manage_controllers_ is false and the controllers that happen to be active to not include the one specified as argument, this function fails.
+           If the 'moveit_manage_controllers' parameter is false and the controllers that happen to be active do not include the one specified as argument, this function fails.
            )")
 
       .def("ensure_active_controllers",
@@ -89,7 +89,7 @@ void initTrajectoryExecutionManager(py::module& m)
            R"(
            Make sure a particular set of controllers are active.
 
-           If manage_controllers_ is false and the controllers that happen to be active to not include the ones specified as argument, this function fails.
+           If the 'moveit_manage_controllers' parameter is false and the controllers that happen to be active do not include the ones specified as argument, this function fails.
           )")
 
       .def("is_controller_active", &trajectory_execution_manager::TrajectoryExecutionManager::isControllerActive,
@@ -101,7 +101,7 @@ void initTrajectoryExecutionManager(py::module& m)
       .def("are_controllers_active", &trajectory_execution_manager::TrajectoryExecutionManager::areControllersActive,
            py::arg("controllers"),
            R"(
-           Check if a set of controllers are active
+           Check if a set of controllers is active.
            )")
 
       .def("push",
