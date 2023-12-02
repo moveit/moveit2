@@ -157,14 +157,32 @@ void initTrajectoryExecutionManager(py::module& m)
       // ToDo(MatthijsBurgh)
       // See https://github.com/ros-planning/moveit2/issues/2442
       // get_trajectories
-      // execute
-      // execute_and_wait
-      // wait_for_execution
       // get_current_expected_trajectory_index
-      // get_last_execution_status
-
+      .def("execute",
+           py::overload_cast<const trajectory_execution_manager::TrajectoryExecutionManager::ExecutionCompleteCallback&,
+                             bool>(&trajectory_execution_manager::TrajectoryExecutionManager::execute),
+           py::arg("callback"), py::arg("auto_clear") = true,
+           R"(
+           Execute a trajectory.
+           )")
+      .def("execute_and_wait", &trajectory_execution_manager::TrajectoryExecutionManager::executeAndWait,
+           py::call_guard<py::gil_scoped_release>(), py::arg("auto_clear") = true,
+           R"(
+           Execute a trajectory and wait for it to finish.
+           )")
+      .def("wait_for_execution", &trajectory_execution_manager::TrajectoryExecutionManager::waitForExecution,
+           py::call_guard<py::gil_scoped_release>(),
+           R"(
+           Wait for the current trajectory to finish execution.
+           )")
+      .def("get_last_execution_status",
+           &trajectory_execution_manager::TrajectoryExecutionManager::getLastExecutionStatus,
+           py::return_value_policy::move,
+           R"(
+           Get the status of the last execution.
+           )")
       .def("stop_execution", &trajectory_execution_manager::TrajectoryExecutionManager::stopExecution,
-           py::arg("auto_clear") = true,
+           py::arg("auto_clear") = true, py::call_guard<py::gil_scoped_release>(),
            R"(
            Stop whatever executions are active, if any.
            )")
