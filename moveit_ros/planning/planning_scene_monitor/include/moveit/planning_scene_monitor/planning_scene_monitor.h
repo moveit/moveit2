@@ -393,7 +393,8 @@ public:
   bool newPlanningSceneMessage(const moveit_msgs::msg::PlanningScene& scene);
 
   // Called to update a collision object in the planning scene.
-  bool processCollisionObjectMsg(const moveit_msgs::msg::CollisionObject::ConstSharedPtr& collision_object_msg);
+  bool processCollisionObjectMsg(const moveit_msgs::msg::CollisionObject::ConstSharedPtr& collision_object_msg,
+                                 const std::optional<moveit_msgs::msg::ObjectColor> color_msg = std::nullopt);
 
   // Called to update an attached collision object in the planning scene.
   bool processAttachedCollisionObjectMsg(
