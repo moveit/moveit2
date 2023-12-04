@@ -162,7 +162,9 @@ void initTrajectoryExecutionManager(py::module& m)
                              bool>(&trajectory_execution_manager::TrajectoryExecutionManager::execute),
            py::arg("callback"), py::arg("auto_clear") = true,
            R"(
-           Start the execution of pushed trajectories; this does not wait for completion, but calls a callback when done.
+           Start the execution of pushed trajectories.
+           
+           This does not wait for completion, but calls a callback when done.
            )")
       .def(
           "execute",
