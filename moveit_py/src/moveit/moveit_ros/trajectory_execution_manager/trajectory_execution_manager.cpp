@@ -163,7 +163,7 @@ void initTrajectoryExecutionManager(py::module& m)
            py::arg("callback"), py::arg("auto_clear") = true,
            R"(
            Start the execution of pushed trajectories.
-           
+
            This does not wait for completion, but calls a callback when done.
            )")
       .def(
@@ -174,7 +174,7 @@ void initTrajectoryExecutionManager(py::module& m)
           py::arg("callback"), py::arg("part_callback"), py::arg("auto_clear") = true,
           R"(
           Start the execution of pushed trajectories.
-          
+
           This does not wait for completion, but calls a callback when done. A callback is also called for every
           trajectory part that completes successfully.
            )")
