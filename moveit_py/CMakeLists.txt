@@ -64,10 +64,12 @@ pybind11_add_module(planning
     src/moveit/planning.cpp
     src/moveit/moveit_ros/moveit_cpp/moveit_cpp.cpp
     src/moveit/moveit_ros/moveit_cpp/planning_component.cpp
+    src/moveit/moveit_ros/move_group_interface/move_group_interface.cpp
     src/moveit/moveit_ros/planning_scene_monitor/planning_scene_monitor.cpp
     src/moveit/moveit_ros/trajectory_execution_manager/trajectory_execution_manager.cpp
 )
 target_link_libraries(planning PRIVATE moveit_ros_planning::moveit_cpp
+    moveit_ros_planning_interface::moveit_move_group_interface
     moveit_ros_planning::moveit_planning_scene_monitor
     moveit_ros_planning::moveit_trajectory_execution_manager
     moveit_core::moveit_utils
