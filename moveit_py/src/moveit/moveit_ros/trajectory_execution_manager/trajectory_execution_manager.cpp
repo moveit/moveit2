@@ -35,6 +35,7 @@
 /* Author: Matthijs van der Burgh */
 
 #include "trajectory_execution_manager.h"
+#include <pybind11/stl.h>
 
 namespace moveit_py
 {
