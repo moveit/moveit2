@@ -140,7 +140,7 @@ void initMoveitPy(py::module& m)
       .def("execute",
            py::overload_cast<const robot_trajectory::RobotTrajectoryPtr&, const std::vector<std::string>&>(
                &moveit_cpp::MoveItCpp::execute),
-           py::arg("robot_trajectory"), py::arg("controllers"),
+           py::arg("robot_trajectory"), py::arg("controllers"), py::call_guard<py::gil_scoped_release>(),
            R"(
 	   Execute a trajectory (planning group is inferred from robot trajectory object).
 	   )")
