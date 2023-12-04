@@ -1,7 +1,7 @@
 /*********************************************************************
  * Software License Agreement (BSD License)
  *
- *  Copyright (c) 2022, Peter David Fagan
+ *  Copyright (c) 2023, Matthew Elwin
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *     copyright notice, this list of conditions and the following
  *     disclaimer in the documentation and/or other materials provided
  *     with the distribution.
- *   * Neither the name of the copyright holder nor the names of its
+ *   * Neither the name of PickNik Inc. nor the names of its
  *     contributors may be used to endorse or promote products derived
  *     from this software without specific prior written permission.
  *
@@ -32,29 +32,19 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-/* Author: Peter David Fagan */
+/* Author: Matthew Elwin*/
 
-#include "moveit_ros/moveit_cpp/moveit_cpp.h"
-#include "moveit_ros/moveit_cpp/planning_component.h"
-#include "moveit_ros/move_group_interface/move_group_interface.h"
-#include "moveit_ros/planning_scene_monitor/planning_scene_monitor.h"
-#include "moveit_ros/trajectory_execution_manager/trajectory_execution_manager.h"
+#pragma once
 
-PYBIND11_MODULE(planning, m)
+#include <pybind11/pybind11.h>
+#include <moveit/move_group_interface/move_group_interface.h>
+
+namespace py = pybind11;
+
+namespace moveit_py
 {
-  m.doc() = "Python bindings for moveit_cpp functionalities.";
-
-  // Provide custom function signatures
-  py::options options;
-  options.disable_function_signatures();
-
-  // Construct module classes
-  moveit_py::bind_move_group_interface::init_move_group_interface(m);
-  moveit_py::bind_planning_component::initPlanRequestParameters(m);
-  moveit_py::bind_planning_component::initMultiPlanRequestParameters(m);
-  moveit_py::bind_planning_component::initPlanningComponent(m);
-  moveit_py::bind_planning_scene_monitor::initPlanningSceneMonitor(m);
-  moveit_py::bind_planning_scene_monitor::initContextManagers(m);
-  moveit_py::bind_trajectory_execution_manager::initTrajectoryExecutionManager(m);
-  moveit_py::bind_moveit_cpp::initMoveitPy(m);
-}
+namespace bind_move_group_interface
+{
+void init_move_group_interface(py::module& m);
+}  // namespace bind_move_group_interface
+}  // namespace moveit_py
