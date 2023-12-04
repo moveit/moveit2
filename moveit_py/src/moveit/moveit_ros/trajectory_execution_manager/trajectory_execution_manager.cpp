@@ -157,16 +157,25 @@ void initTrajectoryExecutionManager(py::module& m)
       // ToDo(MatthijsBurgh)
       // See https://github.com/ros-planning/moveit2/issues/2442
       // get_trajectories
-      // get_current_expected_trajectory_index
       .def("execute",
            py::overload_cast<const trajectory_execution_manager::TrajectoryExecutionManager::ExecutionCompleteCallback&,
                              bool>(&trajectory_execution_manager::TrajectoryExecutionManager::execute),
            py::arg("callback"), py::arg("auto_clear") = true,
            R"(
-           Execute a trajectory.
+           Start the execution of pushed trajectories; this does not wait for completion, but calls a callback when done.
+           )")
+      .def(
+          "execute",
+          py::overload_cast<const trajectory_execution_manager::TrajectoryExecutionManager::ExecutionCompleteCallback&,
+                            const trajectory_execution_manager::TrajectoryExecutionManager::PathSegmentCompleteCallback&,
+                            bool>(&trajectory_execution_manager::TrajectoryExecutionManager::execute),
+          py::arg("callback"), py::arg("part_callback"), py::arg("auto_clear") = true,
+          R"(
+           Start the execution of pushed trajectories; this does not wait for completion, but calls a callback when done. A
+           callback is also called for every trajectory part that completes successfully.
            )")
       .def("execute_and_wait", &trajectory_execution_manager::TrajectoryExecutionManager::executeAndWait,
-           py::call_guard<py::gil_scoped_release>(), py::arg("auto_clear") = true,
+           py::arg("auto_clear") = true, py::call_guard<py::gil_scoped_release>(),
            R"(
            Execute a trajectory and wait for it to finish.
            )")
@@ -175,9 +184,11 @@ void initTrajectoryExecutionManager(py::module& m)
            R"(
            Wait for the current trajectory to finish execution.
            )")
+      // ToDo(MatthijsBurgh)
+      // See https://github.com/ros-planning/moveit2/issues/2442
+      // get_current_expected_trajectory_index
       .def("get_last_execution_status",
            &trajectory_execution_manager::TrajectoryExecutionManager::getLastExecutionStatus,
-           py::return_value_policy::move,
            R"(
            Get the status of the last execution.
            )")
