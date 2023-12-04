@@ -47,7 +47,7 @@ rclcpp::Logger getLogger()
 }
 }  // namespace
 
-move_group::ClearOctomapService::ClearOctomapService() : MoveGroupCapability("ClearOctomapService")
+move_group::ClearOctomapService::ClearOctomapService() : MoveGroupCapability("clear_octomap_service")
 {
 }
 
@@ -63,7 +63,7 @@ void move_group::ClearOctomapService::clearOctomap(const std::shared_ptr<std_srv
                                                    const std::shared_ptr<std_srvs::srv::Empty::Response>& /*res*/)
 {
   if (!context_->planning_scene_monitor_)
-    RCLCPP_ERROR(getLogger(), "Cannot clear octomap since planning_scene_monitor_ does not exist.");
+    RCLCPP_ERROR(getLogger(), "Cannot clear octomap since planning scene monitor has not been initialized.");
 
   RCLCPP_INFO(getLogger(), "Clearing octomap...");
   context_->planning_scene_monitor_->clearOctomap();

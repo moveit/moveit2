@@ -44,7 +44,7 @@ namespace
 {
 rclcpp::Logger getLogger()
 {
-  return moveit::getLogger("servo_command");
+  return moveit::getLogger("servo");
 }
 
 /**

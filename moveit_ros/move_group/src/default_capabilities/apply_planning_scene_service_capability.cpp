@@ -42,7 +42,7 @@
 namespace move_group
 {
 
-ApplyPlanningSceneService::ApplyPlanningSceneService() : MoveGroupCapability("ApplyPlanningSceneService")
+ApplyPlanningSceneService::ApplyPlanningSceneService() : MoveGroupCapability("apply_planning_scene_service")
 {
 }
 

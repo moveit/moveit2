@@ -53,7 +53,7 @@ rclcpp::Logger getLogger()
 }
 }  // namespace
 
-MoveGroupExecuteTrajectoryAction::MoveGroupExecuteTrajectoryAction() : MoveGroupCapability("ExecuteTrajectoryAction")
+MoveGroupExecuteTrajectoryAction::MoveGroupExecuteTrajectoryAction() : MoveGroupCapability("execute_trajectory_action")
 {
 }
 

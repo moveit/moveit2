@@ -45,7 +45,7 @@
 namespace move_group
 {
 
-MoveGroupKinematicsService::MoveGroupKinematicsService() : MoveGroupCapability("KinematicsService")
+MoveGroupKinematicsService::MoveGroupKinematicsService() : MoveGroupCapability("kinematics_service")
 {
 }
 

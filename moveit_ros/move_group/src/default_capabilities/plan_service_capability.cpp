@@ -52,7 +52,7 @@ rclcpp::Logger getLogger()
 }
 }  // namespace
 
-MoveGroupPlanService::MoveGroupPlanService() : MoveGroupCapability("MotionPlanService")
+MoveGroupPlanService::MoveGroupPlanService() : MoveGroupCapability("motion_plan_service")
 {
 }
 

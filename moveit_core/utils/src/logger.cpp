@@ -52,7 +52,7 @@ rclcpp::Logger& getGlobalRootLogger()
     // A random number is appended to the name used for the node to make it unique.
     // This unique node and logger name is only used if a user does not set a logger
     // through the `setNodeLoggerName` method to their node's logger.
-    auto name = fmt::format("____moveit_{}", rsl::rng()());
+    auto name = fmt::format("moveit_{}", rsl::rng()());
     try
     {
       static auto* moveit_node = new rclcpp::Node(name);

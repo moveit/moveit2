@@ -47,7 +47,7 @@
 namespace move_group
 {
 
-TfPublisher::TfPublisher() : MoveGroupCapability("TfPublisher")
+TfPublisher::TfPublisher() : MoveGroupCapability("tf_publisher")
 {
 }
 

@@ -45,11 +45,12 @@ namespace moveit
 
 ConstructException::ConstructException(const std::string& what_arg) : std::runtime_error(what_arg)
 {
-  RCLCPP_ERROR(getLogger("exception"), "Error during construction of object: %s\nException thrown.", what_arg.c_str());
+  RCLCPP_ERROR(getLogger("moveit_exception"), "Error during construction of object: %s\nException thrown.",
+               what_arg.c_str());
 }
 
 Exception::Exception(const std::string& what_arg) : std::runtime_error(what_arg)
 {
-  RCLCPP_ERROR(getLogger("exception"), "%s\nException thrown.", what_arg.c_str());
+  RCLCPP_ERROR(getLogger("moveit_exception"), "%s\nException thrown.", what_arg.c_str());
 }
 }  // namespace moveit

@@ -50,7 +50,7 @@ namespace
 {
 rclcpp::Logger getLogger()
 {
-  return moveit::getLogger("MoveGroupCapability");
+  return moveit::getLogger("move_group_capability");
 }
 }  // namespace
 

@@ -57,7 +57,7 @@ rclcpp::Logger getLogger()
 }  // namespace
 
 MoveGroupMoveAction::MoveGroupMoveAction()
-  : MoveGroupCapability("MoveAction"), move_state_(IDLE), preempt_requested_{ false }
+  : MoveGroupCapability("move_action"), move_state_(IDLE), preempt_requested_{ false }
 {
 }
 

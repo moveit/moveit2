@@ -63,8 +63,6 @@ protected:
 
   void TearDown() override
   {
-    robot_model_.reset();
-    robot_state_.reset();
   }
 
   void initTestTrajectory(robot_trajectory::RobotTrajectoryPtr& trajectory)
@@ -339,19 +337,19 @@ protected:
 
     trajectory = std::make_shared<robot_trajectory::RobotTrajectory>(robot_model_, arm_jmg_name_);
 
-    ASSERT_EQ(trajectory->getGroupName(), arm_jmg_name_) << "Generated trajectory group name does not match";
-    ASSERT_TRUE(trajectory->empty()) << "Generated trajectory not empty";
+    EXPECT_EQ(trajectory->getGroupName(), arm_jmg_name_) << "Generated trajectory group name does not match";
+    EXPECT_TRUE(trajectory->empty()) << "Generated trajectory not empty";
 
     double duration_from_previous = 0.1;
     std::size_t waypoint_count = 5;
     for (std::size_t ix = 0; ix < waypoint_count; ++ix)
       trajectory->addSuffixWayPoint(*robot_state_, duration_from_previous);
     // Quick check that getDuration is working correctly
-    ASSERT_EQ(trajectory->getDuration(), duration_from_previous * waypoint_count)
+    EXPECT_EQ(trajectory->getDuration(), duration_from_previous * waypoint_count)
         << "Generated trajectory duration incorrect";
-    ASSERT_EQ(waypoint_count, trajectory->getWayPointDurations().size())
+    EXPECT_EQ(waypoint_count, trajectory->getWayPointDurations().size())
         << "Generated trajectory has the wrong number of waypoints";
-    ASSERT_EQ(waypoint_count, trajectory->size());
+    EXPECT_EQ(waypoint_count, trajectory->size());
   }
 
 protected:
