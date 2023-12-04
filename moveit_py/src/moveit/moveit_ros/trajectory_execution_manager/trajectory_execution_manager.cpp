@@ -171,8 +171,10 @@ void initTrajectoryExecutionManager(py::module& m)
                             bool>(&trajectory_execution_manager::TrajectoryExecutionManager::execute),
           py::arg("callback"), py::arg("part_callback"), py::arg("auto_clear") = true,
           R"(
-           Start the execution of pushed trajectories; this does not wait for completion, but calls a callback when done. A
-           callback is also called for every trajectory part that completes successfully.
+          Start the execution of pushed trajectories.
+          
+          This does not wait for completion, but calls a callback when done. A callback is also called for every
+          trajectory part that completes successfully.
            )")
       .def("execute_and_wait", &trajectory_execution_manager::TrajectoryExecutionManager::executeAndWait,
            py::arg("auto_clear") = true, py::call_guard<py::gil_scoped_release>(),
