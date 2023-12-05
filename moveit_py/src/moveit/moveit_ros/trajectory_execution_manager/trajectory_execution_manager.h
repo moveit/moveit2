@@ -37,6 +37,7 @@
 #pragma once
 
 #include <pybind11/pybind11.h>
+#include <pybind11/functional.h>
 #include <moveit_py/moveit_py_utils/copy_ros_msg.h>
 #include <moveit_py/moveit_py_utils/ros_msg_typecasters.h>
 #include <rclcpp/rclcpp.hpp>
