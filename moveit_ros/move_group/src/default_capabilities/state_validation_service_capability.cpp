@@ -43,7 +43,7 @@
 
 namespace move_group
 {
-MoveGroupStateValidationService::MoveGroupStateValidationService() : MoveGroupCapability("state_salidation_service")
+MoveGroupStateValidationService::MoveGroupStateValidationService() : MoveGroupCapability("state_validation_service")
 {
 }
 
