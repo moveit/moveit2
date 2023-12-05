@@ -503,7 +503,7 @@ KinematicState Servo::getNextJointState(const ServoInput& command)
 
     // Check if any joints are going past joint position limits
     const std::vector<int> joints_to_halt =
-        jointsToHalt(target_state.positions, target_state.velocities, joint_bounds, servo_params_.joint_limit_margin);
+        jointsToHalt(target_state.positions, target_state.velocities, joint_bounds, servo_params_.joint_limit_margins);
 
     // Apply halting if any joints need to be halted.
     if (!joints_to_halt.empty())

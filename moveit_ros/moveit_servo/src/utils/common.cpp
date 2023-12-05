@@ -341,7 +341,7 @@ double jointLimitVelocityScalingFactor(const Eigen::VectorXd& velocities,
 }
 
 std::vector<int> jointsToHalt(const Eigen::VectorXd& positions, const Eigen::VectorXd& velocities,
-                              const moveit::core::JointBoundsVector& joint_bounds, double margin)
+                              const moveit::core::JointBoundsVector& joint_bounds, const std::vector<double>& margins)
 {
   std::vector<int> joint_idxs_to_halt;
   for (size_t i = 0; i < joint_bounds.size(); i++)
@@ -349,8 +349,8 @@ std::vector<int> jointsToHalt(const Eigen::VectorXd& positions, const Eigen::Vec
     const auto joint_bound = (joint_bounds[i])->front();
     if (joint_bound.position_bounded_)
     {
-      const bool negative_bound = velocities[i] < 0 && positions[i] < (joint_bound.min_position_ + margin);
-      const bool positive_bound = velocities[i] > 0 && positions[i] > (joint_bound.max_position_ - margin);
+      const bool negative_bound = velocities[i] < 0 && positions[i] < (joint_bound.min_position_ + margins[i]);
+      const bool positive_bound = velocities[i] > 0 && positions[i] > (joint_bound.max_position_ - margins[i]);
       if (negative_bound || positive_bound)
       {
         joint_idxs_to_halt.push_back(i);
