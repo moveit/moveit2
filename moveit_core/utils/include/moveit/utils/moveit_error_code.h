@@ -79,7 +79,7 @@ public:
    @param error_code Error code to be translated to a string
    @return Error code string
  */
-inline std::string errorCodeToString(MoveItErrorCode error_code)
+inline std::string errorCodeToString(const MoveItErrorCode& error_code)
 {
   switch (error_code.val)
   {

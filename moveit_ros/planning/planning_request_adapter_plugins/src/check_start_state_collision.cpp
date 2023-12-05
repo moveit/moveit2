@@ -54,7 +54,7 @@ namespace default_planning_request_adapters
 class CheckStartStateCollision : public planning_interface::PlanningRequestAdapter
 {
 public:
-  CheckStartStateCollision() : logger_(moveit::makeChildLogger("validate_start_state"))
+  CheckStartStateCollision() : logger_(moveit::getLogger("validate_start_state"))
   {
   }
 

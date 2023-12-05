@@ -20,6 +20,7 @@ ament_target_dependencies(moveit_collision_detection_fcl
 )
 target_link_libraries(moveit_collision_detection_fcl
   moveit_collision_detection
+  moveit_utils
   fcl
 )
 
@@ -35,6 +36,7 @@ ament_target_dependencies(collision_detector_fcl_plugin
 target_link_libraries(collision_detector_fcl_plugin
   moveit_collision_detection_fcl
   moveit_planning_scene
+  moveit_utils
 )
 
 install(DIRECTORY include/ DESTINATION include/moveit_core)

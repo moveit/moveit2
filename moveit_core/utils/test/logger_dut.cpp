@@ -44,11 +44,11 @@ int main(int argc, char** argv)
   rclcpp::Node::SharedPtr node = rclcpp::Node::make_shared("dut_node");
 
   // Set the moveit logger to be from node
-  moveit::setLogger(node->get_logger());
+  moveit::setNodeLoggerName(node->get_name());
 
   // A node logger, should be in the file output and rosout
   auto wall_timer = node->create_wall_timer(std::chrono::milliseconds(100),
-                                            [&] { RCLCPP_INFO(moveit::getLogger(), "hello from node!"); });
+                                            [&] { RCLCPP_INFO(moveit::getLogger("child"), "hello from node!"); });
 
   rclcpp::spin(node);
 }

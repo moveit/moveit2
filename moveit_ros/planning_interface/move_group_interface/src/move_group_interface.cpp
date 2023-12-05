@@ -110,7 +110,7 @@ class MoveGroupInterface::MoveGroupInterfaceImpl
 public:
   MoveGroupInterfaceImpl(const rclcpp::Node::SharedPtr& node, const Options& opt,
                          const std::shared_ptr<tf2_ros::Buffer>& tf_buffer, const rclcpp::Duration& wait_for_servers)
-    : opt_(opt), node_(node), logger_(moveit::makeChildLogger("move_group_interface")), tf_buffer_(tf_buffer)
+    : opt_(opt), node_(node), logger_(moveit::getLogger("move_group_interface")), tf_buffer_(tf_buffer)
   {
     // We have no control on how the passed node is getting executed. To make sure MGI is functional, we're creating
     // our own callback group which is managed in a separate callback thread
@@ -1319,7 +1319,7 @@ private:
 MoveGroupInterface::MoveGroupInterface(const rclcpp::Node::SharedPtr& node, const std::string& group_name,
                                        const std::shared_ptr<tf2_ros::Buffer>& tf_buffer,
                                        const rclcpp::Duration& wait_for_servers)
-  : logger_(moveit::makeChildLogger("move_group_interface"))
+  : logger_(moveit::getLogger("move_group_interface"))
 {
   if (!rclcpp::ok())
     throw std::runtime_error("ROS does not seem to be running");
@@ -1330,7 +1330,7 @@ MoveGroupInterface::MoveGroupInterface(const rclcpp::Node::SharedPtr& node, cons
 MoveGroupInterface::MoveGroupInterface(const rclcpp::Node::SharedPtr& node, const Options& opt,
                                        const std::shared_ptr<tf2_ros::Buffer>& tf_buffer,
                                        const rclcpp::Duration& wait_for_servers)
-  : logger_(moveit::makeChildLogger("move_group_interface"))
+  : logger_(moveit::getLogger("move_group_interface"))
 {
   impl_ = new MoveGroupInterfaceImpl(node, opt, tf_buffer ? tf_buffer : getSharedTF(), wait_for_servers);
 }
@@ -1341,7 +1341,9 @@ MoveGroupInterface::~MoveGroupInterface()
 }
 
 MoveGroupInterface::MoveGroupInterface(MoveGroupInterface&& other) noexcept
-  : remembered_joint_values_(std::move(other.remembered_joint_values_)), impl_(other.impl_), logger_(other.logger_)
+  : remembered_joint_values_(std::move(other.remembered_joint_values_))
+  , impl_(other.impl_)
+  , logger_(std::move(other.logger_))
 {
   other.impl_ = nullptr;
 }

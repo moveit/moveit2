@@ -54,7 +54,7 @@ namespace default_planning_response_adapters
 class DisplayMotionPath : public planning_interface::PlanningResponseAdapter
 {
 public:
-  DisplayMotionPath() : logger_(moveit::makeChildLogger("display_motion_path"))
+  DisplayMotionPath() : logger_(moveit::getLogger("display_motion_path"))
   {
   }
 

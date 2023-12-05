@@ -42,14 +42,22 @@
 #include <rclcpp/utilities.hpp>
 #include <moveit/utils/logger.hpp>
 
+namespace
+{
+rclcpp::Logger getLogger()
+{
+  return moveit::getLogger("warehouse_connector");
+}
+}  // namespace
+
 #ifdef _WIN32
 void kill(int, int)
 {
-  RCLCPP_ERROR(moveit::getLogger(), "Warehouse connector not supported on Windows");
+  RCLCPP_ERROR(getLogger(), "Warehouse connector not supported on Windows");
 }  // Should never be called
 int fork()
 {
-  RCLCPP_ERROR(moveit::getLogger(), "Warehouse connector not supported on Windows");
+  RCLCPP_ERROR(getLogger(), "Warehouse connector not supported on Windows");
   return -1;
 }
 #else
@@ -58,8 +66,7 @@ int fork()
 
 namespace moveit_warehouse
 {
-WarehouseConnector::WarehouseConnector(const std::string& dbexec)
-  : dbexec_(dbexec), child_pid_(0), logger_(moveit::makeChildLogger("moveit_warehouse_warehouse_connector"))
+WarehouseConnector::WarehouseConnector(const std::string& dbexec) : dbexec_(dbexec), child_pid_(0)
 {
 }
 
@@ -77,7 +84,7 @@ bool WarehouseConnector::connectToDatabase(const std::string& dirname)
   child_pid_ = fork();
   if (child_pid_ == -1)
   {
-    RCLCPP_ERROR(logger_, "Error forking process.");
+    RCLCPP_ERROR(getLogger(), "Error forking process.");
     child_pid_ = 0;
     return false;
   }
@@ -105,7 +112,7 @@ bool WarehouseConnector::connectToDatabase(const std::string& dirname)
       delete[] argv[1];
       delete[] argv[2];
       delete[] argv;
-      RCLCPP_ERROR_STREAM(logger_,
+      RCLCPP_ERROR_STREAM(getLogger(),
                           "execv() returned " << code << ", errno=" << errno << " string errno = " << strerror(errno));
     }
     return false;
