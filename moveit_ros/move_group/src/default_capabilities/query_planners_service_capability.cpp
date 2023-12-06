@@ -42,6 +42,13 @@
 
 namespace move_group
 {
+namespace
+{
+rclcpp::Logger getLogger()
+{
+  return moveit::getLogger("query_planners_service_capability");
+}
+}  // namespace
 MoveGroupQueryPlannersService::MoveGroupQueryPlannersService() : MoveGroupCapability("query_planners_service")
 {
 }
@@ -78,14 +85,13 @@ void MoveGroupQueryPlannersService::queryInterface(
     const auto& planner_plugin_names = planning_pipeline->getPlannerPluginNames();
     if (planner_plugin_names.empty())
     {
-      RCLCPP_ERROR(moveit::getLogger(), "Pipeline '%s' does not have any planner plugins.",
-                   planning_pipelines.first.c_str());
+      RCLCPP_ERROR(getLogger(), "Pipeline '%s' does not have any planner plugins.", planning_pipelines.first.c_str());
       return;
     }
     const auto planner_interface = planning_pipeline->getPlannerManager(planner_plugin_names.at(0));
     if (!planner_interface)
     {
-      RCLCPP_ERROR(moveit::getLogger(), "Requesting planner '%s' from '%s' returned a null pointer.",
+      RCLCPP_ERROR(getLogger(), "Requesting planner '%s' from '%s' returned a null pointer.",
                    planner_plugin_names.at(0).c_str(), planning_pipelines.first.c_str());
     }
     std::vector<std::string> algs;
@@ -104,7 +110,7 @@ void MoveGroupQueryPlannersService::getParams(const std::shared_ptr<moveit_msgs:
   const planning_pipeline::PlanningPipelinePtr planning_pipeline = resolvePlanningPipeline(req->pipeline_id);
   if (!planning_pipeline)
   {
-    RCLCPP_ERROR(moveit::getLogger(), "Pipeline '%s' does not exist.", req->pipeline_id.c_str());
+    RCLCPP_ERROR(getLogger(), "Pipeline '%s' does not exist.", req->pipeline_id.c_str());
     return;
   }
 
@@ -112,13 +118,13 @@ void MoveGroupQueryPlannersService::getParams(const std::shared_ptr<moveit_msgs:
   const auto& planner_plugin_names = planning_pipeline->getPlannerPluginNames();
   if (planner_plugin_names.empty())
   {
-    RCLCPP_ERROR(moveit::getLogger(), "Pipeline '%s' does not have any planner plugins.", req->pipeline_id.c_str());
+    RCLCPP_ERROR(getLogger(), "Pipeline '%s' does not have any planner plugins.", req->pipeline_id.c_str());
     return;
   }
   const auto planner_interface = planning_pipeline->getPlannerManager(planner_plugin_names.at(0));
   if (!planner_interface)
   {
-    RCLCPP_ERROR(moveit::getLogger(), "Requesting planner '%s' from '%s' returned a null pointer.",
+    RCLCPP_ERROR(getLogger(), "Requesting planner '%s' from '%s' returned a null pointer.",
                  planner_plugin_names.at(0).c_str(), req->pipeline_id.c_str());
   }
   std::map<std::string, std::string> config;
@@ -154,14 +160,14 @@ void MoveGroupQueryPlannersService::setParams(
 {
   if (req->params.keys.size() != req->params.values.size())
   {
-    RCLCPP_ERROR(moveit::getLogger(), "Number of parameter names does not match the number of parameters");
+    RCLCPP_ERROR(getLogger(), "Number of parameter names does not match the number of parameters");
     return;
   }
 
   const planning_pipeline::PlanningPipelinePtr planning_pipeline = resolvePlanningPipeline(req->pipeline_id);
   if (!planning_pipeline)
   {
-    RCLCPP_ERROR(moveit::getLogger(), "Pipeline '%s' does not exist.", req->pipeline_id.c_str());
+    RCLCPP_ERROR(getLogger(), "Pipeline '%s' does not exist.", req->pipeline_id.c_str());
     return;
   }
 
@@ -169,13 +175,13 @@ void MoveGroupQueryPlannersService::setParams(
   const auto& planner_plugin_names = planning_pipeline->getPlannerPluginNames();
   if (planner_plugin_names.empty())
   {
-    RCLCPP_ERROR(moveit::getLogger(), "Pipeline '%s' does not have any planner plugins.", req->pipeline_id.c_str());
+    RCLCPP_ERROR(getLogger(), "Pipeline '%s' does not have any planner plugins.", req->pipeline_id.c_str());
     return;
   }
   auto planner_interface = planning_pipeline->getPlannerManager(planner_plugin_names.at(0));
   if (!planner_interface)
   {
-    RCLCPP_ERROR(moveit::getLogger(), "Requesting planner '%s' from '%s' returned a null pointer.",
+    RCLCPP_ERROR(getLogger(), "Requesting planner '%s' from '%s' returned a null pointer.",
                  planner_plugin_names.at(0).c_str(), req->pipeline_id.c_str());
     return;
   }
