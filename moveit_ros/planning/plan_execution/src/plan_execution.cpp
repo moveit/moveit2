@@ -83,7 +83,7 @@ plan_execution::PlanExecution::PlanExecution(
   : node_(node)
   , planning_scene_monitor_(planning_scene_monitor)
   , trajectory_execution_manager_(trajectory_execution)
-  , logger_(moveit::makeChildLogger("add_time_optimal_parameterization"))
+  , logger_(moveit::getLogger("add_time_optimal_parameterization"))
 {
   if (!trajectory_execution_manager_)
   {

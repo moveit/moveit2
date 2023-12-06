@@ -52,7 +52,7 @@ namespace default_planning_response_adapters
 class ValidateSolution : public planning_interface::PlanningResponseAdapter
 {
 public:
-  ValidateSolution() : logger_(moveit::makeChildLogger("validate_solution"))
+  ValidateSolution() : logger_(moveit::getLogger("validate_solution"))
   {
   }
 

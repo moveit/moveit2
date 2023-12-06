@@ -41,8 +41,15 @@
 #include <thread>
 #include <moveit/utils/logger.hpp>
 
-using moveit::getLogger;
 using namespace std::chrono_literals;
+
+namespace
+{
+rclcpp::Logger getLogger()
+{
+  return moveit::getLogger("evaluate_collision_checking_speed");
+}
+}  // namespace
 
 static const std::string ROBOT_DESCRIPTION = "robot_description";
 
@@ -67,7 +74,7 @@ int main(int argc, char** argv)
 {
   rclcpp::init(argc, argv);
   auto node = rclcpp::Node::make_shared("evaluate_collision_checking_speed");
-  moveit::setLogger(node->get_logger());
+  moveit::setNodeLoggerName(node->get_name());
 
   unsigned int nthreads = 2;
   unsigned int trials = 10000;
@@ -106,7 +113,7 @@ int main(int argc, char** argv)
       rclcpp::sleep_for(500ms);
 
     std::vector<moveit::core::RobotStatePtr> states;
-    RCLCPP_INFO(getLogger(), "Sampling %u valid states...", nthreads);
+    RCLCPP_INFO(node->get_logger(), "Sampling %u valid states...", nthreads);
     for (unsigned int i = 0; i < nthreads; ++i)
     {
       // sample a valid state
@@ -140,7 +147,7 @@ int main(int argc, char** argv)
     }
   }
   else
-    RCLCPP_ERROR(getLogger(), "Planning scene not configured");
+    RCLCPP_ERROR(node->get_logger(), "Planning scene not configured");
 
   return 0;
 }
