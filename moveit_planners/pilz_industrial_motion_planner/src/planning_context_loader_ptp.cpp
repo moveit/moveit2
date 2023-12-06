@@ -40,8 +40,7 @@
 
 namespace
 {
-static const rclcpp::Logger LOGGER =
-    rclcpp::get_logger("moveit.pilz_industrial_motion_planner.planning_context_loader_ptp");
+const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.pilz_industrial_motion_planner.planning_context_loader_ptp");
 }
 
 pilz_industrial_motion_planner::PlanningContextLoaderPTP::PlanningContextLoaderPTP()

@@ -51,8 +51,10 @@
 
 namespace pilz_industrial_motion_planner
 {
-static const rclcpp::Logger LOGGER =
-    rclcpp::get_logger("moveit.pilz_industrial_motion_planner.trajectory_generator_circ");
+namespace
+{
+const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.pilz_industrial_motion_planner.trajectory_generator_circ");
+}
 TrajectoryGeneratorCIRC::TrajectoryGeneratorCIRC(const moveit::core::RobotModelConstPtr& robot_model,
                                                  const LimitsContainer& planner_limits,
                                                  const std::string& /*group_name*/)
@@ -188,7 +190,7 @@ void TrajectoryGeneratorCIRC::extractMotionPlanInfo(const planning_scene::Planni
 
 void TrajectoryGeneratorCIRC::plan(const planning_scene::PlanningSceneConstPtr& scene,
                                    const planning_interface::MotionPlanRequest& req, const MotionPlanInfo& plan_info,
-                                   const double& sampling_time, trajectory_msgs::msg::JointTrajectory& joint_trajectory)
+                                   double sampling_time, trajectory_msgs::msg::JointTrajectory& joint_trajectory)
 {
   std::unique_ptr<KDL::Path> cart_path(setPathCIRC(plan_info));
   std::unique_ptr<KDL::VelocityProfile> vel_profile(

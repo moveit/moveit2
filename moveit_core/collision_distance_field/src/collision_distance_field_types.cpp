@@ -622,5 +622,3 @@ void getCollisionMarkers(const std::string& frame_id, const std::string& ns, con
   }
 }
 }  // namespace collision_detection
-const rclcpp::Logger collision_detection::PosedBodyPointDecompositionVector::LOGGER = collision_detection::LOGGER;
-const rclcpp::Logger collision_detection::PosedBodySphereDecompositionVector::LOGGER = collision_detection::LOGGER;

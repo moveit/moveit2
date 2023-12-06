@@ -132,7 +132,7 @@ public:
    *
    * @param[in] package_path the path to the root of the config package
    * @param[in] last_gen_time The time (if any) when the config package was last generated
-   * @parma[out] files Where to put the new generated files
+   * @param[out] files Where to put the new generated files
    */
   virtual void collectFiles(const std::filesystem::path& /*package_path*/, const GeneratedTime& /*last_gen_time*/,
                             std::vector<GeneratedFilePtr>& /*files*/)

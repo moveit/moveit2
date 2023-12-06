@@ -79,7 +79,7 @@ srdf::ModelSharedPtr loadSRDFModel(const std::string& robot_name);
  * \param[in] plugin name of the plugin ("KDL", or full name)
  * \param[in] timeout default solver timeout
  */
-void loadIKPluginForGroup(rclcpp::Node::SharedPtr node, JointModelGroup* jmg, const std::string& base_link,
+void loadIKPluginForGroup(const rclcpp::Node::SharedPtr& node, JointModelGroup* jmg, const std::string& base_link,
                           const std::string& tip_link, std::string plugin = "KDL", double timeout = 0.1);
 
 /** \brief Easily build different robot models for testing.

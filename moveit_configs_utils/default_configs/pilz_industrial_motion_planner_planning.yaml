@@ -1,5 +1,5 @@
 planning_plugin: pilz_industrial_motion_planner/CommandPlanner
-request_adapters: ""
+# The order of the elements in the adapter corresponds to the order they are processed by the motion planning pipeline.
 default_planner_config: PTP
 capabilities: >-
     pilz_industrial_motion_planner/MoveGroupSequenceAction

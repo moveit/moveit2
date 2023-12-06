@@ -47,8 +47,8 @@ namespace moveit_py
 {
 namespace bind_robot_model
 {
-bool satisfies_position_bounds(const moveit::core::JointModelGroup* jmg, const Eigen::VectorXd& joint_positions,
-                               const double margin);
-void init_joint_model_group(py::module& m);
+bool satisfiesPositionBounds(const moveit::core::JointModelGroup* jmg, const Eigen::VectorXd& joint_positions,
+                             const double margin);
+void initJointModelGroup(py::module& m);
 }  // namespace bind_robot_model
 }  // namespace moveit_py

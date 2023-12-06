@@ -42,6 +42,7 @@
 #include <moveit/planning_scene_monitor/planning_scene_monitor.h>
 #include <moveit/planning_scene_monitor/trajectory_monitor.h>
 #include <pluginlib/class_loader.hpp>
+#include <rclcpp/logger.hpp>
 
 #include <atomic>
 
@@ -181,6 +182,8 @@ private:
 
   bool execution_complete_;
   bool path_became_invalid_;
+
+  rclcpp::Logger logger_;
 
   // class DynamicReconfigureImpl;
   // DynamicReconfigureImpl* reconfigure_impl_;

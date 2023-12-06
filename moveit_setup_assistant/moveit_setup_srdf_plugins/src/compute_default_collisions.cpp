@@ -107,20 +107,20 @@ static bool setLinkPair(const std::string& linkA, const std::string& linkB, cons
 /**
  * \brief Build the robot links connection graph and then check for links with no geomotry
  * \param link The root link to begin a breadth first search on
- * \param link_graph A representation of all bi-direcitonal joint connections between links in robot_description
+ * \param link_graph A representation of all bi-directional joint connections between links in robot_description
  */
 static void computeConnectionGraph(const moveit::core::LinkModel* link, LinkGraph& link_graph);
 
 /**
  * \brief Recursively build the adj list of link connections
  * \param link The root link to begin a breadth first search on
- * \param link_graph A representation of all bi-direcitonal joint connections between links in robot_description
+ * \param link_graph A representation of all bi-directional joint connections between links in robot_description
  */
 static void computeConnectionGraphRec(const moveit::core::LinkModel* link, LinkGraph& link_graph);
 
 /**
  * \brief Disable collision checking for adjacent links, or adjacent with no geometry links between them
- * \param link_graph A representation of all bi-direcitonal joint connections between links in robot_description
+ * \param link_graph A representation of all bi-directional joint connections between links in robot_description
  * \param scene A reference to the robot in the planning scene
  * \param link_pairs List of all unique link pairs and each pair's properties
  * \return number of adjacent links found and disabled
@@ -349,7 +349,7 @@ void computeConnectionGraph(const moveit::core::LinkModel* start_link, LinkGraph
   // Recursively build adj list of link connections
   computeConnectionGraphRec(start_link, link_graph);
 
-  // Repeatidly check for links with no geometry and remove them, then re-check until no more removals are detected
+  // Repeatedly check for links with no geometry and remove them, then re-check until no more removals are detected
   bool update = true;  // track if a no geometry link was found
   while (update)
   {

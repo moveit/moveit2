@@ -51,18 +51,18 @@ namespace moveit_py
 namespace bind_planning_interface
 {
 std::shared_ptr<robot_trajectory::RobotTrajectory>
-get_motion_plan_response_trajectory(std::shared_ptr<planning_interface::MotionPlanResponse>& response);
+getMotionPlanResponseTrajectory(std::shared_ptr<planning_interface::MotionPlanResponse>& response);
 
 moveit_msgs::msg::RobotState
-get_motion_plan_response_start_state(std::shared_ptr<planning_interface::MotionPlanResponse>& response);
+getMotionPlanResponseStartState(std::shared_ptr<planning_interface::MotionPlanResponse>& response);
 
 moveit_msgs::msg::MoveItErrorCodes
-get_motion_plan_response_error_code(std::shared_ptr<planning_interface::MotionPlanResponse>& response);
+getMotionPlanResponseErrorCode(std::shared_ptr<planning_interface::MotionPlanResponse>& response);
 
-double get_motion_plan_response_planning_time(std::shared_ptr<planning_interface::MotionPlanResponse>& response);
+double getMotionPlanResponsePlanningTime(std::shared_ptr<planning_interface::MotionPlanResponse>& response);
 
-std::string get_motion_plan_response_planner_id(std::shared_ptr<planning_interface::MotionPlanResponse>& response);
+std::string getMotionPlanResponsePlannerId(std::shared_ptr<planning_interface::MotionPlanResponse>& response);
 
-void init_motion_plan_response(py::module& m);
+void initMotionPlanResponse(py::module& m);
 }  // namespace bind_planning_interface
 }  // namespace moveit_py

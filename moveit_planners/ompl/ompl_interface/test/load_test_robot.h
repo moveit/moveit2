@@ -44,7 +44,7 @@ namespace ompl_interface_testing
 {
 /** \brief Robot independent test class setup
  *
- * The desired robot tests can be impelmented in a derived class in a generic way.
+ * The desired robot tests can be implemented in a derived class in a generic way.
  *
  * It is implemented this way to avoid the ros specific test framework
  * outside moveit_ros.

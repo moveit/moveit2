@@ -47,6 +47,7 @@
   <depend>pybind11_vendor</depend>
   <depend>random_numbers</depend>
   <depend>rclcpp</depend>
+  <depend>rsl</depend>
   <depend>ruckig</depend>
   <depend>sensor_msgs</depend>
   <depend>shape_msgs</depend>
@@ -72,6 +73,9 @@
   <test_depend>ament_cmake_gtest</test_depend>
   <test_depend>ament_cmake_gmock</test_depend>
   <test_depend>ament_index_cpp</test_depend>
+  <test_depend>launch_testing_ament_cmake</test_depend>
+  <test_depend>rclpy</test_depend>
+  <test_depend>rcl_interfaces</test_depend>
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>

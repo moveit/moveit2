@@ -37,7 +37,10 @@
 
 namespace pilz_industrial_motion_planner
 {
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("pilz_industrial_motion_planner.limits_container");
+namespace
+{
+const rclcpp::Logger LOGGER = rclcpp::get_logger("pilz_industrial_motion_planner.limits_container");
+}
 
 LimitsContainer::LimitsContainer() : has_joint_limits_(false), has_cartesian_limits_(false)
 {

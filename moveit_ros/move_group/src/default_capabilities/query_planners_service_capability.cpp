@@ -41,7 +41,7 @@
 
 namespace move_group
 {
-MoveGroupQueryPlannersService::MoveGroupQueryPlannersService() : MoveGroupCapability("QueryPlannersService")
+MoveGroupQueryPlannersService::MoveGroupQueryPlannersService() : MoveGroupCapability("query_planners_service")
 {
 }
 

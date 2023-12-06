@@ -35,11 +35,6 @@
 #include <moveit/hybrid_planning_manager/hybrid_planning_manager.h>
 #include <moveit/hybrid_planning_manager/hybrid_planning_events.h>
 
-namespace
-{
-const rclcpp::Logger LOGGER = rclcpp::get_logger("hybrid_planning_manager");
-}  // namespace
-
 namespace moveit::hybrid_planning
 {
 using namespace std::chrono_literals;
@@ -77,7 +72,7 @@ bool HybridPlanningManager::initialize()
   }
   catch (pluginlib::PluginlibException& ex)
   {
-    RCLCPP_ERROR(LOGGER, "Exception while creating planner logic plugin loader '%s'", ex.what());
+    RCLCPP_ERROR(get_logger(), "Exception while creating planner logic plugin loader '%s'", ex.what());
   }
   // TODO(sjahr) Refactor parameter declaration and use repository wide solution
   std::string logic_plugin_name = "";
@@ -97,11 +92,11 @@ bool HybridPlanningManager::initialize()
     {
       throw std::runtime_error("Unable to initialize planner logic plugin");
     }
-    RCLCPP_INFO(LOGGER, "Using planner logic interface '%s'", logic_plugin_name.c_str());
+    RCLCPP_INFO(get_logger(), "Using planner logic interface '%s'", logic_plugin_name.c_str());
   }
   catch (pluginlib::PluginlibException& ex)
   {
-    RCLCPP_ERROR(LOGGER, "Exception while loading planner logic '%s': '%s'", logic_plugin_name.c_str(), ex.what());
+    RCLCPP_ERROR(get_logger(), "Exception while loading planner logic '%s': '%s'", logic_plugin_name.c_str(), ex.what());
   }
 
   // Initialize local planning action client
@@ -109,14 +104,14 @@ bool HybridPlanningManager::initialize()
   get_parameter<std::string>("local_planning_action_name", local_planning_action_name);
   if (local_planning_action_name.empty())
   {
-    RCLCPP_ERROR(LOGGER, "local_planning_action_name parameter was not defined");
+    RCLCPP_ERROR(get_logger(), "local_planning_action_name parameter was not defined");
     return false;
   }
   local_planner_action_client_ =
       rclcpp_action::create_client<moveit_msgs::action::LocalPlanner>(this, local_planning_action_name);
   if (!local_planner_action_client_->wait_for_action_server(2s))
   {
-    RCLCPP_ERROR(LOGGER, "Local planner action server not available after waiting");
+    RCLCPP_ERROR(get_logger(), "Local planner action server not available after waiting");
     return false;
   }
 
@@ -125,14 +120,14 @@ bool HybridPlanningManager::initialize()
   get_parameter<std::string>("global_planning_action_name", global_planning_action_name);
   if (global_planning_action_name.empty())
   {
-    RCLCPP_ERROR(LOGGER, "global_planning_action_name parameter was not defined");
+    RCLCPP_ERROR(get_logger(), "global_planning_action_name parameter was not defined");
     return false;
   }
   global_planner_action_client_ =
       rclcpp_action::create_client<moveit_msgs::action::GlobalPlanner>(this, global_planning_action_name);
   if (!global_planner_action_client_->wait_for_action_server(2s))
   {
-    RCLCPP_ERROR(LOGGER, "Global planner action server not available after waiting");
+    RCLCPP_ERROR(get_logger(), "Global planner action server not available after waiting");
     return false;
   }
 
@@ -141,7 +136,7 @@ bool HybridPlanningManager::initialize()
   get_parameter<std::string>("hybrid_planning_action_name", hybrid_planning_action_name);
   if (hybrid_planning_action_name.empty())
   {
-    RCLCPP_ERROR(LOGGER, "hybrid_planning_action_name parameter was not defined");
+    RCLCPP_ERROR(get_logger(), "hybrid_planning_action_name parameter was not defined");
     return false;
   }
   cb_group_ = create_callback_group(rclcpp::CallbackGroupType::MutuallyExclusive);
@@ -149,19 +144,19 @@ bool HybridPlanningManager::initialize()
       get_node_base_interface(), get_node_clock_interface(), get_node_logging_interface(),
       get_node_waitables_interface(), hybrid_planning_action_name,
       // Goal callback
-      [](const rclcpp_action::GoalUUID& /*unused*/,
-         const std::shared_ptr<const moveit_msgs::action::HybridPlanner::Goal>& /*unused*/) {
-        RCLCPP_INFO(LOGGER, "Received goal request");
+      [this](const rclcpp_action::GoalUUID& /*unused*/,
+             const std::shared_ptr<const moveit_msgs::action::HybridPlanner::Goal>& /*unused*/) {
+        RCLCPP_INFO(get_logger(), "Received goal request");
         return rclcpp_action::GoalResponse::ACCEPT_AND_EXECUTE;
       },
       // Cancel callback
       [this](const std::shared_ptr<rclcpp_action::ServerGoalHandle<moveit_msgs::action::HybridPlanner>>& /*unused*/) {
         cancelHybridManagerGoals();
-        RCLCPP_INFO(LOGGER, "Received request to cancel goal");
+        RCLCPP_INFO(get_logger(), "Received request to cancel goal");
         return rclcpp_action::CancelResponse::ACCEPT;
       },
       // Execution callback
-      [this](std::shared_ptr<rclcpp_action::ServerGoalHandle<moveit_msgs::action::HybridPlanner>> goal_handle) {
+      [this](const std::shared_ptr<rclcpp_action::ServerGoalHandle<moveit_msgs::action::HybridPlanner>>& goal_handle) {
         // this needs to return quickly to avoid blocking the executor, so spin up a new thread
         if (long_callback_thread_.joinable())
         {
@@ -183,7 +178,7 @@ bool HybridPlanningManager::initialize()
           result->error_code.val = reaction_result.error_code.val;
           result->error_message = reaction_result.error_message;
           hybrid_planning_goal_handle_->abort(result);
-          RCLCPP_ERROR(LOGGER, "Hybrid Planning Manager failed to react to  '%s'", reaction_result.event.c_str());
+          RCLCPP_ERROR(get_logger(), "Hybrid Planning Manager failed to react to  '%s'", reaction_result.event.c_str());
         }
       });
   return true;
@@ -221,7 +216,7 @@ void HybridPlanningManager::executeHybridPlannerGoal(
     result->error_code.val = reaction_result.error_code.val;
     result->error_message = reaction_result.error_message;
     hybrid_planning_goal_handle_->abort(result);
-    RCLCPP_ERROR_STREAM(LOGGER, "Hybrid Planning Manager failed to react to  " << reaction_result.event);
+    RCLCPP_ERROR_STREAM(get_logger(), "Hybrid Planning Manager failed to react to  " << reaction_result.event);
   }
 }
 
@@ -272,7 +267,7 @@ bool HybridPlanningManager::sendGlobalPlannerAction()
           result->error_message = reaction_result.error_message;
 
           hybrid_planning_goal_handle_->abort(result);
-          RCLCPP_ERROR(LOGGER, "Hybrid Planning Manager failed to react to  '%s'", reaction_result.event.c_str());
+          RCLCPP_ERROR(get_logger(), "Hybrid Planning Manager failed to react to  '%s'", reaction_result.event.c_str());
         }
       };
 
@@ -327,7 +322,7 @@ bool HybridPlanningManager::sendLocalPlannerAction()
           result->error_code.val = reaction_result.error_code.val;
           result->error_message = reaction_result.error_message;
           hybrid_planning_goal_handle_->abort(result);
-          RCLCPP_ERROR(LOGGER, "Hybrid Planning Manager failed to react to  '%s'", reaction_result.event.c_str());
+          RCLCPP_ERROR(get_logger(), "Hybrid Planning Manager failed to react to  '%s'", reaction_result.event.c_str());
         }
       };
 
@@ -361,7 +356,7 @@ bool HybridPlanningManager::sendLocalPlannerAction()
             return result;
           }());
           hybrid_planning_goal_handle_->abort(std::make_shared<moveit_msgs::action::HybridPlanner::Result>(result));
-          RCLCPP_ERROR_STREAM(LOGGER, "Hybrid Planning Manager failed to react to " << reaction_result.event);
+          RCLCPP_ERROR_STREAM(get_logger(), "Hybrid Planning Manager failed to react to " << reaction_result.event);
         }
       };
 

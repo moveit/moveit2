@@ -36,6 +36,7 @@
 
 #include <chrono>
 #include <moveit/planning_scene_monitor/planning_scene_monitor.h>
+#include <moveit/utils/logger.hpp>
 
 using namespace std::chrono_literals;
 
@@ -45,6 +46,7 @@ int main(int argc, char** argv)
 {
   rclcpp::init(argc, argv);
   auto node = rclcpp::Node::make_shared("display_random_state");
+  moveit::setNodeLoggerName(node->get_name());
 
   bool valid = false;
   bool invalid = false;
@@ -79,7 +81,7 @@ int main(int argc, char** argv)
   {
     if (!psm.getPlanningScene())
     {
-      RCLCPP_ERROR(LOGGER, "Planning scene did not load properly, exiting...");
+      RCLCPP_ERROR(node->get_logger(), "Planning scene did not load properly, exiting...");
       break;
     }
 

@@ -116,8 +116,8 @@ function build_docker_image {
    echo "Building docker image"
    cat <<EOF > $TMP_DIR/Dockerfile
 FROM personalrobotics/ros-openrave
-# Update ROS keys (https://discourse.ros.org/t/new-gpg-keys-deployed-for-packages-ros-org/9454)
-RUN apt-key adv --keyserver 'hkp://keyserver.ubuntu.com:80' --recv-key C1CF6E31E6BADE8868B172B4F42ED6FBAB17C654 && \
+# Update ROS keys (https://discourse.ros.org/t/new-gpg-keys-deployed-for-packages-ros-org/9454, https://github.com/osrf/docker_images/issues/697)
+RUN apt-key adv --keyserver 'hkp://keyserver.ubuntu.com:80' --recv-key 4B63CF8FDE49746E98FA01DDAD19BAB3CBF125EA && \
     apt-key del 421C365BD9FF1F717815A3895523BAEEB01FA116 && \
     apt-get update && \
     apt-get install -y --no-install-recommends python-pip build-essential liblapack-dev ros-indigo-collada-urdf && \

@@ -73,6 +73,29 @@ protected:
 
   void SetUp() override
   {
+    // Create a node to be given to Servo.
+    servo_test_node_ = std::make_shared<rclcpp::Node>("moveit_servo_test");
+    executor_ = std::make_shared<rclcpp::executors::SingleThreadedExecutor>();
+
+    status_ = moveit_servo::StatusCode::INVALID;
+
+    status_subscriber_ = servo_test_node_->create_subscription<moveit_msgs::msg::ServoStatus>(
+        "/servo_node/status", rclcpp::SystemDefaultsQoS(),
+        [this](const moveit_msgs::msg::ServoStatus::ConstSharedPtr& msg) { return statusCallback(msg); });
+
+    joint_state_subscriber_ = servo_test_node_->create_subscription<sensor_msgs::msg::JointState>(
+        "/joint_states", rclcpp::SystemDefaultsQoS(),
+        [this](const sensor_msgs::msg::JointState::ConstSharedPtr& msg) { return jointStateCallback(msg); });
+
+    trajectory_subscriber_ = servo_test_node_->create_subscription<trajectory_msgs::msg::JointTrajectory>(
+        "/panda_arm_controller/joint_trajectory", rclcpp::SystemDefaultsQoS(),
+        [this](const trajectory_msgs::msg::JointTrajectory::ConstSharedPtr& msg) { return trajectoryCallback(msg); });
+
+    switch_input_client_ =
+        servo_test_node_->create_client<moveit_msgs::srv::ServoCommandType>("/servo_node/switch_command_type");
+
+    waitForService();
+
     executor_->add_node(servo_test_node_);
     executor_thread_ = std::thread([this]() { executor_->spin(); });
   }
@@ -122,28 +145,6 @@ protected:
 
   ServoRosFixture() : state_count_{ 0 }, traj_count_{ 0 }
   {
-    // Create a node to be given to Servo.
-    servo_test_node_ = std::make_shared<rclcpp::Node>("moveit_servo_test");
-    executor_ = std::make_shared<rclcpp::executors::SingleThreadedExecutor>();
-
-    status_ = moveit_servo::StatusCode::INVALID;
-
-    status_subscriber_ = servo_test_node_->create_subscription<moveit_msgs::msg::ServoStatus>(
-        "/servo_node/status", rclcpp::SystemDefaultsQoS(),
-        [this](const moveit_msgs::msg::ServoStatus::ConstSharedPtr& msg) { return statusCallback(msg); });
-
-    joint_state_subscriber_ = servo_test_node_->create_subscription<sensor_msgs::msg::JointState>(
-        "/joint_states", rclcpp::SystemDefaultsQoS(),
-        [this](const sensor_msgs::msg::JointState::ConstSharedPtr& msg) { return jointStateCallback(msg); });
-
-    trajectory_subscriber_ = servo_test_node_->create_subscription<trajectory_msgs::msg::JointTrajectory>(
-        "/panda_arm_controller/joint_trajectory", rclcpp::SystemDefaultsQoS(),
-        [this](const trajectory_msgs::msg::JointTrajectory::ConstSharedPtr& msg) { return trajectoryCallback(msg); });
-
-    switch_input_client_ =
-        servo_test_node_->create_client<moveit_msgs::srv::ServoCommandType>("/servo_node/switch_command_type");
-
-    waitForService();
   }
 
   std::shared_ptr<rclcpp::Node> servo_test_node_;

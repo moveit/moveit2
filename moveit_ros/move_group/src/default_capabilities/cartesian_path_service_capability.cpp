@@ -46,9 +46,16 @@
 #include <moveit/robot_state/cartesian_interpolator.h>
 #include <moveit_msgs/msg/display_trajectory.hpp>
 #include <moveit/trajectory_processing/time_optimal_trajectory_generation.h>
+#include <moveit/utils/logger.hpp>
+
+using moveit::getLogger;
 
 namespace
 {
+
+/** \brief To display a motion path with RVIZ, the solution is sent to this topic (moveit_msgs::msg::DisplayTrajectory) */
+const std::string DISPLAY_PATH_TOPIC = std::string("display_planned_path");
+
 bool isStateValid(const planning_scene::PlanningScene* planning_scene,
                   const kinematic_constraints::KinematicConstraintSet* constraint_set, moveit::core::RobotState* state,
                   const moveit::core::JointModelGroup* group, const double* ik_solution)
@@ -58,13 +65,15 @@ bool isStateValid(const planning_scene::PlanningScene* planning_scene,
   return (!planning_scene || !planning_scene->isStateColliding(*state, group->getName())) &&
          (!constraint_set || constraint_set->decide(*state).satisfied);
 }
+
+rclcpp::Logger getLogger()
+{
+  return moveit::getLogger("cartesian_path_service_capability");
+}
 }  // namespace
 
 namespace move_group
 {
-static const rclcpp::Logger LOGGER =
-    rclcpp::get_logger("moveit_move_group_default_capabilities.cartersian_path_service_capability");
-
 MoveGroupCartesianPathService::MoveGroupCartesianPathService()
   : MoveGroupCapability("CartesianPathService"), display_computed_paths_(true)
 {
@@ -72,8 +81,8 @@ MoveGroupCartesianPathService::MoveGroupCartesianPathService()
 
 void MoveGroupCartesianPathService::initialize()
 {
-  display_path_ = context_->moveit_cpp_->getNode()->create_publisher<moveit_msgs::msg::DisplayTrajectory>(
-      planning_pipeline::PlanningPipeline::DISPLAY_PATH_TOPIC, 10);
+  display_path_ =
+      context_->moveit_cpp_->getNode()->create_publisher<moveit_msgs::msg::DisplayTrajectory>(DISPLAY_PATH_TOPIC, 10);
 
   cartesian_path_service_ = context_->moveit_cpp_->getNode()->create_service<moveit_msgs::srv::GetCartesianPath>(
 
@@ -90,7 +99,7 @@ bool MoveGroupCartesianPathService::computeService(
     const std::shared_ptr<moveit_msgs::srv::GetCartesianPath::Request>& req,
     const std::shared_ptr<moveit_msgs::srv::GetCartesianPath::Response>& res)
 {
-  RCLCPP_INFO(LOGGER, "Received request to compute Cartesian path");
+  RCLCPP_INFO(getLogger(), "Received request to compute Cartesian path");
   context_->planning_scene_monitor_->updateFrameTransforms();
 
   moveit::core::RobotState start_state =
@@ -126,7 +135,7 @@ bool MoveGroupCartesianPathService::computeService(
         }
         else
         {
-          RCLCPP_ERROR(LOGGER, "Error encountered transforming waypoints to frame '%s'", default_frame.c_str());
+          RCLCPP_ERROR(getLogger(), "Error encountered transforming waypoints to frame '%s'", default_frame.c_str());
           ok = false;
           break;
         }
@@ -137,8 +146,8 @@ bool MoveGroupCartesianPathService::computeService(
     {
       if (req->max_step < std::numeric_limits<double>::epsilon())
       {
-        RCLCPP_ERROR(LOGGER, "Maximum step to take between consecutive configurations along Cartesian path"
-                             "was not specified (this value needs to be > 0)");
+        RCLCPP_ERROR(getLogger(), "Maximum step to take between consecutive configurations along Cartesian path"
+                                  "was not specified (this value needs to be > 0)");
         res->error_code.val = moveit_msgs::msg::MoveItErrorCodes::FAILURE;
       }
       else
@@ -163,7 +172,7 @@ bool MoveGroupCartesianPathService::computeService(
                 };
           }
           bool global_frame = !moveit::core::Transforms::sameFrame(link_name, req->header.frame_id);
-          RCLCPP_INFO(LOGGER,
+          RCLCPP_INFO(getLogger(),
                       "Attempting to follow %u waypoints for link '%s' using a step of %lf m "
                       "and jump threshold %lf (in %s reference frame)",
                       static_cast<unsigned int>(waypoints.size()), link_name.c_str(), req->max_step,
@@ -171,7 +180,8 @@ bool MoveGroupCartesianPathService::computeService(
           std::vector<moveit::core::RobotStatePtr> traj;
           res->fraction = moveit::core::CartesianInterpolator::computeCartesianPath(
               &start_state, jmg, traj, start_state.getLinkModel(link_name), waypoints, global_frame,
-              moveit::core::MaxEEFStep(req->max_step), moveit::core::JumpThreshold(req->jump_threshold), constraint_fn);
+              moveit::core::MaxEEFStep(req->max_step), moveit::core::JumpThreshold::relative(req->jump_threshold),
+              constraint_fn);
           moveit::core::robotStateToRobotStateMsg(start_state, res->start_state);
 
           robot_trajectory::RobotTrajectory rt(context_->planning_scene_monitor_->getRobotModel(), req->group_name);
@@ -184,7 +194,7 @@ bool MoveGroupCartesianPathService::computeService(
           time_param.computeTimeStamps(rt, req->max_velocity_scaling_factor, req->max_acceleration_scaling_factor);
 
           rt.getRobotTrajectoryMsg(res->solution);
-          RCLCPP_INFO(LOGGER, "Computed Cartesian path with %u points (followed %lf%% of requested trajectory)",
+          RCLCPP_INFO(getLogger(), "Computed Cartesian path with %u points (followed %lf%% of requested trajectory)",
                       static_cast<unsigned int>(traj.size()), res->fraction * 100.0);
           if (display_computed_paths_ && rt.getWayPointCount() > 0)
           {

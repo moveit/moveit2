@@ -38,10 +38,14 @@
  */
 
 #include <moveit_servo/utils/command.hpp>
+#include <moveit/utils/logger.hpp>
 
 namespace
 {
-const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_servo.command_processor");
+rclcpp::Logger getLogger()
+{
+  return moveit::getLogger("servo");
+}
 
 /**
  * @brief Helper function to create a move group deltas vector from a sub group deltas vector. A delta vector for the
@@ -91,7 +95,7 @@ JointDeltaResult jointDeltaFromJointJog(const JointJogCommand& command, const mo
   velocities.setZero();
   bool names_valid = true;
 
-  for (size_t i = 0; i < command.names.size(); i++)
+  for (size_t i = 0; i < command.names.size(); ++i)
   {
     auto it = std::find(joint_names.begin(), joint_names.end(), command.names[i]);
     if (it != std::end(joint_names))
@@ -100,7 +104,7 @@ JointDeltaResult jointDeltaFromJointJog(const JointJogCommand& command, const mo
     }
     else
     {
-      RCLCPP_WARN_STREAM(LOGGER, "Invalid joint name: " << command.names[i]);
+      RCLCPP_WARN_STREAM(getLogger(), "Invalid joint name: " << command.names[i]);
 
       names_valid = false;
       break;
@@ -120,13 +124,14 @@ JointDeltaResult jointDeltaFromJointJog(const JointJogCommand& command, const mo
     status = StatusCode::INVALID;
     if (!names_valid)
     {
-      RCLCPP_WARN_STREAM(LOGGER, "Invalid joint names in joint jog command. Either you're sending commands for a joint "
-                                 "that is not part of the move group or certain joints cannot be moved because a "
-                                 "subgroup is active and they are not part of it.");
+      RCLCPP_WARN_STREAM(getLogger(),
+                         "Invalid joint names in joint jog command. Either you're sending commands for a joint "
+                         "that is not part of the move group or certain joints cannot be moved because a "
+                         "subgroup is active and they are not part of it.");
     }
     if (!velocity_valid)
     {
-      RCLCPP_WARN_STREAM(LOGGER, "Invalid velocity values in joint jog command");
+      RCLCPP_WARN_STREAM(getLogger(), "Invalid velocity values in joint jog command");
     }
   }
 
@@ -140,17 +145,17 @@ JointDeltaResult jointDeltaFromJointJog(const JointJogCommand& command, const mo
 }
 
 JointDeltaResult jointDeltaFromTwist(const TwistCommand& command, const moveit::core::RobotStatePtr& robot_state,
-                                     const servo::Params& servo_params,
+                                     const servo::Params& servo_params, const std::string& planning_frame,
                                      const JointNameToMoveGroupIndexMap& joint_name_group_index_map)
 {
   StatusCode status = StatusCode::NO_WARNING;
   const int num_joints =
       robot_state->getJointModelGroup(servo_params.move_group_name)->getActiveJointModelNames().size();
   Eigen::VectorXd joint_position_delta(num_joints);
-  Eigen::VectorXd cartesian_position_delta;
+  Eigen::Vector<double, 6> cartesian_position_delta;
 
   const bool valid_command = isValidCommand(command);
-  const bool is_planning_frame = (command.frame_id == servo_params.planning_frame);
+  const bool is_planning_frame = (command.frame_id == planning_frame);
   const bool is_zero = command.velocities.isZero();
   if (!is_zero && is_planning_frame && valid_command)
   {
@@ -179,7 +184,7 @@ JointDeltaResult jointDeltaFromTwist(const TwistCommand& command, const moveit::
       if (singularity_scaling_info.second != StatusCode::NO_WARNING)
       {
         status = singularity_scaling_info.second;
-        RCLCPP_WARN_STREAM(LOGGER, SERVO_STATUS_CODE_MAP.at(status));
+        RCLCPP_WARN_STREAM(getLogger(), SERVO_STATUS_CODE_MAP.at(status));
         joint_position_delta *= singularity_scaling_info.first;
       }
     }
@@ -193,19 +198,19 @@ JointDeltaResult jointDeltaFromTwist(const TwistCommand& command, const moveit::
     status = StatusCode::INVALID;
     if (!valid_command)
     {
-      RCLCPP_WARN_STREAM(LOGGER, "Invalid twist command.");
+      RCLCPP_ERROR_STREAM(getLogger(), "Invalid twist command.");
     }
     if (!is_planning_frame)
     {
-      RCLCPP_WARN_STREAM(LOGGER,
-                         "Command frame is: " << command.frame_id << " expected: " << servo_params.planning_frame);
+      RCLCPP_ERROR_STREAM(getLogger(), "Command frame is: " << command.frame_id << ", expected: " << planning_frame);
     }
   }
   return std::make_pair(status, joint_position_delta);
 }
 
 JointDeltaResult jointDeltaFromPose(const PoseCommand& command, const moveit::core::RobotStatePtr& robot_state,
-                                    const servo::Params& servo_params,
+                                    const servo::Params& servo_params, const std::string& planning_frame,
+                                    const std::string& ee_frame,
                                     const JointNameToMoveGroupIndexMap& joint_name_group_index_map)
 {
   StatusCode status = StatusCode::NO_WARNING;
@@ -214,14 +219,14 @@ JointDeltaResult jointDeltaFromPose(const PoseCommand& command, const moveit::co
   Eigen::VectorXd joint_position_delta(num_joints);
 
   const bool valid_command = isValidCommand(command);
-  const bool is_planning_frame = command.frame_id == servo_params.planning_frame;
+  const bool is_planning_frame = (command.frame_id == planning_frame);
 
   if (valid_command && is_planning_frame)
   {
     Eigen::Vector<double, 6> cartesian_position_delta;
 
     // Compute linear and angular change needed.
-    const Eigen::Isometry3d ee_pose{ robot_state->getGlobalLinkTransform(servo_params.ee_frame) };
+    const Eigen::Isometry3d ee_pose{ robot_state->getGlobalLinkTransform(ee_frame) };
     const Eigen::Quaterniond q_current(ee_pose.rotation()), q_target(command.pose.rotation());
     const Eigen::Quaterniond q_error = q_target * q_current.inverse();
     const Eigen::AngleAxisd angle_axis_error(q_error);
@@ -243,12 +248,11 @@ JointDeltaResult jointDeltaFromPose(const PoseCommand& command, const moveit::co
     status = StatusCode::INVALID;
     if (!valid_command)
     {
-      RCLCPP_WARN_STREAM(LOGGER, "Invalid pose command.");
+      RCLCPP_WARN_STREAM(getLogger(), "Invalid pose command.");
     }
     if (!is_planning_frame)
     {
-      RCLCPP_WARN_STREAM(LOGGER,
-                         "Command frame is: " << command.frame_id << " expected: " << servo_params.planning_frame);
+      RCLCPP_WARN_STREAM(getLogger(), "Command frame is: " << command.frame_id << " expected: " << planning_frame);
     }
   }
   return std::make_pair(status, joint_position_delta);
@@ -276,7 +280,7 @@ JointDeltaResult jointDeltaFromIK(const Eigen::VectorXd& cartesian_position_delt
     if (!ik_solver_supports_group)
     {
       status = StatusCode::INVALID;
-      RCLCPP_ERROR_STREAM(LOGGER, "Loaded IK plugin does not support group " << joint_model_group->getName());
+      RCLCPP_ERROR_STREAM(getLogger(), "Loaded IK plugin does not support group " << joint_model_group->getName());
     }
   }
 
@@ -307,7 +311,7 @@ JointDeltaResult jointDeltaFromIK(const Eigen::VectorXd& cartesian_position_delt
     else
     {
       status = StatusCode::INVALID;
-      RCLCPP_WARN_STREAM(LOGGER, "Could not find IK solution for requested motion, got error code " << err.val);
+      RCLCPP_WARN_STREAM(getLogger(), "Could not find IK solution for requested motion, got error code " << err.val);
     }
   }
   else

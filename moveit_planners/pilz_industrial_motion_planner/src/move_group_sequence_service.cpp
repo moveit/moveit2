@@ -45,8 +45,10 @@
 #include <moveit/moveit_cpp/moveit_cpp.h>
 namespace pilz_industrial_motion_planner
 {
-static const rclcpp::Logger LOGGER =
-    rclcpp::get_logger("moveit.pilz_industrial_motion_planner.move_group_sequence_service");
+namespace
+{
+const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.pilz_industrial_motion_planner.move_group_sequence_service");
+}
 MoveGroupSequenceService::MoveGroupSequenceService() : MoveGroupCapability("SequenceService")
 {
 }

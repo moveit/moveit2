@@ -41,14 +41,14 @@ namespace moveit_py
 {
 namespace bind_robot_model
 {
-bool satisfies_position_bounds(const moveit::core::JointModelGroup* jmg, const Eigen::VectorXd& joint_positions,
-                               const double margin)
+bool satisfiesPositionBounds(const moveit::core::JointModelGroup* jmg, const Eigen::VectorXd& joint_positions,
+                             const double margin)
 {
   assert(joint_positions.size() == jmg->getActiveVariableCount());
   return jmg->satisfiesPositionBounds(joint_positions.data(), margin);
 }
 
-void init_joint_model_group(py::module& m)
+void initJointModelGroup(py::module& m)
 {
   py::module robot_model = m.def_submodule("robot_model");
 
@@ -79,7 +79,7 @@ void init_joint_model_group(py::module& m)
                                }
                                return eef->getName();
                              })
-      .def("satisfies_position_bounds", &moveit_py::bind_robot_model::satisfies_position_bounds, py::arg("values"),
+      .def("satisfies_position_bounds", &moveit_py::bind_robot_model::satisfiesPositionBounds, py::arg("values"),
            py::arg("margin") = 0.0);
 }
 }  // namespace bind_robot_model
