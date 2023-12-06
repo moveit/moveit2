@@ -64,7 +64,7 @@ void initTrajectoryExecutionManager(py::module& m)
            R"(
            Make sure the active controllers are such that trajectories that actuate joints in the specified group can be executed.
 
-           If manage_controllers_ is false and the controllers that happen to be active do not cover the joints in the group to be actuated, this function fails.
+           If the 'moveit_manage_controllers' parameter is false and the controllers that happen to be active do not cover the joints in the group to be actuated, this function fails.
            )")
 
       .def("ensure_active_controllers_for_joints",
@@ -73,7 +73,7 @@ void initTrajectoryExecutionManager(py::module& m)
            R"(
            Make sure the active controllers are such that trajectories that actuate joints in the specified set can be executed.
 
-           If manage_controllers_ is false and the controllers that happen to be active do not cover the joints to be actuated, this function fails.
+           If the 'moveit_manage_controllers' parameter is false and the controllers that happen to be active do not cover the joints to be actuated, this function fails.
            )")
 
       .def("ensure_active_controller",
@@ -81,7 +81,7 @@ void initTrajectoryExecutionManager(py::module& m)
            R"(
            Make sure a particular controller is active.
 
-           If manage_controllers_ is false and the controllers that happen to be active to not include the one specified as argument, this function fails.
+           If the 'moveit_manage_controllers' parameter is false and the controllers that happen to be active do not include the one specified as argument, this function fails.
            )")
 
       .def("ensure_active_controllers",
@@ -89,7 +89,7 @@ void initTrajectoryExecutionManager(py::module& m)
            R"(
            Make sure a particular set of controllers are active.
 
-           If manage_controllers_ is false and the controllers that happen to be active to not include the ones specified as argument, this function fails.
+           If the 'moveit_manage_controllers' parameter is false and the controllers that happen to be active do not include the ones specified as argument, this function fails.
           )")
 
       .def("is_controller_active", &trajectory_execution_manager::TrajectoryExecutionManager::isControllerActive,
@@ -101,7 +101,7 @@ void initTrajectoryExecutionManager(py::module& m)
       .def("are_controllers_active", &trajectory_execution_manager::TrajectoryExecutionManager::areControllersActive,
            py::arg("controllers"),
            R"(
-           Check if a set of controllers are active
+           Check if a set of controllers is active.
            )")
 
       .def("push",
@@ -157,14 +157,47 @@ void initTrajectoryExecutionManager(py::module& m)
       // ToDo(MatthijsBurgh)
       // See https://github.com/ros-planning/moveit2/issues/2442
       // get_trajectories
-      // execute
-      // execute_and_wait
-      // wait_for_execution
-      // get_current_expected_trajectory_index
-      // get_last_execution_status
+      .def("execute",
+           py::overload_cast<const trajectory_execution_manager::TrajectoryExecutionManager::ExecutionCompleteCallback&,
+                             bool>(&trajectory_execution_manager::TrajectoryExecutionManager::execute),
+           py::arg("callback"), py::arg("auto_clear") = true,
+           R"(
+           Start the execution of pushed trajectories.
 
+           This does not wait for completion, but calls a callback when done.
+           )")
+      .def(
+          "execute",
+          py::overload_cast<const trajectory_execution_manager::TrajectoryExecutionManager::ExecutionCompleteCallback&,
+                            const trajectory_execution_manager::TrajectoryExecutionManager::PathSegmentCompleteCallback&,
+                            bool>(&trajectory_execution_manager::TrajectoryExecutionManager::execute),
+          py::arg("callback"), py::arg("part_callback"), py::arg("auto_clear") = true,
+          R"(
+          Start the execution of pushed trajectories.
+
+          This does not wait for completion, but calls a callback when done. A callback is also called for every
+          trajectory part that completes successfully.
+           )")
+      .def("execute_and_wait", &trajectory_execution_manager::TrajectoryExecutionManager::executeAndWait,
+           py::arg("auto_clear") = true, py::call_guard<py::gil_scoped_release>(),
+           R"(
+           Execute a trajectory and wait for it to finish.
+           )")
+      .def("wait_for_execution", &trajectory_execution_manager::TrajectoryExecutionManager::waitForExecution,
+           py::call_guard<py::gil_scoped_release>(),
+           R"(
+           Wait for the current trajectory to finish execution.
+           )")
+      // ToDo(MatthijsBurgh)
+      // See https://github.com/ros-planning/moveit2/issues/2442
+      // get_current_expected_trajectory_index
+      .def("get_last_execution_status",
+           &trajectory_execution_manager::TrajectoryExecutionManager::getLastExecutionStatus,
+           R"(
+           Get the status of the last execution.
+           )")
       .def("stop_execution", &trajectory_execution_manager::TrajectoryExecutionManager::stopExecution,
-           py::arg("auto_clear") = true,
+           py::arg("auto_clear") = true, py::call_guard<py::gil_scoped_release>(),
            R"(
            Stop whatever executions are active, if any.
            )")

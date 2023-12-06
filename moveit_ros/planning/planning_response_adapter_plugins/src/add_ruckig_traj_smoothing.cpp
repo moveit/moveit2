@@ -52,7 +52,7 @@ using namespace trajectory_processing;
 class AddRuckigTrajectorySmoothing : public planning_interface::PlanningResponseAdapter
 {
 public:
-  AddRuckigTrajectorySmoothing() : logger_(moveit::makeChildLogger("add_ruckig_trajectory_smoothing"))
+  AddRuckigTrajectorySmoothing() : logger_(moveit::getLogger("add_ruckig_trajectory_smoothing"))
   {
   }
 

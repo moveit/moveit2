@@ -41,9 +41,19 @@
 #include <moveit/plan_execution/plan_execution.h>
 #include <moveit/utils/logger.hpp>
 
-move_group::MoveGroupContext::MoveGroupContext(const moveit_cpp::MoveItCppPtr& moveit_cpp,
-                                               const std::string& default_planning_pipeline,
-                                               bool allow_trajectory_execution, bool debug)
+namespace move_group
+{
+namespace
+{
+rclcpp::Logger getLogger()
+{
+  return moveit::getLogger("move_group_context");
+}
+}  // namespace
+
+MoveGroupContext::MoveGroupContext(const moveit_cpp::MoveItCppPtr& moveit_cpp,
+                                   const std::string& default_planning_pipeline, bool allow_trajectory_execution,
+                                   bool debug)
   : moveit_cpp_(moveit_cpp)
   , planning_scene_monitor_(moveit_cpp->getPlanningSceneMonitorNonConst())
   , allow_trajectory_execution_(allow_trajectory_execution)
@@ -59,7 +69,7 @@ move_group::MoveGroupContext::MoveGroupContext(const moveit_cpp::MoveItCppPtr& m
   else
   {
     RCLCPP_ERROR(
-        moveit::getLogger(),
+        getLogger(),
         "Failed to find default PlanningPipeline '%s' - please check MoveGroup's planning pipeline configuration.",
         default_planning_pipeline.c_str());
   }
@@ -72,7 +82,7 @@ move_group::MoveGroupContext::MoveGroupContext(const moveit_cpp::MoveItCppPtr& m
   }
 }
 
-move_group::MoveGroupContext::~MoveGroupContext()
+MoveGroupContext::~MoveGroupContext()
 {
   plan_execution_.reset();
   trajectory_execution_manager_.reset();
@@ -80,19 +90,21 @@ move_group::MoveGroupContext::~MoveGroupContext()
   planning_scene_monitor_.reset();
 }
 
-bool move_group::MoveGroupContext::status() const
+bool MoveGroupContext::status() const
 {
   if (planning_pipeline_)
   {
-    RCLCPP_INFO_STREAM(moveit::getLogger(),
+    RCLCPP_INFO_STREAM(getLogger(),
                        "MoveGroup context using pipeline " << planning_pipeline_->getName().c_str());
-    RCLCPP_INFO_STREAM(moveit::getLogger(), "MoveGroup context initialization complete");
+    RCLCPP_INFO_STREAM(getLogger(), "MoveGroup context initialization complete");
     return true;
   }
   else
   {
-    RCLCPP_WARN_STREAM(moveit::getLogger(),
+    RCLCPP_WARN_STREAM(getLogger(),
                        "MoveGroup running was unable to load pipeline " << planning_pipeline_->getName().c_str());
     return false;
   }
 }
+
+}  // namespace move_group

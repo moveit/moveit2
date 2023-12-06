@@ -68,7 +68,7 @@ MotionPlanningFrame::MotionPlanningFrame(MotionPlanningDisplay* pdisplay, rviz_c
   , planning_display_(pdisplay)
   , context_(context)
   , ui_(new Ui::MotionPlanningUI())
-  , logger_(moveit::makeChildLogger("motion_planning_frame"))
+  , logger_(moveit::getLogger("motion_planning_frame"))
   , first_time_(true)
 {
   auto ros_node_abstraction = context_->getRosNodeAbstraction().lock();

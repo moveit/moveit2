@@ -42,8 +42,6 @@
 #include <realtime_tools/thread_priority.hpp>
 #include <moveit/utils/logger.hpp>
 
-using moveit::getLogger;
-
 namespace moveit_servo
 {
 
@@ -67,11 +65,11 @@ ServoNode::ServoNode(const rclcpp::NodeOptions& options)
   , new_twist_msg_{ false }
   , new_pose_msg_{ false }
 {
-  moveit::setLogger(node_->get_logger());
+  moveit::setNodeLoggerName(node_->get_name());
 
   if (!options.use_intra_process_comms())
   {
-    RCLCPP_WARN_STREAM(getLogger(),
+    RCLCPP_WARN_STREAM(node_->get_logger(),
                        "Intra-process communication is disabled, consider enabling it by adding: "
                        "\nextra_arguments=[{'use_intra_process_comms' : True}]\nto the Servo composable node "
                        "in the launch file");
@@ -82,16 +80,16 @@ ServoNode::ServoNode(const rclcpp::NodeOptions& options)
   {
     if (realtime_tools::configure_sched_fifo(servo_params_.thread_priority))
     {
-      RCLCPP_INFO_STREAM(getLogger(), "Realtime kernel available, higher thread priority has been set.");
+      RCLCPP_INFO_STREAM(node_->get_logger(), "Realtime kernel available, higher thread priority has been set.");
     }
     else
     {
-      RCLCPP_WARN_STREAM(getLogger(), "Could not enable FIFO RT scheduling policy.");
+      RCLCPP_WARN_STREAM(node_->get_logger(), "Could not enable FIFO RT scheduling policy.");
     }
   }
   else
   {
-    RCLCPP_WARN_STREAM(getLogger(), "Realtime kernel is recommended for better performance.");
+    RCLCPP_WARN_STREAM(node_->get_logger(), "Realtime kernel is recommended for better performance.");
   }
 
   std::shared_ptr<servo::ParamListener> servo_param_listener =
@@ -182,7 +180,7 @@ void ServoNode::switchCommandType(const std::shared_ptr<moveit_msgs::srv::ServoC
   }
   else
   {
-    RCLCPP_WARN_STREAM(getLogger(), "Unknown command type " << request->command_type << " requested");
+    RCLCPP_WARN_STREAM(node_->get_logger(), "Unknown command type " << request->command_type << " requested");
   }
   response->success = (request->command_type == static_cast<int8_t>(servo_->getCommandType()));
 }
@@ -225,7 +223,7 @@ std::optional<KinematicState> ServoNode::processJointJogCommand()
     if (new_joint_jog_msg_)
     {
       next_joint_state = result.second;
-      RCLCPP_DEBUG_STREAM(getLogger(), "Joint jog command timed out. Halting to a stop.");
+      RCLCPP_DEBUG_STREAM(node_->get_logger(), "Joint jog command timed out. Halting to a stop.");
     }
   }
 
@@ -257,7 +255,7 @@ std::optional<KinematicState> ServoNode::processTwistCommand()
     if (new_twist_msg_)
     {
       next_joint_state = result.second;
-      RCLCPP_DEBUG_STREAM(getLogger(), "Twist command timed out. Halting to a stop.");
+      RCLCPP_DEBUG_STREAM(node_->get_logger(), "Twist command timed out. Halting to a stop.");
     }
   }
 
@@ -286,7 +284,7 @@ std::optional<KinematicState> ServoNode::processPoseCommand()
     if (new_pose_msg_)
     {
       next_joint_state = result.second;
-      RCLCPP_DEBUG_STREAM(getLogger(), "Pose command timed out. Halting to a stop.");
+      RCLCPP_DEBUG_STREAM(node_->get_logger(), "Pose command timed out. Halting to a stop.");
     }
   }
 
@@ -326,7 +324,7 @@ void ServoNode::servoLoop()
     else if (new_joint_jog_msg_ || new_twist_msg_ || new_pose_msg_)
     {
       new_joint_jog_msg_ = new_twist_msg_ = new_pose_msg_ = false;
-      RCLCPP_WARN_STREAM(getLogger(), "Command type has not been set, cannot accept input");
+      RCLCPP_WARN_STREAM(node_->get_logger(), "Command type has not been set, cannot accept input");
     }
 
     if (next_joint_state && (servo_->getStatus() != StatusCode::INVALID) &&

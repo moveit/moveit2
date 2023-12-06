@@ -67,7 +67,7 @@ PlanningSceneDisplay::PlanningSceneDisplay(bool listen_to_planning_scene, bool s
   : Display()
   , planning_scene_needs_render_(true)
   , current_scene_time_(0.0f)
-  , logger_(moveit::makeChildLogger("planning_scene_display"))
+  , logger_(moveit::getLogger("planning_scene_display"))
 {
   move_group_ns_property_ = new rviz_common::properties::StringProperty("Move Group Namespace", "",
                                                                         "The name of the ROS namespace in "

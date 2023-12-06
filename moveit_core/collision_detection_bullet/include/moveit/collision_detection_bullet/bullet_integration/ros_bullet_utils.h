@@ -44,4 +44,6 @@ shapes::ShapePtr constructShape(const urdf::Geometry* geom);
 
 Eigen::Isometry3d urdfPose2Eigen(const urdf::Pose& pose);
 
+rclcpp::Logger getLogger();
+
 }  // namespace collision_detection_bullet

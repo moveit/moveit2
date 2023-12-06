@@ -52,7 +52,7 @@ namespace default_planning_request_adapters
 class CheckForStackedConstraints : public planning_interface::PlanningRequestAdapter
 {
 public:
-  CheckForStackedConstraints() : logger_(moveit::makeChildLogger("check_for_stacked_constraints"))
+  CheckForStackedConstraints() : logger_(moveit::getLogger("check_for_stacked_constraints"))
   {
   }
 

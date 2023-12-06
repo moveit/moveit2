@@ -47,7 +47,6 @@
 #include <tf2_ros/transform_listener.h>
 #include <moveit/utils/logger.hpp>
 
-using moveit::getLogger;
 using namespace moveit_servo;
 
 int main(int argc, char* argv[])
@@ -56,7 +55,7 @@ int main(int argc, char* argv[])
 
   // The servo object expects to get a ROS node.
   const rclcpp::Node::SharedPtr demo_node = std::make_shared<rclcpp::Node>("moveit_servo_demo");
-  moveit::setLogger(demo_node->get_logger());
+  moveit::setNodeLoggerName(demo_node->get_name());
 
   // Get the servo parameters.
   const std::string param_namespace = "moveit_servo";
@@ -92,7 +91,7 @@ int main(int argc, char* argv[])
   std::chrono::seconds time_elapsed(0);
   auto start_time = std::chrono::steady_clock::now();
 
-  RCLCPP_INFO_STREAM(getLogger(), servo.getStatusMessage());
+  RCLCPP_INFO_STREAM(demo_node->get_logger(), servo.getStatusMessage());
   while (rclcpp::ok())
   {
     const KinematicState joint_state = servo.getNextJointState(target_twist);
@@ -102,7 +101,7 @@ int main(int argc, char* argv[])
     time_elapsed = std::chrono::duration_cast<std::chrono::seconds>(current_time - start_time);
     if (time_elapsed > timeout_duration)
     {
-      RCLCPP_INFO_STREAM(getLogger(), "Timed out");
+      RCLCPP_INFO_STREAM(demo_node->get_logger(), "Timed out");
       break;
     }
     else if (status != StatusCode::INVALID)
@@ -112,6 +111,6 @@ int main(int argc, char* argv[])
     rate.sleep();
   }
 
-  RCLCPP_INFO(getLogger(), "Exiting demo.");
+  RCLCPP_INFO(demo_node->get_logger(), "Exiting demo.");
   rclcpp::shutdown();
 }

@@ -46,8 +46,7 @@ namespace planning_pipeline_interfaces
 
 rclcpp::Logger getLogger()
 {
-  static rclcpp::Logger logger = moveit::makeChildLogger("planning_pipeline_interfaces");
-  return logger;
+  return moveit::getLogger("planning_pipeline_interfaces");
 }
 
 ::planning_interface::MotionPlanResponse

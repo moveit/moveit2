@@ -53,9 +53,7 @@ namespace occupancy_map_monitor
 OccupancyMapMonitorMiddlewareHandle::OccupancyMapMonitorMiddlewareHandle(const rclcpp::Node::SharedPtr& node,
                                                                          double map_resolution,
                                                                          const std::string& map_frame)
-  : node_{ node }
-  , parameters_{ map_resolution, map_frame, {} }
-  , logger_(moveit::makeChildLogger("occupancy_map_monitor"))
+  : node_{ node }, parameters_{ map_resolution, map_frame, {} }, logger_(moveit::getLogger("occupancy_map_monitor"))
 {
   try
   {
