@@ -13,6 +13,7 @@ ament_target_dependencies(moveit_robot_trajectory
 target_link_libraries(moveit_robot_trajectory
   moveit_robot_model
   moveit_robot_state
+  moveit_utils
 )
 
 install(DIRECTORY include/ DESTINATION include/moveit_core)

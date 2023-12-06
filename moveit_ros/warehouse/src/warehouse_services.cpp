@@ -50,7 +50,13 @@
 #include <rclcpp/utilities.hpp>
 #include <moveit/utils/logger.hpp>
 
-using moveit::getLogger;
+namespace
+{
+rclcpp::Logger getLogger()
+{
+  return moveit::getLogger("warehouse_services");
+}
+}  // namespace
 
 static const std::string ROBOT_DESCRIPTION = "robot_description";
 
@@ -141,7 +147,7 @@ int main(int argc, char** argv)
   node_options.allow_undeclared_parameters(true);
   node_options.automatically_declare_parameters_from_overrides(true);
   rclcpp::Node::SharedPtr node = rclcpp::Node::make_shared("moveit_warehouse_services", node_options);
-  moveit::setLogger(node->get_logger());
+  moveit::setNodeLoggerName(node->get_name());
 
   std::string host;
 
@@ -161,23 +167,23 @@ int main(int argc, char** argv)
     conn = moveit_warehouse::loadDatabase(node);
     conn->setParams(host, port, connection_timeout);
 
-    RCLCPP_INFO(getLogger(), "Connecting to warehouse on %s:%d", host.c_str(), port);
+    RCLCPP_INFO(node->get_logger(), "Connecting to warehouse on %s:%d", host.c_str(), port);
     int tries = 0;
     while (!conn->connect())
     {
       ++tries;
-      RCLCPP_WARN(getLogger(), "Failed to connect to DB on %s:%d (try %d/%d).", host.c_str(), port, tries,
+      RCLCPP_WARN(node->get_logger(), "Failed to connect to DB on %s:%d (try %d/%d).", host.c_str(), port, tries,
                   connection_retries);
       if (tries == connection_retries)
       {
-        RCLCPP_FATAL(getLogger(), "Failed to connect too many times, giving up");
+        RCLCPP_FATAL(node->get_logger(), "Failed to connect too many times, giving up");
         return 1;
       }
     }
   }
   catch (std::exception& ex)
   {
-    RCLCPP_ERROR(getLogger(), "%s", ex.what());
+    RCLCPP_ERROR(node->get_logger(), "%s", ex.what());
     return 1;
   }
 
@@ -187,13 +193,13 @@ int main(int argc, char** argv)
   rs.getKnownRobotStates(names);
   if (names.empty())
   {
-    RCLCPP_INFO(getLogger(), "There are no previously stored robot states");
+    RCLCPP_INFO(node->get_logger(), "There are no previously stored robot states");
   }
   else
   {
-    RCLCPP_INFO(getLogger(), "Previously stored robot states:");
+    RCLCPP_INFO(node->get_logger(), "Previously stored robot states:");
     for (const std::string& name : names)
-      RCLCPP_INFO(getLogger(), " * %s", name.c_str());
+      RCLCPP_INFO(node->get_logger(), " * %s", name.c_str());
   }
 
   auto save_cb = [&](const std::shared_ptr<moveit_msgs::srv::SaveRobotStateToWarehouse::Request>& request,

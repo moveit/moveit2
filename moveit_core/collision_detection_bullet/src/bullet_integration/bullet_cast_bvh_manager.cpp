@@ -37,8 +37,7 @@
 #include <rclcpp/logging.hpp>
 #include <map>
 #include <utility>
-
-static const rclcpp::Logger BULLET_LOGGER = rclcpp::get_logger("collision_detection.bullet");
+#include <moveit/collision_detection_bullet/bullet_integration/ros_bullet_utils.h>
 
 namespace collision_detection_bullet
 {
@@ -122,8 +121,8 @@ void BulletCastBVHManager::setCastCollisionObjectsTransform(const std::string& n
       }
       else
       {
-        RCLCPP_ERROR_STREAM(BULLET_LOGGER, "I can only continuous collision check convex shapes and "
-                                           "compound shapes made of convex shapes");
+        RCLCPP_ERROR_STREAM(getLogger(), "I can only continuous collision check convex shapes and "
+                                         "compound shapes made of convex shapes");
         throw std::runtime_error(
             "I can only continuous collision check convex shapes and compound shapes made of convex shapes");
       }
@@ -142,7 +141,7 @@ void BulletCastBVHManager::contactTest(collision_detection::CollisionResult& col
   broadphase_->calculateOverlappingPairs(dispatcher_.get());
   btOverlappingPairCache* pair_cache = broadphase_->getOverlappingPairCache();
 
-  RCLCPP_DEBUG_STREAM(BULLET_LOGGER, "Number overlapping candidates " << pair_cache->getNumOverlappingPairs());
+  RCLCPP_DEBUG_STREAM(getLogger(), "Number overlapping candidates " << pair_cache->getNumOverlappingPairs());
 
   BroadphaseContactResultCallback cc(cdata, contact_distance_, acm, false, true);
   TesseractCollisionPairCallback collision_callback(dispatch_info_, dispatcher_.get(), cc);

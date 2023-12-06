@@ -3,7 +3,7 @@ target_include_directories(moveit_transforms PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include/moveit_core>
 )
-target_link_libraries(moveit_transforms moveit_macros)
+target_link_libraries(moveit_transforms moveit_macros moveit_utils)
 set_target_properties(moveit_transforms PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
 ament_target_dependencies(moveit_transforms
   geometric_shapes

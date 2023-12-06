@@ -58,7 +58,7 @@ PointCloudOctomapUpdater::PointCloudOctomapUpdater()
   , max_update_rate_(0)
   , point_cloud_subscriber_(nullptr)
   , point_cloud_filter_(nullptr)
-  , logger_(moveit::makeChildLogger("pointcloud_octomap_updater"))
+  , logger_(moveit::getLogger("pointcloud_octomap_updater"))
 {
 }
 

@@ -44,15 +44,20 @@
 #include <cmath>
 #include <moveit/trajectory_processing/time_optimal_trajectory_generation.h>
 #include <vector>
+#include <moveit/utils/logger.hpp>
 
 namespace trajectory_processing
 {
 namespace
 {
-const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_trajectory_processing.time_optimal_trajectory_generation");
 constexpr double DEFAULT_TIMESTEP = 1e-3;
 constexpr double EPS = 1e-6;
 constexpr double DEFAULT_SCALING_FACTOR = 1.0;
+
+rclcpp::Logger getLogger()
+{
+  return moveit::getLogger("time_optimal_trajectory_generation");
+}
 }  // namespace
 
 class LinearPathSegment : public PathSegment
@@ -327,7 +332,7 @@ Trajectory::Trajectory(const Path& path, const Eigen::VectorXd& max_velocity, co
   if (time_step_ == 0)
   {
     valid_ = false;
-    RCLCPP_ERROR(LOGGER, "The trajectory is invalid because the time step is 0.");
+    RCLCPP_ERROR(getLogger(), "The trajectory is invalid because the time step is 0.");
     return;
   }
   trajectory_.push_back(TrajectoryStep(0.0, 0.0));
@@ -557,7 +562,7 @@ bool Trajectory::integrateForward(std::list<TrajectoryStep>& trajectory, double 
     else if (path_vel < 0.0)
     {
       valid_ = false;
-      RCLCPP_ERROR(LOGGER, "Error while integrating forward: Negative path velocity");
+      RCLCPP_ERROR(getLogger(), "Error while integrating forward: Negative path velocity");
       return true;
     }
 
@@ -576,8 +581,8 @@ bool Trajectory::integrateForward(std::list<TrajectoryStep>& trajectory, double 
       // The position will never change if velocity and acceleration are zero.
       // The loop will spin indefinitely as no exit condition is met.
       valid_ = false;
-      RCLCPP_ERROR(LOGGER, "Error while integrating forward: zero acceleration and velocity. Are any relevant "
-                           "acceleration components limited to zero?");
+      RCLCPP_ERROR(getLogger(), "Error while integrating forward: zero acceleration and velocity. Are any relevant "
+                                "acceleration components limited to zero?");
       return true;
     }
 
@@ -664,7 +669,7 @@ void Trajectory::integrateBackward(std::list<TrajectoryStep>& start_trajectory, 
       if (path_vel < 0.0)
       {
         valid_ = false;
-        RCLCPP_ERROR(LOGGER, "Error while integrating backward: Negative path velocity");
+        RCLCPP_ERROR(getLogger(), "Error while integrating backward: Negative path velocity");
         end_trajectory_ = trajectory;
         return;
       }
@@ -693,7 +698,7 @@ void Trajectory::integrateBackward(std::list<TrajectoryStep>& start_trajectory, 
   }
 
   valid_ = false;
-  RCLCPP_ERROR(LOGGER, "Error while integrating backward: Did not hit start trajectory");
+  RCLCPP_ERROR(getLogger(), "Error while integrating backward: Did not hit start trajectory");
   end_trajectory_ = trajectory;
 }
 
@@ -889,7 +894,7 @@ bool TimeOptimalTrajectoryGeneration::computeTimeStamps(robot_trajectory::RobotT
   const moveit::core::JointModelGroup* group = trajectory.getGroup();
   if (!group)
   {
-    RCLCPP_ERROR(LOGGER, "It looks like the planner did not set the group the plan was computed for");
+    RCLCPP_ERROR(getLogger(), "It looks like the planner did not set the group the plan was computed for");
     return false;
   }
 
@@ -903,7 +908,7 @@ bool TimeOptimalTrajectoryGeneration::computeTimeStamps(robot_trajectory::RobotT
   std::vector<size_t> active_joint_indices;
   if (!group->computeJointVariableIndices(group->getActiveJointModelNames(), active_joint_indices))
   {
-    RCLCPP_ERROR(LOGGER, "Failed to get active variable indices.");
+    RCLCPP_ERROR(getLogger(), "Failed to get active variable indices.");
   }
 
   const size_t num_active_joints = active_joint_indices.size();
@@ -919,7 +924,7 @@ bool TimeOptimalTrajectoryGeneration::computeTimeStamps(robot_trajectory::RobotT
     {
       if (bounds.max_velocity_ <= 0.0)
       {
-        RCLCPP_ERROR(LOGGER, "Invalid max_velocity %f specified for '%s', must be greater than 0.0",
+        RCLCPP_ERROR(getLogger(), "Invalid max_velocity %f specified for '%s', must be greater than 0.0",
                      bounds.max_velocity_, vars[idx].c_str());
         return false;
       }
@@ -928,9 +933,9 @@ bool TimeOptimalTrajectoryGeneration::computeTimeStamps(robot_trajectory::RobotT
     }
     else
     {
-      RCLCPP_ERROR_STREAM(LOGGER, "No velocity limit was defined for joint "
-                                      << vars[idx].c_str()
-                                      << "! You have to define velocity limits in the URDF or joint_limits.yaml");
+      RCLCPP_ERROR_STREAM(getLogger(), "No velocity limit was defined for joint "
+                                           << vars[idx].c_str()
+                                           << "! You have to define velocity limits in the URDF or joint_limits.yaml");
       return false;
     }
 
@@ -938,7 +943,7 @@ bool TimeOptimalTrajectoryGeneration::computeTimeStamps(robot_trajectory::RobotT
     {
       if (bounds.max_acceleration_ < 0.0)
       {
-        RCLCPP_ERROR(LOGGER, "Invalid max_acceleration %f specified for '%s', must be greater than 0.0",
+        RCLCPP_ERROR(getLogger(), "Invalid max_acceleration %f specified for '%s', must be greater than 0.0",
                      bounds.max_acceleration_, vars[idx].c_str());
         return false;
       }
@@ -947,10 +952,10 @@ bool TimeOptimalTrajectoryGeneration::computeTimeStamps(robot_trajectory::RobotT
     }
     else
     {
-      RCLCPP_ERROR_STREAM(LOGGER, "No acceleration limit was defined for joint "
-                                      << vars[idx].c_str()
-                                      << "! You have to define acceleration limits in the URDF or "
-                                         "joint_limits.yaml");
+      RCLCPP_ERROR_STREAM(getLogger(), "No acceleration limit was defined for joint "
+                                           << vars[idx].c_str()
+                                           << "! You have to define acceleration limits in the URDF or "
+                                              "joint_limits.yaml");
       return false;
     }
   }
@@ -993,7 +998,7 @@ bool TimeOptimalTrajectoryGeneration::computeTimeStamps(
   const moveit::core::JointModelGroup* group = trajectory.getGroup();
   if (!group)
   {
-    RCLCPP_ERROR(LOGGER, "It looks like the planner did not set the group the plan was computed for");
+    RCLCPP_ERROR(getLogger(), "It looks like the planner did not set the group the plan was computed for");
     return false;
   }
 
@@ -1007,7 +1012,7 @@ bool TimeOptimalTrajectoryGeneration::computeTimeStamps(
   std::vector<size_t> indices;
   if (!group->computeJointVariableIndices(group->getActiveJointModelNames(), indices))
   {
-    RCLCPP_ERROR(LOGGER, "Failed to get active variable indices.");
+    RCLCPP_ERROR(getLogger(), "Failed to get active variable indices.");
   }
 
   const size_t num_joints = indices.size();
@@ -1033,7 +1038,7 @@ bool TimeOptimalTrajectoryGeneration::computeTimeStamps(
       // Set the default velocity limit, from robot model
       if (bounds.max_velocity_ < 0.0)
       {
-        RCLCPP_ERROR(LOGGER, "Invalid max_velocity %f specified for '%s', must be greater than 0.0",
+        RCLCPP_ERROR(getLogger(), "Invalid max_velocity %f specified for '%s', must be greater than 0.0",
                      bounds.max_velocity_, vars[idx].c_str());
         return false;
       }
@@ -1044,10 +1049,10 @@ bool TimeOptimalTrajectoryGeneration::computeTimeStamps(
 
     if (!set_velocity_limit)
     {
-      RCLCPP_ERROR_STREAM(LOGGER, "No velocity limit was defined for joint "
-                                      << vars[idx].c_str()
-                                      << "! You have to define velocity limits in the URDF or "
-                                         "joint_limits.yaml");
+      RCLCPP_ERROR_STREAM(getLogger(), "No velocity limit was defined for joint "
+                                           << vars[idx].c_str()
+                                           << "! You have to define velocity limits in the URDF or "
+                                              "joint_limits.yaml");
       return false;
     }
 
@@ -1066,7 +1071,7 @@ bool TimeOptimalTrajectoryGeneration::computeTimeStamps(
       // Set the default acceleration limit, from robot model
       if (bounds.max_acceleration_ < 0.0)
       {
-        RCLCPP_ERROR(LOGGER, "Invalid max_acceleration %f specified for '%s', must be greater than 0.0",
+        RCLCPP_ERROR(getLogger(), "Invalid max_acceleration %f specified for '%s', must be greater than 0.0",
                      bounds.max_acceleration_, vars[idx].c_str());
         return false;
       }
@@ -1076,10 +1081,10 @@ bool TimeOptimalTrajectoryGeneration::computeTimeStamps(
     }
     if (!set_acceleration_limit)
     {
-      RCLCPP_ERROR_STREAM(LOGGER, "No acceleration limit was defined for joint "
-                                      << vars[idx].c_str()
-                                      << "! You have to define acceleration limits in the URDF or "
-                                         "joint_limits.yaml");
+      RCLCPP_ERROR_STREAM(getLogger(), "No acceleration limit was defined for joint "
+                                           << vars[idx].c_str()
+                                           << "! You have to define acceleration limits in the URDF or "
+                                              "joint_limits.yaml");
       return false;
     }
   }
@@ -1099,7 +1104,7 @@ bool totgComputeTimeStamps(const size_t num_waypoints, robot_trajectory::RobotTr
 
   if (num_waypoints < 2)
   {
-    RCLCPP_ERROR(LOGGER, "computeTimeStamps() requires num_waypoints > 1");
+    RCLCPP_ERROR(getLogger(), "computeTimeStamps() requires num_waypoints > 1");
     return false;
   }
 
@@ -1122,14 +1127,14 @@ bool TimeOptimalTrajectoryGeneration::doTimeParameterizationCalculations(robot_t
   const moveit::core::JointModelGroup* group = trajectory.getGroup();
   if (!group)
   {
-    RCLCPP_ERROR(LOGGER, "It looks like the planner did not set the group the plan was computed for");
+    RCLCPP_ERROR(getLogger(), "It looks like the planner did not set the group the plan was computed for");
     return false;
   }
 
   if (hasMixedJointTypes(group))
   {
-    RCLCPP_WARN(LOGGER, "There is a combination of revolute and prismatic joints in the robot model. TOTG's "
-                        "`path_tolerance` will not function correctly.");
+    RCLCPP_WARN(getLogger(), "There is a combination of revolute and prismatic joints in the robot model. TOTG's "
+                             "`path_tolerance` will not function correctly.");
   }
 
   const unsigned num_points = trajectory.getWayPointCount();
@@ -1183,7 +1188,7 @@ bool TimeOptimalTrajectoryGeneration::doTimeParameterizationCalculations(robot_t
   Trajectory parameterized(Path(points, path_tolerance_), max_velocity, max_acceleration, DEFAULT_TIMESTEP);
   if (!parameterized.isValid())
   {
-    RCLCPP_ERROR(LOGGER, "Unable to parameterize trajectory.");
+    RCLCPP_ERROR(getLogger(), "Unable to parameterize trajectory.");
     return false;
   }
 
@@ -1251,8 +1256,8 @@ double TimeOptimalTrajectoryGeneration::verifyScalingFactor(const double request
   }
   else
   {
-    RCLCPP_WARN(LOGGER, "Invalid max_%sscaling_factor %f specified, defaulting to %f instead.", limit_type_str.c_str(),
-                requested_scaling_factor, scaling_factor);
+    RCLCPP_WARN(getLogger(), "Invalid max_%sscaling_factor %f specified, defaulting to %f instead.",
+                limit_type_str.c_str(), requested_scaling_factor, scaling_factor);
   }
   return scaling_factor;
 }

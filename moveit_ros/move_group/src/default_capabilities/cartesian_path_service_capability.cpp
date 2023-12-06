@@ -65,6 +65,11 @@ bool isStateValid(const planning_scene::PlanningScene* planning_scene,
   return (!planning_scene || !planning_scene->isStateColliding(*state, group->getName())) &&
          (!constraint_set || constraint_set->decide(*state).satisfied);
 }
+
+rclcpp::Logger getLogger()
+{
+  return moveit::getLogger("cartesian_path_service_capability");
+}
 }  // namespace
 
 namespace move_group

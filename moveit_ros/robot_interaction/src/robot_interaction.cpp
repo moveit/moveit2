@@ -65,7 +65,7 @@ RobotInteraction::RobotInteraction(const moveit::core::RobotModelConstPtr& robot
                                    const rclcpp::Node::SharedPtr& node, const std::string& ns)
   : robot_model_(robot_model)
   , node_(node)
-  , logger_(moveit::makeChildLogger("moveit_ros_robot_interaction"))
+  , logger_(moveit::getLogger("moveit_ros_robot_interaction"))
   , kinematic_options_map_(std::make_shared<KinematicOptionsMap>())
 {
   topic_ = ns.empty() ? INTERACTIVE_MARKER_TOPIC : ns + "/" + INTERACTIVE_MARKER_TOPIC;
