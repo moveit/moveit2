@@ -94,8 +94,7 @@ bool MoveGroupContext::status() const
 {
   if (planning_pipeline_)
   {
-    RCLCPP_INFO_STREAM(getLogger(),
-                       "MoveGroup context using pipeline " << planning_pipeline_->getName().c_str());
+    RCLCPP_INFO_STREAM(getLogger(), "MoveGroup context using pipeline " << planning_pipeline_->getName().c_str());
     RCLCPP_INFO_STREAM(getLogger(), "MoveGroup context initialization complete");
     return true;
   }
