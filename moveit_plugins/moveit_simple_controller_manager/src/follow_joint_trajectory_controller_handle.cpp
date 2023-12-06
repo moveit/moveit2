@@ -98,11 +98,11 @@ bool FollowJointTrajectoryControllerHandle::sendTrajectory(const moveit_msgs::ms
   return true;
 }
 
-void FollowJointTrajectoryControllerHandle::setPathTolerance(double path_tolerance)
+void FollowJointTrajectoryControllerHandle::setPathTolerance(double /*path_tolerance*/)
 {
 }
 
-void FollowJointTrajectoryControllerHandle::setGoalTolerance(double goal_tolerance)
+void FollowJointTrajectoryControllerHandle::setGoalTolerance(double /*goal_tolerance*/)
 {
 }
 
