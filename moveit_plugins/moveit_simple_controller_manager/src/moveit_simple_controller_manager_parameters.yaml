@@ -7,3 +7,59 @@ moveit_simple_controller_manager:
       not_empty<>: []
     }
   }
+  __map_controller_names:
+    action_ns: {
+      type: string,
+      default_value: "",
+      description: "follow_joint_trajectory or gripper_cmd",
+      validation: {
+        not_empty<>: []
+      }
+    }
+    type: {
+      type: string,
+      default_value: "",
+      description: "FollowJointTrajectory or GripperCommand",
+      validation: {
+        not_empty<>: []
+      }
+    }
+    make_default: {
+      type: bool,
+      default_value: false,
+      description: "This param was originally named default. Can't use default with generate_param_lib as default is a C++ keyword. Marking a controller as
+       default makes MoveIt prefer this controller when multiple options are available.",
+      validation: {
+        not_empty<>: []
+      }
+    }
+    joints: {
+      type: string_array,
+      default_value: [],
+      description: "list of joints to actuate",
+      validation: {
+        not_empty<>: []
+      }
+    }
+    # GripperCommand parameters
+    max_effort: {
+      type: double,
+      default_value: 0.0,
+      description: "Parameter to be set if using GripperCommand"
+    }
+    parallel: {
+      type: bool,
+      default_value: false,
+      description: "Parameter to be set if using GripperCommand"
+    }
+    command_joint: {
+      type: string,
+      default_value: "",
+      description: "Parameter to be set if using GripperCommand"
+    }
+    allow_failure: {
+      type: bool,
+      default_value: false,
+      description: "Parameter to be set if using GripperCommand"
+    }
+    # FollowJointTrajectory parameters
