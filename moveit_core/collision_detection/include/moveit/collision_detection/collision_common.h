@@ -327,8 +327,6 @@ struct DistanceResult
 /** \brief Representation of a collision checking result */
 struct CollisionResult
 {
-  using ContactMap = std::map<std::pair<std::string, std::string>, std::vector<Contact> >;
-
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   /** \brief Clear a previously stored result */
