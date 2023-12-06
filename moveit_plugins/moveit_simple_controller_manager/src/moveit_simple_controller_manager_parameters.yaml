@@ -1,0 +1,9 @@
+moveit_simple_controller_manager:
+  controller_names: {
+    type: string_array,
+    default_value: [],
+    description: "List of controllers for MoveIt's controller manager",
+    validation: {
+      not_empty<>: []
+    }
+  }

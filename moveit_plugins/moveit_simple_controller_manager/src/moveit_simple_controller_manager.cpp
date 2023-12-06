@@ -48,6 +48,8 @@
 #include <algorithm>
 #include <map>
 
+#include <moveit_simple_controller_manager_parameters.hpp>
+
 namespace
 {
 /**
@@ -94,19 +96,25 @@ public:
   void initialize(const rclcpp::Node::SharedPtr& node) override
   {
     node_ = node;
-    if (!node_->has_parameter(makeParameterName(PARAM_BASE_NAME, "controller_names")))
-    {
-      RCLCPP_ERROR_STREAM(LOGGER, "No controller_names specified.");
-      return;
-    }
-    rclcpp::Parameter controller_names_param;
-    node_->get_parameter(makeParameterName(PARAM_BASE_NAME, "controller_names"), controller_names_param);
-    if (controller_names_param.get_type() != rclcpp::ParameterType::PARAMETER_STRING_ARRAY)
-    {
-      RCLCPP_ERROR(LOGGER, "Parameter controller_names should be specified as a string array");
-      return;
-    }
-    std::vector<std::string> controller_names = controller_names_param.as_string_array();
+    const auto param_prefix = "moveit_simple_controller_manager";
+    param_listener_ = std::make_shared<moveit_simple_controller_manager::ParamListener>(node_, param_prefix);
+    params_ = param_listener_->get_params();
+
+    // ************** generate param library has checks already in place. Add catch block so that the code does not
+    // segfault ************ if (!node_->has_parameter(makeParameterName(PARAM_BASE_NAME, "controller_names")))
+    // {
+    //   RCLCPP_ERROR_STREAM(LOGGER, "No controller_names specified.");
+    //   return;
+    // }
+    // rclcpp::Parameter controller_names_param;
+    // node_->get_parameter(makeParameterName(PARAM_BASE_NAME, "controller_names"), controller_names_param);
+    // if (controller_names_param.get_type() != rclcpp::ParameterType::PARAMETER_STRING_ARRAY)
+    // {
+    //   RCLCPP_ERROR(LOGGER, "Parameter controller_names should be specified as a string array");
+    //   return;
+    // }
+    std::vector<std::string> controller_names = params_.controller_names;
+
     /* actually create each controller */
     for (const std::string& controller_name : controller_names)
     {
@@ -291,6 +299,9 @@ protected:
   rclcpp::Node::SharedPtr node_;
   std::map<std::string, ActionBasedControllerHandleBasePtr> controllers_;
   std::map<std::string, moveit_controller_manager::MoveItControllerManager::ControllerState> controller_states_;
+
+  std::shared_ptr<moveit_simple_controller_manager::ParamListener> param_listener_;
+  moveit_simple_controller_manager::Params params_;
 };
 
 }  // end namespace moveit_simple_controller_manager
