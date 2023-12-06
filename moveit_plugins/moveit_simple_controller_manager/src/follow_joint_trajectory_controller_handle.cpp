@@ -36,6 +36,7 @@
 /* Author: Michael Ferguson, Ioan Sucan, E. Gil Jones */
 
 #include <moveit_simple_controller_manager/follow_joint_trajectory_controller_handle.h>
+#include <rclcpp/duration.hpp>
 
 using namespace std::placeholders;
 
@@ -95,6 +96,19 @@ bool FollowJointTrajectoryControllerHandle::sendTrajectory(const moveit_msgs::ms
     return false;
   }
   return true;
+}
+
+void FollowJointTrajectoryControllerHandle::setPathTolerance(double path_tolerance)
+{
+}
+
+void FollowJointTrajectoryControllerHandle::setGoalTolerance(double goal_tolerance)
+{
+}
+
+void FollowJointTrajectoryControllerHandle::setGoalTimeTolerance(double goal_time_tolerance)
+{
+  goal_template_.goal_time_tolerance = rclcpp::Duration::from_seconds(goal_time_tolerance);
 }
 
 // TODO(JafarAbdi): Revise parameter lookup

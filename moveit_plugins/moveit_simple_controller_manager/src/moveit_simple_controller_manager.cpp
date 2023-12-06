@@ -152,6 +152,12 @@ public:
         else if (controller_type == "FollowJointTrajectory")
         {
           new_handle = std::make_shared<FollowJointTrajectoryControllerHandle>(node_, controller_name, action_ns);
+
+          // static_cast<FollowJointTrajectoryControllerHandle*>(new_handle.get())->setPathTolerance(controller.second.path_tolerance);
+          // static_cast<FollowJointTrajectoryControllerHandle*>(new_handle.get())->setGoalTolerance(controller.second.goal_tolerance);
+          static_cast<FollowJointTrajectoryControllerHandle*>(new_handle.get())
+              ->setGoalTimeTolerance(controller.second.goal_time_tolerance);
+
           RCLCPP_INFO_STREAM(LOGGER, "Added FollowJointTrajectory controller for " << controller_name);
           controllers_[controller_name] = new_handle;
         }
@@ -178,7 +184,7 @@ public:
     }
     catch (...)
     {
-      RCLCPP_ERROR_STREAM(LOGGER, "Caught unknown exception while parsing controller information");
+      RCLCPP_ERROR_STREAM(LOGGER, "Caught exception while parsing controller information");
     }
   }
 

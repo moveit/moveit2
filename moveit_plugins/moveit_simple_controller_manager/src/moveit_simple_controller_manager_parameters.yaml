@@ -41,7 +41,7 @@ moveit_simple_controller_manager:
         not_empty<>: []
       }
     }
-    # GripperCommand parameters
+    # parameters for gripper controllers
     max_effort: {
       type: double,
       default_value: 0.0,
@@ -62,4 +62,42 @@ moveit_simple_controller_manager:
       default_value: false,
       description: "Parameter to be set if using GripperCommand"
     }
-    # FollowJointTrajectory parameters
+    # parameters for follow joint trajectory controllers
+    goal_time_tolerance: {
+      type: double,
+      default_value: 0.0,
+      description: "Parameter to be set if using FollowJointTrajectory"
+    }
+    # __map_joints:
+    #   path_tolerance:
+    #     position: {
+    #       type: double,
+    #       default_value: 0.0,
+    #       description: "Parameter to be set if using FollowJointTrajectory"
+    #     }
+    #     velocity: {
+    #       type: double,
+    #       default_value: 0.0,
+    #       description: "Parameter to be set if using FollowJointTrajectory"
+    #     }
+    #     acceleration: {
+    #       type: double,
+    #       default_value: 0.0,
+    #       description: "Parameter to be set if using FollowJointTrajectory"
+    #     }
+    #   goal_tolerance:
+    #     position: {
+    #       type: double,
+    #       default_value: 0.0,
+    #       description: "Parameter to be set if using FollowJointTrajectory"
+    #     }
+    #     velocity: {
+    #       type: double,
+    #       default_value: 0.0,
+    #       description: "Parameter to be set if using FollowJointTrajectory"
+    #     }
+    #     acceleration: {
+    #       type: double,
+    #       default_value: 0.0,
+    #       description: "Parameter to be set if using FollowJointTrajectory"
+    #     }
