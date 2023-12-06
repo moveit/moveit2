@@ -1,9 +1,9 @@
 planning_pipeline_parameters:
-  planning_plugin: {
-    type: string,
+  planning_plugins: {
+    type: string_array,
     description: "Name of the planner plugin used by the pipeline",
     read_only: true,
-    default_value: "UNKNOWN",
+    default_value: ["UNKNOWN"],
   }
   request_adapters: {
     type: string_array,

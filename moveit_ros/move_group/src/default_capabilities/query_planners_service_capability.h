@@ -51,15 +51,12 @@ public:
   void initialize() override;
 
 private:
-  bool queryInterface(const std::shared_ptr<rmw_request_id_t>& request_header,
-                      const std::shared_ptr<moveit_msgs::srv::QueryPlannerInterfaces::Request>& /*req*/,
+  void queryInterface(const std::shared_ptr<moveit_msgs::srv::QueryPlannerInterfaces::Request>& /*req*/,
                       const std::shared_ptr<moveit_msgs::srv::QueryPlannerInterfaces::Response>& res);
 
-  bool getParams(const std::shared_ptr<rmw_request_id_t>& request_header,
-                 const std::shared_ptr<moveit_msgs::srv::GetPlannerParams::Request>& req,
+  void getParams(const std::shared_ptr<moveit_msgs::srv::GetPlannerParams::Request>& req,
                  const std::shared_ptr<moveit_msgs::srv::GetPlannerParams::Response>& res);
-  bool setParams(const std::shared_ptr<rmw_request_id_t>& request_header,
-                 const std::shared_ptr<moveit_msgs::srv::SetPlannerParams::Request>& req,
+  void setParams(const std::shared_ptr<moveit_msgs::srv::SetPlannerParams::Request>& req,
                  const std::shared_ptr<moveit_msgs::srv::SetPlannerParams::Response>& /*res*/);
 
   rclcpp::Service<moveit_msgs::srv::QueryPlannerInterfaces>::SharedPtr query_service_;

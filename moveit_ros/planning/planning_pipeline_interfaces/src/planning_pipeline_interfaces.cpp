@@ -181,7 +181,7 @@ createPlanningPipelineMap(const std::vector<std::string>& pipeline_names,
     planning_pipeline::PlanningPipelinePtr pipeline = std::make_shared<planning_pipeline::PlanningPipeline>(
         robot_model, node, parameter_namespace + planning_pipeline_name);
 
-    if (!pipeline->getPlannerManager())
+    if (!pipeline)
     {
       RCLCPP_ERROR(getLogger(), "Failed to initialize planning pipeline '%s'.", planning_pipeline_name.c_str());
       continue;
