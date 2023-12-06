@@ -42,7 +42,7 @@
 
 namespace
 {
-static const rclcpp::Logger LOGGER =
+const rclcpp::Logger LOGGER =
     rclcpp::get_logger("moveit.pilz_industrial_motion_planner.trajectory_blender_transition_window");
 }
 

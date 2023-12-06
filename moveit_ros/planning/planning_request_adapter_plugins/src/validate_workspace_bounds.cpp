@@ -33,69 +33,69 @@
  *********************************************************************/
 
 /* Author: Ioan Sucan
- * Desc: A fix workspace bounds adapter which will specify a default workspace for planning: a cube of size 10 m x 10 m x
- * 10 m. This workspace will only be specified if the planning request to the planner does not have these fields filled in.
+ * Desc: If not specified by the planning request, this request adapter will specify a default workspace for planning.
+ * The default workspace is a cube whose edge length is defined with a ROS 2 parameter.
  */
 
-#include <moveit/planning_request_adapter/planning_request_adapter.h>
+#include <moveit/planning_interface/planning_request_adapter.h>
 #include <class_loader/class_loader.hpp>
 #include <rclcpp/logger.hpp>
 #include <rclcpp/logging.hpp>
 #include <rclcpp/node.hpp>
+#include <moveit/utils/logger.hpp>
 
-#include <default_plan_request_adapter_parameters.hpp>
+#include <default_request_adapter_parameters.hpp>
 
-namespace default_planner_request_adapters
+namespace default_planning_request_adapters
 {
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_ros.fix_workspace_bounds");
 
-/** @brief This fix workspace bounds adapter will specify a default workspace for planning: a cube of size 10 m x 10 m x
- * 10 m. This workspace will only be specified if the planning request to the planner does not have these fields filled in. */
-class FixWorkspaceBounds : public planning_request_adapter::PlanningRequestAdapter
+/** @brief If not specified by the planning request, this request adapter will specify a default workspace for planning. */
+class ValidateWorkspaceBounds : public planning_interface::PlanningRequestAdapter
 {
 public:
+  ValidateWorkspaceBounds() : logger_(moveit::getLogger("validate_workspace_bounds"))
+  {
+  }
+
   void initialize(const rclcpp::Node::SharedPtr& node, const std::string& parameter_namespace) override
   {
-    param_listener_ =
-        std::make_unique<default_plan_request_adapter_parameters::ParamListener>(node, parameter_namespace);
+    param_listener_ = std::make_unique<default_request_adapter_parameters::ParamListener>(node, parameter_namespace);
   }
 
-  std::string getDescription() const override
+  [[nodiscard]] std::string getDescription() const override
   {
-    return "Fix Workspace Bounds";
+    return std::string("ValidateWorkspaceBounds");
   }
 
-  bool adaptAndPlan(const PlannerFn& planner, const planning_scene::PlanningSceneConstPtr& planning_scene,
-                    const planning_interface::MotionPlanRequest& req,
-                    planning_interface::MotionPlanResponse& res) const override
+  [[nodiscard]] moveit::core::MoveItErrorCode adapt(const planning_scene::PlanningSceneConstPtr& /*planning_scene*/,
+                                                    planning_interface::MotionPlanRequest& req) const override
   {
-    RCLCPP_DEBUG(LOGGER, "Running '%s'", getDescription().c_str());
+    RCLCPP_DEBUG(logger_, "Running '%s'", getDescription().c_str());
     const moveit_msgs::msg::WorkspaceParameters& wparams = req.workspace_parameters;
-    if (wparams.min_corner.x == wparams.max_corner.x && wparams.min_corner.x == 0.0 &&
-        wparams.min_corner.y == wparams.max_corner.y && wparams.min_corner.y == 0.0 &&
-        wparams.min_corner.z == wparams.max_corner.z && wparams.min_corner.z == 0.0)
+    if (std::abs(wparams.min_corner.x) < std::numeric_limits<double>::epsilon() &&
+        std::abs(wparams.min_corner.y) < std::numeric_limits<double>::epsilon() &&
+        std::abs(wparams.min_corner.z) < std::numeric_limits<double>::epsilon() &&
+        std::abs(wparams.max_corner.x) < std::numeric_limits<double>::epsilon() &&
+        std::abs(wparams.max_corner.y) < std::numeric_limits<double>::epsilon() &&
+        std::abs(wparams.max_corner.z) < std::numeric_limits<double>::epsilon())
     {
-      RCLCPP_DEBUG(LOGGER, "It looks like the planning volume was not specified. Using default values.");
-      planning_interface::MotionPlanRequest req2 = req;
-      moveit_msgs::msg::WorkspaceParameters& default_wp = req2.workspace_parameters;
+      RCLCPP_WARN(logger_, "It looks like the planning volume was not specified. Using default values.");
+      moveit_msgs::msg::WorkspaceParameters& default_wp = req.workspace_parameters;
       const auto params = param_listener_->get_params();
 
       default_wp.min_corner.x = default_wp.min_corner.y = default_wp.min_corner.z =
           -params.default_workspace_bounds / 2.0;
       default_wp.max_corner.x = default_wp.max_corner.y = default_wp.max_corner.z =
           params.default_workspace_bounds / 2.0;
-      return planner(planning_scene, req2, res);
     }
-    else
-    {
-      return planner(planning_scene, req, res);
-    }
+    return moveit::core::MoveItErrorCode(moveit_msgs::msg::MoveItErrorCodes::SUCCESS, std::string(""), getDescription());
   }
 
 private:
-  std::unique_ptr<default_plan_request_adapter_parameters::ParamListener> param_listener_;
+  std::unique_ptr<default_request_adapter_parameters::ParamListener> param_listener_;
+  rclcpp::Logger logger_;
 };
-}  // namespace default_planner_request_adapters
+}  // namespace default_planning_request_adapters
 
-CLASS_LOADER_REGISTER_CLASS(default_planner_request_adapters::FixWorkspaceBounds,
-                            planning_request_adapter::PlanningRequestAdapter)
+CLASS_LOADER_REGISTER_CLASS(default_planning_request_adapters::ValidateWorkspaceBounds,
+                            planning_interface::PlanningRequestAdapter)

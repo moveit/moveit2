@@ -30,6 +30,7 @@ ament_target_dependencies(moveit_robot_model
 target_link_libraries(moveit_robot_model
   moveit_exceptions
   moveit_macros
+  moveit_utils
 )
 
 if(BUILD_TESTING)

@@ -40,11 +40,7 @@
 
 #include <moveit_servo/servo_node.hpp>
 #include <realtime_tools/thread_priority.hpp>
-
-namespace
-{
-const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_servo.servo_node");
-}  // namespace
+#include <moveit/utils/logger.hpp>
 
 namespace moveit_servo
 {
@@ -69,11 +65,14 @@ ServoNode::ServoNode(const rclcpp::NodeOptions& options)
   , new_twist_msg_{ false }
   , new_pose_msg_{ false }
 {
+  moveit::setNodeLoggerName(node_->get_name());
+
   if (!options.use_intra_process_comms())
   {
-    RCLCPP_WARN_STREAM(LOGGER, "Intra-process communication is disabled, consider enabling it by adding: "
-                               "\nextra_arguments=[{'use_intra_process_comms' : True}]\nto the Servo composable node "
-                               "in the launch file");
+    RCLCPP_WARN_STREAM(node_->get_logger(),
+                       "Intra-process communication is disabled, consider enabling it by adding: "
+                       "\nextra_arguments=[{'use_intra_process_comms' : True}]\nto the Servo composable node "
+                       "in the launch file");
   }
 
   // Check if a realtime kernel is available
@@ -81,16 +80,16 @@ ServoNode::ServoNode(const rclcpp::NodeOptions& options)
   {
     if (realtime_tools::configure_sched_fifo(servo_params_.thread_priority))
     {
-      RCLCPP_INFO_STREAM(LOGGER, "Realtime kernel available, higher thread priority has been set.");
+      RCLCPP_INFO_STREAM(node_->get_logger(), "Realtime kernel available, higher thread priority has been set.");
     }
     else
     {
-      RCLCPP_WARN_STREAM(LOGGER, "Could not enable FIFO RT scheduling policy.");
+      RCLCPP_WARN_STREAM(node_->get_logger(), "Could not enable FIFO RT scheduling policy.");
     }
   }
   else
   {
-    RCLCPP_WARN_STREAM(LOGGER, "Realtime kernel is recommended for better performance.");
+    RCLCPP_WARN_STREAM(node_->get_logger(), "Realtime kernel is recommended for better performance.");
   }
 
   std::shared_ptr<servo::ParamListener> servo_param_listener =
@@ -161,6 +160,10 @@ void ServoNode::pauseServo(const std::shared_ptr<std_srvs::srv::SetBool::Request
   }
   else
   {
+    // Reset the smoothing plugin with the robot's current state in case the robot moved between pausing and unpausing.
+    last_commanded_state_ = servo_->getCurrentRobotState();
+    servo_->resetSmoothing(last_commanded_state_);
+
     servo_->setCollisionChecking(true);
     response->message = "Servoing enabled";
   }
@@ -177,7 +180,7 @@ void ServoNode::switchCommandType(const std::shared_ptr<moveit_msgs::srv::ServoC
   }
   else
   {
-    RCLCPP_WARN_STREAM(LOGGER, "Unknown command type " << request->command_type << " requested");
+    RCLCPP_WARN_STREAM(node_->get_logger(), "Unknown command type " << request->command_type << " requested");
   }
   response->success = (request->command_type == static_cast<int8_t>(servo_->getCommandType()));
 }
@@ -220,7 +223,7 @@ std::optional<KinematicState> ServoNode::processJointJogCommand()
     if (new_joint_jog_msg_)
     {
       next_joint_state = result.second;
-      RCLCPP_DEBUG_STREAM(LOGGER, "Joint jog command timed out. Halting to a stop.");
+      RCLCPP_DEBUG_STREAM(node_->get_logger(), "Joint jog command timed out. Halting to a stop.");
     }
   }
 
@@ -252,7 +255,7 @@ std::optional<KinematicState> ServoNode::processTwistCommand()
     if (new_twist_msg_)
     {
       next_joint_state = result.second;
-      RCLCPP_DEBUG_STREAM(LOGGER, "Twist command timed out. Halting to a stop.");
+      RCLCPP_DEBUG_STREAM(node_->get_logger(), "Twist command timed out. Halting to a stop.");
     }
   }
 
@@ -281,7 +284,7 @@ std::optional<KinematicState> ServoNode::processPoseCommand()
     if (new_pose_msg_)
     {
       next_joint_state = result.second;
-      RCLCPP_DEBUG_STREAM(LOGGER, "Pose command timed out. Halting to a stop.");
+      RCLCPP_DEBUG_STREAM(node_->get_logger(), "Pose command timed out. Halting to a stop.");
     }
   }
 
@@ -298,7 +301,10 @@ void ServoNode::servoLoop()
   {
     // Skip processing if servoing is disabled.
     if (servo_paused_)
+    {
+      servo_frequency.sleep();
       continue;
+    }
 
     next_joint_state = std::nullopt;
     const CommandType expected_type = servo_->getCommandType();
@@ -318,7 +324,7 @@ void ServoNode::servoLoop()
     else if (new_joint_jog_msg_ || new_twist_msg_ || new_pose_msg_)
     {
       new_joint_jog_msg_ = new_twist_msg_ = new_pose_msg_ = false;
-      RCLCPP_WARN_STREAM(LOGGER, "Command type has not been set, cannot accept input");
+      RCLCPP_WARN_STREAM(node_->get_logger(), "Command type has not been set, cannot accept input");
     }
 
     if (next_joint_state && (servo_->getStatus() != StatusCode::INVALID) &&

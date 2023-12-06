@@ -48,7 +48,7 @@ namespace chomp
 {
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("chomp_planner");
 
-bool ChompPlanner::solve(const planning_scene::PlanningSceneConstPtr& planning_scene,
+void ChompPlanner::solve(const planning_scene::PlanningSceneConstPtr& planning_scene,
                          const planning_interface::MotionPlanRequest& req, const ChompParameters& params,
                          planning_interface::MotionPlanDetailedResponse& res) const
 {
@@ -58,7 +58,7 @@ bool ChompPlanner::solve(const planning_scene::PlanningSceneConstPtr& planning_s
   {
     RCLCPP_ERROR(LOGGER, "No planning scene initialized.");
     res.error_code.val = moveit_msgs::msg::MoveItErrorCodes::FAILURE;
-    return false;
+    return;
   }
 
   // get the specified start state
@@ -69,7 +69,7 @@ bool ChompPlanner::solve(const planning_scene::PlanningSceneConstPtr& planning_s
   {
     RCLCPP_ERROR(LOGGER, "Start state violates joint limits");
     res.error_code.val = moveit_msgs::msg::MoveItErrorCodes::INVALID_ROBOT_STATE;
-    return false;
+    return;
   }
 
   ChompTrajectory trajectory(planning_scene->getRobotModel(), 3.0, .03, req.group_name);
@@ -79,7 +79,7 @@ bool ChompPlanner::solve(const planning_scene::PlanningSceneConstPtr& planning_s
   {
     RCLCPP_ERROR(LOGGER, "Expecting exactly one goal constraint, got: %zd", req.goal_constraints.size());
     res.error_code.val = moveit_msgs::msg::MoveItErrorCodes::INVALID_GOAL_CONSTRAINTS;
-    return false;
+    return;
   }
 
   if (req.goal_constraints[0].joint_constraints.empty() || !req.goal_constraints[0].position_constraints.empty() ||
@@ -87,7 +87,7 @@ bool ChompPlanner::solve(const planning_scene::PlanningSceneConstPtr& planning_s
   {
     RCLCPP_ERROR(LOGGER, "Only joint-space goals are supported");
     res.error_code.val = moveit_msgs::msg::MoveItErrorCodes::INVALID_GOAL_CONSTRAINTS;
-    return false;
+    return;
   }
 
   const size_t goal_index = trajectory.getNumPoints() - 1;
@@ -98,7 +98,7 @@ bool ChompPlanner::solve(const planning_scene::PlanningSceneConstPtr& planning_s
   {
     RCLCPP_ERROR(LOGGER, "Goal state violates joint limits");
     res.error_code.val = moveit_msgs::msg::MoveItErrorCodes::INVALID_ROBOT_STATE;
-    return false;
+    return;
   }
   robotStateToArray(goal_state, req.group_name, trajectory.getTrajectoryPoint(goal_index));
 
@@ -141,19 +141,19 @@ bool ChompPlanner::solve(const planning_scene::PlanningSceneConstPtr& planning_s
     if (res.trajectory.empty())
     {
       RCLCPP_ERROR(LOGGER, "No input trajectory specified");
-      return false;
+      return;
     }
     else if (!(trajectory.fillInFromTrajectory(*res.trajectory[0])))
     {
       RCLCPP_ERROR(LOGGER, "Input trajectory has less than 2 points, "
                            "trajectory must contain at least start and goal state");
-      return false;
+      return;
     }
   }
   else
   {
     RCLCPP_ERROR(LOGGER, "invalid interpolation method specified in the chomp_planner file");
-    return false;
+    return;
   }
 
   RCLCPP_INFO(LOGGER, "CHOMP trajectory initialized using method: %s ",
@@ -197,7 +197,7 @@ bool ChompPlanner::solve(const planning_scene::PlanningSceneConstPtr& planning_s
     {
       RCLCPP_ERROR(LOGGER, "Could not initialize optimizer");
       res.error_code.val = moveit_msgs::msg::MoveItErrorCodes::PLANNING_FAILED;
-      return false;
+      return;
     }
 
     RCLCPP_DEBUG(LOGGER, "Optimization took %ld sec to create",
@@ -273,7 +273,7 @@ bool ChompPlanner::solve(const planning_scene::PlanningSceneConstPtr& planning_s
   {
     RCLCPP_ERROR(LOGGER, "Motion plan is invalid.");
     res.error_code.val = moveit_msgs::msg::MoveItErrorCodes::INVALID_MOTION_PLAN;
-    return false;
+    return;
   }
 
   // check that final state is within goal tolerances
@@ -285,14 +285,12 @@ bool ChompPlanner::solve(const planning_scene::PlanningSceneConstPtr& planning_s
     {
       RCLCPP_ERROR(LOGGER, "Goal constraints are violated: %s", constraint.joint_name.c_str());
       res.error_code.val = moveit_msgs::msg::MoveItErrorCodes::GOAL_CONSTRAINTS_VIOLATED;
-      return false;
+      return;
     }
   }
 
   res.processing_time.resize(1);
   res.processing_time[0] = std::chrono::duration<double>(std::chrono::system_clock::now() - start_time).count();
-
-  return true;
 }
 
 }  // namespace chomp

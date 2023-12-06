@@ -60,7 +60,7 @@ Eigen::VectorXd makeVector(const std::vector<double>& values)
 }
 
 // Checks the validity of state.getJacobian() at the given 'joint_values' and 'joint_velocities'.
-void CheckJacobian(moveit::core::RobotState& state, const moveit::core::JointModelGroup& joint_model_group,
+void checkJacobian(moveit::core::RobotState& state, const moveit::core::JointModelGroup& joint_model_group,
                    const Eigen::VectorXd& joint_values, const Eigen::VectorXd& joint_velocities)
 {
   // Using the Jacobian, compute the Cartesian velocity vector at which the end-effector would move, with the given
@@ -811,8 +811,8 @@ TEST(getJacobian, RevoluteJoints)
   const moveit::core::JointModelGroup* jmg = state.getJointModelGroup("base_to_tip");
 
   // Some made-up numbers, at zero and non-zero robot configurations.
-  CheckJacobian(state, *jmg, makeVector({ 0.0, 0.0, 0.0, 0.0 }), makeVector({ 0.1, 0.2, 0.3, 0.4 }));
-  CheckJacobian(state, *jmg, makeVector({ 0.1, 0.2, 0.3, 0.4 }), makeVector({ 0.5, 0.3, 0.2, 0.1 }));
+  checkJacobian(state, *jmg, makeVector({ 0.0, 0.0, 0.0, 0.0 }), makeVector({ 0.1, 0.2, 0.3, 0.4 }));
+  checkJacobian(state, *jmg, makeVector({ 0.1, 0.2, 0.3, 0.4 }), makeVector({ 0.5, 0.3, 0.2, 0.1 }));
 }
 
 TEST(getJacobian, RevoluteAndPrismaticJoints)
@@ -879,8 +879,8 @@ TEST(getJacobian, RevoluteAndPrismaticJoints)
   const moveit::core::JointModelGroup* jmg = state.getJointModelGroup("base_to_tip");
 
   // Some made-up numbers, at zero and non-zero robot configurations.
-  CheckJacobian(state, *jmg, makeVector({ 0.0, 0.0, 0.0, 0.0 }), makeVector({ 0.1, 0.2, 0.3, 0.4 }));
-  CheckJacobian(state, *jmg, makeVector({ 0.1, 0.2, 0.3, 0.4 }), makeVector({ 0.5, 0.3, 0.2, 0.1 }));
+  checkJacobian(state, *jmg, makeVector({ 0.0, 0.0, 0.0, 0.0 }), makeVector({ 0.1, 0.2, 0.3, 0.4 }));
+  checkJacobian(state, *jmg, makeVector({ 0.1, 0.2, 0.3, 0.4 }), makeVector({ 0.5, 0.3, 0.2, 0.1 }));
 }
 
 TEST(getJacobian, RevoluteAndFixedJoints)
@@ -941,8 +941,8 @@ TEST(getJacobian, RevoluteAndFixedJoints)
   const moveit::core::JointModelGroup* jmg = state.getJointModelGroup("base_to_tip");
 
   // Some made-up numbers, at zero and non-zero robot configurations.
-  CheckJacobian(state, *jmg, makeVector({ 0.0, 0.0 }), makeVector({ 0.1, 0.4 }));
-  CheckJacobian(state, *jmg, makeVector({ 0.1, 0.4 }), makeVector({ 0.5, 0.1 }));
+  checkJacobian(state, *jmg, makeVector({ 0.0, 0.0 }), makeVector({ 0.1, 0.4 }));
+  checkJacobian(state, *jmg, makeVector({ 0.1, 0.4 }), makeVector({ 0.5, 0.1 }));
 }
 
 TEST(getJacobian, RevolutePlanarAndPrismaticJoints)
@@ -1008,7 +1008,7 @@ TEST(getJacobian, RevolutePlanarAndPrismaticJoints)
   moveit::core::RobotState state(robot_model);
   const moveit::core::JointModelGroup* jmg = state.getJointModelGroup("base_to_tip");
 
-  CheckJacobian(state, *jmg, makeVector({ 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 }),
+  checkJacobian(state, *jmg, makeVector({ 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 }),
                 makeVector({ 0.2, 0.05, 0.1, 0.2, 0.3, 0.4 }));
 }
 
@@ -1073,8 +1073,8 @@ TEST(getJacobian, GroupNotAtOrigin)
   const moveit::core::JointModelGroup* jmg = state.getJointModelGroup("base_to_tip");
 
   // Some made-up numbers, at zero and non-zero robot configurations.
-  CheckJacobian(state, *jmg, makeVector({ 0.0, 0.0, 0.0 }), makeVector({ 0.1, 0.4, 0.2 }));
-  CheckJacobian(state, *jmg, makeVector({ 0.1, 0.4, 0.3 }), makeVector({ 0.5, 0.1, 0.2 }));
+  checkJacobian(state, *jmg, makeVector({ 0.0, 0.0, 0.0 }), makeVector({ 0.1, 0.4, 0.2 }));
+  checkJacobian(state, *jmg, makeVector({ 0.1, 0.4, 0.3 }), makeVector({ 0.5, 0.1, 0.2 }));
 }
 
 int main(int argc, char** argv)

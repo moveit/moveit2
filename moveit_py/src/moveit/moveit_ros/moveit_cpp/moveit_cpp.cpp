@@ -14,7 +14,7 @@
  *     copyright notice, this list of conditions and the following
  *     disclaimer in the documentation and/or other materials provided
  *     with the distribution.
- *   * Neither the name of PickNik Inc. nor the names of its
+ *   * Neither the name of the copyright holder nor the names of its
  *     contributors may be used to endorse or promote products derived
  *     from this software without specific prior written permission.
  *
@@ -41,12 +41,12 @@ namespace moveit_py
 namespace bind_moveit_cpp
 {
 std::shared_ptr<moveit_cpp::PlanningComponent>
-get_planning_component(std::shared_ptr<moveit_cpp::MoveItCpp>& moveit_cpp_ptr, const std::string& planning_component)
+getPlanningComponent(std::shared_ptr<moveit_cpp::MoveItCpp>& moveit_cpp_ptr, const std::string& planning_component)
 {
   return std::make_shared<moveit_cpp::PlanningComponent>(planning_component, moveit_cpp_ptr);
 }
 
-void init_moveit_py(py::module& m)
+void initMoveitPy(py::module& m)
 {
   auto utils = py::module::import("moveit.utils");
 
@@ -140,11 +140,11 @@ void init_moveit_py(py::module& m)
       .def("execute",
            py::overload_cast<const robot_trajectory::RobotTrajectoryPtr&, const std::vector<std::string>&>(
                &moveit_cpp::MoveItCpp::execute),
-           py::arg("robot_trajectory"), py::arg("controllers"),
+           py::arg("robot_trajectory"), py::arg("controllers"), py::call_guard<py::gil_scoped_release>(),
            R"(
 	   Execute a trajectory (planning group is inferred from robot trajectory object).
 	   )")
-      .def("get_planning_component", &moveit_py::bind_moveit_cpp::get_planning_component,
+      .def("get_planning_component", &moveit_py::bind_moveit_cpp::getPlanningComponent,
            py::arg("planning_component_name"), py::return_value_policy::take_ownership,
            R"(
            Creates a planning component instance.
@@ -164,6 +164,12 @@ void init_moveit_py(py::module& m)
            py::return_value_policy::reference,
            R"(
            Returns the planning scene monitor.
+           )")
+
+      .def("get_trajactory_execution_manager", &moveit_cpp::MoveItCpp::getTrajectoryExecutionManagerNonConst,
+           py::return_value_policy::reference,
+           R"(
+           Returns the trajectory execution manager.
            )")
 
       .def("get_robot_model", &moveit_cpp::MoveItCpp::getRobotModel, py::return_value_policy::reference,

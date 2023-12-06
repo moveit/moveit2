@@ -47,7 +47,6 @@
 
 namespace moveit_rviz_plugin
 {
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_ros_visualization.motion_planning_frame_manipulation");
 
 /////////////// Object Detection ///////////////////////
 void MotionPlanningFrame::detectObjectsButtonClicked()
@@ -104,7 +103,7 @@ void MotionPlanningFrame::processDetectedObjects()
     rclcpp::sleep_for(std::chrono::milliseconds(500));
   }
 
-  RCLCPP_DEBUG(LOGGER, "Found %d objects", static_cast<int>(object_ids.size()));
+  RCLCPP_DEBUG(logger_, "Found %d objects", static_cast<int>(object_ids.size()));
   updateDetectedObjectsList(object_ids);
 }
 
@@ -113,7 +112,7 @@ void MotionPlanningFrame::selectedDetectedObjectChanged()
   QList<QListWidgetItem*> sel = ui_->detected_objects_list->selectedItems();
   if (sel.empty())
   {
-    RCLCPP_INFO(LOGGER, "No objects to select");
+    RCLCPP_INFO(logger_, "No objects to select");
     return;
   }
   planning_scene_monitor::LockedPlanningSceneRW ps = planning_display_->getPlanningSceneRW();
@@ -144,7 +143,7 @@ void MotionPlanningFrame::triggerObjectDetection()
         node_, OBJECT_RECOGNITION_ACTION);
     if (!object_recognition_client_->wait_for_action_server(std::chrono::seconds(3)))
     {
-      RCLCPP_ERROR(LOGGER, "Object recognition action server not responsive");
+      RCLCPP_ERROR(logger_, "Object recognition action server not responsive");
       return;
     }
   }
@@ -154,7 +153,7 @@ void MotionPlanningFrame::triggerObjectDetection()
   goal_handle_future.wait();
   if (goal_handle_future.get()->get_status() != rclcpp_action::GoalStatus::STATUS_SUCCEEDED)
   {
-    RCLCPP_ERROR(LOGGER, "ObjectRecognition client: send goal call failed");
+    RCLCPP_ERROR(logger_, "ObjectRecognition client: send goal call failed");
     return;
   }
 }
@@ -192,7 +191,7 @@ void MotionPlanningFrame::updateDetectedObjectsList(const std::vector<std::strin
 /////////////////////// Support Surfaces ///////////////////////
 void MotionPlanningFrame::updateTables()
 {
-  RCLCPP_DEBUG(LOGGER, "Update table callback");
+  RCLCPP_DEBUG(logger_, "Update table callback");
   planning_display_->addBackgroundJob([this] { publishTables(); }, "publish tables");
 }
 
@@ -209,7 +208,7 @@ void MotionPlanningFrame::selectedSupportSurfaceChanged()
   QList<QListWidgetItem*> sel = ui_->support_surfaces_list->selectedItems();
   if (sel.empty())
   {
-    RCLCPP_INFO(LOGGER, "No tables to select");
+    RCLCPP_INFO(logger_, "No tables to select");
     return;
   }
   planning_scene_monitor::LockedPlanningSceneRW ps = planning_display_->getPlanningSceneRW();
@@ -241,7 +240,7 @@ void MotionPlanningFrame::updateSupportSurfacesList()
   // std::vector<std::string> support_ids = semantic_world_->getTableNamesInROI(min_x, min_y, min_z, max_x, max_y,
   // max_z);
   std::vector<std::string> support_ids;
-  RCLCPP_INFO(LOGGER, "%d Tables in collision world", static_cast<int>(support_ids.size()));
+  RCLCPP_INFO(logger_, "%d Tables in collision world", static_cast<int>(support_ids.size()));
 
   ui_->support_surfaces_list->setUpdatesEnabled(false);
   bool old_state = ui_->support_surfaces_list->blockSignals(true);
@@ -265,14 +264,14 @@ void MotionPlanningFrame::updateSupportSurfacesList()
 /////////////////////////////// Pick & Place /////////////////////////////////
 void MotionPlanningFrame::pickObjectButtonClicked()
 {
-  RCLCPP_WARN_STREAM(LOGGER, "Pick & Place capability isn't supported yet");
+  RCLCPP_WARN_STREAM(logger_, "Pick & Place capability isn't supported yet");
   //  QList<QListWidgetItem*> sel = ui_->detected_objects_list->selectedItems();
   //  QList<QListWidgetItem*> sel_table = ui_->support_surfaces_list->selectedItems();
   //
   //  std::string group_name = planning_display_->getCurrentPlanningGroup();
   //  if (sel.empty())
   //  {
-  //    RCLCPP_INFO(LOGGER, "No objects to pick");
+  //    RCLCPP_INFO(logger_, "No objects to pick");
   //    return;
   //  }
   //  pick_object_name_[group_name] = sel[0]->text().toStdString();
@@ -288,7 +287,7 @@ void MotionPlanningFrame::pickObjectButtonClicked()
   //      {
   //        geometry_msgs::msg::Pose
   //        object_pose(tf2::toMsg(ps->getWorld()->getTransform(pick_object_name_[group_name])));
-  //        RCLCPP_DEBUG(LOGGER, "Finding current table for object: " << pick_object_name_[group_name]);
+  //        RCLCPP_DEBUG(logger_, "Finding current table for object: " << pick_object_name_[group_name]);
   //        support_surface_name_ = semantic_world_->findObjectTable(object_pose);
   //      }
   //      else
@@ -297,7 +296,7 @@ void MotionPlanningFrame::pickObjectButtonClicked()
   //    else
   //      support_surface_name_.clear();
   //  }
-  //  RCLCPP_INFO(LOGGER, "Trying to pick up object %s from support surface %s", pick_object_name_[group_name].c_str(),
+  //  RCLCPP_INFO(logger_, "Trying to pick up object %s from support surface %s", pick_object_name_[group_name].c_str(),
   //           support_surface_name_.c_str());
   //  planning_display_->addBackgroundJob([this] { pickObject(); }, "pick");
 }
@@ -314,7 +313,7 @@ void MotionPlanningFrame::placeObjectButtonClicked()
   else
   {
     support_surface_name_.clear();
-    RCLCPP_ERROR(LOGGER, "Need to specify table to place object on");
+    RCLCPP_ERROR(logger_, "Need to specify table to place object on");
     return;
   }
 
@@ -325,7 +324,7 @@ void MotionPlanningFrame::placeObjectButtonClicked()
   const planning_scene_monitor::LockedPlanningSceneRO& ps = planning_display_->getPlanningSceneRO();
   if (!ps)
   {
-    RCLCPP_ERROR(LOGGER, "No planning scene");
+    RCLCPP_ERROR(logger_, "No planning scene");
     return;
   }
   const moveit::core::JointModelGroup* jmg = ps->getCurrentState().getJointModelGroup(group_name);
@@ -334,7 +333,7 @@ void MotionPlanningFrame::placeObjectButtonClicked()
 
   if (attached_bodies.empty())
   {
-    RCLCPP_ERROR(LOGGER, "No bodies to place");
+    RCLCPP_ERROR(logger_, "No bodies to place");
     return;
   }
 
@@ -357,7 +356,7 @@ void MotionPlanningFrame::placeObjectButtonClicked()
 //  ui_->pick_button->setEnabled(false);
 //  if (pick_object_name_.find(group_name) == pick_object_name_.end())
 //  {
-//    RCLCPP_ERROR(LOGGER, "No pick object set for this group");
+//    RCLCPP_ERROR(logger_, "No pick object set for this group");
 //    return;
 //  }
 //  if (!support_surface_name_.empty())

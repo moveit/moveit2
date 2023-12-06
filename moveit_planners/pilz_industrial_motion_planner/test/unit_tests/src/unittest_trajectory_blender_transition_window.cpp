@@ -147,7 +147,8 @@ protected:
       }
       // generate trajectory
       planning_interface::MotionPlanResponse resp;
-      if (!lin_generator_->generate(planning_scene_, req, resp, sampling_time_))
+      lin_generator_->generate(planning_scene_, req, resp, sampling_time_);
+      if (resp.error_code.val != moveit_msgs::msg::MoveItErrorCodes::SUCCESS)
       {
         std::runtime_error("Failed to generate trajectory.");
       }
@@ -325,7 +326,8 @@ TEST_F(TrajectoryBlenderTransitionWindowTest, testDifferentSamplingTimes)
     }
     // generate trajectory
     planning_interface::MotionPlanResponse resp;
-    if (!lin_generator_->generate(planning_scene_, req, resp, sampling_time_))
+    lin_generator_->generate(planning_scene_, req, resp, sampling_time_);
+    if (resp.error_code.val != moveit_msgs::msg::MoveItErrorCodes::SUCCESS)
     {
       std::runtime_error("Failed to generate trajectory.");
     }

@@ -126,14 +126,14 @@ protected:
 };
 
 /** Helper function to create a quaternion from Euler angles. **/
-inline Eigen::Quaterniond xyz_intrinsix_to_quat(double rx, double ry, double rz)
+inline Eigen::Quaterniond xyzIntrinsixToQuaternion(double rx, double ry, double rz)
 {
   return Eigen::AngleAxisd(rx, Eigen::Vector3d::UnitX()) * Eigen::AngleAxisd(ry, Eigen::Vector3d::UnitY()) *
          Eigen::AngleAxisd(rz, Eigen::Vector3d::UnitZ());
 }
 
 /** Helper function to create a quaternion from a rotation vector. **/
-inline Eigen::Quaterniond rotation_vector_to_quat(double rx, double ry, double rz)
+inline Eigen::Quaterniond rotationVectorToQuaternion(double rx, double ry, double rz)
 {
   Eigen::Vector3d v{ rx, ry, rz };
   Eigen::Matrix3d m{ Eigen::AngleAxisd(v.norm(), v.normalized()) };
@@ -415,16 +415,16 @@ TEST_F(FloatingJointRobot, OrientationConstraintsParameterization)
   EXPECT_TRUE(oc_rotvec.decide(robot_state, true).satisfied);
 
   // some trivial test cases
-  setRobotEndEffectorOrientation(robot_state, xyz_intrinsix_to_quat(0.1, 0.2, -0.3));
+  setRobotEndEffectorOrientation(robot_state, xyzIntrinsixToQuaternion(0.1, 0.2, -0.3));
   EXPECT_TRUE(oc_euler.decide(robot_state).satisfied);
 
-  setRobotEndEffectorOrientation(robot_state, xyz_intrinsix_to_quat(0.1, 0.2, -0.6));
+  setRobotEndEffectorOrientation(robot_state, xyzIntrinsixToQuaternion(0.1, 0.2, -0.6));
   EXPECT_FALSE(oc_euler.decide(robot_state).satisfied);
 
-  setRobotEndEffectorOrientation(robot_state, rotation_vector_to_quat(0.1, 0.2, -0.3));
+  setRobotEndEffectorOrientation(robot_state, rotationVectorToQuaternion(0.1, 0.2, -0.3));
   EXPECT_TRUE(oc_rotvec.decide(robot_state).satisfied);
 
-  setRobotEndEffectorOrientation(robot_state, rotation_vector_to_quat(0.1, 0.2, -0.6));
+  setRobotEndEffectorOrientation(robot_state, rotationVectorToQuaternion(0.1, 0.2, -0.6));
   EXPECT_FALSE(oc_rotvec.decide(robot_state).satisfied);
 
   // more extensive testing using the test data hardcoded at the top of this file
@@ -457,20 +457,20 @@ TEST_F(FloatingJointRobot, OrientationConstraintsParameterization)
   robot_state.update();
 
   ocm.parameterization = moveit_msgs::msg::OrientationConstraint::XYZ_EULER_ANGLES;
-  ocm.orientation = tf2::toMsg(xyz_intrinsix_to_quat(0.1, 0.2, -0.3));
+  ocm.orientation = tf2::toMsg(xyzIntrinsixToQuaternion(0.1, 0.2, -0.3));
   EXPECT_TRUE(oc_euler.configure(ocm, tf));
   EXPECT_TRUE(oc_euler.decide(robot_state).satisfied);
 
-  ocm.orientation = tf2::toMsg(xyz_intrinsix_to_quat(0.1, 0.2, -0.6));
+  ocm.orientation = tf2::toMsg(xyzIntrinsixToQuaternion(0.1, 0.2, -0.6));
   EXPECT_TRUE(oc_euler.configure(ocm, tf));
   EXPECT_FALSE(oc_euler.decide(robot_state).satisfied);
 
   ocm.parameterization = moveit_msgs::msg::OrientationConstraint::ROTATION_VECTOR;
-  ocm.orientation = tf2::toMsg(rotation_vector_to_quat(0.1, 0.2, -0.3));
+  ocm.orientation = tf2::toMsg(rotationVectorToQuaternion(0.1, 0.2, -0.3));
   EXPECT_TRUE(oc_rotvec.configure(ocm, tf));
   EXPECT_TRUE(oc_rotvec.decide(robot_state).satisfied);
 
-  ocm.orientation = tf2::toMsg(rotation_vector_to_quat(0.1, 0.2, -0.6));
+  ocm.orientation = tf2::toMsg(rotationVectorToQuaternion(0.1, 0.2, -0.6));
   EXPECT_TRUE(oc_rotvec.configure(ocm, tf));
   EXPECT_FALSE(oc_rotvec.decide(robot_state).satisfied);
 }

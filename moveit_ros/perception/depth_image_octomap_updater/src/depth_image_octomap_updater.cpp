@@ -43,12 +43,12 @@
 #include <geometric_shapes/shape_operations.h>
 #include <sensor_msgs/image_encodings.hpp>
 #include <stdint.h>
+#include <moveit/utils/logger.hpp>
 
 #include <memory>
 
 namespace occupancy_map_monitor
 {
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.ros.perception.depth_image_octomap_updater");
 
 DepthImageOctomapUpdater::DepthImageOctomapUpdater()
   : OccupancyMapUpdater("DepthImageUpdater")
@@ -71,12 +71,13 @@ DepthImageOctomapUpdater::DepthImageOctomapUpdater()
   , K2_(0.0)
   , K4_(0.0)
   , K5_(0.0)
+  , logger_(moveit::getLogger("depth_image_octomap_updater"))
 {
 }
 
 DepthImageOctomapUpdater::~DepthImageOctomapUpdater()
 {
-  stopHelper();
+  sub_depth_image_.shutdown();
 }
 
 bool DepthImageOctomapUpdater::setParams(const std::string& name_space)
@@ -99,7 +100,7 @@ bool DepthImageOctomapUpdater::setParams(const std::string& name_space)
   }
   catch (const rclcpp::exceptions::InvalidParameterTypeException& e)
   {
-    RCLCPP_ERROR_STREAM(LOGGER, e.what() << '\n');
+    RCLCPP_ERROR_STREAM(logger_, e.what() << '\n');
     return false;
   }
 }
@@ -159,11 +160,6 @@ void DepthImageOctomapUpdater::start()
 
 void DepthImageOctomapUpdater::stop()
 {
-  stopHelper();
-}
-
-void DepthImageOctomapUpdater::stopHelper()
-{
   sub_depth_image_.shutdown();
 }
 
@@ -184,7 +180,7 @@ mesh_filter::MeshHandle DepthImageOctomapUpdater::excludeShape(const shapes::Sha
     }
   }
   else
-    RCLCPP_ERROR(LOGGER, "Mesh filter not yet initialized!");
+    RCLCPP_ERROR(logger_, "Mesh filter not yet initialized!");
   return h;
 }
 
@@ -199,7 +195,7 @@ bool DepthImageOctomapUpdater::getShapeTransform(mesh_filter::MeshHandle h, Eige
   ShapeTransformCache::const_iterator it = transform_cache_.find(h);
   if (it == transform_cache_.end())
   {
-    RCLCPP_ERROR(LOGGER, "Internal error. Mesh filter handle %u not found", h);
+    RCLCPP_ERROR(logger_, "Internal error. Mesh filter handle %u not found", h);
     return false;
   }
   transform = it->second;
@@ -208,23 +204,20 @@ bool DepthImageOctomapUpdater::getShapeTransform(mesh_filter::MeshHandle h, Eige
 
 namespace
 {
-bool host_is_big_endian()
-{
+const bool HOST_IS_BIG_ENDIAN = []() {
   union
   {
     uint32_t i;
     char c[sizeof(uint32_t)];
   } bint = { 0x01020304 };
   return bint.c[0] == 1;
-}
+}();
 }  // namespace
-
-static const bool HOST_IS_BIG_ENDIAN = host_is_big_endian();
 
 void DepthImageOctomapUpdater::depthImageCallback(const sensor_msgs::msg::Image::ConstSharedPtr& depth_msg,
                                                   const sensor_msgs::msg::CameraInfo::ConstSharedPtr& info_msg)
 {
-  RCLCPP_DEBUG(LOGGER, "Received a new depth image message (frame = '%s', encoding='%s')",
+  RCLCPP_DEBUG(logger_, "Received a new depth image message (frame = '%s', encoding='%s')",
                depth_msg->header.frame_id.c_str(), depth_msg->encoding.c_str());
   rclcpp::Time start = node_->now();
 
@@ -317,7 +310,7 @@ void DepthImageOctomapUpdater::depthImageCallback(const sensor_msgs::msg::Image:
         {
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wold-style-cast"
-          RCLCPP_WARN_THROTTLE(LOGGER, *node_->get_clock(), 1000,
+          RCLCPP_WARN_THROTTLE(logger_, *node_->get_clock(), 1000,
                                "More than half of the image messages discarded due to TF being unavailable (%u%%). "
                                "Transform error of sensor data: %s; quitting callback.",
                                (100 * failed_tf_) / (good_tf_ + failed_tf_), err.c_str());
@@ -327,7 +320,7 @@ void DepthImageOctomapUpdater::depthImageCallback(const sensor_msgs::msg::Image:
         {
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wold-style-cast"
-          RCLCPP_DEBUG_THROTTLE(LOGGER, *node_->get_clock(), 1000,
+          RCLCPP_DEBUG_THROTTLE(logger_, *node_->get_clock(), 1000,
                                 "Transform error of sensor data: %s; quitting callback", err.c_str());
 #pragma GCC diagnostic pop
         }
@@ -351,7 +344,7 @@ void DepthImageOctomapUpdater::depthImageCallback(const sensor_msgs::msg::Image:
   {
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wold-style-cast"
-    RCLCPP_ERROR_THROTTLE(LOGGER, *node_->get_clock(), 1000, "endian problem: received image data does not match host");
+    RCLCPP_ERROR_THROTTLE(logger_, *node_->get_clock(), 1000, "endian problem: received image data does not match host");
 #pragma GCC diagnostic pop
   }
 
@@ -374,7 +367,7 @@ void DepthImageOctomapUpdater::depthImageCallback(const sensor_msgs::msg::Image:
     {
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wold-style-cast"
-      RCLCPP_ERROR_THROTTLE(LOGGER, *node_->get_clock(), 1000, "Unexpected encoding type: '%s'. Ignoring input.",
+      RCLCPP_ERROR_THROTTLE(logger_, *node_->get_clock(), 1000, "Unexpected encoding type: '%s'. Ignoring input.",
                             depth_msg->encoding.c_str());
 #pragma GCC diagnostic pop
       return;
@@ -572,7 +565,7 @@ void DepthImageOctomapUpdater::depthImageCallback(const sensor_msgs::msg::Image:
   catch (...)
   {
     tree_->unlockRead();
-    RCLCPP_ERROR(LOGGER, "Internal error while parsing depth data");
+    RCLCPP_ERROR(logger_, "Internal error while parsing depth data");
     return;
   }
   tree_->unlockRead();
@@ -591,7 +584,7 @@ void DepthImageOctomapUpdater::depthImageCallback(const sensor_msgs::msg::Image:
   }
   catch (...)
   {
-    RCLCPP_ERROR(LOGGER, "Internal error while updating octree");
+    RCLCPP_ERROR(logger_, "Internal error while updating octree");
   }
   tree_->unlockWrite();
   tree_->triggerUpdateCallback();
@@ -599,6 +592,6 @@ void DepthImageOctomapUpdater::depthImageCallback(const sensor_msgs::msg::Image:
   // at this point we still have not freed the space
   free_space_updater_->pushLazyUpdate(occupied_cells_ptr, model_cells_ptr, sensor_origin);
 
-  RCLCPP_DEBUG(LOGGER, "Processed depth image in %lf ms", (node_->now() - start).seconds() * 1000.0);
+  RCLCPP_DEBUG(logger_, "Processed depth image in %lf ms", (node_->now() - start).seconds() * 1000.0);
 }
 }  // namespace occupancy_map_monitor

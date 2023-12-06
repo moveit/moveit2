@@ -311,7 +311,7 @@ TEST_F(LoadPlanningModelsPr2, ObjectPoseAndSubframes)
 
   // Add another object C that is defined in a frame that is not the link.
   // The object will be transformed into the link's frame, which
-  // uses an otherwise inactive section of _msgToAttachedBody.
+  // uses an otherwise inactive section of msgToAttachedBody.
   Eigen::Isometry3d pose_c = Eigen::Isometry3d(Eigen::Translation3d(0.1, 0.2, 0.3)) *
                              Eigen::AngleAxisd(0.1 * M_TAU, Eigen::Vector3d::UnitX()) *
                              Eigen::AngleAxisd(0.2 * M_TAU, Eigen::Vector3d::UnitY()) *

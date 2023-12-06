@@ -37,52 +37,62 @@
  * algorithm requires a fully configured trajectory as initial guess.
  */
 
-#include <moveit/planning_request_adapter/planning_request_adapter.h>
+#include <moveit/utils/logger.hpp>
+#include <moveit/planning_interface/planning_response_adapter.h>
 #include <moveit/trajectory_processing/ruckig_traj_smoothing.h>
 #include <class_loader/class_loader.hpp>
+#include <moveit_msgs/msg/move_it_error_codes.hpp>
 
-namespace default_planner_request_adapters
+namespace default_planning_response_adapters
 {
 using namespace trajectory_processing;
 
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_ros.add_traj_smoothing");
-
 /** @brief Use ruckig (https://github.com/pantor/ruckig) to adapt the trajectory to be jerk-constrained and
  * time-optimal.*/
-class AddRuckigTrajectorySmoothing : public planning_request_adapter::PlanningRequestAdapter
+class AddRuckigTrajectorySmoothing : public planning_interface::PlanningResponseAdapter
 {
 public:
-  void initialize(const rclcpp::Node::SharedPtr& /* unused */, const std::string& /* unused */) override
+  AddRuckigTrajectorySmoothing() : logger_(moveit::getLogger("add_ruckig_trajectory_smoothing"))
   {
   }
 
-  std::string getDescription() const override
+  [[nodiscard]] std::string getDescription() const override
   {
-    return "Add Ruckig trajectory smoothing.";
+    return std::string("AddRuckigTrajectorySmoothing");
   }
 
-  bool adaptAndPlan(const PlannerFn& planner, const planning_scene::PlanningSceneConstPtr& planning_scene,
-                    const planning_interface::MotionPlanRequest& req,
-                    planning_interface::MotionPlanResponse& res) const override
+  void adapt(const planning_scene::PlanningSceneConstPtr& /*planning_scene*/,
+             const planning_interface::MotionPlanRequest& req,
+             planning_interface::MotionPlanResponse& res) const override
   {
-    bool result = planner(planning_scene, req, res);
-    if (result && res.trajectory)
+    RCLCPP_DEBUG(logger_, " Running '%s'", getDescription().c_str());
+    if (!res.trajectory)
     {
-      if (!smoother_.applySmoothing(*res.trajectory, req.max_velocity_scaling_factor,
-                                    req.max_acceleration_scaling_factor))
-      {
-        result = false;
-      }
+      RCLCPP_ERROR(
+          logger_,
+          "Cannot apply response adapter '%s' because MotionPlanResponse does not contain a trajectory to smooth.",
+          getDescription().c_str());
+      res.error_code = moveit::core::MoveItErrorCode::INVALID_MOTION_PLAN;
+      return;
     }
 
-    return result;
+    if (smoother_.applySmoothing(*res.trajectory, req.max_velocity_scaling_factor, req.max_acceleration_scaling_factor))
+    {
+      res.error_code = moveit::core::MoveItErrorCode::SUCCESS;
+    }
+    else
+    {
+      RCLCPP_ERROR(logger_, "Response adapter '%s' failed to smooth trajectory.", getDescription().c_str());
+      res.error_code = moveit::core::MoveItErrorCode::FAILURE;
+    }
   }
 
 private:
   RuckigSmoothing smoother_;
+  rclcpp::Logger logger_;
 };
 
-}  // namespace default_planner_request_adapters
+}  // namespace default_planning_response_adapters
 
-CLASS_LOADER_REGISTER_CLASS(default_planner_request_adapters::AddRuckigTrajectorySmoothing,
-                            planning_request_adapter::PlanningRequestAdapter)
+CLASS_LOADER_REGISTER_CLASS(default_planning_response_adapters::AddRuckigTrajectorySmoothing,
+                            planning_interface::PlanningResponseAdapter)

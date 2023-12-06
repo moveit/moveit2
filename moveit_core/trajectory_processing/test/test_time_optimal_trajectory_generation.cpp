@@ -50,7 +50,7 @@ namespace
 // so add them here.
 // TODO(andyz): Function won't be needed once this issue has been addressed:
 // https://github.com/ros/urdfdom/issues/177
-void set_acceleration_limits(const moveit::core::RobotModelPtr& robot_model)
+void setAccelerationLimits(const moveit::core::RobotModelPtr& robot_model)
 {
   const std::vector<moveit::core::JointModel*> joint_models = robot_model->getActiveJointModels();
   for (auto& joint_model : joint_models)
@@ -198,7 +198,7 @@ TEST(time_optimal_trajectory_generation, testCustomLimits)
 
   auto robot_model = moveit::core::loadTestingRobotModel(robot_name);
   ASSERT_TRUE(robot_model) << "Failed to load robot model" << robot_name;
-  set_acceleration_limits(robot_model);
+  setAccelerationLimits(robot_model);
   auto group = robot_model->getJointModelGroup(group_name);
   ASSERT_TRUE(group) << "Failed to load joint model group " << group_name;
   moveit::core::RobotState waypoint_state(robot_model);
@@ -310,7 +310,7 @@ TEST(time_optimal_trajectory_generation, testLastWaypoint)
 
   auto robot_model = moveit::core::loadTestingRobotModel(robot_name);
   ASSERT_TRUE(robot_model) << "Failed to load robot model" << robot_name;
-  set_acceleration_limits(robot_model);
+  setAccelerationLimits(robot_model);
   auto group = robot_model->getJointModelGroup(group_name);
   ASSERT_TRUE(group) << "Failed to load joint model group " << group_name;
   moveit::core::RobotState waypoint_state(robot_model);
@@ -349,7 +349,7 @@ TEST(time_optimal_trajectory_generation, testPluginAPI)
 
   auto robot_model = moveit::core::loadTestingRobotModel(robot_name);
   ASSERT_TRUE(robot_model) << "Failed to load robot model" << robot_name;
-  set_acceleration_limits(robot_model);
+  setAccelerationLimits(robot_model);
   auto group = robot_model->getJointModelGroup(group_name);
   ASSERT_TRUE(group) << "Failed to load joint model group " << group_name;
   moveit::core::RobotState waypoint_state(robot_model);
@@ -472,7 +472,7 @@ TEST(time_optimal_trajectory_generation, testFixedNumWaypoints)
 
   auto robot_model = moveit::core::loadTestingRobotModel(robot_name);
   ASSERT_TRUE(robot_model) << "Failed to load robot model" << robot_name;
-  set_acceleration_limits(robot_model);
+  setAccelerationLimits(robot_model);
   auto group = robot_model->getJointModelGroup(group_name);
   ASSERT_TRUE(group) << "Failed to load joint model group " << group_name;
   moveit::core::RobotState waypoint_state(robot_model);

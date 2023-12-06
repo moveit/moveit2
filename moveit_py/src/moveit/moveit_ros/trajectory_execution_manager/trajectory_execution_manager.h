@@ -1,7 +1,7 @@
 /*********************************************************************
  * Software License Agreement (BSD License)
  *
- *  Copyright (c) 2012, Willow Garage, Inc.
+ *  Copyright (c) 2023, Matthijs van der Burgh
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *     copyright notice, this list of conditions and the following
  *     disclaimer in the documentation and/or other materials provided
  *     with the distribution.
- *   * Neither the name of Willow Garage nor the names of its
+ *   * Neither the name of the copyright holder nor the names of its
  *     contributors may be used to endorse or promote products derived
  *     from this software without specific prior written permission.
  *
@@ -32,35 +32,25 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-/* Author: Ioan Sucan
- * Desc: Empty adapter that just calls the planner
- */
+/* Author: Matthijs van der Burgh */
 
-#include <moveit/planning_request_adapter/planning_request_adapter.h>
-#include <class_loader/class_loader.hpp>
+#pragma once
 
-namespace default_planner_request_adapters
+#include <pybind11/pybind11.h>
+#include <pybind11/functional.h>
+#include <moveit_py/moveit_py_utils/copy_ros_msg.h>
+#include <moveit_py/moveit_py_utils/ros_msg_typecasters.h>
+#include <rclcpp/rclcpp.hpp>
+#include <moveit/trajectory_execution_manager/trajectory_execution_manager.h>
+
+namespace py = pybind11;
+
+namespace moveit_py
 {
-/** @brief Empty adapter that just calls the planner. */
-class Empty : public planning_request_adapter::PlanningRequestAdapter
+namespace bind_trajectory_execution_manager
 {
-public:
-  std::string getDescription() const override
-  {
-    return "No Op";
-  }
 
-  bool adaptAndPlan(const PlannerFn& planner, const planning_scene::PlanningSceneConstPtr& planning_scene,
-                    const planning_interface::MotionPlanRequest& req,
-                    planning_interface::MotionPlanResponse& res) const override
-  {
-    return planner(planning_scene, req, res);
-  }
+void initTrajectoryExecutionManager(py::module& m);
 
-  void initialize(const rclcpp::Node::SharedPtr& /* node */, const std::string& /* parameter_namespace */) override
-  {
-  }
-};
-}  // namespace default_planner_request_adapters
-
-CLASS_LOADER_REGISTER_CLASS(default_planner_request_adapters::Empty, planning_request_adapter::PlanningRequestAdapter)
+}  // namespace bind_trajectory_execution_manager
+}  // namespace moveit_py

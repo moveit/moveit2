@@ -1,0 +1,21 @@
+<library path="moveit_pipeline_test_plugins">
+
+  <class name="planning_pipeline_test/DummyPlannerManager" type="planning_pipeline_test::DummyPlannerManager" base_class_type="planning_interface::PlannerManager">
+    <description>
+      A dummy request adapter that does nothing and is always successful
+    </description>
+  </class>
+
+  <class name="planning_pipeline_test/AlwaysSuccessRequestAdapter" type="planning_pipeline_test::AlwaysSuccessRequestAdapter" base_class_type="planning_interface::PlanningRequestAdapter">
+    <description>
+      A dummy request adapter that does nothing and is always successful
+    </description>
+  </class>
+
+  <class name="planning_pipeline_test/AlwaysSuccessResponseAdapter" type="planning_pipeline_test::AlwaysSuccessResponseAdapter" base_class_type="planning_interface::PlanningResponseAdapter">
+    <description>
+      A dummy request adapter that does nothing and is always successful
+    </description>
+  </class>
+
+</library>

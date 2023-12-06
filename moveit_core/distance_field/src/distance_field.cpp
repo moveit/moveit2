@@ -43,11 +43,17 @@
 #include <tf2_eigen/tf2_eigen.hpp>
 #include <octomap/octomap.h>
 #include <octomap/OcTree.h>
+#include <moveit/utils/logger.hpp>
 
 namespace distance_field
 {
-// Logger
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_distance_field.distance_field");
+namespace
+{
+rclcpp::Logger getLogger()
+{
+  return moveit::getLogger("distance_field");
+}
+}  // namespace
 
 DistanceField::DistanceField(double size_x, double size_y, double size_z, double resolution, double origin_x,
                              double origin_y, double origin_z)
@@ -207,7 +213,7 @@ bool DistanceField::getShapePoints(const shapes::Shape* shape, const Eigen::Isom
     const shapes::OcTree* oc = dynamic_cast<const shapes::OcTree*>(shape);
     if (!oc)
     {
-      RCLCPP_ERROR(LOGGER, "Problem dynamic casting shape that claims to be OcTree");
+      RCLCPP_ERROR(getLogger(), "Problem dynamic casting shape that claims to be OcTree");
       return false;
     }
     getOcTreePoints(oc->octree.get(), points);
@@ -289,7 +295,7 @@ void DistanceField::moveShapeInField(const shapes::Shape* shape, const Eigen::Is
 {
   if (shape->type == shapes::OCTREE)
   {
-    RCLCPP_WARN(LOGGER, "Move shape not supported for Octree");
+    RCLCPP_WARN(getLogger(), "Move shape not supported for Octree");
     return;
   }
   bodies::Body* body = bodies::createEmptyBodyFromShapeType(shape->type);
