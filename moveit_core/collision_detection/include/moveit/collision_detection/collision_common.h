@@ -358,6 +358,7 @@ struct CollisionResult
   std::size_t contact_count = 0;
 
   /** \brief A map returning the pairs of body ids in contact, plus their contact details */
+  using ContactMap = std::map<std::pair<std::string, std::string>, std::vector<Contact> >;
   ContactMap contacts;
 
   /** \brief These are the individual cost sources when costs are computed */
