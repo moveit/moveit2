@@ -118,14 +118,13 @@ public:
      motion planning pipeline.
      \param model The robot model for which this pipeline is initialized.
      \param node The ROS node that should be used for reading parameters needed for configuration
-     \param parameter_namespace Parameter
-     namespace where the planner configurations are stored
-     \param request_adapter_plugin_names Optional vector of
-     RequestAdapter plugin names
+     \param parameter_namespace Parameter namespace where the planner configurations are stored
+     \param planner_plugin_names Names of the planner plugins to use
+     \param request_adapter_plugin_names Optional vector of RequestAdapter plugin names
      \param response_adapter_plugin_names Optional vector of ResponseAdapter plugin names
   */
   PlanningPipeline(const moveit::core::RobotModelConstPtr& model, const std::shared_ptr<rclcpp::Node>& node,
-                   const std::string& parameter_namespace, const std::string& planning_plugin_name,
+                   const std::string& parameter_namespace, const std::vector<std::string>& planner_plugin_names,
                    const std::vector<std::string>& request_adapter_plugin_names = std::vector<std::string>(),
                    const std::vector<std::string>& response_adapter_plugin_names = std::vector<std::string>());
 
@@ -163,6 +162,16 @@ public:
   {
     return false;
   }
+  [[deprecated("Please use getPlannerPluginNames().")]] const std::string& getPlannerPluginName() const
+  {
+    return pipeline_parameters_.planning_plugins.at(0);
+  }
+  [[deprecated(
+      "Please use 'getPlannerManager(const std::string& planner_name)'.")]] const planning_interface::PlannerManagerPtr&
+  getPlannerManager()
+  {
+    return planner_map_.at(pipeline_parameters_.planning_plugins.at(0));
+  }
   /*
   END BLOCK OF DEPRECATED FUNCTIONS
   */
@@ -180,10 +189,10 @@ public:
   /** \brief Request termination, if a generatePlan() function is currently computing plans */
   void terminate() const;
 
-  /** \brief Get the name of the planning plugin used */
-  [[nodiscard]] const std::string& getPlannerPluginName() const
+  /** \brief Get the names of the planning plugins used */
+  [[nodiscard]] const std::vector<std::string>& getPlannerPluginNames() const
   {
-    return pipeline_parameters_.planning_plugin;
+    return pipeline_parameters_.planning_plugins;
   }
 
   /** \brief Get the names of the planning request adapter plugins used */
@@ -198,12 +207,6 @@ public:
     return pipeline_parameters_.response_adapters;
   }
 
-  /** \brief Get the planner manager for the loaded planning plugin */
-  [[nodiscard]] const planning_interface::PlannerManagerPtr& getPlannerManager()
-  {
-    return planner_instance_;
-  }
-
   /** \brief Get the robot model that this pipeline is using */
   [[nodiscard]] const moveit::core::RobotModelConstPtr& getRobotModel() const
   {
@@ -214,6 +217,23 @@ public:
   [[nodiscard]] bool isActive() const
   {
     return active_;
+  }
+
+  /** \brief Return the parameter namespace as name of the planning pipeline. */
+  [[nodiscard]] std::string getName() const
+  {
+    return parameter_namespace_;
+  }
+
+  /** \brief Get access to planner plugin */
+  const planning_interface::PlannerManagerPtr getPlannerManager(const std::string& planner_name)
+  {
+    if (planner_map_.find(planner_name) == planner_map_.end())
+    {
+      RCLCPP_ERROR(node_->get_logger(), "Cannot retrieve planner because '%s' does not exist.", planner_name.c_str());
+      return nullptr;
+    }
+    return planner_map_.at(planner_name);
   }
 
 private:
@@ -240,7 +260,7 @@ private:
 
   // Planner plugin
   std::unique_ptr<pluginlib::ClassLoader<planning_interface::PlannerManager>> planner_plugin_loader_;
-  planning_interface::PlannerManagerPtr planner_instance_;
+  std::unordered_map<std::string, planning_interface::PlannerManagerPtr> planner_map_;
 
   // Plan request adapters
   std::unique_ptr<pluginlib::ClassLoader<planning_interface::PlanningRequestAdapter>> request_adapter_plugin_loader_;

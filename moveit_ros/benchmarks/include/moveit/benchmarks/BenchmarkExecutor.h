@@ -169,9 +169,8 @@ protected:
 
   void shiftConstraintsByOffset(moveit_msgs::msg::Constraints& constraints, const std::vector<double>& offset);
 
-  /// Check that the desired planner plugins and algorithms exist for the given group
-  bool plannerConfigurationsExist(const std::map<std::string, std::vector<std::string>>& planners,
-                                  const std::string& group_name);
+  /// Check that the desired planning pipelines exist
+  bool pipelinesExist(const std::map<std::string, std::vector<std::string>>& planners);
 
   /// Load the planning scene with the given name from the warehouse
   bool loadPlanningScene(const std::string& scene_name, moveit_msgs::msg::PlanningScene& scene_msg);
