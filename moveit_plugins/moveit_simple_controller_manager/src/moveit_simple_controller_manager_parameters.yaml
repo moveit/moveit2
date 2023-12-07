@@ -11,7 +11,7 @@ moveit_simple_controller_manager:
     action_ns: {
       type: string,
       default_value: "",
-      description: "follow_joint_trajectory or gripper_cmd",
+      description: "Action namespace for the controller. The action topic names will start with `/controller_name/action_ns`",
       validation: {
         not_empty<>: []
       }
@@ -19,7 +19,7 @@ moveit_simple_controller_manager:
     type: {
       type: string,
       default_value: "",
-      description: "FollowJointTrajectory or GripperCommand",
+      description: "Controller type. FollowJointTrajectory or GripperCommand",
       validation: {
         not_empty<>: []
       }
@@ -27,7 +27,7 @@ moveit_simple_controller_manager:
     make_default: {
       type: bool,
       default_value: false,
-      description: "This param was originally named default. Can't use default with generate_param_lib as default is a C++ keyword. Marking a controller as
+      description: "This param was originally named default. Marking a controller as
        default makes MoveIt prefer this controller when multiple options are available.",
       validation: {
         not_empty<>: []
@@ -45,17 +45,17 @@ moveit_simple_controller_manager:
     max_effort: {
       type: double,
       default_value: 0.0,
-      description: "Parameter to be set if using GripperCommand"
+      description: "Max Effort. Parameter to be set if using GripperCommand"
     }
     parallel: {
       type: bool,
       default_value: false,
-      description: "Parameter to be set if using GripperCommand"
+      description: "Parallel gripper require exactly two joints. If true, specify only two joints. Parameter to be set if using GripperCommand"
     }
     command_joint: {
       type: string,
       default_value: "",
-      description: "Parameter to be set if using GripperCommand"
+      description: "If not parallel, set the joint to command. Parameter to be set if using GripperCommand"
     }
     allow_failure: {
       type: bool,

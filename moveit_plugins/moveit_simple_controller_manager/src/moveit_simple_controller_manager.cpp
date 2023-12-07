@@ -129,6 +129,7 @@ public:
             {
               RCLCPP_ERROR_STREAM(LOGGER, "Parallel Gripper requires exactly two joints, " << controller_joints.size()
                                                                                            << " are specified");
+              continue;
             }
             static_cast<GripperControllerHandle*>(new_handle.get())
                 ->setParallelJawGripper(controller_joints[0], controller_joints[1]);
