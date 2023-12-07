@@ -39,7 +39,6 @@ For now, this policy only supports moveit_servo command interfaces and Image sen
 
 from abc import ABC, abstractmethod
 
-import rclpy
 from rclpy.node import Node
 from rclpy.qos import QoSProfile
 
@@ -66,7 +65,7 @@ class Policy(ABC, Node):
 
         # set policy to inactive by default
         self._is_active = False
-        self.activate_policy = self.create_service(
+        self.activate_policy_service = self.create_service(
             SetBool,
             "activate_policy",
             self.activate_policy,
@@ -98,7 +97,7 @@ class Policy(ABC, Node):
         if msg_type == "sensor_msgs/Image":
             return Image
         else:
-            raise ValueError(f"Sensor type {sensor_type} not supported.")
+            raise ValueError(f"Sensor type {msg_type} not supported.")
 
     def get_command_msg_type(self, msg_type):
         """Returns the ROS 2 message type for a given command type."""
