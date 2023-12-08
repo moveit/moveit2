@@ -48,8 +48,9 @@ bool processCollisionObject(const planning_scene_monitor::PlanningSceneMonitorPt
 {
   moveit_msgs::msg::CollisionObject::ConstSharedPtr const_ptr =
       std::make_shared<const moveit_msgs::msg::CollisionObject>(collision_object_msg);
-  if (color_msg) {
-     return planning_scene_monitor->processCollisionObjectMsg(const_ptr, *std::move(color_msg));
+  if (color_msg)
+  {
+    return planning_scene_monitor->processCollisionObjectMsg(const_ptr, *std::move(color_msg));
   }
   return planning_scene_monitor->processCollisionObjectMsg(const_ptr);
 }
