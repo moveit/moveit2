@@ -71,7 +71,7 @@ DepthImageOctomapUpdater::DepthImageOctomapUpdater()
   , K2_(0.0)
   , K4_(0.0)
   , K5_(0.0)
-  , logger_(moveit::makeChildLogger("depth_image_octomap_updater"))
+  , logger_(moveit::getLogger("depth_image_octomap_updater"))
 {
 }
 

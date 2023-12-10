@@ -49,7 +49,7 @@ namespace robot_model_loader
 
 RobotModelLoader::RobotModelLoader(const rclcpp::Node::SharedPtr& node, const std::string& robot_description,
                                    bool load_kinematics_solvers)
-  : node_(node), logger_(moveit::makeChildLogger("robot_model_loader"))
+  : node_(node), logger_(moveit::getLogger("robot_model_loader"))
 {
   Options opt(robot_description);
   opt.load_kinematics_solvers = load_kinematics_solvers;
@@ -57,7 +57,7 @@ RobotModelLoader::RobotModelLoader(const rclcpp::Node::SharedPtr& node, const st
 }
 
 RobotModelLoader::RobotModelLoader(const rclcpp::Node::SharedPtr& node, const Options& opt)
-  : node_(node), logger_(moveit::makeChildLogger("robot_model_loader"))
+  : node_(node), logger_(moveit::getLogger("robot_model_loader"))
 {
   configure(opt);
 }

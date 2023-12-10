@@ -49,7 +49,7 @@ namespace default_planning_request_adapters
 class ResolveConstraintFrames : public planning_interface::PlanningRequestAdapter
 {
 public:
-  ResolveConstraintFrames() : logger_(moveit::makeChildLogger("resolve_constraint_frames"))
+  ResolveConstraintFrames() : logger_(moveit::getLogger("resolve_constraint_frames"))
   {
   }
 

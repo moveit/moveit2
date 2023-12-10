@@ -50,7 +50,7 @@ MoveItCpp::MoveItCpp(const rclcpp::Node::SharedPtr& node) : MoveItCpp(node, Opti
 }
 
 MoveItCpp::MoveItCpp(const rclcpp::Node::SharedPtr& node, const Options& options)
-  : node_(node), logger_(moveit::makeChildLogger("moveit_cpp"))
+  : node_(node), logger_(moveit::getLogger("moveit_cpp"))
 {
   // Configure planning scene monitor
   if (!loadPlanningSceneMonitor(options.planning_scene_monitor_options))

@@ -164,8 +164,8 @@ public:
   virtual bool initialize(const moveit::core::RobotModelConstPtr& model, const rclcpp::Node::SharedPtr& node,
                           const std::string& parameter_namespace);
 
-  /// Get \brief a short string that identifies the planning interface
-  virtual std::string getDescription() const;
+  /// \brief Get a short string that identifies the planning interface.
+  virtual std::string getDescription() const = 0;
 
   /// \brief Get the names of the known planning algorithms (values that can be filled as planner_id in the planning
   /// request)

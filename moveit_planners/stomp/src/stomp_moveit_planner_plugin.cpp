@@ -118,12 +118,6 @@ public:
       RCLCPP_ERROR(LOGGER, "Invalid joint group '%s'", req.group_name.c_str());
       return false;
     }
-
-    if (!req.reference_trajectories.empty())
-    {
-      RCLCPP_WARN(LOGGER, "Ignoring reference trajectories - not implemented!");
-    }
-
     return true;
   }
 

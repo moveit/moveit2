@@ -48,7 +48,6 @@
 #include <tf2_ros/transform_listener.h>
 #include <moveit/utils/logger.hpp>
 
-using moveit::getLogger;
 using namespace moveit_servo;
 
 namespace
@@ -63,7 +62,7 @@ int main(int argc, char* argv[])
 
   // The servo object expects to get a ROS node.
   const rclcpp::Node::SharedPtr demo_node = std::make_shared<rclcpp::Node>("moveit_servo_demo");
-  moveit::setLogger(demo_node->get_logger());
+  moveit::setNodeLoggerName(demo_node->get_name());
 
   // Get the servo parameters.
   const std::string param_namespace = "moveit_servo";
@@ -135,7 +134,7 @@ int main(int argc, char* argv[])
 
   // Frequency at which commands will be sent to the robot controller.
   rclcpp::WallRate command_rate(50);
-  RCLCPP_INFO_STREAM(getLogger(), servo.getStatusMessage());
+  RCLCPP_INFO_STREAM(demo_node->get_logger(), servo.getStatusMessage());
 
   while (!stop_tracking && rclcpp::ok())
   {
@@ -157,12 +156,12 @@ int main(int argc, char* argv[])
     command_rate.sleep();
   }
 
-  RCLCPP_INFO_STREAM(getLogger(), "REACHED : " << stop_tracking);
+  RCLCPP_INFO_STREAM(demo_node->get_logger(), "REACHED : " << stop_tracking);
   stop_tracking = true;
 
   if (tracker_thread.joinable())
     tracker_thread.join();
 
-  RCLCPP_INFO(getLogger(), "Exiting demo.");
+  RCLCPP_INFO(demo_node->get_logger(), "Exiting demo.");
   rclcpp::shutdown();
 }

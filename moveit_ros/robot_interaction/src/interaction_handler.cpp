@@ -406,14 +406,15 @@ bool InteractionHandler::transformFeedbackPose(
       }
       catch (tf2::TransformException& e)
       {
-        RCLCPP_ERROR(moveit::getLogger(), "Error transforming from frame '%s' to frame '%s'",
+        RCLCPP_ERROR(moveit::getLogger("InteractionHandler"), "Error transforming from frame '%s' to frame '%s'",
                      tpose.header.frame_id.c_str(), planning_frame_.c_str());
         return false;
       }
     }
     else
     {
-      RCLCPP_ERROR(moveit::getLogger(), "Cannot transform from frame '%s' to frame '%s' (no TF instance provided)",
+      RCLCPP_ERROR(moveit::getLogger("InteractionHandler"),
+                   "Cannot transform from frame '%s' to frame '%s' (no TF instance provided)",
                    tpose.header.frame_id.c_str(), planning_frame_.c_str());
       return false;
     }

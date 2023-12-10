@@ -45,9 +45,10 @@
 
 namespace collision_detection
 {
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.core.collision_detection.bullet");
 const std::string CollisionDetectorAllocatorBullet::NAME("Bullet");
 const double MAX_DISTANCE_MARGIN = 99;
+
+using collision_detection_bullet::getLogger;
 
 CollisionEnvBullet::CollisionEnvBullet(const moveit::core::RobotModelConstPtr& model, double padding, double scale)
   : CollisionEnv(model, padding, scale)
@@ -240,13 +241,13 @@ void CollisionEnvBullet::checkRobotCollisionHelperCCD(const CollisionRequest& re
 void CollisionEnvBullet::distanceSelf(const DistanceRequest& /*req*/, DistanceResult& /*res*/,
                                       const moveit::core::RobotState& /*state*/) const
 {
-  RCLCPP_INFO(LOGGER, "distanceSelf is not implemented for Bullet.");
+  RCLCPP_INFO(getLogger(), "distanceSelf is not implemented for Bullet.");
 }
 
 void CollisionEnvBullet::distanceRobot(const DistanceRequest& /*req*/, DistanceResult& /*res*/,
                                        const moveit::core::RobotState& /*state*/) const
 {
-  RCLCPP_INFO(LOGGER, "distanceRobot is not implemented for Bullet.");
+  RCLCPP_INFO(getLogger(), "distanceRobot is not implemented for Bullet.");
 }
 
 void CollisionEnvBullet::addToManager(const World::Object* obj)
@@ -354,7 +355,7 @@ void CollisionEnvBullet::addAttachedObjects(const moveit::core::RobotState& stat
     }
     catch (std::exception&)
     {
-      RCLCPP_ERROR_STREAM(LOGGER, "Not adding " << body->getName() << " due to bad arguments.");
+      RCLCPP_ERROR_STREAM(getLogger(), "Not adding " << body->getName() << " due to bad arguments.");
     }
   }
 }
@@ -369,7 +370,7 @@ void CollisionEnvBullet::updatedPaddingOrScaling(const std::vector<std::string>&
     }
     else
     {
-      RCLCPP_ERROR(LOGGER, "Updating padding or scaling for unknown link: '%s'", link.c_str());
+      RCLCPP_ERROR(getLogger(), "Updating padding or scaling for unknown link: '%s'", link.c_str());
     }
   }
 }
@@ -443,7 +444,7 @@ void CollisionEnvBullet::addLinkAsCollisionObject(const urdf::LinkSharedPtr& lin
     }
     catch (std::exception&)
     {
-      RCLCPP_ERROR_STREAM(LOGGER, "Not adding " << link->name << " due to bad arguments.");
+      RCLCPP_ERROR_STREAM(getLogger(), "Not adding " << link->name << " due to bad arguments.");
     }
   }
 }

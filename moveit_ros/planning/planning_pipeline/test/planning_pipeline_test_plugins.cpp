@@ -122,6 +122,10 @@ public:
   {
     return true;
   }
+  std::string getDescription() const override
+  {
+    return std::string("DummyPlannerManager");
+  }
 };
 }  // namespace planning_pipeline_test
 
