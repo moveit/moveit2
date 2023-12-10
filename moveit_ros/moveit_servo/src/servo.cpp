@@ -246,6 +246,18 @@ bool Servo::validateParams(const servo::Params& servo_params) const
                  servo_params.active_subgroup.c_str(), servo_params.move_group_name.c_str());
     params_valid = false;
   }
+  if (servo_params.joint_limit_margins.size() !=
+      robot_state->getJointModelGroup(servo_params.move_group_name)->getActiveVariableCount())
+  {
+    RCLCPP_ERROR(logger_,
+                 "Parameter 'joint_limit_margins' must have the same number of elements as the number of joints in the "
+                 "move_group. "
+                 "Size of 'joint_limit_margins' is '%li', but number of joints in '%s' is '%i'. "
+                 "Check the parameters YAML file used to launch this node.",
+                 servo_params.joint_limit_margins.size(), servo_params.move_group_name.c_str(),
+                 robot_state->getJointModelGroup(servo_params.move_group_name)->getActiveVariableCount());
+    params_valid = false;
+  }
 
   return params_valid;
 }
