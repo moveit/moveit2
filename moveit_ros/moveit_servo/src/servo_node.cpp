@@ -332,7 +332,7 @@ void ServoNode::servoLoop()
     {
       if (servo_params_.command_out_type == "trajectory_msgs/JointTrajectory")
       {
-        trajectory_publisher_->publish(composeTrajectoryMessage(servo_->getParams(), next_joint_state.value()));
+        trajectory_publisher_->publish(servo_->createTrajectoryMessage());
       }
       else if (servo_params_.command_out_type == "std_msgs/Float64MultiArray")
       {

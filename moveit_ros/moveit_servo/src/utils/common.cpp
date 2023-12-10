@@ -43,6 +43,7 @@ namespace
 {
 // The threshold above which `override_velocity_scaling_factor` will be used instead of computing the scaling from joint bounds.
 const double SCALING_OVERRIDE_THRESHOLD = 0.01;
+const double MIN_ANGLE_THRESHOLD = 1E-16;
 }  // namespace
 
 namespace moveit_servo
@@ -115,10 +116,12 @@ geometry_msgs::msg::Pose poseFromCartesianDelta(const Eigen::VectorXd& delta_x,
 
   // Get a transformation matrix with desired orientation change
   Eigen::Isometry3d tf_rot_delta(Eigen::Isometry3d::Identity());
-  const Eigen::Quaterniond q = Eigen::AngleAxisd(delta_x[3], Eigen::Vector3d::UnitX()) *
-                               Eigen::AngleAxisd(delta_x[4], Eigen::Vector3d::UnitY()) *
-                               Eigen::AngleAxisd(delta_x[5], Eigen::Vector3d::UnitZ());
-  tf_rot_delta.rotate(q);
+  Eigen::Vector3d rot_vec = delta_x.block<3, 1>(3, 0, 3, 1);
+  double angle = rot_vec.norm();
+  if (angle > MIN_ANGLE_THRESHOLD) {
+    const Eigen::Quaterniond q(Eigen::AngleAxisd(angle, rot_vec / angle).toRotationMatrix());
+    tf_rot_delta.rotate(q);
+  }
 
   // Find the new tip link position without newly applied rotation
   const Eigen::Isometry3d tf_no_new_rot = tf_pos_delta * base_to_tip_frame_transform;

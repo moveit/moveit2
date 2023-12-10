@@ -54,6 +54,7 @@
 #include <tf2_ros/transform_listener.h>
 #include <variant>
 #include <rclcpp/logger.hpp>
+#include <queue>
 
 namespace moveit_servo
 {
@@ -78,6 +79,13 @@ public:
    * @return The required joint state.
    */
   KinematicState getNextJointState(const ServoInput& command);
+
+  /**
+   * \brief Create a trajectory message.
+   * @return The trajectory message.
+   */
+  trajectory_msgs::msg::JointTrajectory createTrajectoryMessage();
+
 
   /**
    * \brief Set the type of incoming servo command.
@@ -180,11 +188,6 @@ private:
   Eigen::VectorXd jointDeltaFromCommand(const ServoInput& command, const moveit::core::RobotStatePtr& robot_state);
 
   /**
-   * \brief Updates data depending on joint model group
-   */
-  void updateJointModelGroup();
-
-  /**
    * \brief Validate the servo parameters
    * @param servo_params The servo parameters
    * @return True if parameters are valid, else False
@@ -232,6 +235,10 @@ private:
 
   // Map between joint subgroup names and corresponding joint name - move group indices map
   std::unordered_map<std::string, JointNameToMoveGroupIndexMap> joint_name_to_index_maps_;
+
+  // keep track of previously generated joint commands for constructing trajectory messages
+  std::deque<KinematicState> committed_commands_;
+
 };
 
 }  // namespace moveit_servo
