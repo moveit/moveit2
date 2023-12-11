@@ -259,10 +259,11 @@ bool Servo::validateParams(const servo::Params& servo_params) const
     params_valid = false;
   }
 
-  if (servo_params.control_latency < servo_params.publish_period)
+  if (servo_params.max_expected_latency < servo_params.publish_period)
   {
-    RCLCPP_ERROR(logger_, "The publish period (%f sec) parameter must be less than latency parameter (%f sec).",
-                 servo_params.publish_period, servo_params.control_latency);
+    RCLCPP_ERROR(logger_,
+                 "The publish period (%f sec) parameter must be less than max expected latency parameter (%f sec).",
+                 servo_params.publish_period, servo_params.max_expected_latency);
     params_valid = false;
   }
 
@@ -478,7 +479,8 @@ KinematicState Servo::getNextJointState(const ServoInput& command)
   // remove commands not yet committed
   auto cur_time = node_->now();
   while (!committed_commands_.empty() &&
-         committed_commands_.back().time > (cur_time + rclcpp::Duration::from_seconds(servo_params_.control_latency)))
+         committed_commands_.back().time >
+             (cur_time + rclcpp::Duration::from_seconds(servo_params_.max_expected_latency)))
   {
     committed_commands_.pop_back();
   }
@@ -551,14 +553,14 @@ KinematicState Servo::getNextJointState(const ServoInput& command)
 
   // remove old commands
   cur_time = node_->now();
-  const auto active_time_window = rclcpp::Duration::from_seconds(2 * servo_params_.control_latency);
+  const auto active_time_window = rclcpp::Duration::from_seconds(2 * servo_params_.max_expected_latency);
   while (!committed_commands_.empty() && committed_commands_.front().time < (cur_time - active_time_window))
   {
     committed_commands_.pop_front();
   }
 
   // add next committed command
-  target_state.time = node_->now() + rclcpp::Duration::from_seconds(servo_params_.control_latency);
+  target_state.time = node_->now() + rclcpp::Duration::from_seconds(servo_params_.max_expected_latency);
   committed_commands_.push_back(target_state);
 
   // add end command stop point in case of large delay
@@ -582,7 +584,7 @@ trajectory_msgs::msg::JointTrajectory Servo::createTrajectoryMessage()
 
   // remove old commands
   auto cur_time = node_->now();
-  const auto active_time_window = rclcpp::Duration::from_seconds(2 * servo_params_.control_latency);
+  const auto active_time_window = rclcpp::Duration::from_seconds(2 * servo_params_.max_expected_latency);
   while (!committed_commands_.empty() && committed_commands_.front().time < (cur_time - active_time_window))
   {
     committed_commands_.pop_front();

@@ -23,7 +23,7 @@ servo:
     }
   }
 
-  control_latency: {
+  max_expected_latency: {
     type: double,
     read_only: true,
     default_value: 0.1,
