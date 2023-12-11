@@ -563,7 +563,7 @@ KinematicState Servo::getNextJointState(const ServoInput& command)
   committed_commands_.push_back(target_state);
 
   // add end command stop point in case of large delay
-  auto dt = 2 * (servo_params_.latency);
+  const auto dt = 2.0 * servo_params_.latency;
   auto end_state = target_state;
   for (int i = 0; i < num_joints; i++)
   {
