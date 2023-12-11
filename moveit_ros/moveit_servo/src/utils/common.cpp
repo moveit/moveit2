@@ -42,8 +42,9 @@
 namespace
 {
 // The threshold above which `override_velocity_scaling_factor` will be used instead of computing the scaling from joint bounds.
-const double SCALING_OVERRIDE_THRESHOLD = 0.01;
-const double MIN_ANGLE_THRESHOLD = 1E-16;
+constexpr double SCALING_OVERRIDE_THRESHOLD = 0.01;
+// The angle threshold in radians below which a rotation will be considered the identity.
+constexpr double MIN_ANGLE_THRESHOLD = 1E-16;
 }  // namespace
 
 namespace moveit_servo
