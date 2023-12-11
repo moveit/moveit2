@@ -12,13 +12,6 @@ joint_names:
   - "panda_joint6"
   - "panda_joint7"
 
-# LMA params
-ik_plugin_name: "lma_kinematics_plugin/LMAKinematicsPlugin"
-num_ik_cb_tests: 0
-num_ik_multiple_tests: 0
-num_nearest_ik_tests: 0
-publish_trajectory: False
-
 # Test inputs
 num_fk_tests: 100
 num_ik_tests: 100
