@@ -340,27 +340,23 @@ void RuckigSmoothing::extendTrajectoryDuration(const double duration_extension_f
                                                const robot_trajectory::RobotTrajectory& original_trajectory,
                                                robot_trajectory::RobotTrajectory& trajectory)
 {
-  const size_t num_waypoints = trajectory.getWayPointCount();
-  for (size_t time_stretch_idx = 1; time_stretch_idx < num_waypoints; ++time_stretch_idx)
-  {
-    trajectory.setWayPointDurationFromPrevious(
-        time_stretch_idx,
-        duration_extension_factor * original_trajectory.getWayPointDurationFromPrevious(time_stretch_idx));
-    // re-calculate waypoint velocity and acceleration
-    auto target_state = trajectory.getWayPointPtr(time_stretch_idx);
-    const auto prev_state = trajectory.getWayPointPtr(time_stretch_idx - 1);
-    double timestep = trajectory.getAverageSegmentDuration();
-    for (size_t joint = 0; joint < num_dof; ++joint)
-    {
-      target_state->setVariableVelocity(move_group_idx.at(joint),
-                                        (1 / duration_extension_factor) *
-                                            target_state->getVariableVelocity(move_group_idx.at(joint)));
+  trajectory.setWayPointDurationFromPrevious(waypoint_idx + 1,
+                                             duration_extension_factor *
+                                                 original_trajectory.getWayPointDurationFromPrevious(waypoint_idx + 1));
+  // re-calculate waypoint velocity and acceleration
+  auto target_state = trajectory.getWayPointPtr(waypoint_idx + 1);
+  const auto prev_state = trajectory.getWayPointPtr(waypoint_idx);
 
-      double prev_velocity = prev_state->getVariableVelocity(move_group_idx.at(joint));
-      double curr_velocity = target_state->getVariableVelocity(move_group_idx.at(joint));
-      target_state->setVariableAcceleration(move_group_idx.at(joint), (curr_velocity - prev_velocity) / timestep);
-    }
-    target_state->update();
+  double timestep = trajectory.getWayPointDurationFromPrevious(waypoint_idx + 1);
+
+  for (size_t joint = 0; joint < num_dof; ++joint)
+  {
+    target_state->setVariableVelocity(move_group_idx.at(joint),
+                                      (1 / duration_extension_factor) *
+                                          target_state->getVariableVelocity(move_group_idx.at(joint)));
+    double prev_velocity = prev_state->getVariableVelocity(move_group_idx.at(joint));
+    double curr_velocity = target_state->getVariableVelocity(move_group_idx.at(joint));
+    target_state->setVariableAcceleration(move_group_idx.at(joint), (curr_velocity - prev_velocity) / timestep);
   }
 }
 
