@@ -27,7 +27,7 @@ servo:
     type: double,
     read_only: true,
     default_value: 0.1,
-    description: " max expected latency between generating a servo command and the controller receiving it [seconds]",
+    description: "Maximum expected latency between generating a servo command and the controller receiving it [seconds].",
     validation: {
       gt<>: 0.0
     }
