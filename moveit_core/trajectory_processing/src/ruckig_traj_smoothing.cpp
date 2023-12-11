@@ -50,7 +50,7 @@ namespace
 constexpr double DEFAULT_MAX_VELOCITY = 5;       // rad/s
 constexpr double DEFAULT_MAX_ACCELERATION = 10;  // rad/s^2
 constexpr double DEFAULT_MAX_JERK = 1000;        // rad/s^3
-constexpr double MAX_DURATION_EXTENSION_FACTOR = 10.0;
+constexpr double MAX_DURATION_EXTENSION_FACTOR = 50.0;
 constexpr double DURATION_EXTENSION_FRACTION = 1.1;
 // If "mitigate_overshoot" is enabled, overshoot is checked with this timestep
 constexpr double OVERSHOOT_CHECK_PERIOD = 0.01;  // sec
@@ -268,7 +268,7 @@ bool RuckigSmoothing::runRuckig(robot_trajectory::RobotTrajectory& trajectory,
   double duration_extension_factor = 1;
   bool smoothing_complete = false;
   size_t waypoint_idx = 0;
-  while ((duration_extension_factor < MAX_DURATION_EXTENSION_FACTOR) && !smoothing_complete)
+  while ((duration_extension_factor <= MAX_DURATION_EXTENSION_FACTOR) && !smoothing_complete)
   {
     while (waypoint_idx < num_waypoints - 1)
     {
@@ -317,6 +317,12 @@ bool RuckigSmoothing::runRuckig(robot_trajectory::RobotTrajectory& trajectory,
       }
       ++waypoint_idx;
     }
+  }
+
+  if (duration_extension_factor > MAX_DURATION_EXTENSION_FACTOR)
+  {
+    RCLCPP_ERROR_STREAM(getLogger(),
+                        "Ruckig extended the trajectory duration to its maximum and still did not find a solution");
   }
 
   if (ruckig_result != ruckig::Result::Working && ruckig_result != ruckig::Result::Finished)
