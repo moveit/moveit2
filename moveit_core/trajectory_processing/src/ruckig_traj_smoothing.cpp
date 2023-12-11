@@ -251,7 +251,7 @@ bool RuckigSmoothing::runRuckig(robot_trajectory::RobotTrajectory& trajectory,
   const size_t num_waypoints = trajectory.getWayPointCount();
   const moveit::core::JointModelGroup* const group = trajectory.getGroup();
   const size_t num_dof = group->getVariableCount();
-  ruckig::OutputParameter<ruckig::DynamicDOFs> ruckig_output{ num_dof };
+  ruckig::Trajectory<ruckig::DynamicDOFs, ruckig::StandardVector> ruckig_output(num_dof);
 
   // This lib does not work properly when angles wrap, so we need to unwind the path first
   trajectory.unwind();
