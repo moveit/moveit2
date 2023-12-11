@@ -602,13 +602,26 @@ trajectory_msgs::msg::JointTrajectory Servo::createTrajectoryMessage()
     size_t num_joints = state.positions.size();
     point.positions.reserve(num_joints);
     point.velocities.reserve(num_joints);
-    for (const auto& pos : state.positions)
+    if (servo_params_.publish_joint_positions)
     {
-      point.positions.emplace_back(pos);
+      for (const auto& pos : state.positions)
+      {
+        point.positions.emplace_back(pos);
+      }
     }
-    for (const auto& vel : state.velocities)
+    if (servo_params_.publish_joint_velocities)
     {
-      point.velocities.emplace_back(vel);
+      for (const auto& vel : state.velocities)
+      {
+        point.velocities.emplace_back(vel);
+      }
+    }
+    if (servo_params_.publish_joint_accelerations)
+    {
+      for (const auto& acc : state.accelerations)
+      {
+        point.accelerations.emplace_back(acc);
+      }
     }
     point.time_from_start = state.time - joint_trajectory.header.stamp;
     joint_trajectory.points.emplace_back(point);
