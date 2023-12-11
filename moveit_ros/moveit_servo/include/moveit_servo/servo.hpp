@@ -86,7 +86,6 @@ public:
    */
   trajectory_msgs::msg::JointTrajectory createTrajectoryMessage();
 
-
   /**
    * \brief Set the type of incoming servo command.
    * @param command_type The type of command servo should expect.
@@ -238,7 +237,6 @@ private:
 
   // keep track of previously generated joint commands for constructing trajectory messages
   std::deque<KinematicState> committed_commands_;
-
 };
 
 }  // namespace moveit_servo

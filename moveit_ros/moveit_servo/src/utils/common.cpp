@@ -118,7 +118,8 @@ geometry_msgs::msg::Pose poseFromCartesianDelta(const Eigen::VectorXd& delta_x,
   Eigen::Isometry3d tf_rot_delta(Eigen::Isometry3d::Identity());
   Eigen::Vector3d rot_vec = delta_x.block<3, 1>(3, 0, 3, 1);
   double angle = rot_vec.norm();
-  if (angle > MIN_ANGLE_THRESHOLD) {
+  if (angle > MIN_ANGLE_THRESHOLD)
+  {
     const Eigen::Quaterniond q(Eigen::AngleAxisd(angle, rot_vec / angle).toRotationMatrix());
     tf_rot_delta.rotate(q);
   }

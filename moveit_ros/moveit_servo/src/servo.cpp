@@ -262,8 +262,7 @@ bool Servo::validateParams(const servo::Params& servo_params) const
 
   if (servo_params.latency < servo_params.publish_period)
   {
-    RCLCPP_ERROR(logger_,
-                 "The publish period (%f sec) parameter must be less than latency parameter (%f sec).",
+    RCLCPP_ERROR(logger_, "The publish period (%f sec) parameter must be less than latency parameter (%f sec).",
                  servo_params.publish_period, servo_params.latency);
     params_valid = false;
   }
@@ -479,20 +478,24 @@ KinematicState Servo::getNextJointState(const ServoInput& command)
 
   // remove commands not yet committed
   auto cur_time = node_->now();
-  while (!committed_commands_.empty() && committed_commands_.back().time > (cur_time + rclcpp::Duration::from_seconds(servo_params_.latency))){
+  while (!committed_commands_.empty() &&
+         committed_commands_.back().time > (cur_time + rclcpp::Duration::from_seconds(servo_params_.latency)))
+  {
     committed_commands_.pop_back();
   }
-  if (!committed_commands_.empty()){
+  if (!committed_commands_.empty())
+  {
     current_state = committed_commands_.back();
-  } else {
-    // Copy current kinematic data from RobotState.
-      robot_state->copyJointGroupPositions(joint_model_group, current_state.positions);
-      robot_state->copyJointGroupVelocities(joint_model_group, current_state.velocities);
-      current_state.joint_names = joint_names;
-      current_state.time = cur_time;
-      committed_commands_.push_back(current_state);
   }
-
+  else
+  {
+    // Copy current kinematic data from RobotState.
+    robot_state->copyJointGroupPositions(joint_model_group, current_state.positions);
+    robot_state->copyJointGroupVelocities(joint_model_group, current_state.velocities);
+    current_state.joint_names = joint_names;
+    current_state.time = cur_time;
+    committed_commands_.push_back(current_state);
+  }
 
   // Compute the change in joint position due to the incoming command
   Eigen::VectorXd joint_position_delta = jointDeltaFromCommand(command, robot_state);
@@ -549,7 +552,9 @@ KinematicState Servo::getNextJointState(const ServoInput& command)
 
   // remove old commands
   cur_time = node_->now();
-  while (!committed_commands_.empty() && committed_commands_.front().time < (cur_time - rclcpp::Duration::from_seconds(2*servo_params_.latency))){
+  while (!committed_commands_.empty() &&
+         committed_commands_.front().time < (cur_time - rclcpp::Duration::from_seconds(2 * servo_params_.latency)))
+  {
     committed_commands_.pop_front();
   }
 
@@ -558,44 +563,53 @@ KinematicState Servo::getNextJointState(const ServoInput& command)
   committed_commands_.push_back(target_state);
 
   // add end command stop point in case of large delay
-  auto dt = 2*(servo_params_.latency);
+  auto dt = 2 * (servo_params_.latency);
   auto end_state = target_state;
-  for (auto i = 0ul; i < num_joints; i++) {
-    end_state.positions[i] = target_state.positions[i] + target_state.velocities[i]*dt;
+  for (auto i = 0ul; i < num_joints; i++)
+  {
+    end_state.positions[i] = target_state.positions[i] + target_state.velocities[i] * dt;
     end_state.velocities[i] = 0;
     end_state.accelerations[i] = 0;
     end_state.time = target_state.time + rclcpp::Duration::from_seconds(dt);
-    }
+  }
   committed_commands_.push_back(end_state);
 
   return target_state;
 }
 
-trajectory_msgs::msg::JointTrajectory Servo::createTrajectoryMessage() {
+trajectory_msgs::msg::JointTrajectory Servo::createTrajectoryMessage()
+{
   // TODO should have realtime capabilities
   trajectory_msgs::msg::JointTrajectory joint_trajectory;
 
   // remove old commands
   auto cur_time = node_->now();
-  while (!committed_commands_.empty() && committed_commands_.front().time < (cur_time-rclcpp::Duration::from_seconds(2*servo_params_.latency))){
+  while (!committed_commands_.empty() &&
+         committed_commands_.front().time < (cur_time - rclcpp::Duration::from_seconds(2 * servo_params_.latency)))
+  {
     committed_commands_.pop_front();
   }
-  if (committed_commands_.empty()) {
-    RCLCPP_ERROR(node_->get_logger(), "Command queue is empty when creating trajectory, the newest command is already in the past!");
+  if (committed_commands_.empty())
+  {
+    RCLCPP_ERROR(node_->get_logger(),
+                 "Command queue is empty when creating trajectory, the newest command is already in the past!");
     return joint_trajectory;
   }
   joint_trajectory.joint_names = committed_commands_.front().joint_names;
   joint_trajectory.points.reserve(committed_commands_.size());
   joint_trajectory.header.stamp = committed_commands_.front().time;
-  for (const auto& state : committed_commands_) {
+  for (const auto& state : committed_commands_)
+  {
     trajectory_msgs::msg::JointTrajectoryPoint point;
     size_t num_joints = state.positions.size();
     point.positions.reserve(num_joints);
     point.velocities.reserve(num_joints);
-    for (const auto& pos : state.positions) {
+    for (const auto& pos : state.positions)
+    {
       point.positions.emplace_back(pos);
     }
-    for (const auto& vel : state.velocities) {
+    for (const auto& vel : state.velocities)
+    {
       point.velocities.emplace_back(vel);
     }
     point.time_from_start = state.time - joint_trajectory.header.stamp;
@@ -604,7 +618,6 @@ trajectory_msgs::msg::JointTrajectory Servo::createTrajectoryMessage() {
 
   return joint_trajectory;
 }
-
 
 std::optional<Eigen::Isometry3d> Servo::getPlanningToCommandFrameTransform(const std::string& command_frame,
                                                                            const std::string& planning_frame) const
