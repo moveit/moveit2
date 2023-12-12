@@ -17,11 +17,9 @@
 !moveit_planners/ompl/package.xml
 !moveit_planners/chomp/chomp_motion_planner/package.xml
 !moveit_planners/chomp/chomp_interface/package.xml
-!moveit_planners/chomp/chomp_optimizer_adapter/package.xml
 !moveit_planners/pilz_industrial_motion_planner_testutils/package.xml
 !moveit_planners/pilz_industrial_motion_planner/package.xml
 !moveit_planners/moveit_planners/package.xml
-!moveit_planners/trajopt/package.xml
 !moveit_runtime/package.xml
 !moveit/package.xml
 !moveit_ros/warehouse/package.xml
