@@ -68,7 +68,8 @@ LocalPlannerComponent::LocalPlannerComponent(const rclcpp::NodeOptions& options)
 bool LocalPlannerComponent::initialize()
 {
   // Load planner parameter
-  config_.load(node_);
+  auto param_listener = local_planner_parameters::ParamListener(node_, "");
+  config_ = param_listener.get_params();
 
   // Validate config
   if (config_.local_solution_topic_type == "std_msgs/Float64MultiArray")
