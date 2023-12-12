@@ -40,11 +40,19 @@
 #include <boost/thread.hpp>
 #include <boost/assign.hpp>
 #include <unordered_map>
+#include <moveit/utils/logger.hpp>
 
 namespace moveit_setup
 {
 namespace srdf_setup
 {
+namespace
+{
+rclcpp::Logger getLogger()
+{
+  return moveit::getLogger("collision_updater");
+}
+}  // namespace
 // ******************************************************************************************
 // Custom Types, Enums and Structs
 // ******************************************************************************************
@@ -55,9 +63,6 @@ const std::unordered_map<DisabledReason, std::string> REASONS_TO_STRING = boost:
 
 const std::unordered_map<std::string, DisabledReason> REASONS_FROM_STRING = boost::assign::map_list_of("Never", NEVER)(
     "Default", DEFAULT)("Adjacent", ADJACENT)("Always", ALWAYS)("User", USER)("Not Disabled", NOT_DISABLED);
-
-// Used for logging
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("collision_updater");
 
 // Unique set of pairs of links in string-based form
 typedef std::set<std::pair<std::string, std::string> > StringPairSet;
@@ -189,7 +194,7 @@ LinkPairMap computeDefaultCollisions(const planning_scene::PlanningSceneConstPtr
   // LinkGraph is a custom type of a map with a LinkModel as key and a set of LinkModels as second
   LinkGraph link_graph;
 
-  // RCLCPP_INFO_STREAM_STREAM(LOGGER, "Initial allowed Collision Matrix Size = " << scene.getAllowedCollisions().getSize() );
+  // RCLCPP_INFO_STREAM_STREAM(getLogger(), "Initial allowed Collision Matrix Size = " << scene.getAllowedCollisions().getSize() );
 
   // 0. GENERATE ALL POSSIBLE LINK PAIRS -------------------------------------------------------------
   // Generate a list of unique link pairs for all links with geometry. Order pairs alphabetically.
@@ -231,7 +236,7 @@ LinkPairMap computeDefaultCollisions(const planning_scene::PlanningSceneConstPtr
   // Compute the links that are always in collision
   unsigned int num_always =
       disableAlwaysInCollision(*scene, link_pairs, req, links_seen_colliding, min_collision_fraction);
-  // RCLCPP_INFO_STREAM(LOGGER, "Links seen colliding total = %d", int(links_seen_colliding.size()));
+  // RCLCPP_INFO_STREAM(getLogger(), "Links seen colliding total = %d", int(links_seen_colliding.size()));
   *progress = 8;  // Progress bar feedback
   boost::this_thread::interruption_point();
 
@@ -243,7 +248,7 @@ LinkPairMap computeDefaultCollisions(const planning_scene::PlanningSceneConstPtr
     num_never = disableNeverInCollision(num_trials, *scene, link_pairs, req, links_seen_colliding, progress);
   }
 
-  // RCLCPP_INFO_STREAM(LOGGER, "Link pairs seen colliding ever: %d", int(links_seen_colliding.size()));
+  // RCLCPP_INFO_STREAM(getLogger(), "Link pairs seen colliding ever: %d", int(links_seen_colliding.size()));
 
   if (verbose)
   {
@@ -255,20 +260,20 @@ LinkPairMap computeDefaultCollisions(const planning_scene::PlanningSceneConstPtr
         ++num_disabled;
     }
 
-    RCLCPP_INFO_STREAM(LOGGER, "-------------------------------------------------------------------------------");
-    RCLCPP_INFO_STREAM(LOGGER, "Statistics:");
+    RCLCPP_INFO_STREAM(getLogger(), "-------------------------------------------------------------------------------");
+    RCLCPP_INFO_STREAM(getLogger(), "Statistics:");
     unsigned int num_links = int(link_graph.size());
     double num_possible = boost::math::binomial_coefficient<double>(num_links, 2);  // n choose 2
     unsigned int num_sometimes = num_possible - num_disabled;
 
-    RCLCPP_INFO_STREAM(LOGGER, "Total Links : " + std::to_string(num_links));
-    RCLCPP_INFO_STREAM(LOGGER, "Total possible collisions : " + std::to_string(num_possible));
-    RCLCPP_INFO_STREAM(LOGGER, "Always in collision : " + std::to_string(num_always));
-    RCLCPP_INFO_STREAM(LOGGER, "Never in collision : " + std::to_string(num_never));
-    RCLCPP_INFO_STREAM(LOGGER, "Default in collision : " + std::to_string(num_default));
-    RCLCPP_INFO_STREAM(LOGGER, "Adjacent links disabled : " + std::to_string(num_adjacent));
-    RCLCPP_INFO_STREAM(LOGGER, "Sometimes in collision : " + std::to_string(num_sometimes));
-    RCLCPP_INFO_STREAM(LOGGER, "TOTAL DISABLED : " + std::to_string(num_disabled));
+    RCLCPP_INFO_STREAM(getLogger(), "Total Links : " + std::to_string(num_links));
+    RCLCPP_INFO_STREAM(getLogger(), "Total possible collisions : " + std::to_string(num_possible));
+    RCLCPP_INFO_STREAM(getLogger(), "Always in collision : " + std::to_string(num_always));
+    RCLCPP_INFO_STREAM(getLogger(), "Never in collision : " + std::to_string(num_never));
+    RCLCPP_INFO_STREAM(getLogger(), "Default in collision : " + std::to_string(num_default));
+    RCLCPP_INFO_STREAM(getLogger(), "Adjacent links disabled : " + std::to_string(num_adjacent));
+    RCLCPP_INFO_STREAM(getLogger(), "Sometimes in collision : " + std::to_string(num_sometimes));
+    RCLCPP_INFO_STREAM(getLogger(), "TOTAL DISABLED : " + std::to_string(num_disabled));
 
     /*ROS_INFO("Copy to Spreadsheet:");
     ROS_INFO_STREAM(num_links << "\t" << num_possible << "\t" << num_always << "\t" << num_never
@@ -387,7 +392,7 @@ void computeConnectionGraph(const moveit::core::LinkModel* start_link, LinkGraph
       }
     }
   }
-  // RCLCPP_INFO_STREAM(LOGGER, "Generated connection graph with %d links", int(link_graph.size()));
+  // RCLCPP_INFO_STREAM(getLogger(), "Generated connection graph with %d links", int(link_graph.size()));
 }
 
 // ******************************************************************************************
@@ -412,7 +417,7 @@ void computeConnectionGraphRec(const moveit::core::LinkModel* start_link, LinkGr
   }
   else
   {
-    RCLCPP_ERROR_STREAM(LOGGER, "Joint exists in URDF with no link!");
+    RCLCPP_ERROR_STREAM(getLogger(), "Joint exists in URDF with no link!");
   }
 }
 
@@ -428,7 +433,8 @@ unsigned int disableAdjacentLinks(planning_scene::PlanningScene& scene, LinkGrap
     for (std::set<const moveit::core::LinkModel*>::const_iterator adj_it = link_graph_it->second.begin();
          adj_it != link_graph_it->second.end(); ++adj_it)
     {
-      // RCLCPP_INFO_STREAM(LOGGER, "Disabled %s to %s", link_graph_it->first->getName().c_str(), (*adj_it)->getName().c_str() );
+      // RCLCPP_INFO_STREAM(getLogger(), "Disabled %s to %s", link_graph_it->first->getName().c_str(),
+      // (*adj_it)->getName().c_str() );
 
       // Check if either of the links have no geometry. If so, do not add (are we sure?)
       if (!link_graph_it->first->getShapes().empty() && !(*adj_it)->getShapes().empty())  // both links have geometry
@@ -440,7 +446,7 @@ unsigned int disableAdjacentLinks(planning_scene::PlanningScene& scene, LinkGrap
       }
     }
   }
-  // RCLCPP_INFO_STREAM(LOGGER, "Disabled %d adjacent link pairs from collision checking", num_disabled);
+  // RCLCPP_INFO_STREAM(getLogger(), "Disabled %d adjacent link pairs from collision checking", num_disabled);
 
   return num_disabled;
 }
@@ -468,7 +474,8 @@ unsigned int disableDefaultCollisions(planning_scene::PlanningScene& scene, Link
     scene.getAllowedCollisionMatrixNonConst().setEntry(it->first.first, it->first.second, true);
   }
 
-  // RCLCPP_INFO_STREAM(LOGGER, "Disabled %d link pairs that are in collision in default state from collision checking", num_disabled);
+  // RCLCPP_INFO_STREAM(getLogger(), "Disabled %d link pairs that are in collision in default state from collision
+  // checking", num_disabled);
 
   return num_disabled;
 }
@@ -515,7 +522,7 @@ unsigned int disableAlwaysInCollision(planning_scene::PlanningScene& scene, Link
       if (nc >= req.max_contacts)
       {
         req.max_contacts *= 2;  // double the max contacts that the CollisionRequest checks for
-        // RCLCPP_INFO_STREAM(LOGGER, "Doubling max_contacts to %d", int(req.max_contacts));
+        // RCLCPP_INFO_STREAM(getLogger(), "Doubling max_contacts to %d", int(req.max_contacts));
       }
     }
 
@@ -543,7 +550,7 @@ unsigned int disableAlwaysInCollision(planning_scene::PlanningScene& scene, Link
     if (found == 0)
       done = true;
 
-    // RCLCPP_INFO_STREAM(LOGGER, "Disabled %u link pairs that are always in collision from collision checking", found);
+    // RCLCPP_INFO_STREAM(getLogger(), "Disabled %u link pairs that are always in collision from collision checking", found);
   }
 
   return num_disabled;
@@ -561,7 +568,7 @@ unsigned int disableNeverInCollision(const unsigned int num_trials, planning_sce
   std::mutex lock;  // used for sharing the same data structures
 
   int num_threads = std::thread::hardware_concurrency();  // how many cores does this computer have?
-  // RCLCPP_INFO_STREAM_STREAM(LOGGER, "Performing " << num_trials << " trials for 'always in collision' checking on " <<
+  // RCLCPP_INFO_STREAM_STREAM(getLogger(), "Performing " << num_trials << " trials for 'always in collision' checking on " <<
   //   num_threads << " threads...");
 
   for (int i = 0; i < num_threads; ++i)
@@ -593,7 +600,7 @@ unsigned int disableNeverInCollision(const unsigned int num_trials, planning_sce
       }
     }
   }
-  // RCLCPP_INFO_STREAM(LOGGER, "Disabled %d link pairs that are never in collision", num_disabled);
+  // RCLCPP_INFO_STREAM(getLogger(), "Disabled %d link pairs that are never in collision", num_disabled);
 
   return num_disabled;
 }
@@ -603,7 +610,7 @@ unsigned int disableNeverInCollision(const unsigned int num_trials, planning_sce
 // ******************************************************************************************
 void disableNeverInCollisionThread(ThreadComputation tc)
 {
-  // RCLCPP_INFO_STREAM_STREAM(LOGGER, "Thread " << tc.thread_id_ << " running " << tc.num_trials_ << " trials");
+  // RCLCPP_INFO_STREAM_STREAM(getLogger(), "Thread " << tc.thread_id_ << " running " << tc.num_trials_ << " trials");
 
   // User feedback vars
   const unsigned int progress_interval = tc.num_trials_ / 20;  // show progress update every 5%

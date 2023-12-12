@@ -40,7 +40,6 @@ namespace moveit_py
 {
 namespace bind_planning_scene_monitor
 {
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_py.bind_planning_scene_monitor");
 
 bool processCollisionObject(const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor,
                             moveit_msgs::msg::CollisionObject& collision_object_msg)
