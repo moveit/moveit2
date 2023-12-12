@@ -3,10 +3,12 @@ import os
 import sys
 import unittest
 
+from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument, ExecuteProcess, TimerAction
+from launch.actions import DeclareLaunchArgument, TimerAction
 from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
 from launch_ros.actions import Node
+from moveit_configs_utils import MoveItConfigsBuilder
 
 sys.path.append(os.path.dirname(__file__))
 from hybrid_planning_common import (
@@ -39,6 +41,57 @@ def generate_test_description():
         output="screen",
     )
 
+    # Static TF
+    static_tf = Node(
+        package="tf2_ros",
+        executable="static_transform_publisher",
+        name="static_transform_publisher",
+        output="log",
+        arguments=["0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "world", "panda_link0"],
+    )
+
+    # Publish TF
+    robot_state_publisher = Node(
+        package="robot_state_publisher",
+        executable="robot_state_publisher",
+        name="robot_state_publisher",
+        output="both",
+        parameters=[moveit_config.robot_description],
+    )
+
+    # ros2_control using FakeSystem as hardware
+    ros2_controllers_path = os.path.join(
+        get_package_share_directory("moveit_hybrid_planning"),
+        "config",
+        "demo_controller.yaml",
+    )
+    ros2_control_node = Node(
+        package="controller_manager",
+        executable="ros2_control_node",
+        parameters=[moveit_config.robot_description, ros2_controllers_path],
+        output="screen",
+    )
+
+    joint_state_broadcaster_spawner = Node(
+        package="controller_manager",
+        executable="spawner",
+        arguments=[
+            "joint_state_broadcaster",
+            "--controller-manager",
+            "/controller_manager",
+        ],
+    )
+
+    panda_joint_group_position_controller_spawner = Node(
+        package="controller_manager",
+        executable="spawner",
+        arguments=[
+            "panda_joint_group_position_controller",
+            "-c",
+            "/controller_manager",
+        ],
+    )
+
     return LaunchDescription(
         [
             DeclareLaunchArgument(
@@ -50,6 +103,13 @@ def generate_test_description():
             launch_testing.actions.ReadyToTest(),
         ]
         + common_launch
+        + [
+            static_tf,
+            robot_state_publisher,
+            ros2_control_node,
+            joint_state_broadcaster_spawner,
+            panda_joint_group_position_controller_spawner,
+        ]
     ), {
         "hybrid_planning_gtest": hybrid_planning_gtest,
     }
