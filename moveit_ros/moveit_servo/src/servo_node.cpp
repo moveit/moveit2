@@ -203,7 +203,7 @@ void ServoNode::poseCallback(const geometry_msgs::msg::PoseStamped::ConstSharedP
   new_pose_msg_ = true;
 }
 
-std::optional<KinematicState> ServoNode::processJointJogCommand()
+std::optional<KinematicState> ServoNode::processJointJogCommand(const KinematicState& current_state)
 {
   std::optional<KinematicState> next_joint_state = std::nullopt;
   // Reject any other command types that had arrived simultaneously.
@@ -214,7 +214,7 @@ std::optional<KinematicState> ServoNode::processJointJogCommand()
   if (!command_stale)
   {
     JointJogCommand command{ latest_joint_jog_.joint_names, latest_joint_jog_.velocities };
-    next_joint_state = servo_->getNextJointState(command);
+    next_joint_state = servo_->getNextJointState(current_state, command);
   }
   else
   {
@@ -230,7 +230,7 @@ std::optional<KinematicState> ServoNode::processJointJogCommand()
   return next_joint_state;
 }
 
-std::optional<KinematicState> ServoNode::processTwistCommand()
+std::optional<KinematicState> ServoNode::processTwistCommand(const KinematicState& current_state)
 {
   std::optional<KinematicState> next_joint_state = std::nullopt;
 
@@ -246,7 +246,7 @@ std::optional<KinematicState> ServoNode::processTwistCommand()
                                                latest_twist_.twist.linear.z,  latest_twist_.twist.angular.x,
                                                latest_twist_.twist.angular.y, latest_twist_.twist.angular.z };
     const TwistCommand command{ latest_twist_.header.frame_id, velocities };
-    next_joint_state = servo_->getNextJointState(command);
+    next_joint_state = servo_->getNextJointState(current_state, command);
   }
   else
   {
@@ -262,7 +262,7 @@ std::optional<KinematicState> ServoNode::processTwistCommand()
   return next_joint_state;
 }
 
-std::optional<KinematicState> ServoNode::processPoseCommand()
+std::optional<KinematicState> ServoNode::processPoseCommand(const KinematicState& current_state)
 {
   std::optional<KinematicState> next_joint_state = std::nullopt;
 
@@ -275,7 +275,7 @@ std::optional<KinematicState> ServoNode::processPoseCommand()
   if (!command_stale)
   {
     const PoseCommand command = poseFromPoseStamped(latest_pose_);
-    next_joint_state = servo_->getNextJointState(command);
+    next_joint_state = servo_->getNextJointState(current_state, command);
   }
   else
   {
@@ -306,20 +306,34 @@ void ServoNode::servoLoop()
       continue;
     }
 
+    bool use_trajectory = servo_params_.command_out_type == "trajectory_msgs/JointTrajectory";
+    KinematicState current_state;
+
+    if (use_trajectory && !joint_cmd_rolling_window_.empty())
+    {
+      current_state = joint_cmd_rolling_window_.back();
+    }
+    else
+    {
+      current_state = servo_->getCurrentRobotState();
+      current_state.time = node_->now();
+      joint_cmd_rolling_window_.push_back(current_state);
+    }
+
     next_joint_state = std::nullopt;
     const CommandType expected_type = servo_->getCommandType();
 
     if (expected_type == CommandType::JOINT_JOG && new_joint_jog_msg_)
     {
-      next_joint_state = processJointJogCommand();
+      next_joint_state = processJointJogCommand(current_state);
     }
     else if (expected_type == CommandType::TWIST && new_twist_msg_)
     {
-      next_joint_state = processTwistCommand();
+      next_joint_state = processTwistCommand(current_state);
     }
     else if (expected_type == CommandType::POSE && new_pose_msg_)
     {
-      next_joint_state = processPoseCommand();
+      next_joint_state = processPoseCommand(current_state);
     }
     else if (new_joint_jog_msg_ || new_twist_msg_ || new_pose_msg_)
     {
@@ -330,11 +344,13 @@ void ServoNode::servoLoop()
     if (next_joint_state && (servo_->getStatus() != StatusCode::INVALID) &&
         (servo_->getStatus() != StatusCode::HALT_FOR_COLLISION))
     {
-      if (servo_params_.command_out_type == "trajectory_msgs/JointTrajectory")
+      if (use_trajectory)
       {
-        trajectory_publisher_->publish(servo_->createTrajectoryMessage());
+        updateSlidingWindow(next_joint_state.value(), joint_cmd_rolling_window_, servo_params_.max_expected_latency,
+                            node_->now());
+        trajectory_publisher_->publish(composeTrajectoryMessage(servo_params_, joint_cmd_rolling_window_));
       }
-      else if (servo_params_.command_out_type == "std_msgs/Float64MultiArray")
+      else
       {
         multi_array_publisher_->publish(composeMultiArrayMessage(servo_->getParams(), next_joint_state.value()));
       }

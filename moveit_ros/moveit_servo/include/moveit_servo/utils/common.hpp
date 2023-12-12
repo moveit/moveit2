@@ -115,8 +115,11 @@ geometry_msgs::msg::Pose poseFromCartesianDelta(const Eigen::VectorXd& delta_x,
  * @param joint_state The joint state to be added into the trajectory.
  * @return The trajectory message.
  */
-trajectory_msgs::msg::JointTrajectory composeTrajectoryMessage(const servo::Params& servo_params,
-                                                               const KinematicState& joint_state);
+trajectory_msgs::msg::JointTrajectory
+composeTrajectoryMessage(const servo::Params& servo_params, const std::deque<KinematicState>& joint_cmd_rolling_window);
+
+void updateSlidingWindow(const KinematicState& next_joint_state, std::deque<KinematicState>& joint_cmd_rolling_window,
+                         double max_expected_latency, const rclcpp::Time& cur_time);
 
 /**
  * \brief Create a Float64MultiArray message from given joint state

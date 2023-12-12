@@ -143,53 +143,83 @@ geometry_msgs::msg::Pose poseFromCartesianDelta(const Eigen::VectorXd& delta_x,
   return tf2::toMsg(tf_pos_translation * tf_rot_delta * tf_neg_translation * tf_no_new_rot);
 }
 
-trajectory_msgs::msg::JointTrajectory composeTrajectoryMessage(const servo::Params& servo_params,
-                                                               const KinematicState& joint_state)
+trajectory_msgs::msg::JointTrajectory
+composeTrajectoryMessage(const servo::Params& servo_params, const std::deque<KinematicState>& joint_cmd_rolling_window)
 {
-  // When a joint_trajectory_controller receives a new command, a stamp of 0 indicates "begin immediately"
-  // See http://wiki.ros.org/joint_trajectory_controller#Trajectory_replacement
-
   trajectory_msgs::msg::JointTrajectory joint_trajectory;
-  joint_trajectory.joint_names = joint_state.joint_names;
 
-  static trajectory_msgs::msg::JointTrajectoryPoint point;
-  point.time_from_start = rclcpp::Duration::from_seconds(servo_params.publish_period);
-  const size_t num_joints = joint_state.joint_names.size();
-  if (point.positions.size() != num_joints)
+  if (joint_cmd_rolling_window.empty())
   {
-    point.positions.resize(num_joints);
-    point.velocities.resize(num_joints);
-    point.accelerations.resize(num_joints);
+    return joint_trajectory;
   }
+  joint_trajectory.joint_names = joint_cmd_rolling_window.front().joint_names;
+  joint_trajectory.points.reserve(joint_cmd_rolling_window.size() + 1);
+  joint_trajectory.header.stamp = joint_cmd_rolling_window.front().time;
 
-  // Set the fields of trajectory point based on which fields are requested.
-  // Some controllers check that acceleration data is non-empty, even if accelerations are not used
-  // Send all zeros (joint_state.accelerations is a vector of all zeros).
-
-  if (servo_params.publish_joint_positions)
-  {
-    for (size_t i = 0; i < num_joints; ++i)
+  auto add_point = [servo_params](trajectory_msgs::msg::JointTrajectory joint_trajectory, const KinematicState& state) {
+    trajectory_msgs::msg::JointTrajectoryPoint point;
+    size_t num_joints = state.positions.size();
+    point.positions.reserve(num_joints);
+    point.velocities.reserve(num_joints);
+    if (servo_params.publish_joint_positions)
     {
-      point.positions[i] = joint_state.positions[i];
+      for (const auto& pos : state.positions)
+      {
+        point.positions.emplace_back(pos);
+      }
     }
-  }
-  if (servo_params.publish_joint_velocities)
-  {
-    for (size_t i = 0; i < num_joints; ++i)
+    if (servo_params.publish_joint_velocities)
     {
-      point.velocities[i] = joint_state.velocities[i];
+      for (const auto& vel : state.velocities)
+      {
+        point.velocities.emplace_back(vel);
+      }
     }
-  }
-  if (servo_params.publish_joint_accelerations)
-  {
-    for (size_t i = 0; i < num_joints; ++i)
+    if (servo_params.publish_joint_accelerations)
     {
-      point.accelerations[i] = joint_state.accelerations[i];
+      for (const auto& acc : state.accelerations)
+      {
+        point.accelerations.emplace_back(acc);
+      }
     }
+    point.time_from_start = state.time - joint_trajectory.header.stamp;
+    joint_trajectory.points.emplace_back(point);
+  };
+
+  for (const auto& state : joint_cmd_rolling_window)
+  {
+    add_point(joint_trajectory, state);
   }
 
-  joint_trajectory.points.push_back(point);
+  // add end command stop point in case of large delay
+  const auto active_time_window = rclcpp::Duration::from_seconds(2 * servo_params.max_expected_latency);
+  auto last_command = joint_cmd_rolling_window.back();
+  auto end_state = last_command;
+  for (int i = 0; i < last_command.positions.size(); ++i)
+  {
+    end_state.positions[i] = last_command.positions[i] + last_command.velocities[i] * active_time_window.seconds();
+    end_state.velocities[i] = 0;
+    end_state.accelerations[i] = 0;
+    end_state.time = last_command.time + rclcpp::Duration::from_seconds(active_time_window.seconds());
+  }
+  add_point(joint_trajectory, end_state);
+
   return joint_trajectory;
+}
+
+void updateSlidingWindow(const KinematicState& next_joint_state, std::deque<KinematicState>& joint_cmd_rolling_window,
+                         double max_expected_latency, const rclcpp::Time& cur_time)
+{
+  // remove old commands
+  const auto active_time_window = rclcpp::Duration::from_seconds(2 * max_expected_latency);
+  while (!joint_cmd_rolling_window.empty() && joint_cmd_rolling_window.front().time < (cur_time - active_time_window))
+  {
+    joint_cmd_rolling_window.pop_front();
+  }
+
+  // add next command
+  joint_cmd_rolling_window.push_back(next_joint_state);
+  joint_cmd_rolling_window.back().time = cur_time + rclcpp::Duration::from_seconds(max_expected_latency);
 }
 
 std_msgs::msg::Float64MultiArray composeMultiArrayMessage(const servo::Params& servo_params,

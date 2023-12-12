@@ -78,7 +78,7 @@ public:
    * @param command The command to follow, std::variant type, can handle JointJog, Twist and Pose.
    * @return The required joint state.
    */
-  KinematicState getNextJointState(const ServoInput& command);
+  KinematicState getNextJointState(const KinematicState& current_state, const ServoInput& command);
 
   /**
    * \brief Create a trajectory message.
@@ -235,8 +235,6 @@ private:
   // Map between joint subgroup names and corresponding joint name - move group indices map
   std::unordered_map<std::string, JointNameToMoveGroupIndexMap> joint_name_to_index_maps_;
 
-  // keep track of previously generated joint commands for constructing trajectory messages
-  std::deque<KinematicState> committed_commands_;
 };
 
 }  // namespace moveit_servo

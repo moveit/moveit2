@@ -106,15 +106,25 @@ int main(int argc, char* argv[])
   auto pose_tracker = [&]() {
     KinematicState joint_state;
     rclcpp::WallRate tracking_rate(1 / servo_params.publish_period);
+    std::deque<KinematicState> joint_cmd_rolling_window;
+    KinematicState current_state = servo.getCurrentRobotState();
+    current_state.time = demo_node->now();
+    joint_cmd_rolling_window.push_back(current_state);
+
     while (!stop_tracking && rclcpp::ok())
     {
+      current_state = joint_cmd_rolling_window.back();
+
       {
         std::lock_guard<std::mutex> pguard(pose_guard);
-        joint_state = servo.getNextJointState(target_pose);
+        joint_state = servo.getNextJointState(current_state, target_pose);
       }
       StatusCode status = servo.getStatus();
-      if (status != StatusCode::INVALID)
-        trajectory_outgoing_cmd_pub->publish(composeTrajectoryMessage(servo_params, joint_state));
+      if (status != StatusCode::INVALID){
+        updateSlidingWindow(joint_state, joint_cmd_rolling_window, servo_params.max_expected_latency,
+                            demo_node->now());
+        trajectory_outgoing_cmd_pub->publish(composeTrajectoryMessage(servo_params, joint_cmd_rolling_window));
+      }
 
       tracking_rate.sleep();
     }

@@ -99,9 +99,9 @@ private:
   void twistCallback(const geometry_msgs::msg::TwistStamped::ConstSharedPtr& msg);
   void poseCallback(const geometry_msgs::msg::PoseStamped::ConstSharedPtr& msg);
 
-  std::optional<KinematicState> processJointJogCommand();
-  std::optional<KinematicState> processTwistCommand();
-  std::optional<KinematicState> processPoseCommand();
+  std::optional<KinematicState> processJointJogCommand(const KinematicState& current_state);
+  std::optional<KinematicState> processTwistCommand(const KinematicState& current_state);
+  std::optional<KinematicState> processPoseCommand(const KinematicState& current_state);
 
   // Variables
 
@@ -132,6 +132,9 @@ private:
 
   // Threads used by ServoNode
   std::thread servo_loop_thread_;
+
+  // rolling window of joint commands
+  std::deque<KinematicState> joint_cmd_rolling_window_;
 };
 
 }  // namespace moveit_servo
