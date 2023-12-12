@@ -156,7 +156,7 @@ composeTrajectoryMessage(const servo::Params& servo_params, const std::deque<Kin
   joint_trajectory.points.reserve(joint_cmd_rolling_window.size() + 1);
   joint_trajectory.header.stamp = joint_cmd_rolling_window.front().time;
 
-  auto add_point = [servo_params](trajectory_msgs::msg::JointTrajectory joint_trajectory, const KinematicState& state) {
+  auto add_point = [servo_params](trajectory_msgs::msg::JointTrajectory & joint_trajectory, const KinematicState& state) {
     trajectory_msgs::msg::JointTrajectoryPoint point;
     size_t num_joints = state.positions.size();
     point.positions.reserve(num_joints);

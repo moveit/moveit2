@@ -106,6 +106,8 @@ int main(int argc, char* argv[])
   auto pose_tracker = [&]() {
     KinematicState joint_state;
     rclcpp::WallRate tracking_rate(1 / servo_params.publish_period);
+
+    //create command queue to build trajectory message
     std::deque<KinematicState> joint_cmd_rolling_window;
     KinematicState current_state = servo.getCurrentRobotState();
     current_state.time = demo_node->now();
