@@ -197,7 +197,7 @@ bool Servo::validateParams(const servo::Params& servo_params) const
   bool params_valid = true;
   auto robot_state = planning_scene_monitor_->getStateMonitor()->getCurrentState();
   auto joint_model_group = robot_state->getJointModelGroup(servo_params.move_group_name);
-  std::string check_yaml_msg = " Check the parameters YAML file used to launch this node.";
+  const std::string check_yaml_string = " Check the parameters YAML file used to launch this node.";
   if (joint_model_group == nullptr)
   {
     RCLCPP_ERROR_STREAM(logger_, "The parameter 'move_group_name': `" << servo_params.move_group_name << '`'
