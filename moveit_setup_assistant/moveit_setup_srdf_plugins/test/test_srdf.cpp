@@ -38,8 +38,6 @@
 #include <moveit_setup_srdf_plugins/planning_groups.hpp>
 #include <tinyxml2.h>
 
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("test_srdf");
-
 using moveit_setup::getSharePath;
 using moveit_setup::SRDFConfig;
 using moveit_setup::srdf_setup::PlanningGroups;

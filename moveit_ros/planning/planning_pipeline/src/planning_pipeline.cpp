@@ -40,7 +40,13 @@
 
 namespace
 {
-const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.ros_planning.planning_pipeline");
+namespace
+{
+rclcpp::Logger getLogger()
+{
+  return moveit::getLogger("planning_pipeline");
+}
+}  // namespace
 
 /**
  * @brief Transform a joint trajectory into a vector of joint constraints
@@ -146,7 +152,7 @@ void PlanningPipeline::configure()
     catch (pluginlib::PluginlibException& ex)
     {
       std::string classes_str = fmt::format("{}", fmt::join(planner_plugin_loader_->getDeclaredClasses(), ", "));
-      RCLCPP_FATAL(LOGGER,
+      RCLCPP_FATAL(getLogger(),
                    "Exception while loading planner '%s': %s"
                    "Available plugins: %s",
                    planner_name.c_str(), ex.what(), classes_str.c_str());
@@ -165,7 +171,7 @@ void PlanningPipeline::configure()
     {
       throw std::runtime_error("Unable to initialize planning plugin " + planner_name);
     }
-    RCLCPP_INFO(LOGGER, "Successfully loaded planner '%s'", planner_instance->getDescription().c_str());
+    RCLCPP_INFO(getLogger(), "Successfully loaded planner '%s'", planner_instance->getDescription().c_str());
     planner_map_.insert(std::make_pair(planner_name, planner_instance));
   }
 
