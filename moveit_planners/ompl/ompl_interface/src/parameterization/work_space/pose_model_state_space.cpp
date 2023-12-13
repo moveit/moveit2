@@ -359,10 +359,6 @@ void PoseModelStateSpace::copyToOMPLState(ompl::base::State* state, const moveit
   state->as<StateType>()->setJointsComputed(true);
   state->as<StateType>()->setPoseComputed(false);
   computeStateFK(state);
-  /*
-  std::cout << "COPY STATE IN:\n";
-  printState(state, std::cout);
-  std::cout << "---------- COPY STATE IN\n"; */
 }
 
 }  // namespace ompl_interface

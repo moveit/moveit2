@@ -273,48 +273,6 @@ ConstraintApproximation::getStateSamplerAllocator(const moveit_msgs::msg::Constr
     return allocConstraintApproximationStateSampler(ss, space_signature_, state_storage_, milestones_);
   };
 }
-/*
-void ConstraintApproximation::visualizeDistribution(const
-std::string &link_name, unsigned int count,
-visualization_msgs::MarkerArray &arr) const
-{
-  moveit::core::RobotState robot_state(robot_model_);
-  robot_state.setToDefaultValues();
-
-  ompl::RNG rng;
-  std_msgs::ColorRGBA color;
-  color.r = 0.0f;
-  color.g = 1.0f;
-  color.b = 1.0f;
-  color.a = 1.0f;
-  if (state_storage_->size() < count)
-    count = state_storage_->size();
-
-  for (std::size_t i = 0 ; i < count ; ++i)
-  {
-    state_storage_->getStateSpace()->as<ModelBasedStateSpace>()->copyToRobotState(robot_state,
-state_storage_->getState(rng.uniformInt(0, state_storage_->size() - 1)));
-    const Eigen::Vector3d &pos =
-robot_state.getLinkState(link_name)->getGlobalLinkTransform().translation();
-
-    visualization_msgs::Marker mk;
-    mk.header.stamp = ros::Time::now();
-    mk.header.frame_id = robot_model_->getModelFrame();
-    mk.ns = "stored_constraint_data";
-    mk.id = i;
-    mk.type = visualization_msgs::Marker::SPHERE;
-    mk.action = visualization_msgs::Marker::ADD;
-    mk.pose.position.x = pos.x();
-    mk.pose.position.y = pos.y();
-    mk.pose.position.z = pos.z();
-    mk.pose.orientation.w = 1.0;
-    mk.scale.x = mk.scale.y = mk.scale.z = 0.035;
-    mk.color = color;
-    mk.lifetime = ros::Duration(30.0);
-    arr.markers.push_back(mk);
-  }
-  }
-*/
 
 void ConstraintsLibrary::loadConstraintApproximations(const std::string& path)
 {

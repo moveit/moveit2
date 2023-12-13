@@ -194,8 +194,6 @@ LinkPairMap computeDefaultCollisions(const planning_scene::PlanningSceneConstPtr
   // LinkGraph is a custom type of a map with a LinkModel as key and a set of LinkModels as second
   LinkGraph link_graph;
 
-  // RCLCPP_INFO_STREAM_STREAM(getLogger(), "Initial allowed Collision Matrix Size = " << scene.getAllowedCollisions().getSize() );
-
   // 0. GENERATE ALL POSSIBLE LINK PAIRS -------------------------------------------------------------
   // Generate a list of unique link pairs for all links with geometry. Order pairs alphabetically.
   // There should be n choose 2 pairs
@@ -248,8 +246,6 @@ LinkPairMap computeDefaultCollisions(const planning_scene::PlanningSceneConstPtr
     num_never = disableNeverInCollision(num_trials, *scene, link_pairs, req, links_seen_colliding, progress);
   }
 
-  // RCLCPP_INFO_STREAM(getLogger(), "Link pairs seen colliding ever: %d", int(links_seen_colliding.size()));
-
   if (verbose)
   {
     // Calculate number of disabled links:
@@ -274,12 +270,6 @@ LinkPairMap computeDefaultCollisions(const planning_scene::PlanningSceneConstPtr
     RCLCPP_INFO_STREAM(getLogger(), "Adjacent links disabled : " + std::to_string(num_adjacent));
     RCLCPP_INFO_STREAM(getLogger(), "Sometimes in collision : " + std::to_string(num_sometimes));
     RCLCPP_INFO_STREAM(getLogger(), "TOTAL DISABLED : " + std::to_string(num_disabled));
-
-    /*ROS_INFO("Copy to Spreadsheet:");
-    ROS_INFO_STREAM(num_links << "\t" << num_possible << "\t" << num_always << "\t" << num_never
-                    << "\t" << num_default << "\t" << num_adjacent << "\t" << num_sometimes
-                    << "\t" << num_disabled);
-    */
   }
 
   *progress = 100;  // end the status bar
@@ -392,7 +382,6 @@ void computeConnectionGraph(const moveit::core::LinkModel* start_link, LinkGraph
       }
     }
   }
-  // RCLCPP_INFO_STREAM(getLogger(), "Generated connection graph with %d links", int(link_graph.size()));
 }
 
 // ******************************************************************************************
@@ -433,9 +422,6 @@ unsigned int disableAdjacentLinks(planning_scene::PlanningScene& scene, LinkGrap
     for (std::set<const moveit::core::LinkModel*>::const_iterator adj_it = link_graph_it->second.begin();
          adj_it != link_graph_it->second.end(); ++adj_it)
     {
-      // RCLCPP_INFO_STREAM(getLogger(), "Disabled %s to %s", link_graph_it->first->getName().c_str(),
-      // (*adj_it)->getName().c_str() );
-
       // Check if either of the links have no geometry. If so, do not add (are we sure?)
       if (!link_graph_it->first->getShapes().empty() && !(*adj_it)->getShapes().empty())  // both links have geometry
       {
@@ -446,7 +432,6 @@ unsigned int disableAdjacentLinks(planning_scene::PlanningScene& scene, LinkGrap
       }
     }
   }
-  // RCLCPP_INFO_STREAM(getLogger(), "Disabled %d adjacent link pairs from collision checking", num_disabled);
 
   return num_disabled;
 }
@@ -473,9 +458,6 @@ unsigned int disableDefaultCollisions(planning_scene::PlanningScene& scene, Link
     // disable link checking in the collision matrix
     scene.getAllowedCollisionMatrixNonConst().setEntry(it->first.first, it->first.second, true);
   }
-
-  // RCLCPP_INFO_STREAM(getLogger(), "Disabled %d link pairs that are in collision in default state from collision
-  // checking", num_disabled);
 
   return num_disabled;
 }
@@ -522,7 +504,6 @@ unsigned int disableAlwaysInCollision(planning_scene::PlanningScene& scene, Link
       if (nc >= req.max_contacts)
       {
         req.max_contacts *= 2;  // double the max contacts that the CollisionRequest checks for
-        // RCLCPP_INFO_STREAM(getLogger(), "Doubling max_contacts to %d", int(req.max_contacts));
       }
     }
 
@@ -549,8 +530,6 @@ unsigned int disableAlwaysInCollision(planning_scene::PlanningScene& scene, Link
     // if no updates were made to the collision matrix, we stop
     if (found == 0)
       done = true;
-
-    // RCLCPP_INFO_STREAM(getLogger(), "Disabled %u link pairs that are always in collision from collision checking", found);
   }
 
   return num_disabled;
@@ -568,8 +547,6 @@ unsigned int disableNeverInCollision(const unsigned int num_trials, planning_sce
   std::mutex lock;  // used for sharing the same data structures
 
   int num_threads = std::thread::hardware_concurrency();  // how many cores does this computer have?
-  // RCLCPP_INFO_STREAM_STREAM(getLogger(), "Performing " << num_trials << " trials for 'always in collision' checking on " <<
-  //   num_threads << " threads...");
 
   for (int i = 0; i < num_threads; ++i)
   {
@@ -600,7 +577,6 @@ unsigned int disableNeverInCollision(const unsigned int num_trials, planning_sce
       }
     }
   }
-  // RCLCPP_INFO_STREAM(getLogger(), "Disabled %d link pairs that are never in collision", num_disabled);
 
   return num_disabled;
 }
@@ -610,8 +586,6 @@ unsigned int disableNeverInCollision(const unsigned int num_trials, planning_sce
 // ******************************************************************************************
 void disableNeverInCollisionThread(ThreadComputation tc)
 {
-  // RCLCPP_INFO_STREAM_STREAM(getLogger(), "Thread " << tc.thread_id_ << " running " << tc.num_trials_ << " trials");
-
   // User feedback vars
   const unsigned int progress_interval = tc.num_trials_ / 20;  // show progress update every 5%
 
