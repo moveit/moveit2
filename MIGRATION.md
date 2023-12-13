@@ -3,6 +3,7 @@
 API changes in MoveIt releases
 
 ## ROS Rolling
+- [12/2023] LMA kinematics plugin is removed to remove the maintenance work because better alternatives exist like KDL or TracIK
 - [10/2023] The planning pipeline now has a vector of planner plugins rather than a single one. Please update the planner plugin parameter e.g. like this:
 ```diff
 - planning_plugin: ompl_interface/OMPLPlanner
