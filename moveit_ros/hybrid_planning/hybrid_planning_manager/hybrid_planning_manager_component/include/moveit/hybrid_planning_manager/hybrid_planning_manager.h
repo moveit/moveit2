@@ -54,14 +54,14 @@ namespace moveit::hybrid_planning
 /**
  * Class HybridPlanningManager - ROS 2 component node that implements the hybrid planning manager.
  */
-class HybridPlanningManager : public rclcpp::Node
+class HybridPlanningManager
 {
 public:
   /** \brief Constructor */
   HybridPlanningManager(const rclcpp::NodeOptions& options);
 
   /** \brief Destructor */
-  ~HybridPlanningManager() override
+  ~HybridPlanningManager()
   {
     // Join the thread used for long-running callbacks
     if (long_callback_thread_.joinable())
@@ -71,19 +71,17 @@ public:
   }
 
   /**
-   * Allows creation of a smart pointer that references to instances of this object
-   * @return shared pointer of the HybridPlanningManager instance that called the function
-   */
-  std::shared_ptr<HybridPlanningManager> shared_from_this()
-  {
-    return std::static_pointer_cast<HybridPlanningManager>(Node::shared_from_this());
-  }
-
-  /**
    * Load and initialized planner logic plugin and ROS 2 action and topic interfaces
    * @return Initialization successful yes/no
    */
   bool initialize();
+
+  // This function is required to make this class a valid NodeClass
+  // see https://docs.ros2.org/foxy/api/rclcpp_components/register__node__macro_8hpp.html
+  rclcpp::node_interfaces::NodeBaseInterface::SharedPtr get_node_base_interface()  // NOLINT
+  {
+    return node_->get_node_base_interface();  // NOLINT
+  }
 
   /**
    * Cancel any active action goals, including global and local planners
@@ -115,18 +113,21 @@ public:
    */
   void sendHybridPlanningResponse(bool success);
 
+  /**
+   * @brief Process the action result and do an action call if necessary
+   *
+   * @param result Result to an event
+   */
+  void processReactionResult(const ReactionResult& result);
+
 private:
+  std::shared_ptr<rclcpp::Node> node_;
+
   // Planner logic plugin loader
   std::unique_ptr<pluginlib::ClassLoader<PlannerLogicInterface>> planner_logic_plugin_loader_;
 
   // Planner logic instance to implement reactive behavior
   std::shared_ptr<PlannerLogicInterface> planner_logic_instance_;
-
-  // Timer to trigger events periodically
-  rclcpp::TimerBase::SharedPtr timer_;
-
-  // Flag that indicates whether the manager is initialized
-  bool initialized_;
 
   // Flag that indicates hybrid planning has been canceled
   std::atomic<bool> stop_hybrid_planning_;

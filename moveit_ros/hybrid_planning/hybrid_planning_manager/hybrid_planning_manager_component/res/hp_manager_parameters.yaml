@@ -1,0 +1,27 @@
+hp_manager_parameters:
+  planner_logic_plugin_name: {
+    type: string,
+    description: "Planning group to be used",
+    default_value: "moveit::hybrid_planning/ReplanInvalidatedTrajectory",
+  }
+  local_planning_action_name: {
+    type: string,
+    description: "Name of the local planner action interface",
+    validation: {
+      not_empty<>: []
+    }
+  }
+  global_planning_action_name: {
+    type: string,
+    description: "Name of the global planner action interface",
+    validation: {
+      not_empty<>: []
+    }
+  }
+  hybrid_planning_action_name: {
+    type: string,
+    description: "Name of the hybrid planning action interface",
+    validation: {
+      not_empty<>: []
+    }
+  }

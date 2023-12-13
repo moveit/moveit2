@@ -34,6 +34,7 @@ set(LIBRARIES
   single_plan_execution_plugin
   # Parameters
   local_planner_parameters
+  hp_manager_parameters
 )
 
 set(THIS_PACKAGE_INCLUDE_DEPENDS
