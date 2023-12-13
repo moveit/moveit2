@@ -44,7 +44,6 @@ namespace mpi = moveit::planning_interface;
 
 namespace moveit_rviz_plugin
 {
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_ros_visualization.motion_planning_param_widget");
 
 MotionPlanningParamWidget::MotionPlanningParamWidget(QWidget* parent)
   : rviz_common::properties::PropertyTreeWidget(parent)

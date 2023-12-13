@@ -35,11 +35,6 @@
 #include <moveit/local_planner/feedback_types.h>
 #include <moveit/planner_logic_plugins/replan_invalidated_trajectory.h>
 
-namespace
-{
-const rclcpp::Logger LOGGER = rclcpp::get_logger("hybrid_planning_manager");
-}
-
 namespace moveit::hybrid_planning
 {
 ReactionResult ReplanInvalidatedTrajectory::react(const std::string& event)
