@@ -91,7 +91,7 @@ int main(int argc, char* argv[])
   std::chrono::seconds time_elapsed(0);
   auto start_time = std::chrono::steady_clock::now();
 
-  //create command queue to build trajectory message
+  // create command queue to build trajectory message
   std::deque<KinematicState> joint_cmd_rolling_window;
   KinematicState current_state = servo.getCurrentRobotState();
   current_state.time = demo_node->now();
@@ -113,8 +113,7 @@ int main(int argc, char* argv[])
     }
     else if (status != StatusCode::INVALID)
     {
-      updateSlidingWindow(joint_state, joint_cmd_rolling_window, servo_params.max_expected_latency,
-                          demo_node->now());
+      updateSlidingWindow(joint_state, joint_cmd_rolling_window, servo_params.max_expected_latency, demo_node->now());
       trajectory_outgoing_cmd_pub->publish(composeTrajectoryMessage(servo_params, joint_cmd_rolling_window));
     }
     rate.sleep();

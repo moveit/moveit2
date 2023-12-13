@@ -81,8 +81,9 @@ int main(int argc, char* argv[])
   Servo servo = Servo(demo_node, servo_param_listener, planning_scene_monitor);
 
   // Helper function to get the current pose of a specified frame.
-  const auto get_current_pose = [planning_scene_monitor](const std::string& target_frame) {
-    return planning_scene_monitor->getStateMonitor()->getCurrentState()->getGlobalLinkTransform(target_frame);
+  const auto get_current_pose = [planning_scene_monitor](const std::string& target_frame,
+                                                         moveit::core::RobotStatePtr robot_state) {
+    return robot_state->getGlobalLinkTransform(target_frame);
   };
 
   // Wait for some time, so that the planning scene is loaded in rviz.
@@ -100,34 +101,46 @@ int main(int argc, char* argv[])
   PoseCommand target_pose;
   target_pose.frame_id = K_BASE_FRAME;
   // Initializing the target pose as end effector pose, this can be any pose.
-  target_pose.pose = get_current_pose(K_TIP_FRAME);
+  auto robot_state = planning_scene_monitor->getStateMonitor()->getCurrentState();
+
+  // Get the robot state and joint model group info.
+  const moveit::core::JointModelGroup* joint_model_group =
+      robot_state->getJointModelGroup(servo_params.move_group_name);
+  target_pose.pose = get_current_pose(K_TIP_FRAME, robot_state);
+
+  // create command queue to build trajectory message
+  std::deque<KinematicState> joint_cmd_rolling_window;
 
   // The pose tracking lambda that will be run in a separate thread.
   auto pose_tracker = [&]() {
     KinematicState joint_state;
     rclcpp::WallRate tracking_rate(1 / servo_params.publish_period);
-
-    //create command queue to build trajectory message
-    std::deque<KinematicState> joint_cmd_rolling_window;
-    KinematicState current_state = servo.getCurrentRobotState();
-    current_state.time = demo_node->now();
-    joint_cmd_rolling_window.push_back(current_state);
+    KinematicState current_state;
+    {
+      std::lock_guard<std::mutex> pguard(pose_guard);
+      current_state = servo.getCurrentRobotState();
+      current_state.time = demo_node->now();
+      joint_cmd_rolling_window.push_back(current_state);
+      current_state.time = current_state.time + rclcpp::Duration::from_seconds(servo_params.max_expected_latency);
+      joint_cmd_rolling_window.push_back(current_state);
+    }
 
     while (!stop_tracking && rclcpp::ok())
     {
-      current_state = joint_cmd_rolling_window.back();
-
+      //      robot_state->setJointGroupPositions(joint_model_group, current_state.positions);
       {
         std::lock_guard<std::mutex> pguard(pose_guard);
+        current_state = joint_cmd_rolling_window.back();
         joint_state = servo.getNextJointState(current_state, target_pose);
-      }
-      StatusCode status = servo.getStatus();
-      if (status != StatusCode::INVALID){
-        updateSlidingWindow(joint_state, joint_cmd_rolling_window, servo_params.max_expected_latency,
-                            demo_node->now());
-        trajectory_outgoing_cmd_pub->publish(composeTrajectoryMessage(servo_params, joint_cmd_rolling_window));
-      }
 
+        StatusCode status = servo.getStatus();
+        if (status != StatusCode::INVALID)
+        {
+          updateSlidingWindow(joint_state, joint_cmd_rolling_window, servo_params.max_expected_latency,
+                              demo_node->now());
+          trajectory_outgoing_cmd_pub->publish(composeTrajectoryMessage(servo_params, joint_cmd_rolling_window));
+        }
+      }
       tracking_rate.sleep();
     }
   };
@@ -152,7 +165,10 @@ int main(int argc, char* argv[])
   {
     {
       std::lock_guard<std::mutex> pguard(pose_guard);
-      target_pose.pose = get_current_pose(K_TIP_FRAME);
+      //      robot_state = planning_scene_monitor->getStateMonitor()->getCurrentState();
+      KinematicState current_state = joint_cmd_rolling_window.back();
+      robot_state->setJointGroupPositions(joint_model_group, current_state.positions);
+      target_pose.pose = get_current_pose(K_TIP_FRAME, robot_state);
       const bool satisfies_linear_tolerance = target_pose.pose.translation().isApprox(
           terminal_pose.translation(), servo_params.pose_tracking.linear_tolerance);
       const bool satisfies_angular_tolerance =

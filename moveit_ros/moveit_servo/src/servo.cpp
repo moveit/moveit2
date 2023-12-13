@@ -467,6 +467,11 @@ KinematicState Servo::getNextJointState(const KinematicState& current_state, con
   const moveit::core::JointModelGroup* joint_model_group =
       robot_state->getJointModelGroup(servo_params_.move_group_name);
 
+  // TODO robot_state should be passed in
+  robot_state->setJointGroupPositions(joint_model_group, current_state.positions);
+  robot_state->setJointGroupVelocities(joint_model_group, current_state.velocities);
+  robot_state->setJointGroupAccelerations(joint_model_group, current_state.accelerations);
+
   // Get necessary information about joints
   const std::vector<std::string> joint_names = joint_model_group->getActiveJointModelNames();
   const moveit::core::JointBoundsVector joint_bounds = joint_model_group->getActiveJointModelsBounds();
@@ -528,12 +533,8 @@ KinematicState Servo::getNextJointState(const KinematicState& current_state, con
       target_state = haltJoints(joints_to_halt, current_state, target_state);
     }
   }
-
-
-
   return target_state;
 }
-
 
 std::optional<Eigen::Isometry3d> Servo::getPlanningToCommandFrameTransform(const std::string& command_frame,
                                                                            const std::string& planning_frame) const

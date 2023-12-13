@@ -308,6 +308,7 @@ void ServoNode::servoLoop()
 
     bool use_trajectory = servo_params_.command_out_type == "trajectory_msgs/JointTrajectory";
     KinematicState current_state;
+    auto cur_time = node_->now();
 
     if (use_trajectory && !joint_cmd_rolling_window_.empty())
     {
@@ -316,7 +317,7 @@ void ServoNode::servoLoop()
     else
     {
       current_state = servo_->getCurrentRobotState();
-      current_state.time = node_->now();
+      current_state.time = cur_time;
       joint_cmd_rolling_window_.push_back(current_state);
     }
 
@@ -331,7 +332,7 @@ void ServoNode::servoLoop()
     {
       next_joint_state = processTwistCommand(current_state);
     }
-    else if (expected_type == CommandType::POSE && new_pose_msg_)
+    else if (new_pose_msg_)
     {
       next_joint_state = processPoseCommand(current_state);
     }
@@ -340,14 +341,29 @@ void ServoNode::servoLoop()
       new_joint_jog_msg_ = new_twist_msg_ = new_pose_msg_ = false;
       RCLCPP_WARN_STREAM(node_->get_logger(), "Command type has not been set, cannot accept input");
     }
+    else
+    {
+      // no commands received, robot should try eventually come to a stop
+      current_state = last_commanded_state_;
+      Eigen::VectorXd eig_vel = current_state.velocities;
+      std::vector<double> vel;
+      std::copy(eig_vel.data(), eig_vel.data() + eig_vel.size(), std::back_inserter(vel));
+      auto cmd_type = servo_->getCommandType();
+      servo_->setCommandType(CommandType::JOINT_JOG);
+      JointJogCommand command{ current_state.joint_names, vel };
+      next_joint_state = servo_->getNextJointState(current_state, command);
+      next_joint_state->velocities *= .5;
+      servo_->setCommandType(cmd_type);
+    }
 
     if (next_joint_state && (servo_->getStatus() != StatusCode::INVALID) &&
         (servo_->getStatus() != StatusCode::HALT_FOR_COLLISION))
     {
       if (use_trajectory)
       {
-        updateSlidingWindow(next_joint_state.value(), joint_cmd_rolling_window_, servo_params_.max_expected_latency,
-                            node_->now());
+        auto& next_joint_state_value = next_joint_state.value();
+        updateSlidingWindow(next_joint_state_value, joint_cmd_rolling_window_, servo_params_.max_expected_latency,
+                            cur_time);
         trajectory_publisher_->publish(composeTrajectoryMessage(servo_params_, joint_cmd_rolling_window_));
       }
       else

@@ -156,7 +156,7 @@ composeTrajectoryMessage(const servo::Params& servo_params, const std::deque<Kin
   joint_trajectory.points.reserve(joint_cmd_rolling_window.size() + 1);
   joint_trajectory.header.stamp = joint_cmd_rolling_window.front().time;
 
-  auto add_point = [servo_params](trajectory_msgs::msg::JointTrajectory & joint_trajectory, const KinematicState& state) {
+  auto add_point = [servo_params](trajectory_msgs::msg::JointTrajectory& joint_trajectory, const KinematicState& state) {
     trajectory_msgs::msg::JointTrajectoryPoint point;
     size_t num_joints = state.positions.size();
     point.positions.reserve(num_joints);
@@ -192,7 +192,7 @@ composeTrajectoryMessage(const servo::Params& servo_params, const std::deque<Kin
   }
 
   // add end command stop point in case of large delay
-  const auto active_time_window = rclcpp::Duration::from_seconds(2 * servo_params.max_expected_latency);
+  const auto active_time_window = rclcpp::Duration::from_seconds(.5);  // TODO parameter for ramp-down time
   auto last_command = joint_cmd_rolling_window.back();
   auto end_state = last_command;
   for (int i = 0; i < last_command.positions.size(); ++i)

@@ -81,12 +81,6 @@ public:
   KinematicState getNextJointState(const KinematicState& current_state, const ServoInput& command);
 
   /**
-   * \brief Create a trajectory message.
-   * @return The trajectory message.
-   */
-  trajectory_msgs::msg::JointTrajectory createTrajectoryMessage();
-
-  /**
    * \brief Set the type of incoming servo command.
    * @param command_type The type of command servo should expect.
    */
@@ -234,7 +228,6 @@ private:
 
   // Map between joint subgroup names and corresponding joint name - move group indices map
   std::unordered_map<std::string, JointNameToMoveGroupIndexMap> joint_name_to_index_maps_;
-
 };
 
 }  // namespace moveit_servo
