@@ -217,6 +217,11 @@ void updateSlidingWindow(const KinematicState& next_joint_state, std::deque<Kine
     joint_cmd_rolling_window.pop_front();
   }
 
+  // replace value at end of window if timestamp is the same
+  if (!joint_cmd_rolling_window.empty() && cur_time + rclcpp::Duration::from_seconds(max_expected_latency) == joint_cmd_rolling_window.back().time){
+    joint_cmd_rolling_window.pop_back();
+  }
+
   // add next command
   joint_cmd_rolling_window.push_back(next_joint_state);
   joint_cmd_rolling_window.back().time = cur_time + rclcpp::Duration::from_seconds(max_expected_latency);
