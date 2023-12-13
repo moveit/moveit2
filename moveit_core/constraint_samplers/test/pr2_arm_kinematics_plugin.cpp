@@ -141,8 +141,6 @@ int PR2ArmIKSolver::CartToJnt(const KDL::JntArray& q_init, const KDL::Frame& p_i
       {
         RCLCPP_WARN(getLogger(), "%d: %f", j, solution_ik[i][j]);
       }
-      RCLCPP_WARN(getLogger(), " ");
-      RCLCPP_WARN(getLogger(), " ");
     }
     double tmp_distance = computeEuclideanDistance(solution_ik[i], q_init);
     if (tmp_distance < min_distance)
