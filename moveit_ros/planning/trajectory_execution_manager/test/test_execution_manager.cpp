@@ -110,8 +110,6 @@ TEST_F(MoveItCppTest, PushExecuteAndWaitTest)
 
 }  // namespace moveit_cpp
 
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_ros.trajectory_execution_manager.test_app");
-
 int main(int argc, char** argv)
 {
   testing::InitGoogleTest(&argc, argv);

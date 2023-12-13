@@ -42,6 +42,7 @@
 #include <rclcpp/logger.hpp>
 #include <rclcpp/logging.hpp>
 #include <urdf_parser/urdf_parser.h>
+#include <moveit/utils/logger.hpp>
 
 #include <pluginlib/class_loader.hpp>
 
@@ -51,7 +52,13 @@ namespace moveit
 {
 namespace core
 {
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_utils.robot_model_test_utils");
+namespace
+{
+rclcpp::Logger getLogger()
+{
+  return moveit::getLogger("robot_model_test_utils");
+}
+}  // namespace
 
 moveit::core::RobotModelPtr loadTestingRobotModel(const std::string& robot_name)
 {
@@ -77,7 +84,8 @@ urdf::ModelInterfaceSharedPtr loadModelInterface(const std::string& robot_name)
   urdf::ModelInterfaceSharedPtr urdf_model = urdf::parseURDFFile(urdf_path);
   if (urdf_model == nullptr)
   {
-    RCLCPP_ERROR(LOGGER, "Cannot find URDF for %s. Make sure moveit_resources_<your_robot_description> is installed",
+    RCLCPP_ERROR(getLogger(),
+                 "Cannot find URDF for %s. Make sure moveit_resources_<your_robot_description> is installed",
                  robot_name.c_str());
   }
   return urdf_model;
@@ -150,22 +158,22 @@ void RobotModelBuilder::addChain(const std::string& section, const std::string& 
   boost::split_regex(link_names, section, boost::regex("->"));
   if (link_names.empty())
   {
-    RCLCPP_ERROR(LOGGER, "No links specified (empty section?)");
+    RCLCPP_ERROR(getLogger(), "No links specified (empty section?)");
     is_valid_ = false;
     return;
   }
   // First link should already be added.
   if (!urdf_model_->getLink(link_names[0]))
   {
-    RCLCPP_ERROR(LOGGER, "Link %s not present in builder yet!", link_names[0].c_str());
+    RCLCPP_ERROR(getLogger(), "Link %s not present in builder yet!", link_names[0].c_str());
     is_valid_ = false;
     return;
   }
 
   if (!joint_origins.empty() && link_names.size() - 1 != joint_origins.size())
   {
-    RCLCPP_ERROR(LOGGER, "There should be one more link (%zu) than there are joint origins (%zu)", link_names.size(),
-                 joint_origins.size());
+    RCLCPP_ERROR(getLogger(), "There should be one more link (%zu) than there are joint origins (%zu)",
+                 link_names.size(), joint_origins.size());
     is_valid_ = false;
     return;
   }
@@ -176,7 +184,7 @@ void RobotModelBuilder::addChain(const std::string& section, const std::string& 
     // These links shouldn't be present already.
     if (urdf_model_->getLink(link_names[i]))
     {
-      RCLCPP_ERROR(LOGGER, "Link %s is already specified", link_names[i].c_str());
+      RCLCPP_ERROR(getLogger(), "Link %s is already specified", link_names[i].c_str());
       is_valid_ = false;
       return;
     }
@@ -223,7 +231,7 @@ void RobotModelBuilder::addChain(const std::string& section, const std::string& 
     }
     else
     {
-      RCLCPP_ERROR(LOGGER, "No such joint type as %s", type.c_str());
+      RCLCPP_ERROR(getLogger(), "No such joint type as %s", type.c_str());
       is_valid_ = false;
       return;
     }
@@ -246,7 +254,7 @@ void RobotModelBuilder::addInertial(const std::string& link_name, double mass, g
 {
   if (!urdf_model_->getLink(link_name))
   {
-    RCLCPP_ERROR(LOGGER, "Link %s not present in builder yet!", link_name.c_str());
+    RCLCPP_ERROR(getLogger(), "Link %s not present in builder yet!", link_name.c_str());
     is_valid_ = false;
     return;
   }
@@ -283,7 +291,7 @@ void RobotModelBuilder::addCollisionBox(const std::string& link_name, const std:
 {
   if (dims.size() != 3)
   {
-    RCLCPP_ERROR(LOGGER, "There can only be 3 dimensions of a box (given %zu!)", dims.size());
+    RCLCPP_ERROR(getLogger(), "There can only be 3 dimensions of a box (given %zu!)", dims.size());
     is_valid_ = false;
     return;
   }
@@ -309,7 +317,7 @@ void RobotModelBuilder::addLinkCollision(const std::string& link_name, const urd
 {
   if (!urdf_model_->getLink(link_name))
   {
-    RCLCPP_ERROR(LOGGER, "Link %s not present in builder yet!", link_name.c_str());
+    RCLCPP_ERROR(getLogger(), "Link %s not present in builder yet!", link_name.c_str());
     is_valid_ = false;
     return;
   }
@@ -327,7 +335,7 @@ void RobotModelBuilder::addLinkVisual(const std::string& link_name, const urdf::
 {
   if (!urdf_model_->getLink(link_name))
   {
-    RCLCPP_ERROR(LOGGER, "Link %s not present in builder yet!", link_name.c_str());
+    RCLCPP_ERROR(getLogger(), "Link %s not present in builder yet!", link_name.c_str());
     is_valid_ = false;
     return;
   }
@@ -430,7 +438,7 @@ moveit::core::RobotModelPtr RobotModelBuilder::build()
   }
   catch (urdf::ParseError& e)
   {
-    RCLCPP_ERROR(LOGGER, "Failed to build tree: %s", e.what());
+    RCLCPP_ERROR(getLogger(), "Failed to build tree: %s", e.what());
     return robot_model;
   }
 
@@ -441,7 +449,7 @@ moveit::core::RobotModelPtr RobotModelBuilder::build()
   }
   catch (urdf::ParseError& e)
   {
-    RCLCPP_ERROR(LOGGER, "Failed to find root link: %s", e.what());
+    RCLCPP_ERROR(getLogger(), "Failed to find root link: %s", e.what());
     return robot_model;
   }
   srdf_writer_->updateSRDFModel(*urdf_model_);

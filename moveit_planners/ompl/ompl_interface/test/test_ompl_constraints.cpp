@@ -56,13 +56,17 @@
 #include <moveit/utils/robot_model_test_utils.h>
 #include <moveit/ompl_interface/detail/ompl_constraints.h>
 #include <moveit_msgs/msg/constraints.hpp>
+#include <moveit/utils/logger.hpp>
 
 #include <ompl/util/Exception.h>
 #include <ompl/base/spaces/RealVectorStateSpace.h>
 #include <ompl/base/spaces/constraint/ProjectedStateSpace.h>
 #include <ompl/base/ConstrainedSpaceInformation.h>
 
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.ompl_planning.test.test_ompl_constraints");
+rclcpp::Logger getLogger()
+{
+  return moveit::getLogger("test_ompl_constraints");
+}
 
 /** \brief Number of times to run a test that uses randomly generated input. **/
 constexpr int NUM_RANDOM_TESTS = 10;
@@ -163,7 +167,7 @@ protected:
   {
     std::string different_link = joint_model_group_->getLinkModelNames().at(num_dofs_ - DIFFERENT_LINK_OFFSET);
 
-    RCLCPP_DEBUG_STREAM(LOGGER, different_link);
+    RCLCPP_DEBUG_STREAM(getLogger(), different_link);
 
     moveit_msgs::msg::Constraints constraint_msgs;
     constraint_msgs.position_constraints.push_back(createPositionConstraint(base_link_name_, different_link));
@@ -207,10 +211,10 @@ protected:
 
       Eigen::MatrixXd jac_approx = numericalJacobianPosition(q, constraint_->getLinkName());
 
-      RCLCPP_DEBUG_STREAM(LOGGER, "Analytical jacobian:");
-      RCLCPP_DEBUG_STREAM(LOGGER, jac_exact);
-      RCLCPP_DEBUG_STREAM(LOGGER, "Finite difference jacobian:");
-      RCLCPP_DEBUG_STREAM(LOGGER, jac_approx);
+      RCLCPP_DEBUG_STREAM(getLogger(), "Analytical jacobian:");
+      RCLCPP_DEBUG_STREAM(getLogger(), jac_exact);
+      RCLCPP_DEBUG_STREAM(getLogger(), "Finite difference jacobian:");
+      RCLCPP_DEBUG_STREAM(getLogger(), jac_approx);
 
       total_error = (jac_exact - jac_approx).lpNorm<1>();
       EXPECT_LT(total_error, JAC_ERROR_TOLERANCE);
@@ -255,7 +259,7 @@ protected:
     }
     catch (ompl::Exception& ex)
     {
-      RCLCPP_ERROR(LOGGER, "Sanity checks did not pass: %s", ex.what());
+      RCLCPP_ERROR(getLogger(), "Sanity checks did not pass: %s", ex.what());
     }
   }
 
