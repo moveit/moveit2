@@ -263,8 +263,7 @@ bool Servo::validateParams(const servo::Params& servo_params) const
     RCLCPP_ERROR_STREAM(
         logger_,
         "The parameter 'joint_limit_margins' must have the same number of elements as the number of joints in the "
-        "move group. "
-        "The size of 'joint_limit_margins' is '"
+        "move group.  The size of 'joint_limit_margins' is '"
             << servo_params.joint_limit_margins.size() << "' but the number of joints of the move group '"
             << servo_params.move_group_name << "' is '"
             << robot_state->getJointModelGroup(servo_params.move_group_name)->getActiveVariableCount() << "'"
