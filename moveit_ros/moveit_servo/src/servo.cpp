@@ -497,14 +497,15 @@ KinematicState Servo::getNextJointState(const KinematicState& current_state, con
   // The computations can be skipped also in case we are halting.
   if (servo_status_ != StatusCode::INVALID && servo_status_ != StatusCode::HALT_FOR_COLLISION)
   {
-    // Apply collision scaling to the joint position delta
-    joint_position_delta *= collision_velocity_scale_;
-
     // Compute the next joint positions based on the joint position deltas
     target_state.positions = current_state.positions + joint_position_delta;
 
     // Apply smoothing to the positions if a smoother was provided.
     doSmoothing(target_state);
+
+    // Apply collision scaling to the joint position delta
+    target_state.positions =
+        current_state.positions + collision_velocity_scale_ * (target_state.positions - current_state.positions);
 
     // Compute velocities based on smoothed joint positions
     target_state.velocities = (target_state.positions - current_state.positions) / servo_params_.publish_period;

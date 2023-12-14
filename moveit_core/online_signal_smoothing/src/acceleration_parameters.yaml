@@ -1,0 +1,9 @@
+online_signal_smoothing:
+  joint_acceleration_limit: {
+    type: double,
+    description: "The unsigned joint acceleration limit used for smoothing",
+    default_value: 10.0,
+    validation: {
+      gt<>: 0.0
+    }
+  }

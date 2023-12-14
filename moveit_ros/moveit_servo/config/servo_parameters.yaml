@@ -27,11 +27,23 @@ servo:
     type: double,
     read_only: true,
     default_value: 0.05,
-    description: "Maximum expected latency between generating a servo command and the controller receiving it [seconds].",
+    description: "Maximum expected latency between generating a servo \
+                  command and the controller receiving it [seconds].",
     validation: {
       gt<>: 0.0
     }
   }
+
+  trajectory_stopping_time: {
+    type: double,
+    read_only: true,
+    default_value: 0.25,
+    description: "The amount of time the robot will take to stop in case the servo node losses connection [seconds]. \
+                  Only applicable when command_out_type is set to trajectory_msgs/JointTrajectory.",
+    validation: {
+      gt<>: 0.0
+    }
+}
 
   move_group_name: {
     type: string,
@@ -222,7 +234,7 @@ servo:
   smoothing_filter_plugin_name: {
     type: string,
     read_only: true,
-    default_value: "online_signal_smoothing::ButterworthFilterPlugin",
+    default_value: "online_signal_smoothing::AccelerationLimitedPlugin",
     description: "The name of the smoothing plugin to be used"
   }
 

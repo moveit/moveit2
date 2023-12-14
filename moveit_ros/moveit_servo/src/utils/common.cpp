@@ -191,16 +191,16 @@ composeTrajectoryMessage(const servo::Params& servo_params, const std::deque<Kin
     add_point(joint_trajectory, state);
   }
 
-  // add end command stop point in case of large delay
-  const auto active_time_window = rclcpp::Duration::from_seconds(.5);  // TODO parameter for ramp-down time
+  // add end command stop point in case of large delay or connection loss
+  const auto stopping_time = rclcpp::Duration::from_seconds(servo_params.trajectory_stopping_time);
   auto last_command = joint_cmd_rolling_window.back();
   auto end_state = last_command;
   for (int i = 0; i < last_command.positions.size(); ++i)
   {
-    end_state.positions[i] = last_command.positions[i] + last_command.velocities[i] * active_time_window.seconds();
+    end_state.positions[i] = last_command.positions[i] + last_command.velocities[i] * stopping_time.seconds();
     end_state.velocities[i] = 0;
     end_state.accelerations[i] = 0;
-    end_state.time = last_command.time + rclcpp::Duration::from_seconds(active_time_window.seconds());
+    end_state.time = last_command.time + rclcpp::Duration::from_seconds(stopping_time.seconds());
   }
   add_point(joint_trajectory, end_state);
 
@@ -217,8 +217,10 @@ void updateSlidingWindow(const KinematicState& next_joint_state, std::deque<Kine
     joint_cmd_rolling_window.pop_front();
   }
 
-  // replace value at end of window if timestamp is the same
-  if (!joint_cmd_rolling_window.empty() && cur_time + rclcpp::Duration::from_seconds(max_expected_latency) == joint_cmd_rolling_window.back().time){
+  // replace command at end of window if timestamp is the same
+  if (!joint_cmd_rolling_window.empty() &&
+      cur_time + rclcpp::Duration::from_seconds(max_expected_latency) == joint_cmd_rolling_window.back().time)
+  {
     joint_cmd_rolling_window.pop_back();
   }
 
