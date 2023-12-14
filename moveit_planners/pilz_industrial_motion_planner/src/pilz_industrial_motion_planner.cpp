@@ -48,13 +48,17 @@
 #include <pluginlib/class_loader.hpp>
 
 #include <memory>
+#include <moveit/utils/logger.hpp>
 
 namespace pilz_industrial_motion_planner
 {
 namespace
 {
 const std::string PARAM_NAMESPACE_LIMITS = "robot_description_planning";
-const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.pilz_industrial_motion_planner");
+rclcpp::Logger getLogger()
+{
+  return moveit::getLogger("pilz_industrial_motion_planner");
+}
 }  // namespace
 
 bool CommandPlanner::initialize(const moveit::core::RobotModelConstPtr& model, const rclcpp::Node::SharedPtr& node,
@@ -88,12 +92,12 @@ bool CommandPlanner::initialize(const moveit::core::RobotModelConstPtr& model, c
     ss << factory << ' ';
   }
 
-  RCLCPP_INFO_STREAM(LOGGER, "Available plugins: " << ss.str());
+  RCLCPP_INFO_STREAM(getLogger(), "Available plugins: " << ss.str());
 
   // Load each factory
   for (const auto& factory : factories)
   {
-    RCLCPP_INFO_STREAM(LOGGER, "About to load: " << factory);
+    RCLCPP_INFO_STREAM(getLogger(), "About to load: " << factory);
     PlanningContextLoaderPtr loader_pointer(planner_context_loader_->createSharedInstance(factory));
 
     pilz_industrial_motion_planner::LimitsContainer limits;
@@ -130,14 +134,14 @@ CommandPlanner::getPlanningContext(const planning_scene::PlanningSceneConstPtr& 
                                    moveit_msgs::msg::MoveItErrorCodes& error_code) const
 {
   // TODO(henningkayser): print req
-  // RCLCPP_DEBUG_STREAM(LOGGER, "Loading PlanningContext for request\n<request>\n" << req << "\n</request>");
-  RCLCPP_DEBUG(LOGGER, "Loading PlanningContext");
+  // RCLCPP_DEBUG_STREAM(getLogger(), "Loading PlanningContext for request\n<request>\n" << req << "\n</request>");
+  RCLCPP_DEBUG(getLogger(), "Loading PlanningContext");
 
   // Check that a loaded for this request exists
   if (!canServiceRequest(req))
   {
-    RCLCPP_ERROR_STREAM(LOGGER, "No ContextLoader for planner_id '" << req.planner_id.c_str()
-                                                                    << "' found. Planning not possible.");
+    RCLCPP_ERROR_STREAM(getLogger(), "No ContextLoader for planner_id '" << req.planner_id.c_str()
+                                                                         << "' found. Planning not possible.");
     return nullptr;
   }
 
@@ -145,7 +149,8 @@ CommandPlanner::getPlanningContext(const planning_scene::PlanningSceneConstPtr& 
 
   if (context_loader_map_.at(req.planner_id)->loadContext(planning_context, req.planner_id, req.group_name))
   {
-    RCLCPP_DEBUG_STREAM(LOGGER, "Found planning context loader for " << req.planner_id << " group:" << req.group_name);
+    RCLCPP_DEBUG_STREAM(getLogger(),
+                        "Found planning context loader for " << req.planner_id << " group:" << req.group_name);
     planning_context->setMotionPlanRequest(req);
     planning_context->setPlanningScene(planning_scene);
     return planning_context;
@@ -161,34 +166,36 @@ bool CommandPlanner::canServiceRequest(const moveit_msgs::msg::MotionPlanRequest
 {
   if (context_loader_map_.find(req.planner_id) == context_loader_map_.end())
   {
-    RCLCPP_ERROR(LOGGER, "Cannot service planning request because planner ID '%s' does not exist.",
+    RCLCPP_ERROR(getLogger(), "Cannot service planning request because planner ID '%s' does not exist.",
                  req.planner_id.c_str());
     return false;
   }
 
   if (req.group_name.empty())
   {
-    RCLCPP_ERROR(LOGGER, "Cannot service planning request because group name is not specified.");
+    RCLCPP_ERROR(getLogger(), "Cannot service planning request because group name is not specified.");
     return false;
   }
 
   auto joint_mode_group_ptr = model_->getJointModelGroup(req.group_name);
   if (joint_mode_group_ptr == nullptr)
   {
-    RCLCPP_ERROR(LOGGER, "Cannot service planning request because group '%s' does not exist.", req.group_name.c_str());
+    RCLCPP_ERROR(getLogger(), "Cannot service planning request because group '%s' does not exist.",
+                 req.group_name.c_str());
     return false;
   }
 
   if (joint_mode_group_ptr->getSolverInstance() == nullptr)
   {
-    RCLCPP_ERROR(LOGGER, "Cannot service planning request because group '%s' does have an IK solver instance.",
+    RCLCPP_ERROR(getLogger(), "Cannot service planning request because group '%s' does have an IK solver instance.",
                  req.group_name.c_str());
     return false;
   }
 
   if (!req.trajectory_constraints.constraints.empty())
   {
-    RCLCPP_ERROR(LOGGER, "Cannot service planning request because PILZ does not support 'trajectory constraints'.");
+    RCLCPP_ERROR(getLogger(),
+                 "Cannot service planning request because PILZ does not support 'trajectory constraints'.");
     return false;
   }
 
@@ -202,7 +209,7 @@ void CommandPlanner::registerContextLoader(
   if (context_loader_map_.find(planning_context_loader->getAlgorithm()) == context_loader_map_.end())
   {
     context_loader_map_[planning_context_loader->getAlgorithm()] = planning_context_loader;
-    RCLCPP_INFO_STREAM(LOGGER, "Registered Algorithm [" << planning_context_loader->getAlgorithm() << ']');
+    RCLCPP_INFO_STREAM(getLogger(), "Registered Algorithm [" << planning_context_loader->getAlgorithm() << ']');
   }
   else
   {

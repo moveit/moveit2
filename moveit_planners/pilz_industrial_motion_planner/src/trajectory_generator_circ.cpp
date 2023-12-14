@@ -48,13 +48,17 @@
 #include <rclcpp/logging.hpp>
 #include <tf2_eigen/tf2_eigen.hpp>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
+#include <moveit/utils/logger.hpp>
 
 namespace pilz_industrial_motion_planner
 {
 namespace
 {
-const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.pilz_industrial_motion_planner.trajectory_generator_circ");
+rclcpp::Logger getLogger()
+{
+  return moveit::getLogger("pilz_trajectory_generator_circ");
 }
+}  // namespace
 TrajectoryGeneratorCIRC::TrajectoryGeneratorCIRC(const moveit::core::RobotModelConstPtr& robot_model,
                                                  const LimitsContainer& planner_limits,
                                                  const std::string& /*group_name*/)
@@ -90,7 +94,7 @@ void TrajectoryGeneratorCIRC::extractMotionPlanInfo(const planning_scene::Planni
                                                     const planning_interface::MotionPlanRequest& req,
                                                     TrajectoryGenerator::MotionPlanInfo& info) const
 {
-  RCLCPP_DEBUG(LOGGER, "Extract necessary information from motion plan request.");
+  RCLCPP_DEBUG(getLogger(), "Extract necessary information from motion plan request.");
 
   info.group_name = req.group_name;
   std::string frame_id{ robot_model_->getModelFrame() };
@@ -129,8 +133,8 @@ void TrajectoryGeneratorCIRC::extractMotionPlanInfo(const planning_scene::Planni
     if (req.goal_constraints.front().position_constraints.front().header.frame_id.empty() ||
         req.goal_constraints.front().orientation_constraints.front().header.frame_id.empty())
     {
-      RCLCPP_WARN(LOGGER, "Frame id is not set in position/orientation constraints of "
-                          "goal. Use model frame as default");
+      RCLCPP_WARN(getLogger(), "Frame id is not set in position/orientation constraints of "
+                               "goal. Use model frame as default");
       frame_id = robot_model_->getModelFrame();
     }
     else
@@ -216,7 +220,7 @@ void TrajectoryGeneratorCIRC::plan(const planning_scene::PlanningSceneConstPtr& 
 
 std::unique_ptr<KDL::Path> TrajectoryGeneratorCIRC::setPathCIRC(const MotionPlanInfo& info) const
 {
-  RCLCPP_DEBUG(LOGGER, "Set Cartesian path for CIRC command.");
+  RCLCPP_DEBUG(getLogger(), "Set Cartesian path for CIRC command.");
 
   KDL::Frame start_pose, goal_pose;
   tf2::transformEigenToKDL(info.start_pose, start_pose);
