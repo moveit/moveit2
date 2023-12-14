@@ -38,8 +38,6 @@
 #include <moveit_setup_controllers/moveit_controllers_config.hpp>
 #include <moveit_setup_controllers/ros2_controllers.hpp>
 
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("test_controllers");
-
 using moveit_setup::expectYamlEquivalence;
 using moveit_setup::getSharePath;
 using moveit_setup::controllers::ControllerInfo;

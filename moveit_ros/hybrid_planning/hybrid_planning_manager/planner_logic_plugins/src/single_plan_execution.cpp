@@ -34,11 +34,6 @@
 
 #include <moveit/planner_logic_plugins/single_plan_execution.h>
 
-namespace
-{
-const rclcpp::Logger LOGGER = rclcpp::get_logger("hybrid_planning_manager");
-}
-
 namespace moveit::hybrid_planning
 {
 bool SinglePlanExecution::initialize(const std::shared_ptr<HybridPlanningManager>& hybrid_planning_manager)

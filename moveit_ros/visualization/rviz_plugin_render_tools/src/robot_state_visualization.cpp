@@ -40,10 +40,18 @@
 #include <rviz_common/properties/parse_color.hpp>
 #include <rviz_default_plugins/robot/robot_link.hpp>
 #include <QApplication>
+#include <moveit/utils/logger.hpp>
 
 namespace moveit_rviz_plugin
 {
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.rviz_plugin_render_tools.robot_state_visualization");
+namespace
+{
+rclcpp::Logger getLogger()
+{
+  return moveit::getLogger("rviz_plugin_render_tools.robot_state_visualization");
+}
+}  // namespace
+
 RobotStateVisualization::RobotStateVisualization(Ogre::SceneNode* root_node, rviz_common::DisplayContext* context,
                                                  const std::string& name,
                                                  rviz_common::properties::Property* parent_property)
@@ -134,7 +142,7 @@ void RobotStateVisualization::updateHelper(const moveit::core::RobotStateConstPt
     rviz_default_plugins::robot::RobotLink* link = robot_.getLink(attached_body->getAttachedLinkName());
     if (!link)
     {
-      RCLCPP_ERROR_STREAM(LOGGER, "Link " << attached_body->getAttachedLinkName() << " not found in rviz::Robot");
+      RCLCPP_ERROR_STREAM(getLogger(), "Link " << attached_body->getAttachedLinkName() << " not found in rviz::Robot");
       continue;
     }
     Ogre::ColourValue rcolor(color.r, color.g, color.b);
