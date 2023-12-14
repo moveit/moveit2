@@ -201,7 +201,7 @@ bool Servo::validateParams(const servo::Params& servo_params) const
   if (joint_model_group == nullptr)
   {
     RCLCPP_ERROR_STREAM(logger_, "The parameter 'move_group_name': `" << servo_params.move_group_name << '`'
-                                                                      << " is not valid." << check_yaml_msg);
+                                                                      << " is not valid." << check_yaml_string);
     params_valid = false;
   }
 
@@ -212,7 +212,7 @@ bool Servo::validateParams(const servo::Params& servo_params) const
                                  "'hard_stop_signularity_threshold' is: '"
                                      << servo_params.hard_stop_singularity_threshold
                                      << "' and the 'lower_singularity_threshold' is: '"
-                                     << servo_params.lower_singularity_threshold << "'" << check_yaml_msg);
+                                     << servo_params.lower_singularity_threshold << "'" << check_yaml_string);
     params_valid = false;
   }
 
@@ -222,7 +222,7 @@ bool Servo::validateParams(const servo::Params& servo_params) const
     RCLCPP_ERROR_STREAM(logger_, "At least one of the parameters: 'publish_joint_positions' / "
                                  "'publish_joint_velocities' / "
                                  "'publish_joint_accelerations' must be true. But they are all false."
-                                     << check_yaml_msg);
+                                     << check_yaml_string);
     params_valid = false;
   }
 
@@ -233,7 +233,7 @@ bool Servo::validateParams(const servo::Params& servo_params) const
         logger_, "When publishing a std_msgs/Float64MultiArray, "
                  "either the parameter 'publish_joint_positions' OR the parameter 'publish_joint_velocities' must "
                  "be set to true. But both are set to false."
-                     << check_yaml_msg);
+                     << check_yaml_string);
     params_valid = false;
   }
 
@@ -244,7 +244,7 @@ bool Servo::validateParams(const servo::Params& servo_params) const
                                  "'self_collision_proximity_threshold' is: '"
                                      << servo_params.self_collision_proximity_threshold
                                      << "' and 'scene_collision_proximity_threshold' is: '"
-                                     << servo_params.scene_collision_proximity_threshold << "'" << check_yaml_msg);
+                                     << servo_params.scene_collision_proximity_threshold << "'" << check_yaml_string);
     params_valid = false;
   }
 
@@ -254,7 +254,7 @@ bool Servo::validateParams(const servo::Params& servo_params) const
     RCLCPP_ERROR_STREAM(logger_, "The parameter 'active_subgroup': '"
                                      << servo_params.active_subgroup
                                      << "' does not name a valid subgroup of 'joint group': '"
-                                     << servo_params.move_group_name << "'" << check_yaml_msg);
+                                     << servo_params.move_group_name << "'" << check_yaml_string);
     params_valid = false;
   }
   if (servo_params.joint_limit_margins.size() !=
@@ -267,7 +267,7 @@ bool Servo::validateParams(const servo::Params& servo_params) const
             << servo_params.joint_limit_margins.size() << "' but the number of joints of the move group '"
             << servo_params.move_group_name << "' is '"
             << robot_state->getJointModelGroup(servo_params.move_group_name)->getActiveVariableCount() << "'"
-            << check_yaml_msg);
+            << check_yaml_string);
 
     params_valid = false;
   }
