@@ -90,5 +90,6 @@ private:
   Eigen::VectorXd cur_velocity_;
   Eigen::VectorXd cur_acceleration;
   double joint_acceleration_limit_;
+  double update_timeout_;
 };
 }  // namespace online_signal_smoothing

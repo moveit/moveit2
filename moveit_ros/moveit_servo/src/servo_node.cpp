@@ -342,19 +342,15 @@ void ServoNode::servoLoop()
       RCLCPP_WARN_STREAM(node_->get_logger(), "Command type has not been set, cannot accept input");
     }
 
-    // no commands received, robot should try eventually come to a stop
-    if (!next_joint_state)
+    // in trajectory mode, the commands must continue to stream. If no commands are received, then robot should try
+    // eventually come to a stop
+    if (!next_joint_state && use_trajectory)
     {
-      current_state = last_commanded_state_;
-      current_state.velocities *= 0;
-      current_state.accelerations *= 0;
-      //      servo_->doSmoothing(current_state);
-      Eigen::VectorXd eig_vel = current_state.velocities;
-      std::vector<double> vel;
-      std::copy(eig_vel.data(), eig_vel.data() + eig_vel.size(), std::back_inserter(vel));
+      std::vector<double> zero_vel;
+      zero_vel.assign(current_state.positions.size(), 0);
       auto cmd_type = servo_->getCommandType();
       servo_->setCommandType(CommandType::JOINT_JOG);
-      JointJogCommand command{ current_state.joint_names, vel };
+      JointJogCommand command{ current_state.joint_names, zero_vel };
       next_joint_state = servo_->getNextJointState(current_state, command);
       servo_->setCommandType(cmd_type);
     }

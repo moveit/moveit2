@@ -59,6 +59,7 @@ bool AccelerationLimitedPlugin::initialize(rclcpp::Node::SharedPtr node, moveit:
   auto param_listener_ = online_signal_smoothing::ParamListener(node_);
   auto params = param_listener_.get_params();
   joint_acceleration_limit_ = params.joint_acceleration_limit;
+  update_timeout_ = params.update_timeout;
 
   return true;
 }
@@ -79,6 +80,7 @@ bool AccelerationLimitedPlugin::doSmoothing(Eigen::VectorXd& positions, Eigen::V
   {
     RCLCPP_ERROR_THROTTLE(node_->get_logger(), *node_->get_clock(), 1000,
                           "Reset must be called before doSmoothing for the AccelerationLimitedPlugin plugin.");
+    return false;
   }
 
   if (!last_positions_[0].second.has_value())
@@ -94,11 +96,19 @@ bool AccelerationLimitedPlugin::doSmoothing(Eigen::VectorXd& positions, Eigen::V
   else
   {
     rclcpp::Time cur_time = node_->now();
-    double dt = (last_positions_[1].second.value() - last_positions_[0].second.value()).seconds();
-    prev_velocity_ = (last_positions_[1].first - last_positions_[0].first) / dt;
-    dt = (cur_time - last_positions_[1].second.value()).seconds();
-    cur_velocity_ = (positions - last_positions_[1].first) / dt;
-    cur_acceleration = (cur_velocity_ - prev_velocity_) / dt;
+    double dt_1 = (last_positions_[1].second.value() - last_positions_[0].second.value()).seconds();
+    double dt_2 = (cur_time - last_positions_[1].second.value()).seconds();
+    if (dt_1 > update_timeout_ || dt_2 > update_timeout_)
+    {
+      RCLCPP_ERROR_THROTTLE(node_->get_logger(), *node_->get_clock(), 1000,
+                            "The maximum allowed time between filter updates exceeded! The `doSmoothing` method must "
+                            "be called at a higher rate.");
+      return false;
+    }
+
+    prev_velocity_ = (last_positions_[1].first - last_positions_[0].first) / dt_1;
+    cur_velocity_ = (positions - last_positions_[1].first) / dt_2;
+    cur_acceleration = (cur_velocity_ - prev_velocity_) / dt_2;
     double scale = 1.0;
     for (size_t i = 0; i < num_joints_; i++)
     {
@@ -106,8 +116,8 @@ bool AccelerationLimitedPlugin::doSmoothing(Eigen::VectorXd& positions, Eigen::V
                                   cur_acceleration[i]);
     }
     cur_acceleration *= scale;
-    cur_velocity_ = prev_velocity_ + cur_acceleration * dt;
-    positions = last_positions_[1].first + cur_velocity_ * dt;
+    cur_velocity_ = prev_velocity_ + cur_acceleration * dt_2;
+    positions = last_positions_[1].first + cur_velocity_ * dt_2;
 
     last_positions_[0] = last_positions_[1];
     last_positions_[1].first = positions;

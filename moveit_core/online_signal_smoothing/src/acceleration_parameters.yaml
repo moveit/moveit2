@@ -2,7 +2,15 @@ online_signal_smoothing:
   joint_acceleration_limit: {
     type: double,
     description: "The unsigned joint acceleration limit used for smoothing",
-    default_value: 10.0,
+    default_value: 5.0,
+    validation: {
+      gt<>: 0.0
+    }
+  }
+  update_timeout: {
+    type: double,
+    description: "The allowable time between updates such that the filter state is considered valid",
+    default_value: 0.5,
     validation: {
       gt<>: 0.0
     }
