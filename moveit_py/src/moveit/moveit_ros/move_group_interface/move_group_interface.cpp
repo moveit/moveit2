@@ -43,7 +43,7 @@ namespace moveit_py
 namespace bind_move_group_interface
 {
 
-void init_move_group_interface(py::module& m)
+void initMoveGroupInterface(py::module& m)
 {
   using moveit::planning_interface::MoveGroupInterface;
   auto move_group_iface =

@@ -49,7 +49,7 @@ PYBIND11_MODULE(planning, m)
   options.disable_function_signatures();
 
   // Construct module classes
-  moveit_py::bind_move_group_interface::init_move_group_interface(m);
+  moveit_py::bind_move_group_interface::initMoveGroupInterface(m);
   moveit_py::bind_planning_component::initPlanRequestParameters(m);
   moveit_py::bind_planning_component::initMultiPlanRequestParameters(m);
   moveit_py::bind_planning_component::initPlanningComponent(m);

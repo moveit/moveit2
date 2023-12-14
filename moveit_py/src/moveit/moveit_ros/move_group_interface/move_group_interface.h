@@ -45,6 +45,6 @@ namespace moveit_py
 {
 namespace bind_move_group_interface
 {
-void init_move_group_interface(py::module& m);
+void initMoveGroupInterface(py::module& m);
 }  // namespace bind_move_group_interface
 }  // namespace moveit_py
