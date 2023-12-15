@@ -139,7 +139,6 @@ int main(int argc, char* argv[])
   {
     auto last_commanded_state = joint_cmd_rolling_window.back();
     robot_state->setJointGroupPositions(joint_model_group, last_commanded_state.positions);
-    robot_state->setJointGroupVelocities(joint_model_group, last_commanded_state.velocities);
 
     // check if goal reached
     target_pose.pose = get_current_pose(K_TIP_FRAME, robot_state);

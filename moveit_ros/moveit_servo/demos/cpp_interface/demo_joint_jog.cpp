@@ -75,10 +75,17 @@ int main(int argc, char* argv[])
   // This is just for convenience, should not be used for sync in real application.
   std::this_thread::sleep_for(std::chrono::seconds(3));
 
+  // Initializing the target pose as end effector pose, this can be any pose.
+  auto robot_state = planning_scene_monitor->getStateMonitor()->getCurrentState();
+
+  // Get the robot state and joint model group info.
+  const moveit::core::JointModelGroup* joint_model_group =
+      robot_state->getJointModelGroup(servo_params.move_group_name);
+
   // Set the command type for servo.
   servo.setCommandType(CommandType::JOINT_JOG);
   // JointJog command that moves only the 7th joint at +1.0 rad/s
-  JointJogCommand joint_jog{ { "panda_joint7" }, { 1.0 } };
+  JointJogCommand joint_jog{ { "panda_joint7" }, { .4 } };
 
   // Frequency at which commands will be sent to the robot controller.
   rclcpp::WallRate rate(1.0 / servo_params.publish_period);
@@ -96,8 +103,9 @@ int main(int argc, char* argv[])
   RCLCPP_INFO_STREAM(demo_node->get_logger(), servo.getStatusMessage());
   while (rclcpp::ok())
   {
-    current_state = joint_cmd_rolling_window.back();
-    const KinematicState joint_state = servo.getNextJointState(current_state, joint_jog);
+    auto last_commanded_state = joint_cmd_rolling_window.back();
+    robot_state->setJointGroupPositions(joint_model_group, last_commanded_state.positions);
+    const KinematicState joint_state = servo.getNextJointState(robot_state, joint_jog);
     const StatusCode status = servo.getStatus();
 
     auto current_time = std::chrono::steady_clock::now();

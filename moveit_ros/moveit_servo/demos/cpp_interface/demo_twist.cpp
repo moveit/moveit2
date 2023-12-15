@@ -77,17 +77,24 @@ int main(int argc, char* argv[])
   // This is just for convenience, should not be used for sync in real application.
   std::this_thread::sleep_for(std::chrono::seconds(3));
 
+  // Initializing the target pose as end effector pose, this can be any pose.
+  auto robot_state = planning_scene_monitor->getStateMonitor()->getCurrentState();
+
+  // Get the robot state and joint model group info.
+  const moveit::core::JointModelGroup* joint_model_group =
+      robot_state->getJointModelGroup(servo_params.move_group_name);
+
   // Set the command type for servo.
   servo.setCommandType(CommandType::TWIST);
 
   // Move end effector in the +z direction at 10 cm/s
   // while turning around z axis in the +ve direction at 0.5 rad/s
-  TwistCommand target_twist{ "panda_link0", { 0.0, 0.0, 0.1, 0.0, 0.0, 0.5 } };
+  TwistCommand target_twist{ "panda_link0", { 0.0, 0.0, 0.05, 0.0, 0.0, 0.4 } };
 
   // Frequency at which commands will be sent to the robot controller.
   rclcpp::WallRate rate(1.0 / servo_params.publish_period);
 
-  std::chrono::seconds timeout_duration(5);
+  std::chrono::seconds timeout_duration(4);
   std::chrono::seconds time_elapsed(0);
   auto start_time = std::chrono::steady_clock::now();
 
@@ -100,8 +107,9 @@ int main(int argc, char* argv[])
   RCLCPP_INFO_STREAM(demo_node->get_logger(), servo.getStatusMessage());
   while (rclcpp::ok())
   {
-    current_state = joint_cmd_rolling_window.back();
-    const KinematicState joint_state = servo.getNextJointState(current_state, target_twist);
+    auto last_commanded_state = joint_cmd_rolling_window.back();
+    robot_state->setJointGroupPositions(joint_model_group, last_commanded_state.positions);
+    const KinematicState joint_state = servo.getNextJointState(robot_state, target_twist);
     const StatusCode status = servo.getStatus();
 
     auto current_time = std::chrono::steady_clock::now();
