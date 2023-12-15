@@ -141,7 +141,7 @@ jobs:
         run: |
           testspace "[ ${{ matrix.env.IMAGE }} ]${{ env.BASEDIR }}/target_ws/**/test_results/**/*.xml"
       - name: Upload test artifacts (on failure)
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: failure() && (steps.ici.outputs.run_target_test || steps.ici.outputs.target_test_results)
         with:
           name: test-results-${{ matrix.env.IMAGE }}
