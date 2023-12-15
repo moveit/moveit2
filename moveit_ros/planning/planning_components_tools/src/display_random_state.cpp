@@ -40,8 +40,6 @@
 
 using namespace std::chrono_literals;
 
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("display_random_state");
-
 int main(int argc, char** argv)
 {
   rclcpp::init(argc, argv);

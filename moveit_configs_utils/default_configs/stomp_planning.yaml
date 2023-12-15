@@ -1,5 +1,5 @@
-planning_plugin: stomp_moveit/StompPlanner
-# The order of the elements in the adapter corresponds to the order they are processed by the motion planning pipeline.
+planning_plugins:
+  - stomp_moveit/StompPlanner
 request_adapters:
   - default_planning_request_adapters/ResolveConstraintFrames
   - default_planning_request_adapters/ValidateWorkspaceBounds
