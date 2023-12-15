@@ -454,7 +454,7 @@ Eigen::VectorXd Servo::jointDeltaFromCommand(const ServoInput& command, const mo
   return joint_position_deltas;
 }
 
-KinematicState Servo::getNextJointState(const KinematicState& current_state, const ServoInput& command)
+KinematicState Servo::getNextJointState(const moveit::core::RobotStatePtr& robot_state, const ServoInput& command)
 {
   // Set status to clear
   servo_status_ = StatusCode::NO_WARNING;
@@ -463,14 +463,8 @@ KinematicState Servo::getNextJointState(const KinematicState& current_state, con
   updateParams();
 
   // Get the robot state and joint model group info.
-  moveit::core::RobotStatePtr robot_state = planning_scene_monitor_->getStateMonitor()->getCurrentState();
   const moveit::core::JointModelGroup* joint_model_group =
       robot_state->getJointModelGroup(servo_params_.move_group_name);
-
-  // TODO robot_state should be passed in
-  robot_state->setJointGroupPositions(joint_model_group, current_state.positions);
-  robot_state->setJointGroupVelocities(joint_model_group, current_state.velocities);
-  robot_state->setJointGroupAccelerations(joint_model_group, current_state.accelerations);
 
   // Get necessary information about joints
   const std::vector<std::string> joint_names = joint_model_group->getActiveJointModelNames();
@@ -478,6 +472,7 @@ KinematicState Servo::getNextJointState(const KinematicState& current_state, con
   const int num_joints = joint_names.size();
 
   // State variables
+  KinematicState current_state = getRobotState(robot_state);
   KinematicState target_state(num_joints);
   target_state.joint_names = joint_names;
 
@@ -630,9 +625,8 @@ std::optional<PoseCommand> Servo::toPlanningFrame(const PoseCommand& command, co
   return PoseCommand{ planning_frame, planning_to_command_tf * command.pose };
 }
 
-KinematicState Servo::getCurrentRobotState() const
+KinematicState Servo::getRobotState(const moveit::core::RobotStatePtr& robot_state) const
 {
-  moveit::core::RobotStatePtr robot_state = planning_scene_monitor_->getStateMonitor()->getCurrentState();
   const moveit::core::JointModelGroup* joint_model_group =
       robot_state->getJointModelGroup(servo_params_.move_group_name);
   const auto joint_names = joint_model_group->getActiveJointModelNames();
@@ -644,6 +638,12 @@ KinematicState Servo::getCurrentRobotState() const
   robot_state->copyJointGroupAccelerations(joint_model_group, current_state.accelerations);
 
   return current_state;
+}
+
+KinematicState Servo::getCurrentRobotState() const
+{
+  moveit::core::RobotStatePtr robot_state = planning_scene_monitor_->getStateMonitor()->getCurrentState();
+  return getRobotState(robot_state);
 }
 
 std::pair<bool, KinematicState> Servo::smoothHalt(const KinematicState& halt_state)

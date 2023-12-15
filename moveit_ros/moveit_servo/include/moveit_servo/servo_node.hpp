@@ -99,9 +99,9 @@ private:
   void twistCallback(const geometry_msgs::msg::TwistStamped::ConstSharedPtr& msg);
   void poseCallback(const geometry_msgs::msg::PoseStamped::ConstSharedPtr& msg);
 
-  std::optional<KinematicState> processJointJogCommand(const KinematicState& current_state);
-  std::optional<KinematicState> processTwistCommand(const KinematicState& current_state);
-  std::optional<KinematicState> processPoseCommand(const KinematicState& current_state);
+  std::optional<KinematicState> processJointJogCommand(const moveit::core::RobotStatePtr& robot_state);
+  std::optional<KinematicState> processTwistCommand(const moveit::core::RobotStatePtr& robot_state);
+  std::optional<KinematicState> processPoseCommand(const moveit::core::RobotStatePtr& robot_state);
 
   // Variables
 

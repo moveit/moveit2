@@ -78,7 +78,7 @@ public:
    * @param command The command to follow, std::variant type, can handle JointJog, Twist and Pose.
    * @return The required joint state.
    */
-  KinematicState getNextJointState(const KinematicState& current_state, const ServoInput& command);
+  KinematicState getNextJointState(const moveit::core::RobotStatePtr& robot_state, const ServoInput& command);
 
   /**
    * \brief Set the type of incoming servo command.
@@ -114,6 +114,12 @@ public:
    * \brief Returns the most recent servo parameters.
    */
   servo::Params& getParams();
+
+  /**
+   * \brief Extract the state from a RobotStatePtr instance.
+   * @return The state of the RobotStatePtr instance.
+   */
+  KinematicState getRobotState(const moveit::core::RobotStatePtr& robot_state) const;
 
   /**
    * \brief Get the current state of the robot as given by planning scene monitor.

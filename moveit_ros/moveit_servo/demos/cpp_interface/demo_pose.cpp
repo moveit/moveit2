@@ -81,8 +81,7 @@ int main(int argc, char* argv[])
   Servo servo = Servo(demo_node, servo_param_listener, planning_scene_monitor);
 
   // Helper function to get the current pose of a specified frame.
-  const auto get_current_pose = [planning_scene_monitor](const std::string& target_frame,
-                                                         moveit::core::RobotStatePtr robot_state) {
+  const auto get_current_pose = [](const std::string& target_frame, const moveit::core::RobotStatePtr& robot_state) {
     return robot_state->getGlobalLinkTransform(target_frame);
   };
 
@@ -108,88 +107,67 @@ int main(int argc, char* argv[])
       robot_state->getJointModelGroup(servo_params.move_group_name);
   target_pose.pose = get_current_pose(K_TIP_FRAME, robot_state);
 
-  // create command queue to build trajectory message
-  std::deque<KinematicState> joint_cmd_rolling_window;
-
-  // The pose tracking lambda that will be run in a separate thread.
-  auto pose_tracker = [&]() {
-    KinematicState joint_state;
-    rclcpp::WallRate tracking_rate(1 / servo_params.publish_period);
-    KinematicState current_state;
-    {
-      std::lock_guard<std::mutex> pguard(pose_guard);
-      current_state = servo.getCurrentRobotState();
-      current_state.time = demo_node->now();
-      joint_cmd_rolling_window.push_back(current_state);
-      current_state.time = current_state.time + rclcpp::Duration::from_seconds(servo_params.max_expected_latency);
-      joint_cmd_rolling_window.push_back(current_state);
-    }
-
-    while (!stop_tracking && rclcpp::ok())
-    {
-      //      robot_state->setJointGroupPositions(joint_model_group, current_state.positions);
-      {
-        std::lock_guard<std::mutex> pguard(pose_guard);
-        current_state = joint_cmd_rolling_window.back();
-        joint_state = servo.getNextJointState(current_state, target_pose);
-
-        StatusCode status = servo.getStatus();
-        if (status != StatusCode::INVALID)
-        {
-          updateSlidingWindow(joint_state, joint_cmd_rolling_window, servo_params.max_expected_latency,
-                              demo_node->now());
-          trajectory_outgoing_cmd_pub->publish(composeTrajectoryMessage(servo_params, joint_cmd_rolling_window));
-        }
-      }
-      tracking_rate.sleep();
-    }
-  };
-
   // Pose tracking thread will exit upon reaching this pose.
   Eigen::Isometry3d terminal_pose = target_pose.pose;
   terminal_pose.rotate(Eigen::AngleAxisd(M_PI / 4, Eigen::Vector3d::UnitZ()));
   terminal_pose.translate(Eigen::Vector3d(0.0, 0.0, -0.1));
 
-  std::thread tracker_thread(pose_tracker);
-  tracker_thread.detach();
+  // Wait for pose tracking to enter its main loop
+  std::this_thread::sleep_for(std::chrono::seconds(1));
 
   // The target pose (frame being tracked) moves by this step size each iteration.
-  Eigen::Vector3d linear_step_size{ 0.0, 0.0, -0.002 };
+  Eigen::Vector3d linear_step_size{ 0.0, 0.0, -0.001 };
   Eigen::AngleAxisd angular_step_size(0.01, Eigen::Vector3d::UnitZ());
 
-  // Frequency at which commands will be sent to the robot controller.
-  rclcpp::WallRate command_rate(50);
   RCLCPP_INFO_STREAM(demo_node->get_logger(), servo.getStatusMessage());
 
+  KinematicState joint_state;
+  rclcpp::WallRate servo_rate(1 / servo_params.publish_period);
+  KinematicState current_state;
+  current_state = servo.getCurrentRobotState();
+  current_state.time = demo_node->now();
+
+  // create command queue to build trajectory message
+  std::deque<KinematicState> joint_cmd_rolling_window;
+  joint_cmd_rolling_window.push_back(current_state);
+  current_state.time = current_state.time + rclcpp::Duration::from_seconds(servo_params.max_expected_latency);
+  joint_cmd_rolling_window.push_back(current_state);
+
+  bool satisfies_linear_tolerance = false;
+  bool satisfies_angular_tolerance = false;
   while (!stop_tracking && rclcpp::ok())
   {
+    auto last_commanded_state = joint_cmd_rolling_window.back();
+    robot_state->setJointGroupPositions(joint_model_group, last_commanded_state.positions);
+    robot_state->setJointGroupVelocities(joint_model_group, last_commanded_state.velocities);
+
+    // check if goal reached
+    target_pose.pose = get_current_pose(K_TIP_FRAME, robot_state);
+    satisfies_linear_tolerance |= target_pose.pose.translation().isApprox(terminal_pose.translation(),
+                                                                          servo_params.pose_tracking.linear_tolerance);
+    satisfies_angular_tolerance |=
+        target_pose.pose.rotation().isApprox(terminal_pose.rotation(), servo_params.pose_tracking.angular_tolerance);
+    stop_tracking = satisfies_linear_tolerance && satisfies_angular_tolerance;
+
+    // Dynamically update the target pose.
+    if (!satisfies_linear_tolerance)
+      target_pose.pose.translate(linear_step_size);
+    if (!satisfies_angular_tolerance)
+      target_pose.pose.rotate(angular_step_size);
+
+    // get next servo command
+    joint_state = servo.getNextJointState(robot_state, target_pose);
+    StatusCode status = servo.getStatus();
+    if (status != StatusCode::INVALID)
     {
-      std::lock_guard<std::mutex> pguard(pose_guard);
-      //      robot_state = planning_scene_monitor->getStateMonitor()->getCurrentState();
-      KinematicState current_state = joint_cmd_rolling_window.back();
-      robot_state->setJointGroupPositions(joint_model_group, current_state.positions);
-      target_pose.pose = get_current_pose(K_TIP_FRAME, robot_state);
-      const bool satisfies_linear_tolerance = target_pose.pose.translation().isApprox(
-          terminal_pose.translation(), servo_params.pose_tracking.linear_tolerance);
-      const bool satisfies_angular_tolerance =
-          target_pose.pose.rotation().isApprox(terminal_pose.rotation(), servo_params.pose_tracking.angular_tolerance);
-      stop_tracking = satisfies_linear_tolerance && satisfies_angular_tolerance;
-      // Dynamically update the target pose.
-      if (!satisfies_linear_tolerance)
-        target_pose.pose.translate(linear_step_size);
-      if (!satisfies_angular_tolerance)
-        target_pose.pose.rotate(angular_step_size);
+      updateSlidingWindow(joint_state, joint_cmd_rolling_window, servo_params.max_expected_latency, demo_node->now());
+      trajectory_outgoing_cmd_pub->publish(composeTrajectoryMessage(servo_params, joint_cmd_rolling_window));
     }
 
-    command_rate.sleep();
+    servo_rate.sleep();
   }
 
   RCLCPP_INFO_STREAM(demo_node->get_logger(), "REACHED : " << stop_tracking);
-  stop_tracking = true;
-
-  if (tracker_thread.joinable())
-    tracker_thread.join();
-
   RCLCPP_INFO(demo_node->get_logger(), "Exiting demo.");
   rclcpp::shutdown();
 }

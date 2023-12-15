@@ -203,7 +203,7 @@ void ServoNode::poseCallback(const geometry_msgs::msg::PoseStamped::ConstSharedP
   new_pose_msg_ = true;
 }
 
-std::optional<KinematicState> ServoNode::processJointJogCommand(const KinematicState& current_state)
+std::optional<KinematicState> ServoNode::processJointJogCommand(const moveit::core::RobotStatePtr& robot_state)
 {
   std::optional<KinematicState> next_joint_state = std::nullopt;
   // Reject any other command types that had arrived simultaneously.
@@ -214,7 +214,7 @@ std::optional<KinematicState> ServoNode::processJointJogCommand(const KinematicS
   if (!command_stale)
   {
     JointJogCommand command{ latest_joint_jog_.joint_names, latest_joint_jog_.velocities };
-    next_joint_state = servo_->getNextJointState(current_state, command);
+    next_joint_state = servo_->getNextJointState(robot_state, command);
   }
   else
   {
@@ -230,7 +230,7 @@ std::optional<KinematicState> ServoNode::processJointJogCommand(const KinematicS
   return next_joint_state;
 }
 
-std::optional<KinematicState> ServoNode::processTwistCommand(const KinematicState& current_state)
+std::optional<KinematicState> ServoNode::processTwistCommand(const moveit::core::RobotStatePtr& robot_state)
 {
   std::optional<KinematicState> next_joint_state = std::nullopt;
 
@@ -246,7 +246,7 @@ std::optional<KinematicState> ServoNode::processTwistCommand(const KinematicStat
                                                latest_twist_.twist.linear.z,  latest_twist_.twist.angular.x,
                                                latest_twist_.twist.angular.y, latest_twist_.twist.angular.z };
     const TwistCommand command{ latest_twist_.header.frame_id, velocities };
-    next_joint_state = servo_->getNextJointState(current_state, command);
+    next_joint_state = servo_->getNextJointState(robot_state, command);
   }
   else
   {
@@ -262,7 +262,7 @@ std::optional<KinematicState> ServoNode::processTwistCommand(const KinematicStat
   return next_joint_state;
 }
 
-std::optional<KinematicState> ServoNode::processPoseCommand(const KinematicState& current_state)
+std::optional<KinematicState> ServoNode::processPoseCommand(const moveit::core::RobotStatePtr& robot_state)
 {
   std::optional<KinematicState> next_joint_state = std::nullopt;
 
@@ -275,7 +275,7 @@ std::optional<KinematicState> ServoNode::processPoseCommand(const KinematicState
   if (!command_stale)
   {
     const PoseCommand command = poseFromPoseStamped(latest_pose_);
-    next_joint_state = servo_->getNextJointState(current_state, command);
+    next_joint_state = servo_->getNextJointState(robot_state, command);
   }
   else
   {
@@ -296,6 +296,11 @@ void ServoNode::servoLoop()
   moveit_msgs::msg::ServoStatus status_msg;
   std::optional<KinematicState> next_joint_state = std::nullopt;
   rclcpp::WallRate servo_frequency(1 / servo_params_.publish_period);
+
+  // Get the robot state and joint model group info.
+  moveit::core::RobotStatePtr robot_state = planning_scene_monitor_->getStateMonitor()->getCurrentState();
+  const moveit::core::JointModelGroup* joint_model_group =
+      robot_state->getJointModelGroup(servo_params_.move_group_name);
 
   while (rclcpp::ok() && !stop_servo_)
   {
@@ -321,20 +326,23 @@ void ServoNode::servoLoop()
       joint_cmd_rolling_window_.push_back(current_state);
     }
 
+    robot_state->setJointGroupPositions(joint_model_group, current_state.positions);
+    robot_state->setJointGroupVelocities(joint_model_group, current_state.velocities);
+
     next_joint_state = std::nullopt;
     const CommandType expected_type = servo_->getCommandType();
 
     if (expected_type == CommandType::JOINT_JOG && new_joint_jog_msg_)
     {
-      next_joint_state = processJointJogCommand(current_state);
+      next_joint_state = processJointJogCommand(robot_state);
     }
     else if (expected_type == CommandType::TWIST && new_twist_msg_)
     {
-      next_joint_state = processTwistCommand(current_state);
+      next_joint_state = processTwistCommand(robot_state);
     }
     else if (new_pose_msg_)
     {
-      next_joint_state = processPoseCommand(current_state);
+      next_joint_state = processPoseCommand(robot_state);
     }
     else if (new_joint_jog_msg_ || new_twist_msg_ || new_pose_msg_)
     {
@@ -351,7 +359,7 @@ void ServoNode::servoLoop()
       auto cmd_type = servo_->getCommandType();
       servo_->setCommandType(CommandType::JOINT_JOG);
       JointJogCommand command{ current_state.joint_names, zero_vel };
-      next_joint_state = servo_->getNextJointState(current_state, command);
+      next_joint_state = servo_->getNextJointState(robot_state, command);
       servo_->setCommandType(cmd_type);
     }
 
