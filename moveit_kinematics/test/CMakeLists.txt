@@ -22,13 +22,6 @@ if(BUILD_TESTING)
   add_ros_test(launch/panda-kdl-singular.test.py ARGS "test_binary_dir:=${CMAKE_CURRENT_BINARY_DIR}")
   add_ros_test(launch/panda-kdl.test.py ARGS "test_binary_dir:=${CMAKE_CURRENT_BINARY_DIR}")
 
-  # LMA testing
-  set(ARGS ARGS ik_plugin:=lma_kinematics_plugin/LMAKinematicsPlugin)
-  add_ros_test(launch/fanuc-lma-singular.test.py ARGS "test_binary_dir:=${CMAKE_CURRENT_BINARY_DIR}")
-  add_ros_test(launch/fanuc-lma.test.py ARGS "test_binary_dir:=${CMAKE_CURRENT_BINARY_DIR}")
-  add_ros_test(launch/panda-lma-singular.test.py ARGS "test_binary_dir:=${CMAKE_CURRENT_BINARY_DIR}")
-  add_ros_test(launch/panda-lma.test.py ARGS "test_binary_dir:=${CMAKE_CURRENT_BINARY_DIR}")
-
   # Run ikfast tests only if the corresponding packages were built
   # TODO (vatanaksoytezer): Enable ikfast tests
   # find_package(fanuc_ikfast_plugin QUIET)

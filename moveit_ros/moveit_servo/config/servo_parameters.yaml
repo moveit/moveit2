@@ -31,21 +31,6 @@ servo:
                   must be passed to the node during launch time."
   }
 
-  planning_frame: {
-    type: string,
-    description: "The name of moveit planning frame.\
-                  This parameter does not have a default value and \
-                  must be passed to the node during launch time."
-  }
-
-  ee_frame: {
-    type: string,
-    description: "The name of end effector frame of your robot, \
-                  this should also be the IK tip frame of your IK solver. \
-                  This parameter does not have a default value and \
-                  must be passed to the node during launch time."
-  }
-
   active_subgroup: {
     type: string,
     default_value: "",
@@ -321,12 +306,12 @@ servo:
     description: "Halt all joints in cartesian mode, else halt only the joints at their limit"
   }
 
-  joint_limit_margin: {
-    type: double,
-    default_value: 0.1,
+  joint_limit_margins: {
+    type: double_array,
+    default_value: [0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1],
     description: "Added as a buffer to joint limits [radians]. If moving quickly, make this larger.",
     validation: {
-      gt<>: 0.0
+      lower_element_bounds<>: 0.0
     }
   }
 

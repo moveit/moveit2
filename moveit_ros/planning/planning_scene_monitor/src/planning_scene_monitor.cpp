@@ -96,7 +96,7 @@ PlanningSceneMonitor::PlanningSceneMonitor(const rclcpp::Node::SharedPtr& node,
   , dt_state_update_(0.0)
   , shape_transform_cache_lookup_wait_time_(0, 0)
   , rm_loader_(rm_loader)
-  , logger_(moveit::makeChildLogger("planning_scene_monitor"))
+  , logger_(moveit::getLogger("planning_scene_monitor"))
 {
   std::vector<std::string> new_args = rclcpp::NodeOptions().arguments();
   new_args.push_back("--ros-args");
@@ -780,6 +780,43 @@ bool PlanningSceneMonitor::newPlanningSceneMessage(const moveit_msgs::msg::Plann
   return result;
 }
 
+bool PlanningSceneMonitor::processCollisionObjectMsg(const moveit_msgs::msg::CollisionObject::ConstSharedPtr& object)
+{
+  if (!scene_)
+    return false;
+
+  updateFrameTransforms();
+  {
+    std::unique_lock<std::shared_mutex> ulock(scene_update_mutex_);
+    last_update_time_ = rclcpp::Clock().now();
+    if (!scene_->processCollisionObjectMsg(*object))
+      return false;
+  }
+  triggerSceneUpdateEvent(UPDATE_GEOMETRY);
+  RCLCPP_INFO(logger_, "Published update collision object");
+  return true;
+}
+
+bool PlanningSceneMonitor::processAttachedCollisionObjectMsg(
+    const moveit_msgs::msg::AttachedCollisionObject::ConstSharedPtr& object)
+{
+  if (!scene_)
+  {
+    return false;
+  }
+
+  updateFrameTransforms();
+  {
+    std::unique_lock<std::shared_mutex> ulock(scene_update_mutex_);
+    last_update_time_ = rclcpp::Clock().now();
+    if (!scene_->processAttachedCollisionObjectMsg(*object))
+      return false;
+  }
+  triggerSceneUpdateEvent(UPDATE_GEOMETRY);
+  RCLCPP_INFO(logger_, "Published update attached");
+  return true;
+}
+
 void PlanningSceneMonitor::newPlanningSceneWorldCallback(
     const moveit_msgs::msg::PlanningSceneWorld::ConstSharedPtr& world)
 {
@@ -802,35 +839,6 @@ void PlanningSceneMonitor::newPlanningSceneWorldCallback(
       }
     }
     triggerSceneUpdateEvent(UPDATE_SCENE);
-  }
-}
-
-void PlanningSceneMonitor::collisionObjectCallback(const moveit_msgs::msg::CollisionObject::ConstSharedPtr& obj)
-{
-  if (!scene_)
-    return;
-
-  updateFrameTransforms();
-  {
-    std::unique_lock<std::shared_mutex> ulock(scene_update_mutex_);
-    last_update_time_ = rclcpp::Clock().now();
-    if (!scene_->processCollisionObjectMsg(*obj))
-      return;
-  }
-  triggerSceneUpdateEvent(UPDATE_GEOMETRY);
-}
-
-void PlanningSceneMonitor::attachObjectCallback(const moveit_msgs::msg::AttachedCollisionObject::ConstSharedPtr& obj)
-{
-  if (scene_)
-  {
-    updateFrameTransforms();
-    {
-      std::unique_lock<std::shared_mutex> ulock(scene_update_mutex_);
-      last_update_time_ = rclcpp::Clock().now();
-      scene_->processAttachedCollisionObjectMsg(*obj);
-    }
-    triggerSceneUpdateEvent(UPDATE_GEOMETRY);
   }
 }
 
@@ -1256,7 +1264,7 @@ void PlanningSceneMonitor::startWorldGeometryMonitor(const std::string& collisio
   {
     collision_object_subscriber_ = pnode_->create_subscription<moveit_msgs::msg::CollisionObject>(
         collision_objects_topic, rclcpp::SystemDefaultsQoS(),
-        [this](const moveit_msgs::msg::CollisionObject::ConstSharedPtr& obj) { return collisionObjectCallback(obj); });
+        [this](const moveit_msgs::msg::CollisionObject::ConstSharedPtr& obj) { processCollisionObjectMsg(obj); });
     RCLCPP_INFO(logger_, "Listening to '%s'", collision_objects_topic.c_str());
   }
 
@@ -1339,7 +1347,7 @@ void PlanningSceneMonitor::startStateMonitor(const std::string& joint_states_top
       attached_collision_object_subscriber_ = pnode_->create_subscription<moveit_msgs::msg::AttachedCollisionObject>(
           attached_objects_topic, rclcpp::SystemDefaultsQoS(),
           [this](const moveit_msgs::msg::AttachedCollisionObject::ConstSharedPtr& obj) {
-            return attachObjectCallback(obj);
+            processAttachedCollisionObjectMsg(obj);
           });
       RCLCPP_INFO(logger_, "Listening to '%s' for attached collision objects",
                   attached_collision_object_subscriber_->get_topic_name());

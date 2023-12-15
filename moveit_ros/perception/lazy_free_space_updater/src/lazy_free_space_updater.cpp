@@ -51,7 +51,7 @@ LazyFreeSpaceUpdater::LazyFreeSpaceUpdater(const collision_detection::OccMapTree
   , process_model_cells_set_(nullptr)
   , update_thread_([this] { lazyUpdateThread(); })
   , process_thread_([this] { processThread(); })
-  , logger_(moveit::makeChildLogger("lazy_free_space_updater"))
+  , logger_(moveit::getLogger("lazy_free_space_updater"))
 {
 }
 

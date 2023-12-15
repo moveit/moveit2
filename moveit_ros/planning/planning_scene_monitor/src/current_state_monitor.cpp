@@ -60,7 +60,7 @@ CurrentStateMonitor::CurrentStateMonitor(std::unique_ptr<CurrentStateMonitor::Mi
   , copy_dynamics_(false)
   , error_(std::numeric_limits<double>::epsilon())
   , use_sim_time_(use_sim_time)
-  , logger_(moveit::makeChildLogger("current_state_monitor"))
+  , logger_(moveit::getLogger("current_state_monitor"))
 {
   robot_state_.setToDefaultValues();
 }

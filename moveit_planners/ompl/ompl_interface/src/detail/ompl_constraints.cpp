@@ -38,13 +38,20 @@
 #include <iterator>
 
 #include <moveit/ompl_interface/detail/ompl_constraints.h>
+#include <moveit/utils/logger.hpp>
 
 #include <tf2_eigen/tf2_eigen.hpp>
 
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_planners_ompl.ompl_constraints");
-
 namespace ompl_interface
 {
+namespace
+{
+rclcpp::Logger getLogger()
+{
+  return moveit::getLogger("ompl_constraints");
+}
+}  // namespace
+
 Bounds::Bounds() : size_(0)
 {
 }
@@ -173,7 +180,7 @@ Eigen::MatrixXd BaseConstraint::robotGeometricJacobian(const Eigen::Ref<const Ei
 
 Eigen::VectorXd BaseConstraint::calcError(const Eigen::Ref<const Eigen::VectorXd>& /*x*/) const
 {
-  RCLCPP_WARN_STREAM(LOGGER,
+  RCLCPP_WARN_STREAM(getLogger(),
                      "BaseConstraint: Constraint method calcError was not overridden, so it should not be used.");
   return Eigen::VectorXd::Zero(getCoDimension());
 }
@@ -181,7 +188,7 @@ Eigen::VectorXd BaseConstraint::calcError(const Eigen::Ref<const Eigen::VectorXd
 Eigen::MatrixXd BaseConstraint::calcErrorJacobian(const Eigen::Ref<const Eigen::VectorXd>& /*x*/) const
 {
   RCLCPP_WARN_STREAM(
-      LOGGER, "BaseConstraint: Constraint method calcErrorJacobian was not overridden, so it should not be used.");
+      getLogger(), "BaseConstraint: Constraint method calcErrorJacobian was not overridden, so it should not be used.");
   return Eigen::MatrixXd::Zero(getCoDimension(), n_);
 }
 
@@ -242,7 +249,7 @@ void EqualityPositionConstraint::parseConstraintMsg(const moveit_msgs::msg::Cons
       if (dims.at(i) < getTolerance())
       {
         RCLCPP_ERROR_STREAM(
-            LOGGER,
+            getLogger(),
             "Dimension: " << i
                           << " of position constraint is smaller than the tolerance used to evaluate the constraints. "
                              "This will make all states invalid and planning will fail. Please use a value between: "
@@ -375,11 +382,11 @@ ompl::base::ConstraintPtr createOMPLConstraints(const moveit::core::RobotModelCo
   std::vector<ompl::base::ConstraintPtr> ompl_constraints;
   if (num_pos_con > 1)
   {
-    RCLCPP_WARN(LOGGER, "Only a single position constraint is supported. Using the first one.");
+    RCLCPP_WARN(getLogger(), "Only a single position constraint is supported. Using the first one.");
   }
   if (num_ori_con > 1)
   {
-    RCLCPP_WARN(LOGGER, "Only a single orientation constraint is supported. Using the first one.");
+    RCLCPP_WARN(getLogger(), "Only a single orientation constraint is supported. Using the first one.");
   }
   if (num_pos_con > 0)
   {
@@ -403,7 +410,7 @@ ompl::base::ConstraintPtr createOMPLConstraints(const moveit::core::RobotModelCo
   }
   if (num_pos_con < 1 && num_ori_con < 1)
   {
-    RCLCPP_ERROR(LOGGER, "No path constraints found in planning request.");
+    RCLCPP_ERROR(getLogger(), "No path constraints found in planning request.");
     return nullptr;
   }
   return std::make_shared<ompl::base::ConstraintIntersection>(num_dofs, ompl_constraints);

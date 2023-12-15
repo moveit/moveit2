@@ -79,14 +79,14 @@ void BackgroundProcessing::processingThread()
       action_lock_.unlock();
       try
       {
-        RCLCPP_DEBUG(moveit::getLogger(), "Begin executing '%s'", action_name.c_str());
+        RCLCPP_DEBUG(moveit::getLogger("BackgroundProcessing"), "Begin executing '%s'", action_name.c_str());
         fn();
-        RCLCPP_DEBUG(moveit::getLogger(), "Done executing '%s'", action_name.c_str());
+        RCLCPP_DEBUG(moveit::getLogger("BackgroundProcessing"), "Done executing '%s'", action_name.c_str());
       }
       catch (std::exception& ex)
       {
-        RCLCPP_ERROR(moveit::getLogger(), "Exception caught while processing action '%s': %s", action_name.c_str(),
-                     ex.what());
+        RCLCPP_ERROR(moveit::getLogger("BackgroundProcessing"), "Exception caught while processing action '%s': %s",
+                     action_name.c_str(), ex.what());
       }
       processing_ = false;
       if (queue_change_event_)

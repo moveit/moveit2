@@ -51,7 +51,7 @@ PlanningComponent::PlanningComponent(const std::string& group_name, const MoveIt
   : node_(moveit_cpp->getNode())
   , moveit_cpp_(moveit_cpp)
   , group_name_(group_name)
-  , logger_(moveit::makeChildLogger("planning_component"))
+  , logger_(moveit::getLogger("planning_component"))
 {
   joint_model_group_ = moveit_cpp_->getRobotModel()->getJointModelGroup(group_name);
   if (!joint_model_group_)

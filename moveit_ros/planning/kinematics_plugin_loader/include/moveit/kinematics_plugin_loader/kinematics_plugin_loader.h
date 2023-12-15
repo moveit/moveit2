@@ -57,7 +57,7 @@ public:
       well as used to read the SRDF document when needed. */
   KinematicsPluginLoader(const rclcpp::Node::SharedPtr& node,
                          const std::string& robot_description = "robot_description")
-    : node_(node), robot_description_(robot_description), logger_(moveit::makeChildLogger("kinematics_plugin_loader"))
+    : node_(node), robot_description_(robot_description), logger_(moveit::getLogger("kinematics_plugin_loader"))
   {
   }
 

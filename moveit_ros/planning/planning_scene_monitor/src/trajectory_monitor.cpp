@@ -55,7 +55,7 @@ planning_scene_monitor::TrajectoryMonitor::TrajectoryMonitor(
   , middleware_handle_(std::move(middleware_handle))
   , sampling_frequency_(sampling_frequency)
   , trajectory_(current_state_monitor_->getRobotModel(), "")
-  , logger_(moveit::makeChildLogger("trajectory_monitor"))
+  , logger_(moveit::getLogger("trajectory_monitor"))
 {
   setSamplingFrequency(sampling_frequency);
 }
