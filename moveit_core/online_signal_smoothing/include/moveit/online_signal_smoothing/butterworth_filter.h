@@ -107,7 +107,7 @@ public:
    * @param positions array of joint position commands
    * @param velocities array of joint velocity commands
    * @param accelerations array of joint acceleration commands
-   * @return True if initialization was successful
+   * @return True if smoothing was successful
    */
   bool doSmoothing(Eigen::VectorXd& positions, Eigen::VectorXd& velocities, Eigen::VectorXd& accelerations) override;
 

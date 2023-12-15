@@ -1,7 +1,7 @@
 /*********************************************************************
  * Software License Agreement (BSD License)
  *
- *  Copyright (c) 2021, PickNik Inc.
+ *  Copyright (c) 2023, PickNik Inc.
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -33,7 +33,7 @@
  *********************************************************************/
 
 /* Author: Paul Gesel
-   Description: Applies smoothing by limiting the  acceleration between consecutivee commands
+   Description: Applies smoothing by limiting the  acceleration between consecutive commands
  */
 
 #include <moveit/online_signal_smoothing/acceleration_filter.h>

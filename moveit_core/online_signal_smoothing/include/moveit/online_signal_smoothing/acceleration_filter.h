@@ -1,7 +1,7 @@
 /*********************************************************************
  * Software License Agreement (BSD License)
  *
- *  Copyright (c) 2021, PickNik Inc.
+ *  Copyright (c) 2023, PickNik Inc.
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -54,7 +54,7 @@ class AccelerationLimitedPlugin : public SmoothingBaseClass
 {
 public:
   /**
-   * Initialize the smoothing algorithm
+   * Initialize the acceleration based smoothing plugin
    * @param node ROS node, used for parameter retrieval
    * @param robot_model typically used to retrieve vel/accel/jerk limits
    * @param num_joints number of actuated joints in the JointGroup Servo controls
@@ -64,16 +64,17 @@ public:
                   size_t num_joints) override;
 
   /**
-   * Smooth the command signals for all DOF
+   * Smooth the command signals for all DOF. This function estimates the velocity and acceleration using the two
+   * previous positions passed in. It is designed to be called in a control loop at a constant interval.
    * @param positions array of joint position commands
-   * @param velocities array of joint velocity commands
-   * @param accelerations array of joint acceleration commands
-   * @return True if initialization was successful
+   * @param velocities (unused)
+   * @param accelerations (unused)
+   * @return True if smoothing was successful
    */
   bool doSmoothing(Eigen::VectorXd& positions, Eigen::VectorXd& velocities, Eigen::VectorXd& accelerations) override;
 
   /**
-   * Reset to a given joint state
+   * Reset to a given joint state. This method must be called before doSmoothing.
    * @param positions reset the filters to these joint positions
    * @param velocities (unused)
    * @param accelerations (unused)
