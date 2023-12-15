@@ -385,6 +385,10 @@ ompl::base::ConstraintPtr createOMPLConstraints(const moveit::core::RobotModelCo
     }
 
     const auto& primitives = constraints.position_constraints.at(0).constraint_region.primitives;
+    if (primitives.size() > 1)
+    {
+      RCLCPP_WARN(getLogger(), "Only a single position primitive is supported. Using the first one.");
+    }
     if (primitives.empty() || primitives.at(0).type != shape_msgs::msg::SolidPrimitive::BOX)
     {
       RCLCPP_ERROR(getLogger(), "Unable to plan with the requested position constraint. "
