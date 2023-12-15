@@ -336,6 +336,7 @@ planning_scene_monitor::PlanningSceneMonitorPtr createPlanningSceneMonitor(const
 
   planning_scene_monitor->startStateMonitor(servo_params.joint_topic);
   planning_scene_monitor->startSceneMonitor(servo_params.monitored_planning_scene_topic);
+  planning_scene_monitor->startWorldGeometryMonitor();
   planning_scene_monitor->setPlanningScenePublishingFrequency(25);
   planning_scene_monitor->getStateMonitor()->enableCopyDynamics(true);
   planning_scene_monitor->startPublishingPlanningScene(planning_scene_monitor::PlanningSceneMonitor::UPDATE_SCENE,
