@@ -67,7 +67,7 @@ bool AccelerationLimitedPlugin::initialize(rclcpp::Node::SharedPtr node, moveit:
 bool AccelerationLimitedPlugin::doSmoothing(Eigen::VectorXd& positions, Eigen::VectorXd& /* unused */,
                                             Eigen::VectorXd& /* unused */)
 {
-  const size_t num_positions = positions.size();
+  const long num_positions = positions.size();
   if (num_positions != num_joints_)
   {
     RCLCPP_ERROR_THROTTLE(
@@ -110,7 +110,7 @@ bool AccelerationLimitedPlugin::doSmoothing(Eigen::VectorXd& positions, Eigen::V
     cur_velocity_ = (positions - last_positions_[1].first) / dt_2;
     cur_acceleration = (cur_velocity_ - prev_velocity_) / dt_2;
     double scale = 1.0;
-    for (size_t i = 0; i < num_joints_; i++)
+    for (long i = 0; i < num_joints_; i++)
     {
       scale = std::min(scale, std::clamp(cur_acceleration[i], -joint_acceleration_limit_, joint_acceleration_limit_) /
                                   cur_acceleration[i]);

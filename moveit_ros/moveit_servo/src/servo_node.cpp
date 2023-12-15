@@ -160,10 +160,10 @@ void ServoNode::pauseServo(const std::shared_ptr<std_srvs::srv::SetBool::Request
   }
   else
   {
-    // Reset the smoothing plugin with the robot's current state in case the robot moved between pausing and unpausing.
+    // Reset the smoothing plugin with the robot's current state in case the robot moved between pausing.
     last_commanded_state_ = servo_->getCurrentRobotState();
     servo_->resetSmoothing(last_commanded_state_);
-
+    joint_cmd_rolling_window_.clear();
     servo_->setCollisionChecking(true);
     response->message = "Servoing enabled";
   }
@@ -340,7 +340,7 @@ void ServoNode::servoLoop()
     {
       next_joint_state = processTwistCommand(robot_state);
     }
-    else if (new_pose_msg_)
+    else if (expected_type == CommandType::POSE && new_pose_msg_)
     {
       next_joint_state = processPoseCommand(robot_state);
     }
@@ -351,7 +351,7 @@ void ServoNode::servoLoop()
     }
 
     // in trajectory mode, the commands must continue to stream. If no commands are received, then robot should try
-    // eventually come to a stop
+    // to eventually come to a stop
     if (!next_joint_state && use_trajectory)
     {
       std::vector<double> zero_vel;
@@ -369,9 +369,12 @@ void ServoNode::servoLoop()
       if (use_trajectory)
       {
         auto& next_joint_state_value = next_joint_state.value();
-        updateSlidingWindow(next_joint_state_value, joint_cmd_rolling_window_, servo_params_.max_expected_latency,
-                            cur_time);
-        trajectory_publisher_->publish(composeTrajectoryMessage(servo_params_, joint_cmd_rolling_window_));
+        next_joint_state_value.time = cur_time + rclcpp::Duration::from_seconds(servo_params_.max_expected_latency);
+        updateSlidingWindow(next_joint_state_value, joint_cmd_rolling_window_, servo_params_.max_expected_latency);
+        if (auto msg = composeTrajectoryMessage(servo_params_, joint_cmd_rolling_window_))
+        {
+          trajectory_publisher_->publish(msg.value());
+        }
       }
       else
       {

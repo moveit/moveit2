@@ -143,12 +143,12 @@ geometry_msgs::msg::Pose poseFromCartesianDelta(const Eigen::VectorXd& delta_x,
   return tf2::toMsg(tf_pos_translation * tf_rot_delta * tf_neg_translation * tf_no_new_rot);
 }
 
-trajectory_msgs::msg::JointTrajectory
+std::optional<trajectory_msgs::msg::JointTrajectory>
 composeTrajectoryMessage(const servo::Params& servo_params, const std::deque<KinematicState>& joint_cmd_rolling_window)
 {
   trajectory_msgs::msg::JointTrajectory joint_trajectory;
 
-  if (joint_cmd_rolling_window.empty())
+  if (joint_cmd_rolling_window.size() < 3)
   {
     return joint_trajectory;
   }
@@ -186,9 +186,9 @@ composeTrajectoryMessage(const servo::Params& servo_params, const std::deque<Kin
     joint_trajectory.points.emplace_back(point);
   };
 
-  for (const auto& state : joint_cmd_rolling_window)
+  for (size_t i = 0; i < joint_cmd_rolling_window.size() - 1; i++)
   {
-    add_point(joint_trajectory, state);
+    add_point(joint_trajectory, joint_cmd_rolling_window[i]);
   }
 
   // add end command stop point in case of large delay or connection loss
@@ -207,26 +207,62 @@ composeTrajectoryMessage(const servo::Params& servo_params, const std::deque<Kin
   return joint_trajectory;
 }
 
-void updateSlidingWindow(const KinematicState& next_joint_state, std::deque<KinematicState>& joint_cmd_rolling_window,
-                         double max_expected_latency, const rclcpp::Time& cur_time)
+void updateSlidingWindow(KinematicState& next_joint_state, std::deque<KinematicState>& joint_cmd_rolling_window,
+                         double max_expected_latency)
 {
   // remove old commands
   const auto active_time_window = rclcpp::Duration::from_seconds(2 * max_expected_latency);
-  while (!joint_cmd_rolling_window.empty() && joint_cmd_rolling_window.front().time < (cur_time - active_time_window))
+  while (!joint_cmd_rolling_window.empty() &&
+         joint_cmd_rolling_window.front().time < (next_joint_state.time - active_time_window))
   {
     joint_cmd_rolling_window.pop_front();
   }
 
-  // replace command at end of window if timestamp is the same
-  if (!joint_cmd_rolling_window.empty() &&
-      cur_time + rclcpp::Duration::from_seconds(max_expected_latency) == joint_cmd_rolling_window.back().time)
+  // remove command at end of window if timestamp is the same
+  if (!joint_cmd_rolling_window.empty() && next_joint_state.time == joint_cmd_rolling_window.back().time)
   {
     joint_cmd_rolling_window.pop_back();
   }
 
+  // update velocity: the velocity has the potential to dramatically influence interpolation of splines and causes large
+  // overshooting. To alleviate this effect, the velocity will be set to zero if the motion changes direction,
+  // otherwise, it will calculate the forward and backward finite difference velocities and chose the minimum.
+  if (joint_cmd_rolling_window.size() >= 2)
+  {
+    size_t num_points = joint_cmd_rolling_window.size();
+    auto& last_state = joint_cmd_rolling_window[num_points - 1];
+    auto& second_last_state = joint_cmd_rolling_window[num_points - 2];
+
+    Eigen::VectorXd direction_1 = second_last_state.positions - last_state.positions;
+    Eigen::VectorXd direction_2 = next_joint_state.positions - last_state.positions;
+    Eigen::VectorXd signs = (direction_1.array() / direction_2.array()).sign();
+    for (long i = 0; i < last_state.velocities.size(); i++)
+    {
+      if (signs[i] > 0)
+      {
+        // direction changed
+        last_state.velocities[i] = 0;
+      }
+      else
+      {
+        double delta_time_1 = (next_joint_state.time - last_state.time).seconds();
+        double delta_time_2 = (last_state.time - second_last_state.time).seconds();
+        auto velocity_1 = (next_joint_state.positions[i] - last_state.positions[i]) / delta_time_1;
+        auto velocity_2 = (last_state.positions[i] - second_last_state.positions[i]) / delta_time_2;
+        if (std::abs(velocity_1) < std::abs(velocity_2))
+        {
+          last_state.velocities[i] = velocity_1;
+        }
+        else
+        {
+          last_state.velocities[i] = velocity_2;
+        }
+      }
+    }
+  }
+
   // add next command
   joint_cmd_rolling_window.push_back(next_joint_state);
-  joint_cmd_rolling_window.back().time = cur_time + rclcpp::Duration::from_seconds(max_expected_latency);
 }
 
 std_msgs::msg::Float64MultiArray composeMultiArrayMessage(const servo::Params& servo_params,

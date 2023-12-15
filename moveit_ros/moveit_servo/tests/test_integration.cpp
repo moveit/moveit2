@@ -56,13 +56,11 @@ TEST_F(ServoCppFixture, JointJogTest)
   status_initial = servo_test_instance_->getStatus();
   ASSERT_EQ(status_initial, moveit_servo::StatusCode::NO_WARNING);
 
-  moveit_servo::KinematicState curr_state =
-      servo_test_instance_->getNextJointState(robot_state, zero_joint_jog);
+  moveit_servo::KinematicState curr_state = servo_test_instance_->getNextJointState(robot_state, zero_joint_jog);
   status_curr = servo_test_instance_->getStatus();
   ASSERT_EQ(status_curr, moveit_servo::StatusCode::NO_WARNING);
 
-  moveit_servo::KinematicState next_state =
-      servo_test_instance_->getNextJointState(robot_state, joint_jog_z);
+  moveit_servo::KinematicState next_state = servo_test_instance_->getNextJointState(robot_state, joint_jog_z);
   status_next = servo_test_instance_->getStatus();
   ASSERT_EQ(status_next, moveit_servo::StatusCode::NO_WARNING);
 
@@ -82,13 +80,11 @@ TEST_F(ServoCppFixture, TwistTest)
   servo_test_instance_->setCommandType(moveit_servo::CommandType::TWIST);
   status_initial = servo_test_instance_->getStatus();
   ASSERT_EQ(status_initial, moveit_servo::StatusCode::NO_WARNING);
-  moveit_servo::KinematicState curr_state =
-      servo_test_instance_->getNextJointState(robot_state, twist_zero);
+  moveit_servo::KinematicState curr_state = servo_test_instance_->getNextJointState(robot_state, twist_zero);
   status_curr = servo_test_instance_->getStatus();
   ASSERT_EQ(status_curr, moveit_servo::StatusCode::NO_WARNING);
 
-  moveit_servo::KinematicState next_state =
-      servo_test_instance_->getNextJointState(robot_state, twist_non_zero);
+  moveit_servo::KinematicState next_state = servo_test_instance_->getNextJointState(robot_state, twist_non_zero);
   status_next = servo_test_instance_->getStatus();
   ASSERT_EQ(status_next, moveit_servo::StatusCode::NO_WARNING);
 
@@ -109,13 +105,11 @@ TEST_F(ServoCppFixture, NonPlanningFrameTwistTest)
   servo_test_instance_->setCommandType(moveit_servo::CommandType::TWIST);
   status_initial = servo_test_instance_->getStatus();
   ASSERT_EQ(status_initial, moveit_servo::StatusCode::NO_WARNING);
-  moveit_servo::KinematicState curr_state =
-      servo_test_instance_->getNextJointState(robot_state, twist_zero);
+  moveit_servo::KinematicState curr_state = servo_test_instance_->getNextJointState(robot_state, twist_zero);
   status_curr = servo_test_instance_->getStatus();
   ASSERT_EQ(status_curr, moveit_servo::StatusCode::NO_WARNING);
 
-  moveit_servo::KinematicState next_state =
-      servo_test_instance_->getNextJointState(robot_state, twist_non_zero);
+  moveit_servo::KinematicState next_state = servo_test_instance_->getNextJointState(robot_state, twist_non_zero);
   status_next = servo_test_instance_->getStatus();
   ASSERT_EQ(status_next, moveit_servo::StatusCode::NO_WARNING);
 
@@ -142,13 +136,11 @@ TEST_F(ServoCppFixture, PoseTest)
   ASSERT_EQ(status_initial, moveit_servo::StatusCode::NO_WARNING);
 
   moveit::core::RobotStatePtr robot_state = planning_scene_monitor_->getStateMonitor()->getCurrentState();
-  moveit_servo::KinematicState curr_state =
-      servo_test_instance_->getNextJointState(robot_state, zero_pose);
+  moveit_servo::KinematicState curr_state = servo_test_instance_->getNextJointState(robot_state, zero_pose);
   status_curr = servo_test_instance_->getStatus();
   ASSERT_EQ(status_curr, moveit_servo::StatusCode::NO_WARNING);
 
-  moveit_servo::KinematicState next_state =
-      servo_test_instance_->getNextJointState(robot_state, non_zero_pose);
+  moveit_servo::KinematicState next_state = servo_test_instance_->getNextJointState(robot_state, non_zero_pose);
   status_next = servo_test_instance_->getStatus();
   ASSERT_EQ(status_next, moveit_servo::StatusCode::NO_WARNING);
 

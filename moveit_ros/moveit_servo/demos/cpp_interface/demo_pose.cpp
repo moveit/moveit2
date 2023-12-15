@@ -89,10 +89,6 @@ int main(int argc, char* argv[])
   // This is just for convenience, should not be used for sync in real application.
   std::this_thread::sleep_for(std::chrono::seconds(3));
 
-  // For syncing pose tracking thread and main thread.
-  std::mutex pose_guard;
-  std::atomic<bool> stop_tracking = false;
-
   // Set the command type for servo.
   servo.setCommandType(CommandType::POSE);
 
@@ -135,6 +131,7 @@ int main(int argc, char* argv[])
 
   bool satisfies_linear_tolerance = false;
   bool satisfies_angular_tolerance = false;
+  bool stop_tracking = false;
   while (!stop_tracking && rclcpp::ok())
   {
     auto last_commanded_state = joint_cmd_rolling_window.back();
@@ -156,11 +153,15 @@ int main(int argc, char* argv[])
 
     // get next servo command
     joint_state = servo.getNextJointState(robot_state, target_pose);
+    joint_state.time = demo_node->now() + rclcpp::Duration::from_seconds(servo_params.max_expected_latency);
     StatusCode status = servo.getStatus();
     if (status != StatusCode::INVALID)
     {
-      updateSlidingWindow(joint_state, joint_cmd_rolling_window, servo_params.max_expected_latency, demo_node->now());
-      trajectory_outgoing_cmd_pub->publish(composeTrajectoryMessage(servo_params, joint_cmd_rolling_window));
+      updateSlidingWindow(joint_state, joint_cmd_rolling_window, servo_params.max_expected_latency);
+      if (auto msg = composeTrajectoryMessage(servo_params, joint_cmd_rolling_window))
+      {
+        trajectory_outgoing_cmd_pub->publish(msg.value());
+      }
     }
 
     servo_rate.sleep();
