@@ -42,8 +42,6 @@ The skeleton of this test was taken from test_state_validity_checker.cpp by Jero
 #include <moveit/ompl_interface/detail/threadsafe_state_storage.h>
 #include <gtest/gtest.h>
 
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.ompl_planning.test.test_thread_safe_storage");
-
 /** \brief Generic implementation of the tests that can be executed on different robots. **/
 class TestThreadSafeStateStorage : public ompl_interface_testing::LoadTestRobot, public testing::Test
 {

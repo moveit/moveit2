@@ -56,7 +56,7 @@ int main(int argc, char** argv)
 {
   rclcpp::init(argc, argv);
   auto node = rclcpp::Node::make_shared("publish_planning_scene");
-  moveit::setLogger(node->get_logger());
+  moveit::setNodeLoggerName(node->get_name());
 
   // decide whether to publish the full scene
   bool full_scene = false;
@@ -101,7 +101,7 @@ int main(int argc, char** argv)
     std::ifstream f(argv[filename_index]);
     if (ps.loadGeometryFromStream(f))
     {
-      RCLCPP_INFO(moveit::getLogger(), "Publishing geometry from '%s' ...", argv[filename_index]);
+      RCLCPP_INFO(node->get_logger(), "Publishing geometry from '%s' ...", argv[filename_index]);
       moveit_msgs::msg::PlanningScene ps_msg;
       ps.getPlanningSceneMsg(ps_msg);
       ps_msg.is_diff = true;
@@ -124,7 +124,7 @@ int main(int argc, char** argv)
   }
   else
   {
-    RCLCPP_WARN(moveit::getLogger(),
+    RCLCPP_WARN(node->get_logger(),
                 "A filename was expected as argument. That file should be a text representation of the geometry in a "
                 "planning scene.");
   }

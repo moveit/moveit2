@@ -64,8 +64,7 @@
 #include <moveit/constraint_samplers/constraint_sampler_manager.h>
 #include <moveit/ompl_interface/parameterization/joint_space/joint_model_state_space.h>
 #include <moveit/ompl_interface/parameterization/joint_space/constrained_planning_state_space.h>
-
-// static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.ompl_planning.test.test_planning_context_manager");
+#include <moveit/utils/logger.hpp>
 
 /** \brief Generic implementation of the tests that can be executed on different robots. **/
 class TestPlanningContext : public ompl_interface_testing::LoadTestRobot, public testing::Test
@@ -74,6 +73,7 @@ public:
   TestPlanningContext(const std::string& robot_name, const std::string& group_name)
     : LoadTestRobot(robot_name, group_name), node_(std::make_shared<rclcpp::Node>("planning_context_manager_test"))
   {
+    moveit::setNodeLoggerName(node_->get_name());
   }
 
   void testSimpleRequest(const std::vector<double>& start, const std::vector<double>& goal)
@@ -108,7 +108,8 @@ public:
 
     // solve the planning problem
     planning_interface::MotionPlanDetailedResponse res;
-    ASSERT_TRUE(pc->solve(res));
+    pc->solve(res);
+    ASSERT_TRUE(res.error_code.val == moveit_msgs::msg::MoveItErrorCodes::SUCCESS);
   }
 
   void testPathConstraints(const std::vector<double>& start, const std::vector<double>& goal)
@@ -154,7 +155,8 @@ public:
     EXPECT_NE(dynamic_cast<ompl_interface::ConstrainedPlanningStateSpace*>(pc->getOMPLStateSpace().get()), nullptr);
 
     planning_interface::MotionPlanDetailedResponse response;
-    ASSERT_TRUE(pc->solve(response));
+    pc->solve(response);
+    ASSERT_TRUE(response.error_code.val == moveit_msgs::msg::MoveItErrorCodes::SUCCESS);
 
     // Are the path constraints created in the planning context?
     auto path_constraints = pc->getPathConstraints();
@@ -191,7 +193,8 @@ public:
 
     // Create a new response, because the solve method does not clear the given response
     planning_interface::MotionPlanDetailedResponse response2;
-    ASSERT_TRUE(pc->solve(response2));
+    pc->solve(response2);
+    ASSERT_TRUE(response2.error_code.val == moveit_msgs::msg::MoveItErrorCodes::SUCCESS);
 
     // Are the path constraints created in the planning context?
     path_constraints = pc->getPathConstraints();

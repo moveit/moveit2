@@ -49,7 +49,10 @@
 
 static const std::string ROBOT_DESCRIPTION = "robot_description";
 
-using moveit::getLogger;
+rclcpp::Logger getLogger()
+{
+  return moveit::getLogger("import_from_text");
+}
 
 void parseStart(std::istream& in, planning_scene_monitor::PlanningSceneMonitor* psm,
                 moveit_warehouse::RobotStateStorage* rs)
@@ -223,7 +226,7 @@ int main(int argc, char** argv)
   node_options.allow_undeclared_parameters(true);
   node_options.automatically_declare_parameters_from_overrides(true);
   rclcpp::Node::SharedPtr node = rclcpp::Node::make_shared("import_from_text_to_warehouse", node_options);
-  moveit::setLogger(node->get_logger());
+  moveit::setNodeLoggerName(node->get_name());
 
   // clang-format off
   boost::program_options::options_description desc;
@@ -253,7 +256,7 @@ int main(int argc, char** argv)
   planning_scene_monitor::PlanningSceneMonitor psm(node, ROBOT_DESCRIPTION);
   if (!psm.getPlanningScene())
   {
-    RCLCPP_ERROR(getLogger(), "Unable to initialize PlanningSceneMonitor");
+    RCLCPP_ERROR(node->get_logger(), "Unable to initialize PlanningSceneMonitor");
     return 1;
   }
 

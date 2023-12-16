@@ -53,6 +53,7 @@
 #include <octomap_msgs/msg/octomap_with_pose.hpp>
 #include <memory>
 #include <functional>
+#include <optional>
 #include <thread>
 #include <variant>
 #include <rclcpp/rclcpp.hpp>
@@ -291,8 +292,12 @@ public:
   {
     return acm_ ? *acm_ : parent_->getAllowedCollisionMatrix();
   }
+
   /** \brief Get the allowed collision matrix */
   collision_detection::AllowedCollisionMatrix& getAllowedCollisionMatrixNonConst();
+
+  /** \brief Set the allowed collision matrix */
+  void setAllowedCollisionMatrix(const collision_detection::AllowedCollisionMatrix& acm);
 
   /**@}*/
 
@@ -741,7 +746,20 @@ public:
 
   bool hasObjectColor(const std::string& id) const;
 
+  /**
+   * \brief Gets the current color of an object.
+   * \param id The string id of the target object.
+   * \return The current object color.
+   */
   const std_msgs::msg::ColorRGBA& getObjectColor(const std::string& id) const;
+
+  /**
+   * \brief Tries to get the original color of an object, if one has been set before.
+   * \param id The string id of the target object.
+   * \return The original object color, if available, otherwise std::nullopt.
+   */
+  std::optional<std_msgs::msg::ColorRGBA> getOriginalObjectColor(const std::string& id) const;
+
   void setObjectColor(const std::string& id, const std_msgs::msg::ColorRGBA& color);
   void removeObjectColor(const std::string& id);
   void getKnownObjectColors(ObjectColorMap& kc) const;
@@ -1015,7 +1033,9 @@ private:
   StateFeasibilityFn state_feasibility_;
   MotionFeasibilityFn motion_feasibility_;
 
+  // Maps of current and original object colors (to manage attaching/detaching objects)
   std::unique_ptr<ObjectColorMap> object_colors_;
+  std::unique_ptr<ObjectColorMap> original_object_colors_;
 
   // a map of object types
   std::unique_ptr<ObjectTypeMap> object_types_;

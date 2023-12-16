@@ -50,7 +50,7 @@ class ConstraintSamplerManagerLoader::Helper
 {
 public:
   Helper(const rclcpp::Node::SharedPtr& node, const constraint_samplers::ConstraintSamplerManagerPtr& csm)
-    : node_(node), logger_(moveit::makeChildLogger("constraint_sampler_manager_loader"))
+    : node_(node), logger_(moveit::getLogger("constraint_sampler_manager_loader"))
   {
     if (node_->has_parameter("constraint_samplers"))
     {

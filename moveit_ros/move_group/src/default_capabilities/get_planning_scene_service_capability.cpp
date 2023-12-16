@@ -39,7 +39,7 @@
 
 namespace move_group
 {
-MoveGroupGetPlanningSceneService::MoveGroupGetPlanningSceneService() : MoveGroupCapability("GetPlanningSceneService")
+MoveGroupGetPlanningSceneService::MoveGroupGetPlanningSceneService() : MoveGroupCapability("get_planning_scene_service")
 {
 }
 

@@ -56,6 +56,7 @@
 #include <rclcpp/parameter_value.hpp>
 #include <rclcpp/qos.hpp>
 #include <rclcpp/version.h>
+#include <moveit/utils/logger.hpp>
 #if RCLCPP_VERSION_GTE(20, 0, 0)
 #include <rclcpp/event_handler.hpp>
 #else
@@ -71,7 +72,10 @@
 using namespace std::chrono_literals;
 namespace
 {
-const rclcpp::Logger LOGGER = rclcpp::get_logger("test_hybrid_planning_client");
+rclcpp::Logger getLogger()
+{
+  return moveit::getLogger("test_hybrid_planning_client");
+}
 }  // namespace
 
 class HybridPlanningDemo
@@ -88,7 +92,7 @@ public:
     }
     else
     {
-      RCLCPP_ERROR(LOGGER, "hybrid_planning_action_name parameter was not defined");
+      RCLCPP_ERROR(getLogger(), "hybrid_planning_action_name parameter was not defined");
       std::exit(EXIT_FAILURE);
     }
     hp_action_client_ =
@@ -147,14 +151,14 @@ public:
 
   void run()
   {
-    RCLCPP_INFO(LOGGER, "Initialize Planning Scene Monitor");
+    RCLCPP_INFO(getLogger(), "Initialize Planning Scene Monitor");
     tf_buffer_ = std::make_shared<tf2_ros::Buffer>(node_->get_clock());
 
     planning_scene_monitor_ = std::make_shared<planning_scene_monitor::PlanningSceneMonitor>(node_, "robot_description",
                                                                                              "planning_scene_monitor");
     if (!planning_scene_monitor_->getPlanningScene())
     {
-      RCLCPP_ERROR(LOGGER, "The planning scene was not retrieved!");
+      RCLCPP_ERROR(getLogger(), "The planning scene was not retrieved!");
       return;
     }
     else
@@ -169,13 +173,13 @@ public:
 
     if (!planning_scene_monitor_->waitForCurrentRobotState(node_->now(), 5))
     {
-      RCLCPP_ERROR(LOGGER, "Timeout when waiting for /joint_states updates. Is the robot running?");
+      RCLCPP_ERROR(getLogger(), "Timeout when waiting for /joint_states updates. Is the robot running?");
       return;
     }
 
     if (!hp_action_client_->wait_for_action_server(20s))
     {
-      RCLCPP_ERROR(LOGGER, "Hybrid planning action server not available after waiting");
+      RCLCPP_ERROR(getLogger(), "Hybrid planning action server not available after waiting");
       return;
     }
 
@@ -194,7 +198,7 @@ public:
       scene->processCollisionObjectMsg(collision_object_1_);
     }  // Unlock PlanningScene
 
-    RCLCPP_INFO(LOGGER, "Wait 2s for the collision object");
+    RCLCPP_INFO(getLogger(), "Wait 2s for the collision object");
     rclcpp::sleep_for(2s);
 
     // Setup motion planning goal taken from motion_planning_api tutorial
@@ -253,27 +257,27 @@ public:
           switch (result.code)
           {
             case rclcpp_action::ResultCode::SUCCEEDED:
-              RCLCPP_INFO(LOGGER, "Hybrid planning goal succeeded");
+              RCLCPP_INFO(getLogger(), "Hybrid planning goal succeeded");
               break;
             case rclcpp_action::ResultCode::ABORTED:
-              RCLCPP_ERROR(LOGGER, "Hybrid planning goal was aborted");
+              RCLCPP_ERROR(getLogger(), "Hybrid planning goal was aborted");
               return;
             case rclcpp_action::ResultCode::CANCELED:
-              RCLCPP_ERROR(LOGGER, "Hybrid planning goal was canceled");
+              RCLCPP_ERROR(getLogger(), "Hybrid planning goal was canceled");
               return;
             default:
-              RCLCPP_ERROR(LOGGER, "Unknown hybrid planning result code");
+              RCLCPP_ERROR(getLogger(), "Unknown hybrid planning result code");
               return;
-              RCLCPP_INFO(LOGGER, "Hybrid planning result received");
+              RCLCPP_INFO(getLogger(), "Hybrid planning result received");
           }
         };
     send_goal_options.feedback_callback =
         [](const rclcpp_action::ClientGoalHandle<moveit_msgs::action::HybridPlanner>::SharedPtr& /*unused*/,
            const std::shared_ptr<const moveit_msgs::action::HybridPlanner::Feedback>& feedback) {
-          RCLCPP_INFO_STREAM(LOGGER, feedback->feedback);
+          RCLCPP_INFO_STREAM(getLogger(), feedback->feedback);
         };
 
-    RCLCPP_INFO(LOGGER, "Sending hybrid planning goal");
+    RCLCPP_INFO(getLogger(), "Sending hybrid planning goal");
     // Ask server to achieve some goal and wait until it's accepted
     auto goal_handle_future = hp_action_client_->async_send_goal(goal_action_request, send_goal_options);
   }

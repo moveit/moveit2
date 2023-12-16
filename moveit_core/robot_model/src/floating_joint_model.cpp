@@ -36,20 +36,26 @@
 /* Author: Ioan Sucan */
 
 #include <cmath>
+#include <Eigen/Geometry>
 #include <geometric_shapes/check_isometry.h>
 #include <limits>
 #include <moveit/robot_model/floating_joint_model.h>
 #include <rclcpp/logger.hpp>
 #include <rclcpp/logging.hpp>
+#include <moveit/utils/logger.hpp>
 
 namespace moveit
 {
 namespace core
 {
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_robot_model.floating_joint_model");
 namespace
 {
 constexpr size_t STATE_SPACE_DIMENSION = 7;
+
+rclcpp::Logger getLogger()
+{
+  return moveit::getLogger("floating_joint_model");
+}
 
 }  // namespace
 
@@ -121,16 +127,10 @@ double FloatingJointModel::distanceTranslation(const double* values1, const doub
 
 double FloatingJointModel::distanceRotation(const double* values1, const double* values2) const
 {
-  double dq =
-      fabs(values1[3] * values2[3] + values1[4] * values2[4] + values1[5] * values2[5] + values1[6] * values2[6]);
-  if (dq + std::numeric_limits<double>::epsilon() >= 1.0)
-  {
-    return 0.0;
-  }
-  else
-  {
-    return acos(dq);
-  }
+  // The values are in "xyzw" order but Eigen expects "wxyz".
+  const auto q1 = Eigen::Quaterniond(values1[6], values1[3], values1[4], values1[5]).normalized();
+  const auto q2 = Eigen::Quaterniond(values2[6], values2[3], values2[4], values2[5]).normalized();
+  return q2.angularDistance(q1);
 }
 
 void FloatingJointModel::interpolate(const double* from, const double* to, const double t, double* state) const
@@ -185,7 +185,7 @@ bool FloatingJointModel::normalizeRotation(double* values) const
     double norm = sqrt(norm_sqr);
     if (norm < std::numeric_limits<double>::epsilon() * 100.0)
     {
-      RCLCPP_WARN(LOGGER, "Quaternion is zero in RobotState representation. Setting to identity");
+      RCLCPP_WARN(getLogger(), "Quaternion is zero in RobotState representation. Setting to identity");
       values[3] = 0.0;
       values[4] = 0.0;
       values[5] = 0.0;

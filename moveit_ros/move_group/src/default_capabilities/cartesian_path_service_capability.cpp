@@ -52,6 +52,10 @@ using moveit::getLogger;
 
 namespace
 {
+
+/** \brief To display a motion path with RVIZ, the solution is sent to this topic (moveit_msgs::msg::DisplayTrajectory) */
+const std::string DISPLAY_PATH_TOPIC = std::string("display_planned_path");
+
 bool isStateValid(const planning_scene::PlanningScene* planning_scene,
                   const kinematic_constraints::KinematicConstraintSet* constraint_set, moveit::core::RobotState* state,
                   const moveit::core::JointModelGroup* group, const double* ik_solution)
@@ -60,6 +64,11 @@ bool isStateValid(const planning_scene::PlanningScene* planning_scene,
   state->update();
   return (!planning_scene || !planning_scene->isStateColliding(*state, group->getName())) &&
          (!constraint_set || constraint_set->decide(*state).satisfied);
+}
+
+rclcpp::Logger getLogger()
+{
+  return moveit::getLogger("cartesian_path_service_capability");
 }
 }  // namespace
 
@@ -72,8 +81,8 @@ MoveGroupCartesianPathService::MoveGroupCartesianPathService()
 
 void MoveGroupCartesianPathService::initialize()
 {
-  display_path_ = context_->moveit_cpp_->getNode()->create_publisher<moveit_msgs::msg::DisplayTrajectory>(
-      planning_pipeline::PlanningPipeline::DISPLAY_PATH_TOPIC, 10);
+  display_path_ =
+      context_->moveit_cpp_->getNode()->create_publisher<moveit_msgs::msg::DisplayTrajectory>(DISPLAY_PATH_TOPIC, 10);
 
   cartesian_path_service_ = context_->moveit_cpp_->getNode()->create_service<moveit_msgs::srv::GetCartesianPath>(
 
@@ -171,7 +180,8 @@ bool MoveGroupCartesianPathService::computeService(
           std::vector<moveit::core::RobotStatePtr> traj;
           res->fraction = moveit::core::CartesianInterpolator::computeCartesianPath(
               &start_state, jmg, traj, start_state.getLinkModel(link_name), waypoints, global_frame,
-              moveit::core::MaxEEFStep(req->max_step), moveit::core::JumpThreshold(req->jump_threshold), constraint_fn);
+              moveit::core::MaxEEFStep(req->max_step), moveit::core::JumpThreshold::relative(req->jump_threshold),
+              constraint_fn);
           moveit::core::robotStateToRobotStateMsg(start_state, res->start_state);
 
           robot_trajectory::RobotTrajectory rt(context_->planning_scene_monitor_->getRobotModel(), req->group_name);
