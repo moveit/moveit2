@@ -758,9 +758,19 @@ void ompl_interface::ModelBasedPlanningContext::postSolve()
   RCLCPP_DEBUG(LOGGER, "There were %d valid motions and %d invalid motions.", v, iv);
 
   // Debug OMPL setup and solution
+<<<<<<< HEAD
   std::stringstream debug_out;
   ompl_simple_setup_->print(debug_out);
   RCLCPP_DEBUG(LOGGER, "%s", rclcpp::get_c_string(debug_out.str()));
+=======
+  RCLCPP_DEBUG(getLogger(), "%s",
+               [&] {
+                 std::stringstream debug_out;
+                 ompl_simple_setup_->print(debug_out);
+                 return debug_out.str();
+               }()
+                   .c_str());
+>>>>>>> 0807cb254 (Invoke OMPL debug print only when debug logging is enabled (#2608))
 }
 
 bool ompl_interface::ModelBasedPlanningContext::solve(planning_interface::MotionPlanResponse& res)
