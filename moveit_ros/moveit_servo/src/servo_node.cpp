@@ -297,6 +297,15 @@ void ServoNode::servoLoop()
   std::optional<KinematicState> next_joint_state = std::nullopt;
   rclcpp::WallRate servo_frequency(1 / servo_params_.publish_period);
 
+  // wait for first robot joint state update
+  auto servo_node_start = node_->now();
+  while (planning_scene_monitor_->getLastUpdateTime().get_clock_type() != node_->get_clock()->get_clock_type() ||
+         servo_node_start > planning_scene_monitor_->getLastUpdateTime())
+  {
+    RCLCPP_INFO(node_->get_logger(), "Waiting to receive robot state update.");
+    rclcpp::sleep_for(std::chrono::microseconds(500));
+  }
+
   // Get the robot state and joint model group info.
   moveit::core::RobotStatePtr robot_state = planning_scene_monitor_->getStateMonitor()->getCurrentState();
   const moveit::core::JointModelGroup* joint_model_group =
