@@ -1077,6 +1077,62 @@ TEST(getJacobian, GroupNotAtOrigin)
   checkJacobian(state, *jmg, makeVector({ 0.1, 0.4, 0.3 }), makeVector({ 0.5, 0.1, 0.2 }));
 }
 
+TEST(getJointPositions, getFixedJointValue)
+{
+  // Robot URDF with two revolute joints and a final fixed joint.
+  // Trying to get the value of the fixed joint should work and return nullptr.
+  constexpr char robot_urdf[] = R"(
+      <?xml version="1.0" ?>
+      <robot name="one_robot">
+        <link name="base_link"/>
+        <joint name="joint_a_revolute" type="revolute">
+            <axis xyz="0 0 1"/>
+            <parent link="base_link"/>
+            <child link="link_a"/>
+            <origin rpy="0 0 0" xyz="0 0 0"/>
+            <limit effort="100.0" lower="-3.14" upper="3.14" velocity="0.2"/>
+        </joint>
+        <link name="link_a"/>
+        <joint name="joint_b_revolute" type="revolute">
+          <axis xyz="0 0 1"/>
+            <parent link="link_a"/>
+            <child link="link_b"/>
+            <origin rpy="0 0 0" xyz="0 0 0"/>
+            <limit effort="100.0" lower="-3.14" upper="3.14" velocity="0.2"/>
+        </joint>
+        <link name="link_b"/>
+        <joint name="joint_c_fixed" type="fixed">
+          <parent link="link_b"/>
+          <child link="link_c"/>
+        </joint>
+        <link name="link_c"/>
+      </robot>
+    )";
+
+  constexpr char robot_srdf[] = R"xml(
+      <?xml version="1.0" ?>
+      <robot name="one_robot">
+        <group name="base_to_tip">
+          <joint name="joint_a_revolute"/>
+          <joint name="joint_b_revolute"/>
+          <joint name="joint_c_fixed"/>
+        </group>
+      </robot>
+      )xml";
+
+  const urdf::ModelInterfaceSharedPtr urdf_model = urdf::parseURDF(robot_urdf);
+  ASSERT_TRUE(urdf_model);
+  const auto srdf_model = std::make_shared<srdf::Model>();
+  ASSERT_TRUE(srdf_model->initString(*urdf_model, robot_srdf));
+  const auto robot_model = std::make_shared<moveit::core::RobotModel>(urdf_model, srdf_model);
+
+  // Getting the value of the last fixed joint should return nullptr, since it doesn't have a active variable.
+  moveit::core::RobotState state(robot_model);
+  state.setToDefaultValues();
+  const double* joint_value = state.getJointPositions("joint_c_fixed");
+  ASSERT_EQ(joint_value, nullptr);
+}
+
 int main(int argc, char** argv)
 {
   testing::InitGoogleTest(&argc, argv);
