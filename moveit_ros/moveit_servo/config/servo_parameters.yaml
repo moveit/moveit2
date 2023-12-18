@@ -234,7 +234,7 @@ servo:
   smoothing_filter_plugin_name: {
     type: string,
     read_only: true,
-    default_value: "online_signal_smoothing::AccelerationLimitedPlugin",
+    default_value: "online_signal_smoothing::ButterworthFilterPlugin",
     description: "The name of the smoothing plugin to be used"
   }
 

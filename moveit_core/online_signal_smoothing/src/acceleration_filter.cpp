@@ -98,13 +98,6 @@ bool AccelerationLimitedPlugin::doSmoothing(Eigen::VectorXd& positions, Eigen::V
     rclcpp::Time cur_time = node_->now();
     double dt_1 = (last_positions_[1].second.value() - last_positions_[0].second.value()).seconds();
     double dt_2 = (cur_time - last_positions_[1].second.value()).seconds();
-    if (dt_1 > update_timeout_ || dt_2 > update_timeout_)
-    {
-      RCLCPP_ERROR_THROTTLE(node_->get_logger(), *node_->get_clock(), 1000,
-                            "The maximum allowed time between filter updates exceeded! The `doSmoothing` method must "
-                            "be called at a higher rate.");
-      return false;
-    }
 
     prev_velocity_ = (last_positions_[1].first - last_positions_[0].first) / dt_1;
     cur_velocity_ = (positions - last_positions_[1].first) / dt_2;
@@ -122,6 +115,15 @@ bool AccelerationLimitedPlugin::doSmoothing(Eigen::VectorXd& positions, Eigen::V
     last_positions_[0] = last_positions_[1];
     last_positions_[1].first = positions;
     last_positions_[1].second = cur_time;
+
+    if (dt_1 > update_timeout_ || dt_2 > update_timeout_)
+    {
+      RCLCPP_ERROR_THROTTLE(node_->get_logger(), *node_->get_clock(), 1000,
+                            "The maximum allowed time between filter updates exceeded! The `doSmoothing` method must "
+                            "be called at a higher rate.");
+      return false;
+    }
+
   }
 
   return true;
