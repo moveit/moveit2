@@ -409,6 +409,34 @@ protected:
   moveit::core::RobotModelConstPtr robot_model_;
 };
 
+TEST_F(OneRobot, setToDefaultValues)
+{
+  moveit::core::RobotState state(robot_model_);
+  state.setToDefaultValues();
+
+  // Get default values for joint_a.
+  double joint_a_default_position = state.getVariablePosition("joint_a");
+  double joint_a_default_velocity = state.getVariableVelocity("joint_a");
+  double joint_a_default_acceleration = state.getVariableAcceleration("joint_a");
+
+  // Set joint_a to some values.
+  state.setVariablePosition("joint_a", 1.0);
+  state.setVariableVelocity("joint_a", 2.0);
+  state.setVariableAcceleration("joint_a", 3.0);
+
+  // Check that joint_a has the right values.
+  EXPECT_EQ(state.getVariablePosition("joint_a"), 1.0);
+  EXPECT_EQ(state.getVariableVelocity("joint_a"), 2.0);
+  EXPECT_EQ(state.getVariableAcceleration("joint_a"), 3.0);
+
+  // Set to default values.
+  // Check that joint_a is back to the default values.
+  state.setToDefaultValues();
+  EXPECT_EQ(state.getVariablePosition("joint_a"), joint_a_default_position);
+  EXPECT_EQ(state.getVariableVelocity("joint_a"), joint_a_default_velocity);
+  EXPECT_EQ(state.getVariableAcceleration("joint_a"), joint_a_default_acceleration);
+}
+
 TEST_F(OneRobot, FK)
 {
   moveit::core::RobotModelConstPtr model = robot_model_;
