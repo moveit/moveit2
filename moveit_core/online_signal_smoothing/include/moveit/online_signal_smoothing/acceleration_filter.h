@@ -85,7 +85,7 @@ public:
 
 private:
   rclcpp::Node::SharedPtr node_;
-  long num_joints_;
+  size_t num_joints_;
   std::array<std::pair<Eigen::VectorXd, std::optional<rclcpp::Time>>, 2> last_positions_;
   Eigen::VectorXd prev_velocity_;
   Eigen::VectorXd cur_velocity_;

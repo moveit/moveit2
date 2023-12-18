@@ -67,7 +67,7 @@ bool AccelerationLimitedPlugin::initialize(rclcpp::Node::SharedPtr node, moveit:
 bool AccelerationLimitedPlugin::doSmoothing(Eigen::VectorXd& positions, Eigen::VectorXd& /* unused */,
                                             Eigen::VectorXd& /* unused */)
 {
-  const long num_positions = positions.size();
+  const size_t num_positions = positions.size();
   if (num_positions != num_joints_)
   {
     RCLCPP_ERROR_THROTTLE(
@@ -76,7 +76,7 @@ bool AccelerationLimitedPlugin::doSmoothing(Eigen::VectorXd& positions, Eigen::V
         num_joints_, num_positions);
     return false;
   }
-  else if (last_positions_[0].first.size() != num_joints_)
+  else if (last_positions_[0].first.size() != (long) num_joints_)
   {
     RCLCPP_ERROR_THROTTLE(node_->get_logger(), *node_->get_clock(), 1000,
                           "Reset must be called before doSmoothing for the AccelerationLimitedPlugin plugin.");
@@ -98,12 +98,18 @@ bool AccelerationLimitedPlugin::doSmoothing(Eigen::VectorXd& positions, Eigen::V
     rclcpp::Time cur_time = node_->now();
     double dt_1 = (last_positions_[1].second.value() - last_positions_[0].second.value()).seconds();
     double dt_2 = (cur_time - last_positions_[1].second.value()).seconds();
+    if (dt_1 <=0 || dt_2 <=0)
+    {
+      RCLCPP_ERROR_THROTTLE(node_->get_logger(), *node_->get_clock(), 1000,
+                            "The calculated time difference between `doSmoothing` calls is not greater than zero.");
+      return false;
+    }
 
     prev_velocity_ = (last_positions_[1].first - last_positions_[0].first) / dt_1;
     cur_velocity_ = (positions - last_positions_[1].first) / dt_2;
     cur_acceleration = (cur_velocity_ - prev_velocity_) / dt_2;
     double scale = 1.0;
-    for (long i = 0; i < num_joints_; i++)
+    for (size_t i = 0; i < num_joints_; ++i)
     {
       scale = std::min(scale, std::clamp(cur_acceleration[i], -joint_acceleration_limit_, joint_acceleration_limit_) /
                                   cur_acceleration[i]);
