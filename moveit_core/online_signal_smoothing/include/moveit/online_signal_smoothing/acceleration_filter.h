@@ -89,7 +89,7 @@ private:
   std::array<std::pair<Eigen::VectorXd, std::optional<rclcpp::Time>>, 2> last_positions_;
   Eigen::VectorXd prev_velocity_;
   Eigen::VectorXd cur_velocity_;
-  Eigen::VectorXd cur_acceleration;
+  Eigen::VectorXd cur_acceleration_;
   double joint_acceleration_limit_;
   double update_timeout_;
 };
