@@ -1126,7 +1126,7 @@ TEST(getJointPositions, getFixedJointValue)
   ASSERT_TRUE(srdf_model->initString(*urdf_model, robot_srdf));
   const auto robot_model = std::make_shared<moveit::core::RobotModel>(urdf_model, srdf_model);
 
-  // Getting the value of the last fixed joint should return nullptr, since it doesn't have a active variable.
+  // Getting the value of the last fixed joint should return nullptr, since it doesn't have an active variable.
   moveit::core::RobotState state(robot_model);
   state.setToDefaultValues();
   const double* joint_value = state.getJointPositions("joint_c_fixed");
