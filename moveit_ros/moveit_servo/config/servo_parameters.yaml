@@ -38,7 +38,7 @@ servo:
     type: double,
     read_only: true,
     default_value: 0.25,
-    description: "The amount of time the robot will take to stop in case the servo node losses connection [seconds]. \
+    description: "The amount of time the robot will take to stop in case the servo node loses connection [seconds]. \
                   Only applicable when command_out_type is set to trajectory_msgs/JointTrajectory.",
     validation: {
       gt<>: 0.0
