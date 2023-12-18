@@ -100,15 +100,10 @@ int main(int argc, char* argv[])
 
   // create command queue to build trajectory message
   std::deque<KinematicState> joint_cmd_rolling_window;
-  KinematicState current_state = servo.getCurrentRobotState();
-  current_state.time = demo_node->now();
-  joint_cmd_rolling_window.push_back(current_state);
 
   RCLCPP_INFO_STREAM(demo_node->get_logger(), servo.getStatusMessage());
   while (rclcpp::ok())
   {
-    auto last_commanded_state = joint_cmd_rolling_window.back();
-    robot_state->setJointGroupPositions(joint_model_group, last_commanded_state.positions);
     KinematicState joint_state = servo.getNextJointState(robot_state, target_twist);
     joint_state.time = demo_node->now() + rclcpp::Duration::from_seconds(servo_params.max_expected_latency);
     const StatusCode status = servo.getStatus();
@@ -127,6 +122,8 @@ int main(int argc, char* argv[])
       {
         trajectory_outgoing_cmd_pub->publish(msg.value());
       }
+      auto last_commanded_state = joint_cmd_rolling_window.back();
+      robot_state->setJointGroupPositions(joint_model_group, last_commanded_state.positions);
     }
     rate.sleep();
   }

@@ -76,7 +76,7 @@ bool AccelerationLimitedPlugin::doSmoothing(Eigen::VectorXd& positions, Eigen::V
         num_joints_, num_positions);
     return false;
   }
-  else if (last_positions_[0].first.size() != (long) num_joints_)
+  else if (last_positions_[0].first.size() != (long)num_joints_)
   {
     RCLCPP_ERROR_THROTTLE(node_->get_logger(), *node_->get_clock(), 1000,
                           "Reset must be called before doSmoothing for the AccelerationLimitedPlugin plugin.");
@@ -98,7 +98,7 @@ bool AccelerationLimitedPlugin::doSmoothing(Eigen::VectorXd& positions, Eigen::V
     rclcpp::Time cur_time = node_->now();
     double dt_1 = (last_positions_[1].second.value() - last_positions_[0].second.value()).seconds();
     double dt_2 = (cur_time - last_positions_[1].second.value()).seconds();
-    if (dt_1 <=0 || dt_2 <=0)
+    if (dt_1 <= 0 || dt_2 <= 0)
     {
       RCLCPP_ERROR_THROTTLE(node_->get_logger(), *node_->get_clock(), 1000,
                             "The calculated time difference between `doSmoothing` calls is not greater than zero.");
@@ -129,7 +129,6 @@ bool AccelerationLimitedPlugin::doSmoothing(Eigen::VectorXd& positions, Eigen::V
                             "be called at a higher rate.");
       return false;
     }
-
   }
 
   return true;

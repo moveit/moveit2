@@ -125,18 +125,12 @@ int main(int argc, char* argv[])
 
   // create command queue to build trajectory message
   std::deque<KinematicState> joint_cmd_rolling_window;
-  joint_cmd_rolling_window.push_back(current_state);
-  current_state.time = current_state.time + rclcpp::Duration::from_seconds(servo_params.max_expected_latency);
-  joint_cmd_rolling_window.push_back(current_state);
 
   bool satisfies_linear_tolerance = false;
   bool satisfies_angular_tolerance = false;
   bool stop_tracking = false;
   while (!stop_tracking && rclcpp::ok())
   {
-    auto last_commanded_state = joint_cmd_rolling_window.back();
-    robot_state->setJointGroupPositions(joint_model_group, last_commanded_state.positions);
-
     // check if goal reached
     target_pose.pose = get_current_pose(K_TIP_FRAME, robot_state);
     satisfies_linear_tolerance |= target_pose.pose.translation().isApprox(terminal_pose.translation(),
@@ -147,9 +141,13 @@ int main(int argc, char* argv[])
 
     // Dynamically update the target pose.
     if (!satisfies_linear_tolerance)
+    {
       target_pose.pose.translate(linear_step_size);
+    }
     if (!satisfies_angular_tolerance)
+    {
       target_pose.pose.rotate(angular_step_size);
+    }
 
     // get next servo command
     joint_state = servo.getNextJointState(robot_state, target_pose);
@@ -162,6 +160,8 @@ int main(int argc, char* argv[])
       {
         trajectory_outgoing_cmd_pub->publish(msg.value());
       }
+      auto last_commanded_state = joint_cmd_rolling_window.back();
+      robot_state->setJointGroupPositions(joint_model_group, last_commanded_state.positions);
     }
 
     servo_rate.sleep();
