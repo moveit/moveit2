@@ -341,6 +341,7 @@ void RobotState::setToDefaultValues()
   robot_model_->getVariableDefaultPositions(position_);  // mimic values are updated
   // set velocity & acceleration to 0
   std::fill(velocity_.begin(), velocity_.end(), 0);
+  std::fill(effort_or_acceleration_.begin(), effort_or_acceleration_.end(), 0);
   std::fill(dirty_joint_transforms_.begin(), dirty_joint_transforms_.end(), 1);
   dirty_link_transforms_ = robot_model_->getRootJoint();
 }
