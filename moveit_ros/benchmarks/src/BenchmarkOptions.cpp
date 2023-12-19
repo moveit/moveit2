@@ -35,10 +35,18 @@
 /* Author: Ryan Luna */
 
 #include <moveit/benchmarks/BenchmarkOptions.h>
+#include <moveit/utils/logger.hpp>
 
+using moveit::getLogger;
 using namespace moveit_ros_benchmarks;
 
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.ros.benchmarks.BenchmarkOptions");
+namespace
+{
+rclcpp::Logger getLogger()
+{
+  return moveit::getLogger("benchmark_options");
+}
+}  // namespace
 
 BenchmarkOptions::BenchmarkOptions(const rclcpp::Node::SharedPtr& node)
 {
@@ -58,12 +66,12 @@ bool BenchmarkOptions::readBenchmarkOptions(const rclcpp::Node::SharedPtr& node)
 
     if (!node->get_parameter("benchmark_config.warehouse.scene_name", scene_name))
     {
-      RCLCPP_WARN(LOGGER, "Benchmark scene_name NOT specified");
+      RCLCPP_WARN(getLogger(), "Benchmark scene_name NOT specified");
     }
 
-    RCLCPP_INFO(LOGGER, "Benchmark host: %s", hostname.c_str());
-    RCLCPP_INFO(LOGGER, "Benchmark port: %d", port);
-    RCLCPP_INFO(LOGGER, "Benchmark scene: %s", scene_name.c_str());
+    RCLCPP_INFO(getLogger(), "Benchmark host: %s", hostname.c_str());
+    RCLCPP_INFO(getLogger(), "Benchmark port: %d", port);
+    RCLCPP_INFO(getLogger(), "Benchmark scene: %s", scene_name.c_str());
     // Read benchmark parameters
     node->get_parameter_or(std::string("benchmark_config.parameters.name"), benchmark_name, std::string(""));
     node->get_parameter_or(std::string("benchmark_config.parameters.runs"), runs, 10);
@@ -85,7 +93,7 @@ bool BenchmarkOptions::readBenchmarkOptions(const rclcpp::Node::SharedPtr& node)
 
     if (!node->get_parameter(std::string("benchmark_config.parameters.group"), group_name))
     {
-      RCLCPP_WARN(LOGGER, "Benchmark group NOT specified");
+      RCLCPP_WARN(getLogger(), "Benchmark group NOT specified");
     }
 
     if (node->has_parameter("benchmark_config.parameters.workspace"))
@@ -94,7 +102,7 @@ bool BenchmarkOptions::readBenchmarkOptions(const rclcpp::Node::SharedPtr& node)
       // Make sure all params exist
       if (!node->get_parameter("benchmark_config.parameters.workspace.frame_id", workspace.header.frame_id))
       {
-        RCLCPP_WARN(LOGGER, "Workspace frame_id not specified in benchmark config");
+        RCLCPP_WARN(getLogger(), "Workspace frame_id not specified in benchmark config");
       }
 
       node->get_parameter_or(std::string("benchmark_config.parameters.workspace.min_corner.x"), workspace.min_corner.x,
@@ -122,22 +130,22 @@ bool BenchmarkOptions::readBenchmarkOptions(const rclcpp::Node::SharedPtr& node)
     node->get_parameter_or(std::string("benchmark_config.parameters.goal_offset.pitch"), goal_offsets.at(4), 0.0);
     node->get_parameter_or(std::string("benchmark_config.parameters.goal_offset.yaw"), goal_offsets.at(5), 0.0);
 
-    RCLCPP_INFO(LOGGER, "Benchmark name: '%s'", benchmark_name.c_str());
-    RCLCPP_INFO(LOGGER, "Benchmark #runs: %d", runs);
-    RCLCPP_INFO(LOGGER, "Benchmark timeout: %f secs", timeout);
-    RCLCPP_INFO(LOGGER, "Benchmark group: %s", group_name.c_str());
-    RCLCPP_INFO(LOGGER, "Benchmark query regex: '%s'", query_regex.c_str());
-    RCLCPP_INFO(LOGGER, "Benchmark start state regex: '%s':", start_state_regex.c_str());
-    RCLCPP_INFO(LOGGER, "Benchmark goal constraint regex: '%s':", goal_constraint_regex.c_str());
-    RCLCPP_INFO(LOGGER, "Benchmark path constraint regex: '%s':", path_constraint_regex.c_str());
-    RCLCPP_INFO(LOGGER, "Benchmark goal offsets (%f %f %f, %f %f %f)", goal_offsets.at(0), goal_offsets.at(1),
+    RCLCPP_INFO(getLogger(), "Benchmark name: '%s'", benchmark_name.c_str());
+    RCLCPP_INFO(getLogger(), "Benchmark #runs: %d", runs);
+    RCLCPP_INFO(getLogger(), "Benchmark timeout: %f secs", timeout);
+    RCLCPP_INFO(getLogger(), "Benchmark group: %s", group_name.c_str());
+    RCLCPP_INFO(getLogger(), "Benchmark query regex: '%s'", query_regex.c_str());
+    RCLCPP_INFO(getLogger(), "Benchmark start state regex: '%s':", start_state_regex.c_str());
+    RCLCPP_INFO(getLogger(), "Benchmark goal constraint regex: '%s':", goal_constraint_regex.c_str());
+    RCLCPP_INFO(getLogger(), "Benchmark path constraint regex: '%s':", path_constraint_regex.c_str());
+    RCLCPP_INFO(getLogger(), "Benchmark goal offsets (%f %f %f, %f %f %f)", goal_offsets.at(0), goal_offsets.at(1),
                 goal_offsets.at(2), goal_offsets.at(3), goal_offsets.at(4), goal_offsets.at(5));
-    RCLCPP_INFO(LOGGER, "Benchmark output directory: %s", output_directory.c_str());
-    RCLCPP_INFO_STREAM(LOGGER, "Benchmark workspace: min_corner: ["
-                                   << workspace.min_corner.x << ", " << workspace.min_corner.y << ", "
-                                   << workspace.min_corner.z << "], "
-                                   << "max_corner: [" << workspace.max_corner.x << ", " << workspace.max_corner.y
-                                   << ", " << workspace.max_corner.z << ']');
+    RCLCPP_INFO(getLogger(), "Benchmark output directory: %s", output_directory.c_str());
+    RCLCPP_INFO_STREAM(getLogger(), "Benchmark workspace: min_corner: ["
+                                        << workspace.min_corner.x << ", " << workspace.min_corner.y << ", "
+                                        << workspace.min_corner.z << "], "
+                                        << "max_corner: [" << workspace.max_corner.x << ", " << workspace.max_corner.y
+                                        << ", " << workspace.max_corner.z << ']');
     // Read planner configuration
     if (!readPlannerConfigs(node))
     {
@@ -146,7 +154,7 @@ bool BenchmarkOptions::readBenchmarkOptions(const rclcpp::Node::SharedPtr& node)
   }
   else
   {
-    RCLCPP_ERROR(LOGGER, "No benchmark_config found on param server");
+    RCLCPP_ERROR(getLogger(), "No benchmark_config found on param server");
     return false;
   }
   return true;
@@ -170,8 +178,7 @@ bool BenchmarkOptions::readPlannerConfigs(const rclcpp::Node::SharedPtr& node)
   std::vector<std::string> pipelines;
   if (!node->get_parameter(ns + ".pipelines", pipelines))
   {
-    RCLCPP_ERROR(LOGGER, "Fail to get the parameter in `%s` namespace.", (ns + ".pipelines").c_str());
-    return false;
+    RCLCPP_WARN(getLogger(), "No single planning pipeline namespace `%s` configured.", (ns + ".pipelines").c_str());
   }
 
   for (const std::string& pipeline : pipelines)
@@ -182,23 +189,23 @@ bool BenchmarkOptions::readPlannerConfigs(const rclcpp::Node::SharedPtr& node)
       const std::string pipeline_parameter_name = std::string(ns).append(".").append(pipeline).append(".name");
       if (!node->get_parameter(pipeline_parameter_name, pipeline_name))
       {
-        RCLCPP_ERROR(LOGGER, "Fail to get the parameter in `%s` namespace.", pipeline_parameter_name.c_str());
+        RCLCPP_ERROR(getLogger(), "Fail to get the parameter in `%s` namespace.", pipeline_parameter_name.c_str());
         return false;
       }
 
-      RCLCPP_INFO(LOGGER, "Reading in planner names for planning pipeline '%s'", pipeline_name.c_str());
+      RCLCPP_INFO(getLogger(), "Reading in planner names for planning pipeline '%s'", pipeline_name.c_str());
 
       std::vector<std::string> planners;
       const std::string pipeline_parameter_planners = std::string(ns).append(".").append(pipeline).append(".planners");
       if (!node->get_parameter(pipeline_parameter_planners, planners))
       {
-        RCLCPP_ERROR(LOGGER, "Fail to get the parameter in `%s` namespace.", pipeline_parameter_planners.c_str());
+        RCLCPP_ERROR(getLogger(), "Fail to get the parameter in `%s` namespace.", pipeline_parameter_planners.c_str());
         return false;
       }
 
       for (const std::string& planner : planners)
       {
-        RCLCPP_INFO(LOGGER, "  %s", planner.c_str());
+        RCLCPP_INFO(getLogger(), "  %s", planner.c_str());
       }
 
       planning_pipelines[pipeline_name] = planners;
@@ -210,15 +217,15 @@ bool BenchmarkOptions::readPlannerConfigs(const rclcpp::Node::SharedPtr& node)
   std::vector<std::string> parallel_pipelines;
   if (!node->get_parameter(ns + ".parallel_pipelines", parallel_pipelines))
   {
-    RCLCPP_ERROR(LOGGER, "Fail to get the parameter in `%s` namespace.", (ns + ".parallel_pipelines").c_str());
-    return false;
+    RCLCPP_WARN(getLogger(), "No parallel planning pipeline namespace `%s` configured.",
+                (ns + ".parallel_pipelines").c_str());
   }
 
   for (const std::string& parallel_pipeline : parallel_pipelines)
   {
     if (!parallel_pipeline.empty())
     {  // Read pipelines
-      RCLCPP_INFO(LOGGER, "Reading in parameters for parallel planning pipeline '%s'", parallel_pipeline.c_str());
+      RCLCPP_INFO(getLogger(), "Reading in parameters for parallel planning pipeline '%s'", parallel_pipeline.c_str());
 
       // Read pipelines
       std::vector<std::string> pipelines;
@@ -226,7 +233,7 @@ bool BenchmarkOptions::readPlannerConfigs(const rclcpp::Node::SharedPtr& node)
           std::string(ns).append(".").append(parallel_pipeline).append(".pipelines");
       if (!node->get_parameter(pipelines_parameter, pipelines))
       {
-        RCLCPP_ERROR(LOGGER, "Fail to get the parameter in `%s` namespace.", pipelines_parameter.c_str());
+        RCLCPP_ERROR(getLogger(), "Fail to get the parameter in `%s` namespace.", pipelines_parameter.c_str());
         return false;
       }
 
@@ -236,13 +243,14 @@ bool BenchmarkOptions::readPlannerConfigs(const rclcpp::Node::SharedPtr& node)
           std::string(ns).append(".").append(parallel_pipeline).append(".planner_ids");
       if (!node->get_parameter(pipeline_planner_ids_parameter, planner_ids))
       {
-        RCLCPP_ERROR(LOGGER, "Fail to get the parameter in `%s` namespace.", pipeline_planner_ids_parameter.c_str());
+        RCLCPP_ERROR(getLogger(), "Fail to get the parameter in `%s` namespace.",
+                     pipeline_planner_ids_parameter.c_str());
         return false;
       }
 
       if (pipelines.size() != planner_ids.size())
       {
-        RCLCPP_ERROR(LOGGER, "Number of planner ids is unequal to the number of pipelines in %s.",
+        RCLCPP_ERROR(getLogger(), "Number of planner ids is unequal to the number of pipelines in %s.",
                      parallel_pipeline.c_str());
         return false;
       }
@@ -250,20 +258,25 @@ bool BenchmarkOptions::readPlannerConfigs(const rclcpp::Node::SharedPtr& node)
       std::vector<std::pair<std::string, std::string>> pipeline_planner_id_pairs;
       for (size_t i = 0; i < pipelines.size(); ++i)
       {
-        pipeline_planner_id_pairs.push_back(std::pair<std::string, std::string>(pipelines[i], planner_ids[i]));
+        pipeline_planner_id_pairs.push_back(std::pair<std::string, std::string>(pipelines.at(i), planner_ids.at(i)));
       }
 
       parallel_planning_pipelines[parallel_pipeline] = pipeline_planner_id_pairs;
 
       for (const auto& entry : parallel_planning_pipelines)
       {
-        RCLCPP_INFO(LOGGER, "Parallel planning pipeline '%s'", entry.first.c_str());
+        RCLCPP_INFO(getLogger(), "Parallel planning pipeline '%s'", entry.first.c_str());
         for (const auto& pair : entry.second)
         {
-          RCLCPP_INFO(LOGGER, "  '%s': '%s'", pair.first.c_str(), pair.second.c_str());
+          RCLCPP_INFO(getLogger(), "  '%s': '%s'", pair.first.c_str(), pair.second.c_str());
         }
       }
     }
+  }
+  if (pipelines.empty() && parallel_pipelines.empty())
+  {
+    RCLCPP_ERROR(getLogger(), "No single or parallel planning pipelines configured for benchmarking.");
+    return false;
   }
   return true;
 }

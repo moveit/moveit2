@@ -36,8 +36,6 @@
 #include <moveit_setup_framework/testing_utils.hpp>
 #include <moveit_setup_app_plugins/perception_config.hpp>
 
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("test_perception");
-
 using moveit_setup::expectYamlEquivalence;
 using moveit_setup::getSharePath;
 using moveit_setup::app::PerceptionConfig;

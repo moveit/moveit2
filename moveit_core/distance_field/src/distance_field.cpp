@@ -43,11 +43,17 @@
 #include <tf2_eigen/tf2_eigen.hpp>
 #include <octomap/octomap.h>
 #include <octomap/OcTree.h>
+#include <moveit/utils/logger.hpp>
 
 namespace distance_field
 {
-// Logger
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_distance_field.distance_field");
+namespace
+{
+rclcpp::Logger getLogger()
+{
+  return moveit::getLogger("distance_field");
+}
+}  // namespace
 
 DistanceField::DistanceField(double size_x, double size_y, double size_z, double resolution, double origin_x,
                              double origin_y, double origin_z)
@@ -207,7 +213,7 @@ bool DistanceField::getShapePoints(const shapes::Shape* shape, const Eigen::Isom
     const shapes::OcTree* oc = dynamic_cast<const shapes::OcTree*>(shape);
     if (!oc)
     {
-      RCLCPP_ERROR(LOGGER, "Problem dynamic casting shape that claims to be OcTree");
+      RCLCPP_ERROR(getLogger(), "Problem dynamic casting shape that claims to be OcTree");
       return false;
     }
     getOcTreePoints(oc->octree.get(), points);
@@ -229,14 +235,6 @@ void DistanceField::addShapeToField(const shapes::Shape* shape, const Eigen::Iso
   EigenSTL::vector_Vector3d point_vec;
   getShapePoints(shape, pose, &point_vec);
   addPointsToField(point_vec);
-}
-
-// DEPRECATED
-void DistanceField::addShapeToField(const shapes::Shape* shape, const geometry_msgs::msg::Pose& pose)
-{
-  Eigen::Isometry3d pose_e;
-  tf2::fromMsg(pose, pose_e);
-  addShapeToField(shape, pose_e);
 }
 
 void DistanceField::getOcTreePoints(const octomap::OcTree* octree, EigenSTL::vector_Vector3d* points)
@@ -297,7 +295,7 @@ void DistanceField::moveShapeInField(const shapes::Shape* shape, const Eigen::Is
 {
   if (shape->type == shapes::OCTREE)
   {
-    RCLCPP_WARN(LOGGER, "Move shape not supported for Octree");
+    RCLCPP_WARN(getLogger(), "Move shape not supported for Octree");
     return;
   }
   bodies::Body* body = bodies::createEmptyBodyFromShapeType(shape->type);
@@ -313,16 +311,6 @@ void DistanceField::moveShapeInField(const shapes::Shape* shape, const Eigen::Is
   updatePointsInField(old_point_vec, new_point_vec);
 }
 
-// DEPRECATED
-void DistanceField::moveShapeInField(const shapes::Shape* shape, const geometry_msgs::msg::Pose& old_pose,
-                                     const geometry_msgs::msg::Pose& new_pose)
-{
-  Eigen::Isometry3d old_pose_e, new_pose_e;
-  tf2::fromMsg(old_pose, old_pose_e);
-  tf2::fromMsg(new_pose, new_pose_e);
-  moveShapeInField(shape, old_pose_e, new_pose_e);
-}
-
 void DistanceField::removeShapeFromField(const shapes::Shape* shape, const Eigen::Isometry3d& pose)
 {
   bodies::Body* body = bodies::createEmptyBodyFromShapeType(shape->type);
@@ -333,14 +321,6 @@ void DistanceField::removeShapeFromField(const shapes::Shape* shape, const Eigen
   findInternalPointsConvex(*body, resolution_, point_vec);
   delete body;
   removePointsFromField(point_vec);
-}
-
-// DEPRECATED
-void DistanceField::removeShapeFromField(const shapes::Shape* shape, const geometry_msgs::msg::Pose& pose)
-{
-  Eigen::Isometry3d pose_e;
-  tf2::fromMsg(pose, pose_e);
-  removeShapeFromField(shape, pose_e);
 }
 
 void DistanceField::getPlaneMarkers(PlaneVisualizationType type, double length, double width, double height,

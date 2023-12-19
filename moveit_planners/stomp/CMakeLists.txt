@@ -13,6 +13,7 @@ find_package(std_msgs REQUIRED)
 find_package(stomp REQUIRED)
 find_package(visualization_msgs REQUIRED)
 find_package(tf2_eigen REQUIRED)
+find_package(rsl REQUIRED)
 
 generate_parameter_library(stomp_moveit_parameters res/stomp_moveit.yaml)
 
@@ -22,13 +23,13 @@ include_directories(include)
 add_library(stomp_moveit_plugin SHARED
   src/stomp_moveit_planner_plugin.cpp
   src/stomp_moveit_planning_context.cpp
-  src/stomp_moveit_smoothing_adapter.cpp
 )
 ament_target_dependencies(stomp_moveit_plugin
   moveit_core
   std_msgs
   tf2_eigen
   visualization_msgs
+  rsl
 )
 target_link_libraries(stomp_moveit_plugin stomp::stomp stomp_moveit_parameters)
 

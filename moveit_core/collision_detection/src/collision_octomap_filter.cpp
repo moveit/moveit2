@@ -43,35 +43,39 @@
 #include <rclcpp/logger.hpp>
 #include <rclcpp/logging.hpp>
 #include <memory>
+#include <moveit/utils/logger.hpp>
 
-// Logger
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_collision_detection.collision_octomap_filter");
+namespace
+{
+rclcpp::Logger getLogger()
+{
+  return moveit::getLogger("collision_detection_octomap_filter");
+}
+}  // namespace
 
 // forward declarations
-bool getMetaballSurfaceProperties(const octomap::point3d_list& cloud, const double& spacing, const double& iso_value,
-                                  const double& r_multiple, const octomath::Vector3& contact_point,
-                                  octomath::Vector3& normal, double& depth, bool estimate_depth);
+bool getMetaballSurfaceProperties(const octomap::point3d_list& cloud, double spacing, double iso_value,
+                                  double r_multiple, const octomath::Vector3& contact_point, octomath::Vector3& normal,
+                                  double& depth, bool estimate_depth);
 
-bool findSurface(const octomap::point3d_list& cloud, const double& spacing, const double& iso_value,
-                 const double& r_multiple, const octomath::Vector3& seed, octomath::Vector3& surface_point,
-                 octomath::Vector3& normal);
+bool findSurface(const octomap::point3d_list& cloud, double spacing, double iso_value, double r_multiple,
+                 const octomath::Vector3& seed, octomath::Vector3& surface_point, octomath::Vector3& normal);
 
-bool sampleCloud(const octomap::point3d_list& cloud, const double& spacing, const double& r_multiple,
+bool sampleCloud(const octomap::point3d_list& cloud, double spacing, double r_multiple,
                  const octomath::Vector3& position, double& intensity, octomath::Vector3& gradient);
 
 int collision_detection::refineContactNormals(const World::ObjectConstPtr& object, CollisionResult& res,
-                                              const double cell_bbx_search_distance,
-                                              const double allowed_angle_divergence, const bool estimate_depth,
-                                              const double iso_value, const double metaball_radius_multiple)
+                                              double cell_bbx_search_distance, double allowed_angle_divergence,
+                                              bool estimate_depth, double iso_value, double metaball_radius_multiple)
 {
   if (!object)
   {
-    RCLCPP_ERROR(LOGGER, "No valid Object passed in, cannot refine Normals!");
+    RCLCPP_ERROR(getLogger(), "No valid Object passed in, cannot refine Normals!");
     return 0;
   }
   if (res.contact_count < 1)
   {
-    RCLCPP_WARN(LOGGER, "There do not appear to be any contacts, so there is nothing to refine!");
+    RCLCPP_WARN(getLogger(), "There do not appear to be any contacts, so there is nothing to refine!");
     return 0;
   }
 
@@ -131,16 +135,16 @@ int collision_detection::refineContactNormals(const World::ObjectConstPtr& objec
             {
               count++;
               node_centers.push_back(pt);
-              // RCLCPP_INFO(LOGGER, "Adding point %d with prob %.3f at [%.3f, %.3f, %.3f]",
+              // RCLCPP_INFO(getLogger(), "Adding point %d with prob %.3f at [%.3f, %.3f, %.3f]",
               //                          count, prob, pt.x(), pt.y(), pt.z());
             }
           }
-          // RCLCPP_INFO(LOGGER, "Contact point at [%.3f, %.3f, %.3f], cell size %.3f, occupied cells
+          // RCLCPP_INFO(getLogger(), "Contact point at [%.3f, %.3f, %.3f], cell size %.3f, occupied cells
           // %d",
           //                          contact_point.x(), contact_point.y(), contact_point.z(), cell_size, count);
 
           // octree->getOccupiedLeafsBBX(node_centers, bbx_min, bbx_max);
-          // RCLCPP_ERROR(LOGGER, "bad stuff in collision_octomap_filter.cpp; need to port octomap
+          // RCLCPP_ERROR(getLogger(), "bad stuff in collision_octomap_filter.cpp; need to port octomap
           // call for groovy");
 
           octomath::Vector3 n;
@@ -153,7 +157,7 @@ int collision_detection::refineContactNormals(const World::ObjectConstPtr& objec
             if (divergence > allowed_angle_divergence)
             {
               modified++;
-              // RCLCPP_INFO(LOGGER, "Normals differ by %.3f, changing: [%.3f, %.3f, %.3f] -> [%.3f,
+              // RCLCPP_INFO(getLogger(), "Normals differ by %.3f, changing: [%.3f, %.3f, %.3f] -> [%.3f,
               // %.3f, %.3f]",
               //                          divergence, contact_normal.x(), contact_normal.y(), contact_normal.z(),
               //                          n.x(), n.y(), n.z());
@@ -170,9 +174,9 @@ int collision_detection::refineContactNormals(const World::ObjectConstPtr& objec
   return modified;
 }
 
-bool getMetaballSurfaceProperties(const octomap::point3d_list& cloud, const double& spacing, const double& iso_value,
-                                  const double& r_multiple, const octomath::Vector3& contact_point,
-                                  octomath::Vector3& normal, double& depth, const bool estimate_depth)
+bool getMetaballSurfaceProperties(const octomap::point3d_list& cloud, double spacing, double iso_value,
+                                  double r_multiple, const octomath::Vector3& contact_point, octomath::Vector3& normal,
+                                  double& depth, bool estimate_depth)
 {
   if (estimate_depth)
   {
@@ -207,9 +211,8 @@ bool getMetaballSurfaceProperties(const octomap::point3d_list& cloud, const doub
 // This algorithm is from Salisbury & Tarr's 1997 paper.  It will find the
 // closest point on the surface starting from a seed point that is close by
 // following the direction of the field gradient.
-bool findSurface(const octomap::point3d_list& cloud, const double& spacing, const double& iso_value,
-                 const double& r_multiple, const octomath::Vector3& seed, octomath::Vector3& surface_point,
-                 octomath::Vector3& normal)
+bool findSurface(const octomap::point3d_list& cloud, double spacing, double iso_value, double r_multiple,
+                 const octomath::Vector3& seed, octomath::Vector3& surface_point, octomath::Vector3& normal)
 {
   octomath::Vector3 p = seed, dp, gs;
   const int iterations = 10;
@@ -233,7 +236,7 @@ bool findSurface(const octomap::point3d_list& cloud, const double& spacing, cons
   //    return p;
 }
 
-bool sampleCloud(const octomap::point3d_list& cloud, const double& spacing, const double& r_multiple,
+bool sampleCloud(const octomap::point3d_list& cloud, double spacing, double r_multiple,
                  const octomath::Vector3& position, double& intensity, octomath::Vector3& gradient)
 {
   intensity = 0.f;
@@ -271,7 +274,7 @@ bool sampleCloud(const octomap::point3d_list& cloud, const double& spacing, cons
     }
     else
     {
-      RCLCPP_ERROR(LOGGER, "This should not be called!");
+      RCLCPP_ERROR(getLogger(), "This should not be called!");
     }
 
     double f_val = 0;
@@ -297,7 +300,7 @@ bool sampleCloud(const octomap::point3d_list& cloud, const double& spacing, cons
     }
     else
     {
-      RCLCPP_ERROR(LOGGER, "This should not be called!");
+      RCLCPP_ERROR(getLogger(), "This should not be called!");
       const double r_scaled = r / r;
       // TODO still need to address the scaling...
       f_val = pow((1 - r_scaled), 4) * (4 * r_scaled + 1);

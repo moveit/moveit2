@@ -16,6 +16,7 @@ ament_target_dependencies(moveit_planning_interface
 target_link_libraries(moveit_planning_interface
   moveit_robot_trajectory
   moveit_robot_state
+  moveit_planning_scene
   moveit_utils
 )
 

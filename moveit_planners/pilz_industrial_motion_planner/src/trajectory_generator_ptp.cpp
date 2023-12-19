@@ -34,6 +34,7 @@
 
 #include <pilz_industrial_motion_planner/trajectory_generator_ptp.h>
 #include <moveit/robot_state/conversions.h>
+#include <moveit/utils/logger.hpp>
 
 #include <rclcpp/duration.hpp>
 #include <rclcpp/logger.hpp>
@@ -46,8 +47,13 @@
 
 namespace pilz_industrial_motion_planner
 {
-static const rclcpp::Logger LOGGER =
-    rclcpp::get_logger("moveit.pilz_industrial_motion_planner.trajectory_generator_ptp");
+namespace
+{
+rclcpp::Logger getLogger()
+{
+  return moveit::getLogger("pilz_trajectory_generator_ptp");
+}
+}  // namespace
 TrajectoryGeneratorPTP::TrajectoryGeneratorPTP(const moveit::core::RobotModelConstPtr& robot_model,
                                                const LimitsContainer& planner_limits, const std::string& group_name)
   : TrajectoryGenerator::TrajectoryGenerator(robot_model, planner_limits)
@@ -85,14 +91,14 @@ TrajectoryGeneratorPTP::TrajectoryGeneratorPTP(const moveit::core::RobotModelCon
     }
   }
 
-  RCLCPP_INFO(LOGGER, "Initialized Point-to-Point Trajectory Generator.");
+  RCLCPP_INFO(getLogger(), "Initialized Point-to-Point Trajectory Generator.");
 }
 
 void TrajectoryGeneratorPTP::planPTP(const std::map<std::string, double>& start_pos,
                                      const std::map<std::string, double>& goal_pos,
                                      trajectory_msgs::msg::JointTrajectory& joint_trajectory,
-                                     const double& velocity_scaling_factor, const double& acceleration_scaling_factor,
-                                     const double& sampling_time)
+                                     double velocity_scaling_factor, double acceleration_scaling_factor,
+                                     double sampling_time)
 {
   // initialize joint names
   for (const auto& item : goal_pos)
@@ -112,7 +118,7 @@ void TrajectoryGeneratorPTP::planPTP(const std::map<std::string, double>& start_
   }
   if (goal_reached)
   {
-    RCLCPP_INFO_STREAM(LOGGER, "Goal already reached, set one goal point explicitly.");
+    RCLCPP_INFO_STREAM(getLogger(), "Goal already reached, set one goal point explicitly.");
     if (joint_trajectory.points.empty())
     {
       trajectory_msgs::msg::JointTrajectoryPoint point;
@@ -245,7 +251,7 @@ void TrajectoryGeneratorPTP::extractMotionPlanInfo(const planning_scene::Plannin
 
 void TrajectoryGeneratorPTP::plan(const planning_scene::PlanningSceneConstPtr& /*scene*/,
                                   const planning_interface::MotionPlanRequest& req, const MotionPlanInfo& plan_info,
-                                  const double& sampling_time, trajectory_msgs::msg::JointTrajectory& joint_trajectory)
+                                  double sampling_time, trajectory_msgs::msg::JointTrajectory& joint_trajectory)
 {
   // plan the ptp trajectory
   planPTP(plan_info.start_joint_position, plan_info.goal_joint_position, joint_trajectory,

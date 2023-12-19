@@ -41,6 +41,7 @@
 #include <unordered_map>
 #include <condition_variable>
 #include <thread>
+#include <rclcpp/logger.hpp>
 
 namespace occupancy_map_monitor
 {
@@ -87,5 +88,7 @@ private:
 
   std::thread update_thread_;
   std::thread process_thread_;
+
+  rclcpp::Logger logger_;
 };
 }  // namespace occupancy_map_monitor

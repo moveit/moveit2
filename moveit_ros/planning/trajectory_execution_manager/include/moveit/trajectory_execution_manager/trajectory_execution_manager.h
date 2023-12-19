@@ -105,30 +105,30 @@ public:
 
   /** \brief Make sure the active controllers are such that trajectories that actuate joints in the specified group can
      be executed.
-      \note If manage_controllers_ is false and the controllers that happen to be active do not cover the joints in the
-     group to be actuated, this function fails. */
+      \note If the 'moveit_manage_controllers' parameter is false and the controllers that happen to be active do not
+     cover the joints in the group to be actuated, this function fails. */
   bool ensureActiveControllersForGroup(const std::string& group);
 
   /** \brief Make sure the active controllers are such that trajectories that actuate joints in the specified set can be
      executed.
-      \note If manage_controllers_ is false and the controllers that happen to be active do not cover the joints to be
-     actuated, this function fails. */
+      \note If the 'moveit_manage_controllers' parameter is false and the controllers that happen to be active do not
+     cover the joints to be actuated, this function fails. */
   bool ensureActiveControllersForJoints(const std::vector<std::string>& joints);
 
   /** \brief Make sure a particular controller is active.
-      \note If manage_controllers_ is false and the controllers that happen to be active to not include the one
-     specified as argument, this function fails. */
+      \note If the 'moveit_manage_controllers' parameter is false and the controllers that happen to be active do not
+     include the one specified as argument, this function fails. */
   bool ensureActiveController(const std::string& controller);
 
   /** \brief Make sure a particular set of controllers are active.
-      \note If manage_controllers_ is false and the controllers that happen to be active to not include the ones
-     specified as argument, this function fails. */
+      \note If the 'moveit_manage_controllers' parameter is false and the controllers that happen to be active do not
+     include the ones specified as argument, this function fails. */
   bool ensureActiveControllers(const std::vector<std::string>& controllers);
 
-  /** \brief Check if a controller is active */
+  /** \brief Check if a controller is active. */
   bool isControllerActive(const std::string& controller);
 
-  /** \brief Check if a set of controllers are active */
+  /** \brief Check if a set of controllers is active. */
   bool areControllersActive(const std::vector<std::string>& controllers);
 
   /// Add a trajectory for future execution. Optionally specify a controller to use for the trajectory. If no controller
@@ -278,6 +278,7 @@ private:
   const std::string name_ = "trajectory_execution_manager";
 
   rclcpp::Node::SharedPtr node_;
+  rclcpp::Logger logger_;
   rclcpp::Node::SharedPtr controller_mgr_node_;
   std::shared_ptr<rclcpp::executors::SingleThreadedExecutor> private_executor_;
   std::thread private_executor_thread_;

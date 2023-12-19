@@ -49,15 +49,15 @@
 
 namespace stomp_moveit
 {
-// Decides if the given state position vector is valid or not - example use cases are collision or constraint checking
-using StateValidatorFn = std::function<bool(const Eigen::VectorXd& state_positions)>;
+// Validates a given state and produces a scalar cost penalty - example use cases are collision or constraint checking
+using StateValidatorFn = std::function<double(const Eigen::VectorXd& state_positions)>;
 
 namespace costs
 {
 
 // Interpolation step size for collision checking (joint space, L2 norm)
 constexpr double COL_CHECK_DISTANCE = 0.05;
-constexpr double CONSTRAINT_CHECK_DISTANCE = 0.1;
+constexpr double CONSTRAINT_CHECK_DISTANCE = 0.05;
 
 /**
  * Creates a cost function from a binary robot state validation function.
@@ -69,12 +69,10 @@ constexpr double CONSTRAINT_CHECK_DISTANCE = 0.1;
  *
  * @param state_validator_fn      The validator function that tests for binary conditions
  * @param interpolation_step_size The L2 norm distance step used for interpolation
- * @param penalty                 The penalty cost value applied to invalid states
  *
  * @return                        Cost function that computes smooth costs for binary validity conditions
  */
-CostFn get_cost_function_from_state_validator(const StateValidatorFn& state_validator_fn,
-                                              double interpolation_step_size, double penalty)
+CostFn getCostFunctionFromStateValidator(const StateValidatorFn& state_validator_fn, double interpolation_step_size)
 {
   CostFn cost_fn = [=](const Eigen::MatrixXd& values, Eigen::VectorXd& costs, bool& validity) {
     costs.setZero(values.cols());
@@ -96,11 +94,13 @@ CostFn get_cost_function_from_state_validator(const StateValidatorFn& state_vali
       double interpolation_fraction = 0.0;
       const double interpolation_step = std::min(0.5, interpolation_step_size / segment_distance);
       bool found_invalid_state = false;
+      double penalty = 0.0;
       while (!found_invalid_state && interpolation_fraction < 1.0)
       {
         Eigen::VectorXd sample_vec = (1 - interpolation_fraction) * current + interpolation_fraction * next;
 
-        found_invalid_state = !state_validator_fn(sample_vec);
+        penalty = state_validator_fn(sample_vec);
+        found_invalid_state = penalty > 0.0;
         interpolation_fraction += interpolation_step;
       }
 
@@ -157,7 +157,7 @@ CostFn get_cost_function_from_state_validator(const StateValidatorFn& state_vali
 /**
  * Creates a cost function for binary collisions of group states in the planning scene.
  * This function uses a StateValidatorFn for computing smooth penalty costs from binary
- * collision checks using get_cost_function_from_state_validator().
+ * collision checks using getCostFunctionFromStateValidator().
  *
  * @param planning_scene    The planning scene instance to use for collision checking
  * @param group             The group to use for computing link transforms from joint positions
@@ -165,8 +165,8 @@ CostFn get_cost_function_from_state_validator(const StateValidatorFn& state_vali
  *
  * @return                  Cost function that computes smooth costs for colliding path segments
  */
-CostFn get_collision_cost_function(const std::shared_ptr<const planning_scene::PlanningScene>& planning_scene,
-                                   const moveit::core::JointModelGroup* group, double collision_penalty)
+CostFn getCollisionCostFunction(const std::shared_ptr<const planning_scene::PlanningScene>& planning_scene,
+                                const moveit::core::JointModelGroup* group, double collision_penalty)
 {
   const auto& joints = group ? group->getActiveJointModels() : planning_scene->getRobotModel()->getActiveJointModels();
   const auto& group_name = group ? group->getName() : "";
@@ -175,30 +175,30 @@ CostFn get_collision_cost_function(const std::shared_ptr<const planning_scene::P
     static moveit::core::RobotState state(planning_scene->getCurrentState());
 
     // Update robot state values
-    set_joint_positions(positions, joints, state);
+    setJointPositions(positions, joints, state);
     state.update();
 
-    return !planning_scene->isStateColliding(state, group_name);
+    return planning_scene->isStateColliding(state, group_name) ? collision_penalty : 0.0;
   };
 
-  return get_cost_function_from_state_validator(collision_validator_fn, COL_CHECK_DISTANCE, collision_penalty);
+  return getCostFunctionFromStateValidator(collision_validator_fn, COL_CHECK_DISTANCE);
 }
 
 /**
  * Creates a cost function for binary constraint checks applied to group states.
  * This function uses a StateValidatorFn for computing smooth penalty costs from binary
- * constraint checks using get_cost_function_from_state_validator().
+ * constraint checks using getCostFunctionFromStateValidator().
  *
  * @param planning_scene      The planning scene instance to use for computing transforms
  * @param group               The group to use for computing link transforms from joint positions
  * @param constraints_msg     The constraints used for validating group states
- * @param constraints_penalty The penalty cost value applied to invalid states
+ * @param cost_scale          A scalar factor applied to the distance cost of invalid states
  *
  * @return                    Cost function that computes smooth costs for invalid path segments
  */
-CostFn get_constraints_cost_function(const std::shared_ptr<const planning_scene::PlanningScene>& planning_scene,
-                                     const moveit::core::JointModelGroup* group,
-                                     const moveit_msgs::msg::Constraints& constraints_msg, double constraints_penalty)
+CostFn getConstraintsCostFunction(const std::shared_ptr<const planning_scene::PlanningScene>& planning_scene,
+                                  const moveit::core::JointModelGroup* group,
+                                  const moveit_msgs::msg::Constraints& constraints_msg, double cost_scale)
 {
   const auto& joints = group ? group->getActiveJointModels() : planning_scene->getRobotModel()->getActiveJointModels();
 
@@ -209,16 +209,13 @@ CostFn get_constraints_cost_function(const std::shared_ptr<const planning_scene:
     static moveit::core::RobotState state(planning_scene->getCurrentState());
 
     // Update robot state values
-    set_joint_positions(positions, joints, state);
+    setJointPositions(positions, joints, state);
     state.update();
 
-    // NOTE: the returned ConstraintEvaluationResult also provides a `double distance` which might be used as an
-    // actual cost gradient instead of the binary state penalty
-    return constraints.decide(state).satisfied;
+    return constraints.decide(state).distance * cost_scale;
   };
 
-  return get_cost_function_from_state_validator(constraints_validator_fn, CONSTRAINT_CHECK_DISTANCE,
-                                                constraints_penalty);
+  return getCostFunctionFromStateValidator(constraints_validator_fn, CONSTRAINT_CHECK_DISTANCE);
 }
 
 /**

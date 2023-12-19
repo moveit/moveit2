@@ -44,10 +44,14 @@
 #include <ompl/util/Exception.h>
 #include <moveit/robot_state/conversions.h>
 #include <moveit/utils/robot_model_test_utils.h>
+#include <moveit/utils/logger.hpp>
 #include <gtest/gtest.h>
 #include <fstream>
 
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.ompl_planning.test.test_state_space");
+rclcpp::Logger getLogger()
+{
+  return moveit::getLogger("test_state_space");
+}
 
 constexpr double EPSILON = std::numeric_limits<double>::epsilon();
 
@@ -83,7 +87,7 @@ TEST_F(LoadPlanningModelsPr2, StateSpace)
   }
   catch (ompl::Exception& ex)
   {
-    RCLCPP_ERROR(LOGGER, "Sanity checks did not pass: %s", ex.what());
+    RCLCPP_ERROR(getLogger(), "Sanity checks did not pass: %s", ex.what());
   }
   EXPECT_TRUE(passed);
 }
@@ -126,7 +130,7 @@ TEST_F(LoadPlanningModelsPr2, StateSpaceCopy)
   }
   catch (ompl::Exception& ex)
   {
-    RCLCPP_ERROR(LOGGER, "Sanity checks did not pass: %s", ex.what());
+    RCLCPP_ERROR(getLogger(), "Sanity checks did not pass: %s", ex.what());
   }
   EXPECT_TRUE(passed);
 
@@ -207,7 +211,7 @@ TEST(TestDiffDrive, TestStateSpace)
   }
   catch (ompl::Exception& ex)
   {
-    RCLCPP_ERROR(LOGGER, "Sanity checks did not pass: %s", ex.what());
+    RCLCPP_ERROR(getLogger(), "Sanity checks did not pass: %s", ex.what());
   }
   EXPECT_TRUE(passed);
 }

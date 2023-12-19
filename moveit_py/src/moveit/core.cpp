@@ -58,19 +58,19 @@ PYBIND11_MODULE(core, m)
   options.disable_function_signatures();
 
   // Construct module classes
-  moveit_py::bind_collision_detection::init_collision_request(m);
-  moveit_py::bind_collision_detection::init_collision_result(m);
-  moveit_py::bind_collision_detection::init_world(m);
-  moveit_py::bind_collision_detection::init_acm(m);
-  moveit_py::bind_controller_manager::init_execution_status(m);
-  moveit_py::bind_kinematic_constraints::init_kinematic_constraints(m);
-  moveit_py::bind_planning_scene::init_planning_scene(m);
-  moveit_py::bind_planning_interface::init_motion_plan_response(m);
-  moveit_py::bind_robot_model::init_joint_model(m);
-  moveit_py::bind_robot_model::init_joint_model_group(m);
-  moveit_py::bind_robot_model::init_robot_model(m);
-  moveit_py::bind_robot_state::init_robot_state(m);
-  moveit_py::bind_robot_trajectory::init_robot_trajectory(m);
+  moveit_py::bind_collision_detection::initCollisionRequest(m);
+  moveit_py::bind_collision_detection::initCollisionResult(m);
+  moveit_py::bind_collision_detection::initWorld(m);
+  moveit_py::bind_collision_detection::initAcm(m);
+  moveit_py::bind_controller_manager::initExecutionStatus(m);
+  moveit_py::bind_kinematic_constraints::initKinematicConstraints(m);
+  moveit_py::bind_planning_scene::initPlanningScene(m);
+  moveit_py::bind_planning_interface::initMotionPlanResponse(m);
+  moveit_py::bind_robot_model::initJointModel(m);
+  moveit_py::bind_robot_model::initJointModelGroup(m);
+  moveit_py::bind_robot_model::initRobotModel(m);
+  moveit_py::bind_robot_state::initRobotState(m);
+  moveit_py::bind_robot_trajectory::initRobotTrajectory(m);
   // TODO (peterdavidfagan): complete LinkModel bindings
   // LinkModel
   // py::class_<moveit::core::LinkModel>(m, "LinkModel");

@@ -40,16 +40,31 @@ namespace moveit_py
 {
 namespace bind_planning_scene_monitor
 {
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_py.bind_planning_scene_monitor");
+
+bool processCollisionObject(const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor,
+                            moveit_msgs::msg::CollisionObject& collision_object_msg)
+{
+  moveit_msgs::msg::CollisionObject::ConstSharedPtr const_ptr =
+      std::make_shared<const moveit_msgs::msg::CollisionObject>(collision_object_msg);
+  return planning_scene_monitor->processCollisionObjectMsg(const_ptr);
+}
+
+bool processAttachedCollisionObjectMsg(const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor,
+                                       moveit_msgs::msg::AttachedCollisionObject& attached_collision_object_msg)
+{
+  moveit_msgs::msg::AttachedCollisionObject::ConstSharedPtr const_ptr =
+      std::make_shared<const moveit_msgs::msg::AttachedCollisionObject>(attached_collision_object_msg);
+  return planning_scene_monitor->processAttachedCollisionObjectMsg(const_ptr);
+}
 
 LockedPlanningSceneContextManagerRO
-read_only(const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor)
+readOnly(const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor)
 {
   return LockedPlanningSceneContextManagerRO(planning_scene_monitor);
 };
 
 LockedPlanningSceneContextManagerRW
-read_write(const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor)
+readWrite(const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor)
 {
   return LockedPlanningSceneContextManagerRW(planning_scene_monitor);
 };
@@ -79,18 +94,7 @@ void LockedPlanningSceneContextManagerRW::lockedPlanningSceneRwExit(const py::ob
   ls_rw_.reset();
 }
 
-// TODO: simplify with typecaster
-void apply_planning_scene(std::shared_ptr<planning_scene_monitor::PlanningSceneMonitor>& planning_scene_monitor,
-                          const moveit_msgs::msg::PlanningScene& planning_scene)
-{
-  // lock planning scene
-  {
-    planning_scene_monitor::LockedPlanningSceneRW scene(planning_scene_monitor);
-    scene->usePlanningSceneMsg(planning_scene);
-  }
-}
-
-void init_planning_scene_monitor(py::module& m)
+void initPlanningSceneMonitor(py::module& m)
 {
   py::class_<planning_scene_monitor::PlanningSceneMonitor, planning_scene_monitor::PlanningSceneMonitorPtr>(
       m, "PlanningSceneMonitor", R"(
@@ -101,6 +105,15 @@ void init_planning_scene_monitor(py::module& m)
                     R"(
                     str: The name of this planning scene monitor.
                     )")
+
+      .def("update_frame_transforms", &planning_scene_monitor::PlanningSceneMonitor::updateFrameTransforms,
+           R"(
+           Update the transforms for the frames that are not part of the kinematic model using tf.
+
+           Examples of these frames are the "map" and "odom_combined" transforms. This function is automatically called
+           when data that uses transforms is received.
+           However, this function should also be called before starting a planning request, for example.
+           )")
 
       .def("start_scene_monitor", &planning_scene_monitor::PlanningSceneMonitor::startSceneMonitor,
            R"(
@@ -121,6 +134,14 @@ void init_planning_scene_monitor(py::module& m)
            R"(
 	       Stops the state monitor.
 	   )")
+      .def("request_planning_scene_state", &planning_scene_monitor::PlanningSceneMonitor::requestPlanningSceneState,
+           py::arg("service_name"),
+           R"(
+	       Request the planning scene.
+
+            Args:
+               service_name (str): The name of the service to call.
+	   )")
 
       .def("wait_for_current_robot_state", &planning_scene_monitor::PlanningSceneMonitor::waitForCurrentRobotState,
            R"(
@@ -131,19 +152,36 @@ void init_planning_scene_monitor(py::module& m)
            R"(
            Clears the octomap.
            )")
+      .def("process_collision_object", &moveit_py::bind_planning_scene_monitor::processCollisionObject,
+           py::arg("collision_object_msg"),  // py::arg("color_msg") = nullptr,
+           R"(
+           Apply a collision object to the planning scene.
 
-      .def("read_only", &moveit_py::bind_planning_scene_monitor::read_only,
+	      Args:
+               collision_object_msg (moveit_msgs.msg.CollisionObject): The collision object to apply to the planning scene.
+           )")
+      .def("process_attached_collision_object",
+           &moveit_py::bind_planning_scene_monitor::processAttachedCollisionObjectMsg,
+           py::arg("attached_collision_object_msg"),
+           R"(
+           Apply an attached collision object msg to the planning scene.
+
+	      Args:
+               attached_collision_object_msg (moveit_msgs.msg.AttachedCollisionObject): The attached collision object to apply to the planning scene.
+           )")
+
+      .def("read_only", &moveit_py::bind_planning_scene_monitor::readOnly,
            R"(
            Returns a read-only context manager for the planning scene.
            )")
 
-      .def("read_write", &moveit_py::bind_planning_scene_monitor::read_write,
+      .def("read_write", &moveit_py::bind_planning_scene_monitor::readWrite,
            R"(
            Returns a read-write context manager for the planning scene.
            )");
 }
 
-void init_context_managers(py::module& m)
+void initContextManagers(py::module& m)
 {
   // In Python we lock the planning scene using a with statement as this allows us to have control over resources.
   // To this end each of the below manager classes binds special methods __enter__ and __exit__.

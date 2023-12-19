@@ -11,13 +11,14 @@ Checks:          '-*,
                   modernize-make-unique,
                   modernize-avoid-bind,
                   misc-unused-parameters,
-		              readability-braces-around-statements,
+                  readability-braces-around-statements,
                   readability-named-parameter,
                   readability-redundant-smartptr-get,
                   readability-redundant-string-cstr,
                   readability-simplify-boolean-expr,
                   readability-container-size-empty,
                   readability-identifier-naming,
+                  readability-static-definition-in-anonymous-namespace,
                   '
 HeaderFilterRegex: ''
 AnalyzeTemporaryDtors: false
@@ -37,6 +38,9 @@ CheckOptions:
     value:           CamelCase
   - key:             readability-identifier-naming.UnionCase
     value:           CamelCase
+  # function names
+  - key:             readability-identifier-naming.FunctionCase
+    value:           camelBack
   # method names
   - key:             readability-identifier-naming.MethodCase
     value:           camelBack
@@ -50,8 +54,12 @@ CheckOptions:
   # const static or global variables are UPPER_CASE
   - key:             readability-identifier-naming.EnumConstantCase
     value:           UPPER_CASE
+  - key:             readability-identifier-naming.StaticVariableCasePrefix
+    value:           's_'
   - key:             readability-identifier-naming.StaticConstantCase
     value:           UPPER_CASE
   - key:             readability-identifier-naming.GlobalConstantCase
+    value:           UPPER_CASE
+  - key:             readability-identifier-naming.ClassConstantCase
     value:           UPPER_CASE
 ...

@@ -53,11 +53,12 @@ TEST(ServoUtilsUnitTests, JointLimitVelocityScaling)
 {
   using moveit::core::loadTestingRobotModel;
   moveit::core::RobotModelPtr robot_model = loadTestingRobotModel("panda");
-  moveit::core::JointBoundsVector joint_bounds = robot_model->getActiveJointModelsBounds();
+  const auto joint_model_group = robot_model->getJointModelGroup("panda_arm");
+  const auto joint_bounds = joint_model_group->getActiveJointModelsBounds();
 
   // Get the upper bound for the velocities of each joint.
   Eigen::VectorXd incoming_velocities(joint_bounds.size());
-  for (size_t i = 0; i < joint_bounds.size(); i++)
+  for (size_t i = 0; i < joint_bounds.size(); ++i)
   {
     const auto joint_bound = (*joint_bounds[i])[0];
     if (joint_bound.velocity_bounded_)
@@ -72,12 +73,26 @@ TEST(ServoUtilsUnitTests, JointLimitVelocityScaling)
   incoming_velocities(1) *= 1.05;
   incoming_velocities.tail<5>() *= 0.7;
 
-  // The resulting scaling factor selected should be approximately 0.95238
+  constexpr double tol = 0.001;
+
+  // The resulting scaling factor from joints should be 1 / 1.1 = 0.90909
   double user_velocity_override = 0.0;
   double scaling_factor =
       moveit_servo::jointLimitVelocityScalingFactor(incoming_velocities, joint_bounds, user_velocity_override);
-  constexpr double tol = 0.001;
-  ASSERT_NEAR(scaling_factor, 0.95238, tol);
+  ASSERT_NEAR(scaling_factor, 1.0 / 1.1, tol);
+
+  // With a scaling override lower than the joint limit scaling, it should use the override value.
+  user_velocity_override = 0.5;
+  scaling_factor =
+      moveit_servo::jointLimitVelocityScalingFactor(incoming_velocities, joint_bounds, user_velocity_override);
+  ASSERT_NEAR(scaling_factor, 0.5, tol);
+
+  // With a scaling override higher than the joint limit scaling, it should still use the joint limits.
+  // Safety always first!
+  user_velocity_override = 1.0;
+  scaling_factor =
+      moveit_servo::jointLimitVelocityScalingFactor(incoming_velocities, joint_bounds, user_velocity_override);
+  ASSERT_NEAR(scaling_factor, 1.0 / 1.1, tol);
 }
 
 TEST(ServoUtilsUnitTests, validVector)
@@ -150,10 +165,9 @@ TEST(ServoUtilsUnitTests, ApproachingSingularityScaling)
 
   servo::Params servo_params;
   servo_params.move_group_name = "panda_arm";
-  const moveit::core::JointModelGroup* joint_model_group =
-      robot_state->getJointModelGroup(servo_params.move_group_name);
+  const auto joint_model_group = robot_state->getJointModelGroup(servo_params.move_group_name);
+  robot_state->setToDefaultValues();
 
-  rclcpp::sleep_for(std::chrono::milliseconds(500));
   Eigen::Vector<double, 6> cartesian_delta{ 0.005, 0.0, 0.0, 0.0, 0.0, 0.0 };
   // Home state
   Eigen::Vector<double, 7> state_ready{ 0.0, -0.785, 0.0, -2.356, 0.0, 1.571, 0.785 };
@@ -176,10 +190,9 @@ TEST(ServoUtilsUnitTests, HaltForSingularityScaling)
 
   servo::Params servo_params;
   servo_params.move_group_name = "panda_arm";
-  const moveit::core::JointModelGroup* joint_model_group =
-      robot_state->getJointModelGroup(servo_params.move_group_name);
+  const auto joint_model_group = robot_state->getJointModelGroup(servo_params.move_group_name);
+  robot_state->setToDefaultValues();
 
-  rclcpp::sleep_for(std::chrono::milliseconds(500));
   Eigen::Vector<double, 6> cartesian_delta{ 0.005, 0.0, 0.0, 0.0, 0.0, 0.0 };
 
   // Home state
@@ -203,11 +216,10 @@ TEST(ServoUtilsUnitTests, LeavingSingularityScaling)
 
   servo::Params servo_params;
   servo_params.move_group_name = "panda_arm";
-  const moveit::core::JointModelGroup* joint_model_group =
-      robot_state->getJointModelGroup(servo_params.move_group_name);
+  const auto joint_model_group = robot_state->getJointModelGroup(servo_params.move_group_name);
+  robot_state->setToDefaultValues();
 
-  rclcpp::sleep_for(std::chrono::milliseconds(500));
-  Eigen::Vector<double, 6> cartesian_delta{ 0.005, 0.0, 0.0, 0.0, 0.0, 0.0 };
+  Eigen::Vector<double, 6> cartesian_delta{ -0.005, 0.0, 0.0, 0.0, 0.0, 0.0 };
 
   // Home state
   Eigen::Vector<double, 7> state_ready{ 0.0, -0.785, 0.0, -2.356, 0.0, 1.571, 0.785 };
@@ -215,14 +227,7 @@ TEST(ServoUtilsUnitTests, LeavingSingularityScaling)
   auto scaling_result = moveit_servo::velocityScalingFactorForSingularity(robot_state, cartesian_delta, servo_params);
   ASSERT_EQ(scaling_result.second, moveit_servo::StatusCode::NO_WARNING);
 
-  // Approach singularity
-  Eigen::Vector<double, 7> state_approaching_singularity{ 0.0, 0.334, 0.0, -1.177, 0.0, 1.510, 0.785 };
-  robot_state->setJointGroupActivePositions(joint_model_group, state_approaching_singularity);
-  scaling_result = moveit_servo::velocityScalingFactorForSingularity(robot_state, cartesian_delta, servo_params);
-  ASSERT_EQ(scaling_result.second, moveit_servo::StatusCode::DECELERATE_FOR_APPROACHING_SINGULARITY);
-
   // Move away from singularity
-  cartesian_delta(0) *= -1;
   Eigen::Vector<double, 7> state_leaving_singularity{ 0.0, 0.3458, 0.0, -1.1424, 0.0, 1.4865, 0.785 };
   robot_state->setJointGroupActivePositions(joint_model_group, state_leaving_singularity);
   scaling_result = moveit_servo::velocityScalingFactorForSingularity(robot_state, cartesian_delta, servo_params);

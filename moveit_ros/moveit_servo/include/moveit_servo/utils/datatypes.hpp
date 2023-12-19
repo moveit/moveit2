@@ -114,7 +114,7 @@ typedef std::variant<JointJogCommand, TwistCommand, PoseCommand> ServoInput;
 struct KinematicState
 {
   std::vector<std::string> joint_names;
-  std::vector<double> positions, velocities, accelerations;
+  Eigen::VectorXd positions, velocities, accelerations;
 
   KinematicState(const int num_joints)
   {
@@ -128,5 +128,8 @@ struct KinematicState
   {
   }
 };
+
+// Mapping joint names and their position in the move group vector
+typedef std::unordered_map<std::string, std::size_t> JointNameToMoveGroupIndexMap;
 
 }  // namespace moveit_servo

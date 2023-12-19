@@ -10,5 +10,6 @@ ament_target_dependencies(moveit_exceptions
   urdfdom
   urdfdom_headers
 )
+target_link_libraries(moveit_exceptions moveit_utils)
 
 install(DIRECTORY include/ DESTINATION include/moveit_core)

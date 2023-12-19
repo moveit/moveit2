@@ -39,14 +39,17 @@
 #include <moveit/planning_scene/planning_scene.h>
 #include <pilz_industrial_motion_planner/planning_context_base.h>
 #include <pilz_industrial_motion_planner/planning_context_circ.h>
+#include <moveit/utils/logger.hpp>
 
 #include <pluginlib/class_list_macros.hpp>
 
 namespace
 {
-static const rclcpp::Logger LOGGER =
-    rclcpp::get_logger("moveit.pilz_industrial_motion_planner.planning_context_loader_circ");
+rclcpp::Logger getLogger()
+{
+  return moveit::getLogger("pilz_planning_context_loader_circ");
 }
+}  // namespace
 
 pilz_industrial_motion_planner::PlanningContextLoaderCIRC::PlanningContextLoaderCIRC()
 {
@@ -69,11 +72,12 @@ bool pilz_industrial_motion_planner::PlanningContextLoaderCIRC::loadContext(
   {
     if (!limits_set_)
     {
-      RCLCPP_ERROR_STREAM(LOGGER, "Limits are not defined. Cannot load planning context. Call setLimits loadContext");
+      RCLCPP_ERROR_STREAM(getLogger(),
+                          "Limits are not defined. Cannot load planning context. Call setLimits loadContext");
     }
     if (!model_set_)
     {
-      RCLCPP_ERROR_STREAM(LOGGER, "Robot model was not set");
+      RCLCPP_ERROR_STREAM(getLogger(), "Robot model was not set");
     }
     return false;
   }

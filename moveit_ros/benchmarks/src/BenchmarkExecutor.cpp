@@ -41,6 +41,7 @@
 #include <moveit/robot_state/conversions.h>
 #include <moveit/version.h>
 #include <tf2_eigen/tf2_eigen.hpp>
+#include <moveit/utils/logger.hpp>
 
 // TODO(henningkayser): Switch to boost/timer/progress_display.hpp with Boost 1.72
 // boost/progress.hpp is deprecated and will be replaced by boost/timer/progress_display.hpp in Boost 1.72.
@@ -63,7 +64,13 @@
 
 using namespace moveit_ros_benchmarks;
 
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.ros.benchmarks.BenchmarkExecutor");
+namespace
+{
+rclcpp::Logger getLogger()
+{
+  return moveit::getLogger("benchmark_executor");
+}
+}  // namespace
 
 template <class Clock, class Duration>
 boost::posix_time::ptime toBoost(const std::chrono::time_point<Clock, Duration>& from)
@@ -108,34 +115,32 @@ BenchmarkExecutor::~BenchmarkExecutor()
   {
     if (moveit_cpp_->getPlanningPipelines().find(planning_pipeline_name) == moveit_cpp_->getPlanningPipelines().end())
     {
-      RCLCPP_ERROR(LOGGER, "Cannot find pipeline '%s'", planning_pipeline_name.c_str());
+      RCLCPP_ERROR(getLogger(), "Cannot find pipeline '%s'", planning_pipeline_name.c_str());
       return false;
     }
 
     const auto& pipeline = moveit_cpp_->getPlanningPipelines().at(planning_pipeline_name);
     // Verify the pipeline has successfully initialized a planner
-    if (!pipeline->getPlannerManager())
+    if (!pipeline)
     {
-      RCLCPP_ERROR(LOGGER, "Failed to initialize planning pipeline '%s'", planning_pipeline_name.c_str());
+      RCLCPP_ERROR(getLogger(), "Failed to initialize planning pipeline '%s'", planning_pipeline_name.c_str());
       continue;
     }
-
-    // Disable visualizations
-    pipeline->displayComputedMotionPlans(false);
-    pipeline->checkSolutionPaths(false);
   }
 
   // Error check
   if (moveit_cpp_->getPlanningPipelines().empty())
   {
-    RCLCPP_ERROR(LOGGER, "No planning pipelines have been loaded. Nothing to do for the benchmarking service.");
+    RCLCPP_ERROR(getLogger(), "No planning pipelines have been loaded. Nothing to do for the benchmarking service.");
   }
   else
   {
-    RCLCPP_INFO(LOGGER, "Available planning pipelines:");
+    RCLCPP_INFO(getLogger(), "Available planning pipelines:");
     for (const std::pair<const std::string, planning_pipeline::PlanningPipelinePtr>& entry :
          moveit_cpp_->getPlanningPipelines())
-      RCLCPP_INFO_STREAM(LOGGER, "Pipeline: " << entry.first << ", Planner: " << entry.second->getPlannerPluginName());
+    {
+      RCLCPP_INFO_STREAM(getLogger(), entry.first);
+    }
   }
   return true;
 }
@@ -206,7 +211,7 @@ bool BenchmarkExecutor::runBenchmarks(const BenchmarkOptions& options)
 {
   if (moveit_cpp_->getPlanningPipelines().empty())
   {
-    RCLCPP_ERROR(LOGGER, "No planning pipelines configured. Did you call BenchmarkExecutor::initialize?");
+    RCLCPP_ERROR(getLogger(), "No planning pipelines configured. Did you call BenchmarkExecutor::initialize?");
     return false;
   }
 
@@ -238,7 +243,7 @@ bool BenchmarkExecutor::runBenchmarks(const BenchmarkOptions& options)
         query_start_fn(queries[i].request, planning_scene_);
       }
 
-      RCLCPP_INFO(LOGGER, "Benchmarking query '%s' (%lu of %lu)", queries[i].name.c_str(), i + 1, queries.size());
+      RCLCPP_INFO(getLogger(), "Benchmarking query '%s' (%lu of %lu)", queries[i].name.c_str(), i + 1, queries.size());
       std::chrono::system_clock::time_point start_time = std::chrono::system_clock::now();
       runBenchmark(queries[i].request, options);
       std::chrono::duration<double> dt = std::chrono::system_clock::now() - start_time;
@@ -261,7 +266,7 @@ bool BenchmarkExecutor::initializeBenchmarks(const BenchmarkOptions& options,
                                              moveit_msgs::msg::PlanningScene& scene_msg,
                                              std::vector<BenchmarkRequest>& requests)
 {
-  if (!plannerConfigurationsExist(options.planning_pipelines, options.group_name))
+  if (!pipelinesExist(options.planning_pipelines))
   {
     return false;
   }
@@ -275,12 +280,12 @@ bool BenchmarkExecutor::initializeBenchmarks(const BenchmarkOptions& options,
   if (!loadBenchmarkQueryData(options, scene_msg, start_states, path_constraints, goal_constraints, traj_constraints,
                               queries))
   {
-    RCLCPP_ERROR(LOGGER, "Failed to load benchmark query data");
+    RCLCPP_ERROR(getLogger(), "Failed to load benchmark query data");
     return false;
   }
 
   RCLCPP_INFO(
-      LOGGER,
+      getLogger(),
       "Benchmark loaded %lu starts, %lu goals, %lu path constraints, %lu trajectory constraints, and %lu queries",
       start_states.size(), goal_constraints.size(), path_constraints.size(), traj_constraints.size(), queries.size());
 
@@ -406,45 +411,45 @@ bool BenchmarkExecutor::loadBenchmarkQueryData(
       constraints_storage_ = std::make_shared<moveit_warehouse::ConstraintsStorage>(warehouse_connection);
       trajectory_constraints_storage_ =
           std::make_shared<moveit_warehouse::TrajectoryConstraintsStorage>(warehouse_connection);
-      RCLCPP_INFO(LOGGER, "Connected to DB");
+      RCLCPP_INFO(getLogger(), "Connected to DB");
     }
     else
     {
-      RCLCPP_ERROR(LOGGER, "Failed to connect to DB");
+      RCLCPP_ERROR(getLogger(), "Failed to connect to DB");
       return false;
     }
   }
   catch (std::exception& e)
   {
-    RCLCPP_ERROR(LOGGER, "Failed to initialize benchmark server: '%s'", e.what());
+    RCLCPP_ERROR(getLogger(), "Failed to initialize benchmark server: '%s'", e.what());
     return false;
   }
 
   if (!loadPlanningScene(options.scene_name, scene_msg))
   {
-    RCLCPP_ERROR(LOGGER, "Failed to load the planning scene");
+    RCLCPP_ERROR(getLogger(), "Failed to load the planning scene");
     return false;
   }
   if (!loadStates(options.start_state_regex, start_states))
   {
-    RCLCPP_ERROR(LOGGER, "Failed to load the states");
+    RCLCPP_ERROR(getLogger(), "Failed to load the states");
     return false;
   }
   if (!loadPathConstraints(options.goal_constraint_regex, goal_constraints))
   {
-    RCLCPP_ERROR(LOGGER, "Failed to load the goal constraints");
+    RCLCPP_ERROR(getLogger(), "Failed to load the goal constraints");
   }
   if (!loadPathConstraints(options.path_constraint_regex, path_constraints))
   {
-    RCLCPP_ERROR(LOGGER, "Failed to load the path constraints");
+    RCLCPP_ERROR(getLogger(), "Failed to load the path constraints");
   }
   if (!loadTrajectoryConstraints(options.trajectory_constraint_regex, traj_constraints))
   {
-    RCLCPP_ERROR(LOGGER, "Failed to load the trajectory constraints");
+    RCLCPP_ERROR(getLogger(), "Failed to load the trajectory constraints");
   }
   if (!loadQueries(options.query_regex, options.scene_name, queries))
   {
-    RCLCPP_ERROR(LOGGER, "Failed to get a query regex");
+    RCLCPP_ERROR(getLogger(), "Failed to get a query regex");
   }
   return true;
 }
@@ -522,8 +527,7 @@ void BenchmarkExecutor::createRequestCombinations(const BenchmarkRequest& benchm
   }
 }
 
-bool BenchmarkExecutor::plannerConfigurationsExist(
-    const std::map<std::string, std::vector<std::string>>& pipeline_configurations, const std::string& group_name)
+bool BenchmarkExecutor::pipelinesExist(const std::map<std::string, std::vector<std::string>>& pipeline_configurations)
 {
   // Make sure planner plugins exist
   for (const std::pair<const std::string, std::vector<std::string>>& pipeline_config_entry : pipeline_configurations)
@@ -539,46 +543,10 @@ bool BenchmarkExecutor::plannerConfigurationsExist(
 
     if (!pipeline_exists)
     {
-      RCLCPP_ERROR(LOGGER, "Planning pipeline '%s' does NOT exist", pipeline_config_entry.first.c_str());
+      RCLCPP_ERROR(getLogger(), "Planning pipeline '%s' does NOT exist", pipeline_config_entry.first.c_str());
       return false;
     }
   }
-
-  // Make sure planners exist within those pipelines
-  auto planning_pipelines = moveit_cpp_->getPlanningPipelines();
-  for (const std::pair<const std::string, std::vector<std::string>>& entry : pipeline_configurations)
-  {
-    planning_interface::PlannerManagerPtr pm = planning_pipelines[entry.first]->getPlannerManager();
-    const planning_interface::PlannerConfigurationMap& config_map = pm->getPlannerConfigurations();
-
-    // if the planner is chomp or stomp skip this function and return true for checking planner configurations for the
-    // planning group otherwise an error occurs, because for OMPL a specific planning algorithm needs to be defined for
-    // a planning group, whereas with STOMP and CHOMP this is not necessary
-    if (pm->getDescription().compare("stomp") || pm->getDescription().compare("chomp"))
-      continue;
-
-    for (std::size_t i = 0; i < entry.second.size(); ++i)
-    {
-      bool planner_exists = false;
-      for (const std::pair<const std::string, planning_interface::PlannerConfigurationSettings>& config_entry :
-           config_map)
-      {
-        std::string planner_name = group_name + "[" + entry.second[i] + "]";
-        planner_exists = (config_entry.second.group == group_name && config_entry.second.name == planner_name);
-      }
-
-      if (!planner_exists)
-      {
-        RCLCPP_ERROR(LOGGER, "Planner '%s' does NOT exist for group '%s' in pipeline '%s'", entry.second[i].c_str(),
-                     group_name.c_str(), entry.first.c_str());
-        std::cout << "There are " << config_map.size() << " planner entries: " << '\n';
-        for (const auto& config_map_entry : config_map)
-          std::cout << config_map_entry.second.name << '\n';
-        return false;
-      }
-    }
-  }
-
   return true;
 }
 
@@ -592,7 +560,7 @@ bool BenchmarkExecutor::loadPlanningScene(const std::string& scene_name, moveit_
 
       if (!planning_scene_storage_->getPlanningScene(planning_scene_w_metadata, scene_name))
       {
-        RCLCPP_ERROR(LOGGER, "Failed to load planning scene '%s'", scene_name.c_str());
+        RCLCPP_ERROR(getLogger(), "Failed to load planning scene '%s'", scene_name.c_str());
         return false;
       }
       scene_msg = static_cast<moveit_msgs::msg::PlanningScene>(*planning_scene_w_metadata);
@@ -602,7 +570,7 @@ bool BenchmarkExecutor::loadPlanningScene(const std::string& scene_name, moveit_
       moveit_warehouse::PlanningSceneWorldWithMetadata pswwm;
       if (!planning_scene_world_storage_->getPlanningSceneWorld(pswwm, scene_name))
       {
-        RCLCPP_ERROR(LOGGER, "Failed to load planning scene world '%s'", scene_name.c_str());
+        RCLCPP_ERROR(getLogger(), "Failed to load planning scene world '%s'", scene_name.c_str());
         return false;
       }
       scene_msg.world = static_cast<moveit_msgs::msg::PlanningSceneWorld>(*pswwm);
@@ -611,16 +579,16 @@ bool BenchmarkExecutor::loadPlanningScene(const std::string& scene_name, moveit_
     }
     else
     {
-      RCLCPP_ERROR(LOGGER, "Failed to find planning scene '%s'", scene_name.c_str());
+      RCLCPP_ERROR(getLogger(), "Failed to find planning scene '%s'", scene_name.c_str());
       return false;
     }
   }
   catch (std::exception& ex)
   {
-    RCLCPP_ERROR(LOGGER, "Error loading planning scene: %s", ex.what());
+    RCLCPP_ERROR(getLogger(), "Error loading planning scene: %s", ex.what());
     return false;
   }
-  RCLCPP_INFO(LOGGER, "Loaded planning scene successfully");
+  RCLCPP_INFO(getLogger(), "Loaded planning scene successfully");
   return true;
 }
 
@@ -629,7 +597,7 @@ bool BenchmarkExecutor::loadQueries(const std::string& regex, const std::string&
 {
   if (regex.empty())
   {
-    RCLCPP_WARN(LOGGER, "No query regex provided, don't load any queries from the database");
+    RCLCPP_WARN(getLogger(), "No query regex provided, don't load any queries from the database");
     return true;
   }
 
@@ -640,13 +608,13 @@ bool BenchmarkExecutor::loadQueries(const std::string& regex, const std::string&
   }
   catch (std::exception& ex)
   {
-    RCLCPP_ERROR(LOGGER, "Error loading motion planning queries: %s", ex.what());
+    RCLCPP_ERROR(getLogger(), "Error loading motion planning queries: %s", ex.what());
     return false;
   }
 
   if (query_names.empty())
   {
-    RCLCPP_ERROR(LOGGER, "Scene '%s' has no associated queries", scene_name.c_str());
+    RCLCPP_ERROR(getLogger(), "Scene '%s' has no associated queries", scene_name.c_str());
     return false;
   }
 
@@ -659,7 +627,7 @@ bool BenchmarkExecutor::loadQueries(const std::string& regex, const std::string&
     }
     catch (std::exception& ex)
     {
-      RCLCPP_ERROR(LOGGER, "Error loading motion planning query '%s': %s", query_name.c_str(), ex.what());
+      RCLCPP_ERROR(getLogger(), "Error loading motion planning query '%s': %s", query_name.c_str(), ex.what());
       continue;
     }
 
@@ -668,7 +636,7 @@ bool BenchmarkExecutor::loadQueries(const std::string& regex, const std::string&
     query.request = static_cast<moveit_msgs::msg::MotionPlanRequest>(*planning_query);
     queries.push_back(query);
   }
-  RCLCPP_INFO(LOGGER, "Loaded queries successfully");
+  RCLCPP_INFO(getLogger(), "Loaded queries successfully");
   return true;
 }
 
@@ -682,7 +650,7 @@ bool BenchmarkExecutor::loadStates(const std::string& regex, std::vector<StartSt
 
     if (state_names.empty())
     {
-      RCLCPP_WARN(LOGGER, "Database does not contain any named states");
+      RCLCPP_WARN(getLogger(), "Database does not contain any named states");
     }
 
     for (const std::string& state_name : state_names)
@@ -703,7 +671,7 @@ bool BenchmarkExecutor::loadStates(const std::string& regex, std::vector<StartSt
         }
         catch (std::exception& ex)
         {
-          RCLCPP_ERROR(LOGGER, "Runtime error when loading state '%s': %s", state_name.c_str(), ex.what());
+          RCLCPP_ERROR(getLogger(), "Runtime error when loading state '%s': %s", state_name.c_str(), ex.what());
           continue;
         }
       }
@@ -711,10 +679,10 @@ bool BenchmarkExecutor::loadStates(const std::string& regex, std::vector<StartSt
 
     if (start_states.empty())
     {
-      RCLCPP_WARN(LOGGER, "No stored states matched the provided start state regex: '%s'", regex.c_str());
+      RCLCPP_WARN(getLogger(), "No stored states matched the provided start state regex: '%s'", regex.c_str());
     }
   }
-  RCLCPP_INFO(LOGGER, "Loaded states successfully");
+  RCLCPP_INFO(getLogger(), "Loaded states successfully");
   return true;
 }
 
@@ -740,18 +708,18 @@ bool BenchmarkExecutor::loadPathConstraints(const std::string& regex, std::vecto
       }
       catch (std::exception& ex)
       {
-        RCLCPP_ERROR(LOGGER, "Runtime error when loading path constraint '%s': %s", cname.c_str(), ex.what());
+        RCLCPP_ERROR(getLogger(), "Runtime error when loading path constraint '%s': %s", cname.c_str(), ex.what());
         continue;
       }
     }
 
     if (constraints.empty())
     {
-      RCLCPP_WARN(LOGGER, "No path constraints found that match regex: '%s'", regex.c_str());
+      RCLCPP_WARN(getLogger(), "No path constraints found that match regex: '%s'", regex.c_str());
     }
     else
     {
-      RCLCPP_INFO(LOGGER, "Loaded path constraints successfully");
+      RCLCPP_INFO(getLogger(), "Loaded path constraints successfully");
     }
   }
   return true;
@@ -780,18 +748,18 @@ bool BenchmarkExecutor::loadTrajectoryConstraints(const std::string& regex,
       }
       catch (std::exception& ex)
       {
-        RCLCPP_ERROR(LOGGER, "Runtime error when loading trajectory constraint '%s': %s", cname.c_str(), ex.what());
+        RCLCPP_ERROR(getLogger(), "Runtime error when loading trajectory constraint '%s': %s", cname.c_str(), ex.what());
         continue;
       }
     }
 
     if (constraints.empty())
     {
-      RCLCPP_WARN(LOGGER, "No trajectory constraints found that match regex: '%s'", regex.c_str());
+      RCLCPP_WARN(getLogger(), "No trajectory constraints found that match regex: '%s'", regex.c_str());
     }
     else
     {
-      RCLCPP_INFO(LOGGER, "Loaded trajectory constraints successfully");
+      RCLCPP_INFO(getLogger(), "Loaded trajectory constraints successfully");
     }
   }
   return true;
@@ -887,7 +855,7 @@ void BenchmarkExecutor::runBenchmark(moveit_msgs::msg::MotionPlanRequest request
         collectMetrics(planner_data[j], responses[j], solved[j], total_time);
         dt = std::chrono::system_clock::now() - start;
         double metriconstraints_storage_time = dt.count();
-        RCLCPP_DEBUG(LOGGER, "Spent %lf seconds collecting metrics", metriconstraints_storage_time);
+        RCLCPP_DEBUG(getLogger(), "Spent %lf seconds collecting metrics", metriconstraints_storage_time);
 
         ++progress;
       }
@@ -989,7 +957,7 @@ void BenchmarkExecutor::runBenchmark(moveit_msgs::msg::MotionPlanRequest request
         collectMetrics(planner_data[j], responses[j], solved[j], total_time);
         dt = std::chrono::system_clock::now() - start;
         double metriconstraints_storage_time = dt.count();
-        RCLCPP_DEBUG(LOGGER, "Spent %lf seconds collecting metrics", metriconstraints_storage_time);
+        RCLCPP_DEBUG(getLogger(), "Spent %lf seconds collecting metrics", metriconstraints_storage_time);
 
         ++progress;
       }
@@ -1030,7 +998,7 @@ void BenchmarkExecutor::collectMetrics(PlannerRunData& metrics,
       const robot_trajectory::RobotTrajectory& p = *motion_plan_response.trajectory[j];
 
       // compute path length
-      traj_len = robot_trajectory::path_length(p);
+      traj_len = robot_trajectory::pathLength(p);
 
       // compute correctness and clearance
       collision_detection::CollisionRequest req;
@@ -1081,7 +1049,7 @@ void BenchmarkExecutor::computeAveragePathSimilarities(
     PlannerBenchmarkData& planner_data, const std::vector<planning_interface::MotionPlanDetailedResponse>& responses,
     const std::vector<bool>& solved)
 {
-  RCLCPP_INFO(LOGGER, "Computing result path similarity");
+  RCLCPP_INFO(getLogger(), "Computing result path similarity");
   const size_t result_count = planner_data.size();
   size_t unsolved = std::count_if(solved.begin(), solved.end(), [](bool s) { return !s; });
   std::vector<double> average_distances(responses.size());
@@ -1240,7 +1208,7 @@ void BenchmarkExecutor::writeOutput(const BenchmarkRequest& benchmark_request, c
   std::ofstream out(filename.c_str());
   if (!out)
   {
-    RCLCPP_ERROR(LOGGER, "Failed to open '%s' for benchmark output", filename.c_str());
+    RCLCPP_ERROR(getLogger(), "Failed to open '%s' for benchmark output", filename.c_str());
     return;
   }
 
@@ -1378,5 +1346,5 @@ void BenchmarkExecutor::writeOutput(const BenchmarkRequest& benchmark_request, c
   }
 
   out.close();
-  RCLCPP_INFO(LOGGER, "Benchmark results saved to '%s'", filename.c_str());
+  RCLCPP_INFO(getLogger(), "Benchmark results saved to '%s'", filename.c_str());
 }

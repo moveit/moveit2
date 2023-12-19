@@ -47,7 +47,6 @@ using namespace std::chrono_literals;
 
 namespace
 {
-const rclcpp::Logger LOGGER = rclcpp::get_logger("local_planner_component");
 const auto JOIN_THREAD_TIMEOUT = std::chrono::seconds(1);
 
 // If the trajectory progress reaches more than 0.X the global goal state is considered as reached
@@ -77,18 +76,19 @@ bool LocalPlannerComponent::initialize()
     if ((config_.publish_joint_positions && config_.publish_joint_velocities) ||
         (!config_.publish_joint_positions && !config_.publish_joint_velocities))
     {
-      RCLCPP_ERROR(LOGGER, "When publishing a std_msgs/Float64MultiArray, you must select positions OR velocities. "
-                           "Enabling both or none is not possible!");
+      RCLCPP_ERROR(node_->get_logger(),
+                   "When publishing a std_msgs/Float64MultiArray, you must select positions OR velocities. "
+                   "Enabling both or none is not possible!");
       return false;
     }
   }
 
   // Configure planning scene monitor
   planning_scene_monitor_ = std::make_shared<planning_scene_monitor::PlanningSceneMonitor>(
-      node_, "robot_description", tf_buffer_, "local_planner/planning_scene_monitor");
+      node_, "robot_description", "local_planner/planning_scene_monitor");
   if (!planning_scene_monitor_->getPlanningScene())
   {
-    RCLCPP_ERROR(LOGGER, "Unable to configure planning scene monitor");
+    RCLCPP_ERROR(node_->get_logger(), "Unable to configure planning scene monitor");
     return false;
   }
 
@@ -107,7 +107,7 @@ bool LocalPlannerComponent::initialize()
   }
   catch (pluginlib::PluginlibException& ex)
   {
-    RCLCPP_ERROR(LOGGER, "Exception while creating trajectory operator plugin loader: '%s'", ex.what());
+    RCLCPP_ERROR(node_->get_logger(), "Exception while creating trajectory operator plugin loader: '%s'", ex.what());
     return false;
   }
   try
@@ -117,11 +117,12 @@ bool LocalPlannerComponent::initialize()
     if (!trajectory_operator_instance_->initialize(node_, planning_scene_monitor_->getRobotModel(),
                                                    config_.group_name))  // TODO(sjahr) add default group param
       throw std::runtime_error("Unable to initialize trajectory operator plugin");
-    RCLCPP_INFO(LOGGER, "Using trajectory operator interface '%s'", config_.trajectory_operator_plugin_name.c_str());
+    RCLCPP_INFO(node_->get_logger(), "Using trajectory operator interface '%s'",
+                config_.trajectory_operator_plugin_name.c_str());
   }
   catch (pluginlib::PluginlibException& ex)
   {
-    RCLCPP_ERROR(LOGGER, "Exception while loading trajectory operator '%s': '%s'",
+    RCLCPP_ERROR(node_->get_logger(), "Exception while loading trajectory operator '%s': '%s'",
                  config_.trajectory_operator_plugin_name.c_str(), ex.what());
     return false;
   }
@@ -134,7 +135,7 @@ bool LocalPlannerComponent::initialize()
   }
   catch (pluginlib::PluginlibException& ex)
   {
-    RCLCPP_ERROR(LOGGER, "Exception while creating constraint solver plugin loader '%s'", ex.what());
+    RCLCPP_ERROR(node_->get_logger(), "Exception while creating constraint solver plugin loader '%s'", ex.what());
     return false;
   }
   try
@@ -143,11 +144,12 @@ bool LocalPlannerComponent::initialize()
         local_constraint_solver_plugin_loader_->createUniqueInstance(config_.local_constraint_solver_plugin_name);
     if (!local_constraint_solver_instance_->initialize(node_, planning_scene_monitor_, config_.group_name))
       throw std::runtime_error("Unable to initialize constraint solver plugin");
-    RCLCPP_INFO(LOGGER, "Using constraint solver interface '%s'", config_.local_constraint_solver_plugin_name.c_str());
+    RCLCPP_INFO(node_->get_logger(), "Using constraint solver interface '%s'",
+                config_.local_constraint_solver_plugin_name.c_str());
   }
   catch (pluginlib::PluginlibException& ex)
   {
-    RCLCPP_ERROR(LOGGER, "Exception while loading constraint solver '%s': '%s'",
+    RCLCPP_ERROR(node_->get_logger(), "Exception while loading constraint solver '%s': '%s'",
                  config_.local_constraint_solver_plugin_name.c_str(), ex.what());
     return false;
   }
@@ -159,7 +161,7 @@ bool LocalPlannerComponent::initialize()
       // Goal callback
       [this](const rclcpp_action::GoalUUID& /*unused*/,
              const std::shared_ptr<const moveit_msgs::action::LocalPlanner::Goal>& /*unused*/) {
-        RCLCPP_INFO(LOGGER, "Received local planning goal request");
+        RCLCPP_INFO(node_->get_logger(), "Received local planning goal request");
         // If another goal is active, cancel it and reject this goal
         if (long_callback_thread_.joinable())
         {
@@ -167,7 +169,7 @@ bool LocalPlannerComponent::initialize()
           auto future = std::async(std::launch::async, &std::thread::join, &long_callback_thread_);
           if (future.wait_for(JOIN_THREAD_TIMEOUT) == std::future_status::timeout)
           {
-            RCLCPP_WARN(LOGGER, "Another goal was running. Rejecting the new hybrid planning goal.");
+            RCLCPP_WARN(node_->get_logger(), "Another goal was running. Rejecting the new hybrid planning goal.");
             return rclcpp_action::GoalResponse::REJECT;
           }
         }
@@ -175,7 +177,7 @@ bool LocalPlannerComponent::initialize()
       },
       // Cancel callback
       [this](const std::shared_ptr<rclcpp_action::ServerGoalHandle<moveit_msgs::action::LocalPlanner>>& /*unused*/) {
-        RCLCPP_INFO(LOGGER, "Received request to cancel local planning goal");
+        RCLCPP_INFO(node_->get_logger(), "Received request to cancel local planning goal");
         state_ = LocalPlannerState::ABORT;
         if (long_callback_thread_.joinable())
         {
@@ -224,7 +226,7 @@ bool LocalPlannerComponent::initialize()
       });
 
   // Initialize local solution publisher
-  RCLCPP_INFO(LOGGER, "Using '%s' as local solution topic type", config_.local_solution_topic_type.c_str());
+  RCLCPP_INFO(node_->get_logger(), "Using '%s' as local solution topic type", config_.local_solution_topic_type.c_str());
   if (config_.local_solution_topic_type == "trajectory_msgs/JointTrajectory")
   {
     local_trajectory_publisher_ =
@@ -292,7 +294,7 @@ void LocalPlannerComponent::executeIteration()
       if (!local_planner_feedback_->feedback.empty())
       {
         local_planning_goal_handle_->publish_feedback(local_planner_feedback_);
-        RCLCPP_ERROR(LOGGER, "Local planner somehow failed");
+        RCLCPP_ERROR(node_->get_logger(), "Local planner somehow failed");
         reset();
         return;
       }
@@ -348,7 +350,8 @@ void LocalPlannerComponent::executeIteration()
       result->error_code.val = moveit_msgs::msg::MoveItErrorCodes::FAILURE;
       result->error_message = "Unexpected failure.";
       local_planning_goal_handle_->abort(result);
-      RCLCPP_ERROR(LOGGER, "Local planner somehow failed");  // TODO(sjahr) Add more detailed failure information
+      RCLCPP_ERROR(node_->get_logger(),
+                   "Local planner somehow failed");  // TODO(sjahr) Add more detailed failure information
       reset();
       return;
     }

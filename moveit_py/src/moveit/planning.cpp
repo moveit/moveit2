@@ -14,7 +14,7 @@
  *     copyright notice, this list of conditions and the following
  *     disclaimer in the documentation and/or other materials provided
  *     with the distribution.
- *   * Neither the name of PickNik Inc. nor the names of its
+ *   * Neither the name of the copyright holder nor the names of its
  *     contributors may be used to endorse or promote products derived
  *     from this software without specific prior written permission.
  *
@@ -37,6 +37,7 @@
 #include "moveit_ros/moveit_cpp/moveit_cpp.h"
 #include "moveit_ros/moveit_cpp/planning_component.h"
 #include "moveit_ros/planning_scene_monitor/planning_scene_monitor.h"
+#include "moveit_ros/trajectory_execution_manager/trajectory_execution_manager.h"
 
 PYBIND11_MODULE(planning, m)
 {
@@ -47,10 +48,11 @@ PYBIND11_MODULE(planning, m)
   options.disable_function_signatures();
 
   // Construct module classes
-  moveit_py::bind_planning_component::init_plan_request_parameters(m);
-  moveit_py::bind_planning_component::init_multi_plan_request_parameters(m);
-  moveit_py::bind_planning_component::init_planning_component(m);
-  moveit_py::bind_planning_scene_monitor::init_planning_scene_monitor(m);
-  moveit_py::bind_planning_scene_monitor::init_context_managers(m);
-  moveit_py::bind_moveit_cpp::init_moveit_py(m);
+  moveit_py::bind_planning_component::initPlanRequestParameters(m);
+  moveit_py::bind_planning_component::initMultiPlanRequestParameters(m);
+  moveit_py::bind_planning_component::initPlanningComponent(m);
+  moveit_py::bind_planning_scene_monitor::initPlanningSceneMonitor(m);
+  moveit_py::bind_planning_scene_monitor::initContextManagers(m);
+  moveit_py::bind_trajectory_execution_manager::initTrajectoryExecutionManager(m);
+  moveit_py::bind_moveit_cpp::initMoveitPy(m);
 }

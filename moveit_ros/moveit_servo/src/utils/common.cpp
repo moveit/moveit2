@@ -48,6 +48,36 @@ const double SCALING_OVERRIDE_THRESHOLD = 0.01;
 namespace moveit_servo
 {
 
+std::optional<std::string> getIKSolverBaseFrame(const moveit::core::RobotStatePtr& robot_state,
+                                                const std::string& group_name)
+{
+  const auto ik_solver = robot_state->getJointModelGroup(group_name)->getSolverInstance();
+
+  if (ik_solver)
+  {
+    return ik_solver->getBaseFrame();
+  }
+  else
+  {
+    return std::nullopt;
+  }
+}
+
+std::optional<std::string> getIKSolverTipFrame(const moveit::core::RobotStatePtr& robot_state,
+                                               const std::string& group_name)
+{
+  const auto ik_solver = robot_state->getJointModelGroup(group_name)->getSolverInstance();
+
+  if (ik_solver)
+  {
+    return ik_solver->getTipFrame();
+  }
+  else
+  {
+    return std::nullopt;
+  }
+}
+
 bool isValidCommand(const Eigen::VectorXd& command)
 {
   // returns true only if there are no nan values.
@@ -115,19 +145,43 @@ trajectory_msgs::msg::JointTrajectory composeTrajectoryMessage(const servo::Para
   // See http://wiki.ros.org/joint_trajectory_controller#Trajectory_replacement
 
   trajectory_msgs::msg::JointTrajectory joint_trajectory;
-  joint_trajectory.header.stamp = rclcpp::Time(0);
-  joint_trajectory.header.frame_id = servo_params.planning_frame;
   joint_trajectory.joint_names = joint_state.joint_names;
 
-  trajectory_msgs::msg::JointTrajectoryPoint point;
+  static trajectory_msgs::msg::JointTrajectoryPoint point;
   point.time_from_start = rclcpp::Duration::from_seconds(servo_params.publish_period);
+  const size_t num_joints = joint_state.joint_names.size();
+  if (point.positions.size() != num_joints)
+  {
+    point.positions.resize(num_joints);
+    point.velocities.resize(num_joints);
+    point.accelerations.resize(num_joints);
+  }
 
   // Set the fields of trajectory point based on which fields are requested.
   // Some controllers check that acceleration data is non-empty, even if accelerations are not used
   // Send all zeros (joint_state.accelerations is a vector of all zeros).
-  point.positions = servo_params.publish_joint_positions ? joint_state.positions : point.positions;
-  point.velocities = servo_params.publish_joint_velocities ? joint_state.velocities : point.velocities;
-  point.accelerations = servo_params.publish_joint_accelerations ? joint_state.accelerations : point.accelerations;
+
+  if (servo_params.publish_joint_positions)
+  {
+    for (size_t i = 0; i < num_joints; ++i)
+    {
+      point.positions[i] = joint_state.positions[i];
+    }
+  }
+  if (servo_params.publish_joint_velocities)
+  {
+    for (size_t i = 0; i < num_joints; ++i)
+    {
+      point.velocities[i] = joint_state.velocities[i];
+    }
+  }
+  if (servo_params.publish_joint_accelerations)
+  {
+    for (size_t i = 0; i < num_joints; ++i)
+    {
+      point.accelerations[i] = joint_state.accelerations[i];
+    }
+  }
 
   joint_trajectory.points.push_back(point);
   return joint_trajectory;
@@ -137,13 +191,21 @@ std_msgs::msg::Float64MultiArray composeMultiArrayMessage(const servo::Params& s
                                                           const KinematicState& joint_state)
 {
   std_msgs::msg::Float64MultiArray multi_array;
+  const size_t num_joints = joint_state.joint_names.size();
+  multi_array.data.resize(num_joints);
   if (servo_params.publish_joint_positions)
   {
-    multi_array.data = joint_state.positions;
+    for (size_t i = 0; i < num_joints; ++i)
+    {
+      multi_array.data[i] = joint_state.positions[i];
+    }
   }
   else if (servo_params.publish_joint_velocities)
   {
-    multi_array.data = joint_state.velocities;
+    for (size_t i = 0; i < num_joints; ++i)
+    {
+      multi_array.data[i] = joint_state.velocities[i];
+    }
   }
 
   return multi_array;
@@ -251,33 +313,35 @@ double jointLimitVelocityScalingFactor(const Eigen::VectorXd& velocities,
                                        const moveit::core::JointBoundsVector& joint_bounds, double scaling_override)
 {
   // If override value is close to zero, user is not overriding the scaling
+  double min_scaling_factor = scaling_override;
   if (scaling_override < SCALING_OVERRIDE_THRESHOLD)
   {
-    scaling_override = 1.0;  // Set to no scaling.
-    double bounded_vel;
-    std::vector<double> velocity_scaling_factors;  // The allowable fraction of computed veclocity
-
-    for (size_t i = 0; i < joint_bounds.size(); i++)
-    {
-      const auto joint_bound = (joint_bounds[i])->front();
-      if (joint_bound.velocity_bounded_ && velocities(i) != 0.0)
-      {
-        // Find the ratio of clamped velocity to original velocity
-        bounded_vel = std::clamp(velocities(i), joint_bound.min_velocity_, joint_bound.max_velocity_);
-        velocity_scaling_factors.push_back(bounded_vel / velocities(i));
-      }
-    }
-    // Find the lowest scaling factor, this helps preserve Cartesian motion.
-    scaling_override = velocity_scaling_factors.empty() ?
-                           scaling_override :
-                           *std::min_element(velocity_scaling_factors.begin(), velocity_scaling_factors.end());
+    min_scaling_factor = 1.0;  // Set to no scaling override.
   }
 
-  return scaling_override;
+  // Now get the scaling factor from joint velocity limits.
+  size_t idx = 0;
+  for (const auto& joint_bound : joint_bounds)
+  {
+    for (const auto& variable_bound : *joint_bound)
+    {
+      const auto& target_vel = velocities(idx);
+      if (variable_bound.velocity_bounded_ && target_vel != 0.0)
+      {
+        // Find the ratio of clamped velocity to original velocity
+        const auto bounded_vel = std::clamp(target_vel, variable_bound.min_velocity_, variable_bound.max_velocity_);
+        const auto joint_scaling_factor = bounded_vel / target_vel;
+        min_scaling_factor = std::min(min_scaling_factor, joint_scaling_factor);
+      }
+      ++idx;
+    }
+  }
+
+  return min_scaling_factor;
 }
 
 std::vector<int> jointsToHalt(const Eigen::VectorXd& positions, const Eigen::VectorXd& velocities,
-                              const moveit::core::JointBoundsVector& joint_bounds, double margin)
+                              const moveit::core::JointBoundsVector& joint_bounds, const std::vector<double>& margins)
 {
   std::vector<int> joint_idxs_to_halt;
   for (size_t i = 0; i < joint_bounds.size(); i++)
@@ -285,8 +349,8 @@ std::vector<int> jointsToHalt(const Eigen::VectorXd& positions, const Eigen::Vec
     const auto joint_bound = (joint_bounds[i])->front();
     if (joint_bound.position_bounded_)
     {
-      const bool negative_bound = velocities[i] < 0 && positions[i] < (joint_bound.min_position_ + margin);
-      const bool positive_bound = velocities[i] > 0 && positions[i] > (joint_bound.max_position_ - margin);
+      const bool negative_bound = velocities[i] < 0 && positions[i] < (joint_bound.min_position_ + margins[i]);
+      const bool positive_bound = velocities[i] > 0 && positions[i] > (joint_bound.max_position_ - margins[i]);
       if (negative_bound || positive_bound)
       {
         joint_idxs_to_halt.push_back(i);
@@ -336,6 +400,7 @@ planning_scene_monitor::PlanningSceneMonitorPtr createPlanningSceneMonitor(const
 
   planning_scene_monitor->startStateMonitor(servo_params.joint_topic);
   planning_scene_monitor->startSceneMonitor(servo_params.monitored_planning_scene_topic);
+  planning_scene_monitor->startWorldGeometryMonitor();
   planning_scene_monitor->setPlanningScenePublishingFrequency(25);
   planning_scene_monitor->getStateMonitor()->enableCopyDynamics(true);
   planning_scene_monitor->startPublishingPlanningScene(planning_scene_monitor::PlanningSceneMonitor::UPDATE_SCENE,

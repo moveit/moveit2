@@ -45,13 +45,9 @@
 #include <rclcpp/rclcpp.hpp>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
 #include <tf2_ros/transform_listener.h>
+#include <moveit/utils/logger.hpp>
 
 using namespace moveit_servo;
-
-namespace
-{
-const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_servo.twist_demo");
-}
 
 int main(int argc, char* argv[])
 {
@@ -59,6 +55,7 @@ int main(int argc, char* argv[])
 
   // The servo object expects to get a ROS node.
   const rclcpp::Node::SharedPtr demo_node = std::make_shared<rclcpp::Node>("moveit_servo_demo");
+  moveit::setNodeLoggerName(demo_node->get_name());
 
   // Get the servo parameters.
   const std::string param_namespace = "moveit_servo";
@@ -85,7 +82,7 @@ int main(int argc, char* argv[])
 
   // Move end effector in the +z direction at 10 cm/s
   // while turning around z axis in the +ve direction at 0.5 rad/s
-  TwistCommand target_twist{ servo_params.planning_frame, { 0.0, 0.0, 0.1, 0.0, 0.0, 0.5 } };
+  TwistCommand target_twist{ "panda_link0", { 0.0, 0.0, 0.1, 0.0, 0.0, 0.5 } };
 
   // Frequency at which commands will be sent to the robot controller.
   rclcpp::WallRate rate(1.0 / servo_params.publish_period);
@@ -94,7 +91,7 @@ int main(int argc, char* argv[])
   std::chrono::seconds time_elapsed(0);
   auto start_time = std::chrono::steady_clock::now();
 
-  RCLCPP_INFO_STREAM(LOGGER, servo.getStatusMessage());
+  RCLCPP_INFO_STREAM(demo_node->get_logger(), servo.getStatusMessage());
   while (rclcpp::ok())
   {
     const KinematicState joint_state = servo.getNextJointState(target_twist);
@@ -104,7 +101,7 @@ int main(int argc, char* argv[])
     time_elapsed = std::chrono::duration_cast<std::chrono::seconds>(current_time - start_time);
     if (time_elapsed > timeout_duration)
     {
-      RCLCPP_INFO_STREAM(LOGGER, "Timed out");
+      RCLCPP_INFO_STREAM(demo_node->get_logger(), "Timed out");
       break;
     }
     else if (status != StatusCode::INVALID)
@@ -114,6 +111,6 @@ int main(int argc, char* argv[])
     rate.sleep();
   }
 
-  RCLCPP_INFO(LOGGER, "Exiting demo.");
+  RCLCPP_INFO(demo_node->get_logger(), "Exiting demo.");
   rclcpp::shutdown();
 }

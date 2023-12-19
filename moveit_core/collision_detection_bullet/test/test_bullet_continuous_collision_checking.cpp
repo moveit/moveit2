@@ -47,13 +47,17 @@
 
 #include <moveit/collision_detection_bullet/collision_env_bullet.h>
 #include <moveit/collision_detection_bullet/bullet_integration/basic_types.h>
+#include <moveit/utils/logger.hpp>
 
 #include <urdf_parser/urdf_parser.h>
 #include <geometric_shapes/shape_operations.h>
 
 namespace cb = collision_detection_bullet;
 
-static const rclcpp::Logger TEST_LOGGER = rclcpp::get_logger("collision_detection.bullet_test");
+rclcpp::Logger getLogger()
+{
+  return moveit::getLogger("collision_detection.bullet_test");
+}
 
 /** \brief Brings the panda robot in user defined home position */
 inline void setToHome(moveit::core::RobotState& panda_state)
@@ -254,7 +258,7 @@ TEST_F(BulletCollisionDetectionTester, DISABLED_ContinuousCollisionSelf)
   ASSERT_FALSE(res.collision);
   res.clear();
 
-  RCLCPP_INFO(TEST_LOGGER, "Continuous to continuous collisions are not supported yet, therefore fail here.");
+  RCLCPP_INFO(getLogger(), "Continuous to continuous collisions are not supported yet, therefore fail here.");
   ASSERT_TRUE(res.collision);
   res.clear();
 }

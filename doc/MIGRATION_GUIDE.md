@@ -4,36 +4,30 @@
 
 In MoveIt 1 we commonly use named ROS logging macros (i.e. `ROS_INFO_NAMED`) with file-specific logger names defined as `constexpr char LOGNAME[]="logger_name"`.
 ROS 2 provides similar macros (i.e. `RCLCPP_INFO`) that instead of an optional name always require a `rclcpp::Logger` instance for scoping the namespace.
-All source files that use ROS logging should now define a file-specific `static const rclcpp::Logger` named `LOGGER`, located at the top of the file and inside the namespace with the narrowest scope (if there is one).
-This leads to the following basic migration steps:
 
-1. Replace `LOGNAME` with `rclcpp::Logger` instance:
+In ROS 2 logging is tied to the Node object for publishing to /rosout.
+For namespaces there is the option of creating a child logger.
+However because of initaliziation order (child logger has to be created after rclcpp::init is called and from a method on the logger from the node) you can no longer define the logger object as a file level static.
+`moveit_core` provides a `util` library which contains some functions to make this situation more ergonomic.
+```C++
+#include <moveit/utils/logger.hpp>
+```
 
-    <b>Old:</b>
+Wherever the node is created there is the option to set the root logging namespace to be from the node for moveit using this syntax:
 
-        constexpr char LOGNAME[] = "logger_name";
+```C++
+moveit::setNodeLoggerName(node->get_name());
+```
 
-    <b>New:</b>
-
-        static const rclcpp::Logger LOGGER = rclcpp::get_logger("logger_name");
-
-2. Replace logging macros:
-
-    <b>Old:</b>
-
-        ROS_INFO_NAMED(LOGNAME, "Very important info message");
-
-   <b>New:</b>
-
-       RCLCPP_INFO(LOGGER, "Very important info message");
+Then wherever you call a logging macro you can use the `moveit::getLogger()` function:
+```C++
+RCLCPP_INFO(moveit::getLogger("my_namespace"), "Very important info message");
+```
 
 ### Logger naming convention
 
 Migrating the loggers is a good opportunity to make logger names more consistent.
 In order to create unique and descriptive logger names we encourage the following naming pattern: general `LIBRARY_NAME.SOURCE_FILE_NAME`.
-For instance, the file `joint_model_group.cpp` inside the library `moveit_robot_model` contains the following logger:
-
-    static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_robot_model.joint_model_group");
 
 For finding the `LIBRARY_NAME` refer to the line `add_library(LIBRARY_NAME ...)` in the library's `CMakeLists.txt`.
 If the source file name is the same or very similar to the library name it is sufficient to only use the source file name.
@@ -42,4 +36,4 @@ If the source file name is the same or very similar to the library name it is su
 
 Some classes declared in header files may contain log messages, for instance to warn about not-implemented virtual functions in abstract classes.
 A logger defined in the header file would not tell us what derived class is missing the implementation, since the source name would be resolved from the header file.
-For this case, the base class should declare a private member variable `static const rclcpp::Logger LOGGER` which is to be defined in the implementing class using the corresponding source file name.
+For this case, the base class should declare a private member variable `rclcpp::Logger logger_;` which is to be defined in the implementing class using the corresponding source file name.

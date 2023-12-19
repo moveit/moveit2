@@ -44,9 +44,18 @@
 #include <tf2_eigen/tf2_eigen.hpp>
 #include <numeric>
 #include <optional>
+#include <moveit/utils/logger.hpp>
 
 namespace robot_trajectory
 {
+namespace
+{
+rclcpp::Logger getLogger()
+{
+  return moveit::getLogger("robot_trajectory");
+}
+}  // namespace
+
 RobotTrajectory::RobotTrajectory(const moveit::core::RobotModelConstPtr& robot_model)
   : robot_model_(robot_model), group_(nullptr)
 {
@@ -93,7 +102,7 @@ double RobotTrajectory::getAverageSegmentDuration() const
 {
   if (duration_from_previous_.empty())
   {
-    RCLCPP_WARN(rclcpp::get_logger("RobotTrajectory"), "Too few waypoints to calculate a duration. Returning 0.");
+    RCLCPP_WARN(getLogger(), "Too few waypoints to calculate a duration. Returning 0.");
     return 0.0;
   }
 
@@ -102,7 +111,7 @@ double RobotTrajectory::getAverageSegmentDuration() const
   {
     if (duration_from_previous_.size() <= 1)
     {
-      RCLCPP_WARN(rclcpp::get_logger("RobotTrajectory"), "First and only waypoint has a duration of 0.");
+      RCLCPP_WARN(getLogger(), "First and only waypoint has a duration of 0.");
       return 0.0;
     }
     else
@@ -490,7 +499,7 @@ RobotTrajectory& RobotTrajectory::setRobotTrajectoryMsg(const moveit::core::Robo
   return setRobotTrajectoryMsg(st, trajectory);
 }
 
-void RobotTrajectory::findWayPointIndicesForDurationAfterStart(const double& duration, int& before, int& after,
+void RobotTrajectory::findWayPointIndicesForDurationAfterStart(double duration, int& before, int& after,
                                                                double& blend) const
 {
   if (duration < 0.0)
@@ -536,11 +545,6 @@ double RobotTrajectory::getWayPointDurationFromStart(std::size_t index) const
   for (std::size_t i = 0; i <= index; ++i)
     time += duration_from_previous_[i];
   return time;
-}
-
-double RobotTrajectory::getWaypointDurationFromStart(std::size_t index) const
-{
-  return getWayPointDurationFromStart(index);
 }
 
 bool RobotTrajectory::getStateAtDurationFromStart(const double request_duration,
@@ -636,7 +640,7 @@ std::ostream& operator<<(std::ostream& out, const RobotTrajectory& trajectory)
   return out;
 }
 
-double path_length(const RobotTrajectory& trajectory)
+double pathLength(const RobotTrajectory& trajectory)
 {
   auto trajectory_length = 0.0;
   for (std::size_t index = 1; index < trajectory.getWayPointCount(); ++index)
@@ -686,13 +690,13 @@ std::optional<double> smoothness(const RobotTrajectory& trajectory)
   return std::nullopt;
 }
 
-std::optional<double> waypoint_density(const RobotTrajectory& trajectory)
+std::optional<double> waypointDensity(const RobotTrajectory& trajectory)
 {
   // Only calculate density if more than one waypoint exists
   if (trajectory.getWayPointCount() > 1)
   {
     // Calculate path length
-    const auto length = path_length(trajectory);
+    const auto length = pathLength(trajectory);
     if (length > 0.0)
     {
       auto density = static_cast<double>(trajectory.getWayPointCount()) / length;

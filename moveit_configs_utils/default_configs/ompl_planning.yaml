@@ -1,10 +1,12 @@
-planning_plugin: ompl_interface/OMPLPlanner
-start_state_max_bounds_error: 0.1
-jiggle_fraction: 0.05
-request_adapters: >-
-    default_planner_request_adapters/AddTimeOptimalParameterization
-    default_planner_request_adapters/ResolveConstraintFrames
-    default_planner_request_adapters/FixWorkspaceBounds
-    default_planner_request_adapters/FixStartStateBounds
-    default_planner_request_adapters/FixStartStateCollision
-    default_planner_request_adapters/FixStartStatePathConstraints
+planning_plugins:
+  - ompl_interface/OMPLPlanner
+# The order of the elements in the adapter corresponds to the order they are processed by the motion planning pipeline.
+request_adapters:
+  - default_planning_request_adapters/ResolveConstraintFrames
+  - default_planning_request_adapters/ValidateWorkspaceBounds
+  - default_planning_request_adapters/CheckStartStateBounds
+  - default_planning_request_adapters/CheckStartStateCollision
+response_adapters:
+  - default_planning_response_adapters/AddTimeOptimalParameterization
+  - default_planning_response_adapters/ValidateSolution
+  - default_planning_response_adapters/DisplayMotionPath

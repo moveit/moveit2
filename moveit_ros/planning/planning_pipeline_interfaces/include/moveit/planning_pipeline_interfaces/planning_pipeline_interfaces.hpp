@@ -103,16 +103,11 @@ const std::vector<::planning_interface::MotionPlanResponse> planWithParallelPipe
  * \param [in] node Node used to load parameters
  * \param [in] parameter_namespace Optional prefix for the pipeline parameter
  * namespace. Empty by default, so only the pipeline name is used as namespace
- * \param [in] planning_plugin_param_name
- * Optional name of the planning plugin namespace
- * \param [in] adapter_plugins_param_name Optional name of the adapter plugin namespace
  * \return Map of PlanningPipelinePtr's associated with a name for faster look-up
  */
 std::unordered_map<std::string, planning_pipeline::PlanningPipelinePtr>
 createPlanningPipelineMap(const std::vector<std::string>& pipeline_names,
                           const moveit::core::RobotModelConstPtr& robot_model, const rclcpp::Node::SharedPtr& node,
-                          const std::string& parameter_namespace = std::string(),
-                          const std::string& planning_plugin_param_name = "planning_plugin",
-                          const std::string& adapter_plugins_param_name = "request_adapters");
+                          const std::string& parameter_namespace = std::string());
 }  // namespace planning_pipeline_interfaces
 }  // namespace moveit

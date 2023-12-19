@@ -1,0 +1,27 @@
+<library path="moveit_default_planning_response_adapter_plugins">
+
+  <class name="default_planning_response_adapters/AddTimeOptimalParameterization" type="default_planning_response_adapters::AddTimeOptimalParameterization" base_class_type="planning_interface::PlanningResponseAdapter">
+    <description>
+      Time parameterization using Time-Optimal Trajectory Generation for Path Following With Bounded Acceleration and Velocity (Kunz and Stilman, RSS 2008). Assumes starting and ending at rest. Not jerk limited.
+    </description>
+  </class>
+
+  <class name="default_planning_response_adapters/AddRuckigTrajectorySmoothing" type="default_planning_response_adapters::AddRuckigTrajectorySmoothing" base_class_type="planning_interface::PlanningResponseAdapter">
+    <description>
+      Adds jerk-limited trajectory smoothing via Ruckig. Best used after a time parameterization algorithm such as TimeOptimalParameterization.
+    </description>
+  </class>
+
+  <class name="default_planning_response_adapters/DisplayMotionPath" type="default_planning_response_adapters::DisplayMotionPath" base_class_type="planning_interface::PlanningResponseAdapter">
+    <description>
+       Response adapter to display the motion path in RVIZ by publishing as EE pose marker array via ROS topic.
+    </description>
+  </class>
+
+  <class name="default_planning_response_adapters/ValidateSolution" type="default_planning_response_adapters::ValidateSolution" base_class_type="planning_interface::PlanningResponseAdapter">
+    <description>
+      Adapter to check the request path validity (collision avoidance, feasibility and constraint satisfaction).
+    </description>
+  </class>
+
+</library>

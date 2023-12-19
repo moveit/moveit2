@@ -37,7 +37,7 @@ target_link_libraries(moveit_cached_ik_kinematics_plugin PRIVATE
     moveit_srv_kinematics_plugin
     moveit_cached_ik_kinematics_base)
 if(trac_ik_kinematics_plugin_FOUND)
-    target_link_libraries(moveit_cached_ik_kinematics_plugin ${trac_ik_kinematics_plugin_LIBRARIES})
+    target_link_libraries(moveit_cached_ik_kinematics_plugin PRIVATE ${trac_ik_kinematics_plugin_LIBRARIES})
     set_target_properties(moveit_cached_ik_kinematics_plugin PROPERTIES COMPILE_DEFINITIONS "CACHED_IK_KINEMATICS_TRAC_IK")
 endif()
 
