@@ -51,9 +51,6 @@ constexpr char PANDA_TEST_GROUP[] = "panda_arm";
 constexpr char PR2_TEST_ROBOT[] = "pr2";
 constexpr char PR2_TIP_LINK[] = "r_wrist_roll_link";
 
-// Number of iterations to use in matrix multiplication / inversion benchmarks.
-constexpr int MATRIX_OPS_N_ITERATIONS = 1e7;
-
 namespace
 {
 Eigen::Isometry3d createTestIsometry()
@@ -66,123 +63,118 @@ Eigen::Isometry3d createTestIsometry()
 }  // namespace
 
 // Benchmark time to multiply an Eigen::Affine3d with an Eigen::Matrix4d.
-static void multiplyAffineTimesMatrix(benchmark::State& st)
+static void multiplyAffineTimesMatrixNoAlias(benchmark::State& st)
 {
-  int n_iters = st.range(0);
   Eigen::Isometry3d isometry = createTestIsometry();
+  Eigen::Affine3d result;
   for (auto _ : st)
   {
-    for (int i = 0; i < n_iters; ++i)
-    {
-      Eigen::Affine3d result;
-      benchmark::DoNotOptimize(result = isometry.affine() * isometry.matrix());
-      benchmark::ClobberMemory();
-    }
+    benchmark::DoNotOptimize(result.affine().noalias() = isometry.affine() * isometry.matrix());
+    benchmark::ClobberMemory();
+  }
+}
+
+// Benchmark time to multiply an Eigen::Matrix4d with an Eigen::Matrix4d.
+static void multiplyMatrixTimesMatrixNoAlias(benchmark::State& st)
+{
+  Eigen::Isometry3d isometry = createTestIsometry();
+  Eigen::Isometry3d result;
+  for (auto _ : st)
+  {
+    benchmark::DoNotOptimize(result.matrix().noalias() = isometry.matrix() * isometry.matrix());
+    benchmark::ClobberMemory();
+  }
+}
+
+// Benchmark time to multiply an Eigen::Isometry3d with an Eigen::Isometry3d.
+static void multiplyIsometryTimesIsometryNoAlias(benchmark::State& st)
+{
+  Eigen::Isometry3d isometry = createTestIsometry();
+  Eigen::Isometry3d result;
+  for (auto _ : st)
+  {
+    benchmark::DoNotOptimize(result.affine().noalias() = isometry.affine() * isometry.matrix());
+    benchmark::ClobberMemory();
   }
 }
 
 // Benchmark time to multiply an Eigen::Matrix4d with an Eigen::Matrix4d.
 static void multiplyMatrixTimesMatrix(benchmark::State& st)
 {
-  int n_iters = st.range(0);
   Eigen::Isometry3d isometry = createTestIsometry();
+  Eigen::Isometry3d result;
   for (auto _ : st)
   {
-    for (int i = 0; i < n_iters; ++i)
-    {
-      Eigen::Matrix4d result;
-      benchmark::DoNotOptimize(result = isometry.matrix() * isometry.matrix());
-      benchmark::ClobberMemory();
-    }
+    benchmark::DoNotOptimize(result.matrix() = isometry.matrix() * isometry.matrix());
+    benchmark::ClobberMemory();
   }
 }
-
 // Benchmark time to multiply an Eigen::Isometry3d with an Eigen::Isometry3d.
 static void multiplyIsometryTimesIsometry(benchmark::State& st)
 {
-  int n_iters = st.range(0);
   Eigen::Isometry3d isometry = createTestIsometry();
+  Eigen::Isometry3d result;
   for (auto _ : st)
   {
-    for (int i = 0; i < n_iters; ++i)
-    {
-      Eigen::Isometry3d result;
-      benchmark::DoNotOptimize(result = isometry * isometry);
-      benchmark::ClobberMemory();
-    }
+    benchmark::DoNotOptimize(result = isometry * isometry);
+    benchmark::ClobberMemory();
   }
 }
 
 // Benchmark time to invert an Eigen::Isometry3d.
 static void inverseIsometry3d(benchmark::State& st)
 {
-  int n_iters = st.range(0);
   Eigen::Isometry3d isometry = createTestIsometry();
   for (auto _ : st)
   {
-    for (int i = 0; i < n_iters; ++i)
-    {
-      Eigen::Isometry3d result;
-      benchmark::DoNotOptimize(result = isometry.inverse());
-      benchmark::ClobberMemory();
-    }
+    Eigen::Isometry3d result;
+    benchmark::DoNotOptimize(result = isometry.inverse());
+    benchmark::ClobberMemory();
   }
 }
 
 // Benchmark time to invert an Eigen::Affine3d(Eigen::Isometry).
 static void inverseAffineIsometry(benchmark::State& st)
 {
-  int n_iters = st.range(0);
   Eigen::Isometry3d isometry = createTestIsometry();
   Eigen::Affine3d affine;
   affine.matrix() = isometry.matrix();
 
   for (auto _ : st)
   {
-    for (int i = 0; i < n_iters; ++i)
-    {
-      Eigen::Affine3d result;
-      benchmark::DoNotOptimize(result = affine.inverse(Eigen::Isometry).affine());
-      benchmark::ClobberMemory();
-    }
+    Eigen::Affine3d result;
+    benchmark::DoNotOptimize(result = affine.inverse(Eigen::Isometry).affine());
+    benchmark::ClobberMemory();
   }
 }
 
 // Benchmark time to invert an Eigen::Affine3d.
 static void inverseAffine(benchmark::State& st)
 {
-  int n_iters = st.range(0);
   Eigen::Isometry3d isometry = createTestIsometry();
   Eigen::Affine3d affine;
   affine.matrix() = isometry.matrix();
 
   for (auto _ : st)
   {
-    for (int i = 0; i < n_iters; ++i)
-    {
-      Eigen::Affine3d result;
-      benchmark::DoNotOptimize(result = affine.inverse().affine());
-      benchmark::ClobberMemory();
-    }
+    Eigen::Affine3d result;
+    benchmark::DoNotOptimize(result = affine.inverse().affine());
+    benchmark::ClobberMemory();
   }
 }
 
 // Benchmark time to invert an Eigen::Matrix4d.
 static void inverseMatrix4d(benchmark::State& st)
 {
-  int n_iters = st.range(0);
   Eigen::Isometry3d isometry = createTestIsometry();
   Eigen::Affine3d affine;
   affine.matrix() = isometry.matrix();
 
   for (auto _ : st)
   {
-    for (int i = 0; i < n_iters; ++i)
-    {
-      Eigen::Affine3d result;
-      benchmark::DoNotOptimize(result = affine.matrix().inverse());
-      benchmark::ClobberMemory();
-    }
+    Eigen::Affine3d result;
+    benchmark::DoNotOptimize(result = affine.matrix().inverse());
+    benchmark::ClobberMemory();
   }
 }
 
@@ -359,14 +351,16 @@ static void kdlJacobian(benchmark::State& st)
   }
 }
 
-BENCHMARK(multiplyAffineTimesMatrix)->Arg(MATRIX_OPS_N_ITERATIONS)->Unit(benchmark::kMillisecond);
-BENCHMARK(multiplyMatrixTimesMatrix)->Arg(MATRIX_OPS_N_ITERATIONS)->Unit(benchmark::kMillisecond);
-BENCHMARK(multiplyIsometryTimesIsometry)->Arg(MATRIX_OPS_N_ITERATIONS)->Unit(benchmark::kMillisecond);
+BENCHMARK(multiplyAffineTimesMatrixNoAlias);
+BENCHMARK(multiplyMatrixTimesMatrixNoAlias);
+BENCHMARK(multiplyIsometryTimesIsometryNoAlias);
+BENCHMARK(multiplyMatrixTimesMatrix);
+BENCHMARK(multiplyIsometryTimesIsometry);
 
-BENCHMARK(inverseIsometry3d)->Arg(MATRIX_OPS_N_ITERATIONS)->Unit(benchmark::kMillisecond);
-BENCHMARK(inverseAffineIsometry)->Arg(MATRIX_OPS_N_ITERATIONS)->Unit(benchmark::kMillisecond);
-BENCHMARK(inverseAffine)->Arg(MATRIX_OPS_N_ITERATIONS)->Unit(benchmark::kMillisecond);
-BENCHMARK(inverseMatrix4d)->Arg(MATRIX_OPS_N_ITERATIONS)->Unit(benchmark::kMillisecond);
+BENCHMARK(inverseIsometry3d);
+BENCHMARK(inverseAffineIsometry);
+BENCHMARK(inverseAffine);
+BENCHMARK(inverseMatrix4d);
 
 BENCHMARK(robotStateConstruct)->RangeMultiplier(10)->Range(100, 10000)->Unit(benchmark::kMillisecond);
 BENCHMARK(robotStateCopy)->RangeMultiplier(10)->Range(100, 10000)->Unit(benchmark::kMillisecond);
