@@ -100,8 +100,6 @@ add_subdirectory(version)
 install(
   TARGETS
     collision_detector_bullet_plugin
-    moveit_acceleration_filter
-    moveit_acceleration_parameters
     moveit_butterworth_filter
     moveit_butterworth_parameters
     moveit_collision_detection
@@ -171,7 +169,6 @@ ament_export_dependencies(
 pluginlib_export_plugin_description_file(moveit_core collision_detector_fcl_description.xml)
 pluginlib_export_plugin_description_file(moveit_core collision_detector_bullet_description.xml)
 pluginlib_export_plugin_description_file(moveit_core filter_plugin_butterworth.xml)
-pluginlib_export_plugin_description_file(moveit_core filter_plugin_acceleration.xml)
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
