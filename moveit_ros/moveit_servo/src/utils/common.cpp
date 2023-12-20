@@ -146,12 +146,13 @@ geometry_msgs::msg::Pose poseFromCartesianDelta(const Eigen::VectorXd& delta_x,
 std::optional<trajectory_msgs::msg::JointTrajectory>
 composeTrajectoryMessage(const servo::Params& servo_params, const std::deque<KinematicState>& joint_cmd_rolling_window)
 {
-  trajectory_msgs::msg::JointTrajectory joint_trajectory;
-
   if (joint_cmd_rolling_window.size() < 3)
   {
-    return joint_trajectory;
+    return {};
   }
+
+  trajectory_msgs::msg::JointTrajectory joint_trajectory;
+
   joint_trajectory.joint_names = joint_cmd_rolling_window.front().joint_names;
   joint_trajectory.points.reserve(joint_cmd_rolling_window.size() + 1);
   joint_trajectory.header.stamp = joint_cmd_rolling_window.front().time;
@@ -191,19 +192,6 @@ composeTrajectoryMessage(const servo::Params& servo_params, const std::deque<Kin
     add_point(joint_trajectory, joint_cmd_rolling_window[i]);
   }
 
-  // add end command stop point in case of large delay or connection loss
-  const auto stopping_time = rclcpp::Duration::from_seconds(servo_params.trajectory_stopping_time);
-  auto last_command = joint_cmd_rolling_window.back();
-  auto end_state = last_command;
-  for (int i = 0; i < last_command.positions.size(); ++i)
-  {
-    end_state.positions[i] = last_command.positions[i] + last_command.velocities[i] * stopping_time.seconds();
-    end_state.velocities[i] = 0;
-    end_state.accelerations[i] = 0;
-    end_state.time = last_command.time + rclcpp::Duration::from_seconds(stopping_time.seconds());
-  }
-  add_point(joint_trajectory, end_state);
-
   return joint_trajectory;
 }
 
@@ -235,10 +223,10 @@ void updateSlidingWindow(KinematicState& next_joint_state, std::deque<KinematicS
 
     Eigen::VectorXd direction_1 = second_last_state.positions - last_state.positions;
     Eigen::VectorXd direction_2 = next_joint_state.positions - last_state.positions;
-    Eigen::VectorXd signs = (direction_1.array() / direction_2.array()).sign();
+    Eigen::VectorXd signs = (direction_1.array().sign() - direction_2.array().sign()).round();
     for (long i = 0; i < last_state.velocities.size(); i++)
     {
-      if (signs[i] > 0)
+      if (signs[i] == 0.0)
       {
         // direction changed
         last_state.velocities[i] = 0;
@@ -262,6 +250,7 @@ void updateSlidingWindow(KinematicState& next_joint_state, std::deque<KinematicS
   }
 
   // add next command
+  next_joint_state.velocities *= 0;
   joint_cmd_rolling_window.push_back(next_joint_state);
 }
 
