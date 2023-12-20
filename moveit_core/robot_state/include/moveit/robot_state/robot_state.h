@@ -527,30 +527,16 @@ public:
     setJointPositions(joint, &position[0]);
   }
 
-  void setJointPositions(const JointModel* joint, const double* position)
-  {
-    memcpy(&position_.at(joint->getFirstVariableIndex()), position, joint->getVariableCount() * sizeof(double));
-    markDirtyJointTransforms(joint);
-    updateMimicJoint(joint);
-  }
+  void setJointPositions(const JointModel* joint, const double* position);
 
   void setJointPositions(const std::string& joint_name, const Eigen::Isometry3d& transform)
   {
     setJointPositions(robot_model_->getJointModel(joint_name), transform);
   }
 
-  void setJointPositions(const JointModel* joint, const Eigen::Isometry3d& transform)
-  {
-    joint->computeVariablePositions(transform, &position_.at(joint->getFirstVariableIndex()));
-    markDirtyJointTransforms(joint);
-    updateMimicJoint(joint);
-  }
+  void setJointPositions(const JointModel* joint, const Eigen::Isometry3d& transform);
 
-  void setJointVelocities(const JointModel* joint, const double* velocity)
-  {
-    has_velocity_ = true;
-    memcpy(&velocity_.at(joint->getFirstVariableIndex()), velocity, joint->getVariableCount() * sizeof(double));
-  }
+  void setJointVelocities(const JointModel* joint, const double* velocity);
 
   void setJointEfforts(const JointModel* joint, const double* effort);
 
@@ -559,40 +545,32 @@ public:
     return getJointPositions(robot_model_->getJointModel(joint_name));
   }
 
-  const double* getJointPositions(const JointModel* joint) const
-  {
-    return &position_.at(joint->getFirstVariableIndex());
-  }
+  // Returns nullptr if `joint` doesn't have any active variables.
+  const double* getJointPositions(const JointModel* joint) const;
 
   const double* getJointVelocities(const std::string& joint_name) const
   {
     return getJointVelocities(robot_model_->getJointModel(joint_name));
   }
 
-  const double* getJointVelocities(const JointModel* joint) const
-  {
-    return &velocity_.at(joint->getFirstVariableIndex());
-  }
+  // Returns nullptr if `joint` doesn't have any active variables.
+  const double* getJointVelocities(const JointModel* joint) const;
 
   const double* getJointAccelerations(const std::string& joint_name) const
   {
     return getJointAccelerations(robot_model_->getJointModel(joint_name));
   }
 
-  const double* getJointAccelerations(const JointModel* joint) const
-  {
-    return &effort_or_acceleration_.at(joint->getFirstVariableIndex());
-  }
+  // Returns nullptr if `joint` doesn't have any active variables.
+  const double* getJointAccelerations(const JointModel* joint) const;
 
   const double* getJointEffort(const std::string& joint_name) const
   {
     return getJointEffort(robot_model_->getJointModel(joint_name));
   }
 
-  const double* getJointEffort(const JointModel* joint) const
-  {
-    return &effort_or_acceleration_.at(joint->getFirstVariableIndex());
-  }
+  // Returns nullptr if `joint` doesn't have any active variables.
+  const double* getJointEffort(const JointModel* joint) const;
 
   /** @} */
 
@@ -1332,17 +1310,7 @@ public:
     return getJointTransform(robot_model_->getJointModel(joint_name));
   }
 
-  const Eigen::Isometry3d& getJointTransform(const JointModel* joint)
-  {
-    const int idx = joint->getJointIndex();
-    unsigned char& dirty = dirty_joint_transforms_[idx];
-    if (dirty)
-    {
-      joint->computeTransform(&position_.at(joint->getFirstVariableIndex()), variable_joint_transforms_[idx]);
-      dirty = 0;
-    }
-    return variable_joint_transforms_[idx];
-  }
+  const Eigen::Isometry3d& getJointTransform(const JointModel* joint);
 
   const Eigen::Isometry3d& getJointTransform(const std::string& joint_name) const
   {
@@ -1392,11 +1360,7 @@ public:
   double distance(const RobotState& other, const JointModelGroup* joint_group) const;
 
   /** \brief Return the sum of joint distances to "other" state. An L1 norm. Only considers active joints. */
-  double distance(const RobotState& other, const JointModel* joint) const
-  {
-    const int idx = joint->getFirstVariableIndex();
-    return joint->distance(&position_.at(idx), &other.position_.at(idx));
-  }
+  double distance(const RobotState& other, const JointModel* joint) const;
 
   /**
    * Interpolate towards "to" state. Mimic joints are correctly updated and flags are set so that FK is recomputed
@@ -1428,13 +1392,7 @@ public:
    * @param state holds the result
    * @param joint interpolate only for this joint
    */
-  void interpolate(const RobotState& to, double t, RobotState& state, const JointModel* joint) const
-  {
-    const int idx = joint->getFirstVariableIndex();
-    joint->interpolate(&position_.at(idx), &to.position_.at(idx), t, &state.position_.at(idx));
-    state.markDirtyJointTransforms(joint);
-    state.updateMimicJoint(joint);
-  }
+  void interpolate(const RobotState& to, double t, RobotState& state, const JointModel* joint) const;
 
   void enforceBounds();
   void enforceBounds(const JointModelGroup* joint_group);
@@ -1444,31 +1402,14 @@ public:
     if (has_velocity_)
       enforceVelocityBounds(joint);
   }
-  void enforcePositionBounds(const JointModel* joint)
-  {
-    if (joint->enforcePositionBounds(&position_.at(joint->getFirstVariableIndex())))
-    {
-      markDirtyJointTransforms(joint);
-      updateMimicJoint(joint);
-    }
-  }
+  void enforcePositionBounds(const JointModel* joint);
 
   /// Call harmonizePosition() for all joints / all joints in group / given joint
   void harmonizePositions();
   void harmonizePositions(const JointModelGroup* joint_group);
-  void harmonizePosition(const JointModel* joint)
-  {
-    if (joint->harmonizePosition(&position_.at(joint->getFirstVariableIndex())))
-    {
-      // no need to mark transforms dirty, as the transform hasn't changed
-      updateMimicJoint(joint);
-    }
-  }
+  void harmonizePosition(const JointModel* joint);
 
-  void enforceVelocityBounds(const JointModel* joint)
-  {
-    joint->enforceVelocityBounds(&velocity_.at(joint->getFirstVariableIndex()));
-  }
+  void enforceVelocityBounds(const JointModel* joint);
 
   bool satisfiesBounds(double margin = 0.0) const;
   bool satisfiesBounds(const JointModelGroup* joint_group, double margin = 0.0) const;
@@ -1751,27 +1692,10 @@ private:
   void markAcceleration();
   void markEffort();
 
-  void updateMimicJoint(const JointModel* joint)
-  {
-    double v = position_[joint->getFirstVariableIndex()];
-    for (const JointModel* jm : joint->getMimicRequests())
-    {
-      position_[jm->getFirstVariableIndex()] = jm->getMimicFactor() * v + jm->getMimicOffset();
-      markDirtyJointTransforms(jm);
-    }
-  }
+  void updateMimicJoint(const JointModel* joint);
 
   /** \brief Update all mimic joints within group */
-  void updateMimicJoints(const JointModelGroup* group)
-  {
-    for (const JointModel* jm : group->getMimicJointModels())
-    {
-      const int fvi = jm->getFirstVariableIndex();
-      position_[fvi] = jm->getMimicFactor() * position_[jm->getMimic()->getFirstVariableIndex()] + jm->getMimicOffset();
-      markDirtyJointTransforms(jm);
-    }
-    markDirtyJointTransforms(group);
-  }
+  void updateMimicJoints(const JointModelGroup* group);
 
   void updateLinkTransformsInternal(const JointModel* start);
 
