@@ -303,7 +303,7 @@ void ServoNode::servoLoop()
          servo_node_start > planning_scene_monitor_->getLastUpdateTime())
   {
     RCLCPP_INFO(node_->get_logger(), "Waiting to receive robot state update.");
-    rclcpp::sleep_for(std::chrono::microseconds(500));
+    rclcpp::sleep_for(std::chrono::seconds(1));
   }
 
   // Get the robot state and joint model group info.
