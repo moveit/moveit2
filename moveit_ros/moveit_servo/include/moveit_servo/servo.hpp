@@ -75,6 +75,7 @@ public:
 
   /**
    * \brief Computes the joint state required to follow the given command.
+   * @param a RobotStatePtr instance used for calculating the joint state.
    * @param command The command to follow, std::variant type, can handle JointJog, Twist and Pose.
    * @return The required joint state.
    */
@@ -117,6 +118,7 @@ public:
 
   /**
    * \brief Extract the state from a RobotStatePtr instance.
+   * @param The RobotStatePtr instance.
    * @return The state of the RobotStatePtr instance.
    */
   KinematicState getRobotState(const moveit::core::RobotStatePtr& robot_state) const;
@@ -182,6 +184,7 @@ private:
   /**
    * \brief Compute the change in joint position required to follow the received command.
    * @param command The incoming servo command.
+   * @param a RobotStatePtr instance used for calculating the command.
    * @return The joint position change required (delta).
    */
   Eigen::VectorXd jointDeltaFromCommand(const ServoInput& command, const moveit::core::RobotStatePtr& robot_state);

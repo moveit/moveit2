@@ -115,7 +115,7 @@ struct KinematicState
 {
   std::vector<std::string> joint_names;
   Eigen::VectorXd positions, velocities, accelerations;
-  rclcpp::Time time;
+  rclcpp::Time time_stamp;
 
   KinematicState(const int num_joints)
   {

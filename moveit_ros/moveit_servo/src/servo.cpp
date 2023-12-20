@@ -284,11 +284,12 @@ bool Servo::validateParams(const servo::Params& servo_params) const
     params_valid = false;
   }
 
-  if (.5 * servo_params.max_expected_latency < servo_params.publish_period)
+  if (0.5 * servo_params.max_expected_latency < servo_params.publish_period)
   {
-    RCLCPP_ERROR(logger_,
-                 "The publish period (%f sec) parameter must be less than 1/2 max expected latency parameter (%f sec).",
-                 servo_params.publish_period, servo_params.max_expected_latency);
+    RCLCPP_ERROR(
+        logger_,
+        "The publish period (%f sec) parameter must be less than 1/2 of the max expected latency parameter (%f sec).",
+        servo_params.publish_period, servo_params.max_expected_latency);
     params_valid = false;
   }
 

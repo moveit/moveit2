@@ -121,7 +121,7 @@ int main(int argc, char* argv[])
   rclcpp::WallRate servo_rate(1 / servo_params.publish_period);
   KinematicState current_state;
   current_state = servo.getCurrentRobotState();
-  current_state.time = demo_node->now();
+  current_state.time_stamp = demo_node->now();
 
   // create command queue to build trajectory message
   std::deque<KinematicState> joint_cmd_rolling_window;
@@ -151,7 +151,7 @@ int main(int argc, char* argv[])
 
     // get next servo command
     joint_state = servo.getNextJointState(robot_state, target_pose);
-    joint_state.time = demo_node->now() + rclcpp::Duration::from_seconds(servo_params.max_expected_latency);
+    joint_state.time_stamp = demo_node->now() + rclcpp::Duration::from_seconds(servo_params.max_expected_latency);
     StatusCode status = servo.getStatus();
     if (status != StatusCode::INVALID)
     {

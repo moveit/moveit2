@@ -110,10 +110,10 @@ geometry_msgs::msg::Pose poseFromCartesianDelta(const Eigen::VectorXd& delta_x,
                                                 const Eigen::Isometry3d& base_to_tip_frame_transform);
 
 /**
- * \brief Create a trajectory message from given joint state. Method optionally returns a trajectory message if one can
- * be created.
+ * \brief Create a trajectory message from a rolling window queue of joint state commands. Method optionally returns a
+ * trajectory message if one can be created.
  * @param servo_params The configuration used by servo, required for setting some field of the trajectory message.
- * @param joint_state The joint state to be added into the trajectory.
+ * @param joint_cmd_rolling_window A rolling window queue of joint state commands.
  * @return The trajectory message.
  */
 std::optional<trajectory_msgs::msg::JointTrajectory>
@@ -124,6 +124,8 @@ composeTrajectoryMessage(const servo::Params& servo_params, const std::deque<Kin
  * of the commands to avoid overshooting.
  * @param next_joint_state The next commanded joint state.
  * @param joint_cmd_rolling_window Queue of containing a rolling window of joint commands.
+ * @param max_expected_latency The next_joint_state will be added to the joint_cmd_rolling_window with a time stamp of
+ * current time plus max_expected_latency.
  */
 void updateSlidingWindow(KinematicState& next_joint_state, std::deque<KinematicState>& joint_cmd_rolling_window,
                          double max_expected_latency);

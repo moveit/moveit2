@@ -305,7 +305,8 @@ void ServoNode::servoLoop()
     RCLCPP_INFO(node_->get_logger(), "Waiting to receive robot state update.");
     rclcpp::sleep_for(std::chrono::seconds(1));
   }
-  last_commanded_state_ = servo_->getCurrentRobotState();
+  KinematicState current_state = servo_->getCurrentRobotState();
+  last_commanded_state_ = current_state;
 
   // Get the robot state and joint model group info.
   moveit::core::RobotStatePtr robot_state = planning_scene_monitor_->getStateMonitor()->getCurrentState();
@@ -321,18 +322,17 @@ void ServoNode::servoLoop()
       continue;
     }
 
-    bool use_trajectory = servo_params_.command_out_type == "trajectory_msgs/JointTrajectory";
-    KinematicState current_state;
-    auto cur_time = node_->now();
+    const bool use_trajectory = servo_params_.command_out_type == "trajectory_msgs/JointTrajectory";
+    const auto cur_time = node_->now();
 
-    if (use_trajectory && !joint_cmd_rolling_window_.empty() && joint_cmd_rolling_window_.back().time > cur_time)
+    if (use_trajectory && !joint_cmd_rolling_window_.empty() && joint_cmd_rolling_window_.back().time_stamp > cur_time)
     {
       current_state = joint_cmd_rolling_window_.back();
     }
     else
     {
       current_state = servo_->getCurrentRobotState();
-      current_state.time = cur_time;
+      current_state.time_stamp = cur_time;
       joint_cmd_rolling_window_.clear();
       joint_cmd_rolling_window_.push_back(current_state);
     }
@@ -367,7 +367,8 @@ void ServoNode::servoLoop()
       if (use_trajectory)
       {
         auto& next_joint_state_value = next_joint_state.value();
-        next_joint_state_value.time = cur_time + rclcpp::Duration::from_seconds(servo_params_.max_expected_latency);
+        next_joint_state_value.time_stamp =
+            cur_time + rclcpp::Duration::from_seconds(servo_params_.max_expected_latency);
         updateSlidingWindow(next_joint_state_value, joint_cmd_rolling_window_, servo_params_.max_expected_latency);
         if (auto msg = composeTrajectoryMessage(servo_params_, joint_cmd_rolling_window_))
         {

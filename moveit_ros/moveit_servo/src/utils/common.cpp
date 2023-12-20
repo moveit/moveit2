@@ -45,6 +45,9 @@ namespace
 constexpr double SCALING_OVERRIDE_THRESHOLD = 0.01;
 // The angle threshold in radians below which a rotation will be considered the identity.
 constexpr double MIN_ANGLE_THRESHOLD = 1E-16;
+// A minimum of 3 points are used to help with interpolation when creating a trjectory messages.
+constexpr int NUM_POINTS_FOR_TRAJ_MSG = 3;
+
 }  // namespace
 
 namespace moveit_servo
@@ -146,7 +149,7 @@ geometry_msgs::msg::Pose poseFromCartesianDelta(const Eigen::VectorXd& delta_x,
 std::optional<trajectory_msgs::msg::JointTrajectory>
 composeTrajectoryMessage(const servo::Params& servo_params, const std::deque<KinematicState>& joint_cmd_rolling_window)
 {
-  if (joint_cmd_rolling_window.size() < 3)
+  if (joint_cmd_rolling_window.size() < NUM_POINTS_FOR_TRAJ_MSG)
   {
     return {};
   }
@@ -155,7 +158,7 @@ composeTrajectoryMessage(const servo::Params& servo_params, const std::deque<Kin
 
   joint_trajectory.joint_names = joint_cmd_rolling_window.front().joint_names;
   joint_trajectory.points.reserve(joint_cmd_rolling_window.size() + 1);
-  joint_trajectory.header.stamp = joint_cmd_rolling_window.front().time;
+  joint_trajectory.header.stamp = joint_cmd_rolling_window.front().time_stamp;
 
   auto add_point = [servo_params](trajectory_msgs::msg::JointTrajectory& joint_trajectory, const KinematicState& state) {
     trajectory_msgs::msg::JointTrajectoryPoint point;
@@ -183,11 +186,11 @@ composeTrajectoryMessage(const servo::Params& servo_params, const std::deque<Kin
         point.accelerations.emplace_back(acc);
       }
     }
-    point.time_from_start = state.time - joint_trajectory.header.stamp;
+    point.time_from_start = state.time_stamp - joint_trajectory.header.stamp;
     joint_trajectory.points.emplace_back(point);
   };
 
-  for (size_t i = 0; i < joint_cmd_rolling_window.size() - 1; i++)
+  for (size_t i = 0; i < joint_cmd_rolling_window.size() - 1; ++i)
   {
     add_point(joint_trajectory, joint_cmd_rolling_window[i]);
   }
@@ -201,13 +204,13 @@ void updateSlidingWindow(KinematicState& next_joint_state, std::deque<KinematicS
   // remove old commands
   const auto active_time_window = rclcpp::Duration::from_seconds(2 * max_expected_latency);
   while (!joint_cmd_rolling_window.empty() &&
-         joint_cmd_rolling_window.front().time < (next_joint_state.time - active_time_window))
+         joint_cmd_rolling_window.front().time_stamp < (next_joint_state.time_stamp - active_time_window))
   {
     joint_cmd_rolling_window.pop_front();
   }
 
   // remove command at end of window if timestamp is the same
-  if (!joint_cmd_rolling_window.empty() && next_joint_state.time == joint_cmd_rolling_window.back().time)
+  if (!joint_cmd_rolling_window.empty() && next_joint_state.time_stamp == joint_cmd_rolling_window.back().time_stamp)
   {
     joint_cmd_rolling_window.pop_back();
   }
@@ -224,7 +227,7 @@ void updateSlidingWindow(KinematicState& next_joint_state, std::deque<KinematicS
     Eigen::VectorXd direction_1 = second_last_state.positions - last_state.positions;
     Eigen::VectorXd direction_2 = next_joint_state.positions - last_state.positions;
     Eigen::VectorXd signs = (direction_1.array().sign() - direction_2.array().sign()).round();
-    for (long i = 0; i < last_state.velocities.size(); i++)
+    for (long i = 0; i < last_state.velocities.size(); ++i)
     {
       if (abs(signs[i]) < 1.5)
       {
@@ -233,8 +236,8 @@ void updateSlidingWindow(KinematicState& next_joint_state, std::deque<KinematicS
       }
       else
       {
-        double delta_time_1 = (next_joint_state.time - last_state.time).seconds();
-        double delta_time_2 = (last_state.time - second_last_state.time).seconds();
+        double delta_time_1 = (next_joint_state.time_stamp - last_state.time_stamp).seconds();
+        double delta_time_2 = (last_state.time_stamp - second_last_state.time_stamp).seconds();
         auto velocity_1 = (next_joint_state.positions[i] - last_state.positions[i]) / delta_time_1;
         auto velocity_2 = (last_state.positions[i] - second_last_state.positions[i]) / delta_time_2;
         if (std::abs(velocity_1) < std::abs(velocity_2))

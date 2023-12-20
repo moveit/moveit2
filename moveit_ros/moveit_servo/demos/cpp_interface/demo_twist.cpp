@@ -105,7 +105,7 @@ int main(int argc, char* argv[])
   while (rclcpp::ok())
   {
     KinematicState joint_state = servo.getNextJointState(robot_state, target_twist);
-    joint_state.time = demo_node->now() + rclcpp::Duration::from_seconds(servo_params.max_expected_latency);
+    joint_state.time_stamp = demo_node->now() + rclcpp::Duration::from_seconds(servo_params.max_expected_latency);
     const StatusCode status = servo.getStatus();
 
     auto current_time = std::chrono::steady_clock::now();
