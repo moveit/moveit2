@@ -197,53 +197,78 @@ bool Servo::validateParams(const servo::Params& servo_params) const
   bool params_valid = true;
   auto robot_state = planning_scene_monitor_->getStateMonitor()->getCurrentState();
   auto joint_model_group = robot_state->getJointModelGroup(servo_params.move_group_name);
+  const std::string check_yaml_string = " Check the parameters YAML file used to launch this node.";
   if (joint_model_group == nullptr)
   {
-    RCLCPP_ERROR_STREAM(logger_, "Invalid move group name: `" << servo_params.move_group_name << '`');
+    RCLCPP_ERROR_STREAM(logger_, "The parameter 'move_group_name': `" << servo_params.move_group_name << '`'
+                                                                      << " is not valid." << check_yaml_string);
     params_valid = false;
   }
 
   if (servo_params.hard_stop_singularity_threshold <= servo_params.lower_singularity_threshold)
   {
-    RCLCPP_ERROR(logger_, "Parameter 'hard_stop_singularity_threshold' "
-                          "should be greater than 'lower_singularity_threshold.' "
-                          "Check the parameters YAML file used to launch this node.");
+    RCLCPP_ERROR_STREAM(logger_, "The parameter 'hard_stop_singularity_threshold' "
+                                 "should be greater than the parameter 'lower_singularity_threshold'. But the "
+                                 "'hard_stop_signularity_threshold' is: '"
+                                     << servo_params.hard_stop_singularity_threshold
+                                     << "' and the 'lower_singularity_threshold' is: '"
+                                     << servo_params.lower_singularity_threshold << "'" << check_yaml_string);
     params_valid = false;
   }
 
   if (!servo_params.publish_joint_positions && !servo_params.publish_joint_velocities &&
       !servo_params.publish_joint_accelerations)
   {
-    RCLCPP_ERROR(logger_, "At least one of publish_joint_positions / "
-                          "publish_joint_velocities / "
-                          "publish_joint_accelerations must be true. "
-                          "Check the parameters YAML file used to launch this node.");
+    RCLCPP_ERROR_STREAM(logger_, "At least one of the parameters: 'publish_joint_positions' / "
+                                 "'publish_joint_velocities' / "
+                                 "'publish_joint_accelerations' must be true. But they are all false."
+                                     << check_yaml_string);
     params_valid = false;
   }
 
   if ((servo_params.command_out_type == "std_msgs/Float64MultiArray") && servo_params.publish_joint_positions &&
       servo_params.publish_joint_velocities)
   {
-    RCLCPP_ERROR(logger_, "When publishing a std_msgs/Float64MultiArray, "
-                          "you must select positions OR velocities."
-                          "Check the parameters YAML file used to launch this node.");
+    RCLCPP_ERROR_STREAM(
+        logger_, "When publishing a std_msgs/Float64MultiArray, "
+                 "either the parameter 'publish_joint_positions' OR the parameter 'publish_joint_velocities' must "
+                 "be set to true. But both are set to false."
+                     << check_yaml_string);
     params_valid = false;
   }
 
   if (servo_params.scene_collision_proximity_threshold < servo_params.self_collision_proximity_threshold)
   {
-    RCLCPP_ERROR(logger_, "Parameter 'self_collision_proximity_threshold' should probably be less "
-                          "than or equal to 'scene_collision_proximity_threshold'."
-                          "Check the parameters YAML file used to launch this node.");
+    RCLCPP_ERROR_STREAM(logger_, "The parameter 'self_collision_proximity_threshold' should probably be less "
+                                 "than or equal to the parameter 'scene_collision_proximity_threshold'. But "
+                                 "'self_collision_proximity_threshold' is: '"
+                                     << servo_params.self_collision_proximity_threshold
+                                     << "' and 'scene_collision_proximity_threshold' is: '"
+                                     << servo_params.scene_collision_proximity_threshold << "'" << check_yaml_string);
     params_valid = false;
   }
 
   if (!servo_params.active_subgroup.empty() && servo_params.active_subgroup != servo_params.move_group_name &&
       !joint_model_group->isSubgroup(servo_params.active_subgroup))
   {
-    RCLCPP_ERROR(logger_,
-                 "The value '%s' Parameter 'active_subgroup' does not name a valid subgroup of joint group '%s'.",
-                 servo_params.active_subgroup.c_str(), servo_params.move_group_name.c_str());
+    RCLCPP_ERROR_STREAM(logger_, "The parameter 'active_subgroup': '"
+                                     << servo_params.active_subgroup
+                                     << "' does not name a valid subgroup of 'joint group': '"
+                                     << servo_params.move_group_name << "'" << check_yaml_string);
+    params_valid = false;
+  }
+  if (servo_params.joint_limit_margins.size() !=
+      robot_state->getJointModelGroup(servo_params.move_group_name)->getActiveVariableCount())
+  {
+    RCLCPP_ERROR_STREAM(
+        logger_,
+        "The parameter 'joint_limit_margins' must have the same number of elements as the number of joints in the "
+        "move group.  The size of 'joint_limit_margins' is '"
+            << servo_params.joint_limit_margins.size() << "' but the number of joints of the move group '"
+            << servo_params.move_group_name << "' is '"
+            << robot_state->getJointModelGroup(servo_params.move_group_name)->getActiveVariableCount() << "'"
+            << check_yaml_string);
+
     params_valid = false;
   }
   if (servo_params.joint_limit_margins.size() !=
