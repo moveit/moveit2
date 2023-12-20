@@ -68,7 +68,7 @@ constexpr double CONSTRAINT_CHECK_DISTANCE = 0.05;
  * optimized as well.
  *
  * @param state_validator_fn      The validator function that tests for binary conditions
- * @param interpolation_step_size The L2 norm distance step used for interpolation
+ * @param interpolation_step_size The L2 norm distance step used for interpolation (disabled when set to 0.0)
  *
  * @return                        Cost function that computes smooth costs for binary validity conditions
  */
@@ -86,46 +86,60 @@ CostFn getCostFunctionFromStateValidator(const StateValidatorFn& state_validator
     // Subsequent invalid states are assumed to have the same cause, so we are keeping track
     // of "invalid windows" which are used for smoothing out the costs per violation cause
     // with a gaussian, penalizing neighboring valid states as well.
-    for (int timestep = 0; timestep < values.cols() - 1; ++timestep)
+    for (int timestep = 0; timestep < values.cols(); ++timestep)
     {
+      // Get state at current timestep and check for validity
+      // The penalty of the validation function is added to the cost of the current timestep
+      // A state is rendered invalid if a cost results from the current validity check or if a penalty is carried over
+      // from the previous iteration
       Eigen::VectorXd current = values.col(timestep);
-      Eigen::VectorXd next = values.col(timestep + 1);
-      const double segment_distance = (next - current).norm();
-      double interpolation_fraction = 0.0;
-      const double interpolation_step = std::min(0.5, interpolation_step_size / segment_distance);
-      bool found_invalid_state = false;
-      double penalty = 0.0;
-      while (!found_invalid_state && interpolation_fraction < 1.0)
-      {
-        Eigen::VectorXd sample_vec = (1 - interpolation_fraction) * current + interpolation_fraction * next;
+      costs(timestep) += state_validator_fn(current);
+      bool found_invalid_state = costs(timestep) > 0.0;
 
-        penalty = state_validator_fn(sample_vec);
-        found_invalid_state = penalty > 0.0;
-        interpolation_fraction += interpolation_step;
+      // If state is valid, interpolate towards the next waypoint if there is one
+      bool continue_interpolation =
+          !found_invalid_state && timestep < (values.cols() - 1) && interpolation_step_size > 0.0;
+      if (continue_interpolation)
+      {
+        Eigen::VectorXd next = values.col(timestep + 1);
+        const double interpolation_step = std::min(0.5, interpolation_step_size / (next - current).norm());
+        for (double interpolation_fraction = interpolation_step; interpolation_fraction < 1.0;
+             interpolation_fraction += interpolation_step)
+        {
+          Eigen::VectorXd sample_vec = (1 - interpolation_fraction) * current + interpolation_fraction * next;
+
+          double penalty = state_validator_fn(sample_vec);
+          found_invalid_state = penalty > 0.0;
+          if (found_invalid_state)
+          {
+            // Apply weighted penalties -> This trajectory is definitely invalid
+            costs(timestep) += (1 - interpolation_fraction) * penalty;
+            costs(timestep + 1) += interpolation_fraction * penalty;
+            break;
+          }
+        }
       }
 
+      // Track groups of invalid states as "invalid windows" for subsequent smoothing
       if (found_invalid_state)
       {
-        // Apply weighted penalties -> This trajectory is definitely invalid
-        costs(timestep) = (1 - interpolation_fraction) * penalty;
-        costs(timestep + 1) = interpolation_fraction * penalty;
+        // Mark solution as invalid
         validity = false;
 
-        // Open new invalid window when this is the first detected invalid state in a group
+        // OPEN new invalid window when this is the first detected invalid state in a group
         if (!in_invalid_window)
         {
-          invalid_windows.emplace_back(timestep, values.cols());
+          invalid_windows.emplace_back(timestep, timestep);
           in_invalid_window = true;
         }
+
+        // Update end of invalid window with the current invalid timestep
+        invalid_windows.back().second = timestep;
       }
       else
       {
-        // Close current invalid window if the current state is valid
-        if (in_invalid_window)
-        {
-          invalid_windows.back().second = timestep - 1;
-          in_invalid_window = false;
-        }
+        // CLOSE current invalid window if the current state is valid
+        in_invalid_window = false;
       }
     }
 
@@ -134,18 +148,31 @@ CostFn getCostFunctionFromStateValidator(const StateValidatorFn& state_validator
     // before and after the violation are penalized as well.
     for (const auto& [start, end] : invalid_windows)
     {
+      // Total cost of invalid states
+      // We are smoothing the exact same total cost over a wider neighborhood
+      const double window_cost = costs(Eigen::seq(start, end)).sum();
+
+      // window size defines 2 sigma of gaussian smoothing kernel
+      // which equals 68.2% of overall cost and about 25% of width
       const double window_size = static_cast<double>(end - start) + 1;
-      const double sigma = window_size / 5.0;
+      const double sigma = std::max(1.0, 0.5 * window_size);
       const double mu = 0.5 * (start + end);
+
       // Iterate over waypoints in the range of +/-sigma (neighborhood)
-      // and add a weighted and continuous cost value for each waypoint
-      // based on a Gaussian distribution.
-      for (auto j = std::max(0l, start - static_cast<long>(sigma));
-           j <= std::min(values.cols() - 1, end + static_cast<long>(sigma)); ++j)
+      // and add a discrete cost value for each waypoint based on a Gaussian
+      // distribution.
+      const long kernel_start = mu - static_cast<long>(sigma) * 4;
+      const long kernel_end = mu + static_cast<long>(sigma) * 4;
+      const long bounded_kernel_start = std::max(0l, kernel_start);
+      const long bounded_kernel_end = std::min(values.cols() - 1, kernel_end);
+      for (auto j = bounded_kernel_start; j <= bounded_kernel_end; ++j)
       {
-        costs(j) +=
-            std::exp(-std::pow(j - mu, 2) / (2 * std::pow(sigma, 2))) / (sigma * std::sqrt(2 * mu)) * window_size;
+        costs(j) = std::exp(-std::pow(j - mu, 2) / (2 * std::pow(sigma, 2))) / (sigma * std::sqrt(2 * M_PI));
       }
+
+      // Normalize values to original total window cost
+      const double cost_sum = costs(Eigen::seq(bounded_kernel_start, bounded_kernel_end)).sum();
+      costs(Eigen::seq(bounded_kernel_start, bounded_kernel_end)) *= window_cost / cost_sum;
     }
 
     return true;
