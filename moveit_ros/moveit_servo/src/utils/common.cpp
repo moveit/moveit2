@@ -226,7 +226,7 @@ void updateSlidingWindow(KinematicState& next_joint_state, std::deque<KinematicS
     Eigen::VectorXd signs = (direction_1.array().sign() - direction_2.array().sign()).round();
     for (long i = 0; i < last_state.velocities.size(); i++)
     {
-      if (signs[i] == 0.0)
+      if (abs(signs[i]) < 1.5)
       {
         // direction changed
         last_state.velocities[i] = 0;
@@ -246,11 +246,11 @@ void updateSlidingWindow(KinematicState& next_joint_state, std::deque<KinematicS
           last_state.velocities[i] = velocity_2;
         }
       }
+      next_joint_state.velocities[i] = last_state.velocities[i];
     }
   }
 
   // add next command
-  next_joint_state.velocities *= 0;
   joint_cmd_rolling_window.push_back(next_joint_state);
 }
 

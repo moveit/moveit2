@@ -342,6 +342,7 @@ KinematicState Servo::haltJoints(const std::vector<int>& joints_to_halt, const K
   {
     // The velocities are initialized to zero by default, so we dont need to set it here.
     bounded_state.positions = current_state.positions;
+    bounded_state.velocities *= 0.0;
   }
   else
   {
@@ -512,8 +513,23 @@ KinematicState Servo::getNextJointState(const moveit::core::RobotStatePtr& robot
     {
       RCLCPP_DEBUG_STREAM(logger_, "Joint velocity limit scaling applied by a factor of " << joint_limit_scale);
     }
-
     target_state.velocities *= joint_limit_scale;
+
+    // Scale down the acceleration based on joint acceleration limit if applicable.
+    // TODO move to function: ApplyAccelerationLimit(...)
+    Eigen::VectorXd accel = (target_state.velocities - current_state.velocities) / (servo_params_.publish_period);
+    double min_scaling_factor = 1.0;
+    for (double val : accel)
+    {
+      // Find the ratio of clamped velocity to original velocity
+      const auto bounded_acc =
+          std::clamp(val, -servo_params_.joint_acceleration_limit, servo_params_.joint_acceleration_limit);
+      if (std::abs(val) > 0.0)
+      {
+        min_scaling_factor = std::min(min_scaling_factor, bounded_acc / val);
+      }
+    }
+    target_state.velocities = current_state.velocities + min_scaling_factor * accel * servo_params_.publish_period;
 
     // Adjust joint position based on scaled down velocity
     target_state.positions = current_state.positions + (target_state.velocities * servo_params_.publish_period);
@@ -650,22 +666,31 @@ std::pair<bool, KinematicState> Servo::smoothHalt(const KinematicState& halt_sta
 {
   bool stopped = false;
   auto target_state = halt_state;
-  const KinematicState current_state = getCurrentRobotState();
 
-  const size_t num_joints = current_state.joint_names.size();
+  // scale target velocities according to acceleration limits
+  double max_speed = target_state.velocities.cwiseAbs().maxCoeff();
+  double scale = 1.0;
+  if (max_speed > 0)
+  {
+    double new_speed = std::max(0.0, max_speed - servo_params_.joint_acceleration_limit * servo_params_.publish_period);
+    scale = new_speed / max_speed;
+  }
+  target_state.velocities *= scale;
+
+  const size_t num_joints = halt_state.joint_names.size();
   for (size_t i = 0; i < num_joints; ++i)
   {
-    const double vel = (target_state.positions[i] - current_state.positions[i]) / servo_params_.publish_period;
-    target_state.velocities[i] = (vel > STOPPED_VELOCITY_EPS) ? vel : 0.0;
+    target_state.positions[i] = halt_state.positions[i] + target_state.velocities[i] * servo_params_.publish_period;
+    const double vel = target_state.velocities[i];
+    target_state.velocities[i] = (std::abs(vel) > STOPPED_VELOCITY_EPS) ? vel : 0.0;
     target_state.accelerations[i] =
-        (target_state.velocities[i] - current_state.velocities[i]) / servo_params_.publish_period;
+        (target_state.velocities[i] - halt_state.velocities[i]) / servo_params_.publish_period;
   }
 
   doSmoothing(target_state);
 
   // If all velocities are near zero, robot has decelerated to a stop.
-  stopped =
-      (std::accumulate(target_state.velocities.begin(), target_state.velocities.end(), 0.0) <= STOPPED_VELOCITY_EPS);
+  stopped = (target_state.velocities.cwiseAbs().array() < STOPPED_VELOCITY_EPS).all();
 
   return std::make_pair(stopped, target_state);
 }

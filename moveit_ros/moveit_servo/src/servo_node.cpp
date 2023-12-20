@@ -305,6 +305,7 @@ void ServoNode::servoLoop()
     RCLCPP_INFO(node_->get_logger(), "Waiting to receive robot state update.");
     rclcpp::sleep_for(std::chrono::seconds(1));
   }
+  last_commanded_state_ = servo_->getCurrentRobotState();
 
   // Get the robot state and joint model group info.
   moveit::core::RobotStatePtr robot_state = planning_scene_monitor_->getStateMonitor()->getCurrentState();
@@ -324,7 +325,7 @@ void ServoNode::servoLoop()
     KinematicState current_state;
     auto cur_time = node_->now();
 
-    if (use_trajectory && !joint_cmd_rolling_window_.empty())
+    if (use_trajectory && !joint_cmd_rolling_window_.empty() && joint_cmd_rolling_window_.back().time > cur_time)
     {
       current_state = joint_cmd_rolling_window_.back();
     }
@@ -332,6 +333,7 @@ void ServoNode::servoLoop()
     {
       current_state = servo_->getCurrentRobotState();
       current_state.time = cur_time;
+      joint_cmd_rolling_window_.clear();
       joint_cmd_rolling_window_.push_back(current_state);
     }
 
@@ -357,11 +359,6 @@ void ServoNode::servoLoop()
     {
       new_joint_jog_msg_ = new_twist_msg_ = new_pose_msg_ = false;
       RCLCPP_WARN_STREAM(node_->get_logger(), "Command type has not been set, cannot accept input");
-    }
-    else if (use_trajectory)
-    {
-      next_joint_state = joint_cmd_rolling_window_.back();
-      next_joint_state->velocities = Eigen::VectorXd::Zero(next_joint_state->velocities.size());
     }
 
     if (next_joint_state && (servo_->getStatus() != StatusCode::INVALID) &&

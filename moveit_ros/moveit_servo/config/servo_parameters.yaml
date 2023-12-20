@@ -34,17 +34,6 @@ servo:
     }
   }
 
-  trajectory_stopping_time: {
-    type: double,
-    read_only: true,
-    default_value: 0.25,
-    description: "The amount of time the robot will take to stop in case the servo node loses connection [seconds]. \
-                  Only applicable when command_out_type is set to trajectory_msgs/JointTrajectory.",
-    validation: {
-      gt<>: 0.0
-    }
-}
-
   move_group_name: {
     type: string,
     read_only: true,
@@ -222,7 +211,7 @@ servo:
                   this should be set to false"
   }
 
-############################### SMOOTHING PLUGIN ###############################
+############################### SMOOTHING         ###############################
 
   use_smoothing: {
     type: bool,
@@ -237,6 +226,18 @@ servo:
     default_value: "online_signal_smoothing::ButterworthFilterPlugin",
     description: "The name of the smoothing plugin to be used"
   }
+
+  joint_acceleration_limit: {
+    type: double,
+    read_only: false,
+    default_value: 10.0,
+    description: "The acceleration limit [m/s^2] for the robot's joints. Lowering this value will generate smoother \
+                  motion and longer ramp up/down times",
+      validation: {
+        gt<>: 0.0
+      }
+  }
+
 
 ############################# COLLISION MONITOR ################################
 
