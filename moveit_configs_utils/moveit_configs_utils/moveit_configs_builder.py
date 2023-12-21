@@ -135,6 +135,11 @@ class MoveItConfigs:
         return parameters
 
 
+# TODO: add `description_package` argument, alongside the `moveit_package` argument.
+# TODO: don't assume relative path of sdrf/urdf.
+# TODO: instead of assuming only a description filepath, instead assume optional robot_description dict being passed in 
+# since we usually need to load it in before getting to the moveit config builder (for example testing the xacro in rviz (robot_state_publisher),
+# to set any xacro arguments, etc), so this will allow more flexible and extensible launch files. 
 class MoveItConfigsBuilder(ParameterBuilder):
     __moveit_configs: MoveItConfigs
     __robot_name: str
@@ -155,16 +160,19 @@ class MoveItConfigsBuilder(ParameterBuilder):
         robot_description="robot_description",
         package_name: Optional[str] = None,
     ):
+        # TODO: don't assume naming
         super().__init__(package_name or (robot_name + "_moveit_config"))
         self.__moveit_configs = MoveItConfigs(package_path=self._package_path)
         self.__robot_name = robot_name
         setup_assistant_file = self._package_path / ".setup_assistant"
 
+        # TODO: get rid of all these double __ functions? They seem super error prone.
         self.__urdf_package = None
         self.__urdf_file_path = None
         self.__urdf_xacro_args = None
         self.__srdf_file_path = None
 
+        # TODO: don't assume this naming scheme (i don't like it). (pass in description file)
         modified_urdf_path = Path("config") / (self.__robot_name + ".urdf.xacro")
         if (self._package_path / modified_urdf_path).exists():
             self.__urdf_package = self._package_path
@@ -190,15 +198,18 @@ class MoveItConfigsBuilder(ParameterBuilder):
                 self.__srdf_file_path = Path(srdf_config["relative_path"])
 
         if not self.__urdf_package or not self.__urdf_file_path:
+            # TODO: what is this formatting?
             logging.warning(
                 f"\x1b[33;21mCannot infer URDF from `{self._package_path}`. -- using config/{robot_name}.urdf\x1b[0m"
             )
+            # TODO: no!
             self.__urdf_package = self._package_path
             self.__urdf_file_path = self.__config_dir_path / (
                 self.__robot_name + ".urdf"
             )
 
         if not self.__srdf_file_path:
+            # TODO: what is this formatting?
             logging.warning(
                 f"\x1b[33;21mCannot infer SRDF from `{self._package_path}`. -- using config/{robot_name}.srdf\x1b[0m"
             )
@@ -206,8 +217,11 @@ class MoveItConfigsBuilder(ParameterBuilder):
                 self.__robot_name + ".srdf"
             )
 
+        # TODO: Why don't we use the robot_description function
         self.__robot_description = robot_description
 
+    # TODO: you need to pass a filepath to this when you set a path. This needs to take an optional config path so we can
+    # specify the package directory without calling a custom `get_package_share_directory` when we pass into this function.
     def robot_description(
         self,
         file_path: Optional[str] = None,
@@ -235,6 +249,7 @@ class MoveItConfigsBuilder(ParameterBuilder):
                     )
                 }
             except ParameterBuilderFileNotFoundError as e:
+                # TODO: what is this formatting?
                 logging.warning(f"\x1b[33;21m{e}\x1b[0m")
                 logging.warning(
                     f"\x1b[33;21mThe robot description will be loaded from /robot_description topic \x1b[0m"
@@ -242,6 +257,7 @@ class MoveItConfigsBuilder(ParameterBuilder):
 
         else:
             self.__moveit_configs.robot_description = {
+                # TODO: Do we really need to do this parse again? or is this the only one for moveit?
                 self.__robot_description: ParameterValue(
                     Xacro(str(robot_description_file_path), mappings=mappings),
                     value_type=str,
@@ -260,7 +276,7 @@ class MoveItConfigsBuilder(ParameterBuilder):
         :param mappings: mappings to be passed when loading the xacro file.
         :return: Instance of MoveItConfigsBuilder with robot_description_semantic loaded.
         """
-
+        # TODO: can we not assume _semantic naming scheme?
         if (mappings is None) or all(
             (isinstance(key, str) and isinstance(value, str))
             for key, value in mappings.items()
@@ -291,6 +307,7 @@ class MoveItConfigsBuilder(ParameterBuilder):
         :param file_path: Absolute or relative path to the kinematics yaml file (w.r.t. robot_name_moveit_config).
         :return: Instance of MoveItConfigsBuilder with robot_description_kinematics loaded.
         """
+        # TODO: can we not assume _kinematics naming scheme?
         self.__moveit_configs.robot_description_kinematics = {
             self.__robot_description
             + "_kinematics": load_yaml(
@@ -306,6 +323,7 @@ class MoveItConfigsBuilder(ParameterBuilder):
         :param file_path: Absolute or relative path to the joint limits yaml file (w.r.t. robot_name_moveit_config).
         :return: Instance of MoveItConfigsBuilder with robot_description_planning loaded.
         """
+        # TODO: can we not assume _planning naming scheme?
         self.__moveit_configs.joint_limits = {
             self.__robot_description
             + "_planning": load_yaml(
@@ -321,6 +339,7 @@ class MoveItConfigsBuilder(ParameterBuilder):
         :param file_path: Absolute or relative path to the MoveItCpp yaml file (w.r.t. robot_name_moveit_config).
         :return: Instance of MoveItConfigsBuilder with moveit_cpp loaded.
         """
+        # TODO: other default
         self.__moveit_configs.moveit_cpp = load_yaml(
             self._package_path
             / (file_path or self.__config_dir_path / "moveit_cpp.yaml")
@@ -345,6 +364,7 @@ class MoveItConfigsBuilder(ParameterBuilder):
         # Find the most likely controller params as needed
         if file_path is None:
             config_folder = self._package_path / self.__config_dir_path
+            # TODO _controller.yaml? what is that regular expression stuff
             controller_pattern = re.compile("^(.*)_controllers.yaml$")
             possible_names = get_pattern_matches(config_folder, controller_pattern)
             if not possible_names:
@@ -390,6 +410,7 @@ class MoveItConfigsBuilder(ParameterBuilder):
         publish_robot_description_semantic: bool = False,
     ):
         self.__moveit_configs.planning_scene_monitor = {
+            # TODO: edit the comment below this. 
             # TODO: Fix parameter namespace upstream -- see planning_scene_monitor.cpp:262
             # "planning_scene_monitor": {
             "publish_planning_scene": publish_planning_scene,
@@ -413,8 +434,6 @@ class MoveItConfigsBuilder(ParameterBuilder):
         )
         if sensors_path.exists():
             sensors_data = load_yaml(sensors_path)
-            # TODO(mikeferguson): remove the second part of this check once
-            # https://github.com/ros-planning/moveit_resources/pull/141 has made through buildfarm
             if len(sensors_data["sensors"]) > 0 and sensors_data["sensors"][0]:
                 self.__moveit_configs.sensors_3d = sensors_data
         return self
@@ -522,7 +541,7 @@ class MoveItConfigsBuilder(ParameterBuilder):
             self.sensors_3d()
         if not self.__moveit_configs.joint_limits:
             self.joint_limits()
-        # TODO(JafarAbdi): We should have a default moveit_cpp.yaml as port of a moveit config package
+        # TODO(JafarAbdi): We should have a default moveit_cpp.yaml as part of a moveit config package
         # if not self.__moveit_configs.moveit_cpp:
         #     self.moveit_cpp()
         if "pilz_industrial_motion_planner" in self.__moveit_configs.planning_pipelines:
