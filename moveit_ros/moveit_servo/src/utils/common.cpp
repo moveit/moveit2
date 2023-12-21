@@ -232,7 +232,7 @@ void updateSlidingWindow(KinematicState& next_joint_state, std::deque<KinematicS
     {
       // check if the direction have changed. `signs` will either have -2, +2 meaning a flat line, -1, 1 meaning a
       // rotated L shape, or 0 meaning a v-shape.
-      if (abs(signs[i]) < 1.5)
+      if (abs(signs[i]) == 0.0)
       {
         // direction changed
         last_state.velocities[i] = 0;
