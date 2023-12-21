@@ -120,7 +120,7 @@ geometry_msgs::msg::Pose poseFromCartesianDelta(const Eigen::VectorXd& delta_x,
 
   // Get a transformation matrix with desired orientation change
   Eigen::Isometry3d tf_rot_delta(Eigen::Isometry3d::Identity());
-  Eigen::Vector3d rot_vec = delta_x.block<3, 1>(3, 0, 3, 1);
+  const Eigen::Vector3d rot_vec = delta_x.block<3, 1>(3, 0, 3, 1);
   double angle = rot_vec.norm();
   if (angle > MIN_ANGLE_THRESHOLD)
   {
@@ -165,6 +165,7 @@ composeTrajectoryMessage(const servo::Params& servo_params, const std::deque<Kin
     size_t num_joints = state.positions.size();
     point.positions.reserve(num_joints);
     point.velocities.reserve(num_joints);
+    point.accelerations.reserve(num_joints);
     if (servo_params.publish_joint_positions)
     {
       for (const auto& pos : state.positions)
@@ -229,6 +230,8 @@ void updateSlidingWindow(KinematicState& next_joint_state, std::deque<KinematicS
     Eigen::VectorXd signs = (direction_1.array().sign() - direction_2.array().sign()).round();
     for (long i = 0; i < last_state.velocities.size(); ++i)
     {
+      // check if the direction have changed. `signs` will either have -2, +2 meaning a flat line, -1, 1 meaning a
+      // rotated L shape, or 0 meaning a v-shape.
       if (abs(signs[i]) < 1.5)
       {
         // direction changed
@@ -236,18 +239,11 @@ void updateSlidingWindow(KinematicState& next_joint_state, std::deque<KinematicS
       }
       else
       {
-        double delta_time_1 = (next_joint_state.time_stamp - last_state.time_stamp).seconds();
-        double delta_time_2 = (last_state.time_stamp - second_last_state.time_stamp).seconds();
-        auto velocity_1 = (next_joint_state.positions[i] - last_state.positions[i]) / delta_time_1;
-        auto velocity_2 = (last_state.positions[i] - second_last_state.positions[i]) / delta_time_2;
-        if (std::abs(velocity_1) < std::abs(velocity_2))
-        {
-          last_state.velocities[i] = velocity_1;
-        }
-        else
-        {
-          last_state.velocities[i] = velocity_2;
-        }
+        const double delta_time_1 = (next_joint_state.time_stamp - last_state.time_stamp).seconds();
+        const double delta_time_2 = (last_state.time_stamp - second_last_state.time_stamp).seconds();
+        const auto velocity_1 = (next_joint_state.positions[i] - last_state.positions[i]) / delta_time_1;
+        const auto velocity_2 = (last_state.positions[i] - second_last_state.positions[i]) / delta_time_2;
+        last_state.velocities[i] = (std::abs(velocity_1) < std::abs(velocity_2)) ? velocity_1 : velocity_2;
       }
       next_joint_state.velocities[i] = last_state.velocities[i];
     }

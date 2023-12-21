@@ -87,8 +87,8 @@ int main(int argc, char* argv[])
   // Set the command type for servo.
   servo.setCommandType(CommandType::TWIST);
 
-  // Move end effector in the +z direction at 10 cm/s
-  // while turning around z axis in the +ve direction at 0.5 rad/s
+  // Move end effector in the +z direction at 5 cm/s
+  // while turning around z axis in the +ve direction at 0.4 rad/s
   TwistCommand target_twist{ "panda_link0", { 0.0, 0.0, 0.05, 0.0, 0.0, 0.4 } };
 
   // Frequency at which commands will be sent to the robot controller.
@@ -118,7 +118,7 @@ int main(int argc, char* argv[])
     else if (status != StatusCode::INVALID)
     {
       updateSlidingWindow(joint_state, joint_cmd_rolling_window, servo_params.max_expected_latency);
-      if (auto msg = composeTrajectoryMessage(servo_params, joint_cmd_rolling_window))
+      if (const auto msg = composeTrajectoryMessage(servo_params, joint_cmd_rolling_window))
       {
         trajectory_outgoing_cmd_pub->publish(msg.value());
       }

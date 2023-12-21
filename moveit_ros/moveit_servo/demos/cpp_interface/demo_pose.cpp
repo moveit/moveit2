@@ -156,7 +156,7 @@ int main(int argc, char* argv[])
     if (status != StatusCode::INVALID)
     {
       updateSlidingWindow(joint_state, joint_cmd_rolling_window, servo_params.max_expected_latency);
-      if (auto msg = composeTrajectoryMessage(servo_params, joint_cmd_rolling_window))
+      if (const auto msg = composeTrajectoryMessage(servo_params, joint_cmd_rolling_window))
       {
         trajectory_outgoing_cmd_pub->publish(msg.value());
       }
