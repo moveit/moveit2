@@ -33,8 +33,8 @@ smoothing_filter_plugin_name: "online_signal_smoothing::ButterworthFilterPlugin"
 # which other nodes can use as a source for information about the planning environment.
 # NOTE: If a different node in your system is responsible for the "primary" planning scene instance (e.g. the MoveGroup node),
 # then is_primary_planning_scene_monitor needs to be set to false.
-check_octomap_collisions: false
 is_primary_planning_scene_monitor: true
+check_octomap_collisions: false  # Check collision against the octomap (if a 3D sensor plugin is available)
 
 ## MoveIt properties
 move_group_name:  panda_arm  # Often 'manipulator' or 'arm'
