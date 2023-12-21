@@ -125,9 +125,9 @@ static void multiplyIsometryTimesIsometry(benchmark::State& st)
 static void inverseIsometry3d(benchmark::State& st)
 {
   Eigen::Isometry3d isometry = createTestIsometry();
+  Eigen::Isometry3d result;
   for (auto _ : st)
   {
-    Eigen::Isometry3d result;
     benchmark::DoNotOptimize(result = isometry.inverse());
     benchmark::ClobberMemory();
   }
@@ -136,14 +136,11 @@ static void inverseIsometry3d(benchmark::State& st)
 // Benchmark time to invert an Eigen::Affine3d(Eigen::Isometry).
 static void inverseAffineIsometry(benchmark::State& st)
 {
-  Eigen::Isometry3d isometry = createTestIsometry();
-  Eigen::Affine3d affine;
-  affine.matrix() = isometry.matrix();
-
+  Eigen::Affine3d affine = createTestIsometry();
+  Eigen::Affine3d result;
   for (auto _ : st)
   {
-    Eigen::Affine3d result;
-    benchmark::DoNotOptimize(result = affine.inverse(Eigen::Isometry).affine());
+    benchmark::DoNotOptimize(result = affine.inverse(Eigen::Isometry));
     benchmark::ClobberMemory();
   }
 }
@@ -151,14 +148,11 @@ static void inverseAffineIsometry(benchmark::State& st)
 // Benchmark time to invert an Eigen::Affine3d.
 static void inverseAffine(benchmark::State& st)
 {
-  Eigen::Isometry3d isometry = createTestIsometry();
-  Eigen::Affine3d affine;
-  affine.matrix() = isometry.matrix();
-
+  Eigen::Affine3d affine = createTestIsometry();
+  Eigen::Affine3d result;
   for (auto _ : st)
   {
-    Eigen::Affine3d result;
-    benchmark::DoNotOptimize(result = affine.inverse().affine());
+    benchmark::DoNotOptimize(result = affine.inverse());
     benchmark::ClobberMemory();
   }
 }
@@ -166,13 +160,10 @@ static void inverseAffine(benchmark::State& st)
 // Benchmark time to invert an Eigen::Matrix4d.
 static void inverseMatrix4d(benchmark::State& st)
 {
-  Eigen::Isometry3d isometry = createTestIsometry();
-  Eigen::Affine3d affine;
-  affine.matrix() = isometry.matrix();
-
+  Eigen::Affine3d affine = createTestIsometry();
+  Eigen::Affine3d result;
   for (auto _ : st)
   {
-    Eigen::Affine3d result;
     benchmark::DoNotOptimize(result = affine.matrix().inverse());
     benchmark::ClobberMemory();
   }
