@@ -232,8 +232,8 @@ std::optional<Path> Path::create(const std::vector<Eigen::VectorXd>& waypoints, 
           outcoming_vector_norm > std::numeric_limits<double>::epsilon())
       {
         double cos_angle = incoming_vector.dot(outcoming_vector) / (incoming_vector_norm * outcoming_vector_norm);
-        constexpr double kAngleTolerance = 1e-05;
-        if (cos_angle <= -1.0 + kAngleTolerance)
+        constexpr double ANGLE_TOLERANCE = 1e-05;
+        if (cos_angle <= -1.0 + ANGLE_TOLERANCE)
         {
           RCLCPP_ERROR(getLogger(),
                        "The path requires a 180 deg. turn, which is not supported by the current implementation.");
