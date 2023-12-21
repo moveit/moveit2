@@ -66,6 +66,18 @@ from launch_ros.parameter_descriptions import ParameterValue
 moveit_configs_utils_path = Path(get_package_share_directory("moveit_configs_utils"))
 
 
+# Function to colorize log messages
+def colorize_log(level, message):
+    colors = {
+        "DEBUG": "\x1b[34;21m"     # Blue
+        "INFO": "\x1b[32;21m",     # Green
+        "WARNING": "\x1b[33;21m",  # Yellow
+        "ERROR": "\x1b[31;21m",    # Red
+    }
+    reset_code = "\x1b[0m"
+    return f"{colors.get(level, '')}{message}{reset_code}"
+
+# TODO: lets do away with this?
 def get_pattern_matches(folder, pattern):
     """Given all the files in the folder, find those that match the pattern.
 
@@ -198,9 +210,8 @@ class MoveItConfigsBuilder(ParameterBuilder):
                 self.__srdf_file_path = Path(srdf_config["relative_path"])
 
         if not self.__urdf_package or not self.__urdf_file_path:
-            # TODO: what is this formatting?
             logging.warning(
-                f"\x1b[33;21mCannot infer URDF from `{self._package_path}`. -- using config/{robot_name}.urdf\x1b[0m"
+                colorize_log("WARNING", f"Cannot infer URDF from `{self._package_path}`. -- using config/{robot_name}.urdf")
             )
             # TODO: no!
             self.__urdf_package = self._package_path
@@ -209,9 +220,8 @@ class MoveItConfigsBuilder(ParameterBuilder):
             )
 
         if not self.__srdf_file_path:
-            # TODO: what is this formatting?
             logging.warning(
-                f"\x1b[33;21mCannot infer SRDF from `{self._package_path}`. -- using config/{robot_name}.srdf\x1b[0m"
+                colorize_log("WARNING", f"Cannot infer SRDF from `{self._package_path}`. -- using config/{robot_name}.srdf")
             )
             self.__srdf_file_path = self.__config_dir_path / (
                 self.__robot_name + ".srdf"
@@ -249,11 +259,8 @@ class MoveItConfigsBuilder(ParameterBuilder):
                     )
                 }
             except ParameterBuilderFileNotFoundError as e:
-                # TODO: what is this formatting?
-                logging.warning(f"\x1b[33;21m{e}\x1b[0m")
-                logging.warning(
-                    f"\x1b[33;21mThe robot description will be loaded from /robot_description topic \x1b[0m"
-                )
+                logging.warning(colorize_log("WARNING", str(e)))
+                logging.warning(colorize_log("WARNING", "The robot description will be loaded from /robot_description topic"))
 
         else:
             self.__moveit_configs.robot_description = {
@@ -369,9 +376,10 @@ class MoveItConfigsBuilder(ParameterBuilder):
             possible_names = get_pattern_matches(config_folder, controller_pattern)
             if not possible_names:
                 # Warn the user instead of raising exception
+                # TODO: 33;20 doesn't usually do anything.
                 logging.warning(
-                    "\x1b[33;20mtrajectory_execution: `Parameter file_path is undefined "
-                    f"and no matches for {config_folder}/*_controllers.yaml\x1b[0m"
+                    colorize_log("WARNING",
+                        "trajectory_execution: `Parameter file_path is undefined and no matches for {config_folder}/*_controllers.yaml")
                 )
             else:
                 chosen_name = None
@@ -508,7 +516,7 @@ class MoveItConfigsBuilder(ParameterBuilder):
         )
         if deprecated_path.exists():
             logging.warning(
-                f"\x1b[33;21mcartesian_limits.yaml is deprecated, please rename to pilz_cartesian_limits.yaml\x1b[0m"
+                colorize_log("WARNING", "cartesian_limits.yaml is deprecated, please rename to pilz_cartesian_limits.yaml")
             )
 
         self.__moveit_configs.pilz_cartesian_limits = {
