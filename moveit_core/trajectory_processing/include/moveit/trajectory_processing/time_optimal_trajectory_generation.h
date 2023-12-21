@@ -49,7 +49,7 @@ namespace trajectory_processing
 // The intermediate waypoints of the input path need to be blended so that the entire path is diffentiable.
 // This constant defines the maximum deviation allowed at those intermediate waypoints, in radians for revolute joints,
 // or meters for prismatic joints.
-constexpr double kDefaultPathTolerance = 0.1;
+constexpr double DEFAULT_PATH_TOLERANCE = 0.1;
 
 enum LimitType
 {
@@ -89,8 +89,8 @@ class Path
 public:
   // Create a Path from a vector of waypoints and a maximum deviation to tolerate at the intermediate waypoints.
   // The algorithm needs max_deviation to be greater than zero so that the path is differentiable.
-  static std::optional<Path> Create(const std::vector<Eigen::VectorXd>& waypoint,
-                                    double max_deviation = kDefaultPathTolerance);
+  static std::optional<Path> create(const std::vector<Eigen::VectorXd>& waypoint,
+                                    double max_deviation = DEFAULT_PATH_TOLERANCE);
 
   // Copy constructor.
   Path(const Path& path);
@@ -111,7 +111,7 @@ public:
   std::list<std::pair<double, bool>> getSwitchingPoints() const;
 
 private:
-  // Default constructor private to prevent misuse. Use `Create` instead to create a Path object.
+  // Default constructor private to prevent misuse. Use `create` instead to create a Path object.
   Path() = default;
 
   PathSegment* getPathSegment(double& s) const;
@@ -126,7 +126,7 @@ class Trajectory
 public:
   /// @brief Generates a time-optimal trajectory.
   /// @returns std::nullopt if the trajectory couldn't be parameterized.
-  static std::optional<Trajectory> Create(const Path& path, const Eigen::VectorXd& max_velocity,
+  static std::optional<Trajectory> create(const Path& path, const Eigen::VectorXd& max_velocity,
                                           const Eigen::VectorXd& max_acceleration, double time_step = 0.001);
 
   /// @brief Returns the optimal duration of the trajectory
@@ -193,7 +193,7 @@ MOVEIT_CLASS_FORWARD(TimeOptimalTrajectoryGeneration);
 class TimeOptimalTrajectoryGeneration : public TimeParameterization
 {
 public:
-  TimeOptimalTrajectoryGeneration(const double path_tolerance = kDefaultPathTolerance, const double resample_dt = 0.1,
+  TimeOptimalTrajectoryGeneration(const double path_tolerance = DEFAULT_PATH_TOLERANCE, const double resample_dt = 0.1,
                                   const double min_angle_change = 0.001);
 
   // clang-format off

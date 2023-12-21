@@ -83,10 +83,10 @@ TEST(time_optimal_trajectory_generation, test1)
   Eigen::VectorXd max_accelerations(4);
   max_accelerations << 0.00249, 0.00249, 0.00249, 0.00249;
 
-  auto path_maybe = Path::Create(waypoints, 100.0);
+  auto path_maybe = Path::create(waypoints, 100.0);
   ASSERT_TRUE(path_maybe.has_value());
 
-  auto trajectory_maybe = Trajectory::Create(*path_maybe, max_velocities, max_accelerations, 10.0);
+  auto trajectory_maybe = Trajectory::create(*path_maybe, max_velocities, max_accelerations, 10.0);
   ASSERT_TRUE(trajectory_maybe.has_value());
   const Trajectory& trajectory = trajectory_maybe.value();
 
@@ -131,10 +131,10 @@ TEST(time_optimal_trajectory_generation, test2)
   Eigen::VectorXd max_accelerations(4);
   max_accelerations << 0.002, 0.002, 0.002, 0.002;
 
-  auto path_maybe = Path::Create(waypoints, 100.0);
+  auto path_maybe = Path::create(waypoints, 100.0);
   ASSERT_TRUE(path_maybe.has_value());
 
-  auto trajectory_maybe = Trajectory::Create(*path_maybe, max_velocities, max_accelerations, 10.0);
+  auto trajectory_maybe = Trajectory::create(*path_maybe, max_velocities, max_accelerations, 10.0);
   ASSERT_TRUE(trajectory_maybe.has_value());
   const Trajectory& trajectory = trajectory_maybe.value();
 
@@ -179,10 +179,10 @@ TEST(time_optimal_trajectory_generation, test3)
   Eigen::VectorXd max_accelerations(4);
   max_accelerations << 0.002, 0.002, 0.002, 0.002;
 
-  auto path_maybe = Path::Create(waypoints, 100.0);
+  auto path_maybe = Path::create(waypoints, 100.0);
   ASSERT_TRUE(path_maybe.has_value());
 
-  auto trajectory_maybe = Trajectory::Create(*path_maybe, max_velocities, max_accelerations);
+  auto trajectory_maybe = Trajectory::create(*path_maybe, max_velocities, max_accelerations);
   ASSERT_TRUE(trajectory_maybe.has_value());
   const Trajectory& trajectory = trajectory_maybe.value();
 
@@ -300,10 +300,10 @@ TEST(time_optimal_trajectory_generation, testLargeAccel)
                        4.7292792634680003;
   // clang-format on
 
-  auto path_maybe = Path::Create(waypoints, path_tolerance);
+  auto path_maybe = Path::create(waypoints, path_tolerance);
   ASSERT_TRUE(path_maybe.has_value());
 
-  auto trajectory_maybe = Trajectory::Create(*path_maybe, max_velocities, max_accelerations, 0.001);
+  auto trajectory_maybe = Trajectory::create(*path_maybe, max_velocities, max_accelerations, 0.001);
   ASSERT_TRUE(trajectory_maybe.has_value());
   const Trajectory& parameterized = trajectory_maybe.value();
 
@@ -338,10 +338,10 @@ TEST(time_optimal_trajectory_generation, AccelerationLimitIsRespected)
   Eigen::VectorXd max_velocities = Eigen::VectorXd::Constant(3, 0.1);
   Eigen::VectorXd max_accelerations = Eigen::VectorXd::Constant(3, 0.5);
 
-  auto path_maybe = Path::Create(waypoints, path_tolerance);
+  auto path_maybe = Path::create(waypoints, path_tolerance);
   ASSERT_TRUE(path_maybe.has_value());
 
-  auto trajectory_maybe = Trajectory::Create(*path_maybe, max_velocities, max_accelerations, 0.001);
+  auto trajectory_maybe = Trajectory::create(*path_maybe, max_velocities, max_accelerations, 0.001);
   ASSERT_TRUE(trajectory_maybe.has_value());
   const Trajectory& parameterized = trajectory_maybe.value();
 
@@ -359,7 +359,7 @@ TEST(time_optimal_trajectory_generation, AccelerationLimitIsRespected)
 }
 
 // A path that requires a full 180 degree turn at any point is not supported by the current implementation.
-// Path::Create() should fail.
+// Path::create() should fail.
 TEST(time_optimal_trajectory_generation, PathMakes180DegreeTurn)
 {
   // Waypoints.
@@ -368,7 +368,7 @@ TEST(time_optimal_trajectory_generation, PathMakes180DegreeTurn)
   waypoints.push_back(Eigen::Vector3d(1.0, 0.0, 0.0));
   waypoints.push_back(Eigen::Vector3d(0.0, 0.0, 0.0));
 
-  EXPECT_FALSE(Path::Create(waypoints, /*path_tolerance=*/0.01));
+  EXPECT_FALSE(Path::create(waypoints, /*path_tolerance=*/0.01));
 }
 
 // Test parameterizing a trajectory would always produce a trajectory with output end waypoint same as the input end
@@ -578,10 +578,10 @@ TEST(time_optimal_trajectory_generation, testSingleDofDiscontinuity)
   Eigen::VectorXd max_accelerations(1);
   max_accelerations << 28.0;
 
-  auto path_maybe = Path::Create(waypoints, 0.1 /* path tolerance */);
+  auto path_maybe = Path::create(waypoints, 0.1 /* path tolerance */);
   ASSERT_TRUE(path_maybe.has_value());
 
-  auto trajectory_maybe = Trajectory::Create(*path_maybe, max_velocities, max_accelerations, 0.001 /* timestep */);
+  auto trajectory_maybe = Trajectory::create(*path_maybe, max_velocities, max_accelerations, 0.001 /* timestep */);
   ASSERT_TRUE(trajectory_maybe.has_value());
   const Trajectory& trajectory = trajectory_maybe.value();
 
@@ -614,26 +614,26 @@ TEST(time_optimal_trajectory_generation, testSingleDofDiscontinuity)
 TEST(time_optimal_trajectory_generation, testRelevantZeroMaxAccelerationsInvalidateTrajectory)
 {
   const Eigen::Vector2d max_velocity(1, 1);
-  const Path path = *Path::Create({ Eigen::Vector2d(0, 0), Eigen::Vector2d(1, 1) });
+  const Path path = *Path::create({ Eigen::Vector2d(0, 0), Eigen::Vector2d(1, 1) });
 
-  EXPECT_FALSE(Trajectory::Create(path, max_velocity, /*max_acceleration=*/Eigen::Vector2d(0, 1)));
-  EXPECT_FALSE(Trajectory::Create(path, max_velocity, /*max_acceleration=*/Eigen::Vector2d(1, 0)));
-  EXPECT_FALSE(Trajectory::Create(path, max_velocity, /*max_acceleration=*/Eigen::Vector2d(0, 0)));
+  EXPECT_FALSE(Trajectory::create(path, max_velocity, /*max_acceleration=*/Eigen::Vector2d(0, 1)));
+  EXPECT_FALSE(Trajectory::create(path, max_velocity, /*max_acceleration=*/Eigen::Vector2d(1, 0)));
+  EXPECT_FALSE(Trajectory::create(path, max_velocity, /*max_acceleration=*/Eigen::Vector2d(0, 0)));
 }
 
 TEST(time_optimal_trajectory_generation, testIrrelevantZeroMaxAccelerationsDontInvalidateTrajectory)
 {
   const Eigen::Vector2d max_velocity(1, 1);
 
-  EXPECT_TRUE(Trajectory::Create(*Path::Create({ Eigen::Vector2d(0, 0), Eigen::Vector2d(0, 1) }), max_velocity,
+  EXPECT_TRUE(Trajectory::create(*Path::create({ Eigen::Vector2d(0, 0), Eigen::Vector2d(0, 1) }), max_velocity,
                                  /*max_acceleration=*/Eigen::Vector2d(0, 1)));
-  EXPECT_TRUE(Trajectory::Create(*Path::Create({ Eigen::Vector2d(0, 0), Eigen::Vector2d(1, 0) }), max_velocity,
+  EXPECT_TRUE(Trajectory::create(*Path::create({ Eigen::Vector2d(0, 0), Eigen::Vector2d(1, 0) }), max_velocity,
                                  /*max_acceleration=*/Eigen::Vector2d(1, 0)));
 }
 
 TEST(time_optimal_trajectory_generation, testTimeStepZeroMakesTrajectoryInvalid)
 {
-  EXPECT_FALSE(Trajectory::Create(*Path::Create({ Eigen::Vector2d(0, 0), Eigen::Vector2d(1, 1) }),
+  EXPECT_FALSE(Trajectory::create(*Path::create({ Eigen::Vector2d(0, 0), Eigen::Vector2d(1, 1) }),
                                   /*max_velocity=*/Eigen::Vector2d(1, 1), /*max_acceleration=*/Eigen::Vector2d(1, 1),
                                   /*time_step=*/0));
 }

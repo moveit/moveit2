@@ -198,7 +198,7 @@ private:
   Eigen::VectorXd y_;
 };
 
-std::optional<Path> Path::Create(const std::vector<Eigen::VectorXd>& waypoints, double max_deviation)
+std::optional<Path> Path::create(const std::vector<Eigen::VectorXd>& waypoints, double max_deviation)
 {
   if (waypoints.size() < 2)
   {
@@ -350,7 +350,7 @@ std::list<std::pair<double, bool>> Path::getSwitchingPoints() const
   return switching_points_;
 }
 
-std::optional<Trajectory> Trajectory::Create(const Path& path, const Eigen::VectorXd& max_velocity,
+std::optional<Trajectory> Trajectory::create(const Path& path, const Eigen::VectorXd& max_velocity,
                                              const Eigen::VectorXd& max_acceleration, double time_step)
 {
   if (time_step <= 0)
@@ -1221,14 +1221,14 @@ bool TimeOptimalTrajectoryGeneration::doTimeParameterizationCalculations(robot_t
   }
 
   // Now actually call the algorithm
-  std::optional<Path> path = Path::Create(points, path_tolerance_);
+  std::optional<Path> path = Path::create(points, path_tolerance_);
   if (!path)
   {
     RCLCPP_ERROR(getLogger(), "Invalid path.");
     return false;
   }
 
-  std::optional<Trajectory> parameterized = Trajectory::Create(*path, max_velocity, max_acceleration, DEFAULT_TIMESTEP);
+  std::optional<Trajectory> parameterized = Trajectory::create(*path, max_velocity, max_acceleration, DEFAULT_TIMESTEP);
   if (!parameterized)
   {
     RCLCPP_ERROR(getLogger(), "Couldn't create trajectory");
