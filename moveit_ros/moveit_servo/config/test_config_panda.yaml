@@ -16,6 +16,7 @@ scale:
   rotational:  1.0 # Max angular velocity. Unit is [rad/s]. Only used for Cartesian commands.
   # Max joint angular/linear velocity. Only used for joint commands on joint_command_in_topic.
   joint: 1.0
+  joint_acceleration: 500.0 # Scale the maximum allowable joint acceleration
 
 # What type of topic does your robot driver expect?
 # Currently supported are std_msgs/Float64MultiArray or trajectory_msgs/JointTrajectory

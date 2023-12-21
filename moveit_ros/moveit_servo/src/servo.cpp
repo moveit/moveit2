@@ -135,6 +135,23 @@ Servo::Servo(const rclcpp::Node::SharedPtr& node, std::shared_ptr<const servo::P
     joint_name_to_index_maps_.insert(
         std::make_pair<std::string, JointNameToMoveGroupIndexMap>(std::string(sub_group_name), std::move(new_map)));
   }
+
+  const moveit::core::JointModelGroup* joint_model_group =
+      robot_state->getJointModelGroup(servo_params_.move_group_name);
+  const std::vector<std::string> joint_names = joint_model_group->getActiveJointModelNames();
+  const moveit::core::JointBoundsVector joint_bounds = joint_model_group->getActiveJointModelsBounds();
+  joint_acceleration_limit = -1.0;
+  for (const auto& bound : joint_bounds)
+  {
+    for (const auto& b1 : *bound)
+    {
+      double max_acceleration = servo_params_.scale.joint_acceleration *
+                                std::max(std::abs(b1.min_acceleration_), std::abs(b1.min_acceleration_));
+      joint_acceleration_limit =
+          joint_acceleration_limit < 0 ? max_acceleration : std::min(joint_acceleration_limit, max_acceleration);
+    }
+  }
+
   RCLCPP_INFO_STREAM(logger_, "Servo initialized successfully");
 }
 
@@ -548,12 +565,8 @@ KinematicState Servo::getNextJointState(const moveit::core::RobotStatePtr& robot
     for (double val : accel)
     {
       // Find the ratio of clamped velocity to original velocity
-      const auto bounded_acc =
-          std::clamp(val, -servo_params_.joint_acceleration_limit, servo_params_.joint_acceleration_limit);
-      if (std::abs(val) > 0.0)
-      {
-        min_scaling_factor = std::min(min_scaling_factor, bounded_acc / val);
-      }
+      const auto bounded_acc = std::clamp(val, -joint_acceleration_limit, joint_acceleration_limit);
+      min_scaling_factor = std::abs(val) > 0.0 ? std::min(min_scaling_factor, bounded_acc / val) : 1.0;
     }
     target_state.velocities = current_state.velocities + min_scaling_factor * accel * servo_params_.publish_period;
 
@@ -683,7 +696,7 @@ std::pair<bool, KinematicState> Servo::smoothHalt(const KinematicState& halt_sta
   double scale = 1.0;
   if (max_speed > 0)
   {
-    double new_speed = std::max(0.0, max_speed - servo_params_.joint_acceleration_limit * servo_params_.publish_period);
+    double new_speed = std::max(0.0, max_speed - joint_acceleration_limit * servo_params_.publish_period);
     scale = new_speed / max_speed;
   }
   target_state.velocities *= scale;

@@ -230,6 +230,9 @@ private:
 
   // Map between joint subgroup names and corresponding joint name - move group indices map
   std::unordered_map<std::string, JointNameToMoveGroupIndexMap> joint_name_to_index_maps_;
+
+  // joint limit acceleration for most restricted joint
+  double joint_acceleration_limit = 0.0;
 };
 
 }  // namespace moveit_servo

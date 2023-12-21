@@ -98,6 +98,11 @@ servo:
       default_value: 0.5,
       description: "Max joint angular/linear velocity. Only used for joint commands on joint_command_in_topic."
     }
+    joint_acceleration: {
+      type: double,
+      default_value: 1.0,
+      description: "Scale the maximum allowable joint acceleration specified in the joint limits configuration."
+    }
 
 
   incoming_command_timeout: {
@@ -225,17 +230,6 @@ servo:
     read_only: true,
     default_value: "online_signal_smoothing::ButterworthFilterPlugin",
     description: "The name of the smoothing plugin to be used"
-  }
-
-  joint_acceleration_limit: {
-    type: double,
-    read_only: false,
-    default_value: 20.0,
-    description: "The acceleration limit [m/s^2] for the robot's joints. Lowering this value will generate smoother \
-                  motion and longer ramp up/down times",
-      validation: {
-        gt<>: 0.0
-      }
   }
 
 
