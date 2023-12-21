@@ -499,7 +499,7 @@ KinematicState Servo::getNextJointState(const moveit::core::RobotStatePtr& robot
   const int num_joints = joint_names.size();
 
   // State variables
-  KinematicState current_state = getRobotState(robot_state);
+  KinematicState current_state = extractRobotState(robot_state, servo_params_.move_group_name);
   KinematicState target_state(num_joints);
   target_state.joint_names = joint_names;
 
@@ -667,25 +667,10 @@ std::optional<PoseCommand> Servo::toPlanningFrame(const PoseCommand& command, co
   return PoseCommand{ planning_frame, planning_to_command_tf * command.pose };
 }
 
-KinematicState Servo::getRobotState(const moveit::core::RobotStatePtr& robot_state) const
-{
-  const moveit::core::JointModelGroup* joint_model_group =
-      robot_state->getJointModelGroup(servo_params_.move_group_name);
-  const auto joint_names = joint_model_group->getActiveJointModelNames();
-
-  KinematicState current_state(joint_names.size());
-  current_state.joint_names = joint_names;
-  robot_state->copyJointGroupPositions(joint_model_group, current_state.positions);
-  robot_state->copyJointGroupVelocities(joint_model_group, current_state.velocities);
-  robot_state->copyJointGroupAccelerations(joint_model_group, current_state.accelerations);
-
-  return current_state;
-}
-
 KinematicState Servo::getCurrentRobotState() const
 {
   moveit::core::RobotStatePtr robot_state = planning_scene_monitor_->getStateMonitor()->getCurrentState();
-  return getRobotState(robot_state);
+  return extractRobotState(robot_state, servo_params_.move_group_name);
 }
 
 std::pair<bool, KinematicState> Servo::smoothHalt(const KinematicState& halt_state)

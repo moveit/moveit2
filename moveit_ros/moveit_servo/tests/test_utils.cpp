@@ -234,6 +234,40 @@ TEST(ServoUtilsUnitTests, LeavingSingularityScaling)
   ASSERT_EQ(scaling_result.second, moveit_servo::StatusCode::DECELERATE_FOR_LEAVING_SINGULARITY);
 }
 
+TEST(ServoUtilsUnitTests, ExtractRobotState)
+{
+  using moveit::core::loadTestingRobotModel;
+  moveit::core::RobotModelPtr robot_model = loadTestingRobotModel("panda");
+  moveit::core::RobotStatePtr robot_state = std::make_shared<moveit::core::RobotState>(robot_model);
+  std::string joint_model_group = "panda_arm";
+  moveit_servo::KinematicState current_state;
+  current_state.positions = Eigen::VectorXd::Ones(7);
+  robot_state->setJointGroupPositions(joint_model_group, current_state.positions);
+  auto new_state = moveit_servo::extractRobotState(robot_state, joint_model_group);
+
+  ASSERT_EQ(current_state.positions, new_state.positions);
+}
+
+TEST(ServoUtilsUnitTests, SlidingWinodw)
+{
+  double latency = .3;
+  moveit_servo::KinematicState current_state;
+  current_state.positions = Eigen::VectorXd::Ones(7);
+  current_state.joint_names = { "j1", "j2", "j3", "j4", "j5", "j6", "j7" };
+  std::deque<moveit_servo::KinematicState> window;
+  for (size_t i = 0; i < 10; ++i)
+  {
+    current_state.time_stamp = rclcpp::Time(100, i * 1E8, RCL_ROS_TIME);
+    moveit_servo::updateSlidingWindow(current_state, window, latency);
+  }
+
+  ASSERT_EQ(window.size(), 7ul);
+  servo::Params params;
+  auto msg = moveit_servo::composeTrajectoryMessage(params, window);
+  ASSERT_TRUE(msg.has_value());
+  ASSERT_EQ(msg.value().points.size(), 6ul);
+}
+
 }  // namespace
 
 int main(int argc, char** argv)

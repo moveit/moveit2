@@ -230,7 +230,7 @@ servo:
   joint_acceleration_limit: {
     type: double,
     read_only: false,
-    default_value: 10.0,
+    default_value: 20.0,
     description: "The acceleration limit [m/s^2] for the robot's joints. Lowering this value will generate smoother \
                   motion and longer ramp up/down times",
       validation: {

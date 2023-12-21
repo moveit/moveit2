@@ -194,4 +194,12 @@ PoseCommand poseFromPoseStamped(const geometry_msgs::msg::PoseStamped& msg);
  */
 planning_scene_monitor::PlanningSceneMonitorPtr createPlanningSceneMonitor(const rclcpp::Node::SharedPtr& node,
                                                                            const servo::Params& servo_params);
+
+/**
+ * \brief Extract the state from a RobotStatePtr instance.
+ * @param The RobotStatePtr instance.
+ * @return The state of the RobotStatePtr instance.
+ */
+KinematicState extractRobotState(const moveit::core::RobotStatePtr& robot_state, const std::string& move_group_name);
+
 }  // namespace moveit_servo

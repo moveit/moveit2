@@ -117,13 +117,6 @@ public:
   servo::Params& getParams();
 
   /**
-   * \brief Extract the state from a RobotStatePtr instance.
-   * @param The RobotStatePtr instance.
-   * @return The state of the RobotStatePtr instance.
-   */
-  KinematicState getRobotState(const moveit::core::RobotStatePtr& robot_state) const;
-
-  /**
    * \brief Get the current state of the robot as given by planning scene monitor.
    * @return The current state of the robot.
    */

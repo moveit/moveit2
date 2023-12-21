@@ -480,4 +480,17 @@ planning_scene_monitor::PlanningSceneMonitorPtr createPlanningSceneMonitor(const
   return planning_scene_monitor;
 }
 
+KinematicState extractRobotState(const moveit::core::RobotStatePtr& robot_state, const std::string& move_group_name)
+{
+  const moveit::core::JointModelGroup* joint_model_group = robot_state->getJointModelGroup(move_group_name);
+  const auto joint_names = joint_model_group->getActiveJointModelNames();
+  KinematicState current_state(joint_names.size());
+  current_state.joint_names = joint_names;
+  robot_state->copyJointGroupPositions(joint_model_group, current_state.positions);
+  robot_state->copyJointGroupVelocities(joint_model_group, current_state.velocities);
+  robot_state->copyJointGroupAccelerations(joint_model_group, current_state.accelerations);
+
+  return current_state;
+}
+
 }  // namespace moveit_servo
