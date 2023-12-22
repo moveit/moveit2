@@ -211,6 +211,11 @@ std::optional<Path> Path::create(const std::vector<Eigen::VectorXd>& waypoints, 
     return std::nullopt;
   }
 
+  // waypoints_iterator1, waypoints_iterator2 and waypoints_iterator3 point to three consecutive waypoints of the input
+  // path. The algorithm creates a LinearPathSegment starting at waypoints_iterator1, connected to CircularPathSegment
+  // at waypoints_iterator2, connected to another LinearPathSegment towards waypoints_iterator3.
+  // It does this iteratively for each three consecutive waypoints, therefore applying a blending of 'max_deviation' at
+  // the intermediate waypoints.
   Path path;
   std::vector<Eigen::VectorXd>::const_iterator waypoints_iterator1 = waypoints.begin();
   std::vector<Eigen::VectorXd>::const_iterator waypoints_iterator2 = waypoints_iterator1;
@@ -965,10 +970,11 @@ bool TimeOptimalTrajectoryGeneration::computeTimeStamps(robot_trajectory::RobotT
     }
     else
     {
-      RCLCPP_ERROR_STREAM(getLogger(), "No velocity limit was defined for joint "
-                                           << vars[idx].c_str()
-                                           << "! You have to define velocity limits "
-                                              "in the URDF or joint_limits.yaml");
+      RCLCPP_ERROR_STREAM(getLogger(), "No velocity limit was defined for joint " << vars[idx].c_str()
+                                                                                  << "! You have to define velocity "
+                                                                                     "limits "
+                                                                                     "in the URDF or "
+                                                                                     "joint_limits.yaml");
       return false;
     }
 
@@ -985,11 +991,11 @@ bool TimeOptimalTrajectoryGeneration::computeTimeStamps(robot_trajectory::RobotT
     }
     else
     {
-      RCLCPP_ERROR_STREAM(getLogger(), "No acceleration limit was defined for joint "
-                                           << vars[idx].c_str()
-                                           << "! You have to define acceleration "
-                                              "limits in the URDF or "
-                                              "joint_limits.yaml");
+      RCLCPP_ERROR_STREAM(getLogger(), "No acceleration limit was defined for joint " << vars[idx].c_str()
+                                                                                      << "! You have to define "
+                                                                                         "acceleration "
+                                                                                         "limits in the URDF or "
+                                                                                         "joint_limits.yaml");
       return false;
     }
   }
@@ -1083,11 +1089,11 @@ bool TimeOptimalTrajectoryGeneration::computeTimeStamps(
 
     if (!set_velocity_limit)
     {
-      RCLCPP_ERROR_STREAM(getLogger(), "No velocity limit was defined for joint "
-                                           << vars[idx].c_str()
-                                           << "! You have to define velocity limits "
-                                              "in the URDF or "
-                                              "joint_limits.yaml");
+      RCLCPP_ERROR_STREAM(getLogger(), "No velocity limit was defined for joint " << vars[idx].c_str()
+                                                                                  << "! You have to define velocity "
+                                                                                     "limits "
+                                                                                     "in the URDF or "
+                                                                                     "joint_limits.yaml");
       return false;
     }
 
@@ -1116,11 +1122,11 @@ bool TimeOptimalTrajectoryGeneration::computeTimeStamps(
     }
     if (!set_acceleration_limit)
     {
-      RCLCPP_ERROR_STREAM(getLogger(), "No acceleration limit was defined for joint "
-                                           << vars[idx].c_str()
-                                           << "! You have to define acceleration "
-                                              "limits in the URDF or "
-                                              "joint_limits.yaml");
+      RCLCPP_ERROR_STREAM(getLogger(), "No acceleration limit was defined for joint " << vars[idx].c_str()
+                                                                                      << "! You have to define "
+                                                                                         "acceleration "
+                                                                                         "limits in the URDF or "
+                                                                                         "joint_limits.yaml");
       return false;
     }
   }
@@ -1236,7 +1242,7 @@ bool TimeOptimalTrajectoryGeneration::doTimeParameterizationCalculations(robot_t
   }
 
   // Compute sample count
-  size_t sample_count = std::ceil(parameterized->getDuration() / resample_dt_);
+  const size_t sample_count = std::ceil(parameterized->getDuration() / resample_dt_);
 
   // Resample and fill in trajectory
   moveit::core::RobotState waypoint = moveit::core::RobotState(trajectory.getWayPoint(0));

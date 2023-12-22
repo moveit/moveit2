@@ -39,7 +39,6 @@
 #include <gtest/gtest.h>
 #include <moveit/trajectory_processing/time_optimal_trajectory_generation.h>
 #include <moveit/utils/robot_model_test_utils.h>
-#include <fstream>
 
 using trajectory_processing::Path;
 using trajectory_processing::TimeOptimalTrajectoryGeneration;
