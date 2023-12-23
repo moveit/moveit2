@@ -9,7 +9,3 @@ repositories:
     type: git
     url: https://github.com/ros-planning/moveit_resources.git
     version: humble
-  ros2_control:
-    type: git
-    url: https://github.com/ros-controls/ros2_control.git
-    version: 2.13.0
