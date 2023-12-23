@@ -195,16 +195,12 @@ struct RobotStateBenchmark : ::benchmark::Fixture
     return states;
   }
 
-  std::vector<size_t> randomPermudation(size_t num)
+  std::vector<size_t> randomPermutation(size_t num)
   {
-    std::vector<size_t> result;
-    result.reserve(num);
-    for (size_t i = 0; i < num; i++)
-      result.push_back(i);
+    std::vector<size_t> result(num);
+    std::iota(result.begin(), result.end(), 0);
 
-    std::random_device random_device;
-    std::mt19937 generator(random_device());
-
+    std::mt19937 generator;
     std::shuffle(result.begin(), result.end(), generator);
     return result;
   }
@@ -242,7 +238,7 @@ BENCHMARK_DEFINE_F(RobotStateBenchmark, copyConstruct)(benchmark::State& st)
 BENCHMARK_DEFINE_F(RobotStateBenchmark, update)(benchmark::State& st)
 {
   auto states = constructStates(st.range(0));
-  auto permutation = randomPermudation(states.size());
+  auto permutation = randomPermutation(states.size());
   for (auto _ : st)
   {
     for (auto i : permutation)  // process states in random order to challenge the cache
