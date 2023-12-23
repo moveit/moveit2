@@ -16,7 +16,7 @@ servo:
   publish_period: {
     type: double,
     read_only: true,
-    default_value: 0.034,
+    default_value: 0.01,
     description: " 1 / (Nominal publish rate) [seconds]",
     validation: {
       gt<>: 0.0
@@ -26,7 +26,7 @@ servo:
   max_expected_latency: {
     type: double,
     read_only: true,
-    default_value: 0.075,
+    default_value: 0.1,
     description: "Maximum expected latency between generating a servo \
                   command and the controller receiving it [seconds].",
     validation: {
