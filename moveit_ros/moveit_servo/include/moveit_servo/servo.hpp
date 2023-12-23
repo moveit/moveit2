@@ -75,7 +75,7 @@ public:
 
   /**
    * \brief Computes the joint state required to follow the given command.
-   * @param a RobotStatePtr instance used for calculating the joint state.
+   * @param robot_state RobotStatePtr instance used for calculating the joint state.
    * @param command The command to follow, std::variant type, can handle JointJog, Twist and Pose.
    * @return The required joint state.
    */
@@ -124,10 +124,12 @@ public:
 
   /**
    * \brief Smoothly halt at a commanded state when command goes stale.
-   * @param The last commanded joint states.
+   * @param robot_state A RobotStatePtr instance.
+   * @param halt_state The desired stop state.
    * @return The next state stepping towards the required halting state.
    */
-  std::pair<bool, KinematicState> smoothHalt(const KinematicState& halt_state);
+  std::pair<bool, KinematicState> smoothHalt(const moveit::core::RobotStatePtr& robot_state,
+                                             const KinematicState& halt_state);
 
   /**
    * \brief Applies smoothing to an input state, if a smoothing plugin is set.
@@ -177,7 +179,7 @@ private:
   /**
    * \brief Compute the change in joint position required to follow the received command.
    * @param command The incoming servo command.
-   * @param a RobotStatePtr instance used for calculating the command.
+   * @param robot_state RobotStatePtr instance used for calculating the command.
    * @return The joint position change required (delta).
    */
   Eigen::VectorXd jointDeltaFromCommand(const ServoInput& command, const moveit::core::RobotStatePtr& robot_state);
@@ -230,9 +232,6 @@ private:
 
   // Map between joint subgroup names and corresponding joint name - move group indices map
   std::unordered_map<std::string, JointNameToMoveGroupIndexMap> joint_name_to_index_maps_;
-
-  // joint limit acceleration for most restricted joint
-  double joint_acceleration_limit = 0.0;
 };
 
 }  // namespace moveit_servo

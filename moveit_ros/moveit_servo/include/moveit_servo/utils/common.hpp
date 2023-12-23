@@ -161,6 +161,16 @@ double jointLimitVelocityScalingFactor(const Eigen::VectorXd& velocities,
                                        const moveit::core::JointBoundsVector& joint_bounds, double scaling_override);
 
 /**
+ * \brief Apply acceleration scaling based on joint limits.
+ * @param accelerations The commanded accelerations.
+ * @param joint_bounds The bounding information for the robot joints.
+ * @param scaling_override The user defined acceleration scaling override.
+ * @return The acceleration scaling factor.
+ */
+double jointLimitAccelerationScalingFactor(const Eigen::VectorXd& accelerations,
+                                           const moveit::core::JointBoundsVector& joint_bounds,
+                                           double scaling_override);
+/**
  * \brief Finds the joints that are exceeding allowable position limits.
  * @param positions The joint positions.
  * @param velocities The current commanded velocities.
@@ -197,7 +207,8 @@ planning_scene_monitor::PlanningSceneMonitorPtr createPlanningSceneMonitor(const
 
 /**
  * \brief Extract the state from a RobotStatePtr instance.
- * @param The RobotStatePtr instance.
+ * @param robot_state A RobotStatePtr instance.
+ * @param move_group_name The name of the planning group.
  * @return The state of the RobotStatePtr instance.
  */
 KinematicState extractRobotState(const moveit::core::RobotStatePtr& robot_state, const std::string& move_group_name);

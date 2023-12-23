@@ -98,12 +98,6 @@ servo:
       default_value: 0.5,
       description: "Max joint angular/linear velocity. Only used for joint commands on joint_command_in_topic."
     }
-    joint_acceleration: {
-      type: double,
-      default_value: 1.0,
-      description: "Scale the maximum allowable joint acceleration specified in the joint limits configuration."
-    }
-
 
   incoming_command_timeout: {
     type: double,
@@ -216,7 +210,7 @@ servo:
                   this should be set to false"
   }
 
-############################### SMOOTHING         ###############################
+############################### SMOOTHING PLUGIN ###############################
 
   use_smoothing: {
     type: bool,
@@ -335,5 +329,17 @@ servo:
   override_velocity_scaling_factor: {
     type: double,
     default_value: 0.0,
-    description: "Scaling factor when servo overrides the velocity (eg: near singularities)"
+    description: "Scaling factor when servo overrides the velocity (eg: near singularities)",
+    validation: {
+      gt_eq<>: 0.0
+    }
+  }
+
+  override_acceleration_scaling_factor: {
+    type: double,
+    default_value: 0.0,
+    description: "Scaling factor when servo overrides the acceleration (eg: rapid velocity changes)",
+    validation: {
+      gt_eq<>: 0.0
+    }
   }

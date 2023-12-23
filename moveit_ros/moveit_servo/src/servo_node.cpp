@@ -218,7 +218,7 @@ std::optional<KinematicState> ServoNode::processJointJogCommand(const moveit::co
   }
   else
   {
-    auto result = servo_->smoothHalt(last_commanded_state_);
+    auto result = servo_->smoothHalt(robot_state, last_commanded_state_);
     new_joint_jog_msg_ = !result.first;
     if (new_joint_jog_msg_)
     {
@@ -250,7 +250,7 @@ std::optional<KinematicState> ServoNode::processTwistCommand(const moveit::core:
   }
   else
   {
-    auto result = servo_->smoothHalt(last_commanded_state_);
+    auto result = servo_->smoothHalt(robot_state, last_commanded_state_);
     new_twist_msg_ = !result.first;
     if (new_twist_msg_)
     {
@@ -279,7 +279,7 @@ std::optional<KinematicState> ServoNode::processPoseCommand(const moveit::core::
   }
   else
   {
-    auto result = servo_->smoothHalt(last_commanded_state_);
+    auto result = servo_->smoothHalt(robot_state, last_commanded_state_);
     new_pose_msg_ = !result.first;
     if (new_pose_msg_)
     {

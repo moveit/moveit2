@@ -16,7 +16,6 @@ scale:
   rotational:  1.0 # Max angular velocity. Unit is [rad/s]. Only used for Cartesian commands.
   # Max joint angular/linear velocity. Only used for joint commands on joint_command_in_topic.
   joint: 1.0
-  joint_acceleration: 500.0 # Scale the maximum allowable joint acceleration
 
 # What type of topic does your robot driver expect?
 # Currently supported are std_msgs/Float64MultiArray or trajectory_msgs/JointTrajectory
@@ -30,7 +29,6 @@ publish_joint_accelerations: false
 ## Plugins for smoothing outgoing commands
 use_smoothing: false
 smoothing_filter_plugin_name: "online_signal_smoothing::ButterworthFilterPlugin"
-joint_acceleration_limit: 500.0
 
 # If is_primary_planning_scene_monitor is set to true, the Servo server's PlanningScene advertises the /get_planning_scene service,
 # which other nodes can use as a source for information about the planning environment.

@@ -140,18 +140,6 @@ Servo::Servo(const rclcpp::Node::SharedPtr& node, std::shared_ptr<const servo::P
       robot_state->getJointModelGroup(servo_params_.move_group_name);
   const std::vector<std::string> joint_names = joint_model_group->getActiveJointModelNames();
   const moveit::core::JointBoundsVector joint_bounds = joint_model_group->getActiveJointModelsBounds();
-  joint_acceleration_limit = -1.0;
-  for (const auto& bound : joint_bounds)
-  {
-    for (const auto& b1 : *bound)
-    {
-      double max_acceleration = servo_params_.scale.joint_acceleration *
-                                std::max(std::abs(b1.min_acceleration_), std::abs(b1.min_acceleration_));
-      joint_acceleration_limit =
-          joint_acceleration_limit < 0 ? max_acceleration : std::min(joint_acceleration_limit, max_acceleration);
-    }
-  }
-
   RCLCPP_INFO_STREAM(logger_, "Servo initialized successfully");
 }
 
@@ -558,17 +546,18 @@ KinematicState Servo::getNextJointState(const moveit::core::RobotStatePtr& robot
     }
     target_state.velocities *= joint_limit_scale;
 
-    // Scale down the acceleration based on joint acceleration limit if applicable.
-    // TODO move to function: ApplyAccelerationLimit(...)
-    Eigen::VectorXd accel = (target_state.velocities - current_state.velocities) / (servo_params_.publish_period);
-    double min_scaling_factor = 1.0;
-    for (double val : accel)
+    // Scale the acceleration if limit is violated based on joint velocity limit or user defined scaling if applicable.
+    Eigen::VectorXd acceleration =
+        (target_state.velocities - current_state.velocities) / (servo_params_.publish_period);
+    const double joint_acceleration_limit_scale = jointLimitAccelerationScalingFactor(
+        acceleration, joint_bounds, servo_params_.override_acceleration_scaling_factor);
+    if (joint_acceleration_limit_scale < 1.0)  // 1.0 means no scaling.
     {
-      // Find the ratio of clamped velocity to original velocity
-      const auto bounded_acc = std::clamp(val, -joint_acceleration_limit, joint_acceleration_limit);
-      min_scaling_factor = std::abs(val) > 0.0 ? std::min(min_scaling_factor, bounded_acc / val) : 1.0;
+      RCLCPP_DEBUG_STREAM(logger_,
+                          "Joint acceleration limit scaling applied by a factor of " << joint_acceleration_limit_scale);
     }
-    target_state.velocities = current_state.velocities + min_scaling_factor * accel * servo_params_.publish_period;
+    target_state.velocities =
+        current_state.velocities + joint_acceleration_limit_scale * acceleration * servo_params_.publish_period;
 
     // Adjust joint position based on scaled down velocity
     target_state.positions = current_state.positions + (target_state.velocities * servo_params_.publish_period);
@@ -686,20 +675,22 @@ KinematicState Servo::getCurrentRobotState() const
   return extractRobotState(robot_state, servo_params_.move_group_name);
 }
 
-std::pair<bool, KinematicState> Servo::smoothHalt(const KinematicState& halt_state)
+std::pair<bool, KinematicState> Servo::smoothHalt(const moveit::core::RobotStatePtr& robot_state,
+                                                  const KinematicState& halt_state)
 {
   bool stopped = false;
   auto target_state = halt_state;
 
-  // scale target velocities according to acceleration limits
-  double max_speed = target_state.velocities.cwiseAbs().maxCoeff();
-  double scale = 1.0;
-  if (max_speed > 0)
-  {
-    double new_speed = std::max(0.0, max_speed - joint_acceleration_limit * servo_params_.publish_period);
-    scale = new_speed / max_speed;
-  }
-  target_state.velocities *= scale;
+  // Get joint bounds from robot state for current move group.
+  const moveit::core::JointModelGroup* joint_model_group =
+      robot_state->getJointModelGroup(servo_params_.move_group_name);
+  const std::vector<std::string> joint_names = joint_model_group->getActiveJointModelNames();
+  const moveit::core::JointBoundsVector joint_bounds = joint_model_group->getActiveJointModelsBounds();
+
+  Eigen::VectorXd acceleration = -target_state.velocities / servo_params_.publish_period;
+  const double joint_acceleration_limit_scale = jointLimitAccelerationScalingFactor(
+      acceleration, joint_bounds, servo_params_.override_acceleration_scaling_factor);
+  target_state.velocities += joint_acceleration_limit_scale * acceleration * servo_params_.publish_period;
 
   const size_t num_joints = halt_state.joint_names.size();
   for (size_t i = 0; i < num_joints; ++i)

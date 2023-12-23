@@ -232,7 +232,7 @@ void updateSlidingWindow(KinematicState& next_joint_state, std::deque<KinematicS
     {
       // check if the direction have changed. `signs` will either have -2, +2 meaning a flat line, -1, 1 meaning a
       // rotated L shape, or 0 meaning a v-shape.
-      if (abs(signs[i]) == 0.0)
+      if (signs[i] == 0.0)
       {
         // direction changed
         last_state.velocities[i] = 0;
@@ -397,6 +397,38 @@ double jointLimitVelocityScalingFactor(const Eigen::VectorXd& velocities,
         // Find the ratio of clamped velocity to original velocity
         const auto bounded_vel = std::clamp(target_vel, variable_bound.min_velocity_, variable_bound.max_velocity_);
         const auto joint_scaling_factor = bounded_vel / target_vel;
+        min_scaling_factor = std::min(min_scaling_factor, joint_scaling_factor);
+      }
+      ++idx;
+    }
+  }
+
+  return min_scaling_factor;
+}
+
+double jointLimitAccelerationScalingFactor(const Eigen::VectorXd& accelerations,
+                                           const moveit::core::JointBoundsVector& joint_bounds, double scaling_override)
+{
+  // If override value is close to zero, user is not overriding the scaling
+  double min_scaling_factor = scaling_override;
+  if (scaling_override < SCALING_OVERRIDE_THRESHOLD)
+  {
+    min_scaling_factor = 1.0;  // Set to no scaling override.
+  }
+
+  // Now get the scaling factor from joint velocity limits.
+  size_t idx = 0;
+  for (const auto& joint_bound : joint_bounds)
+  {
+    for (const auto& variable_bound : *joint_bound)
+    {
+      const auto& target_accel = accelerations(idx);
+      if (variable_bound.acceleration_bounded_ && target_accel != 0.0)
+      {
+        // Find the ratio of clamped velocity to original velocity
+        const auto bounded_accel =
+            std::clamp(target_accel, variable_bound.min_acceleration_, variable_bound.max_acceleration_);
+        const auto joint_scaling_factor = bounded_accel / target_accel;
         min_scaling_factor = std::min(min_scaling_factor, joint_scaling_factor);
       }
       ++idx;
