@@ -331,7 +331,7 @@ servo:
     default_value: 0.0,
     description: "Scaling factor when servo overrides the velocity (eg: near singularities)",
     validation: {
-      gt_eq<>: 0.0
+      bounds<>: [0.0, 1.0]
     }
   }
 
@@ -340,6 +340,6 @@ servo:
     default_value: 0.0,
     description: "Scaling factor when servo overrides the acceleration (eg: rapid velocity changes)",
     validation: {
-      gt_eq<>: 0.0
+      bounds<>: [0.0, 1.0]
     }
   }
