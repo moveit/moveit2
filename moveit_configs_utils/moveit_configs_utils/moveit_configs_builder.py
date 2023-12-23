@@ -69,7 +69,7 @@ moveit_configs_utils_path = Path(get_package_share_directory("moveit_configs_uti
 # Function to colorize log messages
 def colorize_log(level, message):
     colors = {
-        "DEBUG": "\x1b[34;21m"     # Blue
+        "DEBUG": "\x1b[34;21m",     # Blue
         "INFO": "\x1b[32;21m",     # Green
         "WARNING": "\x1b[33;21m",  # Yellow
         "ERROR": "\x1b[31;21m",    # Red

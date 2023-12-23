@@ -53,7 +53,3 @@ def test_xacro_with_mappings():
     SetLaunchConfiguration("number", "2000").visit(context)
     SetLaunchConfiguration("postfix", "mypostfix").visit(context)
     assert xacro.perform(context)
-
-# TODO: add new test with a differently named xacro.
-# TODO: add new test with a xacro in a different package (e.g. a "description" package).
-# TODO: add new test where we pass in the robot description itself.
