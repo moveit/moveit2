@@ -105,7 +105,7 @@ bool MultiQueryPlannerAllocator::storePlannerData()
     planners_[entry.first]->getPlannerData(data);
     if (data.numVertices() == 0)
     {
-      RCLCPP_ERROR_STREAM(LOGGER, "Could not fetch space information or space information is empty.");
+      RCLCPP_ERROR_STREAM(getLogger(), "Could not fetch space information or space information is empty.");
       return false;
     }
     RCLCPP_INFO_STREAM(getLogger(), "Storing planner data. NumEdges: " << data.numEdges()

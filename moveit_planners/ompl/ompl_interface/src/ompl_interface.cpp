@@ -102,7 +102,7 @@ void OMPLInterface::storePlannerData(const std::shared_ptr<std_srvs::srv::Trigge
   response->success = context_manager_.storePlannerData();
   if (!response->success)
   {
-    RCLCPP_ERROR(LOGGER, "Motion planning graph is empty");
+    RCLCPP_ERROR(getLogger(), "Motion planning graph is empty");
   }
 }
 
