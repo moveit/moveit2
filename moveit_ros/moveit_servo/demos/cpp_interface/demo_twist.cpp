@@ -77,10 +77,8 @@ int main(int argc, char* argv[])
   // This is just for convenience, should not be used for sync in real application.
   std::this_thread::sleep_for(std::chrono::seconds(3));
 
-  // Initializing the target pose as end effector pose, this can be any pose.
-  auto robot_state = planning_scene_monitor->getStateMonitor()->getCurrentState();
-
   // Get the robot state and joint model group info.
+  auto robot_state = planning_scene_monitor->getStateMonitor()->getCurrentState();
   const moveit::core::JointModelGroup* joint_model_group =
       robot_state->getJointModelGroup(servo_params.move_group_name);
 
@@ -105,7 +103,6 @@ int main(int argc, char* argv[])
   while (rclcpp::ok())
   {
     KinematicState joint_state = servo.getNextJointState(robot_state, target_twist);
-    joint_state.time_stamp = demo_node->now() + rclcpp::Duration::from_seconds(servo_params.max_expected_latency);
     const StatusCode status = servo.getStatus();
 
     auto current_time = std::chrono::steady_clock::now();
@@ -117,14 +114,16 @@ int main(int argc, char* argv[])
     }
     else if (status != StatusCode::INVALID)
     {
-      updateSlidingWindow(joint_state, joint_cmd_rolling_window, servo_params.max_expected_latency);
+      updateSlidingWindow(joint_state, joint_cmd_rolling_window, servo_params.max_expected_latency, demo_node->now());
       if (const auto msg = composeTrajectoryMessage(servo_params, joint_cmd_rolling_window))
       {
         trajectory_outgoing_cmd_pub->publish(msg.value());
       }
-      auto last_commanded_state = joint_cmd_rolling_window.back();
-      robot_state->setJointGroupPositions(joint_model_group, last_commanded_state.positions);
-      robot_state->setJointGroupVelocities(joint_model_group, last_commanded_state.velocities);
+      if (!joint_cmd_rolling_window.empty())
+      {
+        robot_state->setJointGroupPositions(joint_model_group, joint_cmd_rolling_window.back().positions);
+        robot_state->setJointGroupVelocities(joint_model_group, joint_cmd_rolling_window.back().velocities);
+      }
     }
     rate.sleep();
   }

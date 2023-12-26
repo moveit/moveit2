@@ -75,7 +75,7 @@ public:
 
   /**
    * \brief Computes the joint state required to follow the given command.
-   * @param robot_state RobotStatePtr instance used for calculating the joint state.
+   * @param robot_state RobotStatePtr instance used for calculating the next joint state.
    * @param command The command to follow, std::variant type, can handle JointJog, Twist and Pose.
    * @return The required joint state.
    */

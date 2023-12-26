@@ -99,6 +99,7 @@ servo:
       description: "Max joint angular/linear velocity. Only used for joint commands on joint_command_in_topic."
     }
 
+
   incoming_command_timeout: {
     type: double,
     default_value: 0.1,
@@ -225,7 +226,6 @@ servo:
     default_value: "online_signal_smoothing::ButterworthFilterPlugin",
     description: "The name of the smoothing plugin to be used"
   }
-
 
 ############################# COLLISION MONITOR ################################
 

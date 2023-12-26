@@ -125,10 +125,11 @@ composeTrajectoryMessage(const servo::Params& servo_params, const std::deque<Kin
  * @param next_joint_state The next commanded joint state.
  * @param joint_cmd_rolling_window Queue of containing a rolling window of joint commands.
  * @param max_expected_latency The next_joint_state will be added to the joint_cmd_rolling_window with a time stamp of
- * current time plus max_expected_latency.
+ * @param cur_time The current time stamp when the method is called. This value is used to update the time stamp of
+ * next_joint_state
  */
 void updateSlidingWindow(KinematicState& next_joint_state, std::deque<KinematicState>& joint_cmd_rolling_window,
-                         double max_expected_latency);
+                         double max_expected_latency, const rclcpp::Time& cur_time);
 
 /**
  * \brief Create a Float64MultiArray message from given joint state
@@ -151,7 +152,8 @@ std::pair<double, StatusCode> velocityScalingFactorForSingularity(const moveit::
                                                                   const servo::Params& servo_params);
 
 /**
- * \brief Apply velocity scaling based on joint limits.
+ * \brief Apply velocity scaling based on joint limits. If the robot model does not have velocity limits defined,
+ * then a scale factor of 1.0 will be returned.
  * @param velocities The commanded velocities.
  * @param joint_bounds The bounding information for the robot joints.
  * @param scaling_override The user defined velocity scaling override.
@@ -161,7 +163,8 @@ double jointLimitVelocityScalingFactor(const Eigen::VectorXd& velocities,
                                        const moveit::core::JointBoundsVector& joint_bounds, double scaling_override);
 
 /**
- * \brief Apply acceleration scaling based on joint limits.
+ * \brief Apply acceleration scaling based on joint limits. If the robot model does not have acceleration limits
+ * defined, then a scale factor of 1.0 will be returned.
  * @param accelerations The commanded accelerations.
  * @param joint_bounds The bounding information for the robot joints.
  * @param scaling_override The user defined acceleration scaling override.

@@ -45,8 +45,8 @@ namespace
 constexpr double SCALING_OVERRIDE_THRESHOLD = 0.01;
 // The angle threshold in radians below which a rotation will be considered the identity.
 constexpr double MIN_ANGLE_THRESHOLD = 1E-16;
-// A minimum of 3 points are used to help with interpolation when creating a trjectory messages.
-constexpr int NUM_POINTS_FOR_TRAJ_MSG = 3;
+// A minimum of 3 points are used to help with interpolation when creating trajectory messages.
+constexpr int MIN_POINTS_FOR_TRAJ_MSG = 3;
 
 }  // namespace
 
@@ -149,7 +149,7 @@ geometry_msgs::msg::Pose poseFromCartesianDelta(const Eigen::VectorXd& delta_x,
 std::optional<trajectory_msgs::msg::JointTrajectory>
 composeTrajectoryMessage(const servo::Params& servo_params, const std::deque<KinematicState>& joint_cmd_rolling_window)
 {
-  if (joint_cmd_rolling_window.size() < NUM_POINTS_FOR_TRAJ_MSG)
+  if (joint_cmd_rolling_window.size() < MIN_POINTS_FOR_TRAJ_MSG)
   {
     return {};
   }
@@ -200,25 +200,26 @@ composeTrajectoryMessage(const servo::Params& servo_params, const std::deque<Kin
 }
 
 void updateSlidingWindow(KinematicState& next_joint_state, std::deque<KinematicState>& joint_cmd_rolling_window,
-                         double max_expected_latency)
+                         double max_expected_latency, const rclcpp::Time& cur_time)
 {
-  // remove old commands
-  const auto active_time_window = rclcpp::Duration::from_seconds(2 * max_expected_latency);
+  // remove commands older than current time minus the length of the sliding window
+  next_joint_state.time_stamp = cur_time + rclcpp::Duration::from_seconds(max_expected_latency);
+  const auto active_time_window = rclcpp::Duration::from_seconds(max_expected_latency);
   while (!joint_cmd_rolling_window.empty() &&
-         joint_cmd_rolling_window.front().time_stamp < (next_joint_state.time_stamp - active_time_window))
+         joint_cmd_rolling_window.front().time_stamp < (cur_time - active_time_window))
   {
     joint_cmd_rolling_window.pop_front();
   }
 
-  // remove command at end of window if timestamp is the same
-  if (!joint_cmd_rolling_window.empty() && next_joint_state.time_stamp == joint_cmd_rolling_window.back().time_stamp)
+  // remove commands at end of window if timestamp is the same as current command
+  while (!joint_cmd_rolling_window.empty() && next_joint_state.time_stamp == joint_cmd_rolling_window.back().time_stamp)
   {
     joint_cmd_rolling_window.pop_back();
   }
 
   // update velocity: the velocity has the potential to dramatically influence interpolation of splines and causes large
-  // overshooting. To alleviate this effect, the velocity will be set to zero if the motion changes direction,
-  // otherwise, it will calculate the forward and backward finite difference velocities and chose the minimum.
+  // overshooting. To alleviate this effect, the target velocity will be set to zero if the motion changes direction,
+  // otherwise, it will calculate the forward and backward finite difference velocities and choose the minimum.
   if (joint_cmd_rolling_window.size() >= 2)
   {
     size_t num_points = joint_cmd_rolling_window.size();

@@ -160,10 +160,15 @@ void ServoNode::pauseServo(const std::shared_ptr<std_srvs::srv::SetBool::Request
   }
   else
   {
-    // Reset the smoothing plugin with the robot's current state in case the robot moved between pausing.
+    // Reset the smoothing plugin with the robot's current state in case the robot moved between pausing and unpausing.
     last_commanded_state_ = servo_->getCurrentRobotState();
     servo_->resetSmoothing(last_commanded_state_);
+
+    // clear out the command rolling window and reset last commanded state to be the current state
     joint_cmd_rolling_window_.clear();
+    last_commanded_state_ = servo_->getCurrentRobotState();
+
+    // reactivate collision checking
     servo_->setCollisionChecking(true);
     response->message = "Servoing enabled";
   }
@@ -298,7 +303,7 @@ void ServoNode::servoLoop()
   rclcpp::WallRate servo_frequency(1 / servo_params_.publish_period);
 
   // wait for first robot joint state update
-  auto servo_node_start = node_->now();
+  const auto servo_node_start = node_->now();
   while (planning_scene_monitor_->getLastUpdateTime().get_clock_type() != node_->get_clock()->get_clock_type() ||
          servo_node_start > planning_scene_monitor_->getLastUpdateTime())
   {
@@ -307,11 +312,6 @@ void ServoNode::servoLoop()
   }
   KinematicState current_state = servo_->getCurrentRobotState();
   last_commanded_state_ = current_state;
-
-  // Get the robot state and joint model group info.
-  moveit::core::RobotStatePtr robot_state = planning_scene_monitor_->getStateMonitor()->getCurrentState();
-  const moveit::core::JointModelGroup* joint_model_group =
-      robot_state->getJointModelGroup(servo_params_.move_group_name);
 
   while (rclcpp::ok() && !stop_servo_)
   {
@@ -332,11 +332,15 @@ void ServoNode::servoLoop()
     else
     {
       current_state = servo_->getCurrentRobotState();
-      current_state.time_stamp = cur_time;
       joint_cmd_rolling_window_.clear();
-      joint_cmd_rolling_window_.push_back(current_state);
     }
 
+    // Get the robot state and joint model group info.
+    moveit::core::RobotStatePtr robot_state = planning_scene_monitor_->getStateMonitor()->getCurrentState();
+    const moveit::core::JointModelGroup* joint_model_group =
+        robot_state->getJointModelGroup(servo_params_.move_group_name);
+
+    // update robot state values
     robot_state->setJointGroupPositions(joint_model_group, current_state.positions);
     robot_state->setJointGroupVelocities(joint_model_group, current_state.velocities);
 
@@ -367,9 +371,8 @@ void ServoNode::servoLoop()
       if (use_trajectory)
       {
         auto& next_joint_state_value = next_joint_state.value();
-        next_joint_state_value.time_stamp =
-            cur_time + rclcpp::Duration::from_seconds(servo_params_.max_expected_latency);
-        updateSlidingWindow(next_joint_state_value, joint_cmd_rolling_window_, servo_params_.max_expected_latency);
+        updateSlidingWindow(next_joint_state_value, joint_cmd_rolling_window_, servo_params_.max_expected_latency,
+                            cur_time);
         if (const auto msg = composeTrajectoryMessage(servo_params_, joint_cmd_rolling_window_))
         {
           trajectory_publisher_->publish(msg.value());

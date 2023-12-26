@@ -135,11 +135,6 @@ Servo::Servo(const rclcpp::Node::SharedPtr& node, std::shared_ptr<const servo::P
     joint_name_to_index_maps_.insert(
         std::make_pair<std::string, JointNameToMoveGroupIndexMap>(std::string(sub_group_name), std::move(new_map)));
   }
-
-  const moveit::core::JointModelGroup* joint_model_group =
-      robot_state->getJointModelGroup(servo_params_.move_group_name);
-  const std::vector<std::string> joint_names = joint_model_group->getActiveJointModelNames();
-  const moveit::core::JointBoundsVector joint_bounds = joint_model_group->getActiveJointModelsBounds();
   RCLCPP_INFO_STREAM(logger_, "Servo initialized successfully");
 }
 
@@ -289,11 +284,11 @@ bool Servo::validateParams(const servo::Params& servo_params) const
     params_valid = false;
   }
 
-  if (0.5 * servo_params.max_expected_latency < servo_params.publish_period)
+  if (servo_params.max_expected_latency / 3 < servo_params.publish_period)
   {
     RCLCPP_ERROR(
         logger_,
-        "The publish period (%f sec) parameter must be less than 1/2 of the max expected latency parameter (%f sec).",
+        "The publish period (%f sec) parameter must be less than 1/3 of the max expected latency parameter (%f sec).",
         servo_params.publish_period, servo_params.max_expected_latency);
     params_valid = false;
   }
@@ -371,9 +366,8 @@ KinematicState Servo::haltJoints(const std::vector<int>& joints_to_halt, const K
 
   if (all_joint_halt)
   {
-    // The velocities are initialized to zero by default, so we dont need to set it here.
+    // The velocities are initialized to zero by default, so we don't need to set it here.
     bounded_state.positions = current_state.positions;
-    bounded_state.velocities *= 0.0;
   }
   else
   {
@@ -494,7 +488,7 @@ KinematicState Servo::getNextJointState(const moveit::core::RobotStatePtr& robot
   // Update the parameters
   updateParams();
 
-  // Get the robot state and joint model group info.
+  // Get the joint model group info.
   const moveit::core::JointModelGroup* joint_model_group =
       robot_state->getJointModelGroup(servo_params_.move_group_name);
 
@@ -503,7 +497,7 @@ KinematicState Servo::getNextJointState(const moveit::core::RobotStatePtr& robot
   const moveit::core::JointBoundsVector joint_bounds = joint_model_group->getActiveJointModelsBounds();
   const int num_joints = joint_names.size();
 
-  // State variables
+  // Extract current state from robot state
   KinematicState current_state = extractRobotState(robot_state, servo_params_.move_group_name);
   KinematicState target_state(num_joints);
   target_state.joint_names = joint_names;
@@ -546,7 +540,7 @@ KinematicState Servo::getNextJointState(const moveit::core::RobotStatePtr& robot
     }
     target_state.velocities *= joint_limit_scale;
 
-    // Scale the joint accelerations if limit is violated based on joint velocity limit or user defined scaling if applicable.
+    // Scale down the acceleration based on joint acceleration limit or user defined scaling if applicable.
     Eigen::VectorXd joint_accelerations =
         (target_state.velocities - current_state.velocities) / (servo_params_.publish_period);
     const double joint_acceleration_limit_scale = jointLimitAccelerationScalingFactor(
@@ -573,6 +567,7 @@ KinematicState Servo::getNextJointState(const moveit::core::RobotStatePtr& robot
       target_state = haltJoints(joints_to_halt, current_state, target_state);
     }
   }
+
   return target_state;
 }
 
@@ -684,7 +679,6 @@ std::pair<bool, KinematicState> Servo::smoothHalt(const moveit::core::RobotState
   // Get joint bounds from robot state for current move group.
   const moveit::core::JointModelGroup* joint_model_group =
       robot_state->getJointModelGroup(servo_params_.move_group_name);
-  const std::vector<std::string> joint_names = joint_model_group->getActiveJointModelNames();
   const moveit::core::JointBoundsVector joint_bounds = joint_model_group->getActiveJointModelsBounds();
 
   // apply scaling to target velocity based on robot's limits
@@ -696,8 +690,7 @@ std::pair<bool, KinematicState> Servo::smoothHalt(const moveit::core::RobotState
   // scale velocity in case of obstacle
   target_state.velocities *= collision_velocity_scale_;
 
-  const size_t num_joints = halt_state.joint_names.size();
-  for (size_t i = 0; i < num_joints; ++i)
+  for (size_t i = 0; i < (size_t)halt_state.positions.size(); ++i)
   {
     target_state.positions[i] = halt_state.positions[i] + target_state.velocities[i] * servo_params_.publish_period;
     const double vel = target_state.velocities[i];

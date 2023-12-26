@@ -89,27 +89,25 @@ int main(int argc, char* argv[])
   // This is just for convenience, should not be used for sync in real application.
   std::this_thread::sleep_for(std::chrono::seconds(3));
 
+  // Get the robot state and joint model group info.
+  auto robot_state = planning_scene_monitor->getStateMonitor()->getCurrentState();
+  const moveit::core::JointModelGroup* joint_model_group =
+      robot_state->getJointModelGroup(servo_params.move_group_name);
+
   // Set the command type for servo.
   servo.setCommandType(CommandType::POSE);
 
   // The dynamically updated target pose.
   PoseCommand target_pose;
   target_pose.frame_id = K_BASE_FRAME;
-  // Initializing the target pose as end effector pose, this can be any pose.
-  auto robot_state = planning_scene_monitor->getStateMonitor()->getCurrentState();
 
-  // Get the robot state and joint model group info.
-  const moveit::core::JointModelGroup* joint_model_group =
-      robot_state->getJointModelGroup(servo_params.move_group_name);
+  // Initializing the target pose as end effector pose, this can be any pose.
   target_pose.pose = get_current_pose(K_TIP_FRAME, robot_state);
 
-  // Pose tracking thread will exit upon reaching this pose.
+  // servo loop will exit upon reaching this pose.
   Eigen::Isometry3d terminal_pose = target_pose.pose;
   terminal_pose.rotate(Eigen::AngleAxisd(M_PI / 4, Eigen::Vector3d::UnitZ()));
   terminal_pose.translate(Eigen::Vector3d(0.0, 0.0, -0.1));
-
-  // Wait for pose tracking to enter its main loop
-  std::this_thread::sleep_for(std::chrono::seconds(1));
 
   // The target pose (frame being tracked) moves by this step size each iteration.
   Eigen::Vector3d linear_step_size{ 0.0, 0.0, -0.001 };
@@ -118,10 +116,8 @@ int main(int argc, char* argv[])
   RCLCPP_INFO_STREAM(demo_node->get_logger(), servo.getStatusMessage());
 
   KinematicState joint_state;
+  KinematicState current_state = servo.getCurrentRobotState();
   rclcpp::WallRate servo_rate(1 / servo_params.publish_period);
-  KinematicState current_state;
-  current_state = servo.getCurrentRobotState();
-  current_state.time_stamp = demo_node->now();
 
   // create command queue to build trajectory message
   std::deque<KinematicState> joint_cmd_rolling_window;
@@ -151,18 +147,19 @@ int main(int argc, char* argv[])
 
     // get next servo command
     joint_state = servo.getNextJointState(robot_state, target_pose);
-    joint_state.time_stamp = demo_node->now() + rclcpp::Duration::from_seconds(servo_params.max_expected_latency);
     StatusCode status = servo.getStatus();
     if (status != StatusCode::INVALID)
     {
-      updateSlidingWindow(joint_state, joint_cmd_rolling_window, servo_params.max_expected_latency);
+      updateSlidingWindow(joint_state, joint_cmd_rolling_window, servo_params.max_expected_latency, demo_node->now());
       if (const auto msg = composeTrajectoryMessage(servo_params, joint_cmd_rolling_window))
       {
         trajectory_outgoing_cmd_pub->publish(msg.value());
       }
-      auto last_commanded_state = joint_cmd_rolling_window.back();
-      robot_state->setJointGroupPositions(joint_model_group, last_commanded_state.positions);
-      robot_state->setJointGroupVelocities(joint_model_group, last_commanded_state.velocities);
+      if (!joint_cmd_rolling_window.empty())
+      {
+        robot_state->setJointGroupPositions(joint_model_group, joint_cmd_rolling_window.back().positions);
+        robot_state->setJointGroupVelocities(joint_model_group, joint_cmd_rolling_window.back().velocities);
+      }
     }
 
     servo_rate.sleep();

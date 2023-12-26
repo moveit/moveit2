@@ -311,15 +311,26 @@ TEST(ServoUtilsUnitTests, SlidingWinodw)
   std::deque<moveit_servo::KinematicState> window;
   for (size_t i = 0; i < 10; ++i)
   {
-    current_state.time_stamp = rclcpp::Time(100, i * 1E8, RCL_ROS_TIME);
-    moveit_servo::updateSlidingWindow(current_state, window, latency);
+    moveit_servo::updateSlidingWindow(current_state, window, latency, rclcpp::Time(100, i * 1E8, RCL_ROS_TIME));
   }
+  // Add command at end of window with same timestamp. This should replace the command instead of adding it
+  moveit_servo::updateSlidingWindow(current_state, window, latency, rclcpp::Time(100, 9 * 1E8, RCL_ROS_TIME));
 
   ASSERT_EQ(window.size(), 7ul);
   servo::Params params;
   auto msg = moveit_servo::composeTrajectoryMessage(params, window);
   ASSERT_TRUE(msg.has_value());
   ASSERT_EQ(msg.value().points.size(), 6ul);
+
+  // remove all but MIN_POINTS_FOR_TRAJ_MSG - 1 points
+  constexpr int min_points_for_traj_msg = 3;
+  while (window.size() > min_points_for_traj_msg - 1)
+  {
+    window.pop_front();
+  }
+  // ensure message is empty
+  msg = moveit_servo::composeTrajectoryMessage(params, window);
+  ASSERT_FALSE(msg.has_value());
 }
 
 }  // namespace
