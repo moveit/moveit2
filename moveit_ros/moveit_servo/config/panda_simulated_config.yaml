@@ -3,7 +3,8 @@
 ###############################################
 
 # Optionally override Servo's internal velocity scaling when near singularity or collision (0.0 = use internal velocity scaling)
-# override_velocity_scaling_factor = 0.0 # valid range [0.0:1.0]
+# override_velocity_scaling_factor = 0.0 # valid range [0.0:1.0], 0.0 disables it
+# override_acceleration_scaling_factor = 0.0 # valid range [0.0:1.0], 0.0 disables it
 
 ## Properties of outgoing commands
 publish_period: 0.01  # 1/Nominal publish rate [seconds]
