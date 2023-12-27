@@ -17,6 +17,7 @@ include(GenerateExportHeader)
 generate_export_header(moveit_collision_detection)
 
 ament_target_dependencies(moveit_collision_detection
+  pluginlib
   rclcpp
   rmw_implementation
   urdf
