@@ -28,7 +28,7 @@ publish_joint_velocities: true
 publish_joint_accelerations: false
 
 ## Plugins for smoothing outgoing commands
-use_smoothing: false
+use_smoothing: true
 smoothing_filter_plugin_name: "online_signal_smoothing::ButterworthFilterPlugin"
 
 # If is_primary_planning_scene_monitor is set to true, the Servo server's PlanningScene advertises the /get_planning_scene service,
