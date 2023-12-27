@@ -543,8 +543,8 @@ KinematicState Servo::getNextJointState(const moveit::core::RobotStatePtr& robot
     // Scale down the acceleration based on joint acceleration limit or user defined scaling if applicable.
     Eigen::VectorXd joint_accelerations =
         (target_state.velocities - current_state.velocities) / (servo_params_.publish_period);
-    const double joint_acceleration_limit_scale = jointLimitAccelerationScalingFactor(
-        joint_accelerations, joint_bounds, servo_params_.override_acceleration_scaling_factor);
+    const double joint_acceleration_limit_scale =
+        jointLimitAccelerationScalingFactor(joint_accelerations, joint_bounds, 1.0);
     if (joint_acceleration_limit_scale < 1.0)  // 1.0 means no scaling.
     {
       RCLCPP_DEBUG_STREAM(logger_,
@@ -683,8 +683,7 @@ std::pair<bool, KinematicState> Servo::smoothHalt(const moveit::core::RobotState
 
   // apply scaling to target velocity based on robot's limits
   Eigen::VectorXd acceleration = -target_state.velocities / servo_params_.publish_period;
-  const double joint_acceleration_limit_scale = jointLimitAccelerationScalingFactor(
-      acceleration, joint_bounds, servo_params_.override_acceleration_scaling_factor);
+  const double joint_acceleration_limit_scale = jointLimitAccelerationScalingFactor(acceleration, joint_bounds, 1.0);
   target_state.velocities += joint_acceleration_limit_scale * acceleration * servo_params_.publish_period;
 
   // scale velocity in case of obstacle

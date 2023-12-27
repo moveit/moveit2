@@ -334,12 +334,3 @@ servo:
       bounds<>: [0.0, 1.0]
     }
   }
-
-  override_acceleration_scaling_factor: {
-    type: double,
-    default_value: 0.0,
-    description: "Scaling factor when servo overrides the acceleration (eg: rapid velocity changes)",
-    validation: {
-      bounds<>: [0.0, 1.0]
-    }
-  }
