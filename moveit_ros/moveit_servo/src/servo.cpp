@@ -532,11 +532,11 @@ KinematicState Servo::getNextJointState(const moveit::core::RobotStatePtr& robot
     target_state.velocities = (target_state.positions - current_state.positions) / servo_params_.publish_period;
 
     // Scale down the velocity based on joint velocity limit or user defined scaling if applicable.
-    const double joint_limit_scale = jointLimitVelocityScalingFactor(target_state.velocities, joint_bounds,
-                                                                     servo_params_.override_velocity_scaling_factor);
-    if (joint_limit_scale < 1.0)  // 1.0 means no scaling.
+    const double joint_velocity_limit_scale = jointLimitVelocityScalingFactor(
+        target_state.velocities, joint_bounds, servo_params_.override_velocity_scaling_factor);
+    if (joint_velocity_limit_scale < 1.0)  // 1.0 means no scaling.
     {
-      RCLCPP_DEBUG_STREAM(logger_, "Joint velocity limit scaling applied by a factor of " << joint_limit_scale);
+      RCLCPP_DEBUG_STREAM(logger_, "Joint velocity limit scaling applied by a factor of " << joint_velocity_limit_scale);
     }
     target_state.velocities *= joint_velocity_limit_scale;
 
