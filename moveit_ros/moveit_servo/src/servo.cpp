@@ -538,7 +538,7 @@ KinematicState Servo::getNextJointState(const moveit::core::RobotStatePtr& robot
     {
       RCLCPP_DEBUG_STREAM(logger_, "Joint velocity limit scaling applied by a factor of " << joint_limit_scale);
     }
-    target_state.velocities *= joint_limit_scale;
+    target_state.velocities *= joint_velocity_limit_scale;
 
     // Scale down the acceleration based on joint acceleration limit or user defined scaling if applicable.
     Eigen::VectorXd joint_accelerations =
