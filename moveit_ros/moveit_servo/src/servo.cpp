@@ -521,6 +521,9 @@ KinematicState Servo::getNextJointState(const moveit::core::RobotStatePtr& robot
     // Compute the next joint positions based on the joint position deltas
     target_state.positions = current_state.positions + joint_position_delta;
 
+    // Compute the joint velocities required to reach positions
+    target_state.velocities = joint_position_delta / servo_params_.publish_period;
+
     // Apply smoothing to the positions if a smoother was provided.
     doSmoothing(target_state);
 
@@ -539,19 +542,6 @@ KinematicState Servo::getNextJointState(const moveit::core::RobotStatePtr& robot
       RCLCPP_DEBUG_STREAM(logger_, "Joint velocity limit scaling applied by a factor of " << joint_velocity_limit_scale);
     }
     target_state.velocities *= joint_velocity_limit_scale;
-
-    // Scale down the acceleration based on joint acceleration limit or user defined scaling if applicable.
-    Eigen::VectorXd joint_accelerations =
-        (target_state.velocities - current_state.velocities) / (servo_params_.publish_period);
-    const double joint_acceleration_limit_scale =
-        jointLimitAccelerationScalingFactor(joint_accelerations, joint_bounds, 1.0);
-    if (joint_acceleration_limit_scale < 1.0)  // 1.0 means no scaling.
-    {
-      RCLCPP_DEBUG_STREAM(logger_,
-                          "Joint acceleration limit scaling applied by a factor of " << joint_acceleration_limit_scale);
-    }
-    target_state.velocities =
-        current_state.velocities + joint_acceleration_limit_scale * joint_accelerations * servo_params_.publish_period;
 
     // Adjust joint position based on scaled down velocity
     target_state.positions = current_state.positions + (target_state.velocities * servo_params_.publish_period);
@@ -670,21 +660,16 @@ KinematicState Servo::getCurrentRobotState() const
   return extractRobotState(robot_state, servo_params_.move_group_name);
 }
 
-std::pair<bool, KinematicState> Servo::smoothHalt(const moveit::core::RobotStatePtr& robot_state,
-                                                  const KinematicState& halt_state)
+std::pair<bool, KinematicState> Servo::smoothHalt(const KinematicState& halt_state)
 {
   bool stopped = false;
   auto target_state = halt_state;
 
-  // Get joint bounds from robot state for current move group.
-  const moveit::core::JointModelGroup* joint_model_group =
-      robot_state->getJointModelGroup(servo_params_.move_group_name);
-  const moveit::core::JointBoundsVector joint_bounds = joint_model_group->getActiveJointModelsBounds();
+  // set target velocity
+  target_state.velocities *= 0.0;
 
-  // apply scaling to target velocity based on robot's limits
-  Eigen::VectorXd acceleration = -target_state.velocities / servo_params_.publish_period;
-  const double joint_acceleration_limit_scale = jointLimitAccelerationScalingFactor(acceleration, joint_bounds, 1.0);
-  target_state.velocities += joint_acceleration_limit_scale * acceleration * servo_params_.publish_period;
+  // apply smoothing: this will change target position/velocity to make slow down gradual
+  doSmoothing(target_state);
 
   // scale velocity in case of obstacle
   target_state.velocities *= collision_velocity_scale_;
@@ -697,8 +682,6 @@ std::pair<bool, KinematicState> Servo::smoothHalt(const moveit::core::RobotState
     target_state.accelerations[i] =
         (target_state.velocities[i] - halt_state.velocities[i]) / servo_params_.publish_period;
   }
-
-  doSmoothing(target_state);
 
   // If all velocities are near zero, robot has decelerated to a stop.
   stopped = (target_state.velocities.cwiseAbs().array() < STOPPED_VELOCITY_EPS).all();

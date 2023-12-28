@@ -418,22 +418,6 @@ double jointLimitVelocityScalingFactor(const Eigen::VectorXd& velocities,
   return jointLimitScalingFactorCommon(velocities, joint_bounds, scaling_override, calculate_joint_scaling_factor);
 }
 
-double jointLimitAccelerationScalingFactor(const Eigen::VectorXd& accelerations,
-                                           const moveit::core::JointBoundsVector& joint_bounds, double scaling_override)
-{
-  auto calculate_joint_scaling_factor = [](moveit::core::VariableBounds variable_bound, double target_accel) {
-    if (variable_bound.acceleration_bounded_ && target_accel != 0.0)
-    {
-      // Find the ratio of clamped acceleration to original acceleration
-      const auto bounded_vel =
-          std::clamp(target_accel, variable_bound.min_acceleration_, variable_bound.max_acceleration_);
-      return bounded_vel / target_accel;
-    }
-    return 1.0;
-  };
-  return jointLimitScalingFactorCommon(accelerations, joint_bounds, scaling_override, calculate_joint_scaling_factor);
-}
-
 std::vector<int> jointsToHalt(const Eigen::VectorXd& positions, const Eigen::VectorXd& velocities,
                               const moveit::core::JointBoundsVector& joint_bounds, const std::vector<double>& margins)
 {

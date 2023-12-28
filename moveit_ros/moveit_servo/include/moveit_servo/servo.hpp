@@ -124,12 +124,10 @@ public:
 
   /**
    * \brief Smoothly halt at a commanded state when command goes stale.
-   * @param robot_state A RobotStatePtr instance.
    * @param halt_state The desired stop state.
    * @return The next state stepping towards the required halting state.
    */
-  std::pair<bool, KinematicState> smoothHalt(const moveit::core::RobotStatePtr& robot_state,
-                                             const KinematicState& halt_state);
+  std::pair<bool, KinematicState> smoothHalt(const KinematicState& halt_state);
 
   /**
    * \brief Applies smoothing to an input state, if a smoothing plugin is set.

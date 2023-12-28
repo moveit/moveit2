@@ -95,60 +95,6 @@ TEST(ServoUtilsUnitTests, JointLimitVelocityScaling)
   ASSERT_NEAR(scaling_factor, 1.0 / 1.1, tol);
 }
 
-TEST(ServoUtilsUnitTests, JointLimitAccelerationScaling)
-{
-  using moveit::core::loadTestingRobotModel;
-  moveit::core::RobotModelPtr robot_model = loadTestingRobotModel("panda");
-  const auto joint_model_group = robot_model->getJointModelGroup("panda_arm");
-  auto const_joint_bounds = joint_model_group->getActiveJointModelsBounds();
-
-  // Get the upper bound for the accelerations of each joint.
-  Eigen::VectorXd incoming_accelerations(const_joint_bounds.size());
-
-  // The URDF does not have accelerations, so add values manually
-  incoming_accelerations << 3.75, 1.875, 2.5, 3.125, 3.75, 5.0, 5.0;
-
-  // Build joint_bounds with acceleration data
-  std::vector<const moveit::core::JointModel::Bounds*> joint_bounds;
-  std::vector<moveit::core::JointModel::Bounds> bounds_vector;
-  bounds_vector.resize(const_joint_bounds.size());
-  for (size_t i = 0; i < const_joint_bounds.size(); i++)
-  {
-    moveit::core::JointModel::Bounds* b = &bounds_vector[i];
-    *b = *const_joint_bounds[i];
-    (*b)[0].acceleration_bounded_ = true;
-    (*b)[0].max_acceleration_ = incoming_accelerations(i);
-    joint_bounds.emplace_back(b);
-  }
-
-  // Create incoming accelerations with only joint 1 and joint 2 over limit by a factor of 0.1 and 0.05
-  // Scale down all other joint accelerations by 0.3 to keep it within limits.
-  incoming_accelerations(0) *= 1.1;
-  incoming_accelerations(1) *= 1.05;
-  incoming_accelerations.tail<5>() *= 0.7;
-
-  constexpr double tol = 0.001;
-
-  // The resulting scaling factor from joints should be 1 / 1.1 = 0.90909
-  double user_acceleration_override = 0.0;
-  double scaling_factor = moveit_servo::jointLimitAccelerationScalingFactor(incoming_accelerations, joint_bounds,
-                                                                            user_acceleration_override);
-  ASSERT_NEAR(scaling_factor, 1.0 / 1.1, tol);
-
-  // With a scaling override lower than the joint limit scaling, it should use the override value.
-  user_acceleration_override = 0.5;
-  scaling_factor = moveit_servo::jointLimitAccelerationScalingFactor(incoming_accelerations, joint_bounds,
-                                                                     user_acceleration_override);
-  ASSERT_NEAR(scaling_factor, 0.5, tol);
-
-  // With a scaling override higher than the joint limit scaling, it should still use the joint limits.
-  // Safety always first!
-  user_acceleration_override = 1.0;
-  scaling_factor = moveit_servo::jointLimitAccelerationScalingFactor(incoming_accelerations, joint_bounds,
-                                                                     user_acceleration_override);
-  ASSERT_NEAR(scaling_factor, 1.0 / 1.1, tol);
-}
-
 TEST(ServoUtilsUnitTests, validVector)
 {
   Eigen::VectorXd valid_vector(7);

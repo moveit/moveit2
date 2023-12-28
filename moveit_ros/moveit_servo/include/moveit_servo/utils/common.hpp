@@ -163,17 +163,6 @@ double jointLimitVelocityScalingFactor(const Eigen::VectorXd& velocities,
                                        const moveit::core::JointBoundsVector& joint_bounds, double scaling_override);
 
 /**
- * \brief Apply acceleration scaling based on joint limits. If the robot model does not have acceleration limits
- * defined, then a scale factor of 1.0 will be returned.
- * @param accelerations The commanded accelerations.
- * @param joint_bounds The bounding information for the robot joints.
- * @param scaling_override The user defined acceleration scaling override.
- * @return The acceleration scaling factor.
- */
-double jointLimitAccelerationScalingFactor(const Eigen::VectorXd& accelerations,
-                                           const moveit::core::JointBoundsVector& joint_bounds,
-                                           double scaling_override);
-/**
  * \brief Finds the joints that are exceeding allowable position limits.
  * @param positions The joint positions.
  * @param velocities The current commanded velocities.
