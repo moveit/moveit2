@@ -376,9 +376,8 @@ std::pair<double, StatusCode> velocityScalingFactorForSingularity(const moveit::
   return std::make_pair(velocity_scale, servo_status);
 }
 
-double jointLimitScalingFactorCommon(
-    const Eigen::VectorXd& joint_values, const moveit::core::JointBoundsVector& joint_bounds, double scaling_override,
-    const std::function<double(moveit::core::VariableBounds, double)>& calculate_joint_scaling_factor)
+double jointLimitVelocityScalingFactor(const Eigen::VectorXd& velocities,
+                                       const moveit::core::JointBoundsVector& joint_bounds, double scaling_override)
 {
   // If override value is close to zero, user is not overriding the scaling
   double min_scaling_factor = scaling_override;
@@ -387,35 +386,25 @@ double jointLimitScalingFactorCommon(
     min_scaling_factor = 1.0;  // Set to no scaling override.
   }
 
-  // Now get the scaling factor from joint limits.
+  // Now get the scaling factor from joint velocity limits.
   size_t idx = 0;
   for (const auto& joint_bound : joint_bounds)
   {
     for (const auto& variable_bound : *joint_bound)
     {
-      const auto& joint_target = joint_values(idx);
-      double joint_scaling_factor = calculate_joint_scaling_factor(variable_bound, joint_target);
-      min_scaling_factor = std::min(min_scaling_factor, joint_scaling_factor);
+      const auto& target_vel = velocities(idx);
+      if (variable_bound.velocity_bounded_ && target_vel != 0.0)
+      {
+        // Find the ratio of clamped velocity to original velocity
+        const auto bounded_vel = std::clamp(target_vel, variable_bound.min_velocity_, variable_bound.max_velocity_);
+        const auto joint_scaling_factor = bounded_vel / target_vel;
+        min_scaling_factor = std::min(min_scaling_factor, joint_scaling_factor);
+      }
       ++idx;
     }
   }
 
   return min_scaling_factor;
-}
-
-double jointLimitVelocityScalingFactor(const Eigen::VectorXd& velocities,
-                                       const moveit::core::JointBoundsVector& joint_bounds, double scaling_override)
-{
-  auto calculate_joint_scaling_factor = [](moveit::core::VariableBounds variable_bound, double target_vel) {
-    if (variable_bound.velocity_bounded_ && target_vel != 0.0)
-    {
-      // Find the ratio of clamped velocity to original velocity
-      const auto bounded_vel = std::clamp(target_vel, variable_bound.min_velocity_, variable_bound.max_velocity_);
-      return bounded_vel / target_vel;
-    }
-    return 1.0;
-  };
-  return jointLimitScalingFactorCommon(velocities, joint_bounds, scaling_override, calculate_joint_scaling_factor);
 }
 
 std::vector<int> jointsToHalt(const Eigen::VectorXd& positions, const Eigen::VectorXd& velocities,
