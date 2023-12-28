@@ -59,6 +59,7 @@ bool AccelerationLimitedPlugin::initialize(rclcpp::Node::SharedPtr node, moveit:
   auto param_listener = online_signal_smoothing::ParamListener(node_);
   auto params = param_listener.get_params();
   update_rate_ = params.update_rate;
+  move_group_name_ = params.move_group_name;
 
   return true;
 }
@@ -113,7 +114,7 @@ bool AccelerationLimitedPlugin::doSmoothing(Eigen::VectorXd& positions, Eigen::V
   cur_acceleration_ = (velocities - last_velocities_) / update_rate_;
 
   // scale acceleration using robot joint limits
-  auto joint_model_group = robot_model_->getJointModelGroup("panda_arm");
+  auto joint_model_group = robot_model_->getJointModelGroup(move_group_name_);
   cur_acceleration_ *=
       jointLimitAccelerationScalingFactor(cur_acceleration_, joint_model_group->getActiveJointModelsBounds());
 

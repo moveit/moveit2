@@ -1,9 +1,16 @@
 online_signal_smoothing:
   update_rate: {
     type: double,
-    description: "The expected time in seconds between calls to `doSmoothing`",
+    description: "The expected time in seconds between calls to `doSmoothing` method.",
     read_only: true,
     validation: {
       gt<>: 0.0
     }
+  }
+  move_group_name: {
+    type: string,
+    read_only: true,
+    description: "The name of the moveit move_group of your robot \
+                This parameter does not have a default value and \
+                must be passed to the node during launch time."
   }

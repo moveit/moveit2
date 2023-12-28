@@ -91,5 +91,6 @@ private:
   Eigen::VectorXd cur_acceleration_;
   moveit::core::RobotModelConstPtr robot_model_;
   double update_rate_;
+  std::string move_group_name_;
 };
 }  // namespace online_signal_smoothing

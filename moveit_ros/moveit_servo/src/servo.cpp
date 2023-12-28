@@ -548,6 +548,7 @@ KinematicState Servo::getNextJointState(const moveit::core::RobotStatePtr& robot
     }
   }
 
+  // Update internal state of filter with final calculated command.
   resetSmoothing(target_state);
 
   return target_state;
