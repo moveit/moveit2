@@ -1,0 +1,9 @@
+online_signal_smoothing:
+  update_rate: {
+    type: double,
+    description: "The expected time in seconds between calls to `doSmoothing`",
+    read_only: true,
+    validation: {
+      gt<>: 0.0
+    }
+  }

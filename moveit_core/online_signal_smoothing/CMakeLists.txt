@@ -45,10 +45,34 @@ ament_target_dependencies(moveit_butterworth_filter
   pluginlib
 )
 
+add_library(moveit_acceleration_filter SHARED
+            src/acceleration_filter.cpp
+    )
+generate_export_header(moveit_acceleration_filter)
+target_include_directories(moveit_acceleration_filter PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
+)
+set_target_properties(moveit_acceleration_filter PROPERTIES VERSION
+        "${${PROJECT_NAME}_VERSION}"
+)
+
+generate_parameter_library(moveit_acceleration_parameters src/acceleration_parameters.yaml)
+
+target_link_libraries(moveit_acceleration_filter
+    moveit_acceleration_parameters
+    moveit_robot_state
+    moveit_smoothing_base
+)
+ament_target_dependencies(moveit_acceleration_filter
+        srdfdom  # include dependency from moveit_robot_model
+)
+
+
 # Installation
 install(DIRECTORY include/ DESTINATION include/moveit_core)
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/moveit_smoothing_base_export.h DESTINATION include/moveit_core)
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/moveit_butterworth_filter_export.h DESTINATION include/moveit_core)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/moveit_acceleration_filter_export.h DESTINATION include/moveit_core)
 
 # Testing
 

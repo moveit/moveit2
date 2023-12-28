@@ -548,6 +548,8 @@ KinematicState Servo::getNextJointState(const moveit::core::RobotStatePtr& robot
     }
   }
 
+  resetSmoothing(target_state);
+
   return target_state;
 }
 
