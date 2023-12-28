@@ -115,12 +115,12 @@ int main(int argc, char* argv[])
 
   RCLCPP_INFO_STREAM(demo_node->get_logger(), servo.getStatusMessage());
 
-  KinematicState joint_state;
-  KinematicState current_state = servo.getCurrentRobotState();
   rclcpp::WallRate servo_rate(1 / servo_params.publish_period);
 
-  // create command queue to build trajectory message
+  // create command queue to build trajectory message and add current robot state
   std::deque<KinematicState> joint_cmd_rolling_window;
+  KinematicState current_state = servo.getCurrentRobotState();
+  updateSlidingWindow(current_state, joint_cmd_rolling_window, 0.0, demo_node->now());
 
   bool satisfies_linear_tolerance = false;
   bool satisfies_angular_tolerance = false;
@@ -146,7 +146,7 @@ int main(int argc, char* argv[])
     }
 
     // get next servo command
-    joint_state = servo.getNextJointState(robot_state, target_pose);
+    KinematicState joint_state = servo.getNextJointState(robot_state, target_pose);
     StatusCode status = servo.getStatus();
     if (status != StatusCode::INVALID)
     {

@@ -332,7 +332,9 @@ void ServoNode::servoLoop()
     else
     {
       current_state = servo_->getCurrentRobotState();
+      current_state.velocities *= 0.0;
       joint_cmd_rolling_window_.clear();
+      updateSlidingWindow(current_state, joint_cmd_rolling_window_, 0.0, cur_time);
     }
 
     // Get the robot state and joint model group info.
