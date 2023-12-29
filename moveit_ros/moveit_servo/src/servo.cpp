@@ -209,7 +209,7 @@ bool Servo::validateParams(const servo::Params& servo_params) const
   {
     RCLCPP_ERROR_STREAM(logger_, "The parameter 'hard_stop_singularity_threshold' "
                                  "should be greater than the parameter 'lower_singularity_threshold'. But the "
-                                 "'hard_stop_signularity_threshold' is: '"
+                                 "'hard_stop_singularity_threshold' is: '"
                                      << servo_params.hard_stop_singularity_threshold
                                      << "' and the 'lower_singularity_threshold' is: '"
                                      << servo_params.lower_singularity_threshold << "'" << check_yaml_string);
@@ -284,12 +284,12 @@ bool Servo::validateParams(const servo::Params& servo_params) const
     params_valid = false;
   }
 
-  if (servo_params.max_expected_latency / 3 < servo_params.publish_period)
+  if (servo_params.max_expected_latency / MIN_POINTS_FOR_TRAJ_MSG < servo_params.publish_period)
   {
     RCLCPP_ERROR(
         logger_,
-        "The publish period (%f sec) parameter must be less than 1/3 of the max expected latency parameter (%f sec).",
-        servo_params.publish_period, servo_params.max_expected_latency);
+        "The publish period (%f sec) parameter must be less than 1/%d of the max expected latency parameter (%f sec).",
+        servo_params.publish_period, MIN_POINTS_FOR_TRAJ_MSG, servo_params.max_expected_latency);
     params_valid = false;
   }
 
@@ -662,29 +662,31 @@ KinematicState Servo::getCurrentRobotState() const
 
 std::pair<bool, KinematicState> Servo::smoothHalt(const KinematicState& halt_state)
 {
-  bool stopped = false;
   auto target_state = halt_state;
 
-  // set target velocity
-  target_state.velocities *= 0.0;
-
-  // apply smoothing: this will change target position/velocity to make slow down gradual
-  doSmoothing(target_state);
-
-  // scale velocity in case of obstacle
-  target_state.velocities *= collision_velocity_scale_;
-
-  for (size_t i = 0; i < (size_t)halt_state.positions.size(); ++i)
-  {
-    target_state.positions[i] = halt_state.positions[i] + target_state.velocities[i] * servo_params_.publish_period;
-    const double vel = target_state.velocities[i];
-    target_state.velocities[i] = (std::abs(vel) > STOPPED_VELOCITY_EPS) ? vel : 0.0;
-    target_state.accelerations[i] =
-        (target_state.velocities[i] - halt_state.velocities[i]) / servo_params_.publish_period;
-  }
-
   // If all velocities are near zero, robot has decelerated to a stop.
-  stopped = (target_state.velocities.cwiseAbs().array() < STOPPED_VELOCITY_EPS).all();
+  bool stopped = (target_state.velocities.cwiseAbs().array() < STOPPED_VELOCITY_EPS).all();
+
+  if (!stopped)
+  {
+    // set target velocity
+    target_state.velocities *= 0.0;
+
+    // apply smoothing: this will change target position/velocity to make slow down gradual
+    doSmoothing(target_state);
+
+    // scale velocity in case of obstacle
+    target_state.velocities *= collision_velocity_scale_;
+
+    for (long i = 0; i < halt_state.positions.size(); ++i)
+    {
+      target_state.positions[i] = halt_state.positions[i] + target_state.velocities[i] * servo_params_.publish_period;
+      const double vel = target_state.velocities[i];
+      target_state.velocities[i] = (std::abs(vel) > STOPPED_VELOCITY_EPS) ? vel : 0.0;
+      target_state.accelerations[i] =
+          (target_state.velocities[i] - halt_state.velocities[i]) / servo_params_.publish_period;
+    }
+  }
 
   return std::make_pair(stopped, target_state);
 }

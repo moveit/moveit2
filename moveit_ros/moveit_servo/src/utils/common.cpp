@@ -45,9 +45,6 @@ namespace
 constexpr double SCALING_OVERRIDE_THRESHOLD = 0.01;
 // The angle threshold in radians below which a rotation will be considered the identity.
 constexpr double MIN_ANGLE_THRESHOLD = 1E-16;
-// A minimum of 3 points are used to help with interpolation when creating trajectory messages.
-constexpr int MIN_POINTS_FOR_TRAJ_MSG = 3;
-
 }  // namespace
 
 namespace moveit_servo

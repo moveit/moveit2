@@ -313,6 +313,11 @@ void ServoNode::servoLoop()
   KinematicState current_state = servo_->getCurrentRobotState();
   last_commanded_state_ = current_state;
 
+  // Get the robot state and joint model group info.
+  moveit::core::RobotStatePtr robot_state = planning_scene_monitor_->getStateMonitor()->getCurrentState();
+  const moveit::core::JointModelGroup* joint_model_group =
+      robot_state->getJointModelGroup(servo_params_.move_group_name);
+
   while (rclcpp::ok() && !stop_servo_)
   {
     // Skip processing if servoing is disabled.
@@ -331,16 +336,11 @@ void ServoNode::servoLoop()
     }
     else
     {
+      // if all joint_cmd_rolling_window_ is empty or all commands in it are outdated, use current robot state
+      joint_cmd_rolling_window_.clear();
       current_state = servo_->getCurrentRobotState();
       current_state.velocities *= 0.0;
-      joint_cmd_rolling_window_.clear();
-      updateSlidingWindow(current_state, joint_cmd_rolling_window_, 0.0, cur_time);
     }
-
-    // Get the robot state and joint model group info.
-    moveit::core::RobotStatePtr robot_state = planning_scene_monitor_->getStateMonitor()->getCurrentState();
-    const moveit::core::JointModelGroup* joint_model_group =
-        robot_state->getJointModelGroup(servo_params_.move_group_name);
 
     // update robot state values
     robot_state->setJointGroupPositions(joint_model_group, current_state.positions);
@@ -385,6 +385,12 @@ void ServoNode::servoLoop()
         multi_array_publisher_->publish(composeMultiArrayMessage(servo_->getParams(), next_joint_state.value()));
       }
       last_commanded_state_ = next_joint_state.value();
+    }
+    else
+    {
+      // if no new command was created, use current robot state
+      updateSlidingWindow(current_state, joint_cmd_rolling_window_, servo_params_.max_expected_latency, cur_time);
+      servo_->resetSmoothing(current_state);
     }
 
     status_msg.code = static_cast<int8_t>(servo_->getStatus());

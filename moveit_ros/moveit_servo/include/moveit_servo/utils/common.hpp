@@ -54,6 +54,9 @@
 
 namespace moveit_servo
 {
+// A minimum of 3 points are used to help with interpolation when creating trajectory messages.
+constexpr int MIN_POINTS_FOR_TRAJ_MSG = 3;
+
 /**
  * \brief Get the base frame of the current active joint group or subgroup's IK solver.
  * @param robot_state A pointer to the current robot state.
@@ -121,7 +124,7 @@ composeTrajectoryMessage(const servo::Params& servo_params, const std::deque<Kin
 
 /**
  * \brief Adds a new joint state command to a queue containing commands over a time window. Also modifies the velocities
- * of the commands to avoid overshooting.
+ * of the commands to help avoid overshooting.
  * @param next_joint_state The next commanded joint state.
  * @param joint_cmd_rolling_window Queue of containing a rolling window of joint commands.
  * @param max_expected_latency The next_joint_state will be added to the joint_cmd_rolling_window with a time stamp of
