@@ -327,8 +327,10 @@ def generate_demo_launch(moveit_config):
             package="controller_manager",
             executable="ros2_control_node",
             parameters=[
-                moveit_config.robot_description,
                 str(moveit_config.package_path / "config/ros2_controllers.yaml"),
+            ],
+            remappings=[
+                ("/controller_manager/robot_description", "/robot_description"),
             ],
         )
     )
