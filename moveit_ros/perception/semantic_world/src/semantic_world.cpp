@@ -253,7 +253,7 @@ SemanticWorld::generatePlacePoses(const object_recognition_msgs::msg::Table& cho
 {
   std::vector<geometry_msgs::msg::PoseStamped> place_poses;
   if (object_shape->type != shapes::MESH && object_shape->type != shapes::SPHERE && object_shape->type != shapes::BOX &&
-      object_shape->type != shapes::CONE)
+      object_shape->type != shapes::CYLINDER && object_shape->type != shapes::CONE)
   {
     return place_poses;
   }
