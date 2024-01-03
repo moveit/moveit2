@@ -42,6 +42,7 @@ target_link_libraries(moveit_butterworth_filter
 )
 ament_target_dependencies(moveit_butterworth_filter
   srdfdom  # include dependency from moveit_robot_model
+  pluginlib
 )
 
 # Installation
