@@ -115,7 +115,7 @@ void CollisionMonitor::checkCollisions()
       // Check collision with environment.
       scene_collision_result_.clear();
       locked_scene->getCollisionEnv()->checkRobotCollision(scene_collision_request_, scene_collision_result_,
-                                                           *robot_state_);
+                                                           *robot_state_, locked_scene->getAllowedCollisionMatrix());
 
       // Check robot self collision.
       self_collision_result_.clear();
