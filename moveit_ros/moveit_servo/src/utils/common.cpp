@@ -43,8 +43,12 @@ namespace
 {
 // The threshold above which `override_velocity_scaling_factor` will be used instead of computing the scaling from joint bounds.
 constexpr double SCALING_OVERRIDE_THRESHOLD = 0.01;
+
 // The angle threshold in radians below which a rotation will be considered the identity.
 constexpr double MIN_ANGLE_THRESHOLD = 1E-16;
+
+// The publishing frequency for the planning scene monitor, in Hz.
+constexpr double PLANNING_SCENE_PUBLISHING_FREQUENCY = 25.0;
 }  // namespace
 
 namespace moveit_servo
@@ -454,18 +458,31 @@ PoseCommand poseFromPoseStamped(const geometry_msgs::msg::PoseStamped& msg)
 planning_scene_monitor::PlanningSceneMonitorPtr createPlanningSceneMonitor(const rclcpp::Node::SharedPtr& node,
                                                                            const servo::Params& servo_params)
 {
-  planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor;
   // Can set robot_description name from parameters
   std::string robot_description_name = "robot_description";
   node->get_parameter_or("robot_description_name", robot_description_name, robot_description_name);
+
   // Set up planning_scene_monitor
-  planning_scene_monitor = std::make_shared<planning_scene_monitor::PlanningSceneMonitor>(node, robot_description_name,
-                                                                                          "planning_scene_monitor");
+  auto planning_scene_monitor = std::make_shared<planning_scene_monitor::PlanningSceneMonitor>(
+      node, robot_description_name, "planning_scene_monitor");
 
   planning_scene_monitor->startStateMonitor(servo_params.joint_topic);
   planning_scene_monitor->startSceneMonitor(servo_params.monitored_planning_scene_topic);
-  planning_scene_monitor->startWorldGeometryMonitor();
-  planning_scene_monitor->setPlanningScenePublishingFrequency(25);
+  planning_scene_monitor->startWorldGeometryMonitor(
+      planning_scene_monitor::PlanningSceneMonitor::DEFAULT_COLLISION_OBJECT_TOPIC,
+      planning_scene_monitor::PlanningSceneMonitor::DEFAULT_PLANNING_SCENE_WORLD_TOPIC,
+      servo_params.check_octomap_collisions);
+
+  if (servo_params.is_primary_planning_scene_monitor)
+  {
+    planning_scene_monitor->providePlanningSceneService();
+  }
+  else
+  {
+    planning_scene_monitor->requestPlanningSceneState();
+  }
+
+  planning_scene_monitor->setPlanningScenePublishingFrequency(PLANNING_SCENE_PUBLISHING_FREQUENCY);
   planning_scene_monitor->getStateMonitor()->enableCopyDynamics(true);
   planning_scene_monitor->startPublishingPlanningScene(planning_scene_monitor::PlanningSceneMonitor::UPDATE_SCENE,
                                                        std::string(node->get_fully_qualified_name()) +

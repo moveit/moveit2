@@ -27,6 +27,7 @@ ament_target_dependencies(moveit_test_utils
   Boost
   geometry_msgs
   urdf
+  pluginlib
   srdfdom
   urdfdom
   urdfdom_headers

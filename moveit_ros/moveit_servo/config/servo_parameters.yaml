@@ -200,6 +200,13 @@ servo:
     description: "The topic on which joint states can be monitored"
   }
 
+  check_octomap_collisions: {
+    type: bool,
+    read_only: true,
+    default_value: false,
+    description: "If true, the planning scene monitor also listens to octomap updates for collision checking."
+  }
+
   is_primary_planning_scene_monitor: {
     type: bool,
     read_only: true,
