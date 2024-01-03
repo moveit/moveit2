@@ -1278,7 +1278,7 @@ void PlanningSceneMonitor::startWorldGeometryMonitor(const std::string& collisio
     RCLCPP_INFO(logger_, "Listening to '%s' for planning scene world geometry", planning_scene_world_topic.c_str());
   }
 
-  // Ocotomap monitor is optional
+  // Octomap monitor is optional
   if (load_octomap_monitor)
   {
     if (!octomap_monitor_)
