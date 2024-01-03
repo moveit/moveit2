@@ -38,10 +38,6 @@ find_package(urdfdom REQUIRED)
 find_package(urdfdom_headers REQUIRED)
 find_package(visualization_msgs REQUIRED)
 
-
-# TODO: Port python bindings
-# find_package(pybind11 REQUIRED)
-
 # Finds Boost Components
 include(ConfigExtras.cmake)
 
@@ -68,33 +64,6 @@ add_subdirectory(trajectory_processing)
 add_subdirectory(transforms)
 add_subdirectory(utils)
 add_subdirectory(version)
-
-# TODO: Port python bindings
-# add_subdirectory(python)
-# set(pymoveit_libs
-#   moveit_collision_detection
-#   moveit_kinematic_constraints
-#   moveit_planning_scene
-#   moveit_python_tools
-#   moveit_robot_model
-#   moveit_robot_state
-#   moveit_transforms
-# )
-#
-# pybind_add_module(pymoveit_core
-#     python/pymoveit_core.cpp
-#     collision_detection/src/pycollision_detection.cpp
-#     robot_model/src/pyrobot_model.cpp
-#     robot_state/src/pyrobot_state.cpp
-#     transforms/src/pytransforms.cpp
-#     planning_scene/src/pyplanning_scene.cpp
-#     kinematic_constraints/src/pykinematic_constraint.cpp
-# )
-# target_include_directories(pymoveit_core SYSTEM PRIVATE ${catkin_INCLUDE_DIRS})
-# target_link_libraries(pymoveit_core PRIVATE ${pymoveit_libs} ${catkin_LIBRARIES})
-#
-# #catkin_lint: ignore_once undefined_target (pymoveit_core is defined by pybind_add_module)
-# install(TARGETS pymoveit_core LIBRARY DESTINATION ${CATKIN_GLOBAL_PYTHON_DESTINATION})
 
 
 install(
