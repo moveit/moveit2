@@ -56,7 +56,7 @@ int main(int argc, char** argv)
 {
   rclcpp::init(argc, argv);
   auto node = rclcpp::Node::make_shared("visualize_robot_collision_volume");
-  moveit::setLogger(node->get_logger());
+  moveit::setNodeLoggerName(node->get_name());
 
   rclcpp::executors::MultiThreadedExecutor executor;
   executor.add_node(node);

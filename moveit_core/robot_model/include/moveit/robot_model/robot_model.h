@@ -60,14 +60,14 @@ namespace core
 {
 MOVEIT_CLASS_FORWARD(RobotModel);  // Defines RobotModelPtr, ConstPtr, WeakPtr... etc
 
-static inline void checkInterpolationParamBounds(const rclcpp::Logger& LOGGER, double t)
+static inline void checkInterpolationParamBounds(const rclcpp::Logger& logger, double t)
 {
   if (std::isnan(t) || std::isinf(t))
   {
     throw Exception("Interpolation parameter is NaN or inf.");
   }
 
-  RCLCPP_WARN_STREAM_EXPRESSION(LOGGER, t < 0. || t > 1., "Interpolation parameter is not in the range [0, 1]: " << t);
+  RCLCPP_WARN_STREAM_EXPRESSION(logger, t < 0. || t > 1., "Interpolation parameter is not in the range [0, 1]: " << t);
 }
 
 /** \brief Definition of a kinematic model. This class is not thread

@@ -45,7 +45,7 @@
 namespace moveit_rviz_plugin
 {
 
-TrajectoryDisplay::TrajectoryDisplay() : Display(), logger_(moveit::makeChildLogger("trajectory_display"))
+TrajectoryDisplay::TrajectoryDisplay() : Display(), logger_(moveit::getLogger("trajectory_display"))
 
 {
   // The robot description property is only needed when using the trajectory playback standalone (not within motion

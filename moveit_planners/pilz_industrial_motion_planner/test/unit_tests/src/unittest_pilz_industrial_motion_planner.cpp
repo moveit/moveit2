@@ -74,8 +74,8 @@ protected:
     ASSERT_TRUE(bool(robot_model_)) << "Failed to load robot model";
 
     // Load planner name from node parameters
-    ASSERT_TRUE(node_->has_parameter("planning_plugin")) << "Could not find parameter 'planning_plugin'";
-    node_->get_parameter<std::string>("planning_plugin", planner_plugin_name_);
+    ASSERT_TRUE(node_->has_parameter("planning_plugins")) << "Could not find parameter 'planning_plugins'";
+    node_->get_parameter<std::vector<std::string>>("planning_plugins", planner_plugin_names_);
 
     // Load the plugin
     try
@@ -92,7 +92,7 @@ protected:
     // Create planner
     try
     {
-      planner_instance_.reset(planner_plugin_loader_->createUnmanagedInstance(planner_plugin_name_));
+      planner_instance_.reset(planner_plugin_loader_->createUnmanagedInstance(planner_plugin_names_.at(0)));
       ASSERT_TRUE(planner_instance_->initialize(robot_model_, node_, ""))
           << "Initializing the planner instance failed.";
     }
@@ -104,7 +104,7 @@ protected:
 
   void TearDown() override
   {
-    planner_plugin_loader_->unloadLibraryForClass(planner_plugin_name_);
+    planner_plugin_loader_->unloadLibraryForClass(planner_plugin_names_.at(0));
     robot_model_.reset();
   }
 
@@ -114,7 +114,7 @@ protected:
   moveit::core::RobotModelConstPtr robot_model_;
   std::unique_ptr<robot_model_loader::RobotModelLoader> rm_loader_;
 
-  std::string planner_plugin_name_;
+  std::vector<std::string> planner_plugin_names_;
   std::unique_ptr<pluginlib::ClassLoader<planning_interface::PlannerManager>> planner_plugin_loader_;
   planning_interface::PlannerManagerPtr planner_instance_;
 };

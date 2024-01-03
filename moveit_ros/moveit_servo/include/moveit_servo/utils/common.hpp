@@ -153,11 +153,11 @@ double jointLimitVelocityScalingFactor(const Eigen::VectorXd& velocities,
  * @param positions The joint positions.
  * @param velocities The current commanded velocities.
  * @param joint_bounds The allowable limits for the robot joints.
- * @param margin Additional buffer on the actual joint limits.
+ * @param margins Additional buffer on the actual joint limits.
  * @return The joints that are violating the specified position limits.
  */
 std::vector<int> jointsToHalt(const Eigen::VectorXd& positions, const Eigen::VectorXd& velocities,
-                              const moveit::core::JointBoundsVector& joint_bounds, double margin);
+                              const moveit::core::JointBoundsVector& joint_bounds, const std::vector<double>& margins);
 
 /**
  * \brief Helper function for converting Eigen::Isometry3d to geometry_msgs/TransformStamped.

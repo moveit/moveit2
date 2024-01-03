@@ -17,6 +17,7 @@ include(GenerateExportHeader)
 generate_export_header(moveit_collision_detection)
 
 ament_target_dependencies(moveit_collision_detection
+  pluginlib
   rclcpp
   rmw_implementation
   urdf
@@ -35,6 +36,7 @@ set_target_properties(moveit_collision_detection PROPERTIES VERSION ${${PROJECT_
 
 target_link_libraries(moveit_collision_detection
   moveit_robot_state
+  moveit_utils
 )
 
 # unit tests

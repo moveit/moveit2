@@ -96,7 +96,7 @@ PlanningSceneMonitor::PlanningSceneMonitor(const rclcpp::Node::SharedPtr& node,
   , dt_state_update_(0.0)
   , shape_transform_cache_lookup_wait_time_(0, 0)
   , rm_loader_(rm_loader)
-  , logger_(moveit::makeChildLogger("planning_scene_monitor"))
+  , logger_(moveit::getLogger("planning_scene_monitor"))
 {
   std::vector<std::string> new_args = rclcpp::NodeOptions().arguments();
   new_args.push_back("--ros-args");
@@ -1281,7 +1281,7 @@ void PlanningSceneMonitor::startWorldGeometryMonitor(const std::string& collisio
     RCLCPP_INFO(logger_, "Listening to '%s' for planning scene world geometry", planning_scene_world_topic.c_str());
   }
 
-  // Ocotomap monitor is optional
+  // Octomap monitor is optional
   if (load_octomap_monitor)
   {
     if (!octomap_monitor_)

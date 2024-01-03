@@ -344,7 +344,7 @@ GLuint mesh_filter::GLRenderer::loadShaders(const string& vertex_source, const s
     glGetProgramInfoLog(program_id, info_log_length, nullptr, &program_error_message[0]);
     std::size_t l = strnlen(&program_error_message[0], program_error_message.size());
     if (l > 0)
-      RCLCPP_ERROR(moveit::getLogger(), "%s\n", &program_error_message[0]);
+      RCLCPP_ERROR(moveit::getLogger("gl_renderer"), "%s\n", &program_error_message[0]);
   }
 
   if (vertex_shader_id)

@@ -44,7 +44,6 @@
   <depend>octomap_msgs</depend>
   <depend>octomap</depend>
   <depend>pluginlib</depend>
-  <depend>pybind11_vendor</depend>
   <depend>random_numbers</depend>
   <depend>rclcpp</depend>
   <depend>rsl</depend>

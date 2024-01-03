@@ -38,6 +38,47 @@
 #include <fmt/format.h>
 #include <moveit/utils/logger.hpp>
 
+namespace
+{
+namespace
+{
+rclcpp::Logger getLogger()
+{
+  return moveit::getLogger("planning_pipeline");
+}
+}  // namespace
+
+/**
+ * @brief Transform a joint trajectory into a vector of joint constraints
+ *
+ * @param trajectory Reference trajectory from which the joint constraints are created
+ * @return A vector of joint constraints each corresponding to a waypoint of the reference trajectory.
+ */
+[[nodiscard]] std::vector<moveit_msgs::msg::Constraints>
+getTrajectoryConstraints(const robot_trajectory::RobotTrajectoryPtr& trajectory)
+{
+  const std::vector<std::string> joint_names =
+      trajectory->getFirstWayPoint().getJointModelGroup(trajectory->getGroupName())->getActiveJointModelNames();
+
+  std::vector<moveit_msgs::msg::Constraints> trajectory_constraints;
+  // Iterate through waypoints and create a joint constraint for each
+  for (size_t waypoint_index = 0; waypoint_index < trajectory->getWayPointCount(); ++waypoint_index)
+  {
+    moveit_msgs::msg::Constraints new_waypoint_constraint;
+    // Iterate through joints and copy waypoint data to joint constraint
+    for (const auto& joint_name : joint_names)
+    {
+      moveit_msgs::msg::JointConstraint new_joint_constraint;
+      new_joint_constraint.joint_name = joint_name;
+      new_joint_constraint.position = trajectory->getWayPoint(waypoint_index).getVariablePosition(joint_name);
+      new_waypoint_constraint.joint_constraints.push_back(new_joint_constraint);
+    }
+    trajectory_constraints.push_back(new_waypoint_constraint);
+  }
+  return trajectory_constraints;
+}
+}  // namespace
+
 namespace planning_pipeline
 {
 PlanningPipeline::PlanningPipeline(const moveit::core::RobotModelConstPtr& model,
@@ -46,7 +87,7 @@ PlanningPipeline::PlanningPipeline(const moveit::core::RobotModelConstPtr& model
   , node_(node)
   , parameter_namespace_(parameter_namespace)
   , robot_model_(model)
-  , logger_(moveit::makeChildLogger("planning_pipeline"))
+  , logger_(moveit::getLogger("planning_pipeline"))
 {
   auto param_listener = planning_pipeline_parameters::ParamListener(node, parameter_namespace);
   pipeline_parameters_ = param_listener.get_params();
@@ -56,16 +97,16 @@ PlanningPipeline::PlanningPipeline(const moveit::core::RobotModelConstPtr& model
 
 PlanningPipeline::PlanningPipeline(const moveit::core::RobotModelConstPtr& model,
                                    const std::shared_ptr<rclcpp::Node>& node, const std::string& parameter_namespace,
-                                   const std::string& planner_plugin_name,
+                                   const std::vector<std::string>& planner_plugin_names,
                                    const std::vector<std::string>& request_adapter_plugin_names,
                                    const std::vector<std::string>& response_adapter_plugin_names)
   : active_{ false }
   , node_(node)
   , parameter_namespace_(parameter_namespace)
   , robot_model_(model)
-  , logger_(moveit::makeChildLogger("planning_pipeline"))
+  , logger_(moveit::getLogger("planning_pipeline"))
 {
-  pipeline_parameters_.planning_plugin = planner_plugin_name;
+  pipeline_parameters_.planning_plugins = planner_plugin_names;
   pipeline_parameters_.request_adapters = request_adapter_plugin_names;
   pipeline_parameters_.response_adapters = response_adapter_plugin_names;
   configure();
@@ -73,14 +114,6 @@ PlanningPipeline::PlanningPipeline(const moveit::core::RobotModelConstPtr& model
 
 void PlanningPipeline::configure()
 {
-  // Check if planning plugin name is available
-  if (pipeline_parameters_.planning_plugin.empty())
-  {
-    const std::string classes_str = fmt::format("{}", fmt::join(planner_plugin_loader_->getDeclaredClasses(), ", "));
-    throw std::runtime_error("Planning plugin name is empty. Please choose one of the available plugins: " +
-                             classes_str);
-  }
-
   // If progress topic parameter is not empty, initialize publisher
   if (!pipeline_parameters_.progress_topic.empty())
   {
@@ -100,30 +133,46 @@ void PlanningPipeline::configure()
     throw;
   }
 
-  if (pipeline_parameters_.planning_plugin.empty() || pipeline_parameters_.planning_plugin == "UNKNOWN")
+  if (pipeline_parameters_.planning_plugins.empty() || pipeline_parameters_.planning_plugins.at(0) == "UNKNOWN")
   {
     const std::string classes_str = fmt::format("{}", fmt::join(planner_plugin_loader_->getDeclaredClasses(), ", "));
     throw std::runtime_error("Planning plugin name is empty or not defined in namespace '" + parameter_namespace_ +
                              "'. Please choose one of the available plugins: " + classes_str);
   }
 
-  try
+  for (const auto& planner_name : pipeline_parameters_.planning_plugins)
   {
-    planner_instance_ = planner_plugin_loader_->createUniqueInstance(pipeline_parameters_.planning_plugin);
-    if (!planner_instance_->initialize(robot_model_, node_, parameter_namespace_))
+    planning_interface::PlannerManagerPtr planner_instance;
+
+    // Load plugin
+    try
     {
-      throw std::runtime_error("Unable to initialize planning plugin");
+      planner_instance = planner_plugin_loader_->createUniqueInstance(planner_name);
     }
-    RCLCPP_INFO(logger_, "Using planning interface '%s'", planner_instance_->getDescription().c_str());
-  }
-  catch (pluginlib::PluginlibException& ex)
-  {
-    const std::string classes_str = fmt::format("{}", fmt::join(planner_plugin_loader_->getDeclaredClasses(), ", "));
-    RCLCPP_FATAL(logger_,
-                 "Exception while loading planner '%s': %s"
-                 "Available plugins: %s",
-                 pipeline_parameters_.planning_plugin.c_str(), ex.what(), classes_str.c_str());
-    throw;
+    catch (pluginlib::PluginlibException& ex)
+    {
+      std::string classes_str = fmt::format("{}", fmt::join(planner_plugin_loader_->getDeclaredClasses(), ", "));
+      RCLCPP_FATAL(getLogger(),
+                   "Exception while loading planner '%s': %s"
+                   "Available plugins: %s",
+                   planner_name.c_str(), ex.what(), classes_str.c_str());
+      throw;
+    }
+
+    // Check if planner is not NULL
+    if (!planner_instance)
+    {
+      throw std::runtime_error("Unable to initialize planning plugin " + planner_name +
+                               ". Planner instance is nullptr.");
+    }
+
+    // Initialize planner
+    if (!planner_instance->initialize(robot_model_, node_, parameter_namespace_))
+    {
+      throw std::runtime_error("Unable to initialize planning plugin " + planner_name);
+    }
+    RCLCPP_INFO(getLogger(), "Successfully loaded planner '%s'", planner_instance->getDescription().c_str());
+    planner_map_.insert(std::make_pair(planner_name, planner_instance));
   }
 
   // Load the planner request adapters
@@ -204,7 +253,7 @@ bool PlanningPipeline::generatePlan(const planning_scene::PlanningSceneConstPtr&
                                     planning_interface::MotionPlanResponse& res,
                                     const bool publish_received_requests) const
 {
-  assert(planner_instance_ != nullptr);
+  assert(!planner_map_.empty());
 
   // Set planning pipeline active
   active_ = true;
@@ -241,22 +290,38 @@ bool PlanningPipeline::generatePlan(const planning_scene::PlanningSceneConstPtr&
       }
     }
 
-    // Call planner
-    if (res.error_code)
+    // Call planners
+    for (const auto& planner_name : pipeline_parameters_.planning_plugins)
     {
-      planning_interface::PlanningContextPtr context =
-          planner_instance_->getPlanningContext(planning_scene, mutable_request, res.error_code);
-      if (context)
+      const auto& planner = planner_map_.at(planner_name);
+      // Update reference trajectory with latest solution (if available)
+      if (res.trajectory)
       {
-        context->solve(res);
-        publishPipelineState(mutable_request, res, planner_instance_->getDescription());
+        mutable_request.trajectory_constraints.constraints = getTrajectoryConstraints(res.trajectory);
       }
-      else
+
+      // Try creating a planning context
+      planning_interface::PlanningContextPtr context =
+          planner->getPlanningContext(planning_scene, mutable_request, res.error_code);
+      if (!context)
       {
         RCLCPP_ERROR(node_->get_logger(),
                      "Failed to create PlanningContext for planner '%s'. Aborting planning pipeline.",
-                     planner_instance_->getDescription().c_str());
+                     planner->getDescription().c_str());
         res.error_code = moveit::core::MoveItErrorCode::PLANNING_FAILED;
+        break;
+      }
+
+      // Run planner
+      RCLCPP_INFO(node_->get_logger(), "Calling Planner '%s'", planner->getDescription().c_str());
+      context->solve(res);
+      publishPipelineState(mutable_request, res, planner->getDescription());
+
+      // If planner does not succeed, break chain and return false
+      if (!res.error_code)
+      {
+        RCLCPP_ERROR(node_->get_logger(), "Planner '%s' failed", planner->getDescription().c_str());
+        break;
       }
     }
 
@@ -305,9 +370,12 @@ bool PlanningPipeline::generatePlan(const planning_scene::PlanningSceneConstPtr&
 
 void PlanningPipeline::terminate() const
 {
-  if (planner_instance_)
+  for (const auto& planner_pair : planner_map_)
   {
-    planner_instance_->terminate();
+    if (planner_pair.second)
+    {
+      planner_pair.second->terminate();
+    }
   }
 }
 }  // namespace planning_pipeline

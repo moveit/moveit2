@@ -62,7 +62,7 @@ namespace default_planning_request_adapters
 class CheckStartStateBounds : public planning_interface::PlanningRequestAdapter
 {
 public:
-  CheckStartStateBounds() : logger_(moveit::makeChildLogger("check_start_state_bounds"))
+  CheckStartStateBounds() : logger_(moveit::getLogger("check_start_state_bounds"))
   {
   }
 

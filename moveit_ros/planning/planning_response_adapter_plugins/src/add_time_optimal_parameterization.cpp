@@ -49,7 +49,7 @@ using namespace trajectory_processing;
 class AddTimeOptimalParameterization : public planning_interface::PlanningResponseAdapter
 {
 public:
-  AddTimeOptimalParameterization() : logger_(moveit::makeChildLogger("add_time_optimal_parameterization"))
+  AddTimeOptimalParameterization() : logger_(moveit::getLogger("add_time_optimal_parameterization"))
   {
   }
 

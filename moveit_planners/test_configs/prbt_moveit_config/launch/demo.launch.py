@@ -81,12 +81,20 @@ def generate_launch_description():
         "default_planning_pipeline": "ompl",
         "planning_pipelines": ["pilz", "ompl"],
         "pilz": {
-            "planning_plugin": "pilz_industrial_motion_planner/CommandPlanner",
-            "request_adapters": "",
+            "planning_plugins": ["pilz_industrial_motion_planner/CommandPlanner"],
         },
         "ompl": {
-            "planning_plugin": "ompl_interface/OMPLPlanner",
-            "request_adapters": """default_planning_request_adapters/AddTimeOptimalParameterization default_planning_request_adapters/ValidateWorkspaceBounds default_planning_request_adapters/CheckStartStateBounds default_planning_request_adapters/CheckStartStateCollision default_planning_request_adapters/FixStartStatePathConstraints""",
+            "planning_plugins": ["ompl_interface/OMPLPlanner"],
+            "request_adapters": [
+                "default_planning_request_adapters/ResolveConstraintFrames",
+                "default_planning_request_adapters/ValidateWorkspaceBounds",
+                "default_planning_request_adapters/CheckStartStateBounds",
+                "default_planning_request_adapters/CheckStartStateCollision",
+            ],
+            "response_adapters": [
+                "default_planning_response_adapters/AddTimeOptimalParameterization",
+                "default_planning_response_adapters/ValidateSolution",
+            ],
         },
     }
     ompl_planning_yaml = load_yaml(
@@ -181,7 +189,10 @@ def generate_launch_description():
     ros2_control_node = Node(
         package="controller_manager",
         executable="ros2_control_node",
-        parameters=[robot_description, ros2_controllers_path],
+        parameters=[ros2_controllers_path],
+        remappings=[
+            ("/controller_manager/robot_description", "/robot_description"),
+        ],
         output="screen",
     )
 

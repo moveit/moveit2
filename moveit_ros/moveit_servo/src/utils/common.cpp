@@ -42,7 +42,10 @@
 namespace
 {
 // The threshold above which `override_velocity_scaling_factor` will be used instead of computing the scaling from joint bounds.
-const double SCALING_OVERRIDE_THRESHOLD = 0.01;
+constexpr double SCALING_OVERRIDE_THRESHOLD = 0.01;
+
+// The publishing frequency for the planning scene monitor, in Hz.
+constexpr double PLANNING_SCENE_PUBLISHING_FREQUENCY = 25.0;
 }  // namespace
 
 namespace moveit_servo
@@ -341,7 +344,7 @@ double jointLimitVelocityScalingFactor(const Eigen::VectorXd& velocities,
 }
 
 std::vector<int> jointsToHalt(const Eigen::VectorXd& positions, const Eigen::VectorXd& velocities,
-                              const moveit::core::JointBoundsVector& joint_bounds, double margin)
+                              const moveit::core::JointBoundsVector& joint_bounds, const std::vector<double>& margins)
 {
   std::vector<int> joint_idxs_to_halt;
   for (size_t i = 0; i < joint_bounds.size(); i++)
@@ -349,8 +352,8 @@ std::vector<int> jointsToHalt(const Eigen::VectorXd& positions, const Eigen::Vec
     const auto joint_bound = (joint_bounds[i])->front();
     if (joint_bound.position_bounded_)
     {
-      const bool negative_bound = velocities[i] < 0 && positions[i] < (joint_bound.min_position_ + margin);
-      const bool positive_bound = velocities[i] > 0 && positions[i] > (joint_bound.max_position_ - margin);
+      const bool negative_bound = velocities[i] < 0 && positions[i] < (joint_bound.min_position_ + margins[i]);
+      const bool positive_bound = velocities[i] > 0 && positions[i] > (joint_bound.max_position_ - margins[i]);
       if (negative_bound || positive_bound)
       {
         joint_idxs_to_halt.push_back(i);
@@ -390,17 +393,31 @@ PoseCommand poseFromPoseStamped(const geometry_msgs::msg::PoseStamped& msg)
 planning_scene_monitor::PlanningSceneMonitorPtr createPlanningSceneMonitor(const rclcpp::Node::SharedPtr& node,
                                                                            const servo::Params& servo_params)
 {
-  planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor;
   // Can set robot_description name from parameters
   std::string robot_description_name = "robot_description";
   node->get_parameter_or("robot_description_name", robot_description_name, robot_description_name);
+
   // Set up planning_scene_monitor
-  planning_scene_monitor = std::make_shared<planning_scene_monitor::PlanningSceneMonitor>(node, robot_description_name,
-                                                                                          "planning_scene_monitor");
+  auto planning_scene_monitor = std::make_shared<planning_scene_monitor::PlanningSceneMonitor>(
+      node, robot_description_name, "planning_scene_monitor");
 
   planning_scene_monitor->startStateMonitor(servo_params.joint_topic);
   planning_scene_monitor->startSceneMonitor(servo_params.monitored_planning_scene_topic);
-  planning_scene_monitor->setPlanningScenePublishingFrequency(25);
+  planning_scene_monitor->startWorldGeometryMonitor(
+      planning_scene_monitor::PlanningSceneMonitor::DEFAULT_COLLISION_OBJECT_TOPIC,
+      planning_scene_monitor::PlanningSceneMonitor::DEFAULT_PLANNING_SCENE_WORLD_TOPIC,
+      servo_params.check_octomap_collisions);
+
+  if (servo_params.is_primary_planning_scene_monitor)
+  {
+    planning_scene_monitor->providePlanningSceneService();
+  }
+  else
+  {
+    planning_scene_monitor->requestPlanningSceneState();
+  }
+
+  planning_scene_monitor->setPlanningScenePublishingFrequency(PLANNING_SCENE_PUBLISHING_FREQUENCY);
   planning_scene_monitor->getStateMonitor()->enableCopyDynamics(true);
   planning_scene_monitor->startPublishingPlanningScene(planning_scene_monitor::PlanningSceneMonitor::UPDATE_SCENE,
                                                        std::string(node->get_fully_qualified_name()) +

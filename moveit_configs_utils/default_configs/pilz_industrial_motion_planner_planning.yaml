@@ -1,6 +1,14 @@
-planning_plugin: pilz_industrial_motion_planner/CommandPlanner
-# The order of the elements in the adapter corresponds to the order they are processed by the motion planning pipeline.
+planning_plugins:
+  - pilz_industrial_motion_planner/CommandPlanner
 default_planner_config: PTP
+request_adapters:
+  - default_planning_request_adapters/ResolveConstraintFrames
+  - default_planning_request_adapters/ValidateWorkspaceBounds
+  - default_planning_request_adapters/CheckStartStateBounds
+  - default_planning_request_adapters/CheckStartStateCollision
+response_adapters:
+  - default_planning_response_adapters/ValidateSolution
+  - default_planning_response_adapters/DisplayMotionPath
 capabilities: >-
     pilz_industrial_motion_planner/MoveGroupSequenceAction
     pilz_industrial_motion_planner/MoveGroupSequenceService
