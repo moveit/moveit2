@@ -2,6 +2,16 @@
 Changelog for package moveit_common
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.5.5 (2023-09-10)
+------------------
+* Add `-Wunused-parameter` (`#1756 <https://github.com/ros-planning/moveit2/issues/1756>`_) (`#1757 <https://github.com/ros-planning/moveit2/issues/1757>`_)
+  (cherry picked from commit be474ec5ba6d0210379d009d518bdd631cc46ad9)
+  Co-authored-by: Chris Thrasher <chrisjthrasher@gmail.com>
+* Add `-Wunused-function` (`#1754 <https://github.com/ros-planning/moveit2/issues/1754>`_) (`#1755 <https://github.com/ros-planning/moveit2/issues/1755>`_)
+  (cherry picked from commit ed9c3317bc1335b66afb0b2e7478b95ddb5c4b33)
+  Co-authored-by: Chris Thrasher <chrisjthrasher@gmail.com>
+* Contributors: mergify[bot]
+
 2.5.4 (2022-11-04)
 ------------------
 * Improve CMake usage (`#1550 <https://github.com/ros-planning/moveit2/issues/1550>`_) (`#1555 <https://github.com/ros-planning/moveit2/issues/1555>`_)

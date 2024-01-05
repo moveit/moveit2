@@ -48,13 +48,7 @@ target_link_libraries(collision_detector_bullet_plugin
 )
 
 install(DIRECTORY include/ DESTINATION include)
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${MOVEIT_LIB_NAME}_export.h DESTINATION include)
-install(TARGETS ${MOVEIT_LIB_NAME} collision_detector_bullet_plugin EXPORT export_${MOVEIT_LIB_NAME}
-  LIBRARY DESTINATION lib
-  ARCHIVE DESTINATION lib
-  RUNTIME DESTINATION bin
-)
-ament_export_targets(export_${MOVEIT_LIB_NAME} HAS_LIBRARY_TARGET)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/moveit_collision_detection_bullet_export.h DESTINATION include)
 
 if(BUILD_TESTING)
   if(WIN32)

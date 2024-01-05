@@ -26,8 +26,7 @@
 using namespace ikfast;
 
 // check if the included ikfast version matches what this file was compiled with
-#define IKFAST_COMPILE_ASSERT(x) extern int __dummy[static_cast<int>(x)]
-IKFAST_COMPILE_ASSERT(IKFAST_VERSION==0x1000004a);
+static_assert(IKFAST_VERSION==61); // version found in ikfast.h
 
 #include <cmath>
 #include <vector>
