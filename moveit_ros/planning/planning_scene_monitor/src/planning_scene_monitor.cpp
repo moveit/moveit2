@@ -781,7 +781,7 @@ bool PlanningSceneMonitor::newPlanningSceneMessage(const moveit_msgs::msg::Plann
 }
 
 bool PlanningSceneMonitor::processCollisionObjectMsg(const moveit_msgs::msg::CollisionObject::ConstSharedPtr& object,
-                                                     const std::optional<moveit_msgs::msg::ObjectColor> color_msg)
+                                                     const std::optional<moveit_msgs::msg::ObjectColor>& color_msg)
 {
   if (!scene_)
     return false;
