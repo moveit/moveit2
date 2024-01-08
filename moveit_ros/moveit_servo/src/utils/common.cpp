@@ -44,6 +44,9 @@ namespace
 // The threshold above which `override_velocity_scaling_factor` will be used instead of computing the scaling from joint bounds.
 constexpr double SCALING_OVERRIDE_THRESHOLD = 0.01;
 
+// The angle threshold in radians below which a rotation will be considered the identity.
+constexpr double MIN_ANGLE_THRESHOLD = 1E-16;
+
 // The publishing frequency for the planning scene monitor, in Hz.
 constexpr double PLANNING_SCENE_PUBLISHING_FREQUENCY = 25.0;
 }  // namespace
@@ -118,10 +121,13 @@ geometry_msgs::msg::Pose poseFromCartesianDelta(const Eigen::VectorXd& delta_x,
 
   // Get a transformation matrix with desired orientation change
   Eigen::Isometry3d tf_rot_delta(Eigen::Isometry3d::Identity());
-  const Eigen::Quaterniond q = Eigen::AngleAxisd(delta_x[3], Eigen::Vector3d::UnitX()) *
-                               Eigen::AngleAxisd(delta_x[4], Eigen::Vector3d::UnitY()) *
-                               Eigen::AngleAxisd(delta_x[5], Eigen::Vector3d::UnitZ());
-  tf_rot_delta.rotate(q);
+  const Eigen::Vector3d rot_vec = delta_x.block<3, 1>(3, 0, 3, 1);
+  double angle = rot_vec.norm();
+  if (angle > MIN_ANGLE_THRESHOLD)
+  {
+    const Eigen::Quaterniond q(Eigen::AngleAxisd(angle, rot_vec / angle).toRotationMatrix());
+    tf_rot_delta.rotate(q);
+  }
 
   // Find the new tip link position without newly applied rotation
   const Eigen::Isometry3d tf_no_new_rot = tf_pos_delta * base_to_tip_frame_transform;
@@ -141,53 +147,112 @@ geometry_msgs::msg::Pose poseFromCartesianDelta(const Eigen::VectorXd& delta_x,
   return tf2::toMsg(tf_pos_translation * tf_rot_delta * tf_neg_translation * tf_no_new_rot);
 }
 
-trajectory_msgs::msg::JointTrajectory composeTrajectoryMessage(const servo::Params& servo_params,
-                                                               const KinematicState& joint_state)
+std::optional<trajectory_msgs::msg::JointTrajectory>
+composeTrajectoryMessage(const servo::Params& servo_params, const std::deque<KinematicState>& joint_cmd_rolling_window)
 {
-  // When a joint_trajectory_controller receives a new command, a stamp of 0 indicates "begin immediately"
-  // See http://wiki.ros.org/joint_trajectory_controller#Trajectory_replacement
+  if (joint_cmd_rolling_window.size() < MIN_POINTS_FOR_TRAJ_MSG)
+  {
+    return {};
+  }
 
   trajectory_msgs::msg::JointTrajectory joint_trajectory;
-  joint_trajectory.joint_names = joint_state.joint_names;
 
-  static trajectory_msgs::msg::JointTrajectoryPoint point;
-  point.time_from_start = rclcpp::Duration::from_seconds(servo_params.publish_period);
-  const size_t num_joints = joint_state.joint_names.size();
-  if (point.positions.size() != num_joints)
-  {
-    point.positions.resize(num_joints);
-    point.velocities.resize(num_joints);
-    point.accelerations.resize(num_joints);
-  }
+  joint_trajectory.joint_names = joint_cmd_rolling_window.front().joint_names;
+  joint_trajectory.points.reserve(joint_cmd_rolling_window.size() + 1);
+  joint_trajectory.header.stamp = joint_cmd_rolling_window.front().time_stamp;
 
-  // Set the fields of trajectory point based on which fields are requested.
-  // Some controllers check that acceleration data is non-empty, even if accelerations are not used
-  // Send all zeros (joint_state.accelerations is a vector of all zeros).
-
-  if (servo_params.publish_joint_positions)
-  {
-    for (size_t i = 0; i < num_joints; ++i)
+  auto add_point = [servo_params](trajectory_msgs::msg::JointTrajectory& joint_trajectory, const KinematicState& state) {
+    trajectory_msgs::msg::JointTrajectoryPoint point;
+    size_t num_joints = state.positions.size();
+    point.positions.reserve(num_joints);
+    point.velocities.reserve(num_joints);
+    point.accelerations.reserve(num_joints);
+    if (servo_params.publish_joint_positions)
     {
-      point.positions[i] = joint_state.positions[i];
+      for (const auto& pos : state.positions)
+      {
+        point.positions.emplace_back(pos);
+      }
     }
-  }
-  if (servo_params.publish_joint_velocities)
-  {
-    for (size_t i = 0; i < num_joints; ++i)
+    if (servo_params.publish_joint_velocities)
     {
-      point.velocities[i] = joint_state.velocities[i];
+      for (const auto& vel : state.velocities)
+      {
+        point.velocities.emplace_back(vel);
+      }
     }
-  }
-  if (servo_params.publish_joint_accelerations)
-  {
-    for (size_t i = 0; i < num_joints; ++i)
+    if (servo_params.publish_joint_accelerations)
     {
-      point.accelerations[i] = joint_state.accelerations[i];
+      for (const auto& acc : state.accelerations)
+      {
+        point.accelerations.emplace_back(acc);
+      }
     }
+    point.time_from_start = state.time_stamp - joint_trajectory.header.stamp;
+    joint_trajectory.points.emplace_back(point);
+  };
+
+  for (size_t i = 0; i < joint_cmd_rolling_window.size() - 1; ++i)
+  {
+    add_point(joint_trajectory, joint_cmd_rolling_window[i]);
   }
 
-  joint_trajectory.points.push_back(point);
   return joint_trajectory;
+}
+
+void updateSlidingWindow(KinematicState& next_joint_state, std::deque<KinematicState>& joint_cmd_rolling_window,
+                         double max_expected_latency, const rclcpp::Time& cur_time)
+{
+  // remove commands older than current time minus the length of the sliding window
+  next_joint_state.time_stamp = cur_time + rclcpp::Duration::from_seconds(max_expected_latency);
+  const auto active_time_window = rclcpp::Duration::from_seconds(max_expected_latency);
+  while (!joint_cmd_rolling_window.empty() &&
+         joint_cmd_rolling_window.front().time_stamp < (cur_time - active_time_window))
+  {
+    joint_cmd_rolling_window.pop_front();
+  }
+
+  // remove commands at end of window if timestamp is the same as current command
+  while (!joint_cmd_rolling_window.empty() && next_joint_state.time_stamp == joint_cmd_rolling_window.back().time_stamp)
+  {
+    joint_cmd_rolling_window.pop_back();
+  }
+
+  // update velocity: the velocity has the potential to dramatically influence interpolation of splines and causes large
+  // overshooting. To alleviate this effect, the target velocity will be set to zero if the motion changes direction,
+  // otherwise, it will calculate the forward and backward finite difference velocities and choose the minimum.
+  if (joint_cmd_rolling_window.size() >= 2)
+  {
+    size_t num_points = joint_cmd_rolling_window.size();
+    auto& last_state = joint_cmd_rolling_window[num_points - 1];
+    auto& second_last_state = joint_cmd_rolling_window[num_points - 2];
+
+    Eigen::VectorXd direction_1 = second_last_state.positions - last_state.positions;
+    Eigen::VectorXd direction_2 = next_joint_state.positions - last_state.positions;
+    Eigen::VectorXd signs = (direction_1.array().sign() - direction_2.array().sign()).round();
+    for (long i = 0; i < last_state.velocities.size(); ++i)
+    {
+      // check if the direction have changed. `signs` will either have -2, +2 meaning a flat line, -1, 1 meaning a
+      // rotated L shape, or 0 meaning a v-shape.
+      if (signs[i] == 0.0)
+      {
+        // direction changed
+        last_state.velocities[i] = 0;
+      }
+      else
+      {
+        const double delta_time_1 = (next_joint_state.time_stamp - last_state.time_stamp).seconds();
+        const double delta_time_2 = (last_state.time_stamp - second_last_state.time_stamp).seconds();
+        const auto velocity_1 = (next_joint_state.positions[i] - last_state.positions[i]) / delta_time_1;
+        const auto velocity_2 = (last_state.positions[i] - second_last_state.positions[i]) / delta_time_2;
+        last_state.velocities[i] = (std::abs(velocity_1) < std::abs(velocity_2)) ? velocity_1 : velocity_2;
+      }
+      next_joint_state.velocities[i] = last_state.velocities[i];
+    }
+  }
+
+  // add next command
+  joint_cmd_rolling_window.push_back(next_joint_state);
 }
 
 std_msgs::msg::Float64MultiArray composeMultiArrayMessage(const servo::Params& servo_params,
@@ -424,6 +489,19 @@ planning_scene_monitor::PlanningSceneMonitorPtr createPlanningSceneMonitor(const
                                                            "/publish_planning_scene");
 
   return planning_scene_monitor;
+}
+
+KinematicState extractRobotState(const moveit::core::RobotStatePtr& robot_state, const std::string& move_group_name)
+{
+  const moveit::core::JointModelGroup* joint_model_group = robot_state->getJointModelGroup(move_group_name);
+  const auto joint_names = joint_model_group->getActiveJointModelNames();
+  KinematicState current_state(joint_names.size());
+  current_state.joint_names = joint_names;
+  robot_state->copyJointGroupPositions(joint_model_group, current_state.positions);
+  robot_state->copyJointGroupVelocities(joint_model_group, current_state.velocities);
+  robot_state->copyJointGroupAccelerations(joint_model_group, current_state.accelerations);
+
+  return current_state;
 }
 
 }  // namespace moveit_servo

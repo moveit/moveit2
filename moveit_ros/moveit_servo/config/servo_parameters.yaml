@@ -16,8 +16,19 @@ servo:
   publish_period: {
     type: double,
     read_only: true,
-    default_value: 0.034,
+    default_value: 0.01,
     description: " 1 / (Nominal publish rate) [seconds]",
+    validation: {
+      gt<>: 0.0
+    }
+  }
+
+  max_expected_latency: {
+    type: double,
+    read_only: true,
+    default_value: 0.1,
+    description: "Maximum expected latency between generating a servo \
+                  command and the controller receiving it [seconds].",
     validation: {
       gt<>: 0.0
     }
@@ -325,5 +336,8 @@ servo:
   override_velocity_scaling_factor: {
     type: double,
     default_value: 0.0,
-    description: "Scaling factor when servo overrides the velocity (eg: near singularities)"
+    description: "Scaling factor when servo overrides the velocity (eg: near singularities)",
+    validation: {
+      bounds<>: [0.0, 1.0]
+    }
   }
