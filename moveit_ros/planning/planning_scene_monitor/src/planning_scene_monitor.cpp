@@ -780,7 +780,8 @@ bool PlanningSceneMonitor::newPlanningSceneMessage(const moveit_msgs::msg::Plann
   return result;
 }
 
-bool PlanningSceneMonitor::processCollisionObjectMsg(const moveit_msgs::msg::CollisionObject::ConstSharedPtr& object)
+bool PlanningSceneMonitor::processCollisionObjectMsg(const moveit_msgs::msg::CollisionObject::ConstSharedPtr& object,
+                                                     const std::optional<moveit_msgs::msg::ObjectColor>& color_msg)
 {
   if (!scene_)
     return false;
@@ -791,6 +792,8 @@ bool PlanningSceneMonitor::processCollisionObjectMsg(const moveit_msgs::msg::Col
     last_update_time_ = rclcpp::Clock().now();
     if (!scene_->processCollisionObjectMsg(*object))
       return false;
+    if (color_msg.has_value())
+      scene_->setObjectColor(color_msg.value().id, color_msg.value().color);
   }
   triggerSceneUpdateEvent(UPDATE_GEOMETRY);
   RCLCPP_INFO(logger_, "Published update collision object");
