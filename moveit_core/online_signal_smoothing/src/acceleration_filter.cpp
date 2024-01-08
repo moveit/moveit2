@@ -71,10 +71,16 @@ struct CSCWrapper
     x.assign(M.nonZeros(), 0.0);
     sparse_matrix.x = x.data();
 
-    for (Eigen::Index ind = 0; ind < M.nonZeros(); ++ind)
+    for (Eigen::Index ind = 0; ind < i.size(); ++ind)
+    {
+      i[ind] = M.innerIndexPtr()[ind];
+    }
+    for (Eigen::Index ind = 0; ind < j.size(); ++ind)
     {
       j[ind] = M.outerIndexPtr()[ind];
-      i[ind] = M.innerIndexPtr()[ind];
+     }
+    for (Eigen::Index ind = 0; ind < x.size(); ++ind)
+    {
       x[ind] = M.data().at(ind);
     }
   }
@@ -103,10 +109,16 @@ struct OSQPDataWrapper
   {
     A_sparse.makeCompressed();
     assert(A_sparse.nonZeros() == A.x.size());
-    for (Eigen::Index ind = 0; ind < A_sparse.nonZeros(); ++ind)
+    for (Eigen::Index ind = 0; ind < A.i.size(); ++ind)
+    {
+      A.i[ind] = A_sparse.innerIndexPtr()[ind];
+    }
+    for (Eigen::Index ind = 0; ind < A.j.size(); ++ind)
     {
       A.j[ind] = A_sparse.outerIndexPtr()[ind];
-      A.i[ind] = A_sparse.innerIndexPtr()[ind];
+    }
+    for (Eigen::Index ind = 0; ind < A.x.size(); ++ind)
+    {
       A.x[ind] = A_sparse.data().at(ind);
     }
     osqp_update_A(work, A.x.data(), OSQP_NULL, A.x.size());
@@ -159,6 +171,7 @@ bool AccelerationLimitedPlugin::initialize(rclcpp::Node::SharedPtr node, moveit:
       {
         RCLCPP_ERROR(node_->get_logger(), "The robot must have acceleration joint limits specified for all joint to "
                                           "use AccelerationLimitedPlugin.");
+        return false;
       }
     }
     ind++;
@@ -232,26 +245,29 @@ bool AccelerationLimitedPlugin::doSmoothing(Eigen::VectorXd& positions, Eigen::V
     return false;
   }
 
+  auto update_data = [this](Eigen::SparseMatrix<double> &  A_sparse, const Eigen::VectorXd& lower_bound, const Eigen::VectorXd& upper_bound){
+    data_->update_A(work_, A_sparse);
+    size_t num_constraints  = A_sparse.rows();
+    data_->u.block(0, 0, num_constraints - 1, 1) = upper_bound;
+    data_->l.block(0, 0, num_constraints - 1, 1) = lower_bound;
+    data_->u[num_constraints - 1] = 1.0;
+    data_->l[num_constraints - 1] = 0.0;
+    osqp_update_bounds(work_, data_->l.data(), data_->u.data());
+  };
+
   size_t num_dims = variable_names_.size();
   size_t num_constraints = num_dims + 1;
   Eigen::SparseMatrix<double> A_sparse(num_constraints, 1);
   Eigen::VectorXd offset = last_positions_ - positions;
   for (int i = 0; i < num_constraints - 1; ++i)
   {
-    A_sparse.coeffRef(i, 0) = offset[i];
+    A_sparse.insert(i, 0) = offset[i];
   }
-  A_sparse.coeffRef(num_constraints - 1, 0) = 1;
-  data_->update_A(work_, A_sparse);
-
+  A_sparse.insert(num_constraints - 1, 0) = 1;
   Eigen::VectorXd vel_point = last_positions_ + last_velocities_ * update_rate_;
-  Eigen::VectorXd upper_bound = vel_point - positions + max_acceleration_limits_ * (update_rate_ * update_rate_);
-  Eigen::VectorXd lower_bound = vel_point - positions + min_acceleration_limits_ * (update_rate_ * update_rate_);
-
-  data_->u.block(0, 0, num_constraints - 1, 1) = upper_bound;
-  data_->l.block(0, 0, num_constraints - 1, 1) = lower_bound;
-  data_->u[num_constraints - 1] = 1.0;
-  data_->l[num_constraints - 1] = 0.0;
-  osqp_update_bounds(work_, data_->l.data(), data_->u.data());
+  Eigen::VectorXd upper_bound = vel_point - positions + 100*max_acceleration_limits_ * (update_rate_ * update_rate_);
+  Eigen::VectorXd lower_bound = vel_point - positions + 100*min_acceleration_limits_ * (update_rate_ * update_rate_);
+  update_data(A_sparse, lower_bound, upper_bound);
 
   if (osqp_solve(work_) == 0 && work_->solution->x[0] >= -0.0001 && work_->solution->x[0] <= 1.0001)
   {
@@ -263,21 +279,30 @@ bool AccelerationLimitedPlugin::doSmoothing(Eigen::VectorXd& positions, Eigen::V
   }
   else
   {
-    // estimate velocity and acceleration with finite difference using two previous positions
     auto joint_model_group = robot_model_->getJointModelGroup(move_group_name_);
-    auto joint_bounds = joint_model_group->getActiveJointModelsBounds();
-    cur_acceleration_ = -(last_velocities_) / update_rate_;
-    cur_acceleration_ *= jointLimitAccelerationScalingFactor(cur_acceleration_, joint_bounds);
-
-    for (auto i = 0; i < variable_names_.size(); i++)
-    {
-      robot_state_->setJointPositions(variable_names_[i], &positions.data()[i]);
-    }
     Eigen::MatrixXd J = robot_state_->getJacobian(joint_model_group);
     Eigen::VectorXd target = J * last_velocities_;
     Eigen::MatrixXd Jinv = J.completeOrthogonalDecomposition().pseudoInverse();
-    velocities = .8 * Jinv * target;
-    positions = last_positions_ + velocities * update_rate_;
+    Eigen::MatrixXd cartesian_point = Jinv * target;
+    offset = 100*positions - 100*last_positions_;
+    for (int i = 0; i < num_constraints - 1; ++i)
+    {
+      A_sparse.coeffRef(i, 0) = offset[i];
+    }
+    upper_bound = vel_point - last_positions_ + max_acceleration_limits_ * (update_rate_ * update_rate_);
+    lower_bound = vel_point - last_positions_ + min_acceleration_limits_ * (update_rate_ * update_rate_);
+    update_data(A_sparse, lower_bound, upper_bound);
+
+    if (osqp_solve(work_) == 0 && work_->solution->x[0] >= -0.0001 && work_->solution->x[0] <= 1.0001)
+    {
+      double alpha = work_->solution->x[0];
+      RCLCPP_ERROR(node_->get_logger(), "alpha: %f", alpha);
+      Eigen::VectorXd tmp = (1 - alpha) * positions;
+      positions = alpha * last_positions_ + tmp;
+      velocities = (positions - last_positions_) / update_rate_;
+    } else{
+      RCLCPP_ERROR(node_->get_logger(), "Too fast!!");
+    }
   }
 
   last_velocities_ = velocities;
