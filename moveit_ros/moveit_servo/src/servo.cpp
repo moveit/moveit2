@@ -681,6 +681,7 @@ std::pair<bool, KinematicState> Servo::smoothHalt(const KinematicState& halt_sta
     }
   }
 
+  resetSmoothing(target_state);
   return std::make_pair(stopped, target_state);
 }
 
