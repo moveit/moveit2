@@ -46,8 +46,13 @@
 #include <moveit/robot_state/robot_state.h>
 #include <moveit/online_signal_smoothing/smoothing_base_class.h>
 
+#include <osqp.h>
+#include <types.h>
+#include <Eigen/Sparse>
+
 namespace online_signal_smoothing
 {
+MOVEIT_STRUCT_FORWARD(OSQPDataWrapper);
 
 // Plugin
 class AccelerationLimitedPlugin : public SmoothingBaseClass
@@ -83,14 +88,32 @@ public:
   bool reset(const Eigen::VectorXd& positions, const Eigen::VectorXd& velocities,
              const Eigen::VectorXd& accelerations) override;
 
+  /**
+   * memory allocated by osqp is freed in destructor
+   */
+  ~AccelerationLimitedPlugin()
+  {
+    if (work_ != nullptr)
+    {
+      osqp_cleanup(work_);
+    }
+  }
+
 private:
   rclcpp::Node::SharedPtr node_;
   size_t num_joints_;
   Eigen::VectorXd last_velocities_;
   Eigen::VectorXd last_positions_;
   Eigen::VectorXd cur_acceleration_;
+  Eigen::VectorXd max_acceleration_limits_;
+  Eigen::VectorXd min_acceleration_limits_;
   moveit::core::RobotModelConstPtr robot_model_;
+  moveit::core::RobotStatePtr robot_state_;
+  std::vector<std::string> variable_names_;
   double update_rate_;
   std::string move_group_name_;
+  OSQPDataWrapperPtr data_;
+  OSQPWorkspace* work_ = nullptr;
+  OSQPSettings settings_;
 };
 }  // namespace online_signal_smoothing
