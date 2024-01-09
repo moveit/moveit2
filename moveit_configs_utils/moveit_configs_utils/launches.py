@@ -248,6 +248,8 @@ def generate_demo_launch(moveit_config, launch_package_path=None):
     """
     Launches a self contained demo
 
+    launch_package_path is optional to use different launch and config packages
+
     Includes
      * static_virtual_joint_tfs
      * robot_state_publisher
