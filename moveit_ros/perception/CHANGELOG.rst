@@ -2,8 +2,8 @@
 Changelog for package moveit_ros_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.9.0 (2024-01-09)
+------------------
 * (moveit_ros) add missing CYLINDER check (`#2640 <https://github.com/ros-planning/moveit2/issues/2640>`_)
   As this check was missing, the CYLINDER check later on was unreachable
 * Node logging in moveit_core (`#2503 <https://github.com/ros-planning/moveit2/issues/2503>`_)

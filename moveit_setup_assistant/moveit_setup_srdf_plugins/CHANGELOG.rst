@@ -2,8 +2,8 @@
 Changelog for package moveit_setup_srdf_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.9.0 (2024-01-09)
+------------------
 * Node logging for the rest of MoveIt (`#2599 <https://github.com/ros-planning/moveit2/issues/2599>`_)
 * fix typos in compute_default_collisions.cpp (`#2461 <https://github.com/ros-planning/moveit2/issues/2461>`_)
   * fix typos in compute_default_collisions.cpp

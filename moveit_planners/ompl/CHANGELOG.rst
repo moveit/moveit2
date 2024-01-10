@@ -2,8 +2,8 @@
 Changelog for package moveit_planners_ompl
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.9.0 (2024-01-09)
+------------------
 * Handle unsupported position constraints in OMPL (`#2417 <https://github.com/ros-planning/moveit2/issues/2417>`_)
   * Handle unsupported position constraints in OMPL
   OMPL constrained planning assumes that all position constraints have three
