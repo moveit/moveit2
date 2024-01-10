@@ -2,6 +2,70 @@
 Changelog for package moveit_ros_planning
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* [PSM] Process collision object color when adding object trough the planning scene monitor (`#2567 <https://github.com/ros-planning/moveit2/issues/2567>`_)
+  * Added an optional Collision Object color object to set the coller of the collision object when adding the collision object trough the PSM.
+  * Fixes for clang-tidy warnings
+  * fix pre-commit
+  * Pass by reference
+* [Servo] Make listening to octomap updates optional (`#2627 <https://github.com/ros-planning/moveit2/issues/2627>`_)
+  * [Servo] Make listening to octomap updates optional
+  * Update moveit_ros/moveit_servo/config/panda_simulated_config.yaml
+* Node logging for the rest of MoveIt (`#2599 <https://github.com/ros-planning/moveit2/issues/2599>`_)
+* [Planning Pipeline Refactoring] `#2 <https://github.com/ros-planning/moveit2/issues/2>`_ Enable chaining planners (`#2457 <https://github.com/ros-planning/moveit2/issues/2457>`_)
+  * Enable chaining multiple planners
+* Node logging in moveit_core (`#2503 <https://github.com/ros-planning/moveit2/issues/2503>`_)
+* Fix trajectory execution manager comments for docs builds (`#2563 <https://github.com/ros-planning/moveit2/issues/2563>`_)
+* Change default topic name for display contacts (`#2561 <https://github.com/ros-planning/moveit2/issues/2561>`_)
+* [PSM] Add proccess Collision Object to PSM and request planning scene to moveit py to allow syncing of mutliple PSM (`#2536 <https://github.com/ros-planning/moveit2/issues/2536>`_)
+  * PlanningSceneMonitor and request planning scene to moveit py to allow syncing of multiple planning scene monitors
+  * pre-commit fixes
+  * Update moveit_ros/planning/planning_scene_monitor/src/planning_scene_monitor.cpp
+  First catch empty scene to not have a unneeded indents.
+  Co-authored-by: Sebastian Jahr <sebastian.jahr@tuta.io>
+  * Removed unneeded callback functions
+  ---------
+  Co-authored-by: Sebastian Jahr <sebastian.jahr@picknik.ai>
+* [Planning Pipeline Refactoring] `#1 <https://github.com/ros-planning/moveit2/issues/1>`_ Simplify Adapter - Planner chain (`#2429 <https://github.com/ros-planning/moveit2/issues/2429>`_)
+* Use node logging in moveit_ros (`#2482 <https://github.com/ros-planning/moveit2/issues/2482>`_)
+* Add new clang-tidy style rules (`#2177 <https://github.com/ros-planning/moveit2/issues/2177>`_)
+* Re-enable waiting for current state in MoveItCpp (`#2419 <https://github.com/ros-planning/moveit2/issues/2419>`_)
+* Protect against zero frequency in TrajectoryMonitorMiddlewareHandler (`#2423 <https://github.com/ros-planning/moveit2/issues/2423>`_)
+* Small planning pipeline class fixes (`#2416 <https://github.com/ros-planning/moveit2/issues/2416>`_)
+* Use generate parameters library in PlanningPipelineClass + general cleanups (`#2288 <https://github.com/ros-planning/moveit2/issues/2288>`_)
+  * Don't discard stuff
+  * Move constants into source file
+  * Move static consts into header
+  * Don't ignore pipeline result
+  * Use generate parameter library for planning pipeline parameters
+  * Fix CI
+  * More CI fixes
+  * Remove more state from planning pipeline
+  * Small cleanups
+  * Assert planner_instance\_ is not a nullptr
+  * Remove valid variable
+  * Simplify logic for trajectory printing
+  * More helpful comments
+  * Small logic simplification by using break
+  * Fix clang-tidy
+  * Pre-commit + Deprecate functions instead of removing them
+  * Fix CI
+* Merge branch 'main' into dependabot/github_actions/SonarSource/sonarcloud-github-c-cpp-2
+* Remove old deprecated functions (`#2384 <https://github.com/ros-planning/moveit2/issues/2384>`_)
+* [PSM] Get the parameter values of the main node when declaring them in the private node. (`#2392 <https://github.com/ros-planning/moveit2/issues/2392>`_)
+  * Get the values of the main node when declaring them in the private node.
+  * [chore] linting
+  * Removed logging
+  * Update formatting
+  * Removed whitespace
+  ---------
+* Update clang-format-14 with QualifierAlignment (`#2362 <https://github.com/ros-planning/moveit2/issues/2362>`_)
+  * Set qualifier order in .clang-format
+  * Ran pre-commit to update according to new style guide
+* Merge branch 'main' into dependabot/github_actions/SonarSource/sonarcloud-github-c-cpp-2
+* Contributors: Abishalini Sivaraman, Henning Kayser, Jens Vanhooydonck, Marq Rasmussen, Rayene Messaoud, Sebastian Castro, Sebastian Jahr, Shobuj Paul, Tyler Weaver
+
 2.8.0 (2023-09-10)
 ------------------
 * Remove added path index from planner adapter function signature (`#2285 <https://github.com/ros-planning/moveit2/issues/2285>`_)

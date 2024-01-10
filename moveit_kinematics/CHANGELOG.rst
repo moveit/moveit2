@@ -2,6 +2,24 @@
 Changelog for package moveit_kinematics
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Node logging for the rest of MoveIt (`#2599 <https://github.com/ros-planning/moveit2/issues/2599>`_)
+* Remove LMA kinematics plugin (`#2595 <https://github.com/ros-planning/moveit2/issues/2595>`_)
+* Update ROS Snapshots GPG key (`#2547 <https://github.com/ros-planning/moveit2/issues/2547>`_)
+  * Update GPG key for ROS snapshot
+  * Add link
+* Do not pass and return simple types by const ref (`#2453 <https://github.com/ros-planning/moveit2/issues/2453>`_)
+  Co-authored-by: Nils <nilsmailiseke@gmail.com>
+* Update pre-commit and add to .codespell_words (`#2465 <https://github.com/ros-planning/moveit2/issues/2465>`_)
+* Fix CMake error when building cached_ik_kinematics_plugin with trac_ik present (`#2421 <https://github.com/ros-planning/moveit2/issues/2421>`_)
+* Merge branch 'main' into dependabot/github_actions/SonarSource/sonarcloud-github-c-cpp-2
+* Update clang-format-14 with QualifierAlignment (`#2362 <https://github.com/ros-planning/moveit2/issues/2362>`_)
+  * Set qualifier order in .clang-format
+  * Ran pre-commit to update according to new style guide
+* Merge branch 'main' into dependabot/github_actions/SonarSource/sonarcloud-github-c-cpp-2
+* Contributors: Marq Rasmussen, Sebastian Castro, Sebastian Jahr, Shobuj Paul, Stephanie Eng, Tyler Weaver
+
 2.8.0 (2023-09-10)
 ------------------
 * Fix linking error with cached_ik_kinematics_plugin (`#2292 <https://github.com/ros-planning/moveit2/issues/2292>`_)

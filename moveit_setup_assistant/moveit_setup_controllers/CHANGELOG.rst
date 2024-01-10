@@ -2,6 +2,19 @@
 Changelog for package moveit_setup_controllers
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Node logging for the rest of MoveIt (`#2599 <https://github.com/ros-planning/moveit2/issues/2599>`_)
+* Don't assume gripper controller for single joint control in MoveIt Setup Assistant (`#2555 <https://github.com/ros-planning/moveit2/issues/2555>`_)
+  * For single joint controllers which are not gripper controllers, still output joints list
+  * Use OR
+  * Only check for GripperActionController
+  Co-authored-by: Sebastian Jahr <sebastian.jahr@picknik.ai>
+  ---------
+  Co-authored-by: Sebastian Jahr <sebastian.jahr@picknik.ai>
+* Merge branch 'main' into dependabot/github_actions/SonarSource/sonarcloud-github-c-cpp-2
+* Contributors: Forrest Rogers-Marcovitz, Sebastian Jahr, Tyler Weaver
+
 2.8.0 (2023-09-10)
 ------------------
 

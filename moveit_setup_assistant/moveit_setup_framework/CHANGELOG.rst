@@ -2,6 +2,21 @@
 Changelog for package moveit_setup_framework
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Node logging for the rest of MoveIt (`#2599 <https://github.com/ros-planning/moveit2/issues/2599>`_)
+* Update pre-commit and add to .codespell_words (`#2465 <https://github.com/ros-planning/moveit2/issues/2465>`_)
+* Fix `#1971 <https://github.com/ros-planning/moveit2/issues/1971>`_ (`#2428 <https://github.com/ros-planning/moveit2/issues/2428>`_)
+* Merge branch 'main' into dependabot/github_actions/SonarSource/sonarcloud-github-c-cpp-2
+* Fix collisions_updater CLI if no package is used (`#2344 <https://github.com/ros-planning/moveit2/issues/2344>`_)
+  * Fix collisions_updater CLI if no package is used
+  The exceptions introduced with https://github.com/ros-planning/moveit2/pull/2032
+  prevented from running the collisions updater CLI without a ROS package.
+  This fix makes ROS packages optional again, allowing to use the CLI with absolute
+  paths only.
+  * Improve warn message wording
+* Contributors: David V. Lu!!, Henning Kayser, Sebastian Jahr, Shobuj Paul, Tyler Weaver
+
 2.8.0 (2023-09-10)
 ------------------
 * Replaced boost::algorithm::join with fmt::join (`#2273 <https://github.com/ros-planning/moveit2/issues/2273>`_)
