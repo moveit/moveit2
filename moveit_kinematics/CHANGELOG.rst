@@ -2,8 +2,8 @@
 Changelog for package moveit_kinematics
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.9.0 (2024-01-09)
+------------------
 * Node logging for the rest of MoveIt (`#2599 <https://github.com/ros-planning/moveit2/issues/2599>`_)
 * Remove LMA kinematics plugin (`#2595 <https://github.com/ros-planning/moveit2/issues/2595>`_)
 * Update ROS Snapshots GPG key (`#2547 <https://github.com/ros-planning/moveit2/issues/2547>`_)

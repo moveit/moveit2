@@ -2,8 +2,8 @@
 Changelog for package moveit_setup_framework
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.9.0 (2024-01-09)
+------------------
 * Node logging for the rest of MoveIt (`#2599 <https://github.com/ros-planning/moveit2/issues/2599>`_)
 * Update pre-commit and add to .codespell_words (`#2465 <https://github.com/ros-planning/moveit2/issues/2465>`_)
 * Fix `#1971 <https://github.com/ros-planning/moveit2/issues/1971>`_ (`#2428 <https://github.com/ros-planning/moveit2/issues/2428>`_)

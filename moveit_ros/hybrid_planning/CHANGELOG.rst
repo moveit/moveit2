@@ -2,8 +2,8 @@
 Changelog for package moveit_hybrid_planning
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.9.0 (2024-01-09)
+------------------
 * Update ros2_control usage (`#2620 <https://github.com/ros-planning/moveit2/issues/2620>`_)
   * Update ros2_control usage
   * Update xacro file
