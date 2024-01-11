@@ -72,4 +72,10 @@
     </description>
   </class>
 
+  <class name="move_group/GetUrdfService" type="move_group::GetUrdfService" base_class_type="move_group::MoveGroupCapability">
+    <description>
+      TODO
+    </description>
+  </class>
+
 </library>
