@@ -2,6 +2,95 @@
 Changelog for package moveit_py
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.9.0 (2024-01-09)
+------------------
+* [PSM] Process collision object color when adding object trough the planning scene monitor (`#2567 <https://github.com/ros-planning/moveit2/issues/2567>`_)
+  * Added an optional Collision Object color object to set the coller of the collision object when adding the collision object trough the PSM.
+  * Fixes for clang-tidy warnings
+  * fix pre-commit
+  * Pass by reference
+* Node logging for the rest of MoveIt (`#2599 <https://github.com/ros-planning/moveit2/issues/2599>`_)
+* Fix moveit_py Policy docs build (`#2584 <https://github.com/ros-planning/moveit2/issues/2584>`_)
+* init policy class (`#2494 <https://github.com/ros-planning/moveit2/issues/2494>`_)
+  update command interfaces
+  Update moveit_py/moveit/policies/policy.py
+  Co-authored-by: Sebastian Castro <4603398+sea-bass@users.noreply.github.com>
+  Update moveit_py/moveit/policies/policy.py
+  Co-authored-by: Sebastian Castro <4603398+sea-bass@users.noreply.github.com>
+  Update moveit_py/moveit/policies/policy.py
+  Co-authored-by: Sebastian Castro <4603398+sea-bass@users.noreply.github.com>
+  Update moveit_py/moveit/policies/policy.py
+  Co-authored-by: Sebastian Castro <4603398+sea-bass@users.noreply.github.com>
+  Update moveit_py/moveit/policies/policy.py
+  Co-authored-by: Sebastian Castro <4603398+sea-bass@users.noreply.github.com>
+  Update moveit_py/moveit/policies/policy.py
+  Co-authored-by: Sebastian Castro <4603398+sea-bass@users.noreply.github.com>
+  update script description
+* (moveit_py) Extend Trajectory Execution Manager (`#2569 <https://github.com/ros-planning/moveit2/issues/2569>`_)
+  * (moveit_py) Extend Trajectory Execution Manager
+  Added part of the functions from `#2442 <https://github.com/ros-planning/moveit2/issues/2442>`_
+  * PR-remarks
+  * Update moveit_py/src/moveit/moveit_ros/trajectory_execution_manager/trajectory_execution_manager.cpp
+  Co-authored-by: Matthijs van der Burgh <matthijs.vander.burgh@live.nl>
+  * Update moveit_py/src/moveit/moveit_ros/trajectory_execution_manager/trajectory_execution_manager.cpp
+  Co-authored-by: Matthijs van der Burgh <matthijs.vander.burgh@live.nl>
+  * Update planning.pyi - Removed unused import
+  * Fixes whitespace issues
+  ---------
+  Co-authored-by: Matthijs van der Burgh <matthijs.vander.burgh@live.nl>
+* (moveit_py) execute needs a `gil_scoped_release` (`#2573 <https://github.com/ros-planning/moveit2/issues/2573>`_)
+* Fix trajectory execution manager comments for docs builds (`#2563 <https://github.com/ros-planning/moveit2/issues/2563>`_)
+* [PSM] Add proccess Collision Object to PSM and request planning scene to moveit py to allow syncing of mutliple PSM (`#2536 <https://github.com/ros-planning/moveit2/issues/2536>`_)
+  * PlanningSceneMonitor and request planning scene to moveit py to allow syncing of multiple planning scene monitors
+  * pre-commit fixes
+  * Update moveit_ros/planning/planning_scene_monitor/src/planning_scene_monitor.cpp
+  First catch empty scene to not have a unneeded indents.
+  Co-authored-by: Sebastian Jahr <sebastian.jahr@tuta.io>
+  * Removed unneeded callback functions
+  ---------
+  Co-authored-by: Sebastian Jahr <sebastian.jahr@picknik.ai>
+* Allow editing allowed collision matrix in python + fix get_entry function (`#2551 <https://github.com/ros-planning/moveit2/issues/2551>`_)
+  Co-authored-by: Sebastian Jahr <sebastian.jahr@picknik.ai>
+* Update README.md (`#2552 <https://github.com/ros-planning/moveit2/issues/2552>`_)
+  replace moveit wiht moveit_py
+* (moveit_py) fix pyi files (`#2526 <https://github.com/ros-planning/moveit2/issues/2526>`_)
+  * (moveit_py) fix planning.pyi
+  * (moveit_py) add missing functions to robot_trajectory.pyi
+  * (moveit_py) fix command to generate stubs
+* (moveit_py) Add Trajectory Execution Manager (`#2406 <https://github.com/ros-planning/moveit2/issues/2406>`_)
+  * (moveit_py) add trajectory execution manager
+  * (moveit_py) add __bool_\_ to ExecutionStatus
+  * (moveit_py) Update copyright header of changed files
+  * (moveit_py) add comment referencing issue
+  * Rename init_trajectory_execution_manager -> initTrajectoryExecutionManager
+  * (moveit_py) python functions snake_case
+  * (moveit_py) fix styling
+  ---------
+* (moveit_py) add update_frame_transforms to planning_scene_monitor (`#2521 <https://github.com/ros-planning/moveit2/issues/2521>`_)
+* (moveit_py) remove unused applyPlanningScene (`#2505 <https://github.com/ros-planning/moveit2/issues/2505>`_)
+* [moveit_py] add missing constructor of CollisionResult (`#2500 <https://github.com/ros-planning/moveit2/issues/2500>`_)
+  Co-authored-by: Dongya Jiang <jiangdongya@xiaoyubot.com>
+* Fix wrong rename of set_start_state in 63e0c3a (`#2497 <https://github.com/ros-planning/moveit2/issues/2497>`_)
+* Add new clang-tidy style rules (`#2177 <https://github.com/ros-planning/moveit2/issues/2177>`_)
+* Finally fix errors building new RobotTrajectory Python bindings docs (`#2481 <https://github.com/ros-planning/moveit2/issues/2481>`_)
+  * Add missing parenthesis in Python bindings docstring
+  * Fix more docstrings
+* [Python] Add Allowed Collision Matrix to planning scene and optional planning scene during planning (`#2387 <https://github.com/ros-planning/moveit2/issues/2387>`_)
+* More fixes to Python bindings docstrings (`#2474 <https://github.com/ros-planning/moveit2/issues/2474>`_)
+* Fix docstring spacing in newly added trajectory Python bindings (`#2471 <https://github.com/ros-planning/moveit2/issues/2471>`_)
+* (moveit_py) node can have multiple param files (`#2393 <https://github.com/ros-planning/moveit2/issues/2393>`_)
+  A node is often started with multiple param files. Using `list.index` only returns the first occurrence. The new code searches for all occurrences.
+* [Python] Add RetimeTrajectory to RobotTrajectory (`#2411 <https://github.com/ros-planning/moveit2/issues/2411>`_)
+  * [Python] Add RetimeTrajectory to RobotTrajectory
+  * Split retime trajecotry in multiple functions
+  Moved logic to trajectory_tools
+  Added Docstrings
+  * Removed retime function from python binding
+  ---------
+  Co-authored-by: Sebastian Jahr <sebastian.jahr@picknik.ai>
+* Merge branch 'main' into dependabot/github_actions/SonarSource/sonarcloud-github-c-cpp-2
+* Contributors: Dongya Jiang, Jens Vanhooydonck, Matthijs van der Burgh, Nils-Christian Iseke, Peter David Fagan, Sebastian Castro, Sebastian Jahr, Tyler Weaver
+
 2.8.0 (2023-09-10)
 ------------------
 * Fix moveit_py rclcpp::init() (`#2223 <https://github.com/ros-planning/moveit2/issues/2223>`_)
