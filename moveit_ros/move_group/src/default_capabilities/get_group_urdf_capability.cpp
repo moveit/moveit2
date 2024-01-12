@@ -34,13 +34,13 @@
 
 /* Author: Sebastian Jahr */
 
-
 #include "get_group_urdf_capability.h"
 
 #include <moveit/moveit_cpp/moveit_cpp.h>
 #include <moveit/utils/robot_model_test_utils.h>
 #include <moveit/move_group/capability_names.h>
 #include <moveit/utils/logger.hpp>
+#include <tinyxml2.h>
 
 namespace move_group
 {
@@ -61,17 +61,39 @@ void GetUrdfService::initialize()
 {
   get_urdf_service_ = context_->moveit_cpp_->getNode()->create_service<moveit_msgs::srv::GetGroupUrdf>(
       GET_URDF_SERVICE_NAME, [this](const std::shared_ptr<moveit_msgs::srv::GetGroupUrdf::Request>& req,
-                                   const std::shared_ptr<moveit_msgs::srv::GetGroupUrdf::Response>& res) {
+                                    const std::shared_ptr<moveit_msgs::srv::GetGroupUrdf::Response>& res) {
         auto const robot_model = context_->moveit_cpp_->getRobotModel();
         auto const subgroup = robot_model->getJointModelGroup(req->group_name);
         // Check if group exists in loaded robot model
-        if(!subgroup){
-          RCLCPP_ERROR(getLogger(), "Cannot create URDF because planning group %s does not exist", req->group_name.c_str());
+        if (!subgroup)
+        {
+          RCLCPP_ERROR(getLogger(), "Cannot create URDF because planning group %s does not exist",
+                       req->group_name.c_str());
           res->success = false;
           return;
         }
-        // Create header
-        res->urdf_string = std::string("<?xml version=\"1.0\" ?>\n<robot name=\"") + req->group_name + std::string("\" xmlns:xacro=\"http://ros.org/wiki/xacro\">");
+        // Get robot description string
+        auto full_urdf_string = std::string("");
+        context_->moveit_cpp_->getNode()->get_parameter_or("robot_description", full_urdf_string, std::string(""));
+
+        if (full_urdf_string.empty())
+        {
+          RCLCPP_ERROR(getLogger(), "Couldn't load the urdf from parameter server. Is the /robot_description parameter "
+                                    "initialized?");
+          res->success = false;
+          return;
+        }
+
+        // Parse URDF
+        tinyxml2::XMLDocument full_urdf_xml;
+        full_urdf_xml.Parse(full_urdf_string.c_str());
+        if (full_urdf_xml.Error())
+        {
+          RCLCPP_ERROR(getLogger(), "Failed to parse urdf. tinyxml returned '%s'", full_urdf_xml.ErrorStr());
+          res->success = false;
+          return;
+        }
+        res->urdf_string = full_urdf_string;
 
         // Create link list
         auto const link_names = subgroup->getLinkModelNames();
