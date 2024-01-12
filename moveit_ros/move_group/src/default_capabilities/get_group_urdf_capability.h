@@ -33,7 +33,7 @@
  *********************************************************************/
 
 /* Author: Sebastian Jahr
-   Desc: TODO */
+   Desc: This capability creates an URDF string with joints and links of a requested joint model group */
 
 #pragma once
 
@@ -42,11 +42,23 @@
 
 namespace move_group
 {
+/**
+ * @brief Move group capability to create an URDF string for a joint model group
+ *
+ */
 class GetUrdfService : public MoveGroupCapability
 {
 public:
+  /**
+   * @brief Constructor
+   *
+   */
   GetUrdfService();
 
+  /**
+   * @brief Initializes service when plugin is loaded
+   *
+   */
   void initialize() override;
 
 private:

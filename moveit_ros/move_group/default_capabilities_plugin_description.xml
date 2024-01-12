@@ -74,7 +74,7 @@
 
   <class name="move_group/GetUrdfService" type="move_group::GetUrdfService" base_class_type="move_group::MoveGroupCapability">
     <description>
-      TODO
+      Provide a capability which creates an URDF string with joints and links of a requested joint model group
     </description>
   </class>
 
