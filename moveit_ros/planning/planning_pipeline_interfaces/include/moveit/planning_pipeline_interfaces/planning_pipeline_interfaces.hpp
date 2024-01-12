@@ -40,6 +40,7 @@
 #include <moveit/planning_pipeline_interfaces/plan_responses_container.hpp>
 #include <moveit/planning_interface/planning_response.h>
 #include <moveit/planning_interface/planning_request.h>
+#include <moveit/planning_interface/planning_interface.h>
 #include <moveit/planning_pipeline/planning_pipeline.h>
 #include <moveit/planning_scene/planning_scene.h>
 

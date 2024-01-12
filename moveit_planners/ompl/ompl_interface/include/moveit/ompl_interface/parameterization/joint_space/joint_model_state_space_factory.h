@@ -45,7 +45,7 @@ class JointModelStateSpaceFactory : public ModelBasedStateSpaceFactory
 public:
   JointModelStateSpaceFactory();
 
-  int canRepresentProblem(const std::string& group, const moveit_msgs::msg::MotionPlanRequest& req,
+  int canRepresentProblem(const std::string& group, const planning_interface::MotionPlanRequest& req,
                           const moveit::core::RobotModelConstPtr& robot_model) const override;
 
 protected:

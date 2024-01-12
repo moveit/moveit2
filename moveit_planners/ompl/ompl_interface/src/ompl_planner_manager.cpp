@@ -96,7 +96,7 @@ public:
     return true;
   }
 
-  bool canServiceRequest(const moveit_msgs::msg::MotionPlanRequest& req) const override
+  bool canServiceRequest(const planning_interface::MotionPlanRequest& req) const override
   {
     return req.trajectory_constraints.constraints.empty();
   }
