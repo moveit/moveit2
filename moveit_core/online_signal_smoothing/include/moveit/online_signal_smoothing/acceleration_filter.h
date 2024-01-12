@@ -33,7 +33,7 @@
  *********************************************************************/
 
 /* Author: Paul Gesel
-   Description: Applies smoothing by limiting the  acceleration between consecutive commands
+   Description: applies smoothing by limiting the acceleration between consecutive commands
  */
 
 #pragma once
@@ -69,10 +69,10 @@ public:
                   size_t num_joints) override;
 
   /**
-   * Smooth the command signals for all DOF. This function estimates the velocity and acceleration using the two
-   * previous positions passed in. It is designed to be called in a control loop at a constant interval.
+   * Smooth the command signals for all DOF. This function limits the change in velocity using the acceleration
+   * specified in the robot model.
    * @param positions array of joint position commands
-   * @param velocities (unused)
+   * @param velocities array of joint velocity commands
    * @param accelerations (unused)
    * @return True if smoothing was successful
    */
@@ -80,8 +80,8 @@ public:
 
   /**
    * Reset to a given joint state. This method must be called before doSmoothing.
-   * @param positions reset the filters to these joint positions
-   * @param velocities (unused)
+   * @param positions reset the filters to the joint positions
+   * @param velocities reset the filters to the joint velocities
    * @param accelerations (unused)
    * @return True if reset was successful
    */
@@ -108,9 +108,8 @@ private:
   Eigen::VectorXd max_acceleration_limits_;
   Eigen::VectorXd min_acceleration_limits_;
   moveit::core::RobotModelConstPtr robot_model_;
-  moveit::core::RobotStatePtr robot_state_;
-  std::vector<std::string> variable_names_;
   double update_rate_;
+  Eigen::SparseMatrix<double> A_sparse_;
   std::string move_group_name_;
   OSQPDataWrapperPtr data_;
   OSQPWorkspace* work_ = nullptr;
