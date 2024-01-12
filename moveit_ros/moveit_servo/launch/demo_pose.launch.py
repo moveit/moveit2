@@ -10,7 +10,7 @@ def generate_launch_description():
     moveit_config = (
         MoveItConfigsBuilder("moveit_resources_panda")
         .robot_description(file_path="config/panda.urdf.xacro")
-        .joint_limits(file_path="config/joint_limits.yaml")
+        .joint_limits(file_path="config/hard_joint_limits.yaml")
         .robot_description_kinematics()
         .to_moveit_configs()
     )
@@ -22,9 +22,8 @@ def generate_launch_description():
         .to_dict()
     }
 
-    # This set update rate for acceleration limiting filter
-    acceleration_filter_rate = {"update_rate": 0.01}
-    move_group_name = {"move_group_name": "panda_arm"}
+    # This filter parameter should be >1. Increase it for greater smoothing but slower motion.
+    low_pass_filter_coeff = {"butterworth_filter_coeff": 1.5}
 
     # RViz
     rviz_config_file = (
@@ -102,8 +101,7 @@ def generate_launch_description():
         executable="demo_pose",
         parameters=[
             servo_params,
-            acceleration_filter_rate,
-            move_group_name,
+            low_pass_filter_coeff,
             moveit_config.robot_description,
             moveit_config.robot_description_semantic,
             moveit_config.robot_description_kinematics,
