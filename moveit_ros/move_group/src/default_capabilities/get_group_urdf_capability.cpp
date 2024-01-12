@@ -51,6 +51,8 @@ rclcpp::Logger getLogger()
 {
   return moveit::getLogger("GetUrdfService");
 }
+const auto JOINT_ELEMENT_CLOSING = std::string("</joint>");
+const auto LINK_ELEMENT_CLOSING = std::string("</link>");
 }  // namespace
 
 GetUrdfService::GetUrdfService() : MoveGroupCapability("get_group_urdf")
@@ -84,23 +86,38 @@ void GetUrdfService::initialize()
           return;
         }
 
-        // Parse URDF
-        tinyxml2::XMLDocument full_urdf_xml;
-        full_urdf_xml.Parse(full_urdf_string.c_str());
-        if (full_urdf_xml.Error())
-        {
-          RCLCPP_ERROR(getLogger(), "Failed to parse urdf. tinyxml returned '%s'", full_urdf_xml.ErrorStr());
-          res->success = false;
-          return;
-        }
-        res->urdf_string = full_urdf_string;
+        // Create subgroup urdf
+        res->urdf_string = std::string("<?xml version=\"1.0\" ?>\n<robot name=\"") + req->group_name +
+                           std::string("\" xmlns:xacro=\"http://ros.org/wiki/xacro\">");
 
         // Create link list
         auto const link_names = subgroup->getLinkModelNames();
+        for (const auto& link_name : link_names)
+        {
+          auto const start = full_urdf_string.find("<link name=\"" + link_name);
+          auto substring = full_urdf_string.substr(start, full_urdf_string.size() - start);
+          res->urdf_string += substring.substr(0, substring.find(LINK_ELEMENT_CLOSING) + LINK_ELEMENT_CLOSING.size());
+        }
         // Create joint list
         auto const joint_names = subgroup->getJointModelNames();
+        for (const auto& joint_name : joint_names)
+        {
+          auto const start = full_urdf_string.find("<joint name=\"" + joint_name);
+          auto substring = full_urdf_string.substr(start, full_urdf_string.size() - start);
+          res->urdf_string += substring.substr(0, substring.find(JOINT_ELEMENT_CLOSING) + JOINT_ELEMENT_CLOSING.size());
+        }
         // Create closing
-        auto const closing = "</robot>";
+        res->urdf_string += "</robot>";
+
+        // Validate xml file
+        tinyxml2::XMLDocument group_urdf_xml;
+        group_urdf_xml.Parse(full_urdf_string.c_str());
+        if (group_urdf_xml.Error())
+        {
+          RCLCPP_ERROR(getLogger(), "Failed to parse urdf. tinyxml returned '%s'", group_urdf_xml.ErrorStr());
+          res->success = false;
+          return;
+        }
       });
 }
 }  // namespace move_group
