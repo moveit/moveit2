@@ -77,16 +77,16 @@ struct CSCWrapper
 
   void update(Eigen::SparseMatrix<double>& M)
   {
-    for (Eigen::Index ind = 0; ind < i.size(); ++ind)
+    for (size_t ind = 0; ind < i.size(); ++ind)
     {
       i[ind] = M.innerIndexPtr()[ind];
     }
 
-    for (Eigen::Index ind = 0; ind < j.size(); ++ind)
+    for (size_t ind = 0; ind < j.size(); ++ind)
     {
       j[ind] = M.outerIndexPtr()[ind];
     }
-    for (Eigen::Index ind = 0; ind < x.size(); ++ind)
+    for (size_t ind = 0; ind < x.size(); ++ind)
     {
       x[ind] = M.data().at(ind);
     }
@@ -244,7 +244,7 @@ bool AccelerationLimitedPlugin::doSmoothing(Eigen::VectorXd& positions, Eigen::V
   size_t num_constraints = num_joints_ + 1;
   Eigen::VectorXd positions_offset = last_positions_ - positions;
   Eigen::VectorXd velocities_offset = last_velocities_ - velocities;
-  for (int i = 0; i < num_constraints - 1; ++i)
+  for (size_t i = 0; i < num_constraints - 1; ++i)
   {
     A_sparse_.coeffRef(i, 0) = positions_offset[i];
   }
