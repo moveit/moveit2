@@ -65,7 +65,7 @@ void GetUrdfService::initialize()
       GET_URDF_SERVICE_NAME,
       [this](const std::shared_ptr<moveit_msgs::srv::GetGroupUrdf::Request>& req,
              const std::shared_ptr<moveit_msgs::srv::GetGroupUrdf::Response>& res) {
-        auto const subgroup = context_->moveit_cpp_->getRobotModel()->getJointModelGroup(req->group_name);
+        const auto subgroup = context_->moveit_cpp_->getRobotModel()->getJointModelGroup(req->group_name);
         // Check if group exists in loaded robot model
         if (!subgroup)
         {
@@ -75,7 +75,7 @@ void GetUrdfService::initialize()
           return;
         }
         // Get robot description string
-        auto full_urdf_string = std::string("");
+        std::string full_urdf_string;
         context_->moveit_cpp_->getNode()->get_parameter_or("robot_description", full_urdf_string, std::string(""));
 
         // Check if string is empty
@@ -93,15 +93,15 @@ void GetUrdfService::initialize()
                            std::string("\" xmlns:xacro=\"http://ros.org/wiki/xacro\">");
 
         // Create links
-        auto const link_names = subgroup->getLinkModelNames();
+        const auto& link_names = subgroup->getLinkModelNames();
         for (const auto& link_name : link_names)
         {
-          auto const start = full_urdf_string.find("<link name=\"" + link_name);
+          const auto start = full_urdf_string.find("<link name=\"" + link_name);
           auto substring = full_urdf_string.substr(start, full_urdf_string.size() - start);
           res->urdf_string += substring.substr(0, substring.find(LINK_ELEMENT_CLOSING) + LINK_ELEMENT_CLOSING.size());
         }
         // Create joints
-        auto const joint_names = subgroup->getJointModelNames();
+        const auto& joint_names = subgroup->getJointModelNames();
         for (const auto& joint_name : joint_names)
         {
           auto const start = full_urdf_string.find("<joint name=\"" + joint_name);
