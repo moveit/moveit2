@@ -104,7 +104,7 @@ void GetUrdfService::initialize()
         const auto& joint_names = subgroup->getJointModelNames();
         for (const auto& joint_name : joint_names)
         {
-          auto const start = full_urdf_string.find("<joint name=\"" + joint_name);
+          const auto start = full_urdf_string.find("<joint name=\"" + joint_name);
           auto substring = full_urdf_string.substr(start, full_urdf_string.size() - start);
           res->urdf_string += substring.substr(0, substring.find(JOINT_ELEMENT_CLOSING) + JOINT_ELEMENT_CLOSING.size());
         }
