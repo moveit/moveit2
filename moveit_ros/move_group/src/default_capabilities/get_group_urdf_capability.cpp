@@ -46,13 +46,14 @@ namespace move_group
 
 namespace
 {
+const auto LOG_NAME = std::string("GetUrdfService");
 rclcpp::Logger getLogger()
 {
-  return moveit::getLogger("GetUrdfService");
+  return moveit::getLogger(LOG_NAME);
 }
 const auto JOINT_ELEMENT_CLOSING = std::string("</joint>");
 const auto LINK_ELEMENT_CLOSING = std::string("</link>");
-const auto ROBOT_ELEMENT_CLOSING = std::string("</robot>")
+const auto ROBOT_ELEMENT_CLOSING = std::string("</robot>");
 }  // namespace
 
 GetUrdfService::GetUrdfService() : MoveGroupCapability("get_group_urdf")
@@ -65,13 +66,16 @@ void GetUrdfService::initialize()
       GET_URDF_SERVICE_NAME,
       [this](const std::shared_ptr<moveit_msgs::srv::GetGroupUrdf::Request>& req,
              const std::shared_ptr<moveit_msgs::srv::GetGroupUrdf::Response>& res) {
+        res->error_code.source = LOG_NAME;
         const auto subgroup = context_->moveit_cpp_->getRobotModel()->getJointModelGroup(req->group_name);
         // Check if group exists in loaded robot model
         if (!subgroup)
         {
-          RCLCPP_ERROR(getLogger(), "Cannot create URDF because planning group %s does not exist",
-                       req->group_name.c_str());
-          res->success = false;
+          const auto error_string = std::string("Cannot create URDF because planning group '") + req->group_name +
+                                    std::string("' does not exist");
+          RCLCPP_ERROR(getLogger(), error_string.c_str());
+          res->error_code.message = error_string;
+          res->error_code.val = moveit_msgs::msg::MoveItErrorCodes::FAILURE;
           return;
         }
         // Get robot description string
@@ -81,9 +85,12 @@ void GetUrdfService::initialize()
         // Check if string is empty
         if (full_urdf_string.empty())
         {
-          RCLCPP_ERROR(getLogger(), "Couldn't load the urdf from parameter server. Is the /robot_description parameter "
-                                    "initialized?");
-          res->success = false;
+          const auto error_string =
+              std::string("Couldn't load the urdf from parameter server. Is the /robot_description parameter "
+                          "initialized?");
+          RCLCPP_ERROR(getLogger(), error_string.c_str());
+          res->error_code.message = error_string;
+          res->error_code.val = moveit_msgs::msg::MoveItErrorCodes::FAILURE;
           return;
         }
 
@@ -116,10 +123,14 @@ void GetUrdfService::initialize()
         group_urdf_xml.Parse(full_urdf_string.c_str());
         if (group_urdf_xml.Error())
         {
-          RCLCPP_ERROR(getLogger(), "Failed to create valid urdf. tinyxml returned '%s'", group_urdf_xml.ErrorStr());
-          res->success = false;
+          const std::string error_string = std::string("Failed to create valid urdf. tinyxml returned '") +
+                                           group_urdf_xml.ErrorStr() + std::string("'");
+          RCLCPP_ERROR(getLogger(), error_string.c_str());
+          res->error_code.message = error_string;
+          res->error_code.val = moveit_msgs::msg::MoveItErrorCodes::FAILURE;
           return;
         }
+        res->error_code.val = moveit_msgs::msg::MoveItErrorCodes::SUCCESS;
       }  // End of callback function
   );
 }
