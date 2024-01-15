@@ -73,7 +73,7 @@ void GetUrdfService::initialize()
         {
           const auto error_string = std::string("Cannot create URDF because planning group '") + req->group_name +
                                     std::string("' does not exist");
-          RCLCPP_ERROR(getLogger(), error_string.c_str());
+          RCLCPP_ERROR(getLogger(), "%s", error_string.c_str());
           res->error_code.message = error_string;
           res->error_code.val = moveit_msgs::msg::MoveItErrorCodes::FAILURE;
           return;
@@ -88,7 +88,7 @@ void GetUrdfService::initialize()
           const auto error_string =
               std::string("Couldn't load the urdf from parameter server. Is the /robot_description parameter "
                           "initialized?");
-          RCLCPP_ERROR(getLogger(), error_string.c_str());
+          RCLCPP_ERROR(getLogger(), "%s", error_string.c_str());
           res->error_code.message = error_string;
           res->error_code.val = moveit_msgs::msg::MoveItErrorCodes::FAILURE;
           return;
@@ -125,7 +125,7 @@ void GetUrdfService::initialize()
         {
           const std::string error_string = std::string("Failed to create valid urdf. tinyxml returned '") +
                                            group_urdf_xml.ErrorStr() + std::string("'");
-          RCLCPP_ERROR(getLogger(), error_string.c_str());
+          RCLCPP_ERROR(getLogger(), "%s", error_string.c_str());
           res->error_code.message = error_string;
           res->error_code.val = moveit_msgs::msg::MoveItErrorCodes::FAILURE;
           return;
