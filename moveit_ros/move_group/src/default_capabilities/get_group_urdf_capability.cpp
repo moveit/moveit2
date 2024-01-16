@@ -46,10 +46,9 @@ namespace move_group
 
 namespace
 {
-const auto LOG_NAME = std::string("GetUrdfService");
 rclcpp::Logger getLogger()
 {
-  return moveit::getLogger(LOG_NAME);
+  return moveit::getLogger("get_urdf_service");
 }
 const auto JOINT_ELEMENT_CLOSING = std::string("</joint>");
 const auto LINK_ELEMENT_CLOSING = std::string("</link>");
@@ -66,7 +65,7 @@ void GetUrdfService::initialize()
       GET_URDF_SERVICE_NAME,
       [this](const std::shared_ptr<moveit_msgs::srv::GetGroupUrdf::Request>& req,
              const std::shared_ptr<moveit_msgs::srv::GetGroupUrdf::Response>& res) {
-        res->error_code.source = LOG_NAME;
+        res->error_code.source = std::string("GetUrdfService");
         const auto subgroup = context_->moveit_cpp_->getRobotModel()->getJointModelGroup(req->group_name);
         // Check if group exists in loaded robot model
         if (!subgroup)
