@@ -60,14 +60,15 @@ constexpr double COL_CHECK_DISTANCE = 0.05;
 constexpr double CONSTRAINT_CHECK_DISTANCE = 0.05;
 
 /**
- * Creates a cost function from a binary robot state validation function.
- * This is used for computing smooth cost profiles for binary state conditions like collision checks and constraints.
+ * Creates a cost function from a robot state validation function.
+ * This is used for computing smooth cost profiles for waypoint state conditions like collision checks and constraints.
  * The validator function is applied for all states in the validated path while also considering interpolated states.
  * If a waypoint or an interpolated state is invalid, a local penalty is being applied to the path.
  * Penalty costs are being smoothed out using a Gaussian so that valid neighboring states (near collisions) are
  * optimized as well.
+ * This implementation does not support cost thresholds, non-zero local costs will render the trajectory as invalid.
  *
- * @param state_validator_fn      The validator function that tests for binary conditions
+ * @param state_validator_fn      The validator function that produces local costs for all waypoints
  * @param interpolation_step_size The L2 norm distance step used for interpolation (disabled when set to 0.0)
  *
  * @return                        Cost function that computes smooth costs for binary validity conditions
@@ -75,23 +76,24 @@ constexpr double CONSTRAINT_CHECK_DISTANCE = 0.05;
 CostFn getCostFunctionFromStateValidator(const StateValidatorFn& state_validator_fn, double interpolation_step_size)
 {
   CostFn cost_fn = [=](const Eigen::MatrixXd& values, Eigen::VectorXd& costs, bool& validity) {
+    // Assume zero cost and valid trajectory from the start
     costs.setZero(values.cols());
-
     validity = true;
-    std::vector<std::pair<long, long>> invalid_windows;
-    bool in_invalid_window = false;
 
     // Iterate over sample waypoint pairs and check for validity in each segment.
     // If an invalid state is found, weighted penalty costs are applied to both waypoints.
     // Subsequent invalid states are assumed to have the same cause, so we are keeping track
     // of "invalid windows" which are used for smoothing out the costs per violation cause
     // with a gaussian, penalizing neighboring valid states as well.
+    // Invalid windows are represented as pairs of start and end timesteps.
+    std::vector<std::pair<long, long>> invalid_windows;
+    bool in_invalid_window = false;
     for (int timestep = 0; timestep < values.cols(); ++timestep)
     {
       // Get state at current timestep and check for validity
       // The penalty of the validation function is added to the cost of the current timestep
       // A state is rendered invalid if a cost results from the current validity check or if a penalty is carried over
-      // from the previous iteration
+      // from the previous iteration.
       Eigen::VectorXd current = values.col(timestep);
       costs(timestep) += state_validator_fn(current);
       bool found_invalid_state = costs(timestep) > 0.0;
@@ -102,6 +104,7 @@ CostFn getCostFunctionFromStateValidator(const StateValidatorFn& state_validator
       if (continue_interpolation)
       {
         Eigen::VectorXd next = values.col(timestep + 1);
+        // Interpolate waypoints at least once, even if interpolation_step_size exceeds the waypoint distance
         const double interpolation_step = std::min(0.5, interpolation_step_size / (next - current).norm());
         for (double interpolation_fraction = interpolation_step; interpolation_fraction < 1.0;
              interpolation_fraction += interpolation_step)
@@ -129,6 +132,7 @@ CostFn getCostFunctionFromStateValidator(const StateValidatorFn& state_validator
         // OPEN new invalid window when this is the first detected invalid state in a group
         if (!in_invalid_window)
         {
+          // new windows only include a single timestep as start and end state
           invalid_windows.emplace_back(timestep, timestep);
           in_invalid_window = true;
         }

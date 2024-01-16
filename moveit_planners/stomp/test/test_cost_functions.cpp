@@ -45,63 +45,66 @@ constexpr double PENALTY = 1.0;
 
 TEST(NoiseGeneratorTest, testGetCostFunctionAllValidStates)
 {
-  // State validator that
+  // GIVEN a cost function with a state validator that only returns valid costs of 0.0
   auto state_validator_fn = [](const Eigen::VectorXd& /* state_positions */) { return 0.0; };
-
   auto cost_fn =
       stomp_moveit::costs::getCostFunctionFromStateValidator(state_validator_fn, 0.1 /* interpolation_step_size */);
 
-  // Build trajectory with TIMESTEPS states, interpolating from 0.0 to 1.0 joint values
+  // GIVEN a trajectory with TIMESTEPS states, with waypoints interpolating from 0.0 to 1.0 joint values
   Eigen::MatrixXd values = Eigen::MatrixXd::Zero(VARIABLES, TIMESTEPS);
   const int last_timestep = values.cols() - 1;
   for (int timestep = 0; timestep <= last_timestep; ++timestep)
   {
-    values.col(timestep).fill(1.0 * timestep / last_timestep);
+    values.col(timestep).fill(static_cast<double>(timestep) / last_timestep);
   }
 
+  // WHEN the cost function is applied to the trajectory
   Eigen::VectorXd costs(TIMESTEPS);
   bool validity;
-
   ASSERT_TRUE(cost_fn(values, costs, validity));
+
+  // THEN the trajectory must be valid and have zero costs
   EXPECT_TRUE(validity);
   EXPECT_EQ(costs.sum(), 0.0);
 }
 
 TEST(NoiseGeneratorTest, testGetCostFunctionInvalidStates)
 {
-  // We are simulating a state validator by tagging specific timesteps as invalid.
+  // GIVEN a cost function with a simulated state validator that tags selected timesteps as invalid.
   // The state validation function is called once per timestep since interpolation is disabled.
-  // These assumptions are tested
+  // This assumption is confirmed as boundary assumption after calling the solver.
   static const std::set<int> INVALID_TIMESTEPS(
       { 0, 10, 11, 12, 25, 26, 27, 46, 63, 64, 65, 66, 67, 68, 69, 97, 98, 99 });
   size_t timestep_counter = 0;
   auto state_validator_fn = [&](const Eigen::VectorXd& /* state_positions */) {
     return PENALTY * INVALID_TIMESTEPS.count(timestep_counter++);
   };
-
   auto cost_fn =
       stomp_moveit::costs::getCostFunctionFromStateValidator(state_validator_fn, 0.0 /* interpolation disabled */);
 
-  // Build trajectory with TIMESTEPS states, interpolating from 0.0 to 1.0 joint values
+  // GIVEN a trajectory with TIMESTEPS states, with waypoints interpolating from 0.0 to 1.0 joint values
   Eigen::MatrixXd values = Eigen::MatrixXd::Zero(VARIABLES, TIMESTEPS);
   const int last_timestep = values.cols() - 1;
   for (int timestep = 0; timestep <= last_timestep; ++timestep)
   {
-    values.col(timestep).fill(1.0 * timestep / last_timestep);
+    values.col(timestep).fill(static_cast<double>(timestep) / last_timestep);
   }
 
-  // Test boundary assumptions about cost function outputs, costs and validity
+  // WHEN the cost function is applied to the trajectory
   Eigen::VectorXd costs(TIMESTEPS);
   bool validity;
   ASSERT_TRUE(cost_fn(values, costs, validity));
-  EXPECT_EQ(timestep_counter, 100u);     // 100 timesteps checked without interpolation
+
+  // THEN the following boundary assumptions about cost function outputs, costs and validity need to be met
   EXPECT_FALSE(validity);                // invalid states must result in an invalid trajectory
+  EXPECT_EQ(timestep_counter, 100u);     // 100 timesteps checked without interpolation
   EXPECT_LE(costs.maxCoeff(), PENALTY);  // the highest cost must not be higher than the configured penalty
   EXPECT_GE(costs.minCoeff(), 0.0);      // no negative cost values should be computed
 
-  // The total cost must equal the sum of penalties produced by all invalid timesteps
+  // THEN the total cost must equal the sum of penalties produced by all invalid timesteps
   EXPECT_DOUBLE_EQ(costs.sum(), PENALTY * INVALID_TIMESTEPS.size());
-  // Invalid timesteps should account for the majority of the total cost.
+
+  // THEN invalid timesteps must account for the majority of the total cost.
   // We expect that invalid windows cover at least 2*sigma (=68.1%) of each cost distribution.
   const std::vector<int> invalid_timesteps_vec(INVALID_TIMESTEPS.begin(), INVALID_TIMESTEPS.end());
   EXPECT_GE(costs(invalid_timesteps_vec).sum(), 0.681 * PENALTY);
