@@ -29,9 +29,12 @@ ament_target_dependencies(stomp_moveit_plugin
   std_msgs
   tf2_eigen
   visualization_msgs
-  rsl
 )
-target_link_libraries(stomp_moveit_plugin stomp::stomp stomp_moveit_parameters)
+target_link_libraries(stomp_moveit_plugin
+  stomp::stomp
+  stomp_moveit_parameters
+  rsl::rsl
+)
 
 pluginlib_export_plugin_description_file(moveit_core stomp_moveit_plugin_description.xml)
 
@@ -57,6 +60,8 @@ if(BUILD_TESTING)
   set(ament_cmake_lint_cmake_FOUND TRUE)
 
   ament_lint_auto_find_test_dependencies()
+
+  add_subdirectory(test)
 endif()
 
 ament_package()
