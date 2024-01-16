@@ -54,6 +54,7 @@
 #include <tf2_ros/transform_listener.h>
 #include <variant>
 #include <rclcpp/logger.hpp>
+#include <queue>
 
 namespace moveit_servo
 {
@@ -74,10 +75,11 @@ public:
 
   /**
    * \brief Computes the joint state required to follow the given command.
+   * @param robot_state RobotStatePtr instance used for calculating the next joint state.
    * @param command The command to follow, std::variant type, can handle JointJog, Twist and Pose.
    * @return The required joint state.
    */
-  KinematicState getNextJointState(const ServoInput& command);
+  KinematicState getNextJointState(const moveit::core::RobotStatePtr& robot_state, const ServoInput& command);
 
   /**
    * \brief Set the type of incoming servo command.
@@ -122,7 +124,7 @@ public:
 
   /**
    * \brief Smoothly halt at a commanded state when command goes stale.
-   * @param The last commanded joint states.
+   * @param halt_state The desired stop state.
    * @return The next state stepping towards the required halting state.
    */
   std::pair<bool, KinematicState> smoothHalt(const KinematicState& halt_state);
@@ -175,14 +177,10 @@ private:
   /**
    * \brief Compute the change in joint position required to follow the received command.
    * @param command The incoming servo command.
+   * @param robot_state RobotStatePtr instance used for calculating the command.
    * @return The joint position change required (delta).
    */
   Eigen::VectorXd jointDeltaFromCommand(const ServoInput& command, const moveit::core::RobotStatePtr& robot_state);
-
-  /**
-   * \brief Updates data depending on joint model group
-   */
-  void updateJointModelGroup();
 
   /**
    * \brief Validate the servo parameters

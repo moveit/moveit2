@@ -2,6 +2,11 @@
 Changelog for package moveit
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.9.0 (2024-01-09)
+------------------
+* Merge branch 'main' into dependabot/github_actions/SonarSource/sonarcloud-github-c-cpp-2
+* Contributors: Sebastian Jahr
+
 2.8.0 (2023-09-10)
 ------------------
 
