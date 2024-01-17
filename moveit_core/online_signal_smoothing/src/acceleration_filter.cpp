@@ -264,6 +264,24 @@ bool AccelerationLimitedPlugin::doSmoothing(Eigen::VectorXd& positions, Eigen::V
     return false;
   }
 
+  // formulate quadratic program to find the best new reference point subject to the robot's acceleration limits
+  // p_c: robot's current position
+  // v_c: robot's current velocity
+  // p_t: robot's target position
+  // acc: acceleration to be applied
+  // p_n: next position
+  // dt: time step
+  // p_n_hat: parameterize solution to be along the line from p_c to p_t
+  // p_n_hat = p_t*alpha + p_c*(1-alpha)
+  // define constraints
+  // p_c + v_c*dt + acc_min*dt^2 < p_n_hat < p_c + v_c*dt + acc_max*dt^2
+  // p_c + v_c*dt -p_t + acc_min*dt^2 < (p_c-p_t)alpha < p_c + v_c*dt -p_t + acc_max*dt^2
+  // 0 < alpha < 1
+  // define optimization
+  // opt ||alpha||
+  // s.t. constraints
+  // p_n = p_t*alpha + p_c*(1-alpha)
+
   double& update_rate = params_.update_rate;
   size_t num_constraints = num_joints_ + 1;
   positions_offset_ = last_positions_ - positions;
