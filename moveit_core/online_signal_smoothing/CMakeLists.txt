@@ -84,4 +84,8 @@ if(BUILD_TESTING)
   # Lowpass filter unit test
   ament_add_gtest(test_butterworth_filter test/test_butterworth_filter.cpp)
   target_link_libraries(test_butterworth_filter moveit_butterworth_filter)
+
+  # Acceleration filter unit test
+  ament_add_gtest(test_acceleration_filter test/test_acceleration_filter.cpp)
+  target_link_libraries(test_acceleration_filter moveit_acceleration_filter moveit_test_utils)
 endif()

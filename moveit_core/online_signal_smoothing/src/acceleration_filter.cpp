@@ -136,6 +136,10 @@ bool AccelerationLimitedPlugin::initialize(rclcpp::Node::SharedPtr node, moveit:
   cur_acceleration_ = Eigen::VectorXd::Zero(num_joints);
 
   // get node parameters and store in member variables
+  if (!node_->has_parameter("update_rate") || !node_->has_parameter("move_group_name"))
+  {
+    return false;
+  }
   auto param_listener = online_signal_smoothing::ParamListener(node_);
   auto params = param_listener.get_params();
   update_rate_ = params.update_rate;
@@ -217,6 +221,18 @@ double jointLimitAccelerationScalingFactor(const Eigen::VectorXd& accelerations,
   return min_scaling_factor;
 }
 
+inline bool update_data(const OSQPDataWrapperPtr& data, OSQPWorkspace* work, Eigen::SparseMatrix<double>& A_sparse,
+                        const Eigen::VectorXd& lower_bound, const Eigen::VectorXd& upper_bound)
+{
+  data->update_A(work, A_sparse);
+  size_t num_constraints = A_sparse.rows();
+  data->u.block(0, 0, num_constraints - 1, 1) = upper_bound;
+  data->l.block(0, 0, num_constraints - 1, 1) = lower_bound;
+  data->u[num_constraints - 1] = ALPHA_UPPER_BOUND;
+  data->l[num_constraints - 1] = ALPHA_LOWER_BOUND;
+  return 0 == osqp_update_bounds(work, data->l.data(), data->u.data());
+}
+
 bool AccelerationLimitedPlugin::doSmoothing(Eigen::VectorXd& positions, Eigen::VectorXd& velocities,
                                             Eigen::VectorXd& /* unused */)
 {
@@ -229,17 +245,14 @@ bool AccelerationLimitedPlugin::doSmoothing(Eigen::VectorXd& positions, Eigen::V
         num_joints_, num_positions);
     return false;
   }
-
-  auto update_data = [this](Eigen::SparseMatrix<double>& A_sparse, const Eigen::VectorXd& lower_bound,
-                            const Eigen::VectorXd& upper_bound) {
-    data_->update_A(work_, A_sparse);
-    size_t num_constraints = A_sparse.rows();
-    data_->u.block(0, 0, num_constraints - 1, 1) = upper_bound;
-    data_->l.block(0, 0, num_constraints - 1, 1) = lower_bound;
-    data_->u[num_constraints - 1] = ALPHA_UPPER_BOUND;
-    data_->l[num_constraints - 1] = ALPHA_LOWER_BOUND;
-    osqp_update_bounds(work_, data_->l.data(), data_->u.data());
-  };
+  else if (last_positions_.size() != positions.size())
+  {
+    RCLCPP_ERROR_THROTTLE(node_->get_logger(), *node_->get_clock(), 1000,
+                          "The length of the last joint positions not equal to the current, expected %zu got %zu. Make "
+                          "sure the reset was called.",
+                          last_positions_.size(), positions.size());
+    return false;
+  }
 
   size_t num_constraints = num_joints_ + 1;
   Eigen::VectorXd positions_offset = last_positions_ - positions;
@@ -252,7 +265,12 @@ bool AccelerationLimitedPlugin::doSmoothing(Eigen::VectorXd& positions, Eigen::V
   Eigen::VectorXd vel_point = last_positions_ + last_velocities_ * update_rate_;
   Eigen::VectorXd upper_bound = vel_point - positions + max_acceleration_limits_ * (update_rate_ * update_rate_);
   Eigen::VectorXd lower_bound = vel_point - positions + min_acceleration_limits_ * (update_rate_ * update_rate_);
-  update_data(A_sparse_, lower_bound, upper_bound);
+  if (!update_data(data_, work_, A_sparse_, lower_bound, upper_bound))
+  {
+    RCLCPP_ERROR_THROTTLE(node_->get_logger(), *node_->get_clock(), 1000,
+                          "failed to set osqp_update_bounds. Make sure the robot's acceleration limits are valid");
+    return false;
+  }
 
   if (positions_offset.norm() < COMMAND_DIFFERENCE_THRESHOLD && velocities_offset.norm() < COMMAND_DIFFERENCE_THRESHOLD)
   {
