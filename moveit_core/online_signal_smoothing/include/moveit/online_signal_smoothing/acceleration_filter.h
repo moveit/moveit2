@@ -40,11 +40,11 @@
 
 #include <cstddef>
 
-// Auto-generated
-#include <moveit_acceleration_parameters.hpp>
+#include <moveit/online_signal_smoothing/smoothing_base_class.h>
 #include <moveit/robot_model/robot_model.h>
 #include <moveit/robot_state/robot_state.h>
-#include <moveit/online_signal_smoothing/smoothing_base_class.h>
+#include <moveit/utils/logger.hpp>
+#include <moveit_acceleration_parameters.hpp>
 
 #include <osqp.h>
 #include <types.h>
@@ -101,16 +101,17 @@ public:
 
 private:
   rclcpp::Node::SharedPtr node_;
+  online_signal_smoothing::Params params_;
   size_t num_joints_;
   Eigen::VectorXd last_velocities_;
   Eigen::VectorXd last_positions_;
   Eigen::VectorXd cur_acceleration_;
+  Eigen::VectorXd positions_offset_;
+  Eigen::VectorXd velocities_offset_;
   Eigen::VectorXd max_acceleration_limits_;
   Eigen::VectorXd min_acceleration_limits_;
   moveit::core::RobotModelConstPtr robot_model_;
-  double update_rate_;
   Eigen::SparseMatrix<double> A_sparse_;
-  std::string move_group_name_;
   OSQPDataWrapperPtr data_;
   OSQPWorkspace* work_ = nullptr;
   OSQPSettings settings_;
