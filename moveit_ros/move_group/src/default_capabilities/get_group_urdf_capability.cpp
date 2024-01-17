@@ -39,7 +39,7 @@
 #include <moveit/moveit_cpp/moveit_cpp.h>
 #include <moveit/move_group/capability_names.h>
 #include <moveit/utils/logger.hpp>
-#include <tinyxml2.h>
+#include <urdf_parser/urdf_parser.h>
 
 namespace move_group
 {
@@ -85,7 +85,7 @@ void GetUrdfService::initialize()
         if (full_urdf_string.empty())
         {
           const auto error_string =
-              std::string("Couldn't load the urdf from parameter server. Is the /robot_description parameter "
+              std::string("Couldn't load the urdf from parameter server. Is the '/robot_description' parameter "
                           "initialized?");
           RCLCPP_ERROR(getLogger(), "%s", error_string.c_str());
           res->error_code.message = error_string;
@@ -117,13 +117,10 @@ void GetUrdfService::initialize()
         // Create closing
         res->urdf_string += ROBOT_ELEMENT_CLOSING;
 
-        // Validate xml file
-        tinyxml2::XMLDocument group_urdf_xml;
-        group_urdf_xml.Parse(full_urdf_string.c_str());
-        if (group_urdf_xml.Error())
+        // Validate urdf file
+        if (!urdf::parseURDF(full_urdf_string))
         {
-          const std::string error_string = std::string("Failed to create valid urdf. tinyxml returned '") +
-                                           group_urdf_xml.ErrorStr() + std::string("'");
+          const std::string error_string = std::string("Failed to create valid urdf");
           RCLCPP_ERROR(getLogger(), "%s", error_string.c_str());
           res->error_code.message = error_string;
           res->error_code.val = moveit_msgs::msg::MoveItErrorCodes::FAILURE;
