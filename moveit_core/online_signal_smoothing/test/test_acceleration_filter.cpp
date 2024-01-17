@@ -175,7 +175,7 @@ TEST_F(AccelerationFilterTest, FilterDoSmoothRandomized)
     online_signal_smoothing::AccelerationLimitedPlugin filter;
 
     rclcpp::Node::SharedPtr node = std::make_shared<rclcpp::Node>("AccelerationFilterTest");
-    node->declare_parameter<std::string>("move_group_name", move_group_name);
+    node->declare_parameter<std::string>("move_group_name", move_group_name_);
     node->declare_parameter<double>("update_rate", update_rate);
     Eigen::VectorXd acceleration_limit = 1.2 * (1.0 + Eigen::VectorXd::Random(7).array());
     set_limit(acceleration_limit);
