@@ -148,10 +148,6 @@ bool AccelerationLimitedPlugin::initialize(rclcpp::Node::SharedPtr node, moveit:
   cur_acceleration_ = Eigen::VectorXd::Zero(num_joints);
 
   // get node parameters and store in member variables
-  if (!node_->has_parameter("update_rate") || !node_->has_parameter("move_group_name"))
-  {
-    return false;
-  }
   auto param_listener = online_signal_smoothing::ParamListener(node_);
   params_ = param_listener.get_params();
 
