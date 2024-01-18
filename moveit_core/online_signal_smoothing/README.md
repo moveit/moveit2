@@ -1,4 +1,5 @@
-Description: applies smoothing by limiting the acceleration between consecutive commands.
+### AccelerationLimitedPlugin
+Applies smoothing by limiting the acceleration between consecutive commands.
 The purpose of the plugin is to prevent the robot's acceleration limits from being violated by instantaneous changes
 to the servo command topics.
 
