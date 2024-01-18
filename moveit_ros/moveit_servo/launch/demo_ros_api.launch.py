@@ -29,7 +29,7 @@ def generate_launch_description():
     }
 
     # This sets the update rate for the acceleration limiting filter.
-    acceleration_filter_rate = {"update_rate": 0.01}
+    acceleration_filter_update_period = {"update_period": 0.01}
     planning_group_name = {"planning_group_name": "panda_arm"}
     # RViz
     rviz_config_file = (
@@ -97,7 +97,7 @@ def generate_launch_description():
                 name="servo_node",
                 parameters=[
                     servo_params,
-                    acceleration_filter_rate,
+                    acceleration_filter_update_period,
                     planning_group_name,
                     moveit_config.robot_description,
                     moveit_config.robot_description_semantic,
@@ -129,7 +129,7 @@ def generate_launch_description():
         name="servo_node",
         parameters=[
             servo_params,
-            acceleration_filter_rate,
+            acceleration_filter_update_period,
             planning_group_name,
             moveit_config.robot_description,
             moveit_config.robot_description_semantic,

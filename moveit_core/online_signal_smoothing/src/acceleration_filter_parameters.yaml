@@ -1,5 +1,5 @@
 online_signal_smoothing:
-  update_rate: {
+  update_period: {
     type: double,
     description: "The expected time in seconds between calls to `doSmoothing` method.",
     read_only: true,

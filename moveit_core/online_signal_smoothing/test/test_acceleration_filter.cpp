@@ -36,7 +36,7 @@
 #include <moveit/online_signal_smoothing/acceleration_filter.h>
 #include <moveit/utils/robot_model_test_utils.h>
 
-constexpr std::string_view MOVE_GROUP_NAME = "panda_arm";
+constexpr std::string_view PLANNING_GROUP_NAME = "panda_arm";
 constexpr size_t PANDA_NUM_JOINTS = 7u;
 constexpr std::string_view ROBOT_MODEL = "panda";
 
@@ -51,7 +51,7 @@ protected:
   void setLimits(std::optional<Eigen::VectorXd> acceleration_limits)
   {
     const std::vector<moveit::core::JointModel*> joint_models = robot_model_->getJointModels();
-    auto joint_model_group = robot_model_->getJointModelGroup(MOVE_GROUP_NAME.data());
+    auto joint_model_group = robot_model_->getJointModelGroup(PLANNING_GROUP_NAME.data());
     size_t ind = 0;
     for (auto& joint_model : joint_models)
     {
@@ -82,16 +82,16 @@ TEST_F(AccelerationFilterTest, FilterInitialize)
   online_signal_smoothing::AccelerationLimitedPlugin filter;
   rclcpp::Node::SharedPtr node = std::make_shared<rclcpp::Node>("AccelerationFilterTest");
 
-  // fail because the update_rate parameter is not set
+  // fail because the update_period parameter is not set
   EXPECT_THROW(filter.initialize(node, robot_model_, PANDA_NUM_JOINTS),
                rclcpp::exceptions::ParameterUninitializedException);
 
   node = std::make_shared<rclcpp::Node>("AccelerationFilterTest");
-  node->declare_parameter<std::string>("move_group_name", MOVE_GROUP_NAME.data());
-  node->declare_parameter("update_rate", 0.01);
+  node->declare_parameter<std::string>("planning_group_name", PLANNING_GROUP_NAME.data());
+  node->declare_parameter("update_period", 0.01);
 
   // fail because the number of joints is wrong
-  EXPECT_FALSE(filter.initialize(node, robot_model_, 3));
+  EXPECT_FALSE(filter.initialize(node, robot_model_, 3u));
 
   // fail because the robot does not have acceleration limits
   setLimits({});
@@ -108,9 +108,9 @@ TEST_F(AccelerationFilterTest, FilterDoSmooth)
   online_signal_smoothing::AccelerationLimitedPlugin filter;
 
   rclcpp::Node::SharedPtr node = std::make_shared<rclcpp::Node>("AccelerationFilterTest");
-  node->declare_parameter<std::string>("move_group_name", MOVE_GROUP_NAME.data());
-  const double update_rate = 1.0;
-  node->declare_parameter<double>("update_rate", update_rate);
+  node->declare_parameter<std::string>("planning_group_name", PLANNING_GROUP_NAME.data());
+  const double update_period = 1.0;
+  node->declare_parameter<double>("update_period", update_period);
   Eigen::VectorXd acceleration_limits = 1.2 * Eigen::VectorXd::Ones(PANDA_NUM_JOINTS);
   setLimits(acceleration_limits);
 
@@ -138,7 +138,7 @@ TEST_F(AccelerationFilterTest, FilterDoSmooth)
                Eigen::VectorXd::Zero(PANDA_NUM_JOINTS));
   position.array() = 3.0;
   EXPECT_TRUE(filter.doSmoothing(position, velocity, acceleration));
-  EXPECT_TRUE((position.array() - update_rate * update_rate * acceleration_limits.array()).matrix().norm() < 1E-3);
+  EXPECT_TRUE((position.array() - update_period * update_period * acceleration_limits.array()).matrix().norm() < 1E-3);
 
   // succeed: apply acceleration limits
   position.array() = 0.9;
@@ -151,9 +151,9 @@ TEST_F(AccelerationFilterTest, FilterDoSmooth)
   filter.reset(Eigen::VectorXd::Zero(PANDA_NUM_JOINTS), velocity, Eigen::VectorXd::Zero(PANDA_NUM_JOINTS));
   position.array() = 0.01;
   Eigen::VectorXd expected_offset =
-      velocity.array() * update_rate - update_rate * update_rate * acceleration_limits.array();
+      velocity.array() * update_period - update_period * update_period * acceleration_limits.array();
   EXPECT_TRUE(filter.doSmoothing(position, velocity, acceleration));
-  EXPECT_TRUE((velocity * update_rate - expected_offset).norm() < 1E-3);
+  EXPECT_TRUE((velocity * update_period - expected_offset).norm() < 1E-3);
 }
 
 TEST_F(AccelerationFilterTest, FilterBadAccelerationConfig)
@@ -161,9 +161,9 @@ TEST_F(AccelerationFilterTest, FilterBadAccelerationConfig)
   online_signal_smoothing::AccelerationLimitedPlugin filter;
 
   rclcpp::Node::SharedPtr node = std::make_shared<rclcpp::Node>("AccelerationFilterTest");
-  node->declare_parameter<std::string>("move_group_name", MOVE_GROUP_NAME.data());
-  const double update_rate = 0.1;
-  node->declare_parameter<double>("update_rate", update_rate);
+  node->declare_parameter<std::string>("planning_group_name", PLANNING_GROUP_NAME.data());
+  const double update_period = 0.1;
+  node->declare_parameter<double>("update_period", update_period);
   Eigen::VectorXd acceleration_limits = -1.0 * Eigen::VectorXd::Ones(PANDA_NUM_JOINTS);
   setLimits(acceleration_limits);
   EXPECT_TRUE(filter.initialize(node, robot_model_, PANDA_NUM_JOINTS));
@@ -178,9 +178,9 @@ TEST_F(AccelerationFilterTest, FilterDoSmoothRandomized)
 {
   online_signal_smoothing::AccelerationLimitedPlugin filter;
   rclcpp::Node::SharedPtr node = std::make_shared<rclcpp::Node>("AccelerationFilterTest");
-  const double update_rate = 0.1;
-  node->declare_parameter<std::string>("move_group_name", MOVE_GROUP_NAME.data());
-  node->declare_parameter<double>("update_rate", update_rate);
+  const double update_period = 0.1;
+  node->declare_parameter<std::string>("planning_group_name", PLANNING_GROUP_NAME.data());
+  node->declare_parameter<double>("update_period", update_period);
   Eigen::VectorXd acceleration_limits = 1.2 * (1.0 + Eigen::VectorXd::Random(PANDA_NUM_JOINTS).array());
   setLimits(acceleration_limits);
   EXPECT_TRUE(filter.initialize(node, robot_model_, PANDA_NUM_JOINTS));

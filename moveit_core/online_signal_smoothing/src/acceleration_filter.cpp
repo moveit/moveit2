@@ -282,7 +282,7 @@ bool AccelerationLimitedPlugin::doSmoothing(Eigen::VectorXd& positions, Eigen::V
   // s.t. constraints
   // p_n = p_t*alpha + p_c*(1-alpha)
 
-  double& update_rate = params_.update_rate;
+  double& update_period = params_.update_period;
   size_t num_constraints = num_joints_ + 1;
   positions_offset_ = last_positions_ - positions;
   velocities_offset_ = last_velocities_ - velocities;
@@ -291,9 +291,9 @@ bool AccelerationLimitedPlugin::doSmoothing(Eigen::VectorXd& positions, Eigen::V
     A_sparse_.coeffRef(i, 0) = positions_offset_[i];
   }
   A_sparse_.coeffRef(num_constraints - 1, 0) = 1;
-  Eigen::VectorXd vel_point = last_positions_ + last_velocities_ * update_rate;
-  Eigen::VectorXd upper_bound = vel_point - positions + max_acceleration_limits_ * (update_rate * update_rate);
-  Eigen::VectorXd lower_bound = vel_point - positions + min_acceleration_limits_ * (update_rate * update_rate);
+  Eigen::VectorXd vel_point = last_positions_ + last_velocities_ * update_period;
+  Eigen::VectorXd upper_bound = vel_point - positions + max_acceleration_limits_ * (update_period * update_period);
+  Eigen::VectorXd lower_bound = vel_point - positions + min_acceleration_limits_ * (update_period * update_period);
   if (!update_data(osqp_data_, osqp_workspace_, A_sparse_, lower_bound, upper_bound))
   {
     RCLCPP_ERROR_THROTTLE(getLogger(), *node_->get_clock(), 1000,
@@ -313,16 +313,16 @@ bool AccelerationLimitedPlugin::doSmoothing(Eigen::VectorXd& positions, Eigen::V
   {
     double alpha = osqp_workspace_->solution->x[0];
     positions = alpha * last_positions_ + (1.0 - alpha) * positions.eval();
-    velocities = (positions - last_positions_) / update_rate;
+    velocities = (positions - last_positions_) / update_period;
   }
   else
   {
     auto joint_model_group = robot_model_->getJointModelGroup(params_.planning_group_name);
     auto joint_bounds = joint_model_group->getActiveJointModelsBounds();
-    cur_acceleration_ = -(last_velocities_) / update_rate;
+    cur_acceleration_ = -(last_velocities_) / update_period;
     cur_acceleration_ *= jointLimitAccelerationScalingFactor(cur_acceleration_, joint_bounds);
-    velocities = last_velocities_ + cur_acceleration_ * update_rate;
-    positions = last_positions_ + velocities * update_rate;
+    velocities = last_velocities_ + cur_acceleration_ * update_period;
+    positions = last_positions_ + velocities * update_period;
   }
 
   last_velocities_ = velocities;
