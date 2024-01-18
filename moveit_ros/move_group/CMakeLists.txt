@@ -43,6 +43,7 @@ add_library(moveit_move_group_default_capabilities SHARED
   src/default_capabilities/cartesian_path_service_capability.cpp
   src/default_capabilities/clear_octomap_service_capability.cpp
   src/default_capabilities/execute_trajectory_action_capability.cpp
+  src/default_capabilities/get_group_urdf_capability.cpp
   src/default_capabilities/get_planning_scene_service_capability.cpp
   src/default_capabilities/kinematics_service_capability.cpp
   src/default_capabilities/move_action_capability.cpp
