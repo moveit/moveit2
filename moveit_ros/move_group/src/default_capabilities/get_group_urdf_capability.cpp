@@ -95,7 +95,7 @@ void GetUrdfService::initialize()
 
         // Create subgroup urdf
         // Create header
-        res->urdf_string = std::string("<?xml version=\"1.0\" ?>\n<robot name=\"") + req->group_name +
+        res->urdf_string = std::string("<?xml version=\"1.0\" ?><robot name=\"") + req->group_name +
                            std::string("\" xmlns:xacro=\"http://ros.org/wiki/xacro\">");
 
         // Create links
@@ -106,19 +106,28 @@ void GetUrdfService::initialize()
           auto substring = full_urdf_string.substr(start, full_urdf_string.size() - start);
           res->urdf_string += substring.substr(0, substring.find(LINK_ELEMENT_CLOSING) + LINK_ELEMENT_CLOSING.size());
         }
+
         // Create joints
         const auto& joint_names = subgroup->getJointModelNames();
         for (const auto& joint_name : joint_names)
         {
-          const auto start = full_urdf_string.find("<joint name=\"" + joint_name);
+          const auto start = full_urdf_string.find("<joint name=\"" + joint_name + "\" type");
           auto substring = full_urdf_string.substr(start, full_urdf_string.size() - start);
           res->urdf_string += substring.substr(0, substring.find(JOINT_ELEMENT_CLOSING) + JOINT_ELEMENT_CLOSING.size());
         }
-        // Create closing
-        res->urdf_string += ROBOT_ELEMENT_CLOSING;
+        // If existing add the base link to the subgroup URDF
+        std::string base_link_element;
+        if (!joint_names.empty())
+        {
+          const auto parent_link_element = subgroup->getJointModel(joint_names.at(0))->getParentLinkModel()->getName();
+          base_link_element = "<link name=\"" + parent_link_element + "\"/>";
+        }
 
-        // Validate urdf file
-        if (!urdf::parseURDF(full_urdf_string))
+        // Add closing
+        res->urdf_string += base_link_element + ROBOT_ELEMENT_CLOSING;
+
+        //  Validate urdf file
+        if (!urdf::parseURDF(res->urdf_string))
         {
           const std::string error_string = std::string("Failed to create valid urdf");
           RCLCPP_ERROR(getLogger(), "%s", error_string.c_str());
