@@ -78,7 +78,7 @@ c --------x--- v   |
 #include <moveit/robot_model/robot_model.h>
 #include <moveit/robot_state/robot_state.h>
 #include <moveit/utils/logger.hpp>
-#include <moveit_acceleration_parameters.hpp>
+#include <moveit_acceleration_filter_parameters.hpp>
 
 #include <osqp.h>
 #include <types.h>

@@ -71,9 +71,9 @@ install(
   TARGETS
     collision_detector_bullet_plugin
     moveit_acceleration_filter
-    moveit_acceleration_parameters
+    moveit_acceleration_filter_parameters
     moveit_butterworth_filter
-    moveit_butterworth_parameters
+    moveit_butterworth_filter_parameters
     moveit_collision_detection
     moveit_collision_detection_bullet
     moveit_collision_detection_fcl

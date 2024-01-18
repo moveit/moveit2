@@ -33,10 +33,10 @@ set_target_properties(moveit_butterworth_filter PROPERTIES VERSION
   "${${PROJECT_NAME}_VERSION}"
 )
 
-generate_parameter_library(moveit_butterworth_parameters src/butterworth_parameters.yaml)
+generate_parameter_library(moveit_butterworth_filter_parameters src/butterworth_parameters.yaml)
 
 target_link_libraries(moveit_butterworth_filter
-  moveit_butterworth_parameters
+  moveit_butterworth_filter_parameters
   moveit_robot_model
   moveit_smoothing_base
 )
@@ -46,26 +46,26 @@ ament_target_dependencies(moveit_butterworth_filter
 )
 
 add_library(moveit_acceleration_filter SHARED
-            src/acceleration_filter.cpp
-    )
+  src/acceleration_filter.cpp
+)
 generate_export_header(moveit_acceleration_filter)
 target_include_directories(moveit_acceleration_filter PUBLIC
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
 )
 set_target_properties(moveit_acceleration_filter PROPERTIES VERSION
-        "${${PROJECT_NAME}_VERSION}"
+  "${${PROJECT_NAME}_VERSION}"
 )
 
-generate_parameter_library(moveit_acceleration_parameters src/acceleration_parameters.yaml)
+generate_parameter_library(moveit_acceleration_filter_parameters src/acceleration_parameters.yaml)
 
 target_link_libraries(moveit_acceleration_filter
-    moveit_acceleration_parameters
-    moveit_robot_state
-    moveit_smoothing_base
-    osqp::osqp
+  moveit_acceleration_filter_parameters
+  moveit_robot_state
+  moveit_smoothing_base
+  osqp::osqp
 )
 ament_target_dependencies(moveit_acceleration_filter
-        srdfdom  # include dependency from moveit_robot_model
+  srdfdom  # include dependency from moveit_robot_model
 )
 
 
@@ -77,7 +77,7 @@ install(FILES ${CMAKE_CURRENT_BINARY_DIR}/moveit_acceleration_filter_export.h DE
 
 # Testing
 
-if(BUILD_TESTING)
+if (BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
   find_package(ament_cmake_gtest REQUIRED)
 
@@ -88,4 +88,4 @@ if(BUILD_TESTING)
   # Acceleration filter unit test
   ament_add_gtest(test_acceleration_filter test/test_acceleration_filter.cpp)
   target_link_libraries(test_acceleration_filter moveit_acceleration_filter moveit_test_utils)
-endif()
+endif ()
