@@ -82,7 +82,7 @@ ServoNode::ServoNode(const rclcpp::NodeOptions& options)
   }
   else
   {
-    RCLCPP_WARN_STREAM(node_->get_logger(), "Could not enable FIFO RT scheduling policy.");
+    RCLCPP_WARN_STREAM(node_->get_logger(), "Could not enable FIFO RT scheduling policy. Continuing with the default.");
   }
 
   // Check if a realtime kernel is available
