@@ -45,7 +45,7 @@ jobs:
       - name: "Remove .dockerignore"
         run: rm .dockerignore  # enforce full source context
       - name: Cache ccache
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: .ccache
           key: docker-tutorial-ccache-${{ matrix.ROS_DISTRO }}-${{ hashFiles( '.docker/tutorial-source/Dockerfile' ) }}
