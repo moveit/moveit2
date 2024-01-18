@@ -66,6 +66,7 @@ target_link_libraries(moveit_acceleration_filter
 )
 ament_target_dependencies(moveit_acceleration_filter
   srdfdom  # include dependency from moveit_robot_model
+  pluginlib
 )
 
 
