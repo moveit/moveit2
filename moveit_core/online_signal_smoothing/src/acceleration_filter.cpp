@@ -50,18 +50,18 @@ rclcpp::Logger getLogger()
 constexpr double COMMAND_DIFFERENCE_THRESHOLD = 1E-4;
 // The scaling parameter alpha between the current point and commanded point must be less than 1.0
 constexpr double ALPHA_UPPER_BOUND = 1.0;
-// The scaling parameter alpha must also be graater than 0.0
+// The scaling parameter alpha must also be greater than 0.0
 constexpr double ALPHA_LOWER_BOUND = 0.0;
 
 /** \brief Wrapper struct to make memory management easier for using osqp's C sparse_matrix types */
 struct CSCWrapper
 {
   /// row indices, size nzmax starting from 0
-  std::vector<c_int> i;
+  std::vector<c_int> row_indices;
   /// column pointers (size n+1); col indices (size nzmax)
-  std::vector<c_int> j;
-  /// holds the datain csc form
-  std::vector<double> x;
+  std::vector<c_int> column_pointers;
+  /// holds the non-zero values in Compressed Sparse Column (CSC) form
+  std::vector<double> elements;
   /// osqp C sparse_matrix type
   csc sparse_matrix;
 
@@ -71,14 +71,14 @@ struct CSCWrapper
 
     sparse_matrix.n = M.cols();
     sparse_matrix.m = M.rows();
-    i.assign(M.innerSize(), 0);
-    sparse_matrix.i = i.data();
-    j.assign(M.outerSize() + 1, 0);
-    sparse_matrix.p = j.data();
+    row_indices.assign(M.innerSize(), 0);
+    sparse_matrix.i = row_indices.data();
+    column_pointers.assign(M.outerSize() + 1, 0);
+    sparse_matrix.p = column_pointers.data();
     sparse_matrix.nzmax = M.nonZeros();
     sparse_matrix.nz = -1;
-    x.assign(M.nonZeros(), 0.0);
-    sparse_matrix.x = x.data();
+    elements.assign(M.nonZeros(), 0.0);
+    sparse_matrix.x = elements.data();
 
     update(M);
   }
@@ -86,18 +86,18 @@ struct CSCWrapper
   /// Update the the data point to by sparse_matrix without reallocating memory
   void update(Eigen::SparseMatrix<double>& M)
   {
-    for (size_t ind = 0; ind < i.size(); ++ind)
+    for (size_t ind = 0; ind < row_indices.size(); ++ind)
     {
-      i[ind] = M.innerIndexPtr()[ind];
+      row_indices[ind] = M.innerIndexPtr()[ind];
     }
 
-    for (size_t ind = 0; ind < j.size(); ++ind)
+    for (size_t ind = 0; ind < column_pointers.size(); ++ind)
     {
-      j[ind] = M.outerIndexPtr()[ind];
+      column_pointers[ind] = M.outerIndexPtr()[ind];
     }
-    for (size_t ind = 0; ind < x.size(); ++ind)
+    for (size_t ind = 0; ind < elements.size(); ++ind)
     {
-      x[ind] = M.data().at(ind);
+      elements[ind] = M.data().at(ind);
     }
   }
 };
@@ -127,7 +127,7 @@ struct OSQPDataWrapper
   {
     A_sparse.makeCompressed();
     A.update(A_sparse);
-    osqp_update_A(work, A.x.data(), OSQP_NULL, A.x.size());
+    osqp_update_A(work, A.elements.data(), OSQP_NULL, A.elements.size());
   }
 
   CSCWrapper P;
