@@ -168,7 +168,7 @@ bool AccelerationLimitedPlugin::initialize(rclcpp::Node::SharedPtr node, moveit:
       }
       else
       {
-        RCLCPP_ERROR(getLogger(), "The robot must have acceleration joint limits specified for all joint to "
+        RCLCPP_ERROR(getLogger(), "The robot must have acceleration joint limits specified for all joints to "
                                   "use AccelerationLimitedPlugin.");
         return false;
       }
