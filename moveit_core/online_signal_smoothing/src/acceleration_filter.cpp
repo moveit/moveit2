@@ -107,26 +107,26 @@ MOVEIT_STRUCT_FORWARD(OSQPDataWrapper);
 /** \brief Wrapper struct to make memory management easier for using osqp's C API */
 struct OSQPDataWrapper
 {
-  OSQPDataWrapper(Eigen::SparseMatrix<double>& P_sparse, Eigen::SparseMatrix<double>& A_sparse)
-    : P{ P_sparse }, A{ A_sparse }
+  OSQPDataWrapper(Eigen::SparseMatrix<double>& objective_sparse, Eigen::SparseMatrix<double>& constraints_sparse)
+    : P{ objective_sparse }, A{ constraints_sparse }
   {
-    data.n = P_sparse.rows();
-    data.m = A_sparse.rows();
+    data.n = objective_sparse.rows();
+    data.m = constraints_sparse.rows();
     data.P = &P.csc_sparse_matrix;
-    q = Eigen::VectorXd::Zero(P_sparse.rows());
+    q = Eigen::VectorXd::Zero(objective_sparse.rows());
     data.q = q.data();
     data.A = &A.csc_sparse_matrix;
-    l = Eigen::VectorXd::Zero(A_sparse.rows());
+    l = Eigen::VectorXd::Zero(constraints_sparse.rows());
     data.l = l.data();
-    u = Eigen::VectorXd::Zero(A_sparse.rows());
+    u = Eigen::VectorXd::Zero(constraints_sparse.rows());
     data.u = u.data();
   }
 
   /// Update the constraint matrix A without reallocating memory
-  void update_A(OSQPWorkspace* work, Eigen::SparseMatrix<double>& A_sparse)
+  void updateA(OSQPWorkspace* work, Eigen::SparseMatrix<double>& constraints_sparse)
   {
-    A_sparse.makeCompressed();
-    A.update(A_sparse);
+    constraints_sparse.makeCompressed();
+    A.update(constraints_sparse);
     osqp_update_A(work, A.elements.data(), OSQP_NULL, A.elements.size());
   }
 
@@ -177,19 +177,19 @@ bool AccelerationLimitedPlugin::initialize(rclcpp::Node::SharedPtr node, moveit:
   }
 
   // setup osqp optimization problem
-  Eigen::SparseMatrix<double> P_sparse(1, 1);
-  P_sparse.insert(0, 0) = 1.0;
+  Eigen::SparseMatrix<double> objective_sparse(1, 1);
+  objective_sparse.insert(0, 0) = 1.0;
   size_t num_constraints = num_joints + 1;
-  A_sparse_ = Eigen::SparseMatrix<double>(num_constraints, 1);
+  constraints_sparse_ = Eigen::SparseMatrix<double>(num_constraints, 1);
   for (size_t i = 0; i < num_constraints - 1; ++i)
   {
-    A_sparse_.insert(i, 0) = 0;
+    constraints_sparse_.insert(i, 0) = 0;
   }
-  A_sparse_.insert(num_constraints - 1, 0) = 0;
+  constraints_sparse_.insert(num_constraints - 1, 0) = 0;
   osqp_set_default_settings(&osqp_settings_);
   osqp_settings_.warm_start = 0;
   osqp_settings_.verbose = 0;
-  osqp_data_ = std::make_shared<OSQPDataWrapper>(P_sparse, A_sparse_);
+  osqp_data_ = std::make_shared<OSQPDataWrapper>(objective_sparse, constraints_sparse_);
   osqp_data_->q[0] = 0;
 
   if (osqp_setup(&osqp_workspace_, &osqp_data_->data, &osqp_settings_) != 0)
@@ -231,11 +231,12 @@ double jointLimitAccelerationScalingFactor(const Eigen::VectorXd& accelerations,
   return min_scaling_factor;
 }
 
-inline bool update_data(const OSQPDataWrapperPtr& data, OSQPWorkspace* work, Eigen::SparseMatrix<double>& A_sparse,
-                        const Eigen::VectorXd& lower_bound, const Eigen::VectorXd& upper_bound)
+inline bool updateData(const OSQPDataWrapperPtr& data, OSQPWorkspace* work,
+                       Eigen::SparseMatrix<double>& constraints_sparse, const Eigen::VectorXd& lower_bound,
+                       const Eigen::VectorXd& upper_bound)
 {
-  data->update_A(work, A_sparse);
-  size_t num_constraints = A_sparse.rows();
+  data->updateA(work, constraints_sparse);
+  size_t num_constraints = constraints_sparse.rows();
   data->u.block(0, 0, num_constraints - 1, 1) = upper_bound;
   data->l.block(0, 0, num_constraints - 1, 1) = lower_bound;
   data->u[num_constraints - 1] = ALPHA_UPPER_BOUND;
@@ -288,13 +289,13 @@ bool AccelerationLimitedPlugin::doSmoothing(Eigen::VectorXd& positions, Eigen::V
   velocities_offset_ = last_velocities_ - velocities;
   for (size_t i = 0; i < num_constraints - 1; ++i)
   {
-    A_sparse_.coeffRef(i, 0) = positions_offset_[i];
+    constraints_sparse_.coeffRef(i, 0) = positions_offset_[i];
   }
-  A_sparse_.coeffRef(num_constraints - 1, 0) = 1;
+  constraints_sparse_.coeffRef(num_constraints - 1, 0) = 1;
   Eigen::VectorXd vel_point = last_positions_ + last_velocities_ * update_period;
   Eigen::VectorXd upper_bound = vel_point - positions + max_acceleration_limits_ * (update_period * update_period);
   Eigen::VectorXd lower_bound = vel_point - positions + min_acceleration_limits_ * (update_period * update_period);
-  if (!update_data(osqp_data_, osqp_workspace_, A_sparse_, lower_bound, upper_bound))
+  if (!updateData(osqp_data_, osqp_workspace_, constraints_sparse_, lower_bound, upper_bound))
   {
     RCLCPP_ERROR_THROTTLE(getLogger(), *node_->get_clock(), 1000,
                           "failed to set osqp_update_bounds. Make sure the robot's acceleration limits are valid");

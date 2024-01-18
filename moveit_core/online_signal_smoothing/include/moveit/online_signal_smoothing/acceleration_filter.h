@@ -125,7 +125,7 @@ public:
   /**
    * memory allocated by osqp is freed in destructor
    */
-  ~AccelerationLimitedPlugin()
+  ~AccelerationLimitedPlugin() override
   {
     if (osqp_workspace_ != nullptr)
     {
@@ -153,7 +153,7 @@ private:
   /** \brief Pointer to robot model */
   moveit::core::RobotModelConstPtr robot_model_;
   /** \brief Constraint matrix for optimization problem */
-  Eigen::SparseMatrix<double> A_sparse_;
+  Eigen::SparseMatrix<double> constraints_sparse_;
   /** \brief osqp types used for optimization problem */
   OSQPDataWrapperPtr osqp_data_;
   OSQPWorkspace* osqp_workspace_ = nullptr;
