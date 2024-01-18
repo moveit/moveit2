@@ -127,9 +127,9 @@ public:
    */
   ~AccelerationLimitedPlugin()
   {
-    if (work_ != nullptr)
+    if (osqp_workspace_ != nullptr)
     {
-      osqp_cleanup(work_);
+      osqp_cleanup(osqp_workspace_);
     }
   }
 
@@ -140,18 +140,23 @@ private:
   online_signal_smoothing::Params params_;
   /** \brief The number of joints in the robot's planning group.  */
   size_t num_joints_;
-  /** \brief Last   */
+  /** \brief Last velocities and positions received */
   Eigen::VectorXd last_velocities_;
   Eigen::VectorXd last_positions_;
+  /** \brief Intermediate variables used in calculations */
   Eigen::VectorXd cur_acceleration_;
   Eigen::VectorXd positions_offset_;
   Eigen::VectorXd velocities_offset_;
+  /** \brief Extracted joint limits from robot model */
   Eigen::VectorXd max_acceleration_limits_;
   Eigen::VectorXd min_acceleration_limits_;
+  /** \brief Pointer to robot model */
   moveit::core::RobotModelConstPtr robot_model_;
+  /** \brief Constraint matrix for optimization problem */
   Eigen::SparseMatrix<double> A_sparse_;
-  OSQPDataWrapperPtr data_;
-  OSQPWorkspace* work_ = nullptr;
-  OSQPSettings settings_;
+  /** \brief osqp types used for optimization problem */
+  OSQPDataWrapperPtr osqp_data_;
+  OSQPWorkspace* osqp_workspace_ = nullptr;
+  OSQPSettings osqp_settings_;
 };
 }  // namespace online_signal_smoothing

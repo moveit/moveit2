@@ -36,18 +36,22 @@
 #include <moveit/online_signal_smoothing/acceleration_filter.h>
 #include <moveit/utils/robot_model_test_utils.h>
 
+constexpr std::string_view MOVE_GROUP_NAME = "panda_arm";
+constexpr size_t PANDA_NUM_JOINTS = 7u;
+constexpr std::string_view ROBOT_MODEL = "panda";
+
 class AccelerationFilterTest : public testing::Test
 {
 protected:
   void SetUp() override
   {
-    robot_model_ = moveit::core::loadTestingRobotModel("panda");
+    robot_model_ = moveit::core::loadTestingRobotModel(ROBOT_MODEL.data());
   };
 
-  void set_limit(std::optional<Eigen::VectorXd> acceleration_limit)
+  void setLimits(std::optional<Eigen::VectorXd> acceleration_limits)
   {
     const std::vector<moveit::core::JointModel*> joint_models = robot_model_->getJointModels();
-    auto joint_model_group = robot_model_->getJointModelGroup(move_group_name_);
+    auto joint_model_group = robot_model_->getJointModelGroup(MOVE_GROUP_NAME.data());
     size_t ind = 0;
     for (auto& joint_model : joint_models)
     {
@@ -58,10 +62,10 @@ protected:
       std::vector<moveit_msgs::msg::JointLimits> joint_bounds_msg(joint_model->getVariableBoundsMsg());
       for (auto& joint_bound : joint_bounds_msg)
       {
-        joint_bound.has_acceleration_limits = acceleration_limit.has_value();
+        joint_bound.has_acceleration_limits = acceleration_limits.has_value();
         if (joint_bound.has_acceleration_limits)
         {
-          joint_bound.max_acceleration = acceleration_limit.value()[ind];
+          joint_bound.max_acceleration = acceleration_limits.value()[ind];
         }
       }
       joint_model->setVariableBounds(joint_bounds_msg);
@@ -71,7 +75,6 @@ protected:
 
 protected:
   moveit::core::RobotModelPtr robot_model_;
-  std::string move_group_name_ = "panda_arm";
 };
 
 TEST_F(AccelerationFilterTest, FilterInitialize)
@@ -80,23 +83,24 @@ TEST_F(AccelerationFilterTest, FilterInitialize)
   rclcpp::Node::SharedPtr node = std::make_shared<rclcpp::Node>("AccelerationFilterTest");
 
   // fail because the update_rate parameter is not set
-  EXPECT_THROW(filter.initialize(node, robot_model_, 7), rclcpp::exceptions::ParameterUninitializedException);
+  EXPECT_THROW(filter.initialize(node, robot_model_, PANDA_NUM_JOINTS),
+               rclcpp::exceptions::ParameterUninitializedException);
 
   node = std::make_shared<rclcpp::Node>("AccelerationFilterTest");
-  node->declare_parameter<std::string>("move_group_name", move_group_name_);
+  node->declare_parameter<std::string>("move_group_name", MOVE_GROUP_NAME.data());
   node->declare_parameter("update_rate", 0.01);
 
-  // fail because the number of joint is wrong
+  // fail because the number of joints is wrong
   EXPECT_FALSE(filter.initialize(node, robot_model_, 3));
 
   // fail because the robot does not have acceleration limits
-  set_limit({});
-  EXPECT_FALSE(filter.initialize(node, robot_model_, 7));
+  setLimits({});
+  EXPECT_FALSE(filter.initialize(node, robot_model_, PANDA_NUM_JOINTS));
 
   // succeed with acceleration limits
-  Eigen::VectorXd acceleration_limit = 1.2 * Eigen::VectorXd::Ones(7);
-  set_limit(acceleration_limit);
-  EXPECT_TRUE(filter.initialize(node, robot_model_, 7));
+  Eigen::VectorXd acceleration_limits = 1.2 * Eigen::VectorXd::Ones(PANDA_NUM_JOINTS);
+  setLimits(acceleration_limits);
+  EXPECT_TRUE(filter.initialize(node, robot_model_, PANDA_NUM_JOINTS));
 }
 
 TEST_F(AccelerationFilterTest, FilterDoSmooth)
@@ -104,13 +108,13 @@ TEST_F(AccelerationFilterTest, FilterDoSmooth)
   online_signal_smoothing::AccelerationLimitedPlugin filter;
 
   rclcpp::Node::SharedPtr node = std::make_shared<rclcpp::Node>("AccelerationFilterTest");
-  node->declare_parameter<std::string>("move_group_name", move_group_name_);
+  node->declare_parameter<std::string>("move_group_name", MOVE_GROUP_NAME.data());
   double update_rate = 1.0;
   node->declare_parameter<double>("update_rate", update_rate);
-  Eigen::VectorXd acceleration_limit = 1.2 * Eigen::VectorXd::Ones(7);
-  set_limit(acceleration_limit);
+  Eigen::VectorXd acceleration_limits = 1.2 * Eigen::VectorXd::Ones(PANDA_NUM_JOINTS);
+  setLimits(acceleration_limits);
 
-  EXPECT_TRUE(filter.initialize(node, robot_model_, 7));
+  EXPECT_TRUE(filter.initialize(node, robot_model_, PANDA_NUM_JOINTS));
 
   // fail when called with the wrong number of joints
   Eigen::VectorXd position = Eigen::VectorXd::Zero(5);
@@ -119,20 +123,22 @@ TEST_F(AccelerationFilterTest, FilterDoSmooth)
   EXPECT_FALSE(filter.doSmoothing(position, velocity, acceleration));
 
   // fail because reset was not called
-  position = Eigen::VectorXd::Zero(7);
-  velocity = Eigen::VectorXd::Zero(7);
-  acceleration = Eigen::VectorXd::Zero(7);
+  position = Eigen::VectorXd::Zero(PANDA_NUM_JOINTS);
+  velocity = Eigen::VectorXd::Zero(PANDA_NUM_JOINTS);
+  acceleration = Eigen::VectorXd::Zero(PANDA_NUM_JOINTS);
   EXPECT_FALSE(filter.doSmoothing(position, velocity, acceleration));
 
   // succeed
-  filter.reset(Eigen::VectorXd::Zero(7), Eigen::VectorXd::Zero(7), Eigen::VectorXd::Zero(7));
+  filter.reset(Eigen::VectorXd::Zero(PANDA_NUM_JOINTS), Eigen::VectorXd::Zero(PANDA_NUM_JOINTS),
+               Eigen::VectorXd::Zero(PANDA_NUM_JOINTS));
   EXPECT_TRUE(filter.doSmoothing(position, velocity, acceleration));
 
   // succeed: apply acceleration limits
-  filter.reset(Eigen::VectorXd::Zero(7), Eigen::VectorXd::Zero(7), Eigen::VectorXd::Zero(7));
+  filter.reset(Eigen::VectorXd::Zero(PANDA_NUM_JOINTS), Eigen::VectorXd::Zero(PANDA_NUM_JOINTS),
+               Eigen::VectorXd::Zero(PANDA_NUM_JOINTS));
   position.array() = 3.0;
   EXPECT_TRUE(filter.doSmoothing(position, velocity, acceleration));
-  EXPECT_TRUE((position.array() - update_rate * update_rate * acceleration_limit.array()).matrix().norm() < 1E-3);
+  EXPECT_TRUE((position.array() - update_rate * update_rate * acceleration_limits.array()).matrix().norm() < 1E-3);
 
   // succeed: apply acceleration limits
   position.array() = 0.9;
@@ -141,11 +147,11 @@ TEST_F(AccelerationFilterTest, FilterDoSmooth)
   EXPECT_TRUE((position.array() - 0.9).matrix().norm() < 1E-3);
 
   // succeed: slow down
-  velocity = 10 * Eigen::VectorXd::Ones(7);
-  filter.reset(Eigen::VectorXd::Zero(7), velocity, Eigen::VectorXd::Zero(7));
+  velocity = 10 * Eigen::VectorXd::Ones(PANDA_NUM_JOINTS);
+  filter.reset(Eigen::VectorXd::Zero(PANDA_NUM_JOINTS), velocity, Eigen::VectorXd::Zero(PANDA_NUM_JOINTS));
   position.array() = 0.01;
   Eigen::VectorXd expected_offset =
-      velocity.array() * update_rate - update_rate * update_rate * acceleration_limit.array();
+      velocity.array() * update_rate - update_rate * update_rate * acceleration_limits.array();
   EXPECT_TRUE(filter.doSmoothing(position, velocity, acceleration));
   EXPECT_TRUE((velocity * update_rate - expected_offset).norm() < 1E-3);
 }
@@ -155,15 +161,15 @@ TEST_F(AccelerationFilterTest, FilterBadAccelerationConfig)
   online_signal_smoothing::AccelerationLimitedPlugin filter;
 
   rclcpp::Node::SharedPtr node = std::make_shared<rclcpp::Node>("AccelerationFilterTest");
-  node->declare_parameter<std::string>("move_group_name", move_group_name_);
+  node->declare_parameter<std::string>("move_group_name", MOVE_GROUP_NAME.data());
   double update_rate = 0.1;
   node->declare_parameter<double>("update_rate", update_rate);
-  Eigen::VectorXd acceleration_limit = -1.0 * Eigen::VectorXd::Ones(7);
-  set_limit(acceleration_limit);
-  EXPECT_TRUE(filter.initialize(node, robot_model_, 7));
-  Eigen::VectorXd position = Eigen::VectorXd::Zero(7);
-  Eigen::VectorXd velocity = Eigen::VectorXd::Zero(7);
-  Eigen::VectorXd acceleration = Eigen::VectorXd::Zero(7);
+  Eigen::VectorXd acceleration_limits = -1.0 * Eigen::VectorXd::Ones(PANDA_NUM_JOINTS);
+  setLimits(acceleration_limits);
+  EXPECT_TRUE(filter.initialize(node, robot_model_, PANDA_NUM_JOINTS));
+  Eigen::VectorXd position = Eigen::VectorXd::Zero(PANDA_NUM_JOINTS);
+  Eigen::VectorXd velocity = Eigen::VectorXd::Zero(PANDA_NUM_JOINTS);
+  Eigen::VectorXd acceleration = Eigen::VectorXd::Zero(PANDA_NUM_JOINTS);
   EXPECT_TRUE(filter.reset(position, velocity, acceleration));
   EXPECT_FALSE(filter.doSmoothing(position, velocity, acceleration));
 }
@@ -173,21 +179,22 @@ TEST_F(AccelerationFilterTest, FilterDoSmoothRandomized)
   online_signal_smoothing::AccelerationLimitedPlugin filter;
   rclcpp::Node::SharedPtr node = std::make_shared<rclcpp::Node>("AccelerationFilterTest");
   double update_rate = 0.1;
-  node->declare_parameter<std::string>("move_group_name", move_group_name_);
+  node->declare_parameter<std::string>("move_group_name", MOVE_GROUP_NAME.data());
   node->declare_parameter<double>("update_rate", update_rate);
-  Eigen::VectorXd acceleration_limit = 1.2 * (1.0 + Eigen::VectorXd::Random(7).array());
-  set_limit(acceleration_limit);
-  EXPECT_TRUE(filter.initialize(node, robot_model_, 7));
+  Eigen::VectorXd acceleration_limits = 1.2 * (1.0 + Eigen::VectorXd::Random(PANDA_NUM_JOINTS).array());
+  setLimits(acceleration_limits);
+  EXPECT_TRUE(filter.initialize(node, robot_model_, PANDA_NUM_JOINTS));
 
   for (size_t iter = 0; iter < 64; ++iter)
   {
-    acceleration_limit = 1.2 * (1.0 + Eigen::VectorXd::Random(7).array());
-    set_limit(acceleration_limit);
-    EXPECT_TRUE(filter.initialize(node, robot_model_, 7));
-    filter.reset(Eigen::VectorXd::Zero(7), Eigen::VectorXd::Zero(7), Eigen::VectorXd::Zero(7));
-    Eigen::VectorXd position = Eigen::VectorXd::Random(7);
-    Eigen::VectorXd velocity = Eigen::VectorXd::Random(7);
-    Eigen::VectorXd acceleration = Eigen::VectorXd::Random(7);
+    acceleration_limits = 1.2 * (1.0 + Eigen::VectorXd::Random(PANDA_NUM_JOINTS).array());
+    setLimits(acceleration_limits);
+    EXPECT_TRUE(filter.initialize(node, robot_model_, PANDA_NUM_JOINTS));
+    filter.reset(Eigen::VectorXd::Zero(PANDA_NUM_JOINTS), Eigen::VectorXd::Zero(PANDA_NUM_JOINTS),
+                 Eigen::VectorXd::Zero(PANDA_NUM_JOINTS));
+    Eigen::VectorXd position = Eigen::VectorXd::Random(PANDA_NUM_JOINTS);
+    Eigen::VectorXd velocity = Eigen::VectorXd::Random(PANDA_NUM_JOINTS);
+    Eigen::VectorXd acceleration = Eigen::VectorXd::Random(PANDA_NUM_JOINTS);
     EXPECT_TRUE(filter.doSmoothing(position, velocity, acceleration));
   }
 }
