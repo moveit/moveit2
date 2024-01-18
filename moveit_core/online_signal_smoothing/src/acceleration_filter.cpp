@@ -46,7 +46,7 @@ rclcpp::Logger getLogger()
   return moveit::getLogger("AccelerationLimitedPlugin");
 }
 
-// The threshold below which any velocity or position difference is considered zero.
+// The threshold below which any velocity or position difference is considered zero (rad and rad/s).
 constexpr double COMMAND_DIFFERENCE_THRESHOLD = 1E-4;
 // The scaling parameter alpha between the current point and commanded point must be less than 1.0
 constexpr double ALPHA_UPPER_BOUND = 1.0;
@@ -264,7 +264,7 @@ bool AccelerationLimitedPlugin::doSmoothing(Eigen::VectorXd& positions, Eigen::V
     return false;
   }
 
-  // formulate quadratic program to find the best new reference point subject to the robot's acceleration limits
+  // formulate a quadratic program to find the best new reference point subject to the robot's acceleration limits
   // p_c: robot's current position
   // v_c: robot's current velocity
   // p_t: robot's target position

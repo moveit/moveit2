@@ -109,7 +109,7 @@ TEST_F(AccelerationFilterTest, FilterDoSmooth)
 
   rclcpp::Node::SharedPtr node = std::make_shared<rclcpp::Node>("AccelerationFilterTest");
   node->declare_parameter<std::string>("move_group_name", MOVE_GROUP_NAME.data());
-  double update_rate = 1.0;
+  const double update_rate = 1.0;
   node->declare_parameter<double>("update_rate", update_rate);
   Eigen::VectorXd acceleration_limits = 1.2 * Eigen::VectorXd::Ones(PANDA_NUM_JOINTS);
   setLimits(acceleration_limits);
@@ -162,7 +162,7 @@ TEST_F(AccelerationFilterTest, FilterBadAccelerationConfig)
 
   rclcpp::Node::SharedPtr node = std::make_shared<rclcpp::Node>("AccelerationFilterTest");
   node->declare_parameter<std::string>("move_group_name", MOVE_GROUP_NAME.data());
-  double update_rate = 0.1;
+  const double update_rate = 0.1;
   node->declare_parameter<double>("update_rate", update_rate);
   Eigen::VectorXd acceleration_limits = -1.0 * Eigen::VectorXd::Ones(PANDA_NUM_JOINTS);
   setLimits(acceleration_limits);
@@ -178,7 +178,7 @@ TEST_F(AccelerationFilterTest, FilterDoSmoothRandomized)
 {
   online_signal_smoothing::AccelerationLimitedPlugin filter;
   rclcpp::Node::SharedPtr node = std::make_shared<rclcpp::Node>("AccelerationFilterTest");
-  double update_rate = 0.1;
+  const double update_rate = 0.1;
   node->declare_parameter<std::string>("move_group_name", MOVE_GROUP_NAME.data());
   node->declare_parameter<double>("update_rate", update_rate);
   Eigen::VectorXd acceleration_limits = 1.2 * (1.0 + Eigen::VectorXd::Random(PANDA_NUM_JOINTS).array());

@@ -56,7 +56,7 @@ set_target_properties(moveit_acceleration_filter PROPERTIES VERSION
   "${${PROJECT_NAME}_VERSION}"
 )
 
-generate_parameter_library(moveit_acceleration_filter_parameters src/acceleration_parameters.yaml)
+generate_parameter_library(moveit_acceleration_filter_parameters src/acceleration_filter_parameters.yaml)
 
 target_link_libraries(moveit_acceleration_filter
   moveit_acceleration_filter_parameters
