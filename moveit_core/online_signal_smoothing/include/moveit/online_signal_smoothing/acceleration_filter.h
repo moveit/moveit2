@@ -134,9 +134,13 @@ public:
   }
 
 private:
+  /** \brief Pointer to rclcpp node handle.  */
   rclcpp::Node::SharedPtr node_;
+  /** \brief Parameters for plugin.  */
   online_signal_smoothing::Params params_;
+  /** \brief The number of joints in the robot's planning group.  */
   size_t num_joints_;
+  /** \brief Last   */
   Eigen::VectorXd last_velocities_;
   Eigen::VectorXd last_positions_;
   Eigen::VectorXd cur_acceleration_;

@@ -77,16 +77,17 @@ protected:
 TEST_F(AccelerationFilterTest, FilterInitialize)
 {
   online_signal_smoothing::AccelerationLimitedPlugin filter;
-
   rclcpp::Node::SharedPtr node = std::make_shared<rclcpp::Node>("AccelerationFilterTest");
+
+  // fail because the update_rate parameter is not set
+  EXPECT_THROW(filter.initialize(node, robot_model_, 7), rclcpp::exceptions::ParameterUninitializedException);
+
+  node = std::make_shared<rclcpp::Node>("AccelerationFilterTest");
   node->declare_parameter<std::string>("move_group_name", move_group_name_);
+  node->declare_parameter("update_rate", 0.01);
 
   // fail because the number of joint is wrong
   EXPECT_FALSE(filter.initialize(node, robot_model_, 3));
-
-  // fail because the update_rate parameter is not set
-  EXPECT_FALSE(filter.initialize(node, robot_model_, 7));
-  node->declare_parameter<double>("update_rate", 0.01);
 
   // fail because the robot does not have acceleration limits
   set_limit({});
@@ -169,15 +170,18 @@ TEST_F(AccelerationFilterTest, FilterBadAccelerationConfig)
 
 TEST_F(AccelerationFilterTest, FilterDoSmoothRandomized)
 {
+  online_signal_smoothing::AccelerationLimitedPlugin filter;
+  rclcpp::Node::SharedPtr node = std::make_shared<rclcpp::Node>("AccelerationFilterTest");
   double update_rate = 0.1;
+  node->declare_parameter<std::string>("move_group_name", move_group_name_);
+  node->declare_parameter<double>("update_rate", update_rate);
+  Eigen::VectorXd acceleration_limit = 1.2 * (1.0 + Eigen::VectorXd::Random(7).array());
+  set_limit(acceleration_limit);
+  EXPECT_TRUE(filter.initialize(node, robot_model_, 7));
+
   for (size_t iter = 0; iter < 64; ++iter)
   {
-    online_signal_smoothing::AccelerationLimitedPlugin filter;
-
-    rclcpp::Node::SharedPtr node = std::make_shared<rclcpp::Node>("AccelerationFilterTest");
-    node->declare_parameter<std::string>("move_group_name", move_group_name_);
-    node->declare_parameter<double>("update_rate", update_rate);
-    Eigen::VectorXd acceleration_limit = 1.2 * (1.0 + Eigen::VectorXd::Random(7).array());
+    acceleration_limit = 1.2 * (1.0 + Eigen::VectorXd::Random(7).array());
     set_limit(acceleration_limit);
     EXPECT_TRUE(filter.initialize(node, robot_model_, 7));
     filter.reset(Eigen::VectorXd::Zero(7), Eigen::VectorXd::Zero(7), Eigen::VectorXd::Zero(7));
