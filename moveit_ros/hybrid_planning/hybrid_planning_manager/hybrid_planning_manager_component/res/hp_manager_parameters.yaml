@@ -1,7 +1,7 @@
 hp_manager_parameters:
   planner_logic_plugin_name: {
     type: string,
-    description: "Planning group to be used",
+    description: "Name of the planner logic plugin",
     default_value: "moveit::hybrid_planning/ReplanInvalidatedTrajectory",
   }
   local_planning_action_name: {
