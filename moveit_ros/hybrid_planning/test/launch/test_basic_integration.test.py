@@ -11,9 +11,6 @@ from launch_ros.actions import Node
 sys.path.append(os.path.dirname(__file__))
 from hybrid_planning_common import (
     generate_common_hybrid_launch_description,
-    get_robot_description,
-    get_robot_description_semantic,
-    load_file,
     load_yaml,
 )
 
@@ -21,8 +18,11 @@ from hybrid_planning_common import (
 def generate_test_description():
     # generate_common_hybrid_launch_description() returns a list of nodes to launch
     common_launch = generate_common_hybrid_launch_description()
-    robot_description = get_robot_description()
-    robot_description_semantic = get_robot_description_semantic()
+    moveit_config = (
+        MoveItConfigsBuilder("moveit_resources_panda")
+        .robot_description(file_path="config/panda.urdf.xacro")
+        .to_moveit_configs()
+    )
 
     common_hybrid_planning_param = load_yaml(
         "moveit_hybrid_planning", "config/common_hybrid_planning_params.yaml"
@@ -33,8 +33,7 @@ def generate_test_description():
             [LaunchConfiguration("test_binary_dir"), "test_basic_integration"]
         ),
         parameters=[
-            robot_description,
-            robot_description_semantic,
+            moveit_config.to_dict(),
             common_hybrid_planning_param,
         ],
         output="screen",
