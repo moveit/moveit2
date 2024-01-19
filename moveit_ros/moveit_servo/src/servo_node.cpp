@@ -78,7 +78,7 @@ ServoNode::ServoNode(const rclcpp::NodeOptions& options)
   // Configure SCHED_FIFO and priority
   if (realtime_tools::configure_sched_fifo(servo_params_.thread_priority))
   {
-    RCLCPP_INFO_STREAM(node_->get_logger(), "Enabled SCHED_FIO and higher thread priority.");
+    RCLCPP_INFO_STREAM(node_->get_logger(), "Enabled SCHED_FIFO and higher thread priority.");
   }
   else
   {
