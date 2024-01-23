@@ -45,6 +45,7 @@ planning_interface::MotionPlanResponse
 plan(std::shared_ptr<moveit_cpp::PlanningComponent>& planning_component,
      std::shared_ptr<moveit_cpp::PlanningComponent::PlanRequestParameters>& single_plan_parameters,
      std::shared_ptr<moveit_cpp::PlanningComponent::MultiPipelinePlanRequestParameters>& multi_plan_parameters,
+     std::shared_ptr<planning_scene::PlanningScene>& planning_scene,
      std::optional<const moveit::planning_pipeline_interfaces::SolutionSelectionFunction> solution_selection_function,
      std::optional<moveit::planning_pipeline_interfaces::StoppingCriterionFunction> stopping_criterion_callback)
 {
@@ -61,7 +62,7 @@ plan(std::shared_ptr<moveit_cpp::PlanningComponent>& planning_component,
     std::shared_ptr<const moveit_cpp::PlanningComponent::PlanRequestParameters> const_single_plan_parameters =
         std::const_pointer_cast<const moveit_cpp::PlanningComponent::PlanRequestParameters>(single_plan_parameters);
 
-    return planning_component->plan(*const_single_plan_parameters);
+    return planning_component->plan(*const_single_plan_parameters, planning_scene);
   }
   else if (multi_plan_parameters)
   {
@@ -73,25 +74,32 @@ plan(std::shared_ptr<moveit_cpp::PlanningComponent>& planning_component,
     if (solution_selection_function && stopping_criterion_callback)
     {
       return planning_component->plan(*const_multi_plan_parameters, std::ref(*solution_selection_function),
-                                      *stopping_criterion_callback);
+                                      *stopping_criterion_callback, planning_scene);
     }
     else if (solution_selection_function)
     {
-      return planning_component->plan(*const_multi_plan_parameters, std::ref(*solution_selection_function));
+      return planning_component->plan(*const_multi_plan_parameters, std::ref(*solution_selection_function), nullptr,
+                                      planning_scene);
     }
     else if (stopping_criterion_callback)
     {
       return planning_component->plan(*const_multi_plan_parameters,
                                       moveit::planning_pipeline_interfaces::getShortestSolution,
-                                      *stopping_criterion_callback);
+                                      *stopping_criterion_callback, planning_scene);
     }
     else
     {
-      return planning_component->plan(*const_multi_plan_parameters);
+      return planning_component->plan(*const_multi_plan_parameters,
+                                      moveit::planning_pipeline_interfaces::getShortestSolution, nullptr,
+                                      planning_scene);
     }
   }
   else
   {
+    if (planning_scene)
+    {
+      throw std::invalid_argument("Cannot specify planning scene without specifying plan parameters");
+    }
     return planning_component->plan();
   }
 }
@@ -322,8 +330,9 @@ void init_planning_component(py::module& m)
 
       // TODO (peterdavidfagan): improve the plan API
       .def("plan", &moveit_py::bind_planning_component::plan, py::arg("single_plan_parameters") = nullptr,
-           py::arg("multi_plan_parameters") = nullptr, py::arg("solution_selection_function") = nullptr,
-           py::arg("stopping_criterion_callback") = nullptr, py::return_value_policy::move,
+           py::arg("multi_plan_parameters") = nullptr, py::arg("planning_scene") = nullptr,
+           py::arg("solution_selection_function") = nullptr, py::arg("stopping_criterion_callback") = nullptr,
+           py::return_value_policy::move,
            R"(
            Plan a motion plan using the current start and goal states.
 

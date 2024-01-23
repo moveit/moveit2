@@ -62,6 +62,7 @@ planning_interface::MotionPlanResponse
 plan(std::shared_ptr<moveit_cpp::PlanningComponent>& planning_component,
      std::shared_ptr<moveit_cpp::PlanningComponent::PlanRequestParameters>& single_plan_parameters,
      std::shared_ptr<moveit_cpp::PlanningComponent::MultiPipelinePlanRequestParameters>& multi_plan_parameters,
+     std::shared_ptr<planning_scene::PlanningScene>& planning_scene,
      std::optional<const moveit::planning_pipeline_interfaces::SolutionSelectionFunction> solution_selection_function,
      std::optional<moveit::planning_pipeline_interfaces::StoppingCriterionFunction> stopping_criterion_callback);
 
