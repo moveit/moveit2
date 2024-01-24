@@ -229,6 +229,13 @@ JointModelGroup::JointModelGroup(const std::string& group_name, const srdf::Mode
   {
     link_model_map_[link_model->getName()] = link_model;
     link_model_name_vector_.push_back(link_model->getName());
+    // if this is the first link of the group with geometry (for example `base_link`) it should included
+    if(link_model_with_geometry_vector_.empty() && !link_model->getParentLinkModel()->getShapes().empty())
+    {        
+      link_model_with_geometry_vector_.push_back(link_model->getParentLinkModel());
+      link_model_with_geometry_name_vector_.push_back(link_model->getParentLinkModel()->getName());
+    }
+    // all child links with collision geometry should also be included
     if (!link_model->getShapes().empty())
     {
       link_model_with_geometry_vector_.push_back(link_model);
