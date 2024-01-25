@@ -2,7 +2,7 @@ servo_solver_parameters:
   reference_frame: {
     type: string,
     description: "Frame that is tracked by servo",
-    #validation: {
-    #  not_empty<>: []
-    #}
+    validation: {
+      not_empty<>: []
+    }
   }

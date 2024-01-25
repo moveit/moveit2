@@ -64,7 +64,6 @@ bool ServoSolver::initialize(const rclcpp::Node::SharedPtr& node,
   solver_parameters_ = solver_param_listener->get_params();
 
   // Get Servo Parameters
-  // Get the servo parameters.
   const std::string param_namespace = "moveit_servo";
   const std::shared_ptr<const servo::ParamListener> servo_param_listener =
       std::make_shared<const servo::ParamListener>(node, param_namespace);
@@ -145,7 +144,7 @@ ServoSolver::solve(const robot_trajectory::RobotTrajectory& local_trajectory,
     moveit_servo::KinematicState joint_state = servo_->getNextJointState(current_state, target_twist);
     const auto status = servo_->getStatus();
     // Servo solver feedback is always the status of the first servo iteration
-    if (feedback_result.feedback.empty())
+    if (feedback_result.feedback.empty() && status != moveit_servo::StatusCode::NO_WARNING)
     {
       feedback_result.feedback = moveit_servo::SERVO_STATUS_CODE_MAP.at(status);
     }
