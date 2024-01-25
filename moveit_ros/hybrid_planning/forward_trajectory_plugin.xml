@@ -1,7 +1,0 @@
-<library path="forward_trajectory_plugin">
-  <class name="moveit_hybrid_planning/ForwardTrajectory" type="moveit::hybrid_planning::ForwardTrajectory" base_class_type="moveit::hybrid_planning::LocalConstraintSolverInterface">
-    <description>
-    Simple local solver plugin that forwards the next waypoint of the sampled local trajectory.
-    </description>
-  </class>
-</library>

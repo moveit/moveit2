@@ -1,0 +1,46 @@
+<class_libraries>
+<!-- Planner Logic Plugins-->
+<library path="single_plan_execution_plugin">
+  <class name="moveit_hybrid_planning/SinglePlanExecution" type="moveit::hybrid_planning::SinglePlanExecution" base_class_type="moveit::hybrid_planning::PlannerLogicInterface">
+    <description>
+    Simple hybrid planning logic that runs the global planner once and execute the global solution with the local planner.
+    </description>
+  </class>
+</library>
+<library path="replan_invalidated_trajectory_plugin">
+  <class name="moveit_hybrid_planning/ReplanInvalidatedTrajectory" type="moveit::hybrid_planning::ReplanInvalidatedTrajectory" base_class_type="moveit::hybrid_planning::PlannerLogicInterface">
+    <description>
+    Simple hybrid planning logic that runs the global planner once and starts executing the global solution with the local planner. In case the local planner detects a collision the global planner is rerun to update the invalidated global trajectory.
+    </description>
+  </class>
+</library>
+<!-- Global Planner Plugins -->
+<library path="motion_planning_pipeline_plugin">
+  <class name="moveit_hybrid_planning/MoveItPlanningPipeline" type="moveit::hybrid_planning::MoveItPlanningPipeline" base_class_type="moveit::hybrid_planning::GlobalPlannerInterface">
+    <description>
+    Use default MoveIt planning pipeline as Global Planner
+    </description>
+  </class>
+</library>
+<!-- Trajectory Operator Plugins -->
+<library path="simple_sampler_plugin">
+  <class name="moveit_hybrid_planning/SimpleSampler" type="moveit::hybrid_planning::SimpleSampler" base_class_type="moveit::hybrid_planning::TrajectoryOperatorInterface">
+    <description>
+    Simple trajectory operator plugin that updates the local planner's reference trajectory by simple replacing it and extracts the next trajectory point based on the current robot state and an index.
+    </description>
+  </class>
+</library>
+<!-- Local solver Plugins -->
+<library path="forward_trajectory_plugin">
+  <class name="moveit_hybrid_planning/ForwardTrajectory" type="moveit::hybrid_planning::ForwardTrajectory" base_class_type="moveit::hybrid_planning::LocalConstraintSolverInterface">
+    <description>
+    Simple local solver plugin that forwards the next waypoint of the sampled local trajectory.
+    </description>
+  </class>
+</library>
+<library path="servo_local_solver_plugin">
+  <class name="moveit_hybrid_planning/ServoSolver" type="moveit::hybrid_planning::ServoSolver" base_class_type="moveit::hybrid_planning::LocalConstraintSolverInterface">
+    <description>Uses Servo as a local solver.</description>
+  </class>
+</library>
+</class_libraries>

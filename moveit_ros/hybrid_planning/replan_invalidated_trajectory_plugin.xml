@@ -1,7 +1,0 @@
-<library path="replan_invalidated_trajectory_plugin">
-  <class name="moveit_hybrid_planning/ReplanInvalidatedTrajectory" type="moveit::hybrid_planning::ReplanInvalidatedTrajectory" base_class_type="moveit::hybrid_planning::PlannerLogicInterface">
-    <description>
-    Simple hybrid planning logic that runs the global planner once and starts executing the global solution with the local planner. In case the local planner detects a collision the global planner is rerun to update the invalidated global trajectory.
-    </description>
-  </class>
-</library>

@@ -1,7 +1,0 @@
-<library path="motion_planning_pipeline_plugin">
-  <class name="moveit_hybrid_planning/MoveItPlanningPipeline" type="moveit::hybrid_planning::MoveItPlanningPipeline" base_class_type="moveit::hybrid_planning::GlobalPlannerInterface">
-    <description>
-    Use default MoveIt planning pipeline as Global Planner
-    </description>
-  </class>
-</library>

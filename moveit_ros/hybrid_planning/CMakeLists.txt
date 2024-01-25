@@ -7,11 +7,13 @@ moveit_package()
 
 # find dependencies
 find_package(ament_cmake REQUIRED)
+find_package(control_msgs REQUIRED)
 find_package(generate_parameter_library REQUIRED)
 find_package(moveit_core REQUIRED)
 find_package(moveit_msgs REQUIRED)
 find_package(moveit_ros_planning REQUIRED)
 find_package(moveit_ros_planning_interface REQUIRED)
+find_package(moveit_servo REQUIRED)
 find_package(pluginlib REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(rclcpp_action REQUIRED)
@@ -30,6 +32,7 @@ set(LIBRARIES
   forward_trajectory_plugin
   motion_planning_pipeline_plugin
   replan_invalidated_trajectory_plugin
+  servo_local_solver_plugin
   simple_sampler_plugin
   single_plan_execution_plugin
   # Parameters
@@ -38,10 +41,12 @@ set(LIBRARIES
 )
 
 set(THIS_PACKAGE_INCLUDE_DEPENDS
+  control_msgs
   moveit_core
   moveit_msgs
   moveit_ros_planning
   moveit_ros_planning_interface
+  moveit_servo
   pluginlib
   rclcpp
   rclcpp_action
@@ -90,11 +95,7 @@ install(DIRECTORY ${THIS_PACKAGE_INCLUDE_DIRS} DESTINATION include/moveit_hybrid
 install(DIRECTORY test/launch DESTINATION share/moveit_hybrid_planning)
 install(DIRECTORY test/config DESTINATION share/moveit_hybrid_planning)
 
-pluginlib_export_plugin_description_file(moveit_hybrid_planning single_plan_execution_plugin.xml)
-pluginlib_export_plugin_description_file(moveit_hybrid_planning moveit_planning_pipeline_plugin.xml)
-pluginlib_export_plugin_description_file(moveit_hybrid_planning simple_sampler_plugin.xml)
-pluginlib_export_plugin_description_file(moveit_hybrid_planning replan_invalidated_trajectory_plugin.xml)
-pluginlib_export_plugin_description_file(moveit_hybrid_planning forward_trajectory_plugin.xml)
+pluginlib_export_plugin_description_file(moveit_hybrid_planning plugins.xml)
 
 ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS})
 ament_export_targets(moveit_hybrid_planningTargets HAS_LIBRARY_TARGET)
