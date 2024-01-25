@@ -38,6 +38,8 @@ set(LIBRARIES
   # Parameters
   local_planner_parameters
   hp_manager_parameters
+  forward_trajectory_parameters
+  servo_solver_parameters
 )
 
 set(THIS_PACKAGE_INCLUDE_DEPENDS

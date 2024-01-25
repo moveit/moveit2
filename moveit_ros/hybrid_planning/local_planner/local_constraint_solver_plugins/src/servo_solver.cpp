@@ -59,6 +59,10 @@ bool ServoSolver::initialize(const rclcpp::Node::SharedPtr& node,
   planning_scene_monitor_ = planning_scene_monitor;
   node_ = node;
 
+  const std::shared_ptr<const servo_solver_parameters::ParamListener> solver_param_listener =
+      std::make_shared<const servo_solver_parameters::ParamListener>(node, "");
+  solver_parameters_ = solver_param_listener->get_params();
+
   // Get Servo Parameters
   // Get the servo parameters.
   const std::string param_namespace = "moveit_servo";
@@ -109,9 +113,9 @@ ServoSolver::solve(const robot_trajectory::RobotTrajectory& local_trajectory,
   target_state.update();
 
   // TF planning_frame -> current EE
-  Eigen::Isometry3d current_pose = current_state->getFrameTransform("tcp_welding_gun_link");
+  Eigen::Isometry3d current_pose = current_state->getFrameTransform(solver_parameters_.reference_frame);
   // TF planning -> target EE
-  Eigen::Isometry3d target_pose = target_state.getFrameTransform("tcp_welding_gun_link");
+  Eigen::Isometry3d target_pose = target_state.getFrameTransform(solver_parameters_.reference_frame);
 
   // current EE -> planning frame * planning frame -> target EE
   Eigen::Isometry3d diff_pose = current_pose.inverse() * target_pose;
@@ -127,33 +131,27 @@ ServoSolver::solve(const robot_trajectory::RobotTrajectory& local_trajectory,
   // Transform goal pose to command frame
   servo_->setCommandType(moveit_servo::CommandType::TWIST);
   moveit_servo::TwistCommand target_twist{
-    "tcp_welding_gun_link",
+    solver_parameters_.reference_frame,
     { diff_pose.translation().x() * trans_gain, diff_pose.translation().y() * trans_gain,
       diff_pose.translation().z() * trans_gain, axis_angle.axis().x() * axis_angle.angle() * rot_gain,
       axis_angle.axis().y() * axis_angle.angle() * rot_gain, axis_angle.axis().z() * axis_angle.angle() * rot_gain }
   };
 
-  // Start DEBUG uncomment for debugging
-  // auto msg = std::make_unique<geometry_msgs::msg::TwistStamped>();
-  // msg->header.stamp = node_->now();
-  // msg->twist.linear.x = target_twist.velocities[0];
-  // msg->twist.linear.y = target_twist.velocities[1];
-  // msg->twist.linear.z = target_twist.velocities[2];
-  // msg->twist.angular.x =target_twist.velocities[3];
-  // msg->twist.angular.y =target_twist.velocities[4];
-  // msg->twist.angular.z =target_twist.velocities[5];
-  // twist_cmd_pub_->publish(std::move(msg));
-  // End Debug
-
   std::optional<trajectory_msgs::msg::JointTrajectory> trajectory_msg;
+  // Create servo commands until a trajectory message can be generated
   while (!trajectory_msg)
   {
     // Calculate next servo command
     moveit_servo::KinematicState joint_state = servo_->getNextJointState(current_state, target_twist);
     const auto status = servo_->getStatus();
+    // Servo solver feedback is always the status of the first servo iteration
+    if (feedback_result.feedback.empty())
+    {
+      feedback_result.feedback = moveit_servo::SERVO_STATUS_CODE_MAP.at(status);
+    }
+    // If servo couldn't compute the next joint state, exit local solver without a solution
     if (status == moveit_servo::StatusCode::INVALID)
     {
-      feedback_result.feedback = "Servo StatusCode 'INVALID'";
       return feedback_result;
     }
     moveit_servo::updateSlidingWindow(joint_state, joint_cmd_rolling_window_, servo_parameters_.max_expected_latency,

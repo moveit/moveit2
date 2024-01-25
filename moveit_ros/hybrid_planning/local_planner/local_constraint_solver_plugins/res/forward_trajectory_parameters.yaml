@@ -1,0 +1,6 @@
+forward_trajectory_parameters:
+  stop_before_collision: {
+    type: bool,
+    description: "If a collision is detected should the robot stop at the current pose or continue executing",
+    default_value: false,
+  }

@@ -36,6 +36,7 @@
 #include <moveit/local_planner/feedback_types.h>
 #include <moveit/planning_scene/planning_scene.h>
 #include <moveit/robot_state/conversions.h>
+#include <forward_trajectory_parameters.hpp>
 
 namespace
 {
@@ -50,15 +51,8 @@ bool ForwardTrajectory::initialize(const rclcpp::Node::SharedPtr& node,
                                    const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor,
                                    const std::string& /* unused */)
 {
-  // Load parameter & initialize member variables
-  if (node->has_parameter("stop_before_collision"))
-  {
-    node->get_parameter<bool>("stop_before_collision", stop_before_collision_);
-  }
-  else
-  {
-    stop_before_collision_ = node->declare_parameter<bool>("stop_before_collision", false);
-  }
+  auto param_listener = forward_trajectory_parameters::ParamListener(node, "");
+  stop_before_collision_ = param_listener.get_params().stop_before_collision;
   node_ = node;
   path_invalidation_event_send_ = false;
   num_iterations_stuck_ = 0;

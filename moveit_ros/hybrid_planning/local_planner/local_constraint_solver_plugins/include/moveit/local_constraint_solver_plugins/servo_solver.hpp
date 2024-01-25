@@ -33,8 +33,7 @@
  *********************************************************************/
 
 /* Author: Sebastian Jahr
-   Description: Local solver plugin that uses moveit_servo to execute the local trajectory in combination with
-   replanning capabilities
+   Description: Local solver plugin that uses moveit_servo steer the robot towards a Cartesian goal point.
  */
 
 #pragma once
@@ -44,17 +43,45 @@
 #include <moveit/local_planner/local_constraint_solver_interface.h>
 
 #include <moveit_servo/servo.hpp>
+#include <servo_solver_parameters.hpp>
 
 namespace moveit::hybrid_planning
 {
+/**
+ * @brief Local solver plugin that utilizes moveit_servo as a local planner
+ *
+ */
 class ServoSolver : public moveit::hybrid_planning::LocalConstraintSolverInterface
 {
 public:
+  /**
+   * @brief Initializes moveit servo
+   *
+   * @param node
+   * @param planning_scene_monitor Planning scene monitor to access the current state of the system
+   * @param group_name UNUSED
+   * @return True if initialization was successful
+   */
   bool initialize(const rclcpp::Node::SharedPtr& node,
                   const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor,
                   const std::string& group_name) override;
+  /**
+   * @brief Reset rolling window
+   *
+   * @return Always returns true
+   */
   bool reset() override;
 
+  /**
+   * @brief Solves local planning problem with servo. The first waypoint of the local trajectory is used as goal point
+   * for servo. After computing FK for that waypoint, the difference between the current and goal reference frame is used
+   * to calculate a twist command for servo. The status of servo is returned as feedback to the hybrid planning manager.
+   *
+   * @param local_trajectory Reference trajectory, only the first waypoint is used
+   * @param local_goal UNUSED
+   * @param local_solution Joint trajectory containing a sequence of servo commands
+   * @return moveit_msgs::action::LocalPlanner::Feedback containing the servo status code
+   */
   moveit_msgs::action::LocalPlanner::Feedback
   solve(const robot_trajectory::RobotTrajectory& local_trajectory,
         const std::shared_ptr<const moveit_msgs::action::LocalPlanner::Goal> local_goal,
@@ -63,28 +90,11 @@ public:
 private:
   rclcpp::Node::SharedPtr node_;
   planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor_;
-
+  servo_solver_parameters::Params solver_parameters_;
   servo::Params servo_parameters_;
 
   // Servo cpp interface
   std::unique_ptr<moveit_servo::Servo> servo_;
-
-  // Uncomment for debugging
-  // rclcpp::Publisher<geometry_msgs::msg::TwistStamped>::SharedPtr twist_cmd_pub_;
-
-  rclcpp::Publisher<trajectory_msgs::msg::JointTrajectory>::SharedPtr traj_cmd_pub_;
-  bool publish_ = true;
-  rclcpp::Subscription<std_msgs::msg::Float64>::SharedPtr collision_velocity_scale_sub_;
-
-  // Subscribe to laser corrections
-  rclcpp::Subscription<control_msgs::msg::JointJog>::SharedPtr laser_corrections_sub_;
-  double laser_correction_ = 0;
-
-  // Flag to indicate if replanning is necessary
-  bool replan_;
-
-  // Flag to indicate that replanning is requested
-  bool feedback_send_;
 
   // Command queue to build trajectory message and add current robot state
   std::deque<moveit_servo::KinematicState> joint_cmd_rolling_window_;
