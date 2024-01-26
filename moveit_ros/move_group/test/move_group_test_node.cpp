@@ -76,7 +76,6 @@ protected:
 
 TEST_F(MoveGroupFixture, testParamAPI)
 {
-
   // GIVEN a node with the parameters defined by MoveItConfigsBuilder
   // WHEN a parameter from the parameter from the API is requested
   // THEN it is a defined in the note
