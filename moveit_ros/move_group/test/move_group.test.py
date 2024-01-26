@@ -5,9 +5,6 @@ import launch_ros
 import launch_testing
 from ament_index_python.packages import get_package_share_directory
 from moveit_configs_utils import MoveItConfigsBuilder
-from launch_param_builder import ParameterBuilder
-from launch.conditions import IfCondition, UnlessCondition
-from launch.substitutions import LaunchConfiguration
 
 
 def generate_test_description():
@@ -17,6 +14,9 @@ def generate_test_description():
             file_path="config/panda.urdf.xacro",
         )
         .robot_description_semantic(file_path="config/panda.srdf")
+        .planning_scene_monitor(
+            publish_robot_description=True, publish_robot_description_semantic=True
+        )
         .trajectory_execution(file_path="config/gripper_moveit_controllers.yaml")
         .planning_pipelines(
             pipelines=["ompl", "chomp", "pilz_industrial_motion_planner", "stomp"]
@@ -25,7 +25,7 @@ def generate_test_description():
     )
 
     # Start the actual move_group node/action server
-    move_group_node = Node(
+    move_group_node = launch_ros.actions.Node(
         package="moveit_ros_move_group",
         executable="move_group",
         output="screen",
@@ -68,14 +68,14 @@ def generate_test_description():
         arguments=["panda_arm_controller", "-c", "/controller_manager"],
     )
 
-    panda_hand_controller_spawner = Node(
+    panda_hand_controller_spawner = launch_ros.actions.Node(
         package="controller_manager",
         executable="spawner",
         arguments=["panda_hand_controller", "-c", "/controller_manager"],
     )
 
     # Static TF
-    static_tf_node = Node(
+    static_tf_node = launch_ros.actions.Node(
         package="tf2_ros",
         executable="static_transform_publisher",
         name="static_transform_publisher",
@@ -84,7 +84,7 @@ def generate_test_description():
     )
 
     # Publish TF
-    robot_state_publisher = Node(
+    robot_state_publisher = launch_ros.actions.Node(
         package="robot_state_publisher",
         executable="robot_state_publisher",
         name="robot_state_publisher",
@@ -121,18 +121,18 @@ def generate_test_description():
             launch_testing.actions.ReadyToTest(),
         ]
     ), {
-        "servo_gtest": servo_gtest,
+        "move_group_gtest": move_group_gtest,
     }
 
 
 class TestGTestWaitForCompletion(unittest.TestCase):
     # Waits for test to complete, then waits a bit to make sure result files are generated
-    def test_gtest_run_complete(self, servo_gtest):
-        self.proc_info.assertWaitForShutdown(servo_gtest, timeout=4000.0)
+    def test_gtest_run_complete(self, move_group_gtest):
+        self.proc_info.assertWaitForShutdown(move_group_gtest, timeout=4000.0)
 
 
 @launch_testing.post_shutdown_test()
 class TestGTestProcessPostShutdown(unittest.TestCase):
     # Checks if the test has been completed with acceptable exit codes (successful codes)
-    def test_gtest_pass(self, proc_info, servo_gtest):
-        launch_testing.asserts.assertExitCodes(proc_info, process=servo_gtest)
+    def test_gtest_pass(self, proc_info, move_group_gtest):
+        launch_testing.asserts.assertExitCodes(proc_info, process=move_group_gtest)

@@ -37,7 +37,7 @@
 */
 
 #include <gtest/gtest.h>
-#include <rclcpp/node.hpp>
+#include <rclcpp/rclcpp.hpp>
 
 #include "parameter_name_list.hpp"
 
@@ -54,7 +54,7 @@ protected:
     test_node_ = std::make_shared<rclcpp::Node>("move_group_param_test_node", node_options);
     executor_ = std::make_shared<rclcpp::executors::SingleThreadedExecutor>();
 
-    executor_->add_node(servo_test_node_);
+    executor_->add_node(test_node_);
     executor_thread_ = std::thread([this]() { executor_->spin(); });
   }
 
@@ -72,16 +72,24 @@ protected:
   // Executor and a thread to run the executor.
   rclcpp::Executor::SharedPtr executor_;
   std::thread executor_thread_;
-}
+};
 
 TEST_F(MoveGroupFixture, testParamAPI)
 {
+  rclcpp::sleep_for(std::chrono::seconds(5));
+
   // GIVEN a node with the parameters defined by MoveItConfigsBuilder
   // WHEN a parameter from the parameter from the API is requested
   // THEN it is a defined in the note
   for (const auto& param_name : move_group_test::PARAMETER_NAME_LIST)
   {
-    EXPECT_TRUE(test_node_->has_parameter(param_name));
+    const auto param_exists = test_node_->has_parameter(param_name);
+    if (!param_exists)
+    {
+      RCLCPP_ERROR(test_node_->get_logger(), "Parameter %s doesn't exists", param_name.c_str());
+    }
+    EXPECT_TRUE(param_exists);
+    rclcpp::sleep_for(std::chrono::seconds(1));
   }
 }
 int main(int argc, char** argv)
