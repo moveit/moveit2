@@ -76,7 +76,6 @@ protected:
 
 TEST_F(MoveGroupFixture, testParamAPI)
 {
-  rclcpp::sleep_for(std::chrono::seconds(5));
 
   // GIVEN a node with the parameters defined by MoveItConfigsBuilder
   // WHEN a parameter from the parameter from the API is requested
