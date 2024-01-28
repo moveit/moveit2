@@ -34,7 +34,7 @@
  *********************************************************************/
 
 /* Author: Sebastian Jahr
-   Description: List of all parameter names used by move_group interface (01/2024)
+   Description: List of all parameter names used when move_group with OMPL, CHOMP, STOMP and PILZ is launched (01/2024).
 */
 #include <string>
 

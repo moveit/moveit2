@@ -98,9 +98,6 @@ if(BUILD_TESTING)
   # https://github.com/ros-planning/moveit2/issues/23 this test is flaky
   # add_rostest(test/test_cancel_before_plan_execution.test)
   # add_rostest(test/test_check_state_validity_in_empty_scene.test)
-  ament_add_gtest_executable(move_group_test_node test/move_group_test_node.cpp)
-  ament_target_dependencies(move_group_test_node ${THIS_PACKAGE_INCLUDE_DEPENDS})
-  add_ros_test(test/move_group.test.py TIMEOUT 30 ARGS "test_binary_dir:=${CMAKE_CURRENT_BINARY_DIR}")
 endif()
 
 ament_export_targets(moveit_ros_move_groupTargets HAS_LIBRARY_TARGET)
