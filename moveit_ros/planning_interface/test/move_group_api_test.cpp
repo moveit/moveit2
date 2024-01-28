@@ -41,9 +41,6 @@
 
 #include "parameter_name_list.hpp"
 
-namespace
-{
-}
 class MoveGroupFixture : public testing::Test
 {
 protected:
@@ -63,17 +60,19 @@ protected:
 
 TEST_F(MoveGroupFixture, testParamAPI)
 {
+  // Create parameter client
   auto params_client = std::make_shared<rclcpp::SyncParametersClient>(test_node_, "move_group");
   bool reach_param_client = params_client->wait_for_service(std::chrono::seconds(5));
+  // This pattern helps with debugging if service is not available.
   if (!reach_param_client)
   {
     RCLCPP_ERROR(test_node_->get_logger(), "Couldn't reach parameter server. Is the move_group up and running?");
   }
   ASSERT_TRUE(reach_param_client);
 
-  // GIVEN a node with the parameters defined by MoveItConfigsBuilder
-  // WHEN a parameter from the parameter from the API is requested
-  // THEN it is a defined in the note
+  // GIVEN a running move_group
+  // WHEN a parameter name from parameter API checked
+  // THEN that parameter exists
   for (const auto& param_name : move_group_test::PARAMETER_NAME_LIST)
   {
     bool param_exists = false;
@@ -91,9 +90,11 @@ TEST_F(MoveGroupFixture, testParamAPI)
                    param_name.c_str());
     }
     EXPECT_TRUE(param_exists);
-    rclcpp::sleep_for(std::chrono::milliseconds(1));
   }
 }
+
+// TODO(sjahr): Add more API tests e.g. from move_group_interface_cpp_test.cpp
+
 int main(int argc, char** argv)
 {
   rclcpp::init(argc, argv);

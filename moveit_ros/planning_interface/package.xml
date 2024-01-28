@@ -26,7 +26,6 @@
   <depend>moveit_ros_warehouse</depend>
   <depend>moveit_ros_move_group</depend>
   <depend>rclcpp</depend>
-  <depend>rclpy</depend>
   <depend>rclcpp_action</depend>
   <depend>geometry_msgs</depend>
   <depend>moveit_msgs</depend>
@@ -34,10 +33,6 @@
   <depend>tf2_eigen</depend>
   <depend>tf2_geometry_msgs</depend>
   <depend>tf2_ros</depend>
-  <depend>python3</depend>
-  <!--depend>eigenpy</depend-->
-
-  <build_depend>eigen</build_depend>
 
   <test_depend>moveit_resources_fanuc_moveit_config</test_depend>
   <test_depend>moveit_resources_panda_moveit_config</test_depend>

@@ -72,9 +72,9 @@ if(BUILD_TESTING)
   # "test_binary_dir:=${CMAKE_CURRENT_BINARY_DIR}") end move group interface cpp
   # ompl constrained planning integration test
 
-  ament_add_gtest_executable(move_group_param_api_test test/move_group_param_api_test.cpp)
-  ament_target_dependencies(move_group_param_api_test ${THIS_PACKAGE_INCLUDE_DEPENDS})
-  add_ros_test(test/launch/move_group_param_api.test.py TIMEOUT 30 ARGS "test_binary_dir:=${CMAKE_CURRENT_BINARY_DIR}")
+  ament_add_gtest_executable(move_group_api_test test/move_group_api_test.cpp)
+  ament_target_dependencies(move_group_api_test ${THIS_PACKAGE_INCLUDE_DEPENDS})
+  add_ros_test(test/launch/move_group_api.test.py TIMEOUT 30 ARGS "test_binary_dir:=${CMAKE_CURRENT_BINARY_DIR}")
 
 endif()
 
