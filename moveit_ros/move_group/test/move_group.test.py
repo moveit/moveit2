@@ -117,7 +117,8 @@ def generate_test_description():
             joint_state_broadcaster_spawner,
             panda_arm_controller_spawner,
             panda_hand_controller_spawner,
-            launch.actions.TimerAction(period=9.0, actions=[move_group_gtest]),
+            move_group_gtest,
+            #launch.actions.TimerAction(period=15.0, actions=[move_group_gtest]),
             launch_testing.actions.ReadyToTest(),
         ]
     ), {

@@ -76,18 +76,29 @@ protected:
 
 TEST_F(MoveGroupFixture, testParamAPI)
 {
+  auto params_client = std::make_shared<rclcpp::SyncParametersClient>(test_node_, "move_group");
+  ASSERT_TRUE(params_client->wait_for_service(std::chrono::seconds(20)));
+
   // GIVEN a node with the parameters defined by MoveItConfigsBuilder
   // WHEN a parameter from the parameter from the API is requested
   // THEN it is a defined in the note
   for (const auto& param_name : move_group_test::PARAMETER_NAME_LIST)
   {
-    const auto param_exists = test_node_->has_parameter(param_name);
-    if (!param_exists)
+    bool param_exists = false;
+    if (params_client->wait_for_service(std::chrono::seconds(1)))
     {
-      RCLCPP_ERROR(test_node_->get_logger(), "Parameter %s doesn't exists", param_name.c_str());
+      const auto param_exists = params_client->has_parameter(param_name);
+      if (!param_exists)
+      {
+        RCLCPP_ERROR(test_node_->get_logger(), "Parameter %s doesn't exists", param_name.c_str());
+      }
+    }
+    else
+    {
+      RCLCPP_ERROR(test_node_->get_logger(), "Cannot read parameter %s because service couldn't be reached",
+                   param_name.c_str());
     }
     EXPECT_TRUE(param_exists);
-    rclcpp::sleep_for(std::chrono::seconds(1));
   }
 }
 int main(int argc, char** argv)
