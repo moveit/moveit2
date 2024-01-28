@@ -52,32 +52,24 @@ protected:
     rclcpp::NodeOptions node_options;
     node_options.automatically_declare_parameters_from_overrides(true);
     test_node_ = std::make_shared<rclcpp::Node>("move_group_param_test_node", node_options);
-    executor_ = std::make_shared<rclcpp::executors::SingleThreadedExecutor>();
-
-    executor_->add_node(test_node_);
-    executor_thread_ = std::thread([this]() { executor_->spin(); });
   }
 
   void TearDown() override
   {
-    executor_->cancel();
-    if (executor_thread_.joinable())
-    {
-      executor_thread_.join();
-    }
   }
 
   std::shared_ptr<rclcpp::Node> test_node_;
-
-  // Executor and a thread to run the executor.
-  rclcpp::Executor::SharedPtr executor_;
-  std::thread executor_thread_;
 };
 
 TEST_F(MoveGroupFixture, testParamAPI)
 {
   auto params_client = std::make_shared<rclcpp::SyncParametersClient>(test_node_, "move_group");
-  ASSERT_TRUE(params_client->wait_for_service(std::chrono::seconds(20)));
+  bool reach_param_client = params_client->wait_for_service(std::chrono::seconds(5));
+  if (!reach_param_client)
+  {
+    RCLCPP_ERROR(test_node_->get_logger(), "Couldn't reach parameter server. Is the move_group up and running?");
+  }
+  ASSERT_TRUE(reach_param_client);
 
   // GIVEN a node with the parameters defined by MoveItConfigsBuilder
   // WHEN a parameter from the parameter from the API is requested
@@ -87,7 +79,7 @@ TEST_F(MoveGroupFixture, testParamAPI)
     bool param_exists = false;
     if (params_client->wait_for_service(std::chrono::seconds(1)))
     {
-      const auto param_exists = params_client->has_parameter(param_name);
+      param_exists = params_client->has_parameter(param_name);
       if (!param_exists)
       {
         RCLCPP_ERROR(test_node_->get_logger(), "Parameter %s doesn't exists", param_name.c_str());
@@ -99,6 +91,7 @@ TEST_F(MoveGroupFixture, testParamAPI)
                    param_name.c_str());
     }
     EXPECT_TRUE(param_exists);
+    rclcpp::sleep_for(std::chrono::milliseconds(1));
   }
 }
 int main(int argc, char** argv)

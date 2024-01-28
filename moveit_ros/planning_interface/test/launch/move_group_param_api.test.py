@@ -96,7 +96,7 @@ def generate_test_description():
         executable=launch.substitutions.PathJoinSubstitution(
             [
                 launch.substitutions.LaunchConfiguration("test_binary_dir"),
-                "move_group_test_node",
+                "move_group_param_api_test",
             ]
         ),
         parameters=[moveit_config.to_dict()],
@@ -118,7 +118,7 @@ def generate_test_description():
             panda_arm_controller_spawner,
             panda_hand_controller_spawner,
             move_group_gtest,
-            #launch.actions.TimerAction(period=15.0, actions=[move_group_gtest]),
+            # launch.actions.TimerAction(period=15.0, actions=[move_group_gtest]),
             launch_testing.actions.ReadyToTest(),
         ]
     ), {
