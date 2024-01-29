@@ -31,8 +31,8 @@
   <depend>boost</depend>
   <depend>bullet</depend>
   <depend>common_interfaces</depend>
-  <depend>eigen_stl_containers</depend>
   <depend>eigen</depend>
+  <depend>eigen_stl_containers</depend>
   <depend>generate_parameter_library</depend>
   <depend>geometric_shapes</depend>
   <depend>geometry_msgs</depend>
@@ -41,8 +41,9 @@
   <depend>libfcl-dev</depend>
   <depend>moveit_common</depend>
   <depend>moveit_msgs</depend>
-  <depend>octomap_msgs</depend>
   <depend>octomap</depend>
+  <depend>octomap_msgs</depend>
+  <depend>osqp_vendor</depend>
   <depend>pluginlib</depend>
   <depend>random_numbers</depend>
   <depend>rclcpp</depend>
@@ -52,14 +53,14 @@
   <depend>shape_msgs</depend>
   <depend>srdfdom</depend>
   <depend>std_msgs</depend>
+  <depend>tf2</depend>
   <depend>tf2_eigen</depend>
   <depend>tf2_geometry_msgs</depend>
   <depend>tf2_kdl</depend>
-  <depend>tf2</depend>
   <depend>trajectory_msgs</depend>
   <depend>urdf</depend>
-  <depend>urdfdom_headers</depend>
   <depend>urdfdom</depend>
+  <depend>urdfdom_headers</depend>
   <depend>visualization_msgs</depend>
 
   <doc_depend>python3-sphinx-rtd-theme</doc_depend>

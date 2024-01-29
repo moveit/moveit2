@@ -75,19 +75,18 @@ ServoNode::ServoNode(const rclcpp::NodeOptions& options)
                        "in the launch file");
   }
 
-  // Check if a realtime kernel is available
-  if (realtime_tools::has_realtime_kernel())
+  // Configure SCHED_FIFO and priority
+  if (realtime_tools::configure_sched_fifo(servo_params_.thread_priority))
   {
-    if (realtime_tools::configure_sched_fifo(servo_params_.thread_priority))
-    {
-      RCLCPP_INFO_STREAM(node_->get_logger(), "Realtime kernel available, higher thread priority has been set.");
-    }
-    else
-    {
-      RCLCPP_WARN_STREAM(node_->get_logger(), "Could not enable FIFO RT scheduling policy.");
-    }
+    RCLCPP_INFO_STREAM(node_->get_logger(), "Enabled SCHED_FIFO and higher thread priority.");
   }
   else
+  {
+    RCLCPP_WARN_STREAM(node_->get_logger(), "Could not enable FIFO RT scheduling policy. Continuing with the default.");
+  }
+
+  // Check if a realtime kernel is available
+  if (!realtime_tools::has_realtime_kernel())
   {
     RCLCPP_WARN_STREAM(node_->get_logger(), "Realtime kernel is recommended for better performance.");
   }

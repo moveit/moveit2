@@ -20,6 +20,7 @@ find_package(kdl_parser REQUIRED)
 find_package(moveit_msgs REQUIRED)
 find_package(OCTOMAP REQUIRED)
 find_package(octomap_msgs REQUIRED)
+find_package(osqp REQUIRED)
 find_package(pluginlib REQUIRED)
 find_package(random_numbers REQUIRED)
 find_package(rclcpp REQUIRED)
@@ -69,8 +70,10 @@ add_subdirectory(version)
 install(
   TARGETS
     collision_detector_bullet_plugin
+    moveit_acceleration_filter
+    moveit_acceleration_filter_parameters
     moveit_butterworth_filter
-    moveit_butterworth_parameters
+    moveit_butterworth_filter_parameters
     moveit_collision_detection
     moveit_collision_detection_bullet
     moveit_collision_detection_fcl
@@ -115,6 +118,7 @@ ament_export_dependencies(
   moveit_msgs
   OCTOMAP
   octomap_msgs
+  osqp
   pluginlib
   random_numbers
   rclcpp
@@ -138,6 +142,7 @@ ament_export_dependencies(
 pluginlib_export_plugin_description_file(moveit_core collision_detector_fcl_description.xml)
 pluginlib_export_plugin_description_file(moveit_core collision_detector_bullet_description.xml)
 pluginlib_export_plugin_description_file(moveit_core filter_plugin_butterworth.xml)
+pluginlib_export_plugin_description_file(moveit_core filter_plugin_acceleration.xml)
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
