@@ -61,6 +61,8 @@ Eigen::Isometry3d createTestIsometry()
 }  // namespace
 
 // Benchmark time to multiply an Eigen::Affine3d with an Eigen::Matrix4d.
+// The NoAlias versions just use Eigen's .noalias() modifier, allowing to write the result of matrix multiplication
+// directly into the result matrix instead of using an intermediate temporary (which is the default).
 static void multiplyAffineTimesMatrixNoAlias(benchmark::State& st)
 {
   Eigen::Isometry3d isometry = createTestIsometry();
