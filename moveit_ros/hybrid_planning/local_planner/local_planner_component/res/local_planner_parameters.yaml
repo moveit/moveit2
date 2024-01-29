@@ -21,7 +21,7 @@ local_planner_parameters:
   }
   global_solution_topic: {
     type: string,
-    description: "Name of the topic where the global solutionis published",
+    description: "Name of the topic where the global solution is published",
     default_value: "UNKNOWN",
   }
   local_solution_topic: {

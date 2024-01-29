@@ -61,8 +61,11 @@
 #include <tf2_ros/buffer.h>
 #include <tf2_ros/transform_listener.h>
 
-#include <local_planner_parameters.hpp>
-
+// Forward declaration of parameter class allows users to implement custom parameters
+namespace local_planner_parameters
+{
+MOVEIT_STRUCT_FORWARD(Params);
+}
 namespace moveit::hybrid_planning
 {
 /// Internal local planner states
@@ -122,7 +125,7 @@ private:
   std::shared_ptr<rclcpp::Node> node_;
 
   // Planner configuration
-  local_planner_parameters::Params config_;
+  std::shared_ptr<local_planner_parameters::Params> config_;
 
   // Current planner state. Must be thread-safe
   std::atomic<LocalPlannerState> state_;

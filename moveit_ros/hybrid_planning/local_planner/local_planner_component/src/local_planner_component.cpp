@@ -33,6 +33,7 @@
  *********************************************************************/
 
 #include <moveit/local_planner/local_planner_component.h>
+#include <local_planner_parameters.hpp>
 
 #include <moveit/planning_scene/planning_scene.h>
 #include <moveit/robot_state/robot_state.h>
@@ -69,13 +70,13 @@ bool LocalPlannerComponent::initialize()
 {
   // Load planner parameter
   auto param_listener = local_planner_parameters::ParamListener(node_, "");
-  config_ = param_listener.get_params();
+  config_ = std::make_shared<local_planner_parameters::Params>(param_listener.get_params());
 
   // Validate config
-  if (config_.local_solution_topic_type == "std_msgs/Float64MultiArray")
+  if (config_->local_solution_topic_type == "std_msgs/Float64MultiArray")
   {
-    if ((config_.publish_joint_positions && config_.publish_joint_velocities) ||
-        (!config_.publish_joint_positions && !config_.publish_joint_velocities))
+    if ((config_->publish_joint_positions && config_->publish_joint_velocities) ||
+        (!config_->publish_joint_positions && !config_->publish_joint_velocities))
     {
       RCLCPP_ERROR(node_->get_logger(),
                    "When publishing a std_msgs/Float64MultiArray, you must select positions OR velocities. "
@@ -94,9 +95,9 @@ bool LocalPlannerComponent::initialize()
   }
 
   // Start state and scene monitors
-  planning_scene_monitor_->startSceneMonitor(config_.monitored_planning_scene_topic);
-  planning_scene_monitor_->startWorldGeometryMonitor(config_.collision_object_topic);
-  planning_scene_monitor_->startStateMonitor(config_.joint_states_topic, "/attached_collision_object");
+  planning_scene_monitor_->startSceneMonitor(config_->monitored_planning_scene_topic);
+  planning_scene_monitor_->startWorldGeometryMonitor(config_->collision_object_topic);
+  planning_scene_monitor_->startStateMonitor(config_->joint_states_topic, "/attached_collision_object");
   planning_scene_monitor_->monitorDiffs(true);
   planning_scene_monitor_->stopPublishingPlanningScene();
 
@@ -114,17 +115,17 @@ bool LocalPlannerComponent::initialize()
   try
   {
     trajectory_operator_instance_ =
-        trajectory_operator_loader_->createUniqueInstance(config_.trajectory_operator_plugin_name);
+        trajectory_operator_loader_->createUniqueInstance(config_->trajectory_operator_plugin_name);
     if (!trajectory_operator_instance_->initialize(node_, planning_scene_monitor_->getRobotModel(),
-                                                   config_.group_name))  // TODO(sjahr) add default group param
+                                                   config_->group_name))  // TODO(sjahr) add default group param
       throw std::runtime_error("Unable to initialize trajectory operator plugin");
     RCLCPP_INFO(node_->get_logger(), "Using trajectory operator interface '%s'",
-                config_.trajectory_operator_plugin_name.c_str());
+                config_->trajectory_operator_plugin_name.c_str());
   }
   catch (pluginlib::PluginlibException& ex)
   {
     RCLCPP_ERROR(node_->get_logger(), "Exception while loading trajectory operator '%s': '%s'",
-                 config_.trajectory_operator_plugin_name.c_str(), ex.what());
+                 config_->trajectory_operator_plugin_name.c_str(), ex.what());
     return false;
   }
 
@@ -142,16 +143,16 @@ bool LocalPlannerComponent::initialize()
   try
   {
     local_constraint_solver_instance_ =
-        local_constraint_solver_plugin_loader_->createUniqueInstance(config_.local_constraint_solver_plugin_name);
-    if (!local_constraint_solver_instance_->initialize(node_, planning_scene_monitor_, config_.group_name))
+        local_constraint_solver_plugin_loader_->createUniqueInstance(config_->local_constraint_solver_plugin_name);
+    if (!local_constraint_solver_instance_->initialize(node_, planning_scene_monitor_, config_->group_name))
       throw std::runtime_error("Unable to initialize constraint solver plugin");
     RCLCPP_INFO(node_->get_logger(), "Using constraint solver interface '%s'",
-                config_.local_constraint_solver_plugin_name.c_str());
+                config_->local_constraint_solver_plugin_name.c_str());
   }
   catch (pluginlib::PluginlibException& ex)
   {
     RCLCPP_ERROR(node_->get_logger(), "Exception while loading constraint solver '%s': '%s'",
-                 config_.local_constraint_solver_plugin_name.c_str(), ex.what());
+                 config_->local_constraint_solver_plugin_name.c_str(), ex.what());
     return false;
   }
 
@@ -198,7 +199,7 @@ bool LocalPlannerComponent::initialize()
         // This needs to return quickly to avoid blocking the executor, so run the local planner in a new thread.
         auto local_planner_timer = [&]() {
           timer_ =
-              node_->create_wall_timer(1s / config_.local_planning_frequency, [this]() { return executeIteration(); });
+              node_->create_wall_timer(1s / config_->local_planning_frequency, [this]() { return executeIteration(); });
         };
         long_callback_thread_ = std::thread(local_planner_timer);
       },
@@ -206,7 +207,7 @@ bool LocalPlannerComponent::initialize()
 
   // Initialize global trajectory listener
   global_solution_subscriber_ = node_->create_subscription<moveit_msgs::msg::MotionPlanResponse>(
-      config_.global_solution_topic, rclcpp::SystemDefaultsQoS(),
+      config_->global_solution_topic, rclcpp::SystemDefaultsQoS(),
       [this](const moveit_msgs::msg::MotionPlanResponse::ConstSharedPtr& msg) {
         // Add received trajectory to internal reference trajectory
         robot_trajectory::RobotTrajectory new_trajectory(planning_scene_monitor_->getRobotModel(), msg->group_name);
@@ -227,18 +228,19 @@ bool LocalPlannerComponent::initialize()
       });
 
   // Initialize local solution publisher
-  RCLCPP_INFO(node_->get_logger(), "Using '%s' as local solution topic type", config_.local_solution_topic_type.c_str());
-  if (config_.local_solution_topic_type == "trajectory_msgs/JointTrajectory")
+  RCLCPP_INFO(node_->get_logger(), "Using '%s' as local solution topic type",
+              config_->local_solution_topic_type.c_str());
+  if (config_->local_solution_topic_type == "trajectory_msgs/JointTrajectory")
   {
     local_trajectory_publisher_ =
-        node_->create_publisher<trajectory_msgs::msg::JointTrajectory>(config_.local_solution_topic, 1);
+        node_->create_publisher<trajectory_msgs::msg::JointTrajectory>(config_->local_solution_topic, 1);
   }
-  else if (config_.local_solution_topic_type == "std_msgs/Float64MultiArray")
+  else if (config_->local_solution_topic_type == "std_msgs/Float64MultiArray")
   {
     local_solution_publisher_ =
-        node_->create_publisher<std_msgs::msg::Float64MultiArray>(config_.local_solution_topic, 1);
+        node_->create_publisher<std_msgs::msg::Float64MultiArray>(config_->local_solution_topic, 1);
   }
-  else if (config_.local_solution_topic_type == "CUSTOM")
+  else if (config_->local_solution_topic_type == "CUSTOM")
   {
     // Local solution publisher is defined by the local constraint solver plugin
   }
@@ -286,7 +288,7 @@ void LocalPlannerComponent::executeIteration()
 
       // Get local goal trajectory to follow
       robot_trajectory::RobotTrajectory local_trajectory =
-          robot_trajectory::RobotTrajectory(planning_scene_monitor_->getRobotModel(), config_.group_name);
+          robot_trajectory::RobotTrajectory(planning_scene_monitor_->getRobotModel(), config_->group_name);
       *local_planner_feedback_ =
           trajectory_operator_instance_->getLocalTrajectory(current_robot_state, local_trajectory);
 
@@ -319,28 +321,28 @@ void LocalPlannerComponent::executeIteration()
       // (See https://github.com/ros-planning/moveit2/blob/main/moveit_ros/moveit_servo/src/servo_calcs.cpp)
       // Format outgoing msg in the right format
       // (trajectory_msgs/JointTrajectory or joint positions/velocities in form of std_msgs/Float64MultiArray).
-      if (config_.local_solution_topic_type == "trajectory_msgs/JointTrajectory")
+      if (config_->local_solution_topic_type == "trajectory_msgs/JointTrajectory")
       {
         local_trajectory_publisher_->publish(local_solution);
       }
-      else if (config_.local_solution_topic_type == "std_msgs/Float64MultiArray")
+      else if (config_->local_solution_topic_type == "std_msgs/Float64MultiArray")
       {
         // Transform "trajectory_msgs/JointTrajectory" to "std_msgs/Float64MultiArray"
         auto joints = std::make_unique<std_msgs::msg::Float64MultiArray>();
         if (!local_solution.points.empty())
         {
-          if (config_.publish_joint_positions)
+          if (config_->publish_joint_positions)
           {
             joints->data = local_solution.points[0].positions;
           }
-          else if (config_.publish_joint_velocities)
+          else if (config_->publish_joint_velocities)
           {
             joints->data = local_solution.points[0].velocities;
           }
         }
         local_solution_publisher_->publish(std::move(joints));
       }
-      else if (config_.local_solution_topic_type == "CUSTOM")
+      else if (config_->local_solution_topic_type == "CUSTOM")
       {
         // Local solution publisher is defined by the local constraint solver plugin
       }
