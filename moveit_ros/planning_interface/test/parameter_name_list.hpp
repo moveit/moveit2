@@ -459,7 +459,6 @@ const std::vector<std::string> PARAMETER_NAME_LIST = {
   "robot_description_planning.joint_limits.virtual_joint/trans_z.max_position",
   "robot_description_planning.joint_limits.virtual_joint/trans_z.min_position",
   "robot_description_semantic",
-  "start_type_description_service",
   "stomp.control_cost_weight",
   "stomp.default_workspace_bounds",
   "stomp.delta_t",
@@ -493,4 +492,4 @@ const std::vector<std::string> PARAMETER_NAME_LIST = {
   "trajectory_execution.allowed_start_tolerance",
   "use_sim_time",
 };
-}
+}  // namespace move_group_test
