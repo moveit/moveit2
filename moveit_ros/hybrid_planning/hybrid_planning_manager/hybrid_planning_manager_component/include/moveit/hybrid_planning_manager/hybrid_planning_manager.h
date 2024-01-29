@@ -77,7 +77,7 @@ public:
   bool initialize();
 
   // This function is required to make this class a valid NodeClass
-  // see https://docs.ros2.org/foxy/api/rclcpp_components/register__node__macro_8hpp.html
+  // see https://docs.ros2.org/latest/api/rclcpp_components/register__node__macro_8hpp.html
   rclcpp::node_interfaces::NodeBaseInterface::SharedPtr get_node_base_interface()  // NOLINT
   {
     return node_->get_node_base_interface();  // NOLINT
