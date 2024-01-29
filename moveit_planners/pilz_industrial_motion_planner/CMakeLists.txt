@@ -16,7 +16,6 @@ find_package(moveit_core REQUIRED)
 find_package(moveit_msgs REQUIRED)
 find_package(moveit_ros_move_group REQUIRED)
 find_package(moveit_ros_planning REQUIRED)
-find_package(moveit_ros_planning_interface REQUIRED)
 find_package(pluginlib REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(tf2 REQUIRED)
@@ -29,45 +28,34 @@ find_package(tf2_ros REQUIRED)
 find_package(orocos_kdl REQUIRED)
 find_package(Boost REQUIRED COMPONENTS)
 
-# TODO(henning): Remove/Port if(CATKIN_ENABLE_TESTING AND
-# ENABLE_COVERAGE_TESTING) find_package(code_coverage REQUIRED)
-# append_coverage_compiler_flags() endif()
-#
-# ##############################################################################
-# ## Clang tidy ##
-# ##############################################################################
-# if(CATKIN_ENABLE_CLANG_TIDY) find_program( CLANG_TIDY_EXE NAMES "clang-tidy"
-# DOC "Path to clang-tidy executable" ) if(NOT CLANG_TIDY_EXE)
-# message(FATAL_ERROR "clang-tidy not found.") else() message(STATUS "clang-tidy
-# found: ${CLANG_TIDY_EXE}") set(CMAKE_CXX_CLANG_TIDY "${CLANG_TIDY_EXE}")
-# endif() endif()
-
-# ##############################################################################
-# Build ##
-# ##############################################################################
-include_directories(include)
+###########
+## Build ##
+###########
+include_directories(
+  include
+)
 
 set(THIS_PACKAGE_INCLUDE_DEPENDS
-    Eigen3
-    eigen3_cmake_module
-    # joint_limits_interface
-    generate_parameter_library
-    geometry_msgs
-    moveit_core
-    moveit_msgs
-    moveit_ros_move_group
-    moveit_ros_planning
-    moveit_ros_planning_interface
-    pluginlib
-    rclcpp
-    tf2
-    tf2_eigen
-    tf2_eigen_kdl
-    tf2_geometry_msgs
-    tf2_kdl
-    tf2_ros
-    orocos_kdl
-    Boost)
+  Eigen3
+  eigen3_cmake_module
+  # joint_limits_interface
+  generate_parameter_library
+  geometry_msgs
+  moveit_core
+  moveit_msgs
+  moveit_ros_move_group
+  moveit_ros_planning
+  pluginlib
+  rclcpp
+  tf2
+  tf2_eigen
+  tf2_eigen_kdl
+  tf2_geometry_msgs
+  tf2_kdl
+  tf2_ros
+  orocos_kdl
+  Boost
+)
 
 # ##############################################################################
 # Libraries ##
