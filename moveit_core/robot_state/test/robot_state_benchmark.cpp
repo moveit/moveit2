@@ -171,10 +171,7 @@ struct RobotStateBenchmark : ::benchmark::Fixture
 {
   void SetUp(const ::benchmark::State& /*state*/) override
   {
-    if (rcutils_logging_set_logger_level("moveit_robot_model.robot_model", RCUTILS_LOG_SEVERITY_WARN) != RCUTILS_RET_OK)
-    {
-    }
-
+    std::ignore = rcutils_logging_set_logger_level("moveit_robot_model.robot_model", RCUTILS_LOG_SEVERITY_WARN);
     robot_model = moveit::core::loadTestingRobotModel(PANDA_TEST_ROBOT);
   }
 
