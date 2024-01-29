@@ -329,6 +329,8 @@ void HybridPlanningManager::processReactionResult(const ReactionResult& result)
     case HybridPlanningAction::SEND_LOCAL_SOLVER_REQUEST:
       sendLocalPlannerAction();
       break;
+    default:
+      RCLCPP_ERROR(getLogger(), "Unknown reaction result code. No actions taken by the hybrid planning manager.");
   }
 }
 }  // namespace moveit::hybrid_planning
