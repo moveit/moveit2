@@ -26,17 +26,12 @@ def generate_test_description():
         .to_moveit_configs()
     )
 
-    common_hybrid_planning_param = load_yaml(
-        "moveit_hybrid_planning", "config/common_hybrid_planning_params.yaml"
-    )
-
     hybrid_planning_gtest = Node(
         executable=PathJoinSubstitution(
             [LaunchConfiguration("test_binary_dir"), "test_basic_integration"]
         ),
         parameters=[
             moveit_config.to_dict(),
-            common_hybrid_planning_param,
         ],
         output="screen",
     )

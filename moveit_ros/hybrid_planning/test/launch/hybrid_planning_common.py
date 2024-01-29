@@ -36,9 +36,6 @@ def generate_common_hybrid_launch_description():
 
     # Hybrid planning parameter
     # Any parameters that are unique to your plugins go here
-    common_hybrid_planning_param = load_yaml(
-        "moveit_hybrid_planning", "config/common_hybrid_planning_params.yaml"
-    )
     global_planner_param = load_yaml(
         "moveit_hybrid_planning", "config/global_planner.yaml"
     )
@@ -61,7 +58,6 @@ def generate_common_hybrid_launch_description():
                 plugin="moveit::hybrid_planning::GlobalPlannerComponent",
                 name="global_planner",
                 parameters=[
-                    common_hybrid_planning_param,
                     global_planner_param,
                     moveit_config.to_dict(),
                 ],
@@ -71,7 +67,6 @@ def generate_common_hybrid_launch_description():
                 plugin="moveit::hybrid_planning::LocalPlannerComponent",
                 name="local_planner",
                 parameters=[
-                    common_hybrid_planning_param,
                     local_planner_param,
                     moveit_config.to_dict(),
                 ],
@@ -81,7 +76,6 @@ def generate_common_hybrid_launch_description():
                 plugin="moveit::hybrid_planning::HybridPlanningManager",
                 name="hybrid_planning_manager",
                 parameters=[
-                    common_hybrid_planning_param,
                     hybrid_planning_manager_param,
                 ],
             ),

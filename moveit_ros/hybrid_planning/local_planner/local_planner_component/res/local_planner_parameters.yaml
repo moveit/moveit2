@@ -14,11 +14,6 @@ local_planner_parameters:
     description: "Local constraint solver plugin",
     default_value: "UNKNOWN",
   }
-  local_planning_action_name: {
-    type: string,
-    description: "Local planning action name",
-    default_value: "UNKNOWN",
-  }
   local_planning_frequency: {
     type: double,
     description: "Spinning frequency of the local planner [Hz].",

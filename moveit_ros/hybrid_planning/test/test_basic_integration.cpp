@@ -63,20 +63,7 @@ public:
 
     executor_.add_node(node_);
 
-    std::string hybrid_planning_action_name = "";
-    node_->declare_parameter("hybrid_planning_action_name", "");
-    if (node_->has_parameter("hybrid_planning_action_name"))
-    {
-      node_->get_parameter<std::string>("hybrid_planning_action_name", hybrid_planning_action_name);
-    }
-    else
-    {
-      RCLCPP_ERROR(node_->get_logger(), "hybrid_planning_action_name parameter was not defined");
-      std::exit(EXIT_FAILURE);
-    }
-
-    hp_action_client_ =
-        rclcpp_action::create_client<moveit_msgs::action::HybridPlanner>(node_, hybrid_planning_action_name);
+    hp_action_client_ = rclcpp_action::create_client<moveit_msgs::action::HybridPlanner>(node_, "run_hybrid_planning");
 
     // Add new collision object as soon as global trajectory is available.
     global_solution_subscriber_ = node_->create_subscription<moveit_msgs::msg::MotionPlanResponse>(

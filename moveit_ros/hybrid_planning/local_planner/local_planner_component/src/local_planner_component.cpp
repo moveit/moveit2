@@ -33,6 +33,7 @@
  *********************************************************************/
 
 #include <moveit/local_planner/local_planner_component.h>
+#include <local_planner_parameters.hpp>
 
 #include <moveit/planning_scene/planning_scene.h>
 #include <moveit/robot_state/robot_state.h>
@@ -158,7 +159,7 @@ bool LocalPlannerComponent::initialize()
   // Initialize local planning request action server
   cb_group_ = node_->create_callback_group(rclcpp::CallbackGroupType::MutuallyExclusive);
   local_planning_request_server_ = rclcpp_action::create_server<moveit_msgs::action::LocalPlanner>(
-      node_, config_.local_planning_action_name,
+      node_, "local_planning_action",
       // Goal callback
       [this](const rclcpp_action::GoalUUID& /*unused*/,
              const std::shared_ptr<const moveit_msgs::action::LocalPlanner::Goal>& /*unused*/) {

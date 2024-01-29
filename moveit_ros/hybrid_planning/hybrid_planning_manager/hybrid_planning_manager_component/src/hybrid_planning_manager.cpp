@@ -83,7 +83,7 @@ HybridPlanningManager::HybridPlanningManager(const rclcpp::NodeOptions& options)
 
   // Initialize local planning action client
   local_planner_action_client_ =
-      rclcpp_action::create_client<moveit_msgs::action::LocalPlanner>(node_, params.local_planning_action_name);
+      rclcpp_action::create_client<moveit_msgs::action::LocalPlanner>(node_, "local_planning_action");
   if (!local_planner_action_client_->wait_for_action_server(2s))
   {
     RCLCPP_ERROR(getLogger(), "Local planner action server not available after waiting");
@@ -92,7 +92,7 @@ HybridPlanningManager::HybridPlanningManager(const rclcpp::NodeOptions& options)
 
   // Initialize global planning action client
   global_planner_action_client_ =
-      rclcpp_action::create_client<moveit_msgs::action::GlobalPlanner>(node_, params.global_planning_action_name);
+      rclcpp_action::create_client<moveit_msgs::action::GlobalPlanner>(node_, "global_planning_action");
   if (!global_planner_action_client_->wait_for_action_server(2s))
   {
     RCLCPP_ERROR(getLogger(), "Global planner action server not available after waiting");
@@ -102,7 +102,7 @@ HybridPlanningManager::HybridPlanningManager(const rclcpp::NodeOptions& options)
   // Initialize hybrid planning action server
   cb_group_ = node_->create_callback_group(rclcpp::CallbackGroupType::MutuallyExclusive);
   hybrid_planning_request_server_ = rclcpp_action::create_server<moveit_msgs::action::HybridPlanner>(
-      node_, params.hybrid_planning_action_name,
+      node_, "run_hybrid_planning",
       // Goal callback
       [](const rclcpp_action::GoalUUID& /*unused*/,
          const std::shared_ptr<const moveit_msgs::action::HybridPlanner::Goal>& /*unused*/) {
