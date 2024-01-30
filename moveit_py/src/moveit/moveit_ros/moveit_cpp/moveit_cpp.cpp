@@ -87,7 +87,6 @@ void initMoveitPy(py::module& m)
              // Initialize ROS, pass launch arguments with rclcpp::init()
              if (!rclcpp::ok())
              {
-               RCLCPP_INFO(getLogger(), "Initialize rclcpp");
                std::vector<const char*> chars;
                chars.reserve(launch_arguments.size());
                for (const auto& arg : launch_arguments)
@@ -96,6 +95,7 @@ void initMoveitPy(py::module& m)
                }
 
                rclcpp::init(launch_arguments.size(), chars.data());
+               RCLCPP_INFO(getLogger(), "Initialize rclcpp");
              }
 
              // Build NodeOptions
