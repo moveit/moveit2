@@ -68,7 +68,7 @@ public:
     // Add new collision object as soon as global trajectory is available.
     global_solution_subscriber_ = node_->create_subscription<moveit_msgs::msg::MotionPlanResponse>(
         "global_trajectory", rclcpp::SystemDefaultsQoS(),
-        [this](const moveit_msgs::msg::MotionPlanResponse::SharedPtr /* unused */) {});
+        [](const moveit_msgs::msg::MotionPlanResponse::SharedPtr /* unused */) {});
 
     RCLCPP_INFO(node_->get_logger(), "Initialize Planning Scene Monitor");
     tf_buffer_ = std::make_shared<tf2_ros::Buffer>(node_->get_clock());
@@ -182,7 +182,7 @@ public:
     send_goal_options_.feedback_callback =
         [this](rclcpp_action::ClientGoalHandle<moveit_msgs::action::HybridPlanner>::SharedPtr /*unused*/,
                const std::shared_ptr<const moveit_msgs::action::HybridPlanner::Feedback> feedback) {
-          RCLCPP_INFO(node_->get_logger(), feedback->feedback.c_str());
+          RCLCPP_INFO(node_->get_logger(), "%s", feedback->feedback.c_str());
         };
   }
 
