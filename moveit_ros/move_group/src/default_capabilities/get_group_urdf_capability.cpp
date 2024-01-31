@@ -112,7 +112,7 @@ void GetUrdfService::initialize()
 
           // Link elements can be closed either by "/>" or "</link>" so we need to consider both cases
           auto const substring_without_opening = substring.substr(1, substring.size() - 2);
-          auto const general_opening_pos_a = substring_without_opening.find("<");
+          auto const general_opening_pos_a = substring_without_opening.find('<');
           auto const link_closing_pos_b = substring.find(GENERAL_ELEMENT_CLOSING);
           // Case "/>"
           if (link_closing_pos_b < general_opening_pos_a)
