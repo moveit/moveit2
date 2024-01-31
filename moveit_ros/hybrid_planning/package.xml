@@ -40,6 +40,7 @@
   <test_depend>ament_lint_common</test_depend>
   <test_depend>moveit_configs_utils</test_depend>
   <test_depend>moveit_planners_ompl</test_depend>
+  <test_depend>moveit_simple_controller_manager</test_depend>
   <test_depend>ros_testing</test_depend>
 
   <export>
