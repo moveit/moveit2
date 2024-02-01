@@ -224,7 +224,7 @@ struct TestAction
 };
 
 /* notification callback */
-static void TrackChangesNotify(TestAction& ta, const World::ObjectConstPtr& obj, World::Action action)
+static void trackChangesNotify(TestAction& ta, const World::ObjectConstPtr& obj, World::Action action)
 {
   ta.obj_ = *obj;
   ta.action_ = action;
@@ -238,7 +238,7 @@ TEST(World, TrackChanges)
   TestAction ta;
   World::ObserverHandle observer_ta;
   observer_ta = world.addObserver([&ta](const World::ObjectConstPtr& object, World::Action action) {
-    return TrackChangesNotify(ta, object, action);
+    return trackChangesNotify(ta, object, action);
   });
 
   // Create some shapes
@@ -271,7 +271,7 @@ TEST(World, TrackChanges)
   TestAction ta2;
   World::ObserverHandle observer_ta2;
   observer_ta2 = world.addObserver([&ta2](const World::ObjectConstPtr& object, World::Action action) {
-    return TrackChangesNotify(ta2, object, action);
+    return trackChangesNotify(ta2, object, action);
   });
 
   world.addToObject("obj2", cyl, Eigen::Isometry3d::Identity());
@@ -311,7 +311,7 @@ TEST(World, TrackChanges)
   TestAction ta3;
   World::ObserverHandle observer_ta3;
   observer_ta3 = world.addObserver([&ta3](const World::ObjectConstPtr& object, World::Action action) {
-    return TrackChangesNotify(ta3, object, action);
+    return trackChangesNotify(ta3, object, action);
   });
 
   bool rm_good = world.removeShapeFromObject("obj2", cyl);
@@ -379,7 +379,7 @@ TEST(World, ObjectPoseAndSubframes)
   TestAction ta;
   World::ObserverHandle observer_ta;
   observer_ta = world.addObserver([&ta](const World::ObjectConstPtr& object, World::Action action) {
-    return TrackChangesNotify(ta, object, action);
+    return trackChangesNotify(ta, object, action);
   });
 
   // Create shapes

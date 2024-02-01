@@ -1,0 +1,8 @@
+<library path="moveit_acceleration_filter">
+    <class type="online_signal_smoothing::AccelerationLimitedPlugin"
+           base_class_type="online_signal_smoothing::SmoothingBaseClass">
+        <description>
+            Limits acceleration of commands to generate smooth motion.
+        </description>
+    </class>
+</library>

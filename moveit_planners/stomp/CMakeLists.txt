@@ -13,6 +13,7 @@ find_package(std_msgs REQUIRED)
 find_package(stomp REQUIRED)
 find_package(visualization_msgs REQUIRED)
 find_package(tf2_eigen REQUIRED)
+find_package(rsl REQUIRED)
 
 generate_parameter_library(stomp_moveit_parameters res/stomp_moveit.yaml)
 
@@ -22,7 +23,6 @@ include_directories(include)
 add_library(stomp_moveit_plugin SHARED
   src/stomp_moveit_planner_plugin.cpp
   src/stomp_moveit_planning_context.cpp
-  src/stomp_moveit_smoothing_adapter.cpp
 )
 ament_target_dependencies(stomp_moveit_plugin
   moveit_core
@@ -30,7 +30,11 @@ ament_target_dependencies(stomp_moveit_plugin
   tf2_eigen
   visualization_msgs
 )
-target_link_libraries(stomp_moveit_plugin stomp::stomp stomp_moveit_parameters)
+target_link_libraries(stomp_moveit_plugin
+  stomp::stomp
+  stomp_moveit_parameters
+  rsl::rsl
+)
 
 pluginlib_export_plugin_description_file(moveit_core stomp_moveit_plugin_description.xml)
 
@@ -56,6 +60,8 @@ if(BUILD_TESTING)
   set(ament_cmake_lint_cmake_FOUND TRUE)
 
   ament_lint_auto_find_test_dependencies()
+
+  add_subdirectory(test)
 endif()
 
 ament_package()

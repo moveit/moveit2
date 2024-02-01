@@ -40,13 +40,12 @@
 #include <moveit/utils/message_checks.h>
 #include <tf2_eigen/tf2_eigen.hpp>
 #include <moveit/move_group/capability_names.h>
+#include <moveit/utils/logger.hpp>
 
 namespace move_group
 {
-static const rclcpp::Logger LOGGER =
-    rclcpp::get_logger("moveit_move_group_default_capabilities.kinematics_service_capability");
 
-MoveGroupKinematicsService::MoveGroupKinematicsService() : MoveGroupCapability("KinematicsService")
+MoveGroupKinematicsService::MoveGroupKinematicsService() : MoveGroupCapability("kinematics_service")
 {
 }
 
@@ -206,7 +205,7 @@ bool MoveGroupKinematicsService::computeFKService(const std::shared_ptr<rmw_requ
 {
   if (req->fk_link_names.empty())
   {
-    RCLCPP_ERROR(LOGGER, "No links specified for FK request");
+    RCLCPP_ERROR(moveit::getLogger("MoveGroupKinematicsService"), "No links specified for FK request");
     res->error_code.val = moveit_msgs::msg::MoveItErrorCodes::INVALID_LINK_NAME;
     return true;
   }

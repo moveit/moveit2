@@ -37,6 +37,7 @@
 #pragma once
 
 #include <pybind11/pybind11.h>
+#include <pybind11/stl.h>
 #include <moveit_py/moveit_py_utils/copy_ros_msg.h>
 #include <moveit_py/moveit_py_utils/ros_msg_typecasters.h>
 #include <rclcpp/rclcpp.hpp>
@@ -85,21 +86,13 @@ public:
 };
 
 LockedPlanningSceneContextManagerRW
-read_write(const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor);
+readWrite(const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor);
 
 LockedPlanningSceneContextManagerRO
-read_only(const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor);
+readOnly(const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor);
 
-// const planning_scene::PlanningScenePtr& locked_planning_scene_enter_(LockedPlanningSceneContextManager& context_manager);
+void initPlanningSceneMonitor(py::module& m);
 
-// void locked_planning_scene_exit_(LockedPlanningSceneContextManager& context_manager, const py::object& type,
-//                                  const py::object& value, const py::object& traceback);
-
-void apply_planning_scene(std::shared_ptr<planning_scene_monitor::PlanningSceneMonitor>& planning_scene_monitor,
-                          const moveit_msgs::msg::PlanningScene& planning_scene);
-
-void init_planning_scene_monitor(py::module& m);
-
-void init_context_managers(py::module& m);
+void initContextManagers(py::module& m);
 }  // namespace bind_planning_scene_monitor
 }  // namespace moveit_py

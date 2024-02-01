@@ -50,7 +50,7 @@ namespace stomp_moveit
 namespace filters
 {
 // \brief An empty placeholder filter that doesn't apply any updates to the trajectory.
-const static FilterFn NO_FILTER = [](const Eigen::MatrixXd& /*values*/, Eigen::MatrixXd& /*filtered_values*/) {
+static const FilterFn NO_FILTER = [](const Eigen::MatrixXd& /*values*/, Eigen::MatrixXd& /*filtered_values*/) {
   return true;
 };
 
@@ -60,7 +60,7 @@ const static FilterFn NO_FILTER = [](const Eigen::MatrixXd& /*values*/, Eigen::M
  * @param num_timesteps The number of trajectory waypoints configured for STOMP
  * @return The smoothing filter function to be used for the STOMP task
  */
-FilterFn simple_smoothing_matrix(size_t num_timesteps)
+FilterFn simpleSmoothingMatrix(size_t num_timesteps)
 {
   // Generates a smoothing matrix and applies it for each joint dimension in filtered_values
   // The 'dt' value is a placeholder timestep duration that is used for approximating the second order derivative
@@ -83,7 +83,7 @@ FilterFn simple_smoothing_matrix(size_t num_timesteps)
  * @param group The JointModelGroup providing the joint limits
  * @return The filter function for enforcing joint limits
  */
-FilterFn enforce_position_bounds(const moveit::core::JointModelGroup* group)
+FilterFn enforcePositionBounds(const moveit::core::JointModelGroup* group)
 {
   return [=](const Eigen::MatrixXd& values, Eigen::MatrixXd& filtered_values) {
     filtered_values = values;

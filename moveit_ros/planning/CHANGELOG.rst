@@ -2,6 +2,125 @@
 Changelog for package moveit_ros_planning
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.9.0 (2024-01-09)
+------------------
+* [PSM] Process collision object color when adding object trough the planning scene monitor (`#2567 <https://github.com/ros-planning/moveit2/issues/2567>`_)
+  * Added an optional Collision Object color object to set the coller of the collision object when adding the collision object trough the PSM.
+  * Fixes for clang-tidy warnings
+  * fix pre-commit
+  * Pass by reference
+* [Servo] Make listening to octomap updates optional (`#2627 <https://github.com/ros-planning/moveit2/issues/2627>`_)
+  * [Servo] Make listening to octomap updates optional
+  * Update moveit_ros/moveit_servo/config/panda_simulated_config.yaml
+* Node logging for the rest of MoveIt (`#2599 <https://github.com/ros-planning/moveit2/issues/2599>`_)
+* [Planning Pipeline Refactoring] `#2 <https://github.com/ros-planning/moveit2/issues/2>`_ Enable chaining planners (`#2457 <https://github.com/ros-planning/moveit2/issues/2457>`_)
+  * Enable chaining multiple planners
+* Node logging in moveit_core (`#2503 <https://github.com/ros-planning/moveit2/issues/2503>`_)
+* Fix trajectory execution manager comments for docs builds (`#2563 <https://github.com/ros-planning/moveit2/issues/2563>`_)
+* Change default topic name for display contacts (`#2561 <https://github.com/ros-planning/moveit2/issues/2561>`_)
+* [PSM] Add proccess Collision Object to PSM and request planning scene to moveit py to allow syncing of mutliple PSM (`#2536 <https://github.com/ros-planning/moveit2/issues/2536>`_)
+  * PlanningSceneMonitor and request planning scene to moveit py to allow syncing of multiple planning scene monitors
+  * pre-commit fixes
+  * Update moveit_ros/planning/planning_scene_monitor/src/planning_scene_monitor.cpp
+  First catch empty scene to not have a unneeded indents.
+  Co-authored-by: Sebastian Jahr <sebastian.jahr@tuta.io>
+  * Removed unneeded callback functions
+  ---------
+  Co-authored-by: Sebastian Jahr <sebastian.jahr@picknik.ai>
+* [Planning Pipeline Refactoring] `#1 <https://github.com/ros-planning/moveit2/issues/1>`_ Simplify Adapter - Planner chain (`#2429 <https://github.com/ros-planning/moveit2/issues/2429>`_)
+* Use node logging in moveit_ros (`#2482 <https://github.com/ros-planning/moveit2/issues/2482>`_)
+* Add new clang-tidy style rules (`#2177 <https://github.com/ros-planning/moveit2/issues/2177>`_)
+* Re-enable waiting for current state in MoveItCpp (`#2419 <https://github.com/ros-planning/moveit2/issues/2419>`_)
+* Protect against zero frequency in TrajectoryMonitorMiddlewareHandler (`#2423 <https://github.com/ros-planning/moveit2/issues/2423>`_)
+* Small planning pipeline class fixes (`#2416 <https://github.com/ros-planning/moveit2/issues/2416>`_)
+* Use generate parameters library in PlanningPipelineClass + general cleanups (`#2288 <https://github.com/ros-planning/moveit2/issues/2288>`_)
+  * Don't discard stuff
+  * Move constants into source file
+  * Move static consts into header
+  * Don't ignore pipeline result
+  * Use generate parameter library for planning pipeline parameters
+  * Fix CI
+  * More CI fixes
+  * Remove more state from planning pipeline
+  * Small cleanups
+  * Assert planner_instance\_ is not a nullptr
+  * Remove valid variable
+  * Simplify logic for trajectory printing
+  * More helpful comments
+  * Small logic simplification by using break
+  * Fix clang-tidy
+  * Pre-commit + Deprecate functions instead of removing them
+  * Fix CI
+* Merge branch 'main' into dependabot/github_actions/SonarSource/sonarcloud-github-c-cpp-2
+* Remove old deprecated functions (`#2384 <https://github.com/ros-planning/moveit2/issues/2384>`_)
+* [PSM] Get the parameter values of the main node when declaring them in the private node. (`#2392 <https://github.com/ros-planning/moveit2/issues/2392>`_)
+  * Get the values of the main node when declaring them in the private node.
+  * [chore] linting
+  * Removed logging
+  * Update formatting
+  * Removed whitespace
+  ---------
+* Update clang-format-14 with QualifierAlignment (`#2362 <https://github.com/ros-planning/moveit2/issues/2362>`_)
+  * Set qualifier order in .clang-format
+  * Ran pre-commit to update according to new style guide
+* Merge branch 'main' into dependabot/github_actions/SonarSource/sonarcloud-github-c-cpp-2
+* Contributors: Abishalini Sivaraman, Henning Kayser, Jens Vanhooydonck, Marq Rasmussen, Rayene Messaoud, Sebastian Castro, Sebastian Jahr, Shobuj Paul, Tyler Weaver
+
+2.8.0 (2023-09-10)
+------------------
+* Remove added path index from planner adapter function signature (`#2285 <https://github.com/ros-planning/moveit2/issues/2285>`_)
+* Replaced boost::algorithm::join with fmt::join (`#2273 <https://github.com/ros-planning/moveit2/issues/2273>`_)
+  * Replaced boost::algorithm::join with fmt::join
+  * Made changes in CMakeLists.txt to accomodate fmt
+  * Updated package.xml files
+  * removed redundant boost dependencies
+  * Rename variables -> variable
+  ---------
+  Co-authored-by: Sebastian Castro <4603398+sea-bass@users.noreply.github.com>
+  Co-authored-by: Sebastian Jahr <sebastian.jahr@picknik.ai>
+* Replaced numbers with SystemDefaultsQos() (`#2271 <https://github.com/ros-planning/moveit2/issues/2271>`_)
+* Cleanup planning request adapter interface (`#2266 <https://github.com/ros-planning/moveit2/issues/2266>`_)
+  * Use default arguments instead of additional functions
+  * Use generate param lib for default plan request adapters
+  * Small cleanup of ResolveConstraintFrames
+  * Remove dublicate yaml file entry
+  * Move list_planning_adapter_plugins into own directory
+  * Apply suggestions from code review
+  Co-authored-by: Sebastian Castro <4603398+sea-bass@users.noreply.github.com>
+  * Fix copy& paste error
+  * Update parameter descriptions
+  Co-authored-by: Sebastian Castro <4603398+sea-bass@users.noreply.github.com>
+  * Apply suggestions from code review
+  Co-authored-by: Kyle Cesare <kcesare@gmail.com>
+  * EMPTY_PATH_INDEX_VECTOR -> empty_path_index_vector
+  * Update parameter yaml
+  * Make param listener unique
+  * Fix build error
+  * Use gt_eq instead of deprecated lower_bounds
+  ---------
+  Co-authored-by: Sebastian Castro <4603398+sea-bass@users.noreply.github.com>
+  Co-authored-by: Kyle Cesare <kcesare@gmail.com>
+* Prefer to use the active controller if multiple controllers apply (`#2251 <https://github.com/ros-planning/moveit2/issues/2251>`_)
+* Don't default to random algorithm if no plugin is defined (`#2228 <https://github.com/ros-planning/moveit2/issues/2228>`_)
+  * Don't default to random algorithm if no plugin is defined
+  * Simplify selection logic & initialize default values in constructor
+  * Increase message severity
+* Always set response planner id and warn if it is not set (`#2236 <https://github.com/ros-planning/moveit2/issues/2236>`_)
+* Suppress redundant error message in CSM (`#2222 <https://github.com/ros-planning/moveit2/issues/2222>`_)
+  The CSM would spam the log if /joint_states messages
+  includes unkonwn joints. RobotModel::hasJointModel()
+  allows for verifying joint names in a safe way without
+  the error message.
+* Minor cleanup to ros_control_interface and trajectory execution (`#2208 <https://github.com/ros-planning/moveit2/issues/2208>`_)
+* Ensure that planning pipeline id is set (`#2202 <https://github.com/ros-planning/moveit2/issues/2202>`_)
+* Add @brief descriptions for plan_request_adapters (`#2185 <https://github.com/ros-planning/moveit2/issues/2185>`_)
+* Make loggers static or move into anonymous namespace (`#2184 <https://github.com/ros-planning/moveit2/issues/2184>`_)
+  * Make loggers static or move into anonymous namespace
+  * Update moveit_ros/planning_interface/move_group_interface/src/move_group_interface.cpp
+  * Update moveit_ros/planning_interface/move_group_interface/src/move_group_interface.cpp
+  * Move LOGGER out of class template
+* Contributors: Henning Kayser, Sebastian Jahr, Shobuj Paul, Stephanie Eng
+
 2.7.4 (2023-05-18)
 ------------------
 * Update default planning configs to use AddTimeOptimalParameterization (`#2167 <https://github.com/ros-planning/moveit2/issues/2167>`_)

@@ -43,7 +43,7 @@ namespace moveit
 {
 namespace planning_pipeline_interfaces
 {
-/** \brief Function that returns the shortest solution out of a vector of solutions based on robot_trajectory::path_length(...)
+/** \brief Function that returns the shortest solution out of a vector of solutions based on robot_trajectory::pathLength(...)
  *  \param [in] solutions Vector of solutions to chose the shortest one from
  *  \return Shortest solution, trajectory of the returned MotionPlanResponse is a nullptr if no solution is found!
  */

@@ -7,6 +7,7 @@ moveit_package()
 
 # find dependencies
 find_package(ament_cmake REQUIRED)
+find_package(generate_parameter_library REQUIRED)
 find_package(moveit_core REQUIRED)
 find_package(moveit_msgs REQUIRED)
 find_package(moveit_ros_planning REQUIRED)
@@ -31,6 +32,9 @@ set(LIBRARIES
   replan_invalidated_trajectory_plugin
   simple_sampler_plugin
   single_plan_execution_plugin
+  # Parameters
+  local_planner_parameters
+  hp_manager_parameters
 )
 
 set(THIS_PACKAGE_INCLUDE_DEPENDS
@@ -75,7 +79,7 @@ install(TARGETS ${LIBRARIES}
   RUNTIME DESTINATION bin
   INCLUDES DESTINATION include/moveit_hybrid_planning)
 
-install(TARGETS cancel_action hybrid_planning_demo_node
+install(TARGETS cancel_action
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION lib/moveit_hybrid_planning

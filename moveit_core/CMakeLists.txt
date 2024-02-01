@@ -5,16 +5,6 @@ project(moveit_core LANGUAGES CXX)
 find_package(moveit_common REQUIRED)
 moveit_package()
 
-find_package(PkgConfig REQUIRED)
-pkg_check_modules(LIBFCL REQUIRED "fcl>=0.5.0")
-# replace LIBFCL_LIBRARIES with full paths to the libraries
-set(LIBFCL_LIBRARIES_FULL "")
-foreach(LIBFCL_LIBRARY ${LIBFCL_LIBRARIES})
-  find_library(${LIBFCL_LIBRARY}_LIB ${LIBFCL_LIBRARY} ${LIBFCL_LIBRARY_DIRS})
-  list(APPEND LIBFCL_LIBRARIES_FULL ${${LIBFCL_LIBRARY}_LIB})
-endforeach()
-set(LIBFCL_LIBRARIES "${LIBFCL_LIBRARIES_FULL}")
-
 find_package(ament_cmake REQUIRED)
 find_package(angles REQUIRED)
 find_package(Bullet 2.87 REQUIRED)
@@ -22,6 +12,7 @@ find_package(common_interfaces REQUIRED)
 find_package(eigen_stl_containers REQUIRED)
 find_package(Eigen3 REQUIRED)
 find_package(eigen3_cmake_module REQUIRED)
+find_package(fcl REQUIRED)
 find_package(generate_parameter_library REQUIRED)
 find_package(geometric_shapes REQUIRED)
 find_package(geometry_msgs REQUIRED)
@@ -29,9 +20,11 @@ find_package(kdl_parser REQUIRED)
 find_package(moveit_msgs REQUIRED)
 find_package(OCTOMAP REQUIRED)
 find_package(octomap_msgs REQUIRED)
+find_package(osqp REQUIRED)
 find_package(pluginlib REQUIRED)
 find_package(random_numbers REQUIRED)
 find_package(rclcpp REQUIRED)
+find_package(rsl REQUIRED)
 find_package(ruckig REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(shape_msgs REQUIRED)
@@ -45,10 +38,6 @@ find_package(urdf REQUIRED)
 find_package(urdfdom REQUIRED)
 find_package(urdfdom_headers REQUIRED)
 find_package(visualization_msgs REQUIRED)
-
-
-# TODO: Port python bindings
-# find_package(pybind11 REQUIRED)
 
 # Finds Boost Components
 include(ConfigExtras.cmake)
@@ -68,7 +57,6 @@ add_subdirectory(kinematics_metrics)
 add_subdirectory(macros)
 add_subdirectory(online_signal_smoothing)
 add_subdirectory(planning_interface)
-add_subdirectory(planning_request_adapter)
 add_subdirectory(planning_scene)
 add_subdirectory(robot_model)
 add_subdirectory(robot_state)
@@ -78,39 +66,14 @@ add_subdirectory(transforms)
 add_subdirectory(utils)
 add_subdirectory(version)
 
-# TODO: Port python bindings
-# add_subdirectory(python)
-# set(pymoveit_libs
-#   moveit_collision_detection
-#   moveit_kinematic_constraints
-#   moveit_planning_scene
-#   moveit_python_tools
-#   moveit_robot_model
-#   moveit_robot_state
-#   moveit_transforms
-# )
-#
-# pybind_add_module(pymoveit_core
-#     python/pymoveit_core.cpp
-#     collision_detection/src/pycollision_detection.cpp
-#     robot_model/src/pyrobot_model.cpp
-#     robot_state/src/pyrobot_state.cpp
-#     transforms/src/pytransforms.cpp
-#     planning_scene/src/pyplanning_scene.cpp
-#     kinematic_constraints/src/pykinematic_constraint.cpp
-# )
-# target_include_directories(pymoveit_core SYSTEM PRIVATE ${catkin_INCLUDE_DIRS})
-# target_link_libraries(pymoveit_core PRIVATE ${pymoveit_libs} ${catkin_LIBRARIES})
-#
-# #catkin_lint: ignore_once undefined_target (pymoveit_core is defined by pybind_add_module)
-# install(TARGETS pymoveit_core LIBRARY DESTINATION ${CATKIN_GLOBAL_PYTHON_DESTINATION})
-
 
 install(
   TARGETS
     collision_detector_bullet_plugin
+    moveit_acceleration_filter
+    moveit_acceleration_filter_parameters
     moveit_butterworth_filter
-    moveit_butterworth_parameters
+    moveit_butterworth_filter_parameters
     moveit_collision_detection
     moveit_collision_detection_bullet
     moveit_collision_detection_fcl
@@ -124,7 +87,6 @@ install(
     moveit_kinematics_metrics
     moveit_macros
     moveit_planning_interface
-    moveit_planning_request_adapter
     moveit_planning_scene
     moveit_robot_model
     moveit_robot_state
@@ -148,6 +110,7 @@ ament_export_dependencies(
   eigen_stl_containers
   Eigen3
   eigen3_cmake_module
+  fcl
   generate_parameter_library
   geometric_shapes
   geometry_msgs
@@ -155,9 +118,11 @@ ament_export_dependencies(
   moveit_msgs
   OCTOMAP
   octomap_msgs
+  osqp
   pluginlib
   random_numbers
   rclcpp
+  rsl
   ruckig
   sensor_msgs
   shape_msgs
@@ -177,6 +142,7 @@ ament_export_dependencies(
 pluginlib_export_plugin_description_file(moveit_core collision_detector_fcl_description.xml)
 pluginlib_export_plugin_description_file(moveit_core collision_detector_bullet_description.xml)
 pluginlib_export_plugin_description_file(moveit_core filter_plugin_butterworth.xml)
+pluginlib_export_plugin_description_file(moveit_core filter_plugin_acceleration.xml)
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)

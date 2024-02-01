@@ -23,10 +23,6 @@ jobs:
             ROS_DISTRO: rolling
             IKFAST_TEST: true
             CLANG_TIDY: pedantic
-            # Silent gmock/gtest warnings: https://github.com/ament/googletest/pull/21
-            AFTER_BUILD_UPSTREAM_WORKSPACE: |
-              git clone --quiet --branch clalancette/update-to-gtest-1.11 https://github.com/ament/googletest "${BASEDIR}/upstream_ws/src/googletest"
-              builder_run_build "/opt/ros/${ROS_DISTRO}" "${BASEDIR}/upstream_ws" --packages-select gtest_vendor gmock_vendor
           - IMAGE: humble-ci
             ROS_DISTRO: humble
           - IMAGE: humble-ci-testing
@@ -85,7 +81,7 @@ jobs:
           # free up a lot of stuff from /usr/local
           sudo rm -rf /usr/local
           df -h
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: testspace-com/setup-testspace@v1
         if: github.repository == 'ros-planning/moveit2'
         with:
@@ -145,7 +141,7 @@ jobs:
         run: |
           testspace "[ ${{ matrix.env.IMAGE }} ]${{ env.BASEDIR }}/target_ws/**/test_results/**/*.xml"
       - name: Upload test artifacts (on failure)
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: failure() && (steps.ici.outputs.run_target_test || steps.ici.outputs.target_test_results)
         with:
           name: test-results-${{ matrix.env.IMAGE }}

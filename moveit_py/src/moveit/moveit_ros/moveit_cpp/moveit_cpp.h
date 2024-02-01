@@ -55,6 +55,6 @@ namespace moveit_py
 {
 namespace bind_moveit_cpp
 {
-void init_moveit_py(py::module& m);
+void initMoveitPy(py::module& m);
 }  // namespace bind_moveit_cpp
 }  // namespace moveit_py

@@ -40,10 +40,18 @@
 #include <rviz_common/properties/parse_color.hpp>
 #include <rviz_default_plugins/robot/robot_link.hpp>
 #include <QApplication>
+#include <moveit/utils/logger.hpp>
 
 namespace moveit_rviz_plugin
 {
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.rviz_plugin_render_tools.robot_state_visualization");
+namespace
+{
+rclcpp::Logger getLogger()
+{
+  return moveit::getLogger("rviz_plugin_render_tools.robot_state_visualization");
+}
+}  // namespace
+
 RobotStateVisualization::RobotStateVisualization(Ogre::SceneNode* root_node, rviz_common::DisplayContext* context,
                                                  const std::string& name,
                                                  rviz_common::properties::Property* parent_property)
@@ -119,7 +127,7 @@ void RobotStateVisualization::updateHelper(const moveit::core::RobotStateConstPt
   for (const moveit::core::AttachedBody* attached_body : attached_bodies)
   {
     std_msgs::msg::ColorRGBA color = default_attached_object_color;
-    float alpha = robot_.getAlpha();
+    double alpha = robot_.getAlpha();
     if (color_map)
     {
       std::map<std::string, std_msgs::msg::ColorRGBA>::const_iterator it = color_map->find(attached_body->getName());
@@ -134,7 +142,7 @@ void RobotStateVisualization::updateHelper(const moveit::core::RobotStateConstPt
     rviz_default_plugins::robot::RobotLink* link = robot_.getLink(attached_body->getAttachedLinkName());
     if (!link)
     {
-      RCLCPP_ERROR_STREAM(LOGGER, "Link " << attached_body->getAttachedLinkName() << " not found in rviz::Robot");
+      RCLCPP_ERROR_STREAM(getLogger(), "Link " << attached_body->getAttachedLinkName() << " not found in rviz::Robot");
       continue;
     }
     Ogre::ColourValue rcolor(color.r, color.g, color.b);
@@ -176,7 +184,7 @@ void RobotStateVisualization::setCollisionVisible(bool visible)
   robot_.setCollisionVisible(visible);
 }
 
-void RobotStateVisualization::setAlpha(float alpha)
+void RobotStateVisualization::setAlpha(double alpha)
 {
   robot_.setAlpha(alpha);
 }

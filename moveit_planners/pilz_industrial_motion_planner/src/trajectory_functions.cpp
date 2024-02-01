@@ -39,11 +39,15 @@
 #include <tf2_eigen_kdl/tf2_eigen_kdl.hpp>
 #include <tf2_eigen/tf2_eigen.hpp>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
+#include <moveit/utils/logger.hpp>
 
 namespace
 {
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.pilz_industrial_motion_planner.trajectory_functions");
+rclcpp::Logger getLogger()
+{
+  return moveit::getLogger("pilz_trajectory_functions");
 }
+}  // namespace
 
 bool pilz_industrial_motion_planner::computePoseIK(const planning_scene::PlanningSceneConstPtr& scene,
                                                    const std::string& group_name, const std::string& link_name,
@@ -55,27 +59,25 @@ bool pilz_industrial_motion_planner::computePoseIK(const planning_scene::Plannin
   const moveit::core::RobotModelConstPtr& robot_model = scene->getRobotModel();
   if (!robot_model->hasJointModelGroup(group_name))
   {
-    RCLCPP_ERROR_STREAM(LOGGER, "Robot model has no planning group named as " << group_name);
+    RCLCPP_ERROR_STREAM(getLogger(), "Robot model has no planning group named as " << group_name);
     return false;
   }
 
   if (!robot_model->getJointModelGroup(group_name)->canSetStateFromIK(link_name))
   {
-    RCLCPP_ERROR_STREAM(LOGGER, "No valid IK solver exists for " << link_name << " in planning group " << group_name);
+    RCLCPP_ERROR_STREAM(getLogger(),
+                        "No valid IK solver exists for " << link_name << " in planning group " << group_name);
     return false;
   }
 
   if (frame_id != robot_model->getModelFrame())
   {
-    RCLCPP_ERROR_STREAM(LOGGER, "Given frame (" << frame_id << ") is unequal to model frame("
-                                                << robot_model->getModelFrame() << ')');
+    RCLCPP_ERROR_STREAM(getLogger(), "Given frame (" << frame_id << ") is unequal to model frame("
+                                                     << robot_model->getModelFrame() << ')');
     return false;
   }
 
-  moveit::core::RobotState rstate(robot_model);
-  // By setting the robot state to default values, we basically allow
-  // the user of this function to supply an incomplete or even empty seed.
-  rstate.setToDefaultValues();
+  moveit::core::RobotState rstate{ scene->getCurrentState() };
   rstate.setVariablePositions(seed);
 
   moveit::core::GroupStateValidityCallbackFn ik_constraint_function;
@@ -98,9 +100,9 @@ bool pilz_industrial_motion_planner::computePoseIK(const planning_scene::Plannin
   }
   else
   {
-    RCLCPP_ERROR(LOGGER, "Unable to find IK solution.");
+    RCLCPP_ERROR(getLogger(), "Unable to find IK solution.");
     // TODO(henning): Re-enable logging error
-    // RCLCPP_ERROR_STREAM(LOGGER, "Inverse kinematics for pose \n" << pose.translation() << " has no solution.");
+    // RCLCPP_ERROR_STREAM(getLogger(), "Inverse kinematics for pose \n" << pose.translation() << " has no solution.");
     return false;
   }
 }
@@ -118,22 +120,20 @@ bool pilz_industrial_motion_planner::computePoseIK(const planning_scene::Plannin
                        timeout);
 }
 
-bool pilz_industrial_motion_planner::computeLinkFK(const moveit::core::RobotModelConstPtr& robot_model,
+bool pilz_industrial_motion_planner::computeLinkFK(const planning_scene::PlanningSceneConstPtr& scene,
                                                    const std::string& link_name,
                                                    const std::map<std::string, double>& joint_state,
                                                    Eigen::Isometry3d& pose)
-{  // create robot state
-  moveit::core::RobotState rstate(robot_model);
+{  // take robot state from the current scene
+  moveit::core::RobotState rstate{ scene->getCurrentState() };
 
   // check the reference frame of the target pose
   if (!rstate.knowsFrameTransform(link_name))
   {
-    RCLCPP_ERROR_STREAM(LOGGER, "The target link " << link_name << " is not known by robot.");
+    RCLCPP_ERROR_STREAM(getLogger(), "The target link " << link_name << " is not known by robot.");
     return false;
   }
 
-  // set the joint positions
-  rstate.setToDefaultValues();
   rstate.setVariablePositions(joint_state);
 
   // update the frame
@@ -151,7 +151,7 @@ bool pilz_industrial_motion_planner::verifySampleJointLimits(
   const double epsilon = 10e-6;
   if (duration_current <= epsilon)
   {
-    RCLCPP_ERROR(LOGGER, "Sample duration too small, cannot compute the velocity");
+    RCLCPP_ERROR(getLogger(), "Sample duration too small, cannot compute the velocity");
     return false;
   }
 
@@ -163,10 +163,11 @@ bool pilz_industrial_motion_planner::verifySampleJointLimits(
 
     if (!joint_limits.verifyVelocityLimit(pos.first, velocity_current))
     {
-      RCLCPP_ERROR_STREAM(LOGGER, "Joint velocity limit of "
-                                      << pos.first << " violated. Set the velocity scaling factor lower!"
-                                      << " Actual joint velocity is " << velocity_current << ", while the limit is "
-                                      << joint_limits.getLimit(pos.first).max_velocity << ". ");
+      RCLCPP_ERROR_STREAM(getLogger(), "Joint velocity limit of "
+                                           << pos.first << " violated. Set the velocity scaling factor lower!"
+                                           << " Actual joint velocity is " << velocity_current
+                                           << ", while the limit is " << joint_limits.getLimit(pos.first).max_velocity
+                                           << ". ");
       return false;
     }
 
@@ -176,11 +177,11 @@ bool pilz_industrial_motion_planner::verifySampleJointLimits(
     {
       if (!joint_limits.verifyAccelerationLimit(pos.first, acceleration_current))
       {
-        RCLCPP_ERROR_STREAM(LOGGER, "Joint acceleration limit of "
-                                        << pos.first << " violated. Set the acceleration scaling factor lower!"
-                                        << " Actual joint acceleration is " << acceleration_current
-                                        << ", while the limit is " << joint_limits.getLimit(pos.first).max_acceleration
-                                        << ". ");
+        RCLCPP_ERROR_STREAM(getLogger(), "Joint acceleration limit of "
+                                             << pos.first << " violated. Set the acceleration scaling factor lower!"
+                                             << " Actual joint acceleration is " << acceleration_current
+                                             << ", while the limit is "
+                                             << joint_limits.getLimit(pos.first).max_acceleration << ". ");
         return false;
       }
     }
@@ -189,11 +190,11 @@ bool pilz_industrial_motion_planner::verifySampleJointLimits(
     {
       if (!joint_limits.verifyDecelerationLimit(pos.first, acceleration_current))
       {
-        RCLCPP_ERROR_STREAM(LOGGER, "Joint deceleration limit of "
-                                        << pos.first << " violated. Set the acceleration scaling factor lower!"
-                                        << " Actual joint deceleration is " << acceleration_current
-                                        << ", while the limit is " << joint_limits.getLimit(pos.first).max_deceleration
-                                        << ". ");
+        RCLCPP_ERROR_STREAM(getLogger(), "Joint deceleration limit of "
+                                             << pos.first << " violated. Set the acceleration scaling factor lower!"
+                                             << " Actual joint deceleration is " << acceleration_current
+                                             << ", while the limit is "
+                                             << joint_limits.getLimit(pos.first).max_deceleration << ". ");
         return false;
       }
     }
@@ -206,11 +207,11 @@ bool pilz_industrial_motion_planner::generateJointTrajectory(
     const planning_scene::PlanningSceneConstPtr& scene,
     const pilz_industrial_motion_planner::JointLimitsContainer& joint_limits, const KDL::Trajectory& trajectory,
     const std::string& group_name, const std::string& link_name,
-    const std::map<std::string, double>& initial_joint_position, const double& sampling_time,
+    const std::map<std::string, double>& initial_joint_position, double sampling_time,
     trajectory_msgs::msg::JointTrajectory& joint_trajectory, moveit_msgs::msg::MoveItErrorCodes& error_code,
     bool check_self_collision)
 {
-  RCLCPP_DEBUG(LOGGER, "Generate joint trajectory from a Cartesian trajectory.");
+  RCLCPP_DEBUG(getLogger(), "Generate joint trajectory from a Cartesian trajectory.");
 
   const moveit::core::RobotModelConstPtr& robot_model = scene->getRobotModel();
   rclcpp::Clock clock;
@@ -242,7 +243,7 @@ bool pilz_industrial_motion_planner::generateJointTrajectory(
     if (!computePoseIK(scene, group_name, link_name, pose_sample, robot_model->getModelFrame(), ik_solution_last,
                        ik_solution, check_self_collision))
     {
-      RCLCPP_ERROR(LOGGER, "Failed to compute inverse kinematics solution for sampled Cartesian pose.");
+      RCLCPP_ERROR(getLogger(), "Failed to compute inverse kinematics solution for sampled Cartesian pose.");
       error_code.val = moveit_msgs::msg::MoveItErrorCodes::NO_IK_SOLUTION;
       joint_trajectory.points.clear();
       return false;
@@ -265,9 +266,9 @@ bool pilz_industrial_motion_planner::generateJointTrajectory(
         !verifySampleJointLimits(ik_solution_last, joint_velocity_last, ik_solution, sampling_time,
                                  duration_current_sample, joint_limits))
     {
-      RCLCPP_ERROR_STREAM(LOGGER, "Inverse kinematics solution at "
-                                      << *time_iter
-                                      << "s violates the joint velocity/acceleration/deceleration limits.");
+      RCLCPP_ERROR_STREAM(getLogger(), "Inverse kinematics solution at "
+                                           << *time_iter
+                                           << "s violates the joint velocity/acceleration/deceleration limits.");
       error_code.val = moveit_msgs::msg::MoveItErrorCodes::PLANNING_FAILED;
       joint_trajectory.points.clear();
       return false;
@@ -312,9 +313,9 @@ bool pilz_industrial_motion_planner::generateJointTrajectory(
 
   error_code.val = moveit_msgs::msg::MoveItErrorCodes::SUCCESS;
   double duration_ms = (clock.now() - generation_begin).seconds() * 1000;
-  RCLCPP_DEBUG_STREAM(LOGGER, "Generate trajectory (N-Points: "
-                                  << joint_trajectory.points.size() << ") took " << duration_ms << " ms | "
-                                  << duration_ms / joint_trajectory.points.size() << " ms per Point");
+  RCLCPP_DEBUG_STREAM(getLogger(), "Generate trajectory (N-Points: "
+                                       << joint_trajectory.points.size() << ") took " << duration_ms << " ms | "
+                                       << duration_ms / joint_trajectory.points.size() << " ms per Point");
 
   return true;
 }
@@ -328,7 +329,7 @@ bool pilz_industrial_motion_planner::generateJointTrajectory(
     trajectory_msgs::msg::JointTrajectory& joint_trajectory, moveit_msgs::msg::MoveItErrorCodes& error_code,
     bool check_self_collision)
 {
-  RCLCPP_DEBUG(LOGGER, "Generate joint trajectory from a Cartesian trajectory.");
+  RCLCPP_DEBUG(getLogger(), "Generate joint trajectory from a Cartesian trajectory.");
 
   const moveit::core::RobotModelConstPtr& robot_model = scene->getRobotModel();
   rclcpp::Clock clock;
@@ -350,8 +351,8 @@ bool pilz_industrial_motion_planner::generateJointTrajectory(
     if (!computePoseIK(scene, group_name, link_name, trajectory.points.at(i).pose, robot_model->getModelFrame(),
                        ik_solution_last, ik_solution, check_self_collision))
     {
-      RCLCPP_ERROR(LOGGER, "Failed to compute inverse kinematics solution for sampled "
-                           "Cartesian pose.");
+      RCLCPP_ERROR(getLogger(), "Failed to compute inverse kinematics solution for sampled "
+                                "Cartesian pose.");
       error_code.val = moveit_msgs::msg::MoveItErrorCodes::NO_IK_SOLUTION;
       joint_trajectory.points.clear();
       return false;
@@ -376,10 +377,10 @@ bool pilz_industrial_motion_planner::generateJointTrajectory(
       // overload generateJointTrajectory(...,
       // KDL::Trajectory, ...)
       // TODO: refactor to avoid code duplication.
-      RCLCPP_ERROR_STREAM(LOGGER, "Inverse kinematics solution of the "
-                                      << i
-                                      << "th sample violates the joint "
-                                         "velocity/acceleration/deceleration limits.");
+      RCLCPP_ERROR_STREAM(getLogger(), "Inverse kinematics solution of the "
+                                           << i
+                                           << "th sample violates the joint "
+                                              "velocity/acceleration/deceleration limits.");
       error_code.val = moveit_msgs::msg::MoveItErrorCodes::PLANNING_FAILED;
       joint_trajectory.points.clear();
       return false;
@@ -409,9 +410,9 @@ bool pilz_industrial_motion_planner::generateJointTrajectory(
   error_code.val = moveit_msgs::msg::MoveItErrorCodes::SUCCESS;
 
   double duration_ms = (clock.now() - generation_begin).seconds() * 1000;
-  RCLCPP_DEBUG_STREAM(LOGGER, "Generate trajectory (N-Points: "
-                                  << joint_trajectory.points.size() << ") took " << duration_ms << " ms | "
-                                  << duration_ms / joint_trajectory.points.size() << " ms per Point");
+  RCLCPP_DEBUG_STREAM(getLogger(), "Generate trajectory (N-Points: "
+                                       << joint_trajectory.points.size() << ") took " << duration_ms << " ms | "
+                                       << duration_ms / joint_trajectory.points.size() << " ms per Point");
 
   return true;
 }
@@ -426,7 +427,7 @@ bool pilz_industrial_motion_planner::determineAndCheckSamplingTime(
   std::size_t n2 = second_trajectory->getWayPointCount() - 1;
   if ((n1 < 2) && (n2 < 2))
   {
-    RCLCPP_ERROR_STREAM(LOGGER, "Both trajectories do not have enough points to determine sampling time.");
+    RCLCPP_ERROR_STREAM(getLogger(), "Both trajectories do not have enough points to determine sampling time.");
     return false;
   }
 
@@ -445,9 +446,9 @@ bool pilz_industrial_motion_planner::determineAndCheckSamplingTime(
     {
       if (fabs(sampling_time - first_trajectory->getWayPointDurationFromPrevious(i)) > epsilon)
       {
-        RCLCPP_ERROR_STREAM(LOGGER, "First trajectory violates sampline time " << sampling_time << " between points "
-                                                                               << (i - 1) << "and " << i
-                                                                               << " (indices).");
+        RCLCPP_ERROR_STREAM(getLogger(), "First trajectory violates sampline time "
+                                             << sampling_time << " between points " << (i - 1) << "and " << i
+                                             << " (indices).");
         return false;
       }
     }
@@ -456,9 +457,9 @@ bool pilz_industrial_motion_planner::determineAndCheckSamplingTime(
     {
       if (fabs(sampling_time - second_trajectory->getWayPointDurationFromPrevious(i)) > epsilon)
       {
-        RCLCPP_ERROR_STREAM(LOGGER, "Second trajectory violates sampline time " << sampling_time << " between points "
-                                                                                << (i - 1) << "and " << i
-                                                                                << " (indices).");
+        RCLCPP_ERROR_STREAM(getLogger(), "Second trajectory violates sampline time "
+                                             << sampling_time << " between points " << (i - 1) << "and " << i
+                                             << " (indices).");
         return false;
       }
     }
@@ -478,8 +479,8 @@ bool pilz_industrial_motion_planner::isRobotStateEqual(const moveit::core::Robot
 
   if ((joint_position_1 - joint_position_2).norm() > epsilon)
   {
-    RCLCPP_DEBUG_STREAM(LOGGER, "Joint positions of the two states are different. state1: "
-                                    << joint_position_1 << " state2: " << joint_position_2);
+    RCLCPP_DEBUG_STREAM(getLogger(), "Joint positions of the two states are different. state1: "
+                                         << joint_position_1 << " state2: " << joint_position_2);
     return false;
   }
 
@@ -490,8 +491,8 @@ bool pilz_industrial_motion_planner::isRobotStateEqual(const moveit::core::Robot
 
   if ((joint_velocity_1 - joint_velocity_2).norm() > epsilon)
   {
-    RCLCPP_DEBUG_STREAM(LOGGER, "Joint velocities of the two states are different. state1: "
-                                    << joint_velocity_1 << " state2: " << joint_velocity_2);
+    RCLCPP_DEBUG_STREAM(getLogger(), "Joint velocities of the two states are different. state1: "
+                                         << joint_velocity_1 << " state2: " << joint_velocity_2);
     return false;
   }
 
@@ -502,8 +503,8 @@ bool pilz_industrial_motion_planner::isRobotStateEqual(const moveit::core::Robot
 
   if ((joint_acc_1 - joint_acc_2).norm() > epsilon)
   {
-    RCLCPP_DEBUG_STREAM(LOGGER, "Joint accelerations of the two states are different. state1: "
-                                    << joint_acc_1 << " state2: " << joint_acc_2);
+    RCLCPP_DEBUG_STREAM(getLogger(), "Joint accelerations of the two states are different. state1: "
+                                         << joint_acc_1 << " state2: " << joint_acc_2);
     return false;
   }
 
@@ -517,25 +518,24 @@ bool pilz_industrial_motion_planner::isRobotStateStationary(const moveit::core::
   state.copyJointGroupVelocities(group, joint_variable);
   if (joint_variable.norm() > EPSILON)
   {
-    RCLCPP_DEBUG(LOGGER, "Joint velocities are not zero.");
+    RCLCPP_DEBUG(getLogger(), "Joint velocities are not zero.");
     return false;
   }
   state.copyJointGroupAccelerations(group, joint_variable);
   if (joint_variable.norm() > EPSILON)
   {
-    RCLCPP_DEBUG(LOGGER, "Joint accelerations are not zero.");
+    RCLCPP_DEBUG(getLogger(), "Joint accelerations are not zero.");
     return false;
   }
   return true;
 }
 
 bool pilz_industrial_motion_planner::linearSearchIntersectionPoint(const std::string& link_name,
-                                                                   const Eigen::Vector3d& center_position,
-                                                                   const double& r,
+                                                                   const Eigen::Vector3d& center_position, double r,
                                                                    const robot_trajectory::RobotTrajectoryPtr& traj,
                                                                    bool inverseOrder, std::size_t& index)
 {
-  RCLCPP_DEBUG(LOGGER, "Start linear search for intersection point.");
+  RCLCPP_DEBUG(getLogger(), "Start linear search for intersection point.");
 
   const size_t waypoint_num = traj->getWayPointCount();
 
@@ -569,7 +569,7 @@ bool pilz_industrial_motion_planner::linearSearchIntersectionPoint(const std::st
 
 bool pilz_industrial_motion_planner::intersectionFound(const Eigen::Vector3d& p_center,
                                                        const Eigen::Vector3d& p_current, const Eigen::Vector3d& p_next,
-                                                       const double& r)
+                                                       double r)
 {
   return ((p_current - p_center).norm() <= r) && ((p_next - p_center).norm() >= r);
 }

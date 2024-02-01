@@ -2,6 +2,20 @@
 Changelog for package moveit_setup_srdf_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.9.0 (2024-01-09)
+------------------
+* Node logging for the rest of MoveIt (`#2599 <https://github.com/ros-planning/moveit2/issues/2599>`_)
+* fix typos in compute_default_collisions.cpp (`#2461 <https://github.com/ros-planning/moveit2/issues/2461>`_)
+  * fix typos in compute_default_collisions.cpp
+  * Fix typo
+  ---------
+  Co-authored-by: Sebastian Jahr <sebastian.jahr@tuta.io>
+* Merge branch 'main' into dependabot/github_actions/SonarSource/sonarcloud-github-c-cpp-2
+* Contributors: Sebastian Jahr, Surav Shrestha, Tyler Weaver
+
+2.8.0 (2023-09-10)
+------------------
+
 2.7.4 (2023-05-18)
 ------------------
 

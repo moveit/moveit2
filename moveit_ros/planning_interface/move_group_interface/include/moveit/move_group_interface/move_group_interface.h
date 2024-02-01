@@ -45,12 +45,9 @@
 #include <moveit_msgs/msg/planner_interface_description.hpp>
 #include <moveit_msgs/msg/constraints.hpp>
 #include <moveit_msgs/msg/grasp.hpp>
-// #include <moveit_msgs/msg/place_location.hpp>
-
-// #include <moveit_msgs/action/pickup.hpp>
-// #include <moveit_msgs/action/place.hpp>
 #include <moveit_msgs/action/move_group.hpp>
 #include <moveit_msgs/action/execute_trajectory.hpp>
+#include <rclcpp/logger.hpp>
 
 #include <moveit_msgs/msg/motion_plan_request.hpp>
 #include <geometry_msgs/msg/pose_stamped.hpp>
@@ -68,8 +65,6 @@ namespace moveit
 /** \brief Simple interface to MoveIt components */
 namespace planning_interface
 {
-using MoveItErrorCode [[deprecated("Use moveit::core::MoveItErrorCode")]] = moveit::core::MoveItErrorCode;
-
 MOVEIT_CLASS_FORWARD(MoveGroupInterface);  // Defines MoveGroupInterfacePtr, ConstPtr, WeakPtr... etc
 
 /** \class MoveGroupInterface move_group_interface.h moveit/planning_interface/move_group_interface.h
@@ -506,9 +501,6 @@ public:
   /** \brief Get the current joint state goal in a form compatible to setJointValueTarget() */
   void getJointValueTarget(std::vector<double>& group_variable_values) const;
 
-  /// Get the currently set joint state goal, replaced by private getTargetRobotState()
-  [[deprecated]] const moveit::core::RobotState& getJointValueTarget() const;
-
   /**@}*/
 
   /**
@@ -719,17 +711,41 @@ public:
       target. No execution is performed. The resulting plan is stored in \e plan*/
   moveit::core::MoveItErrorCode plan(Plan& plan);
 
-  /** \brief Given a \e plan, execute it without waiting for completion. */
-  moveit::core::MoveItErrorCode asyncExecute(const Plan& plan);
+  /** \brief Given a \e plan, execute it without waiting for completion.
+   *  \param [in] plan The motion plan for which to execute
+   *  \param [in] controllers An optional list of ros2_controllers to execute with. If none, MoveIt will attempt to find
+   * a controller. The exact behavior of finding a controller depends on which MoveItControllerManager plugin is active.
+   *  \return moveit::core::MoveItErrorCode::SUCCESS if successful
+   */
+  moveit::core::MoveItErrorCode asyncExecute(const Plan& plan,
+                                             const std::vector<std::string>& controllers = std::vector<std::string>());
 
-  /** \brief Given a \e robot trajectory, execute it without waiting for completion. */
-  moveit::core::MoveItErrorCode asyncExecute(const moveit_msgs::msg::RobotTrajectory& trajectory);
+  /** \brief Given a \e robot trajectory, execute it without waiting for completion.
+   *  \param [in] trajectory The trajectory to execute
+   *  \param [in] controllers An optional list of ros2_controllers to execute with. If none, MoveIt will attempt to find
+   * a controller. The exact behavior of finding a controller depends on which MoveItControllerManager plugin is active.
+   *  \return moveit::core::MoveItErrorCode::SUCCESS if successful
+   */
+  moveit::core::MoveItErrorCode asyncExecute(const moveit_msgs::msg::RobotTrajectory& trajectory,
+                                             const std::vector<std::string>& controllers = std::vector<std::string>());
 
-  /** \brief Given a \e plan, execute it while waiting for completion. */
-  moveit::core::MoveItErrorCode execute(const Plan& plan);
+  /** \brief Given a \e plan, execute it while waiting for completion.
+   *  \param [in] plan Contains trajectory info as well as metadata such as a RobotModel.
+   *  \param [in] controllers An optional list of ros2_controllers to execute with. If none, MoveIt will attempt to find
+   * a controller. The exact behavior of finding a controller depends on which MoveItControllerManager plugin is active.
+   *  \return moveit::core::MoveItErrorCode::SUCCESS if successful
+   */
+  moveit::core::MoveItErrorCode execute(const Plan& plan,
+                                        const std::vector<std::string>& controllers = std::vector<std::string>());
 
-  /** \brief Given a \e robot trajectory, execute it while waiting for completion. */
-  moveit::core::MoveItErrorCode execute(const moveit_msgs::msg::RobotTrajectory& trajectory);
+  /** \brief Given a \e robot trajectory, execute it while waiting for completion.
+   *  \param [in] trajectory The trajectory to execute
+   *  \param [in] controllers An optional list of ros2_controllers to execute with. If none, MoveIt will attempt to find
+   * a controller. The exact behavior of finding a controller depends on which MoveItControllerManager plugin is active.
+   *  \return moveit::core::MoveItErrorCode::SUCCESS if successful
+   */
+  moveit::core::MoveItErrorCode execute(const moveit_msgs::msg::RobotTrajectory& trajectory,
+                                        const std::vector<std::string>& controllers = std::vector<std::string>());
 
   /** \brief Compute a Cartesian path that follows specified waypoints with a step size of at most \e eef_step meters
       between end effector configurations of consecutive points in the result \e trajectory. The reference frame for the
@@ -784,98 +800,12 @@ public:
       in \e request */
   void constructMotionPlanRequest(moveit_msgs::msg::MotionPlanRequest& request);
 
-  /** \brief Build a PickupGoal for an object named \e object and store it in \e goal_out */
-
-  //  moveit_msgs::action::Pickup::Goal constructPickupGoal(const std::string& object,
-  //                                                      std::vector<moveit_msgs::msg::Grasp> grasps,
-  //                                                      bool plan_only) const;
-  //
-  //  /** \brief Build a PlaceGoal for an object named \e object and store it in \e goal_out */
-  //  moveit_msgs::action::Place::Goal constructPlaceGoal(const std::string& object,
-  //                                                    std::vector<moveit_msgs::msg::PlaceLocation> locations,
-  //                                                    bool plan_only) const;
-  //
-  //  /** \brief Convert a vector of PoseStamped to a vector of PlaceLocation */
-  //  std::vector<moveit_msgs::msg::PlaceLocation>
-  //  posesToPlaceLocations(const std::vector<geometry_msgs::msg::PoseStamped>& poses) const;
-
   /**@}*/
 
   /**
    * \name High level actions that trigger a sequence of plans and actions.
    */
   /**@{*/
-
-  /** \brief Pick up an object
-
-      This applies a number of hard-coded default grasps */
-  //  moveit::core::MoveItErrorCode pick(const std::string& object, bool plan_only = false)
-  //  {
-  //    return pick(constructPickupGoal(object, std::vector<moveit_msgs::msg::Grasp>(), plan_only));
-  //  }
-  //
-  /** \brief Pick up an object given a grasp pose */
-  //  moveit::core::MoveItErrorCode pick(const std::string& object, const moveit_msgs::msg::Grasp& grasp, bool plan_only = false)
-  //  {
-  //    return pick(constructPickupGoal(object, { grasp }, plan_only));
-  //  }
-  //
-  /** \brief Pick up an object given possible grasp poses */
-  //  moveit::core::MoveItErrorCode pick(const std::string& object, std::vector<moveit_msgs::msg::Grasp> grasps, bool
-  //  plan_only = false)
-  //  {
-  //    return pick(constructPickupGoal(object, std::move(grasps), plan_only));
-  //  }
-
-  /** \brief Pick up an object given a PickupGoal
-
-      Use as follows: first create the goal with constructPickupGoal(), then set \e possible_grasps and any other
-      desired variable in the goal, and finally pass it on to this function */
-
-  // moveit::core::MoveItErrorCode pick(const moveit_msgs::action::Pickup::Goal& goal);
-
-  /** \brief Pick up an object
-
-      calls the external moveit_msgs::srv::GraspPlanning service "plan_grasps" to compute possible grasps */
-  // moveit::core::MoveItErrorCode planGraspsAndPick(const std::string& object = "", bool plan_only = false);
-
-  /** \brief Pick up an object
-      calls the external moveit_msgs::srv::GraspPlanning service "plan_grasps" to compute possible grasps */
-  // moveit::core::MoveItErrorCode planGraspsAndPick(const moveit_msgs::msg::CollisionObject& object, bool plan_only = false);
-
-  /** \brief Place an object somewhere safe in the world (a safe location will be detected) */
-  //  moveit::core::MoveItErrorCode place(const std::string& object, bool plan_only = false)
-  //  {
-  //    return place(constructPlaceGoal(object, std::vector<moveit_msgs::msg::PlaceLocation>(), plan_only));
-  //  }
-
-  /** \brief Place an object at one of the specified possible locations */
-  //  moveit::core::MoveItErrorCode place(const std::string& object, std::vector<moveit_msgs::msg::PlaceLocation> locations,
-  //                        bool plan_only = false)
-  //  {
-  //    return place(constructPlaceGoal(object, std::move(locations), plan_only));
-  //  }
-
-  /** \brief Place an object at one of the specified possible locations */
-  //  moveit::core::MoveItErrorCode place(const std::string& object, const std::vector<geometry_msgs::msg::PoseStamped>& poses,
-  //                        bool plan_only = false)
-  //  {
-  //    return place(constructPlaceGoal(object, posesToPlaceLocations(poses), plan_only));
-  //  }
-
-  /** \brief Place an object at one of the specified possible location */
-  //  moveit::core::MoveItErrorCode place(const std::string& object, const geometry_msgs::msg::PoseStamped& pose, bool
-  //  plan_only = false)
-  //  {
-  //    return place(constructPlaceGoal(object, posesToPlaceLocations({ pose }), plan_only));
-  //  }
-
-  /** \brief Place an object given a PlaceGoal
-
-      Use as follows: first create the goal with constructPlaceGoal(), then set \e place_locations and any other
-      desired variable in the goal, and finally pass it on to this function */
-
-  // moveit::core::MoveItErrorCode place(const moveit_msgs::action::Place::Goal& goal);
 
   /** \brief Given the name of an object in the planning scene, make
       the object attached to a link of the robot.  If no link name is
@@ -1014,6 +944,7 @@ private:
   std::map<std::string, std::vector<double> > remembered_joint_values_;
   class MoveGroupInterfaceImpl;
   MoveGroupInterfaceImpl* impl_;
+  rclcpp::Logger logger_;
 };
 }  // namespace planning_interface
 }  // namespace moveit

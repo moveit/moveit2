@@ -2,6 +2,24 @@
 Changelog for package pilz_industrial_motion_planner_testutils
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.9.0 (2024-01-09)
+------------------
+* Merge branch 'main' into dependabot/github_actions/SonarSource/sonarcloud-github-c-cpp-2
+* Update clang-format-14 with QualifierAlignment (`#2362 <https://github.com/ros-planning/moveit2/issues/2362>`_)
+  * Set qualifier order in .clang-format
+  * Ran pre-commit to update according to new style guide
+* Merge branch 'main' into dependabot/github_actions/SonarSource/sonarcloud-github-c-cpp-2
+* Contributors: Marq Rasmussen, Sebastian Jahr, Shobuj Paul
+
+2.8.0 (2023-09-10)
+------------------
+* Make loggers static or move into anonymous namespace (`#2184 <https://github.com/ros-planning/moveit2/issues/2184>`_)
+  * Make loggers static or move into anonymous namespace
+  * Update moveit_ros/planning_interface/move_group_interface/src/move_group_interface.cpp
+  * Update moveit_ros/planning_interface/move_group_interface/src/move_group_interface.cpp
+  * Move LOGGER out of class template
+* Contributors: Sebastian Jahr
+
 2.7.4 (2023-05-18)
 ------------------
 

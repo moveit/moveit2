@@ -1,0 +1,24 @@
+planning_pipeline_parameters:
+  planning_plugins: {
+    type: string_array,
+    description: "Name of the planner plugin used by the pipeline",
+    read_only: true,
+    default_value: ["UNKNOWN"],
+  }
+  request_adapters: {
+    type: string_array,
+    description: "Names of the planning request adapter plugins (plugin names separated by space). The order of the elements in the adapter corresponds to the order they are processed by the motion planning pipeline.",
+    read_only: true,
+    default_value: [],
+  }
+  response_adapters: {
+    type: string_array,
+    description: "Names of the planning request adapter plugins (plugin names separated by space). The order of the elements in the adapter corresponds to the order they are processed by the motion planning pipeline.",
+    read_only: true,
+    default_value: [],
+  }
+  progress_topic: {
+    type: string,
+    description: "For every stage of the planning pipeline a progress message is published to this topic. An empty string disables the publisher.",
+    default_value: "pipeline_state",
+  }

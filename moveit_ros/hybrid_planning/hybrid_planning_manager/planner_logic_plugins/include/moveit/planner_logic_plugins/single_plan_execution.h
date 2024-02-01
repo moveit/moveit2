@@ -47,7 +47,6 @@ class SinglePlanExecution : public PlannerLogicInterface
 public:
   SinglePlanExecution() = default;
   ~SinglePlanExecution() override = default;
-  bool initialize(const std::shared_ptr<HybridPlanningManager>& hybrid_planning_manager) override;
   ReactionResult react(const HybridPlanningEvent& event) override;
   ReactionResult react(const std::string& event) override;
 

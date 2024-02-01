@@ -72,7 +72,7 @@ static constexpr double DEFAULT_ROTATION_AXIS_EQUALITY_TOLERANCE{ 1e-8 };
 /**
  * @brief Convert degree to rad.
  */
-inline static constexpr double deg2Rad(double angle)
+static inline constexpr double deg2Rad(double angle)
 {
   return (angle / 180.0) * M_PI;
 }
@@ -88,7 +88,7 @@ inline std::string getJointName(size_t joint_number, const std::string& joint_pr
  */
 pilz_industrial_motion_planner::JointLimitsContainer createFakeLimits(const std::vector<std::string>& joint_names);
 
-inline std::string demangle(char const* name)
+inline std::string demangle(const char* name)
 {
   return boost::core::demangle(name);
 }
@@ -169,7 +169,7 @@ void createPTPRequest(const std::string& planning_group, const moveit::core::Rob
 
 /**
  * @brief check if the goal given in joint space is reached
- * Only the last point in the trajectory is veryfied.
+ * Only the last point in the trajectory is verified.
  * @param trajectory: generated trajectory
  * @param goal: goal in joint space
  * @param joint_position_tolerance
@@ -182,7 +182,7 @@ bool isGoalReached(const trajectory_msgs::msg::JointTrajectory& trajectory,
 
 /**
  * @brief check if the goal given in cartesian space is reached
- * Only the last point in the trajectory is veryfied.
+ * Only the last point in the trajectory is verified.
  * @param robot_model
  * @param trajectory
  * @param req
@@ -344,7 +344,7 @@ bool checkBlendingCartSpaceContinuity(const pilz_industrial_motion_planner::Traj
  * @brief Checks if all points of the blending trajectory lie within the
  * blending radius.
  */
-bool checkThatPointsInRadius(const std::string& link_name, const double& r, Eigen::Isometry3d& circ_pose,
+bool checkThatPointsInRadius(const std::string& link_name, double r, Eigen::Isometry3d& circ_pose,
                              const pilz_industrial_motion_planner::TrajectoryBlendResponse& res);
 
 /**
@@ -434,8 +434,8 @@ bool checkBlendResult(const pilz_industrial_motion_planner::TrajectoryBlendReque
 bool generateTrajFromBlendTestData(const planning_scene::PlanningSceneConstPtr& scene,
                                    const std::shared_ptr<pilz_industrial_motion_planner::TrajectoryGenerator>& tg,
                                    const std::string& group_name, const std::string& link_name,
-                                   const BlendTestData& data, const double& sampling_time_1,
-                                   const double& sampling_time_2, planning_interface::MotionPlanResponse& res_lin_1,
+                                   const BlendTestData& data, double sampling_time_1, double sampling_time_2,
+                                   planning_interface::MotionPlanResponse& res_lin_1,
                                    planning_interface::MotionPlanResponse& res_lin_2, double& dis_lin_1,
                                    double& dis_lin_2);
 
@@ -474,7 +474,7 @@ checkCartesianRotationalPath(const robot_trajectory::RobotTrajectoryConstPtr& tr
                              const double rot_axis_tol = DEFAULT_ROTATION_AXIS_EQUALITY_TOLERANCE,
                              const double acc_tol = DEFAULT_ACCELERATION_EQUALITY_TOLERANCE);
 
-inline bool isMonotonouslyDecreasing(const std::vector<double>& vec, const double& tol)
+inline bool isMonotonouslyDecreasing(const std::vector<double>& vec, double tol)
 {
   return std::is_sorted(vec.begin(), vec.end(), [tol](double a, double b) {
     return !(std::abs(a - b) < tol || a < b);  // true -> a is ordered before b -> list is not sorted

@@ -3,19 +3,48 @@
 API changes in MoveIt releases
 
 ## ROS Rolling
-- `lockSceneRead()` and `lockSceneWrite()` are now protected member functions, for internal use only. To lock the planning scene, use LockedPlanningSceneRO or LockedPlanningSceneRW:
+- [12/2023] `trajectory_processing::Path` and `trajectory_processing::Trajectory` APIs have been updated to prevent misuse.
+The constructors have been replaced by builder methods so that errors can be communicated. Paths and trajectories now need to be created with `Path::Create()` and `Trajectory::Create()`. These methods now return an `std::optional` that needs to be checked for a valid value. `Trajectory` no longer has the `isValid()` method. If it's invalid, `Trajectory::Create()` will return `std::nullopt`. Finally, `Path` now takes the list of input waypoints as `std::vector`, instead of `std::list`.
+- [12/2023] LMA kinematics plugin is removed to remove the maintenance work because better alternatives exist like KDL or TracIK
+- [10/2023] The planning pipeline now has a vector of planner plugins rather than a single one. Please update the planner plugin parameter e.g. like this:
+```diff
+- planning_plugin: ompl_interface/OMPLPlanner
++ planning_plugins:
++   - ompl_interface/OMPLPlanner
+```
+- [10/2023] Planning request adapters are now separated into PlanRequest (preprocessing) and PlanResponse (postprocessing) adapters. The adapters are configured with ROS parameter vectors (vector order corresponds to execution order). Please update your pipeline configurations for example like this:
+```diff
+- request_adapters: >-
+-     default_planner_request_adapters/AddTimeOptimalParameterization
+-     default_planner_request_adapters/ResolveConstraintFrames
+-     default_planner_request_adapters/FixWorkspaceBounds
+-     default_planner_request_adapters/FixStartStateBounds
+-     default_planner_request_adapters/FixStartStateCollision
+-     default_planner_request_adapters/FixStartStatePathConstraints
++ # The order of the elements in the adapter corresponds to the order they are processed by the motion planning pipeline.
++ request_adapters:
++   - default_planning_request_adapters/ResolveConstraintFrames
++   - default_planning_request_adapters/ValidateWorkspaceBounds
++   - default_planning_request_adapters/CheckStartStateBounds
++   - default_planning_request_adapters/CheckStartStateCollision
++ response_adapters:
++   - default_planning_response_adapters/AddTimeOptimalParameterization
++   - default_planning_response_adapters/ValidateSolution
++   - default_planning_response_adapters/DisplayMotionPath
+```
+- [2021] `lockSceneRead()` and `lockSceneWrite()` are now protected member functions, for internal use only. To lock the planning scene, use ``LockedPlanningSceneRO`` or ``LockedPlanningSceneRW``:
 ```
       planning_scene_monitor::LockedPlanningSceneRO ls(planning_scene_monitor);
       moveit::core::RobotModelConstPtr model = ls->getRobotModel();
 ```
-- ServoServer was renamed to ServoNode
-- `CollisionObject` messages are now defined with a `Pose`, and shapes and subframes are defined relative to the object's pose. This makes it easier to place objects with subframes and multiple shapes in the scene. This causes several changes:
+- [2021] ServoServer was renamed to ServoNode
+- [2021] `CollisionObject` messages are now defined with a `Pose`, and shapes and subframes are defined relative to the object's pose. This makes it easier to place objects with subframes and multiple shapes in the scene. This causes several changes:
     - `getFrameTransform()` now returns this pose instead of the first shape's pose.
     - The Rviz plugin's manipulation tab now uses the object's pose instead of the shape pose to evaluate if object's are in the region of interest.
     - Planning scene geometry text files (`.scene`) have changed format. Loading old files is still supported. You can add a line `0 0 0 0 0 0 1` under each line with an asterisk to upgrade old files.
-- add API for passing RNG to setToRandomPositionsNearBy
-- Static member variable interface of the CollisionDetectorAllocatorTemplate for the string NAME was replaced with a virtual method `getName`.
-- Enhance `RDFLoader` to load from string parameter OR string topic (and add the ability to publish a string topic).
+- [2021] Add API for passing RNG to setToRandomPositionsNearBy
+- [2021] Static member variable interface of the CollisionDetectorAllocatorTemplate for the string NAME was replaced with a virtual method `getName`.
+- [2021] Enhance `RDFLoader` to load from string parameter OR string topic (and add the ability to publish a string topic).
 
 ## ROS Noetic
 - RobotModel no longer overrides empty URDF collision geometry by matching the visual geometry of the link.

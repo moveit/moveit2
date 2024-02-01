@@ -38,14 +38,15 @@
 
 #include <moveit/trajectory_rviz_plugin/trajectory_display.h>
 #include <rviz_common/properties/string_property.hpp>
+#include <moveit/utils/logger.hpp>
 
 #include <memory>
 
 namespace moveit_rviz_plugin
 {
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.ros.visualization.trajectory_display");
 
-TrajectoryDisplay::TrajectoryDisplay() : Display()
+TrajectoryDisplay::TrajectoryDisplay() : Display(), logger_(moveit::getLogger("trajectory_display"))
+
 {
   // The robot description property is only needed when using the trajectory playback standalone (not within motion
   // planning plugin)
@@ -65,7 +66,7 @@ void TrajectoryDisplay::onInitialize()
   auto ros_node_abstraction = context_->getRosNodeAbstraction().lock();
   if (!ros_node_abstraction)
   {
-    RCLCPP_INFO(LOGGER, "Unable to lock weak_ptr from DisplayContext in TrajectoryDisplay constructor");
+    RCLCPP_INFO(logger_, "Unable to lock weak_ptr from DisplayContext in TrajectoryDisplay constructor");
     return;
   }
   node_ = ros_node_abstraction->get_raw_node();

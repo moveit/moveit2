@@ -146,14 +146,14 @@ public:
       the state by calling update(true). */
   double* getVariablePositions()
   {
-    return position_;
+    return position_.data();
   }
 
   /** \brief Get a raw pointer to the positions of the variables
       stored in this state. */
   const double* getVariablePositions() const
   {
-    return position_;
+    return position_.data();
   }
 
   /** \brief It is assumed \e positions is an array containing the new
@@ -236,14 +236,14 @@ public:
   double* getVariableVelocities()
   {
     markVelocity();
-    return velocity_;
+    return velocity_.data();
   }
 
   /** \brief Get const access to the velocities of the variables that make up this state. The values are in the same
    * order as reported by getVariableNames() */
   const double* getVariableVelocities() const
   {
-    return velocity_;
+    return velocity_.data();
   }
 
   /** \brief Set all velocities to 0.0 */
@@ -254,7 +254,7 @@ public:
   {
     has_velocity_ = true;
     // assume everything is in order in terms of array lengths (for efficiency reasons)
-    memcpy(velocity_, velocity, robot_model_->getVariableCount() * sizeof(double));
+    memcpy(velocity_.data(), velocity, robot_model_->getVariableCount() * sizeof(double));
   }
 
   /** \brief Given an array with velocity values for all variables, set those values as the velocities in this state */
@@ -330,14 +330,14 @@ public:
   double* getVariableAccelerations()
   {
     markAcceleration();
-    return acceleration_;
+    return effort_or_acceleration_.data();
   }
 
   /** \brief Get const raw access to the accelerations of the variables that make up this state. The values are in the
    * same order as reported by getVariableNames() */
   const double* getVariableAccelerations() const
   {
-    return acceleration_;
+    return effort_or_acceleration_.data();
   }
 
   /** \brief Set all accelerations to 0.0 */
@@ -351,7 +351,7 @@ public:
     has_effort_ = false;
 
     // assume everything is in order in terms of array lengths (for efficiency reasons)
-    memcpy(acceleration_, acceleration, robot_model_->getVariableCount() * sizeof(double));
+    memcpy(effort_or_acceleration_.data(), acceleration, robot_model_->getVariableCount() * sizeof(double));
   }
 
   /** \brief Given an array with acceleration values for all variables, set those values as the accelerations in this
@@ -388,13 +388,13 @@ public:
   void setVariableAcceleration(int index, double value)
   {
     markAcceleration();
-    acceleration_[index] = value;
+    effort_or_acceleration_[index] = value;
   }
 
   /** \brief Get the acceleration of a particular variable. An exception is thrown if the variable is not known. */
   double getVariableAcceleration(const std::string& variable) const
   {
-    return acceleration_[robot_model_->getVariableIndex(variable)];
+    return effort_or_acceleration_[robot_model_->getVariableIndex(variable)];
   }
 
   /** \brief Get the acceleration of a particular variable. The variable is
@@ -402,7 +402,7 @@ public:
       of the index passed  */
   double getVariableAcceleration(int index) const
   {
-    return acceleration_[index];
+    return effort_or_acceleration_[index];
   }
 
   /** \brief Remove accelerations from this state (this differs from setting them to zero) */
@@ -428,14 +428,14 @@ public:
   double* getVariableEffort()
   {
     markEffort();
-    return effort_;
+    return effort_or_acceleration_.data();
   }
 
   /** \brief Get const raw access to the effort of the variables that make up this state. The values are in the same
    * order as reported by getVariableNames(). */
   const double* getVariableEffort() const
   {
-    return effort_;
+    return effort_or_acceleration_.data();
   }
 
   /** \brief Set all effort values to 0.0 */
@@ -447,7 +447,7 @@ public:
     has_effort_ = true;
     has_acceleration_ = false;
     // assume everything is in order in terms of array lengths (for efficiency reasons)
-    memcpy(effort_, effort, robot_model_->getVariableCount() * sizeof(double));
+    memcpy(effort_or_acceleration_.data(), effort, robot_model_->getVariableCount() * sizeof(double));
   }
 
   /** \brief Given an array with effort values for all variables, set those values as the effort in this state */
@@ -479,13 +479,13 @@ public:
   void setVariableEffort(int index, double value)
   {
     markEffort();
-    effort_[index] = value;
+    effort_or_acceleration_[index] = value;
   }
 
   /** \brief Get the effort of a particular variable. An exception is thrown if the variable is not known. */
   double getVariableEffort(const std::string& variable) const
   {
-    return effort_[robot_model_->getVariableIndex(variable)];
+    return effort_or_acceleration_[robot_model_->getVariableIndex(variable)];
   }
 
   /** \brief Get the effort of a particular variable. The variable is
@@ -493,7 +493,7 @@ public:
       of the index passed  */
   double getVariableEffort(int index) const
   {
-    return effort_[index];
+    return effort_or_acceleration_[index];
   }
 
   /** \brief Remove effort values from this state (this differs from setting them to zero) */
@@ -527,30 +527,16 @@ public:
     setJointPositions(joint, &position[0]);
   }
 
-  void setJointPositions(const JointModel* joint, const double* position)
-  {
-    memcpy(position_ + joint->getFirstVariableIndex(), position, joint->getVariableCount() * sizeof(double));
-    markDirtyJointTransforms(joint);
-    updateMimicJoint(joint);
-  }
+  void setJointPositions(const JointModel* joint, const double* position);
 
   void setJointPositions(const std::string& joint_name, const Eigen::Isometry3d& transform)
   {
     setJointPositions(robot_model_->getJointModel(joint_name), transform);
   }
 
-  void setJointPositions(const JointModel* joint, const Eigen::Isometry3d& transform)
-  {
-    joint->computeVariablePositions(transform, position_ + joint->getFirstVariableIndex());
-    markDirtyJointTransforms(joint);
-    updateMimicJoint(joint);
-  }
+  void setJointPositions(const JointModel* joint, const Eigen::Isometry3d& transform);
 
-  void setJointVelocities(const JointModel* joint, const double* velocity)
-  {
-    has_velocity_ = true;
-    memcpy(velocity_ + joint->getFirstVariableIndex(), velocity, joint->getVariableCount() * sizeof(double));
-  }
+  void setJointVelocities(const JointModel* joint, const double* velocity);
 
   void setJointEfforts(const JointModel* joint, const double* effort);
 
@@ -559,40 +545,32 @@ public:
     return getJointPositions(robot_model_->getJointModel(joint_name));
   }
 
-  const double* getJointPositions(const JointModel* joint) const
-  {
-    return position_ + joint->getFirstVariableIndex();
-  }
+  // Returns nullptr if `joint` doesn't have any active variables.
+  const double* getJointPositions(const JointModel* joint) const;
 
   const double* getJointVelocities(const std::string& joint_name) const
   {
     return getJointVelocities(robot_model_->getJointModel(joint_name));
   }
 
-  const double* getJointVelocities(const JointModel* joint) const
-  {
-    return velocity_ + joint->getFirstVariableIndex();
-  }
+  // Returns nullptr if `joint` doesn't have any active variables.
+  const double* getJointVelocities(const JointModel* joint) const;
 
   const double* getJointAccelerations(const std::string& joint_name) const
   {
     return getJointAccelerations(robot_model_->getJointModel(joint_name));
   }
 
-  const double* getJointAccelerations(const JointModel* joint) const
-  {
-    return acceleration_ + joint->getFirstVariableIndex();
-  }
+  // Returns nullptr if `joint` doesn't have any active variables.
+  const double* getJointAccelerations(const JointModel* joint) const;
 
   const double* getJointEffort(const std::string& joint_name) const
   {
     return getJointEffort(robot_model_->getJointModel(joint_name));
   }
 
-  const double* getJointEffort(const JointModel* joint) const
-  {
-    return effort_ + joint->getFirstVariableIndex();
-  }
+  // Returns nullptr if `joint` doesn't have any active variables.
+  const double* getJointEffort(const JointModel* joint) const;
 
   /** @} */
 
@@ -1067,83 +1045,11 @@ public:
   bool setFromDiffIK(const JointModelGroup* group, const geometry_msgs::msg::Twist& twist, const std::string& tip,
                      double dt, const GroupStateValidityCallbackFn& constraint = GroupStateValidityCallbackFn());
 
-  /** \brief Compute the sequence of joint values that correspond to a straight Cartesian path for a particular group.
-
-     The Cartesian path to be followed is specified as a direction of motion (\e direction, unit vector) for the origin
-     The Cartesian path to be followed is specified as a direction of motion (\e direction, unit vector) for the origin
-     of a robot link (\e link). The direction is assumed to be either in a global reference frame or in the local
-     reference frame of the link. In the latter case (\e global_reference_frame is false) the \e direction is rotated
-     accordingly. The link needs to move in a straight line, following the specified direction, for the desired \e
-     distance. The resulting joint values are stored in the vector \e traj, one by one. The maximum distance in
-     Cartesian space between consecutive points on the resulting path is specified in the \e MaxEEFStep struct which
-     provides two fields: translation and rotation. If a \e validCallback is specified, this is passed to the internal
-     call to setFromIK(). In case of IK failure, the computation of the path stops and the value returned corresponds to
-     the distance that was computed and for which corresponding states were added to the path.  At the end of the
-     function call, the state of the group corresponds to the last attempted Cartesian pose.
-
-     During the computation of the trajectory, it is usually preferred if consecutive joint values do not 'jump' by a
-     large amount in joint space, even if the Cartesian distance between the corresponding points is small as expected.
-     To account for this, the \e jump_threshold struct is provided, which comprises three fields:
-     \e jump_threshold_factor, \e revolute_jump_threshold and \e prismatic_jump_threshold.
-     If either \e revolute_jump_threshold or \e prismatic_jump_threshold  are non-zero, we test for absolute jumps.
-     If \e jump_threshold_factor is non-zero, we test for relative jumps. Otherwise (all params are zero), jump
-     detection is disabled.
-
-     For relative jump detection, the average joint-space distance between consecutive points in the trajectory is
-     computed. If any individual joint-space motion delta is larger then this average distance by a factor of
-     \e jump_threshold_factor, this step is considered a failure and the returned path is truncated up to just
-     before the jump.
-
-     For absolute jump thresholds, if any individual joint-space motion delta is larger then \e revolute_jump_threshold
-     for revolute joints or \e prismatic_jump_threshold for prismatic joints then this step is considered a failure and
-     the returned path is truncated up to just before the jump.
-
-     NOTE: As of ROS-Melodic these are deprecated and should not be used
-     */
-  [[deprecated]] double
-  computeCartesianPath(const JointModelGroup* group, std::vector<RobotStatePtr>& traj, const LinkModel* link,
-                       const Eigen::Vector3d& direction, bool global_reference_frame, double distance, double max_step,
-                       double jump_threshold_factor,
-                       const GroupStateValidityCallbackFn& validCallback = GroupStateValidityCallbackFn(),
-                       const kinematics::KinematicsQueryOptions& options = kinematics::KinematicsQueryOptions());
-
-  /** \brief Compute the sequence of joint values that correspond to a straight Cartesian path, for a particular group.
-
-     In contrast to the previous function, the Cartesian path is specified as a target frame to be reached (\e target)
-     for the origin of a robot link (\e link). The target frame is assumed to be either in a global reference frame or
-     in the local reference frame of the link. In the latter case (\e global_reference_frame is false) the \e target is
-     rotated accordingly. All other comments from the previous function apply.
-
-     NOTE: As of ROS-Melodic these are deprecated and should not be used
-     */
-  [[deprecated]] double
-  computeCartesianPath(const JointModelGroup* group, std::vector<RobotStatePtr>& traj, const LinkModel* link,
-                       const Eigen::Isometry3d& target, bool global_reference_frame, double max_step,
-                       double jump_threshold_factor,
-                       const GroupStateValidityCallbackFn& validCallback = GroupStateValidityCallbackFn(),
-                       const kinematics::KinematicsQueryOptions& options = kinematics::KinematicsQueryOptions());
-
-  /** \brief Compute the sequence of joint values that perform a general Cartesian path.
-
-     In contrast to the previous functions, the Cartesian path is specified as a set of \e waypoints to be sequentially
-     reached for the origin of a robot link (\e link). The waypoints are transforms given either in a global reference
-     frame or in the local reference frame of the link at the immediately preceding waypoint. The link needs to move
-     in a straight line between two consecutive waypoints. All other comments apply.
-
-     NOTE: As of ROS-Melodic these are deprecated and should not be used
-     */
-  [[deprecated]] double
-  computeCartesianPath(const JointModelGroup* group, std::vector<RobotStatePtr>& traj, const LinkModel* link,
-                       const EigenSTL::vector_Isometry3d& waypoints, bool global_reference_frame, double max_step,
-                       double jump_threshold_factor,
-                       const GroupStateValidityCallbackFn& validCallback = GroupStateValidityCallbackFn(),
-                       const kinematics::KinematicsQueryOptions& options = kinematics::KinematicsQueryOptions());
-
   /** \brief Compute the Jacobian with reference to a particular point on a given link, for a specified group.
    * \param group The group to compute the Jacobian for
    * \param link The link model to compute the Jacobian for
    * \param reference_point_position The reference point position (with respect to the link specified in link)
-   * \param jacobian The resultant jacobian
+   * \param jacobian The resultant jacobian, with the origin at the group root link.
    * \param use_quaternion_representation Flag indicating if the Jacobian should use a quaternion representation
    * (default is false)
    * \return True if jacobian was successfully computed, false otherwise
@@ -1155,7 +1061,7 @@ public:
    * \param group The group to compute the Jacobian for
    * \param link The link model to compute the Jacobian for
    * \param reference_point_position The reference point position (with respect to the link specified in link)
-   * \param jacobian The resultant jacobian
+   * \param jacobian The resultant jacobian, with the origin at the group root link.
    * \param use_quaternion_representation Flag indicating if the Jacobian should use a quaternion representation
    * (default is false)
    * \return True if jacobian was successfully computed, false otherwise
@@ -1168,8 +1074,8 @@ public:
                                                              use_quaternion_representation);
   }
 
-  /** \brief Compute the Jacobian with reference to the last link of a specified group. If the group is not a chain, an
-   * exception is thrown.
+  /** \brief Compute the Jacobian with reference to the last link of a specified group, and origin at the group root
+   * link. If the group is not a chain, an exception is thrown.
    * \param group The group to compute the Jacobian for
    * \param reference_point_position The reference point position (with respect to the link specified in link_name)
    * \return The computed Jacobian.
@@ -1177,8 +1083,8 @@ public:
   Eigen::MatrixXd getJacobian(const JointModelGroup* group,
                               const Eigen::Vector3d& reference_point_position = Eigen::Vector3d(0.0, 0.0, 0.0)) const;
 
-  /** \brief Compute the Jacobian with reference to the last link of a specified group. If the group is not a chain, an
-   * exception is thrown.
+  /** \brief Compute the Jacobian with reference to the last link of a specified group, and origin at the group root
+   * link. If the group is not a chain, an exception is thrown.
    * \param group The group to compute the Jacobian for
    * \param reference_point_position The reference point position (with respect to the link specified in link_name)
    * \return The computed Jacobian.
@@ -1258,15 +1164,14 @@ public:
   /** \brief Set all joints in \e group to random values near the value in \e seed.
    *  \e distance is the maximum amount each joint value will vary from the
    *  corresponding value in \e seed.  \distance represents meters for
-   *  prismatic/postitional joints and radians for revolute/orientation joints.
+   *  prismatic/positional joints and radians for revolute/orientation joints.
    *  Resulting values are clamped within default bounds. */
   void setToRandomPositionsNearBy(const JointModelGroup* group, const RobotState& seed, double distance);
 
-  /** \brief Set all joints in \e group to random values near the value in \e seed, using a specified random number generator.
-   *  \e distance is the maximum amount each joint value will vary from the
-   *  corresponding value in \e seed.  \distance represents meters for
-   *  prismatic/postitional joints and radians for revolute/orientation joints.
-   *  Resulting values are clamped within default bounds. */
+  /** \brief Set all joints in \e group to random values near the value in \e seed, using a specified random number
+   * generator. \e distance is the maximum amount each joint value will vary from the corresponding value in \e seed.
+   * \distance represents meters for prismatic/positional joints and radians for revolute/orientation joints. Resulting
+   * values are clamped within default bounds. */
   void setToRandomPositionsNearBy(const JointModelGroup* group, const RobotState& seed, double distance,
                                   random_numbers::RandomNumberGenerator& rng);
 
@@ -1275,18 +1180,16 @@ public:
    *  group.getActiveJointModels().  Each value in \e distances is the maximum
    *  amount the corresponding active joint in \e group will vary from the
    *  corresponding value in \e seed.  \distance represents meters for
-   *  prismatic/postitional joints and radians for revolute/orientation joints.
+   *  prismatic/positional joints and radians for revolute/orientation joints.
    *  Resulting values are clamped within default bounds. */
   void setToRandomPositionsNearBy(const JointModelGroup* group, const RobotState& seed,
                                   const std::vector<double>& distances);
 
-  /** \brief Set all joints in \e group to random values near the value in \e seed, using a specified random number generator.
-   *  \e distances \b MUST have the same size as \c
-   *  group.getActiveJointModels().  Each value in \e distances is the maximum
-   *  amount the corresponding active joint in \e group will vary from the
-   *  corresponding value in \e seed.  \distance represents meters for
-   *  prismatic/postitional joints and radians for revolute/orientation joints.
-   *  Resulting values are clamped within default bounds. */
+  /** \brief Set all joints in \e group to random values near the value in \e seed, using a specified random number
+   * generator. \e distances \b MUST have the same size as \c group.getActiveJointModels().  Each value in \e distances
+   * is the maximum amount the corresponding active joint in \e group will vary from the corresponding value in \e seed.
+   * \distance represents meters for prismatic/positional joints and radians for revolute/orientation joints. Resulting
+   * values are clamped within default bounds. */
   void setToRandomPositionsNearBy(const JointModelGroup* group, const RobotState& seed,
                                   const std::vector<double>& distances, random_numbers::RandomNumberGenerator& rng);
 
@@ -1407,17 +1310,7 @@ public:
     return getJointTransform(robot_model_->getJointModel(joint_name));
   }
 
-  const Eigen::Isometry3d& getJointTransform(const JointModel* joint)
-  {
-    const int idx = joint->getJointIndex();
-    unsigned char& dirty = dirty_joint_transforms_[idx];
-    if (dirty)
-    {
-      joint->computeTransform(position_ + joint->getFirstVariableIndex(), variable_joint_transforms_[idx]);
-      dirty = 0;
-    }
-    return variable_joint_transforms_[idx];
-  }
+  const Eigen::Isometry3d& getJointTransform(const JointModel* joint);
 
   const Eigen::Isometry3d& getJointTransform(const std::string& joint_name) const
   {
@@ -1460,18 +1353,14 @@ public:
   /** \brief Return the sum of joint distances to "other" state. An L1 norm. Only considers active joints. */
   double distance(const RobotState& other) const
   {
-    return robot_model_->distance(position_, other.getVariablePositions());
+    return robot_model_->distance(position_.data(), other.getVariablePositions());
   }
 
   /** \brief Return the sum of joint distances to "other" state. An L1 norm. Only considers active joints. */
   double distance(const RobotState& other, const JointModelGroup* joint_group) const;
 
   /** \brief Return the sum of joint distances to "other" state. An L1 norm. Only considers active joints. */
-  double distance(const RobotState& other, const JointModel* joint) const
-  {
-    const int idx = joint->getFirstVariableIndex();
-    return joint->distance(position_ + idx, other.position_ + idx);
-  }
+  double distance(const RobotState& other, const JointModel* joint) const;
 
   /**
    * Interpolate towards "to" state. Mimic joints are correctly updated and flags are set so that FK is recomputed
@@ -1503,13 +1392,7 @@ public:
    * @param state holds the result
    * @param joint interpolate only for this joint
    */
-  void interpolate(const RobotState& to, double t, RobotState& state, const JointModel* joint) const
-  {
-    const int idx = joint->getFirstVariableIndex();
-    joint->interpolate(position_ + idx, to.position_ + idx, t, state.position_ + idx);
-    state.markDirtyJointTransforms(joint);
-    state.updateMimicJoint(joint);
-  }
+  void interpolate(const RobotState& to, double t, RobotState& state, const JointModel* joint) const;
 
   void enforceBounds();
   void enforceBounds(const JointModelGroup* joint_group);
@@ -1519,31 +1402,14 @@ public:
     if (has_velocity_)
       enforceVelocityBounds(joint);
   }
-  void enforcePositionBounds(const JointModel* joint)
-  {
-    if (joint->enforcePositionBounds(position_ + joint->getFirstVariableIndex()))
-    {
-      markDirtyJointTransforms(joint);
-      updateMimicJoint(joint);
-    }
-  }
+  void enforcePositionBounds(const JointModel* joint);
 
   /// Call harmonizePosition() for all joints / all joints in group / given joint
   void harmonizePositions();
   void harmonizePositions(const JointModelGroup* joint_group);
-  void harmonizePosition(const JointModel* joint)
-  {
-    if (joint->harmonizePosition(position_ + joint->getFirstVariableIndex()))
-    {
-      // no need to mark transforms dirty, as the transform hasn't changed
-      updateMimicJoint(joint);
-    }
-  }
+  void harmonizePosition(const JointModel* joint);
 
-  void enforceVelocityBounds(const JointModel* joint)
-  {
-    joint->enforceVelocityBounds(velocity_ + joint->getFirstVariableIndex());
-  }
+  void enforceVelocityBounds(const JointModel* joint);
 
   bool satisfiesBounds(double margin = 0.0) const;
   bool satisfiesBounds(const JointModelGroup* joint_group, double margin = 0.0) const;
@@ -1598,27 +1464,6 @@ public:
    * detected against it.
    **/
   void attachBody(std::unique_ptr<AttachedBody> attached_body);
-
-  /** \brief Add an attached body to this state. Ownership of the
-   * memory for the attached body is assumed by the state.
-   *
-   * This only adds the given body to this RobotState
-   * instance.  It does not change anything about other
-   * representations of the object elsewhere in the system.  So if the
-   * body represents an object in a collision_detection::World (like
-   * from a planning_scene::PlanningScene), you will likely need to remove the
-   * corresponding object from that world to avoid having collisions
-   * detected against it.
-   *
-   * \note This version of the function (taking an AttachedBody
-   * pointer) does not copy the AttachedBody object, it just uses it
-   * directly.  The AttachedBody object stores its position data
-   * internally.  This means you should <b>never attach a single
-   * AttachedBody instance to multiple RobotState instances</b>, or
-   * the body positions will get corrupted.  You need to make a fresh
-   * copy of the AttachedBody object for each RobotState you attach it
-   * to.*/
-  [[deprecated("Deprecated. Pass a unique_ptr instead")]] void attachBody(AttachedBody* attached_body);
 
   /** @brief Add an attached body to a link
    * @param id The string id associated with the attached body
@@ -1717,7 +1562,7 @@ public:
   random_numbers::RandomNumberGenerator& getRandomNumberGenerator()
   {
     if (!rng_)
-      rng_ = new random_numbers::RandomNumberGenerator();
+      rng_ = std::make_unique<random_numbers::RandomNumberGenerator>();
     return *rng_;
   }
 
@@ -1824,7 +1669,7 @@ public:
 
 private:
   void allocMemory();
-  void initTransforms();
+  void init();
   void copyFrom(const RobotState& other);
 
   void markDirtyJointTransforms(const JointModel* joint)
@@ -1847,42 +1692,10 @@ private:
   void markAcceleration();
   void markEffort();
 
-  void updateMimicJoint(const JointModel* joint)
-  {
-    double v = position_[joint->getFirstVariableIndex()];
-    for (const JointModel* jm : joint->getMimicRequests())
-    {
-      position_[jm->getFirstVariableIndex()] = jm->getMimicFactor() * v + jm->getMimicOffset();
-      markDirtyJointTransforms(jm);
-    }
-  }
-
-  /** \brief Update a set of joints that are certain to be mimicking other joints */
-  /* use updateMimicJoints() instead, which also marks joints dirty */
-  [[deprecated]] void updateMimicJoint(const std::vector<const JointModel*>& mim)
-  {
-    for (const JointModel* jm : mim)
-    {
-      const int fvi = jm->getFirstVariableIndex();
-      position_[fvi] = jm->getMimicFactor() * position_[jm->getMimic()->getFirstVariableIndex()] + jm->getMimicOffset();
-      // Only mark joint transform dirty, but not the associated link transform
-      // as this function is always used in combination of
-      // updateMimicJoint(group->getMimicJointModels()) + markDirtyJointTransforms(group);
-      dirty_joint_transforms_[jm->getJointIndex()] = 1;
-    }
-  }
+  void updateMimicJoint(const JointModel* joint);
 
   /** \brief Update all mimic joints within group */
-  void updateMimicJoints(const JointModelGroup* group)
-  {
-    for (const JointModel* jm : group->getMimicJointModels())
-    {
-      const int fvi = jm->getFirstVariableIndex();
-      position_[fvi] = jm->getMimicFactor() * position_[jm->getMimic()->getFirstVariableIndex()] + jm->getMimicOffset();
-      markDirtyJointTransforms(jm);
-    }
-    markDirtyJointTransforms(group);
-  }
+  void updateMimicJoints(const JointModelGroup* group);
 
   void updateLinkTransformsInternal(const JointModel* start);
 
@@ -1900,26 +1713,25 @@ private:
   bool checkCollisionTransforms() const;
 
   RobotModelConstPtr robot_model_;
-  void* memory_;
 
-  double* position_;
-  double* velocity_;
-  double* acceleration_;
-  double* effort_;
-  bool has_velocity_;
-  bool has_acceleration_;
-  bool has_effort_;
+  std::vector<double> position_;
+  std::vector<double> velocity_;
+  std::vector<double> effort_or_acceleration_;
+  bool has_velocity_ = false;
+  bool has_acceleration_ = false;
+  bool has_effort_ = false;
 
-  const JointModel* dirty_link_transforms_;
-  const JointModel* dirty_collision_body_transforms_;
+  const JointModel* dirty_link_transforms_ = nullptr;
+  const JointModel* dirty_collision_body_transforms_ = nullptr;
 
-  // All the following transform variables point into aligned memory in memory_
+  // All the following transform variables point into aligned memory.
   // They are updated lazily, based on the flags in dirty_joint_transforms_
   // resp. the pointers dirty_link_transforms_ and dirty_collision_body_transforms_
-  Eigen::Isometry3d* variable_joint_transforms_;         ///< Local transforms of all joints
-  Eigen::Isometry3d* global_link_transforms_;            ///< Transforms from model frame to link frame for each link
-  Eigen::Isometry3d* global_collision_body_transforms_;  ///< Transforms from model frame to collision bodies
-  unsigned char* dirty_joint_transforms_;
+  std::vector<Eigen::Isometry3d> variable_joint_transforms_;  ///< Local transforms of all joints
+  std::vector<Eigen::Isometry3d> global_link_transforms_;  ///< Transforms from model frame to link frame for each link
+  std::vector<Eigen::Isometry3d> global_collision_body_transforms_;  ///< Transforms from model frame to collision
+                                                                     ///< bodies
+  std::vector<unsigned char> dirty_joint_transforms_;
 
   /** \brief All attached bodies that are part of this state, indexed by their name */
   std::map<std::string, std::unique_ptr<AttachedBody>> attached_body_map_;
@@ -1931,9 +1743,8 @@ private:
   /** \brief For certain operations a state needs a random number generator. However, it may be slightly expensive
       to allocate the random number generator if many state instances are generated. For this reason, the generator
       is allocated on a need basis, by the getRandomNumberGenerator() function. Never use the rng_ member directly, but
-     call
-      getRandomNumberGenerator() instead. */
-  random_numbers::RandomNumberGenerator* rng_;
+      call getRandomNumberGenerator() instead. */
+  std::unique_ptr<random_numbers::RandomNumberGenerator> rng_;
 };
 
 /** \brief Operator overload for printing variable bounds to a stream */

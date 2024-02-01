@@ -1,9 +1,6 @@
 add_executable(cancel_action cancel_action.cpp)
 ament_target_dependencies(cancel_action PUBLIC ${THIS_PACKAGE_INCLUDE_DEPENDS})
 
-add_executable(hybrid_planning_demo_node hybrid_planning_demo_node.cpp)
-ament_target_dependencies(hybrid_planning_demo_node PUBLIC ${THIS_PACKAGE_INCLUDE_DEPENDS})
-
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
   find_package(ament_cmake_gtest REQUIRED)

@@ -45,6 +45,12 @@
 
 namespace trajectory_processing
 {
+
+// The intermediate waypoints of the input path need to be blended so that the entire path is diffentiable.
+// This constant defines the maximum deviation allowed at those intermediate waypoints, in radians for revolute joints,
+// or meters for prismatic joints.
+constexpr double DEFAULT_PATH_TOLERANCE = 0.1;
+
 enum LimitType
 {
   VELOCITY,
@@ -81,8 +87,14 @@ protected:
 class Path
 {
 public:
-  Path(const std::list<Eigen::VectorXd>& path, double max_deviation = 0.0);
+  // Create a Path from a vector of waypoints and a maximum deviation to tolerate at the intermediate waypoints.
+  // The algorithm needs max_deviation to be greater than zero so that the path is differentiable.
+  static std::optional<Path> create(const std::vector<Eigen::VectorXd>& waypoint,
+                                    double max_deviation = DEFAULT_PATH_TOLERANCE);
+
+  // Copy constructor.
   Path(const Path& path);
+
   double getLength() const;
   Eigen::VectorXd getConfig(double s) const;
   Eigen::VectorXd getTangent(double s) const;
@@ -99,8 +111,12 @@ public:
   std::list<std::pair<double, bool>> getSwitchingPoints() const;
 
 private:
+  // Default constructor private to prevent misuse. Use `create` instead to create a Path object.
+  Path() = default;
+
   PathSegment* getPathSegment(double& s) const;
-  double length_;
+
+  double length_ = 0.0;
   std::list<std::pair<double, bool>> switching_points_;
   std::list<std::unique_ptr<PathSegment>> path_segments_;
 };
@@ -108,16 +124,10 @@ private:
 class Trajectory
 {
 public:
-  /// @brief Generates a time-optimal trajectory
-  Trajectory(const Path& path, const Eigen::VectorXd& max_velocity, const Eigen::VectorXd& max_acceleration,
-             double time_step = 0.001);
-
-  ~Trajectory();
-
-  /** @brief Call this method after constructing the object to make sure the
-     trajectory generation succeeded without errors. If this method returns
-     false, all other methods have undefined behavior. **/
-  bool isValid() const;
+  /// @brief Generates a time-optimal trajectory.
+  /// @returns std::nullopt if the trajectory couldn't be parameterized.
+  static std::optional<Trajectory> create(const Path& path, const Eigen::VectorXd& max_velocity,
+                                          const Eigen::VectorXd& max_acceleration, double time_step = 0.001);
 
   /// @brief Returns the optimal duration of the trajectory
   double getDuration() const;
@@ -131,6 +141,9 @@ public:
   Eigen::VectorXd getAcceleration(double time) const;
 
 private:
+  Trajectory(const Path& path, const Eigen::VectorXd& max_velocity, const Eigen::VectorXd& max_acceleration,
+             double time_step);
+
   struct TrajectoryStep
   {
     TrajectoryStep()
@@ -165,14 +178,14 @@ private:
   Path path_;
   Eigen::VectorXd max_velocity_;
   Eigen::VectorXd max_acceleration_;
-  unsigned int joint_num_;
-  bool valid_;
+  unsigned int joint_num_ = 0.0;
+  bool valid_ = true;
   std::list<TrajectoryStep> trajectory_;
   std::list<TrajectoryStep> end_trajectory_;  // non-empty only if the trajectory generation failed.
 
-  const double time_step_;
+  double time_step_ = 0.0;
 
-  mutable double cached_time_;
+  mutable double cached_time_ = std::numeric_limits<double>::max();
   mutable std::list<TrajectoryStep>::const_iterator cached_trajectory_segment_;
 };
 
@@ -180,7 +193,7 @@ MOVEIT_CLASS_FORWARD(TimeOptimalTrajectoryGeneration);
 class TimeOptimalTrajectoryGeneration : public TimeParameterization
 {
 public:
-  TimeOptimalTrajectoryGeneration(const double path_tolerance = 0.1, const double resample_dt = 0.1,
+  TimeOptimalTrajectoryGeneration(const double path_tolerance = DEFAULT_PATH_TOLERANCE, const double resample_dt = 0.1,
                                   const double min_angle_change = 0.001);
 
   // clang-format off

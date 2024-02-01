@@ -42,6 +42,7 @@
 #include <rviz_common/properties/int_property.hpp>
 #include <rviz_common/properties/ros_topic_property.hpp>
 #include <mutex>
+#include <rclcpp/logger.hpp>
 
 #ifndef Q_MOC_RUN
 #include <moveit/rviz_plugin_render_tools/robot_state_visualization.h>
@@ -87,7 +88,7 @@ public:
 
   ~TrajectoryVisualization() override;
 
-  virtual void update(float wall_dt, float sim_dt);
+  virtual void update(double wall_dt, double sim_dt);
   virtual void reset();
 
   void onInitialize(const rclcpp::Node::SharedPtr& node, Ogre::SceneNode* scene_node,
@@ -132,7 +133,7 @@ protected:
    * \return Positive values indicate a fixed time per state
    *         Negative values indicate a realtime-factor
    */
-  float getStateDisplayTime();
+  double getStateDisplayTime();
   void clearTrajectoryTrail();
 
   // Handles actually drawing the robot along motion plans
@@ -150,7 +151,7 @@ protected:
   bool animating_path_;
   bool drop_displaying_trajectory_;
   int current_state_;
-  float current_state_time_;
+  double current_state_time_;
   std::mutex update_trajectory_message_;
 
   moveit::core::RobotModelConstPtr robot_model_;
@@ -164,6 +165,7 @@ protected:
   rclcpp::Node::SharedPtr node_;
   TrajectoryPanel* trajectory_slider_panel_;
   rviz_common::PanelDockWidget* trajectory_slider_dock_panel_;
+  rclcpp::Logger logger_;
 
   // Properties
   rviz_common::properties::BoolProperty* display_path_visual_enabled_property_;

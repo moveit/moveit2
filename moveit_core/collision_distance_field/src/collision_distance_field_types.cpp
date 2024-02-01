@@ -42,13 +42,19 @@
 #include <rclcpp/logger.hpp>
 #include <rclcpp/time.hpp>
 #include <memory>
+#include <moveit/utils/logger.hpp>
 
-const static double EPSILON{ 0.0001 };
+static const double EPSILON{ 0.0001 };
 
 namespace collision_detection
 {
-static const rclcpp::Logger LOGGER =
-    rclcpp::get_logger("moveit_collision_distance_field.collision_distance_field_types");
+namespace
+{
+rclcpp::Logger getLogger()
+{
+  return moveit::getLogger("collision_distance_field_types");
+}
+}  // namespace
 
 std::vector<CollisionSphere> determineCollisionSpheres(const bodies::Body* body, Eigen::Isometry3d& relative_transform)
 {
@@ -158,7 +164,7 @@ bool getCollisionSphereGradients(const distance_field::DistanceField* distance_f
     double dist = distance_field->getDistanceGradient(p.x(), p.y(), p.z(), grad.x(), grad.y(), grad.z(), in_bounds);
     if (!in_bounds && grad.norm() > EPSILON)
     {
-      RCLCPP_DEBUG(LOGGER, "Collision sphere point is out of bounds %lf, %lf, %lf", p.x(), p.y(), p.z());
+      RCLCPP_DEBUG(getLogger(), "Collision sphere point is out of bounds %lf, %lf, %lf", p.x(), p.y(), p.z());
       return true;
     }
 
@@ -216,7 +222,7 @@ bool getCollisionSphereCollision(const distance_field::DistanceField* distance_f
 
     if (!in_bounds && grad.norm() > 0)
     {
-      RCLCPP_DEBUG(LOGGER, "Collision sphere point is out of bounds");
+      RCLCPP_DEBUG(getLogger(), "Collision sphere point is out of bounds");
       return true;
     }
 
@@ -243,7 +249,7 @@ bool getCollisionSphereCollision(const distance_field::DistanceField* distance_f
     double dist = distance_field->getDistanceGradient(p.x(), p.y(), p.z(), grad.x(), grad.y(), grad.z(), in_bounds);
     if (!in_bounds && (grad.norm() > 0))
     {
-      RCLCPP_DEBUG(LOGGER, "Collision sphere point is out of bounds");
+      RCLCPP_DEBUG(getLogger(), "Collision sphere point is out of bounds");
       return true;
     }
     if (maximum_value > dist && (sphere_list[i].radius_ - dist > tolerance))
@@ -324,8 +330,8 @@ void BodyDecomposition::init(const std::vector<shapes::ShapeConstPtr>& shapes, c
   }
   bodies::mergeBoundingSpheres(bounding_spheres, relative_bounding_sphere_);
 
-  RCLCPP_DEBUG(LOGGER, "BodyDecomposition generated %zu collision spheres out of %zu shapes", collision_spheres_.size(),
-               shapes.size());
+  RCLCPP_DEBUG(getLogger(), "BodyDecomposition generated %zu collision spheres out of %zu shapes",
+               collision_spheres_.size(), shapes.size());
 }
 
 BodyDecomposition::~BodyDecomposition()
@@ -450,7 +456,7 @@ void getProximityGradientMarkers(const std::string& frame_id, const std::string&
   rclcpp::Clock ros_clock;
   if (gradients.size() != posed_decompositions.size() + posed_vector_decompositions.size())
   {
-    RCLCPP_WARN(LOGGER, "Size mismatch between gradients %u and decompositions %u",
+    RCLCPP_WARN(getLogger(), "Size mismatch between gradients %u and decompositions %u",
                 static_cast<unsigned int>(gradients.size()),
                 static_cast<unsigned int>((posed_decompositions.size() + posed_vector_decompositions.size())));
     return;
@@ -484,12 +490,12 @@ void getProximityGradientMarkers(const std::string& frame_id, const std::string&
         }
         else
         {
-          RCLCPP_DEBUG(LOGGER, "Negative length for %u %d %lf", i, arrow_mark.id, gradients[i].gradients[j].norm());
+          RCLCPP_DEBUG(getLogger(), "Negative length for %u %d %lf", i, arrow_mark.id, gradients[i].gradients[j].norm());
         }
       }
       else
       {
-        RCLCPP_DEBUG(LOGGER, "Negative dist %lf for %u %d", gradients[i].distances[j], i, arrow_mark.id);
+        RCLCPP_DEBUG(getLogger(), "Negative dist %lf for %u %d", gradients[i].distances[j], i, arrow_mark.id);
       }
       arrow_mark.points.resize(2);
       if (i < posed_decompositions.size())
@@ -551,7 +557,7 @@ void getCollisionMarkers(const std::string& frame_id, const std::string& ns, con
   rclcpp::Clock ros_clock;
   if (gradients.size() != posed_decompositions.size() + posed_vector_decompositions.size())
   {
-    RCLCPP_WARN(LOGGER, "Size mismatch between gradients %zu and decompositions %zu", gradients.size(),
+    RCLCPP_WARN(getLogger(), "Size mismatch between gradients %zu and decompositions %zu", gradients.size(),
                 posed_decompositions.size() + posed_vector_decompositions.size());
     return;
   }
@@ -622,5 +628,3 @@ void getCollisionMarkers(const std::string& frame_id, const std::string& ns, con
   }
 }
 }  // namespace collision_detection
-const rclcpp::Logger collision_detection::PosedBodyPointDecompositionVector::LOGGER = collision_detection::LOGGER;
-const rclcpp::Logger collision_detection::PosedBodySphereDecompositionVector::LOGGER = collision_detection::LOGGER;

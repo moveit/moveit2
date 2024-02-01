@@ -39,6 +39,7 @@
 #include <moveit/warehouse/moveit_message_storage.h>
 #include <moveit/macros/class_forward.h>
 #include <moveit_msgs/msg/trajectory_constraints.hpp>
+#include <rclcpp/logger.hpp>
 
 namespace moveit_warehouse
 {
@@ -84,5 +85,6 @@ private:
   void createCollections();
 
   TrajectoryConstraintsCollection constraints_collection_;
+  rclcpp::Logger logger_;
 };
 }  // namespace moveit_warehouse

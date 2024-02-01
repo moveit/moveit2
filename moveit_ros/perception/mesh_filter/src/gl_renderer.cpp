@@ -43,6 +43,7 @@
 #endif
 #include <GL/freeglut.h>
 #include <moveit/mesh_filter/gl_renderer.h>
+#include <moveit/utils/logger.hpp>
 #include <sstream>
 #include <fstream>
 #include <stdexcept>
@@ -53,9 +54,7 @@
 
 using namespace std;
 
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.ros.perception.gl_renderer");
-
-mesh_filter::GLRenderer::GLRenderer(unsigned width, unsigned height, float near, float far)
+mesh_filter::GLRenderer::GLRenderer(unsigned width, unsigned height, double near, double far)
   : width_(width)
   , height_(height)
   , fbo_id_(0)
@@ -92,7 +91,7 @@ void mesh_filter::GLRenderer::setBufferSize(unsigned width, unsigned height)
   }
 }
 
-void mesh_filter::GLRenderer::setClippingRange(float near, float far)
+void mesh_filter::GLRenderer::setClippingRange(double near, double far)
 {
   if (near_ <= 0)
     throw runtime_error("near clipping plane distance needs to be larger than 0");
@@ -102,7 +101,7 @@ void mesh_filter::GLRenderer::setClippingRange(float near, float far)
   far_ = far;
 }
 
-void mesh_filter::GLRenderer::setCameraParameters(float fx, float fy, float cx, float cy)
+void mesh_filter::GLRenderer::setCameraParameters(double fx, double fy, double cx, double cy)
 {
   fx_ = fx;
   fy_ = fy;
@@ -112,10 +111,10 @@ void mesh_filter::GLRenderer::setCameraParameters(float fx, float fy, float cx, 
 
 void mesh_filter::GLRenderer::setCameraParameters() const
 {
-  float left = near_ * -cx_ / fx_;
-  float right = near_ * (width_ - cx_) / fx_;
-  float top = near_ * cy_ / fy_;
-  float bottom = near_ * (cy_ - height_) / fy_;
+  double left = near_ * -cx_ / fx_;
+  double right = near_ * (width_ - cx_) / fx_;
+  double top = near_ * cy_ / fy_;
+  double bottom = near_ * (cy_ - height_) / fy_;
 
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
@@ -214,7 +213,7 @@ void mesh_filter::GLRenderer::getColorBuffer(unsigned char* buffer) const
   glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-void mesh_filter::GLRenderer::getDepthBuffer(float* buffer) const
+void mesh_filter::GLRenderer::getDepthBuffer(double* buffer) const
 {
   glBindFramebuffer(GL_FRAMEBUFFER, fbo_id_);
   glBindTexture(GL_TEXTURE_2D, depth_id_);
@@ -246,12 +245,12 @@ const GLuint& mesh_filter::GLRenderer::getProgramID() const
   return program_;
 }
 
-const float& mesh_filter::GLRenderer::getNearClippingDistance() const
+const double& mesh_filter::GLRenderer::getNearClippingDistance() const
 {
   return near_;
 }
 
-const float& mesh_filter::GLRenderer::getFarClippingDistance() const
+const double& mesh_filter::GLRenderer::getFarClippingDistance() const
 {
   return far_;
 }
@@ -261,7 +260,7 @@ GLuint mesh_filter::GLRenderer::createShader(GLuint shaderType, const string& Sh
   GLuint shader_id = glCreateShader(shaderType);
 
   // Compile Shader
-  char const* source_pointer = ShaderCode.c_str();
+  const char* source_pointer = ShaderCode.c_str();
   glShaderSource(shader_id, 1, &source_pointer, nullptr);
   glCompileShader(shader_id);
 
@@ -345,7 +344,7 @@ GLuint mesh_filter::GLRenderer::loadShaders(const string& vertex_source, const s
     glGetProgramInfoLog(program_id, info_log_length, nullptr, &program_error_message[0]);
     std::size_t l = strnlen(&program_error_message[0], program_error_message.size());
     if (l > 0)
-      RCLCPP_ERROR(LOGGER, "%s\n", &program_error_message[0]);
+      RCLCPP_ERROR(moveit::getLogger("gl_renderer"), "%s\n", &program_error_message[0]);
   }
 
   if (vertex_shader_id)
@@ -357,9 +356,9 @@ GLuint mesh_filter::GLRenderer::loadShaders(const string& vertex_source, const s
   return program_id;
 }
 
-map<std::thread::id, pair<unsigned, GLuint> > mesh_filter::GLRenderer::context_;
-std::mutex mesh_filter::GLRenderer::context_lock_;
-bool mesh_filter::GLRenderer::glutInitialized_ = false;
+map<std::thread::id, pair<unsigned, GLuint> > mesh_filter::GLRenderer::s_context;
+std::mutex mesh_filter::GLRenderer::s_context_lock;
+bool mesh_filter::GLRenderer::s_glut_initialized = false;
 
 namespace
 {
@@ -370,8 +369,8 @@ void nullDisplayFunction()
 
 void mesh_filter::GLRenderer::createGLContext()
 {
-  std::unique_lock<std::mutex> _(context_lock_);
-  if (!glutInitialized_)
+  std::unique_lock<std::mutex> _(s_context_lock);
+  if (!s_glut_initialized)
   {
     char buffer[1];
     char* args = buffer;
@@ -379,16 +378,16 @@ void mesh_filter::GLRenderer::createGLContext()
 
     glutInit(&n, &args);
     glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB | GLUT_DEPTH);
-    glutInitialized_ = true;
+    s_glut_initialized = true;
   }
 
   // check if our thread is initialized
   std::thread::id thread_id = std::this_thread::get_id();
-  map<std::thread::id, pair<unsigned, GLuint> >::iterator context_it = context_.find(thread_id);
+  map<std::thread::id, pair<unsigned, GLuint> >::iterator context_it = s_context.find(thread_id);
 
-  if (context_it == context_.end())
+  if (context_it == s_context.end())
   {
-    context_[thread_id] = std::pair<unsigned, GLuint>(1, 0);
+    s_context.at(thread_id) = std::pair<unsigned, GLuint>(1, 0);
 
     glutInitWindowPosition(glutGet(GLUT_SCREEN_WIDTH) + 30000, 0);
     glutInitWindowSize(1, 1);
@@ -409,7 +408,7 @@ void mesh_filter::GLRenderer::createGLContext()
     for (int i = 0; i < 10; ++i)
       glutMainLoopEvent();
 
-    context_[thread_id] = std::pair<unsigned, GLuint>(1, window_id);
+    s_context.at(thread_id) = std::pair<unsigned, GLuint>(1, window_id);
   }
   else
     ++(context_it->second.first);
@@ -417,10 +416,10 @@ void mesh_filter::GLRenderer::createGLContext()
 
 void mesh_filter::GLRenderer::deleteGLContext()
 {
-  std::unique_lock<std::mutex> _(context_lock_);
+  std::unique_lock<std::mutex> _(s_context_lock);
   std::thread::id thread_id = std::this_thread::get_id();
-  map<std::thread::id, pair<unsigned, GLuint> >::iterator context_it = context_.find(thread_id);
-  if (context_it == context_.end())
+  map<std::thread::id, pair<unsigned, GLuint> >::iterator context_it = s_context.find(thread_id);
+  if (context_it == s_context.end())
   {
     stringstream error_msg;
     error_msg << "No OpenGL context exists for Thread " << thread_id;
@@ -430,7 +429,7 @@ void mesh_filter::GLRenderer::deleteGLContext()
   if (--(context_it->second.first) == 0)
   {
     glutDestroyWindow(context_it->second.second);
-    context_.erase(context_it);
+    s_context.erase(context_it);
   }
 }
 

@@ -43,6 +43,7 @@
 #include <rclcpp/node.hpp>
 #include <string>
 #include <functional>
+#include <moveit/utils/logger.hpp>
 
 #include <moveit_kinematics_base_export.h>
 
@@ -146,7 +147,6 @@ MOVEIT_CLASS_FORWARD(KinematicsBase);  // Defines KinematicsBasePtr, ConstPtr, W
 class MOVEIT_KINEMATICS_BASE_EXPORT KinematicsBase
 {
 public:
-  static const rclcpp::Logger LOGGER;
   static const double DEFAULT_SEARCH_DISCRETIZATION; /* = 0.1 */
   static const double DEFAULT_TIMEOUT;               /* = 1.0 */
 
@@ -156,7 +156,7 @@ public:
 
   /** @brief Signature for a cost function used to evaluate IK solutions. */
   using IKCostFn = std::function<double(const geometry_msgs::msg::Pose&, const moveit::core::RobotState&,
-                                        moveit::core::JointModelGroup const*, const std::vector<double>&)>;
+                                        const moveit::core::JointModelGroup*, const std::vector<double>&)>;
 
   /**
    * @brief Given a desired pose of the end-effector, compute the joint angles to reach it
@@ -322,7 +322,8 @@ public:
     }
 
     // Otherwise throw error because this function should have been implemented
-    RCLCPP_ERROR(LOGGER, "This kinematic solver does not support searchPositionIK with multiple poses");
+    RCLCPP_ERROR(moveit::getLogger("kinematics_base"),
+                 "This kinematic solver does not support searchPositionIK with multiple poses");
     return false;
   }
 
@@ -362,7 +363,8 @@ public:
       return searchPositionIK(ik_poses, ik_seed_state, timeout, consistency_limits, solution, solution_callback,
                               error_code, options, context_state);
     }
-    RCLCPP_ERROR(LOGGER, "This kinematic solver does not support IK solution cost functions");
+    RCLCPP_ERROR(moveit::getLogger("kinematics_base"),
+                 "This kinematic solver does not support IK solution cost functions");
     return false;
   }
 
@@ -435,8 +437,8 @@ public:
   {
     if (tip_frames_.size() > 1)
     {
-      RCLCPP_ERROR(LOGGER, "This kinematic solver has more than one tip frame, "
-                           "do not call getTipFrame()");
+      RCLCPP_ERROR(moveit::getLogger("kinematics_base"), "This kinematic solver has more than one tip frame, "
+                                                         "do not call getTipFrame()");
     }
 
     return tip_frames_[0];
@@ -591,51 +593,6 @@ protected:
   std::vector<unsigned int> redundant_joint_indices_;
   std::map<int, double> redundant_joint_discretization_;
   std::vector<DiscretizationMethod> supported_methods_;
-
-  /**
-   * @brief Enables kinematics plugins access to parameters that are defined
-   * for the private namespace and inside 'robot_description_kinematics'.
-   * Parameters are searched in the following locations and order
-   *
-   * ~/<group_name>/<param>
-   * ~/<param>
-   * robot_description_kinematics/<group_name>/<param>
-   * robot_description_kinematics/<param>
-   *
-   * This order maintains default behavior by keeping the private namespace
-   * as the predominant configuration but also allows groupwise specifications.
-   */
-  template <typename T>
-  [[deprecated("Use generate_parameter_library instead")]] inline bool
-  lookupParam(const rclcpp::Node::SharedPtr& node, const std::string& param, T& val, const T& default_val) const
-  {
-    if (node->has_parameter({ group_name_ + "." + param }))
-    {
-      node->get_parameter(group_name_ + "." + param, val);
-      return true;
-    }
-
-    if (node->has_parameter({ param }))
-    {
-      node->get_parameter(param, val);
-      return true;
-    }
-
-    if (node->has_parameter({ "robot_description_kinematics." + group_name_ + "." + param }))
-    {
-      node->get_parameter("robot_description_kinematics." + group_name_ + "." + param, val);
-      return true;
-    }
-
-    if (node->has_parameter("robot_description_kinematics." + param))
-    {
-      node->get_parameter("robot_description_kinematics." + param, val);
-      return true;
-    }
-
-    val = default_val;
-    return false;
-  }
 
   /** Store some core variables passed via initialize().
    *

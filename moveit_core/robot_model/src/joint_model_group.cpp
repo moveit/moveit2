@@ -42,6 +42,7 @@
 #include <rclcpp/logger.hpp>
 #include <rclcpp/logging.hpp>
 #include <algorithm>
+#include <moveit/utils/logger.hpp>
 
 #include "order_robot_model_items.inc"
 
@@ -51,7 +52,10 @@ namespace core
 {
 namespace
 {
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_robot_model.joint_model_group");
+rclcpp::Logger getLogger()
+{
+  return moveit::getLogger("joint_model_group");
+}
 
 // check if a parent or ancestor of joint is included in this group
 bool includesParent(const JointModel* joint, const JointModelGroup* group)
@@ -225,6 +229,14 @@ JointModelGroup::JointModelGroup(const std::string& group_name, const srdf::Mode
   {
     link_model_map_[link_model->getName()] = link_model;
     link_model_name_vector_.push_back(link_model->getName());
+    // if this is the first link of the group with a valid parent and includes geometry (for example `base_link`) it should included
+    if (link_model_with_geometry_vector_.empty() && link_model->getParentLinkModel() &&
+        !link_model->getParentLinkModel()->getShapes().empty())
+    {
+      link_model_with_geometry_vector_.push_back(link_model->getParentLinkModel());
+      link_model_with_geometry_name_vector_.push_back(link_model->getParentLinkModel()->getName());
+    }
+    // all child links with collision geometry should also be included
     if (!link_model->getShapes().empty())
     {
       link_model_with_geometry_vector_.push_back(link_model);
@@ -316,7 +328,7 @@ const LinkModel* JointModelGroup::getLinkModel(const std::string& name) const
   LinkModelMapConst::const_iterator it = link_model_map_.find(name);
   if (it == link_model_map_.end())
   {
-    RCLCPP_ERROR(LOGGER, "Link '%s' not found in group '%s'", name.c_str(), name_.c_str());
+    RCLCPP_ERROR(getLogger(), "Link '%s' not found in group '%s'", name.c_str(), name_.c_str());
     return nullptr;
   }
   return it->second;
@@ -327,7 +339,7 @@ const JointModel* JointModelGroup::getJointModel(const std::string& name) const
   JointModelMapConst::const_iterator it = joint_model_map_.find(name);
   if (it == joint_model_map_.end())
   {
-    RCLCPP_ERROR(LOGGER, "Joint '%s' not found in group '%s'", name.c_str(), name_.c_str());
+    RCLCPP_ERROR(getLogger(), "Joint '%s' not found in group '%s'", name.c_str(), name_.c_str());
     return nullptr;
   }
   return it->second;
@@ -377,7 +389,7 @@ void JointModelGroup::getVariableRandomPositionsNearBy(random_numbers::RandomNum
     }
     else
     {
-      RCLCPP_WARN(LOGGER, "Did not pass in distance for '%s'", active_joint_model_vector_[i]->getName().c_str());
+      RCLCPP_WARN(getLogger(), "Did not pass in distance for '%s'", active_joint_model_vector_[i]->getName().c_str());
     }
     active_joint_model_vector_[i]->getVariableRandomPositionsNearBy(rng, values + active_joint_model_start_index_[i],
                                                                     *active_joint_bounds[i],
@@ -548,7 +560,7 @@ bool JointModelGroup::getEndEffectorTips(std::vector<const LinkModel*>& tips) co
     const JointModelGroup* eef = parent_model_->getEndEffector(name);
     if (!eef)
     {
-      RCLCPP_ERROR(LOGGER, "Unable to find joint model group for eef");
+      RCLCPP_ERROR(getLogger(), "Unable to find joint model group for eef");
       return false;
     }
     const std::string& eef_parent = eef->getEndEffectorParentGroup().second;
@@ -556,7 +568,7 @@ bool JointModelGroup::getEndEffectorTips(std::vector<const LinkModel*>& tips) co
     const LinkModel* eef_link = parent_model_->getLinkModel(eef_parent);
     if (!eef_link)
     {
-      RCLCPP_ERROR(LOGGER, "Unable to find end effector link for eef");
+      RCLCPP_ERROR(getLogger(), "Unable to find end effector link for eef");
       return false;
     }
     // insert eef_link into tips, maintaining a *sorted* vector, thus enabling use of std::lower_bound
@@ -577,11 +589,11 @@ const LinkModel* JointModelGroup::getOnlyOneEndEffectorTip() const
   }
   else if (tips.size() > 1)
   {
-    RCLCPP_ERROR(LOGGER, "More than one end effector tip found for joint model group, so cannot return only one");
+    RCLCPP_ERROR(getLogger(), "More than one end effector tip found for joint model group, so cannot return only one");
   }
   else
   {
-    RCLCPP_ERROR(LOGGER, "No end effector tips found in joint model group");
+    RCLCPP_ERROR(getLogger(), "No end effector tips found in joint model group");
   }
   return nullptr;
 }
@@ -591,7 +603,7 @@ int JointModelGroup::getVariableGroupIndex(const std::string& variable) const
   VariableIndexMap::const_iterator it = joint_variables_index_map_.find(variable);
   if (it == joint_variables_index_map_.end())
   {
-    RCLCPP_ERROR(LOGGER, "Variable '%s' is not part of group '%s'", variable.c_str(), name_.c_str());
+    RCLCPP_ERROR(getLogger(), "Variable '%s' is not part of group '%s'", variable.c_str(), name_.c_str());
     return -1;
   }
   return it->second;
@@ -618,7 +630,7 @@ bool JointModelGroup::computeJointVariableIndices(const std::vector<std::string>
       // skip reported fixed joints
       if (hasJointModel(joint_name) && getJointModel(joint_name)->getType() == JointModel::FIXED)
         continue;
-      RCLCPP_ERROR(LOGGER,
+      RCLCPP_ERROR(getLogger(),
                    "Looking for variables for joint '%s', "
                    "but group '%s' does not contain such a joint.",
                    joint_name.c_str(), getName().c_str());
@@ -676,7 +688,7 @@ bool JointModelGroup::canSetStateFromIK(const std::string& tip) const
 
   if (tip_frames.empty())
   {
-    RCLCPP_WARN(LOGGER, "Group %s has no tip frame(s)", name_.c_str());
+    RCLCPP_WARN(getLogger(), "Group %s has no tip frame(s)", name_.c_str());
     return false;
   }
 
@@ -686,7 +698,8 @@ bool JointModelGroup::canSetStateFromIK(const std::string& tip) const
     // remove frame reference, if specified
     const std::string& tip_local = tip[0] == '/' ? tip.substr(1) : tip;
     const std::string& tip_frame_local = tip_frame[0] == '/' ? tip_frame.substr(1) : tip_frame;
-    RCLCPP_DEBUG(LOGGER, "comparing input tip: %s to this groups tip: %s ", tip_local.c_str(), tip_frame_local.c_str());
+    RCLCPP_DEBUG(getLogger(), "comparing input tip: %s to this groups tip: %s ", tip_local.c_str(),
+                 tip_frame_local.c_str());
 
     // Check if the IK solver's tip is the same as the frame of inquiry
     if (tip_local != tip_frame_local)
@@ -781,7 +794,7 @@ bool JointModelGroup::isValidVelocityMove(const std::vector<double>& from_joint_
   // Check for equal sized arrays
   if (from_joint_pose.size() != to_joint_pose.size())
   {
-    RCLCPP_ERROR(LOGGER, "To and from joint poses are of different sizes.");
+    RCLCPP_ERROR(getLogger(), "To and from joint poses are of different sizes.");
     return false;
   }
 
@@ -802,8 +815,8 @@ bool JointModelGroup::isValidVelocityMove(const double* from_joint_pose, const d
     if (var_bounds->size() != 1)
     {
       // TODO(davetcoleman) Support multiple variables
-      RCLCPP_ERROR(LOGGER, "Attempting to check velocity bounds for waypoint move with joints that have multiple "
-                           "variables");
+      RCLCPP_ERROR(getLogger(), "Attempting to check velocity bounds for waypoint move with joints that have multiple "
+                                "variables");
       return false;
     }
     const double max_velocity = (*var_bounds)[0].max_velocity_;
@@ -811,7 +824,7 @@ bool JointModelGroup::isValidVelocityMove(const double* from_joint_pose, const d
     double max_dtheta = dt * max_velocity;
     if (dtheta > max_dtheta)
     {
-      RCLCPP_DEBUG(LOGGER, "Not valid velocity move because of joint %lu", i);
+      RCLCPP_DEBUG(getLogger(), "Not valid velocity move because of joint %lu", i);
       return false;
     }
   }

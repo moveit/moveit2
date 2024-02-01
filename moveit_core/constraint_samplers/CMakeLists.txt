@@ -22,6 +22,7 @@ target_link_libraries(moveit_constraint_samplers
   moveit_kinematic_constraints
   moveit_kinematics_base
   moveit_planning_scene
+  moveit_utils
 )
 
 install(DIRECTORY include/ DESTINATION include/moveit_core)

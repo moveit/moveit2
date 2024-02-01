@@ -58,6 +58,7 @@
 #include <std_msgs/msg/bool.hpp>
 #include <std_msgs/msg/empty.hpp>
 #include <std_srvs/srv/empty.hpp>
+#include <rclcpp/logger.hpp>
 #endif
 
 #include <map>
@@ -121,7 +122,7 @@ protected:
   void initFromMoveGroupNS();
   void constructPlanningRequest(moveit_msgs::msg::MotionPlanRequest& mreq);
 
-  void updateSceneMarkers(float wall_dt, float ros_dt);
+  void updateSceneMarkers(double wall_dt, double ros_dt);
 
   void updateExternalCommunication();
 
@@ -325,6 +326,7 @@ private:
   void setItemSelectionInList(const std::string& item_name, bool selection, QListWidget* list);
 
   rclcpp::Node::SharedPtr node_;
+  rclcpp::Logger logger_;
   rclcpp::Publisher<moveit_msgs::msg::PlanningScene>::SharedPtr planning_scene_publisher_;
   rclcpp::Publisher<moveit_msgs::msg::PlanningSceneWorld>::SharedPtr planning_scene_world_publisher_;
 

@@ -81,10 +81,10 @@ bool computePoseIK(const planning_scene::PlanningSceneConstPtr& scene, const std
  * @param pose: pose of the link in base frame of robot model
  * @return true if succeed
  */
-bool computeLinkFK(const moveit::core::RobotModelConstPtr& robot_model, const std::string& link_name,
+bool computeLinkFK(const planning_scene::PlanningSceneConstPtr& scene, const std::string& link_name,
                    const std::map<std::string, double>& joint_state, Eigen::Isometry3d& pose);
 
-bool computeLinkFK(const moveit::core::RobotModelConstPtr& robot_model, const std::string& link_name,
+bool computeLinkFK(const planning_scene::PlanningSceneConstPtr& scene, const std::string& link_name,
                    const std::vector<std::string>& joint_names, const std::vector<double>& joint_positions,
                    Eigen::Isometry3d& pose);
 
@@ -126,7 +126,7 @@ bool verifySampleJointLimits(const std::map<std::string, double>& position_last,
 bool generateJointTrajectory(const planning_scene::PlanningSceneConstPtr& scene,
                              const JointLimitsContainer& joint_limits, const KDL::Trajectory& trajectory,
                              const std::string& group_name, const std::string& link_name,
-                             const std::map<std::string, double>& initial_joint_position, const double& sampling_time,
+                             const std::map<std::string, double>& initial_joint_position, double sampling_time,
                              trajectory_msgs::msg::JointTrajectory& joint_trajectory,
                              moveit_msgs::msg::MoveItErrorCodes& error_code, bool check_self_collision = false);
 
@@ -195,12 +195,12 @@ bool isRobotStateStationary(const moveit::core::RobotState& state, const std::st
  * smallest index of trajectroy.
  * @param index The intersection index which has to be determined.
  */
-bool linearSearchIntersectionPoint(const std::string& link_name, const Eigen::Vector3d& center_position,
-                                   const double& r, const robot_trajectory::RobotTrajectoryPtr& traj, bool inverseOrder,
+bool linearSearchIntersectionPoint(const std::string& link_name, const Eigen::Vector3d& center_position, const double r,
+                                   const robot_trajectory::RobotTrajectoryPtr& traj, bool inverseOrder,
                                    std::size_t& index);
 
 bool intersectionFound(const Eigen::Vector3d& p_center, const Eigen::Vector3d& p_current, const Eigen::Vector3d& p_next,
-                       const double& r);
+                       double r);
 
 /**
  * @brief Checks if current robot state is in self collision.

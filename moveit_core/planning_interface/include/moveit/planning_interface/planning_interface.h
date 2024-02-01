@@ -39,15 +39,11 @@
 #include <moveit/macros/class_forward.h>
 #include <moveit/planning_interface/planning_request.h>
 #include <moveit/planning_interface/planning_response.h>
+#include <moveit/planning_scene/planning_scene.h>
 #include <rclcpp/node.hpp>
 #include <string>
 #include <map>
 #include <rclcpp/rclcpp.hpp>
-
-namespace planning_scene
-{
-MOVEIT_CLASS_FORWARD(PlanningScene);  // Defines PlanningScenePtr, ConstPtr, WeakPtr... etc
-}
 
 /** \brief This namespace includes the base class for MoveIt planners */
 namespace planning_interface
@@ -119,11 +115,11 @@ public:
 
   /** \brief Solve the motion planning problem and store the result in \e res. This function should not clear data
    * structures before computing. The constructor and clear() do that. */
-  virtual bool solve(MotionPlanResponse& res) = 0;
+  virtual void solve(MotionPlanResponse& res) = 0;
 
   /** \brief Solve the motion planning problem and store the detailed result in \e res. This function should not clear
    * data structures before computing. The constructor and clear() do that. */
-  virtual bool solve(MotionPlanDetailedResponse& res) = 0;
+  virtual void solve(MotionPlanDetailedResponse& res) = 0;
 
   /** \brief If solve() is running, terminate the computation. Return false if termination not possible. No-op if
    * solve() is not running (returns true).*/
@@ -168,8 +164,8 @@ public:
   virtual bool initialize(const moveit::core::RobotModelConstPtr& model, const rclcpp::Node::SharedPtr& node,
                           const std::string& parameter_namespace);
 
-  /// Get \brief a short string that identifies the planning interface
-  virtual std::string getDescription() const;
+  /// \brief Get a short string that identifies the planning interface.
+  virtual std::string getDescription() const = 0;
 
   /// \brief Get the names of the known planning algorithms (values that can be filled as planner_id in the planning
   /// request)
