@@ -42,11 +42,8 @@ ReactionResult ReplanInvalidatedTrajectory::react(const std::string& event)
   if ((event == toString(LocalFeedbackEnum::COLLISION_AHEAD)) ||
       (event == toString(LocalFeedbackEnum::LOCAL_PLANNER_STUCK)))
   {
-    if (!hybrid_planning_manager_->sendGlobalPlannerAction())  // Start global planning
-    {
-      hybrid_planning_manager_->sendHybridPlanningResponse(false);
-    }
-    return ReactionResult(event, "", moveit_msgs::msg::MoveItErrorCodes::SUCCESS);
+    return ReactionResult(event, "", moveit_msgs::msg::MoveItErrorCodes::SUCCESS,
+                          HybridPlanningAction::SEND_GLOBAL_SOLVER_REQUEST);
   }
   else
   {

@@ -43,7 +43,7 @@ install(TARGETS stomp_moveit_plugin stomp_moveit_parameters
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
   RUNTIME DESTINATION bin
-  INCLUDES DESTINATION include
+  INCLUDES DESTINATION include/moveit_planners_stomp
 )
 
 ament_export_targets(moveit_planners_stompTargets HAS_LIBRARY_TARGET)
