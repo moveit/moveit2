@@ -6,7 +6,7 @@ find_package(moveit_common REQUIRED)
 moveit_package()
 
 if(BUILD_TESTING)
-  find_package(ament_cmake_gtest REQUIRED)  
+  find_package(ament_cmake_gtest REQUIRED)
   find_package(ament_cmake REQUIRED)
   find_package(rclcpp REQUIRED)
   find_package(ros_testing REQUIRED)
