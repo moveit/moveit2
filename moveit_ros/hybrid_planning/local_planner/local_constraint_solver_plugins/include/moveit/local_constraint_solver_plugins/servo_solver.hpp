@@ -57,7 +57,7 @@ public:
   /**
    * @brief Initializes moveit servo
    *
-   * @param node
+   * @param node Node provided by the local planning component to this plugin. Can be used to init and use ROS interfaces
    * @param planning_scene_monitor Planning scene monitor to access the current state of the system
    * @param group_name UNUSED
    * @return True if initialization was successful

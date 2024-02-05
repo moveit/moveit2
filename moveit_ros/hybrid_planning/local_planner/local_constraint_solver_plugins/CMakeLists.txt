@@ -9,5 +9,5 @@ ament_target_dependencies(forward_trajectory_plugin ${THIS_PACKAGE_INCLUDE_DEPEN
 generate_parameter_library(servo_solver_parameters res/servo_solver_parameters.yaml)
 add_library(servo_local_solver_plugin SHARED src/servo_solver.cpp)
 set_target_properties(servo_local_solver_plugin PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
-target_link_libraries(servo_local_solver_plugin servo_solver_parameters)
+target_link_libraries(servo_local_solver_plugin servo_solver_parameters local_planner_parameters)
 ament_target_dependencies(servo_local_solver_plugin ${THIS_PACKAGE_INCLUDE_DEPENDS})

@@ -6,3 +6,19 @@ servo_solver_parameters:
       not_empty<>: []
     }
   }
+  trans_gain_scaling: {
+    type: double,
+    description: "Scaling for translative velocities computed from pose diff.",
+    default_value: 0.05,
+    validation: {
+      gt<>: 0.0
+    }
+  }
+  rot_gain_scaling: {
+    type: double,
+    description: "Scaling for rotational velocities computed from pose diff",
+    default_value: 5.0,
+    validation: {
+      gt<>: 0.0
+    }
+  }

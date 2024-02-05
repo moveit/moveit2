@@ -41,6 +41,7 @@
 #include <moveit/planning_scene/planning_scene.h>
 #include <moveit/robot_state/conversions.h>
 #include <moveit/utils/logger.hpp>
+#include <local_planner_parameters.hpp>
 
 namespace moveit::hybrid_planning
 {
@@ -72,8 +73,20 @@ bool ServoSolver::initialize(const rclcpp::Node::SharedPtr& node,
   // Create Servo and start it
   servo_ = std::make_unique<moveit_servo::Servo>(node_, servo_param_listener, planning_scene_monitor_);
 
-  // Use for debugging
-  // twist_cmd_pub_ = node_->create_publisher<geometry_msgs::msg::TwistStamped>("~/delta_twist_cmds", 10);
+  // Set servo publish_period
+  auto local_param_listener = local_planner_parameters::ParamListener(node_, "");
+  const auto local_config = local_param_listener.get_params();
+
+  // Publish period is the time difference used for numerical integration. It is recommended that the period 3x smaller
+  // than the actual publish period.
+  const double servo_publish_rate = 1.0 / 3.0 * local_config.local_planning_frequency;
+  if (!node_->has_parameter("publish_period"))
+  {
+    RCLCPP_ERROR(getLogger(), "Node used by servo solver doesn't seem to have a parameter called 'publish_period' that "
+                              "shouldn't happen!");
+    return false;
+  }
+  node_->set_parameter(rclcpp::Parameter("publish_period", servo_publish_rate));
   return true;
 }
 
@@ -106,9 +119,9 @@ ServoSolver::solve(const robot_trajectory::RobotTrajectory& local_trajectory,
   const auto current_state = planning_scene_monitor_->getStateMonitor()->getCurrentState();
 
   // Create goal state
-  moveit::core::RobotState target_state(local_trajectory.getRobotModel());
+  moveit::core::RobotState target_state = *current_state;
   target_state.setVariablePositions(robot_command.joint_trajectory.joint_names,
-                                    robot_command.joint_trajectory.points[0].positions);
+                                    robot_command.joint_trajectory.points.at(0).positions);
   target_state.update();
 
   // TF planning_frame -> current EE
@@ -120,10 +133,8 @@ ServoSolver::solve(const robot_trajectory::RobotTrajectory& local_trajectory,
   Eigen::Isometry3d diff_pose = current_pose.inverse() * target_pose;
   Eigen::AngleAxisd axis_angle(diff_pose.linear());
 
-  constexpr double fixed_trans_vel = 0.05;
-  constexpr double fixed_rot_vel = 5;
-  const double trans_gain = fixed_trans_vel / diff_pose.translation().norm();
-  const double rot_gain = fixed_rot_vel / diff_pose.rotation().norm();
+  const double trans_gain = solver_parameters_.trans_gain_scaling / diff_pose.translation().norm();
+  const double rot_gain = solver_parameters_.rot_gain_scaling / diff_pose.rotation().norm();
 
   // Calculate Cartesian command delta
   // Transform current pose to command frame
@@ -137,6 +148,21 @@ ServoSolver::solve(const robot_trajectory::RobotTrajectory& local_trajectory,
   };
 
   std::optional<trajectory_msgs::msg::JointTrajectory> trajectory_msg;
+
+  // Clear all commands that are older than older than one publish period
+  const auto cutoff_timestamp = node_->now() - rclcpp::Duration::from_seconds(3.0 * servo_parameters_.publish_period);
+  const auto cutoff_iterator = std::find_if(joint_cmd_rolling_window_.rbegin(), joint_cmd_rolling_window_.rend(),
+                                            [&cutoff_timestamp](moveit_servo::KinematicState state) {
+                                              return state.time_stamp < cutoff_timestamp;
+                                            })
+                                   .base();
+
+  if (cutoff_iterator != joint_cmd_rolling_window_.end())
+  {
+    // Erase elements from the beginning to the found position
+    joint_cmd_rolling_window_.erase(joint_cmd_rolling_window_.begin(), cutoff_iterator);
+  }
+
   // Create servo commands until a trajectory message can be generated
   while (!trajectory_msg)
   {
