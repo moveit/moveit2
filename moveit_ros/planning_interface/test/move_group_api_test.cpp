@@ -33,7 +33,7 @@
  *********************************************************************/
 
 /* Author: Sebastian Jahr
-   Description: Integrations tests for the move_group interface
+   Description: Integration tests for the move_group interface
 */
 
 #include <gtest/gtest.h>

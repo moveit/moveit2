@@ -54,8 +54,6 @@ def generate_test_description():
         executable="spawner",
         arguments=[
             "joint_state_broadcaster",
-            "--controller-manager-timeout",
-            "300",
             "--controller-manager",
             "/controller_manager",
         ],
