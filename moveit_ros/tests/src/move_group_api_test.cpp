@@ -76,7 +76,7 @@ TEST_F(MoveGroupFixture, testParamAPI)
   for (const auto& param_name : move_group_test::PARAMETER_NAME_LIST)
   {
     bool param_exists = false;
-    if (params_client->wait_for_service(std::chrono::seconds(1)))
+    if (params_client->wait_for_service(std::chrono::seconds(0.1)))
     {
       param_exists = params_client->has_parameter(param_name);
       if (!param_exists)
