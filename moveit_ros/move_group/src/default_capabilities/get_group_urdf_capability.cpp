@@ -53,6 +53,7 @@ rclcpp::Logger getLogger()
 const auto JOINT_ELEMENT_CLOSING = std::string("</joint>");
 const auto LINK_ELEMENT_CLOSING = std::string("</link>");
 const auto ROBOT_ELEMENT_CLOSING = std::string("</robot>");
+const auto GENERAL_ELEMENT_CLOSING = std::string("/>");
 }  // namespace
 
 GetUrdfService::GetUrdfService() : MoveGroupCapability("get_group_urdf")
@@ -99,32 +100,56 @@ void GetUrdfService::initialize()
                            std::string("\" xmlns:xacro=\"http://ros.org/wiki/xacro\">");
 
         // Create links
-        const auto& link_names = subgroup->getLinkModelNames();
+        auto link_names = subgroup->getLinkModelNames();
+        // Remove duplicates
+        std::sort(link_names.begin(), link_names.end());
+        link_names.erase(std::unique(link_names.begin(), link_names.end()), link_names.end());
+
         for (const auto& link_name : link_names)
         {
-          const auto start = full_urdf_string.find("<link name=\"" + link_name);
+          const auto start = full_urdf_string.find("<link name=\"" + link_name + "\"");
           auto substring = full_urdf_string.substr(start, full_urdf_string.size() - start);
-          res->urdf_string += substring.substr(0, substring.find(LINK_ELEMENT_CLOSING) + LINK_ELEMENT_CLOSING.size());
+
+          // Link elements can be closed either by "/>" or "</link>" so we need to consider both cases
+          auto const substring_without_opening = substring.substr(1, substring.size() - 2);
+          auto const general_opening_pos_a = substring_without_opening.find('<');
+          auto const link_closing_pos_b = substring.find(GENERAL_ELEMENT_CLOSING);
+          // Case "/>"
+          if (link_closing_pos_b < general_opening_pos_a)
+          {
+            res->urdf_string += substring.substr(0, link_closing_pos_b + GENERAL_ELEMENT_CLOSING.size());
+          }
+          // Case </link>
+          else
+          {
+            res->urdf_string += substring.substr(0, substring.find(LINK_ELEMENT_CLOSING) + LINK_ELEMENT_CLOSING.size());
+          }
         }
 
         // Create joints
-        const auto& joint_names = subgroup->getJointModelNames();
+        auto joint_names = subgroup->getJointModelNames();
+        // Remove duplicates
+        std::sort(joint_names.begin(), joint_names.end());
+        joint_names.erase(std::unique(joint_names.begin(), joint_names.end()), joint_names.end());
         for (const auto& joint_name : joint_names)
         {
           const auto start = full_urdf_string.find("<joint name=\"" + joint_name + "\" type");
           auto substring = full_urdf_string.substr(start, full_urdf_string.size() - start);
           res->urdf_string += substring.substr(0, substring.find(JOINT_ELEMENT_CLOSING) + JOINT_ELEMENT_CLOSING.size());
-        }
-        // If existing add the base link to the subgroup URDF
-        std::string base_link_element;
-        if (!joint_names.empty())
-        {
-          const auto parent_link_element = subgroup->getJointModel(joint_names.at(0))->getParentLinkModel()->getName();
-          base_link_element = "<link name=\"" + parent_link_element + "\"/>";
+          RCLCPP_ERROR(getLogger(), "%s", joint_name.c_str());
+
+          // If parent link model is not part of the joint group, add it
+          const auto parent_link_element = subgroup->getJointModel(joint_name)->getParentLinkModel()->getName();
+          if (std::find(link_names.begin(), link_names.end(), parent_link_element) == link_names.end())
+          {
+            auto const base_link_element = "<link name=\"" + parent_link_element + "\"/>";
+            res->urdf_string += base_link_element;
+            link_names.push_back(parent_link_element);
+          }
         }
 
         // Add closing
-        res->urdf_string += base_link_element + ROBOT_ELEMENT_CLOSING;
+        res->urdf_string += ROBOT_ELEMENT_CLOSING;
 
         //  Validate urdf file
         if (!urdf::parseURDF(res->urdf_string))
