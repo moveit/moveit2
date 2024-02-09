@@ -1,0 +1,4 @@
+find_package(ament_cmake_gtest REQUIRED)
+find_package(ros_testing REQUIRED)
+
+add_ros_test(test_initialize_and_cleanly_shut_down_movegroup.test.py TIMEOUT 120)
