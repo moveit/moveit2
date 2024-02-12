@@ -56,16 +56,16 @@ const auto ROBOT_ELEMENT_CLOSING = std::string("</robot>");
 const auto GENERAL_ELEMENT_CLOSING = std::string("/>");
 }  // namespace
 
-GetUrdfService::GetUrdfService()
-  : MoveGroupCapability("get_group_urdf")
-  , robot_description_subscriber_{ context_->moveit_cpp_->getNode()->create_subscription<std_msgs::msg::String>(
-        "robot_description", rclcpp::QoS(1).transient_local().reliable(),
-        [this](const std_msgs::msg::String::ConstSharedPtr& msg) { return robotDescriptionSubscriberCallback(msg); }) }
+GetUrdfService::GetUrdfService() : MoveGroupCapability("get_group_urdf")
 {
 }
 
 void GetUrdfService::initialize()
 {
+  robot_description_subscriber_ = context_->moveit_cpp_->getNode()->create_subscription<std_msgs::msg::String>(
+      "robot_description", rclcpp::SystemDefaultsQoS(),
+      [this](const std_msgs::msg::String::ConstSharedPtr& msg) { return robotDescriptionSubscriberCallback(msg); });
+
   get_urdf_service_ = context_->moveit_cpp_->getNode()->create_service<moveit_msgs::srv::GetGroupUrdf>(
       GET_URDF_SERVICE_NAME,
       [this](const std::shared_ptr<moveit_msgs::srv::GetGroupUrdf::Request>& req,
