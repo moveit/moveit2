@@ -59,7 +59,7 @@ const auto GENERAL_ELEMENT_CLOSING = std::string("/>");
 GetUrdfService::GetUrdfService()
   : MoveGroupCapability("get_group_urdf")
   , robot_description_subscriber_{ context_->moveit_cpp_->getNode()->create_subscription<std_msgs::msg::String>(
-        "robot_description", rclcpp::SystemDefaultsQoS(),
+        "robot_description", rclcpp::QoS(1).transient_local().reliable(),
         [this](const std_msgs::msg::String::ConstSharedPtr& msg) { return robotDescriptionSubscriberCallback(msg); }) }
 {
 }
