@@ -87,8 +87,7 @@ void GetUrdfService::initialize()
         if (full_urdf_string_.empty())
         {
           const auto error_string =
-              std::string("Couldn't load the urdf from parameter server. Is the '/robot_description' parameter "
-                          "initialized?");
+              std::string("Couldn't get the robot description string from '/robot_description' topic");
           RCLCPP_ERROR(getLogger(), "%s", error_string.c_str());
           res->error_code.message = error_string;
           res->error_code.val = moveit_msgs::msg::MoveItErrorCodes::FAILURE;
