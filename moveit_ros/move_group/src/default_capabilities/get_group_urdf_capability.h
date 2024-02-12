@@ -40,6 +40,8 @@
 #include <moveit/move_group/move_group_capability.h>
 #include <moveit_msgs/srv/get_group_urdf.hpp>
 
+#include <std_msgs/msg/string.hpp>
+
 namespace move_group
 {
 /**
@@ -62,6 +64,10 @@ public:
   void initialize() override;
 
 private:
+  std::string full_urdf_string_;
+  rclcpp::Subscription<std_msgs::msg::String>::SharedPtr robot_description_subscriber_;
   rclcpp::Service<moveit_msgs::srv::GetGroupUrdf>::SharedPtr get_urdf_service_;
+
+  void robotDescriptionSubscriberCallback(const std_msgs::msg::String::ConstSharedPtr& msg);
 };
 }  // namespace move_group
