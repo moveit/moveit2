@@ -34,8 +34,10 @@
   <depend>moveit_msgs</depend>
   <depend>moveit_ros_occupancy_map_monitor</depend>
   <depend>rclcpp_action</depend>
+  <depend>rclcpp_components</depend>
   <depend>rclcpp</depend>
   <depend>srdfdom</depend>
+  <depend>std_msgs</depend>
   <depend>tf2_eigen</depend>
   <depend>tf2_geometry_msgs</depend>
   <depend>tf2_msgs</depend>

@@ -16,7 +16,9 @@ find_package(moveit_msgs REQUIRED)
 find_package(moveit_ros_occupancy_map_monitor REQUIRED)
 find_package(pluginlib REQUIRED)
 find_package(rclcpp REQUIRED)
+find_package(rclcpp_components REQUIRED)
 find_package(srdfdom REQUIRED)
+find_package(std_msgs REQUIRED)
 find_package(tf2 REQUIRED)
 find_package(tf2_eigen REQUIRED)
 find_package(tf2_geometry_msgs REQUIRED)
@@ -57,7 +59,8 @@ set(THIS_PACKAGE_LIBRARIES
     moveit_rdf_loader
     moveit_robot_model_loader
     moveit_trajectory_execution_manager
-    planning_pipeline_parameters)
+    planning_pipeline_parameters
+    srdf_publisher_node)
 
 set(THIS_PACKAGE_INCLUDE_DEPENDS
     Eigen3
@@ -68,7 +71,9 @@ set(THIS_PACKAGE_INCLUDE_DEPENDS
     moveit_ros_occupancy_map_monitor
     pluginlib
     rclcpp
+    rclcpp_components
     srdfdom
+    std_msgs
     tf2
     tf2_eigen
     tf2_geometry_msgs
@@ -94,6 +99,7 @@ add_subdirectory(planning_response_adapter_plugins)
 add_subdirectory(planning_scene_monitor)
 add_subdirectory(rdf_loader)
 add_subdirectory(robot_model_loader)
+add_subdirectory(srdf_publisher_node)
 add_subdirectory(trajectory_execution_manager)
 
 install(
@@ -107,6 +113,10 @@ install(
 
 ament_export_targets(moveit_ros_planningTargets HAS_LIBRARY_TARGET)
 ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS})
+
+rclcpp_components_register_node(
+  srdf_publisher_node PLUGIN "moveit_ros_planning::SrdfPublisher" EXECUTABLE
+  srdf_publisher)
 
 pluginlib_export_plugin_description_file(
   moveit_core "default_request_adapters_plugin_description.xml")
