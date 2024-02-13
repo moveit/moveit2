@@ -78,16 +78,14 @@ void GetUrdfService::initialize()
           res->error_code.val = moveit_msgs::msg::MoveItErrorCodes::FAILURE;
           return;
         }
-        // Get robot description string
-        std::string full_urdf_string;
-        context_->moveit_cpp_->getNode()->get_parameter_or("robot_description", full_urdf_string, std::string(""));
 
-        // Check if string is empty
+        std::string full_urdf_string =
+            context_->moveit_cpp_->getPlanningSceneMonitor()->getRobotModelLoader()->getRDFLoader()->getURDFString();
+
+        // Check if robot description string is empty
         if (full_urdf_string.empty())
         {
-          const auto error_string =
-              std::string("Couldn't load the urdf from parameter server. Is the '/robot_description' parameter "
-                          "initialized?");
+          const auto error_string = std::string("Couldn't get the robot description string from MoveItCpp");
           RCLCPP_ERROR(getLogger(), "%s", error_string.c_str());
           res->error_code.message = error_string;
           res->error_code.val = moveit_msgs::msg::MoveItErrorCodes::FAILURE;
