@@ -67,7 +67,6 @@ if(BUILD_TESTING)
   set(AMENT_CMAKE_CPPLINT_FOUND TRUE)
   set(AMENT_CMAKE_FLAKE8_FOUND TRUE)
   set(AMENT_CMAKE_UNCRUSTIFY_FOUND TRUE)
-  set(AMENT_CMAKE_LINT_CMAKE_FOUND TRUE)
 
   # Run all lint tests in package.xml except those listed above
   ament_lint_auto_find_test_dependencies()

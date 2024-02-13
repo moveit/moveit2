@@ -24,7 +24,6 @@
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_clang_format</test_depend>
-  <test_depend>ament_cmake_lint_cmake</test_depend>
   <test_depend>ament_cmake_xmllint</test_depend>
 
   <export>
