@@ -31,10 +31,10 @@ if(BUILD_TESTING)
                       ${tf2_kdl_INCLUDE_DIRS})
 
   if(WIN32)
-    # set(append_library_dirs
+    # set(APPEND_LIBRARY_DIRS
     # "$<TARGET_FILE_DIR:${PROJECT_NAME}>;$<TARGET_FILE_DIR:${PROJECT_NAME}_TestPlugins1>")
   else()
-    set(append_library_dirs
+    set(APPEND_LIBRARY_DIRS
         "${CMAKE_CURRENT_BINARY_DIR};${CMAKE_CURRENT_BINARY_DIR}/../utils;${CMAKE_CURRENT_BINARY_DIR}/../robot_state;${CMAKE_CURRENT_BINARY_DIR}/../planning_scene;${CMAKE_CURRENT_BINARY_DIR}/../robot_model;${CMAKE_CURRENT_BINARY_DIR}/../kinematics_constraint"
     )
   endif()

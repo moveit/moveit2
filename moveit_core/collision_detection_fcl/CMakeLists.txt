@@ -39,10 +39,10 @@ install(
 
 if(BUILD_TESTING)
   if(WIN32)
-    # set(append_library_dirs
+    # set(APPEND_LIBRARY_DIRS
     # "$<TARGET_FILE_DIR:${PROJECT_NAME}>;$<TARGET_FILE_DIR:${PROJECT_NAME}_TestPlugins1>")
   else()
-    set(append_library_dirs
+    set(APPEND_LIBRARY_DIRS
         "${CMAKE_CURRENT_BINARY_DIR};${CMAKE_CURRENT_BINARY_DIR}/../collision_detection;${CMAKE_CURRENT_BINARY_DIR}/../robot_state;${CMAKE_CURRENT_BINARY_DIR}/../robot_model;${CMAKE_CURRENT_BINARY_DIR}/../utils"
     )
   endif()

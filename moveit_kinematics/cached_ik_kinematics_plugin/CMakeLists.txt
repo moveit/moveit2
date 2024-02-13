@@ -45,18 +45,19 @@ endif()
 # analytic solvers, so caching just adds extra overhead.
 if(ur_kinematics_FOUND)
   include_directories(${ur_kinematics_INCLUDE_DIRS})
-  foreach(UR 3 5 10)
-    add_library(moveit_cached_ur${UR}_kinematics_plugin SHARED
+  foreach(ur_version 3 5 10)
+    add_library(moveit_cached_ur${ur_version}_kinematics_plugin SHARED
                 src/cached_ur_kinematics_plugin.cpp)
-    set_target_properties(moveit_cached_ur${UR}_kinematics_plugin
+    set_target_properties(moveit_cached_ur${ur_version}_kinematics_plugin
                           PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
-    find_library(ur${UR}_pluginlib ur${UR}_moveit_plugin
+    find_library(ur${ur_version}_pluginlib ur${ur_version}_moveit_plugin
                  PATHS ${ur_kinematics_LIBRARY_DIRS})
-    target_link_libraries(moveit_cached_ur${UR}_kinematics_plugin
-                          moveit_cached_ik_kinematics_base ${ur${UR}_pluginlib})
+    target_link_libraries(
+      moveit_cached_ur${ur_version}_kinematics_plugin
+      moveit_cached_ik_kinematics_base ${ur${ur_version}_pluginlib})
     install(
-      TARGETS moveit_cached_ur${UR}_kinematics_plugin
-      EXPORT moveit_cached_ur${UR}_kinematics_plugin
+      TARGETS moveit_cached_ur${ur_version}_kinematics_plugin
+      EXPORT moveit_cached_ur${ur_version}_kinematics_plugin
       LIBRARY DESTINATION lib
       ARCHIVE DESTINATION lib
       RUNTIME DESTINATION bin)

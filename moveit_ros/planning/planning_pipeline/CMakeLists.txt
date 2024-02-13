@@ -29,7 +29,7 @@ if(BUILD_TESTING)
 
   ament_add_gtest(
     moveit_planning_pipeline_test test/planning_pipeline_tests.cpp
-    APPEND_LIBRARY_DIRS "${append_library_dirs}")
+    APPEND_LIBRARY_DIRS "${APPEND_LIBRARY_DIRS}")
   target_include_directories(
     moveit_planning_pipeline_test
     PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>)

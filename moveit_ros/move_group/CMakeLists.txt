@@ -22,8 +22,8 @@ set(THIS_PACKAGE_INCLUDE_DEPENDS
     tf2_geometry_msgs
     tf2_ros)
 
-foreach(Dependency IN ITEMS ${THIS_PACKAGE_INCLUDE_DEPENDS})
-  find_package(${Dependency} REQUIRED)
+foreach(dependency IN ITEMS ${THIS_PACKAGE_INCLUDE_DEPENDS})
+  find_package(${dependency} REQUIRED)
 endforeach()
 
 add_library(moveit_move_group_capabilities_base SHARED
@@ -96,18 +96,18 @@ if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
 
   # These don't pass yet, disable them for now
-  set(ament_cmake_copyright_FOUND TRUE)
-  set(ament_cmake_cpplint_FOUND TRUE)
-  set(ament_cmake_flake8_FOUND TRUE)
-  set(ament_cmake_uncrustify_FOUND TRUE)
+  set(AMENT_CMAKE_COPYRIGHT_FOUND TRUE)
+  set(AMENT_CMAKE_CPPLINT_FOUND TRUE)
+  set(AMENT_CMAKE_FLAKE8_FOUND TRUE)
+  set(AMENT_CMAKE_UNCRUSTIFY_FOUND TRUE)
 
   # Run all lint tests in package.xml except those listed above
   ament_lint_auto_find_test_dependencies()
 
   # TODO(henningkayser): enable rostests find_package(rostest REQUIRED) #
   # rostest under development in ROS2
-  # https://github.com/ros-planning/moveit2/issues/23
-  # this test is flaky add_rostest(test/test_cancel_before_plan_execution.test)
+  # https://github.com/ros-planning/moveit2/issues/23 this test is flaky
+  # add_rostest(test/test_cancel_before_plan_execution.test)
   # add_rostest(test/test_check_state_validity_in_empty_scene.test)
 endif()
 

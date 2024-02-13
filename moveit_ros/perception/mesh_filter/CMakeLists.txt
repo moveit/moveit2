@@ -11,7 +11,7 @@ set_target_properties(moveit_mesh_filter
 ament_target_dependencies(moveit_mesh_filter rclcpp moveit_core
                           geometric_shapes Eigen3)
 
-target_link_libraries(moveit_mesh_filter ${gl_LIBS} ${SYSTEM_GL_LIBRARIES})
+target_link_libraries(moveit_mesh_filter ${GL_LIBS} ${SYSTEM_GL_LIBRARIES})
 
 # TODO: Port to ROS2 add_library(moveit_depth_self_filter SHARED
 # src/depth_self_filter_nodelet.cpp src/transform_provider.cpp )

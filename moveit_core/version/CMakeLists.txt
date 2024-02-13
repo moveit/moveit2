@@ -14,6 +14,7 @@ message(
 # https://stackoverflow.com/questions/13920072/how-to-always-run-command-when-building-regardless-of-any-dependency
 add_custom_command(
   OUTPUT ${CMAKE_BINARY_DIR}/include/moveit/version.h always_rebuild
+  COMMENT "Generate version header"
   COMMAND
     ${CMAKE_COMMAND} -DVERSION_FILE_PATH="${CMAKE_BINARY_DIR}/include"
     -DMOVEIT_VERSION="${moveit_core_VERSION}"

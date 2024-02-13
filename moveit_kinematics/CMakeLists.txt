@@ -81,12 +81,12 @@ if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
 
   # These don't pass yet, disable them for now
-  set(ament_cmake_copyright_FOUND TRUE)
-  set(ament_cmake_cpplint_FOUND TRUE)
-  set(ament_cmake_flake8_FOUND TRUE)
-  set(ament_cmake_pep257_FOUND TRUE)
-  set(ament_cmake_uncrustify_FOUND TRUE)
-  set(ament_cmake_xmllint_FOUND TRUE)
+  set(AMENT_CMAKE_COPYRIGHT_FOUND TRUE)
+  set(AMENT_CMAKE_CPPLINT_FOUND TRUE)
+  set(AMENT_CMAKE_FLAKE8_FOUND TRUE)
+  set(AMENT_CMAKE_PEP257_FOUND TRUE)
+  set(AMENT_CMAKE_UNCRUSTIFY_FOUND TRUE)
+  set(AMENT_CMAKE_XMLLINT_FOUND TRUE)
 
   # Run all lint tests in package.xml except those listed above
   ament_lint_auto_find_test_dependencies()

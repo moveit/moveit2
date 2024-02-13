@@ -47,21 +47,21 @@ if(BUILD_TESTING)
   if(WIN32)
     # TODO add window paths
   else()
-    set(append_library_dirs
+    set(APPEND_LIBRARY_DIRS
         "${CMAKE_CURRENT_BINARY_DIR};${CMAKE_CURRENT_BINARY_DIR}/../robot_model;${CMAKE_CURRENT_BINARY_DIR}/../utils"
     )
   endif()
 
   ament_add_gtest(test_world test/test_world.cpp APPEND_LIBRARY_DIRS
-                  "${append_library_dirs}")
+                  "${APPEND_LIBRARY_DIRS}")
   target_link_libraries(test_world moveit_collision_detection)
 
   ament_add_gtest(test_world_diff test/test_world_diff.cpp APPEND_LIBRARY_DIRS
-                  "${append_library_dirs}")
+                  "${APPEND_LIBRARY_DIRS}")
   target_link_libraries(test_world_diff moveit_collision_detection)
 
   ament_add_gtest(test_all_valid test/test_all_valid.cpp APPEND_LIBRARY_DIRS
-                  "${append_library_dirs}")
+                  "${APPEND_LIBRARY_DIRS}")
   target_link_libraries(test_all_valid moveit_collision_detection
                         moveit_robot_model)
 endif()

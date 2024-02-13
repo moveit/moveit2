@@ -15,7 +15,7 @@ if(WITH_OPENGL)
   find_package(OpenGL REQUIRED)
   find_package(GLEW REQUIRED)
 
-  set(gl_LIBS ${gl_LIBS} ${OPENGL_LIBRARIES})
+  set(GL_LIBS ${GL_LIBS} ${OPENGL_LIBRARIES})
   if(APPLE)
     find_package(FreeGLUT REQUIRED)
     set(SYSTEM_GL_LIBRARIES ${GLEW_LIBRARIES} GLEW::GLEW FreeGLUT::freeglut)
@@ -27,7 +27,7 @@ if(WITH_OPENGL)
       set(SYSTEM_GL_LIBRARIES ${GLEW_LIBRARIES} GLUT::GLUT)
     endif()
   endif()
-  set(perception_GL_INCLUDE_DIRS "mesh_filter/include"
+  set(PERCEPTION_GL_INCLUDE_DIRS "mesh_filter/include"
                                  "depth_image_octomap_updater/include")
   set(SYSTEM_GL_INCLUDE_DIRS ${GLEW_INCLUDE_DIR} ${GLUT_INCLUDE_DIR})
 endif()
@@ -66,7 +66,7 @@ set(THIS_PACKAGE_INCLUDE_DIRS
     point_containment_filter/include
     pointcloud_octomap_updater/include
     semantic_world/include
-    ${perception_GL_INCLUDE_DIRS})
+    ${PERCEPTION_GL_INCLUDE_DIRS})
 
 set(THIS_PACKAGE_LIBRARIES
     moveit_depth_image_octomap_updater
@@ -127,9 +127,9 @@ if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
 
   # These don't pass yet, disable them for now
-  set(ament_cmake_copyright_FOUND TRUE)
-  set(ament_cmake_cpplint_FOUND TRUE)
-  set(ament_cmake_uncrustify_FOUND TRUE)
+  set(AMENT_CMAKE_COPYRIGHT_FOUND TRUE)
+  set(AMENT_CMAKE_CPPLINT_FOUND TRUE)
+  set(AMENT_CMAKE_UNCRUSTIFY_FOUND TRUE)
 
   # Run all lint tests in package.xml except those listed above
   ament_lint_auto_find_test_dependencies()
