@@ -63,7 +63,6 @@ install(FILES ${CMAKE_CURRENT_BINARY_DIR}/moveit_acceleration_filter_export.h
 # Testing
 
 if(BUILD_TESTING)
-  find_package(ament_lint_auto REQUIRED)
   find_package(ament_cmake_gtest REQUIRED)
 
   # Lowpass filter unit test

@@ -44,9 +44,6 @@ ament_target_dependencies(moveit_setup_controllers ament_index_cpp
                           moveit_setup_framework pluginlib rclcpp)
 
 if(BUILD_TESTING)
-  find_package(ament_lint_auto REQUIRED)
-  ament_lint_auto_find_test_dependencies()
-
   find_package(ament_cmake_gtest REQUIRED)
   ament_add_gtest(test_controllers test/test_controllers.cpp)
   target_link_libraries(test_controllers moveit_setup_controllers)

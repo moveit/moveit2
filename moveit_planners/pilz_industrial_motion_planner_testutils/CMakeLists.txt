@@ -59,17 +59,4 @@ ament_export_targets(pilz_industrial_motion_planner_testutilsTargets
                      HAS_LIBRARY_TARGET)
 ament_export_dependencies(rclcpp moveit_core moveit_msgs tf2_eigen)
 
-if(BUILD_TESTING)
-  find_package(ament_lint_auto REQUIRED)
-
-  # These don't pass yet, disable them for now
-  set(AMENT_CMAKE_COPYRIGHT_FOUND TRUE)
-  set(AMENT_CMAKE_CPPLINT_FOUND TRUE)
-  set(AMENT_CMAKE_FLAKE8_FOUND TRUE)
-  set(AMENT_CMAKE_UNCRUSTIFY_FOUND TRUE)
-
-  # Run all lint tests in package.xml except those listed above
-  ament_lint_auto_find_test_dependencies()
-endif()
-
 ament_package()

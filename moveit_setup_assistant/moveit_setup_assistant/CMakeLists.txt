@@ -72,10 +72,4 @@ install(DIRECTORY resources DESTINATION share/moveit_setup_assistant)
 ament_export_targets(moveit_setup_assistantTargets HAS_LIBRARY_TARGET)
 ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS})
 
-# Unit tests
-if(BUILD_TESTING)
-  find_package(ament_lint_auto REQUIRED)
-  ament_lint_auto_find_test_dependencies()
-endif()
-
 ament_package()

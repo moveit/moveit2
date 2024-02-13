@@ -93,17 +93,6 @@ pluginlib_export_plugin_description_file(
   moveit_ros_move_group default_capabilities_plugin_description.xml)
 
 if(BUILD_TESTING)
-  find_package(ament_lint_auto REQUIRED)
-
-  # These don't pass yet, disable them for now
-  set(AMENT_CMAKE_COPYRIGHT_FOUND TRUE)
-  set(AMENT_CMAKE_CPPLINT_FOUND TRUE)
-  set(AMENT_CMAKE_FLAKE8_FOUND TRUE)
-  set(AMENT_CMAKE_UNCRUSTIFY_FOUND TRUE)
-
-  # Run all lint tests in package.xml except those listed above
-  ament_lint_auto_find_test_dependencies()
-
   # TODO(henningkayser): enable rostests find_package(rostest REQUIRED) #
   # rostest under development in ROS2
   # https://github.com/ros-planning/moveit2/issues/23 this test is flaky

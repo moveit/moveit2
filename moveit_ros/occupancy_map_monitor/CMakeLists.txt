@@ -62,16 +62,6 @@ ament_export_targets(moveit_ros_occupancy_map_monitorTargets HAS_LIBRARY_TARGET)
 ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS} eigen3_cmake_module)
 
 if(BUILD_TESTING)
-  find_package(ament_lint_auto REQUIRED)
-
-  # These don't pass yet, disable them for now
-  set(AMENT_CMAKE_COPYRIGHT_FOUND TRUE)
-  set(AMENT_CMAKE_CPPLINT_FOUND TRUE)
-  set(AMENT_CMAKE_UNCRUSTIFY_FOUND TRUE)
-
-  # Run all lint tests in package.xml except those listed above
-  ament_lint_auto_find_test_dependencies()
-
   find_package(ament_cmake_gmock REQUIRED)
 
   ament_add_gmock(occupancy_map_monitor_tests

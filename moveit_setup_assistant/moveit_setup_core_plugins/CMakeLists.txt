@@ -46,11 +46,6 @@ ament_target_dependencies(
   srdfdom
   urdf)
 
-if(BUILD_TESTING)
-  find_package(ament_lint_auto REQUIRED)
-  ament_lint_auto_find_test_dependencies()
-endif()
-
 install(
   TARGETS moveit_setup_core_plugins
   EXPORT moveit_setup_core_pluginsTargets

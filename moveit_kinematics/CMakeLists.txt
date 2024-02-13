@@ -77,19 +77,4 @@ install(
 ament_export_targets(${PROJECT_NAME}Targets HAS_LIBRARY_TARGET)
 ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS})
 
-if(BUILD_TESTING)
-  find_package(ament_lint_auto REQUIRED)
-
-  # These don't pass yet, disable them for now
-  set(AMENT_CMAKE_COPYRIGHT_FOUND TRUE)
-  set(AMENT_CMAKE_CPPLINT_FOUND TRUE)
-  set(AMENT_CMAKE_FLAKE8_FOUND TRUE)
-  set(AMENT_CMAKE_PEP257_FOUND TRUE)
-  set(AMENT_CMAKE_UNCRUSTIFY_FOUND TRUE)
-  set(AMENT_CMAKE_XMLLINT_FOUND TRUE)
-
-  # Run all lint tests in package.xml except those listed above
-  ament_lint_auto_find_test_dependencies()
-endif()
-
 ament_package(CONFIG_EXTRAS ConfigExtras.cmake)

@@ -2,19 +2,9 @@ add_executable(cancel_action cancel_action.cpp)
 ament_target_dependencies(cancel_action PUBLIC ${THIS_PACKAGE_INCLUDE_DEPENDS})
 
 if(BUILD_TESTING)
-  find_package(ament_lint_auto REQUIRED)
   find_package(ament_cmake_gtest REQUIRED)
   find_package(ros_testing REQUIRED)
   find_package(Boost REQUIRED COMPONENTS filesystem)
-
-  # These don't pass yet, disable them for now
-  set(AMENT_CMAKE_COPYRIGHT_FOUND TRUE)
-  set(AMENT_CMAKE_CPPLINT_FOUND TRUE)
-  set(AMENT_CMAKE_FLAKE8_FOUND TRUE)
-  set(AMENT_CMAKE_UNCRUSTIFY_FOUND TRUE)
-
-  # Run all lint tests in package.xml except those listed above
-  ament_lint_auto_find_test_dependencies()
 
   # TODO (vatanaksoytezer / andyze: Flaky behaviour, investigate and re-enable
   # this test asap) Basic integration tests

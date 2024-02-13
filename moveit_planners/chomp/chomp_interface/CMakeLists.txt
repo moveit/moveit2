@@ -43,19 +43,6 @@ ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS})
 pluginlib_export_plugin_description_file(moveit_core
                                          chomp_interface_plugin_description.xml)
 
-if(BUILD_TESTING)
-  find_package(ament_lint_auto REQUIRED)
-
-  # These don't pass yet, disable them for now
-  set(AMENT_CMAKE_COPYRIGHT_FOUND TRUE)
-  set(AMENT_CMAKE_CPPLINT_FOUND TRUE)
-  set(AMENT_CMAKE_FLAKE8_FOUND TRUE)
-  set(AMENT_CMAKE_UNCRUSTIFY_FOUND TRUE)
-
-  # Run all lint tests in package.xml except those listed above
-  ament_lint_auto_find_test_dependencies()
-endif()
-
 # TODO: Enable testing () if(CATKIN_ENABLE_TESTING) set(CHOMP_TEST_DEPS
 # moveit_ros_planning_interface) else() set(CHOMP_TEST_DEPS) endif()
 

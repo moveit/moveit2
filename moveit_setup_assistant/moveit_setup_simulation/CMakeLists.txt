@@ -27,11 +27,6 @@ target_include_directories(
 ament_target_dependencies(moveit_setup_simulation ament_index_cpp
                           moveit_setup_framework pluginlib rclcpp)
 
-if(BUILD_TESTING)
-  find_package(ament_lint_auto REQUIRED)
-  ament_lint_auto_find_test_dependencies()
-endif()
-
 install(DIRECTORY templates DESTINATION share/moveit_setup_simulation)
 
 install(

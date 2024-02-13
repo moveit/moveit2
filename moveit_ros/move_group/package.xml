@@ -37,9 +37,6 @@
 
   <test_depend>moveit_resources_fanuc_moveit_config</test_depend>
 
-  <test_depend>ament_lint_auto</test_depend>
-  <test_depend>ament_lint_common</test_depend>
-
   <export>
     <moveit_ros_move_group plugin="${prefix}/default_capabilities_plugin_description.xml" />
     <build_type>ament_cmake</build_type>

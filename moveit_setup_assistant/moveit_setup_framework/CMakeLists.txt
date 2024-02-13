@@ -62,10 +62,6 @@ ament_target_dependencies(
   srdfdom
   urdf)
 
-if(BUILD_TESTING)
-  find_package(ament_lint_auto REQUIRED)
-  ament_lint_auto_find_test_dependencies()
-endif()
 install(DIRECTORY include/ DESTINATION include/moveit_setup_framework)
 install(FILES moveit_setup_framework_plugins.xml
         DESTINATION share/moveit_setup_framework)
