@@ -41,16 +41,11 @@
 #include <moveit/utils/logger.hpp>
 #include <urdf_parser/urdf_parser.h>
 
-#include "rclcpp/wait_for_message.hpp"
-
 namespace move_group
 {
 
 namespace
 {
-
-using namespace std::chrono_literals;
-
 rclcpp::Logger getLogger()
 {
   return moveit::getLogger("get_urdf_service");
