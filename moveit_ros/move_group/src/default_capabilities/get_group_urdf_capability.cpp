@@ -41,11 +41,16 @@
 #include <moveit/utils/logger.hpp>
 #include <urdf_parser/urdf_parser.h>
 
+#include "rclcpp/wait_for_message.hpp"
+
 namespace move_group
 {
 
 namespace
 {
+
+using namespace std::chrono_literals;
+
 rclcpp::Logger getLogger()
 {
   return moveit::getLogger("get_urdf_service");
@@ -62,10 +67,6 @@ GetUrdfService::GetUrdfService() : MoveGroupCapability("get_group_urdf")
 
 void GetUrdfService::initialize()
 {
-  robot_description_subscriber_ = context_->moveit_cpp_->getNode()->create_subscription<std_msgs::msg::String>(
-      "robot_description", rclcpp::QoS(1).transient_local().reliable(),
-      [this](const std_msgs::msg::String::ConstSharedPtr& msg) { return robotDescriptionSubscriberCallback(msg); });
-
   get_urdf_service_ = context_->moveit_cpp_->getNode()->create_service<moveit_msgs::srv::GetGroupUrdf>(
       GET_URDF_SERVICE_NAME,
       [this](const std::shared_ptr<moveit_msgs::srv::GetGroupUrdf::Request>& req,
@@ -83,11 +84,13 @@ void GetUrdfService::initialize()
           return;
         }
 
+        std::string full_urdf_string =
+            context_->moveit_cpp_->getPlanningSceneMonitor()->getRobotModelLoader()->getRDFLoader()->getURDFString();
+
         // Check if robot description string is empty
-        if (full_urdf_string_.empty())
+        if (full_urdf_string.empty())
         {
-          const auto error_string =
-              std::string("Couldn't get the robot description string from '/robot_description' topic");
+          const auto error_string = std::string("Couldn't get the robot description string from MoveItCpp");
           RCLCPP_ERROR(getLogger(), "%s", error_string.c_str());
           res->error_code.message = error_string;
           res->error_code.val = moveit_msgs::msg::MoveItErrorCodes::FAILURE;
@@ -107,8 +110,8 @@ void GetUrdfService::initialize()
 
         for (const auto& link_name : link_names)
         {
-          const auto start = full_urdf_string_.find("<link name=\"" + link_name + "\"");
-          auto substring = full_urdf_string_.substr(start, full_urdf_string_.size() - start);
+          const auto start = full_urdf_string.find("<link name=\"" + link_name + "\"");
+          auto substring = full_urdf_string.substr(start, full_urdf_string.size() - start);
 
           // Link elements can be closed either by "/>" or "</link>" so we need to consider both cases
           auto const substring_without_opening = substring.substr(1, substring.size() - 2);
@@ -133,8 +136,8 @@ void GetUrdfService::initialize()
         joint_names.erase(std::unique(joint_names.begin(), joint_names.end()), joint_names.end());
         for (const auto& joint_name : joint_names)
         {
-          const auto start = full_urdf_string_.find("<joint name=\"" + joint_name + "\" type");
-          auto substring = full_urdf_string_.substr(start, full_urdf_string_.size() - start);
+          const auto start = full_urdf_string.find("<joint name=\"" + joint_name + "\" type");
+          auto substring = full_urdf_string.substr(start, full_urdf_string.size() - start);
           res->urdf_string += substring.substr(0, substring.find(JOINT_ELEMENT_CLOSING) + JOINT_ELEMENT_CLOSING.size());
           RCLCPP_ERROR(getLogger(), "%s", joint_name.c_str());
 
@@ -164,12 +167,6 @@ void GetUrdfService::initialize()
       }  // End of callback function
   );
 }
-
-void GetUrdfService::robotDescriptionSubscriberCallback(const std_msgs::msg::String::ConstSharedPtr& msg)
-{
-  full_urdf_string_ = msg->data;
-}
-
 }  // namespace move_group
 
 #include <pluginlib/class_list_macros.hpp>
