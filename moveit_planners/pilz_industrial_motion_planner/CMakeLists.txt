@@ -28,34 +28,31 @@ find_package(tf2_ros REQUIRED)
 find_package(orocos_kdl REQUIRED)
 find_package(Boost REQUIRED COMPONENTS)
 
-###########
-## Build ##
-###########
-include_directories(
-  include
-)
+# ##############################################################################
+# Build ##
+# ##############################################################################
+include_directories(include)
 
 set(THIS_PACKAGE_INCLUDE_DEPENDS
-  Eigen3
-  eigen3_cmake_module
-  # joint_limits_interface
-  generate_parameter_library
-  geometry_msgs
-  moveit_core
-  moveit_msgs
-  moveit_ros_move_group
-  moveit_ros_planning
-  pluginlib
-  rclcpp
-  tf2
-  tf2_eigen
-  tf2_eigen_kdl
-  tf2_geometry_msgs
-  tf2_kdl
-  tf2_ros
-  orocos_kdl
-  Boost
-)
+    Eigen3
+    eigen3_cmake_module
+    # joint_limits_interface
+    generate_parameter_library
+    geometry_msgs
+    moveit_core
+    moveit_msgs
+    moveit_ros_move_group
+    moveit_ros_planning
+    pluginlib
+    rclcpp
+    tf2
+    tf2_eigen
+    tf2_eigen_kdl
+    tf2_geometry_msgs
+    tf2_kdl
+    tf2_ros
+    orocos_kdl
+    Boost)
 
 # ##############################################################################
 # Libraries ##
