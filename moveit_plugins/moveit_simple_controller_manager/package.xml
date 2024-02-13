@@ -26,9 +26,6 @@
   <depend>control_msgs</depend>
   <depend>rclcpp_action</depend>
 
-  <test_depend>ament_lint_auto</test_depend>
-  <test_depend>ament_lint_common</test_depend>
-
   <export>
     <build_type>ament_cmake</build_type>
     <moveit_core plugin="${prefix}/moveit_simple_controller_manager_plugin_description.xml"/>

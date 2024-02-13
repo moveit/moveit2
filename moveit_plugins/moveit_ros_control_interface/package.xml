@@ -21,9 +21,6 @@
   <depend version_gte="1.11.2">pluginlib</depend>
   <depend>trajectory_msgs</depend>
 
-  <test_depend>ament_lint_auto</test_depend>
-  <test_depend>ament_lint_common</test_depend>
-
   <export>
     <build_type>ament_cmake</build_type>
   </export>
