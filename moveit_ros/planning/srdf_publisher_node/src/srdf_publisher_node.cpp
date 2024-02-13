@@ -65,6 +65,11 @@ public:
   {
     srdf_publisher_ = this->create_publisher<std_msgs::msg::String>("robot_description_semantic",
                                                                     rclcpp::QoS(1).transient_local().reliable());
+
+    // TODO: Update the callback used here once Humble is EOL
+    // Using add_on_set_parameters_callback as it is the only parameter callback available in Humble.
+    // This is also why we have to return an always success validation.
+    // Once Humble is EOL use add_post_set_parameters_callback.
     on_set_parameters_handle_ =
         this->add_on_set_parameters_callback([this](const std::vector<rclcpp::Parameter>& parameters) {
           for (auto const& parameter : parameters)
@@ -74,6 +79,7 @@ public:
               std_msgs::msg::String msg;
               msg.data = parameter.get_value<std::string>();
               srdf_publisher_->publish(msg);
+              break;
             }
           }
 
