@@ -60,3 +60,4 @@ repos:
       - id: cmake-lint
         args:
           - "--disabled-codes=C0301" # Disable Line too long lint
+          - "--suppress-decorations"
