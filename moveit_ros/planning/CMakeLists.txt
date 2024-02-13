@@ -39,50 +39,46 @@ set(THIS_PACKAGE_INCLUDE_DIRS
     trajectory_execution_manager/include
     plan_execution/include
     collision_plugin_loader/include
-    moveit_cpp/include
-)
+    moveit_cpp/include)
 
 set(THIS_PACKAGE_LIBRARIES
-  moveit_rdf_loader
-  moveit_kinematics_plugin_loader
-  moveit_robot_model_loader
-  moveit_constraint_sampler_manager_loader
-  planning_pipeline_parameters
-  moveit_planning_pipeline
-  moveit_planning_pipeline_interfaces
-  moveit_trajectory_execution_manager
-  moveit_plan_execution
-  moveit_planning_scene_monitor
-  moveit_collision_plugin_loader
-  default_request_adapter_parameters
-  default_response_adapter_parameters
-  moveit_default_planning_request_adapter_plugins
-  moveit_default_planning_response_adapter_plugins
-  moveit_cpp
-)
+    moveit_rdf_loader
+    moveit_kinematics_plugin_loader
+    moveit_robot_model_loader
+    moveit_constraint_sampler_manager_loader
+    planning_pipeline_parameters
+    moveit_planning_pipeline
+    moveit_planning_pipeline_interfaces
+    moveit_trajectory_execution_manager
+    moveit_plan_execution
+    moveit_planning_scene_monitor
+    moveit_collision_plugin_loader
+    default_request_adapter_parameters
+    default_response_adapter_parameters
+    moveit_default_planning_request_adapter_plugins
+    moveit_default_planning_response_adapter_plugins
+    moveit_cpp)
 
 set(THIS_PACKAGE_INCLUDE_DEPENDS
-  pluginlib
-  generate_parameter_library
-  rclcpp
-  message_filters
-  srdfdom
-  urdf
-  tf2
-  tf2_eigen
-  tf2_ros
-  Eigen3
-  moveit_core
-  # moveit_ros_perception
-  moveit_ros_occupancy_map_monitor
-  moveit_msgs
-  tf2_msgs
-  tf2_geometry_msgs
-)
+    pluginlib
+    generate_parameter_library
+    rclcpp
+    message_filters
+    srdfdom
+    urdf
+    tf2
+    tf2_eigen
+    tf2_ros
+    Eigen3
+    moveit_core
+    # moveit_ros_perception
+    moveit_ros_occupancy_map_monitor
+    moveit_msgs
+    tf2_msgs
+    tf2_geometry_msgs)
 
 include_directories(${THIS_PACKAGE_INCLUDE_DIRS})
-include_directories(SYSTEM
-                    ${EIGEN3_INCLUDE_DIRS})
+include_directories(SYSTEM ${EIGEN3_INCLUDE_DIRS})
 
 add_subdirectory(collision_plugin_loader)
 add_subdirectory(constraint_sampler_manager_loader)
@@ -105,16 +101,19 @@ install(
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
   RUNTIME DESTINATION bin
-  INCLUDES DESTINATION include/moveit_ros_planning
-)
+  INCLUDES
+  DESTINATION include/moveit_ros_planning)
 
 ament_export_targets(moveit_ros_planningTargets HAS_LIBRARY_TARGET)
 ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS})
 
-pluginlib_export_plugin_description_file(moveit_core "default_request_adapters_plugin_description.xml")
-pluginlib_export_plugin_description_file(moveit_core "default_response_adapters_plugin_description.xml")
+pluginlib_export_plugin_description_file(
+  moveit_core "default_request_adapters_plugin_description.xml")
+pluginlib_export_plugin_description_file(
+  moveit_core "default_response_adapters_plugin_description.xml")
 if(BUILD_TESTING)
-  pluginlib_export_plugin_description_file(moveit_core "planning_pipeline_test_plugins_description.xml")
+  pluginlib_export_plugin_description_file(
+    moveit_core "planning_pipeline_test_plugins_description.xml")
 
   find_package(ament_lint_auto REQUIRED)
   # These don't pass yet, disable them for now

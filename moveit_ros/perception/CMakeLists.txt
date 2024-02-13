@@ -27,7 +27,8 @@ if(WITH_OPENGL)
       set(SYSTEM_GL_LIBRARIES ${GLEW_LIBRARIES} GLUT::GLUT)
     endif()
   endif()
-  set(perception_GL_INCLUDE_DIRS "mesh_filter/include" "depth_image_octomap_updater/include")
+  set(perception_GL_INCLUDE_DIRS "mesh_filter/include"
+                                 "depth_image_octomap_updater/include")
   set(SYSTEM_GL_INCLUDE_DIRS ${GLEW_INCLUDE_DIR} ${GLUT_INCLUDE_DIR})
 endif()
 
@@ -59,46 +60,39 @@ find_package(OpenCV)
 include(ConfigExtras.cmake)
 
 set(THIS_PACKAGE_INCLUDE_DIRS
-  depth_image_octomap_updater/include
-  lazy_free_space_updater/include
-  mesh_filter/include
-  point_containment_filter/include
-  pointcloud_octomap_updater/include
-  semantic_world/include
-  ${perception_GL_INCLUDE_DIRS}
-)
+    depth_image_octomap_updater/include
+    lazy_free_space_updater/include
+    mesh_filter/include
+    point_containment_filter/include
+    pointcloud_octomap_updater/include
+    semantic_world/include
+    ${perception_GL_INCLUDE_DIRS})
 
 set(THIS_PACKAGE_LIBRARIES
-  moveit_depth_image_octomap_updater
-  moveit_depth_image_octomap_updater_core
-  moveit_lazy_free_space_updater
-  moveit_mesh_filter
-  moveit_point_containment_filter
-  moveit_pointcloud_octomap_updater
-  moveit_pointcloud_octomap_updater_core
-  moveit_semantic_world
-)
+    moveit_depth_image_octomap_updater
+    moveit_depth_image_octomap_updater_core
+    moveit_lazy_free_space_updater
+    moveit_mesh_filter
+    moveit_point_containment_filter
+    moveit_pointcloud_octomap_updater
+    moveit_pointcloud_octomap_updater_core
+    moveit_semantic_world)
 
 set(THIS_PACKAGE_INCLUDE_DEPENDS
-  image_transport
-  moveit_core
-  moveit_msgs
-  moveit_ros_occupancy_map_monitor
-  object_recognition_msgs
-  rclcpp
-  sensor_msgs
-  tf2_geometry_msgs
-  Eigen3
-)
+    image_transport
+    moveit_core
+    moveit_msgs
+    moveit_ros_occupancy_map_monitor
+    object_recognition_msgs
+    rclcpp
+    sensor_msgs
+    tf2_geometry_msgs
+    Eigen3)
 
 include_directories(${THIS_PACKAGE_INCLUDE_DIRS})
-include_directories(SYSTEM
-  ${Boost_INCLUDE_DIRS}
-  ${EIGEN3_INCLUDE_DIRS}
-  ${OpenCV_INCLUDE_DIRS}
-  ${SYSTEM_GL_INCLUDE_DIR}
-  ${X11_INCLUDE_DIR}
-)
+include_directories(
+  SYSTEM ${Boost_INCLUDE_DIRS} ${EIGEN3_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS}
+  ${SYSTEM_GL_INCLUDE_DIR} ${X11_INCLUDE_DIR})
 
 add_subdirectory(lazy_free_space_updater)
 add_subdirectory(point_containment_filter)
@@ -116,14 +110,18 @@ install(
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
   RUNTIME DESTINATION bin
-  INCLUDES DESTINATION include/moveit_ros_perception
-)
+  INCLUDES
+  DESTINATION include/moveit_ros_perception)
 
 ament_export_targets(moveit_ros_perceptionTargets HAS_LIBRARY_TARGET)
 ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS})
 
-pluginlib_export_plugin_description_file(moveit_ros_occupancy_map_monitor "pointcloud_octomap_updater_plugin_description.xml")
-pluginlib_export_plugin_description_file(moveit_ros_occupancy_map_monitor "depth_image_octomap_updater_plugin_description.xml")
+pluginlib_export_plugin_description_file(
+  moveit_ros_occupancy_map_monitor
+  "pointcloud_octomap_updater_plugin_description.xml")
+pluginlib_export_plugin_description_file(
+  moveit_ros_occupancy_map_monitor
+  "depth_image_octomap_updater_plugin_description.xml")
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)

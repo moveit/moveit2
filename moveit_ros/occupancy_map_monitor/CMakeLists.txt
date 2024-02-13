@@ -17,40 +17,33 @@ find_package(octomap REQUIRED)
 find_package(geometric_shapes REQUIRED)
 find_package(tf2_ros REQUIRED)
 
-
 include_directories(include)
-include_directories(SYSTEM
-  ${EIGEN3_INCLUDE_DIRS}
-  ${X11_INCLUDE_DIR}
-)
+include_directories(SYSTEM ${EIGEN3_INCLUDE_DIRS} ${X11_INCLUDE_DIR})
 
 set(THIS_PACKAGE_INCLUDE_DEPENDS
-  rclcpp
-  moveit_core
-  moveit_msgs
-  pluginlib
-  octomap
-  geometric_shapes
-  Boost
-)
+    rclcpp
+    moveit_core
+    moveit_msgs
+    pluginlib
+    octomap
+    geometric_shapes
+    Boost)
 
-add_library(moveit_ros_occupancy_map_monitor SHARED
-  src/occupancy_map_monitor.cpp
-  src/occupancy_map_monitor_middleware_handle.cpp
-  src/occupancy_map_updater.cpp
-)
-set_target_properties(moveit_ros_occupancy_map_monitor PROPERTIES VERSION "${moveit_ros_occupancy_map_monitor_VERSION}")
+add_library(
+  moveit_ros_occupancy_map_monitor SHARED
+  src/occupancy_map_monitor.cpp src/occupancy_map_monitor_middleware_handle.cpp
+  src/occupancy_map_updater.cpp)
+set_target_properties(
+  moveit_ros_occupancy_map_monitor
+  PROPERTIES VERSION "${moveit_ros_occupancy_map_monitor_VERSION}")
 ament_target_dependencies(moveit_ros_occupancy_map_monitor
-  ${THIS_PACKAGE_INCLUDE_DEPENDS}
-)
+                          ${THIS_PACKAGE_INCLUDE_DEPENDS})
 
 add_executable(moveit_ros_occupancy_map_server src/occupancy_map_server.cpp)
-ament_target_dependencies(moveit_ros_occupancy_map_server
-  PUBLIC ${THIS_PACKAGE_INCLUDE_DEPENDS}
-)
+ament_target_dependencies(moveit_ros_occupancy_map_server PUBLIC
+                          ${THIS_PACKAGE_INCLUDE_DEPENDS})
 target_link_libraries(moveit_ros_occupancy_map_server
-  PRIVATE
-  moveit_ros_occupancy_map_monitor)
+                      PRIVATE moveit_ros_occupancy_map_monitor)
 
 install(
   TARGETS moveit_ros_occupancy_map_monitor
@@ -58,12 +51,11 @@ install(
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
   RUNTIME DESTINATION bin
-  INCLUDES DESTINATION include/moveit_ros_occupancy_map_monitor
-)
+  INCLUDES
+  DESTINATION include/moveit_ros_occupancy_map_monitor)
 
 install(TARGETS moveit_ros_occupancy_map_server
-  DESTINATION lib/moveit_ros_occupancy_map_monitor
-)
+        DESTINATION lib/moveit_ros_occupancy_map_monitor)
 install(DIRECTORY include/ DESTINATION include/moveit_ros_occupancy_map_monitor)
 
 ament_export_targets(moveit_ros_occupancy_map_monitorTargets HAS_LIBRARY_TARGET)
@@ -83,11 +75,9 @@ if(BUILD_TESTING)
   find_package(ament_cmake_gmock REQUIRED)
 
   ament_add_gmock(occupancy_map_monitor_tests
-    test/occupancy_map_monitor_tests.cpp
-  )
+                  test/occupancy_map_monitor_tests.cpp)
   target_link_libraries(occupancy_map_monitor_tests
-    moveit_ros_occupancy_map_monitor
-  )
+                        moveit_ros_occupancy_map_monitor)
 endif()
 
 ament_package()

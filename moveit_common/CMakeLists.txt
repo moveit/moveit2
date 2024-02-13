@@ -8,11 +8,6 @@ if(BUILD_TESTING)
   ament_lint_auto_find_test_dependencies()
 endif()
 
-ament_package(
-  CONFIG_EXTRAS "moveit_common-extras.cmake"
-)
+ament_package(CONFIG_EXTRAS "moveit_common-extras.cmake")
 
-install(
-  DIRECTORY cmake
-  DESTINATION share/moveit_common
-)
+install(DIRECTORY cmake DESTINATION share/moveit_common)

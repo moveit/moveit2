@@ -20,31 +20,24 @@ generate_parameter_library(stomp_moveit_parameters res/stomp_moveit.yaml)
 include_directories(include)
 
 # Planner Plugin
-add_library(stomp_moveit_plugin SHARED
-  src/stomp_moveit_planner_plugin.cpp
-  src/stomp_moveit_planning_context.cpp
-)
-ament_target_dependencies(stomp_moveit_plugin
-  moveit_core
-  std_msgs
-  tf2_eigen
-  visualization_msgs
-)
-target_link_libraries(stomp_moveit_plugin
-  stomp::stomp
-  stomp_moveit_parameters
-  rsl::rsl
-)
+add_library(stomp_moveit_plugin SHARED src/stomp_moveit_planner_plugin.cpp
+                                       src/stomp_moveit_planning_context.cpp)
+ament_target_dependencies(stomp_moveit_plugin moveit_core std_msgs tf2_eigen
+                          visualization_msgs)
+target_link_libraries(stomp_moveit_plugin stomp::stomp stomp_moveit_parameters
+                      rsl::rsl)
 
-pluginlib_export_plugin_description_file(moveit_core stomp_moveit_plugin_description.xml)
+pluginlib_export_plugin_description_file(moveit_core
+                                         stomp_moveit_plugin_description.xml)
 
-install(TARGETS stomp_moveit_plugin stomp_moveit_parameters
+install(
+  TARGETS stomp_moveit_plugin stomp_moveit_parameters
   EXPORT moveit_planners_stompTargets
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
   RUNTIME DESTINATION bin
-  INCLUDES DESTINATION include/moveit_planners_stomp
-)
+  INCLUDES
+  DESTINATION include/moveit_planners_stomp)
 
 ament_export_targets(moveit_planners_stompTargets HAS_LIBRARY_TARGET)
 ament_export_dependencies(moveit_core stomp generate_parameter_library)

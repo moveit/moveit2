@@ -19,32 +19,26 @@ include(ConfigExtras.cmake)
 include_directories(include)
 
 set(THIS_PACKAGE_INCLUDE_DEPENDS
-  rclcpp
-  Boost
-  tf2_eigen
-  moveit_core
-  moveit_ros_planning
-  moveit_ros_warehouse
-  pluginlib
-)
+    rclcpp
+    Boost
+    tf2_eigen
+    moveit_core
+    moveit_ros_planning
+    moveit_ros_warehouse
+    pluginlib)
 
-add_library(moveit_ros_benchmarks SHARED
-  src/BenchmarkOptions.cpp
-  src/BenchmarkExecutor.cpp
-)
-set_target_properties(moveit_ros_benchmarks PROPERTIES VERSION "${moveit_ros_benchmarks_VERSION}")
+add_library(moveit_ros_benchmarks SHARED src/BenchmarkOptions.cpp
+                                         src/BenchmarkExecutor.cpp)
+set_target_properties(moveit_ros_benchmarks
+                      PROPERTIES VERSION "${moveit_ros_benchmarks_VERSION}")
 if(WIN32)
   set(EXTRA_LIB ws2_32.lib)
 endif()
-ament_target_dependencies(moveit_ros_benchmarks
-  ${THIS_PACKAGE_INCLUDE_DEPENDS}
-)
+ament_target_dependencies(moveit_ros_benchmarks ${THIS_PACKAGE_INCLUDE_DEPENDS})
 target_link_libraries(moveit_ros_benchmarks ${EXTRA_LIB})
 
 add_executable(moveit_run_benchmark src/RunBenchmark.cpp)
-ament_target_dependencies(moveit_run_benchmark
-  ${THIS_PACKAGE_INCLUDE_DEPENDS}
-)
+ament_target_dependencies(moveit_run_benchmark ${THIS_PACKAGE_INCLUDE_DEPENDS})
 target_link_libraries(moveit_run_benchmark moveit_ros_benchmarks)
 
 install(
@@ -53,25 +47,18 @@ install(
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
   RUNTIME DESTINATION bin
-  INCLUDES DESTINATION include/moveit_ros_benchmarks
-)
+  INCLUDES
+  DESTINATION include/moveit_ros_benchmarks)
 
 ament_export_targets(moveit_ros_benchmarksTargets HAS_LIBRARY_TARGET)
 ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS})
 
-install(
-  TARGETS
-    moveit_run_benchmark
-  DESTINATION lib/moveit_ros_benchmarks
-)
+install(TARGETS moveit_run_benchmark DESTINATION lib/moveit_ros_benchmarks)
 
-install(DIRECTORY include/
-  DESTINATION include/moveit_ros_benchmarks
-)
+install(DIRECTORY include/ DESTINATION include/moveit_ros_benchmarks)
 
 install(PROGRAMS scripts/moveit_benchmark_statistics.py
-  DESTINATION lib/moveit_ros_benchmarks
-)
+        DESTINATION lib/moveit_ros_benchmarks)
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)

@@ -16,12 +16,12 @@ if(BUILD_TESTING)
   # Run all lint tests in package.xml except those listed above
   ament_lint_auto_find_test_dependencies()
 
-  # TODO (vatanaksoytezer / andyze: Flaky behaviour, investigate and re-enable this test asap)
-  # Basic integration tests
-  # ament_add_gtest_executable(test_basic_integration
-  #     test_basic_integration.cpp
-  # )
-  # ament_target_dependencies(test_basic_integration ${THIS_PACKAGE_INCLUDE_DEPENDS})
-  # add_ros_test(launch/test_basic_integration.test.py TIMEOUT 50 ARGS "test_binary_dir:=${CMAKE_CURRENT_BINARY_DIR}")
+  # TODO (vatanaksoytezer / andyze: Flaky behaviour, investigate and re-enable
+  # this test asap) Basic integration tests
+  # ament_add_gtest_executable(test_basic_integration test_basic_integration.cpp
+  # ) ament_target_dependencies(test_basic_integration
+  # ${THIS_PACKAGE_INCLUDE_DEPENDS})
+  # add_ros_test(launch/test_basic_integration.test.py TIMEOUT 50 ARGS
+  # "test_binary_dir:=${CMAKE_CURRENT_BINARY_DIR}")
 
 endif()

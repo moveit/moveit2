@@ -24,39 +24,38 @@ find_package(tf2_kdl REQUIRED)
 include(ConfigExtras.cmake)
 
 set(THIS_PACKAGE_INCLUDE_DIRS
-  kdl_kinematics_plugin/include
-  srv_kinematics_plugin/include
-  cached_ik_kinematics_plugin/include
-)
+    kdl_kinematics_plugin/include srv_kinematics_plugin/include
+    cached_ik_kinematics_plugin/include)
 
 set(THIS_PACKAGE_LIBRARIES
-  cached_ik_kinematics_parameters
-  moveit_cached_ik_kinematics_base
-  moveit_cached_ik_kinematics_plugin
-  kdl_kinematics_parameters
-  moveit_kdl_kinematics_plugin
-  srv_kinematics_parameters
-  moveit_srv_kinematics_plugin
-)
+    cached_ik_kinematics_parameters
+    moveit_cached_ik_kinematics_base
+    moveit_cached_ik_kinematics_plugin
+    kdl_kinematics_parameters
+    moveit_kdl_kinematics_plugin
+    srv_kinematics_parameters
+    moveit_srv_kinematics_plugin)
 
 set(THIS_PACKAGE_INCLUDE_DEPENDS
-  Eigen3
-  class_loader
-  generate_parameter_library
-  kdl_parser
-  moveit_core
-  moveit_msgs
-  moveit_ros_planning
-  orocos_kdl_vendor
-  pluginlib
-  random_numbers
-  rclcpp
-  tf2_kdl
-)
+    Eigen3
+    class_loader
+    generate_parameter_library
+    kdl_parser
+    moveit_core
+    moveit_msgs
+    moveit_ros_planning
+    orocos_kdl_vendor
+    pluginlib
+    random_numbers
+    rclcpp
+    tf2_kdl)
 
-pluginlib_export_plugin_description_file(moveit_core kdl_kinematics_plugin_description.xml)
-pluginlib_export_plugin_description_file(moveit_core srv_kinematics_plugin_description.xml)
-pluginlib_export_plugin_description_file(moveit_core cached_ik_kinematics_plugin_description.xml)
+pluginlib_export_plugin_description_file(moveit_core
+                                         kdl_kinematics_plugin_description.xml)
+pluginlib_export_plugin_description_file(moveit_core
+                                         srv_kinematics_plugin_description.xml)
+pluginlib_export_plugin_description_file(
+  moveit_core cached_ik_kinematics_plugin_description.xml)
 
 include_directories(${THIS_PACKAGE_INCLUDE_DIRS})
 
@@ -72,8 +71,8 @@ install(
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
   RUNTIME DESTINATION bin
-  INCLUDES DESTINATION include/moveit_kinematics
-)
+  INCLUDES
+  DESTINATION include/moveit_kinematics)
 
 ament_export_targets(${PROJECT_NAME}Targets HAS_LIBRARY_TARGET)
 ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS})
