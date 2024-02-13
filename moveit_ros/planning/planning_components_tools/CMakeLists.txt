@@ -1,5 +1,5 @@
-# NOTE: For some reason ament_lint_cmake [linelength] only complains about this
-# file
+# NOTE: For some reason ament_lint_cmake [linelength] only caware omplains about
+# this file
 # TODO(henningkayser): Disable linelength filter once number of digits is
 # configurable - set to 120 lint_cmake: -linelength
 add_executable(moveit_print_planning_model_info
