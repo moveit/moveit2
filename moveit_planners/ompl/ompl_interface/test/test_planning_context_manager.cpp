@@ -64,8 +64,7 @@
 #include <moveit/constraint_samplers/constraint_sampler_manager.h>
 #include <moveit/ompl_interface/parameterization/joint_space/joint_model_state_space.h>
 #include <moveit/ompl_interface/parameterization/joint_space/constrained_planning_state_space.h>
-
-// static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.ompl_planning.test.test_planning_context_manager");
+#include <moveit/utils/logger.hpp>
 
 /** \brief Generic implementation of the tests that can be executed on different robots. **/
 class TestPlanningContext : public ompl_interface_testing::LoadTestRobot, public testing::Test
@@ -74,6 +73,7 @@ public:
   TestPlanningContext(const std::string& robot_name, const std::string& group_name)
     : LoadTestRobot(robot_name, group_name), node_(std::make_shared<rclcpp::Node>("planning_context_manager_test"))
   {
+    moveit::setNodeLoggerName(node_->get_name());
   }
 
   void testSimpleRequest(const std::vector<double>& start, const std::vector<double>& goal)

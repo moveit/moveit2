@@ -40,13 +40,17 @@ namespace moveit_py
 {
 namespace bind_planning_scene_monitor
 {
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_py.bind_planning_scene_monitor");
 
 bool processCollisionObject(const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor,
-                            moveit_msgs::msg::CollisionObject& collision_object_msg)
+                            moveit_msgs::msg::CollisionObject& collision_object_msg,
+                            std::optional<moveit_msgs::msg::ObjectColor> color_msg)
 {
   moveit_msgs::msg::CollisionObject::ConstSharedPtr const_ptr =
       std::make_shared<const moveit_msgs::msg::CollisionObject>(collision_object_msg);
+  if (color_msg)
+  {
+    return planning_scene_monitor->processCollisionObjectMsg(const_ptr, *std::move(color_msg));
+  }
   return planning_scene_monitor->processCollisionObjectMsg(const_ptr);
 }
 
@@ -154,7 +158,7 @@ void initPlanningSceneMonitor(py::module& m)
            Clears the octomap.
            )")
       .def("process_collision_object", &moveit_py::bind_planning_scene_monitor::processCollisionObject,
-           py::arg("collision_object_msg"),  // py::arg("color_msg") = nullptr,
+           py::arg("collision_object_msg"), py::arg("color_msg") = nullptr,
            R"(
            Apply a collision object to the planning scene.
 

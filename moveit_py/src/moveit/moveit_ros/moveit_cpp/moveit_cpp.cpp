@@ -35,11 +35,17 @@
 /* Author: Peter David Fagan */
 
 #include "moveit_cpp.h"
+#include <moveit/utils/logger.hpp>
 
 namespace moveit_py
 {
 namespace bind_moveit_cpp
 {
+rclcpp::Logger getLogger()
+{
+  return moveit::getLogger("moveit_cpp_initializer");
+}
+
 std::shared_ptr<moveit_cpp::PlanningComponent>
 getPlanningComponent(std::shared_ptr<moveit_cpp::MoveItCpp>& moveit_cpp_ptr, const std::string& planning_component)
 {
@@ -56,8 +62,6 @@ void initMoveitPy(py::module& m)
 
       .def(py::init([](const std::string& node_name, const std::vector<std::string>& launch_params_filepaths,
                        const py::object& config_dict, bool provide_planning_service) {
-             static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_cpp_initializer");
-
              // This section is used to load the appropriate node parameters before spinning a moveit_cpp instance
              // Priority is given to parameters supplied directly via a config_dict, followed by launch parameters
              // and finally no supplied parameters.
@@ -83,7 +87,6 @@ void initMoveitPy(py::module& m)
              // Initialize ROS, pass launch arguments with rclcpp::init()
              if (!rclcpp::ok())
              {
-               RCLCPP_INFO(LOGGER, "Initialize rclcpp");
                std::vector<const char*> chars;
                chars.reserve(launch_arguments.size());
                for (const auto& arg : launch_arguments)
@@ -92,21 +95,22 @@ void initMoveitPy(py::module& m)
                }
 
                rclcpp::init(launch_arguments.size(), chars.data());
+               RCLCPP_INFO(getLogger(), "Initialize rclcpp");
              }
 
              // Build NodeOptions
-             RCLCPP_INFO(LOGGER, "Initialize node parameters");
+             RCLCPP_INFO(getLogger(), "Initialize node parameters");
              rclcpp::NodeOptions node_options;
              node_options.allow_undeclared_parameters(true)
                  .automatically_declare_parameters_from_overrides(true)
                  .arguments(launch_arguments);
 
-             RCLCPP_INFO(LOGGER, "Initialize node and executor");
+             RCLCPP_INFO(getLogger(), "Initialize node and executor");
              rclcpp::Node::SharedPtr node = rclcpp::Node::make_shared(node_name, "", node_options);
              std::shared_ptr<rclcpp::executors::SingleThreadedExecutor> executor =
                  std::make_shared<rclcpp::executors::SingleThreadedExecutor>();
 
-             RCLCPP_INFO(LOGGER, "Spin separate thread");
+             RCLCPP_INFO(getLogger(), "Spin separate thread");
              auto spin_node = [node, executor]() {
                executor->add_node(node);
                executor->spin();

@@ -1,6 +1,0 @@
-# Parameters that are shared across several component nodes
-
-# A namespace can be added if multiple hybrid planners are launched
-global_planning_action_name: "/test/hybrid_planning/global_planning_action"
-local_planning_action_name: "/test/hybrid_planning/local_planning_action"
-hybrid_planning_action_name: "/test/hybrid_planning/run_hybrid_planning"

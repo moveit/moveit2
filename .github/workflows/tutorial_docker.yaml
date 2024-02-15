@@ -45,12 +45,12 @@ jobs:
       - name: "Remove .dockerignore"
         run: rm .dockerignore  # enforce full source context
       - name: Cache ccache
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: .ccache
           key: docker-tutorial-ccache-${{ matrix.ROS_DISTRO }}-${{ hashFiles( '.docker/tutorial-source/Dockerfile' ) }}
       - name: inject ccache into docker
-        uses: reproducible-containers/buildkit-cache-dance@v2.1.3
+        uses: reproducible-containers/buildkit-cache-dance@v2.1.4
         with:
           cache-source: .ccache
           cache-target: /root/.ccache/
@@ -74,7 +74,7 @@ jobs:
     steps:
       - name: Delete Untagged Images
         if: (github.event_name != 'pull_request') && (github.repository == 'ros-planning/moveit2')
-        uses: actions/github-script@v6
+        uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.DELETE_PACKAGES_TOKEN }}
           script: |
