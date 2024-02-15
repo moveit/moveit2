@@ -197,7 +197,12 @@ def generate_move_group_launch(moveit_config):
         DeclareBooleanLaunchArg("publish_monitored_planning_scene", default_value=True)
     )
     # load non-default MoveGroup capabilities (space separated)
-    ld.add_action(DeclareLaunchArgument("capabilities", default_value=""))
+    ld.add_action(
+        DeclareLaunchArgument(
+            "capabilities",
+            default_value=moveit_config.move_group_capabilities["capabilities"],
+        )
+    )
     # inhibit these default MoveGroup capabilities (space separated)
     ld.add_action(DeclareLaunchArgument("disable_capabilities", default_value=""))
 
@@ -228,7 +233,6 @@ def generate_move_group_launch(moveit_config):
     move_group_params = [
         moveit_config.to_dict(),
         move_group_configuration,
-        moveit_config.move_group_capabilities,
     ]
 
     add_debuggable_node(
