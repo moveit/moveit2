@@ -46,13 +46,13 @@
 
 static const std::string ROBOT_DESCRIPTION = "robot_description";
 
-/** \brief Factor to compute the maximum number of trials random clutter generation. */
+// \brief Factor to compute the maximum number of trials random clutter generation.
 static const int MAX_SEARCH_FACTOR_CLUTTER = 3;
 
-/** \brief Factor to compute the maximum number of trials for random state generation. */
+// \brief Factor to compute the maximum number of trials for random state generation.
 static const int MAX_SEARCH_FACTOR_STATES = 30;
 
-/** \brief Defines a random robot state. */
+// \brief Defines a random robot state.
 enum class RobotStateSelector
 {
   IN_COLLISION,
@@ -60,26 +60,26 @@ enum class RobotStateSelector
   RANDOM,
 };
 
-/** \brief Enumerates the available collision detectors. */
+// \brief Enumerates the available collision detectors.
 enum class CollisionDetector
 {
   FCL,
   BULLET,
 };
 
-/** \brief Enumerates the different types of collision objects. */
+// \brief Enumerates the different types of collision objects.
 enum class CollisionObjectType
 {
   MESH,
   BOX,
 };
 
-/** \brief Clutters the world of the planning scene with random objects in a certain area around the origin. All added
- *  objects are not in collision with the robot.
- *
- *   \param planning_scene The planning scene
- *   \param num_objects The number of objects to be cluttered
- *   \param CollisionObjectType Type of object to clutter (mesh or box) */
+// \brief Clutters the world of the planning scene with random objects in a certain area around the origin. All added
+//  objects are not in collision with the robot.
+//
+//   \param planning_scene The planning scene
+//   \param num_objects The number of objects to be cluttered
+//   \param CollisionObjectType Type of object to clutter (mesh or box)
 void clutterWorld(const planning_scene::PlanningScenePtr& planning_scene, const size_t num_objects,
                   CollisionObjectType type)
 {
@@ -164,12 +164,12 @@ void clutterWorld(const planning_scene::PlanningScenePtr& planning_scene, const 
   ROS_INFO_STREAM("Cluttered the planning scene with " << added_objects << " objects");
 }
 
-/** \brief Runs a collision detection benchmark and measures the time.
- *
- *   \param trials The number of repeated collision checks for each state
- *   \param scene The planning scene
- *   \param CollisionDetector The type of collision detector
- *   \param only_self Flag for only self collision check performed */
+// \brief Runs a collision detection benchmark and measures the time.
+//
+//   \param trials The number of repeated collision checks for each state
+//   \param scene The planning scene
+//   \param CollisionDetector The type of collision detector
+//   \param only_self Flag for only self collision check performed
 void runCollisionDetection(unsigned int trials, const planning_scene::PlanningScenePtr& scene,
                            const std::vector<moveit::core::RobotState>& states, const CollisionDetector col_detector,
                            bool only_self, bool distance = false)
@@ -242,11 +242,11 @@ void runCollisionDetection(unsigned int trials, const planning_scene::PlanningSc
   scene->setCurrentState(states.back());
 }
 
-/** \brief Samples valid states of the robot which can be in collision if desired.
- *  \param desired_states Specifier for type for desired state
- *  \param num_states Number of desired states
- *  \param scene The planning scene
- *  \param robot_states Result vector */
+//\brief Samples valid states of the robot which can be in collision if desired.
+//\param desired_states Specifier for type for desired state
+//\param num_states Number of desired states
+//\param scene The planning scene
+//\param robot_states Result vector
 void findStates(const RobotStateSelector desired_states, unsigned int num_states,
                 const planning_scene::PlanningScenePtr& scene, std::vector<moveit::core::RobotState>& robot_states)
 {
