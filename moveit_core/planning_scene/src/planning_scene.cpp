@@ -511,10 +511,8 @@ void PlanningScene::getCollidingLinks(std::vector<std::string>& links, const mov
   {
     for (const collision_detection::Contact& contact : it->second)
     {
-      if (contact.body_type_1 == collision_detection::BodyTypes::ROBOT_LINK)
-        links.push_back(contact.body_name_1);
-      if (contact.body_type_2 == collision_detection::BodyTypes::ROBOT_LINK)
-        links.push_back(contact.body_name_2);
+      links.push_back(contact.body_name_1);
+      links.push_back(contact.body_name_2);
     }
   }
 }
