@@ -37,6 +37,9 @@
 #include <moveit/planning_pipeline/planning_pipeline.h>
 #include <fmt/format.h>
 #include <moveit/utils/logger.hpp>
+#include <chrono>
+#include <ratio>
+#include <stdexcept>
 
 namespace
 {
@@ -267,10 +270,14 @@ bool PlanningPipeline::generatePlan(const planning_scene::PlanningSceneConstPtr&
   // ---------------------------------
   // Solve the motion planning problem
   // ---------------------------------
-
   planning_interface::MotionPlanRequest mutable_request = req;
   try
   {
+    using clock = std::chrono::system_clock;
+    const auto timeout_error = std::runtime_error("allowed_planning_time exceeded");
+    const auto plan_start_time = clock::now();
+    const double allowed_planning_time = req.allowed_planning_time;
+
     // Call plan request adapter chain
     for (const auto& req_adapter : planning_request_adapter_vector_)
     {
@@ -288,11 +295,24 @@ bool PlanningPipeline::generatePlan(const planning_scene::PlanningSceneConstPtr&
                      req_adapter->getDescription().c_str(), status.message.c_str());
         break;
       }
+
+      // check for timeout
+      if (std::chrono::duration<double>(clock::now() - plan_start_time).count() >= allowed_planning_time)
+      {
+        throw timeout_error;
+      }
     }
+
+    // modify planner request to notice plugins of their corresponding max_allowed_time
+    // NOTE: currently just evenly distributing the remaining time
+    const double max_single_planner_time = std::chrono::duration<double>(clock::now() - plan_start_time).count() /
+                                           pipeline_parameters_.planning_plugins.size();
+    mutable_request.allowed_planning_time = max_single_planner_time;
 
     // Call planners
     for (const auto& planner_name : pipeline_parameters_.planning_plugins)
     {
+      auto planner_start_time = clock::now();
       const auto& planner = planner_map_.at(planner_name);
       // Update reference trajectory with latest solution (if available)
       if (res.trajectory)
@@ -323,6 +343,13 @@ bool PlanningPipeline::generatePlan(const planning_scene::PlanningSceneConstPtr&
         RCLCPP_ERROR(node_->get_logger(), "Planner '%s' failed", planner->getDescription().c_str());
         break;
       }
+
+      // TODO: should this be optional since the plugins already checked for timeout?
+      // check for timeout
+      if (std::chrono::duration<double>(clock::now() - planner_start_time).count() >= max_single_planner_time)
+      {
+        throw timeout_error;
+      }
     }
 
     // Call plan response adapter chain
@@ -341,6 +368,12 @@ bool PlanningPipeline::generatePlan(const planning_scene::PlanningSceneConstPtr&
           RCLCPP_ERROR(node_->get_logger(), "PlanningResponseAdapter '%s' failed",
                        res_adapter->getDescription().c_str());
           break;
+        }
+
+        // check for timeout
+        if (std::chrono::duration<double>(clock::now() - plan_start_time).count() >= allowed_planning_time)
+        {
+          throw timeout_error;
         }
       }
     }
