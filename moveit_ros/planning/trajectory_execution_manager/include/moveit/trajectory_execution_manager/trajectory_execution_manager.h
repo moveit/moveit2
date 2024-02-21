@@ -193,23 +193,41 @@ public:
   /// longer than expected, the trajectory is canceled
   void enableExecutionDurationMonitoring(bool flag);
 
+  /// Get the current status of the monitoring of trajectory execution duration.
+  bool executionDurationMonitoring() const;
+
   /// When determining the expected duration of a trajectory, this multiplicative factor is applied
   /// to get the allowed duration of execution
   void setAllowedExecutionDurationScaling(double scaling);
+
+  /// Get the current scaling of the duration of a trajectory to get the allowed duration of execution.
+  double allowedExecutionDurationScaling() const;
 
   /// When determining the expected duration of a trajectory, this multiplicative factor is applied
   /// to allow more than the expected execution time before triggering trajectory cancel
   void setAllowedGoalDurationMargin(double margin);
 
+  /// Get the current margin of the duration of a trajectory to get the allowed duration of execution.
+  double allowedGoalDurationMargin() const;
+
   /// Before sending a trajectory to a controller, scale the velocities by the factor specified.
   /// By default, this is 1.0
   void setExecutionVelocityScaling(double scaling);
 
+  /// Get the current scaling of the execution velocities.
+  double executionVelocityScaling() const;
+
   /// Set joint-value tolerance for validating trajectory's start point against current robot state
   void setAllowedStartTolerance(double tolerance);
 
+  /// Get the current joint-value for validating trajectory's start point against current robot state.
+  double allowedStartTolerance() const;
+
   /// Enable or disable waiting for trajectory completion
   void setWaitForTrajectoryCompletion(bool flag);
+
+  /// Get the current state of waiting for the trajectory being completed.
+  bool waitForTrajectoryCompletion() const;
 
   rclcpp::Node::SharedPtr getControllerManagerNode()
   {
