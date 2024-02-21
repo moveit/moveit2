@@ -71,21 +71,23 @@ jobs:
         with:
           file: moveit2.repos
       - name: Cache upstream workspace
-        uses: pat-s/always-upload-cache@v3.0.11
+        uses: actions/cache@v4
         with:
           path: ${{ env.BASEDIR }}/upstream_ws
           key: ${{ env.CACHE_PREFIX }}-${{ github.run_id }}
           restore-keys: ${{ env.CACHE_PREFIX }}
+          save-always: true
         env:
           CACHE_PREFIX: ${{ steps.rosdistro_release_date.outputs.date }}-upstream_ws-${{ steps.repos_edit_timestamp.outputs.timestamp }}-rolling-ci-${{ hashFiles('moveit2*.repos', '.github/workflows/ci.yaml') }}
       - name: Cache ccache
-        uses: pat-s/always-upload-cache@v3.0.11
+        uses: actions/cache@v4
         with:
           path: ${{ env.CCACHE_DIR }}
           key: ccache-rolling-ci-ccov-${{ github.sha }}-${{ github.run_id }}
           restore-keys: |
             ccache-rolling-ci-ccov-${{ github.sha }}
             ccache-rolling-ci-ccov
+          save-always: true
       - name: Configure ccache
         run: |
           mkdir -p ${{ env.CCACHE_DIR }}
