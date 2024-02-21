@@ -76,7 +76,7 @@ protected:
     EXPECT_EQ(trajectory->getGroupName(), arm_jmg_name_) << "Generated trajectory group name does not match";
     EXPECT_TRUE(trajectory->empty()) << "Generated trajectory not empty";
 
-    double duration_from_previous = 0.1;
+    rclcpp::Duration duration_from_previous = 0.1;
     std::size_t waypoint_count = 5;
     for (std::size_t ix = 0; ix < waypoint_count; ++ix)
     {
@@ -124,7 +124,7 @@ protected:
 
     // Modify the first waypoint duration
     double trajectory_first_duration_before_update = trajectory->getWayPointDurationFromPrevious(0);
-    double new_duration = trajectory_first_duration_before_update + 0.1;
+    rclcpp::Duration new_duration = trajectory_first_duration_before_update + 0.1;
     trajectory->setWayPointDurationFromPrevious(0, new_duration);
 
     // Check that the trajectory's first duration was updated
@@ -340,7 +340,7 @@ protected:
     EXPECT_EQ(trajectory->getGroupName(), arm_jmg_name_) << "Generated trajectory group name does not match";
     EXPECT_TRUE(trajectory->empty()) << "Generated trajectory not empty";
 
-    double duration_from_previous = 0.1;
+    rclcpp::Duration duration_from_previous = 0.1;
     std::size_t waypoint_count = 5;
     for (std::size_t ix = 0; ix < waypoint_count; ++ix)
       trajectory->addSuffixWayPoint(*robot_state_, duration_from_previous);
@@ -420,7 +420,7 @@ TEST_F(RobotTrajectoryTestFixture, Append)
   EXPECT_EQ(traj2->getWayPointCount(), size_t(5));
 
   // After append() we should have 10 waypoints, all with 0.1s duration
-  const double expected_duration = 0.1;
+  const rclcpp::Duration expected_duration = 0.1;
   initial_trajectory->append(*traj2, expected_duration, 0, 5);
   EXPECT_EQ(initial_trajectory->getWayPointCount(), size_t(10));
 
