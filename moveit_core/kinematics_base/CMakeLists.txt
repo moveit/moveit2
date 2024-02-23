@@ -22,6 +22,6 @@ ament_target_dependencies(
   geometric_shapes
   geometry_msgs)
 
-install(DIRECTORY include/ DESTINATION include/moveit_core)
+install(DIRECTORY include/ DESTINATION include/moveit_core_kinematics_base)
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/moveit_kinematics_base_export.h
-        DESTINATION include/moveit_core)
+        DESTINATION include/moveit_core_kinematics_base)
