@@ -76,3 +76,6 @@ _autosummary
 # source dependencies (see moveit2.repos)
 moveit_msgs
 moveit_resources
+
+# ignore macos generated files
+.DS_Store
