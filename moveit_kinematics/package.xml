@@ -2,7 +2,7 @@
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
   <name>moveit_kinematics</name>
-  <version>2.8.0</version>
+  <version>2.9.0</version>
   <description>Package for all inverse kinematics solvers in MoveIt</description>
 
   <maintainer email="henningkayser@picknik.ai">Henning Kayser</maintainer>
@@ -46,8 +46,6 @@
   <test_depend>moveit_resources_panda_moveit_config</test_depend>
 
   <test_depend>ament_cmake_gtest</test_depend>
-  <test_depend>ament_lint_auto</test_depend>
-  <test_depend>ament_lint_common</test_depend>
   <test_depend>ros_testing</test_depend>
   <test_depend>moveit_configs_utils</test_depend>
   <test_depend>launch_param_builder</test_depend>

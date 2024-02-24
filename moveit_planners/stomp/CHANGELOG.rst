@@ -2,6 +2,33 @@
 Changelog for package moveit_planners_stomp
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.9.0 (2024-01-09)
+------------------
+* Node logging for the rest of MoveIt (`#2599 <https://github.com/ros-planning/moveit2/issues/2599>`_)
+* [Planning Pipeline Refactoring] `#2 <https://github.com/ros-planning/moveit2/issues/2>`_ Enable chaining planners (`#2457 <https://github.com/ros-planning/moveit2/issues/2457>`_)
+  * Enable chaining multiple planners
+* [Planning Pipeline Refactoring] `#1 <https://github.com/ros-planning/moveit2/issues/1>`_ Simplify Adapter - Planner chain (`#2429 <https://github.com/ros-planning/moveit2/issues/2429>`_)
+* Add new clang-tidy style rules (`#2177 <https://github.com/ros-planning/moveit2/issues/2177>`_)
+* Do not pass and return simple types by const ref (`#2453 <https://github.com/ros-planning/moveit2/issues/2453>`_)
+  Co-authored-by: Nils <nilsmailiseke@gmail.com>
+* Use constraint distance instead of bool validity in STOMP cost function (`#2418 <https://github.com/ros-planning/moveit2/issues/2418>`_)
+  * Use constraint distance instead of bool validity in STOMP cost function
+  * Fix comment
+* Using std types instead of boost for Gaussian sampling (`#2351 <https://github.com/ros-planning/moveit2/issues/2351>`_)
+  * *Changed boost namespace to std
+  *Need to compare function implementations
+  *Find an equivalent implementation for variate_generator
+  * calling Distribution(Engine) directly
+  * cleanup
+  * Seed mersenne twister variable with random device
+  * Updated with rsl random library
+* Merge branch 'main' into dependabot/github_actions/SonarSource/sonarcloud-github-c-cpp-2
+* Update clang-format-14 with QualifierAlignment (`#2362 <https://github.com/ros-planning/moveit2/issues/2362>`_)
+  * Set qualifier order in .clang-format
+  * Ran pre-commit to update according to new style guide
+* Merge branch 'main' into dependabot/github_actions/SonarSource/sonarcloud-github-c-cpp-2
+* Contributors: Henning Kayser, Marq Rasmussen, Sebastian Jahr, Shobuj Paul, Tyler Weaver
+
 2.8.0 (2023-09-10)
 ------------------
 * Remove added path index from planner adapter function signature (`#2285 <https://github.com/ros-planning/moveit2/issues/2285>`_)

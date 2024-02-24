@@ -177,11 +177,15 @@ bool MoveGroupCartesianPathService::computeService(
                       "and jump threshold %lf (in %s reference frame)",
                       static_cast<unsigned int>(waypoints.size()), link_name.c_str(), req->max_step,
                       req->jump_threshold, global_frame ? "global" : "link");
+          moveit::core::JumpThreshold jump_threshold = moveit::core::JumpThreshold::disabled();
+          if (req->jump_threshold > 0.0)
+          {
+            jump_threshold = moveit::core::JumpThreshold::relative(req->jump_threshold);
+          }
           std::vector<moveit::core::RobotStatePtr> traj;
           res->fraction = moveit::core::CartesianInterpolator::computeCartesianPath(
               &start_state, jmg, traj, start_state.getLinkModel(link_name), waypoints, global_frame,
-              moveit::core::MaxEEFStep(req->max_step), moveit::core::JumpThreshold::relative(req->jump_threshold),
-              constraint_fn);
+              moveit::core::MaxEEFStep(req->max_step), jump_threshold, constraint_fn);
           moveit::core::robotStateToRobotStateMsg(start_state, res->start_state);
 
           robot_trajectory::RobotTrajectory rt(context_->planning_scene_monitor_->getRobotModel(), req->group_name);

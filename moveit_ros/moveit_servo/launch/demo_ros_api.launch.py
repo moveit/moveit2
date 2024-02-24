@@ -12,6 +12,7 @@ def generate_launch_description():
     moveit_config = (
         MoveItConfigsBuilder("moveit_resources_panda")
         .robot_description(file_path="config/panda.urdf.xacro")
+        .joint_limits(file_path="config/hard_joint_limits.yaml")
         .to_moveit_configs()
     )
 
@@ -27,9 +28,9 @@ def generate_launch_description():
         .to_dict()
     }
 
-    # This filter parameter should be >1. Increase it for greater smoothing but slower motion.
-    low_pass_filter_coeff = {"butterworth_filter_coeff": 1.5}
-
+    # This sets the update rate and planning group name for the acceleration limiting filter.
+    acceleration_filter_update_period = {"update_period": 0.01}
+    planning_group_name = {"planning_group_name": "panda_arm"}
     # RViz
     rviz_config_file = (
         get_package_share_directory("moveit_servo")
@@ -96,10 +97,12 @@ def generate_launch_description():
                 name="servo_node",
                 parameters=[
                     servo_params,
-                    low_pass_filter_coeff,
+                    acceleration_filter_update_period,
+                    planning_group_name,
                     moveit_config.robot_description,
                     moveit_config.robot_description_semantic,
                     moveit_config.robot_description_kinematics,
+                    moveit_config.joint_limits,
                 ],
                 condition=UnlessCondition(launch_as_standalone_node),
             ),
@@ -126,10 +129,12 @@ def generate_launch_description():
         name="servo_node",
         parameters=[
             servo_params,
-            low_pass_filter_coeff,
+            acceleration_filter_update_period,
+            planning_group_name,
             moveit_config.robot_description,
             moveit_config.robot_description_semantic,
             moveit_config.robot_description_kinematics,
+            moveit_config.joint_limits,
         ],
         output="screen",
         condition=IfCondition(launch_as_standalone_node),

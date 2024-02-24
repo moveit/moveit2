@@ -416,12 +416,23 @@ void PlanningSceneMonitor::startPublishingPlanningScene(SceneUpdateType update_t
                                                         const std::string& planning_scene_topic)
 {
   publish_update_types_ = update_type;
-  if (!publish_planning_scene_ && scene_)
+
+  if (publish_planning_scene_)
+  {
+    RCLCPP_INFO(logger_, "Stopping existing planning scene publisher.");
+    stopPublishingPlanningScene();
+  }
+
+  if (scene_)
   {
     planning_scene_publisher_ = pnode_->create_publisher<moveit_msgs::msg::PlanningScene>(planning_scene_topic, 100);
     RCLCPP_INFO(logger_, "Publishing maintained planning scene on '%s'", planning_scene_topic.c_str());
     monitorDiffs(true);
     publish_planning_scene_ = std::make_unique<std::thread>([this] { scenePublishingThread(); });
+  }
+  else
+  {
+    RCLCPP_WARN(logger_, "Did not find a planning scene, so cannot publish it.");
   }
 }
 
@@ -780,7 +791,8 @@ bool PlanningSceneMonitor::newPlanningSceneMessage(const moveit_msgs::msg::Plann
   return result;
 }
 
-bool PlanningSceneMonitor::processCollisionObjectMsg(const moveit_msgs::msg::CollisionObject::ConstSharedPtr& object)
+bool PlanningSceneMonitor::processCollisionObjectMsg(const moveit_msgs::msg::CollisionObject::ConstSharedPtr& object,
+                                                     const std::optional<moveit_msgs::msg::ObjectColor>& color_msg)
 {
   if (!scene_)
     return false;
@@ -791,6 +803,8 @@ bool PlanningSceneMonitor::processCollisionObjectMsg(const moveit_msgs::msg::Col
     last_update_time_ = rclcpp::Clock().now();
     if (!scene_->processCollisionObjectMsg(*object))
       return false;
+    if (color_msg.has_value())
+      scene_->setObjectColor(color_msg.value().id, color_msg.value().color);
   }
   triggerSceneUpdateEvent(UPDATE_GEOMETRY);
   RCLCPP_INFO(logger_, "Published update collision object");
@@ -1278,7 +1292,7 @@ void PlanningSceneMonitor::startWorldGeometryMonitor(const std::string& collisio
     RCLCPP_INFO(logger_, "Listening to '%s' for planning scene world geometry", planning_scene_world_topic.c_str());
   }
 
-  // Ocotomap monitor is optional
+  // Octomap monitor is optional
   if (load_octomap_monitor)
   {
     if (!octomap_monitor_)

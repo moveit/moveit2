@@ -97,32 +97,35 @@ jobs:
         with:
           file: moveit2.repos
       - name: Cache upstream workspace
-        uses: pat-s/always-upload-cache@v3.0.11
+        uses: actions/cache@v4
         with:
           path: ${{ env.BASEDIR }}/upstream_ws
           key: ${{ env.CACHE_PREFIX }}-${{ github.run_id }}
           restore-keys: ${{ env.CACHE_PREFIX }}
+          save-always: true
         env:
           CACHE_PREFIX: ${{ steps.rosdistro_release_date.outputs.date }}-upstream_ws-${{ steps.repos_edit_timestamp.outputs.timestamp }}-${{ matrix.env.IMAGE }}-${{ hashFiles('moveit2*.repos', '.github/workflows/ci.yaml') }}
       # The target directory cache doesn't include the source directory because
       # that comes from the checkout.  See "prepare target_ws for cache" task below
       - name: Cache target workspace
         if: "!matrix.env.CCOV"
-        uses: pat-s/always-upload-cache@v3.0.11
+        uses: actions/cache@v4
         with:
           path: ${{ env.BASEDIR }}/target_ws
           key: ${{ env.CACHE_PREFIX }}-${{ github.run_id }}
           restore-keys: ${{ env.CACHE_PREFIX }}
+          save-always: true
         env:
           CACHE_PREFIX: target_ws${{ matrix.env.CCOV && '-ccov' || '' }}-${{ matrix.env.IMAGE }}-${{ hashFiles('**/CMakeLists.txt', '**/package.xml', '.github/workflows/ci.yaml') }}
       - name: Cache ccache
-        uses: pat-s/always-upload-cache@v3.0.11
+        uses: actions/cache@v4
         with:
           path: ${{ env.CCACHE_DIR }}
           key: ${{ env.CACHE_PREFIX }}-${{ github.sha }}-${{ github.run_id }}
           restore-keys: |
             ${{ env.CACHE_PREFIX }}-${{ github.sha }}
             ${{ env.CACHE_PREFIX }}
+          save-always: true
         env:
           CACHE_PREFIX: ccache-${{ matrix.env.IMAGE }}${{ matrix.env.CCOV && '-ccov' || '' }}
       - name: Configure ccache
@@ -154,7 +157,7 @@ jobs:
           workdir: ${{ env.BASEDIR }}/target_ws
           ignore: '"*/target_ws/build/*" "*/target_ws/install/*" "*/test/*"'
       - name: Upload codecov report
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v4
         if: always() && matrix.env.CCOV && steps.ici.outputs.target_test_results == '0'
         with:
           files: ${{ env.BASEDIR }}/target_ws/coverage.info

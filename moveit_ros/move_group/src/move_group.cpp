@@ -62,6 +62,7 @@ rclcpp::Logger getLogger()
 // These capabilities are loaded unless listed in disable_capabilities
 // clang-format off
 static const char* const DEFAULT_CAPABILITIES[] = {
+   "move_group/GetUrdfService",
    "move_group/MoveGroupCartesianPathService",
    "move_group/MoveGroupKinematicsService",
    "move_group/MoveGroupExecuteTrajectoryAction",
