@@ -99,6 +99,7 @@ void TrajectoryExecutionManager::initialize()
   execution_duration_monitoring_ = true;
   execution_velocity_scaling_ = 1.0;
   allowed_start_tolerance_ = 0.01;
+  joints_allowed_start_tolerance_.clear();
   wait_for_trajectory_completion_ = true;
   control_multi_dof_joint_variables_ = DEFAULT_CONTROL_MULTI_DOF_JOINT_VARIABLES;
 
@@ -209,6 +210,8 @@ void TrajectoryExecutionManager::initialize()
   controller_mgr_node_->get_parameter("trajectory_execution.allowed_start_tolerance", allowed_start_tolerance_);
   controller_mgr_node_->get_parameter("trajectory_execution.control_multi_dof_joint_variables",
                                       control_multi_dof_joint_variables_);
+
+  updateJointsAllowedStartTolerance();
 
   if (manage_controllers_)
   {
@@ -914,7 +917,7 @@ bool TrajectoryExecutionManager::distributeTrajectory(const moveit_msgs::msg::Ro
 
 bool TrajectoryExecutionManager::validate(const TrajectoryExecutionContext& context) const
 {
-  if (allowed_start_tolerance_ == 0)  // skip validation on this magic number
+  if (allowed_start_tolerance_ == 0 && joints_allowed_start_tolerance_.empty())  // skip validation on this magic number
     return true;
 
   RCLCPP_INFO(logger_, "Validating trajectory with allowed_start_tolerance %g", allowed_start_tolerance_);
@@ -960,14 +963,15 @@ bool TrajectoryExecutionManager::validate(const TrajectoryExecutionContext& cont
 
       for (const auto joint : joints)
       {
+        double joint_start_tolerance = getJointAllowedStartTolerance(joint_names[i]);
         reference_state.enforcePositionBounds(joint);
         current_state->enforcePositionBounds(joint);
-        if (reference_state.distance(*current_state, joint) > allowed_start_tolerance_)
+        if (joint_start_tolerance != 0 && reference_state.distance(*current_state, joint) > joint_start_tolerance)
         {
           RCLCPP_ERROR(logger_,
                        "Invalid Trajectory: start point deviates from current robot state more than %g at joint '%s'."
                        "\nEnable DEBUG for detailed state info.",
-                       allowed_start_tolerance_, joint->getName().c_str());
+                       joint_start_tolerance, joint->getName().c_str());
           RCLCPP_DEBUG(logger_, "| Joint | Expected | Current |");
           for (const auto& joint_name : joint_names)
           {
@@ -1012,10 +1016,12 @@ bool TrajectoryExecutionManager::validate(const TrajectoryExecutionContext& cont
         Eigen::Vector3d offset = cur_transform.translation() - start_transform.translation();
         Eigen::AngleAxisd rotation;
         rotation.fromRotationMatrix(cur_transform.linear().transpose() * start_transform.linear());
-        if ((offset.array() > allowed_start_tolerance_).any() || rotation.angle() > allowed_start_tolerance_)
+        double joint_start_tolerance = getJointAllowedStartTolerance(joint_names[i]);
+        if (joint_start_tolerance != 0 &&
+            ((offset.array() > joint_start_tolerance).any() || rotation.angle() > joint_start_tolerance))
         {
           RCLCPP_ERROR_STREAM(logger_, "\nInvalid Trajectory: start point deviates from current robot state more than "
-                                           << allowed_start_tolerance_ << "\nmulti-dof joint '" << joint_names[i]
+                                           << joint_start_tolerance << "\nmulti-dof joint '" << joint_names[i]
                                            << "': pos delta: " << offset.transpose()
                                            << " rot delta: " << rotation.angle());
           return false;
@@ -1235,6 +1241,8 @@ void TrajectoryExecutionManager::execute(const ExecutionCompleteCallback& callba
     return;
 
   stopExecution(false);
+
+  updateJointsAllowedStartTolerance();
 
   // check whether first trajectory starts at current robot state
   if (!trajectories_.empty() && !validate(*trajectories_.front()))
@@ -1568,7 +1576,7 @@ bool TrajectoryExecutionManager::executePart(std::size_t part_index)
 bool TrajectoryExecutionManager::waitForRobotToStop(const TrajectoryExecutionContext& context, double wait_time)
 {
   // skip waiting for convergence?
-  if (allowed_start_tolerance_ == 0 || !wait_for_trajectory_completion_)
+  if ((allowed_start_tolerance_ == 0 && joints_allowed_start_tolerance_.empty()) || !wait_for_trajectory_completion_)
   {
     RCLCPP_INFO(logger_, "Not waiting for trajectory completion");
     return true;
@@ -1607,8 +1615,8 @@ bool TrajectoryExecutionManager::waitForRobotToStop(const TrajectoryExecutionCon
         if (!jm)
           continue;  // joint vanished from robot state (shouldn't happen), but we don't care
 
-        if (fabs(jm->distance(cur_state->getJointPositions(jm), prev_state->getJointPositions(jm))) >
-            allowed_start_tolerance_)
+        double joint_tolerance = getJointAllowedStartTolerance(joint_names[i]);
+        if (fabs(jm->distance(cur_state->getJointPositions(jm), prev_state->getJointPositions(jm))) > joint_tolerance)
         {
           moved = true;
           no_motion_count = 0;
@@ -1834,4 +1842,27 @@ void TrajectoryExecutionManager::loadControllerParams()
   //   }
   // }
 }
+
+double TrajectoryExecutionManager::getJointAllowedStartTolerance(std::string const& jointName) const
+{
+  auto start_tolerance_it = joints_allowed_start_tolerance_.find(jointName);
+  return start_tolerance_it != joints_allowed_start_tolerance_.end() ? start_tolerance_it->second :
+                                                                       allowed_start_tolerance_;
+}
+
+void TrajectoryExecutionManager::updateJointsAllowedStartTolerance()
+{
+  joints_allowed_start_tolerance_.clear();
+  node_handle_.getParam("trajectory_execution/joints_allowed_start_tolerance", joints_allowed_start_tolerance_);
+
+  // remove negative values
+  for (auto it = joints_allowed_start_tolerance_.begin(); it != joints_allowed_start_tolerance_.end();)
+  {
+    if (it->second < 0)
+      it = joints_allowed_start_tolerance_.erase(it);
+    else
+      ++it;
+  }
+}
+
 }  // namespace trajectory_execution_manager
