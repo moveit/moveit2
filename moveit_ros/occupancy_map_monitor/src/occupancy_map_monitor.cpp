@@ -47,13 +47,10 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include <moveit/utils/logger.hpp>
 
 namespace occupancy_map_monitor
 {
-namespace
-{
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.ros.occupancy_map_monitor");
-}
 
 OccupancyMapMonitor::OccupancyMapMonitor(const rclcpp::Node::SharedPtr& node, double map_resolution)
   : OccupancyMapMonitor{ std::make_unique<OccupancyMapMonitorMiddlewareHandle>(node, map_resolution, ""), nullptr }
@@ -76,6 +73,7 @@ OccupancyMapMonitor::OccupancyMapMonitor(std::unique_ptr<MiddlewareHandle> middl
   , debug_info_{ false }
   , mesh_handle_count_{ 0 }
   , active_{ false }
+  , logger_(moveit::getLogger("occupancy_map_monitor"))
 {
   if (middleware_handle_ == nullptr)
   {
@@ -85,16 +83,16 @@ OccupancyMapMonitor::OccupancyMapMonitor(std::unique_ptr<MiddlewareHandle> middl
   // Get the parameters
   parameters_ = middleware_handle_->getParameters();
 
-  RCLCPP_DEBUG(LOGGER, "Using resolution = %lf m for building octomap", parameters_.map_resolution);
+  RCLCPP_DEBUG(logger_, "Using resolution = %lf m for building octomap", parameters_.map_resolution);
 
   if (tf_buffer_ != nullptr && parameters_.map_frame.empty())
   {
-    RCLCPP_WARN(LOGGER, "No target frame specified for Octomap. No transforms will be applied to received data.");
+    RCLCPP_WARN(logger_, "No target frame specified for Octomap. No transforms will be applied to received data.");
   }
   if (tf_buffer_ == nullptr && !parameters_.map_frame.empty())
   {
-    RCLCPP_WARN(LOGGER, "Target frame specified but no TF instance (buffer) specified."
-                        "No transforms will be applied to received data.");
+    RCLCPP_WARN(logger_, "Target frame specified but no TF instance (buffer) specified."
+                         "No transforms will be applied to received data.");
   }
 
   tree_ = std::make_shared<collision_detection::OccMapTree>(parameters_.map_resolution);
@@ -107,7 +105,7 @@ OccupancyMapMonitor::OccupancyMapMonitor(std::unique_ptr<MiddlewareHandle> middl
     // Verify the updater was loaded
     if (occupancy_map_updater == nullptr)
     {
-      RCLCPP_ERROR_STREAM(LOGGER, "Failed to load sensor: `" << sensor_name << "` of type: `" << sensor_type << '`');
+      RCLCPP_ERROR_STREAM(logger_, "Failed to load sensor: `" << sensor_name << "` of type: `" << sensor_type << '`');
       continue;
     }
 
@@ -120,7 +118,7 @@ OccupancyMapMonitor::OccupancyMapMonitor(std::unique_ptr<MiddlewareHandle> middl
     // Load the params in the updater
     if (!occupancy_map_updater->setParams(sensor_name))
     {
-      RCLCPP_ERROR_STREAM(LOGGER, "Failed to configure updater of type " << occupancy_map_updater->getType());
+      RCLCPP_ERROR_STREAM(logger_, "Failed to configure updater of type " << occupancy_map_updater->getType());
       continue;
     }
 
@@ -179,7 +177,7 @@ void OccupancyMapMonitor::addUpdater(const OccupancyMapUpdaterPtr& updater)
       updater->setTransformCacheCallback(transform_cache_callback_);
   }
   else
-    RCLCPP_ERROR(LOGGER, "nullptr updater was specified");
+    RCLCPP_ERROR(logger_, "nullptr updater was specified");
 }
 
 void OccupancyMapMonitor::publishDebugInformation(bool flag)
@@ -262,7 +260,7 @@ bool OccupancyMapMonitor::getShapeTransformCache(std::size_t index, const std::s
           rclcpp::Clock steady_clock(RCL_STEADY_TIME);
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wold-style-cast"
-          RCLCPP_ERROR_THROTTLE(LOGGER, steady_clock, 1000, "Incorrect mapping of mesh handles");
+          RCLCPP_ERROR_THROTTLE(logger_, steady_clock, 1000, "Incorrect mapping of mesh handles");
 #pragma GCC diagnostic pop
           return false;
         }
@@ -282,7 +280,7 @@ bool OccupancyMapMonitor::saveMapCallback(const std::shared_ptr<rmw_request_id_t
                                           const std::shared_ptr<moveit_msgs::srv::SaveMap::Request>& request,
                                           const std::shared_ptr<moveit_msgs::srv::SaveMap::Response>& response)
 {
-  RCLCPP_INFO(LOGGER, "Writing map to %s", request->filename.c_str());
+  RCLCPP_INFO(logger_, "Writing map to %s", request->filename.c_str());
   tree_->lockRead();
   try
   {
@@ -300,7 +298,7 @@ bool OccupancyMapMonitor::loadMapCallback(const std::shared_ptr<rmw_request_id_t
                                           const std::shared_ptr<moveit_msgs::srv::LoadMap::Request>& request,
                                           const std::shared_ptr<moveit_msgs::srv::LoadMap::Response>& response)
 {
-  RCLCPP_INFO(LOGGER, "Reading map from %s", request->filename.c_str());
+  RCLCPP_INFO(logger_, "Reading map from %s", request->filename.c_str());
 
   /* load the octree from disk */
   tree_->lockWrite();
@@ -310,7 +308,7 @@ bool OccupancyMapMonitor::loadMapCallback(const std::shared_ptr<rmw_request_id_t
   }
   catch (...)
   {
-    RCLCPP_ERROR(LOGGER, "Failed to load map from file");
+    RCLCPP_ERROR(logger_, "Failed to load map from file");
     response->success = false;
   }
   tree_->unlockWrite();

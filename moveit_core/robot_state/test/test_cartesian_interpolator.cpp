@@ -141,34 +141,29 @@ TEST_F(SimpleRobot, checkAbsoluteJointSpaceJump)
   // Container for results
   double fraction;
 
-  // Direct call of absolute version
-  fraction = CartesianInterpolator::checkAbsoluteJointSpaceJump(joint_model_group, traj, 1.0, 1.0);
-  EXPECT_EQ(expected_revolute_jump_traj_len, traj.size());  // traj should be cut
-  EXPECT_NEAR(expected_revolute_jump_fraction, fraction, 0.01);
-
-  // Indirect call using checkJointSpaceJumps
+  // Revolute and prismatic joints.
   generateTestTraj(traj, robot_model_);
-  fraction = CartesianInterpolator::checkJointSpaceJump(joint_model_group, traj, JumpThreshold(1.0, 1.0));
+  fraction = CartesianInterpolator::checkJointSpaceJump(joint_model_group, traj, JumpThreshold::absolute(1.0, 1.0));
   EXPECT_EQ(expected_revolute_jump_traj_len, traj.size());  // traj should be cut before the revolute jump
   EXPECT_NEAR(expected_revolute_jump_fraction, fraction, 0.01);
 
   // Test revolute joints
   generateTestTraj(traj, robot_model_);
-  fraction = CartesianInterpolator::checkJointSpaceJump(joint_model_group, traj, JumpThreshold(1.0, 0.0));
+  fraction = CartesianInterpolator::checkJointSpaceJump(joint_model_group, traj, JumpThreshold::absolute(0.01, 10.0));
   EXPECT_EQ(expected_revolute_jump_traj_len, traj.size());  // traj should be cut before the revolute jump
   EXPECT_NEAR(expected_revolute_jump_fraction, fraction, 0.01);
 
   // Test prismatic joints
   generateTestTraj(traj, robot_model_);
-  fraction = CartesianInterpolator::checkJointSpaceJump(joint_model_group, traj, JumpThreshold(0.0, 1.0));
+  fraction = CartesianInterpolator::checkJointSpaceJump(joint_model_group, traj, JumpThreshold::absolute(10.0, 0.01));
   EXPECT_EQ(expected_prismatic_jump_traj_len, traj.size());  // traj should be cut before the prismatic jump
   EXPECT_NEAR(expected_prismatic_jump_fraction, fraction, 0.01);
 
-  // Ignore all absolute jumps
-  generateTestTraj(traj, robot_model_);
-  fraction = CartesianInterpolator::checkJointSpaceJump(joint_model_group, traj, JumpThreshold(0.0, 0.0));
-  EXPECT_EQ(full_traj_len, traj.size());  // traj should not be cut
-  EXPECT_NEAR(1.0, fraction, 0.01);
+  // Pre-condition checks.
+  EXPECT_ANY_THROW(
+      CartesianInterpolator::checkJointSpaceJump(joint_model_group, traj, JumpThreshold::absolute(0.0, 0.01)));
+  EXPECT_ANY_THROW(
+      CartesianInterpolator::checkJointSpaceJump(joint_model_group, traj, JumpThreshold::absolute(0.01, 0.0)));
 }
 
 TEST_F(SimpleRobot, checkRelativeJointSpaceJump)
@@ -185,172 +180,172 @@ TEST_F(SimpleRobot, checkRelativeJointSpaceJump)
       static_cast<double>(expected_relative_jump_traj_len) / static_cast<double>(full_traj_len);
 
   // Container for results
-  double fraction;
+  double fraction = 0.0;
 
-  // Direct call of relative version: 1.01 > 2.97 * (0.01 * 2 + 1.01 * 2)/6.
-  fraction = CartesianInterpolator::checkRelativeJointSpaceJump(joint_model_group, traj, 2.97);
-  EXPECT_EQ(expected_relative_jump_traj_len, traj.size());  // traj should be cut before the first jump of 1.01
-  EXPECT_NEAR(expected_relative_jump_fraction, fraction, 0.01);
-
-  // Indirect call of relative version using checkJointSpaceJumps
+  // Call of relative version: 1.01 > 2.97 * (0.01 * 2 + 1.01 * 2)/6.
   generateTestTraj(traj, robot_model_);
-  fraction = CartesianInterpolator::checkJointSpaceJump(joint_model_group, traj, JumpThreshold(2.97));
+  fraction = CartesianInterpolator::checkJointSpaceJump(joint_model_group, traj, JumpThreshold::relative(2.97));
   EXPECT_EQ(expected_relative_jump_traj_len, traj.size());  // traj should be cut before the first jump of 1.01
   EXPECT_NEAR(expected_relative_jump_fraction, fraction, 0.01);
 
   // Trajectory should not be cut: 1.01 < 2.98 * (0.01 * 2 + 1.01 * 2)/6.
   generateTestTraj(traj, robot_model_);
-  fraction = CartesianInterpolator::checkJointSpaceJump(joint_model_group, traj, JumpThreshold(2.98));
+  fraction = CartesianInterpolator::checkJointSpaceJump(joint_model_group, traj, JumpThreshold::relative(2.98));
   EXPECT_EQ(full_traj_len, traj.size());  // traj should not be cut
   EXPECT_NEAR(1.0, fraction, 0.01);
+
+  // Pre-condition checks.
+  EXPECT_ANY_THROW(CartesianInterpolator::checkJointSpaceJump(joint_model_group, traj, JumpThreshold::relative(0.0)));
 }
 
-class PandaRobot : public testing::Test
-{
-protected:
-  static void SetUpTestSuite()  // setup resources shared between tests
-  {
-    robot_model_ = loadTestingRobotModel("panda");
-    jmg_ = robot_model_->getJointModelGroup("panda_arm");
-    link_ = robot_model_->getLinkModel("panda_link8");
-    ASSERT_TRUE(link_);
-    node_ = rclcpp::Node::make_shared("test_cartesian_interpolator");
-    loadIKPluginForGroup(node_, jmg_, "panda_link0", link_->getName());
-  }
-
-  static void TearDownTestSuite()
-  {
-    robot_model_.reset();
-  }
-
-  void SetUp() override
-  {
-    start_state_ = std::make_shared<RobotState>(robot_model_);
-    ASSERT_TRUE(start_state_->setToDefaultValues(jmg_, "ready"));
-    start_pose_ = start_state_->getGlobalLinkTransform(link_);
-  }
-
-  double computeCartesianPath(std::vector<std::shared_ptr<RobotState>>& result, const Eigen::Vector3d& translation,
-                              bool global)
-  {
-    return CartesianInterpolator::computeCartesianPath(start_state_.get(), jmg_, result, link_, translation, global,
-                                                       MaxEEFStep(0.1), JumpThreshold(), GroupStateValidityCallbackFn(),
-                                                       kinematics::KinematicsQueryOptions());
-  }
-
-  double computeCartesianPath(std::vector<std::shared_ptr<RobotState>>& result, const Eigen::Isometry3d& target,
-                              bool global, const Eigen::Isometry3d& offset = Eigen::Isometry3d::Identity())
-  {
-    return CartesianInterpolator::computeCartesianPath(start_state_.get(), jmg_, result, link_, target, global,
-                                                       MaxEEFStep(0.1), JumpThreshold(), GroupStateValidityCallbackFn(),
-                                                       kinematics::KinematicsQueryOptions(),
-                                                       kinematics::KinematicsBase::IKCostFn(), offset);
-  }
-
-protected:
-  static RobotModelPtr robot_model_;
-  static JointModelGroup* jmg_;
-  static const LinkModel* link_;
-  static rclcpp::Node::SharedPtr node_;
-
-  double prec_ = 1e-8;
-  RobotStatePtr start_state_;
-  Eigen::Isometry3d start_pose_;
-  std::vector<std::shared_ptr<RobotState>> result_;
-};
-
 // TODO - The tests below fail since no kinematic plugins are found. Move the tests to IK plugin package.
-
+// class PandaRobot : public testing::Test
+// {
+// protected:
+//   static void SetUpTestSuite()  // setup resources shared between tests
+//   {
+//     robot_model_ = loadTestingRobotModel("panda");
+//     jmg = robot_model_->getJointModelGroup("panda_arm");
+//     link = robot_model_->getLinkModel("panda_link8");
+//     ASSERT_TRUE(link);
+//     node = rclcpp::Node::make_shared("test_cartesian_interpolator");
+//     loadIKPluginForGroup(node, jmg, "panda_link0", link->getName());
+//   }
+//
+//   static void TearDownTestSuite()
+//   {
+//     robot_model_.reset();
+//   }
+//
+//   void SetUp() override
+//   {
+//     start_state = std::make_shared<RobotState>(robot_model_);
+//     ASSERT_TRUE(start_state->setToDefaultValues(jmg, "ready"));
+//     start_pose = start_state->getGlobalLinkTransform(link);
+//   }
+//
+//   double computeCartesianPath(std::vector<std::shared_ptr<RobotState>>& result, const Eigen::Vector3d& translation,
+//                               bool global)
+//   {
+//     return CartesianInterpolator::computeCartesianPath(start_state.get(), jmg, result, link, translation, global,
+//                                                        MaxEEFStep(0.1), JumpThreshold::Disabled(),
+//                                                        GroupStateValidityCallbackFn(),
+//                                                        kinematics::KinematicsQueryOptions());
+//   }
+//
+//   double computeCartesianPath(std::vector<std::shared_ptr<RobotState>>& result, const Eigen::Isometry3d& target,
+//                               bool global, const Eigen::Isometry3d& offset = Eigen::Isometry3d::Identity())
+//   {
+//     return CartesianInterpolator::computeCartesianPath(start_state.get(), jmg, result, link, target, global,
+//                                                        MaxEEFStep(0.1), JumpThreshold::Disabled(),
+//                                                        GroupStateValidityCallbackFn(),
+//                                                        kinematics::KinematicsQueryOptions(),
+//                                                        kinematics::KinematicsBase::IKCostFn(), offset);
+//   }
+//
+// protected:
+//   static RobotModelPtr robot_model_;
+//   static JointModelGroup* jmg_;
+//   static const LinkModel* link_;
+//   static rclcpp::Node::SharedPtr node;
+//
+//   const double prec_ = 1e-8;
+//   RobotStatePtr start_state_;
+//   Eigen::Isometry3d start_pose_;
+//   std::vector<std::shared_ptr<RobotState>> result_;
+// };
+//
 // TEST_F(PandaRobot, testVectorGlobal)
 // {
 //   Eigen::Vector3d translation(0.2, 0, 0);                                   // move by 0.2 along world's x axis
-//   ASSERT_DOUBLE_EQ(computeCartesianPath(result_, translation, true), 0.2);  // moved full distance of 0.2
+//   ASSERT_DOUBLE_EQ(computeCartesianPath(result, translation, true), 0.2);  // moved full distance of 0.2
 //   // first pose of trajectory should be identical to start_pose
-//   EXPECT_EIGEN_EQ(result_.front()->getGlobalLinkTransform(link_), start_pose_);
+//   EXPECT_EIGEN_EQ(result.front()->getGlobalLinkTransform(link), start_pose);
 //   // last pose of trajectory should have same orientation, and offset of 0.2 along world's x-axis
-//   EXPECT_EIGEN_NEAR(result_.back()->getGlobalLinkTransform(link_).linear(), start_pose_.linear(), prec_);
-//   EXPECT_EIGEN_NEAR(result_.back()->getGlobalLinkTransform(link_).translation(),
-//                     start_pose_.translation() + translation, prec_);
+//   EXPECT_EIGEN_NEAR(result.back()->getGlobalLinkTransform(link).linear(), start_pose.linear(), prec);
+//   EXPECT_EIGEN_NEAR(result.back()->getGlobalLinkTransform(link).translation(),
+//                     start_pose.translation() + translation, prec);
 // }
 // TEST_F(PandaRobot, testVectorLocal)
 // {
 //   Eigen::Vector3d translation(0.2, 0, 0);                                    // move by 0.2 along link's x axis
-//   ASSERT_DOUBLE_EQ(computeCartesianPath(result_, translation, false), 0.2);  // moved full distance of 0.2
+//   ASSERT_DOUBLE_EQ(computeCartesianPath(result, translation, false), 0.2);  // moved full distance of 0.2
 //   // first pose of trajectory should be identical to start_pose
-//   EXPECT_EIGEN_EQ(result_.front()->getGlobalLinkTransform(link_), start_pose_);
+//   EXPECT_EIGEN_EQ(result.front()->getGlobalLinkTransform(link), start_pose);
 //   // last pose of trajectory should have same orientation, and offset of 0.2 along link's x-axis
-//   EXPECT_EIGEN_NEAR(result_.back()->getGlobalLinkTransform(link_).linear(), start_pose_.linear(), prec_);
-//   EXPECT_EIGEN_NEAR(result_.back()->getGlobalLinkTransform(link_).translation(), start_pose_ * translation, prec_);
+//   EXPECT_EIGEN_NEAR(result.back()->getGlobalLinkTransform(link).linear(), start_pose.linear(), prec);
+//   EXPECT_EIGEN_NEAR(result.back()->getGlobalLinkTransform(link).translation(), start_pose * translation, prec);
 // }
 
 // TEST_F(PandaRobot, testTranslationGlobal)
 // {
-//   Eigen::Isometry3d goal = start_pose_;
+//   Eigen::Isometry3d goal = start_pose;
 //   goal.translation().x() += 0.2;  // move by 0.2 along world's x-axis
 
-//   ASSERT_DOUBLE_EQ(computeCartesianPath(result_, goal, true), 1.0);  // 100% of distance generated
+//   ASSERT_DOUBLE_EQ(computeCartesianPath(result, goal, true), 1.0);  // 100% of distance generated
 //   // first pose of trajectory should be identical to start_pose
-//   EXPECT_EIGEN_EQ(result_.front()->getGlobalLinkTransform(link_), start_pose_);
+//   EXPECT_EIGEN_EQ(result.front()->getGlobalLinkTransform(link), start_pose);
 //   // last pose of trajectory should have same orientation, but offset of 0.2 along world's x-axis
-//   EXPECT_EIGEN_NEAR(result_.back()->getGlobalLinkTransform(link_).linear(), start_pose_.linear(), prec_);
-//   EXPECT_EIGEN_NEAR(result_.back()->getGlobalLinkTransform(link_).translation(), goal.translation(), prec_);
+//   EXPECT_EIGEN_NEAR(result.back()->getGlobalLinkTransform(link).linear(), start_pose.linear(), prec);
+//   EXPECT_EIGEN_NEAR(result.back()->getGlobalLinkTransform(link).translation(), goal.translation(), prec);
 // }
 // TEST_F(PandaRobot, testTranslationLocal)
 // {
 //   Eigen::Isometry3d offset(Eigen::Translation3d(0.2, 0, 0));            // move along link's x-axis
-//   ASSERT_DOUBLE_EQ(computeCartesianPath(result_, offset, false), 1.0);  // 100% of distance generated
+//   ASSERT_DOUBLE_EQ(computeCartesianPath(result, offset, false), 1.0);  // 100% of distance generated
 //   // first pose of trajectory should be identical to start_pose
-//   EXPECT_EIGEN_EQ(result_.front()->getGlobalLinkTransform(link_), start_pose_);
+//   EXPECT_EIGEN_EQ(result.front()->getGlobalLinkTransform(link), start_pose);
 //   // last pose of trajectory should have same orientation, but offset of 0.2 along link's x-axis
-//   EXPECT_EIGEN_NEAR(result_.back()->getGlobalLinkTransform(link_).linear(), start_pose_.linear(), prec_);
-//   EXPECT_EIGEN_NEAR(result_.back()->getGlobalLinkTransform(link_).translation(), start_pose_ * offset.translation(),
-//                     prec_);
+//   EXPECT_EIGEN_NEAR(result.back()->getGlobalLinkTransform(link).linear(), start_pose.linear(), prec);
+//   EXPECT_EIGEN_NEAR(result.back()->getGlobalLinkTransform(link).translation(), start_pose * offset.translation(),
+//                     prec);
 // }
 
 // TEST_F(PandaRobot, testRotationLocal)
 // {
 //   // 45° rotation about links's x-axis
 //   Eigen::Isometry3d rot(Eigen::AngleAxisd(M_PI / 4, Eigen::Vector3d::UnitX()));
-//   Eigen::Isometry3d goal = start_pose_ * rot;
+//   Eigen::Isometry3d goal = start_pose * rot;
 
-//   ASSERT_DOUBLE_EQ(computeCartesianPath(result_, rot, false), 1.0);  // 100% of distance generated
+//   ASSERT_DOUBLE_EQ(computeCartesianPath(result, rot, false), 1.0);  // 100% of distance generated
 //   // first pose of trajectory should be identical to start_pose
-//   EXPECT_EIGEN_EQ(result_.front()->getGlobalLinkTransform(link_), start_pose_);
+//   EXPECT_EIGEN_EQ(result.front()->getGlobalLinkTransform(link), start_pose);
 //   // last pose of trajectory should have same position,
-//   EXPECT_EIGEN_NEAR(result_.back()->getGlobalLinkTransform(link_).translation(), start_pose_.translation(), prec_);
-//   EXPECT_EIGEN_NEAR(result_.back()->getGlobalLinkTransform(link_), goal, prec_);
+//   EXPECT_EIGEN_NEAR(result.back()->getGlobalLinkTransform(link).translation(), start_pose.translation(), prec);
+//   EXPECT_EIGEN_NEAR(result.back()->getGlobalLinkTransform(link), goal, prec);
 // }
 // TEST_F(PandaRobot, testRotationGlobal)
 // {
 //   // 45° rotation about links's x-axis
 //   Eigen::Isometry3d rot(Eigen::AngleAxisd(M_PI / 4, Eigen::Vector3d::UnitX()));
-//   Eigen::Isometry3d goal = start_pose_ * rot;
+//   Eigen::Isometry3d goal = start_pose * rot;
 
-//   ASSERT_DOUBLE_EQ(computeCartesianPath(result_, goal, true), 1.0);  // 100% of distance generated
+//   ASSERT_DOUBLE_EQ(computeCartesianPath(result, goal, true), 1.0);  // 100% of distance generated
 //   // first pose of trajectory should be identical to start_pose
-//   EXPECT_EIGEN_NEAR(result_.front()->getGlobalLinkTransform(link_), start_pose_, prec_);
+//   EXPECT_EIGEN_NEAR(result.front()->getGlobalLinkTransform(link), start_pose, prec);
 //   // last pose of trajectory should have same position,
-//   EXPECT_EIGEN_NEAR(result_.back()->getGlobalLinkTransform(link_).translation(), start_pose_.translation(), prec_);
-//   EXPECT_EIGEN_NEAR(result_.back()->getGlobalLinkTransform(link_), goal, prec_);
+//   EXPECT_EIGEN_NEAR(result.back()->getGlobalLinkTransform(link).translation(), start_pose.translation(), prec);
+//   EXPECT_EIGEN_NEAR(result.back()->getGlobalLinkTransform(link), goal, prec);
 // }
 // TEST_F(PandaRobot, testRotationOffset)
 // {
 //   // define offset to virtual center frame
-//   Eigen::Isometry3d offset = Eigen::Translation3d(0, 0, 0.2) * Eigen::AngleAxisd(-M_PI / 4, Eigen::Vector3d::UnitZ());
+//   Eigen::Isometry3d offset = Eigen::Translation3d(0, 0, 0.2) * Eigen::AngleAxisd(-M_PI / 4,
+//   Eigen::Vector3d::UnitZ());
 //   // 45° rotation about center's x-axis
 //   Eigen::Isometry3d rot(Eigen::AngleAxisd(M_PI / 4, Eigen::Vector3d::UnitX()));
-//   Eigen::Isometry3d goal = start_pose_ * offset * rot;
+//   Eigen::Isometry3d goal = start_pose * offset * rot;
 
-//   ASSERT_DOUBLE_EQ(computeCartesianPath(result_, goal, true, offset), 1.0);  // 100% of distance generated
+//   ASSERT_DOUBLE_EQ(computeCartesianPath(result, goal, true, offset), 1.0);  // 100% of distance generated
 //   // first pose of trajectory should be identical to start_pose
-//   EXPECT_EIGEN_NEAR(result_.front()->getGlobalLinkTransform(link_), start_pose_, prec_);
+//   EXPECT_EIGEN_NEAR(result.front()->getGlobalLinkTransform(link), start_pose, prec);
 
 //   // All waypoints of trajectory should have same position in virtual frame
-//   for (const auto& waypoint : result_)
-//     EXPECT_EIGEN_NEAR((waypoint->getGlobalLinkTransform(link_) * offset).translation(),
-//                       (start_pose_ * offset).translation(), prec_);
+//   for (const auto& waypoint : result)
+//     EXPECT_EIGEN_NEAR((waypoint->getGlobalLinkTransform(link) * offset).translation(),
+//                       (start_pose * offset).translation(), prec);
 //   // goal should be reached by virtual frame
-//   EXPECT_EIGEN_NEAR(result_.back()->getGlobalLinkTransform(link_) * offset, goal, prec_);
+//   EXPECT_EIGEN_NEAR(result.back()->getGlobalLinkTransform(link) * offset, goal, prec);
 // }
 
 int main(int argc, char** argv)

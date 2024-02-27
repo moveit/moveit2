@@ -40,8 +40,8 @@
 
 namespace planning_interface
 {
-// for now this is just a typedef
 
+// for now this is just a typedef
 typedef moveit_msgs::msg::MotionPlanRequest MotionPlanRequest;
 
 }  // namespace planning_interface

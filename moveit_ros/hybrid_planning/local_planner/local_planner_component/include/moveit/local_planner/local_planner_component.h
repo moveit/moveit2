@@ -61,32 +61,13 @@
 #include <tf2_ros/buffer.h>
 #include <tf2_ros/transform_listener.h>
 
+// Forward declaration of parameter class allows users to implement custom parameters
+namespace local_planner_parameters
+{
+MOVEIT_STRUCT_FORWARD(Params);
+}
 namespace moveit::hybrid_planning
 {
-// TODO(sjahr) Refactor and use repository wide solution
-template <typename T>
-void declareOrGetParam(const std::string& param_name, T& output_value, const T& default_value,
-                       const rclcpp::Node::SharedPtr& node)
-{
-  try
-  {
-    if (node->has_parameter(param_name))
-    {
-      node->get_parameter<T>(param_name, output_value);
-    }
-    else
-    {
-      output_value = node->declare_parameter<T>(param_name, default_value);
-    }
-  }
-  catch (const rclcpp::exceptions::InvalidParameterTypeException& e)
-  {
-    RCLCPP_ERROR_STREAM(node->get_logger(),
-                        "Error getting parameter '" << param_name << "', check parameter type in YAML file");
-    throw e;
-  }
-}
-
 /// Internal local planner states
 /// TODO(sjahr) Use lifecycle node?
 enum class LocalPlannerState : int8_t
@@ -104,48 +85,6 @@ enum class LocalPlannerState : int8_t
 class LocalPlannerComponent
 {
 public:
-  /// Struct that contains configuration of the local planner component node
-  struct LocalPlannerConfig
-  {
-    void load(const rclcpp::Node::SharedPtr& node)
-    {
-      std::string undefined = "<undefined>";
-      declareOrGetParam<std::string>("group_name", group_name, undefined, node);
-      declareOrGetParam<std::string>("trajectory_operator_plugin_name", trajectory_operator_plugin_name, undefined,
-                                     node);
-      declareOrGetParam<std::string>("local_constraint_solver_plugin_name", local_constraint_solver_plugin_name,
-                                     undefined, node);
-      declareOrGetParam<std::string>("local_planning_action_name", local_planning_action_name, undefined, node);
-      declareOrGetParam<double>("local_planning_frequency", local_planning_frequency, 1.0, node);
-      declareOrGetParam<std::string>("global_solution_topic", global_solution_topic, undefined, node);
-      declareOrGetParam<std::string>("local_solution_topic", local_solution_topic, undefined, node);
-      declareOrGetParam<std::string>("local_solution_topic_type", local_solution_topic_type, undefined, node);
-      declareOrGetParam<bool>("publish_joint_positions", publish_joint_positions, false, node);
-      declareOrGetParam<bool>("publish_joint_velocities", publish_joint_velocities, false, node);
-      // Planning scene monitor options
-      declareOrGetParam<std::string>("monitored_planning_scene", monitored_planning_scene_topic, undefined, node);
-      declareOrGetParam<std::string>("collision_object_topic", collision_object_topic, undefined, node);
-      declareOrGetParam<std::string>("joint_states_topic", joint_states_topic, undefined, node);
-    }
-
-    std::string group_name;
-    std::string robot_description;
-    std::string robot_description_semantic;
-    std::string publish_planning_scene_topic;
-    std::string trajectory_operator_plugin_name;
-    std::string local_constraint_solver_plugin_name;
-    std::string local_planning_action_name;
-    std::string global_solution_topic;
-    std::string local_solution_topic;
-    std::string local_solution_topic_type;
-    bool publish_joint_positions;
-    bool publish_joint_velocities;
-    double local_planning_frequency;
-    std::string monitored_planning_scene_topic;
-    std::string collision_object_topic;
-    std::string joint_states_topic;
-  };
-
   /** \brief Constructor */
   LocalPlannerComponent(const rclcpp::NodeOptions& options);
 
@@ -186,7 +125,7 @@ private:
   std::shared_ptr<rclcpp::Node> node_;
 
   // Planner configuration
-  LocalPlannerConfig config_;
+  std::shared_ptr<local_planner_parameters::Params> config_;
 
   // Current planner state. Must be thread-safe
   std::atomic<LocalPlannerState> state_;

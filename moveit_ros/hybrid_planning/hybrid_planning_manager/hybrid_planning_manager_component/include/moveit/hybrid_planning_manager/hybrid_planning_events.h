@@ -50,13 +50,27 @@ enum class HybridPlanningEvent
   GLOBAL_PLANNING_ACTION_SUCCESSFUL,
   GLOBAL_PLANNING_ACTION_ABORTED,
   GLOBAL_PLANNING_ACTION_CANCELED,
+  GLOBAL_PLANNING_ACTION_REJECTED,
   // Indicates that the global planner found a solution (This solution is not necessarily the last or best solution)
   GLOBAL_SOLUTION_AVAILABLE,
   // Result of the local planning action
   LOCAL_PLANNING_ACTION_SUCCESSFUL,
   LOCAL_PLANNING_ACTION_ABORTED,
   LOCAL_PLANNING_ACTION_CANCELED,
+  LOCAL_PLANNING_ACTION_REJECTED,
   // Undefined event to allow empty reaction events to indicate failure
   UNDEFINED
+};
+
+/**
+ * Enum class HybridPlanningAction - This class defines the basic actions that the HP manager can perform
+ */
+enum class HybridPlanningAction
+{
+  DO_NOTHING,
+  RETURN_HP_SUCCESS,
+  RETURN_HP_FAILURE,
+  SEND_GLOBAL_SOLVER_REQUEST,
+  SEND_LOCAL_SOLVER_REQUEST
 };
 }  // namespace moveit::hybrid_planning

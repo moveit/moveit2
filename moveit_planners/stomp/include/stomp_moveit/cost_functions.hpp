@@ -60,72 +60,90 @@ constexpr double COL_CHECK_DISTANCE = 0.05;
 constexpr double CONSTRAINT_CHECK_DISTANCE = 0.05;
 
 /**
- * Creates a cost function from a binary robot state validation function.
- * This is used for computing smooth cost profiles for binary state conditions like collision checks and constraints.
+ * Creates a cost function from a robot state validation function.
+ * This is used for computing smooth cost profiles for waypoint state conditions like collision checks and constraints.
  * The validator function is applied for all states in the validated path while also considering interpolated states.
  * If a waypoint or an interpolated state is invalid, a local penalty is being applied to the path.
  * Penalty costs are being smoothed out using a Gaussian so that valid neighboring states (near collisions) are
  * optimized as well.
+ * This implementation does not support cost thresholds, non-zero local costs will render the trajectory as invalid.
  *
- * @param state_validator_fn      The validator function that tests for binary conditions
- * @param interpolation_step_size The L2 norm distance step used for interpolation
+ * @param state_validator_fn      The validator function that produces local costs for all waypoints
+ * @param interpolation_step_size The L2 norm distance step used for interpolation (disabled when set to 0.0)
  *
  * @return                        Cost function that computes smooth costs for binary validity conditions
  */
-CostFn get_cost_function_from_state_validator(const StateValidatorFn& state_validator_fn, double interpolation_step_size)
+CostFn getCostFunctionFromStateValidator(const StateValidatorFn& state_validator_fn, double interpolation_step_size)
 {
   CostFn cost_fn = [=](const Eigen::MatrixXd& values, Eigen::VectorXd& costs, bool& validity) {
+    // Assume zero cost and valid trajectory from the start
     costs.setZero(values.cols());
-
     validity = true;
-    std::vector<std::pair<long, long>> invalid_windows;
-    bool in_invalid_window = false;
 
     // Iterate over sample waypoint pairs and check for validity in each segment.
     // If an invalid state is found, weighted penalty costs are applied to both waypoints.
     // Subsequent invalid states are assumed to have the same cause, so we are keeping track
     // of "invalid windows" which are used for smoothing out the costs per violation cause
     // with a gaussian, penalizing neighboring valid states as well.
-    for (int timestep = 0; timestep < values.cols() - 1; ++timestep)
+    // Invalid windows are represented as pairs of start and end timesteps.
+    std::vector<std::pair<long, long>> invalid_windows;
+    bool in_invalid_window = false;
+    for (int timestep = 0; timestep < values.cols(); ++timestep)
     {
+      // Get state at current timestep and check for validity
+      // The penalty of the validation function is added to the cost of the current timestep
+      // A state is rendered invalid if a cost results from the current validity check or if a penalty is carried over
+      // from the previous iteration.
       Eigen::VectorXd current = values.col(timestep);
-      Eigen::VectorXd next = values.col(timestep + 1);
-      const double segment_distance = (next - current).norm();
-      double interpolation_fraction = 0.0;
-      const double interpolation_step = std::min(0.5, interpolation_step_size / segment_distance);
-      bool found_invalid_state = false;
-      double penalty = 0.0;
-      while (!found_invalid_state && interpolation_fraction < 1.0)
-      {
-        Eigen::VectorXd sample_vec = (1 - interpolation_fraction) * current + interpolation_fraction * next;
+      costs(timestep) += state_validator_fn(current);
+      bool found_invalid_state = costs(timestep) > 0.0;
 
-        penalty = state_validator_fn(sample_vec);
-        found_invalid_state = penalty > 0.0;
-        interpolation_fraction += interpolation_step;
+      // If state is valid, interpolate towards the next waypoint if there is one
+      bool continue_interpolation =
+          !found_invalid_state && timestep < (values.cols() - 1) && interpolation_step_size > 0.0;
+      if (continue_interpolation)
+      {
+        Eigen::VectorXd next = values.col(timestep + 1);
+        // Interpolate waypoints at least once, even if interpolation_step_size exceeds the waypoint distance
+        const double interpolation_step = std::min(0.5, interpolation_step_size / (next - current).norm());
+        for (double interpolation_fraction = interpolation_step; interpolation_fraction < 1.0;
+             interpolation_fraction += interpolation_step)
+        {
+          Eigen::VectorXd sample_vec = (1 - interpolation_fraction) * current + interpolation_fraction * next;
+
+          double penalty = state_validator_fn(sample_vec);
+          found_invalid_state = penalty > 0.0;
+          if (found_invalid_state)
+          {
+            // Apply weighted penalties -> This trajectory is definitely invalid
+            costs(timestep) += (1 - interpolation_fraction) * penalty;
+            costs(timestep + 1) += interpolation_fraction * penalty;
+            break;
+          }
+        }
       }
 
+      // Track groups of invalid states as "invalid windows" for subsequent smoothing
       if (found_invalid_state)
       {
-        // Apply weighted penalties -> This trajectory is definitely invalid
-        costs(timestep) = (1 - interpolation_fraction) * penalty;
-        costs(timestep + 1) = interpolation_fraction * penalty;
+        // Mark solution as invalid
         validity = false;
 
-        // Open new invalid window when this is the first detected invalid state in a group
+        // OPEN new invalid window when this is the first detected invalid state in a group
         if (!in_invalid_window)
         {
-          invalid_windows.emplace_back(timestep, values.cols());
+          // new windows only include a single timestep as start and end state
+          invalid_windows.emplace_back(timestep, timestep);
           in_invalid_window = true;
         }
+
+        // Update end of invalid window with the current invalid timestep
+        invalid_windows.back().second = timestep;
       }
       else
       {
-        // Close current invalid window if the current state is valid
-        if (in_invalid_window)
-        {
-          invalid_windows.back().second = timestep - 1;
-          in_invalid_window = false;
-        }
+        // CLOSE current invalid window if the current state is valid
+        in_invalid_window = false;
       }
     }
 
@@ -134,18 +152,31 @@ CostFn get_cost_function_from_state_validator(const StateValidatorFn& state_vali
     // before and after the violation are penalized as well.
     for (const auto& [start, end] : invalid_windows)
     {
+      // Total cost of invalid states
+      // We are smoothing the exact same total cost over a wider neighborhood
+      const double window_cost = costs(Eigen::seq(start, end)).sum();
+
+      // window size defines 2 sigma of gaussian smoothing kernel
+      // which equals 68.2% of overall cost and about 25% of width
       const double window_size = static_cast<double>(end - start) + 1;
-      const double sigma = window_size / 5.0;
+      const double sigma = std::max(1.0, 0.5 * window_size);
       const double mu = 0.5 * (start + end);
+
       // Iterate over waypoints in the range of +/-sigma (neighborhood)
-      // and add a weighted and continuous cost value for each waypoint
-      // based on a Gaussian distribution.
-      for (auto j = std::max(0l, start - static_cast<long>(sigma));
-           j <= std::min(values.cols() - 1, end + static_cast<long>(sigma)); ++j)
+      // and add a discrete cost value for each waypoint based on a Gaussian
+      // distribution.
+      const long kernel_start = mu - static_cast<long>(sigma) * 4;
+      const long kernel_end = mu + static_cast<long>(sigma) * 4;
+      const long bounded_kernel_start = std::max(0l, kernel_start);
+      const long bounded_kernel_end = std::min(values.cols() - 1, kernel_end);
+      for (auto j = bounded_kernel_start; j <= bounded_kernel_end; ++j)
       {
-        costs(j) +=
-            std::exp(-std::pow(j - mu, 2) / (2 * std::pow(sigma, 2))) / (sigma * std::sqrt(2 * mu)) * window_size;
+        costs(j) = std::exp(-std::pow(j - mu, 2) / (2 * std::pow(sigma, 2))) / (sigma * std::sqrt(2 * M_PI));
       }
+
+      // Normalize values to original total window cost
+      const double cost_sum = costs(Eigen::seq(bounded_kernel_start, bounded_kernel_end)).sum();
+      costs(Eigen::seq(bounded_kernel_start, bounded_kernel_end)) *= window_cost / cost_sum;
     }
 
     return true;
@@ -157,7 +188,7 @@ CostFn get_cost_function_from_state_validator(const StateValidatorFn& state_vali
 /**
  * Creates a cost function for binary collisions of group states in the planning scene.
  * This function uses a StateValidatorFn for computing smooth penalty costs from binary
- * collision checks using get_cost_function_from_state_validator().
+ * collision checks using getCostFunctionFromStateValidator().
  *
  * @param planning_scene    The planning scene instance to use for collision checking
  * @param group             The group to use for computing link transforms from joint positions
@@ -165,8 +196,8 @@ CostFn get_cost_function_from_state_validator(const StateValidatorFn& state_vali
  *
  * @return                  Cost function that computes smooth costs for colliding path segments
  */
-CostFn get_collision_cost_function(const std::shared_ptr<const planning_scene::PlanningScene>& planning_scene,
-                                   const moveit::core::JointModelGroup* group, double collision_penalty)
+CostFn getCollisionCostFunction(const std::shared_ptr<const planning_scene::PlanningScene>& planning_scene,
+                                const moveit::core::JointModelGroup* group, double collision_penalty)
 {
   const auto& joints = group ? group->getActiveJointModels() : planning_scene->getRobotModel()->getActiveJointModels();
   const auto& group_name = group ? group->getName() : "";
@@ -175,19 +206,19 @@ CostFn get_collision_cost_function(const std::shared_ptr<const planning_scene::P
     static moveit::core::RobotState state(planning_scene->getCurrentState());
 
     // Update robot state values
-    set_joint_positions(positions, joints, state);
+    setJointPositions(positions, joints, state);
     state.update();
 
     return planning_scene->isStateColliding(state, group_name) ? collision_penalty : 0.0;
   };
 
-  return get_cost_function_from_state_validator(collision_validator_fn, COL_CHECK_DISTANCE);
+  return getCostFunctionFromStateValidator(collision_validator_fn, COL_CHECK_DISTANCE);
 }
 
 /**
  * Creates a cost function for binary constraint checks applied to group states.
  * This function uses a StateValidatorFn for computing smooth penalty costs from binary
- * constraint checks using get_cost_function_from_state_validator().
+ * constraint checks using getCostFunctionFromStateValidator().
  *
  * @param planning_scene      The planning scene instance to use for computing transforms
  * @param group               The group to use for computing link transforms from joint positions
@@ -196,9 +227,9 @@ CostFn get_collision_cost_function(const std::shared_ptr<const planning_scene::P
  *
  * @return                    Cost function that computes smooth costs for invalid path segments
  */
-CostFn get_constraints_cost_function(const std::shared_ptr<const planning_scene::PlanningScene>& planning_scene,
-                                     const moveit::core::JointModelGroup* group,
-                                     const moveit_msgs::msg::Constraints& constraints_msg, double cost_scale)
+CostFn getConstraintsCostFunction(const std::shared_ptr<const planning_scene::PlanningScene>& planning_scene,
+                                  const moveit::core::JointModelGroup* group,
+                                  const moveit_msgs::msg::Constraints& constraints_msg, double cost_scale)
 {
   const auto& joints = group ? group->getActiveJointModels() : planning_scene->getRobotModel()->getActiveJointModels();
 
@@ -209,13 +240,13 @@ CostFn get_constraints_cost_function(const std::shared_ptr<const planning_scene:
     static moveit::core::RobotState state(planning_scene->getCurrentState());
 
     // Update robot state values
-    set_joint_positions(positions, joints, state);
+    setJointPositions(positions, joints, state);
     state.update();
 
     return constraints.decide(state).distance * cost_scale;
   };
 
-  return get_cost_function_from_state_validator(constraints_validator_fn, CONSTRAINT_CHECK_DISTANCE);
+  return getCostFunctionFromStateValidator(constraints_validator_fn, CONSTRAINT_CHECK_DISTANCE);
 }
 
 /**

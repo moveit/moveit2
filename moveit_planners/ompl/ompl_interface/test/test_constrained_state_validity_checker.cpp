@@ -46,6 +46,7 @@
 #include <moveit/ompl_interface/model_based_planning_context.h>
 #include <moveit/ompl_interface/parameterization/joint_space/constrained_planning_state_space.h>
 #include <moveit/planning_scene/planning_scene.h>
+#include <moveit/utils/logger.hpp>
 
 #include <ompl/geometric/SimpleSetup.h>
 #include <ompl/base/Constraint.h>
@@ -55,8 +56,10 @@
 /** \brief This flag sets the verbosity level for the state validity checker. **/
 constexpr bool VERBOSE = false;
 
-static const rclcpp::Logger LOGGER =
-    rclcpp::get_logger("moveit.ompl_planning.test.test_constrained_state_validity_checker");
+rclcpp::Logger getLogger()
+{
+  return moveit::getLogger("test_constrained_state_validity_checker");
+}
 
 /** \brief Pretty print std:vectors **/
 std::ostream& operator<<(std::ostream& os, const std::vector<double>& v)
@@ -116,7 +119,7 @@ public:
                      ->getState()
                      ->as<ompl_interface::ConstrainedPlanningStateSpace::StateType>();
 
-    RCLCPP_DEBUG_STREAM(LOGGER,
+    RCLCPP_DEBUG_STREAM(getLogger(),
                         std::vector<double>(state->values, state->values + joint_model_group_->getVariableCount()));
 
     // assume the default position in not in self-collision
@@ -128,7 +131,7 @@ public:
     double distance = 0.0;
     result = checker->isValid(ompl_state.get(), distance);
 
-    RCLCPP_DEBUG(LOGGER, "Distance from the isValid function '%f': ", distance);
+    RCLCPP_DEBUG(getLogger(), "Distance from the isValid function '%f': ", distance);
     EXPECT_TRUE(result);
     EXPECT_GT(distance, 0.0);
 
@@ -136,7 +139,7 @@ public:
     state->values[0] = std::numeric_limits<double>::max();
     state->clearKnownInformation();  // make sure the validity checker does not use the cached value
 
-    RCLCPP_DEBUG_STREAM(LOGGER,
+    RCLCPP_DEBUG_STREAM(getLogger(),
                         std::vector<double>(state->values, state->values + joint_model_group_->getVariableCount()));
 
     bool result_2 = checker->isValid(ompl_state.get());
@@ -172,7 +175,7 @@ public:
 
     // ompl_state.reals() throws a segmentation fault for this state type
     // use a more involved conversion to std::vector for logging
-    RCLCPP_DEBUG_STREAM(LOGGER,
+    RCLCPP_DEBUG_STREAM(getLogger(),
                         std::vector<double>(state->values, state->values + joint_model_group_->getVariableCount()));
 
     // the given state is known to be in self-collision, we check it here
@@ -238,7 +241,7 @@ protected:
     planning_context_->setPlanningScene(planning_scene_);
     planning_context_->setCompleteInitialState(*initial_robot_state_);
 
-    RCLCPP_DEBUG(LOGGER, "Planning context with name '%s' is ready (but not configured).",
+    RCLCPP_DEBUG(getLogger(), "Planning context with name '%s' is ready (but not configured).",
                  planning_context_->getName().c_str());
   }
 

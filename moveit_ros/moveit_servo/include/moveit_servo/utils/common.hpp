@@ -54,6 +54,26 @@
 
 namespace moveit_servo
 {
+// A minimum of 3 points are used to help with interpolation when creating trajectory messages.
+constexpr int MIN_POINTS_FOR_TRAJ_MSG = 3;
+
+/**
+ * \brief Get the base frame of the current active joint group or subgroup's IK solver.
+ * @param robot_state A pointer to the current robot state.
+ * @param group_name The currently active joint group name.
+ * @return The IK solver base frame, if one exists, otherwise std::nullopt.
+ */
+std::optional<std::string> getIKSolverBaseFrame(const moveit::core::RobotStatePtr& robot_state,
+                                                const std::string& group_name);
+
+/**
+ * \brief Get the tip (end-effector) frame of the current active joint group or subgroup's IK solver.
+ * @param robot_state A pointer to the current robot state.
+ * @param group_name The currently active joint group name.
+ * @return The IK solver tip frame, if one exists, otherwise std::nullopt.
+ */
+std::optional<std::string> getIKSolverTipFrame(const moveit::core::RobotStatePtr& robot_state,
+                                               const std::string& group_name);
 
 /**
  * \brief Checks if a given VectorXd is a valid command.
@@ -93,13 +113,26 @@ geometry_msgs::msg::Pose poseFromCartesianDelta(const Eigen::VectorXd& delta_x,
                                                 const Eigen::Isometry3d& base_to_tip_frame_transform);
 
 /**
- * \brief Create a trajectory message from given joint state.
+ * \brief Create a trajectory message from a rolling window queue of joint state commands. Method optionally returns a
+ * trajectory message if one can be created.
  * @param servo_params The configuration used by servo, required for setting some field of the trajectory message.
- * @param joint_state The joint state to be added into the trajectory.
+ * @param joint_cmd_rolling_window A rolling window queue of joint state commands.
  * @return The trajectory message.
  */
-trajectory_msgs::msg::JointTrajectory composeTrajectoryMessage(const servo::Params& servo_params,
-                                                               const KinematicState& joint_state);
+std::optional<trajectory_msgs::msg::JointTrajectory>
+composeTrajectoryMessage(const servo::Params& servo_params, const std::deque<KinematicState>& joint_cmd_rolling_window);
+
+/**
+ * \brief Adds a new joint state command to a queue containing commands over a time window. Also modifies the velocities
+ * of the commands to help avoid overshooting.
+ * @param next_joint_state The next commanded joint state.
+ * @param joint_cmd_rolling_window Queue of containing a rolling window of joint commands.
+ * @param max_expected_latency The next_joint_state will be added to the joint_cmd_rolling_window with a time stamp of
+ * @param cur_time The current time stamp when the method is called. This value is used to update the time stamp of
+ * next_joint_state
+ */
+void updateSlidingWindow(KinematicState& next_joint_state, std::deque<KinematicState>& joint_cmd_rolling_window,
+                         double max_expected_latency, const rclcpp::Time& cur_time);
 
 /**
  * \brief Create a Float64MultiArray message from given joint state
@@ -112,8 +145,7 @@ std_msgs::msg::Float64MultiArray composeMultiArrayMessage(const servo::Params& s
 
 /**
  * \brief Computes scaling factor for velocity when the robot is near a singularity.
- * @param joint_model_group The joint model group of the robot, used for fetching the Jacobian.
- * @param current_state The current state of the robot, used for singularity look ahead.
+ * @param robot_state A pointer to the current robot state.
  * @param target_delta_x The vector containing the required change in Cartesian position.
  * @param servo_params The servo parameters, contains the singularity thresholds.
  * @return The velocity scaling factor and the reason for scaling.
@@ -123,7 +155,8 @@ std::pair<double, StatusCode> velocityScalingFactorForSingularity(const moveit::
                                                                   const servo::Params& servo_params);
 
 /**
- * \brief Apply velocity scaling based on joint limits.
+ * \brief Apply velocity scaling based on joint limits. If the robot model does not have velocity limits defined,
+ * then a scale factor of 1.0 will be returned.
  * @param velocities The commanded velocities.
  * @param joint_bounds The bounding information for the robot joints.
  * @param scaling_override The user defined velocity scaling override.
@@ -137,11 +170,11 @@ double jointLimitVelocityScalingFactor(const Eigen::VectorXd& velocities,
  * @param positions The joint positions.
  * @param velocities The current commanded velocities.
  * @param joint_bounds The allowable limits for the robot joints.
- * @param margin Additional buffer on the actual joint limits.
+ * @param margins Additional buffer on the actual joint limits.
  * @return The joints that are violating the specified position limits.
  */
 std::vector<int> jointsToHalt(const Eigen::VectorXd& positions, const Eigen::VectorXd& velocities,
-                              const moveit::core::JointBoundsVector& joint_bounds, double margin);
+                              const moveit::core::JointBoundsVector& joint_bounds, const std::vector<double>& margins);
 
 /**
  * \brief Helper function for converting Eigen::Isometry3d to geometry_msgs/TransformStamped.
@@ -166,4 +199,13 @@ PoseCommand poseFromPoseStamped(const geometry_msgs::msg::PoseStamped& msg);
  */
 planning_scene_monitor::PlanningSceneMonitorPtr createPlanningSceneMonitor(const rclcpp::Node::SharedPtr& node,
                                                                            const servo::Params& servo_params);
+
+/**
+ * \brief Extract the state from a RobotStatePtr instance.
+ * @param robot_state A RobotStatePtr instance.
+ * @param move_group_name The name of the planning group.
+ * @return The state of the RobotStatePtr instance.
+ */
+KinematicState extractRobotState(const moveit::core::RobotStatePtr& robot_state, const std::string& move_group_name);
+
 }  // namespace moveit_servo

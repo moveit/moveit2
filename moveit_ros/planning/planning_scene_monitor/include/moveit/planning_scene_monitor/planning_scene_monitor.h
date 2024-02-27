@@ -392,6 +392,14 @@ public:
   // Called to update the planning scene with a new message.
   bool newPlanningSceneMessage(const moveit_msgs::msg::PlanningScene& scene);
 
+  // Called to update a collision object in the planning scene.
+  bool processCollisionObjectMsg(const moveit_msgs::msg::CollisionObject::ConstSharedPtr& collision_object_msg,
+                                 const std::optional<moveit_msgs::msg::ObjectColor>& color_msg = std::nullopt);
+
+  // Called to update an attached collision object in the planning scene.
+  bool processAttachedCollisionObjectMsg(
+      const moveit_msgs::msg::AttachedCollisionObject::ConstSharedPtr& attached_collision_object_msg);
+
 protected:
   /** @brief Initialize the planning scene monitor
    *  @param scene The scene instance to fill with data (an instance is allocated if the one passed in is not allocated)
@@ -418,17 +426,11 @@ protected:
   /** @brief Configure the default padding*/
   void configureDefaultPadding();
 
-  /** @brief Callback for a new collision object msg*/
-  void collisionObjectCallback(const moveit_msgs::msg::CollisionObject::ConstSharedPtr& obj);
-
   /** @brief Callback for a new planning scene world*/
   void newPlanningSceneWorldCallback(const moveit_msgs::msg::PlanningSceneWorld::ConstSharedPtr& world);
 
   /** @brief Callback for octomap updates */
   void octomapUpdateCallback();
-
-  /** @brief Callback for a new attached object msg*/
-  void attachObjectCallback(const moveit_msgs::msg::AttachedCollisionObject::ConstSharedPtr& obj);
 
   /** @brief Callback for a change for an attached object of the current state of the planning scene */
   void currentStateAttachedBodyUpdateCallback(moveit::core::AttachedBody* attached_body, bool just_attached);
@@ -592,6 +594,8 @@ private:
 
   friend class LockedPlanningSceneRO;
   friend class LockedPlanningSceneRW;
+
+  rclcpp::Logger logger_;
 };
 
 /** \brief This is a convenience class for obtaining access to an
@@ -609,7 +613,7 @@ private:
  * a member of this class.  However because of the "operator->" here
  * which returns a PlanningSceneConstPtr, this works.
  *
- * Any number of these "ReadOnly" locks can exist at a given time.
+ * Any number of these "read_only" locks can exist at a given time.
  * The intention is that users which only need to read from the
  * PlanningScene will use these and will thus not interfere with each
  * other.

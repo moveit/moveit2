@@ -329,5 +329,7 @@ private:
   std::size_t mesh_handle_count_; /*!< Count of mesh handles */
 
   bool active_; /*!< True when actively monitoring updaters */
+
+  rclcpp::Logger logger_;
 };
 }  // namespace occupancy_map_monitor

@@ -47,6 +47,7 @@
 #include <moveit_msgs/msg/grasp.hpp>
 #include <moveit_msgs/action/move_group.hpp>
 #include <moveit_msgs/action/execute_trajectory.hpp>
+#include <rclcpp/logger.hpp>
 
 #include <moveit_msgs/msg/motion_plan_request.hpp>
 #include <geometry_msgs/msg/pose_stamped.hpp>
@@ -943,6 +944,7 @@ private:
   std::map<std::string, std::vector<double> > remembered_joint_values_;
   class MoveGroupInterfaceImpl;
   MoveGroupInterfaceImpl* impl_;
+  rclcpp::Logger logger_;
 };
 }  // namespace planning_interface
 }  // namespace moveit

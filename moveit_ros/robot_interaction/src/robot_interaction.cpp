@@ -45,6 +45,7 @@
 #include <tf2_eigen/tf2_eigen.hpp>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
 #include <tf2/LinearMath/Transform.h>
+#include <moveit/utils/logger.hpp>
 
 #include <algorithm>
 #include <limits>
@@ -55,7 +56,6 @@
 
 namespace robot_interaction
 {
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_ros_robot_interaction.robot_interaction");
 static const double END_EFFECTOR_UNREACHABLE_COLOR[4] = { 1.0, 0.3, 0.3, 1.0 };
 static const double END_EFFECTOR_REACHABLE_COLOR[4] = { 0.2, 1.0, 0.2, 1.0 };
 
@@ -63,10 +63,12 @@ const std::string RobotInteraction::INTERACTIVE_MARKER_TOPIC = "robot_interactio
 
 RobotInteraction::RobotInteraction(const moveit::core::RobotModelConstPtr& robot_model,
                                    const rclcpp::Node::SharedPtr& node, const std::string& ns)
-  : robot_model_(robot_model), kinematic_options_map_(std::make_shared<KinematicOptionsMap>())
+  : robot_model_(robot_model)
+  , node_(node)
+  , logger_(moveit::getLogger("moveit_ros_robot_interaction"))
+  , kinematic_options_map_(std::make_shared<KinematicOptionsMap>())
 {
   topic_ = ns.empty() ? INTERACTIVE_MARKER_TOPIC : ns + "/" + INTERACTIVE_MARKER_TOPIC;
-  node_ = node;
   int_marker_server_ = new interactive_markers::InteractiveMarkerServer(topic_, node_);
 
   // spin a thread that will process feedback events
@@ -95,7 +97,7 @@ void RobotInteraction::decideActiveComponents(const std::string& group, Interact
   decideActiveJoints(group);
   if (!group.empty() && active_eef_.empty() && active_vj_.empty() && active_generic_.empty())
   {
-    RCLCPP_INFO(LOGGER,
+    RCLCPP_INFO(logger_,
                 "No active joints or end effectors found for group '%s'. "
                 "Make sure that kinematics.yaml is loaded in this node's namespace.",
                 group.c_str());
@@ -196,7 +198,7 @@ void RobotInteraction::decideActiveJoints(const std::string& group)
   if (group.empty())
     return;
 
-  RCLCPP_DEBUG(LOGGER, "Deciding active joints for group '%s'", group.c_str());
+  RCLCPP_DEBUG(logger_, "Deciding active joints for group '%s'", group.c_str());
 
   const srdf::ModelConstSharedPtr& srdf = robot_model_->getSRDF();
   const moveit::core::JointModelGroup* jmg = robot_model_->getJointModelGroup(group);
@@ -282,14 +284,14 @@ void RobotInteraction::decideActiveEndEffectors(const std::string& group, Intera
   if (group.empty())
     return;
 
-  RCLCPP_DEBUG(LOGGER, "Deciding active end-effectors for group '%s'", group.c_str());
+  RCLCPP_DEBUG(logger_, "Deciding active end-effectors for group '%s'", group.c_str());
 
   const srdf::ModelConstSharedPtr& srdf = robot_model_->getSRDF();
   const moveit::core::JointModelGroup* jmg = robot_model_->getJointModelGroup(group);
 
   if (!jmg || !srdf)
   {
-    RCLCPP_WARN(LOGGER, "Unable to decide active end effector: no joint model group or no srdf model");
+    RCLCPP_WARN(logger_, "Unable to decide active end effector: no joint model group or no srdf model");
     return;
   }
 
@@ -353,7 +355,7 @@ void RobotInteraction::decideActiveEndEffectors(const std::string& group, Intera
     // otherwise, we use the size of the parent_link
     eef.size = (eef.eef_group == eef.parent_group) ? computeLinkMarkerSize(eef.parent_link) :
                                                      computeGroupMarkerSize(eef.eef_group);
-    RCLCPP_DEBUG(LOGGER, "Found active end-effector '%s', of scale %lf", eef.eef_group.c_str(), eef.size);
+    RCLCPP_DEBUG(logger_, "Found active end-effector '%s', of scale %lf", eef.eef_group.c_str(), eef.size);
   }
   // if there is only a single end effector marker, we can safely use a larger marker
   if (active_eef_.size() == 1)
@@ -485,7 +487,7 @@ void RobotInteraction::addInteractiveMarkers(const InteractionHandlerPtr& handle
         im.name = getMarkerName(handler, active_generic_[i]);
         shown_markers_[im.name] = i;
         ims.push_back(im);
-        RCLCPP_DEBUG(LOGGER, "Publishing interactive marker %s (size = %lf)", im.name.c_str(), im.scale);
+        RCLCPP_DEBUG(logger_, "Publishing interactive marker %s (size = %lf)", im.name.c_str(), im.scale);
       }
     }
 
@@ -530,7 +532,7 @@ void RobotInteraction::addInteractiveMarkers(const InteractionHandlerPtr& handle
       }
       ims.push_back(im);
       registerMoveInteractiveMarkerTopic(marker_name, handler->getName() + "_" + active_eef_[i].parent_link);
-      RCLCPP_DEBUG(LOGGER, "Publishing interactive marker %s (size = %lf)", marker_name.c_str(), mscale);
+      RCLCPP_DEBUG(logger_, "Publishing interactive marker %s (size = %lf)", marker_name.c_str(), mscale);
     }
     for (std::size_t i = 0; i < active_vj_.size(); ++i)
     {
@@ -558,7 +560,7 @@ void RobotInteraction::addInteractiveMarkers(const InteractionHandlerPtr& handle
       }
       ims.push_back(im);
       registerMoveInteractiveMarkerTopic(marker_name, handler->getName() + "_" + active_vj_[i].connecting_link);
-      RCLCPP_DEBUG(LOGGER, "Publishing interactive marker %s (size = %lf)", marker_name.c_str(), mscale);
+      RCLCPP_DEBUG(logger_, "Publishing interactive marker %s (size = %lf)", marker_name.c_str(), mscale);
     }
     handlers_[handler->getName()] = handler;
   }
@@ -739,7 +741,7 @@ void RobotInteraction::processInteractiveMarkerFeedback(
   std::map<std::string, std::size_t>::const_iterator it = shown_markers_.find(feedback->marker_name);
   if (it == shown_markers_.end())
   {
-    RCLCPP_ERROR(LOGGER, "Unknown marker name: '%s' (not published by RobotInteraction class)",
+    RCLCPP_ERROR(logger_, "Unknown marker name: '%s' (not published by RobotInteraction class)",
                  feedback->marker_name.c_str());
     return;
   }
@@ -747,7 +749,7 @@ void RobotInteraction::processInteractiveMarkerFeedback(
   std::size_t u = feedback->marker_name.find_first_of('_');
   if (u == std::string::npos || u < 4)
   {
-    RCLCPP_ERROR(LOGGER, "Invalid marker name: '%s'", feedback->marker_name.c_str());
+    RCLCPP_ERROR(logger_, "Invalid marker name: '%s'", feedback->marker_name.c_str());
     return;
   }
 
@@ -768,12 +770,12 @@ void RobotInteraction::processingThread()
     {
       auto feedback = feedback_map_.begin()->second;
       feedback_map_.erase(feedback_map_.begin());
-      RCLCPP_DEBUG(LOGGER, "Processing feedback from map for marker [%s]", feedback->marker_name.c_str());
+      RCLCPP_DEBUG(logger_, "Processing feedback from map for marker [%s]", feedback->marker_name.c_str());
 
       std::map<std::string, std::size_t>::const_iterator it = shown_markers_.find(feedback->marker_name);
       if (it == shown_markers_.end())
       {
-        RCLCPP_ERROR(LOGGER,
+        RCLCPP_ERROR(logger_,
                      "Unknown marker name: '%s' (not published by RobotInteraction class) "
                      "(should never have ended up in the feedback_map!)",
                      feedback->marker_name.c_str());
@@ -782,7 +784,7 @@ void RobotInteraction::processingThread()
       std::size_t u = feedback->marker_name.find_first_of('_');
       if (u == std::string::npos || u < 4)
       {
-        RCLCPP_ERROR(LOGGER, "Invalid marker name: '%s' (should never have ended up in the feedback_map!)",
+        RCLCPP_ERROR(logger_, "Invalid marker name: '%s' (should never have ended up in the feedback_map!)",
                      feedback->marker_name.c_str());
         continue;
       }
@@ -791,7 +793,7 @@ void RobotInteraction::processingThread()
       std::map<std::string, InteractionHandlerPtr>::const_iterator jt = handlers_.find(handler_name);
       if (jt == handlers_.end())
       {
-        RCLCPP_ERROR(LOGGER, "Interactive Marker Handler '%s' is not known.", handler_name.c_str());
+        RCLCPP_ERROR(logger_, "Interactive Marker Handler '%s' is not known.", handler_name.c_str());
         continue;
       }
 
@@ -810,7 +812,7 @@ void RobotInteraction::processingThread()
           }
           catch (std::exception& ex)
           {
-            RCLCPP_ERROR(LOGGER, "Exception caught while handling end-effector update: %s", ex.what());
+            RCLCPP_ERROR(logger_, "Exception caught while handling end-effector update: %s", ex.what());
           }
           marker_access_lock_.lock();
         }
@@ -826,7 +828,7 @@ void RobotInteraction::processingThread()
           }
           catch (std::exception& ex)
           {
-            RCLCPP_ERROR(LOGGER, "Exception caught while handling joint update: %s", ex.what());
+            RCLCPP_ERROR(logger_, "Exception caught while handling joint update: %s", ex.what());
           }
           marker_access_lock_.lock();
         }
@@ -841,19 +843,19 @@ void RobotInteraction::processingThread()
           }
           catch (std::exception& ex)
           {
-            RCLCPP_ERROR(LOGGER, "Exception caught while handling joint update: %s", ex.what());
+            RCLCPP_ERROR(logger_, "Exception caught while handling joint update: %s", ex.what());
           }
           marker_access_lock_.lock();
         }
         else
         {
-          RCLCPP_ERROR(LOGGER, "Unknown marker class ('%s') for marker '%s'", marker_class.c_str(),
+          RCLCPP_ERROR(logger_, "Unknown marker class ('%s') for marker '%s'", marker_class.c_str(),
                        feedback->marker_name.c_str());
         }
       }
       catch (std::exception& ex)
       {
-        RCLCPP_ERROR(LOGGER, "Exception caught while processing event: %s", ex.what());
+        RCLCPP_ERROR(logger_, "Exception caught while processing event: %s", ex.what());
       }
     }
   }

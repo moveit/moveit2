@@ -44,16 +44,20 @@
 #include <cmath>
 #include <moveit/trajectory_processing/time_optimal_trajectory_generation.h>
 #include <vector>
+#include <moveit/utils/logger.hpp>
 
 namespace trajectory_processing
 {
 namespace
 {
-static const rclcpp::Logger LOGGER =
-    rclcpp::get_logger("moveit_trajectory_processing.time_optimal_trajectory_generation");
 constexpr double DEFAULT_TIMESTEP = 1e-3;
 constexpr double EPS = 1e-6;
 constexpr double DEFAULT_SCALING_FACTOR = 1.0;
+
+rclcpp::Logger getLogger()
+{
+  return moveit::getLogger("time_optimal_trajectory_generation");
+}
 }  // namespace
 
 class LinearPathSegment : public PathSegment
@@ -194,59 +198,95 @@ private:
   Eigen::VectorXd y_;
 };
 
-Path::Path(const std::list<Eigen::VectorXd>& path, double max_deviation) : length_(0.0)
+std::optional<Path> Path::create(const std::vector<Eigen::VectorXd>& waypoints, double max_deviation)
 {
-  if (path.size() < 2)
-    return;
-  std::list<Eigen::VectorXd>::const_iterator path_iterator1 = path.begin();
-  std::list<Eigen::VectorXd>::const_iterator path_iterator2 = path_iterator1;
-  ++path_iterator2;
-  std::list<Eigen::VectorXd>::const_iterator path_iterator3;
-  Eigen::VectorXd start_config = *path_iterator1;
-  while (path_iterator2 != path.end())
+  if (waypoints.size() < 2)
   {
-    path_iterator3 = path_iterator2;
-    ++path_iterator3;
-    if (max_deviation > 0.0 && path_iterator3 != path.end())
+    RCLCPP_ERROR(getLogger(), "A path needs at least 2 waypoints.");
+    return std::nullopt;
+  }
+  if (max_deviation <= 0.0)
+  {
+    RCLCPP_ERROR(getLogger(), "Path max_deviation must be greater than 0.0.");
+    return std::nullopt;
+  }
+
+  // waypoints_iterator1, waypoints_iterator2 and waypoints_iterator3 point to three consecutive waypoints of the input
+  // path. The algorithm creates a LinearPathSegment starting at waypoints_iterator1, connected to CircularPathSegment
+  // at waypoints_iterator2, connected to another LinearPathSegment towards waypoints_iterator3.
+  // It does this iteratively for each three consecutive waypoints, therefore applying a blending of 'max_deviation' at
+  // the intermediate waypoints.
+  Path path;
+  std::vector<Eigen::VectorXd>::const_iterator waypoints_iterator1 = waypoints.begin();
+  std::vector<Eigen::VectorXd>::const_iterator waypoints_iterator2 = waypoints_iterator1;
+  ++waypoints_iterator2;
+  std::vector<Eigen::VectorXd>::const_iterator waypoints_iterator3;
+  Eigen::VectorXd start_config = *waypoints_iterator1;
+  while (waypoints_iterator2 != waypoints.end())
+  {
+    waypoints_iterator3 = waypoints_iterator2;
+    ++waypoints_iterator3;
+    if (waypoints_iterator3 != waypoints.end())
+    {
+      // Check that the path is not making a 180 deg. turn, which is not supported by the current implementation.
+      Eigen::VectorXd incoming_vector = *waypoints_iterator2 - *waypoints_iterator1;
+      Eigen::VectorXd outcoming_vector = *waypoints_iterator3 - *waypoints_iterator2;
+      double incoming_vector_norm = incoming_vector.norm();
+      double outcoming_vector_norm = outcoming_vector.norm();
+      if (incoming_vector_norm > std::numeric_limits<double>::epsilon() &&
+          outcoming_vector_norm > std::numeric_limits<double>::epsilon())
+      {
+        double cos_angle = incoming_vector.dot(outcoming_vector) / (incoming_vector_norm * outcoming_vector_norm);
+        constexpr double angle_tolerance = 1e-05;
+        if (cos_angle <= -1.0 + angle_tolerance)
+        {
+          RCLCPP_ERROR(getLogger(),
+                       "The path requires a 180 deg. turn, which is not supported by the current implementation.");
+          return std::nullopt;
+        }
+      }
+    }
+    if (max_deviation > 0.0 && waypoints_iterator3 != waypoints.end())
     {
       CircularPathSegment* blend_segment =
-          new CircularPathSegment(0.5 * (*path_iterator1 + *path_iterator2), *path_iterator2,
-                                  0.5 * (*path_iterator2 + *path_iterator3), max_deviation);
+          new CircularPathSegment(0.5 * (*waypoints_iterator1 + *waypoints_iterator2), *waypoints_iterator2,
+                                  0.5 * (*waypoints_iterator2 + *waypoints_iterator3), max_deviation);
       Eigen::VectorXd end_config = blend_segment->getConfig(0.0);
       if ((end_config - start_config).norm() > 0.000001)
       {
-        path_segments_.push_back(std::make_unique<LinearPathSegment>(start_config, end_config));
+        path.path_segments_.push_back(std::make_unique<LinearPathSegment>(start_config, end_config));
       }
-      path_segments_.emplace_back(blend_segment);
+      path.path_segments_.emplace_back(blend_segment);
 
       start_config = blend_segment->getConfig(blend_segment->getLength());
     }
     else
     {
-      path_segments_.push_back(std::make_unique<LinearPathSegment>(start_config, *path_iterator2));
-      start_config = *path_iterator2;
+      path.path_segments_.push_back(std::make_unique<LinearPathSegment>(start_config, *waypoints_iterator2));
+      start_config = *waypoints_iterator2;
     }
-    path_iterator1 = path_iterator2;
-    ++path_iterator2;
+    waypoints_iterator1 = waypoints_iterator2;
+    ++waypoints_iterator2;
   }
 
   // Create list of switching point candidates, calculate total path length and
   // absolute positions of path segments
-  for (std::unique_ptr<PathSegment>& path_segment : path_segments_)
+  for (std::unique_ptr<PathSegment>& path_segment : path.path_segments_)
   {
-    path_segment->position_ = length_;
+    path_segment->position_ = path.length_;
     std::list<double> local_switching_points = path_segment->getSwitchingPoints();
     for (std::list<double>::const_iterator point = local_switching_points.begin();
          point != local_switching_points.end(); ++point)
     {
-      switching_points_.push_back(std::make_pair(length_ + *point, false));
+      path.switching_points_.push_back(std::make_pair(path.length_ + *point, false));
     }
-    length_ += path_segment->getLength();
-    while (!switching_points_.empty() && switching_points_.back().first >= length_)
-      switching_points_.pop_back();
-    switching_points_.push_back(std::make_pair(length_, true));
+    path.length_ += path_segment->getLength();
+    while (!path.switching_points_.empty() && path.switching_points_.back().first >= path.length_)
+      path.switching_points_.pop_back();
+    path.switching_points_.push_back(std::make_pair(path.length_, true));
   }
-  switching_points_.pop_back();
+  path.switching_points_.pop_back();
+  return path;
 }
 
 Path::Path(const Path& path) : length_(path.length_), switching_points_(path.switching_points_)
@@ -315,60 +355,66 @@ std::list<std::pair<double, bool>> Path::getSwitchingPoints() const
   return switching_points_;
 }
 
-Trajectory::Trajectory(const Path& path, const Eigen::VectorXd& max_velocity, const Eigen::VectorXd& max_acceleration,
-                       double time_step)
-  : path_(path)
-  , max_velocity_(max_velocity)
-  , max_acceleration_(max_acceleration)
-  , joint_num_(max_velocity.size())
-  , valid_(true)
-  , time_step_(time_step)
-  , cached_time_(std::numeric_limits<double>::max())
+std::optional<Trajectory> Trajectory::create(const Path& path, const Eigen::VectorXd& max_velocity,
+                                             const Eigen::VectorXd& max_acceleration, double time_step)
 {
-  if (time_step_ == 0)
+  if (time_step <= 0)
   {
-    valid_ = false;
-    RCLCPP_ERROR(LOGGER, "The trajectory is invalid because the time step is 0.");
-    return;
+    RCLCPP_ERROR(getLogger(), "The trajectory is invalid because the time step is <= 0.0.");
+    return std::nullopt;
   }
-  trajectory_.push_back(TrajectoryStep(0.0, 0.0));
-  double after_acceleration = getMinMaxPathAcceleration(0.0, 0.0, true);
-  while (valid_ && !integrateForward(trajectory_, after_acceleration) && valid_)
+
+  Trajectory output(path, max_velocity, max_acceleration, time_step);
+  output.trajectory_.push_back(TrajectoryStep(0.0, 0.0));
+  double after_acceleration = output.getMinMaxPathAcceleration(0.0, 0.0, true);
+  while (output.valid_ && !output.integrateForward(output.trajectory_, after_acceleration) && output.valid_)
   {
     double before_acceleration;
     TrajectoryStep switching_point;
-    if (getNextSwitchingPoint(trajectory_.back().path_pos_, switching_point, before_acceleration, after_acceleration))
+    if (output.getNextSwitchingPoint(output.trajectory_.back().path_pos_, switching_point, before_acceleration,
+                                     after_acceleration))
     {
       break;
     }
-    integrateBackward(trajectory_, switching_point.path_pos_, switching_point.path_vel_, before_acceleration);
+    output.integrateBackward(output.trajectory_, switching_point.path_pos_, switching_point.path_vel_,
+                             before_acceleration);
   }
 
-  if (valid_)
+  if (!output.valid_)
   {
-    double before_acceleration = getMinMaxPathAcceleration(path_.getLength(), 0.0, false);
-    integrateBackward(trajectory_, path_.getLength(), 0.0, before_acceleration);
+    RCLCPP_ERROR(getLogger(), "Trajectory not valid after integrateForward and integrateBackward.");
+    return std::nullopt;
   }
 
-  if (valid_)
+  double before_acceleration = output.getMinMaxPathAcceleration(output.path_.getLength(), 0.0, false);
+  output.integrateBackward(output.trajectory_, output.path_.getLength(), 0.0, before_acceleration);
+
+  if (!output.valid_)
   {
-    // Calculate timing
-    std::list<TrajectoryStep>::iterator previous = trajectory_.begin();
-    std::list<TrajectoryStep>::iterator it = previous;
-    it->time_ = 0.0;
+    RCLCPP_ERROR(getLogger(), "Trajectory not valid after the second integrateBackward pass.");
+    return std::nullopt;
+  }
+
+  // Calculate timing.
+  std::list<TrajectoryStep>::iterator previous = output.trajectory_.begin();
+  std::list<TrajectoryStep>::iterator it = previous;
+  it->time_ = 0.0;
+  ++it;
+  while (it != output.trajectory_.end())
+  {
+    it->time_ = previous->time_ + (it->path_pos_ - previous->path_pos_) / ((it->path_vel_ + previous->path_vel_) / 2.0);
+    previous = it;
     ++it;
-    while (it != trajectory_.end())
-    {
-      it->time_ =
-          previous->time_ + (it->path_pos_ - previous->path_pos_) / ((it->path_vel_ + previous->path_vel_) / 2.0);
-      previous = it;
-      ++it;
-    }
   }
+
+  return output;
 }
 
-Trajectory::~Trajectory()
+Trajectory::Trajectory(const Path& path, const Eigen::VectorXd& max_velocity, const Eigen::VectorXd& max_acceleration,
+                       double time_step)
+  : path_(path), max_velocity_(max_velocity), max_acceleration_(max_acceleration), time_step_(time_step)
 {
+  joint_num_ = max_velocity.size();
 }
 
 // Returns true if end of path is reached.
@@ -558,7 +604,7 @@ bool Trajectory::integrateForward(std::list<TrajectoryStep>& trajectory, double 
     else if (path_vel < 0.0)
     {
       valid_ = false;
-      RCLCPP_ERROR(LOGGER, "Error while integrating forward: Negative path velocity");
+      RCLCPP_ERROR(getLogger(), "Error while integrating forward: Negative path velocity");
       return true;
     }
 
@@ -577,8 +623,8 @@ bool Trajectory::integrateForward(std::list<TrajectoryStep>& trajectory, double 
       // The position will never change if velocity and acceleration are zero.
       // The loop will spin indefinitely as no exit condition is met.
       valid_ = false;
-      RCLCPP_ERROR(LOGGER, "Error while integrating forward: zero acceleration and velocity. Are any relevant "
-                           "acceleration components limited to zero?");
+      RCLCPP_ERROR(getLogger(), "Error while integrating forward: zero acceleration and velocity. Are any relevant "
+                                "acceleration components limited to zero?");
       return true;
     }
 
@@ -665,7 +711,7 @@ void Trajectory::integrateBackward(std::list<TrajectoryStep>& start_trajectory, 
       if (path_vel < 0.0)
       {
         valid_ = false;
-        RCLCPP_ERROR(LOGGER, "Error while integrating backward: Negative path velocity");
+        RCLCPP_ERROR(getLogger(), "Error while integrating backward: Negative path velocity");
         end_trajectory_ = trajectory;
         return;
       }
@@ -694,7 +740,7 @@ void Trajectory::integrateBackward(std::list<TrajectoryStep>& start_trajectory, 
   }
 
   valid_ = false;
-  RCLCPP_ERROR(LOGGER, "Error while integrating backward: Did not hit start trajectory");
+  RCLCPP_ERROR(getLogger(), "Error while integrating backward: Did not hit start trajectory");
   end_trajectory_ = trajectory;
 }
 
@@ -785,11 +831,6 @@ double Trajectory::getVelocityMaxPathVelocityDeriv(double path_pos)
   }
   return -(max_velocity_[active_constraint] * path_.getCurvature(path_pos)[active_constraint]) /
          (tangent[active_constraint] * std::abs(tangent[active_constraint]));
-}
-
-bool Trajectory::isValid() const
-{
-  return valid_;
 }
 
 double Trajectory::getDuration() const
@@ -890,7 +931,7 @@ bool TimeOptimalTrajectoryGeneration::computeTimeStamps(robot_trajectory::RobotT
   const moveit::core::JointModelGroup* group = trajectory.getGroup();
   if (!group)
   {
-    RCLCPP_ERROR(LOGGER, "It looks like the planner did not set the group the plan was computed for");
+    RCLCPP_ERROR(getLogger(), "It looks like the planner did not set the group the plan was computed for");
     return false;
   }
 
@@ -904,7 +945,7 @@ bool TimeOptimalTrajectoryGeneration::computeTimeStamps(robot_trajectory::RobotT
   std::vector<size_t> active_joint_indices;
   if (!group->computeJointVariableIndices(group->getActiveJointModelNames(), active_joint_indices))
   {
-    RCLCPP_ERROR(LOGGER, "Failed to get active variable indices.");
+    RCLCPP_ERROR(getLogger(), "Failed to get active variable indices.");
   }
 
   const size_t num_active_joints = active_joint_indices.size();
@@ -920,7 +961,7 @@ bool TimeOptimalTrajectoryGeneration::computeTimeStamps(robot_trajectory::RobotT
     {
       if (bounds.max_velocity_ <= 0.0)
       {
-        RCLCPP_ERROR(LOGGER, "Invalid max_velocity %f specified for '%s', must be greater than 0.0",
+        RCLCPP_ERROR(getLogger(), "Invalid max_velocity %f specified for '%s', must be greater than 0.0",
                      bounds.max_velocity_, vars[idx].c_str());
         return false;
       }
@@ -929,9 +970,11 @@ bool TimeOptimalTrajectoryGeneration::computeTimeStamps(robot_trajectory::RobotT
     }
     else
     {
-      RCLCPP_ERROR_STREAM(LOGGER, "No velocity limit was defined for joint "
-                                      << vars[idx].c_str()
-                                      << "! You have to define velocity limits in the URDF or joint_limits.yaml");
+      RCLCPP_ERROR_STREAM(getLogger(), "No velocity limit was defined for joint " << vars[idx].c_str()
+                                                                                  << "! You have to define velocity "
+                                                                                     "limits "
+                                                                                     "in the URDF or "
+                                                                                     "joint_limits.yaml");
       return false;
     }
 
@@ -939,7 +982,7 @@ bool TimeOptimalTrajectoryGeneration::computeTimeStamps(robot_trajectory::RobotT
     {
       if (bounds.max_acceleration_ < 0.0)
       {
-        RCLCPP_ERROR(LOGGER, "Invalid max_acceleration %f specified for '%s', must be greater than 0.0",
+        RCLCPP_ERROR(getLogger(), "Invalid max_acceleration %f specified for '%s', must be greater than 0.0",
                      bounds.max_acceleration_, vars[idx].c_str());
         return false;
       }
@@ -948,10 +991,11 @@ bool TimeOptimalTrajectoryGeneration::computeTimeStamps(robot_trajectory::RobotT
     }
     else
     {
-      RCLCPP_ERROR_STREAM(LOGGER, "No acceleration limit was defined for joint "
-                                      << vars[idx].c_str()
-                                      << "! You have to define acceleration limits in the URDF or "
-                                         "joint_limits.yaml");
+      RCLCPP_ERROR_STREAM(getLogger(), "No acceleration limit was defined for joint " << vars[idx].c_str()
+                                                                                      << "! You have to define "
+                                                                                         "acceleration "
+                                                                                         "limits in the URDF or "
+                                                                                         "joint_limits.yaml");
       return false;
     }
   }
@@ -994,7 +1038,7 @@ bool TimeOptimalTrajectoryGeneration::computeTimeStamps(
   const moveit::core::JointModelGroup* group = trajectory.getGroup();
   if (!group)
   {
-    RCLCPP_ERROR(LOGGER, "It looks like the planner did not set the group the plan was computed for");
+    RCLCPP_ERROR(getLogger(), "It looks like the planner did not set the group the plan was computed for");
     return false;
   }
 
@@ -1008,7 +1052,7 @@ bool TimeOptimalTrajectoryGeneration::computeTimeStamps(
   std::vector<size_t> indices;
   if (!group->computeJointVariableIndices(group->getActiveJointModelNames(), indices))
   {
-    RCLCPP_ERROR(LOGGER, "Failed to get active variable indices.");
+    RCLCPP_ERROR(getLogger(), "Failed to get active variable indices.");
   }
 
   const size_t num_joints = indices.size();
@@ -1034,7 +1078,7 @@ bool TimeOptimalTrajectoryGeneration::computeTimeStamps(
       // Set the default velocity limit, from robot model
       if (bounds.max_velocity_ < 0.0)
       {
-        RCLCPP_ERROR(LOGGER, "Invalid max_velocity %f specified for '%s', must be greater than 0.0",
+        RCLCPP_ERROR(getLogger(), "Invalid max_velocity %f specified for '%s', must be greater than 0.0",
                      bounds.max_velocity_, vars[idx].c_str());
         return false;
       }
@@ -1045,10 +1089,11 @@ bool TimeOptimalTrajectoryGeneration::computeTimeStamps(
 
     if (!set_velocity_limit)
     {
-      RCLCPP_ERROR_STREAM(LOGGER, "No velocity limit was defined for joint "
-                                      << vars[idx].c_str()
-                                      << "! You have to define velocity limits in the URDF or "
-                                         "joint_limits.yaml");
+      RCLCPP_ERROR_STREAM(getLogger(), "No velocity limit was defined for joint " << vars[idx].c_str()
+                                                                                  << "! You have to define velocity "
+                                                                                     "limits "
+                                                                                     "in the URDF or "
+                                                                                     "joint_limits.yaml");
       return false;
     }
 
@@ -1067,7 +1112,7 @@ bool TimeOptimalTrajectoryGeneration::computeTimeStamps(
       // Set the default acceleration limit, from robot model
       if (bounds.max_acceleration_ < 0.0)
       {
-        RCLCPP_ERROR(LOGGER, "Invalid max_acceleration %f specified for '%s', must be greater than 0.0",
+        RCLCPP_ERROR(getLogger(), "Invalid max_acceleration %f specified for '%s', must be greater than 0.0",
                      bounds.max_acceleration_, vars[idx].c_str());
         return false;
       }
@@ -1077,10 +1122,11 @@ bool TimeOptimalTrajectoryGeneration::computeTimeStamps(
     }
     if (!set_acceleration_limit)
     {
-      RCLCPP_ERROR_STREAM(LOGGER, "No acceleration limit was defined for joint "
-                                      << vars[idx].c_str()
-                                      << "! You have to define acceleration limits in the URDF or "
-                                         "joint_limits.yaml");
+      RCLCPP_ERROR_STREAM(getLogger(), "No acceleration limit was defined for joint " << vars[idx].c_str()
+                                                                                      << "! You have to define "
+                                                                                         "acceleration "
+                                                                                         "limits in the URDF or "
+                                                                                         "joint_limits.yaml");
       return false;
     }
   }
@@ -1100,7 +1146,7 @@ bool totgComputeTimeStamps(const size_t num_waypoints, robot_trajectory::RobotTr
 
   if (num_waypoints < 2)
   {
-    RCLCPP_ERROR(LOGGER, "computeTimeStamps() requires num_waypoints > 1");
+    RCLCPP_ERROR(getLogger(), "computeTimeStamps() requires num_waypoints > 1");
     return false;
   }
 
@@ -1123,14 +1169,14 @@ bool TimeOptimalTrajectoryGeneration::doTimeParameterizationCalculations(robot_t
   const moveit::core::JointModelGroup* group = trajectory.getGroup();
   if (!group)
   {
-    RCLCPP_ERROR(LOGGER, "It looks like the planner did not set the group the plan was computed for");
+    RCLCPP_ERROR(getLogger(), "It looks like the planner did not set the group the plan was computed for");
     return false;
   }
 
   if (hasMixedJointTypes(group))
   {
-    RCLCPP_WARN(LOGGER, "There is a combination of revolute and prismatic joints in the robot model. TOTG's "
-                        "`path_tolerance` will not function correctly.");
+    RCLCPP_WARN(getLogger(), "There is a combination of revolute and prismatic joints in the robot model. TOTG's "
+                             "`path_tolerance` will not function correctly.");
   }
 
   const unsigned num_points = trajectory.getWayPointCount();
@@ -1139,7 +1185,7 @@ bool TimeOptimalTrajectoryGeneration::doTimeParameterizationCalculations(robot_t
 
   // Have to convert into Eigen data structs and remove repeated points
   //  (https://github.com/tobiaskunz/trajectories/issues/3)
-  std::list<Eigen::VectorXd> points;
+  std::vector<Eigen::VectorXd> points;
   for (size_t p = 0; p < num_points; ++p)
   {
     moveit::core::RobotStatePtr waypoint = trajectory.getWayPointPtr(p);
@@ -1181,15 +1227,22 @@ bool TimeOptimalTrajectoryGeneration::doTimeParameterizationCalculations(robot_t
   }
 
   // Now actually call the algorithm
-  Trajectory parameterized(Path(points, path_tolerance_), max_velocity, max_acceleration, DEFAULT_TIMESTEP);
-  if (!parameterized.isValid())
+  std::optional<Path> path = Path::create(points, path_tolerance_);
+  if (!path)
   {
-    RCLCPP_ERROR(LOGGER, "Unable to parameterize trajectory.");
+    RCLCPP_ERROR(getLogger(), "Invalid path.");
+    return false;
+  }
+
+  std::optional<Trajectory> parameterized = Trajectory::create(*path, max_velocity, max_acceleration, DEFAULT_TIMESTEP);
+  if (!parameterized)
+  {
+    RCLCPP_ERROR(getLogger(), "Couldn't create trajectory");
     return false;
   }
 
   // Compute sample count
-  size_t sample_count = std::ceil(parameterized.getDuration() / resample_dt_);
+  const size_t sample_count = std::ceil(parameterized->getDuration() / resample_dt_);
 
   // Resample and fill in trajectory
   moveit::core::RobotState waypoint = moveit::core::RobotState(trajectory.getWayPoint(0));
@@ -1198,10 +1251,10 @@ bool TimeOptimalTrajectoryGeneration::doTimeParameterizationCalculations(robot_t
   for (size_t sample = 0; sample <= sample_count; ++sample)
   {
     // always sample the end of the trajectory as well
-    double t = std::min(parameterized.getDuration(), sample * resample_dt_);
-    Eigen::VectorXd position = parameterized.getPosition(t);
-    Eigen::VectorXd velocity = parameterized.getVelocity(t);
-    Eigen::VectorXd acceleration = parameterized.getAcceleration(t);
+    double t = std::min(parameterized->getDuration(), sample * resample_dt_);
+    Eigen::VectorXd position = parameterized->getPosition(t);
+    Eigen::VectorXd velocity = parameterized->getVelocity(t);
+    Eigen::VectorXd acceleration = parameterized->getAcceleration(t);
 
     for (size_t j = 0; j < num_joints; ++j)
     {
@@ -1252,8 +1305,8 @@ double TimeOptimalTrajectoryGeneration::verifyScalingFactor(const double request
   }
   else
   {
-    RCLCPP_WARN(LOGGER, "Invalid max_%sscaling_factor %f specified, defaulting to %f instead.", limit_type_str.c_str(),
-                requested_scaling_factor, scaling_factor);
+    RCLCPP_WARN(getLogger(), "Invalid max_%sscaling_factor %f specified, defaulting to %f instead.",
+                limit_type_str.c_str(), requested_scaling_factor, scaling_factor);
   }
   return scaling_factor;
 }

@@ -42,13 +42,12 @@
 #include <tf2_eigen/tf2_eigen.hpp>
 #include <moveit/robot_state/robot_state.h>
 #include <moveit/robot_state/attached_body.h>
+#include <moveit/utils/logger.hpp>
 
 namespace move_group
 {
-static const rclcpp::Logger LOGGER =
-    rclcpp::get_logger("moveit_move_group_default_capabilities.tf_publisher_capability");
 
-TfPublisher::TfPublisher() : MoveGroupCapability("TfPublisher")
+TfPublisher::TfPublisher() : MoveGroupCapability("tf_publisher")
 {
 }
 
@@ -133,7 +132,8 @@ void TfPublisher::initialize()
 
   keep_running_ = true;
 
-  RCLCPP_INFO(LOGGER, "Initializing MoveGroupTfPublisher with a frame publishing rate of %d", rate_);
+  RCLCPP_INFO(moveit::getLogger("TfPublisher"), "Initializing MoveGroupTfPublisher with a frame publishing rate of %d",
+              rate_);
   thread_ = std::thread(&TfPublisher::publishPlanningSceneFrames, this);
 }
 }  // namespace move_group

@@ -104,10 +104,10 @@ plan(std::shared_ptr<moveit_cpp::PlanningComponent>& planning_component,
   }
 }
 
-bool set_goal(std::shared_ptr<moveit_cpp::PlanningComponent>& planning_component,
-              std::optional<std::string> configuration_name, std::optional<moveit::core::RobotState> robot_state,
-              std::optional<geometry_msgs::msg::PoseStamped> pose_stamped_msg, std::optional<std::string> pose_link,
-              std::optional<std::vector<moveit_msgs::msg::Constraints>> motion_plan_constraints)
+bool setGoal(std::shared_ptr<moveit_cpp::PlanningComponent>& planning_component,
+             std::optional<std::string> configuration_name, std::optional<moveit::core::RobotState> robot_state,
+             std::optional<geometry_msgs::msg::PoseStamped> pose_stamped_msg, std::optional<std::string> pose_link,
+             std::optional<std::vector<moveit_msgs::msg::Constraints>> motion_plan_constraints)
 {
   // check that no more than one argument is specified
   if (configuration_name && robot_state)
@@ -167,8 +167,8 @@ bool set_goal(std::shared_ptr<moveit_cpp::PlanningComponent>& planning_component
   }
 }
 
-bool set_start_state(std::shared_ptr<moveit_cpp::PlanningComponent>& planning_component,
-                     std::optional<std::string> configuration_name, std::optional<moveit::core::RobotState> robot_state)
+bool setStartState(std::shared_ptr<moveit_cpp::PlanningComponent>& planning_component,
+                   std::optional<std::string> configuration_name, std::optional<moveit::core::RobotState> robot_state)
 {
   // check that no more than one argument is specified
   if (configuration_name && robot_state)
@@ -194,7 +194,7 @@ bool set_start_state(std::shared_ptr<moveit_cpp::PlanningComponent>& planning_co
   }
 }
 
-void init_plan_request_parameters(py::module& m)
+void initPlanRequestParameters(py::module& m)
 {
   py::class_<moveit_cpp::PlanningComponent::PlanRequestParameters,
              std::shared_ptr<moveit_cpp::PlanningComponent::PlanRequestParameters>>(m, "PlanRequestParameters",
@@ -235,7 +235,7 @@ void init_plan_request_parameters(py::module& m)
                      )");
 }
 
-void init_multi_plan_request_parameters(py::module& m)
+void initMultiPlanRequestParameters(py::module& m)
 {
   py::class_<moveit_cpp::PlanningComponent::MultiPipelinePlanRequestParameters,
              std::shared_ptr<moveit_cpp::PlanningComponent::MultiPipelinePlanRequestParameters>>(
@@ -252,7 +252,7 @@ void init_multi_plan_request_parameters(py::module& m)
       .def_readonly("multi_plan_request_parameters",
                     &moveit_cpp::PlanningComponent::MultiPipelinePlanRequestParameters::plan_request_parameter_vector);
 }
-void init_planning_component(py::module& m)
+void initPlanningComponent(py::module& m)
 {
   py::class_<moveit_cpp::PlanningComponent, std::shared_ptr<moveit_cpp::PlanningComponent>>(m, "PlanningComponent",
                                                                                             R"(
@@ -290,7 +290,7 @@ void init_planning_component(py::module& m)
            Set the start state of the plan to the current state of the robot.
            )")
 
-      .def("set_start_state", &moveit_py::bind_planning_component::set_start_state,
+      .def("set_start_state", &moveit_py::bind_planning_component::setStartState,
            py::arg("configuration_name") = nullptr, py::arg("robot_state") = nullptr,
            R"(
            Set the start state of the plan to the given robot state.
@@ -311,7 +311,7 @@ void init_planning_component(py::module& m)
            py::overload_cast<std::shared_ptr<moveit_cpp::PlanningComponent>&, std::optional<std::string>,
                              std::optional<moveit::core::RobotState>, std::optional<geometry_msgs::msg::PoseStamped>,
                              std::optional<std::string>, std::optional<std::vector<moveit_msgs::msg::Constraints>>>(
-               &moveit_py::bind_planning_component::set_goal),
+               &moveit_py::bind_planning_component::setGoal),
            py::arg("configuration_name") = nullptr, py::arg("robot_state") = nullptr,
            py::arg("pose_stamped_msg") = nullptr, py::arg("pose_link") = nullptr,
            py::arg("motion_plan_constraints") = nullptr,

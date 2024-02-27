@@ -39,6 +39,7 @@
 
 #include <class_loader/class_loader.hpp>
 #include <stomp_moveit/stomp_moveit_planning_context.hpp>
+#include <moveit/utils/logger.hpp>
 
 #include <rclcpp/node.hpp>
 #include <rclcpp/logging.hpp>
@@ -46,7 +47,13 @@
 
 namespace stomp_moveit
 {
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("stomp_moveit");
+namespace
+{
+rclcpp::Logger getLogger()
+{
+  return moveit::getLogger("stomp_moveit");
+}
+}  // namespace
 
 using namespace planning_interface;
 
@@ -109,21 +116,15 @@ public:
   {
     if (req.goal_constraints.empty())
     {
-      RCLCPP_ERROR(LOGGER, "Invalid goal constraints");
+      RCLCPP_ERROR(getLogger(), "Invalid goal constraints");
       return false;
     }
 
     if (req.group_name.empty() || !robot_model_->hasJointModelGroup(req.group_name))
     {
-      RCLCPP_ERROR(LOGGER, "Invalid joint group '%s'", req.group_name.c_str());
+      RCLCPP_ERROR(getLogger(), "Invalid joint group '%s'", req.group_name.c_str());
       return false;
     }
-
-    if (!req.reference_trajectories.empty())
-    {
-      RCLCPP_WARN(LOGGER, "Ignoring reference trajectories - not implemented!");
-    }
-
     return true;
   }
 

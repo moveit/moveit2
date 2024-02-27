@@ -2,6 +2,16 @@
 Changelog for package moveit_ros_control_interface
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.9.0 (2024-01-09)
+------------------
+* Fix warning and cleanup unneeded placeholders (`#2566 <https://github.com/ros-planning/moveit2/issues/2566>`_)
+  * Fix warning and cleanup unneeded placeholders
+  * Make clang-tidy happy
+  * Remove print statement
+* Node logging for the rest of MoveIt (`#2599 <https://github.com/ros-planning/moveit2/issues/2599>`_)
+* Merge branch 'main' into dependabot/github_actions/SonarSource/sonarcloud-github-c-cpp-2
+* Contributors: Sebastian Jahr, Tyler Weaver
+
 2.8.0 (2023-09-10)
 ------------------
 * Simplify controller manager namespacing (`#2210 <https://github.com/ros-planning/moveit2/issues/2210>`_)

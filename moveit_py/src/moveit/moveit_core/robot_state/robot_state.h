@@ -51,29 +51,28 @@ namespace bind_robot_state
 {
 void update(moveit::core::RobotState* self, bool force, std::string& category);
 
-Eigen::MatrixXd get_frame_transform(const moveit::core::RobotState* self, std::string& frame_id);
+Eigen::MatrixXd getFrameTransform(const moveit::core::RobotState* self, std::string& frame_id);
 
-Eigen::MatrixXd get_global_link_transform(const moveit::core::RobotState* self, std::string& link_name);
+Eigen::MatrixXd getGlobalLinkTransform(const moveit::core::RobotState* self, std::string& link_name);
 
-geometry_msgs::msg::Pose get_pose(const moveit::core::RobotState* self, const std::string& link_name);
+geometry_msgs::msg::Pose getPose(const moveit::core::RobotState* self, const std::string& link_name);
 
-Eigen::VectorXd copy_joint_group_positions(const moveit::core::RobotState* self,
-                                           const std::string& joint_model_group_name);
-Eigen::VectorXd copy_joint_group_velocities(const moveit::core::RobotState* self,
+Eigen::VectorXd copyJointGroupPositions(const moveit::core::RobotState* self, const std::string& joint_model_group_name);
+Eigen::VectorXd copyJointGroupVelocities(const moveit::core::RobotState* self,
+                                         const std::string& joint_model_group_name);
+Eigen::VectorXd copyJointGroupAccelerations(const moveit::core::RobotState* self,
                                             const std::string& joint_model_group_name);
-Eigen::VectorXd copy_joint_group_accelerations(const moveit::core::RobotState* self,
-                                               const std::string& joint_model_group_name);
 
-Eigen::MatrixXd get_jacobian(const moveit::core::RobotState* self, const std::string& joint_model_group_name,
-                             const std::string& link_model_name, const Eigen::Vector3d& reference_point_position,
-                             bool use_quaternion_representation);
+Eigen::MatrixXd getJacobian(const moveit::core::RobotState* self, const std::string& joint_model_group_name,
+                            const std::string& link_model_name, const Eigen::Vector3d& reference_point_position,
+                            bool use_quaternion_representation);
 
-Eigen::MatrixXd get_jacobian(const moveit::core::RobotState* self, const std::string& joint_model_group_name,
-                             const Eigen::Vector3d& reference_point_position);
+Eigen::MatrixXd getJacobian(const moveit::core::RobotState* self, const std::string& joint_model_group_name,
+                            const Eigen::Vector3d& reference_point_position);
 
-bool set_to_default_values(moveit::core::RobotState* self, const std::string& joint_model_group_name,
-                           const std::string& state_name);
+bool setToDefaultValues(moveit::core::RobotState* self, const std::string& joint_model_group_name,
+                        const std::string& state_name);
 
-void init_robot_state(py::module& m);
+void initRobotState(py::module& m);
 }  // namespace bind_robot_state
 }  // namespace moveit_py

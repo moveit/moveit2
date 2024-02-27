@@ -47,11 +47,11 @@ namespace moveit_py
 {
 namespace bind_transforms
 {
-Eigen::MatrixXd get_transform(std::shared_ptr<moveit::core::Transforms>& transforms, std::string& from_frame);
+Eigen::MatrixXd getTransform(std::shared_ptr<moveit::core::Transforms>& transforms, std::string& from_frame);
 
-std::map<std::string, Eigen::MatrixXd> get_all_transforms(std::shared_ptr<moveit::core::Transforms>& transforms);
+std::map<std::string, Eigen::MatrixXd> getAllTransforms(std::shared_ptr<moveit::core::Transforms>& transforms);
 
-void init_transforms(py::module& m);
+void initTransforms(py::module& m);
 
 }  // namespace bind_transforms
 }  // namespace moveit_py

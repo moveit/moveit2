@@ -37,7 +37,6 @@
 #pragma once
 
 #include <string>
-#include <rclcpp/logger.hpp>
 
 namespace moveit_warehouse
 {
@@ -53,6 +52,5 @@ public:
 private:
   std::string dbexec_;
   int child_pid_;
-  rclcpp::Logger logger_;
 };
 }  // namespace moveit_warehouse
