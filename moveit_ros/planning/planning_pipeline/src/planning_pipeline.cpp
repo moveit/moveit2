@@ -306,16 +306,16 @@ bool PlanningPipeline::generatePlan(const planning_scene::PlanningSceneConstPtr&
       }
     }
 
-    // modify planner request to notice plugins of their corresponding max_allowed_time
-    // NOTE: currently just evenly distributing the remaining time
-    const double max_single_planner_time = std::chrono::duration<double>(clock::now() - plan_start_time).count() /
-                                           pipeline_parameters_.planning_plugins.size();
-    mutable_request.allowed_planning_time = max_single_planner_time;
-
     // Call planners
-    for (const auto& planner_name : pipeline_parameters_.planning_plugins)
+    for (size_t i = 0; i < pipeline_parameters_.planning_plugins.size(); i++)
     {
-      const auto& planner = planner_map_.at(planner_name);
+      // modify planner request to notice plugins of their corresponding max_allowed_time
+      // NOTE: currently just evenly distributing the remaining time among the remaining planners
+      double max_single_planner_time = std::chrono::duration<double>(clock::now() - plan_start_time).count() /
+                                       (pipeline_parameters_.planning_plugins.size() - i);
+      mutable_request.allowed_planning_time = max_single_planner_time;
+
+      const auto& planner = planner_map_.at(pipeline_parameters_.planning_plugins[i]);
       // Update reference trajectory with latest solution (if available)
       if (res.trajectory)
       {
