@@ -11,4 +11,4 @@ ament_target_dependencies(moveit_planning_interface moveit_msgs urdf urdfdom
 target_link_libraries(moveit_planning_interface moveit_robot_trajectory
                       moveit_robot_state moveit_planning_scene moveit_utils)
 
-install(DIRECTORY include/ DESTINATION include/moveit_core)
+install(DIRECTORY include/ DESTINATION include/moveit_core/planning_interface)
