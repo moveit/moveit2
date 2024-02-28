@@ -12,4 +12,4 @@ ament_target_dependencies(moveit_kinematics_metrics urdf urdfdom_headers
 target_link_libraries(moveit_kinematics_metrics moveit_robot_model
                       moveit_robot_state moveit_utils)
 
-install(DIRECTORY include/ DESTINATION include/moveit_core)
+install(DIRECTORY include/ DESTINATION include/moveit_core/kinematics_metrics)
