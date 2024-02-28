@@ -38,6 +38,7 @@
 #include <moveit/planning_interface/planning_interface.h>
 #include <moveit/planning_interface/planning_request_adapter.h>
 #include <moveit/planning_interface/planning_response_adapter.h>
+#include <moveit/utils/moveit_error_code.h>
 #include <class_loader/class_loader.hpp>
 
 namespace planning_pipeline_test

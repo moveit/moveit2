@@ -37,6 +37,7 @@
 #include <gtest/gtest.h>
 
 #include <moveit/planning_pipeline/planning_pipeline.h>
+#include <moveit/utils/moveit_error_code.h>
 #include <moveit/utils/robot_model_test_utils.h>
 
 namespace
@@ -92,6 +93,7 @@ TEST_F(TestPlanningPipeline, HappyPath)
   // THEN A successful response is created
   planning_interface::MotionPlanResponse motion_plan_response;
   planning_interface::MotionPlanRequest motion_plan_request;
+  motion_plan_request.allowed_planning_time = 10;
   const auto planning_scene_ptr = std::make_shared<planning_scene::PlanningScene>(robot_model_);
   EXPECT_TRUE(pipeline_ptr_->generatePlan(planning_scene_ptr, motion_plan_request, motion_plan_response));
   EXPECT_TRUE(motion_plan_response.error_code);
@@ -113,6 +115,34 @@ TEST_F(TestPlanningPipeline, NoPlannerPluginConfigured)
                    robot_model_, node_, "", std::vector<std::string>({ "UNKNOWN" }), REQUEST_ADAPTERS,
                    RESPONSE_ADAPTERS),
                std::runtime_error);
+}
+
+TEST_F(TestPlanningPipeline, TestTimeout)
+{
+  // construct pipline
+  EXPECT_NO_THROW(pipeline_ptr_ = std::make_shared<planning_pipeline::PlanningPipeline>(
+                      robot_model_, node_, "", PLANNER_PLUGINS, REQUEST_ADAPTERS, RESPONSE_ADAPTERS));
+
+  // WHEN generatePlan is called
+  // THEN A successful response is created
+  planning_interface::MotionPlanResponse motion_plan_response;
+  planning_interface::MotionPlanRequest motion_plan_request;
+  const auto planning_scene_ptr = std::make_shared<planning_scene::PlanningScene>(robot_model_);
+
+  // timeout by request adapter
+  motion_plan_request.allowed_planning_time = 0.1;
+  EXPECT_FALSE(pipeline_ptr_->generatePlan(planning_scene_ptr, motion_plan_request, motion_plan_response));
+  EXPECT_EQ(motion_plan_response.error_code, moveit::core::MoveItErrorCode::TIMED_OUT);
+
+  // timeout by planner
+  motion_plan_request.allowed_planning_time = 1;
+  EXPECT_FALSE(pipeline_ptr_->generatePlan(planning_scene_ptr, motion_plan_request, motion_plan_response));
+  EXPECT_EQ(motion_plan_response.error_code, moveit::core::MoveItErrorCode::TIMED_OUT);
+
+  // passes
+  motion_plan_request.allowed_planning_time = 10;
+  EXPECT_TRUE(pipeline_ptr_->generatePlan(planning_scene_ptr, motion_plan_request, motion_plan_response));
+  EXPECT_EQ(motion_plan_response.error_code, moveit::core::MoveItErrorCode::SUCCESS);
 }
 
 int main(int argc, char** argv)
