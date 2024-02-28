@@ -32,9 +32,9 @@ target_link_libraries(
   moveit_trajectory_processing
   moveit_utils)
 
-install(DIRECTORY include/ DESTINATION include/moveit_core)
+install(DIRECTORY include/ DESTINATION include/moveit_core/planning_scene)
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/moveit_planning_scene_export.h
-        DESTINATION include/moveit_core)
+        DESTINATION include/moveit_core/planning_scene)
 
 if(BUILD_TESTING)
   find_package(ament_cmake_gtest REQUIRED)
