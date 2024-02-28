@@ -274,7 +274,6 @@ bool PlanningPipeline::generatePlan(const planning_scene::PlanningSceneConstPtr&
   try
   {
     using clock = std::chrono::system_clock;
-    const auto timeout_error = std::runtime_error("allowed_planning_time exceeded");
     const auto plan_start_time = clock::now();
     const double allowed_planning_time = req.allowed_planning_time;
 
@@ -285,8 +284,18 @@ bool PlanningPipeline::generatePlan(const planning_scene::PlanningSceneConstPtr&
       RCLCPP_INFO(node_->get_logger(), "Calling PlanningRequestAdapter '%s'", req_adapter->getDescription().c_str());
       const auto status = req_adapter->adapt(planning_scene, mutable_request);
       res.error_code = status.val;
+      std::string message = status.message;
+
       // Publish progress
       publishPipelineState(mutable_request, res, req_adapter->getDescription());
+
+      // check for timeout (mainly for sanity check since adapters are fast)
+      if (std::chrono::duration<double>(clock::now() - plan_start_time).count() >= allowed_planning_time)
+      {
+        message = "failed to finish within " + std::to_string(allowed_planning_time) + "s";
+        res.error_code = moveit::core::MoveItErrorCode::TIMED_OUT;
+      }
+
       // If adapter does not succeed, break chain and return false
       if (!res.error_code)
       {
@@ -294,12 +303,6 @@ bool PlanningPipeline::generatePlan(const planning_scene::PlanningSceneConstPtr&
                      "PlanningRequestAdapter '%s' failed, because '%s'. Aborting planning pipeline.",
                      req_adapter->getDescription().c_str(), status.message.c_str());
         break;
-      }
-
-      // check for timeout
-      if (std::chrono::duration<double>(clock::now() - plan_start_time).count() >= allowed_planning_time)
-      {
-        throw timeout_error;
       }
     }
 
@@ -312,7 +315,6 @@ bool PlanningPipeline::generatePlan(const planning_scene::PlanningSceneConstPtr&
     // Call planners
     for (const auto& planner_name : pipeline_parameters_.planning_plugins)
     {
-      auto planner_start_time = clock::now();
       const auto& planner = planner_map_.at(planner_name);
       // Update reference trajectory with latest solution (if available)
       if (res.trajectory)
@@ -337,18 +339,17 @@ bool PlanningPipeline::generatePlan(const planning_scene::PlanningSceneConstPtr&
       context->solve(res);
       publishPipelineState(mutable_request, res, planner->getDescription());
 
+      // check for overall timeout
+      if (std::chrono::duration<double>(clock::now() - plan_start_time).count() >= allowed_planning_time)
+      {
+        res.error_code = moveit::core::MoveItErrorCode::TIMED_OUT;
+      }
+
       // If planner does not succeed, break chain and return false
       if (!res.error_code)
       {
         RCLCPP_ERROR(node_->get_logger(), "Planner '%s' failed", planner->getDescription().c_str());
         break;
-      }
-
-      // TODO: should this be optional since the plugins already checked for timeout?
-      // check for timeout
-      if (std::chrono::duration<double>(clock::now() - planner_start_time).count() >= max_single_planner_time)
-      {
-        throw timeout_error;
       }
     }
 
@@ -362,18 +363,19 @@ bool PlanningPipeline::generatePlan(const planning_scene::PlanningSceneConstPtr&
         RCLCPP_INFO(node_->get_logger(), "Calling PlanningResponseAdapter '%s'", res_adapter->getDescription().c_str());
         res_adapter->adapt(planning_scene, mutable_request, res);
         publishPipelineState(mutable_request, res, res_adapter->getDescription());
+
+        // check for timeout
+        if (std::chrono::duration<double>(clock::now() - plan_start_time).count() >= allowed_planning_time)
+        {
+          res.error_code = moveit::core::MoveItErrorCode::TIMED_OUT;
+        }
+
         // If adapter does not succeed, break chain and return false
         if (!res.error_code)
         {
           RCLCPP_ERROR(node_->get_logger(), "PlanningResponseAdapter '%s' failed",
                        res_adapter->getDescription().c_str());
           break;
-        }
-
-        // check for timeout
-        if (std::chrono::duration<double>(clock::now() - plan_start_time).count() >= allowed_planning_time)
-        {
-          throw timeout_error;
         }
       }
     }
