@@ -48,4 +48,4 @@ if(BUILD_TESTING)
   target_link_libraries(test_robot_model moveit_test_utils moveit_robot_model)
 endif()
 
-install(DIRECTORY include/ DESTINATION include/moveit_core)
+install(DIRECTORY include/ DESTINATION include/moveit_core_robot_model)
