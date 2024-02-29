@@ -30,7 +30,7 @@ target_link_libraries(
   moveit_kinematic_constraints moveit_collision_detection_fcl
   moveit_kinematics_base moveit_robot_state moveit_robot_model moveit_utils)
 
-install(DIRECTORY include/ DESTINATION include/moveit_core)
+install(DIRECTORY include/ DESTINATION include/moveit_core_kinematic_constraints)
 
 if(BUILD_TESTING)
   find_package(ament_cmake_gtest REQUIRED)
