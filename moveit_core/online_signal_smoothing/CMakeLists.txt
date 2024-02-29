@@ -54,11 +54,11 @@ ament_target_dependencies(
 # Installation
 install(DIRECTORY include/ DESTINATION include/moveit_core)
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/moveit_smoothing_base_export.h
-        DESTINATION include/moveit_core/online_signal_smoothing)
+        DESTINATION include/moveit_core_online_signal_smoothing)
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/moveit_butterworth_filter_export.h
-        DESTINATION include/moveit_core/online_signal_smoothing)
+        DESTINATION include/moveit_core_online_signal_smoothing)
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/moveit_acceleration_filter_export.h
-        DESTINATION include/moveit_core/online_signal_smoothing)
+        DESTINATION include/moveit_core_online_signal_smoothing)
 
 # Testing
 
