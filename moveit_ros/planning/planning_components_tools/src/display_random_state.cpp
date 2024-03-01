@@ -102,7 +102,7 @@ int main(int argc, char** argv)
       if (valid)
       {
         bool found = false;
-        unsigned int attempts = 0;
+        unsigned int attempts{ 0 };
         do
         {
           attempts++;
@@ -121,7 +121,7 @@ int main(int argc, char** argv)
       else if (invalid)
       {
         bool found = false;
-        unsigned int attempts = 0;
+        unsigned int attempts{ 0 };
         do
         {
           attempts++;
