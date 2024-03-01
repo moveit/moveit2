@@ -76,8 +76,8 @@ int main(int argc, char** argv)
   auto node = rclcpp::Node::make_shared("evaluate_collision_checking_speed");
   moveit::setNodeLoggerName(node->get_name());
 
-  unsigned int nthreads = 2;
-  unsigned int trials = 10000;
+  unsigned int nthreads{ 2 };
+  unsigned int trials{ 10000 };
   boost::program_options::options_description desc;
   desc.add_options()("nthreads", boost::program_options::value<unsigned int>(&nthreads)->default_value(nthreads),
                      "Number of threads to use")(
