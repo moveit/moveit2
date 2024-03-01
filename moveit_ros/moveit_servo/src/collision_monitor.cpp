@@ -47,7 +47,7 @@ namespace
 {
 rclcpp::Logger getLogger()
 {
-  return moveit::getLogger("CollisionMonitor");
+  return moveit::getLogger("moveit.ros.move_group.collision_monitor");
 }
 }  // namespace
 

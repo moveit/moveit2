@@ -60,7 +60,7 @@ namespace
 {
 rclcpp::Logger getLogger()
 {
-  return moveit::getLogger("moveit_collision_detection_fcl");
+  return moveit::getLogger("moveit.core.moveit_collision_detection_fcl");
 }
 }  // namespace
 

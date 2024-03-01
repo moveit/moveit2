@@ -48,7 +48,7 @@ namespace
 {
 rclcpp::Logger getLogger()
 {
-  return moveit::getLogger("get_urdf_service");
+  return moveit::getLogger("moveit.ros.move_group.get_urdf_service");
 }
 const auto JOINT_ELEMENT_CLOSING = std::string("</joint>");
 const auto LINK_ELEMENT_CLOSING = std::string("</link>");

@@ -74,7 +74,7 @@ namespace
 {
 rclcpp::Logger getLogger()
 {
-  return moveit::getLogger("ompl_model_based_planning_context");
+  return moveit::getLogger("moveit.planners.ompl.model_based_planning_context");
 }
 }  // namespace
 

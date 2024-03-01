@@ -53,7 +53,7 @@ namespace
 {
 rclcpp::Logger getLogger()
 {
-  return moveit::getLogger("moveit_constraint_samplers.test.pr2_arm_kinematics_plugin");
+  return moveit::getLogger("moveit.core.moveit_constraint_samplers.test.pr2_arm_kinematics_plugin");
 }
 }  // namespace
 

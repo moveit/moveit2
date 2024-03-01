@@ -51,7 +51,7 @@ namespace
 {
 rclcpp::Logger getLogger()
 {
-  return moveit::getLogger("stomp_moveit");
+  return moveit::getLogger("moveit.planners.stomp.planner_manager");
 }
 }  // namespace
 

@@ -52,7 +52,7 @@ namespace
 {
 rclcpp::Logger getLogger()
 {
-  return moveit::getLogger("kdl_kinematics_plugin");
+  return moveit::getLogger("moveit.kinematics.kdl_kinematics_plugin");
 }
 }  // namespace
 

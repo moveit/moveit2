@@ -52,7 +52,7 @@ namespace
 {
 rclcpp::Logger getLogger()
 {
-  return moveit::getLogger("collision_distance_field_types");
+  return moveit::getLogger("moveit.core.collision_distance_field_types");
 }
 }  // namespace
 

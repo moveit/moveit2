@@ -43,7 +43,7 @@ namespace
 {
 rclcpp::Logger getLogger()
 {
-  return moveit::getLogger("pilz_planning_context_loader_ptp");
+  return moveit::getLogger("moveit.planners.pilz.planning_context_loader.ptp");
 }
 }  // namespace
 

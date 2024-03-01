@@ -46,7 +46,8 @@ using warehouse_ros::Metadata;
 using warehouse_ros::Query;
 
 moveit_warehouse::PlanningSceneWorldStorage::PlanningSceneWorldStorage(warehouse_ros::DatabaseConnection::Ptr conn)
-  : MoveItMessageStorage(std::move(conn)), logger_(moveit::getLogger("moveit_warehouse_planning_scene_world_storage"))
+  : MoveItMessageStorage(std::move(conn))
+  , logger_(moveit::getLogger("moveit.ros.warehouse_planning_scene_world_storage"))
 {
   createCollections();
 }

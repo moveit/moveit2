@@ -48,7 +48,7 @@ namespace
 {
 rclcpp::Logger getLogger()
 {
-  return moveit::getLogger("ompl_constraints");
+  return moveit::getLogger("moveit.planners.ompl.constraints");
 }
 }  // namespace
 

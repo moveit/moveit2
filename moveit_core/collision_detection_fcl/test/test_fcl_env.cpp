@@ -66,7 +66,7 @@ inline void setToHome(moveit::core::RobotState& panda_state)
 
 rclcpp::Logger getLogger()
 {
-  return moveit::getLogger("moveit_collision_detection_fcl.test.test_fcl_env");
+  return moveit::getLogger("moveit.core.collision_detection_fcl.test_fcl_env");
 }
 
 class CollisionDetectionEnvTest : public testing::Test

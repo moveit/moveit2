@@ -47,7 +47,7 @@ namespace
 {
 rclcpp::Logger getLogger()
 {
-  return moveit::getLogger("collision_detection_matrix");
+  return moveit::getLogger("moveit.core.collision_detection_matrix");
 }
 }  // namespace
 

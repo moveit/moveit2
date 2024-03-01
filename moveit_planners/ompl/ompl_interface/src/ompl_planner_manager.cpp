@@ -47,7 +47,7 @@ namespace
 {
 rclcpp::Logger getLogger()
 {
-  return moveit::getLogger("ompl_planner_manager");
+  return moveit::getLogger("moveit.planners.ompl.planner_manager");
 }
 }  // namespace
 

@@ -47,7 +47,7 @@ namespace
 {
 rclcpp::Logger getLogger()
 {
-  return moveit::getLogger("ompl_constrained_goal_sampler");
+  return moveit::getLogger("moveit.planners.ompl.constrained_goal_sampler");
 }
 }  // namespace
 

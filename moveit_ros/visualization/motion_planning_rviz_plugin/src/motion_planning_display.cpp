@@ -1037,7 +1037,8 @@ void MotionPlanningDisplay::changePlanningGroup(const std::string& group)
     planning_group_property_->setStdString(group);
   }
   else
-    RCLCPP_ERROR(moveit::getLogger("MotionPlanningDisplay"), "Group [%s] not found in the robot model.", group.c_str());
+    RCLCPP_ERROR(moveit::getLogger("moveit.ros.motion_planning_display"), "Group [%s] not found in the robot model.",
+                 group.c_str());
 }
 
 void MotionPlanningDisplay::changedPlanningGroup()

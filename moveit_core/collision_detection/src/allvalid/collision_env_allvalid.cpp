@@ -46,7 +46,7 @@ namespace
 {
 rclcpp::Logger getLogger()
 {
-  return moveit::getLogger("collision_detection.world_allvalid");
+  return moveit::getLogger("moveit.core.collision_detection.world_allvalid");
 }
 }  // namespace
 
