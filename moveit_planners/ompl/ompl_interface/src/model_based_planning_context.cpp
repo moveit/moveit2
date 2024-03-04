@@ -802,12 +802,10 @@ void ModelBasedPlanningContext::solve(planning_interface::MotionPlanResponse& re
 void ModelBasedPlanningContext::solve(planning_interface::MotionPlanDetailedResponse& res)
 {
   res.planner_id = request_.planner_id;
-  moveit_msgs::msg::MoveItErrorCodes moveit_result =
-      solve(request_.allowed_planning_time, request_.num_planning_attempts);
-  if (moveit_result.val != moveit_msgs::msg::MoveItErrorCodes::SUCCESS)
+  res.error_code = solve(request_.allowed_planning_time, request_.num_planning_attempts);
+  if (res.error_code.val != moveit_msgs::msg::MoveItErrorCodes::SUCCESS)
   {
     RCLCPP_INFO(getLogger(), "Unable to solve the planning problem");
-    res.error_code.val = moveit_msgs::msg::MoveItErrorCodes::PLANNING_FAILED;
     return;
   }
 
@@ -845,7 +843,6 @@ void ModelBasedPlanningContext::solve(planning_interface::MotionPlanDetailedResp
 
   RCLCPP_DEBUG(getLogger(), "%s: Returning successful solution with %lu states", getName().c_str(),
                getOMPLSimpleSetup()->getSolutionPath().getStateCount());
-  res.error_code.val = moveit_result.val;
 }
 
 const moveit_msgs::msg::MoveItErrorCodes ModelBasedPlanningContext::solve(double timeout, unsigned int count)
