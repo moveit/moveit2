@@ -38,6 +38,7 @@
 #include <moveit/utils/logger.hpp>
 
 #include <thread>
+#include <tuple>  // std::ignore.
 
 namespace moveit
 {
@@ -63,10 +64,7 @@ planWithSinglePipeline(const ::planning_interface::MotionPlanRequest& motion_pla
     return motion_plan_response;
   }
   const planning_pipeline::PlanningPipelinePtr pipeline = it->second;
-  if (!pipeline->generatePlan(planning_scene, motion_plan_request, motion_plan_response))
-  {
-    motion_plan_response.error_code = moveit::core::MoveItErrorCode::FAILURE;
-  }
+  std::ignore = pipeline->generatePlan(planning_scene, motion_plan_request, motion_plan_response);
   return motion_plan_response;
 }
 
