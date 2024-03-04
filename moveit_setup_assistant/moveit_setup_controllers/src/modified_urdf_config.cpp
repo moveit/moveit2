@@ -67,7 +67,7 @@ bool ModifiedUrdfConfig::hasChanges() const
 {
   // Returns true if any of the included xacros are configured and have individually changed
   // or the list of included xacros have changed.
-  unsigned int count = 0;
+  unsigned int count{ 0 };
   for (auto& pair : getIncludedXacroMap())
   {
     if (!pair.second->isConfigured())
