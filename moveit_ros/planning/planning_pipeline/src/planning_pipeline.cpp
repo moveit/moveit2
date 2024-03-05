@@ -286,7 +286,8 @@ bool PlanningPipeline::generatePlan(const planning_scene::PlanningSceneConstPtr&
         RCLCPP_ERROR(node_->get_logger(),
                      "PlanningRequestAdapter '%s' failed, because '%s'. Aborting planning pipeline.",
                      req_adapter->getDescription().c_str(), status.message.c_str());
-        break;
+        active_ = false;
+        return false;
       }
     }
 
@@ -309,7 +310,8 @@ bool PlanningPipeline::generatePlan(const planning_scene::PlanningSceneConstPtr&
                      "Failed to create PlanningContext for planner '%s'. Aborting planning pipeline.",
                      planner->getDescription().c_str());
         res.error_code = moveit::core::MoveItErrorCode::PLANNING_FAILED;
-        break;
+        active_ = false;
+        return false;
       }
 
       // Run planner
@@ -320,8 +322,10 @@ bool PlanningPipeline::generatePlan(const planning_scene::PlanningSceneConstPtr&
       // If planner does not succeed, break chain and return false
       if (!res.error_code)
       {
-        RCLCPP_ERROR(node_->get_logger(), "Planner '%s' failed", planner->getDescription().c_str());
-        break;
+        RCLCPP_ERROR(node_->get_logger(), "Planner '%s' failed with error code %s", planner->getDescription().c_str(),
+                     errorCodeToString(res.error_code).c_str());
+        active_ = false;
+        return false;
       }
     }
 
@@ -338,9 +342,10 @@ bool PlanningPipeline::generatePlan(const planning_scene::PlanningSceneConstPtr&
         // If adapter does not succeed, break chain and return false
         if (!res.error_code)
         {
-          RCLCPP_ERROR(node_->get_logger(), "PlanningResponseAdapter '%s' failed",
-                       res_adapter->getDescription().c_str());
-          break;
+          RCLCPP_ERROR(node_->get_logger(), "PlanningResponseAdapter '%s' failed with error code %s",
+                       res_adapter->getDescription().c_str(), errorCodeToString(res.error_code).c_str());
+          active_ = false;
+          return false;
         }
       }
     }
@@ -365,7 +370,7 @@ bool PlanningPipeline::generatePlan(const planning_scene::PlanningSceneConstPtr&
 
   // Set planning pipeline to inactive
   active_ = false;
-  return bool(res);
+  return static_cast<bool>(res);
 }
 
 void PlanningPipeline::terminate() const
