@@ -38,7 +38,6 @@
 #include <moveit/utils/logger.hpp>
 
 #include <thread>
-#include <tuple>  // std::ignore.
 
 namespace moveit
 {
@@ -64,7 +63,16 @@ planWithSinglePipeline(const ::planning_interface::MotionPlanRequest& motion_pla
     return motion_plan_response;
   }
   const planning_pipeline::PlanningPipelinePtr pipeline = it->second;
-  std::ignore = pipeline->generatePlan(planning_scene, motion_plan_request, motion_plan_response);
+  if (!pipeline->generatePlan(planning_scene, motion_plan_request, motion_plan_response))
+  {
+    if ((motion_plan_response.error_code.val == moveit::core::MoveItErrorCode::SUCCESS) ||
+        (motion_plan_response.error_code.val == moveit::core::MoveItErrorCode::UNDEFINED))
+    {
+      RCLCPP_ERROR(getLogger(), "Planning pipeline '%s' failed to plan, but did not set an error code",
+                   motion_plan_request.pipeline_id.c_str());
+      motion_plan_response.error_code = moveit::core::MoveItErrorCode::FAILURE;
+    }
+  }
   return motion_plan_response;
 }
 
