@@ -78,9 +78,6 @@ public:
     // TODO(sjahr): Would verbose make sense?
     planning_scene->checkCollision(creq, cres, start_state);
 
-    collision_detection::CollisionResult::ContactMap contacts;
-    planning_scene->getCollidingPairs(contacts);
-
     auto status = moveit::core::MoveItErrorCode();
     if (!cres.collision)
     {
