@@ -771,6 +771,7 @@ void ModelBasedPlanningContext::postSolve()
 
 void ModelBasedPlanningContext::solve(planning_interface::MotionPlanResponse& res)
 {
+  res.planner_id = request_.planner_id;
   res.error_code = solve(request_.allowed_planning_time, request_.num_planning_attempts);
   if (res.error_code.val != moveit_msgs::msg::MoveItErrorCodes::SUCCESS)
   {
@@ -800,6 +801,7 @@ void ModelBasedPlanningContext::solve(planning_interface::MotionPlanResponse& re
 
 void ModelBasedPlanningContext::solve(planning_interface::MotionPlanDetailedResponse& res)
 {
+  res.planner_id = request_.planner_id;
   moveit_msgs::msg::MoveItErrorCodes moveit_result =
       solve(request_.allowed_planning_time, request_.num_planning_attempts);
   if (moveit_result.val != moveit_msgs::msg::MoveItErrorCodes::SUCCESS)
