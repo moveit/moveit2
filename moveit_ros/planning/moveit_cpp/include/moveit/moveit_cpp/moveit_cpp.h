@@ -62,15 +62,12 @@ public:
       const std::string ns = "planning_scene_monitor_options";
       node->get_parameter_or(ns + ".name", name, std::string("planning_scene_monitor"));
       node->get_parameter_or(ns + ".robot_description", robot_description, std::string("robot_description"));
-      node->get_parameter_or(ns + ".joint_state_topic", joint_state_topic,
-                             planning_scene_monitor::PlanningSceneMonitor::DEFAULT_JOINT_STATES_TOPIC);
-      node->get_parameter_or(ns + ".attached_collision_object_topic", attached_collision_object_topic,
-                             planning_scene_monitor::PlanningSceneMonitor::DEFAULT_ATTACHED_COLLISION_OBJECT_TOPIC);
-      node->get_parameter_or(ns + ".monitored_planning_scene_topic", monitored_planning_scene_topic,
-                             planning_scene_monitor::PlanningSceneMonitor::MONITORED_PLANNING_SCENE_TOPIC);
-      node->get_parameter_or(ns + ".publish_planning_scene_topic", publish_planning_scene_topic,
-                             planning_scene_monitor::PlanningSceneMonitor::DEFAULT_PLANNING_SCENE_TOPIC);
       node->get_parameter_or(ns + ".wait_for_initial_state_timeout", wait_for_initial_state_timeout, 0.0);
+      
+      joint_state_topic = planning_scene_monitor::PlanningSceneMonitor::DEFAULT_JOINT_STATES_TOPIC;
+      attached_collision_object_topic = planning_scene_monitor::PlanningSceneMonitor::DEFAULT_ATTACHED_COLLISION_OBJECT_TOPIC;
+      monitored_planning_scene_topic = planning_scene_monitor::PlanningSceneMonitor::MONITORED_PLANNING_SCENE_TOPIC;
+      publish_planning_scene_topic = planning_scene_monitor::PlanningSceneMonitor::DEFAULT_PLANNING_SCENE_TOPIC;
     }
     std::string name;
     std::string robot_description;
