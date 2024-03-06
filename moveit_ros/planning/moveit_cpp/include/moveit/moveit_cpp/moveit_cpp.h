@@ -57,24 +57,28 @@ public:
   /// Specification of options to use when constructing the MoveItCpp class
   struct PlanningSceneMonitorOptions
   {
+    PlanningSceneMonitorOptions()
+      : joint_state_topic(planning_scene_monitor::PlanningSceneMonitor::DEFAULT_JOINT_STATES_TOPIC)
+      , attached_collision_object_topic(
+            planning_scene_monitor::PlanningSceneMonitor::DEFAULT_ATTACHED_COLLISION_OBJECT_TOPIC)
+      , monitored_planning_scene_topic(planning_scene_monitor::PlanningSceneMonitor::MONITORED_PLANNING_SCENE_TOPIC)
+      , publish_planning_scene_topic(planning_scene_monitor::PlanningSceneMonitor::DEFAULT_PLANNING_SCENE_TOPIC)
+    {
+    }
+
     void load(const rclcpp::Node::SharedPtr& node)
     {
       const std::string ns = "planning_scene_monitor_options";
       node->get_parameter_or(ns + ".name", name, std::string("planning_scene_monitor"));
       node->get_parameter_or(ns + ".robot_description", robot_description, std::string("robot_description"));
       node->get_parameter_or(ns + ".wait_for_initial_state_timeout", wait_for_initial_state_timeout, 0.0);
-      
-      joint_state_topic = planning_scene_monitor::PlanningSceneMonitor::DEFAULT_JOINT_STATES_TOPIC;
-      attached_collision_object_topic = planning_scene_monitor::PlanningSceneMonitor::DEFAULT_ATTACHED_COLLISION_OBJECT_TOPIC;
-      monitored_planning_scene_topic = planning_scene_monitor::PlanningSceneMonitor::MONITORED_PLANNING_SCENE_TOPIC;
-      publish_planning_scene_topic = planning_scene_monitor::PlanningSceneMonitor::DEFAULT_PLANNING_SCENE_TOPIC;
     }
     std::string name;
     std::string robot_description;
-    std::string joint_state_topic;
-    std::string attached_collision_object_topic;
-    std::string monitored_planning_scene_topic;
-    std::string publish_planning_scene_topic;
+    const std::string joint_state_topic;
+    const std::string attached_collision_object_topic;
+    const std::string monitored_planning_scene_topic;
+    const std::string publish_planning_scene_topic;
     double wait_for_initial_state_timeout;
   };
 
