@@ -119,7 +119,7 @@ TEST_F(TestPlanningPipeline, NoPlannerPluginConfigured)
 
 TEST_F(TestPlanningPipeline, TestTimeout)
 {
-  // construct pipline
+  // construct pipeline
   EXPECT_NO_THROW(pipeline_ptr_ = std::make_shared<planning_pipeline::PlanningPipeline>(
                       robot_model_, node_, "", PLANNER_PLUGINS, REQUEST_ADAPTERS, RESPONSE_ADAPTERS));
 
