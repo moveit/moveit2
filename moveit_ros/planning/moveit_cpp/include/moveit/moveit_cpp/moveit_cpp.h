@@ -54,7 +54,7 @@ MOVEIT_CLASS_FORWARD(MoveItCpp);  // Defines MoveItCppPtr, ConstPtr, WeakPtr... 
 class MoveItCpp
 {
 public:
-  /// Specification of options to use when constructing the MoveItCpp class
+  // Specification of options to use when constructing the MoveItCpp class
   struct PlanningSceneMonitorOptions
   {
     void load(const rclcpp::Node::SharedPtr& node)
@@ -81,7 +81,7 @@ public:
     double wait_for_initial_state_timeout;
   };
 
-  /// struct contains the the variables used for loading the planning pipeline
+  // struct contains the the variables used for loading the planning pipeline
   struct PlanningPipelineOptions
   {
     void load(const rclcpp::Node::SharedPtr& node)
@@ -94,10 +94,10 @@ public:
     std::string parent_namespace;
   };
 
-  /// Parameter container for initializing MoveItCpp
+  // Parameter container for initializing MoveItCpp
   struct Options
   {
-    Options(const rclcpp::Node::SharedPtr& node)
+    explicit Options(const rclcpp::Node::SharedPtr& node)
     {
       planning_scene_monitor_options.load(node);
       planning_pipeline_options.load(node);
@@ -107,59 +107,58 @@ public:
     PlanningPipelineOptions planning_pipeline_options;
   };
 
-  /** \brief Constructor */
+// \brief Constructor
   MoveItCpp(const rclcpp::Node::SharedPtr& node);
   MoveItCpp(const rclcpp::Node::SharedPtr& node, const Options& options);
 
-  /**
-   * @brief This class owns unique resources (e.g. action clients, threads) and its not very
-   * meaningful to copy. Pass by references, move it, or simply create multiple instances where
-   * required.
-   */
+// @brief This class owns unique resources (e.g. action clients, threads) and its not very
+// meaningful to copy. Pass by references, move it, or simply create multiple instances where
+// required.
+
   MoveItCpp(const MoveItCpp&) = delete;
   MoveItCpp& operator=(const MoveItCpp&) = delete;
 
   MoveItCpp(MoveItCpp&& other) = default;
   MoveItCpp& operator=(MoveItCpp&& other) = default;
 
-  /** \brief Destructor */
+// \brief Destructor
   ~MoveItCpp();
 
-  /** \brief Get the RobotModel object. */
+// \brief Get the RobotModel object.
   moveit::core::RobotModelConstPtr getRobotModel() const;
 
-  /** \brief Get the ROS node this instance operates on */
+// \brief Get the ROS node this instance operates on
   const rclcpp::Node::SharedPtr& getNode() const;
 
-  /** \brief Get the current state queried from the current state monitor
-      \param wait_seconds the time in seconds for the state monitor to wait for a robot state. */
+// \brief Get the current state queried from the current state monitor
+//     \param wait_seconds the time in seconds for the state monitor to wait for a robot state.
   bool getCurrentState(moveit::core::RobotStatePtr& current_state, double wait_seconds);
 
-  /** \brief Get the current state queried from the current state monitor
-      \param wait_seconds the time in seconds for the state monitor to wait for a robot state. */
+// \brief Get the current state queried from the current state monitor
+//     \param wait_seconds the time in seconds for the state monitor to wait for a robot state.
   moveit::core::RobotStatePtr getCurrentState(double wait_seconds = 0.0);
 
-  /** \brief Get all loaded planning pipeline instances mapped to their reference names */
+// \brief Get all loaded planning pipeline instances mapped to their reference names
   const std::unordered_map<std::string, planning_pipeline::PlanningPipelinePtr>& getPlanningPipelines() const;
 
-  /** \brief Get the stored instance of the planning scene monitor */
+// \brief Get the stored instance of the planning scene monitor
   planning_scene_monitor::PlanningSceneMonitorConstPtr getPlanningSceneMonitor() const;
   planning_scene_monitor::PlanningSceneMonitorPtr getPlanningSceneMonitorNonConst();
 
   std::shared_ptr<const tf2_ros::Buffer> getTFBuffer() const;
   std::shared_ptr<tf2_ros::Buffer> getTFBuffer();
 
-  /** \brief Get the stored instance of the trajectory execution manager */
+// \brief Get the stored instance of the trajectory execution manager
   trajectory_execution_manager::TrajectoryExecutionManagerConstPtr getTrajectoryExecutionManager() const;
   trajectory_execution_manager::TrajectoryExecutionManagerPtr getTrajectoryExecutionManagerNonConst();
 
-  /** \brief Execute a trajectory on the planning group specified by the robot's trajectory using the trajectory
-   * execution manager.
-   *  \param [in] robot_trajectory Contains trajectory info as well as metadata such as a RobotModel.
-   *  \param [in] controllers An optional list of ros2_controllers to execute with. If none, MoveIt will attempt to find
-   * a controller. The exact behavior of finding a controller depends on which MoveItControllerManager plugin is active.
-   *  \return moveit_controller_manager::ExecutionStatus::SUCCEEDED if successful
-   */
+// \brief Execute a trajectory on the planning group specified by the robot's trajectory using the trajectory
+// execution manager.
+//  \param [in] robot_trajectory Contains trajectory info as well as metadata such as a RobotModel.
+//  \param [in] controllers An optional list of ros2_controllers to execute with. If none, MoveIt will attempt to find
+// a controller. The exact behavior of finding a controller depends on which MoveItControllerManager plugin is active.
+//  \return moveit_controller_manager::ExecutionStatus::SUCCEEDED if successful
+
   [[deprecated("MoveItCpp::execute() no longer requires a blocking parameter")]] moveit_controller_manager::ExecutionStatus
   execute(const robot_trajectory::RobotTrajectoryPtr& robot_trajectory, bool blocking,
           const std::vector<std::string>& controllers = std::vector<std::string>());
@@ -168,7 +167,7 @@ public:
   execute(const robot_trajectory::RobotTrajectoryPtr& robot_trajectory,
           const std::vector<std::string>& controllers = std::vector<std::string>());
 
-  /** \brief Utility to terminate the given planning pipeline */
+// \brief Utility to terminate the given planning pipeline
   bool terminatePlanningPipeline(const std::string& pipeline_name);
 
 private:
@@ -185,10 +184,10 @@ private:
 
   rclcpp::Logger logger_;
 
-  /** \brief Initialize and setup the planning scene monitor */
+// \brief Initialize and setup the planning scene monitor
   bool loadPlanningSceneMonitor(const PlanningSceneMonitorOptions& options);
 
-  /** \brief Initialize and setup the planning pipelines */
+// \brief Initialize and setup the planning pipelines
   bool loadPlanningPipelines(const PlanningPipelineOptions& options);
 };
 }  // namespace moveit_cpp
