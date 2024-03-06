@@ -123,8 +123,6 @@ TEST_F(TestPlanningPipeline, TestTimeout)
   EXPECT_NO_THROW(pipeline_ptr_ = std::make_shared<planning_pipeline::PlanningPipeline>(
                       robot_model_, node_, "", PLANNER_PLUGINS, REQUEST_ADAPTERS, RESPONSE_ADAPTERS));
 
-  // WHEN generatePlan is called
-  // THEN A successful response is created
   planning_interface::MotionPlanResponse motion_plan_response;
   planning_interface::MotionPlanRequest motion_plan_request;
   const auto planning_scene_ptr = std::make_shared<planning_scene::PlanningScene>(robot_model_);
@@ -135,14 +133,14 @@ TEST_F(TestPlanningPipeline, TestTimeout)
   EXPECT_EQ(motion_plan_response.error_code, moveit::core::MoveItErrorCode::TIMED_OUT);
 
   // timeout by planner
-  motion_plan_request.allowed_planning_time = 1;
+  motion_plan_request.allowed_planning_time = 1.0;
   EXPECT_FALSE(pipeline_ptr_->generatePlan(planning_scene_ptr, motion_plan_request, motion_plan_response));
   EXPECT_EQ(motion_plan_response.error_code, moveit::core::MoveItErrorCode::TIMED_OUT);
 
-  // passes
-  motion_plan_request.allowed_planning_time = 10;
-  EXPECT_TRUE(pipeline_ptr_->generatePlan(planning_scene_ptr, motion_plan_request, motion_plan_response));
-  EXPECT_EQ(motion_plan_response.error_code, moveit::core::MoveItErrorCode::SUCCESS);
+  // timeout by response adapter
+  motion_plan_request.allowed_planning_time = 2.3;
+  EXPECT_FALSE(pipeline_ptr_->generatePlan(planning_scene_ptr, motion_plan_request, motion_plan_response));
+  EXPECT_EQ(motion_plan_response.error_code, moveit::core::MoveItErrorCode::TIMED_OUT);
 }
 
 int main(int argc, char** argv)

@@ -282,9 +282,8 @@ bool PlanningPipeline::generatePlan(const planning_scene::PlanningSceneConstPtr&
     {
       assert(req_adapter);
       RCLCPP_INFO(node_->get_logger(), "Calling PlanningRequestAdapter '%s'", req_adapter->getDescription().c_str());
-      const auto status = req_adapter->adapt(planning_scene, mutable_request);
+      auto status = req_adapter->adapt(planning_scene, mutable_request);
       res.error_code = status.val;
-      std::string message = status.message;
 
       // Publish progress
       publishPipelineState(mutable_request, res, req_adapter->getDescription());
@@ -292,7 +291,8 @@ bool PlanningPipeline::generatePlan(const planning_scene::PlanningSceneConstPtr&
       // check for timeout (mainly for sanity check since adapters are fast)
       if (std::chrono::duration<double>(clock::now() - plan_start_time).count() >= allowed_planning_time)
       {
-        message = "failed to finish within " + std::to_string(allowed_planning_time) + "s";
+        status.message =
+            "Failed to finish planning within allowed planning time ( " + std::to_string(allowed_planning_time) + "s )";
         res.error_code = moveit::core::MoveItErrorCode::TIMED_OUT;
       }
 
@@ -311,11 +311,11 @@ bool PlanningPipeline::generatePlan(const planning_scene::PlanningSceneConstPtr&
     {
       // modify planner request to notice plugins of their corresponding max_allowed_time
       // NOTE: currently just evenly distributing the remaining time among the remaining planners
-      double max_single_planner_time = std::chrono::duration<double>(clock::now() - plan_start_time).count() /
-                                       (pipeline_parameters_.planning_plugins.size() - i);
-      mutable_request.allowed_planning_time = max_single_planner_time;
+      mutable_request.allowed_planning_time =
+          (allowed_planning_time - std::chrono::duration<double>(clock::now() - plan_start_time).count()) /
+          (pipeline_parameters_.planning_plugins.size() - i);
 
-      const auto& planner = planner_map_.at(pipeline_parameters_.planning_plugins[i]);
+      const auto& planner = planner_map_.at(pipeline_parameters_.planning_plugins.at(i));
       // Update reference trajectory with latest solution (if available)
       if (res.trajectory)
       {
