@@ -85,8 +85,18 @@ public:
     }
     else
     {
+      collision_detection::CollisionResult::ContactMap contacts;
+      planning_scene->getCollidingPairs(contacts);
+
+      std::string contact_information = std::to_string(contacts.size()) + " contact(s) detected : ";
+
+      for (const auto& [contact_pair, contact_info] : contacts)
+      {
+        contact_information.append(contact_pair.first + " - " + contact_pair.second + ", ");
+      }
+
       status.val = moveit_msgs::msg::MoveItErrorCodes::START_STATE_IN_COLLISION;
-      status.message = std::string("Start state in collision.");
+      status.message = std::string(contact_information);
     }
     status.source = getDescription();
     return status;
