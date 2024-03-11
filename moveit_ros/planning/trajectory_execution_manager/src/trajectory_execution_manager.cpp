@@ -258,9 +258,19 @@ void TrajectoryExecutionManager::enableExecutionDurationMonitoring(bool flag)
   execution_duration_monitoring_ = flag;
 }
 
+bool TrajectoryExecutionManager::executionDurationMonitoring() const
+{
+  return execution_duration_monitoring_;
+}
+
 void TrajectoryExecutionManager::setAllowedExecutionDurationScaling(double scaling)
 {
   allowed_execution_duration_scaling_ = scaling;
+}
+
+double TrajectoryExecutionManager::allowedExecutionDurationScaling() const
+{
+  return allowed_execution_duration_scaling_;
 }
 
 void TrajectoryExecutionManager::setAllowedGoalDurationMargin(double margin)
@@ -268,9 +278,19 @@ void TrajectoryExecutionManager::setAllowedGoalDurationMargin(double margin)
   allowed_goal_duration_margin_ = margin;
 }
 
+double TrajectoryExecutionManager::allowedGoalDurationMargin() const
+{
+  return allowed_goal_duration_margin_;
+}
+
 void TrajectoryExecutionManager::setExecutionVelocityScaling(double scaling)
 {
   execution_velocity_scaling_ = scaling;
+}
+
+double TrajectoryExecutionManager::executionVelocityScaling() const
+{
+  return execution_velocity_scaling_;
 }
 
 void TrajectoryExecutionManager::setAllowedStartTolerance(double tolerance)
@@ -278,9 +298,19 @@ void TrajectoryExecutionManager::setAllowedStartTolerance(double tolerance)
   allowed_start_tolerance_ = tolerance;
 }
 
+double TrajectoryExecutionManager::allowedStartTolerance() const
+{
+  return allowed_start_tolerance_;
+}
+
 void TrajectoryExecutionManager::setWaitForTrajectoryCompletion(bool flag)
 {
   wait_for_trajectory_completion_ = flag;
+}
+
+bool TrajectoryExecutionManager::waitForTrajectoryCompletion() const
+{
+  return wait_for_trajectory_completion_;
 }
 
 bool TrajectoryExecutionManager::isManagingControllers() const
