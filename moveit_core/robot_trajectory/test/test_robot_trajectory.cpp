@@ -634,6 +634,31 @@ TEST_F(OneRobot, UnwindFromState)
   }
 }
 
+TEST_F(OneRobot, MultiDofTrajectoryToJointStates)
+{
+  robot_trajectory::RobotTrajectory trajectory(robot_model_);
+  trajectory.addSuffixWayPoint(robot_state_, 0.01 /* dt */);
+  trajectory.addSuffixWayPoint(robot_state_, 0.01 /* dt */);
+  auto maybe_trajectory_msg = toJointTrajectory(trajectory, true /* include_mdof_joints */);
+
+  ASSERT_TRUE(maybe_trajectory_msg.has_value());
+
+  const auto traj = maybe_trajectory_msg.value();
+  const auto& joint_names = traj.joint_names;
+
+  size_t joint_variable_count = 0u;
+  for (const auto& active_joint : robot_model_->getActiveJointModels())
+  {
+    joint_variable_count += active_joint->getVariableCount();
+  }
+
+  EXPECT_EQ(joint_names.size(), joint_variable_count);
+  EXPECT_TRUE(std::find(joint_names.begin(), joint_names.end(), "base_joint/x") != joint_names.end());
+  ASSERT_EQ(traj.points.size(), 2u);
+  EXPECT_EQ(traj.points.at(0).positions.size(), joint_variable_count);
+  EXPECT_EQ(traj.points.at(1).positions.size(), joint_variable_count);
+}
+
 int main(int argc, char** argv)
 {
   testing::InitGoogleTest(&argc, argv);
