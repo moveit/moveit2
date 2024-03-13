@@ -704,12 +704,12 @@ bool TrajectoryExecutionManager::distributeTrajectory(const moveit_msgs::msg::Ro
   std::set<std::string> actuated_joints_single;
   for (const std::string& joint_name : trajectory.joint_trajectory.joint_names)
   {
-    const moveit::core::JointModel* jm = robot_model_->getJointModel(joint_name);
+    const moveit::core::JointModel* jm = robot_model_->getJointOfVariable(joint_name);
     if (jm)
     {
       if (jm->isPassive() || jm->getMimic() != nullptr || jm->getType() == moveit::core::JointModel::FIXED)
         continue;
-      actuated_joints_single.insert(jm->getName());
+      actuated_joints_single.insert(joint_name);
     }
   }
 
@@ -865,11 +865,12 @@ bool TrajectoryExecutionManager::validate(const TrajectoryExecutionContext& cont
 
       for (std::size_t i = 0, end = joint_names.size(); i < end; ++i)
       {
+        // TODO support multi-dof joints
         const moveit::core::JointModel* jm = current_state->getJointModel(joint_names[i]);
         if (!jm)
         {
           RCLCPP_ERROR_STREAM(logger_, "Unknown joint in trajectory: " << joint_names[i]);
-          return false;
+          continue;
         }
 
         double cur_position = current_state->getJointPositions(jm)[0];
@@ -947,7 +948,7 @@ bool TrajectoryExecutionManager::configure(TrajectoryExecutionContext& context,
   std::set<std::string> actuated_joints;
 
   auto is_actuated = [this](const std::string& joint_name) -> bool {
-    const moveit::core::JointModel* jm = robot_model_->getJointModel(joint_name);
+    const moveit::core::JointModel* jm = robot_model_->getJointOfVariable(joint_name);
     return (jm && !jm->isPassive() && !jm->getMimic() && jm->getType() != moveit::core::JointModel::FIXED);
   };
   for (const std::string& joint_name : trajectory.multi_dof_joint_trajectory.joint_names)
@@ -1490,6 +1491,7 @@ bool TrajectoryExecutionManager::waitForRobotToStop(const TrajectoryExecutionCon
 
       for (std::size_t i = 0; i < n && !moved; ++i)
       {
+        // TODO: Update to respect mdof joint variables
         const moveit::core::JointModel* jm = cur_state->getJointModel(joint_names[i]);
         if (!jm)
           continue;  // joint vanished from robot state (shouldn't happen), but we don't care
