@@ -134,7 +134,6 @@ void GetUrdfService::initialize()
           const auto start = full_urdf_string.find("<joint name=\"" + joint_name + "\" type");
           auto substring = full_urdf_string.substr(start, full_urdf_string.size() - start);
           res->urdf_string += substring.substr(0, substring.find(JOINT_ELEMENT_CLOSING) + JOINT_ELEMENT_CLOSING.size());
-          RCLCPP_ERROR(getLogger(), "%s", joint_name.c_str());
 
           // If parent link model is not part of the joint group, add it
           const auto parent_link_element = subgroup->getJointModel(joint_name)->getParentLinkModel()->getName();
