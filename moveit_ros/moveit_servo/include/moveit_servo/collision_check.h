@@ -80,9 +80,6 @@ private:
   /** \brief Run one iteration of collision checking */
   void run();
 
-  /** \brief Get a read-only copy of the planning scene */
-  planning_scene_monitor::LockedPlanningSceneRO getLockedPlanningSceneRO() const;
-
   // Pointer to the ROS node
   const std::shared_ptr<rclcpp::Node> node_;
 
