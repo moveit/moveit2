@@ -59,7 +59,7 @@ namespace
 {
 rclcpp::Logger getLogger()
 {
-  return moveit::getLogger("planning_scene");
+  return moveit::getLogger("moveit.core.planning_scene");
 }
 }  // namespace
 

@@ -87,7 +87,7 @@ namespace
 {
 rclcpp::Logger getLogger()
 {
-  return moveit::getLogger("moveit_simple_controller_manager");
+  return moveit::getLogger("moveit.plugins.simple_controller_manager");
 }
 }  // namespace
 static const std::string PARAM_BASE_NAME = "moveit_simple_controller_manager";

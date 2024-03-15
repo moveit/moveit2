@@ -44,7 +44,7 @@ namespace
 {
 rclcpp::Logger getLogger()
 {
-  return moveit::getLogger("pilz_joint_limits_aggregator");
+  return moveit::getLogger("moveit.planners.pilz.joint_limits_aggregator");
 }
 }  // namespace
 

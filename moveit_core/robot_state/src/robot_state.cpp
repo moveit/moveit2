@@ -59,7 +59,7 @@ namespace
 {
 rclcpp::Logger getLogger()
 {
-  return moveit::getLogger("robot_state");
+  return moveit::getLogger("moveit.core.robot_state");
 }
 }  // namespace
 

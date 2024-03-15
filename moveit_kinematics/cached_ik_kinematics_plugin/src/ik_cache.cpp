@@ -47,7 +47,7 @@ namespace
 {
 rclcpp::Logger getLogger()
 {
-  return moveit::getLogger("dynamics_solver");
+  return moveit::getLogger("moveit.core.dynamics_solver");
 }
 }  // namespace
 IKCache::IKCache()

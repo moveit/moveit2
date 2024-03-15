@@ -58,7 +58,7 @@
 
 rclcpp::Logger getLogger()
 {
-  return moveit::getLogger("test_kinematics_plugin");
+  return moveit::getLogger("moveit.kinematics.test_kinematics_plugin");
 }
 const std::string ROBOT_DESCRIPTION_PARAM = "robot_description";
 const double DEFAULT_SEARCH_DISCRETIZATION = 0.01f;

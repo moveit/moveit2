@@ -43,7 +43,7 @@ namespace online_signal_smoothing
 {
 rclcpp::Logger getLogger()
 {
-  return moveit::getLogger("AccelerationLimitedPlugin");
+  return moveit::getLogger("moveit.core.acceleration_limited_plugin");
 }
 
 // The threshold below which any velocity or position difference is considered zero (rad and rad/s).

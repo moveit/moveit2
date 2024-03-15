@@ -57,7 +57,7 @@ namespace
 
 rclcpp::Logger getLogger()
 {
-  return moveit::getLogger("cartesian_interpolator");
+  return moveit::getLogger("moveit.core.cartesian_interpolator");
 }
 
 std::optional<int> hasRelativeJointSpaceJump(const std::vector<moveit::core::RobotStatePtr>& waypoints,

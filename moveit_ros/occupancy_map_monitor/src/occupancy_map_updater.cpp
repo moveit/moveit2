@@ -48,7 +48,7 @@ namespace
 {
 rclcpp::Logger getLogger()
 {
-  return moveit::getLogger("OccupancyMapUpdater");
+  return moveit::getLogger("moveit.ros.occupancy_map_updater");
 }
 }  // namespace
 

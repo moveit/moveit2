@@ -54,7 +54,7 @@ constexpr size_t STATE_SPACE_DIMENSION = 7;
 
 rclcpp::Logger getLogger()
 {
-  return moveit::getLogger("floating_joint_model");
+  return moveit::getLogger("moveit.core.floating_joint_model");
 }
 
 }  // namespace

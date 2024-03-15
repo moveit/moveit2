@@ -56,7 +56,7 @@ namespace cb = collision_detection_bullet;
 
 rclcpp::Logger getLogger()
 {
-  return moveit::getLogger("collision_detection.bullet_test");
+  return moveit::getLogger("moveit.core.collision_detection.bullet_test");
 }
 
 /** \brief Brings the panda robot in user defined home position */

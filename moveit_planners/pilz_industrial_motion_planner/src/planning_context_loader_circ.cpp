@@ -47,7 +47,7 @@ namespace
 {
 rclcpp::Logger getLogger()
 {
-  return moveit::getLogger("pilz_planning_context_loader_circ");
+  return moveit::getLogger("moveit.planners.pilz.planning_context_loader.circ");
 }
 }  // namespace
 
