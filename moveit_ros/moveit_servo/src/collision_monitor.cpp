@@ -108,9 +108,6 @@ void CollisionMonitor::checkCollisions()
       // Fetch latest robot state.
       robot_state_ = planning_scene_monitor_->getPlanningScene()->getCurrentState();
       // This must be called before doing collision checking.
-      std::vector<const moveit::core::AttachedBody*> bodies;
-      robot_state_.getAttachedBodies(bodies);
-      RCLCPP_ERROR(getLogger(), "SCASTRO Servo Attached bodies: %ld", bodies.size());
       robot_state_.updateCollisionBodyTransforms();
 
       // Get a read-only copy of planning scene.
