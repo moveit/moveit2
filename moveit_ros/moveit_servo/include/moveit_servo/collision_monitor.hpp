@@ -67,8 +67,9 @@ private:
   // Variables
 
   const servo::Params& servo_params_;
-  moveit::core::RobotStatePtr robot_state_;
+
   const planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor_;
+  moveit::core::RobotState robot_state_;
 
   // The collision monitor thread.
   std::thread monitor_thread_;
