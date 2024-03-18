@@ -95,11 +95,10 @@ void KDLKinematicsPlugin::getJointWeights()
   joint_weights_ = std::vector<double>(joint_names.size(), 1.0);
 
   // Check if joint weight is assigned in kinematics YAML
-  // Loop through map (key: joint name and value: Struct with a weight member variable)
-  for (const auto& joint_weight : params_.joints_map)
+  // Loop through map (key: joint name and weight: struct with a value member variable)
+  for (const auto& [joint_name, weight] : params_.weights.joints_map)
   {
     // Check if joint is an active joint in the group
-    const auto joint_name = joint_weight.first;
     auto it = std::find(joint_names.begin(), joint_names.end(), joint_name);
     if (it == joint_names.cend())
     {
@@ -109,7 +108,7 @@ void KDLKinematicsPlugin::getJointWeights()
     }
 
     // Find index of the joint name and assign weight to the coressponding index
-    joint_weights_.at(it - joint_names.begin()) = joint_weight.second.weight;
+    joint_weights_.at(it - joint_names.begin()) = weight.value;
   }
 
   RCLCPP_INFO_STREAM(

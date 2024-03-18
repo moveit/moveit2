@@ -5,15 +5,16 @@ kdl_kinematics:
     description: "Joints names to assign weights",
   }
 
-  __map_joints:
-    weight: {
-      type: double,
-      default_value: 1.0,
-      description: "Joint weight",
-      validation: {
-        gt<>: [ 0.0 ]
+  weights:
+    __map_joints:
+      value: {
+        type: double,
+        default_value: 1.0,
+        description: "Joint weight",
+        validation: {
+          gt<>: [ 0.0 ]
+        }
       }
-    }
 
   max_solver_iterations: {
     type: int,
