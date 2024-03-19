@@ -55,7 +55,7 @@ namespace
 {
 rclcpp::Logger getLogger()
 {
-  return moveit::getLogger("moveit_collision_detection_fcl");
+  return moveit::getLogger("moveit.core.collision_detection_fcl");
 }
 
 // Check whether this FCL version supports the requested computations

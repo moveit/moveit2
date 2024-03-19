@@ -54,7 +54,7 @@ namespace
 {
 rclcpp::Logger getLogger()
 {
-  return moveit::getLogger("srv_kinematics_plugin");
+  return moveit::getLogger("moveit.kinematics.srv_kinematics_plugin");
 }
 }  // namespace
 

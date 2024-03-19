@@ -67,7 +67,7 @@ bool ApplyPlanningSceneService::applyScene(const std::shared_ptr<rmw_request_id_
 {
   if (!context_->planning_scene_monitor_)
   {
-    RCLCPP_ERROR(moveit::getLogger("ApplyPlanningSceneService"),
+    RCLCPP_ERROR(moveit::getLogger("moveit.ros.move_group.apply_planning_scene_service"),
                  "Cannot apply PlanningScene as no scene is monitored.");
     return true;
   }

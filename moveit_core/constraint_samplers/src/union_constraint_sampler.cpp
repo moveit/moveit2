@@ -47,7 +47,7 @@ namespace
 {
 rclcpp::Logger getLogger()
 {
-  return moveit::getLogger("union_constraint_sampler");
+  return moveit::getLogger("moveit.core.union_constraint_sampler");
 }
 }  // namespace
 

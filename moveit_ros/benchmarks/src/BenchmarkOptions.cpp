@@ -44,7 +44,7 @@ namespace
 {
 rclcpp::Logger getLogger()
 {
-  return moveit::getLogger("benchmark_options");
+  return moveit::getLogger("moveit.benchmarks.options");
 }
 }  // namespace
 

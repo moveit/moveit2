@@ -46,7 +46,7 @@ namespace planning_pipeline_interfaces
 
 rclcpp::Logger getLogger()
 {
-  return moveit::getLogger("planning_pipeline_interfaces");
+  return moveit::getLogger("moveit.ros.planning_pipeline_interfaces");
 }
 
 ::planning_interface::MotionPlanResponse

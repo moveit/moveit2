@@ -67,7 +67,7 @@ namespace
 {
 rclcpp::Logger getLogger()
 {
-  return moveit::getLogger("_ROBOT_NAME___GROUP_NAME__ikfast_solver");
+  return moveit::getLogger("moveit.core._ROBOT_NAME___GROUP_NAME__ikfast_solver");
 }
 }  // namespace
 

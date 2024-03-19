@@ -47,7 +47,7 @@ namespace
 {
 rclcpp::Logger getLogger()
 {
-  return moveit::getLogger("evaluate_collision_checking_speed");
+  return moveit::getLogger("moveit.ros.evaluate_collision_checking_speed");
 }
 }  // namespace
 

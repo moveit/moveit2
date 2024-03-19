@@ -68,7 +68,7 @@ bool isStateValid(const planning_scene::PlanningScene* planning_scene,
 
 rclcpp::Logger getLogger()
 {
-  return moveit::getLogger("cartesian_path_service_capability");
+  return moveit::getLogger("moveit.ros.move_group.cartesian_path_service_capability");
 }
 }  // namespace
 

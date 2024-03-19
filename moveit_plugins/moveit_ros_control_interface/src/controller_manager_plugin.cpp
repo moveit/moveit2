@@ -65,7 +65,7 @@ namespace
 {
 rclcpp::Logger getLogger()
 {
-  return moveit::getLogger("ros_control_interface");
+  return moveit::getLogger("moveit.plugins.ros_control_interface");
 }
 }  // namespace
 

@@ -45,7 +45,7 @@ namespace
 {
 rclcpp::Logger getLogger()
 {
-  return moveit::getLogger("pilz_trajectory_blender_transition_window");
+  return moveit::getLogger("moveit.planners.pilz.trajectory_blender_transition_window");
 }
 }  // namespace
 

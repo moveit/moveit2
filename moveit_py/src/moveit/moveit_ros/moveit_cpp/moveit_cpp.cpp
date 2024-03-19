@@ -43,7 +43,7 @@ namespace bind_moveit_cpp
 {
 rclcpp::Logger getLogger()
 {
-  return moveit::getLogger("moveit_cpp_initializer");
+  return moveit::getLogger("moveit.py.cpp_initializer");
 }
 
 std::shared_ptr<moveit_cpp::PlanningComponent>

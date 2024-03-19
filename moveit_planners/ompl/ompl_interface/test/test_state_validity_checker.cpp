@@ -68,7 +68,7 @@ constexpr bool VERBOSE = false;
 
 rclcpp::Logger getLogger()
 {
-  return moveit::getLogger("test_state_validity_checker");
+  return moveit::getLogger("moveit.planners.ompl.test_state_validity_checker");
 }
 
 /** \brief Pretty print std:vectors **/

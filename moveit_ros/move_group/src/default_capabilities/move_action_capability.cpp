@@ -52,7 +52,7 @@ namespace
 {
 rclcpp::Logger getLogger()
 {
-  return moveit::getLogger("MoveGroupMoveAction");
+  return moveit::getLogger("moveit.ros.move_group.move_action");
 }
 }  // namespace
 

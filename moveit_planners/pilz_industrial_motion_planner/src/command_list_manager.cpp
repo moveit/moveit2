@@ -57,7 +57,7 @@ namespace
 const std::string PARAM_NAMESPACE_LIMITS = "robot_description_planning";
 rclcpp::Logger getLogger()
 {
-  return moveit::getLogger("pilz_command_list_manager");
+  return moveit::getLogger("moveit.planners.pilz.command_list_manager");
 }
 }  // namespace
 

@@ -50,7 +50,7 @@ namespace
 {
 rclcpp::Logger getLogger()
 {
-  return moveit::getLogger("collision_updater");
+  return moveit::getLogger("moveit.setup_assistant.collision_updater");
 }
 }  // namespace
 // ******************************************************************************************

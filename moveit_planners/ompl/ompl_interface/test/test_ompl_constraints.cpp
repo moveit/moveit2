@@ -65,7 +65,7 @@
 
 rclcpp::Logger getLogger()
 {
-  return moveit::getLogger("test_ompl_constraints");
+  return moveit::getLogger("moveit.planners.ompl.test_constraints");
 }
 
 /** \brief Number of times to run a test that uses randomly generated input. **/
