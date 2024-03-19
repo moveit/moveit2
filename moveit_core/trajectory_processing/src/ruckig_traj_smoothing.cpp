@@ -57,7 +57,7 @@ constexpr double OVERSHOOT_CHECK_PERIOD = 0.01;  // sec
 
 rclcpp::Logger getLogger()
 {
-  return moveit::getLogger("ruckig_traj_smoothing");
+  return moveit::getLogger("moveit.core.ruckig_traj_smoothing");
 }
 }  // namespace
 

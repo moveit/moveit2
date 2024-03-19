@@ -51,7 +51,7 @@ namespace
 {
 rclcpp::Logger getLogger()
 {
-  return moveit::getLogger("distance_field");
+  return moveit::getLogger("moveit.core.distance_field");
 }
 }  // namespace
 

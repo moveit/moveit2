@@ -56,7 +56,7 @@ namespace
 {
 rclcpp::Logger getLogger()
 {
-  return moveit::getLogger("robot_model_test_utils");
+  return moveit::getLogger("moveit.core.robot_model_test_utils");
 }
 }  // namespace
 

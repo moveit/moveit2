@@ -48,7 +48,7 @@ namespace
 {
 rclcpp::Logger getLogger()
 {
-  return moveit::getLogger("MoveGroupPlanService");
+  return moveit::getLogger("moveit.ros.move_group.plan_service");
 }
 }  // namespace
 

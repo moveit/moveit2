@@ -54,7 +54,7 @@ namespace
 {
 rclcpp::Logger getLogger()
 {
-  return moveit::getLogger("joint_model_group");
+  return moveit::getLogger("moveit.core.joint_model_group");
 }
 
 // check if a parent or ancestor of joint is included in this group

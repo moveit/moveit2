@@ -54,7 +54,7 @@ namespace
 {
 rclcpp::Logger getLogger()
 {
-  return moveit::getLogger("moveit_constaint_samplers.test.pr2_arm_ik");
+  return moveit::getLogger("moveit.core.moveit_constaint_samplers.test.pr2_arm_ik");
 }
 }  // namespace
 

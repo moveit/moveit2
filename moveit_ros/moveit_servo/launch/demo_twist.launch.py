@@ -22,8 +22,9 @@ def generate_launch_description():
         .to_dict()
     }
 
-    # This filter parameter should be >1. Increase it for greater smoothing but slower motion.
-    low_pass_filter_coeff = {"butterworth_filter_coeff": 1.5}
+    # This sets the update rate and planning group name for the acceleration limiting filter.
+    acceleration_filter_update_period = {"update_period": 0.01}
+    planning_group_name = {"planning_group_name": "panda_arm"}
 
     # RViz
     rviz_config_file = (
@@ -104,7 +105,8 @@ def generate_launch_description():
         executable="demo_twist",
         parameters=[
             servo_params,
-            low_pass_filter_coeff,
+            acceleration_filter_update_period,
+            planning_group_name,
             moveit_config.robot_description,
             moveit_config.robot_description_semantic,
             moveit_config.robot_description_kinematics,

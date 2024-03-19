@@ -46,7 +46,7 @@ namespace planning_pipeline_interfaces
 
 rclcpp::Logger getLogger()
 {
-  return moveit::getLogger("planning_pipeline_interfaces");
+  return moveit::getLogger("moveit.ros.planning_pipeline_interfaces");
 }
 
 ::planning_interface::MotionPlanResponse
@@ -65,7 +65,13 @@ planWithSinglePipeline(const ::planning_interface::MotionPlanRequest& motion_pla
   const planning_pipeline::PlanningPipelinePtr pipeline = it->second;
   if (!pipeline->generatePlan(planning_scene, motion_plan_request, motion_plan_response))
   {
-    motion_plan_response.error_code = moveit::core::MoveItErrorCode::FAILURE;
+    if ((motion_plan_response.error_code.val == moveit::core::MoveItErrorCode::SUCCESS) ||
+        (motion_plan_response.error_code.val == moveit::core::MoveItErrorCode::UNDEFINED))
+    {
+      RCLCPP_ERROR(getLogger(), "Planning pipeline '%s' failed to plan, but did not set an error code",
+                   motion_plan_request.pipeline_id.c_str());
+      motion_plan_response.error_code = moveit::core::MoveItErrorCode::FAILURE;
+    }
   }
   return motion_plan_response;
 }

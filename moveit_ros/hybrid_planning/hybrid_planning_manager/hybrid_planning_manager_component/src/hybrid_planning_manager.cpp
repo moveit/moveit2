@@ -45,7 +45,7 @@ namespace
 {
 rclcpp::Logger getLogger()
 {
-  return moveit::getLogger("hybrid_planning_manger");
+  return moveit::getLogger("moveit.hybrid_planning.manager");
 }
 }  // namespace
 

@@ -73,7 +73,7 @@ OccupancyMapMonitor::OccupancyMapMonitor(std::unique_ptr<MiddlewareHandle> middl
   , debug_info_{ false }
   , mesh_handle_count_{ 0 }
   , active_{ false }
-  , logger_(moveit::getLogger("occupancy_map_monitor"))
+  , logger_(moveit::getLogger("moveit.ros.occupancy_map_monitor"))
 {
   if (middleware_handle_ == nullptr)
   {

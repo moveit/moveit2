@@ -52,7 +52,7 @@ namespace
 {
 rclcpp::Logger getLogger()
 {
-  return moveit::getLogger("pilz_trajectory_generator");
+  return moveit::getLogger("moveit.planners.pilz.trajectory_generator");
 }
 }  // namespace
 

@@ -43,7 +43,7 @@ namespace
 {
 rclcpp::Logger getLogger()
 {
-  return moveit::getLogger("ClearOctomapService");
+  return moveit::getLogger("moveit.ros.move_group.clear_octomap_service");
 }
 }  // namespace
 

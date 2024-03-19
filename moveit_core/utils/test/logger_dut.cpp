@@ -47,8 +47,9 @@ int main(int argc, char** argv)
   moveit::setNodeLoggerName(node->get_name());
 
   // A node logger, should be in the file output and rosout
-  auto wall_timer = node->create_wall_timer(std::chrono::milliseconds(100),
-                                            [&] { RCLCPP_INFO(moveit::getLogger("child"), "hello from node!"); });
+  auto wall_timer = node->create_wall_timer(std::chrono::milliseconds(100), [&] {
+    RCLCPP_INFO(moveit::getLogger("moveit.core.child"), "hello from node!");
+  });
 
   rclcpp::spin(node);
 }
