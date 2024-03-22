@@ -1071,7 +1071,12 @@ bool TrajectoryExecutionManager::configure(TrajectoryExecutionContext& context,
       {
         if (known_controllers_.find(controller) == known_controllers_.end())
         {
-          RCLCPP_ERROR(logger_, "Controller '%s' is not known", controller.c_str());
+          std::stringstream stream;
+          for (const auto& controller : known_controllers_)
+          {
+            stream << " `" << controller.first << '`';
+          }
+          RCLCPP_ERROR_STREAM(logger_, "Controller " << controller << " is not known. Known controllers: " << stream.str());
           return false;
         }
       }
