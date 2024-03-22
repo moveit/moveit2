@@ -220,20 +220,8 @@ MoveItCpp::execute(const robot_trajectory::RobotTrajectoryPtr& robot_trajectory,
   }
 
   // Execute trajectory
-  const auto maybe_traj = robot_trajectory::toJointTrajectory(*robot_trajectory, true /* include_mdof_joints */);
-  if (!maybe_traj.has_value())
-  {
-    RCLCPP_ERROR(logger_, "Execution failed! Could not convert robot trajectory to message");
-    return moveit_controller_manager::ExecutionStatus::ABORTED;
-  }
-
   moveit_msgs::msg::RobotTrajectory robot_trajectory_msg;
-  robot_trajectory_msg.joint_trajectory = maybe_traj.value();
-
-  RCLCPP_ERROR(logger_, "Pushing trajectory for joints:");
-  for (const auto& joint_name : robot_trajectory_msg.joint_trajectory.joint_names)
-    RCLCPP_ERROR_STREAM(logger_, "- " << joint_name);
-
+  robot_trajectory->getRobotTrajectoryMsg(robot_trajectory_msg);
   trajectory_execution_manager_->push(robot_trajectory_msg, controllers);
   trajectory_execution_manager_->execute();
   return trajectory_execution_manager_->waitForExecution();

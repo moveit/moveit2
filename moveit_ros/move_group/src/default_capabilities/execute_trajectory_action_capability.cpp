@@ -106,29 +106,8 @@ void MoveGroupExecuteTrajectoryAction::executePath(const std::shared_ptr<ExecTra
 {
   RCLCPP_INFO(getLogger(), "Execution request received");
 
-  // Convert mdof trajectory to RobotTrajectory
-  auto trajectory_msg = goal->get_goal()->trajectory;
-  if (!trajectory_msg.multi_dof_joint_trajectory.points.empty())
-  {
-    std::vector<std::string> joint_names = {};  // trajectory_msg.joint_trajectory.joint_names;
-    for (const auto& name : trajectory_msg.multi_dof_joint_trajectory.joint_names)
-    {
-      joint_names.push_back(name);
-    }
-
-    robot_trajectory::RobotTrajectory trajectory(context_->moveit_cpp_->getRobotModel());
-    trajectory.setRobotTrajectoryMsg(*context_->moveit_cpp_->getCurrentState(0.05), trajectory_msg);
-    const auto joint_trajectory =
-        robot_trajectory::toJointTrajectory(trajectory, true /* include_mdof_joints */, joint_names);
-    if (joint_trajectory.has_value())
-    {
-      trajectory_msg.joint_trajectory = joint_trajectory.value();
-      trajectory_msg.multi_dof_joint_trajectory = trajectory_msgs::msg::MultiDOFJointTrajectory();
-    }
-  }
-
   context_->trajectory_execution_manager_->clear();
-  if (context_->trajectory_execution_manager_->push(trajectory_msg, goal->get_goal()->controller_names))
+  if (context_->trajectory_execution_manager_->push(goal->get_goal()->trajectory, goal->get_goal()->controller_names))
   {
     setExecuteTrajectoryState(MONITOR, goal);
     context_->trajectory_execution_manager_->execute();
