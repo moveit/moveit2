@@ -206,6 +206,7 @@ bool ROS2ControllersConfig::GeneratedControllersConfig::writeYaml(YAML::Emitter&
           const ControlInterfaces interfaces = parent_.getControlInterfaces(ci.joints_);
           emitter << YAML::Key << "command_interfaces" << YAML::Value << interfaces.command_interfaces;
           emitter << YAML::Key << "state_interfaces" << YAML::Value << interfaces.state_interfaces;
+          emitter << YAML::Key << "allow_nonzero_velocity_at_trajectory_end" << YAML::Value << true;
         }
       }
       emitter << YAML::EndMap;
