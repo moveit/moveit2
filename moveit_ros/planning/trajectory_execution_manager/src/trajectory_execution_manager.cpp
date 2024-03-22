@@ -36,6 +36,7 @@
 
 #include <moveit/trajectory_execution_manager/trajectory_execution_manager.h>
 #include <moveit/robot_state/robot_state.h>
+#include <moveit/robot_trajectory/robot_trajectory.h>
 #include <geometric_shapes/check_isometry.h>
 #include <tf2_eigen/tf2_eigen.hpp>
 #include <moveit/utils/logger.hpp>
@@ -350,8 +351,45 @@ bool TrajectoryExecutionManager::push(const moveit_msgs::msg::RobotTrajectory& t
     return false;
   }
 
+  bool convert_multi_dof_to_joint_states = true;
+  std::optional<moveit_msgs::msg::RobotTrajectory> replaced_trajectory;
+  if (convert_multi_dof_to_joint_states && !trajectory.multi_dof_joint_trajectory.points.empty())
+  {
+    // We convert the trajectory message into a RobotTrajectory first,
+    // since the conversion to a combined JointTrajectory depends on the local variables
+    // of the Multi-DOF joint types.
+    moveit::core::RobotState reference_state(robot_model_);
+    reference_state.setToDefaultValues();
+    robot_trajectory::RobotTrajectory tmp_trajectory(robot_model_);
+    tmp_trajectory.setRobotTrajectoryMsg(reference_state, trajectory);
+
+    // Combine all joints for filtering the joint trajectory waypoints
+    std::vector<std::string> all_trajectory_joints = trajectory.joint_trajectory.joint_names;
+    for (const auto& mdof_joint : trajectory.multi_dof_joint_trajectory.joint_names)
+    {
+      all_trajectory_joints.push_back(mdof_joint);
+    }
+
+    // Convert back to single joint trajectory including the MDOF joint variables, e.g. position/x, position/y, ...
+    const auto joint_trajectory =
+        robot_trajectory::toJointTrajectory(tmp_trajectory, true /* include_mdof_joints */, all_trajectory_joints);
+
+    // Check success of conversion
+    // This should never happen when using MoveIt's interfaces, but users can pass anything into TEM::push() directly
+    if (!joint_trajectory.has_value())
+    {
+      RCLCPP_ERROR(logger_, "Failed to convert multi-DOF trajectory to joint trajectory, aborting execution!");
+      return false;
+    }
+
+    // Create a new robot trajectory message that only contains the combined joint trajectory
+    RCLCPP_INFO(logger_, "Successfully converted multi-DOF trajectory to joint trajectory for execution.");
+    replaced_trajectory = moveit_msgs::msg::RobotTrajectory();
+    replaced_trajectory->joint_trajectory = joint_trajectory.value();
+  }
+
   TrajectoryExecutionContext* context = new TrajectoryExecutionContext();
-  if (configure(*context, trajectory, controllers))
+  if (configure(*context, replaced_trajectory.value_or(trajectory), controllers))
   {
     if (verbose_)
     {
