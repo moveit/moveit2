@@ -315,6 +315,7 @@ private:
   // 'global' values
   double allowed_execution_duration_scaling_;
   double allowed_goal_duration_margin_;
+  bool control_multi_dof_joint_variables_;
   // controller-specific values
   // override the 'global' values
   std::map<std::string, double> controller_allowed_execution_duration_scaling_;

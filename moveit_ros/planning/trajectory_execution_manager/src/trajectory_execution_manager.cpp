@@ -52,6 +52,7 @@ static const double DEFAULT_CONTROLLER_GOAL_DURATION_MARGIN = 0.5;  // allow 0.5
                                                                     // after scaling)
 static const double DEFAULT_CONTROLLER_GOAL_DURATION_SCALING =
     1.1;  // allow the execution of a trajectory to take more time than expected (scaled by a value > 1)
+static const bool DEFAULT_CONTROL_MULTI_DOF_JOINT_VARIABLES = false;
 
 TrajectoryExecutionManager::TrajectoryExecutionManager(const rclcpp::Node::SharedPtr& node,
                                                        const moveit::core::RobotModelConstPtr& robot_model,
@@ -95,6 +96,7 @@ void TrajectoryExecutionManager::initialize()
   execution_velocity_scaling_ = 1.0;
   allowed_start_tolerance_ = 0.01;
   wait_for_trajectory_completion_ = true;
+  control_multi_dof_joint_variables_ = DEFAULT_CONTROL_MULTI_DOF_JOINT_VARIABLES;
 
   allowed_execution_duration_scaling_ = DEFAULT_CONTROLLER_GOAL_DURATION_SCALING;
   allowed_goal_duration_margin_ = DEFAULT_CONTROLLER_GOAL_DURATION_MARGIN;
@@ -201,6 +203,7 @@ void TrajectoryExecutionManager::initialize()
   controller_mgr_node_->get_parameter("trajectory_execution.allowed_goal_duration_margin",
                                       allowed_goal_duration_margin_);
   controller_mgr_node_->get_parameter("trajectory_execution.allowed_start_tolerance", allowed_start_tolerance_);
+  controller_mgr_node_->get_parameter("trajectory_execution.control_multi_dof_joint_variables", control_multi_dof_joint_variables_);
 
   if (manage_controllers_)
   {
@@ -351,9 +354,9 @@ bool TrajectoryExecutionManager::push(const moveit_msgs::msg::RobotTrajectory& t
     return false;
   }
 
-  bool convert_multi_dof_to_joint_states = true;
+  // Optionally, convert multi dof waypoints to joint states and replace trajectory for execution
   std::optional<moveit_msgs::msg::RobotTrajectory> replaced_trajectory;
-  if (convert_multi_dof_to_joint_states && !trajectory.multi_dof_joint_trajectory.points.empty())
+  if (control_multi_dof_joint_variables_ && !trajectory.multi_dof_joint_trajectory.points.empty())
   {
     // We convert the trajectory message into a RobotTrajectory first,
     // since the conversion to a combined JointTrajectory depends on the local variables
@@ -1098,6 +1101,13 @@ bool TrajectoryExecutionManager::configure(TrajectoryExecutionContext& context,
     }
   }
   RCLCPP_ERROR(logger_, "Known controllers and their joints:\n%s", ss2.str().c_str());
+
+  if (!trajectory.multi_dof_joint_trajectory.joint_names.empty())
+  {
+    RCLCPP_WARN(logger_, "Hint: You can control multi-dof waypoints as joint trajectory by setting "
+                         "`trajectory_execution.control_multi_dof_joint_variables=True`");
+  }
+
   return false;
 }
 
