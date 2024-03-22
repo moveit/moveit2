@@ -887,7 +887,7 @@ bool TrajectoryExecutionManager::validate(const TrajectoryExecutionContext& cont
     RCLCPP_WARN(logger_, "Failed to validate trajectory: couldn't receive full current joint state within 1s");
     return false;
   }
-
+  moveit::core::RobotState reference_state(*current_state);
   for (const auto& trajectory : context.trajectory_parts_)
   {
     if (!trajectory.joint_trajectory.points.empty())
@@ -901,31 +901,45 @@ bool TrajectoryExecutionManager::validate(const TrajectoryExecutionContext& cont
         return false;
       }
 
+      std::set<const moveit::core::JointModel*> joints;
       for (std::size_t i = 0, end = joint_names.size(); i < end; ++i)
       {
-        // TODO support multi-dof joints
-        const moveit::core::JointModel* jm = current_state->getJointModel(joint_names[i]);
+        const moveit::core::JointModel* jm = robot_model_->getJointOfVariable(joint_names[i]);
         if (!jm)
         {
           RCLCPP_ERROR_STREAM(logger_, "Unknown joint in trajectory: " << joint_names[i]);
-          continue;
+          return false;
         }
 
-        double cur_position = current_state->getJointPositions(jm)[0];
-        double traj_position = positions[i];
-        // normalize positions and compare
-        jm->enforcePositionBounds(&cur_position);
-        jm->enforcePositionBounds(&traj_position);
-        if (jm->distance(&cur_position, &traj_position) > allowed_start_tolerance_)
+        joints.insert(jm);
+      }
+
+      // Copy all variable positions to reference state, and then compare start state joint distance within bounds
+      // Note on multi-DOF joints: Instead of comparing the translation and rotation distances like it's done for
+      // the multi-dof trajectory, this check will use the joint's internal distance implementation instead.
+      // This is more accurate, but may require special treatment for cases like the diff drive's turn path geometry.
+      reference_state.setVariablePositions(joint_names, positions);
+      for (const auto joint : joints)
+      {
+        reference_state.enforcePositionBounds(joint);
+        current_state->enforcePositionBounds(joint);
+        if (reference_state.distance(*current_state, joint) > allowed_start_tolerance_)
         {
           RCLCPP_ERROR(logger_,
-                       "\nInvalid Trajectory: start point deviates from current robot state more than %g"
-                       "\njoint '%s': expected: %g, current: %g",
-                       allowed_start_tolerance_, joint_names[i].c_str(), traj_position, cur_position);
+                       "Invalid Trajectory: start point deviates from current robot state more than %g at joint '%s'."
+                       "\nEnable DEBUG for detailed state info.",
+                       allowed_start_tolerance_, joint->getName().c_str());
+          // TODO(henningkayser): print state info, or treat multi-dof joint separately using the
+          //  current_state->printStatePositions()
+          //  RCLCPP_DEBUG(logger_,
+          //               "Current state
+          //               "\njoint '%s': expected: %g, current: %g",
+          //               allowed_start_tolerance_, joint->getName().c_str(), traj_position, cur_position);
           return false;
         }
       }
     }
+
     if (!trajectory.multi_dof_joint_trajectory.points.empty())
     {
       // Check multi-dof trajectory
@@ -1529,12 +1543,12 @@ bool TrajectoryExecutionManager::waitForRobotToStop(const TrajectoryExecutionCon
 
       for (std::size_t i = 0; i < n && !moved; ++i)
       {
-        // TODO: Update to respect mdof joint variables
-        const moveit::core::JointModel* jm = cur_state->getJointModel(joint_names[i]);
+        const moveit::core::JointModel* jm = robot_model_->getJointOfVariable(joint_names[i]);
         if (!jm)
           continue;  // joint vanished from robot state (shouldn't happen), but we don't care
 
-        if (fabs(cur_state->getJointPositions(jm)[0] - prev_state->getJointPositions(jm)[0]) > allowed_start_tolerance_)
+        if (fabs(jm->distance(cur_state->getJointPositions(jm), prev_state->getJointPositions(jm))) >
+            allowed_start_tolerance_)
         {
           moved = true;
           no_motion_count = 0;
