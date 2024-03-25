@@ -222,7 +222,7 @@ bool Servo::validateParams(const servo::Params& servo_params) const
     RCLCPP_ERROR_STREAM(
         logger_, "When publishing a std_msgs/Float64MultiArray, "
                  "either the parameter 'publish_joint_positions' OR the parameter 'publish_joint_velocities' must "
-                 "be set to true. But both are set to false."
+                 "be set to true. But both are set to true."
                      << check_yaml_string);
     params_valid = false;
   }
