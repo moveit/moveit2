@@ -193,9 +193,17 @@ bool Servo::validateParams(const servo::Params& servo_params)
   if ((servo_params.command_out_type == "std_msgs/Float64MultiArray") && servo_params.publish_joint_positions &&
       servo_params.publish_joint_velocities)
   {
+<<<<<<< HEAD
     RCLCPP_ERROR(LOGGER, "When publishing a std_msgs/Float64MultiArray, "
                          "you must select positions OR velocities."
                          "Check the parameters YAML file used to launch this node.");
+=======
+    RCLCPP_ERROR_STREAM(
+        logger_, "When publishing a std_msgs/Float64MultiArray, "
+                 "either the parameter 'publish_joint_positions' OR the parameter 'publish_joint_velocities' must "
+                 "be set to true. But both are set to true."
+                     << check_yaml_string);
+>>>>>>> df78880a0 (Fix error message text in servo.cpp (#2769))
     params_valid = false;
   }
 
