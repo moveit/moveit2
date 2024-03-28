@@ -32,7 +32,7 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-/* Author: Jeroen De Maeyer, Boston Cleek */
+/* Author: Jeroen De Maeyer, Boston Cleek, Berend Pijnenburg */
 
 #include <algorithm>
 #include <iterator>
@@ -105,35 +105,12 @@ std::ostream& operator<<(std::ostream& os, const ompl_interface::Bounds& bounds)
  * Base class for constraints
  * **************************/
 BaseConstraint::BaseConstraint(const moveit::core::RobotModelConstPtr& robot_model, const std::string& group,
-                               const unsigned int num_dofs, const unsigned int num_cons_)
-  : ompl::base::Constraint(num_dofs, num_cons_)
+                               const unsigned int num_dofs, const unsigned int num_cons)
+  : ompl::base::Constraint(num_dofs, num_cons)
   , state_storage_(robot_model)
   , joint_model_group_(robot_model->getJointModelGroup(group))
 
 {
-}
-
-void BaseConstraint::init(const moveit_msgs::msg::Constraints& constraints)
-{
-  parseConstraintMsg(constraints);
-}
-
-void BaseConstraint::function(const Eigen::Ref<const Eigen::VectorXd>& joint_values,
-                              Eigen::Ref<Eigen::VectorXd> out) const
-{
-  const Eigen::VectorXd current_values = calcError(joint_values);
-  out = bounds_.penalty(current_values);
-}
-
-void BaseConstraint::jacobian(const Eigen::Ref<const Eigen::VectorXd>& joint_values,
-                              Eigen::Ref<Eigen::MatrixXd> out) const
-{
-  const Eigen::VectorXd constraint_error = calcError(joint_values);
-  const Eigen::MatrixXd robot_jacobian = calcErrorJacobian(joint_values);
-  for (std::size_t i = 0; i < bounds_.size(); ++i)
-  {
-    out.row(i) = robot_jacobian.row(i);
-  }
 }
 
 Eigen::Isometry3d BaseConstraint::forwardKinematics(const Eigen::Ref<const Eigen::VectorXd>& joint_values) const
@@ -152,20 +129,6 @@ Eigen::MatrixXd BaseConstraint::robotGeometricJacobian(const Eigen::Ref<const Ei
   robot_state->getJacobian(joint_model_group_, joint_model_group_->getLinkModel(link_name_),
                            Eigen::Vector3d(0.0, 0.0, 0.0), jacobian);
   return jacobian;
-}
-
-Eigen::VectorXd BaseConstraint::calcError(const Eigen::Ref<const Eigen::VectorXd>& /*x*/) const
-{
-  RCLCPP_WARN_STREAM(getLogger(),
-                     "BaseConstraint: Constraint method calcError was not overridden, so it should not be used.");
-  return Eigen::VectorXd::Zero(getCoDimension());
-}
-
-Eigen::MatrixXd BaseConstraint::calcErrorJacobian(const Eigen::Ref<const Eigen::VectorXd>& /*x*/) const
-{
-  RCLCPP_WARN_STREAM(
-      getLogger(), "BaseConstraint: Constraint method calcErrorJacobian was not overridden, so it should not be used.");
-  return Eigen::MatrixXd::Zero(getCoDimension(), n_);
 }
 
 /******************************************
@@ -262,45 +225,96 @@ Bounds BoxConstraint::createBoundVector(const moveit_msgs::msg::PositionConstrai
 /******************************************
  * Orientation constraints
  * ****************************************/
-void OrientationConstraint::parseConstraintMsg(const moveit_msgs::msg::Constraints& constraints)
+OrientationConstraint::OrientationConstraint(const moveit::core::RobotModelConstPtr& robot_model, const std::string& group,
+                        const unsigned int num_dofs, const moveit_msgs::msg::OrientationConstraint& ori_con)
+    : BaseConstraint(robot_model, group, num_dofs, 0)
 {
-  bounds_ = orientationConstraintMsgToBoundVector(constraints.orientation_constraints.at(0));
+  constrained_dims_ = getConstrainedDims(ori_con);
 
-  tf2::fromMsg(constraints.orientation_constraints.at(0).orientation, target_orientation_);
+  setManifoldDimension(num_dofs - constrained_dims_.size());
 
-  link_name_ = constraints.orientation_constraints.at(0).link_name;
+  bounds_ = createBoundVector(ori_con, constrained_dims_);
+
+  tf2::fromMsg(ori_con.orientation, target_orientation_);
+
+  link_name_ = ori_con.link_name;
 }
 
-Eigen::VectorXd OrientationConstraint::calcError(const Eigen::Ref<const Eigen::VectorXd>& x) const
+void OrientationConstraint::function(const Eigen::Ref<const Eigen::VectorXd>& joint_values, Eigen::Ref<Eigen::VectorXd> out) const
 {
-  Eigen::Matrix3d orientation_difference = forwardKinematics(x).linear().transpose() * target_orientation_;
+  Eigen::Matrix3d orientation_difference = forwardKinematics(joint_values).linear().transpose() * target_orientation_;
   Eigen::AngleAxisd aa(orientation_difference);
-  return aa.axis() * aa.angle();
-}
+  Eigen::VectorXd error = aa.axis() * aa.angle();
 
-Eigen::MatrixXd OrientationConstraint::calcErrorJacobian(const Eigen::Ref<const Eigen::VectorXd>& x) const
-{
-  Eigen::Matrix3d orientation_difference = forwardKinematics(x).linear().transpose() * target_orientation_;
-  Eigen::AngleAxisd aa{ orientation_difference };
-  return -angularVelocityToAngleAxis(aa.angle(), aa.axis()) * robotGeometricJacobian(x).bottomRows(3);
-}
-
-/************************************
- * MoveIt constraint message parsing
- * **********************************/
-
-Bounds orientationConstraintMsgToBoundVector(const moveit_msgs::msg::OrientationConstraint& ori_con)
-{
-  std::vector<double> dims = { ori_con.absolute_x_axis_tolerance * 2.0, ori_con.absolute_y_axis_tolerance * 2.0,
-                               ori_con.absolute_z_axis_tolerance * 2.0 };
-
-  // dimension of -1 signifies unconstrained parameter, so set to infinity
-  for (auto& dim : dims)
+  int emplace_index = 0;
+  for (auto& dim : constrained_dims_)
   {
-    if (dim == -1)
-      dim = std::numeric_limits<double>::infinity();
+    out[emplace_index] = error[dim];
+    emplace_index++;
   }
-  return { { -dims[0], -dims[1], -dims[2] }, { dims[0], dims[1], dims[2] } };
+  out = bounds_.penalty(out);
+}
+
+void OrientationConstraint::jacobian(const Eigen::Ref<const Eigen::VectorXd>& joint_values, Eigen::Ref<Eigen::MatrixXd> out) const
+{
+  Eigen::Matrix3d orientation_difference = forwardKinematics(joint_values).linear().transpose() * target_orientation_;
+  Eigen::AngleAxisd aa{ orientation_difference };
+  Eigen::MatrixXd jac = -angularVelocityToAngleAxis(aa.angle(), aa.axis()) * robotGeometricJacobian(joint_values).bottomRows(3);
+
+  int emplace_index = 0;
+  for (auto& dim : constrained_dims_)
+  {
+      out.row(emplace_index) = jac.row(dim);
+      emplace_index++;
+  }
+}
+
+std::vector<std::size_t> OrientationConstraint::getConstrainedDims(const moveit_msgs::msg::OrientationConstraint& ori_con) const
+{
+  std::vector<std::size_t> constrained_dims;
+  // If a tolerance is < 0 or infinity dont constrain it
+
+  if (ori_con.absolute_x_axis_tolerance> 0 && ori_con.absolute_x_axis_tolerance != std::numeric_limits<double>::infinity())
+  {
+    constrained_dims.push_back(0);
+  }
+  if (ori_con.absolute_x_axis_tolerance> 0 && ori_con.absolute_y_axis_tolerance != std::numeric_limits<double>::infinity())
+  {
+    constrained_dims.push_back(1);
+  }
+  if (ori_con.absolute_x_axis_tolerance> 0 && ori_con.absolute_z_axis_tolerance != std::numeric_limits<double>::infinity())
+  {
+    constrained_dims.push_back(2);
+  }
+  
+  return constrained_dims;
+}
+
+Bounds OrientationConstraint::createBoundVector(const moveit_msgs::msg::OrientationConstraint& ori_con, const std::vector<std::size_t>& constrained_dims) const
+{
+  std::vector<double> lower;
+  std::vector<double> upper;
+
+  for (auto& dim : constrained_dims)
+  {
+    if (dim == 0)
+    {
+      lower.push_back(-ori_con.absolute_x_axis_tolerance);
+      upper.push_back(ori_con.absolute_x_axis_tolerance);
+    }
+    else if (dim == 1)
+    {
+      lower.push_back(-ori_con.absolute_y_axis_tolerance);
+      upper.push_back(ori_con.absolute_y_axis_tolerance);
+    }
+    else if (dim == 2)
+    {
+      lower.push_back(-ori_con.absolute_z_axis_tolerance);
+      upper.push_back(ori_con.absolute_z_axis_tolerance);
+    }
+     
+  }
+  return { lower, upper };
 }
 
 /******************************************
@@ -348,8 +362,7 @@ ompl::base::ConstraintPtr createOMPLConstraints(const moveit::core::RobotModelCo
       RCLCPP_WARN(getLogger(), "Only a single orientation constraint is supported. Using the first one.");
     }
 
-    auto ori_con = std::make_shared<OrientationConstraint>(robot_model, group, num_dofs);
-    ori_con->init(constraints);
+    auto ori_con = std::make_shared<OrientationConstraint>(robot_model, group, num_dofs, constraints.orientation_constraints.at(0));
     ompl_constraints.emplace_back(ori_con);
   }
 

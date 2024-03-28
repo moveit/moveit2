@@ -32,7 +32,7 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-/* Author: Jeroen De Maeyer, Boston Cleek */
+/* Author: Jeroen De Maeyer, Boston Cleek, Berend Pijnenburg */
 
 #pragma once
 
@@ -68,6 +68,7 @@ class Bounds
 {
 public:
   Bounds();
+  Bounds(const std::vector<double>& lower, const std::vector<double>& upper);
   /** \brief Distance to region inside bounds
    *
    * Distance of a given value outside the bounds, zero inside the bounds.
@@ -116,30 +117,21 @@ std::ostream& operator<<(std::ostream& os, const ompl_interface::Bounds& bounds)
 class BaseConstraint : public ompl::base::Constraint
 {
 public:
-  /** \brief Construct a BaseConstraint using 3 `num_cons` by default because all constraints currently implemented have
-   * 3 constraint equations. **/
   BaseConstraint(const moveit::core::RobotModelConstPtr& robot_model, const std::string& group,
-                 const unsigned int num_dofs, const unsigned int num_cons = 3);
-
-  /** \brief Initialize constraint based on message content.
-   *
-   * This is necessary because we cannot call the pure virtual
-   * parseConstraintsMsg method from the constructor of this class.
-   * */
-  void init(const moveit_msgs::msg::Constraints& constraints);
+                 const unsigned int num_dofs, const unsigned int num_cons);
 
   /** OMPL's main constraint evaluation function.
    *
    *  OMPL requires you to override at least "function" which represents the constraint F(q) = 0
    * */
-  void function(const Eigen::Ref<const Eigen::VectorXd>& joint_values, Eigen::Ref<Eigen::VectorXd> out) const override;
+  virtual void function(const Eigen::Ref<const Eigen::VectorXd>& joint_values, Eigen::Ref<Eigen::VectorXd> out) const = 0;
 
   /** \brief Jacobian of the constraint function.
    *
    * Optionally you can also provide dF(q)/dq, the Jacobian of  the constraint.
    *
    * */
-  void jacobian(const Eigen::Ref<const Eigen::VectorXd>& joint_values, Eigen::Ref<Eigen::MatrixXd> out) const override;
+  virtual void jacobian(const Eigen::Ref<const Eigen::VectorXd>& joint_values, Eigen::Ref<Eigen::MatrixXd> out) const = 0;
 
   /** \brief Wrapper for forward kinematics calculated by MoveIt's Robot State.
    *
@@ -156,37 +148,6 @@ public:
    * Jacobian method.
    * */
   Eigen::MatrixXd robotGeometricJacobian(const Eigen::Ref<const Eigen::VectorXd>& joint_values) const;
-
-  /** \brief Parse bounds on position and orientation parameters from MoveIt's constraint message.
-   *
-   * This can be non-trivial given the often complex structure of these messages.
-   * */
-  virtual void parseConstraintMsg(const moveit_msgs::msg::Constraints& constraints) = 0;
-
-  /** \brief For inequality constraints: calculate the value of the parameter that is being constrained by the bounds.
-   *
-   * In this Position constraints case, it calculates the x, y and z position
-   * of the end-effector. This error is then converted in generic equality constraints in the implementation of
-   * `ompl_interface::BaseConstraint::function`.
-   *
-   * This method can be bypassed if you want to override `ompl_interface::BaseConstraint::function directly and ignore
-   * the bounds calculation.
-   * */
-  virtual Eigen::VectorXd calcError(const Eigen::Ref<const Eigen::VectorXd>& /*x*/) const;
-
-  /** \brief For inequality constraints: calculate the Jacobian for the current parameters that are being constrained.
-   *   *
-   * This error jacobian, as the name suggests, is only the jacobian of the position / orientation / ... error.
-   * It does not take into account the derivative of the penalty functions defined in the Bounds class.
-   * This correction is added in the implementation of of BaseConstraint::jacobian.
-   *
-   * This method can be bypassed if you want to override `ompl_interface::BaseConstraint::jacobian directly and ignore
-   * the bounds calculation.
-   *
-   * TODO(jeroendm), Maybe also use an output argument as in `ompl::base::Constraint::jacobian(x, out)` for better
-   * performance?
-   * */
-  virtual Eigen::MatrixXd calcErrorJacobian(const Eigen::Ref<const Eigen::VectorXd>& /*x*/) const;
 
   // the methods below are specifically for debugging and testing
 
@@ -325,44 +286,17 @@ class OrientationConstraint : public BaseConstraint
 {
 public:
   OrientationConstraint(const moveit::core::RobotModelConstPtr& robot_model, const std::string& group,
-                        const unsigned int num_dofs)
-    : BaseConstraint(robot_model, group, num_dofs)
-  {
-  }
+                        const unsigned int num_dofs, const moveit_msgs::msg::OrientationConstraint& ori_con);
 
-  /** \brief Parse bounds on orientation parameters from MoveIt's constraint message.
-   *
-   * This can be non-trivial given the often complex structure of these messages.
-   * */
-  void parseConstraintMsg(const moveit_msgs::msg::Constraints& constraints) override;
+  void function(const Eigen::Ref<const Eigen::VectorXd>& joint_values, Eigen::Ref<Eigen::VectorXd> out) const override;
 
-  /** \brief For inequality constraints: calculate the value of the parameter that is being constrained by the bounds.
-   *
-   * In this orientation constraints case, it calculates the orientation
-   * of the end-effector. This error is then converted in generic equality constraints in the implementation of
-   * `ompl_interface::BaseConstraint::function`.
-   *
-   * This method can be bypassed if you want to override `ompl_interface::BaseConstraint::function directly and ignore
-   * the bounds calculation.
-   * */
-  Eigen::VectorXd calcError(const Eigen::Ref<const Eigen::VectorXd>& x) const override;
+  void jacobian(const Eigen::Ref<const Eigen::VectorXd>& joint_values, Eigen::Ref<Eigen::MatrixXd> out) const override;
 
-  /** \brief For inequality constraints: calculate the Jacobian for the current parameters that are being constrained.
-   *   *
-   * This error jacobian, as the name suggests, is only the jacobian of the position / orientation / ... error.
-   * It does not take into account the derivative of the penalty functions defined in the Bounds class.
-   * This correction is added in the implementation of of BaseConstraint::jacobian.
-   *
-   * This method can be bypassed if you want to override `ompl_interface::BaseConstraint::jacobian directly and ignore
-   * the bounds calculation.
-   *
-   * TODO(jeroendm), Maybe also use an output argument as in `ompl::base::Constraint::jacobian(x, out)` for better
-   * performance?
-   * */
-  Eigen::MatrixXd calcErrorJacobian(const Eigen::Ref<const Eigen::VectorXd>& x) const override;
-};
+private:
+  
+  std::vector<std::size_t> getConstrainedDims(const moveit_msgs::msg::OrientationConstraint& ori_con) const;
 
-/** \brief Extract orientation constraints from the MoveIt message
+/** \brief
  *
  * These bounds are assumed to be centered around the target orientation / desired orientation
  * given in the "orientation" field in the message.
@@ -373,7 +307,13 @@ public:
  * the width of the tolerance regions around the target orientation, represented using exponential coordinates.
  *
  * */
-Bounds orientationConstraintMsgToBoundVector(const moveit_msgs::msg::OrientationConstraint& ori_con);
+  Bounds createBoundVector(const moveit_msgs::msg::OrientationConstraint& ori_con, const std::vector<std::size_t>& constrained_dims) const;
+
+  std::vector<std::size_t> constrained_dims_;
+};
+
+
+
 
 /** \brief Factory to create constraints based on what is in the MoveIt constraint message. **/
 ompl::base::ConstraintPtr createOMPLConstraints(const moveit::core::RobotModelConstPtr& robot_model,
