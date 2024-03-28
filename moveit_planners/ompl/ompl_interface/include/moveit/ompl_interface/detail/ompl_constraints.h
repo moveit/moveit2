@@ -68,30 +68,25 @@ class Bounds
 {
 public:
   Bounds();
-  Bounds(const std::vector<double>& lower, const std::vector<double>& upper);
   /** \brief Distance to region inside bounds
    *
    * Distance of a given value outside the bounds, zero inside the bounds.
+   * With the sign showing the direction of the penalty,
    * Creates a penalty function that looks like this:
    *
    * (penalty) ^
-   *           | \         /
-   *           |  \       /
-   *           |   \_____/
-   *           |----------------> (variable to be constrained)
+   *           |           /
+   *           |          /
+   *           |--- _____/-------------> (variable to be constrained)
+   *           |   /
+   *           |  /
+   *           | /
+   *           v
    * */
   Eigen::VectorXd penalty(const Eigen::Ref<const Eigen::VectorXd>& x) const;
 
-  /** \brief Derivative of the penalty function
-   * ^
-   * |
-   * | -1-1-1 0 0 0 +1+1+1
-   * |------------------------>
-   * **/
-  Eigen::VectorXd derivative(const Eigen::Ref<const Eigen::VectorXd>& x) const;
-
   std::size_t size() const;
-
+  
 private:
   std::vector<double> lower_, upper_;
   std::size_t size_;

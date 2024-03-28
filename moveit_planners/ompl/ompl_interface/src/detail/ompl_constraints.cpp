@@ -72,7 +72,7 @@ Eigen::VectorXd Bounds::penalty(const Eigen::Ref<const Eigen::VectorXd>& x) cons
   {
     if (x[i] < lower_.at(i))
     {
-      penalty[i] = lower_.at(i) - x[i];
+      penalty[i] = x[i] - lower_.at(i);
     }
     else if (x[i] > upper_.at(i))
     {
@@ -84,29 +84,6 @@ Eigen::VectorXd Bounds::penalty(const Eigen::Ref<const Eigen::VectorXd>& x) cons
     }
   }
   return penalty;
-}
-
-Eigen::VectorXd Bounds::derivative(const Eigen::Ref<const Eigen::VectorXd>& x) const
-{
-  assert(static_cast<long>(lower_.size()) == x.size());
-  Eigen::VectorXd derivative(x.size());
-
-  for (unsigned int i = 0; i < x.size(); ++i)
-  {
-    if (x[i] < lower_.at(i))
-    {
-      derivative[i] = -1.0;
-    }
-    else if (x[i] > upper_.at(i))
-    {
-      derivative[i] = 1.0;
-    }
-    else
-    {
-      derivative[i] = 0.0;
-    }
-  }
-  return derivative;
 }
 
 std::size_t Bounds::size() const
@@ -152,11 +129,10 @@ void BaseConstraint::jacobian(const Eigen::Ref<const Eigen::VectorXd>& joint_val
                               Eigen::Ref<Eigen::MatrixXd> out) const
 {
   const Eigen::VectorXd constraint_error = calcError(joint_values);
-  const Eigen::VectorXd constraint_derivative = bounds_.derivative(constraint_error);
   const Eigen::MatrixXd robot_jacobian = calcErrorJacobian(joint_values);
   for (std::size_t i = 0; i < bounds_.size(); ++i)
   {
-    out.row(i) = constraint_derivative[i] * robot_jacobian.row(i);
+    out.row(i) = robot_jacobian.row(i);
   }
 }
 
