@@ -124,14 +124,16 @@ public:
    *
    *  OMPL requires you to override at least "function" which represents the constraint F(q) = 0
    * */
-  virtual void function(const Eigen::Ref<const Eigen::VectorXd>& joint_values, Eigen::Ref<Eigen::VectorXd> out) const = 0;
+  virtual void function(const Eigen::Ref<const Eigen::VectorXd>& joint_values,
+                        Eigen::Ref<Eigen::VectorXd> out) const = 0;
 
   /** \brief Jacobian of the constraint function.
    *
    * Optionally you can also provide dF(q)/dq, the Jacobian of  the constraint.
    *
    * */
-  virtual void jacobian(const Eigen::Ref<const Eigen::VectorXd>& joint_values, Eigen::Ref<Eigen::MatrixXd> out) const = 0;
+  virtual void jacobian(const Eigen::Ref<const Eigen::VectorXd>& joint_values,
+                        Eigen::Ref<Eigen::MatrixXd> out) const = 0;
 
   /** \brief Wrapper for forward kinematics calculated by MoveIt's Robot State.
    *
@@ -209,9 +211,9 @@ public:
  *
  * These bounds are applied around the nominal position and orientation
  * of the box.
- * 
+ *
  * All constraints with a dimension lower than `EQUALITY_CONSTRAINT_THRESHOLD` will be modelled as equality constraints.
- * 
+ *
  * WARNING: Below follows the explanation of an ugly hack. Ideally, the user could specify equality constraints by
  * setting the constraint dimension to zero. However, this would result in a constraint region primitive with a zero
  * dimension in MoveIt, which the planner can (almost) never satisfy. Therefore we use a threshold value, below which
@@ -242,20 +244,20 @@ public:
   void jacobian(const Eigen::Ref<const Eigen::VectorXd>& joint_values, Eigen::Ref<Eigen::MatrixXd> out) const override;
 
 private:
-  
   std::vector<std::size_t> getConstrainedDims(const moveit_msgs::msg::PositionConstraint& pos_con) const;
 
-/** \brief 
- *
- * Assumes there is a single primitive of type `shape_msgs/SolidPrimitive.BOX`.
- * The dimensions of the box are the bounds on the deviation of the link origin from
- * the target pose, given in constraint_regions.primitive_poses[0].
- * */
-  Bounds createBoundVector(const moveit_msgs::msg::PositionConstraint& pos_con, const std::vector<std::size_t>& constrained_dims) const;
+  /** \brief
+   *
+   * Assumes there is a single primitive of type `shape_msgs/SolidPrimitive.BOX`.
+   * The dimensions of the box are the bounds on the deviation of the link origin from
+   * the target pose, given in constraint_regions.primitive_poses[0].
+   * */
+  Bounds createBoundVector(const moveit_msgs::msg::PositionConstraint& pos_con,
+                           const std::vector<std::size_t>& constrained_dims) const;
 
   std::vector<std::size_t> constrained_dims_;
 
-   static constexpr double EQUALITY_CONSTRAINT_THRESHOLD{ 0.001 };
+  static constexpr double EQUALITY_CONSTRAINT_THRESHOLD{ 0.001 };
 };
 
 /******************************************
@@ -293,27 +295,24 @@ public:
   void jacobian(const Eigen::Ref<const Eigen::VectorXd>& joint_values, Eigen::Ref<Eigen::MatrixXd> out) const override;
 
 private:
-  
   std::vector<std::size_t> getConstrainedDims(const moveit_msgs::msg::OrientationConstraint& ori_con) const;
 
-/** \brief
- *
- * These bounds are assumed to be centered around the target orientation / desired orientation
- * given in the "orientation" field in the message.
- * These bounds represent orientation error between the desired orientation and the current orientation of the
- * end-effector.
- *
- * The "absolute_x_axis_tolerance", "absolute_y_axis_tolerance" and "absolute_z_axis_tolerance" are interpreted as
- * the width of the tolerance regions around the target orientation, represented using exponential coordinates.
- *
- * */
-  Bounds createBoundVector(const moveit_msgs::msg::OrientationConstraint& ori_con, const std::vector<std::size_t>& constrained_dims) const;
+  /** \brief
+   *
+   * These bounds are assumed to be centered around the target orientation / desired orientation
+   * given in the "orientation" field in the message.
+   * These bounds represent orientation error between the desired orientation and the current orientation of the
+   * end-effector.
+   *
+   * The "absolute_x_axis_tolerance", "absolute_y_axis_tolerance" and "absolute_z_axis_tolerance" are interpreted as
+   * the width of the tolerance regions around the target orientation, represented using exponential coordinates.
+   *
+   * */
+  Bounds createBoundVector(const moveit_msgs::msg::OrientationConstraint& ori_con,
+                           const std::vector<std::size_t>& constrained_dims) const;
 
   std::vector<std::size_t> constrained_dims_;
 };
-
-
-
 
 /** \brief Factory to create constraints based on what is in the MoveIt constraint message. **/
 ompl::base::ConstraintPtr createOMPLConstraints(const moveit::core::RobotModelConstPtr& robot_model,
