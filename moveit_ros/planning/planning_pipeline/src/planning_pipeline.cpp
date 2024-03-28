@@ -356,6 +356,7 @@ bool PlanningPipeline::generatePlan(const planning_scene::PlanningSceneConstPtr&
     // Call plan response adapter chain
     if (res.error_code)
     {
+      auto start_time = clock::now();
       // Call plan request adapter chain
       for (const auto& res_adapter : planning_response_adapter_vector_)
       {
@@ -365,7 +366,9 @@ bool PlanningPipeline::generatePlan(const planning_scene::PlanningSceneConstPtr&
         publishPipelineState(mutable_request, res, res_adapter->getDescription());
 
         // check for timeout
-        if (std::chrono::duration<double>(clock::now() - plan_start_time).count() >= allowed_planning_time)
+        // NOTE: reserving 10ms here
+        if (std::chrono::duration<double>(clock::now() - start_time).count() >= 10.0 * 1e-3 &&
+            std::chrono::duration<double>(clock::now() - plan_start_time).count() >= allowed_planning_time)
         {
           res.error_code = moveit::core::MoveItErrorCode::TIMED_OUT;
         }
