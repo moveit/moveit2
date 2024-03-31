@@ -105,7 +105,6 @@ void ServoParameters::declare(const std::string& ns,
 
   // Properties of incoming commands
 
-
   node_parameters->declare_parameter(
       ns + ".robot_link_command_frame", ParameterValue{ parameters.robot_link_command_frame },
       ParameterDescriptorBuilder{}
