@@ -102,16 +102,10 @@ void ServoParameters::declare(const std::string& ns,
       ParameterDescriptorBuilder{}
           .type(PARAMETER_BOOL)
           .description("Whether the robot is started in a Gazebo simulation environment"));
-  node_parameters->declare_parameter(
-      ns + ".status_topic", ParameterValue{ parameters.status_topic },
-      ParameterDescriptorBuilder{}.type(PARAMETER_STRING).description("Publish status to this topic"));
+
   // Properties of incoming commands
-  node_parameters->declare_parameter(
-      ns + ".cartesian_command_in_topic", ParameterValue{ parameters.cartesian_command_in_topic },
-      ParameterDescriptorBuilder{}.type(PARAMETER_STRING).description("Topic for incoming Cartesian twist commands"));
-  node_parameters->declare_parameter(
-      ns + ".joint_command_in_topic", ParameterValue{ parameters.joint_command_in_topic },
-      ParameterDescriptorBuilder{}.type(PARAMETER_STRING).description("Topic for incoming joint angle commands"));
+
+
   node_parameters->declare_parameter(
       ns + ".robot_link_command_frame", ParameterValue{ parameters.robot_link_command_frame },
       ParameterDescriptorBuilder{}
@@ -271,12 +265,11 @@ ServoParameters ServoParameters::get(const std::string& ns,
 
   // ROS Parameters
   parameters.use_gazebo = node_parameters->get_parameter(ns + ".use_gazebo").as_bool();
-  parameters.status_topic = node_parameters->get_parameter(ns + ".status_topic").as_string();
+  parameters.status_topic = "/servo_server/status";
 
   // Properties of incoming commands
-  parameters.cartesian_command_in_topic =
-      node_parameters->get_parameter(ns + ".cartesian_command_in_topic").as_string();
-  parameters.joint_command_in_topic = node_parameters->get_parameter(ns + ".joint_command_in_topic").as_string();
+  parameters.cartesian_command_in_topic = "/servo_server/cartesian_commands";
+  parameters.joint_command_in_topic = "/servo_server/joint_commands";
   parameters.robot_link_command_frame = node_parameters->get_parameter(ns + ".robot_link_command_frame").as_string();
   parameters.command_in_type = node_parameters->get_parameter(ns + ".command_in_type").as_string();
   parameters.linear_scale = node_parameters->get_parameter(ns + ".scale.linear").as_double();
