@@ -3,23 +3,27 @@
 API changes in MoveIt releases
 
 ## ROS Rolling
+
 - `lockSceneRead()` and `lockSceneWrite()` are now protected member functions, for internal use only. To lock the planning scene, use LockedPlanningSceneRO or LockedPlanningSceneRW:
+
 ```
       planning_scene_monitor::LockedPlanningSceneRO ls(planning_scene_monitor);
       moveit::core::RobotModelConstPtr model = ls->getRobotModel();
 ```
+
 - ServoServer was renamed to ServoNode
 - `CollisionObject` messages are now defined with a `Pose`, and shapes and subframes are defined relative to the object's pose. This makes it easier to place objects with subframes and multiple shapes in the scene. This causes several changes:
-    - `getFrameTransform()` now returns this pose instead of the first shape's pose.
-    - The Rviz plugin's manipulation tab now uses the object's pose instead of the shape pose to evaluate if object's are in the region of interest.
-    - Planning scene geometry text files (`.scene`) have changed format. Loading old files is still supported. You can add a line `0 0 0 0 0 0 1` under each line with an asterisk to upgrade old files.
+  - `getFrameTransform()` now returns this pose instead of the first shape's pose.
+  - The Rviz plugin's manipulation tab now uses the object's pose instead of the shape pose to evaluate if object's are in the region of interest.
+  - Planning scene geometry text files (`.scene`) have changed format. Loading old files is still supported. You can add a line `0 0 0 0 0 0 1` under each line with an asterisk to upgrade old files.
 - add API for passing RNG to setToRandomPositionsNearBy
 - Static member variable interface of the CollisionDetectorAllocatorTemplate for the string NAME was replaced with a virtual method `getName`.
 - Enhance `RDFLoader` to load from string parameter OR string topic (and add the ability to publish a string topic).
 
 ## ROS Noetic
+
 - RobotModel no longer overrides empty URDF collision geometry by matching the visual geometry of the link.
-- Planned trajectories are *slow* by default.
+- Planned trajectories are _slow_ by default.
   The default values of the `velocity_scaling_factor` and `acceleration_scaling_factor` can now be customized and default to 0.1 instead of 1.0.
   The values can be changed by setting the parameters `default_acceleration_scaling_factor` and `default_velocity_scaling_factor` in the `joint_limits.yaml` of your robot's `moveit_config` package.
   Consider setting them to values between 0.2 and 0.6, to allow for significant speedup/slowdown of your application.
@@ -44,13 +48,13 @@ API changes in MoveIt releases
 
 ## ROS Melodic
 
-- Migration to ``tf2`` API.
+- Migration to `tf2` API.
 - Replaced Eigen::Affine3d with Eigen::Isometry3d, which is computationally more efficient.
   Simply find-replace occurrences of Affine3d:
-  ``find . -iname "*.[hc]*" -print0 | xargs -0 sed -i 's#Affine3#Isometry3#g'``
-- The move_group capability ``ExecuteTrajectoryServiceCapability`` has been removed in favor of the improved ``ExecuteTrajectoryActionCapability`` capability. Since Indigo, both capabilities were supported. If you still load default capabilities in your ``config/launch/move_group.launch``, you can just remove them from the capabilities parameter. The correct default capabilities will be loaded automatically.
-- Deprecated method ``CurrentStateMonitor::waitForCurrentState(double wait_time)`` was finally removed.
-- Renamed ``RobotState::getCollisionBodyTransforms`` to ``getCollisionBodyTransform`` as it returns a single transform only.
+  `find . -iname "*.[hc]*" -print0 | xargs -0 sed -i 's#Affine3#Isometry3#g'`
+- The move_group capability `ExecuteTrajectoryServiceCapability` has been removed in favor of the improved `ExecuteTrajectoryActionCapability` capability. Since Indigo, both capabilities were supported. If you still load default capabilities in your `config/launch/move_group.launch`, you can just remove them from the capabilities parameter. The correct default capabilities will be loaded automatically.
+- Deprecated method `CurrentStateMonitor::waitForCurrentState(double wait_time)` was finally removed.
+- Renamed `RobotState::getCollisionBodyTransforms` to `getCollisionBodyTransform` as it returns a single transform only.
 - Removed deprecated class MoveGroup (was renamed to MoveGroupInterface).
 - KinematicsBase: Deprecated members `tip_frame_`, `search_discretization_`.
   Use `tip_frames_` and `redundant_joint_discretization_` instead.
@@ -58,15 +62,55 @@ API changes in MoveIt releases
   Adapt your kinematics plugin to directly receive a `RobotModel`. See the [KDL plugin](https://github.com/ros-planning/moveit/tree/melodic-devel/moveit_kinematics/kdl_kinematics_plugin) for an example.
 - IK: Removed notion of IK attempts and redundant random seeding in RobotState::setFromIK(). Number of attempts is limited by timeout only. ([#1288](https://github.com/ros-planning/moveit/pull/1288))
   Remove parameters `kinematics_solver_attempts` from your `kinematics.yaml` config files.
-- ``RDFLoader`` / ``RobotModelLoader``: removed TinyXML-based API (https://github.com/ros-planning/moveit/pull/1254)
+- `RDFLoader` / `RobotModelLoader`: removed TinyXML-based API (https://github.com/ros-planning/moveit/pull/1254)
 - Deprecated `EndEffectorInteractionStyle` got removed from `RobotInteraction` (https://github.com/ros-planning/moveit/pull/1287)
   Use [the corresponding `InteractionStyle` definitions](https://github.com/ros-planning/moveit/pull/1287/files#diff-24e57a8ea7f2f2d8a63cfc31580d09ddL240) instead
 
+## ROS Humble
+
+- [03/2024] Modified the `moveit_cpp::PlanningSceneMonitorOptions` struct to use constant strings for topic names instead of loading them from parameters. This change simplifies the API and ensures that topic names are consistent and less prone to user error. The affected topics are:
+
+  - Joint state topic now uses `planning_scene_monitor::PlanningSceneMonitor::DEFAULT_JOINT_STATES_TOPIC` directly.
+  - Attached collision object topic now uses `planning_scene_monitor::PlanningSceneMonitor::DEFAULT_ATTACHED_COLLISION_OBJECT_TOPIC` directly.
+  - Monitored planning scene topic now uses `planning_scene_monitor::PlanningSceneMonitor::MONITORED_PLANNING_SCENE_TOPIC` directly.
+  - Publish planning scene topic now uses `planning_scene_monitor::PlanningSceneMonitor::DEFAULT_PLANNING_SCENE_TOPIC` directly.
+
+  Before this change, these topics could be configured via ROS parameters, allowing for a higher degree of flexibility at the cost of increased complexity and potential misconfiguration. With the new approach, these topics are set to their default values, as defined in the `PlanningSceneMonitor` class, simplifying the configuration process. Users who need to customize the topic names can do so via topic remapping in launch files or at the ROS node level.
+
+  If your setup previously used custom topic names via ROS parameters, you will now need to use topic remapping. Here's an example of how to remap these topics in a launch file:
+
+  ```xml
+   <remap from="joint_states" to="custom_joint_states"/>
+   <remap from="attached_collision_object" to="custom_attached_collision_object"/>
+   <remap from="monitored_planning_scene" to="custom_monitored_planning_scene"/>
+   <remap from="planning_scene" to="custom_planning_scene"/>
+  ```
+
+  This change affects users who previously relied on parameter-based topic configuration for the moveit_cpp::MoveItCpp class and associated utilities.
+
+  - [03/2024] Updated `moveit_servo::ServoParameters` to utilize hardcoded topic names for incoming commands and status updates. This modification removes the previous dynamic configuration of certain topics via parameters, standardizing the topics and streamlining the setup process.
+
+  Affected topics and changes are as follows:
+
+  - Status topic is now hardcoded to `"/servo_server/status"`.
+  - Cartesian command topic is now hardcoded to `"/servo_server/cartesian_commands"`.
+  - Joint command topic is now hardcoded to `"/servo_server/joint_commands"`.
+
+  Users who were utilizing custom topic names by setting ROS parameters will need to remap these topics manually in their launch files or source code. For example:
+
+  ```xml
+  <remap from="servo_server/status" to="custom_status_topic"/>
+  <remap from="servo_server/cartesian_commands" to="custom_cartesian_command_topic"/>
+  <remap from="servo_server/joint_commands" to="custom_joint_command_topic"/>
+  ```
+
+  These changes are made in the pursuit of a more straightforward configuration at the expense of parameter-driven flexibility. It is recommended to review your setup and adjust topic remappings as necessary to maintain compatibility with this new update.
+
 ## ROS Kinetic
 
-- In the C++ MoveGroupInterface class the ``plan()`` method returns a ``MoveItErrorCode`` object and not a boolean.
+- In the C++ MoveGroupInterface class the `plan()` method returns a `MoveItErrorCode` object and not a boolean.
   `static_cast<bool>(mgi.plan())` can be used to achieve the old behavior.
-- ``CurrentStateMonitor::waitForCurrentState(double wait_time)`` has been renamed to ``waitForCompleteState`` to better reflect the actual semantics. Additionally a new method ``waitForCurrentState(const ros::Time t = ros::Time::now())`` was added that actually waits until all joint updates are newer than ``t``.
+- `CurrentStateMonitor::waitForCurrentState(double wait_time)` has been renamed to `waitForCompleteState` to better reflect the actual semantics. Additionally a new method `waitForCurrentState(const ros::Time t = ros::Time::now())` was added that actually waits until all joint updates are newer than `t`.
 - To avoid deadlocks, the PlanningSceneMonitor listens to its own EventQueue, monitored by an additional spinner thread.
   Providing a custom NodeHandle, a user can control which EventQueue and processing thread is used instead.
   Providing a default NodeHandle, the old behavior (using the global EventQueue) can be restored, which is however not recommended.
