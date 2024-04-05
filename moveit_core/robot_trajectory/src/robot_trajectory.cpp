@@ -733,19 +733,26 @@ std::optional<trajectory_msgs::msg::JointTrajectory> toJointTrajectory(const Rob
     if (active_joint->getVariableCount() == 1)
     {
       onedof.push_back(active_joint);
-      joint_trajectory.joint_names.push_back(active_joint->getName());
     }
     else if (include_mdof_joints)
     {
       mdof.push_back(active_joint);
-      for (const auto& variable_name : active_joint->getVariableNames())
-      {
-        joint_trajectory.joint_names.push_back(variable_name);
-      }
     }
   }
 
-  if (!joint_trajectory.joint_names.empty())
+  for (const auto& joint : onedof)
+  {
+    joint_trajectory.joint_names.push_back(joint->getName());
+  }
+  for (const auto& joint : mdof)
+  {
+    for (const auto& name : joint->getVariableNames())
+    {
+      joint_trajectory.joint_names.push_back(name);
+    }
+  }
+
+  if (!onedof.empty() || !mdof.empty())
   {
     joint_trajectory.header.frame_id = robot_model->getModelFrame();
     joint_trajectory.header.stamp = rclcpp::Time(0, 0, RCL_ROS_TIME);
@@ -803,15 +810,13 @@ std::optional<trajectory_msgs::msg::JointTrajectory> toJointTrajectory(const Rob
         const std::vector<std::string> names = joint->getVariableNames();
         joint_trajectory.points[i].positions.reserve(joint_trajectory.points[i].positions.size() + names.size());
 
+        joint_trajectory.points[i].velocities.reserve(joint_trajectory.points[i].velocities.size() + names.size());
+
         for (const auto& name : names)
         {
           joint_trajectory.points[i].positions.push_back(waypoint.getVariablePosition(name));
-        }
 
-        if (waypoint.hasVelocities())
-        {
-          joint_trajectory.points[i].velocities.reserve(joint_trajectory.points[i].velocities.size() + names.size());
-          for (const auto& name : names)
+          if (waypoint.hasVelocities())
           {
             joint_trajectory.points[i].velocities.push_back(waypoint.getVariableVelocity(name));
           }
