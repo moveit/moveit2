@@ -203,7 +203,8 @@ void TrajectoryExecutionManager::initialize()
   controller_mgr_node_->get_parameter("trajectory_execution.allowed_goal_duration_margin",
                                       allowed_goal_duration_margin_);
   controller_mgr_node_->get_parameter("trajectory_execution.allowed_start_tolerance", allowed_start_tolerance_);
-  controller_mgr_node_->get_parameter("trajectory_execution.control_multi_dof_joint_variables", control_multi_dof_joint_variables_);
+  controller_mgr_node_->get_parameter("trajectory_execution.control_multi_dof_joint_variables",
+                                      control_multi_dof_joint_variables_);
 
   if (manage_controllers_)
   {
@@ -386,7 +387,7 @@ bool TrajectoryExecutionManager::push(const moveit_msgs::msg::RobotTrajectory& t
     }
 
     // Create a new robot trajectory message that only contains the combined joint trajectory
-    RCLCPP_INFO(logger_, "Successfully converted multi-DOF trajectory to joint trajectory for execution.");
+    RCLCPP_DEBUG(logger_, "Successfully converted multi-DOF trajectory to joint trajectory for execution.");
     replaced_trajectory = moveit_msgs::msg::RobotTrajectory();
     replaced_trajectory->joint_trajectory = joint_trajectory.value();
   }
@@ -922,6 +923,7 @@ bool TrajectoryExecutionManager::validate(const TrajectoryExecutionContext& cont
       // the multi-dof trajectory, this check will use the joint's internal distance implementation instead.
       // This is more accurate, but may require special treatment for cases like the diff drive's turn path geometry.
       reference_state.setVariablePositions(joint_names, positions);
+
       for (const auto joint : joints)
       {
         reference_state.enforcePositionBounds(joint);
@@ -932,12 +934,13 @@ bool TrajectoryExecutionManager::validate(const TrajectoryExecutionContext& cont
                        "Invalid Trajectory: start point deviates from current robot state more than %g at joint '%s'."
                        "\nEnable DEBUG for detailed state info.",
                        allowed_start_tolerance_, joint->getName().c_str());
-          // TODO(henningkayser): print state info, or treat multi-dof joint separately using the
-          //  current_state->printStatePositions()
-          //  RCLCPP_DEBUG(logger_,
-          //               "Current state
-          //               "\njoint '%s': expected: %g, current: %g",
-          //               allowed_start_tolerance_, joint->getName().c_str(), traj_position, cur_position);
+          RCLCPP_DEBUG(logger_, "| Joint | Expected | Current |");
+          for (const auto& joint_name : joint_names)
+          {
+            RCLCPP_DEBUG(logger_, "| %s | %g | %g |", joint_name.c_str(),
+                         reference_state.getVariablePosition(joint_name),
+                         current_state->getVariablePosition(joint_name));
+          }
           return false;
         }
       }
@@ -1076,7 +1079,8 @@ bool TrajectoryExecutionManager::configure(TrajectoryExecutionContext& context,
           {
             stream << " `" << controller.first << '`';
           }
-          RCLCPP_ERROR_STREAM(logger_, "Controller " << controller << " is not known. Known controllers: " << stream.str());
+          RCLCPP_ERROR_STREAM(logger_,
+                              "Controller " << controller << " is not known. Known controllers: " << stream.str());
           return false;
         }
       }
