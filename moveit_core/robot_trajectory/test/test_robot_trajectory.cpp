@@ -636,11 +636,15 @@ TEST_F(OneRobot, UnwindFromState)
 
 TEST_F(OneRobot, MultiDofTrajectoryToJointStates)
 {
+  // GIVEN a RobotTrajectory with two waypoints of a robot model that has a multi-dof base joint
   robot_trajectory::RobotTrajectory trajectory(robot_model_);
   trajectory.addSuffixWayPoint(robot_state_, 0.01 /* dt */);
   trajectory.addSuffixWayPoint(robot_state_, 0.01 /* dt */);
+
+  // WHEN converting the RobotTrajectory to a JointTrajectory message, including mdof variables
   auto maybe_trajectory_msg = toJointTrajectory(trajectory, true /* include_mdof_joints */);
 
+  // WHEN the optional trajectory result is valid (always assumed)
   ASSERT_TRUE(maybe_trajectory_msg.has_value());
 
   const auto traj = maybe_trajectory_msg.value();
@@ -652,9 +656,12 @@ TEST_F(OneRobot, MultiDofTrajectoryToJointStates)
     joint_variable_count += active_joint->getVariableCount();
   }
 
+  // THEN all joints names should include the base joint variables
   EXPECT_EQ(joint_names.size(), joint_variable_count);
   EXPECT_TRUE(std::find(joint_names.begin(), joint_names.end(), "base_joint/x") != joint_names.end());
+  // THEN the size of the trajectory should equal the input size
   ASSERT_EQ(traj.points.size(), 2u);
+  // THEN all positions size should equal the variable size
   EXPECT_EQ(traj.points.at(0).positions.size(), joint_variable_count);
   EXPECT_EQ(traj.points.at(1).positions.size(), joint_variable_count);
 }
