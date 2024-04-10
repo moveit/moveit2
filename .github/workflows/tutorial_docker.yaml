@@ -50,7 +50,7 @@ jobs:
           path: .ccache
           key: docker-tutorial-ccache-${{ matrix.ROS_DISTRO }}-${{ hashFiles( '.docker/tutorial-source/Dockerfile' ) }}
       - name: inject ccache into docker
-        uses: reproducible-containers/buildkit-cache-dance@v3.0.0
+        uses: reproducible-containers/buildkit-cache-dance@v3.1.0
         with:
           cache-source: .ccache
           cache-target: /root/.ccache/
