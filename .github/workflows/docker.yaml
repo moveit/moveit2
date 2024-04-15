@@ -119,7 +119,9 @@ jobs:
           cache-to: type=inline
           tags: |
             ${{ env.GH_IMAGE }}
+            ${{ env.GH_IMAGE }}-testing
             ${{ env.DH_IMAGE }}
+            ${{ env.DH_IMAGE }}-testing
 
   source:
     needs: ci
