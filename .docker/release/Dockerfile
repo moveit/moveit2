@@ -5,6 +5,9 @@ ARG ROS_DISTRO=rolling
 FROM ros:${ROS_DISTRO}-ros-base
 LABEL maintainer Robert Haschke rhaschke@techfak.uni-bielefeld.de
 
+# Allow non-interactive installation of ros-humble-rmw-connextdds
+ENV RTI_NC_LICENSE_ACCEPTED yes
+
 # Commands are combined in single RUN statement with "apt/lists" folder removal to reduce image size
 RUN apt-get update -q && \
     apt-get upgrade -q -y && \
