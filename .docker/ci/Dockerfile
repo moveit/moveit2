@@ -13,6 +13,7 @@ WORKDIR /root/ws_moveit
 # Copy MoveIt sources from docker context
 COPY . src/moveit2
 
+RUN rosdep update --rosdistro $ROS_DISTRO
 # Commands are combined in single RUN statement with "apt/lists" folder removal to reduce image size
 # https://docs.docker.com/develop/develop-images/dockerfile_best-practices/#minimize-the-number-of-layers
 RUN \
