@@ -373,29 +373,36 @@ void RobotTrajectory::getRobotTrajectoryMsg(moveit_msgs::msg::RobotTrajectory& t
         {
           const std::vector<std::string> names = mdof[j]->getVariableNames();
           const double* velocities = waypoints_[i]->getJointVelocities(mdof[j]);
+          const double* accelerations = waypoints_[i]->getJointAccelerations(mdof[j]);
 
           geometry_msgs::msg::Twist point_velocity;
+          geometry_msgs::msg::Twist point_acceleration;
 
           for (std::size_t k = 0; k < names.size(); ++k)
           {
             if (names[k].find("/x") != std::string::npos)
             {
               point_velocity.linear.x = velocities[k];
+              point_acceleration.linear.x = accelerations[k];
             }
             else if (names[k].find("/y") != std::string::npos)
             {
               point_velocity.linear.y = velocities[k];
+              point_acceleration.linear.y = accelerations[k];
             }
             else if (names[k].find("/z") != std::string::npos)
             {
               point_velocity.linear.z = velocities[k];
+              point_acceleration.linear.z = accelerations[k];
             }
             else if (names[k].find("/theta") != std::string::npos)
             {
               point_velocity.angular.z = velocities[k];
+              point_acceleration.angular.z = accelerations[k];
             }
           }
           trajectory.multi_dof_joint_trajectory.points[i].velocities.push_back(point_velocity);
+          trajectory.multi_dof_joint_trajectory.points[i].accelerations.push_back(point_acceleration);
         }
       }
       if (duration_from_previous_.size() > i)
@@ -819,6 +826,10 @@ std::optional<trajectory_msgs::msg::JointTrajectory> toJointTrajectory(const Rob
           if (waypoint.hasVelocities())
           {
             joint_trajectory.points[i].velocities.push_back(waypoint.getVariableVelocity(name));
+          }
+          if (waypoint.hasAccelerations())
+          {
+            joint_trajectory.points[i].accelerations.push_back(waypoint.getVariableAcceleration(name));
           }
         }
       }
