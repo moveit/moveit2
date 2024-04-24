@@ -8,4 +8,12 @@ repositories:
   moveit_resources:
     type: git
     url: https://github.com/ros-planning/moveit_resources.git
+<<<<<<< HEAD
     version: humble
+=======
+    version: ros2
+  generate_parameter_library:
+    type: git
+    url: https://github.com/PickNikRobotics/generate_parameter_library.git
+    version: 0.3.7
+>>>>>>> 1f853c36f (add generate_parameter_library 0.37 until latest release is fixed (#2802))
