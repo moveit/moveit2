@@ -120,7 +120,7 @@ FROM personalrobotics/ros-openrave
 RUN apt-key adv --keyserver 'hkp://keyserver.ubuntu.com:80' --recv-key 4B63CF8FDE49746E98FA01DDAD19BAB3CBF125EA && \
     apt-key del 421C365BD9FF1F717815A3895523BAEEB01FA116 && \
     apt-get update && \
-    apt-get install -y --no-install-recommends python-pip build-essential liblapack-dev ros-indigo-collada-urdf && \
+    apt-get install -y --force-yes --no-install-recommends python-pip build-essential liblapack-dev ros-indigo-collada-urdf && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 # enforce a specific version of sympy, which is known to work with OpenRave
 RUN pip install git+https://github.com/sympy/sympy.git@sympy-0.7.1
