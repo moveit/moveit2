@@ -86,7 +86,7 @@ namespace
 {
 rclcpp::Logger getLogger()
 {
-  return moveit::getLogger("ompl_planning_context_manager");
+  return moveit::getLogger("moveit.planners.ompl.planning_context_manager");
 }
 }  // namespace
 

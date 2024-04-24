@@ -49,7 +49,7 @@ namespace
 {
 rclcpp::Logger getLogger()
 {
-  return moveit::getLogger("kinematics_metrics");
+  return moveit::getLogger("moveit.core.kinematics_metrics");
 }
 }  // namespace
 

@@ -47,7 +47,7 @@ namespace
 {
 rclcpp::Logger getLogger()
 {
-  return moveit::getLogger("CollisionMonitor");
+  return moveit::getLogger("moveit.ros.move_group.collision_monitor");
 }
 }  // namespace
 
@@ -55,6 +55,7 @@ CollisionMonitor::CollisionMonitor(const planning_scene_monitor::PlanningSceneMo
                                    const servo::Params& servo_params, std::atomic<double>& collision_velocity_scale)
   : servo_params_(servo_params)
   , planning_scene_monitor_(planning_scene_monitor)
+  , robot_state_(planning_scene_monitor->getPlanningScene()->getCurrentState())
   , collision_velocity_scale_(collision_velocity_scale)
 {
   scene_collision_request_.distance = true;
@@ -104,10 +105,11 @@ void CollisionMonitor::checkCollisions()
 
     if (servo_params_.check_collisions)
     {
-      // Fetch latest robot state.
-      robot_state_ = planning_scene_monitor_->getStateMonitor()->getCurrentState();
+      // Fetch latest robot state using planning scene instead of state monitor due to
+      // https://github.com/ros-planning/moveit2/issues/2748
+      robot_state_ = planning_scene_monitor_->getPlanningScene()->getCurrentState();
       // This must be called before doing collision checking.
-      robot_state_->updateCollisionBodyTransforms();
+      robot_state_.updateCollisionBodyTransforms();
 
       // Get a read-only copy of planning scene.
       planning_scene_monitor::LockedPlanningSceneRO locked_scene(planning_scene_monitor_);
@@ -115,12 +117,12 @@ void CollisionMonitor::checkCollisions()
       // Check collision with environment.
       scene_collision_result_.clear();
       locked_scene->getCollisionEnv()->checkRobotCollision(scene_collision_request_, scene_collision_result_,
-                                                           *robot_state_, locked_scene->getAllowedCollisionMatrix());
+                                                           robot_state_, locked_scene->getAllowedCollisionMatrix());
 
       // Check robot self collision.
       self_collision_result_.clear();
       locked_scene->getCollisionEnvUnpadded()->checkSelfCollision(
-          self_collision_request_, self_collision_result_, *robot_state_, locked_scene->getAllowedCollisionMatrix());
+          self_collision_request_, self_collision_result_, robot_state_, locked_scene->getAllowedCollisionMatrix());
 
       // If collision detected scale velocity to 0, else start decelerating exponentially.
       // velocity_scale = e ^ k * (collision_distance - threshold)

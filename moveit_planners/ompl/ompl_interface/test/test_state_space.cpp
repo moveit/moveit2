@@ -50,7 +50,7 @@
 
 rclcpp::Logger getLogger()
 {
-  return moveit::getLogger("test_state_space");
+  return moveit::getLogger("moveit.planners.ompl.test_state_space");
 }
 
 constexpr double EPSILON = std::numeric_limits<double>::epsilon();

@@ -46,7 +46,7 @@ namespace
 {
 rclcpp::Logger getLogger()
 {
-  return moveit::getLogger("pilz_joint_limits_container");
+  return moveit::getLogger("moveit.planners.pilz.joint_limits_container");
 }
 }  // namespace
 bool JointLimitsContainer::addLimit(const std::string& joint_name,

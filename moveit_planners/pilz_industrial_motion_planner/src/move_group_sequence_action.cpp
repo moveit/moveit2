@@ -58,7 +58,7 @@ namespace
 {
 rclcpp::Logger getLogger()
 {
-  return moveit::getLogger("pilz_move_group_sequence_action");
+  return moveit::getLogger("moveit.planners.pilz.move_group_sequence_action");
 }
 }  // namespace
 

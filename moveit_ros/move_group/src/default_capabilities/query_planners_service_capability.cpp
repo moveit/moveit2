@@ -46,7 +46,7 @@ namespace
 {
 rclcpp::Logger getLogger()
 {
-  return moveit::getLogger("query_planners_service_capability");
+  return moveit::getLogger("moveit.ros.move_group.query_planners_service_capability");
 }
 }  // namespace
 MoveGroupQueryPlannersService::MoveGroupQueryPlannersService() : MoveGroupCapability("query_planners_service")

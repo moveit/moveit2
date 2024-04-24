@@ -51,7 +51,7 @@ static const std::string ROBOT_DESCRIPTION = "robot_description";
 
 rclcpp::Logger getLogger()
 {
-  return moveit::getLogger("import_from_text");
+  return moveit::getLogger("moveit.ros.import_from_text");
 }
 
 void parseStart(std::istream& in, planning_scene_monitor::PlanningSceneMonitor* psm,

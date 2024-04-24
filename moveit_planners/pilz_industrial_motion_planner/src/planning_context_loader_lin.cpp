@@ -44,7 +44,7 @@ namespace
 {
 rclcpp::Logger getLogger()
 {
-  return moveit::getLogger("pilz_planning_context_loader_lin");
+  return moveit::getLogger("moveit.planners.pilz.planning_context_loader.lin");
 }
 }  // namespace
 

@@ -49,7 +49,7 @@ namespace
 {
 rclcpp::Logger getLogger()
 {
-  return moveit::getLogger("constraint_sampler_tools");
+  return moveit::getLogger("moveit.core.constraint_sampler_tools");
 }
 }  // namespace
 

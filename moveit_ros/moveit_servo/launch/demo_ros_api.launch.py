@@ -31,6 +31,7 @@ def generate_launch_description():
     # This sets the update rate and planning group name for the acceleration limiting filter.
     acceleration_filter_update_period = {"update_period": 0.01}
     planning_group_name = {"planning_group_name": "panda_arm"}
+
     # RViz
     rviz_config_file = (
         get_package_share_directory("moveit_servo")

@@ -45,7 +45,7 @@ namespace
 {
 rclcpp::Logger getLogger()
 {
-  return moveit::getLogger("moveit_setup.templates");
+  return moveit::getLogger("moveit.setup_assistant.setup.templates");
 }
 }  // namespace
 std::vector<TemplateVariable> TemplatedGeneratedFile::variables;

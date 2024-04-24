@@ -68,7 +68,7 @@ namespace
 {
 rclcpp::Logger getLogger()
 {
-  return moveit::getLogger("benchmark_executor");
+  return moveit::getLogger("moveit.benchmarks.executor");
 }
 }  // namespace
 

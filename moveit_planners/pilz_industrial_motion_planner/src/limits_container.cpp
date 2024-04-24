@@ -42,7 +42,7 @@ namespace
 {
 rclcpp::Logger getLogger()
 {
-  return moveit::getLogger("pilz_limits_container");
+  return moveit::getLogger("moveit.planners.pilz.limits_container");
 }
 }  // namespace
 

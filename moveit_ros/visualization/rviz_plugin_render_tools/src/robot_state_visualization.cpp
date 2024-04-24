@@ -48,7 +48,7 @@ namespace
 {
 rclcpp::Logger getLogger()
 {
-  return moveit::getLogger("rviz_plugin_render_tools.robot_state_visualization");
+  return moveit::getLogger("moveit.ros.rviz_plugin_render_tools.robot_state_visualization");
 }
 }  // namespace
 

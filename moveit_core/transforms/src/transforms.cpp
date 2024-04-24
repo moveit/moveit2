@@ -50,7 +50,7 @@ namespace
 {
 rclcpp::Logger getLogger()
 {
-  return moveit::getLogger("transforms");
+  return moveit::getLogger("moveit.core.transforms");
 }
 }  // namespace
 

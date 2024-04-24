@@ -47,7 +47,7 @@ namespace
 {
 rclcpp::Logger getLogger()
 {
-  return moveit::getLogger("ompl_state_validity_checker");
+  return moveit::getLogger("moveit.planners.ompl.state_validity_checker");
 }
 }  // namespace
 
