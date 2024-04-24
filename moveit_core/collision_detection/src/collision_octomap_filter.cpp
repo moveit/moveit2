@@ -49,7 +49,7 @@ namespace
 {
 rclcpp::Logger getLogger()
 {
-  return moveit::getLogger("collision_detection_octomap_filter");
+  return moveit::getLogger("moveit.core.collision_detection_octomap_filter");
 }
 }  // namespace
 

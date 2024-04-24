@@ -57,7 +57,10 @@ static const bool DEFAULT_CONTROL_MULTI_DOF_JOINT_VARIABLES = false;
 TrajectoryExecutionManager::TrajectoryExecutionManager(const rclcpp::Node::SharedPtr& node,
                                                        const moveit::core::RobotModelConstPtr& robot_model,
                                                        const planning_scene_monitor::CurrentStateMonitorPtr& csm)
-  : node_(node), logger_(moveit::getLogger("trajectory_execution_manager")), robot_model_(robot_model), csm_(csm)
+  : node_(node)
+  , logger_(moveit::getLogger("moveit.ros.trajectory_execution_manager"))
+  , robot_model_(robot_model)
+  , csm_(csm)
 {
   if (!node_->get_parameter("moveit_manage_controllers", manage_controllers_))
     manage_controllers_ = false;
@@ -69,7 +72,7 @@ TrajectoryExecutionManager::TrajectoryExecutionManager(const rclcpp::Node::Share
                                                        const planning_scene_monitor::CurrentStateMonitorPtr& csm,
                                                        bool manage_controllers)
   : node_(node)
-  , logger_(moveit::getLogger("trajectory_execution_manager"))
+  , logger_(moveit::getLogger("moveit.ros.trajectory_execution_manager"))
   , robot_model_(robot_model)
   , csm_(csm)
   , manage_controllers_(manage_controllers)
@@ -260,9 +263,19 @@ void TrajectoryExecutionManager::enableExecutionDurationMonitoring(bool flag)
   execution_duration_monitoring_ = flag;
 }
 
+bool TrajectoryExecutionManager::executionDurationMonitoring() const
+{
+  return execution_duration_monitoring_;
+}
+
 void TrajectoryExecutionManager::setAllowedExecutionDurationScaling(double scaling)
 {
   allowed_execution_duration_scaling_ = scaling;
+}
+
+double TrajectoryExecutionManager::allowedExecutionDurationScaling() const
+{
+  return allowed_execution_duration_scaling_;
 }
 
 void TrajectoryExecutionManager::setAllowedGoalDurationMargin(double margin)
@@ -270,9 +283,19 @@ void TrajectoryExecutionManager::setAllowedGoalDurationMargin(double margin)
   allowed_goal_duration_margin_ = margin;
 }
 
+double TrajectoryExecutionManager::allowedGoalDurationMargin() const
+{
+  return allowed_goal_duration_margin_;
+}
+
 void TrajectoryExecutionManager::setExecutionVelocityScaling(double scaling)
 {
   execution_velocity_scaling_ = scaling;
+}
+
+double TrajectoryExecutionManager::executionVelocityScaling() const
+{
+  return execution_velocity_scaling_;
 }
 
 void TrajectoryExecutionManager::setAllowedStartTolerance(double tolerance)
@@ -280,9 +303,19 @@ void TrajectoryExecutionManager::setAllowedStartTolerance(double tolerance)
   allowed_start_tolerance_ = tolerance;
 }
 
+double TrajectoryExecutionManager::allowedStartTolerance() const
+{
+  return allowed_start_tolerance_;
+}
+
 void TrajectoryExecutionManager::setWaitForTrajectoryCompletion(bool flag)
 {
   wait_for_trajectory_completion_ = flag;
+}
+
+bool TrajectoryExecutionManager::waitForTrajectoryCompletion() const
+{
+  return wait_for_trajectory_completion_;
 }
 
 bool TrajectoryExecutionManager::isManagingControllers() const

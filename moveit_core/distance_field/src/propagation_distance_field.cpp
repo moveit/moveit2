@@ -49,7 +49,7 @@ namespace
 {
 rclcpp::Logger getLogger()
 {
-  return moveit::getLogger("propagation_distance_field");
+  return moveit::getLogger("moveit.core.propagation_distance_field");
 }
 }  // namespace
 

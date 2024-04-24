@@ -61,7 +61,7 @@ static void publishOctomap(const rclcpp::Publisher<octomap_msgs::msg::Octomap>::
                            occupancy_map_monitor::OccupancyMapMonitor& server)
 {
   octomap_msgs::msg::Octomap map;
-  const auto logger = moveit::getLogger("occupancy_map_monitor");
+  const auto logger = moveit::getLogger("moveit.ros.occupancy_map_monitor");
 
   map.header.frame_id = server.getMapFrame();
   map.header.stamp = rclcpp::Clock().now();

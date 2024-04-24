@@ -47,7 +47,7 @@ namespace
 {
 rclcpp::Logger getLogger()
 {
-  return moveit::getLogger("planning_interface");
+  return moveit::getLogger("moveit.core.planning_interface");
 }
 }  // namespace
 

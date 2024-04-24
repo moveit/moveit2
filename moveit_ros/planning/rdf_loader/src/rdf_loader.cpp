@@ -60,7 +60,7 @@ namespace
 {
 rclcpp::Logger getLogger()
 {
-  return moveit::getLogger("RDFLoader");
+  return moveit::getLogger("moveit.ros.rdf_loader");
 }
 }  // namespace
 

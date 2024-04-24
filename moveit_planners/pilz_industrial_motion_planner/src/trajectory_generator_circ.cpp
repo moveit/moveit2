@@ -56,7 +56,7 @@ namespace
 {
 rclcpp::Logger getLogger()
 {
-  return moveit::getLogger("pilz_trajectory_generator_circ");
+  return moveit::getLogger("moveit.planners.pilz.trajectory_generator.circ");
 }
 }  // namespace
 TrajectoryGeneratorCIRC::TrajectoryGeneratorCIRC(const moveit::core::RobotModelConstPtr& robot_model,

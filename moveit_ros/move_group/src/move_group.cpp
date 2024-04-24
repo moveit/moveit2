@@ -55,7 +55,7 @@ namespace
 {
 rclcpp::Logger getLogger()
 {
-  return moveit::getLogger("move_group");
+  return moveit::getLogger("moveit.ros.move_group.executable");
 }
 }  // namespace
 

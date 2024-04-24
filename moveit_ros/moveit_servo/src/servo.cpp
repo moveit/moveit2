@@ -58,7 +58,7 @@ namespace moveit_servo
 Servo::Servo(const rclcpp::Node::SharedPtr& node, std::shared_ptr<const servo::ParamListener> servo_param_listener,
              const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor)
   : node_(node)
-  , logger_(moveit::getLogger("servo"))
+  , logger_(moveit::getLogger("moveit.ros.servo"))
   , servo_param_listener_{ std::move(servo_param_listener) }
   , planning_scene_monitor_{ planning_scene_monitor }
 {
@@ -222,7 +222,7 @@ bool Servo::validateParams(const servo::Params& servo_params) const
     RCLCPP_ERROR_STREAM(
         logger_, "When publishing a std_msgs/Float64MultiArray, "
                  "either the parameter 'publish_joint_positions' OR the parameter 'publish_joint_velocities' must "
-                 "be set to true. But both are set to false."
+                 "be set to true. But both are set to true."
                      << check_yaml_string);
     params_valid = false;
   }

@@ -96,7 +96,7 @@ PlanningSceneMonitor::PlanningSceneMonitor(const rclcpp::Node::SharedPtr& node,
   , dt_state_update_(0.0)
   , shape_transform_cache_lookup_wait_time_(0, 0)
   , rm_loader_(rm_loader)
-  , logger_(moveit::getLogger("planning_scene_monitor"))
+  , logger_(moveit::getLogger("moveit.ros.planning_scene_monitor"))
 {
   std::vector<std::string> new_args = rclcpp::NodeOptions().arguments();
   new_args.push_back("--ros-args");
@@ -728,7 +728,21 @@ bool PlanningSceneMonitor::newPlanningSceneMessage(const moveit_msgs::msg::Plann
     RCLCPP_DEBUG(logger_, "scene update %f robot stamp: %f", fmod(last_update_time_.seconds(), 10.),
                  fmod(last_robot_motion_time_.seconds(), 10.));
     old_scene_name = scene_->getName();
-    result = scene_->usePlanningSceneMsg(scene);
+
+    if (!scene.is_diff && parent_scene_)
+    {
+      // clear maintained (diff) scene_ and set the full new scene in parent_scene_ instead
+      scene_->clearDiffs();
+      result = parent_scene_->setPlanningSceneMsg(scene);
+      // There were no callbacks for individual object changes, so rebuild the octree masks
+      excludeAttachedBodiesFromOctree();
+      excludeWorldObjectsFromOctree();
+    }
+    else
+    {
+      result = scene_->setPlanningSceneDiffMsg(scene);
+    }
+
     if (octomap_monitor_)
     {
       if (!scene.is_diff && scene.world.octomap.octomap.data.empty())
@@ -740,23 +754,6 @@ bool PlanningSceneMonitor::newPlanningSceneMessage(const moveit_msgs::msg::Plann
     }
     robot_model_ = scene_->getRobotModel();
 
-    // if we just reset the scene completely but we were maintaining diffs, we need to fix that
-    if (!scene.is_diff && parent_scene_)
-    {
-      // the scene is now decoupled from the parent, since we just reset it
-      scene_->setAttachedBodyUpdateCallback(moveit::core::AttachedBodyCallback());
-      scene_->setCollisionObjectUpdateCallback(collision_detection::World::ObserverCallbackFn());
-      parent_scene_ = scene_;
-      scene_ = parent_scene_->diff();
-      scene_const_ = scene_;
-      scene_->setAttachedBodyUpdateCallback([this](moveit::core::AttachedBody* body, bool attached) {
-        currentStateAttachedBodyUpdateCallback(body, attached);
-      });
-      scene_->setCollisionObjectUpdateCallback(
-          [this](const collision_detection::World::ObjectConstPtr& object, collision_detection::World::Action action) {
-            currentWorldObjectUpdateCallback(object, action);
-          });
-    }
     if (octomap_monitor_)
     {
       excludeAttachedBodiesFromOctree();  // in case updates have happened to the attached bodies, put them in

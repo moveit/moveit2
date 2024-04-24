@@ -61,7 +61,7 @@
 
 rclcpp::Logger getLogger()
 {
-  return moveit::getLogger("test_constrained_planning_state_space");
+  return moveit::getLogger("moveit.planners.ompl.test_constrained_planning_state_space");
 }
 
 /** \brief Dummy constraint for testing, always satisfied. We need this to create and OMPL ConstrainedStateSpace. **/

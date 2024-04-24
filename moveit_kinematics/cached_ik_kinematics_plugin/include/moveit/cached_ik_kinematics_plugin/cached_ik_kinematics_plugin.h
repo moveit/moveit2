@@ -280,7 +280,7 @@ private:
   {
     if (tip_frames.size() != 1)
     {
-      RCLCPP_ERROR(moveit::getLogger("cached_ik_kinematics_plugin"),
+      RCLCPP_ERROR(moveit::getLogger("moveit.core.cached_ik_kinematics_plugin"),
                    "This solver does not support multiple tip frames");
       return false;
     }

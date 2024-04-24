@@ -50,7 +50,7 @@ namespace
 {
 rclcpp::Logger getLogger()
 {
-  return moveit::getLogger("ompl_constraints_library");
+  return moveit::getLogger("moveit.planners.ompl.constraints_library");
 }
 
 template <typename T>

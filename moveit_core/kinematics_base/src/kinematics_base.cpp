@@ -45,7 +45,7 @@ namespace
 {
 rclcpp::Logger getLogger()
 {
-  return moveit::getLogger("kinematics_base");
+  return moveit::getLogger("moveit.core.kinematics_base");
 }
 }  // namespace
 

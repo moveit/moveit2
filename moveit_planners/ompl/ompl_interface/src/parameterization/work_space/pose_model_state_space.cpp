@@ -46,7 +46,7 @@ namespace
 {
 rclcpp::Logger getLogger()
 {
-  return moveit::getLogger("ompl_pose_model_state_space");
+  return moveit::getLogger("moveit.planners.ompl.pose_model_state_space");
 }
 }  // namespace
 
