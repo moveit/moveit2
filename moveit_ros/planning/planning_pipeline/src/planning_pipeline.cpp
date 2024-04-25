@@ -40,7 +40,13 @@
 
 namespace
 {
-const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.ros_planning.planning_pipeline");
+namespace
+{
+rclcpp::Logger getLogger()
+{
+  return moveit::getLogger("moveit.ros.planning_pipeline");
+}
+}  // namespace
 
 /**
  * @brief Transform a joint trajectory into a vector of joint constraints
@@ -81,7 +87,7 @@ PlanningPipeline::PlanningPipeline(const moveit::core::RobotModelConstPtr& model
   , node_(node)
   , parameter_namespace_(parameter_namespace)
   , robot_model_(model)
-  , logger_(moveit::getLogger("planning_pipeline"))
+  , logger_(moveit::getLogger("moveit.ros.planning_pipeline"))
 {
   auto param_listener = planning_pipeline_parameters::ParamListener(node, parameter_namespace);
   pipeline_parameters_ = param_listener.get_params();
@@ -98,7 +104,7 @@ PlanningPipeline::PlanningPipeline(const moveit::core::RobotModelConstPtr& model
   , node_(node)
   , parameter_namespace_(parameter_namespace)
   , robot_model_(model)
-  , logger_(moveit::getLogger("planning_pipeline"))
+  , logger_(moveit::getLogger("moveit.ros.planning_pipeline"))
 {
   pipeline_parameters_.planning_plugins = planner_plugin_names;
   pipeline_parameters_.request_adapters = request_adapter_plugin_names;
@@ -146,7 +152,7 @@ void PlanningPipeline::configure()
     catch (pluginlib::PluginlibException& ex)
     {
       std::string classes_str = fmt::format("{}", fmt::join(planner_plugin_loader_->getDeclaredClasses(), ", "));
-      RCLCPP_FATAL(LOGGER,
+      RCLCPP_FATAL(getLogger(),
                    "Exception while loading planner '%s': %s"
                    "Available plugins: %s",
                    planner_name.c_str(), ex.what(), classes_str.c_str());
@@ -165,7 +171,7 @@ void PlanningPipeline::configure()
     {
       throw std::runtime_error("Unable to initialize planning plugin " + planner_name);
     }
-    RCLCPP_INFO(LOGGER, "Successfully loaded planner '%s'", planner_instance->getDescription().c_str());
+    RCLCPP_INFO(getLogger(), "Successfully loaded planner '%s'", planner_instance->getDescription().c_str());
     planner_map_.insert(std::make_pair(planner_name, planner_instance));
   }
 
@@ -280,7 +286,8 @@ bool PlanningPipeline::generatePlan(const planning_scene::PlanningSceneConstPtr&
         RCLCPP_ERROR(node_->get_logger(),
                      "PlanningRequestAdapter '%s' failed, because '%s'. Aborting planning pipeline.",
                      req_adapter->getDescription().c_str(), status.message.c_str());
-        break;
+        active_ = false;
+        return false;
       }
     }
 
@@ -303,7 +310,8 @@ bool PlanningPipeline::generatePlan(const planning_scene::PlanningSceneConstPtr&
                      "Failed to create PlanningContext for planner '%s'. Aborting planning pipeline.",
                      planner->getDescription().c_str());
         res.error_code = moveit::core::MoveItErrorCode::PLANNING_FAILED;
-        break;
+        active_ = false;
+        return false;
       }
 
       // Run planner
@@ -314,8 +322,10 @@ bool PlanningPipeline::generatePlan(const planning_scene::PlanningSceneConstPtr&
       // If planner does not succeed, break chain and return false
       if (!res.error_code)
       {
-        RCLCPP_ERROR(node_->get_logger(), "Planner '%s' failed", planner->getDescription().c_str());
-        break;
+        RCLCPP_ERROR(node_->get_logger(), "Planner '%s' failed with error code %s", planner->getDescription().c_str(),
+                     errorCodeToString(res.error_code).c_str());
+        active_ = false;
+        return false;
       }
     }
 
@@ -332,9 +342,10 @@ bool PlanningPipeline::generatePlan(const planning_scene::PlanningSceneConstPtr&
         // If adapter does not succeed, break chain and return false
         if (!res.error_code)
         {
-          RCLCPP_ERROR(node_->get_logger(), "PlanningResponseAdapter '%s' failed",
-                       res_adapter->getDescription().c_str());
-          break;
+          RCLCPP_ERROR(node_->get_logger(), "PlanningResponseAdapter '%s' failed with error code %s",
+                       res_adapter->getDescription().c_str(), errorCodeToString(res.error_code).c_str());
+          active_ = false;
+          return false;
         }
       }
     }
@@ -359,7 +370,7 @@ bool PlanningPipeline::generatePlan(const planning_scene::PlanningSceneConstPtr&
 
   // Set planning pipeline to inactive
   active_ = false;
-  return bool(res);
+  return static_cast<bool>(res);
 }
 
 void PlanningPipeline::terminate() const

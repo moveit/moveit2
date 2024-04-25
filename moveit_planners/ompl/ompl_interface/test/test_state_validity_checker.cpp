@@ -59,13 +59,17 @@
 #include <moveit/ompl_interface/model_based_planning_context.h>
 #include <moveit/ompl_interface/parameterization/joint_space/joint_model_state_space.h>
 #include <moveit/planning_scene/planning_scene.h>
+#include <moveit/utils/logger.hpp>
 
 #include <ompl/geometric/SimpleSetup.h>
 
 /** \brief This flag sets the verbosity level for the state validity checker. **/
 constexpr bool VERBOSE = false;
 
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.ompl_planning.test.test_state_validity_checker");
+rclcpp::Logger getLogger()
+{
+  return moveit::getLogger("moveit.planners.ompl.test_state_validity_checker");
+}
 
 /** \brief Pretty print std:vectors **/
 std::ostream& operator<<(std::ostream& os, const std::vector<double>& v)
@@ -108,7 +112,7 @@ public:
     ompl::base::ScopedState<> ompl_state(state_space_);
     state_space_->copyToOMPLState(ompl_state.get(), *robot_state_);
 
-    RCLCPP_DEBUG_STREAM(LOGGER, ompl_state.reals());
+    RCLCPP_DEBUG_STREAM(getLogger(), ompl_state.reals());
 
     // assume the given position is not in self-collision
     // and there are no collision objects or path constraints so this state should be valid
@@ -118,7 +122,7 @@ public:
     ompl_state->as<ompl_interface::JointModelStateSpace::StateType>()->values[0] = std::numeric_limits<double>::max();
     ompl_state->as<ompl_interface::JointModelStateSpace::StateType>()->clearKnownInformation();
 
-    RCLCPP_DEBUG_STREAM(LOGGER, ompl_state.reals());
+    RCLCPP_DEBUG_STREAM(getLogger(), ompl_state.reals());
 
     EXPECT_FALSE(checker->isValid(ompl_state.get()));
   }
@@ -139,7 +143,7 @@ public:
     ompl::base::ScopedState<> ompl_state(state_space_);
     state_space_->copyToOMPLState(ompl_state.get(), *robot_state_);
 
-    RCLCPP_DEBUG_STREAM(LOGGER, ompl_state.reals());
+    RCLCPP_DEBUG_STREAM(getLogger(), ompl_state.reals());
 
     // the given state is known to be in self-collision, we check it here
     EXPECT_FALSE(checker->isValid(ompl_state.get()));
@@ -175,7 +179,7 @@ public:
     ompl::base::ScopedState<> ompl_state(state_space_);
     state_space_->copyToOMPLState(ompl_state.get(), *robot_state_);
 
-    RCLCPP_DEBUG_STREAM(LOGGER, ompl_state.reals());
+    RCLCPP_DEBUG_STREAM(getLogger(), ompl_state.reals());
 
     EXPECT_TRUE(checker->isValid(ompl_state.get()));
 

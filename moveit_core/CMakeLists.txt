@@ -20,6 +20,7 @@ find_package(kdl_parser REQUIRED)
 find_package(moveit_msgs REQUIRED)
 find_package(OCTOMAP REQUIRED)
 find_package(octomap_msgs REQUIRED)
+find_package(osqp REQUIRED)
 find_package(pluginlib REQUIRED)
 find_package(random_numbers REQUIRED)
 find_package(rclcpp REQUIRED)
@@ -37,10 +38,6 @@ find_package(urdf REQUIRED)
 find_package(urdfdom REQUIRED)
 find_package(urdfdom_headers REQUIRED)
 find_package(visualization_msgs REQUIRED)
-
-
-# TODO: Port python bindings
-# find_package(pybind11 REQUIRED)
 
 # Finds Boost Components
 include(ConfigExtras.cmake)
@@ -69,66 +66,39 @@ add_subdirectory(transforms)
 add_subdirectory(utils)
 add_subdirectory(version)
 
-# TODO: Port python bindings
-# add_subdirectory(python)
-# set(pymoveit_libs
-#   moveit_collision_detection
-#   moveit_kinematic_constraints
-#   moveit_planning_scene
-#   moveit_python_tools
-#   moveit_robot_model
-#   moveit_robot_state
-#   moveit_transforms
-# )
-#
-# pybind_add_module(pymoveit_core
-#     python/pymoveit_core.cpp
-#     collision_detection/src/pycollision_detection.cpp
-#     robot_model/src/pyrobot_model.cpp
-#     robot_state/src/pyrobot_state.cpp
-#     transforms/src/pytransforms.cpp
-#     planning_scene/src/pyplanning_scene.cpp
-#     kinematic_constraints/src/pykinematic_constraint.cpp
-# )
-# target_include_directories(pymoveit_core SYSTEM PRIVATE ${catkin_INCLUDE_DIRS})
-# target_link_libraries(pymoveit_core PRIVATE ${pymoveit_libs} ${catkin_LIBRARIES})
-#
-# #catkin_lint: ignore_once undefined_target (pymoveit_core is defined by pybind_add_module)
-# install(TARGETS pymoveit_core LIBRARY DESTINATION ${CATKIN_GLOBAL_PYTHON_DESTINATION})
-
-
 install(
-  TARGETS
-    collision_detector_bullet_plugin
-    moveit_butterworth_filter
-    moveit_butterworth_parameters
-    moveit_collision_detection
-    moveit_collision_detection_bullet
-    moveit_collision_detection_fcl
-    moveit_collision_distance_field
-    moveit_constraint_samplers
-    moveit_distance_field
-    moveit_dynamics_solver
-    moveit_exceptions
-    moveit_kinematic_constraints
-    moveit_kinematics_base
-    moveit_kinematics_metrics
-    moveit_macros
-    moveit_planning_interface
-    moveit_planning_scene
-    moveit_robot_model
-    moveit_robot_state
-    moveit_robot_trajectory
-    moveit_smoothing_base
-    moveit_test_utils
-    moveit_trajectory_processing
-    moveit_transforms
-    moveit_utils
+  TARGETS collision_detector_bullet_plugin
+          collision_detector_fcl_plugin
+          moveit_acceleration_filter
+          moveit_acceleration_filter_parameters
+          moveit_butterworth_filter
+          moveit_butterworth_filter_parameters
+          moveit_collision_detection
+          moveit_collision_detection_bullet
+          moveit_collision_detection_fcl
+          moveit_collision_distance_field
+          moveit_constraint_samplers
+          moveit_distance_field
+          moveit_dynamics_solver
+          moveit_exceptions
+          moveit_kinematic_constraints
+          moveit_kinematics_base
+          moveit_kinematics_metrics
+          moveit_macros
+          moveit_planning_interface
+          moveit_planning_scene
+          moveit_robot_model
+          moveit_robot_state
+          moveit_robot_trajectory
+          moveit_smoothing_base
+          moveit_test_utils
+          moveit_trajectory_processing
+          moveit_transforms
+          moveit_utils
   EXPORT moveit_coreTargets
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
-  RUNTIME DESTINATION bin
-)
+  RUNTIME DESTINATION bin)
 
 ament_export_targets(moveit_coreTargets HAS_LIBRARY_TARGET)
 ament_export_dependencies(
@@ -146,6 +116,7 @@ ament_export_dependencies(
   moveit_msgs
   OCTOMAP
   octomap_msgs
+  osqp
   pluginlib
   random_numbers
   rclcpp
@@ -162,26 +133,16 @@ ament_export_dependencies(
   urdf
   urdfdom
   urdfdom_headers
-  visualization_msgs
-)
+  visualization_msgs)
 
 # Plugin exports
-pluginlib_export_plugin_description_file(moveit_core collision_detector_fcl_description.xml)
-pluginlib_export_plugin_description_file(moveit_core collision_detector_bullet_description.xml)
-pluginlib_export_plugin_description_file(moveit_core filter_plugin_butterworth.xml)
-
-if(BUILD_TESTING)
-  find_package(ament_lint_auto REQUIRED)
-
-  # These don't pass yet, disable them for now
-  set(ament_cmake_copyright_FOUND TRUE)
-  set(ament_cmake_cpplint_FOUND TRUE)
-  set(ament_cmake_flake8_FOUND TRUE)
-  set(ament_cmake_uncrustify_FOUND TRUE)
-  set(ament_cmake_lint_cmake_FOUND TRUE)
-
-  # Run all lint tests in package.xml except those listed above
-  ament_lint_auto_find_test_dependencies()
-endif()
+pluginlib_export_plugin_description_file(moveit_core
+                                         collision_detector_fcl_description.xml)
+pluginlib_export_plugin_description_file(
+  moveit_core collision_detector_bullet_description.xml)
+pluginlib_export_plugin_description_file(moveit_core
+                                         filter_plugin_butterworth.xml)
+pluginlib_export_plugin_description_file(moveit_core
+                                         filter_plugin_acceleration.xml)
 
 ament_package(CONFIG_EXTRAS ConfigExtras.cmake)

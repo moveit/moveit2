@@ -67,7 +67,7 @@ namespace semantic_world
 
 SemanticWorld::SemanticWorld(const rclcpp::Node::SharedPtr& node,
                              const planning_scene::PlanningSceneConstPtr& planning_scene)
-  : planning_scene_(planning_scene), node_handle_(node), logger_(moveit::getLogger("semantic_world"))
+  : planning_scene_(planning_scene), node_handle_(node), logger_(moveit::getLogger("moveit.ros.semantic_world"))
 
 {
   table_subscriber_ = node_handle_->create_subscription<object_recognition_msgs::msg::TableArray>(
@@ -253,7 +253,7 @@ SemanticWorld::generatePlacePoses(const object_recognition_msgs::msg::Table& cho
 {
   std::vector<geometry_msgs::msg::PoseStamped> place_poses;
   if (object_shape->type != shapes::MESH && object_shape->type != shapes::SPHERE && object_shape->type != shapes::BOX &&
-      object_shape->type != shapes::CONE)
+      object_shape->type != shapes::CYLINDER && object_shape->type != shapes::CONE)
   {
     return place_poses;
   }

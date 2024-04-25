@@ -38,21 +38,16 @@
 // To run this benchmark, 'cd' to the build/moveit_core/robot_state directory and directly run the binary.
 
 #include <benchmark/benchmark.h>
+#include <random>
 #include <kdl_parser/kdl_parser.hpp>
-#include <kdl/chainjnttojacsolver.hpp>
+#include <kdl/treejnttojacsolver.hpp>
 #include <moveit/robot_model/robot_model.h>
 #include <moveit/robot_state/robot_state.h>
 #include <moveit/utils/robot_model_test_utils.h>
-#include <random_numbers/random_numbers.h>
 
 // Robot and planning group for benchmarks.
 constexpr char PANDA_TEST_ROBOT[] = "panda";
 constexpr char PANDA_TEST_GROUP[] = "panda_arm";
-constexpr char PR2_TEST_ROBOT[] = "pr2";
-constexpr char PR2_TIP_LINK[] = "r_wrist_roll_link";
-
-// Number of iterations to use in matrix multiplication / inversion benchmarks.
-constexpr int MATRIX_OPS_N_ITERATIONS = 1e7;
 
 namespace
 {
@@ -66,267 +61,228 @@ Eigen::Isometry3d createTestIsometry()
 }  // namespace
 
 // Benchmark time to multiply an Eigen::Affine3d with an Eigen::Matrix4d.
-static void multiplyAffineTimesMatrix(benchmark::State& st)
+// The NoAlias versions just use Eigen's .noalias() modifier, allowing to write the result of matrix multiplication
+// directly into the result matrix instead of using an intermediate temporary (which is the default).
+static void multiplyAffineTimesMatrixNoAlias(benchmark::State& st)
 {
-  int n_iters = st.range(0);
   Eigen::Isometry3d isometry = createTestIsometry();
+  Eigen::Affine3d result;
   for (auto _ : st)
   {
-    for (int i = 0; i < n_iters; ++i)
-    {
-      Eigen::Affine3d result;
-      benchmark::DoNotOptimize(result = isometry.affine() * isometry.matrix());
-      benchmark::ClobberMemory();
-    }
+    benchmark::DoNotOptimize(result.affine().noalias() = isometry.affine() * isometry.matrix());
+    benchmark::ClobberMemory();
+  }
+}
+
+// Benchmark time to multiply an Eigen::Matrix4d with an Eigen::Matrix4d.
+static void multiplyMatrixTimesMatrixNoAlias(benchmark::State& st)
+{
+  Eigen::Isometry3d isometry = createTestIsometry();
+  Eigen::Isometry3d result;
+  for (auto _ : st)
+  {
+    benchmark::DoNotOptimize(result.matrix().noalias() = isometry.matrix() * isometry.matrix());
+    benchmark::ClobberMemory();
+  }
+}
+
+// Benchmark time to multiply an Eigen::Isometry3d with an Eigen::Isometry3d.
+static void multiplyIsometryTimesIsometryNoAlias(benchmark::State& st)
+{
+  Eigen::Isometry3d isometry = createTestIsometry();
+  Eigen::Isometry3d result;
+  for (auto _ : st)
+  {
+    benchmark::DoNotOptimize(result.affine().noalias() = isometry.affine() * isometry.matrix());
+    benchmark::ClobberMemory();
   }
 }
 
 // Benchmark time to multiply an Eigen::Matrix4d with an Eigen::Matrix4d.
 static void multiplyMatrixTimesMatrix(benchmark::State& st)
 {
-  int n_iters = st.range(0);
   Eigen::Isometry3d isometry = createTestIsometry();
+  Eigen::Isometry3d result;
   for (auto _ : st)
   {
-    for (int i = 0; i < n_iters; ++i)
-    {
-      Eigen::Matrix4d result;
-      benchmark::DoNotOptimize(result = isometry.matrix() * isometry.matrix());
-      benchmark::ClobberMemory();
-    }
+    benchmark::DoNotOptimize(result.matrix() = isometry.matrix() * isometry.matrix());
+    benchmark::ClobberMemory();
   }
 }
-
 // Benchmark time to multiply an Eigen::Isometry3d with an Eigen::Isometry3d.
 static void multiplyIsometryTimesIsometry(benchmark::State& st)
 {
-  int n_iters = st.range(0);
   Eigen::Isometry3d isometry = createTestIsometry();
+  Eigen::Isometry3d result;
   for (auto _ : st)
   {
-    for (int i = 0; i < n_iters; ++i)
-    {
-      Eigen::Isometry3d result;
-      benchmark::DoNotOptimize(result = isometry * isometry);
-      benchmark::ClobberMemory();
-    }
+    benchmark::DoNotOptimize(result = isometry * isometry);
+    benchmark::ClobberMemory();
   }
 }
 
 // Benchmark time to invert an Eigen::Isometry3d.
 static void inverseIsometry3d(benchmark::State& st)
 {
-  int n_iters = st.range(0);
   Eigen::Isometry3d isometry = createTestIsometry();
+  Eigen::Isometry3d result;
   for (auto _ : st)
   {
-    for (int i = 0; i < n_iters; ++i)
-    {
-      Eigen::Isometry3d result;
-      benchmark::DoNotOptimize(result = isometry.inverse());
-      benchmark::ClobberMemory();
-    }
+    benchmark::DoNotOptimize(result = isometry.inverse());
+    benchmark::ClobberMemory();
   }
 }
 
 // Benchmark time to invert an Eigen::Affine3d(Eigen::Isometry).
 static void inverseAffineIsometry(benchmark::State& st)
 {
-  int n_iters = st.range(0);
-  Eigen::Isometry3d isometry = createTestIsometry();
-  Eigen::Affine3d affine;
-  affine.matrix() = isometry.matrix();
-
+  Eigen::Affine3d affine = createTestIsometry();
+  Eigen::Affine3d result;
   for (auto _ : st)
   {
-    for (int i = 0; i < n_iters; ++i)
-    {
-      Eigen::Affine3d result;
-      benchmark::DoNotOptimize(result = affine.inverse(Eigen::Isometry).affine());
-      benchmark::ClobberMemory();
-    }
+    benchmark::DoNotOptimize(result = affine.inverse(Eigen::Isometry));
+    benchmark::ClobberMemory();
   }
 }
 
 // Benchmark time to invert an Eigen::Affine3d.
 static void inverseAffine(benchmark::State& st)
 {
-  int n_iters = st.range(0);
-  Eigen::Isometry3d isometry = createTestIsometry();
-  Eigen::Affine3d affine;
-  affine.matrix() = isometry.matrix();
-
+  Eigen::Affine3d affine = createTestIsometry();
+  Eigen::Affine3d result;
   for (auto _ : st)
   {
-    for (int i = 0; i < n_iters; ++i)
-    {
-      Eigen::Affine3d result;
-      benchmark::DoNotOptimize(result = affine.inverse().affine());
-      benchmark::ClobberMemory();
-    }
+    benchmark::DoNotOptimize(result = affine.inverse());
+    benchmark::ClobberMemory();
   }
 }
 
 // Benchmark time to invert an Eigen::Matrix4d.
 static void inverseMatrix4d(benchmark::State& st)
 {
-  int n_iters = st.range(0);
-  Eigen::Isometry3d isometry = createTestIsometry();
-  Eigen::Affine3d affine;
-  affine.matrix() = isometry.matrix();
-
+  Eigen::Affine3d affine = createTestIsometry();
+  Eigen::Affine3d result;
   for (auto _ : st)
   {
-    for (int i = 0; i < n_iters; ++i)
-    {
-      Eigen::Affine3d result;
-      benchmark::DoNotOptimize(result = affine.matrix().inverse());
-      benchmark::ClobberMemory();
-    }
+    benchmark::DoNotOptimize(result = affine.matrix().inverse());
+    benchmark::ClobberMemory();
   }
 }
 
-// Benchmark time to construct a RobotState given a RobotModel.
-static void robotStateConstruct(benchmark::State& st)
+struct RobotStateBenchmark : ::benchmark::Fixture
 {
-  int n_states = st.range(0);
-  const moveit::core::RobotModelPtr& robot_model = moveit::core::loadTestingRobotModel(PANDA_TEST_ROBOT);
-
-  // Make sure the group exists, otherwise exit early with an error.
-  if (!robot_model->hasJointModelGroup(PANDA_TEST_GROUP))
+  void SetUp(const ::benchmark::State& /*state*/) override
   {
-    st.SkipWithError("The planning group doesn't exist.");
-    return;
+    std::ignore = rcutils_logging_set_logger_level("moveit_robot_model.robot_model", RCUTILS_LOG_SEVERITY_WARN);
+    robot_model = moveit::core::loadTestingRobotModel(PANDA_TEST_ROBOT);
   }
 
+  std::vector<moveit::core::RobotState> constructStates(size_t num)
+  {
+    std::vector<moveit::core::RobotState> states;
+    states.reserve(num);
+    for (size_t i = 0; i < num; i++)
+      states.emplace_back(robot_model);
+    return states;
+  }
+  std::vector<moveit::core::RobotState> constructStates(size_t num, const moveit::core::RobotState& state)
+  {
+    std::vector<moveit::core::RobotState> states;
+    states.reserve(num);
+    for (size_t i = 0; i < num; i++)
+      states.emplace_back(state);
+    return states;
+  }
+
+  std::vector<size_t> randomPermutation(size_t num)
+  {
+    std::vector<size_t> result(num);
+    std::iota(result.begin(), result.end(), 0);
+
+    std::mt19937 generator;
+    std::shuffle(result.begin(), result.end(), generator);
+    return result;
+  }
+
+  moveit::core::RobotModelPtr robot_model;
+};
+
+// Benchmark time to construct RobotStates
+BENCHMARK_DEFINE_F(RobotStateBenchmark, construct)(benchmark::State& st)
+{
   for (auto _ : st)
   {
-    for (int i = 0; i < n_states; i++)
-    {
-      std::unique_ptr<moveit::core::RobotState> robot_state;
-      benchmark::DoNotOptimize(robot_state = std::make_unique<moveit::core::RobotState>(robot_model));
-      benchmark::ClobberMemory();
-    }
+    auto states = constructStates(st.range(0));
+    benchmark::DoNotOptimize(states);
+    benchmark::ClobberMemory();
   }
 }
 
-// Benchmark time to copy a RobotState.
-static void robotStateCopy(benchmark::State& st)
+// Benchmark time to copy-construct a RobotState.
+BENCHMARK_DEFINE_F(RobotStateBenchmark, copyConstruct)(benchmark::State& st)
 {
-  int n_states = st.range(0);
-  const moveit::core::RobotModelPtr& robot_model = moveit::core::loadTestingRobotModel(PANDA_TEST_ROBOT);
-
-  // Make sure the group exists, otherwise exit early with an error.
-  if (!robot_model->hasJointModelGroup(PANDA_TEST_GROUP))
-  {
-    st.SkipWithError("The planning group doesn't exist.");
-    return;
-  }
-
-  // Robot state.
-  moveit::core::RobotState robot_state(robot_model);
-  robot_state.setToDefaultValues();
-
-  for (auto _ : st)
-  {
-    for (int i = 0; i < n_states; i++)
-    {
-      std::unique_ptr<moveit::core::RobotState> robot_state_copy;
-      benchmark::DoNotOptimize(robot_state_copy = std::make_unique<moveit::core::RobotState>(robot_state));
-      benchmark::ClobberMemory();
-    }
-  }
-}
-
-// Benchmark time to call `setToRandomPositions` and `update` on a RobotState.
-static void robotStateUpdate(benchmark::State& st)
-{
-  int n_states = st.range(0);
-  const moveit::core::RobotModelPtr& robot_model = moveit::core::loadTestingRobotModel(PR2_TEST_ROBOT);
   moveit::core::RobotState state(robot_model);
+  state.setToDefaultValues();
+  state.update();
 
   for (auto _ : st)
   {
-    for (int i = 0; i < n_states; ++i)
-    {
-      state.setToRandomPositions();
-      state.update();
-      benchmark::ClobberMemory();
-    }
+    auto states = constructStates(st.range(0), state);
+    benchmark::DoNotOptimize(states);
+    benchmark::ClobberMemory();
   }
 }
 
-// Benchmark time to call `setToRandomPositions` and `getGlobalLinkTransform` on a RobotState.
-static void robotStateForwardKinematics(benchmark::State& st)
+// Benchmark time to call `setToRandomPositions` and `update` on RobotState.
+BENCHMARK_DEFINE_F(RobotStateBenchmark, update)(benchmark::State& st)
 {
-  int n_states = st.range(0);
-  const moveit::core::RobotModelPtr& robot_model = moveit::core::loadTestingRobotModel(PR2_TEST_ROBOT);
-  moveit::core::RobotState state(robot_model);
-
+  auto states = constructStates(st.range(0));
+  auto permutation = randomPermutation(states.size());
   for (auto _ : st)
   {
-    for (int i = 0; i < n_states; ++i)
+    for (auto i : permutation)  // process states in random order to challenge the cache
     {
-      state.setToRandomPositions();
-      Eigen::Isometry3d transform;
-      benchmark::DoNotOptimize(transform = state.getGlobalLinkTransform(robot_model->getLinkModel(PR2_TIP_LINK)));
-      benchmark::ClobberMemory();
+      states[i].setToRandomPositions();
+      states[i].update();
     }
   }
 }
 
 // Benchmark time to compute the Jacobian, using MoveIt's `getJacobian` function.
-static void moveItJacobian(benchmark::State& st)
+BENCHMARK_DEFINE_F(RobotStateBenchmark, jacobianMoveIt)(benchmark::State& st)
 {
-  // Load a test robot model.
-  const moveit::core::RobotModelPtr& robot_model = moveit::core::loadTestingRobotModel(PANDA_TEST_ROBOT);
-
-  // Make sure the group exists, otherwise exit early with an error.
-  if (!robot_model->hasJointModelGroup(PANDA_TEST_GROUP))
+  moveit::core::RobotState state(robot_model);
+  const moveit::core::JointModelGroup* jmg = state.getJointModelGroup(PANDA_TEST_GROUP);
+  if (!jmg)
   {
     st.SkipWithError("The planning group doesn't exist.");
     return;
   }
 
-  // Robot state.
-  moveit::core::RobotState kinematic_state(robot_model);
-  const moveit::core::JointModelGroup* jmg = kinematic_state.getJointModelGroup(PANDA_TEST_GROUP);
-
-  // Provide our own random number generator to setToRandomPositions to get a deterministic sequence of joint
-  // configurations.
+  // Manually seeded RandomNumberGenerator for deterministic results
   random_numbers::RandomNumberGenerator rng(0);
 
   for (auto _ : st)
   {
     // Time only the jacobian computation, not the forward kinematics.
     st.PauseTiming();
-    kinematic_state.setToRandomPositions(jmg, rng);
-    kinematic_state.updateLinkTransforms();
+    state.setToRandomPositions(jmg, rng);
+    state.updateLinkTransforms();
     st.ResumeTiming();
-    kinematic_state.getJacobian(jmg);
+    state.getJacobian(jmg);
   }
 }
 
 // Benchmark time to compute the Jacobian using KDL.
-static void kdlJacobian(benchmark::State& st)
+BENCHMARK_DEFINE_F(RobotStateBenchmark, jacobianKDL)(benchmark::State& st)
 {
-  const moveit::core::RobotModelPtr& robot_model = moveit::core::loadTestingRobotModel(PANDA_TEST_ROBOT);
-
-  // Make sure the group exists, otherwise exit early with an error.
-  if (!robot_model->hasJointModelGroup(PANDA_TEST_GROUP))
+  moveit::core::RobotState state(robot_model);
+  const moveit::core::JointModelGroup* jmg = state.getJointModelGroup(PANDA_TEST_GROUP);
+  if (!jmg)
   {
     st.SkipWithError("The planning group doesn't exist.");
     return;
   }
-
-  // Robot state.
-  moveit::core::RobotState kinematic_state(robot_model);
-  const moveit::core::JointModelGroup* jmg = kinematic_state.getJointModelGroup(PANDA_TEST_GROUP);
-
-  // Provide our own random number generator to setToRandomPositions to get a deterministic sequence of joint
-  // configurations.
-  random_numbers::RandomNumberGenerator rng(0);
-
   KDL::Tree kdl_tree;
   if (!kdl_parser::treeFromUrdfModel(*robot_model->getURDF(), kdl_tree))
   {
@@ -334,44 +290,45 @@ static void kdlJacobian(benchmark::State& st)
     return;
   }
 
-  KDL::Chain kdl_chain;
-  if (!kdl_tree.getChain(jmg->getJointModels().front()->getParentLinkModel()->getName(),
-                         jmg->getLinkModelNames().back(), kdl_chain))
-  {
-    st.SkipWithError("Can't create KDL Chain.");
-    return;
-  }
+  KDL::TreeJntToJacSolver jacobian_solver(kdl_tree);
+  KDL::Jacobian jacobian(kdl_tree.getNrOfJoints());
+  KDL::JntArray kdl_q(kdl_tree.getNrOfJoints());
+  const std::string tip_link = jmg->getLinkModelNames().back();
 
-  KDL::ChainJntToJacSolver jacobian_solver(kdl_chain);
+  // Manually seeded RandomNumberGenerator for deterministic results
+  random_numbers::RandomNumberGenerator rng(0);
 
   for (auto _ : st)
   {
     // Time only the jacobian computation, not the forward kinematics.
     st.PauseTiming();
-    kinematic_state.setToRandomPositions(jmg, rng);
-    kinematic_state.updateLinkTransforms();
-    KDL::Jacobian jacobian(kdl_chain.getNrOfJoints());
-    KDL::JntArray kdl_q;
-    kdl_q.resize(kdl_chain.getNrOfJoints());
-    kinematic_state.copyJointGroupPositions(jmg, &kdl_q.data[0]);
+    state.setToRandomPositions(jmg, rng);
+    state.copyJointGroupPositions(jmg, &kdl_q.data[0]);
     st.ResumeTiming();
-    jacobian_solver.JntToJac(kdl_q, jacobian);
+    jacobian_solver.JntToJac(kdl_q, jacobian, tip_link);
   }
 }
 
-BENCHMARK(multiplyAffineTimesMatrix)->Arg(MATRIX_OPS_N_ITERATIONS)->Unit(benchmark::kMillisecond);
-BENCHMARK(multiplyMatrixTimesMatrix)->Arg(MATRIX_OPS_N_ITERATIONS)->Unit(benchmark::kMillisecond);
-BENCHMARK(multiplyIsometryTimesIsometry)->Arg(MATRIX_OPS_N_ITERATIONS)->Unit(benchmark::kMillisecond);
+BENCHMARK(multiplyAffineTimesMatrixNoAlias);
+BENCHMARK(multiplyMatrixTimesMatrixNoAlias);
+BENCHMARK(multiplyIsometryTimesIsometryNoAlias);
+BENCHMARK(multiplyMatrixTimesMatrix);
+BENCHMARK(multiplyIsometryTimesIsometry);
 
-BENCHMARK(inverseIsometry3d)->Arg(MATRIX_OPS_N_ITERATIONS)->Unit(benchmark::kMillisecond);
-BENCHMARK(inverseAffineIsometry)->Arg(MATRIX_OPS_N_ITERATIONS)->Unit(benchmark::kMillisecond);
-BENCHMARK(inverseAffine)->Arg(MATRIX_OPS_N_ITERATIONS)->Unit(benchmark::kMillisecond);
-BENCHMARK(inverseMatrix4d)->Arg(MATRIX_OPS_N_ITERATIONS)->Unit(benchmark::kMillisecond);
+BENCHMARK(inverseIsometry3d);
+BENCHMARK(inverseAffineIsometry);
+BENCHMARK(inverseAffine);
+BENCHMARK(inverseMatrix4d);
 
-BENCHMARK(robotStateConstruct)->RangeMultiplier(10)->Range(100, 10000)->Unit(benchmark::kMillisecond);
-BENCHMARK(robotStateCopy)->RangeMultiplier(10)->Range(100, 10000)->Unit(benchmark::kMillisecond);
-BENCHMARK(robotStateUpdate)->RangeMultiplier(10)->Range(10, 1000)->Unit(benchmark::kMillisecond);
-BENCHMARK(robotStateForwardKinematics)->RangeMultiplier(10)->Range(10, 1000)->Unit(benchmark::kMillisecond);
+BENCHMARK_REGISTER_F(RobotStateBenchmark, construct)
+    ->RangeMultiplier(10)
+    ->Range(100, 10000)
+    ->Unit(benchmark::kMillisecond);
+BENCHMARK_REGISTER_F(RobotStateBenchmark, copyConstruct)
+    ->RangeMultiplier(10)
+    ->Range(100, 10000)
+    ->Unit(benchmark::kMillisecond);
+BENCHMARK_REGISTER_F(RobotStateBenchmark, update)->RangeMultiplier(10)->Range(10, 10000)->Unit(benchmark::kMillisecond);
 
-BENCHMARK(moveItJacobian);
-BENCHMARK(kdlJacobian);
+BENCHMARK_REGISTER_F(RobotStateBenchmark, jacobianMoveIt);
+BENCHMARK_REGISTER_F(RobotStateBenchmark, jacobianKDL);

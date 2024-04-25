@@ -48,7 +48,7 @@ namespace
 {
 rclcpp::Logger getLogger()
 {
-  return moveit::getLogger("constraint_sampler_manager");
+  return moveit::getLogger("moveit.core.constraint_sampler_manager");
 }
 }  // namespace
 

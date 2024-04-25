@@ -34,6 +34,7 @@
 
 #include <pilz_industrial_motion_planner/trajectory_generator_ptp.h>
 #include <moveit/robot_state/conversions.h>
+#include <moveit/utils/logger.hpp>
 
 #include <rclcpp/duration.hpp>
 #include <rclcpp/logger.hpp>
@@ -48,8 +49,11 @@ namespace pilz_industrial_motion_planner
 {
 namespace
 {
-const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.pilz_industrial_motion_planner.trajectory_generator_ptp");
+rclcpp::Logger getLogger()
+{
+  return moveit::getLogger("moveit.planners.pilz.trajectory_generator.ptp");
 }
+}  // namespace
 TrajectoryGeneratorPTP::TrajectoryGeneratorPTP(const moveit::core::RobotModelConstPtr& robot_model,
                                                const LimitsContainer& planner_limits, const std::string& group_name)
   : TrajectoryGenerator::TrajectoryGenerator(robot_model, planner_limits)
@@ -87,7 +91,7 @@ TrajectoryGeneratorPTP::TrajectoryGeneratorPTP(const moveit::core::RobotModelCon
     }
   }
 
-  RCLCPP_INFO(LOGGER, "Initialized Point-to-Point Trajectory Generator.");
+  RCLCPP_INFO(getLogger(), "Initialized Point-to-Point Trajectory Generator.");
 }
 
 void TrajectoryGeneratorPTP::planPTP(const std::map<std::string, double>& start_pos,
@@ -114,7 +118,7 @@ void TrajectoryGeneratorPTP::planPTP(const std::map<std::string, double>& start_
   }
   if (goal_reached)
   {
-    RCLCPP_INFO_STREAM(LOGGER, "Goal already reached, set one goal point explicitly.");
+    RCLCPP_INFO_STREAM(getLogger(), "Goal already reached, set one goal point explicitly.");
     if (joint_trajectory.points.empty())
     {
       trajectory_msgs::msg::JointTrajectoryPoint point;

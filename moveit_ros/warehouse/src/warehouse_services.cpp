@@ -54,7 +54,7 @@ namespace
 {
 rclcpp::Logger getLogger()
 {
-  return moveit::getLogger("warehouse_services");
+  return moveit::getLogger("moveit.ros.warehouse_services");
 }
 }  // namespace
 

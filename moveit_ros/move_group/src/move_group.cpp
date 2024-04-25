@@ -55,13 +55,14 @@ namespace
 {
 rclcpp::Logger getLogger()
 {
-  return moveit::getLogger("move_group");
+  return moveit::getLogger("moveit.ros.move_group.executable");
 }
 }  // namespace
 
 // These capabilities are loaded unless listed in disable_capabilities
 // clang-format off
 static const char* const DEFAULT_CAPABILITIES[] = {
+   "move_group/GetUrdfService",
    "move_group/MoveGroupCartesianPathService",
    "move_group/MoveGroupKinematicsService",
    "move_group/MoveGroupExecuteTrajectoryAction",

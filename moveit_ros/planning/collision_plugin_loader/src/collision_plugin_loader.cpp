@@ -37,9 +37,7 @@
 
 namespace collision_detection
 {
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("collision_plugin_loader");
-
-CollisionPluginLoader::CollisionPluginLoader() : logger_(moveit::getLogger("collision_plugin_loader"))
+CollisionPluginLoader::CollisionPluginLoader() : logger_(moveit::getLogger("moveit.ros.collision_plugin_loader"))
 {
 }
 

@@ -37,13 +37,20 @@
 #include <moveit/planning_interface/planning_interface.h>
 #include <moveit/planning_scene/planning_scene.h>
 #include <moveit/robot_model/robot_model.h>
+#include <moveit/utils/logger.hpp>
 
 #include <pluginlib/class_list_macros.hpp>
 #include <vector>
 
 namespace chomp_interface
 {
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("chomp_optimizer");
+namespace
+{
+rclcpp::Logger getLogger()
+{
+  return moveit::getLogger("moveit.planners.chomp.planner_manager");
+}
+}  // namespace
 
 class CHOMPPlannerManager : public planning_interface::PlannerManager
 {
@@ -71,14 +78,14 @@ public:
 
     if (req.group_name.empty())
     {
-      RCLCPP_ERROR(LOGGER, "No group specified to plan for");
+      RCLCPP_ERROR(getLogger(), "No group specified to plan for");
       error_code.val = moveit_msgs::msg::MoveItErrorCodes::INVALID_GROUP_NAME;
       return planning_interface::PlanningContextPtr();
     }
 
     if (!planning_scene)
     {
-      RCLCPP_ERROR(LOGGER, "No planning scene supplied as input");
+      RCLCPP_ERROR(getLogger(), "No planning scene supplied as input");
       error_code.val = moveit_msgs::msg::MoveItErrorCodes::FAILURE;
       return planning_interface::PlanningContextPtr();
     }

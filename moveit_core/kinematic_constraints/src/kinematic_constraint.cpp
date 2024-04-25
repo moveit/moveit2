@@ -60,7 +60,7 @@ namespace
 {
 rclcpp::Logger getLogger()
 {
-  return moveit::getLogger("kinematic_constraints");
+  return moveit::getLogger("moveit.core.kinematic_constraints");
 }
 }  // namespace
 

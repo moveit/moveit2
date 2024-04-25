@@ -42,6 +42,7 @@
 
 #include <kdl/velocityprofile_trap.hpp>
 #include <moveit/robot_state/conversions.h>
+#include <moveit/utils/logger.hpp>
 
 #include <pilz_industrial_motion_planner/limits_container.h>
 
@@ -49,8 +50,11 @@ namespace pilz_industrial_motion_planner
 {
 namespace
 {
-const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.pilz_industrial_motion_planner.trajectory_generator");
+rclcpp::Logger getLogger()
+{
+  return moveit::getLogger("moveit.planners.pilz.trajectory_generator");
 }
+}  // namespace
 
 sensor_msgs::msg::JointState TrajectoryGenerator::filterGroupValues(const sensor_msgs::msg::JointState& robot_state,
                                                                     const std::string& group) const
@@ -307,7 +311,7 @@ void TrajectoryGenerator::generate(const planning_scene::PlanningSceneConstPtr& 
                                    const planning_interface::MotionPlanRequest& req,
                                    planning_interface::MotionPlanResponse& res, double sampling_time)
 {
-  RCLCPP_INFO_STREAM(LOGGER, "Generating " << req.planner_id << " trajectory...");
+  RCLCPP_INFO_STREAM(getLogger(), "Generating " << req.planner_id << " trajectory...");
   rclcpp::Time planning_begin = clock_->now();
 
   res.planner_id = req.planner_id;
@@ -317,7 +321,7 @@ void TrajectoryGenerator::generate(const planning_scene::PlanningSceneConstPtr& 
   }
   catch (const MoveItErrorCodeException& ex)
   {
-    RCLCPP_ERROR_STREAM(LOGGER, ex.what());
+    RCLCPP_ERROR_STREAM(getLogger(), ex.what());
     res.error_code.val = ex.getErrorCode();
     setFailureResponse(planning_begin, res);
     return;
@@ -329,7 +333,7 @@ void TrajectoryGenerator::generate(const planning_scene::PlanningSceneConstPtr& 
   }
   catch (const MoveItErrorCodeException& ex)
   {
-    RCLCPP_ERROR_STREAM(LOGGER, ex.what());
+    RCLCPP_ERROR_STREAM(getLogger(), ex.what());
     res.error_code.val = ex.getErrorCode();
     setFailureResponse(planning_begin, res);
     return;
@@ -342,7 +346,7 @@ void TrajectoryGenerator::generate(const planning_scene::PlanningSceneConstPtr& 
   }
   catch (const MoveItErrorCodeException& ex)
   {
-    RCLCPP_ERROR_STREAM(LOGGER, ex.what());
+    RCLCPP_ERROR_STREAM(getLogger(), ex.what());
     res.error_code.val = ex.getErrorCode();
     setFailureResponse(planning_begin, res);
     return;
@@ -355,7 +359,7 @@ void TrajectoryGenerator::generate(const planning_scene::PlanningSceneConstPtr& 
   }
   catch (const MoveItErrorCodeException& ex)
   {
-    RCLCPP_ERROR_STREAM(LOGGER, ex.what());
+    RCLCPP_ERROR_STREAM(getLogger(), ex.what());
     res.error_code.val = ex.getErrorCode();
     setFailureResponse(planning_begin, res);
     return;

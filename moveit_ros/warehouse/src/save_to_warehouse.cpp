@@ -62,7 +62,7 @@
 
 rclcpp::Logger getLogger()
 {
-  return moveit::getLogger("save_to_warehouse");
+  return moveit::getLogger("moveit.ros.save_to_warehouse");
 }
 
 static const std::string ROBOT_DESCRIPTION = "robot_description";

@@ -47,11 +47,10 @@
 #include <utility>
 #include <filesystem>
 #include <cached_ik_kinematics_parameters.hpp>
+#include <moveit/utils/logger.hpp>
 
 namespace cached_ik_kinematics_plugin
 {
-static const rclcpp::Logger LOGGER =
-    rclcpp::get_logger("moveit_cached_ik_kinematics_plugin.cached_ik_kinematics_plugin");
 
 /** \brief A cache of inverse kinematic solutions */
 class IKCache
@@ -281,7 +280,8 @@ private:
   {
     if (tip_frames.size() != 1)
     {
-      RCLCPP_ERROR(LOGGER, "This solver does not support multiple tip frames");
+      RCLCPP_ERROR(moveit::getLogger("moveit.core.cached_ik_kinematics_plugin"),
+                   "This solver does not support multiple tip frames");
       return false;
     }
 

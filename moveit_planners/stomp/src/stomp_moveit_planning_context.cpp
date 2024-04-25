@@ -51,10 +51,17 @@
 
 #include <moveit/constraint_samplers/constraint_sampler_manager.h>
 #include <moveit/robot_state/conversions.h>
+#include <moveit/utils/logger.hpp>
 
 namespace stomp_moveit
 {
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("stomp_moveit");
+namespace
+{
+rclcpp::Logger getLogger()
+{
+  return moveit::getLogger("moveit.planners.stomp.planning_context");
+}
+}  // namespace
 
 // @brief Run a planning attempt with STOMP, either providing start and goal states or an optional seed trajectory
 bool solveWithStomp(const std::shared_ptr<stomp::Stomp>& stomp, const moveit::core::RobotState& start_state,
@@ -105,7 +112,7 @@ bool extractSeedTrajectory(const planning_interface::MotionPlanRequest& req,
     auto n = constraints[i].joint_constraints.size();
     if (n != dof)
     {  // first test to ensure that dimensionality is correct
-      RCLCPP_WARN(LOGGER, "Seed trajectory index %lu does not have %lu constraints (has %lu instead).", i, dof, n);
+      RCLCPP_WARN(getLogger(), "Seed trajectory index %lu does not have %lu constraints (has %lu instead).", i, dof, n);
       return false;
     }
 
@@ -116,8 +123,9 @@ bool extractSeedTrajectory(const planning_interface::MotionPlanRequest& req,
       const auto& c = constraints[i].joint_constraints[j];
       if (c.joint_name != names[j])
       {
-        RCLCPP_WARN(LOGGER, "Seed trajectory (index %lu, joint %lu) joint name '%s' does not match expected name '%s'",
-                    i, j, c.joint_name.c_str(), names[j].c_str());
+        RCLCPP_WARN(getLogger(),
+                    "Seed trajectory (index %lu, joint %lu) joint name '%s' does not match expected name '%s'", i, j,
+                    c.joint_name.c_str(), names[j].c_str());
         return false;
       }
       joint_pt.positions.push_back(c.position);
@@ -272,7 +280,7 @@ void StompPlanningContext::solve(planning_interface::MotionPlanResponse& res)
 void StompPlanningContext::solve(planning_interface::MotionPlanDetailedResponse& /*res*/)
 {
   // TODO(#2168): implement this function
-  RCLCPP_ERROR(LOGGER,
+  RCLCPP_ERROR(getLogger(),
                "StompPlanningContext::solve(planning_interface::MotionPlanDetailedResponse&) is not implemented!");
   return;
 }

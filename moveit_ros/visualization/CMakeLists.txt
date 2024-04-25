@@ -5,7 +5,8 @@ project(moveit_ros_visualization LANGUAGES CXX)
 find_package(moveit_common REQUIRED)
 moveit_package()
 
-# definition needed for boost/math/constants/constants.hpp included by Ogre to compile
+# definition needed for boost/math/constants/constants.hpp included by Ogre to
+# compile
 add_definitions(-DBOOST_MATH_DISABLE_FLOAT128)
 
 find_package(ament_cmake REQUIRED)
@@ -39,7 +40,8 @@ include(ConfigExtras.cmake)
 # Qt Stuff
 find_package(Qt5 ${rviz_QT_VERSION} REQUIRED Core Widgets)
 set(QT_LIBRARIES Qt5::Widgets)
-macro(qt_wrap_ui)
+# Delegate to QT5 macro
+macro(QT_WRAP_UI)
   qt5_wrap_ui(${ARGN})
 endmacro()
 
@@ -49,47 +51,43 @@ set(CMAKE_AUTORCC ON)
 add_definitions(-DQT_NO_KEYWORDS)
 
 set(THIS_PACKAGE_LIBRARIES
-  moveit_motion_planning_rviz_plugin
-  moveit_motion_planning_rviz_plugin_core
-  moveit_planning_scene_rviz_plugin
-  moveit_planning_scene_rviz_plugin_core
-  moveit_robot_state_rviz_plugin
-  moveit_robot_state_rviz_plugin_core
-  moveit_rviz_plugin_render_tools
-  moveit_trajectory_rviz_plugin
-  moveit_trajectory_rviz_plugin_core
-)
+    moveit_motion_planning_rviz_plugin
+    moveit_motion_planning_rviz_plugin_core
+    moveit_planning_scene_rviz_plugin
+    moveit_planning_scene_rviz_plugin_core
+    moveit_robot_state_rviz_plugin
+    moveit_robot_state_rviz_plugin_core
+    moveit_rviz_plugin_render_tools
+    moveit_trajectory_rviz_plugin
+    moveit_trajectory_rviz_plugin_core)
 
 set(THIS_PACKAGE_INCLUDE_DEPENDS
-  class_loader
-  geometric_shapes
-  interactive_markers
-  moveit_ros_planning
-  moveit_ros_planning_interface
-  moveit_msgs
-  moveit_core
-  moveit_ros_warehouse
-  octomap_msgs
-  moveit_ros_robot_interaction
-  object_recognition_msgs
-  pluginlib
-  rclcpp
-  rclcpp_action
-  rclpy
-  rviz2
-  tf2_eigen
-  Eigen3
-  rviz_ogre_vendor
-  rviz_common
-  rviz_default_plugins
-)
+    class_loader
+    geometric_shapes
+    interactive_markers
+    moveit_ros_planning
+    moveit_ros_planning_interface
+    moveit_msgs
+    moveit_core
+    moveit_ros_warehouse
+    octomap_msgs
+    moveit_ros_robot_interaction
+    object_recognition_msgs
+    pluginlib
+    rclcpp
+    rclcpp_action
+    rclpy
+    rviz2
+    tf2_eigen
+    Eigen3
+    rviz_ogre_vendor
+    rviz_common
+    rviz_default_plugins)
 
-include_directories(rviz_plugin_render_tools/include
-                    robot_state_rviz_plugin/include
-                    planning_scene_rviz_plugin/include
-                    motion_planning_rviz_plugin/include
-                    trajectory_rviz_plugin/include
-)
+include_directories(
+  rviz_plugin_render_tools/include robot_state_rviz_plugin/include
+  planning_scene_rviz_plugin/include motion_planning_rviz_plugin/include
+  trajectory_rviz_plugin/include)
 
 add_subdirectory(rviz_plugin_render_tools)
 add_subdirectory(robot_state_rviz_plugin)
@@ -99,10 +97,14 @@ add_subdirectory(trajectory_rviz_plugin)
 
 install(DIRECTORY icons DESTINATION share/moveit_ros_visualization)
 
-pluginlib_export_plugin_description_file(rviz_common motion_planning_rviz_plugin_description.xml)
-pluginlib_export_plugin_description_file(rviz_common trajectory_rviz_plugin_description.xml)
-pluginlib_export_plugin_description_file(rviz_common planning_scene_rviz_plugin_description.xml)
-pluginlib_export_plugin_description_file(rviz_common robot_state_rviz_plugin_description.xml)
+pluginlib_export_plugin_description_file(
+  rviz_common motion_planning_rviz_plugin_description.xml)
+pluginlib_export_plugin_description_file(rviz_common
+                                         trajectory_rviz_plugin_description.xml)
+pluginlib_export_plugin_description_file(
+  rviz_common planning_scene_rviz_plugin_description.xml)
+pluginlib_export_plugin_description_file(
+  rviz_common robot_state_rviz_plugin_description.xml)
 
 install(
   TARGETS ${THIS_PACKAGE_LIBRARIES}
@@ -110,24 +112,11 @@ install(
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
   RUNTIME DESTINATION bin
-  INCLUDES DESTINATION include/moveit_ros_visualization
-)
+  INCLUDES
+  DESTINATION include/moveit_ros_visualization)
 
 ament_export_targets(moveit_ros_visualizationTargets HAS_LIBRARY_TARGET)
 ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS})
-
-if(BUILD_TESTING)
-  find_package(ament_lint_auto REQUIRED)
-
-  # These don't pass yet, disable them for now
-  set(ament_cmake_copyright_FOUND TRUE)
-  set(ament_cmake_cpplint_FOUND TRUE)
-  set(ament_cmake_flake8_FOUND TRUE)
-  set(ament_cmake_uncrustify_FOUND TRUE)
-
-  # Run all lint tests in package.xml except those listed above
-  ament_lint_auto_find_test_dependencies()
-endif()
 
 ament_package(CONFIG_EXTRAS ConfigExtras.cmake)
 

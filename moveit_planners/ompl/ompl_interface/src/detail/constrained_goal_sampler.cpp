@@ -37,17 +37,23 @@
 #include <moveit/ompl_interface/detail/constrained_goal_sampler.h>
 #include <moveit/ompl_interface/model_based_planning_context.h>
 #include <moveit/ompl_interface/detail/state_validity_checker.h>
+#include <moveit/utils/logger.hpp>
 
 #include <utility>
 
 namespace ompl_interface
 {
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.ompl_planning.constrained_goal_sampler");
-}  // namespace ompl_interface
+namespace
+{
+rclcpp::Logger getLogger()
+{
+  return moveit::getLogger("moveit.planners.ompl.constrained_goal_sampler");
+}
+}  // namespace
 
-ompl_interface::ConstrainedGoalSampler::ConstrainedGoalSampler(const ModelBasedPlanningContext* pc,
-                                                               kinematic_constraints::KinematicConstraintSetPtr ks,
-                                                               constraint_samplers::ConstraintSamplerPtr cs)
+ConstrainedGoalSampler::ConstrainedGoalSampler(const ModelBasedPlanningContext* pc,
+                                               kinematic_constraints::KinematicConstraintSetPtr ks,
+                                               constraint_samplers::ConstraintSamplerPtr cs)
   : ob::GoalLazySamples(
         pc->getOMPLSimpleSetup()->getSpaceInformation(),
         [this](const GoalLazySamples* gls, ompl::base::State* state) {
@@ -64,22 +70,20 @@ ompl_interface::ConstrainedGoalSampler::ConstrainedGoalSampler(const ModelBasedP
 {
   if (!constraint_sampler_)
     default_sampler_ = si_->allocStateSampler();
-  RCLCPP_DEBUG(LOGGER, "Constructed a ConstrainedGoalSampler instance at address %p", this);
+  RCLCPP_DEBUG(getLogger(), "Constructed a ConstrainedGoalSampler instance at address %p", this);
   startSampling();
 }
 
-bool ompl_interface::ConstrainedGoalSampler::checkStateValidity(ob::State* new_goal,
-                                                                const moveit::core::RobotState& state,
-                                                                bool verbose) const
+bool ConstrainedGoalSampler::checkStateValidity(ob::State* new_goal, const moveit::core::RobotState& state,
+                                                bool verbose) const
 {
   planning_context_->getOMPLStateSpace()->copyToOMPLState(new_goal, state);
   return static_cast<const StateValidityChecker*>(si_->getStateValidityChecker().get())->isValid(new_goal, verbose);
 }
 
-bool ompl_interface::ConstrainedGoalSampler::stateValidityCallback(ob::State* new_goal,
-                                                                   const moveit::core::RobotState* state,
-                                                                   const moveit::core::JointModelGroup* jmg,
-                                                                   const double* jpos, bool verbose) const
+bool ConstrainedGoalSampler::stateValidityCallback(ob::State* new_goal, const moveit::core::RobotState* state,
+                                                   const moveit::core::JointModelGroup* jmg, const double* jpos,
+                                                   bool verbose) const
 {
   // we copy the state to not change the seed state
   moveit::core::RobotState solution_state(*state);
@@ -88,8 +92,7 @@ bool ompl_interface::ConstrainedGoalSampler::stateValidityCallback(ob::State* ne
   return checkStateValidity(new_goal, solution_state, verbose);
 }
 
-bool ompl_interface::ConstrainedGoalSampler::sampleUsingConstraintSampler(const ob::GoalLazySamples* gls,
-                                                                          ob::State* new_goal)
+bool ConstrainedGoalSampler::sampleUsingConstraintSampler(const ob::GoalLazySamples* gls, ob::State* new_goal)
 {
   unsigned int max_attempts = planning_context_->getMaximumGoalSamplingAttempts();
   unsigned int attempts_so_far = gls->samplingAttemptsCount();
@@ -144,9 +147,9 @@ bool ompl_interface::ConstrainedGoalSampler::sampleUsingConstraintSampler(const 
           if (!warned_invalid_samples_ && invalid_sampled_constraints_ >= (attempts_so_far * 8) / 10)
           {
             warned_invalid_samples_ = true;
-            RCLCPP_WARN(LOGGER, "More than 80%% of the sampled goal states "
-                                "fail to satisfy the constraints imposed on the goal sampler. "
-                                "Is the constrained sampler working correctly?");
+            RCLCPP_WARN(getLogger(), "More than 80%% of the sampled goal states "
+                                     "fail to satisfy the constraints imposed on the goal sampler. "
+                                     "Is the constrained sampler working correctly?");
           }
         }
       }
@@ -164,3 +167,5 @@ bool ompl_interface::ConstrainedGoalSampler::sampleUsingConstraintSampler(const 
   }
   return false;
 }
+
+}  // namespace ompl_interface

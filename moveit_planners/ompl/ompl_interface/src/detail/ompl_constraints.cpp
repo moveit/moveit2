@@ -38,13 +38,20 @@
 #include <iterator>
 
 #include <moveit/ompl_interface/detail/ompl_constraints.h>
+#include <moveit/utils/logger.hpp>
 
 #include <tf2_eigen/tf2_eigen.hpp>
 
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_planners_ompl.ompl_constraints");
-
 namespace ompl_interface
 {
+namespace
+{
+rclcpp::Logger getLogger()
+{
+  return moveit::getLogger("moveit.planners.ompl.constraints");
+}
+}  // namespace
+
 Bounds::Bounds() : size_(0)
 {
 }
@@ -173,7 +180,7 @@ Eigen::MatrixXd BaseConstraint::robotGeometricJacobian(const Eigen::Ref<const Ei
 
 Eigen::VectorXd BaseConstraint::calcError(const Eigen::Ref<const Eigen::VectorXd>& /*x*/) const
 {
-  RCLCPP_WARN_STREAM(LOGGER,
+  RCLCPP_WARN_STREAM(getLogger(),
                      "BaseConstraint: Constraint method calcError was not overridden, so it should not be used.");
   return Eigen::VectorXd::Zero(getCoDimension());
 }
@@ -181,7 +188,7 @@ Eigen::VectorXd BaseConstraint::calcError(const Eigen::Ref<const Eigen::VectorXd
 Eigen::MatrixXd BaseConstraint::calcErrorJacobian(const Eigen::Ref<const Eigen::VectorXd>& /*x*/) const
 {
   RCLCPP_WARN_STREAM(
-      LOGGER, "BaseConstraint: Constraint method calcErrorJacobian was not overridden, so it should not be used.");
+      getLogger(), "BaseConstraint: Constraint method calcErrorJacobian was not overridden, so it should not be used.");
   return Eigen::MatrixXd::Zero(getCoDimension(), n_);
 }
 
@@ -242,7 +249,7 @@ void EqualityPositionConstraint::parseConstraintMsg(const moveit_msgs::msg::Cons
       if (dims.at(i) < getTolerance())
       {
         RCLCPP_ERROR_STREAM(
-            LOGGER,
+            getLogger(),
             "Dimension: " << i
                           << " of position constraint is smaller than the tolerance used to evaluate the constraints. "
                              "This will make all states invalid and planning will fail. Please use a value between: "
@@ -364,48 +371,65 @@ ompl::base::ConstraintPtr createOMPLConstraints(const moveit::core::RobotModelCo
                                                 const std::string& group,
                                                 const moveit_msgs::msg::Constraints& constraints)
 {
-  // TODO(bostoncleek): does this reach the end w/o a return ?
-
-  const std::size_t num_dofs = robot_model->getJointModelGroup(group)->getVariableCount();
-  const std::size_t num_pos_con = constraints.position_constraints.size();
-  const std::size_t num_ori_con = constraints.orientation_constraints.size();
-
   // This factory method contains template code to support position and/or orientation constraints.
   // If the specified constraints are invalid, a nullptr is returned.
   std::vector<ompl::base::ConstraintPtr> ompl_constraints;
-  if (num_pos_con > 1)
+  const std::size_t num_dofs = robot_model->getJointModelGroup(group)->getVariableCount();
+
+  // Parse Position Constraints
+  if (!constraints.position_constraints.empty())
   {
-    RCLCPP_WARN(LOGGER, "Only a single position constraint is supported. Using the first one.");
-  }
-  if (num_ori_con > 1)
-  {
-    RCLCPP_WARN(LOGGER, "Only a single orientation constraint is supported. Using the first one.");
-  }
-  if (num_pos_con > 0)
-  {
-    BaseConstraintPtr pos_con;
-    if (constraints.name == "use_equality_constraints")
+    if (constraints.position_constraints.size() > 1)
     {
-      pos_con = std::make_shared<EqualityPositionConstraint>(robot_model, group, num_dofs);
+      RCLCPP_WARN(getLogger(), "Only a single position constraint is supported. Using the first one.");
+    }
+
+    const auto& primitives = constraints.position_constraints.at(0).constraint_region.primitives;
+    if (primitives.size() > 1)
+    {
+      RCLCPP_WARN(getLogger(), "Only a single position primitive is supported. Using the first one.");
+    }
+    if (primitives.empty() || primitives.at(0).type != shape_msgs::msg::SolidPrimitive::BOX)
+    {
+      RCLCPP_ERROR(getLogger(), "Unable to plan with the requested position constraint. "
+                                "Only BOX primitive shapes are supported as constraint region.");
     }
     else
     {
-      pos_con = std::make_shared<BoxConstraint>(robot_model, group, num_dofs);
+      BaseConstraintPtr pos_con;
+      if (constraints.name == "use_equality_constraints")
+      {
+        pos_con = std::make_shared<EqualityPositionConstraint>(robot_model, group, num_dofs);
+      }
+      else
+      {
+        pos_con = std::make_shared<BoxConstraint>(robot_model, group, num_dofs);
+      }
+      pos_con->init(constraints);
+      ompl_constraints.emplace_back(pos_con);
     }
-    pos_con->init(constraints);
-    ompl_constraints.emplace_back(pos_con);
   }
-  if (num_ori_con > 0)
+
+  // Parse Orientation Constraints
+  if (!constraints.orientation_constraints.empty())
   {
+    if (constraints.orientation_constraints.size() > 1)
+    {
+      RCLCPP_WARN(getLogger(), "Only a single orientation constraint is supported. Using the first one.");
+    }
+
     auto ori_con = std::make_shared<OrientationConstraint>(robot_model, group, num_dofs);
     ori_con->init(constraints);
     ompl_constraints.emplace_back(ori_con);
   }
-  if (num_pos_con < 1 && num_ori_con < 1)
+
+  // Check if we have any constraints to plan with
+  if (ompl_constraints.empty())
   {
-    RCLCPP_ERROR(LOGGER, "No path constraints found in planning request.");
+    RCLCPP_ERROR(getLogger(), "Failed to parse any supported path constraints from planning request.");
     return nullptr;
   }
+
   return std::make_shared<ompl::base::ConstraintIntersection>(num_dofs, ompl_constraints);
 }
 }  // namespace ompl_interface
