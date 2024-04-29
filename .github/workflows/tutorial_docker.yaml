@@ -53,7 +53,7 @@ jobs:
         uses: reproducible-containers/buildkit-cache-dance@v3.1.0
         with:
           cache-source: .ccache
-          cache-target: /root/.ccache/
+          cache-map: /root/.ccache/
       - name: Build and Push
         uses: docker/build-push-action@v5
         with:
