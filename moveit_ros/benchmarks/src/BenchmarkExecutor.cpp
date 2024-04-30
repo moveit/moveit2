@@ -43,13 +43,10 @@
 #include <tf2_eigen/tf2_eigen.hpp>
 #include <moveit/utils/logger.hpp>
 
-// TODO(henningkayser): Switch to boost/timer/progress_display.hpp with Boost 1.72
-// boost/progress.hpp is deprecated and will be replaced by boost/timer/progress_display.hpp in Boost 1.72.
-// Until then we need to suppress the deprecation warning.
 #define BOOST_ALLOW_DEPRECATED_HEADERS
 #include <boost/regex.hpp>
-#include <boost/progress.hpp>
 #undef BOOST_ALLOW_DEPRECATED_HEADERS
+#include <boost/timer/progress_display.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <math.h>
 #include <limits>
@@ -776,7 +773,7 @@ void BenchmarkExecutor::runBenchmark(moveit_msgs::msg::MotionPlanRequest request
   }
   num_planners += options.parallel_planning_pipelines.size();
 
-  boost::progress_display progress(num_planners * options.runs, std::cout);
+  boost::timer::progress_display progress(num_planners * options.runs, std::cout);
 
   // Iterate through all planning pipelines
   auto planning_pipelines = moveit_cpp_->getPlanningPipelines();
