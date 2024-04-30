@@ -410,4 +410,13 @@ std::ostream& operator<<(std::ostream& out, const RobotTrajectory& trajectory);
 /// or nullopt if it is not possible to calculate the density
 [[nodiscard]] std::optional<double> waypointDensity(const RobotTrajectory& trajectory);
 
+/// \brief Converts a RobotTrajectory to a JointTrajectory message
+//  \param[in] trajectory Given robot trajectory
+//  \param[in] include_mdof_joints Treat Multi-DOF variables as joints, e.g. position/x position/y position/theta
+//  \param[in] joint_filter Exclude joints with the provided names
+//  \return JointTrajectory message including all waypoints
+//  or nullopt if the provided RobotTrajectory or RobotModel is empty
+[[nodiscard]] std::optional<trajectory_msgs::msg::JointTrajectory>
+toJointTrajectory(const RobotTrajectory& trajectory, bool include_mdof_joints = false,
+                  const std::vector<std::string>& joint_filter = {});
 }  // namespace robot_trajectory
