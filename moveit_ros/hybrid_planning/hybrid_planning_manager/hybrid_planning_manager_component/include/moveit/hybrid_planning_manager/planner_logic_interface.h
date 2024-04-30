@@ -40,8 +40,8 @@
 
 #include <rclcpp/rclcpp.hpp>
 #include <moveit_msgs/msg/move_it_error_codes.hpp>
+#include <moveit/utils/moveit_error_code.h>
 #include <moveit/hybrid_planning_manager/hybrid_planning_events.h>
-#include <moveit/hybrid_planning_manager/moveit_error_code_interface.h>
 
 namespace moveit::hybrid_planning
 {
@@ -100,7 +100,7 @@ struct ReactionResult
   std::string error_message;
 
   // Error code
-  MoveItErrorCode error_code;
+  moveit::core::MoveItErrorCode error_code;
 
   // Action to that needs to be performed by the HP manager
   HybridPlanningAction action;
