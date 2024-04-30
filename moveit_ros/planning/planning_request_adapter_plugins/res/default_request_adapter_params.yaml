@@ -8,5 +8,5 @@ default_request_adapter_parameters:
   default_workspace_bounds: {
     type: double,
     description: "ValidateWorkspaceBounds: Default workspace bounds representing a cube around the robot's origin whose edge length this parameter defines.",
-    default_value: 10.0,
+    default_value: 1000000000000.0, # TODO ideally, this should be inf or 1e308, but this notation is not working in version 0.3.8
   }
