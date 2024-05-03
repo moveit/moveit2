@@ -1,6 +1,5 @@
 add_library(moveit_cpp SHARED src/moveit_cpp.cpp src/planning_component.cpp)
-set_target_properties(moveit_cpp PROPERTIES VERSION
-                                            "${${PROJECT_NAME}_VERSION}")
+set_target_properties(moveit_cpp PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
 ament_target_dependencies(moveit_cpp rclcpp moveit_core)
 target_link_libraries(
   moveit_cpp moveit_planning_scene_monitor moveit_planning_pipeline
