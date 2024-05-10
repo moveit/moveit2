@@ -77,11 +77,6 @@ CollisionCheck::CollisionCheck(const rclcpp::Node::SharedPtr& node, const ServoP
   current_state_ = planning_scene_monitor_->getStateMonitor()->getCurrentState();
 }
 
-planning_scene_monitor::LockedPlanningSceneRO CollisionCheck::getLockedPlanningSceneRO() const
-{
-  return planning_scene_monitor::LockedPlanningSceneRO(planning_scene_monitor_);
-}
-
 void CollisionCheck::start()
 {
   timer_ = node_->create_wall_timer(std::chrono::duration<double>(period_), [this]() { return run(); });
@@ -101,16 +96,17 @@ void CollisionCheck::run()
 
   // Do a timer-safe distance-based collision detection
   collision_result_.clear();
-  getLockedPlanningSceneRO()->getCollisionEnv()->checkRobotCollision(collision_request_, collision_result_,
-                                                                     *current_state_);
+  auto locked_scene = planning_scene_monitor::LockedPlanningSceneRO(planning_scene_monitor_);
+  locked_scene->getCollisionEnv()->checkRobotCollision(collision_request_, collision_result_, *current_state_,
+                                                       locked_scene->getAllowedCollisionMatrix());
   scene_collision_distance_ = collision_result_.distance;
   collision_detected_ |= collision_result_.collision;
   collision_result_.print();
 
   collision_result_.clear();
   // Self-collisions and scene collisions are checked separately so different thresholds can be used
-  getLockedPlanningSceneRO()->getCollisionEnvUnpadded()->checkSelfCollision(
-      collision_request_, collision_result_, *current_state_, getLockedPlanningSceneRO()->getAllowedCollisionMatrix());
+  locked_scene->getCollisionEnvUnpadded()->checkSelfCollision(collision_request_, collision_result_, *current_state_,
+                                                              locked_scene->getAllowedCollisionMatrix());
   self_collision_distance_ = collision_result_.distance;
   collision_detected_ |= collision_result_.collision;
   collision_result_.print();
