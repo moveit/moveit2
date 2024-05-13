@@ -56,7 +56,7 @@
 #include <rviz_default_plugins/robot/robot_link.hpp>
 #include <rviz_common/window_manager_interface.hpp>
 
-#include <string> 
+#include <string>
 
 using namespace std::placeholders;
 
@@ -476,11 +476,11 @@ void TrajectoryVisualization::update(float wall_dt, float sim_dt)
       current_state_ = 0;
       current_state_time_ = 0.0;
     }
-    else 
+    else
     {  // Handle the update based on the time elapsed
       float dt;
       float tm = getStateDisplayTime();
-      
+
       if (use_sim_time_property_->getBool())
       {
         dt = sim_dt;
@@ -500,13 +500,13 @@ void TrajectoryVisualization::update(float wall_dt, float sim_dt)
       {
         for (current_state_ = current_state_; current_state_ < waypoint_count; ++current_state_)
         {
-          float state_duration = displaying_trajectory_message_->getWayPointDurationFromPrevious(current_state_+1);
+          float state_duration = displaying_trajectory_message_->getWayPointDurationFromPrevious(current_state_ + 1);
           // If we are on the last state, show it for a fixed amount of time before looping.
           // getWayPointDurationFromPrevious returns 0 for the last state, so we need to handle it separately.
           // Its our choice to specify either the start state display duration or the end state display duration.
           if (current_state_ == waypoint_count - 1)
             state_duration = 1.0;
-          if (current_state_time_ < state_duration) 
+          if (current_state_time_ < state_duration)
             break;
           current_state_time_ -= state_duration;
         }
