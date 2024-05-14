@@ -498,7 +498,7 @@ void TrajectoryVisualization::update(float wall_dt, float sim_dt)
       current_state_time_ += dt;
       if (tm < 0.0)
       {
-        for (current_state_ = current_state_; current_state_ < waypoint_count; ++current_state_)
+        for (; current_state_ < waypoint_count; ++current_state_)
         {
           float state_duration = displaying_trajectory_message_->getWayPointDurationFromPrevious(current_state_ + 1);
           // If we are on the last state, show it for a fixed amount of time before looping.
