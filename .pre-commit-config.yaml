@@ -33,7 +33,7 @@ repos:
       - id: trailing-whitespace
 
   - repo: https://github.com/psf/black
-    rev: 23.10.0
+    rev: 24.4.2
     hooks:
       - id: black
 
@@ -54,7 +54,7 @@ repos:
         exclude: CHANGELOG.rst
 
   - repo: https://github.com/cheshirekow/cmake-format-precommit
-    rev: v0.6.10
+    rev: v0.6.13
     hooks:
       - id: cmake-format
       - id: cmake-lint
