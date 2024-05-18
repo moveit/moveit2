@@ -2295,6 +2295,10 @@ void MoveGroupInterface::setSupportSurfaceName(const std::string& name)
   impl_->setSupportSurfaceName(name);
 }
 
+rclcpp::Node::SharedPtr getNodeHandle() {
+  return impl_->node_;
+}
+
 const std::string& MoveGroupInterface::getPlanningFrame() const
 {
   return impl_->getRobotModel()->getModelFrame();
