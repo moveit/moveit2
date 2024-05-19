@@ -2295,7 +2295,8 @@ void MoveGroupInterface::setSupportSurfaceName(const std::string& name)
   impl_->setSupportSurfaceName(name);
 }
 
-rclcpp::Node::SharedPtr getNodeHandle() {
+const rclcpp::Node::SharedPtr& MoveGroupInterface::getNode() const
+{
   return impl_->node_;
 }
 
