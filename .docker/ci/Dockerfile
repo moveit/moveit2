@@ -1,4 +1,4 @@
-# ghcr.io/ros-planning/moveit2:${ROS_DISTRO}-ci
+# ghcr.io/moveit/moveit2:${ROS_DISTRO}-ci
 # ROS base image augmented with all MoveIt dependencies to use for CI
 
 ARG ROS_DISTRO=rolling
