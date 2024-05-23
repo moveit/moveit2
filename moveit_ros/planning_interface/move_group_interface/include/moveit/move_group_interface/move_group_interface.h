@@ -164,7 +164,7 @@ public:
   moveit::core::RobotModelConstPtr getRobotModel() const;
 
   /** \brief Get the ROS node handle of this instance operates on */
-  rclcpp::Node::SharedPtr getNodeHandle();
+  const rclcpp::Node::SharedPtr& getNode() const;
 
   /** \brief Get the name of the frame in which the robot is planning */
   const std::string& getPlanningFrame() const;

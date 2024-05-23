@@ -67,14 +67,6 @@ ServoNode::ServoNode(const rclcpp::NodeOptions& options)
 {
   moveit::setNodeLoggerName(node_->get_name());
 
-  if (!options.use_intra_process_comms())
-  {
-    RCLCPP_WARN_STREAM(node_->get_logger(),
-                       "Intra-process communication is disabled, consider enabling it by adding: "
-                       "\nextra_arguments=[{'use_intra_process_comms' : True}]\nto the Servo composable node "
-                       "in the launch file");
-  }
-
   // Configure SCHED_FIFO and priority
   if (realtime_tools::configure_sched_fifo(servo_params_.thread_priority))
   {
