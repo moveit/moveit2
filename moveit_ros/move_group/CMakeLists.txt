@@ -95,7 +95,7 @@ pluginlib_export_plugin_description_file(
 if(BUILD_TESTING)
   # TODO(henningkayser): enable rostests find_package(rostest REQUIRED) #
   # rostest under development in ROS2
-  # https://github.com/ros-planning/moveit2/issues/23 this test is flaky
+  # https://github.com/moveit/moveit2/issues/23 this test is flaky
   # add_rostest(test/test_cancel_before_plan_execution.test)
   # add_rostest(test/test_check_state_validity_in_empty_scene.test)
 endif()

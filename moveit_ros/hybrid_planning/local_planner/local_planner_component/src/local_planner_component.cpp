@@ -318,7 +318,7 @@ void LocalPlannerComponent::executeIteration()
       }
 
       // Use a configurable message interface like MoveIt servo
-      // (See https://github.com/ros-planning/moveit2/blob/main/moveit_ros/moveit_servo/src/servo_calcs.cpp)
+      // (See https://github.com/moveit/moveit2/blob/main/moveit_ros/moveit_servo/src/servo_calcs.cpp)
       // Format outgoing msg in the right format
       // (trajectory_msgs/JointTrajectory or joint positions/velocities in form of std_msgs/Float64MultiArray).
       if (config_->local_solution_topic_type == "trajectory_msgs/JointTrajectory")
