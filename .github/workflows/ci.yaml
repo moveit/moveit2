@@ -90,7 +90,7 @@ jobs:
       - uses: testspace-com/setup-testspace@v1
         if: github.repository == 'moveit/moveit2'
         with:
-          domain: ros-planning
+          domain: moveit
       - name: Get latest release date for rosdistro
         id: rosdistro_release_date
         uses: JafarAbdi/latest-rosdistro-release-date-action@main
