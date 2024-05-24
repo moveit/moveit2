@@ -11,8 +11,8 @@
   <license>Apache 2.0</license>
 
   <url type="website">http://moveit.ros.org</url>
-  <url type="bugtracker">https://github.com/ros-planning/moveit-resources/issues</url>
-  <url type="repository">https://github.com/ros-planning/moveit-resources</url>
+  <url type="bugtracker">https://github.com/moveit/moveit-resources/issues</url>
+  <url type="repository">https://github.com/moveit/moveit-resources</url>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
 

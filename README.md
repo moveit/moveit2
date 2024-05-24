@@ -1,13 +1,13 @@
 <img src="https://moveit.ros.org/assets/logo/moveit_logo-black.png" alt="MoveIt Logo" width="200"/>
 
-The [MoveIt Motion Planning Framework for ROS 2](http://moveit.ros.org). For the ROS 1 repository see [MoveIt 1](https://github.com/ros-planning/moveit). For the commercially supported version see [MoveIt Pro](http://picknik.ai/pro).
+The [MoveIt Motion Planning Framework for ROS 2](http://moveit.ros.org). For the ROS 1 repository see [MoveIt 1](https://github.com/moveit/moveit). For the commercially supported version see [MoveIt Pro](http://picknik.ai/pro).
 
 *Easy-to-use open source robotics manipulation platform for developing commercial applications, prototyping designs, and benchmarking algorithms.*
 
 ## Continuous Integration Status
 
-[![Formatting (pre-commit)](https://github.com/ros-planning/moveit2/actions/workflows/format.yaml/badge.svg?branch=main)](https://github.com/ros-planning/moveit2/actions/workflows/format.yaml?query=branch%3Amain)
-[![CI (Rolling and Humble)](https://github.com/ros-planning/moveit2/actions/workflows/ci.yaml/badge.svg?branch=main)](https://github.com/ros-planning/moveit2/actions/workflows/ci.yaml?query=branch%3Amain)
+[![Formatting (pre-commit)](https://github.com/moveit/moveit2/actions/workflows/format.yaml/badge.svg?branch=main)](https://github.com/moveit/moveit2/actions/workflows/format.yaml?query=branch%3Amain)
+[![CI (Rolling and Humble)](https://github.com/moveit/moveit2/actions/workflows/ci.yaml/badge.svg?branch=main)](https://github.com/moveit/moveit2/actions/workflows/ci.yaml?query=branch%3Amain)
 [![Code Coverage](https://codecov.io/gh/ros-planning/moveit2/branch/main/graph/badge.svg?token=W7uHKcY0ly)](https://codecov.io/gh/ros-planning/moveit2)
 
 ## Getting Started

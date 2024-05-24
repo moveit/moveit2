@@ -1,4 +1,4 @@
-# ghcr.io/ros-planning/moveit2:${ROS_DISTRO}-release
+# ghcr.io/moveit/moveit2:${ROS_DISTRO}-release
 # Full debian-based install of MoveIt using apt-get
 
 ARG ROS_DISTRO=rolling

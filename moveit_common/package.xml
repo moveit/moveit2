@@ -11,8 +11,8 @@
   <license>BSD-3-Clause</license>
 
   <url type="website">http://moveit.ros.org</url>
-  <url type="bugtracker">https://github.com/ros-planning/moveit2/issues</url>
-  <url type="repository">https://github.com/ros-planning/moveit2</url>
+  <url type="bugtracker">https://github.com/moveit/moveit2/issues</url>
+  <url type="repository">https://github.com/moveit/moveit2</url>
 
   <author email="lior.lustgarten@microsoft.com">Lior Lustgarten</author>
 
