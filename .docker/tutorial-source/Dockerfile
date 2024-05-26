@@ -30,6 +30,8 @@ RUN --mount=type=cache,target=/root/.ccache/,sharing=locked \
         rosdep update && \
         DEBIAN_FRONTEND=noninteractive \
         rosdep install -y --from-paths src --ignore-src --rosdistro ${ROS_DISTRO} --as-root=apt:false && \
+        # HACK: Remove ROS' octomap to avoid conflicts with system's octomap
+        apt-get remove -y ros-${ROS_DISTRO}-octomap && \
         rm -rf /var/lib/apt/lists/* && \
         # Build the workspace
         colcon build \
