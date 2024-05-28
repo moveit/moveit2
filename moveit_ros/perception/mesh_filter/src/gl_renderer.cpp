@@ -387,8 +387,7 @@ void mesh_filter::GLRenderer::createGLContext()
 
   if (context_it == s_context.end())
   {
-
-    s_context.insert({thread_id, std::pair<unsigned, GLuint>(1, 0)});
+    s_context.insert({ thread_id, std::pair<unsigned, GLuint>(1, 0) });
 
     glutInitWindowPosition(glutGet(GLUT_SCREEN_WIDTH) + 30000, 0);
     glutInitWindowSize(1, 1);
