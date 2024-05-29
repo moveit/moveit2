@@ -212,6 +212,7 @@ PlanningScene::PlanningScene(const PlanningSceneConstPtr& parent) : parent_(pare
 
   setStateFeasibilityPredicate(parent->getStateFeasibilityPredicate());
   setMotionFeasibilityPredicate(parent->getMotionFeasibilityPredicate());
+  setCollisionObjectUpdateCallback(parent_->current_world_object_update_callback_);
 
   // maintain a separate world.  Copy on write ensures that most of the object
   // info is shared until it is modified.
@@ -1206,6 +1207,8 @@ void PlanningScene::decoupleParent()
         (object_types_.value())[it->first] = it->second;
     }
   }
+
+  setCollisionObjectUpdateCallback(nullptr);
 
   parent_.reset();
 }
