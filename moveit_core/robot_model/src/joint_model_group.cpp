@@ -831,5 +831,41 @@ bool JointModelGroup::isValidVelocityMove(const double* from_joint_pose, const d
 
   return true;
 }
+
+std::pair<Eigen::VectorXd, Eigen::VectorXd> getLowerAndUpperLimits(const moveit::core::JointModelGroup& group)
+{
+  // Get the group joints lower/upper position limits.
+  Eigen::VectorXd lower_limits(group.getActiveVariableCount());
+  Eigen::VectorXd upper_limits(group.getActiveVariableCount());
+  const moveit::core::JointBoundsVector& group_bounds = group.getActiveJointModelsBounds();
+  int joint_index = 0;
+  for (const moveit::core::JointModel::Bounds* joint_bounds : group_bounds)
+  {
+    for (const moveit::core::VariableBounds& variable_bounds : *joint_bounds)
+    {
+      lower_limits[joint_index] = variable_bounds.min_position_;
+      upper_limits[joint_index] = variable_bounds.max_position_;
+      joint_index++;
+    }
+  }
+  return { lower_limits, upper_limits };
+}
+
+std::pair<Eigen::VectorXd, Eigen::VectorXd>
+getMaximumVelocitiesAndAccelerations(const moveit::core::JointModelGroup& group)
+{
+  const std::size_t n_dofs = group.getActiveVariableCount();
+  Eigen::VectorXd max_joint_velocities = Eigen::VectorXd::Constant(n_dofs, 0.0);
+  Eigen::VectorXd max_joint_accelerations = Eigen::VectorXd::Constant(n_dofs, 0.0);
+  const moveit::core::JointBoundsVector& bounds = group.getActiveJointModelsBounds();
+  assert(bounds.size() == n_dofs);
+  for (std::size_t i = 0; i < bounds.size(); ++i)
+  {
+    assert(bounds[i]->size() == 1);  // single-variable joints.
+    max_joint_velocities[i] = std::min(-bounds[i]->at(0).min_velocity_, bounds[i]->at(0).max_velocity_);
+    max_joint_accelerations[i] = std::min(-bounds[i]->at(0).min_acceleration_, bounds[i]->at(0).max_acceleration_);
+  }
+  return { max_joint_velocities, max_joint_accelerations };
+}
 }  // end of namespace core
 }  // end of namespace moveit
