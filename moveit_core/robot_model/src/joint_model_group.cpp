@@ -858,7 +858,7 @@ std::pair<Eigen::VectorXd, Eigen::VectorXd> JointModelGroup::getMaxVelocitiesAnd
   {
     // TODO(sjahr) Support multiple variables
     RCLCPP_ERROR(getLogger(), "Number of active joint models does not match number of active joint model bounds. "
-                              "Returning bound vectors.with zeros");
+                              "Returning bound vectors with zeros");
     return { max_joint_velocities, max_joint_accelerations };
   }
   for (std::size_t i = 0; i < active_joint_models_bounds_.size(); ++i)

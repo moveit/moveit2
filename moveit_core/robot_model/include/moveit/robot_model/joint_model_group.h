@@ -587,7 +587,7 @@ public:
                                    std::vector<size_t>& joint_bijection) const;
 
   /**
-   * @brief Get the lower and upper position limits of a given joint group.
+   * @brief Get the lower and upper position limits of all active variables in the group.
    *
    * @return std::pair<Eigen::VectorXd, Eigen::VectorXd> Containing the joint limits
    */
@@ -596,7 +596,7 @@ public:
   /**
    * @brief Gets the pair of maximum joint velocities/accelerations for a given group. Asserts that the group contains
    * only single-variable joints,
-   *
+   * @details In case of asymmetric velocity or acceleration limits, this function will return the most limiting component.
    * @return std::pair<Eigen::VectorXd, Eigen::VectorXd> Containing the velocity and acceleration limits
    */
   [[nodiscard]] std::pair<Eigen::VectorXd, Eigen::VectorXd> getMaxVelocitiesAndAccelerationBounds() const;
