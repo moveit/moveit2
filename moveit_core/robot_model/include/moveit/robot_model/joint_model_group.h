@@ -599,7 +599,7 @@ public:
    *
    * @return std::pair<Eigen::VectorXd, Eigen::VectorXd> Containing the velocity and acceleration limits
    */
-  [[nodiscard]] std::pair<Eigen::VectorXd, Eigen::VectorXd> getMaximumVelocitiesAndAccelerations();
+  [[nodiscard]] std::pair<Eigen::VectorXd, Eigen::VectorXd> getMaxVelocitiesAndAccelerationBounds();
 
 protected:
   /** \brief Update the variable values for the state of a group with respect to the mimic joints. This only updates

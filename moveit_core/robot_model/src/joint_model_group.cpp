@@ -850,7 +850,7 @@ std::pair<Eigen::VectorXd, Eigen::VectorXd> JointModelGroup::getLowerAndUpperLim
   return { lower_limits, upper_limits };
 }
 
-std::pair<Eigen::VectorXd, Eigen::VectorXd> JointModelGroup::getMaximumVelocitiesAndAccelerations()
+std::pair<Eigen::VectorXd, Eigen::VectorXd> JointModelGroup::getMaxVelocitiesAndAccelerationBounds()
 {
   Eigen::VectorXd max_joint_velocities = Eigen::VectorXd::Constant(active_variable_count_, 0.0);
   Eigen::VectorXd max_joint_accelerations = Eigen::VectorXd::Constant(active_variable_count_, 0.0);
