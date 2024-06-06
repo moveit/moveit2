@@ -832,7 +832,7 @@ bool JointModelGroup::isValidVelocityMove(const double* from_joint_pose, const d
   return true;
 }
 
-std::pair<Eigen::VectorXd, Eigen::VectorXd> JointModelGroup::getLowerAndUpperLimits()
+std::pair<Eigen::VectorXd, Eigen::VectorXd> JointModelGroup::getLowerAndUpperLimits() const
 {
   // Get the group joints lower/upper position limits.
   Eigen::VectorXd lower_limits(active_variable_count_);
@@ -850,7 +850,7 @@ std::pair<Eigen::VectorXd, Eigen::VectorXd> JointModelGroup::getLowerAndUpperLim
   return { lower_limits, upper_limits };
 }
 
-std::pair<Eigen::VectorXd, Eigen::VectorXd> JointModelGroup::getMaxVelocitiesAndAccelerationBounds()
+std::pair<Eigen::VectorXd, Eigen::VectorXd> JointModelGroup::getMaxVelocitiesAndAccelerationBounds() const
 {
   Eigen::VectorXd max_joint_velocities = Eigen::VectorXd::Constant(active_variable_count_, 0.0);
   Eigen::VectorXd max_joint_accelerations = Eigen::VectorXd::Constant(active_variable_count_, 0.0);

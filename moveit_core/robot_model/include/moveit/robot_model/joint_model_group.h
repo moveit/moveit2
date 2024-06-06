@@ -591,7 +591,7 @@ public:
    *
    * @return std::pair<Eigen::VectorXd, Eigen::VectorXd> Containing the joint limits
    */
-  [[nodiscard]] std::pair<Eigen::VectorXd, Eigen::VectorXd> getLowerAndUpperLimits();
+  [[nodiscard]] std::pair<Eigen::VectorXd, Eigen::VectorXd> getLowerAndUpperLimits() const;
 
   /**
    * @brief Gets the pair of maximum joint velocities/accelerations for a given group. Asserts that the group contains
@@ -599,7 +599,7 @@ public:
    *
    * @return std::pair<Eigen::VectorXd, Eigen::VectorXd> Containing the velocity and acceleration limits
    */
-  [[nodiscard]] std::pair<Eigen::VectorXd, Eigen::VectorXd> getMaxVelocitiesAndAccelerationBounds();
+  [[nodiscard]] std::pair<Eigen::VectorXd, Eigen::VectorXd> getMaxVelocitiesAndAccelerationBounds() const;
 
 protected:
   /** \brief Update the variable values for the state of a group with respect to the mimic joints. This only updates
