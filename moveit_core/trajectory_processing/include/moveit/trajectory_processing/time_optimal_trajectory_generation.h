@@ -189,13 +189,6 @@ private:
   mutable std::list<TrajectoryStep>::const_iterator cached_trajectory_segment_;
 };
 
-/**
- * @brief Converts a `trajectory_processing::Trajectory` into a `JointTrajectory` message with a given sampling rate.
- */
-[[nodiscard]] trajectory_msgs::msg::JointTrajectory
-createTrajectoryMessage(const std::vector<std::string>& joint_names,
-                        const trajectory_processing::Trajectory& trajectory, const int sampling_rate);
-
 MOVEIT_CLASS_FORWARD(TimeOptimalTrajectoryGeneration);
 class TimeOptimalTrajectoryGeneration : public TimeParameterization
 {

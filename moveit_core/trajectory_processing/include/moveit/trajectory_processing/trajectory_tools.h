@@ -38,6 +38,7 @@
 
 #include <moveit_msgs/msg/robot_trajectory.hpp>
 #include <moveit/robot_trajectory/robot_trajectory.h>
+#include <moveit/trajectory_processing/time_optimal_trajectory_generation.h>
 
 namespace trajectory_processing
 {
@@ -79,4 +80,11 @@ bool applyTOTGTimeParameterization(robot_trajectory::RobotTrajectory& trajectory
 bool applyRuckigSmoothing(robot_trajectory::RobotTrajectory& trajectory, double velocity_scaling_factor,
                           double acceleration_scaling_factor, bool mitigate_overshoot = false,
                           double overshoot_threshold = 0.01);
+
+/**
+ * @brief Converts a `trajectory_processing::Trajectory` into a `JointTrajectory` message with a given sampling rate.
+ */
+[[nodiscard]] trajectory_msgs::msg::JointTrajectory
+createTrajectoryMessage(const std::vector<std::string>& joint_names,
+                        const trajectory_processing::Trajectory& trajectory, const int sampling_rate);
 }  // namespace trajectory_processing

@@ -832,14 +832,13 @@ bool JointModelGroup::isValidVelocityMove(const double* from_joint_pose, const d
   return true;
 }
 
-std::pair<Eigen::VectorXd, Eigen::VectorXd> getLowerAndUpperLimits(const moveit::core::JointModelGroup& group)
+std::pair<Eigen::VectorXd, Eigen::VectorXd> JointModelGroup::getLowerAndUpperLimits()
 {
   // Get the group joints lower/upper position limits.
-  Eigen::VectorXd lower_limits(group.getActiveVariableCount());
-  Eigen::VectorXd upper_limits(group.getActiveVariableCount());
-  const moveit::core::JointBoundsVector& group_bounds = group.getActiveJointModelsBounds();
+  Eigen::VectorXd lower_limits(active_variable_count_);
+  Eigen::VectorXd upper_limits(active_variable_count_);
   int joint_index = 0;
-  for (const moveit::core::JointModel::Bounds* joint_bounds : group_bounds)
+  for (const moveit::core::JointModel::Bounds* joint_bounds : active_joint_models_bounds_)
   {
     for (const moveit::core::VariableBounds& variable_bounds : *joint_bounds)
     {
@@ -851,19 +850,31 @@ std::pair<Eigen::VectorXd, Eigen::VectorXd> getLowerAndUpperLimits(const moveit:
   return { lower_limits, upper_limits };
 }
 
-std::pair<Eigen::VectorXd, Eigen::VectorXd>
-getMaximumVelocitiesAndAccelerations(const moveit::core::JointModelGroup& group)
+std::pair<Eigen::VectorXd, Eigen::VectorXd> JointModelGroup::getMaximumVelocitiesAndAccelerations()
 {
-  const std::size_t n_dofs = group.getActiveVariableCount();
-  Eigen::VectorXd max_joint_velocities = Eigen::VectorXd::Constant(n_dofs, 0.0);
-  Eigen::VectorXd max_joint_accelerations = Eigen::VectorXd::Constant(n_dofs, 0.0);
-  const moveit::core::JointBoundsVector& bounds = group.getActiveJointModelsBounds();
-  assert(bounds.size() == n_dofs);
-  for (std::size_t i = 0; i < bounds.size(); ++i)
+  Eigen::VectorXd max_joint_velocities = Eigen::VectorXd::Constant(active_variable_count_, 0.0);
+  Eigen::VectorXd max_joint_accelerations = Eigen::VectorXd::Constant(active_variable_count_, 0.0);
+  if (active_joint_models_bounds_.size() != active_variable_count_)
   {
-    assert(bounds[i]->size() == 1);  // single-variable joints.
-    max_joint_velocities[i] = std::min(-bounds[i]->at(0).min_velocity_, bounds[i]->at(0).max_velocity_);
-    max_joint_accelerations[i] = std::min(-bounds[i]->at(0).min_acceleration_, bounds[i]->at(0).max_acceleration_);
+    // TODO(sjahr) Support multiple variables
+    RCLCPP_ERROR(getLogger(), "Number of active joint models does not match number of active joint model bounds. "
+                              "Returning bound vectors.with zeros");
+    return { max_joint_velocities, max_joint_accelerations };
+  }
+  for (std::size_t i = 0; i < active_joint_models_bounds_.size(); ++i)
+  {
+    if (active_joint_models_bounds_[i]->size() == 1)
+    {
+      RCLCPP_ERROR(
+          getLogger(),
+          "Joint '%li' has '%li' bounds and only joints with one bounds set are supported by this function. In "
+          "the returned vector this element will be 0.",
+          i, active_joint_models_bounds_.size());
+    }
+    max_joint_velocities[i] = std::min(-active_joint_models_bounds_[i]->at(0).min_velocity_,
+                                       active_joint_models_bounds_[i]->at(0).max_velocity_);
+    max_joint_accelerations[i] = std::min(-active_joint_models_bounds_[i]->at(0).min_acceleration_,
+                                          active_joint_models_bounds_[i]->at(0).max_acceleration_);
   }
   return { max_joint_velocities, max_joint_accelerations };
 }

@@ -1310,33 +1310,4 @@ double TimeOptimalTrajectoryGeneration::verifyScalingFactor(const double request
   }
   return scaling_factor;
 }
-
-trajectory_msgs::msg::JointTrajectory createTrajectoryMessage(const std::vector<std::string>& joint_names,
-                                                              const trajectory_processing::Trajectory& trajectory,
-                                                              const int sampling_rate)
-{
-  trajectory_msgs::msg::JointTrajectory trajectory_msg;
-  trajectory_msg.joint_names = joint_names;
-  assert(sampling_rate > 0);
-  const double time_step = 1.0 / static_cast<double>(sampling_rate);
-  const int n_samples = static_cast<int>(trajectory.getDuration() / time_step) + 1;
-  trajectory_msg.points.reserve(n_samples);
-  for (int sample = 0; sample < n_samples; ++sample)
-  {
-    const double t = sample * time_step;
-    trajectory_msgs::msg::JointTrajectoryPoint point;
-    auto position = trajectory.getPosition(t);
-    auto velocity = trajectory.getVelocity(t);
-    auto acceleration = trajectory.getAcceleration(t);
-    for (std::size_t i = 0; i < joint_names.size(); i++)
-    {
-      point.positions.push_back(position[i]);
-      point.velocities.push_back(velocity[i]);
-      point.accelerations.push_back(acceleration[i]);
-    }
-    point.time_from_start = rclcpp::Duration(std::chrono::duration<double>(t));
-    trajectory_msg.points.push_back(std::move(point));
-  }
-  return trajectory_msg;
-}
 }  // namespace trajectory_processing

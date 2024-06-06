@@ -586,6 +586,21 @@ public:
   bool computeJointVariableIndices(const std::vector<std::string>& joint_names,
                                    std::vector<size_t>& joint_bijection) const;
 
+  /**
+   * @brief Get the lower and upper position limits of a given joint group.
+   *
+   * @return std::pair<Eigen::VectorXd, Eigen::VectorXd> Containing the joint limits
+   */
+  [[nodiscard]] std::pair<Eigen::VectorXd, Eigen::VectorXd> getLowerAndUpperLimits();
+
+  /**
+   * @brief Gets the pair of maximum joint velocities/accelerations for a given group. Asserts that the group contains
+   * only single-variable joints,
+   *
+   * @return std::pair<Eigen::VectorXd, Eigen::VectorXd> Containing the velocity and acceleration limits
+   */
+  [[nodiscard]] std::pair<Eigen::VectorXd, Eigen::VectorXd> getMaximumVelocitiesAndAccelerations();
+
 protected:
   /** \brief Update the variable values for the state of a group with respect to the mimic joints. This only updates
       mimic joints that have the parent in this group. If there is a joint mimicking one that is outside the group,
@@ -754,24 +769,5 @@ protected:
   /** \brief The names of the default states specified for this group in the SRDF */
   std::vector<std::string> default_states_names_;
 };
-
-/**
- * @brief Get the lower and upper position limits of a given joint group.
- *
- * @param group Joint model group from which the limits are read
- * @return std::pair<Eigen::VectorXd, Eigen::VectorXd> Containing the joint limits
- */
-[[nodiscard]] std::pair<Eigen::VectorXd, Eigen::VectorXd>
-getLowerAndUpperLimits(const moveit::core::JointModelGroup& group);
-
-/**
- * @brief Gets the pair of maximum joint velocities/accelerations for a given group. Asserts that the group contains
- * only single-variable joints,
- *
- * @param group Joint model group from which the limits are read
- * @return std::pair<Eigen::VectorXd, Eigen::VectorXd> Containing the velocity and acceleration limits
- */
-[[nodiscard]] std::pair<Eigen::VectorXd, Eigen::VectorXd>
-getMaximumVelocitiesAndAccelerations(const moveit::core::JointModelGroup& group);
 }  // namespace core
 }  // namespace moveit
