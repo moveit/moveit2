@@ -17,7 +17,7 @@ ament_target_dependencies(
   visualization_msgs
   geometric_shapes
   tf2_eigen
-  OCTOMAP)
+  octomap)
 
 install(DIRECTORY include/ DESTINATION include/moveit_core)
 
@@ -28,5 +28,5 @@ if(BUILD_TESTING)
   target_link_libraries(test_voxel_grid moveit_distance_field)
 
   ament_add_gtest(test_distance_field test/test_distance_field.cpp)
-  target_link_libraries(test_distance_field moveit_distance_field)
+  target_link_libraries(test_distance_field moveit_distance_field octomap)
 endif()

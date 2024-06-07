@@ -26,7 +26,13 @@
   <depend>rclcpp</depend>
   <depend>moveit_core</depend>
   <depend>moveit_msgs</depend>
+  <!--
+  Temporarily disable octomap dependency because of
+  version conflict. We use liboctomap-dev provided
+  by moveit_core->libfcl-dev.
+  See https://github.com/moveit/moveit2/issues/2862
   <depend>octomap</depend>
+  -->
   <depend version_gte="1.11.2">pluginlib</depend>
   <depend>tf2_ros</depend>
   <depend>geometric_shapes</depend>

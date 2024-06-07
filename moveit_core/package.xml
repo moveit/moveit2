@@ -41,7 +41,13 @@
   <depend>libfcl-dev</depend>
   <depend>moveit_common</depend>
   <depend>moveit_msgs</depend>
+  <!--
+  Temporarily disable octomap dependency because of
+  version conflict. We use liboctomap-dev provided
+  by libfcl-dev.
+  See https://github.com/moveit/moveit2/issues/2862
   <depend>octomap</depend>
+  -->
   <depend>octomap_msgs</depend>
   <depend>osqp_vendor</depend>
   <depend>pluginlib</depend>
