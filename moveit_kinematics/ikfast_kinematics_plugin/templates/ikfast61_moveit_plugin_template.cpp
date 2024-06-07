@@ -808,10 +808,10 @@ bool IKFastKinematicsPlugin::getPositionFK(const std::vector<std::string>& link_
     return false;
   }
 
-  #pragma clang diagnostic push
-  #pragma clang diagnostic ignored "-Wno-vla-extension"
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wno-vla-extension"
   IkReal angles[num_joints_];
-  #pragma clang diagnostic pop
+#pragma clang diagnostic pop
   for (unsigned char i = 0; i < num_joints_; ++i)
     angles[i] = joint_angles[i];
 
