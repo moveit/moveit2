@@ -16,7 +16,7 @@ set_target_properties(moveit_collision_distance_field
                       PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
 
 ament_target_dependencies(moveit_collision_distance_field urdf
-                          visualization_msgs tf2_eigen geometric_shapes OCTOMAP)
+                          visualization_msgs tf2_eigen geometric_shapes octomap)
 
 target_link_libraries(
   moveit_collision_distance_field moveit_planning_scene moveit_distance_field
@@ -34,7 +34,7 @@ if(BUILD_TESTING)
   ament_add_gtest(test_collision_distance_field
                   test/test_collision_distance_field.cpp)
   ament_target_dependencies(test_collision_distance_field geometric_shapes
-                            OCTOMAP srdfdom resource_retriever)
+                            octomap srdfdom resource_retriever)
   target_link_libraries(
     test_collision_distance_field
     moveit_collision_distance_field
