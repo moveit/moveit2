@@ -192,18 +192,22 @@ public:
   unsigned int getVariableCount() const;
 
   /** \brief Get the descriptions of all planning plugins loaded by the action server */
-  bool getInterfaceDescriptions(std::vector<moveit_msgs::msg::PlannerInterfaceDescription>& desc) const;
+  bool getInterfaceDescriptions(std::vector<moveit_msgs::msg::PlannerInterfaceDescription>& desc,
+                                const rclcpp::Duration& server_timeout = rclcpp::Duration::from_seconds(-1)) const;
 
   /** \brief Get the description of the default planning plugin loaded by the action server */
-  bool getInterfaceDescription(moveit_msgs::msg::PlannerInterfaceDescription& desc) const;
+  bool getInterfaceDescription(moveit_msgs::msg::PlannerInterfaceDescription& desc,
+                               const rclcpp::Duration& server_timeout = rclcpp::Duration::from_seconds(-1)) const;
 
   /** \brief Get the planner parameters for given group and planner_id */
-  std::map<std::string, std::string> getPlannerParams(const std::string& planner_id,
-                                                      const std::string& group = "") const;
+  std::map<std::string, std::string>
+  getPlannerParams(const std::string& planner_id, const std::string& group = "",
+                   const rclcpp::Duration& server_timeout = rclcpp::Duration::from_seconds(-1)) const;
 
   /** \brief Set the planner parameters for given group and planner_id */
   void setPlannerParams(const std::string& planner_id, const std::string& group,
-                        const std::map<std::string, std::string>& params, bool bReplace = false);
+                        const std::map<std::string, std::string>& params, bool bReplace = false,
+                        const rclcpp::Duration& server_timeout = rclcpp::Duration::from_seconds(-1));
 
   std::string getDefaultPlanningPipelineId() const;
 
@@ -690,9 +694,15 @@ public:
   /**@{*/
 
   /** \brief Plan and execute a trajectory that takes the group of joints declared in the constructor to the specified
-     target.
-      This call is not blocking (does not wait for the execution of the trajectory to complete). */
-  moveit::core::MoveItErrorCode asyncMove();
+   * target.
+   * This call is not blocking (does not wait for the execution of the trajectory to complete).
+   * \param [in] server_timeout period of time duration for waiting server's response. Function returns TIME_OUT in case
+   * that server doesn't answer whether the request is accepted or rejected within certain period of time \param [in]
+   * moving_timeout period of time duration for waiting server's job to finish. Function returns TIME_OUT in case that
+   * server's job is not finished within certain period of time
+   */
+  moveit::core::MoveItErrorCode asyncMove(const rclcpp::Duration& server_timeout = rclcpp::Duration::from_seconds(-1),
+                                          const rclcpp::Duration& moving_timeout = rclcpp::Duration::from_seconds(-1));
 
   /** \brief Get the move_group action client used by the \e MoveGroupInterface.
       The client can be used for querying the execution state of the trajectory and abort trajectory execution
@@ -701,51 +711,90 @@ public:
   rclcpp_action::Client<moveit_msgs::action::MoveGroup>& getMoveGroupClient() const;
 
   /** \brief Plan and execute a trajectory that takes the group of joints declared in the constructor to the specified
-     target.
-      This call is always blocking (waits for the execution of the trajectory to complete) and requires an asynchronous
-     spinner to be started.*/
-  moveit::core::MoveItErrorCode move();
+   * target.
+   * This call is always blocking (waits for the execution of the trajectory to complete) and requires an asynchronous
+   * spinner to be started.
+   * \param [in] server_timeout period of time duration for waiting server's response. Function returns TIME_OUT in case
+   * that server doesn't answer whether the request is accepted or rejected within certain period of time \param [in]
+   * moving_timeout period of time duration for waiting server's job to finish. Function returns TIME_OUT in case that
+   * server's job is not finished within certain period of time
+   */
+  moveit::core::MoveItErrorCode move(const rclcpp::Duration& server_timeout = rclcpp::Duration::from_seconds(-1),
+                                     const rclcpp::Duration& moving_timeout = rclcpp::Duration::from_seconds(-1));
 
   /** \brief Compute a motion plan that takes the group declared in the constructor from the current state to the
-     specified
-      target. No execution is performed. The resulting plan is stored in \e plan*/
-  moveit::core::MoveItErrorCode plan(Plan& plan);
+   * specified
+   * target. No execution is performed. The resulting plan is stored in \e plan
+   * \param [in] server_timeout period of time duration for waiting server's response. Function returns TIME_OUT in case
+   * that server doesn't answer whether the request is accepted or rejected within certain period of time \param [in]
+   * planning_timeout period of time duration for waiting server's job to finish. Function returns TIME_OUT in case that
+   * server's job is not finished within certain period of time
+   */
+  moveit::core::MoveItErrorCode plan(Plan& plan,
+                                     const rclcpp::Duration& server_timeout = rclcpp::Duration::from_seconds(-1),
+                                     const rclcpp::Duration& planning_timeout = rclcpp::Duration::from_seconds(-1));
 
   /** \brief Given a \e plan, execute it without waiting for completion.
    *  \param [in] plan The motion plan for which to execute
    *  \param [in] controllers An optional list of ros2_controllers to execute with. If none, MoveIt will attempt to find
    * a controller. The exact behavior of finding a controller depends on which MoveItControllerManager plugin is active.
-   *  \return moveit::core::MoveItErrorCode::SUCCESS if successful
+   *  \param [in] server_timeout period of time duration for waiting server's response. Function returns TIME_OUT in
+   * case that server doesn't answer whether the request is accepted or rejected within certain period of time \param
+   * [in] trajectory_execution_timeout period of time duration for waiting server's job to finish. Function returns
+   * TIME_OUT in case that server's job is not finished within certain period of time \return
+   * moveit::core::MoveItErrorCode::SUCCESS if successful
    */
-  moveit::core::MoveItErrorCode asyncExecute(const Plan& plan,
-                                             const std::vector<std::string>& controllers = std::vector<std::string>());
+  moveit::core::MoveItErrorCode
+  asyncExecute(const Plan& plan, const std::vector<std::string>& controllers = std::vector<std::string>(),
+               const rclcpp::Duration& server_timeout = rclcpp::Duration::from_seconds(-1),
+               const rclcpp::Duration& trajectory_execution_timeout = rclcpp::Duration::from_seconds(-1));
 
   /** \brief Given a \e robot trajectory, execute it without waiting for completion.
    *  \param [in] trajectory The trajectory to execute
    *  \param [in] controllers An optional list of ros2_controllers to execute with. If none, MoveIt will attempt to find
    * a controller. The exact behavior of finding a controller depends on which MoveItControllerManager plugin is active.
-   *  \return moveit::core::MoveItErrorCode::SUCCESS if successful
+   *  \param [in] server_timeout period of time duration for waiting server's response. Function returns TIME_OUT in
+   * case that server doesn't answer whether the request is accepted or rejected within certain period of time \param
+   * [in] trajectory_execution_timeout period of time duration for waiting server's job to finish. Function returns
+   * TIME_OUT in case that server's job is not finished within certain period of time \return
+   * moveit::core::MoveItErrorCode::SUCCESS if successful
    */
-  moveit::core::MoveItErrorCode asyncExecute(const moveit_msgs::msg::RobotTrajectory& trajectory,
-                                             const std::vector<std::string>& controllers = std::vector<std::string>());
+  moveit::core::MoveItErrorCode
+  asyncExecute(const moveit_msgs::msg::RobotTrajectory& trajectory,
+               const std::vector<std::string>& controllers = std::vector<std::string>(),
+               const rclcpp::Duration& server_timeout = rclcpp::Duration::from_seconds(-1),
+               const rclcpp::Duration& trajectory_execution_timeout = rclcpp::Duration::from_seconds(-1));
 
   /** \brief Given a \e plan, execute it while waiting for completion.
    *  \param [in] plan Contains trajectory info as well as metadata such as a RobotModel.
    *  \param [in] controllers An optional list of ros2_controllers to execute with. If none, MoveIt will attempt to find
    * a controller. The exact behavior of finding a controller depends on which MoveItControllerManager plugin is active.
-   *  \return moveit::core::MoveItErrorCode::SUCCESS if successful
+   *  \param [in] server_timeout period of time duration for waiting server's response. Function returns TIME_OUT in
+   * case that server doesn't answer whether the request is accepted or rejected within certain period of time \param
+   * [in] trajectory_execution_timeout period of time duration for waiting server's job to finish. Function returns
+   * TIME_OUT in case that server's job is not finished within certain period of time \return
+   * moveit::core::MoveItErrorCode::SUCCESS if successful
    */
-  moveit::core::MoveItErrorCode execute(const Plan& plan,
-                                        const std::vector<std::string>& controllers = std::vector<std::string>());
+  moveit::core::MoveItErrorCode
+  execute(const Plan& plan, const std::vector<std::string>& controllers = std::vector<std::string>(),
+          const rclcpp::Duration& server_timeout = rclcpp::Duration::from_seconds(-1),
+          const rclcpp::Duration& trajectory_execution_timeout = rclcpp::Duration::from_seconds(-1));
 
   /** \brief Given a \e robot trajectory, execute it while waiting for completion.
    *  \param [in] trajectory The trajectory to execute
    *  \param [in] controllers An optional list of ros2_controllers to execute with. If none, MoveIt will attempt to find
    * a controller. The exact behavior of finding a controller depends on which MoveItControllerManager plugin is active.
-   *  \return moveit::core::MoveItErrorCode::SUCCESS if successful
+   *  \param [in] server_timeout period of time duration for waiting server's response. Function returns TIME_OUT in
+   * case that server doesn't answer whether the request is accepted or rejected within certain period of time \param
+   * [in] trajectory_execution_timeout period of time duration for waiting server's job to finish. Function returns
+   * TIME_OUT in case that server's job is not finished within certain period of time \return
+   * moveit::core::MoveItErrorCode::SUCCESS if successful
    */
-  moveit::core::MoveItErrorCode execute(const moveit_msgs::msg::RobotTrajectory& trajectory,
-                                        const std::vector<std::string>& controllers = std::vector<std::string>());
+  moveit::core::MoveItErrorCode
+  execute(const moveit_msgs::msg::RobotTrajectory& trajectory,
+          const std::vector<std::string>& controllers = std::vector<std::string>(),
+          const rclcpp::Duration& server_timeout = rclcpp::Duration::from_seconds(-1),
+          const rclcpp::Duration& trajectory_execution_timeout = rclcpp::Duration::from_seconds(-1));
 
   /** \brief Compute a Cartesian path that follows specified waypoints with a step size of at most \e eef_step meters
       between end effector configurations of consecutive points in the result \e trajectory. The reference frame for the
@@ -758,7 +807,8 @@ public:
       Return -1.0 in case of error. */
   double computeCartesianPath(const std::vector<geometry_msgs::msg::Pose>& waypoints, double eef_step,
                               double jump_threshold, moveit_msgs::msg::RobotTrajectory& trajectory,
-                              bool avoid_collisions = true, moveit_msgs::msg::MoveItErrorCodes* error_code = nullptr);
+                              bool avoid_collisions = true, moveit_msgs::msg::MoveItErrorCodes* error_code = nullptr,
+                              const rclcpp::Duration& server_timeout = rclcpp::Duration::from_seconds(-1));
 
   /** \brief Compute a Cartesian path that follows specified waypoints with a step size of at most \e eef_step meters
       between end effector configurations of consecutive points in the result \e trajectory. The reference frame for the
@@ -775,7 +825,8 @@ public:
   double computeCartesianPath(const std::vector<geometry_msgs::msg::Pose>& waypoints, double eef_step,
                               double jump_threshold, moveit_msgs::msg::RobotTrajectory& trajectory,
                               const moveit_msgs::msg::Constraints& path_constraints, bool avoid_collisions = true,
-                              moveit_msgs::msg::MoveItErrorCodes* error_code = nullptr);
+                              moveit_msgs::msg::MoveItErrorCodes* error_code = nullptr,
+                              const rclcpp::Duration& server_timeout = rclcpp::Duration::from_seconds(-1));
 
   /** \brief Stop any trajectory execution, if one is active */
   void stop();
