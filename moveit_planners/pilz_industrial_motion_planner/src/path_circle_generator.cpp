@@ -65,10 +65,6 @@ std::unique_ptr<KDL::Path> PathCircleGenerator::circleFromCenter(const KDL::Fram
   }
   catch (KDL::Error_MotionPlanning&)
   {
-#if KDL_VERSION < ((1 << 16) | (4 << 8) | 1)  // older than 1.4.1 ?
-    delete rot_interpo;                       // in case we could not construct the Path object,
-                                              // avoid a memory leak
-#endif
     KDL::epsilon = old_kdl_epsilon;
     throw;  // and pass the exception on to the caller
   }
@@ -123,24 +119,9 @@ std::unique_ptr<KDL::Path> PathCircleGenerator::circleFromInterim(const KDL::Fra
   }
 
   KDL::RotationalInterpolation* rot_interpo = new KDL::RotationalInterpolation_SingleAxis();
-  try
-  {
-    return std::unique_ptr<KDL::Path>(new KDL::Path_Circle(start_pose, center_point, kdl_aux_point, goal_pose.M, alpha,
-                                                           rot_interpo, eqradius,
-                                                           true /* take ownership of RotationalInterpolation */));
-  }
-  catch (KDL::Error_MotionPlanning&)  // LCOV_EXCL_START // The cases where
-                                      // KDL would throw are already handled
-                                      // above,
-                                      // we keep these lines to be safe
-  {
-#if KDL_VERSION < ((1 << 16) | (4 << 8) | 1)  // older than 1.4.1 ?
-    delete rot_interpo;                       // in case we could not construct the Path object,
-                                              // avoid a memory leak
-#endif
-    throw;  // and pass the exception on to the caller
-    // LCOV_EXCL_STOP
-  }
+  return std::unique_ptr<KDL::Path>(
+      std::make_unique<KDL::Path_Circle>(start_pose, center_point, kdl_aux_point, goal_pose.M, alpha, rot_interpo,
+                                         eqradius, true /* take ownership of RotationalInterpolation */));
 }
 
 double PathCircleGenerator::cosines(const double a, const double b, const double c)
