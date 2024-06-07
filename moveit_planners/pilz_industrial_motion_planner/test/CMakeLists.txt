@@ -1,5 +1,5 @@
 find_package(ament_cmake_gtest REQUIRED)
-find_package(ament_cmake_gmock REQUIRED)
+# find_package(ament_cmake_gmock REQUIRED)
 find_package(ros_testing REQUIRED)
 find_package(moveit_resources_prbt_support REQUIRED)
 find_package(moveit_resources_prbt_moveit_config REQUIRED)

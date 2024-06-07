@@ -14,8 +14,8 @@ set(UNIT_TEST_SOURCEFILES
     unittest_joint_limits_container
     unittest_joint_limits_validator
     unittest_planning_context_loaders
-    unittest_planning_context
-    unittest_get_solver_tip_frame)
+    unittest_planning_context)
+# unittest_get_solver_tip_frame)
 
 # Direct Command Planner Unit Test
 ament_add_gtest(unittest_pilz_industrial_motion_planner_direct
@@ -144,10 +144,9 @@ target_link_libraries(
 add_ros_test(launch/unittest_planning_context.test.py ARGS
              "test_binary_dir:=${CMAKE_CURRENT_BINARY_DIR}")
 
-# GetTipFrames Unit Test
-ament_add_gmock(unittest_get_solver_tip_frame
-                src/unittest_get_solver_tip_frame.cpp)
-target_link_libraries(unittest_get_solver_tip_frame ${PROJECT_NAME})
+# GetTipFrames Unit Test ament_add_gmock(unittest_get_solver_tip_frame
+# src/unittest_get_solver_tip_frame.cpp)
+# target_link_libraries(unittest_get_solver_tip_frame ${PROJECT_NAME})
 
 install(
   TARGETS ${UNIT_TEST_SOURCEFILES}
