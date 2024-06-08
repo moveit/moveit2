@@ -39,7 +39,9 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 #pragma GCC diagnostic push
+#if defined(__GNUC__) && !defined(__clang__)
 #pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
+#endif
 #include <pybind11/eigen.h>
 #pragma GCC diagnostic pop
 #include <moveit_py/moveit_py_utils/copy_ros_msg.h>
