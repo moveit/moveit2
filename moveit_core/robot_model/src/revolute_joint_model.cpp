@@ -189,7 +189,7 @@ bool RevoluteJointModel::satisfiesPositionBounds(const double* values, const Bou
   }
   else
   {
-    return !(values[0] < bounds[0].min_position_ - margin || values[0] > bounds[0].max_position_ + margin);
+    return values[0] >= bounds[0].min_position_ - margin && values[0] <= bounds[0].max_position_ + margin;
   }
 }
 

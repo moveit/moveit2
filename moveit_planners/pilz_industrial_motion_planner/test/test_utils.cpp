@@ -301,9 +301,9 @@ bool testutils::checkSLERP(const Eigen::Isometry3d& start_pose, const Eigen::Iso
   // parallel rotation axis
   // it is possible the axis opposite is
   // if the angle is zero, axis is arbitrary
-  if (!(((start_goal_aa.axis() - start_wp_aa.axis()).norm() < fabs(rot_axis_norm_tolerance)) ||
-        ((start_goal_aa.axis() + start_wp_aa.axis()).norm() < fabs(rot_axis_norm_tolerance)) ||
-        (fabs(start_wp_aa.angle()) < fabs(rot_angle_tolerance))))
+  if (((start_goal_aa.axis() - start_wp_aa.axis()).norm() >= fabs(rot_axis_norm_tolerance)) &&
+      ((start_goal_aa.axis() + start_wp_aa.axis()).norm() >= fabs(rot_axis_norm_tolerance)) &&
+      (fabs(start_wp_aa.angle()) >= fabs(rot_angle_tolerance)))
   {
     std::cout << "Rotational linearity is violated. \n"
               << '\n'

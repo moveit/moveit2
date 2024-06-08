@@ -242,7 +242,7 @@ public:
   RobotTrajectory& append(const RobotTrajectory& source, double dt, size_t start_index = 0,
                           size_t end_index = std::numeric_limits<std::size_t>::max());
 
-  void swap(robot_trajectory::RobotTrajectory& other);
+  void swap(robot_trajectory::RobotTrajectory& other) noexcept;
 
   RobotTrajectory& clear()
   {
