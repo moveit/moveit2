@@ -1,6 +1,7 @@
 ---
 Checks:          '-*,
                   performance-*,
+                  -performance-enum-size,
                   llvm-namespace-comment,
                   modernize-redundant-void-arg,
                   modernize-use-nullptr,
@@ -21,7 +22,6 @@ Checks:          '-*,
                   readability-static-definition-in-anonymous-namespace,
                   '
 HeaderFilterRegex: ''
-AnalyzeTemporaryDtors: false
 CheckOptions:
   - key:             llvm-namespace-comment.ShortNamespaceLines
     value:           '10'
