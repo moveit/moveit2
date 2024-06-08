@@ -121,7 +121,7 @@ double RobotTrajectory::getAverageSegmentDuration() const
     return getDuration() / static_cast<double>(duration_from_previous_.size());
 }
 
-void RobotTrajectory::swap(RobotTrajectory& other)
+void RobotTrajectory::swap(RobotTrajectory& other) noexcept
 {
   robot_model_.swap(other.robot_model_);
   std::swap(group_, other.group_);
@@ -719,7 +719,7 @@ std::optional<trajectory_msgs::msg::JointTrajectory> toJointTrajectory(const Rob
                                                                        const std::vector<std::string>& joint_filter)
 {
   const auto group = trajectory.getGroup();
-  const auto robot_model = trajectory.getRobotModel();
+  const auto& robot_model = trajectory.getRobotModel();
   const std::vector<const moveit::core::JointModel*>& jnts =
       group ? group->getActiveJointModels() : robot_model->getActiveJointModels();
 

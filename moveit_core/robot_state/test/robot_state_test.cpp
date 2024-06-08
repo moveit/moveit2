@@ -95,7 +95,7 @@ void checkJacobian(moveit::core::RobotState& state, const moveit::core::JointMod
   EXPECT_NEAR(angle, 0.0, 1e-05) << "Angle between Cartesian velocity and Cartesian displacement larger than expected. "
                                     "Angle: "
                                  << angle << ". displacement: " << displacement.transpose()
-                                 << ". Cartesian velocity: " << cartesian_velocity.head<3>().transpose() << std::endl;
+                                 << ". Cartesian velocity: " << cartesian_velocity.head<3>().transpose() << '\n';
 }
 }  // namespace
 
