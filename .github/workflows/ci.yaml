@@ -20,7 +20,7 @@ jobs:
           - IMAGE: rolling-ci
             CCOV: true
             ROS_DISTRO: rolling
-          - IMAGE: rolling-ci-testing
+          - IMAGE: rolling-ci
             ROS_DISTRO: rolling
             IKFAST_TEST: true
             CLANG_TIDY: pedantic
@@ -29,8 +29,6 @@ jobs:
           - IMAGE: humble-ci-testing
             ROS_DISTRO: humble
           - IMAGE: jazzy-ci
-            ROS_DISTRO: jazzy
-          - IMAGE: jazzy-ci-testing
             ROS_DISTRO: jazzy
     env:
       CXXFLAGS: >-
