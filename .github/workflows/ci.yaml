@@ -63,6 +63,7 @@ jobs:
         (cd $TARGET_REPO_PATH; clang-tidy --list-checks)
         # Disable clang-tidy for ikfast plugins as we cannot fix the generated code
         find $BASEDIR/target_ws/build -iwholename "*_ikfast_plugin/compile_commands.json" -exec rm {} \;
+        find $BASEDIR/target_ws/build -iwholename "*_ikfast_manipulator_plugin/compile_commands.json" -exec rm {} \;
       CC: ${{ matrix.env.CLANG_TIDY && 'clang' }}
       CXX: ${{ matrix.env.CLANG_TIDY && 'clang++' }}
       ADDITIONAL_DEBS: lld
