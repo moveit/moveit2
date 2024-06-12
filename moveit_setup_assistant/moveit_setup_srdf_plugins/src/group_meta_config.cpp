@@ -121,7 +121,7 @@ bool GroupMetaConfig::inputKinematicsYAML(const std::filesystem::path& file_path
                       DEFAULT_KIN_SOLVER_TIMEOUT);
 
       // Assign meta data to vector
-      group_meta_data_[group_name] = meta_data;
+      group_meta_data_[group_name] = std::move(meta_data);
     }
 
     return true;

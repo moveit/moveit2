@@ -37,9 +37,11 @@
 #pragma once
 
 #include <QAbstractTableModel>
+#include <srdfdom/srdf_writer.h>
 
 #ifndef Q_MOC_RUN
 #include <moveit_setup_srdf_plugins/compute_default_collisions.hpp>
+#include <moveit_setup_srdf_plugins/default_collisions.hpp>
 #endif
 
 #include <QItemSelection>
@@ -51,12 +53,12 @@ class CollisionMatrixModel : public QAbstractTableModel
 {
   Q_OBJECT
 public:
-  CollisionMatrixModel(LinkPairMap& pairs, const std::vector<std::string>& names, QObject* parent = nullptr);
+  CollisionMatrixModel(DefaultCollisions& default_collisions, const std::vector<std::string>& names,
+                       QObject* parent = nullptr);
   int rowCount(const QModelIndex& parent = QModelIndex()) const override;
   int columnCount(const QModelIndex& parent = QModelIndex()) const override;
   QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
   QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
-  DisabledReason reason(const QModelIndex& index) const;
 
   // for editing
   Qt::ItemFlags flags(const QModelIndex& index) const override;
@@ -68,14 +70,7 @@ public Q_SLOTS:
   void setFilterRegExp(const QString& filter);
 
 private:
-  LinkPairMap::iterator item(const QModelIndex& index);
-  LinkPairMap::const_iterator item(const QModelIndex& index) const
-  {
-    return const_cast<CollisionMatrixModel*>(this)->item(index);
-  }
-
-private:
-  LinkPairMap& pairs_;
+  DefaultCollisions& default_collisions_;
   const std::vector<std::string> std_names_;  // names of links
   QList<QString> q_names_;                    // names of links
   QList<int> visual_to_index_;                // map from visual index to actual index

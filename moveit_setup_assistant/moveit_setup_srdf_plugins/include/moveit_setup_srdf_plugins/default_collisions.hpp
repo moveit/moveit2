@@ -56,6 +56,10 @@ namespace srdf_setup
 class DefaultCollisions : public SRDFStep
 {
 public:
+  DefaultCollisions()
+  {
+  }
+
   std::string getName() const override
   {
     return "Self-Collisions";
@@ -84,6 +88,34 @@ public:
     return link_pairs_;
   }
 
+  struct PairMatcher
+  {
+    PairMatcher(const std::string& link1, const std::string& link2)
+      : search(link1 < link2 ? std::make_pair(std::cref(link1), std::cref(link2)) :
+                               std::make_pair(std::cref(link2), std::cref(link1)))
+    {
+    }
+
+    bool operator()(const srdf::Model::CollisionPair& pair) const
+    {
+      return (pair.link1_ == search.first && pair.link2_ == search.second) ||
+             (pair.link2_ == search.first && pair.link1_ == search.second);
+    }
+
+    std::pair<const std::string&, const std::string&> search;
+  };
+
+  /**
+   * \brief Enable/Disable link collisions by default
+   */
+  bool setDefault(const std::string& name, bool disabled);  // Is this needed?
+
+  bool setDefault(const std::string& link1, const std::string& link2, bool disable);
+
+  static inline const std::string COLLISION_DISABLING_REASON_ENABLED = "Explicitly enabled";
+  static inline const std::string COLLISION_DISABLING_REASON_DISABLED = "Disabled by default";
+  std::string getCollisionDisablingReason(const std::string& link1, const std::string& link2) const;
+
   // For Threaded Operations
   void startGenerationThread(unsigned int num_trials, double min_frac, bool verbose = true);
   void cancelGenerationThread();
@@ -99,6 +131,8 @@ protected:
   // For threaded operations
   boost::thread worker_;
   unsigned int progress_;
+
+  bool disabledByDefault(const std::string& link1, const std::string& link2) const;
 };
 }  // namespace srdf_setup
 }  // namespace moveit_setup
