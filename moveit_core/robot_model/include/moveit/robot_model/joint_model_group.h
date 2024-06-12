@@ -586,6 +586,21 @@ public:
   bool computeJointVariableIndices(const std::vector<std::string>& joint_names,
                                    std::vector<size_t>& joint_bijection) const;
 
+  /**
+   * @brief Get the lower and upper position limits of all active variables in the group.
+   *
+   * @return std::pair<Eigen::VectorXd, Eigen::VectorXd> Containing the lower and upper joint limits for all active variables.
+   */
+  [[nodiscard]] std::pair<Eigen::VectorXd, Eigen::VectorXd> getLowerAndUpperLimits() const;
+
+  /**
+   * @brief Gets the pair of maximum joint velocities/accelerations for a given group. Asserts that the group contains
+   * only single-variable joints,
+   * @details In case of asymmetric velocity or acceleration limits, this function will return the most limiting component.
+   * @return std::pair<Eigen::VectorXd, Eigen::VectorXd> Containing the velocity and acceleration limits
+   */
+  [[nodiscard]] std::pair<Eigen::VectorXd, Eigen::VectorXd> getMaxVelocitiesAndAccelerationBounds() const;
+
 protected:
   /** \brief Update the variable values for the state of a group with respect to the mimic joints. This only updates
       mimic joints that have the parent in this group. If there is a joint mimicking one that is outside the group,
