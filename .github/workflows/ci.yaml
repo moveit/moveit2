@@ -18,7 +18,7 @@ jobs:
       matrix:
         env:
           - IMAGE: rolling-ci
-            CCOV: true
+            CCOV: false # Disabled: https://github.com/moveit/moveit2/issues/2866
             ROS_DISTRO: rolling
           - IMAGE: rolling-ci
             ROS_DISTRO: rolling
