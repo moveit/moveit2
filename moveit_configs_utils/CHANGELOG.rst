@@ -2,6 +2,25 @@
 Changelog for package moveit_configs_utils
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.10.0 (2024-06-13)
+-------------------
+* Migrate ros-planning org to moveit (`#2847 <https://github.com/moveit/moveit2/issues/2847>`_)
+  * Rename github.com/ros-planning -> github.com/moveit
+  * Rename ros-planning.github.io -> moveit.github.io
+  * Rename ros-planning organization in docker and CI workflow files
+  - ghcr.io/ros-planning -> ghcr.io/moveit
+  - github.repository == 'moveit/*''
+* Fix xacro args loading issue (`#2684 <https://github.com/moveit/moveit2/issues/2684>`_)
+  * Fixed xacro args loading issue
+  * Formatting fixes with pre-commit action
+* Pass along move_group_capabilities parameters (`#2587 <https://github.com/moveit/moveit2/issues/2587>`_)
+  * Pass along move_group_capabilities parameters
+  * fix lint check
+  * Use move_group_capabilities as default launch argument
+* CMake format and lint in pre-commit (`#2683 <https://github.com/moveit/moveit2/issues/2683>`_)
+* Use different packages for launch and config packages in generate_demo_launch (`#2647 <https://github.com/moveit/moveit2/issues/2647>`_)
+* Contributors: Alex Navarro, Forrest Rogers-Marcovitz, Robert Haschke, Tyler Weaver
+
 2.9.0 (2024-01-09)
 ------------------
 * Update ros2_control usage (`#2620 <https://github.com/ros-planning/moveit2/issues/2620>`_)
