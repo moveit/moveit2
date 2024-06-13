@@ -20,7 +20,7 @@ RUN --mount=type=cache,target=/root/.ccache/,sharing=locked \
         # Enable ccache
         PATH=/usr/lib/ccache:$PATH && \
         # Checkout the tutorial repo
-        git clone https://github.com/moveit/moveit2_tutorials src/moveit2_tutorials && \
+        git clone https://github.com/moveit/moveit2_tutorials -b fix_gz_ros2_control src/moveit2_tutorials && \
         # Fetch required upstream sources for building
         vcs import --skip-existing src < src/moveit2_tutorials/moveit2_tutorials.repos && \
         # Source ROS install
