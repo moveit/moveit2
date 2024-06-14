@@ -38,6 +38,7 @@
 #include <moveit/robot_state/robot_state.h>
 #include <moveit/robot_trajectory/robot_trajectory.h>
 #include <geometric_shapes/check_isometry.h>
+#include <memory>
 #include <tf2_eigen/tf2_eigen.hpp>
 #include <moveit/utils/logger.hpp>
 
@@ -166,7 +167,7 @@ void TrajectoryExecutionManager::initialize()
         rclcpp::NodeOptions opt;
         opt.allow_undeclared_parameters(true);
         opt.automatically_declare_parameters_from_overrides(true);
-        controller_mgr_node_.reset(new rclcpp::Node("moveit_simple_controller_manager", opt));
+        controller_mgr_node_ = std::make_shared<rclcpp::Node>("moveit_simple_controller_manager", opt);
 
         auto all_params = node_->get_node_parameters_interface()->get_parameter_overrides();
         for (const auto& param : all_params)
@@ -939,12 +940,12 @@ bool TrajectoryExecutionManager::validate(const TrajectoryExecutionContext& cont
       }
 
       std::set<const moveit::core::JointModel*> joints;
-      for (std::size_t i = 0, end = joint_names.size(); i < end; ++i)
+      for (const auto& joint_name : joint_names)
       {
-        const moveit::core::JointModel* jm = robot_model_->getJointOfVariable(joint_names[i]);
+        const moveit::core::JointModel* jm = robot_model_->getJointOfVariable(joint_name);
         if (!jm)
         {
-          RCLCPP_ERROR_STREAM(logger_, "Unknown joint in trajectory: " << joint_names[i]);
+          RCLCPP_ERROR_STREAM(logger_, "Unknown joint in trajectory: " << joint_name);
           return false;
         }
 

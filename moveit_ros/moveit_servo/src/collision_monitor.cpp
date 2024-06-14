@@ -106,7 +106,7 @@ void CollisionMonitor::checkCollisions()
     if (servo_params_.check_collisions)
     {
       // Fetch latest robot state using planning scene instead of state monitor due to
-      // https://github.com/ros-planning/moveit2/issues/2748
+      // https://github.com/moveit/moveit2/issues/2748
       robot_state_ = planning_scene_monitor_->getPlanningScene()->getCurrentState();
       // This must be called before doing collision checking.
       robot_state_.updateCollisionBodyTransforms();

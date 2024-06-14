@@ -1,6 +1,6 @@
 # syntax = docker/dockerfile:1.3
 
-# ghcr.io/ros-planning/moveit2:main-${ROS_DISTRO}-tutorial-source
+# ghcr.io/moveit/moveit2:main-${ROS_DISTRO}-tutorial-source
 # Source build of the repos file from the tutorail site
 
 ARG ROS_DISTRO=rolling
@@ -20,7 +20,7 @@ RUN --mount=type=cache,target=/root/.ccache/,sharing=locked \
         # Enable ccache
         PATH=/usr/lib/ccache:$PATH && \
         # Checkout the tutorial repo
-        git clone https://github.com/ros-planning/moveit2_tutorials src/moveit2_tutorials && \
+        git clone https://github.com/moveit/moveit2_tutorials src/moveit2_tutorials && \
         # Fetch required upstream sources for building
         vcs import --skip-existing src < src/moveit2_tutorials/moveit2_tutorials.repos && \
         # Source ROS install

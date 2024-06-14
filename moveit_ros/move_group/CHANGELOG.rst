@@ -2,6 +2,27 @@
 Changelog for package moveit_ros_move_group
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.10.0 (2024-06-13)
+-------------------
+* Migrate ros-planning org to moveit (`#2847 <https://github.com/moveit/moveit2/issues/2847>`_)
+  * Rename github.com/ros-planning -> github.com/moveit
+  * Rename ros-planning.github.io -> moveit.github.io
+  * Rename ros-planning organization in docker and CI workflow files
+  - ghcr.io/ros-planning -> ghcr.io/moveit
+  - github.repository == 'moveit/*''
+* Unify log names (`#2720 <https://github.com/moveit/moveit2/issues/2720>`_)
+  Co-authored-by: Abishalini Sivaraman <abi.gpuram@gmail.com>
+* Remove extraneous error message from URDF service (`#2736 <https://github.com/moveit/moveit2/issues/2736>`_)
+* Add parameter api integration test (`#2662 <https://github.com/moveit/moveit2/issues/2662>`_)
+* CMake format and lint in pre-commit (`#2683 <https://github.com/moveit/moveit2/issues/2683>`_)
+* Get robot description from topic in GetUrdfService (`#2681 <https://github.com/moveit/moveit2/issues/2681>`_)
+* Fix bug in GetUrdfService move_group capability  (`#2669 <https://github.com/moveit/moveit2/issues/2669>`_)
+  * Take both possible closings for links into account
+  * Make CI happy
+* avoid a relative jump threshold of 0.0 (`#2654 <https://github.com/moveit/moveit2/issues/2654>`_)
+* Add get group urdf capability (`#2649 <https://github.com/moveit/moveit2/issues/2649>`_)
+* Contributors: Abishalini Sivaraman, Ezra Brooks, Mario Prats, Robert Haschke, Sebastian Jahr, Tyler Weaver
+
 2.9.0 (2024-01-09)
 ------------------
 * Fix warning and cleanup unneeded placeholders (`#2566 <https://github.com/ros-planning/moveit2/issues/2566>`_)

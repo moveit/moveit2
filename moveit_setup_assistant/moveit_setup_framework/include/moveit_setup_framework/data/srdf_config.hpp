@@ -118,6 +118,7 @@ public:
   std::vector<std::string> getGroupNames() const
   {
     std::vector<std::string> group_names;
+    group_names.reserve(srdf_.groups_.size());
     for (const srdf::Model::Group& group : srdf_.groups_)
     {
       group_names.push_back(group.name_);

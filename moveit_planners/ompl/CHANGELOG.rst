@@ -2,6 +2,26 @@
 Changelog for package moveit_planners_ompl
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.10.0 (2024-06-13)
+-------------------
+* Migrate ros-planning org to moveit (`#2847 <https://github.com/moveit/moveit2/issues/2847>`_)
+  * Rename github.com/ros-planning -> github.com/moveit
+  * Rename ros-planning.github.io -> moveit.github.io
+  * Rename ros-planning organization in docker and CI workflow files
+  - ghcr.io/ros-planning -> ghcr.io/moveit
+  - github.repository == 'moveit/*''
+* Unify log names (`#2720 <https://github.com/moveit/moveit2/issues/2720>`_)
+  Co-authored-by: Abishalini Sivaraman <abi.gpuram@gmail.com>
+* Do not overwrite the error code with OMPL interface (`#2725 <https://github.com/moveit/moveit2/issues/2725>`_)
+  In case of failure, set the error code to the one returned by the
+  planning pipeline's `solve` method rather than overwriting it with
+  `PLANNING_FAILED`.
+* Set `planner_id` in reponses with OMPL interface (`#2724 <https://github.com/moveit/moveit2/issues/2724>`_)
+  This avoids a warning `PlanningPipeline::generatePlan()`.
+  Co-authored-by: Gaël Écorchard <gael@km-robotics.cz>
+* CMake format and lint in pre-commit (`#2683 <https://github.com/moveit/moveit2/issues/2683>`_)
+* Contributors: Gaël Écorchard, Robert Haschke, Sebastian Jahr, Tyler Weaver
+
 2.9.0 (2024-01-09)
 ------------------
 * Handle unsupported position constraints in OMPL (`#2417 <https://github.com/ros-planning/moveit2/issues/2417>`_)

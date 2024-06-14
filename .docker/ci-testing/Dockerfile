@@ -1,4 +1,4 @@
-# ghcr.io/ros-planning/moveit2:${OUR_ROS_DISTRO}-ci-testing
+# ghcr.io/moveit/moveit2:${OUR_ROS_DISTRO}-ci-testing
 # CI image using the ROS testing repository
 
 FROM osrf/ros2:testing

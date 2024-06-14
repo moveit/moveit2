@@ -153,7 +153,7 @@ void initTrajectoryExecutionManager(py::module& m)
            )")
 
       // ToDo(MatthijsBurgh)
-      // See https://github.com/ros-planning/moveit2/issues/2442
+      // See https://github.com/moveit/moveit2/issues/2442
       // get_trajectories
       .def("execute",
            py::overload_cast<const trajectory_execution_manager::TrajectoryExecutionManager::ExecutionCompleteCallback&,
@@ -187,7 +187,7 @@ void initTrajectoryExecutionManager(py::module& m)
            Wait for the current trajectory to finish execution.
            )")
       // ToDo(MatthijsBurgh)
-      // See https://github.com/ros-planning/moveit2/issues/2442
+      // See https://github.com/moveit/moveit2/issues/2442
       // get_current_expected_trajectory_index
       .def("get_last_execution_status",
            &trajectory_execution_manager::TrajectoryExecutionManager::getLastExecutionStatus,
@@ -283,7 +283,7 @@ void initTrajectoryExecutionManager(py::module& m)
            )");
 
   // ToDo(MatthijsBurgh)
-  // https://github.com/ros-planning/moveit2/issues/2442
+  // https://github.com/moveit/moveit2/issues/2442
   // get_controller_manager_node
 }
 }  // namespace bind_trajectory_execution_manager

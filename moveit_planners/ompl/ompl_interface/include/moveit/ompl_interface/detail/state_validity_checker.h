@@ -115,7 +115,7 @@ protected:
  *
  * We still check the path constraints, because not all states sampled by the constrained state space
  * satisfy the constraints unfortunately. This is a complicated issue. For more details see:
- * https://github.com/ros-planning/moveit/issues/2092#issuecomment-669911722.
+ * https://github.com/moveit/moveit/issues/2092#issuecomment-669911722.
  **/
 class ConstrainedPlanningStateValidityChecker : public StateValidityChecker
 {
