@@ -28,7 +28,7 @@ ament_target_dependencies(
   visualization_msgs
   tf2_eigen
   geometric_shapes
-  OCTOMAP)
+  octomap)
 target_include_directories(
   moveit_collision_detection BEFORE
   PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>)

@@ -2,6 +2,11 @@
 Changelog for package moveit_runtime
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.10.0 (2024-06-13)
+-------------------
+* CMake format and lint in pre-commit (`#2683 <https://github.com/moveit/moveit2/issues/2683>`_)
+* Contributors: Tyler Weaver
+
 2.9.0 (2024-01-09)
 ------------------
 * Merge branch 'main' into dependabot/github_actions/SonarSource/sonarcloud-github-c-cpp-2

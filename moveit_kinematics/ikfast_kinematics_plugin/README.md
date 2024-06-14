@@ -7,4 +7,4 @@ Generates a IKFast kinematics plugin for MoveIt using [OpenRave](http://openrave
 
 Tested on ROS Hydro and greater with Catkin using OpenRave 0.8 with a 6dof and 7dof robot arm manipulator. Does not work with greater than 7dof.
 
-[Documentation on docs.ros.org](https://ros-planning.github.io/moveit_tutorials/doc/ikfast/ikfast_tutorial.html#creating-the-ikfast-moveit-plugin)
+[Documentation on docs.ros.org](https://moveit.github.io/moveit_tutorials/doc/ikfast/ikfast_tutorial.html#creating-the-ikfast-moveit-plugin)

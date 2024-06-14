@@ -127,8 +127,8 @@ public:
       bool good = true;
       for (const geometry_msgs::msg::Pose& mesh_pose : collision_object.mesh_poses)
       {
-        if (!(mesh_pose.position.x >= minx && mesh_pose.position.x <= maxx && mesh_pose.position.y >= miny &&
-              mesh_pose.position.y <= maxy && mesh_pose.position.z >= minz && mesh_pose.position.z <= maxz))
+        if (mesh_pose.position.x < minx || mesh_pose.position.x > maxx || mesh_pose.position.y < miny ||
+            mesh_pose.position.y > maxy || mesh_pose.position.z < minz || mesh_pose.position.z > maxz)
         {
           good = false;
           break;
@@ -136,9 +136,8 @@ public:
       }
       for (const geometry_msgs::msg::Pose& primitive_pose : collision_object.primitive_poses)
       {
-        if (!(primitive_pose.position.x >= minx && primitive_pose.position.x <= maxx &&
-              primitive_pose.position.y >= miny && primitive_pose.position.y <= maxy &&
-              primitive_pose.position.z >= minz && primitive_pose.position.z <= maxz))
+        if (primitive_pose.position.x < minx || primitive_pose.position.x > maxx || primitive_pose.position.y < miny ||
+            primitive_pose.position.y > maxy || primitive_pose.position.z < minz || primitive_pose.position.z > maxz)
         {
           good = false;
           break;

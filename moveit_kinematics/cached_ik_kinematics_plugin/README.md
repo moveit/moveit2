@@ -17,8 +17,8 @@ to this:
       kinematics_solver: cached_ik_kinematics_plugin/CachedKDLKinematicsPlugin
       # optional parameters for caching:
       max_cache_size: 10000
-      min_pose_distance: 1
-      min_joint_config_distance: 4
+      min_pose_distance: 1.0
+      min_joint_config_distance: 4.0
 
 The cache size can be controlled with an absolute cap (`max_cache_size`) or with a distance threshold on the end effector pose (`min_pose_distance`) or robot joint state (`min_joint_config_distance`). Normally, the cache files are saved to the current working directory (which is usually `${HOME}/.ros`, not the directory where you ran `roslaunch`), in a subdirectory for each robot. Possible values for `kinematics_solver` are:
 

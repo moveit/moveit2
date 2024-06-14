@@ -2,6 +2,20 @@
 Changelog for package moveit_ros_control_interface
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.10.0 (2024-06-13)
+-------------------
+* Revert "Simplify controller manager namespacing (`#2210 <https://github.com/moveit/moveit2/issues/2210>`_)"
+  This reverts commit 55df0bccd5e884649780b4ceeee80891e563b57b.
+  The deprecated constructor was being used in the same file
+  for the exact use case of enabling namespaces that are not
+  specified by the parameter. There is no replacement for
+  supporting a dynamic server lookup, however the parameter
+  logic could still use simplification.
+* Unify log names (`#2720 <https://github.com/moveit/moveit2/issues/2720>`_)
+  Co-authored-by: Abishalini Sivaraman <abi.gpuram@gmail.com>
+* CMake format and lint in pre-commit (`#2683 <https://github.com/moveit/moveit2/issues/2683>`_)
+* Contributors: Henning Kayser, Sebastian Jahr, Tyler Weaver
+
 2.9.0 (2024-01-09)
 ------------------
 * Fix warning and cleanup unneeded placeholders (`#2566 <https://github.com/ros-planning/moveit2/issues/2566>`_)
