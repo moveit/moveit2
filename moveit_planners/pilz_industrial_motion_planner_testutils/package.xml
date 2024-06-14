@@ -2,7 +2,7 @@
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
   <name>pilz_industrial_motion_planner_testutils</name>
-  <version>2.9.0</version>
+  <version>2.10.0</version>
   <description>Helper scripts and functionality to test industrial motion generation</description>
 
   <maintainer email="c.henkel@pilz.de">Christian Henkel</maintainer>
@@ -11,8 +11,8 @@
   <license>BSD-3-Clause</license>
 
   <url type="website">http://moveit.ros.org</url>
-  <url type="bugtracker">https://github.com/ros-planning/moveit2/issues</url>
-  <url type="repository">https://github.com/ros-planning/moveit2</url>
+  <url type="bugtracker">https://github.com/moveit/moveit2/issues</url>
+  <url type="repository">https://github.com/moveit/moveit2</url>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
   <buildtool_depend>eigen3_cmake_module</buildtool_depend>

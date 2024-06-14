@@ -6,6 +6,7 @@ name: CI
 on:
   workflow_dispatch:
   pull_request:
+  merge_group:
   push:
     branches:
       - main
@@ -17,9 +18,9 @@ jobs:
       matrix:
         env:
           - IMAGE: rolling-ci
-            CCOV: true
+            CCOV: false # Disabled: https://github.com/moveit/moveit2/issues/2866
             ROS_DISTRO: rolling
-          - IMAGE: rolling-ci-testing
+          - IMAGE: rolling-ci
             ROS_DISTRO: rolling
             IKFAST_TEST: true
             CLANG_TIDY: pedantic
@@ -27,6 +28,8 @@ jobs:
             ROS_DISTRO: humble
           - IMAGE: humble-ci-testing
             ROS_DISTRO: humble
+          - IMAGE: jazzy-ci
+            ROS_DISTRO: jazzy
     env:
       CXXFLAGS: >-
         -Wall -Wextra -Wwrite-strings -Wunreachable-code -Wpointer-arith -Wredundant-decls
@@ -49,7 +52,7 @@ jobs:
         -DCMAKE_SHARED_LINKER_FLAGS=-fuse-ld=lld
         -DCMAKE_MODULE_LINKER_FLAGS=-fuse-ld=lld
         -DCMAKE_BUILD_TYPE=${{ matrix.env.CCOV && 'Debug' || 'Release'}}
-        -DCMAKE_CXX_FLAGS="-Werror $CXXFLAGS${{ matrix.env.CCOV && ' --coverage -O2 -fno-omit-frame-pointer'}}"
+        -DCMAKE_CXX_FLAGS="-Werror $CXXFLAGS${{ matrix.env.CCOV && ' --coverage -O2 -fno-omit-frame-pointer' || ''}}"
       UPSTREAM_CMAKE_ARGS: "-DCMAKE_CXX_FLAGS=''"
       DOWNSTREAM_CMAKE_ARGS: -DCMAKE_CXX_FLAGS="-Wall -Wextra"
       CCACHE_DIR: ${{ github.workspace }}/.ccache
@@ -60,6 +63,7 @@ jobs:
         (cd $TARGET_REPO_PATH; clang-tidy --list-checks)
         # Disable clang-tidy for ikfast plugins as we cannot fix the generated code
         find $BASEDIR/target_ws/build -iwholename "*_ikfast_plugin/compile_commands.json" -exec rm {} \;
+        find $BASEDIR/target_ws/build -iwholename "*_ikfast_manipulator_plugin/compile_commands.json" -exec rm {} \;
       CC: ${{ matrix.env.CLANG_TIDY && 'clang' }}
       CXX: ${{ matrix.env.CLANG_TIDY && 'clang++' }}
       ADDITIONAL_DEBS: lld
@@ -82,10 +86,12 @@ jobs:
           sudo rm -rf /usr/local
           df -h
       - uses: actions/checkout@v4
-      - uses: testspace-com/setup-testspace@v1
-        if: github.repository == 'ros-planning/moveit2'
-        with:
-          domain: ros-planning
+# NOTE: Testspace is temporarily disabled and needs to be installed for the MoveIt org
+# See: https://github.com/moveit/moveit2/issues/2852
+#       - uses: testspace-com/setup-testspace@v1
+#         if: github.repository == 'moveit/moveit2'
+#         with:
+#           domain: moveit
       - name: Get latest release date for rosdistro
         id: rosdistro_release_date
         uses: JafarAbdi/latest-rosdistro-release-date-action@main
@@ -139,10 +145,12 @@ jobs:
         name: Run industrial_ci
         uses: ros-industrial/industrial_ci@master
         env: ${{ matrix.env }}
-      - name: Push result to Testspace
-        if: always() && (github.repository == 'ros-planning/moveit2')
-        run: |
-          testspace "[ ${{ matrix.env.IMAGE }} ]${{ env.BASEDIR }}/target_ws/**/test_results/**/*.xml"
+# NOTE: Testspace is temporarily disabled and needs to be installed for the MoveIt org
+# See: https://github.com/moveit/moveit2/issues/2852
+#      - name: Push result to Testspace
+#        if: always() && (github.repository == 'moveit/moveit2')
+#        run: |
+#          testspace "[ ${{ matrix.env.IMAGE }} ]${{ env.BASEDIR }}/target_ws/**/test_results/**/*.xml"
       - name: Upload test artifacts (on failure)
         uses: actions/upload-artifact@v4
         if: failure() && (steps.ici.outputs.run_target_test || steps.ici.outputs.target_test_results)

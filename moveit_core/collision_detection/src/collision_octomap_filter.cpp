@@ -126,15 +126,15 @@ int collision_detection::refineContactNormals(const World::ObjectConstPtr& objec
               octree->begin_leafs_bbx(bbx_min, bbx_max);
           octomap::OcTreeBaseImpl<octomap::OcTreeNode, octomap::AbstractOccupancyOcTree>::leaf_bbx_iterator leafs_end =
               octree->end_leafs_bbx();
-          int count = 0;
+          // int count = 0;
           for (; it != leafs_end; ++it)
           {
             const octomap::point3d pt = it.getCoordinate();
-            // double prob = it->getOccupancy();
             if (octree->isNodeOccupied(*it))  // magic number!
             {
-              count++;
               node_centers.push_back(pt);
+              // count++;
+              // double prob = it->getOccupancy();
               // RCLCPP_INFO(getLogger(), "Adding point %d with prob %.3f at [%.3f, %.3f, %.3f]",
               //                          count, prob, pt.x(), pt.y(), pt.z());
             }
