@@ -13,8 +13,8 @@
   <license>BSD-3-Clause</license>
 
   <url type="website">http://moveit.ros.org</url>
-  <url type="bugtracker">https://github.com/ros-planning/moveit2/issues</url>
-  <url type="repository">https://github.com/ros-planning/moveit2</url>
+  <url type="bugtracker">https://github.com/moveit/moveit2/issues</url>
+  <url type="repository">https://github.com/moveit/moveit2</url>
 
   <author email="davidvlu@gmail.com">David V. Lu!!</author>
   <author email="dave@picknik.ai">Dave Coleman</author>
@@ -27,10 +27,11 @@
   <depend>rclcpp</depend>
   <depend>moveit_setup_framework</depend>
   <depend>moveit_setup_srdf_plugins</depend> <!-- For collision_updater executable -->
+  <exec_depend>moveit_configs_utils</exec_depend>
   <exec_depend>moveit_setup_controllers</exec_depend>
   <exec_depend>moveit_setup_core_plugins</exec_depend>
   <exec_depend>moveit_setup_app_plugins</exec_depend>
-  <!-- TODO: Enable once https://github.com/ros-planning/moveit2/issues/1262 is resolved -->
+  <!-- TODO: Enable once https://github.com/moveit/moveit2/issues/1262 is resolved -->
   <!-- <exec_depend>moveit_setup_simulation</exec_depend>  -->
 
   <test_depend>moveit_resources_panda_moveit_config</test_depend>

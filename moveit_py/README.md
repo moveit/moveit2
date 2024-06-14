@@ -26,7 +26,7 @@ If you use this library in your work please use the following citation:
 @software{fagan2023moveitpy,
   author = {Fagan, Peter David},
   title = {{MoveIt 2 Python Library: A Software Library for Robotics Education and Research}},
-  url = {https://github.com/ros-planning/moveit2/tree/main/moveit_py},
+  url = {https://github.com/moveit/moveit2/tree/main/moveit_py},
   year = {2023}
 }
 ```

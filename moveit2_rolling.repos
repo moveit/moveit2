@@ -1,0 +1,9 @@
+repositories:
+  octomap:
+      type: git
+      url: https://github.com/octomap/octomap.git
+      version: devel
+  geometric_shapes:
+      type: git
+      url: https://github.com/moveit/geometric_shapes.git
+      version: ros2

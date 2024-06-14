@@ -6,6 +6,7 @@ name: CI
 on:
   workflow_dispatch:
   pull_request:
+  merge_group:
   push:
     branches:
       - main
@@ -83,7 +84,7 @@ jobs:
           df -h
       - uses: actions/checkout@v4
       - uses: testspace-com/setup-testspace@v1
-        if: github.repository == 'ros-planning/moveit2'
+        if: github.repository == 'moveit/moveit2'
         with:
           domain: ros-planning
       - name: Get latest release date for rosdistro
@@ -140,7 +141,7 @@ jobs:
         uses: ros-industrial/industrial_ci@master
         env: ${{ matrix.env }}
       - name: Push result to Testspace
-        if: always() && (github.repository == 'ros-planning/moveit2')
+        if: always() && (github.repository == 'moveit/moveit2')
         run: |
           testspace "[ ${{ matrix.env.IMAGE }} ]${{ env.BASEDIR }}/target_ws/**/test_results/**/*.xml"
       - name: Upload test artifacts (on failure)

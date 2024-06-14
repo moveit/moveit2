@@ -343,7 +343,7 @@ std::pair<double, StatusCode> velocityScalingFactorForSingularity(const moveit::
   const bool moving_towards_singularity = vector_towards_singularity.dot(target_delta_x) > 0;
 
   // Compute upper condition variable threshold based on if we are moving towards or away from singularity.
-  // See https://github.com/ros-planning/moveit2/pull/620#issuecomment-1201418258 for visual explanation.
+  // See https://github.com/moveit/moveit2/pull/620#issuecomment-1201418258 for visual explanation.
   double upper_threshold;
   if (moving_towards_singularity)
   {

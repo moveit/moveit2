@@ -7,8 +7,8 @@
   <maintainer email="henningkayser@picknik.ai">Henning Kayser</maintainer>
   <license>BSD-3-Clause</license>
 
-  <url type="bugtracker">https://github.com/ros-planning/moveit2/issues</url>
-  <url type="repository">https://github.com/ros-planning/moveit2</url>
+  <url type="bugtracker">https://github.com/moveit/moveit2/issues</url>
+  <url type="repository">https://github.com/moveit/moveit2</url>
 
   <author email="henningkayser@picknik.ai">Henning Kayser</author>
 
