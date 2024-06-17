@@ -17,7 +17,7 @@ ament_target_dependencies(
   urdfdom
   urdfdom_headers
   octomap_msgs
-  OCTOMAP)
+  octomap)
 
 target_link_libraries(
   moveit_planning_scene

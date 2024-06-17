@@ -2,7 +2,7 @@
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
   <name>moveit_ros_occupancy_map_monitor</name>
-  <version>2.9.0</version>
+  <version>2.10.0</version>
   <description>Components of MoveIt connecting to occupancy map</description>
   <maintainer email="henningkayser@picknik.ai">Henning Kayser</maintainer>
   <maintainer email="tyler@picknik.ai">Tyler Weaver</maintainer>
@@ -26,7 +26,13 @@
   <depend>rclcpp</depend>
   <depend>moveit_core</depend>
   <depend>moveit_msgs</depend>
+  <!--
+  Temporarily disable octomap dependency because of
+  version conflict. We use liboctomap-dev provided
+  by moveit_core->libfcl-dev.
+  See https://github.com/moveit/moveit2/issues/2862
   <depend>octomap</depend>
+  -->
   <depend version_gte="1.11.2">pluginlib</depend>
   <depend>tf2_ros</depend>
   <depend>geometric_shapes</depend>

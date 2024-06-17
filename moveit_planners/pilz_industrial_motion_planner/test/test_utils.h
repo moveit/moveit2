@@ -477,7 +477,7 @@ checkCartesianRotationalPath(const robot_trajectory::RobotTrajectoryConstPtr& tr
 inline bool isMonotonouslyDecreasing(const std::vector<double>& vec, double tol)
 {
   return std::is_sorted(vec.begin(), vec.end(), [tol](double a, double b) {
-    return !(std::abs(a - b) < tol || a < b);  // true -> a is ordered before b -> list is not sorted
+    return std::abs(a - b) >= tol && a >= b;  // true -> a is ordered before b -> list is not sorted
   });
 }
 

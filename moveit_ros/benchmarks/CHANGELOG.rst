@@ -2,6 +2,36 @@
 Changelog for package moveit_ros_benchmarks
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.10.0 (2024-06-13)
+-------------------
+* Migrate ros-planning org to moveit (`#2847 <https://github.com/moveit/moveit2/issues/2847>`_)
+  * Rename github.com/ros-planning -> github.com/moveit
+  * Rename ros-planning.github.io -> moveit.github.io
+  * Rename ros-planning organization in docker and CI workflow files
+  - ghcr.io/ros-planning -> ghcr.io/moveit
+  - github.repository == 'moveit/*''
+* Fix CI for Rolling / Ubuntu Noble (`#2793 <https://github.com/moveit/moveit2/issues/2793>`_)
+  * docker.yaml: Enable caching
+  * [TEMP] moveit2_rolling.repos: add not yet released packages
+  * Skip broken ci-testing image: osrf/ros2:testing doesn't contain /opt/ros!
+  * use boost::timer::progress_display if available
+  check for header to stay compatible with ubuntu 20.04.
+  Support boost >= 1.83
+  Slightly ugly due to the double alias, but boost::timer was a class
+  before 1.72, so using `boost::timer::progress_display` in the code
+  breaks with older versions.
+  * cherry-pick of `#3547 <https://github.com/moveit/moveit2/issues/3547>`_ from MoveIt1
+  * Tag ci image as ci-testing as well
+  ---------
+  Co-authored-by: Michael Görner <me@v4hn.de>
+  Co-authored-by: Sebastian Jahr <sebastian.jahr@picknik.ai>
+  Co-authored-by: Henning Kayser <henningkayser@picknik.ai>
+* Update deprecated include of boost/progress.hpp to boost/timer/progress_display.hpp (`#2811 <https://github.com/moveit/moveit2/issues/2811>`_)
+* Unify log names (`#2720 <https://github.com/moveit/moveit2/issues/2720>`_)
+  Co-authored-by: Abishalini Sivaraman <abi.gpuram@gmail.com>
+* CMake format and lint in pre-commit (`#2683 <https://github.com/moveit/moveit2/issues/2683>`_)
+* Contributors: Robert Haschke, Sebastian Jahr, Stephanie Eng, Tyler Weaver
+
 2.9.0 (2024-01-09)
 ------------------
 * [Planning Pipeline Refactoring] `#2 <https://github.com/ros-planning/moveit2/issues/2>`_ Enable chaining planners (`#2457 <https://github.com/ros-planning/moveit2/issues/2457>`_)

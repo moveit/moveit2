@@ -2,6 +2,21 @@
 Changelog for package moveit_kinematics
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.10.0 (2024-06-13)
+-------------------
+* At least on humble, error is: 'robot_description_kinematics.arm.min_joint_config_distance' has invalid type: expected [double] got [integer]. (`#2865 <https://github.com/moveit/moveit2/issues/2865>`_)
+* Migrate ros-planning org to moveit (`#2847 <https://github.com/moveit/moveit2/issues/2847>`_)
+  * Rename github.com/ros-planning -> github.com/moveit
+  * Rename ros-planning.github.io -> moveit.github.io
+  * Rename ros-planning organization in docker and CI workflow files
+  - ghcr.io/ros-planning -> ghcr.io/moveit
+  - github.repository == 'moveit/*''
+* CI: Fix building of ikfast plugins (`#2791 <https://github.com/moveit/moveit2/issues/2791>`_)
+  Ignore missing authentication for Indigo packages using --force-yes.
+* Unify log names (`#2720 <https://github.com/moveit/moveit2/issues/2720>`_)
+* CMake format and lint in pre-commit (`#2683 <https://github.com/moveit/moveit2/issues/2683>`_)
+* Contributors: Henning Kayser, Robert Haschke, Sebastian Jahr, Tyler Weaver, s-trinh
+
 2.9.0 (2024-01-09)
 ------------------
 * Node logging for the rest of MoveIt (`#2599 <https://github.com/ros-planning/moveit2/issues/2599>`_)

@@ -2,6 +2,74 @@
 Changelog for package moveit_ros_planning
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.10.0 (2024-06-13)
+-------------------
+* Apply clang-tidy fixes
+* Migrate ros-planning org to moveit (`#2847 <https://github.com/moveit/moveit2/issues/2847>`_)
+  * Rename github.com/ros-planning -> github.com/moveit
+  * Rename ros-planning.github.io -> moveit.github.io
+  * Rename ros-planning organization in docker and CI workflow files
+  - ghcr.io/ros-planning -> ghcr.io/moveit
+  - github.repository == 'moveit/*''
+* Enable mdof trajectory execution (`#2740 <https://github.com/moveit/moveit2/issues/2740>`_)
+  * Add RobotTrajectory conversion from MDOF to joints
+  * Convert MDOF trajectories to joint trajectories in planning interfaces
+  * Treat mdof joint variables as common joints in
+  TrajectoryExecutionManager
+  * Convert multi-DOF trajectories to joints in TEM
+  * Revert "Convert MDOF trajectories to joint trajectories in planning interfaces"
+  This reverts commit 885ee2718594859555b73dc341311a859d31216e.
+  * Handle multi-DOF variables in TEM's bound checking
+  * Add parameter to optionally enable multi-dof conversion
+  * Improve error message about unknown controllers
+  * Fix name ordering in JointTrajectory conversion
+  * Improve DEBUG output in TEM
+  * Comment RobotTrajectory test
+  * add acceleration to avoid out of bounds read
+  ---------
+  Co-authored-by: Paul Gesel <paulgesel@gmail.com>
+  Co-authored-by: Abishalini Sivaraman <abi.gpuram@gmail.com>
+  Co-authored-by: Ezra Brooks <ezra@brooks.cx>
+* Skip flaky PSM launch test (`#2822 <https://github.com/moveit/moveit2/issues/2822>`_)
+* change default to 1e308 (`#2801 <https://github.com/moveit/moveit2/issues/2801>`_)
+* PSM: keep references to scene\_ valid upon receiving full scenes (`#2745 <https://github.com/moveit/moveit2/issues/2745>`_)
+  plan_execution-related modules rely on `plan.planning_scene\_` in many places
+  to point to the currently monitored scene (or a diff on top of it).
+  Before this patch, if the PSM would receive full scenes during execution,
+  `plan.planning_scene\_` would not include later incremental updates anymore
+  because the monitor created a new diff scene.
+  ---------
+  Co-authored-by: v4hn <me@v4hn.de>
+* Unify log names (`#2720 <https://github.com/moveit/moveit2/issues/2720>`_)
+  Co-authored-by: Abishalini Sivaraman <abi.gpuram@gmail.com>
+* Print links in collision (`#2727 <https://github.com/moveit/moveit2/issues/2727>`_)
+* Do not overwrite the error code in planWithSinglePipeline (`#2723 <https://github.com/moveit/moveit2/issues/2723>`_)
+  * Do not overwrite the error code in planWithSinglePipeline
+  Return the `MotionPlanResponse` as-is.
+  * Do not rely on generatePlan() to set error code
+  Do not rely on generatePlan() to set the error code in all cases and
+  ensure that the error code is set to FAILURE if `generatePlan()` returns
+  false.
+  ---------
+  Co-authored-by: Gaël Écorchard <gael@km-robotics.cz>
+* Get configuration values of traj_exec_man (`#2702 <https://github.com/moveit/moveit2/issues/2702>`_)
+  * (ros_planning) get configuration values of traj_exec_man
+  * (py) get configuration values of traj_exec_man
+  ---------
+  Co-authored-by: Sebastian Jahr <sebastian.jahr@picknik.ai>
+* Exit earlier on failure in `generatePlan` (`#2726 <https://github.com/moveit/moveit2/issues/2726>`_)
+  With this change, the `PlanningPipeline::generatePlan()` exits as soon
+  as a failure is detected. Before this, `break` was used to exit the
+  current loop of request adapters, planners, or response adapters, but
+  the function continued to the next loop. For example, if a planner would
+  fail, the response adapters would still be executed.
+  Co-authored-by: Gaël Écorchard <gael@km-robotics.cz>
+* srdf publisher node (`#2682 <https://github.com/moveit/moveit2/issues/2682>`_)
+* CMake format and lint in pre-commit (`#2683 <https://github.com/moveit/moveit2/issues/2683>`_)
+* Get robot description from topic in GetUrdfService (`#2681 <https://github.com/moveit/moveit2/issues/2681>`_)
+* Shut down PSM publishing before starting to publish on a potentially new topic (`#2680 <https://github.com/moveit/moveit2/issues/2680>`_)
+* Contributors: Abishalini Sivaraman, Ezra Brooks, Gaël Écorchard, Henning Kayser, Matthijs van der Burgh, Paul Gesel, Robert Haschke, Sebastian Castro, Sebastian Jahr, Tyler Weaver
+
 2.9.0 (2024-01-09)
 ------------------
 * [PSM] Process collision object color when adding object trough the planning scene monitor (`#2567 <https://github.com/ros-planning/moveit2/issues/2567>`_)
