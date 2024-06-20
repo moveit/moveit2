@@ -108,7 +108,7 @@ private:
   //                     const std::string& group_name,
   //                     Eigen::VectorXd& state_vec);
 
-  void setRobotStateFromPoint(ChompTrajectory& group_trajectory, int i);
+  void setRobotStateFromPoint(ChompTrajectory& group_trajectory, const int i);
 
   // collision_proximity::CollisionProximitySpace::TrajectorySafety checkCurrentIterValidity();
 
