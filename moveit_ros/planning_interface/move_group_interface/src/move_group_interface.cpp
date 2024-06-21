@@ -112,9 +112,8 @@ public:
                          const std::shared_ptr<tf2_ros::Buffer>& tf_buffer, const rclcpp::Duration& wait_for_servers)
     : opt_(opt), node_(node), logger_(moveit::getLogger("moveit.ros.move_group_interface")), tf_buffer_(tf_buffer)
   {
-    // We have no control on how the passed node is getting executed. To make sure MGI is functional, we're creating
-    // our own callback group which is managed in a separate callback thread
-    pnode_ = std::make_shared<rclcpp::Node>("move_group_interface_private_node");
+    pnode_ = std::make_shared<rclcpp::Node>("move_group_interface_private_node_" +
+                                            std::to_string(reinterpret_cast<std::size_t>(this)));
     callback_group_ = pnode_->create_callback_group(rclcpp::CallbackGroupType::MutuallyExclusive,
                                                     false /* don't spin with node executor */);
     callback_executor_.add_callback_group(callback_group_, pnode_->get_node_base_interface());
