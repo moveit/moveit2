@@ -56,7 +56,7 @@ jobs:
           cache-source: .ccache
           cache-target: /root/.ccache/
       - name: Build and Push
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: .
           file: .docker/${{ github.job }}/Dockerfile
