@@ -1262,6 +1262,7 @@ bool PlanningScene::setPlanningSceneDiffMsg(const moveit_msgs::msg::PlanningScen
 
 bool PlanningScene::setPlanningSceneMsg(const moveit_msgs::msg::PlanningScene& scene_msg)
 {
+  assert(scene_msg.is_diff == false);
   RCLCPP_DEBUG(getLogger(), "Setting new planning scene: '%s'", scene_msg.name.c_str());
   name_ = scene_msg.name;
 
