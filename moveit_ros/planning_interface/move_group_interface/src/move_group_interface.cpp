@@ -112,11 +112,9 @@ public:
                          const std::shared_ptr<tf2_ros::Buffer>& tf_buffer, const rclcpp::Duration& wait_for_servers)
     : opt_(opt), node_(node), logger_(moveit::getLogger("moveit.ros.move_group_interface")), tf_buffer_(tf_buffer)
   {
-    pnode_ = std::make_shared<rclcpp::Node>("move_group_interface_private_node_" +
-                                            std::to_string(reinterpret_cast<std::size_t>(this)));
-    callback_group_ = pnode_->create_callback_group(rclcpp::CallbackGroupType::MutuallyExclusive,
-                                                    false /* don't spin with node executor */);
-    callback_executor_.add_callback_group(callback_group_, pnode_->get_node_base_interface());
+    callback_group_ = node_->create_callback_group(rclcpp::CallbackGroupType::MutuallyExclusive,
+                                                   false /* don't spin with node executor */);
+    callback_executor_.add_callback_group(callback_group_, node_->get_node_base_interface());
 
     robot_model_ = opt.robot_model ? opt.robot_model : getSharedRobotModel(node_, opt.robot_description);
     if (!getRobotModel())
@@ -159,11 +157,11 @@ public:
       end_effector_link_ = joint_model_group_->getLinkModelNames().back();
     pose_reference_frame_ = getRobotModel()->getModelFrame();
     // Append the slash between two topic components
-    trajectory_event_publisher_ = pnode_->create_publisher<std_msgs::msg::String>(
+    trajectory_event_publisher_ = node_->create_publisher<std_msgs::msg::String>(
         rclcpp::names::append(opt_.move_group_namespace,
                               trajectory_execution_manager::TrajectoryExecutionManager::EXECUTION_EVENT_TOPIC),
         1);
-    attached_object_publisher_ = pnode_->create_publisher<moveit_msgs::msg::AttachedCollisionObject>(
+    attached_object_publisher_ = node_->create_publisher<moveit_msgs::msg::AttachedCollisionObject>(
         rclcpp::names::append(opt_.move_group_namespace,
                               planning_scene_monitor::PlanningSceneMonitor::DEFAULT_ATTACHED_COLLISION_OBJECT_TOPIC),
         1);
@@ -171,22 +169,22 @@ public:
     current_state_monitor_ = getSharedStateMonitor(node_, robot_model_, tf_buffer_);
 
     move_action_client_ = rclcpp_action::create_client<moveit_msgs::action::MoveGroup>(
-        pnode_, rclcpp::names::append(opt_.move_group_namespace, move_group::MOVE_ACTION), callback_group_);
+        node_, rclcpp::names::append(opt_.move_group_namespace, move_group::MOVE_ACTION), callback_group_);
     move_action_client_->wait_for_action_server(wait_for_servers.to_chrono<std::chrono::duration<double>>());
     execute_action_client_ = rclcpp_action::create_client<moveit_msgs::action::ExecuteTrajectory>(
-        pnode_, rclcpp::names::append(opt_.move_group_namespace, move_group::EXECUTE_ACTION_NAME), callback_group_);
+        node_, rclcpp::names::append(opt_.move_group_namespace, move_group::EXECUTE_ACTION_NAME), callback_group_);
     execute_action_client_->wait_for_action_server(wait_for_servers.to_chrono<std::chrono::duration<double>>());
 
-    query_service_ = pnode_->create_client<moveit_msgs::srv::QueryPlannerInterfaces>(
+    query_service_ = node_->create_client<moveit_msgs::srv::QueryPlannerInterfaces>(
         rclcpp::names::append(opt_.move_group_namespace, move_group::QUERY_PLANNERS_SERVICE_NAME), qosDefault(),
         callback_group_);
-    get_params_service_ = pnode_->create_client<moveit_msgs::srv::GetPlannerParams>(
+    get_params_service_ = node_->create_client<moveit_msgs::srv::GetPlannerParams>(
         rclcpp::names::append(opt_.move_group_namespace, move_group::GET_PLANNER_PARAMS_SERVICE_NAME), qosDefault(),
         callback_group_);
-    set_params_service_ = pnode_->create_client<moveit_msgs::srv::SetPlannerParams>(
+    set_params_service_ = node_->create_client<moveit_msgs::srv::SetPlannerParams>(
         rclcpp::names::append(opt_.move_group_namespace, move_group::SET_PLANNER_PARAMS_SERVICE_NAME), qosDefault(),
         callback_group_);
-    cartesian_path_service_ = pnode_->create_client<moveit_msgs::srv::GetCartesianPath>(
+    cartesian_path_service_ = node_->create_client<moveit_msgs::srv::GetCartesianPath>(
         rclcpp::names::append(opt_.move_group_namespace, move_group::CARTESIAN_PATH_SERVICE_NAME), qosDefault(),
         callback_group_);
 
@@ -240,15 +238,13 @@ public:
       return false;
     }
 
-    if (future_response.valid())
+    const auto& response = future_response.get();
+    if (!response->planner_interfaces.empty())
     {
-      const auto& response = future_response.get();
-      if (!response->planner_interfaces.empty())
-      {
-        desc = response->planner_interfaces.front();
-        return true;
-      }
+      desc = response->planner_interfaces.front();
+      return true;
     }
+
     return false;
   }
 
@@ -266,14 +262,11 @@ public:
       return false;
     }
 
-    if (future_response.valid())
+    const auto& response = future_response.get();
+    if (!response->planner_interfaces.empty())
     {
-      const auto& response = future_response.get();
-      if (!response->planner_interfaces.empty())
-      {
-        desc = response->planner_interfaces;
-        return true;
-      }
+      desc = response->planner_interfaces;
+      return true;
     }
     return false;
   }
@@ -297,12 +290,9 @@ public:
       return result;
     }
 
-    if (future_response.valid())
-    {
-      response = future_response.get();
-      for (unsigned int i = 0, end = response->params.keys.size(); i < end; ++i)
-        result[response->params.keys[i]] = response->params.values[i];
-    }
+    response = future_response.get();
+    for (unsigned int i = 0, end = response->params.keys.size(); i < end; ++i)
+      result[response->params.keys[i]] = response->params.values[i];
     return result;
   }
 
@@ -1301,7 +1291,7 @@ public:
 
   rclcpp::Clock::SharedPtr getClock()
   {
-    return pnode_->get_clock();
+    return node_->get_clock();
   }
 
 private:
@@ -1310,7 +1300,7 @@ private:
     // Set up db
     try
     {
-      warehouse_ros::DatabaseConnection::Ptr conn = moveit_warehouse::loadDatabase(pnode_);
+      warehouse_ros::DatabaseConnection::Ptr conn = moveit_warehouse::loadDatabase(node_);
       conn->setParams(host, port);
       if (conn->connect())
       {
@@ -1326,7 +1316,6 @@ private:
 
   Options opt_;
   rclcpp::Node::SharedPtr node_;
-  rclcpp::Node::SharedPtr pnode_;
   rclcpp::Logger logger_;
   rclcpp::CallbackGroup::SharedPtr callback_group_;
   rclcpp::executors::SingleThreadedExecutor callback_executor_;
