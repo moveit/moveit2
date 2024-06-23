@@ -309,7 +309,7 @@ int main(int argc, char** argv)
       RCLCPP_INFO(nh->get_logger(), "MoveGroup debug mode is OFF");
     }
 
-    rclcpp::executors::MultiThreadedExecutor executor;
+    rclcpp::executors::SingleThreadedExecutor executor;
 
     move_group::MoveGroupExe mge(moveit_cpp, default_planning_pipeline, debug);
 

@@ -193,12 +193,13 @@ void TrajectoryExecutionManager::initialize()
   // The default callback group for rclcpp::Node is MutuallyExclusive which means we cannot call
   // receiveEvent while processing a different callback. To fix this we create a new callback group (the type is not
   // important since we only use it to process one callback) and associate event_topic_subscriber_ with this callback group
-  auto callback_group = node_->create_callback_group(rclcpp::CallbackGroupType::MutuallyExclusive);
+  auto callback_group = node_->create_callback_group(rclcpp::CallbackGroupType::MutuallyExclusive, false);
   auto options = rclcpp::SubscriptionOptions();
   options.callback_group = callback_group;
   event_topic_subscriber_ = node_->create_subscription<std_msgs::msg::String>(
       EXECUTION_EVENT_TOPIC, rclcpp::SystemDefaultsQoS(),
       [this](const std_msgs::msg::String::ConstSharedPtr& event) { return receiveEvent(event); }, options);
+  private_executor_->add_callback_group(callback_group, node_->get_node_base_interface());
 
   controller_mgr_node_->get_parameter("trajectory_execution.execution_duration_monitoring",
                                       execution_duration_monitoring_);
