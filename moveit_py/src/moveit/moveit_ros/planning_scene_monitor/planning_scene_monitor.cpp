@@ -175,8 +175,7 @@ void initPlanningSceneMonitor(py::module& m)
                attached_collision_object_msg (moveit_msgs.msg.AttachedCollisionObject): The attached collision object to apply to the planning scene.
            )")
 
-      .def("new_planning_scene_message",
-           &planning_scene_monitor::PlanningSceneMonitor::newPlanningSceneMessage,
+      .def("new_planning_scene_message", &planning_scene_monitor::PlanningSceneMonitor::newPlanningSceneMessage,
            py::arg("scene"),
            R"(
            Called to update the planning scene with a new message.
