@@ -60,7 +60,7 @@ void initMoveitPy(py::module& m)
   The MoveItPy class is the main interface to the MoveIt Python API. It is a wrapper around the MoveIt C++ API.
 									     )")
 
-      .def(py::init([](const std::string& node_name, const std::vector<std::string>& launch_params_filepaths,
+      .def(py::init([](const std::string& node_name, const std::string& name_space, const std::vector<std::string>& launch_params_filepaths,
                        const py::object& config_dict, bool provide_planning_service) {
              // This section is used to load the appropriate node parameters before spinning a moveit_cpp instance
              // Priority is given to parameters supplied directly via a config_dict, followed by launch parameters
@@ -106,7 +106,7 @@ void initMoveitPy(py::module& m)
                  .arguments(launch_arguments);
 
              RCLCPP_INFO(getLogger(), "Initialize node and executor");
-             rclcpp::Node::SharedPtr node = rclcpp::Node::make_shared(node_name, "", node_options);
+             rclcpp::Node::SharedPtr node = rclcpp::Node::make_shared(node_name, name_space, node_options);
              std::shared_ptr<rclcpp::executors::SingleThreadedExecutor> executor =
                  std::make_shared<rclcpp::executors::SingleThreadedExecutor>();
 
@@ -134,6 +134,7 @@ void initMoveitPy(py::module& m)
              return moveit_cpp_ptr;
            }),
            py::arg("node_name") = "moveit_py",
+           py::arg("name_space") = "",
            py::arg("launch_params_filepaths") =
                utils.attr("get_launch_params_filepaths")().cast<std::vector<std::string>>(),
            py::arg("config_dict") = py::none(), py::arg("provide_planning_service") = true,
