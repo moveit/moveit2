@@ -29,7 +29,7 @@
   <!-- The next 2 packages are required for the gazebo simulation.
        We don't include them by default to prevent installing gazebo and all its dependencies. -->
   <!-- <exec_depend>joint_trajectory_controller</exec_depend> -->
-  <!-- <exec_depend>gazebo_ros_control</exec_depend> -->
+  <!-- <exec_depend>gazebo_ros2_control</exec_depend> -->
 [OTHER_DEPENDENCIES]
 
   <export>
