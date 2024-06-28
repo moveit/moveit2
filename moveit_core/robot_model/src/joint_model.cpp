@@ -86,7 +86,7 @@ size_t JointModel::getLocalVariableIndex(const std::string& variable) const
 {
   VariableIndexMap::const_iterator it = variable_index_map_.find(variable);
   if (it == variable_index_map_.end())
-    throw Exception("Could not find variable '" + variable + "' to get bounds for within joint '" + name_ + "'");
+    throw Exception("Could not find variable '" + variable + "' to get bounds for within joint '" + name_ + ''');
   return it->second;
 }
 

@@ -95,7 +95,7 @@ void GetUrdfService::initialize()
         // Create subgroup urdf
         // Create header
         res->urdf_string = std::string("<?xml version=\"1.0\" ?><robot name=\"") + req->group_name +
-                           std::string("\" xmlns:xacro=\"http://ros.org/wiki/xacro\">");
+                           std::string('\' xmlns:xacro=\"http://ros.org/wiki/xacro\">");
 
         // Create links
         auto link_names = subgroup->getLinkModelNames();

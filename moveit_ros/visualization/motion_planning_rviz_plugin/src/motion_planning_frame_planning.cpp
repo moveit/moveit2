@@ -536,14 +536,14 @@ void MotionPlanningFrame::configureWorkspace()
     {
       if (joint->getType() == moveit::core::JointModel::PLANAR)
       {
-        joint->setVariableBounds(joint->getName() + "/" + joint->getLocalVariableNames()[0], bx);
-        joint->setVariableBounds(joint->getName() + "/" + joint->getLocalVariableNames()[1], by);
+        joint->setVariableBounds(joint->getName() + '/' + joint->getLocalVariableNames()[0], bx);
+        joint->setVariableBounds(joint->getName() + '/' + joint->getLocalVariableNames()[1], by);
       }
       else if (joint->getType() == moveit::core::JointModel::FLOATING)
       {
-        joint->setVariableBounds(joint->getName() + "/" + joint->getLocalVariableNames()[0], bx);
-        joint->setVariableBounds(joint->getName() + "/" + joint->getLocalVariableNames()[1], by);
-        joint->setVariableBounds(joint->getName() + "/" + joint->getLocalVariableNames()[2], bz);
+        joint->setVariableBounds(joint->getName() + '/' + joint->getLocalVariableNames()[0], bx);
+        joint->setVariableBounds(joint->getName() + '/' + joint->getLocalVariableNames()[1], by);
+        joint->setVariableBounds(joint->getName() + '/' + joint->getLocalVariableNames()[2], bz);
       }
     }
   }

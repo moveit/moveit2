@@ -152,14 +152,14 @@ std::string Simulation::getGazeboCompatibleURDF()
       auto actuator_name = joint_name + std::string("_motor");
       auto* actuator = uniqueInsert(doc, *transmission, "actuator", { { "name", actuator_name.c_str() } });
       uniqueInsert(doc, *actuator, "hardwareInterface", {}, hw_interface.c_str());
-      uniqueInsert(doc, *actuator, "mechanicalReduction", {}, "1");
+      uniqueInsert(doc, *actuator, "mechanicalReduction", {}, '1');
     }
   }
 
   // Add gazebo_ros_control plugin which reads the transmission tags
   XMLElement* gazebo = uniqueInsert(doc, *root, "gazebo");
   XMLElement* plugin = uniqueInsert(doc, *gazebo, "plugin", { { "name", "gazebo_ros_control", true } });
-  uniqueInsert(doc, *plugin, "robotNamespace", {}, "/");
+  uniqueInsert(doc, *plugin, "robotNamespace", {}, '/');
 
   // generate new URDF
   std::string new_urdf = printXML(doc);

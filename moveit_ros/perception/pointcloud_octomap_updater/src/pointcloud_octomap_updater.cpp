@@ -94,7 +94,7 @@ void PointCloudOctomapUpdater::start()
 {
   std::string prefix = "";
   if (!ns_.empty())
-    prefix = ns_ + "/";
+    prefix = ns_ + '/';
 
   rclcpp::QoS qos(rclcpp::QoSInitialization::from_rmw(rmw_qos_profile_sensor_data));
   if (!filtered_cloud_topic_.empty())
@@ -241,9 +241,9 @@ void PointCloudOctomapUpdater::cloudMsgCallback(const sensor_msgs::msg::PointClo
     pcd_modifier.resize(cloud_msg->width * cloud_msg->height);
 
     // we have created a filtered_out, so we can create the iterators now
-    iter_filtered_x = std::make_unique<sensor_msgs::PointCloud2Iterator<float>>(*filtered_cloud, "x");
-    iter_filtered_y = std::make_unique<sensor_msgs::PointCloud2Iterator<float>>(*filtered_cloud, "y");
-    iter_filtered_z = std::make_unique<sensor_msgs::PointCloud2Iterator<float>>(*filtered_cloud, "z");
+    iter_filtered_x = std::make_unique<sensor_msgs::PointCloud2Iterator<float>>(*filtered_cloud, 'x');
+    iter_filtered_y = std::make_unique<sensor_msgs::PointCloud2Iterator<float>>(*filtered_cloud, 'y');
+    iter_filtered_z = std::make_unique<sensor_msgs::PointCloud2Iterator<float>>(*filtered_cloud, 'z');
   }
   size_t filtered_cloud_size = 0;
 
@@ -256,7 +256,7 @@ void PointCloudOctomapUpdater::cloudMsgCallback(const sensor_msgs::msg::PointClo
     for (unsigned int row = 0; row < cloud_msg->height; row += point_subsample_)
     {
       unsigned int row_c = row * cloud_msg->width;
-      sensor_msgs::PointCloud2ConstIterator<float> pt_iter(*cloud_msg, "x");
+      sensor_msgs::PointCloud2ConstIterator<float> pt_iter(*cloud_msg, 'x');
       // set iterator to point at start of the current row
       pt_iter += row_c;
 

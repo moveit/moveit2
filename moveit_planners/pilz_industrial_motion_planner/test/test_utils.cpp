@@ -990,12 +990,12 @@ void testutils::getOriChange(Eigen::Matrix3d& ori1, Eigen::Matrix3d& ori2)
 void testutils::createFakeCartTraj(const robot_trajectory::RobotTrajectoryPtr& traj, const std::string& link_name,
                                    moveit_msgs::msg::RobotTrajectory& fake_traj)
 {
-  fake_traj.joint_trajectory.joint_names.push_back("x");
-  fake_traj.joint_trajectory.joint_names.push_back("y");
-  fake_traj.joint_trajectory.joint_names.push_back("z");
-  //  fake_traj.joint_trajectory.joint_names.push_back("a");
-  //  fake_traj.joint_trajectory.joint_names.push_back("b");
-  //  fake_traj.joint_trajectory.joint_names.push_back("c");
+  fake_traj.joint_trajectory.joint_names.push_back('x');
+  fake_traj.joint_trajectory.joint_names.push_back('y');
+  fake_traj.joint_trajectory.joint_names.push_back('z');
+  //  fake_traj.joint_trajectory.joint_names.push_back('a');
+  //  fake_traj.joint_trajectory.joint_names.push_back('b');
+  //  fake_traj.joint_trajectory.joint_names.push_back('c');
 
   for (size_t i = 0; i < traj->getWayPointCount(); ++i)
   {

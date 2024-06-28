@@ -192,7 +192,7 @@ void RobotModelBuilder::addChain(const std::string& section, const std::string& 
     link->name = link_names[i];
     urdf_model_->links_.insert(std::make_pair(link_names[i], link));
     auto joint = std::make_shared<urdf::Joint>();
-    joint->name = link_names[i - 1] + "-" + link_names[i] + "-joint";
+    joint->name = link_names[i - 1] + '-' + link_names[i] + "-joint";
     // Default to Identity transform for origins.
     joint->parent_to_joint_origin_transform.clear();
     if (!joint_origins.empty())
@@ -367,7 +367,7 @@ void RobotModelBuilder::addVirtualJoint(const std::string& parent_frame, const s
   srdf::Model::VirtualJoint new_virtual_joint;
   if (name.empty())
   {
-    new_virtual_joint.name_ = parent_frame + "-" + child_link + "-virtual_joint";
+    new_virtual_joint.name_ = parent_frame + '-' + child_link + "-virtual_joint";
   }
   else
   {
@@ -384,7 +384,7 @@ void RobotModelBuilder::addGroupChain(const std::string& base_link, const std::s
   srdf::Model::Group new_group;
   if (name.empty())
   {
-    new_group.name_ = base_link + "-" + tip_link + "-chain-group";
+    new_group.name_ = base_link + '-' + tip_link + "-chain-group";
   }
   else
   {

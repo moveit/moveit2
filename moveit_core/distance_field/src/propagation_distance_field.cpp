@@ -105,7 +105,7 @@ void PropagationDistanceField::initialize()
 
 void PropagationDistanceField::print(const VoxelSet& set)
 {
-  RCLCPP_DEBUG(getLogger(), "[");
+  RCLCPP_DEBUG(getLogger(), '[');
   VoxelSet::const_iterator it;
   for (it = set.begin(); it != set.end(); ++it)
   {
@@ -117,7 +117,7 @@ void PropagationDistanceField::print(const VoxelSet& set)
 
 void PropagationDistanceField::print(const EigenSTL::vector_Vector3d& points)
 {
-  RCLCPP_DEBUG(getLogger(), "[");
+  RCLCPP_DEBUG(getLogger(), '[');
   EigenSTL::vector_Vector3d::const_iterator it;
   for (it = points.begin(); it != points.end(); ++it)
   {
@@ -483,11 +483,11 @@ void PropagationDistanceField::propagateNegative()
         int new_distance_sq = (vptr->closest_negative_point_ - nloc).squaredNorm();
         if (new_distance_sq > max_distance_sq_)
           continue;
-        // std::cout << "Looking at " << nloc.x() << " " << nloc.y() << " " << nloc.z() << " " << new_distance_sq << " "
+        // std::cout << "Looking at " << nloc.x() << ' ' << nloc.y() << ' ' << nloc.z() << ' ' << new_distance_sq << ' '
         // << neighbor->negative_distance_square_ << '\n';
         if (new_distance_sq < neighbor->negative_distance_square_)
         {
-          // std::cout << "Updating " << nloc.x() << " " << nloc.y() << " " << nloc.z() << " " << new_distance_sq <<
+          // std::cout << "Updating " << nloc.x() << ' ' << nloc.y() << ' ' << nloc.z() << ' ' << new_distance_sq <<
           // '\n';
           // update the neighboring voxel
           neighbor->negative_distance_square_ = new_distance_sq;
@@ -660,7 +660,7 @@ bool PropagationDistanceField::writeToStream(std::ostream& os) const
         {
           if (getCell(x, y, z + zi).distance_square_ == 0)
           {
-            // std::cout << "Marking obs cell " << x << " " << y << " " << z+zi << '\n';
+            // std::cout << "Marking obs cell " << x << ' ' << y << ' ' << z+zi << '\n';
             bs[zi] = 1;
           }
         }
@@ -727,7 +727,7 @@ bool PropagationDistanceField::readFromStream(std::istream& is)
   in.push(boost::iostreams::zlib_decompressor());
   in.push(is);
 
-  // std::cout << "Nums " << getXNumCells() << " " << getYNumCells() << " " << getZNumCells() << '\n';
+  // std::cout << "Nums " << getXNumCells() << ' ' << getYNumCells() << ' ' << getZNumCells() << '\n';
 
   EigenSTL::vector_Vector3i obs_points;
   for (unsigned int x = 0; x < static_cast<unsigned int>(getXNumCells()); ++x)
@@ -748,7 +748,7 @@ bool PropagationDistanceField::readFromStream(std::istream& is)
         {
           if (inbit[zi] == 1)
           {
-            // std::cout << "Adding obs cell " << x << " " << y << " " << z+zi << '\n';
+            // std::cout << "Adding obs cell " << x << ' ' << y << ' ' << z+zi << '\n';
             obs_points.push_back(Eigen::Vector3i(x, y, z + zi));
           }
         }

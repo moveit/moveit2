@@ -84,7 +84,7 @@ public:
     planning_interface::PlannerConfigurationSettings pconfig_settings;
     pconfig_settings.group = group_name_;
     pconfig_settings.name = group_name_;
-    pconfig_settings.config = { { "enforce_joint_model_state_space", "0" } };
+    pconfig_settings.config = { { "enforce_joint_model_state_space", '0' } };
 
     planning_interface::PlannerConfigurationMap pconfig_map{ { pconfig_settings.name, pconfig_settings } };
     moveit_msgs::msg::MoveItErrorCodes error_code;
@@ -122,8 +122,8 @@ public:
     planning_interface::PlannerConfigurationSettings pconfig_settings;
     pconfig_settings.group = group_name_;
     pconfig_settings.name = group_name_;
-    pconfig_settings.config = { { "enforce_joint_model_state_space", "0" },
-                                { "projection_evaluator", "joints(" + joint_names[0] + "," + joint_names[1] + ")" },
+    pconfig_settings.config = { { "enforce_joint_model_state_space", '0' },
+                                { "projection_evaluator", "joints(" + joint_names[0] + ',' + joint_names[1] + ')' },
                                 { "type", "geometric::PRM" } };
 
     planning_interface::PlannerConfigurationMap pconfig_map{ { pconfig_settings.name, pconfig_settings } };

@@ -72,7 +72,7 @@ protected:
   void SetUp() override;
 
 protected:
-  ros::NodeHandle ph_{ "~" };
+  ros::NodeHandle ph_{ '~' };
   ros::ServiceClient client_;
   robot_model::RobotModelPtr robot_model_;
 

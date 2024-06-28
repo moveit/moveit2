@@ -476,7 +476,7 @@ void PR2ArmIK::computeIKShoulderRoll(const Eigen::Isometry3f& g_in, const double
                                      std::vector<std::vector<double> >& solution) const
 {
   std::vector<double> solution_ik(NUM_JOINTS_ARM7DOF, 0.0);
-  //  ROS_INFO(" ");
+  //  ROS_INFO(' ');
   // solution_ik_.clear();
   //  ROS_INFO("Solution IK size: %d",solution_ik_.size());
   //  for(unsigned int i=0; i < solution_ik_.size(); ++i)

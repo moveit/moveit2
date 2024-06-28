@@ -523,11 +523,11 @@ void MotionPlanningFrame::addSceneObject()
 
   // find available (initial) name of object
   int idx = 0;
-  std::string shape_name = selected_shape + "_" + std::to_string(idx);
+  std::string shape_name = selected_shape + '_' + std::to_string(idx);
   while (planning_display_->getPlanningSceneRO()->getWorld()->hasObject(shape_name))
   {
     idx++;
-    shape_name = selected_shape + "_" + std::to_string(idx);
+    shape_name = selected_shape + '_' + std::to_string(idx);
   }
 
   // Actually add object to the plugin's PlanningScene

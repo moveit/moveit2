@@ -324,7 +324,7 @@ void ConstraintsLibrary::loadConstraintApproximations(const std::string& path)
     moveit_msgs::msg::Constraints msg;
     hexToMsg(serialization, msg);
     auto* cass = new ConstraintApproximationStateStorage(context_->getOMPLSimpleSetup()->getStateSpace());
-    cass->load((std::string{ path }.append("/").append(filename)).c_str());
+    cass->load((std::string{ path }.append('/').append(filename)).c_str());
     auto cap = std::make_shared<ConstraintApproximation>(group, state_space_parameterization, explicit_motions, msg,
                                                          filename, ompl::base::StateStoragePtr(cass), milestones);
     if (constraint_approximations_.find(cap->getName()) != constraint_approximations_.end())
@@ -370,7 +370,7 @@ void ConstraintsLibrary::saveConstraintApproximations(const std::string& path)
       fout << serialization << '\n';
       fout << it->second->getFilename() << '\n';
       if (it->second->getStateStorage())
-        it->second->getStateStorage()->store((path + "/" + it->second->getFilename()).c_str());
+        it->second->getStateStorage()->store((path + '/' + it->second->getFilename()).c_str());
     }
   }
   else
@@ -446,7 +446,7 @@ ConstraintApproximationConstructionResults ConstraintsLibrary::addConstraintAppr
   {
     auto constraint_approx = std::make_shared<ConstraintApproximation>(
         group, options.state_space_parameterization, options.explicit_motions, constr_hard,
-        group + "_" + boost::posix_time::to_iso_extended_string(boost::posix_time::microsec_clock::universal_time()) +
+        group + '_' + boost::posix_time::to_iso_extended_string(boost::posix_time::microsec_clock::universal_time()) +
             ".ompldb",
         state_storage, res.milestones);
     if (constraint_approximations_.find(constraint_approx->getName()) != constraint_approximations_.end())

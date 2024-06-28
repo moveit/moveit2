@@ -408,10 +408,10 @@ void ProgressBarDelegate::paint(QPainter* painter, const QStyleOptionViewItem& o
       switch (joint_type.toInt())
       {
         case moveit::core::JointModel::REVOLUTE:
-          style_option.text = option.locale.toString(value * 180 / M_PI, 'f', 0).append("°");
+          style_option.text = option.locale.toString(value * 180 / M_PI, 'f', 0).append('°');
           break;
         case moveit::core::JointModel::PRISMATIC:
-          style_option.text = option.locale.toString(value, 'f', 3).append("m");
+          style_option.text = option.locale.toString(value, 'f', 3).append('m');
           break;
         default:
           break;

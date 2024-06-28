@@ -138,7 +138,7 @@ bool OMPLInterface::loadPlannerConfiguration(const std::string& group_name, cons
     return false;
   }
 
-  planner_config.name = group_name + "[" + planner_id + "]";
+  planner_config.name = group_name + '[' + planner_id + ']';
   planner_config.group = group_name;
 
   // default to specified parameters of the group (overridden by configuration specific parameters)
@@ -172,14 +172,14 @@ void OMPLInterface::loadPlannerConfigurations()
       { "enforce_constrained_state_space", rclcpp::ParameterType::PARAMETER_BOOL }
     };
 
-    const std::string group_name_param = parameter_namespace_ + "." + group_name;
+    const std::string group_name_param = parameter_namespace_ + '.' + group_name;
 
     // get parameters specific for the robot planning group
     std::map<std::string, std::string> specific_group_params;
     for (const auto& [name, type] : KNOWN_GROUP_PARAMS)
     {
       std::string param_name{ group_name_param };
-      param_name += ".";
+      param_name += '.';
       param_name += name;
       if (node_->has_parameter(param_name))
       {

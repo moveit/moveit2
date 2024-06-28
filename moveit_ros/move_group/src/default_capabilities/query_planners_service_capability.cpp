@@ -140,7 +140,7 @@ void MoveGroupQueryPlannersService::getParams(const std::shared_ptr<moveit_msgs:
 
   if (!req->group.empty())
   {  // merge in group-specific params
-    it = configs.find(req->group + "[" + req->planner_config + "]");
+    it = configs.find(req->group + '[' + req->planner_config + ']');
     if (it != configs.end())
     {
       config.insert(it->second.config.begin(), it->second.config.end());
@@ -188,7 +188,7 @@ void MoveGroupQueryPlannersService::setParams(
 
   planning_interface::PlannerConfigurationMap configs = planner_interface->getPlannerConfigurations();
   const std::string config_name =
-      req->group.empty() ? req->planner_config : req->group + "[" + req->planner_config + "]";
+      req->group.empty() ? req->planner_config : req->group + '[' + req->planner_config + ']';
 
   planning_interface::PlannerConfigurationSettings& config = configs[config_name];
   config.group = req->group;

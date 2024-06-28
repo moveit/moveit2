@@ -75,7 +75,7 @@ PoseModelStateSpace::PoseModelStateSpace(const ModelBasedStateSpaceSpecification
   {
     std::sort(poses_.begin(), poses_.end());
   }
-  setName(getName() + "_" + PARAMETERIZATION_TYPE);
+  setName(getName() + '_' + PARAMETERIZATION_TYPE);
 }
 
 PoseModelStateSpace::~PoseModelStateSpace() = default;
@@ -233,7 +233,7 @@ bool PoseModelStateSpace::PoseComponent::computeStateIK(StateType* full_state, u
   /*
   std::cout << "seed: ";
   for (std::size_t i = 0 ; i < seed_values.size() ; ++i)
-    std::cout << seed_values[i] << " ";
+    std::cout << seed_values[i] << ' ';
   std::cout << '\n';
   */
 

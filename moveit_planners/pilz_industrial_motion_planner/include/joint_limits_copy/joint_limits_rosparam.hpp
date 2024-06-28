@@ -44,7 +44,7 @@ namespace joint_limits
 inline bool declareParameters(const std::string& joint_name, const rclcpp::Node::SharedPtr& node,
                               const std::string& param_ns)
 {
-  const std::string param_base_name = (param_ns.empty() ? "" : param_ns + ".") + "joint_limits." + joint_name;
+  const std::string param_base_name = (param_ns.empty() ? "" : param_ns + '.') + "joint_limits." + joint_name;
 
   try
   {
@@ -112,7 +112,7 @@ inline bool declareParameters(const std::string& joint_name, const rclcpp::Node:
 inline bool getJointLimits(const std::string& joint_name, const rclcpp::Node::SharedPtr& node,
                            const std::string& param_ns, JointLimits& limits)
 {
-  const std::string param_base_name = (param_ns.empty() ? "" : param_ns + ".") + "joint_limits." + joint_name;
+  const std::string param_base_name = (param_ns.empty() ? "" : param_ns + '.') + "joint_limits." + joint_name;
   try
   {
     if (!node->has_parameter(param_base_name + ".has_position_limits") &&
@@ -257,7 +257,7 @@ inline bool getJointLimits(const std::string& joint_name, const rclcpp::Node::Sh
 inline bool getJointLimits(const std::string& joint_name, const rclcpp::Node::SharedPtr& node,
                            const std::string& param_ns, SoftJointLimits& soft_limits)
 {
-  const std::string param_base_name = (param_ns.empty() ? "" : param_ns + ".") + "joint_limits." + joint_name;
+  const std::string param_base_name = (param_ns.empty() ? "" : param_ns + '.') + "joint_limits." + joint_name;
   try
   {
     if (!node->has_parameter(param_base_name + ".has_soft_limits") &&

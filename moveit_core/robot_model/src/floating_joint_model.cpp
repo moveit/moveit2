@@ -72,7 +72,7 @@ FloatingJointModel::FloatingJointModel(const std::string& name, size_t joint_ind
   local_variable_names_.push_back("rot_w");
   for (size_t i = 0; i < STATE_SPACE_DIMENSION; ++i)
   {
-    variable_names_.push_back(getName() + "/" + local_variable_names_[i]);
+    variable_names_.push_back(getName() + '/' + local_variable_names_[i]);
     variable_index_map_[variable_names_.back()] = i;
   }
 

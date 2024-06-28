@@ -86,8 +86,8 @@ void IKCache::initializeCache(const std::string& robot_id, const std::string& gr
   // create cache directory if necessary
   std::filesystem::create_directories(prefix);
 
-  cache_file_name_ = prefix / (robot_id + group_name + "_" + cache_name + "_" + std::to_string(max_cache_size_) + "_" +
-                               std::to_string(min_pose_distance_) + "_" +
+  cache_file_name_ = prefix / (robot_id + group_name + '_' + cache_name + '_' + std::to_string(max_cache_size_) + '_' +
+                               std::to_string(min_pose_distance_) + '_' +
                                std::to_string(std::sqrt(min_config_distance2_)) + ".ikcache");
 
   ik_cache_.clear();

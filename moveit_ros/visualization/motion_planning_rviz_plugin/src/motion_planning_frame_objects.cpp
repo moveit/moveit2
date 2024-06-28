@@ -65,7 +65,7 @@ QString subframePosesToQstring(const moveit::core::FixedTransformsMap& subframes
     status_text += QString::fromStdString(subframe.first) + "', '";
   }
   status_text.chop(3);
-  status_text += ".";
+  status_text += '.';
   return status_text;
 }
 }  // namespace
@@ -241,7 +241,7 @@ void MotionPlanningFrame::removeSceneObject()
 
 static QString decideStatusText(const collision_detection::CollisionEnv::ObjectConstPtr& obj)
 {
-  QString status_text = "'" + QString::fromStdString(obj->id_) + "' is a collision object with ";
+  QString status_text = ''' + QString::fromStdString(obj->id_) + "' is a collision object with ";
   if (obj->shapes_.empty())
   {
     status_text += "no geometry";
@@ -259,9 +259,9 @@ static QString decideStatusText(const collision_detection::CollisionEnv::ObjectC
     {
       status_text += QString::fromStdString(std::to_string(shape_names.size())) + " shapes:";
       for (const QString& shape_name : shape_names)
-        status_text += " " + shape_name;
+        status_text += ' ' + shape_name;
     }
-    status_text += ".";
+    status_text += '.';
   }
   if (!obj->subframe_poses_.empty())
   {
@@ -272,7 +272,7 @@ static QString decideStatusText(const collision_detection::CollisionEnv::ObjectC
 
 static QString decideStatusText(const moveit::core::AttachedBody* attached_body)
 {
-  QString status_text = "'" + QString::fromStdString(attached_body->getName()) + "' is attached to '" +
+  QString status_text = ''' + QString::fromStdString(attached_body->getName()) + "' is attached to '" +
                         QString::fromStdString(attached_body->getAttachedLinkName()) + "'.";
   if (!attached_body->getSubframes().empty())
   {
@@ -512,7 +512,7 @@ void MotionPlanningFrame::copySelectedCollisionObject()
     name.insert(0, "Copy of ");
     if (ps->getWorld()->hasObject(name))
     {
-      name += " ";
+      name += ' ';
       unsigned int n = 1;
       while (ps->getWorld()->hasObject(name + std::to_string(n)))
         n++;

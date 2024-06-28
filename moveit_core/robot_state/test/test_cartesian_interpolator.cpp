@@ -49,10 +49,10 @@ class SimpleRobot : public testing::Test
 protected:
   void SetUp() override
   {
-    RobotModelBuilder builder("simple", "a");
+    RobotModelBuilder builder("simple", 'a');
     builder.addChain("a->b", "continuous");
     builder.addChain("b->c", "prismatic");
-    builder.addGroupChain("a", "c", "group");
+    builder.addGroupChain('a', 'c', "group");
     robot_model_ = builder.build();
   }
 

@@ -172,9 +172,9 @@ void point_containment_filter::ShapeMask::maskContainment(const sensor_msgs::msg
     const double radius_squared = bound.radius * bound.radius;
 
     // we now decide which points we keep
-    sensor_msgs::PointCloud2ConstIterator<float> iter_x(data_in, "x");
-    sensor_msgs::PointCloud2ConstIterator<float> iter_y(data_in, "y");
-    sensor_msgs::PointCloud2ConstIterator<float> iter_z(data_in, "z");
+    sensor_msgs::PointCloud2ConstIterator<float> iter_x(data_in, 'x');
+    sensor_msgs::PointCloud2ConstIterator<float> iter_y(data_in, 'y');
+    sensor_msgs::PointCloud2ConstIterator<float> iter_z(data_in, 'z');
 
     // Cloud iterators are not incremented in the for loop, because of the pragma
     // Comment out below parallelization as it can result in very high CPU consumption

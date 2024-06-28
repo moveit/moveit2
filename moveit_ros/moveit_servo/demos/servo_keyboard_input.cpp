@@ -257,46 +257,46 @@ int KeyboardServo::keyLoop()
         publish_twist = true;
         break;
       case KEYCODE_1:
-        RCLCPP_DEBUG(nh_->get_logger(), "1");
+        RCLCPP_DEBUG(nh_->get_logger(), '1');
         joint_msg->velocities[0] = joint_vel_cmd_;
         publish_joint = true;
         break;
       case KEYCODE_2:
-        RCLCPP_DEBUG(nh_->get_logger(), "2");
+        RCLCPP_DEBUG(nh_->get_logger(), '2');
         joint_msg->velocities[1] = joint_vel_cmd_;
         publish_joint = true;
         break;
       case KEYCODE_3:
-        RCLCPP_DEBUG(nh_->get_logger(), "3");
+        RCLCPP_DEBUG(nh_->get_logger(), '3');
         joint_msg->velocities[2] = joint_vel_cmd_;
         publish_joint = true;
         break;
       case KEYCODE_4:
-        RCLCPP_DEBUG(nh_->get_logger(), "4");
+        RCLCPP_DEBUG(nh_->get_logger(), '4');
         joint_msg->velocities[3] = joint_vel_cmd_;
         publish_joint = true;
         break;
       case KEYCODE_5:
-        RCLCPP_DEBUG(nh_->get_logger(), "5");
+        RCLCPP_DEBUG(nh_->get_logger(), '5');
         joint_msg->velocities[4] = joint_vel_cmd_;
         publish_joint = true;
         break;
       case KEYCODE_6:
-        RCLCPP_DEBUG(nh_->get_logger(), "6");
+        RCLCPP_DEBUG(nh_->get_logger(), '6');
         joint_msg->velocities[5] = joint_vel_cmd_;
         publish_joint = true;
         break;
       case KEYCODE_7:
-        RCLCPP_DEBUG(nh_->get_logger(), "7");
+        RCLCPP_DEBUG(nh_->get_logger(), '7');
         joint_msg->velocities[6] = joint_vel_cmd_;
         publish_joint = true;
         break;
       case KEYCODE_R:
-        RCLCPP_DEBUG(nh_->get_logger(), "r");
+        RCLCPP_DEBUG(nh_->get_logger(), 'r');
         joint_vel_cmd_ *= -1;
         break;
       case KEYCODE_J:
-        RCLCPP_DEBUG(nh_->get_logger(), "j");
+        RCLCPP_DEBUG(nh_->get_logger(), 'j');
         request_ = std::make_shared<moveit_msgs::srv::ServoCommandType::Request>();
         request_->command_type = moveit_msgs::srv::ServoCommandType::Request::JOINT_JOG;
         if (switch_input_->wait_for_service(std::chrono::seconds(1)))
@@ -313,7 +313,7 @@ int KeyboardServo::keyLoop()
         }
         break;
       case KEYCODE_T:
-        RCLCPP_DEBUG(nh_->get_logger(), "t");
+        RCLCPP_DEBUG(nh_->get_logger(), 't');
         request_ = std::make_shared<moveit_msgs::srv::ServoCommandType::Request>();
         request_->command_type = moveit_msgs::srv::ServoCommandType::Request::TWIST;
         if (switch_input_->wait_for_service(std::chrono::seconds(1)))
@@ -330,12 +330,12 @@ int KeyboardServo::keyLoop()
         }
         break;
       case KEYCODE_W:
-        RCLCPP_DEBUG(nh_->get_logger(), "w");
+        RCLCPP_DEBUG(nh_->get_logger(), 'w');
         RCLCPP_INFO_STREAM(nh_->get_logger(), "Command frame set to: " << PLANNING_FRAME_ID);
         command_frame_id_ = PLANNING_FRAME_ID;
         break;
       case KEYCODE_E:
-        RCLCPP_DEBUG(nh_->get_logger(), "e");
+        RCLCPP_DEBUG(nh_->get_logger(), 'e');
         RCLCPP_INFO_STREAM(nh_->get_logger(), "Command frame set to: " << EE_FRAME_ID);
         command_frame_id_ = EE_FRAME_ID;
         break;

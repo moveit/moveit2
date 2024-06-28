@@ -66,7 +66,7 @@ void publishSubframes(tf2_ros::TransformBroadcaster& broadcaster, const moveit::
   for (auto& subframe : subframes)
   {
     transform = tf2::eigenToTransform(subframe.second);
-    transform.child_frame_id = parent_object + "/" + subframe.first;
+    transform.child_frame_id = parent_object + '/' + subframe.first;
     transform.header.stamp = stamp;
     transform.header.frame_id = parent_object;
     broadcaster.sendTransform(transform);
@@ -128,7 +128,7 @@ void TfPublisher::initialize()
   context_->moveit_cpp_->getNode()->get_parameter_or("planning_scene_frame_publishing_rate", rate_, 10);
   context_->moveit_cpp_->getNode()->get_parameter_or("planning_scene_tf_prefix", prefix_, prefix);
   if (!prefix_.empty())
-    prefix_ += "/";
+    prefix_ += '/';
 
   keep_running_ = true;
 

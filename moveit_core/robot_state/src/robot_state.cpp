@@ -2389,7 +2389,7 @@ void RobotState::printTransform(const Eigen::Isometry3d& transform, std::ostream
   {
     out << "[NON-ISOMETRY] "
         << transform.matrix().format(
-               Eigen::IOFormat(Eigen::StreamPrecision, Eigen::DontAlignCols, ", ", "; ", "", "", "[", "]"));
+               Eigen::IOFormat(Eigen::StreamPrecision, Eigen::DontAlignCols, ", ", "; ", "", "", '[', ']'));
   }
   out << '\n';
 }

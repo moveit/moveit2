@@ -96,7 +96,7 @@ int main(int argc, char** argv)
   // Create Qt Application
   QApplication qt_app(argc, argv);
   // numeric values should always be POSIX
-  setlocale(LC_NUMERIC, "C");
+  setlocale(LC_NUMERIC, 'C');
 
   // Load Qt Widget
   moveit_setup::assistant::SetupAssistantWidget saw(node, nullptr, vm);

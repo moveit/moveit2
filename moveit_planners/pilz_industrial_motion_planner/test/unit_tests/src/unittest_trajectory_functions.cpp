@@ -223,7 +223,7 @@ TEST_F(TrajectoryFunctionsTestFlangeAndGripper, testIKSolver)
 
   if (!solver)
   {
-    throw("No IK solver configured for group '" + planning_group_ + "'");
+    throw("No IK solver configured for group '" + planning_group_ + ''');
   }
   // robot state
   moveit::core::RobotState rstate(robot_model_);

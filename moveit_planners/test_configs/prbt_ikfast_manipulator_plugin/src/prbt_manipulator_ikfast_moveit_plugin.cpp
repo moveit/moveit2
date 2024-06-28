@@ -1017,7 +1017,7 @@ bool IKFastKinematicsPlugin::searchPositionIK(const geometry_msgs::msg::Pose& ik
             break;
           }
           // RCLCPP_INFO_STREAM(LOGGER,"Num " << i << " value " << sol[i] << " has limits " <<
-          // joint_has_limits_vector_[i] << " " << joint_min_vector_[i] << " " << joint_max_vector_[i]);
+          // joint_has_limits_vector_[i] << ' ' << joint_min_vector_[i] << ' ' << joint_max_vector_[i]);
         }
         if (obeys_limits)
         {

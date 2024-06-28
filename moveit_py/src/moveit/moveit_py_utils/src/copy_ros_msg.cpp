@@ -56,13 +56,13 @@ geometry_msgs::msg::Pose poseToCpp(const py::object& pose)
 {
   // recreate instance in C++ using python object data
   geometry_msgs::msg::Pose pose_cpp;
-  pose_cpp.orientation.w = pose.attr("orientation").attr("w").cast<double>();
-  pose_cpp.orientation.x = pose.attr("orientation").attr("x").cast<double>();
-  pose_cpp.orientation.y = pose.attr("orientation").attr("y").cast<double>();
-  pose_cpp.orientation.z = pose.attr("orientation").attr("z").cast<double>();
-  pose_cpp.position.x = pose.attr("position").attr("x").cast<double>();
-  pose_cpp.position.y = pose.attr("position").attr("y").cast<double>();
-  pose_cpp.position.z = pose.attr("position").attr("z").cast<double>();
+  pose_cpp.orientation.w = pose.attr("orientation").attr('w').cast<double>();
+  pose_cpp.orientation.x = pose.attr("orientation").attr('x').cast<double>();
+  pose_cpp.orientation.y = pose.attr("orientation").attr('y').cast<double>();
+  pose_cpp.orientation.z = pose.attr("orientation").attr('z').cast<double>();
+  pose_cpp.position.x = pose.attr("position").attr('x').cast<double>();
+  pose_cpp.position.y = pose.attr("position").attr('y').cast<double>();
+  pose_cpp.position.z = pose.attr("position").attr('z').cast<double>();
 
   return pose_cpp;
 }
@@ -72,13 +72,13 @@ py::object poseToPy(geometry_msgs::msg::Pose pose)
   // recreate instance in Python using C++ object data
   py::object pose_py = py::module_::import("geometry_msgs.msg").attr("Pose")();
 
-  pose_py.attr("orientation").attr("w") = pose.orientation.w;
-  pose_py.attr("orientation").attr("x") = pose.orientation.x;
-  pose_py.attr("orientation").attr("y") = pose.orientation.y;
-  pose_py.attr("orientation").attr("z") = pose.orientation.z;
-  pose_py.attr("position").attr("x") = pose.position.x;
-  pose_py.attr("position").attr("y") = pose.position.y;
-  pose_py.attr("position").attr("z") = pose.position.z;
+  pose_py.attr("orientation").attr('w') = pose.orientation.w;
+  pose_py.attr("orientation").attr('x') = pose.orientation.x;
+  pose_py.attr("orientation").attr('y') = pose.orientation.y;
+  pose_py.attr("orientation").attr('z') = pose.orientation.z;
+  pose_py.attr("position").attr('x') = pose.position.x;
+  pose_py.attr("position").attr('y') = pose.position.y;
+  pose_py.attr("position").attr('z') = pose.position.z;
 
   return pose_py;
 }
@@ -87,9 +87,9 @@ geometry_msgs::msg::Point pointToCpp(const py::object& point)
 {
   // recreate instance in C++ using python object data
   geometry_msgs::msg::Point point_cpp;
-  point_cpp.x = point.attr("x").cast<double>();
-  point_cpp.y = point.attr("y").cast<double>();
-  point_cpp.z = point.attr("z").cast<double>();
+  point_cpp.x = point.attr('x').cast<double>();
+  point_cpp.y = point.attr('y').cast<double>();
+  point_cpp.z = point.attr('z').cast<double>();
 
   return point_cpp;
 }
@@ -98,9 +98,9 @@ geometry_msgs::msg::Vector3 vector3ToCpp(const py::object& vector3)
 {
   // recreate instance in C++ using python object data
   geometry_msgs::msg::Vector3 vector3_cpp;
-  vector3_cpp.x = vector3.attr("x").cast<double>();
-  vector3_cpp.y = vector3.attr("y").cast<double>();
-  vector3_cpp.z = vector3.attr("z").cast<double>();
+  vector3_cpp.x = vector3.attr('x').cast<double>();
+  vector3_cpp.y = vector3.attr('y').cast<double>();
+  vector3_cpp.z = vector3.attr('z').cast<double>();
 
   return vector3_cpp;
 }
@@ -109,10 +109,10 @@ geometry_msgs::msg::Quaternion quaternionToCpp(const py::object& quaternion)
 {
   // recreate instance in C++ using python object data
   geometry_msgs::msg::Quaternion quaternion_cpp;
-  quaternion_cpp.w = quaternion.attr("w").cast<double>();
-  quaternion_cpp.x = quaternion.attr("x").cast<double>();
-  quaternion_cpp.y = quaternion.attr("y").cast<double>();
-  quaternion_cpp.z = quaternion.attr("z").cast<double>();
+  quaternion_cpp.w = quaternion.attr('w').cast<double>();
+  quaternion_cpp.x = quaternion.attr('x').cast<double>();
+  quaternion_cpp.y = quaternion.attr('y').cast<double>();
+  quaternion_cpp.z = quaternion.attr('z').cast<double>();
 
   return quaternion_cpp;
 }

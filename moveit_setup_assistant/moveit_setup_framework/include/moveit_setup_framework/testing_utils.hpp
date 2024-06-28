@@ -132,7 +132,7 @@ void expectYamlEquivalence(const YAML::Node& generated, const YAML::Node& refere
     }
     for (std::size_t i = 0; i < generated.size(); ++i)
     {
-      std::string sub_namespace = yaml_namespace + "[" + std::to_string(i) + "]";
+      std::string sub_namespace = yaml_namespace + '[' + std::to_string(i) + ']';
       expectYamlEquivalence(generated[i], reference[i], generated_path, sub_namespace);
     }
   }
@@ -149,15 +149,15 @@ void expectYamlEquivalence(const YAML::Node& generated, const YAML::Node& refere
 
     for (const std::string& key : missing_keys)
     {
-      ADD_FAILURE() << msg_prefix << "is missing the key '" << key << "'";
+      ADD_FAILURE() << msg_prefix << "is missing the key '" << key << ''';
     }
     for (const std::string& key : extra_keys)
     {
-      ADD_FAILURE() << msg_prefix << "has an extra key '" << key << "'";
+      ADD_FAILURE() << msg_prefix << "has an extra key '" << key << ''';
     }
     for (const std::string& key : common_keys)
     {
-      std::string sub_namespace = yaml_namespace + "/" + key;
+      std::string sub_namespace = yaml_namespace + '/' + key;
       expectYamlEquivalence(generated[key], reference[key], generated_path, sub_namespace);
     }
   }

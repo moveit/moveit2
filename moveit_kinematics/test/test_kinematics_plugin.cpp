@@ -312,7 +312,7 @@ public:
 };
 
 #define EXPECT_NEAR_POSES(lhs, rhs, near)                                                                              \
-  SCOPED_TRACE("EXPECT_NEAR_POSES(" #lhs ", " #rhs ")");                                                               \
+  SCOPED_TRACE("EXPECT_NEAR_POSES(" #lhs ", " #rhs ')');                                                               \
   GTEST_ASSERT_(expectNearHelper(#lhs, #rhs, #near, lhs, rhs, near), GTEST_NONFATAL_FAILURE_);
 
 TEST_F(KinematicsTest, getFK)
@@ -498,7 +498,7 @@ TEST_F(KinematicsTest, unitIK)
   for (size_t i = 0; i < expected_test_poses; ++i)  // NOLINT(modernize-loop-convert)
   {
     const std::string pose_name = "pose_" + std::to_string(i);
-    const std::string pose_param = TEST_POSES_PARAM + "." + pose_name;  // NOLINT
+    const std::string pose_param = TEST_POSES_PARAM + '.' + pose_name;  // NOLINT
     goal = initial;                                                     // reset goal to initial
     ground_truth.clear();
 

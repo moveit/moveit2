@@ -72,19 +72,19 @@ void parseStart(std::istream& in, planning_scene_monitor::PlanningSceneMonitor* 
         std::string marker;
         double value;
         in >> joint;
-        while (joint != "." && in.good() && !in.eof())
+        while (joint != '.' && in.good() && !in.eof())
         {
           in >> marker;
-          if (marker != "=")
+          if (marker != '=')
           {
-            joint = ".";
+            joint = '.';
           }
           else
           {
             in >> value;
             v[joint] = value;
           }
-          if (joint != ".")
+          if (joint != '.')
             in >> joint;
         }
       }
@@ -120,7 +120,7 @@ void parseLinkConstraint(std::istream& in, planning_scene_monitor::PlanningScene
   std::string type;
   in >> type;
 
-  while (type != "." && in.good() && !in.eof())
+  while (type != '.' && in.good() && !in.eof())
   {
     if (type == "xyz")
     {

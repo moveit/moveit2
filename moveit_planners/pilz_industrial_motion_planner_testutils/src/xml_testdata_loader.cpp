@@ -208,11 +208,11 @@ const pt::ptree::value_type& XmlTestdataLoader::findNodeWithName(const boost::pr
   std::string msg;
   msg.append("Node of type \"")
       .append(key)
-      .append("\" with ")
+      .append('\' with ")
       .append(path_str)
       .append("=\"")
       .append(name)
-      .append("\" "
+      .append('\' "
               "not "
               "foun"
               "d.");
@@ -241,7 +241,7 @@ JointConfiguration XmlTestdataLoader::getJoints(const boost::property_tree::ptre
   const auto& joint_node{ findNodeWithName(joints_tree, group_name, JOINT_STR, GROUP_NAME_PATH_STR) };
 
   std::vector<std::string> strs;
-  boost::split(strs, joint_node.second.data(), boost::is_any_of(" "));
+  boost::split(strs, joint_node.second.data(), boost::is_any_of(' '));
   return JointConfiguration(group_name, strVec2doubleVec(strs), robot_model_);
 }
 
@@ -265,7 +265,7 @@ CartesianConfiguration XmlTestdataLoader::getPose(const std::string& pos_name, c
   boost::trim(data);
 
   std::vector<std::string> pos_ori_str;
-  boost::split(pos_ori_str, data, boost::is_any_of(" "));
+  boost::split(pos_ori_str, data, boost::is_any_of(' '));
   CartesianConfiguration cart_config{ CartesianConfiguration(group_name, link_name_attr.data(),
                                                              strVec2doubleVec(pos_ori_str), robot_model_) };
 

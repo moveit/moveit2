@@ -479,11 +479,11 @@ static bool constructConstraint(const rclcpp::Node::SharedPtr& node, const std::
       return true;
     };
 
-    if (!parse_dimension("x", region_pose.position.x,
+    if (!parse_dimension('x', region_pose.position.x,
                          region_primitive.dimensions[shape_msgs::msg::SolidPrimitive::BOX_X]) ||
-        !parse_dimension("y", region_pose.position.y,
+        !parse_dimension('y', region_pose.position.y,
                          region_primitive.dimensions[shape_msgs::msg::SolidPrimitive::BOX_Y]) ||
-        !parse_dimension("z", region_pose.position.z,
+        !parse_dimension('z', region_pose.position.z,
                          region_primitive.dimensions[shape_msgs::msg::SolidPrimitive::BOX_Z]))
       return false;
 
@@ -614,7 +614,7 @@ bool constructConstraints(const rclcpp::Node::SharedPtr& node, const std::string
     return false;
 
   for (auto& constraint_id : constraint_ids)
-    constraint_id.insert(0, constraints_param + std::string("."));
+    constraint_id.insert(0, constraints_param + std::string('.'));
 
   return collectConstraints(node, constraint_ids, constraints);
 }

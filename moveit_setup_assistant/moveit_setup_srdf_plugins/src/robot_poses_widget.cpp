@@ -212,7 +212,7 @@ QWidget* RobotPosesWidget::createEditWidget()
   collision_warning_ = new QLabel("<font color='red'><b>Robot in Collision State</b></font>", this);
   collision_warning_->setTextFormat(Qt::RichText);
   collision_warning_->hide();  // show later
-  form_layout->addRow(" ", collision_warning_);
+  form_layout->addRow(' ', collision_warning_);
 
   column1->addLayout(form_layout);
   columns_layout->addLayout(column1);

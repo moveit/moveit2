@@ -113,7 +113,7 @@ static void expect_near(const Eigen::MatrixXd& x, const Eigen::MatrixXd& y,
 
 // clang-format off
 #define EXPECT_NEAR_TRACED(...) {                 \
-	SCOPED_TRACE("expect_near(" #__VA_ARGS__ ")"); \
+	SCOPED_TRACE("expect_near(" #__VA_ARGS__ ')'); \
 	expect_near(__VA_ARGS__);                      \
 }
 // clang-format on
@@ -772,7 +772,7 @@ TEST_F(OneRobot, rigidlyConnectedParent)
   EXPECT_EQ(nullptr, state.getRigidlyConnectedParentLinkModel("object/no_subframe"));
   EXPECT_EQ(nullptr, state.getRigidlyConnectedParentLinkModel(""));
   EXPECT_EQ(nullptr, state.getRigidlyConnectedParentLinkModel("object/"));
-  EXPECT_EQ(nullptr, state.getRigidlyConnectedParentLinkModel("/"));
+  EXPECT_EQ(nullptr, state.getRigidlyConnectedParentLinkModel('/'));
 }
 
 TEST(getJacobian, RevoluteJoints)

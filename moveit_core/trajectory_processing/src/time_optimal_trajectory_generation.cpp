@@ -1296,7 +1296,7 @@ double TimeOptimalTrajectoryGeneration::verifyScalingFactor(const double request
   const auto limit_type_it = LIMIT_TYPES.find(limit_type);
   if (limit_type_it != LIMIT_TYPES.end())
   {
-    limit_type_str = limit_type_it->second + "_";
+    limit_type_str = limit_type_it->second + '_';
   }
 
   if (requested_scaling_factor > 0.0 && requested_scaling_factor <= 1.0)

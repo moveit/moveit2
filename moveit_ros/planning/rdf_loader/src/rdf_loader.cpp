@@ -174,13 +174,13 @@ bool RDFLoader::loadXacroFileToString(std::string& buffer, const std::string& pa
 
   std::string cmd = "ros2 run xacro xacro ";
   for (const std::string& xacro_arg : xacro_args)
-    cmd += xacro_arg + " ";
+    cmd += xacro_arg + ' ';
   cmd += path;
 
 #ifdef _WIN32
-  FILE* pipe = _popen(cmd.c_str(), "r");
+  FILE* pipe = _popen(cmd.c_str(), 'r');
 #else
-  FILE* pipe = popen(cmd.c_str(), "r");
+  FILE* pipe = popen(cmd.c_str(), 'r');
 #endif
   if (!pipe)
   {

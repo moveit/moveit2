@@ -127,9 +127,9 @@ void onRobotState(const moveit_msgs::msg::RobotState& msg, moveit_warehouse::Rob
   rs.getKnownRobotStates(names);
   std::set<std::string> names_set(names.begin(), names.end());
   std::size_t n = names.size();
-  while (names_set.find("S" + std::to_string(n)) != names_set.end())
+  while (names_set.find('S' + std::to_string(n)) != names_set.end())
     n++;
-  std::string name = "S" + std::to_string(n);
+  std::string name = 'S' + std::to_string(n);
   RCLCPP_INFO(getLogger(), "Adding robot state '%s'", name.c_str());
   rs.addRobotState(msg, name);
 }

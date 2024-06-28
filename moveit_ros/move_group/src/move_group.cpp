@@ -151,7 +151,7 @@ private:
     std::string capability_plugins;
     if (context_->moveit_cpp_->getNode()->get_parameter("capabilities", capability_plugins))
     {
-      boost::char_separator<char> sep(" ");
+      boost::char_separator<char> sep(' ');
       boost::tokenizer<boost::char_separator<char>> tok(capability_plugins, sep);
       capabilities.insert(tok.begin(), tok.end());
     }
@@ -163,7 +163,7 @@ private:
       std::string pipeline_capabilities;
       if (context_->moveit_cpp_->getNode()->get_parameter(pipeline_name + ".capabilities", pipeline_capabilities))
       {
-        boost::char_separator<char> sep(" ");
+        boost::char_separator<char> sep(' ');
         boost::tokenizer<boost::char_separator<char>> tok(pipeline_capabilities, sep);
         capabilities.insert(tok.begin(), tok.end());
       }
@@ -172,7 +172,7 @@ private:
     // drop capabilities that have been explicitly disabled
     if (context_->moveit_cpp_->getNode()->get_parameter("disable_capabilities", capability_plugins))
     {
-      boost::char_separator<char> sep(" ");
+      boost::char_separator<char> sep(' ');
       boost::tokenizer<boost::char_separator<char>> tok(capability_plugins, sep);
       for (boost::tokenizer<boost::char_separator<char>>::iterator cap_name = tok.begin(); cap_name != tok.end();
            ++cap_name)

@@ -78,7 +78,7 @@ protected:
   void SetUp() override;
 
 protected:
-  ros::NodeHandle ph_{ "~" };
+  ros::NodeHandle ph_{ '~' };
 
   robot_model::RobotModelPtr robot_model_;
 
@@ -125,7 +125,7 @@ void IntegrationTestCommandPlanning::SetUp()
  */
 TEST_F(IntegrationTestCommandPlanning, PtpJoint)
 {
-  ros::NodeHandle node_handle("~");
+  ros::NodeHandle node_handle('~');
   auto ptp{ test_data_->getPtpJoint("Ptp1") };
 
   moveit_msgs::GetMotionPlan srv;
@@ -174,7 +174,7 @@ TEST_F(IntegrationTestCommandPlanning, PtpJoint)
  */
 TEST_F(IntegrationTestCommandPlanning, PtpJointCart)
 {
-  ros::NodeHandle node_handle("~");
+  ros::NodeHandle node_handle('~');
 
   PtpJointCart ptp{ test_data_->getPtpJointCart("Ptp1") };
   ptp.getGoalConfiguration().setPoseTolerance(0.01);
@@ -247,7 +247,7 @@ TEST_F(IntegrationTestCommandPlanning, LinJoint)
   moveit_msgs::GetMotionPlan srv;
   srv.request.motion_plan_request = req;
 
-  ros::NodeHandle node_handle("~");
+  ros::NodeHandle node_handle('~');
   ros::ServiceClient client = node_handle.serviceClient<moveit_msgs::GetMotionPlan>(PLAN_SERVICE_NAME);
 
   ASSERT_TRUE(client.call(srv));
@@ -289,7 +289,7 @@ TEST_F(IntegrationTestCommandPlanning, LinJoint)
  */
 TEST_F(IntegrationTestCommandPlanning, LinJointCart)
 {
-  ros::NodeHandle node_handle("~");
+  ros::NodeHandle node_handle('~');
   planning_interface::MotionPlanRequest req{ test_data_->getLinJointCart("lin2").toRequest() };
 
   std::cout << "++++++++++" << '\n';
@@ -337,7 +337,7 @@ TEST_F(IntegrationTestCommandPlanning, LinJointCart)
  */
 TEST_F(IntegrationTestCommandPlanning, CircJointCenterCart)
 {
-  ros::NodeHandle node_handle("~");
+  ros::NodeHandle node_handle('~');
 
   CircJointCenterCart circ{ test_data_->getCircJointCenterCart("circ1_center_2") };
 
@@ -422,7 +422,7 @@ TEST_F(IntegrationTestCommandPlanning, CircJointCenterCart)
  */
 TEST_F(IntegrationTestCommandPlanning, CircCartCenterCart)
 {
-  ros::NodeHandle node_handle("~");
+  ros::NodeHandle node_handle('~');
 
   CircCenterCart circ{ test_data_->getCircCartCenterCart("circ1_center_2") };
   moveit_msgs::msg::MotionPlanRequest req{ circ.toRequest() };

@@ -67,7 +67,7 @@ public:
         RCLCPP_ERROR(logger_, "Exception while creating constraint sampling plugin loader %s", ex.what());
         return;
       }
-      boost::char_separator<char> sep(" ");
+      boost::char_separator<char> sep(' ');
       boost::tokenizer<boost::char_separator<char>> tok(constraint_samplers, sep);
       for (boost::tokenizer<boost::char_separator<char>>::iterator beg = tok.begin(); beg != tok.end(); ++beg)
       {

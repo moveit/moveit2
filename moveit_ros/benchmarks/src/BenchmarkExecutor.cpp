@@ -498,7 +498,7 @@ void BenchmarkExecutor::createRequestCombinations(const BenchmarkRequest& benchm
     {
       BenchmarkRequest new_benchmark_request = benchmark_request;
       new_benchmark_request.request.path_constraints = path_constraint.constraints.at(0);
-      new_benchmark_request.name = benchmark_request.name + "_" + path_constraint.name;
+      new_benchmark_request.name = benchmark_request.name + '_' + path_constraint.name;
       requests.push_back(new_benchmark_request);
     }
 
@@ -522,13 +522,13 @@ void BenchmarkExecutor::createRequestCombinations(const BenchmarkRequest& benchm
       for (const PathConstraints& path_constraint : path_constraints)
       {
         new_benchmark_request.request.path_constraints = path_constraint.constraints.at(0);
-        new_benchmark_request.name = start_state.name + "_" + new_benchmark_request.name + "_" + path_constraint.name;
+        new_benchmark_request.name = start_state.name + '_' + new_benchmark_request.name + '_' + path_constraint.name;
         requests.push_back(new_benchmark_request);
       }
 
       if (path_constraints.empty())
       {
-        new_benchmark_request.name = start_state.name + "_" + benchmark_request.name;
+        new_benchmark_request.name = start_state.name + '_' + benchmark_request.name;
         requests.push_back(new_benchmark_request);
       }
     }
@@ -1202,15 +1202,15 @@ void BenchmarkExecutor::writeOutput(const BenchmarkRequest& benchmark_request, c
   std::string filename = options.output_directory;
   if (!filename.empty() && filename[filename.size() - 1] != '/')
   {
-    filename.append("/");
+    filename.append('/');
   }
 
   // Ensure directories exist
   std::filesystem::create_directories(filename);
 
   // Create output log file name
-  filename += (options.benchmark_name.empty() ? "" : options.benchmark_name + "_") + benchmark_request.name + "_" +
-              hostname + "_" + start_time + ".log";
+  filename += (options.benchmark_name.empty() ? "" : options.benchmark_name + '_') + benchmark_request.name + '_' +
+              hostname + '_' + start_time + ".log";
 
   // Write benchmark results to file
   std::ofstream out(filename.c_str());
@@ -1308,7 +1308,7 @@ void BenchmarkExecutor::writeOutput(const BenchmarkRequest& benchmark_request, c
        options.parallel_planning_pipelines)
   {
     // Write the name of the planner and the used pipeline
-    out << parallel_pipeline.first << " (" << parallel_pipeline.first << ")" << '\n';
+    out << parallel_pipeline.first << " (" << parallel_pipeline.first << ')' << '\n';
 
     // in general, we could have properties specific for a planner;
     // right now, we do not include such properties
@@ -1347,7 +1347,7 @@ void BenchmarkExecutor::writeOutput(const BenchmarkRequest& benchmark_request, c
       }
       out << '\n';  // end of the run
     }
-    out << "." << '\n';  // end the planner
+    out << '.' << '\n';  // end the planner
 
     // Increase index
     run_id += 1;

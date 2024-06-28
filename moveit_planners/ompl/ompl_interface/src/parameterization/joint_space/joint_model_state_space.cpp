@@ -41,5 +41,5 @@ const std::string ompl_interface::JointModelStateSpace::PARAMETERIZATION_TYPE = 
 ompl_interface::JointModelStateSpace::JointModelStateSpace(const ModelBasedStateSpaceSpecification& spec)
   : ModelBasedStateSpace(spec)
 {
-  setName(getName() + "_" + PARAMETERIZATION_TYPE);
+  setName(getName() + '_' + PARAMETERIZATION_TYPE);
 }

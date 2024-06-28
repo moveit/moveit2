@@ -57,7 +57,7 @@ public:
     options.arguments({ "--ros-args", "-r",
                         "__node:=" + std::string("planning_scene_interface_") +
                             std::to_string(reinterpret_cast<std::size_t>(this)) });
-    node_ = rclcpp::Node::make_shared("_", ns, options);
+    node_ = rclcpp::Node::make_shared('_', ns, options);
     moveit::setNodeLoggerName(node_->get_name());
     planning_scene_diff_publisher_ = node_->create_publisher<moveit_msgs::msg::PlanningScene>("planning_scene", 1);
     planning_scene_service_ =

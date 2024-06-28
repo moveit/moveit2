@@ -206,7 +206,7 @@ PlanningScene::PlanningScene(const PlanningSceneConstPtr& parent) : parent_(pare
     throw moveit::ConstructException("nullptr parent pointer for planning scene");
 
   if (!parent_->getName().empty())
-    name_ = parent_->getName() + "+";
+    name_ = parent_->getName() + '+';
 
   robot_model_ = parent_->robot_model_;
 
@@ -1018,7 +1018,7 @@ bool PlanningScene::loadGeometryFromStream(std::istream& in, const Eigen::Isomet
       RCLCPP_ERROR(getLogger(), "Bad input stream when loading marker in scene geometry");
       return false;
     }
-    if (marker == "*")  // Start of new object
+    if (marker == '*')  // Start of new object
     {
       std::string object_id;
       std::getline(in, object_id);
@@ -1096,7 +1096,7 @@ bool PlanningScene::loadGeometryFromStream(std::istream& in, const Eigen::Isomet
         world_->setSubframesOfObject(object_id, subframes);
       }
     }
-    else if (marker == ".")
+    else if (marker == '.')
     {
       // Marks the end of the scene geometry;
       return true;

@@ -45,7 +45,7 @@ int main(int /*argc*/, char** /*argv*/)
   {
     std::cout << ", git commit: " << MOVEIT_GIT_COMMIT_HASH;
     if (strlen(MOVEIT_GIT_NAME))
-      std::cout << " (" << MOVEIT_GIT_NAME << ")";
+      std::cout << " (" << MOVEIT_GIT_NAME << ')';
   }
   std::cout << '\n';
   return 0;

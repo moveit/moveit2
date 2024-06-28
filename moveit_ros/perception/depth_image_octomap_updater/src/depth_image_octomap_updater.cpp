@@ -135,7 +135,7 @@ void DepthImageOctomapUpdater::start()
 
   std::string prefix = "";
   if (!ns_.empty())
-    prefix = ns_ + "/";
+    prefix = ns_ + '/';
 
   pub_model_depth_image_ = model_depth_transport_->advertiseCamera(prefix + "model_depth", 1);
   if (!filtered_cloud_topic_.empty())

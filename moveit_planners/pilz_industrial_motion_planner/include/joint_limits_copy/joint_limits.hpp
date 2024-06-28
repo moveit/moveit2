@@ -65,27 +65,27 @@ struct JointLimits
     if (has_position_limits)
     {
       ss_output << "  position limits: "
-                << "[" << min_position << ", " << max_position << "]\n";
+                << '[' << min_position << ", " << max_position << "]\n";
     }
     if (has_velocity_limits)
     {
       ss_output << "  velocity limit: "
-                << "[" << max_velocity << "]\n";
+                << '[' << max_velocity << "]\n";
     }
     if (has_acceleration_limits)
     {
       ss_output << "  acceleration limit: "
-                << "[" << max_acceleration << "]\n";
+                << '[' << max_acceleration << "]\n";
     }
     if (has_jerk_limits)
     {
       ss_output << "  jerk limit: "
-                << "[" << max_acceleration << "]\n";
+                << '[' << max_acceleration << "]\n";
     }
     if (has_effort_limits)
     {
       ss_output << "  effort limit: "
-                << "[" << max_acceleration << "]\n";
+                << '[' << max_acceleration << "]\n";
     }
     if (angle_wraparound)
     {
@@ -99,13 +99,13 @@ struct JointLimits
   {
     std::stringstream ss_output;
 
-    ss_output << "  has position limits: " << (has_position_limits ? "true" : "false") << "[" << min_position << ", "
+    ss_output << "  has position limits: " << (has_position_limits ? "true" : "false") << '[' << min_position << ", "
               << max_position << "]\n";
-    ss_output << "  has velocity limits: " << (has_velocity_limits ? "true" : "false") << "[" << max_velocity << "]\n";
+    ss_output << "  has velocity limits: " << (has_velocity_limits ? "true" : "false") << '[' << max_velocity << "]\n";
     ss_output << "  has acceleration limits: " << (has_acceleration_limits ? "true" : "false") << " ["
               << max_acceleration << "]\n";
-    ss_output << "  has jerk limits: " << (has_jerk_limits ? "true" : "false") << "[" << max_jerk << "]\n";
-    ss_output << "  has effort limits: " << (has_effort_limits ? "true" : "false") << "[" << max_effort << "]\n";
+    ss_output << "  has jerk limits: " << (has_jerk_limits ? "true" : "false") << '[' << max_jerk << "]\n";
+    ss_output << "  has effort limits: " << (has_effort_limits ? "true" : "false") << '[' << max_effort << "]\n";
     ss_output << "  angle wraparound: " << (angle_wraparound ? "true" : "false");
 
     return ss_output.str();

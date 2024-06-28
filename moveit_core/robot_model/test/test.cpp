@@ -107,7 +107,7 @@ TEST(SiblingAssociateLinks, SimpleYRobot)
   ASSERT_TRUE(builder.isValid());
   moveit::core::RobotModelConstPtr robot_model = builder.build();
 
-  const std::string a = "a", b = "b", c = "c", d = "d";
+  const std::string a = 'a', b = 'b', c = 'c', d = 'd';
   auto connected = { a, b, c, d };  // these are rigidly connected with each other
   moveit::core::LinkTransformMap map;
 
@@ -121,8 +121,8 @@ TEST(SiblingAssociateLinks, SimpleYRobot)
       actual_set.insert(item.first->getName());
 
     std::ostringstream expected, actual;
-    std::copy(expected_set.begin(), expected_set.end(), std::ostream_iterator<std::string>(expected, " "));
-    std::copy(actual_set.begin(), actual_set.end(), std::ostream_iterator<std::string>(actual, " "));
+    std::copy(expected_set.begin(), expected_set.end(), std::ostream_iterator<std::string>(expected, ' '));
+    std::copy(actual_set.begin(), actual_set.end(), std::ostream_iterator<std::string>(actual, ' '));
 
     EXPECT_EQ(expected.str(), actual.str());
   }

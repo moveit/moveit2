@@ -88,7 +88,7 @@ public:
                                    const moveit_msgs::msg::MoveGroupSequenceResultConstPtr& result));
 
 protected:
-  ros::NodeHandle ph_{ "~" };
+  ros::NodeHandle ph_{ '~' };
   actionlib::SimpleActionClient<moveit_msgs::msg::MoveGroupSequenceAction> ac_{ ph_, SEQUENCE_ACTION_NAME, true };
   std::shared_ptr<moveit::planning_interface::MoveGroupInterface> move_group_;
 

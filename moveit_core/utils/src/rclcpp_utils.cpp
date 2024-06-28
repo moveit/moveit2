@@ -52,7 +52,7 @@ std::string clean(const std::string& name)
 
 std::string append(const std::string& left, const std::string& right)
 {
-  return clean(left + "/" + right);
+  return clean(left + '/' + right);
 }
 }  // namespace names
 }  // namespace rclcpp

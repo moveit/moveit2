@@ -130,7 +130,7 @@ void RobotModelLoader::configure(const Options& opt)
       for (std::size_t joint_id = 0; joint_id < joint_limit.size(); ++joint_id)
       {
         std::string prefix =
-            rdf_loader_->getRobotDescription() + "_planning.joint_limits." + joint_limit[joint_id].joint_name + ".";
+            rdf_loader_->getRobotDescription() + "_planning.joint_limits." + joint_limit[joint_id].joint_name + '.';
 
         std::string param_name;
         try
@@ -271,7 +271,7 @@ void RobotModelLoader::loadKinematicsSolvers(const kinematics_plugin_loader::Kin
         kinematics_loader_->getLoaderFunction(rdf_loader_->getSRDF());
     const std::vector<std::string>& groups = kinematics_loader_->getKnownGroups();
     std::stringstream ss;
-    std::copy(groups.begin(), groups.end(), std::ostream_iterator<std::string>(ss, " "));
+    std::copy(groups.begin(), groups.end(), std::ostream_iterator<std::string>(ss, ' '));
     RCLCPP_DEBUG(logger_, "Loaded information about the following groups: '%s' ", ss.str().c_str());
     if (groups.empty() && !model_->getJointModelGroups().empty())
       RCLCPP_WARN(logger_, "No kinematics plugins defined. Fill and load kinematics.yaml!");

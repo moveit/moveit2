@@ -139,7 +139,7 @@ TEST_F(TestAABB, TestPR2)
 
 #if VISUALIZE_PR2_RVIZ
   std::cout << "Overall bounding box of PR2:" << '\n';
-  std::string dims[] = { "x", "y", "z" };
+  std::string dims[] = { 'x', 'y', 'z' };
   for (std::size_t i = 0; i < 3; ++i)
   {
     double dim = pr2_aabb[2 * i + 1] - pr2_aabb[2 * i];

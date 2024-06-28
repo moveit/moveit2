@@ -183,7 +183,7 @@ ompl::base::ProjectionEvaluatorPtr ModelBasedPlanningContext::getProjectionEvalu
   else if (peval.find_first_of("joints(") == 0 && peval[peval.length() - 1] == ')')
   {
     std::string joints = peval.substr(7, peval.length() - 8);
-    boost::replace_all(joints, ",", " ");
+    boost::replace_all(joints, ',', ' ');
     std::vector<unsigned int> j;
     std::stringstream ss(joints);
     while (ss.good() && !ss.eof())
@@ -413,7 +413,7 @@ void ModelBasedPlanningContext::useConfig()
   {
     std::string type = it->second;
     cfg.erase(it);
-    const std::string planner_name = getGroupName() + "/" + name_;
+    const std::string planner_name = getGroupName() + '/' + name_;
     ompl_simple_setup_->setPlannerAllocator(
         [planner_name, &spec = spec_, allocator = spec_.planner_selector_(type)](
             const ompl::base::SpaceInformationPtr& si) { return allocator(si, planner_name, spec); });
@@ -699,8 +699,8 @@ bool ModelBasedPlanningContext::benchmark(double timeout, unsigned int count, co
   ompl_benchmark_.clearPlanners();
   ompl_simple_setup_->setup();
   ompl_benchmark_.addPlanner(ompl_simple_setup_->getPlanner());
-  ompl_benchmark_.setExperimentName(getRobotModel()->getName() + "_" + getGroupName() + "_" +
-                                    getPlanningScene()->getName() + "_" + name_);
+  ompl_benchmark_.setExperimentName(getRobotModel()->getName() + '_' + getGroupName() + '_' +
+                                    getPlanningScene()->getName() + '_' + name_);
 
   ot::Benchmark::Request req;
   req.maxTime = timeout;

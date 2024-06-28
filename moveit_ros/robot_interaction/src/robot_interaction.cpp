@@ -68,7 +68,7 @@ RobotInteraction::RobotInteraction(const moveit::core::RobotModelConstPtr& robot
   , logger_(moveit::getLogger("moveit.ros.robot_interaction"))
   , kinematic_options_map_(std::make_shared<KinematicOptionsMap>())
 {
-  topic_ = ns.empty() ? INTERACTIVE_MARKER_TOPIC : ns + "/" + INTERACTIVE_MARKER_TOPIC;
+  topic_ = ns.empty() ? INTERACTIVE_MARKER_TOPIC : ns + '/' + INTERACTIVE_MARKER_TOPIC;
   int_marker_server_ = new interactive_markers::InteractiveMarkerServer(topic_, node_);
 
   // spin a thread that will process feedback events
@@ -114,7 +114,7 @@ void RobotInteraction::addActiveComponent(const InteractiveMarkerConstructorFn& 
   g.update_pose = update;
   g.process_feedback = process;
   // compute the suffix that will be added to the generated markers
-  g.marker_name_suffix = "_" + name + "_" + std::to_string(active_generic_.size());
+  g.marker_name_suffix = '_' + name + '_' + std::to_string(active_generic_.size());
   active_generic_.push_back(g);
 }
 
@@ -458,17 +458,17 @@ void RobotInteraction::addEndEffectorMarkers(const InteractionHandlerPtr& handle
 
 static inline std::string getMarkerName(const InteractionHandlerPtr& handler, const EndEffectorInteraction& eef)
 {
-  return "EE:" + handler->getName() + "_" + eef.parent_link;
+  return "EE:" + handler->getName() + '_' + eef.parent_link;
 }
 
 static inline std::string getMarkerName(const InteractionHandlerPtr& handler, const JointInteraction& vj)
 {
-  return "JJ:" + handler->getName() + "_" + vj.connecting_link;
+  return "JJ:" + handler->getName() + '_' + vj.connecting_link;
 }
 
 static inline std::string getMarkerName(const InteractionHandlerPtr& handler, const GenericInteraction& g)
 {
-  return "GG:" + handler->getName() + "_" + g.marker_name_suffix;
+  return "GG:" + handler->getName() + '_' + g.marker_name_suffix;
 }
 
 void RobotInteraction::addInteractiveMarkers(const InteractionHandlerPtr& handler, const double marker_scale)
@@ -531,7 +531,7 @@ void RobotInteraction::addInteractiveMarkers(const InteractionHandlerPtr& handle
                               active_eef_[i].interaction & InteractionStyle::ORIENTATION_EEF);
       }
       ims.push_back(im);
-      registerMoveInteractiveMarkerTopic(marker_name, handler->getName() + "_" + active_eef_[i].parent_link);
+      registerMoveInteractiveMarkerTopic(marker_name, handler->getName() + '_' + active_eef_[i].parent_link);
       RCLCPP_DEBUG(logger_, "Publishing interactive marker %s (size = %lf)", marker_name.c_str(), mscale);
     }
     for (std::size_t i = 0; i < active_vj_.size(); ++i)
@@ -559,7 +559,7 @@ void RobotInteraction::addInteractiveMarkers(const InteractionHandlerPtr& handle
         }
       }
       ims.push_back(im);
-      registerMoveInteractiveMarkerTopic(marker_name, handler->getName() + "_" + active_vj_[i].connecting_link);
+      registerMoveInteractiveMarkerTopic(marker_name, handler->getName() + '_' + active_vj_[i].connecting_link);
       RCLCPP_DEBUG(logger_, "Publishing interactive marker %s (size = %lf)", marker_name.c_str(), mscale);
     }
     handlers_[handler->getName()] = handler;
@@ -789,7 +789,7 @@ void RobotInteraction::processingThread()
         continue;
       }
       std::string marker_class = feedback->marker_name.substr(0, 2);
-      std::string handler_name = feedback->marker_name.substr(3, u - 3);  // skip the ":"
+      std::string handler_name = feedback->marker_name.substr(3, u - 3);  // skip the ':'
       std::map<std::string, InteractionHandlerPtr>::const_iterator jt = handlers_.find(handler_name);
       if (jt == handlers_.end())
       {

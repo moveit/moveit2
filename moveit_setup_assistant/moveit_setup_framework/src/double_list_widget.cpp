@@ -97,13 +97,13 @@ DoubleListWidget::DoubleListWidget(QWidget* parent, const QString& long_name, co
   column2->setSizeConstraint(QLayout::SetFixedSize);  // constraint it
 
   // Right Arrow Button
-  QPushButton* btn_right = new QPushButton(">", this);
+  QPushButton* btn_right = new QPushButton('>', this);
   btn_right->setMaximumSize(25, 80);
   connect(btn_right, SIGNAL(clicked()), this, SLOT(selectDataButtonClicked()));
   column2->addWidget(btn_right);
 
   // Left Arrow Button
-  QPushButton* btn_left = new QPushButton("<", this);
+  QPushButton* btn_left = new QPushButton('<', this);
   btn_left->setMaximumSize(25, 80);
   connect(btn_left, SIGNAL(clicked()), this, SLOT(deselectDataButtonClicked()));
   column2->addWidget(btn_left);
@@ -115,7 +115,7 @@ DoubleListWidget::DoubleListWidget(QWidget* parent, const QString& long_name, co
   QVBoxLayout* column3 = new QVBoxLayout();
 
   // Label
-  column2_label_ = new QLabel(QString("Selected ").append(short_name_).append("s"), this);
+  column2_label_ = new QLabel(QString("Selected ").append(short_name_).append('s'), this);
   column3->addWidget(column2_label_);
 
   // Table

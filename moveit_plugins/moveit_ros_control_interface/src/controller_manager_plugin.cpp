@@ -268,7 +268,7 @@ public:
     {
       if (!node_->has_parameter("ros_control_namespace"))
       {
-        ns_ = node_->declare_parameter<std::string>("ros_control_namespace", "/");
+        ns_ = node_->declare_parameter<std::string>("ros_control_namespace", '/');
       }
       else
       {
@@ -399,7 +399,7 @@ public:
         for (const auto& dependency : dependency_map_[controller])
         {
           queue.push_back(dependency);
-          controllers->push_back("/" + dependency);
+          controllers->push_back('/' + dependency);
         }
       }
     }

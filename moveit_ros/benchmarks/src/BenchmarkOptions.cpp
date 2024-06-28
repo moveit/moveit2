@@ -186,7 +186,7 @@ bool BenchmarkOptions::readPlannerConfigs(const rclcpp::Node::SharedPtr& node)
     if (!pipeline.empty())
     {
       std::string pipeline_name;
-      const std::string pipeline_parameter_name = std::string(ns).append(".").append(pipeline).append(".name");
+      const std::string pipeline_parameter_name = std::string(ns).append('.').append(pipeline).append(".name");
       if (!node->get_parameter(pipeline_parameter_name, pipeline_name))
       {
         RCLCPP_ERROR(getLogger(), "Fail to get the parameter in `%s` namespace.", pipeline_parameter_name.c_str());
@@ -196,7 +196,7 @@ bool BenchmarkOptions::readPlannerConfigs(const rclcpp::Node::SharedPtr& node)
       RCLCPP_INFO(getLogger(), "Reading in planner names for planning pipeline '%s'", pipeline_name.c_str());
 
       std::vector<std::string> planners;
-      const std::string pipeline_parameter_planners = std::string(ns).append(".").append(pipeline).append(".planners");
+      const std::string pipeline_parameter_planners = std::string(ns).append('.').append(pipeline).append(".planners");
       if (!node->get_parameter(pipeline_parameter_planners, planners))
       {
         RCLCPP_ERROR(getLogger(), "Fail to get the parameter in `%s` namespace.", pipeline_parameter_planners.c_str());
@@ -230,7 +230,7 @@ bool BenchmarkOptions::readPlannerConfigs(const rclcpp::Node::SharedPtr& node)
       // Read pipelines
       std::vector<std::string> pipelines;
       const std::string pipelines_parameter =
-          std::string(ns).append(".").append(parallel_pipeline).append(".pipelines");
+          std::string(ns).append('.').append(parallel_pipeline).append(".pipelines");
       if (!node->get_parameter(pipelines_parameter, pipelines))
       {
         RCLCPP_ERROR(getLogger(), "Fail to get the parameter in `%s` namespace.", pipelines_parameter.c_str());
@@ -240,7 +240,7 @@ bool BenchmarkOptions::readPlannerConfigs(const rclcpp::Node::SharedPtr& node)
       // Read planner_ids
       std::vector<std::string> planner_ids;
       const std::string pipeline_planner_ids_parameter =
-          std::string(ns).append(".").append(parallel_pipeline).append(".planner_ids");
+          std::string(ns).append('.').append(parallel_pipeline).append(".planner_ids");
       if (!node->get_parameter(pipeline_planner_ids_parameter, planner_ids))
       {
         RCLCPP_ERROR(getLogger(), "Fail to get the parameter in `%s` namespace.",

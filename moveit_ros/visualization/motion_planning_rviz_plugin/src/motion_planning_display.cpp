@@ -644,7 +644,7 @@ void MotionPlanningDisplay::drawQueryStartState()
         for (collision_detection::CollisionResult::ContactMap::const_iterator it = pairs.begin(); it != pairs.end();
              ++it)
           addStatusText(it->first.first + " - " + it->first.second);
-        addStatusText(".");
+        addStatusText('.');
       }
       if (!getCurrentPlanningGroup().empty())
       {
@@ -765,7 +765,7 @@ void MotionPlanningDisplay::drawQueryGoalState()
         for (collision_detection::CollisionResult::ContactMap::const_iterator it = pairs.begin(); it != pairs.end();
              ++it)
           addStatusText(it->first.first + " - " + it->first.second);
-        addStatusText(".");
+        addStatusText('.');
       }
 
       if (!getCurrentPlanningGroup().empty())
@@ -1081,7 +1081,7 @@ void MotionPlanningDisplay::setQueryStateHelper(bool use_start_state, const std:
 {
   moveit::core::RobotState state = use_start_state ? *getQueryStartState() : *getQueryGoalState();
 
-  std::string v = "<" + state_name + ">";
+  std::string v = '<' + state_name + '>';
 
   if (v == "<random>")
   {
@@ -1388,21 +1388,21 @@ void MotionPlanningDisplay::load(const rviz_common::Config& config)
     rviz_common::Config workspace = config.mapGetChild("MoveIt_Workspace");
     rviz_common::Config ws_center = workspace.mapGetChild("Center");
     float val;
-    if (ws_center.mapGetFloat("X", &val))
+    if (ws_center.mapGetFloat('X', &val))
       frame_->ui_->wcenter_x->setValue(val);
-    if (ws_center.mapGetFloat("Y", &val))
+    if (ws_center.mapGetFloat('Y', &val))
       frame_->ui_->wcenter_y->setValue(val);
-    if (ws_center.mapGetFloat("Z", &val))
+    if (ws_center.mapGetFloat('Z', &val))
       frame_->ui_->wcenter_z->setValue(val);
 
     rviz_common::Config ws_size = workspace.mapGetChild("Size");
     if (ws_size.isValid())
     {
-      if (ws_size.mapGetFloat("X", &val))
+      if (ws_size.mapGetFloat('X', &val))
         frame_->ui_->wsize_x->setValue(val);
-      if (ws_size.mapGetFloat("Y", &val))
+      if (ws_size.mapGetFloat('Y', &val))
         frame_->ui_->wsize_y->setValue(val);
-      if (ws_size.mapGetFloat("Z", &val))
+      if (ws_size.mapGetFloat('Z', &val))
         frame_->ui_->wsize_z->setValue(val);
     }
     else
@@ -1438,13 +1438,13 @@ void MotionPlanningDisplay::save(rviz_common::Config config) const
 
     rviz_common::Config workspace = config.mapMakeChild("MoveIt_Workspace");
     rviz_common::Config ws_center = workspace.mapMakeChild("Center");
-    ws_center.mapSetValue("X", frame_->ui_->wcenter_x->value());
-    ws_center.mapSetValue("Y", frame_->ui_->wcenter_y->value());
-    ws_center.mapSetValue("Z", frame_->ui_->wcenter_z->value());
+    ws_center.mapSetValue('X', frame_->ui_->wcenter_x->value());
+    ws_center.mapSetValue('Y', frame_->ui_->wcenter_y->value());
+    ws_center.mapSetValue('Z', frame_->ui_->wcenter_z->value());
     rviz_common::Config ws_size = workspace.mapMakeChild("Size");
-    ws_size.mapSetValue("X", frame_->ui_->wsize_x->value());
-    ws_size.mapSetValue("Y", frame_->ui_->wsize_y->value());
-    ws_size.mapSetValue("Z", frame_->ui_->wsize_z->value());
+    ws_size.mapSetValue('X', frame_->ui_->wsize_x->value());
+    ws_size.mapSetValue('Y', frame_->ui_->wsize_y->value());
+    ws_size.mapSetValue('Z', frame_->ui_->wsize_z->value());
   }
 }
 

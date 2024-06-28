@@ -105,7 +105,7 @@ PlanningSceneMonitor::PlanningSceneMonitor(const rclcpp::Node::SharedPtr& node,
   new_args.push_back(std::string("__node:=") + node_->get_name() + "_private_" +
                      std::to_string(reinterpret_cast<std::size_t>(this)));
   new_args.push_back("--");
-  pnode_ = std::make_shared<rclcpp::Node>("_", node_->get_namespace(), rclcpp::NodeOptions().arguments(new_args));
+  pnode_ = std::make_shared<rclcpp::Node>('_', node_->get_namespace(), rclcpp::NodeOptions().arguments(new_args));
   tf_listener_ = std::make_shared<tf2_ros::TransformListener>(*tf_buffer_);
   tf_buffer_->setUsingDedicatedThread(true);
   // use same callback queue as root_nh_

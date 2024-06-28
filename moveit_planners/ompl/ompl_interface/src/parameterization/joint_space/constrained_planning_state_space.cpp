@@ -45,7 +45,7 @@ const std::string ConstrainedPlanningStateSpace::PARAMETERIZATION_TYPE = "Constr
 ConstrainedPlanningStateSpace::ConstrainedPlanningStateSpace(const ModelBasedStateSpaceSpecification& spec)
   : ModelBasedStateSpace(spec)
 {
-  setName(getName() + "_" + PARAMETERIZATION_TYPE);
+  setName(getName() + '_' + PARAMETERIZATION_TYPE);
 }
 
 double* ConstrainedPlanningStateSpace::getValueAddressAtIndex(ompl::base::State* ompl_state,

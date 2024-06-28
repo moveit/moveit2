@@ -54,7 +54,7 @@ RobotConfiguration::RobotConfiguration(const std::string& group_name,
   if (robot_model && (!robot_model_->hasJointModelGroup(group_name_)))
   {
     std::string msg{ "Specified robot model does not contain specified group \"" };
-    msg.append(group_name).append("\"");
+    msg.append(group_name).append('\'");
     throw std::invalid_argument(msg);
   }
 }
