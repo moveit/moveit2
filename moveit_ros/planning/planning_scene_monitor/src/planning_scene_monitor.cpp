@@ -542,7 +542,7 @@ void PlanningSceneMonitor::getMonitoredTopics(std::vector<std::string>& topics) 
   if (collision_object_subscriber_)
   {
     // TODO (anasarrak) This has been changed to subscriber on Moveit, look at
-    // https://github.com/ros-planning/moveit/pull/1406/files/cb9488312c00e9c8949d89b363766f092330954d#diff-fb6e26ecc9a73d59dbdae3f3e08145e6
+    // https://github.com/moveit/moveit/pull/1406/files/cb9488312c00e9c8949d89b363766f092330954d#diff-fb6e26ecc9a73d59dbdae3f3e08145e6
     topics.push_back(collision_object_subscriber_->get_topic_name());
   }
   if (planning_scene_world_subscriber_)

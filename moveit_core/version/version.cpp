@@ -47,6 +47,6 @@ int main(int /*argc*/, char** /*argv*/)
     if (strlen(MOVEIT_GIT_NAME))
       std::cout << " (" << MOVEIT_GIT_NAME << ")";
   }
-  std::cout << std::endl;
+  std::cout << '\n';
   return 0;
 }

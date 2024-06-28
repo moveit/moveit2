@@ -11,7 +11,7 @@ sudo apt-get -qq update
 sudo apt-get -qq install python3-lxml python3-yaml
 
 # Clone moveit_resources for URDFs. They are not available before running docker.
-git clone -q --depth=1 -b ros2 https://github.com/ros-planning/moveit_resources /tmp/resources
+git clone -q --depth=1 -b ros2 https://github.com/moveit/moveit_resources /tmp/resources
 fanuc=/tmp/resources/fanuc_description/urdf/fanuc.urdf
 panda=/tmp/resources/panda_description/urdf/panda.urdf
 

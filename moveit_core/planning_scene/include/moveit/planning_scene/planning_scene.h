@@ -56,6 +56,7 @@
 #include <optional>
 #include <thread>
 #include <variant>
+#include <optional>
 #include <rclcpp/rclcpp.hpp>
 
 #include <moveit_planning_scene_export.h>
@@ -159,7 +160,7 @@ public:
   const moveit::core::RobotState& getCurrentState() const
   {
     // if we have an updated state, return it; otherwise, return the parent one
-    return robot_state_ ? *robot_state_ : parent_->getCurrentState();
+    return robot_state_.has_value() ? robot_state_.value() : parent_->getCurrentState();
   }
   /** \brief Get the state at which the robot is assumed to be. */
   moveit::core::RobotState& getCurrentStateNonConst();
@@ -176,15 +177,15 @@ public:
   const std::string& getPlanningFrame() const
   {
     // if we have an updated set of transforms, return it; otherwise, return the parent one
-    return scene_transforms_ ? scene_transforms_->getTargetFrame() : parent_->getPlanningFrame();
+    return scene_transforms_.has_value() ? scene_transforms_.value()->getTargetFrame() : parent_->getPlanningFrame();
   }
 
   /** \brief Get the set of fixed transforms from known frames to the planning frame */
   const moveit::core::Transforms& getTransforms() const
   {
-    if (scene_transforms_ || !parent_)
+    if (scene_transforms_.has_value() || !parent_)
     {
-      return *scene_transforms_;
+      return *scene_transforms_.value();
     }
 
     // if this planning scene is a child of another, and doesn't have its own custom transforms
@@ -290,7 +291,7 @@ public:
   /** \brief Get the allowed collision matrix */
   const collision_detection::AllowedCollisionMatrix& getAllowedCollisionMatrix() const
   {
-    return acm_ ? *acm_ : parent_->getAllowedCollisionMatrix();
+    return acm_.has_value() ? acm_.value() : parent_->getAllowedCollisionMatrix();
   }
 
   /** \brief Get the allowed collision matrix */
@@ -1011,14 +1012,14 @@ private:
 
   moveit::core::RobotModelConstPtr robot_model_;  // Never null (may point to same model as parent)
 
-  moveit::core::RobotStatePtr robot_state_;  // if nullptr use parent's
+  std::optional<moveit::core::RobotState> robot_state_;  // if there is no value use parent's
 
   // Called when changes are made to attached bodies
   moveit::core::AttachedBodyCallback current_state_attached_body_callback_;
 
   // This variable is not necessarily used by child planning scenes
   // This Transforms class is actually a SceneTransforms class
-  moveit::core::TransformsPtr scene_transforms_;  // if nullptr use parent's
+  std::optional<moveit::core::TransformsPtr> scene_transforms_;  // if there is no value use parent's
 
   collision_detection::WorldPtr world_;             // never nullptr, never shared with parent/child
   collision_detection::WorldConstPtr world_const_;  // copy of world_
@@ -1028,7 +1029,7 @@ private:
 
   CollisionDetectorPtr collision_detector_;  // Never nullptr.
 
-  collision_detection::AllowedCollisionMatrixPtr acm_;  // if nullptr use parent's
+  std::optional<collision_detection::AllowedCollisionMatrix> acm_;  // if there is no value use parent's
 
   StateFeasibilityFn state_feasibility_;
   MotionFeasibilityFn motion_feasibility_;
@@ -1038,6 +1039,6 @@ private:
   std::unique_ptr<ObjectColorMap> original_object_colors_;
 
   // a map of object types
-  std::unique_ptr<ObjectTypeMap> object_types_;
+  std::optional<ObjectTypeMap> object_types_;
 };
 }  // namespace planning_scene

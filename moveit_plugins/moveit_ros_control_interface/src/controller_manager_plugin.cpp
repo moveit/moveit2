@@ -255,8 +255,7 @@ public:
    * \brief Configure interface with namespace
    * @param ns namespace of ros_control node (without /controller_manager/)
    */
-  [[deprecated("Ros2ControlManager constructor with namespace is deprecated. Set namespace via the "
-               "ros_control_namespace parameter.")]] Ros2ControlManager(const std::string& ns)
+  Ros2ControlManager(const std::string& ns)
     : ns_(ns), loader_("moveit_ros_control_interface", "moveit_ros_control_interface::ControllerHandleAllocator")
   {
     RCLCPP_INFO_STREAM(getLogger(), "Started moveit_ros_control_interface::Ros2ControlManager for namespace " << ns_);
@@ -265,12 +264,18 @@ public:
   void initialize(const rclcpp::Node::SharedPtr& node) override
   {
     node_ = node;
-    // Set the namespace from the ros_control_namespace parameter, or default to "/"
-    if (!node_->has_parameter("ros_control_namespace"))
+    if (!ns_.empty())
     {
-      ns_ = node_->declare_parameter<std::string>("ros_control_namespace", "/");
+      if (!node_->has_parameter("ros_control_namespace"))
+      {
+        ns_ = node_->declare_parameter<std::string>("ros_control_namespace", "/");
+      }
+      else
+      {
+        node_->get_parameter<std::string>("ros_control_namespace", ns_);
+      }
     }
-    else
+    else if (node->has_parameter("ros_control_namespace"))
     {
       node_->get_parameter<std::string>("ros_control_namespace", ns_);
       RCLCPP_INFO_STREAM(getLogger(), "Namespace for controller manager was specified, namespace: " << ns_);

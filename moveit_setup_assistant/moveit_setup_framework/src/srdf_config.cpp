@@ -300,7 +300,7 @@ bool SRDFConfig::GeneratedJointLimits::writeYaml(YAML::Emitter& emitter)
 
     // Output property
     emitter << YAML::Key << "max_velocity";
-    emitter << YAML::Value << std::min(fabs(b.max_velocity_), fabs(b.min_velocity_));
+    emitter << YAML::Value << static_cast<double>(std::min(fabs(b.max_velocity_), fabs(b.min_velocity_)));
 
     // Output property
     emitter << YAML::Key << "has_acceleration_limits";
@@ -315,7 +315,7 @@ bool SRDFConfig::GeneratedJointLimits::writeYaml(YAML::Emitter& emitter)
 
     // Output property
     emitter << YAML::Key << "max_acceleration";
-    emitter << YAML::Value << std::min(fabs(b.max_acceleration_), fabs(b.min_acceleration_));
+    emitter << YAML::Value << static_cast<double>(std::min(fabs(b.max_acceleration_), fabs(b.min_acceleration_)));
 
     emitter << YAML::EndMap;
   }

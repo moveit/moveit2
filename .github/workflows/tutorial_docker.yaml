@@ -6,6 +6,7 @@ on:
     - cron:  '0 17 * * 6'
   workflow_dispatch:
   pull_request:
+  merge_group:
   push:
     branches:
       - main
@@ -21,9 +22,9 @@ jobs:
       packages: write
       contents: read
     env:
-      GH_IMAGE: ghcr.io/ros-planning/moveit2:main-${{ matrix.ROS_DISTRO }}-${{ github.job }}
+      GH_IMAGE: ghcr.io/moveit/moveit2:main-${{ matrix.ROS_DISTRO }}-${{ github.job }}
       DH_IMAGE: moveit/moveit2:main-${{ matrix.ROS_DISTRO }}-${{ github.job }}
-      PUSH: ${{ (github.event_name != 'pull_request') && (github.repository == 'ros-planning/moveit2') }}
+      PUSH: ${{ (github.event_name != 'pull_request') && (github.repository == 'moveit/moveit2') }}
 
     steps:
       - uses: actions/checkout@v4
@@ -50,12 +51,12 @@ jobs:
           path: .ccache
           key: docker-tutorial-ccache-${{ matrix.ROS_DISTRO }}-${{ hashFiles( '.docker/tutorial-source/Dockerfile' ) }}
       - name: inject ccache into docker
-        uses: reproducible-containers/buildkit-cache-dance@v3.1.0
+        uses: reproducible-containers/buildkit-cache-dance@v3.1.1
         with:
           cache-source: .ccache
           cache-target: /root/.ccache/
       - name: Build and Push
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: .
           file: .docker/${{ github.job }}/Dockerfile
@@ -73,7 +74,7 @@ jobs:
       - tutorial-source
     steps:
       - name: Delete Untagged Images
-        if: (github.event_name != 'pull_request') && (github.repository == 'ros-planning/moveit2')
+        if: (github.event_name != 'pull_request') && (github.repository == 'moveit/moveit2')
         uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.DELETE_PACKAGES_TOKEN }}
@@ -89,6 +90,6 @@ jobs:
                 }
             }
         env:
-          OWNER: ros-planning
+          OWNER: moveit
           PACKAGE_NAME: moveit2
           PER_PAGE: 100
