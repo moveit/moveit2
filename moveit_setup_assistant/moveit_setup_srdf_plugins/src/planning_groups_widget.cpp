@@ -594,7 +594,7 @@ void PlanningGroupsWidget::loadGroupScreen(srdf::Model::Group* this_group)
   {
     current_edit_group_ = this_group->name_;
     group_edit_widget_->title_->setText(
-        QString("Edit Planning Group '").append(current_edit_group_.c_str()).append('''));
+        QString("Edit Planning Group '").append(current_edit_group_.c_str()).append('\''));
     group_edit_widget_->btn_delete_->show();
     group_edit_widget_->new_buttons_widget_->hide();  // not necessary for existing groups
     group_edit_widget_->btn_save_->show();            // this is only for edit mode

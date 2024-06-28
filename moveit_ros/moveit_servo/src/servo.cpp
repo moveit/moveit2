@@ -202,7 +202,7 @@ bool Servo::validateParams(const servo::Params& servo_params) const
                                  "'hard_stop_singularity_threshold' is: '"
                                      << servo_params.hard_stop_singularity_threshold
                                      << "' and the 'lower_singularity_threshold' is: '"
-                                     << servo_params.lower_singularity_threshold << ''' << check_yaml_string);
+                                     << servo_params.lower_singularity_threshold << '\'' << check_yaml_string);
     params_valid = false;
   }
 
@@ -234,7 +234,7 @@ bool Servo::validateParams(const servo::Params& servo_params) const
                                  "'self_collision_proximity_threshold' is: '"
                                      << servo_params.self_collision_proximity_threshold
                                      << "' and 'scene_collision_proximity_threshold' is: '"
-                                     << servo_params.scene_collision_proximity_threshold << ''' << check_yaml_string);
+                                     << servo_params.scene_collision_proximity_threshold << '\'' << check_yaml_string);
     params_valid = false;
   }
 
@@ -244,7 +244,7 @@ bool Servo::validateParams(const servo::Params& servo_params) const
     RCLCPP_ERROR_STREAM(logger_, "The parameter 'active_subgroup': '"
                                      << servo_params.active_subgroup
                                      << "' does not name a valid subgroup of 'joint group': '"
-                                     << servo_params.move_group_name << ''' << check_yaml_string);
+                                     << servo_params.move_group_name << '\'' << check_yaml_string);
     params_valid = false;
   }
   if (servo_params.joint_limit_margins.size() !=
@@ -256,7 +256,7 @@ bool Servo::validateParams(const servo::Params& servo_params) const
         "move group.  The size of 'joint_limit_margins' is '"
             << servo_params.joint_limit_margins.size() << "' but the number of joints of the move group '"
             << servo_params.move_group_name << "' is '"
-            << robot_state->getJointModelGroup(servo_params.move_group_name)->getActiveVariableCount() << '''
+            << robot_state->getJointModelGroup(servo_params.move_group_name)->getActiveVariableCount() << '\''
             << check_yaml_string);
 
     params_valid = false;

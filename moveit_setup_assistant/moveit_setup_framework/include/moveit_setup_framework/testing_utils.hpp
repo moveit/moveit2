@@ -149,11 +149,11 @@ void expectYamlEquivalence(const YAML::Node& generated, const YAML::Node& refere
 
     for (const std::string& key : missing_keys)
     {
-      ADD_FAILURE() << msg_prefix << "is missing the key '" << key << ''';
+      ADD_FAILURE() << msg_prefix << "is missing the key '" << key << '\'';
     }
     for (const std::string& key : extra_keys)
     {
-      ADD_FAILURE() << msg_prefix << "has an extra key '" << key << ''';
+      ADD_FAILURE() << msg_prefix << "has an extra key '" << key << '\'';
     }
     for (const std::string& key : common_keys)
     {

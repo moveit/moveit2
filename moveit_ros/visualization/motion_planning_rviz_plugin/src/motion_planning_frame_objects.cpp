@@ -241,7 +241,7 @@ void MotionPlanningFrame::removeSceneObject()
 
 static QString decideStatusText(const collision_detection::CollisionEnv::ObjectConstPtr& obj)
 {
-  QString status_text = ''' + QString::fromStdString(obj->id_) + "' is a collision object with ";
+  QString status_text = '\'' + QString::fromStdString(obj->id_) + "' is a collision object with ";
   if (obj->shapes_.empty())
   {
     status_text += "no geometry";
@@ -272,7 +272,7 @@ static QString decideStatusText(const collision_detection::CollisionEnv::ObjectC
 
 static QString decideStatusText(const moveit::core::AttachedBody* attached_body)
 {
-  QString status_text = ''' + QString::fromStdString(attached_body->getName()) + "' is attached to '" +
+  QString status_text = '\'' + QString::fromStdString(attached_body->getName()) + "' is attached to '" +
                         QString::fromStdString(attached_body->getAttachedLinkName()) + "'.";
   if (!attached_body->getSubframes().empty())
   {
