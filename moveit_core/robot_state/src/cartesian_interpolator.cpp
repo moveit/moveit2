@@ -355,10 +355,13 @@ CartesianInterpolator::Distance CartesianInterpolator::computeCartesianPath(
   // the translation direction can be specified w.r.t. the local link frame (then rotate into global frame)
   pose.translation() += global_reference_frame ? translation : pose.linear() * translation;
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
   // call computeCartesianPath for the computed target pose in the global reference frame
   return CartesianInterpolator::Distance(distance) * computeCartesianPath(start_state, group, path, link, pose, true,
                                                                           max_step, jump_threshold, validCallback,
                                                                           options, cost_function);
+#pragma GCC diagnostic pop
 }
 
 CartesianInterpolator::Percentage CartesianInterpolator::computeCartesianPath(
@@ -481,9 +484,12 @@ CartesianInterpolator::Percentage CartesianInterpolator::computeCartesianPath(
     // Don't test joint space jumps for every waypoint, test them later on the whole path.
     static const JumpThreshold NO_JOINT_SPACE_JUMP_TEST = JumpThreshold::disabled();
     std::vector<RobotStatePtr> waypoint_path;
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
     double wp_percentage_solved =
         computeCartesianPath(start_state, group, waypoint_path, link, waypoints[i], global_reference_frame, max_step,
                              NO_JOINT_SPACE_JUMP_TEST, validCallback, options, cost_function, link_offset);
+#pragma GCC diagnostic pop
     if (fabs(wp_percentage_solved - 1.0) < std::numeric_limits<double>::epsilon())
     {
       percentage_solved = static_cast<double>((i + 1)) / static_cast<double>(waypoints.size());

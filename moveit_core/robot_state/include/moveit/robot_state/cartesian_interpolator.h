@@ -235,12 +235,19 @@ public:
 
      During the computation of the path, it is usually preferred if consecutive joint values do not 'jump' by a
      large amount in joint space, even if the Cartesian distance between the corresponding points is small as expected.
-     To account for this, the \e jump_threshold argument is provided. If a jump detection is enabled and a jump is
-     found, the path is truncated up to just before the jump.
+     To account for this, the \e jump_threshold struct is provided, which comprises three fields:
+     \e jump_threshold_factor, \e revolute_jump_threshold and \e prismatic_jump_threshold.
+     If either \e revolute_jump_threshold or \e prismatic_jump_threshold  are non-zero, we test for absolute jumps.
+     If \e jump_threshold_factor is non-zero, we test for relative jumps. To this end, the average joint-space distance
+     between consecutive points in the trajectory is computed. If any individual joint-space motion delta is larger than
+     this average distance multiplied by \e jump_threshold_factor, this step is considered a jump.
+
+     Otherwise (if all params are zero), jump detection is disabled.
+     If a jump is detected, the path is truncated up to just before the jump.
 
      Kinematics solvers may use cost functions to prioritize certain solutions, which may be specified with \e
      cost_function. */
-  static Distance computeCartesianPath(
+  [[deprecated("Replace JumpThreshold with CartesianPrecision")]] static Distance computeCartesianPath(
       RobotState* start_state, const JointModelGroup* group, std::vector<std::shared_ptr<RobotState>>& path,
       const LinkModel* link, const Eigen::Vector3d& translation, bool global_reference_frame,
       const MaxEEFStep& max_step, const JumpThreshold& jump_threshold,
@@ -252,7 +259,7 @@ public:
 
      In contrast to the previous function, the translation vector is specified as a (unit) direction vector and
      a distance. */
-  static Distance computeCartesianPath(
+  [[deprecated("Replace JumpThreshold with CartesianPrecision")]] static Distance computeCartesianPath(
       RobotState* start_state, const JointModelGroup* group, std::vector<std::shared_ptr<RobotState>>& path,
       const LinkModel* link, const Eigen::Vector3d& direction, bool global_reference_frame, double distance,
       const MaxEEFStep& max_step, const JumpThreshold& jump_threshold,
@@ -260,8 +267,11 @@ public:
       const kinematics::KinematicsQueryOptions& options = kinematics::KinematicsQueryOptions(),
       const kinematics::KinematicsBase::IKCostFn& cost_function = kinematics::KinematicsBase::IKCostFn())
   {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
     return computeCartesianPath(start_state, group, path, link, distance * direction, global_reference_frame, max_step,
                                 jump_threshold, validCallback, options, cost_function);
+#pragma GCC diagnostic pop
   }
 
   /** \brief Compute the sequence of joint values that correspond to a straight Cartesian path, for a particular frame.
@@ -271,7 +281,7 @@ public:
      The target frame is assumed to be specified either w.r.t. to the global reference frame or the virtual link frame
      (\e global_reference_frame is false). This function returns the percentage (0..1) of the path that was achieved.
      All other comments from the previous function apply. */
-  static Percentage computeCartesianPath(
+  [[deprecated("Replace JumpThreshold with CartesianPrecision")]] static Percentage computeCartesianPath(
       RobotState* start_state, const JointModelGroup* group, std::vector<std::shared_ptr<RobotState>>& path,
       const LinkModel* link, const Eigen::Isometry3d& target, bool global_reference_frame, const MaxEEFStep& max_step,
       const JumpThreshold& jump_threshold,
@@ -286,7 +296,7 @@ public:
      reached by the virtual frame attached to the robot \e link. The waypoints are transforms given either w.r.t. the
      global reference frame or the virtual frame at the immediately preceding waypoint. The virtual frame needs to move
      in a straight line between two consecutive waypoints. All other comments apply. */
-  static Percentage computeCartesianPath(
+  [[deprecated("Replace JumpThreshold with CartesianPrecision")]] static Percentage computeCartesianPath(
       RobotState* start_state, const JointModelGroup* group, std::vector<std::shared_ptr<RobotState>>& path,
       const LinkModel* link, const EigenSTL::vector_Isometry3d& waypoints, bool global_reference_frame,
       const MaxEEFStep& max_step, const JumpThreshold& jump_threshold,
