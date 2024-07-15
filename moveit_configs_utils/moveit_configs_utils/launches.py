@@ -200,7 +200,7 @@ def generate_move_group_launch(moveit_config):
     ld.add_action(
         DeclareLaunchArgument(
             "capabilities",
-            default_value=moveit_config.move_group_capabilities["capabilities"],
+            default_value="",
         )
     )
     # inhibit these default MoveGroup capabilities (space separated)
