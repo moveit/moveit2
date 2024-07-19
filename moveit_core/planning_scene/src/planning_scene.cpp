@@ -655,9 +655,13 @@ void PlanningScene::getPlanningSceneDiffMsg(moveit_msgs::msg::PlanningScene& sce
       if (it.first == OCTOMAP_NS)
       {
         if (it.second == collision_detection::World::DESTROY)
+        {
           scene_msg.world.octomap.octomap.id = "cleared";  // indicate cleared octomap
+        }
         else
+        {
           do_omap = true;
+        }
       }
       else if (it.second == collision_detection::World::DESTROY)
       {
@@ -1880,8 +1884,9 @@ bool PlanningScene::processCollisionObjectMove(const moveit_msgs::msg::Collision
       std::size_t shape_size = object.primitive_poses.size() + object.mesh_poses.size() + object.plane_poses.size();
       if (shape_size != world_object->shape_poses_.size())
       {
-        ROS_ERROR_NAMED(LOGNAME, "Move operation for object '%s' must have same number of geometry poses. Cannot move.",
-                        object.id.c_str());
+        RCLCPP_ERROR(getLogger(),
+                     "Move operation for object '%s' must have same number of geometry poses. Cannot move.",
+                     object.id.c_str());
         return false;
       }
 
@@ -1890,22 +1895,23 @@ bool PlanningScene::processCollisionObjectMove(const moveit_msgs::msg::Collision
       for (const auto& shape_pose : object.primitive_poses)
       {
         shape_poses.emplace_back();
-        PlanningScene::poseMsgToEigen(shape_pose, shape_poses.back());
+        utilities::poseMsgToEigen(shape_pose, shape_poses.back());
       }
       for (const auto& shape_pose : object.mesh_poses)
       {
         shape_poses.emplace_back();
-        PlanningScene::poseMsgToEigen(shape_pose, shape_poses.back());
+        utilities::poseMsgToEigen(shape_pose, shape_poses.back());
       }
       for (const auto& shape_pose : object.plane_poses)
       {
         shape_poses.emplace_back();
-        PlanningScene::poseMsgToEigen(shape_pose, shape_poses.back());
+        utilities::poseMsgToEigen(shape_pose, shape_poses.back());
       }
 
       if (!world_->moveShapesInObject(object.id, shape_poses))
       {
-        ROS_ERROR_NAMED(LOGNAME, "Move operation for object '%s' internal world error. Cannot move.", object.id.c_str());
+        RCLCPP_ERROR(getLogger(), "Move operation for object '%s' internal world error. Cannot move.",
+                     object.id.c_str());
         return false;
       }
     }
