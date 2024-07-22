@@ -113,11 +113,10 @@ public:
     : opt_(opt), node_(node), logger_(moveit::getLogger("moveit.ros.move_group_interface")), tf_buffer_(tf_buffer)
   {
     // We have no control on how the passed node is getting executed. To make sure MGI is functional, we're creating
-    // our own callback group which is managed in a separate callback thread
+    // our own callback group which is managed in a separate executor
     callback_group_ = node_->create_callback_group(rclcpp::CallbackGroupType::MutuallyExclusive,
                                                    false /* don't spin with node executor */);
-    callback_executor_.add_callback_group(callback_group_, node->get_node_base_interface());
-    callback_thread_ = std::thread([this]() { callback_executor_.spin(); });
+    callback_executor_.add_callback_group(callback_group_, node_->get_node_base_interface());
 
     robot_model_ = opt.robot_model ? opt.robot_model : getSharedRobotModel(node_, opt.robot_description);
     if (!getRobotModel())
@@ -200,9 +199,6 @@ public:
       constraints_init_thread_->join();
 
     callback_executor_.cancel();
-
-    if (callback_thread_.joinable())
-      callback_thread_.join();
   }
 
   const std::shared_ptr<tf2_ros::Buffer>& getTF() const
@@ -230,40 +226,55 @@ public:
     return *move_action_client_;
   }
 
-  bool getInterfaceDescription(moveit_msgs::msg::PlannerInterfaceDescription& desc)
+  bool getInterfaceDescription(moveit_msgs::msg::PlannerInterfaceDescription& desc,
+                               const rclcpp::Duration& server_timeout)
   {
     auto req = std::make_shared<moveit_msgs::srv::QueryPlannerInterfaces::Request>();
     auto future_response = query_service_->async_send_request(req);
 
-    if (future_response.valid())
+    if (callback_executor_.spin_until_future_complete(future_response,
+                                                      server_timeout.to_chrono<std::chrono::duration<double>>()) !=
+        rclcpp::FutureReturnCode::SUCCESS)
     {
-      const auto& response = future_response.get();
-      if (!response->planner_interfaces.empty())
-      {
-        desc = response->planner_interfaces.front();
-        return true;
-      }
+      RCLCPP_ERROR(logger_, "MoveGroupInterfaceImpl::getInterfaceDescription() get sent call failed :(");
+      return false;
     }
+
+    const auto& response = future_response.get();
+    if (!response->planner_interfaces.empty())
+    {
+      desc = response->planner_interfaces.front();
+      return true;
+    }
+
     return false;
   }
 
-  bool getInterfaceDescriptions(std::vector<moveit_msgs::msg::PlannerInterfaceDescription>& desc)
+  bool getInterfaceDescriptions(std::vector<moveit_msgs::msg::PlannerInterfaceDescription>& desc,
+                                const rclcpp::Duration& server_timeout)
   {
     auto req = std::make_shared<moveit_msgs::srv::QueryPlannerInterfaces::Request>();
     auto future_response = query_service_->async_send_request(req);
-    if (future_response.valid())
+
+    if (callback_executor_.spin_until_future_complete(future_response,
+                                                      server_timeout.to_chrono<std::chrono::duration<double>>()) !=
+        rclcpp::FutureReturnCode::SUCCESS)
     {
-      const auto& response = future_response.get();
-      if (!response->planner_interfaces.empty())
-      {
-        desc = response->planner_interfaces;
-        return true;
-      }
+      RCLCPP_ERROR(logger_, "MoveGroupInterfaceImpl::getInterfaceDescriptions() get sent call failed :(");
+      return false;
+    }
+
+    const auto& response = future_response.get();
+    if (!response->planner_interfaces.empty())
+    {
+      desc = response->planner_interfaces;
+      return true;
     }
     return false;
   }
 
-  std::map<std::string, std::string> getPlannerParams(const std::string& planner_id, const std::string& group = "")
+  std::map<std::string, std::string> getPlannerParams(const std::string& planner_id, const std::string& group,
+                                                      const rclcpp::Duration& server_timeout)
   {
     auto req = std::make_shared<moveit_msgs::srv::GetPlannerParams::Request>();
     moveit_msgs::srv::GetPlannerParams::Response::SharedPtr response;
@@ -272,17 +283,24 @@ public:
     std::map<std::string, std::string> result;
 
     auto future_response = get_params_service_->async_send_request(req);
-    if (future_response.valid())
+
+    if (callback_executor_.spin_until_future_complete(future_response,
+                                                      server_timeout.to_chrono<std::chrono::duration<double>>()) !=
+        rclcpp::FutureReturnCode::SUCCESS)
     {
-      response = future_response.get();
-      for (unsigned int i = 0, end = response->params.keys.size(); i < end; ++i)
-        result[response->params.keys[i]] = response->params.values[i];
+      RCLCPP_ERROR(logger_, "MoveGroupInterfaceImpl::getPlannerParams() get sent call failed :(");
+      return result;
     }
+
+    response = future_response.get();
+    for (unsigned int i = 0, end = response->params.keys.size(); i < end; ++i)
+      result[response->params.keys[i]] = response->params.values[i];
     return result;
   }
 
   void setPlannerParams(const std::string& planner_id, const std::string& group,
-                        const std::map<std::string, std::string>& params, bool replace = false)
+                        const std::map<std::string, std::string>& params, bool replace,
+                        const rclcpp::Duration& server_timeout)
   {
     auto req = std::make_shared<moveit_msgs::srv::SetPlannerParams::Request>();
     req->planner_config = planner_id;
@@ -293,7 +311,15 @@ public:
       req->params.keys.push_back(param.first);
       req->params.values.push_back(param.second);
     }
-    set_params_service_->async_send_request(req);
+
+    auto future_response = set_params_service_->async_send_request(req);
+
+    if (callback_executor_.spin_until_future_complete(future_response,
+                                                      server_timeout.to_chrono<std::chrono::duration<double>>()) !=
+        rclcpp::FutureReturnCode::SUCCESS)
+    {
+      RCLCPP_ERROR(logger_, "MoveGroupInterfaceImpl::setPlannerParams() get sent call failed :(");
+    }
   }
 
   std::string getDefaultPlanningPipelineId() const
@@ -633,7 +659,8 @@ public:
     return true;
   }
 
-  moveit::core::MoveItErrorCode plan(Plan& plan)
+  moveit::core::MoveItErrorCode plan(Plan& plan, const rclcpp::Duration& server_timeout,
+                                     const rclcpp::Duration& planning_timeout)
   {
     if (!move_action_client_ || !move_action_client_->action_server_is_ready())
     {
@@ -650,7 +677,6 @@ public:
     goal.planning_options.planning_scene_diff.is_diff = true;
     goal.planning_options.planning_scene_diff.robot_state.is_diff = true;
 
-    bool done = false;
     rclcpp_action::ResultCode code = rclcpp_action::ResultCode::UNKNOWN;
     std::shared_ptr<moveit_msgs::action::MoveGroup::Result> res;
     auto send_goal_opts = rclcpp_action::Client<moveit_msgs::action::MoveGroup>::SendGoalOptions();
@@ -659,7 +685,6 @@ public:
         [&](const rclcpp_action::ClientGoalHandle<moveit_msgs::action::MoveGroup>::SharedPtr& goal_handle) {
           if (!goal_handle)
           {
-            done = true;
             RCLCPP_INFO(logger_, "Planning request rejected");
           }
           else
@@ -669,7 +694,6 @@ public:
         [&](const rclcpp_action::ClientGoalHandle<moveit_msgs::action::MoveGroup>::WrappedResult& result) {
           res = result.result;
           code = result.code;
-          done = true;
 
           switch (result.code)
           {
@@ -689,11 +713,21 @@ public:
         };
 
     auto goal_handle_future = move_action_client_->async_send_goal(goal, send_goal_opts);
-
-    // wait until send_goal_opts.result_callback is called
-    while (!done)
+    if (callback_executor_.spin_until_future_complete(goal_handle_future,
+                                                      server_timeout.to_chrono<std::chrono::duration<double>>()) !=
+        rclcpp::FutureReturnCode::SUCCESS)
     {
-      std::this_thread::sleep_for(std::chrono::milliseconds(1));
+      RCLCPP_ERROR(logger_, "MoveGroupInterfaceImpl::plan() get sent call failed :(");
+      return moveit::core::MoveItErrorCode::TIMED_OUT;
+    }
+
+    auto goal_result_future = move_action_client_->async_get_result(goal_handle_future.get());
+    if (callback_executor_.spin_until_future_complete(goal_result_future,
+                                                      planning_timeout.to_chrono<std::chrono::duration<double>>()) !=
+        rclcpp::FutureReturnCode::SUCCESS)
+    {
+      RCLCPP_ERROR(logger_, "MoveGroupInterface::plan() get result call failed :(");
+      return moveit::core::MoveItErrorCode::TIMED_OUT;
     }
 
     if (code != rclcpp_action::ResultCode::SUCCEEDED)
@@ -710,7 +744,8 @@ public:
     return res->error_code;
   }
 
-  moveit::core::MoveItErrorCode move(bool wait)
+  moveit::core::MoveItErrorCode move(bool wait, const rclcpp::Duration& server_timeout,
+                                     const rclcpp::Duration& moving_timeout)
   {
     if (!move_action_client_ || !move_action_client_->action_server_is_ready())
     {
@@ -727,7 +762,6 @@ public:
     goal.planning_options.planning_scene_diff.is_diff = true;
     goal.planning_options.planning_scene_diff.robot_state.is_diff = true;
 
-    bool done = false;
     rclcpp_action::ResultCode code = rclcpp_action::ResultCode::UNKNOWN;
     std::shared_ptr<moveit_msgs::action::MoveGroup_Result> res;
     auto send_goal_opts = rclcpp_action::Client<moveit_msgs::action::MoveGroup>::SendGoalOptions();
@@ -736,7 +770,6 @@ public:
         [&](const rclcpp_action::ClientGoalHandle<moveit_msgs::action::MoveGroup>::SharedPtr& goal_handle) {
           if (!goal_handle)
           {
-            done = true;
             RCLCPP_INFO(logger_, "Plan and Execute request rejected");
           }
           else
@@ -746,7 +779,6 @@ public:
         [&](const rclcpp_action::ClientGoalHandle<moveit_msgs::action::MoveGroup>::WrappedResult& result) {
           res = result.result;
           code = result.code;
-          done = true;
 
           switch (result.code)
           {
@@ -764,14 +796,26 @@ public:
               return;
           }
         };
+
     auto goal_handle_future = move_action_client_->async_send_goal(goal, send_goal_opts);
+    if (callback_executor_.spin_until_future_complete(goal_handle_future,
+                                                      server_timeout.to_chrono<std::chrono::duration<double>>()) !=
+        rclcpp::FutureReturnCode::SUCCESS)
+    {
+      RCLCPP_ERROR(logger_, "MoveGroupInterface::move() get sent call failed :(");
+      return moveit::core::MoveItErrorCode::TIMED_OUT;
+    }
+
     if (!wait)
       return moveit::core::MoveItErrorCode::SUCCESS;
 
-    // wait until send_goal_opts.result_callback is called
-    while (!done)
+    auto goal_result_future = move_action_client_->async_get_result(goal_handle_future.get());
+    if (callback_executor_.spin_until_future_complete(goal_result_future,
+                                                      moving_timeout.to_chrono<std::chrono::duration<double>>()) !=
+        rclcpp::FutureReturnCode::SUCCESS)
     {
-      std::this_thread::sleep_for(std::chrono::milliseconds(1));
+      RCLCPP_ERROR(logger_, "MoveGroupInterface::move() get result call failed :(");
+      return moveit::core::MoveItErrorCode::TIMED_OUT;
     }
 
     if (code != rclcpp_action::ResultCode::SUCCEEDED)
@@ -782,7 +826,9 @@ public:
   }
 
   moveit::core::MoveItErrorCode execute(const moveit_msgs::msg::RobotTrajectory& trajectory, bool wait,
-                                        const std::vector<std::string>& controllers = std::vector<std::string>())
+                                        const std::vector<std::string>& controllers,
+                                        const rclcpp::Duration& server_timeout,
+                                        const rclcpp::Duration& trajectory_execution_timeout)
   {
     if (!execute_action_client_ || !execute_action_client_->action_server_is_ready())
     {
@@ -790,7 +836,6 @@ public:
       return moveit::core::MoveItErrorCode::FAILURE;
     }
 
-    bool done = false;
     rclcpp_action::ResultCode code = rclcpp_action::ResultCode::UNKNOWN;
     std::shared_ptr<moveit_msgs::action::ExecuteTrajectory_Result> res;
     auto send_goal_opts = rclcpp_action::Client<moveit_msgs::action::ExecuteTrajectory>::SendGoalOptions();
@@ -799,7 +844,6 @@ public:
         [&](const rclcpp_action::ClientGoalHandle<moveit_msgs::action::ExecuteTrajectory>::SharedPtr& goal_handle) {
           if (!goal_handle)
           {
-            done = true;
             RCLCPP_INFO(logger_, "Execute request rejected");
           }
           else
@@ -809,7 +853,6 @@ public:
         [&](const rclcpp_action::ClientGoalHandle<moveit_msgs::action::ExecuteTrajectory>::WrappedResult& result) {
           res = result.result;
           code = result.code;
-          done = true;
 
           switch (result.code)
           {
@@ -833,13 +876,24 @@ public:
     goal.controller_names = controllers;
 
     auto goal_handle_future = execute_action_client_->async_send_goal(goal, send_goal_opts);
+    if (callback_executor_.spin_until_future_complete(goal_handle_future,
+                                                      server_timeout.to_chrono<std::chrono::duration<double>>()) !=
+        rclcpp::FutureReturnCode::SUCCESS)
+    {
+      RCLCPP_ERROR(logger_, "MoveGroupInterface::execute() get sent call failed :(");
+      return moveit::core::MoveItErrorCode::TIMED_OUT;
+    }
+
     if (!wait)
       return moveit::core::MoveItErrorCode::SUCCESS;
 
-    // wait until send_goal_opts.result_callback is called
-    while (!done)
+    auto goal_result_future = execute_action_client_->async_get_result(goal_handle_future.get());
+    if (callback_executor_.spin_until_future_complete(
+            goal_result_future, trajectory_execution_timeout.to_chrono<std::chrono::duration<double>>()) !=
+        rclcpp::FutureReturnCode::SUCCESS)
     {
-      std::this_thread::sleep_for(std::chrono::milliseconds(1));
+      RCLCPP_ERROR(logger_, "MoveGroupInterface::execute() get result call failed :(");
+      return moveit::core::MoveItErrorCode::TIMED_OUT;
     }
 
     if (code != rclcpp_action::ResultCode::SUCCEEDED)
@@ -852,7 +906,7 @@ public:
   double computeCartesianPath(const std::vector<geometry_msgs::msg::Pose>& waypoints, double step,
                               double jump_threshold, moveit_msgs::msg::RobotTrajectory& msg,
                               const moveit_msgs::msg::Constraints& path_constraints, bool avoid_collisions,
-                              moveit_msgs::msg::MoveItErrorCodes& error_code)
+                              moveit_msgs::msg::MoveItErrorCodes& error_code, const rclcpp::Duration& server_timeout)
   {
     auto req = std::make_shared<moveit_msgs::srv::GetCartesianPath::Request>();
     moveit_msgs::srv::GetCartesianPath::Response::SharedPtr response;
@@ -879,6 +933,14 @@ public:
     req->max_acceleration_scaling_factor = max_acceleration_scaling_factor_;
 
     auto future_response = cartesian_path_service_->async_send_request(req);
+    if (callback_executor_.spin_until_future_complete(future_response,
+                                                      server_timeout.to_chrono<std::chrono::duration<double>>()) !=
+        rclcpp::FutureReturnCode::SUCCESS)
+    {
+      RCLCPP_ERROR(logger_, "MoveGroupInterface::computeCartesianPath() get sent call failed :(");
+      return -1.0;
+    }
+
     if (future_response.valid())
     {
       response = future_response.get();
@@ -1259,7 +1321,6 @@ private:
   rclcpp::Logger logger_;
   rclcpp::CallbackGroup::SharedPtr callback_group_;
   rclcpp::executors::SingleThreadedExecutor callback_executor_;
-  std::thread callback_thread_;
   std::shared_ptr<tf2_ros::Buffer> tf_buffer_;
   moveit::core::RobotModelConstPtr robot_model_;
   planning_scene_monitor::CurrentStateMonitorPtr current_state_monitor_;
@@ -1379,26 +1440,30 @@ moveit::core::RobotModelConstPtr MoveGroupInterface::getRobotModel() const
   return impl_->getRobotModel();
 }
 
-bool MoveGroupInterface::getInterfaceDescription(moveit_msgs::msg::PlannerInterfaceDescription& desc) const
+bool MoveGroupInterface::getInterfaceDescription(moveit_msgs::msg::PlannerInterfaceDescription& desc,
+                                                 const rclcpp::Duration& server_timeout) const
 {
-  return impl_->getInterfaceDescription(desc);
+  return impl_->getInterfaceDescription(desc, server_timeout);
 }
 
-bool MoveGroupInterface::getInterfaceDescriptions(std::vector<moveit_msgs::msg::PlannerInterfaceDescription>& desc) const
+bool MoveGroupInterface::getInterfaceDescriptions(std::vector<moveit_msgs::msg::PlannerInterfaceDescription>& desc,
+                                                  const rclcpp::Duration& server_timeout) const
 {
-  return impl_->getInterfaceDescriptions(desc);
+  return impl_->getInterfaceDescriptions(desc, server_timeout);
 }
 
 std::map<std::string, std::string> MoveGroupInterface::getPlannerParams(const std::string& planner_id,
-                                                                        const std::string& group) const
+                                                                        const std::string& group,
+                                                                        const rclcpp::Duration& server_timeout) const
 {
-  return impl_->getPlannerParams(planner_id, group);
+  return impl_->getPlannerParams(planner_id, group, server_timeout);
 }
 
 void MoveGroupInterface::setPlannerParams(const std::string& planner_id, const std::string& group,
-                                          const std::map<std::string, std::string>& params, bool replace)
+                                          const std::map<std::string, std::string>& params, bool replace,
+                                          const rclcpp::Duration& server_timeout)
 {
-  impl_->setPlannerParams(planner_id, group, params, replace);
+  impl_->setPlannerParams(planner_id, group, params, replace, server_timeout);
 }
 
 std::string MoveGroupInterface::getDefaultPlanningPipelineId() const
@@ -1446,9 +1511,10 @@ void MoveGroupInterface::setMaxAccelerationScalingFactor(double max_acceleration
   impl_->setMaxAccelerationScalingFactor(max_acceleration_scaling_factor);
 }
 
-moveit::core::MoveItErrorCode MoveGroupInterface::asyncMove()
+moveit::core::MoveItErrorCode MoveGroupInterface::asyncMove(const rclcpp::Duration& server_timeout,
+                                                            const rclcpp::Duration& moving_timeout)
 {
-  return impl_->move(false);
+  return impl_->move(false, server_timeout, moving_timeout);
 }
 
 rclcpp_action::Client<moveit_msgs::action::MoveGroup>& MoveGroupInterface::getMoveGroupClient() const
@@ -1456,37 +1522,47 @@ rclcpp_action::Client<moveit_msgs::action::MoveGroup>& MoveGroupInterface::getMo
   return impl_->getMoveGroupClient();
 }
 
-moveit::core::MoveItErrorCode MoveGroupInterface::move()
+moveit::core::MoveItErrorCode MoveGroupInterface::move(const rclcpp::Duration& server_timeout,
+                                                       const rclcpp::Duration& moving_timeout)
 {
-  return impl_->move(true);
+  return impl_->move(true, server_timeout, moving_timeout);
 }
 
 moveit::core::MoveItErrorCode MoveGroupInterface::asyncExecute(const Plan& plan,
-                                                               const std::vector<std::string>& controllers)
+                                                               const std::vector<std::string>& controllers,
+                                                               const rclcpp::Duration& server_timeout,
+                                                               const rclcpp::Duration& trajectory_execution_timeout)
 {
-  return impl_->execute(plan.trajectory, false, controllers);
+  return impl_->execute(plan.trajectory, false, controllers, server_timeout, trajectory_execution_timeout);
 }
 
 moveit::core::MoveItErrorCode MoveGroupInterface::asyncExecute(const moveit_msgs::msg::RobotTrajectory& trajectory,
-                                                               const std::vector<std::string>& controllers)
+                                                               const std::vector<std::string>& controllers,
+                                                               const rclcpp::Duration& server_timeout,
+                                                               const rclcpp::Duration& trajectory_execution_timeout)
 {
-  return impl_->execute(trajectory, false, controllers);
+  return impl_->execute(trajectory, false, controllers, server_timeout, trajectory_execution_timeout);
 }
 
-moveit::core::MoveItErrorCode MoveGroupInterface::execute(const Plan& plan, const std::vector<std::string>& controllers)
+moveit::core::MoveItErrorCode MoveGroupInterface::execute(const Plan& plan, const std::vector<std::string>& controllers,
+                                                          const rclcpp::Duration& server_timeout,
+                                                          const rclcpp::Duration& trajectory_execution_timeout)
 {
-  return impl_->execute(plan.trajectory, true, controllers);
+  return impl_->execute(plan.trajectory, true, controllers, server_timeout, trajectory_execution_timeout);
 }
 
 moveit::core::MoveItErrorCode MoveGroupInterface::execute(const moveit_msgs::msg::RobotTrajectory& trajectory,
-                                                          const std::vector<std::string>& controllers)
+                                                          const std::vector<std::string>& controllers,
+                                                          const rclcpp::Duration& server_timeout,
+                                                          const rclcpp::Duration& trajectory_execution_timeout)
 {
-  return impl_->execute(trajectory, true, controllers);
+  return impl_->execute(trajectory, true, controllers, server_timeout, trajectory_execution_timeout);
 }
 
-moveit::core::MoveItErrorCode MoveGroupInterface::plan(Plan& plan)
+moveit::core::MoveItErrorCode MoveGroupInterface::plan(Plan& plan, const rclcpp::Duration& server_timeout,
+                                                       const rclcpp::Duration& planning_timeout)
 {
-  return impl_->plan(plan);
+  return impl_->plan(plan, server_timeout, planning_timeout);
 }
 
 // moveit_msgs::action::Pickup::Goal MoveGroupInterface::constructPickupGoal(const std::string& object,
@@ -1531,22 +1607,24 @@ moveit::core::MoveItErrorCode MoveGroupInterface::plan(Plan& plan)
 
 double MoveGroupInterface::computeCartesianPath(const std::vector<geometry_msgs::msg::Pose>& waypoints, double eef_step,
                                                 double jump_threshold, moveit_msgs::msg::RobotTrajectory& trajectory,
-                                                bool avoid_collisions, moveit_msgs::msg::MoveItErrorCodes* error_code)
+                                                bool avoid_collisions, moveit_msgs::msg::MoveItErrorCodes* error_code,
+                                                const rclcpp::Duration& server_timeout)
 {
   moveit_msgs::msg::Constraints path_constraints_tmp;
   return computeCartesianPath(waypoints, eef_step, jump_threshold, trajectory, moveit_msgs::msg::Constraints(),
-                              avoid_collisions, error_code);
+                              avoid_collisions, error_code, server_timeout);
 }
 
 double MoveGroupInterface::computeCartesianPath(const std::vector<geometry_msgs::msg::Pose>& waypoints, double eef_step,
                                                 double jump_threshold, moveit_msgs::msg::RobotTrajectory& trajectory,
                                                 const moveit_msgs::msg::Constraints& path_constraints,
-                                                bool avoid_collisions, moveit_msgs::msg::MoveItErrorCodes* error_code)
+                                                bool avoid_collisions, moveit_msgs::msg::MoveItErrorCodes* error_code,
+                                                const rclcpp::Duration& server_timeout)
 {
   if (error_code)
   {
     return impl_->computeCartesianPath(waypoints, eef_step, jump_threshold, trajectory, path_constraints,
-                                       avoid_collisions, *error_code);
+                                       avoid_collisions, *error_code, server_timeout);
   }
   else
   {
@@ -1554,7 +1632,7 @@ double MoveGroupInterface::computeCartesianPath(const std::vector<geometry_msgs:
     err_tmp.val = moveit_msgs::msg::MoveItErrorCodes::SUCCESS;
     moveit_msgs::msg::MoveItErrorCodes& err = error_code ? *error_code : err_tmp;
     return impl_->computeCartesianPath(waypoints, eef_step, jump_threshold, trajectory, path_constraints,
-                                       avoid_collisions, err);
+                                       avoid_collisions, err, server_timeout);
   }
 }
 
