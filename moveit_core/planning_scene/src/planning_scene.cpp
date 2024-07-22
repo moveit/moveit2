@@ -210,6 +210,10 @@ PlanningScene::PlanningScene(const PlanningSceneConstPtr& parent) : parent_(pare
 
   robot_model_ = parent_->robot_model_;
 
+  setStateFeasibilityPredicate(parent->getStateFeasibilityPredicate());
+  setMotionFeasibilityPredicate(parent->getMotionFeasibilityPredicate());
+  setCollisionObjectUpdateCallback(parent_->current_world_object_update_callback_);
+
   // maintain a separate world.  Copy on write ensures that most of the object
   // info is shared until it is modified.
   world_ = std::make_shared<collision_detection::World>(*parent_->world_);
@@ -1203,6 +1207,8 @@ void PlanningScene::decoupleParent()
         (object_types_.value())[it->first] = it->second;
     }
   }
+
+  setCollisionObjectUpdateCallback(nullptr);
 
   parent_.reset();
 }
