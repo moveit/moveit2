@@ -246,6 +246,7 @@ public:
 
 private:
   rclcpp::Node::SharedPtr node_;
+  rclcpp::Logger logger_;
   warehouse_ros::DatabaseConnection::Ptr db_;
 
   double exact_match_precision_ = 1e-6;
