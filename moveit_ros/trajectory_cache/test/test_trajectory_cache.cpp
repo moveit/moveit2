@@ -92,7 +92,7 @@ std::vector<geometry_msgs::msg::Pose> get_dummy_waypoints()
 void test_motion_trajectories(std::shared_ptr<MoveGroupInterface> move_group, std::shared_ptr<TrajectoryCache> cache)
 {
   // Setup =====================================================================
-  // All variants are copies.
+  // All variants are modified copies of `plan_req`.
 
   /// MotionPlanRequest
 
@@ -577,7 +577,7 @@ void test_cartesian_trajectories(std::shared_ptr<MoveGroupInterface> move_group,
                  prefix, "Ok");
 
   // Setup =====================================================================
-  // All variants are copies.
+  // All variants are modified copies of `cartesian_plan_req`.
 
   /// GetCartesianPath::Request
 
