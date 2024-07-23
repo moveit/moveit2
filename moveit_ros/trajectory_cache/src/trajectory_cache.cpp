@@ -64,7 +64,7 @@ void sort_constraints(std::vector<moveit_msgs::msg::JointConstraint>& joint_cons
 
 // Trajectory Cache ============================================================
 
-TrajectoryCache::TrajectoryCache(const rclcpp::Node::SharedPtr& node) : node_(node)
+TrajectoryCache::TrajectoryCache(const rclcpp::Node::SharedPtr& node) : node_(node), logger_(moveit::getLogger("moveit.ros.trajectory_cache"))
 {
   tf_buffer_ = std::make_unique<tf2_ros::Buffer>(node_->get_clock());
   tf_listener_ = std::make_shared<tf2_ros::TransformListener>(*tf_buffer_);
@@ -72,7 +72,7 @@ TrajectoryCache::TrajectoryCache(const rclcpp::Node::SharedPtr& node) : node_(no
 
 bool TrajectoryCache::init(const std::string& db_path, uint32_t db_port, double exact_match_precision)
 {
-  RCLCPP_DEBUG(node_->get_logger(), "Opening trajectory cache database at: %s (Port: %d, Precision: %f)",
+  RCLCPP_DEBUG(logger_, "Opening trajectory cache database at: %s (Port: %d, Precision: %f)",
               db_path.c_str(), db_port, exact_match_precision);
 
   // If the `warehouse_plugin` parameter isn't set, defaults to warehouse_ros'
@@ -119,7 +119,7 @@ TrajectoryCache::fetch_all_matching_trajectories(const moveit::planning_interfac
 
   if (!start_ok || !goal_ok)
   {
-    RCLCPP_ERROR(node_->get_logger(), "Could not construct trajectory query.");
+    RCLCPP_ERROR(logger_, "Could not construct trajectory query.");
     return {};
   }
 
@@ -138,7 +138,7 @@ MessageWithMetadata<moveit_msgs::msg::RobotTrajectory>::ConstPtr TrajectoryCache
 
   if (matching_trajectories.empty())
   {
-    RCLCPP_DEBUG(node_->get_logger(), "No matching trajectories found.");
+    RCLCPP_DEBUG(logger_, "No matching trajectories found.");
     return nullptr;
   }
 
@@ -163,17 +163,17 @@ bool TrajectoryCache::put_trajectory(const moveit::planning_interface::MoveGroup
   // Check pre-conditions
   if (!trajectory.multi_dof_joint_trajectory.points.empty())
   {
-    RCLCPP_ERROR(node_->get_logger(), "Skipping plan insert: Multi-DOF trajectory plans are not supported.");
+    RCLCPP_ERROR(logger_, "Skipping plan insert: Multi-DOF trajectory plans are not supported.");
     return false;
   }
   if (plan_request.workspace_parameters.header.frame_id.empty() || trajectory.joint_trajectory.header.frame_id.empty())
   {
-    RCLCPP_ERROR(node_->get_logger(), "Skipping plan insert: Frame IDs cannot be empty.");
+    RCLCPP_ERROR(logger_, "Skipping plan insert: Frame IDs cannot be empty.");
     return false;
   }
   if (plan_request.workspace_parameters.header.frame_id != trajectory.joint_trajectory.header.frame_id)
   {
-    RCLCPP_ERROR(node_->get_logger(),
+    RCLCPP_ERROR(logger_,
                  "Skipping plan insert: "
                  "Plan request frame (%s) does not match plan frame (%s).",
                  plan_request.workspace_parameters.header.frame_id.c_str(),
@@ -192,7 +192,7 @@ bool TrajectoryCache::put_trajectory(const moveit::planning_interface::MoveGroup
 
   if (!start_query_ok || !goal_query_ok)
   {
-    RCLCPP_ERROR(node_->get_logger(), "Skipping plan insert: Could not construct lookup query.");
+    RCLCPP_ERROR(logger_, "Skipping plan insert: Could not construct lookup query.");
     return false;
   }
 
@@ -211,7 +211,7 @@ bool TrajectoryCache::put_trajectory(const moveit::planning_interface::MoveGroup
         if (execution_time_s < match_execution_time_s)
         {
           int delete_id = match->lookupInt("id");
-          RCLCPP_DEBUG(node_->get_logger(),
+          RCLCPP_DEBUG(logger_,
                       "Overwriting plan (id: %d): "
                       "execution_time (%es) > new trajectory's execution_time (%es)",
                       delete_id, match_execution_time_s, execution_time_s);
@@ -238,11 +238,11 @@ bool TrajectoryCache::put_trajectory(const moveit::planning_interface::MoveGroup
 
     if (!start_meta_ok || !goal_meta_ok)
     {
-      RCLCPP_ERROR(node_->get_logger(), "Skipping plan insert: Could not construct insert metadata.");
+      RCLCPP_ERROR(logger_, "Skipping plan insert: Could not construct insert metadata.");
       return false;
     }
 
-    RCLCPP_DEBUG(node_->get_logger(),
+    RCLCPP_DEBUG(logger_,
                 "Inserting trajectory: New trajectory execution_time (%es) "
                 "is better than best trajectory's execution_time (%es)",
                 execution_time_s, best_execution_time);
@@ -251,7 +251,7 @@ bool TrajectoryCache::put_trajectory(const moveit::planning_interface::MoveGroup
     return true;
   }
 
-  RCLCPP_DEBUG(node_->get_logger(),
+  RCLCPP_DEBUG(logger_,
               "Skipping plan insert: New trajectory execution_time (%es) "
               "is worse than best trajectory's execution_time (%es)",
               execution_time_s, best_execution_time);
@@ -268,11 +268,11 @@ bool TrajectoryCache::extract_and_append_trajectory_start_to_query(
   // Make ignored members explicit
   if (!plan_request.start_state.multi_dof_joint_state.joint_names.empty())
   {
-    RCLCPP_WARN(node_->get_logger(), "Ignoring start_state.multi_dof_joint_states: Not supported.");
+    RCLCPP_WARN(logger_, "Ignoring start_state.multi_dof_joint_states: Not supported.");
   }
   if (!plan_request.start_state.attached_collision_objects.empty())
   {
-    RCLCPP_WARN(node_->get_logger(), "Ignoring start_state.attached_collision_objects: Not supported.");
+    RCLCPP_WARN(logger_, "Ignoring start_state.attached_collision_objects: Not supported.");
   }
 
   query.append("group_name", plan_request.group_name);
@@ -308,7 +308,7 @@ bool TrajectoryCache::extract_and_append_trajectory_start_to_query(
     moveit::core::RobotStatePtr current_state = move_group.getCurrentState();
     if (!current_state)
     {
-      RCLCPP_WARN(node_->get_logger(), "Skipping start query append: Could not get robot state.");
+      RCLCPP_WARN(logger_, "Skipping start query append: Could not get robot state.");
       // NOTE: methyldragon -
       //   Ideally we would restore the original state here and undo our changes, however copy of the query is not supported.
       return false;
@@ -361,7 +361,7 @@ bool TrajectoryCache::extract_and_append_trajectory_goal_to_query(
   }
   if (emit_position_constraint_warning)
   {
-    RCLCPP_WARN(node_->get_logger(), "Ignoring goal_constraints.position_constraints.constraint_region: "
+    RCLCPP_WARN(logger_, "Ignoring goal_constraints.position_constraints.constraint_region: "
                                      "Not supported.");
   }
 
@@ -438,7 +438,7 @@ bool TrajectoryCache::extract_and_append_trajectory_goal_to_query(
         }
         catch (tf2::TransformException& ex)
         {
-          RCLCPP_WARN(node_->get_logger(),
+          RCLCPP_WARN(logger_,
                       "Skipping goal query append: "
                       "Could not get goal transform for translation %s to %s: %s",
                       plan_request.workspace_parameters.header.frame_id.c_str(), constraint.header.frame_id.c_str(),
@@ -492,7 +492,7 @@ bool TrajectoryCache::extract_and_append_trajectory_goal_to_query(
         }
         catch (tf2::TransformException& ex)
         {
-          RCLCPP_WARN(node_->get_logger(),
+          RCLCPP_WARN(logger_,
                       "Skipping goal query append: "
                       "Could not get goal transform for orientation %s to %s: %s",
                       plan_request.workspace_parameters.header.frame_id.c_str(), constraint.header.frame_id.c_str(),
@@ -542,11 +542,11 @@ bool TrajectoryCache::extract_and_append_trajectory_start_to_metadata(
   // Make ignored members explicit
   if (!plan_request.start_state.multi_dof_joint_state.joint_names.empty())
   {
-    RCLCPP_WARN(node_->get_logger(), "Ignoring start_state.multi_dof_joint_states: Not supported.");
+    RCLCPP_WARN(logger_, "Ignoring start_state.multi_dof_joint_states: Not supported.");
   }
   if (!plan_request.start_state.attached_collision_objects.empty())
   {
-    RCLCPP_WARN(node_->get_logger(), "Ignoring start_state.attached_collision_objects: Not supported.");
+    RCLCPP_WARN(logger_, "Ignoring start_state.attached_collision_objects: Not supported.");
   }
 
   metadata.append("group_name", plan_request.group_name);
@@ -581,7 +581,7 @@ bool TrajectoryCache::extract_and_append_trajectory_start_to_metadata(
     moveit::core::RobotStatePtr current_state = move_group.getCurrentState();
     if (!current_state)
     {
-      RCLCPP_WARN(node_->get_logger(), "Skipping start metadata append: Could not get robot state.");
+      RCLCPP_WARN(logger_, "Skipping start metadata append: Could not get robot state.");
       // NOTE: methyldragon -
       //   Ideally we would restore the original state here and undo our changes, however copy of the query is not supported.
       return false;
@@ -634,7 +634,7 @@ bool TrajectoryCache::extract_and_append_trajectory_goal_to_metadata(
   }
   if (emit_position_constraint_warning)
   {
-    RCLCPP_WARN(node_->get_logger(), "Ignoring goal_constraints.position_constraints.constraint_region: "
+    RCLCPP_WARN(logger_, "Ignoring goal_constraints.position_constraints.constraint_region: "
                                      "Not supported.");
   }
 
@@ -708,7 +708,7 @@ bool TrajectoryCache::extract_and_append_trajectory_goal_to_metadata(
         }
         catch (tf2::TransformException& ex)
         {
-          RCLCPP_WARN(node_->get_logger(),
+          RCLCPP_WARN(logger_,
                       "Skipping goal metadata append: "
                       "Could not get goal transform for translation %s to %s: %s",
                       plan_request.workspace_parameters.header.frame_id.c_str(), constraint.header.frame_id.c_str(),
@@ -759,7 +759,7 @@ bool TrajectoryCache::extract_and_append_trajectory_goal_to_metadata(
         }
         catch (tf2::TransformException& ex)
         {
-          RCLCPP_WARN(node_->get_logger(),
+          RCLCPP_WARN(logger_,
                       "Skipping goal metadata append: "
                       "Could not get goal transform for orientation %s to %s: %s",
                       plan_request.workspace_parameters.header.frame_id.c_str(), constraint.header.frame_id.c_str(),
@@ -849,7 +849,7 @@ TrajectoryCache::fetch_all_matching_cartesian_trajectories(
 
   if (!start_ok || !goal_ok)
   {
-    RCLCPP_ERROR(node_->get_logger(), "Could not construct cartesian trajectory query.");
+    RCLCPP_ERROR(logger_, "Could not construct cartesian trajectory query.");
     return {};
   }
 
@@ -870,7 +870,7 @@ TrajectoryCache::fetch_best_matching_cartesian_trajectory(
 
   if (matching_trajectories.empty())
   {
-    RCLCPP_DEBUG(node_->get_logger(), "No matching cartesian trajectories found.");
+    RCLCPP_DEBUG(logger_, "No matching cartesian trajectories found.");
     return nullptr;
   }
 
@@ -896,13 +896,13 @@ bool TrajectoryCache::put_cartesian_trajectory(const moveit::planning_interface:
   // Check pre-conditions
   if (!trajectory.multi_dof_joint_trajectory.points.empty())
   {
-    RCLCPP_ERROR(node_->get_logger(), "Skipping cartesian trajectory insert: "
+    RCLCPP_ERROR(logger_, "Skipping cartesian trajectory insert: "
                                       "Multi-DOF trajectory plans are not supported.");
     return false;
   }
   if (plan_request.header.frame_id.empty() || trajectory.joint_trajectory.header.frame_id.empty())
   {
-    RCLCPP_ERROR(node_->get_logger(), "Skipping cartesian trajectory insert: Frame IDs cannot be empty.");
+    RCLCPP_ERROR(logger_, "Skipping cartesian trajectory insert: Frame IDs cannot be empty.");
     return false;
   }
 
@@ -920,7 +920,7 @@ bool TrajectoryCache::put_cartesian_trajectory(const moveit::planning_interface:
 
   if (!start_query_ok || !goal_query_ok)
   {
-    RCLCPP_ERROR(node_->get_logger(), "Skipping cartesian trajectory insert: Could not construct lookup query.");
+    RCLCPP_ERROR(logger_, "Skipping cartesian trajectory insert: Could not construct lookup query.");
     return false;
   }
 
@@ -938,7 +938,7 @@ bool TrajectoryCache::put_cartesian_trajectory(const moveit::planning_interface:
         if (execution_time_s < match_execution_time_s)
         {
           int delete_id = match->lookupInt("id");
-          RCLCPP_DEBUG(node_->get_logger(),
+          RCLCPP_DEBUG(logger_,
                       "Overwriting cartesian trajectory (id: %d): "
                       "execution_time (%es) > new trajectory's execution_time (%es)",
                       delete_id, match_execution_time_s, execution_time_s);
@@ -966,12 +966,12 @@ bool TrajectoryCache::put_cartesian_trajectory(const moveit::planning_interface:
 
     if (!start_meta_ok || !goal_meta_ok)
     {
-      RCLCPP_ERROR(node_->get_logger(), "Skipping cartesian trajectory insert: "
+      RCLCPP_ERROR(logger_, "Skipping cartesian trajectory insert: "
                                         "Could not construct insert metadata.");
       return false;
     }
 
-    RCLCPP_DEBUG(node_->get_logger(),
+    RCLCPP_DEBUG(logger_,
                 "Inserting cartesian trajectory: New trajectory execution_time (%es) "
                 "is better than best trajectory's execution_time (%es) at fraction (%es)",
                 execution_time_s, best_execution_time, fraction);
@@ -980,7 +980,7 @@ bool TrajectoryCache::put_cartesian_trajectory(const moveit::planning_interface:
     return true;
   }
 
-  RCLCPP_DEBUG(node_->get_logger(),
+  RCLCPP_DEBUG(logger_,
               "Skipping cartesian trajectory insert: New trajectory execution_time (%es) "
               "is worse than best trajectory's execution_time (%es) at fraction (%es)",
               execution_time_s, best_execution_time, fraction);
@@ -997,11 +997,11 @@ bool TrajectoryCache::extract_and_append_cartesian_trajectory_start_to_query(
   // Make ignored members explicit
   if (!plan_request.start_state.multi_dof_joint_state.joint_names.empty())
   {
-    RCLCPP_WARN(node_->get_logger(), "Ignoring start_state.multi_dof_joint_states: Not supported.");
+    RCLCPP_WARN(logger_, "Ignoring start_state.multi_dof_joint_states: Not supported.");
   }
   if (!plan_request.start_state.attached_collision_objects.empty())
   {
-    RCLCPP_WARN(node_->get_logger(), "Ignoring start_state.attached_collision_objects: Not supported.");
+    RCLCPP_WARN(logger_, "Ignoring start_state.attached_collision_objects: Not supported.");
   }
 
   query.append("group_name", plan_request.group_name);
@@ -1027,7 +1027,7 @@ bool TrajectoryCache::extract_and_append_cartesian_trajectory_start_to_query(
     moveit::core::RobotStatePtr current_state = move_group.getCurrentState();
     if (!current_state)
     {
-      RCLCPP_WARN(node_->get_logger(), "Skipping start metadata append: Could not get robot state.");
+      RCLCPP_WARN(logger_, "Skipping start metadata append: Could not get robot state.");
       // NOTE: methyldragon -
       //   Ideally we would restore the original state here and undo our changes, however copy of the query is not supported.
       return false;
@@ -1068,11 +1068,11 @@ bool TrajectoryCache::extract_and_append_cartesian_trajectory_goal_to_query(
       !plan_request.path_constraints.orientation_constraints.empty() ||
       !plan_request.path_constraints.visibility_constraints.empty())
   {
-    RCLCPP_WARN(node_->get_logger(), "Ignoring path_constraints: Not supported.");
+    RCLCPP_WARN(logger_, "Ignoring path_constraints: Not supported.");
   }
   if (plan_request.avoid_collisions)
   {
-    RCLCPP_WARN(node_->get_logger(), "Ignoring avoid_collisions: Not supported.");
+    RCLCPP_WARN(logger_, "Ignoring avoid_collisions: Not supported.");
   }
 
   query_append_range_inclusive_with_tolerance(query, "max_velocity_scaling_factor",
@@ -1110,7 +1110,7 @@ bool TrajectoryCache::extract_and_append_cartesian_trajectory_goal_to_query(
     }
     catch (tf2::TransformException& ex)
     {
-      RCLCPP_WARN(node_->get_logger(),
+      RCLCPP_WARN(logger_,
                   "Skipping goal metadata append: "
                   "Could not get goal transform for %s to %s: %s",
                   base_frame.c_str(), plan_request.header.frame_id.c_str(), ex.what());
@@ -1166,11 +1166,11 @@ bool TrajectoryCache::extract_and_append_cartesian_trajectory_start_to_metadata(
   // Make ignored members explicit
   if (!plan_request.start_state.multi_dof_joint_state.joint_names.empty())
   {
-    RCLCPP_WARN(node_->get_logger(), "Ignoring start_state.multi_dof_joint_states: Not supported.");
+    RCLCPP_WARN(logger_, "Ignoring start_state.multi_dof_joint_states: Not supported.");
   }
   if (!plan_request.start_state.attached_collision_objects.empty())
   {
-    RCLCPP_WARN(node_->get_logger(), "Ignoring start_state.attached_collision_objects: Not supported.");
+    RCLCPP_WARN(logger_, "Ignoring start_state.attached_collision_objects: Not supported.");
   }
 
   metadata.append("group_name", plan_request.group_name);
@@ -1196,7 +1196,7 @@ bool TrajectoryCache::extract_and_append_cartesian_trajectory_start_to_metadata(
     moveit::core::RobotStatePtr current_state = move_group.getCurrentState();
     if (!current_state)
     {
-      RCLCPP_WARN(node_->get_logger(), "Skipping start metadata append: Could not get robot state.");
+      RCLCPP_WARN(logger_, "Skipping start metadata append: Could not get robot state.");
       // NOTE: methyldragon -
       //   Ideally we would restore the original state here and undo our changes, however copy of the query is not supported.
       return false;
@@ -1236,11 +1236,11 @@ bool TrajectoryCache::extract_and_append_cartesian_trajectory_goal_to_metadata(
       !plan_request.path_constraints.orientation_constraints.empty() ||
       !plan_request.path_constraints.visibility_constraints.empty())
   {
-    RCLCPP_WARN(node_->get_logger(), "Ignoring path_constraints: Not supported.");
+    RCLCPP_WARN(logger_, "Ignoring path_constraints: Not supported.");
   }
   if (plan_request.avoid_collisions)
   {
-    RCLCPP_WARN(node_->get_logger(), "Ignoring avoid_collisions: Not supported.");
+    RCLCPP_WARN(logger_, "Ignoring avoid_collisions: Not supported.");
   }
 
   metadata.append("max_velocity_scaling_factor", plan_request.max_velocity_scaling_factor);
@@ -1276,7 +1276,7 @@ bool TrajectoryCache::extract_and_append_cartesian_trajectory_goal_to_metadata(
     }
     catch (tf2::TransformException& ex)
     {
-      RCLCPP_WARN(node_->get_logger(),
+      RCLCPP_WARN(logger_,
                   "Skipping goal metadata append: "
                   "Could not get goal transform for %s to %s: %s",
                   base_frame.c_str(), plan_request.header.frame_id.c_str(), ex.what());
