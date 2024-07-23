@@ -37,6 +37,7 @@ set(TRAJECTORY_CACHE_LIBRARY_NAME trajectory_cache)
 # Motion plan cache library
 add_library(${TRAJECTORY_CACHE_LIBRARY_NAME} src/trajectory_cache.cpp)
 ament_target_dependencies(${TRAJECTORY_CACHE_LIBRARY_NAME} ${trajectory_cache_dependencies})
+target_include_directories(${TRAJECTORY_CACHE_LIBRARY_NAME} PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>)
 
 #===============================================================================
 
@@ -45,7 +46,8 @@ if(BUILD_TESTING)
   find_package(launch_testing_ament_cmake REQUIRED)
   find_package(rmf_utils REQUIRED)
 
-  add_executable(test_trajectory_cache src/test_trajectory_cache.cpp)
+  # This test executable is run by the pytest_test, since a node is required for testing move groups
+  add_executable(test_trajectory_cache test/test_trajectory_cache.cpp)
   target_link_libraries(test_trajectory_cache ${TRAJECTORY_CACHE_LIBRARY_NAME})
 
   install(TARGETS
