@@ -826,10 +826,7 @@ TrajectoryCache::construct_get_cartesian_path_request(moveit::planning_interface
   out.path_constraints = moveit_msgs::msg::Constraints();
   out.avoid_collisions = avoid_collisions;
   out.link_name = move_group.getEndEffectorLink();
-
-  // We were already cursed before, now we are double cursed...
-  // move_group.getNodeHandle() is UNIMPLEMENTED upstream.
-  out.header.stamp = node_->now();
+  out.header.stamp = move_group.getNode()->now();
 
   return out;
 }
