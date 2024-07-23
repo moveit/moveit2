@@ -72,7 +72,7 @@ TrajectoryCache::TrajectoryCache(const rclcpp::Node::SharedPtr& node) : node_(no
 
 bool TrajectoryCache::init(const std::string& db_path, uint32_t db_port, double exact_match_precision)
 {
-  RCLCPP_INFO(node_->get_logger(), "Opening trajectory cache database at: %s (Port: %d, Precision: %f)",
+  RCLCPP_DEBUG(node_->get_logger(), "Opening trajectory cache database at: %s (Port: %d, Precision: %f)",
               db_path.c_str(), db_port, exact_match_precision);
 
   // If the `warehouse_plugin` parameter isn't set, defaults to warehouse_ros'
@@ -138,7 +138,7 @@ MessageWithMetadata<moveit_msgs::msg::RobotTrajectory>::ConstPtr TrajectoryCache
 
   if (matching_trajectories.empty())
   {
-    RCLCPP_INFO(node_->get_logger(), "No matching trajectories found.");
+    RCLCPP_DEBUG(node_->get_logger(), "No matching trajectories found.");
     return nullptr;
   }
 
@@ -211,7 +211,7 @@ bool TrajectoryCache::put_trajectory(const moveit::planning_interface::MoveGroup
         if (execution_time_s < match_execution_time_s)
         {
           int delete_id = match->lookupInt("id");
-          RCLCPP_INFO(node_->get_logger(),
+          RCLCPP_DEBUG(node_->get_logger(),
                       "Overwriting plan (id: %d): "
                       "execution_time (%es) > new trajectory's execution_time (%es)",
                       delete_id, match_execution_time_s, execution_time_s);
@@ -242,7 +242,7 @@ bool TrajectoryCache::put_trajectory(const moveit::planning_interface::MoveGroup
       return false;
     }
 
-    RCLCPP_INFO(node_->get_logger(),
+    RCLCPP_DEBUG(node_->get_logger(),
                 "Inserting trajectory: New trajectory execution_time (%es) "
                 "is better than best trajectory's execution_time (%es)",
                 execution_time_s, best_execution_time);
@@ -251,7 +251,7 @@ bool TrajectoryCache::put_trajectory(const moveit::planning_interface::MoveGroup
     return true;
   }
 
-  RCLCPP_INFO(node_->get_logger(),
+  RCLCPP_DEBUG(node_->get_logger(),
               "Skipping plan insert: New trajectory execution_time (%es) "
               "is worse than best trajectory's execution_time (%es)",
               execution_time_s, best_execution_time);
@@ -274,8 +274,6 @@ bool TrajectoryCache::extract_and_append_trajectory_start_to_query(
   {
     RCLCPP_WARN(node_->get_logger(), "Ignoring start_state.attached_collision_objects: Not supported.");
   }
-
-  // auto original = *query;  // Copy not supported.
 
   query.append("group_name", plan_request.group_name);
 
@@ -311,7 +309,8 @@ bool TrajectoryCache::extract_and_append_trajectory_start_to_query(
     if (!current_state)
     {
       RCLCPP_WARN(node_->get_logger(), "Skipping start query append: Could not get robot state.");
-      // *query = original;  // Undo our changes. (Can't. Copy not supported.)
+      // NOTE: methyldragon -
+      //   Ideally we would restore the original state here and undo our changes, however copy of the query is not supported.
       return false;
     }
 
@@ -365,8 +364,6 @@ bool TrajectoryCache::extract_and_append_trajectory_goal_to_query(
     RCLCPP_WARN(node_->get_logger(), "Ignoring goal_constraints.position_constraints.constraint_region: "
                                      "Not supported.");
   }
-
-  // auto original = *query;  // Copy not supported.
 
   query_append_range_inclusive_with_tolerance(query, "max_velocity_scaling_factor",
                                               plan_request.max_velocity_scaling_factor, match_tolerance);
@@ -447,8 +444,8 @@ bool TrajectoryCache::extract_and_append_trajectory_goal_to_query(
                       plan_request.workspace_parameters.header.frame_id.c_str(), constraint.header.frame_id.c_str(),
                       ex.what());
 
-          // (Can't. Copy not supported.)
-          // *query = original;  // Undo our changes.
+          // NOTE: methyldragon -
+          //   Ideally we would restore the original state here and undo our changes, however copy of the query is not supported.
           return false;
         }
       }
@@ -501,8 +498,8 @@ bool TrajectoryCache::extract_and_append_trajectory_goal_to_query(
                       plan_request.workspace_parameters.header.frame_id.c_str(), constraint.header.frame_id.c_str(),
                       ex.what());
 
-          // (Can't. Copy not supported.)
-          // *query = original;  // Undo our changes.
+          // NOTE: methyldragon -
+          //   Ideally we would restore the original state here and undo our changes, however copy of the query is not supported.
           return false;
         }
       }
@@ -552,8 +549,6 @@ bool TrajectoryCache::extract_and_append_trajectory_start_to_metadata(
     RCLCPP_WARN(node_->get_logger(), "Ignoring start_state.attached_collision_objects: Not supported.");
   }
 
-  // auto original = *metadata;  // Copy not supported.
-
   metadata.append("group_name", plan_request.group_name);
 
   // Workspace params
@@ -587,7 +582,8 @@ bool TrajectoryCache::extract_and_append_trajectory_start_to_metadata(
     if (!current_state)
     {
       RCLCPP_WARN(node_->get_logger(), "Skipping start metadata append: Could not get robot state.");
-      // *metadata = original;  // Undo our changes.  // Copy not supported
+      // NOTE: methyldragon -
+      //   Ideally we would restore the original state here and undo our changes, however copy of the query is not supported.
       return false;
     }
 
@@ -641,8 +637,6 @@ bool TrajectoryCache::extract_and_append_trajectory_goal_to_metadata(
     RCLCPP_WARN(node_->get_logger(), "Ignoring goal_constraints.position_constraints.constraint_region: "
                                      "Not supported.");
   }
-
-  // auto original = *metadata;  // Copy not supported.
 
   metadata.append("max_velocity_scaling_factor", plan_request.max_velocity_scaling_factor);
   metadata.append("max_acceleration_scaling_factor", plan_request.max_acceleration_scaling_factor);
@@ -720,8 +714,8 @@ bool TrajectoryCache::extract_and_append_trajectory_goal_to_metadata(
                       plan_request.workspace_parameters.header.frame_id.c_str(), constraint.header.frame_id.c_str(),
                       ex.what());
 
-          // (Can't. Copy not supported.)
-          // *metadata = original;  // Undo our changes.
+          // NOTE: methyldragon -
+          //   Ideally we would restore the original state here and undo our changes, however copy of the query is not supported.
           return false;
         }
       }
@@ -771,8 +765,8 @@ bool TrajectoryCache::extract_and_append_trajectory_goal_to_metadata(
                       plan_request.workspace_parameters.header.frame_id.c_str(), constraint.header.frame_id.c_str(),
                       ex.what());
 
-          // (Can't. Copy not supported.)
-          // *metadata = original;  // Undo our changes.
+          // NOTE: methyldragon -
+          //   Ideally we would restore the original state here and undo our changes, however copy of the query is not supported.
           return false;
         }
       }
@@ -879,7 +873,7 @@ TrajectoryCache::fetch_best_matching_cartesian_trajectory(
 
   if (matching_trajectories.empty())
   {
-    RCLCPP_INFO(node_->get_logger(), "No matching cartesian trajectories found.");
+    RCLCPP_DEBUG(node_->get_logger(), "No matching cartesian trajectories found.");
     return nullptr;
   }
 
@@ -947,7 +941,7 @@ bool TrajectoryCache::put_cartesian_trajectory(const moveit::planning_interface:
         if (execution_time_s < match_execution_time_s)
         {
           int delete_id = match->lookupInt("id");
-          RCLCPP_INFO(node_->get_logger(),
+          RCLCPP_DEBUG(node_->get_logger(),
                       "Overwriting cartesian trajectory (id: %d): "
                       "execution_time (%es) > new trajectory's execution_time (%es)",
                       delete_id, match_execution_time_s, execution_time_s);
@@ -980,7 +974,7 @@ bool TrajectoryCache::put_cartesian_trajectory(const moveit::planning_interface:
       return false;
     }
 
-    RCLCPP_INFO(node_->get_logger(),
+    RCLCPP_DEBUG(node_->get_logger(),
                 "Inserting cartesian trajectory: New trajectory execution_time (%es) "
                 "is better than best trajectory's execution_time (%es) at fraction (%es)",
                 execution_time_s, best_execution_time, fraction);
@@ -989,7 +983,7 @@ bool TrajectoryCache::put_cartesian_trajectory(const moveit::planning_interface:
     return true;
   }
 
-  RCLCPP_INFO(node_->get_logger(),
+  RCLCPP_DEBUG(node_->get_logger(),
               "Skipping cartesian trajectory insert: New trajectory execution_time (%es) "
               "is worse than best trajectory's execution_time (%es) at fraction (%es)",
               execution_time_s, best_execution_time, fraction);
@@ -1012,8 +1006,6 @@ bool TrajectoryCache::extract_and_append_cartesian_trajectory_start_to_query(
   {
     RCLCPP_WARN(node_->get_logger(), "Ignoring start_state.attached_collision_objects: Not supported.");
   }
-
-  // auto original = *metadata;  // Copy not supported.
 
   query.append("group_name", plan_request.group_name);
 
@@ -1039,7 +1031,8 @@ bool TrajectoryCache::extract_and_append_cartesian_trajectory_start_to_query(
     if (!current_state)
     {
       RCLCPP_WARN(node_->get_logger(), "Skipping start metadata append: Could not get robot state.");
-      // *metadata = original;  // Undo our changes.  // Copy not supported
+      // NOTE: methyldragon -
+      //   Ideally we would restore the original state here and undo our changes, however copy of the query is not supported.
       return false;
     }
 
@@ -1085,8 +1078,6 @@ bool TrajectoryCache::extract_and_append_cartesian_trajectory_goal_to_query(
     RCLCPP_WARN(node_->get_logger(), "Ignoring avoid_collisions: Not supported.");
   }
 
-  // auto original = *metadata;  // Copy not supported.
-
   query_append_range_inclusive_with_tolerance(query, "max_velocity_scaling_factor",
                                               plan_request.max_velocity_scaling_factor, match_tolerance);
   query_append_range_inclusive_with_tolerance(query, "max_acceleration_scaling_factor",
@@ -1127,8 +1118,8 @@ bool TrajectoryCache::extract_and_append_cartesian_trajectory_goal_to_query(
                   "Could not get goal transform for %s to %s: %s",
                   base_frame.c_str(), plan_request.header.frame_id.c_str(), ex.what());
 
-      // (Can't. Copy not supported.)
-      // *metadata = original;  // Undo our changes.
+      // NOTE: methyldragon -
+      //   Ideally we would restore the original state here and undo our changes, however copy of the query is not supported.
       return false;
     }
   }
@@ -1185,8 +1176,6 @@ bool TrajectoryCache::extract_and_append_cartesian_trajectory_start_to_metadata(
     RCLCPP_WARN(node_->get_logger(), "Ignoring start_state.attached_collision_objects: Not supported.");
   }
 
-  // auto original = *metadata;  // Copy not supported.
-
   metadata.append("group_name", plan_request.group_name);
 
   // Joint state
@@ -1211,7 +1200,8 @@ bool TrajectoryCache::extract_and_append_cartesian_trajectory_start_to_metadata(
     if (!current_state)
     {
       RCLCPP_WARN(node_->get_logger(), "Skipping start metadata append: Could not get robot state.");
-      // *metadata = original;  // Undo our changes.  // Copy not supported
+      // NOTE: methyldragon -
+      //   Ideally we would restore the original state here and undo our changes, however copy of the query is not supported.
       return false;
     }
 
@@ -1256,8 +1246,6 @@ bool TrajectoryCache::extract_and_append_cartesian_trajectory_goal_to_metadata(
     RCLCPP_WARN(node_->get_logger(), "Ignoring avoid_collisions: Not supported.");
   }
 
-  // auto original = *metadata;  // Copy not supported.
-
   metadata.append("max_velocity_scaling_factor", plan_request.max_velocity_scaling_factor);
   metadata.append("max_acceleration_scaling_factor", plan_request.max_acceleration_scaling_factor);
   metadata.append("max_step", plan_request.max_step);
@@ -1296,8 +1284,8 @@ bool TrajectoryCache::extract_and_append_cartesian_trajectory_goal_to_metadata(
                   "Could not get goal transform for %s to %s: %s",
                   base_frame.c_str(), plan_request.header.frame_id.c_str(), ex.what());
 
-      // (Can't. Copy not supported.)
-      // *metadata = original;  // Undo our changes.
+      // NOTE: methyldragon -
+      //   Ideally we would restore the original state here and undo our changes, however copy of the query is not supported.
       return false;
     }
   }

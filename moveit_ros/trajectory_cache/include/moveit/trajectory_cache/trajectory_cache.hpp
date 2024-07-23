@@ -12,8 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC__TRAJECTORY_CACHE_HPP
-#define SRC__TRAJECTORY_CACHE_HPP
+#pragma once
 
 #include <chrono>
 #include <memory>
@@ -257,5 +256,3 @@ private:
 
 }  // namespace trajectory_cache
 }  // namespace moveit_ros
-
-#endif  // SRC__TRAJECTORY_CACHE_HPP
