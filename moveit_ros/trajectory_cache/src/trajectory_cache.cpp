@@ -22,7 +22,7 @@
 
 #include "rclcpp/rclcpp.hpp"
 #include "rclcpp/logging.hpp"
-#include "trajectory_cache.hpp"
+#include "moveit/trajectory_cache/trajectory_cache.hpp"
 
 namespace moveit_ros
 {

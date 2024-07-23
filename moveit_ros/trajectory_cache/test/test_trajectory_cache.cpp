@@ -16,7 +16,7 @@
 
 #include "moveit/robot_state/conversions.h"
 #include "moveit/robot_state/robot_state.h"
-#include "trajectory_cache.hpp"
+#include "moveit/trajectory_cache/trajectory_cache.hpp"
 
 #include <atomic>
 #include <thread>
