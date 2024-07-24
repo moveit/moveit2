@@ -54,8 +54,7 @@ def robot_fixture(moveit_config):
         package="tf2_ros",
         executable="static_transform_publisher",
         output="log",
-        arguments=["0.0", "0.0", "0.0", "0.0",
-                   "0.0", "0.0", "world", "panda_link0"],
+        arguments=["0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "world", "panda_link0"],
     )
 
     robot_state_publisher = Node(
@@ -87,8 +86,7 @@ def robot_fixture(moveit_config):
     ]:
         load_controllers += [
             ExecuteProcess(
-                cmd=["ros2 run controller_manager spawner {}".format(
-                    controller)],
+                cmd=["ros2 run controller_manager spawner {}".format(controller)],
                 shell=True,
                 output="log",
             )
@@ -99,7 +97,7 @@ def robot_fixture(moveit_config):
         static_tf,
         robot_state_publisher,
         ros2_control_node,
-        *load_controllers
+        *load_controllers,
     ]
 
 
@@ -111,25 +109,24 @@ def trajectory_cache_test_runner_node(moveit_config):
         name="test_trajectory_cache_node",
         output="screen",
         cached_output=True,
-        parameters=[moveit_config.to_dict()]
+        parameters=[moveit_config.to_dict()],
     )
 
 
 @launch_pytest.fixture
 def launch_description(trajectory_cache_test_runner_node, robot_fixture):
     return LaunchDescription(
-        robot_fixture +
-        [
-            trajectory_cache_test_runner_node,
-            launch_pytest.actions.ReadyToTest()
-        ]
+        robot_fixture
+        + [trajectory_cache_test_runner_node, launch_pytest.actions.ReadyToTest()]
     )
 
 
 def validate_stream(expected):
     def wrapped(output):
-        assert expected in output.splitlines(
+        assert (
+            expected in output.splitlines()
         ), f"Did not get expected: {expected} in output:\n\n{output}"
+
     return wrapped
 
 
@@ -140,7 +137,7 @@ def test_all_tests_pass(trajectory_cache_test_runner_node, launch_context):
         launch_context,
         trajectory_cache_test_runner_node,
         lambda x: x.count("[PASS]") == 165,  # All test cases passed.
-        timeout=30
+        timeout=30,
     )
 
     # Check no occurrences of [FAIL] in output
@@ -148,7 +145,7 @@ def test_all_tests_pass(trajectory_cache_test_runner_node, launch_context):
         launch_context,
         trajectory_cache_test_runner_node,
         lambda x: "[FAIL]" in x,
-        timeout=10
+        timeout=10,
     )
 
     yield
