@@ -24,8 +24,8 @@
 using moveit::planning_interface::MoveGroupInterface;
 using moveit_ros::trajectory_cache::TrajectoryCache;
 
-const std::string g_robot_name = "panda";
-const std::string g_robot_frame = "world";
+const std::string ROBOT_NAME = "panda";
+const std::string ROBOT_FRAME = "world";
 
 // UTILS =======================================================================
 // Utility function to emit a pass or fail statement.
@@ -48,15 +48,15 @@ moveit_msgs::msg::RobotTrajectory get_dummy_panda_traj()
     moveit_msgs::msg::RobotTrajectory traj;
 
     auto trajectory = &traj.joint_trajectory;
-    trajectory->header.frame_id = g_robot_frame;
+    trajectory->header.frame_id = ROBOT_FRAME;
 
-    trajectory->joint_names.push_back(g_robot_name + "_joint1");
-    trajectory->joint_names.push_back(g_robot_name + "_joint2");
-    trajectory->joint_names.push_back(g_robot_name + "_joint3");
-    trajectory->joint_names.push_back(g_robot_name + "_joint4");
-    trajectory->joint_names.push_back(g_robot_name + "_joint5");
-    trajectory->joint_names.push_back(g_robot_name + "_joint6");
-    trajectory->joint_names.push_back(g_robot_name + "_joint7");
+    trajectory->joint_names.push_back(ROBOT_NAME + "_joint1");
+    trajectory->joint_names.push_back(ROBOT_NAME + "_joint2");
+    trajectory->joint_names.push_back(ROBOT_NAME + "_joint3");
+    trajectory->joint_names.push_back(ROBOT_NAME + "_joint4");
+    trajectory->joint_names.push_back(ROBOT_NAME + "_joint5");
+    trajectory->joint_names.push_back(ROBOT_NAME + "_joint6");
+    trajectory->joint_names.push_back(ROBOT_NAME + "_joint7");
 
     trajectory->points.emplace_back();
     trajectory->points.at(0).positions = { 0, 0, 0, 0, 0, 0 };
@@ -99,7 +99,7 @@ void test_motion_trajectories(std::shared_ptr<MoveGroupInterface> move_group, st
   // Plain start
   moveit_msgs::msg::MotionPlanRequest plan_req;
   move_group->constructMotionPlanRequest(plan_req);
-  plan_req.workspace_parameters.header.frame_id = g_robot_frame;
+  plan_req.workspace_parameters.header.frame_id = ROBOT_FRAME;
   plan_req.workspace_parameters.max_corner.x = 10;
   plan_req.workspace_parameters.max_corner.y = 10;
   plan_req.workspace_parameters.max_corner.z = 10;
@@ -192,58 +192,58 @@ void test_motion_trajectories(std::shared_ptr<MoveGroupInterface> move_group, st
   // Initially empty
   prefix = "test_motion_trajectories.empty";
 
-  check_and_emit(cache->count_trajectories(g_robot_name) == 0, prefix, "Trajectory cache initially empty");
+  check_and_emit(cache->countTrajectories(ROBOT_NAME) == 0, prefix, "Trajectory cache initially empty");
 
-  check_and_emit(cache->fetch_all_matching_trajectories(*move_group, g_robot_name, plan_req, 999, 999).empty(), prefix,
+  check_and_emit(cache->fetchAllMatchingTrajectories(*move_group, ROBOT_NAME, plan_req, 999, 999).empty(), prefix,
                  "Fetch all trajectories on empty cache returns empty");
 
-  check_and_emit(cache->fetch_best_matching_trajectory(*move_group, g_robot_name, plan_req, 999, 999) == nullptr,
-                 prefix, "Fetch best trajectory on empty cache returns nullptr");
+  check_and_emit(cache->fetchBestMatchingTrajectory(*move_group, ROBOT_NAME, plan_req, 999, 999) == nullptr, prefix,
+                 "Fetch best trajectory on empty cache returns nullptr");
 
   // Put trajectory empty frame
   //
   // Trajectory must have frame in joint trajectory, expect put fail
-  prefix = "test_motion_trajectories.put_trajectory_empty_frame";
+  prefix = "test_motion_trajectories.putTrajectory_empty_frame";
   double execution_time = 999;
   double planning_time = 999;
 
-  check_and_emit(!cache->put_trajectory(*move_group, g_robot_name, plan_req, empty_frame_traj, execution_time,
-                                        planning_time, false),
+  check_and_emit(!cache->putTrajectory(*move_group, ROBOT_NAME, plan_req, empty_frame_traj, execution_time,
+                                       planning_time, false),
                  prefix, "Put empty frame trajectory, no delete_worse_trajectories, not ok");
 
-  check_and_emit(cache->count_trajectories(g_robot_name) == 0, prefix, "No trajectories in cache");
+  check_and_emit(cache->countTrajectories(ROBOT_NAME) == 0, prefix, "No trajectories in cache");
 
   // Put trajectory req empty frame
   //
   // Trajectory request must have frame in workspace, expect put fail
-  prefix = "test_motion_trajectories.put_trajectory_req_empty_frame";
+  prefix = "test_motion_trajectories.putTrajectory_req_empty_frame";
   execution_time = 999;
   planning_time = 999;
 
-  check_and_emit(!cache->put_trajectory(*move_group, g_robot_name, empty_frame_plan_req, traj, execution_time,
-                                        planning_time, false),
+  check_and_emit(!cache->putTrajectory(*move_group, ROBOT_NAME, empty_frame_plan_req, traj, execution_time,
+                                       planning_time, false),
                  prefix, "Put empty frame req trajectory, no delete_worse_trajectories, not ok");
 
-  check_and_emit(cache->count_trajectories(g_robot_name) == 0, prefix, "No trajectories in cache");
+  check_and_emit(cache->countTrajectories(ROBOT_NAME) == 0, prefix, "No trajectories in cache");
 
   // Put first, no delete_worse_trajectories
   prefix = "test_motion_trajectories.put_first";
   execution_time = 999;
   planning_time = 999;
 
-  check_and_emit(cache->put_trajectory(*move_group, g_robot_name, plan_req, traj, execution_time, planning_time, false),
+  check_and_emit(cache->putTrajectory(*move_group, ROBOT_NAME, plan_req, traj, execution_time, planning_time, false),
                  prefix, "Put first valid trajectory, no delete_worse_trajectories, ok");
 
-  check_and_emit(cache->count_trajectories(g_robot_name) == 1, prefix, "One trajectory in cache");
+  check_and_emit(cache->countTrajectories(ROBOT_NAME) == 1, prefix, "One trajectory in cache");
 
   // Fetch matching, no tolerance
   //
   // Exact key match should have cache hit
   prefix = "test_motion_trajectories.put_first.fetch_matching_no_tolerance";
 
-  auto fetched_trajectories = cache->fetch_all_matching_trajectories(*move_group, g_robot_name, plan_req, 0, 0);
+  auto fetched_trajectories = cache->fetchAllMatchingTrajectories(*move_group, ROBOT_NAME, plan_req, 0, 0);
 
-  auto fetched_traj = cache->fetch_best_matching_trajectory(*move_group, g_robot_name, plan_req, 0, 0);
+  auto fetched_traj = cache->fetchBestMatchingTrajectory(*move_group, ROBOT_NAME, plan_req, 0, 0);
 
   check_and_emit(fetched_trajectories.size() == 1, prefix, "Fetch all returns one");
   check_and_emit(fetched_traj != nullptr, prefix, "Fetch best trajectory is not nullptr");
@@ -264,9 +264,9 @@ void test_motion_trajectories(std::shared_ptr<MoveGroupInterface> move_group, st
   // change, hence should have cache hit
   prefix = "test_motion_trajectories.put_first.fetch_is_diff_no_tolerance";
 
-  fetched_trajectories = cache->fetch_all_matching_trajectories(*move_group, g_robot_name, is_diff_plan_req, 0, 0);
+  fetched_trajectories = cache->fetchAllMatchingTrajectories(*move_group, ROBOT_NAME, is_diff_plan_req, 0, 0);
 
-  fetched_traj = cache->fetch_best_matching_trajectory(*move_group, g_robot_name, is_diff_plan_req, 0, 0);
+  fetched_traj = cache->fetchBestMatchingTrajectory(*move_group, ROBOT_NAME, is_diff_plan_req, 0, 0);
 
   check_and_emit(fetched_trajectories.size() == 1, prefix, "Fetch all returns one");
   check_and_emit(fetched_traj != nullptr, prefix, "Fetch best trajectory is not nullptr");
@@ -286,10 +286,9 @@ void test_motion_trajectories(std::shared_ptr<MoveGroupInterface> move_group, st
   // Non-matching key should not have cache hit
   prefix = "test_motion_trajectories.put_first.fetch_non_matching_out_of_tolerance";
 
-  fetched_trajectories =
-      cache->fetch_all_matching_trajectories(*move_group, g_robot_name, close_matching_plan_req, 0, 0);
+  fetched_trajectories = cache->fetchAllMatchingTrajectories(*move_group, ROBOT_NAME, close_matching_plan_req, 0, 0);
 
-  fetched_traj = cache->fetch_best_matching_trajectory(*move_group, g_robot_name, close_matching_plan_req, 0, 0);
+  fetched_traj = cache->fetchBestMatchingTrajectory(*move_group, ROBOT_NAME, close_matching_plan_req, 0, 0);
 
   check_and_emit(fetched_trajectories.size() == 0, prefix, "Fetch all returns empty");
   check_and_emit(fetched_traj == nullptr, prefix, "Fetch best trajectory is nullptr");
@@ -299,10 +298,9 @@ void test_motion_trajectories(std::shared_ptr<MoveGroupInterface> move_group, st
   // Non-matching key should not have cache hit
   prefix = "test_motion_trajectories.put_first.fetch_non_matching_only_start_in_tolerance";
 
-  fetched_trajectories =
-      cache->fetch_all_matching_trajectories(*move_group, g_robot_name, close_matching_plan_req, 999, 0);
+  fetched_trajectories = cache->fetchAllMatchingTrajectories(*move_group, ROBOT_NAME, close_matching_plan_req, 999, 0);
 
-  fetched_traj = cache->fetch_best_matching_trajectory(*move_group, g_robot_name, close_matching_plan_req, 999, 0);
+  fetched_traj = cache->fetchBestMatchingTrajectory(*move_group, ROBOT_NAME, close_matching_plan_req, 999, 0);
 
   check_and_emit(fetched_trajectories.size() == 0, prefix, "Fetch all returns empty");
   check_and_emit(fetched_traj == nullptr, prefix, "Fetch best trajectory is nullptr");
@@ -312,10 +310,9 @@ void test_motion_trajectories(std::shared_ptr<MoveGroupInterface> move_group, st
   // Non-matching key should not have cache hit
   prefix = "test_motion_trajectories.put_first.fetch_non_matching_only_goal_in_tolerance";
 
-  fetched_trajectories =
-      cache->fetch_all_matching_trajectories(*move_group, g_robot_name, close_matching_plan_req, 0, 999);
+  fetched_trajectories = cache->fetchAllMatchingTrajectories(*move_group, ROBOT_NAME, close_matching_plan_req, 0, 999);
 
-  fetched_traj = cache->fetch_best_matching_trajectory(*move_group, g_robot_name, close_matching_plan_req, 0, 999);
+  fetched_traj = cache->fetchBestMatchingTrajectory(*move_group, ROBOT_NAME, close_matching_plan_req, 0, 999);
 
   check_and_emit(fetched_trajectories.size() == 0, prefix, "Fetch all returns empty");
   check_and_emit(fetched_traj == nullptr, prefix, "Fetch best trajectory is nullptr");
@@ -326,9 +323,9 @@ void test_motion_trajectories(std::shared_ptr<MoveGroupInterface> move_group, st
   prefix = "test_motion_trajectories.put_first.fetch_non_matching_in_tolerance";
 
   fetched_trajectories =
-      cache->fetch_all_matching_trajectories(*move_group, g_robot_name, close_matching_plan_req, 0.1, 0.1);
+      cache->fetchAllMatchingTrajectories(*move_group, ROBOT_NAME, close_matching_plan_req, 0.1, 0.1);
 
-  fetched_traj = cache->fetch_best_matching_trajectory(*move_group, g_robot_name, close_matching_plan_req, 0.1, 0.1);
+  fetched_traj = cache->fetchBestMatchingTrajectory(*move_group, ROBOT_NAME, close_matching_plan_req, 0.1, 0.1);
 
   check_and_emit(fetched_trajectories.size() == 1, prefix, "Fetch all returns one");
   check_and_emit(fetched_traj != nullptr, prefix, "Fetch best trajectory is not nullptr");
@@ -349,10 +346,9 @@ void test_motion_trajectories(std::shared_ptr<MoveGroupInterface> move_group, st
   prefix = "test_motion_trajectories.put_first.fetch_swapped";
 
   fetched_trajectories =
-      cache->fetch_all_matching_trajectories(*move_group, g_robot_name, swapped_close_matching_plan_req, 0.1, 0.1);
+      cache->fetchAllMatchingTrajectories(*move_group, ROBOT_NAME, swapped_close_matching_plan_req, 0.1, 0.1);
 
-  fetched_traj =
-      cache->fetch_best_matching_trajectory(*move_group, g_robot_name, swapped_close_matching_plan_req, 0.1, 0.1);
+  fetched_traj = cache->fetchBestMatchingTrajectory(*move_group, ROBOT_NAME, swapped_close_matching_plan_req, 0.1, 0.1);
 
   check_and_emit(fetched_trajectories.size() == 1, prefix, "Fetch all returns one");
   check_and_emit(fetched_traj != nullptr, prefix, "Fetch best trajectory is not nullptr");
@@ -374,9 +370,9 @@ void test_motion_trajectories(std::shared_ptr<MoveGroupInterface> move_group, st
   prefix = "test_motion_trajectories.put_first.fetch_smaller_workspace";
 
   fetched_trajectories =
-      cache->fetch_all_matching_trajectories(*move_group, g_robot_name, smaller_workspace_plan_req, 999, 999);
+      cache->fetchAllMatchingTrajectories(*move_group, ROBOT_NAME, smaller_workspace_plan_req, 999, 999);
 
-  fetched_traj = cache->fetch_best_matching_trajectory(*move_group, g_robot_name, smaller_workspace_plan_req, 999, 999);
+  fetched_traj = cache->fetchBestMatchingTrajectory(*move_group, ROBOT_NAME, smaller_workspace_plan_req, 999, 999);
 
   check_and_emit(fetched_trajectories.size() == 0, prefix, "Fetch all returns empty");
   check_and_emit(fetched_traj == nullptr, prefix, "Fetch best trajectory is nullptr");
@@ -388,9 +384,9 @@ void test_motion_trajectories(std::shared_ptr<MoveGroupInterface> move_group, st
   prefix = "test_motion_trajectories.put_first.fetch_larger_workspace";
 
   fetched_trajectories =
-      cache->fetch_all_matching_trajectories(*move_group, g_robot_name, larger_workspace_plan_req, 999, 999);
+      cache->fetchAllMatchingTrajectories(*move_group, ROBOT_NAME, larger_workspace_plan_req, 999, 999);
 
-  fetched_traj = cache->fetch_best_matching_trajectory(*move_group, g_robot_name, larger_workspace_plan_req, 999, 999);
+  fetched_traj = cache->fetchBestMatchingTrajectory(*move_group, ROBOT_NAME, larger_workspace_plan_req, 999, 999);
 
   check_and_emit(fetched_trajectories.size() == 1, prefix, "Fetch all returns one");
   check_and_emit(fetched_traj != nullptr, prefix, "Fetch best trajectory is not nullptr");
@@ -419,11 +415,11 @@ void test_motion_trajectories(std::shared_ptr<MoveGroupInterface> move_group, st
   prefix = "test_motion_trajectories.put_worse";
   double worse_execution_time = execution_time + 100;
 
-  check_and_emit(!cache->put_trajectory(*move_group, g_robot_name, plan_req, traj, worse_execution_time, planning_time,
-                                        false),
+  check_and_emit(!cache->putTrajectory(*move_group, ROBOT_NAME, plan_req, traj, worse_execution_time, planning_time,
+                                       false),
                  prefix, "Put worse trajectory, no delete_worse_trajectories, not ok");
 
-  check_and_emit(cache->count_trajectories(g_robot_name) == 1, prefix, "One trajectory in cache");
+  check_and_emit(cache->countTrajectories(ROBOT_NAME) == 1, prefix, "One trajectory in cache");
 
   // Put better, no delete_worse_trajectories
   //
@@ -431,20 +427,20 @@ void test_motion_trajectories(std::shared_ptr<MoveGroupInterface> move_group, st
   prefix = "test_motion_trajectories.put_better";
   double better_execution_time = execution_time - 100;
 
-  check_and_emit(cache->put_trajectory(*move_group, g_robot_name, plan_req, traj, better_execution_time, planning_time,
-                                       false),
+  check_and_emit(cache->putTrajectory(*move_group, ROBOT_NAME, plan_req, traj, better_execution_time, planning_time,
+                                      false),
                  prefix, "Put better trajectory, no delete_worse_trajectories, ok");
 
-  check_and_emit(cache->count_trajectories(g_robot_name) == 2, prefix, "Two trajectories in cache");
+  check_and_emit(cache->countTrajectories(ROBOT_NAME) == 2, prefix, "Two trajectories in cache");
 
   // Fetch sorted
   //
   // With multiple trajectories in cache, fetches should be sorted accordingly
   prefix = "test_motion_trajectories.put_better.fetch_sorted";
 
-  fetched_trajectories = cache->fetch_all_matching_trajectories(*move_group, g_robot_name, plan_req, 0, 0);
+  fetched_trajectories = cache->fetchAllMatchingTrajectories(*move_group, ROBOT_NAME, plan_req, 0, 0);
 
-  fetched_traj = cache->fetch_best_matching_trajectory(*move_group, g_robot_name, plan_req, 0, 0);
+  fetched_traj = cache->fetchBestMatchingTrajectory(*move_group, ROBOT_NAME, plan_req, 0, 0);
 
   check_and_emit(fetched_trajectories.size() == 2, prefix, "Fetch all returns two");
   check_and_emit(fetched_traj != nullptr, prefix, "Fetch best trajectory is not nullptr");
@@ -469,18 +465,18 @@ void test_motion_trajectories(std::shared_ptr<MoveGroupInterface> move_group, st
   prefix = "test_motion_trajectories.put_better_delete_worse_trajectories";
   double even_better_execution_time = better_execution_time - 100;
 
-  check_and_emit(cache->put_trajectory(*move_group, g_robot_name, plan_req, different_traj, even_better_execution_time,
-                                       planning_time, true),
+  check_and_emit(cache->putTrajectory(*move_group, ROBOT_NAME, plan_req, different_traj, even_better_execution_time,
+                                      planning_time, true),
                  prefix, "Put better trajectory, delete_worse_trajectories, ok");
 
-  check_and_emit(cache->count_trajectories(g_robot_name) == 1, prefix, "One trajectory in cache");
+  check_and_emit(cache->countTrajectories(ROBOT_NAME) == 1, prefix, "One trajectory in cache");
 
   // Fetch better plan
   prefix = "test_motion_trajectories.put_better_delete_worse_trajectories.fetch";
 
-  fetched_trajectories = cache->fetch_all_matching_trajectories(*move_group, g_robot_name, plan_req, 0, 0);
+  fetched_trajectories = cache->fetchAllMatchingTrajectories(*move_group, ROBOT_NAME, plan_req, 0, 0);
 
-  fetched_traj = cache->fetch_best_matching_trajectory(*move_group, g_robot_name, plan_req, 0, 0);
+  fetched_traj = cache->fetchBestMatchingTrajectory(*move_group, ROBOT_NAME, plan_req, 0, 0);
 
   check_and_emit(fetched_trajectories.size() == 1, prefix, "Fetch all returns one");
   check_and_emit(fetched_traj != nullptr, prefix, "Fetch best trajectory is not nullptr");
@@ -500,20 +496,20 @@ void test_motion_trajectories(std::shared_ptr<MoveGroupInterface> move_group, st
   // Unrelated trajectory requests should live alongside pre-existing plans
   prefix = "test_motion_trajectories.put_different_req";
 
-  check_and_emit(cache->put_trajectory(*move_group, g_robot_name, different_plan_req, different_traj,
-                                       better_execution_time, planning_time, true),
+  check_and_emit(cache->putTrajectory(*move_group, ROBOT_NAME, different_plan_req, different_traj,
+                                      better_execution_time, planning_time, true),
                  prefix, "Put different trajectory req, delete_worse_trajectories, ok");
 
-  check_and_emit(cache->count_trajectories(g_robot_name) == 2, prefix, "Two trajectories in cache");
+  check_and_emit(cache->countTrajectories(ROBOT_NAME) == 2, prefix, "Two trajectories in cache");
 
   // Fetch with different trajectory req
   //
   // With multiple trajectories in cache, fetches should be sorted accordingly
   prefix = "test_motion_trajectories.put_different_req.fetch";
 
-  fetched_trajectories = cache->fetch_all_matching_trajectories(*move_group, g_robot_name, different_plan_req, 0, 0);
+  fetched_trajectories = cache->fetchAllMatchingTrajectories(*move_group, ROBOT_NAME, different_plan_req, 0, 0);
 
-  fetched_traj = cache->fetch_best_matching_trajectory(*move_group, g_robot_name, different_plan_req, 0, 0);
+  fetched_traj = cache->fetchBestMatchingTrajectory(*move_group, ROBOT_NAME, different_plan_req, 0, 0);
 
   check_and_emit(fetched_trajectories.size() == 1, prefix, "Fetch all returns one");
   check_and_emit(fetched_traj != nullptr, prefix, "Fetch best trajectory is not nullptr");
@@ -534,23 +530,23 @@ void test_motion_trajectories(std::shared_ptr<MoveGroupInterface> move_group, st
   prefix = "test_motion_trajectories.different_robot.empty";
   std::string different_robot_name = "different_robot";
 
-  check_and_emit(cache->count_cartesian_trajectories(different_robot_name) == 0, prefix, "No trajectories in cache");
+  check_and_emit(cache->countCartesianTrajectories(different_robot_name) == 0, prefix, "No trajectories in cache");
 
   // Put first for different robot, delete_worse_trajectories
   //
   // A different robot's cache should not interact with the original cache
   prefix = "test_motion_trajectories.different_robot.put_first";
-  check_and_emit(cache->put_trajectory(*move_group, different_robot_name, different_plan_req, different_traj,
-                                       better_execution_time, planning_time, true),
+  check_and_emit(cache->putTrajectory(*move_group, different_robot_name, different_plan_req, different_traj,
+                                      better_execution_time, planning_time, true),
                  prefix, "Put different trajectory req, delete_worse_trajectories, ok");
 
-  check_and_emit(cache->count_trajectories(different_robot_name) == 1, prefix, "One trajectories in cache");
+  check_and_emit(cache->countTrajectories(different_robot_name) == 1, prefix, "One trajectories in cache");
 
-  check_and_emit(cache->count_trajectories(different_robot_name) == 1, prefix, "One trajectories in cache");
+  check_and_emit(cache->countTrajectories(different_robot_name) == 1, prefix, "One trajectories in cache");
 
-  check_and_emit(cache->count_trajectories(g_robot_name) == 2, prefix, "Two trajectories in original robot's cache");
+  check_and_emit(cache->countTrajectories(ROBOT_NAME) == 2, prefix, "Two trajectories in original robot's cache");
 
-  fetched_trajectories = cache->fetch_all_matching_trajectories(*move_group, g_robot_name, different_plan_req, 0, 0);
+  fetched_trajectories = cache->fetchAllMatchingTrajectories(*move_group, ROBOT_NAME, different_plan_req, 0, 0);
 
   check_and_emit(fetched_trajectories.size() == 1, prefix, "Fetch all on original still returns one");
 }
@@ -562,13 +558,13 @@ void test_cartesian_trajectories(std::shared_ptr<MoveGroupInterface> move_group,
   /// First, test if construction even works...
 
   // Construct get cartesian trajectory request
-  prefix = "test_cartesian_trajectories.construct_get_cartesian_path_request";
+  prefix = "test_cartesian_trajectories.constructGetCartesianPathRequest";
 
   int test_step = 1;
   int test_jump = 2;
   auto test_waypoints = get_dummy_waypoints();
   auto cartesian_plan_req_under_test =
-      cache->construct_get_cartesian_path_request(*move_group, test_waypoints, test_step, test_jump, false);
+      cache->constructGetCartesianPathRequest(*move_group, test_waypoints, test_step, test_jump, false);
 
   check_and_emit(cartesian_plan_req_under_test.waypoints == test_waypoints &&
                      static_cast<int>(cartesian_plan_req_under_test.max_step) == test_step &&
@@ -583,7 +579,7 @@ void test_cartesian_trajectories(std::shared_ptr<MoveGroupInterface> move_group,
 
   // Plain start
   auto waypoints = get_dummy_waypoints();
-  auto cartesian_plan_req = cache->construct_get_cartesian_path_request(*move_group, waypoints, 1, 1, false);
+  auto cartesian_plan_req = cache->constructGetCartesianPathRequest(*move_group, waypoints, 1, 1, false);
   cartesian_plan_req.start_state.multi_dof_joint_state.joint_names.clear();
   cartesian_plan_req.start_state.multi_dof_joint_state.transforms.clear();
   cartesian_plan_req.start_state.multi_dof_joint_state.twist.clear();
@@ -643,54 +639,53 @@ void test_cartesian_trajectories(std::shared_ptr<MoveGroupInterface> move_group,
   // Initially empty
   prefix = "test_cartesian_trajectories.empty";
 
-  check_and_emit(cache->count_cartesian_trajectories(g_robot_name) == 0, prefix, "Trajectory cache initially empty");
+  check_and_emit(cache->countCartesianTrajectories(ROBOT_NAME) == 0, prefix, "Trajectory cache initially empty");
 
   check_and_emit(
-      cache->fetch_all_matching_cartesian_trajectories(*move_group, g_robot_name, cartesian_plan_req, 0, 999, 999)
-          .empty(),
+      cache->fetchAllMatchingCartesianTrajectories(*move_group, ROBOT_NAME, cartesian_plan_req, 0, 999, 999).empty(),
       prefix, "Fetch all trajectories on empty cache returns empty");
 
-  check_and_emit(cache->fetch_best_matching_cartesian_trajectory(*move_group, g_robot_name, cartesian_plan_req, 0, 999,
-                                                                 999) == nullptr,
+  check_and_emit(cache->fetchBestMatchingCartesianTrajectory(*move_group, ROBOT_NAME, cartesian_plan_req, 0, 999,
+                                                             999) == nullptr,
                  prefix, "Fetch best trajectory on empty cache returns nullptr");
 
   // Put trajectory empty frame
   //
   // Trajectory must have frame in joint trajectory, expect put fail
-  prefix = "test_cartesian_trajectories.put_trajectory_empty_frame";
+  prefix = "test_cartesian_trajectories.putTrajectory_empty_frame";
   double execution_time = 999;
   double planning_time = 999;
   double fraction = 0.5;
 
-  check_and_emit(!cache->put_cartesian_trajectory(*move_group, g_robot_name, cartesian_plan_req, empty_frame_traj,
-                                                  execution_time, planning_time, fraction, false),
+  check_and_emit(!cache->putCartesianTrajectory(*move_group, ROBOT_NAME, cartesian_plan_req, empty_frame_traj,
+                                                execution_time, planning_time, fraction, false),
                  prefix, "Put empty frame trajectory, no delete_worse_trajectories, not ok");
 
-  check_and_emit(cache->count_cartesian_trajectories(g_robot_name) == 0, prefix, "No trajectories in cache");
+  check_and_emit(cache->countCartesianTrajectories(ROBOT_NAME) == 0, prefix, "No trajectories in cache");
 
   // Put trajectory req empty frame
   //
   // Trajectory request must have frame in workspace, expect put fail
-  prefix = "test_cartesian_trajectories.put_trajectory_req_empty_frame";
+  prefix = "test_cartesian_trajectories.putTrajectory_req_empty_frame";
   execution_time = 999;
   planning_time = 999;
 
-  check_and_emit(!cache->put_cartesian_trajectory(*move_group, g_robot_name, empty_frame_cartesian_plan_req, traj,
-                                                  execution_time, planning_time, fraction, false),
+  check_and_emit(!cache->putCartesianTrajectory(*move_group, ROBOT_NAME, empty_frame_cartesian_plan_req, traj,
+                                                execution_time, planning_time, fraction, false),
                  prefix, "Put empty frame req trajectory, no delete_worse_trajectories, not ok");
 
-  check_and_emit(cache->count_cartesian_trajectories(g_robot_name) == 0, prefix, "No trajectories in cache");
+  check_and_emit(cache->countCartesianTrajectories(ROBOT_NAME) == 0, prefix, "No trajectories in cache");
 
   // Put first, no delete_worse_trajectories
   prefix = "test_cartesian_trajectories.put_first";
   execution_time = 999;
   planning_time = 999;
 
-  check_and_emit(cache->put_cartesian_trajectory(*move_group, g_robot_name, cartesian_plan_req, traj, execution_time,
-                                                 planning_time, fraction, false),
+  check_and_emit(cache->putCartesianTrajectory(*move_group, ROBOT_NAME, cartesian_plan_req, traj, execution_time,
+                                               planning_time, fraction, false),
                  prefix, "Put first valid trajectory, no delete_worse_trajectories, ok");
 
-  check_and_emit(cache->count_cartesian_trajectories(g_robot_name) == 1, prefix, "One trajectory in cache");
+  check_and_emit(cache->countCartesianTrajectories(ROBOT_NAME) == 1, prefix, "One trajectory in cache");
 
   // Fetch matching, no tolerance
   //
@@ -698,10 +693,10 @@ void test_cartesian_trajectories(std::shared_ptr<MoveGroupInterface> move_group,
   prefix = "test_cartesian_trajectories.put_first.fetch_matching_no_tolerance";
 
   auto fetched_trajectories =
-      cache->fetch_all_matching_cartesian_trajectories(*move_group, g_robot_name, cartesian_plan_req, fraction, 0, 0);
+      cache->fetchAllMatchingCartesianTrajectories(*move_group, ROBOT_NAME, cartesian_plan_req, fraction, 0, 0);
 
   auto fetched_traj =
-      cache->fetch_best_matching_cartesian_trajectory(*move_group, g_robot_name, cartesian_plan_req, fraction, 0, 0);
+      cache->fetchBestMatchingCartesianTrajectory(*move_group, ROBOT_NAME, cartesian_plan_req, fraction, 0, 0);
 
   check_and_emit(fetched_trajectories.size() == 1, prefix, "Fetch all returns one");
   check_and_emit(fetched_traj != nullptr, prefix, "Fetch best trajectory is not nullptr");
@@ -724,11 +719,11 @@ void test_cartesian_trajectories(std::shared_ptr<MoveGroupInterface> move_group,
   // change, hence should have cache hit
   prefix = "test_cartesian_trajectories.put_first.fetch_is_diff_no_tolerance";
 
-  fetched_trajectories = cache->fetch_all_matching_cartesian_trajectories(*move_group, g_robot_name,
-                                                                          is_diff_cartesian_plan_req, fraction, 0, 0);
+  fetched_trajectories =
+      cache->fetchAllMatchingCartesianTrajectories(*move_group, ROBOT_NAME, is_diff_cartesian_plan_req, fraction, 0, 0);
 
-  fetched_traj = cache->fetch_best_matching_cartesian_trajectory(*move_group, g_robot_name, is_diff_cartesian_plan_req,
-                                                                 fraction, 0, 0);
+  fetched_traj =
+      cache->fetchBestMatchingCartesianTrajectory(*move_group, ROBOT_NAME, is_diff_cartesian_plan_req, fraction, 0, 0);
 
   check_and_emit(fetched_trajectories.size() == 1, prefix, "Fetch all returns one");
   check_and_emit(fetched_traj != nullptr, prefix, "Fetch best trajectory is not nullptr");
@@ -750,11 +745,11 @@ void test_cartesian_trajectories(std::shared_ptr<MoveGroupInterface> move_group,
   // Non-matching key should not have cache hit
   prefix = "test_cartesian_trajectories.put_first.fetch_non_matching_out_of_tolerance";
 
-  fetched_trajectories = cache->fetch_all_matching_cartesian_trajectories(
-      *move_group, g_robot_name, close_matching_cartesian_plan_req, fraction, 0, 0);
+  fetched_trajectories = cache->fetchAllMatchingCartesianTrajectories(
+      *move_group, ROBOT_NAME, close_matching_cartesian_plan_req, fraction, 0, 0);
 
-  fetched_traj = cache->fetch_best_matching_cartesian_trajectory(*move_group, g_robot_name,
-                                                                 close_matching_cartesian_plan_req, fraction, 0, 0);
+  fetched_traj = cache->fetchBestMatchingCartesianTrajectory(*move_group, ROBOT_NAME, close_matching_cartesian_plan_req,
+                                                             fraction, 0, 0);
 
   check_and_emit(fetched_trajectories.size() == 0, prefix, "Fetch all returns empty");
   check_and_emit(fetched_traj == nullptr, prefix, "Fetch best trajectory is nullptr");
@@ -764,11 +759,11 @@ void test_cartesian_trajectories(std::shared_ptr<MoveGroupInterface> move_group,
   // Non-matching key should not have cache hit
   prefix = "test_motion_trajectories.put_first.fetch_non_matching_only_start_in_tolerance";
 
-  fetched_trajectories = cache->fetch_all_matching_cartesian_trajectories(
-      *move_group, g_robot_name, close_matching_cartesian_plan_req, fraction, 999, 0);
+  fetched_trajectories = cache->fetchAllMatchingCartesianTrajectories(
+      *move_group, ROBOT_NAME, close_matching_cartesian_plan_req, fraction, 999, 0);
 
-  fetched_traj = cache->fetch_best_matching_cartesian_trajectory(*move_group, g_robot_name,
-                                                                 close_matching_cartesian_plan_req, fraction, 999, 0);
+  fetched_traj = cache->fetchBestMatchingCartesianTrajectory(*move_group, ROBOT_NAME, close_matching_cartesian_plan_req,
+                                                             fraction, 999, 0);
 
   check_and_emit(fetched_trajectories.size() == 0, prefix, "Fetch all returns empty");
   check_and_emit(fetched_traj == nullptr, prefix, "Fetch best trajectory is nullptr");
@@ -778,11 +773,11 @@ void test_cartesian_trajectories(std::shared_ptr<MoveGroupInterface> move_group,
   // Non-matching key should not have cache hit
   prefix = "test_motion_trajectories.put_first.fetch_non_matching_only_goal_in_tolerance";
 
-  fetched_trajectories = cache->fetch_all_matching_cartesian_trajectories(
-      *move_group, g_robot_name, close_matching_cartesian_plan_req, fraction, 0, 999);
+  fetched_trajectories = cache->fetchAllMatchingCartesianTrajectories(
+      *move_group, ROBOT_NAME, close_matching_cartesian_plan_req, fraction, 0, 999);
 
-  fetched_traj = cache->fetch_best_matching_cartesian_trajectory(*move_group, g_robot_name,
-                                                                 close_matching_cartesian_plan_req, fraction, 0, 999);
+  fetched_traj = cache->fetchBestMatchingCartesianTrajectory(*move_group, ROBOT_NAME, close_matching_cartesian_plan_req,
+                                                             fraction, 0, 999);
 
   check_and_emit(fetched_trajectories.size() == 0, prefix, "Fetch all returns empty");
   check_and_emit(fetched_traj == nullptr, prefix, "Fetch best trajectory is nullptr");
@@ -792,11 +787,11 @@ void test_cartesian_trajectories(std::shared_ptr<MoveGroupInterface> move_group,
   // Close key within tolerance limit should have cache hit
   prefix = "test_cartesian_trajectories.put_first.fetch_non_matching_in_tolerance";
 
-  fetched_trajectories = cache->fetch_all_matching_cartesian_trajectories(
-      *move_group, g_robot_name, close_matching_cartesian_plan_req, fraction, 0.1, 0.1);
+  fetched_trajectories = cache->fetchAllMatchingCartesianTrajectories(
+      *move_group, ROBOT_NAME, close_matching_cartesian_plan_req, fraction, 0.1, 0.1);
 
-  fetched_traj = cache->fetch_best_matching_cartesian_trajectory(*move_group, g_robot_name,
-                                                                 close_matching_cartesian_plan_req, fraction, 0.1, 0.1);
+  fetched_traj = cache->fetchBestMatchingCartesianTrajectory(*move_group, ROBOT_NAME, close_matching_cartesian_plan_req,
+                                                             fraction, 0.1, 0.1);
 
   check_and_emit(fetched_trajectories.size() == 1, prefix, "Fetch all returns one");
   check_and_emit(fetched_traj != nullptr, prefix, "Fetch best trajectory is not nullptr");
@@ -820,10 +815,9 @@ void test_cartesian_trajectories(std::shared_ptr<MoveGroupInterface> move_group,
   prefix = "test_cartesian_trajectories.put_first.fetch_higher_fraction";
 
   fetched_trajectories =
-      cache->fetch_all_matching_cartesian_trajectories(*move_group, g_robot_name, cartesian_plan_req, 1, 999, 999);
+      cache->fetchAllMatchingCartesianTrajectories(*move_group, ROBOT_NAME, cartesian_plan_req, 1, 999, 999);
 
-  fetched_traj =
-      cache->fetch_best_matching_cartesian_trajectory(*move_group, g_robot_name, cartesian_plan_req, 1, 999, 999);
+  fetched_traj = cache->fetchBestMatchingCartesianTrajectory(*move_group, ROBOT_NAME, cartesian_plan_req, 1, 999, 999);
 
   check_and_emit(fetched_trajectories.size() == 0, prefix, "Fetch all returns empty");
   check_and_emit(fetched_traj == nullptr, prefix, "Fetch best trajectory is nullptr");
@@ -835,10 +829,9 @@ void test_cartesian_trajectories(std::shared_ptr<MoveGroupInterface> move_group,
   prefix = "test_cartesian_trajectories.put_first.fetch_lower_fraction";
 
   fetched_trajectories =
-      cache->fetch_all_matching_cartesian_trajectories(*move_group, g_robot_name, cartesian_plan_req, 0, 999, 999);
+      cache->fetchAllMatchingCartesianTrajectories(*move_group, ROBOT_NAME, cartesian_plan_req, 0, 999, 999);
 
-  fetched_traj =
-      cache->fetch_best_matching_cartesian_trajectory(*move_group, g_robot_name, cartesian_plan_req, 0, 999, 999);
+  fetched_traj = cache->fetchBestMatchingCartesianTrajectory(*move_group, ROBOT_NAME, cartesian_plan_req, 0, 999, 999);
 
   check_and_emit(fetched_trajectories.size() == 1, prefix, "Fetch all returns one");
   check_and_emit(fetched_traj != nullptr, prefix, "Fetch best trajectory is not nullptr");
@@ -861,11 +854,11 @@ void test_cartesian_trajectories(std::shared_ptr<MoveGroupInterface> move_group,
   prefix = "test_cartesian_trajectories.put_worse";
   double worse_execution_time = execution_time + 100;
 
-  check_and_emit(!cache->put_cartesian_trajectory(*move_group, g_robot_name, cartesian_plan_req, traj,
-                                                  worse_execution_time, planning_time, fraction, false),
+  check_and_emit(!cache->putCartesianTrajectory(*move_group, ROBOT_NAME, cartesian_plan_req, traj, worse_execution_time,
+                                                planning_time, fraction, false),
                  prefix, "Put worse trajectory, no delete_worse_trajectories, not ok");
 
-  check_and_emit(cache->count_cartesian_trajectories(g_robot_name) == 1, prefix, "One trajectory in cache");
+  check_and_emit(cache->countCartesianTrajectories(ROBOT_NAME) == 1, prefix, "One trajectory in cache");
 
   // Put better, no delete_worse_trajectories
   //
@@ -873,11 +866,11 @@ void test_cartesian_trajectories(std::shared_ptr<MoveGroupInterface> move_group,
   prefix = "test_cartesian_trajectories.put_better";
   double better_execution_time = execution_time - 100;
 
-  check_and_emit(cache->put_cartesian_trajectory(*move_group, g_robot_name, cartesian_plan_req, traj,
-                                                 better_execution_time, planning_time, fraction, false),
+  check_and_emit(cache->putCartesianTrajectory(*move_group, ROBOT_NAME, cartesian_plan_req, traj, better_execution_time,
+                                               planning_time, fraction, false),
                  prefix, "Put better trajectory, no delete_worse_trajectories, ok");
 
-  check_and_emit(cache->count_cartesian_trajectories(g_robot_name) == 2, prefix, "Two trajectories in cache");
+  check_and_emit(cache->countCartesianTrajectories(ROBOT_NAME) == 2, prefix, "Two trajectories in cache");
 
   // Fetch sorted
   //
@@ -885,10 +878,10 @@ void test_cartesian_trajectories(std::shared_ptr<MoveGroupInterface> move_group,
   prefix = "test_cartesian_trajectories.put_better.fetch_sorted";
 
   fetched_trajectories =
-      cache->fetch_all_matching_cartesian_trajectories(*move_group, g_robot_name, cartesian_plan_req, fraction, 0, 0);
+      cache->fetchAllMatchingCartesianTrajectories(*move_group, ROBOT_NAME, cartesian_plan_req, fraction, 0, 0);
 
   fetched_traj =
-      cache->fetch_best_matching_cartesian_trajectory(*move_group, g_robot_name, cartesian_plan_req, fraction, 0, 0);
+      cache->fetchBestMatchingCartesianTrajectory(*move_group, ROBOT_NAME, cartesian_plan_req, fraction, 0, 0);
 
   check_and_emit(fetched_trajectories.size() == 2, prefix, "Fetch all returns two");
   check_and_emit(fetched_traj != nullptr, prefix, "Fetch best trajectory is not nullptr");
@@ -915,20 +908,20 @@ void test_cartesian_trajectories(std::shared_ptr<MoveGroupInterface> move_group,
   prefix = "test_cartesian_trajectories.put_better_delete_worse_trajectories";
   double even_better_execution_time = better_execution_time - 100;
 
-  check_and_emit(cache->put_cartesian_trajectory(*move_group, g_robot_name, cartesian_plan_req, different_traj,
-                                                 even_better_execution_time, planning_time, fraction, true),
+  check_and_emit(cache->putCartesianTrajectory(*move_group, ROBOT_NAME, cartesian_plan_req, different_traj,
+                                               even_better_execution_time, planning_time, fraction, true),
                  prefix, "Put better trajectory, delete_worse_trajectories, ok");
 
-  check_and_emit(cache->count_cartesian_trajectories(g_robot_name) == 1, prefix, "One trajectory in cache");
+  check_and_emit(cache->countCartesianTrajectories(ROBOT_NAME) == 1, prefix, "One trajectory in cache");
 
   // Fetch better plan
   prefix = "test_cartesian_trajectories.put_better_delete_worse_trajectories.fetch";
 
   fetched_trajectories =
-      cache->fetch_all_matching_cartesian_trajectories(*move_group, g_robot_name, cartesian_plan_req, fraction, 0, 0);
+      cache->fetchAllMatchingCartesianTrajectories(*move_group, ROBOT_NAME, cartesian_plan_req, fraction, 0, 0);
 
   fetched_traj =
-      cache->fetch_best_matching_cartesian_trajectory(*move_group, g_robot_name, cartesian_plan_req, fraction, 0, 0);
+      cache->fetchBestMatchingCartesianTrajectory(*move_group, ROBOT_NAME, cartesian_plan_req, fraction, 0, 0);
 
   check_and_emit(fetched_trajectories.size() == 1, prefix, "Fetch all returns one");
   check_and_emit(fetched_traj != nullptr, prefix, "Fetch best trajectory is not nullptr");
@@ -950,22 +943,22 @@ void test_cartesian_trajectories(std::shared_ptr<MoveGroupInterface> move_group,
   // Unrelated trajectory requests should live alongside pre-existing plans
   prefix = "test_cartesian_trajectories.put_different_req";
 
-  check_and_emit(cache->put_cartesian_trajectory(*move_group, g_robot_name, different_cartesian_plan_req,
-                                                 different_traj, better_execution_time, planning_time, fraction, true),
+  check_and_emit(cache->putCartesianTrajectory(*move_group, ROBOT_NAME, different_cartesian_plan_req, different_traj,
+                                               better_execution_time, planning_time, fraction, true),
                  prefix, "Put different trajectory req, delete_worse_trajectories, ok");
 
-  check_and_emit(cache->count_cartesian_trajectories(g_robot_name) == 2, prefix, "Two trajectories in cache");
+  check_and_emit(cache->countCartesianTrajectories(ROBOT_NAME) == 2, prefix, "Two trajectories in cache");
 
   // Fetch with different trajectory req
   //
   // With multiple trajectories in cache, fetches should be sorted accordingly
   prefix = "test_cartesian_trajectories.put_different_req.fetch";
 
-  fetched_trajectories = cache->fetch_all_matching_cartesian_trajectories(*move_group, g_robot_name,
-                                                                          different_cartesian_plan_req, fraction, 0, 0);
+  fetched_trajectories = cache->fetchAllMatchingCartesianTrajectories(*move_group, ROBOT_NAME,
+                                                                      different_cartesian_plan_req, fraction, 0, 0);
 
-  fetched_traj = cache->fetch_best_matching_cartesian_trajectory(*move_group, g_robot_name,
-                                                                 different_cartesian_plan_req, fraction, 0, 0);
+  fetched_traj = cache->fetchBestMatchingCartesianTrajectory(*move_group, ROBOT_NAME, different_cartesian_plan_req,
+                                                             fraction, 0, 0);
 
   check_and_emit(fetched_trajectories.size() == 1, prefix, "Fetch all returns one");
   check_and_emit(fetched_traj != nullptr, prefix, "Fetch best trajectory is not nullptr");
@@ -988,25 +981,25 @@ void test_cartesian_trajectories(std::shared_ptr<MoveGroupInterface> move_group,
   prefix = "test_cartesian_trajectories.different_robot.empty";
   std::string different_robot_name = "different_robot";
 
-  check_and_emit(cache->count_cartesian_trajectories(different_robot_name) == 0, prefix, "No trajectories in cache");
+  check_and_emit(cache->countCartesianTrajectories(different_robot_name) == 0, prefix, "No trajectories in cache");
 
   // Put first for different robot, delete_worse_trajectories
   //
   // A different robot's cache should not interact with the original cache
   prefix = "test_cartesian_trajectories.different_robot.put_first";
-  check_and_emit(cache->put_cartesian_trajectory(*move_group, different_robot_name, different_cartesian_plan_req,
-                                                 different_traj, better_execution_time, planning_time, fraction, true),
+  check_and_emit(cache->putCartesianTrajectory(*move_group, different_robot_name, different_cartesian_plan_req,
+                                               different_traj, better_execution_time, planning_time, fraction, true),
                  prefix, "Put different trajectory req, delete_worse_trajectories, ok");
 
-  check_and_emit(cache->count_cartesian_trajectories(different_robot_name) == 1, prefix, "One trajectories in cache");
+  check_and_emit(cache->countCartesianTrajectories(different_robot_name) == 1, prefix, "One trajectories in cache");
 
-  check_and_emit(cache->count_cartesian_trajectories(different_robot_name) == 1, prefix, "One trajectories in cache");
+  check_and_emit(cache->countCartesianTrajectories(different_robot_name) == 1, prefix, "One trajectories in cache");
 
-  check_and_emit(cache->count_cartesian_trajectories(g_robot_name) == 2, prefix,
+  check_and_emit(cache->countCartesianTrajectories(ROBOT_NAME) == 2, prefix,
                  "Two trajectories in original robot's cache");
 
-  fetched_trajectories = cache->fetch_all_matching_cartesian_trajectories(*move_group, g_robot_name,
-                                                                          different_cartesian_plan_req, fraction, 0, 0);
+  fetched_trajectories = cache->fetchAllMatchingCartesianTrajectories(*move_group, ROBOT_NAME,
+                                                                      different_cartesian_plan_req, fraction, 0, 0);
 
   check_and_emit(fetched_trajectories.size() == 1, prefix, "Fetch all on original still returns one");
 }
@@ -1018,12 +1011,11 @@ int main(int argc, char** argv)
 
   rclcpp::NodeOptions test_node_options;
   test_node_options.automatically_declare_parameters_from_overrides(true);
-  test_node_options.arguments({"--ros-args", "-r", "__node:=test_node"});
-
+  test_node_options.arguments({ "--ros-args", "-r", "__node:=test_node" });
 
   rclcpp::NodeOptions move_group_node_options;
   move_group_node_options.automatically_declare_parameters_from_overrides(true);
-  move_group_node_options.arguments({"--ros-args", "-r", "__node:=move_group_node"});
+  move_group_node_options.arguments({ "--ros-args", "-r", "__node:=move_group_node" });
 
   auto test_node = rclcpp::Node::make_shared("test_node", test_node_options);
   auto move_group_node = rclcpp::Node::make_shared("move_group_node", move_group_node_options);
