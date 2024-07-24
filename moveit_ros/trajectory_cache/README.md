@@ -50,9 +50,8 @@ If you use this package in your work, please cite it using the following:
 // Be sure to set some relevant ROS parameters:
 // Relevant ROS Parameters:
 //   - `warehouse_plugin`: What database to use
-//   - `warehouse_host`: Where the database should be created
-//   - `warehouse_port`: The port used for the database
 auto traj_cache = std::make_shared<TrajectoryCache>(node);
+traj_cache->init(/*db_host=*/":memory:", /*db_port=*/0, /*exact_match_precision=*/1e-6);
 
 auto fetched_trajectory =
     traj_cache->fetchBestMatchingTrajectory(*move_group_interface, robot_name, motion_plan_req_msg,

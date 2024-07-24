@@ -85,33 +85,31 @@ bool TrajectoryCache::init(const std::string& db_path, uint32_t db_port, double 
   return db_->connect();
 }
 
-unsigned TrajectoryCache::countTrajectories(const std::string& move_group_namespace)
+unsigned TrajectoryCache::countTrajectories(const std::string& cache_namespace)
 {
-  auto coll =
-      db_->openCollection<moveit_msgs::msg::RobotTrajectory>("move_group_trajectory_cache", move_group_namespace);
+  auto coll = db_->openCollection<moveit_msgs::msg::RobotTrajectory>("move_group_trajectory_cache", cache_namespace);
   return coll.count();
 }
 
-unsigned TrajectoryCache::countCartesianTrajectories(const std::string& move_group_namespace)
+unsigned TrajectoryCache::countCartesianTrajectories(const std::string& cache_namespace)
 {
-  auto coll = db_->openCollection<moveit_msgs::msg::RobotTrajectory>("move_group_cartesian_trajectory_cache",
-                                                                     move_group_namespace);
+  auto coll =
+      db_->openCollection<moveit_msgs::msg::RobotTrajectory>("move_group_cartesian_trajectory_cache", cache_namespace);
   return coll.count();
 }
 
 // =============================================================================
 // MOTION PLAN TRAJECTORY CACHING
 // =============================================================================
-// MOTION PLAN TRAJECTORY CACHING: TOP LEVEL OPS
+
 std::vector<MessageWithMetadata<moveit_msgs::msg::RobotTrajectory>::ConstPtr>
 TrajectoryCache::fetchAllMatchingTrajectories(const moveit::planning_interface::MoveGroupInterface& move_group,
-                                              const std::string& move_group_namespace,
+                                              const std::string& cache_namespace,
                                               const moveit_msgs::msg::MotionPlanRequest& plan_request,
                                               double start_tolerance, double goal_tolerance, bool metadata_only,
                                               const std::string& sort_by)
 {
-  auto coll =
-      db_->openCollection<moveit_msgs::msg::RobotTrajectory>("move_group_trajectory_cache", move_group_namespace);
+  auto coll = db_->openCollection<moveit_msgs::msg::RobotTrajectory>("move_group_trajectory_cache", cache_namespace);
 
   Query::Ptr query = coll.createQuery();
 
@@ -128,13 +126,13 @@ TrajectoryCache::fetchAllMatchingTrajectories(const moveit::planning_interface::
 }
 
 MessageWithMetadata<moveit_msgs::msg::RobotTrajectory>::ConstPtr TrajectoryCache::fetchBestMatchingTrajectory(
-    const moveit::planning_interface::MoveGroupInterface& move_group, const std::string& move_group_namespace,
+    const moveit::planning_interface::MoveGroupInterface& move_group, const std::string& cache_namespace,
     const moveit_msgs::msg::MotionPlanRequest& plan_request, double start_tolerance, double goal_tolerance,
     bool metadata_only, const std::string& sort_by)
 {
   // First find all matching, but metadata only.
   // Then use the ID metadata of the best plan to pull the actual message.
-  auto matching_trajectories = this->fetchAllMatchingTrajectories(move_group, move_group_namespace, plan_request,
+  auto matching_trajectories = this->fetchAllMatchingTrajectories(move_group, cache_namespace, plan_request,
                                                                   start_tolerance, goal_tolerance, true, sort_by);
 
   if (matching_trajectories.empty())
@@ -143,8 +141,7 @@ MessageWithMetadata<moveit_msgs::msg::RobotTrajectory>::ConstPtr TrajectoryCache
     return nullptr;
   }
 
-  auto coll =
-      db_->openCollection<moveit_msgs::msg::RobotTrajectory>("move_group_trajectory_cache", move_group_namespace);
+  auto coll = db_->openCollection<moveit_msgs::msg::RobotTrajectory>("move_group_trajectory_cache", cache_namespace);
 
   // Best plan is at first index, since the lookup query was sorted by
   // execution_time.
@@ -156,7 +153,7 @@ MessageWithMetadata<moveit_msgs::msg::RobotTrajectory>::ConstPtr TrajectoryCache
 }
 
 bool TrajectoryCache::putTrajectory(const moveit::planning_interface::MoveGroupInterface& move_group,
-                                    const std::string& move_group_namespace,
+                                    const std::string& cache_namespace,
                                     const moveit_msgs::msg::MotionPlanRequest& plan_request,
                                     const moveit_msgs::msg::RobotTrajectory& trajectory, double execution_time_s,
                                     double planning_time_s, bool delete_worse_trajectories)
@@ -182,8 +179,7 @@ bool TrajectoryCache::putTrajectory(const moveit::planning_interface::MoveGroupI
     return false;
   }
 
-  auto coll =
-      db_->openCollection<moveit_msgs::msg::RobotTrajectory>("move_group_trajectory_cache", move_group_namespace);
+  auto coll = db_->openCollection<moveit_msgs::msg::RobotTrajectory>("move_group_trajectory_cache", cache_namespace);
 
   // Pull out trajectories "exactly" keyed by request in cache.
   Query::Ptr exact_query = coll.createQuery();
@@ -197,7 +193,7 @@ bool TrajectoryCache::putTrajectory(const moveit::planning_interface::MoveGroupI
     return false;
   }
 
-  auto exact_matches = coll.queryList(exact_query, /* metadata_only */ true, /* sort_by */ "execution_time_s");
+  auto exact_matches = coll.queryList(exact_query, /*metadata_only=*/true, /*sort_by=*/"execution_time_s");
 
   double best_execution_time = std::numeric_limits<double>::infinity();
   if (!exact_matches.empty())
@@ -257,7 +253,196 @@ bool TrajectoryCache::putTrajectory(const moveit::planning_interface::MoveGroupI
   return false;
 }
 
-// MOTION PLAN TRAJECTORY CACHING: QUERY CONSTRUCTION
+// =============================================================================
+// CARTESIAN TRAJECTORY CACHING
+// =============================================================================
+
+moveit_msgs::srv::GetCartesianPath::Request
+TrajectoryCache::constructGetCartesianPathRequest(moveit::planning_interface::MoveGroupInterface& move_group,
+                                                  const std::vector<geometry_msgs::msg::Pose>& waypoints,
+                                                  double max_step, double jump_threshold, bool avoid_collisions)
+{
+  moveit_msgs::srv::GetCartesianPath::Request out;
+
+  move_group.constructRobotState(out.start_state);
+
+  out.group_name = move_group.getName();
+  out.max_velocity_scaling_factor = move_group.getMaxVelocityScalingFactor();
+  out.max_acceleration_scaling_factor = move_group.getMaxVelocityScalingFactor();
+
+  out.header.frame_id = move_group.getPoseReferenceFrame();
+  out.waypoints = waypoints;
+  out.max_step = max_step;
+  out.jump_threshold = jump_threshold;
+  out.path_constraints = moveit_msgs::msg::Constraints();
+  out.avoid_collisions = avoid_collisions;
+  out.link_name = move_group.getEndEffectorLink();
+  out.header.stamp = move_group.getNode()->now();
+
+  return out;
+}
+
+std::vector<MessageWithMetadata<moveit_msgs::msg::RobotTrajectory>::ConstPtr>
+TrajectoryCache::fetchAllMatchingCartesianTrajectories(const moveit::planning_interface::MoveGroupInterface& move_group,
+                                                       const std::string& cache_namespace,
+                                                       const moveit_msgs::srv::GetCartesianPath::Request& plan_request,
+                                                       double min_fraction, double start_tolerance,
+                                                       double goal_tolerance, bool metadata_only,
+                                                       const std::string& sort_by)
+{
+  auto coll =
+      db_->openCollection<moveit_msgs::msg::RobotTrajectory>("move_group_cartesian_trajectory_cache", cache_namespace);
+
+  Query::Ptr query = coll.createQuery();
+
+  bool start_ok =
+      this->extractAndAppendCartesianTrajectoryStartToQuery(*query, move_group, plan_request, start_tolerance);
+  bool goal_ok = this->extractAndAppendCartesianTrajectoryGoalToQuery(*query, move_group, plan_request, goal_tolerance);
+
+  if (!start_ok || !goal_ok)
+  {
+    RCLCPP_ERROR(logger_, "Could not construct cartesian trajectory query.");
+    return {};
+  }
+
+  query->appendGTE("fraction", min_fraction);
+  return coll.queryList(query, metadata_only, sort_by, true);
+}
+
+MessageWithMetadata<moveit_msgs::msg::RobotTrajectory>::ConstPtr TrajectoryCache::fetchBestMatchingCartesianTrajectory(
+    const moveit::planning_interface::MoveGroupInterface& move_group, const std::string& cache_namespace,
+    const moveit_msgs::srv::GetCartesianPath::Request& plan_request, double min_fraction, double start_tolerance,
+    double goal_tolerance, bool metadata_only, const std::string& sort_by)
+{
+  // First find all matching, but metadata only.
+  // Then use the ID metadata of the best plan to pull the actual message.
+  auto matching_trajectories = this->fetchAllMatchingCartesianTrajectories(
+      move_group, cache_namespace, plan_request, min_fraction, start_tolerance, goal_tolerance, true, sort_by);
+
+  if (matching_trajectories.empty())
+  {
+    RCLCPP_DEBUG(logger_, "No matching cartesian trajectories found.");
+    return nullptr;
+  }
+
+  auto coll =
+      db_->openCollection<moveit_msgs::msg::RobotTrajectory>("move_group_cartesian_trajectory_cache", cache_namespace);
+
+  // Best plan is at first index, since the lookup query was sorted by
+  // execution_time.
+  int best_trajectory_id = matching_trajectories.at(0)->lookupInt("id");
+  Query::Ptr best_query = coll.createQuery();
+  best_query->append("id", best_trajectory_id);
+
+  return coll.findOne(best_query, metadata_only);
+}
+
+bool TrajectoryCache::putCartesianTrajectory(const moveit::planning_interface::MoveGroupInterface& move_group,
+                                             const std::string& cache_namespace,
+                                             const moveit_msgs::srv::GetCartesianPath::Request& plan_request,
+                                             const moveit_msgs::msg::RobotTrajectory& trajectory,
+                                             double execution_time_s, double planning_time_s, double fraction,
+                                             bool delete_worse_trajectories)
+{
+  // Check pre-conditions
+  if (!trajectory.multi_dof_joint_trajectory.points.empty())
+  {
+    RCLCPP_ERROR(logger_, "Skipping cartesian trajectory insert: "
+                          "Multi-DOF trajectory plans are not supported.");
+    return false;
+  }
+  if (plan_request.header.frame_id.empty() || trajectory.joint_trajectory.header.frame_id.empty())
+  {
+    RCLCPP_ERROR(logger_, "Skipping cartesian trajectory insert: Frame IDs cannot be empty.");
+    return false;
+  }
+
+  auto coll =
+      db_->openCollection<moveit_msgs::msg::RobotTrajectory>("move_group_cartesian_trajectory_cache", cache_namespace);
+
+  // Pull out trajectories "exactly" keyed by request in cache.
+  Query::Ptr exact_query = coll.createQuery();
+
+  bool start_query_ok =
+      this->extractAndAppendCartesianTrajectoryStartToQuery(*exact_query, move_group, plan_request, 0);
+  bool goal_query_ok = this->extractAndAppendCartesianTrajectoryGoalToQuery(*exact_query, move_group, plan_request, 0);
+  exact_query->append("fraction", fraction);
+
+  if (!start_query_ok || !goal_query_ok)
+  {
+    RCLCPP_ERROR(logger_, "Skipping cartesian trajectory insert: Could not construct lookup query.");
+    return false;
+  }
+
+  auto exact_matches = coll.queryList(exact_query, /*metadata_only=*/true, /*sort_by=*/"execution_time_s");
+  double best_execution_time = std::numeric_limits<double>::infinity();
+  if (!exact_matches.empty())
+  {
+    best_execution_time = exact_matches.at(0)->lookupDouble("execution_time_s");
+
+    if (delete_worse_trajectories)
+    {
+      for (auto& match : exact_matches)
+      {
+        double match_execution_time_s = match->lookupDouble("execution_time_s");
+        if (execution_time_s < match_execution_time_s)
+        {
+          int delete_id = match->lookupInt("id");
+          RCLCPP_DEBUG(logger_,
+                       "Overwriting cartesian trajectory (id: %d): "
+                       "execution_time (%es) > new trajectory's execution_time (%es)",
+                       delete_id, match_execution_time_s, execution_time_s);
+
+          Query::Ptr delete_query = coll.createQuery();
+          delete_query->append("id", delete_id);
+          coll.removeMessages(delete_query);
+        }
+      }
+    }
+  }
+
+  // Insert if candidate is best seen.
+  if (execution_time_s < best_execution_time)
+  {
+    Metadata::Ptr insert_metadata = coll.createMetadata();
+
+    bool start_meta_ok =
+        this->extractAndAppendCartesianTrajectoryStartToMetadata(*insert_metadata, move_group, plan_request);
+    bool goal_meta_ok =
+        this->extractAndAppendCartesianTrajectoryGoalToMetadata(*insert_metadata, move_group, plan_request);
+    insert_metadata->append("execution_time_s", execution_time_s);
+    insert_metadata->append("planning_time_s", planning_time_s);
+    insert_metadata->append("fraction", fraction);
+
+    if (!start_meta_ok || !goal_meta_ok)
+    {
+      RCLCPP_ERROR(logger_, "Skipping cartesian trajectory insert: "
+                            "Could not construct insert metadata.");
+      return false;
+    }
+
+    RCLCPP_DEBUG(logger_,
+                 "Inserting cartesian trajectory: New trajectory execution_time (%es) "
+                 "is better than best trajectory's execution_time (%es) at fraction (%es)",
+                 execution_time_s, best_execution_time, fraction);
+
+    coll.insert(trajectory, insert_metadata);
+    return true;
+  }
+
+  RCLCPP_DEBUG(logger_,
+               "Skipping cartesian trajectory insert: New trajectory execution_time (%es) "
+               "is worse than best trajectory's execution_time (%es) at fraction (%es)",
+               execution_time_s, best_execution_time, fraction);
+  return false;
+}
+
+// =============================================================================
+// MOTION PLAN TRAJECTORY QUERY AND METADATA CONSTRUCTION
+// =============================================================================
+
+// MOTION PLAN TRAJECTORY CACHING: QUERY CONSTRUCTION ==========================
+
 bool TrajectoryCache::extractAndAppendTrajectoryStartToQuery(
     Query& query, const moveit::planning_interface::MoveGroupInterface& move_group,
     const moveit_msgs::msg::MotionPlanRequest& plan_request, double match_tolerance)
@@ -533,7 +718,8 @@ bool TrajectoryCache::extractAndAppendTrajectoryGoalToQuery(
   return true;
 }
 
-// MOTION PLAN TRAJECTORY CACHING: METADATA CONSTRUCTION
+// MOTION PLAN TRAJECTORY CACHING: METADATA CONSTRUCTION =======================
+
 bool TrajectoryCache::extractAndAppendTrajectoryStartToMetadata(
     Metadata& metadata, const moveit::planning_interface::MoveGroupInterface& move_group,
     const moveit_msgs::msg::MotionPlanRequest& plan_request)
@@ -797,190 +983,11 @@ bool TrajectoryCache::extractAndAppendTrajectoryGoalToMetadata(
 }
 
 // =============================================================================
-// CARTESIAN TRAJECTORY CACHING
+// CARTESIAN TRAJECTORY QUERY AND METADATA CONSTRUCTION
 // =============================================================================
-// CARTESIAN TRAJECTORY CACHING: TOP LEVEL OPS
-moveit_msgs::srv::GetCartesianPath::Request
-TrajectoryCache::constructGetCartesianPathRequest(moveit::planning_interface::MoveGroupInterface& move_group,
-                                                  const std::vector<geometry_msgs::msg::Pose>& waypoints, double step,
-                                                  double jump_threshold, bool avoid_collisions)
-{
-  moveit_msgs::srv::GetCartesianPath::Request out;
 
-  move_group.constructRobotState(out.start_state);
+// CARTESIAN TRAJECTORY CACHING: QUERY CONSTRUCTION ============================
 
-  out.group_name = move_group.getName();
-  out.max_velocity_scaling_factor = move_group.getMaxVelocityScalingFactor();
-  out.max_acceleration_scaling_factor = move_group.getMaxVelocityScalingFactor();
-
-  out.header.frame_id = move_group.getPoseReferenceFrame();
-  out.waypoints = waypoints;
-  out.max_step = step;
-  out.jump_threshold = jump_threshold;
-  out.path_constraints = moveit_msgs::msg::Constraints();
-  out.avoid_collisions = avoid_collisions;
-  out.link_name = move_group.getEndEffectorLink();
-  out.header.stamp = move_group.getNode()->now();
-
-  return out;
-}
-
-std::vector<MessageWithMetadata<moveit_msgs::msg::RobotTrajectory>::ConstPtr>
-TrajectoryCache::fetchAllMatchingCartesianTrajectories(const moveit::planning_interface::MoveGroupInterface& move_group,
-                                                       const std::string& move_group_namespace,
-                                                       const moveit_msgs::srv::GetCartesianPath::Request& plan_request,
-                                                       double min_fraction, double start_tolerance,
-                                                       double goal_tolerance, bool metadata_only,
-                                                       const std::string& sort_by)
-{
-  auto coll = db_->openCollection<moveit_msgs::msg::RobotTrajectory>("move_group_cartesian_trajectory_cache",
-                                                                     move_group_namespace);
-
-  Query::Ptr query = coll.createQuery();
-
-  bool start_ok =
-      this->extractAndAppendCartesianTrajectoryStartToQuery(*query, move_group, plan_request, start_tolerance);
-  bool goal_ok = this->extractAndAppendCartesianTrajectoryGoalToQuery(*query, move_group, plan_request, goal_tolerance);
-
-  if (!start_ok || !goal_ok)
-  {
-    RCLCPP_ERROR(logger_, "Could not construct cartesian trajectory query.");
-    return {};
-  }
-
-  query->appendGTE("fraction", min_fraction);
-  return coll.queryList(query, metadata_only, sort_by, true);
-}
-
-MessageWithMetadata<moveit_msgs::msg::RobotTrajectory>::ConstPtr TrajectoryCache::fetchBestMatchingCartesianTrajectory(
-    const moveit::planning_interface::MoveGroupInterface& move_group, const std::string& move_group_namespace,
-    const moveit_msgs::srv::GetCartesianPath::Request& plan_request, double min_fraction, double start_tolerance,
-    double goal_tolerance, bool metadata_only, const std::string& sort_by)
-{
-  // First find all matching, but metadata only.
-  // Then use the ID metadata of the best plan to pull the actual message.
-  auto matching_trajectories = this->fetchAllMatchingCartesianTrajectories(
-      move_group, move_group_namespace, plan_request, min_fraction, start_tolerance, goal_tolerance, true, sort_by);
-
-  if (matching_trajectories.empty())
-  {
-    RCLCPP_DEBUG(logger_, "No matching cartesian trajectories found.");
-    return nullptr;
-  }
-
-  auto coll = db_->openCollection<moveit_msgs::msg::RobotTrajectory>("move_group_cartesian_trajectory_cache",
-                                                                     move_group_namespace);
-
-  // Best plan is at first index, since the lookup query was sorted by
-  // execution_time.
-  int best_trajectory_id = matching_trajectories.at(0)->lookupInt("id");
-  Query::Ptr best_query = coll.createQuery();
-  best_query->append("id", best_trajectory_id);
-
-  return coll.findOne(best_query, metadata_only);
-}
-
-bool TrajectoryCache::putCartesianTrajectory(const moveit::planning_interface::MoveGroupInterface& move_group,
-                                             const std::string& move_group_namespace,
-                                             const moveit_msgs::srv::GetCartesianPath::Request& plan_request,
-                                             const moveit_msgs::msg::RobotTrajectory& trajectory,
-                                             double execution_time_s, double planning_time_s, double fraction,
-                                             bool delete_worse_trajectories)
-{
-  // Check pre-conditions
-  if (!trajectory.multi_dof_joint_trajectory.points.empty())
-  {
-    RCLCPP_ERROR(logger_, "Skipping cartesian trajectory insert: "
-                          "Multi-DOF trajectory plans are not supported.");
-    return false;
-  }
-  if (plan_request.header.frame_id.empty() || trajectory.joint_trajectory.header.frame_id.empty())
-  {
-    RCLCPP_ERROR(logger_, "Skipping cartesian trajectory insert: Frame IDs cannot be empty.");
-    return false;
-  }
-
-  auto coll = db_->openCollection<moveit_msgs::msg::RobotTrajectory>("move_group_cartesian_trajectory_cache",
-                                                                     move_group_namespace);
-
-  // Pull out trajectories "exactly" keyed by request in cache.
-  Query::Ptr exact_query = coll.createQuery();
-
-  bool start_query_ok =
-      this->extractAndAppendCartesianTrajectoryStartToQuery(*exact_query, move_group, plan_request, 0);
-  bool goal_query_ok = this->extractAndAppendCartesianTrajectoryGoalToQuery(*exact_query, move_group, plan_request, 0);
-  exact_query->append("fraction", fraction);
-
-  if (!start_query_ok || !goal_query_ok)
-  {
-    RCLCPP_ERROR(logger_, "Skipping cartesian trajectory insert: Could not construct lookup query.");
-    return false;
-  }
-
-  auto exact_matches = coll.queryList(exact_query, /* metadata_only */ true, /* sort_by */ "execution_time_s");
-  double best_execution_time = std::numeric_limits<double>::infinity();
-  if (!exact_matches.empty())
-  {
-    best_execution_time = exact_matches.at(0)->lookupDouble("execution_time_s");
-
-    if (delete_worse_trajectories)
-    {
-      for (auto& match : exact_matches)
-      {
-        double match_execution_time_s = match->lookupDouble("execution_time_s");
-        if (execution_time_s < match_execution_time_s)
-        {
-          int delete_id = match->lookupInt("id");
-          RCLCPP_DEBUG(logger_,
-                       "Overwriting cartesian trajectory (id: %d): "
-                       "execution_time (%es) > new trajectory's execution_time (%es)",
-                       delete_id, match_execution_time_s, execution_time_s);
-
-          Query::Ptr delete_query = coll.createQuery();
-          delete_query->append("id", delete_id);
-          coll.removeMessages(delete_query);
-        }
-      }
-    }
-  }
-
-  // Insert if candidate is best seen.
-  if (execution_time_s < best_execution_time)
-  {
-    Metadata::Ptr insert_metadata = coll.createMetadata();
-
-    bool start_meta_ok =
-        this->extractAndAppendCartesianTrajectoryStartToMetadata(*insert_metadata, move_group, plan_request);
-    bool goal_meta_ok =
-        this->extractAndAppendCartesianTrajectoryGoalToMetadata(*insert_metadata, move_group, plan_request);
-    insert_metadata->append("execution_time_s", execution_time_s);
-    insert_metadata->append("planning_time_s", planning_time_s);
-    insert_metadata->append("fraction", fraction);
-
-    if (!start_meta_ok || !goal_meta_ok)
-    {
-      RCLCPP_ERROR(logger_, "Skipping cartesian trajectory insert: "
-                            "Could not construct insert metadata.");
-      return false;
-    }
-
-    RCLCPP_DEBUG(logger_,
-                 "Inserting cartesian trajectory: New trajectory execution_time (%es) "
-                 "is better than best trajectory's execution_time (%es) at fraction (%es)",
-                 execution_time_s, best_execution_time, fraction);
-
-    coll.insert(trajectory, insert_metadata);
-    return true;
-  }
-
-  RCLCPP_DEBUG(logger_,
-               "Skipping cartesian trajectory insert: New trajectory execution_time (%es) "
-               "is worse than best trajectory's execution_time (%es) at fraction (%es)",
-               execution_time_s, best_execution_time, fraction);
-  return false;
-}
-
-// CARTESIAN TRAJECTORY CACHING: QUERY CONSTRUCTION
 bool TrajectoryCache::extractAndAppendCartesianTrajectoryStartToQuery(
     Query& query, const moveit::planning_interface::MoveGroupInterface& move_group,
     const moveit_msgs::srv::GetCartesianPath::Request& plan_request, double match_tolerance)
@@ -1151,7 +1158,8 @@ bool TrajectoryCache::extractAndAppendCartesianTrajectoryGoalToQuery(
   return true;
 }
 
-// CARTESIAN TRAJECTORY CACHING: METADATA CONSTRUCTION
+// CARTESIAN TRAJECTORY CACHING: METADATA CONSTRUCTION =========================
+
 bool TrajectoryCache::extractAndAppendCartesianTrajectoryStartToMetadata(
     Metadata& metadata, const moveit::planning_interface::MoveGroupInterface& move_group,
     const moveit_msgs::srv::GetCartesianPath::Request& plan_request)
