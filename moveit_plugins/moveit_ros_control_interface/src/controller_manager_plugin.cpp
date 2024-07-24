@@ -436,8 +436,8 @@ public:
           resources_bimap::right_const_iterator res = claimed_resources.right.find(required_resource);
           if (res != claimed_resources.right.end())
           {  // resource is claimed
-            if (std::find(request->deactivate_controllers.begin(), request->deactivate_controllers.end(), res->second) ==
-                request->deactivate_controllers.end())
+            if (std::find(request->deactivate_controllers.begin(), request->deactivate_controllers.end(),
+                          res->second) == request->deactivate_controllers.end())
             {
               request->deactivate_controllers.push_back(res->second);  // add claiming controller to stop list
             }
