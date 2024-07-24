@@ -171,6 +171,7 @@ public:
    * \param[in] goal_tolerance. Match tolerance for cache entries for the `plan_request` goal parameters.
    * \param[in] metadata_only. If true, returns only the cache entry metadata.
    * \param[in] sort_by. The cache column to sort by, defaults to execution time.
+   * \param[in] ascending. If true, sorts in ascending order. If false, sorts in descending order.
    * \returns A vector of cache hits, sorted by the `sort_by` param.
    */
   std::vector<warehouse_ros::MessageWithMetadata<moveit_msgs::msg::RobotTrajectory>::ConstPtr>
@@ -178,7 +179,7 @@ public:
                                const std::string& cache_namespace,
                                const moveit_msgs::msg::MotionPlanRequest& plan_request, double start_tolerance,
                                double goal_tolerance, bool metadata_only = false,
-                               const std::string& sort_by = "execution_time_s");
+                               const std::string& sort_by = "execution_time_s", bool ascending = true);
 
   /**
    * \brief Fetch the best trajectory that fits within the requested tolerances for start and goal conditions, by some
@@ -191,18 +192,19 @@ public:
    * \param[in] goal_tolerance. Match tolerance for cache entries for the `plan_request` goal parameters.
    * \param[in] metadata_only. If true, returns only the cache entry metadata.
    * \param[in] sort_by. The cache column to sort by, defaults to execution time.
+   * \param[in] ascending. If true, sorts in ascending order. If false, sorts in descending order.
    * \returns The best cache hit, with respect to the `sort_by` param.
    */
   warehouse_ros::MessageWithMetadata<moveit_msgs::msg::RobotTrajectory>::ConstPtr fetchBestMatchingTrajectory(
       const moveit::planning_interface::MoveGroupInterface& move_group, const std::string& cache_namespace,
       const moveit_msgs::msg::MotionPlanRequest& plan_request, double start_tolerance, double goal_tolerance,
-      bool metadata_only = false, const std::string& sort_by = "execution_time_s");
+      bool metadata_only = false, const std::string& sort_by = "execution_time_s", bool ascending = true);
 
   /**
    * \brief Put a trajectory into the database if it is the best matching trajectory seen so far.
    *
    * Trajectories are matched based off their start and goal states.
-   * And are considered "better" if they have a smaller planned execution time than exactly matching trajectories.
+   * And are considered "better" if they higher priority in the sorting order specified by `sort_by` than exactly matching trajectories.
    *
    * A trajectory is "exactly matching" if its start and goal are close enough to another trajectory.
    * The tolerance for this depends on the `exact_match_tolerance` arg passed in init().
@@ -261,6 +263,7 @@ public:
    * \param[in] goal_tolerance. Match tolerance for cache entries for the `plan_request` goal parameters.
    * \param[in] metadata_only. If true, returns only the cache entry metadata.
    * \param[in] sort_by. The cache column to sort by, defaults to execution time.
+   * \param[in] ascending. If true, sorts in ascending order. If false, sorts in descending order.
    * \returns A vector of cache hits, sorted by the `sort_by` param.
    */
   std::vector<warehouse_ros::MessageWithMetadata<moveit_msgs::msg::RobotTrajectory>::ConstPtr>
@@ -268,7 +271,7 @@ public:
                                         const std::string& cache_namespace,
                                         const moveit_msgs::srv::GetCartesianPath::Request& plan_request,
                                         double min_fraction, double start_tolerance, double goal_tolerance,
-                                        bool metadata_only = false, const std::string& sort_by = "execution_time_s");
+                                        bool metadata_only = false, const std::string& sort_by = "execution_time_s", bool ascending = true);
 
   /**
    * \brief Fetch the best cartesian trajectory that fits within the requested tolerances for start and goal conditions,
@@ -282,18 +285,19 @@ public:
    * \param[in] goal_tolerance. Match tolerance for cache entries for the `plan_request` goal parameters.
    * \param[in] metadata_only. If true, returns only the cache entry metadata.
    * \param[in] sort_by. The cache column to sort by, defaults to execution time.
+   * \param[in] ascending. If true, sorts in ascending order. If false, sorts in descending order.
    * \returns The best cache hit, with respect to the `sort_by` param.
    */
   warehouse_ros::MessageWithMetadata<moveit_msgs::msg::RobotTrajectory>::ConstPtr fetchBestMatchingCartesianTrajectory(
       const moveit::planning_interface::MoveGroupInterface& move_group, const std::string& cache_namespace,
       const moveit_msgs::srv::GetCartesianPath::Request& plan_request, double min_fraction, double start_tolerance,
-      double goal_tolerance, bool metadata_only = false, const std::string& sort_by = "execution_time_s");
+      double goal_tolerance, bool metadata_only = false, const std::string& sort_by = "execution_time_s", bool ascending = true);
 
   /**
    * \brief Put a cartesian trajectory into the database if it is the best matching cartesian trajectory seen so far.
    *
    * Cartesian trajectories are matched based off their start and goal states.
-   * And are considered "better" if they have a smaller planned execution time than exactly matching cartesian
+   * And are considered "better" if they higher priority in the sorting order specified by `sort_by` than exactly matching cartesian
    * trajectories.
    *
    * A trajectory is "exactly matching" if its start and goal (and fraction) are close enough to another trajectory.

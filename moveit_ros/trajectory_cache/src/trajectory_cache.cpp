@@ -107,7 +107,7 @@ TrajectoryCache::fetchAllMatchingTrajectories(const moveit::planning_interface::
                                               const std::string& cache_namespace,
                                               const moveit_msgs::msg::MotionPlanRequest& plan_request,
                                               double start_tolerance, double goal_tolerance, bool metadata_only,
-                                              const std::string& sort_by)
+                                              const std::string& sort_by, bool ascending)
 {
   auto coll = db_->openCollection<moveit_msgs::msg::RobotTrajectory>("move_group_trajectory_cache", cache_namespace);
 
@@ -122,18 +122,18 @@ TrajectoryCache::fetchAllMatchingTrajectories(const moveit::planning_interface::
     return {};
   }
 
-  return coll.queryList(query, metadata_only, sort_by, true);
+  return coll.queryList(query, metadata_only, sort_by, ascending);
 }
 
 MessageWithMetadata<moveit_msgs::msg::RobotTrajectory>::ConstPtr TrajectoryCache::fetchBestMatchingTrajectory(
     const moveit::planning_interface::MoveGroupInterface& move_group, const std::string& cache_namespace,
     const moveit_msgs::msg::MotionPlanRequest& plan_request, double start_tolerance, double goal_tolerance,
-    bool metadata_only, const std::string& sort_by)
+    bool metadata_only, const std::string& sort_by, bool ascending)
 {
   // First find all matching, but metadata only.
   // Then use the ID metadata of the best plan to pull the actual message.
   auto matching_trajectories = this->fetchAllMatchingTrajectories(move_group, cache_namespace, plan_request,
-                                                                  start_tolerance, goal_tolerance, true, sort_by);
+                                                                  start_tolerance, goal_tolerance, true, sort_by, ascending);
 
   if (matching_trajectories.empty())
   {
@@ -288,7 +288,7 @@ TrajectoryCache::fetchAllMatchingCartesianTrajectories(const moveit::planning_in
                                                        const moveit_msgs::srv::GetCartesianPath::Request& plan_request,
                                                        double min_fraction, double start_tolerance,
                                                        double goal_tolerance, bool metadata_only,
-                                                       const std::string& sort_by)
+                                                       const std::string& sort_by, bool ascending)
 {
   auto coll =
       db_->openCollection<moveit_msgs::msg::RobotTrajectory>("move_group_cartesian_trajectory_cache", cache_namespace);
@@ -306,18 +306,18 @@ TrajectoryCache::fetchAllMatchingCartesianTrajectories(const moveit::planning_in
   }
 
   query->appendGTE("fraction", min_fraction);
-  return coll.queryList(query, metadata_only, sort_by, true);
+  return coll.queryList(query, metadata_only, sort_by, ascending);
 }
 
 MessageWithMetadata<moveit_msgs::msg::RobotTrajectory>::ConstPtr TrajectoryCache::fetchBestMatchingCartesianTrajectory(
     const moveit::planning_interface::MoveGroupInterface& move_group, const std::string& cache_namespace,
     const moveit_msgs::srv::GetCartesianPath::Request& plan_request, double min_fraction, double start_tolerance,
-    double goal_tolerance, bool metadata_only, const std::string& sort_by)
+    double goal_tolerance, bool metadata_only, const std::string& sort_by, bool ascending)
 {
   // First find all matching, but metadata only.
   // Then use the ID metadata of the best plan to pull the actual message.
   auto matching_trajectories = this->fetchAllMatchingCartesianTrajectories(
-      move_group, cache_namespace, plan_request, min_fraction, start_tolerance, goal_tolerance, true, sort_by);
+      move_group, cache_namespace, plan_request, min_fraction, start_tolerance, goal_tolerance, true, sort_by, ascending);
 
   if (matching_trajectories.empty())
   {
