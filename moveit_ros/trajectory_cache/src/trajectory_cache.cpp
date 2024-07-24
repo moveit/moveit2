@@ -36,15 +36,15 @@ using warehouse_ros::Query;
 // Utils =======================================================================
 
 // Append a range inclusive query with some tolerance about some center value.
-void query_append_range_inclusive_with_tolerance(Query& query, const std::string& name, double center, double tolerance)
+void queryAppendRangeInclusiveWithTolerance(Query& query, const std::string& name, double center, double tolerance)
 {
   query.appendRangeInclusive(name, center - tolerance / 2, center + tolerance / 2);
 }
 
 // Sort constraint components by joint or link name.
-void sort_constraints(std::vector<moveit_msgs::msg::JointConstraint>& joint_constraints,
-                      std::vector<moveit_msgs::msg::PositionConstraint>& position_constraints,
-                      std::vector<moveit_msgs::msg::OrientationConstraint>& orientation_constraints)
+void sortConstraints(std::vector<moveit_msgs::msg::JointConstraint>& joint_constraints,
+                     std::vector<moveit_msgs::msg::PositionConstraint>& position_constraints,
+                     std::vector<moveit_msgs::msg::OrientationConstraint>& orientation_constraints)
 {
   std::sort(joint_constraints.begin(), joint_constraints.end(),
             [](const moveit_msgs::msg::JointConstraint& l, const moveit_msgs::msg::JointConstraint& r) {
@@ -132,8 +132,8 @@ MessageWithMetadata<moveit_msgs::msg::RobotTrajectory>::ConstPtr TrajectoryCache
 {
   // First find all matching, but metadata only.
   // Then use the ID metadata of the best plan to pull the actual message.
-  auto matching_trajectories = this->fetchAllMatchingTrajectories(move_group, cache_namespace, plan_request,
-                                                                  start_tolerance, goal_tolerance, true, sort_by, ascending);
+  auto matching_trajectories = this->fetchAllMatchingTrajectories(
+      move_group, cache_namespace, plan_request, start_tolerance, goal_tolerance, true, sort_by, ascending);
 
   if (matching_trajectories.empty())
   {
@@ -316,8 +316,9 @@ MessageWithMetadata<moveit_msgs::msg::RobotTrajectory>::ConstPtr TrajectoryCache
 {
   // First find all matching, but metadata only.
   // Then use the ID metadata of the best plan to pull the actual message.
-  auto matching_trajectories = this->fetchAllMatchingCartesianTrajectories(
-      move_group, cache_namespace, plan_request, min_fraction, start_tolerance, goal_tolerance, true, sort_by, ascending);
+  auto matching_trajectories =
+      this->fetchAllMatchingCartesianTrajectories(move_group, cache_namespace, plan_request, min_fraction,
+                                                  start_tolerance, goal_tolerance, true, sort_by, ascending);
 
   if (matching_trajectories.empty())
   {
@@ -504,8 +505,8 @@ bool TrajectoryCache::extractAndAppendTrajectoryStartToQuery(
     for (size_t i = 0; i < current_state_msg.joint_state.name.size(); i++)
     {
       query.append("start_state.joint_state.name_" + std::to_string(i), current_state_msg.joint_state.name.at(i));
-      query_append_range_inclusive_with_tolerance(query, "start_state.joint_state.position_" + std::to_string(i),
-                                                  current_state_msg.joint_state.position.at(i), match_tolerance);
+      queryAppendRangeInclusiveWithTolerance(query, "start_state.joint_state.position_" + std::to_string(i),
+                                             current_state_msg.joint_state.position.at(i), match_tolerance);
     }
   }
   else
@@ -513,8 +514,8 @@ bool TrajectoryCache::extractAndAppendTrajectoryStartToQuery(
     for (size_t i = 0; i < plan_request.start_state.joint_state.name.size(); i++)
     {
       query.append("start_state.joint_state.name_" + std::to_string(i), plan_request.start_state.joint_state.name.at(i));
-      query_append_range_inclusive_with_tolerance(query, "start_state.joint_state.position_" + std::to_string(i),
-                                                  plan_request.start_state.joint_state.position.at(i), match_tolerance);
+      queryAppendRangeInclusiveWithTolerance(query, "start_state.joint_state.position_" + std::to_string(i),
+                                             plan_request.start_state.joint_state.position.at(i), match_tolerance);
     }
   }
   return true;
@@ -549,12 +550,12 @@ bool TrajectoryCache::extractAndAppendTrajectoryGoalToQuery(
                          "Not supported.");
   }
 
-  query_append_range_inclusive_with_tolerance(query, "max_velocity_scaling_factor",
-                                              plan_request.max_velocity_scaling_factor, match_tolerance);
-  query_append_range_inclusive_with_tolerance(query, "max_acceleration_scaling_factor",
-                                              plan_request.max_acceleration_scaling_factor, match_tolerance);
-  query_append_range_inclusive_with_tolerance(query, "max_cartesian_speed", plan_request.max_cartesian_speed,
-                                              match_tolerance);
+  queryAppendRangeInclusiveWithTolerance(query, "max_velocity_scaling_factor", plan_request.max_velocity_scaling_factor,
+                                         match_tolerance);
+  queryAppendRangeInclusiveWithTolerance(query, "max_acceleration_scaling_factor",
+                                         plan_request.max_acceleration_scaling_factor, match_tolerance);
+  queryAppendRangeInclusiveWithTolerance(query, "max_cartesian_speed", plan_request.max_cartesian_speed,
+                                         match_tolerance);
 
   // Extract constraints (so we don't have cardinality on goal_constraint idx.)
   std::vector<moveit_msgs::msg::JointConstraint> joint_constraints;
@@ -576,7 +577,7 @@ bool TrajectoryCache::extractAndAppendTrajectoryGoalToQuery(
     }
 
     // Also sort for even less cardinality.
-    sort_constraints(joint_constraints, position_constraints, orientation_constraints);
+    sortConstraints(joint_constraints, position_constraints, orientation_constraints);
   }
 
   // Joint constraints
@@ -586,7 +587,7 @@ bool TrajectoryCache::extractAndAppendTrajectoryGoalToQuery(
     std::string meta_name = "goal_constraints.joint_constraints_" + std::to_string(joint_idx++);
 
     query.append(meta_name + ".joint_name", constraint.joint_name);
-    query_append_range_inclusive_with_tolerance(query, meta_name + ".position", constraint.position, match_tolerance);
+    queryAppendRangeInclusiveWithTolerance(query, meta_name + ".position", constraint.position, match_tolerance);
     query.appendGTE(meta_name + ".tolerance_above", constraint.tolerance_above);
     query.appendLTE(meta_name + ".tolerance_below", constraint.tolerance_below);
   }
@@ -636,12 +637,12 @@ bool TrajectoryCache::extractAndAppendTrajectoryGoalToQuery(
 
       query.append(meta_name + ".link_name", constraint.link_name);
 
-      query_append_range_inclusive_with_tolerance(query, meta_name + ".target_point_offset.x",
-                                                  x_offset + constraint.target_point_offset.x, match_tolerance);
-      query_append_range_inclusive_with_tolerance(query, meta_name + ".target_point_offset.y",
-                                                  y_offset + constraint.target_point_offset.y, match_tolerance);
-      query_append_range_inclusive_with_tolerance(query, meta_name + ".target_point_offset.z",
-                                                  z_offset + constraint.target_point_offset.z, match_tolerance);
+      queryAppendRangeInclusiveWithTolerance(query, meta_name + ".target_point_offset.x",
+                                             x_offset + constraint.target_point_offset.x, match_tolerance);
+      queryAppendRangeInclusiveWithTolerance(query, meta_name + ".target_point_offset.y",
+                                             y_offset + constraint.target_point_offset.y, match_tolerance);
+      queryAppendRangeInclusiveWithTolerance(query, meta_name + ".target_point_offset.z",
+                                             z_offset + constraint.target_point_offset.z, match_tolerance);
     }
   }
 
@@ -704,14 +705,14 @@ bool TrajectoryCache::extractAndAppendTrajectoryGoalToQuery(
       auto final_quat = tf2_quat_goal_offset * tf2_quat_frame_offset;
       final_quat.normalize();
 
-      query_append_range_inclusive_with_tolerance(query, meta_name + ".target_point_offset.x", final_quat.getX(),
-                                                  match_tolerance);
-      query_append_range_inclusive_with_tolerance(query, meta_name + ".target_point_offset.y", final_quat.getY(),
-                                                  match_tolerance);
-      query_append_range_inclusive_with_tolerance(query, meta_name + ".target_point_offset.z", final_quat.getZ(),
-                                                  match_tolerance);
-      query_append_range_inclusive_with_tolerance(query, meta_name + ".target_point_offset.w", final_quat.getW(),
-                                                  match_tolerance);
+      queryAppendRangeInclusiveWithTolerance(query, meta_name + ".target_point_offset.x", final_quat.getX(),
+                                             match_tolerance);
+      queryAppendRangeInclusiveWithTolerance(query, meta_name + ".target_point_offset.y", final_quat.getY(),
+                                             match_tolerance);
+      queryAppendRangeInclusiveWithTolerance(query, meta_name + ".target_point_offset.z", final_quat.getZ(),
+                                             match_tolerance);
+      queryAppendRangeInclusiveWithTolerance(query, meta_name + ".target_point_offset.w", final_quat.getW(),
+                                             match_tolerance);
     }
   }
 
@@ -847,7 +848,7 @@ bool TrajectoryCache::extractAndAppendTrajectoryGoalToMetadata(
     }
 
     // Also sort for even less cardinality.
-    sort_constraints(joint_constraints, position_constraints, orientation_constraints);
+    sortConstraints(joint_constraints, position_constraints, orientation_constraints);
   }
 
   // Joint constraints
@@ -1039,8 +1040,8 @@ bool TrajectoryCache::extractAndAppendCartesianTrajectoryStartToQuery(
     for (size_t i = 0; i < current_state_msg.joint_state.name.size(); i++)
     {
       query.append("start_state.joint_state.name_" + std::to_string(i), current_state_msg.joint_state.name.at(i));
-      query_append_range_inclusive_with_tolerance(query, "start_state.joint_state.position_" + std::to_string(i),
-                                                  current_state_msg.joint_state.position.at(i), match_tolerance);
+      queryAppendRangeInclusiveWithTolerance(query, "start_state.joint_state.position_" + std::to_string(i),
+                                             current_state_msg.joint_state.position.at(i), match_tolerance);
     }
   }
   else
@@ -1048,8 +1049,8 @@ bool TrajectoryCache::extractAndAppendCartesianTrajectoryStartToQuery(
     for (size_t i = 0; i < plan_request.start_state.joint_state.name.size(); i++)
     {
       query.append("start_state.joint_state.name_" + std::to_string(i), plan_request.start_state.joint_state.name.at(i));
-      query_append_range_inclusive_with_tolerance(query, "start_state.joint_state.position_" + std::to_string(i),
-                                                  plan_request.start_state.joint_state.position.at(i), match_tolerance);
+      queryAppendRangeInclusiveWithTolerance(query, "start_state.joint_state.position_" + std::to_string(i),
+                                             plan_request.start_state.joint_state.position.at(i), match_tolerance);
     }
   }
 
@@ -1075,12 +1076,12 @@ bool TrajectoryCache::extractAndAppendCartesianTrajectoryGoalToQuery(
     RCLCPP_WARN(logger_, "Ignoring avoid_collisions: Not supported.");
   }
 
-  query_append_range_inclusive_with_tolerance(query, "max_velocity_scaling_factor",
-                                              plan_request.max_velocity_scaling_factor, match_tolerance);
-  query_append_range_inclusive_with_tolerance(query, "max_acceleration_scaling_factor",
-                                              plan_request.max_acceleration_scaling_factor, match_tolerance);
-  query_append_range_inclusive_with_tolerance(query, "max_step", plan_request.max_step, match_tolerance);
-  query_append_range_inclusive_with_tolerance(query, "jump_threshold", plan_request.jump_threshold, match_tolerance);
+  queryAppendRangeInclusiveWithTolerance(query, "max_velocity_scaling_factor", plan_request.max_velocity_scaling_factor,
+                                         match_tolerance);
+  queryAppendRangeInclusiveWithTolerance(query, "max_acceleration_scaling_factor",
+                                         plan_request.max_acceleration_scaling_factor, match_tolerance);
+  queryAppendRangeInclusiveWithTolerance(query, "max_step", plan_request.max_step, match_tolerance);
+  queryAppendRangeInclusiveWithTolerance(query, "jump_threshold", plan_request.jump_threshold, match_tolerance);
 
   // Waypoints
   // Restating them in terms of the robot model frame (usually base_link)
@@ -1131,12 +1132,12 @@ bool TrajectoryCache::extractAndAppendCartesianTrajectoryGoalToQuery(
 
     // Apply offsets
     // Position
-    query_append_range_inclusive_with_tolerance(query, meta_name + ".position.x", x_offset + waypoint.position.x,
-                                                match_tolerance);
-    query_append_range_inclusive_with_tolerance(query, meta_name + ".position.y", y_offset + waypoint.position.y,
-                                                match_tolerance);
-    query_append_range_inclusive_with_tolerance(query, meta_name + ".position.z", z_offset + waypoint.position.z,
-                                                match_tolerance);
+    queryAppendRangeInclusiveWithTolerance(query, meta_name + ".position.x", x_offset + waypoint.position.x,
+                                           match_tolerance);
+    queryAppendRangeInclusiveWithTolerance(query, meta_name + ".position.y", y_offset + waypoint.position.y,
+                                           match_tolerance);
+    queryAppendRangeInclusiveWithTolerance(query, meta_name + ".position.z", z_offset + waypoint.position.z,
+                                           match_tolerance);
 
     // Orientation
     tf2::Quaternion tf2_quat_goal_offset(waypoint.orientation.x, waypoint.orientation.y, waypoint.orientation.z,
@@ -1146,10 +1147,10 @@ bool TrajectoryCache::extractAndAppendCartesianTrajectoryGoalToQuery(
     auto final_quat = tf2_quat_goal_offset * tf2_quat_frame_offset;
     final_quat.normalize();
 
-    query_append_range_inclusive_with_tolerance(query, meta_name + ".orientation.x", final_quat.getX(), match_tolerance);
-    query_append_range_inclusive_with_tolerance(query, meta_name + ".orientation.y", final_quat.getY(), match_tolerance);
-    query_append_range_inclusive_with_tolerance(query, meta_name + ".orientation.z", final_quat.getZ(), match_tolerance);
-    query_append_range_inclusive_with_tolerance(query, meta_name + ".orientation.w", final_quat.getW(), match_tolerance);
+    queryAppendRangeInclusiveWithTolerance(query, meta_name + ".orientation.x", final_quat.getX(), match_tolerance);
+    queryAppendRangeInclusiveWithTolerance(query, meta_name + ".orientation.y", final_quat.getY(), match_tolerance);
+    queryAppendRangeInclusiveWithTolerance(query, meta_name + ".orientation.z", final_quat.getZ(), match_tolerance);
+    queryAppendRangeInclusiveWithTolerance(query, meta_name + ".orientation.w", final_quat.getW(), match_tolerance);
   }
 
   query.append("link_name", plan_request.link_name);
