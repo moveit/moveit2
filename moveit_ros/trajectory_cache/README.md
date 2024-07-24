@@ -54,7 +54,7 @@ If you use this package in your work, please cite it using the following:
 //   - `warehouse_port`: The port used for the database
 auto traj_cache = std::make_shared<TrajectoryCache>(node);
 
-auto fetched_trajectory = traj_cache->fetch_best_matching_trajectory(
+auto fetched_trajectory = traj_cache->fetchBestMatchingTrajectory(
       *move_group_interface, robot_name, motion_plan_req_msg,
       _cache_start_match_tolerance, _cache_goal_match_tolerance, /*sort_by=*/"execution_time_s");
 
@@ -63,7 +63,7 @@ if (fetched_trajectory) {
   // Do something with the plan.
 } else {
   // Plan... And put it for posterity!
-  traj_cache->put_trajectory(
+  traj_cache->putTrajectory(
         *interface, robot_name, std::move(plan_req_msg), std::move(res->result.trajectory),
         rclcpp::Duration(
           res->result.trajectory.joint_trajectory.points.back().time_from_start

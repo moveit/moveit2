@@ -122,9 +122,9 @@ public:
 
   bool init(const std::string& db_path = ":memory:", uint32_t db_port = 0, double exact_match_precision = 1e-6);
 
-  unsigned count_trajectories(const std::string& move_group_namespace);
+  unsigned countTrajectories(const std::string& move_group_namespace);
 
-  unsigned count_cartesian_trajectories(const std::string& move_group_namespace);
+  unsigned countCartesianTrajectories(const std::string& move_group_namespace);
 
   // ===========================================================================
   // MOTION PLAN TRAJECTORY CACHING
@@ -134,15 +134,15 @@ public:
   // Fetches all plans that fit within the requested tolerances for start and
   // goal conditions, returning them as a vector, sorted by some db column.
   std::vector<warehouse_ros::MessageWithMetadata<moveit_msgs::msg::RobotTrajectory>::ConstPtr>
-  fetch_all_matching_trajectories(const moveit::planning_interface::MoveGroupInterface& move_group,
-                                  const std::string& move_group_namespace,
-                                  const moveit_msgs::msg::MotionPlanRequest& plan_request, double start_tolerance,
-                                  double goal_tolerance, bool metadata_only = false,
-                                  const std::string& sort_by = "execution_time_s");
+  fetchAllMatchingTrajectories(const moveit::planning_interface::MoveGroupInterface& move_group,
+                               const std::string& move_group_namespace,
+                               const moveit_msgs::msg::MotionPlanRequest& plan_request, double start_tolerance,
+                               double goal_tolerance, bool metadata_only = false,
+                               const std::string& sort_by = "execution_time_s");
 
   // Fetches the best trajectory that fits within the requested tolerances for start
   // and goal conditions, by some db column.
-  warehouse_ros::MessageWithMetadata<moveit_msgs::msg::RobotTrajectory>::ConstPtr fetch_best_matching_trajectory(
+  warehouse_ros::MessageWithMetadata<moveit_msgs::msg::RobotTrajectory>::ConstPtr fetchBestMatchingTrajectory(
       const moveit::planning_interface::MoveGroupInterface& move_group, const std::string& move_group_namespace,
       const moveit_msgs::msg::MotionPlanRequest& plan_request, double start_tolerance, double goal_tolerance,
       bool metadata_only = false, const std::string& sort_by = "execution_time_s");
@@ -154,30 +154,30 @@ public:
   // than matching trajectories.
   //
   // Optionally deletes all worse trajectories by default to prune the cache.
-  bool put_trajectory(const moveit::planning_interface::MoveGroupInterface& move_group,
-                      const std::string& move_group_namespace, const moveit_msgs::msg::MotionPlanRequest& plan_request,
-                      const moveit_msgs::msg::RobotTrajectory& trajectory, double execution_time_s,
-                      double planning_time_s, bool delete_worse_trajectories = true);
+  bool putTrajectory(const moveit::planning_interface::MoveGroupInterface& move_group,
+                     const std::string& move_group_namespace, const moveit_msgs::msg::MotionPlanRequest& plan_request,
+                     const moveit_msgs::msg::RobotTrajectory& trajectory, double execution_time_s,
+                     double planning_time_s, bool delete_worse_trajectories = true);
 
   // QUERY CONSTRUCTION
-  bool extract_and_append_trajectory_start_to_query(warehouse_ros::Query& query,
-                                                    const moveit::planning_interface::MoveGroupInterface& move_group,
-                                                    const moveit_msgs::msg::MotionPlanRequest& plan_request,
-                                                    double match_tolerance);
+  bool extractAndAppendTrajectoryStartToQuery(warehouse_ros::Query& query,
+                                              const moveit::planning_interface::MoveGroupInterface& move_group,
+                                              const moveit_msgs::msg::MotionPlanRequest& plan_request,
+                                              double match_tolerance);
 
-  bool extract_and_append_trajectory_goal_to_query(warehouse_ros::Query& query,
-                                                   const moveit::planning_interface::MoveGroupInterface& move_group,
-                                                   const moveit_msgs::msg::MotionPlanRequest& plan_request,
-                                                   double match_tolerance);
+  bool extractAndAppendTrajectoryGoalToQuery(warehouse_ros::Query& query,
+                                             const moveit::planning_interface::MoveGroupInterface& move_group,
+                                             const moveit_msgs::msg::MotionPlanRequest& plan_request,
+                                             double match_tolerance);
 
   // METADATA CONSTRUCTION
-  bool extract_and_append_trajectory_start_to_metadata(warehouse_ros::Metadata& metadata,
-                                                       const moveit::planning_interface::MoveGroupInterface& move_group,
-                                                       const moveit_msgs::msg::MotionPlanRequest& plan_request);
+  bool extractAndAppendTrajectoryStartToMetadata(warehouse_ros::Metadata& metadata,
+                                                 const moveit::planning_interface::MoveGroupInterface& move_group,
+                                                 const moveit_msgs::msg::MotionPlanRequest& plan_request);
 
-  bool extract_and_append_trajectory_goal_to_metadata(warehouse_ros::Metadata& metadata,
-                                                      const moveit::planning_interface::MoveGroupInterface& move_group,
-                                                      const moveit_msgs::msg::MotionPlanRequest& plan_request);
+  bool extractAndAppendTrajectoryGoalToMetadata(warehouse_ros::Metadata& metadata,
+                                                const moveit::planning_interface::MoveGroupInterface& move_group,
+                                                const moveit_msgs::msg::MotionPlanRequest& plan_request);
 
   // ===========================================================================
   // CARTESIAN TRAJECTORY CACHING
@@ -187,29 +187,26 @@ public:
   // This mimics the move group computeCartesianPath signature (without path
   // constraints).
   moveit_msgs::srv::GetCartesianPath::Request
-  construct_get_cartesian_path_request(moveit::planning_interface::MoveGroupInterface& move_group,
-                                       const std::vector<geometry_msgs::msg::Pose>& waypoints, double step,
-                                       double jump_threshold, bool avoid_collisions = true);
+  constructGetCartesianPathRequest(moveit::planning_interface::MoveGroupInterface& move_group,
+                                   const std::vector<geometry_msgs::msg::Pose>& waypoints, double step,
+                                   double jump_threshold, bool avoid_collisions = true);
 
   // Fetches all cartesian trajectories that fit within the requested tolerances
   // for start and goal conditions, returning them as a vector, sorted by some
   // db column.
   std::vector<warehouse_ros::MessageWithMetadata<moveit_msgs::msg::RobotTrajectory>::ConstPtr>
-  fetch_all_matching_cartesian_trajectories(const moveit::planning_interface::MoveGroupInterface& move_group,
-                                            const std::string& move_group_namespace,
-                                            const moveit_msgs::srv::GetCartesianPath::Request& plan_request,
-                                            double min_fraction, double start_tolerance, double goal_tolerance,
-                                            bool metadata_only = false,
-                                            const std::string& sort_by = "execution_time_s");
+  fetchAllMatchingCartesianTrajectories(const moveit::planning_interface::MoveGroupInterface& move_group,
+                                        const std::string& move_group_namespace,
+                                        const moveit_msgs::srv::GetCartesianPath::Request& plan_request,
+                                        double min_fraction, double start_tolerance, double goal_tolerance,
+                                        bool metadata_only = false, const std::string& sort_by = "execution_time_s");
 
   // Fetches the best cartesian trajectory that fits within the requested tolerances
   // for start and goal conditions, by some db column.
-  warehouse_ros::MessageWithMetadata<moveit_msgs::msg::RobotTrajectory>::ConstPtr
-  fetch_best_matching_cartesian_trajectory(const moveit::planning_interface::MoveGroupInterface& move_group,
-                                           const std::string& move_group_namespace,
-                                           const moveit_msgs::srv::GetCartesianPath::Request& plan_request,
-                                           double min_fraction, double start_tolerance, double goal_tolerance,
-                                           bool metadata_only = false, const std::string& sort_by = "execution_time_s");
+  warehouse_ros::MessageWithMetadata<moveit_msgs::msg::RobotTrajectory>::ConstPtr fetchBestMatchingCartesianTrajectory(
+      const moveit::planning_interface::MoveGroupInterface& move_group, const std::string& move_group_namespace,
+      const moveit_msgs::srv::GetCartesianPath::Request& plan_request, double min_fraction, double start_tolerance,
+      double goal_tolerance, bool metadata_only = false, const std::string& sort_by = "execution_time_s");
 
   // Put a cartesian trajectory into the database if it is the best matching
   // cartesian trajectory seen so far.
@@ -220,29 +217,33 @@ public:
   //
   // Optionally deletes all worse cartesian trajectories by default to prune the
   // cache.
-  bool put_cartesian_trajectory(const moveit::planning_interface::MoveGroupInterface& move_group,
-                                const std::string& move_group_namespace,
-                                const moveit_msgs::srv::GetCartesianPath::Request& plan_request,
-                                const moveit_msgs::msg::RobotTrajectory& trajectory, double execution_time_s,
-                                double planning_time_s, double fraction, bool delete_worse_trajectories = true);
+  bool putCartesianTrajectory(const moveit::planning_interface::MoveGroupInterface& move_group,
+                              const std::string& move_group_namespace,
+                              const moveit_msgs::srv::GetCartesianPath::Request& plan_request,
+                              const moveit_msgs::msg::RobotTrajectory& trajectory, double execution_time_s,
+                              double planning_time_s, double fraction, bool delete_worse_trajectories = true);
 
   // QUERY CONSTRUCTION
-  bool extract_and_append_cartesian_trajectory_start_to_query(
-      warehouse_ros::Query& query, const moveit::planning_interface::MoveGroupInterface& move_group,
-      const moveit_msgs::srv::GetCartesianPath::Request& plan_request, double match_tolerance);
+  bool extractAndAppendCartesianTrajectoryStartToQuery(warehouse_ros::Query& query,
+                                                       const moveit::planning_interface::MoveGroupInterface& move_group,
+                                                       const moveit_msgs::srv::GetCartesianPath::Request& plan_request,
+                                                       double match_tolerance);
 
-  bool extract_and_append_cartesian_trajectory_goal_to_query(
-      warehouse_ros::Query& query, const moveit::planning_interface::MoveGroupInterface& move_group,
-      const moveit_msgs::srv::GetCartesianPath::Request& plan_request, double match_tolerance);
+  bool extractAndAppendCartesianTrajectoryGoalToQuery(warehouse_ros::Query& query,
+                                                      const moveit::planning_interface::MoveGroupInterface& move_group,
+                                                      const moveit_msgs::srv::GetCartesianPath::Request& plan_request,
+                                                      double match_tolerance);
 
   // METADATA CONSTRUCTION
-  bool extract_and_append_cartesian_trajectory_start_to_metadata(
-      warehouse_ros::Metadata& metadata, const moveit::planning_interface::MoveGroupInterface& move_group,
-      const moveit_msgs::srv::GetCartesianPath::Request& plan_request);
+  bool
+  extractAndAppendCartesianTrajectoryStartToMetadata(warehouse_ros::Metadata& metadata,
+                                                     const moveit::planning_interface::MoveGroupInterface& move_group,
+                                                     const moveit_msgs::srv::GetCartesianPath::Request& plan_request);
 
-  bool extract_and_append_cartesian_trajectory_goal_to_metadata(
-      warehouse_ros::Metadata& metadata, const moveit::planning_interface::MoveGroupInterface& move_group,
-      const moveit_msgs::srv::GetCartesianPath::Request& plan_request);
+  bool
+  extractAndAppendCartesianTrajectoryGoalToMetadata(warehouse_ros::Metadata& metadata,
+                                                    const moveit::planning_interface::MoveGroupInterface& move_group,
+                                                    const moveit_msgs::srv::GetCartesianPath::Request& plan_request);
 
 private:
   rclcpp::Node::SharedPtr node_;
