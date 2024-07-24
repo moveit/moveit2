@@ -808,16 +808,11 @@ TrajectoryCache::construct_get_cartesian_path_request(moveit::planning_interface
 {
   moveit_msgs::srv::GetCartesianPath::Request out;
 
-  // Some of these parameters need us to pull PRIVATE values out of the
-  // move_group elsewhere... Yes, it is very cursed and I hate it.
-  // Fixing it requires fixing it in MoveIt.
-  moveit_msgs::msg::MotionPlanRequest tmp;
-  move_group.constructMotionPlanRequest(tmp);
+  move_group.constructRobotState(out.start_state);
 
-  out.start_state = std::move(tmp.start_state);
-  out.group_name = std::move(tmp.group_name);
-  out.max_velocity_scaling_factor = tmp.max_velocity_scaling_factor;
-  out.max_acceleration_scaling_factor = tmp.max_acceleration_scaling_factor;
+  out.group_name = move_group.getName();
+  out.max_velocity_scaling_factor = move_group.getMaxVelocityScalingFactor();
+  out.max_acceleration_scaling_factor = move_group.getMaxVelocityScalingFactor();
 
   out.header.frame_id = move_group.getPoseReferenceFrame();
   out.waypoints = waypoints;
