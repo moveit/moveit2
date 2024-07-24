@@ -130,3 +130,5 @@ Since this is an initial release, the following features are unsupported because
 - !!! This cache does NOT support certain constraints
   - Including: path, constraint regions, everything related to collision.
 - The fuzzy lookup can't be configured on a per-joint basis.
+- Alternate ordinal lookup metrics for the cache
+  - Currently only execution time is explicitly supported as a way to compare cache entries. Ideally we should be able to inject lambdas to save custom cache DB metadata to represent and sort on custom cost functions (e.g. minimum jerk, path length, etc.). (e.g. https://github.com/moveit/moveit2/pull/2153)
