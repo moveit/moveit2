@@ -44,6 +44,7 @@
 #include <tf2_ros/create_timer_interface.h>
 #include <tf2_ros/create_timer_ros.h>
 #include <moveit/utils/logger.hpp>
+#include <rclcpp/version.h>
 
 #include <memory>
 
