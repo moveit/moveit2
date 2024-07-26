@@ -866,7 +866,7 @@ void PlanningSceneMonitor::excludeRobotLinksFromOctree()
   bool warned = false;
   for (const moveit::core::LinkModel* link : links)
   {
-    std::vector<shapes::ShapeConstPtr> shapes = link->getShapes();  // copy shared ptrs on purpuse
+    std::vector<shapes::ShapeConstPtr> shapes = link->getShapes();  // copy shared ptrs on purpose
     for (std::size_t j = 0; j < shapes.size(); ++j)
     {
       // merge mesh vertices up to 0.1 mm apart
