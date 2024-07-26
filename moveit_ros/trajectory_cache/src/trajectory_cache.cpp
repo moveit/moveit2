@@ -35,6 +35,20 @@ using warehouse_ros::Query;
 
 // Utils =======================================================================
 
+// Ensure we always have a workspace frame ID.
+std::string getWorkspaceFrameId(const moveit::planning_interface::MoveGroupInterface& move_group,
+                                const moveit_msgs::msg::WorkspaceParameters& workspace_parameters)
+{
+  if (workspace_parameters.header.frame_id.empty())
+  {
+    return move_group.getRobotModel()->getModelFrame();
+  }
+  else
+  {
+    return workspace_parameters.header.frame_id;
+  }
+}
+
 // Append a range inclusive query with some tolerance about some center value.
 void queryAppendRangeInclusiveWithTolerance(Query& query, const std::string& name, double center, double tolerance)
 {
@@ -158,24 +172,25 @@ bool TrajectoryCache::putTrajectory(const moveit::planning_interface::MoveGroupI
                                     const moveit_msgs::msg::RobotTrajectory& trajectory, double execution_time_s,
                                     double planning_time_s, bool delete_worse_trajectories)
 {
+  std::string workspace_frame_id = getWorkspaceFrameId(move_group, plan_request.workspace_parameters);
+
   // Check pre-conditions
   if (!trajectory.multi_dof_joint_trajectory.points.empty())
   {
     RCLCPP_ERROR(logger_, "Skipping plan insert: Multi-DOF trajectory plans are not supported.");
     return false;
   }
-  if (plan_request.workspace_parameters.header.frame_id.empty() || trajectory.joint_trajectory.header.frame_id.empty())
+  if (workspace_frame_id.empty() || trajectory.joint_trajectory.header.frame_id.empty())
   {
     RCLCPP_ERROR(logger_, "Skipping plan insert: Frame IDs cannot be empty.");
     return false;
   }
-  if (plan_request.workspace_parameters.header.frame_id != trajectory.joint_trajectory.header.frame_id)
+  if (workspace_frame_id != trajectory.joint_trajectory.header.frame_id)
   {
     RCLCPP_ERROR(logger_,
                  "Skipping plan insert: "
                  "Plan request frame (%s) does not match plan frame (%s).",
-                 plan_request.workspace_parameters.header.frame_id.c_str(),
-                 trajectory.joint_trajectory.header.frame_id.c_str());
+                 workspace_frame_id.c_str(), trajectory.joint_trajectory.header.frame_id.c_str());
     return false;
   }
 
@@ -448,6 +463,7 @@ bool TrajectoryCache::extractAndAppendTrajectoryStartToQuery(
     Query& query, const moveit::planning_interface::MoveGroupInterface& move_group,
     const moveit_msgs::msg::MotionPlanRequest& plan_request, double match_tolerance)
 {
+  std::string workspace_frame_id = getWorkspaceFrameId(move_group, plan_request.workspace_parameters);
   match_tolerance += exact_match_precision_;
 
   // Make ignored members explicit
@@ -464,7 +480,7 @@ bool TrajectoryCache::extractAndAppendTrajectoryStartToQuery(
 
   // Workspace params
   // Match anything within our specified workspace limits.
-  query.append("workspace_parameters.header.frame_id", plan_request.workspace_parameters.header.frame_id);
+  query.append("workspace_parameters.header.frame_id", workspace_frame_id);
   query.appendGTE("workspace_parameters.min_corner.x", plan_request.workspace_parameters.min_corner.x);
   query.appendGTE("workspace_parameters.min_corner.y", plan_request.workspace_parameters.min_corner.y);
   query.appendGTE("workspace_parameters.min_corner.z", plan_request.workspace_parameters.min_corner.z);
@@ -495,7 +511,8 @@ bool TrajectoryCache::extractAndAppendTrajectoryStartToQuery(
     {
       RCLCPP_WARN(logger_, "Skipping start query append: Could not get robot state.");
       // NOTE: methyldragon -
-      //   Ideally we would restore the original state here and undo our changes, however copy of the query is not supported.
+      //   Ideally we would restore the original state here and undo our changes, however copy of the query is not
+      //   supported.
       return false;
     }
 
@@ -522,9 +539,10 @@ bool TrajectoryCache::extractAndAppendTrajectoryStartToQuery(
 }
 
 bool TrajectoryCache::extractAndAppendTrajectoryGoalToQuery(
-    Query& query, const moveit::planning_interface::MoveGroupInterface& /* move_group */,
+    Query& query, const moveit::planning_interface::MoveGroupInterface& move_group,
     const moveit_msgs::msg::MotionPlanRequest& plan_request, double match_tolerance)
 {
+  std::string workspace_frame_id = getWorkspaceFrameId(move_group, plan_request.workspace_parameters);
   match_tolerance += exact_match_precision_;
 
   // Make ignored members explicit
@@ -597,8 +615,7 @@ bool TrajectoryCache::extractAndAppendTrajectoryGoalToQuery(
   // instead.
   if (!position_constraints.empty())
   {
-    query.append("goal_constraints.position_constraints.header.frame_id",
-                 plan_request.workspace_parameters.header.frame_id);
+    query.append("goal_constraints.position_constraints.header.frame_id", workspace_frame_id);
 
     size_t pos_idx = 0;
     for (auto& constraint : position_constraints)
@@ -610,12 +627,12 @@ bool TrajectoryCache::extractAndAppendTrajectoryGoalToQuery(
       double y_offset = 0;
       double z_offset = 0;
 
-      if (plan_request.workspace_parameters.header.frame_id != constraint.header.frame_id)
+      if (workspace_frame_id != constraint.header.frame_id)
       {
         try
         {
-          auto transform = tf_buffer_->lookupTransform(
-              constraint.header.frame_id, plan_request.workspace_parameters.header.frame_id, tf2::TimePointZero);
+          auto transform =
+              tf_buffer_->lookupTransform(constraint.header.frame_id, workspace_frame_id, tf2::TimePointZero);
 
           x_offset = transform.transform.translation.x;
           y_offset = transform.transform.translation.y;
@@ -626,11 +643,11 @@ bool TrajectoryCache::extractAndAppendTrajectoryGoalToQuery(
           RCLCPP_WARN(logger_,
                       "Skipping goal query append: "
                       "Could not get goal transform for translation %s to %s: %s",
-                      plan_request.workspace_parameters.header.frame_id.c_str(), constraint.header.frame_id.c_str(),
-                      ex.what());
+                      workspace_frame_id.c_str(), constraint.header.frame_id.c_str(), ex.what());
 
           // NOTE: methyldragon -
-          //   Ideally we would restore the original state here and undo our changes, however copy of the query is not supported.
+          //   Ideally we would restore the original state here and undo our changes, however copy of the query is not
+          //   supported.
           return false;
         }
       }
@@ -651,8 +668,7 @@ bool TrajectoryCache::extractAndAppendTrajectoryGoalToQuery(
   // instead.
   if (!orientation_constraints.empty())
   {
-    query.append("goal_constraints.orientation_constraints.header.frame_id",
-                 plan_request.workspace_parameters.header.frame_id);
+    query.append("goal_constraints.orientation_constraints.header.frame_id", workspace_frame_id);
 
     size_t ori_idx = 0;
     for (auto& constraint : orientation_constraints)
@@ -666,12 +682,12 @@ bool TrajectoryCache::extractAndAppendTrajectoryGoalToQuery(
       quat_offset.z = 0;
       quat_offset.w = 1;
 
-      if (plan_request.workspace_parameters.header.frame_id != constraint.header.frame_id)
+      if (workspace_frame_id != constraint.header.frame_id)
       {
         try
         {
-          auto transform = tf_buffer_->lookupTransform(
-              constraint.header.frame_id, plan_request.workspace_parameters.header.frame_id, tf2::TimePointZero);
+          auto transform =
+              tf_buffer_->lookupTransform(constraint.header.frame_id, workspace_frame_id, tf2::TimePointZero);
 
           quat_offset = transform.transform.rotation;
         }
@@ -680,11 +696,11 @@ bool TrajectoryCache::extractAndAppendTrajectoryGoalToQuery(
           RCLCPP_WARN(logger_,
                       "Skipping goal query append: "
                       "Could not get goal transform for orientation %s to %s: %s",
-                      plan_request.workspace_parameters.header.frame_id.c_str(), constraint.header.frame_id.c_str(),
-                      ex.what());
+                      workspace_frame_id.c_str(), constraint.header.frame_id.c_str(), ex.what());
 
           // NOTE: methyldragon -
-          //   Ideally we would restore the original state here and undo our changes, however copy of the query is not supported.
+          //   Ideally we would restore the original state here and undo our changes, however copy of the query is not
+          //   supported.
           return false;
         }
       }
@@ -725,6 +741,8 @@ bool TrajectoryCache::extractAndAppendTrajectoryStartToMetadata(
     Metadata& metadata, const moveit::planning_interface::MoveGroupInterface& move_group,
     const moveit_msgs::msg::MotionPlanRequest& plan_request)
 {
+  std::string workspace_frame_id = getWorkspaceFrameId(move_group, plan_request.workspace_parameters);
+
   // Make ignored members explicit
   if (!plan_request.start_state.multi_dof_joint_state.joint_names.empty())
   {
@@ -738,7 +756,7 @@ bool TrajectoryCache::extractAndAppendTrajectoryStartToMetadata(
   metadata.append("group_name", plan_request.group_name);
 
   // Workspace params
-  metadata.append("workspace_parameters.header.frame_id", plan_request.workspace_parameters.header.frame_id);
+  metadata.append("workspace_parameters.header.frame_id", workspace_frame_id);
   metadata.append("workspace_parameters.min_corner.x", plan_request.workspace_parameters.min_corner.x);
   metadata.append("workspace_parameters.min_corner.y", plan_request.workspace_parameters.min_corner.y);
   metadata.append("workspace_parameters.min_corner.z", plan_request.workspace_parameters.min_corner.z);
@@ -769,7 +787,8 @@ bool TrajectoryCache::extractAndAppendTrajectoryStartToMetadata(
     {
       RCLCPP_WARN(logger_, "Skipping start metadata append: Could not get robot state.");
       // NOTE: methyldragon -
-      //   Ideally we would restore the original state here and undo our changes, however copy of the query is not supported.
+      //   Ideally we would restore the original state here and undo our changes, however copy of the query is not
+      //   supported.
       return false;
     }
 
@@ -798,9 +817,11 @@ bool TrajectoryCache::extractAndAppendTrajectoryStartToMetadata(
 }
 
 bool TrajectoryCache::extractAndAppendTrajectoryGoalToMetadata(
-    Metadata& metadata, const moveit::planning_interface::MoveGroupInterface& /* move_group */,
+    Metadata& metadata, const moveit::planning_interface::MoveGroupInterface& move_group,
     const moveit_msgs::msg::MotionPlanRequest& plan_request)
 {
+  std::string workspace_frame_id = getWorkspaceFrameId(move_group, plan_request.workspace_parameters);
+
   // Make ignored members explicit
   bool emit_position_constraint_warning = false;
   for (auto& constraint : plan_request.goal_constraints)
@@ -868,8 +889,7 @@ bool TrajectoryCache::extractAndAppendTrajectoryGoalToMetadata(
   {
     // All offsets will be "frozen" and computed wrt. the workspace frame
     // instead.
-    metadata.append("goal_constraints.position_constraints.header.frame_id",
-                    plan_request.workspace_parameters.header.frame_id);
+    metadata.append("goal_constraints.position_constraints.header.frame_id", workspace_frame_id);
 
     size_t position_idx = 0;
     for (auto& constraint : position_constraints)
@@ -881,12 +901,12 @@ bool TrajectoryCache::extractAndAppendTrajectoryGoalToMetadata(
       double y_offset = 0;
       double z_offset = 0;
 
-      if (plan_request.workspace_parameters.header.frame_id != constraint.header.frame_id)
+      if (workspace_frame_id != constraint.header.frame_id)
       {
         try
         {
-          auto transform = tf_buffer_->lookupTransform(
-              constraint.header.frame_id, plan_request.workspace_parameters.header.frame_id, tf2::TimePointZero);
+          auto transform =
+              tf_buffer_->lookupTransform(constraint.header.frame_id, workspace_frame_id, tf2::TimePointZero);
 
           x_offset = transform.transform.translation.x;
           y_offset = transform.transform.translation.y;
@@ -897,11 +917,11 @@ bool TrajectoryCache::extractAndAppendTrajectoryGoalToMetadata(
           RCLCPP_WARN(logger_,
                       "Skipping goal metadata append: "
                       "Could not get goal transform for translation %s to %s: %s",
-                      plan_request.workspace_parameters.header.frame_id.c_str(), constraint.header.frame_id.c_str(),
-                      ex.what());
+                      workspace_frame_id.c_str(), constraint.header.frame_id.c_str(), ex.what());
 
           // NOTE: methyldragon -
-          //   Ideally we would restore the original state here and undo our changes, however copy of the query is not supported.
+          //   Ideally we would restore the original state here and undo our changes, however copy of the query is not
+          //   supported.
           return false;
         }
       }
@@ -919,8 +939,7 @@ bool TrajectoryCache::extractAndAppendTrajectoryGoalToMetadata(
   {
     // All offsets will be "frozen" and computed wrt. the workspace frame
     // instead.
-    metadata.append("goal_constraints.orientation_constraints.header.frame_id",
-                    plan_request.workspace_parameters.header.frame_id);
+    metadata.append("goal_constraints.orientation_constraints.header.frame_id", workspace_frame_id);
 
     size_t ori_idx = 0;
     for (auto& constraint : orientation_constraints)
@@ -934,12 +953,12 @@ bool TrajectoryCache::extractAndAppendTrajectoryGoalToMetadata(
       quat_offset.z = 0;
       quat_offset.w = 1;
 
-      if (plan_request.workspace_parameters.header.frame_id != constraint.header.frame_id)
+      if (workspace_frame_id != constraint.header.frame_id)
       {
         try
         {
-          auto transform = tf_buffer_->lookupTransform(
-              constraint.header.frame_id, plan_request.workspace_parameters.header.frame_id, tf2::TimePointZero);
+          auto transform =
+              tf_buffer_->lookupTransform(constraint.header.frame_id, workspace_frame_id, tf2::TimePointZero);
 
           quat_offset = transform.transform.rotation;
         }
@@ -948,11 +967,11 @@ bool TrajectoryCache::extractAndAppendTrajectoryGoalToMetadata(
           RCLCPP_WARN(logger_,
                       "Skipping goal metadata append: "
                       "Could not get goal transform for orientation %s to %s: %s",
-                      plan_request.workspace_parameters.header.frame_id.c_str(), constraint.header.frame_id.c_str(),
-                      ex.what());
+                      workspace_frame_id.c_str(), constraint.header.frame_id.c_str(), ex.what());
 
           // NOTE: methyldragon -
-          //   Ideally we would restore the original state here and undo our changes, however copy of the query is not supported.
+          //   Ideally we would restore the original state here and undo our changes, however copy of the query is not
+          //   supported.
           return false;
         }
       }
@@ -1030,7 +1049,8 @@ bool TrajectoryCache::extractAndAppendCartesianTrajectoryStartToQuery(
     {
       RCLCPP_WARN(logger_, "Skipping start metadata append: Could not get robot state.");
       // NOTE: methyldragon -
-      //   Ideally we would restore the original state here and undo our changes, however copy of the query is not supported.
+      //   Ideally we would restore the original state here and undo our changes, however copy of the query is not
+      //   supported.
       return false;
     }
 
@@ -1117,7 +1137,8 @@ bool TrajectoryCache::extractAndAppendCartesianTrajectoryGoalToQuery(
                   base_frame.c_str(), plan_request.header.frame_id.c_str(), ex.what());
 
       // NOTE: methyldragon -
-      //   Ideally we would restore the original state here and undo our changes, however copy of the query is not supported.
+      //   Ideally we would restore the original state here and undo our changes, however copy of the query is not
+      //   supported.
       return false;
     }
   }
@@ -1200,7 +1221,8 @@ bool TrajectoryCache::extractAndAppendCartesianTrajectoryStartToMetadata(
     {
       RCLCPP_WARN(logger_, "Skipping start metadata append: Could not get robot state.");
       // NOTE: methyldragon -
-      //   Ideally we would restore the original state here and undo our changes, however copy of the query is not supported.
+      //   Ideally we would restore the original state here and undo our changes, however copy of the query is not
+      //   supported.
       return false;
     }
 
@@ -1284,7 +1306,8 @@ bool TrajectoryCache::extractAndAppendCartesianTrajectoryGoalToMetadata(
                   base_frame.c_str(), plan_request.header.frame_id.c_str(), ex.what());
 
       // NOTE: methyldragon -
-      //   Ideally we would restore the original state here and undo our changes, however copy of the query is not supported.
+      //   Ideally we would restore the original state here and undo our changes, however copy of the query is not
+      //   supported.
       return false;
     }
   }
