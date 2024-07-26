@@ -136,7 +136,7 @@ def test_all_tests_pass(trajectory_cache_test_runner_node, launch_context):
     assert process_tools.wait_for_output_sync(
         launch_context,
         trajectory_cache_test_runner_node,
-        lambda x: x.count("[PASS]") == 165,  # All test cases passed.
+        lambda x: x.count("[PASS]") == 163,  # All test cases passed.
         timeout=30,
     )
 

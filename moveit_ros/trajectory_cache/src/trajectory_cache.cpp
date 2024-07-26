@@ -51,7 +51,7 @@ std::string getWorkspaceFrameId(const moveit::planning_interface::MoveGroupInter
 
 // Ensure we always have a cartesian path request frame ID.
 std::string getCartesianPathRequestFrameId(const moveit::planning_interface::MoveGroupInterface& move_group,
-                                const moveit_msgs::srv::GetCartesianPath::Request& path_request)
+                                           const moveit_msgs::srv::GetCartesianPath::Request& path_request)
 {
   if (path_request.header.frame_id.empty())
   {
