@@ -49,6 +49,20 @@ std::string getWorkspaceFrameId(const moveit::planning_interface::MoveGroupInter
   }
 }
 
+// Ensure we always have a cartesian path request frame ID.
+std::string getCartesianPathRequestFrameId(const moveit::planning_interface::MoveGroupInterface& move_group,
+                                const moveit_msgs::srv::GetCartesianPath::Request& path_request)
+{
+  if (path_request.header.frame_id.empty())
+  {
+    return move_group.getPoseReferenceFrame();
+  }
+  else
+  {
+    return path_request.header.frame_id;
+  }
+}
+
 // Append a range inclusive query with some tolerance about some center value.
 void queryAppendRangeInclusiveWithTolerance(Query& query, const std::string& name, double center, double tolerance)
 {
@@ -180,9 +194,14 @@ bool TrajectoryCache::putTrajectory(const moveit::planning_interface::MoveGroupI
     RCLCPP_ERROR(logger_, "Skipping plan insert: Multi-DOF trajectory plans are not supported.");
     return false;
   }
-  if (workspace_frame_id.empty() || trajectory.joint_trajectory.header.frame_id.empty())
+  if (workspace_frame_id.empty())
   {
-    RCLCPP_ERROR(logger_, "Skipping plan insert: Frame IDs cannot be empty.");
+    RCLCPP_ERROR(logger_, "Skipping plan insert: Workspace frame ID cannot be empty.");
+    return false;
+  }
+  if (trajectory.joint_trajectory.header.frame_id.empty())
+  {
+    RCLCPP_ERROR(logger_, "Skipping plan insert: Trajectory frame ID cannot be empty.");
     return false;
   }
   if (workspace_frame_id != trajectory.joint_trajectory.header.frame_id)
@@ -360,6 +379,8 @@ bool TrajectoryCache::putCartesianTrajectory(const moveit::planning_interface::M
                                              double execution_time_s, double planning_time_s, double fraction,
                                              bool delete_worse_trajectories)
 {
+  std::string path_request_frame_id = getCartesianPathRequestFrameId(move_group, plan_request);
+
   // Check pre-conditions
   if (!trajectory.multi_dof_joint_trajectory.points.empty())
   {
@@ -367,9 +388,14 @@ bool TrajectoryCache::putCartesianTrajectory(const moveit::planning_interface::M
                           "Multi-DOF trajectory plans are not supported.");
     return false;
   }
-  if (plan_request.header.frame_id.empty() || trajectory.joint_trajectory.header.frame_id.empty())
+  if (path_request_frame_id.empty())
   {
-    RCLCPP_ERROR(logger_, "Skipping cartesian trajectory insert: Frame IDs cannot be empty.");
+    RCLCPP_ERROR(logger_, "Skipping cartesian trajectory insert: Path request frame ID cannot be empty.");
+    return false;
+  }
+  if (trajectory.joint_trajectory.header.frame_id.empty())
+  {
+    RCLCPP_ERROR(logger_, "Skipping cartesian trajectory insert: Trajectory frame ID cannot be empty.");
     return false;
   }
 
@@ -1012,6 +1038,7 @@ bool TrajectoryCache::extractAndAppendCartesianTrajectoryStartToQuery(
     Query& query, const moveit::planning_interface::MoveGroupInterface& move_group,
     const moveit_msgs::srv::GetCartesianPath::Request& plan_request, double match_tolerance)
 {
+  std::string path_request_frame_id = getCartesianPathRequestFrameId(move_group, plan_request);
   match_tolerance += exact_match_precision_;
 
   // Make ignored members explicit
@@ -1025,6 +1052,7 @@ bool TrajectoryCache::extractAndAppendCartesianTrajectoryStartToQuery(
   }
 
   query.append("group_name", plan_request.group_name);
+  query.append("path_request.header.frame_id", path_request_frame_id);
 
   // Joint state
   //   Only accounts for joint_state position. Ignores velocity and effort.
@@ -1081,6 +1109,7 @@ bool TrajectoryCache::extractAndAppendCartesianTrajectoryGoalToQuery(
     Query& query, const moveit::planning_interface::MoveGroupInterface& move_group,
     const moveit_msgs::srv::GetCartesianPath::Request& plan_request, double match_tolerance)
 {
+  std::string path_request_frame_id = getCartesianPathRequestFrameId(move_group, plan_request);
   match_tolerance += exact_match_precision_;
 
   // Make ignored members explicit
@@ -1118,11 +1147,11 @@ bool TrajectoryCache::extractAndAppendCartesianTrajectoryGoalToQuery(
   quat_offset.z = 0;
   quat_offset.w = 1;
 
-  if (base_frame != plan_request.header.frame_id)
+  if (base_frame != path_request_frame_id)
   {
     try
     {
-      auto transform = tf_buffer_->lookupTransform(plan_request.header.frame_id, base_frame, tf2::TimePointZero);
+      auto transform = tf_buffer_->lookupTransform(path_request_frame_id, base_frame, tf2::TimePointZero);
 
       x_offset = transform.transform.translation.x;
       y_offset = transform.transform.translation.y;
@@ -1134,7 +1163,7 @@ bool TrajectoryCache::extractAndAppendCartesianTrajectoryGoalToQuery(
       RCLCPP_WARN(logger_,
                   "Skipping goal metadata append: "
                   "Could not get goal transform for %s to %s: %s",
-                  base_frame.c_str(), plan_request.header.frame_id.c_str(), ex.what());
+                  base_frame.c_str(), path_request_frame_id.c_str(), ex.what());
 
       // NOTE: methyldragon -
       //   Ideally we would restore the original state here and undo our changes, however copy of the query is not
@@ -1186,6 +1215,8 @@ bool TrajectoryCache::extractAndAppendCartesianTrajectoryStartToMetadata(
     Metadata& metadata, const moveit::planning_interface::MoveGroupInterface& move_group,
     const moveit_msgs::srv::GetCartesianPath::Request& plan_request)
 {
+  std::string path_request_frame_id = getCartesianPathRequestFrameId(move_group, plan_request);
+
   // Make ignored members explicit
   if (!plan_request.start_state.multi_dof_joint_state.joint_names.empty())
   {
@@ -1197,6 +1228,7 @@ bool TrajectoryCache::extractAndAppendCartesianTrajectoryStartToMetadata(
   }
 
   metadata.append("group_name", plan_request.group_name);
+  metadata.append("path_request.header.frame_id", path_request_frame_id);
 
   // Joint state
   //   Only accounts for joint_state position. Ignores velocity and effort.
@@ -1254,6 +1286,8 @@ bool TrajectoryCache::extractAndAppendCartesianTrajectoryGoalToMetadata(
     Metadata& metadata, const moveit::planning_interface::MoveGroupInterface& move_group,
     const moveit_msgs::srv::GetCartesianPath::Request& plan_request)
 {
+  std::string path_request_frame_id = getCartesianPathRequestFrameId(move_group, plan_request);
+
   // Make ignored members explicit
   if (!plan_request.path_constraints.joint_constraints.empty() ||
       !plan_request.path_constraints.position_constraints.empty() ||
@@ -1287,11 +1321,11 @@ bool TrajectoryCache::extractAndAppendCartesianTrajectoryGoalToMetadata(
   quat_offset.z = 0;
   quat_offset.w = 1;
 
-  if (base_frame != plan_request.header.frame_id)
+  if (base_frame != path_request_frame_id)
   {
     try
     {
-      auto transform = tf_buffer_->lookupTransform(plan_request.header.frame_id, base_frame, tf2::TimePointZero);
+      auto transform = tf_buffer_->lookupTransform(path_request_frame_id, base_frame, tf2::TimePointZero);
 
       x_offset = transform.transform.translation.x;
       y_offset = transform.transform.translation.y;
@@ -1303,7 +1337,7 @@ bool TrajectoryCache::extractAndAppendCartesianTrajectoryGoalToMetadata(
       RCLCPP_WARN(logger_,
                   "Skipping goal metadata append: "
                   "Could not get goal transform for %s to %s: %s",
-                  base_frame.c_str(), plan_request.header.frame_id.c_str(), ex.what());
+                  base_frame.c_str(), path_request_frame_id.c_str(), ex.what());
 
       // NOTE: methyldragon -
       //   Ideally we would restore the original state here and undo our changes, however copy of the query is not
