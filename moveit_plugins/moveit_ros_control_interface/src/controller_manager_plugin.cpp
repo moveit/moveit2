@@ -418,7 +418,7 @@ public:
       ControllersMap::iterator c = managed_controllers_.find(it);
       if (c != managed_controllers_.end())
       {  // controller belongs to this manager
-        request->stop_controllers.push_back(c->second.name);
+        request->deactivate_controllers.push_back(c->second.name);
         claimed_resources.right.erase(c->second.name);  // remove resources
       }
     }
@@ -430,16 +430,16 @@ public:
       ControllersMap::iterator c = managed_controllers_.find(it);
       if (c != managed_controllers_.end())
       {  // controller belongs to this manager
-        request->start_controllers.push_back(c->second.name);
+        request->activate_controllers.push_back(c->second.name);
         for (const auto& required_resource : c->second.required_command_interfaces)
         {
           resources_bimap::right_const_iterator res = claimed_resources.right.find(required_resource);
           if (res != claimed_resources.right.end())
           {  // resource is claimed
-            if (std::find(request->stop_controllers.begin(), request->stop_controllers.end(), res->second) ==
-                request->stop_controllers.end())
+            if (std::find(request->deactivate_controllers.begin(), request->deactivate_controllers.end(),
+                          res->second) == request->deactivate_controllers.end())
             {
-              request->stop_controllers.push_back(res->second);  // add claiming controller to stop list
+              request->deactivate_controllers.push_back(res->second);  // add claiming controller to stop list
             }
             claimed_resources.left.erase(res->second);  // remove claimed resources
           }
@@ -451,7 +451,7 @@ public:
     // successfully activated or deactivated.
     request->strictness = controller_manager_msgs::srv::SwitchController::Request::STRICT;
 
-    if (!request->start_controllers.empty() || !request->stop_controllers.empty())
+    if (!request->activate_controllers.empty() || !request->deactivate_controllers.empty())
     {  // something to switch?
       auto result_future = switch_controller_service_->async_send_request(request);
       if (result_future.wait_for(std::chrono::duration<double>(SERVICE_CALL_TIMEOUT)) == std::future_status::timeout)
