@@ -134,7 +134,8 @@ public:
    * \param[in] db_port. The database port.
    * \param[in] exact_match_precision. Tolerance for float precision comparison for what counts as an exact match.
    *   An exact match is when:
-   *   (candidate >= value - (exact_match_precision / 2) && candidate <= value + (exact_match_precision / 2))
+   *     (candidate >= value - (exact_match_precision / 2)
+   *      && candidate <= value + (exact_match_precision / 2))
    * \returns true if the database was successfully connected to.
    * */
   bool init(const std::string& db_path = ":memory:", uint32_t db_port = 0, double exact_match_precision = 1e-6);
@@ -204,11 +205,11 @@ public:
    * \brief Put a trajectory into the database if it is the best matching trajectory seen so far.
    *
    * Trajectories are matched based off their start and goal states.
-   * And are considered "better" if they higher priority in the sorting order specified by `sort_by` than exactly
-   * matching trajectories.
+   * And are considered "better" if they are higher priority in the sorting order specified by `sort_by` than another
+   * exactly matching trajectory.
    *
    * A trajectory is "exactly matching" if its start and goal are close enough to another trajectory.
-   * The tolerance for this depends on the `exact_match_tolerance` arg passed in init().
+   * The tolerance for this depends on the `exact_match_precision` arg passed in init().
    * \see init()
    *
    * Optionally deletes all worse trajectories by default to prune the cache.
@@ -300,11 +301,11 @@ public:
    * \brief Put a cartesian trajectory into the database if it is the best matching cartesian trajectory seen so far.
    *
    * Cartesian trajectories are matched based off their start and goal states.
-   * And are considered "better" if they higher priority in the sorting order specified by `sort_by` than exactly
-   * matching cartesian trajectories.
+   * And are considered "better" if they are higher priority in the sorting order specified by `sort_by` than another
+   * exactly matching cartesian trajectory.
    *
    * A trajectory is "exactly matching" if its start and goal (and fraction) are close enough to another trajectory.
-   * The tolerance for this depends on the `exact_match_tolerance` arg passed in init().
+   * The tolerance for this depends on the `exact_match_precision` arg passed in init().
    * \see init()
    *
    * Optionally deletes all worse cartesian trajectories by default to prune the cache.
@@ -343,7 +344,7 @@ private:
    * \param[out] query. The query to add parameters to.
    * \param[in] move_group. The manipulator move group, used to get its state.
    * \param[in] plan_request. The motion plan request to key the cache with.
-   * \param[in] match_tolerance. The match tolerance (additive with exact_match_tolerance) for the query.
+   * \param[in] match_tolerance. The match tolerance (additive with exact_match_precision) for the query.
    * \returns true if successfully added to. If false, the query might have been partially modified and should not be
    * used.
    */
@@ -361,7 +362,7 @@ private:
    * \param[out] query. The query to add parameters to.
    * \param[in] move_group. The manipulator move group, used to get its state.
    * \param[in] plan_request. The motion plan request to key the cache with.
-   * \param[in] match_tolerance. The match tolerance (additive with exact_match_tolerance) for the query.
+   * \param[in] match_tolerance. The match tolerance (additive with exact_match_precision) for the query.
    * \returns true if successfully added to. If false, the query might have been partially modified and should not be
    * used.
    */
@@ -418,7 +419,7 @@ private:
    * \param[out] query. The query to add parameters to.
    * \param[in] move_group. The manipulator move group, used to get its state.
    * \param[in] plan_request. The cartesian plan request to key the cache with.
-   * \param[in] match_tolerance. The match tolerance (additive with exact_match_tolerance) for the query.
+   * \param[in] match_tolerance. The match tolerance (additive with exact_match_precision) for the query.
    * \returns true if successfully added to. If false, the query might have been partially modified and should not be
    * used.
    */
@@ -436,7 +437,7 @@ private:
    * \param[out] query. The query to add parameters to.
    * \param[in] move_group. The manipulator move group, used to get its state.
    * \param[in] plan_request. The cartesian plan request to key the cache with.
-   * \param[in] match_tolerance. The match tolerance (additive with exact_match_tolerance) for the query.
+   * \param[in] match_tolerance. The match tolerance (additive with exact_match_precision) for the query.
    * \returns true if successfully added to. If false, the query might have been partially modified and should not be
    * used.
    */
