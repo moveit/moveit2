@@ -5,7 +5,6 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
 endif()
 
-# find dependencies
 find_package(ament_cmake REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(moveit_ros_planning_interface REQUIRED)
@@ -34,9 +33,20 @@ set(TRAJECTORY_CACHE_DEPENDENCIES
 
 # Motion plan cache library
 add_library(trajectory_cache src/trajectory_cache.cpp)
-ament_target_dependencies(trajectory_cache ${TRAJECTORY_CACHE_DEPENDENCIES})
 target_include_directories(
-  trajectory_cache PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>)
+  trajectory_cache
+  PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
+         $<INSTALL_INTERFACE:include/moveit_ros_trajectory_cache>)
+ament_target_dependencies(trajectory_cache ${TRAJECTORY_CACHE_DEPENDENCIES})
+
+install(
+  TARGETS trajectory_cache
+  EXPORT moveit_ros_trajectory_cacheTargets
+  LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib
+  RUNTIME DESTINATION bin)
+
+install(DIRECTORY include/ DESTINATION include/moveit_ros_trajectory_cache)
 
 # ==============================================================================
 
@@ -58,5 +68,6 @@ if(BUILD_TESTING)
 
 endif()
 
+ament_export_targets(moveit_ros_trajectory_cacheTargets HAS_LIBRARY_TARGET)
 ament_export_dependencies(${TRAJECTORY_CACHE_DEPENDENCIES})
 ament_package()
