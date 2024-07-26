@@ -103,7 +103,7 @@ public:
 
   MOVEIT_STRUCT_FORWARD(Plan);
 
-  /// The representation of a motion plan (as ROS messasges)
+  /// The representation of a motion plan (as ROS messages)
   struct Plan
   {
     /// The full starting state used for planning

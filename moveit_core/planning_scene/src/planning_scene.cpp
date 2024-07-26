@@ -210,6 +210,10 @@ PlanningScene::PlanningScene(const PlanningSceneConstPtr& parent) : parent_(pare
 
   robot_model_ = parent_->robot_model_;
 
+  setStateFeasibilityPredicate(parent->getStateFeasibilityPredicate());
+  setMotionFeasibilityPredicate(parent->getMotionFeasibilityPredicate());
+  setCollisionObjectUpdateCallback(parent_->current_world_object_update_callback_);
+
   // maintain a separate world.  Copy on write ensures that most of the object
   // info is shared until it is modified.
   world_ = std::make_shared<collision_detection::World>(*parent_->world_);
@@ -1204,6 +1208,8 @@ void PlanningScene::decoupleParent()
     }
   }
 
+  setCollisionObjectUpdateCallback(nullptr);
+
   parent_.reset();
 }
 
@@ -1262,6 +1268,7 @@ bool PlanningScene::setPlanningSceneDiffMsg(const moveit_msgs::msg::PlanningScen
 
 bool PlanningScene::setPlanningSceneMsg(const moveit_msgs::msg::PlanningScene& scene_msg)
 {
+  assert(scene_msg.is_diff == false);
   RCLCPP_DEBUG(getLogger(), "Setting new planning scene: '%s'", scene_msg.name.c_str());
   name_ = scene_msg.name;
 
