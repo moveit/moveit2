@@ -60,8 +60,7 @@ public:
 
   std::string getInstructions() const override
   {
-    return "Configure controllers to be used in executing trajectories with MoveIt (hardware or simulation)."
-           "hardware";
+    return "Configure controllers to be used in executing trajectories with MoveIt (hardware or simulation).";
   }
 
   std::string getButtonText() const override

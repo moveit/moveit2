@@ -60,7 +60,7 @@ namespace online_signal_smoothing
  * It comes from finding the bilinear transform equivalent of the analog transfer function and
  * further applying the inverse z-transform.
  * The parameter "low_pass_filter_coeff" equals (2*pi / tan(omega_d * T))
- * where omega_d is the cutoff frequency and T is the samping period in sec.
+ * where omega_d is the cutoff frequency and T is the sampling period in sec.
  */
 class ButterworthFilter
 {
@@ -69,7 +69,7 @@ public:
    * Constructor.
    * @param low_pass_filter_coeff Larger filter_coeff-> more smoothing of commands, but more lag.
    * low_pass_filter_coeff = (2*pi / tan(omega_d * T))
-   * where omega_d is the cutoff frequency and T is the samping period in sec.
+   * where omega_d is the cutoff frequency and T is the sampling period in sec.
    */
   ButterworthFilter(double low_pass_filter_coeff);
   ButterworthFilter() = delete;
