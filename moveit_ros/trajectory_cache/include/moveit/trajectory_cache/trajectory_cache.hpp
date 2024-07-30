@@ -125,20 +125,39 @@ public:
   explicit TrajectoryCache(const rclcpp::Node::SharedPtr& node);
 
   /**
+   * \brief Options struct for TrajectoryCache.
+   *
+   * \property db_path. The database path.
+   * \property db_port. The database port.
+   * \property exact_match_precision. Tolerance for float precision comparison for what counts as an exact match.
+   *   An exact match is when:
+   *     (candidate >= value - (exact_match_precision / 2)
+   *      && candidate <= value + (exact_match_precision / 2))
+   * \property num_additional_trajectories_to_preserve_when_deleting_worse. The number of additional cached trajectories
+   * to preserve when `delete_worse_trajectories` is true. It is useful to keep more than one matching trajectory to
+   * have alternative trajectories to handle obstacles.
+   */
+  struct Options
+  {
+    std::string db_path = ":memory:";
+    uint32_t db_port = 0;
+
+    double exact_match_precision = 1e-6;
+    size_t num_additional_trajectories_to_preserve_when_deleting_worse = 1;
+  };
+
+  /**
    * \brief Initialize the TrajectoryCache.
    *
    * This sets up the database connection, and sets any configuration parameters.
    * You must call this before calling any other method of the trajectory cache.
    *
-   * \param[in] db_path. The database path.
-   * \param[in] db_port. The database port.
-   * \param[in] exact_match_precision. Tolerance for float precision comparison for what counts as an exact match.
-   *   An exact match is when:
-   *     (candidate >= value - (exact_match_precision / 2)
-   *      && candidate <= value + (exact_match_precision / 2))
+   * \param[in] options. An instance of TrajectoryCache::Options to initialize the cache with.
+   *   \see TrajectoryCache::Options
    * \returns true if the database was successfully connected to.
+   * \throws When options.num_additional_trajectories_to_preserve_when_deleting_worse is less than 1.
    * */
-  bool init(const std::string& db_path = ":memory:", uint32_t db_port = 0, double exact_match_precision = 1e-6);
+  bool init(const Options& options);
 
   /**
    * \brief Count the number of non-cartesian trajectories for a particular cache namespace.
@@ -155,6 +174,32 @@ public:
    * \returns The number of cartesian trajectories for the cache namespace.
    */
   unsigned countCartesianTrajectories(const std::string& cache_namespace);
+
+  /**
+   * \name Getters and setters.
+   */
+  /**@{*/
+
+  /// \brief Gets the database path.
+  std::string getDbPath();
+
+  /// \brief Gets the database port.
+  uint32_t getDbPort();
+
+  /// \brief Getss the exact match precision.
+  double getExactMatchPrecision();
+
+  /// \brief Sets the exact match precision.
+  void setExactMatchPrecision(double exact_match_precision);
+
+  /// \brief Get the number of trajectories to preserve when deleting worse trajectories.
+  size_t getNumAdditionalTrajectoriesToPreserveWhenDeletingWorse();
+
+  /// \brief Set the number of additional trajectories to preserve when deleting worse trajectories.
+  void setNumAdditionalTrajectoriesToPreserveWhenDeletingWorse(
+      size_t num_additional_trajectories_to_preserve_when_deleting_worse);
+
+  /**@}*/
 
   /**
    * \name Motion plan trajectory caching
@@ -484,7 +529,7 @@ private:
   rclcpp::Logger logger_;
   warehouse_ros::DatabaseConnection::Ptr db_;
 
-  double exact_match_precision_ = 1e-6;
+  Options options_;
 
   std::unique_ptr<tf2_ros::Buffer> tf_buffer_;
   std::shared_ptr<tf2_ros::TransformListener> tf_listener_;

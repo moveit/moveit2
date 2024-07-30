@@ -99,17 +99,17 @@ TrajectoryCache::TrajectoryCache(const rclcpp::Node::SharedPtr& node)
   tf_listener_ = std::make_shared<tf2_ros::TransformListener>(*tf_buffer_);
 }
 
-bool TrajectoryCache::init(const std::string& db_path, uint32_t db_port, double exact_match_precision)
+bool TrajectoryCache::init(const TrajectoryCache::Options& options)
 {
-  RCLCPP_DEBUG(logger_, "Opening trajectory cache database at: %s (Port: %d, Precision: %f)", db_path.c_str(), db_port,
-               exact_match_precision);
+  RCLCPP_DEBUG(logger_, "Opening trajectory cache database at: %s (Port: %d, Precision: %f)", options.db_path.c_str(),
+               options.db_port, options.exact_match_precision);
 
   // If the `warehouse_plugin` parameter isn't set, defaults to warehouse_ros'
   // default.
   db_ = moveit_warehouse::loadDatabase(node_);
+  options_ = options;
 
-  exact_match_precision_ = exact_match_precision;
-  db_->setParams(db_path, db_port);
+  db_->setParams(options.db_path, options.db_port);
   return db_->connect();
 }
 
@@ -124,6 +124,42 @@ unsigned TrajectoryCache::countCartesianTrajectories(const std::string& cache_na
   auto coll =
       db_->openCollection<moveit_msgs::msg::RobotTrajectory>("move_group_cartesian_trajectory_cache", cache_namespace);
   return coll.count();
+}
+
+// =============================================================================
+// GETTERS AND SETTERS
+// =============================================================================
+
+std::string TrajectoryCache::getDbPath()
+{
+  return options_.db_path;
+}
+
+uint32_t TrajectoryCache::getDbPort()
+{
+  return options_.db_port;
+}
+
+double TrajectoryCache::getExactMatchPrecision()
+{
+  return options_.exact_match_precision;
+}
+
+void TrajectoryCache::setExactMatchPrecision(double exact_match_precision)
+{
+  options_.exact_match_precision = exact_match_precision;
+}
+
+size_t TrajectoryCache::getNumAdditionalTrajectoriesToPreserveWhenDeletingWorse()
+{
+  return options_.num_additional_trajectories_to_preserve_when_deleting_worse;
+}
+
+void TrajectoryCache::setNumAdditionalTrajectoriesToPreserveWhenDeletingWorse(
+    size_t num_additional_trajectories_to_preserve_when_deleting_worse)
+{
+  options_.num_additional_trajectories_to_preserve_when_deleting_worse =
+      num_additional_trajectories_to_preserve_when_deleting_worse;
 }
 
 // =============================================================================
@@ -227,7 +263,8 @@ bool TrajectoryCache::putTrajectory(const moveit::planning_interface::MoveGroupI
     return false;
   }
 
-  auto exact_matches = coll.queryList(exact_query, /*metadata_only=*/true, /*sort_by=*/"execution_time_s");
+  auto exact_matches =
+      coll.queryList(exact_query, /*metadata_only=*/true, /*sort_by=*/"execution_time_s", /*ascending=*/true);
 
   double best_execution_time = std::numeric_limits<double>::infinity();
   if (!exact_matches.empty())
@@ -236,10 +273,12 @@ bool TrajectoryCache::putTrajectory(const moveit::planning_interface::MoveGroupI
 
     if (delete_worse_trajectories)
     {
+      size_t preserved_count = 0;
       for (auto& match : exact_matches)
       {
         double match_execution_time_s = match->lookupDouble("execution_time_s");
-        if (execution_time_s < match_execution_time_s)
+        if (++preserved_count > options_.num_additional_trajectories_to_preserve_when_deleting_worse &&
+            execution_time_s < match_execution_time_s)
         {
           int delete_id = match->lookupInt("id");
           RCLCPP_DEBUG(logger_,
@@ -416,7 +455,8 @@ bool TrajectoryCache::putCartesianTrajectory(const moveit::planning_interface::M
     return false;
   }
 
-  auto exact_matches = coll.queryList(exact_query, /*metadata_only=*/true, /*sort_by=*/"execution_time_s");
+  auto exact_matches =
+      coll.queryList(exact_query, /*metadata_only=*/true, /*sort_by=*/"execution_time_s", /*ascending=*/true);
   double best_execution_time = std::numeric_limits<double>::infinity();
   if (!exact_matches.empty())
   {
@@ -424,10 +464,12 @@ bool TrajectoryCache::putCartesianTrajectory(const moveit::planning_interface::M
 
     if (delete_worse_trajectories)
     {
+      size_t preserved_count = 0;
       for (auto& match : exact_matches)
       {
         double match_execution_time_s = match->lookupDouble("execution_time_s");
-        if (execution_time_s < match_execution_time_s)
+        if (++preserved_count > options_.num_additional_trajectories_to_preserve_when_deleting_worse &&
+            execution_time_s < match_execution_time_s)
         {
           int delete_id = match->lookupInt("id");
           RCLCPP_DEBUG(logger_,
@@ -490,7 +532,7 @@ bool TrajectoryCache::extractAndAppendTrajectoryStartToQuery(
     const moveit_msgs::msg::MotionPlanRequest& plan_request, double match_tolerance) const
 {
   std::string workspace_frame_id = getWorkspaceFrameId(move_group, plan_request.workspace_parameters);
-  match_tolerance += exact_match_precision_;
+  match_tolerance += options_.exact_match_precision;
 
   // Make ignored members explicit
   if (!plan_request.start_state.multi_dof_joint_state.joint_names.empty())
@@ -569,7 +611,7 @@ bool TrajectoryCache::extractAndAppendTrajectoryGoalToQuery(
     const moveit_msgs::msg::MotionPlanRequest& plan_request, double match_tolerance) const
 {
   std::string workspace_frame_id = getWorkspaceFrameId(move_group, plan_request.workspace_parameters);
-  match_tolerance += exact_match_precision_;
+  match_tolerance += options_.exact_match_precision;
 
   // Make ignored members explicit
   bool emit_position_constraint_warning = false;
@@ -1039,7 +1081,7 @@ bool TrajectoryCache::extractAndAppendCartesianTrajectoryStartToQuery(
     const moveit_msgs::srv::GetCartesianPath::Request& plan_request, double match_tolerance) const
 {
   std::string path_request_frame_id = getCartesianPathRequestFrameId(move_group, plan_request);
-  match_tolerance += exact_match_precision_;
+  match_tolerance += options_.exact_match_precision;
 
   // Make ignored members explicit
   if (!plan_request.start_state.multi_dof_joint_state.joint_names.empty())
@@ -1110,7 +1152,7 @@ bool TrajectoryCache::extractAndAppendCartesianTrajectoryGoalToQuery(
     const moveit_msgs::srv::GetCartesianPath::Request& plan_request, double match_tolerance) const
 {
   std::string path_request_frame_id = getCartesianPathRequestFrameId(move_group, plan_request);
-  match_tolerance += exact_match_precision_;
+  match_tolerance += options_.exact_match_precision;
 
   // Make ignored members explicit
   if (!plan_request.path_constraints.joint_constraints.empty() ||
