@@ -180,7 +180,7 @@ public:
                                const std::string& cache_namespace,
                                const moveit_msgs::msg::MotionPlanRequest& plan_request, double start_tolerance,
                                double goal_tolerance, bool metadata_only = false,
-                               const std::string& sort_by = "execution_time_s", bool ascending = true);
+                               const std::string& sort_by = "execution_time_s", bool ascending = true) const;
 
   /**
    * \brief Fetch the best trajectory that fits within the requested tolerances for start and goal conditions, by some
@@ -199,7 +199,7 @@ public:
   warehouse_ros::MessageWithMetadata<moveit_msgs::msg::RobotTrajectory>::ConstPtr fetchBestMatchingTrajectory(
       const moveit::planning_interface::MoveGroupInterface& move_group, const std::string& cache_namespace,
       const moveit_msgs::msg::MotionPlanRequest& plan_request, double start_tolerance, double goal_tolerance,
-      bool metadata_only = false, const std::string& sort_by = "execution_time_s", bool ascending = true);
+      bool metadata_only = false, const std::string& sort_by = "execution_time_s", bool ascending = true) const;
 
   /**
    * \brief Put a trajectory into the database if it is the best matching trajectory seen so far.
@@ -274,7 +274,7 @@ public:
                                         const moveit_msgs::srv::GetCartesianPath::Request& plan_request,
                                         double min_fraction, double start_tolerance, double goal_tolerance,
                                         bool metadata_only = false, const std::string& sort_by = "execution_time_s",
-                                        bool ascending = true);
+                                        bool ascending = true) const;
 
   /**
    * \brief Fetch the best cartesian trajectory that fits within the requested tolerances for start and goal conditions,
@@ -295,7 +295,7 @@ public:
       const moveit::planning_interface::MoveGroupInterface& move_group, const std::string& cache_namespace,
       const moveit_msgs::srv::GetCartesianPath::Request& plan_request, double min_fraction, double start_tolerance,
       double goal_tolerance, bool metadata_only = false, const std::string& sort_by = "execution_time_s",
-      bool ascending = true);
+      bool ascending = true) const;
 
   /**
    * \brief Put a cartesian trajectory into the database if it is the best matching cartesian trajectory seen so far.
@@ -351,7 +351,7 @@ private:
   bool extractAndAppendTrajectoryStartToQuery(warehouse_ros::Query& query,
                                               const moveit::planning_interface::MoveGroupInterface& move_group,
                                               const moveit_msgs::msg::MotionPlanRequest& plan_request,
-                                              double match_tolerance);
+                                              double match_tolerance) const;
 
   /**
    * \brief Extract relevant parameters from a motion plan request's goal parameters to populate a cache db query, with
@@ -369,7 +369,7 @@ private:
   bool extractAndAppendTrajectoryGoalToQuery(warehouse_ros::Query& query,
                                              const moveit::planning_interface::MoveGroupInterface& move_group,
                                              const moveit_msgs::msg::MotionPlanRequest& plan_request,
-                                             double match_tolerance);
+                                             double match_tolerance) const;
 
   /**
    * \brief Extract relevant parameters from a motion plan request's start parameters to populate a cache entry's
@@ -385,7 +385,7 @@ private:
    */
   bool extractAndAppendTrajectoryStartToMetadata(warehouse_ros::Metadata& metadata,
                                                  const moveit::planning_interface::MoveGroupInterface& move_group,
-                                                 const moveit_msgs::msg::MotionPlanRequest& plan_request);
+                                                 const moveit_msgs::msg::MotionPlanRequest& plan_request) const;
 
   /**
    * \brief Extract relevant parameters from a motion plan request's goal parameters to populate a cache entry's
@@ -401,7 +401,7 @@ private:
    */
   bool extractAndAppendTrajectoryGoalToMetadata(warehouse_ros::Metadata& metadata,
                                                 const moveit::planning_interface::MoveGroupInterface& move_group,
-                                                const moveit_msgs::msg::MotionPlanRequest& plan_request);
+                                                const moveit_msgs::msg::MotionPlanRequest& plan_request) const;
 
   /**@}*/
 
@@ -426,7 +426,7 @@ private:
   bool extractAndAppendCartesianTrajectoryStartToQuery(warehouse_ros::Query& query,
                                                        const moveit::planning_interface::MoveGroupInterface& move_group,
                                                        const moveit_msgs::srv::GetCartesianPath::Request& plan_request,
-                                                       double match_tolerance);
+                                                       double match_tolerance) const;
 
   /**
    * \brief Extract relevant parameters from a cartesian plan request's goal parameters to populate a cache db query,
@@ -444,7 +444,7 @@ private:
   bool extractAndAppendCartesianTrajectoryGoalToQuery(warehouse_ros::Query& query,
                                                       const moveit::planning_interface::MoveGroupInterface& move_group,
                                                       const moveit_msgs::srv::GetCartesianPath::Request& plan_request,
-                                                      double match_tolerance);
+                                                      double match_tolerance) const;
 
   /**
    * \brief Extract relevant parameters from a cartesian plan request's goal parameters to populate a cache entry's
@@ -458,10 +458,9 @@ private:
    * \returns true if successfully added to. If false, the metadata might have been partially modified and should not be
    * used.
    */
-  bool
-  extractAndAppendCartesianTrajectoryStartToMetadata(warehouse_ros::Metadata& metadata,
-                                                     const moveit::planning_interface::MoveGroupInterface& move_group,
-                                                     const moveit_msgs::srv::GetCartesianPath::Request& plan_request);
+  bool extractAndAppendCartesianTrajectoryStartToMetadata(
+      warehouse_ros::Metadata& metadata, const moveit::planning_interface::MoveGroupInterface& move_group,
+      const moveit_msgs::srv::GetCartesianPath::Request& plan_request) const;
 
   /**
    * \brief Extract relevant parameters from a cartesian plan request's goal parameters to populate a cache entry's
@@ -475,10 +474,9 @@ private:
    * \returns true if successfully added to. If false, the metadata might have been partially modified and should not be
    * used.
    */
-  bool
-  extractAndAppendCartesianTrajectoryGoalToMetadata(warehouse_ros::Metadata& metadata,
-                                                    const moveit::planning_interface::MoveGroupInterface& move_group,
-                                                    const moveit_msgs::srv::GetCartesianPath::Request& plan_request);
+  bool extractAndAppendCartesianTrajectoryGoalToMetadata(
+      warehouse_ros::Metadata& metadata, const moveit::planning_interface::MoveGroupInterface& move_group,
+      const moveit_msgs::srv::GetCartesianPath::Request& plan_request) const;
 
   /**@}*/
 

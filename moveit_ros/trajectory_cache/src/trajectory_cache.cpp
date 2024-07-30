@@ -135,7 +135,7 @@ TrajectoryCache::fetchAllMatchingTrajectories(const moveit::planning_interface::
                                               const std::string& cache_namespace,
                                               const moveit_msgs::msg::MotionPlanRequest& plan_request,
                                               double start_tolerance, double goal_tolerance, bool metadata_only,
-                                              const std::string& sort_by, bool ascending)
+                                              const std::string& sort_by, bool ascending) const
 {
   auto coll = db_->openCollection<moveit_msgs::msg::RobotTrajectory>("move_group_trajectory_cache", cache_namespace);
 
@@ -156,7 +156,7 @@ TrajectoryCache::fetchAllMatchingTrajectories(const moveit::planning_interface::
 MessageWithMetadata<moveit_msgs::msg::RobotTrajectory>::ConstPtr TrajectoryCache::fetchBestMatchingTrajectory(
     const moveit::planning_interface::MoveGroupInterface& move_group, const std::string& cache_namespace,
     const moveit_msgs::msg::MotionPlanRequest& plan_request, double start_tolerance, double goal_tolerance,
-    bool metadata_only, const std::string& sort_by, bool ascending)
+    bool metadata_only, const std::string& sort_by, bool ascending) const
 {
   // First find all matching, but metadata only.
   // Then use the ID metadata of the best plan to pull the actual message.
@@ -322,7 +322,7 @@ TrajectoryCache::fetchAllMatchingCartesianTrajectories(const moveit::planning_in
                                                        const moveit_msgs::srv::GetCartesianPath::Request& plan_request,
                                                        double min_fraction, double start_tolerance,
                                                        double goal_tolerance, bool metadata_only,
-                                                       const std::string& sort_by, bool ascending)
+                                                       const std::string& sort_by, bool ascending) const
 {
   auto coll =
       db_->openCollection<moveit_msgs::msg::RobotTrajectory>("move_group_cartesian_trajectory_cache", cache_namespace);
@@ -346,7 +346,7 @@ TrajectoryCache::fetchAllMatchingCartesianTrajectories(const moveit::planning_in
 MessageWithMetadata<moveit_msgs::msg::RobotTrajectory>::ConstPtr TrajectoryCache::fetchBestMatchingCartesianTrajectory(
     const moveit::planning_interface::MoveGroupInterface& move_group, const std::string& cache_namespace,
     const moveit_msgs::srv::GetCartesianPath::Request& plan_request, double min_fraction, double start_tolerance,
-    double goal_tolerance, bool metadata_only, const std::string& sort_by, bool ascending)
+    double goal_tolerance, bool metadata_only, const std::string& sort_by, bool ascending) const
 {
   // First find all matching, but metadata only.
   // Then use the ID metadata of the best plan to pull the actual message.
@@ -487,7 +487,7 @@ bool TrajectoryCache::putCartesianTrajectory(const moveit::planning_interface::M
 
 bool TrajectoryCache::extractAndAppendTrajectoryStartToQuery(
     Query& query, const moveit::planning_interface::MoveGroupInterface& move_group,
-    const moveit_msgs::msg::MotionPlanRequest& plan_request, double match_tolerance)
+    const moveit_msgs::msg::MotionPlanRequest& plan_request, double match_tolerance) const
 {
   std::string workspace_frame_id = getWorkspaceFrameId(move_group, plan_request.workspace_parameters);
   match_tolerance += exact_match_precision_;
@@ -566,7 +566,7 @@ bool TrajectoryCache::extractAndAppendTrajectoryStartToQuery(
 
 bool TrajectoryCache::extractAndAppendTrajectoryGoalToQuery(
     Query& query, const moveit::planning_interface::MoveGroupInterface& move_group,
-    const moveit_msgs::msg::MotionPlanRequest& plan_request, double match_tolerance)
+    const moveit_msgs::msg::MotionPlanRequest& plan_request, double match_tolerance) const
 {
   std::string workspace_frame_id = getWorkspaceFrameId(move_group, plan_request.workspace_parameters);
   match_tolerance += exact_match_precision_;
@@ -765,7 +765,7 @@ bool TrajectoryCache::extractAndAppendTrajectoryGoalToQuery(
 
 bool TrajectoryCache::extractAndAppendTrajectoryStartToMetadata(
     Metadata& metadata, const moveit::planning_interface::MoveGroupInterface& move_group,
-    const moveit_msgs::msg::MotionPlanRequest& plan_request)
+    const moveit_msgs::msg::MotionPlanRequest& plan_request) const
 {
   std::string workspace_frame_id = getWorkspaceFrameId(move_group, plan_request.workspace_parameters);
 
@@ -844,7 +844,7 @@ bool TrajectoryCache::extractAndAppendTrajectoryStartToMetadata(
 
 bool TrajectoryCache::extractAndAppendTrajectoryGoalToMetadata(
     Metadata& metadata, const moveit::planning_interface::MoveGroupInterface& move_group,
-    const moveit_msgs::msg::MotionPlanRequest& plan_request)
+    const moveit_msgs::msg::MotionPlanRequest& plan_request) const
 {
   std::string workspace_frame_id = getWorkspaceFrameId(move_group, plan_request.workspace_parameters);
 
@@ -1036,7 +1036,7 @@ bool TrajectoryCache::extractAndAppendTrajectoryGoalToMetadata(
 
 bool TrajectoryCache::extractAndAppendCartesianTrajectoryStartToQuery(
     Query& query, const moveit::planning_interface::MoveGroupInterface& move_group,
-    const moveit_msgs::srv::GetCartesianPath::Request& plan_request, double match_tolerance)
+    const moveit_msgs::srv::GetCartesianPath::Request& plan_request, double match_tolerance) const
 {
   std::string path_request_frame_id = getCartesianPathRequestFrameId(move_group, plan_request);
   match_tolerance += exact_match_precision_;
@@ -1107,7 +1107,7 @@ bool TrajectoryCache::extractAndAppendCartesianTrajectoryStartToQuery(
 
 bool TrajectoryCache::extractAndAppendCartesianTrajectoryGoalToQuery(
     Query& query, const moveit::planning_interface::MoveGroupInterface& move_group,
-    const moveit_msgs::srv::GetCartesianPath::Request& plan_request, double match_tolerance)
+    const moveit_msgs::srv::GetCartesianPath::Request& plan_request, double match_tolerance) const
 {
   std::string path_request_frame_id = getCartesianPathRequestFrameId(move_group, plan_request);
   match_tolerance += exact_match_precision_;
@@ -1213,7 +1213,7 @@ bool TrajectoryCache::extractAndAppendCartesianTrajectoryGoalToQuery(
 
 bool TrajectoryCache::extractAndAppendCartesianTrajectoryStartToMetadata(
     Metadata& metadata, const moveit::planning_interface::MoveGroupInterface& move_group,
-    const moveit_msgs::srv::GetCartesianPath::Request& plan_request)
+    const moveit_msgs::srv::GetCartesianPath::Request& plan_request) const
 {
   std::string path_request_frame_id = getCartesianPathRequestFrameId(move_group, plan_request);
 
@@ -1284,7 +1284,7 @@ bool TrajectoryCache::extractAndAppendCartesianTrajectoryStartToMetadata(
 
 bool TrajectoryCache::extractAndAppendCartesianTrajectoryGoalToMetadata(
     Metadata& metadata, const moveit::planning_interface::MoveGroupInterface& move_group,
-    const moveit_msgs::srv::GetCartesianPath::Request& plan_request)
+    const moveit_msgs::srv::GetCartesianPath::Request& plan_request) const
 {
   std::string path_request_frame_id = getCartesianPathRequestFrameId(move_group, plan_request);
 
