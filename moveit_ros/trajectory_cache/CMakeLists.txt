@@ -28,9 +28,24 @@ set(TRAJECTORY_CACHE_DEPENDENCIES
     trajectory_msgs
     warehouse_ros)
 
+set(TRAJECTORY_CACHE_LIBRARIES moveit_ros_trajectory_cache_utils_lib
+                               moveit_ros_trajectory_cache_lib)
+
+# Utils library
+add_library(moveit_ros_trajectory_cache_utils_lib src/utils/utils.cpp)
+generate_export_header(moveit_ros_trajectory_cache_utils_lib)
+target_include_directories(
+  moveit_ros_trajectory_cache_utils_lib
+  PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
+         $<INSTALL_INTERFACE:include/moveit_ros_trajectory_cache>)
+ament_target_dependencies(moveit_ros_trajectory_cache_utils_lib
+                          ${TRAJECTORY_CACHE_DEPENDENCIES})
+
 # Trajectory cache library
 add_library(moveit_ros_trajectory_cache_lib SHARED src/trajectory_cache.cpp)
 generate_export_header(moveit_ros_trajectory_cache_lib)
+target_link_libraries(moveit_ros_trajectory_cache_lib
+                      moveit_ros_trajectory_cache_utils_lib)
 target_include_directories(
   moveit_ros_trajectory_cache_lib
   PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
@@ -39,7 +54,7 @@ ament_target_dependencies(moveit_ros_trajectory_cache_lib
                           ${TRAJECTORY_CACHE_DEPENDENCIES})
 
 install(
-  TARGETS moveit_ros_trajectory_cache_lib
+  TARGETS ${TRAJECTORY_CACHE_LIBRARIES}
   EXPORT moveit_ros_trajectory_cacheTargets
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
@@ -48,30 +63,14 @@ install(
   DESTINATION include/moveit_ros_trajectory_cache)
 
 install(DIRECTORY include/ DESTINATION include/moveit_ros_trajectory_cache)
-install(
-  FILES ${CMAKE_CURRENT_BINARY_DIR}/moveit_ros_trajectory_cache_lib_export.h
-  DESTINATION include/moveit_ros_trajectory_cache)
 
-if(BUILD_TESTING)
-  find_package(ament_cmake_pytest REQUIRED)
-  find_package(launch_testing_ament_cmake REQUIRED)
-  find_package(rmf_utils REQUIRED)
-  find_package(warehouse_ros_sqlite REQUIRED)
+# Install export headers for each library
+foreach(lib_target ${TRAJECTORY_CACHE_LIBRARIES})
+  install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${lib_target}_export.h
+          DESTINATION include/moveit_ros_trajectory_cache)
+endforeach()
 
-  # This test executable is run by the pytest_test, since a node is required for
-  # testing move groups
-  add_executable(test_trajectory_cache test/test_trajectory_cache.cpp)
-  target_link_libraries(test_trajectory_cache moveit_ros_trajectory_cache_lib)
-  ament_target_dependencies(test_trajectory_cache warehouse_ros_sqlite)
-
-  install(TARGETS test_trajectory_cache RUNTIME DESTINATION lib/${PROJECT_NAME})
-
-  ament_add_pytest_test(
-    test_trajectory_cache_py "test/test_trajectory_cache.py" WORKING_DIRECTORY
-    "${CMAKE_CURRENT_BINARY_DIR}")
-
-endif()
-
+add_subdirectory(test)
 ament_export_targets(moveit_ros_trajectory_cacheTargets HAS_LIBRARY_TARGET)
 ament_export_dependencies(${TRAJECTORY_CACHE_DEPENDENCIES})
 ament_package()
