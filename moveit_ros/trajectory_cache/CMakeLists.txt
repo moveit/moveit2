@@ -16,6 +16,7 @@ find_package(trajectory_msgs REQUIRED)
 find_package(warehouse_ros REQUIRED)
 find_package(warehouse_ros_sqlite REQUIRED)
 
+include(GenerateExportHeader)
 include_directories(include)
 
 set(TRAJECTORY_CACHE_DEPENDENCIES
@@ -31,22 +32,29 @@ set(TRAJECTORY_CACHE_DEPENDENCIES
 
 # ==============================================================================
 
-# Motion plan cache library
-add_library(trajectory_cache src/trajectory_cache.cpp)
+# Trajectory cache library
+add_library(moveit_ros_trajectory_cache_lib src/trajectory_cache.cpp)
+generate_export_header(moveit_ros_trajectory_cache_lib)
 target_include_directories(
-  trajectory_cache
+  moveit_ros_trajectory_cache_lib
   PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
          $<INSTALL_INTERFACE:include/moveit_ros_trajectory_cache>)
-ament_target_dependencies(trajectory_cache ${TRAJECTORY_CACHE_DEPENDENCIES})
+ament_target_dependencies(moveit_ros_trajectory_cache_lib
+                          ${TRAJECTORY_CACHE_DEPENDENCIES})
 
 install(
-  TARGETS trajectory_cache
+  TARGETS moveit_ros_trajectory_cache_lib
   EXPORT moveit_ros_trajectory_cacheTargets
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
-  RUNTIME DESTINATION bin)
+  RUNTIME DESTINATION bin
+  INCLUDES
+  DESTINATION include/moveit_ros_trajectory_cache)
 
 install(DIRECTORY include/ DESTINATION include/moveit_ros_trajectory_cache)
+install(
+  FILES ${CMAKE_CURRENT_BINARY_DIR}/moveit_ros_trajectory_cache_lib_export.h
+  DESTINATION include/moveit_ros_trajectory_cache)
 
 # ==============================================================================
 
@@ -58,7 +66,7 @@ if(BUILD_TESTING)
   # This test executable is run by the pytest_test, since a node is required for
   # testing move groups
   add_executable(test_trajectory_cache test/test_trajectory_cache.cpp)
-  target_link_libraries(test_trajectory_cache trajectory_cache)
+  target_link_libraries(test_trajectory_cache moveit_ros_trajectory_cache_lib)
 
   install(TARGETS test_trajectory_cache RUNTIME DESTINATION lib/${PROJECT_NAME})
 
