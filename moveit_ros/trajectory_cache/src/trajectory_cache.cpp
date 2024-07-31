@@ -1,4 +1,4 @@
-// Copyright 2022 Johnson & Johnson
+// Copyright 2024 Intrinsic Innovation LLC.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,17 +12,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+/** @file
+ * @brief Implementation of the Fuzzy-Matching Trajectory Cache.
+ * @author methylDragon
+ */
+
 #include <memory>
 #include <vector>
 
-#include "moveit/robot_state/conversions.h"
-#include "moveit/robot_state/robot_state.h"
-#include "moveit/warehouse/moveit_message_storage.h"
-#include "warehouse_ros/message_collection.h"
+#include <moveit/robot_state/conversions.h>
+#include <moveit/robot_state/robot_state.h>
+#include <moveit/warehouse/moveit_message_storage.h>
+#include <warehouse_ros/message_collection.h>
 
-#include "rclcpp/rclcpp.hpp"
-#include "rclcpp/logging.hpp"
-#include "moveit/trajectory_cache/trajectory_cache.hpp"
+#include <rclcpp/rclcpp.hpp>
+#include <rclcpp/logging.hpp>
+#include <moveit/trajectory_cache/trajectory_cache.hpp>
 
 namespace moveit_ros
 {
@@ -216,11 +221,11 @@ MessageWithMetadata<moveit_msgs::msg::RobotTrajectory>::ConstPtr TrajectoryCache
   return coll.findOne(best_query, metadata_only);
 }
 
-bool TrajectoryCache::putTrajectory(const moveit::planning_interface::MoveGroupInterface& move_group,
-                                    const std::string& cache_namespace,
-                                    const moveit_msgs::msg::MotionPlanRequest& plan_request,
-                                    const moveit_msgs::msg::RobotTrajectory& trajectory, double execution_time_s,
-                                    double planning_time_s, bool delete_worse_trajectories)
+bool TrajectoryCache::insertTrajectory(const moveit::planning_interface::MoveGroupInterface& move_group,
+                                       const std::string& cache_namespace,
+                                       const moveit_msgs::msg::MotionPlanRequest& plan_request,
+                                       const moveit_msgs::msg::RobotTrajectory& trajectory, double execution_time_s,
+                                       double planning_time_s, bool prune_worse_trajectories)
 {
   std::string workspace_frame_id = getWorkspaceFrameId(move_group, plan_request.workspace_parameters);
 
@@ -271,7 +276,7 @@ bool TrajectoryCache::putTrajectory(const moveit::planning_interface::MoveGroupI
   {
     best_execution_time = exact_matches.at(0)->lookupDouble("execution_time_s");
 
-    if (delete_worse_trajectories)
+    if (prune_worse_trajectories)
     {
       size_t preserved_count = 0;
       for (auto& match : exact_matches)
@@ -411,12 +416,12 @@ MessageWithMetadata<moveit_msgs::msg::RobotTrajectory>::ConstPtr TrajectoryCache
   return coll.findOne(best_query, metadata_only);
 }
 
-bool TrajectoryCache::putCartesianTrajectory(const moveit::planning_interface::MoveGroupInterface& move_group,
-                                             const std::string& cache_namespace,
-                                             const moveit_msgs::srv::GetCartesianPath::Request& plan_request,
-                                             const moveit_msgs::msg::RobotTrajectory& trajectory,
-                                             double execution_time_s, double planning_time_s, double fraction,
-                                             bool delete_worse_trajectories)
+bool TrajectoryCache::insertCartesianTrajectory(const moveit::planning_interface::MoveGroupInterface& move_group,
+                                                const std::string& cache_namespace,
+                                                const moveit_msgs::srv::GetCartesianPath::Request& plan_request,
+                                                const moveit_msgs::msg::RobotTrajectory& trajectory,
+                                                double execution_time_s, double planning_time_s, double fraction,
+                                                bool prune_worse_trajectories)
 {
   std::string path_request_frame_id = getCartesianPathRequestFrameId(move_group, plan_request);
 
@@ -462,7 +467,7 @@ bool TrajectoryCache::putCartesianTrajectory(const moveit::planning_interface::M
   {
     best_execution_time = exact_matches.at(0)->lookupDouble("execution_time_s");
 
-    if (delete_worse_trajectories)
+    if (prune_worse_trajectories)
     {
       size_t preserved_count = 0;
       for (auto& match : exact_matches)

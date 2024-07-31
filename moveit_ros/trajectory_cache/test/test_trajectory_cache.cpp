@@ -1,4 +1,4 @@
-// Copyright 2023 Johnson & Johnson
+// Copyright 2024 Intrinsic Innovation LLC.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,11 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+/** @file
+ * @author methylDragon
+ */
+
 #include <rclcpp/rclcpp.hpp>
 
-#include "moveit/robot_state/conversions.h"
-#include "moveit/robot_state/robot_state.h"
-#include "moveit/trajectory_cache/trajectory_cache.hpp"
+#include <moveit/robot_state/conversions.h>
+#include <moveit/robot_state/robot_state.h>
+#include <moveit/trajectory_cache/trajectory_cache.hpp>
 
 #include <atomic>
 #include <thread>
@@ -220,36 +224,36 @@ void test_motion_trajectories(std::shared_ptr<MoveGroupInterface> move_group, st
   // Put trajectory empty frame
   //
   // Trajectory must have frame in joint trajectory, expect put fail
-  test_case = "test_motion_trajectories.putTrajectory_empty_frame";
+  test_case = "test_motion_trajectories.insertTrajectory_empty_frame";
   double execution_time = 999;
   double planning_time = 999;
 
-  check_and_emit(!cache->putTrajectory(*move_group, ROBOT_NAME, plan_req, empty_frame_traj, execution_time,
-                                       planning_time, false),
-                 test_case, "Put empty frame trajectory, no delete_worse_trajectories, not ok");
+  check_and_emit(!cache->insertTrajectory(*move_group, ROBOT_NAME, plan_req, empty_frame_traj, execution_time,
+                                          planning_time, false),
+                 test_case, "Put empty frame trajectory, no prune_worse_trajectories, not ok");
 
   check_and_emit(cache->countTrajectories(ROBOT_NAME) == 0, test_case, "No trajectories in cache");
 
   // Put trajectory req empty frame
   //
   // Trajectory request having no frame in workspace should default to robot frame
-  test_case = "test_motion_trajectories.putTrajectory_req_empty_frame";
+  test_case = "test_motion_trajectories.insertTrajectory_req_empty_frame";
   execution_time = 1000;
   planning_time = 1000;
 
-  check_and_emit(cache->putTrajectory(*move_group, ROBOT_NAME, empty_frame_plan_req, traj, execution_time,
-                                      planning_time, false),
-                 test_case, "Put empty frame req trajectory, no delete_worse_trajectories, ok");
+  check_and_emit(cache->insertTrajectory(*move_group, ROBOT_NAME, empty_frame_plan_req, traj, execution_time,
+                                         planning_time, false),
+                 test_case, "Put empty frame req trajectory, no prune_worse_trajectories, ok");
 
   check_and_emit(cache->countTrajectories(ROBOT_NAME) == 1, test_case, "One trajectory in cache");
 
-  // Put second, no delete_worse_trajectories
+  // Put second, no prune_worse_trajectories
   test_case = "test_motion_trajectories.put_second";
   execution_time = 999;
   planning_time = 999;
 
-  check_and_emit(cache->putTrajectory(*move_group, ROBOT_NAME, plan_req, traj, execution_time, planning_time, false),
-                 test_case, "Put second valid trajectory, no delete_worse_trajectories, ok");
+  check_and_emit(cache->insertTrajectory(*move_group, ROBOT_NAME, plan_req, traj, execution_time, planning_time, false),
+                 test_case, "Put second valid trajectory, no prune_worse_trajectories, ok");
 
   check_and_emit(cache->countTrajectories(ROBOT_NAME) == 2, test_case, "Two trajectories in cache");
 
@@ -426,27 +430,27 @@ void test_motion_trajectories(std::shared_ptr<MoveGroupInterface> move_group, st
                      larger_workspace_plan_req.workspace_parameters.min_corner.x,
                  test_case, "Fetched trajectory has more restrictive workspace min_corner");
 
-  // Put worse, no delete_worse_trajectories
+  // Put worse, no prune_worse_trajectories
   //
   // Worse trajectories should not be inserted
   test_case = "test_motion_trajectories.put_worse";
   double worse_execution_time = execution_time + 100;
 
-  check_and_emit(!cache->putTrajectory(*move_group, ROBOT_NAME, plan_req, traj, worse_execution_time, planning_time,
-                                       false),
-                 test_case, "Put worse trajectory, no delete_worse_trajectories, not ok");
+  check_and_emit(!cache->insertTrajectory(*move_group, ROBOT_NAME, plan_req, traj, worse_execution_time, planning_time,
+                                          false),
+                 test_case, "Put worse trajectory, no prune_worse_trajectories, not ok");
 
   check_and_emit(cache->countTrajectories(ROBOT_NAME) == 2, test_case, "Two trajectories in cache");
 
-  // Put better, no delete_worse_trajectories
+  // Put better, no prune_worse_trajectories
   //
   // Better trajectories should be inserted
   test_case = "test_motion_trajectories.put_better";
   double better_execution_time = execution_time - 100;
 
-  check_and_emit(cache->putTrajectory(*move_group, ROBOT_NAME, plan_req, traj, better_execution_time, planning_time,
-                                      false),
-                 test_case, "Put better trajectory, no delete_worse_trajectories, ok");
+  check_and_emit(cache->insertTrajectory(*move_group, ROBOT_NAME, plan_req, traj, better_execution_time, planning_time,
+                                         false),
+                 test_case, "Put better trajectory, no prune_worse_trajectories, ok");
 
   check_and_emit(cache->countTrajectories(ROBOT_NAME) == 3, test_case, "Three trajectories in cache");
 
@@ -476,20 +480,20 @@ void test_motion_trajectories(std::shared_ptr<MoveGroupInterface> move_group, st
                      fetched_trajectories.at(1)->lookupDouble("execution_time_s") == execution_time,
                  test_case, "Fetched trajectories are sorted correctly");
 
-  // Put better, delete_worse_trajectories
+  // Put better, prune_worse_trajectories
   //
   // Better, different, trajectories should be inserted
-  test_case = "test_motion_trajectories.put_better_delete_worse_trajectories";
+  test_case = "test_motion_trajectories.put_better_prune_worse_trajectories";
   double even_better_execution_time = better_execution_time - 100;
 
-  check_and_emit(cache->putTrajectory(*move_group, ROBOT_NAME, plan_req, different_traj, even_better_execution_time,
-                                      planning_time, true),
-                 test_case, "Put better trajectory, delete_worse_trajectories, ok");
+  check_and_emit(cache->insertTrajectory(*move_group, ROBOT_NAME, plan_req, different_traj, even_better_execution_time,
+                                         planning_time, true),
+                 test_case, "Put better trajectory, prune_worse_trajectories, ok");
 
   check_and_emit(cache->countTrajectories(ROBOT_NAME) == 1, test_case, "One trajectory in cache");
 
   // Fetch better plan
-  test_case = "test_motion_trajectories.put_better_delete_worse_trajectories.fetch";
+  test_case = "test_motion_trajectories.put_better_prune_worse_trajectories.fetch";
 
   fetched_trajectories = cache->fetchAllMatchingTrajectories(*move_group, ROBOT_NAME, plan_req, 0, 0);
 
@@ -508,14 +512,14 @@ void test_motion_trajectories(std::shared_ptr<MoveGroupInterface> move_group, st
   check_and_emit(fetched_traj->lookupDouble("planning_time_s") == planning_time, test_case,
                  "Fetched trajectory has correct planning time");
 
-  // Put different req, delete_worse_trajectories
+  // Put different req, prune_worse_trajectories
   //
   // Unrelated trajectory requests should live alongside pre-existing plans
   test_case = "test_motion_trajectories.put_different_req";
 
-  check_and_emit(cache->putTrajectory(*move_group, ROBOT_NAME, different_plan_req, different_traj,
-                                      better_execution_time, planning_time, true),
-                 test_case, "Put different trajectory req, delete_worse_trajectories, ok");
+  check_and_emit(cache->insertTrajectory(*move_group, ROBOT_NAME, different_plan_req, different_traj,
+                                         better_execution_time, planning_time, true),
+                 test_case, "Put different trajectory req, prune_worse_trajectories, ok");
 
   check_and_emit(cache->countTrajectories(ROBOT_NAME) == 2, test_case, "Two trajectories in cache");
 
@@ -549,13 +553,13 @@ void test_motion_trajectories(std::shared_ptr<MoveGroupInterface> move_group, st
 
   check_and_emit(cache->countCartesianTrajectories(different_robot_name) == 0, test_case, "No trajectories in cache");
 
-  // Put first for different robot, delete_worse_trajectories
+  // Put first for different robot, prune_worse_trajectories
   //
   // A different robot's cache should not interact with the original cache
   test_case = "test_motion_trajectories.different_robot.put_first";
-  check_and_emit(cache->putTrajectory(*move_group, different_robot_name, different_plan_req, different_traj,
-                                      better_execution_time, planning_time, true),
-                 test_case, "Put different trajectory req, delete_worse_trajectories, ok");
+  check_and_emit(cache->insertTrajectory(*move_group, different_robot_name, different_plan_req, different_traj,
+                                         better_execution_time, planning_time, true),
+                 test_case, "Put different trajectory req, prune_worse_trajectories, ok");
 
   check_and_emit(cache->countTrajectories(different_robot_name) == 1, test_case, "One trajectory in cache");
 
@@ -667,38 +671,38 @@ void test_cartesian_trajectories(std::shared_ptr<MoveGroupInterface> move_group,
   // Put trajectory empty frame
   //
   // Trajectory must have frame in joint trajectory, expect put fail
-  test_case = "test_cartesian_trajectories.putTrajectory_empty_frame";
+  test_case = "test_cartesian_trajectories.insertTrajectory_empty_frame";
   double execution_time = 999;
   double planning_time = 999;
   double fraction = 0.5;
 
-  check_and_emit(!cache->putCartesianTrajectory(*move_group, ROBOT_NAME, cartesian_plan_req, empty_frame_traj,
-                                                execution_time, planning_time, fraction, false),
-                 test_case, "Put empty frame trajectory, no delete_worse_trajectories, not ok");
+  check_and_emit(!cache->insertCartesianTrajectory(*move_group, ROBOT_NAME, cartesian_plan_req, empty_frame_traj,
+                                                   execution_time, planning_time, fraction, false),
+                 test_case, "Put empty frame trajectory, no prune_worse_trajectories, not ok");
 
   check_and_emit(cache->countCartesianTrajectories(ROBOT_NAME) == 0, test_case, "No trajectories in cache");
 
   // Put trajectory req empty frame
   //
   // Trajectory request having no frame in workspace should default to robot frame
-  test_case = "test_cartesian_trajectories.putTrajectory_req_empty_frame";
+  test_case = "test_cartesian_trajectories.insertTrajectory_req_empty_frame";
   execution_time = 1000;
   planning_time = 1000;
 
-  check_and_emit(cache->putCartesianTrajectory(*move_group, ROBOT_NAME, empty_frame_cartesian_plan_req, traj,
-                                               execution_time, planning_time, fraction, false),
-                 test_case, "Put empty frame req trajectory, no delete_worse_trajectories, ok");
+  check_and_emit(cache->insertCartesianTrajectory(*move_group, ROBOT_NAME, empty_frame_cartesian_plan_req, traj,
+                                                  execution_time, planning_time, fraction, false),
+                 test_case, "Put empty frame req trajectory, no prune_worse_trajectories, ok");
 
   check_and_emit(cache->countCartesianTrajectories(ROBOT_NAME) == 1, test_case, "One trajectory in cache");
 
-  // Put second, no delete_worse_trajectories
+  // Put second, no prune_worse_trajectories
   test_case = "test_cartesian_trajectories.put_second";
   execution_time = 999;
   planning_time = 999;
 
-  check_and_emit(cache->putCartesianTrajectory(*move_group, ROBOT_NAME, cartesian_plan_req, traj, execution_time,
-                                               planning_time, fraction, false),
-                 test_case, "Put second valid trajectory, no delete_worse_trajectories, ok");
+  check_and_emit(cache->insertCartesianTrajectory(*move_group, ROBOT_NAME, cartesian_plan_req, traj, execution_time,
+                                                  planning_time, fraction, false),
+                 test_case, "Put second valid trajectory, no prune_worse_trajectories, ok");
 
   check_and_emit(cache->countCartesianTrajectories(ROBOT_NAME) == 2, test_case, "Two trajectories in cache");
 
@@ -867,27 +871,27 @@ void test_cartesian_trajectories(std::shared_ptr<MoveGroupInterface> move_group,
   check_and_emit(fetched_traj->lookupDouble("fraction") == fraction, test_case,
                  "Fetched trajectory has correct fraction");
 
-  // Put worse, no delete_worse_trajectories
+  // Put worse, no prune_worse_trajectories
   //
   // Worse trajectories should not be inserted
   test_case = "test_cartesian_trajectories.put_worse";
   double worse_execution_time = execution_time + 100;
 
-  check_and_emit(!cache->putCartesianTrajectory(*move_group, ROBOT_NAME, cartesian_plan_req, traj, worse_execution_time,
-                                                planning_time, fraction, false),
-                 test_case, "Put worse trajectory, no delete_worse_trajectories, not ok");
+  check_and_emit(!cache->insertCartesianTrajectory(*move_group, ROBOT_NAME, cartesian_plan_req, traj,
+                                                   worse_execution_time, planning_time, fraction, false),
+                 test_case, "Put worse trajectory, no prune_worse_trajectories, not ok");
 
   check_and_emit(cache->countCartesianTrajectories(ROBOT_NAME) == 2, test_case, "Two trajectories in cache");
 
-  // Put better, no delete_worse_trajectories
+  // Put better, no prune_worse_trajectories
   //
   // Better trajectories should be inserted
   test_case = "test_cartesian_trajectories.put_better";
   double better_execution_time = execution_time - 100;
 
-  check_and_emit(cache->putCartesianTrajectory(*move_group, ROBOT_NAME, cartesian_plan_req, traj, better_execution_time,
-                                               planning_time, fraction, false),
-                 test_case, "Put better trajectory, no delete_worse_trajectories, ok");
+  check_and_emit(cache->insertCartesianTrajectory(*move_group, ROBOT_NAME, cartesian_plan_req, traj,
+                                                  better_execution_time, planning_time, fraction, false),
+                 test_case, "Put better trajectory, no prune_worse_trajectories, ok");
 
   check_and_emit(cache->countCartesianTrajectories(ROBOT_NAME) == 3, test_case, "Three trajectories in cache");
 
@@ -922,20 +926,20 @@ void test_cartesian_trajectories(std::shared_ptr<MoveGroupInterface> move_group,
                      fetched_trajectories.at(1)->lookupDouble("execution_time_s") == execution_time,
                  test_case, "Fetched trajectories are sorted correctly");
 
-  // Put better, delete_worse_trajectories
+  // Put better, prune_worse_trajectories
   //
   // Better, different, trajectories should be inserted
-  test_case = "test_cartesian_trajectories.put_better_delete_worse_trajectories";
+  test_case = "test_cartesian_trajectories.put_better_prune_worse_trajectories";
   double even_better_execution_time = better_execution_time - 100;
 
-  check_and_emit(cache->putCartesianTrajectory(*move_group, ROBOT_NAME, cartesian_plan_req, different_traj,
-                                               even_better_execution_time, planning_time, fraction, true),
-                 test_case, "Put better trajectory, delete_worse_trajectories, ok");
+  check_and_emit(cache->insertCartesianTrajectory(*move_group, ROBOT_NAME, cartesian_plan_req, different_traj,
+                                                  even_better_execution_time, planning_time, fraction, true),
+                 test_case, "Put better trajectory, prune_worse_trajectories, ok");
 
   check_and_emit(cache->countCartesianTrajectories(ROBOT_NAME) == 1, test_case, "One trajectory in cache");
 
   // Fetch better plan
-  test_case = "test_cartesian_trajectories.put_better_delete_worse_trajectories.fetch";
+  test_case = "test_cartesian_trajectories.put_better_prune_worse_trajectories.fetch";
 
   fetched_trajectories =
       cache->fetchAllMatchingCartesianTrajectories(*move_group, ROBOT_NAME, cartesian_plan_req, fraction, 0, 0);
@@ -959,14 +963,14 @@ void test_cartesian_trajectories(std::shared_ptr<MoveGroupInterface> move_group,
   check_and_emit(fetched_traj->lookupDouble("fraction") == fraction, test_case,
                  "Fetched trajectory has correct fraction");
 
-  // Put different req, delete_worse_trajectories
+  // Put different req, prune_worse_trajectories
   //
   // Unrelated trajectory requests should live alongside pre-existing plans
   test_case = "test_cartesian_trajectories.put_different_req";
 
-  check_and_emit(cache->putCartesianTrajectory(*move_group, ROBOT_NAME, different_cartesian_plan_req, different_traj,
-                                               better_execution_time, planning_time, fraction, true),
-                 test_case, "Put different trajectory req, delete_worse_trajectories, ok");
+  check_and_emit(cache->insertCartesianTrajectory(*move_group, ROBOT_NAME, different_cartesian_plan_req, different_traj,
+                                                  better_execution_time, planning_time, fraction, true),
+                 test_case, "Put different trajectory req, prune_worse_trajectories, ok");
 
   check_and_emit(cache->countCartesianTrajectories(ROBOT_NAME) == 2, test_case, "Two trajectories in cache");
 
@@ -1005,13 +1009,13 @@ void test_cartesian_trajectories(std::shared_ptr<MoveGroupInterface> move_group,
 
   check_and_emit(cache->countCartesianTrajectories(different_robot_name) == 0, test_case, "No trajectories in cache");
 
-  // Put first for different robot, delete_worse_trajectories
+  // Put first for different robot, prune_worse_trajectories
   //
   // A different robot's cache should not interact with the original cache
   test_case = "test_cartesian_trajectories.different_robot.put_first";
-  check_and_emit(cache->putCartesianTrajectory(*move_group, different_robot_name, different_cartesian_plan_req,
-                                               different_traj, better_execution_time, planning_time, fraction, true),
-                 test_case, "Put different trajectory req, delete_worse_trajectories, ok");
+  check_and_emit(cache->insertCartesianTrajectory(*move_group, different_robot_name, different_cartesian_plan_req,
+                                                  different_traj, better_execution_time, planning_time, fraction, true),
+                 test_case, "Put different trajectory req, prune_worse_trajectories, ok");
 
   check_and_emit(cache->countCartesianTrajectories(different_robot_name) == 1, test_case, "One trajectory in cache");
 
